@@ -1,0 +1,14 @@
+*.suo
+*.user
+*.vs
+*.phpproj
+*.lock
+*.sln
+*.log
+*.csproj
+*.bat
+
+/build/release.tar.bz2
+/build/release
+
+thumbs.db

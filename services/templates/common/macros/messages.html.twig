@@ -1,0 +1,131 @@
+{% macro addButton(viewAction) %}
+	{% if viewAction %}
+		<div style='padding-top: 8px'>
+		<p>
+				<a style="border-radius:3px;color:white;font-size:15px;padding:14px 7px 14px 7px;
+						max-width:210px;font-family:proxima_nova,'Open Sans','lucida grande',
+						'Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;
+						border:1px #00aeef solid;text-align:center;text-decoration:none;
+						width:210px;margin:6px auto;display:block;
+						background-color:#00aeef"
+						href="{{ viewAction.url | raw }}" target="_blank">{{ viewAction.description }}</a>
+		</p>
+		</div>
+	{% endif %}
+{% endmacro %}
+
+{% macro mainTitle() %}
+	style = "color: #FE6D4C;
+			text-align: left;
+			font-size: 21px;
+			font-family: proxima_nova,'Open Sans','lucida grande','Segoe UI',arial,verdana,'lucida sans unicode',tahoma,sans-serif;
+			padding: 12px 3px 0px 7px;"
+{% endmacro %}
+
+{% macro sectionToken() %}
+	style = "text-align: center;
+			font-size: 16px;
+			font-weight: normal;
+			padding: 22px 0px 3px 20px;
+			color: #333333;
+			font-family: Arial,Helvetica,sans-serif;"
+{% endmacro %}
+
+{% macro sectionTitle() %}
+	style = "text-align: left;
+			font-size: 16px;
+			font-weight: bold;
+			padding: 22px 0px 3px 20px;
+			 color: #333333;
+			font-family: Arial,Helvetica,sans-serif;"
+{% endmacro %}
+
+{% macro moderationInfo(entities, from, to, stylesP ) %}
+{% from _self import sectionContent %}
+	<div {{ sectionContent() }}>
+	<p {{ stylesP | raw }}>
+	• La evaluación de {{ entities }} podrá realizarse desde el <b>{{ from }}</b> hasta el <b>{{ to }}</b>.
+	</p></div>
+{% endmacro %}
+
+{% macro sectionContent() %}
+	style = "padding: 8px 20px 0px 20px;
+			line-height: 1.5em;
+			text-align: justify;
+			 font-size: 13px;"
+{% endmacro %}
+
+{% macro rowForm() %}
+	style = "padding: 2px 20px 0px 20px;
+			line-height: 1.5em;
+			text-align: justify;
+			 font-size: 13px;"
+{% endmacro %}
+
+{% macro formLabel() %}
+	style = "margin: 0px 0px 6px 0px;float: left; text-align:left; width: 110px;"
+{% endmacro %}
+{% macro formValue() %}
+	style = "margin: 0px 0px 6px 115px;"
+{% endmacro %}
+
+{% macro sectionContentIndented() %}
+	style = "padding: 0px 20px 0px 35px; clear: both;
+			line-height: 1.5em;
+			text-align: justify;
+			 font-size: 13px;"
+{% endmacro %}
+
+{% macro sectionFooter() %}
+	style = "font-size: 11px;
+			text-align: justify;
+			margin-top: 3px;"
+{% endmacro %}
+
+{% macro aSmall() %}
+	style = "font-size: 11px;"
+{% endmacro %}
+
+{% macro p() %}
+	style = "margin: 6px 0px 6px 0px;"
+{% endmacro %}
+
+{% macro dSoftLink() %}
+	style = "text-decoration: none;
+			font-weight: normal;
+			color: #0077b5;"
+{% endmacro %}
+
+{% macro facebook() %}
+<table width=10 height=10 cellpadding=0 cellspacing=0>
+<tr width=10><td bgcolor=#6179af><div style='width:1px;height:1px'/></td><td bgcolor=#405fa0><div style='width:1px;height:1px'/></td><td width=2 colspan=2 bgcolor=#4462a1><div style='width:1px;height:1px'/></td><td bgcolor=#4563a1><div style='width:1px;height:1px'/></td><td bgcolor=#4563a2><div style='width:1px;height:1px'/></td><td bgcolor=#335499><div style='width:1px;height:1px'/></td><td bgcolor=#294c94><div style='width:1px;height:1px'/></td><td bgcolor=#315298><div style='width:1px;height:1px'/></td><td bgcolor=#647cb0><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#39599d><div style='width:1px;height:1px'/></td><td bgcolor=#3a599c><div style='width:1px;height:1px'/></td><td width=2 colspan=2 rowspan=2 bgcolor=#39599c><div style='width:1px;height:1px'/></td><td bgcolor=#37579b><div style='width:1px;height:1px'/></td><td bgcolor=#315297><div style='width:1px;height:1px'/></td><td bgcolor=#8093bf><div style='width:1px;height:1px'/></td><td bgcolor=#bac5dd><div style='width:1px;height:1px'/></td><td bgcolor=#889cc3><div style='width:1px;height:1px'/></td><td bgcolor=#264a93><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td rowspan=4 bgcolor=#4462a1><div style='width:1px;height:1px'/></td><td rowspan=4 bgcolor=#39599c><div style='width:1px;height:1px'/></td><td bgcolor=#254892><div style='width:1px;height:1px'/></td><td bgcolor=#627ab0><div style='width:1px;height:1px'/></td><td width=2 colspan=2 bgcolor=#ffffff><div style='width:1px;height:1px'/></td><td bgcolor=#a7b6d3><div style='width:1px;height:1px'/></td><td bgcolor=#2a4c94><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td rowspan=3 bgcolor=#39599c><div style='width:1px;height:1px'/></td><td bgcolor=#3c5b9d><div style='width:1px;height:1px'/></td><td bgcolor=#0d3386><div style='width:1px;height:1px'/></td><td bgcolor=#6981b4><div style='width:1px;height:1px'/></td><td rowspan=6 bgcolor=#ffffff><div style='width:1px;height:1px'/></td><td bgcolor=#405f9f><div style='width:1px;height:1px'/></td><td bgcolor=#143b8a><div style='width:1px;height:1px'/></td><td bgcolor=#4865a3><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#264993><div style='width:1px;height:1px'/></td><td bgcolor=#a9b6d4><div style='width:1px;height:1px'/></td><td rowspan=2 bgcolor=#e8ecf4><div style='width:1px;height:1px'/></td><td bgcolor=#e2e7f1><div style='width:1px;height:1px'/></td><td bgcolor=#93a4c9><div style='width:1px;height:1px'/></td><td bgcolor=#2e5097><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#274a93><div style='width:1px;height:1px'/></td><td bgcolor=#a2b0d1><div style='width:1px;height:1px'/></td><td bgcolor=#e4e8f1><div style='width:1px;height:1px'/></td><td bgcolor=#8fa0c7><div style='width:1px;height:1px'/></td><td bgcolor=#2f5197><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#4260a0><div style='width:1px;height:1px'/></td><td bgcolor=#34559a><div style='width:1px;height:1px'/></td><td bgcolor=#35559a><div style='width:1px;height:1px'/></td><td bgcolor=#37579b><div style='width:1px;height:1px'/></td><td bgcolor=#0a3185><div style='width:1px;height:1px'/></td><td bgcolor=#617aaf><div style='width:1px;height:1px'/></td><td bgcolor=#4261a1><div style='width:1px;height:1px'/></td><td bgcolor=#153b8a><div style='width:1px;height:1px'/></td><td bgcolor=#4563a2><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#4765a2><div style='width:1px;height:1px'/></td><td bgcolor=#4261a1><div style='width:1px;height:1px'/></td><td width=2 colspan=2 bgcolor=#4160a0><div style='width:1px;height:1px'/></td><td bgcolor=#2a4c95><div style='width:1px;height:1px'/></td><td bgcolor=#7a8fbc><div style='width:1px;height:1px'/></td><td bgcolor=#607aaf><div style='width:1px;height:1px'/></td><td bgcolor=#325499><div style='width:1px;height:1px'/></td><td bgcolor=#4765a2><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#516ea4><div style='width:1px;height:1px'/></td><td bgcolor=#7992bc><div style='width:1px;height:1px'/></td><td width=2 colspan=2 bgcolor=#738db9><div style='width:1px;height:1px'/></td><td bgcolor=#5f7caf><div style='width:1px;height:1px'/></td><td bgcolor=#a3b5d1><div style='width:1px;height:1px'/></td><td bgcolor=#8da3c6><div style='width:1px;height:1px'/></td><td bgcolor=#6b87b6><div style='width:1px;height:1px'/></td><td bgcolor=#516ea4><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#677eb0><div style='width:1px;height:1px'/></td><td bgcolor=#506da8><div style='width:1px;height:1px'/></td><td bgcolor=#526ea8><div style='width:1px;height:1px'/></td><td bgcolor=#526ea8><div style='width:1px;height:1px'/></td><td bgcolor=#4d6ba6><div style='width:1px;height:1px'/></td><td bgcolor=#5d79af><div style='width:1px;height:1px'/></td><td bgcolor=#7a8fbc><div style='width:1px;height:1px'/></td><td bgcolor=#5974ac><div style='width:1px;height:1px'/></td><td bgcolor=#4c6ba6><div style='width:1px;height:1px'/></td><td bgcolor=#677eb0><div style='width:1px;height:1px'/></td></tr>
+</table>
+{% endmacro %}
+{% macro twitter() %}
+<table width=10 height=10 bgcolor=#ffffff cellpadding=0 cellspacing=0>
+<tr width=10><td bgcolor=#d1e8ef><div style='width:1px;height:1px'/></td><td bgcolor=#94d9f7><div style='width:1px;height:1px'/></td><td bgcolor=#7fcdeb><div style='width:1px;height:1px'/></td><td bgcolor=#87d1e9><div style='width:1px;height:1px'/></td><td bgcolor=#7ed1ef><div style='width:1px;height:1px'/></td><td bgcolor=#8bd5f6><div style='width:1px;height:1px'/></td><td bgcolor=#90d5f2><div style='width:1px;height:1px'/></td><td bgcolor=#8ad3ee><div style='width:1px;height:1px'/></td><td bgcolor=#86d6f5><div style='width:1px;height:1px'/></td><td bgcolor=#bcdef0><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#8dd5ed><div style='width:1px;height:1px'/></td><td bgcolor=#55bfe0><div style='width:1px;height:1px'/></td><td bgcolor=#88d6ec><div style='width:1px;height:1px'/></td><td bgcolor=#d7f0fa><div style='width:1px;height:1px'/></td><td bgcolor=#a6ddf7><div style='width:1px;height:1px'/></td><td bgcolor=#50bfea><div style='width:1px;height:1px'/></td><td bgcolor=#54c0e8><div style='width:1px;height:1px'/></td><td bgcolor=#59c3eb><div style='width:1px;height:1px'/></td><td bgcolor=#62c5ea><div style='width:1px;height:1px'/></td><td bgcolor=#7dcef0><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#7dd1ef><div style='width:1px;height:1px'/></td><td bgcolor=#5ac1e3><div style='width:1px;height:1px'/></td><td bgcolor=#ddf4f7><div style='width:1px;height:1px'/></td><td bgcolor=#faffff><div style='width:1px;height:1px'/></td><td bgcolor=#f7fffe><div style='width:1px;height:1px'/></td><td bgcolor=#96d6ec><div style='width:1px;height:1px'/></td><td bgcolor=#7ecde3><div style='width:1px;height:1px'/></td><td bgcolor=#68c5e6><div style='width:1px;height:1px'/></td><td bgcolor=#56c3eb><div style='width:1px;height:1px'/></td><td bgcolor=#82d4ed><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#69c7e3><div style='width:1px;height:1px'/></td><td bgcolor=#54bfe4><div style='width:1px;height:1px'/></td><td bgcolor=#dbf2fc><div style='width:1px;height:1px'/></td><td bgcolor=#ccfafd><div style='width:1px;height:1px'/></td><td bgcolor=#d6fafd><div style='width:1px;height:1px'/></td><td bgcolor=#f0fbfe><div style='width:1px;height:1px'/></td><td bgcolor=#eafdfe><div style='width:1px;height:1px'/></td><td bgcolor=#cceff7><div style='width:1px;height:1px'/></td><td bgcolor=#51c0e5><div style='width:1px;height:1px'/></td><td bgcolor=#6cc7e6><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#58bdda><div style='width:1px;height:1px'/></td><td bgcolor=#2fb4d7><div style='width:1px;height:1px'/></td><td bgcolor=#d0f1fb><div style='width:1px;height:1px'/></td><td bgcolor=#c2f5ff><div style='width:1px;height:1px'/></td><td bgcolor=#adedf9><div style='width:1px;height:1px'/></td><td bgcolor=#aaeffb><div style='width:1px;height:1px'/></td><td bgcolor=#b1f3fe><div style='width:1px;height:1px'/></td><td bgcolor=#f8ffff><div style='width:1px;height:1px'/></td><td bgcolor=#5cc2de><div style='width:1px;height:1px'/></td><td bgcolor=#45badb><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#5dc6e1><div style='width:1px;height:1px'/></td><td bgcolor=#36b9dc><div style='width:1px;height:1px'/></td><td bgcolor=#cceef8><div style='width:1px;height:1px'/></td><td bgcolor=#a0ecfe><div style='width:1px;height:1px'/></td><td bgcolor=#c0f5fe><div style='width:1px;height:1px'/></td><td bgcolor=#fbfcff><div style='width:1px;height:1px'/></td><td bgcolor=#fcffff><div style='width:1px;height:1px'/></td><td bgcolor=#ade3f0><div style='width:1px;height:1px'/></td><td bgcolor=#28b0db><div style='width:1px;height:1px'/></td><td bgcolor=#5cc6e5><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#62c6e4><div style='width:1px;height:1px'/></td><td bgcolor=#44bbe4><div style='width:1px;height:1px'/></td><td bgcolor=#c9f0fd><div style='width:1px;height:1px'/></td><td bgcolor=#88e3f4><div style='width:1px;height:1px'/></td><td bgcolor=#aaeafb><div style='width:1px;height:1px'/></td><td bgcolor=#d2f4f8><div style='width:1px;height:1px'/></td><td bgcolor=#d7f3fc><div style='width:1px;height:1px'/></td><td bgcolor=#b7e6f4><div style='width:1px;height:1px'/></td><td bgcolor=#38bde0><div style='width:1px;height:1px'/></td><td bgcolor=#5fc7e7><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#6ac9e9><div style='width:1px;height:1px'/></td><td bgcolor=#34b8dc><div style='width:1px;height:1px'/></td><td bgcolor=#bcedfb><div style='width:1px;height:1px'/></td><td bgcolor=#b8effb><div style='width:1px;height:1px'/></td><td bgcolor=#74d6f6><div style='width:1px;height:1px'/></td><td bgcolor=#69d9f5><div style='width:1px;height:1px'/></td><td bgcolor=#70d9f6><div style='width:1px;height:1px'/></td><td bgcolor=#e1fbfe><div style='width:1px;height:1px'/></td><td bgcolor=#77cee7><div style='width:1px;height:1px'/></td><td bgcolor=#59c3e8><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#6ecce8><div style='width:1px;height:1px'/></td><td bgcolor=#36b9e5><div style='width:1px;height:1px'/></td><td bgcolor=#59c7e8><div style='width:1px;height:1px'/></td><td bgcolor=#b9eef4><div style='width:1px;height:1px'/></td><td bgcolor=#c0f1f8><div style='width:1px;height:1px'/></td><td bgcolor=#b7eeff><div style='width:1px;height:1px'/></td><td bgcolor=#c1f1f9><div style='width:1px;height:1px'/></td><td bgcolor=#a9e4f4><div style='width:1px;height:1px'/></td><td bgcolor=#43c0e1><div style='width:1px;height:1px'/></td><td bgcolor=#58c8e9><div style='width:1px;height:1px'/></td></tr>
+<tr width=10><td bgcolor=#b3d8e2><div style='width:1px;height:1px'/></td><td bgcolor=#6fcfee><div style='width:1px;height:1px'/></td><td bgcolor=#68cfed><div style='width:1px;height:1px'/></td><td bgcolor=#79d5eb><div style='width:1px;height:1px'/></td><td bgcolor=#91def5><div style='width:1px;height:1px'/></td><td bgcolor=#95e0f3><div style='width:1px;height:1px'/></td><td bgcolor=#91dff0><div style='width:1px;height:1px'/></td><td bgcolor=#72d5ed><div style='width:1px;height:1px'/></td><td bgcolor=#62d2f3><div style='width:1px;height:1px'/></td><td bgcolor=#a5dae9><div style='width:1px;height:1px'/></td></tr>
+</table>
+{% endmacro %}
+
+{% macro appendDot(t1) %}
+{{ t1 | trim }}{% if not (t1 | trim ends with '.') %}.{%
+endif
+%}{% endmacro %}

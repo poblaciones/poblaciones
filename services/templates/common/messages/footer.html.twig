@@ -1,0 +1,17 @@
+{% import "messages.html.twig" as styles %}
+</div>
+</div>
+<div {{ styles.sectionFooter }}>
+Poblaciones <a {{ styles.dSoftLink }} href='https://poblaciones.org'>https://poblaciones.org</a>
+</div>
+<div {{ styles.sectionFooter }}>
+{% if footer == 2 %}
+	Aclaración: si usted no intentó registrarse en Poblaciones,	simplemente ignore este mensaje.
+{% endif  %}
+{% if footer == 3 %}
+	Si no desea recibir correos de Poblaciones, por
+	favor envíe un mensaje a contacto@poblaciones.org con el asunto 'remover'.
+{% endif  %}
+</div>
+</body>
+</html>

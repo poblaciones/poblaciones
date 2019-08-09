@@ -1,0 +1,12 @@
+<div class='dEdit' style='float:right; font-size: 14px; letter-spacing: normal;
+	color: #333; text-align: right; margin-top: -1px;'>
+	<form id='monthlyForm' method='post'>
+		<b>Período: </b><select onchange="document.getElementById('monthlyForm').submit();" name='month'>
+			{% for month in months %}
+			<option
+			{% if current_month == month or (current_month == 'yesterday' and month == "Ayer") %}
+			selected
+			{% endif %}>{{ month }}</option>
+			{% endfor %}</select>
+	</form>
+</div>

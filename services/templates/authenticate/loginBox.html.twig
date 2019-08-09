@@ -1,0 +1,142 @@
+{% import "macros.html.twig" as macros %}
+<script language="javascript">
+function jqueryLogin()
+{
+	var data = $("#frmLogin").serialize();
+
+	$.ajax({
+		type : 'POST',
+		url  : '{{ login_url_postJson | raw }}',
+		data : data,
+		beforeSend: function() {
+			$("#error").fadeOut();
+			$("#btnLogin").html('Enviando...');
+			disableButton("btnLogin");
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+			$("#btnLogin").html('Ingresar');
+			enableButton("btnLogin");
+			var text = XMLHttpRequest.responseText;
+			if (text === undefined || text === null || text.length === 0) {
+				text = errorThrown;
+			}
+			if (text.substr(1, 6) === '[ME-E]' || text.substr(0, 6) === '[ME-E]') {
+				text = text.substr(text.indexOf('[ME-E]') + 7).trim();
+				if (text.substr(text.length - 1, 1) !== '.')
+					text += '.';
+			}
+
+			alert("No se ha podido completar la solicitud. " + text);
+		},
+		success: function(response) {
+			if(response.trim() =="ok" || (response.length === 3 && response.substr(1,2) === "ok")) {
+				$("#btnLogin").html('Ingresando...');
+				window.location.href = "{{ to }}";
+			} else {
+				$("#error").fadeIn(1000, function(){
+					$("#error").html('<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>&nbsp; '+response+'</div>');
+					$("#btnLogin").html('Ingresar');
+					enableButton("btnLogin");
+				});
+			}
+		}
+	});
+
+	return false;
+}
+</script>
+<form action='#' method='post' onsubmit='if (validateFormLogin()) return jqueryLogin(); else return false;' id='frmLogin' name='frmLogin'>
+	<div class='dLogin'>
+		<div class='dLoginHeader'>
+			Ingresar</div>
+		<div class='dLoginRegisterInner'>
+			<div class='dBlockNewLineS1'>Correo electrónico: </div>
+			<div class='dBlockSize1'>
+				{% if user %}
+				{{ user }}
+					<input type="hidden" name='username' id='username' value='{{ user }}'>
+					{% else %}
+					<input type="text" class='fSize2' name='username' id='username'>
+				{% endif %}
+				<input type='hidden' name='login' value='1'>
+				<input type='hidden' name='to' value='{{ to }}'>
+				<input type='hidden' id='is_framed' name='is_framed' value='0'>
+			</div>
+			<div class='dBlockNewLineS1'>Contraseña: </div>
+			<div class='dBlockSize1'>
+				<input type="password" class='fSize2'  name='password' maxlength='50'>
+				<div class='dDivExplanation'><a href='{{ lostPassword_url }}?to={{ to }}'>Olvidé mi contraseña...</a></div>
+			</div>
+			<div style='clear: both;'>
+				<div class='dErrorsRow' id="error">
+					<!-- error will be shown here ! -->
+				</div>
+			</div>
+			<input type='hidden' name='returnUrl' value='{{ current_url }}'>
+			<div class='dButtonsRow' style='padding-top: 5px;' style='float: left'>
+				<div class='dBlockNewLineS1 dExplanation dNoMarginTop'>
+				<label><input name='remember' id='remember' checked='checked' type='checkbox'> No salir de la cuenta</label>
+				</div>
+				<div class='dBlockNewSize1'>
+					<button id='btnLogin' type='submit' class='btn' style='width: 100px' name='ok'>
+						Ingresar
+					</button>
+					</div>
+			</div>
+
+			{% if useOpenId and (useOpenIdFacebook or useOpenIdGoogle) %}
+				<div id="openid-buttons">
+					<div style="margin-top: 6px;">
+						<table width="100%">
+							<tr>
+								<td width="40%">
+									<hr style="color: #aaa" noshade size="1"></hr>
+								</td>
+								<td style="color: #aaa;  white-space: nowrap;">
+									o ({{ macros.helpButton('openId', '¿QUÉ ES?', true) }})
+								</td>
+									<td width="40%">
+									<hr style="color: #aaa" size="1" noshade></hr>
+								</td>
+							</tr>
+						</table>
+
+					</div>
+
+					{% if useOpenIdGoogle %}
+				<div class="major-provider google-login" style="width: 180px;" data-url="{{ oauthGoogle_url }}">
+					<div class="icon-container">
+						<i class="fab fa-google"></i>
+					</div>
+					<div class="text">
+						<span>Ingresar con Google</span>
+					</div>
+				</div>
+				{% endif %}
+				{% if useOpenIdFacebook %}
+				<div disabled='disabled' class="major-provider facebook-login" data-url="{{ oauthFacebook_url }}">
+					<div class="icon-container">
+						<i class="fab fa-facebook"></i>
+					</div>
+					<div class="text">
+						<span>Ingresar con Facebook</span>
+					</div>
+				</div>
+				{% endif %}
+				</div>
+				<div style="clear: both;"></div>
+			{% endif %}
+
+		</div>
+	</div>
+</form>
+<script type="text/javascript">
+	function validateFormLogin() {
+	{% if not user %}
+	if (!checkTextHasValue('username', 'una cuenta (dirección de correo electrónico)')) return false;
+	{% endif %}
+	if (!checkTextHasValue('password', 'una contraseña')) return false;
+
+	return true;
+	}
+</script>

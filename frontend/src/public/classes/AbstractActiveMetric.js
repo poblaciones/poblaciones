@@ -1,0 +1,33 @@
+export default AbstractActiveMetric;
+
+function AbstractActiveMetric(selectedMetric) {
+	// IMPLEMENT
+	this.$Segment = null;
+	this.index = -1;
+	this.isBaseMetric = true;
+	this.KillDuplicateds = false;
+};
+AbstractActiveMetric.prototype.showText = function () {
+	// IMPLEMENT
+};
+
+AbstractActiveMetric.prototype.CheckTileIsOutOfClipping = function() {
+	// IMPLEMENT
+};
+
+AbstractActiveMetric.prototype.GetPattern = function () {
+	// IMPLEMENT
+};
+
+AbstractActiveMetric.prototype.CreateComposer = function() {
+  // IMPLEMENT
+};
+
+AbstractActiveMetric.prototype.GetCartoService = function () {
+	// IMPLEMENT
+};
+
+AbstractActiveMetric.prototype.GetDataService = function () {
+	// IMPLEMENT
+};
+

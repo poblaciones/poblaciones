@@ -1,0 +1,28 @@
+<?php
+
+namespace helena\entities\frontend\clipping;
+
+use helena\entities\BaseMapModel;
+
+class ClippingLevelInfo extends BaseMapModel
+{
+	public $Id;
+	public $Name;
+	public $Revision;
+	public $Metadata;
+	public $MaxZoom;
+	public $PartialCoverage;
+
+	public static function GetMap()
+	{
+		return array (
+			'geo_id' => 'Id',
+			'geo_caption' => 'Name',
+			'geo_revision' => 'Revision',
+			'geo_max_zoom' => 'MaxZoom',
+			'geo_partial_coverage' => 'PartialCoverage');
+	}
+
+}
+
+

@@ -1,0 +1,30 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'SEARCHLOG' %}
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+
+	{{ include('monthlyPanel.html.twig') }}
+	<script type="text/javascript">
+		var form = getElement('monthlyForm');
+		var combo = form.elements['month'];
+		combo.options[0].text = "Hoy";
+		combo.options[0].value = "";
+	</script>
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Búsquedas</div>
+	</div>
+	<div style="overflow-x: auto; border: 1px solid #f0f0f0">
+	{{ macros.showTable(search_table, 1, 1) }}
+	</div>
+    <div>
+        Total: {{ search_table | length - 1 }} búsquedas.
+        </div>
+</div>
+
+{% endblock %}

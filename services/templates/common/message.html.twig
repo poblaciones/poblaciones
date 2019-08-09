@@ -1,0 +1,19 @@
+{% import "macros.html.twig" as macros %}
+
+{% extends "layout.html.twig" %}
+
+{% block content %}
+
+{{ macros.Title(page) }}
+
+<div class="contenedorSmall">
+	<div style='margin-top: 20px; margin-bottom: 40px;'>
+		{{ message | raw }}
+	</div>
+	{% if nobutton is not defined or nobutton != 1 %}
+	<p style='text-align:center'>
+		<input type='button' class="btn" id='messageActionButton' value='{{ caption | default("Continuar") }}' onclick="{{ action | raw }};disableButton('messageActionButton');">
+	</p>
+	{% endif %}
+</div>
+{% endblock %}

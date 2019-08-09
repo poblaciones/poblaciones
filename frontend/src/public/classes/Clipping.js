@@ -1,0 +1,191 @@
+import axios from 'axios';
+import h from '@/public/js/helper';
+import err from '@/common/js/err';
+
+export default Clipping;
+
+function Clipping(segmentedMap, frame, clipping) {
+	this.frame = frame;
+	this.clipping = clipping;
+	this.SegmentedMap = segmentedMap;
+	this.ClippingRequest = null;
+	this.ClippingCallback = null;
+	this.cancelCreateClipping = null;
+};
+
+Clipping.prototype.FitCurrentRegion = function() {
+	this.SegmentedMap.MapsApi.FitEnvelope(this.clipping.Region.Envelope);
+};
+
+Clipping.prototype.SetClippingCanvas = function (canvas) {
+	if (canvas !== null) {
+		this.SegmentedMap.MapsApi.SetClippingCanvas(canvas);
+	} else {
+		this.SegmentedMap.MapsApi.ClearClippingCanvas();
+	}
+};
+
+Clipping.prototype.ProcessFrameMoved = function (bounds) {
+	if (this.ClippingCallback != null) {
+		this.ClippingCallback();
+		this.ClippingCallback = null;
+		return true;
+	} else if (this.FrameHasNoClipping()) {
+		this.ClippingChanged();
+		return false;
+	} else {
+		return false;
+	}
+};
+
+Clipping.prototype.SetClippingRegionCircle = function (clippingCircle) {
+	this.frame.ClippingCircle = clippingCircle;
+	this.SegmentedMap.ReleasePins();
+	this.SegmentedMap.ClearMyLocation();
+	this.CreateClipping(true, true);
+	this.SegmentedMap.UpdateMap();
+};
+
+Clipping.prototype.HasClippingLevels = function () {
+	return this.GetClippingLevels() !== null;
+};
+
+Clipping.prototype.LevelMachLevels = function (level) {
+	var levels = this.GetClippingLevels();
+	if (levels) {
+		for (var l = 0; l < levels.length; l++) {
+			if (levels[l].Id === level.GeographyId) {
+				return true;
+			}
+		}
+	}
+	return false;
+};
+
+Clipping.prototype.GetClippingLevels = function () {
+	var clippingLevels = null;
+	if (this.frame.ClippingRegionId !== null && this.frame.ClippingCircle === null) {
+		clippingLevels = this.clipping.Region.Levels;
+	}
+	return clippingLevels;
+};
+
+Clipping.prototype.ResetClippingCircle = function () {
+	this.frame.ClippingCircle = null;
+	this.SegmentedMap.MapsApi.ClearClippingCanvas();
+	if (this.frame.ClippingRegionId !== null) {
+		this.SetClippingRegion(this.frame.ClippingRegionId, false);
+	} else {
+		this.ClippingChanged();
+		this.SegmentedMap.UpdateMap();
+	}
+	this.SegmentedMap.SaveRoute.UpdateRoute();
+};
+
+Clipping.prototype.ResetClippingRegion = function () {
+	this.frame.ClippingRegionId = null;
+	this.SegmentedMap.MapsApi.ClearClippingCanvas();
+	this.ClippingChanged();
+	this.SegmentedMap.SaveRoute.UpdateRoute();
+	this.SegmentedMap.UpdateMap();
+};
+Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter) {
+	this.frame.ClippingCircle = null;
+	this.SegmentedMap.ReleasePins();
+	this.SegmentedMap.ClearMyLocation();
+	this.frame.ClippingRegionId = clippingRegionId;
+	this.CreateClipping(true, moveCenter);
+	this.SegmentedMap.UpdateMap();
+};
+
+Clipping.prototype.ClippingChanged = function () {
+	this.CreateClipping(false, true);
+};
+
+
+Clipping.prototype.CreateClipping = function (fitRegion, moveCenter) {
+	var args = h.getCreateClippingParams(this.SegmentedMap.frame, this.clipping);
+	if (this.ClippingRequest === '*' || this.ClippingRequest === args) {
+		return;
+	}
+
+	var CancelToken = axios.CancelToken;
+	if (this.cancelCreateClipping !== null) {
+		this.cancelCreateClipping('cancelled');
+	}
+	this.SetClippingRequest(args);
+	this.SegmentedMap.RefreshSummaries();
+
+	const loc = this;
+	this.SegmentedMap.Get(window.host + '/services/clipping/CreateClipping', {
+		params: args,
+		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
+	}).then(function (res) {
+		loc.ProcessClipping(res.data, fitRegion, moveCenter);
+		loc.ResetClippingRequest(args);
+	}).catch(function (error) {
+		loc.ResetClippingRequest(args);
+		err.errDialog('CreateClipping', 'crear la regiÃ³n seleccionada', error);
+	});
+};
+
+Clipping.prototype.SetClippingRequest = function (request) {
+	this.ClippingRequest = request;
+	this.clipping.IsUpdating = (request !== null ? '1' : '0');
+};
+Clipping.prototype.ResetClippingRequest = function (request) {
+	if (this.ClippingRequest === request) {
+		this.SetClippingRequest(null);
+	}
+};
+
+Clipping.prototype.FrameHasNoClipping = function () {
+	return this.frame.ClippingCircle === null &&
+		this.frame.ClippingRegionId === null;
+};
+
+Clipping.prototype.FrameHasClippingCircle = function () {
+	return this.frame.ClippingCircle !== null;
+};
+
+Clipping.prototype.RestoreClipping = function (clippingName) {
+	const loc = this;
+	var CancelToken = axios.CancelToken;
+	if (this.cancelCreateClipping !== null) {
+		this.cancelCreateClipping('cancelled');
+	}
+	this.SetClippingRequest('*');
+	this.SegmentedMap.MapsApi.ClearClippingCanvas();
+	this.SegmentedMap.RefreshSummaries();
+
+	this.SegmentedMap.Get(window.host + '/services/clipping/CreateClippingByName', {
+		params: h.getCreateClippingParamsByName(loc.frame, clippingName),
+		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
+	}).then(function (res) {
+		loc.ProcessClipping(res.data, true, false);
+		loc.ResetClippingRequest('*');
+	}).catch(function (error) {
+		loc.ResetClippingRequest('*');
+		err.errDialog('RestoreClipping', 'crear la regiÃ³n de selecciÃ³n', error);
+	});
+};
+
+Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
+	this.cancelCreateClipping = null;
+	var canvas = data.Canvas;
+	data.Canvas = null;
+	if (data.Summary !== null) {
+		this.clipping.Region = data;
+		if (this.clipping.Region.Summary.Name) {
+			document.title = this.clipping.Region.Summary.Name;
+		} else {
+			document.title = this.SegmentedMap.DefaultTitle;
+		}
+		if (fitRegion) {
+			if (moveCenter) {
+				this.FitCurrentRegion();
+			}
+			this.SetClippingCanvas(canvas);
+		}
+	}
+};

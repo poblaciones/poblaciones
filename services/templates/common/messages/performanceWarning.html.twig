@@ -1,0 +1,19 @@
+{% import "messages.html.twig" as styles %}
+{{ include('header.html.twig') }}
+	<div {{ styles.sectionTitle }}>
+		Alerta Administrativa
+	</div>
+	<div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+	Se ha excedido un límite establecido en el control de rendimiento.
+	</p>
+	</div><div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+		El valor para <b>{{ metric }}</b> ha superado los <b>{{ limit }}</b>.
+	</p>
+</div><div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+		El valor actual registrado es de <b>{{ value }}</b>.
+	</p>
+	</div>
+{{ include('footer.html.twig') }}

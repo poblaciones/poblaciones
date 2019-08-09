@@ -1,0 +1,46 @@
+{% extends "layout.html.twig" %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+	$("document").ready(function(){
+
+	$("div.major-provider").click(function () {
+		onOauthClick($(this).closest("form"), $(this).attr('data-url'), $(this).attr('data-terms') == '1');
+	});
+
+	clearPassword('reg_password');
+	clearPassword('reg_verification');
+
+	$("#username").focus();
+
+	});
+</script>
+<div>
+
+<div class="dTitle" style="color: #00A0D2!important; font-size: 3.7em">
+        POBLACIONES
+  </div>
+<div style="width: 590px; margin:0 auto;">
+		<p style="color: #bd3434; text-align: center">
+		Para poder continuar debe poder identificarse en el sitio.
+		</p>
+	<div>
+		<div style="border-radius: 10px;padding: 10px; width: 590px; bac<rkground-color: rgba(255,255,255,0.5)">
+			<div>En caso de ya estar registrado en el sitio, puede ingresar sus credenciales para poder continuar.
+			</div>
+			<div class="dLoginHolder">
+				{{ include('loginBox.html.twig') }}
+			</div>
+		<div>
+		Si aún no posee una cuenta en el sitio, inicie la registración completando el siguiente formulario.
+		</div>
+			{{ include('registerBox.html.twig') }}
+		</div>
+	</div>
+	<div style="clear:both">&nbsp;</div>
+</div>
+
+</div>
+{% endblock %}

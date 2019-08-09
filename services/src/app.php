@@ -1,0 +1,64 @@
+<?php
+
+use Silex\Application;
+use Silex\Provider\AssetServiceProvider;
+use Silex\Provider\CsrfServiceProvider;
+use Silex\Provider\DoctrineServiceProvider;
+use Silex\Provider\FormServiceProvider;
+use Silex\Provider\HttpFragmentServiceProvider;
+use Silex\Provider\LocaleServiceProvider;
+use Silex\Provider\RoutingServiceProvider;
+use Silex\Provider\ServiceControllerServiceProvider;
+use Silex\Provider\SessionServiceProvider;
+use Silex\Provider\TranslationServiceProvider;
+use Silex\Provider\TwigServiceProvider;
+use Silex\Provider\ValidatorServiceProvider;
+use Symfony\Component\Debug\ErrorHandler;
+
+use helena\classes\Paths;
+use helena\classes\Callbacks;
+use helena\classes\App;
+use helena\classes\settings\LocalSettings;
+
+use minga\framework\Context;
+
+ErrorHandler::register();
+
+// Initializa el mingaFramework
+Context::InjectSettings(new LocalSettings());
+// Setea el manejo de EndRequest
+Context::InjectCallbacks(new Callbacks());
+// toma settings
+Context::Settings()->useVendor = true;
+Context::Settings()->Initialize(dirname(__DIR__), true);
+
+$app = new Application();
+App::$app = $app;
+$app->register(new AssetServiceProvider());
+$app->register(new CsrfServiceProvider());
+$app->register(new FormServiceProvider());
+$app->register(new ValidatorServiceProvider());
+$app->register(new HttpFragmentServiceProvider());
+$app->register(new LocaleServiceProvider());
+$app->register(new RoutingServiceProvider());
+
+$app->register(new ServiceControllerServiceProvider());
+$app->register(new TwigServiceProvider());
+$app->register(new DoctrineServiceProvider(), array(
+	 'db.options' => array(
+		 'driver' => 'mysqli',
+		 'charset' => 'utf8',
+	)
+));
+
+App::CreateTwigEngines();
+
+// configure your app for the production environment
+$app['path.base'] = dirname(__DIR__);
+$app['path.python'] = $app['path.base'].'/py';
+
+$app['twig.path'] = array_merge(Paths::GetMacrosPaths(), Paths::GetTemplatePaths());
+$app['twig.options'] = array('cache' => Context::Paths()->GetTwigCache());
+$app['twig.form.templates'] = array('bootstrap_3_layout.html.twig');
+
+return $app;

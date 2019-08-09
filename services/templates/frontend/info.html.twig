@@ -1,0 +1,40 @@
+{% extends "frontendLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% block content %}
+
+	{{ macros.InfoMapsTitle('Institucional') }}
+
+	<div style='margin-top: 0px'>
+	{{ macros.InfoMapsSubTitle('Objetivos') }}
+    <p>La plataforma <i>{{ application_name }}</i> tiene por objetivos:
+    </p><p><ul>
+    <li>Hacer accesible información pública sobre temas cruciales para la mejor compresión de las temáticas sociales en el territorio de la República Argentina.</li>
+    <li>Permitir a los diferentes niveles nacionales de gobierno (nacional, provincial, municipal) acceder de manera segmentada y ágil a información crítica para la toma de decisiones en política pública y aspectos relevante de la administración.</li>
+    <li>Fomentar la ciencia abierta, proveyendo una plataforma donde volcar la producción cartográfica de los diversos grupos de investigadores que trabajan en el país en temáticas sociales Georeferenciales.</li>
+    <li>Constituir una fuente confiable y documentada de información social, dando un tratamiento apropiado a las referencias institucional, de autoría, metodología y licencias de uso de cada obra puesta a disposición.</li>
+    <li>Facilitar la colaboración entre investigadores, dando mayor visibilidad a la producción existente y fomentando la reutilización de fuentes primarias ya disponibles.</li>
+    <li>Mediar entre las prácticas y productos de los organismos estatales de producción de información estadística y cartográfica y los usuarios de dicha información, generando conocimiento acerca de los requerimientos, demandas y dificultades que estos últimos manifesten a partir de su interacción con la información disponible.</li>
+        </ul>
+{{ macros.InfoMapsSubTitle('Historia') }}
+        <p>La plataforma <i>{{ application_name }}</i> comenzó a ser discutida a mediados del año 2016, ante la percepción de que un creciente número de investigadores y organismos estatales producía y demandaba información Georeferenciada sin existir un espacio de mediación apropiado para articular estas nuevas necesidades e intereses.
+</p><p>En este sentido, al mismo tiempo que desde el sector público se comenzaba a exponer una cantidad cada vez mayor de información geoespacial (a través de nodos nucleados en IDERA, pero también desde organismos ajenos a esta red de diferentes niveles jurisdiccionales y de áreas de gobierno), muchos campos de las humanidades y las ciencias sociales comenzaban a hacerse eco de la inquietud internacional por la espacialidad en sus objetos de investigación.
+</p><p>El aumento de la disponibilidad de mapas y de la noción de Georeferencialidad que la sociedad experimentaba –visible en su uso en medios de comunicación, en la emergencia de guías para la población en el transporte público, en el acceso masivo a imágenes satelitales, en el uso de GPS para la movilidad, el turismo y la geocodificación de información personal y laboral, entre otros– contrastaba con la ausencia de plataformas de depósito, consulta y archivo de información cartográfica y Georeferenciable de la comunidad académica.
+</p><p>Esta carencia redundaba de forma muy notoria en la multiplicación de esfuerzos por parte de grupos de investigación y organismos de gobierno para obtener, procesar y analizar datos básicos de información social geoespacial del país.
+</p><p>Bajo este escenario, se dio inicio para finales de 2016 a un trabajo en colaboración entre el equipo del Observatorio de la Deuda Social de la Universidad Católica Argentina y el equipo de Acta Académica, delineando allí los objetivos generales y el alcance que debía tener una plataforma de datos espaciales sociales multipropósito.
+</p><p>En diciembre de 2016 se dio comienzo al desarrollo de dicha plataforma, estando entre sus metas principales maximizar la facilidad de uso para especialistas en gestión pública y en investigación en ciencias sociales, favorecer su integración con herramientas modernas de visualización satelital y de imágenes de terreno y garantizar la libre circulación de la información disponible y depositada en la herramienta.
+
+        </p><p>Como resultado de este trabajo en colaboración, en junio de 2018 estuvo disponible al público la primera versión de la plataforma, ofreciendo al público general y a los especialistas académicos y del sector público información geoespacial de población del país de múltiples fuentes y dimensiones.
+			</p>
+
+	</div>
+
+	 <div>
+			{{ macros.InfoMapsSubTitle('¿Cómo colaborar?') }}
+			<p>
+			Para aportar tiempo, trabajo o ideas al proyecto contactarnos por <a href='mailto:contacto@poblaciones.org' class='dSoftLink'>correo electrónico</a> o a través de la página de <a href='{{ maps_feedback_url }}'>comentarios</a>.
+			</p>
+			<br>
+		</div>
+
+{% endblock %}

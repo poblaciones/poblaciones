@@ -1,0 +1,30 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'ERRORS' %}
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+<script type="text/javascript">
+function deleteItem() {
+	if (!confirm('Se procederá a eliminar la información de este error.\n\n¿Está seguro de que desea hacer esto?'))
+		return;
+	document.location = '{{ delete_item_url | raw }}';
+}
+</script>
+<div class="contenedor">
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Errores del {{ current_month }} - Detalle para {{error}}</div>
+	</div>
+	{% if isMegaUser %}
+	<input type='button' class="dButton" value='Eliminar' onclick='deleteItem();'>
+	{% endif %}
+	<!--input type='button' value='Marcar como no leído'-->
+	<div class='dText'><pre>{{ error_text | raw}}</pre>
+	</div>
+	<div class='dBlockNewLineS3'></div>
+</div>
+
+{% endblock %}

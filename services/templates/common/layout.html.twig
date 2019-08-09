@@ -1,0 +1,23 @@
+﻿<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<title>{{ application_name }}{% if html_title %} - {{ html_title }}{% endif %}</title>
+		<meta name="robots" content="noindex, nofollow">
+		<link rel="shortcut icon" href="/favicon.ico">
+		<link href="/static/css/styles.css" rel="stylesheet">
+		<link href="/static/css/authenticate.css" rel="stylesheet">
+		<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+		<link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
+		<link href="//fonts.googleapis.com/css?family=Lato:300,700" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+		<script type="text/javascript" src="/static/js/js.js"></script>
+		<script type="text/javascript" src="/static/js/jquery-1.10.1.min.js"></script>
+</head><body><div id="wrap">
+
+    <div style="">
+        {% block content %}{% endblock %}
+    </div>
+    </div>
+
+    </body>
+</html>

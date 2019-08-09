@@ -1,0 +1,28 @@
+{% extends "frontendLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% block content %}
+
+    {{ include('topBar.html.twig') }}
+	{{ macros.InfoMapsTitle("Mapeos comunitarios") }}
+	<p>La producción colectiva de conocimiento es fundamental para la construcción
+        de un espacio plural de expresión y representación de las necesidades
+        y singularidades de las poblaciones en el territorio. A partir de
+        esta perspectiva, <i>{{ application_name }}</i> se propone acompañar en procesos de identificación
+    de necesidades y recursos así como en la elaboración o puesta en circulación de
+    relevamientos realizados por actores comunitarios u otros organismos y asociaciones de la sociedad civil.
+	</p>
+    <p>Para ello, la plataforma <i>{{ application_name }}</i> proporciona:
+    <ul>
+    <li>Espacio gratuito de alojamiento de información resultante de mapeos colectivos y comunitarios.</li>
+    <li>Herramientas automatizadas de carga, ajuste y Georeferenciación de los datos relevados.</li>
+    <li>Exhibición individual para cada mapeo, permitiendo el contacto con sus productores.</li>
+    <li>Mayor visibilidad, gracias a la integración en el mapa general de información poblacional.</li>
+    <li>Extracción de imágenes de los mapas resultantes.</li>
+    </ul>
+    <p>
+    Si usted pertenece a una asociación que ha realizado un mapeo comunitario que querría hacer disponible online, o se encuentra en proceso
+        de realizar un relevamiento colectivo que podría ser de interés, puede contactarnos por <a href='mailto:contacto@poblaciones.org' class='dSoftLink'>correo electrónico</a> o a través de la página de <a href='{{ maps_feedback_url }}'>contacto</a>.
+    </p>
+
+{% endblock %}

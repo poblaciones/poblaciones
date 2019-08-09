@@ -1,0 +1,21 @@
+{% import "messages.html.twig" as styles %}
+{{ include('header.html.twig') }}
+	<div {{ styles.sectionTitle }}>
+		Instrucciones
+	</div>
+	<div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+	Para comenzar a utilizar su cuenta en Poblaciones
+	debe confirmar que dispone de esta casilla de correo electrónico.
+	</p>
+	</div>
+	<div {{ styles.sectionToken }}>
+		Código: <b>{{ token }}</b>.
+	</div>
+	{{ styles.addButton(viewAction) }}
+	<div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+		¡Gracias por utilizar Poblaciones!
+	</p>
+	</div>
+{{ include('footer.html.twig') }}

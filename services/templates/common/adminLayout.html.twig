@@ -1,0 +1,31 @@
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<title>{{ application_name }}{% if html_title %} - {{ html_title }}{% endif %}</title>
+		<meta name="robots" content="noindex, nofollow">
+		<link rel="shortcut icon" href="/favicon.ico">
+		<link href="/static/css/styles.css" rel="stylesheet">
+		<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+		<link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
+		<link href="//fonts.googleapis.com/css?family=Lato:300,700" rel="stylesheet" type="text/css">
+        <script type="text/javascript" src="/static/js/js.js"></script>
+</head>
+
+	<body>
+    <div id="wrap">
+    {% if current_user %}
+		    <div style="float: right; text-align: right; padding-top: 6px; padding-right: 4px">
+			    Usuario: {{ current_user }} <br />
+			    <a href='/authenticate/logoff'>Cerrar sesión</a>
+		    </div>
+    {% endif %}
+    <div style="padding: 8px">
+        {% block content %}{% endblock %}
+    </div>
+    <div style="clear: both">&nbsp;</div>
+    <div style="height: 40px; clear: both"></div>
+    </div>
+
+    {{ include('footer.html.twig') }}
+    </body>
+</html>

@@ -1,0 +1,226 @@
+{% macro Title(text, noPadding = false) %}
+	<div class="{{ (noPadding ? 'dTitleBoxed' : 'dTitle' ) }}">
+        {{ text }}
+  </div>
+{% endmacro %}
+
+{% macro helpButton(template, text = '¿Por qué?', light = false)
+%}{# tooltip_url es una variable global #}<span class="dTooltip" style='font-size: 8.5px; cursor: pointer' onclick="return false;" onmouseover="tooltip.ajax(this, '{{ tooltip_url }}?&item={{ template}}');" >{%
+		if light
+			%}<span class='tooltipUnderline'>{{text | upper }}</span>{%
+		else
+			%}<span class='tooltipBoxP'><span class='tooltipUnderline'>{{text | upper }}</span></span>{%
+		endif %}</span>{%
+endmacro %}
+
+{% macro putInfoPerson(fullname, description, smallBottomSpace = false) %}
+<div style='font-weight: bold; padding-top: 8px; '>{{ fullname }}</div>
+<div style='width:700px; padding-bottom: {{ ( smallBottomSpace ? '4' : '8') }}px; text-align: left; font-size: 12px; line-height: 1.5em; letter-spacing: -0.025em;'>
+{{description}}
+</div>
+{% endmacro %}
+
+{% macro subTitleSmaller(text) %}
+	<div class="dSeparatorSmaller">
+		<div>{{ text }}</div>
+	</div>
+{% endmacro %}
+
+{% macro subTitleSmallest(text) %}
+	<div class="dSeparatorSmallest">
+		<div>{{ text }}</div>
+	</div>
+{% endmacro %}
+
+{% macro SiteTitle() %}
+	<div class="mapTopBar" style="height: 20px;">
+		{#{ application_name }#}
+    &nbsp;
+	</div>
+{% endmacro %}
+
+{% macro InfoMapsTitle(text) %}
+	<div class="dInfoMapsTitle">
+      <a title="Volver" href="{{ home_url }}"><img style="vertical-align: bottom;" src="/static/img/back.png" /></a> {{ text }}
+  </div>
+{% endmacro %}
+{% macro InfoMapsSubTitle(text) %}
+	<div class="dInfoMapsSubTitle">
+      {{ text }}
+  </div>
+{% endmacro %}
+{% macro InfoTitle(text) %}
+	<div class="dInfoTitle">
+        {{ text }}
+  </div>
+{% endmacro %}
+
+{% macro subTitle(text) %}
+	<div class="dSeparator">
+		<div>{{ text }}</div>
+	</div>
+{% endmacro %}
+{% macro putLogo(logosUrl, logoSize, height, title, logoLink, image = 'aa')  %}
+		<table><tr><td>
+			<a href='{{ logoLink }}' target='_blank'
+			class='dSoftLink'><img src='{{logosUrl}}/{{ image }}-logo-{{ logoSize }}x{{ logoSize }}.png' style="height: {{ height }}px" alt='logo'
+				title='{{ title }}'></a></td><td valign='center' class='dLogoText'>{{ title }}</td></tr></table>
+{% endmacro %}
+
+{% macro putLogoSmaller(logosUrl, logoSize, title, logoLink, image = 'aa')  %}
+		<table><tr><td>
+			<a href='{{ logoLink }}' target='_blank'
+			class='dSoftLink'><img src='{{logosUrl}}/{{ image }}-logo-{{ logoSize }}x{{ logoSize }}.png' alt='logo' style="height: 48px"
+				title='{{ title }}'></a></td><td valign='center' class='dLogoTextSmaller'>{{ title }}</td></tr></table>
+{% endmacro %}
+
+{% macro ShowUpdateStatus(updateStatusArray, item) %}
+    {% if updateStatusArray.item is defined %}
+        <span class="dExplanationWarning">Require actualización.</span>
+    {% else %}
+        <span class="dExplanationWarning">No require actualización.</span>
+    {% endif %}
+
+{% endmacro %}
+
+{% macro showTable(rows, headerRows = 1, colspan = 1, small = false) %}
+	<table class="dCssTable">
+		{% set n = 0 %}
+		{% for rowTitle, cells in rows %}
+			{% set isFirst = (n < headerRows) %}
+			{% set n = n+1 %}
+			<tr class="dTableRowAlt">
+					<td class='dTableCellLeft1 {{ (isFirst ? 'tFontHeader4' : 'tFontRowHeader') }}'>{{ rowTitle | raw }}</td>
+				{% set c = 0 %}
+				{% for cell in cells %}
+					{% set c = c + 1 %}
+					<td {{ (n == 1 ? "colspan=" ~ colspan : "") }} class='dTableCell0 {{ (isFirst ? 'tFontHeader4' : (small ? 'tFont3' : 'tFont4')) }}
+						{{ (colspan > 1 and (n == 1 or c % colspan == 0) ? 'tRightBorder' : '') }}'>{{ cell | raw }}</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+	</table>
+{% endmacro %}
+
+{% macro tableSorter(idTable1, idTable2 = "", idTable3 = "") %}
+	<script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$("#{{ idTable1 }}").tablesorter();
+			{% if idTable2 != "" %}
+			$("#{{ idTable2 }}").tablesorter();
+			{% endif %}
+			{% if idTable3 != "" %}
+			$("#{{ idTable3 }}").tablesorter();
+			{% endif %}
+		});
+	</script>
+{% endmacro %}
+
+{% macro PutMenuBar(menu_set, active_menu) %}
+{% from _self import menuItem %}
+	{% if (menu_set | keys )| first != '' %}
+		<div style='height: 8px'>&nbsp;</div>
+		<div style='clear: both' class='dMenuItemStart'>&nbsp;</div>
+		{% for menu_desc, menu_items in menu_set %}
+			{% set isSelected = false %}
+			{% set firsturl = '' %}
+			{% set last_menu_item = '' %}
+			{% for menu_item in menu_items %}
+				{% if loop.first %}
+					{% set firsturl = menu_item.url %}
+				{% endif %}
+				{% set isSelected = isSelected or (active_menu == menu_item.key) %}
+				{% set last_menu_item = menu_item %}
+			{% endfor %}
+			{{ menuItem(menu_desc, firsturl, isSelected, '', last_menu_item.key) }}
+		{% endfor %}
+		<div class='dMenuItemContainer'>&nbsp;</div>
+	{% endif %}
+{% endmacro %}
+
+{% macro menuItem(name, link, isSelected, extraStyle = '', key = '') %}
+<a class='dBlackLinkNoUnderline' href='{{ link }}'>
+<div {{ (key ? "id='" ~ key ~ "'" : "") }} class='dMenuItem{{ isSelected ? "Selected" : "" }}{{ extraStyle }}'>
+{{ name|raw }}
+</div></a>
+{% endmacro %}
+
+{% macro PutSubmenuBar(active_menu_items, menu, dropdown = null) %}
+{% from _self import subMenuItem %}
+	{% if active_menu_items | length > 0 %}
+	<div class='dMenuItemContainer' style='padding-bottom:0px; padding-top:6px; padding-left: 2px; background-color: white;text-align: right'>&nbsp;
+		{# Pone nivel 1 #}
+		{% for menu_item in active_menu_items %}
+			{% if menu_item.key != "EMPTY" %}
+				{{ subMenuItem(menu_item.link, menu_item.url, menu == menu_item.key, '', loop.first) }}
+			{% endif %}
+		{% endfor %}
+		{% if dropdown %}
+		<div style='float: right' class='dDropdownButton'>
+			<ul id="nav" class="dropdown dropdown-horizontal">
+				<li class="dirWhite" style='cursor: pointer; font-size: 11px; color: white;'>Agregar página <span style='border-top-color: white;' class="caret"></span>&nbsp;
+					<ul>
+						{% for hiddenItem in dropdown %}
+							<li><a href="{{ hiddenItem.url }}">{{ hiddenItem.link }}</a></li>
+						{% endfor %}
+					</ul>
+				</li>
+			</ul>
+		</div>
+		{% endif %}
+	</div>
+	<div style='clear: both;'></div>
+	{% endif %}
+{% endmacro %}
+
+{% macro PutLightMenuBar(active_menu_items, menu) %}
+{% from _self import subMenuItem %}
+	{% if active_menu_items | length > 0 %}
+	<div>&nbsp;
+		{# Pone nivel 1 #}
+		{% for menu_item in active_menu_items %}
+			{% if menu_item.key != "EMPTY" %}
+				{{ subMenuItem(menu_item.link, menu_item.url, menu == menu_item.key, '', loop.first) }}
+			{% endif %}
+		{% endfor %}
+	<div style='clear: both;'></div>
+	</div>
+	{% endif %}
+{% endmacro %}
+
+{% macro PutTabBar(menu_set) %}
+{% from _self import tabItem %}
+	<div style='height: 8px'>&nbsp;</div>
+	<div style='clear: both' class='dMenuItemStart'>&nbsp;</div>
+	{% for menu_desc, menu_item in menu_set %}
+		{{ tabItem(menu_desc, menu_item.url, menu_item.key) }}
+  {% endfor %}
+	<div class='dMenuItemContainer'>&nbsp;</div>
+{% endmacro %}
+
+{% macro tabItem(name, link, keyitem = '') %}
+<div {{ (keyitem != "" ? "id=" ~ keyitem : "") }} class='dMenuItem' onclick="{{ link }}">
+{{ name|raw }}
+</div>
+{% endmacro %}
+
+{% macro subMenuItem(name, link, isSelected, extraStyle = '', loopFirst = false) %}
+<div class='dSubMenuItem{{ extraStyle }}' onclick="document.location='{{ link }}';"
+{% if loopFirst %}
+style='border-left: inherit; padding-left: 2px'
+{% endif %}
+>
+<a class='dBlackLinkNoUnderline{{ isSelected ? "Selected" : "" }}' href='{{ link }}'>{{ name|raw }}</a>
+</div>
+{% endmacro %}
+
+{% macro publicMenuItem(url, link, isSelected) %}
+<span class='navItem'>
+{% if isSelected %}
+  <a class='navAselected' href='{{ url }}'>{{ link }}</a>
+{% else %}
+	<a class='navA' href='{{ url }}'>{{ link }}</a>
+{% endif %}
+</span>
+{% endmacro %}

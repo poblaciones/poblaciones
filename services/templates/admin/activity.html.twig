@@ -1,0 +1,64 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'ADMIN' %}
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+
+<div class="contenedorAdmin">
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Espacio en disco</div>
+	</div>
+
+	<div>
+		<small>
+		{% if isMegaUser %}
+			<form method='post' action='{{ action_url }}'>
+			<input class='dSmallerButton' type="submit" value="Actualizar" id='updateData' onclick="disableButton('updateData');">
+			Fecha de información: {{ dateCache }}.
+			</form>
+		</small>
+		<div class='dSpace'></div>
+	</div>
+		{% endif %}
+	<div class='dBlockNewLineS2 dNoPaddingTop'>Espacio total:</div>
+	<div class='dBlockSize3'>{{ total_size }}.</div>
+	<div style="clear:both">
+		<div style="float: left; width: 600px">
+			<div class='dCategory'>Archivos</div>
+			<div class='dBlockNewLineS2 dNoPaddingTop'>Espacio total:</div>
+			<div class='dBlockSize3'>{{ total_disk_size }}.</div>
+			<div class='dBlockNewLineS2 dNoPaddingTop'>Inodes:</div>
+			<div class='dBlockSize3'>{{ total_inodes }} (Límite inodes: 230,000).</div>
+
+			<div class='dSubCategory'>Log</div>
+			<div class='dBlockNewLineS2  dNoPaddingTop'>Espacio total:</div>
+			<div class='dBlockSize3'>{{ log_files_count }} inodes / {{ log_size }} MB.</div>
+
+			<div class='dSubCategory'>Caches</div>
+			<div class='dBlockNewLineS2  dNoPaddingTop'>Espacio total:</div>
+			<div class='dBlockSize3'>{{ caches_files_count }} inodes / {{ caches_size }} MB.</div>
+			{% for cache in caches %}
+				<div class='dBlockNewLineS2  dNoPaddingTop'>{{ cache.label }}:</div>
+				<div class='dBlockSize3'>{{ cache.files_count }} inodes / {{ cache.size }} MB.</div>
+			{% endfor %}
+		</div>
+
+		<div style="float: left">
+			<div class='dCategory'>Base de datos</div>
+			<div class='dBlockNewLineS2 dNoPaddingTop'>Total:</div>
+			<div class='dBlockSize3'>{{ total_data_size }}.</div>
+			<div class='dBlockNewLineS2 dNoPaddingTop'>Datos:</div>
+			<div class='dBlockSize3'>{{ index_data_size }}.</div>
+			<div class='dBlockNewLineS2 dNoPaddingTop'>Indices:</div>
+			<div class='dBlockSize3'>{{ index_index_size }}.</div>
+		</div>
+	</div>
+
+</div>
+
+{% endblock %}

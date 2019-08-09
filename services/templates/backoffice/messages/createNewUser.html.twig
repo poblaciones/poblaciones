@@ -1,0 +1,23 @@
+{% import "messages.html.twig" as styles %}
+{{ include('header.html.twig') }}
+	<div {{ styles.sectionTitle }}>
+	<div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+	{{ message }}.
+	</p>
+	</div><div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+		Para acceder haga click o copie en su navegador
+		el siguiente enlace:
+	</p>
+	</div><div {{ styles.sectionContent }}>
+	<p {{ stylesPLeft | raw }}>
+		&nbsp;&nbsp;&nbsp;&nbsp;{{ type | capitalize }} <a href='{{ url }}'>{{ url }}</a>.
+	</p>
+	</div>
+	<div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+		¡Gracias por utilizar Poblaciones!
+	</p>
+	</div>
+{{ include('footer.html.twig') }}

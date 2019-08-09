@@ -1,0 +1,15 @@
+{% import "messages.html.twig" as styles %}
+{{ include('header.html.twig') }}
+	<div {{ styles.sectionTitle }}>
+		Feedback
+	</div>
+	<div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+		De: {{ from }}.
+	</p>
+	</div><div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+		Mensaje: {{ message }}
+	</p>
+	</div>
+{{ include('footer.html.twig') }}

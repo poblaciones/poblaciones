@@ -1,0 +1,124 @@
+<template>
+	<div>
+		<TopWelcome/>
+		<invoker ref="invoker">
+		</invoker>
+
+
+		<div class="app-singlebar app-container">
+			<div class="md-layout">
+				<div v-show="showTabs" class="md-layout-item md-size-90 md-small-size-100">
+					<md-tabs md-sync-route ref="tabs">
+						<template slot="md-tab" slot-scope="{ tab }">
+							{{ tab.label }} <help-icon v-if="tab.data.help" :size="14"
+									class="md-icon-button hand md-small-hide"
+									style="margin-top: 10px;
+											margin-left: -7px;
+											color: #b1b1b1;
+											position: absolute;"
+									v-tooltip.bottom-start="{ content: tab.data.help, autoHide: false,
+										classes : 'tooltipInTitleBar' }"  />
+						</template>
+
+						<md-tab class="transparentTab" to="/" md-label="Cartografías" :md-active="isPath('/')"
+										:md-template-data="{ help: `<p>
+											Para publicar información en la plataforma es necesario organizarla en cartografías.
+										</p><p>
+											Cada cartografía está compuesta por un conjunto de datasets e indicadores que se representan en el visor del mapa.
+										</p>
+										` }">
+						<works filter="R"></works>
+						</md-tab>
+						<md-tab class="transparentTab" id="public-tab" v-if="showPublic" to="/public" :md-active="isPath('/public')" md-label="Datos públicos"
+										:md-template-data="{ help: `
+											<p>
+											Los datos públicos reúnen información de carácter general sobre el territorio o la
+											población descripta por la plataforma. Son datos típicamente producidos por fuentes
+											estatales y son ofrecidos en el sitio a través del botón de acceso rápido en el
+											visor del mapa.
+											</p><p>Los administradores del sitio deben encargarse de incorporar los datos públicos
+											o delegar en usuarios clave la posibilidad de cargar estos datos.
+										</p>` }">
+							<works filter="P"></works>
+						</md-tab>
+						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/users" :md-active="isPath('/users')" md-label="Usuarios">
+							<users v-if="isPath('/users')"></users>
+						</md-tab>
+					</md-tabs>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+import TopWelcome from '@/backoffice/components/TopWelcome';
+import Works from './Work/Works';
+import Users from './Administration/Users';
+import ActiveWork from '@/backoffice/classes/ActiveWork';
+import arr from '@/common/js/arr';
+
+export default {
+	name: 'home',
+	components: {
+		TopWelcome,
+		Works,
+		Users
+	},
+	mounted() {
+		document.title = 'Poblaciones';
+		window.Context.CurrentWork = null;
+		window.Context.CurrentDataset = null;
+	},
+	data() {
+		return {
+		};
+	},
+	computed: {
+		isAdmin() {
+			return window.Context.IsAdmin();
+		},
+		showTabs() {
+			return (window.Context.Cartographies);
+		},
+		filter() {
+			var isInPublic = (this.$route.path === '/public');
+			return (isInPublic ? 'P' : 'R');
+		},
+		showPublic() {
+			return (window.Context.Cartographies && window.Context.CanViewPublicData());
+		},
+	},
+	methods: {
+		select(element) {
+			this.$router.push({ path: '/cartographies/' + element.Id + '/content' });
+		},
+		isPath(path) {
+			if (this.$route.path === '/public' && this.$refs.tabs) {
+				this.$refs.tabs.activeTab = 'public-tab';
+			} else if (this.$route.path === '/users' && this.$refs.tabs) {
+				this.$refs.tabs.activeTab = 'users-tab';
+			}
+			return this.$route.path === path;
+		},
+	}
+};
+</script>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+
+.dashboard {
+	&-container {
+		margin: 30px;
+	}
+	&-text {
+		font-size: 20px;
+		line-height: 30px;
+	}
+}
+
+.transparentTab {
+	background-color: #fafafa; padding: 4px;
+	margin-top: -10px;
+}
+</style>

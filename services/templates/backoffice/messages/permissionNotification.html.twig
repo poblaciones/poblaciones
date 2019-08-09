@@ -1,0 +1,11 @@
+{% import "messages.html.twig" as styles %}
+{{ include('header.html.twig') }}
+	<div {{ styles.sectionTitle }}>
+		{{ header | nl2br }}
+	</div>
+	<div {{ styles.sectionContent }}>
+	<p {{ stylesP | raw }}>
+	Le han sido concedidos permisos {{ level | lower }} {{ type_label }} <b>{{ full_name }}</b> en Poblaciones.
+	</p></div>
+	{{ styles.addButton(viewAction) }}
+{{ include('footer.html.twig') }}

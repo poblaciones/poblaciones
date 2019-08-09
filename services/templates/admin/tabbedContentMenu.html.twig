@@ -1,0 +1,22 @@
+{% import "notifications.html.twig" as notifications %}
+{% import "macros.html.twig" as macros %}
+
+{# Identifica la rama de menú activa #}
+{% set active_menu = '' %}
+{% set parent_menu = '' %}
+{% set active_menu_items = '' %}
+{% for menu_desc, menu_items in menu_set %}
+	{% for menu_item in menu_items %}
+		{% if menu == menu_item.key %}
+			{% set active_menu = menu_item %}
+			{% set parent_menu = menu_desc %}
+			{% set active_menu_items = menu_items %}
+		{% endif %}
+	{% endfor %}
+{% endfor %}
+
+{{ macros.PutMenuBar(menu_set, active_menu.key) }}
+
+{{ macros.PutSubmenuBar(active_menu_items, menu, null) }}
+
+{{ notifications.ShowNotification(success) }}

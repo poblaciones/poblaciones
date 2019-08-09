@@ -1,0 +1,55 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'PERFORMANCE' %}
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+	<br>
+	<form action='{{ action_post_url }}' method='post'>
+		<div class='dBlockNewLineS1'>Profiling: </div>
+		<div class='dBlockSize3'>{{ profiling }} &nbsp;<input type='submit' name="toggle" value='{{ action }}'>
+		</div>
+	</form>
+
+	{{ include('monthlyPanel.html.twig') }}
+	<script type="text/javascript">
+		var form = getElement('monthlyForm');
+		var combo = form.elements['month'];
+		combo.options[0].text = "Hoy";
+		combo.options[0].value = "";
+	</script>
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Tiempo de ejecución - {{ now }}</div>
+	</div>
+	{{ macros.showTable(dayly_table, 1, 1, true) }}
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Apertura por Controller</div>
+	</div>
+	<div style="overflow-x: auto; border: 1px solid #f0f0f0">
+	{{ macros.showTable(controller_table, 2, 4) }}
+	</div>
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Apertura por Usuario</div>
+	</div>
+	<div style="overflow-x: auto; border: 1px solid #f0f0f0">
+	{{ macros.showTable(user_table, 2, 4) }}
+	</div>
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Administración - Apertura por Controller</div>
+	</div>
+	{{ macros.showTable(controller_table_admin, 2, 4) }}
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Apertura de locks</div>
+	</div>
+	{{ macros.showTable(locks_table, 1, 1) }}
+</div>
+
+{% endblock %}

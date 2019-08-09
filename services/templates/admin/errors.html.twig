@@ -1,0 +1,50 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'ERRORS' %}
+
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+
+<script type="text/javascript">
+function deleteAll() {
+	if (!confirm('Se procederá a eliminar todos los errores acumulados.\n\n¿Está seguro de que desea hacer esto?'))
+		return;
+	document.location = '{{ delete_all_url | raw }}';
+}
+</script>
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Errores del {{ current_month }}</div>
+		{{ include('monthlyPanel.html.twig') }}
+	</div>
+{% if isMegaUser %}
+	<input type='button' class="dButton" value='Eliminar Todos' onclick='deleteAll();'>
+{% endif %}
+	<div class="dTableHeader">
+		<div style='padding-top: 0px' class='dBlockNewLineS1'>Fecha</div>
+		<div class='dCellSize2 Center'>Usuario</div>
+		<div class='dCellSize2b Center'>Url</div>
+		<div class='dCellSize3Center'>Descripción</div>
+	</div>
+	{% for error in errors %}
+
+	<div class='dBlockNewLineS1'>{{ error.date }}</div>
+	<div class='dCellSize2 Center'>{{ error.user }}</div>
+	<div class='dCellSize2b Center'>{{ error.url | raw}}</div>
+	<div class='dCellSize3'><a {{ error.link | raw}} href='{{ error.error_url}}'>{{ error.description }}</a></div>
+	<div class='dNewLine'></div>
+
+	{% else %}
+
+	{% endfor %}
+	<div class='dBlockNewLineS3'><br></div>
+
+	<div class='dText'>Total: {{ errors_count }} errors.</div>
+	<div class='dBlockNewLineS3'></div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'TRAFFIC' %}
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+	<div class="dSeparatorNewLine">
+		{{ include('monthlyPanel.html.twig') }}
+		<div class='dText'>Tráfico (&gt; {{ limit }} hits) - {{ now }}</div>
+	</div>
+	<table id="tableSort" class="dCssTable">
+		<thead>
+		<tr>
+			<th class='dTableCellLeft'><a href="#">IP</a></th>
+			<th class='dTableCell0'><a href="#">Hits</a></th>
+			<th class='dTableCell2'><a href="#">País</a></th>
+			<th class='dTableCell4'><a href="#">User-Agent</a></th>
+			<th class='dTableCell4'><a href="#">Última Url</a></th>
+			<th class='dTableCell2'><a href="#">Dispositivo</a></th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for t in traffic if not t.isTotal %}
+		<tr style="{{ (loop.index % 2 ? '' : 'background-color: #f0f0f0;') }}{{ "border-top: thin solid black;" }}">
+			<td class='dTableCellLeft'><a target='_blank' href='http://whatismyipaddress.com/ip/{{ t.ip }}'>{{ t.ip }}</a></td>
+			<td class='dTableCell0' style='text-align:center'>{{ t.hits }}</td>
+			<td class='dTableCell2' style='text-align:center'>{{ t.country }}</td>
+			<td class='dTableCell4' style='text-align:center'>{{ t.agent }}</td>
+			<td class='dTableCell4' style='text-align:center'>
+				<a href='{{ t.url }}' target='_blank'>{{ publicURL }}{{ t.url }}</a>
+			</td>
+			<td class='dTableCell2' style='text-align:center'>{{ t.device }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+		<tfoot>
+			{% for t in traffic if t.isTotal %}
+			<tr style="font-style:italic">
+				<td class='dTableCellLeft'>{{ t.ip }}</td>
+				<td class='dTableCell0' style='text-align:center'>{{ t.hits }}</td>
+				<td class='dTableCell2'></td>
+				<td class='dTableCell4'></td>
+				<td class='dTableCell4'></td>
+				<td class='dTableCell2'></td>
+			</tr>
+			{% endfor %}
+		</tfoot>
+	</table>
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Tráfico total</div>
+	</div>
+	<div class='dText'>IPs únicas: {{ ips_count }}.
+	{%
+	for key, value in ips_by_device %}<br>&bull; {{ key }}: {{ value }}.{% endfor %}
+	</div>
+
+	<div class='dText'>Hits: {{ hits_count }} hits.</div>
+</div>
+
+{% endblock %}

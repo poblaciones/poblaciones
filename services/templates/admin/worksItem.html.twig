@@ -1,0 +1,74 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+{% import "crudMacros.html.twig" as crudMacros %}
+
+{% block content %}
+
+{% if type == 'P' %}
+    {% set menu = 'PUBLICDATA' ~ (mode == 'D' ? 'DRAFT' : '') %}
+{% else %}
+    {% set menu = 'CARTOGRAPHIES' ~ (mode == 'D' ? 'DRAFT' : '') %}
+{% endif  %}
+{{ macros.Title(html_title) }}
+
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+
+    {{ crudMacros.addValidateFormJs() }}
+
+     {% if work.Metadata.Name %}
+        {{ macros.subTitle(work.Metadata.Name) }}
+	 {% else %}
+        {% if type == 'P' %}
+            {{ macros.subTitle('Nuevo borrador de datos públicos') }}
+        {% else %}
+            {{ macros.subTitle('Nueva borrador de cartografía') }}
+        {% endif  %}
+     {% endif %}
+    <form onsubmit="return validateFormJs();" action="/admin/{{ (type == 'P' ? 'publicData' : 'cartographies' ) }}Item?id={{ id }}" method="post">
+        {{ macros.subTitleSmaller('Atribución') }}
+
+        {{ crudMacros.ShowText('Título', 'Name', work.Metadata.Name, 200, 'Indique un título descriptivo de la información. Si la obra incluirá información de varias ediciones, omitir la edición. Ej. Indicadores del Censo Nacional de Población, Hogares y Viviendas, 2001; Mapa Nacional Educativo.', true) }}
+        {% if type == 'P' %}
+            {{ crudMacros.ShowText('Editores', 'Authors', work.Metadata.Authors, 200, 'Refiere a los responsables de obtener, procesar y difundir en la plataforma este conjunto datos públicos. Ej. López, Ernesto y Rosso, Ana.', false) }}
+        {% else %}
+            {{ crudMacros.ShowText('Autores', 'Authors', work.Metadata.Authors, 200, 'Ej. López, Ernesto y Rosso, Ana.', true) }}
+        {% endif  %}
+        {{ crudMacros.ShowCombo('Estado', 'Status', validStatus, work.Metadata.Status, '', false) }}
+
+        {{ crudMacros.ShowText('Fecha de publicación', 'PublicationDate', work.Metadata.PublicationDate, 10, 'Fecha completa o sólo el año, en formato DD/MM/AAAA o AAAA. Ej. 2016.', true) }}
+
+        {{ macros.subTitleSmaller('Contenido') }}
+
+        {{ crudMacros.ShowCombo('Categoría', 'GroupId', groups, work.Metadata.GroupId, '', true) }}
+
+        {{ crudMacros.ShowTextMultiline('Resumen', 'Abstract', work.Metadata.Abstract, 4000, 'Resumen de hasta 4 mil caracteres describiendo el contenido.') }}
+        {{ crudMacros.ShowTextMultiline('Detalle', 'AbstractLong', work.Metadata.AbstractLong, 50000, 'Información detallada de las fuentes utilizadas, los procedimientos empleados y las limitaciones relevantes para la comprensión o interpretación de la información.') }}
+
+        {{ crudMacros.putLicensePanelEdit(licenseVersions, work.Metadata.LicenseType, work.Metadata.LicenseCommercial, work.Metadata.LicenseOpen, work.Metadata.LicenseVersion, true) }}
+
+        {{ crudMacros.ShowTextMultiline('Comentarios (internos)', 'Comments', work.Comments, 5000, 'Esta información no será visible para los visitantes del sitio ni para quienes descarguen la información.') }}
+
+        {{ macros.subTitleSmaller('Cobertura') }}
+
+        {{ crudMacros.ShowText('Cobertura', 'Coverage', work.Metadata.Coverage, 200, 'Extensión geográfica cubierta por los datos. Ej. Argentina, Misiones, Gran Salta.', true) }}
+        {{ crudMacros.ShowText('Período', 'Period', work.Metadata.Period, 50, 'Período de tiempo cubierto por los datos. Ej. 2008, 2003-2006.', true) }}
+        {{ crudMacros.ShowText('Frecuencia', 'Frequency', work.Metadata.Frequency, 10, 'Intervalo de tiempo de actualización. Ej. Según necesidad, Anual, Bianual, Trimestral, Desconocida.', false) }}
+
+        {{ macros.subTitleSmaller('Fuente') }}
+        {% if type == 'P' %}
+            {{ crudMacros.ShowSourceFields(work.Metadata.Source, 'Source', institutions, false) }}
+        {% else %}
+            {{ crudMacros.ShowCombo('Fuente', 'SourceId', publicSources, work.Metadata.SourceId, '', true) }}
+            {{ macros.subTitleSmaller('Contacto') }}
+            {{ crudMacros.ShowContact('Contact', work.Metadata.Contact, true) }}
+            {{ macros.subTitleSmaller('Institución') }}
+            {{ crudMacros.ShowInstitution('Institution', institutions, work.Metadata.InstitutionId, true) }}
+        {% endif %}
+
+	<div class='dBlockNewLineS3'><br></div>
+	{{ crudMacros.ShowButtonsRow() }}
+        </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,206 @@
+	/*
+  	Flaticon icon font: Flaticon
+  	Creation date: 15/10/2018 13:33
+  	*/
+
+@font-face {
+  font-family: "Flaticon";
+  src: url("./Flaticon.eot");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff") format("woff"),
+       url("./Flaticon.ttf") format("truetype"),
+       url("./Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./Flaticon.svg#Flaticon") format("svg");
+  }
+}
+
+[class^="flaticon-"]:before, [class*=" flaticon-"]:before,
+[class^="flaticon-"]:after, [class*=" flaticon-"]:after {
+	font-family: Flaticon;
+	/*  font-size: 20px;*/
+	font-style: normal;
+	/*	margin-left: 20px; */
+}
+
+.flaticon-001-cruiser-voyage:before { content: "\f100"; }
+.flaticon-002-unisex-symbol:before { content: "\f101"; }
+.flaticon-003-teacher-reading:before { content: "\f102"; }
+.flaticon-004-men-and-women-toilet:before { content: "\f103"; }
+.flaticon-005-work-hammer:before { content: "\f104"; }
+.flaticon-006-motorcyclist:before { content: "\f105"; }
+.flaticon-007-city-hall:before { content: "\f106"; }
+.flaticon-008-maps-mark:before { content: "\f107"; }
+.flaticon-009-chairlift:before { content: "\f108"; }
+.flaticon-010-car-mechanic:before { content: "\f109"; }
+.flaticon-011-cube-recycle-paper:before { content: "\f10a"; }
+.flaticon-012-heliport-symbol:before { content: "\f10b"; }
+.flaticon-013-swing-game:before { content: "\f10c"; }
+.flaticon-014-calculator-mathematics:before { content: "\f10d"; }
+.flaticon-015-medic-suitcase:before { content: "\f10e"; }
+.flaticon-016-canoe-racing:before { content: "\f10f"; }
+.flaticon-017-masculine-avatar:before { content: "\f110"; }
+.flaticon-018-house-roof:before { content: "\f111"; }
+.flaticon-019-bicycle-road:before { content: "\f112"; }
+.flaticon-020-position-mark:before { content: "\f113"; }
+.flaticon-021-supermarket-basket:before { content: "\f114"; }
+.flaticon-022-screen-expand:before { content: "\f115"; }
+.flaticon-023-go-sledding:before { content: "\f116"; }
+.flaticon-024-ad-logo:before { content: "\f117"; }
+.flaticon-025-snowboarding:before { content: "\f118"; }
+.flaticon-026-trial-hammer:before { content: "\f119"; }
+.flaticon-027-hook-and-fish:before { content: "\f11a"; }
+.flaticon-028-cycling:before { content: "\f11b"; }
+.flaticon-029-flying-hang-glider:before { content: "\f11c"; }
+.flaticon-030-hiking:before { content: "\f11d"; }
+.flaticon-031-climb:before { content: "\f11e"; }
+.flaticon-032-boat-on-a-ramp:before { content: "\f11f"; }
+.flaticon-033-communication-tool:before { content: "\f120"; }
+.flaticon-034-house-for-rent:before { content: "\f121"; }
+.flaticon-035-closed-book-cover:before { content: "\f122"; }
+.flaticon-036-home-sign:before { content: "\f123"; }
+.flaticon-037-letter-p:before { content: "\f124"; }
+.flaticon-038-instagram-logo:before { content: "\f125"; }
+.flaticon-039-two-bottles:before { content: "\f126"; }
+.flaticon-040-little-flag:before { content: "\f127"; }
+.flaticon-041-black-square:before { content: "\f128"; }
+.flaticon-042-side-triangle:before { content: "\f129"; }
+.flaticon-043-pin-map:before { content: "\f12a"; }
+.flaticon-044-door-hole:before { content: "\f12b"; }
+.flaticon-045-fireguard-shield:before { content: "\f12c"; }
+.flaticon-046-police-shield:before { content: "\f12d"; }
+.flaticon-047-veterinarian-hospital:before { content: "\f12e"; }
+.flaticon-048-frontal-bus-silhouette:before { content: "\f12f"; }
+.flaticon-049-graduation-cap:before { content: "\f130"; }
+.flaticon-050-camping-tent-shape:before { content: "\f131"; }
+.flaticon-051-closed-slate:before { content: "\f132"; }
+.flaticon-052-horseman-silhouette:before { content: "\f133"; }
+.flaticon-053-sleeping-bed-silhouette:before { content: "\f134"; }
+.flaticon-054-paper-list-and-a-pencil:before { content: "\f135"; }
+.flaticon-055-bowling-silhouette:before { content: "\f136"; }
+.flaticon-056-car-in-a-garage-silhouette:before { content: "\f137"; }
+.flaticon-057-t-shirt-silhouette:before { content: "\f138"; }
+.flaticon-058-taxi-silhouette:before { content: "\f139"; }
+.flaticon-059-skiing-silhouette:before { content: "\f13a"; }
+.flaticon-060-train-on-railroad:before { content: "\f13b"; }
+.flaticon-061-fuel-service:before { content: "\f13c"; }
+.flaticon-062-fish-and-a-knife:before { content: "\f13d"; }
+.flaticon-063-slot-machine-silhouette:before { content: "\f13e"; }
+.flaticon-064-two-men-in-a-house:before { content: "\f13f"; }
+.flaticon-065-delivery-truck-outline:before { content: "\f140"; }
+.flaticon-066-rafting:before { content: "\f141"; }
+.flaticon-067-binoculars-silhouette:before { content: "\f142"; }
+.flaticon-068-mailbox-silhouette:before { content: "\f143"; }
+.flaticon-069-flower-silhouette:before { content: "\f144"; }
+.flaticon-070-snowflake-shape:before { content: "\f145"; }
+.flaticon-071-skating-silhouette:before { content: "\f146"; }
+.flaticon-072-shopper-with-bags:before { content: "\f147"; }
+.flaticon-073-wine-glasses:before { content: "\f148"; }
+.flaticon-074-batter-silhouette:before { content: "\f149"; }
+.flaticon-075-anchor-silhouette:before { content: "\f14a"; }
+.flaticon-076-fishing-sign:before { content: "\f14b"; }
+.flaticon-077-zoom-symbol:before { content: "\f14c"; }
+.flaticon-078-dollar-bill:before { content: "\f14d"; }
+.flaticon-079-two-arrows-pointing-opposite-directions:before { content: "\f14e"; }
+.flaticon-080-house-silhouette:before { content: "\f14f"; }
+.flaticon-081-city-hall-silhouette:before { content: "\f150"; }
+.flaticon-082-creative-commons-logo:before { content: "\f151"; }
+.flaticon-083-chapel-outline:before { content: "\f152"; }
+.flaticon-084-medical-pill:before { content: "\f153"; }
+.flaticon-085-black-shield-silhouette:before { content: "\f154"; }
+.flaticon-086-monumental-building-silhouette:before { content: "\f155"; }
+.flaticon-087-square-silhouette:before { content: "\f156"; }
+.flaticon-088-balance-silhouette:before { content: "\f157"; }
+.flaticon-089-person-travelling-in-a-boat-transport-floating-on-the-sea:before { content: "\f158"; }
+.flaticon-090-watercraft-silhouette:before { content: "\f159"; }
+.flaticon-091-giraffe-silhouette:before { content: "\f15a"; }
+.flaticon-092-paint-roller-silhouette:before { content: "\f15b"; }
+.flaticon-093-buy-a-car:before { content: "\f15c"; }
+.flaticon-094-moon-and-star:before { content: "\f15d"; }
+.flaticon-095-man-and-cashier-machine:before { content: "\f15e"; }
+.flaticon-096-tennis-player:before { content: "\f15f"; }
+.flaticon-097-compass-tool:before { content: "\f160"; }
+.flaticon-098-magnifying-glass-silhouette:before { content: "\f161"; }
+.flaticon-099-blind-man-silhouette:before { content: "\f162"; }
+.flaticon-100-color-palette:before { content: "\f163"; }
+.flaticon-101-windsurf-sea:before { content: "\f164"; }
+.flaticon-102-mouse-pointer:before { content: "\f165"; }
+.flaticon-103-diving-silhouette:before { content: "\f166"; }
+.flaticon-104-power-button-outline:before { content: "\f167"; }
+.flaticon-105-sailing-boat-silhouette:before { content: "\f168"; }
+.flaticon-106-knife-and-fork-silhouette:before { content: "\f169"; }
+.flaticon-107-coffe-cup-silhouette:before { content: "\f16a"; }
+.flaticon-108-locked-house:before { content: "\f16b"; }
+.flaticon-109-minus-sign-silhouette:before { content: "\f16c"; }
+.flaticon-110-picnic-table-silhouette:before { content: "\f16d"; }
+.flaticon-111-diamond-outline:before { content: "\f16e"; }
+.flaticon-112-plus-sign-silhouette:before { content: "\f16f"; }
+.flaticon-113-road-caravan:before { content: "\f170"; }
+.flaticon-114-luggage-information:before { content: "\f171"; }
+.flaticon-115-black-shield-shape:before { content: "\f172"; }
+.flaticon-116-church-silhouette:before { content: "\f173"; }
+.flaticon-117-bus-and-train-silhouettes:before { content: "\f174"; }
+.flaticon-118-office-box-silhouette:before { content: "\f175"; }
+.flaticon-119-locked-silhouette:before { content: "\f176"; }
+.flaticon-120-audition-sign:before { content: "\f177"; }
+.flaticon-121-womens-bathroom:before { content: "\f178"; }
+.flaticon-122-oc:before { content: "\f179"; }
+.flaticon-123-relaxing-massage:before { content: "\f17a"; }
+.flaticon-124-disability-symbol:before { content: "\f17b"; }
+.flaticon-125-loaf-of-bread-silhouette:before { content: "\f17c"; }
+.flaticon-126-zoom-out-silhouette:before { content: "\f17d"; }
+.flaticon-127-om-symbol:before { content: "\f17e"; }
+.flaticon-128-envelope-silhouette:before { content: "\f17f"; }
+.flaticon-129-tennis-player-playing-tennis:before { content: "\f180"; }
+.flaticon-130-american-dollar-symbol:before { content: "\f181"; }
+.flaticon-131-pedestrian-walking:before { content: "\f182"; }
+.flaticon-132-braille-writing-system:before { content: "\f183"; }
+.flaticon-133-subway-sign:before { content: "\f184"; }
+.flaticon-134-pharmacy-cross-sign:before { content: "\f185"; }
+.flaticon-135-electric-plug:before { content: "\f186"; }
+.flaticon-136-skier-skiing:before { content: "\f187"; }
+.flaticon-137-deaf-sign-language:before { content: "\f188"; }
+.flaticon-138-swimming-man:before { content: "\f189"; }
+.flaticon-139-public-museum-sign:before { content: "\f18a"; }
+.flaticon-140-police-metal-plate:before { content: "\f18b"; }
+.flaticon-141-hamburguer-drink-with-straw:before { content: "\f18c"; }
+.flaticon-142-walking-with-snowshoes:before { content: "\f18d"; }
+.flaticon-143-golf-player-hitting-the-ball:before { content: "\f18e"; }
+.flaticon-144-bag-for-going-shopping:before { content: "\f18f"; }
+.flaticon-145-canoe-athlete:before { content: "\f190"; }
+.flaticon-146-vintage-chest-of-drawers:before { content: "\f191"; }
+.flaticon-147-pipe-losing-water:before { content: "\f192"; }
+.flaticon-148-dumbbell-for-training:before { content: "\f193"; }
+.flaticon-149-roller-skater:before { content: "\f194"; }
+.flaticon-150-metal-lunchbox:before { content: "\f195"; }
+.flaticon-151-old-digital-camera:before { content: "\f196"; }
+.flaticon-152-ski-jumping:before { content: "\f197"; }
+.flaticon-153-hairdresser-scissors-and-comb:before { content: "\f198"; }
+.flaticon-154-escalation:before { content: "\f199"; }
+.flaticon-155-map-localization:before { content: "\f19a"; }
+.flaticon-156-snow-motorbike:before { content: "\f19b"; }
+.flaticon-157-surf-sea:before { content: "\f19c"; }
+.flaticon-158-ice-skating-athlete:before { content: "\f19d"; }
+.flaticon-159-rent-a-car:before { content: "\f19e"; }
+.flaticon-160-dog-pawprint:before { content: "\f19f"; }
+.flaticon-161-tooth:before { content: "\f1a0"; }
+.flaticon-162-israel-star-of-david:before { content: "\f1a1"; }
+.flaticon-163-carousel:before { content: "\f1a2"; }
+.flaticon-164-exercise-gym:before { content: "\f1a3"; }
+.flaticon-165-hard-drive:before { content: "\f1a4"; }
+.flaticon-166-hair-dryer:before { content: "\f1a5"; }
+.flaticon-167-fishing-dock:before { content: "\f1a6"; }
+.flaticon-168-spyhole:before { content: "\f1a7"; }
+.flaticon-169-aeroplane:before { content: "\f1a8"; }
+.flaticon-170-viewer:before { content: "\f1a9"; }
+.flaticon-171-dot:before { content: "\f1aa"; }
+.flaticon-172-archer:before { content: "\f1ab"; }
+.flaticon-173-surfer:before { content: "\f1ac"; }
+.flaticon-174-swimming-jump:before { content: "\f1ad"; }
+.flaticon-175-supermarket-cart:before { content: "\f1ae"; }

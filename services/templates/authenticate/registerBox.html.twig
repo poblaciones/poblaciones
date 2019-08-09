@@ -1,0 +1,108 @@
+{% import "macros.html.twig" as macros %}
+<script type="text/javascript">
+function validateFormRegister()
+{
+	if (!checkTextHasValue('reg_firstName', 'su nombre')) return false;
+	if (!checkTextHasValue('reg_lastName', 'su apellido')) return false;
+	{% if not user %}
+	if (!checkTextHasEmail('reg_username', 'una dirección de correo electrónico')) return false;
+	{% endif %}
+	if (!checkTextHasValue('reg_password', 'una contraseña', 6)) return false;
+	if (getTextValue('reg_password') != getTextValue('reg_verification'))
+	{
+		alert("La contraseña no coincide con la verificación.");
+		setFocus('reg_verification');
+		return false;
+	}
+
+	if (!checkCheckChecked('reg_terms', "aceptar los 'Términos y condiciones' para poder continuar"))
+		return false;
+
+	return true;
+}
+var RecaptchaOptions = { theme : 'white' };
+</script>
+
+<form action='{{ new_url_post }}' onsubmit="return validateFormRegister();" name='register' method='post'>
+	<input type='hidden' name='loginUrl' value='{{ new_url_post }}'>
+		<div class='dLoginRegister'>
+			<div class='dLoginHeader'>Registración</div>
+			<div class='dLoginRegisterInner'>
+				<div class='dBlockNewLineS1'>Nombre completo: </div><div class='dBlockSize3'>
+					<input type="text" class='fSize15' placeholder='Nombre' id='reg_firstName' name='reg_firstName' style="width: 120px;">
+					<input type="text" class='fSize15' placeholder='Apellido' id='reg_lastName' name='reg_lastName'>
+					<input type='hidden' name='to' value='{{ to }}'>
+				</div>
+				<div class='dBlockNewLineS1'>Correo electrónico: </div><div class='dBlockSize2'>
+					{% if user %}
+						{{ user }}
+					<input type="hidden" name='user' value='{{ user }}'>
+					<input type="hidden" name='token' value='{{ token }}'>
+					{% else %}
+
+					<input type="text" class='fSize27' id='reg_username' name='reg_username'>
+					{% endif %}
+				</div>
+				<div class='dBlockNewLineS1'>Contraseña a utilizar: </div><div class='dBlockSize3'>
+					<input autocomplete='off' class='fSize27' maxlength='50' type="password" id='reg_password' name='reg_password'>
+				</div>
+				<div class='dBlockNewLineS1'>Repetir contraseña: </div><div class='dBlockSize3'>
+					<input autocomplete='off' class='fSize27' maxlength='50' type="password" name='reg_verification' id='reg_verification'>
+				</div>
+				<div class='dSpace'></div>
+				<div class='dBlockNewLineS3' style="padding: 9px 0px">
+					<label><input name='reg_terms' id='reg_terms' type='checkbox'> He leído y acepto los <a href='{{ terms_url }}' target='_blank'>Términos y condiciones de uso</a>.</label>
+				</div>
+
+				<div class='dButtonsRow'>
+					<center>
+						<input type='submit' class="btn" name='ok' value='Continuar'>
+					</center>
+				</div>
+
+				{% if useOpenId and (useOpenIdFacebook or useOpenIdGoogle) %}
+					<div id="openid-buttons">
+						<div style="margin-top: 6px;">
+							<table width="100%">
+								<tr>
+									<td width="40%">
+										<hr style="color: #aaa" noshade size="1"></hr>
+									</td>
+									<td style="color: #aaa;  white-space: nowrap;">
+										o ({{ macros.helpButton('openId', '¿QUÉ ES?', true) }})
+									</td>
+										<td width="40%">
+										<hr style="color: #aaa" size="1" noshade></hr>
+									</td>
+								</tr>
+							</table>
+
+						</div>
+
+					{% if useOpenIdGoogle %}
+					<div class="major-provider google-login" data-terms="1" style="width: 200px;" data-url="{{ oauthGoogle_url }}">
+						<div class="icon-container">
+							<i class="fab fa-google"></i>
+						</div>
+						<div class="text">
+							<span>Registrarse con Google</span>
+						</div>
+					</div>
+					{% endif %}
+					{% if useOpenIdFacebook %}
+					<div class="major-provider facebook-login" data-terms="1" style="width: 220px;" data-url="{{ oauthFacebook_url }}">
+						<div class="icon-container">
+							<i class="fab fa-facebook"></i>
+						</div>
+						<div class="text">
+							<span>Registrarse con Facebook</span>
+						</div>
+					</div>
+					{% endif %}
+					</div>
+					<div style="clear: both;"></div>
+					{% endif %}
+				</div>
+
+		</div>
+	</form>

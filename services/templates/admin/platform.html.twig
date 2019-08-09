@@ -1,0 +1,64 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'PLATFORM' %}
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Plataforma</div>
+	</div>
+
+	{% for result in serverInfo %}
+		<div class='dBlockNewLineS1'>
+			{{ result.name }}:
+		</div>
+		<div class='dBlockSize3'>
+			{{ result.value }}.
+		</div>
+	{% endfor %}
+
+	{% if results %}
+	<div class='dBlockNewLineS3'><br></div>
+	<table id="tableSort" class="dCssTable">
+		<thead>
+		<tr style='border-bottom: 1px solid grey;'>
+			<th class='dTableCellLeft'><a href="#">Comando</a></th>
+			<th class='dTableCellLeft'><a href="#">Respuesta</a></th>
+			<th class='dTableCellLeft'><a href="#">Resultado</a></th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for result in results %}
+		<tr style="{{ (loop.index % 2 ? '' : 'background-color: #f0f0f0') }}">
+			<td class='dTableCellLeft'>{{ result.command }} </td>
+			<td class='dTableCellLeft5'>{{ result.output|nl2br }}</td>
+			{% if result.return == 0 %}
+				<td class='dTableCellLeft'>OK</td>
+			{% else %}
+				<td class='dTableCellLeft'>Error ({{ result.return }})</td>
+			{% endif %}
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
+    <div style="clear: both"></div>
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Base de datos</div>
+	</div>
+	{% for result in dbItems %}
+		<div class='dBlockNewLineS1'>
+			{{ result.name }}:
+		</div>
+		<div class='dBlockSize3'>
+			{{ result.value }}.
+		</div>
+	{% endfor %}
+
+</div>
+
+{% endblock %}

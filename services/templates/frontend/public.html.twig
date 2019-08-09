@@ -1,0 +1,33 @@
+{% extends "frontendLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+	function validateForm() {
+	if (!checkTextHasValue('from', 'una dirección de correo electrónico')) return false;
+	if (!checkTextHasValue('message', 'un mensaje')) return false;
+	return true;
+	}
+</script>
+
+	{{ macros.InfoMapsTitle("Datos públicos") }}
+	<p><i>{{ application_name }}</i> incorpora en su repositorio publicaciones eventuales y periódicas que los diferentes organismos estatales realizan de sus relevamientos estadísticas o sus datos de gestión. Gracias
+    a diferentes iniciativas de gobierno abierto, acompañadas por la Ley de Acceso a la Información Pública 27.275/16, la diversidad de información provista por organismos de gobierno se ha visto ampliada considerablemente, lo que supone
+    nuevos desafíos en el acceso, la conservación y la visualización de dichas fuentes. Asimismo, el repositorio incorpora
+    series de datos abiertos construidos o curados por instituciones privadas o del tercer sector que tengan
+    la cualidad de mejorar la comprensión de las realidades sociales, económicas, culturales y políticas de las poblaciones.
+    </p>
+    <p>En la actualidad nuestro repositorio de datos espaciales de población mantiene disponibles las colecciones enumeradas a continuación.</p>
+    <ul>
+    <li>Censo Nacional de Población, Hogares y Viviendas. Fuente: INDEC</li>
+    <li>Mapa Nacional Educativo. Fuente: Ministerio de Educación.</li>
+    <li>Mapa Cultural. Sistema de Información Cultural de la Argentina. Fuente: Ministerio de Cultura</li>
+    <li>Mapa Sanitario. Fuente: Ministerio de Salud.</li>
+    <li>Resultados electorales nacionales. Fuente: .</li>
+    <li>Relevamiento de Barrios Populares. Fuente: .</li>
+    </ul>
+    <p>Si considera que existe una publicación que debería ser incorporada en nuestras colecciones de datos pueden comentárnoslo por medio del <a href="/feedback">formulario de contacto</a>.</p>
+
+{% endblock %}

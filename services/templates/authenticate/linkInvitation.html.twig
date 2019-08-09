@@ -1,0 +1,45 @@
+{% extends "layout.html.twig" %}
+
+{% block content %}
+
+<script type="text/javascript">
+	window.onload = function()
+	{
+
+	document.forms[0].elements[0].focus();
+
+	clearPassword('reg_password');
+	clearPassword('reg_verification');
+	};
+
+	$("document").ready(function()
+	{
+	$("div.major-provider").click(function() {
+		onOauthClick($(this).closest("form"),
+		$(this).attr('data-url'), $(this).attr('data-terms') == '1');
+	});
+	});
+</script>
+<div class="dTitle">
+	Identificación de usuario
+</div>
+<div class="contenedor">
+	<p>
+		{{ customMessage | raw }}
+	</p>
+	{% if login %}
+	El siguiente formulario le permitirá iniciar sesión:
+	<div class="dLoginHolder">
+		{{ include('loginBox.html.twig') }}
+	</div>
+	{% else %}
+	<p>
+		El siguiente formulario le permitirá iniciar su cuenta de usuario. Para ello, debe indicar su nombre completo y elegir una contraseña para el uso del sitio.
+	</p>
+	{{ include('registerBox.html.twig') }}
+	{% endif %}
+	&nbsp;<br>
+</div>
+
+
+{% endblock %}

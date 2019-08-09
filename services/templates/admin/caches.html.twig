@@ -1,0 +1,67 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'CACHES' %}
+
+{% block content %}
+
+{{ macros.Title('Cachés') }}
+
+{{ include('tabbedContentMenu.html.twig') }}
+
+<div class="contenedorAdmin">
+    <form method='post' action='{{ action_url }}'>
+
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Procesar vistas de base de datos</div>
+	</div>
+	<div class='dBlockNewLineS2  dNoPaddingTop'>Geografías:</div>
+	<div class='dBlockSize3'>
+        <input class='dSmallerButton' name="regenGeography" type="submit" value="Actualizar" id='updateGeography' onclick="disableButton('updateGeography');">
+        {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_CARTOGRAPHY') }}
+        <div class="dExplanation">Procesar cuando se agrega una geografía.</div>
+    </div>
+	<div class='dBlockNewLineS2  dNoPaddingTop'>Regiones por geografías:</div>
+	<div class='dBlockSize3'>
+        <input class='dSmallerButton' name="regenClippingGeography" type="submit" value="Actualizar" id='updateClippingGeography' onclick="disableButton('updateClippingGeography');">
+        {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_CARTOGRAPHY_REGION') }}
+        <div class="dExplanation">Procesar cuando se agrega una relación entre geografía y cartografía.</div>
+    </div>
+	<div class='dBlockNewLineS2  dNoPaddingTop'>Lookup de regiones:</div>
+	<div class='dBlockSize3'>
+        <input class='dSmallerButton' name="regenClipping" type="submit" value="Actualizar" id='updateClipping' onclick="disableButton('updateClipping');">
+        {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_LOOKUP') }}
+        <div class="dExplanation">Procesar cuando se agrega o actualiza una región de clipping.</div>
+    </div>
+
+
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Espacio utilizado</div>
+	</div>
+
+	<div>
+		<small>
+		{% if isMegaUser %}
+			<input class='dSmallerButton' name="calculateSpace" type="submit" value="Actualizar" id='updateData' onclick="disableButton('updateData');">
+			Fecha de información: {{ dateCache }}.
+		</small>
+		<div class='dSpace'></div>
+	</div>
+		{% endif %}
+	<div style="clear:both">
+			<div class='dSubCategory'>Caches</div>
+			<div class='dBlockNewLineS2  dNoPaddingTop'>Espacio total:</div>
+			<div class='dBlockSize3'>{{ caches_files_count }} inodes / {{ caches_size }} MB.</div>
+			{% for cache in caches %}
+				<div class='dBlockNewLineS2  dNoPaddingTop'>{{ cache.label }}:</div>
+				<div class='dBlockSize3'>{{ cache.files_count }} inodes / {{ cache.size }} MB.</div>
+			{% endfor %}
+            <div style="clear:both"></div>
+	</div>
+
+</form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'SOURCES' %}
+
+{% block content %}
+
+{{ macros.Title('Fuentes') }}
+
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+
+<script type="text/javascript">
+    function deleteItem(url) {
+        if (!confirm('Se procederá a eliminar el elemento seleccionado.\n\n¿Está seguro de que desea hacer esto?'))
+            return false;
+        document.location = url;
+        return false;
+    }
+</script>
+    <div style="padding-top: 20px;padding-bottom: 10px;">
+    <a href="{{ new_url }}">Nueva fuente</a>
+    </div>
+	<div class="dTableHeader">
+		<div style='padding-top: 0px' class='dCellStartRowS3 dTableHeader'>Nombre</div>
+		<div class='dCellSize2 Center dTableHeader'>Edición</div>
+		<div class='dCellSize2 Center dTableHeader'>Global</div>
+		<div class='dCellSize2 Center dTableHeader'>Usos</div>
+		<div class='dCellSize2b Center dTableHeader'>Acciones</div>
+	</div>
+	{% for source in sources %}
+	    <div class='dCellStartRowS3'><a href='{{ source.edit_url}}'>{{ source.caption }}</a></div>
+	    <div class='dCellSize2 Center'>{{ source.version }}</div>
+	    <div class='dCellSize2 Center'>{{( source.isGlobal ? 'Sí' : 'No' )}}</div>
+	    <div class='dCellSize2 Center'><span title="{{ source.users }}" >{{ source.usages }}</span></div>
+	    <div class='dCellSize2b Center'><a href='{{ source.edit_url}}'>Editar</a>
+                    <a href="#" onclick="return deleteItem('{{ source.delete_url}}');">Borrar</a></div>
+	{% else %}
+        <div class='dBlockNewLineS1'>
+        No hay información disponible.
+        </div>
+	{% endfor %}
+	<div class='dBlockNewLineS3'><br></div>
+
+	<div class='dText'>Total: {{ sources | length }} fuentes.</div>
+	<div class='dBlockNewLineS3'></div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,100 @@
+<?php
+
+namespace helena\services\frontend;
+
+use helena\classes\App;
+use minga\framework\Performance;
+use helena\classes\GlobalTimer;
+use helena\caches\TileDataCache;
+use helena\services\common\BaseService;
+
+use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
+use helena\entities\frontend\clipping\TileDataInfo;
+use helena\entities\frontend\geometries\Envelope;
+
+
+class TileDataService extends BaseService
+{
+	// Los niveles de zoom se mapean con la calidad de imagen
+	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
+	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
+	const TILE_SIZE = 256;
+
+	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
+	{
+		$data = null;
+		$this->CheckNotNullNumeric($metricId);
+		$this->CheckNotNullNumeric($metricVersionId);
+		$this->CheckNotNumericNullable($levelId);
+		$this->CheckNotNullNumeric($x);
+		$this->CheckNotNullNumeric($y);
+		$this->CheckNotNullNumeric($z);
+
+		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $x, $y, $z, $b);
+
+		if ($frame->ClippingCircle == null && TileDataCache::Cache()->HasData($metricId, $key, $data))
+		{
+			return $this->GotFromCache($data);
+		}
+		else
+		{
+			Performance::CacheMissed();
+		}
+
+		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b);
+
+		if ($frame->ClippingCircle == null)
+			TileDataCache::Cache()->PutData($metricId, $key, $data);
+
+		return $data;
+	}
+
+	private function CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
+	{
+		$selectedService = new SelectedMetricService();
+		$metric = $selectedService->GetSelectedMetric($metricId);
+		$version = $metric->GetVersion($metricVersionId);
+		$level = $version->GetLevel($levelId);
+
+		$table = new SnapshotMetricVersionItemVariableModel();
+		$geographyId = $level->GeographyId;
+
+		if ($b != null)
+		{
+			$envelope = Envelope::TextDeserialize($b);
+		}
+		else
+		{
+			$envelope = Envelope::FromXYZ($x, $y, $z);
+		}
+		$hasDescriptions = $level->HasDescriptions;
+
+		if ($frame->ClippingCircle != NULL)
+		{
+			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $geographyId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $level->HasTotals);
+		}
+		else if ($frame->ClippingRegionId != NULL)
+		{
+			$rows = $table->GetMetricVersionTileDataByRegionId($metricVersionId, $geographyId, $urbanity, $envelope, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $level->HasTotals);
+		}
+		else
+		{
+			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $geographyId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions, $level->HasTotals);
+		}
+
+		$data = $this->CreateTileDataInfo($rows);
+
+		return $data;
+	}
+
+	private function CreateTileDataInfo($rows)
+	{
+		$ret = new TileDataInfo();
+
+		$ret->Data = $rows;
+
+		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
+		return $ret;
+	}
+}
+

@@ -1,0 +1,5 @@
+{% macro ShowNotification(message) %}
+	{% if message %}
+		<div class='dSmallTipBox' onclick="this.style.display='none';">{{ message }}</div>
+	{% endif %}
+{% endmacro %}

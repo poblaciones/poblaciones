@@ -1,0 +1,36 @@
+{% import "messages.html.twig" as styles %}
+<html>
+    <head>
+        <title>
+        Poblaciones - {{fullName}}
+        </title>
+        <meta lang='es' name='keywords' content='pdf, art�culos, revistas, documentos, congresos, investigaci�n, jornadas'>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    </head>
+{% if viewAction %}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "EmailMessage",
+  "description": "{{ viewAction.description }}",
+  "potentialAction": {
+    "@type": "ViewAction",
+    "target": "{{ viewAction.url | raw }}",
+    "name": "{{ viewAction.name }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ viewAction.organization }}",
+    "url": "{{ viewAction.organization_url | raw }}"
+  }
+}
+</script>
+{% endif %}
+    <body style='font-family:Helvetica,Verdana,Arial,sans-serif; font-size: 14px;'>
+<div style='background-color: #dfdfdf; padding: 20px 80px 20px 80px;'>
+<div style='margin-left: auto; margin-right: auto ; width: 550px'>
+<div style='background-color: #00aeef; padding: 6px 6px 6px 6px;'>
+<div style='background-color: #ffffff; padding: 6px 6px 14px 6px'>
+	<div {{ styles.mainTitle }}>
+	<center>{{ title }}</center>
+	</div>

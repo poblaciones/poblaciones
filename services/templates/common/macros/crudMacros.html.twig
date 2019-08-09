@@ -1,0 +1,254 @@
+{% macro ShowCombo(caption, name, list, selected, tooltip = '', isMandatory = false) %}
+{% from _self import ShowLabel, ShowTooltip, AddMandatoryJs %}
+{{ AddMandatoryJs(isMandatory, caption, name) }}
+<div>
+    {{ ShowLabel(caption, isMandatory) }}
+    <div class='dBlockSize3'><select name="{{ name }}" id="{{ name }}">
+    <option value=''></option>
+    {% for key, value in list %}
+        <option {{ (key == selected ? ' selected' : '') }} value="{{ key }}">{{ value | raw }}</option>
+    {% endfor %}
+    </select>
+    {{ ShowTooltip(tooltip) }}
+    </div>
+    </div>
+{% endmacro %}
+
+{% macro AddMandatoryJs(isMandatory, caption, name) %}
+    {% if isMandatory %}
+    <script type="text/javascript">
+        validateRequired.push(['{{name | escape('js') }}', '{{caption | escape('js') }}']);
+    </script>
+    {% endif %}
+{% endmacro %}
+
+{% macro ShowText(caption, name, value, maxlength, tooltip = '', isMandatory = false) %}
+{% from _self import ShowLabel, ShowTooltip, AddMandatoryJs %}
+{{ AddMandatoryJs(isMandatory, caption, name) }}
+<div>
+    {{ ShowLabel(caption, isMandatory) }}
+	<div class='dBlockSize3'><input type="text" class="{{ (maxlength > 50 ?
+                                            'dLargeTextEdit' : (maxlength > 20 ?
+                                            'dMediumTextEdit' : 'dTextEdit')) }}" name="{{ name }}" value="{{ value }}" maxlength="{{ maxlength }}" />
+    {{ ShowTooltip(tooltip) }}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro ShowTextMultiline(caption, name, value, maxlength, tooltip = '', isMandatory = false) %}
+{% from _self import ShowLabel, ShowTooltip, AddMandatoryJs %}
+{{ AddMandatoryJs(isMandatory, caption, name) }}
+<div>
+    {{ ShowLabel(caption) }}
+	<div class='dBlockSize3'><textarea name="{{ name }}" class="{{ (maxlength > 5000 ? 'dLargeTextArea' : 'dTextArea') }}" maxlength="{{ maxlength }}">{{ value }}</textarea>
+    {{ ShowTooltip(tooltip) }}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro ShowButtonsRow() %}
+<div class='dBlockNewLineS3' style="padding-left: 250px">
+    <input type="submit" value="Guardar" />&nbsp;
+    <input type="button" onclick="history.back();" value="Cancelar" />
+</div>
+{% endmacro %}
+
+{% macro ShowLabel(caption, isMandatory = false) %}
+    {% if caption != '' %}
+        <div class='dBlockNewLineS1'>{{ caption }}{% if isMandatory %}<span style="color: red">*</span>{% endif %}:</div>
+    {% endif %}
+{% endmacro %}
+{% macro ShowTooltip(tooltip) %}
+    <div class='dExplanation'>{{ tooltip }}</div>
+{% endmacro %}
+
+{% macro ShowInstitution(fieldPreffix, institutions, institutionId, isMandatory = false) %}
+{% from _self import ShowText,  ShowLabel, ShowTextMultiline, ShowCombo, ShowInstitutionFields %}
+    {{  ShowLabel('Institución', isMandatory) }}
+    <div class='dBlockSize3'>
+        {{ ShowCombo('', fieldPreffix ~ 'Id', institutions, institutionId, '', false) }}
+        <div style="clear:both">
+            <a href="#" onclick="setElementHide('newInstitution', false); setSelectByText('{{ fieldPreffix }}Id', ''); setElementHide('hideLink', false); return false;" >Nueva institución</a>
+            <a id="hideLink" href="#" style="display: none" onclick="setElementHide('newInstitution', true);setElementHide('hideLink', true); return false;" >Ocultar</a>
+        </div>
+        <div id="newInstitution" style="display: none">
+         {{ ShowInstitutionFields(fieldPreffix) }}
+        </div>
+     </div>
+
+{% endmacro %}
+
+{% macro ShowInstitutionFields(fieldPreffix, institution = null) %}
+{% from _self import ShowText, ShowTextMultiline, ShowCombo %}
+    {{ ShowText('Nombre', fieldPreffix ~ 'Name', (institution ? institution.Name : ''), 200, 'Nombre completo de la institución. Ej. Instituto de Estadísticas y Censos.', true) }}
+    {{ ShowText('País', fieldPreffix ~ 'Country', (institution ? institution.Country : 'Argentina'), 50, 'País al que pertenece la institución.', true) }}
+    {{ ShowText('Página web', fieldPreffix ~ 'Web', (institution ? institution.Web : ''), 255, 'Sitio institucional. Ej. http://capex.gov.ar.') }}
+    {{ ShowText('Correo electrónico', fieldPreffix ~ 'Email', (institution ? institution.Email : ''), 50, 'Dirección de correo electrónico. Ej. contacto@aminca.edu.ar.') }}
+    {{ ShowTextMultiline('Dirección postal', fieldPreffix ~ 'Address', (institution ? institution.Address : ''), 200, 'Dirección física de la institución.') }}
+    {{ ShowText('Teléfono', fieldPreffix ~ 'Phone', (institution ? institution.Phone : ''), 50, 'Teléfono del contacto. Ej. +54 11 5041-1212') }}
+{% endmacro %}
+
+{% macro ShowContact(fieldPreffix, contact, isMandatory = false) %}
+{% from _self import ShowText, ShowLabel %}
+{{  ShowLabel('Contacto', isMandatory) }}
+    <div class='dBlockSize3'>
+    {{ ShowText('Nombre y apellido', fieldPreffix ~ 'Person', contact.Person, 200, 'Nombre de la persona de contacto. Ej. Juan Hermiñez.') }}
+    {{ ShowText('Correo electrónico', fieldPreffix ~ 'Email', contact.Email, 50, 'Dirección de correo electrónico. Ej. lopezq@gmail.com.') }}
+    {{ ShowText('Teléfono', fieldPreffix ~ 'Phone', contact.Phone, 50, 'Teléfono del contacto. Ej. +54 11 5041-1212') }}
+</div>
+{% endmacro %}
+
+{% macro ShowSourceFields(source, fieldPreffix, institutions, offerType, possibleTypes = null) %}
+{% from _self import ShowText, ShowLabel, ShowContact, ShowCombo, ShowInstitution %}
+    {{ ShowText('Nombre', fieldPreffix ~ 'Caption', source.Caption, 200, 'Título de la fuente. Ej. Censo Nacional de Población, Hogares y Viviendas.', true) }}
+    {% if offerType %}
+        {{ ShowCombo('Tipo', fieldPreffix ~ 'Type', possibleTypes, source.Type, 'El tipo indica en qué elementos se puede utilizar esta fuente.', true) }}
+    {% endif %}
+    {{ ShowText('Edición', fieldPreffix ~ 'Version', source.Version, 50, 'Edición de la fuente. Típicamente refiere al año de recolección. Ej. 2001.', true) }}
+    {{ ShowText('Alias', fieldPreffix ~ 'Alias', source.Alias, 20, 'Forma abreviada de la fuente, incluyendo información de versión. Ej. CNPHyV2001, MNE2007.', true) }}
+    {{ ShowText('Página web', fieldPreffix ~ 'Web', source.Web, 255, 'Dirección web en la que puede descargarse (o consultarse) la fuente de información. En lo posible debe indicarse una página web y no un link de descarga directa. Ej. http://mec.gov.ec/encuesta-nacional-rural/inicio.html.', false) }}
+    {{ ShowText('Wikipedia', fieldPreffix ~ 'Wiki', source.Wiki, 255, 'Dirección de la entrada en wikipedia de la información fuente. Ej. https://es.wikipedia.org/wiki/Censo_argentino_de_2010.', false) }}
+    {{ ShowText('Autores', fieldPreffix ~ 'Authors', source.Authors, 200, 'Ej. López, Ernesto y Rosso, Ana.') }}
+    {{ ShowInstitution(fieldPreffix ~ 'Institution', institutions, source.InstitutionId, false) }}
+    {{ ShowContact(fieldPreffix ~ 'Contact', source.Contact) }}
+{% endmacro %}
+
+{% macro addValidateFormJs() %}
+<script type="text/javascript">
+    var validateRequired = new Array();
+    function validateFormJs() {
+        for (n = 0; n < validateRequired.length; n++) {
+            var name = validateRequired[n][0];
+            var caption = validateRequired[n][1];
+            if (!isHidden(name) && checkHasValue(name, caption) == false)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+{% endmacro %}
+
+{% macro putLicensePanel(licenseImage, licenseLegend, licenseType = 1) %}
+{% from _self import ShowLabel %}
+	{% if licenseType == 0 %}
+		No especificada.
+	{% else %}
+		<div>
+		<div style='float:left; padding-top: 2px; '><img src='{{ licenseImage }}' alt='Creative Commons' title='Creative Commons'> </div>
+		<div style='float:left; padding-left: 7px; line-height: 1.4em; font-size: 12px; '>{{ licenseLegend | raw }}</div>
+		</div>
+	{% endif %}
+{% endmacro %}
+
+
+{% macro putLicensePanelEdit(licenseVersions, licenseType, licenseCommercial, licenseOpen, licenseVersion, isEvent, isArticle = false) %}
+{% from _self import TupleGuion, yesNoRadioList, radioList, helpButton, ShowLabel %}
+<div>
+    {{ ShowLabel('Licencia') }}
+			<div class="dBlockSize3"><label><input type="radio" onclick='licenseChanged();' name='LicenseType' id='licenseType_1' value='1' {{ (licenseType == 1 ? 'checked' : "") }} >Creative Commons.</label> {{ helpButton('creativecommons', '¿QUÉ ES?', true) }}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<label><input type="radio" onclick='licenseChanged();' name='LicenseType' id='licenseType_0' value='0' {{ (licenseType == 0 ? 'checked' : "") }}>No especificada.</label>
+			<br>
+
+			<div id='panCCommons' class='dBlockGroupSize3' >
+			Versión:
+				<select name='LicenseVersion' id='licenseVersion'>
+				{% for key,value in licenseVersions %}
+					<option {{ (key == licenseVersion ? "selected" : "") }}
+					value='{{ key }}'>{{ value }}</option>
+				{% endfor %}
+				</select>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+			Permitir uso comercial: &nbsp;&nbsp;{{ yesNoRadioList('LicenseCommercial', licenseCommercial) }}
+
+			<br>Permitir modificaciones: &nbsp;&nbsp;{{
+						radioList('LicenseOpen', licenseOpen, "Sí.", "always", "No.", "never", "Sí, siempre que se comparta de la misma manera.", "same") }}
+			</div>
+	<script type="text/javascript">
+		// Ocultar fields
+		function setLicenseChanged(type) {
+			var elements = Array('LicenseVersion', 'LicenseCommercial_0', 'LicenseCommercial_1', 'LicenseOpen_never', 'LicenseOpen_always', 'LicenseOpen_same');
+			for (n = 0; n < elements.length; n++) {
+				var ele = getElement(elements[n]);
+				ele.disabled = (type != "1");
+			}
+		}
+		function licenseChanged() {
+			var type = getRadioValue('LicenseType');
+			setLicenseChanged(type);
+		}
+        licenseChanged();
+
+	</script>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro helpButton(template, text = '¿Por qué?', light = false)
+%}{%
+endmacro %}
+
+{% macro radioList(name, value, opt1, value1, opt2, value2, opt3, value3, opt4, value4, opt5, value5) %}
+							<label><input type="radio" id='{{name}}_{{value1}}' name='{{name}}' value='{{value1}}' {{ value == value1 ? 'checked' : '' }}>{{opt1}}</label>
+	{% if (opt2) %}
+	&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="radio" id='{{name}}_{{value2}}' name='{{name}}' value='{{value2}}' {{ value == value2 ? 'checked' : '' }}>{{opt2}}</label>
+	{% endif %}
+	{% if (opt3) %}
+	&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="radio" id='{{name}}_{{value3}}' name='{{name}}' value='{{value3}}' {{ value == value3 ? 'checked' : '' }}>{{opt3}}</label>
+	{% endif %}
+	{% if (opt4) %}
+	&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="radio" id='{{name}}_{{value4}}' name='{{name}}' value='{{value4}}' {{ value == value4 ? 'checked' : '' }}>{{opt4}}</label>
+	{% endif %}
+	{% if (opt5) %}
+	&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="radio" id='{{name}}_{{value5}}' name='{{name}}' value='{{value5}}' {{ value == value5 ? 'checked' : '' }}>{{opt5}}</label>
+	{% endif %}
+{% endmacro %}
+
+{% macro yesNoRadioList(name, value = '1') %}
+	<label><input type="radio" name='{{name}}' id='{{name}}_1' value='1' {{ value != '0' ? 'checked' : '' }}>S&iacute;.</label>
+	&nbsp;&nbsp;&nbsp;&nbsp;
+	<label><input type="radio" name='{{name}}' id='{{name}}_0' value='0' {{ value == '0' ? 'checked' : '' }}>No.</label>
+{% endmacro %}
+
+{% macro yesNoCheckbox(name, value, onclick = '') %}
+	<input type="checkbox" name='{{name}}' id='{{name}}' {{ (onclick ? 'onclick="' ~ onclick ~ '"' : "") | raw }} {{ value != '0' ? 'checked' : '' }}>
+{% endmacro %}
+
+{% macro inputDateRange(name, from, to) %}
+{% from _self import inputDate %}
+	Desde: {{ inputDate(name ~ 'From', from) }}
+
+	&nbsp;&nbsp;&nbsp;&nbsp;
+
+	Hasta: {{ inputDate(name ~ 'To', to) }}
+{% endmacro %}
+
+
+{% macro TupleGuion(t1, t2) %}
+{{ t1 | trim }}{% if t2 | trim %} - {{ t2 }}{%
+endif
+%}{% endmacro %}
+
+{% macro appendDot(t1) %}
+{{ t1 | trim }}{% if not (t1 | trim) %}-{% elseif not (t1 | trim ends with '.') %}.{%
+endif
+%}{% endmacro %}
+
+{% macro inputDate(name, value) %}
+<input size="8" id="{{ name }}" name="{{ name }}" value="{{ value }}"><button id="{{ name }}_trigger">..</button>
+  <script type="text/javascript">
+  RANGE_CAL_1 = new Calendar({
+  	inputField: "{{ name }}",
+  	dateFormat: "%d/%m/%Y",
+    trigger: "{{ name }}_trigger",
+    bottomBar: false,
+    onSelect: function () {
+      this.hide();
+    }
+  });
+</script>
+{% endmacro %}
