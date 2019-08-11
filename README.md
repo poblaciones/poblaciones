@@ -55,4 +55,3 @@ Nidia Herández y Romina De León trabajaron en la comunicación de contenidos, 
 
 # Licencia
 
-El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
