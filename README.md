@@ -43,7 +43,7 @@ El sitio se encuentra operativo con datos demográficos, sociales y políticos d
 # Créditos
 
 Agustín Salvia y Pablo De Grande establecieron en 2016 el alcance inicial, proyectada como una herramienta para la publicación y visualización de información espacial de datos sociales de población. 
-El diseño de la arquitectura y el modelo de datos dependieron de Pablo De Grande y Rodrigo Queipo, quienes desarrollaron el primer prototipo funcional del visor durante 2017. 
+El diseño de la arquitectura y el modelo de datos dependieron de Pablo De Grande y Rodrigo Queipo, quienes desarrollar el primer prototipo funcional del visor durante 2017. 
 
 La participación de Gimena del Río, a partir de 2018, permitió enmarcar al proyecto como plataforma colaborativa académica de ciencia abierta y situar sus características dentro del espacio de discusión de las Humanidades Digitales. 
 
@@ -53,10 +53,6 @@ Las cartografías publicadas del Observatorio de la Deuda Social en la versión 
 
 Nidia Herández y Romina De León trabajaron en la comunicación de contenidos, elaborando videos, tutoriales y estructurando el contenido de la página institucional, bajo la supervisión de Gimena del Río. Ezequiel Soto trabajó en el diseño gráfico de la página institucional.
 
-La realización del proyecto se benefició durante todo el proceso del apoyo del Observatorio de la Deuda Social Argentina de la Universidad Católica Argentina (ODSA).
-
-# Derechos de autor y licenciamiento
-Poblaciones - Plataforma abierta de datos espaciales de población.
-Copyright (C) 2018-2019. Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET) y Universidad Católica Argentina (UCA).
+# Licencia
 
 El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
