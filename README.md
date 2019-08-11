@@ -43,7 +43,7 @@ El sitio se encuentra operativo con datos demográficos, sociales y políticos d
 # Créditos
 
 Agustín Salvia y Pablo De Grande establecieron en 2016 el alcance inicial, proyectada como una herramienta para la publicación y visualización de información espacial de datos sociales de población. 
-El diseño de la arquitectura y el modelo de datos dependieron de Pablo De Grande y Rodrigo Queipo, quienes desarrollar el primer prototipo funcional del visor durante 2017. 
+El diseño de la arquitectura y el modelo de datos dependieron de Pablo De Grande y Rodrigo Queipo, quienes desarrollaron el primer prototipo funcional del visor durante 2017. 
 
 La participación de Gimena del Río, a partir de 2018, permitió enmarcar al proyecto como plataforma colaborativa académica de ciencia abierta y situar sus características dentro del espacio de discusión de las Humanidades Digitales. 
 
