@@ -1,4 +1,4 @@
-# Poblaciones
+﻿# Poblaciones
 Aplicación web para la publicación colaborativa de datos espaciales de población
 
 # Introducción
@@ -53,5 +53,11 @@ Las cartografías publicadas del Observatorio de la Deuda Social en la versión 
 
 Nidia Herández y Romina De León trabajaron en la comunicación de contenidos, elaborando videos, tutoriales y estructurando el contenido de la página institucional, bajo la supervisión de Gimena del Río. Ezequiel Soto trabajó en el diseño gráfico de la página institucional.
 
-# Licencia
+La realización del proyecto se benefició durante todo el proceso del apoyo del Observatorio de la Deuda Social Argentina de la Universidad Católica Argentina (ODSA).
 
+# Licencia
+Poblaciones - Plataforma abierta de datos espaciales de población.
+
+Copyright (C) 2018-2019. Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET). Observatorio de la Deuda Social Argentina (ODSA) - Universidad Católica Argentina (UCA). 
+
+El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
