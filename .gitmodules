@@ -1,0 +1,3 @@
+[submodule "services/src/framework"]
+	path = services/src/framework
+	url = https://github.com/laminga/framework.git

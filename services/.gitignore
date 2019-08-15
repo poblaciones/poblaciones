@@ -10,7 +10,6 @@
 /var
 /vendor
 /web/phpMyAdmin
-/src/framework
 /web.config
 /web/web.config
 /web/test*.php
