@@ -68,11 +68,10 @@ class CacheManager
 	public function ClearMetricMetadata($metricId)
 	{
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
-
 		SummaryCache::Cache()->Clear($metricIdShardified);
 		TileDataCache::Cache()->Clear($metricIdShardified);
 		SelectedMetricsMetadataCache::Cache()->Clear($metricIdShardified);
-
+		
 		FrameMetricsHashCache::Cache()->Clear();
 		MetricHashesListCache::Cache()->Clear();
 	}

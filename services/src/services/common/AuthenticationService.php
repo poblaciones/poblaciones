@@ -2,9 +2,7 @@
 
 namespace helena\services\common;
 
-use helena\classes\App;
-use helena\services\backoffice\UserService;
-
+use helena\classes\Account;
 use helena\classes\Session;
 
 class AuthenticationService
@@ -13,12 +11,12 @@ class AuthenticationService
 	{
 		if (Session::IsAuthenticated())
 		{
-			$userService = new UserService();
-			$user = $userService->GetCurrentUser();
-			$ret = array('user' => $user->getEmail(),
-									'firstName' => $user->getFirstName(),
-									'lastname' => $user->getLastName(),
-									'privileges' => $user->getPrivileges(),
+			$user = Account::Current();
+			$ret = array('user' => $user->GetEmail(),
+									'firstName' => $user->GetFirstName(),
+									'lastname' => $user->GetLastName(),
+									'master' => Account::GetMasterUser(),
+									'privileges' => $user->privileges,
 									'logged' => true);
 		}
 		else
@@ -26,6 +24,7 @@ class AuthenticationService
 			$ret = array('user' => '',
 									'firstName' => '',
 									'lastname' => '',
+									'master' => '',
 									'privileges' => '',
 									'logged' => false);
 		}

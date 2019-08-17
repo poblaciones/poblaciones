@@ -48,7 +48,7 @@ class ClippingService extends BaseService
 		if ($current === null)
 		{
 			// Trata de resolver a IP a lat-long
-			$latLng = null; GeoIp::GetCurrentLatLong();
+			$latLng = null; // GeoIp::GetCurrentLatLong();
 			if ($latLng !== null)
 			{
 				$current = new Coordinate($latLng['lat'], $latLng['lon']);

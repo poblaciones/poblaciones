@@ -37,7 +37,7 @@
 								<div class="md-layout-item md-size-100">
 									<div class="md-layout md-gutter gutterBottom" v-if="absoluteMap(metadata.Url)">
 										<div class="md-layout-item md-size-30 md-xsmall-size-100">
-											<label class="with-area">Dirección:</label>
+											<label class="with-area">Dirección estable:</label>
 										</div>
 										<div class="md-layout-item md-size-60">
 											<a style="color: #989797;" :href="absoluteMap(metadata.Url)" target="_blank">{{ absoluteMap(metadata.Url) }}</a>

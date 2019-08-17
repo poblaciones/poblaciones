@@ -73,6 +73,10 @@ class Account
 		else
 			return $this->privileges === $key;
 	}
+	public function GetMaster()
+	{
+		return self::GetMasterUser();
+	}
 
 	public function GetFullName()
 	{
@@ -87,6 +91,11 @@ class Account
 	{
 		$this->EnsureDbInfo();
 		return $this->lastName;
+	}
+	public function GetEmail()
+	{
+		$this->EnsureDbInfo();
+		return $this->user;
 	}
 	public function GetUserId()
 	{

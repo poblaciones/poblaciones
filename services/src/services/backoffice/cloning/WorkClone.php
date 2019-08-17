@@ -72,22 +72,17 @@ class WorkClone
 	}
 	public function CopyMetadata()
 	{
-		// Copia metadatos
 		$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
+		// Clona el contacto
+		$contactId = RowDuplicator::DuplicateRows(entities\DraftContact::class, $work->getMetadata()->getContact()->getId());
+		// Copia metadatos
 		$sourceMetadataId = $work->getMetadata()->getId();
 		$newName = $this->state->Get('name');
-		$static = array('met_title' => $newName);
+		$static = array('met_title' => $newName, 'met_contact_id' => $contactId);
 		$metadataId = RowDuplicator::DuplicateRows(entities\DraftMetadata::class, $sourceMetadataId, $static);
 		// Corrige encabezado
 		$update = "UPDATE draft_work SET wrk_metadata_id = ? WHERE wrk_id = ?";
 		App::Db()->exec($update, array($metadataId, $this->targetWorkId));
-		// Decide si duplica Contact
-		if ($work->getType() !== 'P' && $work->getMetadata()->getContact())
-		{	// Clona el contacto
-			$contactId = RowDuplicator::DuplicateRows(entities\DraftContact::class, $work->getMetadata()->getContact()->getId());
-			$contact = "UPDATE draft_metadata SET met_contact_id = ? WHERE met_id = ?";
-			App::Db()->exec($contact, array($contactId, $metadataId));
-		}
 	}
 
 	public function CopyPermissions()

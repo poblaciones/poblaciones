@@ -1,10 +1,7 @@
 <template>
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar">
-			<div v-if="this.user" class="userInfo">
-				<div>Usuario: {{ user.user }}</div>
-				<div><a class="whiteLink" @click="logoff">Cerrar sesión</a></div>
-			</div>
+			<user-info></user-info>
 			<div style="float: left">
 				<router-link :to="getBackRoute">
 					 <BackIcon class="icon" style="font-size: 28px; color: #fff" />
@@ -26,17 +23,16 @@
 import { mapGetters } from 'vuex';
 import Context from '@/backoffice/classes/Context';
 import BackIcon from '@/backoffice/assets/back.svg';
+import UserInfo from '@/backoffice/components/UserInfo';
 
 export default {
 	name: 'topBar',
 	components: {
-		BackIcon
+		BackIcon,
+		UserInfo
 	},
 	computed: {
 		Work() { return window.Context.CurrentWork; },
-		user() {
-			return window.Context.User;
-		},
 		getBackRoute() {
 			if (this.Work.properties.Type == 'P') {
 				return '/public';
@@ -62,10 +58,6 @@ export default {
 		handleResize() {
 			var parentwidth = document.getElementById('topBarContainer').offsetWidth;
 			document.getElementById('topBar').style.width = parentwidth + 'px';
-		},
-		logoff() {
-			var url = window.host + '/authenticate/logoff';
-			document.location = url;
 		},
 		beginTest() {
 			this.$refs.TestStepper.startUrl = this.Work.GetStartWorkTestUrl();

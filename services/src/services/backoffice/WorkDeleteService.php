@@ -2,14 +2,10 @@
 
 namespace helena\services\backoffice;
 
-use helena\classes\App;
 use helena\services\common\BaseService;
 
 use helena\services\backoffice\cloning\WorkDelete;
-use helena\entities\backoffice\DraftWork;
-use helena\entities\backoffice\structs\WorkInfo;
 use helena\services\backoffice\publish\WorkStateBag;
-use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\ErrorException;
 
 class WorkDeleteService extends BaseService
@@ -23,8 +19,11 @@ class WorkDeleteService extends BaseService
 
 	public function StartDeleteWork($workId, $name = null)
 	{
+		// Este multipaso invoca primero a los pasos de revocar publicación, y luego
+		// ejecuta sus pasos.
+		$revoke = new RevokeService();
 		$this->state = WorkStateBag::Create($workId);
-		$this->state->SetTotalSteps(3);
+		$this->state->SetTotalSteps(3 + $revoke->TotalSteps());
 		$this->state->SetProgressLabel('Eliminando datasets');
 		return $this->state->ReturnState(false);
 	}
@@ -36,7 +35,14 @@ class WorkDeleteService extends BaseService
 		$this->state->LoadFromKey($key);
 		$delete = new WorkDelete($this->state);
 
-		switch($this->state->Step())
+		// Se fija si está revocando...
+		$revoke = new RevokeService($this->state);
+		if ($this->state->Step() < $revoke->TotalSteps())
+		{
+			return $revoke->StepRevoke($key, true);
+		}
+
+		switch($this->state->Step() - $revoke->TotalSteps())
 		{
 			case self::STEP_DELETE_DATASETS:
 				$done = $delete->DeleteDatasets();

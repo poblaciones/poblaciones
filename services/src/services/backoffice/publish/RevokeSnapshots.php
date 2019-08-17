@@ -105,7 +105,6 @@ class RevokeSnapshots extends BaseService
 		foreach(Arr::UniqueByField('mvr_metric_id', array_merge($previousMetricVersions, $metricVersions)) as $row)
 		{
 			$cacheManager->ClearMetricMetadata($row['mvr_metric_id']);
-			$cacheManager->ClearSelectedMetricMetadata($row['mvr_metric_id']);
 		}
 	}
 }

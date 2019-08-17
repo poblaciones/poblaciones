@@ -26,7 +26,8 @@ class LabelsService extends BaseService
 
 		if (LabelsCache::Cache()->HasData($key, $data))
 		{
-            foreach($data->Data as &$label) if ($label['type'] === 'C') $label['FIDs'] = null;
+      foreach($data->Data as &$label) 
+				if ($label['type'] === 'C') $label['FIDs'] = null;
 
 			return $this->GotFromCache($data);
 		}

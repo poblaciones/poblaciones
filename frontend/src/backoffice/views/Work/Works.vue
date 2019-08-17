@@ -36,11 +36,11 @@
 								<md-button v-if="canEdit(item) && !publishDisabled(item)" title="Publicar" class="md-icon-button" v-on:click="onPublish(item)">
 									<md-icon>public</md-icon>
 								</md-button>
-								<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
-									<md-icon>edit</md-icon>
-								</md-button>
 								<md-button v-if="canEdit(item) && !revokeDisabled(item)" title="Revocar publicación" class="md-icon-button" v-on:click="onRevoke(item)">
 									<md-icon>pause_circle_filled</md-icon>
+								</md-button>
+								<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
+									<md-icon>edit</md-icon>
 								</md-button>
 								<md-button v-if="canEdit(item)" @click="onDuplicate(item)"  title="Duplicar" class="md-icon-button">
 									<md-icon>file_copy</md-icon>

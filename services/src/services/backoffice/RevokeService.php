@@ -21,22 +21,28 @@ class RevokeService extends BaseService
 
 	private $state = null;
 
+	function __construct($state = null)
+	{
+		$this->state = $state;
+	}
+
 	public function StartRevoke($workId)
 	{
 		$this->state = WorkStateBag::Create($workId);
-		$this->state->SetTotalSteps(4);
+		$this->state->SetTotalSteps($this->TotalSteps());
 		$this->state->SetProgressLabel('Revocando publicación');
 		return $this->state->ReturnState(false);
 	}
-
-	public function StepRevoke($key)
+	public function TotalSteps()
+	{
+		return 4;
+	}
+	public function StepRevoke($key, $isSubStepper = false)
 	{
 		// Desde acá controla los pasos de publicación
 		$this->state = new WorkStateBag();
 		$this->state->LoadFromKey($key);
 		$workId = $this->state->Get('workId');
-
-		$totalSlices = 0;
 
 		switch($this->state->Step())
 		{
@@ -67,7 +73,7 @@ class RevokeService extends BaseService
 			default:
 				throw new ErrorException('Invalid step.');
 		}
-		$done = ($this->state->Step() == self::STEP_COMPLETED);
+		$done = ($this->state->Step() == self::STEP_COMPLETED && !$isSubStepper);
 		return $this->state->ReturnState($done);
 	}
 }
