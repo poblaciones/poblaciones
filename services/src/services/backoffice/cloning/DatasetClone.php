@@ -87,7 +87,7 @@ class DatasetClone
 		$targetMetricVersionRow = $this->GetTargetVersionByCaption($name, $this->targetWorkId);
 		if ($targetMetricVersionRow == null)
 		{
-			$newName = RowDuplicator::ResolveNewName($name, 'draft_metric_version', $metricVersion->getMetric()->getId(), 'mvr_metric_id', 'mvr_caption');
+			$newName = RowDuplicator::ResolveNewName($name, 'draft_metric_version', $metricVersion->getMetric()->getId(), 'mvr_metric_id', 'mvr_caption', true);
 			$static = array('mvr_work_id' => $this->targetWorkId, 'mvr_caption' => $newName);
 			$targetMetricVersionId = RowDuplicator::DuplicateRows(entities\DraftMetricVersion::class, $metricVersionId, $static);
 		}
@@ -100,8 +100,24 @@ class DatasetClone
 		$static = array('mvl_metric_version_id' => $targetMetricVersionId, 'mvl_dataset_id' => $this->targetDatasetId);
 		RowDuplicator::DuplicateRows(entities\DraftMetricVersionLevel::class, $metricVersionId, $static, 'mvl_metric_version_id');
 
+		// Copia symbology
+		$static = array();
+		RowDuplicator::DuplicateRows(entities\DraftSymbology::class,
+											"(SELECT mvv_symbology_id FROM draft_variable
+												JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
+												WHERE mvl_metric_version_id = " . $metricVersionId . ")", $static, 'vsy_id IN');
+
+		// Calcula el enganche con symbology
+		$metadata = App::Orm()->getClassMetadata(entities\DraftSymbology::class);
+		$table = $metadata->GetTableName();
+		$symbologyQuery = RowDuplicator::CreatePairingQuery($table, $metricVersionId, $targetMetricVersionId,
+																								"(SELECT mvl_metric_version_id FROM draft_metric_version_level
+																									JOIN draft_variable ON mvv_metric_version_level_id = mvl_id)",
+																									'vsy_id', 'mvv_symbology_id');
 		// Copia variables
-		$parentInfo = array(entities\DraftMetricVersionLevel::class, $metricVersionId, $targetMetricVersionId, 'mvl_metric_version_id', 'mvv_metric_version_level_id');
+		$static = array('mvv_symbology_id' => $symbologyQuery);
+		$parentInfo = array(entities\DraftMetricVersionLevel::class, $metricVersionId,
+													$targetMetricVersionId, 'mvl_metric_version_id', 'mvv_metric_version_level_id');
 		RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftVariable::class);
 
 		// Copia variableValueLabel

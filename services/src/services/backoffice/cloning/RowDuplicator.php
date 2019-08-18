@@ -15,20 +15,32 @@ class RowDuplicator
 {
 	private static $varCounter = 0;
 
-	public static function ResolveNewName($name, $table, $filterValue, $filterColumn, $captionColumn)
+	public static function ResolveNewName($name, $table, $filterValue, $filterColumn, $captionColumn, $shortForm = false)
 	{
-		$exists = true;
 		$sql = "SELECT count(*) FROM " . $table . " WHERE " . $filterColumn . " = ? AND " . $captionColumn . " = ?";
 		$i = 1;
 		$newName = $name;
 		$params = array($filterValue, $newName);
 		while(App::Db()->fetchScalarInt($sql, $params) != 0)
 		{
-			$newName = $name . " " . trim("(copia " . ($i == 1 ? '' : $i)) . ")";
+			if ($shortForm)
+				$newName = $name . " " . trim("(copia " . ($i == 1 ? '' : $i)) . ")";
+			else
+				$newName = $name . " " . trim("(" . ($i == 1 ? '' : $i)) . ")";
 			$params = array($filterValue, $newName);
 			$i++;
 		}
 		return $newName;
+	}
+
+	public static function CreatePairingQuery($parentTable, $parentSourceId, $parentTargetId,
+																								$parentFilterField, $parentIdentifier, $childFilterField)
+	{
+		$query1 = self::CreateNumberedQuery($parentTable, $parentSourceId, $parentFilterField, $parentIdentifier);
+		$query2 = self::CreateNumberedQuery($parentTable, $parentTargetId, $parentFilterField, $parentIdentifier);
+		$staticQuery = "(SELECT g2." . $parentIdentifier . " FROM " . $query1 . " AS g1, " . $query2 . " AS g2
+												WHERE g1.rowNum = g2.rowNum AND g1." . $parentIdentifier . "=" . $childFilterField . ")";
+		return $staticQuery;
 	}
 
 	public static function DuplicateParentedRows($parentInfo, $childClass, $staticColumns = array())
@@ -45,10 +57,9 @@ class RowDuplicator
 		// Arma los select
 		$filter = self::GetFilter($parentFilterField, $parentSourceId);
 		$sourceRows = "SELECT " . $parentIdentifier . " FROM " . $parentTable . " WHERE " . $filter . " ORDER BY " . $parentIdentifier;
-		$query1 = self::CreateNumberedQuery($parentTable, $parentSourceId, $parentFilterField, $parentIdentifier);
-		$query2 = self::CreateNumberedQuery($parentTable, $parentTargetId, $parentFilterField, $parentIdentifier);
-		$staticQuery = "(SELECT g2." . $parentIdentifier . " FROM " . $query1 . " AS g1, " . $query2 . " AS g2
-												WHERE g1.rowNum = g2.rowNum AND g1." . $parentIdentifier . "=" . $childFilterField . ")";
+		//
+		$staticQuery = self::CreatePairingQuery($parentTable, $parentSourceId, $parentTargetId,
+																								$parentFilterField, $parentIdentifier, $childFilterField);
 		$staticColumns[$childFilterField] = array($staticQuery);
 		// Pone el filtro
 		$filterColumn = $childFilterField . ' IN';

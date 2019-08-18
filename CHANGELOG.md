@@ -13,6 +13,8 @@ v2.0 (2019-08-17)
 - Al impersonar adminitrativamente se ve el nombre de ambos usuarios en la barra.
 - Fix: no clonaba bien contacto de la cartografía.
 - Fix: La baja de cartografía no estaba revocando antes de eliminar.
+- Fix: el clonado de datasets dejaba la symbología con referencias cruzadas.
+- Fix: el clonado de datasets no replica los archivos y fuentes secundarias.
 
 v1.9 (2019-07-23)
 - La identificación de indicadores es 'full text' (se pueden poner palabras sueltas y funciona. ej.: acceso gas resuelve bien el indicador "acceso a gas")

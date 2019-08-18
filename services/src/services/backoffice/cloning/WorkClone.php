@@ -83,8 +83,28 @@ class WorkClone
 		// Corrige encabezado
 		$update = "UPDATE draft_work SET wrk_metadata_id = ? WHERE wrk_id = ?";
 		App::Db()->exec($update, array($metadataId, $this->targetWorkId));
+		// Copia metadata_sources
+		$static = array('msc_metadata_id' => $metadataId);
+		RowDuplicator::DuplicateRows(entities\DraftMetadataSource::class, $sourceMetadataId, $static, 'msc_metadata_id');
+		// Copia metadata_files
+		$this->CopyFiles($sourceMetadataId, $metadataId);
+}
+	private function CopyFiles($sourceMetadataId, $metadataId)
+	{
+		$files = App::Orm()->findManyByProperty(entities\DraftMetadataFile::class, "Metadata.Id", $sourceMetadataId);
+		foreach($files as $file)
+		{
+			// Copia el file
+			$static = array();
+			$sourceFileId = $file->getFile()->getId();
+			$newFileId = RowDuplicator::DuplicateRows(entities\DraftFile::class, $sourceFileId, $static, 'fil_id');
+			$static = array('chu_file_id' => $newFileId);
+			RowDuplicator::DuplicateRows(entities\DraftFileChunk::class, $sourceFileId, $static, 'chu_file_id');
+			// Copia el metadataFile
+			$static = array('mfi_metadata_id' => $metadataId, 'mfi_file_id' => $newFileId);
+			RowDuplicator::DuplicateRows(entities\DraftMetadataFile::class, $sourceMetadataId, $static, 'mfi_metadata_id');
+		}
 	}
-
 	public function CopyPermissions()
 	{
 		// Copia permisos

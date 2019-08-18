@@ -68,13 +68,8 @@ class MetricService extends BaseService
 		$variableAlter = App::Orm()->find(entities\DraftVariable::class, $previousVariableId);
 		if ($variableAlter === null)
 			return self::OK;
-		// Actualiza
-		$order1 = $variableAlter->getOrder();
-		$order2 = $variable->getOrder();
-		$variable->setOrder($order1);
-		$variableAlter->setOrder($order2);
-		App::Orm()->save($variable);
-		App::Orm()->save($variableAlter);
+		$this->SwapOrders($variable, $variableAlter);
+		// Listo
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetDatasetLabelsChanged($dataset->getWork()->getId());
 		return self::OK;
@@ -88,23 +83,27 @@ class MetricService extends BaseService
 		$variableAlter = App::Orm()->find(entities\DraftVariable::class, $nextVariableId);
 		if ($variableAlter === null)
 			return self::OK;
-		// Actualiza
-		$order1 = $variableAlter->getOrder();
-		$order2 = $variable->getOrder();
-		// Pone negativo para respetar el índice
-		$variable->setOrder(-$order1);
-		App::Orm()->save($variable);
-		// Actualiza los valores
-		$variableAlter->setOrder($order2);
-		App::Orm()->save($variableAlter);
-		$variable->setOrder($order1);
-		App::Orm()->save($variable);
+		$this->SwapOrders($variable, $variableAlter);
 		// Listo
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetDatasetLabelsChanged($dataset->getWork()->getId());
 		return self::OK;
 	}
 
+	private function SwapOrders($variable, $variableAlter)
+	{
+		// Actualiza
+		$order1 = $variableAlter->getOrder();
+		$order2 = $variable->getOrder();
+		// Pone negativo para respetar el índice
+		$variable->setOrder(-1 - $order1);
+		App::Orm()->save($variable);
+		// Actualiza los valores
+		$variableAlter->setOrder($order2);
+		App::Orm()->save($variableAlter);
+		$variable->setOrder($order1);
+		App::Orm()->save($variable);
+	}
 	private function LoadAndValidate($datasetId, $variableId)
 	{
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
