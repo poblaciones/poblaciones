@@ -40,21 +40,6 @@ La aplicación puede ser alojada en un servidor compartido (ej. hostgator), dado 
 
 El sitio se encuentra operativo con datos demográficos, sociales y políticos de la Argentina en https://poblaciones.org.
 
-# Créditos
-
-Agustín Salvia y Pablo De Grande establecieron en 2016 el alcance inicial, proyectada como una herramienta para la publicación y visualización de información espacial de datos sociales de población. 
-El diseño de la arquitectura y el modelo de datos dependieron de Pablo De Grande y Rodrigo Queipo, quienes desarrollar el primer prototipo funcional del visor durante 2017. 
-
-La participación de Gimena del Río, a partir de 2018, permitió enmarcar al proyecto como plataforma colaborativa académica de ciencia abierta y situar sus características dentro del espacio de discusión de las Humanidades Digitales. 
-
-Entre 2018 y 2019 se completó la segunda versión del visor y la interfaz web de administración de datos espaciales, etapa de desarrollo que estuvo a cargo de Gonzalo Méndez y Pablo De Grande. Juan Ignacio Bonfiglio fue responsable de la evaluación de uso y comentarios de dicha etapa.
-
-Las cartografías publicadas del Observatorio de la Deuda Social en la versión 2019 fueron puestas online por Juan Bonfiglio. Los datos públicos de la versión 2019 fueron procesados por Pablo De Grande, en colaboración con Agustín Salvia para los indicadores censales 2010-2001-1991.
-
-Nidia Herández y Romina De León trabajaron en la comunicación de contenidos, elaborando videos, tutoriales y estructurando el contenido de la página institucional, bajo la supervisión de Gimena del Río. Ezequiel Soto trabajó en el diseño gráfico de la página institucional.
-
-La realización del proyecto se benefició durante todo el proceso del apoyo del Observatorio de la Deuda Social Argentina de la Universidad Católica Argentina (ODSA).
-
 # Licencia
 Poblaciones - Plataforma abierta de datos espaciales de población.
 

@@ -1,4 +1,9 @@
 ﻿[CURRENT]
+- Zona administrativa en /admins.
+- La zona /admin pasa a /logs.
+- Adminsitración de indexado/no indexado para cartografías y datos públicos.
+- Adminsitración de privado/público para cartografías y datos públicos en solapa de visiblidad.
+- Botón de solicitar revisión en Visiblidad.
 
 v2.0 (2019-08-17)
 - El 'Detalle' pasa a llamarse 'Resumen', con límite de 5 mil caracteres.
