@@ -252,6 +252,21 @@ ActiveWork.prototype.AddPermission = function (user, permission) {
 		});
 };
 
+ActiveWork.prototype.RequestReview = function () {
+	var loc = this;
+	return axiosClient.getPromise(window.host + '/services/backoffice/RequestReview',
+		{ 'w': this.properties.Id }, 'solicitar la revisión');
+};
+
+ActiveWork.prototype.UpdateVisibility = function () {
+	var loc = this;
+	return axiosClient.getPromise(window.host + '/services/backoffice/UpdateWorkVisiblity',
+		{ 'w': this.properties.Id, 'p': (this.properties.IsPrivate ? '1' : '0') }, 'actualizar la visibilidad').then(
+		function () {
+			window.Context.UpdatePrivacy(loc.properties.Id, loc.properties.IsPrivate);
+		});
+};
+
 ActiveWork.prototype.DeletePermission = function (permission) {
 	var loc = this;
 	return axiosClient.getPromise(window.host + '/services/backoffice/RemoveWorkPermission',

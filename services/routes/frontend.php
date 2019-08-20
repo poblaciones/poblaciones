@@ -5,10 +5,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 use helena\entities\frontend\geometries\Frame;
 use helena\entities\frontend\geometries\Coordinate;
+use helena\db\frontend\MetadataModel;
 
 use helena\services\frontend as services;
 
 use helena\classes\App;
+use helena\classes\Session;
 use minga\framework\Params;
 
 // MAPA
@@ -57,6 +59,9 @@ App::$app->get('/services/download/StartDownload', function (Request $request) {
 	$datasetId = Params::GetInt('d');
 	$clippingItemId = Params::GetInt('r');
 	$type = Params::Get('t');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
+
 	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId));
 });
 
@@ -89,6 +94,9 @@ App::$app->get('/services/download/GetFile', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	$clippingItemId = Params::GetInt('r');
 	$type = Params::Get('t');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
 	return services\DownloadService::GetFileBytes($type, $workId, $datasetId, $clippingItemId);
 });
 
@@ -137,6 +145,9 @@ App::$app->get('/services/metrics/GetSummary', function (Request $request) {
 	$levelId = Params::GetInt('a');
 	$urbanity = Params::Get('u');
 	$frame = Frame::FromParams();
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+
 	return App::Json($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity));
 });
 
@@ -167,17 +178,13 @@ App::$app->get('/services/metrics/GetData', function (Request $request) {
 	return App::Json($demo);
 });
 
-// ej. http://mapas/services/works/GetWorkByMetricVersion?v=12
-App::$app->get('/services/works/GetWorkByMetricVersion', function (Request $request) {
-	$controller = new services\WorkService();
-	$metricVersionId = Params::GetInt('v');
-	return $controller->GetWorkByMetricVersionJson($metricVersionId);
-});
-
 // ej. http://mapas/services/works/GetWork?w=12
 App::$app->get('/services/works/GetWork', function (Request $request) {
 	$controller = new services\WorkService();
 	$workId = Params::GetInt('w');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
 	return App::Json($controller->GetWork($workId));
 });
 
@@ -186,6 +193,11 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 	$controller = new services\MetadataService();
 	$metadataId = Params::GetIntMandatory('m');
 	$fileId = Params::GetIntMandatory('f');
+
+	$model = new MetadataModel();
+	$workId = $model->GetWorkIdByMetadataId($metadataId);
+	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
 	return $controller->GetMetadataFile($metadataId, $fileId);
 });
 
@@ -195,6 +207,9 @@ App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) 
 	$metadataId = Params::GetIntMandatory('m');
 	$workId = Params::GetInt('w');
 	$datasetId = Params::GetInt('d', null);
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
 	return $controller->GetMetadataPdf($metadataId, $datasetId, false, $workId);
 });
 
@@ -202,6 +217,9 @@ App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) 
 App::$app->get('/services/works/GetWorkImage', function (Request $request) {
 	$controller = new services\WorkService();
 	$workId = Params::GetInt('w');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
 	return $controller->GetWorkImage($workId);
 });
 
@@ -234,6 +252,9 @@ App::$app->get('/services/shapes/GetDatasetShapes', function (Request $request) 
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntMandatory('z');
 	$b = Params::Get('b');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
+
 	return App::Json($controller->GetDatasetShapes($datasetId, $x, $y, $z, $b));
 });
 
@@ -244,6 +265,9 @@ App::$app->get('/services/metrics/GetTileData', function (Request $request) {
 	$controller = new services\TileDataService();
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+
 	$levelId = Params::GetInt('a');
 	$urbanity = Params::Get('u');
 	$frame = Frame::FromParams();
@@ -255,33 +279,17 @@ App::$app->get('/services/metrics/GetTileData', function (Request $request) {
 });
 
 
-App::$app->get('/services/metrics/GetMetricGroups', function (Request $request) {
-	$controller = new services\MetricService();
-	return App::Json($controller->GetMetricGroups());
-});
-
 App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {
 	$controller = new services\MetricService();
 	return $controller->GetFabMetricsJson();
 });
-
-App::$app->get('/services/metrics/GetMetrics', function (Request $request) {
-	$controller = new services\MetricService();
-
-	$previousmetricHash = Params::Get('pr');
-	$frame = Frame::FromParams();
-	// ej. /services/metrics/GetMetrics?r=(regionid) 589
-	//
-	// ej. /services/metrics/GetMetrics?c=lat,long;radLat;radLong&(regionid)
-	return App::Json($controller->GetMetrics($frame, $previousmetricHash));
-});
-
 
 App::$app->get('/services/metrics/GetSelectedMetric', function (Request $request) {
 	$controller = new services\SelectedMetricService();
 
 	$metricId = Params::GetInt('l');
 	// ej. /services/metrics/GetSelectedMetric?l=8
+
 	return $controller->GetSelectedMetricJson($metricId);
 });
 
@@ -291,14 +299,6 @@ App::$app->get('/services/metrics/GetSelectedMetrics', function (Request $reques
 	$metricsId = Params::Get('l');
 	// ej. /services/metrics/GetSelectedMetrics?l=8,9
 	return $controller->GetSelectedMetricsJson($metricsId);
-});
-
-App::$app->get('/services/metrics/GetMetric', function (Request $request) {
-	$controller = new services\MetricService();
-
-	$metricId = Params::GetInt('l');
-	// ej. /services/metrics/GetMetric?l=8
-	return App::Json($controller->GetMetric($metricId));
 });
 
 

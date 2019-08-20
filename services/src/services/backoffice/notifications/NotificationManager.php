@@ -71,6 +71,37 @@ class NotificationManager
 	}
 
 
+	public function NotifyRequestReview($workId)
+	{
+		if (empty(Context::Settings()->Mail()->NotifyAddress))
+			return;
+		// Manda email....
+		$work = App::Orm()->find(entities\DraftWork::class, $workId);
+
+		$type = $work->getType();
+		$mail = new Mail();
+		$mail->to = Context::Settings()->Mail()->NotifyAddress;
+		$user = $this->getCurrentUserMessagePart();
+		$named = $this->addQuote($work->getMetadata()->getTitle());;
+		$mail->subject = 'Solicitud de revisión en Poblaciones';
+		if ($type == "P")
+		{
+			$message = $user . 'solicitado la revisión de sus datos públicos llamados ' . $named;
+		}
+		else
+		{
+			$message = $user . 'solicitado la revisión de su cartografía llamada ' . $named;
+		}
+		$vals = array();
+		$vals['title'] = "";
+		$vals['message'] = $message;
+		$metadata = $work->getMetadata();
+		$vals['url'] = Context::Settings()->GetPublicUrl() . $metadata->getUrl();
+		$mail->message = App::RenderMessage('publishNotification.html.twig', $vals);
+		$mail->Send(false, true);
+	}
+
+
 	public function NotifyCreateUser($user, $fullName)
 	{
 		if (empty(Context::Settings()->Mail()->NotifyAddress))

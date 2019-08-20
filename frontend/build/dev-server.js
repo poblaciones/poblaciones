@@ -27,6 +27,9 @@ app.use(function(req, res, next) {
    if (req.url === '/users/' || req.url === '/users') {
      req.url = '/backoffice.html';
 	 }
+	if (req.url === '/admins/' || req.url === '/admins') {
+     req.url = '/admins.html';
+	 }
 	if (req.url === '/map/' || req.url === '/map') {
      req.url = '/index.html';
    }

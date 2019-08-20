@@ -84,7 +84,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 			filename: config.build.indexAdmin,
 			template: 'backoffice.html',
 			metadata: { google_maps_key: env.google_maps_key.replace(/"/g, '') },
-			chunks: ['manifest', 'vendor', 'appAdmin'],
+			chunks: ['manifest', 'vendor', 'appBackoffice', 'appAdmin'],
 			inject: true,
 			minify: {
 				removeComments: true,

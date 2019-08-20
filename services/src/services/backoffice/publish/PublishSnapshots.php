@@ -2,13 +2,12 @@
 
 namespace helena\services\backoffice\publish;
 
-use helena\services\common\BaseService;
-use helena\db\admin\WorkModel;
-use helena\classes\App;
-use minga\framework\ErrorException;
-
 use minga\framework\Profiling;
 use minga\framework\Arr;
+
+use helena\db\admin\WorkModel;
+use helena\services\common\BaseService;
+use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionModel;
 
 class PublishSnapshots extends BaseService
 {
@@ -82,6 +81,28 @@ class PublishSnapshots extends BaseService
 		}
 		else
 			return true;
+	}
+
+	public function UpdateWorkVisiblity($workId)
+	{
+		// Es llamado cuando cambia el isIndexed, el isPrivate o el workType de una cartografía.
+
+		// 1. Trae los metrics ya publicados
+		$workModel = new WorkModel(false);
+		$workIdShardified = PublishDataTables::Shardified($workId);
+		$metricVersions = $workModel->GetMetricVersions($workIdShardified);
+
+		$unshardifiedMetricVersions = PublishDataTables::UnshardifyList($metricVersions, array('mvr_id', 'mvr_metric_id'));
+
+		// 2. Los resetea
+		$snapshots = new SnapshotsManager();
+		$cache = new CacheManager();
+		foreach(Arr::UniqueByField('mvr_metric_id', $unshardifiedMetricVersions) as $metric)
+		{
+			$snapshots->UpdateMetricMetadata($metric['mvr_metric_id']);
+			$cache->ClearSelectedMetricMetadata($metric['mvr_metric_id']);
+		}
+		$cache->CleanFabMetricsCache();
 	}
 }
 

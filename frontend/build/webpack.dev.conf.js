@@ -34,7 +34,14 @@ module.exports = merge(baseWebpackConfig, {
 			filename: 'backoffice.html',
 			template: 'backoffice.html',
 			metadata: { google_maps_key: config.dev.env.google_maps_key.replace(/"/g, '') },
-			chunks: ['appAdmin'],
+			chunks: ['appBackoffice'],
+			inject: true
+		}),
+		new HtmlWebpackPlugin({
+			filename: 'admins.html',
+			template: 'admins.html',
+			metadata: { google_maps_key: config.dev.env.google_maps_key.replace(/"/g, '') },
+			chunks: ['appAdmins'],
 			inject: true
 		}),
 		new HtmlWebpackPlugin({

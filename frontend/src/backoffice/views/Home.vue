@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<TopWelcome/>
+		<TopWelcome :offerAdminLink='true' />
 		<invoker ref="invoker">
 		</invoker>
 
@@ -36,13 +36,8 @@
 											población descripta por la plataforma. Son datos típicamente producidos por fuentes
 											estatales y son ofrecidos en el sitio a través del botón de acceso rápido en el
 											visor del mapa.
-											</p><p>Los administradores del sitio deben encargarse de incorporar los datos públicos
-											o delegar en usuarios clave la posibilidad de cargar estos datos.
-										</p>` }">
+											</p>` }">
 							<works filter="P"></works>
-						</md-tab>
-						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/users" :md-active="isPath('/users')" md-label="Usuarios">
-							<users v-if="isPath('/users')"></users>
 						</md-tab>
 					</md-tabs>
 				</div>
@@ -54,7 +49,6 @@
 <script>
 import TopWelcome from '@/backoffice/components/TopWelcome';
 import Works from './Work/Works';
-import Users from './Administration/Users';
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/js/arr';
 
@@ -62,8 +56,7 @@ export default {
 	name: 'home',
 	components: {
 		TopWelcome,
-		Works,
-		Users
+		Works
 	},
 	mounted() {
 		document.title = 'Poblaciones';
@@ -90,14 +83,9 @@ export default {
 		},
 	},
 	methods: {
-		select(element) {
-			this.$router.push({ path: '/cartographies/' + element.Id + '/content' });
-		},
 		isPath(path) {
 			if (this.$route.path === '/public' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'public-tab';
-			} else if (this.$route.path === '/users' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'users-tab';
 			}
 			return this.$route.path === path;
 		},

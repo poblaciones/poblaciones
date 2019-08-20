@@ -5,6 +5,7 @@ use Symfony\Component\HttpFoundation\Request;
 use helena\classes\App;
 use helena\classes\Session;
 use helena\services\backoffice as services;
+use helena\services\admin as adminServices;
 use helena\entities\backoffice as entities;
 use minga\framework\Params;
 use minga\framework\ErrorException;
@@ -34,8 +35,8 @@ App::$app->get('/services/backoffice/GetFactories', function (Request $request) 
 	$metadataFileService = new services\MetadataFileService();
 	$ret['MetadataFile'] = $metadataFileService->GetNewMetadataFile(null);
 
-	$administrationService = new services\AdministrationService();
-	$ret['User'] = $administrationService->GetNewUser();
+	$userService = new adminServices\UserService();
+	$ret['User'] = $userService->GetNewUser();
 
 	$metricService = new services\MetricService();
 	$ret['MetricVersionLevel'] = $metricService->GetNewMetricVersionLevel();
@@ -74,6 +75,23 @@ App::$app->get('/services/backoffice/GetWorkInfo', function (Request $request) {
 
 	$controller = new services\WorkService();
 	return App::OrmJson($controller->GetWorkInfo($workId));
+});
+
+
+App::$app->get('/services/backoffice/UpdateWorkVisiblity', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	$private = Params::GetBoolMandatory('p');
+	$controller = new services\WorkService();
+	return App::Json($controller->UpdateWorkVisiblity($workId, $private));
+});
+
+App::$app->get('/services/backoffice/RequestReview', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$controller = new services\WorkService();
+	return App::Json($controller->RequestReview($workId));
 });
 
 App::$app->get('/services/backoffice/StartPublishWork', function (Request $request) {

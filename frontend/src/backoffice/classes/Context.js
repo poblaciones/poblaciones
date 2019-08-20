@@ -71,6 +71,10 @@ Context.prototype.CanCreatePublicData = function () {
 	return (this.User.privileges === 'A' || this.User.privileges === 'E');
 };
 
+Context.prototype.CanAccessAdminSite = function () {
+	return (this.User.privileges === 'A' || this.User.privileges === 'E' || this.User.privileges === 'L');
+};
+
 Context.prototype.CanViewPublicData = function () {
 	return (this.User.privileges === 'A' || this.User.privileges === 'E' || this.User.privileges === 'L') ||
 		this.HasPublicData();
@@ -112,5 +116,14 @@ Context.prototype.HasPublicData = function () {
 	return false;
 };
 
-
+Context.prototype.UpdatePrivacy = function (workId, value) {
+	if (this.CartographiesStarted) {
+		for (var i = 0; i < this.Cartographies.length; i++) {
+			if (this.Cartographies[i].Id === workId) {
+				this.Cartographies[i].IsPrivate = value;
+				return;
+			}
+		}
+	}
+};
 

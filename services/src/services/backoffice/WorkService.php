@@ -2,8 +2,7 @@
 
 namespace helena\services\backoffice;
 
-use minga\framework\Mail;
-
+use minga\framework\Arr;
 use helena\classes\App;
 use helena\classes\Session;
 use helena\services\common\BaseService;
@@ -14,6 +13,8 @@ use helena\entities\backoffice\DraftWork;
 use helena\entities\backoffice\structs\WorkInfo;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\notifications\NotificationManager;
+use helena\services\backoffice\publish\PublishDataTables;
+use helena\services\backoffice\publish\PublishSnapshots;
 
 use minga\framework\ErrorException;
 
@@ -96,6 +97,33 @@ class WorkService extends BaseService
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
 		Profiling::EndTimer();
 		return $workInfo;
+	}
+
+	public function RequestReview($workId)
+	{
+		// Manda un mensaje administrativo avisando del pedido
+		$nm = new NotificationManager();
+		$nm->NotifyRequestReview($workId);
+		return self::OK;
+	}
+
+	public function UpdateWorkVisiblity($workId, $value)
+	{
+		// Cambia el valor
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWork->setIsPrivate($value);
+		App::Orm()->save($draftWork);
+		// Si existe publicado, lo cambia también
+		$workIdShardified = PublishDataTables::Shardified($workId);
+		$work = App::Orm()->find(entities\Work::class, $workIdShardified);
+		if ($work !== null) {
+			$work->setIsPrivate($value);
+			App::Orm()->save($work);
+		}
+		// Actualiza cachés
+		$publisher = new PublishSnapshots();
+		$publisher->UpdateWorkVisiblity($workId);
+		return self::OK;
 	}
 
 	private function GetDatasets($workId)
@@ -201,12 +229,22 @@ class WorkService extends BaseService
 	}
 	private function GetFiles($workId)
 	{
-		Profiling::EndTimer();
 		Profiling::BeginTimer();
 		$ret = App::Orm()->findManyByQuery("SELECT f FROM e:DraftMetadataFile f JOIN f.Metadata m JOIN e:DraftWork w WITH w.Metadata = m WHERE w.Id = :p1 ORDER BY f.Order", array($workId));
 		Profiling::EndTimer();
 		return $ret;
 	}
+
+	public function GetWorksByType($filter, $timeFilterDays = 0)
+	{
+		$condition = "wrk_type = '" . substr($filter, 0, 1) . "' ";
+		if ($timeFilterDays > 0)
+			$condition .= ' AND met_create >= ( CURDATE() - INTERVAL ' . $timeFilterDays. ' DAY ) ';
+		// Trae las cartografías
+		$list = $this->GetWorks($condition);
+		return $list;
+	}
+
 	public function GetCurrentUserWorks()
 	{
 		$userId = Session::GetCurrentUser()->GetUserId();
@@ -221,11 +259,12 @@ class WorkService extends BaseService
 		}
 		// Trae las cartografías del usuario
 		$list = $this->GetWorks($condition . " wrk_id IN (SELECT wkp_work_id FROM draft_work_permission WHERE wkp_user_id = " . $userId . ")");
-
 		return $list;
 	}
 	private function GetWorks($condition)
 	{
+		Profiling::BeginTimer();
+
 		$userId = Session::GetCurrentUser()->GetUserId();
 		$sql = "SELECT wrk_id Id,
 								met_title Caption,
@@ -233,6 +272,8 @@ class WorkService extends BaseService
 								(wrk_metadata_changed OR wrk_dataset_labels_changed OR
 								wrk_dataset_data_changed OR wrk_metric_labels_changed OR
 								wrk_metric_data_changed) HasChanges
+								, wrk_is_private IsPrivate
+								, wrk_is_indexed IsIndexed
 								, wrk_type Type
 								, (SELECT MIN(wkp_permission) FROM draft_work_permission WHERE wkp_work_id = wrk_id AND wkp_user_id = ?) privileges
 								, (SELECT COUNT(*) FROM draft_dataset d1 WHERE d1.dat_work_id = wrk_id) DatasetCount
@@ -241,30 +282,12 @@ class WorkService extends BaseService
 																				JOIN draft_dataset d2 ON mvl.mvl_dataset_id = d2.dat_id
 																					WHERE d2.dat_work_id = wrk_id) MetricCount
 															FROM draft_work
-											LEFT JOIN draft_metadata ON wrk_metadata_id = met_id WHERE " . $condition;
-			return App::Db()->fetchAll($sql, array($userId));
+											LEFT JOIN draft_metadata ON wrk_metadata_id = met_id WHERE " . $condition .
+						" ORDER BY met_title";
+			$ret = App::Db()->fetchAll($sql, array($userId));
+			Arr::IntToBoolean($ret, array('IsPrivate', 'IsIndexed'));
+			Profiling::EndTimer();
+			return $ret;
 	}
 
-	private function CompleteInfo($works, $list)
-	{
-		$json = App::OrmSerialize($works);
-		$records = json_decode($json, true);
-		foreach($records as &$record)
-		{
-			$extraInfo = $this->FindWork($list, $record['Id']);
-			$record['DatasetCount'] = intval($extraInfo['datasets']);
-			$record['MetricCount'] = intval($extraInfo['metrics']);
-			$record['Privileges'] = $extraInfo['privileges'];
-		}
-		return $records;
-	}
-	private function FindWork($list, $id)
-	{
-		foreach($list as $c)
-		{
-			if ($c['id'] == $id)
-				return $c;
-		}
-		throw new ErrorException('No se ha encontrado la cartografía.');
-	}
 }

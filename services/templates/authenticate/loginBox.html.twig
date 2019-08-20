@@ -72,7 +72,7 @@ function jqueryLogin()
 					<!-- error will be shown here ! -->
 				</div>
 			</div>
-			<input type='hidden' name='returnUrl' value='{{ current_url }}'>
+			<input type='hidden' name='returnUrl' value='{{ current_url | raw }}'>
 			<div class='dButtonsRow' style='padding-top: 5px;' style='float: left'>
 				<div class='dBlockNewLineS1 dExplanation dNoMarginTop'>
 				<label><input name='remember' id='remember' checked='checked' type='checkbox'> No salir de la cuenta</label>

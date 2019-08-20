@@ -407,11 +407,7 @@ html, body {
 	font-size: 14px!important;
   color: #999 !important;
 }
-.userInfo {
-	float: right;
-	font-size: 12px;
-	margin-top: -8px;
-	}
+
 .md-field.md-has-textarea:not(.md-autogrow) .md-count {
     bottom: -22px!important;
 }

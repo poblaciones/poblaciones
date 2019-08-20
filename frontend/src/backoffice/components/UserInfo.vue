@@ -29,5 +29,10 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
+.userInfo {
+	float: right;
+	font-size: 12px;
+	margin-top: -8px;
+}
 </style>
 

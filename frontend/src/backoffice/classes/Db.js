@@ -80,13 +80,23 @@ Db.prototype.ServerClipboardPaste = function (user) {
 		{}, 'pegar la información');
 };
 
+Db.prototype.UpdateWorkIndexing = function (item) {
+	return axiosClient.getPromise(window.host + '/services/admin/UpdateWorkIndexing',
+		{ w: item.Id, v: (item.IsIndexed ? '1' : '0') }, 'cambiar la indexación de la obra');
+};
+
 Db.prototype.GetUsers = function () {
-	return axiosClient.getPromise(window.host + '/services/backoffice/GetUsers',
+	return axiosClient.getPromise(window.host + '/services/admin/GetUsers',
 			{ }, 'obtener la lista de usuarios');
 };
 
+Db.prototype.GetWorks = function (filter, timeFilter) {
+	return axiosClient.getPromise(window.host + '/services/admin/GetWorks',
+			{ f: filter, t: timeFilter }, 'obtener la lista de cartografías');
+};
+
 Db.prototype.DeleteUser = function (user, callback) {
-	return axiosClient.getPromise(window.host + '/services/backoffice/DeleteUser',
+	return axiosClient.getPromise(window.host + '/services/admin/DeleteUser',
 		{ u: user.Id }, 'eliminar al usuario').then(function () {
 			callback();
 		});
@@ -94,14 +104,14 @@ Db.prototype.DeleteUser = function (user, callback) {
 
 
 Db.prototype.UpdateUser = function (user) {
-	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateUser',
+	return axiosClient.postPromise(window.host + '/services/admin/UpdateUser',
 		{ u: user }, 'actualizar al usuario').then(function () {
 
 		});
 };
 
 Db.prototype.LoginAs = function (user) {
-	return axiosClient.getPromise(window.host + '/services/backoffice/LoginAs',
+	return axiosClient.getPromise(window.host + '/services/admin/LoginAs',
 			{ u: user.Id }, 'ingresar como el usuario indicado');
 };
 

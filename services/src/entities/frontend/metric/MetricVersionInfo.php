@@ -12,6 +12,7 @@ class MetricVersionInfo extends BaseMapModel
 	public $PartialCoverage;
 	public $Work;
 	public $WorkId;
+	public $WorkIsPrivate = false;
 
 	public static function GetMap()
 	{

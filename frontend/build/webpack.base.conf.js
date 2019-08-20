@@ -16,7 +16,8 @@ function resolve (dir) {
 module.exports = {
 	entry: {
 		app: './src/public/main.js',
-		appAdmin: './src/backoffice/main.js',
+		appBackoffice: './src/backoffice/main.js',
+		appAdmins: './src/admins/main.js',
 	},
 	output: {
 		path: config.build.assetsRoot,

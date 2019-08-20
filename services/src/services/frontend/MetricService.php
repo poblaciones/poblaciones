@@ -6,21 +6,14 @@ use minga\framework\Context;
 use minga\framework\Arr;
 
 use helena\caches\MetricGroupsMetadataCache;
-use helena\caches\FrameMetricsHashCache;
-use helena\caches\MetricHashesListCache;
 use helena\caches\FabMetricsCache;
 use helena\services\common\BaseService;
 use minga\framework\ErrorException;
 
-use helena\entities\frontend\metric\MetricInfo;
 use helena\entities\frontend\metric\MetricVersionInfo;
+use helena\entities\frontend\metric\MetricInfo;
 use helena\entities\frontend\metric\MetricGroupInfo;
 use helena\entities\frontend\metric\MetricsList;
-use helena\entities\frontend\work\WorkInfo;
-
-use helena\entities\frontend\work\SourceInfo;
-
-use helena\db\frontend\WorkModel;
 use helena\db\frontend\MetricGroupModel;
 use helena\db\frontend\SnapshotMetricModel;
 
@@ -81,7 +74,6 @@ class MetricService extends BaseService
 		return $ret;
 	}
 
-
 	private function GetFabMetricsGrouped()
 	{
 		$table = new SnapshotMetricModel();
@@ -103,62 +95,11 @@ class MetricService extends BaseService
 		}
 		return $ret;
 	}
-
-	public function GetMetrics($frame, $previousmetricHash)
-	{
-		$metricsList = null;
-		$metricHash= null;
-
-		$frameSerialized = $frame->GetKeyNoFeature();
-		if (!FrameMetricsHashCache::Cache()->HasData($frameSerialized, $metricHash))
-		{
-			$metricsList = $this->CalculateMetricsList($frame);
-			$metricHash = $metricsList->Hash;
-			FrameMetricsHashCache::Cache()->PutData($frameSerialized, $metricHash);
-			MetricHashesListCache::Cache()->PutDataIfMissing($metricHash, $metricsList);
-		}
-		// Compara con el hash del anterior
-		if ($metricHash == $previousmetricHash)
-			return null;
-
-		// Si no tiene nada del anterior o son diferentes, tiene que devolver
-		// los valores.
-		if ($metricsList == null)
-		{
-			if (!MetricHashesListCache::Cache()->HasData($metricHash, $metricsList))
-			{
-				$metricsList = $this->CalculateMetricsList($frame);
-				if ($metricsList->Hash != $metricHash)
-					FrameMetricsHashCache::Cache()->PutData($frameSerialized, $metricsList->Hash);
-
-				MetricHashesListCache::Cache()->PutData($metricsList->Hash, $metricsList);
-			}
-		}
-		return $metricsList;
-	}
-
-
-	private function CalculateMetricsList($frame)
-	{
-		$list = new MetricsList();
-
-		$table = new SnapshotMetricModel();
-
-		$items = $table->GetMetricSnapshotByFrame($frame);
-
-		foreach($items as $item)
-			if (Context::Settings()->Shard()->IsValidPublicShardLow($item['myv_metric_id']))
-				$list->Metrics[] = $this->CreateMetric($item);
-
-		$list->CalculateHash();
-		return $list;
-	}
-
+	
 	public function GetMetric($metricId, $errorOnNotFound = true)
 	{
-		$table = new SnapshotMetricModel();
-
-		$item = $table->GetByMetricId($metricId);
+		$model = new SnapshotMetricModel();
+		$item = $model->GetMetric($metricId);
 		if ($item == null)
 		{
 			if ($errorOnNotFound)
@@ -174,29 +115,32 @@ class MetricService extends BaseService
 	{
 		$metric = new MetricInfo();
 		$metric->Id = $item['myv_metric_id'];
-		$metric->Name = $item['myv_caption'];
+		$metric->Name = $item['myv_metric_caption'];
 		$metric->MetricGroupId = $item['myv_metric_group_id'];
 		$this->AddVersions($metric, $item);
 		return $metric;
 	}
+
 	private function AddVersions($metric, $item)
 	{
+
 		$ids = explode("\t", $item['myv_version_ids']);
 		$captions = explode("\t", $item['myv_version_captions']);
 		$coverages = explode("\t", $item['myv_version_partial_coverages']);
 		$workIds = explode("\t", $item['myv_work_ids']);
 		$works = explode("\t", $item['myv_work_captions']);
+		$isPrivate = explode("\t", $item['myv_work_is_private']);
 		for($n = 0; $n < sizeof($ids); $n++)
 		{
 			$version = new MetricVersionInfo();
-			$version->Id = $ids[$n];
+			$version->Id = intval($ids[$n]);
 			$version->Name = $captions[$n];
-
 			$version->PartialCoverage = $coverages[$n];
 			if ($version->PartialCoverage == '')
 				$version->PartialCoverage = null;
 			$version->Work = $works[$n];
-			$version->WorkId = $workIds[$n];
+			$version->WorkId = intval($workIds[$n]);
+			$version->WorkIsPrivate = intval($isPrivate[$n]);
 
 			$metric->Versions[] = $version;
 		}

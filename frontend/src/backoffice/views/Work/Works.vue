@@ -10,13 +10,19 @@
 		<invoker ref="invoker">
 		</invoker>
 
-		<div v-if="canCreate && !showingWelcome">
+		<div v-if="canCreate && !showingWelcome && createEnabled">
 			<md-button @click="onNewWork">
 				<md-icon>add_circle_outline</md-icon>
 				{{ newLabel }}
 			</md-button>
 		</div>
+		</div>
 
+		<div v-if="offerAdminActions">
+			<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="0">Todas</md-radio>
+			<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="7">Últimos 7 días</md-radio>
+			<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="30">Últimos 30 días</md-radio>
+			<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="90">Últimos 90 días</md-radio>
 		</div>
 			<div class="md-layout-item md-size-100">
 				<md-table style="max-width: 1000px;" v-if="list.length > 0" v-model="list" md-sort="title" md-sort-order="asc" md-card>
@@ -25,10 +31,20 @@
 								<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
 							</md-table-cell>
           			<md-table-cell @click.native="select(item)" class="selectable" md-label="Datasets">{{ item.DatasetCount }}</md-table-cell>
-								<md-table-cell @click.native="select(item)" class="selectable" md-label="Georreferenciados">{{ item.GeorreferencedCount }}</md-table-cell>
 								<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores">{{ item.MetricCount }}</md-table-cell>
+								<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado">
+									<md-switch class="md-primary"  v-model="item.IsIndexed"
+											@change="onIndexedChanged(item)" />
+								</md-table-cell>
 								<md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
-									<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon></md-table-cell>
+										<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
+									<div class="extraIconContainer">
+										<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
+										<md-icon v-if="!showIndexingColumn && !item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
+													 class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
+Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.">error_outline</md-icon>
+									</div>
+								</md-table-cell>
 								<md-table-cell md-label="Acciones">
 								<md-button v-if="!canEdit(item)" title="Consultar" class="md-icon-button" v-on:click="select(item)">
 									<md-icon>remove_red_eye</md-icon>
@@ -109,18 +125,28 @@ export default {
 		return {
 			activateNewWork: false,
 			newWorkName: '',
+			timeFilter: 0,
+			works: [],
 			activateSaveAs: false,
 		};
 	},
 	props: {
 		filter: String,
+		createEnabled:  { type: Boolean, default: true },
+		offerAdminActions:  { type: Boolean, default: false },
 	},
 	computed: {
 		showingWelcome() {
 			return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 		},
+		showIndexingColumn() {
+			return this.offerAdminActions && this.user.privileges === 'A';
+		},
+		user() {
+			return window.Context.User;
+		},
 		canCreate() {
-			return (this.filter !== 'P' || window.Context.CanCreatePublicData());
+			return (this.filter !== 'P' || window.Context.CanCreatePublicData()) && !this.offerAdminActions;
 		},
 		entityName() {
 			if (this.filter === 'P') {
@@ -142,14 +168,23 @@ export default {
 		},
 		list() {
 			var ret = [];
-			if (window.Context.Cartographies) {
-				for(var i = 0; i < window.Context.Cartographies.length; i++) {
-					if (window.Context.Cartographies[i].Type === this.filter) {
-						ret.push(window.Context.Cartographies[i]);
+			if (this.offerAdminActions) {
+				return this.works;
+			} else {
+				if (window.Context.Cartographies) {
+					for(var i = 0; i < window.Context.Cartographies.length; i++) {
+						if (window.Context.Cartographies[i].Type === this.filter) {
+							ret.push(window.Context.Cartographies[i]);
+						}
 					}
 				}
 			}
 			return ret;
+		}
+	},
+	mounted() {
+		if (this.offerAdminActions) {
+			this.refreshWorks();
 		}
 	},
 	methods: {
@@ -163,6 +198,14 @@ export default {
 		select(element) {
 			this.$router.push({ path: this.getWorkUri(element, false) });
 		},
+		refreshWorks() {
+			var loc = this;
+			this.$refs.invoker.do(window.Db,
+					window.Db.GetWorks, this.filter, this.timeFilter).then(function(data) {
+						arr.Clear(loc.works);
+						arr.AddRange(loc.works, data);
+						});
+		},
 		publishDisabled(item) {
 			return !(item.MetadataLastOnline === null || item.HasChanges !== 0);
 		},
@@ -170,12 +213,13 @@ export default {
 			return (item.MetadataLastOnline === null);
 		},
 		status(item) {
+			var privacy = (item.IsPrivate ? ' - Visiblidad: Privada' : '');
 			if (item.Metadata === null || item.MetadataLastOnline === null) {
-				return { label: 'Sin publicar', icon: 'error_outline', color: '#ff7936' };
+				return { label: 'Sin publicar' + privacy, tag: 'unpublished', icon: 'error_outline', color: '#ff7936' };
 			} else if (item.HasChanges !== 0) {
-				return { label: 'Con cambios', icon: 'border_color', color: '#969696' };
+				return { label: 'Existen cambios sin publicar' + privacy, tag: 'published_changes', icon: 'border_color', color: '#969696' };
 			}	else {
-				return { label: 'Publicado', icon: 'check_circle_outline', color: '#44b10f' };
+				return { label: 'Publicada' + privacy, tag: 'published', icon: 'check_circle_outline', color: '#44b10f' };
 			}
 		},
 		canEdit(item){
@@ -237,6 +281,10 @@ export default {
 			this.$refs.invoker.do(window.Db,
 														window.Db.CreateWork, this.newWorkName.trim(), this.filter);
 		},
+		onIndexedChanged(item) {
+			this.$refs.invoker.do(window.Db,
+														window.Db.ChangeWorkIndexing, item);	
+		},
 		onRevoke(item) {
 			this.$refs.stepper.startUrl = window.Db.GetStartWorkRevokeUrl(item.Id);
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkRevokeUrl();
@@ -275,5 +323,23 @@ export default {
 		font-size: 20px;
 		line-height: 30px;
 	}
+}
+
+.extraIconContainer {
+  position: absolute;
+  right: calc(28%);
+  bottom: 16px;
+  width: 13px;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 13px;
+ 
+}
+.extraIcon {
+	 background-color: white;
+  font-size: 15px !important;
+  color: #868686;
+  margin-left: -5px;
+  margin-top: -6px;
 }
 </style>

@@ -195,35 +195,6 @@ export default {
 				err.errDialog('GetWork', 'obtener la información del servidor', error);
 			});
 		},
-		GetMetrics(region) {
-			const loc = this;
-			axios.get(window.host + '/services/metrics/GetMetrics', {
-				params: { r: region }
-			}).then(function(res) {
-				h.l('GetMetrics', res.data, loc);
-			}).catch(function(error) {
-				err.errDialog('GetMetrics', 'acceder a los indicadores', error);
-			});
-		},
-		GetMetric(metricId) {
-			const loc = this;
-			axios.get(window.host + '/services/metrics/GetMetric', {
-				params: { l: metricId }
-			}).then(function(res) {
-				h.l('GetMetric', res.data, loc);
-			}).catch(function(error) {
-				err.errDialog('GetMetric', 'obtener el indicador', error);
-			});
-		},
-		GetMetricGroups() {
-			const loc = this;
-			axios.get(window.host + '/services/metrics/GetMetricGroups')
-				.then(function(res) {
-					h.l('GetMetricGroups', res.data, loc);
-				}).catch(function(error) {
-					err.errDialog('GetMetricGroups', 'acceder a los grupos de indicadores', error);
-				});
-		},
 		RegisterErrorHandler() {
 			Vue.config.errorHandler = err.HandleError;
 			window.onerror = err.HandleError;

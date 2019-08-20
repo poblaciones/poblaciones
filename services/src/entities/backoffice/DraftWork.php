@@ -101,6 +101,33 @@ class DraftWork
      */
     private $Shard;
 
+		/**
+		 * @var boolean
+		 *
+		 * @ClientReadonly
+		 *
+		 * @ORM\Column(name="wrk_is_private", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+		 */
+    private $IsPrivate;
+
+		/**
+		 * @var boolean
+		 *
+		 * @ClientReadonly
+		 *
+		 * @ORM\Column(name="wrk_is_indexed", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+		 */
+    private $IsIndexed;
+
+		/**
+		 * @var string
+		 *
+		 * @ClientReadonly
+		 *
+		 * @ORM\Column(name="wrk_access_link", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
+		 */
+    private $AccessLink;
+
     /**
      * @var \helena\entities\backoffice\DraftMetadata
      *
@@ -266,6 +293,80 @@ class DraftWork
     public function getComments()
     {
         return $this->Comments;
+    }
+
+
+    /**
+		 * Set isPrivate
+		 *
+		 * @param boolean $isPrivate
+		 *
+		 * @return DraftWork
+		 */
+    public function setIsPrivate($isPrivate)
+    {
+			$this->IsPrivate = $isPrivate;
+
+			return $this;
+    }
+
+    /**
+		 * Get isPrivate
+		 *
+		 * @return boolean
+		 */
+    public function getIsPrivate()
+    {
+			return $this->IsPrivate;
+    }
+
+
+    /**
+		 * Set isIndexed
+		 *
+		 * @param boolean $isIndexed
+		 *
+		 * @return DraftWork
+		 */
+    public function setIsIndexed($isIndexed)
+    {
+			$this->IsIndexed = $isIndexed;
+
+			return $this;
+    }
+
+    /**
+		 * Get isIndexed
+		 *
+		 * @return boolean
+		 */
+    public function getIsIndexed()
+    {
+			return $this->IsIndexed;
+    }
+
+    /**
+		 * Set accessLink
+		 *
+		 * @param string $accessLink
+		 *
+		 * @return DraftWork
+		 */
+    public function setAccessLink($accessLink)
+    {
+			$this->AccessLink = $accessLink;
+
+			return $this;
+    }
+
+    /**
+		 * Get accessLink
+		 *
+		 * @return string
+		 */
+    public function getAccessLink()
+    {
+			return $this->AccessLink;
     }
 
     /**

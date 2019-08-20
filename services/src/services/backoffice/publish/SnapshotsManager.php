@@ -2,15 +2,12 @@
 
 namespace helena\services\backoffice\publish;
 
-use minga\framework\Arr;
 use minga\framework\Profiling;
 
 use helena\services\common\BaseService;
-use helena\db\admin\WorkModel;
 use helena\classes\DatasetTypeEnum;
 
 use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionModel;
-use helena\services\backoffice\publish\snapshots\SnapshotMetricModel;
 use helena\services\backoffice\publish\snapshots\SnapshotShapeDatasetItemModel;
 use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionItemVariableModel;
 use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
@@ -21,10 +18,6 @@ class SnapshotsManager extends BaseService
 	{
 		$modelVersion = new SnapshotMetricVersionModel();
 		$modelVersion->ClearMetricVersion($metricVersionId);
-
-		$model = new SnapshotMetricModel();
-		$model->ClearMetric($metricId);
-		$model->RegenMetric($metricId);
 	}
 
 	// Metric
@@ -34,14 +27,10 @@ class SnapshotsManager extends BaseService
 		// Regen
 		$modelVersion = new SnapshotMetricVersionModel();
 		$modelVersion->RegenMetric($metricId);
-		$model = new SnapshotMetricModel();
-		$model->RegenMetric($metricId);
 	}
 
 	public function CleanMetricMetadata($metricId)
 	{
-		$model = new SnapshotMetricModel();
-		$model->ClearMetric($metricId);
 		$modelVersion = new SnapshotMetricVersionModel();
 		$modelVersion->ClearMetric($metricId);
 	}

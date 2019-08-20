@@ -27,7 +27,7 @@ export const constantRouterMap = [
 
 {
 	path: '/',
-		alias: [ '/public', '/users' ],
+		alias: [ '/public' ],
 		name: 'Inicio',
 		hidden: true,
 			component: () => import('@/backoffice/views/Home.vue'),
@@ -173,6 +173,22 @@ group: 'Metadatos',
 				path: '/cartographies/:workId/permissions',
 				name: 'PermisosTarget',
 				component: () => import('@/backoffice/views/Permissions/Permissions.vue'),
+			}
+		]
+	},
+	
+	{
+		group: 'Administración',
+		path: '/cartographies/:workId/visibility',
+		component: Layout,
+		redirect: '/cartographies/:workId/visibility',
+		icon: 'far fa-eye',
+		name: 'Visibilidad',
+		children: [
+			{
+				path: '/cartographies/:workId/visibility',
+				name: 'VisibilidadTarget',
+				component: () => import('@/backoffice/views/Visibility/Visibility.vue'),
 			}
 		]
 	},

@@ -31,6 +31,18 @@ class MetadataModel extends BaseModel
 		return $ret;
 	}
 
+	public function GetWorkIdByMetadataId($metadataId)
+	{
+		Profiling::BeginTimer();
+		$params = array($metadataId);
+
+		$sql = "SELECT wrk_id FROM " . $this->draftPreffix . "work WHERE wrk_metadata_id = ? LIMIT 1";
+
+		$ret = App::Db()->fetchScalarIntNullable($sql, $params);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetMetadata($metadataId)
 	{
 		Profiling::BeginTimer();

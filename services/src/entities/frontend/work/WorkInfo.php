@@ -13,6 +13,7 @@ class WorkInfo extends BaseMapModel
 	public $ReleaseDate;
 	public $Authors;
 	public $License;
+	public $IsPrivate;
 	public $StartArgs;
 	public $Coverage;
 	public $Institution;
@@ -36,6 +37,7 @@ class WorkInfo extends BaseMapModel
 			'ins_caption' => 'Institution',
 
 			'wrk_type' => 'Type',
+			'wrk_is_private' => 'IsPrivate',
 			'met_publication_date' => 'ReleaseDate',
 			'wrk_start_args' => 'StartArgs',
 			'wrk_image_id' => 'ImageId',

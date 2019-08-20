@@ -73,10 +73,6 @@ class Account
 		else
 			return $this->privileges === $key;
 	}
-	public function GetMaster()
-	{
-		return self::GetMasterUser();
-	}
 
 	public function GetFullName()
 	{

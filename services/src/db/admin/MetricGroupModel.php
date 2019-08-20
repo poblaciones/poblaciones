@@ -22,7 +22,7 @@ class MetricGroupModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array();
 
-		$sql = "SELECT lgr_id, lgr_caption, lgr_icon, lgr_order, lgr_visible,
+		$sql = "SELECT lgr_id, lgr_caption, lgr_icon, lgr_order, 
 				(select count(*) from metric where mtr_metric_group_id = lgr_id) as usages FROM metric_group ORDER BY lgr_order, lgr_caption";
 
 		$ret = App::Db()->fetchAll($sql, $params);

@@ -554,7 +554,7 @@ export default {
 }
 
 .palette {
-	background-image: url('../../assets/palette.png');
+	background-image: url('../../../common/assets/palette.png');
 	height: 27px;
 	background-size: 240px 480px;
 	background-repeat: repeat-y;

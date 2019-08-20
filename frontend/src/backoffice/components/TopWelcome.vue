@@ -1,9 +1,10 @@
 <template>
 	<div id="topBarContainer">
-		<div id="topBar" class="topbar">
+		<div id="topBar" class="topbar" :style="(backColor ? 'background-color: ' + backColor : '')">
 			<user-info></user-info>
+			<admin-links v-if="showAdminButton"></admin-links>
 			<div style="padding-top: 2px; font-size: 24px; ">
-					Bienvenido a Poblaciones
+					{{ welcomeMessage }}
 			</div>
 		</div>
 
@@ -14,22 +15,35 @@
 import { mapGetters } from 'vuex';
 import ActiveWork from '@/backoffice/classes/ActiveWork.js';
 import UserInfo from './UserInfo';
+import AdminLinks from './AdminLinks';
 
 export default {
 	name: 'topBar',
 	components: {
-		UserInfo
+		UserInfo,
+		AdminLinks
 	},
 	data() {
 		return {
-			newName: '',
+			newName: ''
 			};
 	},
 	computed: {
 		...mapGetters([
 		'sidebar',
 		'avatar'
-		])
+		]),
+		user() {
+			return window.Context.User;
+		},
+		showAdminButton() {
+			return this.user && this.offerAdminLink && window.Context.CanAccessAdminSite();
+		},
+	},
+	props: {
+		welcomeMessage:  { type: String, default: 'Bienvenido a Poblaciones' },
+		offerAdminLink:  { type: Boolean, default: false },
+		backColor: { type: String, default: null }
 	},
 	mounted() {
 		window.addEventListener('resize', this.handleResize);

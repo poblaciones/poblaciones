@@ -22,7 +22,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Context from '@/backoffice/classes/Context';
-import BackIcon from '@/backoffice/assets/back.svg';
+import BackIcon from '@/common/assets/back.svg';
 import UserInfo from '@/backoffice/components/UserInfo';
 
 export default {

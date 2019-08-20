@@ -7,7 +7,8 @@ use minga\framework\MessageBox;
 use minga\framework\PhpSession;
 use helena\caches\WorkPermissionsCache;
 use minga\framework\Profiling;
-
+use helena\services\frontend\SelectedMetricService;
+use helena\services\backoffice\publish\PublishDataTables;
 
 class Session
 {
@@ -38,6 +39,102 @@ class Session
 		$account = Account::Current();
 		return $account->IsSiteReader();
 	}
+
+	public static function CheckIsWorkPublicOrAccessible($workId)
+	{
+		Profiling::BeginTimer();
+		// Se fija los permisos
+		if (self::IsWorkPublicOrAccessible($workId))
+			$ret = null;
+		else
+		{
+			if ($app = Session::CheckSessionAlive())
+				$ret = $app;
+			else
+				$ret = self::NotEnoughPermissions();
+		}
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public static function CheckIsWorkPublicOrAccessibleByDataset($datasetId)
+	{
+		Profiling::BeginTimer();
+		// Se fija los permisos
+		if (self::IsWorkPublicOrAccessibleByDataset($datasetId))
+			$ret = null;
+		else
+		{
+			if ($app = Session::CheckSessionAlive())
+				$ret = $app;
+			else
+				$ret = self::NotEnoughPermissions();
+		}		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public static function CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)
+	{
+		Profiling::BeginTimer();
+		// Se fija los permisos
+		if (self::IsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId))
+			$ret = null;
+		else
+		{
+			if ($app = Session::CheckSessionAlive())
+				$ret = $app;
+			else
+				$ret = self::NotEnoughPermissions();
+		}
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public static function IsWorkPublicOrAccessible($workId)
+	{
+		$private = App::Db()->fetchScalarIntNullable("SELECT wrk_is_private FROM work WHERE wrk_id = ? LIMIT 1", array($workId));
+		if (!$private)
+			return true;
+		if (!Session::IsAuthenticated())
+			return false;
+		else
+			return self::IsWorkReaderShardified($workId);
+	}
+
+	public static function IsWorkPublicOrAccessibleByDataset($datasetId)
+	{
+		$res = App::Db()->fetchAssoc("SELECT wrk_is_private, wrk_id FROM dataset JOIN work ON dat_work_id = wrk_id WHERE dat_id = ? LIMIT 1", array($datasetId));
+		if ($res === null || !$res['wrk_is_private'])
+			return true;
+		if (!Session::IsAuthenticated())
+			return false;
+		else
+			return self::IsWorkReaderShardified($res['wrk_id']);
+	}
+
+	public static function IsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)
+	{
+		$selectedMetricService = new SelectedMetricService();
+		$metric = $selectedMetricService->GetSelectedMetric($metricId);
+		if ($metric === null) return true;
+		foreach($metric->Versions as $version)
+			if ($version->Version->Id === $metricVersionId)
+			{
+				if ($version->Version->WorkIsPrivate)
+				{
+					if (!Session::IsAuthenticated())
+						return false;
+					else
+						return self::IsWorkReaderShardified($version->Version->WorkId);
+				}
+				else
+					return true;
+			}
+		return true;
+	}
+
+
+
 	public static function IsWorkEditor($workId)
 	{
 		$permission = WorkPermissionsCache::GetCurrentUserPermission($workId);
@@ -47,7 +144,11 @@ class Session
 		$account = Account::Current();
 		return $account->IsSiteEditor();
 	}
-
+	public static function IsWorkReaderShardified($workShardifiedId)
+	{
+		$workId = PublishDataTables::Unshardify($workShardifiedId);
+		return self::IsWorkReader($workId);
+	}
 	public static function IsWorkReader($workId)
 	{
 		$permission = WorkPermissionsCache::GetCurrentUserPermission($workId);
@@ -83,7 +184,7 @@ class Session
 		MessageBox::ThrowMessage("Para acceder a esta opción debe ingresar con su cuenta de usuario.
 				<br><br>Seleccione continuar para identificarse.", $url);
 	}
-	private static function NotEnoughPermissions()
+	public static function NotEnoughPermissions()
 	{
 		$account = Account::Current();
 		$url = App::RedirectLoginUrl();
@@ -174,7 +275,21 @@ class Session
 			$ret = $app;
 		// Se fija los permisos
 		else if (self::IsSiteEditor())
-			$ret =  null;
+			$ret = null;
+		else
+			$ret = self::NotEnoughPermissions();
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public static function CheckIsSiteReader()
+	{
+		Profiling::BeginTimer();
+		if ($app = Session::CheckSessionAlive())
+			$ret = $app;
+		// Se fija los permisos
+		else if (self::IsSiteReader())
+			$ret = null;
 		else
 			$ret = self::NotEnoughPermissions();
 		Profiling::EndTimer();

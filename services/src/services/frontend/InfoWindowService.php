@@ -4,7 +4,7 @@ namespace helena\services\frontend;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\DatasetItemModel;
-use helena\classes\App;
+use helena\classes\Session;
 
 class InfoWindowService extends BaseService
 {
@@ -15,7 +15,7 @@ class InfoWindowService extends BaseService
 		if ($metricId)
 		{
 			$selectedService = new SelectedMetricService();
-			$metric = $selectedService->GetSelectedMetric($metricId);
+			$metric = $selectedService->GetSelectedMetric($metricId, true, true);
 			$version = $metric->GetVersion($metricVersionId);
 			$level = $version->GetLevel($levelId);
 			$datasetId = $level->Dataset->Id;
@@ -35,6 +35,10 @@ class InfoWindowService extends BaseService
 		{
 			$datasetId = intval($featureId / 0x100000000);
 			$id = $featureId & 0xFFFFFFFF;
+			if (!Session::IsWorkPublicOrAccessibleByDataset($datasetId))
+			{
+				throw self::NotEnoughPermissions();
+			}
 			$info = $datasetModel->GetInfoById($datasetId, $id);
 		}
 		return $info;

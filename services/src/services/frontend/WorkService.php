@@ -38,10 +38,6 @@ class WorkService extends BaseService
 		return $ret;
 	}
 
-	public function GetWorkByMetricVersionJson($metricVersionId)
-	{
-		return App::Json($this->GetWorkByMetricVersion($metricVersionId));
-	}
 	public function GetWorkImage($workId)
 	{
 		$work = $this->GetWorkOnly($workId);

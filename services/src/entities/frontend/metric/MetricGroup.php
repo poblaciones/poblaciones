@@ -9,7 +9,6 @@ class MetricGroup extends BaseMapModel
 	public $Id;
 	public $Name;
 	public $Icon;
-	public $Visible;
 	public $Order;
 
 	public $ParentId;
@@ -20,8 +19,7 @@ class MetricGroup extends BaseMapModel
 			'lgr_id' => 'Id',
 			'lgr_caption' => 'Name',
 			'lgr_icon' => 'Icon',
-			'lgr_order' => 'Order',
-			'lgr_visible' => 'Visible');
+			'lgr_order' => 'Order');
 	}
 }
 

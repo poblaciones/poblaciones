@@ -76,9 +76,13 @@ App::$app->options("{anything}", function () {
 require_once('authenticate.php');
 require_once('frontend.php');
 require_once('common.php');
-require_once('admin.php');
+require_once('logs.php');
 App::RegisterControllerGet('/users', helena\controllers\backoffice\cBackoffice::class);
 App::RegisterControllerGet('/users/{any}', helena\controllers\backoffice\cBackoffice::class)->assert("any", ".*");
+
+App::RegisterControllerGet('/admins', helena\controllers\admins\cAdmins::class);
+App::RegisterControllerGet('/admins/{any}', helena\controllers\admins\cAdmins::class)->assert("any", ".*");
+
 require_once('backoffice/work.php');
 require_once('backoffice/permission.php');
 require_once('backoffice/metric.php');
@@ -89,7 +93,7 @@ require_once('backoffice/georeference.php');
 require_once('backoffice/upload.php');
 require_once('backoffice/mock.php');
 require_once('backoffice/test.php');
-require_once('backoffice/administration.php');
+require_once('admin/admin.php');
 
 require_once('tests.php');
 App::$app->get('/phpinfo2', function (Request $request) {

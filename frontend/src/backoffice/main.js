@@ -69,7 +69,7 @@ Vue.config.productionTip = false;
 
 const store = window.Context.CreateStore();
 
-var appAdmin = new Vue({
+var appBackoffice = new Vue({
 	el: '#wrapper',
   router,
   store,

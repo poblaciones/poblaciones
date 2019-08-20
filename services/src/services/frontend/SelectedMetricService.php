@@ -4,6 +4,7 @@ namespace helena\services\frontend;
 
 use helena\caches\SelectedMetricsMetadataCache;
 use helena\services\common\BaseService;
+use helena\classes\Session;
 use helena\classes\LevelZoom;
 use helena\db\frontend\MetricVersionModel;
 use helena\db\frontend\VariableModel;
@@ -26,7 +27,7 @@ class SelectedMetricService extends BaseService
 {
 	public function GetSelectedMetricJson($metricId)
 	{
-		return App::Json($this->GetSelectedMetric($metricId, true));
+		return App::Json($this->GetSelectedMetric($metricId, true, true));
 	}
 	public function GetSelectedMetricsJson($metricsId)
 	{
@@ -41,7 +42,7 @@ class SelectedMetricService extends BaseService
 		{
 			if ($id != '')
 			{
-				$ret[] = $this->GetSelectedMetric(intval($id), false);
+				$ret[] = $this->GetSelectedMetric(intval($id), false, true);
 			}
 		}
 		return $ret;
@@ -49,7 +50,7 @@ class SelectedMetricService extends BaseService
 
 	//GetSelectedMetricByVersion
 
-	public function GetSelectedMetric($metricId, $throwError = true)
+	public function GetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false)
 	{
 		$data = null;
 
@@ -66,7 +67,25 @@ class SelectedMetricService extends BaseService
 			$data = $this->GotFromCache($data);
 		}
 		Statistics::StoreSelectedMetricHit($data);
-		return $data;
+		// Quita los que no tenga acceso
+		$this->RemovePrivateVersions($data);
+		if(sizeof($data->Versions) == 0)
+			return null;
+		else
+			return $data;
+	}
+
+	private function RemovePrivateVersions($data)
+	{
+		for($n = sizeof($data->Versions) - 1; $n >= 0; $n--)
+		{
+			$version = $data->Versions[$n];
+			if ($version->Version->WorkIsPrivate && (!Session::IsAuthenticated() || !Session::IsWorkReaderShardified($version->Version->WorkId)))
+			{
+				// Lo tiene que remover...
+				Arr::RemoveAt($data->Versions, $n);
+			}
+		}
 	}
 
 	private function CalculateSelectedMetric($metricId, $throwError)
