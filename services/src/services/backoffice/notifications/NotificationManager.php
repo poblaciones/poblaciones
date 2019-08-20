@@ -5,9 +5,11 @@ namespace helena\services\backoffice\notifications;
 use minga\framework\Mail;
 
 use helena\classes\App;
+use helena\classes\Links;
 use helena\classes\Account;
 use minga\framework\Context;
 use helena\entities\backoffice as entities;
+
 
 class NotificationManager
 {
@@ -34,7 +36,7 @@ class NotificationManager
 		$vals = array();
 		$vals['title'] = "";
 		$vals['message'] = $message;
-		$vals['url'] = Context::Settings()->GetPublicUrl() . "/users/#/cartographies/" . $work->getId();
+		$vals['url'] = Links::GetBackofficeWorkUrl($work->getId());
 		$mail->message = App::RenderMessage('createNotification.html.twig', $vals);
 		$mail->Send(false, true);
 	}
@@ -95,8 +97,7 @@ class NotificationManager
 		$vals = array();
 		$vals['title'] = "";
 		$vals['message'] = $message;
-		$metadata = $work->getMetadata();
-		$vals['url'] = Context::Settings()->GetPublicUrl() . $metadata->getUrl();
+		$vals['url'] = Links::GetBackofficeWorkUrl($workId);
 		$mail->message = App::RenderMessage('publishNotification.html.twig', $vals);
 		$mail->Send(false, true);
 	}

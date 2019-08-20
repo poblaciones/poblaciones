@@ -56,22 +56,27 @@
 						</md-card-header>
 						<md-card-content>
 							<div class="md-layout md-gutter">
-								<div class="md-layout-item md-size-100 md-small-size-100">
-									Cuando una cartografía se encuentra ‘indexada’ sus indicadores son ofrecidos en el buscador del sitio y es indexada en buscadores externos como Google.
-								</div>		
-								<div v-if="!Work.properties.IsIndexed" class="md-layout-item md-size-100 md-small-size-100" style="padding-top: 16px">
-									Para que la cartografía sea indexada, se debe antes solicitar una revisión. Antes de hacerlo, verifique que satisfaga los siguientes criterios:
-									<ul>
-										<li>La cartografía tiene un título que describe claramente su contenido.</li>
-										<li>Estén detallados los autores y la institución originante en la atribución.</li>
-										<li>En lo posible hay documentos que explicitan la metodología utilizada, los resultados encontrados o tablas de códigos que permitan interpretar mejor la información en la sección 'Adjuntos'.</li>
-										<li>Las fuentes secundarias utilizados (censos, cartografías, etc.) estén apropiadamente indicadas en el apartado 'Fuentes'.</li>
-										<li>Los nombres de los datasets, sus variables e indicadores son claros y mantienen coherencia interna.</li>
-										<li>Las variables de los datasets poseen etiquetas bien definidas que permiten comprender bien su contenido.</li>
-										<li>Los tipos de dato y precisión de las variables de los datasets son los apropiados (ej. no ofrecer decimales en variables de valores enteros).</li>
-										<li>La información de contacto de la cartografía ofrece canales válidos para realizar consultas.</li>
-									</ul>
+								<div v-if="Work.properties.IsIndexed" class="md-layout-item md-size-100 md-small-size-100">
+									Cuando una cartografía se encuentra ‘indexada’ sus indicadores son ofrecidos en el buscador del sitio y es indexada en buscadores externos como Google. Si considera que hizo cambios significativos en su información, puede solicitar una nueva revisión.
 								</div>
+								<template v-else>
+									<div class="md-layout-item md-size-100 md-small-size-100">
+										Cuando una cartografía no se encuentra indexada sus indicadores no son ofrecidos en el buscador del sitio y es no indexada en buscadores externos como Google.
+									</div>
+									<div class="md-layout-item md-size-100 md-small-size-100" style="padding-top: 16px">
+										Para que una cartografía sea indexada, se debe solicitar una revisión. Antes de hacerlo, verifique que la misma satisfaga los siguientes criterios:
+										<ul>
+											<li>La cartografía tiene un título que describe claramente su contenido.</li>
+											<li>Estén detallados los autores y la institución originante en la atribución.</li>
+											<li>En lo posible hay documentos que explicitan la metodología utilizada, los resultados encontrados o tablas de códigos que permitan interpretar mejor la información en la sección 'Adjuntos'.</li>
+											<li>Las fuentes secundarias utilizados (censos, cartografías, etc.) estén apropiadamente indicadas en el apartado 'Fuentes'.</li>
+											<li>Los nombres de los datasets, sus variables e indicadores son claros y mantienen coherencia interna.</li>
+											<li>Las variables de los datasets poseen etiquetas bien definidas que permiten comprender bien su contenido.</li>
+											<li>Los tipos de dato y precisión de las variables de los datasets son los apropiados (ej. no ofrecer decimales en variables de valores enteros).</li>
+											<li>La información de contacto de la cartografía ofrece canales válidos para realizar consultas.</li>
+										</ul>
+									</div>
+								</template>
 								<div class="md-layout-item md-size-100 md-small-size-100">
 									<md-button v-if="Work.CanEdit()" @click="askReview" class="md-raised">
 										Solicitar revisión
@@ -108,7 +113,7 @@ export default {
 				var url = f.absoluteUrl(this.Work.properties.Metadata.Url);
 				return "(<a href='" + url + "' target='_blank'>" + url + "</a>)";
 			} else {
-				return "que será generada al publicar se la cartografía";
+				return "(que será generada al publicarse la cartografía)";
 			}
 		}
 	},

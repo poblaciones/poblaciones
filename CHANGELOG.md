@@ -1,8 +1,8 @@
 ﻿[CURRENT]
 - Zona administrativa en /admins.
 - La zona /admin pasa a /logs.
-- Adminsitración de indexado/no indexado para cartografías y datos públicos.
-- Adminsitración de privado/público para cartografías y datos públicos en solapa de visiblidad.
+- Administración de indexado/no indexado para cartografías y datos públicos.
+- Administración de privado/público para cartografías y datos públicos en solapa de visiblidad.
 - Botón de solicitar revisión en Visiblidad.
 
 v2.0 (2019-08-17)

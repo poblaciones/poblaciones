@@ -43,6 +43,11 @@ class Links
 	{
 		return self::GetMapUrl() . '/' .  $workId;
 	}
+	public static function GetBackofficeWorkUrl($workId)
+	{
+		return Context::Settings()->GetPublicUrl() . "/users/#/cartographies/" . $workId;
+	}
+
 	public static function GetMapUrl()
 	{
 		return '/map';
