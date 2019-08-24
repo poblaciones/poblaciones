@@ -74,6 +74,7 @@ cp ../services/web/static/css/authenticate.css $output/web/static/css/authentica
 cp -r ../services/web/static/img $output/web/static/>>$output-4_copy.log
 cp $output/templates/index.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/backoffice.html.twig $output/templates/frontend/>>$output-4_copy.log
+cp $output/templates/admins.html.twig $output/templates/frontend/>>$output-4_copy.log
 
 echo "*** 5. Crea release comprimido"
 tar cjvf $output.tar.bz2 -C $output . >$output-5_tar.log

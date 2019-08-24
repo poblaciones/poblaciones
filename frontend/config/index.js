@@ -10,7 +10,8 @@ module.exports = {
 	build: {
 		env: {} ,
 		index: path.resolve(__dirname, '../../services/templates/index.html.twig'),
-		indexAdmin: path.resolve(__dirname, '../../services/templates/backoffice.html.twig'),
+		indexBackoffice: path.resolve(__dirname, '../../services/templates/backoffice.html.twig'),
+		indexAdmin: path.resolve(__dirname, '../../services/templates/admins.html.twig'),
 		assetsRoot: path.resolve(__dirname, '../../services/web'),
 		assetsSubDirectory: 'static',
 		assetsPublicPath: '/',

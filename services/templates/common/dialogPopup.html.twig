@@ -1,0 +1,19 @@
+<style type="text/css">
+	body {
+		height: auto;
+	}
+</style>
+<div class="dTitlePopup" style='margin-top: 40px;'>
+	{{ page }}
+</div>
+<div class="contenedorMessage">
+	<div style='margin-top: 20px; margin-bottom: 40px; margin-left: 30px; margin-right: 30px'>
+		{{ message }}
+	</div>
+	<p style='text-align:center'>
+		{% if retry is defined and retry %}
+			<input type='button' class="dButton" value='Reintentar' onclick="{{ retry }}">
+		{% endif %}
+		<input type='button' class="dButton" value='Cerrar' onclick="window.close();">
+	</p>
+</div>

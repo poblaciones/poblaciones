@@ -120,7 +120,7 @@ class PublishService extends BaseService
 				// Manda un mensaje administrativo avisando del nuevo elemento
 				$nm = new NotificationManager();
 				$nm->NotifyPublish($workId);
-				$this->state->SetVisitUrl($publicUrl);
+				$this->state->SetVisitUrl($publicUrl, 'Ver mapa');
 				$this->state->NextStep('Listo');
 				break;
 			default:

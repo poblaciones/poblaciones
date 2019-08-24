@@ -196,7 +196,11 @@ export default {
 			return pre + '/cartographies/' + element.Id + '/content';
 		},
 		select(element) {
-			this.$router.push({ path: this.getWorkUri(element, false) });
+			if (this.offerAdminActions) {
+				window.open(this.getWorkUri(element, true), '_blank');
+			} else {
+				this.$router.push({ path: this.getWorkUri(element, false) });
+			}
 		},
 		refreshWorks() {
 			var loc = this;
@@ -283,7 +287,7 @@ export default {
 		},
 		onIndexedChanged(item) {
 			this.$refs.invoker.do(window.Db,
-														window.Db.ChangeWorkIndexing, item);	
+														window.Db.UpdateWorkIndexing, item);	
 		},
 		onRevoke(item) {
 			this.$refs.stepper.startUrl = window.Db.GetStartWorkRevokeUrl(item.Id);

@@ -60,8 +60,8 @@ class cLinkInvitation extends cController
 		$this->AddValue('useOpenId', Context::Settings()->useOpenId);
 		$this->AddValue('useOpenIdFacebook', Context::Settings()->useOpenIdFacebook);
 		$this->AddValue('useOpenIdGoogle',  Context::Settings()->useOpenIdGoogle);
-		$this->AddValue('oauthGoogle_url', "/oauthGoogle.do");
-		$this->AddValue('oauthFacebook_url',  "/oauthFacebook.do");
+		$this->AddValue('oauthGoogle_url', "/oauthGoogle");
+		$this->AddValue('oauthFacebook_url',  "/oauthFacebook");
 		$this->AddValue('lostPassword_url', "lostPassword");
 		$this->AddValue('new_url_post', "");
 

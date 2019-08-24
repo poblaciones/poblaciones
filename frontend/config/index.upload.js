@@ -6,9 +6,11 @@ module.exports = {
 	build: {
 		env: require('./upload.env'),
 		index: path.resolve(__dirname, '../../build/release/templates/index.html.twig'),
-		indexAdmin: path.resolve(__dirname, '../../build/release/templates/backoffice.html.twig'),
+		indexBackoffice: path.resolve(__dirname, '../../build/release/templates/backoffice.html.twig'),
+		indexAdmin: path.resolve(__dirname, '../../build/release/templates/admins.html.twig'),
 		main: path.resolve(__dirname, '../src/public/main.js'),
-		mainAdmin: path.resolve(__dirname, '../src/backoffice/main.js'),
+		mainBackoffice: path.resolve(__dirname, '../src/backoffice/main.js'),
+		mainAdmin: path.resolve(__dirname, '../src/admins/main.js'),
 		assetsRoot: path.resolve(__dirname, '../../build/release/web'),
 		assetsSubDirectory: 'static',
 		assetsPublicPath: '/',
@@ -38,6 +40,7 @@ module.exports = {
 				paths: [
 					loc.build.main,
 					loc.build.mainAdmin,
+					loc.build.mainBackoffice
 				],
 				silent: true,
 				recursive: false,

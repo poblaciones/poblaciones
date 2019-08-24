@@ -36,7 +36,7 @@
 							</div>
 						</div>
 						<div>
-							<md-button v-if="visitUrl" class="md-raised" :href="visitUrl" target="_blank" @click="Close()">Acceder</md-button>
+							<md-button v-if="visitUrl" class="md-raised" :href="visitUrl" target="_blank" @click="Close()">{{ visitCaption }}</md-button>
 							<md-button v-else class="md-raised" @click="Close()">Continuar</md-button>
 						</div>
 					</div>
@@ -88,6 +88,7 @@ export default {
 			this.imageSrc = '';
 			this.key = '';
 			this.visitUrl = '';
+			this.visitCaption = '';
 			this.error = '';
 			this.hideProgress = false;
 		},
@@ -132,6 +133,7 @@ export default {
 			}).then(function (res) {
 				if (res.data.visitUrl) {
 					loc.visitUrl = res.data.visitUrl;
+					loc.visitCaption = res.data.visitCaption;
 				}
 				if (res.data.done) {
 					loc.ShowCompleted();
@@ -185,6 +187,7 @@ export default {
 			errorDetail: '',
 			status: '',
 			imageSrc: '',
+			visitCaption: '',
 			visitUrl: '',
 			url: '',
 			key: '',

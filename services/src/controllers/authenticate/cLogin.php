@@ -6,21 +6,34 @@ use helena\controllers\common\cController;
 use helena\classes\Session;
 use helena\classes\App;
 use helena\classes\Account;
+use helena\classes\Remember;
 use helena\classes\Register;
 
 use minga\framework\Context;
 use minga\framework\Str;
 use minga\framework\Params;
+use minga\framework\MessageBox;
+use minga\framework\PhpSession;
+use minga\framework\oauth\OauthData;
 
 class cLogin extends cController
 {
-	public function Show()
+	public function Show($forceShow = false)
 	{
+		if (array_key_exists('post', $_GET) && !$forceShow)
+		{
+			return $this->Post();
+		}
 		$alwaysAsk = Params::SafeGet('ask');
 
 		$to = Params::SafeGet('to');
 		if ($alwaysAsk !== '1' && Session::IsAuthenticated())
-			return App::Redirect($to);
+		{
+			if ($to == '/' || Str::StartsWithI($to, '/login.do') || $to == '')
+				return Session::GoProfile();
+			else
+				return App::Redirect($to);
+		}
 		$this->AddValue('to', $to);
 		$this->AddValue('user', "");
 		$this->AddValue('current_url', App::AbsoluteUrl(''));
@@ -28,44 +41,96 @@ class cLogin extends cController
 		$this->AddValue('useOpenId', Context::Settings()->useOpenId);
 		$this->AddValue('useOpenIdFacebook', Context::Settings()->useOpenIdFacebook);
 		$this->AddValue('useOpenIdGoogle',  Context::Settings()->useOpenIdGoogle);
-		$this->AddValue('oauthGoogle_url', "/oauthGoogle.do");
-		$this->AddValue('oauthFacebook_url',  "/oauthFacebook.do");
+		$this->AddValue('oauthGoogle_url', "/oauthGoogle");
+		$this->AddValue('oauthFacebook_url',  "/oauthFacebook");
+		$this->AddValue('login_url_post', "/authenticate/login?post");
 
 		$this->AddValue('lostPassword_url', "lostPassword");
-		$this->AddValue('new_url_post', "login");
+		$this->AddValue('new_url_post', "/authenticate/register?post");
 
 		return $this->Render('login.html.twig');
 	}
 
 	public function Post()
 	{
-		Register::CheckTerms();
+		$user = Params::SafeGet('username');
+		if ($user != '')
+		{
+			// Login tradicional
+			$account = self::ProcessLogin($user);
+			$returnUrl = Params::SafeGet('returnUrl');
+		}
+		else
+		{
+			// Se fija si tiene datos de openAuth
+			$data = OauthData::DeserializeFromSession();
+			if($data == null)
+			{	// No los tiene... sale.
+				return $this->Show(true);
+			}
+			// Los procesa
+			$account = self::ProcessLogin($data->email, false, $data);
+			$returnUrl = PhpSession::GetSessionValue($data->provider . 'OauthReturnUrl');
+			OauthData::ClearSession();
+		}
+		return self::JumpToLoginUrl($returnUrl);
+	}
 
-		if(Register::CompleteOauthRegistration())
-			Functions::Redirect($this->ResolveTargetPage());
+	public static function JumpToLoginUrl($returnUrl)
+	{
+		if(Str::StartsWith($returnUrl, '/') == false && Str::StartsWith($returnUrl, 'http') == false)
+			$returnUrl = '/' . $returnUrl;
+
+		if ($returnUrl == '/' || Str::StartsWithI($returnUrl, '/login.do') || $returnUrl == '')
+			return Session::GoProfile();
+		else
+			return App::Redirect($returnUrl);
+	}
+
+	public static function ProcessLogin($user, $checkPassword = true, $oauthData = null)
+	{
+		$user = Str::ToLower(trim($user));
+		if ($user == '')
+			MessageBox::ThrowMessage('Debe indicarse una cuenta para ingresar.');
 
 		$account = new Account();
-
-		$user = Str::ToLower(trim(Params::SafeGet('reg_username')));
-		$password = Params::SafeGet('reg_password');
-		$verification = Params::SafeGet('reg_verification');
-		$firstName = Params::SafeGet('reg_firstName');
-		$lastName = Params::SafeGet('reg_lastName');
-
-		Register::CheckNewUser($user, $password, $verification, $firstName, $lastName);
-
 		$account->user = $user;
+		if ($account->Exists() == false)
+		{
+			if ($checkPassword)
+				MessageBox::ThrowMessage('Cuenta inexistente (' . $user . ').');
+			else
+				MessageBox::ThrowMessage('La cuenta <b>' . $user . '</b> no se encuentra registrada en el sitio. Para utilizarla debe completar previamente la registración.');
+		}
 
-		// Manda el mail de activación
-		$to = Params::SafeGet("to");
-		$url = $account->BeginActivation($password, $firstName, $lastName, $to);
+		if($account->IsActive() == false)
+		{
+			MessageBox::ThrowMessage('La cuenta debe ser activada antes de poder ser utilizada. Verifique en su casilla de correo por el mensaje de activación.');
+		}
 
-		// Redirige...
-		Session::Logoff();
+		if($checkPassword)
+		{
+			$password = Params::SafeGet('password');
+			if ($account->Login($password) == false)
+			{
+				MessageBox::ThrowMessage('Usuario no encontrado o contraseña incorrecta.');
+			}
 
-		// Muestra mensaje
-		return $this->ShowMessage($url);
+			if(Params::SafeGet('remember') != '')
+				Remember::SetRemember($account);
+		}
+		else
+		{
+			if($oauthData != null
+				&& $account->GetOauthId($oauthData->provider) == '')
+				$account->SaveOauthActivation($oauthData, false);
+
+			$account->Begin();
+			Remember::SetRemember($account);
+		}
+		return $account;
 	}
+
 
 	public function ShowMessage($url)
 	{

@@ -6,6 +6,7 @@ use minga\framework\Params;
 use minga\framework\oauth\OauthData;
 use minga\framework\Str;
 use minga\framework\MessageBox;
+use minga\framework\PhpSession;
 
 class Register
 {
@@ -36,8 +37,8 @@ class Register
 			<p>&bull; Autorizar el uso de dicha cuenta por medio de un proveedor externo (Google o Facebook).');
 
 		$account = new Account();
-		$account->LoadOrCreate($user);
-
+		$account->user = $user;
+		$account->LoadOrCreate();
 		// Activa...
 		$account->SaveOauthActivation($data);
 
@@ -47,8 +48,6 @@ class Register
 
 		$account->Begin();
 		Remember::SetRemember($account);
-
-		$stats->Increment('register_post_hits');
 
 		return true;
 	}

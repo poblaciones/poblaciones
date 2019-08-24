@@ -81,10 +81,22 @@ var webpackConfig = merge(baseWebpackConfig, {
 			}
 		}),
 		new HtmlWebpackPlugin({
-			filename: config.build.indexAdmin,
+			filename: config.build.indexBackoffice,
 			template: 'backoffice.html',
 			metadata: { google_maps_key: env.google_maps_key.replace(/"/g, '') },
-			chunks: ['manifest', 'vendor', 'appBackoffice', 'appAdmin'],
+			chunks: ['manifest', 'vendor', 'appBackoffice'],
+			inject: true,
+			minify: {
+				removeComments: true,
+				collapseWhitespace: true,
+				removeAttributeQuotes: true
+			}
+		}),
+		new HtmlWebpackPlugin({
+			filename: config.build.indexAdmin,
+			template: 'admins.html',
+			metadata: { google_maps_key: env.google_maps_key.replace(/"/g, '') },
+			chunks: ['manifest', 'vendor', 'appAdmin'],
 			inject: true,
 			minify: {
 				removeComments: true,

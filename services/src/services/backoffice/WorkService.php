@@ -165,13 +165,13 @@ class WorkService extends BaseService
 				// que es utilizado el institution
 				$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
 													JOIN draft_metadata ON wrk_metadata_id = met_id
-												  LEFT draft_metadata_source ON msc_metadata_id = met_id
-												  LEFT draft_source ON msc_source_id = src_id
+												  LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
+												  LEFT JOIN draft_source ON msc_source_id = src_id
 													WHERE src_institution_id = ? OR met_institution_id = ?) AS used,
 												(SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
 													JOIN draft_metadata ON wrk_metadata_id = met_id
-												  LEFT draft_metadata_source ON msc_metadata_id = met_id
-													LEFT draft_source ON msc_source_id = src_id
+												  LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
+													LEFT JOIN draft_source ON msc_source_id = src_id
 													JOIN draft_work_permission ON wkp_work_id = wrk_id
 													WHERE src_institution_id = ? OR met_institution_id = ?
 													AND wkp_user_id = ? AND wkp_permission IN ('E', 'A')) AS editor";

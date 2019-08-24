@@ -1,0 +1,17 @@
+<div class="dTitlePopup">
+	{{ page }}
+</div>
+<script type="text/javascript">
+	window.onload = function(){
+	parent.$.fancybox.update()
+	};
+</script>
+<div class="contenedorMessage">
+	<div style='margin-top: 20px; margin-bottom: 40px;'>
+		{{ message }}
+	</div>
+	<p style='text-align:center'>
+	<input type='button' class="dButton" value='Cerrar' onclick="parent.$.fancybox.close();">
+	</p>
+</div><br>&nbsp;<br>
+

@@ -21,6 +21,9 @@ class Account
 	public $firstName = '';
 	public $lastName = '';
 	public $privileges = '';
+	public $facebookOauthId = '';
+	public $googleOauthId = '';
+
 	public $isActive = false;
 	protected $geographies = NULL;
 
@@ -78,6 +81,25 @@ class Account
 	{
 		return trim($this->GetFirstName() . " " . $this->GetLastName());
 	}
+	public function GetOauthId($provider)
+	{
+		$this->EnsureDbInfo();
+		if ($provider === 'google')
+			return $this->googleOauthId;
+		else if ($provider === 'facebook')
+			return $this->facebookOauthId;
+		else throw new ErrorException("Provider no reconocido.");
+	}
+	public function SetOauthId($provider, $id)
+	{
+		$this->EnsureDbInfo();
+		if ($provider === 'google')
+			$this->googleOauthId = $id;
+		else if ($provider === 'facebook')
+			$this->facebookOauthId = $id;
+		else throw new ErrorException("Provider no reconocido.");
+	}
+
 	public function GetFirstName()
 	{
 		$this->EnsureDbInfo();
@@ -122,6 +144,8 @@ class Account
 			$this->privileges = $attrs['usr_privileges'];
 			$this->firstName = $attrs['usr_firstname'];
 			$this->lastName = $attrs['usr_lastname'];
+			$this->facebookOauthId = $attrs['usr_facebook_oauth_id'];
+			$this->googleOauthId = $attrs['usr_google_oauth_id'];
 			$this->isActive = $attrs['usr_is_active'];
 			$this->password = $attrs['usr_password'];
 		}
@@ -219,7 +243,18 @@ class Account
 		return $link;
 	}
 
-
+	public function LoadOrCreate()
+	{
+		if ($this->Exists() == false)
+		{
+			$model = new UserModel();
+			$model->CreateUser($this->user);
+		}
+		else
+		{
+			$this->EnsureDbInfo();
+		}
+	}
 	public function BeginLostPassword($target)
 	{
 		// busca la carpeta correspondiente
@@ -255,6 +290,21 @@ class Account
 	{
 		$sql = "UPDATE user SET usr_firstname = ?, usr_lastname = ?, usr_password = ?, usr_is_active = 1 WHERE usr_id = ?";
 		App::Db()->exec($sql, array($firstName, $lastName, $passwordHashed, $this->userId));
+	}
+
+	public function SaveOauthActivation($data, $isCreate = true)
+	{
+		$this->EnsureDbInfo();
+		if($isCreate)
+		{
+			$this->firstName = $data->firstName;
+			$this->lastName = $data->lastName;
+		}
+		$this->SetOauthId($data->provider, $data->id);
+		$this->isActive = true;
+		$sql = "UPDATE user SET usr_firstname = ?, usr_lastname = ?, usr_facebook_oauth_id = ?,
+												usr_google_oauth_id = ?, usr_is_active = 1 WHERE usr_id = ?";
+		App::Db()->exec($sql, array($this->firstName, $this->lastName, $this->facebookOauthId, $this->googleOauthId, $this->userId));
 	}
 	public function LostPasswordActivate($id)
 	{

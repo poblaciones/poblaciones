@@ -26,7 +26,7 @@
 								</div>
 								<div class="md-layout md-gutter">
 									<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
-									Pública
+									Público
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
 									Todos los usuarios que conozcan la ruta estable de la cartografía <span v-html="stableUrl"></span> pueden acceder a ella.
@@ -38,10 +38,10 @@
 							</div>
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
-									Privada
+									Privado
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									Una cartografía privada es visible solamente para quien que la creó y para quienes hayan sido agregados en la solapa Permisos.
+									Una cartografía con acceso privado es visible solamente para quien que la creó y para quienes hayan sido agregados en la solapa Permisos.
 								</div>
 							</div>
 						</md-card-content>

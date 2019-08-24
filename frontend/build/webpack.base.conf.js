@@ -17,7 +17,7 @@ module.exports = {
 	entry: {
 		app: './src/public/main.js',
 		appBackoffice: './src/backoffice/main.js',
-		appAdmins: './src/admins/main.js',
+		appAdmin: './src/admins/main.js',
 	},
 	output: {
 		path: config.build.assetsRoot,

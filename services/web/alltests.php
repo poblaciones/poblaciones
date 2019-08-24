@@ -1,11 +1,12 @@
 <?php
 
 use helena\classes\App;
+use minga\framework\Context;
 use minga\framework\Test;
 
 require_once __DIR__.'/../startup.php';
 
-Test::SetServer('http://mapas');
+Test::SetServer(Context::Settings()->GetMainServerPublicUrl());
 
 Test::WriteLine('Servicios de capas');
 Test::Get('/services/metrics/GetFabMetrics');
@@ -30,4 +31,4 @@ Test::Get('/services/backoffice/GetDatasetColumns?k=119');
 Test::Get('/services/backoffice/GetDatasetColumnsLabels?k=119');
 Test::Get('/services/backoffice/GetDatasetMetricVersionLevels?k=119');
 Test::Get('/services/backoffice/GetDatasetDataPaged?k=119&filterscount=0&groupscount=0&pagenum=0&pagesize=50&recordstartindex=0&recordendindex=50&page=0');
-Test::Get('/services/backoffice/GetColumnDistributions?k=84&c=O&ci=5411&o=O&oi=5404&s=100');
+Test::Get('/services/backoffice/GetColumnDistributions?k=209&c=O&ci=9744&o=O&oi=9741&s=100');
