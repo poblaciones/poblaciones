@@ -1,7 +1,0 @@
-D:\Pablo\Sociologia\Mapa Social\poblaciones\services\src\checkPHPstart\checkPHPstart\bin\Debug\checkPHPstart.exe.config
-D:\Pablo\Sociologia\Mapa Social\poblaciones\services\src\checkPHPstart\checkPHPstart\bin\Debug\checkPHPstart.exe
-D:\Pablo\Sociologia\Mapa Social\poblaciones\services\src\checkPHPstart\checkPHPstart\bin\Debug\checkPHPstart.pdb
-D:\Pablo\Sociologia\Mapa Social\poblaciones\services\src\checkPHPstart\checkPHPstart\obj\Debug\checkPHPstart.csprojResolveAssemblyReference.cache
-D:\Pablo\Sociologia\Mapa Social\poblaciones\services\src\checkPHPstart\checkPHPstart\obj\Debug\checkPHPstart.csproj.CoreCompileInputs.cache
-D:\Pablo\Sociologia\Mapa Social\poblaciones\services\src\checkPHPstart\checkPHPstart\obj\Debug\checkPHPstart.exe
-D:\Pablo\Sociologia\Mapa Social\poblaciones\services\src\checkPHPstart\checkPHPstart\obj\Debug\checkPHPstart.pdb
