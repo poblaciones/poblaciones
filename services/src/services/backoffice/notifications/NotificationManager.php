@@ -115,7 +115,7 @@ class NotificationManager
 		$vals = array();
 		$vals['title'] = "";
 		$vals['message'] = $message;
-		$vals['url'] = Context::Settings()->GetPublicUrl() . "/users/#/users";
+		$vals['url'] = Context::Settings()->GetPublicUrl() . "/admins";
 		$mail->message = App::RenderMessage('createNewUser.html.twig', $vals);
 		$mail->Send(false, true);
 	}

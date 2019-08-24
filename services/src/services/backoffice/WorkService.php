@@ -33,6 +33,8 @@ class WorkService extends BaseService
 		$work->setDatasetDataChanged(false);
 		$work->setMetricLabelsChanged(false);
 		$work->setMetricDataChanged(false);
+		$work->setIsIndexed(false);
+		$work->setIsPrivate(false);
 		$work->setShard(Context::Settings()->Shard()->CurrentShard);
 
 		// Crea metadatos
