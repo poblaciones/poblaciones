@@ -90,12 +90,10 @@
 								<md-list-item v-for="item in Variable.Values" v-bind:key="item.Id"
 															:value="item.Id" class="itemSmall">
 									<mp-color-picker :canEdit="canEdit" :isDisabledObject="item"
-													:ommitHexaSign="true" @selected="colorSelected" v-model="item.FillColor"
+													:ommitHexaSign="true" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
 																	 style="width: 45px; padding-top: 0px" />
 									<span class="md-list-item-text">{{ item.Caption }}</span>
-									<md-switch v-if="item.Value === null" class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.NullCategory">
-									</md-switch>
-									<md-button v-if="canEdit && Variable.Symbology.CutMode === 'M'" class="md-icon-button md-list-action"
+									<md-button v-if="canEdit && (Variable.Symbology.CutMode === 'M' || item.Value === null)" class="md-icon-button md-list-action"
 											@click="editValue(item)">
 										<md-icon>edit</md-icon>
 									</md-button>
@@ -184,6 +182,16 @@
 		</md-dialog-actions>
 
 		</md-dialog>
+		<md-dialog-prompt
+				:md-active.sync="activateNullValueLabel"
+				v-model="nullValueLabel"
+				md-title="Descripción"
+				md-input-maxlength="50"
+				md-input-placeholder="Descripción..."
+				md-confirm-text="Aceptar"
+				md-cancel-text="Cancelar"
+				@md-confirm="updateNullValueLabel">
+		</md-dialog-prompt>
 	</div>
 </template>
 
@@ -210,28 +218,7 @@ export default {
 		},
 		copySymbology() {
 			// Prepara la info
-			var data = f.clone({ Symbology: this.Variable.Symbology });
-			if (this.Variable.Symbology.CutMode === 'M') {
-				// Copia los valores
-				var values = [];
-				for(var n = 0; n < this.Variable.Values.length; n++) {
-					values.push(this.Variable.Values[n].Value);
-				}
-				data.Values = values;
-			}
-			data.Symbology.Id = null;
-			if (this.Variable.Symbology.CutMode === 'V' && this.Variable.Symbology.CutColumn !== null) {
-				// Copia los valores
-				data.Symbology.CutColumn = data.Symbology.CutColumn.Variable;
-			} else {
-				data.Symbology.CutColumn = null;
-			}
-			// Guarda los custom colors
-			if (this.Variable.Symbology.CutMode === 'S') {
-				data.Symbology.CustomColors = JSON.stringify([this.singleColor]);
-			} else {
-				data.Symbology.CustomColors = JSON.stringify(this.customColors);
-			}
+			var data = this.Dataset.ScaleGenerator.CopySymbology(this.Variable, this.singleColor, this.customColors);
 			// Listo
 			var text = JSON.stringify(data);
 			// La copia
@@ -244,7 +231,8 @@ export default {
 					alert('No hay valores disponibles. Para pegar una simbología debe realizar \'copiar simbología\' en otro indicador.');
 				} else
 					var newClone = f.clone(loc.Variable);
-					loc.Dataset.ScaleGenerator.ApplySymbology(loc.Level, newClone, JSON.parse(data.text));
+					var newData = JSON.parse(data.text);
+					loc.Dataset.ScaleGenerator.ApplySymbology(loc.Level, newClone, newData);
 					var keepOriginalVariable = loc.originalVariable;
 					loc.receiveVariable(newClone);
 					loc.originalVariable = keepOriginalVariable;
@@ -258,10 +246,10 @@ export default {
 					alert('No hay valores disponibles. Para pegar el coloreo debe copiar la simbología de otro indicador.');
 				} else {
 					loc.Dataset.ScaleGenerator.ApplyColors(loc.Level, loc.Variable, JSON.parse(data.text));
-					if (loc.Variable.Symbology.CustomColors === null) {
-						loc.customColors = [];
-					} else {
+					if (loc.Variable.Symbology.CustomColors) {
 						loc.customColors = JSON.parse(loc.Variable.Symbology.CustomColors);
+					} else {
+						loc.customColors = [];
 					}
 					loc.RegenCategories();
 				}
@@ -272,20 +260,33 @@ export default {
 		},
 		editValue(item) {
 			var n = this.Variable.Values.indexOf(item);
-			var previous = (n === 0 ? null : this.Variable.Values[n - 1]);
+			var previous = (n === 0 || this.Variable.Values[n - 1].Value === null ? null : this.Variable.Values[n - 1]);
 			var isLast = (n === this.Variable.Values.length - 1);
-			this.$refs.valuePopup.show(this.Variable, this.customColors, item, previous, isLast);
-		},
-		colorSelected() {
-			for(var n = 0; n < this.Variable.Values.length; n++) {
-				this.customColors[n] = this.Variable.Values[n].FillColor;
+			var isNull = (item.Value === null);
+			if (isNull) {
+				this.nullValueLabel = item.Caption; 
+				this.activateNullValueLabel = true;
+			} else {
+				this.$refs.valuePopup.show(this.Variable, this.customColors, item, previous, isLast);
 			}
-			this.Variable.Symbology.Rainbow = 100;
-			this.Variable.Symbology.PaletteType = 'P';
+		},
+		updateNullValueLabel() {
+			this.Variable.Values[0].Caption = this.nullValueLabel;
+		},
+		colorSelected(switchToCustom) {
+			var hasNulls = (this.Variable.Values.length > 0 && this.Variable.Values[0].Value === null);
+			var nullOffset = (hasNulls ? 1 : 0);
+			for(var n = nullOffset; n < this.Variable.Values.length; n++) {
+				this.customColors[n - nullOffset] = this.Variable.Values[n].FillColor;
+			}
+			if (switchToCustom) {
+				this.Variable.Symbology.Rainbow = 100;
+				this.Variable.Symbology.PaletteType = 'P';
+			}
 		},
 		RegenCategories() {
 			this.Variable.Symbology.CustomColors = JSON.stringify(this.customColors);
-			this.Dataset.ScaleGenerator.RegenVariableCategories(this.Level, this.Variable);
+			return this.Dataset.ScaleGenerator.RegenVariableCategories(this.Level, this.Variable);
 		},
 		paletteOffset(paletteId) {
 			return -(paletteId * 32);
@@ -301,10 +302,10 @@ export default {
 		receiveVariable(variable) {
 			this.originalVariable = variable;
 			this.Variable = f.clone(variable);
-			if (this.Variable.Symbology.CustomColors === null) {
-				this.customColors = [];
-			} else {
+			if (this.Variable.Symbology.CustomColors) {
 				this.customColors = JSON.parse(this.Variable.Symbology.CustomColors);
+			} else {
+				this.customColors = [];
 			}
 			if (this.Variable.Data === 'N' && (this.Variable.Symbology.CutMode === "J" || this.Variable.Symbology.CutMode === "T" || this.Variable.Symbology.CutMode === "M")) {
 				this.Variable.Symbology.CutMode = 'S';
@@ -492,6 +493,8 @@ export default {
 			Level: null,
 			Variable: null,
 			showDialog: false,
+			activateNullValueLabel: false,
+			nullValueLabel: '',
 			isOpen: false,
 			originalVariable: null,
 			customColors: [],

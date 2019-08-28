@@ -2,6 +2,7 @@ import axios from 'axios';
 import axiosClient from '@/common/js/axiosClient';
 import arr from '@/common/js/arr';
 import str from '@/common/js/str';
+import f from '@/backoffice/classes/Formatter';
 
 export default ScaleGenerator;
 
@@ -61,7 +62,6 @@ ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds = f
 		}
 	}
 };
-
 
 ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByLabelChange = function (changedColumn) {
 	// Esto toma los casos en que se cambiaron las etiquetas
@@ -130,6 +130,9 @@ ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
 	var key = this.createKey(variable);
 	var data = loc.InfoCache[key];
 	if (loc.RegenPending[key]) {
+		// Pone a que ese proceso atienda a la variable
+		// en su versión más nueva disponible
+		loc.RegenPending[key] = variable;
 		let ret = new Promise((resolve, reject) => {
 			resolve();
 		});
@@ -142,13 +145,14 @@ ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
 		});
 		return ret;
 	} else {
-		loc.RegenPending[key] = true;
+		loc.RegenPending[key] = variable;
 		// Trae los grupos calculados para ese par de variables y escalas
 		let url = window.host + '/services/backoffice/GetColumnDistributions';
 		return loc.GetColumnDistributions(variable).then(function (data) {
 				loc.InfoCache[key] = data;
-				loc.RegenPending[key] = false;
-				loc.CreateVariableCategories(level, variable, data);
+				var varPending = loc.RegenPending[key];
+				loc.RegenPending[key] = null;
+				loc.CreateVariableCategories(level, varPending, data);
 				return data;
 			}).catch(function(err) {
 				loc.RegenPending[key] = false;
@@ -159,12 +163,7 @@ ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
 ScaleGenerator.prototype.CalculateColor = function (variable, n, total, customColors) {
 	// Resuelve nulo
 	if (n === null) {
-		if (variable.Symbology.PaletteType === 'P' && variable.Symbology.Rainbow === 100
-					&& customColors.length > 0) {
-			return customColors[0];
-		} else {
-			return 'D0D0D0';
-		}
+		return 'D0D0D0';
 	}
 	// Calcula lo demás
 	var ratio = (total <= 1 ? 0 : n / (total - 1));
@@ -186,6 +185,45 @@ ScaleGenerator.prototype.CalculateColor = function (variable, n, total, customCo
 	return '606060';
 };
 
+ScaleGenerator.prototype.CopySymbology = function (variable, singleColor, customColors) {
+	// Copia el symbology y resetea el id
+	var data = f.clone({ Symbology: variable.Symbology });
+	data.Symbology.Id = null;
+	// Pasa valores si es manual
+	if (variable.Symbology.CutMode === 'M') {
+		// Copia los valores
+		var values = [];
+		var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+		for (var n = 0; n < valuesNoNullElement.length; n++) {
+			values.push(valuesNoNullElement[n].Value);
+		}
+		data.Values = values;
+	}
+	// Si tiene valores para nulo los graba
+	if (this.HasNullCategory(variable))
+	{
+		data.NullValue = {
+			Caption: variable.Values[0].Caption,
+			FillColor: variable.Values[0].FillColor
+		};
+	}
+	// Pasa cutColumn
+	if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null) {
+		data.Symbology.CutColumn = data.Symbology.CutColumn.Variable;
+	} else {
+		data.Symbology.CutColumn = null;
+	}
+	// Guarda los custom colors
+	if (variable.Symbology.CutMode === 'S') {
+		data.Symbology.CustomColors = JSON.stringify([singleColor]);
+	} else {
+		data.Symbology.CustomColors = JSON.stringify(customColors);
+	}
+	// Guarda visibilidades
+	data.Visibilities = this.saveVisibilities(variable);
+	return data;
+};
+
 ScaleGenerator.prototype.ApplySymbology = function (level, variable, newData) {
 	variable.Symbology = newData.Symbology;
 	// Se fija si son rangos manuales
@@ -198,16 +236,20 @@ ScaleGenerator.prototype.ApplySymbology = function (level, variable, newData) {
 		}
 	}
 	// Se fija si tiene una variable a reponer
-	if (cutMode === 'V') {
-		var column = this.Dataset.GetColumnFromVariable(newData.Symbology.CutVariable, false);
-		variable.Symbology.CutVariable = column;
-	}
 	if (cutMode === 'S') {
 		variable.Values = [];
 		var customColors = JSON.parse(variable.Symbology.CustomColors);
 		var value = ScaleGenerator.CreateValue('Total', 0, customColors[0], 1);
 		variable.Values.push(value);
+	} else {
+		if (cutMode === 'V') {
+			var column = this.Dataset.GetColumnFromVariable(newData.Symbology.CutVariable, false);
+			variable.Symbology.CutVariable = column;
+		}
 	}
+	// Pone la info de visibilidad y nulo, que aún no puede aplicar porque
+	// no se regeneraron los valores
+	variable.Symbology.PendingPaste = { NullValue: newData.NullValue, Visibilities: newData.Visibilities };
 };
 
 ScaleGenerator.prototype.ApplyColors = function (level, variable, newData) {
@@ -217,6 +259,16 @@ ScaleGenerator.prototype.ApplyColors = function (level, variable, newData) {
 	variable.Symbology.CustomColors = newData.Symbology.CustomColors;
 	variable.Symbology.RainbowReverse = newData.Symbology.RainbowReverse;
 	variable.Symbology.PaletteType = newData.Symbology.PaletteType;
+	this.applyNullInfo(variable, newData, false);
+};
+
+ScaleGenerator.prototype.applyNullInfo = function (variable, newData, updateCaption) {
+	if (this.HasNullCategory(variable) && newData.NullValue) {
+		if (updateCaption) {
+			variable.Values[0].Caption = newData.NullValue.Caption;
+		}
+		variable.Values[0].FillColor = newData.NullValue.FillColor;
+	}
 };
 
 ScaleGenerator.prototype.CalculateCustomPaletteColor = function (variable, n, customColors) {
@@ -263,36 +315,57 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 	// Borra y regenera las categorías
 	var previousVisibilities = this.saveVisibilities(variable);
 	if (variable.Symbology.CutMode !== 'M') {
-		variable.Values.length = 0;
+		// Resetea los valores para regenerar
+		variable.Values.length = (data.HasNulls && this.HasNullCategory(variable) ? 1 : 0);
 	}
 	if (variable.Symbology.CutMode !== 'V' && data.HasNulls) {
-		this.EnsureNullCategory(variable, customColors);
+		this.EnsureNullCategory(variable);
 	}
 	if (variable.Symbology.CutMode === 'S') {
-		this.CreateSingleCategory(variable, customColors);
+		this.CreateSingleCategory(variable);
 	}
 	if (variable.Symbology.CutMode === 'J') {
-		this.CreateRangeCategories(variable, data, 'jenks', customColors);
+		this.CreateRangeCategories(variable, data, 'jenks');
 	}
 	if (variable.Symbology.CutMode === 'T') {
-		this.CreateRangeCategories(variable, data, 'ntiles', customColors);
+		this.CreateRangeCategories(variable, data, 'ntiles');
 	}
 	if (variable.Symbology.CutMode === 'M') {
-		this.CreateManualCategories(variable, data.HasNulls, customColors);
+		this.CreateManualCategories(variable);
 	}
 	if (variable.Symbology.CutMode === 'V') {
-		this.CreateByVariableCategories(variable, customColors);
+		this.CreateByVariableCategories(variable);
 	}
-	this.applyVisibilities(variable, previousVisibilities);
+	if (variable.Symbology.PendingPaste)
+	{
+		this.applyNullInfo(variable, variable.Symbology.PendingPaste, true);
+		this.applyVisibilities(variable, variable.Symbology.PendingPaste.Visibilities);
+		variable.Symbology.PendingPaste = null;
+	}	else {
+		this.applyVisibilities(variable, previousVisibilities);
+	}
+	this.recalculateColors(variable, customColors);
+};
+
+ScaleGenerator.prototype.recalculateColors = function (variable, customColors) {
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	for (var n = 0; n < valuesNoNullElement.length; n++) {
+		var color = this.CalculateColor(variable, n, valuesNoNullElement.length, customColors);
+		valuesNoNullElement[n].FillColor = color;
+	}
 };
 
 ScaleGenerator.prototype.saveVisibilities = function (variable) {
-	var ret = [];
+	var ret = { Null: true, Values: [] };
 	if (!variable.Values) {
 		return ret;
 	}
-	for (var n = 0; n < variable.Values.length; n++) {
-		ret.push(variable.Values[n].Visible);
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	for (var n = 0; n < valuesNoNullElement.length; n++) {
+		ret.Values.push(valuesNoNullElement[n].Visible);
+	}
+	if (this.HasNullCategory(variable)) {
+		ret.Null = variable.Values[0].Visible;
 	}
 	return ret;
 };
@@ -301,11 +374,15 @@ ScaleGenerator.prototype.applyVisibilities = function (variable, previousVisibil
 	if (!variable.Values) {
 		return;
 	}
-	for (var n = 0; n < variable.Values.length; n++) {
-		if (n >= previousVisibilities.length) {
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	for (var n = 0; n < valuesNoNullElement.length; n++) {
+		if (n >= previousVisibilities.Values.length) {
 			break;
 		}
-		variable.Values[n].Visible = previousVisibilities[n];
+		valuesNoNullElement[n].Visible = previousVisibilities.Values[n];
+	}
+	if (this.HasNullCategory(variable)) {
+		variable.Values[0].Visible = previousVisibilities.Null;
 	}
 	return;
 };
@@ -317,13 +394,23 @@ ScaleGenerator.prototype.EnsureNullCategory = function (variable, customColors) 
 	var value = {
 		Id: null,
 		Caption: 'Sin valores',
-		Visible: variable.Symbology.NullCategory,
+		Visible: true,
 		Value: null,
 		FillColor: this.CalculateColor(variable, null, null, customColors),
 		LineColor: null,
 		Order: 0
 	};
 	arr.InsertAt(variable.Values, 0, value);
+};
+
+ScaleGenerator.prototype.GetValuesNoNullElement = function (variable) {
+	var ret = [];
+	for (var n = 0; n < variable.Values.length; n++) {
+		if (variable.Values[n].Value !== null) {
+			ret.push(variable.Values[n]);
+		}
+	}
+	return ret;
 };
 
 ScaleGenerator.prototype.HasNullCategory = function (variable) {
@@ -335,20 +422,20 @@ ScaleGenerator.prototype.HasNullCategory = function (variable) {
 	return false;
 };
 
-ScaleGenerator.prototype.CreateSingleCategory = function (variable, customColors) {
+ScaleGenerator.prototype.CreateSingleCategory = function (variable) {
 	var value = {
 		Id: null,
 		Caption: 'Total',
 		Visible: true,
 		Value: 10,
-		FillColor: this.CalculateColor(variable, 0, 1, customColors),
+		FillColor: null,
 		LineColor: null,
 		Order: 1
 	};
 	variable.Values.push(value);
 };
 
-ScaleGenerator.prototype.CreateByVariableCategories = function (variable, customColors) {
+ScaleGenerator.prototype.CreateByVariableCategories = function (variable) {
 	var col = variable.Symbology.CutColumn;
 	if (col === null || this.Dataset.Labels === null ||
 		this.Dataset.Labels[col.Id] === undefined) {
@@ -363,7 +450,7 @@ ScaleGenerator.prototype.CreateByVariableCategories = function (variable, custom
 			Caption: label.Caption,
 			Visible: true,
 			Value: label.Value,
-			FillColor: this.CalculateColor(variable, n, total, customColors),
+			FillColor: null,
 			LineColor: null,
 			Order: n + 1
 		};
@@ -371,8 +458,8 @@ ScaleGenerator.prototype.CreateByVariableCategories = function (variable, custom
 	}
 };
 
-ScaleGenerator.prototype.CreateManualCategories = function (variable, hasNulls, customColors) {
-	var extraNullElement = (hasNulls ? 1 : 0);
+ScaleGenerator.prototype.CreateManualCategories = function (variable) {
+	var extraNullElement = (this.HasNullCategory(variable) ? 1 : 0);
 	var total = parseInt(variable.Symbology.Categories);
 	if (variable.Values.length > total + extraNullElement) {
 		variable.Values.length = total + extraNullElement;
@@ -384,28 +471,27 @@ ScaleGenerator.prototype.CreateManualCategories = function (variable, hasNulls, 
 	next += 10;
 	variable.Values[variable.Values.length - 1].Value = next;
 	next += 10;
-	for (var n = variable.Values.length - extraNullElement; n < total; n++) {
-		var color = this.CalculateColor(variable, n, total, customColors);
-		var value = ScaleGenerator.CreateValue('Etiqueta ' + (n + 1), next, color, n + 1);
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	for (var n = valuesNoNullElement.length; n < total; n++) {
+		var value = ScaleGenerator.CreateValue('Etiqueta ' + (n + 1), next, null, n + 1);
 		next += 10;
 		variable.Values.push(value);
 	}
-	this.FixManualRanges(variable, customColors);
+	this.FixManualRanges(variable);
 };
 
-ScaleGenerator.prototype.FixManualRanges = function (variable, customColors) {
+ScaleGenerator.prototype.FixManualRanges = function (variable) {
 	// Regenera captions
-	var total = variable.Values.length;
 	var lastValue = 0;
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	var total = valuesNoNullElement.length;
 	for (var n = 0; n < total; n++) {
-		var value = variable.Values[n].Value;
+		var value = valuesNoNullElement[n].Value;
 		var caption = this.ResolveRangeCaption(variable, n === 0, n === total - 1, value, lastValue);
-		var color = this.CalculateColor(variable, n, total, customColors);
-		variable.Values[n].Caption = caption;
-		variable.Values[n].FillColor = color;
+		valuesNoNullElement[n].Caption = caption;
 		lastValue = value;
 	}
-	variable.Values[variable.Values.length - 1].Value = MAX_VALUE;
+	valuesNoNullElement[valuesNoNullElement.length - 1].Value = MAX_VALUE;
 };
 
 ScaleGenerator.CreateValue = function (caption, value, color, order) {
@@ -428,7 +514,7 @@ ScaleGenerator.prototype.RoundByVariable = function (variable, n) {
 	}
 };
 
-ScaleGenerator.prototype.CreateRangeCategories = function (variable, data, set, customColors) {
+ScaleGenerator.prototype.CreateRangeCategories = function (variable, data, set) {
 //	var total = variable.Symbology.Categories;
 	var roundedValue = 0;
 	var groups = data.Groups;
@@ -454,8 +540,7 @@ ScaleGenerator.prototype.CreateRangeCategories = function (variable, data, set, 
 			}
 		}
 		var caption = this.ResolveRangeCaption(variable, n === 0, n === total - 1, roundedValue, lastRoundedValue);
-		var color = this.CalculateColor(variable, n, total, customColors);
-		var value = ScaleGenerator.CreateValue(caption, roundedValue, color, n + 1);
+		var value = ScaleGenerator.CreateValue(caption, roundedValue, null, n + 1);
 		variable.Values.push(value);
 		lastRoundedValue = roundedValue;
 	}

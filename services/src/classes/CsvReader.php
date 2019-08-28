@@ -328,8 +328,7 @@ class CsvReader
 			if($isHeader)
 				return $line;
 
-			//hace que las filas tengan al menos la
-			//mismas cantidad de elementos que el header.
+			//hace que las filas tengan al menos la mismas cantidad de elementos que el header.
 			if(count($line) < $this->headLength)
 				$line = array_merge($line, array_fill(0, $this->headLength - count($line), null));
 

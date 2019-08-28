@@ -51,7 +51,7 @@ class MetricsManager
 	{
 		if (sizeof($data) > 0 && $data[0][0] === null)
 		{
-			array_shift($data[0]);
+			array_shift($data);
 			return true;
 		}
 		else
@@ -73,7 +73,7 @@ class MetricsManager
 		// Hace la consulta
 		$sql = "SELECT " . $field . ", COUNT(*) " .
 						" FROM " . $table . $geoJoin .
-						" WHERE " . $field . " IS NOT NULL AND ommit = 0 " .
+						" WHERE ommit = 0 " .
 						" GROUP BY " . $field . " ORDER BY ". $field;
 		$ret = App::Db()->fetchAllByPos($sql);
 		Arr::CastColumnAsFloat($ret, 0);

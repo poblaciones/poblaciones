@@ -41,9 +41,12 @@ class DatasetTable
 		foreach($items as $item)
 		{
 			$sql = "(" . mt_rand( 0, 1000000 );
+			$c = 0;
 			foreach($item as $value)
 			{
+				if ($value === '' && $headers[$c]->IsNumeric()) $value = null;
 				$sql .=	',' . SqlBuilder::FormatValue($value);
+				$c++;
 			}
 			$sql .= ')';
 			$batch[] = $sql;

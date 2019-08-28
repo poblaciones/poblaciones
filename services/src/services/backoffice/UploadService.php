@@ -157,38 +157,6 @@ class UploadService extends BaseService
 		$datasetColumns = new DatasetColumns($headers);
 		$datasetColumns->InsertColumnDescriptions($datasetId);
 	}
-	private function InsertData()
-	{
-		// Comienza a insertar
-		$headers = $this->state->GetHeaders();
-		$tableName = $this->state->Get("tableName");
-		$datasetTable = new DatasetTable();
-
-		$files = IO::GetFilesStartsWith($this->state->GetFileFolder(), "data_");
-		$this->state->SetTotalSlices(sizeof($files));
-
-		$file = $files[$this->state->Slice()];
-		$filePath = $this->state->GetFileFolder() . "/" . $file;
-		$datasetTable->InsertDatafile($tableName, $headers, $filePath);
-
-		$this->state->NextSlice();
-		if ($this->state->Slice() == $this->state->GetTotalSlices())
-		{
-			$this->state->SetStep(self::STEP_INSERTED, 'Actualizando dataset');
-		}
-		return $this->state->ReturnState(false);
-	}
-
-	private function CreateTables()
-	{
-		$datasetTable = new DatasetTable();
-		$headers = $this->state->GetHeaders();
-		$tableName = $datasetTable->CreateTable($headers);
-		$this->state->Set('tableName', $tableName);
-		//$this->state->SetStep(self::STEP_METADATA, 'Creando variables');
-		$this->state->SetStep(self::STEP_INSERTING, 'Insertando datos');
-		return $this->state->ReturnState(false);
-	}
 
 	private function ConvertCSV($bucket)
 	{
@@ -237,5 +205,39 @@ class UploadService extends BaseService
 		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
 		return $this->state->ReturnState(false);
 	}
+
+	private function CreateTables()
+	{
+		$datasetTable = new DatasetTable();
+		$headers = $this->state->GetHeaders();
+		$tableName = $datasetTable->CreateTable($headers);
+		$this->state->Set('tableName', $tableName);
+		//$this->state->SetStep(self::STEP_METADATA, 'Creando variables');
+		$this->state->SetStep(self::STEP_INSERTING, 'Insertando datos');
+		return $this->state->ReturnState(false);
+	}
+
+	private function InsertData()
+	{
+		// Comienza a insertar
+		$headers = $this->state->GetHeaders();
+		$tableName = $this->state->Get("tableName");
+		$datasetTable = new DatasetTable();
+
+		$files = IO::GetFilesStartsWith($this->state->GetFileFolder(), "data_");
+		$this->state->SetTotalSlices(sizeof($files));
+
+		$file = $files[$this->state->Slice()];
+		$filePath = $this->state->GetFileFolder() . "/" . $file;
+		$datasetTable->InsertDatafile($tableName, $headers, $filePath);
+
+		$this->state->NextSlice();
+		if ($this->state->Slice() == $this->state->GetTotalSlices())
+		{
+			$this->state->SetStep(self::STEP_INSERTED, 'Actualizando dataset');
+		}
+		return $this->state->ReturnState(false);
+	}
+
 }
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace helena\services\backoffice\upload;
+use helena\classes\spss\Format;
 
 class FileTableHeader
 {
@@ -60,6 +61,9 @@ class FileTableHeader
 
 	public function GetField(){
 		return $this->field;
+	}
+	public function IsNumeric(){
+		return $this->spssType !== Format::A;
 	}
 
 	public function GetSpssType(){

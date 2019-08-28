@@ -1,5 +1,10 @@
 ﻿[CURRENT]
 
+v2.2 (2019-08-27)
+- Soporte mejorados para valores nulos en csv.
+- Copiar y pegar simbologías soporta apropiadamente los atributos para nulos.
+- El valor de simbología para nulos permite modificar su etiqueta.
+
 v2.1 (2019-08-24)
 - Zona administrativa en /admins.
 - La zona /admin pasa a /logs.
