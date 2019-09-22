@@ -109,7 +109,7 @@ import arr from '@/common/js/arr';
 		},
 		onLoginAs(item) {
 			window.Db.LoginAs(item).then(function() {
-				location.reload();
+				document.location = '/users';
 			});
 		},
 		onDelete(item) {

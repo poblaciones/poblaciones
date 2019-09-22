@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<title-bar title="Atribución" :help="`<p>
-			La atribución permite indicar ` + authorLabel + ` y opcionalmente la atribución institucional de los datos publicados.
+			La atribución permite indicar los autores individuales y opcionalmente la atribución institucional de los datos publicados.
 		</p><p>
 				La información de contacto hace accesible a los usuarios de la información un canal de comunicación con los responsables de los datos para poder realizar consultas o realimentar el proceso de producción de la información.
 			</p><p>
@@ -19,7 +19,7 @@
 						<md-card-content>
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									<mp-text :canEdit="Work.CanEdit()" :label="Work.AuthorLabel()"
+									<mp-text :canEdit="Work.CanEdit()" label="Autores"
 									 :helper="'Indique quiénes ' + (Work.IsPublicData() ? 'procesaron la información' : 'elaboraron la cartografía' ) + '. Ej. Petraqui, María y Herández, José.'"
 										@update="Update" :maxlength="200"
 									 v-model="metadata.Authors" />
@@ -91,13 +91,6 @@
 		metadata () {
 			return window.Context.CurrentWork.properties.Metadata;
 		},
-		authorLabel() {
-			if (this.Work.IsPublicData()) {
-				return "los responsables del procesamiento";
-			} else {
-				return "los autores individuales";
-			}
-		}
 	},
 	methods: {
 		Update() {

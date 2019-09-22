@@ -37,7 +37,7 @@ class InfoWindowService extends BaseService
 			$id = $featureId & 0xFFFFFFFF;
 			if (!Session::IsWorkPublicOrAccessibleByDataset($datasetId))
 			{
-				throw self::NotEnoughPermissions();
+				throw Session::NotEnoughPermissions();
 			}
 			$info = $datasetModel->GetInfoById($datasetId, $id);
 		}

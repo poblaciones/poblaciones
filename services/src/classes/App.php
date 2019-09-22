@@ -166,8 +166,6 @@ class App
 	{
 		$actual_link = self::AbsoluteUrl('');
 		$url = self::AbsoluteUrl('/authenticate/login');
-		//$back = self::AbsoluteUrl('/services/authentication/redirector');
-		//$back = Str::AppendParam($back, 'to', $actual_link);
 
 		$url = Str::AppendParam($url, 'ask', 1);
 		$url = Str::AppendParam($url, 'to', $actual_link);

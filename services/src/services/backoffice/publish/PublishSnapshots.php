@@ -57,6 +57,7 @@ class PublishSnapshots extends BaseService
 		// Los datos cambian por metricVersion; los metadatos sólo por metric.
 		if (sizeof($metricVersions) === 0)
 		{
+			$snapshotsManager->DeleteMetricVersionsByWork($workId);
 			Profiling::EndTimer();
 			return true;
 		}
@@ -65,6 +66,11 @@ class PublishSnapshots extends BaseService
 		// Actualiza los metric
 		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
 		{
+			// En el primero se asegura de dejar limpio
+			if ($slice === 0) 
+			{
+				$snapshotsManager->DeleteMetricVersionsByWork($workId);
+			}			
 			// Actualiza los metadatos del metric en el que están las versiones
 			$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
 		}

@@ -1,5 +1,13 @@
 ﻿[CURRENT]
 
+v2.3 (2019-09-22)
+- Buscador: expresiones con textos de menos de 3 caracteres no entrecomillados volvían nula la búsqueda (ej. <riesgo inseguridad> traía <riesgo de inseguridad> pero <riesgo de inseguridad> no traía nada).
+- Buscador: se incorporan los nombres de autores y la institución en la búsqueda de texto libre
+- Se nombra como 'autores' a los creadores tanto en datos públicos como en cartografías.
+- Al eliminar un indicador no se estaba removiendo adecuadamente del índice para búsquedas.
+- La series en el resumen del buscador no aparecían ordenadas en forma ascedenente.
+- El marco superior para cartografías incluye institución, autores y link a metadatos.
+
 v2.2 (2019-08-27)
 - Soporte mejorados para valores nulos en csv.
 - Copiar y pegar simbologías soporta apropiadamente los atributos para nulos.

@@ -5,6 +5,9 @@
 		 :showOk="false">
 				<addMetric v-if="work.Current" ref="addMetric" :list="work.Current.Metrics" v-on:selectedItem="metricSelected" />
 			</Modal>
+			<div class="panel card">
+				<WorkMetricMetadata ref="showFuente" :work="work.Current" />
+			</div>
 		</div>
 		<nav id="workPanel" class="navbar-fixed-top workPanel">
 			<div v-if="work.Current !== null" class="panel card workPanelBody" id="barBody">
@@ -14,10 +17,27 @@
 				<div class="title pull-right" style="margin-top: -1px">
 						<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
 						<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
-					<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
+						<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
+					<div style="position: relative; z-index: 10">
+
+						<div class="sourceInfo" :style="(work.Current.Institution ? '' : 'margin-top: 0px')">
+							<a href="#" :title="'Metadatos de ' + work.Current.Name"
+									v-on:click="clickFuente" style="color: #FFF">
+								<link-icon />
+								Metadatos
+							</a>
+						</div>
+					
+					</div>
 				</div>
-				<div class="h3 title titleRow" style="width: 100%; text-overflow: ellipsis; color: white">
+				<div v-if="work.Current.Institution" class="littleRow preTitleRow">
+					{{ work.Current.Institution }}
+				</div>
+				<div class="h3 title titleRow">
 					{{ work.Current.Name }}
+				</div>
+				<div v-if="work.Current.Authors" class="littleRow postTitleRow">
+					{{ work.Current.Authors }}
 				</div>
 			</div>
 		</nav>
@@ -27,6 +47,8 @@
 <script>
 import Modal from '@/public/components/popups/modal';
 import addMetric from '@/public/components/popups/addMetric';
+import WorkMetricMetadata from '@/public/components/popups/workMetricMetadata';
+import LinkIcon from 'vue-material-design-icons/Link.vue';
 
 export default {
 	name: 'workPanel',
@@ -35,7 +57,9 @@ export default {
 	],
 	components: {
 		Modal,
-		addMetric
+		addMetric,
+		WorkMetricMetadata,
+		LinkIcon,
 	},
 	data() {
 		return {
@@ -52,6 +76,10 @@ export default {
 			if (visible) {
 				this.updateWork();
 			}
+		},
+		clickFuente(e) {
+			e.preventDefault();
+			this.$refs.showFuente.show();
 		},
 		metricSelected() {
 			var metric = this.$refs.addMetric.selected;
@@ -105,11 +133,36 @@ export default {
 	background-color: white;
 	z-index: 1;
 }
+.littleRow {
+	width: 100%;
+  text-overflow: ellipsis;
+  color: white;
+  margin-left: 1px;
+	font-size: 10px;
+}
+.sourceInfo
+{
+	margin-left: 12px;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.preTitleRow {
+  text-transform: uppercase;
+  margin-bottom: 0px;
+  margin-top: -4px;
+}
+.postTitleRow {
+  margin-bottom: -2px;
+  margin-top: -5px;
+}
 
 .titleRow {
 	line-height: 1.1em;
 	padding-bottom: 8px;
 	margin-top: 0px;
+	width: 100%;
+	text-overflow: ellipsis;
+	color: white
 }
 .infoRow {
 	padding: 7px 0px 0px 0px;

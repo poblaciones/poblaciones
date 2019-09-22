@@ -54,14 +54,6 @@ ActiveWork.prototype.IsPublicData = function () {
 	return (this.properties ? this.properties.Type === 'P' : false);
 };
 
-ActiveWork.prototype.AuthorLabel = function () {
-	if (this.IsPublicData()) {
-		return 'Procesamiento';
-	} else {
-		return 'Autores';
-	}
-};
-
 ActiveWork.prototype.ThisWorkLabel = function () {
 	if (this.IsPublicData()) {
 		return 'estos datos públicos';

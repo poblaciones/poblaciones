@@ -1,41 +1,42 @@
 <template>
-	<div>
+  <Modal :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false"  :showOk="false"
+					v-on:cancel="closeFuente" v-on:ok="closeFuente">
 		<div>
 			<table class="localTable">
 				<tbody>
 					<tr>
 						<td>Título:</td>
-						<td>{{ version.Work.Name }}</td>
+						<td>{{ work.Name }}</td>
 					</tr>
-					<tr>
+					<tr v-if="level">
 						<td>Dataset:</td>
 						<td>{{ level.Dataset.Name }}</td>
 					</tr>
-					<tr v-if="version.Work.Abstract">
+					<tr v-if="work.Abstract">
 						<td>Resumen:</td>
-						<td>{{ version.Work.Abstract }}</td>
+						<td>{{ work.Abstract }}</td>
 					</tr>
 					<tr>
 						<td style="width: 120px;">Dirección:</td>
 						<td>
-							<a target="_blank" :href="version.Work.Url">{{ version.Work.Url }}</a>
+							<a target="_blank" :href="work.Url">{{ work.Url }}</a>
 						</td>
 					</tr>
 					<tr>
-						<td>{{ (version.Work.Type === 'P' ? 'Procesamiento' : 'Autores') }}:</td>
-						<td>{{ version.Work.Authors }}</td>
+						<td>Autores:</td>
+						<td>{{ work.Authors }}</td>
 					</tr>
-          <tr v-if="version.Work.ReleaseDate">
+          <tr v-if="work.ReleaseDate">
             <td>Publicación:</td>
-            <td>{{ version.Work.ReleaseDate }}</td>
+            <td>{{ work.ReleaseDate }}</td>
           </tr>
           <tr>
             <td>Licencia:</td>
             <td>
-              <creativeCommons :license="version.Work.License"/>
+              <creativeCommons :license="work.License"/>
             </td>
           </tr>
-					<tr>
+					<tr v-if="version">
 						<td>Nivel:</td>
 						<td v-if="version.Levels.length > 1">
 							<select v-model="downloadLevel">
@@ -57,10 +58,10 @@
               </a>
             </td>
           </tr>
-					<tr v-if="version.Work.Files && version.Work.Files.length > 0">
+					<tr v-if="work.Files && work.Files.length > 0">
 						<td>Adjuntos:</td>
 						<td>
-							<span v-for="file in version.Work.Files" :key="file.Id">
+							<span v-for="file in work.Files" :key="file.Id">
 									<a target="_blank" :href="resolveFileUrl(file)">
                     <file-pdf-icon title="Descargar"/> {{ file.Caption }}
                   </a>
@@ -70,7 +71,7 @@
 				</tbody>
 			</table>
 		</div>
-	</div>
+	</Modal>
 </template>
 
 
@@ -79,15 +80,18 @@ import h from '@/public/js/helper';
 import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
 import creativeCommons from '@/public/components/widgets/creativeCommons.vue';
 import str from '@/common/js/str';
+import Modal from '@/public/components/popups/modal';
 
 export default {
 	name: 'metricMetadataPopup',
 	props: [
 		'metric',
+		'work',
 	],
 	components: {
     creativeCommons,
-    FilePdfIcon
+    FilePdfIcon,
+		Modal
 	},
 	data() {
 		return {
@@ -95,29 +99,46 @@ export default {
 		};
 	},
   methods: {
+		show() {
+			if (this.metric) {
+				this.downloadLevel = this.version.SelectedLevelIndex;
+			}
+			this.$refs.dialog.show();
+		},
 		resolveFileUrl(file) {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.MetadataId + '&f=' + file.FileId;
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.work.MetadataId + '&f=' + file.FileId;
 			} else {
 				return '#';
 			}
 		},
+		closeFuente() {
+			this.$refs.dialog.hide();
+		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.version.Work.MetadataId + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id;
+			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.work.MetadataId + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id;
 		},
 	},
 	computed:
 	{
 		version() {
-			return this.metric.SelectedVersion();
+			if (this.metric) {
+				return this.metric.SelectedVersion();
+			} else {
+				return null;
+			}
 		},
 		level() {
-			return this.version.Levels[this.downloadLevel];
+			if (this.metric) {
+				return this.version.Levels[this.downloadLevel];
+			} else {
+				return null;
 			}
 		}
-	};
+	}
+};
 </script>
 <style scoped>
 </style>

@@ -12,7 +12,7 @@
 						<td>{{ metadata.Abstract }}</td>
 					</tr>
 					<tr v-if="metadata.Authors">
-						<td>Procesamiento:</td>
+						<td>Autores:</td>
 						<td>{{ metadata.Authors }}</td>
 					</tr>
 					<tr v-if="metadata.Institution">

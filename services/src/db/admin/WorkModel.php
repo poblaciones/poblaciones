@@ -8,10 +8,10 @@ use helena\entities\admin\WorkPermission;
 use helena\classes\App;
 use helena\classes\Account;
 use helena\services\backoffice\publish\PublishDataTables;
-use helena\services\backoffice\publish\PublishSnapshots;
 use minga\framework\Date;
 use minga\framework\Context;
 use minga\framework\Profiling;
+use helena\services\backoffice\publish\RevokeSnapshots;
 
 class WorkModel extends BaseModel
 {
@@ -164,10 +164,10 @@ class WorkModel extends BaseModel
 					$publisher = new PublishDataTables();
 					$publisher->DeleteDatasetsTables($workId);
 		echo '<br>STEP_DELETE_SNAPSHOTS_DATASETS:';
-					$manager = new PublishSnapshots();
+					$manager = new RevokeSnapshots();
 					$manager->DeleteWorkDatasets($workId, true);
 		echo '<br>STEP_DELETE_SNAPSHOTS_METRICS:';
-					$manager = new PublishSnapshots();
+					$manager = new RevokeSnapshots();
 					$manager->DeleteWorkMetricVersions($workId, true);
 		echo '<br>done';
 	}

@@ -92,10 +92,7 @@ class RevokeSnapshots extends BaseService
 			$removedMetricVersions = Arr::RemoveByField('mvr_id', $previousMetricVersions, $metricVersions);
 
 		// Borra lo removido
-		foreach($removedMetricVersions as $row)
-		{
-			$snapshotsManager->DeleteMetricVersionMetadata($row['mvr_id'], $row['mvr_metric_id']);
-		}
+		$snapshotsManager->DeleteMetricVersionsByWork($workId);
 
 		foreach($removedMetricVersions as $row)
 		{

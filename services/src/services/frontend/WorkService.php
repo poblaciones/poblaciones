@@ -17,7 +17,7 @@ class WorkService extends BaseService
 	{
 		$worksTable = new WorkModel();
 		$ret = $this->GetWorkOnly($workId);
-
+		
 		$rows = $worksTable->GetWorkMetricsInfo($workId);
 		$ret->FillMetrics($rows);
 		$metadataTable = new MetadataModel();
@@ -35,6 +35,7 @@ class WorkService extends BaseService
 		}
 		$ret = new WorkInfo();
 		$ret->Fill($work);
+		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
 		return $ret;
 	}
 

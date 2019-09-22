@@ -14,10 +14,10 @@ use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 
 class SnapshotsManager extends BaseService
 {
-	public function DeleteMetricVersionMetadata($metricVersionId, $metricId)
+	public function DeleteMetricVersionsByWork($workId)
 	{
 		$modelVersion = new SnapshotMetricVersionModel();
-		$modelVersion->ClearMetricVersion($metricVersionId);
+		$modelVersion->ClearByWork($workId);
 	}
 
 	// Metric

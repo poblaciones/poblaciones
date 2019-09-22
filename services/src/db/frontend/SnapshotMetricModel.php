@@ -42,13 +42,13 @@ class SnapshotMetricModel extends BaseModel
 		$sql = "SELECT	MIN(mvw_metric_caption) myv_metric_caption,
 										MIN(mvw_metric_id) myv_metric_id,
 										MIN(mvw_metric_group_id) myv_metric_group_id,
-										GROUP_CONCAT(mvw_work_id ORDER BY mvw_metric_version_id SEPARATOR '\t') myv_work_ids,
-										GROUP_CONCAT(mvw_work_caption ORDER BY mvw_metric_version_id SEPARATOR '\t') myv_work_captions,
-										GROUP_CONCAT(mvw_work_is_private ORDER BY mvw_work_is_private SEPARATOR '\t') myv_work_is_private,
-										GROUP_CONCAT(mvw_work_is_indexed ORDER BY mvw_work_is_indexed SEPARATOR '\t') myv_work_is_indexed,
-										GROUP_CONCAT(mvw_metric_version_id ORDER BY mvw_metric_version_id SEPARATOR '\t') myv_version_ids,
-										GROUP_CONCAT(mvw_caption ORDER BY mvw_metric_version_id SEPARATOR '\t') myv_version_captions,
-										GROUP_CONCAT(IFNULL(mvw_partial_coverage, '') ORDER BY mvw_metric_version_id SEPARATOR '\t') myv_version_partial_coverages
+										GROUP_CONCAT(mvw_work_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_ids,
+										GROUP_CONCAT(mvw_work_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_captions,
+										GROUP_CONCAT(mvw_work_is_private ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_private,
+										GROUP_CONCAT(mvw_work_is_indexed ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_indexed,
+										GROUP_CONCAT(mvw_metric_version_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_ids,
+										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_captions,
+										GROUP_CONCAT(IFNULL(mvw_partial_coverage, '') ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_partial_coverages
 									FROM snapshot_metric_versions
 									" . $where . "
 									group by mvw_metric_id " .
@@ -77,18 +77,17 @@ class SnapshotMetricModel extends BaseModel
 		Profiling::BeginTimer();
 		$sql = "SELECT mvw_metric_id id,
 										mvw_metric_caption caption,
-										GROUP_CONCAT(mvw_caption ORDER BY mvw_metric_version_id SEPARATOR '\t') extra,
+										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') extra,
 										'L' type,
 										MAX(MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`,
-										`mvw_variable_value_captions`, `mvw_work_caption`) AGAINST (?)) relevance
+										`mvw_variable_value_captions`, `mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (?)) relevance
 										FROM snapshot_metric_versions
 										WHERE MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
-										`mvw_work_caption`) AGAINST (? IN BOOLEAN MODE)
+										`mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (? IN BOOLEAN MODE)
 										AND mvw_work_is_indexed = 1 AND mvw_work_is_private = 0
 										GROUP BY mvw_metric_id, mvw_metric_caption
 										ORDER BY relevance DESC
 										LIMIT 0, 10";
-
 		$ret = App::Db()->fetchAll($sql, array($query, $query));
 		Profiling::EndTimer();
 		return $ret;

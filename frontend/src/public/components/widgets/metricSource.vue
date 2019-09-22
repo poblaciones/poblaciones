@@ -10,18 +10,14 @@
 			</a>
     </div>
     <div style="position: absolute">
-      <Modal title="Fuente" ref="showFuente" :showCancel="false"  :showOk="false"
-						 v-on:cancel="closeFuente" v-on:ok="closeFuente">
-				<MetricMetadata :metric="metric" />
-      </Modal>
+			<WorkMetricMetadata ref="showFuente" :metric="metric" :work="metric.SelectedVersion().Work" />
       <MetricDownload ref="showDescargar" :metric="metric" :clipping="clipping" />
     </div>
   </div>
 </template>
 
 <script>
-import Modal from '@/public/components/popups/modal';
-import MetricMetadata from '@/public/components/popups/metricMetadata';
+import WorkMetricMetadata from '@/public/components/popups/workMetricMetadata';
 import MetricDownload from '@/public/components/popups/metricDownload';
 import DownloadIcon from 'vue-material-design-icons/download.vue';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
@@ -29,9 +25,8 @@ import LinkIcon from 'vue-material-design-icons/Link.vue';
 export default {
 	name: 'metricSourceInfo',
 	components: {
-    Modal,
     DownloadIcon,
-		MetricMetadata,
+		WorkMetricMetadata,
 		LinkIcon,
 		MetricDownload
 	},
@@ -52,9 +47,6 @@ export default {
 		clickFuente(e) {
 			e.preventDefault();
 			this.$refs.showFuente.show();
-		},
-		closeFuente() {
-			this.$refs.showFuente.hide();
 		},
 	},
 };

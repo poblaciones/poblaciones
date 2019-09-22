@@ -13,13 +13,13 @@ class SnapshotMetricVersionModel
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 
 	 	Profiling::BeginTimer();
-		$sql = "INSERT INTO snapshot_metric_versions ( `mvw_metric_version_id`, `mvw_metric_id`, mvw_metric_caption, mvw_metric_group_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
-			`mvw_work_id`, `mvw_work_caption`, mvw_work_type, mvw_work_is_private, mvw_work_is_indexed, mvw_work_access_link, `mvw_variable_captions`, `mvw_variable_value_captions`) ";
+		$sql = "INSERT INTO snapshot_metric_versions ( mvw_metric_version_id, mvw_metric_id, mvw_metric_caption, mvw_metric_group_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
+			mvw_work_id, mvw_work_caption, mvw_work_authors, mvw_work_institution, mvw_work_type, mvw_work_is_private, mvw_work_is_indexed, mvw_work_access_link, `mvw_variable_captions`, `mvw_variable_value_captions`) ";
 
 		$sql .= "SELECT mvr_id, mvr_metric_id, mtr_caption, mtr_metric_group_id, mvr_caption,
 						GROUP_CONCAT(DISTINCT IFNULL(mvl_partial_coverage, geo_partial_coverage) ORDER BY geo_id SEPARATOR ','),
 						GROUP_CONCAT(geo_caption ORDER BY geo_id SEPARATOR ','),
-						wrk_id, met_title,
+						wrk_id, met_title, met_authors, ins_caption,
 						wrk_type, wrk_is_private, 
 						wrk_is_indexed, wrk_access_link, ";
 						// Hace un subselect con los nombres de variables
@@ -43,6 +43,7 @@ class SnapshotMetricVersionModel
 						JOIN geography ON dat_geography_id = geo_id
 						JOIN work ON dat_work_id = wrk_id
 						JOIN metadata ON wrk_metadata_id = met_id
+						LEFT JOIN institution ON met_institution_id = ins_id
 						WHERE mvr_metric_id = ?
 						GROUP BY mvr_id, mvr_metric_id, mvr_caption, wrk_id, met_title";
 
@@ -63,15 +64,15 @@ class SnapshotMetricVersionModel
 		Profiling::EndTimer();
 	}
 
-	public function ClearMetricVersion($metricVersionId)
+	public function ClearByWork($workId)
 	{
-		$metricVersionIdShardified = PublishDataTables::Shardified($metricVersionId);
+		$workIdShardified = PublishDataTables::Shardified($workId);
 
 	 	Profiling::BeginTimer();
 
-		$sql = "DELETE FROM snapshot_metric_versions WHERE mvw_metric_version_id = ?";
+		$sql = "DELETE FROM snapshot_metric_versions WHERE mvw_work_id = ?";
 
-		App::Db()->exec($sql, array($metricVersionIdShardified));
+		App::Db()->exec($sql, array($workIdShardified));
 
 		Profiling::EndTimer();
 	}

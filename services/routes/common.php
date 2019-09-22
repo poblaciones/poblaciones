@@ -12,11 +12,6 @@ App::$app->get('/services/authentication/status', function (Request $request) {
 	return App::Json($authentication->GetStatus());
 });
 
-App::$app->post('/services/authentication/redirector', function (Request $request) {
-	$authentication = new services\AuthenticationService();
-	return $authentication->CompleteAuthenticationProcess();
-});
-
 App::$app->get('/services/authentication/logoff', function (Request $request) {
 	Session::Logoff();
 	return App::Json(array('logged' => false));

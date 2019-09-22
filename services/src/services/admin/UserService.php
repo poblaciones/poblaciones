@@ -9,7 +9,7 @@ use minga\framework\ErrorException;
 
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
-
+use helena\services\backoffice\PermissionsService;
 use minga\framework\Profiling;
 
 class UserService extends BaseService

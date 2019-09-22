@@ -31,10 +31,6 @@ class AuthenticationService
 
 		return $ret;
 	}
-	public function CompleteAuthenticationProcess()
-	{
-		return Session::CompleteAuthenticationProcess();
-	}
 
 }
 

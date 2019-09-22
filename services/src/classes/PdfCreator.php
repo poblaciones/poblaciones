@@ -40,7 +40,7 @@ class PdfCreator
 
 		$this->WriteStableUrl();
 
-		$this->WriteValuePair(($this->metadata['met_type'] === 'P' || $this->metadata['met_type'] === 'C' ? "Procesamiento" : "Autores") , 'met_authors');
+		$this->WriteValuePair("Autores", 'met_authors');
 
 		$this->WriteValuePair("Período", 'met_period_caption');
 		$this->WriteValuePair("Frecuencia de actualización", 'met_frequency');
