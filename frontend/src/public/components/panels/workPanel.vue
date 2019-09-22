@@ -20,7 +20,7 @@
 						<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
 					<div style="position: relative; z-index: 10">
 
-						<div class="sourceInfo" :style="(work.Current.Institution ? '' : 'margin-top: 0px')">
+						<div class="sourceInfo" :style="(work.Current.Institution ? '' : 'margin-top: 3px')">
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
 									v-on:click="clickFuente" style="color: #FFF">
 								<link-icon />
@@ -138,22 +138,22 @@ export default {
   text-overflow: ellipsis;
   color: white;
   margin-left: 1px;
-	font-size: 10px;
+	font-size: 11px;
 }
 .sourceInfo
 {
-	margin-left: 12px;
-  font-size: 12px;
-  margin-top: 4px;
+	margin-left: 10px;
+  font-size: 12.5px;
+  margin-top: 9px;
 }
 .preTitleRow {
   text-transform: uppercase;
-  margin-bottom: 0px;
+  margin-bottom: 3px;
   margin-top: -4px;
 }
 .postTitleRow {
   margin-bottom: -2px;
-  margin-top: -5px;
+  margin-top: -3px;
 }
 
 .titleRow {
@@ -162,7 +162,8 @@ export default {
 	margin-top: 0px;
 	width: 100%;
 	text-overflow: ellipsis;
-	color: white
+	color: white;
+	font-size: 27px;
 }
 .infoRow {
 	padding: 7px 0px 0px 0px;
