@@ -85,27 +85,22 @@ class WorkModel extends BaseModel
 		$metadataModel = new MetadataModel($this->fromDraft);
 		$workPermissionModel = new WorkPermissionModel();
 
-		if ($work->Metadata->Contact->Person != null && (
-				!$work->Metadata->ContactId || $work->Metadata->Contact->isDirty))
+		if ($work->Metadata->Contact->Person != null)
 			$work->Metadata->ContactId = $contactModel->DbSave($work->Metadata->Contact);
-		if ($work->Metadata->Institution->Name != null &&
-			(!$work->Metadata->InstitutionId || $work->Metadata->Institution->isDirty))
+		if ($work->Metadata->Institution->Name != null)
 			$work->Metadata->InstitutionId = $institutionModel->DbSave($work->Metadata->Institution);
 
 		if ($work->Metadata->Source != null)
 		{
 			if ($work->Metadata->Source->Contact != null &&
-					$work->Metadata->Source->Contact->Person != null && (
-					!$work->Metadata->Source->ContactId || $work->Metadata->Source->Contact->isDirty))
+					$work->Metadata->Source->Contact->Person != null)
 				$work->Metadata->Source->ContactId = $contactModel->DbSave($work->Metadata->Source->Contact);
 
 			if ($work->Metadata->Source->Institution != null &&
-					$work->Metadata->Source->Institution->Name != null && (
-					!$work->Metadata->Source->InstitutionId || $work->Metadata->Source->Institution->isDirty))
+					$work->Metadata->Source->Institution->Name != null)
 				$work->Metadata->Source->InstitutionId = $institutionModel->DbSave($work->Metadata->Source->Institution);
 
-			if ($work->Metadata->Source->Caption != null &&
-					(!$work->Metadata->SourceId || $work->Metadata->Source->isDirty))
+			if ($work->Metadata->Source->Caption != null)
 				$work->Metadata->SourceId = $sourceModel->DbSave($work->Metadata->Source);
 		}
 		$workPermission = null;

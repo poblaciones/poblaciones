@@ -1,6 +1,6 @@
 <template>
   <Modal :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false"  :showOk="false"
-					v-on:cancel="closeFuente" v-on:ok="closeFuente">
+					v-on:cancel="closeFuente" v-on:ok="closeFuente" v-if="work">
 		<div>
 			<table class="localTable">
 				<tbody>

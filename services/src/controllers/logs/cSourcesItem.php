@@ -44,8 +44,7 @@ class cSourcesItem extends cMultiController
 		$id = Params::GetInt('id', null);
 		$source = $sourcesModel->GetObjectForEdit($id);
 		$source->FillMetadataFromParams();
-		$source->Contact->isDirty = true;
-
+		
 		$sourcesModel->Save($source);
 
 		return App::Redirect("/admin/sources");

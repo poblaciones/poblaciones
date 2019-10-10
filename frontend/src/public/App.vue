@@ -336,6 +336,15 @@ text-decoration: underline;
 	text-align: center;
 }
 
+.mapLabelsSat .ibLink {
+	color: #fff!important;
+}
+
+.mapLabelsSat .ibLink:hover {
+	color: #5591ec!important;
+	text-decoration: none !important;
+}
+
 .ibLink {
 	color: #5a626d;
 	cursor: pointer;
@@ -369,6 +378,10 @@ text-decoration: underline;
 	color: #252422;
 }
 
+.mapLabelsSat
+{
+	text-shadow: .75px .75px 1px #000, -.75px -1px 1px #000, -.75px .75px 1px #000, .75px -1px 1px #000, .75px .75px 1px #000, -.75px -1px 1px #000, -.75px 1px 1px #000, .75px -.75px 1px #000 !important;
+}
 .mapLabels {
 	width: 200px;
 	background: transparent;
@@ -378,8 +391,8 @@ text-decoration: underline;
 	font-weight: 400;
 	color: #333;
 	font-size: 12px;
-	text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, -1px 1px 0px #fff, 1px -1px 0px #fff,
-							1px 1px 2px #fff, -1px -1px 2px #fff, -1px 1px 2px #fff, 1px -1px 2px #fff;
+	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff,
+							.75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
 }
 
 .mapLabelsLarger {

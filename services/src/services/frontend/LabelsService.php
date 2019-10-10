@@ -26,18 +26,12 @@ class LabelsService extends BaseService
 
 		if (LabelsCache::Cache()->HasData($key, $data))
 		{
-      foreach($data->Data as &$label) 
-				if ($label['type'] === 'C') $label['FIDs'] = null;
-
 			return $this->GotFromCache($data);
 		}
 
 		$data = $this->CalculateLabels($x, $y, $z, $b);
 
 		LabelsCache::Cache()->PutData($key, $data);
-
-        foreach($data->Data as &$label) if ($label['type'] === 'C') $label['FIDs'] = null;
-
 		return $data;
 	}
 
@@ -99,7 +93,9 @@ class LabelsService extends BaseService
 				{
 					if ($row['FIDs'] !== null)
 					{
-						$ret[] = array('Show' => 0, 'FIDs' => $row['FIDs'], 'Lat' => $row['Lat'], 'Lon' => $row['Lon']);
+						// Lo agrega como no visible para la semaforización por ejemplo de escuelas, que llegan
+						// desde Labels y luego se cargan con información que se prende o se apaga.
+						$ret[] = array('type' => $row['type'], 'Show' => 0, 'FIDs' => $row['FIDs'], 'Lat' => $row['Lat'], 'Lon' => $row['Lon']);
 					}
 				}
 			}
@@ -128,25 +124,7 @@ class LabelsService extends BaseService
 		return array('x1' => $row['Lon'] - $widthHalf, 'x2' => $row['Lon'] + $widthHalf,
 									'y1' => $row['Lat'] - $boxLine * $lines, 'y2' => $row['Lat']);
 	}
-
-	private function ClipInBounds($rows, $bounds)
-	{
-		$ret = array();
-		foreach($rows as $row)
-		{
-			$visible = $row['Show'];
-			if ($bounds->Contains($row['Lat'], $row['Lon']) &&
-				($visible || $row['FIDs'] !== null))
-			{
-				if ($visible)
-					$ret[] = $row;
-				else
-					$ret[] = array('Show' => 0, 'FIDs' => $row['FIDs'], 'Lat' => $row['Lat'], 'Lon' => $row['Lon']);
-			}
-		}
-		return $ret;
-	}
-
+	
 	private function CreateLabelsDataInfo($rows, $z)
 	{
 		$z = 0 + $z;

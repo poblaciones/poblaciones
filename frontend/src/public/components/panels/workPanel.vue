@@ -20,7 +20,7 @@
 						<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
 					<div style="position: relative; z-index: 10">
 
-						<div class="sourceInfo" :style="(work.Current.Institution ? '' : 'margin-top: 3px')">
+						<div class="sourceInfo" :style="getMetadataStyle()">
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
 									v-on:click="clickFuente" style="color: #FFF">
 								<link-icon />
@@ -80,6 +80,17 @@ export default {
 		clickFuente(e) {
 			e.preventDefault();
 			this.$refs.showFuente.show();
+		},
+		getMetadataStyle() {
+			if (this.work.Current.Institution) {
+				return '';
+			} else {
+				if (this.work.Current.Authors) {
+					return 'margin-top: 3px';
+				} else {
+				return 'margin-top: -24px; margin-left: -90px;';
+				}
+			}
 		},
 		metricSelected() {
 			var metric = this.$refs.addMetric.selected;
@@ -153,12 +164,12 @@ export default {
 }
 .postTitleRow {
   margin-bottom: -2px;
-  margin-top: -3px;
+  margin-top: -2px;
 }
 
 .titleRow {
 	line-height: 1.1em;
-	padding-bottom: 8px;
+	padding-bottom: 7px;
 	margin-top: 0px;
 	width: 100%;
 	text-overflow: ellipsis;

@@ -7,8 +7,6 @@ use minga\framework\ErrorException;
 
 class BaseMapModel
 {
-	public $isDirty = false;
-
 	public function Fill($row, $map = null, $preffix = '')
 	{
 		if ($map == null)

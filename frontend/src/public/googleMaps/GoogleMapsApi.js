@@ -53,6 +53,9 @@ GoogleMapsApi.prototype.Write = function (text, location, zIndex, style, id) {
 	if (style === undefined) {
 		style = 'mapLabels';
 	}
+	if (this.IsSatelliteType()) {
+		style += ' mapLabelsSat';
+	}
 	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex, id);
 	return overlay;
 };
@@ -60,6 +63,9 @@ GoogleMapsApi.prototype.Write = function (text, location, zIndex, style, id) {
 GoogleMapsApi.prototype.Write = function(text, location, zIndex, style) {
 	if(style === undefined) {
 		style = 'mapLabels';
+	}
+	if (this.IsSatelliteType()) {
+		style += ' mapLabelsSat';
 	}
 	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex);
 	return overlay;
@@ -262,6 +268,14 @@ GoogleMapsApi.prototype.GetMapTypeState = function () {
 		}
 	}
 	return ret;
+};
+
+GoogleMapsApi.prototype.IsSatelliteType = function () {
+	if (!this.gMap) {
+		return false;
+	}
+	var type = this.gMap.getMapTypeId();
+	return (type == 'satellite' || type == 'hybrid');
 };
 
 GoogleMapsApi.prototype.SetMapTypeState = function (mapTypeState) {

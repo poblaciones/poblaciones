@@ -67,7 +67,9 @@ LocationsGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResu
 			}
 		}
 	}
-	this.keysInTile[tileKey] = [];
+	if (this.keysInTile.hasOwnProperty(tileKey) === false) {
+		this.keysInTile[tileKey] = [];
+	}
 	return { 'type': 'FeatureCollection', 'features': filtered };
 };
 
@@ -153,6 +155,9 @@ LocationsGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 			});
 		}
 
+		if (loc.keysInTile.hasOwnProperty(tileKey) === false) {
+			loc.keysInTile[tileKey] = [];
+		}
 		loc.keysInTile[tileKey].push(element);
 		return { visible: false };
 	});

@@ -90,13 +90,11 @@ class SourceModel extends BaseModel
 		$institutionModel = new InstitutionModel($this->fromDraft);
 
 		if ($source->Contact != null &&
-				$source->Contact->Person != null && (
-				!$source->ContactId || $source->Contact->isDirty))
+				$source->Contact->Person != null)
 			$source->ContactId = $contactModel->DbSave($source->Contact);
 
 		if ($source->Institution != null &&
-				$source->Institution->Name != null && (
-				!$source->InstitutionId || $source->Institution->isDirty))
+				$source->Institution->Name != null)
 			$source->InstitutionId = $institutionModel->DbSave($source->Institution);
 
 		$sourceModel->DbSave($source);

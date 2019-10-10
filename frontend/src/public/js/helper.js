@@ -297,6 +297,9 @@ module.exports = {
 		if(this.hasCircle(frame.ClippingCircle)) {
 			ret.c = this.getCircleParam(frame.ClippingCircle);
 		}
+		if (ret.r || ret.c) {
+			ret.e = null;
+		}
 		return ret;
 	},
 	hasCircle(circle) {

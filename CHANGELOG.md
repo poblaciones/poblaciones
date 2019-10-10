@@ -1,5 +1,11 @@
 ﻿[CURRENT]
 
+v2.4 (2019-10-10)
+- Las etiquetas en modo satélite se colorean en blanco en lugar de negro.
+- Mejora de rendimiento en consulta de etiquetas.
+- Fix: no da error de vuejs de elementos con misma clave en el buscador.
+- Fix: no deja markers huérfanos tras cambio de zoom.
+
 v2.3 (2019-09-22)
 - Buscador: expresiones con textos de menos de 3 caracteres no entrecomillados volvían nula la búsqueda (ej. <riesgo inseguridad> traía <riesgo de inseguridad> pero <riesgo de inseguridad> no traía nada).
 - Buscador: se incorporan los nombres de autores y la institución en la búsqueda de texto libre

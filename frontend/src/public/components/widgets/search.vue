@@ -10,7 +10,7 @@
 		<transition name="fade">
 		<div class='auto' id="auto" v-if="hasSelected()" v-on-clickaway="escapeKey">
 			<ul>
-				<li v-on:click="select(item)" v-for="(item, index) in autolist" :key="item" :class="item.class"
+				<li v-on:click="select(item)" v-for="(item, index) in autolist" :key="item.id" :class="item.class"
 					v-on:mouseover="over(item, index)"
 					v-on:mouseout="out(item, index)">
           <div v-if="item.type === 'L'">
