@@ -65,9 +65,6 @@ class PublishService extends BaseService
 				$this->state->NextStep('Preparando indicadores');
 				break;
 			case self::STEP_DELETE_SNAPSHOTS_METRICS_AND_DEFINITIONS:
-				// DELETE SNAPSHOTMETRICS
-				$manager = new RevokeSnapshots();
-				$manager->DeleteWorkMetricVersions($workId);
 				// DELETE DEFINITIONS
 				$publisher = new PublishDataTables();
 				$publisher->DeleteWorkTables($workId);

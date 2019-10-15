@@ -48,7 +48,7 @@ class ClippingService extends BaseService
 		if ($current === null)
 		{
 			// Trata de resolver a IP a lat-long
-			$latLng = null; // GeoIp::GetCurrentLatLong();
+			$latLng = null;// GeoIp::GetCurrentLatLong();
 			if ($latLng !== null)
 			{
 				$current = new Coordinate($latLng['lat'], $latLng['lon']);
@@ -58,7 +58,7 @@ class ClippingService extends BaseService
 		{
 			// si recibió coordenadas, hace zoon al clipppingRegionItem
 			// más chico que matchee.
-			$item = $table->GetClippingRegionItemByLocation($current);
+			$item = $table->GetClippingRegionItemByLocation($current, false, 0.01);
 			if ($item != null)
 				$frame->ClippingRegionId = $item['Id'];
 		}

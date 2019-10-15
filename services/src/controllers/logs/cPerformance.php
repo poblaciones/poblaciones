@@ -30,7 +30,7 @@ class cPerformance extends cController
 		}
 
 		$this->AddValue('now', date("Y-m-d H:i:s"));
-		$this->AddValue('action_post_url', '/admin/performance');
+		$this->AddValue('action_post_url', '/logs/performance');
 
 		Menu::RegisterAdmin($this->templateValues);
 

@@ -27,7 +27,7 @@ class cActivity extends cController
 		foreach($spaceData as $key => $value)
 			$this->AddValue($key, $value);
 
-		$this->AddValue('action_url', "/admin/activity");
+		$this->AddValue('action_url', "/logs/activity");
 
 		// Pone el menu
 		Menu::RegisterAdmin($this->templateValues);

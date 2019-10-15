@@ -28,33 +28,33 @@ class Menu
 
 
 		$activityMenu = array();
-		$activityMenu[] = self::MenuItem('ADMIN', '/admin/activity', 'Actividad');
-		$activityMenu[] = self::MenuItem('PERFORMANCE', '/admin/performance', 'Rendimiento');
-		$activityMenu[] = self::MenuItem('SEARCHLOG', '/admin/search', 'Búsquedas');
-		$activityMenu[] = self::MenuItem('TRAFFIC', '/admin/traffic', 'Tráfico');
-		$activityMenu[] = self::MenuItem('ERRORS', '/admin/errors', 'Errores');
+		$activityMenu[] = self::MenuItem('ADMIN', '/logs/activity', 'Actividad');
+		$activityMenu[] = self::MenuItem('PERFORMANCE', '/logs/performance', 'Rendimiento');
+		$activityMenu[] = self::MenuItem('SEARCHLOG', '/logs/search', 'Búsquedas');
+		$activityMenu[] = self::MenuItem('TRAFFIC', '/logs/traffic', 'Tráfico');
+		$activityMenu[] = self::MenuItem('ERRORS', '/logs/errors', 'Errores');
 
 		$configurationMenu = array();
-		$configurationMenu[] = self::MenuItem('PLATFORM', '/admin/platform', 'Plataforma');
-		$configurationMenu[] = self::MenuItem('CACHES', '/admin/caches', 'Cachés');
+		$configurationMenu[] = self::MenuItem('PLATFORM', '/logs/platform', 'Plataforma');
+		$configurationMenu[] = self::MenuItem('CACHES', '/logs/caches', 'Cachés');
 
 		$contentsMenu = array();
-		$contentsMenu[] = self::MenuItem('PUBLICDATADRAFT', '/admin/publicDataDraft', 'Datos públicos');
-		$contentsMenu[] = self::MenuItem('CARTOGRAPHIESDRAFT', '/admin/cartographiesDraft', 'Cartografías');
-		$contentsMenu[] = self::MenuItem('INSTITUTIONSDRAFT', '/admin/institutionsDraft', 'Instituciones');
-		$contentsMenu[] = self::MenuItem('SOURCESDRAFT', '/admin/sourcesDraft', 'Fuentes');
-		$contentsMenu[] = self::MenuItem('CATEGORIESDRAFT', '/admin/categoriesDraft', 'Categorías');
-		$contentsMenu[] = self::MenuItem('CONTACTDRAFT', '/admin/contactDraft', 'Contacto');
+		$contentsMenu[] = self::MenuItem('PUBLICDATADRAFT', '/logs/publicDataDraft', 'Datos públicos');
+		$contentsMenu[] = self::MenuItem('CARTOGRAPHIESDRAFT', '/logs/cartographiesDraft', 'Cartografías');
+		$contentsMenu[] = self::MenuItem('INSTITUTIONSDRAFT', '/logs/institutionsDraft', 'Instituciones');
+		$contentsMenu[] = self::MenuItem('SOURCESDRAFT', '/logs/sourcesDraft', 'Fuentes');
+		$contentsMenu[] = self::MenuItem('CATEGORIESDRAFT', '/logs/categoriesDraft', 'Categorías');
+		$contentsMenu[] = self::MenuItem('CONTACTDRAFT', '/logs/contactDraft', 'Contacto');
 
 		$menu_set['Contenidos de usuario'] = $contentsMenu;
 
 		$publicMenu = array();
-		$publicMenu[] = self::MenuItem('PUBLICDATA', '/admin/publicData', 'Datos públicos');
-		$publicMenu[] = self::MenuItem('CARTOGRAPHIES', '/admin/cartographies', 'Cartografías');
-		$publicMenu[] = self::MenuItem('INSTITUTIONS', '/admin/institutions', 'Instituciones');
-		$publicMenu[] = self::MenuItem('SOURCES', '/admin/sources', 'Fuentes');
-		$publicMenu[] = self::MenuItem('CATEGORIES', '/admin/categories', 'Categorías');
-		$publicMenu[] = self::MenuItem('CONTACT', '/admin/contact', 'Contacto');
+		$publicMenu[] = self::MenuItem('PUBLICDATA', '/logs/publicData', 'Datos públicos');
+		$publicMenu[] = self::MenuItem('CARTOGRAPHIES', '/logs/cartographies', 'Cartografías');
+		$publicMenu[] = self::MenuItem('INSTITUTIONS', '/logs/institutions', 'Instituciones');
+		$publicMenu[] = self::MenuItem('SOURCES', '/logs/sources', 'Fuentes');
+		$publicMenu[] = self::MenuItem('CATEGORIES', '/logs/categories', 'Categorías');
+		$publicMenu[] = self::MenuItem('CONTACT', '/logs/contact', 'Contacto');
 
 		$menu_set['Contenidos públicos'] = $publicMenu;
 

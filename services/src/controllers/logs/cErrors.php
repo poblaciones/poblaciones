@@ -65,7 +65,7 @@ class cErrors extends cController
 					$target = $path . '/' . $error . '.@.txt';
 					IO::Move($file, $target);
 				}
-				$this->templateValues['delete_item_url'] = "/admin/errors?deleteItem&error=" . urlencode($error);
+				$this->templateValues['delete_item_url'] = "/logs/errors?deleteItem&error=" . urlencode($error);
 
 				Menu::RegisterAdmin($this->templateValues);
 
@@ -94,7 +94,7 @@ class cErrors extends cController
 					$current['link'] = "class='dSoftLink'";
 				else
 					$current['link'] = "";
-				$current['error_url'] = "/admin/errors?error=" . urlencode($error_no_ext);
+				$current['error_url'] = "/logs/errors?error=" . urlencode($error_no_ext);
 				if (array_key_exists('Description', $lines))
 					$current['description'] = $lines['Description'];
 				else // legacy bugs fixing
@@ -108,7 +108,7 @@ class cErrors extends cController
 
 		uasort($errors, array("self", "myComparerErrors"));
 
-		$this->templateValues['delete_all_url'] = '/admin/errors?deleteAll';
+		$this->templateValues['delete_all_url'] = '/logs/errors?deleteAll';
 		$this->templateValues['errors'] = $errors;
 		$this->templateValues['errors_count'] = $errors_count;
 

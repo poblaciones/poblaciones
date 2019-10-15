@@ -18,7 +18,7 @@ class cPlatform extends cController
 
 		$this->templateValues = array();
 		$this->templateValues['isSelf'] = true;
-		$this->templateValues['admin_url'] = ('/admin/');
+		$this->templateValues['admin_url'] = ('/logs/');
 		$this->templateValues['serverInfo'] = System::GetServerInfo();
 		$this->templateValues['results'] = array();
 		if(!System::IsOnIIS())

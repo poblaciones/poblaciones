@@ -27,7 +27,7 @@ class cCaches extends cController
 		foreach($spaceData as $key => $value)
 			$this->AddValue($key, $value);
 
-		$this->AddValue('action_url', "/admin/caches");
+		$this->AddValue('action_url', "/logs/caches");
 
 		$this->AddValue('updateStatus', $this->LoadUpdateStates());
 

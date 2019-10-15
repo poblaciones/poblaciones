@@ -35,12 +35,12 @@ class cMetricGroups extends cController
 	}
 	private function LoadLinks(&$ret)
 	{
-		$this->templateValues['new_url'] = '/admin/categoriesItem';
+		$this->templateValues['new_url'] = '/logs/categoriesItem';
 		if ($ret == null) return;
 		foreach($ret as &$item)
 		{
-			$item['edit_url'] = '/admin/categoriesItem?id=' . $item['id'];
-			$item['delete_url'] = '/admin/categories?delete&id=' . $item['id'];
+			$item['edit_url'] = '/logs/categoriesItem?id=' . $item['id'];
+			$item['delete_url'] = '/logs/categories?delete&id=' . $item['id'];
 		}
 	}
 

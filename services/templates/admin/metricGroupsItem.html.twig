@@ -17,7 +17,7 @@
 	 {% else %}
         {{ macros.subTitle('Nueva Categoría') }}
      {% endif %}
-    <form onsubmit="return validateFormJs();" action="/admin/categoriesItem?id={{ id }}" method="post">
+    <form onsubmit="return validateFormJs();" action="/logs/categoriesItem?id={{ id }}" method="post">
     {{ crudMacros.ShowText('Nombre', 'Name', metricGroup.Name, 200, 'Indique el nombre de la categoría. Ej. Vivienda.', true) }}
     {{ crudMacros.ShowText('Ícono', 'Icon', metricGroup.Icon, 50, 'Imagen del listado de íconos de Material-Icons (ej. people).', false) }}
 	  {{ crudMacros.ShowText('Orden', 'Order', metricGroup.Order, 5, 'Orden en que se muestra el item (ej. 1, 2, 3).', false) }}

@@ -47,6 +47,6 @@ class cSourcesItem extends cMultiController
 		
 		$sourcesModel->Save($source);
 
-		return App::Redirect("/admin/sources");
+		return App::Redirect("/logs/sources");
 	}
 }

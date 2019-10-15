@@ -2,28 +2,14 @@
 
 namespace helena\services\common;
 
-use minga\framework\IO;
-use minga\framework\Log;
 use minga\framework\ErrorException;
-use minga\framework\Str;
-use minga\framework\System;
 
 use helena\classes\DownloadStateBag;
-use helena\classes\Paths;
 use helena\db\frontend\DatasetModel;
 use helena\db\frontend\ClippingRegionItemModel;
 use helena\caches\DownloadCache;
 use helena\caches\BackofficeDownloadCache;
-
-
-use helena\classes\spss\Alignment;
-use helena\classes\spss\Variable;
-use helena\classes\spss\Format;
-use helena\classes\spss\Measurement;
-
 use helena\classes\App;
-use helena\classes\GeoJson;
-
 
 class DownloadManager
 {
@@ -33,10 +19,11 @@ class DownloadManager
 	const STEP_DATA_COMPLETE = 3;
 	const STEP_CACHED = 4;
 
-	const OUTPUT_LATIN3_WINDOWS_ISO = false;
+	const FILE_SPSS = 1;
+	const FILE_CSV = 2;
+	const FILE_SHP = 3;
 
-	const MAX_ROWS = 5000;
-	const MAX_DECIMALS = 6;
+	const OUTPUT_LATIN3_WINDOWS_ISO = false;
 
 	private $start = 0.0;
 	private $model;
@@ -114,6 +101,27 @@ class DownloadManager
 		else
 			throw new ErrorException('File must be created before.');
 	}
+	
+	private static function GetFileName($datasetId, $clippingItemId, $type)
+	{
+		if($type[0] == 's')
+			$ext = 'sav';
+		elseif($type[0] == 'z')
+			$ext = 'zsav';
+		elseif($type[0] == 'c')
+			$ext = 'csv';
+		elseif($type[0] == 'h')
+			$ext = 'zip';
+		else
+			throw new ErrorException('Tipo de descarga inválido');
+
+		$name = 'dataset' . $datasetId . $type;
+		if($clippingItemId != 0)
+			$name .= 'r'.$clippingItemId;
+
+		return $name . '.' . $ext;
+	}
+
 	private static function createKey($fromDraft, $type, $clippingItemId)
 	{
 		if ($fromDraft)
@@ -121,6 +129,7 @@ class DownloadManager
 		else
 			return DownloadCache::CreateKey($type, $clippingItemId);
 	}
+
 	private static function getCache($fromDraft)
 	{
 		if ($fromDraft)
@@ -128,6 +137,7 @@ class DownloadManager
 		else
 			return DownloadCache::Cache();
 	}
+
 	private function PutFileToCache()
 	{
 		if($this->state->Step() == self::STEP_CACHED)
@@ -146,7 +156,7 @@ class DownloadManager
 
 	private static function ValidateType($type)
 	{
-		if($type != 's' && $type != 'sw' && $type != 'sg' && $type != 'c' && $type != 'cw' && $type != 'cg' && $type != 'zw' && $type != 'zg')
+		if($type != 's' && $type != 'sw' && $type != 'sg' && $type != 'h' && $type != 'hw' && $type != 'c' && $type != 'cw' && $type != 'cg' && $type != 'zw' && $type != 'zg')
 			throw new ErrorException('Tipo de descarga inválido');
 	}
 
@@ -185,348 +195,71 @@ class DownloadManager
 		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $this->model, $fromDraft);
 		$this->state->SetStep(self::STEP_BEGIN);
 		$this->state->SetTotalSteps(2);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $type);
+		$this->state->Set('friendlyName', $friendlyName);
 		$this->state->Set('totalRows', $this->model->GetCountRows());
+		$latLon = $this->model->GetLatLongColumns($datasetId);
+		$this->state->Set('latVariable', $latLon['lat']);
+		$this->state->Set('lonVariable', $latLon['lon']);
 		$this->state->Save();
+	}
+
+	private function getFileType()
+	{
+		if ($this->state->Get('type')[0] == 's' || $this->state->Get('type')[0] == 'z')
+			return self::FILE_SPSS;
+		else if ($this->state->Get('type')[0] == 'h')
+			return self::FILE_SHP;
+		else if ($this->state->Get('type')[0] == 'c')
+			return self::FILE_CSV;
+		else  
+			throw new ErrorException('Tipo de descarga inválido');
+	}
+
+	private function getWriter($fileType)
+	{
+		if ($fileType === self::FILE_SPSS) 
+			return new SpssWriter($this->model, $this->state);
+		else if ($fileType === self::FILE_CSV)
+			return new CsvWriter($this->model, $this->state);
+		else if ($fileType === self::FILE_SHP)
+			return new ShpWriter($this->model, $this->state);
+		else 
+			throw new ErrorException('Tipo de descarga inválido');
 	}
 
 	private function CreateNextFilePart()
 	{
-		if($this->state->Get('type')[0] == 's' || $this->state->Get('type')[0] == 'z')
+		$fileType = $this->getFileType();
+		$writer = $this->getWriter($fileType);
+
+		if($fileType === self::FILE_SPSS || $fileType === self::FILE_SHP)
 		{
 			if($this->state->Step() == self::STEP_BEGIN)
 				$this->state->SetStep(self::STEP_ADDING_ROWS, 'Anexando filas');
 			else if($this->state->Step() == self::STEP_ADDING_ROWS)
-				$this->PageDataSPSS();
+				$writer->PageData();
 			else if($this->state->Step() == self::STEP_CREATED)
-				$this->SaveSPSS();
+			{
+				$writer->Flush();
+			}
 		}
-		elseif($this->state->Get('type')[0] == 'c')
+		else if($fileType === self::FILE_CSV)
 		{
 			if($this->state->Step() == self::STEP_BEGIN)
-				$this->SaveHeaderCSV();
+				$writer->SaveHeader();
 			else if($this->state->Step() == self::STEP_ADDING_ROWS)
-				$this->PageDataCSV();
+				$writer->PageData();
 		}
-		else
-			throw new ErrorException('Tipo de descarga inválido');
 	}
 
 	private function GetPolygon($type)
 	{
-		if ($type == 'cw' || $type == 'sw' || $type == 'zw')
+		if (substr($type, 1, 1) === 'w')
 			return 'wkt';
-		if ($type == 'cg' || $type == 'sg' || $type == 'zg')
+		else if (substr($type, 1, 1) === 'g')
 			return 'geojson';
-		return null;
-	}
-
-	private function PrepareGeometry($type, $value)
-	{
-		if ($value == null)
-			return null;
-		if ($type[1] == 'g')
-		{
-			$geoJson = new GeoJson();
-			$jsonArray = $geoJson->GenerateFeatureFromBinary(array('name'=>'', 'value' => $value));
-			$value = json_encode($jsonArray['geometry']);
-		}
-		return $this->RoundWktValue($value);
-	}
-
-	private function RoundWktValue($value)
-	{
-		// \. = caracter de punto (.)
-		// \d = dígito de 0 a 9
-		//    {n} = cantidad de ocurrencias n
-		// \d* = digitos cantidad de ocurrencias mayor igual a cero
-		// [ ,\)] = alguno de los caracteres entre corchetes: espacio, coma o cierra paréntesis
-		// Entre paréntesis los grupos para el replace $1, $2 (se borra), $3
-		return preg_replace('/(\.\d{'.self::MAX_DECIMALS.'})(\d*)([ ,\)\]])/', '$1$3', $value);
-	}
-
-	private function SaveSPSS()
-	{
-		// Creo el archivo de datos vacío por
-		// consistencia de SafeName con hFile.
-		touch($this->state->Get('dFile'));
-
-		$head = array();
-		foreach($this->state->Cols() as $col)
-			$head = $this->ProcessColumn($col, $head);
-
-		// Si no tiene value labels crea el valor
-		// vacío para que esté en el json para python.
-		if(isset($head['valueLabels']) == false)
-			$head['valueLabels'] = new \stdClass();
-
-		$hFile = $this->state->Get('outFile') . '_head.json';
-		IO::WriteJson($hFile, $head, true);
-		/*
-		echo($this->state->Get('outFile') . '_head.json');
-			throw new \Exception("aa");
-		*/
-		$lines = array();
-		$ret = System::Execute(App::GetSetting('python'), array(
-			Paths::GetPythonScriptsPath() .'/json2spss.py',
-			$hFile,
-			$this->state->Get('dFile'),
-			$this->state->Get('outFile'),
-		), $lines);
-
-		if($ret !== 0)
-		{
-			$err = '';
-			$detail = "\nHeader: " . $hFile
-				. "\nData: " . $this->state->Get('dFile') . ' (' . $this->state->Get('index') . ')'
-				. "\n" . implode("\n", $lines);
-			if(App::Debug())
-				$err = $detail;
-			else {
-				Log::HandleSilentException(new ErrorException($detail));
-			}
-			throw new ErrorException('Error en creación de archivo spss.' . $err);
-		}
-
-		$this->state->SetStep(self::STEP_DATA_COMPLETE, 'Descargando archivo');
-		$this->state->Save();
-	}
-
-	private function PageDataSPSS()
-	{
-		$rows = $this->GetRowsAndIncrementSlice();
-
-		if(count($rows) > 0)
-		{
-			$cols = $this->state->Cols();
-
-			foreach($rows as &$row)
-			{
-				foreach($row as $k => &$value)
-				{
-					if($this->model->wktIndex == $k)
-						$value = $this->PrepareGeometry($this->state->Get('type'), $value);
-					$cols[$k]['field_width'] = $this->GetFieldWitdh($value, $cols[$k]);
-					$this->SetIdLabels($value, $cols[$k]);
-				}
-			}
-			// Itera para ponerlo en el array
-			foreach($cols as $k => $value)
-			{
-				$this->state->SetColWidth($k, $value['field_width']);
-			}
-			IO::WriteJson(IO::GetSequenceName($this->state->Get('dFile'), $this->state->Get('index')), $rows);
-			$this->state->Increment('index');
-		}
-		else
-		{
-			$this->FixDefaultWidths();
-			// Finaliza
-			$this->state->SetStep(self::STEP_CREATED, 'Consolidando archivo');
-		}
-
-		$this->state->Save();
-	}
-	private function FixDefaultWidths()
-	{
-		// Pone defaults para anchos no asignados
-		// (sólo ocurre en archivos sin filas)
-		$cols = $this->state->Cols();
-		foreach($cols as $k => $value)
-			if ($value['field_width'] == null)
-				$this->state->SetColWidth($k, 10);
-	}
-	private function SetIdLabels($item, &$col)
-	{
-		if($col['measure'] != Measurement::Scale && $col['id'] !== null)
-		{
-			if(isset($col['label_ids']) == false)
-				$col['label_ids'] = array();
-			$col['label_ids'][$item] = null;
-		}
-	}
-
-	private function GetFieldWitdh($item, $col)
-	{
-		if(isset($col['field_width']) == false)
-			return min(max(1, strlen($item)), 32767);
-		else
-			return min(max(1, $col['field_width'], strlen($item)), 32767);
-	}
-
-	private function SaveHeaderCSV()
-	{
-		$file = fopen($this->state->Get('outFile'), 'a');
-		if($file === false)
-			throw new ErrorException('Error en creación de archivo');
-
-		$count = count($this->state->Cols());
-
-		$labels = $this->writeCSVheader($file, $count);
-
-		fclose($file);
-
-		$this->state->Set('labels', $labels);
-		$this->state->SetStep(self::STEP_ADDING_ROWS, 'Anexando filas');
-		$this->state->Save();
-	}
-
-	private function GetRowsAndIncrementSlice()
-	{
-		$this->state->SetTotalSlices($this->state->Get("totalRows"));
-		$start = $this->state->Get('start');
-		$this->state->SetSlice($start);
-		$rows = $this->model->GetPagedRows($start, self::MAX_ROWS);
-		$this->state->Increment('start', self::MAX_ROWS);
-		return $rows;
-	}
-
-	private function PageDataCSV()
-	{
-		$rows = $this->GetRowsAndIncrementSlice();
-
-
-		if(count($rows) > 0)
-		{
-			$file = fopen($this->state->Get('outFile'), 'a');
-			if($file === false)
-				throw new ErrorException('Error en creación de archivo');
-			$cols = $this->state->Cols();
-			$count = count($cols);
-
-			foreach($rows as $row)
-			{
-				$rowText = '';
-				$c = 0;
-				foreach($row as $k => $value)
-				{
-					if($this->model->wktIndex == $k)
-						$value = $this->PrepareGeometry($this->state->Get('type'), $value);
-					$isNumericColumn = $cols[$c]['format'] == Format::F;
-					if($isNumericColumn)
-					{
-						if (Str::Contains($value, '.'))
-						{
-							$value = rtrim($value, '0');
-							$value = rtrim($value, '.');
-						}
-					}
-					$text = $this->GetCSVField($k, $value, $isNumericColumn, $this->state->Get('labels'), ($k + 1 == $count));
-					$text = $this->MakeOutputEncoding($text);
-					$rowText .= $text;
-					$c++;
-				}
-				if(fwrite($file, $rowText) === false)
-					throw new ErrorException('Error en creación de archivo');
-			}
-			fclose($file);
-		}
-		else
-		{
-			$this->state->SetStep(self::STEP_DATA_COMPLETE, 'Descargando archivo');
-		}
-
-		$this->state->Save();
-	}
-	private function MakeOutputEncoding($utf8text)
-	{
-		if (self::OUTPUT_LATIN3_WINDOWS_ISO)
-			return mb_convert_encoding($utf8text, 'ISO-8859-1', 'UTF-8');
-		else
-			return $utf8text;
-	}
-	private function writeCSVheader($file, $count)
-	{
-		$labels = array();
-		foreach($this->state->Cols() as $k => $col)
-		{
-			$text = $this->FormatCSVField($col['caption'], ($k + 1 == $count));
-			$text = $this->MakeOutputEncoding($text);
-			if(fwrite($file, $text) === false)
-				throw new ErrorException('Error en creación de archivo');
-
-			$res = $this->GetValueLabels($col);
-			if(count($res) > 0)
-				$labels[$k] = $res;
-		}
-		return $labels;
-	}
-
-	private function GetCSVField($k, $value, $isNumericColumn, $labels, $last)
-	{
-		if(isset($labels[$k][$value]))
-			return $this->FormatCSVField($labels[$k][$value], $last, false);
-		else
-			return $this->FormatCSVField($value, $last, $isNumericColumn);
-	}
-
-	private function FormatCSVField($value, $last = false, $isNumericColumn = false)
-	{
-		$end = ',';
-		if($last)
-			$end = "\r\n";
-
-		if ($isNumericColumn)
-			return $value . $end;
-		else
-			return '"' . str_replace('"', '""', $value) . '"' . $end;
-	}
-
-	private static function GetFileName($datasetId, $clippingItemId, $type)
-	{
-		if($type[0] == 's')
-			$ext = 'sav';
-		elseif($type[0] == 'z')
-			$ext = 'zsav';
-		elseif($type[0] == 'c')
-			$ext = 'csv';
-		else
-			throw new ErrorException('Tipo de descarga inválido');
-
-		$name = 'dataset' . $datasetId . $type;
-		if($clippingItemId != 0)
-			$name .= 'r'.$clippingItemId;
-
-		return $name . '.' . $ext;
-	}
-
-	private function GetValueLabels($col)
-	{
-		if($col['measure'] != Measurement::Scale && $col['id'] !== null)
-		{
-			$ids = array();
-			if(isset($col['label_ids']))
-				$ids = array_keys($col['label_ids']);
-			return $this->model->GetColumnLabels($col['id'], $ids);
-		}
-		return array();
-	}
-	private function ProcessColumn(array $col, array $head)
-	{
-		$col['variable'] = Variable::FixName($col['variable']);
-
-		$head['varNames'][] = $col['variable'];
-
-		$labels = $this->GetValueLabels($col);
-		if(count($labels) > 0)
-			$head['valueLabels'][$col['variable']] = $labels;
-
-		$head['varFormats'][$col['variable']] = Format::GetName($col['format']).$col['field_width'];
-
-		if($col['format'] == Format::F)
-		{
-			$head['varTypes'][$col['variable']] = 0;
-			$head['varFormats'][$col['variable']] .= '.'.$col['decimals'];
-		}
-		else
-			$head['varTypes'][$col['variable']] = (int)$col['field_width'];
-
-		$head['varLabels'][$col['variable']] = $col['caption'];
-
-		$head['measureLevels'][$col['variable']] = Measurement::GetName($col['measure']);
-		$head['columnWidths'][$col['variable']] = (int)$col['column_width'];
-		$head['alignments'][$col['variable']] = Alignment::GetName($col['align']);
-
-		return $head;
+		else return null;
 	}
 
 }

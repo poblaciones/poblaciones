@@ -64,7 +64,7 @@
 								</button>
 							</span>
 							<span v-else="">
-								<img src="/static/img/spinner.gif"> Generando archivo. El proceso puede demorar varios minutos...
+								<img src="/static/img/spinner.gif"> Generando archivo. El proceso puede demorar varios minutos... {{ (progress ? '(' + progress + '%)' : '') }}
 						</span>
 						</td>
 					</tr>
@@ -123,6 +123,7 @@ export default {
 		return {
 			visibleUrl: true,
 			useFilter: true,
+			progress: null,
 			downloadLevel: 0,
 		};
 	},
@@ -157,6 +158,9 @@ export default {
 			var ret = [];
 			ret.push({ caption: 'SPSS (.sav)', key: 's' });
 			ret.push({ caption: 'Texto (.csv)', key: 'c' });
+			/*if (!this.level.HasArea) {
+				ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
+			}*/
 			return ret;
 		},
 		resolveFileUrl(file) {
@@ -177,6 +181,7 @@ export default {
 			ret.push({ caption: 'SPSS con WKT (.sav)', key: 'sw' });
 			ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
 			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
+			//ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
 			return ret;
 		},
 		showUrls: debounce(function() {
@@ -201,12 +206,14 @@ export default {
 		process(e, type) {
 			e.preventDefault();
 			this.visibleUrl = false;
+			this.progress = null;
 			var url = this.startDownloadUrl(type);
 			const loc = this;
 			axios.get(url).then(function(res) {
 				if(res.data.done === false) {
-					loc.processStep(type, res.data.key, 0);
+					loc.processStep(type, res.data, 0);
 				} else {
+					loc.progress = 100;
 					loc.sendFileByType(type);
 					loc.showUrls();
 				}
@@ -215,7 +222,11 @@ export default {
 				err.errDialog('process', 'crear el archivo', error);
 			});
 		},
-		processStep(type, key, i) {
+		processStep(type, data, i) {
+			var key = data.key;
+			if (data.slice && data.totalSlices && data.slice < data.totalSlices) {
+				this.progress = parseInt(data.slice * 100 / data.totalSlices);
+			}
 			const loc = this;
 			return axios.get(loc.stepDownloadUrl(), {
 				params: { k: key }
@@ -226,8 +237,9 @@ export default {
 					i++;
 
 					if(res.data.done === false) {
-						return loc.processStep(type, res.data.key, i);
+						return loc.processStep(type, res.data, i);
 					} else {
+						loc.progress = 100;
 						loc.sendFileByType(type);
 						loc.showUrls();
 					}

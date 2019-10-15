@@ -92,14 +92,11 @@ class PublishSnapshots extends BaseService
 	public function UpdateWorkVisiblity($workId)
 	{
 		// Es llamado cuando cambia el isIndexed, el isPrivate o el workType de una cartografía.
-
 		// 1. Trae los metrics ya publicados
 		$workModel = new WorkModel(false);
 		$workIdShardified = PublishDataTables::Shardified($workId);
 		$metricVersions = $workModel->GetMetricVersions($workIdShardified);
-
 		$unshardifiedMetricVersions = PublishDataTables::UnshardifyList($metricVersions, array('mvr_id', 'mvr_metric_id'));
-
 		// 2. Los resetea
 		$snapshots = new SnapshotsManager();
 		$cache = new CacheManager();

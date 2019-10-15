@@ -15,7 +15,7 @@
         <div class="dExplanation">
             La siguiente información de contacto será ofrecida para todas las obras públicas del sitio.
         </div>
-        <form onsubmit="return validateFormJs();" action="/admin/contact?id={{ id }}" method="post">
+        <form onsubmit="return validateFormJs();" action="/logs/contact?id={{ id }}" method="post">
             {{ crudMacros.ShowContact('', contact) }}
 	    <div class='dBlockNewLineS3'><br></div>
 	    {{ crudMacros.ShowButtonsRow() }}

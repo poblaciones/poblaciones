@@ -36,12 +36,20 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
-	public function GetClippingRegionItemByLocation($coordinate, $includeName = false)
+	public function GetClippingRegionItemByLocation($coordinate, $includeName = false, $sizeThreshold = -1)
 	{
 		Profiling::BeginTimer();
 		$params = array();
 		$coordinate->ToParams($params);
-
+		if ($sizeThreshold !== -1)
+		{
+			$sizeFilter = ' AND (SELECT ST_AREA(cli_geometry_r1) FROM clipping_region_item
+																WHERE cgv_clipping_region_item_id = cli_id) > ' . $sizeThreshold	;
+		}
+		else
+		{
+			$sizeFilter = '';
+		}
 		$nameFields = "";
 		$nameJoins = "";
 		if ($includeName)
@@ -57,7 +65,8 @@ class SnapshotClippingRegionItemModel extends BaseModel
 			" FROM snapshot_geography_item JOIN snapshot_clipping_region_item_geography_item ON cgv_geography_item_id = giw_geography_item_id "
 			. $nameJoins .
 			"WHERE ST_CONTAINS(giw_geometry_r3 , POINT(?, ?)) AND giw_geography_is_tracking_level = 1 ".
-			"ORDER BY cgv_clipping_region_priority DESC ".
+			$sizeFilter .
+			" ORDER BY cgv_clipping_region_priority DESC ".
 			"LIMIT 1";
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		Profiling::EndTimer();

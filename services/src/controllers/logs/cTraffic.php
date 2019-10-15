@@ -17,7 +17,7 @@ class cTraffic extends cController
 		if ($app = Session::CheckIsMegaUser())
 			return $app;
 
-		$this->AddValue('action_post_url', '/admin/traffic');
+		$this->AddValue('action_post_url', '/logs/traffic');
 
 		Menu::RegisterAdmin($this->templateValues);
 

@@ -32,12 +32,12 @@ class cSources extends cMultiController
 	}
 	private function LoadLinks(&$ret)
 	{
-		$this->templateValues['new_url'] = '/admin/sourcesItem';
+		$this->templateValues['new_url'] = '/logs/sourcesItem';
 		if ($ret == null) return;
 		foreach($ret as &$item)
 		{
-			$item['edit_url'] = '/admin/sourcesItem?id=' . $item['id'];
-			$item['delete_url'] = '/admin/sources?delete&id=' . $item['id'];
+			$item['edit_url'] = '/logs/sourcesItem?id=' . $item['id'];
+			$item['delete_url'] = '/logs/sources?delete&id=' . $item['id'];
 		}
 	}
 

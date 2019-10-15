@@ -18,7 +18,7 @@ class cSearchLog extends cController
 		if ($app = Session::CheckIsMegaUser())
 			return $app;
 
-		$this->AddValue('action_post_url', '/admin/search');
+		$this->AddValue('action_post_url', '/logs/search');
 
 		Menu::RegisterAdmin($this->templateValues);
 

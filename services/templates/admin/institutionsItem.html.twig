@@ -18,7 +18,7 @@
 	 {% else %}
         {{ macros.subTitle('Nueva institución') }}
      {% endif %}
-    <form onsubmit="return validateFormJs();" action="/admin/institutionsItem?id={{ id }}" method="post">
+    <form onsubmit="return validateFormJs();" action="/logs/institutionsItem?id={{ id }}" method="post">
         {{ crudMacros.ShowInstitutionFields('', institution) }}
 	<div class='dBlockNewLineS3'><br></div>
 	{{ crudMacros.ShowButtonsRow() }}

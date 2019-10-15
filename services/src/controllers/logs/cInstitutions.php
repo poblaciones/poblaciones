@@ -33,12 +33,12 @@ class cInstitutions extends cMultiController
 	}
 	private function LoadLinks(&$ret)
 	{
-		$this->templateValues['new_url'] = '/admin/institutionsItem';
+		$this->templateValues['new_url'] = '/logs/institutionsItem';
 		if ($ret == null) return;
 		foreach($ret as &$item)
 		{
-			$item['edit_url'] = '/admin/institutionsItem?id=' . $item['id'];
-			$item['delete_url'] = '/admin/institutions?delete&id=' . $item['id'];
+			$item['edit_url'] = '/logs/institutionsItem?id=' . $item['id'];
+			$item['delete_url'] = '/logs/institutions?delete&id=' . $item['id'];
 		}
 	}
 

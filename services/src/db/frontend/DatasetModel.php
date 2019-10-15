@@ -375,6 +375,22 @@ class DatasetModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
+	public function GetLatLongColumns($datasetId)
+	{
+		Profiling::BeginTimer();
+
+		$sql = 'SELECT lat.dco_variable as lat, lng.dco_variable as lon
+			FROM ' . $this->draftPreffix() . 'dataset
+			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column lat ON lat.dco_id = dat_latitude_column_id
+			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column lng ON lng.dco_id = dat_longitude_column_id
+			WHERE dat_id = ?';
+
+		$ret = App::Db()->fetchAssoc($sql, array($datasetId));
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	private function GetCustomCol($field, $variable, $caption, $format,
 		$columnWidth, $fieldWidth, $decimals, $measure, $alignment)
 	{

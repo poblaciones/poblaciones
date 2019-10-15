@@ -49,6 +49,6 @@ class cMetricGroupsItem extends cController
 		$caches->CleanFabMetricsCache();
 		$caches->CleanMetricGroupsMetadataCache();
 
-		return App::Redirect("/admin/categories");
+		return App::Redirect("/logs/categories");
 	}
 }

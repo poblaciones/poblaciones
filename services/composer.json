@@ -47,7 +47,8 @@
 		"jms/metadata": "^1.6",
 		"indigophp/doctrine-annotation-autoload": "^0.1.0",
 		"lusitanian/oauth": "^0.8.11",
-		"mjaschen/phpgeo": "^2.1"
+		"mjaschen/phpgeo": "^2.1",
+		"gasparesganga/php-shapefile": "^3.0"
 	},
 	"autoload": {
 		"psr-0": {

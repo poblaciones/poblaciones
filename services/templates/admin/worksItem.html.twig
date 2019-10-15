@@ -25,7 +25,7 @@
             {{ macros.subTitle('Nueva borrador de cartografía') }}
         {% endif  %}
      {% endif %}
-    <form onsubmit="return validateFormJs();" action="/admin/{{ (type == 'P' ? 'publicData' : 'cartographies' ) }}Item?id={{ id }}" method="post">
+    <form onsubmit="return validateFormJs();" action="/logs/{{ (type == 'P' ? 'publicData' : 'cartographies' ) }}Item?id={{ id }}" method="post">
         {{ macros.subTitleSmaller('Atribución') }}
 
         {{ crudMacros.ShowText('Título', 'Name', work.Metadata.Name, 200, 'Indique un título descriptivo de la información. Si la obra incluirá información de varias ediciones, omitir la edición. Ej. Indicadores del Censo Nacional de Población, Hogares y Viviendas, 2001; Mapa Nacional Educativo.', true) }}

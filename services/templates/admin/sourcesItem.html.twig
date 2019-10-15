@@ -17,7 +17,7 @@
 	 {% else %}
         {{ macros.subTitle('Nueva fuente') }}
      {% endif %}
-    <form onsubmit="return validateFormJs();" action="/admin/sourcesItem?id={{ id }}" method="post">
+    <form onsubmit="return validateFormJs();" action="/logs/sourcesItem?id={{ id }}" method="post">
     {{ crudMacros.ShowSourceFields(source, '', institutions, true, possibleTypes) }}
 	<div class='dBlockNewLineS3'><br></div>
 	{{ crudMacros.ShowButtonsRow() }}

@@ -23,16 +23,10 @@ class SnapshotsManager extends BaseService
 	// Metric
 	public function UpdateMetricMetadata($metricId)
 	{
-		$this->CleanMetricMetadata($metricId);
 		// Regen
 		$modelVersion = new SnapshotMetricVersionModel();
-		$modelVersion->RegenMetric($metricId);
-	}
-
-	public function CleanMetricMetadata($metricId)
-	{
-		$modelVersion = new SnapshotMetricVersionModel();
 		$modelVersion->ClearMetric($metricId);
+		$modelVersion->RegenMetric($metricId);
 	}
 
 	// MetricVersion

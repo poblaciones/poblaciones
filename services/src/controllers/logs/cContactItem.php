@@ -41,6 +41,6 @@ class cContactItem extends cMultiController
 		$contact->FillFromParams();
 		$contactModel->DbSave($contact);
 
-		return App::Redirect("/admin/contact");
+		return App::Redirect("/logs/contact");
 	}
 }
