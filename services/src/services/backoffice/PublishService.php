@@ -60,8 +60,8 @@ class PublishService extends BaseService
 				$this->state->NextStep('Preparando índices');
 				break;
 			case self::STEP_DELETE_SNAPSHOTS_DATASETS:
-				$manager = new RevokeSnapshots();
-				$manager->DeleteWorkDatasets($workId);
+				$manager = new RevokeSnapshots($workId);
+				$manager->DeleteMissingWorkDatasets();
 				$this->state->NextStep('Preparando indicadores');
 				break;
 			case self::STEP_DELETE_SNAPSHOTS_METRICS_AND_DEFINITIONS:

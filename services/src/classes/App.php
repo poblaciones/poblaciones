@@ -234,6 +234,10 @@ class App
 		$sessionTime = gmdate('D, d M Y H:i:s', intval($sessionStarted)) . ' GMT';
 		//
 		//Mock::SaveJson($value);
+		if (version_compare(phpversion(), '7.1', '>=')) {
+			ini_set( 'precision', 17 );
+			ini_set( 'serialize_precision', -1);
+		}
 		return self::$app->json($value, 200, [ 'Cache-control' => 'private',
 			'Last-Modified' => $sessionTime ]);
 	}

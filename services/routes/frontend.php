@@ -240,8 +240,10 @@ App::$app->get('/services/geographies/GetGeography', function (Request $request)
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntMandatory('z');
+	$p = Params::GetInt('p', 0);
 	$b = Params::Get('b');
-	return App::Json($controller->GetGeography($levelId, $x, $y, $z, $b));
+	$ret = $controller->GetGeography($levelId, $x, $y, $z, $b, $p);
+	return App::Json($ret);
 });
 
 // ej. http://mapas/services/shapes/GetDatasetShapes?a=62&z=12&x=1380&y=2468

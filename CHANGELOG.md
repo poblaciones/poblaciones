@@ -1,5 +1,11 @@
 ﻿[CURRENT]
 - Fix: al publicarse obras con cambios solamente en los metadatos, dejaban de quedar visibles sus indicadores.
+- Leyendas a pie de mapa (condiciones de Google Maps) pasadas a castellano.
+- Botones superiores de marco de cartografía mejorados.
+- Fix: mejoras en la limpieza de caché al publicarse versiones (impacta en bug 'cambio en colores')
+- Descarga de datos en format Shapefile desde el visor del mapa.
+- Los 'Valores' de columna pasan a llamarse 'Categorías'.
+- El agrupamiento por 'Variable' pasa a llamarse 'Categorías'.
 
 v2.4 (2019-10-10)
 - Las etiquetas en modo satélite se colorean en blanco en lugar de negro.

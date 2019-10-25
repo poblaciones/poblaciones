@@ -6,10 +6,10 @@ use helena\classes\App;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\ErrorException;
-use helena\services\backoffice\upload\MetadataMerger;
+use helena\services\backoffice\import\MetadataMerger;
 use minga\framework\Arr;
 use minga\framework\Str;
-use helena\services\backoffice\upload\DatasetTable;
+use helena\services\backoffice\import\DatasetTable;
 
 class DatasetClone
 {

@@ -23,6 +23,8 @@ function TileRequest(selectedMetricOverlay, coord, zoom, boundsRectRequired, key
 	this.CancelToken2 = axios.CancelToken;
 	this.dataDone = null;
 	this.mapDone = null;
+	this.prevMapData = null;
+	this.Page = 0;
 }
 
 TileRequest.prototype.CancelHttpRequests = function () {
@@ -81,6 +83,9 @@ TileRequest.prototype.startGeographyRequest = function () {
 	} else {
 		geographyParams.a = geographyId;
 	}
+	if (this.Page > 0) {
+		geographyParams.p = this.Page;
+	}
 	if (this.boundsRectRequired) {
 		geographyParams.b = this.boundsRectRequired;
 	};
@@ -90,13 +95,30 @@ TileRequest.prototype.startGeographyRequest = function () {
 		cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; }),
 	}).then(function (res) {
 		queue.Release(loc.preCancel2);
-		loc.mapDone = res.data;
-		if (loc.dataDone) {
-			loc.selectedMetricOverlay.process(loc.div.dataMetric, loc.mapDone, loc.dataDone, loc.key, loc.div, loc.coord.x, loc.coord.y, loc.zoom);
+		loc.receiveMapData(res.data);
+		var total = (res.data.TotalPages ? res.data.TotalPages : 1);
+		var next = (res.data.Page ? res.data.Page + 1 : 1);
+		if (total === next) {
+			loc.mapDone = loc.prevMapData;
+			if (loc.dataDone) {
+				loc.selectedMetricOverlay.process(loc.div.dataMetric, loc.mapDone, loc.dataDone, loc.key, loc.div, loc.coord.x, loc.coord.y, loc.zoom);
+			}
+		} else {
+			loc.Page = next;
+			queue.Enlist(loc, loc.startGeographyRequest, null, function (p) { loc.preCancel2 = p; },
+						loc.selectedMetricOverlay.geographyService);
 		}
 	}).catch(function (error1) {
 		queue.Release(loc.preCancel2);
 		loc.selectedMetricOverlay.SetDivFailure(loc.div);
 		err.err('GetGeography', error1);
 	});
+};
+
+TileRequest.prototype.receiveMapData = function (newData) {
+	if (this.prevMapData !== null) {
+		this.prevMapData.Data.features = this.prevMapData.Data.features.concat(newData.Data.features);	
+	} else {
+		this.prevMapData = newData;
+	}
 };

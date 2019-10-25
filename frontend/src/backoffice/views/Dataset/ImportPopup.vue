@@ -127,8 +127,8 @@ export default {
     },
     save() {
       var stepper = this.$refs.stepper;
-      stepper.startUrl = this.Work.GetDatasetFileUploadUrl(this.keepLabels);
-      stepper.stepUrl = this.Work.GetStepDatasetFileUploadUrl();
+      stepper.startUrl = this.Work.GetDatasetFileImportUrl(this.keepLabels);
+      stepper.stepUrl = this.Work.GetStepDatasetFileImportUrl();
       let bucketId = this.getBucketId();
       let datasetId = this.Dataset.properties.Id;
       let extension = this.extension;

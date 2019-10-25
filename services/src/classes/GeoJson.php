@@ -61,6 +61,24 @@ class GeoJson
 			return self::TrimNumber($arr);
 		}
 	}
+	public static function ReallocRecursive($arr)
+	{
+			$size = sizeof($arr);
+			$ret = new \SplFixedArray($size);
+			for($n = 0; $n < $size; $n++)
+			{
+				$val = $arr[$n];
+				if (is_array($val))
+				{
+					$ret[$n] = self::ReallocRecursive($val);
+				}
+				else
+				{
+					$ret[$n] = $val;
+				}
+			}
+			return $ret;
+	}
 	public static function ProjectRecursive($arr)
 	{
 		if (sizeof($arr) == 0) return $arr;
@@ -86,14 +104,16 @@ class GeoJson
 			'features' => array(),
 			'projected' => $project
 		);
+		$features = array();
 		foreach($results as $res)
 		{
 			$feature = $this->GenerateFeatureFromBinary($res, true, $getCentroids, $project);
 			if ($feature != null)
 			{
-				array_push($geojson['features'], $feature);
+				$features[] = $feature;
 			}
 		}
+		$geojson['features'] = $features;
 		return $geojson;
 	}
 	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false)
@@ -119,7 +139,7 @@ class GeoJson
 		if ($project)
 			$coordinates = self::ProjectRecursive($geometry->asArray());
 		else
-			$coordinates = $geometry->asArray();
+			$coordinates = $geometry->asArray(); //self::ReallocRecursive($geometry->asArray());
 
 		$ret['geometry'] = array(
 					'type' => $geometry->getGeomType(),

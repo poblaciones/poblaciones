@@ -49,6 +49,7 @@ class PublishSnapshots extends BaseService
 		$workModel = new WorkModel();
 		$work = $workModel->GetWork($workId);
 
+		$cacheManager = new CacheManager();
 		$snapshotsManager = new SnapshotsManager();
 
 		$workModel = new WorkModel();
@@ -58,6 +59,7 @@ class PublishSnapshots extends BaseService
 		if (sizeof($metricVersions) === 0)
 		{
 			$snapshotsManager->DeleteMetricVersionsByWork($workId);
+			$this->ClearRemovedMetrics($workId, $metricVersions);
 			Profiling::EndTimer();
 			return true;
 		}
@@ -67,12 +69,15 @@ class PublishSnapshots extends BaseService
 		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
 		{
 			// En el primero se asegura de dejar limpio
-			if ($slice === 0) 
+			if ($slice === 0)
 			{
 				$snapshotsManager->DeleteMetricVersionsByWork($workId);
-			}			
+				$this->ClearRemovedMetrics($workId, $metricVersions);
+			}
 			// Actualiza los metadatos del metric en el que están las versiones
 			$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
+			// Libera los metadatos del metric (summary, selected, getTile)
+			$cacheManager->ClearMetricMetadata($metricVersion['mvr_metric_id']);
 		}
 		// Actualiza los version
 		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'])
@@ -89,13 +94,26 @@ class PublishSnapshots extends BaseService
 			return true;
 	}
 
+	private function ClearRemovedMetrics($workId, $metricVersions)
+	{
+		$cacheManager = new CacheManager();
+		$workIdShardified = PublishDataTables::Shardified($workId);
+		$publicWorkModel = new WorkModel(false);
+		$previousMetricVersions = PublishDataTables::UnshardifyList($publicWorkModel->GetMetricVersions($workIdShardified),
+																																				array('mvr_id', 'mvr_metric_id'));
+		$removedMetricVersions = Arr::RemoveByField('mvr_id', $previousMetricVersions, $metricVersions);
+		foreach($removedMetricVersions as $row)
+		{
+			$cacheManager->ClearMetricMetadata($row['mvr_metric_id']);
+		}
+}
 	public function UpdateWorkVisiblity($workId)
 	{
 		// Es llamado cuando cambia el isIndexed, el isPrivate o el workType de una cartografía.
 		// 1. Trae los metrics ya publicados
-		$workModel = new WorkModel(false);
+		$publicWorkModel = new WorkModel(false);
 		$workIdShardified = PublishDataTables::Shardified($workId);
-		$metricVersions = $workModel->GetMetricVersions($workIdShardified);
+		$metricVersions = $publicWorkModel->GetMetricVersions($workIdShardified);
 		$unshardifiedMetricVersions = PublishDataTables::UnshardifyList($metricVersions, array('mvr_id', 'mvr_metric_id'));
 		// 2. Los resetea
 		$snapshots = new SnapshotsManager();

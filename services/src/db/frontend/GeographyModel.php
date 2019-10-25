@@ -37,6 +37,7 @@ class GeographyModel extends BaseModel
 			geo_id id,
 			geo_caption geography,
 			geo_field_code_name field_code,
+			geo_field_code_size field_size,
 			geo_field_caption_name field_caption,
 			geo_parent_id parent,
 			geo_min_zoom
@@ -54,6 +55,7 @@ class GeographyModel extends BaseModel
 			geo_id id,
 			geo_caption geography,
 			geo_field_code_name field_code,
+			geo_field_code_size field_size,
 			geo_field_caption_name field_caption,
 			geo_parent_id parent
 			FROM geography

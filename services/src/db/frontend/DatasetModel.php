@@ -298,12 +298,12 @@ class DatasetModel extends BaseModel
 		$carto = Str::SpanishSingle(Str::ToLower($car['geography']));
 
 		$cols[] = $this->GetCustomCol($table.'.gei_code', $car['field_code'], 'Código de ' . $carto,
-			Format::A, 0, null, 0, Measurement::Nominal, Alignment::Left);
+			Format::A, 0, $car['field_size'], 0, Measurement::Nominal, Alignment::Left);
 
 		if($car['field_caption'] != null)
 		{
 			$cols[] = $this->GetCustomCol($table.'.gei_caption', $car['field_caption'], 'Nombre de '.$carto,
-				Format::A, 0, null, 0, Measurement::Nominal, Alignment::Left);
+				Format::A, 0, 100, 0, Measurement::Nominal, Alignment::Left);
 		}
 		return $cols;
 	}

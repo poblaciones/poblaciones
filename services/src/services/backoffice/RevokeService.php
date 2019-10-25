@@ -52,13 +52,13 @@ class RevokeService extends BaseService
 				$this->state->NextStep('Eliminando datos públicos');
 				break;
 			case self::STEP_DELETE_SNAPSHOTS_DATASETS:
-				$manager = new RevokeSnapshots();
-				$manager->DeleteWorkDatasets($workId, true);
+				$manager = new RevokeSnapshots($workId);
+				$manager->DeleteAllWorkDatasets();
 				$this->state->NextStep('Eliminando indicadores públicos');
 				break;
 			case self::STEP_DELETE_SNAPSHOTS_METRICS_AND_DEFINITIONS:
-				$manager = new RevokeSnapshots();
-				$manager->DeleteWorkMetricVersions($workId, true);
+				$manager = new RevokeSnapshots($workId);
+				$manager->DeleteAllWorkMetricVersions();
 				// DEFINICIONES
 				$publisher = new PublishDataTables();
 				$publisher->DeleteWorkTables($workId);

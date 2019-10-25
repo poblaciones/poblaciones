@@ -159,11 +159,11 @@ class WorkModel extends BaseModel
 					$publisher = new PublishDataTables();
 					$publisher->DeleteDatasetsTables($workId);
 		echo '<br>STEP_DELETE_SNAPSHOTS_DATASETS:';
-					$manager = new RevokeSnapshots();
-					$manager->DeleteWorkDatasets($workId, true);
+					$manager = new RevokeSnapshots($workId);
+					$manager->DeleteAllWorkDatasets();
 		echo '<br>STEP_DELETE_SNAPSHOTS_METRICS:';
-					$manager = new RevokeSnapshots();
-					$manager->DeleteWorkMetricVersions($workId, true);
+					$manager = new RevokeSnapshots($workId);
+					$manager->DeleteAllWorkMetricVersions();
 		echo '<br>done';
 	}
 	public function GetList($type, $onlyCurrentUser = false)

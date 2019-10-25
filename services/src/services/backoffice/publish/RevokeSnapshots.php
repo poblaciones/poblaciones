@@ -4,104 +4,117 @@ namespace helena\services\backoffice\publish;
 
 use helena\services\common\BaseService;
 use helena\db\admin\WorkModel;
-use helena\classes\App;
-use minga\framework\ErrorException;
-
 use minga\framework\Profiling;
 use minga\framework\Arr;
 
 class RevokeSnapshots extends BaseService
 {
-	public function DeleteWorkDatasets($workId, $deleteAll = false)
+	private $cacheManager;
+	private $snapshotsManager;
+	private $workId;
+	private $shardifiedWorkId;
+	private $workModel;
+	private $work;
+	private $publicWorkModel;
+	private $publicWork;
+
+	public function __construct($workId)
+	{
+		$this->cacheManager = new CacheManager();
+		$this->snapshotsManager = new SnapshotsManager();
+		$this->workId = $workId;
+		$this->shardifiedWorkId = PublishDataTables::Shardified($workId);
+		$this->workModel = new WorkModel();
+		$this->work = $this->workModel->GetWork($workId);
+		$this->publicWorkModel = new WorkModel(false);
+		$this->publicWork = $this->publicWorkModel->GetWork($workId);
+	}
+
+	public function DeleteAllWorkDatasets()
+	{
+		$previousDatasets = PublishDataTables::UnshardifyList($this->publicWorkModel->GetDatasets($this->shardifiedWorkId), array('dat_id'));
+		return $this->DeleteDatasets($previousDatasets);
+	}
+	public function DeleteMissingWorkDatasets()
+	{
+		$datasets = $this->workModel->GetDatasets($this->workId);
+		$previousDatasets = PublishDataTables::UnshardifyList($this->publicWorkModel->GetDatasets($this->shardifiedWorkId), array('dat_id'));
+		$removedDatasets = Arr::RemoveByField('dat_id', $previousDatasets, $datasets);
+		if (sizeof($previousDatasets) != sizeof($datasets))
+			$this->work['wrk_dataset_data_changed'] = true;
+		return $this->DeleteDatasets($removedDatasets);
+	}
+	private function DeleteDatasets($datasetsToDelete)
 	{
 		Profiling::BeginTimer();
 
-		$workModel = new WorkModel();
-		$work = $workModel->GetWork($workId);
-		if ($work == null)
+		if ($this->publicWork == null)
 			// es la primera vez que se publica
 			return;
 
-		$cacheManager = new CacheManager();
-		$snapshotsManager = new SnapshotsManager();
-		$datasets = $workModel->GetDatasets($workId);
+		$datasets = $this->workModel->GetDatasets($this->workId);
 
-		$publicWorkModel = new WorkModel(false);
-		$shardifiedWorkId = PublishDataTables::Shardified($workId);
-		$previousDatasets = PublishDataTables::UnshardifyList($publicWorkModel->GetDatasets($shardifiedWorkId), array('dat_id'));
-
-		// Identifica qué borrar
-		if ($deleteAll)
-			$removedDatasets = $previousDatasets;
-		else
-			$removedDatasets = Arr::RemoveByField('dat_id', $previousDatasets, $datasets);
 		// Borra
-		foreach($removedDatasets as $row)
+		foreach($datasetsToDelete as $row)
 		{
-			$cacheManager->ClearDataset($row['dat_id']);
-			$snapshotsManager->CleanDataset($row['dat_id']);
+			$this->cacheManager->ClearDataset($row['dat_id']);
+			$this->snapshotsManager->CleanDataset($row['dat_id']);
 		}
-		foreach(Arr::UniqueByField('dat_work_id', $removedDatasets) as $row)
+		foreach(Arr::UniqueByField('dat_work_id', $datasetsToDelete) as $row)
 		{
-			$cacheManager->CleanMetadataPdfCache($row['dat_work_id']);
+			$this->cacheManager->CleanMetadataPdfCache($row['dat_work_id']);
 		}
+
 		// Si hubo uso de datasets que antes no estaban o sacó alguno, tiene que regenerar
-		if (sizeof($removedDatasets) > 0 || sizeof($previousDatasets) != sizeof($datasets))
-			$work['wrk_dataset_data_changed'] = true;
+		if (sizeof($datasetsToDelete) > 0)
+			$this->work['wrk_dataset_data_changed'] = true;
 
 		// Actualiza metadatos
-		if ($work['wrk_dataset_labels_changed'] || $work['wrk_dataset_data_changed'])
+		if ($this->work['wrk_dataset_labels_changed'] || $this->work['wrk_dataset_data_changed'])
 		{
 			foreach($datasets as $row)
-				$cacheManager->ClearDatasetMetaData($row['dat_id']);
+				$this->cacheManager->ClearDatasetMetaData($row['dat_id']);
+			foreach($datasetsToDelete as $row)
+				$this->cacheManager->ClearDatasetMetaData($row['dat_id']);
 
 			foreach(Arr::UniqueByField('dat_work_id', $datasets) as $row)
-				$cacheManager->CleanMetadataPdfCache($row);
+				$this->cacheManager->CleanMetadataPdfCache($row);
+			foreach(Arr::UniqueByField('dat_work_id', $datasetsToDelete) as $row)
+				$this->cacheManager->CleanMetadataPdfCache($row);
 		}
 
 		Profiling::EndTimer();
 	}
 
-	public function DeleteWorkMetricVersions($workId, $deleteAll = false)
+	public function DeleteAllWorkMetricVersions()
 	{
 		Profiling::BeginTimer();
 
-		$workModel = new WorkModel();
-		$work = $workModel->GetWork($workId);
+		$metricVersions = $this->workModel->GetMetricVersions($this->workId);
 
-		$cacheManager = new CacheManager();
-		$snapshotsManager = new SnapshotsManager();
-
-		$workModel = new WorkModel();
-		$metricVersions = $workModel->GetMetricVersions($workId);
-
-		$publicWorkModel = new WorkModel(false);
-		$shardifiedWorkId = PublishDataTables::Shardified($workId);
-		$previousMetricVersions = PublishDataTables::UnshardifyList($publicWorkModel->GetMetricVersions($shardifiedWorkId), array('mvr_id', 'mvr_metric_id'));
+		$previousMetricVersions = PublishDataTables::UnshardifyList($this->publicWorkModel->GetMetricVersions($this->shardifiedWorkId),
+																																								array('mvr_id', 'mvr_metric_id'));
 
 		// Limpia el fabCache
-		if ($work['wrk_type'] === 'P')
+		if ($this->work['wrk_type'] === 'P')
 		{
-			$cacheManager->CleanFabMetricsCache();
+			$this->cacheManager->CleanFabMetricsCache();
 		}
 
 		// Identifica qué borrar
-		if ($deleteAll)
-			$removedMetricVersions = $previousMetricVersions;
-		else
-			$removedMetricVersions = Arr::RemoveByField('mvr_id', $previousMetricVersions, $metricVersions);
+		$removedMetricVersions = $previousMetricVersions;
 
-		// Borra lo removido
-		$snapshotsManager->DeleteMetricVersionsByWork($workId);
+		// Borra
+		$this->snapshotsManager->DeleteMetricVersionsByWork($this->workId);
 
 		foreach($removedMetricVersions as $row)
 		{
-			$snapshotsManager->CleanMetricVersionData($row);
+			$this->snapshotsManager->CleanMetricVersionData($row);
 		}
 		// Libera los metadatos del metric en el que están las versiones y de los borrados
 		foreach(Arr::UniqueByField('mvr_metric_id', array_merge($previousMetricVersions, $metricVersions)) as $row)
 		{
-			$cacheManager->ClearMetricMetadata($row['mvr_metric_id']);
+			$this->cacheManager->ClearMetricMetadata($row['mvr_metric_id']);
 		}
 	}
 }

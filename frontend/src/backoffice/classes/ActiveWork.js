@@ -122,15 +122,15 @@ ActiveWork.prototype.GetUploadUrl = function () {
 
 
 ActiveWork.prototype.GetCreateFileUrl = function (bucketId) {
-	return window.host + '/services/backoffice/UploadChunk?b=' + bucketId;
+	return window.host + '/services/backoffice/PostImportChunk?b=' + bucketId;
 };
 
-ActiveWork.prototype.GetDatasetFileUploadUrl = function (keepLabels) {
-	return window.host + '/services/backoffice/Dataset/CreateMultiUploadFile?k=' + (keepLabels ? '1' : 0);
+ActiveWork.prototype.GetDatasetFileImportUrl = function (keepLabels) {
+	return window.host + '/services/backoffice/Dataset/CreateMultiImportFile?k=' + (keepLabels ? '1' : 0);
 };
 
-ActiveWork.prototype.GetStepDatasetFileUploadUrl = function () {
-	return window.host + '/services/backoffice/Dataset/StepMultiUploadFile';
+ActiveWork.prototype.GetStepDatasetFileImportUrl = function () {
+	return window.host + '/services/backoffice/Dataset/StepMultiImportFile';
 };
 
 ActiveWork.prototype.GetHighestLevelForVersion = function(metricVersion) {

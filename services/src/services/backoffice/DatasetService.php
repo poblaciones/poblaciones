@@ -12,7 +12,7 @@ use helena\services\backoffice\cloning\DatasetClone;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;
-use helena\services\backoffice\upload\DatasetTable;
+use helena\services\backoffice\import\DatasetTable;
 use helena\caches\BackofficeDownloadCache;
 
 class DatasetService extends DbSession

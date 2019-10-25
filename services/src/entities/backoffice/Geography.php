@@ -65,6 +65,13 @@ class Geography
     private $FieldCodeName;
 
     /**
+		 * @var integer
+		 *
+		 * @ORM\Column(name="geo_field_code_size", type="integer", precision=0, scale=0, nullable=false, unique=false)
+		 */
+    private $FieldCodeSize;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="geo_field_code_type", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
@@ -299,6 +306,30 @@ class Geography
     public function getFieldCodeName()
     {
         return $this->FieldCodeName;
+    }
+
+		/**
+		 * Set fieldCodeSize
+		 *
+	 * @param integer $fieldCodeSize
+		 *
+		 * @return Geography
+		 */
+    public function setFieldCodeSize($fieldCodeSize)
+    {
+			$this->FieldCodeSize = $fieldCodeSize;
+
+			return $this;
+    }
+
+    /**
+		 * Get fieldCodeSize
+		 *
+		 * @return integer
+		 */
+    public function getFieldCodeSize()
+    {
+			return $this->FieldCodeSize;
     }
 
     /**

@@ -10,7 +10,7 @@ use helena\entities\backoffice as entities;
 use helena\services\backoffice\cloning\SqlBuilder;
 use helena\caches\DatasetColumnCache;
 use helena\caches\BackofficeDownloadCache;
-use helena\services\backoffice\upload\DatasetColumns;
+use helena\services\backoffice\import\DatasetColumns;
 
 
 class DatasetColumnService extends DbSession

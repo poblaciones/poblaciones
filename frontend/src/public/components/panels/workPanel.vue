@@ -18,8 +18,7 @@
 						<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
 						<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
 						<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
-					<div style="position: relative; z-index: 10">
-
+					<div style="position: relative; z-index: 10;" :style="(showButtonsInInSingleRow() ? 'width: 1px' : '')">
 						<div class="sourceInfo" :style="getMetadataStyle()">
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
 									v-on:click="clickFuente" style="color: #FFF">
@@ -81,15 +80,17 @@ export default {
 			e.preventDefault();
 			this.$refs.showFuente.show();
 		},
+		showButtonsInInSingleRow() {
+			return (!this.work.Current.Institution && !this.work.Current.Authors);
+		},
 		getMetadataStyle() {
+			if (this.showButtonsInInSingleRow()) {
+				return 'margin-top: -24px; margin-left: -90px;';
+			}
 			if (this.work.Current.Institution) {
 				return '';
 			} else {
-				if (this.work.Current.Authors) {
-					return 'margin-top: 3px';
-				} else {
-				return 'margin-top: -24px; margin-left: -90px;';
-				}
+				return 'margin-top: 3px';
 			}
 		},
 		metricSelected() {
