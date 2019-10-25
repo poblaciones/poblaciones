@@ -32,7 +32,7 @@ class SpssWriter extends JsonWriter
 
 		$hFile = $this->state->Get('outFile') . '_head.json';
 		IO::WriteJson($hFile, $head, true);
-		
+
 		$lines = array();
 		$ret = System::Execute(App::GetSetting('python'), array(
 			Paths::GetPythonScriptsPath() .'/json2spss.py',
@@ -54,11 +54,8 @@ class SpssWriter extends JsonWriter
 			}
 			throw new ErrorException('Error en creación de archivo spss.' . $err);
 		}
-
-		$this->state->SetStep(DownloadManager::STEP_DATA_COMPLETE, 'Descargando archivo');
-		$this->state->Save();
 	}
-	
+
 	private function ProcessColumn(array $col, array $head)
 	{
 		$col['variable'] = Variable::FixName($col['variable']);

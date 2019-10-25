@@ -17,43 +17,42 @@ use helena\classes\App;
 
 class JsonWriter extends BaseWriter
 {
+	public function SaveHeader()
+	{
+	}
 	public function PageData()
 	{
 		$rows = $this->GetRowsAndIncrementSlice();
-		if(count($rows) > 0)
-		{
-			$cols = $this->state->Cols();
-
-			foreach($rows as &$row)
-			{
-				foreach($row as $k => &$valueFor)
-				{
-					if($this->model->wktIndex == $k)
-					{
-						$valueFor = $this->PrepareGeometry($this->state->Get('type'), $valueFor);
-					}
-					$cols[$k]['field_width'] = $this->GetFieldWitdh($valueFor, $cols[$k]);
-					$this->SetIdLabels($valueFor, $cols[$k]);
-				}
-			}
-			// Itera para ponerlo en el array
-			foreach($cols as $k => $value)
-			{
-				$this->state->SetColWidth($k, $value['field_width']);
-			}
-			IO::WriteJson(IO::GetSequenceName($this->state->Get('dFile'), $this->state->Get('index')), $rows);
-			$this->state->Increment('index');
-		}
-		else
+		if(count($rows) === 0) 
 		{
 			$this->FixDefaultWidths();
-			// Finaliza
-			$this->state->SetStep(DownloadManager::STEP_CREATED, 'Consolidando archivo');
+			return false;
 		}
+		$cols = $this->state->Cols();
 
-		$this->state->Save();
+		foreach($rows as &$row)
+		{
+			foreach($row as $k => &$valueFor)
+			{
+				if($this->model->wktIndex == $k)
+				{
+					$valueFor = $this->PrepareGeometry($this->state->Get('type'), $valueFor);
+				}
+				$cols[$k]['field_width'] = $this->GetFieldWitdh($valueFor, $cols[$k]);
+				$this->SetIdLabels($valueFor, $cols[$k]);
+			}
+		}
+		// Itera para ponerlo en el array
+		foreach($cols as $k => $value)
+		{
+			$this->state->SetColWidth($k, $value['field_width']);
+		}
+		IO::WriteJson(IO::GetSequenceName($this->state->Get('dFile'), $this->state->Get('index')), $rows);
+		$this->state->Increment('index');
+
+		return true;
 	}
-	
+
 
 	private function FixDefaultWidths()
 	{

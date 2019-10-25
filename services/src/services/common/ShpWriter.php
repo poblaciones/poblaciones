@@ -16,22 +16,18 @@ use Shapefile\Geometry\MultiLinestring;
 use Shapefile\Geometry\Polygon;
 use Shapefile\Geometry\MultiPolygon;
 
-class ShpWriter extends JsonWriter
+class ShpWriter extends BaseWriter
 {
 	const PRJ = "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433],METADATA[\"World\",-180.0,-90.0,180.0,90.0,0.0,0.0174532925199433,0.0,1262]]";
 	private $cols;
 
-	public function Flush()
+	public function SaveHeader()
 	{
-		$dir = dirname($this->state->Get('outFile'));
-		$friendly = $this->state->Get('friendlyName');
-		$friendlyNoExtension = $dir . '/' . substr($friendly, 0, strlen($friendly) - 4);
-		$zipFile = $this->state->Get('outFile');
-		$shapeFile =  $friendlyNoExtension . '.shp';
 		$this->cols = $this->state->Cols();
 
 		// Empieza a crear los archivos
-    $Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_OVERWRITE_EXISTING_FILES  => true]);
+		$shapeFile = $this->resolveShapeFile();
+    $Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_EXISTING_FILES_MODE  => Shapefile::MODE_OVERWRITE]);
 
     // Setea el tipo
 		$wktIndex = $this->model->wktIndex;
@@ -42,65 +38,81 @@ class ShpWriter extends JsonWriter
 		else
 		{
 		  $Shapefile->setShapeType(Shapefile::SHAPE_TYPE_POINT);
-			$iLat = $this->getColumnByVariable($this->state->Get('latVariable'));
-			$iLon = $this->getColumnByVariable($this->state->Get('lonVariable'));
 		}
     $Shapefile->setPRJ(self::PRJ);
 
 		$cols = $this->cols;
 		$this->ProcessColumns($Shapefile, $cols);
 
-		// Ya armó la estructura
-		$q = 0;
-		foreach(IO::GetFilesStartsWith($dir, 'intermediate_data_', true) as $file)
-		{
-			$data = IO::ReadJson($file);
-			foreach($data as $row)
-			{
-//				Profiling::BeginTimer('PrepareRecord');
-				$geom = null;
-				if ($wktIndex !== -1)
-				{
-					// rearma el polígono
-					$polygon = $row[$wktIndex];
-					$geom = $this->createGeom($polygon);
-				} else {
-					$geom = new Point(floatval($row[$iLon]), floatval($row[$iLat]));
-				}
-				$i = 0;
-				foreach($cols as $col)
-				{
-					if ($wktIndex !== $i)
-					{
-
-				if ($col['format'] != Format::F)
-				{
-	//				Profiling::BeginTimer('utf8_decode');
-
-						$val = utf8_decode($row[$i]);
-		//		Profiling::EndTimer();
-				}
-				else
-				{
-					$val = strval($row[$i]);
-				}
-						if (strlen($val) > 254)
-						{
-							$val = substr($val, 0, 254);
-						}
-						$geom->setData($col['effectiveVariable'], $val);
-					}
-					$i++;
-				}
-			//	Profiling::EndTimer();
-		    $Shapefile->writeRecord($geom);
-			}
-			$q++;
-		}
-
 		$Shapefile = null;
+	}
 
+	public function PageData()
+	{
+		$rows = $this->GetRowsAndIncrementSlice();
+		if(count($rows) === 0) return false;
+
+		$shapeFile = $this->resolveShapeFile();
+	  $Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_EXISTING_FILES_MODE  => Shapefile::MODE_APPEND,
+			Shapefile::OPTION_BUFFERED_RECORDS => 100,
+			Shapefile::OPTION_ENFORCE_GEOMETRY_DATA_STRUCTURE => false]);
+
+		$wktIndex = $this->model->wktIndex;
+		$cols = $this->state->Cols();
+		if ($wktIndex === -1)
+		{
+			$iLat = $this->getColumnByVariable($this->state->Get('latVariable'));
+			$iLon = $this->getColumnByVariable($this->state->Get('lonVariable'));
+		}
+		$f = 0;
+		foreach($rows as &$row)
+		{
+			$f++;
+			$geom = null;
+			if ($wktIndex !== -1)
+			{
+				// rearma el polígono
+				$polygon = $row[$wktIndex];
+				$geom = $this->createGeom($polygon);
+			} else
+			{
+				$geom = new Point(floatval($row[$iLon]), floatval($row[$iLat]));
+			}
+			$i = 0;
+			foreach($cols as $col)
+			{
+				if ($wktIndex !== $i)
+				{
+					if ($col['format'] != Format::F)
+					{
+						$val = utf8_decode($row[$i]);
+					}
+					else
+					{
+						$val = $row[$i];
+					}
+					if (strlen($val) > 254)
+					{
+						$val = substr($val, 0, 254);
+					}
+					$geom->setData($col['effectiveVariable'], $val);
+				}
+				$i++;
+			}
+			//	Profiling::EndTimer();
+			$Shapefile->writeRecord($geom);
+		}
+		$Shapefile = null;
+		$this->state->Increment('index');
+
+		return true;
+	}
+
+	public function Flush()
+	{
+		$zipFile = $this->state->Get('outFile');
 		$zip = new Zip($zipFile);
+		$friendlyNoExtension = $this->resolveBaseName();
 		$files = array($friendlyNoExtension . '.dbf', $friendlyNoExtension . '.prj',
 															$friendlyNoExtension . '.shp', $friendlyNoExtension . '.shx');
 		if (file_exists($friendlyNoExtension . '.cpg'))
@@ -108,12 +120,27 @@ class ShpWriter extends JsonWriter
 		if (file_exists($friendlyNoExtension . '.cpg'))
 			$files[] =  $friendlyNoExtension . '.dbt';
 
+		$dir = $this->resolveDirectory();
 		$zip->AddToZip($dir, $files);
-		//throw new \Exception('aaa');
-
-		$this->state->SetStep(DownloadManager::STEP_DATA_COMPLETE, 'Descargando archivo');
-		$this->state->Save();
 	}
+
+	private function resolveShapeFile()
+	{
+		$shapeFile = $this->resolveBaseName() . '.shp';
+		return $shapeFile;
+	}
+	private function resolveDirectory()
+	{
+		return dirname($this->state->Get('outFile'));
+	}
+	private function resolveBaseName()
+	{
+		$dir = $this->resolveDirectory();
+		$friendly = $this->state->Get('friendlyName');
+		$friendlyNoExtension = $dir . '/' . substr($friendly, 0, strlen($friendly) - 4);
+		return $friendlyNoExtension;
+	}
+
 	private function createGeom($wkt)
 	{
 //		Profiling::BeginTimer();
@@ -172,65 +199,25 @@ class ShpWriter extends JsonWriter
 		{
 			if ($wktIndex !== $i)
 			{
-				$varName = $this->fixVarName($col['variable'], $cols);
-				$col['effectiveVariable'] = $varName;
-
 				$width = $col['field_width'];
 				$decimals = $col['decimals'];
 
 				if ($col['format'] == Format::F)
 				{
-					$Shapefile->addNumericField($varName, $width, $decimals);
+					$varName = $Shapefile->addNumericField($col['variable'], $width, $decimals);
 				}
 				else if ($width < 255)
 				{
-					$Shapefile->addCharField($varName, $width);
+					$varName = $Shapefile->addCharField($col['variable'], $width);
 				}
 				else
 				{
-					$Shapefile->addCharField($varName, 254);
+					$varName = $Shapefile->addCharField($col['variable'], 254);
 				}
+				$this->state->state['cols'][$i]['effectiveVariable'] = $varName;
 			}
 			$i++;
 		}
 	}
-
-	private function fixVarName($name, $cols)
-	{
-		$n = 0;
-		$name = strtoupper($name);
-		$candidate = $nCandidate = $this->sanitizeDBFFieldName($name);
-		while($this->variableExists($nCandidate, $cols))
-		{
-			$n++;
-			$nCandidate = $this->appendNumber($candidate, $n);
-		}
-		return $nCandidate;
-	}
-
-	private function variableExists($cad, $cols)
-  {
-		foreach($cols as $col)
-			if (isset($col['effectiveVariable']) && $col['effectiveVariable'] === $cad)
-				return true;
-		return false;
-	}
-
-	private function appendNumber($cad, $n)
-  {
-		$futureLength = strlen($cad . '_' . $n);
-		if ($futureLength > 10)
-			$cad = substr($cad, 0, strlen($cad) - ($futureLength - 10));
-		return $cad . '_' . $n;
-  }
-
-	private function sanitizeDBFFieldName($input)
-  {
-      if ($input === '') {
-          return $input;
-      }
-      $ret = substr(preg_replace('/[^a-zA-Z0-9]/', '_', $input), 0, 10);
-      return $ret;
-  }
 }
 

@@ -21,59 +21,54 @@ class CsvWriter extends BaseWriter
 
 		$labels = $this->writeCSVheader($file, $count);
 
-		fclose($file);
-
 		$this->state->Set('labels', $labels);
-		$this->state->SetStep(DownloadManager::STEP_ADDING_ROWS, 'Anexando filas');
-		$this->state->Save();
+		fclose($file);
 	}
 
 	public function PageData()
 	{
 		$rows = $this->GetRowsAndIncrementSlice();
 
-		if(count($rows) > 0)
-		{
-			$file = fopen($this->state->Get('outFile'), 'a');
-			if($file === false)
-				throw new ErrorException('Error en creación de archivo');
-			$cols = $this->state->Cols();
-			$count = count($cols);
+		if(count($rows) === 0) return false;
 
-			foreach($rows as $row)
+		$file = fopen($this->state->Get('outFile'), 'a');
+		if($file === false)
+			throw new ErrorException('Error en creación de archivo');
+		$cols = $this->state->Cols();
+		$count = count($cols);
+
+		foreach($rows as $row)
+		{
+			$rowText = '';
+			$c = 0;
+			foreach($row as $k => $value)
 			{
-				$rowText = '';
-				$c = 0;
-				foreach($row as $k => $value)
+				if($this->model->wktIndex == $k)
+					$value = $this->PrepareGeometry($this->state->Get('type'), $value);
+				$isNumericColumn = $cols[$c]['format'] == Format::F;
+				if($isNumericColumn)
 				{
-					if($this->model->wktIndex == $k)
-						$value = $this->PrepareGeometry($this->state->Get('type'), $value);
-					$isNumericColumn = $cols[$c]['format'] == Format::F;
-					if($isNumericColumn)
+					if (Str::Contains($value, '.'))
 					{
-						if (Str::Contains($value, '.'))
-						{
-							$value = rtrim($value, '0');
-							$value = rtrim($value, '.');
-						}
+						$value = rtrim($value, '0');
+						$value = rtrim($value, '.');
 					}
-					$text = $this->GetCSVField($k, $value, $isNumericColumn, $this->state->Get('labels'), ($k + 1 == $count));
-					$text = $this->MakeOutputEncoding($text);
-					$rowText .= $text;
-					$c++;
 				}
-				if(fwrite($file, $rowText) === false)
-					throw new ErrorException('Error en creación de archivo');
+				$text = $this->GetCSVField($k, $value, $isNumericColumn, $this->state->Get('labels'), ($k + 1 == $count));
+				$text = $this->MakeOutputEncoding($text);
+				$rowText .= $text;
+				$c++;
 			}
-			fclose($file);
+			if(fwrite($file, $rowText) === false)
+				throw new ErrorException('Error en creación de archivo');
 		}
-		else
-		{
-			$this->state->SetStep(DownloadManager::STEP_DATA_COMPLETE, 'Descargando archivo');
-		}
-		$this->state->Save();
-	}
+		fclose($file);
 
+		return true;
+	}
+	public function Flush()
+	{
+	}
 	private function MakeOutputEncoding($utf8text)
 	{
 		if (self::OUTPUT_LATIN3_WINDOWS_ISO)

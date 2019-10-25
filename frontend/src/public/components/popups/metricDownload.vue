@@ -158,9 +158,9 @@ export default {
 			var ret = [];
 			ret.push({ caption: 'SPSS (.sav)', key: 's' });
 			ret.push({ caption: 'Texto (.csv)', key: 'c' });
-			/*if (!this.level.HasArea) {
+			if (!this.level.HasArea) {
 				ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
-			}*/
+			}
 			return ret;
 		},
 		resolveFileUrl(file) {
@@ -181,7 +181,7 @@ export default {
 			ret.push({ caption: 'SPSS con WKT (.sav)', key: 'sw' });
 			ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
 			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
-			//ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
+			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
 			return ret;
 		},
 		showUrls: debounce(function() {
