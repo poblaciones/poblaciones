@@ -45,7 +45,7 @@
 
 						<md-button @click="valuesOnClick()" :disabled="valuesDisabled">
 							<md-icon>ballot</md-icon>
-							Valores
+							Categorías
 						</md-button>
 
 					<md-button @click="excelBtnOnClick()">
@@ -485,7 +485,7 @@ export default {
 					},{
 						text: 'Etiqueta', datafield: 'Label', cellsalign: 'left', renderer: this.columnsrenderer, width: 120, type: 'string'
 					},{
-						text: 'Valores', cellsalign: 'left', datafield: 'ValueLabels', renderer: this.columnsrenderer, width: 90
+						text: 'Categorías', cellsalign: 'left', datafield: 'ValueLabels', renderer: this.columnsrenderer, width: 90
 					},{
 						text: 'Columnas', datafield: 'ColumnWidth', cellsalign: 'center', renderer: this.columnsrenderer, width: 70, type: 'int'
 					},{

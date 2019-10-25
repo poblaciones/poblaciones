@@ -3,7 +3,7 @@
 		<md-dialog :md-active.sync="openPopup" @md-closed="onClosed">
 			<invoker ref="invoker"></invoker>
 			<md-dialog-title>
-				Etiquetas de variable
+				Categorías
 			</md-dialog-title>
 
 			<md-dialog-content>

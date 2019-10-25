@@ -20,11 +20,11 @@
 									</div>
 								<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="S">Simple</md-radio>
 								<span v-if="Variable.Data !== 'N'">
-									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="J">Jenks</md-radio>
+									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="J" style="margin-left: 20px">Jenks</md-radio>
 									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="T">Ntiles</md-radio>
 									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="M">Manual</md-radio>
 								</span>
-								<md-radio v-model="Variable.Symbology.CutMode" class="md-primary" :disabled="!canEdit || Dataset.Labels.length === 0" value="V">Variable</md-radio>
+								<md-radio v-model="Variable.Symbology.CutMode" class="md-primary" style="float: right; margin-right: 10px;" :disabled="!canEdit || Dataset.Labels.length === 0" value="V">Categorías</md-radio>
 							</div>
 							<div class="md-layout-item md-size-100" style="margin-bottom: 10px;">
 								<md-divider></md-divider>
@@ -49,7 +49,7 @@
 								<div class="md-layout md-gutter">
 									<div class="md-layout-item md-size-45">
 										<mp-simple-text :canEdit="canEdit"
-													label="Cantidad de categorías (máx. 10)"
+													:label="'Cantidad de ' + CategoriesLabel + ' (máx. 10)'"
 													type="number"
 													v-model="Variable.Symbology.Categories"
 											/>
@@ -66,7 +66,7 @@
 								</div>
 							</div>
 							<div v-if="CutMode === 'V'">
-								<mp-select label='Variable de corte' :canEdit='canEdit' style='padding-right: 40px;'
+								<mp-select label='Variable de categorías' :canEdit='canEdit' style='padding-right: 40px;'
 										v-model='Variable.Symbology.CutColumn'
 										list-key='Id'
 										:list='Dataset.GetNumericWithLabelColumns()'
@@ -85,7 +85,7 @@
 					<md-card-content class="fixeHeightCard">
 					<div class="md-layout">
 						<div class="md-layout-item md-size-100" >
-							<div class="separator">Categorías</div>
+							<div class="separator">{{ CategoriesLabel }}</div>
 							<md-list style="height: 185px; overflow-y: auto">
 								<md-list-item v-for="item in Variable.Values" v-bind:key="item.Id"
 															:value="item.Id" class="itemSmall">
@@ -93,7 +93,7 @@
 													:ommitHexaSign="true" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
 																	 style="width: 45px; padding-top: 0px" />
 									<span class="md-list-item-text">{{ item.Caption }}</span>
-									<md-button v-if="canEdit && (Variable.Symbology.CutMode === 'M' || item.Value === null)" class="md-icon-button md-list-action"
+									<md-button v-if="canEdit && (CutMode === 'M' || item.Value === null)" class="md-icon-button md-list-action"
 											@click="editValue(item)">
 										<md-icon>edit</md-icon>
 									</md-button>
@@ -307,10 +307,10 @@ export default {
 			} else {
 				this.customColors = [];
 			}
-			if (this.Variable.Data === 'N' && (this.Variable.Symbology.CutMode === "J" || this.Variable.Symbology.CutMode === "T" || this.Variable.Symbology.CutMode === "M")) {
+			if (this.Variable.Data === 'N' && (this.CutMode === "J" || this.CutMode === "T" || this.CutMode === "M")) {
 				this.Variable.Symbology.CutMode = 'S';
 			}
-			if (this.Variable.Symbology.CutMode === 'S') {
+			if (this.CutMode === 'S') {
 				if (this.Variable.Values.length > 0) {
 					this.singleColor = this.Variable.Values[0].FillColor;
 				}
@@ -333,7 +333,7 @@ export default {
 				this.Variable.Symbology.ColorFrom = DEFAULT_FROM_COLOR;
 				this.Variable.Symbology.ColorTo = DEFAULT_TO_COLOR;
 			}
-			if (this.Variable.Symbology.CutMode === null) {
+			if (this.CutMode === null) {
 				this.Variable.Symbology.CutMode = 'S';
 			}
 		},
@@ -352,8 +352,8 @@ export default {
 			return '';
 		},
 		ValidateIncreasing() {
-			if (this.Variable.Symbology.CutMode === 'V' ||
-				this.Variable.Symbology.CutMode === 'S') {
+			if (this.CutMode === 'V' ||
+				this.CutMode === 'S') {
 				return true;
 			}
 			var last = null;
@@ -379,7 +379,7 @@ export default {
 				return true;
 			}
 			var text = '';
-			if (this.Variable.Symbology.CutMode === 'V') {
+			if (this.CutMode === 'V') {
 				alert ('Dos etiquetas de valores refieren al mismo valor (' + val + ').');
 			} else {
 				alert ('Dos rangos de valores se superponen (' + val + ').');
@@ -449,6 +449,9 @@ export default {
 		},
 		CutMode() {
 			return this.Variable.Symbology.CutMode;
+		},
+		CategoriesLabel() {
+			return (this.CutMode === 'V' ? 'categorías' : 'cortes');
 		},
 		roundValues () {
 			return [
