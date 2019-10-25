@@ -1,6 +1,6 @@
 <?php
 
-namespace helena\services\backoffice\upload;
+namespace helena\services\backoffice\import;
 
 use helena\classes\App;
 use helena\entities\backoffice as entities;

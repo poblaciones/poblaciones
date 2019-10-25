@@ -16,15 +16,15 @@ use helena\classes\CsvToJson;
 
 use helena\entities\backoffice\DraftDataset;
 
-use helena\services\backoffice\upload\MetadataMerger;
-use helena\services\backoffice\upload\UploadStateBag;
-use helena\services\backoffice\upload\DatasetTable;
-use helena\services\backoffice\upload\DatasetColumns;
+use helena\services\backoffice\import\MetadataMerger;
+use helena\services\backoffice\import\ImportStateBag;
+use helena\services\backoffice\import\DatasetTable;
+use helena\services\backoffice\import\DatasetColumns;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\entities\backoffice as entities;
 
 
-class UploadService extends BaseService
+class ImportService extends BaseService
 {
 	const STEP_BEGIN = 0;
 	const STEP_CONVERTED = 1;
@@ -34,7 +34,7 @@ class UploadService extends BaseService
 
 	private $state;
 
-	public function CreateMultiUploadFile($datasetId, $bucketId, $fileExtension, $keepLabels){
+	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels){
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetDatasetDataChanged($dataset->getWork()->getId());
 
@@ -54,7 +54,7 @@ class UploadService extends BaseService
 		throw new ErrorException('La extensión del archivo debe ser .SAV o .CSV. Extensión recibida: ' . $fileExtension);
 	}
 
-	public function FileChunkUpload($bucketId) {
+	public function FileChunkImport($bucketId) {
 		$bucket = FileBucket::Load($bucketId);
 		return $this->SaveTo($bucket);
 	}
@@ -75,13 +75,13 @@ class UploadService extends BaseService
 		return array('status' => 'OK', 'bucket' => $bucket->id, 'extension' => $extension);
 	}
 
-	public function FileUpload()
+	public function SingleStepFileImport()
 	{
 		$bucket = FileBucket::Create();
 		return $this->SaveTo($bucket);
 	}
 
-	public function StepMultiUploadFile($key)
+	public function StepMultiImportFile($key)
 	{
 		// Carga los estados
 		$this->LoadState($key);
@@ -105,13 +105,13 @@ class UploadService extends BaseService
 
 	private function LoadState($key)
 	{
-		$this->state = new UploadStateBag();
+		$this->state = new ImportStateBag();
 		$this->state->LoadFromKey($key);
 	}
 
 	private function PrepareNewState($datasetId, $keepLabels, $defaultBucketId)
 	{
-		$this->state = UploadStateBag::Create($datasetId, $defaultBucketId);
+		$this->state = ImportStateBag::Create($datasetId, $defaultBucketId);
 		$this->state->Set("datasetId", $datasetId);
 		$this->state->Set("keepLabels", $keepLabels);
 		$this->state->Save();

@@ -101,7 +101,7 @@ class DownloadManager
 		else
 			throw new ErrorException('File must be created before.');
 	}
-	
+
 	private static function GetFileName($datasetId, $clippingItemId, $type)
 	{
 		if($type[0] == 's')
@@ -212,19 +212,19 @@ class DownloadManager
 			return self::FILE_SHP;
 		else if ($this->state->Get('type')[0] == 'c')
 			return self::FILE_CSV;
-		else  
+		else
 			throw new ErrorException('Tipo de descarga inválido');
 	}
 
 	private function getWriter($fileType)
 	{
-		if ($fileType === self::FILE_SPSS) 
+		if ($fileType === self::FILE_SPSS)
 			return new SpssWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_CSV)
 			return new CsvWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_SHP)
 			return new ShpWriter($this->model, $this->state);
-		else 
+		else
 			throw new ErrorException('Tipo de descarga inválido');
 	}
 
@@ -233,23 +233,25 @@ class DownloadManager
 		$fileType = $this->getFileType();
 		$writer = $this->getWriter($fileType);
 
-		if($fileType === self::FILE_SPSS || $fileType === self::FILE_SHP)
+		if($this->state->Step() == self::STEP_BEGIN)
 		{
-			if($this->state->Step() == self::STEP_BEGIN)
-				$this->state->SetStep(self::STEP_ADDING_ROWS, 'Anexando filas');
-			else if($this->state->Step() == self::STEP_ADDING_ROWS)
-				$writer->PageData();
-			else if($this->state->Step() == self::STEP_CREATED)
-			{
-				$writer->Flush();
-			}
+			$writer->SaveHeader();
+			$this->state->SetStep(self::STEP_ADDING_ROWS, 'Anexando filas');
+			$this->state->Save();
 		}
-		else if($fileType === self::FILE_CSV)
+		else if($this->state->Step() == self::STEP_ADDING_ROWS)
 		{
-			if($this->state->Step() == self::STEP_BEGIN)
-				$writer->SaveHeader();
-			else if($this->state->Step() == self::STEP_ADDING_ROWS)
-				$writer->PageData();
+			if (!$writer->PageData())
+			{
+				$this->state->SetStep(DownloadManager::STEP_CREATED, 'Consolidando archivo');
+			}
+			$this->state->Save();
+		}
+		else if($this->state->Step() == self::STEP_CREATED)
+		{
+			$writer->Flush();
+			$this->state->SetStep(DownloadManager::STEP_DATA_COMPLETE, 'Descargando archivo');
+			$this->state->Save();
 		}
 	}
 

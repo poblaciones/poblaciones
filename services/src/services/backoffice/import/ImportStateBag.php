@@ -1,14 +1,14 @@
 <?php
 
-namespace helena\services\backoffice\upload;
+namespace helena\services\backoffice\import;
 
 use helena\classes\StateBag;
 
-class UploadStateBag extends StateBag
+class ImportStateBag extends StateBag
 {
 	public static function Create($datasetId, $defaultBucketId)
 	{
-		$ret = new UploadStateBag();
+		$ret = new ImportStateBag();
 		$ret->Initialize($defaultBucketId);
 		$folder = $ret->GetFolder();
 

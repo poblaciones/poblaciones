@@ -1,6 +1,6 @@
 <?php
 
-namespace helena\services\backoffice\upload;
+namespace helena\services\backoffice\import;
 
 use helena\classes\spss\Alignment;
 use helena\classes\spss\Format;
