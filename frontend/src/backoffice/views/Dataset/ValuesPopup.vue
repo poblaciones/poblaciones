@@ -317,8 +317,8 @@ export default {
 			var selectedRows = this.selectedIndexes();
 			for(var n = selectedRows.length - 1; n >= 0; n--) {
 				if (this.source.localdata[selectedRows[n]].Id !== null)
-					this.deletedList.push(this.source.localdata[n].Id);
-				arr.RemoveAt(this.source.localdata, n);
+					this.deletedList.push(this.source.localdata[selectedRows[n]].Id);
+				arr.RemoveAt(this.source.localdata, selectedRows[n]);
 			}
 			this.refreshData();
 			loc.Grid.clearselection();
