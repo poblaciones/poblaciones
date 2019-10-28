@@ -6,6 +6,8 @@
 - Descarga de datos en format Shapefile desde el visor del mapa.
 - Los 'Valores' de columna pasan a llamarse 'Categorías'.
 - El agrupamiento por 'Variable' pasa a llamarse 'Categorías'.
+- Fix: baja de categorías tomaba los elementos en el orden equivocado.
+- Filtra geometrías de menos de 1/300 tile (hasta x20 en tiempos para indicadores a nivel radio)
 
 v2.4 (2019-10-10)
 - Las etiquetas en modo satélite se colorean en blanco en lugar de negro.

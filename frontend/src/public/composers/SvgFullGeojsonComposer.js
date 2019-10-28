@@ -79,13 +79,15 @@ SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResult
 			id = dataItems[i]['FID'];
 			var fid = parseFloat(id);
 			// avanza en mapa
-			while (parseFloat(mapItems[iMapa].id) < fid) {
+			while (mapItems[iMapa].id < fid) {
 				if (++iMapa === mapItems.length) {
-					console.error('El elemento ' + fid + ' no se encontró en la cartografía para x:' + x + ', y:' + y + '.');
 					break;
 				}
 			}
-			if (iMapa !== mapItems.length && parseFloat(mapItems[iMapa].id) === fid) {
+			if (iMapa === mapItems.length) {
+				break;
+			}
+			if (mapItems[iMapa].id == fid) {
 				this.processFeature(id, dataItems[i], mapItems[iMapa], tileKey, tileBounds, filtered, allKeys, patternValue, colorMap);
 			}
 		}
