@@ -3,7 +3,7 @@
 namespace helena\services\backoffice\publish\snapshots;
 
 use helena\services\backoffice\publish\PublishDataTables;
-use helena\db\backoffice\VersionUpdater;
+use helena\classes\VersionUpdater;
 
 use minga\framework\Profiling;
 use minga\framework\Context;
@@ -12,14 +12,17 @@ use helena\classes\App;
 
 class SnapshotLookupModel
 {
+	public const SMALL_LABELS_FROM = 15;
+	public const SMALL_LABELS_TO = 22;
+
 	public function ClearDataset($datasetId)
 	{
 		$datasetIdShardified = PublishDataTables::Shardified($datasetId);
 
 		Profiling::BeginTimer();
-
 		$sqlDelete = "DELETE FROM snapshot_lookup WHERE clv_dataset_id = ?";
 		App::Db()->exec($sqlDelete, array($datasetIdShardified));
+		VersionUpdater::Increment('LOOKUP');
 
 		Profiling::EndTimer();
 	}
@@ -37,7 +40,7 @@ class SnapshotLookupModel
 
 		$sqlInsert = "SELECT ?, gei_geography_id,
 								?, '', " . $dataset['CaptionColumn'] . ", 'F', "
-								. $this->GetCentroidField($dataset) . ", 15, 22, " .
+								. $this->GetCentroidField($dataset) . ", " . self::SMALL_LABELS_FROM . ", " . self::SMALL_LABELS_TO . ", " .
 								$dataset["dat_id"] . " * 0x100000000 +id, 0 , ?, ?
 									FROM `" . $dataset["dat_table"] . "`, geography_item
 								WHERE gei_id = geography_item_id
@@ -57,6 +60,8 @@ class SnapshotLookupModel
 		}
 		$sqlCountry = "UPDATE snapshot_lookup SET clv_full_ids = CONCAT(?, '\t', clv_full_ids), clv_full_parent = CONCAT(?, '\t', clv_full_parent) WHERE clv_level IS NULL AND clv_dataset_id = ?";
 		$r = App::Db()->exec($sqlCountry, array($dataset['cli_id'], $dataset['cli_caption'], $datasetIdShardified));
+
+		VersionUpdater::Increment('LOOKUP');
 
 		Profiling::EndTimer();
 
@@ -105,6 +110,8 @@ class SnapshotLookupModel
 		$sqlDelete = "DELETE FROM snapshot_lookup WHERE clv_type = 'C';";
 		App::Db()->exec($sqlDelete);
 
+		VersionUpdater::Increment('LOOKUP_REGIONS');
+
 		Profiling::EndTimer();
 	}
 
@@ -135,6 +142,9 @@ class SnapshotLookupModel
 			$sqlParents = "UPDATE snapshot_lookup JOIN clipping_region_item ON clv_level = cli_id SET clv_level = cli_parent_id, clv_full_ids = CONCAT(cli_id, '\t', clv_full_ids), clv_full_parent = CONCAT(cli_caption, '\t', clv_full_parent) WHERE clv_level is not null";
 			$r = App::Db()->exec($sqlParents);
 		}
+
+		VersionUpdater::Increment('LOOKUP_REGIONS');
+
 		$ver->SetUpdated();
 
 		Profiling::EndTimer();

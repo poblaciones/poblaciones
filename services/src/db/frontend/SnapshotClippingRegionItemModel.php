@@ -182,9 +182,25 @@ class SnapshotClippingRegionItemModel extends BaseModel
 					ORDER BY C1.geo_revision";
 		$params = array();
 		$coordinate->ToParams($params);
-
 		$ret = App::Db()->fetchAll($sql, $params);
 
+		Profiling::EndTimer();
+		return $ret;
+	}
+	public function CalculateLevelsFromEnvelope($envelope)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_caption, C1.geo_revision,
+          C1.geo_partial_coverage, metadata.*, ins_caption
+          FROM geography C1
+					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
+					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
+					LEFT JOIN institution ON met_institution_id = ins_id
+					WHERE EXISTS (SELECT * FROM snapshot_geography_item WHERE C2.geo_id = giw_geography_id
+					AND MBRIntersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "')) AND giw_geography_is_tracking_level = 1)
+					ORDER BY C1.geo_revision";
+		$ret = App::Db()->fetchAll($sql);
+		
 		Profiling::EndTimer();
 		return $ret;
 	}

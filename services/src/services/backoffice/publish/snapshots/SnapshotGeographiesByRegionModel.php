@@ -6,7 +6,7 @@ use minga\framework\Profiling;
 use helena\caches\ClippingCache;
 use helena\classes\App;
 
-use helena\db\backoffice\VersionUpdater;
+use helena\classes\VersionUpdater;
 
 class SnapshotGeographiesByRegionModel
 {
@@ -15,6 +15,7 @@ class SnapshotGeographiesByRegionModel
 	 	Profiling::BeginTimer();
 
 		App::Db()->exec("TRUNCATE TABLE snapshot_clipping_region_item_geography_item");
+		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
 
 		ClippingCache::Cache()->Clear();
 
@@ -26,6 +27,7 @@ class SnapshotGeographiesByRegionModel
 		$ver = new VersionUpdater("SNAPSHOT_CARTOGRAPHY_REGION");
 
 	 	Profiling::BeginTimer();
+		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
 
 		$rowsAffected = 0;
 		$l = 1;
@@ -72,6 +74,7 @@ class SnapshotGeographiesByRegionModel
 			$rowsAffected += $r;
 		}
 
+		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
 		$ver->SetUpdated();
 
 	 	Profiling::EndTimer();

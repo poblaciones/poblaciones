@@ -9,7 +9,7 @@ use helena\services\backoffice\publish\snapshots\SnapshotGeographiesByRegionMode
 use helena\services\backoffice\publish\CacheManager;
 use helena\classes\Session;
 use helena\classes\Menu;
-use helena\db\backoffice\VersionUpdater;
+use helena\classes\VersionUpdater;
 
 use minga\framework\IO;
 use minga\framework\Arr;

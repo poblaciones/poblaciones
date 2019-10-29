@@ -42,6 +42,7 @@ App::RegisterControllerGet('/send', 'helena\controllers\frontend\cSend');
 // - Key: k
 // - Variable: i
 // - Urbanity: u
+// - revision: w
 // De download:
 // - Type: t
 //		case 'ss': // spss+shape,
@@ -103,7 +104,7 @@ App::$app->get('/services/download/GetFile', function (Request $request) {
 App::$app->get('/services/search', function (Request $request) {
 	$query = Params::Get('q');
 	$controller = new services\LookupService($query);
-	return App::Json($controller->Search());
+	return App::JsonImmutable($controller->Search());
 });
 
 App::$app->get('/services/clipping/GetDefaultFrame', function (Request $request) {
@@ -126,7 +127,7 @@ App::$app->get('/services/clipping/CreateClippingByName', function (Request $req
 	$controller = new services\ClippingService();
 	$frame = Frame::FromParams();
 	$levelName = Params::Get('n', null);
-	return App::Json($controller->CreateClippingByName($frame, $levelName));
+	return App::JsonImmutable($controller->CreateClippingByName($frame, $levelName));
 });
 
 // ej. http://mapas/services/clipping/CreateClipping
@@ -134,7 +135,7 @@ App::$app->get('/services/clipping/CreateClipping', function (Request $request) 
 	$controller = new services\ClippingService();
 	$frame = Frame::FromParams();
 	$levelId = Params::GetInt('a', 0);
-	return App::Json($controller->CreateClipping($frame, $levelId));
+	return App::JsonImmutable($controller->CreateClipping($frame, $levelId));
 });
 
 // ej. http://mapas/services/metrics/GetSummary?l=8&v=12&a=62&r=7160
@@ -148,7 +149,7 @@ App::$app->get('/services/metrics/GetSummary', function (Request $request) {
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
-	return App::Json($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity));
+	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity));
 });
 
 
@@ -230,7 +231,7 @@ App::$app->get('/services/clipping/GetLabels', function (Request $request) {
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntMandatory('z');
 	$b = Params::Get('b');
-	return App::Json($controller->GetLabels($x, $y, $z, $b));
+	return App::JsonImmutable($controller->GetLabels($x, $y, $z, $b));
 });
 
 // ej. http://mapas/services/geographies/GetGeography?a=62&z=12&x=1380&y=2468
@@ -243,7 +244,8 @@ App::$app->get('/services/geographies/GetGeography', function (Request $request)
 	$p = Params::GetInt('p', 0);
 	$b = Params::Get('b');
 	$ret = $controller->GetGeography($levelId, $x, $y, $z, $b, $p);
-	return App::Json($ret);
+
+	return App::JsonImmutable($ret);
 });
 
 // ej. http://mapas/services/shapes/GetDatasetShapes?a=62&z=12&x=1380&y=2468
@@ -257,7 +259,7 @@ App::$app->get('/services/shapes/GetDatasetShapes', function (Request $request) 
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
 
-	return App::Json($controller->GetDatasetShapes($datasetId, $x, $y, $z, $b));
+	return App::JsonImmutable($controller->GetDatasetShapes($datasetId, $x, $y, $z, $b));
 });
 
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470
@@ -277,13 +279,18 @@ App::$app->get('/services/metrics/GetTileData', function (Request $request) {
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntMandatory('z');
 	$b = Params::Get('b');
-	return App::Json($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b));
+	return App::JsonImmutable($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b));
 });
 
 
+App::$app->get('/services/GetRevisions', function (Request $request) {
+	$controller = new services\RevisionsService();
+	return App::Json($controller->GetRevisions());
+});
+
 App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {
 	$controller = new services\MetricService();
-	return $controller->GetFabMetricsJson();
+	return App::JsonImmutable($controller->GetFabMetrics());
 });
 
 App::$app->get('/services/metrics/GetSelectedMetric', function (Request $request) {

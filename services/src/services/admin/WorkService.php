@@ -25,7 +25,7 @@ class WorkService extends BaseService
 		}
 		// Actualiza cachés
 		$publisher = new PublishSnapshots();
-		$publisher->UpdateWorkVisiblity($workId);
+		$publisher->UpdateWorkVisibility($workId);
 		return self::OK;
 	}
 

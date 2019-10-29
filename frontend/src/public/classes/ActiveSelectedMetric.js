@@ -454,11 +454,11 @@ ActiveSelectedMetric.prototype.GetDataService = function () {
 ActiveSelectedMetric.prototype.GetCartoService = function () {
 	switch (this.SelectedLevel().LevelType) {
 	case 'L':
-		return { url: null, useDatasetId: false };
+			return { url: null, useDatasetId: false, revision: null };
 	case 'D':
-		return { url: 'geographies/GetGeography', useDatasetId: false };
+		return { url: 'geographies/GetGeography', useDatasetId: false, revision: window.SegMap.Revisions.Geography };
 	case 'S':
-		return { url: 'shapes/GetDatasetShapes', useDatasetId: true };
+		return { url: 'shapes/GetDatasetShapes', useDatasetId: true, revision: this.properties.Metric.Revision };
 	default:
 		throw new Error('Unknown dataset metric type');
 	}

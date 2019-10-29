@@ -25,7 +25,6 @@ class GeographyService extends BaseService
 	{
 		$data = null;
 		$key = GeographyCache::CreateKey($x, $y, $z, $b, $page);
-
 		if (GeographyCache::Cache()->HasData($geographyId, $key, $data))
 		{
 			return $this->GotFromCache($data);

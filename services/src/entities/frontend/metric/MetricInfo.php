@@ -10,6 +10,7 @@ class MetricInfo extends BaseMapModel
 	public $Id; //  implements JsonSerializable
 	public $Name;
 	public $MetricGroupId;
+	public $Revision;
 
 	public $Versions = array();
 	public static function GetMap()

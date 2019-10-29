@@ -93,7 +93,6 @@ class ClippingService extends BaseService
 	{
 		$data = $this->CalculateClipping($frame,  0, $name);
 		$data->EllapsedMs = GlobalTimer::EllapsedMs();
-
 		return $data;
 	}
 
@@ -186,7 +185,7 @@ class ClippingService extends BaseService
 		}
 		else if ($frame->Envelope != null)
 		{
-			$rows = $table->CalculateLevelsFromPoint($frame->Envelope->GetCentroid());
+			$rows = $table->CalculateLevelsFromEnvelope($frame->Envelope);
 		}
 		else
 		{

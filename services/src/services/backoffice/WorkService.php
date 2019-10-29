@@ -109,7 +109,7 @@ class WorkService extends BaseService
 		return self::OK;
 	}
 
-	public function UpdateWorkVisiblity($workId, $value)
+	public function UpdateWorkVisibility($workId, $value)
 	{
 		// Cambia el valor
 		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
@@ -124,7 +124,7 @@ class WorkService extends BaseService
 		}
 		// Actualiza cachés
 		$publisher = new PublishSnapshots();
-		$publisher->UpdateWorkVisiblity($workId);
+		$publisher->UpdateWorkVisibility($workId);
 		return self::OK;
 	}
 

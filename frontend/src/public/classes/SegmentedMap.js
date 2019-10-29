@@ -8,16 +8,16 @@ import RestoreRoute from '@/public/classes/RestoreRoute';
 import axios from 'axios';
 import str from '@/common/js/str';
 
-import wrapper from 'axios-cache-plugin';
 import h from '@/public/js/helper';
 import err from '@/common/js/err';
 
 export default SegmentedMap;
 
-function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCollection) {
+function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCollection, revisions) {
 	this.frame = frame;
 	this.Tutorial = new Tutorial(toolbarStates);
 	this.Clipping = new Clipping(this, frame, clipping);
+	this.Revisions = revisions;
 	this.MapsApi = mapsApi;
 	this.Work = null;
 	this.textCanvas = {};
@@ -72,9 +72,7 @@ SegmentedMap.prototype.CreateAxios = function () {
 	// La instancia de axios que usa tiene caching
 	// y control de cantidad máxima de pedidos al servidor
 	var api = axios.create({ withCredentials: true });
-	var axi = wrapper(api, { maxCacheSize: 500 });
-	axi.__addFilter(/services/);
-	return axi;
+	return api;
 };
 
 SegmentedMap.prototype.MapInitialized = function () {

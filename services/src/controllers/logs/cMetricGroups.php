@@ -6,6 +6,7 @@ use helena\controllers\common\cController;
 use helena\db\admin\MetricGroupModel;
 use helena\services\backoffice\publish\CacheManager;
 use helena\classes\Session;
+use helena\classes\VersionUpdater;
 use helena\classes\Menu;
 
 class cMetricGroups extends cController
@@ -22,6 +23,7 @@ class cMetricGroups extends cController
 			$caches = new CacheManager();
 			$caches->CleanFabMetricsCache();
 			$caches->CleanMetricGroupsMetadataCache();
+			VersionUpdater::Increment('FAB_METRICS');
 		}
 		$metricGroups = $metricGroupsModel->GetList();
 		$this->LoadLinks($metricGroups);

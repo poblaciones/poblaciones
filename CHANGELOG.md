@@ -1,4 +1,12 @@
 ﻿[CURRENT]
+
+v2.6 (2019-10-28)
+- Habilitación de caching entre sesiones del navegador. 
+- Filtro de entidades inferiores a un pixel (< 1/300 tile) (hasta x20 en tiempos para indicadores a nivel radio)
+- Mejora en uso de RAM en el browser (baja a menos de un tercio en mapas con muchas entidades).
+- Permite descargar en format shapefile.
+
+v2.5 (2019-10-18)
 - Fix: al publicarse obras con cambios solamente en los metadatos, dejaban de quedar visibles sus indicadores.
 - Leyendas a pie de mapa (condiciones de Google Maps) pasadas a castellano.
 - Botones superiores de marco de cartografía mejorados.
@@ -7,7 +15,8 @@
 - Los 'Valores' de columna pasan a llamarse 'Categorías'.
 - El agrupamiento por 'Variable' pasa a llamarse 'Categorías'.
 - Fix: baja de categorías tomaba los elementos en el orden equivocado.
-- Filtra geometrías de menos de 1/300 tile (hasta x20 en tiempos para indicadores a nivel radio)
+- Filtra geometrías de menos de 1/300 tile 
+- Fix: la restauración por ruta no se completaba bien si el centro se encontraba en alguna ubicación fuera del territorio nacional.
 
 v2.4 (2019-10-10)
 - Las etiquetas en modo satélite se colorean en blanco en lugar de negro.
@@ -15,7 +24,6 @@ v2.4 (2019-10-10)
 - Fix: no da error de vuejs de elementos con misma clave en el buscador.
 - Fix: no deja markers huérfanos tras cambio de zoom.
 - La descarga muestra % de progreso.
-- Permite descargar en format shapefile.
 
 v2.3 (2019-09-22)
 - Buscador: expresiones con textos de menos de 3 caracteres no entrecomillados volvían nula la búsqueda (ej. <riesgo inseguridad> traía <riesgo de inseguridad> pero <riesgo de inseguridad> no traía nada).

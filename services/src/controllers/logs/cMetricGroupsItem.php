@@ -5,7 +5,7 @@ namespace helena\controllers\logs;
 use helena\controllers\common\cController;
 use helena\db\admin\MetricGroupModel;
 use helena\services\backoffice\publish\CacheManager;
-
+use helena\classes\VersionUpdater;
 use helena\classes\Session;
 use helena\classes\Menu;
 use helena\classes\App;
@@ -48,6 +48,7 @@ class cMetricGroupsItem extends cController
 		$caches = new CacheManager();
 		$caches->CleanFabMetricsCache();
 		$caches->CleanMetricGroupsMetadataCache();
+		VersionUpdater::Increment('FAB_METRICS');
 
 		return App::Redirect("/logs/categories");
 	}

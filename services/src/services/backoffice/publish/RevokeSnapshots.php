@@ -4,6 +4,8 @@ namespace helena\services\backoffice\publish;
 
 use helena\services\common\BaseService;
 use helena\db\admin\WorkModel;
+use helena\classes\VersionUpdater;
+
 use minga\framework\Profiling;
 use minga\framework\Arr;
 
@@ -98,6 +100,7 @@ class RevokeSnapshots extends BaseService
 		// Limpia el fabCache
 		if ($this->work['wrk_type'] === 'P')
 		{
+			VersionUpdater::Increment('FAB_METRICS');
 			$this->cacheManager->CleanFabMetricsCache();
 		}
 

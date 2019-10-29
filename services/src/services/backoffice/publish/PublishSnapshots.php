@@ -7,7 +7,7 @@ use minga\framework\Arr;
 
 use helena\db\admin\WorkModel;
 use helena\services\common\BaseService;
-use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionModel;
+use helena\classes\VersionUpdater;
 
 class PublishSnapshots extends BaseService
 {
@@ -74,10 +74,15 @@ class PublishSnapshots extends BaseService
 				$snapshotsManager->DeleteMetricVersionsByWork($workId);
 				$this->ClearRemovedMetrics($workId, $metricVersions);
 			}
-			// Actualiza los metadatos del metric en el que están las versiones
-			$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
 			// Libera los metadatos del metric (summary, selected, getTile)
 			$cacheManager->ClearMetricMetadata($metricVersion['mvr_metric_id']);
+		}
+		// Actualiza los metadatos del metric en el que están las versiones
+		$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
+		if ($this->work['wrk_type'] === 'P')
+		{
+			VersionUpdater::Increment('FAB_METRICS');
+			$cacheManager->CleanFabMetricsCache();
 		}
 		// Actualiza los version
 		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'])
@@ -106,8 +111,9 @@ class PublishSnapshots extends BaseService
 		{
 			$cacheManager->ClearMetricMetadata($row['mvr_metric_id']);
 		}
-}
-	public function UpdateWorkVisiblity($workId)
+	}
+
+	public function UpdateWorkVisibility($workId)
 	{
 		// Es llamado cuando cambia el isIndexed, el isPrivate o el workType de una cartografía.
 		// 1. Trae los metrics ya publicados
@@ -123,6 +129,7 @@ class PublishSnapshots extends BaseService
 			$snapshots->UpdateMetricMetadata($metric['mvr_metric_id']);
 			$cache->ClearSelectedMetricMetadata($metric['mvr_metric_id']);
 		}
+		VersionUpdater::Increment('FAB_METRICS');
 		$cache->CleanFabMetricsCache();
 	}
 }

@@ -227,25 +227,26 @@ module.exports = {
 		});
 		return res;
 	},
-	getCreateClippingParams(frame, clipping) {
+	getCreateClippingParams(frame, clipping, revision) {
 		var levelId = null;
 		if (clipping.Region.Levels && clipping.Region.SelectedLevelIndex < clipping.Region.Levels.length) {
 			levelId = clipping.Region.Levels[clipping.Region.SelectedLevelIndex].Id;
 		}
 		return this.mergeObject({
-			a: levelId,
+			a: levelId, w: revision
 		}, this.getFrameParams(frame));
 	},
-	getCreateClippingParamsByName(frame, name) {
+	getCreateClippingParamsByName(frame, name, revision) {
 		return this.mergeObject({
-			n: name,
+			n: name, w: revision
 		}, this.getFrameParams(frame));
 	},
-	getLabelsParams(frame, x, y, boundsRectRequired) {
+	getLabelsParams(frame, x, y, boundsRectRequired, revision) {
 		var ret = {
 			x: x,
 			y: y,
-			z: frame.Zoom
+			z: frame.Zoom,
+			w: revision
 		};
 		if (boundsRectRequired) {
 			ret.b = boundsRectRequired;
@@ -269,20 +270,23 @@ module.exports = {
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
 			x: x,
-			y: y
+			y: y,
+			w: metric.Metric.Revision
 		}, this.getFrameParams(frame));
+		ret.e = null;
 		if (boundsRectRequired) {
 			ret.b = boundsRectRequired;
 		};
 		return ret;
 	},
-	getSummaryParams(metric, frame) {
+	getSummaryParams(metric, frame, revision) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		return this.mergeObject({
 			l: metric.Metric.Id,
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
+			w: metric.Metric.Revision
 		}, this.getFrameParams(frame));
 	},
 	getFrameParams(frame) {

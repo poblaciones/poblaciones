@@ -4,7 +4,7 @@
 			<WorkPanel :work="work" ref="workPanel" />
 			<Search/>
 			<Mapa/>
-			<Fab/>
+			<Fab ref="fabPanel" />
 		</div>
 		<div id="panRight" class="split split-horizontal">
 			<SummaryPanel :metrics="metrics"
@@ -89,6 +89,7 @@ export default {
 				ClippingFeatureId: null,
 			},
 			metrics: [],
+			revisions: [],
 			work: { Current: null },
 			workToLoad: false
 		};
@@ -99,30 +100,42 @@ export default {
 			minSizes: 200,
 			gutterSize: 7
 		});
-		this.RestoreWork();
-		this.RegisterErrorHandler();
-		var hash = window.location.hash;
-		if (hash.length > 3 && hash.substr(0, 3) === '#/@') {
-			this.StartByUrl(hash);
-		} else {
-			this.StartByDefaultFrameAndClipping();
-		}
 		var loc = this;
-		window.onpopstate = function(event) {
-			if (event.state !== null) {
-				loc.workToLoad = false;
-				window.SegMap.RestoreRoute.LoadRoute(event.state.route);
-				loc.RestoreWork();
+		this.GetRevisions().then(function() {
+			loc.RestoreWork();
+			loc.RegisterErrorHandler();
+			var hash = window.location.hash;
+			if (hash.length > 3 && hash.substr(0, 3) === '#/@') {
+				loc.StartByUrl(hash);
+			} else {
+				loc.StartByDefaultFrameAndClipping();
 			}
-		};
-		window.onresize = function(event) {
-			loc.$refs.workPanel.onResize();
-		};
-		window.onload = function(event) {
-			loc.$refs.workPanel.onResize();
-		};
+			window.onpopstate = function(event) {
+				if (event.state !== null) {
+					loc.workToLoad = false;
+					window.SegMap.RestoreRoute.LoadRoute(event.state.route);
+					loc.RestoreWork();
+				}
+			};
+			window.onresize = function(event) {
+				loc.$refs.workPanel.onResize();
+			};
+			window.onload = function(event) {
+				loc.$refs.workPanel.onResize();
+			};
+		});
 	},
 	methods: {
+		GetRevisions() {
+			const loc = this;
+			return axios.get(window.host + '/services/GetRevisions', {
+				params: {}
+			}).then(function(res) {
+				loc.revisions = res.data.Revisions;
+			}).catch(function(error) {
+				err.errDialog('GetRevisions', 'conectarse con el servidor', error);
+			});
+		},
 		RestoreWork() {
 			var pathArray = window.location.pathname.split('/');
 			if (pathArray.length > 0 && pathArray[pathArray.length - 1] === '') {
@@ -171,11 +184,12 @@ export default {
 		},
 		SetupMap(afterLoaded) {
 			var mapApi = new GoogleMapsApi(window.google);
-			var segMap = new SegmentedMap(mapApi, this.frame, this.clipping, this.toolbarStates, this.metrics);
+			var segMap = new SegmentedMap(mapApi, this.frame, this.clipping, this.toolbarStates, this.metrics, this.revisions);
 			segMap.Work = this.work;
 			segMap.afterCallback = afterLoaded;
 
 			window.SegMap = segMap;
+			this.$refs.fabPanel.loadFabMetrics();
 			mapApi.SetSegmentedMap(segMap);
 			mapApi.Initialize();
 		},

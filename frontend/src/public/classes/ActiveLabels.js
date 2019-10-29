@@ -28,7 +28,11 @@ ActiveLabels.prototype.CheckTileIsOutOfClipping = function() {
 };
 
 ActiveLabels.prototype.getDataServiceParams = function (coord, boundsRectRequired) {
-	return h.getLabelsParams(window.SegMap.frame, coord.x, coord.y, boundsRectRequired);
+	var rev = window.SegMap.Revisions.BigLabels;
+	if (coord.z >= window.SegMap.Revisions.SmallLabelsFrom) {
+		rev += '_' + window.SegMap.Revisions.SmallLabels;
+	}
+	return h.getLabelsParams(window.SegMap.frame, coord.x, coord.y, boundsRectRequired, rev);
 };
 
 ActiveLabels.prototype.UpdateOpacity = function (zoom) {
@@ -49,7 +53,7 @@ ActiveLabels.prototype.CreateComposer = function() {
 };
 
 ActiveLabels.prototype.GetCartoService = function () {
-	return { url: null, useDatasetId: false };
+	return { url: null, useDatasetId: false, revision: null };
 };
 
 ActiveLabels.prototype.GetDataService = function () {

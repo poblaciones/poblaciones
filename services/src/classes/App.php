@@ -227,19 +227,31 @@ class App
 		$serializer = App::GetSerializer();
 		return $serializer->deserialize($entity, $className, 'json');
 	}
-
-	public static function Json($value)
+	public static function JsonImmutable($value)
+	{
+		Params::GetMandatory('w');
+		return self::Json($value, 1000);
+	}
+	public static function Json($value, $daysToExpire = -1)
 	{
 		$sessionStarted = PhpSession::GetSessionValue('started', null);
 		$sessionTime = gmdate('D, d M Y H:i:s', intval($sessionStarted)) . ' GMT';
 		//
-		//Mock::SaveJson($value);
 		if (version_compare(phpversion(), '7.1', '>=')) {
 			ini_set( 'precision', 17 );
 			ini_set( 'serialize_precision', -1);
 		}
-		return self::$app->json($value, 200, [ 'Cache-control' => 'private',
-			'Last-Modified' => $sessionTime ]);
+		if ($daysToExpire === -1)
+			$headers = [ 'Cache-control' => 'private',
+									'Last-Modified' => $sessionTime ];
+		else {
+			$days = $daysToExpire * 86400;
+			$headers = [ 'Cache-control' => 'public' ];
+			header("Pragma: ");
+			header("Cache-Control: max-age=" . $days );
+		}
+
+		return self::$app->json($value, 200, $headers);
 	}
 
 	public static function RegisterControllerGetPost($path, $controllerClassName)

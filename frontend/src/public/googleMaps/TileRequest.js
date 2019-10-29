@@ -47,9 +47,8 @@ TileRequest.prototype.GetTile = function () {
 	queue.Enlist(this, this.startDataRequest, null, function (p) { loc.preCancel1 = p; },
 	this.selectedMetricOverlay.dataService);
 
-	if (this.selectedMetricOverlay.geographyService) {
-		queue.Enlist(this, this.startGeographyRequest, null, function (p) { loc.preCancel2 = p; },
-			this.selectedMetricOverlay.geographyService);
+	if (this.selectedMetricOverlay.geographyService.url) {
+		queue.Enlist(this, this.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
 	}
 };
 
@@ -61,7 +60,7 @@ TileRequest.prototype.startDataRequest = function () {
 	}).then(function (res) {
 		queue.Release(loc.preCancel1);
 		loc.dataDone = res.data;
-		if (loc.mapDone || loc.selectedMetricOverlay.geographyService === null) {
+		if (loc.mapDone || loc.selectedMetricOverlay.geographyService.url === null) {
 			loc.selectedMetricOverlay.process(loc.div.dataMetric, loc.mapDone, loc.dataDone, loc.key, loc.div, loc.coord.x, loc.coord.y, loc.zoom);
 		}
 	}).catch(function (error) {
@@ -77,8 +76,8 @@ TileRequest.prototype.startGeographyRequest = function () {
 	var loc = this;
 
 	var geographyId = this.selectedMetricOverlay.activeSelectedMetric.SelectedLevel().GeographyId;
-	var geographyParams = { x: this.coord.x, y: this.coord.y, z: this.zoom };
-	if (this.selectedMetricOverlay.useDatasetId) {
+	var geographyParams = { x: this.coord.x, y: this.coord.y, z: this.zoom, w: this.selectedMetricOverlay.geographyService.revision };
+	if (this.selectedMetricOverlay.geographyService.useDatasetId) {
 		geographyParams.d = this.selectedMetricOverlay.activeSelectedMetric.SelectedLevel().Dataset.Id;
 	} else {
 		geographyParams.a = geographyId;
@@ -89,7 +88,7 @@ TileRequest.prototype.startGeographyRequest = function () {
 	if (this.boundsRectRequired) {
 		geographyParams.b = this.boundsRectRequired;
 	};
-	var url = window.host + '/services/' + this.selectedMetricOverlay.geographyService;
+	var url = window.host + '/services/' + this.selectedMetricOverlay.geographyService.url;
 	window.SegMap.Get(url, {
 		params: geographyParams,
 		cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; }),
@@ -105,8 +104,7 @@ TileRequest.prototype.startGeographyRequest = function () {
 			}
 		} else {
 			loc.Page = next;
-			queue.Enlist(loc, loc.startGeographyRequest, null, function (p) { loc.preCancel2 = p; },
-						loc.selectedMetricOverlay.geographyService);
+			queue.Enlist(loc, loc.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
 		}
 	}).catch(function (error1) {
 		queue.Release(loc.preCancel2);

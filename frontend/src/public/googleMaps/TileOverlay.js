@@ -13,10 +13,8 @@ function TileOverlay(map, google, activeSelectedMetric) {
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.tileSize = new google.maps.Size(TILE_SIZE, TILE_SIZE);
 	this.composer = activeSelectedMetric.CreateComposer();
-	var service = activeSelectedMetric.GetCartoService();
-	this.geographyService = service.url;
+	this.geographyService = activeSelectedMetric.GetCartoService();
 	this.dataService = activeSelectedMetric.GetDataService();
-	this.useDatasetId = service.useDatasetId;
 	this.requestedTiles = [];
 }
 

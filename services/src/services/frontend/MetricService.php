@@ -22,11 +22,6 @@ use helena\classes\App;
 
 class MetricService extends BaseService
 {
-	public function GetFabMetricsJson()
-	{
-		return App::Json($this->GetFabMetrics());
-	}
-
 	public function GetMetricGroups()
 	{
 		$shard = Context::Settings()->Shard()->CurrentShard;
@@ -95,7 +90,7 @@ class MetricService extends BaseService
 		}
 		return $ret;
 	}
-	
+
 	public function GetMetric($metricId, $errorOnNotFound = true)
 	{
 		$model = new SnapshotMetricModel();
@@ -117,6 +112,7 @@ class MetricService extends BaseService
 		$metric->Id = $item['myv_metric_id'];
 		$metric->Name = $item['myv_metric_caption'];
 		$metric->MetricGroupId = $item['myv_metric_group_id'];
+		$metric->Revision = $item['myv_metric_revision'];
 		$this->AddVersions($metric, $item);
 		return $metric;
 	}

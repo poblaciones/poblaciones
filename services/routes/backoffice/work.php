@@ -78,12 +78,12 @@ App::$app->get('/services/backoffice/GetWorkInfo', function (Request $request) {
 });
 
 
-App::$app->get('/services/backoffice/UpdateWorkVisiblity', function (Request $request) {
+App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
 	$private = Params::GetBoolMandatory('p');
 	$controller = new services\WorkService();
-	return App::Json($controller->UpdateWorkVisiblity($workId, $private));
+	return App::Json($controller->UpdateWorkVisibility($workId, $private));
 });
 
 App::$app->get('/services/backoffice/RequestReview', function (Request $request) {

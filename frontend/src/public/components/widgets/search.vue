@@ -116,7 +116,7 @@ export default {
 			var CancelToken = axios.CancelToken;
 			var retCancel = null;
 			window.SegMap.Get(window.host + '/services/search', {
-        params: { q: t },
+        params: { q: t, w: window.SegMap.Revisions.Search },
 				cancelToken: new CancelToken(function executor(c) { retCancel = c; })
 				})
 				.then(function(res) {

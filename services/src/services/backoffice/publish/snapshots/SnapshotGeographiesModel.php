@@ -6,7 +6,7 @@ use helena\caches\GeographyCache;
 use minga\framework\Profiling;
 use helena\classes\Account;
 use helena\classes\App;
-use helena\db\backoffice\VersionUpdater;
+use helena\classes\VersionUpdater;
 
 class SnapshotGeographiesModel
 {
@@ -15,6 +15,7 @@ class SnapshotGeographiesModel
 	 	Profiling::BeginTimer();
 
 		App::Db()->exec("TRUNCATE TABLE snapshot_geography_item");;
+		VersionUpdater::Increment('CARTOGRAPHY_VIEW');
 
 		GeographyCache::Cache()->Clear();
 
@@ -32,6 +33,8 @@ class SnapshotGeographiesModel
 						. "	from geography_item, geography where gei_geography_id = geo_id and gei_geometry_is_null = 0";
 
 		$ret = App::Db()->exec($sql);
+
+		VersionUpdater::Increment('CARTOGRAPHY_VIEW');
 
 		$ver->SetUpdated();
 
