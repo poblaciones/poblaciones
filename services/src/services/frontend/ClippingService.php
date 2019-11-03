@@ -157,6 +157,7 @@ class ClippingService extends BaseService
 			{
 				$geo = new GeoJson();
 				$clipping->Canvas = $geo->GenerateFromBinary(array(array('name'=>'', 'value' => $item['Geometry'], 'FID' => $frame->ClippingRegionId)));
+				$clipping->Canvas['features'][0]['geometry']['coordinates'] =  GeoJson::TrimRecursive($clipping->Canvas['features'][0]['geometry']['coordinates']);
 				$clipping->Envelope = Envelope::FromDb($item['Envelope'])->Trim();
 			}
 		}
