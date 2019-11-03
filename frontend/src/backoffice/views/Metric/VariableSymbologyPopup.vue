@@ -66,13 +66,17 @@
 								</div>
 							</div>
 							<div v-if="CutMode === 'V'">
-								<mp-select label='Variable de categorías' :canEdit='canEdit' style='padding-right: 40px;'
-										v-model='Variable.Symbology.CutColumn'
-										list-key='Id'
-										:list='Dataset.GetNumericWithLabelColumns()'
-										:render='formatColumn'
-										helper='Seleccione la variable para crear las categorías'
-								/>
+								<div class="md-layout md-gutter">
+									<div class="md-layout-item md-size-80">
+										<mp-select label='Variable de categorías' :canEdit='canEdit' style='padding-right: 40px;'
+												v-model='Variable.Symbology.CutColumn'
+												list-key='Id'
+												:list='Dataset.GetNumericWithLabelColumns()'
+												:render='formatColumn'
+												helper='Seleccione la variable de la cual tomar las categorías'
+										/>
+									</div>
+								</div>
 							</div>
 
 						</div>
@@ -86,7 +90,7 @@
 					<div class="md-layout">
 						<div class="md-layout-item md-size-100" >
 							<div class="separator">{{ CategoriesLabel }}</div>
-							<md-list style="height: 185px; overflow-y: auto">
+							<md-list style="overflow-y: auto;" :style="(this.CutMode === 'V' ? 'height: 156px;':'height: 185px;')">
 								<md-list-item v-for="item in Variable.Values" v-bind:key="item.Id"
 															:value="item.Id" class="itemSmall">
 									<mp-color-picker :canEdit="canEdit" :isDisabledObject="item"
@@ -99,6 +103,9 @@
 									</md-button>
 								</md-list-item>
 							</md-list>
+							<div v-if="this.CutMode === 'V'" class="md-helper-text helper" style="margin-top: 8px">
+								Para agregar o modificar categorías, utilice la opción Categorías en la solapa Variables.
+							</div>
 						</div>
 					</div>
 					</md-card-content>
