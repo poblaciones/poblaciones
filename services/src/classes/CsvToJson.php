@@ -68,7 +68,7 @@ class CsvToJson
 				foreach($header['varNames'] as $k => $varName)
 				{
 					$lengths[$varName] = self::GetLengths($data[$k], $lengths, $varName);
-					$header['isNumber'][$varName] = self::GetIsNumber($data[$k], $header['isNumber'], $varName);
+					$header['isNumber'][$varName] = self::GetIsNumber($data[$k], $header['isNumber'], $varName, $decimal);
 					$header['alignments'][$varName] = self::GetAlignments($header['isNumber'], $varName);
 					$varFormats[$varName] = self::GetVarFormatsParts($data[$k], $lengths, $header['isNumber'], $varFormats, $varName);
 				}
@@ -158,7 +158,7 @@ class CsvToJson
 			return 'left';
 	}
 
-	private static function GetIsNumber(array $col, array $isNumberList, $varName)
+	private static function GetIsNumber(array $col, array $isNumberList, $varName, $decimal)
 	{
 		if(isset($isNumberList[$varName]) && $isNumberList[$varName] == false)
 			return false;
@@ -169,6 +169,7 @@ class CsvToJson
 			if($val != '')
 			{
 				$allAreEmpty = false;
+				if ($decimal != '.') $val = Str::Replace($val, $decimal, ".");
 				if (Str::IsNumberNotPlaceheld($val) === false)
 					return false;
 			}

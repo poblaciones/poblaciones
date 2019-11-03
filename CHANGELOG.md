@@ -1,4 +1,6 @@
 ﻿[CURRENT]
+- Fix en la detección de encoding de CSV.
+- Fix en la detección de decimales en CSV.
 
 v2.6 (2019-10-28)
 - Habilitación de caching entre sesiones del navegador. 

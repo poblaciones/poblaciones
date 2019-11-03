@@ -229,7 +229,7 @@ class App
 	}
 	public static function JsonImmutable($value)
 	{
-		Params::GetMandatory('w');
+	//	Params::GetMandatory('w');
 		return self::Json($value, 1000);
 	}
 	public static function Json($value, $daysToExpire = -1)

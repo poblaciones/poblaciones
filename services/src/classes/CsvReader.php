@@ -372,9 +372,6 @@ class CsvReader
 		return $lines;
 	}
 
-	//TODO: Revisar este método, no funciona muy bien
-	//la detección de encoding, php tiene poca documentación.
-	//En teoría no haría falta leer todo el archivo...
 	private function DetectEncoding()
 	{
 		if($this->encoding !== null)
@@ -388,7 +385,7 @@ class CsvReader
 			if($str === false)
 				break;
 
-			$this->encoding = mb_detect_encoding($str);
+			$this->encoding = Str::DetectEncoding($str);
 			if($this->encoding == 'UTF-8')
 				break;
 		}
