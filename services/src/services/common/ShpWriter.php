@@ -5,6 +5,7 @@ namespace helena\services\common;
 use minga\framework\IO;
 use minga\framework\Str;
 use helena\classes\spss\Format;
+use helena\classes\App;
 use minga\framework\Zip;
 
 use Shapefile\Shapefile;
@@ -19,6 +20,7 @@ use Shapefile\Geometry\MultiPolygon;
 class ShpWriter extends BaseWriter
 {
 	const PRJ = "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433],METADATA[\"World\",-180.0,-90.0,180.0,90.0,0.0,0.0174532925199433,0.0,1262]]";
+	const ENCODING = "UTF-8";
 	private $cols;
 
 	public function SaveHeader()
@@ -40,11 +42,13 @@ class ShpWriter extends BaseWriter
 		  $Shapefile->setShapeType(Shapefile::SHAPE_TYPE_POINT);
 		}
     $Shapefile->setPRJ(self::PRJ);
+		$Shapefile->setCharset(self::ENCODING);
 
 		$cols = $this->cols;
 		$this->ProcessColumns($Shapefile, $cols);
-
 		$Shapefile = null;
+		$codepageFile = $this->resolveBaseName() . '.cpg';
+		IO::WriteAllText($codepageFile, self::ENCODING);
 	}
 
 	public function PageData()
@@ -56,6 +60,7 @@ class ShpWriter extends BaseWriter
 	  $Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_EXISTING_FILES_MODE  => Shapefile::MODE_APPEND,
 			Shapefile::OPTION_BUFFERED_RECORDS => 100,
 			Shapefile::OPTION_ENFORCE_GEOMETRY_DATA_STRUCTURE => false]);
+		$Shapefile->setCharset(self::ENCODING);
 
 		$wktIndex = $this->model->wktIndex;
 		$cols = $this->state->Cols();
@@ -85,7 +90,7 @@ class ShpWriter extends BaseWriter
 				{
 					if ($col['format'] != Format::F)
 					{
-						$val = utf8_decode($row[$i]);
+						$val = $row[$i];
 					}
 					else
 					{
@@ -98,11 +103,16 @@ class ShpWriter extends BaseWriter
 					$geom->setData($col['effectiveVariable'], $val);
 				}
 				$i++;
+				if ($i == Shapefile::DBF_MAX_FIELD_COUNT)
+					break;
 			}
 			//	Profiling::EndTimer();
 			$Shapefile->writeRecord($geom);
 		}
 		$Shapefile = null;
+		$codepageFile = $this->resolveBaseName() . '.cpg';
+		IO::WriteAllText($codepageFile, self::ENCODING);
+
 		$this->state->Increment('index');
 
 		return true;
@@ -110,6 +120,9 @@ class ShpWriter extends BaseWriter
 
 	public function Flush()
 	{
+		$codepageFile = $this->resolveBaseName() . '.cpg';
+		IO::WriteAllText($codepageFile, self::ENCODING);
+
 		$zipFile = $this->state->Get('outFile');
 		$zip = new Zip($zipFile);
 		$friendlyNoExtension = $this->resolveBaseName();
@@ -117,7 +130,7 @@ class ShpWriter extends BaseWriter
 															$friendlyNoExtension . '.shp', $friendlyNoExtension . '.shx');
 		if (file_exists($friendlyNoExtension . '.cpg'))
 			$files[] =  $friendlyNoExtension . '.cpg';
-		if (file_exists($friendlyNoExtension . '.cpg'))
+		if (file_exists($friendlyNoExtension . '.dbt'))
 			$files[] =  $friendlyNoExtension . '.dbt';
 
 		$dir = $this->resolveDirectory();
@@ -179,7 +192,7 @@ class ShpWriter extends BaseWriter
 	private function getColumnByVariable($variable)
 	{
 		// Agrega columnas
-		$cols = $this->cols;
+		$cols = $this->state->Cols();
 		$i = 0;
 		foreach($cols as $col)
 		{
@@ -199,8 +212,10 @@ class ShpWriter extends BaseWriter
 		{
 			if ($wktIndex !== $i)
 			{
-				$width = $col['field_width'];
+				$width = $col['field_width'] + 1; // agrega uno más por si hay negativos
 				$decimals = $col['decimals'];
+				if ($decimals > 0)
+					$width++; // agrega uno más por el separador
 
 				if ($col['format'] == Format::F)
 				{
@@ -217,6 +232,8 @@ class ShpWriter extends BaseWriter
 				$this->state->state['cols'][$i]['effectiveVariable'] = $varName;
 			}
 			$i++;
+			if ($i == Shapefile::DBF_MAX_FIELD_COUNT)
+				break;
 		}
 	}
 }

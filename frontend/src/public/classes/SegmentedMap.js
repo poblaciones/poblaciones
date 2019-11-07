@@ -142,7 +142,7 @@ SegmentedMap.prototype.ZoomChanged = function (zoom) {
 		this.frame.Zoom = zoom;
 		this.Labels.UpdateMap();
 		this.Metrics.ZoomChanged();
-		//this.SaveRoute.UpdateRoute();
+		this.SaveRoute.UpdateRoute();
 	}
 };
 SegmentedMap.prototype.FrameMoved = function (bounds) {

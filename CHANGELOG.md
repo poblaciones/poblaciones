@@ -1,6 +1,10 @@
 ﻿[CURRENT]
 - Fix en la detección de encoding de CSV.
 - Fix en la detección de decimales en CSV.
+- Fix a exportación de shapefile de puntos.
+- El encoding de los shapefile es UTF-8.
+- Fix: columnas con decimales o negativos en shapefile daban overflow.
+- Fix: shapefile tiene límite de cantidad de columnas (255). Se ignoran las siguientes en lugar de dar error.
 
 v2.6 (2019-10-28)
 - Habilitación de caching entre sesiones del navegador. 

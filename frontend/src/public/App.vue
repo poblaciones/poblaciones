@@ -105,7 +105,7 @@ export default {
 			loc.RestoreWork();
 			loc.RegisterErrorHandler();
 			var hash = window.location.hash;
-			if (hash.length > 3 && hash.substr(0, 3) === '#/@') {
+			if (hash.length > 2 && hash.substr(0, 2) === '#/') {
 				loc.StartByUrl(hash);
 			} else {
 				loc.StartByDefaultFrameAndClipping();

@@ -20,9 +20,15 @@ RestoreRoute.prototype.LoadLocationFromRoute = function (route) {
 	this.segmentedMap.SaveRoute.lastState = null;
 	// Setea la posición, el zoom y el tipo de mapa
 	this.segmentedMap.SaveRoute.Disabled = true;
-	this.segmentedMap.SetCenter(framing.Center);
-	this.segmentedMap.SetZoom(framing.Zoom);
-	this.segmentedMap.SetMapTypeState(framing.MapType);
+	if (framing.Center.Lat && framing.Center.Lon) {
+		this.segmentedMap.SetCenter(framing.Center);
+	}
+	if (framing.Zoom || framing.Zoom === 0) {
+		this.segmentedMap.SetZoom(framing.Zoom);
+	}
+	if (framing.MapType) {
+		this.segmentedMap.SetMapTypeState(framing.MapType);
+	}
 	// Se fija si cambia el clipping
 	this.LoadClipping(framing);
 	this.segmentedMap.SaveRoute.Disabled = false;
@@ -32,39 +38,51 @@ RestoreRoute.prototype.LoadLocationFromRoute = function (route) {
 RestoreRoute.prototype.framingFromRoute = function (route) {
 	var start = route.indexOf('@') + 1;
 	var end = route.indexOf('/', start);
-	if (start === 0) {
-		return null;
-	}
-	if (end === -1) {
-		end = route.length;
-	}
-	var frameClippingPart = route.substring(start, end);
-	var parts = frameClippingPart.split('&');
-	// Reconoce la posición del frame
-	var frame = parts[0];
-	var positionParts = frame.split(',');
-	if (positionParts.length < 2) {
-		return null;
-	}
-	var lat = parseFloat(positionParts[0]);
-	var lon = parseFloat(positionParts[1]);
+	var remaining = '';
+	var lat = null;
+	var lon = null;
 	var zoom = null;
-	if (positionParts.length >= 3) {
-		zoom = parseInt(positionParts[2].replace('z', ''));
+	if (start !== 0) {
+		if (end === -1) {
+			end = route.length;
+		}
+		var frameClippingPart = route.substring(start, end);
+		var parts = frameClippingPart.split('&');
+		// Reconoce la posición del frame
+		var frame = parts[0];
+		var positionParts = frame.split(',');
+		if (positionParts.length < 2) {
+			return null;
+		}
+		lat = parseFloat(positionParts[0]);
+		lon = parseFloat(positionParts[1]);
+		if (positionParts.length >= 3) {
+			zoom = parseInt(positionParts[2].replace('z', ''));
+		} else {
+			zoom = 14;
+		}
+		var mapType = 'r';
+		if (positionParts.length === 4) {
+			mapType = positionParts[3];
+		}
+		remaining = parts[1];
 	} else {
-		zoom = 14;
-	}
-	var mapType = 'r';
-	if (positionParts.length === 4) {
-		mapType = positionParts[3];
+		var end = route.indexOf('/', 2);
+		if (end === -1) {
+			end = route.length;
+		}
+		remaining = route.substring(0, end);
 	}
 	// Reconoce el clipping del frame
-	var values = (parts.length > 1 ? h.parseSingleLetterArgs(parts[1]) : {});
+	var values = h.parseSingleLetterArgs(remaining);
 	var clippingRegionId = h.getSafeValue(values, 'r', null);
 	var clippingFeatureId = h.getSafeValue(values, 'f', null);
 	var clippingCircle = this.getClippingCircle(h.getSafeValue(values, 'c', null));
 	var clippingLevelName = h.getSafeValue(values, 'l', null);
-
+	if ((zoom === null || lat === null || lon === null) &&
+		(clippingRegionId === null && clippingFeatureId === null && clippingCircle === null)) {
+		return null;
+	}
 	// devuelve un framing, que es un frame con atributos extra de 'center' y 'mapType'
 	return {
 		Center: {
@@ -134,7 +152,11 @@ RestoreRoute.prototype.LoadClipping = function (frame) {
 				loc.segmentedMap.Clipping.RestoreClipping(frame.ClippingLevelName);
 			};
 		} else {
-			this.segmentedMap.Clipping.RestoreClipping(frame.ClippingLevelName);
+			var requiresUpdate = (frame.MapType === undefined);
+			this.segmentedMap.Clipping.RestoreClipping(frame.ClippingLevelName, requiresUpdate);
+			if (requiresUpdate) {
+				this.segmentedMap.SaveRoute.UpdateRoute();
+			}
 		}
 	}
 };

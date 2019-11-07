@@ -148,7 +148,7 @@ Clipping.prototype.FrameHasClippingCircle = function () {
 	return this.frame.ClippingCircle !== null;
 };
 
-Clipping.prototype.RestoreClipping = function (clippingName) {
+Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
 	const loc = this;
 	var CancelToken = axios.CancelToken;
 	if (this.cancelCreateClipping !== null) {
@@ -157,16 +157,15 @@ Clipping.prototype.RestoreClipping = function (clippingName) {
 	this.SetClippingRequest('*');
 	this.SegmentedMap.MapsApi.ClearClippingCanvas();
 	this.SegmentedMap.RefreshSummaries();
-
 	this.SegmentedMap.Get(window.host + '/services/clipping/CreateClippingByName', {
 		params: h.getCreateClippingParamsByName(loc.frame, clippingName, this.SegmentedMap.Revisions.Clipping),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
 	}).then(function (res) {
-		loc.ProcessClipping(res.data, true, false);
+		loc.ProcessClipping(res.data, true, fitRegion === true);
 		loc.ResetClippingRequest('*');
 	}).catch(function (error) {
 		loc.ResetClippingRequest('*');
-		err.errDialog('RestoreClipping', 'crear la regiÃ³n de selecciÃ³n', error);
+		err.errDialog('RestoreClipping', 'crear la región de selección', error);
 	});
 };
 

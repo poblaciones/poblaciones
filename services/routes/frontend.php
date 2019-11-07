@@ -229,7 +229,7 @@ App::$app->get('/services/clipping/GetLabels', function (Request $request) {
 	$controller = new services\LabelsService();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
-	$z = Params::GetIntMandatory('z');
+	$z = Params::GetIntRangeMandatory('z', 0, 23);
 	$b = Params::Get('b');
 	return App::JsonImmutable($controller->GetLabels($x, $y, $z, $b));
 });
@@ -240,7 +240,7 @@ App::$app->get('/services/geographies/GetGeography', function (Request $request)
 	$levelId = Params::GetIntMandatory('a');
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
-	$z = Params::GetIntMandatory('z');
+	$z = Params::GetIntRangeMandatory('z', 0, 23);
 	$p = Params::GetInt('p', 0);
 	$b = Params::Get('b');
 	$ret = $controller->GetGeography($levelId, $x, $y, $z, $b, $p);
@@ -254,7 +254,7 @@ App::$app->get('/services/shapes/GetDatasetShapes', function (Request $request) 
 	$datasetId = Params::GetInt('d');
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
-	$z = Params::GetIntMandatory('z');
+	$z = Params::GetIntRangeMandatory('z', 0, 23);
 	$b = Params::Get('b');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
@@ -277,7 +277,7 @@ App::$app->get('/services/metrics/GetTileData', function (Request $request) {
 	$frame = Frame::FromParams();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
-	$z = Params::GetIntMandatory('z');
+	$z = Params::GetIntRangeMandatory('z', 0, 23);
 	$b = Params::Get('b');
 	return App::JsonImmutable($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b));
 });
