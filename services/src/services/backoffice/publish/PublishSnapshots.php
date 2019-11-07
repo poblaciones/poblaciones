@@ -79,7 +79,7 @@ class PublishSnapshots extends BaseService
 		}
 		// Actualiza los metadatos del metric en el que están las versiones
 		$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
-		if ($this->work['wrk_type'] === 'P')
+		if (work['wrk_type'] === 'P')
 		{
 			VersionUpdater::Increment('FAB_METRICS');
 			$cacheManager->CleanFabMetricsCache();

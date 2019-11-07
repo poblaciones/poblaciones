@@ -24,7 +24,7 @@ class MetricVersion
     /**
      * @var string
      *
-     * @ORM\Column(name="mvr_caption", type="string", length=10, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="mvr_caption", type="string", length=20, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Caption;
 

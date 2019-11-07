@@ -1,4 +1,8 @@
 ﻿[CURRENT]
+- Fix: CloneDataset no estaba generando versiones nuevas para los indicadores.
+- Mejoras en generación de nombres nuevos por clonado.
+
+v2.7 (2019-11-07)
 - Fix en la detección de encoding de CSV.
 - Fix en la detección de decimales en CSV.
 - Fix a exportación de shapefile de puntos.

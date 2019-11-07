@@ -15,7 +15,7 @@ class RowDuplicator
 {
 	private static $varCounter = 0;
 
-	public static function ResolveNewName($name, $table, $filterValue, $filterColumn, $captionColumn, $shortForm = false)
+	public static function ResolveNewName($name, $table, $filterValue, $filterColumn, $captionColumn, $shortForm, $fieldWidth)
 	{
 		$sql = "SELECT count(*) FROM " . $table . " WHERE " . $filterColumn . " = ? AND " . $captionColumn . " = ?";
 		$i = 1;
@@ -24,9 +24,17 @@ class RowDuplicator
 		while(App::Db()->fetchScalarInt($sql, $params) != 0)
 		{
 			if ($shortForm)
-				$newName = $name . " " . trim("(copia " . ($i == 1 ? '' : $i)) . ")";
+				$suffix = "(" . $i . ")";
 			else
-				$newName = $name . " " . trim("(" . ($i == 1 ? '' : $i)) . ")";
+				$suffix = "(copia" . ($i == 1 ? '' : ' ' . $i) . ")";
+			if (strlen($name) + strlen($suffix) >= $fieldWidth)
+			{
+				$newName = substr($name, 0, $fieldWidth - strlen($suffix) - 1) . ' ' . $suffix;
+			}
+			else
+			{
+				$newName = $name . ' ' . $suffix;
+			}
 			$params = array($filterValue, $newName);
 			$i++;
 		}
@@ -85,7 +93,7 @@ class RowDuplicator
 		else
 			return $filterColumn . " = " . SqlBuilder::FormatValue($filterValue);
 	}
-	public static function DuplicateRows($entity1, $filterValue, $staticColumns = array(), $filterColumn = null)
+	public static function DuplicateRows($entity1, $filterValue, $staticColumns = array(), $filterColumn = null, $showDebug = false)
 	{
 		$metadata = App::Orm()->getClassMetadata($entity1);
 		$identifier = $metadata->getColumnName($metadata->identifier[0]);
@@ -96,9 +104,11 @@ class RowDuplicator
 		$filter = self::GetFilter($filterColumn, $filterValue);
 		$sqlParts = self::GetMigrateSqlQueries($entity1, $entity1, false, $staticColumns);
 		$table = $metadata->GetTableName();
-		$sql = "INSERT INTO " . $table . " (" . $sqlParts['insert'] . ") SELECT "
-							. $sqlParts['select'] . " FROM " . $table . " WHERE " .  $filter . " ORDER BY " . $identifier;
-		App::Db()->exec($sql);
+		$insertInto = "INSERT INTO " . $table . " (" . $sqlParts['insert'] . ") ";
+		$select = "SELECT " . $sqlParts['select'] . " FROM " . $table . " WHERE " .  $filter . " ORDER BY " . $identifier;
+		if ($showDebug)
+			echo $select;
+		App::Db()->exec($insertInto . $select);
 		return App::Db()->lastInsertId();
 	}
 

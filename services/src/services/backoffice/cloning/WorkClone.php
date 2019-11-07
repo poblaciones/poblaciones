@@ -65,7 +65,7 @@ class WorkClone
 			$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
 			$newName = $work->getMetadata()->getTitle();
 			$userId = Account::Current()->GetUserId();
-			$newName = RowDuplicator::ResolveNewName($newName, 'draft_work, draft_metadata, draft_work_permission', $userId, 'wrk_metadata_id = met_id AND wkp_work_id = wrk_id AND wkp_user_id', 'met_caption');
+			$newName = RowDuplicator::ResolveNewName($newName, 'draft_work, draft_metadata, draft_work_permission', $userId, 'wrk_metadata_id = met_id AND wkp_work_id = wrk_id AND wkp_user_id', 'met_title', false, 150);
 		}
 		$this->state->Set('name', $newName);
 		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId);

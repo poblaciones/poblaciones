@@ -28,7 +28,7 @@
 					<mp-simple-text
 									label="Edición" ref="metricInput"  @enter="save"
 									helper="Año de referencia de la edición o serie de datos. Ej. 2010"
-									:maxlength="10"  v-model="newMetricVersionLevel.MetricVersion.Caption"
+									:maxlength="20"  v-model="newMetricVersionLevel.MetricVersion.Caption"
 								></mp-simple-text>
 				</div>
 			</div>

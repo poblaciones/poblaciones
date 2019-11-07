@@ -36,7 +36,7 @@
 									ref="metricVersionInput"
 									label="Edición"  @enter="save"
 									helper="Año de referencia de la edición o serie de datos. Ej. 2010"
-									:maxlength="10"  v-model="newMetricVersion"
+									:maxlength="20"  v-model="newMetricVersion"
 								></mp-simple-text>
 				</div>
 

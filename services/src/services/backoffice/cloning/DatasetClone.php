@@ -26,7 +26,14 @@ class DatasetClone
 	{
 		$this->workId = $workId;
 		$this->sourceDatasetId = $sourceDatasetId;
-		$this->targetWorkId = $targetWorkId;
+		if ($targetWorkId !== null)
+		{
+			$this->targetWorkId = $targetWorkId;
+		}
+		else
+		{
+			$this->targetWorkId = $workId;
+		}
 		$this->newName = $newName;
 	}
 	public function CloneDataset()
@@ -84,22 +91,13 @@ class DatasetClone
 		$metricVersionId = $metricVersion->getId();
 		// Copia encabezado
 		$name = $metricVersion->getCaption();
-		$targetMetricVersionRow = $this->GetTargetVersionByCaption($name, $this->targetWorkId);
-		if ($targetMetricVersionRow == null)
-		{
-			$newName = RowDuplicator::ResolveNewName($name, 'draft_metric_version', $metricVersion->getMetric()->getId(), 'mvr_metric_id', 'mvr_caption', true);
-			$static = array('mvr_work_id' => $this->targetWorkId, 'mvr_caption' => $newName);
-			$targetMetricVersionId = RowDuplicator::DuplicateRows(entities\DraftMetricVersion::class, $metricVersionId, $static);
-		}
-		else
-		{
-			$targetMetricVersionId = $targetMetricVersionRow['mvr_id'];
-		}
-
+		$newName = RowDuplicator::ResolveNewName($name, 'draft_metric_version', $metricVersion->getMetric()->getId(), 'mvr_metric_id', 'mvr_caption', true, 20);
+		$static = array('mvr_work_id' => $this->targetWorkId, 'mvr_caption' => $newName);
+		$targetMetricVersionId = RowDuplicator::DuplicateRows(entities\DraftMetricVersion::class, $metricVersionId, $static);
+		
 		// Copia levels
 		$static = array('mvl_metric_version_id' => $targetMetricVersionId, 'mvl_dataset_id' => $this->targetDatasetId);
 		RowDuplicator::DuplicateRows(entities\DraftMetricVersionLevel::class, $metricVersionId, $static, 'mvl_metric_version_id');
-
 		// Copia symbology
 		$static = array();
 		RowDuplicator::DuplicateRows(entities\DraftSymbology::class,
@@ -119,7 +117,7 @@ class DatasetClone
 		$parentInfo = array(entities\DraftMetricVersionLevel::class, $metricVersionId,
 													$targetMetricVersionId, 'mvl_metric_version_id', 'mvv_metric_version_level_id');
 		RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftVariable::class);
-
+		
 		// Copia variableValueLabel
 		$parentInfo = array(entities\DraftVariable::class,
 									"(SELECT mvl_id FROM draft_metric_version_level WHERE mvl_metric_version_id = " . $metricVersionId . ")",
@@ -127,6 +125,7 @@ class DatasetClone
 										'mvv_metric_version_level_id IN', 'vvl_variable_id');
 		RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftVariableValueLabel::class);
 	}
+
 	private function GetTargetVersionByCaption($newName, $targetWorkId)
 	{
 		$sql = "SELECT mvr_id FROM draft_metric_version JOIN draft_metric_version_level ON
@@ -139,14 +138,10 @@ class DatasetClone
 		// Copia encabezado
 		if ($newName === null)
 			$newName = $this->dataset->getCaption();
-		if ($this->targetWorkId == null)
-			$workId = $this->dataset->getWork()->getId();
-		else
-			$workId = $this->targetWorkId;
-		$newName = RowDuplicator::ResolveNewName($newName, 'draft_dataset', $workId, 'dat_work_id', 'dat_caption');
+		$workId = $this->targetWorkId;
+		$newName = RowDuplicator::ResolveNewName($newName, 'draft_dataset', $workId, 'dat_work_id', 'dat_caption', false, 100);
 		$static = array('dat_georeference_status' => 0, 'dat_georeference_attributes' => null, 'dat_caption' => $newName);
-		if ($this->targetWorkId != null)
-			$static['dat_work_id'] = $this->targetWorkId;
+		$static['dat_work_id'] = $this->targetWorkId;
 		$this->targetDatasetId = RowDuplicator::DuplicateRows(entities\DraftDataset::class, $this->sourceDatasetId, $static);
 
 		// Copia columnas
