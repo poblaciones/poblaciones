@@ -129,9 +129,9 @@ SvgFullGeojsonComposer.prototype.processFeature = function (id, dataElement, map
 };
 
 SvgFullGeojsonComposer.prototype.AddFeatureText = function (val, mapElement, dataElement, tileKey, tileBounds, colorMap) {
-	if (this.activeSelectedMetric.showText() === false) {
+	/*if (this.activeSelectedMetric.showText() === false) {
 		return;
-	}
+	}*/
 	var location;
 	if (mapElement['properties'] && mapElement['properties'].centroid) {
 		location = new window.google.maps.LatLng(mapElement['properties'].centroid[0], mapElement['properties'].centroid[1]);

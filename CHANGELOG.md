@@ -1,12 +1,14 @@
 ﻿[CURRENT]
 - Fix: CloneDataset no estaba generando versiones nuevas para los indicadores.
 - Mejoras en generación de nombres nuevos por clonado.
+- Fix: vinculación de etiquetas y valores.
+- CABA pasa a Distrito.
 
 v2.7 (2019-11-07)
 - Fix en la detección de encoding de CSV.
 - Fix en la detección de decimales en CSV.
 - Fix a exportación de shapefile de puntos.
-- El encoding de los shapefile es UTF-8.
+- El encoding de los shapefile que descargan es ahora UTF-8.
 - Fix: columnas con decimales o negativos en shapefile daban overflow.
 - Fix: shapefile tiene límite de cantidad de columnas (255). Se ignoran las siguientes en lugar de dar error.
 

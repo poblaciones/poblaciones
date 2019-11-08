@@ -12,7 +12,7 @@ AbstractTextComposer.prototype.AbstractConstructor = function (value, total, des
 
 AbstractTextComposer.prototype.ResolveValueLabel = function (dataElement, location, tileKey, backColor) {
 	var number = null;
-	if (this.activeSelectedMetric.SelectedVariable().ShowValues === 1) {
+	if (this.activeSelectedMetric.SelectedVariable().ShowValues == 1) {
 		number = this.FormatValue(dataElement['Value'], dataElement['Summary'], dataElement['Total']);
 	} else {
 		var pattern = this.activeSelectedMetric.GetPattern();
@@ -20,7 +20,7 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (dataElement, locati
 			number = '&nbsp;&nbsp;';
 		}
 	}
-	this.SetTextOverlay(null, [dataElement['FID']], tileKey, location, null, null, number, backColor);
+	this.SetTextOverlay(null, [dataElement['FID']], '' + tileKey, location, null, null, number, backColor);
 };
 
 AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, location, description, tooltip, number, backColor, clickId, hidden) {

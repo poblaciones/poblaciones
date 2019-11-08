@@ -50,10 +50,10 @@ CirclesGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResult
 				mapItem['properties'] = {
 					'LabelId': val
 				};
-				if (this.activeSelectedMetric.SelectedVariable().ShowValues === 1) {
+				if (this.activeSelectedMetric.SelectedVariable().ShowValues == 1) {
 					mapItem['properties'].Value = dataElement['Value'];
 				}
-				if (this.activeSelectedMetric.SelectedVariable().ShowDescriptions === 1) {
+				if (this.activeSelectedMetric.SelectedVariable().ShowDescriptions == 1) {
 					mapItem['properties'].Description = dataElement['Description'];
 				}
 

@@ -161,6 +161,17 @@ class PublishDataTables
 		Profiling::EndTimer();
 	}
 
+	public function CleanTempTables()
+	{
+		$sql = "SELECT wdd_id, wdd_table FROM work_dataset_draft WHERE wdd_table like 'tmp_work_dataset%' AND wdd_created  < NOW() - INTERVAL 1 WEEK";
+		$tables = App::Db()->fetchAll($sql);
+		foreach($tables as $table)
+		{
+			App::Db()->dropTable($table['wdd_table']);
+			App::Db()->exec("DELETE FROM work_dataset_draft WHERE wdd_id = ?", array($table['wdd_id']));
+		}
+		return sizeof($tables);
+	}
 
 	public function CopyDraftTables($workId)
 	{

@@ -7,6 +7,7 @@ use helena\services\backoffice\publish\snapshots\SnapshotGeographiesModel;
 use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 use helena\services\backoffice\publish\snapshots\SnapshotGeographiesByRegionModel;
 use helena\services\backoffice\publish\CacheManager;
+use helena\services\backoffice\publish\PublishDataTables;
 use helena\classes\Session;
 use helena\classes\Menu;
 use helena\classes\VersionUpdater;
@@ -60,6 +61,10 @@ class cCaches extends cController
 			$model = new SnapshotLookupModel();
 			$model->ClearClippingRegions();
 			$this->message = 'Regeneradas ' . $model->RegenClippingRegions() . ' filas. . Si modificó Regiones existentes, debe borrar manualmente el caché de Labels.';
+		} else if (array_key_exists('clearTempTables', $_POST)) {
+			$model = new PublishDataTables();
+			$n = $model->CleanTempTables();
+			$this->message = 'Liberadas ' . $n . ' tablas.';
 		} else if (array_key_exists('regenClippingGeography', $_POST)) {
 			$model = new SnapshotGeographiesByRegionModel();
 			$model->Clean();

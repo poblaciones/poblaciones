@@ -74,7 +74,7 @@ class SnapshotLookupModel extends BaseModel
 		Profiling::BeginTimer();
 		$envelopeQuery = new QueryPart("", "ST_Contains(PolygonFromText('" . $envelope->ToWKT() . "'), clv_location)");
 
-		$select = "clv_type type, round(clv_population / 1000) Population, clv_caption Caption, (case when clv_type = 'C' then null else clv_feature_ids end) FIDs, clv_symbol Symbol,
+		$select = "clv_type type, round(clv_population / 1000) Population, clv_caption Caption, clv_feature_ids FIDs, clv_symbol Symbol,
 								CAST((case when clv_type = 'C' then clv_clipping_region_item_id else clv_dataset_id end) AS UNSIGNED INTEGER) RID,
 								round(Y(clv_location), ". GeoJson::PRECISION .") as Lat, round(X(clv_location), ". GeoJson::PRECISION .") as Lon, clv_min_zoom MinZoom, clv_tooltip	Tooltip";
 

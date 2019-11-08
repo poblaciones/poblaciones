@@ -24,7 +24,7 @@ LabelsComposer.prototype.renderGeoJson = function(dataMetric, mapResults, dataRe
 
 		if (dataElement['Show']) {
 			this.UpdateTextStyle(dataElement['Size']);
-			this.SetTextOverlay(dataElement['type'], dataElement['FIDs'], tileKey, location, dataElement['Caption'], dataElement['Tooltip'], null, '', (dataElement['FIDs'] === null ? dataElement['RID'] : dataElement['FIDs']));
+			this.SetTextOverlay(dataElement['type'], dataElement['FIDs'], tileKey, location, dataElement['Caption'], dataElement['Tooltip'], null, '', (dataElement['FIDs'] === null || dataElement['type'] === 'C' ? dataElement['RID'] : dataElement['FIDs']));
 		} else {
 			this.SetTextOverlay(null, dataElement['FIDs'], tileKey, location, null, null, null, '', null, true);
 		}

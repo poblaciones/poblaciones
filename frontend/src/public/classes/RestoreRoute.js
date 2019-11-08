@@ -74,7 +74,7 @@ RestoreRoute.prototype.framingFromRoute = function (route) {
 		remaining = route.substring(0, end);
 	}
 	// Reconoce el clipping del frame
-	var values = h.parseSingleLetterArgs(remaining);
+	var values = (remaining ? h.parseSingleLetterArgs(remaining) : {});
 	var clippingRegionId = h.getSafeValue(values, 'r', null);
 	var clippingFeatureId = h.getSafeValue(values, 'f', null);
 	var clippingCircle = this.getClippingCircle(h.getSafeValue(values, 'c', null));

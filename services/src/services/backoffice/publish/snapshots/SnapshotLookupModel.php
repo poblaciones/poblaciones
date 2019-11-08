@@ -129,10 +129,19 @@ class SnapshotLookupModel
 		// geographyItem (ej Salta => Salta). Para todos, calcula desde geography el population.
 		$sql = $sqlInsert . "select cli_id, cli_parent_id, clr_caption, '0', cli_caption, 'C', cli_centroid, " .
 															"clr_labels_min_zoom, clr_labels_max_zoom, featureIds, population, clr_caption, clr_symbol " .
-															"from clipping_region_item, clipping_region, " .
-															"(select clipping_region_item_id, GROUP_CONCAT(geography_item_id SEPARATOR ',') featureIds, MIN(geo_min_zoom) min_zoom, max(population) population from " .
-															"(select cgi_clipping_region_item_id clipping_region_item_id,  gei_geography_id , (case when COUNT(*) = 1 then  min(cgi_geography_item_id) else NULL end) geography_item_id, sum(IFNULL(gei_population, 0)) population from clipping_region_geography_item, geography_item where gei_id = cgi_geography_item_id group by cgi_clipping_region_item_id,  gei_geography_id) as Geographies, geography where geo_id = gei_geography_id " .
-															"group by clipping_region_item_id) as geographyInfo " .
+															"FROM clipping_region_item, clipping_region, " .
+															"(SELECT	clipping_region_item_id, GROUP_CONCAT(geography_item_id SEPARATOR ',') featureIds, 
+																				MIN(geo_min_zoom) min_zoom, max(population) population " .
+																"FROM (	SELECT cgi_clipping_region_item_id clipping_region_item_id,  gei_geography_id , 
+																						(CASE WHEN COUNT(*) = 1 THEN min(cgi_geography_item_id) else NULL END) geography_item_id, 
+																						SUM(IFNULL(gei_population, 0)) population
+																				FROM clipping_region_geography_item
+																				JOIN geography_item ON gei_id = cgi_geography_item_id 
+																				GROUP BY cgi_clipping_region_item_id,  gei_geography_id
+																				) as Geographies 
+																	JOIN geography ON geo_id = gei_geography_id " .
+																" GROUP BY clipping_region_item_id
+																			) as geographyInfo " .
 															"where clr_id = cli_clipping_region_id and cli_id = clipping_region_item_id and clr_no_autocomplete = false";
 		$r = App::Db()->exec($sql);
 

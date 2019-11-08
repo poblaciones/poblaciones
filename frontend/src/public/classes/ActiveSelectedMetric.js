@@ -259,7 +259,7 @@ ActiveSelectedMetric.prototype.GetSymbolInfo = function () {
 ActiveSelectedMetric.prototype.showText = function () {
 	var minZoom = this.SelectedLevel().MinZoom;
 	var pattern = this.GetPattern();
-	return (pattern === 2 || this.SelectedVariable().ShowValues === 1) &&
+	return (pattern === 2 || this.SelectedVariable().ShowValues == 1) &&
 					(minZoom === null || window.SegMap.frame.Zoom >= parseInt(minZoom));
 };
 
