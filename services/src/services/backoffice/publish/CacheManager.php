@@ -9,6 +9,11 @@ use helena\caches\FabMetricsCache;
 use helena\caches\MetricHashesListCache;
 use helena\caches\SelectedMetricsMetadataCache;
 use helena\caches\MetricGroupsMetadataCache;
+use helena\caches\DatasetColumnCache;
+use helena\caches\ClippingSummaryCache;
+use helena\caches\ClippingCache;
+use helena\caches\BackofficeDownloadCache;
+
 use helena\caches\SummaryCache;
 use helena\caches\TileDataCache;
 use helena\caches\GeographyCache;
@@ -49,11 +54,30 @@ class CacheManager
 	{
 		GeographyCache::Cache()->Clear();
 	}
+	public function CleanClippingCache()
+	{
+		ClippingCache::Cache()->Clear();
+		ClippingSummaryCache::Cache()->Clear();
+	}
 	public function CleanLabelsCache()
 	{
 		LabelsCache::Cache()->Clear();
 	}
 
+	public function CleanAllMetricCaches()
+	{
+		SummaryCache::Cache()->Clear();
+		TileDataCache::Cache()->Clear();
+		DatasetColumnCache::Cache()->Clear();
+		ClippingSummaryCache::Cache()->Clear();
+		BackofficeDownloadCache::Cache()->Clear();
+		DatasetShapesCache::Cache()->Clear();
+		DownloadCache::Cache()->Clear();
+		FabMetricsCache::Cache()->Clear();
+		SelectedMetricsMetadataCache::Cache()->Clear();
+		FrameMetricsHashCache::Cache()->Clear();
+		MetricHashesListCache::Cache()->Clear();
+	}
 	public function CleanMetricGroupsMetadataCache()
 	{
 		MetricGroupsMetadataCache::Cache()->Clear();
@@ -71,7 +95,7 @@ class CacheManager
 		SummaryCache::Cache()->Clear($metricIdShardified);
 		TileDataCache::Cache()->Clear($metricIdShardified);
 		SelectedMetricsMetadataCache::Cache()->Clear($metricIdShardified);
-		
+
 		FrameMetricsHashCache::Cache()->Clear();
 		MetricHashesListCache::Cache()->Clear();
 	}

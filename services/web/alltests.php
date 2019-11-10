@@ -8,17 +8,19 @@ require_once __DIR__.'/../startup.php';
 
 Test::SetServer(Context::Settings()->GetMainServerPublicUrl());
 
+$rand = rand(0, 20000);
+
 Test::WriteLine('Servicios de capas');
 Test::Get('/services/metrics/GetFabMetrics');
 Test::Get('/services/clipping/GetDefaultFrameAndClipping');
-Test::Get('/services/clipping/GetLabels?x=85&y=156&z=8');
-Test::Get('/services/clipping/CreateClipping?a=86&e=-36.321756,-56.568096%3B-38.339494,-61.822308&z=8&r=13903');
-Test::Get('/services/clipping/CreateClipping?a=90&e=-36.321756,-56.568096%3B-38.339494,-61.822308&z=8');
-Test::Get('/services/clipping/CreateClipping?a=90&e=-37.359188,-59.742139%3B-37.374946,-59.783188&z=15&r=19517&c=-37.366931,-59.761601%3B0.005383,0.006773');
+Test::Get('/services/clipping/GetLabels?x=85&y=156&z=8&w=' . $rand);
+Test::Get('/services/clipping/CreateClipping?a=86&e=-36.321756,-56.568096%3B-38.339494,-61.822308&z=8&r=13903&w=' . $rand);
+Test::Get('/services/clipping/CreateClipping?a=90&e=-36.321756,-56.568096%3B-38.339494,-61.822308&z=8&w=' . $rand);
+Test::Get('/services/clipping/CreateClipping?a=90&e=-37.359188,-59.742139%3B-37.374946,-59.783188&z=15&r=19517&c=-37.366931,-59.761601%3B0.005383,0.006773&w=' . $rand);
 Test::Get('/services/search?q=nbi');
-Test::Get('/services/metrics/GetSelectedMetric?l=3401');
-Test::Get('/services/metrics/GetTileData?l=3401&v=201&a=8501&u=N&x=86&y=156&e=-36.31489,-56.568096%3B-38.33281,-61.822308&z=8');
-Test::Get('/services/metrics/GetSummary?l=3401&v=201&a=8501&u=N&e=-36.31489,-56.568096%3B-38.33281,-61.822308&z=8');
+Test::Get('/services/metrics/GetSelectedMetric?l=3401&w=' . $rand);
+Test::Get('/services/metrics/GetTileData?l=3401&v=201&a=8501&u=N&x=86&y=156&e=-36.31489,-56.568096%3B-38.33281,-61.822308&z=8&w=' . $rand);
+Test::Get('/services/metrics/GetSummary?l=3401&v=201&a=8501&u=N&e=-36.31489,-56.568096%3B-38.33281,-61.822308&z=8&w=' . $rand);
 
 Test::WriteLine('Servicios de backoffice');
 Test::Get('/services/backoffice/GetFactories');

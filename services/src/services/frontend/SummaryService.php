@@ -74,12 +74,11 @@ class SummaryService extends BaseService
 		{
 			$rows = $table->GetMetricVersionSummaryByEnvelope($metricVersionId, $level->HasSummary, $geographyId, $urbanity, $frame->Envelope);
 		}
-		$data = $this->CreateSummaryInfo($rows, $level->HasTotals);
-
+		$data = $this->CreateSummaryInfo($rows);
 		return $data;
 	}
 
-	private function CreateSummaryInfo($rows, $hasTotals)
+	private function CreateSummaryInfo($rows)
 	{
 		$ret = new SummaryInfo();
 		foreach($rows as $row)
@@ -87,10 +86,10 @@ class SummaryService extends BaseService
 			$item = new SummaryItemInfo();
 			$item->Value = $row['Value'] ;
 			$item->Count = $row['Areas'] ;
-			if ($hasTotals)
+			if (array_key_exists('Total', $row) && $row['Total'] !== null)
 				$item->Total = $row['Total'] ;
-			$item->Km2 = $row['Km2'] ;
 
+			$item->Km2 = $row['Km2'] ;
 			$item->VariableId = $row['VariableId'];
 			$item->ValueId= $row['ValueId'];
 

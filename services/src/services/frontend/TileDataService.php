@@ -71,15 +71,15 @@ class TileDataService extends BaseService
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $geographyId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $level->HasTotals);
+			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $geographyId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
 		else if ($frame->ClippingRegionId != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByRegionId($metricVersionId, $geographyId, $urbanity, $envelope, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $level->HasTotals);
+			$rows = $table->GetMetricVersionTileDataByRegionId($metricVersionId, $geographyId, $urbanity, $envelope, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $geographyId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions, $level->HasTotals);
+			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $geographyId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions);
 		}
 
 		$data = $this->CreateTileDataInfo($rows);

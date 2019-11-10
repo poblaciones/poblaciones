@@ -328,7 +328,6 @@ class CsvToJson
 		for($i = 0; $i < count($names); $i++)
 		{
 			$names[$i] = Variable::FixName(trim($names[$i]));
-
 			if($names[$i] == '')
 				$names[$i] = 'x';
 			elseif(Str::IsNumber($names[$i]) || $names[$i][0] == '_')

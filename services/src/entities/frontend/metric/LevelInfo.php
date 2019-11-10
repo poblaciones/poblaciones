@@ -16,8 +16,7 @@ class LevelInfo extends BaseMapModel
 	public $SummaryCaption;
 	public $HasUrbanity;
 	public $HasSummary = false;
-	public $HasTotals = false;
-
+	
 	public $Pinned = false;
 
 	public $Source;

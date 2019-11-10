@@ -400,7 +400,7 @@ ActiveSelectedMetric.prototype.getValidMetrics = function () {
 	var ret = [];
 	ret.push({ Key: 'N', Caption: 'Cantidad' });
 
-	if (this.SelectedLevel().HasTotals) {
+	if (this.SelectedVariable().HasTotals) {
 		ret.push({ Key: 'I', Caption: 'Incidencia' });
 	}
 

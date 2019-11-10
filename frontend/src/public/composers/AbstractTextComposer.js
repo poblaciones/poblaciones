@@ -20,7 +20,7 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (dataElement, locati
 			number = '&nbsp;&nbsp;';
 		}
 	}
-	this.SetTextOverlay(null, [dataElement['FID']], '' + tileKey, location, null, null, number, backColor);
+	this.SetTextOverlay(null, ['' + dataElement['FID']], '' + tileKey, location, null, null, number, backColor);
 };
 
 AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, location, description, tooltip, number, backColor, clickId, hidden) {
