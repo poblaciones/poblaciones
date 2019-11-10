@@ -57,10 +57,10 @@ class cCaches extends cController
 		} else if (array_key_exists('regenGeography', $_POST)) {
 			$model = new SnapshotGeographiesModel();
 			$model->Clean();
+
 			$cm = new CacheManager();
 			$cm->CleanGeographyCache();
-			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';
-		} else if (array_key_exists('regenClipping', $_POST)) {
+			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';		} else if (array_key_exists('regenClipping', $_POST)) {
 			$model = new SnapshotLookupModel();
 			$model->ClearClippingRegions();
 			$this->message = 'Regeneradas ' . $model->RegenClippingRegions() . ' filas.';
@@ -71,17 +71,16 @@ class cCaches extends cController
 			$n = $model->IncrementAllRevisions();
 			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores.';
 			$cm = new CacheManager();
-			$cm->CleanAllMetricCaches();
-		} else if (array_key_exists('clearTempTables', $_POST)) {
+			$cm->CleanAllMetricCaches();		} else if (array_key_exists('clearTempTables', $_POST)) {
 			$model = new PublishDataTables();
 			$n = $model->CleanTempTables();
 			$this->message = 'Liberadas ' . $n . ' tablas.';
 		} else if (array_key_exists('regenClippingGeography', $_POST)) {
 			$model = new SnapshotGeographiesByRegionModel();
 			$model->Clean();
+			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';
 			$cm = new CacheManager();
 			$cm->CleanClippingCache();
-			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';
 		}
 		return $this->Show();
 	}
