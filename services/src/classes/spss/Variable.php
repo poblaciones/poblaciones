@@ -44,6 +44,7 @@ class Variable
 			if(Str::Contains($validChars, $name[$i]) == false)
 				$name[$i] = '_';
 		}
+		$name = iconv("UTF-8","UTF-8//IGNORE", $name);
 		return $name;
 	}
 

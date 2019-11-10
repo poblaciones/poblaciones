@@ -67,26 +67,28 @@ class CsvReader
 	const MAX_BYTES_ENCODING = 100000;
 
 	private $headLength = 0;
-	private $handle = false;
+	private $handle = null;
 	private $start = 0;
 
 	public $eof = false;
 	public $delimiter = null;
 	public $textQualifier = '"';
 	public $decimalSeparator = null;
+	public $lineDelimiter = null;
 	public $encoding = null;
 
 	public function __construct($textQualifier = '"',
-	  	$delimiter = null, $encoding = null)
+	  	$delimiter = null, $encoding = null, $lineDelimiter = null)
 	{
 		$this->encoding = $encoding;
 		$this->delimiter = $delimiter;
+		$this->lineDelimiter = $lineDelimiter;
 		$this->textQualifier = $textQualifier;
 	}
 
 	public function Open($filename)
 	{
-		if($this->handle !== false)
+		if($this->handle !== null)
 			$this->InternalReset();
 
 		$this->handle = fopen($filename, 'r');
@@ -96,7 +98,7 @@ class CsvReader
 			$this->InternalReset();
 			throw new ErrorException('Could not open file');
 		}
-
+		$this->DetectLineDelimiter();
 		$this->DetectEncoding();
 	}
 
@@ -241,15 +243,15 @@ class CsvReader
 
 	public function Close()
 	{
-		if($this->handle !== false)
+		if($this->handle !== null)
 			fclose($this->handle);
 
-		$this->handle = false;
+		$this->handle = null;
 	}
 
 	private function ReadHeaderLine()
 	{
-		if($this->handle === false)
+		if($this->handle === null)
 			throw new ErrorException('Open file first');
 
 		if($this->start > 0)
@@ -351,8 +353,7 @@ class CsvReader
 		$lines = [];
 		for($i = $this->start; $i < $this->start + $count; $i++)
 		{
-			$line = fgets($this->handle);
-
+			$line = stream_get_line($this->handle, 1024*1024*1024, $this->lineDelimiter);
 			if($line !== false)
 			{
 				if($this->encoding !== null && $this->encoding != 'UTF-8')
@@ -370,6 +371,45 @@ class CsvReader
 		}
 		$this->start += $count;
 		return $lines;
+	}
+
+	private function DetectLineDelimiter()
+	{
+		if($this->lineDelimiter !== null)
+			return;
+
+		$prev = ftell($this->handle);
+		$ret = "\r\n";
+		while(feof($this->handle) == false)
+		{
+			$str = fread($this->handle, self::MAX_BYTES_ENCODING);
+			if($str === false)
+				break;
+			$r = strpos($str, "\r");
+			$n = strpos($str, "\n");
+			if ($r !== FALSE || $n !== FALSE)
+			{
+				if ($r !== FALSE && $n === $r + 1)
+				{
+					$ret = "\r\n";
+				}
+				else if ($n !== FALSE && $r === $n + 1)
+				{
+					$ret = "\n\r";
+				}
+				else if ($r !== FALSE)
+				{
+					$ret = "\r";
+				}
+				else
+				{
+					$ret = "\n";
+				}
+			break;
+			}
+		}
+		fseek($this->handle, $prev);
+		$this->lineDelimiter = $ret;
 	}
 
 	private function DetectEncoding()

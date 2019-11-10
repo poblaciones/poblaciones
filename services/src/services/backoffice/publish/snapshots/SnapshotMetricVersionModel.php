@@ -64,6 +64,22 @@ class SnapshotMetricVersionModel
 		Profiling::EndTimer();
 	}
 
+	public function IncrementAllRevisions()
+	{
+		Profiling::BeginTimer();
+
+		$sql = "UPDATE snapshot_metric_versions SET mvw_metric_revision = mvw_metric_revision + 1";
+		App::Db()->exec($sql);
+		$sql = "UPDATE metric SET mtr_revision = mtr_revision + 1";
+		$ret = App::Db()->exec($sql);
+
+		Profiling::EndTimer();
+
+		return $ret;
+	}
+
+
+
 	public function IncrementMetricRevision($metricId)
 	{
 		$metricIdShardified = PublishDataTables::Shardified($metricId);

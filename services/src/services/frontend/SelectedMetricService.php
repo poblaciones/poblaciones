@@ -203,6 +203,7 @@ class SelectedMetricService extends BaseService
 		{
 			$variableInfo = new VariableInfo();
 			$variableInfo->Fill($variable);
+			$variableInfo->HasTotals = $variable['mvv_normalization'] !== null;
 			$this->AddVariablesValues($variableInfo);
 			if ($variableInfo->IsDefault)
 				$levelInfo->SelectedVariableIndex = sizeof($levelInfo->Variables);

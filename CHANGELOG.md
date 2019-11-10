@@ -1,8 +1,14 @@
 ﻿[CURRENT]
+
+
+v2.8 (2019-11-11)
 - Fix: CloneDataset no estaba generando versiones nuevas para los indicadores.
 - Mejoras en generación de nombres nuevos por clonado.
 - Fix: vinculación de etiquetas y valores.
-- CABA pasa a Distrito.
+- CABA pasa a ser distrito en el clipping regions (sale de aglomerado).
+- Fix: al importar archivos, si se reutilizaba el popup para subir dos archivos, anexaba el segundo al primero.
+- Soporta la importación de archivos CSV con encoding MAC-ROMAN (macintosh previos a UTF-8).
+- Soporta la importación de archivos CSV con delimitador de línea LF, CR, CRLF o LFCR.
 
 v2.7 (2019-11-07)
 - Fix en la detección de encoding de CSV.

@@ -14,6 +14,9 @@
             </li>
             <li>Archivos de texto separados por comas (.csv).</li>
           </ul>
+					<!--
+					https://poblaciones.org/wp-content/uploads/2019/11/Poblaciones-Como-convertir-shapefiles-a-CSV-con-QGIS.pdf
+						-->
         </div>
 
         <div class="md-layout md-gutter">
@@ -113,6 +116,7 @@ export default {
 		},
 		clear() {
 			this.$refs.myVueDropzone.removeAllFiles();
+			this.generateBucketId();
 			this.hasFiles = false;
 		},
     afterSuccess(file, response) {
@@ -136,31 +140,34 @@ export default {
 				alert('La extensión del archivo debe ser SAV, CSV o TXT.');
 				return;
 			}
-	stepper.args = { b: bucketId, d: datasetId, fe: extension };
-	let loc = this;
-	stepper.Start().then(function() {
-	loc.Work.WorkChanged();
-	loc.Dataset.ReloadProperties();
-	loc.Dataset.ReloadColumns();
-	});
-	},
-	onCloseStepper(success) {
-	if (success) {
-	this.openImport = false;
-	}
-	},
-	show() {
-	this.extension = '';
-	this.bucketId = new Date().getTime() * 10000;
-	this.sending = false;
-	this.hasFiles = false;
-	this.openImport = true;
-	}
+			stepper.args = { b: bucketId, d: datasetId, fe: extension };
+			let loc = this;
+			stepper.Start().then(function() {
+				loc.Work.WorkChanged();
+				loc.Dataset.ReloadProperties();
+				loc.Dataset.ReloadColumns();
+			});
+		},
+		onCloseStepper(success) {
+			if (success) {
+				this.openImport = false;
+			}
+		},
+		generateBucketId() {
+			this.bucketId = new Date().getTime() * 10000;
+		},
+		show() {
+			this.extension = '';
+			this.generateBucketId();
+			this.sending = false;
+			this.hasFiles = false;
+			this.openImport = true;
+		}
 	},
 	components: {
-	vueDropzone: vue2Dropzone
+		vueDropzone: vue2Dropzone
 	}
-	};
+};
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
