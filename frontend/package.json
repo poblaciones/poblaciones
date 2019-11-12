@@ -35,7 +35,7 @@
 				"parse-svg": "^0.0.0",
 				"replace": "^1.1.0",
 				"screenfull": "^4.2.0",
-				"showdown": "^1.9.0",
+				"showdown": "^1.9.1",
 				"split.js": "^1.5.10",
 				"svg.js": "^2.7.1",
 				"tls": "0.0.1",

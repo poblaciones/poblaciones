@@ -23,7 +23,7 @@
             <br/>
 						<span>{{ item.highlighted }}</span>
           </div>
-          <div v-if="item.type === 'F'">
+          <div v-if="item.type === 'F' || item.type === 'P'">
             <em class='text-softer small'>{{ item.extra }}</em>
             <br/>
             <span>{{ item.highlighted }}</span>
@@ -42,6 +42,7 @@
 
 <script>
 import h from '@/public/js/helper';
+import Search from '@/public/classes/Search';
 import { mixin as clickaway } from 'vue-clickaway';
 import err from '@/common/js/err';
 import axios from 'axios';
@@ -91,55 +92,37 @@ export default {
 			this.selindex = index;
 		},
 		select(item) {
-			window.SegMap.SelectId(item.type, item.id, item.Lat, item.Lon);
+			if (item.type === 'P') {
+				window.SegMap.SetMyLocation(item);
+			}
+			else {
+				window.SegMap.SelectId(item.type, item.id, item.Lat, item.Lon);
+			}
 			this.text = '';
 			this.autolist = [];
 		},
-		doSearch: debounce(function(e) {
-			if(e.keyCode === 40 ||
-				e.keyCode === 38 ||
-				e.keyCode === 27) {
-				return;
-			}
-			const loc = this;
-			const t = loc.text.trim().toLowerCase();
-			if(t === '' || loc.searched === t) {
-				return;
-			}
-			loc.autolist = [];
-			loc.loading = true;
-			if(this.retCancel !== null)
+		doSearch: debounce(function(e)
 			{
-				this.retCancel('cancelled');
-				this.retCancel = null;
-			}
-			var CancelToken = axios.CancelToken;
-			var retCancel = null;
-			window.SegMap.Get(window.host + '/services/search', {
-        params: { q: t, w: window.SegMap.Revisions.Search },
-				cancelToken: new CancelToken(function executor(c) { retCancel = c; })
-				})
-				.then(function(res) {
-					loc.searched = t;
-					// const regEx = new RegExp(t, 'i');
-					loc.autolist = res.data.map(function(el) {
-						el.highlighted = el.caption; // .replace(regEx, '<b>' + t + '</b>');
-						el.class = '';
-						return el;
-					});
-					if(loc.autolist.length === 0) {
-						loc.autolist = [{
-							type: 'N',
-							highlighted: 'No se encontraron resultados.',
-						}];
-					}
-					loc.loading = false;
-				}).catch(function(error) {
-					loc.loading = false;
-					err.errDialog('search', 'completar la búsqueda solicitada', error);
-				});
-			this.retCancel = retCancel;
-		}, 500),
+				if(e.keyCode === 40 ||
+					e.keyCode === 38 ||
+					e.keyCode === 27) {
+					return;
+				}
+				const loc = this;
+				const t = loc.text.trim().toLowerCase();
+				if(t === '' || loc.searched === t) {
+					return;
+				}
+				loc.autolist = [];
+				if(this.retCancel !== null)
+				{
+					this.retCancel('cancelled');
+					this.retCancel = null;
+				}
+				var s = new Search(this, window.SegMap);
+				s.StartSearch(t);
+			},
+			500),
 		enterKey(e) {
 			const loc = this;
 			if(loc.hasSelected() === false) {
