@@ -11,6 +11,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.properties = workInfo.Work;
 	this.Datasets = [];
 	this.Bounded = false;
+	this.pendingChanges = 0;
 	this.Sources = workInfo.Sources;
 	this.MetricVersions = new AsyncCatalog(window.host + '/services/backoffice/GetWorkMetricVersions?w=' + workInfo.Work.Id);
 	this.MetricVersions.Refresh();
@@ -75,6 +76,14 @@ ActiveWork.prototype.CanEdit = function () {
 	}
 	return false;
 };
+
+ActiveWork.prototype.HasChanges = function () {
+	return this.pendingChanges || this.properties.Metadata.LastOnline === null ||
+		this.properties.MetadataChanged || this.properties.DatasetLabelsChanged ||
+		this.properties.DatasetDataChanged || this.properties.MetricLabelsChanged ||
+		this.properties.MetricDataChanged;
+};
+
 ActiveWork.prototype.CanAdmin = function () {
 	if (window.Context.User.privileges === 'A') {
 		return true;
@@ -368,9 +377,38 @@ ActiveWork.prototype.MoveSourceDown = function (item) {
 };
 
 ActiveWork.prototype.WorkChanged = function () {
+	this.UpdateHasChanges(1);
+};
+
+ActiveWork.prototype.WorkPublished = function () {
+	this.UpdateHasChanges(0);
+};
+
+
+ActiveWork.prototype.UpdateDatasetGeorreferencedCount = function () {
+	// Cuenta...
+	var DatasetCount = this.Datasets.length;
+	var GeorreferencedCount = 0;
+	for (var n = 0; n < this.Datasets.length; n++) {
+		if (this.Datasets[n].properties.Geocoded) GeorreferencedCount++;
+	}
+	// Actualiza
 	for (var n = 0; n < this.workListMetadata.length; n++) {
 		if (this.workListMetadata[n].Id === this.properties.Id) {
-			this.workListMetadata[n].HasChanges = 1;
+			this.workListMetadata[n].DatasetCount = DatasetCount;
+			this.workListMetadata[n].GeorreferencedCount = DatasetCount;
+			break;
+		}
+	}
+	// Devuelve
+	return { DatasetCount: DatasetCount, GeorreferencedCount: GeorreferencedCount };
+};
+
+ActiveWork.prototype.UpdateHasChanges = function (value) {
+	this.pendingChanges = value;
+	for (var n = 0; n < this.workListMetadata.length; n++) {
+		if (this.workListMetadata[n].Id === this.properties.Id) {
+			this.workListMetadata[n].HasChanges = value;
 			break;
 		}
 	}

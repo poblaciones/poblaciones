@@ -5,6 +5,7 @@
 			<Search/>
 			<Mapa/>
 			<Fab ref="fabPanel" />
+			<Edit v-if="work.Current" ref="editPanel" :work="work" />
 		</div>
 		<div id="panRight" class="split split-horizontal">
 			<SummaryPanel :metrics="metrics"
@@ -20,6 +21,7 @@ import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
 import Mapa from '@/public/components/panels/mapPanel';
 import Fab from '@/public/components/panels/fabPanel';
+import Edit from '@/public/components/panels/editPanel';
 import SummaryPanel from '@/public/components/panels/summaryPanel';
 import Search from '@/public/components/widgets/search';
 import Split from 'split.js';
@@ -35,6 +37,7 @@ export default {
 		SummaryPanel,
 		Search,
 		Mapa,
+		Edit,
 		Fab,
 		WorkPanel
 	},

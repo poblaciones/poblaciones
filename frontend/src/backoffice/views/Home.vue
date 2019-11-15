@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import TopWelcome from '@/backoffice/components/TopWelcome';
+import TopWelcome from '@/backoffice/views/Layout/TopWelcome';
 import Works from './Work/Works';
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/js/arr';

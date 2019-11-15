@@ -1,5 +1,7 @@
 ﻿[CURRENT]
-
+- El buscador permite indicar coordenadas por lat/lon.
+- Se agregan botones de acceso al mapa y a publicar al editarse una cartografía.
+- Si el indicador muestra conteo, no se repiten los valores de N en zonas y valores.
 
 v2.8 (2019-11-11)
 - Fix: CloneDataset no estaba generando versiones nuevas para los indicadores.

@@ -1,10 +1,7 @@
 <template>
 	<div>
 		<div style="position: absolute; z-index: 10">
-			<Modal class="panel card" title="Agregar indicador" ref="metrics" :showCancel="false"
-		 :showOk="false">
-				<addMetric v-if="work.Current" ref="addMetric" :list="work.Current.Metrics" v-on:selectedItem="metricSelected" />
-			</Modal>
+			<addMetric ref="addMetric" :list="(work.Current ? work.Current.Metrics : [])" v-on:selectedItem="metricSelected" />
 			<div class="panel card">
 				<WorkMetricMetadata ref="showFuente" :work="work.Current" />
 			</div>
@@ -15,18 +12,18 @@
 					<span aria-hidden="true">&times;</span>
 				</button -->
 				<div class="title pull-right" style="margin-top: -1px">
-						<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
-						<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
-						<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
+					<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
+					<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
+					<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
 					<div style="position: relative; z-index: 10;" :style="(showButtonsInInSingleRow() ? 'width: 1px' : '')">
 						<div class="sourceInfo" :style="getMetadataStyle()">
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
-									v-on:click="clickFuente" style="color: #FFF">
+								 v-on:click="clickFuente" style="color: #FFF">
 								<link-icon />
 								Metadatos
 							</a>
 						</div>
-					
+
 					</div>
 				</div>
 				<div v-if="work.Current.Institution" class="littleRow preTitleRow">
@@ -44,7 +41,6 @@
 </template>
 
 <script>
-import Modal from '@/public/components/popups/modal';
 import addMetric from '@/public/components/popups/addMetric';
 import WorkMetricMetadata from '@/public/components/popups/workMetricMetadata';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
@@ -55,7 +51,6 @@ export default {
 		'work',
 	],
 	components: {
-		Modal,
 		addMetric,
 		WorkMetricMetadata,
 		LinkIcon,
@@ -68,7 +63,7 @@ export default {
 	},
 	methods: {
 		showMetrics() {
-			this.$refs.metrics.show();
+			this.$refs.addMetric.show();
 		},
 		onResize() {
 			var visible = (this.work.Current !== null);
@@ -95,7 +90,7 @@ export default {
 		},
 		metricSelected() {
 			var metric = this.$refs.addMetric.selected;
-			this.$refs.metrics.hide();
+			this.$refs.addMetric.hide();
 			window.SegMap.AddMetricByIdAndWork(metric.Id, this.work.Current.Id);
 		},
 		updateWork() {

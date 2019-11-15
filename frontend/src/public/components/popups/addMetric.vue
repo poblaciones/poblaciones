@@ -1,35 +1,38 @@
 <template>
-	<div>
-		<div class="listContainer">
-			<table class="localTable">
-				<tbody>
-					<tr style="font-size: 1.2em">
-						<td style="width: 390px">Indicador</td>
-						<td style="width: 130px" align="center">Ediciones</td>
-					</tr>
-				</tbody>
-			</table>
-			<div style="height: 240px; width: 540px; overflow: auto;
+	<Modal class="panel card" title="Agregar fuente pública" ref="showPopup" :showCancel="false" :showOk="false">
+		<div>
+			<div class="listContainer">
+				<table class="localTable">
+					<tbody>
+						<tr style="font-size: 1.2em">
+							<td style="width: 390px">Indicador</td>
+							<td style="width: 130px" align="center">Ediciones</td>
+						</tr>
+					</tbody>
+				</table>
+				<div style="height: 240px; width: 540px; overflow: auto;
 					 border: 1px solid #e2e2e2;">
-			<table class="localTable">
-				<tbody>
-					<tr v-for="(item, index) in list" @mouseover="selected = item"
-							 @mouseleave="leave(item)"
-							@click="select(item)" :key="item.Id"
-							:class="(index < list.length - 1 ? 'metricrowborder ' : '') + ' hand ' + (selected === item ? 'selectedRow' : '')">
-						<td class="metricCell" style="width: 390px">{{ item.Name }}</td>
-						<td class="metricCell" align="center" style="width: 150px">{{ joinVersions(item.Versions) }}</td>
-					</tr>
-				</tbody>
-			</table>
+					<table class="localTable">
+						<tbody>
+							<tr v-for="(item, index) in list" @mouseover="selected = item"
+									@mouseleave="leave(item)"
+									@click="select(item)" :key="item.Id"
+									:class="(index < list.length - 1 ? 'metricrowborder ' : '') + ' hand ' + (selected === item ? 'selectedRow' : '')">
+								<td class="metricCell" style="width: 390px">{{ item.Name }}</td>
+								<td class="metricCell" align="center" style="width: 150px">{{ joinVersions(item.Versions) }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
-	</div>
+	</Modal>
 </template>
 
 
 <script>
 import h from '@/public/js/helper';
+import Modal from '@/public/components/popups/modal';
 
 export default {
 	name: 'addMetricPopup',
@@ -42,6 +45,7 @@ export default {
 		'list',
 	],
 	components: {
+		Modal
  },
   methods: {
 		leave(item) {
@@ -56,6 +60,12 @@ export default {
 					this.$emit('selectedItem');
 				});
 			}
+		},
+		show() {
+			this.$refs.showPopup.show();
+		},
+		hide() {
+			this.$refs.showPopup.hide();
 		},
 		joinVersions(versions) {
 			var ret = '';

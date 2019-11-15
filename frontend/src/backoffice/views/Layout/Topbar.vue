@@ -2,16 +2,17 @@
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar">
 			<user-info></user-info>
+			<backoffice-links ></backoffice-links>
 			<div style="float: left">
 				<router-link :to="getBackRoute">
-					 <BackIcon class="icon" style="font-size: 28px; color: #fff" />
+					<BackIcon class="icon" style="font-size: 28px; color: #fff" />
 				</router-link>
-				</div>
-				<div class="titleLine">
-					<span>
-						{{ this.Work.properties.Metadata.Title }}
-					</span>
-				</div>
+			</div>
+			<div class="titleLine">
+				<span>
+					{{ this.Work.properties.Metadata.Title }}
+				</span>
+			</div>
 		</div>
 
 		<stepper ref="TestStepper" title="Asistente de prueba">
@@ -24,11 +25,13 @@ import { mapGetters } from 'vuex';
 import Context from '@/backoffice/classes/Context';
 import BackIcon from '@/common/assets/back.svg';
 import UserInfo from '@/backoffice/components/UserInfo';
+import BackofficeLinks from '@/backoffice/components/BackofficeLinks.vue';
 
 export default {
 	name: 'topBar',
 	components: {
 		BackIcon,
+		BackofficeLinks,
 		UserInfo
 	},
 	computed: {

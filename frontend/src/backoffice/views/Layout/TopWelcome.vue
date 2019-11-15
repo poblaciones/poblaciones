@@ -14,8 +14,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import ActiveWork from '@/backoffice/classes/ActiveWork.js';
-import UserInfo from './UserInfo';
-import AdminLinks from './AdminLinks';
+import UserInfo from '@/backoffice/components/UserInfo';
+import AdminLinks from '@/backoffice/components/AdminLinks';
 
 export default {
 	name: 'topBar',

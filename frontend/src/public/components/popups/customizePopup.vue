@@ -1,6 +1,5 @@
 <template>
-	<Modal title="Personalizar" ref="showCustomize" :showCancel="false" :showOk="false"
-				 v-on:cancel="closeCustomize" v-on:ok="closeCustomize">
+	<Modal title="Personalizar" ref="showCustomize" :showCancel="false" :showOk="false">
 		<div v-if="metric !== null">
 			<table class="localTable">
 				<tr>
@@ -108,9 +107,6 @@ export default {
 		show(metric) {
 			this.metric = metric;
 			this.$refs.showCustomize.show();
-		},
-		closeCustomize() {
-			this.$refs.showCustomize.hide();
 		},
 		getActiveTransparency(key) {
 			if(key === this.metric.properties.Transparency) {

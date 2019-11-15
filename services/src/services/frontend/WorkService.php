@@ -10,6 +10,7 @@ use helena\db\frontend\MetadataModel;
 use helena\db\frontend\WorkModel;
 use helena\db\frontend\FileModel;
 use helena\classes\App;
+use helena\classes\Session;
 
 class WorkService extends BaseService
 {
@@ -17,7 +18,6 @@ class WorkService extends BaseService
 	{
 		$worksTable = new WorkModel();
 		$ret = $this->GetWorkOnly($workId);
-		
 		$rows = $worksTable->GetWorkMetricsInfo($workId);
 		$ret->FillMetrics($rows);
 		$metadataTable = new MetadataModel();
@@ -34,6 +34,7 @@ class WorkService extends BaseService
 			throw new ErrorException("La cartografía no ha sido encontrada.");
 		}
 		$ret = new WorkInfo();
+		$ret->CanEdit = Session::IsWorkEditor($workId);
 		$ret->Fill($work);
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
 		return $ret;

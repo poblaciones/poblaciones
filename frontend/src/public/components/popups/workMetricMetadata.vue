@@ -1,6 +1,5 @@
 <template>
-  <Modal :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false"  :showOk="false"
-					v-on:cancel="closeFuente" v-on:ok="closeFuente" v-if="work">
+  <Modal v-if="work" :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false"  :showOk="false">
 		<div>
 			<table class="localTable">
 				<tbody>
@@ -113,9 +112,6 @@ export default {
 			} else {
 				return '#';
 			}
-		},
-		closeFuente() {
-			this.$refs.dialog.hide();
 		},
 		resolveMetadataUrl() {
 			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.work.MetadataId + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id;

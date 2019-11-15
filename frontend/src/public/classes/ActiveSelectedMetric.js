@@ -381,12 +381,17 @@ ActiveSelectedMetric.prototype.getValidPatterns = function () {
 	ret.push({ Key: 0, Caption: 'Pleno' });
 	ret.push({ Key: 1, Caption: 'Contorno' });
 	ret.push({ Key: 2, Caption: 'Semáforo' });
-	var ipattern = parseInt(this.SelectedVariable().Pattern);
-	if (ipattern >= 3 && ipattern <= 5) {
-		ret.push({ Key: this.SelectedVariable().Pattern, Caption: 'Cañería' });
+	if (this.SelectedVariable()) {
+		var ipattern = parseInt(this.SelectedVariable().Pattern);
+		if (ipattern >= 3 && ipattern <= 5) {
+			ret.push({ Key: this.SelectedVariable().Pattern, Caption: 'Cañería' });
+		} else {
+			ret.push({ Key: 3, Caption: 'Cañería' });
+		}
 	} else {
 		ret.push({ Key: 3, Caption: 'Cañería' });
 	}
+
 	ret.push({ Key: 7, Caption: 'Diagonal' });
 	ret.push({ Key: 8, Caption: 'Horizontal' });
 	ret.push({ Key: 9, Caption: 'Diagonal invertida' });
@@ -396,11 +401,14 @@ ActiveSelectedMetric.prototype.getValidPatterns = function () {
 	return ret;
 };
 
-ActiveSelectedMetric.prototype.getValidMetrics = function () {
+ActiveSelectedMetric.prototype.getValidMetrics = function (variable) {
 	var ret = [];
+	if (!variable) {
+		variable = this.SelectedVariable();
+	}
 	ret.push({ Key: 'N', Caption: 'Cantidad' });
 
-	if (this.SelectedVariable().HasTotals) {
+	if (variable && variable.HasTotals) {
 		ret.push({ Key: 'I', Caption: 'Incidencia' });
 	}
 

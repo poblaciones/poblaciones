@@ -260,6 +260,7 @@ export default {
 					break;
 				case STEP_END:
 					this.Dataset.properties.Geocoded = true;
+					this.Work.UpdateDatasetGeorreferencedCount();
 					this.Dataset.ScaleGenerator.RegenAndSaveAllVariables();
 					stepper.complete = 'Georeferenciación exitosa.';
 					break;

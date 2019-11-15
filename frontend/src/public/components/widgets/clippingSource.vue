@@ -15,16 +15,12 @@
 			</a>
     </div>
     <div style="position: absolute">
-      <Modal title="Fuente" ref="showFuente" :showCancel="false"  :showOk="false"
-						 v-on:cancel="closeFuente" v-on:ok="closeFuente">
-				<ClippingMetadata :metadata="metadata" />
-      </Modal>
+      <ClippingMetadata ref="fuenteDialog" :metadata="metadata" />
     </div>
   </div>
 </template>
 
 <script>
-import Modal from '@/public/components/popups/modal';
 import ClippingMetadata from '@/public/components/popups/clippingMetadata';
 import DownloadIcon from 'vue-material-design-icons/download.vue';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
@@ -32,7 +28,6 @@ import LinkIcon from 'vue-material-design-icons/Link.vue';
 export default {
 	name: 'clippingSourceInfo',
 	components: {
-    Modal,
     DownloadIcon,
 		LinkIcon,
 		ClippingMetadata
@@ -58,10 +53,7 @@ export default {
 		},
 		clickFuente(e) {
 			e.preventDefault();
-			this.$refs.showFuente.show();
-		},
-		closeFuente() {
-			this.$refs.showFuente.hide();
+			this.$refs.fuenteDialog.show();
 		},
 	},
 };

@@ -19,8 +19,8 @@ class VariableInfo extends BaseMapModel
 	public $ShowEmptyCategories = true;
 	public $Decimals = 0;
 	public $HasTotals = 0;
+	public $IsSimpleCount = false;
 	public $DefaultMeasure = 'N';
-
 	public $ValueLabels = array();
 
 	public static function GetMap()

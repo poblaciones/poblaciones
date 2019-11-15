@@ -3,7 +3,7 @@
 		<div class="statsHeader">&nbsp;
 			<span :title="getValueHeaderTooltip()" v-html="getValueHeader()" style="width: 75px; text-align: right" class='pull-right'>
 			</span>
-			<span class='pull-right' :style="(version.Levels.length > 1 ? 'margin-right: -15px;' : '')">{{ level.Name }}
+			<span class='pull-right' v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="(version.Levels.length > 1 ? 'margin-right: -15px;' : '')">{{ level.Name }}
 				<span v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
 							class="hand" v-on:click="togglePin">
 					<PinIcon v-if="!level.Pinned" class="icon" />
@@ -18,14 +18,14 @@
 					<!-- 2575fb -->
 					<i :style="'color: ' + label.FillColor" class="fa drop fa-tint"></i> {{ label.Name }}
 					<span style="width: 75px; text-align: right" class='pull-right padleft' :class="getMuted()">{{ getValueFormatted(label.Values, variable.ValueLabels) }}</span>
-					<span class='pull-right' :class="getMuted()">{{ h.formatNum(label.Values.Count) }}</span>
+					<span v-if="!variable.IsSimpleCount" class='pull-right' :class="getMuted()">{{ h.formatNum(label.Values.Count) }}</span>
 					<div class="bar" :style="getLength(getValue(label.Values, variable.ValueLabels), variable)"></div>
 				</div>
 				<div v-else class="labelRow">
 					<span class="action-muted"><i class="fa drop fa-tint"></i></span>
 					<span class="text-muted"> {{ label.Name }}
 						<span style="width: 75px; text-align: right" class='pull-right'>{{ getValueFormatted(label.Values, variable.ValueLabels) }}</span>
-						<span class='pull-right'>{{ h.formatNum(label.Values.Count) }}</span>
+						<span v-if="!variable.IsSimpleCount" class='pull-right'>{{ h.formatNum(label.Values.Count) }}</span>
 					</span>
 					<div class="bar-muted" :style="getLength( getValue(label.Values, variable.ValueLabels), variable)"></div>
 				</div>
@@ -34,7 +34,7 @@
 		<div v-if="showTotals" class="stats">&nbsp;
 			<span>Total
 			<span style="width: 75px; text-align: right" class='pull-right'>&nbsp;{{ aniTotal }}</span>
-			<span class='pull-right'>{{ aniTotalCount }}</span>
+			<span v-if="!variable.IsSimpleCount" class='pull-right'>{{ aniTotalCount }}</span>
 			</span>
 		</div>
 		<div class='smallIcons hand'>
@@ -107,7 +107,7 @@ export default {
 				}
 			});
 			if (loc.metric.properties.SummaryMetric === 'I') {
-				ret = (tot > 0 ? ret * this.metric.SelectedVariable().NormalizationScale / tot : 0);
+				ret = (tot > 0 ? ret * this.variable.NormalizationScale / tot : 0);
 			}
 			return ret;
 		},
@@ -145,7 +145,7 @@ export default {
 			return this.version.Levels[this.version.SelectedLevelIndex];
 		},
 		currentMetric() {
-			var ret = this.metric.getValidMetrics();
+			var ret = this.metric.getValidMetrics(this.variable);
 			for(var n = 0; n < ret.length; n++) {
 				if (ret[n].Key === this.metric.properties.SummaryMetric) {
 					return ret[n];
@@ -216,7 +216,7 @@ export default {
 				format = '%';
 				break;
 			case 'I':
-				switch(this.metric.SelectedVariable().NormalizationScale) {
+				switch(this.variable.NormalizationScale) {
 					case 100:
 						format = '%100';
 						break;
@@ -247,16 +247,16 @@ export default {
 			case 'P':
 				return 'COL %';
 			case 'I':
-				switch(this.metric.SelectedVariable().NormalizationScale) {
-					case '100':
+				switch(this.variable.NormalizationScale) {
+					case 100:
 						return '%';
-          case '1':
+          case 1:
             return '/1';
-          case '1000':
+          case 1000:
             return '/k';
-          case '10000':
+          case 10000:
             return '/10k';
-          case '100000':
+          case 100000:
             return '/100k';
         }
         return 'N/A';
@@ -279,7 +279,7 @@ export default {
 			case 'P':
 				return 'Distribución (%)';
 			case 'I':
-				switch(this.metric.SelectedVariable().NormalizationScale) {
+				switch(this.variable.NormalizationScale) {
 					case '100':
             return 'Incidencia (%)';
           case '1':
@@ -336,7 +336,7 @@ export default {
 				return area;
 			} else if(this.metric.properties.SummaryMetric === 'I') {
 				var nTotal = Number(values.Total);
-				return (nTotal > 0 ? value * this.metric.SelectedVariable().NormalizationScale / nTotal : 0);
+				return (nTotal > 0 ? value * this.variable.NormalizationScale / nTotal : 0);
 			} else if(this.metric.properties.SummaryMetric === 'H') {
 				return area / 0.01;
 			} else if(this.metric.properties.SummaryMetric === 'A') {
