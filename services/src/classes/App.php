@@ -241,7 +241,7 @@ class App
 			ini_set( 'precision', 17 );
 			ini_set( 'serialize_precision', -1);
 		}
-		if ($daysToExpire === -1)
+		if ($daysToExpire === -1 || self::Debug())
 			$headers = [ 'Cache-control' => 'private',
 									'Last-Modified' => $sessionTime ];
 		else {

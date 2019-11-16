@@ -42,7 +42,7 @@
 
 <script>
 import addMetric from '@/public/components/popups/addMetric';
-import WorkMetricMetadata from '@/public/components/popups/workMetricMetadata';
+import WorkMetricMetadata from '@/public/components/popups/metricMetadata';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
 
 export default {

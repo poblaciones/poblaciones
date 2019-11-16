@@ -5,7 +5,8 @@ import VueHotkey from 'v-hotkey';
 import App from '@/public/App';
 import axios from 'axios';
 import 'vue-material-design-icons/styles.css';
-// Bus para comunicación entre componentes
+import Clipboard from 'v-clipboard';
+ // Bus para comunicación entre componentes
 // usar window.bus.$emit y window.bus.$on
 window.bus = new Vue();
 
@@ -25,6 +26,8 @@ window.SegMap = null;
 
 // enable axios post cookie, default false
 axios.defaults.withCredentials = true;
+
+Vue.use(Clipboard);
 
 Vue.config.productionTip = false;
 Vue.use(VueHotkey);

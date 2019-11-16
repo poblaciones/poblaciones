@@ -5,6 +5,22 @@ module.exports = {
 	StartsWith(cad, part) {
 		return cad.lastIndexOf(part, 0) === 0;
 	},
+	AbsoluteUrl(url) {
+		if (url) {
+			var protocol = window.location.protocol;
+			if (url.startsWith(protocol)) {
+				return url;
+			}
+			var slashes = protocol + "//";
+			var host = slashes + window.location.hostname + ( window.location.port ? ':' + window.location.port : '');
+			if (!url.startsWith('/')) {
+				url = '/' + url;
+			}
+			return host + url.trim();
+		} else {
+			return null;
+		}
+	},
 	LowerFirstIfOnlyUpper(cad) {
 		if (cad.length === 1 || cad.substring(1) === cad.substring(1).toLowerCase()) {
 			return cad.toLowerCase();
@@ -30,6 +46,38 @@ module.exports = {
 			return null;
 		}
 		return (cad.toString()).replace(new RegExp(this.EscapeRegExp(text), "g"), text2);
+	},
+
+	GetMonthLabel(m) {
+		switch(m + 1)
+		{
+			case 1:
+				return 'Enero';
+			case 2:
+				return 'Febrero';
+			case 3:
+				return 'Marzo';
+			case 4:
+				return 'Abril';
+			case 5:
+				return 'Mayo';
+			case 6:
+				return 'Junio';
+			case 7:
+				return 'Julio';
+			case 8:
+				return 'Agosto';
+			case 9:
+				return 'Septiembre';
+			case 10:
+				return 'Octubre';
+			case 11:
+				return 'Noviembre';
+			case 12:
+				return 'Diciembre';
+			default:
+				return '';
+		}
 	},
 	EndsWith(cad, part) {
 		return cad.indexOf(part, cad.length - part.length) !== -1;

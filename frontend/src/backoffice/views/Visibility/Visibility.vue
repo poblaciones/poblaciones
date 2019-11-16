@@ -96,6 +96,7 @@
 <script>
 import Context from '@/backoffice/classes/Context';
 import f from '@/backoffice/classes/Formatter';
+import str from '@/common/js/str';
 
 export default {
 	name: 'Visibility',
@@ -110,7 +111,7 @@ export default {
 		},
 		stableUrl() {
 			if (this.Work.properties.Metadata.Url) {
-				var url = f.absoluteUrl(this.Work.properties.Metadata.Url);
+				var url = str.absoluteUrl(this.Work.properties.Metadata.Url);
 				return "(<a href='" + url + "' target='_blank'>" + url + "</a>)";
 			} else {
 				return "(que será generada al publicarse la cartografía)";

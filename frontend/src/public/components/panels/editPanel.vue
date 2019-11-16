@@ -14,6 +14,7 @@
 
 <script>
 import f from '@/backoffice/classes/Formatter';
+import str from '@/common/js/str';
 
 export default {
 	name: 'editPanel',
@@ -31,7 +32,7 @@ export default {
 	],
   methods:{
 		absoluteMap(url) {
-			return f.absoluteUrl(url);
+			return str.AbsoluteUrl(url);
 		},
 		goEdit() {
 			var id = this.work.Current.Id + '';

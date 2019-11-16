@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import WorkMetricMetadata from '@/public/components/popups/workMetricMetadata';
+import WorkMetricMetadata from '@/public/components/popups/metricMetadata';
 import MetricDownload from '@/public/components/popups/metricDownload';
 import DownloadIcon from 'vue-material-design-icons/download.vue';
 import LinkIcon from 'vue-material-design-icons/Link.vue';

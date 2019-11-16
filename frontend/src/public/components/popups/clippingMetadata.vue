@@ -8,10 +8,6 @@
 							<td>Título:</td>
 							<td>{{ metadata.Caption }}</td>
 						</tr>
-						<tr v-if="metadata.Abstract">
-							<td>Resumen:</td>
-							<td>{{ metadata.Abstract }}</td>
-						</tr>
 						<tr v-if="metadata.Authors">
 							<td>Autores:</td>
 							<td>{{ metadata.Authors }}</td>
@@ -23,6 +19,19 @@
 						<tr v-if="metadata.Date">
 							<td>Publicación:</td>
 							<td>{{ metadata.Date }}</td>
+						</tr>
+						<tr v-if="metadata.Abstract">
+							<td>Resumen:</td>
+							<td>{{ metadata.Abstract }} </td>
+						</tr>
+						<tr>
+							<td>Cita (APA):</td>
+							<td class="quotation">
+								<span v-html="citationAPA(metadata)"> </span>
+								<a href="#" v-clipboard="() => citationAPAText(metadata)" class="superSmallButton">
+									Copiar
+								</a>
+							</td>
 						</tr>
 						<tr>
 							<td>Licencia:</td>
@@ -65,6 +74,7 @@ import h from '@/public/js/helper';
 import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
 import creativeCommons from '@/public/components/widgets/creativeCommons.vue';
 import str from '@/common/js/str';
+import apa from '@/common/js/citationAPA';
 import Modal from '@/public/components/popups/modal';
 
 export default {
@@ -89,6 +99,18 @@ export default {
 		},
 		show() {
 			this.$refs.showFuente.show();
+		},
+		citationAPA(metadata) {
+			return apa.onlineMapCitation(this.htmlEncode(metadata.Authors), this.htmlEncode(metadata.Date),
+					this.htmlEncode(metadata.Caption));
+		},
+		citationAPAText(metadata) {
+			return apa.onlineMapCitation(metadata.Authors, metadata.Date,
+				metadata.Caption, null, true);
+		},
+		htmlEncode(html) {
+			return document.createElement('a').appendChild(
+				document.createTextNode(html)).parentNode.innerHTML;
 		},
 		resolveMetadataUrl() {
 			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.metadata.Id;

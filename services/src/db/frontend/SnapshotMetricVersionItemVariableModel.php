@@ -3,6 +3,7 @@
 namespace helena\db\frontend;
 
 use helena\classes\App;
+use minga\framework\Arr;
 use minga\framework\Profiling;
 
 use minga\framework\QueryPart;
@@ -11,6 +12,7 @@ use helena\classes\GeoJson;
 
 class SnapshotMetricVersionItemVariableModel extends BaseModel
 {
+	const LOCATIONS_LIMIT_PER_TILE = 500;
 	private $spatialConditions;
 
 	public function __construct()
@@ -133,6 +135,10 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		$multiQuery = new MultiQuery($baseQuery, $envelopeQuery, $query, $extraQuery);
 		//$multiQuery->dump();
 		$ret = App::Db()->fetchAll($multiQuery->sql, $multiQuery->params);
+		if ($datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
+		{ 
+			$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
+		}
 		return $ret;
 	}
 }

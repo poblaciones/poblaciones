@@ -289,7 +289,11 @@ html, body {
 	background-repeat: no-repeat;
 	background-position: 50%;
 }
-
+.superSmallButton {
+	border: 1px solid #68B3C8;
+  padding: 0px 3px;
+  margin-left: 2px;
+}
 .gutter.gutter-vertical {
 	background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
 	cursor: ns-resize;
@@ -331,6 +335,10 @@ html, body {
 	font-size: 11px;
 	height: 16px;
 	text-transform: uppercase;
+}
+
+.quotation {
+	font-size: 12px;
 }
 
 .form-control {

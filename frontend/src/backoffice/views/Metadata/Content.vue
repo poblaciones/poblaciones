@@ -112,6 +112,7 @@
 <script>
 import Context from '@/backoffice/classes/Context';
 import f from '@/backoffice/classes/Formatter';
+import str from '@/common/js/str';
 
 export default {
 name: 'Contenido',
@@ -131,7 +132,7 @@ name: 'Contenido',
 	},
 	methods: {
 		absoluteMap(url) {
-			return f.absoluteUrl(url);
+			return str.AbsoluteUrl(url);
 		},
 		resolveMetadataUrl() {
 	    return window.host + '/services/backoffice/GetMetadataPdf?w=' + this.Work.properties.Id;

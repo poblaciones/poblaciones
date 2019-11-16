@@ -85,8 +85,8 @@ TileOverlay.prototype.process = function (dataMetric, mapResults, dataResults, t
 	var tileBounds = mercator.getTileBoundsLatLon({ x: x, y: y, z: z });
 	var filtered = this.composer.renderGeoJson(dataMetric, mapResults, dataResults, tileKey, div, x, y, z, tileBounds);
 	// Los agrega
-	dataMetric.addGeoJson(filtered);
 	this.composer.bindStyles(dataMetric, tileKey);
+	dataMetric.addGeoJson(filtered);
 	// Listo
 	window.SegMap.MapsApi.BindDataMetric(dataMetric);
 };

@@ -1,22 +1,6 @@
 const str = require('@/common/js/str');
 
 module.exports = {
-	absoluteUrl(url) {
-		if (url) {
-			var protocol = window.location.protocol;
-			if (url.startsWith(protocol)) {
-				return url;
-			}
-			var slashes = protocol + "//";
-			var host = slashes + window.location.hostname + ( window.location.port ? ':' + window.location.port : '');
-			if (!url.startsWith('/')) {
-				url = '/' + url;
-			}
-			return host + url;
-		} else {
-			return null;
-		}
-	},
 	formatDate(date) {
 		if (date === null) {
 			return '-';
