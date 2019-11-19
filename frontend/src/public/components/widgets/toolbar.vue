@@ -59,14 +59,13 @@ export default {
 	},
 	methods: {
 		selectionModes() {
-			var ret = [
-				{ Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' },
-				{ Name: 'Información sobre un elemento', Icon: 'fas fa-info-circle' }
-			];
-			if (this.frame.Zoom >= 13) {
-				ret.push({ Name: 'Seleccionar una zona', Icon: 'fa fa-circle-notch' });
+			if (this.frame.Zoom >= 10) {
+				return [
+					{ Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' },
+					{ Name: 'Seleccionar una zona', Icon: 'fa fa-circle-notch' }];
+			} else {
+				return [];
 			}
-			return ret;
 		},
     showTutorial() {
       this.$refs.Tour.toggleModal();
@@ -138,13 +137,9 @@ export default {
 			case 0:
 				// go back to default mode
 				window.map.style.cursor = 'auto';
+				window.SegMap.StartClickSelecting();
 				break;
 			case 1:
-				// startInfoMode
-				window.map.style.cursor = 'hand';
-				window.SegMap.StartSelecting();
-				break;
-			case 2:
 				// startCircleMode
 				window.SegMap.BeginDrawingCircle();
 				break;

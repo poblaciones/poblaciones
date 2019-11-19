@@ -7,7 +7,7 @@ module.exports = {
 				var parts = str.Split(escapedDate, '/');
 				escapedDate = parts[parts.length - 1];
 			}
-			if (escapedDate) {
+			if (escapedDate && escapedDate !== 'null') {
 				ret += " (" + escapedDate + "). ";
 			} else {
 				ret += " (s/f). ";

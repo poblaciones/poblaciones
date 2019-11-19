@@ -55,7 +55,7 @@ LocationsGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResu
 				if (this.activeSelectedMetric.SelectedVariable().ShowValues == 1) {
 					mapItem['properties'].Value = dataElement['Value'];
 				}
-				if (this.activeSelectedMetric.SelectedVariable().ShowDescriptions == 1) {
+				if (dataElement['Description']) {
 					mapItem['properties'].Description = dataElement['Description'];
 				}
 				filtered.push(mapItem);
@@ -151,6 +151,27 @@ LocationsGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 					VariableId: metric.SelectedVariable().Id
 				};
 				loc.MapsApi.markerClicked(e, parentInfo, feature.getId(),
+					new loc.MapsApi.google.maps.Size(0, -1 * h.getScaleFactor(z)));
+			});
+			element.addListener('mouseover', function (e) {
+				var parentInfo = {
+					MetricName: metric.properties.Metric.Name,
+					MetricId: metric.properties.Metric.Id,
+					MetricVersionId: metric.SelectedVersion().Version.Id,
+					LevelId: metric.SelectedLevel().Id,
+					VariableId: metric.SelectedVariable().Id
+				};
+				loc.MapsApi.markerMouseOver(e, parentInfo, feature.getId(), feature.getProperty('Description'));
+			});
+			element.addListener('mouseout', function (e) {
+				var parentInfo = {
+					MetricName: metric.properties.Metric.Name,
+					MetricId: metric.properties.Metric.Id,
+					MetricVersionId: metric.SelectedVersion().Version.Id,
+					LevelId: metric.SelectedLevel().Id,
+					VariableId: metric.SelectedVariable().Id
+				};
+				loc.MapsApi.markerMouseOut(e, parentInfo, feature.getId(),
 					new loc.MapsApi.google.maps.Size(0, -1 * h.getScaleFactor(z)));
 			});
 		}

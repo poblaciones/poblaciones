@@ -161,10 +161,10 @@ SegmentedMap.prototype.AxiosClone = function (obj) {
 	return JSON.parse(JSON.stringify(obj));
 };
 
-SegmentedMap.prototype.StartSelecting = function () {
+
+SegmentedMap.prototype.StartClickSelecting = function () {
 	this.MapsApi.SetSelectorCanvas();
 };
-
 
 SegmentedMap.prototype.SetSelectionMode = function (mode) {
 	if (this.toolbarStates.selectionMode !== mode) {
@@ -173,9 +173,7 @@ SegmentedMap.prototype.SetSelectionMode = function (mode) {
 };
 
 SegmentedMap.prototype.EndSelecting = function () {
-	if (this.MapsApi.ClearSelectorCanvas()) {
-		this.SetSelectionMode(0);
-	}
+	this.MapsApi.ClearSelectorCanvas();
 };
 
 SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset) {
@@ -206,8 +204,8 @@ SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset) 
 			//TODO: buscar un mejor mensaje o directamente sacar esto.
 			text += '<div>Sin datos.' + '</div>';
 		}
-		text += '</div>';
 		text += "<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: " + h.trimNumber(position.Coordinate.Lat) + ',' + h.trimNumber(position.Coordinate.Lon) + '.</div>';
+		text += '</div>';
 		text += '</div>';
 		loc.MapsApi.ShowInfoWindow(text, position.Coordinate, offset);
 	}).catch(function (error) {

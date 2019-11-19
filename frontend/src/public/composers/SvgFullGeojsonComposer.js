@@ -116,30 +116,35 @@ SvgFullGeojsonComposer.prototype.processFeature = function (id, dataElement, map
 	}
 
 	// Lo agrega
+	var centroid = 	this.getCentroid(mapElement);
 	var mapItem = {
-		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry, properties: { className: 'c' + val } };
+		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry, properties: { className: 'c' + val }
+	};
+
+	if (dataElement.Description) {
+		mapItem.properties.description = dataElement.Description;
+	}
 
 	if (this.patternUseFillStyles(patternValue)) {
 		mapItem.properties.style = 'fill: url(#cs' + val + ');';
 	}
 
-	this.AddFeatureText(val, mapElement, dataElement, tileKey, tileBounds, colorMap);
+	this.AddFeatureText(val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap);
 
 	filtered.push(mapItem);
 };
 
-SvgFullGeojsonComposer.prototype.AddFeatureText = function (val, mapElement, dataElement, tileKey, tileBounds, colorMap) {
-	/*if (this.activeSelectedMetric.showText() === false) {
-		return;
-	}*/
-	var location;
+SvgFullGeojsonComposer.prototype.getCentroid = function (mapElement) {
 	if (mapElement['properties'] && mapElement['properties'].centroid) {
-		location = new window.google.maps.LatLng(mapElement['properties'].centroid[0], mapElement['properties'].centroid[1]);
+		return new window.google.maps.LatLng(mapElement['properties'].centroid[0], mapElement['properties'].centroid[1]);
 	} else {
-		location = Helper.getGeojsonCenter(mapElement);
+		return Helper.getGeojsonCenter(mapElement);
 	}
-	if (this.inTile(tileBounds, location)) {
-		this.ResolveValueLabel(dataElement, location, tileKey, colorMap[val]);
+};
+
+SvgFullGeojsonComposer.prototype.AddFeatureText = function (val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap) {
+	if (this.inTile(tileBounds, centroid)) {
+		this.ResolveValueLabel(dataElement, centroid, tileKey, colorMap[val]);
 	}
 };
 
@@ -168,7 +173,8 @@ SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (div, features, pro
 	var max = mercator.fromLatLngToPoint({ lat: tileBounds.Max.Lat, lng: tileBounds.Max.Lon });
 
 	var attributes = [{ property: 'id', type: 'dynamic', key: 'FID' },
-		{ property: 'properties.className', type: 'dynamic', key: 'class' }];
+		{ property: 'properties.className', type: 'dynamic', key: 'class' },
+		{ property: 'properties.description', type: 'dynamic', key: 'description' }];
 
 	if (this.patternUseFillStyles(patternValue)) {
 		attributes.push({ property: 'properties.style', type: 'dynamic', key: 'style' });

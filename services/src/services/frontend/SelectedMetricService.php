@@ -30,10 +30,6 @@ class SelectedMetricService extends BaseService
 	{
 		return App::Json($this->GetSelectedMetric($metricId, true, true));
 	}
-	public function GetSelectedMetricsJson($metricsId)
-	{
-		return App::Json($this->GetSelectedMetrics($metricsId));
-	}
 
 	public function GetSelectedMetrics($metricsId)
 	{

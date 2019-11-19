@@ -1,4 +1,9 @@
 ﻿[CURRENT]
+- click en elementos abre infowindow.
+- click en el mapa cierra los infowindow.
+- el modo de + información active un hover.
+- Fix: dato de posición en infowindow se superponía.
+- se generan tooltips contextuales a partir de la descripción de markers y zonas.
 
 v2.9 (2019-11-16)
 - El buscador permite indicar coordenadas por lat/lon.

@@ -2,12 +2,13 @@ import arr from '@/common/js/arr';
 
 export default TxtOverlay;
 
-function TxtOverlay(map, pos, txt, cls, zIndex) {
+function TxtOverlay(map, pos, txt, className, zIndex, innerClassName) {
 	this.pos = pos;
 	this.txt = txt;
 	this.tooltip = null;
 	this.clickId = null;
-	this.cls = cls;
+	this.className = className;
+	this.innerClassName = innerClassName;
 	this.hidden = false;
 	this.RefCount = 1;
 	this.map = map;
@@ -36,9 +37,12 @@ TxtOverlay.prototype.RebuildHtml = function () {
 		this.div.innerHTML = '';
 		return;
 	}
-
-	var text = "<div class='innerBox'>";
+	var extraStyle = (this.innerClassName ? ' innerBoxTooltip' : '');
+	var text = "<div class='innerBox" + extraStyle + "'>";
 	if (this.txt) {
+		if (this.innerClassName) {
+			text += "<div class='" + this.innerClassName + "'>";
+		}
 		if (this.clickId) {
 			var tooltip = '';
 			if (this.type === 'C') {
@@ -52,6 +56,9 @@ TxtOverlay.prototype.RebuildHtml = function () {
 		text += this.txt;
 		if (this.clickId && this.type === 'C') {
 			text += '</span>';
+		}
+		if (this.innerClassName) {
+			text += '</div>';
 		}
 	}
 	text += "</div><div class='bottomBox'>";
@@ -79,7 +86,7 @@ TxtOverlay.prototype.RebuildHtml = function () {
 TxtOverlay.prototype.onAdd = function() {
 
 	var div = document.createElement('div');
-	div.className = this.cls;
+	div.className = this.className;
 
 	this.div = div;
 	this.RebuildHtml();

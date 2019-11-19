@@ -108,7 +108,9 @@ TileRequest.prototype.startGeographyRequest = function () {
 		}
 	}).catch(function (error1) {
 		queue.Release(loc.preCancel2);
-		loc.selectedMetricOverlay.SetDivFailure(loc.div);
+		if (error1.message !== 'cancelled') {
+			loc.selectedMetricOverlay.SetDivFailure(loc.div);
+		}
 		err.err('GetGeography', error1);
 	});
 };

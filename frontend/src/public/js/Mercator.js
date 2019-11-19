@@ -29,6 +29,13 @@ Mercator.prototype.fromLatLonToGoogleLatLng = function (point) {
 	return new window.SegMap.MapsApi.google.maps.LatLng(point.Lat, point.Lon);
 };
 
+Mercator.prototype.fromTextToGoogleLatLng = function (point) {
+	// Reconoce el formato (-34.584605, -58.47833800000001)
+	var p = point.replace(/[\(\) ]+/g, '');
+	var parts = p.split(',');
+	return new window.SegMap.MapsApi.google.maps.LatLng(parts[0], parts[1]);
+};
+
 Mercator.prototype.getTileAtLatLng = function (latLng, zoom) {
 	var t = Math.pow(2, zoom);
 	var s = 256 / t;

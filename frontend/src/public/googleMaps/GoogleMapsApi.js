@@ -14,6 +14,13 @@ function GoogleMapsApi(google) {
 	this.isSettingZoom = false;
 	this.clippingCanvas = null;
 	this.selectorCanvas = null;
+	this.tooltipLocation = null;
+	this.selectorCanvasEvents = null;
+	this.tooltipMarker = null;
+	this.tooltipCandidate = null;
+	this.tooltipTimer = null;
+	this.tooltipOverlay = null;
+	this.tooltipKillerTimer = null;
 	this.segmentedMap = null;
 	this.infoWindow = null;
 };
@@ -24,14 +31,17 @@ GoogleMapsApi.prototype.SetSegmentedMap = function(segmentedMap) {
 GoogleMapsApi.prototype.BindDataMetric = function (dataMetric) {
 	dataMetric.setMap(this.gMap);
 };
+GoogleMapsApi.prototype.ResetInfoWindow = function (text, coordinate, offset) {
+	if(this.infoWindow !== null) {
+		this.infoWindow.close();
+	}
+};
 
 GoogleMapsApi.prototype.ShowInfoWindow = function(text, coordinate, offset) {
 	if(offset === undefined) {
 		offset = null;
 	}
-	if(this.infoWindow !== null) {
-		this.infoWindow.close();
-	}
+	this.ResetInfoWindow();
 	this.infoWindow = new this.google.maps.InfoWindow({
 		content: text,
 		position: new this.google.maps.LatLng(coordinate.Lat, coordinate.Lon),
@@ -49,25 +59,14 @@ GoogleMapsApi.prototype.MoveInfoWindow = function(zoom) {
 	}
 };
 
-GoogleMapsApi.prototype.Write = function (text, location, zIndex, style, id) {
-	if (style === undefined) {
+GoogleMapsApi.prototype.Write = function(text, location, zIndex, style, innerStyle) {
+	if(!style) {
 		style = 'mapLabels';
 	}
 	if (this.IsSatelliteType()) {
 		style += ' mapLabelsSat';
 	}
-	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex, id);
-	return overlay;
-};
-
-GoogleMapsApi.prototype.Write = function(text, location, zIndex, style) {
-	if(style === undefined) {
-		style = 'mapLabels';
-	}
-	if (this.IsSatelliteType()) {
-		style += ' mapLabelsSat';
-	}
-	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex);
+	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex, innerStyle);
 	return overlay;
 };
 
@@ -368,9 +367,8 @@ GoogleMapsApi.prototype.SetClippingCanvas = function (canvas) {
 };
 
 
-GoogleMapsApi.prototype.SetSelectorCanvas = function (canvas) {
+GoogleMapsApi.prototype.SetSelectorCanvas = function () {
 	this.ClearSelectorCanvas();
-
 	var zeroItem = [
 		{ lat: 0, lng: 90 },
 		{ lat: 180, lng: 90 },
@@ -382,17 +380,28 @@ GoogleMapsApi.prototype.SetSelectorCanvas = function (canvas) {
 		{ lat: 0, lng: 90 }
 	];
 	// Construct the polygon.
+	var cursor = 'default';
+	/*if (hoverSelecting) {
+		cursor = 'url(/static/img/infocursor.png) 1 0, auto';
+	}*/
+
 	var polygon = new this.google.maps.Polygon({
 		paths: zeroItem,
 		strokeColor: '#FF0000',
 		strokeOpacity: 0.8,
 		strokeWeight: 0,
-		cursor: 'url(/static/img/infocursor.png) 1 0, auto',
+		cursor: cursor,
 		fillColor: '#FF0000',
 		fillOpacity: 0
 	});
 	polygon.setMap(this.gMap);
-	this.selectorCanvasListener = this.google.maps.event.addListener(polygon, 'click', this.selectorClicked);
+	this.selectorCanvasEvents = [];
+	this.selectorCanvasEvents.push(this.google.maps.event.addListener(polygon, 'click', this.selectorClicked));
+	this.selectorCanvasEvents.push(this.google.maps.event.addListener(polygon, 'mouseout', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.google.maps.event.addListener(polygon, 'zoom_changed', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.google.maps.event.addListener(polygon, 'center_changed', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.google.maps.event.addListener(polygon, 'mousemove', this.selectorMoved));
+
 	this.selectorCanvas = polygon;
 };
 
@@ -400,8 +409,7 @@ GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid, off
 	window.SegMap.InfoRequested(h.getPosition(event), metricVersion, fid, offset);
 };
 
-GoogleMapsApi.prototype.selectorClicked = function (event) {
-	window.SegMap.EndSelecting();
+GoogleMapsApi.prototype.getFeature = function (event) {
 	var position = h.getPosition(event);
 	var ele = document.elementsFromPoint(position.Point.X, position.Point.Y);
 	for (var n = 0; n < ele.length; n++) {
@@ -413,9 +421,121 @@ GoogleMapsApi.prototype.selectorClicked = function (event) {
 				LevelId: ele[n].parentElement.attributes['levelId'].value,
 				VariableId: ele[n].parentElement.attributes['variableId'].value
 			};
-			window.SegMap.InfoRequested(position, parentInfo, ele[n].id, null);
-			break;
+			var desc = null;
+			if (ele[n].attributes.description) {
+				desc = ele[n].attributes.description.value;
+			}
+			return { position: position, parentInfo: parentInfo, id: ele[n].id, description: desc };
 		}
+	}
+	return null;
+};
+GoogleMapsApi.prototype.createTooltipKiller = function () {
+	var loc = window.SegMap.MapsApi;
+	loc.tooltipKillerTimer = setTimeout(loc.resetTooltip, 75000);
+};
+
+GoogleMapsApi.prototype.resetTooltip = function (feature) {
+	var loc = window.SegMap.MapsApi;
+	if (loc.tooltipKillerTimer !== null) {
+		clearTimeout(loc.tooltipKillerTimer); 
+	}
+/*	if (feature) {
+		if (loc.tooltipCandidate && feature.id === loc.tooltipCandidate.id) {
+			loc.createTooltipKiller();
+			return false;
+		}
+	}*/
+	if (loc.tooltipCandidate === null) {
+		return true;
+	}
+	loc.tooltipCandidate = null;
+	if (loc.tooltipTimer !== null) {
+		clearTimeout(loc.tooltipTimer); 
+	}
+	loc.tooltipTimer = null;
+	// Si está visible, remueve el tooltip
+	// https://medelbou.wordpress.com/2012/02/03/creating-a-tooltip-for-google-maps-javascript-api-v3/
+	if (loc.tooltipOverlay !== null) {
+		loc.tooltipOverlay.Release();
+		loc.tooltipOverlay = null;
+	}
+	// https://ux.stackexchange.com/questions/358/how-long-should-the-delay-be-before-a-tooltip-pops-up
+	return true;
+};
+
+GoogleMapsApi.prototype.showTooltip = function () {
+	var loc = window.SegMap.MapsApi;
+	var m = new Mercator();
+	//var coord = m.fromLatLonToGoogleLatLng(loc.tooltipCandidate.position.Coordinate);
+	//var coord = m.fromTextToGoogleLatLng(loc.tooltipCandidate.centroid);
+	var coord = m.fromLatLonToGoogleLatLng(loc.tooltipLocation.Coordinate);
+	var style = 'ibTooltip';
+	if (loc.tooltipMarker) {
+		style += ' ibTooltipNoYOffset';
+	}
+	loc.tooltipOverlay = loc.Write(loc.tooltipCandidate.description, coord, 10000000, null, style);
+	loc.createTooltipKiller();
+};
+
+GoogleMapsApi.prototype.startTooltipCandidate = function (feature) {
+	if (feature.description) {
+		var loc = window.SegMap.MapsApi;
+		loc.tooltipCandidate = feature;
+		loc.tooltipTimer = setTimeout(loc.showTooltip, 100);
+	}
+};
+
+GoogleMapsApi.prototype.markerMouseOver = function (event, metricVersion, fid, description) {
+	var loc = window.SegMap.MapsApi;
+	var feature = { id: fid, description: description };
+	loc.tooltipLocation = h.getPosition(event);
+	if (!loc.resetTooltip(feature)) {
+		// Sale porque está en el mismo feature del cual se está mostrando el tooltip
+		return false;
+	}
+	loc.tooltipMarker = feature;
+	loc.startTooltipCandidate(feature);
+	return false;
+};
+GoogleMapsApi.prototype.markerMouseOut = function (event, metricVersion, fid, offset) {
+	var loc = window.SegMap.MapsApi;
+	loc.tooltipMarker = null;
+	if (loc.tooltipTimer !== null) {
+		clearTimeout(loc.tooltipTimer); 
+	}
+};
+
+GoogleMapsApi.prototype.selectorMoved = function (event) {
+	var loc = window.SegMap.MapsApi;
+	if (loc.tooltipMarker !== null) {
+		return;
+	}
+	var feature = loc.getFeature(event);
+	loc.tooltipLocation = h.getPosition(event);
+	var pointer;
+	if (!loc.resetTooltip(feature)) {
+		// Sale porque está en el mismo feature del cual se está mostrando el tooltip
+		return;
+	}
+	if (feature !== null) {
+		pointer = 'pointer';
+		loc.startTooltipCandidate(feature);
+	} else {
+		pointer = 'url(https://maps.gstatic.com/mapfiles/openhand_8_8.cur),default';
+	}
+	var currentPointer = loc.selectorCanvas.cursor;
+	if (currentPointer !== pointer) {
+		loc.selectorCanvas.cursor = pointer;
+	}
+};
+
+GoogleMapsApi.prototype.selectorClicked = function (event) {
+	var loc = window.SegMap.MapsApi;
+	loc.ResetInfoWindow();
+	var feature = loc.getFeature(event);
+	if (feature !== null) {
+		window.SegMap.InfoRequested(feature.position, feature.parentInfo, feature.id, null);
 	}
 };
 
@@ -423,8 +543,12 @@ GoogleMapsApi.prototype.ClearSelectorCanvas = function () {
 	if (this.selectorCanvas !== null) {
 		this.selectorCanvas.setMap(null);
 		this.selectorCanvas = null;
-		this.selectorCanvasListener.remove();
-		this.selectorCanvasListener = null;
+		if (this.selectorCanvasEvents) {
+			for (var n = 0; n < this.selectorCanvasEvents.length; n++) {
+				this.selectorCanvasEvents[n].remove();
+			}
+			this.selectorCanvasEvents = null;
+		}
 		return true;
 	} else {
 		return false;

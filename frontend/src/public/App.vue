@@ -43,7 +43,7 @@ export default {
 	},
 	data() {
 		return {
-			toolbarStates: { selectionMode: 0, tutorialOpened: 0 },
+			toolbarStates: { selectionMode: null, tutorialOpened: 0 },
 			clipping: {
 				IsUpdating: false,
 				Region: {
@@ -195,6 +195,7 @@ export default {
 			this.$refs.fabPanel.loadFabMetrics();
 			mapApi.SetSegmentedMap(segMap);
 			mapApi.Initialize();
+			segMap.SetSelectionMode(0);
 		},
 		GetSummaryAll() {
 			this.metrics.forEach(function(metric) {
@@ -349,6 +350,14 @@ a:hover {
 text-decoration: underline;
 }
 
+.innerBoxTooltip
+{
+	right: unset!important;
+	max-height: 200px!important;
+	overflow: auto!important;
+	padding-top: 20px;
+	padding-left: 9px;
+}
 .innerBox {
 	pointer-events: none;
 	position: relative;
@@ -368,6 +377,17 @@ text-decoration: underline;
 .mapLabelsSat .ibLink:hover {
 	color: #5591ec!important;
 	text-decoration: none !important;
+}
+.ibTooltipNoYOffset {
+	margin-top: -18px;
+}
+
+.ibTooltip {
+	color: #5a626d;
+	background-color: #f9f9e0;
+	padding: 2px;
+	border: 1px solid gray;
+	pointer-events: none;
 }
 
 .ibLink {
@@ -408,10 +428,9 @@ text-decoration: underline;
 	text-shadow: .75px .75px 1px #000, -.75px -1px 1px #000, -.75px .75px 1px #000, .75px -1px 1px #000, .75px .75px 1px #000, -.75px -1px 1px #000, -.75px 1px 1px #000, .75px -.75px 1px #000 !important;
 }
 .mapLabels {
-	width: 200px;
+	max-width: 200px;
 	background: transparent;
 	border: 0px solid black;
-	position: absolute;
 	position: absolute;
 	font-weight: 400;
 	color: #333;
@@ -421,7 +440,7 @@ text-decoration: underline;
 }
 
 .mapLabelsLarger {
-	width: 250px;
+	max-width: 250px;
 	font-size: 16px;
 }
 .ml1 {

@@ -307,7 +307,10 @@ App::$app->get('/services/metrics/GetSelectedMetrics', function (Request $reques
 
 	$metricsId = Params::Get('l');
 	// ej. /services/metrics/GetSelectedMetrics?l=8,9
-	return $controller->GetSelectedMetricsJson($metricsId);
+	/*if (App::Debug())
+		return App::JsonImmutable($controller->GetSelectedMetrics($metricsId));
+	else */
+		return App::Json($controller->GetSelectedMetrics($metricsId));
 });
 
 
