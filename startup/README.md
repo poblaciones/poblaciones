@@ -10,3 +10,5 @@ Las guías permiten:
 2. Obtener y utilizar los fuentes para armar un entorno de desarrollo.
 
 3. Convertir un entorno de desarrollo en una versión instalable.
+
+El script de instalación incializa una base de datos de Poblaciones con un usuario 'admin', cuya contraseña es 'admin001'. Se recomienda modificarla en el primer uso.
