@@ -2618,4 +2618,4 @@ INSERT INTO `clipping_region` (`clr_id`, `clr_country_id`, `clr_parent_id`, `clr
 
 
 INSERT INTO `user` (`usr_id`, `usr_email`, `usr_firstname`, `usr_lastname`, `usr_password`, `usr_create_time`, `usr_privileges`, `usr_deleted`, `usr_is_active`) VALUES
-(1, 'admin', 'Administrador', 'Administrador', '$2y$10$Vp1zQ5yZMihV.P8.0iZKnuD69OLQZVjFiIUSbxKkdAIB7Fj8UK88a', '2019-07-12 16:19:02', 'A', 0, 1);
+(1, 'admin', 'Administrador', 'Administrador', '$2y$10$3ZM..N0URJfcwxgeL7QHQepGCbbbWYxrWsDk4yS.MfmMJB53UE6Zi', '2019-07-12 16:19:02', 'A', 0, 1);
