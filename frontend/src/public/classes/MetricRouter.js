@@ -30,7 +30,7 @@ MetricRouter.prototype.ToRoute = function () {
 		ret += this.AddBoolean('s', this.activeSelectedMetric.SelectedVariable().ShowValues, '0');
 	}
 	// bloque de estado de variables. las variables van separadas por @, e indican visible y luego lista de visible de valores.
-	ret += '!r';
+	ret += '!w';
 	for (var v = 0; v < this.activeSelectedMetric.SelectedLevel().Variables.length; v++) {
 		var variable = this.activeSelectedMetric.SelectedLevel().Variables[v];
 		ret += (variable.Visible ? '1' : '0');
@@ -79,7 +79,7 @@ MetricRouter.prototype.parseMetric = function (metricString) {
 	var showValues = h.getSafeValue(values, 's', '0');
 	var customPattern = h.getSafeValue(values, 'p', '');
 	var transparency = h.getSafeValue(values, 't', 'M');
-	var variableStates = h.getSafeValue(values, 'r', []);
+	var variableStates = h.getSafeValue(values, 'w', null);
 	return {
 		Id: parseInt(id),
 		VersionIndex: versionIndex,

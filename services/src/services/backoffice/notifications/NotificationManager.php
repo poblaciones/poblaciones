@@ -9,7 +9,7 @@ use helena\classes\Links;
 use helena\classes\Account;
 use minga\framework\Context;
 use helena\entities\backoffice as entities;
-
+use minga\framework\Log;
 
 class NotificationManager
 {
@@ -38,7 +38,7 @@ class NotificationManager
 		$vals['message'] = $message;
 		$vals['url'] = Links::GetBackofficeWorkUrl($work->getId());
 		$mail->message = App::RenderMessage('createNotification.html.twig', $vals);
-		$mail->Send(false, true);
+		$this->Send($mail);
 	}
 
 	public function NotifyPublish($workId)
@@ -69,9 +69,26 @@ class NotificationManager
 		$metadata = $work->getMetadata();
 		$vals['url'] = Context::Settings()->GetPublicUrl() . $metadata->getUrl();
 		$mail->message = App::RenderMessage('publishNotification.html.twig', $vals);
-		$mail->Send(false, true);
+		$this->Send($mail);
 	}
 
+	private function Send($mail)
+	{
+		try
+		{
+			$mail->Send(false, true);
+		}
+		catch(\Exception $e)
+		{
+			$text = "Message delivery failed. <br>\r\n";
+			$text = "ERROR: " . $e->getMessage() . "<br>\r\n";
+			$text = "-----------------------------------<br>\r\n";;
+			$text = "To: " . $mail->to . "<br>\r\n";
+			$text = "Subject: " . $mail->subject . "<br>\r\n";
+			$text = "Message: " . $mail->message . "<br>\r\n";
+			Log::PutToFatalErrorLog($text);
+		}
+	}
 
 	public function NotifyRequestReview($workId)
 	{
@@ -99,7 +116,7 @@ class NotificationManager
 		$vals['message'] = $message;
 		$vals['url'] = Links::GetBackofficeWorkUrl($workId);
 		$mail->message = App::RenderMessage('publishNotification.html.twig', $vals);
-		$mail->Send(false, true);
+		$this->Send($mail);
 	}
 
 
@@ -117,7 +134,7 @@ class NotificationManager
 		$vals['message'] = $message;
 		$vals['url'] = Context::Settings()->GetPublicUrl() . "/admins";
 		$mail->message = App::RenderMessage('createNewUser.html.twig', $vals);
-		$mail->Send(false, true);
+		$this->Send($mail);
 	}
 
 	private function addQuote($cad)

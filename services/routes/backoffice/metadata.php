@@ -5,7 +5,7 @@ use Symfony\Component\HttpFoundation\Request;
 use helena\classes\App;
 use helena\classes\Session;
 use helena\services\backoffice as services;
-use helena\controllers\backoffice as controllers;
+use helena\services\common as commonServices;
 use helena\entities\backoffice as entities;
 use minga\framework\Params;
 
@@ -17,7 +17,7 @@ App::GetOrPost('/services/backoffice/UpdateMetadata', function (Request $request
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
 
-	$controller = new services\MetadataService();
+	$controller = new commonServices\MetadataService();
 	$metadata = App::ReconnectJsonParam(entities\DraftMetadata::class, 'm');
 	return App::Json($controller->UpdateMetadata($workId, $metadata));
 });
@@ -75,7 +75,7 @@ App::Get('/services/backoffice/MoveMetadataFileDown', function (Request $request
 });
 
 App::$app->get('/services/backoffice/GetMetadataPdf', function (Request $request) {
-	$controller = new helena\services\frontend\MetadataService();
+	$controller = new commonServices\MetadataService();
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
 

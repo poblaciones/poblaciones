@@ -1,9 +1,10 @@
 <?php
 
-namespace helena\services\frontend;
+namespace helena\services\common;
 
 use minga\framework\Date;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use minga\framework\IO;
 use minga\framework\ErrorException;
 
 use helena\services\common\BaseService;
@@ -26,10 +27,11 @@ class MetadataService extends BaseService
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}
 
-	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
+	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null, $inMemory = false, $metadata = null)
 	{
 		$model = new MetadataModel($fromDraft);
-		$metadata = $model->GetMetadata($metadataId);
+		if ($metadata === null)			
+			$metadata = $model->GetMetadata($metadataId);
 		if ($metadata === null || sizeof($metadata) < 2) throw new ErrorException('Metadatos no encontrados.');
 
 		$sources = $model->GetMetadataSources($metadataId);
@@ -40,14 +42,23 @@ class MetadataService extends BaseService
 		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
 
 		$PdfCreator = new PdfCreator();
-		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $dataset);
+		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $dataset, $inMemory);
 
-		if ($workId !== null)
-			Statistics::StoreDownloadMetadataHit($workId);
-
-		return App::SendFile($filename)
-			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
-			->deleteFileAfterSend(true);
+		if (!$inMemory)
+		{		
+			if ($workId !== null)
+				Statistics::StoreDownloadMetadataHit($workId);
+		
+			return App::SendFile($filename)
+				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
+				->deleteFileAfterSend(true);
+		}
+		else
+		{
+			$ret = IO::ReadAllText($filename);
+			IO::Delete($filename);
+			return $ret;
+		}
 	}
 
 	private function formatDate($date)

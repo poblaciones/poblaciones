@@ -17,6 +17,7 @@
 
 <script>
 import SegmentedMap from '@/public/classes/SegmentedMap';
+import RestoreRoute from '@/public/classes/RestoreRoute';
 import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
 import Mapa from '@/public/components/panels/mapPanel';
@@ -108,10 +109,14 @@ export default {
 			loc.RestoreWork();
 			loc.RegisterErrorHandler();
 			var hash = window.location.hash;
+			var route = null;
 			if (hash.length > 2 && hash.substr(0, 2) === '#/') {
+				route = hash;
+			}
+			if (route && new RestoreRoute(null).RouteHasLocation(hash)) {
 				loc.StartByUrl(hash);
 			} else {
-				loc.StartByDefaultFrameAndClipping();
+				loc.StartByDefaultFrameAndClipping(route);
 			}
 			window.onpopstate = function(event) {
 				if (event.state !== null) {
@@ -162,7 +167,7 @@ export default {
 			window.SegMap.Tutorial.UpdateOpenTutorial();
 			window.SegMap.RestoreRoute.LoadLocationFromRoute(route);
 		},
-		StartByDefaultFrameAndClipping() {
+		StartByDefaultFrameAndClipping(route) {
 			const loc = this;
 			axios.get(window.host + '/services/clipping/GetDefaultFrameAndClipping', {
 				params: {}
@@ -172,10 +177,15 @@ export default {
 
 				loc.clipping.Region = res.data.clipping;
 				loc.frame = res.data.frame;
-				var afterLoaded = function() {
-					window.SegMap.SaveRoute.UpdateRoute();
-				};
-				loc.SetupMap(afterLoaded);
+				if (!window.SegMap) {
+					var afterLoaded = function() {
+						window.SegMap.SaveRoute.UpdateRoute();
+						if (route) {
+							window.SegMap.RestoreRoute.LoadRoute(route, true);
+						}
+					};
+					loc.SetupMap(afterLoaded);
+				}
 				if (loc.workToLoad === false) {
 					window.SegMap.Tutorial.CheckOpenTutorial();
 				}

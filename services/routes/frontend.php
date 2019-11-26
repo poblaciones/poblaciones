@@ -8,6 +8,7 @@ use helena\entities\frontend\geometries\Coordinate;
 use helena\db\frontend\MetadataModel;
 
 use helena\services\frontend as services;
+use helena\services\common as commonServices;
 
 use helena\classes\App;
 use helena\classes\Session;
@@ -15,8 +16,14 @@ use minga\framework\Params;
 
 // MAPA
 App::RegisterControllerGet('/', 'helena\controllers\frontend\cHome');
+App::RegisterControllerGet('/sitemap', 'helena\controllers\frontend\cSitemap');
 App::RegisterControllerGet('/map', 'helena\controllers\frontend\cMap');
 App::RegisterControllerGet('/map/', 'helena\controllers\frontend\cMap');
+App::RegisterControllerGet('/handle/{path1}', 'helena\controllers\frontend\cHandle');
+App::RegisterControllerGet('/handle/{path1}/{path2}', 'helena\controllers\frontend\cHandle');
+App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}', 'helena\controllers\frontend\cHandle');
+App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}', 'helena\controllers\frontend\cHandle');
+App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}/{path5}', 'helena\controllers\frontend\cHandle');
 // HOME INSTITUCIONAL
 App::RegisterControllerGet('/home', 'helena\controllers\frontend\cHome');
 App::RegisterControllerGet('/info', 'helena\controllers\frontend\cInfo');
@@ -191,7 +198,7 @@ App::$app->get('/services/works/GetWork', function (Request $request) {
 
 // ej. http://mapas/services/metadata/GetMetadataFile?m=12&f=4
 App::$app->get('/services/metadata/GetMetadataFile', function (Request $request) {
-	$controller = new services\MetadataService();
+	$controller = new commonServices\MetadataService();
 	$metadataId = Params::GetIntMandatory('m');
 	$fileId = Params::GetIntMandatory('f');
 
@@ -202,9 +209,22 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 	return $controller->GetMetadataFile($metadataId, $fileId);
 });
 
+// ej. http://mapas/map/3701/metadata
+App::$app->get('/map/metadata', function (Request $request) {
+	$controller = new commonServices\MetadataService();
+	$workId = Params::CheckParseIntValue(Params::CheckMandatoryValue(Params::FromPath(2)));
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+	
+	$workService = new services\WorkService();
+	$work = $workService->GetWorkOnly($workId);
+	$metadataId = $work->MetadataId;
+
+	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
+});
+
 // ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4
 App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) {
-	$controller = new services\MetadataService();
+	$controller = new commonServices\MetadataService();
 	$metadataId = Params::GetIntMandatory('m');
 	$workId = Params::GetInt('w');
 	$datasetId = Params::GetInt('d', null);
@@ -336,6 +356,9 @@ App::$app->error(function (\Exception $e, Request $request, $code) {
 	if ($e instanceof \minga\framework\MessageException || $e instanceof \minga\framework\ErrorException)
 	{
 		$text = $e->getPublicMessage();
+		return new Response($text);
+	} else {
+		$text = $e->getMessage();
 		return new Response($text);
 	}
 	return new Response(App::RenderResolve($templates, array(

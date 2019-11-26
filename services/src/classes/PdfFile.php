@@ -18,15 +18,22 @@ class PdfFile
 {
 	private $mpdf;
 
-	public function __construct()
+	public function __construct($inMemory = false)
 	{
-		$this->mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4',
+		if ($inMemory) 
+		{
+			$this->mpdf = new MpdfMemory();
+		}
+		else 
+		{
+			$this->mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4',
 																	'margin_left' => 30,
 																	'margin_right' => 30,
 																	'margin_top' => 25.4,
 																	'margin_bottom' => 25.4,
 																	'margin_header' => 9,
 																	'margin_footer' => 9]);
+		}
 		$this->writeStyles();
 	}
 	public function Save($filename = "")

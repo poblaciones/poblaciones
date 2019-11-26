@@ -13,16 +13,13 @@ class PdfCreator
 	private $sources;
 	private $dataset;
 
-	public function CreateMetadataPdf($metadata, $sources, $dataset = null)
+	public function CreateMetadataPdf($metadata, $sources, $dataset = null, $inMemory = false)
 	{
 		$this->metadata = $metadata;
 		$this->sources = $sources;
 		$this->dataset = $dataset;
 
-		$friendlyName = $metadata['met_title'] . '.pdf';
-		$type = 'application/pdf';
-
-		$this->pdf = new PdfFile();
+		$this->pdf = new PdfFile($inMemory);
 
 		$this->pdf->WriteHeading1($metadata['met_title']);
 		$this->WriteValuePair("Título", 'met_title');

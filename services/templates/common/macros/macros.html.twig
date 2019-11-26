@@ -39,6 +39,11 @@ endmacro %}
 	</div>
 {% endmacro %}
 
+{% macro metaInfo(tag, value) %}
+{% if value %}		<meta name="{{ tag }}" content="{{ value | e('html') }}">
+{% endif %}
+{% endmacro %}
+
 {% macro InfoMapsTitle(text) %}
 	<div class="dInfoMapsTitle">
       <a title="Volver" href="{{ home_url }}"><img style="vertical-align: bottom;" src="/static/img/back.png" /></a> {{ text }}

@@ -43,11 +43,24 @@ class Links
 	{
 		return self::GetMapUrl() . '/' .  $workId;
 	}
+	
+	public static function GetWorkMetricUrl($workId, $metricId)
+	{
+		return self::GetWorkUrl($workId) . '/#/l=' . $metricId;
+	}
+	public static function GetWorkHandleUrl($workId, $metricId = null, $regionId = null, $regionItemId = null)
+	{
+		return self::GetHandleUrl() . '/' . $workId . ($metricId !== null ? '/' . $metricId : '') . ($regionId !== null ? '/' . $regionId : '') . ($regionItemId !== null ? '/' . $regionItemId : '');
+	}
 	public static function GetBackofficeWorkUrl($workId)
 	{
 		return Context::Settings()->GetPublicUrl() . "/users/#/cartographies/" . $workId;
 	}
-
+	
+	public static function GetHandleUrl()
+	{
+		return '/handle';
+	}
 	public static function GetMapUrl()
 	{
 		return '/map';

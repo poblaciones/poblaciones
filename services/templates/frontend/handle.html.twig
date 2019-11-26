@@ -1,0 +1,33 @@
+{% import "macros.html.twig" as macros %}
+{% if not html_title is defined %}
+{% set html_title = 'Poblaciones' %}
+{% endif %}
+<html lang="es">
+	<head>
+	<meta charset="utf-8">
+	<title>{{ html_title }}</title>
+	<meta name='keywords' content='mapas, georreferenciación, datos espaciales, cartografías'>
+	{% for meta in metadata %}{{ 
+		macros.metaInfo(meta.name, meta.value) }}
+	{% endfor %}
+	<meta name="generator" content="poblaciones.org">
+	<link rel="canonical" href="{{ canonical }}">
+	<link rel="shortcut icon" href="/favicon.ico">
+	</head>
+	<body>
+		{{ content | raw }}
+
+	{% if links is defined %}
+    <h4>Indicadores</h4>
+		{% for link in links %} 		
+			<div class='indentedText'><a href='{{ canonical }}/{{ link.Id }}{{ (debugParam == 1 ? '?debug=1' : '') }}#{{ link.UrlName }}'> {{ link.Name }}</a></div>
+	{% endfor %}
+	{% endif %}
+
+	{% if metadata_pdf is defined %}
+    <h4>Metadatos</h4>
+		<div class='indentedText'><a href='{{ metadata_pdf }}'>{{ metadata_pdf }}</a></div>
+	{% endif %}
+
+	</body>
+</html>

@@ -9,14 +9,23 @@ function RestoreRoute(map) {
 	this.segmentedMap = map;
 };
 
-RestoreRoute.prototype.LoadRoute = function (route) {
-	this.LoadLocationFromRoute(route);
+RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
+	var locationSet = this.LoadLocationFromRoute(route);
 	var metrics = this.metricListFromRoute(route);
-	this.LoadMetrics(metrics);
+	this.LoadMetrics(metrics, updateRoute);
+	return locationSet;
+};
+
+RestoreRoute.prototype.RouteHasLocation = function (route) {
+	var framing = this.framingFromRoute(route);
+	return (framing !== null);
 };
 
 RestoreRoute.prototype.LoadLocationFromRoute = function (route) {
 	var framing = this.framingFromRoute(route);
+	if (framing === null) {
+		return false;
+	}
 	this.segmentedMap.SaveRoute.lastState = null;
 	// Setea la posición, el zoom y el tipo de mapa
 	this.segmentedMap.SaveRoute.Disabled = true;
@@ -32,7 +41,7 @@ RestoreRoute.prototype.LoadLocationFromRoute = function (route) {
 	// Se fija si cambia el clipping
 	this.LoadClipping(framing);
 	this.segmentedMap.SaveRoute.Disabled = false;
-
+	return true;
 };
 
 RestoreRoute.prototype.framingFromRoute = function (route) {
@@ -193,7 +202,7 @@ RestoreRoute.prototype.metricsChanged = function (metrics, currentMetrics) {
 	return false;
 };
 
-RestoreRoute.prototype.LoadMetrics = function (metrics) {
+RestoreRoute.prototype.LoadMetrics = function (metrics, updateRoute) {
 	// Se fija si cambian las métricas
 	if (metrics.length === 0) {
 		this.segmentedMap.Metrics.ClearUserMetrics();
@@ -224,6 +233,9 @@ RestoreRoute.prototype.LoadMetrics = function (metrics) {
 			}
 			loc.segmentedMap.Labels.UpdateMap();
 			loc.segmentedMap.SaveRoute.Disabled = false;
+			if (updateRoute) {
+				loc.segmentedMap.SaveRoute.UpdateRoute();
+			}
 		}).catch(function (error) {
 			err.errDialog('GetSelectedMetrics', 'obtener la información para los indicadores seleccionados', error);
 		});
