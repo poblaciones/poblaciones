@@ -42,11 +42,11 @@ El sitio se encuentra operativo con datos demográficos, sociales y políticos d
 
 # Instalación
 
-Para generar una versión para instalar: (startup/BUILD.md)
+Para generar una versión para instalar: [guía de compilación] (startup/BUILD.md)
 
-Para instalar un ambiente productivo: (startup/INSTALL.md)
+Para instalar un ambiente productivo: [guía de instalación] (startup/INSTALL.md)
 
-Para instalar un ambiente de desarrollo: (startup/SOURCES.md)
+Para instalar un ambiente de desarrollo: [guía para desarrollo] (startup/SOURCES.md)
 
 # Licencia
 Poblaciones - Plataforma abierta de datos espaciales de población.
