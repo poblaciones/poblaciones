@@ -1,14 +1,13 @@
 # poblaciones
-Herramienta para la publicaci髇 colaborativa de datos espaciales de poblaci髇
+Herramienta para la publicaci贸n colaborativa de datos espaciales de poblaci贸n
 
 En esta carpeta se encuentran los elementos necesarios para inicializarse en el uso de Poblaciones.
 
-Las gu韆s permiten:
+Las gu铆as permiten:
 
-1. Instalar una versi髇 en un sitio productivo.
+1. Instalar una versi贸n en un sitio productivo [INSTALL.md].
 
-2. Obtener y utilizar los fuentes para armar un entorno de desarrollo.
+2. Obtener y utilizar los fuentes para armar un entorno de desarrollo [SOURCES.md].
 
-3. Convertir un entorno de desarrollo en una versi髇 instalable.
+3. Convertir un entorno de desarrollo en una versi贸n instalable [BUILD.md].
 
-El script de instalaci髇 incializa una base de datos de Poblaciones con un usuario 'admin', cuya contrase馻 es 'admin001'. Se recomienda modificarla en el primer uso.
