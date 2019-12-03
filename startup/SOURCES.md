@@ -28,6 +28,7 @@ En esta guía se indican los pasos necesarios para inicializar una instalación 
 2) Actualizar las dependencias de los servicios en PHP y del cliente VueJS, ejecutando:
 
   frontend> npm install
+  
   services> php composer.phar install
 
 ## 4. Crear el archivo de configuración
