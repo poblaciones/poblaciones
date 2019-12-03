@@ -29,9 +29,10 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 Los fuente se descargan sin las dependencias que utilizan. Para descargarlas ne forma automática ejecutar:
 
+```
    frontend> npm install
-  
    services> php composer.phar install
+```
 
 Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
 
@@ -56,9 +57,9 @@ Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
 3) Si bien los datos cargados por los usuarios se persisten en la base de datos relacional, varios cachés y otros logs que proceduce la aplicación se almacen en filesystem. La carpeta predeterminada para ello es /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
 
 4) Iniciar el frontend (el servidor de vuejs) ejecutando:
- 
+ ```
     frontend>npm run dev
-
+```
 ## 6. Navegación e inicialización 
 
 1) Navegar http://localhost:8000/ para el visor, http://localhost:8000/users#/ para el backoffice, y http://desa.poblaciones.org/logs para la parte administrativa.
