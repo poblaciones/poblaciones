@@ -1,7 +1,5 @@
 # Poblaciones
-Herramienta para la publicación colaborativa de datos espaciales de población
-
-En esta guía se indican los pasos necesarios para inicializar una instalación de desarrollo de Poblaciones.
+Esta guía detalla los pasos necesarios para inicializar una instalación de desarrollo de Poblaciones.
 
 ## 1. Instalar el software necesario.
 
@@ -13,7 +11,11 @@ En esta guía se indican los pasos necesarios para inicializar una instalación 
 
 4) Instalar MySql 5.6 o superior.
 
-## 2. Iniciar una base de datos para Poblaciones
+## 2. Descargar los fuentes del repositorio.
+
+1) Hacer git clone de https://github.com/poblaciones/poblaciones en una carpeta local.
+
+## 3. Iniciar una base de datos para Poblaciones
 
 1) Utilizar [dbscript-v1.sql](dbscript-v1.sql) para crear una base vacía. 
 
@@ -21,17 +23,19 @@ En esta guía se indican los pasos necesarios para inicializar una instalación 
 
 3) Ejecutar en la base de datos los scripts de /startup/scripts para actualizar la estructura.
 
-## 3. Descargar los fuentes del repositorio.
+4) El usuario predeterminado para acceder luego a la aplicación es 'admin', cuya contraseña es 'admin001'. Se recomienda modificarla en el primer uso.
 
-1) Hacer git clone de https://github.com/poblaciones/poblaciones en una carpeta local.
+## 4. Actualizar las dependencias.
 
-2) Actualizar las dependencias de los servicios en PHP y del cliente VueJS, ejecutando:
+Los fuente se descargan sin las dependencias que utilizan. Para descargarlas ne forma automática ejecutar:
 
-  frontend> npm install
+   frontend> npm install
   
-  services> php composer.phar install
+   services> php composer.phar install
 
-## 4. Crear el archivo de configuración
+Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
+
+## 5. Crear los archivos de configuración
 
 1) Renombrar services/config/settings.sample.php a services/config/settings.php 
  
@@ -45,12 +49,14 @@ En esta guía se indican los pasos necesarios para inicializar una instalación 
 
 ## 5. Crear sitios para el servidor de servicios
 
-1. Agregar en hosts la entrada desa.poblaciones.org apuntando a 127.0.0.1.
-2. Agregar un Site (en IIS o apache) que apunte a la carpeta /services/web, resolviendo con ella la navegación de http://desa.poblaciones.org (o la ruta que se haya elegido).
-3. Los cachés y otros datos que proceduce la aplicación serán almacenados en /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
-4. Iniciar el frontend (el servidor de vuejs) ejecutando:
+1) Agregar en hosts la entrada desa.poblaciones.org apuntando a 127.0.0.1.
+
+2) Agregar un Site (en IIS o apache) que apunte a la carpeta /services/web, resolviendo con ella la navegación de http://desa.poblaciones.org (o la ruta que se haya elegido).
+
+3) Los cachés y otros datos que proceduce la aplicación serán almacenados en /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
+4) Iniciar el frontend (el servidor de vuejs) ejecutando:
  
-  frontend>npm run dev
+    frontend>npm run dev
 
 ## 6. Navegación e inicialización 
 
