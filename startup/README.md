@@ -5,9 +5,8 @@ En esta carpeta se encuentran los elementos necesarios para inicializarse en el 
 
 Las guías permiten:
 
-1. Instalar una versión en un sitio productivo [INSTALL.md](INSTALL.md).
+1. Obtener y utilizar los fuentes para armar un entorno de desarrollo [SOURCES.md](SOURCES.md).
 
-2. Obtener y utilizar los fuentes para armar un entorno de desarrollo [SOURCES.md](SOURCES.md).
+2. Convertir un entorno de desarrollo en una versión instalable [BUILD.md](BUILD.md).
 
-3. Convertir un entorno de desarrollo en una versión instalable [BUILD.md](BUILD.md).
-
+3. Instalar una versión en un sitio productivo [INSTALL.md](INSTALL.md).
