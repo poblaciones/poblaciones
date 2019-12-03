@@ -3,13 +3,13 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 ## 1. Instalar el software necesario.
 
-1) Para instalar VueJS. Descargar e instalar NodeJs https://nodejs.org/en/. Luego de instalarlo, ejecutar npm install vue
+1) Para instalar VueJS. Descargar e instalar NodeJs https://nodejs.org/en/. Luego de instalarlo, ejecutar > npm install vue.
 
-2) Instalar PHP 7.1 o posterior en Apache a IIS.
+2) Instalar PHP 7.1 o posterior en Apache o IIS (Windows) (https://www.php.net/downloads.php).
 
-3) Instalar Python 2.7 (sólo requerido para conversiones de archivos SPSS)
+3) Instalar Python 2.7 (sólo requerido para conversiones de archivos SPSS) (https://www.python.org/downloads/release/python-2716/)
 
-4) Instalar MySql 5.6 o superior.
+4) Instalar MySql 5.6 o superior (https://dev.mysql.com/downloads/mysql/).
 
 ## 2. Descargar los fuentes del repositorio.
 
