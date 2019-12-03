@@ -15,7 +15,7 @@ En esta guía se indican los pasos necesarios para inicializar una instalación 
 
 ## 2. Iniciar una base de datos para Poblaciones
 
-1) Utilizar [dbscript-v1.sql] para crear una base vacía. 
+1) Utilizar [dbscript-v1.sql](dbscript-v1.sql) para crear una base vacía. 
 
 2) Agregar los registros de un 'data-pack' desde https://github.com/poblaciones/data-packs.
 
