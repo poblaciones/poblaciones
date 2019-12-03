@@ -5,7 +5,7 @@ En esta carpeta se encuentran los elementos necesarios para inicializarse en el 
 
 Las guías permiten:
 
-1. Instalar una versión en un sitio productivo [INSTALL.md].
+1. Instalar una versión en un sitio productivo (INSTALL.md).
 
 2. Obtener y utilizar los fuentes para armar un entorno de desarrollo [SOURCES.md].
 
