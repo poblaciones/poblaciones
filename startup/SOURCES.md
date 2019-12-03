@@ -53,7 +53,8 @@ Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
 
 2) Agregar un Site (en IIS o apache) que apunte a la carpeta /services/web, resolviendo con ella la navegación de http://desa.poblaciones.org (o la ruta que se haya elegido).
 
-3) Los cachés y otros datos que proceduce la aplicación serán almacenados en /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
+3) Si bien los datos cargados por los usuarios se persisten en la base de datos relacional, varios cachés y otros logs que proceduce la aplicación se almacen en filesystem. La carpeta predeterminada para ello es /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
+
 4) Iniciar el frontend (el servidor de vuejs) ejecutando:
  
     frontend>npm run dev
