@@ -42,7 +42,7 @@ Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
  
 2) Indicar dentro de ese archivo los datos de conexión a la base de datos. 
 
-3) Indicar configuraciones para el envío de notificaciones por correo electrónico y las claves para la API de Google Maps.
+3) Indicar configuraciones para el envío de notificaciones por correo electrónico y las claves para la API de Google Maps. Opcionalmente se puede habilitar allí la autenticación de OpenAuth de Google y Facebook (generando las claves necesarios para esos servicios).
 
 4) Renombrar frontend/config/dev.env.sample.js a frontend/config/dev.env.js
  
@@ -62,6 +62,6 @@ Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
 ```
 ## 6. Navegación e inicialización 
 
-1) Navegar http://localhost:8000/ para el visor, http://localhost:8000/users#/ para el backoffice, y http://desa.poblaciones.org/logs para la parte administrativa.
+1) Navegar http://localhost:8000/ para utilizar el visor, http://localhost:8000/users#/ para ingresar al backoffice, y http://desa.poblaciones.org/logs para consultar la parte administrativa.
 
-2) Por último, es necesario regenerar las tablas precalculadas de la base de datos. En la consola de administración (desa.poblaciones.org/logs), ir a Configuración > Cachés y presionar sucesivamente 'Actualizar' en los cachés de Geografías, Regiones por Geografías y Lookup de Regiones para regenerar los cachés.
+2) Por último, es necesario regenerar las tablas precalculadas de la base de datos. En la consola de administración (http://desa.poblaciones.org/logs), ir a Configuración > Cachés y presionar sucesivamente 'Actualizar' en los cachés de Geografías, Regiones por Geografías y Lookup de Regiones para regenerar los cachés.
