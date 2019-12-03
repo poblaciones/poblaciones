@@ -201,6 +201,98 @@ class Variable
 						($normalization !== SpecialColumnEnum::NullValue &&
 						$normalization !== SpecialColumnEnum::Other);
 	}
+	
+	public static function GetRichColumnVariable($col, $fieldVariable)
+	{
+		$specialColumnEnum = $col;
+		if ($specialColumnEnum == SpecialColumnEnum::NullValue)
+			return '';
+		else if ($specialColumnEnum == SpecialColumnEnum::Other)
+		{
+      return $fieldVariable;
+		}
+		else
+			return "[" . self::SpecialColumnToLabel($specialColumnEnum) . "]";
+	}
+
+	public static function GetRichColumnCaption($col, $fieldLabel)
+	{
+		$specialColumnEnum = $col;
+		if ($specialColumnEnum == SpecialColumnEnum::NullValue)
+			return '';
+		else if ($specialColumnEnum == SpecialColumnEnum::Other)
+		{
+      return $fieldLabel;
+		}
+		else
+			return self::SpecialColumnToLabel($specialColumnEnum);
+	}
+
+	public static function SpecialColumnToLabel($dc)
+	{
+		$label = null;
+		switch ($dc)
+		{
+			case SpecialColumnEnum::Adult:
+				$label = "Adultos (>=18)";
+				break;
+			case SpecialColumnEnum::AreaM2:
+				$label = "Area m2";
+				break;
+			case SpecialColumnEnum::Children:
+				$label = "Niños (<18)";
+				break;
+			case SpecialColumnEnum::Household:
+				$label = "Hogares";
+				break;
+			case SpecialColumnEnum::People:
+				$label = "Población total";
+				break;
+			case SpecialColumnEnum::Count:
+				$label = "Conteo";
+				break;
+			default:
+				throw new ErrorException("La columna indicada no pertenece a la tabla de geografía.");
+		}
+		return $label;
+	}
+	public static function FormulaToString($variable)
+	{/*
+				$variable['dataCaption'] = Variable::GetRichColumnCaption($variable['mvv_data'], $variable['mvv_data_column_caption']);
+			$variable['normalizationCaption'] = Variable::GetRichColumnCaption($variable['mvv_normalization'], $variable['mvv_normalization_column_caption']);
+		*/
+
+		$dataVariable = self::GetRichColumnVariable($variable['mvv_data'], $variable['mvv_data_column_variable']);
+		$normalizationVariable = self::GetRichColumnVariable($variable['mvv_normalization'], $variable['mvv_normalization_column_variable']);
+			
+		$ret = $dataVariable;
+		if ($normalizationVariable)
+		{
+			switch($variable['mvv_normalization_scale'])
+			{
+				case 1:
+					$ret .= " / " . $normalizationVariable . " (n cada unidad)";
+					break;
+				case 100:
+					$ret .= " / " . $normalizationVariable . " * 100 (Porcentaje)";
+					break;
+				case 1000:
+					$ret .= " / " . $normalizationVariable . " / 1000 (n cada mil)";
+					break;
+				case 10000:
+					$ret .= " / " . $normalizationVariable . " / 10.000 (n cada 10 mil)";
+					break;
+				case 100000:
+					$ret .= " / " . $normalizationVariable . " / 100.000 (n cada 100 mil)";
+					break;
+				case 1000000:
+					$ret .= " / " . $normalizationVariable . " / 1.000.000 (n cada 1 millón)";
+					break;
+			}
+		}
+		return $ret;
+	}
+
 	public static function GetRichColumn($col, $field)
 	{
 		$specialColumnEnum = $col[$field];

@@ -71,7 +71,7 @@ abstract class cController
 		$this->AddValue('isMegaUser',  Session::IsMegaUser());
 		$user = Session::GetCurrentUser()->user;
 		$this->AddValue('current_user',  $user);
-
+		
 		return App::Render($template, $this->templateValues);
 	}
 

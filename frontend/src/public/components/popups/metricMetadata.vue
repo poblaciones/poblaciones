@@ -17,7 +17,7 @@
 					</tr>
 					<tr v-if="work.ReleaseDate">
 						<td>Publicación:</td>
-						<td>{{ work.ReleaseDate }}</td>
+						<td>{{ formattedReleaseDate }}</td>
 					</tr>
 					<tr v-if="work.Abstract">
 						<td>Resumen:</td>
@@ -112,9 +112,9 @@ export default {
 			}
 			this.$refs.dialog.show();
 		},
-		citationAPA(work) {
-			return apa.onlineMapCitation(this.htmlEncode(work.Authors), this.htmlEncode(work.ReleaseDate),
-					this.htmlEncode(work.Name), work.Url);
+		citationAPA() {
+			return apa.onlineMapCitation(this.htmlEncode(this.work.Authors), this.htmlEncode(this.formattedYear),
+					this.htmlEncode(this.work.Name), this.work.Url);
 		},
 		citationAPAText(work) {
 			return apa.onlineMapCitation(work.Authors, work.ReleaseDate,
@@ -144,6 +144,28 @@ export default {
 				return this.metric.SelectedVersion();
 			} else {
 				return null;
+			}
+		},
+		formattedYear() {
+			var s = this.work.ReleaseDate;
+			if (s === null) {
+				return null;
+			}
+			if (s[4] === '-') {
+				return s.substr(0, 4);
+			} else {
+				throw new Error('Formato de fecha no reconocido.');
+			}
+		},
+		formattedReleaseDate() {
+			var s = this.work.ReleaseDate;
+			if (s === null) {
+				return null;
+			}
+			if (s[4] === '-') {
+				return s.substr(8, 2) + '/' + s.substr(5, 2) + '/' + s.substr(0, 4);
+			} else {
+				throw new Error('Formato de fecha no reconocido.');
 			}
 		},
 		level() {

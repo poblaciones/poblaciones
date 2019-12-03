@@ -38,6 +38,7 @@ class App
 	public static $app;
 	public static $db = null;
 	public static $orm = null;
+	private static $contentType = null;
 
 	public static function CreateTwigEngines()
 	{
@@ -241,7 +242,7 @@ class App
 			ini_set( 'precision', 17 );
 			ini_set( 'serialize_precision', -1);
 		}
-		if ($daysToExpire === -1/* || self::Debug()*/)
+		if ($daysToExpire === -1 || self::Debug())
 			$headers = [ 'Cache-control' => 'private',
 									'Last-Modified' => $sessionTime ];
 		else {
@@ -273,7 +274,7 @@ class App
 	}
 
 	public static function RegisterCRUDRoute($path, $controllerClassName)
-	{
+	{	
 		self::RegisterControllerGet($path, $controllerClassName);
 		self::RegisterControllerGet($path . 'Item', $controllerClassName . 'Item');
 		self::RegisterControllerPost($path . 'Item', $controllerClassName . 'Item');
@@ -286,7 +287,10 @@ class App
 
 	public static function SendFile($file)
 	{
-		return self::$app->SendFile($file);
+		$ret = self::$app->SendFile($file);
+		if (self::$contentType !== null)
+	    $ret->headers->set('Content-Type', self::$contentType);
+		return $ret;
 	}
 
 	public static function StreamFile($filepath, $name)
@@ -329,12 +333,19 @@ class App
 			self::$orm = new Orm();
 		return self::$orm;
 	}
-
+	public static function SetContentType($contentType)
+	{
+		self::$contentType = $contentType;
+	}
 	public static function Render($template, $args)
 	{
 		Profiling::BeginTimer();
 		self::AddStandardParameters($args);
-		$ret = self::$app['twig']->render($template, $args);
+		$text = self::$app['twig']->render($template, $args);
+		$ret = new Response($text, 200);
+		if (self::$contentType !== null)
+	    $ret->headers->set('Content-Type', self::$contentType);
+
 		Profiling::EndTimer();
 		return $ret;
 	}

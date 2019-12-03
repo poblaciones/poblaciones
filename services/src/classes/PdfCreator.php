@@ -13,22 +13,27 @@ class PdfCreator
 	private $sources;
 	private $dataset;
 
-	public function CreateMetadataPdf($metadata, $sources, $dataset = null, $inMemory = false)
+	public function CreateMetadataPdf($metadata, $sources, $dataset = null)
 	{
 		$this->metadata = $metadata;
 		$this->sources = $sources;
 		$this->dataset = $dataset;
 
-		$this->pdf = new PdfFile($inMemory);
+		$this->pdf = new PdfFile();
 
-		$this->pdf->WriteHeading1($metadata['met_title']);
-		$this->WriteValuePair("Título", 'met_title');
 		if ($dataset != null)
-			$this->WriteValuePair("Dataset", 'dat_caption');
-
+		{
+			$this->pdf->WriteHeading1($dataset['dat_caption']);
+			$this->WriteValuePair("Cartografía", 'met_title');
+		}
+		else
+		{
+			$this->pdf->WriteHeading1($metadata['met_title']);
+			$this->WriteValuePair("Título", 'met_title');
+		}
 		$this->WriteValuePair("Fecha de publicación", 'met_publication_date');
 		if ($this->metadata['met_online_since_formatted'] !== '-')
-			$this->WriteValuePair("Puesta online", 'met_online_since_formatted');
+			$this->WriteValuePair("Fecha de publicación", 'met_online_since_formatted');
 
 		if ($this->metadata['met_online_since'] !== $this->metadata['met_last_online'])
 			$this->WriteValuePair("Última actualización", 'met_last_online_formatted');
@@ -49,9 +54,10 @@ class PdfCreator
 		$this->WriteInstitution();
 
 		$this->WriteSources();
-		$this->WriteLicense();
-
+		
 		$this->WriteDataset();
+
+		$this->WriteLicense();
 
 		$filename = $this->pdf->Save();
 
@@ -130,7 +136,6 @@ class PdfCreator
 				$this->pdf->WriteIndentedPairLink('Wikipedia', $source['src_wiki']);
 			if ($source['con_person'] != '')
 			{
-				//$this->pdf->WriteIndentedSpace();
 				$this->pdf->WriteIndentedPair('Contacto', $source['con_person']);
 				$this->pdf->WriteDoubleIndentedPair('Correo electrónico', $source['con_email']);
 				$this->pdf->WriteDoubleIndentedPair('Teléfono', $source['con_phone']);
@@ -179,6 +184,13 @@ class PdfCreator
 	{
 		if ($this->dataset == null)
 			return;
+	
+		$this->WriteDatasetColumns();
+		$this->WriteDatasetMetrics();
+	}
+
+	private function WriteDatasetColumns()
+	{
 		$this->pdf->WriteHeading4('Variables');
 		$this->pdf->WriteIndentedPairTitle('Nombre', 'Etiqueta');
 		foreach($this->dataset['columns'] as $column)
@@ -188,6 +200,47 @@ class PdfCreator
 			{
 				foreach($column['values'] as $value)
 					$this->pdf->WriteDoubleIndentedText($value['dla_value'] . ':' . $value['dla_caption']);
+			}
+		}
+	}
+
+	private function WriteDatasetMetrics()
+	{
+		$this->pdf->WriteHeading4('Indicadores');
+		foreach($this->dataset['metrics'] as $metricId => $variables)
+		{
+			$this->pdf->WriteIndentedPair('Nombre', $variables[0]['mtr_caption']);
+			$this->pdf->WriteIndentedPair('Versión', $variables[0]['mvr_caption']);
+			$this->pdf->WriteIndentedText('Variables');
+			$isFirst = true;
+			foreach($variables as $variable)
+			{
+				if (!$isFirst) 
+					$this->pdf->WriteExtraIndentedSpace();
+				else
+					$isFirst = false;
+
+				$this->pdf->WriteExtraIndentedPair('Nombre', $variable['mvv_caption']);
+				$this->pdf->WriteExtraIndentedPair('Fórmula', $variable['mvv_formula']);
+				if (array_key_exists('values', $variable) && $variable['values'] != null)
+				{
+					$valuesBlock = '';
+					foreach($variable['values'] as $value)
+					{
+						$color = $value['vvl_fill_color'];
+						if ($color !== null && $color !== '') 
+						{
+							if (Str::StartsWith($color, "fffff"))
+								// círculo vacío
+								$valuesBlock .= "<span style='color: #d0d0d0" . $color . "'>&#x25cb;</span> ";  
+							else
+								// círculo pleno
+								$valuesBlock .= "<span style='color: #" . $color . "'>&#x25cf;</span> ";  
+						}
+						$valuesBlock .= $this->pdf->HtmlEncode($value['vvl_caption']) . '<br>';
+					}
+					$this->pdf->WriteExtraIndentedPair('Categorías', $valuesBlock, false, false);
+				}
 			}
 		}
 	}

@@ -10,7 +10,7 @@
 			</div>
 			<div class="titleLine">
 				<span>
-					{{ this.Work.properties.Metadata.Title }}
+					{{ Work.properties.Metadata.Title }}
 				</span>
 			</div>
 		</div>

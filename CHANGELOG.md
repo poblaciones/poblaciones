@@ -1,5 +1,13 @@
 ﻿[CURRENT]
 
+v2.11 (2019-12-02)
+- El PDF de metadatos corta adecuadamente las urls largas para presentarlas.
+- El PDF de medatados incluye los indicadores en la información del dataset.
+- Tecla ESC funciona para cerrar popups del visor y FAB.
+- Fix: Si una variable estaba en un indicador, daba error al guardar las categorías.
+- Fix: Cuando el panel de indicadores en el visor se volvía angosto, se mezclaban las etiquetas con las cifras.
+- Soporte a metadatos de OpenGraph para links desde facebook u otras fuentes externas.
+
 v2.10 (2019-11-25)
 - click en elementos abre infowindow.
 - click en el mapa cierra los infowindow.

@@ -6,6 +6,7 @@ use minga\framework\Arr;
 use minga\framework\Profiling;
 use helena\db\frontend\GeographyItemModel;
 use helena\classes\App;
+use helena\services\backoffice\publish\snapshots\Variable;
 
 class MetadataModel extends BaseModel
 {
@@ -25,6 +26,18 @@ class MetadataModel extends BaseModel
 		$params = array($metadataId, $fileId);
 
 		$sql = "SELECT * FROM " . $this->draftPreffix . "metadata_file WHERE mfi_metadata_id = ? AND mfi_file_id = ? LIMIT 1";
+
+		$ret = App::Db()->fetchAssoc($sql, $params);
+		Profiling::EndTimer();
+		return $ret;
+	}
+	
+	public function GetMetadataByWorkId($workId)
+	{
+		Profiling::BeginTimer();
+		$params = array($workId);
+
+		$sql = "SELECT m.* FROM " . $this->draftPreffix . "work w JOIN " . $this->draftPreffix . "metadata m ON m.met_id = w.wrk_metadata_id WHERE wrk_id = ? LIMIT 1";
 
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		Profiling::EndTimer();
@@ -85,29 +98,85 @@ class MetadataModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
 	public function GetDatasetMetadata($datasetId)
 	{
 		if ($datasetId == null)
 			return null;
+
 		Profiling::BeginTimer();
+
+		// Trae atributos generales
 		$sql = "SELECT dat_caption FROM " . $this->draftPreffix . "dataset WHERE dat_id = ? LIMIT 1";
 		$ret = App::Db()->fetchAssoc($sql, array($datasetId));
+		// Trae columnas e indicadores
+		$ret['columns'] = $this->GetDatasetColumnsMetadata($datasetId);
+		$ret['metrics'] = $this->GetDatasetMetricsMetadata($datasetId);
+		
+		// Listo
+		Profiling::EndTimer();
+		return $ret;
+	}
+	
+	private function GetDatasetMetricsMetadata($datasetId)
+	{
+		Profiling::BeginTimer();
+		$metricToVariableJoin = $this->draftPreffix . "metric 
+								JOIN " . $this->draftPreffix . "metric_version ON mvr_metric_id = mtr_id
+								JOIN " . $this->draftPreffix . "metric_version_level ON mvl_metric_version_id = mvr_id
+								JOIN " . $this->draftPreffix . "variable ON mvv_metric_version_level_id = mvl_id ";
+		// Trae las variables
+		$sql = "select mtr_id, mtr_caption, mvr_caption, mvv_id, mvv_caption,
+								c1.dco_variable AS mvv_data_column_variable, c1.dco_caption AS mvv_data_column_caption,
+								c2.dco_variable AS mvv_normalization_column_variable, c2.dco_caption AS mvv_normalization_column_caption,
+								mvv_normalization, mvv_normalization_scale, mvv_normalization_column_id,
+								mvv_data, mvv_data_column_id, geo_caption, geo_revision
+								FROM " . $metricToVariableJoin . "
+								JOIN " . $this->draftPreffix . "dataset ON mvl_dataset_id = dat_id
+								LEFT JOIN geography ON dat_geography_id = geo_id
+								LEFT JOIN " . $this->draftPreffix . "dataset_column c1 ON c1.dco_id = mvv_data_column_id
+								LEFT JOIN " . $this->draftPreffix . "dataset_column c2 ON c2.dco_id = mvv_normalization_column_id
+								WHERE mvl_dataset_id = ? ORDER BY mtr_caption, mtr_id, mvr_caption, mvv_caption, geo_revision";
+		$variables = App::Db()->fetchAll($sql, array($datasetId));
+		// Completa los nombres de variables
+		foreach($variables as &$variable)
+		{
+			$variable['mvv_formula'] = Variable::FormulaToString($variable);
+		}		
+		// Trae las categorías
+		$sql = "select mvv_id, vvl_caption, vvl_fill_color
+								FROM " . $metricToVariableJoin . "
+								JOIN " . $this->draftPreffix . "variable_value_label ON vvl_variable_id = mvv_id
+								WHERE mvl_dataset_id = ? ORDER BY mvv_id, vvl_order";
+
+		$values = App::Db()->fetchAll($sql, array($datasetId));
+		$diccionary = Arr::FromSortedToKeyed($values, 'mvv_id');
+		// Completa categorías
+		foreach($variables as &$variable)
+			 $variable['values'] = Arr::SafeGet($diccionary, $variable['mvv_id'], null);
+		// Agrupa por metric
+		$metrics = Arr::FromSortedToKeyed($variables, 'mtr_id');
+
+		Profiling::EndTimer();
+		return $metrics;
+	}
+
+	private function GetDatasetColumnsMetadata($datasetId)
+	{
+		Profiling::BeginTimer();
 		// Trae las columnas
 		$sql = "SELECT dco_id, dco_variable, dco_label FROM " . $this->draftPreffix . "dataset_column WHERE dco_dataset_id = ? ORDER BY dco_order";
 		$columns = App::Db()->fetchAll($sql, array($datasetId));
-		$ret['columns'] = $columns;
 		// Trae las etiquetas
 		$sql = "SELECT dco_id, dla_value, dla_caption FROM " . $this->draftPreffix . "dataset_label JOIN " . $this->draftPreffix . "dataset_column ON dco_id = dla_dataset_column_id WHERE dco_dataset_id = ? ORDER BY dco_order, dla_order";
 		$values = App::Db()->fetchAll($sql, array($datasetId));
 		$diccionary = Arr::FromSortedToKeyed($values, 'dco_id');
 		// Completa etiquetas en columns
-		foreach($columns as $column)
+		foreach($columns as &$column)
 			 $column['values'] = Arr::SafeGet($diccionary, $column['dco_id'], null);
-		// Listo
 		Profiling::EndTimer();
-		return $ret;
+		return $columns;
 	}
-
 }
 
 

@@ -12,6 +12,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.Datasets = [];
 	this.Bounded = false;
 	this.pendingChanges = 0;
+	Vue.set(this, "pendingChanges", 0);
 	this.Sources = workInfo.Sources;
 	this.MetricVersions = new AsyncCatalog(window.host + '/services/backoffice/GetWorkMetricVersions?w=' + workInfo.Work.Id);
 	this.MetricVersions.Refresh();
@@ -405,7 +406,9 @@ ActiveWork.prototype.UpdateDatasetGeorreferencedCount = function () {
 };
 
 ActiveWork.prototype.UpdateHasChanges = function (value) {
-	this.pendingChanges = value;
+	//this.pendingChanges = value;
+	// TODO: este update no está funcionando:
+	Vue.set(this, "pendingChanges", value);
 	for (var n = 0; n < this.workListMetadata.length; n++) {
 		if (this.workListMetadata[n].Id === this.properties.Id) {
 			this.workListMetadata[n].HasChanges = value;

@@ -35,12 +35,10 @@
 		"defuse/php-encryption": "^2.2",
 		"phpmailer/phpmailer": "^6.0",
 		"rodrigoq/phpmailersendgrid": "^1.0",
-		"setasign/fpdf": "^1.8",
 		"geoip2/geoip2": "^2.9",
 		"doctrine/orm": "^2.6.3",
 		"creof/doctrine2-spatial": "^1.2",
 		"jms/serializer": "^1.12",
-		"mpdf/mpdf": "^7.1",
 		"symfony/serializer": "^3.4",
 		"symfony/property-info": "^3.4",
 		"doctrine/annotations": "^1.4",
@@ -48,7 +46,8 @@
 		"indigophp/doctrine-annotation-autoload": "^0.1.0",
 		"lusitanian/oauth": "^0.8.11",
 		"mjaschen/phpgeo": "^2.1",
-		"gasparesganga/php-shapefile": "^3.1"
+		"gasparesganga/php-shapefile": "^3.1",
+		"mpdf/mpdf": "^8.0"
 	},
 	"autoload": {
 		"psr-0": {

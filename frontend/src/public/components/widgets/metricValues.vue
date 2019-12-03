@@ -1,47 +1,66 @@
 <template>
-	<div style="position: relative">
-		<div class="statsHeader">&nbsp;
-			<span :title="getValueHeaderTooltip()" v-html="getValueHeader()" style="width: 75px; text-align: right" class='pull-right'>
-			</span>
-			<span class='pull-right' v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="(version.Levels.length > 1 ? 'margin-right: -15px;' : '')">{{ level.Name }}
-				<span v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
-							class="hand" v-on:click="togglePin">
-					<PinIcon v-if="!level.Pinned" class="icon" />
-					<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
-								-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />
-				</span>
-			</span>
-		</div>
-		<div class="hand" v-on:click="click(label)" v-for="label in variable.ValueLabels" :key="label.Id">
-			<div v-if="displayLabel(label)">
-				<div v-if="label.Visible" class="labelRow">
-					<!-- 2575fb -->
-					<i :style="'color: ' + label.FillColor" class="fa drop fa-tint"></i> {{ label.Name }}
-					<span style="width: 75px; text-align: right" class='pull-right padleft' :class="getMuted()">{{ getValueFormatted(label.Values, variable.ValueLabels) }}</span>
-					<span v-if="!variable.IsSimpleCount" class='pull-right' :class="getMuted()">{{ h.formatNum(label.Values.Count) }}</span>
-					<div class="bar" :style="getLength(getValue(label.Values, variable.ValueLabels), variable)"></div>
-				</div>
-				<div v-else class="labelRow">
-					<span class="action-muted"><i class="fa drop fa-tint"></i></span>
-					<span class="text-muted"> {{ label.Name }}
-						<span style="width: 75px; text-align: right" class='pull-right'>{{ getValueFormatted(label.Values, variable.ValueLabels) }}</span>
-						<span v-if="!variable.IsSimpleCount" class='pull-right'>{{ h.formatNum(label.Values.Count) }}</span>
-					</span>
-					<div class="bar-muted" :style="getLength( getValue(label.Values, variable.ValueLabels), variable)"></div>
-				</div>
-			</div>
-		</div>
-		<div v-if="showTotals" class="stats">&nbsp;
-			<span>Total
-			<span style="width: 75px; text-align: right" class='pull-right'>&nbsp;{{ aniTotal }}</span>
-			<span v-if="!variable.IsSimpleCount" class='pull-right'>{{ aniTotalCount }}</span>
-			</span>
-		</div>
-		<div class='smallIcons hand'>
-      <span :title="currentMetric.Title" v-on:click="clickMetric(currentMetric.Next.Key)">
-        #
-      </span>
-		</div>
+	<div>
+		<table class="localTableCompact">
+			<tbody>
+				<tr>
+					<td class="statsHeader" style="width: 25px; "></td>
+					<td colspan="2" class="statsHeader">
+						<span v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="(version.Levels.length > 1 ? 'margin-right: -15px;' : '')">
+							{{ level.Name }}
+							<span v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
+										class="hand" v-on:click="togglePin">
+								<PinIcon v-if="!level.Pinned" class="icon" />
+								<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
+									-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />
+							</span>
+						</span>
+					</td>
+					<td class="statsHeader textRight" style="min-width: 75px">
+						<span class="hand" :title="currentMetric.Title" v-on:click="clickMetric(currentMetric.Next.Key)"
+									v-html="getValueHeader()">
+						</span>
+					</td>
+				</tr>
+				<tr v-on:click="click(label)" v-for="label in variable.ValueLabels" class="hand" :key="label.Id">
+					<template v-if="displayLabel(label)">
+						<template v-if="label.Visible" class="labelRow">
+							<td class="dataBox">
+								<!-- 2575fb -->
+								<i :style="'color: ' + label.FillColor" class="fa drop fa-tint"></i>
+							</td>
+							<td class="dataBox">
+								{{ label.Name }}
+								<div class="bar" :style="getLength(getValue(label.Values, variable.ValueLabels), variable)"></div>
+							</td>
+							<td v-if="!variable.IsSimpleCount" class='textRight' :class="getMuted()">{{ h.formatNum(label.Values.Count) }}</td>
+							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(label.Values, variable.ValueLabels) }}</td>
+						</template>
+						<template v-else class="labelRow">
+							<td class="dataBox action-muted">
+								<i class="fa drop fa-tint"></i>
+							</td>
+							<td class="dataBox text-muted">
+								{{ label.Name }}
+								<div class="bar-muted" :style="getLength( getValue(label.Values, variable.ValueLabels), variable)"></div>
+							</td>
+							<td v-if="!variable.IsSimpleCount" class='text-muted textRight'>{{ h.formatNum(label.Values.Count) }}</td>
+							<td class='text-muted textRight'>{{ getValueFormatted(label.Values, variable.ValueLabels) }}</td>
+						</template>
+					</template>
+				</tr>
+				<tr v-if="showTotals">
+					<td class="stats" colspan="2">
+						&nbsp;Total
+					</td>
+					<td class="stats textRight">
+						<span v-if="!variable.IsSimpleCount">{{ aniTotalCount }}</span>
+					</td>
+					<td class="stats textRight">
+						{{ aniTotal }}
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 </template>
 
@@ -370,11 +389,11 @@ export default {
 <style scoped>
 .bar {
 	border: 1px solid #2575fb;
-	margin-left: 1.6em;
+	position: absolute;
 }
 .bar-muted {
 	border: 1px solid #999;
-	margin-left: 1.6em;
+	position: absolute;
 }
 .labelRow
 {
@@ -391,6 +410,32 @@ export default {
 	right: 0px;
 	bottom: -17px;
 	font-size: 10px;
+}
+.textRight {
+	text-align: right;
+}
+.statsHeader {
+	text-align: right;
+	color: #a9a9a9;
+	font-weight: 300;
+	font-size: 11px;
+	height: 16px;
+	padding: 0px;
+	text-transform: uppercase;
+}
+
+.dataBox {
+	padding-left: 2px!important;
+	padding-right: 2px!important;
+	padding-bottom: 5px!important;
+}
+.localTableCompact {
+	width: 100%;
+}
+.localTableCompact td {
+	border: 0px;
+	padding: 3px;
+	vertical-align: top;
 }
 
 </style>

@@ -111,8 +111,10 @@ export default {
 		if (this.showDialog) {
 			document.body.className += ' modal-open';
 		}
+		window.addEventListener('keydown', this.keyProcess);
 	},
 	beforeDestroy () {
+		window.removeEventListener('keydown', this.keyProcess);
 		document.body.className = document.body.className.replace(/\s?modal-open/, '');
 	},
 	watch: {
@@ -135,6 +137,13 @@ export default {
 			this.$emit('ok');
 			if (this.closeWhenOK) {
 				// this.showDialog = false;
+			}
+		},
+		keyProcess(e) {
+			if (this.showDialog) {
+				if (e.key === "Escape") {
+					this.showDialog = false;
+				}
 			}
 		},
 		cancel () {

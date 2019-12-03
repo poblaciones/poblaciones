@@ -34,13 +34,6 @@ class DraftWork
     /**
      * @var string
      *
-     * @ORM\Column(name="wrk_uri", type="string", length=255, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $Uri;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="wrk_start_args", type="string", length=500, precision=0, scale=0, nullable=true, unique=false)
      */
     private $StartArgs;
@@ -197,30 +190,6 @@ class DraftWork
     public function getType()
     {
         return $this->Type;
-    }
-
-    /**
-     * Set uri
-     *
-     * @param string $uri
-     *
-     * @return DraftWork
-     */
-    public function setUri($uri)
-    {
-        $this->Uri = $uri;
-
-        return $this;
-    }
-
-    /**
-     * Get uri
-     *
-     * @return string
-     */
-    public function getUri()
-    {
-        return $this->Uri;
     }
 
     /**

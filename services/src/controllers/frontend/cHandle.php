@@ -10,6 +10,7 @@ use minga\framework\Str;
 use helena\classes\Session;
 use helena\classes\Links;
 
+use helena\services\frontend\SelectedMetricService;
 use minga\framework\ErrorException;
 use helena\services\frontend\WorkService;
 use helena\services\common\MetadataService;
@@ -33,8 +34,13 @@ class cHandle extends cPublicController
 		$parts = explode('/', $uri);
 		array_shift($parts);
 		if ($parts[0] !== 'handle') 
-			throw new ErrorException("Ruta inv�lida.");
+			throw new ErrorException("Ruta inválida.");
 		array_shift($parts);
+		// Al último le saca el posible sufijo textual
+		$last = sizeof($parts) - 1;
+		if (Str::Contains($parts[$last], "_"))
+			 $parts[$last] = Str::EatFrom($parts[$last], "_");
+		
 		$this->AddValue("debugParam", Params::Get("debug"));
 		$workId = Params::CheckParseIntValue($parts[0]);
 		if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
@@ -107,32 +113,14 @@ class cHandle extends cPublicController
 		$links = [];
 		foreach($work->Metrics as $metric)
 			$links[] = [ 'Id' => $metric['Id'], 
-																	'UrlName' => $this->GetUrlName($this->PreppendMap($metric['Name'])), 
+																	'UrlName' => Str::CrawlerUrlEncode($metric['Name']), 
 																	'Name' => $metric['Name']];
 		$this->AddValue('links', $links);
 	}
 
-	private function GetUrlName($name)
-	{
-		$name = Str::RemoveAccents(Str::ToLower($name));
-		$name = Str::Replace($name, " ", "_");
-		$name = Str::Replace($name, ",", "_");
-		$name = Str::Replace($name, "(", "_");
-		$name = Str::Replace($name, ")", "_");
-		$name = Str::Replace($name, ".", "_");
-		$name = Str::Replace($name, "__", "_");
-		$name = Str::Replace($name, "__", "_");
-		$name = Str::Replace($name, "__", "_");
-		if (Str::EndsWith($name, "_")) $name = substr($name, 0, strlen($name) - 1);
-		return urlencode($name);
-	}
-
 	public function AddMetadata(&$metadata, $url)
 	{
-		if ($metadata['met_abstract'])
-			$metadata['met_title'] = Str::Concat($metadata['met_title'], $metadata['met_abstract'], '. ');
-
-		$this->AddValue('html_title', $metadata['met_title']);
+		$this->AddValue('htmltitle', $metadata['met_title']);
 		$map = [	'citation_title' => 'met_title', 
 							'citation_publication_date' => 'met_online_since', 
 							'citation_date' => 'met_online_since', 
@@ -168,14 +156,14 @@ class cHandle extends cPublicController
 		$workService = new WorkService();
 		$work = $workService->GetWork($workId);
 		$metadata = $this->GetMetadata($work);
-		
-		//$metadata['met_title'] = $this->PreppendMap($metadata['met_title']);
+		$metadata['met_title'] = $this->PreppendMap($metadata['met_title']);
 
 		$this->AddMetadata($metadata, $work->Url);
 		$this->AddMetricLinks($work);
 
-		$this->AddValue("content", $metadata['met_title']);
-
+		$items[] = ['Name' => $metadata['met_title'], 'Value' => $metadata['met_abstract']];
+		$this->AddValue("items", $items);		
+		
 		$this->AddValue("metadata_pdf", $work->Url . '/metadata');
 	}
 
@@ -192,20 +180,94 @@ class cHandle extends cPublicController
 		$workService = new WorkService();
 		$work = $workService->GetWork($workId);
 		$metadata = $this->GetMetadata($work);
+		$model = new MetadataModel();
 
-		$workTitle = $metadata['met_title'];
-		//$this->AddValue('source', $metadata['met_title']);
-		$title = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
-		
-		$title = $this->PreppendMap($title);
-		$metadata['met_title'] = Str::Concat($title, $workTitle, '. ');
-
-		$metadataService = new MetadataService();
+		$items = [];
 		$metadataId = $work->MetadataId;
+		$sources = $model->GetMetadataSources($metadataId);
+		//$dataset = $model->GetDatasetMetadata($datasetId);
 
+		$metric = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
+		$metric = $this->PreppendMap($metric);
+
+		$this->addInfo($metadata, $metric, $items);
+		$this->addSources($sources, $items);
+		$this->AddValue("items", $items);		
+
+		$metadata['met_title'] = $metric;
 		$this->AddMetadata($metadata, $work->Url);
-		
-		$this->AddValue("content", $metadataService->GetMetadataPdf($metadataId, null, false, $workId, true, $metadata));
+		// Trae los niveles y variables...
+		$selectedService = new SelectedMetricService();
+		$selectedMetric = $selectedService->GetSelectedMetric($metricId);
+		$variables = [];
+		foreach($selectedMetric->Versions as $version)	
+		{
+			if ($version->Version->WorkId === $workId)
+			{
+				// Lo representa
+				foreach($version->Levels as $level)	
+				{
+					foreach($level->Variables as $variable)	
+					{
+						$line = $variable->Name;
+						$vals = "";
+						foreach($variable->ValueLabels as $value)	
+						{
+							if ($vals != "") $vals .= ", ";
+							$vals .= $value->Name;
+						}
+						$fullName = Str::Concat($line, $vals, ": ");
+						$fullName .= " (" . $level->Name . ", " . $version->Version->Name . ")"; 
+						$variables[] = $fullName;
+					}
+				}
+			}
+		}
+		$this->AddValue("variables", $variables);		
+	}
+
+	private function addInfo($metadata, $metric, &$items) 
+	{
+		$items[] = ['Name' => $metric, 'Value' => ''];
+		$workTitle = $metadata['met_title'];
+		if (trim($metadata["met_abstract"]) === "") $metadata["met_abstract"] = '-';
+		$tags = ["met_abstract" => $workTitle, "met_authors" => "Autores", "ins_caption" => "Institución", "con_person" => "Contacto"];
+		foreach($tags as $tag => $label)
+		{
+			if (array_key_exists($tag, $metadata)) 
+			{
+				$val = $metadata[$tag];
+				if ($val !== null && trim($val) !== '')
+				{
+					$items[] = ['Name' => $label, 'Value' => $val];
+				}
+			}
+		}
+	}
+
+	private function addSources($sources, &$items) 
+	{
+		$n = sizeof($sources);
+		if ($n == 0)
+			return;
+		$plural = ($n == 1 ? "" : "s");
+		$caption = 'Fuente' . $plural;
+		$val = '';
+
+		for($i = 0; $i < $n; $i++)
+		{
+			$source = $sources[$i];
+			$val = $source['src_caption'];
+			$val = Str::Concat($val, $source['src_version'], ', ');
+			$val = Str::Concat($val, $source['src_authors'], '. ');
+			// Institución
+			if ($source['ins_caption'] != '')
+			{
+				$val = Str::Concat($val, $source['ins_caption'], '. ');
+			}
+			$items[] = ['Name' => $caption, 'Value' => $val];
+			$caption = '';
+		}
 	}
 
 	private function ShowWorkMetricRegion($workId, $metricId, $regionId)

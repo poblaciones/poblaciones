@@ -18,22 +18,16 @@ class PdfFile
 {
 	private $mpdf;
 
-	public function __construct($inMemory = false)
+	public function __construct()
 	{
-		if ($inMemory) 
-		{
-			$this->mpdf = new MpdfMemory();
-		}
-		else 
-		{
-			$this->mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4',
-																	'margin_left' => 30,
-																	'margin_right' => 30,
-																	'margin_top' => 25.4,
-																	'margin_bottom' => 25.4,
-																	'margin_header' => 9,
-																	'margin_footer' => 9]);
-		}
+		$this->mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4',
+																'margin_left' => 30,
+																'margin_right' => 30,
+																'margin_top' => 25.4,
+																'margin_bottom' => 25.4,
+																'margin_header' => 9,
+																'margin_footer' => 9,
+																'shrink_tables_to_fit' => false]);
 		$this->writeStyles();
 	}
 	public function Save($filename = "")
@@ -94,22 +88,42 @@ class PdfFile
 
 	private function WriteIndenterTable($text1, $text2, $level, $escape, $extraStyle = '')
 	{
-		$html = "<table cellpadding=0 cellspacing=0><tr><td valign='top' class='fixedIndentedTextBlock" . $level . " " . $extraStyle . "'>" . $this->HtmlEncode($text1, $escape)
+		$html = "<table cellpadding=0 cellspacing=0 style='overflow: wrap'><tr><td valign='top' class='fixedIndentedTextBlock" . $level . " " . $extraStyle . "'>" . $this->HtmlEncode($text1, $escape)
 								. "</td><td valign='top' class='fixedIndentedTextBlockEnd " . $extraStyle . "'>" . $this->HtmlEncode($text2, $escape) . "</td></tr></table>";
 		$this->mpdf->WriteHTML($html);
 	}
 
-	public function WriteDoubleIndentedPair($label, $text, $escape = true)
+	public function WriteDoubleIndentedPair($label, $text, $escape = true, $addDots = true)
 	{
 		$text = trim($text);
 		if ($text == "")
 			return;
-		if (Str::EndsWith($text, ".") == false) $text .= ".";
+		if ($addDots && Str::EndsWith($text, ".") == false) $text .= ".";
 		$this->WriteIndenterTable($label . ":", $text, "2", $escape);
 	}
+	
+	public function WriteExtraIndentedPair($label, $text, $escape = true, $addDots = true)
+	{
+		$text = trim($text);
+		if ($text == "")
+			return;
+		if ($addDots && Str::EndsWith($text, ".") == false) $text .= ".";
+		$this->WriteIndenterTable($label . ":", $text, "15", $escape);
+	}
+	
 	public function WriteIndentedSeparator()
 	{
 		$this->WriteIndentedText("<p style='font-size: 5pt'>________________________________________________________________________________________________________________________________________________________________________</p>", false);
+	}
+
+	public function WriteExtraIndentedSpace()
+	{
+		$this->WriteIndentedText("<div style='height: 6px'></div>", false);
+	}
+
+	public function WriteExtraIndentedSeparator()
+	{
+		$this->WriteIndentedText("<p style='font-size: 5pt; margin-left: 60px'>_________________________________________________________________________________________________________________________________________________</p>", false);
 	}
 
 	public function WriteIndentedSpace()
@@ -132,7 +146,7 @@ class PdfFile
 		$text = Str::Replace($text, "\n", "<br>");
 
 		if (Str::StartsWith($text, 'http'))
-			$text = "<a href='" . $text . "'>" . $text . '</a>';
+			$text = "<a class='link' href='" . $text . "'>" . $text . '</a>';
 		if (Str::EndsWith($text, ".") == false) $text .= ".";
 		$this->WriteIndentedText($text, false);
 	}
@@ -172,15 +186,20 @@ class PdfFile
 									text-align: center; color: #999999;
 									margin-top: 8pt; margin-bottom: 8pt; }
 
-								a {	color: #000066; font-style: normal; text-decoration: underline;
+								a {	color: #000066; font-style: normal; text-decoration: none;
 									font-weight: normal; }
 
 								ul {	text-indent: 5mm; margin-bottom: 9pt; }
 								ol {	text-indent: 5mm; margin-bottom: 9pt; }
 
+								.link {	color: #000066; font-style: normal; text-decoration: none;
+									font-weight: normal; }
+
+
 								.indentedText { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em;  text-align: justify; margin-left: " . $firstPadding. "pt;  }
 								.doubleIndentedText { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em;  text-align: justify; margin-left: " . ($firstPadding + $fieldWidth) . "pt;  }
 								.fixedIndentedTextBlock1 { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em;  text-align: left; padding-left: " . $firstPadding . "pt; width: " . ($fieldWidth + $firstPadding) . "pt;  }
+								.fixedIndentedTextBlock15 { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em;  text-align: left; padding-left: " . ($firstPadding + $fieldWidth / 2) . "pt; width: " . ($firstPadding + $fieldWidth * 1.5) . "pt;  }
 								.fixedIndentedTextBlock2 { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em;  text-align: left; padding-left: " . ($firstPadding + $fieldWidth) . "pt; width: " . ($firstPadding + $fieldWidth * 2) . "pt;  }
 								.fixedIndentedTextBlockEnd { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em; width: 100%;  text-align: justify;  }
 

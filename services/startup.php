@@ -46,6 +46,8 @@ if(Context::Settings()->Debug()->debug)
 	Profiling::BeginTimer("Debug");
 	$app['debug'] = true;
 	Debug::enable();
+	
+	Context::Settings()->Debug()->showErrors = true;
 
 	$app['twig.options'] = array('cache' => false);
 	require_once __DIR__.'/src/debug.php';

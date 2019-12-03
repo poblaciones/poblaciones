@@ -30,7 +30,7 @@ class cOauth extends cController
 		{
 			$data = $this->oauth->RequestData($code, $state);
 			if($data != null)
-				$this->oauth->RedirectSuccess($data);
+				$this->oauth->RedirectSuccess($data, $state);
 		}
 		$this->oauth->RedirectError();
 	}

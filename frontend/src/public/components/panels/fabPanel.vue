@@ -2,7 +2,7 @@
 	<div>
 		<addMetric ref="addMetricPopup" :list="action.Metrics" v-on:selectedItem="metricSelected" />
 		<span v-if="fabMetrics.length > 0">
-			<fab style="left: 15px!important"
+			<fab ref="vuefab" style="left: 15px!important"
 					 icon-size="small"
 					 z-index="1000000095"
 					 :enable-rotation="false"
@@ -49,7 +49,13 @@ export default {
 					fabMetrics: [],
           position: 'bottom-left',
       };
-  },
+		},
+	created () {
+		window.addEventListener('keydown', this.keyProcess);
+	},
+	beforeDestroy () {
+		window.removeEventListener('keydown', this.keyProcess);
+	},
 	mounted() {
 		
 	},
@@ -74,6 +80,13 @@ export default {
 				}).catch(function (error) {
 					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
 				});
+		},
+		keyProcess(e) {
+			if (e.key === "Escape") {
+				if (this.$refs.vuefab.toggle) {
+					this.$refs.vuefab.toggle = false;
+				}
+			}
 		},
     selected(n){
 			this.action = this.fabMetrics[n];

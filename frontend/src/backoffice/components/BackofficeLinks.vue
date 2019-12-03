@@ -1,6 +1,6 @@
 <template>
 	<div class="adminButton">
-		<md-button @click="onPublish" v-if="Work.CanEdit() && Work.HasChanges()" class="md-raised">
+		<md-button @click="onPublish" v-if="Work.CanEdit() && (Work.HasChanges() || Work.properties.pendingChanges == 1)" class="md-raised">
 			<md-icon>public</md-icon> Publicar cambios
 		</md-button>
 		<md-button @click="goMap" v-if="url" class="md-raised">
@@ -54,6 +54,11 @@ export default {
 					window.Db.ReBindWork(loc.Work.properties.Id);
 			});
 		},
+	},
+	watch: {
+		'Work.pendingChanges'() {
+			
+		}
 	}
 };
 </script>

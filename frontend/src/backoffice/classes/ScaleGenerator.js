@@ -314,11 +314,17 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 	var customColors = JSON.parse(variable.Symbology.CustomColors);
 	// Borra y regenera las categorías
 	var previousVisibilities = this.saveVisibilities(variable);
+	var requiresNullCategory;
+	if (data !== null) {
+		requiresNullCategory = data.HasNulls;
+	} else {
+		requiresNullCategory = this.HasNullCategory(variable);
+	}
 	if (variable.Symbology.CutMode !== 'M') {
 		// Resetea los valores para regenerar
-		variable.Values.length = (data.HasNulls && this.HasNullCategory(variable) ? 1 : 0);
+		variable.Values.length = (requiresNullCategory && this.HasNullCategory(variable) ? 1 : 0);
 	}
-	if (variable.Symbology.CutMode !== 'V' && data.HasNulls) {
+	if (variable.Symbology.CutMode !== 'V' && requiresNullCategory) {
 		this.EnsureNullCategory(variable);
 	}
 	if (variable.Symbology.CutMode === 'S') {

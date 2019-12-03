@@ -339,14 +339,6 @@ html, body {
 	cursor: hand;
 	color: #DDDDDD;
 }
-.statsHeader
-{
-	color: #a9a9a9;
-	font-weight: 300;
-	font-size: 11px;
-	height: 16px;
-	text-transform: uppercase;
-}
 
 .quotation {
 	font-size: 12px;

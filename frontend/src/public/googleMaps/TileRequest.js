@@ -54,8 +54,9 @@ TileRequest.prototype.GetTile = function () {
 
 TileRequest.prototype.startDataRequest = function () {
 	var loc = this;
+	var params = this.selectedMetricOverlay.activeSelectedMetric.getDataServiceParams(this.coord, this.boundsRectRequired);
 	window.SegMap.Get(window.host + '/services/' + this.selectedMetricOverlay.dataService, {
-		params: this.selectedMetricOverlay.activeSelectedMetric.getDataServiceParams(this.coord, this.boundsRectRequired),
+		params: params,
 		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; }),
 	}).then(function (res) {
 		queue.Release(loc.preCancel1);
@@ -65,6 +66,7 @@ TileRequest.prototype.startDataRequest = function () {
 		}
 	}).catch(function (error) {
 		queue.Release(loc.preCancel1);
+		var q = params;
 		if (error.message !== 'cancelled') {
 			loc.selectedMetricOverlay.SetDivFailure(loc.div);
 		}

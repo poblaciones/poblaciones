@@ -27,11 +27,10 @@ class MetadataService extends BaseService
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}
 
-	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null, $inMemory = false, $metadata = null)
+	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
 	{
 		$model = new MetadataModel($fromDraft);
-		if ($metadata === null)			
-			$metadata = $model->GetMetadata($metadataId);
+		$metadata = $model->GetMetadata($metadataId);
 		if ($metadata === null || sizeof($metadata) < 2) throw new ErrorException('Metadatos no encontrados.');
 
 		$sources = $model->GetMetadataSources($metadataId);
@@ -42,23 +41,14 @@ class MetadataService extends BaseService
 		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
 
 		$PdfCreator = new PdfCreator();
-		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $dataset, $inMemory);
+		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $dataset);
 
-		if (!$inMemory)
-		{		
-			if ($workId !== null)
-				Statistics::StoreDownloadMetadataHit($workId);
+		if ($workId !== null)
+			Statistics::StoreDownloadMetadataHit($workId);
 		
-			return App::SendFile($filename)
-				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
-				->deleteFileAfterSend(true);
-		}
-		else
-		{
-			$ret = IO::ReadAllText($filename);
-			IO::Delete($filename);
-			return $ret;
-		}
+		return App::SendFile($filename)
+			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
+			->deleteFileAfterSend(true);
 	}
 
 	private function formatDate($date)
