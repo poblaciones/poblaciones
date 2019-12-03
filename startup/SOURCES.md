@@ -63,4 +63,4 @@ Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
 
 1) Navegar http://localhost:8000/ para el visor, http://localhost:8000/users#/ para el backoffice, y http://desa.poblaciones.org/logs para la parte administrativa.
 
-2) Por último paso, regenerar las tablas precalculadas de la base de datos: en la consola de administración (desa.poblaciones.org/logs), ir a Configuración > Cachés y presionar sucesivamente 'Actualizar' en los cachés de Geografías, Regiones por Geografías y Lookup de Regiones para regenerar los cachés.
+2) Por último, es necesario regenerar las tablas precalculadas de la base de datos. En la consola de administración (desa.poblaciones.org/logs), ir a Configuración > Cachés y presionar sucesivamente 'Actualizar' en los cachés de Geografías, Regiones por Geografías y Lookup de Regiones para regenerar los cachés.
