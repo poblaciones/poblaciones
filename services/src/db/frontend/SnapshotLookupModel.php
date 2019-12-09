@@ -88,7 +88,7 @@ class SnapshotLookupModel extends BaseModel
 
 		$multiQuery = new MultiQuery($baseQuery, $envelopeQuery, $query, $extraQuery);
 		//$multiQuery->dump();
-		$ret = App::Db()->fetchAll($multiQuery->sql, $multiQuery->params);
+		$ret = $multiQuery->fetchAll();
 		Profiling::EndTimer();
 		return $ret;
 	}

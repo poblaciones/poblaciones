@@ -1,6 +1,6 @@
 <template>
 	<Modal class="panel card" title="Agregar fuente pública" ref="showPopup" :showCancel="false" :showOk="false">
-		<div>
+		<div v-if="list">
 			<div class="listContainer">
 				<table class="localTable">
 					<tbody>
@@ -38,12 +38,11 @@ export default {
 	name: 'addMetricPopup',
 	data() {
 		return {
+			list: [],
+			workId: null,
 			selected: null
 		};
 	},
-	props: [
-		'list',
-	],
 	components: {
 		Modal
  },
@@ -53,15 +52,23 @@ export default {
 				this.selected = null;
 			}
 		},
-		select(item) {
-			this.selected = item;
-			if (item !== null) {
-				this.$nextTick(() => {
-					this.$emit('selectedItem');
-				});
+		select(metric) {
+			this.selected = metric;
+			if (metric !== null) {
+				this.hide();
+				if (this.workId) {
+					window.SegMap.AddMetricByIdAndWork(metric.Id, this.workId);
+				} else {
+					window.SegMap.AddMetricById(metric.Id);
+				}
 			}
 		},
-		show() {
+		show(list, workId) {
+			if (!list) {
+				list = [];
+			}
+			this.workId = workId;
+			this.list = list;
 			this.$refs.showPopup.show();
 		},
 		hide() {

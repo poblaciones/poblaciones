@@ -3,7 +3,7 @@
 		<div id="panMain" class="split split-horizontal" style="position: relative">
 			<WorkPanel :work="work" ref="workPanel" />
 			<Search/>
-			<Mapa/>
+			<MapPanel/>
 			<Fab ref="fabPanel" />
 			<Edit v-if="work.Current" ref="editPanel" :work="work" />
 		</div>
@@ -20,7 +20,7 @@ import SegmentedMap from '@/public/classes/SegmentedMap';
 import RestoreRoute from '@/public/classes/RestoreRoute';
 import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
-import Mapa from '@/public/components/panels/mapPanel';
+import MapPanel from '@/public/components/panels/mapPanel';
 import Fab from '@/public/components/panels/fabPanel';
 import Edit from '@/public/components/panels/editPanel';
 import SummaryPanel from '@/public/components/panels/summaryPanel';
@@ -37,10 +37,13 @@ export default {
 	components: {
 		SummaryPanel,
 		Search,
-		Mapa,
+		MapPanel,
 		Edit,
 		Fab,
 		WorkPanel
+	},
+	created() {
+		window.Popups = {};
 	},
 	data() {
 		return {
@@ -547,4 +550,31 @@ border-color: #66615B;
 	display: none;
 }
 
+.copyrightText {
+	color: #000000;
+}
+.copyrightText:active {
+	color: #000000;
+}
+.copyrightText:visited {
+	color: #000000;
+}
+.copyrightText:hover {
+	text-decoration: none;
+	color: #000000;
+}
+
+.copyright {
+	padding: 0px 5px;
+	user-select: none;
+	height: 14px;
+	line-height: 14px;
+	background-color: #ffffff;
+	opacity: 0.7;
+	border-top-left-radius: 6px;
+	font-family: Roboto, Arial, sans-serif;
+	font-size: 10px;
+	white-space: nowrap;
+	vertical-align: middle;
+}
 </style>

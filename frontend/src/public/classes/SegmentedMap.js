@@ -20,6 +20,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.Revisions = revisions;
 	this.MapsApi = mapsApi;
 	this.Work = null;
+	this.Popups = {};
 	this.textCanvas = {};
 	this.toolbarStates = toolbarStates;
 	this.DefaultTitle = 'Poblaciones';

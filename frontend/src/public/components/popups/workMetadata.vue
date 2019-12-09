@@ -1,6 +1,6 @@
 <template>
-  <Modal v-if="work" :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false"  :showOk="false">
-		<div>
+  <Modal :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false"  :showOk="false">
+		<div v-if="metric || work">
 			<table class="localTable">
 				<tbody>
 					<tr>
@@ -90,11 +90,7 @@ import apa from '@/common/js/citationAPA';
 import Modal from '@/public/components/popups/modal';
 
 export default {
-	name: 'metricMetadataPopup',
-	props: [
-		'metric',
-		'work',
-	],
+	name: 'workMetadataPopup',
 	components: {
     creativeCommons,
     FilePdfIcon,
@@ -103,13 +99,21 @@ export default {
 	data() {
 		return {
 			downloadLevel: 0,
+			metric: null,
+			work: null
 		};
 	},
   methods: {
-		show() {
-			if (this.metric) {
-				this.downloadLevel = this.version.SelectedLevelIndex;
-			}
+		showByMetric(metric) {
+			this.metric = metric;
+			this.downloadLevel = this.version.SelectedLevelIndex;
+			this.work = metric.SelectedVersion().Work;
+			this.$refs.dialog.show();
+		},
+		show(work) {
+			this.metric = null;
+			this.downloadLevel = null;
+			this.work = work;
 			this.$refs.dialog.show();
 		},
 		citationAPA() {

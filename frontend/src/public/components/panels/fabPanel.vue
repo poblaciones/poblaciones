@@ -1,6 +1,5 @@
 <template>
 	<div>
-		<addMetric ref="addMetricPopup" :list="action.Metrics" v-on:selectedItem="metricSelected" />
 		<span v-if="fabMetrics.length > 0">
 			<fab ref="vuefab" style="left: 15px!important"
 					 icon-size="small"
@@ -27,7 +26,6 @@
 
 <script>
 import axios from 'axios';
-import addMetric from '@/public/components/popups/addMetric';
 import fab from 'vue-fab';
 import err from '@/common/js/err';
 
@@ -37,8 +35,7 @@ import err from '@/common/js/err';
 export default {
 	name: 'fabPanel',
 	components: {
-		fab,
-		addMetric
+		fab
 	},
 	data(){
       return {
@@ -90,12 +87,7 @@ export default {
 		},
     selected(n){
 			this.action = this.fabMetrics[n];
-			this.$refs.addMetricPopup.show();
-		},
-		metricSelected() {
-			var metric = this.$refs.addMetricPopup.selected;
-			this.$refs.addMetricPopup.hide();
-			window.SegMap.AddMetricById(metric.Id);
+			window.Popups.AddMetric.show(this.action.Metrics);
 		}
   },
 };
@@ -103,7 +95,7 @@ export default {
 
 <style scoped>
 	.fab-wrapper {
-		z-index: unset!important;
+		z-index: 1!important;
 	}
 </style>
 

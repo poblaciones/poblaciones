@@ -11,14 +11,10 @@
         </button>
       </h4>
 		</div>
-		<div>
-			<customize ref="customize" />
-		</div>
 	</div>
 </template>
 
 <script>
-import Customize from '@/public/components/popups/customizePopup';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import DotsVerticalIcon from 'vue-material-design-icons/DotsVertical.vue';
 
@@ -31,8 +27,7 @@ export default {
 		'clipping',
 	],
 	components: {
-		Customize,
-    DotsVerticalIcon,
+		DotsVerticalIcon,
     CloseIcon
 	},
 	data() {
@@ -46,7 +41,7 @@ export default {
 		},
 		clickCustomize(e) {
 			e.preventDefault();
-			this.$refs.customize.show(this.metric);
+			window.Popups.MetricCustomize.show(this.metric);
 		},
 		clickQuitar(e) {
 			e.preventDefault();

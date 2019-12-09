@@ -22,7 +22,7 @@ class SummaryService extends BaseService
 		$this->CheckNotNullNumeric($metricVersionId);
 		$this->CheckNotNumericNullable($levelId);
 
-		if ($frame->ClippingFeatureId == NULL && $frame->ClippingRegionId == NULL
+		if ($frame->ClippingRegionId == NULL
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new ErrorException("A spatial indication must be specified (envelope, circle or region).");
 
@@ -61,10 +61,6 @@ class SummaryService extends BaseService
 		if ($frame->ClippingCircle != NULL)
 		{
 			$rows = $table->GetMetricVersionSummaryByCircle($metricVersionId, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingCircle, $level->Dataset->Type);
-		}
-		else if ($frame->ClippingFeatureId != NULL)
-		{
-			$rows = $table->GetMetricVersionSummaryByFeatureId($metricVersionId, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingFeatureId);
 		}
 		else if ($frame->ClippingRegionId != NULL)
 		{

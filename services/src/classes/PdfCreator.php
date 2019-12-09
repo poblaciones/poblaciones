@@ -209,7 +209,7 @@ class PdfCreator
 		$this->pdf->WriteHeading4('Indicadores');
 		foreach($this->dataset['metrics'] as $metricId => $variables)
 		{
-			$this->pdf->WriteIndentedPair('Nombre', $variables[0]['mtr_caption']);
+			$this->pdf->WriteIndentedPairTitle('Nombre:', $variables[0]['mtr_caption']);
 			$this->pdf->WriteIndentedPair('Versión', $variables[0]['mvr_caption']);
 			$this->pdf->WriteIndentedText('Variables');
 			$isFirst = true;

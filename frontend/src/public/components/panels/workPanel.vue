@@ -1,9 +1,8 @@
 <template>
 	<div>
 		<div style="position: absolute; z-index: 10">
-			<addMetric ref="addMetric" :list="(work.Current ? work.Current.Metrics : [])" v-on:selectedItem="metricSelected" />
 			<div class="panel card">
-				<WorkMetricMetadata ref="showFuente" :work="work.Current" />
+				<WorkMetadata ref="showFuente" :work="work.Current" />
 			</div>
 		</div>
 		<nav id="workPanel" class="navbar-fixed-top workPanel">
@@ -41,8 +40,6 @@
 </template>
 
 <script>
-import addMetric from '@/public/components/popups/addMetric';
-import WorkMetricMetadata from '@/public/components/popups/metricMetadata';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
 
 export default {
@@ -51,8 +48,6 @@ export default {
 		'work',
 	],
 	components: {
-		addMetric,
-		WorkMetricMetadata,
 		LinkIcon,
 	},
 	data() {
@@ -63,7 +58,7 @@ export default {
 	},
 	methods: {
 		showMetrics() {
-			this.$refs.addMetric.show();
+			window.Popups.AddMetric.show(this.work.Current.Metrics, this.work.Current.Id);
 		},
 		onResize() {
 			var visible = (this.work.Current !== null);
@@ -73,7 +68,7 @@ export default {
 		},
 		clickFuente(e) {
 			e.preventDefault();
-			this.$refs.showFuente.show();
+			window.Popups.WorkMetadata.show(this.work.Current);
 		},
 		showButtonsInInSingleRow() {
 			return (!this.work.Current.Institution && !this.work.Current.Authors);
@@ -87,11 +82,6 @@ export default {
 			} else {
 				return 'margin-top: 3px';
 			}
-		},
-		metricSelected() {
-			var metric = this.$refs.addMetric.selected;
-			this.$refs.addMetric.hide();
-			window.SegMap.AddMetricByIdAndWork(metric.Id, this.work.Current.Id);
 		},
 		updateWork() {
 			var visible = (this.work.Current !== null);

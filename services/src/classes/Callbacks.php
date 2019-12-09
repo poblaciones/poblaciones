@@ -19,4 +19,8 @@ class Callbacks extends FrameworkCallbacks
 	{
 		App::EndRequest();
 	}
+	public function Db()
+	{
+		return App::Db();
+	}
 }

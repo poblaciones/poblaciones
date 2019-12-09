@@ -1,5 +1,5 @@
 <template>
-	<div v-hotkey="keymap" class="cen no-print">
+	<div v-hotkey="keymap" class="searchBar no-print">
 		<div class="input-group">
 			<input v-model='text' ref='sfield' id='sfield' autofocus v-on:keyup='doSearch' class="form-control formBorder" :class="getLoading()" type="text" placeholder="Buscar">
 			<span class="input-group-btn">
@@ -201,12 +201,14 @@ export default {
 </script>
 
 <style scoped>
-.cen {
-	/* margin: 0 auto; */
+.searchBar {
 	top:20px;
-	left:25%;
+  left: 300px;
   z-index: 1;
-	width:500px;
+  width: 50%;
+  width: calc(100% - 500px);
+	min-width: 200px;
+	z-index: 1;
 	position:absolute;
 }
 .auto {

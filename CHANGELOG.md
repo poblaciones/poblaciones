@@ -1,4 +1,7 @@
 ﻿[CURRENT]
+- Fix: Los popups del visor perdían su ubicación al ser arrastrados.
+- Link a comentarios, términos y condiciones e información de copyright agregada al visor.
+- Adaptación del onboarding al link de contacto.
 
 v2.11 (2019-12-02)
 - El PDF de metadatos corta adecuadamente las urls largas para presentarlas.

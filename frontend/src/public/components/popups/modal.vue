@@ -2,7 +2,7 @@
 	<div v-if="showDialog" :transition="transition">
 		<div class="modal" @click.self="clickMask">
 			<div class="modal-dialog" :class="modalClass" @click.self="clickMask" ref="dialog">
-				<div class="modal-content">
+				<div class="modal-content card">
 					<!--Header-->
 					<div class="modal-header">
 						<slot name="header">

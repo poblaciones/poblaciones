@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<span>
 		<table class="localTableCompact">
 			<tbody>
 				<tr>
@@ -28,22 +28,22 @@
 								<!-- 2575fb -->
 								<i :style="'color: ' + label.FillColor" class="fa drop fa-tint"></i>
 							</td>
-							<td class="dataBox">
+							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
 								<div class="bar" :style="getLength(getValue(label.Values, variable.ValueLabels), variable)"></div>
 							</td>
-							<td v-if="!variable.IsSimpleCount" class='textRight' :class="getMuted()">{{ h.formatNum(label.Values.Count) }}</td>
+							<td class='textRight' :class="getMuted()"><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
 							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(label.Values, variable.ValueLabels) }}</td>
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted">
 								<i class="fa drop fa-tint"></i>
 							</td>
-							<td class="dataBox text-muted">
+							<td class="dataBox text-muted" style="width: 100%">
 								{{ label.Name }}
 								<div class="bar-muted" :style="getLength( getValue(label.Values, variable.ValueLabels), variable)"></div>
 							</td>
-							<td v-if="!variable.IsSimpleCount" class='text-muted textRight'>{{ h.formatNum(label.Values.Count) }}</td>
+							<td class='text-muted textRight'><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
 							<td class='text-muted textRight'>{{ getValueFormatted(label.Values, variable.ValueLabels) }}</td>
 						</template>
 					</template>
@@ -61,7 +61,7 @@
 				</tr>
 			</tbody>
 		</table>
-	</div>
+	</span>
 </template>
 
 <script>
@@ -376,7 +376,9 @@ export default {
 			variable.ValueLabels.forEach(function(label) {
 				tot += Number(loc.getValue(label.Values, variable.ValueLabels));
 			});
-			return 'width:' + ((tot > 0 ? value / tot : 0) * this.panelWidth) + 'px';
+			//return 'width:' + ((tot > 0 ? value / tot : 0) * this.panelWidth) + 'px';
+			var prop = (tot > 0 ? value / tot : 0);
+			return 'width: calc(' + (prop * 100) + '% - ' + (60 * prop) + 'px)';
 		},
 		click(label) {
 			label.Visible = !label.Visible;
@@ -430,7 +432,6 @@ export default {
 	padding-bottom: 5px!important;
 }
 .localTableCompact {
-	width: 100%;
 }
 .localTableCompact td {
 	border: 0px;

@@ -159,8 +159,6 @@ App::$app->get('/services/metrics/GetSummary', function (Request $request) {
 	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity));
 });
 
-
-
 App::$app->get('/services/metrics/GetInfoWindowData', function (Request $request) {
 	$controller = new services\InfoWindowService();
 

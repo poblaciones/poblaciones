@@ -9,16 +9,10 @@
 				Fuente
 			</a>
     </div>
-    <div style="position: absolute">
-			<WorkMetricMetadata ref="showFuente" :metric="metric" :work="metric.SelectedVersion().Work" />
-      <MetricDownload ref="showDescargar" :metric="metric" :clipping="clipping" />
-    </div>
   </div>
 </template>
 
 <script>
-import WorkMetricMetadata from '@/public/components/popups/metricMetadata';
-import MetricDownload from '@/public/components/popups/metricDownload';
 import DownloadIcon from 'vue-material-design-icons/download.vue';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
 
@@ -26,9 +20,7 @@ export default {
 	name: 'metricSourceInfo',
 	components: {
     DownloadIcon,
-		WorkMetricMetadata,
-		LinkIcon,
-		MetricDownload
+		LinkIcon
 	},
 	props: [
     'metric',
@@ -42,11 +34,11 @@ export default {
   methods: {
 		clickDescargar(e) {
 			e.preventDefault();
-			this.$refs.showDescargar.show();
+			window.Popups.MetricDownload.show(this.metric, this.clipping);
 		},
 		clickFuente(e) {
 			e.preventDefault();
-			this.$refs.showFuente.show();
+			window.Popups.WorkMetadata.showByMetric(this.metric);
 		},
 	},
 };

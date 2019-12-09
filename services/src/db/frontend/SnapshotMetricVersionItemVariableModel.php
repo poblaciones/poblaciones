@@ -35,13 +35,6 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		return $this->ExecSummaryQuery($metricVersionId, $hasSummary, $geographyId, $urbanity, $query, $circleQuery);
 	}
 
-	public function GetMetricVersionSummaryByFeatureId($metricVersionId, $hasSummary, $geographyId, $urbanity, $clippingFeatureId)
-	{
-		$query =  $this->spatialConditions->CreateFeatureQuery($clippingFeatureId);
-
-		return $this->ExecSummaryQuery($metricVersionId, $hasSummary, $geographyId, $urbanity, $query);
-	}
-
 	public function GetMetricVersionSummaryByEnvelope($metricVersionId, $hasSummary, $geographyId, $urbanity, $envelope)
 	{
 		$query = $this->spatialConditions->CreateRichEnvelopeQuery($envelope, $metricVersionId, $geographyId);
@@ -73,12 +66,31 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
 
-		$params = $query->Params;
+		$ret = $multiQuery->fetchAll();
+		Profiling::EndTimer();
+		return $ret;
+	}
 
-		if ($extraQuery != null && $extraQuery->Params != null)
-			$params = array_merge($params, $extraQuery->Params);
+	private function CreateCrossTableQuery($metricVersionId, $hasSummary, $geographyId, $urbanity, $query, $extraQuery = null)
+	{
+		Profiling::BeginTimer();
+		$select = "t1.miv_metric_version_variable_id VariableId, t1.miv_version_value_label_id ValueId, t2.miv_metric_version_variable_id TargetVariableId, t2.miv_version_value_label_id TargetValueId, " .
+			"SUM(IFNULL(t1.miv_value, 0)) Value, SUM(IFNULL(t1.miv_total, 0)) Total, Round(SUM(IFNULL(t1.miv_area_m2, 0)) / 1000000, 6) Km2, COUNT(*) Areas ";
 
-		$ret = App::Db()->fetchAll($multiQuery->sql, $multiQuery->params);
+		$from = $this->tableName . " t1";
+		$join = " JOIN snapshop_geography_item_geography_item snap ON t1.miv_geography_item_id = snap.gii_from_geography_item_id LEFT JOIN " . $this->tableName . " t2 ON t2.miv_geography_item_id = snap.gii_to_geography_item_id";
+
+		$where = "t1.miv_metric_version_id = ? AND t1.miv_geography_id <=> ? " .	$this->spatialConditions->UrbanityCondition($urbanity);
+		$params = array($metricVersionId, $geographyId);
+
+		$groupBy = "t1.miv_metric_version_variable_id, t1.miv_version_value_label_id, t2.miv_metric_version_variable_id, t2.miv_version_value_label_id";
+		
+		// TODO: falta duplicar los subqueries y crear snapshop_geography_item_geography_item
+		$baseQuery = new QueryPart($from, $where, $params, $select, $groupBy);
+
+		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
+
+		$ret = $multiQuery->fetchAll();
 		Profiling::EndTimer();
 		return $ret;
 	}
@@ -134,7 +146,8 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 
 		$multiQuery = new MultiQuery($baseQuery, $envelopeQuery, $query, $extraQuery);
 		//$multiQuery->dump();
-		$ret = App::Db()->fetchAll($multiQuery->sql, $multiQuery->params);
+		$ret = $multiQuery->fetchAll();
+
 		if ($datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
 		{ 
 			$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);

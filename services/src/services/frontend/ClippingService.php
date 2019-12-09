@@ -175,11 +175,6 @@ class ClippingService extends BaseService
 			// Actualiza región según círculo
 			$rows = $table->CalculateLevelsFromPoint($frame->ClippingCircle->Center);
 		}
-		else if ($frame->ClippingFeatureId != null)
-		{   // Calcula geography del feature
-			// TODO
-			return null;
-		}
 		else if ($frame->ClippingRegionId != null)
 		{   // Calcula región
 			$rows = $table->CalculateLevelsFromRegionId($frame->ClippingRegionId);
@@ -228,11 +223,6 @@ class ClippingService extends BaseService
 		{
 			// Actualiza región según círculo
 			return $this->CalculateRegionFromCircle($frame->ClippingCircle, $levelId);
-		}
-		else if ($frame->ClippingFeatureId != null)
-		{   // Calcula datos del feature
-			// TODO
-			return new SelectionInfo();
 		}
 		else if ($frame->ClippingRegionId != null)
 		{   // Calcula región

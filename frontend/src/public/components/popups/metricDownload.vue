@@ -1,6 +1,6 @@
 <template>
 	<Modal title="Descargar" ref="dialog" :showCancel="false"  :showOk="false">
-		<div>
+		<div v-if="metric">
 			<table class="localTable">
 				<tbody>
 					<tr>
@@ -108,8 +108,6 @@ var debounce = require('lodash.debounce');
 export default {
 	name: 'metricDownload',
 	props: [
-		'metric',
-		'clipping',
 		'visible',
 	],
 	components: {
@@ -121,6 +119,8 @@ export default {
 	},
 	data() {
 		return {
+			metric: null,
+			clipping: null,
 			visibleUrl: true,
 			useFilter: true,
 			progress: null,
@@ -149,9 +149,12 @@ export default {
 		}
 	},
 	methods: {
-		show() {
+		show(metric, clipping) {
+			this.metric = metric;
+			this.clipping = clipping;
 			this.useFilter = true;
 			this.downloadLevel = this.version.SelectedLevelIndex;
+
 			this.$refs.dialog.show();
 		},
 		getDataFormats() {
