@@ -1,53 +1,67 @@
-# poblaciones
-Herramienta para la publicaci髇 colaborativa de datos espaciales de poblaci髇
+# Poblaciones
+Esta gu铆a detalla los pasos necesarios para inicializar una instalaci贸n de desarrollo de Poblaciones.
 
-En esta carpeta se encuentran los elementos necesarios para inicializar una instalaci髇 de desarrollo de Poblaciones.
+## 1. Instalar el software necesario.
 
-1. Instalar el software necesario.
+1) Para instalar VueJS. Descargar e instalar NodeJs https://nodejs.org/en/. Luego de instalarlo, ejecutar > npm install vue.
 
-PHP 7.1 o posterior.
-Python 2.7 (s髄o requerido para conversiones de archivos SPSS)
-VueJS.
+2) Instalar PHP 7.1 o posterior en Apache o IIS (Windows) (https://www.php.net/downloads.php).
 
-2. Descargar los fuentes del repositorio.
+3) Instalar Python 2.7 (s贸lo requerido para conversiones de archivos SPSS) (https://www.python.org/downloads/release/python-2716/)
 
-3. Obtener las dependencias de los fuentes (frontend y services)
-  
-  frontend>npm install
-  services>php composer.phar %*
+4) Instalar MySql 5.6 o superior (https://dev.mysql.com/downloads/mysql/).
 
-4. Crear la base de datos 
+## 2. Descargar los fuentes del repositorio.
 
-  crear en mysql (5.6 o posterior) una base de datos nueva.
+1) Hacer git clone de https://github.com/poblaciones/poblaciones en una carpeta local.
 
-  si posee una backup de otra instalaci髇:
-   restaurar el backup.
+## 3. Iniciar una base de datos para Poblaciones
 
-  si desea comenzar con una base nueva:  
-   ejecutar el script dbscript.sql
-   ejecutar scripts de actualizaciones (startup/scripts)
-   instalar opcionalmente un data-pack para su pa韘 ()
-  
-5. Archivos de configuraci髇
+1) Utilizar [dbscript-v1.sql](dbscript-v1.sql) para crear una base vac铆a. 
 
-  renombrar services/config/settings.sample.php a services/config/settings.php 
+2) Agregar los registros de un 'data-pack' desde https://github.com/poblaciones/data-packs.
+
+3) Ejecutar en la base de datos los scripts de /startup/scripts para actualizar la estructura.
+
+4) El usuario predeterminado para acceder luego a la aplicaci贸n es 'admin', cuya contrase帽a es 'admin001'. Se recomienda modificarla en el primer uso.
+
+## 4. Actualizar las dependencias.
+
+Los fuente se descargan sin las dependencias que utilizan. Para descargarlas ne forma autom谩tica ejecutar:
+
+```
+   frontend> npm install
+   services> php composer.phar install
+```
+
+Eso instalar谩 las librer铆as que precisan los servicios en PHP y cliente VueJS.
+
+## 5. Crear los archivos de configuraci贸n
+
+1) Renombrar services/config/settings.sample.php a services/config/settings.php 
  
-  indicar dentro de ese archivo los datos de conexi髇 a la base de datos. opcionalmente indicar configuraciones para el env韔 de notificaciones por correo electr髇ico.
+2) Indicar dentro de ese archivo los datos de conexi贸n a la base de datos. 
 
-  renombrar frontend/config/dev.env.sample.js a fronend/config/dev.env.js
+3) Indicar configuraciones para el env铆o de notificaciones por correo electr贸nico y las claves para la API de Google Maps. Opcionalmente se puede habilitar all铆 la autenticaci贸n de OpenAuth de Google y Facebook (generando las claves necesarios para esos servicios).
+
+4) Renombrar frontend/config/dev.env.sample.js a frontend/config/dev.env.js
  
-  indicar dentro de ese archivo un key v醠ido de google maps
+5) Indicar dentro de ese archivo un key v谩lido de google maps.
 
-6. Crear sitios para el servidor de servicios
+## 5. Crear sitios para el servidor de servicios
 
-  agregar en hosts la entrada desa.poblaciones.org (si se utiliza otra, modificar los archivos de configuraci髇 en 5 para reflejar el cambio).
-  apuntar desde IIS o apache a la carpeta /services/web resolviendo con ella la navegaci髇 de http://desa.poblaciones.org (o la ruta que se haya elegido)
+1) Agregar en hosts la entrada desa.poblaciones.org apuntando a 127.0.0.1.
 
-7. Storage
+2) Agregar un Site (en IIS o apache) que apunte a la carpeta /services/web, resolviendo con ella la navegaci贸n de http://desa.poblaciones.org (o la ruta que se haya elegido).
 
-  los cach閟 y logs ser醤 almacenados en /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
+3) Si bien los datos cargados por los usuarios se persisten en la base de datos relacional, varios cach茅s y otros logs que proceduce la aplicaci贸n se almacen en filesystem. La carpeta predeterminada para ello es /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
 
-8. Iniciar el frontend (el servidor de vuejs):
- 
-  frontend>npm run dev
-  
+4) Iniciar el frontend (el servidor de vuejs) ejecutando:
+ ```
+    frontend>npm run dev
+```
+## 6. Navegaci贸n e inicializaci贸n 
+
+1) Navegar http://localhost:8000/ para utilizar el visor, http://localhost:8000/users#/ para ingresar al backoffice, y http://desa.poblaciones.org/logs para consultar la parte administrativa.
+
+2) Por 煤ltimo, es necesario regenerar las tablas precalculadas de la base de datos. En la consola de administraci贸n (http://desa.poblaciones.org/logs), ir a Configuraci贸n > Cach茅s y presionar sucesivamente 'Actualizar' en los cach茅s de Geograf铆as, Regiones por Geograf铆as y Lookup de Regiones para regenerar los cach茅s.
