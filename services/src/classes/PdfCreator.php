@@ -23,12 +23,12 @@ class PdfCreator
 
 		if ($dataset != null)
 		{
-			$this->pdf->WriteHeading1($dataset['dat_caption']);
+			$this->pdf->WriteMainTitle($dataset['dat_caption']);
 			$this->WriteValuePair("Cartografía", 'met_title');
 		}
 		else
 		{
-			$this->pdf->WriteHeading1($metadata['met_title']);
+			$this->pdf->WriteMainTitle($metadata['met_title']);
 			$this->WriteValuePair("Título", 'met_title');
 		}
 		$this->WriteValuePair("Fecha de publicación", 'met_publication_date');

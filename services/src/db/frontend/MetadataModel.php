@@ -168,7 +168,7 @@ class MetadataModel extends BaseModel
 		$sql = "SELECT dco_id, dco_variable, dco_label FROM " . $this->draftPreffix . "dataset_column WHERE dco_dataset_id = ? ORDER BY dco_order";
 		$columns = App::Db()->fetchAll($sql, array($datasetId));
 		// Trae las etiquetas
-		$sql = "SELECT dco_id, dla_value, dla_caption FROM " . $this->draftPreffix . "dataset_label JOIN " . $this->draftPreffix . "dataset_column ON dco_id = dla_dataset_column_id WHERE dco_dataset_id = ? ORDER BY dco_order, dla_order";
+		$sql = "SELECT dco_id, dla_value, dla_caption FROM " . $this->draftPreffix . "dataset_label JOIN " . $this->draftPreffix . "dataset_column ON dco_id = dla_dataset_column_id WHERE dco_dataset_id = ? ORDER BY dco_order, dla_order, dla_value";
 		$values = App::Db()->fetchAll($sql, array($datasetId));
 		$diccionary = Arr::FromSortedToKeyed($values, 'dco_id');
 		// Completa etiquetas en columns

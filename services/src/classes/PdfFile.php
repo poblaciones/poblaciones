@@ -20,16 +20,54 @@ class PdfFile
 
 	public function __construct()
 	{
-		$this->mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4',
+	$this->mpdf = $this->createPdfInstance();
+		$this->mpdf->SetHTMLFooter('<div class="footer">
+						<table width=100% cellspacing=0 cellpadding=0><tr><td class="footerPageNumber" align="center" style="width: 70px; padding: 5px 12px 5px 12px; background-color: #e0e0e0;">
+<div class="footerPageNumber">
+							{PAGENO}
+						</div></td>
+<td style="padding: 7px 12px 7px 12px; background-color: #efefef;"><div class="footerRow1">
+							Poblaciones
+						</div><div class="footerRow2">
+							Plataforma abierta de datos espaciales de la Argentina
+						</div></td></tr>
+						</table></div>');
+	}
+	public function WriteMainTitle($title)
+	{
+		// Pone el encabezado para todas las páginas
+		$this->mpdf->SetHTMLHeader("<div class='header'>" . $this->HtmlEncode($title, true) . "</div>");
+		// Pisa con el título de la primera
+		$titleHtml = "<h1>" . $this->HtmlEncode($title, true) . "</h1>";
+		$this->mpdf->WriteHTML("<div class='mainTitle'>" . $titleHtml . "</div>");
+		// avanza el contenido de la primera en función del tamaño del título
+		$height = $this->measureHeight($titleHtml, false);
+		$this->mpdf->y += $height - 65; 
+	}
+
+	private function measureHeight($html, $escape)
+	{
+		$temp =  $this->createPdfInstance();
+		$a = $temp->y;
+		$temp->WriteHTML($this->HtmlEncode($html, $escape));
+		$b = $temp->y;
+		return $b - $a;
+	}
+	
+	private function createPdfInstance()
+	{
+		$mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4',
 																'margin_left' => 30,
 																'margin_right' => 30,
-																'margin_top' => 25.4,
+																'margin_top' => 30,
 																'margin_bottom' => 25.4,
 																'margin_header' => 9,
-																'margin_footer' => 9,
+																'margin_footer' => 14,
 																'shrink_tables_to_fit' => false]);
-		$this->writeStyles();
+		$this->writeStyles($mpdf);
+		return $mpdf;
 	}
+
 	public function Save($filename = "")
 	{
 		if ($filename == "")
@@ -133,8 +171,8 @@ class PdfFile
 	public function WriteIndentedPairLink($label, $url, $escape = true)
 	{
 		$label = trim($label);
-		$link = $this->FormatLink($url, $url) . ".";
-		$this->WriteIndentedPair($label, $link, false);
+		$link = $this->FormatLink($url, $url);
+		$this->WriteIndentedPair($label, $link, false, false);
 	}
 	public function WritePair($label, $text, $escape = true)
 	{
@@ -172,7 +210,7 @@ class PdfFile
 		return "<a href='" . $this->HtmlEncode($url). "'>" . $this->HtmlEncode($text) . "</a>";
 	}
 
-	private function writeStyles()
+	private function writeStyles($mpdf)
 	{
 		// Como en http://www.vesna.ru/php5/examples/example02_CSS_styles.php
 
@@ -206,9 +244,41 @@ class PdfFile
 								.subTableHeader { font-weight: bold };
 
 								pre { font-family: DejaVuSansMono, monospaced; font-size: 9pt; margin-top: 5pt; margin-bottom: 5pt; }
-									h1 {	font-weight: normal; font-size: 18pt; color: #000066;
+	
+			.mainTitle {
+								width: 100%; position: absolute; 
+								top: -2px; background-color: white;
+								}		
+	.header {	
+									margin-left: -200px; margin-right: -200px; background-color: #979797;
+									padding: 5px 200px 5px 200px;
+									font-weight: normal; font-size: 12pt; color: #FFF;
 									font-family: DejaVuSansCondensed, sans-serif; margin-top: 18pt; margin-bottom: 16pt;
-									text-align: center; page-break-after:avoid; }
+									text-align: right;  page-break-after:avoid; }
+						
+	h1 {	
+									margin-left: -200px; background-color: #979797;
+									padding: 50px 200px 10px 200px;
+									font-weight: normal; font-size: 18pt; color: #FFF;
+									font-family: DejaVuSansCondensed, sans-serif; margin-top: 0pt; margin-bottom: 16pt;
+									text-align: left;  page-break-after:avoid; }
+
+.footer {	
+									position: absolute; left: 0px; color: #666;
+									padding: 0px; width: 100% }
+.footerRow1 {	
+									margin-left: 40px; margin-top: 0px; font-weight: normal; font-size: 20pt; 
+									font-family: DejaVuSansCondensed, sans-serif; text-transform: uppercase;
+									text-align: left;  page-break-after:avoid; color: #888; }
+.footerRow2 {	
+									margin-left: 40px; font-weight: normal; font-size: 7pt; 
+									font-family: DejaVuSansCondensed, sans-serif;
+									text-align: left;  page-break-after:avoid; color: #888; }
+.footerPageNumber {	
+									margin-left: 0px; font-weight: normal; font-size: 27pt; 
+									font-family:\'DejaVu Sans Condensed\', DejaVuSansCondensed, sans-serif;
+									text-align: left;  page-break-after:avoid; color: #666; }
+
 								h2 {	font-weight: bold; font-size: 12pt; color: #000066;
 									font-family: DejaVuSansCondensed, sans-serif; margin-top: 6pt; margin-bottom: 6pt;
 									border-top: 0.07cm solid #000000; border-bottom: 0.07cm solid #000000;
@@ -217,7 +287,7 @@ class PdfFile
 									font-family: DejaVuSansCondensed, sans-serif; margin-top: 0pt; margin-bottom: 6pt;
 									border-top: 0; border-bottom: 0;
 									text-align: ; page-break-after:avoid; }
-								h4 {	font-weight: normal; font-size: 11pt; color: #9f2b1e;
+								h4 {	font-weight: normal; font-size: 11pt; color: #444;
 									font-family: DejaVuSansCondensed, sans-serif; margin-top: 2pt; margin-bottom: 2pt;
 									text-align: ;  margin-collapse:collapse; page-break-after:avoid; }
 								h5 {	font-weight: bold; font-style:italic; ; font-size: 11pt; color: #000044;
@@ -239,6 +309,6 @@ class PdfFile
 								.slanted { font-style: italic; }";
 							// border-top: 0.075cm solid #000000; border-bottom: 0.075cm solid #000000;
 
-		$this->mpdf->WriteHTML($styles, 1);
+		$mpdf->WriteHTML($styles, 1);
 	}
 }
