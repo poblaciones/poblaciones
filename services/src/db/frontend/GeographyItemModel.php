@@ -3,7 +3,7 @@
 namespace helena\db\frontend;
 
 use helena\classes\App;
-use helena\db\frontend\ClippingRegionGeographyItemModel;
+use helena\db\frontend\ClippingRegionItemGeographyItemModel;
 use minga\framework\Profiling;
 
 class GeographyItemModel extends BaseModel

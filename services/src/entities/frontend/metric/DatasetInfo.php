@@ -10,6 +10,7 @@ class DatasetInfo extends BaseMapModel
 	public $Name;
 	public $Type;
 	public $Symbol;
+	public $ShowInfo;
 
 	public static function GetMap()
 	{
@@ -17,7 +18,8 @@ class DatasetInfo extends BaseMapModel
 			'dat_id' => 'Id',
 			'dat_type' => 'Type',
 			'dat_symbol' => 'Symbol',
-			'dat_caption' => 'Name');
+			'dat_caption' => 'Name',
+			'dat_show_info' => 'ShowInfo');
 	}
 
 }

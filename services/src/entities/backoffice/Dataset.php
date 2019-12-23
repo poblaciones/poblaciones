@@ -71,6 +71,12 @@ class Dataset
      */
     private $Geocoded;
 
+		/**
+     * @var boolean
+		 *
+     * @ORM\Column(name="dat_show_info", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $ShowInfo;
 
     /**
      * @var \helena\entities\backoffice\DatasetColumn
@@ -309,6 +315,32 @@ class Dataset
     public function getExportable()
     {
         return $this->Exportable;
+    }
+
+
+
+    /**
+     * Set ShowInfo
+     *
+     * @param boolean $ShowInfo
+     *
+     * @return DraftDataset
+     */
+    public function setShowInfo($ShowInfo)
+    {
+        $this->ShowInfo = $ShowInfo;
+
+        return $this;
+    }
+
+    /**
+     * Get ShowInfo
+     *
+     * @return boolean
+     */
+    public function getShowInfo()
+    {
+        return $this->ShowInfo;
     }
 
     /**

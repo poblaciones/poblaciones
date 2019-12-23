@@ -32,9 +32,10 @@ class ClippingService extends BaseService
 {
 	public function GetDefaultFrameAndClipping($current = null)
 	{
-		$frame = $this->GetDefaultFrame($current);
+		$isDefaultRegion = false;
+		$frame = $this->GetDefaultFrameRegion($current, $isDefaultRegion);
 		$clipping = $this->CreateClipping($frame);
-		$ret = array('frame' => $frame, 'clipping' => $clipping);
+		$ret = array('frame' => $frame, 'clipping' => $clipping, 'isDefaultRegion' => $isDefaultRegion);
 		return $ret;
 	}
 
@@ -44,11 +45,46 @@ class ClippingService extends BaseService
 		$frame = new Frame();
 		$frame->ClippingRegionId = null;
 
+		if ($current === null)
+		{
+			// Trata de resolver a IP a lat-long
+			$latLng = GeoIp::GetCurrentLatLong();
+			if ($latLng !== null)
+			{
+				$current = new Coordinate($latLng['lat'], $latLng['lon']);
+			}
+		}
+		$frame->Center = $current;
+		$frame->ClippingRegionId = null;
+		$frame->ClippingCircle = null;
+		$frame->ClippingFeatureId = null;
+		$zoneInfo = $this->GetDefaultFrameAndClipping($current);
+		$frame->Zoom = 11;
+		if ($zoneInfo['isDefaultRegion'])
+		{
+			$frame->Center = $zoneInfo['frame']->Envelope->GetCentroid();
+		}
+		$density = $zoneInfo['clipping']->Summary->Population / $zoneInfo['clipping']->Summary->AreaKm2;
+		if ($density < 100)
+		 	$frame->Zoom = 12;
+		if ($density > 10000)
+		 	$frame->Zoom = 10;
+		$frame->Envelope = new Envelope($frame->Center, $frame->Center);
+		Profiling::EndTimer();
+		return $frame;
+	}
+
+	public function GetDefaultFrameRegion($current = null, &$isDefaultRegion = false)
+	{
+		Profiling::BeginTimer();
+		$frame = new Frame();
+		$frame->ClippingRegionId = null;
+
 		$table = new SnapshotClippingRegionItemModel();
 		if ($current === null)
 		{
 			// Trata de resolver a IP a lat-long
-			$latLng = null;// GeoIp::GetCurrentLatLong();
+			$latLng = GeoIp::GetCurrentLatLong();
 			if ($latLng !== null)
 			{
 				$current = new Coordinate($latLng['lat'], $latLng['lon']);
@@ -71,6 +107,7 @@ class ClippingService extends BaseService
 			if ($item == null)
 				throw new ErrorException("The 'Region clipping views' has no data. Rebuild region clipping views.");
 			$frame->ClippingRegionId = $item['Id'];
+			$isDefaultRegion = true;
 		}
 
 		if ($frame->ClippingRegionId != null)
@@ -96,7 +133,6 @@ class ClippingService extends BaseService
 		return $data;
 	}
 
-
 	public function CreateClipping($frame, $levelId = 0)
 	{
 		Profiling::BeginTimer();
@@ -115,7 +151,6 @@ class ClippingService extends BaseService
 		Profiling::EndTimer();
 		return $data;
 	}
-
 
 	private function CalculateClipping($frame,  $levelId, $levelName = null)
 	{

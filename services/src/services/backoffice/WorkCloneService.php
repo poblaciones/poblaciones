@@ -59,6 +59,7 @@ class WorkCloneService extends BaseService
 				$publisher = new PublishDataTables();
 				$publisher->RevokeOnlineDates($targetWorkId);
 				WorkFlags::SetAll($targetWorkId);
+				$cloner->SetFinished();
 				$this->state->NextStep('Listo');
 				return $this->state->ReturnState(true, array('targetWorkId'));
 			default:

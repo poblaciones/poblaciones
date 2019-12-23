@@ -120,7 +120,9 @@ SvgFullGeojsonComposer.prototype.processFeature = function (id, dataElement, map
 	var mapItem = {
 		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry, properties: { className: 'c' + val }
 	};
-
+	if (!this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
+		mapItem.id = null;
+	}
 	if (dataElement.Description) {
 		mapItem.properties.description = dataElement.Description;
 	}

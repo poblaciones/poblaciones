@@ -135,7 +135,7 @@ class SnapshotLookupModel
 																"FROM (	SELECT cgi_clipping_region_item_id clipping_region_item_id,  gei_geography_id , 
 																						(CASE WHEN COUNT(*) = 1 THEN min(cgi_geography_item_id) else NULL END) geography_item_id, 
 																						SUM(IFNULL(gei_population, 0)) population
-																				FROM clipping_region_geography_item
+																				FROM clipping_region_item_geography_item
 																				JOIN geography_item ON gei_id = cgi_geography_item_id 
 																				GROUP BY cgi_clipping_region_item_id,  gei_geography_id
 																				) as Geographies 

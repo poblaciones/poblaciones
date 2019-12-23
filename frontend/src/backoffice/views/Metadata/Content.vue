@@ -28,7 +28,7 @@
 													 :required="true" @update="UpdateTitle"
 													 v-model="metadata.Title" />
 								</div>
-								<div class="md-layout-item md-size-80 md-small-size-100">
+								<div class="md-layout-item md-size-90 md-small-size-100">
 
 										<mp-text :canEdit="Work.CanEdit()" label="Descripción" :multiline="true" :maxlength="400"
 													 :rows="3" helper="Breve descripción del contenido. Ej. Se presentan resultados de una investigación sobre migración en la Argentina a partir de variaciones intercensales de población en edad activa." @update="Update"
@@ -37,10 +37,10 @@
 								<div class="md-layout-item md-size-100">
 									<div class="md-layout md-gutter gutterBottom" v-if="absoluteMap(metadata.Url)">
 										<div class="md-layout-item md-size-30 md-xsmall-size-100">
-											<label class="with-area">Dirección estable:</label>
+											<label class="with-area">Dirección:</label>
 										</div>
 										<div class="md-layout-item md-size-60">
-											<a style="color: #989797;" :href="absoluteMap(metadata.Url)" target="_blank">{{ absoluteMap(metadata.Url) }}</a>
+											<a style="color: #989797;" :href="absoluteMap(appendAccessLink(metadata.Url))" target="_blank">{{ absoluteMap(appendAccessLink(metadata.Url)) }}</a>
 										</div>
 									</div>
 									<div class="md-layout md-gutter">
@@ -136,6 +136,13 @@ name: 'Contenido',
 		},
 		resolveMetadataUrl() {
 	    return window.host + '/services/backoffice/GetMetadataPdf?w=' + this.Work.properties.Id;
+		},
+		appendAccessLink(url) {
+			if (this.Work.properties.AccessLink) {
+				return url + '/' + this.Work.properties.AccessLink;
+			} else {
+				return url;
+			}
 		},
 		formatDate(date) {
 				return f.formatDate(date);

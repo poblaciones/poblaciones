@@ -50,7 +50,7 @@ class SnapshotMetricModel extends BaseModel
 										GROUP_CONCAT(mvw_metric_version_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_ids,
 										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_captions,
 										GROUP_CONCAT(IFNULL(mvw_partial_coverage, '') ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_partial_coverages
-									FROM snapshot_metric_versions
+									FROM snapshot_metric_version
 									" . $where . "
 									group by mvw_metric_id " .
 									$having .
@@ -82,7 +82,7 @@ class SnapshotMetricModel extends BaseModel
 										'L' type,
 										MAX(MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`,
 										`mvw_variable_value_captions`, `mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (?)) relevance
-										FROM snapshot_metric_versions
+										FROM snapshot_metric_version
 										WHERE MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
 										`mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (? IN BOOLEAN MODE)
 										AND mvw_work_is_indexed = 1 AND mvw_work_is_private = 0

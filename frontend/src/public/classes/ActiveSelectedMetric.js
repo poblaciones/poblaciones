@@ -286,7 +286,6 @@ ActiveSelectedMetric.prototype.ResolveStyle = function (labelId) {
 		var value = variable.ValueLabels[i];
 		if (value['Id'] === labelId) {
 			var fillColor = value.FillColor;
-			// var lineColor = value.LineColor;
 			if (this.GetPattern() === 1) {
 				return /** @type {google.maps.Data.StyleOptions} */({
 					fillColor: 'transparent',
@@ -300,7 +299,6 @@ ActiveSelectedMetric.prototype.ResolveStyle = function (labelId) {
 				return /** @type {google.maps.Data.StyleOptions} */({
 					fillColor: fillColor,
 					fillOpacity: this.currentOpacity,
-					//strokeWeight: (lineColor === null ? 0 : 1),
 					strokeWeight: 1,
 					strokeColor: '#808080',
 					zIndex: 10000 - this.index,

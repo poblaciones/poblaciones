@@ -9,9 +9,12 @@ use helena\caches\WorkPermissionsCache;
 use minga\framework\Profiling;
 use helena\services\frontend\SelectedMetricService;
 use helena\services\backoffice\publish\PublishDataTables;
+use helena\caches\WorkVisiblityCache;
 
 class Session
 {
+	public static $AccessLink = null;
+
 	public static function GetCurrentUser()
 	{
 		$account = Account::Current();
@@ -92,44 +95,66 @@ class Session
 
 	public static function IsWorkPublicOrAccessible($workId)
 	{
-		$private = App::Db()->fetchScalarIntNullable("SELECT wrk_is_private FROM work WHERE wrk_id = ? LIMIT 1", array($workId));
-		if (!$private)
-			return true;
-		if (!Session::IsAuthenticated())
-			return false;
+		Profiling::BeginTimer();
+		$res = null;
+		if (!WorkVisiblityCache::Cache()->HasData($workId, $res))
+		{
+			$res = App::Db()->fetchAssoc("SELECT wrk_is_private, wrk_access_link FROM work WHERE wrk_id = ? LIMIT 1", array($workId));
+			WorkVisiblityCache::Cache()->PutData($workId, $res);
+		}
+		if (!$res['wrk_is_private'])
+			$ret = self::IsLinkAccessible($res['wrk_access_link']);
+		else if (!Session::IsAuthenticated())
+			$ret = false;
 		else
-			return self::IsWorkReaderShardified($workId);
+			$ret = self::IsWorkReaderShardified($workId);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	private static function IsLinkAccessible($link)
+	{
+		if (!$link) return true;
+
+		if (self::$AccessLink === null)
+		{
+			if (array_key_exists('HTTP_ACCESS_LINK', $_SERVER))
+				self::$AccessLink = $_SERVER['HTTP_ACCESS_LINK'];
+		}
+		if (! self::$AccessLink) return false;
+		return (self::$AccessLink === $link);
 	}
 
 	public static function IsWorkPublicOrAccessibleByDataset($datasetId)
 	{
-		$res = App::Db()->fetchAssoc("SELECT wrk_is_private, wrk_id FROM dataset JOIN work ON dat_work_id = wrk_id WHERE dat_id = ? LIMIT 1", array($datasetId));
-		if ($res === null || !$res['wrk_is_private'])
-			return true;
-		if (!Session::IsAuthenticated())
-			return false;
+		Profiling::BeginTimer();
+		$res = App::Db()->fetchAssoc("SELECT wrk_is_private, wrk_access_link, wrk_id FROM dataset JOIN work ON dat_work_id = wrk_id WHERE dat_id = ? LIMIT 1", array($datasetId));
+		if ($res === null)
+			$ret = true;
+		else if (!$res['wrk_is_private'])
+			$ret = self::IsLinkAccessible($res['wrk_access_link']);
+		else if (!Session::IsAuthenticated())
+			$ret = false;
 		else
-			return self::IsWorkReaderShardified($res['wrk_id']);
+			$ret = self::IsWorkReaderShardified($res['wrk_id']);
+		Profiling::EndTimer();
+		return $ret;
 	}
 
 	public static function IsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)
 	{
+		Profiling::BeginTimer();
 		$selectedMetricService = new SelectedMetricService();
 		$metric = $selectedMetricService->GetSelectedMetric($metricId);
 		if ($metric === null) return true;
 		foreach($metric->Versions as $version)
 			if ($version->Version->Id === $metricVersionId)
 			{
-				if ($version->Version->WorkIsPrivate)
-				{
-					if (!Session::IsAuthenticated())
-						return false;
-					else
-						return self::IsWorkReaderShardified($version->Version->WorkId);
-				}
-				else
-					return true;
+				$ret = self::IsWorkPublicOrAccessible($version->Version->WorkId);
+				Profiling::EndTimer();
+				return $ret;
 			}
+		Profiling::EndTimer();
 		return true;
 	}
 

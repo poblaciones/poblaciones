@@ -29,6 +29,7 @@ class MetricVersionModel extends BaseModel
 										dat_caption,
 										dat_caption_column_id,
 										dat_symbol,
+										dat_show_info,
 										carto_meta.met_wiki
 						FROM metric_version_level
 										JOIN dataset ON mvl_dataset_id = dat_id

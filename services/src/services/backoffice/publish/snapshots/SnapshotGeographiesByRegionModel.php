@@ -38,7 +38,7 @@ class SnapshotGeographiesByRegionModel
 		$sql = $sqlInsert . "SELECT cli_clipping_region_id, cli_id, clr_priority, gei_id, gei_urbanity, gei_area_m2, " .
 			"gei_population, gei_households, gei_children, gei_geography_id, "
 				. $l . " FROM clipping_region_item, " .
-						"clipping_region_geography_item ," .
+						"clipping_region_item_geography_item ," .
 						"clipping_region ," .
 						"geography_item  " .
 						"WHERE gei_geometry_is_null = 0 AND gei_id = cgi_geography_item_id ".

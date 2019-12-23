@@ -218,7 +218,9 @@ export default {
 		},
 		status(item) {
 			var privacy = (item.IsPrivate ? ' - Visiblidad: Privada' : '');
-			if (item.Metadata === null || item.MetadataLastOnline === null) {
+			if (item.Unfinished) {
+				return { label: 'Clonación fallida', tag: 'unfinished', icon: 'error', color: '#ff0000' };
+			} else if (item.Metadata === null || item.MetadataLastOnline === null) {
 				return { label: 'Sin publicar' + privacy, tag: 'unpublished', icon: 'error_outline', color: '#ff7936' };
 			} else if (item.HasChanges !== 0) {
 				return { label: 'Existen cambios sin publicar' + privacy, tag: 'published_changes', icon: 'border_color', color: '#969696' };

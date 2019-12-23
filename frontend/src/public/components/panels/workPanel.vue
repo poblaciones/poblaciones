@@ -1,10 +1,5 @@
 <template>
 	<div>
-		<div style="position: absolute; z-index: 10">
-			<div class="panel card">
-				<WorkMetadata ref="showFuente" :work="work.Current" />
-			</div>
-		</div>
 		<nav id="workPanel" class="navbar-fixed-top workPanel">
 			<div v-if="work.Current !== null" class="panel card workPanelBody" id="barBody">
 				<!--button title="Cerrar" type="button" v-on:click="work.Current = null" class="close">

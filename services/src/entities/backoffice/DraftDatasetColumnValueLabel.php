@@ -5,12 +5,12 @@ namespace helena\entities\backoffice;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DraftDatasetLabel
+ * DraftDatasetColumnValueLabel
  *
- * @ORM\Table(name="draft_dataset_label", indexes={@ORM\Index(name="draft_fk_datasets_labels_datasets_columns1_idx", columns={"dla_dataset_column_id"})})
+ * @ORM\Table(name="draft_dataset_column_value_label", indexes={@ORM\Index(name="draft_fk_datasets_labels_datasets_columns1_idx", columns={"dla_dataset_column_id"})})
  * @ORM\Entity
  */
-class DraftDatasetLabel
+class DraftDatasetColumnValueLabel
 {
     /**
      * @var integer
@@ -69,7 +69,7 @@ class DraftDatasetLabel
      *
      * @param integer $id
      *
-     * @return DraftDatasetLabel
+     * @return DraftDatasetColumnValueLabel
      */
     public function setId($id)
     {
@@ -83,7 +83,7 @@ class DraftDatasetLabel
      *
      * @param integer $order
      *
-     * @return DraftDatasetLabel
+     * @return DraftDatasetColumnValueLabel
      */
     public function setOrder($order)
     {
@@ -107,7 +107,7 @@ class DraftDatasetLabel
      *
      * @param string $value
      *
-     * @return DraftDatasetLabel
+     * @return DraftDatasetColumnValueLabel
      */
     public function setValue($value)
     {
@@ -131,7 +131,7 @@ class DraftDatasetLabel
      *
      * @param string $caption
      *
-     * @return DraftDatasetLabel
+     * @return DraftDatasetColumnValueLabel
      */
     public function setCaption($caption)
     {
@@ -155,7 +155,7 @@ class DraftDatasetLabel
      *
      * @param \helena\entities\backoffice\DraftDatasetColumn $datasetColumn
      *
-     * @return DraftDatasetLabel
+     * @return DraftDatasetColumnValueLabel
      */
     public function setDatasetColumn(\helena\entities\backoffice\DraftDatasetColumn $datasetColumn = null)
     {

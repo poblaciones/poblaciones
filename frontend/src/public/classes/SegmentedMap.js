@@ -33,6 +33,11 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 };
 
 SegmentedMap.prototype.Get = function (url, params) {
+	if (window.accessLink) {
+		if (!params) { params = {}; }
+		if (!params.headers) { params.headers = {}; }
+		params.headers['Access-Link'] = window.accessLink;
+	}
 	return this._axios.get(url, params).then(function (res) {
 		if ((!res.response || res.response.status === undefined) && res.message === 'cancelled') {
 			throw { message: 'cancelled', origin: 'segmented' };
@@ -70,8 +75,6 @@ SegmentedMap.prototype.Get = function (url, params) {
 };
 
 SegmentedMap.prototype.CreateAxios = function () {
-	// La instancia de axios que usa tiene caching
-	// y control de cantidad máxima de pedidos al servidor
 	var api = axios.create({ withCredentials: true });
 	return api;
 };

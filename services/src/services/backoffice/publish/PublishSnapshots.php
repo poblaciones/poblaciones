@@ -115,7 +115,7 @@ class PublishSnapshots extends BaseService
 
 	public function UpdateWorkVisibility($workId)
 	{
-		// Es llamado cuando cambia el isIndexed, el isPrivate o el workType de una cartografía.
+		// Es llamado cuando cambia el isIndexed, el isPrivate, el accesLink o el workType de una cartografía.
 		// 1. Trae los metrics ya publicados
 		$publicWorkModel = new WorkModel(false);
 		$workIdShardified = PublishDataTables::Shardified($workId);
@@ -131,6 +131,7 @@ class PublishSnapshots extends BaseService
 		}
 		VersionUpdater::Increment('FAB_METRICS');
 		$cache->CleanFabMetricsCache();
+		$cache->CleanWorkVisiblityCache($workId);
 	}
 }
 

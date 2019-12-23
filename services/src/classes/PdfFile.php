@@ -2,16 +2,9 @@
 
 namespace helena\classes;
 
-use helena\services\common\BaseService;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use minga\framework\CreativeCommons;
-use minga\framework\Context;
-use minga\framework\AttributeEntity;
 use minga\framework\Str;
-use helena\db\frontend\MetadataModel;
-use helena\db\frontend\FileModel;
-use helena\classes\App;
 use minga\framework\IO;
+use minga\framework\Profiling;
 
 // Documentation: https://mpdf.github.io/
 class PdfFile
@@ -20,7 +13,8 @@ class PdfFile
 
 	public function __construct()
 	{
-	$this->mpdf = $this->createPdfInstance();
+		Profiling::BeginTimer();
+		$this->mpdf = $this->createPdfInstance();
 		$this->mpdf->SetHTMLFooter('<div class="footer">
 						<table width=100% cellspacing=0 cellpadding=0><tr><td class="footerPageNumber" align="center" style="width: 70px; padding: 5px 12px 5px 12px; background-color: #e0e0e0;">
 <div class="footerPageNumber">
@@ -32,28 +26,39 @@ class PdfFile
 							Plataforma abierta de datos espaciales de la Argentina
 						</div></td></tr>
 						</table></div>');
+		Profiling::EndTimer();
 	}
 	public function WriteMainTitle($title)
 	{
+		Profiling::BeginTimer();
 		// Pone el encabezado para todas las páginas
 		$this->mpdf->SetHTMLHeader("<div class='header'>" . $this->HtmlEncode($title, true) . "</div>");
 		// Pisa con el título de la primera
 		$titleHtml = "<h1>" . $this->HtmlEncode($title, true) . "</h1>";
+		$titleHtmlMeasure = "<h2>" . $this->HtmlEncode($title, true) . "</h2>";
 		$this->mpdf->WriteHTML("<div class='mainTitle'>" . $titleHtml . "</div>");
 		// avanza el contenido de la primera en función del tamaño del título
-		$height = $this->measureHeight($titleHtml, false);
-		$this->mpdf->y += $height - 65; 
+		$height = $this->measureHeight($titleHtmlMeasure, false);
+
+
+		$this->mpdf->y += $height - 27;
+
+//		$this->mpdf->WriteHTML("<div>" . $height . ".</div>");
+//		$this->mpdf->WriteHTML($this->HtmlEncode($titleHtmlMeasure, false));
+
+		Profiling::EndTimer();
 	}
 
 	private function measureHeight($html, $escape)
 	{
 		$temp =  $this->createPdfInstance();
+		$temp->WriteHTML("<div>.</div>");
 		$a = $temp->y;
 		$temp->WriteHTML($this->HtmlEncode($html, $escape));
 		$b = $temp->y;
 		return $b - $a;
 	}
-	
+
 	private function createPdfInstance()
 	{
 		$mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4',
@@ -70,58 +75,78 @@ class PdfFile
 
 	public function Save($filename = "")
 	{
+		Profiling::BeginTimer();
 		if ($filename == "")
 			$filename = IO::GetTempFilename();
 		$this->mpdf->Output($filename);
+		Profiling::EndTimer();
 		return $filename;
 	}
 
 	public function AddImage($tag, $content)
 	{
+		Profiling::BeginTimer();
 		$this->mpdf->imageVars[$tag] = $content;
+		Profiling::EndTimer();
 	}
 	public function WriteHeading1($text, $escape = true)
 	{
+		Profiling::BeginTimer();
 		$this->mpdf->WriteHTML("<h1>" . $this->HtmlEncode($text, $escape) . "</h1>");
+		Profiling::EndTimer();
 	}
 	public function WriteHeading4($text, $escape = true)
 	{
+		Profiling::BeginTimer();
 		$this->mpdf->WriteHTML("<h4>" . $text . "</h4>");
+		Profiling::EndTimer();
 	}
 	public function WriteIndentedText($text, $escape = true)
 	{
+		Profiling::BeginTimer();
 		$this->mpdf->WriteHTML("<div class='indentedText'>" . $this->HtmlEncode($text, $escape) . "</div>");
+		Profiling::EndTimer();
 	}
 	public function WriteDoubleIndentedText($text, $escape = true)
 	{
+		Profiling::BeginTimer();
 		$this->mpdf->WriteHTML("<div class='doubleIndentedText'>" . $this->HtmlEncode($text, $escape) . "</div>");
+		Profiling::EndTimer();
 	}
 	public function WriteIndentedMail($mail)
 	{
+		Profiling::BeginTimer();
 		if ($mail != '')
 				$this->WriteIndentedPair('Correo electrónico', $this->FormatEmail($mail), false);
+		Profiling::EndTimer();
 	}
 	public function WriteDoubleIndentedMail($mail)
 	{
+		Profiling::BeginTimer();
 		if ($mail != '')
 				$this->WriteDoubleIndentedPair('Correo electrónico', $this->FormatEmail($mail), false);
+		Profiling::EndTimer();
 	}
 	public function WriteIndentedPair($label, $text, $escape = true, $addDots = true)
 	{
 		$text = trim($text);
 		if ($text == "")
 			return;
+		Profiling::BeginTimer();
 		if (Str::EndsWith($text, ".") == false && $addDots) $text .= ".";
 		if ($addDots) $label .= ":";
 
 		$this->WriteIndenterTable($label, $text, "1", $escape);
+		Profiling::EndTimer();
 	}
 	public function WriteIndentedPairTitle($label, $text, $escape = true)
 	{
 		$text = trim($text);
 		if ($text == "")
 			return;
+		Profiling::BeginTimer();
 		$this->WriteIndenterTable($label, $text, "1", $escape, 'subTableHeader');
+		Profiling::EndTimer();
 	}
 
 	private function WriteIndenterTable($text1, $text2, $level, $escape, $extraStyle = '')
@@ -136,32 +161,42 @@ class PdfFile
 		$text = trim($text);
 		if ($text == "")
 			return;
+		Profiling::BeginTimer();
 		if ($addDots && Str::EndsWith($text, ".") == false) $text .= ".";
 		$this->WriteIndenterTable($label . ":", $text, "2", $escape);
+		Profiling::EndTimer();
 	}
-	
+
 	public function WriteExtraIndentedPair($label, $text, $escape = true, $addDots = true)
 	{
 		$text = trim($text);
 		if ($text == "")
 			return;
+		Profiling::BeginTimer();
 		if ($addDots && Str::EndsWith($text, ".") == false) $text .= ".";
 		$this->WriteIndenterTable($label . ":", $text, "15", $escape);
+		Profiling::EndTimer();
 	}
-	
+
 	public function WriteIndentedSeparator()
 	{
+		Profiling::BeginTimer();
 		$this->WriteIndentedText("<p style='font-size: 5pt'>________________________________________________________________________________________________________________________________________________________________________</p>", false);
+		Profiling::EndTimer();
 	}
 
 	public function WriteExtraIndentedSpace()
 	{
+		Profiling::BeginTimer();
 		$this->WriteIndentedText("<div style='height: 6px'></div>", false);
+		Profiling::EndTimer();
 	}
 
 	public function WriteExtraIndentedSeparator()
 	{
+		Profiling::BeginTimer();
 		$this->WriteIndentedText("<p style='font-size: 5pt; margin-left: 60px'>_________________________________________________________________________________________________________________________________________________</p>", false);
+		Profiling::EndTimer();
 	}
 
 	public function WriteIndentedSpace()
@@ -180,6 +215,7 @@ class PdfFile
 		$text = trim($text);
 		if ($text == "")
 			return;
+		Profiling::BeginTimer();
 		$text = $this->HtmlEncode($text, $escape);
 		$text = Str::Replace($text, "\n", "<br>");
 
@@ -187,6 +223,7 @@ class PdfFile
 			$text = "<a class='link' href='" . $text . "'>" . $text . '</a>';
 		if (Str::EndsWith($text, ".") == false) $text .= ".";
 		$this->WriteIndentedText($text, false);
+		Profiling::EndTimer();
 	}
 
 	function HtmlEncode($text, $escape = true)
@@ -217,7 +254,7 @@ class PdfFile
 		$fieldWidth = 90;
 		$firstPadding = 45;
 		$bottomMargin = 5;
-		$styles = "body { font-family: DejaVuSansCondensed, sans-serif; font-size: 10pt;  }
+		$styles = "body { font-family: sans-serif; font-size: 10pt;  }
 								p { 	text-align: justify; margin-bottom: 4pt;  margin-top:0pt; }
 
 								hr {	width: 70%; height: 1px;
@@ -244,57 +281,60 @@ class PdfFile
 								.subTableHeader { font-weight: bold };
 
 								pre { font-family: DejaVuSansMono, monospaced; font-size: 9pt; margin-top: 5pt; margin-bottom: 5pt; }
-	
+
 			.mainTitle {
-								width: 100%; position: absolute; 
+								width: 100%; position: absolute;
 								top: -2px; background-color: white;
-								}		
-	.header {	
+								}
+	.header {
 									margin-left: -200px; margin-right: -200px; background-color: #979797;
 									padding: 5px 200px 5px 200px;
 									font-weight: normal; font-size: 12pt; color: #FFF;
-									font-family: DejaVuSansCondensed, sans-serif; margin-top: 18pt; margin-bottom: 16pt;
+									font-family: sans-serif; margin-top: 18pt; margin-bottom: 16pt;
 									text-align: right;  page-break-after:avoid; }
-						
-	h1 {	
+
+	h1 {
 									margin-left: -200px; background-color: #979797;
 									padding: 50px 200px 10px 200px;
-									font-weight: normal; font-size: 18pt; color: #FFF;
-									font-family: DejaVuSansCondensed, sans-serif; margin-top: 0pt; margin-bottom: 16pt;
+									font-weight: normal; font-size: 18pt; color: #fff;
+									font-family: sans-serif; margin-top: 0pt; margin-bottom: 16pt;
 									text-align: left;  page-break-after:avoid; }
 
-.footer {	
+h2 {
+									 background-color: #979797;
+									padding: 50px 0px 10px 0px;
+									font-weight: normal; font-size: 18pt; color: red;
+									font-family: sans-serif; margin-top: 0pt; margin-bottom: 16pt;
+									text-align: left;  page-break-after:avoid; }
+
+.footer {
 									position: absolute; left: 0px; color: #666;
 									padding: 0px; width: 100% }
-.footerRow1 {	
-									margin-left: 40px; margin-top: 0px; font-weight: normal; font-size: 20pt; 
-									font-family: DejaVuSansCondensed, sans-serif; text-transform: uppercase;
+.footerRow1 {
+									margin-left: 40px; margin-top: 0px; font-weight: normal; font-size: 20pt;
+									font-family: sans-serif; text-transform: uppercase;
 									text-align: left;  page-break-after:avoid; color: #888; }
-.footerRow2 {	
-									margin-left: 40px; font-weight: normal; font-size: 7pt; 
-									font-family: DejaVuSansCondensed, sans-serif;
+.footerRow2 {
+									margin-left: 40px; font-weight: normal; font-size: 7pt;
+									font-family: sans-serif;
 									text-align: left;  page-break-after:avoid; color: #888; }
-.footerPageNumber {	
-									margin-left: 0px; font-weight: normal; font-size: 27pt; 
-									font-family:\'DejaVu Sans Condensed\', DejaVuSansCondensed, sans-serif;
+.footerPageNumber {
+									margin-left: 0px; font-weight: normal; font-size: 27pt;
+									font-family:\'DejaVu Sans Condensed\', sans-serif;
 									text-align: left;  page-break-after:avoid; color: #666; }
 
-								h2 {	font-weight: bold; font-size: 12pt; color: #000066;
-									font-family: DejaVuSansCondensed, sans-serif; margin-top: 6pt; margin-bottom: 6pt;
-									border-top: 0.07cm solid #000000; border-bottom: 0.07cm solid #000000;
-									text-align: ;  text-transform: uppercase; page-break-after:avoid; }
 								h3 {	font-weight: normal; font-size: 26pt; color: #000000;
-									font-family: DejaVuSansCondensed, sans-serif; margin-top: 0pt; margin-bottom: 6pt;
+									font-family: sans-serif; margin-top: 0pt; margin-bottom: 6pt;
 									border-top: 0; border-bottom: 0;
 									text-align: ; page-break-after:avoid; }
 								h4 {	font-weight: normal; font-size: 11pt; color: #444;
-									font-family: DejaVuSansCondensed, sans-serif; margin-top: 2pt; margin-bottom: 2pt;
+									font-family: sans-serif; margin-top: 2pt; margin-bottom: 2pt;
 									text-align: ;  margin-collapse:collapse; page-break-after:avoid; }
 								h5 {	font-weight: bold; font-style:italic; ; font-size: 11pt; color: #000044;
-									font-family: DejaVuSansCondensed, sans-serif; margin-top: 8pt; margin-bottom: 4pt;
+									font-family: sans-serif; margin-top: 8pt; margin-bottom: 4pt;
 									text-align: ;  page-break-after:avoid; }
 								h6 {	font-weight: bold; font-size: 9.5pt; color: #333333;
-									font-family: DejaVuSansCondensed, sans-serif; margin-top: 6pt; margin-bottom: ;
+									font-family: sans-serif; margin-top: 6pt; margin-bottom: ;
 									text-align: ;  page-break-after:avoid; }
 
 

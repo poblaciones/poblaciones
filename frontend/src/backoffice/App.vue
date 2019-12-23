@@ -452,4 +452,10 @@ a.normalTextLink:hover {
 	height: 100%;
 	float: left;
 }
+
+.superSmallButton {
+	border: 1px solid #68B3C8;
+  padding: 0px 3px;
+  margin-left: 2px;
+}
 </style>

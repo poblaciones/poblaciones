@@ -16,7 +16,7 @@ class DatasetClone
 	private	$sourceDatasetId;
 
 	private	$targetDatasetId;
-	private	$targetTable;
+	private	$targetTable = null;
 	private	$dataset;
 	private	$workId;
 	private $targetWorkId;
@@ -44,11 +44,11 @@ class DatasetClone
 		$this->dataset = App::Orm()->find(entities\DraftDataset::class, $this->sourceDatasetId);
 		if ($this->dataset === null)
 			throw new ErrorException('Dataset no encontrado');
-		// 1. Crea el dataset y las columnas
-		$this->doCreateNewDataset($this->newName);
-
-		// 2. Crea tabla de datos
+		// 1. Crea tabla de datos (esto no transacciona por ser DDL)
 		$this->CopyWorkDatasetTables();
+
+		// 2. Crea el dataset y las columnas
+		$this->doCreateNewDataset($this->newName);
 
 		// 3. Copia indicadores
 		$this->CopyMetricVersions();
@@ -62,7 +62,6 @@ class DatasetClone
 		// 5. Toca work
 		WorkFlags::SetMetricDataChanged($this->workId);
 		WorkFlags::SetDatasetDataChanged($this->workId);
-
 		// 6. La saca de temporal
 		$datasetTable = new DatasetTable();
 		if ($this->targetTable) {
@@ -94,7 +93,7 @@ class DatasetClone
 		$newName = RowDuplicator::ResolveNewName($name, 'draft_metric_version', $metricVersion->getMetric()->getId(), 'mvr_metric_id', 'mvr_caption', true, 20);
 		$static = array('mvr_work_id' => $this->targetWorkId, 'mvr_caption' => $newName);
 		$targetMetricVersionId = RowDuplicator::DuplicateRows(entities\DraftMetricVersion::class, $metricVersionId, $static);
-		
+
 		// Copia levels
 		$static = array('mvl_metric_version_id' => $targetMetricVersionId, 'mvl_dataset_id' => $this->targetDatasetId);
 		RowDuplicator::DuplicateRows(entities\DraftMetricVersionLevel::class, $metricVersionId, $static, 'mvl_metric_version_id');
@@ -117,7 +116,7 @@ class DatasetClone
 		$parentInfo = array(entities\DraftMetricVersionLevel::class, $metricVersionId,
 													$targetMetricVersionId, 'mvl_metric_version_id', 'mvv_metric_version_level_id');
 		RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftVariable::class);
-		
+
 		// Copia variableValueLabel
 		$parentInfo = array(entities\DraftVariable::class,
 									"(SELECT mvl_id FROM draft_metric_version_level WHERE mvl_metric_version_id = " . $metricVersionId . ")",
@@ -142,8 +141,8 @@ class DatasetClone
 		$newName = RowDuplicator::ResolveNewName($newName, 'draft_dataset', $workId, 'dat_work_id', 'dat_caption', false, 100);
 		$static = array('dat_georeference_status' => 0, 'dat_georeference_attributes' => null, 'dat_caption' => $newName);
 		$static['dat_work_id'] = $this->targetWorkId;
+		$static['dat_table'] = $this->targetTable;
 		$this->targetDatasetId = RowDuplicator::DuplicateRows(entities\DraftDataset::class, $this->sourceDatasetId, $static);
-
 		// Copia columnas
 		$static = array('dco_dataset_id' => $this->targetDatasetId);
 		RowDuplicator::DuplicateRows(entities\DraftDatasetColumn::class, $this->sourceDatasetId, $static, 'dco_dataset_id');
@@ -159,8 +158,6 @@ class DatasetClone
 			// Copia
 			$datasetTable = new DatasetTable();
 			$datasetTable->CopyTables($table, $this->targetTable);
-			// Setea el table
-			$this->UpdateTargetTable();
 		}
 	}
 	private function UpdateTargetTable()

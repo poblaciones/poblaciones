@@ -113,9 +113,9 @@ class GeoreferenceService extends BaseService
 		{
 			// Mueve los datos de _errors a _retry, dejando _errors vacía.
 			$drop = "DROP TABLE IF EXISTS " . $this->state->RetryTable();
-			App::Db()->exec($drop);
+			App::Db()->execDDL($drop);
 			$rename = "RENAME TABLE " . $this->state->ErrorsTable() . " TO " . $this->state->RetryTable();
-			App::Db()->exec($rename);
+			App::Db()->execDDL($rename);
 			$this->EnsureErrorsTableExists();
 		}
 		$this->state->Save();
@@ -184,10 +184,10 @@ class GeoreferenceService extends BaseService
 		if ($dropFirst)
 		{
 			$delete = "DROP TABLE IF EXISTS " . $this->state->ErrorsTable();
-			App::Db()->exec($delete);
+			App::Db()->execDDL($delete);
 		}
 		$create = "CREATE TABLE IF NOT EXISTS " . $this->state->ErrorsTable() . " (row_id INT, error_code INT)";
-		App::Db()->exec($create);
+		App::Db()->execDDL($create);
 	}
 
 	private function LoopStep($method, $next)

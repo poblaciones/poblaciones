@@ -253,6 +253,12 @@ module.exports = {
 		};
 		return ret;
 	},
+	urlParam(paramName, paramValue) {
+		if (!paramValue) {
+			return;
+		}
+		return "&" + paramName + "=" + encodeURI(paramValue);
+	},
 	addListener(element, eventName, handler) {
 		if (element.addEventListener) {
 			element.addEventListener(eventName, handler, false);

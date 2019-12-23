@@ -17,7 +17,7 @@ App::GetOrPost('/services/backoffice/UpdateMetadata', function (Request $request
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
 
-	$controller = new commonServices\MetadataService();
+	$controller = new services\MetadataService();
 	$metadata = App::ReconnectJsonParam(entities\DraftMetadata::class, 'm');
 	return App::Json($controller->UpdateMetadata($workId, $metadata));
 });

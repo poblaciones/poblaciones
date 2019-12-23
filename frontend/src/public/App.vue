@@ -109,7 +109,7 @@ export default {
 		});
 		var loc = this;
 		this.GetRevisions().then(function() {
-			loc.RestoreWork();
+			loc.TryRestoreWork();
 			loc.RegisterErrorHandler();
 			var hash = window.location.hash;
 			var route = null;
@@ -119,13 +119,13 @@ export default {
 			if (route && new RestoreRoute(null).RouteHasLocation(hash)) {
 				loc.StartByUrl(hash);
 			} else {
-				loc.StartByDefaultFrameAndClipping(route);
+				loc.StartByDefaultFrame(route);
 			}
 			window.onpopstate = function(event) {
 				if (event.state !== null) {
 					loc.workToLoad = false;
 					window.SegMap.RestoreRoute.LoadRoute(event.state.route);
-					loc.RestoreWork();
+					loc.TryRestoreWork();
 				}
 			};
 			window.onresize = function(event) {
@@ -147,7 +147,9 @@ export default {
 				err.errDialog('GetRevisions', 'conectarse con el servidor', error);
 			});
 		},
-		RestoreWork() {
+		TryRestoreWork() {
+			window.accessLink = null;
+			window.accessWorkId = null;
 			var pathArray = window.location.pathname.split('/');
 			if (pathArray.length > 0 && pathArray[pathArray.length - 1] === '') {
 				pathArray.pop();
@@ -155,11 +157,17 @@ export default {
 			if (pathArray.length > 0 && pathArray[pathArray.length - 1] === 'map') {
 				pathArray.pop();
 			}
+			var link = null;
+			if (pathArray.length > 0 && pathArray[pathArray.length - 1].length === 18) {
+				 link = pathArray.pop();
+			}
 			if (pathArray.length === 0 || !str.isNumeric(pathArray[pathArray.length - 1])) {
 				this.work.Current = null;
 				return;
 			}
 			var wk = parseInt(pathArray[pathArray.length - 1]);
+			window.accessWorkId = wk;
+			window.accessLink = link;
 			this.GetWork(wk);
 		},
 		StartByUrl(route) {
@@ -169,6 +177,34 @@ export default {
 			this.SetupMap(afterLoaded);
 			window.SegMap.Tutorial.UpdateOpenTutorial();
 			window.SegMap.RestoreRoute.LoadLocationFromRoute(route);
+		},
+		StartByDefaultFrame(route) {
+			const loc = this;
+			axios.get(window.host + '/services/clipping/GetDefaultFrame', {
+				params: {}
+			}).then(function(res) {
+				loc.frame = res.data;
+				if (!window.SegMap) {
+					var afterLoaded = function() {
+						window.SegMap.SaveRoute.UpdateRoute();
+						if (route) {
+							window.SegMap.RestoreRoute.LoadRoute(route, true);
+						}
+					};
+					loc.SetupMap(afterLoaded);
+				}
+				if (loc.workToLoad === false) {
+					window.SegMap.Tutorial.CheckOpenTutorial();
+				}
+				if (loc.frame.Center.Lat && loc.frame.Center.Lon) {
+					window.SegMap.SetCenter(loc.frame.Center);
+				}
+				if (loc.frame.Zoom || loc.frame.Zoom === 0) {
+					window.SegMap.SetZoom(loc.frame.Zoom);
+				}
+			}).catch(function(error) {
+				err.errDialog('GetDefaultFrame', 'conectarse con el servidor', error);
+			});
 		},
 		StartByDefaultFrameAndClipping(route) {
 			const loc = this;
@@ -192,8 +228,17 @@ export default {
 				if (loc.workToLoad === false) {
 					window.SegMap.Tutorial.CheckOpenTutorial();
 				}
-				window.SegMap.Clipping.FitCurrentRegion();
-				window.SegMap.Clipping.SetClippingCanvas(canvas);
+				if (canvas) {
+					window.SegMap.Clipping.FitCurrentRegion();
+					window.SegMap.Clipping.SetClippingCanvas(canvas);
+				} else {
+					if (loc.frame.Center.Lat && loc.frame.Center.Lon) {
+						window.SegMap.SetCenter(loc.frame.Center);
+					}
+					if (loc.frame.Zoom || loc.frame.Zoom === 0) {
+						window.SegMap.SetZoom(loc.frame.Zoom);
+					}
+				}
 			}).catch(function(error) {
 				err.errDialog('GetDefaultFrameAndClipping', 'conectarse con el servidor', error);
 			});
@@ -219,7 +264,8 @@ export default {
 			const loc = this;
 			this.workToLoad = true;
 			axios.get(window.host + '/services/works/GetWork', {
-				params: { w: workId }
+				params: { w: workId },
+				headers: (window.accessLink ? { 'Access-Link' : window.accessLink } : {})
 			}).then(function(res) {
 				loc.work.Current = res.data;
 			}).catch(function(error) {

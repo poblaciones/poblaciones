@@ -32,13 +32,6 @@ class Work
     /**
      * @var string
      *
-     * @ORM\Column(name="wrk_start_args", type="string", length=500, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $StartArgs;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="wrk_image_type", type="string", length=1, precision=0, scale=0, nullable=false, unique=false)
      */
     private $ImageType;
@@ -157,30 +150,6 @@ class Work
     public function getType()
     {
         return $this->Type;
-    }
-
-    /**
-     * Set startArgs
-     *
-     * @param string $startArgs
-     *
-     * @return Work
-     */
-    public function setStartArgs($startArgs)
-    {
-        $this->StartArgs = $startArgs;
-
-        return $this;
-    }
-
-    /**
-     * Get startArgs
-     *
-     * @return string
-     */
-    public function getStartArgs()
-    {
-        return $this->StartArgs;
     }
 
     /**

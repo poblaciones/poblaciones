@@ -12,6 +12,15 @@ output=./release
 release=true
 
 # manejo de parámetros
+
+if [ "$2" == "" ]; then
+	echo "*** Para marcar el tag en git, agregarlo como parámetro ***"
+else
+	echo "*** Marcando el tag v$2 ***"
+	git tag v$2
+fi
+
+
 while test $# -gt 0
 do
 	case "$1" in
@@ -22,6 +31,7 @@ do
 	esac
 	shift
 done
+
 
 echo "*** Preparando en $output ***"
 

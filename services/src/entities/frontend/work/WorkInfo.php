@@ -40,7 +40,6 @@ class WorkInfo extends BaseMapModel
 			'wrk_type' => 'Type',
 			'wrk_is_private' => 'IsPrivate',
 			'met_online_since' => 'ReleaseDate',
-			'wrk_start_args' => 'StartArgs',
 			'wrk_image_id' => 'ImageId',
 			'wrk_image_type' => 'ImageType'
 			);

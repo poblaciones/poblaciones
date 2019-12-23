@@ -17,24 +17,47 @@
 						<md-card-content>
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									El nivel de acceso define si la cartografía es de acceso público o si solamente pueden consultarla quienes tengan asignados permisos para hacerlo.
+									El nivel de acceso define si la cartografía es de acceso público o si solamente pueden consultarla quienes tengan asignados un link o permisos para hacerlo.
 									Los cambios en la visibilidad se harán efectivos en forma inmediata, sin necesidad de volver a publicar la cartografía.
 								</div>
 							</div>
 									<div class="floatRadio largeOption">
-									<md-radio v-model="Work.properties.IsPrivate" :disabled="!Work.CanEdit()" class="md-primary" @change="Update" :value="false"></md-radio>
+									<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()" class="md-primary" @change="UpdateClearLink" :value="1"></md-radio>
 								</div>
 								<div class="md-layout md-gutter">
 									<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
 									Público
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									Todos los usuarios que conozcan la ruta estable de la cartografía <span v-html="stableUrl"></span> pueden acceder a ella.
+									Todos los usuarios que conozcan la ruta estable de la cartografía <span v-html="stableUrlHref"></span> pueden acceder a ella.
 								</div>
 							</div>
+
+								<template v-if="!Work.properties.IsIndexed">
+									<div class="floatRadio largeOption">
+										<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()" class="md-primary" @change="UpdateSetLink" :value="2"></md-radio>
+									</div>
+									<div class="md-layout md-gutter">
+										<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+											Enlace
+										</div>
+										<div class="md-layout-item md-size-100 md-small-size-100">
+											La cartografía será visible a todos los usuarios que dispongan del siguiente enlace:
+										</div>
+										<div class="md-layout-item md-size-100 md-small-size-100">
+											<span v-html="accessLinkUrlHref"></span>
+											<a href="#" v-if="visibilityMode == 2 && this.Work.properties.Metadata.Url" v-clipboard="() => accessLinkUrl" @click.prevent="" class="superSmallButton">
+												Copiar
+											</a>
+											<a v-show="visibilityMode == 2 && this.Work.properties.Metadata.Url" href="#" @click.prevent="RegenLink" class="superSmallButton">
+												Cambiar enlace
+											</a>
+										</div>
+									</div>
+								</template>
 							
 							<div class="floatRadio largeOption">
-								<md-radio v-model="Work.properties.IsPrivate" :disabled="!Work.CanEdit()" class="md-primary" @change="Update" :value="true"></md-radio>
+								<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()" class="md-primary" @change="UpdateClearLink" :value="3"></md-radio>
 							</div>
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
@@ -102,24 +125,88 @@ export default {
 	name: 'Visibility',
 	data() {
 		return {
-
+			visibilityMode: 0
 		};
 	},
 	computed: {
 		Work() {
 			return window.Context.CurrentWork;
 		},
-		stableUrl() {
+		accessLinkUrl() {
 			if (this.Work.properties.Metadata.Url) {
-				var url = str.absoluteUrl(this.Work.properties.Metadata.Url);
+				if (this.Work.properties.AccessLink) {
+				 return str.AbsoluteUrl(this.Work.properties.Metadata.Url) + '/' + this.Work.properties.AccessLink;
+				} else if (this.Work.properties.LastAccessLink) {
+				 return str.AbsoluteUrl(this.Work.properties.Metadata.Url) + '/' + this.Work.properties.LastAccessLink;
+				} else {
+					return "(no utilizado)";
+				}
+			} else {
+				return "(será generado al publicarse la cartografía)";
+			}
+		},
+		stableUrlHref() {
+			if (this.Work.properties.Metadata.Url) {
+				var url = str.AbsoluteUrl(this.Work.properties.Metadata.Url);
 				return "(<a href='" + url + "' target='_blank'>" + url + "</a>)";
 			} else {
-				return "(que será generada al publicarse la cartografía)";
+				return "(será generada al publicarse la cartografía)";
+			}
+		},
+		accessLinkUrlHref() {
+			if (this.Work.properties.Metadata.Url && this.Work.properties.AccessLink) {
+				var url = this.accessLinkUrl;
+				return "<a href='" + url + "' target='_blank'>" + url + "</a>";
+			} else {
+				return this.accessLinkUrl;
 			}
 		}
 	},
+	mounted() {
+		if (this.Work) {
+			this.CalculateMode();
+		}
+	},
 	methods: {
-		Update() {
+		CalculateMode() {
+			if (this.Work.properties.IsPrivate) {
+				this.visibilityMode = 3;
+				return;
+			}
+			if (this.Work.properties.AccessLink) {
+				this.visibilityMode = 2;
+			} else {
+				this.visibilityMode = 1;
+			}
+		},
+		RegenLink() {
+			if (!confirm('Al cambiar el enlace quienes posean la ruta actual ya no podrán accederla. \n\n¿Está seguro de que desea hacer esto?')) {
+				return;
+			}
+			this.Work.properties.LastAccessLink = null;
+			this.Work.properties.AccessLink = null;
+			this.UpdateLink();
+		},
+		UpdateClearLink() {
+			if (this.Work.properties.AccessLink !== null) {
+				this.Work.properties.LastAccessLink = this.Work.properties.AccessLink;
+				this.Work.properties.AccessLink = null;
+			}
+			return this.doUpdate();
+		},
+		UpdateSetLink() {
+			if (!this.Work.properties.AccessLink) {
+				if (this.Work.properties.LastAccessLink !== null) {
+					this.Work.properties.AccessLink = this.Work.properties.LastAccessLink;
+					this.Work.properties.LastAccessLink = null;
+				} else {
+					this.Work.properties.AccessLink = str.GenerateAccessLink();
+				}
+			}
+			return this.doUpdate();
+		},
+		doUpdate() {
+			this.Work.properties.IsPrivate = this.visibilityMode === 3;
 			this.$refs.invoker.do(this.Work,
 					this.Work.UpdateVisibility);
 			return true;
@@ -133,10 +220,13 @@ export default {
 		}
 	},
 	components: {
+	},
+	watch: {
+		Work() {
+			this.CalculateMode();
+		}
 	}
-};
-
-</script>
+};</script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 

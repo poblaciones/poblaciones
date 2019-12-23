@@ -172,6 +172,15 @@ class DraftDataset
      */
     private $Work;
 
+
+    /**
+     * @var boolean
+		 *
+     * @ORM\Column(name="dat_show_info", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $ShowInfo;
+
+
     /**
      * Get id
      *
@@ -413,6 +422,30 @@ class DraftDataset
         return $this->Geocoded;
     }
 
+
+    /**
+     * Set ShowInfo
+     *
+     * @param boolean $ShowInfo
+     *
+     * @return DraftDataset
+     */
+    public function setShowInfo($ShowInfo)
+    {
+        $this->ShowInfo = $ShowInfo;
+
+        return $this;
+    }
+
+    /**
+     * Get ShowInfo
+     *
+     * @return boolean
+     */
+    public function getShowInfo()
+    {
+        return $this->ShowInfo;
+    }
     /**
      * Set imagesColumn
      *

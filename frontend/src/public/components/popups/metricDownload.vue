@@ -7,7 +7,7 @@
 						<td style="width: 250px">Fuente:</td>
 						<td style="width: 500px">{{ version.Work.Name }}</td>
 					</tr>
-					<tr v-if="version.Work.Type !=='P'">
+					<tr v-if="version.Work.Type !=='P' && version.Work.Authors">
 						<td>Autores:</td>
 						<td>{{ version.Work.Authors }}</td>
 					</tr>
@@ -170,13 +170,13 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.MetadataId + '&f=' + file.FileId;
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.MetadataId + '&f=' + file.FileId + h.urlParam('l', window.accessLink);
 			} else {
 				return '#';
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.version.Work.MetadataId + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id;
+			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.version.Work.MetadataId + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
 		},
 		getSpatialFormats() {
 			var ret = [];
@@ -212,7 +212,9 @@ export default {
 			this.progress = null;
 			var url = this.startDownloadUrl(type);
 			const loc = this;
-			axios.get(url).then(function(res) {
+			axios.get(url, {
+				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
+			}).then(function (res) {
 				if(res.data.done === false) {
 					loc.processStep(type, res.data, 0);
 				} else {
@@ -232,7 +234,8 @@ export default {
 			}
 			const loc = this;
 			return axios.get(loc.stepDownloadUrl(), {
-				params: { k: key }
+				params: { k: key },
+				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
 				}).then(function(res) {
 					if(i >= 1000) {
 						throw new Error('Hard limit reached');

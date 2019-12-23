@@ -15,6 +15,7 @@ use helena\entities\backoffice as entities;
 use helena\services\backoffice\notifications\NotificationManager;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\PublishSnapshots;
+use helena\services\backoffice\publish\CacheManager;
 
 use minga\framework\ErrorException;
 
@@ -28,6 +29,7 @@ class WorkService extends BaseService
 
 		$work->setType($type);
 		$work->setImageType('N');
+		$work->setUnfinished(false);
 		$work->setMetadataChanged(false);
 		$work->setDatasetLabelsChanged(false);
 		$work->setDatasetDataChanged(false);
@@ -109,19 +111,23 @@ class WorkService extends BaseService
 		return self::OK;
 	}
 
-	public function UpdateWorkVisibility($workId, $value)
+	public function UpdateWorkVisibility($workId, $value, $link = null)
 	{
 		// Cambia el valor
 		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
 		$draftWork->setIsPrivate($value);
+		$draftWork->setAccessLink($link);
 		App::Orm()->save($draftWork);
 		// Si existe publicado, lo cambia también
 		$workIdShardified = PublishDataTables::Shardified($workId);
 		$work = App::Orm()->find(entities\Work::class, $workIdShardified);
 		if ($work !== null) {
 			$work->setIsPrivate($value);
+			$work->setAccessLink($link);
 			App::Orm()->save($work);
 		}
+		$caches = new CacheManager();
+		$caches->CleanPdfMetadata($draftWork->getMetadata()->getId());
 		// Actualiza cachés
 		$publisher = new PublishSnapshots();
 		$publisher->UpdateWorkVisibility($workId);
@@ -277,6 +283,7 @@ class WorkService extends BaseService
 								, wrk_is_private IsPrivate
 								, wrk_is_indexed IsIndexed
 								, wrk_type Type
+								, wrk_unfinished Unfinished
 								, (SELECT MIN(wkp_permission) FROM draft_work_permission WHERE wkp_work_id = wrk_id AND wkp_user_id = ?) privileges
 								, (SELECT COUNT(*) FROM draft_dataset d1 WHERE d1.dat_work_id = wrk_id) DatasetCount
 								, (SELECT COUNT(*) FROM draft_dataset d2 WHERE d2.dat_work_id = wrk_id AND dat_geocoded = 1) GeorreferencedCount

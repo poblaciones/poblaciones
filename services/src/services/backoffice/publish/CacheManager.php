@@ -13,6 +13,8 @@ use helena\caches\DatasetColumnCache;
 use helena\caches\ClippingSummaryCache;
 use helena\caches\ClippingCache;
 use helena\caches\BackofficeDownloadCache;
+use helena\caches\PdfMetadataCache;
+use helena\caches\WorkVisiblityCache;
 
 use helena\caches\SummaryCache;
 use helena\caches\TileDataCache;
@@ -40,16 +42,22 @@ class CacheManager
 		DownloadCache::Cache()->Clear($datasetIdShardified);
 	}
 
-	// Work
-	public function CleanMetadataPdfCache($workId)
+	public function CleanPdfMetadata($metadataId)
 	{
-		// TODO CleanMetadataPdfCache($row)
+		$metadataIdShardified = PublishDataTables::Shardified($metadataId);
+		PdfMetadataCache::Cache()->Clear($metadataIdShardified);
 	}
+
 	public function CleanFabMetricsCache()
 	{
 		FabMetricsCache::Cache()->Clear();
 	}
 
+	public function CleanWorkVisiblityCache($workId)
+	{
+		$workIdShardified = PublishDataTables::Shardified($workId);
+		WorkVisiblityCache::Cache()->Clear($workIdShardified);
+	}
 	public function CleanGeographyCache()
 	{
 		GeographyCache::Cache()->Clear();

@@ -35,6 +35,7 @@ import MpConfirm from '@/backoffice/components/MpConfirm';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
 import MpSelect from '@/backoffice/components/MpSelect';
 import HelpIcon from 'vue-material-design-icons/HelpCircleOutline.vue';
+import Clipboard from 'v-clipboard';
 
 Vue.component('help-icon', HelpIcon);
 Vue.component('title-bar', TitleBar);
@@ -45,6 +46,8 @@ Vue.component('mp-confirm', MpConfirm);
 Vue.component('mp-text', MpText);
 Vue.component('mp-color-picker', MpColorPicker);
 Vue.component('mp-simple-text', MpSimpleText);
+
+Vue.use(Clipboard);
 
 // Settings
 window.host = process.env.host;

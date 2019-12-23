@@ -260,6 +260,13 @@ export default {
 					break;
 				case STEP_END:
 					this.Dataset.properties.Geocoded = true;
+					if (this.tab === 'location') {
+						this.Dataset.properties.Type = 'L';
+					} else if (this.tab === 'code') {
+						this.Dataset.properties.Type = 'D';
+					} else if (this.tab === 'shape') {
+						this.Dataset.properties.Type = 'S';
+					}
 					this.Work.UpdateDatasetGeorreferencedCount();
 					this.Dataset.ScaleGenerator.RegenAndSaveAllVariables();
 					stepper.complete = 'Georeferenciación exitosa.';

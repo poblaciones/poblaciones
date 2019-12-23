@@ -6,7 +6,8 @@ use minga\framework\Date;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use minga\framework\IO;
 use minga\framework\ErrorException;
-
+use minga\framework\Performance;
+use helena\caches\PdfMetadataCache;
 use helena\services\common\BaseService;
 use helena\db\frontend\MetadataModel;
 use helena\db\frontend\FileModel;
@@ -32,11 +33,26 @@ class MetadataService extends BaseService
 		$model = new MetadataModel($fromDraft);
 		$metadata = $model->GetMetadata($metadataId);
 		if ($metadata === null || sizeof($metadata) < 2) throw new ErrorException('Metadatos no encontrados.');
+		$friendlyName = $metadata['met_title'] . '.pdf';
+
+		// se fija en el caché
+		$key = PdfMetadataCache::CreateKey($datasetId);
+		$data = null;
+		if ($fromDraft === false && PdfMetadataCache::Cache()->HasData($metadataId, $key, $data))
+		{
+			return App::SendFile($data)
+				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
+				->deleteFileAfterSend(true);
+		}
+		else
+		{
+			Performance::CacheMissed();
+		}
+		$metadata['wrk_access_link'] = $model->GetAccessLink($workId);
 
 		$sources = $model->GetMetadataSources($metadataId);
 		$dataset = $model->GetDatasetMetadata($datasetId);
 
-		$friendlyName = $metadata['met_title'] . '.pdf';
 		$metadata['met_online_since_formatted'] = $this->formatDate($metadata['met_online_since']);
 		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
 
@@ -45,7 +61,10 @@ class MetadataService extends BaseService
 
 		if ($workId !== null)
 			Statistics::StoreDownloadMetadataHit($workId);
-		
+
+		if ($fromDraft === false)
+			PdfMetadataCache::Cache()->PutData($metadataId, $key, $filename);
+
 		return App::SendFile($filename)
 			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
 			->deleteFileAfterSend(true);

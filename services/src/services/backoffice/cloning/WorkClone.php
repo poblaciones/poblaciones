@@ -68,7 +68,8 @@ class WorkClone
 			$newName = RowDuplicator::ResolveNewName($newName, 'draft_work, draft_metadata, draft_work_permission', $userId, 'wrk_metadata_id = met_id AND wkp_work_id = wrk_id AND wkp_user_id', 'met_title', false, 150);
 		}
 		$this->state->Set('name', $newName);
-		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId);
+		$static = array('wrk_unfinished' => true);
+		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId, $static);
 	}
 	public function CopyMetadata()
 	{
@@ -88,7 +89,7 @@ class WorkClone
 		RowDuplicator::DuplicateRows(entities\DraftMetadataSource::class, $sourceMetadataId, $static, 'msc_metadata_id');
 		// Copia metadata_files
 		$this->CopyFiles($sourceMetadataId, $metadataId);
-}
+	}
 	private function CopyFiles($sourceMetadataId, $metadataId)
 	{
 		$files = App::Orm()->findManyByProperty(entities\DraftMetadataFile::class, "Metadata.Id", $sourceMetadataId);
@@ -111,5 +112,10 @@ class WorkClone
 		$static = array('wkp_work_id' => $this->targetWorkId);
 		RowDuplicator::DuplicateRows(entities\DraftWorkPermission::class, $this->sourceWorkId, $static, 'wkp_work_id');
 	}
+	public function SetFinished()
+	{
+		$update = "UPDATE draft_work SET wrk_unfinished = ? WHERE wrk_id = ?";
+		App::Db()->exec($update, array(false, $this->targetWorkId));
+}
 }
 

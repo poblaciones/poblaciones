@@ -79,7 +79,7 @@ class DatasetModel extends BaseModel
 		$sql = 'SELECT
 			dla_value value,
 			dla_caption caption
-			FROM ' . $this->draftPreffix() . 'dataset_label
+			FROM ' . $this->draftPreffix() . 'dataset_column_value_label
 			WHERE dla_dataset_column_id = ?' . $where . ' ORDER BY dla_order';
 
 		$items = App::Db()->fetchAll($sql, $params, $types);

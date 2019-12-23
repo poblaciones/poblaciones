@@ -77,6 +77,9 @@ export default {
 				var len = this.input.$el.value.length;
 				this.input.$el.selectionStart = 0;
 				this.input.$el.selectionEnd = len;
+			} else {
+				this.input.$el.selectionStart = 0;
+				this.input.$el.selectionEnd = 0;
 			}
 		},
 		htmlEncode(html ) {

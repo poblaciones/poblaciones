@@ -66,6 +66,7 @@ class RevokeService extends BaseService
 				break;
 			case self::STEP_RESET_FLAGS:
 				$publisher = new PublishDataTables();
+				$publisher->CleanWorkCaches($workId);
 				$publisher->RevokeOnlineDates($workId);
 				WorkFlags::SetAll($workId);
 				$this->state->NextStep('Listo');

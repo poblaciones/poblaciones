@@ -57,7 +57,7 @@ class DatasetColumns
 
 	private function SaveLabels($labelValues, $column)
 	{
-		$sql = "INSERT INTO draft_dataset_label (dla_value, dla_caption, dla_dataset_column_id) VALUES ";
+		$sql = "INSERT INTO draft_dataset_column_value_label (dla_value, dla_caption, dla_dataset_column_id) VALUES ";
 		$values = "";
 		foreach($labelValues as $key => $description)
 		{

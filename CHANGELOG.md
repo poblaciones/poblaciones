@@ -1,7 +1,19 @@
-﻿[CURRENT]
+[CURRENT]
+
+v2.12 (2019-12-22)
 - Fix: Los popups del visor perdían su ubicación al ser arrastrados.
-- Link a comentarios, términos y condiciones e información de copyright agregada al visor.
+- Copyright, link a comentarios, términos y condiciones e información de copyright agregada al pie del visor.
 - Adaptación del onboarding al link de contacto.
+- Mejora en reubicación de barra de búsqueda al reducirse la ventana.
+- Mejora estética en PDF de metadatos.
+- Fix: bug en eliminación de adjunto al eliminar cartografías.
+- Fix: los tooltips en modo satélite no tomaban la tipografía correcta.
+- Permite deshabilitar el popup de resumen en la definición del dataset (Dataset > Identificación).
+- Fix: ofrece la selección de ícono solamente en los dataset de ubicaciones.
+- Fix: mejoras en manejo de transacciones para evitar inconsistencias por comandos DDL.
+- Agrega el nivel de visibilidad 'Enlace'.
+- Hace caché de PDF de metadatos.
+- Fix: cita APA de cartografía sin autor aparece formateada correctamente.
 
 v2.11 (2019-12-02)
 - El PDF de metadatos corta adecuadamente las urls largas para presentarlas.

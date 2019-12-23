@@ -34,13 +34,6 @@ class DraftWork
     /**
      * @var string
      *
-     * @ORM\Column(name="wrk_start_args", type="string", length=500, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $StartArgs;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="wrk_image_type", type="string", length=1, precision=0, scale=0, nullable=false, unique=false)
      */
     private $ImageType;
@@ -94,6 +87,17 @@ class DraftWork
      */
     private $Shard;
 
+
+
+		/**
+		 * @var boolean
+		 *
+		 * @ClientReadonly
+		 *
+		 * @ORM\Column(name="wrk_unfinished", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+		 */
+    private $Unfinished;
+
 		/**
 		 * @var boolean
 		 *
@@ -120,6 +124,15 @@ class DraftWork
 		 * @ORM\Column(name="wrk_access_link", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
 		 */
     private $AccessLink;
+
+		/**
+		 * @var string
+		 *
+		 * @ClientReadonly
+		 *
+		 * @ORM\Column(name="wrk_last_access_link", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
+		 */
+    private $LastAccessLink;
 
     /**
      * @var \helena\entities\backoffice\DraftMetadata
@@ -190,30 +203,6 @@ class DraftWork
     public function getType()
     {
         return $this->Type;
-    }
-
-    /**
-     * Set startArgs
-     *
-     * @param string $startArgs
-     *
-     * @return DraftWork
-     */
-    public function setStartArgs($startArgs)
-    {
-        $this->StartArgs = $startArgs;
-
-        return $this;
-    }
-
-    /**
-     * Get startArgs
-     *
-     * @return string
-     */
-    public function getStartArgs()
-    {
-        return $this->StartArgs;
     }
 
     /**
@@ -289,6 +278,29 @@ class DraftWork
 			return $this->IsPrivate;
     }
 
+    /**
+		 * Set unfinished
+		 *
+		 * @param boolean $unfinished
+		 *
+		 * @return DraftWork
+		 */
+    public function setUnfinished($unfinished)
+    {
+			$this->Unfinished = $unfinished;
+
+			return $this;
+    }
+
+    /**
+		 * Get unfinished
+		 *
+		 * @return boolean
+		 */
+    public function getUnfinished()
+    {
+			return $this->Unfinished;
+    }
 
     /**
 		 * Set isIndexed
@@ -336,6 +348,30 @@ class DraftWork
     public function getAccessLink()
     {
 			return $this->AccessLink;
+    }
+
+		    /**
+		 * Set lastLastAccessLink
+		 *
+		 * @param string $lastLastAccessLink
+		 *
+		 * @return DraftWork
+		 */
+    public function setLastAccessLink($lastLastAccessLink)
+    {
+			$this->LastAccessLink = $lastLastAccessLink;
+
+			return $this;
+    }
+
+    /**
+		 * Get lastLastAccessLink
+		 *
+		 * @return string
+		 */
+    public function getLastAccessLink()
+    {
+			return $this->LastAccessLink;
     }
 
     /**

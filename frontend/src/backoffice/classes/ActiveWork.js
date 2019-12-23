@@ -263,7 +263,7 @@ ActiveWork.prototype.RequestReview = function () {
 ActiveWork.prototype.UpdateVisibility = function () {
 	var loc = this;
 	return axiosClient.getPromise(window.host + '/services/backoffice/UpdateWorkVisibility',
-		{ 'w': this.properties.Id, 'p': (this.properties.IsPrivate ? '1' : '0') }, 'actualizar la visibilidad').then(
+		{ 'w': this.properties.Id, 'l' : this.properties.AccessLink, 'p': (this.properties.IsPrivate ? '1' : '0') }, 'actualizar la visibilidad').then(
 		function () {
 			window.Context.UpdatePrivacy(loc.properties.Id, loc.properties.IsPrivate);
 		});

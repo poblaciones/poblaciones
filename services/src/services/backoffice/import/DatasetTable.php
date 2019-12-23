@@ -22,7 +22,7 @@ class DatasetTable
 		$tableName = self::CreateNewTableName();
 		$this->RegisterTable($tableName);
 		$creationQuery = $this->SqlCreateTable($tableName, $headers);
-		App::Db()->exec($creationQuery);
+		App::Db()->execDDL($creationQuery);
 		$this->CreateFk($tableName);
 		return $tableName;
 	}
@@ -89,7 +89,7 @@ class DatasetTable
 		// Crea la tabla
 		App::Db()->dropTable($target);
 		$create = "CREATE TABLE " . $target . " LIKE " . $table;
-		App::Db()->exec($create);
+		App::Db()->execDDL($create);
 		// Hace el insert
 		$insert = "INSERT " . $target . " SELECT * FROM " . $table;
 		App::Db()->exec($insert);
@@ -101,7 +101,7 @@ class DatasetTable
 				. " ADD FOREIGN KEY(geography_item_id)"
 				. " REFERENCES geography_item(gei_id);";
 
-		App::Db()->exec($query);
+		App::Db()->execDDL($query);
 	}
 	public function RegisterTable($table)
 	{

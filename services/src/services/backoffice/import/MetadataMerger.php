@@ -53,7 +53,7 @@ class MetadataMerger
 		// 1) determina el universo de datos
 		$columnsWhere = " WHERE dc_old.dco_dataset_id = " . $this->datasetId . $this->getIdRangeCondition();
 		// 2) drop de los valueslables viejos
-		$deleteValues = "DELETE FROM draft_dataset_label WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column dc_old " .
+		$deleteValues = "DELETE FROM draft_dataset_column_value_label WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column dc_old " .
 													$columnsWhere . ")";
 		App::Db()->exec($deleteValues);
 		// 3) drop de las columnas viejas
@@ -64,12 +64,12 @@ class MetadataMerger
 	private function MigrateValueLabels()
 	{
 		// Borra las de destino
-		$deleteValues = "DELETE FROM draft_dataset_label WHERE dla_dataset_column_id IN (SELECT dco_new_id FROM " .
+		$deleteValues = "DELETE FROM draft_dataset_column_value_label WHERE dla_dataset_column_id IN (SELECT dco_new_id FROM " .
 													$this->MatchSubtable() . " WHERE dco_new_id IS NOT NULL)";
 		App::Db()->exec($deleteValues);
 		// Copia las de origen
-		$insertValues = "INSERT INTO draft_dataset_label (dla_value, dla_caption, dla_dataset_column_id)
-												SELECT dla_value, dla_caption, dco_new_id FROM draft_dataset_label INNER JOIN " .
+		$insertValues = "INSERT INTO draft_dataset_column_value_label (dla_value, dla_caption, dla_dataset_column_id)
+												SELECT dla_value, dla_caption, dco_new_id FROM draft_dataset_column_value_label INNER JOIN " .
 													$this->MatchSubtable() . " ON matches.dco_old_id = dla_dataset_column_id
 													WHERE dco_new_id IS NOT NULL ORDER BY dla_id";
 		App::Db()->exec($insertValues);
@@ -126,11 +126,11 @@ class MetadataMerger
 		$message = "La variable de normalización para el indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_normalization_column_id', $message);
 
-		$this->DeleteOrfanVariables();
+		$this->DeleteOrphanVariables();
 
 		return $turnedToNull;
 	}
-	private function DeleteOrfanVariables()
+	private function DeleteOrphanVariables()
 	{
 		if (sizeof($this->lastIdList) > 0)
 		{

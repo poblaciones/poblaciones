@@ -5,12 +5,12 @@ namespace helena\entities\backoffice;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * ClippingRegionGeographyItem
+ * ClippingRegionItemGeographyItem
  *
- * @ORM\Table(name="clipping_region_geography_item", indexes={@ORM\Index(name="fk_clipping_regions_items_geography_items_clipping_regions__idx", columns={"cgi_clipping_region_item_id"}), @ORM\Index(name="fk_clipping_regions_items_geography_items_geographies_items_idx", columns={"cgi_geography_item_id"}), @ORM\Index(name="fk_clipping_regions_items_geography_items_clipping_regions__idx1", columns={"cgi_clipping_region_geography_id"})})
+ * @ORM\Table(name="clipping_region_item_geography_item", indexes={@ORM\Index(name="fk_clipping_regions_items_geography_items_clipping_regions__idx", columns={"cgi_clipping_region_item_id"}), @ORM\Index(name="fk_clipping_regions_items_geography_items_geographies_items_idx", columns={"cgi_geography_item_id"}), @ORM\Index(name="fk_clipping_regions_items_geography_items_clipping_regions__idx1", columns={"cgi_clipping_region_geography_id"})})
  * @ORM\Entity
  */
-class ClippingRegionGeographyItem
+class ClippingRegionItemGeographyItem
 {
     /**
      * @var integer
@@ -74,7 +74,7 @@ class ClippingRegionGeographyItem
      *
      * @param integer $id
      *
-     * @return ClippingRegionGeographyItem
+     * @return ClippingRegionItemGeographyItem
      */
     public function setId($id)
     {
@@ -87,7 +87,7 @@ class ClippingRegionGeographyItem
      *
      * @param float $intersectionPercent
      *
-     * @return ClippingRegionGeographyItem
+     * @return ClippingRegionItemGeographyItem
      */
     public function setIntersectionPercent($intersectionPercent)
     {
@@ -111,7 +111,7 @@ class ClippingRegionGeographyItem
      *
      * @param \helena\entities\backoffice\ClippingRegionGeography $clippingRegionGeography
      *
-     * @return ClippingRegionGeographyItem
+     * @return ClippingRegionItemGeographyItem
      */
     public function setClippingRegionGeography(\helena\entities\backoffice\ClippingRegionGeography $clippingRegionGeography = null)
     {
@@ -135,7 +135,7 @@ class ClippingRegionGeographyItem
      *
      * @param \helena\entities\backoffice\ClippingRegionItem $clippingRegionItem
      *
-     * @return ClippingRegionGeographyItem
+     * @return ClippingRegionItemGeographyItem
      */
     public function setClippingRegionItem(\helena\entities\backoffice\ClippingRegionItem $clippingRegionItem = null)
     {
@@ -159,7 +159,7 @@ class ClippingRegionGeographyItem
      *
      * @param \helena\entities\backoffice\GeographyItem $geographyItem
      *
-     * @return ClippingRegionGeographyItem
+     * @return ClippingRegionItemGeographyItem
      */
     public function setGeographyItem(\helena\entities\backoffice\GeographyItem $geographyItem = null)
     {

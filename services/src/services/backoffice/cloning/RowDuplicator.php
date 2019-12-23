@@ -138,7 +138,6 @@ class RowDuplicator
 
 		foreach($columnsList as $column)
 		{
-			$prop = $column['property'];
 			$col = $column['field'];
 			$shardify = $column['shardify'];
 			if ($retInsert != '') { $retInsert .= ', '; $retSelect .= ', '; $retUpdate .= ', '; }

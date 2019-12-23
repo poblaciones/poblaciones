@@ -142,17 +142,21 @@ LocationsGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 			};
 
 			element = new loc.MapsApi.google.maps.Marker(params);
-			element.addListener('click', function (e) {
-				var parentInfo = {
-					MetricName: metric.properties.Metric.Name,
-					MetricId: metric.properties.Metric.Id,
-					MetricVersionId: metric.SelectedVersion().Version.Id,
-					LevelId: metric.SelectedLevel().Id,
-					VariableId: metric.SelectedVariable().Id
-				};
-				loc.MapsApi.markerClicked(e, parentInfo, feature.getId(),
-					new loc.MapsApi.google.maps.Size(0, -1 * h.getScaleFactor(z)));
-			});
+			if (loc.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
+				element.addListener('click', function (e) {
+					var parentInfo = {
+						MetricName: metric.properties.Metric.Name,
+						MetricId: metric.properties.Metric.Id,
+						MetricVersionId: metric.SelectedVersion().Version.Id,
+						LevelId: metric.SelectedLevel().Id,
+						VariableId: metric.SelectedVariable().Id
+					};
+					loc.MapsApi.markerClicked(e, parentInfo, feature.getId(),
+						new loc.MapsApi.google.maps.Size(0, -1 * h.getScaleFactor(z)));
+				});
+			} else {
+				element.clickable = false;
+			}
 			element.addListener('mouseover', function (e) {
 				var parentInfo = {
 					MetricName: metric.properties.Metric.Name,

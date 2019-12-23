@@ -27,6 +27,7 @@ class DatasetService extends DbSession
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
 		$dataset->setWork($work);
 		$dataset->setType('L');
+		$dataset->setShowInfo(1);
 		$dataset->setExportable(true);
 		$dataset->setGeoreferenceStatus(0);
 		$dataset->setGeocoded(false);
@@ -381,7 +382,7 @@ class DatasetService extends DbSession
 		// Borra indicadores
 		$this->DeleteMetricVersionLevels($datasetId);
 		// Borra valueLabels
-		$deleteLabels = "DELETE FROM draft_dataset_label WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column WHERE dco_dataset_id = ?)";
+		$deleteLabels = "DELETE FROM draft_dataset_column_value_label WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column WHERE dco_dataset_id = ?)";
 		App::Db()->exec($deleteLabels, array($datasetId));
 		// Borra columnas
 		$deleteCols = "DELETE FROM draft_dataset_column WHERE dco_dataset_id = ?";

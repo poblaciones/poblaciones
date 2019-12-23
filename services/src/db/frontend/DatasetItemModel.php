@@ -44,7 +44,7 @@ class DatasetItemModel
 			{
 				$cols .= ', ' . $column['field'] . ' c' . $n;
 				if ($column['id'] != null)
-					$cols .= ', (SELECT dla_caption FROM dataset_label WHERE dla_dataset_column_id = ' . $column['id'] . ' AND dla_value = ' . $column['field'] . ') l' . $n;
+					$cols .= ', (SELECT dla_caption FROM dataset_column_value_label WHERE dla_dataset_column_id = ' . $column['id'] . ' AND dla_value = ' . $column['field'] . ') l' . $n;
 				else
 					$cols .= ', null l' . $n;
 				$n++;

@@ -74,13 +74,23 @@ class WorkDelete
 		// Borra las relaciones con fuente
 		$delete = "DELETE FROM draft_metadata_source WHERE msc_metadata_id = ?";
 		App::Db()->exec($delete, array($metadata->getId()));
-		// Borra archivos
-		$deleteFiles = "DELETE draft_file FROM draft_file JOIN
+		// Consulta archivos a borrar
+		$queryDeleteFiles = "SELECT fil_id FROM draft_file JOIN
 						draft_metadata_file ON mfi_file_id = fil_id WHERE
 								mfi_metadata_id = ?";
-		App::Db()->exec($deleteFiles, array($metadata->getId()));
+		$filesRes = App::Db()->fetchAll($queryDeleteFiles, array($metadata->getId()));
+		$files = array();
+		foreach($filesRes as $fileRow)
+			$files[] = $fileRow['fil_id'];
+		// Borra metada_files
 		$deleteMetadataFiles = "DELETE FROM draft_metadata_file WHERE mfi_metadata_id = ?";
 		App::Db()->exec($deleteMetadataFiles, array($metadata->getId()));
+		// Borra los files
+		if (sizeof($files) > 0)
+		{
+			$deleteFiles = "DELETE draft_file FROM draft_file WHERE fil_id IN (" . join(',', $files) . ")";
+			App::Db()->exec($deleteFiles);
+		}
 		// Borra metadatos
 		$delete = "DELETE FROM draft_metadata WHERE met_id = ?";
 		App::Db()->exec($delete, array($metadata->getId()));
@@ -91,7 +101,7 @@ class WorkDelete
 		{	// Borra el contacto
 			App::Orm()->delete($contact);
 		}
-		
+
 	}
 	private function IsLastParent($contact)
 	{

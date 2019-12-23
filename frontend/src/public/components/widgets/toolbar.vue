@@ -59,7 +59,7 @@ export default {
 	},
 	methods: {
 		selectionModes() {
-			if (this.frame.Zoom >= 10) {
+			if (this.frame && this.frame.Zoom >= 10) {
 				return [
 					{ Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' },
 					{ Name: 'Seleccionar una zona', Icon: 'fa fa-circle-notch' }];

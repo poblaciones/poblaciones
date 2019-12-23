@@ -8,32 +8,24 @@ use helena\entities\frontend\geometries\Coordinate;
 use helena\db\frontend\MetadataModel;
 
 use helena\services\frontend as services;
+use helena\controllers\frontend as controllers;
 use helena\services\common as commonServices;
 
 use helena\classes\App;
+use helena\classes\Links;
 use helena\classes\Session;
 use minga\framework\Params;
 
 // MAPA
-App::RegisterControllerGet('/', 'helena\controllers\frontend\cHome');
-App::RegisterControllerGet('/sitemap', 'helena\controllers\frontend\cSitemap');
-App::RegisterControllerGet('/map', 'helena\controllers\frontend\cMap');
-App::RegisterControllerGet('/map/', 'helena\controllers\frontend\cMap');
-App::RegisterControllerGet('/handle/{path1}', 'helena\controllers\frontend\cHandle');
-App::RegisterControllerGet('/handle/{path1}/{path2}', 'helena\controllers\frontend\cHandle');
-App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}', 'helena\controllers\frontend\cHandle');
-App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}', 'helena\controllers\frontend\cHandle');
-App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}/{path5}', 'helena\controllers\frontend\cHandle');
-// HOME INSTITUCIONAL
-App::RegisterControllerGet('/home', 'helena\controllers\frontend\cHome');
-App::RegisterControllerGet('/info', 'helena\controllers\frontend\cInfo');
-App::RegisterControllerGet('/terms', 'helena\controllers\frontend\cTerms');
-App::RegisterControllerGet('/privacy', 'helena\controllers\frontend\cPrivacy');
-App::RegisterControllerGet('/research', 'helena\controllers\frontend\cResearch');
-App::RegisterControllerGet('/public', 'helena\controllers\frontend\cPublic');
-App::RegisterControllerGet('/community', 'helena\controllers\frontend\cCommunity');
-App::RegisterControllerGetPost('/feedback', 'helena\controllers\frontend\cFeedback');
-App::RegisterControllerGet('/send', 'helena\controllers\frontend\cSend');
+App::RegisterControllerGet('/sitemap', controllers\cSitemap::class);
+App::RegisterControllerGet('/map', controllers\cMap::class);
+App::RegisterControllerGet('/map/', controllers\cMap::class);
+App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
+App::RegisterControllerGet('/handle/{path1}', controllers\cHandle::class);
+App::RegisterControllerGet('/handle/{path1}/{path2}', controllers\cHandle::class);
+App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}', controllers\cHandle::class);
+App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}', controllers\cHandle::class);
+App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}/{path5}', controllers\cHandle::class);
 
 // Parametros:
 // De frame:
@@ -58,7 +50,8 @@ App::RegisterControllerGet('/send', 'helena\controllers\frontend\cSend');
 //		case 'cs': // csv+shape,
 
 
-
+App::$app->get('/', function (Request $request) {
+		return App::Redirect(Links::GetMapUrl());});
 
 // http://mapas.aacademica.org/services/download/CreateFile?t=ss&l=8&r=1692&a=X&k=
 // http://mapas.aacademica.org/services/download/CreateFile?k=e0UN2j
@@ -202,6 +195,7 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 
 	$model = new MetadataModel();
 	$workId = $model->GetWorkIdByMetadataId($metadataId);
+	Session::$AccessLink = Params::Get('l');
 	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
 	return $controller->GetMetadataFile($metadataId, $fileId);
@@ -211,8 +205,10 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 App::$app->get('/map/metadata', function (Request $request) {
 	$controller = new commonServices\MetadataService();
 	$workId = Params::CheckParseIntValue(Params::CheckMandatoryValue(Params::FromPath(2)));
+	Session::$AccessLink = Params::Get('l');
+
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
-	
+
 	$workService = new services\WorkService();
 	$work = $workService->GetWorkOnly($workId);
 	$metadataId = $work->MetadataId;
@@ -226,6 +222,7 @@ App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) 
 	$metadataId = Params::GetIntMandatory('m');
 	$workId = Params::GetInt('w');
 	$datasetId = Params::GetInt('d', null);
+	Session::$AccessLink = Params::Get('l');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 

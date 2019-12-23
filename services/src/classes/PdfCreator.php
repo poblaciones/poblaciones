@@ -109,8 +109,9 @@ class PdfCreator
 		$value = $this->metadata['met_url'];
 		if ($value == null)
 			return;
-
-		$this->pdf->WritePair("Dirección estable", Links::GetFullyQualifiedUrl($this->metadata['met_url']));
+		$extra = $this->metadata['wrk_access_link'];
+		if ($extra) $value .= '/' . $extra;
+		$this->pdf->WritePair("Dirección", Links::GetFullyQualifiedUrl($value));
 	}
 	private function WriteSources()
 	{

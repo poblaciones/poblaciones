@@ -41,7 +41,7 @@ class DatasetColumnService extends DbSession
 		// Quita referencias hacia estas columnas
 		$this->UnlockColumns($datasetId, $ids);
 		// Borra los valueLabels
-		$labels = "DELETE draft_dataset_label FROM draft_dataset_label
+		$labels = "DELETE draft_dataset_column_value_label FROM draft_dataset_label
 									JOIN draft_dataset_column ON dla_dataset_column_id = dco_id
 					WHERE dco_dataset_id = ? AND dla_dataset_column_id IN (" . join(',', $ids) . ")";
 		App::Db()->exec($labels, array($datasetId));
@@ -52,7 +52,7 @@ class DatasetColumnService extends DbSession
 
 		// Hace el query de alter table en los datos
 		// Ejecuta el drop de los datos
-		App::Db()->exec($deleteData);
+		App::Db()->execDDL($deleteData);
 		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
 		DatasetColumnCache::Cache()->Clear($datasetId);
 		Profiling::EndTimer();
@@ -191,7 +191,7 @@ class DatasetColumnService extends DbSession
 		// 2. DATOS
 		// Hace el alterTable
 		$alter = "ALTER TABLE " . $dataset->getTable() . " ADD COLUMN " . $newColumn->getField() . " INT(11) NULL DEFAULT NULL AFTER " . $originalField;
-		App::Db()->exec($alter);
+		App::Db()->execDDL($alter);
 
 		Profiling::EndTimer();
 		return $newColumn;
@@ -276,7 +276,7 @@ class DatasetColumnService extends DbSession
 		Profiling::BeginTimer();
 		// actualiza labels
 		$valueIds = array();
-		$insertInto = "INSERT INTO draft_dataset_label (dla_dataset_column_id, dla_value, dla_caption, dla_order) VALUES ";
+		$insertInto = "INSERT INTO draft_dataset_column_value_label (dla_dataset_column_id, dla_value, dla_caption, dla_order) VALUES ";
 		$insertBlock = "";
 		$insertCount = 0;
 		$done = array();
@@ -330,7 +330,7 @@ class DatasetColumnService extends DbSession
 		}
 		if (sizeof($valueIds) > 0)
 		{
-			$sql = "UPDATE draft_dataset_label SET dla_value = (CASE " . $valueCase . " END),
+			$sql = "UPDATE draft_dataset_column_value_label SET dla_value = (CASE " . $valueCase . " END),
 																						dla_caption = (CASE " . $captionCase . " END),
 																						dla_order = (CASE " . $orderCase . " END)
 									WHERE dla_id IN (" . join(',', $valueIds) . ") AND dla_dataset_column_id = ?";
@@ -344,7 +344,7 @@ class DatasetColumnService extends DbSession
 
 		if (sizeof($deletedLabels) > 0)
 		{
-			$labels = "DELETE draft_dataset_label FROM draft_dataset_label
+			$labels = "DELETE draft_dataset_column_value_label FROM draft_dataset_label
 										JOIN draft_dataset_column ON dla_dataset_column_id = dco_id
 						WHERE dco_dataset_id = ? AND dla_id IN (" . join(',', $deletedLabels) . ")";
 			App::Db()->exec($labels, array($datasetId));
@@ -401,7 +401,7 @@ class DatasetColumnService extends DbSession
 		// Devuelve todas las etiquetas de valores de columna
 		// de un dataset en forma de diccionario[id_columna]['Id' => id, 'Value' => value, 'Caption' => caption, 'Order' => order]
 		$sql = "SELECT dla_dataset_column_id, dla_id, dla_value, dla_caption, dla_order
-									FROM draft_dataset_label JOIN draft_dataset_column ON dco_id = dla_dataset_column_id
+									FROM draft_dataset_column_value_label JOIN draft_dataset_column ON dco_id = dla_dataset_column_id
 									WHERE dco_dataset_id = ? " . $filter . " ORDER BY dla_dataset_column_id, dla_order, dla_value";
 		$labels = App::Db()->fetchAllByPos($sql, array($datasetId));
 		$ret = array();

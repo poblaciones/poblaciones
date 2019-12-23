@@ -103,7 +103,6 @@ class RevokeSnapshots extends BaseService
 			VersionUpdater::Increment('FAB_METRICS');
 			$this->cacheManager->CleanFabMetricsCache();
 		}
-
 		// Identifica qué borrar
 		$removedMetricVersions = $previousMetricVersions;
 

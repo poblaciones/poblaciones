@@ -38,6 +38,17 @@ module.exports = {
 			return str;
 		}
 	},
+	GenerateAccessLink() {
+		return 'l-' + this.GetRandomString(16);
+	},
+	GetRandomString(length) {
+    var text = "";
+    var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < length; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+	},
 	EscapeRegExp(str) {
 		return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 	},

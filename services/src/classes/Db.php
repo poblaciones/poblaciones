@@ -36,6 +36,11 @@ class Db
 		return App::Orm()->GetEntityManager();
 	}
 
+	public function IsInTransaction()
+	{
+		return $this->isInTransaction;
+	}
+
 	public function begin()
 	{
 		Profiling::BeginTimer();
@@ -92,7 +97,7 @@ class Db
 		Profiling::BeginTimer();
 		$this->ensureBegin();
 		$sql = "DROP TABLE IF EXISTS `" . $table . "`";
-		$this->exec($sql);
+		$this->execDDL($sql);
 		Profiling::EndTimer();
 	}
 
@@ -113,7 +118,7 @@ class Db
 		Profiling::BeginTimer();
 		$this->ensureBegin();
 		$sql = "RENAME TABLE `" . $tableSource . "` TO `" . $tableTarget . "`";
-		$this->exec($sql);
+		$this->execDDL($sql);
 		Profiling::EndTimer();
 	}
 
@@ -200,6 +205,22 @@ class Db
 		$ret = $this->db->fetchColumn($sql, $params);
 		Performance::EndDbWait();
 		Profiling::EndTimer();
+		return $ret;
+	}
+	public function execDDL($sql, $params = array())
+	{
+		// Los cambios de estructura finalizan la transacción activa
+		$wasInTransaction = $this->isInTransaction;
+		if ($wasInTransaction) {
+			// Cierra si había una
+			$this->commit();
+		}
+		$ret = $this->executeQuery($sql, $params);
+		if ($wasInTransaction) {
+			$this->commit();
+			// Reabre
+			$this->ensureBegin();
+		}
 		return $ret;
 	}
 	public function exec($sql, $params = array())

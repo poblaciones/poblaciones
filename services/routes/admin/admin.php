@@ -7,6 +7,7 @@ use helena\classes\Session;
 use helena\services\admin as services;
 use helena\services\backoffice as backofficeServices;
 use minga\framework\Params;
+use helena\services\backoffice\publish\CacheManager;
 use helena\entities\backoffice as entities;
 
 // Admins
@@ -72,5 +73,15 @@ App::Get('/services/admin/UpdateWorkIndexing', function (Request $request) {
 	$value = Params::GetBoolMandatory('v');
 	$controller = new services\WorkService();
 	$ret = $controller->UpdateWorkIndexing($workId, $value);
+	return App::Json($ret);
+});
+
+
+App::Get('/services/admin/services/admin/ClearMetadataPdfCache', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$controller = new CacheManager();
+	$metadataId = Params::GetMandatory('m');
+	$ret = $controller->CleanPdfMetadata($metadataId);
 	return App::Json($ret);
 });

@@ -7,7 +7,7 @@
 						<td>Título:</td>
 						<td>{{ work.Name }}</td>
 					</tr>
-					<tr>
+					<tr v-if="work.Authors">
 						<td>Autores:</td>
 						<td>{{ work.Authors }}</td>
 					</tr>
@@ -26,7 +26,7 @@
 					<tr>
 						<td style="width: 120px;">Dirección:</td>
 						<td>
-							<a target="_blank" :href="work.Url">{{ work.Url }}</a>
+							<a target="_blank" :href="completeUrl(work.Url)">{{ completeUrl(work.Url) }}</a>
 						</td>
 					</tr>
 					<tr>
@@ -116,13 +116,20 @@ export default {
 			this.work = work;
 			this.$refs.dialog.show();
 		},
+		completeUrl(url) {
+			if (window.accessWorkId && window.accessLink && window.accessWorkId === this.work.Id) {
+				return url + '/' + window.accessLink;
+			} else {
+				return url;
+			}
+		},
 		citationAPA() {
 			return apa.onlineMapCitation(this.htmlEncode(this.work.Authors), this.htmlEncode(this.formattedYear),
-					this.htmlEncode(this.work.Name), this.work.Url);
+					this.htmlEncode(this.work.Name), this.completeUrl(this.work.Url));
 		},
 		citationAPAText(work) {
 			return apa.onlineMapCitation(work.Authors, work.ReleaseDate,
-				work.Name, work.Url, true);
+				work.Name, this.completeUrl(work.Url), true);
 		},
 		htmlEncode(html) {
 			return document.createElement('a').appendChild(
@@ -132,13 +139,13 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.work.MetadataId + '&f=' + file.FileId;
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.work.MetadataId + '&f=' + file.FileId + h.urlParam('l', window.accessLink);
 			} else {
 				return '#';
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.work.MetadataId + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id;
+			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.work.MetadataId + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id + h.urlParam('l', window.accessLink);
 		},
 	},
 	computed:

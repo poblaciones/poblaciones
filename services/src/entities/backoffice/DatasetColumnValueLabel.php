@@ -5,12 +5,12 @@ namespace helena\entities\backoffice;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * DatasetLabel
+ * DatasetColumnValueLabel
  *
- * @ORM\Table(name="dataset_label", indexes={@ORM\Index(name="fk_datasets_labels_datasets_columns1_idx", columns={"dla_dataset_column_id"})})
+ * @ORM\Table(name="dataset_column_value_label", indexes={@ORM\Index(name="fk_datasets_labels_datasets_columns1_idx", columns={"dla_dataset_column_id"})})
  * @ORM\Entity
  */
-class DatasetLabel
+class DatasetColumnValueLabel
 {
     /**
      * @var integer
@@ -68,7 +68,7 @@ class DatasetLabel
      *
      * @param integer $id
      *
-     * @return DatasetLabel
+     * @return DatasetColumnValueLabel
      */
     public function setId($id)
     {
@@ -82,7 +82,7 @@ class DatasetLabel
      *
      * @param integer $order
      *
-     * @return DatasetLabel
+     * @return DatasetColumnValueLabel
      */
     public function setOrder($order)
     {
@@ -106,7 +106,7 @@ class DatasetLabel
      *
      * @param string $value
      *
-     * @return DatasetLabel
+     * @return DatasetColumnValueLabel
      */
     public function setValue($value)
     {
@@ -130,7 +130,7 @@ class DatasetLabel
      *
      * @param string $caption
      *
-     * @return DatasetLabel
+     * @return DatasetColumnValueLabel
      */
     public function setCaption($caption)
     {
@@ -154,7 +154,7 @@ class DatasetLabel
      *
      * @param \helena\entities\backoffice\DatasetColumn $datasetColumn
      *
-     * @return DatasetLabel
+     * @return DatasetColumnValueLabel
      */
     public function setDatasetColumn(\helena\entities\backoffice\DatasetColumn $datasetColumn = null)
     {

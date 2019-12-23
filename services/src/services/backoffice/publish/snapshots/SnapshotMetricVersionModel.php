@@ -13,7 +13,7 @@ class SnapshotMetricVersionModel
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 
 	 	Profiling::BeginTimer();
-		$sql = "INSERT INTO snapshot_metric_versions ( mvw_metric_version_id, mvw_metric_id, mvw_metric_revision, mvw_metric_caption, mvw_metric_group_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
+		$sql = "INSERT INTO snapshot_metric_version ( mvw_metric_version_id, mvw_metric_id, mvw_metric_revision, mvw_metric_caption, mvw_metric_group_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
 			mvw_work_id, mvw_work_caption, mvw_work_authors, mvw_work_institution, mvw_work_type, mvw_work_is_private, mvw_work_is_indexed, mvw_work_access_link, `mvw_variable_captions`, `mvw_variable_value_captions`) ";
 
 		$sql .= "SELECT mvr_id, mvr_metric_id, mtr_revision, mtr_caption, mtr_metric_group_id, mvr_caption,
@@ -57,7 +57,7 @@ class SnapshotMetricVersionModel
 
 	 	Profiling::BeginTimer();
 
-		$sql = "DELETE FROM snapshot_metric_versions WHERE mvw_metric_id = ?";
+		$sql = "DELETE FROM snapshot_metric_version WHERE mvw_metric_id = ?";
 
 		App::Db()->exec($sql, array($metricIdShardified));
 
@@ -68,7 +68,7 @@ class SnapshotMetricVersionModel
 	{
 		Profiling::BeginTimer();
 
-		$sql = "UPDATE snapshot_metric_versions SET mvw_metric_revision = mvw_metric_revision + 1";
+		$sql = "UPDATE snapshot_metric_version SET mvw_metric_revision = mvw_metric_revision + 1";
 		App::Db()->exec($sql);
 		$sql = "UPDATE metric SET mtr_revision = mtr_revision + 1";
 		$ret = App::Db()->exec($sql);
@@ -99,7 +99,7 @@ class SnapshotMetricVersionModel
 
 	 	Profiling::BeginTimer();
 
-		$sql = "DELETE FROM snapshot_metric_versions WHERE mvw_work_id = ?";
+		$sql = "DELETE FROM snapshot_metric_version WHERE mvw_work_id = ?";
 
 		App::Db()->exec($sql, array($workIdShardified));
 
