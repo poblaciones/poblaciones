@@ -156,6 +156,15 @@ class DraftWork
      */
     private $Image;
 
+    /**
+     * @var \helena\entities\backoffice\DraftWorkStartup
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftWorkStartup")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="wrk_startup_id", referencedColumnName="wst_id", nullable=false)
+     * })
+     */
+    private $Startup;
 
     /**
      * Get id
@@ -564,6 +573,31 @@ class DraftWork
     public function getImage()
     {
         return $this->Image;
+    }
+
+
+    /**
+     * Set startup
+     *
+     * @param \helena\entities\backoffice\DraftWorkStartup $startup
+     *
+     * @return DraftWork
+     */
+    public function setStartup(\helena\entities\backoffice\DraftWorkStartup $startup = null)
+    {
+        $this->Startup = $startup;
+
+        return $this;
+    }
+
+    /**
+     * Get startup
+     *
+     * @return \helena\entities\backoffice\DraftWorkStartup
+     */
+    public function getStartup()
+    {
+        return $this->Startup;
     }
 }
 

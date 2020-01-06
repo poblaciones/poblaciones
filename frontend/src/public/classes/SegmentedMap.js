@@ -23,12 +23,14 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.Popups = {};
 	this.textCanvas = {};
 	this.toolbarStates = toolbarStates;
+	this.MapIsInitialized = false;
 	this.DefaultTitle = 'Poblaciones';
 	this._axios = this.CreateAxios();
 	this.Metrics = new MetricsList(this, selectedMetricCollection);
 	this.SaveRoute = new SaveRoute(this);
 	this.RestoreRoute = new RestoreRoute(this);
 	this.afterCallback = null;
+	this.afterCallback2 = null;
 	this.Labels = new ActiveLabels();
 };
 
@@ -80,10 +82,13 @@ SegmentedMap.prototype.CreateAxios = function () {
 };
 
 SegmentedMap.prototype.MapInitialized = function () {
-
+	this.MapIsInitialized = true;
 	this.Metrics.AppendNonStandardMetric(this.Labels);
 	if (this.afterCallback !== null) {
 		this.afterCallback();
+	}
+	if (this.afterCallback2 !== null) {
+		this.afterCallback2();
 	}
 };
 
@@ -126,7 +131,9 @@ SegmentedMap.prototype.SetMapTypeState = function (mapType) {
 };
 
 SegmentedMap.prototype.SetCenter = function (coord) {
-	this.SaveRoute.lastCenter = coord;
+//	this.SaveRoute.lastCenter = coord;
+	this.frame.Envelope.Min = coord;
+	this.frame.Envelope.Max = coord;
 	this.MapsApi.SetCenter(coord);
 };
 
@@ -146,7 +153,7 @@ SegmentedMap.prototype.ZoomChanged = function (zoom) {
 		this.frame.Zoom = zoom;
 		this.Labels.UpdateMap();
 		this.Metrics.ZoomChanged();
-		this.SaveRoute.UpdateRoute();
+		//this.SaveRoute.UpdateRoute();
 	}
 };
 SegmentedMap.prototype.FrameMoved = function (bounds) {
@@ -157,7 +164,7 @@ SegmentedMap.prototype.FrameMoved = function (bounds) {
 	}
 };
 
-SegmentedMap.prototype.DragEnd = function () {
+SegmentedMap.prototype.BoundsChanged = function () {
 	this.SaveRoute.UpdateRoute();
 };
 

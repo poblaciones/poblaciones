@@ -5,21 +5,27 @@ namespace helena\classes;
 use minga\framework\IO;
 use minga\framework\Params;
 use minga\framework\Date;
+use minga\framework\Profiling;
 
 class Statistics
 {
 	public static function StoreDownloadDatasetHit($workId, $datasetId, $downloadType)
 	{
+		Profiling::BeginTimer();
 		self::SaveData($workId, 'download', $datasetId, $downloadType);
+		Profiling::EndTimer();
 	}
 
 	public static function StoreDownloadMetadataHit($workId)
 	{
+		Profiling::BeginTimer();
 		self::SaveData($workId, 'metadata', '');
+		Profiling::EndTimer();
 	}
 
 	public static function StoreSelectedMetricHit($selectedMetric)
 	{
+		Profiling::BeginTimer();
 		$metricId = $selectedMetric->Metric->Id;
 		foreach($selectedMetric->Versions as $version)
 		{
@@ -27,6 +33,7 @@ class Statistics
 			$workId = $work->Id;
 			self::SaveData($workId, 'metric', $metricId);
 		}
+		Profiling::EndTimer();
 	}
 
 	private static function SaveData($workId, $type, $id, $extra = '')
@@ -54,4 +61,3 @@ class Statistics
 		return $ret;
 	}
 }
-

@@ -255,7 +255,7 @@ module.exports = {
 	},
 	urlParam(paramName, paramValue) {
 		if (!paramValue) {
-			return;
+			return '';
 		}
 		return "&" + paramName + "=" + encodeURI(paramValue);
 	},

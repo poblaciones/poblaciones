@@ -13,6 +13,7 @@ class LevelInfo extends BaseMapModel
 
 	public $GeographyId;
 	public $Dataset;
+	public $Extents = null;
 	public $SummaryCaption;
 	public $HasUrbanity;
 	public $HasSummary = false;

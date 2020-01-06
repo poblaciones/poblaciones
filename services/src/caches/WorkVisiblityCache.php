@@ -8,7 +8,7 @@ class WorkVisiblityCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new ObjectCache("Works/Visiblity");
+		return new ObjectCache("Works/Visiblity", true);
 	}
 }
 

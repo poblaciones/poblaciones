@@ -114,12 +114,7 @@ export default {
 					return;
 				}
 				loc.autolist = [];
-				if(this.retCancel !== null)
-				{
-					this.retCancel('cancelled');
-					this.retCancel = null;
-				}
-				var s = new Search(this, window.SegMap);
+				var s = new Search(this, window.SegMap.Revisions.Search, 'a');
 				s.StartSearch(t);
 			},
 			500),
@@ -210,6 +205,21 @@ export default {
 	min-width: 200px;
 	z-index: 1;
 	position:absolute;
+}
+
+
+/* condition for screen size minimum of 500px */
+@media (max-width:700px) {
+  .searchBar {
+	  left: 20px;
+	  top: 60px;
+		width: calc(100% - 35px);
+	}
+}
+@media (max-width:350px) {
+  .searchBar {
+	  top: 90px;
+	}
 }
 .auto {
 	background: white;

@@ -111,20 +111,18 @@ GoogleMapsApi.prototype.Initialize = function () {
 	//https://developers.google.com/maps/documentation/javascript/maptypes#Rotating45DegreeImagery
 
 	var loc = this;
-	this.gMap.addListener('dragstart', function () {
-		loc.dragging = true;
+	this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
+		loc.segmentedMap.MapInitialized();
 	});
-	this.gMap.addListener('dragend', function () {
-		loc.dragging = false;
-		loc.segmentedMap.DragEnd();
-	});
+};
+
+GoogleMapsApi.prototype.BindEvents = function () {
+	var loc = this;
 	this.gMap.addListener('bounds_changed', function () {
 		if (loc.dragging === false) {
 			loc.segmentedMap.FrameMoved(loc.getBounds());
+			loc.segmentedMap.BoundsChanged();
 		}
-	});
-	this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
-		loc.segmentedMap.MapInitialized();
 	});
 	this.gMap.addListener('zoom_changed', function () {
 		//	if (loc.isSettingZoom === false) {
@@ -132,12 +130,19 @@ GoogleMapsApi.prototype.Initialize = function () {
 		//}
 		loc.MoveInfoWindow(loc.gMap.getZoom());
 	});
+	this.gMap.addListener('dragstart', function () {
+		loc.dragging = true;
+	});
+	this.gMap.addListener('dragend', function () {
+		loc.dragging = false;
+		loc.segmentedMap.BoundsChanged();
+	});
 
 	this.gMap.addListener('maptypeid_changed', function () {
 		loc.segmentedMap.MapTypeChanged(loc.GetMapTypeState());
 		loc.UpdateClippingStyle();
 	});
-	this.google.maps.event.addListener(this.drawingManager, 'circlecomplete', function(circle) {
+	this.google.maps.event.addListener(this.drawingManager, 'circlecomplete', function (circle) {
 		loc.CircleCompleted(circle);
 	});
 };

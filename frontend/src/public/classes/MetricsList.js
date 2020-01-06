@@ -95,7 +95,6 @@ MetricsList.prototype.ClearUserMetrics = function () {
 	this.ClearSegment(this.GeoShapesSegment);
 	this.ClearSegment(this.PatternsSegment);
 	this.ClearSegment(this.LocationsSegment);
-	this.map.SaveRoute.UpdateRoute();
 };
 
 

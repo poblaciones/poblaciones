@@ -7,16 +7,14 @@ use Silex\Provider\VarDumperServiceProvider;
 
 use helena\classes\App;
 use minga\framework\Context;
-use helena\classes\GlobalTimer;
 use minga\framework\Profiling;
 
-require_once __DIR__.'/vendor/autoload.php';
-GlobalTimer::Start();
-Profiling::BeginTimer("Context");
+time_elapsed('preautoload');
 
-Profiling::BeginTimer("App");
+require_once __DIR__.'/vendor/autoload.php';
+time_elapsed('postautoload');
 $app = require_once __DIR__.'/src/app.php';
-Profiling::EndTimer();
+time_elapsed('app-ended');
 
 Context::Settings()->applicationName = 'Poblaciones';
 Context::Settings()->storagePath = Context::Settings()->rootPath . '/storage';
@@ -30,7 +28,9 @@ if (!file_exists($settings)) {
 				<p>La ubicación esperada es: ' . $settings . '.';
 	exit;
 }
+time_elapsed('presettings');
 require_once $settings;
+time_elapsed('settings');
 
 Context::Settings()->Shard()->CheckCurrentIsSet();
 
@@ -40,6 +40,7 @@ $db['dbname'] = Context::Settings()->Db()->Name;
 $db['user'] = Context::Settings()->Db()->User;
 $db['password'] = Context::Settings()->Db()->Password;
 App::SetDbConfig($db);
+time_elapsed('setdb');
 
 if(Context::Settings()->Debug()->debug)
 {

@@ -8,7 +8,7 @@ class SelectedMetricsMetadataCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new ObjectCache("Metrics/SelectedMetric");
+		return new ObjectCache("Metrics/SelectedMetric", true);
 	}
 }
 

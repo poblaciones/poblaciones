@@ -65,12 +65,14 @@ class PublishDataTables
 		$imageMatrix = array('class' => entities\File::class, 'parentKey' => 'wrk_image_id', 'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')));
 
 		$extraMetrics = array('class' => entities\WorkExtraMetric::class, 'childKey' => 'wmt_work_id');
+		$workStartup = array('class' => entities\WorkStartup::class, 'parentKey' => 'wrk_startup_id');
 
 		// Inicia el pasaje
 		$publishMatrix = array('class' => entities\Work::class,
 														'children' => array(
 															$imageMatrix,
 															$extraMetrics,
+															$workStartup,
 															$metadataMatrix,
 															$datasetMatrix,
 															$metricMatrix));
@@ -439,6 +441,7 @@ class PublishDataTables
 		$ret =  RowDuplicator::GetMigrateSqlQueries($entity1, $entity2, $shardifyIds, $staticColumns);
 		return $ret;
 	}
+
 
 	private function ProcessTree($ele, $prevKey = null, $nlevel = 0)
 	{

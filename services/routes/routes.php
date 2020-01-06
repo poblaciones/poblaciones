@@ -4,7 +4,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 use helena\classes\App;
-use helena\classes\GlobalTimer;
 use helena\classes\Router;
 use helena\classes\Remember;
 use helena\classes\Session;
@@ -14,7 +13,6 @@ use minga\framework\Headers;
 use minga\framework\Profiling;
 use minga\framework\Log;
 use minga\framework\PhpSession;
-use minga\framework\Str;
 use minga\framework\Traffic;
 if (PhpSession::GetSessionValue('started', null) === null) {
 	PhpSession::SetSessionValue('started', $_SERVER['REQUEST_TIME']);
@@ -22,8 +20,6 @@ if (PhpSession::GetSessionValue('started', null) === null) {
 ob_start();
 
 App::$app->before(function(Request $request) {
-
-	Profiling::EndTimer();
 	Profiling::BeginTimer("Request");
 
 	$add = $_SERVER['REMOTE_ADDR'];
@@ -40,8 +36,6 @@ App::$app->before(function(Request $request) {
 	Headers::AcceptAnyCOARS();
 
 	$route = $request->getPathInfo();
-
-	GlobalTimer::Start();
 
 	if (Router::ProcessPath($route)) {
 		$newRequest = Request::create($route, $request->getMethod());
@@ -76,25 +70,29 @@ App::$app->options("{anything}", function () {
 require_once('authenticate.php');
 require_once('frontend.php');
 require_once('common.php');
-require_once('logs.php');
-App::RegisterControllerGet('/users', helena\controllers\backoffice\cBackoffice::class);
-App::RegisterControllerGet('/users/{any}', helena\controllers\backoffice\cBackoffice::class)->assert("any", ".*");
 
-App::RegisterControllerGet('/admins', helena\controllers\admins\cAdmins::class);
-App::RegisterControllerGet('/admins/{any}', helena\controllers\admins\cAdmins::class)->assert("any", ".*");
+if (!$isPublic)
+{
+	require_once('logs.php');
 
-require_once('backoffice/work.php');
-require_once('backoffice/permission.php');
-require_once('backoffice/metric.php');
-require_once('backoffice/dataset.php');
-require_once('backoffice/datasetColumns.php');
-require_once('backoffice/metadata.php');
-require_once('backoffice/georeference.php');
-require_once('backoffice/import.php');
-require_once('backoffice/mock.php');
-require_once('backoffice/test.php');
-require_once('admin/admin.php');
+	App::RegisterControllerGet('/users', helena\controllers\backoffice\cBackoffice::class);
+	App::RegisterControllerGet('/users/{any}', helena\controllers\backoffice\cBackoffice::class)->assert("any", ".*");
 
+	App::RegisterControllerGet('/admins', helena\controllers\admins\cAdmins::class);
+	App::RegisterControllerGet('/admins/{any}', helena\controllers\admins\cAdmins::class)->assert("any", ".*");
+
+	require_once('backoffice/work.php');
+	require_once('backoffice/permission.php');
+	require_once('backoffice/metric.php');
+	require_once('backoffice/dataset.php');
+	require_once('backoffice/datasetColumns.php');
+	require_once('backoffice/metadata.php');
+	require_once('backoffice/georeference.php');
+	require_once('backoffice/import.php');
+	require_once('backoffice/mock.php');
+	require_once('backoffice/test.php');
+	require_once('admin/admin.php');
+}
 require_once('tests.php');
 App::$app->get('/phpinfo2', function (Request $request) {
 	phpinfo();

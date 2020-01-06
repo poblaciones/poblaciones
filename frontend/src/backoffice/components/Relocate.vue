@@ -7,32 +7,38 @@
 		<md-dialog-content>
 			<div>
 				<p>
-				Indique la nueva ubicación del elemento.
+				Indique la ubicación:
 				</p>
 				<div id="map" style="width: 600px; height: 320px;"></div>
 				<div style="margin-top: 20px; margin-bottom: -10px">
 					<div class="md-layout md-gutter">
-						<div class="md-layout-item md-size-30">
+						<div class="md-layout-item md-size-20">
 							<md-field>
-							<label>Latitud</label>
-							<md-input v-model="newLat"></md-input>
-						</md-field>
+								<label>Latitud</label>
+								<md-input v-model="newLat"></md-input>
+							</md-field>
 						</div>
 						<div class="md-layout-item md-size-10">
 							<md-button class="md-icon-button" @click="swapValues" style="margin-top: 8px;"
-											 title="Intercambiar latitud y longitud">
+												 title="Intercambiar latitud y longitud">
 								<md-icon>import_export</md-icon>
 							</md-button>
 						</div>
-						<div class="md-layout-item md-size-30">
+						<div class="md-layout-item md-size-20">
 							<md-field>
 								<label>Longitud</label>
 								<md-input v-model="newLon"></md-input>
 							</md-field>
 						</div>
-						<div class="md-layout-item md-size-30">
+						<div v-if="!useMarker" class="md-layout-item md-size-20">
+							<md-field>
+								<label>Zoom</label>
+								<md-input v-model="newZoom"></md-input>
+							</md-field>
+						</div>
+						<div class="md-layout-item md-size-10">
 							<md-button class="md-icon-button" @click="goto" style="margin-top: 8px;"
-												 title="Ir" :disabled="lat === newLat && lon === newLon">
+												 title="Ir" :disabled="!(lat !== newLat || lon !== newLon || (!useMarker && zoom !== newZoom))">
 								<md-icon>keyboard_arrow_right</md-icon>
 							</md-button>
 
@@ -87,7 +93,11 @@ export default {
 		},
 		goto() {
 			var latLng = new google.maps.LatLng(this.newLat, this.newLon);
-			this.marker.setPosition(latLng);
+			if (this.marker) {
+				this.marker.setPosition(latLng);
+			} else {
+				this.map.setZoom(parseFloat(this.newZoom));
+			}
 			this.map.setCenter(latLng);
 		},
 
@@ -97,7 +107,9 @@ export default {
 			var latLng = new google.maps.LatLng(this.lat, this.lon);
 
 			this.updateMarkerPosition(latLng);
-			this.marker.setPosition(latLng);
+			if (this.marker) {
+				this.marker.setPosition(latLng);
+			}
 			this.map.setCenter(latLng);
 		},
 		round(value, decimals) {
@@ -107,54 +119,65 @@ export default {
 			var loc = this;
 			var latLng = new google.maps.LatLng(this.lat, this.lon);
 			var map = new google.maps.Map(document.getElementById('map'), {
-				zoom: 14,
+				zoom: this.zoom,
 				center: latLng,
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			});
-
-			var marker = new google.maps.Marker({
-				position: latLng,
-				title: 'Relocalizar',
-				map: map,
-				draggable: true
-			});
-			this.marker = marker;
+			if (this.useMarker) {
+				var marker = new google.maps.Marker({
+					position: latLng,
+					title: 'Relocalizar',
+					map: map,
+					draggable: true
+				});
+				this.marker = marker;
+			} else {
+				this.marker = null;
+			}
 			this.map = map;
-			map.overlayMapTypes.insertAt(0, new GeographyOverlay(map,
-							window.Context.GetTrackingLevelGeography().Id));
-
-			// Update current position info.
+			if (this.useOverlay) {
+				map.overlayMapTypes.insertAt(0, new GeographyOverlay(map,
+					window.Context.GetTrackingLevelGeography().Id));
+			}
 			loc.updateMarkerPosition(latLng);
 
-			// Add dragging event listeners.
-			google.maps.event.addListener(marker, 'dragstart', function() {
-				//updateMarkerAddress('Dragging...');
-			});
-
-			google.maps.event.addListener(marker, 'drag', function() {
-				//updateMarkerStatus('Dragging...');
-				loc.updateMarkerPosition(marker.getPosition());
-			});
-
-			google.maps.event.addListener(marker, 'dragend', function() {
-				//loc.updateMarkerStatus('Drag ended');
-			});
+			if (this.useMarker) {
+				google.maps.event.addListener(marker, 'drag', function () {
+					loc.updateMarkerPosition(marker.getPosition());
+				});
+			} else {
+				google.maps.event.addListener(map, 'bounds_changed', function (e) {
+					var c = map.getCenter();
+					loc.newLat = parseFloat(c.lat().toFixed(6));
+					loc.newLon = parseFloat(c.lng().toFixed(6));
+				});
+				google.maps.event.addListener(map, 'zoom_changed', function (e) {
+					loc.newZoom = map.getZoom();
+				});
+			}
 
 			google.maps.event.addListener(map, 'click', function(e) {
 				loc.updateMarkerPosition(e.latLng);
-				marker.setPosition(e.latLng);
+				if (loc.marker) {
+					marker.setPosition(e.latLng);
+				}
 			});
 		},
-		show(lat, lon) {
+		show(lat, lon, zoom) {
 			var loc = this;
+			if (!zoom || isNaN(zoom)) {
+				zoom = 14;
+			}
 			this.openPopup = true;
 			this.$nextTick(() => {
 				loc.initialize();
 			});
 			this.lat = lat;
 			this.lon = lon;
+			this.zoom = zoom;
 			this.newLat = lat;
 			this.newLon = lon;
+			this.newZoom = zoom;
 		},
 		save() {
 			this.$emit('relocated');
@@ -162,13 +185,19 @@ export default {
 		},
 	},
 	props: {
+		// Esta propiedad establece si funciona como un popup de captación de posición
+		// por marker o si apartir de la posición actual del mapa revuelve un lat, lon y zoom.
+		useMarker: true,
+		useOverlay: true
   },
 	data() {
 		return {
 			lat: null,
 			lon: null,
+			zoom: null,
 			newLat: null,
 			newLon: null,
+			newZoom: null,
 			marker: null,
 			openPopup: false,
 			map: null,

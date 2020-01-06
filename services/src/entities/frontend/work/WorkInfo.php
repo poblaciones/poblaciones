@@ -3,6 +3,7 @@
 namespace helena\entities\frontend\work;
 
 use helena\entities\BaseMapModel;
+use helena\classes\GeoJson;
 
 class WorkInfo extends BaseMapModel
 {
@@ -15,13 +16,13 @@ class WorkInfo extends BaseMapModel
 	public $License;
 	public $IsPrivate;
 	public $CanEdit;
-	public $StartArgs;
 	public $Coverage;
 	public $Institution;
 	public $Url;
 	public $FileUrl;
 	public $Files;
 	public $Metrics;
+	public $Startup;
 
 	public static function GetMap()
 	{
@@ -39,9 +40,7 @@ class WorkInfo extends BaseMapModel
 
 			'wrk_type' => 'Type',
 			'wrk_is_private' => 'IsPrivate',
-			'met_online_since' => 'ReleaseDate',
-			'wrk_image_id' => 'ImageId',
-			'wrk_image_type' => 'ImageType'
+			'met_online_since' => 'ReleaseDate'
 			);
 	}
 
@@ -67,6 +66,17 @@ class WorkInfo extends BaseMapModel
 			$arr[] = array('Caption' => $row['Caption'], 'Web' => $row['Web'], 'FileId' => $row['FileId']);
 		}
 		$this->Files = $arr;
+	}
+
+	public function FillStartup($row)
+	{
+		$this->Startup = new StartupInfo();
+		$this->Startup->Fill($row);
+
+		if ($row['wst_center_lat'] !== null && $row['wst_center_lon'] !== null)
+		{
+			$this->Startup->Center = ['Lat' => $row['wst_center_lat'], 'Lon' => $row['wst_center_lon']];
+		}
 	}
 }
 

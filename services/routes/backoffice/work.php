@@ -78,6 +78,19 @@ App::$app->get('/services/backoffice/GetWorkInfo', function (Request $request) {
 });
 
 
+App::$app->post('/services/backoffice/UpdateStartup', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	$work = App::Orm()->find(entities\DraftWork::class, $workId);
+	$startup = App::ReconnectJsonParamMandatory(entities\DraftWorkStartup::class, 's');
+	if ($work->getStartup()->getId() !== $startup->getId())
+	{
+		throw new ErrorException('Invalid startup.');
+	}
+	$controller = new services\WorkService();
+	return App::Json($controller->UpdateStartup($workId, $startup));
+});
+
 App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;

@@ -89,12 +89,12 @@ Clipping.prototype.ResetClippingRegion = function () {
 	this.SegmentedMap.SaveRoute.UpdateRoute();
 	this.SegmentedMap.UpdateMap();
 };
-Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter) {
+Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, clipForZoomOnly) {
 	this.frame.ClippingCircle = null;
 	this.SegmentedMap.ReleasePins();
 	this.SegmentedMap.ClearMyLocation();
 	this.frame.ClippingRegionId = clippingRegionId;
-	this.CreateClipping(true, moveCenter);
+	this.CreateClipping(true, moveCenter, clipForZoomOnly);
 	this.SegmentedMap.UpdateMap();
 };
 
@@ -103,7 +103,7 @@ Clipping.prototype.ClippingChanged = function () {
 };
 
 
-Clipping.prototype.CreateClipping = function (fitRegion, moveCenter) {
+Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoomOnly) {
 	var args = h.getCreateClippingParams(this.SegmentedMap.frame, this.clipping, this.SegmentedMap.Revisions.Clipping);
 	if (this.ClippingRequest === '*' || this.ClippingRequest === args) {
 		return;
@@ -123,6 +123,9 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter) {
 	}).then(function (res) {
 		loc.ProcessClipping(res.data, fitRegion, moveCenter);
 		loc.ResetClippingRequest(args);
+		if (clipForZoomOnly) {
+			loc.ResetClippingRegion();
+		}
 	}).catch(function (error) {
 		loc.ResetClippingRequest(args);
 		err.errDialog('CreateClipping', 'crear la región seleccionada', error);

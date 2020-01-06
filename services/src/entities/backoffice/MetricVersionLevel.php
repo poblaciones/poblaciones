@@ -28,6 +28,13 @@ class MetricVersionLevel
      */
     private $PartialCoverage;
 
+		/**
+     * @var geometry
+     *
+     * @ORM\Column(name="mvl_extents", type="geometry", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Extents;
+
     /**
      * @var \helena\entities\backoffice\Dataset
      *
@@ -119,6 +126,30 @@ class MetricVersionLevel
     public function getDataset()
     {
         return $this->Dataset;
+    }
+
+		/**
+     * Set extents
+     *
+     * @param geometry $extents
+     *
+     * @return MetricVersionLevel
+     */
+    public function setExtents($extents)
+    {
+        $this->Extents = $extents;
+
+        return $this;
+    }
+
+    /**
+     * Get extents
+     *
+     * @return geometry
+     */
+    public function getExtents()
+    {
+        return $this->Extents;
     }
 
     /**

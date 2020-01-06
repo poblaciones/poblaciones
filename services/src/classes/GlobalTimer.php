@@ -5,20 +5,22 @@ namespace helena\classes;
 class GlobalTimer
 {
 	private static $startTime;
+	private static $startTotalTime;
 	private static $values = array();
 	private static $steps = array();
 	private static $currentCaption = array();
 	private static $currentStartTime = array();
 
-	public static function Start()
+	public static function Start($startTotalTime)
 	{
+		self::$startTotalTime = $startTotalTime;
 		self::$startTime = microtime(true);
 	}
 
 	public static function EllapsedMs()
 	{
 		$endtime = microtime(true);
-		return (int) (($endtime - self::$startTime) * 1000);
+		return '' . ((int) (($endtime - self::$startTime) * 1000)) . ' (+' . ((int) ((self::$startTime - self::$startTotalTime) * 1000)) . ')';
 	}
 	public static function AddTrace($caption)
 	{

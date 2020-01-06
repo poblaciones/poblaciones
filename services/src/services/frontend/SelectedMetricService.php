@@ -9,9 +9,11 @@ use helena\classes\LevelZoom;
 use helena\db\frontend\MetricVersionModel;
 use helena\db\frontend\VariableModel;
 use helena\db\frontend\VariableValueLabelModel;
-use helena\db\frontend\MetricModel;
+use helena\entities\frontend\geometries\Envelope;
 use minga\framework\ErrorException;
 use minga\framework\Arr;
+use minga\framework\Profiling;
+
 use helena\entities\frontend\metric\DatasetInfo;
 use helena\entities\frontend\metric\SelectedMetric;
 use helena\entities\frontend\metric\SelectedMetricVersion;
@@ -26,12 +28,7 @@ use helena\classes\Statistics;
 
 class SelectedMetricService extends BaseService
 {
-	public function GetSelectedMetricJson($metricId)
-	{
-		return App::Json($this->GetSelectedMetric($metricId, true, true));
-	}
-
-	public function GetSelectedMetrics($metricsId)
+	public function PublicGetSelectedMetrics($metricsId)
 	{
 		$ids = explode(',', $metricsId);
 		$ret = array();
@@ -39,23 +36,32 @@ class SelectedMetricService extends BaseService
 		{
 			if ($id != '')
 			{
-				$ret[] = $this->GetSelectedMetric(intval($id), false, true);
+				$ret[] = $this->PublicGetSelectedMetric(intval($id), false, true);
 			}
 		}
 		return $ret;
 	}
-
-	//GetSelectedMetricByVersion
+	public function PublicGetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false)
+	{
+		$ret = self::GetSelectedMetric($metricId, $throwError, $filterByPermissions);
+		if ($ret !== null)
+			Statistics::StoreSelectedMetricHit($ret);
+		return $ret;
+	}
 
 	public function GetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false)
 	{
 		$data = null;
+		Profiling::BeginTimer();
 
 		if (SelectedMetricsMetadataCache::Cache()->HasData($metricId, $data) == false)
 		{
 			$data = $this->CalculateSelectedMetric($metricId, $throwError);
 			if ($data == null)
+			{
+				Profiling::EndTimer();
 				return null;
+			}
 			SelectedMetricsMetadataCache::Cache()->PutData($metricId, $data);
 			$data->EllapsedMs = GlobalTimer::EllapsedMs();
 		}
@@ -63,9 +69,10 @@ class SelectedMetricService extends BaseService
 		{
 			$data = $this->GotFromCache($data);
 		}
-		Statistics::StoreSelectedMetricHit($data);
 		// Quita los que no tenga acceso
 		$this->RemovePrivateVersions($data);
+
+		Profiling::EndTimer();
 		if(sizeof($data->Versions) == 0)
 			return null;
 		else
@@ -184,7 +191,8 @@ class SelectedMetricService extends BaseService
 		$level->Fill($selectedVersionLevelInfo);
 		$level->CanSetUrbanity = ($selectedVersionLevelInfo['geo_field_urbanity_name'] != null);
 		$level->SelectedVariableIndex = 0;
-
+		if ($selectedVersionLevelInfo['mvl_extents'])
+			$level->Extents = Envelope::FromDb($selectedVersionLevelInfo['mvl_extents'])->Trim();
 		$level->Dataset = new DatasetInfo();
 		$level->Dataset->Fill($selectedVersionLevelInfo);
 		// Agrega variables

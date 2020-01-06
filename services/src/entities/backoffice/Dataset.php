@@ -324,7 +324,7 @@ class Dataset
      *
      * @param boolean $ShowInfo
      *
-     * @return DraftDataset
+     * @return Dataset
      */
     public function setShowInfo($ShowInfo)
     {

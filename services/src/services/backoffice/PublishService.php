@@ -24,8 +24,9 @@ class PublishService extends BaseService
 	const STEP_COPY_DATASETS = 4;
 	const STEP_CREATE_SNAPSHOTS_DATASETS = 5;
 	const STEP_CREATE_SNAPSHOTS_METRICS = 6;
-	const STEP_RESET_FLAGS = 7;
-	const STEP_COMPLETED = 8;
+	const STEP_UPDATE_EXTENTS = 7;
+	const STEP_RESET_FLAGS = 8;
+	const STEP_COMPLETED = 9;
 
 	private $state = null;
 
@@ -108,8 +109,13 @@ class PublishService extends BaseService
 				}
 				else
 				{
-					$this->state->NextStep('Completando');
+					$this->state->NextStep('Actualizando extensiones');
 				}
+				break;
+			case self::STEP_UPDATE_EXTENTS:
+				$manager = new PublishSnapshots();
+				$manager->UpdateExtents($workId);
+				$this->state->NextStep('Completando');
 				break;
 			case self::STEP_RESET_FLAGS:
 				$publisher = new PublishDataTables();

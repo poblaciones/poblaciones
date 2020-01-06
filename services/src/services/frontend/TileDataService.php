@@ -3,6 +3,8 @@
 namespace helena\services\frontend;
 
 use helena\classes\App;
+use minga\framework\Profiling;
+
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
 use helena\caches\TileDataCache;
@@ -22,6 +24,7 @@ class TileDataService extends BaseService
 
 	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
 	{
+		Profiling::BeginTimer();
 		$data = null;
 		$this->CheckNotNullNumeric($metricId);
 		$this->CheckNotNullNumeric($metricVersionId);
@@ -34,6 +37,7 @@ class TileDataService extends BaseService
 
 		if ($frame->ClippingCircle == null && TileDataCache::Cache()->HasData($metricId, $key, $data))
 		{
+			Profiling::EndTimer();
 			return $this->GotFromCache($data);
 		}
 		else
@@ -46,6 +50,7 @@ class TileDataService extends BaseService
 		if ($frame->ClippingCircle == null)
 			TileDataCache::Cache()->PutData($metricId, $key, $data);
 
+		Profiling::EndTimer();
 		return $data;
 	}
 

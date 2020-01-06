@@ -1,4 +1,6 @@
 [CURRENT]
+- Opciones de inicio para la obra (dinámico, región o punto).
+- Cálculo de extensión por indicador y por obra en la publicación.
 
 v2.12 (2019-12-22)
 - Fix: Los popups del visor perdían su ubicación al ser arrastrados.

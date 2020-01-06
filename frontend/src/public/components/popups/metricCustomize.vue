@@ -12,7 +12,7 @@
 				<tr>
 					<td>Métrica:</td>
 					<td>
-						<div class="btn-group" style="width: 500px">
+						<div class="btn-group">
 							<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" v-on:click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
 								{{ metric.Caption }}
 							</button>

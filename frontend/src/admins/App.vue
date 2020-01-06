@@ -29,7 +29,7 @@ export default {
 	mounted() {
 		this.RegisterErrorHandler();
 		this.InitializePage();
-	},
+		},
 	methods: {
 		InitializePage() {
       const loc = this;
@@ -87,6 +87,7 @@ html, body {
 	zoom: 0.8;
 	-moz-transform: scale(0.8);
 }
+
 
 .md-table-cell-container {
     padding-right: 0px!important;

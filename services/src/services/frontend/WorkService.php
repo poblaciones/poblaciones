@@ -37,6 +37,7 @@ class WorkService extends BaseService
 		$ret->CanEdit = Session::IsWorkEditor($workId);
 		$ret->Fill($work);
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
+		$ret->FillStartup($work);
 		return $ret;
 	}
 

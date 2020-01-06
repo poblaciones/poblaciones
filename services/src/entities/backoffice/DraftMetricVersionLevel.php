@@ -123,9 +123,6 @@ class DraftMetricVersionLevel
         return $this->Dataset;
     }
 
-
-
-
     /**
      * Set metricVersion
      *

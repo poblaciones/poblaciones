@@ -11,24 +11,24 @@ use minga\framework\Profiling;
 
 class LookupService extends BaseService
 {
-	private $query;
-	private $modelLookup;
-	private $modelMetrics;
-
-	public function __construct($query)
+	public function __construct()
 	{
-		$this->modelMetrics = new SnapshotMetricModel();
-		$this->modelLookup = new SnapshotLookupModel();
-		$this->query = $query;
 	}
 
-	public function Search()
+	public function Search($query, $filter)
 	{
 		Profiling::BeginTimer();
 		SearchLog::BeginSearch();
 
-		$resLay = $this->modelMetrics->Search($this->query);
-		$resClippings = $this->modelLookup->Search($this->query, 'C');
+		$modelMetrics = new SnapshotMetricModel();
+		$modelLookup = new SnapshotLookupModel();
+
+		if ($filter != 'r')
+			$resLay = $modelMetrics->Search($query);
+		else
+			$resLay = [];
+
+		$resClippings = $modelLookup->Search($query, 'C');
 		$ret = array();
 		if (sizeof($resClippings) >= 5)
 			$this->appendResults($ret, $resLay, 5);
@@ -39,12 +39,12 @@ class LookupService extends BaseService
 		else
 			$this->appendResults($ret, $resClippings);
 		// Si no encontró, complementa con features
-		if (sizeof($ret) === 0)
+		if (sizeof($ret) === 0 && $filter != 'r')
 		{
-			$resFeatures = $this->modelLookup->Search($this->query, 'F');
+			$resFeatures = $modelLookup->Search($query, 'F');
 			$this->appendResults($ret, $resFeatures, 10 - sizeof($ret));
 		}
-		SearchLog::RegisterSearch($this->query, sizeof($ret));
+		SearchLog::RegisterSearch($query, sizeof($ret));
 
 		Profiling::EndTimer();
 		return $ret;

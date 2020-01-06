@@ -7,7 +7,7 @@
 			<img :src='image' alt='Creative Commons' title='Creative Commons' style='float: left; margin-top: 3px; margin-right: 6px'/>
       Esta obra está bajo una licencia de Creative Commons.<br>
       Para ver una copia de esta licencia, visite:<br>
-        <a :href='url' target='_blank'>{{ url }}</a>.
+        <a :href='url' style="word-break: break-word;" target='_blank'>{{ url }}</a>.
     </div>
   </div>
 </template>

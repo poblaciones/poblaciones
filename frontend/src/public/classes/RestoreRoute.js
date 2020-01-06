@@ -17,6 +17,9 @@ RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
 };
 
 RestoreRoute.prototype.RouteHasLocation = function (route) {
+	if (route.length <= 2 || route.substr(0, 2) !== '#/') {
+		return false;
+	}
 	var framing = this.framingFromRoute(route);
 	return (framing !== null);
 };

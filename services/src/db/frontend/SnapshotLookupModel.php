@@ -39,11 +39,31 @@ class SnapshotLookupModel extends BaseModel
 			AND clv_type = '" . $type . "'
 			ORDER by clv_population DESC
 			LIMIT 0, 10";
-
+		// , clv_full_parent
 		$ret = App::Db()->fetchAll($sql, array('query' => $query));
 		Profiling::EndTimer();
 		return $ret;
 	}
+
+	public function GetByClippingRegionItemId($clippingRegionItemId)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT (clv_clipping_region_item_id AS UNSIGNED INTEGER) id,
+			clv_caption caption,
+			clv_type type,
+			clv_full_ids extraIds,
+			clv_symbol symbol,
+			round(Y(clv_location), ". GeoJson::PRECISION .") as Lat,
+			round(X(clv_location), ". GeoJson::PRECISION .") as Lon,
+			Replace(clv_full_parent, '\t', ' > ') extra
+			FROM snapshot_lookup
+			WHERE clv_clipping_region_item_id = ?
+			LIMIT 1";
+		$ret = App::Db()->fetchAssoc($sql, array($clippingRegionItemId));
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 
 	public function GetLabelsByEnvelope($envelope, $z)
 	{

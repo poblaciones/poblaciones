@@ -18,6 +18,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.MetricVersions.Refresh();
 	this.Files = workInfo.Files;
 	this.Permissions = workInfo.Permissions;
+	this.StartupExtraInfo = workInfo.StartupExtraInfo;
 	this.workListMetadata = workListMetadata;
 	if (workInfo.Datasets) {
 		for (var i = 0; i < workInfo.Datasets.length; i++) {
@@ -220,6 +221,15 @@ ActiveWork.prototype.UpdateSource = function (source) {
 			}
 		});
 };
+
+ActiveWork.prototype.UpdateStartup = function () {
+	var args = { 'w': this.properties.Id, 's': this.properties.Startup };
+	this.WorkChanged();
+	// Guarda en el servidor lo que esté en this.properties.Startup
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateStartup', args,
+		'actualizar los atributos de inicio');
+};
+
 
 ActiveWork.prototype.UpdateMetadata = function () {
 	var args = { 'w': this.properties.Id, 'm': this.properties.Metadata };

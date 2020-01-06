@@ -103,8 +103,9 @@ App::$app->get('/services/download/GetFile', function (Request $request) {
 
 App::$app->get('/services/search', function (Request $request) {
 	$query = Params::Get('q');
-	$controller = new services\LookupService($query);
-	return App::JsonImmutable($controller->Search());
+	$controller = new services\LookupService();
+	$filter = Params::Get('f', '');
+	return App::JsonImmutable($controller->Search($query, $filter));
 });
 
 App::$app->get('/services/clipping/GetDefaultFrame', function (Request $request) {
@@ -176,6 +177,30 @@ App::$app->get('/services/metrics/GetData', function (Request $request) {
 
 	return App::Json($demo);
 });
+
+
+// ej. http://mapas/services/works/GetWorkAndDefaultFrame?w=12
+App::$app->get('/services/works/GetWorkAndDefaultFrame', function (Request $request) {
+	$controller = new services\WorkService();
+	$workId = Params::GetInt('w');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+	$work = $controller->GetWork($workId);
+
+	if ($work->Startup->Type === 'D')
+	{
+		$controller = new services\ClippingService();
+		$paramCoordinate = Params::Get('p');
+		$coordinate = Coordinate::TextDeserialize($paramCoordinate);
+		$frame = $controller->GetDefaultFrame($coordinate);
+	}
+	else
+	{
+		$frame = null;
+	}
+	return App::Json(['work' => $work, 'frame' => $frame]);
+});
+
 
 // ej. http://mapas/services/works/GetWork?w=12
 App::$app->get('/services/works/GetWork', function (Request $request) {
@@ -314,18 +339,15 @@ App::$app->get('/services/metrics/GetSelectedMetric', function (Request $request
 	$metricId = Params::GetInt('l');
 	// ej. /services/metrics/GetSelectedMetric?l=8
 
-	return $controller->GetSelectedMetricJson($metricId);
+	return App::Json($controller->PublicGetSelectedMetric($metricId));
 });
 
 App::$app->get('/services/metrics/GetSelectedMetrics', function (Request $request) {
 	$controller = new services\SelectedMetricService();
 
-	$metricsId = Params::Get('l');
 	// ej. /services/metrics/GetSelectedMetrics?l=8,9
-	/*if (App::Debug())
-		return App::JsonImmutable($controller->GetSelectedMetrics($metricsId));
-	else */
-		return App::Json($controller->GetSelectedMetrics($metricsId));
+	$metricsId = Params::Get('l');
+	return App::Json($controller->PublicGetSelectedMetrics($metricsId));
 });
 
 

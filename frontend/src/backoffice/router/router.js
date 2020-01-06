@@ -176,7 +176,7 @@ group: 'Metadatos',
 			}
 		]
 	},
-	
+
 	{
 		group: 'Administración',
 		path: '/cartographies/:workId/visibility',
@@ -193,7 +193,7 @@ group: 'Metadatos',
 		]
 	},
 
-/*	{
+	{
 		group: 'Administración',
 		path: '/cartographies/:workId/customize',
 		component: Layout,
@@ -208,7 +208,7 @@ group: 'Metadatos',
 			}
 		]
 	},
-	*/
+
 
 	{ path: '*', redirect: '/404', hidden: true }
 ];

@@ -8,6 +8,7 @@ use helena\classes\Session;
 use helena\services\common\BaseService;
 use minga\framework\Context;
 use minga\framework\Profiling;
+use helena\db\frontend\RevisionsModel;
 
 use helena\entities\backoffice\DraftWork;
 use helena\entities\backoffice\structs\WorkInfo;
@@ -16,7 +17,7 @@ use helena\services\backoffice\notifications\NotificationManager;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\PublishSnapshots;
 use helena\services\backoffice\publish\CacheManager;
-
+use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\ErrorException;
 
 class WorkService extends BaseService
@@ -39,6 +40,9 @@ class WorkService extends BaseService
 		$work->setIsPrivate(false);
 		$work->setShard(Context::Settings()->Shard()->CurrentShard);
 
+		// Crea startup
+		$startup  = $this->CreateStartup();
+		$work->setStartup($startup);
 		// Crea metadatos
 		$metadata = $this->CreateMetadata($type, $title);
 		$work->setMetadata($metadata);
@@ -53,6 +57,16 @@ class WorkService extends BaseService
 
 		return $work;
 	}
+
+	private function CreateStartup()
+	{
+		$startup = new entities\DraftWorkStartup();
+		$startup->setType('D');
+		$startup->setClippingRegionItemSelected(true);
+		App::Orm()->Save($startup);
+		return $startup;
+	}
+
 	private function CreateMetadata($type, $title)
 	{
 		$metadata = new entities\DraftMetadata();
@@ -85,7 +99,6 @@ class WorkService extends BaseService
 		App::Orm()->Save($permissionDefault);
 	}
 
-
 	public function GetWorkInfo($workId)
 	{
 		Profiling::BeginTimer();
@@ -99,8 +112,36 @@ class WorkService extends BaseService
 		$workInfo->Sources = $this->GetSources($workId);
 		$workInfo->Files = $this->GetFiles($workId);
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
+		$workInfo->StartupExtraInfo = $this->GetStartupExtraInfo($workId);
 		Profiling::EndTimer();
 		return $workInfo;
+	}
+
+	public function GetStartupExtraInfo($workId)
+	{
+		Profiling::BeginTimer();
+		$revisions = new RevisionsModel();
+		$lookupVersion = $revisions->GetLookupRevision();
+		$extraInfo = $this->GetWorkStartupClippingRegionExtra($workId);
+		Profiling::EndTimer();
+		return [ 'LookupVersion' => $lookupVersion, 'RegionExtraInfo' => $extraInfo['extra'], 'RegionCaption' => $extraInfo['caption']];
+	}
+
+	private function GetWorkStartupClippingRegionExtra($workId)
+	{
+		Profiling::BeginTimer();
+
+		$sql = "SELECT clv_caption caption, Replace(clv_full_parent, '\t', ' > ') extra FROM draft_work JOIN draft_work_startup ON wrk_startup_id = wst_id
+							JOIN snapshot_lookup ON wst_clipping_region_item_id = clv_clipping_region_item_id AND wst_clipping_region_item_id IS NOT NULL
+								WHERE wrk_id = ?
+								LIMIT 1";
+		$row = App::Db()->fetchAssoc($sql, array($workId));
+		if ($row === null)
+			$ret = ['extra' => null, 'caption' => null];
+		else
+			$ret = $row;
+		Profiling::EndTimer();
+		return $ret;
 	}
 
 	public function RequestReview($workId)
@@ -110,7 +151,12 @@ class WorkService extends BaseService
 		$nm->NotifyRequestReview($workId);
 		return self::OK;
 	}
-
+	public function UpdateStartup($workId, $startup)
+	{
+		App::Orm()->save($startup);
+		WorkFlags::SetMetadataDataChanged($workId);
+		return self::OK;
+	}
 	public function UpdateWorkVisibility($workId, $value, $link = null)
 	{
 		// Cambia el valor

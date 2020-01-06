@@ -65,7 +65,7 @@ class ClippingRegionItem
 
     /**
      * @var \helena\entities\backoffice\ClippingRegion
-     *
+     *exclude
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\ClippingRegion")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="cli_clipping_region_id", referencedColumnName="clr_id", nullable=true)

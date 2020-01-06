@@ -72,6 +72,13 @@ class Envelope extends BaseMapModel
 		$ret->Lon = ($this->Min->Lon + $this->Max->Lon) / 2;
 		return $ret;
 	}
+	public function ToFormattedString()
+	{
+		return "Latitud norte: " . Str::FormatLocaleNumber($this->Min->Lat, 6) . ". "
+						. "Longitud oeste: " . Str::FormatLocaleNumber($this->Min->Lon, 6) . ". \n"
+						. "Latitud sur: " . Str::FormatLocaleNumber($this->Max->Lat, 6) . ". "
+						. "Longitud este: " . Str::FormatLocaleNumber($this->Max->Lon, 6) . ". ";
+	}
 	public function ToWKT()
 	{
 		return "POLYGON((" . $this->Min->Lon .

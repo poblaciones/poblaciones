@@ -24,7 +24,7 @@ class WorkExtraMetric
     private $Id;
 
     /**
-     * @var string
+     * @var integer
      *
      * @ORM\Column(name="wmt_order", type="integer", precision=0, scale=0, nullable=false, unique=false)
      */
@@ -83,7 +83,7 @@ class WorkExtraMetric
      *
      * @return WorkExtraMetric
      */
-    public function setOrder($orer)
+    public function setOrder($order)
     {
         $this->Order = $order;
 
@@ -93,7 +93,7 @@ class WorkExtraMetric
     /**
      * Get order
      *
-     * @return string
+     * @return integer
      */
     public function getOrder()
     {

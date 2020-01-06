@@ -40,23 +40,43 @@ class App
 	public static $orm = null;
 	private static $contentType = null;
 
-	public static function CreateTwigEngines()
+	private static function getTwigEngine()
 	{
-		Profiling::BeginTimer();
-		self::$app['twig'] = self::$app->extend('twig', function ($twig, $app) {
+		if (!array_key_exists('twig', self::$app))
+		{
+			self::$app['twig'] = self::$app->extend('twig', function ($twig, $app) {
 
-			$baseUrl = Context::Settings()->GetPublicUrl();
+				$baseUrl = Context::Settings()->GetPublicUrl();
 
-			$twig->addGlobal('baseurl', $baseUrl);
-			$twig->addGlobal('title', 'Nombre del sitio');
-			$twig->addGlobal('tooltip_url', Links::TooltipUrl());
-			$twig->addGlobal('home_url', Links::GetHomeUrl());
-			$twig->addGlobal('application_name', Context::Settings()->applicationName);
+				$twig->addGlobal('baseurl', $baseUrl);
+				$twig->addGlobal('title', 'Nombre del sitio');
+				$twig->addGlobal('tooltip_url', Links::TooltipUrl());
+				$twig->addGlobal('home_url', Links::GetHomeUrl());
+				$twig->addGlobal('application_name', Context::Settings()->applicationName);
 
-			return $twig;
-		});
-		self::$app['twigMsg'] = null;
-		Profiling::EndTimer();
+				return $twig;
+			});
+		}
+		return self::$app['twig'];
+	}
+
+	private static function getMessageTwigEngine()
+	{
+		if (!array_key_exists('twigMsg', self::$app))
+		{
+			Profiling::BeginTimer();
+			// instancia un twig para mensajes
+			$paths = array_merge(Paths::GetMacrosPaths(), Paths::GetMessagesPaths());
+			$loaderMsg = new FilesystemLoader($paths);
+			$twigMsg = new Environment($loaderMsg, array('cache' => Context::Paths()->GetTwigCache(),
+				'debug' => Context::Settings()->Debug()->debug));
+
+			$twigMsg->addExtension(new StringLoaderExtension());
+
+			self::$app['twigMsg'] = $twigMsg;
+			Profiling::EndTimer();
+		}
+		return self::$app['twigMsg'];
 	}
 
 	public static function Debug()
@@ -105,7 +125,8 @@ class App
 
 	public static function RenderResolve($templates, $args)
 	{
-		return self::$app['twig']->resolveTemplate($templates)->render($args);
+		$twig = self::getTwigEngine();
+		return $twig->resolveTemplate($templates)->render($args);
 	}
 
 	public static function Redirect($url, $status = 302)
@@ -148,9 +169,13 @@ class App
 	public static function AbsoluteUrl($url)
 	{
 		$host = Context::Settings()->GetPublicUrl();
-		if (Str::StartsWith($url, "/") == false)
+		$hasBar = substr($url, 0, 1) === '/';
+		if (!$hasBar)
 		{
-			$uri = $_SERVER['REQUEST_URI'];
+			if (array_key_exists('REQUEST_URI', $_SERVER)) {
+				$uri = $_SERVER['REQUEST_URI'];
+			} else $uri = '';
+
 			if ($url != "")
 			{
 				$n = strrpos($uri, '/');
@@ -158,9 +183,10 @@ class App
 			}
 			else
 				$host .= $uri;
+
+			if ($url != "" && substr($host, -1) !== '/')
+			$host .= "/";
 		}
-		if ($url != "" && Str::EndsWith($host, '/') == false
-					&& Str::StartsWith($url, '/') == false) $host .= "/";
 		return $host . $url;
 	}
 	public static function RedirectLoginUrl()
@@ -230,7 +256,7 @@ class App
 	}
 	public static function JsonImmutable($value)
 	{
-	//	Params::GetMandatory('w');
+		Params::GetMandatory('w');
 		return self::Json($value, 1000);
 	}
 	public static function Json($value, $daysToExpire = -1)
@@ -274,7 +300,7 @@ class App
 	}
 
 	public static function RegisterCRUDRoute($path, $controllerClassName)
-	{	
+	{
 		self::RegisterControllerGet($path, $controllerClassName);
 		self::RegisterControllerGet($path . 'Item', $controllerClassName . 'Item');
 		self::RegisterControllerPost($path . 'Item', $controllerClassName . 'Item');
@@ -341,7 +367,8 @@ class App
 	{
 		Profiling::BeginTimer();
 		self::AddStandardParameters($args);
-		$text = self::$app['twig']->render($template, $args);
+		$twig = self::getTwigEngine();
+		$text = $twig->render($template, $args);
 		$ret = new Response($text, 200);
 		if (self::$contentType !== null)
 	    $ret->headers->set('Content-Type', self::$contentType);
@@ -354,31 +381,21 @@ class App
 	{
 		Profiling::BeginTimer();
 		self::AddStandardParameters($args);
-		echo self::$app['twig']->render($template, $args);
+		$twig = self::getTwigEngine();
+		echo $twig->render($template, $args);
 		Profiling::EndTimer();
 		self::EndRequest();
 	}
 
 	public static function RenderMessage($template, $vals = array())
 	{
-		if (self::$app['twigMsg'] === null)
-		{
-			// instancia un twig para mensajes
-			$paths = array_merge(Paths::GetMacrosPaths(), Paths::GetMessagesPaths());
-			$loaderMsg = new FilesystemLoader($paths);
-			$twigMsg = new Environment($loaderMsg, array('cache' => Context::Paths()->GetTwigCache(),
-				'debug' => Context::Settings()->Debug()->debug));
-
-			$twigMsg->addExtension(new StringLoaderExtension());
-
-			self::$app['twigMsg'] = $twigMsg;
-		}
 		self::AddStandardParameters($vals);
 		$styleP = "style='margin: 3px 0 0px 0;'";
 		$vals['stylesP'] = $styleP;
 		$stylePLeft = "style='text-align: left;margin: 3px 0 0px 0;'";
 		$vals['stylesPLeft'] = $stylePLeft;
-		return self::$app['twigMsg']->render($template, $vals);
+		$twig = self::getMessageTwigEngine();
+		return $twig->render($template, $vals);
 	}
 
 	private static function AddStandardParameters(&$vals)

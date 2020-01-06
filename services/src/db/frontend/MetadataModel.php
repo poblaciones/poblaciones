@@ -59,8 +59,12 @@ class MetadataModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 		$params = array($metadataId);
+		if ($this->draftPreffix)
+			$extents = '';
+		else
+			$extents = 'AsText(met_extents) Extents, ';
 
-		$sql = "SELECT *, (SELECT MIN(wrk_id) FROM " . $this->draftPreffix . "work WHERE wrk_metadata_id = met_id) AS wrk_id
+		$sql = "SELECT *, " . $extents . "(SELECT MIN(wrk_id) FROM " . $this->draftPreffix . "work WHERE wrk_metadata_id = met_id) AS wrk_id
 							FROM " . $this->draftPreffix . "metadata
 							LEFT JOIN " . $this->draftPreffix . "institution ON met_institution_id = ins_id
 							LEFT JOIN " . $this->draftPreffix . "contact ON met_contact_id = con_id

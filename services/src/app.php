@@ -9,8 +9,6 @@ use Silex\Provider\HttpFragmentServiceProvider;
 use Silex\Provider\LocaleServiceProvider;
 use Silex\Provider\RoutingServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
-use Silex\Provider\SessionServiceProvider;
-use Silex\Provider\TranslationServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\ValidatorServiceProvider;
 use Symfony\Component\Debug\ErrorHandler;
@@ -22,15 +20,22 @@ use helena\classes\settings\LocalSettings;
 
 use minga\framework\Context;
 
+time_elapsed('preregister');
 ErrorHandler::register();
+time_elapsed('ErrorHandler::register');
 
 // Initializa el mingaFramework
 Context::InjectSettings(new LocalSettings());
+time_elapsed('injectSettings');
 // Setea el manejo de EndRequest
 Context::InjectCallbacks(new Callbacks());
+time_elapsed('InjectCallbacks');
 // toma settings
 Context::Settings()->useVendor = true;
 Context::Settings()->Initialize(dirname(__DIR__), true);
+time_elapsed('Settings()->Initialize');
+
+time_elapsed('prenewapp');
 
 $app = new Application();
 App::$app = $app;
@@ -41,6 +46,7 @@ $app->register(new ValidatorServiceProvider());
 $app->register(new HttpFragmentServiceProvider());
 $app->register(new LocaleServiceProvider());
 $app->register(new RoutingServiceProvider());
+time_elapsed('after routing');
 
 $app->register(new ServiceControllerServiceProvider());
 $app->register(new TwigServiceProvider());
@@ -50,8 +56,7 @@ $app->register(new DoctrineServiceProvider(), array(
 		 'charset' => 'utf8',
 	)
 ));
-
-App::CreateTwigEngines();
+time_elapsed('after doctrine');
 
 // configure your app for the production environment
 $app['path.base'] = dirname(__DIR__);
@@ -62,3 +67,4 @@ $app['twig.options'] = array('cache' => Context::Paths()->GetTwigCache());
 $app['twig.form.templates'] = array('bootstrap_3_layout.html.twig');
 
 return $app;
+

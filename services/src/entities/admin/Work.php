@@ -8,7 +8,6 @@ class Work extends BaseMapModel
 {
 	public $Id;
 	public $Comments;
-	public $StartArgs;
 
 	public $Metadata;
 	public $MetadataId;

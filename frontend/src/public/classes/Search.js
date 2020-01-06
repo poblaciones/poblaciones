@@ -3,22 +3,28 @@ import axios from 'axios';
 
 export default Search;
 
-function Search(view, segMap) {
+function Search(view, revision, searchType) {
 	this.view = view;
-	this.SegMap = segMap;
+	this.searchType = searchType;
+	this.revision = revision;
 };
 
 Search.prototype.StartSearch = function (t) {
 	if (this.preSearch(t)) {
 		return;
 	}
+	if(this.view.retCancel !== null)
+	{
+		this.view.retCancel('cancelled');
+		this.view.retCancel = null;
+	}
 	var CancelToken = axios.CancelToken;
 	var retCancel = null;
 	var view = this.view;
 	var loc = this;
 	view.loading = true;
-	this.SegMap.Get(window.host + '/services/search', {
-    params: { q: t, w: this.SegMap.Revisions.Search  },
+	axios.get(window.host + '/services/search', {
+    params: { q: t, f: this.searchType, w: this.revision },
 		cancelToken: new CancelToken(function executor(c) { retCancel = c; })
 		})
 		.then(function(res) {

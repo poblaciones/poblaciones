@@ -10,7 +10,7 @@
 						</tr>
 					</tbody>
 				</table>
-				<div style="height: 240px; width: 540px; overflow: auto;
+				<div style="height: 240px; max-width: 540px; overflow: auto;
 					 border: 1px solid #e2e2e2;">
 					<table class="localTable">
 						<tbody>

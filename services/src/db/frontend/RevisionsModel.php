@@ -36,6 +36,11 @@ class RevisionsModel extends BaseModel
 		return $ret;
 	}
 
+	public function GetLookupRevision()
+	{
+		$sql = "SELECT ver_value FROM version WHERE ver_name = 'LOOKUP_VIEW'";
+		return App::Db()->fetchScalar($sql);
+	}
 }
 
 

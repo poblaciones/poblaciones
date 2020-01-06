@@ -106,6 +106,17 @@ class Work
 
 
     /**
+     * @var \helena\entities\backoffice\WorkStartup
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\WorkStartup")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="wrk_startup_id", referencedColumnName="wst_id", nullable=false)
+     * })
+     */
+    private $Startup;
+
+
+    /**
      * Get id
      *
      * @return integer
@@ -368,6 +379,30 @@ class Work
     public function getMetadata()
     {
         return $this->Metadata;
+    }
+
+    /**
+     * Set startup
+     *
+     * @param \helena\entities\backoffice\WorkStartup $startup
+     *
+     * @return Work
+     */
+    public function setStartup(\helena\entities\backoffice\WorkStartup $startup = null)
+    {
+        $this->Startup = $startup;
+
+        return $this;
+    }
+
+    /**
+     * Get startup
+     *
+     * @return \helena\entities\backoffice\WorkStartup
+     */
+    public function getStartup()
+    {
+        return $this->Startup;
     }
 }
 

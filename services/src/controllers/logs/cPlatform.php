@@ -4,6 +4,7 @@ namespace helena\controllers\logs;
 use helena\controllers\common\cController;
 use minga\framework\Context;
 
+use helena\classes\App;
 use helena\classes\Session;
 use helena\classes\Menu;
 
@@ -35,10 +36,15 @@ class cPlatform extends cController
 		$this->templateValues['html_title'] = 'Plataforma';
 
 		$this->templateValues['dbItems'] = System::GetDbInfo();
+		$this->templateValues['dbItems'][] = $this->getScriptsVersion();
 
 		return $this->Render('platform.html.twig');
 	}
 
+	private function getScriptsVersion()
+	{
+		return [ "name" => "Scripts", "value" => App::Db()->fetchScalar("SELECT ver_value FROM version WHERE ver_name = 'DB';")];
+	}
 	private function RunCommand($command)
 	{
 		$output = array();

@@ -6,13 +6,11 @@ use minga\framework\Str;
 use minga\framework\Context;
 use minga\framework\Profiling;
 use minga\framework\Performance;
-use minga\framework\Log;
 use minga\framework\ErrorException;
 use helena\services\backoffice\DbSession;
 
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Doctrine_Connection_Profiler;
 use Doctrine\DBAL\Types\Type;
 
 

@@ -8,6 +8,7 @@ class Frame
 {
 	public $Envelope;
 	public $Zoom;
+	public $Center;
 	public $ClippingRegionId;
 	public $ClippingCircle;
 	// https://stackoverflow.com/questions/11130323/google-map-api-v3-shade-everything-except-for-polygon

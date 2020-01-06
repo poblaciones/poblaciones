@@ -17,10 +17,10 @@ class PdfFile
 		$this->mpdf = $this->createPdfInstance();
 		$this->mpdf->SetHTMLFooter('<div class="footer">
 						<table width=100% cellspacing=0 cellpadding=0><tr><td class="footerPageNumber" align="center" style="width: 70px; padding: 5px 12px 5px 12px; background-color: #e0e0e0;">
-<div class="footerPageNumber">
+						<div class="footerPageNumber">
 							{PAGENO}
 						</div></td>
-<td style="padding: 7px 12px 7px 12px; background-color: #efefef;"><div class="footerRow1">
+						<td style="padding: 7px 12px 7px 12px; background-color: #efefef;"><div class="footerRow1">
 							Poblaciones
 						</div><div class="footerRow2">
 							Plataforma abierta de datos espaciales de la Argentina

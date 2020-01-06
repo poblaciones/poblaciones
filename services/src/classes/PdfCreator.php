@@ -5,6 +5,7 @@ namespace helena\classes;
 use minga\framework\CreativeCommons;
 use minga\framework\AttributeEntity;
 use minga\framework\Str;
+use helena\entities\frontend\geometries\Envelope;
 
 class PdfCreator
 {
@@ -48,13 +49,18 @@ class PdfCreator
 		$this->WriteValuePair("Frecuencia de actualización", 'met_frequency');
 		$this->WriteValuePair("Cobertura", 'met_coverage_caption');
 
+		if (array_key_exists('Extents', $this->metadata) && $this->metadata['Extents'])
+		{
+			$env = Envelope::FromDb($this->metadata['Extents']);
+			$this->pdf->WritePair("Extensión geográfica", $env->ToFormattedString());
+		}
 		$this->WriteValuePair("Detalle", 'met_abstract_long');
 
 		$this->WriteContact();
 		$this->WriteInstitution();
 
 		$this->WriteSources();
-		
+
 		$this->WriteDataset();
 
 		$this->WriteLicense();
@@ -185,7 +191,7 @@ class PdfCreator
 	{
 		if ($this->dataset == null)
 			return;
-	
+
 		$this->WriteDatasetColumns();
 		$this->WriteDatasetMetrics();
 	}
@@ -216,7 +222,7 @@ class PdfCreator
 			$isFirst = true;
 			foreach($variables as $variable)
 			{
-				if (!$isFirst) 
+				if (!$isFirst)
 					$this->pdf->WriteExtraIndentedSpace();
 				else
 					$isFirst = false;
@@ -229,14 +235,14 @@ class PdfCreator
 					foreach($variable['values'] as $value)
 					{
 						$color = $value['vvl_fill_color'];
-						if ($color !== null && $color !== '') 
+						if ($color !== null && $color !== '')
 						{
 							if (Str::StartsWith($color, "fffff"))
 								// círculo vacío
-								$valuesBlock .= "<span style='color: #d0d0d0" . $color . "'>&#x25cb;</span> ";  
+								$valuesBlock .= "<span style='color: #d0d0d0" . $color . "'>&#x25cb;</span> ";
 							else
 								// círculo pleno
-								$valuesBlock .= "<span style='color: #" . $color . "'>&#x25cf;</span> ";  
+								$valuesBlock .= "<span style='color: #" . $color . "'>&#x25cf;</span> ";
 						}
 						$valuesBlock .= $this->pdf->HtmlEncode($value['vvl_caption']) . '<br>';
 					}
