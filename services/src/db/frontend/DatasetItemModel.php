@@ -81,7 +81,7 @@ class DatasetItemModel
 				$val = $ret['c' . $n];
 				if (is_numeric($val) && (substr((string)$val, 0, 1) !== '0' || substr((string)$val, 0, 2) === '0.'))
 				{
-					$val = (float) $val;
+					$val = (float) Str::FormatNumber((float) $val, $column['decimals']);
 				}
 				$items[] = array('Name' => $column['caption'], 'Value' => $val, 'Caption' => $ret['l' . $n]);
 				$n++;
