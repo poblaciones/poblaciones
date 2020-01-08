@@ -6,7 +6,7 @@ use minga\framework\Test;
 
 require_once __DIR__.'/../startup.php';
 
-Test::SetServer(Context::Settings()->GetMainServerPublicUrl());
+Test::SetServer(Context::Settings()->GetPublicUrl());
 
 $rand = rand(0, 20000);
 
@@ -34,3 +34,7 @@ Test::Get('/services/backoffice/GetDatasetColumnsLabels?k=119');
 Test::Get('/services/backoffice/GetDatasetMetricVersionLevels?k=119');
 Test::Get('/services/backoffice/GetDatasetDataPaged?k=119&filterscount=0&groupscount=0&pagenum=0&pagesize=50&recordstartindex=0&recordendindex=50&page=0');
 Test::Get('/services/backoffice/GetColumnDistributions?k=209&c=O&ci=9744&o=O&oi=9741&s=100');
+
+function time_elapsed()
+{
+}
