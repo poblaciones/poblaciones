@@ -53,7 +53,7 @@ function isPublicPath()
 	if(!array_key_exists('REQUEST_URI', $_SERVER))
 		return false;
 	$uri = $_SERVER['REQUEST_URI'];
-	return !startsWith($uri, '/users') && !startsWith($uri, '/logs') && !startsWith($uri, '/services/backoffice/');
+	return !startsWith($uri, '/users') && !startsWith($uri, '/logs') && !startsWith($uri, '/services/backoffice/') && !startsWith($uri, '/admins');
 }
 function startsWith($text, $word)
 {

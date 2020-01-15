@@ -2590,6 +2590,22 @@ ALTER TABLE `metric_version_level`
   ADD CONSTRAINT `fk_version_dataset` FOREIGN KEY (`mvl_dataset_id`) REFERENCES `dataset` (`dat_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fw_metric_version` FOREIGN KEY (`mvl_metric_version_id`) REFERENCES `metric_version` (`mvr_id`) ON DELETE CASCADE;
 
+
+--
+-- Constraints for table `variable_value_label`
+--
+ALTER TABLE `variable_value_label`
+  ADD CONSTRAINT `fw_variable` FOREIGN KEY (`vvl_variable_id`) REFERENCES `variable` (`mvv_id`) ON DELETE CASCADE;
+--
+-- Constraints for table `variable`
+--
+ALTER TABLE `variable`
+  ADD CONSTRAINT `fk_metric_version_data_col` FOREIGN KEY (`mvv_data_column_id`) REFERENCES `dataset_column` (`dco_id`),
+  ADD CONSTRAINT `fk_variable_norm_col` FOREIGN KEY (`mvv_normalization_column_id`) REFERENCES `dataset_column` (`dco_id`),
+  ADD CONSTRAINT `fk_variable_symbology` FOREIGN KEY (`mvv_symbology_id`) REFERENCES `symbology` (`vsy_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_version_level_variable2` FOREIGN KEY (`mvv_metric_version_level_id`) REFERENCES `metric_version_level` (`mvl_id`) ON DELETE CASCADE;
+
+
 --
 -- Constraints for table `source`
 --

@@ -332,6 +332,24 @@ module.exports = {
 		return envelope.Min.Lat + ',' + envelope.Min.Lon +
 			';' + envelope.Max.Lat + ',' + envelope.Max.Lon;
 	},
+	scaleEnvelope(envelope, scale) {
+		scale = 1 - ((1 - scale) / 2);
+
+		var center = {
+										Lat: (envelope.Max.Lat + envelope.Min.Lat) / 2,
+										Lon: (envelope.Max.Lon + envelope.Min.Lon) / 2,
+		};
+		return {
+			Min: {
+				Lat: center.Lat - (center.Lat - envelope.Min.Lat) * scale,
+				Lon: center.Lon - (center.Lon - envelope.Min.Lon) * scale,
+			},
+			Max: {
+				Lat: center.Lat + (envelope.Max.Lat - center.Lat) * scale,
+				Lon: center.Lon + (envelope.Max.Lon - center.Lon) * scale,
+			}
+		};
+	},
 	mergeObject(obj1, obj2) {
 		var ret = {};
 		for (let attr in obj1) { ret[attr] = obj1[attr]; }
