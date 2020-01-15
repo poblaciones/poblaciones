@@ -28,7 +28,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionId, $geographyId);
 
 		if ($circle != null)
-			$circleQuery =  $this->spatialConditions->CreateRichCircleQuery($circle, $datasetType, $metricVersionId, $geographyId);
+			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
 		else
 			$circleQuery = null;
 
@@ -37,14 +37,15 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 
 	public function GetMetricVersionSummaryByEnvelope($metricVersionId, $hasSummary, $geographyId, $urbanity, $envelope)
 	{
-		$query = $this->spatialConditions->CreateRichEnvelopeQuery($envelope, $metricVersionId, $geographyId);
+
+		$query = $this->spatialConditions->CreateSimpleEnvelopeQuery($envelope);
 
 		return $this->ExecSummaryQuery($metricVersionId, $hasSummary, $geographyId, $urbanity,$query);
 	}
 
 	public function GetMetricVersionSummaryByCircle($metricVersionId, $hasSummary, $geographyId, $urbanity, $circle, $datasetType)
 	{
-		$query =  $this->spatialConditions->CreateRichCircleQuery($circle, $datasetType, $metricVersionId, $geographyId);
+		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
 
 		return $this->ExecSummaryQuery($metricVersionId, $hasSummary, $geographyId, $urbanity, $query);
 	}
@@ -84,7 +85,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		$params = array($metricVersionId, $geographyId);
 
 		$groupBy = "t1.miv_metric_version_variable_id, t1.miv_version_value_label_id, t2.miv_metric_version_variable_id, t2.miv_version_value_label_id";
-		
+
 		// TODO: falta duplicar los subqueries y crear snapshop_geography_item_geography_item
 		$baseQuery = new QueryPart($from, $where, $params, $select, $groupBy);
 
@@ -114,7 +115,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 
 	public function GetMetricVersionTileDataByCircle($metricVersionId, $geographyId, $urbanity, $envelope, $circle, $datasetType, $hasDescriptions)
 	{
-		$query =  $this->spatialConditions->CreateRichCircleQuery($circle, $datasetType, $metricVersionId, $geographyId);
+		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
 
 		return $this->ExecTileDataQuery($metricVersionId, $geographyId, $urbanity, $envelope, $datasetType, $hasDescriptions, $query);
 	}
@@ -122,12 +123,13 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 	private function ExecTileDataQuery($metricVersionId, $geographyId, $urbanity, $envelope, $datasetType, $hasDescriptions, $query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
-		$envelopeQuery =  $this->spatialConditions->CreateRichEnvelopeQuery($envelope, $metricVersionId, $geographyId);
+
+		$envelopeQuery =  $this->spatialConditions->CreateSimpleEnvelopeQuery($envelope);
 
 		$select = "miv_metric_version_variable_id VariableId, miv_value Value, miv_version_value_label_id ValueId, miv_feature_id FID";
 		if ($hasDescriptions)
 			$select .= ", miv_description Description";
-		
+
 		$select .= ", miv_total Total";
 
 		if ($datasetType == 'L')
@@ -149,7 +151,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		$ret = $multiQuery->fetchAll();
 
 		if ($datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
-		{ 
+		{
 			$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
 		}
 		return $ret;

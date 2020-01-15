@@ -41,7 +41,7 @@ class DatasetColumnService extends DbSession
 		// Quita referencias hacia estas columnas
 		$this->UnlockColumns($datasetId, $ids);
 		// Borra los valueLabels
-		$labels = "DELETE draft_dataset_column_value_label FROM draft_dataset_label
+		$labels = "DELETE draft_dataset_column_value_label FROM draft_dataset_column_value_label
 									JOIN draft_dataset_column ON dla_dataset_column_id = dco_id
 					WHERE dco_dataset_id = ? AND dla_dataset_column_id IN (" . join(',', $ids) . ")";
 		App::Db()->exec($labels, array($datasetId));
@@ -344,7 +344,7 @@ class DatasetColumnService extends DbSession
 
 		if (sizeof($deletedLabels) > 0)
 		{
-			$labels = "DELETE draft_dataset_column_value_label FROM draft_dataset_label
+			$labels = "DELETE draft_dataset_column_value_label FROM draft_dataset_column_value_label
 										JOIN draft_dataset_column ON dla_dataset_column_id = dco_id
 						WHERE dco_dataset_id = ? AND dla_id IN (" . join(',', $deletedLabels) . ")";
 			App::Db()->exec($labels, array($datasetId));

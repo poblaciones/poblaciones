@@ -71,8 +71,28 @@ class SnapshotMetricVersionItemVariableModel
 		{
 			$this->InsertRows($metricVersionLevel, $variable);
 		}
+		$this->UpdateExtents($metricVersionLevel);
 	}
 
+	private function UpdateExtents($metricVersionLevel)
+	{
+		Profiling::BeginTimer();
+		// Calcula para cada level
+		$sql = "UPDATE metric_version_level
+				JOIN dataset ON dat_id = mvl_dataset_id
+				set mvl_extents =
+					(SELECT
+								Envelope(LineString(
+				POINT(Min(X(PointN(ExteriorRing(miv_envelope), 1))),
+				min(Y(PointN(ExteriorRing(miv_envelope), 1)))),
+				POINT(Max(X(PointN(ExteriorRing(miv_envelope), 3))),
+				Max(Y(PointN(ExteriorRing(miv_envelope), 3))))))
+				FROM  snapshot_metric_version_item_variable
+				WHERE miv_metric_version_id = mvl_metric_version_id AND miv_geography_id = dat_geography_id)
+				where mvl_id = ?";
+		App::Db()->exec($sql, array($metricVersionLevel['mvl_id']));
+		Profiling::EndTimer();
+	}
 	private function InsertRows($metricVersionLevel, $variable)
 	{
 		Profiling::BeginTimer();
@@ -81,7 +101,7 @@ class SnapshotMetricVersionItemVariableModel
 				`miv_geography_id`,`miv_geography_item_id`,`miv_urbanity`,
 				`miv_metric_version_variable_id`,
 				`miv_value`, `miv_version_value_label_id`, miv_description, miv_total, miv_feature_id, `miv_area_m2`,
-				miv_envelope, miv_rich_envelope, miv_location) ";
+				miv_envelope, miv_location) ";
 
 		$sql = "SELECT " . $metricVersionLevel["mvr_metric_id"] . ", " . $metricVersionLevel["mvr_id"] . ",
 								gei_geography_id,
@@ -128,7 +148,6 @@ class SnapshotMetricVersionItemVariableModel
 			throw new ErrorException("Invalid dataset type.");
 		// Envelopes
 		$sql .= "Envelope(" . $envelopeTarget . "), ";
-		$sql .= "RichEnvelope(" . $envelopeTarget . ", " . $metricVersionLevel["mvr_id"] . ", gei_geography_id), ";
 		// Location
 		$sql .= $location;
 

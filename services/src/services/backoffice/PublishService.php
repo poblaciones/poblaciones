@@ -109,7 +109,7 @@ class PublishService extends BaseService
 				}
 				else
 				{
-					$this->state->NextStep('Actualizando extensiones');
+					$this->state->NextStep('Actualizando dimensiones');
 				}
 				break;
 			case self::STEP_UPDATE_EXTENTS:

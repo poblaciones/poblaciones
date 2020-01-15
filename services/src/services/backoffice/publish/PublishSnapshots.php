@@ -138,39 +138,29 @@ class PublishSnapshots extends BaseService
 	public function UpdateExtents($workId)
 	{
 		Profiling::BeginTimer();
-		// Calcula para cada level
-		$sql = "UPDATE metric_version_level
-				JOIN dataset ON dat_id = mvl_dataset_id
-				set mvl_extents =
-				 (SELECT
-								Envelope(LineString(
-				POINT(Min(X(PointN(ExteriorRing(miv_envelope), 1))),
-				min(Y(PointN(ExteriorRing(miv_envelope), 1)))),
-				POINT(Max(X(PointN(ExteriorRing(miv_envelope), 3))),
-				Max(Y(PointN(ExteriorRing(miv_envelope), 3))))))
-				FROM  snapshot_metric_version_item_variable
-				WHERE miv_metric_version_id = mvl_metric_version_id AND miv_geography_id = dat_geography_id)
-				where dat_work_id = ?";
-		$workIdShardified = PublishDataTables::Shardified($workId);
-		App::Db()->exec($sql, array($workIdShardified));
-		// Calcula el del work
-		$sql = "UPDATE metadata
-				JOIN work ON wrk_metadata_id = met_id
-				JOIN dataset ON wrk_id = dat_work_id
-				set met_extents =
-				 (SELECT
-								Envelope(LineString(
-				POINT(Min(X(PointN(ExteriorRing(mvl_extents), 1))),
-				min(Y(PointN(ExteriorRing(mvl_extents), 1)))),
-				POINT(Max(X(PointN(ExteriorRing(mvl_extents), 3))),
-				Max(Y(PointN(ExteriorRing(mvl_extents), 3))))))
-				FROM  metric_version_level
-				WHERE dat_id = mvl_dataset_id)
 
-				WHERE wrk_id = ?";
-		$workIdShardified = PublishDataTables::Shardified($workId);
-		App::Db()->exec($sql, array($workIdShardified));
+		$workModel = new WorkModel();
+		$work = $workModel->GetWork($workId);
+		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'])
+		{
+			// Calcula el del work
+			$sql = "UPDATE metadata
+					JOIN work ON wrk_metadata_id = met_id
+					JOIN dataset ON wrk_id = dat_work_id
+					set met_extents =
+					 (SELECT
+									Envelope(LineString(
+					POINT(Min(X(PointN(ExteriorRing(mvl_extents), 1))),
+					min(Y(PointN(ExteriorRing(mvl_extents), 1)))),
+					POINT(Max(X(PointN(ExteriorRing(mvl_extents), 3))),
+					Max(Y(PointN(ExteriorRing(mvl_extents), 3))))))
+					FROM  metric_version_level
+					WHERE dat_id = mvl_dataset_id)
 
+					WHERE wrk_id = ?";
+			$workIdShardified = PublishDataTables::Shardified($workId);
+			App::Db()->exec($sql, array($workIdShardified));
+		}
 		Profiling::EndTimer();
 	}
 }

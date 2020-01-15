@@ -1,4 +1,5 @@
 [CURRENT]
+- Fix a tooltips.
 
 v2.13 (2020-01-14)
 - Opciones de inicio para la obra (dinámico, región o punto).
