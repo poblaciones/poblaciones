@@ -10,14 +10,8 @@
 				<div v-show="showTabs" class="md-layout-item md-size-90 md-small-size-100">
 					<md-tabs md-sync-route ref="tabs">
 						<template slot="md-tab" slot-scope="{ tab }">
-							{{ tab.label }} <help-icon v-if="tab.data.help" :size="14"
-									class="md-icon-button hand md-small-hide"
-									style="margin-top: 10px;
-											margin-left: -7px;
-											color: #b1b1b1;
-											position: absolute;"
-									v-tooltip.bottom-start="{ content: tab.data.help, autoHide: false,
-										classes : 'tooltipInTitleBar' }"  />
+							{{ tab.label }}
+							<mp-help :text="tab.data.help" />
 						</template>
 
 						<md-tab class="transparentTab" to="/" md-label="Cartografías" :md-active="isPath('/')"

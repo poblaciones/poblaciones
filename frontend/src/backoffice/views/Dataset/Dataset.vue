@@ -52,14 +52,7 @@
 								<md-tabs v-else md-sync-route ref="tabs">
 											<template slot="md-tab" slot-scope="{ tab }">
 												{{ tab.label }}  <i class="badge" v-if="tab.data.badge">{{ tab.data.badge }}</i>
-													<help-icon v-if="tab.data.help" :size="14"
-														class="md-icon-button hand md-small-hide"
-														style="	margin-top: 10px;
-																			margin-left: -7px;
-																			color: #b1b1b1;
-																			position: absolute;"
-														v-tooltip.bottom-start="{ content: tab.data.help, autoHide: false,
-																	classes : 'tooltipInTitleBar tooltipLarge' }"  />
+													<mp-help :text="tab.data.help" :large="true" />
 											</template>
 
 											<md-tab style='flex: 1 0 100% !important;' id="data" md-label="Datos" @click="EnsureColumns"

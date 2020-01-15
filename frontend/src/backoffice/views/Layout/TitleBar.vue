@@ -3,16 +3,8 @@
 		<div class="md-elevation-1 titleBar">
 			<span>
 				{{ title }}
-				<help-icon v-if="help" :size="14"
-									class="md-icon-button hand md-small-hide"
-									style="margin-top: 10px;
-									    margin-left: 3px;
-											color: #888;
-											position: absolute;"
-									v-tooltip.bottom-start="{ content: help, autoHide: false,
-									classes : 'tooltipInTitleBar' }"  />
-
-		</span>
+				<mp-help :text="help"></mp-help>
+			</span>
 		</div>
 		<div style="height: 52px;"></div>
 	</div>

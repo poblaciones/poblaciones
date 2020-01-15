@@ -4,6 +4,7 @@ namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Exclude;
+use helena\db\backoffice\annotations\ClientReadonly;
 
 /**
  * Dataset

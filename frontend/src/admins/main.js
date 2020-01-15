@@ -34,9 +34,7 @@ import MpColorPicker from '@/backoffice/components/MpColorPicker';
 import MpConfirm from '@/backoffice/components/MpConfirm';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
 import MpSelect from '@/backoffice/components/MpSelect';
-import HelpIcon from 'vue-material-design-icons/HelpCircleOutline.vue';
 
-Vue.component('help-icon', HelpIcon);
 Vue.component('title-bar', TitleBar);
 Vue.component('invoker', Invoker);
 Vue.component('stepper', Stepper);

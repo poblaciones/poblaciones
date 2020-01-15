@@ -50,7 +50,7 @@
 		},
 		methods: {
 			show() {
-				this.search = new Search(this, this.Work.StartupExtraInfo.LookupVersion, searchType);
+				this.search = new Search(this, this.Work.StartupExtraInfo.LookupVersion, this.searchType);
 				this.filter = '';
 				this.autolist = [];
 				this.openDialog = true;

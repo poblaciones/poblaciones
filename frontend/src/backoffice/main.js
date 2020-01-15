@@ -15,13 +15,7 @@ import VueMaterial from 'vue-material';
 import 'vue-material/dist/vue-material.css';
 import 'vue-material/dist/theme/default.css';
 
-import VTooltip from 'v-tooltip';
-import VueRouter from 'vue-router';
-
 Vue.use(VueMaterial);
-Vue.use(VTooltip);
-Vue.use(VueRouter);
-
 Vue.component('router-link', Vue.options.components.RouterLink);
 Vue.component('router-view', Vue.options.components.RouterView);
 
@@ -34,20 +28,27 @@ import MpColorPicker from '@/backoffice/components/MpColorPicker';
 import MpConfirm from '@/backoffice/components/MpConfirm';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
 import MpSelect from '@/backoffice/components/MpSelect';
+import MpHelp from '@/backoffice/components/MpHelp';
 import HelpIcon from 'vue-material-design-icons/HelpCircleOutline.vue';
 import Clipboard from 'v-clipboard';
 
-Vue.component('help-icon', HelpIcon);
 Vue.component('title-bar', TitleBar);
 Vue.component('invoker', Invoker);
 Vue.component('stepper', Stepper);
 Vue.component('mp-select', MpSelect);
 Vue.component('mp-confirm', MpConfirm);
 Vue.component('mp-text', MpText);
+Vue.component('mp-help', MpHelp);
 Vue.component('mp-color-picker', MpColorPicker);
 Vue.component('mp-simple-text', MpSimpleText);
 
 Vue.use(Clipboard);
+
+import VTooltip from 'v-tooltip';
+import VueRouter from 'vue-router';
+
+Vue.use(VTooltip);
+Vue.use(VueRouter);
 
 // Settings
 window.host = process.env.host;

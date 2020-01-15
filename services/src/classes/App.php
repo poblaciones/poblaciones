@@ -53,6 +53,7 @@ class App
 				$twig->addGlobal('tooltip_url', Links::TooltipUrl());
 				$twig->addGlobal('home_url', Links::GetHomeUrl());
 				$twig->addGlobal('application_name', Context::Settings()->applicationName);
+				$twig->addGlobal('google_maps_version', '3.39');
 
 				return $twig;
 			});

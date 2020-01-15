@@ -35,19 +35,12 @@
 				<div class="md-layout-item md-size-80 md-small-size-100">
 					<md-card>
 						<md-card-header>
-							<div class="md-title">Licencia
-									<help-icon :size="14"
-																		class="md-icon-button hand md-small-hide"
-																		style="margin-top: 10px;
-																				margin-left: 3px;
-																				color: #888;
-																				position: absolute;"
-																		v-tooltip.bottom-start="{ content: `<p><b>¿Qué son las licencias Creative Commons?</b></p><p>Creative Commons es una organización sin fines de lucro, que brinda un conjunto
+							<div class="md-title">
+								Licencia
+								<mp-help :text="`<p><b>¿Qué son las licencias Creative Commons?</b></p><p>Creative Commons es una organización sin fines de lucro, que brinda un conjunto
 																			de licencias legales abiertas estandarizadas.</p><p>Estas licencias se basan en el derecho de autor y sirven para llevar la postura extrema de “Todos los derechos reservados” hacia una más flexible, de “Algunos derechos reservados” o, en algunos casos, “Sin derechos reservados”.</p>
-																			</p>Se pueden utilizar en cualquier obra creativa siempre que la misma se encuentre bajo derecho de autor y conexos, y pueden utilizarla tanto personas como instituciones.</p>`,
-										autoHide: false,
-										classes : 'tooltipInTitleBar' }"  />
-									</div>
+																			</p>Se pueden utilizar en cualquier obra creativa siempre que la misma se encuentre bajo derecho de autor y conexos, y pueden utilizarla tanto personas como instituciones.</p>`" />
+								</div>
 						</md-card-header>
 						<md-card-content>
 							<mp-license :canEdit="Work.CanEdit()" v-model="metadata.License" @update="Update"></mp-license>

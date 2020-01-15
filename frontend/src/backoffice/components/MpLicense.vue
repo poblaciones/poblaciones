@@ -8,16 +8,7 @@
 						<div>
 							<md-radio ref="licenseType1" v-model="decoded.licenseType" :value="1">
 								Creative Commons
-								<help-icon v-if="help" :size="14"
-									class="md-icon-button hand md-small-hide"
-									style="margin-top: -4px;
-													margin-left: 3px;
-													right: -16px;
-													text-align: right;
-													color: rgb(136, 136, 136);
-													position: absolute;"
-										v-tooltip.bottom-start="{ content: help, autoHide: false,
-												classes : 'tooltipInTitleBar tooltipLarge' }"  />
+								<mp-help :text="help" :large="true" />
 							</md-radio>
 							<md-radio v-model="decoded.licenseType" :value="0">No especificada</md-radio>
 						</div>
