@@ -50,7 +50,7 @@ class cMap extends cPublicController
 			$service = new MetadataModel();
 			$metadata = $service->GetMetadataByWorkId($this->workId);
 			if ($metadata !== null) {
-				$this->AddValue('application_name' , "Poblaciones: " . $metadata['met_title']);
+				$this->AddValue('application_name' , "Mapa de " . $metadata['met_title'] . " - Poblaciones");
 				$this->AddValue('description', $metadata['met_abstract']);
 			}
 		}

@@ -96,7 +96,8 @@ class DraftDataset
     /**
      * @var \helena\entities\backoffice\DraftDatasetColumn
  		 *
-     *
+ 		 * @ClientReadonly
+		 *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="dat_latitude_column_id", referencedColumnName="dco_id", nullable=true)
@@ -107,7 +108,8 @@ class DraftDataset
     /**
      * @var \helena\entities\backoffice\DraftDatasetColumn
      *
-	   *
+	   * @ClientReadonly
+		 *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="dat_longitude_column_id", referencedColumnName="dco_id", nullable=true)

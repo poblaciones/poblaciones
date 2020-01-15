@@ -16,16 +16,34 @@ use helena\classes\Links;
 use helena\classes\Session;
 use minga\framework\Params;
 
-// MAPA
+// CRAWLER
 App::RegisterControllerGet('/sitemap', controllers\cSitemap::class);
-App::RegisterControllerGet('/map', controllers\cMap::class);
-App::RegisterControllerGet('/map/', controllers\cMap::class);
-App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
 App::RegisterControllerGet('/handle/{path1}', controllers\cHandle::class);
 App::RegisterControllerGet('/handle/{path1}/{path2}', controllers\cHandle::class);
 App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}', controllers\cHandle::class);
 App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}', controllers\cHandle::class);
 App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}/{path5}', controllers\cHandle::class);
+
+
+// ej. http://mapas/map/3701/metadata
+App::$app->get('/map/metadata', function (Request $request) {
+	$controller = new commonServices\MetadataService();
+	$workId = Params::CheckParseIntValue(Params::CheckMandatoryValue(Params::FromPath(2)));
+	Session::$AccessLink = Params::Get('l');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
+	$workService = new services\WorkService();
+	$work = $workService->GetWorkOnly($workId);
+	$metadataId = $work->MetadataId;
+
+	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
+});
+
+// MAPA
+App::RegisterControllerGet('/map', controllers\cMap::class);
+App::RegisterControllerGet('/map/', controllers\cMap::class);
+App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
 
 // Parametros:
 // De frame:
@@ -224,21 +242,6 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
 	return $controller->GetMetadataFile($metadataId, $fileId);
-});
-
-// ej. http://mapas/map/3701/metadata
-App::$app->get('/map/metadata', function (Request $request) {
-	$controller = new commonServices\MetadataService();
-	$workId = Params::CheckParseIntValue(Params::CheckMandatoryValue(Params::FromPath(2)));
-	Session::$AccessLink = Params::Get('l');
-
-	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
-
-	$workService = new services\WorkService();
-	$work = $workService->GetWorkOnly($workId);
-	$metadataId = $work->MetadataId;
-
-	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
 });
 
 // ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4

@@ -1,6 +1,11 @@
 [CURRENT]
+
+v2.13 (2020-01-14)
 - Opciones de inicio para la obra (dinámico, región o punto).
-- Cálculo de extensión por indicador y por obra en la publicación.
+- Cálculo de extensión (extents) por indicador y por obra en la publicación.
+- Fix a puesta en nulo de columnas de latitud y longitud al modificarse la columna de descripción.
+- Fix a ruteo de metadatos.
+- Homologación de título de página entre /handle y /map
 
 v2.12 (2019-12-22)
 - Fix: Los popups del visor perdían su ubicación al ser arrastrados.

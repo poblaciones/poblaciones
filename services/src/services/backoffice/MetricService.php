@@ -23,7 +23,6 @@ class MetricService extends BaseService
 	public function GetNewMetricVersionLevel()
 	{
 		$level = new entities\DraftMetricVersionLevel();
-		$level->setExtents(null);
 		$version = new entities\DraftMetricVersion();
 		$version->setMultilevel(false);
 		$metric = new entities\DraftMetric();
