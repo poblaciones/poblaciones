@@ -278,6 +278,7 @@ class Account
 
 	public function SavePassword($password)
 	{
+		$this->EnsureDbInfo();
 		$passwordHashed = Str::SecurePasswordHash($password);
 		$sql = "UPDATE user SET usr_password = ? WHERE usr_id = ?";
 		App::Db()->exec($sql, array($passwordHashed, $this->userId));

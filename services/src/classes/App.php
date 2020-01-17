@@ -422,6 +422,20 @@ class App
 		return;
 	}
 
+	public static function GetPythonPath()
+	{
+		if (Context::Settings()->Servers()->Python27 === null)
+		{
+			if (array_key_exists('python', self::$app))
+				return self::$app['python'];
+			else
+				return Context::Settings()->Servers()->Python27;
+		}
+		else
+		{
+			return Context::Settings()->Servers()->Python27;
+		}
+	}
 	public static function GetSetting($key)
 	{
 		return self::$app[$key];

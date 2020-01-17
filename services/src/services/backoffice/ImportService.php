@@ -173,13 +173,13 @@ class ImportService extends BaseService
 		$folder = $this->state->GetFileFolder();
 		$uploadFolder = $bucket->path;
 		$sourceFile =  $uploadFolder . '/file.dat';
-		$python = App::GetSetting('python');
+		$python = App::GetPythonPath();
 		if (IO::Exists($python) === false) {
 			throw new ErrorException('El ejecutable de python no fue encontrado en ' . $python);
 		}
 		$lines = array();
 
-		$ret = System::Execute(App::GetSetting('python'), array(
+		$ret = System::Execute(App::GetPythonPath(), array(
 			Paths::GetPythonScriptsPath() .'/spss2json.py',
 			$sourceFile,
 			$folder

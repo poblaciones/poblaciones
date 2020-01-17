@@ -1,5 +1,5 @@
 [CURRENT]
-- Fix a emergentes de ayuda de backoffice.
+- Fix a tooltips emergentes de ayuda de backoffice.
 - Mejora en el listado administrativo de usuarios (permite actualizar emails y contraseña).
 - Soporte mejorado para MySql 5.7.
 - Build incluye ejemplos de settings.php y htaccess.

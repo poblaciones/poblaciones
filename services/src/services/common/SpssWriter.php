@@ -34,7 +34,7 @@ class SpssWriter extends JsonWriter
 		IO::WriteJson($hFile, $head, true);
 
 		$lines = array();
-		$ret = System::Execute(App::GetSetting('python'), array(
+		$ret = System::Execute(App::GetPythonPath(), array(
 			Paths::GetPythonScriptsPath() .'/json2spss.py',
 			$hFile,
 			$this->state->Get('dFile'),

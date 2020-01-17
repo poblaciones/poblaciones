@@ -16,11 +16,11 @@
 
 					<div class="md-layout-item md-size-40">
 						<mp-simple-text label="Contraseña"
-										v-model="password" @enter="save" />
+								type="password" v-model="password" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-40">
 						<mp-simple-text label="Verificación"
-									v-model="verification" @enter="save" />
+									type="password" v-model="verification" @enter="save" />
 					</div>
 
 					<div class="md-layout-item md-size-40">
@@ -41,7 +41,7 @@
 					</div>
 					<div class="md-layout-item md-size-70">
 						<md-switch class="md-primary" :value="1" v-model="user.IsActive">
-							Usuario activado
+							Usuario {{ (user.IsActive ? 'activo' : 'inactivo') }}
 						</md-switch>
 					</div>
 				</div>

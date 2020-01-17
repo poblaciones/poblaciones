@@ -8,7 +8,7 @@ use minga\framework\ErrorException;
 class ShardSettings
 {
 	//Datos de la partición de la base de datos
-	public $CurrentShard = null;
+	public $CurrentShard = 1;
 	public $Inclusions = null;
 	public $Exclusions = null;
 

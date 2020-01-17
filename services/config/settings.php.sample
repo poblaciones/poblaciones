@@ -40,5 +40,4 @@ Context::Settings()->Mail()->SMTPHost = "localhost";
 Context::Settings()->Db()->SetDatabase("SERVIDOR", "BASE_DE_DATOS", "USUARIO", "CONTRASEÑA");
 
 // Ubicación de python
-$app['python'] = 'C:/Python27/python.exe';
-
+Context::Settings()->Servers()->Python27 = 'C:/Python27/python.exe';
