@@ -15,8 +15,17 @@
 					</div>
 
 					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Correo electrónico" :disabled="true"
-									v-model="user.Email" />
+						<mp-simple-text label="Contraseña"
+										v-model="password" @enter="save" />
+					</div>
+					<div class="md-layout-item md-size-40">
+						<mp-simple-text label="Verificación"
+									v-model="verification" @enter="save" />
+					</div>
+
+					<div class="md-layout-item md-size-40">
+						<mp-simple-text label="Correo electrónico"
+									v-model="user.Email" @enter="save" />
 					</div>
 
 					<div class="md-layout-item md-size-70">
@@ -56,6 +65,8 @@ export default {
     return {
 			activateEdit: false,
 			user: null,
+			password: '',
+			verification: '',
     };
   },
   computed: {
@@ -71,8 +82,12 @@ export default {
 		},
 		save() {
 			var loc = this;
+			if (this.password !== '' && this.password !== this.verification) {
+				alert('La contraseña y la verificación no coinciden.');
+				return;
+			}
 			this.$refs.invoker.do(window.Db, window.Db.UpdateUser,
-							this.user).then(function(data) {
+							this.user, this.password, this.verification).then(function(data) {
 								loc.activateEdit = false;
 								loc.$emit('completed', loc.user);
 			});
