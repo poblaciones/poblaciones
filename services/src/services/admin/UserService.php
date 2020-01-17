@@ -38,10 +38,20 @@ class UserService extends BaseService
 		Profiling::EndTimer();
 		return $ret;
 	}
-	public function UpdateUser($user)
+	public function UpdateUser($user, $password, $verification)
 	{
 		Profiling::BeginTimer();
 		App::Orm()->Save($user);
+		if ($password !== null && strlen($password) > 0)
+		{
+			if ($password !== $verification)
+			{
+				throw new ErrorException("La verificación no coincide con la constraseña.");
+			}
+			$account = new Account();
+			$account->user = $user->getEmail();
+			$account->SavePassword($password);
+		}
 		Profiling::EndTimer();
 		return self::OK;
 	}

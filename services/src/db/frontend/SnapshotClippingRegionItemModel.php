@@ -129,16 +129,10 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		$params = array($levelId);
 
 		$sql = "SELECT SUM(IFNULL(giw_population, 0)) AS Population, SUM(IFNULL(giw_households, 0)) AS Households, " .
-			"SUM(IFNULL(giw_children, 0)) AS Children, SUM(IFNULL(giw_area_m2, 0)) AS AreaM2, null Name, null Type,
-						met_id, met_title, met_abstract, met_publication_date, met_license,
-								met_authors, ins_caption  " .
-			"FROM snapshot_geography_item ".
-			"JOIN geography ON geo_id = giw_geography_id ".
-			"LEFT JOIN metadata ON met_id = geo_metadata_id ".
-			"LEFT JOIN institution ON ins_id = met_institution_id ".
-			"WHERE giw_geography_id = ? AND ".
-			"ST_Intersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "'))";
-
+					"SUM(IFNULL(giw_children, 0)) AS Children, SUM(IFNULL(giw_area_m2, 0)) AS AreaM2, null Name, null Type " .
+					"FROM snapshot_geography_item ".
+					"WHERE giw_geography_id = ? AND ".
+					"ST_Intersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "'))";
 		if ($circle != null)
 		{
 			$sql .= " AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
@@ -146,7 +140,16 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		}
 
 		$ret = App::Db()->fetchAssoc($sql, $params);
-
+		if ($ret !== null)
+		{
+			$sqlMetadata = "SELECT met_id, met_title, met_abstract, met_publication_date, met_license, met_authors, ins_caption  " .
+							"FROM geography ".
+							"LEFT JOIN metadata ON met_id = geo_metadata_id ".
+							"LEFT JOIN institution ON ins_id = met_institution_id ".
+							"WHERE geo_id = ?";
+			$retMetadata = App::Db()->fetchAssoc($sqlMetadata, $params);
+			$ret = array_merge($ret, $retMetadata);
+		}
 		Profiling::EndTimer();
 		return $ret;
 	}

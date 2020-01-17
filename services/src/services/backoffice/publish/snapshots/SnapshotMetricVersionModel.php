@@ -24,7 +24,10 @@ class SnapshotMetricVersionModel
 						wrk_is_indexed, wrk_access_link, ";
 						// Hace un subselect con los nombres de variables
 		$sql .= "(SELECT GROUP_CONCAT(mvv_caption ORDER BY mvv_order SEPARATOR '\n')
-							FROM variable WHERE mvv_metric_version_level_id = mvl_id),";
+							FROM variable
+							JOIN metric_version_level ON mvv_metric_version_level_id = mvl_id
+							WHERE mvl_metric_version_id = mvr_id
+									),";
 						// Hace un subselect distinct con los valores de variables
 		$sql .= "(SELECT GROUP_CONCAT(SUB.V1 ORDER BY mvv_order SEPARATOR '\n')
 							FROM
@@ -34,7 +37,7 @@ class SnapshotMetricVersionModel
 									JOIN variable ON mvv_metric_version_level_id = mvl_id
 									JOIN variable_value_label ON vvl_variable_id = mvv_id
 									WHERE mvr_metric_id = ?
-									GROUP BY mvr_id, mvv_id) AS SUB
+									GROUP BY mvr_id, mvv_id, mvv_order) AS SUB
 							 WHERE SUB.mvr_id = metric_version.mvr_id)
 						FROM metric_version
 						JOIN metric ON mvr_metric_id = mtr_id
@@ -45,7 +48,8 @@ class SnapshotMetricVersionModel
 						JOIN metadata ON wrk_metadata_id = met_id
 						LEFT JOIN institution ON met_institution_id = ins_id
 						WHERE mvr_metric_id = ?
-						GROUP BY mvr_id, mvr_metric_id, mvr_caption, wrk_id, met_title";
+						GROUP BY mvr_id, mvr_metric_id, mtr_revision, mtr_caption, mtr_metric_group_id, mvr_caption, wrk_id, met_title,
+										met_authors, ins_caption, wrk_type, wrk_is_private, wrk_is_indexed, wrk_access_link";
 
 		App::Db()->exec($sql, array($metricIdShardified, $metricIdShardified));
 		Profiling::EndTimer();

@@ -14,7 +14,7 @@ def main():
     os._exit(1)
 
   try:
-    with open(sys.argv[1]) as head_file:
+    with open(sys.argv[1], 'r') as head_file:
         head = json.load(head_file)
 
     head['valueLabels'] = int_keys(head['valueLabels'], head['varTypes'])
@@ -25,7 +25,7 @@ def main():
       head['columnWidths'], head['alignments'], ioUtf8=True) as writer:
 
       for f in sorted(glob.glob(data_path)):
-        with open(f) as data_file:
+        with open(f, 'r') as data_file:
           for record in ijson.items(data_file, 'item'):
             writer.writerow(record)
 

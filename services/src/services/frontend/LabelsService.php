@@ -117,7 +117,7 @@ class LabelsService extends BaseService
 	{
 		$boxWidth = ($row['Size'] < 3 ? 200 : 100);
 		$boxLine =  $boxWidth * 0.5 * $scaleY;
-		$lines = intval(sizeof($row['Caption']) / 16) + 1;
+		$lines = intval(strlen($row['Caption']) / 16) + 1;
 		if ($lines > 3) $lines = 3;
 
 		$widthHalf = ($boxWidth * $scaleX) / 2;

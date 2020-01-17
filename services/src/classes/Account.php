@@ -278,14 +278,11 @@ class Account
 
 	public function SavePassword($password)
 	{
-		// busca la carpeta correspondiente
-		if (!$this->IsActive())
-			MessageBox::ThrowBackMessage('La cuenta de correo electrónico indicada no corresponde a una cuenta activa.');
-
 		$passwordHashed = Str::SecurePasswordHash($password);
 		$sql = "UPDATE user SET usr_password = ? WHERE usr_id = ?";
 		App::Db()->exec($sql, array($passwordHashed, $this->userId));
 	}
+
 	public function SaveActivation($firstName, $lastName, $passwordHashed)
 	{
 		$sql = "UPDATE user SET usr_firstname = ?, usr_lastname = ?, usr_password = ?, usr_is_active = 1 WHERE usr_id = ?";

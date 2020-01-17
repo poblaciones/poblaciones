@@ -50,6 +50,7 @@ echo "*** 1. Copia todo lo que hay que subir"
 cp -vr ../services/startup.php $output>>$output-1_copy.log
 cp -vr ../services/py $output>>$output-1_copy.log
 cp -vr ../services/src $output>>$output-1_copy.log
+cp -vr ../services/config $output>>$output-1_copy.log
 cp -vr ../services/resources $output>>$output-1_copy.log
 cp -vr ../services/web $output>>$output-1_copy.log
 cp -vr ../services/templates $output>>$output-1_copy.log
@@ -61,6 +62,7 @@ if [ $vendor = true ]; then
 fi
 
 echo "*** 2. Borra lo que no se sube"
+find $output/config ! -name 'settings.php.sample' -type f -exec rm -f {} +
 rm -f $output/web/.htaccess
 rm -f $output/web/IIRF.ini
 rm -f $output/web/web.config

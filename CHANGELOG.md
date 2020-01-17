@@ -1,5 +1,7 @@
 [CURRENT]
-- Fix a tooltips.
+- Fix a emergentes de ayuda de backoffice.
+- Mejora en el listado administrativo de usuarios (permite actualizar emails y contraseña).
+
 
 v2.13 (2020-01-14)
 - Opciones de inicio para la obra (dinámico, región o punto).

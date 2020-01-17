@@ -39,8 +39,8 @@ class SnapshotMetricModel extends BaseModel
 			$orderBy = "";
 		}
 
-		$sql = "SELECT	MIN(mvw_metric_caption) myv_metric_caption,
-										MIN(mvw_metric_id) myv_metric_id,
+		$sql = "SELECT	mvw_metric_id myv_metric_id,
+										MIN(mvw_metric_caption) myv_metric_caption,
 										MAX(mvw_metric_revision) myv_metric_revision,
 										MIN(mvw_metric_group_id) myv_metric_group_id,
 										GROUP_CONCAT(mvw_work_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_ids,

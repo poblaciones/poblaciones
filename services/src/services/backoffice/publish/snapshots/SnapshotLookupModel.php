@@ -131,7 +131,7 @@ class SnapshotLookupModel
 															"clr_labels_min_zoom, clr_labels_max_zoom, featureIds, population, clr_caption, clr_symbol " .
 															"FROM clipping_region_item, clipping_region, " .
 															"(SELECT	clipping_region_item_id, GROUP_CONCAT(geography_item_id SEPARATOR ',') featureIds, 
-																				MIN(geo_min_zoom) min_zoom, max(population) population " .
+																				MIN(geo_min_zoom) min_zoom, MAX(population) population " .
 																"FROM (	SELECT cgi_clipping_region_item_id clipping_region_item_id,  gei_geography_id , 
 																						(CASE WHEN COUNT(*) = 1 THEN min(cgi_geography_item_id) else NULL END) geography_item_id, 
 																						SUM(IFNULL(gei_population, 0)) population

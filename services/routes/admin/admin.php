@@ -22,8 +22,11 @@ App::GetOrPost('/services/admin/UpdateUser', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())
 		return $app;
 	$user = App::ReconnectJsonParamMandatory(entities\User::class, 'u');
+	$password = Params::Get('p');
+	$verification = Params::Get('v');
+
 	$controller = new services\UserService();
-	$ret = $controller->UpdateUser($user);
+	$ret = $controller->UpdateUser($user, $password, $verification);
 	return App::Json($ret);
 });
 
