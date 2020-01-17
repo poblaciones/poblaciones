@@ -38,26 +38,6 @@ class Menu
 		$configurationMenu[] = self::MenuItem('PLATFORM', '/logs/platform', 'Plataforma');
 		$configurationMenu[] = self::MenuItem('CACHES', '/logs/caches', 'Cachés');
 
-		$contentsMenu = array();
-		$contentsMenu[] = self::MenuItem('PUBLICDATADRAFT', '/logs/publicDataDraft', 'Datos públicos');
-		$contentsMenu[] = self::MenuItem('CARTOGRAPHIESDRAFT', '/logs/cartographiesDraft', 'Cartografías');
-		$contentsMenu[] = self::MenuItem('INSTITUTIONSDRAFT', '/logs/institutionsDraft', 'Instituciones');
-		$contentsMenu[] = self::MenuItem('SOURCESDRAFT', '/logs/sourcesDraft', 'Fuentes');
-		$contentsMenu[] = self::MenuItem('CATEGORIESDRAFT', '/logs/categoriesDraft', 'Categorías');
-		$contentsMenu[] = self::MenuItem('CONTACTDRAFT', '/logs/contactDraft', 'Contacto');
-
-		$menu_set['Contenidos de usuario'] = $contentsMenu;
-
-		$publicMenu = array();
-		$publicMenu[] = self::MenuItem('PUBLICDATA', '/logs/publicData', 'Datos públicos');
-		$publicMenu[] = self::MenuItem('CARTOGRAPHIES', '/logs/cartographies', 'Cartografías');
-		$publicMenu[] = self::MenuItem('INSTITUTIONS', '/logs/institutions', 'Instituciones');
-		$publicMenu[] = self::MenuItem('SOURCES', '/logs/sources', 'Fuentes');
-		$publicMenu[] = self::MenuItem('CATEGORIES', '/logs/categories', 'Categorías');
-		$publicMenu[] = self::MenuItem('CONTACT', '/logs/contact', 'Contacto');
-
-		$menu_set['Contenidos públicos'] = $publicMenu;
-
 		if(Session::IsMegaUser())
 		{
 			$menu_set['Actividad'] = $activityMenu;
