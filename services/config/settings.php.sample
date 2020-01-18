@@ -9,10 +9,7 @@ use minga\framework\settings\MailSettings;
 App::SetDebug(true);
 
 // **** Servidores
-Context::Settings()->Servers()->RegisterServer('core', "http://desa.poblaciones.org");
-Context::Settings()->Servers()->RegisterCDNServer('mapas', "http://desa.poblaciones.org");
-Context::Settings()->Servers()->SetCurrentServer('mapas');
-Context::Settings()->Shard()->CurrentShard = 1;
+Context::Settings()->Servers()->RegisterServers("http://servidor.poblaciones.org", "http://poblaciones.org");
 
 // **** Keys de terceros
 Context::Settings()->Keys()->GoogleMapsKey = "GOOGLE_MAPS_KEY";
@@ -22,12 +19,6 @@ Context::Settings()->Keys()->GoogleMapsKey = "GOOGLE_MAPS_KEY";
 //
 // En caso de usarse AddThis para que los usuarios vinculen contenidos en redes sociales:
 // Context::Settings()->Keys()->AddThisKey = "ADD_THIS_KEY";
-
-// **** Keys de firmado
-Context::Settings()->Keys()->RememberKey = '3vAAAGS4lKNFO7PKg1vWAy4SnnalgRatxknIrQJhWDvTqe7QTJV4gZD2w+n3EQdzzfi6gBhq3Xo/eUSp7M92ymMeYuo=';
-
-// **** Región de inicio
-// Context::Settings()->Map()->DefaultClippingRegion = { ID en clipping_region_item };
 
 // **** Mail
 // Posibles providers: Context::Settings()->Mail()->Provider: MailSettings::SendGrid, MailSettings::SMTP;

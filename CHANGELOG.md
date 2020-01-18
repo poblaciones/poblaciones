@@ -1,9 +1,11 @@
 [CURRENT]
+
+v2.14 (2020-01-18)
 - Fix a tooltips emergentes de ayuda de backoffice.
 - Mejora en el listado administrativo de usuarios (permite actualizar emails y contraseña).
 - Soporte mejorado para MySql 5.7.
 - Build incluye ejemplos de settings.php y htaccess.
-
+- Configuración simplificada.
 
 v2.13 (2020-01-14)
 - Opciones de inicio para la obra (dinámico, región o punto).
