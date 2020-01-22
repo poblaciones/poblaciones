@@ -7,7 +7,7 @@ use helena\classes\GlobalTimer;
 use helena\caches\LabelsCache;
 use helena\services\common\BaseService;
 
-use helena\db\frontend\SnapshotLookupModel;
+use helena\db\frontend\SnapshotSearchModel;
 use helena\entities\frontend\clipping\LabelsDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
@@ -37,7 +37,7 @@ class LabelsService extends BaseService
 
 	private function CalculateLabels($x, $y, $z, $b)
 	{
-		$table = new SnapshotLookupModel();
+		$table = new SnapshotSearchModel();
 
 		if ($b != null)
 		{

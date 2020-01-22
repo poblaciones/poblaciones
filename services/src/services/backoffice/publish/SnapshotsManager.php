@@ -70,11 +70,12 @@ class SnapshotsManager extends BaseService
 	public function UpdateDatasetData($row)
 	{
 		Profiling::BeginTimer();
+
+		$this->CleanDataset($row['dat_id']);
 		if ($row["dat_type"] == DatasetTypeEnum::Shapes)
 		{
-			$this->CleanDataset($row['dat_id']);
-			$mode = new SnapshotShapeDatasetItemModel();
-			$mode->RegenDataset($row['dat_id']);
+			$shapeItems = new SnapshotShapeDatasetItemModel();
+			$shapeItems->RegenDataset($row['dat_id']);
 		}
 		if (($row["dat_type"] == DatasetTypeEnum::Shapes || $row["dat_type"] == DatasetTypeEnum::Locations)
 			&& $row["dat_caption_column_id"] !== null)

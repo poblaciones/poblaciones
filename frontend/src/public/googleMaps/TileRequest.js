@@ -119,7 +119,7 @@ TileRequest.prototype.startGeographyRequest = function () {
 
 TileRequest.prototype.receiveMapData = function (newData) {
 	if (this.prevMapData !== null) {
-		this.prevMapData.Data.features = this.prevMapData.Data.features.concat(newData.Data.features);	
+		this.prevMapData.Data.features = this.prevMapData.Data.features.concat(newData.Data.features);
 	} else {
 		this.prevMapData = newData;
 	}

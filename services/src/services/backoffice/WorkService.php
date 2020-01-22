@@ -131,8 +131,8 @@ class WorkService extends BaseService
 	{
 		Profiling::BeginTimer();
 
-		$sql = "SELECT clv_caption caption, Replace(clv_full_parent, '\t', ' > ') extra FROM draft_work JOIN draft_work_startup ON wrk_startup_id = wst_id
-							JOIN snapshot_lookup ON wst_clipping_region_item_id = clv_clipping_region_item_id AND wst_clipping_region_item_id IS NOT NULL
+		$sql = "SELECT clc_caption caption, Replace(clc_full_parent, '\t', ' > ') extra FROM draft_work JOIN draft_work_startup ON wrk_startup_id = wst_id
+							JOIN snapshot_lookup_clipping_region_item ON wst_clipping_region_item_id = clc_clipping_region_item_id AND wst_clipping_region_item_id IS NOT NULL
 								WHERE wrk_id = ?
 								LIMIT 1";
 		$row = App::Db()->fetchAssoc($sql, array($workId));

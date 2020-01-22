@@ -126,6 +126,7 @@ App::$app->get('/services/search', function (Request $request) {
 	return App::JsonImmutable($controller->Search($query, $filter));
 });
 
+
 App::$app->get('/services/clipping/GetDefaultFrame', function (Request $request) {
 	$controller = new services\ClippingService();
 	$paramCoordinate = Params::Get('p');
@@ -133,28 +134,14 @@ App::$app->get('/services/clipping/GetDefaultFrame', function (Request $request)
 	return App::Json($controller->GetDefaultFrame($coordinate));
 });
 
-// ej. http://mapas/services/clipping/GetDefaultFrameAndClipping
-App::$app->get('/services/clipping/GetDefaultFrameAndClipping', function (Request $request) {
-	$controller = new services\ClippingService();
-	$paramCoordinate = Params::Get('p');
-	$coordinate = Coordinate::TextDeserialize($paramCoordinate);
-	return App::Json($controller->GetDefaultFrameAndClipping($coordinate));
-});
-
-// ej. http://mapas/services/clipping/CreateClippingByName
-App::$app->get('/services/clipping/CreateClippingByName', function (Request $request) {
-	$controller = new services\ClippingService();
-	$frame = Frame::FromParams();
-	$levelName = Params::Get('n', null);
-	return App::JsonImmutable($controller->CreateClippingByName($frame, $levelName));
-});
-
 // ej. http://mapas/services/clipping/CreateClipping
 App::$app->get('/services/clipping/CreateClipping', function (Request $request) {
 	$controller = new services\ClippingService();
 	$frame = Frame::FromParams();
 	$levelId = Params::GetInt('a', 0);
-	return App::JsonImmutable($controller->CreateClipping($frame, $levelId));
+	$levelName = Params::Get('n');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	return App::JsonImmutable($controller->CreateClipping($frame, $levelId, $levelName, $urbanity));
 });
 
 // ej. http://mapas/services/metrics/GetSummary?l=8&v=12&a=62&r=7160
@@ -163,7 +150,7 @@ App::$app->get('/services/metrics/GetSummary', function (Request $request) {
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
 	$levelId = Params::GetInt('a');
-	$urbanity = Params::Get('u');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$frame = Frame::FromParams();
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
@@ -182,20 +169,6 @@ App::$app->get('/services/metrics/GetInfoWindowData', function (Request $request
 
 	return App::Json($controller->GetInfo($featureId, $metricId, $metricVersionId, $levelId));
 });
-
-//TODO: Definir este servicio, parámetros etc..
-// ej. http://mapas/services/metrics/GetData?f=134834
-App::$app->get('/services/metrics/GetData', function (Request $request) {
-	// $controller = new services\DataService();
-	// $id = Params::GetInt('f');
-	// return $controller->GetDataJson($id);
-	$demo = array();
-	for($i = 0; $i < rand(3,6); $i++)
-		$demo[] = array('Name' => $i.'. Name'.rand(1, 100), 'Value' => 'Value'.rand(1, 100));
-
-	return App::Json($demo);
-});
-
 
 // ej. http://mapas/services/works/GetWorkAndDefaultFrame?w=12
 App::$app->get('/services/works/GetWorkAndDefaultFrame', function (Request $request) {
@@ -316,7 +289,7 @@ App::$app->get('/services/metrics/GetTileData', function (Request $request) {
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
 	$levelId = Params::GetInt('a');
-	$urbanity = Params::Get('u');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$frame = Frame::FromParams();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');

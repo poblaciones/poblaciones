@@ -1,5 +1,10 @@
 [CURRENT]
 
+v2.15 (2020-01-21)
+- Deduplicación de entradas en índice fulltext.
+- Separación de regiones y features en la tablas de búsqueda.
+- Revisión de Urbanity en las funciones servidor.
+
 v2.14 (2020-01-18)
 - Fix a tooltips emergentes de ayuda de backoffice.
 - Mejora en el listado administrativo de usuarios (permite actualizar emails y contraseña).

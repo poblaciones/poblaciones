@@ -5,7 +5,6 @@ export default Queue;
 
 const MAX_REQUESTS = 5;
 
-// Esta cola pone en espera pedidos solicitados por
 function Queue() {
 	this.id = 0;
 	this.queue = [];

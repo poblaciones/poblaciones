@@ -5,6 +5,7 @@ namespace helena\db\frontend;
 use minga\framework\QueryPart;
 use minga\framework\Profiling;
 use minga\framework\ErrorException;
+use minga\framework\Str;
 
 class SpatialConditions
 {
@@ -142,18 +143,14 @@ class SpatialConditions
 	public function UrbanityCondition($urbanity)
 	{
 		$field = $this->preffix . "_urbanity";
-		if ($urbanity =='U')
-			$sql = $field . " = 'U' ";
-		else if ($urbanity =='D')
-			$sql = $field . " = 'D' ";
-		else if ($urbanity =='UD' || $urbanity =='DU')
-			$sql = "(" . $field . " = 'U' OR " . $field . " = 'D') ";
-		else if ($urbanity =='R')
-			$sql = $field . " = 'R' ";
-		else
-			return ''; // sin filtros
+		if (strlen($urbanity) > 4) throw new ErrorException('Valor inválido para ' . $urbanity);
+		if ($urbanity === null) return '';
+		$sql = $field . " IN ('N'";
+		foreach(['U', 'D', 'R', 'L'] as $validFilter)
+		if (Str::Contains($urbanity, $validFilter))
+			$sql .= ",'" . $validFilter . "'";
 
-		return ' AND ' . $sql;
+		return ' AND ' . $sql . ') ';
 	}
 }
 

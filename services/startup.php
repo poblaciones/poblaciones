@@ -66,3 +66,30 @@ if(Context::Settings()->Debug()->debug)
 }
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
+
+function time_elapsed($label = null)
+{
+    static $last = null;
+    static $total = null;
+    static $round = 1;
+
+    $now = microtime(true);
+		if ($last != null) {
+        outwrite($round);
+				if ($label) outwrite('. ' . $label);
+				outwrite(': Parcial: ' . ($now - $last) * 1000 . ' ms');
+				outwrite('. Total: ' . ($now - $total) * 1000 . " ms\n<br>");
+				$round++;
+		} else $total = $now;
+
+    $last = $now;
+}
+
+function outwrite($text = null)
+{
+   static $out = "\n<br>";
+	if ($text !== null)
+		$out .= $text;
+	else
+		echo $out;
+}

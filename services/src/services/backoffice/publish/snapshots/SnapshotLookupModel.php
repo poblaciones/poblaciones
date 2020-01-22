@@ -20,7 +20,7 @@ class SnapshotLookupModel
 		$datasetIdShardified = PublishDataTables::Shardified($datasetId);
 
 		Profiling::BeginTimer();
-		$sqlDelete = "DELETE FROM snapshot_lookup WHERE clv_dataset_id = ?";
+		$sqlDelete = "DELETE FROM snapshot_lookup_feature WHERE clf_dataset_id = ?";
 		App::Db()->exec($sqlDelete, array($datasetIdShardified));
 		VersionUpdater::Increment('LOOKUP');
 
@@ -35,13 +35,13 @@ class SnapshotLookupModel
 
 		$dataset = $this->GetDatasetInfo($datasetIdShardified);
 
-		$sql = "INSERT INTO snapshot_lookup (clv_dataset_id, clv_level, "
-								. "clv_full_parent, clv_full_ids, clv_caption, clv_type, clv_location, clv_min_zoom, clv_max_zoom, clv_feature_ids, clv_population, clv_symbol, clv_tooltip) ";
+		$sql = "INSERT INTO snapshot_lookup_feature (clf_dataset_id, clf_level, "
+								. "clf_full_parent, clf_caption, clf_location, clf_min_zoom, clf_max_zoom, clf_feature_ids, clf_symbol, clf_tooltip) ";
 
 		$sqlInsert = "SELECT ?, gei_geography_id,
-								?, '', " . $dataset['CaptionColumn'] . ", 'F', "
+								?, " . $dataset['CaptionColumn'] . ", "
 								. $this->GetCentroidField($dataset) . ", " . self::SMALL_LABELS_FROM . ", " . self::SMALL_LABELS_TO . ", " .
-								$dataset["dat_id"] . " * 0x100000000 +id, 0 , ?, ?
+								$dataset["dat_id"] . " * 0x100000000 +id, ?, ?
 									FROM `" . $dataset["dat_table"] . "`, geography_item
 								WHERE gei_id = geography_item_id
 								ORDER BY id";
@@ -50,22 +50,11 @@ class SnapshotLookupModel
 					$dataset["dat_caption"], $dataset["dat_symbol"], $dataset["dat_caption"]);
 		$r = App::Db()->exec($sql . $sqlInsert, $params);
 
-		$rowsAffected = $r;
-		while ($r != 0)
-		{
-			$sqlParents = "UPDATE snapshot_lookup JOIN geography_item ON clv_level = gei_id
-						SET clv_level = gei_parent_id, clv_full_ids = CONCAT(gei_id, '\t', clv_full_ids), clv_full_parent = (CASE WHEN gei_caption is null THEN clv_full_parent ELSE CONCAT(gei_caption, '\t', coalesce(clv_full_parent, '')) END) WHERE clv_level is not null
-							AND clv_dataset_id = ?";
-			$r = App::Db()->exec($sqlParents, array($datasetIdShardified));
-		}
-		$sqlCountry = "UPDATE snapshot_lookup SET clv_full_ids = CONCAT(?, '\t', clv_full_ids), clv_full_parent = CONCAT(?, '\t', clv_full_parent) WHERE clv_level IS NULL AND clv_dataset_id = ?";
-		$r = App::Db()->exec($sqlCountry, array($dataset['cli_id'], $dataset['cli_caption'], $datasetIdShardified));
-
 		VersionUpdater::Increment('LOOKUP');
 
 		Profiling::EndTimer();
 
-		return $rowsAffected;
+		return $r;
 	}
 
 
@@ -107,7 +96,7 @@ class SnapshotLookupModel
 	{
 		Profiling::BeginTimer();
 
-		$sqlDelete = "DELETE FROM snapshot_lookup WHERE clv_type = 'C';";
+		$sqlDelete = "TRUNCATE TABLE snapshot_lookup_clipping_region_item;";
 		App::Db()->exec($sqlDelete);
 
 		VersionUpdater::Increment('LOOKUP_REGIONS');
@@ -121,13 +110,13 @@ class SnapshotLookupModel
 
 		Profiling::BeginTimer();
 
-		$sqlInsert = "INSERT INTO snapshot_lookup (clv_clipping_region_item_id, clv_level, "
-							. "clv_full_parent, clv_full_ids, clv_caption, clv_type, clv_location, clv_min_zoom, clv_max_zoom, clv_feature_ids, clv_population, clv_tooltip, clv_symbol) ";
+		$sqlInsert = "INSERT INTO snapshot_lookup_clipping_region_item (clc_clipping_region_item_id, clc_level, "
+							. "clc_full_parent, clc_full_ids, clc_caption, clc_location, clc_min_zoom, clc_max_zoom, clc_feature_ids, clc_population, clc_tooltip, clc_symbol) ";
 
 		// En el siguiente select trae los clipping_region_item que no tengan clr_no_autocomplete en true. Al traerlos
 		// les agrega información de geographyItem a los que tengan una relación de 1 a 1 con la tabla de
 		// geographyItem (ej Salta => Salta). Para todos, calcula desde geography el population.
-		$sql = $sqlInsert . "select cli_id, cli_parent_id, clr_caption, '0', cli_caption, 'C', cli_centroid, " .
+		$sql = $sqlInsert . "select cli_id, cli_parent_id, clr_caption, '0', cli_caption, cli_centroid, " .
 															"clr_labels_min_zoom, clr_labels_max_zoom, featureIds, population, clr_caption, clr_symbol " .
 															"FROM clipping_region_item, clipping_region, " .
 															"(SELECT	clipping_region_item_id, GROUP_CONCAT(geography_item_id SEPARATOR ',') featureIds, 
@@ -148,7 +137,7 @@ class SnapshotLookupModel
 		$rowsAffected = $r;
 		while ($r != 0)
 		{
-			$sqlParents = "UPDATE snapshot_lookup JOIN clipping_region_item ON clv_level = cli_id SET clv_level = cli_parent_id, clv_full_ids = CONCAT(cli_id, '\t', clv_full_ids), clv_full_parent = CONCAT(cli_caption, '\t', clv_full_parent) WHERE clv_level is not null";
+			$sqlParents = "UPDATE snapshot_lookup_clipping_region_item JOIN clipping_region_item ON clc_level = cli_id SET clc_level = cli_parent_id, clc_full_ids = CONCAT(cli_id, '\t', clc_full_ids), clc_full_parent = CONCAT(cli_caption, '\t', clc_full_parent) WHERE clc_level is not null";
 			$r = App::Db()->exec($sqlParents);
 		}
 

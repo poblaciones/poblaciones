@@ -9,7 +9,3 @@ require_once 'startup.php';
 $entityManager = App::Orm()->GetEntityManager();
 
 return ConsoleRunner::createHelperSet($entityManager);
-
-function time_elapsed($label = null)
-{
-}

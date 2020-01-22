@@ -126,24 +126,17 @@ class ClippingService extends BaseService
 		return $frame;
 	}
 
-	public function CreateClippingByName($frame, $name)
-	{
-		$data = $this->CalculateClipping($frame,  0, $name);
-		$data->EllapsedMs = GlobalTimer::EllapsedMs();
-		return $data;
-	}
-
-	public function CreateClipping($frame, $levelId = 0)
+	public function CreateClipping($frame, $levelId = 0, $name = null, $urbanity = null)
 	{
 		Profiling::BeginTimer();
 		$data = null;
-		$frameKey = $levelId . "@" . $frame->GetClippingKey();
+		$frameKey = ClippingCache::CreateKey($frame, $levelId, $name, $urbanity);
 		if ($frame->HasClippingFactor() && ClippingCache::Cache()->HasData($frameKey, $data))
 		{
 			Profiling::EndTimer();
 			return $this->GotFromCache($data);
 		}
-		$data = $this->CalculateClipping($frame,  $levelId);
+		$data = $this->CalculateClipping($frame, $levelId, $name, $urbanity);
 
 		if ($frame->HasClippingFactor())
 			ClippingCache::Cache()->PutData($frameKey, $data);
@@ -152,12 +145,15 @@ class ClippingService extends BaseService
 		return $data;
 	}
 
-	private function CalculateClipping($frame,  $levelId, $levelName = null)
+	private function CalculateClipping($frame, $levelId, $levelName, $urbanity)
 	{
 		$clipping = new ClippingInfo();
 
 		GlobalTimer::Begin('CalculateLevels');
-		$clipping->Levels = $this->CalculateLevels($frame);
+
+		$forcetrackingLevels = ($urbanity !== null);
+
+		$clipping->Levels = $this->CalculateLevels($frame, $forcetrackingLevels);
 		GlobalTimer::End();
 
 		if (sizeof($clipping->Levels) == 0)
@@ -173,7 +169,7 @@ class ClippingService extends BaseService
 				$clipping->SelectedLevelIndex = $clipping->GetLevelIndexByName($levelName, sizeof($clipping->Levels)-1);
 
 			GlobalTimer::Begin('CalculateSummary');
-			$clipping->Summary = $this->CalculateSummary($frame, $clipping->Levels[$clipping->SelectedLevelIndex]->Id);
+			$clipping->Summary = $this->CalculateSummary($frame, $clipping->Levels[$clipping->SelectedLevelIndex]->Id, $urbanity);
 			GlobalTimer::End();
 		}
 
@@ -201,7 +197,7 @@ class ClippingService extends BaseService
 		return $clipping;
 	}
 
-	private function CalculateLevels($frame)
+	private function CalculateLevels($frame, $forceTrackingLevels)
 	{
 		$table = new SnapshotClippingRegionItemModel();
 
@@ -212,7 +208,7 @@ class ClippingService extends BaseService
 		}
 		else if ($frame->ClippingRegionId != null)
 		{   // Calcula región
-			$rows = $table->CalculateLevelsFromRegionId($frame->ClippingRegionId);
+			$rows = $table->CalculateLevelsFromRegionId($frame->ClippingRegionId, $forceTrackingLevels);
 		}
 		else if ($frame->Envelope != null)
 		{
@@ -235,37 +231,20 @@ class ClippingService extends BaseService
 		return $ret;
 	}
 
-	public function GetSummary($frame, $levelId)
-	{
-		$data = null;
-		$frameKey = $levelId + "@" + $frame->GetClippingKey();
-		if (ClippingSummaryCache::Cache()->HasData($frameKey, $data))
-		{
-			return $this->GotFromCache($data);
-		}
-
-		$data = $this->CalculateSummary($frame, $levelId);
-
-		ClippingSummaryCache::Cache()->PutData($frameKey, $data);
-		$data->EllapsedMs = GlobalTimer::EllapsedMs();
-
-		return $data;
-	}
-
-	private function CalculateSummary($frame, $levelId)
+	private function CalculateSummary($frame, $levelId, $urbanity)
 	{
 		if ($frame->ClippingCircle != null)
 		{
 			// Actualiza región según círculo
-			return $this->CalculateRegionFromCircle($frame->ClippingCircle, $levelId);
+			return $this->CalculateRegionFromCircle($frame->ClippingCircle, $levelId, $urbanity);
 		}
 		else if ($frame->ClippingRegionId != null)
 		{   // Calcula región
-			return $this->CalculateRegionFromId($frame->ClippingRegionId, $levelId);
+			return $this->CalculateRegionFromId($frame->ClippingRegionId, $levelId, $urbanity);
 		}
 		else if ($frame->Envelope != null)
 		{
-			return $this->CalculateRegionFromEnvelope($frame->Envelope, $levelId);
+			return $this->CalculateRegionFromEnvelope($frame->Envelope, $levelId, $urbanity);
 		}
 		else
 		{
@@ -273,10 +252,10 @@ class ClippingService extends BaseService
 		}
 	}
 
-	private function CalculateRegionFromId($clippingRegionId, $levelId)
+	private function CalculateRegionFromId($clippingRegionId, $levelId, $urbanity)
 	{
 		$table = new SnapshotClippingRegionItemModel();
-		$item = $table->GetSelectionInfoById($clippingRegionId, $levelId);
+		$item = $table->GetSelectionInfoById($clippingRegionId, $levelId, $urbanity);
 		if ($item != null)
 			return $this->CreateSelectionInfo($clippingRegionId, $item);
 		else
@@ -297,10 +276,10 @@ class ClippingService extends BaseService
 		}
 	}
 
-	private function CalculateRegionFromEnvelope($envelope, $levelId)
+	private function CalculateRegionFromEnvelope($envelope, $levelId, $urbanity)
 	{
 		$table = new SnapshotClippingRegionItemModel();
-		$item = $table->GetSelectionInfoByEnvelope($envelope, $levelId);
+		$item = $table->GetSelectionInfoByEnvelope($envelope, $levelId, $urbanity);
 
 		$info = $this->CreateSelectionInfo(null, $item);
 
@@ -309,12 +288,12 @@ class ClippingService extends BaseService
 		return $info;
 	}
 
-	private function CalculateRegionFromCircle($circle, $levelId)
+	private function CalculateRegionFromCircle($circle, $levelId, $urbanity)
 	{
 		$table = new SnapshotClippingRegionItemModel();
 
 		GlobalTimer::Begin('GetSelectionInfoByCircle');
-		$item = $table->GetSelectionInfoByCircle($circle, $levelId);
+		$item = $table->GetSelectionInfoByCircle($circle, $levelId, $urbanity);
 		GlobalTimer::End();
 
 		$info = $this->CreateSelectionInfo(null, $item);

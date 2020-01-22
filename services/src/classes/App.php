@@ -451,6 +451,19 @@ class App
 		return '';
 	}
 
+	public static function SanitizeUrbanity($paramValue)
+	{
+		// Ordena y limpia lo recibido en urbanity
+		$ret = '';
+		foreach(['U', 'D', 'R', 'L'] as $validFilter)
+		if (Str::Contains($paramValue, $validFilter))
+			$ret .= $validFilter;
+		if ($ret == '' || strlen($ret) === 4)
+			return null;
+		else
+			return $ret;
+	}
+
 	public static function AppendProfilingResults(Request $req, Response $res)
 	{
 		if (!Profiling::IsProfiling() || $req->getMethod() !== 'GET')

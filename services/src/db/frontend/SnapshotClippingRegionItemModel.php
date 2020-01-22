@@ -86,10 +86,10 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
-	public function GetSelectionInfoById($clippingRegionId, $levelId)
+	public function GetSelectionInfoById($clippingRegionId, $levelId, $urbanity)
 	{
 		Profiling::BeginTimer();
-		$viewSql = $this->CreateRegionQuery();
+		$viewSql = $this->CreateRegionQuery($urbanity);
 		$params = array($levelId, $clippingRegionId);
 
 		$sql = "SELECT cli_caption Name, clr_caption Type, cli_centroid Location, ".
@@ -106,33 +106,37 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
-	private function CreateRegionQuery()
+	private function CreateRegionQuery($urbanity)
 	{
+		$spatial = new SpatialConditions('cgv_');
+
 		$sql = "SELECT cgv_clipping_region_item_id Id, SUM(IFNULL(cgv_population, 0)) AS Population, SUM(IFNULL(cgv_households, 0)) AS Households, SUM(IFNULL(cgv_children, 0)) AS Children, SUM(IFNULL(cgv_area_m2, 0)) AS AreaM2 " .
-			" FROM snapshot_clipping_region_item_geography_item WHERE cgv_geography_id = ? AND cgv_clipping_region_item_id = ? GROUP BY cgv_clipping_region_item_id";
+			" FROM snapshot_clipping_region_item_geography_item WHERE cgv_geography_id = ? " . $spatial->UrbanityCondition($urbanity) .
+			"AND cgv_clipping_region_item_id = ? GROUP BY cgv_clipping_region_item_id";
 		return $sql;
 	}
 
-	public function GetSelectionInfoByEnvelope($envelope, $levelId)
+	public function GetSelectionInfoByEnvelope($envelope, $levelId, $urbanity)
 	{
-		return $this->GetSelectionInfoByZone($envelope, $levelId);
+		return $this->GetSelectionInfoByZone($envelope, $levelId, $urbanity);
 	}
 
-	public function GetSelectionInfoByCircle($circle, $levelId)
+	public function GetSelectionInfoByCircle($circle, $levelId, $urbanity)
 	{
-		return $this->GetSelectionInfoByZone($circle->GetEnvelope(), $levelId, $circle);
+		return $this->GetSelectionInfoByZone($circle->GetEnvelope(), $levelId, $urbanity, $circle);
 	}
 
-	public function GetSelectionInfoByZone($envelope, $levelId, $circle = null)
+	private function GetSelectionInfoByZone($envelope, $levelId, $urbanity, $circle = null)
 	{
 		Profiling::BeginTimer();
 		$params = array($levelId);
+		$spatial = new SpatialConditions('giw_');
 
 		$sql = "SELECT SUM(IFNULL(giw_population, 0)) AS Population, SUM(IFNULL(giw_households, 0)) AS Households, " .
 					"SUM(IFNULL(giw_children, 0)) AS Children, SUM(IFNULL(giw_area_m2, 0)) AS AreaM2, null Name, null Type " .
 					"FROM snapshot_geography_item ".
-					"WHERE giw_geography_id = ? AND ".
-					"ST_Intersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "'))";
+					"WHERE giw_geography_id = ? " . $spatial->UrbanityCondition($urbanity) .
+				  "AND ST_Intersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "'))";
 		if ($circle != null)
 		{
 			$sql .= " AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
@@ -154,10 +158,25 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
-	public function CalculateLevelsFromRegionId($regionItemId)
+	public function CalculateLevelsFromRegionId($regionItemId, $trackingLevels = false)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT geo_id, geo_max_zoom, geo_caption, geo_revision, geo_partial_coverage,
+
+		if ($trackingLevels)
+		{
+			$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_caption, C1.geo_revision,
+          C1.geo_partial_coverage, metadata.*, ins_caption
+          FROM geography C1
+					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
+					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
+					LEFT JOIN institution ON met_institution_id = ins_id
+					WHERE EXISTS (SELECT * FROM snapshot_clipping_region_item_geography_item WHERE C2.geo_id = cgv_geography_id
+					AND cgv_clipping_region_item_id = ? AND giw_geography_is_tracking_level = 1)
+					ORDER BY C1.geo_revision";
+		}
+		else
+		{
+			$sql = "SELECT geo_id, geo_max_zoom, geo_caption, geo_revision, geo_partial_coverage,
 								met_id, met_title, met_abstract, met_publication_date, met_license,
 								met_authors, ins_caption
 							FROM clipping_region_item
@@ -167,6 +186,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 							LEFT JOIN metadata ON geo_metadata_id = met_id
 							LEFT JOIN institution ON met_institution_id = ins_id
 							WHERE  cli_id = ? ORDER BY geo_revision";
+		}
 		$params = array($regionItemId);
 		return App::Db()->fetchAll($sql, $params);
 	}
@@ -203,7 +223,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 					AND MBRIntersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "')) AND giw_geography_is_tracking_level = 1)
 					ORDER BY C1.geo_revision";
 		$ret = App::Db()->fetchAll($sql);
-		
+
 		Profiling::EndTimer();
 		return $ret;
 	}
