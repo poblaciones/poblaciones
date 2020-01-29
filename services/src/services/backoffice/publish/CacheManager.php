@@ -4,14 +4,13 @@ namespace helena\services\backoffice\publish;
 
 use helena\caches\DownloadCache;
 use helena\caches\DatasetShapesCache;
-use helena\caches\FrameMetricsHashCache;
 use helena\caches\FabMetricsCache;
-use helena\caches\MetricHashesListCache;
 use helena\caches\SelectedMetricsMetadataCache;
 use helena\caches\MetricGroupsMetadataCache;
 use helena\caches\DatasetColumnCache;
 use helena\caches\ClippingSummaryCache;
 use helena\caches\ClippingCache;
+use helena\caches\RankingCache;
 use helena\caches\BackofficeDownloadCache;
 use helena\caches\PdfMetadataCache;
 use helena\caches\WorkVisiblityCache;
@@ -76,6 +75,7 @@ class CacheManager
 	{
 		SummaryCache::Cache()->Clear();
 		TileDataCache::Cache()->Clear();
+		RankingCache::Cache()->Clear();
 		DatasetColumnCache::Cache()->Clear();
 		ClippingSummaryCache::Cache()->Clear();
 		BackofficeDownloadCache::Cache()->Clear();
@@ -83,8 +83,6 @@ class CacheManager
 		DownloadCache::Cache()->Clear();
 		FabMetricsCache::Cache()->Clear();
 		SelectedMetricsMetadataCache::Cache()->Clear();
-		FrameMetricsHashCache::Cache()->Clear();
-		MetricHashesListCache::Cache()->Clear();
 	}
 	public function CleanMetricGroupsMetadataCache()
 	{
@@ -102,9 +100,7 @@ class CacheManager
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 		SummaryCache::Cache()->Clear($metricIdShardified);
 		TileDataCache::Cache()->Clear($metricIdShardified);
+		RankingCache::Cache()->Clear($metricIdShardified);
 		SelectedMetricsMetadataCache::Cache()->Clear($metricIdShardified);
-
-		FrameMetricsHashCache::Cache()->Clear();
-		MetricHashesListCache::Cache()->Clear();
 	}
 }

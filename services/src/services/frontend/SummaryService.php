@@ -26,7 +26,7 @@ class SummaryService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new ErrorException("A spatial indication must be specified (envelope, circle or region).");
 
-		$key = SummaryCache::CreateKey($frame, $metricVersionId, $levelId);
+		$key = SummaryCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && SummaryCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -53,8 +53,6 @@ class SummaryService extends BaseService
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
 
-		// calcula los summary (según indicado por campo 'resumen' en el ABM)
-		// para cada categoría del metric indicado en la región clipeada.
 		$table = new SnapshotMetricVersionItemVariableModel();
 		$geographyId = $level->GeographyId;
 

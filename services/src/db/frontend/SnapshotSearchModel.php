@@ -17,7 +17,7 @@ class SnapshotSearchModel extends BaseModel
 		Profiling::BeginTimer();
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
-		$sql = "SELECT DISTINCT
+		$sql = "SELECT
 			CAST(clc_clipping_region_item_id AS UNSIGNED INTEGER) id,
 			clc_caption caption,
 			'C' type,

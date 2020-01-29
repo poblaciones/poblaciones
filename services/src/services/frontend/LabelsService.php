@@ -11,10 +11,32 @@ use helena\db\frontend\SnapshotSearchModel;
 use helena\entities\frontend\clipping\LabelsDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
+use helena\entities\frontend\clipping\TileDataInfo;
+use minga\framework\Context;
 
 
 class LabelsService extends BaseService
 {
+	public function GetBlockLabels($x, $y, $z, $b)
+	{
+		$size = Context::Settings()->Map()->LabelsBlockSize;
+		$blocks = [];
+		for($ix = $x; $ix < $x + $size; $ix++)
+		{
+			$row = [];
+			for($iy = $y; $iy < $y + $size; $iy++)
+			{
+				$row[$iy] = $this->GetLabels($ix, $iy, $z, $b);
+			}
+			$blocks[$ix] = $row;
+		}
+		$ret = new TileDataInfo();
+		$ret->Data = $blocks;
+		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
+
+		return $ret;
+	}
+
 	public function GetLabels($x, $y, $z, $b)
 	{
 		$data = null;

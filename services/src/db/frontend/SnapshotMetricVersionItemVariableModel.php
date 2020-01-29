@@ -156,6 +156,83 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		}
 		return $ret;
 	}
+
+
+	public function GetMetricVersionRankingByRegionId($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionId, $circle, $datasetType, $hasDescriptions, $size, $direction)
+	{
+		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionId, $geographyId);
+
+		if ($circle != null)
+			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
+		else
+			$circleQuery = null;
+
+		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query, $circleQuery);
+	}
+
+	public function GetMetricVersionRankingByEnvelope($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $envelope, $datasetType, $hasDescriptions, $size, $direction)
+	{
+
+		$query = $this->spatialConditions->CreateSimpleEnvelopeQuery($envelope);
+
+		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query);
+	}
+
+	public function GetMetricVersionRankingByCircle($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $circle, $datasetType, $hasDescriptions, $size, $direction)
+	{
+		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
+
+		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query);
+	}
+
+	private function ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query, $extraQuery = null)
+	{
+		Profiling::BeginTimer();
+		$select = "IFNULL(miv_value, 0) Value, IFNULL(miv_total, 0) Total, miv_feature_id FeatureId,
+								miv_version_value_label_id ValueId, round(Y(miv_location), ". GeoJson::PRECISION .") as Lat, round(X(miv_location), ". GeoJson::PRECISION .")  as Lon";
+		if ($hasDescriptions)
+		{
+			$select .= ", miv_description Name ";
+		}
+		else if ($datasetType == 'L' || $datasetType == 'S')
+		{
+			// Pone la ubicación
+			$select .= ", CONCAT('[', round(Y(miv_location), ". GeoJson::PRECISION ."), ',', round(X(miv_location), ". GeoJson::PRECISION ."), ']') Name ";
+		}
+		else
+		{
+			// Pone descripción o código
+			$select .= ", (SELECT IFNULL(gei_caption, gei_code) FROM geography_item WHERE gei_id = miv_geography_item_id) Name ";
+		}
+		$from = $this->tableName;
+
+		$where = "miv_metric_version_id = ? AND miv_geography_id <=> ? " .	$this->spatialConditions->UrbanityCondition($urbanity) .
+							" AND miv_metric_version_variable_id = ?";
+		if ($hasTotals)
+			$where .= " AND IFNULL(miv_total, 0) > 0 ";
+
+		$params = array($metricVersionId, $geographyId, $variableId);
+
+		if ($hasTotals)
+		{
+			$orderBy = "CASE WHEN Total = 0 THEN 0 ELSE Value / Total END";
+		}
+		else
+		{
+			$orderBy = "Value";
+		}
+		$orderBy .= ($direction === 'D' ? ' DESC' : ' ASC');
+
+		$baseQuery = new QueryPart($from, $where, $params, $select, null, $orderBy);
+
+		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
+
+		$multiQuery->setMaxRows($size);
+
+		$ret = $multiQuery->fetchAll();
+		Profiling::EndTimer();
+		return $ret;
+	}
 }
 
 

@@ -13,6 +13,7 @@ use helena\services\common\BaseService;
 use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
+use minga\framework\Context;
 
 
 class TileDataService extends BaseService
@@ -21,6 +22,25 @@ class TileDataService extends BaseService
 	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
 	const TILE_SIZE = 256;
+
+	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
+	{
+		$s = Context::Settings()->Map()->TileDataBlockSize;
+		$blocks = [];
+		for($ix = $x; $ix < $x + $s; $ix++)
+		{
+			$row = [];
+			for($iy = $y; $iy < $y + $s; $iy++)
+			{
+	 				$row[$iy] = $this->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $ix, $iy, $z, $b);
+			}
+			$blocks[$ix] = $row;
+		}
+		$ret = new TileDataInfo();
+		$ret->Data = $blocks;
+		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
+		return $ret;
+	}
 
 	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
 	{
@@ -33,7 +53,7 @@ class TileDataService extends BaseService
 		$this->CheckNotNullNumeric($y);
 		$this->CheckNotNullNumeric($z);
 
-		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $x, $y, $z, $b);
+		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b);
 
 		if ($frame->ClippingCircle == null && TileDataCache::Cache()->HasData($metricId, $key, $data))
 		{
