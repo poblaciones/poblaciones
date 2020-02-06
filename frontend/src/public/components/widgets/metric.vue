@@ -11,18 +11,6 @@
 				<div class="btn-group">
 					<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button" v-on:click="changeSelectedVersionIndex(index)" class="btn btn-default btn-xs" :class="getActive(index)">{{ ver.Version.Name }}</button>
 				</div>
-
-				<div class="btn-group">
-					<button v-if="metric.SelectedLevel().Extents" ref="zoomExtentsBtn" type="button" class="btn btn-default btn-xs" title="Zoom al indicador" v-on:click="zoomExtents()">
-						<i class="fas fa-expand-arrows-alt" style="margin-left: 2px;" />
-					</button>
-
-					<button type="button" v-on:click="toogleRankings" v-if="useRankings" onmouseup="this.blur()"
-									class="btn btn-default btn-xs" :class="(metric.ShowRanking ? 'active' : '')" title="Ranking">
-						<i class="fa fa-signal" style="margin-left: -4px;" />
-					</button>
-				</div>
-
 				<MetricSource :metric="metric" :clipping="clipping" />
 			</div>
 			<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">

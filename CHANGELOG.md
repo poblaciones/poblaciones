@@ -1,4 +1,9 @@
 [CURRENT]
+- Optimización de tiles por bloques.
+- Fix: los tooltips de las capas capturaban el mouse de las etiquetas.
+- Fix: los clicks en etiquetas no se propagan a las métricas.
+- Ofrece ránkings para los elementos de los indicadores.
+- Ofrece zoom a la extensión del indicador.
 
 v2.15 (2020-01-21)
 - Deduplicación de entradas en índice fulltext.

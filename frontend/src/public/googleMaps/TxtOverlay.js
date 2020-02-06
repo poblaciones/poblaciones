@@ -50,7 +50,7 @@ TxtOverlay.prototype.RebuildHtml = function () {
 			} else {
 				tooltip = 'Más información de ' + this.tooltip;
 			}
-			text += "<span title='" + tooltip + "' onClick=\"window.SegMap.SelectId('" + this.type + "', '" + this.clickId +
+			text += "<span title='" + tooltip + "' onClick=\"event.stopPropagation(); window.SegMap.SelectId('" + this.type + "', '" + this.clickId +
 				"', " + this.pos.lat() + ', ' + this.pos.lng() + ");\" class='ibLink'>";
 		}
 		text += this.txt;

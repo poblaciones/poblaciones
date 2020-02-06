@@ -17,7 +17,6 @@
 
 <script>
 import SegmentedMap from '@/public/classes/SegmentedMap';
-import RestoreRoute from '@/public/classes/RestoreRoute';
 import StartMap from '@/public/classes/StartMap';
 import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
@@ -29,9 +28,7 @@ import Search from '@/public/components/widgets/search';
 import Split from 'split.js';
 import axios from 'axios';
 import Vue from 'vue';
-import h from '@/public/js/helper';
 import err from '@/common/js/err';
-import str from '@/common/js/str';
 
 export default {
 	name: 'app',
@@ -84,7 +81,7 @@ export default {
 				ClippingFeatureId: null,
 			},
 			metrics: [],
-			revisions: [],
+			config: {},
 			work: { Current: null },
 			workToLoad: false
 		};
@@ -98,20 +95,20 @@ export default {
 
 		this.BindEvents();
 		var loc = this;
-		this.GetRevisions().then(function() {
+		this.GetConfiguration().then(function() {
 			var start = new StartMap(loc.work, loc, loc.SetupMap);
 			start.Start();
 		});
 	},
 	methods: {
-		GetRevisions() {
+		GetConfiguration() {
 			const loc = this;
-			return axios.get(window.host + '/services/GetRevisions', {
+			return axios.get(window.host + '/services/GetConfiguration', {
 				params: {}
 			}).then(function(res) {
-				loc.revisions = res.data.Revisions;
+				loc.config = res.data;
 			}).catch(function(error) {
-				err.errDialog('GetRevisions', 'conectarse con el servidor', error);
+				err.errDialog('GetConfiguration', 'conectarse con el servidor', error);
 			});
 		},
 		BindEvents() {
@@ -141,20 +138,15 @@ export default {
 				}
 			}
 			var mapApi = new GoogleMapsApi(window.google);
-			var segMap = new SegmentedMap(mapApi, this.frame, this.clipping, this.toolbarStates, this.metrics, this.revisions);
+			var segMap = new SegmentedMap(mapApi, this.frame, this.clipping, this.toolbarStates, this.metrics, this.config);
 			segMap.Work = this.work;
 			segMap.afterCallback = afterLoaded;
 			window.SegMap = segMap;
 			this.$refs.fabPanel.loadFabMetrics();
 			mapApi.SetSegmentedMap(segMap);
+			segMap.SaveRoute.DisableOnce = true;
 			mapApi.Initialize();
-			mapApi.BindEvents();
 			segMap.SetSelectionMode(0);
-		},
-		GetSummaryAll() {
-			this.metrics.forEach(function(metric) {
-				metric.UpdateSummary();
-			});
 		},
 		RegisterErrorHandler() {
 			Vue.config.errorHandler = err.HandleError;
@@ -292,7 +284,7 @@ text-decoration: underline;
 	max-height: 200px!important;
 	overflow: auto!important;
 	padding-top: 20px;
-	padding-left: 9px;
+	padding-left: 0px;
 }
 .innerBox {
 	pointer-events: none;
@@ -325,7 +317,9 @@ text-decoration: underline;
 	border: 1px solid gray;
 	pointer-events: none;
 }
-
+.ibTooltipOffsetLeft {
+	margin-left: 9px;
+}
 .ibLink {
 	color: #5a626d;
 	cursor: pointer;

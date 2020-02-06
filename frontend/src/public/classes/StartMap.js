@@ -91,22 +91,26 @@ StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 		this.frameReference.frame.Envelope.Min = startup.Center;
 		this.frameReference.frame.Envelope.Max = startup.Center;
 		this.frameReference.frame.Zoom = startup.Zoom;
+
 		setMapPosition = function () {
 			window.SegMap.SetCenter(startup.Center);
 			window.SegMap.SetZoom(startup.Zoom);
-			};
+		};
 	} else {
 		// Type === 'D' || 'R' sin región
 		this.StartByDefaultFrame(frame);
 		return;
 	}
 	this.SetupMap(setMapPosition);
+	this.Finish();
 },
 
 StartMap.prototype.StartByUrl = function () {
 	var route = this.hash;
+	var loc = this;
 	var afterLoaded = function() {
 		window.SegMap.RestoreRoute.LoadRoute(route);
+		loc.Finish();
 	};
 	this.SetupMap(afterLoaded);
 };
@@ -147,6 +151,10 @@ StartMap.prototype.StartByDefaultFrame = function (frame) {
 	if (this.frameReference.frame.Zoom || this.frameReference.frame.Zoom === 0) {
 		window.SegMap.SetZoom(this.frameReference.frame.Zoom);
 	}
+	this.Finish();
+};
+StartMap.prototype.Finish = function () {
+	window.SegMap.MapsApi.BindEvents();
 };
 
 StartMap.prototype.StartByDefaultFrameAndClipping = function (route) {
@@ -182,6 +190,7 @@ StartMap.prototype.StartByDefaultFrameAndClipping = function (route) {
 				window.SegMap.SetZoom(this.frameReference.frame.Zoom);
 			}
 		}
+		loc.Finish();
 	}).catch(function(error) {
 		err.errDialog('GetDefaultFrameAndClipping', 'conectarse con el servidor', error);
 	});

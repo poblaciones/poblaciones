@@ -109,7 +109,7 @@ export default {
 		},
 		changeClipping(index) {
 			this.clipping.Region.SelectedLevelIndex = index;
-			window.SegMap.Clipping.ClippingChanged();
+			window.SegMap.Clipping.ClippingChanged(true);
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		falseChangeClipping(index) {

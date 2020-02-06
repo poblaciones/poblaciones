@@ -48,7 +48,7 @@ export default {
 .sourceInfo
 {
   position: absolute;
-  top: 12px;
+  top: 10px;
   right: 0px;
   font-size: 12px;
 }

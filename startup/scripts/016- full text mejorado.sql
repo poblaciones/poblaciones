@@ -53,17 +53,18 @@ INSERT INTO `snapshot_lookup_clipping_region_item`(`clc_clipping_region_item_id`
 select
 `clv_clipping_region_item_id`, `clv_full_parent`, `clv_full_ids`, `clv_caption`, `clv_tooltip`, `clv_feature_ids`, `clv_population`, `clv_min_zoom`, `clv_symbol`, `clv_location`, `clv_max_zoom`, `clv_shard`
 FROM snapshot_lookup
-WHERE clv_type = 'C'
+WHERE clv_type = 'C';
 
 ALTER TABLE `snapshot_lookup_feature` ADD UNIQUE `ux_fid` (`clf_feature_ids`);
 
 truncate table `snapshot_lookup_feature`;
+
 INSERT INTO `snapshot_lookup_feature`(`clf_dataset_id`, `clf_level`, `clf_full_parent`, `clf_caption`, `clf_tooltip`, `clf_feature_ids`, `clf_min_zoom`, `clf_symbol`, `clf_location`, `clf_max_zoom`, `clf_shard`)
-SELECT DISTINCT
-`clv_dataset_id`, `clv_level`, `clv_full_parent`, `clv_caption`, `clv_tooltip`, `clv_feature_ids`, `clv_min_zoom`, `clv_symbol`, `clv_location`, `clv_max_zoom`, `clv_shard`
+SELECT max(
+`clv_dataset_id`), max(`clv_level`), max(`clv_full_parent`), max(`clv_caption`), max( `clv_tooltip`), `clv_feature_ids`, max(`clv_min_zoom`), max(`clv_symbol`), max(`clv_location`), max(`clv_max_zoom`), max(`clv_shard`)
 FROM snapshot_lookup
 JOIN dataset ON clv_dataset_id = dat_id
-WHERE clv_type = 'F';
+WHERE clv_type = 'F' GROUP BY clv_feature_ids;
 
 DROP TABLE snapshot_lookup;
 

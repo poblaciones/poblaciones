@@ -23,7 +23,7 @@ AbstractActiveMetric.prototype.CreateComposer = function() {
   // IMPLEMENT
 };
 
-AbstractActiveMetric.prototype.GetCartoService = function () {
+AbstractActiveMetric.prototype.GetCartographyService = function () {
 	// IMPLEMENT
 };
 

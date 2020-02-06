@@ -11,10 +11,12 @@ use helena\services\frontend as services;
 use helena\controllers\frontend as controllers;
 use helena\services\common as commonServices;
 
+use helena\classes\GlobalTimer;
 use helena\classes\App;
 use helena\classes\Links;
 use helena\classes\Session;
 use minga\framework\Params;
+use minga\framework\Context;
 
 // CRAWLER
 App::RegisterControllerGet('/sitemap', controllers\cSitemap::class);
@@ -147,9 +149,9 @@ App::$app->get('/services/clipping/CreateClipping', function (Request $request) 
 // ej. http://mapas/services/metrics/GetSummary?l=8&v=12&a=62&r=7160
 App::$app->get('/services/metrics/GetSummary', function (Request $request) {
 	$controller = new services\SummaryService();
-	$metricId = Params::GetInt('l');
-	$metricVersionId = Params::GetInt('v');
-	$levelId = Params::GetInt('a');
+	$metricId = Params::GetIntMandatory('l');
+	$metricVersionId = Params::GetIntMandatory('v');
+	$levelId = Params::GetIntMandatory('a');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$frame = Frame::FromParams();
 
@@ -157,6 +159,26 @@ App::$app->get('/services/metrics/GetSummary', function (Request $request) {
 
 	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity));
 });
+
+
+// ej. http://mapas/services/metrics/GetRanking?l=8&v=12&a=62&r=7160&s=10
+App::$app->get('/services/metrics/GetRanking', function (Request $request) {
+	$controller = new services\RankingService();
+	$metricId = Params::GetIntMandatory('l');
+	$metricVersionId = Params::GetIntMandatory('v');
+	$levelId = Params::GetIntMandatory('a');
+	$variableId = Params::GetIntMandatory('i');
+	$hasTotals = Params::GetBoolMandatory('t');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$frame = Frame::FromParams();
+	$size = Params::GetIntRangeMandatory('s', 10, 100);
+	$direction = Params::GetMandatory('d');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+
+	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction));
+});
+
 
 App::$app->get('/services/metrics/GetInfoWindowData', function (Request $request) {
 	$controller = new services\InfoWindowService();
@@ -280,8 +302,6 @@ App::$app->get('/services/shapes/GetDatasetShapes', function (Request $request) 
 
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470
 App::$app->get('/services/metrics/GetTileData', function (Request $request) {
-	//if (Str::Contains($_SERVER['REQUEST_URI'], '/services/metrics/GetTileData')) {
-	//  echo GlobalTimer::EllapsedMs();
 	$controller = new services\TileDataService();
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
@@ -299,9 +319,44 @@ App::$app->get('/services/metrics/GetTileData', function (Request $request) {
 });
 
 
-App::$app->get('/services/GetRevisions', function (Request $request) {
-	$controller = new services\RevisionsService();
-	return App::Json($controller->GetRevisions());
+// ej. http://mapas/services/metrics/GetBlockTileData?l=8&s=4&v=12&a=62&z=12&x=1383&y=2470
+App::$app->get('/services/metrics/GetBlockTileData', function (Request $request) {
+	$controller = new services\TileDataService();
+	$metricId = Params::GetInt('l');
+	$metricVersionId = Params::GetInt('v');
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+
+	$levelId = Params::GetInt('a');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$frame = Frame::FromParams();
+	$x = Params::GetIntMandatory('x');
+	$y = Params::GetIntMandatory('y');
+	$s = Params::GetIntMandatory('s');
+	$z = Params::GetIntRangeMandatory('z', 0, 23);
+	$b = Params::Get('b');
+	if (!Context::Settings()->Map()->UseTileBlocks ||
+			$s !== Context::Settings()->Map()->TileDataBlockSize)
+			throw new ErrorException('Argumentos no válidos.');
+	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b));
+});
+
+// ej. http://mapas/services/clipping/GetBlockLabels?s=4&x=1382&y=2468&e=-34.569622,-58.257501%3B-34.667663,-58.608033&z=12&r=1692
+App::$app->get('/services/clipping/GetBlockLabels', function (Request $request) {
+	$controller = new services\LabelsService();
+	$x = Params::GetIntMandatory('x');
+	$y = Params::GetIntMandatory('y');
+	$s = Params::GetIntMandatory('s');
+	$z = Params::GetIntRangeMandatory('z', 0, 23);
+	$b = Params::Get('b');
+	if (!Context::Settings()->Map()->UseTileBlocks ||
+			$s !== Context::Settings()->Map()->LabelsBlockSize)
+			throw new ErrorException('Argumentos no válidos.');
+	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z, $b));
+});
+
+App::$app->get('/services/GetConfiguration', function (Request $request) {
+	$controller = new services\ConfigurationService();
+	return App::Json($controller->GetConfiguration());
 });
 
 App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {

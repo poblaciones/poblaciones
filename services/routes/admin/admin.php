@@ -80,7 +80,7 @@ App::Get('/services/admin/UpdateWorkIndexing', function (Request $request) {
 });
 
 
-App::Get('/services/admin/services/admin/ClearMetadataPdfCache', function (Request $request) {
+App::Get('/services/admin/ClearMetadataPdfCache', function (Request $request) {
 	if ($app = Session::CheckIsSiteReader())
 		return $app;
 	$controller = new CacheManager();

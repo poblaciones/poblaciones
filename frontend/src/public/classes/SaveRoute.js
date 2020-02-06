@@ -17,11 +17,16 @@ export default SaveRoute;
 function SaveRoute(map) {
 	this.segmentedMap = map;
 	this.Disabled = false;
+	this.DisableOnce = false;
 	this.lastState = null;
 };
 
 SaveRoute.prototype.UpdateRoute = function (coord) {
 	if (this.Disabled) {
+		return;
+	}
+	if (this.DisableOnce) {
+		this.DisableOnce = false;
 		return;
 	}
 

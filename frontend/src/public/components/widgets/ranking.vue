@@ -1,0 +1,232 @@
+<template>
+	<div>
+		<div>
+			<table class="localTableCompact">
+				<tbody>
+					<tr>
+						<td class="statsHeader" style="text-align: left" colspan="2">
+							Ranking de {{ level.Name }}
+						</td>
+						<td class="statsHeader textRight" style="min-width: 75px">
+							{{ getValueHeader() }}
+						</td>
+					</tr>
+					<tr v-on:click="clickItem(item)" v-for="item in ranking" class="hand" :key="item.Id">
+						<template class="labelRow">
+							<td class="dataBox" style="width: 100%">
+								{{ item.Name }}
+							</td>
+							<td class="dataBox">
+								<!-- 2575fb -->
+								<i :style="'color: ' + getColor(item)" class="fas fa-circle"></i>
+							</td>
+							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(getValue(item)) }}</td>
+						</template>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="sourceRow">
+			<div class="btn-group">
+				<button v-for="sizeItem in possibleSizes" type="button" :key="sizeItem" :id="sizeItem"
+								 onmouseup="this.blur()" class="btn btn-default btn-xs" :class="getActiveSize(sizeItem)"
+								v-on:click="changeSize(sizeItem)">{{ sizeItem }}</button>
+			</div>
+			<div class="btn-group">
+				<button v-for="direction in possibleDirections" type="button" :key="direction.Value" :id="direction.Value"
+								 onmouseup="this.blur()" class="btn btn-default btn-xs" :class="getActiveDirection(direction.Value)"
+								v-on:click="changeDirection(direction.Value)" :title="direction.Tooltip"><i :class="direction.Icon" /></button>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+import h from '@/public/js/helper';
+
+export default {
+	name: 'metricValues',
+	props: [
+		'metric',
+	],
+	components: {
+	},
+  mounted() {
+    var format = this.getFormat();
+		this.updateRanking();
+  },
+  data() {
+		return {
+			panelWidth: 270,
+			possibleSizes: [10, 25, 50],
+			possibleDirections: [{ Value: 'D', Tooltip: 'De mayor a menor', Icon: 'fas fa-sort-amount-down' }, { Value: 'A', Tooltip: 'De menor a mayor', Icon: 'fas fa-sort-amount-down-alt' }],
+			h: h
+		};
+	},
+	computed: {
+		version() {
+			return this.metric.properties.Versions[this.metric.properties.SelectedVersionIndex];
+		},
+		level() {
+			return this.version.Levels[this.version.SelectedLevelIndex];
+		},
+		variable() {
+			return this.metric.SelectedVariable();
+		},
+		ranking() {
+			return (this.variable ? this.variable.RankingItems : []);
+		},
+	},
+	methods: {
+		getFormat() {
+			var format = '';
+			if (this.variable.HasTotals) {
+				switch (this.variable.NormalizationScale) {
+					case 100:
+						format = '%100';
+						break;
+					case 1:
+						format = '%1';
+						break;
+					case 1000:
+						format = '%1000';
+						break;
+					case 10000:
+						format = '%10000';
+						break;
+					case 100000:
+						format = '%100000';
+						break;
+				}
+			} else {
+				format = 'num';
+			}
+			return format;
+		},
+		getMuted() {
+			if (this.metric.IsUpdatingRanking) {
+				return ' text-muted';
+			} else {
+				return '';
+			}
+		},
+		getValueHeader() {
+			if (this.variable.HasTotals) {
+				switch (this.variable.NormalizationScale) {
+					case 100:
+						return '%';
+					case 1:
+						return '/1';
+					case 1000:
+						return '/k';
+					case 10000:
+						return '/10k';
+					case 100000:
+						return '/100k';
+				}
+				return 'N/A';
+			} else {
+				return 'N';
+			}
+		},
+		getValueFormatted(value) {
+			if (this.variable.HasTotals) {
+				return h.formatPercentNumber(value);
+			} else {
+				return h.formatNum(value);
+			}
+		},
+		getValue(item) {
+			if (this.variable.HasTotals) {
+				return (item.Total > 0 ? item.Value * this.variable.NormalizationScale / item.Total : 0);
+			} else {
+				return item.Value;
+			}
+		},
+		getColor(item) {
+			var label = h.getValueLabel(this.variable.ValueLabels, item.ValueId);
+			return (label ? label.FillColor : '');
+		},
+		clickItem(item) {
+			var position = { Coordinate: { Lat: item.Lat, Lon: item.Lon }};
+			var parentInfo = {
+						MetricName: this.metric.properties.Metric.Name,
+						MetricId: this.metric.properties.Metric.Id,
+						MetricVersionId: this.metric.SelectedVersion().Version.Id,
+						LevelId: this.metric.SelectedLevel().Id,
+						VariableId: this.metric.SelectedVariable().Id
+					};
+			window.SegMap.InfoRequested(position, parentInfo, item.FID);
+		},
+		changeSize(itemSize) {
+			this.metric.RankingSize = itemSize;
+			this.updateRanking();
+			window.SegMap.SaveRoute.UpdateRoute();
+		},
+		changeDirection(direction) {
+			this.metric.RankingDirection = direction;
+			this.updateRanking();
+			window.SegMap.SaveRoute.UpdateRoute();
+		},
+		getActiveDirection(direction) {
+			if (direction === this.metric.RankingDirection) {
+				return ' active';
+			} else {
+				return '';
+			}
+		},
+		getActiveSize(currentSize) {
+			if (currentSize === this.metric.RankingSize) {
+				return ' active';
+			} else {
+				return '';
+			}
+		},
+		updateRanking() {
+			if (this.variable !== null) {
+				this.metric.UpdateRanking();
+			} else {
+			}
+		}
+	},
+	watch: {
+		variable() {
+			this.updateRanking();
+		},
+	}
+}; //
+</script>
+
+<style scoped>
+.labelRow
+{
+	padding: 0px 0px 6px 3px;
+}
+.textRight {
+	text-align: right;
+}
+.statsHeader {
+	text-align: right;
+	color: #a9a9a9;
+	font-weight: 300;
+	font-size: 11px;
+	height: 16px;
+	padding: 0px;
+	text-transform: uppercase;
+}
+
+.dataBox {
+	padding-left: 2px!important;
+	padding-right: 2px!important;
+	padding-bottom: 5px!important;
+}
+.localTableCompact {
+}
+.localTableCompact td {
+	border: 0px;
+	padding: 3px;
+	vertical-align: top;
+}
+
+</style>
+

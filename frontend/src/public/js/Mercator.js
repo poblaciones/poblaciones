@@ -4,7 +4,6 @@ export default Mercator;
 function Mercator() {
 };
 
-
 Mercator.prototype.fromLatLngToPoint = function (latLng) {
 	var siny = Math.min(Math.max(Math.sin(latLng.lat * (Math.PI / 180)),
 		-0.9999),
@@ -131,6 +130,34 @@ Mercator.prototype.alignRectangle = function (r) {
 	return { Min: min, Max: max };
 };
 
+Mercator.prototype.rectanglesIntersection = function (R1free, R2free) {
+	var R1 = this.alignRectangle(R1free);
+	var R2 = this.alignRectangle(R2free);
+	if (this.rectanglesIntersect(R1, R2)) {
+		return {
+			Min: {
+				Lat: Math.max(R1.Min.Lat, R2.Min.Lat),
+				Lon: Math.max(R1.Min.Lon, R2.Min.Lon)
+			},
+			Max: {
+				Lat: Math.min(R1.Max.Lat, R2.Max.Lat),
+				Lon: Math.min(R1.Max.Lon, R2.Max.Lon)
+			}
+		};
+	} else {
+		return {
+			Min: {
+				Lat: Math.min(R1.Min.Lat, R2.Min.Lat),
+				Lon: Math.min(R1.Min.Lon, R2.Min.Lon)
+			},
+			Max: {
+				Lat: Math.max(R1.Max.Lat, R2.Max.Lat),
+				Lon: Math.max(R1.Max.Lon, R2.Max.Lon)
+			}
+		};
+	}
+};
+
 Mercator.prototype.rectanglesIntersect = function (R1free, R2free) {
 	var R1 = this.alignRectangle(R1free);
 	var R2 = this.alignRectangle(R2free);
@@ -142,3 +169,4 @@ Mercator.prototype.rectanglesIntersect = function (R1free, R2free) {
 		return false;
 	}
 };
+

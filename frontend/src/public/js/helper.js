@@ -253,6 +253,19 @@ module.exports = {
 		};
 		return ret;
 	},
+	getBlockLabelsParams(frame, x, y, boundsRectRequired, revision, size) {
+		var ret = {
+			x: x - x % size,
+			y: y - y % size,
+			s: size,
+			z: frame.Zoom,
+			w: revision
+		};
+		if (boundsRectRequired) {
+			ret.b = boundsRectRequired;
+		};
+		return ret;
+	},
 	urlParam(paramName, paramValue) {
 		if (!paramValue) {
 			return '';
@@ -285,7 +298,41 @@ module.exports = {
 		};
 		return ret;
 	},
-	getSummaryParams(metric, frame, revision) {
+	getBlockTileParams(metric, frame, x, y, boundsRectRequired, size) {
+		const ver = metric.Versions[metric.SelectedVersionIndex];
+		var ret = this.mergeObject({
+			l: metric.Metric.Id,
+			v: ver.Version.Id,
+			a: ver.Levels[ver.SelectedLevelIndex].Id,
+			u: metric.SelectedUrbanity,
+			x: x - x % size,
+			y: y - y % size,
+			s: size,
+			w: metric.Metric.Revision
+		}, this.getFrameParams(frame));
+		ret.e = null;
+		if (boundsRectRequired) {
+			ret.b = boundsRectRequired;
+		};
+		return ret;
+	},
+	getRankingParams(metric, frame, size, direction) {
+		const ver = metric.Versions[metric.SelectedVersionIndex];
+		const level = ver.Levels[ver.SelectedLevelIndex];
+		const variable = level.Variables[level.SelectedVariableIndex];
+		return this.mergeObject({
+			l: metric.Metric.Id,
+			v: ver.Version.Id,
+			a: level.Id,
+			i: variable.Id,
+			t: (variable.HasTotals ? 1 : 0),
+			u: metric.SelectedUrbanity,
+			w: metric.Metric.Revision,
+			s: size,
+			d: direction
+		}, this.getFrameParams(frame));
+	},
+	getSummaryParams(metric, frame) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		return this.mergeObject({
 			l: metric.Metric.Id,

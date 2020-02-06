@@ -22,6 +22,7 @@ class VariableInfo extends BaseMapModel
 	public $IsSimpleCount = false;
 	public $RankingItems = array();
 	public $DefaultMeasure = 'N';
+	public $Categorical;
 	public $ValueLabels = array();
 
 	public static function GetMap()

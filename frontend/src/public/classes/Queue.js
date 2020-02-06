@@ -3,12 +3,12 @@ import arr from '@/common/js/arr';
 
 export default Queue;
 
-const MAX_REQUESTS = 5;
-
-function Queue() {
+function Queue(max) {
 	this.id = 0;
 	this.queue = [];
 	this.runningRequests = 0;
+	this.maxRequests = max;
+	if (max <= 0) max = 10000;
 }
 
 Queue.prototype.Enlist = function (context, callback, params, idSetter, info) {
@@ -20,7 +20,7 @@ Queue.prototype.Enlist = function (context, callback, params, idSetter, info) {
 };
 
 Queue.prototype.startOne = function () {
-	if (this.runningRequests >= MAX_REQUESTS) {
+	if (this.runningRequests >= this.maxRequests) {
 		return;
 	}
 	for (var n = 0; n < this.queue.length; n++) {
@@ -53,3 +53,14 @@ Queue.prototype.Release = function (id) {
 		}
 	}
 };
+
+Queue.prototype.GetSameRequest = function (info) {
+	for (var n = 0; n < this.queue.length; n++) {
+		var queueItem = this.queue[n];
+		if (queueItem.info === info) {
+			return queueItem.context;
+		}
+	}
+	return null;
+};
+

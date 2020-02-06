@@ -63,6 +63,7 @@ MetricsList.prototype.doInsert = function (activeMetric, i, insertInMetrics) {
 		arr.InsertAt(this.metrics, i, activeMetric);
 		this.updateMetricIndexes();
 		activeMetric.UpdateSummary();
+		activeMetric.UpdateRanking();
 	}
 };
 

@@ -210,7 +210,7 @@ export default {
 			}
 		},
 		getMuted() {
-			if (this.metric.IsUpdating) {
+			if (this.metric.IsUpdatingSummary) {
 				return ' text-muted';
 			} else {
 				return '';
@@ -400,18 +400,6 @@ export default {
 .labelRow
 {
 	padding: 0px 0px 6px 3px;
-}
-.padleft
-{
-	padding-left: 3px;
-}
-.smallIcons
-{
-	position: absolute;
-	color: #999;
-	right: 0px;
-	bottom: -17px;
-	font-size: 10px;
 }
 .textRight {
 	text-align: right;

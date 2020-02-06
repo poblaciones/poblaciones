@@ -13,8 +13,7 @@ function TileOverlay(map, google, activeSelectedMetric) {
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.tileSize = new google.maps.Size(TILE_SIZE, TILE_SIZE);
 	this.composer = activeSelectedMetric.CreateComposer();
-	this.geographyService = activeSelectedMetric.GetCartoService();
-	this.dataService = activeSelectedMetric.GetDataService();
+	this.geographyService = activeSelectedMetric.GetCartographyService();
 	this.requestedTiles = [];
 }
 
@@ -46,7 +45,7 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 		return div;
 	}
 
-	var dataRequest = new TileRequest(this, coord, zoom, boundsRectRequired, key, div);
+	var dataRequest = new TileRequest(window.SegMap.Queue, this, coord, zoom, boundsRectRequired, key, div);
 	dataRequest.GetTile();
 	//div.innerHTML = '<div style="padding: 4px; "><a href="' + args + '">' + args + '</a></div>';
 

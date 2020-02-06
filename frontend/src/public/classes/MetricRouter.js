@@ -14,7 +14,7 @@ MetricRouter.prototype.ToRoute = function () {
 	ret += this.AddValue('v', this.activeSelectedMetric.properties.SelectedVersionIndex, 0);
 	ret += this.AddValue('a', this.activeSelectedMetric.SelectedVersion().SelectedLevelIndex, 0);
 	ret += this.AddValue('i', this.activeSelectedMetric.SelectedLevel().SelectedVariableIndex, 0);
-
+	ret += this.AddRanking(this.activeSelectedMetric);
 	ret += this.AddBoolean('c', this.activeSelectedMetric.SelectedVersion().LabelsCollapsed, false);
 
 	ret += this.AddValue('m', this.activeSelectedMetric.properties.SummaryMetric, 'N');
@@ -77,9 +77,11 @@ MetricRouter.prototype.parseMetric = function (metricString) {
 	var urbanity = h.getSafeValue(values, 'u', 'N');
 	var showDescriptions = h.getSafeValue(values, 'd', '0');
 	var showValues = h.getSafeValue(values, 's', '0');
+	var ranking = h.getSafeValue(values, 'r', null);
 	var customPattern = h.getSafeValue(values, 'p', '');
 	var transparency = h.getSafeValue(values, 't', 'M');
 	var variableStates = h.getSafeValue(values, 'w', null);
+
 	return {
 		Id: parseInt(id),
 		VersionIndex: versionIndex,
@@ -90,12 +92,49 @@ MetricRouter.prototype.parseMetric = function (metricString) {
 		Urbanity: urbanity,
 		ShowDescriptions: showDescriptions,
 		ShowValues: showValues,
+		ShowRanking: this.ParseRanking(ranking)['Show'],
+		RankingSize: this.ParseRanking(ranking)['Size'],
+		RankingDirection: this.ParseRanking(ranking)['Direction'],
 		Transparency: transparency,
 		CustomPattern: (customPattern === '' ? '' : parseInt(customPattern)),
 		VariableStates: (variableStates ? variableStates.split(',') : [])
 	};
 };
 
+
+MetricRouter.prototype.ParseRanking = function (value) {
+	var size = 10;
+	var direction = 'D';
+	var show = false;
+	if (value !== null) {
+		show = true;
+		if (value.indexOf('A') !== -1) {
+			direction = 'A';
+		}
+		value = value.replace('A', '');
+		value = value.replace('D', '');
+		if (value.length > 0) {
+			size = parseInt(value);
+			if (size > 50 || size < 10) {
+				size = 10;
+			}
+		}
+	}
+	return { Size: size, Direction: direction, Show: show };
+};
+
+
+MetricRouter.prototype.AddRanking = function (metric) {
+	if (!metric.ShowRanking) {
+		return '';
+	}
+	var ret = '!r';
+	if (metric.RankingSize != 10) {
+		ret += metric.RankingSize;
+	}
+	ret += metric.RankingDirection;
+	return ret;
+};
 
 MetricRouter.prototype.AddValue = function (key, value, def) {
 	if (value !== def) {
@@ -135,6 +174,20 @@ MetricRouter.prototype.RestoreMetricState = function (state) {
 		level.SelectedVariableIndex = variableIndex;
 		mapChanged = true;
 	}
+	if (state.LabelsCollapsed !== version.LabelsCollapsed) {
+		version.LabelsCollapsed = state.LabelsCollapsed;
+	}
+
+	if (state.ShowRanking !== this.activeSelectedMetric.ShowRanking) {
+		this.activeSelectedMetric.ShowRanking = state.ShowRanking;
+	}
+	if (state.RankingDirection !== this.activeSelectedMetric.RankingDirection) {
+		this.activeSelectedMetric.RankingDirection = state.RankingDirection;
+	}
+	if (state.RankingSize !== this.activeSelectedMetric.RankingSize) {
+		this.activeSelectedMetric.RankingSize = state.RankingSize;
+	}
+
 	if (state.LabelsCollapsed !== version.LabelsCollapsed) {
 		version.LabelsCollapsed = state.LabelsCollapsed;
 	}

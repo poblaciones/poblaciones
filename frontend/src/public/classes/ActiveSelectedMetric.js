@@ -1,6 +1,6 @@
 import LocationsGeojsonComposer from '@/public/composers/LocationsGeojsonComposer';
 import SvgFullGeojsonComposer from '@/public/composers/SvgFullGeojsonComposer';
-import Svg from '@/public/js/svg';
+import Vue from 'vue';
 
 import MetricRouter from '@/public/classes/MetricRouter';
 import h from '@/public/js/helper';
@@ -18,13 +18,19 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.$Router = new MetricRouter(this);
 	this.$calculatedSymbol = null;
 	this.cancelUpdateSummary = null;
+	this.cancelUpdateRanking = null;
 	this.properties = selectedMetric;
 	this.index = -1;
-	this.IsUpdating = false;
+	this.IsUpdatingSummary = false;
+	this.IsUpdatingRanking = false;
 	this.isBaseMetric = isBaseMetric;
 	this.currentOpacity = -1;
+	this.ShowRanking = false;
+	this.RankingSize = 10;
+	this.RankingDirection = 'D';
 	this.KillDuplicateds = true;
 	this.fillEmptySummaries();
+	this.blockSize = window.SegMap.tileDataBlockSize;
 };
 
 ActiveSelectedMetric.prototype.UpdateOpacity = function (zoom) {
@@ -83,7 +89,7 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 	if (this.cancelUpdateSummary !== null) {
 		this.cancelUpdateSummary('cancelled');
 	}
-	this.IsUpdating = true;
+	this.IsUpdatingSummary = true;
 	window.SegMap.Get(window.host + '/services/metrics/GetSummary', {
 		params: h.getSummaryParams(metric, window.SegMap.frame),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateSummary = c; }),
@@ -92,7 +98,7 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 		if (res.message === 'cancelled') {
 			return;
 		}
-		loc.IsUpdating = false;
+		loc.IsUpdatingSummary = false;
 		loc.fillEmptySummaries();
 		res.data.Items.forEach(function (num) {
 			var variable = h.getVariable(metric.Versions[metric.SelectedVersionIndex].Levels[metric.Versions[metric.SelectedVersionIndex].SelectedLevelIndex].Variables, num.VariableId);
@@ -105,6 +111,39 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 		});
 	}).catch(function (error) {
 		err.errDialog('GetSummary', 'obtener las estadísticas de resumen', error);
+	});
+};
+
+
+ActiveSelectedMetric.prototype.UpdateRanking = function () {
+	if (!this.ShowRanking) {
+		return;
+	}
+	var metric = this.properties;
+	var variable = this.SelectedVariable();
+	if (!variable) {
+		return;
+	}
+	var loc = this;
+	var CancelToken = axios.CancelToken;
+	if (this.cancelUpdateRanking !== null) {
+		this.cancelUpdateRanking('cancelled');
+	}
+	this.IsUpdatingRanking = true;
+
+	window.SegMap.Get(window.host + '/services/metrics/GetRanking', {
+		params: h.getRankingParams(metric, window.SegMap.frame, this.RankingSize, this.RankingDirection),
+		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateRanking = c; }),
+	}).then(function (res) {
+		loc.cancelUpdateRanking = null;
+		if (res.message === 'cancelled') {
+			return;
+		}
+		loc.IsUpdatingRanking = false;
+
+		variable.RankingItems = res.data.Items;
+	}).catch(function (error) {
+		err.errDialog('GetRanking', 'obtener el ranking', error);
 	});
 };
 
@@ -453,11 +492,7 @@ ActiveSelectedMetric.prototype.CheckTileIsOutOfClipping = function() {
 	return (window.SegMap.Clipping.clipping.IsUpdating !== '1');
 };
 
-ActiveSelectedMetric.prototype.GetDataService = function () {
-	return 'metrics/GetTileData';
-};
-
-ActiveSelectedMetric.prototype.GetCartoService = function () {
+ActiveSelectedMetric.prototype.GetCartographyService = function () {
 	switch (this.SelectedLevel().LevelType) {
 	case 'L':
 			return { url: null, useDatasetId: false, revision: null };
@@ -470,8 +505,32 @@ ActiveSelectedMetric.prototype.GetCartoService = function () {
 	}
 };
 
-ActiveSelectedMetric.prototype.getDataServiceParams = function (coord, boundsRectRequired) {
-	return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, boundsRectRequired);
+ActiveSelectedMetric.prototype.UseBlockedRequests = function (boundsRectRequired) {
+	return this.blockSize && !boundsRectRequired;
+};
+
+ActiveSelectedMetric.prototype.GetDataService = function (boundsRectRequired) {
+	if (this.UseBlockedRequests(boundsRectRequired)) {
+		return 'metrics/GetBlockTileData';
+	} else {
+		return 'metrics/GetTileData';
+	}
+};
+
+ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord, boundsRectRequired) {
+	if (this.UseBlockedRequests(boundsRectRequired)) {
+		return h.getBlockTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, boundsRectRequired, this.blockSize);
+	} else {
+		return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, boundsRectRequired);
+	}
+};
+
+ActiveSelectedMetric.prototype.GetSubset = function (coord, boundsRectRequired) {
+	if (this.UseBlockedRequests(boundsRectRequired)) {
+		return [coord.x, coord.y];
+	} else {
+		return null;
+	}
 };
 
 ActiveSelectedMetric.prototype.ResolveSegment = function () {

@@ -67,6 +67,8 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
 
+$multiQuery->dump();
+
 		$ret = $multiQuery->fetchAll();
 		Profiling::EndTimer();
 		return $ret;
@@ -154,6 +156,8 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		{
 			$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
 		}
+		Profiling::EndTimer();
+
 		return $ret;
 	}
 

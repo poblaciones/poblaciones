@@ -5,6 +5,7 @@ import SaveRoute from '@/public/classes/SaveRoute';
 import Clipping from '@/public/classes/Clipping';
 import Tutorial from '@/public/classes/Tutorial';
 import RestoreRoute from '@/public/classes/RestoreRoute';
+import Queue from './Queue';
 import axios from 'axios';
 import str from '@/common/js/str';
 
@@ -13,11 +14,11 @@ import err from '@/common/js/err';
 
 export default SegmentedMap;
 
-function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCollection, revisions) {
+function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCollection, config) {
 	this.frame = frame;
 	this.Tutorial = new Tutorial(toolbarStates);
 	this.Clipping = new Clipping(this, frame, clipping);
-	this.Revisions = revisions;
+	this.Revisions = config.Revisions;
 	this.MapsApi = mapsApi;
 	this.Work = null;
 	this.Popups = {};
@@ -31,7 +32,13 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.RestoreRoute = new RestoreRoute(this);
 	this.afterCallback = null;
 	this.afterCallback2 = null;
-	this.Labels = new ActiveLabels();
+	this.Labels = new ActiveLabels(config);
+	if (config.Blocks.UseTileBlocks) {
+		this.tileDataBlockSize = config.Blocks.TileDataBlockSize;
+	} else {
+		this.tileDataBlockSize = null;
+	}
+	this.Queue = new Queue(config.MaxQueueRequests);
 };
 
 SegmentedMap.prototype.Get = function (url, params) {
@@ -143,6 +150,7 @@ SegmentedMap.prototype.PanTo = function (coord) {
 
 SegmentedMap.prototype.SetZoom = function (zoom) {
 	this.MapsApi.SetZoom(zoom);
+	this.frame.Zoom = zoom;
 };
 
 SegmentedMap.prototype.MapTypeChanged = function(mapTypeState) {
@@ -153,7 +161,6 @@ SegmentedMap.prototype.ZoomChanged = function (zoom) {
 		this.frame.Zoom = zoom;
 		this.Labels.UpdateMap();
 		this.Metrics.ZoomChanged();
-		//this.SaveRoute.UpdateRoute();
 	}
 };
 SegmentedMap.prototype.FrameMoved = function (bounds) {
@@ -174,7 +181,7 @@ SegmentedMap.prototype.AxiosClone = function (obj) {
 
 
 SegmentedMap.prototype.StartClickSelecting = function () {
-	this.MapsApi.SetSelectorCanvas();
+	this.MapsApi.selector.SetSelectorCanvas();
 };
 
 SegmentedMap.prototype.SetSelectionMode = function (mode) {
@@ -184,7 +191,7 @@ SegmentedMap.prototype.SetSelectionMode = function (mode) {
 };
 
 SegmentedMap.prototype.EndSelecting = function () {
-	this.MapsApi.ClearSelectorCanvas();
+	this.MapsApi.selector.ClearSelectorCanvas();
 };
 
 SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset) {
@@ -275,8 +282,7 @@ SegmentedMap.prototype.doAddMetricById = function (id, versionSelector) {
 
 SegmentedMap.prototype.ChangeMetricIndex = function (oldIndex, newIndex) {
 	this.Metrics.MoveFrom(oldIndex, newIndex);
-	//TODO: ver a qué metodo llamar para que redibuje los metrics.
-	this.Clipping.ClippingChanged();
+	this.UpdateMap();
 	this.SaveRoute.UpdateRoute();
 };
 
@@ -322,6 +328,7 @@ SegmentedMap.prototype.UpdateMap = function () {
 SegmentedMap.prototype.RefreshSummaries = function () {
 	for (var i = 0; i < this.Metrics.metrics.length; i++) {
 		this.Metrics.metrics[i].UpdateSummary();
+		this.Metrics.metrics[i].UpdateRanking();
 	}
 };
 
