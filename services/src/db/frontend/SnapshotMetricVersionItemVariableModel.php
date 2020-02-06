@@ -67,7 +67,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
 
-$multiQuery->dump();
+//$multiQuery->dump();
 
 		$ret = $multiQuery->fetchAll();
 		Profiling::EndTimer();
