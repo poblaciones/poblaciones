@@ -64,7 +64,6 @@ class CacheManager
 	public function CleanClippingCache()
 	{
 		ClippingCache::Cache()->Clear();
-		ClippingSummaryCache::Cache()->Clear();
 	}
 	public function CleanLabelsCache()
 	{
@@ -77,7 +76,6 @@ class CacheManager
 		TileDataCache::Cache()->Clear();
 		RankingCache::Cache()->Clear();
 		DatasetColumnCache::Cache()->Clear();
-		ClippingSummaryCache::Cache()->Clear();
 		BackofficeDownloadCache::Cache()->Clear();
 		DatasetShapesCache::Cache()->Clear();
 		DownloadCache::Cache()->Clear();

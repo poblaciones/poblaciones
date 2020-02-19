@@ -2,7 +2,7 @@
 	<div class="metricBlock">
 		<hr class="moderateHr"/>
 		<div>
-			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index" />
+			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index" @RankingShown="rankingShown" />
 			<h4 class="title">
 				<span class="drag">{{ metric.properties.Metric.Name }}</span>
 			</h4>
@@ -16,7 +16,7 @@
 			<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
 				Cobertura: {{ metric.SelectedVersion().Version.PartialCoverage }}.
 			</div>
-			<div v-if="metric.ShowRanking && useRankings" class="rankingBox">
+			<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
 				<Ranking :metric="metric" :clipping="clipping" />
 			</div>
 		</div>
@@ -55,18 +55,13 @@ export default {
 		changeMetricVisibility() {
 			this.metric.ChangeMetricVisibility();
 		},
-		zoomExtents() {
-			var extents = this.metric.SelectedLevel().Extents;
-			if (!window.SegMap.Clipping.FrameHasNoClipping()) {
-				var m = new Mercator();
-				extents = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
-			}
-			window.SegMap.MapsApi.FitEnvelope(extents);
-			this.$refs.zoomExtentsBtn.blur();
-		},
-		toogleRankings() {
-			this.metric.ShowRanking = !this.metric.ShowRanking;
-			window.SegMap.SaveRoute.UpdateRoute();
+		rankingShown() {
+			var vScrollTo = require('vue-scrollto');
+			var loc = this;
+			setTimeout(function () {
+				vScrollTo.scrollTo(loc.$refs.rankings, 500, { container: '#panRight', force: false });
+			}, 100);
+
 		},
 		remove(e) {
 			e.preventDefault();
@@ -74,14 +69,7 @@ export default {
 		}
 	},
 	computed: {
-		useRankings() {
-			var variable = this.metric.SelectedVariable();
-			if (variable) {
-				return !variable.IsSimpleCount;
-			} else {
-				return false;
-			}
-		}
+
 	}
 };
 </script>

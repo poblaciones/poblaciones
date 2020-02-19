@@ -47,6 +47,19 @@ class SpatialConditions
 		return new QueryPart($from, $where, $params);
 	}
 
+	public function CreateRichCircleQuery($circle, $effectiveDatasetType, $metricVersion, $geographyId)
+	{
+		$from = "";
+		$params = array();
+
+		$envelope = $circle->GetEnvelope();
+		$where = $this->RichEnvelopePart($envelope, $metricVersion, $geographyId);
+
+		$where .=  $this->CircleCondition($circle, $effectiveDatasetType);
+
+		return new QueryPart($from, $where, $params);
+	}
+
 	public function CreateFeatureQuery($featureId)
 	{
 		$from = "";
@@ -59,10 +72,24 @@ class SpatialConditions
 	{
 		return "MBRIntersects(" . $this->preffix . "_envelope, PolygonFromText('" . $envelope->ToWKT() . "'))";
 	}
+	private function RichEnvelopePart($envelope, $metricVersionId, $geographyId)
+	{
+		return "MBRIntersects(" . $this->preffix . "_rich_envelope, RichEnvelope(PolygonFromText('" . $envelope->ToWKT() . "'), " . $metricVersionId . ", " . $geographyId . "))";
+	}
 	public function CreateSimpleEnvelopeQuery($envelope)
 	{
 		$from = "";
 		$where = $this->EnvelopePart($envelope);
+		$select = "";
+		$params = array();
+
+		return new QueryPart($from, $where, $params, $select);
+	}
+
+	public function CreateRichEnvelopeQuery($envelope, $metricVersionId, $geographyId)
+	{
+		$from = "";
+		$where = $this->RichEnvelopePart($envelope, $metricVersionId, $geographyId);
 		$select = "";
 		$params = array();
 

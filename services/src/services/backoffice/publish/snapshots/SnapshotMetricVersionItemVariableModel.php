@@ -101,7 +101,7 @@ class SnapshotMetricVersionItemVariableModel
 				`miv_geography_id`,`miv_geography_item_id`,`miv_urbanity`,
 				`miv_metric_version_variable_id`,
 				`miv_value`, `miv_version_value_label_id`, miv_description, miv_total, miv_feature_id, `miv_area_m2`,
-				miv_envelope, miv_location) ";
+				miv_envelope, miv_rich_envelope, miv_location) ";
 
 		$sql = "SELECT " . $metricVersionLevel["mvr_metric_id"] . ", " . $metricVersionLevel["mvr_id"] . ",
 								gei_geography_id,
@@ -148,6 +148,7 @@ class SnapshotMetricVersionItemVariableModel
 			throw new ErrorException("Invalid dataset type.");
 		// Envelopes
 		$sql .= "Envelope(" . $envelopeTarget . "), ";
+		$sql .= "RichEnvelope(" . $envelopeTarget . ", " . $metricVersionLevel["mvr_id"] . ", gei_geography_id), ";
 		// Location
 		$sql .= $location;
 

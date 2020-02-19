@@ -22,8 +22,6 @@ ALTER TABLE `snapshot_lookup_clipping_region_item`
 ALTER TABLE `snapshot_lookup_clipping_region_item` ADD FULLTEXT KEY `ix_lookup_caption` (`clc_caption`, clc_tooltip);
 ALTER TABLE `snapshot_lookup_clipping_region_item`
   MODIFY `clc_id` int(11) NOT NULL AUTO_INCREMENT;
-COMMIT;
-
 
 CREATE TABLE `snapshot_lookup_feature` (
   `clf_id` int(11) NOT NULL,

@@ -7,6 +7,6 @@ join work on wrk_id = mvw_work_id
 join metadata on met_id = wrk_metadata_id 
 left join institution on ins_id = met_institution_id
 set mvw_work_institution = ins_caption, 
-    mvw_work_authors = met_authors
+    mvw_work_authors = met_authors;
 
 UPDATE version SET ver_value = '003' WHERE ver_name = 'DB';

@@ -69,6 +69,11 @@ class ShpWriter extends BaseWriter
 			$iLat = $this->getColumnByVariable($this->state->Get('latVariable'));
 			$iLon = $this->getColumnByVariable($this->state->Get('lonVariable'));
 		}
+		else
+		{
+			$iLat = -1;
+			$iLon = -1;
+		}
 		$f = 0;
 		foreach($rows as &$row)
 		{

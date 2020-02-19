@@ -112,7 +112,7 @@ export default {
 	watch: {
 		'work.Current'() {
 			var loc = this;
-			setInterval(function () { loc.updateWork(); }, 50);
+			setTimeout(function () { loc.updateWork(); }, 50);
 		}
 	}
 };

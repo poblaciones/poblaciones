@@ -175,7 +175,7 @@ LocationsGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 					LevelId: metric.SelectedLevel().Id,
 					VariableId: metric.SelectedVariable().Id
 				};
-				loc.MapsApi.markerMouseOut(e, parentInfo, feature.getId(),
+				loc.MapsApi.selector.markerMouseOut(e, parentInfo, feature.getId(),
 					new loc.MapsApi.google.maps.Size(0, -1 * h.getScaleFactor(z)));
 			});
 		}

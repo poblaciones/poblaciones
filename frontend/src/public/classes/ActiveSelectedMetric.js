@@ -114,9 +114,17 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 	});
 };
 
+ActiveSelectedMetric.prototype.useRankings = function () {
+	var variable = this.SelectedVariable();
+	if (variable) {
+		return !variable.IsSimpleCount && !variable.IsCategorical;
+	} else {
+		return false;
+	}
+};
 
 ActiveSelectedMetric.prototype.UpdateRanking = function () {
-	if (!this.ShowRanking) {
+	if (!this.ShowRanking || ! this.useRankings()) {
 		return;
 	}
 	var metric = this.properties;

@@ -224,6 +224,8 @@ RestoreRoute.prototype.LoadMetrics = function (metrics, updateRoute) {
 			params: { l: metricIds },
 		}).then(function (res) {
 			loc.segmentedMap.SaveRoute.Disabled = true;
+			loc.segmentedMap.Metrics.ClearUserMetrics();
+
 			for (var n = 0; n < metrics.length; n++) {
 				var selectedMetric = res.data[n];
 				if (selectedMetric != null) {

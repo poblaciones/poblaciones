@@ -11,7 +11,7 @@
 					<dots-vertical-icon title="Personalizar" />
 				</button>
 
-				<button type="button" v-on:click="toogleRankings" v-if="useRankings" onmouseup="this.blur()"
+				<button type="button" v-on:click="toogleRankings" v-if="metric.useRankings()" onmouseup="this.blur()"
 								class="close lightButton" :class="(metric.ShowRanking ? 'activeButton' : '')" :title="(metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking')">
 					<i class="fa fa-signal" style="margin-left: -4px;" />
 				</button>
@@ -64,6 +64,9 @@ export default {
 		toogleRankings() {
 			this.metric.ShowRanking = !this.metric.ShowRanking;
 			window.SegMap.SaveRoute.UpdateRoute();
+			if (this.metric.ShowRanking) {
+				this.$emit('RankingShown');
+			}
 		},
 		zoomExtents() {
 			var extents = this.metric.SelectedLevel().Extents;
@@ -76,14 +79,7 @@ export default {
 		},
 	},
 	computed: {
-		useRankings() {
-			var variable = this.metric.SelectedVariable();
-			if (variable) {
-				return !variable.IsSimpleCount && !variable.IsCategorical;
-			} else {
-				return false;
-			}
-		}
+
 	}
 };
 

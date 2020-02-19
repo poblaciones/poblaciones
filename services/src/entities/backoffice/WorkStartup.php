@@ -158,7 +158,7 @@ class WorkStartup
     /**
      * Set clippingRegionItemId
      *
-     * @param integer
+     * @param integer $clippingRegionItemId
      *
      * @return WorkStartup
      */

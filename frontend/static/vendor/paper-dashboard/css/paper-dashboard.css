@@ -87,7 +87,8 @@ blockquote small {
   font-style: normal; }
 
 .text-muted {
-  color: #DDDDDD; }
+	opacity: 0.2;
+}
 
 .text-primary, .text-primary:hover {
   color: #427C89; }

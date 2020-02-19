@@ -13,10 +13,10 @@
 					</tr>
 					<tr v-on:click="clickItem(item)" v-for="item in ranking" class="hand" :key="item.Id">
 						<template class="labelRow">
-							<td class="dataBox" style="width: 100%">
+							<td class="dataBox" style="width: 100%" :class="getMuted()">
 								{{ item.Name }}
 							</td>
-							<td class="dataBox">
+							<td class="dataBox" :class="getMuted()">
 								<!-- 2575fb -->
 								<i :style="'color: ' + getColor(item)" class="fas fa-circle"></i>
 							</td>
@@ -74,6 +74,13 @@ export default {
 			return this.metric.SelectedVariable();
 		},
 		ranking() {
+			if (!this.variable || this.variable.RankingItems === null) {
+				var ret = [ { Id: 1, Name: '-', Value: '-', Total: 0 },
+										{ Id: 2, Name: '-', Value: '-', Total: 0 },
+										{ Id: 3, Name: '-', Value: '-', Total: 0 },
+										{ Id: 4, Name: '-', Value: '-', Total: 0 }];
+				return ret;
+			}
 			return (this.variable ? this.variable.RankingItems : []);
 		},
 	},
@@ -130,13 +137,18 @@ export default {
 			}
 		},
 		getValueFormatted(value) {
-			if (this.variable.HasTotals) {
+			if (value === '-') {
+				return '-';
+			} else if (this.variable.HasTotals) {
 				return h.formatPercentNumber(value);
 			} else {
 				return h.formatNum(value);
 			}
 		},
 		getValue(item) {
+			if (item.Value === '-') {
+				return '-';
+			}
 			if (this.variable.HasTotals) {
 				return (item.Total > 0 ? item.Value * this.variable.NormalizationScale / item.Total : 0);
 			} else {
@@ -194,8 +206,7 @@ export default {
 			this.updateRanking();
 		},
 	}
-}; //
-</script>
+}; //</script>
 
 <style scoped>
 .labelRow
