@@ -17,7 +17,7 @@ import f from '@/backoffice/classes/Formatter';
 import str from '@/common/js/str';
 
 export default {
-	name: 'editPanel',
+	name: 'editButton',
 	components: {
 	},
 	data(){

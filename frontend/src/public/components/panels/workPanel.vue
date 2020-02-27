@@ -1,7 +1,7 @@
 <template>
-	<div>
-		<nav id="workPanel" class="navbar-fixed-top workPanel">
-			<div v-if="work.Current !== null" class="panel card workPanelBody" id="barBody">
+	<nav id="workPanel" class="navbar-fixed-top workPanel">
+		<div>
+			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody">
 				<!--button title="Cerrar" type="button" v-on:click="work.Current = null" class="close">
 					<span aria-hidden="true">&times;</span>
 				</button -->
@@ -30,8 +30,8 @@
 					{{ work.Current.Authors }}
 				</div>
 			</div>
-		</nav>
-	</div>
+		</div>
+	</nav>
 </template>
 
 <script>
@@ -66,7 +66,7 @@ export default {
 			window.Popups.WorkMetadata.show(this.work.Current);
 		},
 		showButtonsInInSingleRow() {
-			return (!this.work.Current.Institution && !this.work.Current.Authors);
+			return this.work.Current && (!this.work.Current.Institution && !this.work.Current.Authors);
 		},
 		getMetadataStyle() {
 			if (this.showButtonsInInSingleRow()) {
@@ -112,7 +112,12 @@ export default {
 	watch: {
 		'work.Current'() {
 			var loc = this;
-			setTimeout(function () { loc.updateWork(); }, 50);
+			setTimeout(function () {
+				loc.updateWork();
+				// hack por problemas en chrome y firefox con navbar-fixed-top en la inicialización
+				var height = (loc.work.Current && loc.$refs.barBody ? loc.$refs.barBody.offsetHeight : 0);
+				document.body.style.paddingTop = height + "px";
+			}, 50);
 		}
 	}
 };

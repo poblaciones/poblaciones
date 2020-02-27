@@ -15,12 +15,14 @@
 					</div>
 
 					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Contraseña"
+						<mp-simple-text label="Contraseña" readonly onfocus="this.removeAttribute('readonly');"
+								autocomplete="off"
 								type="password" v-model="password" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-40">
 						<mp-simple-text label="Verificación"
-									type="password" v-model="verification" @enter="save" />
+									type="password" v-model="verification" readonly onfocus="this.removeAttribute('readonly');"
+								autocomplete="off" @enter="save" />
 					</div>
 
 					<div class="md-layout-item md-size-40">

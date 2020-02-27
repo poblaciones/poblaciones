@@ -1,4 +1,5 @@
 [CURRENT]
+- Fix a colocación de panel de cartografía en la vista de mapa (hasta cambiar el tamaño de la ventana, se veía mal en chrome y en firefox).
 
 v2.16 (2020-02-16)
 - Optimización de tiles por bloques.
