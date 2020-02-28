@@ -34,7 +34,7 @@ class Paths
 		$ret = array(Context::Paths()->GetRoot() . "/" . $preffix . "/common" . $suffix,
 								 Context::Paths()->GetRoot() . "/" . $preffix . "/authenticate" . $suffix,
 								 Context::Paths()->GetRoot() . "/" . $preffix . "/backoffice" . $suffix,
-								 Context::Paths()->GetRoot() . "/" . $preffix . "/admin" . $suffix,
+								 Context::Paths()->GetRoot() . "/" . $preffix . "/logs" . $suffix,
 								 Context::Paths()->GetRoot() . "/" . $preffix . "/frontend" . $suffix);
 		$ret = self::CleanPaths($ret);
 		return $ret;
