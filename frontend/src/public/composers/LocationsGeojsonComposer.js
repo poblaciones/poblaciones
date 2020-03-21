@@ -165,7 +165,7 @@ LocationsGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 					LevelId: metric.SelectedLevel().Id,
 					VariableId: metric.SelectedVariable().Id
 				};
-				loc.MapsApi.markerMouseOver(e, parentInfo, feature.getId(), feature.getProperty('Description'));
+				loc.MapsApi.selector.markerMouseOver(e, parentInfo, feature.getId(), feature.getProperty('Description'));
 			});
 			element.addListener('mouseout', function (e) {
 				var parentInfo = {

@@ -1,5 +1,12 @@
 [CURRENT]
+
+v2.17 (2020-03-21)
 - Fix a colocación de panel de cartografía en la vista de mapa (hasta cambiar el tamaño de la ventana, se veía mal en chrome y en firefox).
+- Posibilidad de georreferenciar por distrito escolar para datos de 2001.
+- Al cambiar el nivel por una modificación en el zoom (ej. de provincia a departamento), si existe una variable con igual nombre se mantiene como seleccionada.
+- El bloqueo de nivel (ej. fijar departamento) se guarda y recupera de la ruta.
+- Fix: al moverse sin una región seleccionada, no se actualizan los resúmenes de los indicadores.
+- Mejoras en compatibilidad para MySql 5.7 y 8.0.
 
 v2.16 (2020-02-16)
 - Optimización de tiles por bloques.

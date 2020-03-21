@@ -23,7 +23,7 @@ class MetricVersionModel extends BaseModel
 
 		$sql = 'SELECT	mvl_id,
 										mvl_partial_coverage,
-										AsText(mvl_extents) mvl_extents,
+										ST_AsText(mvl_extents) mvl_extents,
 										geography.*,
 										dat_id,
 										dat_type,

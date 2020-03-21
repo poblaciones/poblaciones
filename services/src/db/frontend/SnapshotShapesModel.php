@@ -20,12 +20,12 @@ class SnapshotShapesModel extends BaseModel
 		$rZoom = (int) (($zoom + 2) / 3);
 		if ($zoom > 10 || $rZoom > 5) $rZoom = 5;
 
-		$centroids = ($getCentroids ? ", Y(centroid) as Lat, X(centroid) as Lon" : '');
+		$centroids = ($getCentroids ? ", ST_Y(centroid) as Lat, ST_X(centroid) as Lon" : '');
 
 		$sql = "SELECT geometry_r" . $rZoom . " as value, " . $datasetId . " * 0x100000000 + id as FID " .
 			$centroids .
 			" FROM " . $this->tableName . " WHERE " .
-			" ST_Intersects(geometry_r1, PolygonFromText('" . $envelope->ToWKT() . "'))" .
+			" ST_Intersects(geometry_r1, ST_PolygonFromText('" . $envelope->ToWKT() . "'))" .
 			" ORDER BY id";
 		$params = array();
 	//	$params = array($datasetId);

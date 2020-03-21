@@ -19,7 +19,9 @@ MetricRouter.prototype.ToRoute = function () {
 
 	ret += this.AddValue('m', this.activeSelectedMetric.properties.SummaryMetric, 'N');
 	ret += this.AddValue('u', this.activeSelectedMetric.properties.SelectedUrbanity, 'N');
-
+	if (this.activeSelectedMetric.SelectedLevel().Pinned) {
+		ret += this.AddValue('l', '1');
+	}
 	ret += this.AddValue('t', this.activeSelectedMetric.properties.Transparency, 'M');
 
 	if (this.activeSelectedMetric.SelectedVariable()) {
@@ -75,6 +77,7 @@ MetricRouter.prototype.parseMetric = function (metricString) {
 	var labelsCollapsed = h.getSafeValue(values, 'c', false);
 	var summaryMetric = h.getSafeValue(values, 'm', 'N');
 	var urbanity = h.getSafeValue(values, 'u', 'N');
+	var pinnedLevel = h.getSafeValue(values, 'l', '');
 	var showDescriptions = h.getSafeValue(values, 'd', '0');
 	var showValues = h.getSafeValue(values, 's', '0');
 	var ranking = h.getSafeValue(values, 'r', null);
@@ -96,6 +99,7 @@ MetricRouter.prototype.parseMetric = function (metricString) {
 		RankingSize: this.ParseRanking(ranking)['Size'],
 		RankingDirection: this.ParseRanking(ranking)['Direction'],
 		Transparency: transparency,
+		PinnedLevel: pinnedLevel,
 		CustomPattern: (customPattern === '' ? '' : parseInt(customPattern)),
 		VariableStates: (variableStates ? variableStates.split(',') : [])
 	};
@@ -165,6 +169,9 @@ MetricRouter.prototype.RestoreMetricState = function (state) {
 	if (levelIndex !== version.SelectedLevelIndex &&
 		levelIndex < version.Levels.length) {
 		version.SelectedLevelIndex = levelIndex;
+		if (state.PinnedLevel === '1') {
+			this.activeSelectedMetric.SelectedLevel().Pinned = true;
+		}
 		mapChanged = true;
 	}
 	var level = version.Levels[version.SelectedLevelIndex];

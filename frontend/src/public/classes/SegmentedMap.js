@@ -325,6 +325,12 @@ SegmentedMap.prototype.UpdateMap = function () {
 	}
 };
 
+SegmentedMap.prototype.InvalidateSummaries = function () {
+	for (var i = 0; i < this.Metrics.metrics.length; i++) {
+		this.Metrics.metrics[i].IsUpdatingSummary = true;
+	}
+};
+
 SegmentedMap.prototype.RefreshSummaries = function () {
 	for (var i = 0; i < this.Metrics.metrics.length; i++) {
 		this.Metrics.metrics[i].UpdateSummary();

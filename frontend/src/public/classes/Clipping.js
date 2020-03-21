@@ -112,6 +112,7 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 		this.cancelCreateClipping('cancelled');
 	}
 	this.SetClippingRequest(args);
+	this.SegmentedMap.InvalidateSummaries();
 
 	const loc = this;
 	this.SegmentedMap.Get(window.host + '/services/clipping/CreateClipping', {
@@ -125,8 +126,8 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 		}
 		if (!doNotUpdateMap) {
 			loc.SegmentedMap.UpdateMap();
-			loc.SegmentedMap.RefreshSummaries();
 		}
+		loc.SegmentedMap.RefreshSummaries();
 }).catch(function (error) {
 		loc.ResetClippingRequest(args);
 		err.errDialog('CreateClipping', 'crear la región seleccionada', error);

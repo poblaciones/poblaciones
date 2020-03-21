@@ -136,7 +136,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		if ($datasetType == 'L')
 		{
 			// Si es un metric de puntos, trae la ubicación del punto
-			$select .= ", round(Y(miv_location), ". GeoJson::PRECISION .") as Lat, round(X(miv_location), ". GeoJson::PRECISION .")  as Lon";
+			$select .= ", round(ST_Y(miv_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(miv_location), ". GeoJson::PRECISION .")  as Lon";
 		}
 		$from = $this->tableName;
 
@@ -191,7 +191,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 		$select = "IFNULL(miv_value, 0) Value, IFNULL(miv_total, 0) Total, miv_feature_id FeatureId,
-								miv_version_value_label_id ValueId, round(Y(miv_location), ". GeoJson::PRECISION .") as Lat, round(X(miv_location), ". GeoJson::PRECISION .")  as Lon";
+								miv_version_value_label_id ValueId, round(ST_Y(miv_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(miv_location), ". GeoJson::PRECISION .")  as Lon";
 		if ($hasDescriptions)
 		{
 			$select .= ", miv_description Name ";
@@ -199,7 +199,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		else if ($datasetType == 'L' || $datasetType == 'S')
 		{
 			// Pone la ubicación
-			$select .= ", CONCAT('[', round(Y(miv_location), ". GeoJson::PRECISION ."), ',', round(X(miv_location), ". GeoJson::PRECISION ."), ']') Name ";
+			$select .= ", CONCAT('[', round(ST_Y(miv_location), ". GeoJson::PRECISION ."), ',', round(ST_X(miv_location), ". GeoJson::PRECISION ."), ']') Name ";
 		}
 		else
 		{

@@ -92,8 +92,8 @@ GoogleMapsApi.prototype.Initialize = function () {
 			stylers: [{ visibility: 'off' }]
 		}],
 		clickableIcons: false,
-		center: { lat: 0, lng: 0 },
-		zoom: 1
+		center: { lat: -37.1799565, lng: -65.6866910 },
+		zoom: 6
 	};
 //		controlSize: 25,
 

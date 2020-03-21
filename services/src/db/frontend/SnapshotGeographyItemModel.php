@@ -19,7 +19,7 @@ class SnapshotGeographyItemModel extends BaseModel
 		if ($zoom > 10 || $rZoom > 5) $rZoom = 5;
 		if ($zoom >= 18) $rZoom = 6;
 		if ($zoom < 1) $rZoom = 1;
-		$centroids = ($getCentroids ? ', Y(giw_centroid) as Lat, X(giw_centroid) as Lon' : '');
+		$centroids = ($getCentroids ? ', ST_Y(giw_centroid) as Lat, ST_X(giw_centroid) as Lon' : '');
 
 	//	if ($rZoom === 6)
 	//		$field = "(select gei_geometry from geography_item WHERE gei_id = giw_geography_item_id)";
@@ -35,7 +35,7 @@ class SnapshotGeographyItemModel extends BaseModel
 
 		$sql = "SELECT  " . $field . " as value, giw_geography_item_id as FID" . $centroids .
 			" FROM snapshot_geography_item WHERE giw_geography_id = ? " .
-			" AND (MBRIntersects(" . $field . ", PolygonFromText('" . $envelope->ToWKT() . "'))
+			" AND (MBRIntersects(" . $field . ", ST_PolygonFromText('" . $envelope->ToWKT() . "'))
 						)" . $filterSize .
 			" ORDER BY giw_geography_item_id";
 		$params = array($geographyId);

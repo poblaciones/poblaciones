@@ -285,9 +285,9 @@ class DatasetModel extends BaseModel
 	{
 		$cols[] = $this->GetCustomCol('spss1.area_m2', 'area_m2', 'Área en m2',
 			Format::F, 9, 19, 2, Measurement::Scale, Alignment::Right);
-		$cols[] = $this->GetCustomCol('X(spss1.centroid)', 'latitud_centroide', 'Latitud del centroide',
+		$cols[] = $this->GetCustomCol('ST_X(spss1.centroid)', 'latitud_centroide', 'Latitud del centroide',
 			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
-		$cols[] = $this->GetCustomCol('Y(spss1.centroid)', 'longitud_centroide', 'Longitud del centroide',
+		$cols[] = $this->GetCustomCol('ST_Y(spss1.centroid)', 'longitud_centroide', 'Longitud del centroide',
 			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
 		return $cols;
 	}
@@ -318,9 +318,9 @@ class DatasetModel extends BaseModel
 			Format::F, 9, 10, 0, Measurement::Scale, Alignment::Right);
 		$cols[] = $this->GetCustomCol($table.'.gei_households', $carto.'_hogares_total', 'Total de hogares'.$sufix,
 			Format::F, 9, 10, 0, Measurement::Scale, Alignment::Right);
-		$cols[] = $this->GetCustomCol('X('.$table.'.gei_centroid)', $carto.'_latitud_centroide', 'Latitud del centroide'.$sufix,
+		$cols[] = $this->GetCustomCol('ST_X('.$table.'.gei_centroid)', $carto.'_latitud_centroide', 'Latitud del centroide'.$sufix,
 			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
-		$cols[] = $this->GetCustomCol('Y('.$table.'.gei_centroid)', $carto.'_longitud_centroide', 'Longitud del centroide'.$sufix,
+		$cols[] = $this->GetCustomCol('ST_Y('.$table.'.gei_centroid)', $carto.'_longitud_centroide', 'Longitud del centroide'.$sufix,
 			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
 		$cols[] = $this->GetCustomCol($table.'.gei_area_m2', $carto.'_area_m2', 'Área en m2'.$sufix,
 			Format::F, 9, 19, 2, Measurement::Scale, Alignment::Right);

@@ -186,6 +186,7 @@ export default {
 			} else {
 				this.level.Pinned = true;
 			}
+			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		toggleShowDescriptions() {
 			this.variable.ShowDescriptions = (this.level.ShowDescriptions === 1 ? 0 : 1);

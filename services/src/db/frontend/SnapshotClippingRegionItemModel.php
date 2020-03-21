@@ -78,7 +78,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($clippingRegionId);
 
-		$sql = "SELECT AsText(Envelope(cli_geometry)) Envelope ".
+		$sql = "SELECT ST_AsText(PolygonEnvelope(cli_geometry)) Envelope ".
 			"FROM clipping_region_item WHERE cli_id = ? LIMIT 1";
 
 		$ret = App::Db()->fetchAssoc($sql, $params);
@@ -136,7 +136,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 					"SUM(IFNULL(giw_children, 0)) AS Children, SUM(IFNULL(giw_area_m2, 0)) AS AreaM2, null Name, null Type " .
 					"FROM snapshot_geography_item ".
 					"WHERE giw_geography_id = ? " . $spatial->UrbanityCondition($urbanity) .
-				  "AND ST_Intersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "'))";
+				  "AND ST_Intersects(giw_geometry_r3, ST_PolygonFromText('" . $envelope->ToWKT() . "'))";
 		if ($circle != null)
 		{
 			$sql .= " AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
@@ -220,7 +220,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
 					LEFT JOIN institution ON met_institution_id = ins_id
 					WHERE EXISTS (SELECT * FROM snapshot_geography_item WHERE C2.geo_id = giw_geography_id
-					AND MBRIntersects(giw_geometry_r3, PolygonFromText('" . $envelope->ToWKT() . "')) AND giw_geography_is_tracking_level = 1)
+					AND MBRIntersects(giw_geometry_r3, ST_PolygonFromText('" . $envelope->ToWKT() . "')) AND giw_geography_is_tracking_level = 1)
 					ORDER BY C1.geo_revision";
 		$ret = App::Db()->fetchAll($sql);
 

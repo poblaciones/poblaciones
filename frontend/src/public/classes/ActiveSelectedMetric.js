@@ -74,8 +74,23 @@ ActiveSelectedMetric.prototype.ChangeMetricVisibility = function () {
 	this.UpdateMap();
 };
 
-ActiveSelectedMetric.prototype.SetSelectedLevelIndex = function (index) {
+ActiveSelectedMetric.prototype.ChangeSelectedLevelIndex = function (index) {
+	// Cambia el level, intentando mantener la variable seleccionado.
+	// La mantiene si el caption coincide.
+	var variable = this.SelectedVariable();
+	var name = (variable !== null ? variable.Name : null);
 	this.SelectedVersion().SelectedLevelIndex = index;
+	this.SetSelectedVariableByName(name);
+};
+
+ActiveSelectedMetric.prototype.SetSelectedVariableByName = function (name) {
+	var level = this.SelectedLevel();
+	for (var l = 0; l < level.Variables.length; l++) {
+		if (level.Variables[l].Name === name) {
+			level.SelectedVariableIndex = l;
+			break;
+		}
+	}
 };
 
 ActiveSelectedMetric.prototype.Visible = function () {
@@ -379,7 +394,7 @@ ActiveSelectedMetric.prototype.UpdateLevel = function () {
 	}
 	var l = this.CalculateProperLevel();
 	if (l !== this.SelectedLevel().Id) {
-		this.SetSelectedLevelIndex(l);
+		this.ChangeSelectedLevelIndex(l);
 		this.CheckValidMetric();
 		return true;
 	} else {

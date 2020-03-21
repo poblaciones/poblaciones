@@ -70,11 +70,11 @@ class SpatialConditions
 	}
 	private function EnvelopePart($envelope)
 	{
-		return "MBRIntersects(" . $this->preffix . "_envelope, PolygonFromText('" . $envelope->ToWKT() . "'))";
+		return "MBRIntersects(" . $this->preffix . "_envelope, ST_PolygonFromText('" . $envelope->ToWKT() . "'))";
 	}
 	private function RichEnvelopePart($envelope, $metricVersionId, $geographyId)
 	{
-		return "MBRIntersects(" . $this->preffix . "_rich_envelope, RichEnvelope(PolygonFromText('" . $envelope->ToWKT() . "'), " . $metricVersionId . ", " . $geographyId . "))";
+		return "MBRIntersects(" . $this->preffix . "_rich_envelope, RichEnvelope(ST_PolygonFromText('" . $envelope->ToWKT() . "'), " . $metricVersionId . ", " . $geographyId . "))";
 	}
 	public function CreateSimpleEnvelopeQuery($envelope)
 	{
@@ -100,7 +100,7 @@ class SpatialConditions
 	{
 		$from = "";
 		$where = $this->EnvelopePart($envelope);
-		$select = "MBRContains(PolygonFromText('" . $envelope->ToWKT() . "'), " . $this->preffix . "_envelope) as Inside";
+		$select = "MBRContains(ST_PolygonFromText('" . $envelope->ToWKT() . "'), " . $this->preffix . "_envelope) as Inside";
 		$params = array();
 
 		return new QueryPart($from, $where, $params, $select);

@@ -80,16 +80,16 @@ class SnapshotMetricVersionItemVariableModel
 		// Calcula para cada level
 		$sql = "UPDATE metric_version_level
 				JOIN dataset ON dat_id = mvl_dataset_id
-				set mvl_extents =
+				SET mvl_extents =
 					(SELECT
 								Envelope(LineString(
-				POINT(Min(X(PointN(ExteriorRing(miv_envelope), 1))),
-				min(Y(PointN(ExteriorRing(miv_envelope), 1)))),
-				POINT(Max(X(PointN(ExteriorRing(miv_envelope), 3))),
-				Max(Y(PointN(ExteriorRing(miv_envelope), 3))))))
+				POINT(Min(ST_X(PointN(ExteriorRing(miv_envelope), 1))),
+				MIN(ST_Y(PointN(ExteriorRing(miv_envelope), 1)))),
+				POINT(Max(ST_X(PointN(ExteriorRing(miv_envelope), 3))),
+				MAX(ST_Y(PointN(ExteriorRing(miv_envelope), 3))))))
 				FROM  snapshot_metric_version_item_variable
 				WHERE miv_metric_version_id = mvl_metric_version_id AND miv_geography_id = dat_geography_id)
-				where mvl_id = ?";
+				WHERE mvl_id = ?";
 		App::Db()->exec($sql, array($metricVersionLevel['mvl_id']));
 		Profiling::EndTimer();
 	}
@@ -147,7 +147,7 @@ class SnapshotMetricVersionItemVariableModel
 		else
 			throw new ErrorException("Invalid dataset type.");
 		// Envelopes
-		$sql .= "Envelope(" . $envelopeTarget . "), ";
+		$sql .= "PolygonEnvelope(" . $envelopeTarget . "), ";
 		$sql .= "RichEnvelope(" . $envelopeTarget . ", " . $metricVersionLevel["mvr_id"] . ", gei_geography_id), ";
 		// Location
 		$sql .= $location;

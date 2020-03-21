@@ -31,7 +31,7 @@ SaveRoute.prototype.UpdateRoute = function (coord) {
 	}
 
 	var args = this.calculateState(coord);
-	if (this.lastState === args) {
+	if (this.lastState === args || str.StartsWith(args, "@0.0000000,0.0000000,0z")) {
 		return;
 	}
 	this.lastState = args;
