@@ -18,12 +18,12 @@ class SnapshotSearchModel extends BaseModel
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
 		$sql = "SELECT
-			CAST(clc_clipping_region_item_id AS UNSIGNED INTEGER) id,
-			clc_caption caption,
-			'C' type,
-			clc_full_ids extraIds,
-			clc_symbol symbol,
-			Replace(clc_full_parent, '\t', ' > ') extra
+			CAST(clc_clipping_region_item_id AS UNSIGNED INTEGER) Id,
+			clc_caption Caption,
+			'C' Type,
+			clc_full_ids ExtraIds,
+			clc_symbol Symbol,
+			Replace(clc_full_parent, '\t', ' > ') Extra
 			FROM snapshot_lookup_clipping_region_item
 			WHERE MATCH(clc_caption, clc_tooltip) AGAINST (:query IN BOOLEAN MODE)
 			ORDER by clc_population DESC
@@ -39,14 +39,14 @@ class SnapshotSearchModel extends BaseModel
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
 		$sql = "SELECT DISTINCT
-			CAST(clf_feature_ids AS UNSIGNED INTEGER) id,
-			clf_caption caption,
-			'F' type,
-			null extraIds,
-			clf_symbol symbol,
+			CAST(clf_feature_ids AS UNSIGNED INTEGER) Id,
+			clf_caption Caption,
+			'F' Type,
+			null ExtraIds,
+			clf_symbol Symbol,
 			round(ST_Y(clf_location), ". GeoJson::PRECISION .") as Lat,
 			round(ST_X(clf_location), ". GeoJson::PRECISION .") as Lon,
-			Replace(clf_full_parent, '\t', ' > ') extra
+			Replace(clf_full_parent, '\t', ' > ') Extra
 			FROM snapshot_lookup_feature
 			WHERE MATCH(clf_caption) AGAINST (:query IN BOOLEAN MODE)
 			LIMIT 0, 10";

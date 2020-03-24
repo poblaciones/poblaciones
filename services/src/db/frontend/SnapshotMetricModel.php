@@ -5,6 +5,7 @@ namespace helena\db\frontend;
 use helena\classes\App;
 use minga\framework\Profiling;
 use minga\framework\Str;
+use helena\services\backoffice\publish\PublishDataTables;
 
 class SnapshotMetricModel extends BaseModel
 {
@@ -70,59 +71,47 @@ class SnapshotMetricModel extends BaseModel
 	}
 
 
+	public function HasVisibleVersions($metricId)
+	{
+		Profiling::BeginTimer();
+		$metricIdShardified = PublishDataTables::Shardified($metricId);
+		$sql = "SELECT COUNT(*)
+							FROM snapshot_metric_version
+							WHERE mvw_work_is_indexed = 1 AND mvw_work_is_private = 0";
+		$ret = App::Db()->fetchScalarInt($sql, array($metricIdShardified));
+		Profiling::EndTimer();
+		return $ret > 0;
+	}
 
-	public function Search($originalQuery)
+	public function Search($originalQuery, $inBackoffice)
 	{
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
 		Profiling::BeginTimer();
-		$sql = "SELECT mvw_metric_id id,
-										mvw_metric_caption caption,
-										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') extra,
-										'L' type,
+		$sql = "SELECT mvw_metric_id Id,
+										mvw_metric_caption Caption,
+										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') Extra,
+										'L' Type,
 										MAX(MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`,
-										`mvw_variable_value_captions`, `mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (?)) relevance
+										`mvw_variable_value_captions`, `mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (?)) Relevance
 										FROM snapshot_metric_version
 										WHERE MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
 										`mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (? IN BOOLEAN MODE)
 										AND mvw_work_is_indexed = 1 AND mvw_work_is_private = 0
 										GROUP BY mvw_metric_id, mvw_metric_caption
-										ORDER BY relevance DESC
+										ORDER BY Relevance DESC
 										LIMIT 0, 10";
 		$ret = App::Db()->fetchAll($sql, array($query, $query));
+		if ($inBackoffice)
+		{
+			foreach($ret as &$retItem)
+			{
+				$retItem['Id'] = PublishDataTables::Unshardify($retItem['Id']);
+			}
+		}
 		Profiling::EndTimer();
 		return $ret;
 	}
-
-	/*
-	public function Search($originalQuery)
-	{
-	"SELECT myv_id, myv_metric_id, myv_caption, myv_work_ids, myv_work_captions, myv_has_public_data,
-	myv_version_ids, myv_version_captions, myv_version_partial_coverages,
-	myv_variable_captions, myv_metric_group_id
-	FROM snapshot_metric JOIN metric_group ON myv_metric_group_id = lgr_id
-	WHERE myv_has_public_data ORDER BY lgr_id, myv_caption";
-
-	$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
-
-		Profiling::BeginTimer();
-		 $sql = "SELECT myv_metric_id id,
-			myv_caption caption,
-			myv_version_captions extra,
-			'L' type,
-		 	MATCH (myv_caption, myv_version_captions, myv_variable_captions, myv_variable_value_captions,
-			myv_work_captions) AGAINST (?) relevance
-		 	FROM snapshot_metric
-		 	WHERE MATCH (myv_caption, myv_version_captions, myv_variable_captions,
-			myv_variable_value_captions, myv_work_captions) AGAINST (? IN BOOLEAN MODE)
-		 	ORDER BY relevance DESC
-		 	LIMIT 0, 10";
-
-		$ret = App::Db()->fetchAll($sql, array($query, $query));
-		Profiling::EndTimer();
-		return $ret;
-	}*/
-
 }
 
 

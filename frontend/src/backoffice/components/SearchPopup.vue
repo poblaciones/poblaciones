@@ -1,6 +1,6 @@
 <template>
 	<md-dialog :md-active.sync="openDialog">
-		<md-dialog-title>Seleccionar región</md-dialog-title>
+		<md-dialog-title>Seleccionar {{ typeCaption }} </md-dialog-title>
 		<md-dialog-content>
 			<div class='md-layout'>
 				<div class='md-layout-item md-size-100 md-small-size-100'>
@@ -8,11 +8,11 @@
 						<md-input ref="inputName" placeholder="Buscar..." v-model="filter" @input="doSearch" />
 					</md-field>
 					<md-list>
-						<md-list-item v-for="item in autolist" v-bind:key="item.id" :value="item.id"
+						<md-list-item v-for="item in autolist" v-bind:key="item.Id" :value="item.Id"
 													@click="select(item)">
 							<div class="md-list-item-text">
-								<div>{{ item.extra }}</div>
-								<div>{{ item.caption }}</div>
+								<div>{{ item.Extra }}</div>
+								<div>{{ item.Caption }}</div>
 							</div>
 						</md-list-item>
 					</md-list>
@@ -39,18 +39,30 @@
 				autolist: [],
 				retCancel: null,
 				openDialog: false,
-				searchType: 'r',
 				filter: null,
 			};
+		},
+		props: {
+			searchType: String,
 		},
 		computed: {
 			Work() {
 				return window.Context.CurrentWork;
 			},
+			typeCaption() {
+				switch (this.searchType) {
+					case 'r':
+						return 'región';
+					case 'm':
+						return 'indicador';
+					default:
+						throw new Error('Tipo de búsqueda inválido.');
+				}
+			},
 		},
 		methods: {
-			show() {
-				this.search = new Search(this, this.Work.StartupExtraInfo.LookupVersion, this.searchType);
+			show(type) {
+				this.search = new Search(this, this.Work.Startup.LookupVersion, this.searchType, true);
 				this.filter = '';
 				this.autolist = [];
 				this.openDialog = true;
@@ -59,6 +71,9 @@
 				}, 100);
 			},
 			select(item) {
+				if (!item.Id) {
+					return;
+				}
 				this.openDialog = false;
 				this.$emit('selected', item);
 			},

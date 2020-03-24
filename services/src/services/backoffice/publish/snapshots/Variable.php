@@ -82,7 +82,10 @@ class Variable
 	}
 	public function CalculateNormalizationField()
 	{
-		return self::GetRichColumn($this->attributes, "mvv_normalization");
+		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
+			return 0;
+		else
+			return self::GetRichColumn($this->attributes, "mvv_normalization");
 	}
 	public function CalculateSegmentationValueField()
 	{

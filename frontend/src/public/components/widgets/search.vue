@@ -10,28 +10,28 @@
 		<transition name="fade">
 		<div class='auto' id="auto" v-if="hasSelected()" v-on-clickaway="escapeKey">
 			<ul>
-				<li v-on:click="select(item)" v-for="(item, index) in autolist" :key="item.id" :class="item.class"
+				<li v-on:click="select(item)" v-for="(item, index) in autolist" :key="item.Id" :class="item.Class"
 					v-on:mouseover="over(item, index)"
 					v-on:mouseout="out(item, index)">
-          <div v-if="item.type === 'L'">
-						<span>{{ item.highlighted }}</span>
+          <div v-if="item.Type === 'L'">
+						<span>{{ item.Highlighted }}</span>
             <br/>
-             <em class='text-softer small'>{{ item.extra }}</em>
+             <em class='text-softer small'>{{ item.Extra }}</em>
             </div>
-          <div v-if="item.type === 'C'">
-            <em class='text-softer small'>{{ item.extra }}</em>
+          <div v-if="item.Type === 'C'">
+            <em class='text-softer small'>{{ item.Extra }}</em>
             <br/>
-						<span>{{ item.highlighted }}</span>
+						<span>{{ item.Highlighted }}</span>
           </div>
-          <div v-if="item.type === 'F' || item.type === 'P'">
-            <em class='text-softer small'>{{ item.extra }}</em>
+          <div v-if="item.Type === 'F' || item.Type === 'P'">
+            <em class='text-softer small'>{{ item.Extra }}</em>
             <br/>
-            <span>{{ item.highlighted }}</span>
+            <span>{{ item.Highlighted }}</span>
           </div>
-				 <div v-if="item.type === 'N'">
-					<em class='text-softer small'>{{ item.extra }}</em>
+				 <div v-if="item.Type === 'N'">
+					<em class='text-softer small'>{{ item.Extra }}</em>
 					<br/>
-					 <span>{{ item.highlighted }}</span>
+					 <span>{{ item.Highlighted }}</span>
 				 </div>
 				</li>
 			</ul>
@@ -92,11 +92,11 @@ export default {
 			this.selindex = index;
 		},
 		select(item) {
-			if (item.type === 'P') {
+			if (item.Type === 'P') {
 				window.SegMap.SetMyLocation(item);
 			}
 			else {
-				window.SegMap.SelectId(item.type, item.id, item.Lat, item.Lon);
+				window.SegMap.SelectId(item.Type, item.Id, item.Lat, item.Lon);
 			}
 			this.text = '';
 			this.autolist = [];

@@ -18,7 +18,8 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.MetricVersions.Refresh();
 	this.Files = workInfo.Files;
 	this.Permissions = workInfo.Permissions;
-	this.StartupExtraInfo = workInfo.StartupExtraInfo;
+	this.Startup = workInfo.Startup;
+	this.ExtraMetrics = workInfo.ExtraMetrics;
 	this.workListMetadata = workListMetadata;
 	if (workInfo.Datasets) {
 		for (var i = 0; i < workInfo.Datasets.length; i++) {
@@ -84,6 +85,10 @@ ActiveWork.prototype.HasChanges = function () {
 		this.properties.MetadataChanged || this.properties.DatasetLabelsChanged ||
 		this.properties.DatasetDataChanged || this.properties.MetricLabelsChanged ||
 		this.properties.MetricDataChanged;
+};
+
+ActiveWork.prototype.GetWorkMetrics = function () {
+
 };
 
 ActiveWork.prototype.CanAdmin = function () {
@@ -220,6 +225,20 @@ ActiveWork.prototype.UpdateSource = function (source) {
 				window.Context.Sources.Refresh();
 			}
 		});
+};
+
+ActiveWork.prototype.AppendExtraMetric = function (metric) {
+	var args = { 'w': this.properties.Id, 'm': metric.Id };
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/AppendExtraMetric', args,
+		'agregar el indicador adicional');
+};
+
+ActiveWork.prototype.RemoveExtraMetric = function (metric) {
+	var args = { 'w': this.properties.Id, 'm': metric.Id };
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/RemoveExtraMetric', args,
+		'remover el indicador adicional');
 };
 
 ActiveWork.prototype.UpdateStartup = function () {

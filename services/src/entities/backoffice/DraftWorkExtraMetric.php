@@ -24,16 +24,9 @@ class DraftWorkExtraMetric
     private $Id;
 
     /**
-     * @var integer
+     * @var \helena\entities\backoffice\DraftMetric
      *
-     * @ORM\Column(name="wmt_order", type="integer", precision=0, scale=0, nullable=false, unique=false)
-     */
-    private $Order;
-
-    /**
-     * @var \helena\entities\backoffice\Metric
-     *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Metric")
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftMetric")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="wmt_metric_id", referencedColumnName="mtr_id", nullable=false)
      * })
@@ -76,38 +69,15 @@ class DraftWorkExtraMetric
 
         return $this;
     }
-    /**
-     * Set order
-     *
-     * @param integer $order
-     *
-     * @return DraftWorkExtraMetric
-     */
-    public function setOrder($order)
-    {
-        $this->Order = $order;
-
-        return $this;
-    }
-
-    /**
-     * Get order
-     *
-     * @return integer
-     */
-    public function getOrder()
-    {
-        return $this->Order;
-    }
 
     /**
      * Set metric
      *
-     * @param \helena\entities\backoffice\Metric $metric
+     * @param \helena\entities\backoffice\DraftMetric $metric
      *
      * @return DraftWorkExtraMetric
      */
-    public function setMetric(\helena\entities\backoffice\Metric $metric = null)
+    public function setMetric(\helena\entities\backoffice\DraftMetric $metric = null)
     {
         $this->Metric = $metric;
 
@@ -117,7 +87,7 @@ class DraftWorkExtraMetric
     /**
      * Get metric
      *
-     * @return \helena\entities\backoffice\Metric
+     * @return \helena\entities\backoffice\DraftMetric
      */
     public function getMetric()
     {

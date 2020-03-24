@@ -24,13 +24,6 @@ class WorkExtraMetric
     private $Id;
 
     /**
-     * @var integer
-     *
-     * @ORM\Column(name="wmt_order", type="integer", precision=0, scale=0, nullable=false, unique=false)
-     */
-    private $Order;
-
-    /**
      * @var \helena\entities\backoffice\Metric
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Metric")
@@ -75,29 +68,6 @@ class WorkExtraMetric
         $this->Id = $id;
 
         return $this;
-    }
-    /**
-     * Set order
-     *
-     * @param integer $order
-     *
-     * @return WorkExtraMetric
-     */
-    public function setOrder($order)
-    {
-        $this->Order = $order;
-
-        return $this;
-    }
-
-    /**
-     * Get order
-     *
-     * @return integer
-     */
-    public function getOrder()
-    {
-        return $this->Order;
     }
 
     /**

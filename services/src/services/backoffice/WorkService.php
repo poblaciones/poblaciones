@@ -12,6 +12,7 @@ use helena\db\frontend\RevisionsModel;
 
 use helena\entities\backoffice\DraftWork;
 use helena\entities\backoffice\structs\WorkInfo;
+use helena\entities\backoffice\structs\StartupInfo;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\notifications\NotificationManager;
 use helena\services\backoffice\publish\PublishDataTables;
@@ -111,20 +112,37 @@ class WorkService extends BaseService
 		$workInfo->Datasets = $this->GetDatasets($workId);
 		$workInfo->Sources = $this->GetSources($workId);
 		$workInfo->Files = $this->GetFiles($workId);
+		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
-		$workInfo->StartupExtraInfo = $this->GetStartupExtraInfo($workId);
+		$workInfo->Startup = $this->GetStartupInfo($workId);
 		Profiling::EndTimer();
 		return $workInfo;
 	}
 
-	public function GetStartupExtraInfo($workId)
+	public function GetStartupInfo($workId)
 	{
 		Profiling::BeginTimer();
 		$revisions = new RevisionsModel();
-		$lookupVersion = $revisions->GetLookupRevision();
+		$startup = new StartupInfo();
+		$startup->LookupVersion = $revisions->GetLookupRevision();
 		$extraInfo = $this->GetWorkStartupClippingRegionExtra($workId);
+		$startup->RegionExtraInfo = $extraInfo['extra'];
+		$startup->RegionCaption = $extraInfo['caption'];
 		Profiling::EndTimer();
-		return [ 'LookupVersion' => $lookupVersion, 'RegionExtraInfo' => $extraInfo['extra'], 'RegionCaption' => $extraInfo['caption']];
+		return $startup;
+	}
+
+
+	private function GetExtraMetrics($workId)
+	{
+		Profiling::BeginTimer();
+		$extraMetrics = App::Orm()->findManyByProperty(entities\DraftWorkExtraMetric::class, "Work.Id", $workId);
+		$ret = [];
+		foreach($extraMetrics as $extraMetric)
+			$ret[] = $extraMetric->getMetric();
+		Arr::SortByGetter($ret, 'getCaption');
+		Profiling::EndTimer();
+		return $ret;
 	}
 
 	private function GetWorkStartupClippingRegionExtra($workId)
@@ -149,6 +167,23 @@ class WorkService extends BaseService
 		// Manda un mensaje administrativo avisando del pedido
 		$nm = new NotificationManager();
 		$nm->NotifyRequestReview($workId);
+		return self::OK;
+	}
+	public function AppendExtraMetric($workId, $metricId)
+	{
+		// Evita duplicados
+		$this->RemoveExtraMetric($workId, $metricId);
+		// La agrega
+		$args = [$workId, $metricId];
+		App::Db()->exec("INSERT INTO draft_work_extra_metric(wmt_work_id, wmt_metric_id) VALUES (?, ?)", $args);
+		// Listo
+		return self::OK;
+	}
+	public function RemoveExtraMetric($workId, $metricId)
+	{
+		$args = [$workId, $metricId];
+		App::Db()->exec("DELETE FROM draft_work_extra_metric WHERE wmt_work_id = ? AND wmt_metric_id = ?", $args);
+		WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
 	}
 	public function UpdateStartup($workId, $startup)

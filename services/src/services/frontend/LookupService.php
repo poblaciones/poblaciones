@@ -13,21 +13,26 @@ use minga\framework\Profiling;
 
 class LookupService extends BaseService
 {
-	public function Search($query, $filter)
+	public function Search($query, $filter, $inBackoffice)
 	{
 		Profiling::BeginTimer();
-		SearchLog::BeginSearch();
+		$log = new SearchLog();
+		$log->BeginSearch();
 
 		$modelMetrics = new SnapshotMetricModel();
 		$modelLookup = new SnapshotSearchModel();
 
 		// Trae los indicadores que coinciden
 		if ($filter != 'r')
-			$resLay = $modelMetrics->Search($query);
+			$resLay = $modelMetrics->Search($query, $inBackoffice);
 		else
 			$resLay = [];
+
 		// Trae las regiones
-		$resClippings = $modelLookup->SearchClippingRegions($query);
+		if ($filter != 'm')
+			$resClippings = $modelLookup->SearchClippingRegions($query);
+		else
+			$resClippings = [];
 
 		// Si hay de ambas, pone 5 de cada uno
 		$ret = array();
@@ -45,7 +50,7 @@ class LookupService extends BaseService
 			$resFeatures = $modelLookup->SearchFeatures($query);
 			$this->appendResults($ret, $resFeatures, 10 - sizeof($ret));
 		}
-		SearchLog::RegisterSearch($query, sizeof($ret));
+		$log->RegisterSearch($query, sizeof($ret));
 
 		Profiling::EndTimer();
 		return $ret;

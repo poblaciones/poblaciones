@@ -1,4 +1,5 @@
 [CURRENT]
+- Posibilidad de agregar indicadores externos en una cartografía a la lista de indicadores del panel superior.
 
 v2.17 (2020-03-21)
 - Fix a colocación de panel de cartografía en la vista de mapa (hasta cambiar el tamaño de la ventana, se veía mal en chrome y en firefox).

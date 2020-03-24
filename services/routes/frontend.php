@@ -125,7 +125,9 @@ App::$app->get('/services/search', function (Request $request) {
 	$query = Params::Get('q');
 	$controller = new services\LookupService();
 	$filter = Params::Get('f', '');
-	return App::JsonImmutable($controller->Search($query, $filter));
+	$inBackoffice = Params::GetBool('b');
+
+	return App::JsonImmutable($controller->Search($query, $filter, $inBackoffice));
 });
 
 

@@ -435,8 +435,6 @@ class DatasetService extends DbSession
 
 		// Borra el metric version level
 		App::Orm()->delete($metricVersionLevel);
-
-		// Borra los metric sin verisones
 		$this->DeleteOrphanMetricVersion($metricVersion);
 
 		// Borra los metric sin verisones
@@ -476,6 +474,9 @@ class DatasetService extends DbSession
 		$sibilings = App::Db()->fetchScalarInt($childrenSql, array($metric->getId()));
 		if ($sibilings == 0)
 		{
+			// Borra sus usos como extra metric
+			App::Db()->exec("DELETE FROM draft_work_extra_metric WHERE wmt_metric_id = ?", array($metric->getId()));
+			// Lo borra
 			App::Orm()->delete($metric);
 		}
 		Profiling::EndTimer();

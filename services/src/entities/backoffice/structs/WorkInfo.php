@@ -9,6 +9,7 @@ class WorkInfo
 	public $Files;
 	public $Permissions;
 	public $Sources;
-	public $StartupExtraInfo;
+	public $ExtraMetrics;
+	public $Startup;
 }
 

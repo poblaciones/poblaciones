@@ -9,6 +9,7 @@ use helena\services\admin as adminServices;
 use helena\entities\backoffice as entities;
 use minga\framework\Params;
 use minga\framework\ErrorException;
+use helena\db\frontend\SnapshotMetricModel;
 
 // ********************************* Servicios *********************************
 
@@ -77,6 +78,25 @@ App::$app->get('/services/backoffice/GetWorkInfo', function (Request $request) {
 	return App::OrmJson($controller->GetWorkInfo($workId));
 });
 
+App::$app->get('/services/backoffice/AppendExtraMetric', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	$metricId = Params::GetIntMandatory('m');
+	$check = new SnapshotMetricModel();
+	if (!$check->HasVisibleVersions($metricId))
+		return Session::NotEnoughPermissions();
+
+	$controller = new services\WorkService();
+	return App::Json($controller->AppendExtraMetric($workId, $metricId));
+});
+
+App::$app->get('/services/backoffice/RemoveExtraMetric', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	$metricId = Params::GetIntMandatory('m');
+	$controller = new services\WorkService();
+	return App::Json($controller->RemoveExtraMetric($workId, $metricId));
+});
 
 App::$app->post('/services/backoffice/UpdateStartup', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
