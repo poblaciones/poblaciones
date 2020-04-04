@@ -40,6 +40,9 @@ La aplicación puede ser alojada en un servidor compartido (ej. hostgator), dado
 
 El sitio se encuentra operativo con datos demográficos, sociales y políticos de la Argentina en https://poblaciones.org.
 
+# Tutoriales técnicos
+
+En youtube pueden encontrar tutoriales técnicos para mantener, extender y mejorar el código en https://bit.ly/2x0PXFm.
 # Instalación
 
 Para generar una versión para instalar: [guía de compilación](startup/BUILD.md)
