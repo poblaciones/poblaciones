@@ -168,7 +168,9 @@ html, body {
 	top: 0px !important;
 	right: 0px !important;
 }
-
+.gAlpha {
+	opacity: 0;
+}
 .gm-fullscreen-control
 {
 	zoom: 0.8;

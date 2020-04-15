@@ -9,7 +9,7 @@ use helena\classes\spss\Format;
 
 class CsvWriter extends BaseWriter
 {
-	const OUTPUT_LATIN3_WINDOWS_ISO = false;
+	static $OUTPUT_LATIN3_WINDOWS_ISO = false;
 
 	public function SaveHeader()
 	{
@@ -71,7 +71,7 @@ class CsvWriter extends BaseWriter
 	}
 	private function MakeOutputEncoding($utf8text)
 	{
-		if (self::OUTPUT_LATIN3_WINDOWS_ISO)
+		if (self::$OUTPUT_LATIN3_WINDOWS_ISO)
 			return mb_convert_encoding($utf8text, 'ISO-8859-1', 'UTF-8');
 		else
 			return $utf8text;

@@ -44,6 +44,13 @@ class WorkStartup
      */
     private $Zoom;
 
+		/**
+     * @var string
+     *
+     * @ORM\Column(name="wst_active_metrics", type="string", length=200, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $ActiveMetrics;
+
     /**
      * @var integer
      *
@@ -105,6 +112,30 @@ class WorkStartup
         $this->Zoom = $zoom;
 
         return $this;
+    }
+
+		/**
+     * Set activeMetrics
+     *
+     * @param string $activeMetrics
+     *
+     * @return WorkStartup
+     */
+    public function setActiveMetrics($activeMetrics)
+    {
+        $this->ActiveMetrics = $activeMetrics;
+
+        return $this;
+    }
+
+    /**
+     * Get activeMetrics
+     *
+     * @return string
+     */
+    public function getActiveMetrics()
+    {
+        return $this->ActiveMetrics;
     }
 
     /**

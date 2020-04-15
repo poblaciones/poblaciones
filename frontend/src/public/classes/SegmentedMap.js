@@ -38,6 +38,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	} else {
 		this.tileDataBlockSize = null;
 	}
+	this.UseGradients = config.UseGradients;
 	this.Queue = new Queue(config.MaxQueueRequests);
 };
 

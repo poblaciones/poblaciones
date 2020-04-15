@@ -5,7 +5,11 @@
 							title="Guardar como PNG..." v-on:click="capturePng()"><i class="fas fa-camera"/></button>
 		<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" v-on:click="geolocate()"><i class="far fa-dot-circle"/></button>
-		</div>
+
+
+		<button v-if="useGradients" type="button" class="btn btn-default btn-xs"
+							title="Máscara poblacional" v-on:click="changeGradientOpacity(.25)"><i class="fas fa-satellite"/></button>
+	</div>
 		<div class="btn-group">
 			<button v-for="(mode, index) in selectionModes()" :key="mode.Name" type="button"
 							v-on:click="setMode(index)" v-on:mouseup="setMode(index)"
@@ -46,6 +50,7 @@
 import html2canvas from 'html2canvas';
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 import tour from '@/public/components/popups/tour';
+import h from '@/public/js/helper';
 
 export default {
 	name: 'toolbar',
@@ -122,6 +127,21 @@ export default {
 				return ' active';
 			}
 			return '';
+		},
+		changeGradientOpacity(delta) {
+			var rule = h.getCssRule(document, '.gAlpha');
+			if (rule) {
+				var result = parseFloat(rule.style.opacity) + delta;
+				if (result > 1) {
+					result = 0.1;
+				}
+				rule.style.opacity = result;
+			}
+		}
+	},
+	computed: {
+		useGradients() {
+			return true;
 		},
 	},
 	watch: {

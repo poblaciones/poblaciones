@@ -55,8 +55,40 @@
 													<mp-help :text="tab.data.help" :large="true" />
 											</template>
 
+											<md-tab style='flex: 1 0 100% !important;overflow-x: auto;' id="metrics" md-label="Indicadores"
+														:to="makePath('')" :md-active="isPath(makePath(''))"
+													:md-template-data="{ badge: (Dataset && Dataset.MetricVersionLevels ? Dataset.MetricVersionLevels.length : ''), help: `
+														<p>
+															Los indicadores vuelven la información visible en el mapa.
+														</p><p>
+															Cada indicador muestra un aspecto de los datos (ej. Nivel educativo, Antiguedad de la escuela), pudiendo seleccionarse colores y criterios de segmentación para las variables utilizadas.
+														</p>`}" >
+												<metrics-tab></metrics-tab>
+											</md-tab>
+											<md-tab style='flex: 1 0 100% !important;' id="georeference" md-label="Georreferenciar"
+															:to="makePath('georeference')" :md-active="isPath(makePath('georeference'))"
+															:md-template-data="{ help: `<p>
+													La georreferenciación es el proceso que vincula los datos con una ubicación espacial en el mapa. Para poder publicar los datos es necesario previamente georreferenciarlos.
+												</p>
+												<p>
+													Existen tres formas de georreferenciar los datos:
+												</p>
+												<ul style='padding-left: 20px;'>
+													<li>
+														Ubicaciones: esta modalidad supone que cada fila del dataset contiene una coordenada especificada por latitud y longitud.
+													</li>
+													<li>
+														Códigos: al referenciar por código, se requiere que cada fila del dataset posea un código compatible con las geografías definidas en la plataforma.
+																Estos códigos pueden ser códigos de Provincia, Departamento o Radio, homologados según su uso en los censos de los años 1991, 2001 y 2010.
+													</li>
+													<li>
+														Polígonos: se identifica la localización de la fila por el reconocimiento de un polígono en alguna de las variables del dataset, en formato Well-known-text (WKT) o GeoJson.
+													</li>
+												</ul>` }">
+												<georeference-tab></georeference-tab>
+											</md-tab>
 											<md-tab style='flex: 1 0 100% !important;' id="data" md-label="Datos" @click="EnsureColumns"
-															:to="makePath('')" :md-active="isPath(makePath(''))"
+															:to="makePath('data')" :md-active="isPath(makePath('data'))"
 															:md-template-data="{ help: `
 															<p>
 																La información de un dataset debe ser incorporada mediante la importación
@@ -78,38 +110,6 @@
 															recodificarlas (convertir en códigos numéricos con etiquetas) variables
 															existentes.</p>` }">
 													<columns-tab></columns-tab>
-												</md-tab>
-												<md-tab style='flex: 1 0 100% !important;' id="georeference" md-label="Georreferenciar"
-																:to="makePath('georeference')" :md-active="isPath(makePath('georeference'))"
-																:md-template-data="{ help: `<p>
-														La georreferenciación es el proceso que vincula los datos con una ubicación espacial en el mapa. Para poder publicar los datos es necesario previamente georreferenciarlos.
-													</p>
-													<p>
-														Existen tres formas de georreferenciar los datos:
-													</p>
-													<ul style='padding-left: 20px;'>
-														<li>
-															Ubicaciones: esta modalidad supone que cada fila del dataset contiene una coordenada especificada por latitud y longitud.
-														</li>
-														<li>
-															Códigos: al referenciar por código, se requiere que cada fila del dataset posea un código compatible con las geografías definidas en la plataforma.
-																	Estos códigos pueden ser códigos de Provincia, Departamento o Radio, homologados según su uso en los censos de los años 1991, 2001 y 2010.
-														</li>
-														<li>
-															Polígonos: se identifica la localización de la fila por el reconocimiento de un polígono en alguna de las variables del dataset, en formato Well-known-text (WKT) o GeoJson.
-														</li>
-													</ul>` }">
-													<georeference-tab></georeference-tab>
-												</md-tab>
-												<md-tab style='flex: 1 0 100% !important;overflow-x: auto;' id="metrics" md-label="Indicadores"
-															:to="makePath('metrics')" :md-active="isPath(makePath('metrics'))"
-														:md-template-data="{ badge: (Dataset && Dataset.MetricVersionLevels ? Dataset.MetricVersionLevels.length : ''), help: `
-															<p>
-																Los indicadores vuelven la información visible en el mapa.
-															</p><p>
-																Cada indicador muestra un aspecto de los datos (ej. Nivel educativo, Antiguedad de la escuela), pudiendo seleccionarse colores y criterios de segmentación para las variables utilizadas.
-															</p>`}" >
-													<metrics-tab></metrics-tab>
 												</md-tab>
 												<md-tab style='flex: 1 0 100% !important;' id="identity" md-label="Identificación"
 															:to="makePath('identity')" :md-active="isPath(makePath('identity'))"
@@ -200,12 +200,12 @@ export default {
 					this.$refs.tabs.activeTab = 'georeference';
 				} else if (this.$route.path.endsWith('/multilevel')) {
 					this.$refs.tabs.activeTab = 'multilevel';
-				} else if (this.$route.path.endsWith('/metrics')) {
-					this.$refs.tabs.activeTab = 'metrics';
+				} else if (this.$route.path.endsWith('/data')) {
+					this.$refs.tabs.activeTab = 'data';
 				} else if (this.$route.path.endsWith('/identity')) {
 					this.$refs.tabs.activeTab = 'identity';
 				} else {
-					this.$refs.tabs.activeTab = 'data';
+					this.$refs.tabs.activeTab = 'metrics';
 				}
 			}
 			return this.$route.path === path;

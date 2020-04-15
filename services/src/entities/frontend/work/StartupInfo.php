@@ -11,12 +11,14 @@ class StartupInfo extends BaseMapModel
 	public $Zoom;
 	public $ClippingRegionItemId;
 	public $Selected;
+	public $ActiveMetrics;
 
 	public static function GetMap()
 	{
 		return array (
 			'wst_type' => 'Type',
 			'wst_zoom' => 'Zoom',
+			'wst_active_metrics' => 'ActiveMetrics',
 			'wst_clipping_region_item_id' => 'ClippingRegionItemId',
 			'wst_clipping_region_item_selected' => 'Selected'
 			);

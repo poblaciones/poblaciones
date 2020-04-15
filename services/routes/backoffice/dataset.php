@@ -16,7 +16,7 @@ App::$app->get('/services/backoffice/CreateDataset', function (Request $request)
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
 	$title = Params::Get('t');
-	$entity = $controller->Create($workId, $title);
+	$entity = $controller->CreateDatasetWithDefaultMetric($workId, $title);
 	return App::OrmJson($entity);
 });
 

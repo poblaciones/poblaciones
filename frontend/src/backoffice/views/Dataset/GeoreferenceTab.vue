@@ -67,16 +67,15 @@
 					<div class='md-layout'>
 						<div class='md-layout-item md-size-35 md-small-size-100'>
 							<mp-select :canEdit="Work.CanEdit()" :list="geographies"
-							:model-key="true" label="Geografía" helper="Nivel para georreferenciar"
-							v-model="geographyId" :render="formatGeography"
-												/>
+												 :model-key="true" label="Geografía" helper="Nivel para georreferenciar"
+												 v-model="geographyId" :render="formatGeography" />
+							<br />
+							<md-button @click="valuesOnClick()" :disabled="valuesDisabled"
+													style="margin-top: -10px; margin-left: -5px; margin-bottom: 20px;">
+								<md-icon>ballot</md-icon>
+								Consultar valores
+							</md-button>
 						</div>
-						<md-button @click="valuesOnClick()" :disabled="valuesDisabled">
-							<md-icon>ballot</md-icon>
-							Consultar valores
-						</md-button>
-					</div>
-					<div class='md-layout'>
 						<div class='md-layout-item md-size-35 md-small-size-100'>
 							<mp-select :canEdit="Work.CanEdit()" :list="Dataset.Columns"
 													:model-key="true" label="Variable" helper="Variable que contiene los códigos geográficos"

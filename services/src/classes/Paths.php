@@ -61,6 +61,11 @@ class Paths
 	{
 		return Context::Paths()->GetStorageRoot(). '/sitemaps';
 	}
+
+	public static function GetGradientsFolder()
+	{
+		return Context::Paths()->GetStorageRoot(). '/gradients';
+	}
 	public static function GetSerializerPath()
 	{
 		$ret = Context::Paths()->GetRoot() . '/serializer_cache';

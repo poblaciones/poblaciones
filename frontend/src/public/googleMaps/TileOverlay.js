@@ -73,7 +73,7 @@ TileOverlay.prototype.SetDivFailure = function (div) {
 	div.style.backgroundColor = 'rgba(100, 100, 100, 0.25)';
 };
 
-TileOverlay.prototype.process = function (dataMetric, mapResults, dataResults, tileKey, div, x, y, z) {
+TileOverlay.prototype.process = function (dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z) {
 	if ((tileKey in this.requestedTiles) === false) {
 		return;
 	}
@@ -82,7 +82,7 @@ TileOverlay.prototype.process = function (dataMetric, mapResults, dataResults, t
 	this.composer.textInTile[tileKey] = [];
 	var mercator = new Mercator();
 	var tileBounds = mercator.getTileBoundsLatLon({ x: x, y: y, z: z });
-	var filtered = this.composer.renderGeoJson(dataMetric, mapResults, dataResults, tileKey, div, x, y, z, tileBounds);
+	var filtered = this.composer.renderGeoJson(dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds);
 	// Los agrega
 	this.composer.bindStyles(dataMetric, tileKey);
 	dataMetric.addGeoJson(filtered);

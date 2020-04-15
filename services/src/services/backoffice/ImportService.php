@@ -9,6 +9,8 @@ use minga\framework\FileBucket;
 use minga\framework\ErrorException;
 use minga\framework\System;
 
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
+
 use helena\services\common\BaseService;
 use helena\classes\Paths;
 use helena\classes\App;
@@ -42,13 +44,18 @@ class ImportService extends BaseService
 		$this->PrepareNewState($datasetId, $keepLabels, $bucketId);
 		$this->state->SetTotalSteps(self::STEP_END);
 		$fileExtension = Str::ToLower($fileExtension);
-		if ($fileExtension == "csv" || $fileExtension == "txt")
+		if ($fileExtension == "csv" || $fileExtension == "txt"
+				|| $fileExtension == "xlsx"  || $fileExtension == "xls")
 		{
-			return $this->ConvertCSV($bucket);
+			if ($fileExtension == "xlsx"  || $fileExtension == "xls")
+			{
+				$this->ExcelToCsv($fileExtension, $bucket);
+			}
+			return $this->CSVtoJson($bucket);
 		}
 		else if ($fileExtension == "sav")
 		{
-			return $this->ConvertSPSS($bucket);
+			return $this->SPSStoJson($bucket);
 		}
 
 		throw new ErrorException('La extensión del archivo debe ser .SAV o .CSV. Extensión recibida: ' . $fileExtension);
@@ -158,7 +165,25 @@ class ImportService extends BaseService
 		$datasetColumns->InsertColumnDescriptions($datasetId);
 	}
 
-	private function ConvertCSV($bucket)
+	private function ExcelToCsv($fileExtension, $bucket)
+	{
+		$uploadFolder = $bucket->path;
+		$sourceFile =  $uploadFolder . '/file.dat';
+		$xlsFile =  $uploadFolder . '/file_xls.dat';
+		IO::Move($sourceFile, $xlsFile);
+
+		$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($xlsFile);
+		$loadedSheetNames = $spreadsheet->getSheetNames();
+		$writer = new Csv($spreadsheet);
+
+		foreach($loadedSheetNames as $sheetIndex => $loadedSheetName) {
+				$writer->setSheetIndex($sheetIndex);
+				$writer->save($sourceFile);
+				break;
+		}
+	}
+
+	private function CSVtoJson($bucket)
 	{
 		$folder = $this->state->GetFileFolder();
 		$uploadFolder = $bucket->path;
@@ -168,7 +193,7 @@ class ImportService extends BaseService
 		return $this->state->ReturnState(false);
 	}
 
-	private function ConvertSPSS($bucket)
+	private function SPSStoJson($bucket)
 	{
 		$folder = $this->state->GetFileFolder();
 		$uploadFolder = $bucket->path;

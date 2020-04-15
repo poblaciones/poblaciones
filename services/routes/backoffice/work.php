@@ -47,6 +47,16 @@ App::$app->get('/services/backoffice/GetFactories', function (Request $request) 
 	return App::OrmJson($ret);
 });
 
+
+App::GetOrPost('/services/backoffice/GetWorkMetricsList', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+
+	$controller = new services\WorkService();
+	return App::OrmJson($controller->GetWorkMetricsList($workId));
+});
+
+
 App::GetOrPost('/services/backoffice/UpdateWorkSource', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
@@ -88,6 +98,19 @@ App::$app->get('/services/backoffice/AppendExtraMetric', function (Request $requ
 
 	$controller = new services\WorkService();
 	return App::Json($controller->AppendExtraMetric($workId, $metricId));
+});
+
+App::$app->get('/services/backoffice/UpdateExtraMetricStart', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	$metricId = Params::GetIntMandatory('m');
+	$check = new SnapshotMetricModel();
+	if (!$check->HasVisibleVersions($metricId))
+		return Session::NotEnoughPermissions();
+	$active = Params::GetBoolMandatory('a');
+
+	$controller = new services\WorkService();
+	return App::Json($controller->UpdateExtraMetricStart($workId, $metricId, $active));
 });
 
 App::$app->get('/services/backoffice/RemoveExtraMetric', function (Request $request) {
@@ -155,6 +178,7 @@ App::$app->get('/services/backoffice/StepRevokeWork', function (Request $request
 	$key = Params::GetMandatory('k');
 	return App::Json($controller->StepRevoke($key));
 });
+
 
 // ej. http://mapas/services/backoffice/StartCloneWork?w=5
 App::$app->get('/services/backoffice/StartCloneWork', function (Request $request) {

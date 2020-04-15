@@ -23,6 +23,8 @@ function SvgFullGeojsonComposer(mapsApi, activeSelectedMetric) {
 };
 SvgFullGeojsonComposer.prototype = new AbstractTextComposer();
 
+SvgFullGeojsonComposer.uniqueCssId = 1;
+
 SvgFullGeojsonComposer.prototype.SVG = function (h, w, z) {
 	var xmlns = 'http://www.w3.org/2000/svg';
 	var boxWidth = h;
@@ -53,7 +55,7 @@ SvgFullGeojsonComposer.prototype.SVG = function (h, w, z) {
 	return svgElem;
 };
 
-SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResults, dataResults, tileKey, div, x, y, z, tileBounds) {
+SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
 	var filtered = [];
 	var allKeys = [];
 	var mapItems = mapResults.Data.features;
@@ -64,6 +66,7 @@ SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResult
 	}
 	var variableId = this.activeSelectedMetric.SelectedVariable().Id;
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
+	var tileUniqueId = SvgFullGeojsonComposer.uniqueCssId++;
 	var id;
 	var varId;
 	var iMapa = 0;
@@ -88,12 +91,12 @@ SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResult
 				break;
 			}
 			if (mapItems[iMapa].id == fid) {
-				this.processFeature(id, dataItems[i], mapItems[iMapa], tileKey, tileBounds, filtered, allKeys, patternValue, colorMap);
+				this.processFeature(tileUniqueId, id, dataItems[i], mapItems[iMapa], tileKey, tileBounds, filtered, allKeys, patternValue, colorMap);
 			}
 		}
 	}
 	this.keysInTile[tileKey] = allKeys;
-	var svg = this.CreateSVGOverlay(div, filtered, projected, tileBounds, z, patternValue);
+	var svg = this.CreateSVGOverlay(tileUniqueId, div, filtered, projected, tileBounds, z, patternValue, gradient);
 
 	if (svg !== null) {
 		this.svgInTile[tileKey] = svg;
@@ -104,7 +107,7 @@ SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResult
 SvgFullGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 };
 
-SvgFullGeojsonComposer.prototype.processFeature = function (id, dataElement, mapElement, tileKey, tileBounds, filtered, allKeys, patternValue, colorMap) {
+SvgFullGeojsonComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, mapElement, tileKey, tileBounds, filtered, allKeys, patternValue, colorMap) {
 	// Se fija si por etiqueta está visible
 	var val = dataElement['ValueId'];
 	var valKey = 'K' + val;
@@ -118,7 +121,7 @@ SvgFullGeojsonComposer.prototype.processFeature = function (id, dataElement, map
 	// Lo agrega
 	var centroid = 	this.getCentroid(mapElement);
 	var mapItem = {
-		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry, properties: { className: 'c' + val }
+		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry, properties: { className: 'e' + tileUniqueId + '_' + val }
 	};
 	if (!this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
 		mapItem.id = null;
@@ -158,7 +161,7 @@ SvgFullGeojsonComposer.prototype.patternIsPipeline = function (patternValue) {
 	return (patternValue >= 3 && patternValue <= 6);
 };
 
-SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (div, features, projected, tileBounds, z, patternValue) {
+SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, projected, tileBounds, z, patternValue, gradient) {
 	var m = new Mercator();
 	var projectedFeatures;
 	if (projected) {
@@ -203,7 +206,27 @@ SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (div, features, pro
 	if (this.patternUseFillStyles(patternValue)) {
 		this.appendPatterns(o2, labels, scales);
 	}
-	this.appendStyles(oSvg, labels, patternValue);
+
+	var maskId = null;
+	if (gradient) {
+		// test mask: https://jsfiddle.net/ycLsr32k/
+		var image = o2.image("data:" + gradient.ImageType + ";base64," + gradient.Data, 256, 256);
+		// rectángulo de transparencia global
+		var rect = o2.rect(256, 256);
+		rect.style('fill: #FFFFFF;');
+		rect.attr('class', 'gAlpha');
+		var rect2 = o2.rect(256, 256);
+		rect2.style('fill: #FFFFFF; opacity: ' + gradient.Luminance);
+		// rectángulo de transparencia local
+		var mask = o2.mask();
+		mask.add(image);
+		mask.add(rect);
+		mask.add(rect2);
+		maskId = 'svgMasks' + tileUniqueId;
+		mask.attr('id', maskId);
+	}
+
+	this.appendStyles(oSvg, tileUniqueId, labels, patternValue, maskId);
 
 	svgStrings.forEach(function (svgStr) {
 		var svg = parseSVG(svgStr);
@@ -234,21 +257,21 @@ SvgFullGeojsonComposer.prototype.appendPatterns = function (o2, labels, scales) 
 	}
 };
 
-SvgFullGeojsonComposer.prototype.appendStyles = function (oSvg, labels, patternValue) {
+SvgFullGeojsonComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask) {
 	// crea una clase para cada tipo de etiqueta
 	var styles = "<style type='text/css'>";
-	var fill = '';
-	if (patternValue === 1 || patternValue === 2) {
-		fill = '; fill: transparent ';
-	}
+	var fillBlock = (patternValue === 1 || patternValue === 2 ? '; fill: transparent ' : '');
+	var maskBlock = (mask ? '; mask: url(#' + mask + ')' : '');
+
 	for (var l = 0; l < labels.length; l++) {
 		if (patternValue === 0) {
-			styles += '.' + labels[l].className +
-				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + (this.activeSelectedMetric.currentOpacity * 1.1) + '; ' +
-				' fill: ' + labels[l].fillColor + '; fill-opacity: ' + this.activeSelectedMetric.currentOpacity + ' } ';
+			styles += '.e' + tileUniqueId + '_' + labels[l].className +
+				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + (this.activeSelectedMetric.currentOpacity * 1.1) +
+				maskBlock + '; fill: ' + labels[l].fillColor + '; fill-opacity: ' + this.activeSelectedMetric.currentOpacity + ' } ';
 		} else {
-			styles += '.' + labels[l].className +
-				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.currentOpacity + fill + ' } ';
+			styles += '.e' + tileUniqueId + '_' + labels[l].className +
+				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.currentOpacity +
+					fillBlock + maskBlock + ' } ';
 		}
 	}
 	styles += '</style>';

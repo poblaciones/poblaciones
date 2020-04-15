@@ -202,9 +202,6 @@ class App
 
 	public static function OrmJson($entity){
 		$value = self::OrmSerialize($entity);
-
-		//Mock::SaveText($value);
-
 		$response = new Response($value);
 		$response->headers->set('Content-Type', 'application/json');
 		return $response;

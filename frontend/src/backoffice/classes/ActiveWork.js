@@ -87,8 +87,11 @@ ActiveWork.prototype.HasChanges = function () {
 		this.properties.MetricDataChanged;
 };
 
-ActiveWork.prototype.GetWorkMetrics = function () {
-
+ActiveWork.prototype.GetMetricsList = function () {
+	// Trae sus variables
+	var args = { 'w': this.properties.Id };
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetWorkMetricsList', args,
+		'obtener la lista de métricas');
 };
 
 ActiveWork.prototype.CanAdmin = function () {
@@ -232,6 +235,13 @@ ActiveWork.prototype.AppendExtraMetric = function (metric) {
 	this.WorkChanged();
 	return axiosClient.getPromise(window.host + '/services/backoffice/AppendExtraMetric', args,
 		'agregar el indicador adicional');
+};
+
+ActiveWork.prototype.UpdateExtraMetricStart = function (metric) {
+	var args = { 'w': this.properties.Id, 'm': metric.Id, 'a': (metric.StartActive ? 1 : 0) };
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/UpdateExtraMetricStart', args,
+		'actualizar el indicador adicional');
 };
 
 ActiveWork.prototype.RemoveExtraMetric = function (metric) {

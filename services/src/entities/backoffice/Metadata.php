@@ -274,7 +274,7 @@ class Metadata
     /**
      * Set onlineSince
      *
-     * @param string $onlineSince
+     * @param \DateTime $onlineSince
      *
      * @return Metadata
      */
@@ -288,7 +288,7 @@ class Metadata
     /**
      * Get onlineSince
      *
-     * @return string
+     * @return \DateTime
      */
     public function getOnlineSince()
     {
@@ -299,7 +299,7 @@ class Metadata
     /**
      * Set lastOnline
      *
-     * @param string $lastOnline
+     * @param \DateTime $lastOnline
      *
      * @return Metadata
      */
@@ -313,7 +313,7 @@ class Metadata
     /**
      * Get lastOnline
      *
-     * @return string
+     * @return \DateTime
      */
     public function getLastOnline()
     {

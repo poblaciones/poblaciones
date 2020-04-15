@@ -15,7 +15,7 @@ function LabelsComposer(mapsApi, activeLabelMetric) {
 };
 LabelsComposer.prototype = new AbstractTextComposer();
 
-LabelsComposer.prototype.renderGeoJson = function(dataMetric, mapResults, dataResults, tileKey, div, x, y, z, tileBounds) {
+LabelsComposer.prototype.renderGeoJson = function(dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
 	var dataItems = dataResults.Data;
 
 	for (var i = 0; i < dataItems.length; i++) {

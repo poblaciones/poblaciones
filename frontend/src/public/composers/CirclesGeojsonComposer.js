@@ -15,7 +15,7 @@ function CirclesGeojsonComposer(mapsApi, activeSelectedMetric) {
 
 CirclesGeojsonComposer.prototype = new AbstractTextComposer();
 
-CirclesGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResults, dataResults, tileKey, div, x, y, z, tileBounds) {
+CirclesGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
 	var filtered = [];
 	var allKeys = [];
 	var dataItems = dataResults.Data;

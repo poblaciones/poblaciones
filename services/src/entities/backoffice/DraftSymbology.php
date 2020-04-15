@@ -43,7 +43,7 @@ class DraftSymbology
     private $Rainbow;
 
     /**
-     * @var integer
+     * @var ?integer
      *
      * @ORM\Column(name="vsy_opacity", type="integer", precision=0, scale=0, nullable=true, unique=false)
      */
@@ -389,7 +389,7 @@ class DraftSymbology
     /**
      * Set opacity
      *
-     * @param integer $opacity
+     * @param ?integer $opacity
      *
      * @return DraftSymbology
      */
@@ -403,7 +403,7 @@ class DraftSymbology
     /**
      * Get opacity
      *
-     * @return integer
+     * @return ?integer
      */
     public function getOpacity()
     {

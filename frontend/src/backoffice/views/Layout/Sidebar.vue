@@ -1,13 +1,15 @@
 <template>
-  <div>
-  <sidebar-menu :menu="menuItems"  theme="white-theme"
-							:collapsed="false"  @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
-  </div>
+	<div>
+		<sidebar-menu :menu="menuItems" theme="white-theme"
+									:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
+		<import-popup ref="importPopup"></import-popup>
+	</div>
 
 
 </template>
 
 <script>
+import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import { SidebarMenu } from 'vue-sidebar-menu';
 import { mapGetters } from 'vuex';
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css';
@@ -19,8 +21,9 @@ import arr from '@/common/js/arr';
 
 export default {
   components: {
-      SidebarMenu,
-    },
+		ImportPopup,
+    SidebarMenu,
+  },
   methods: {
     replaceParams(text) {
       if (this.Work !== null) {
@@ -86,6 +89,9 @@ export default {
 				ret.push(item);
 			}
 		},
+		showUpload() {
+			this.$refs.importPopup.show(true);
+		},
 		createBadge(dataset) {
 			if (dataset.properties.MultilevelMatrix === null &&
 					dataset.properties.Geocoded) {
@@ -103,8 +109,24 @@ export default {
 				badge.attributes.title = 'El dataset no ha sido georreferenciado';
 			}
 			return badge;
+		},
+		createBadgeUpload() {
+			var badge = {
+				text: '',
+				class: 'vsm-badge badgeWhite default-badge badgeall badgewith fas fa-cloud-upload-alt',
+				attributes: {
+					title: 'Subir archivo', onclick: 'window.openUpload(); return false;'
+				}
+			};
+			return badge;
 		}
   },
+	mounted() {
+		var loc = this;
+		window.openUpload = function () {
+			loc.showUpload();
+		};
+	},
   computed: {
     ...mapGetters([
       'sidebar'
@@ -128,7 +150,8 @@ export default {
 				if (!route.hidden) {
 					ret.push(men);
 				}
-				if(route.name === 'Nuevo dataset') {
+				if (route.name === 'Nuevo dataset') {
+					men.badge = this.createBadgeUpload();
 					this.addDatasets(ret);
 				}
 			}
@@ -185,7 +208,10 @@ export default {
 .badge9 {
 	background-color: #c5a400!important;
 }
-
+.badgeWhite {
+	background-color: white!important;
+	border: 1px solid #e2e2e2;
+}
 .v-sidebar-menu
 {
 	position: relative;

@@ -65,15 +65,15 @@ StartMap.prototype.RestoreWork = function (workId, link) {
 	window.accessLink = link;
 	axios.get(window.host + '/services/works/GetWorkAndDefaultFrame', {
 		params: { w: workId },
-		headers: (window.accessLink ? { 'Access-Link' : window.accessLink } : {})
-	}).then(function(res) {
+		headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
+	}).then(function (res) {
 		loc.workReference.Current = res.data.work;
 		loc.ReceiveWorkStartup(loc.workReference.Current.Startup, res.data.frame);
-	}).catch(function(error) {
+	}).catch(function (error) {
 		err.errDialog('GetWork', 'obtener la información del servidor', error);
 	});
 	return true;
-},
+};
 
 StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 	var hasRoute = new RestoreRoute(null).RouteHasLocation(this.hash);
@@ -98,12 +98,28 @@ StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 		};
 	} else {
 		// Type === 'D' || 'R' sin región
-		this.StartByDefaultFrame(frame);
+		var loc = this;
+		this.StartByDefaultFrame(frame, function () {
+			loc.LoadStartMetrics(startup);
+		});
 		return;
 	}
 	this.SetupMap(setMapPosition);
 	this.Finish();
-},
+	this.LoadStartMetrics(startup);
+};
+
+StartMap.prototype.LoadStartMetrics = function (startup) {
+	// Carga la lista de indicadores
+	var list = [];
+	if (startup.ActiveMetrics) {
+		var metrics = startup.ActiveMetrics.split(',');
+		for (var n = 0; n < metrics.length; n++) {
+			list.push({ Id: metrics[n] });
+		}
+	}
+	window.SegMap.RestoreRoute.LoadMetrics(list, true, true);
+};
 
 StartMap.prototype.StartByUrl = function () {
 	var route = this.hash;
@@ -126,7 +142,7 @@ StartMap.prototype.GetAndStartByDefaultFrame = function () {
 	});
 };
 
-StartMap.prototype.StartByDefaultFrame = function (frame) {
+StartMap.prototype.StartByDefaultFrame = function (frame, extrafunc) {
 	var loc = this;
 	var route = null;
 	if (this.hash.length > 2 && this.hash.substr(0, 2) === '#/') {
@@ -134,14 +150,17 @@ StartMap.prototype.StartByDefaultFrame = function (frame) {
 	}
 	this.frameReference.frame = frame;
 	var afterLoaded = function() {
-			if (route) {
-				window.SegMap.RestoreRoute.LoadRoute(route, true);
-			}
-			window.SegMap.SaveRoute.UpdateRoute();
+		if (route) {
+			window.SegMap.RestoreRoute.LoadRoute(route, true);
+		}
+		window.SegMap.SaveRoute.UpdateRoute();
 
-			if (window.accessWorkId === null) {
-				window.SegMap.Tutorial.CheckOpenTutorial();
-			}
+		if (window.accessWorkId === null) {
+			window.SegMap.Tutorial.CheckOpenTutorial();
+		}
+		if (extrafunc) {
+			extrafunc();
+		}
 	};
 	loc.SetupMap(afterLoaded);
 

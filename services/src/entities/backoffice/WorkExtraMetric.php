@@ -45,6 +45,12 @@ class WorkExtraMetric
      */
     private $Work;
 
+		/**
+     * @var boolean
+     *
+     * @ORM\Column(name="wmt_start_active", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $StartActive;
 
     /**
      * Get id
@@ -68,6 +74,31 @@ class WorkExtraMetric
         $this->Id = $id;
 
         return $this;
+    }
+
+
+   /**
+     * Set startActive
+     *
+     * @param boolean $startActive
+     *
+     * @return WorkExtraMetric
+     */
+    public function setStartActive($startActive)
+    {
+        $this->StartActive = $startActive;
+
+        return $this;
+    }
+
+    /**
+     * Get startActive
+     *
+     * @return boolean
+     */
+    public function getStartActive()
+    {
+        return $this->StartActive;
     }
 
     /**

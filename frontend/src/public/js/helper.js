@@ -61,7 +61,7 @@ module.exports = {
 			return '-';
 		}
 		var ret = Number(num);
-		if (isInteger(ret) === false)	{
+		if (isInteger(ret) === false) {
 			if (ret > 10) {
 				return Number(Math.round(ret)).toLocaleString('es');
 			}
@@ -86,7 +86,7 @@ module.exports = {
 	},
 	animateNum(vm, element, newValue, oldValue, format) {
 		var fix = 0;
-		if(format === 'km') {
+		if (format === 'km') {
 			format = this.formatKm;
 			fix = 1;
 		} else if (format && format.substr(0, 1) === '%') {
@@ -100,7 +100,7 @@ module.exports = {
 			return;
 		}
 		var loc = this;
-		function animate () {
+		function animate() {
 			if (TWEEN.update()) {
 				requestAnimationFrame(animate);
 			}
@@ -115,6 +115,41 @@ module.exports = {
 			.start();
 
 		animate();
+	},
+	extractFileExtension(file) {
+		if(file.indexOf('.') == -1) {
+			return '';
+		}
+		else {
+			return file.split(".").pop().toLowerCase();
+		}
+	},
+	extractFilename(file) {
+		var ext = this.extractFileExtension(file);
+		if (ext.length > 0) {
+			ext = '.' + ext;
+		}
+		return file.substr(0, file.length - ext.length);
+	},
+	getCssRule(d, name) {
+    var rules = {};
+    for (var i=0; i<d.styleSheets.length; ++i) {
+			var cssRules = null;
+			if (d.styleSheets[i].ownerNode && d.styleSheets[i].ownerNode.localName == 'style') {
+				if (d.styleSheets[i]['cssRules'] !== undefined) {
+					cssRules = d.styleSheets[i].cssRules;
+				} else if (d.styleSheets[i]['rules'] !== undefined) {
+					cssRules = d.styleSheets[i].rules;
+				}
+			}
+			if (cssRules) {
+				for (var j = 0; j < cssRules.length; ++j)
+					if (name === cssRules[j].selectorText) {
+						return cssRules[j];
+					}
+			}
+    }
+    return null;
 	},
 	quickFormat(format, fix, number) {
 		if (number === '' || number === '-' || number === 'n/d') {

@@ -1,5 +1,10 @@
 [CURRENT]
+
+v2.18 (2020-04-15)
 - Posibilidad de agregar indicadores externos en una cartografía a la lista de indicadores del panel superior.
+- Se puede indicar qué indicadores aparecen activos en el mapa al ingresarse por las rutas de cartografía.
+- Se pueden importar datos en formato excel (xls y xlsx).
+- Se pueden importar archivos sin crear previamente un dataset.
 
 v2.17 (2020-03-21)
 - Fix a colocación de panel de cartografía en la vista de mapa (hasta cambiar el tamaño de la ventana, se veía mal en chrome y en firefox).

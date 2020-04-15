@@ -9,5 +9,6 @@ class cOauthGoogle extends cOauth
 	public function __construct()
 	{
 		$this->oauth = new OauthGoogle();
+		parent::__construct();
 	}
 }

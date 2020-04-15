@@ -139,8 +139,12 @@ class WorkService extends BaseService
 		$extraMetrics = App::Orm()->findManyByProperty(entities\DraftWorkExtraMetric::class, "Work.Id", $workId);
 		$ret = [];
 		foreach($extraMetrics as $extraMetric)
-			$ret[] = $extraMetric->getMetric();
-		Arr::SortByGetter($ret, 'getCaption');
+		{
+			$metric = json_decode(App::OrmSerialize($extraMetric->getMetric()), true);
+			$metric['StartActive'] = $extraMetric->getStartActive();
+			$ret[] = $metric;
+		}
+		Arr::SortByKey($ret, 'Caption');
 		Profiling::EndTimer();
 		return $ret;
 	}
@@ -162,6 +166,18 @@ class WorkService extends BaseService
 		return $ret;
 	}
 
+
+	public function GetWorkMetricsList($workId)
+	{
+		Profiling::BeginTimer();
+		$metrics = App::Orm()->findManyByQuery("SELECT m FROM e:DraftMetric m
+																				JOIN e:DraftMetricVersion v WITH v.Metric = m
+																				JOIN e:DraftMetricVersionLevel l WITH l.MetricVersion = v
+																				JOIN v.Work w WHERE w.Id = :p1 ORDER BY m.Caption", array($workId));
+		Profiling::EndTimer();
+		return $metrics;
+	}
+
 	public function RequestReview($workId)
 	{
 		// Manda un mensaje administrativo avisando del pedido
@@ -177,8 +193,22 @@ class WorkService extends BaseService
 		$args = [$workId, $metricId];
 		App::Db()->exec("INSERT INTO draft_work_extra_metric(wmt_work_id, wmt_metric_id) VALUES (?, ?)", $args);
 		// Listo
+		WorkFlags::SetMetadataDataChanged($workId);
+
 		return self::OK;
 	}
+
+	public function UpdateExtraMetricStart($workId, $metricId, $active)
+	{
+		$args = [($active ? 1 : 0), $workId, $metricId];
+		App::Db()->exec("UPDATE draft_work_extra_metric SET wmt_start_active = ? WHERE wmt_work_id = ? AND wmt_metric_id = ?", $args);
+
+		WorkFlags::SetMetadataDataChanged($workId);
+
+		return self::OK;
+	}
+
+
 	public function RemoveExtraMetric($workId, $metricId)
 	{
 		$args = [$workId, $metricId];

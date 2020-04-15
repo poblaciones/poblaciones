@@ -15,7 +15,7 @@ class ConfigurationService extends BaseService
 		$blockStrategy = array('UseTileBlocks' => Context::Settings()->Map()->UseTileBlocks,
 													 'TileDataBlockSize' => Context::Settings()->Map()->TileDataBlockSize,
 													 'LabelsBlockSize' => Context::Settings()->Map()->LabelsBlockSize);
-		return array('Revisions' => $revisions, 'Blocks' => $blockStrategy, 'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests);
+		return array('Revisions' => $revisions, 'Blocks' => $blockStrategy, 'UseGradients' => Context::Settings()->Map()->UseGradients, 'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests);
 	}
 }
 

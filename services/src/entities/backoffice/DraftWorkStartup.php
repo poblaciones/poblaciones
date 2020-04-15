@@ -30,6 +30,13 @@ class DraftWorkStartup
      */
     private $Type;
 
+		/**
+     * @var string
+     *
+     * @ORM\Column(name="wst_active_metrics", type="string", length=200, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $ActiveMetrics;
+
     /**
      * @var point
      *
@@ -130,6 +137,31 @@ class DraftWorkStartup
         return $this->Type;
     }
 
+		/**
+     * Set activeMetrics
+     *
+     * @param string $activeMetrics
+     *
+     * @return DraftWorkStartup
+     */
+    public function setActiveMetrics($activeMetrics)
+    {
+        $this->ActiveMetrics = $activeMetrics;
+
+        return $this;
+    }
+
+    /**
+     * Get activeMetrics
+     *
+     * @return string
+     */
+    public function getActiveMetrics()
+    {
+        return $this->ActiveMetrics;
+    }
+
+
     /**
      * Set center
      *
@@ -157,7 +189,7 @@ class DraftWorkStartup
     /**
      * Set clippingRegionItemId
      *
-     * @param integer
+     * @param integer $clippingRegionItemId
      *
      * @return DraftWorkStartup
      */

@@ -241,7 +241,7 @@ class DraftMetadata
     /**
      * Set onlineSince
      *
-     * @param string $onlineSince
+     * @param \DateTime $onlineSince
      *
      * @return DraftMetadata
      */
@@ -255,7 +255,7 @@ class DraftMetadata
     /**
      * Get onlineSince
      *
-     * @return string
+     * @return \DateTime
      */
     public function getOnlineSince()
     {
@@ -266,7 +266,7 @@ class DraftMetadata
     /**
      * Set lastOnline
      *
-     * @param string $lastOnline
+     * @param \DateTime $lastOnline
      *
      * @return DraftMetadata
      */
@@ -280,7 +280,7 @@ class DraftMetadata
     /**
      * Get lastOnline
      *
-     * @return string
+     * @return \DateTime
      */
     public function getLastOnline()
     {

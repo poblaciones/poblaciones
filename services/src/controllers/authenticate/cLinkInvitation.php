@@ -107,7 +107,7 @@ class cLinkInvitation extends cController
 
 		Register::CheckTerms();
 
-		if(Register::CompleteOauthRegistration('register', $user))
+		if(Register::CompleteOauthRegistration($user))
 			return App::Redirect($linkInvitation);
 
 		$password = Params::SafeGet('reg_password');

@@ -192,13 +192,55 @@ class PublishDataTables
 		Profiling::BeginTimer();
 		$shard = '';
 		$branches = $this->PrepareDraftTablesOperation($workId, $shard);
-		// 4. Calcula los insertsOrUpdate
+		// 1. Calcula los insertsOrUpdate
 		$this->CallCopyQueries($branches, $workId);
-		// 5. Termina de pasar propiedades específicas
+		// 2. Termina de pasar propiedades específicas
 		$this->FixProperties($shard, $workId);
-		// 6. Quita instituciones o fuentes sin usuarios
+		// 3. Quita instituciones o fuentes sin usuarios
 		$this->FixOrphans();
+		// 4. Se asegura de pedir indicadores válidos
+		$this->FixActiveMetrics($workId);
+
 		Profiling::EndTimer();
+	}
+
+	private function FixActiveMetrics($workId)
+	{
+		Profiling::BeginTimer();
+		// Obtiene las propias
+		$sql = "SELECT DISTINCT mvr_metric_id metricId FROM draft_work_startup
+							JOIN draft_work ON wrk_startup_id = wst_id
+							JOIN draft_metric_version ON wrk_id = mvr_work_id AND FIND_IN_SET(mvr_metric_id, wst_active_metrics)
+							WHERE wrk_id = ?";
+		$ownMetric = App::Db()->fetchAll($sql, array($workId));
+		// Obtiene las extra
+		$sql = "SELECT wmt_metric_id metricId FROM draft_work_extra_metric
+											WHERE wmt_work_id = ? AND wmt_start_active = 1";
+		$extraMetric = App::Db()->fetchAll($sql, array($workId));
+
+		// Arma el final
+		$metricsList = [];
+		$this->addMetricsToResult($metricsList, $ownMetric);
+		$this->addMetricsToResult($metricsList, $extraMetric);
+
+		$metrics = join(',', $metricsList);
+
+		// Graba el resultado
+		$workIdShardified = self::Shardified($workId);
+		$sql = "UPDATE work_startup JOIN work ON wrk_startup_id = wst_id
+										 SET wst_active_metrics = ? WHERE wrk_id = ?";
+		App::Db()->exec($sql, array($metrics, $workIdShardified));
+		Profiling::EndTimer();
+	}
+
+	private function addMetricsToResult(&$metricsList, $list)
+	{
+		foreach($list as $metric)
+		{
+			$metricIdShardified = self::Shardified($metric['metricId']);
+			if (!in_array($metricIdShardified, $metricsList))
+				$metricsList[] = $metricIdShardified;
+		}
 	}
 
 	private function FixOrphans()

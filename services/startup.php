@@ -67,6 +67,8 @@ if(Context::Settings()->Debug()->debug)
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
+
+
 function time_elapsed($label = null)
 {
     static $last = null;

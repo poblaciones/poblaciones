@@ -99,6 +99,13 @@ class Geography
      */
     private $IsTrackingLevel;
 
+		/**
+     * @var float
+     *
+     * @ORM\Column(name="geo_gradient_luminance", type="float", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $GradientLuminance;
+
     /**
      * @var string
      *
@@ -426,6 +433,31 @@ class Geography
     public function getIsTrackingLevel()
     {
         return $this->IsTrackingLevel;
+    }
+
+
+    /**
+     * Set gradientLuminance
+     *
+     * @param float $gradientLuminance
+     *
+     * @return Geography
+     */
+    public function setGradientLuminance($gradientLuminance)
+    {
+        $this->GradientLuminance = $gradientLuminance;
+
+        return $this;
+    }
+
+    /**
+     * Get gradientLuminance
+     *
+     * @return float
+     */
+    public function getGradientLuminance()
+    {
+        return $this->GradientLuminance;
     }
 
     /**

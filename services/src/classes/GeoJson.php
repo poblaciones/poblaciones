@@ -147,6 +147,7 @@ class GeoJson
 					);
 		return $ret;
 	}
+	/*
 	private static function simplify($geometry)
 	{
 		// FALTA IMPLEMENTAR LINE, MULTIPOLYGON y MULTILINE
@@ -181,6 +182,7 @@ class GeoJson
 		}
 		return $coordinates;
 	}
+	*/
 	private static function ProjectLocation($point)
 	{
 		if (sizeof($point) !== 2) throw new ErrorException('Invalid argument to project.');

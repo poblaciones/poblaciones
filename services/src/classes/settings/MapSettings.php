@@ -13,5 +13,6 @@ class MapSettings
 	public $TileDataBlockSize = 4;
 
 	public $UseTileBlocks = false;
+	public $UseGradients = false;
 	public $MaxQueueRequests = 5;
 }

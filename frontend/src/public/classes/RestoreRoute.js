@@ -205,7 +205,7 @@ RestoreRoute.prototype.metricsChanged = function (metrics, currentMetrics) {
 	return false;
 };
 
-RestoreRoute.prototype.LoadMetrics = function (metrics, updateRoute) {
+RestoreRoute.prototype.LoadMetrics = function (metrics, updateRoute, skipRestore) {
 	// Se fija si cambian las métricas
 	if (metrics.length === 0) {
 		this.segmentedMap.Metrics.ClearUserMetrics();
@@ -230,7 +230,9 @@ RestoreRoute.prototype.LoadMetrics = function (metrics, updateRoute) {
 				var selectedMetric = res.data[n];
 				if (selectedMetric != null) {
 					var activeMetric = new ActiveSelectedMetric(selectedMetric, false);
-					activeMetric.$Router.RestoreMetricState(metrics[n]);
+					if (!skipRestore) {
+						activeMetric.$Router.RestoreMetricState(metrics[n]);
+					}
 					activeMetric.properties.SelectedVersionIndex = parseInt(activeMetric.properties.SelectedVersionIndex);
 					activeMetric.UpdateLevel();
 					loc.segmentedMap.Metrics.AppendStandardMetric(activeMetric);

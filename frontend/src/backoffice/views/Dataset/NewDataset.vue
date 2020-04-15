@@ -10,7 +10,8 @@
 						<md-card-content>
 							<div>
 								<mp-simple-text @enter="performNewDataset"
-	label="Indique el nombre del dataset" ref="datasetInput" helper="Ej. Escuelas primarias." placeholder="Nuevo dataset..." :maxlength="100"  v-model="newDatasetName"
+	label="Indique el nombre del dataset" ref="datasetInput" helper="Ej. Escuelas primarias."
+																placeholder="Nuevo dataset..." :maxlength="100"  v-model="newDatasetName"
 									></mp-simple-text>
 
 							</div>
@@ -66,7 +67,7 @@ export default {
 			this.$refs.invoker.do(this.Work,
 														this.Work.CreateNewDataset,
 														this.newDatasetName.trim())
-										.then(function(data) {
+										.then(function() {
 												loc.$refs.invoker.do(window.Db, window.Db.RebindAndFocusLastDataset, loc.$router);
 										});
 		},

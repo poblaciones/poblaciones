@@ -13,6 +13,9 @@ use JMS\Serializer\Annotation\Exclude;
  */
 class DraftVariable
 {
+		// Colección no mapeada
+		public $Values;
+
     /**
      * @var integer
      *

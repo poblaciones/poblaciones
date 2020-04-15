@@ -54,19 +54,19 @@ class SummaryService extends BaseService
 		$level = $version->GetLevel($levelId);
 
 		$table = new SnapshotMetricVersionItemVariableModel();
-		$geographyId = $level->GeographyId;
+		$gradientId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionSummaryByCircle($metricVersionId, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingCircle, $level->Dataset->Type);
+			$rows = $table->GetMetricVersionSummaryByCircle($metricVersionId, $level->HasSummary, $gradientId, $urbanity, $frame->ClippingCircle, $level->Dataset->Type);
 		}
 		else if ($frame->ClippingRegionId != NULL)
 		{
-			$rows = $table->GetMetricVersionSummaryByRegionId($metricVersionId, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type);
+			$rows = $table->GetMetricVersionSummaryByRegionId($metricVersionId, $level->HasSummary, $gradientId, $urbanity, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionSummaryByEnvelope($metricVersionId, $level->HasSummary, $geographyId, $urbanity, $frame->Envelope);
+			$rows = $table->GetMetricVersionSummaryByEnvelope($metricVersionId, $level->HasSummary, $gradientId, $urbanity, $frame->Envelope);
 		}
 		$data = $this->CreateSummaryInfo($rows);
 		return $data;

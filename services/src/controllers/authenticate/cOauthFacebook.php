@@ -9,5 +9,6 @@ class cOauthFacebook extends cOauth
 	public function __construct()
 	{
 		$this->oauth = new OauthFacebook();
+		parent::__construct();
 	}
 }

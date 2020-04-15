@@ -12,6 +12,7 @@ class FeaturesInfo extends BaseMapModel
 	public $EllapsedMs;
 	public $Cached = 0;
 	public $Data = array();
+	public $Gradient = null;
 	public $Page = 0;
 	public $TotalPages = 0;
 

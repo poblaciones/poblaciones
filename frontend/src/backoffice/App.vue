@@ -453,6 +453,12 @@ a.normalTextLink:hover {
 	float: left;
 }
 
+.highlightBox {
+	position: absolute;
+  border-radius: 5px;
+  border: 2px solid #00a0d2;
+}
+
 .superSmallButton {
 	border: 1px solid #68B3C8;
   padding: 0px 3px;

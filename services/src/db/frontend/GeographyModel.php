@@ -40,8 +40,13 @@ class GeographyModel extends BaseModel
 			geo_field_code_size field_size,
 			geo_field_caption_name field_caption,
 			geo_parent_id parent,
+			geo_gradient_id gradient_id,
+			geo_gradient_luminance gradient_luminance,
+			grd_max_zoom_level max_zoom_level,
+			grd_image_type gradient_type,
 			geo_min_zoom
 			FROM geography
+			LEFT JOIN gradient ON geo_gradient_id = grd_id
 			WHERE geo_id = ?";
 		$ret = App::Db()->fetchAssoc($sql, array($geographyId));
 		Profiling::EndTimer();

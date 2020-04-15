@@ -2,10 +2,8 @@
 
 namespace helena\services\frontend;
 
-use helena\classes\App;
-use helena\classes\GeoJson;
-use helena\classes\GlobalTimer;
 use helena\caches\GeographyCache;
+use minga\framework\Context;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\SnapshotGeographyItemModel;
@@ -69,6 +67,15 @@ class GeographyService extends BaseService
 		{
 			$data->Page = $page;
 			$data->TotalPages = $totalPages;
+		}
+		$gradientId = $carto['gradient_id'];
+		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b)
+		{
+			$controller = new GradientService();
+			$gradientLimit = $carto['max_zoom_level'];
+			$gradientType = $carto['gradient_type'];
+			$gradientLuminance = $carto['gradient_luminance'];
+			$data->Gradient = $controller->GetGradient($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z);
 		}
 		return $data;
 	}

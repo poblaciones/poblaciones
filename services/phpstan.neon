@@ -15,6 +15,7 @@ parameters:
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\bit.#'
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\geometry.#'
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\point.#'
+		- '#filename of function imagejpeg expects string|null, resource|false given.#'
 		- '#Function vd not found.*#'
 		- '#Function pr not found.*#'
 		- '#Function ec not found.*#'

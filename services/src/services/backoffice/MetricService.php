@@ -12,6 +12,7 @@ use helena\services\backoffice\metrics\MetricsManager;
 use helena\entities\backoffice as entities;
 use minga\framework\ErrorException;
 use minga\framework\Serializator;
+use minga\framework\Date;
 
 use minga\framework\MessageException;
 use helena\services\backoffice\publish\WorkFlags;
@@ -27,6 +28,7 @@ class MetricService extends BaseService
 		$version->setMultilevel(false);
 		$metric = new entities\DraftMetric();
 		$level->setMetricVersion($version);
+		$version->setCaption(Date::CurrentYear());
 		$version->setMetric($metric);
 		return $level;
 	}
@@ -358,7 +360,10 @@ class MetricService extends BaseService
 	private function SaveValues($variable, $variableConnected)
 	{
 		Profiling::BeginTimer();
-		$this->ClearValues($variable->Id);
+		if (method_exists($variable, 'getId'))
+			$this->ClearValues($variable->getId());
+		else
+			$this->ClearValues($variable->Id);
 
 		if (property_exists($variable, 'Values'))
 		{

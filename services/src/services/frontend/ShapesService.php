@@ -64,8 +64,8 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 		}
 
 		$cartoTable = new GeographyModel();
-		$geographyId = $dataset['dat_geography_id'];
-		$carto = $cartoTable->GetGeographyInfo($geographyId);
+		$gradientId = $dataset['dat_geography_id'];
+		$carto = $cartoTable->GetGeographyInfo($gradientId);
 		$getCentroids = ($carto['geo_min_zoom'] == null || $z >= $carto['geo_min_zoom']);
 
 		$rows = $table->GetShapesByEnvelope($datasetId, $envelope, $zoom, $getCentroids);

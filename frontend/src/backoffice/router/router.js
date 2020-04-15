@@ -151,7 +151,7 @@ group: 'Metadatos',
 			{
 				hidden: true,
 				path: 'datasets/:datasetId',
-				alias: ['datasets/:datasetId/metrics', 'datasets/:datasetId/variables',
+				alias: ['datasets/:datasetId/data', 'datasets/:datasetId/variables',
 								'datasets/:datasetId/georeference', 'datasets/:datasetId/identity',
 								'datasets/:datasetId/multilevel'],
 				name: 'DatasetEdit',

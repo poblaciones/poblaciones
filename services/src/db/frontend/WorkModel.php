@@ -58,7 +58,7 @@ class WorkModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($workId);
 		$sql = "SELECT work.*, metadata.*, ins_caption, wst_type, ST_X(wst_center) wst_center_lon, ST_Y(wst_center) wst_center_lat, wst_zoom,
-								wst_clipping_region_item_id, wst_clipping_region_item_selected FROM work " . $this->MetadataJoins() . " JOIN work_startup ON wrk_startup_id = wst_id "
+								wst_clipping_region_item_id, wst_clipping_region_item_selected, wst_active_metrics FROM work " . $this->MetadataJoins() . " JOIN work_startup ON wrk_startup_id = wst_id "
 							. " WHERE wrk_id = ? LIMIT 1";
 
 		$ret = App::Db()->fetchAssoc($sql, $params);

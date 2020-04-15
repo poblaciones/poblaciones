@@ -496,7 +496,7 @@ ActiveSelectedMetric.prototype.GetStyleColorList = function() {
 	var ret = [];
 	for (let i = 0; i < variable.ValueLabels.length; i++) {
 		var value = variable.ValueLabels[i];
-		ret.push({ cs: 'cs' + value['Id'], className: 'c' + value['Id'], fillColor: value.FillColor });
+		ret.push({ cs: 'cs' + value['Id'], className: value['Id'], fillColor: value.FillColor });
 	}
 	return ret;
 };
