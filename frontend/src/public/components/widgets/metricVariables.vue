@@ -4,7 +4,7 @@
 			<div class="variableBlock">
 				<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')" class="variableRow hand" v-on:click="clickVariable(index)">
 					<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle"></i>
-					{{ variable.Name }}
+					{{ (variable.Name ? variable.Name : 'Conteo') }}
 					<span v-if="index === level.SelectedVariableIndex || level.Variables.length == 1" v-on:click="toggleVariable()" class='hand'>
 						<chevron-down-icon v-if="version.LabelsCollapsed"
 																title="Mostrar categorías"/>

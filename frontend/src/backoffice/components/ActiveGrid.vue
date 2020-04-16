@@ -17,7 +17,7 @@
       <JqxGrid
         ref="activeGrid"
         :width="700"
-				:height="(showingErrors ? 300 : 500)"
+				:height="(showingErrors ? 300 : 350)"
         @bindingcomplete="bindingcomplete($event)"
         :virtualmode="true"
         :pageable="usePagedGrid"

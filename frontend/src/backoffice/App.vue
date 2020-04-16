@@ -453,6 +453,10 @@ a.normalTextLink:hover {
 	float: left;
 }
 
+.md-tabs-content {
+	height: auto !important;
+}
+
 .highlightBox {
 	position: absolute;
   border-radius: 5px;

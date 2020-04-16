@@ -32,7 +32,6 @@ class PdfCreator
 			$this->pdf->WriteMainTitle($metadata['met_title']);
 			$this->WriteValuePair("Título", 'met_title');
 		}
-		$this->WriteValuePair("Fecha de publicación", 'met_publication_date');
 		if ($this->metadata['met_online_since_formatted'] !== '-')
 			$this->WriteValuePair("Fecha de publicación", 'met_online_since_formatted');
 
