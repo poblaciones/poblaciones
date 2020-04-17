@@ -2,7 +2,11 @@ ALTER TABLE `draft_work_extra_metric` DROP `wmt_order`;
 
 ALTER TABLE `work_extra_metric` DROP `wmt_order`;
 
+ALTER TABLE `draft_work_extra_metric` DROP FOREIGN KEY `fk_draft_work_metric_metric`;
+
 ALTER TABLE `draft_work_extra_metric` DROP INDEX `fk_draft_work_metric_metric`;
+
+ALTER TABLE `work_extra_metric` DROP FOREIGN KEY `fk_work_metric_metric`;
 
 ALTER TABLE `work_extra_metric` DROP INDEX `fk_work_metric_metric`;
 
