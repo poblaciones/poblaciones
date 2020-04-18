@@ -122,6 +122,7 @@ class PublishDataTables
 
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanPdfMetadata($work->getMetadata()->getId());
+		$cacheManager->CleanWorkHandlesCache($workId);
 		$cacheManager->CleanWorkVisiblityCache($workId);
 	}
 

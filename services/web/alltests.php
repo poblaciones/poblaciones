@@ -12,7 +12,7 @@ $rand = rand(0, 20000);
 
 Test::WriteLine('Servicios de capas');
 Test::Get('/services/metrics/GetFabMetrics?w=0');
-Test::Get('/services/clipping/GetDefaultFrameAndClipping');
+Test::Get('/services/clipping/GetDefaultFrame');
 Test::Get('/services/clipping/GetLabels?x=85&y=156&z=8&w=' . $rand);
 Test::Get('/services/clipping/CreateClipping?a=86&e=-36.321756,-56.568096%3B-38.339494,-61.822308&z=8&r=13903&w=' . $rand);
 Test::Get('/services/clipping/CreateClipping?a=90&e=-36.321756,-56.568096%3B-38.339494,-61.822308&z=8&w=' . $rand);

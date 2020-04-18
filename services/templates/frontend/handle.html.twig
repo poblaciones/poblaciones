@@ -1,4 +1,4 @@
-﻿{% import "macros.html.twig" as macros %}
+{% import "macros.html.twig" as macros %}
 {% if not htmltitle is defined %}
 {% set htmltitle = 'Poblaciones' %}
 {% endif %}
@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<title>{{ htmltitle }}</title>
 	<meta name='keywords' content='mapas, georreferenciación, datos espaciales, cartografías'>
-	{% for meta in metadata %}{{ 
+	{% for meta in metadata %}{{
 		macros.metaInfo(meta.name, meta.value) }}
 	{% endfor %}
 	<meta name="generator" content="poblaciones.org">
@@ -15,25 +15,50 @@
 	<link rel="shortcut icon" href="/favicon.ico">
 	</head>
 	<body>
-	{% for item in items %} 
+	<h2>{{ handleTitle }}
+	{% if clippingRegion is defined %}
+		- {{ clippingRegionItem }}{%
+	endif %}{% if parentCaption is
+		defined %}, {{ parentCaption }}{%
+	endif %}{% if grandParentCaption is
+		defined %}, {{ grandParentCaption }}
+	{% endif %}
+	{% if selfNavigateLink is defined %}
+		-&gt; <a target="_blank" href='{{ selfNavigateLink }}'>link</a>
+	{% endif %}
+	</h2>
+
+	{% for item in items %}
 		{% if item.Name %}
 			<h4>{{ item.Name }}</h4>
 		{% endif %}
 		<p>{{ item.Value }}</p>
 	{% endfor %}
 
-
 	{% if links is defined %}
     <h4>Indicadores</h4>
-		{% for link in links %} 		
-			<p><a href='{{ canonical }}/{{ link.Id }}_{{ link.UrlName }}{{ (debugParam == 1 ? '?debug=1' : '') }}'> {{ link.Name }}</a></div>
+		{% for link in links %}
+			<p><a href='{{ canonical }}/{{ link.Id }}_{{ link.UrlName }}{{ (debugParam == 1 ? '?debug=1' : '') }}'> {{ link.Name }}</a></p>
 	{% endfor %}
 	{% endif %}
+
 	{% if variables is defined %}
     <h4>Variables</h4>
-		{% for variable in variables %} 		
+		{% for variable in variables %}
 			<p>{{ variable }}</p>
 	{% endfor %}
+	{% endif %}
+
+	{% if regions is defined %}
+		{% for regionName, elements in regions %}
+			<h4>{{ regionName }}</h4>
+			<p>
+			{% for item in elements %}
+				<a href='{{ canonical_base }}/{{ item.Id }}_{{ metricUrlName }}_{{ item.UrlName}}{{ (debugParam == 1 ? '?debug=1' : '') }}'> {{ item.Name }}</a>{{
+				(loop.last ? '.' : ', ') }}
+			{% endfor %}
+			</p>
+		{% endfor %}
 	{% endif %}
 
 	{% if metadata_pdf is defined %}

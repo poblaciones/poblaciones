@@ -697,11 +697,14 @@ ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors) {
 		}
 		newColumn.cellsalign = this.spssAlignmentToGridAligment(datasetColumn.Alignment);
 		newColumn.width = (datasetColumn.ColumnWidth < 30 ? datasetColumn.ColumnWidth * 10 : 200);
-		//newColumn.rendered = this.tooltiprenderer;
+		newColumn.cellsrenderer = this.cellsRenderer;
 
 		columns.push(newColumn);
 	}
 	return columns;
+};
+ActiveDataset.prototype.cellsRenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
+	return '<span style="margin: 4px; float: ' + columnproperties.cellsalign + ';">' + str.EscapeHtml(value) + '</span>';
 };
 
 ActiveDataset.prototype.getLabelList = function (list) {

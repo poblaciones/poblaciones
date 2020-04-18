@@ -5,10 +5,10 @@
 				<md-field style="margin-bottom: 0px">
 					<label class="mp-label" :style="(this.multiline ? 'top: 6px !important' : '')">
 						{{ this.label }}</label>
-					<md-input v-if="!this.multiline" :type="type" style="font-size: 19px"
+					<md-input v-if="!this.multiline" :type="type" style="font-size: 19px" autocomplete="off"
 										:placeholder="(placeholder ? placeholder : '')" v-model="localValue"
 										:disabled="isDisabled" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
-					<md-textarea v-if="this.multiline" class="mp-area" :style="minHeightRows"
+					<md-textarea v-if="this.multiline" class="mp-area" :style="minHeightRows" autocomplete="off"
 											 :disabled="isDisabled" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 				</md-field>
 				<div :style="'line-height: 1em;' + (!isDisabled && maxlength > 0 ? ' padding-right: 34px' : '')">

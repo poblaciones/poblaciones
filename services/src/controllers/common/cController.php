@@ -30,6 +30,12 @@ abstract class cController
 		$this->templateValues = array_merge($this->templateValues, $values);
 	}
 	// Identifica el item
+	public function AddValueIfNotNull($key, $value)
+	{
+		if ($value !== null)
+			$this->AddValue($key, $value);
+	}
+
 	public function AddValue($key, $value)
 	{
 		$this->templateValues[$key] = $value;
@@ -71,7 +77,7 @@ abstract class cController
 		$this->AddValue('isMegaUser',  Session::IsMegaUser());
 		$user = Session::GetCurrentUser()->user;
 		$this->AddValue('current_user',  $user);
-		
+
 		return App::Render($template, $this->templateValues);
 	}
 

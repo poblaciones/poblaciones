@@ -24,10 +24,10 @@ export const constantRouterMap = [
 
 {
 	path: '/',
-		alias: [ '/public', '/works' ],
+		alias: [ '/public', '/works', '/regions' ],
 		name: 'Inicio',
 		hidden: true,
-			component: () => import('@/admins/views/Home.vue'),
+			component: () => import('@/admins/views/Layout.vue'),
 				meta: { title: 'Inicio', icon: 'form' }
 },
 

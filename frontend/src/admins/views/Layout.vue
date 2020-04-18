@@ -11,13 +11,11 @@
 					<md-tabs md-sync-route ref="tabs">
 						<template slot="md-tab" slot-scope="{ tab }">
 							{{ tab.label }}
-							<mp-help :text="tab.data.help"/>
+							<mp-help :text="tab.data.help" />
 						</template>
-
 						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/" :md-active="isPath('/')" md-label="Usuarios">
 							<users></users>
 						</md-tab>
-
 						<md-tab class="transparentTab" to="/works" id="works-tab" md-label="Cartografías" :md-active="isPath('/works')"
 										:md-template-data="{ help: `<p>
 											Acceso al listado de cartografías del sitio.
@@ -25,13 +23,18 @@
 										` }">
 						<works filter="R" :createEnabled="false" :offerAdminActions="true"></works>
 						</md-tab>
+
 						<md-tab class="transparentTab" id="public-tab" v-if="showPublic" to="/public" :md-active="isPath('/public')" md-label="Datos públicos"
 										:md-template-data="{ help: `
 											<p>
 											Los datos públicos son las cartografías que se ofrecen a los usuarios
-											en el botón inferior (+) del visor. 
+											en el botón inferior (+) del visor.
 										</p>` }">
 							<works filter="P" :createEnabled="false" :offerAdminActions="true"></works>
+						</md-tab>
+
+						<md-tab class="transparentTab" id="clipping-regions-tab" v-if="isAdmin" to="/regions" :md-active="isPath('/regions')" md-label="Regiones">
+							<clipping-regions></clipping-regions>
 						</md-tab>
 					</md-tabs>
 				</div>
@@ -44,14 +47,16 @@
 import TopWelcome from '@/backoffice/views/Layout/TopWelcome';
 import Works from '@/backoffice/views/Work/Works';
 import Users from './Users/Users';
+import ClippingRegions from './ClippingRegions/ClippingRegions';
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/js/arr';
 
 export default {
-	name: 'home',
+	name: 'Layout',
 	components: {
 		TopWelcome,
 		Works,
+		ClippingRegions,
 		Users
 	},
 	mounted() {
@@ -82,6 +87,8 @@ export default {
 		isPath(path) {
 			if (this.$route.path === '/public' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'public-tab';
+			} else if (this.$route.path === '/regions' && this.$refs.tabs) {
+				this.$refs.tabs.activeTab = 'clipping-regions-tab';
 			} else if (this.$route.path === '/works' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'works-tab';
 			}

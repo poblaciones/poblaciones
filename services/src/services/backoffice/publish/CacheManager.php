@@ -8,7 +8,7 @@ use helena\caches\FabMetricsCache;
 use helena\caches\SelectedMetricsMetadataCache;
 use helena\caches\MetricGroupsMetadataCache;
 use helena\caches\DatasetColumnCache;
-use helena\caches\ClippingSummaryCache;
+use helena\caches\WorkHandlesCache;
 use helena\caches\ClippingCache;
 use helena\caches\RankingCache;
 use helena\caches\BackofficeDownloadCache;
@@ -52,6 +52,10 @@ class CacheManager
 		FabMetricsCache::Cache()->Clear();
 	}
 
+	public function CleanWorkHandlesCache($workId)
+	{
+		WorkHandlesCache::Cache()->Clear($workId);
+	}
 	public function CleanWorkVisiblityCache($workId)
 	{
 		$workIdShardified = PublishDataTables::Shardified($workId);
@@ -64,6 +68,7 @@ class CacheManager
 	public function CleanClippingCache()
 	{
 		ClippingCache::Cache()->Clear();
+		WorkHandlesCache::Cache()->Clear();
 	}
 	public function CleanLabelsCache()
 	{

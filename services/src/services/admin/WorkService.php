@@ -33,5 +33,26 @@ class WorkService extends BaseService
 		return self::OK;
 	}
 
+	public function UpdateWorkSegmentedCrawling($workId, $value)
+	{
+		// Cambia el valor
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWork->setSegmentedCrawling($value);
+		App::Orm()->save($draftWork);
+		// Si existe publicado, lo cambia también
+		$workIdShardified = PublishDataTables::Shardified($workId);
+		$work = App::Orm()->find(entities\Work::class, $workIdShardified);
+		if ($value && $work->getAccessLink()) {
+			throw new ErrorException("No se puede indexar una cartografía con visibilidad por enlace.");
+		}
+		if ($work !== null) {
+			$work->setSegmentedCrawling($value);
+			App::Orm()->save($work);
+		}
+		// Actualiza cachés
+		$publisher = new PublishSnapshots();
+		$publisher->UpdateWorkSegmentedCrawling($workId);
+		return self::OK;
+	}
 }
 

@@ -43,10 +43,11 @@ class Links
 	{
 		return self::GetMapUrl() . '/' .  $workId;
 	}
-	
-	public static function GetWorkMetricUrl($workId, $metricId)
+
+	public static function GetWorkMetricUrl($workId, $metricId, $regionItemId)
 	{
-		return self::GetWorkUrl($workId) . '/#/l=' . $metricId;
+ 		// http://desa.poblaciones.org/map/3501/#/l=6301&!r19166
+		return self::GetWorkUrl($workId) . '/#/l=' . $metricId . ($regionItemId ? '&!r' . $regionItemId : '');
 	}
 	public static function GetWorkHandleUrl($workId, $metricId = null, $regionId = null, $regionItemId = null)
 	{
@@ -56,7 +57,7 @@ class Links
 	{
 		return Context::Settings()->GetPublicUrl() . "/users/#/cartographies/" . $workId;
 	}
-	
+
 	public static function GetHandleUrl()
 	{
 		return '/handle';

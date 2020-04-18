@@ -135,6 +135,12 @@ class PublishSnapshots extends BaseService
 		$cache->CleanWorkVisiblityCache($workId);
 	}
 
+	public function UpdateWorkSegmentedCrawling($workId)
+	{
+		$cache = new CacheManager();
+		$cache->CleanWorkHandlesCache($workId);
+		$cache->CleanWorkVisiblityCache($workId);
+	}
 	public function UpdateExtents($workId)
 	{
 		Profiling::BeginTimer();

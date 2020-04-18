@@ -1,6 +1,6 @@
 <template>
 	<div>
-	<div class="md-layout">
+		<div class="md-layout">
 			<div class="md-layout-item md-size-25">
 				<md-button @click="createNewUser()">
 					<md-icon>add_circle_outline</md-icon>
@@ -128,37 +128,5 @@ import arr from '@/common/js/arr';
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.md-layout-item .md-size-15 {
-    padding: 0 !important;
-}
-
-.md-layout-item .md-size-25 {
-    padding: 0 !important;
-}
-
-.md-layout-item .md-size-20 {
-    padding: 0 !important;
-}
-
-.md-layout-item .md-size-10 {
-    padding: 0 !important;
-}
-
-.md-avatar {
-    min-width: 200px;
-    min-height: 200px;
-    border-radius: 200px;
-}
-
-.md-dialog-actions {
-  padding: 8px 20px 8px 24px !important;
-}
-
-.close-button {
-    min-width: unset;
-    height: unset;
-    margin: unset;
-    float: right;
-}
 
 </style>

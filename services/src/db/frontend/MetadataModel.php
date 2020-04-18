@@ -62,7 +62,7 @@ class MetadataModel extends BaseModel
 		if ($this->draftPreffix)
 			$extents = '';
 		else
-			$extents = 'ST_AsText(met_extents) Extents, ';
+			$extents = 'ST_AsText(PolygonEnvelope(met_extents)) Extents, ';
 
 		$sql = "SELECT *, " . $extents . "(SELECT MIN(wrk_id) FROM " . $this->draftPreffix . "work WHERE wrk_metadata_id = met_id) AS wrk_id
 							FROM " . $this->draftPreffix . "metadata

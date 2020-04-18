@@ -49,6 +49,14 @@ module.exports = {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
 	},
+	EscapeHtml(unsafe) {
+    return ('' + unsafe)
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+	},
 	EscapeRegExp(str) {
 		return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 	},

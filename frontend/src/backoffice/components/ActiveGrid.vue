@@ -28,6 +28,7 @@
 				@rowselect="selectionChanged"
         @rowunselect="selectionChanged"
         :showfilterrow="true"
+				:rowsheight="22"
         :filterable="true"
         :columnsresize="true"
         :sortable="true"
