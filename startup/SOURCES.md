@@ -13,7 +13,9 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 ## 2. Descargar los fuentes del repositorio.
 
-1) Hacer git clone de https://github.com/poblaciones/poblaciones en una carpeta local.
+1) Hacer `git clone https://github.com/poblaciones/poblaciones` en una carpeta local.
+
+2) Hacer `git submodule update` en el mismo directorio.
 
 ## 3. Iniciar una base de datos para Poblaciones
 
