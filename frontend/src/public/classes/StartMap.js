@@ -125,7 +125,7 @@ StartMap.prototype.StartByUrl = function () {
 	var route = this.hash;
 	var loc = this;
 	var afterLoaded = function() {
-		window.SegMap.RestoreRoute.LoadRoute(route);
+		window.SegMap.RestoreRoute.LoadRoute(route, true);
 		loc.Finish();
 	};
 	this.SetupMap(afterLoaded);

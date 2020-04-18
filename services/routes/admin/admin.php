@@ -30,6 +30,16 @@ App::GetOrPost('/services/admin/UpdateUser', function (Request $request) {
 	return App::Json($ret);
 });
 
+App::GetOrPost('/services/admin/UpdateClippingRegion', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$region = App::ReconnectJsonParamMandatory(entities\ClippingRegion::class, 'r');
+
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->UpdateClippingRegion($region);
+	return App::Json($ret);
+});
+
 App::Get('/services/admin/GetWorks', function (Request $request) {
 	if ($app = Session::CheckIsSiteReader())
 		return $app;
@@ -38,6 +48,14 @@ App::Get('/services/admin/GetWorks', function (Request $request) {
 	$timeFilter = Params::GetInt('t', 0);
 	$ret = $controller->GetWorksByType($filter, $timeFilter);
 	return App::Json($ret);
+});
+
+App::Get('/services/admin/GetClippingRegions', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->GetClippingRegions();
+	return App::OrmJson($ret);
 });
 
 App::Get('/services/admin/GetUsers', function (Request $request) {
@@ -67,7 +85,6 @@ App::Get('/services/admin/DeleteUser', function (Request $request) {
 	return App::Json($ret);
 });
 
-
 App::Get('/services/admin/UpdateWorkIndexing', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())
 		return $app;
@@ -76,6 +93,17 @@ App::Get('/services/admin/UpdateWorkIndexing', function (Request $request) {
 	$value = Params::GetBoolMandatory('v');
 	$controller = new services\WorkService();
 	$ret = $controller->UpdateWorkIndexing($workId, $value);
+	return App::Json($ret);
+});
+
+App::Get('/services/admin/UpdateWorkSegmentedCrawling', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+
+	$workId = Params::GetIntMandatory('w');
+	$value = Params::GetBoolMandatory('v');
+	$controller = new services\WorkService();
+	$ret = $controller->UpdateWorkSegmentedCrawling($workId, $value);
 	return App::Json($ret);
 });
 

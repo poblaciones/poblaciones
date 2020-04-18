@@ -50,6 +50,12 @@ class DraftMetricVersionLevel
      */
     private $MetricVersion;
 
+		/**
+     * @var geometry
+     *
+     * @ORM\Column(name="mvl_extents", type="geometry", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Extents;
 
     /**
      * Get id
@@ -121,6 +127,30 @@ class DraftMetricVersionLevel
     public function getDataset()
     {
         return $this->Dataset;
+    }
+
+		/**
+     * Set extents
+     *
+     * @param geometry $extents
+     *
+     * @return DraftMetricVersionLevel
+     */
+    public function setExtents($extents)
+    {
+        $this->Extents = $extents;
+
+        return $this;
+    }
+
+    /**
+     * Get extents
+     *
+     * @return geometry
+     */
+    public function getExtents()
+    {
+        return $this->Extents;
     }
 
     /**

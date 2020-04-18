@@ -61,6 +61,16 @@ class Work
 		 */
     private $IsIndexed;
 
+
+		/**
+		 * @var boolean
+		 *
+		 * @ClientReadonly
+		 *
+		 * @ORM\Column(name="wrk_segmented_crawling", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+		 */
+    private $SegmentedCrawling;
+
 		/**
 		 * @var string
 		 *
@@ -234,6 +244,30 @@ class Work
     public function getIsPrivate()
     {
 			return $this->IsPrivate;
+    }
+
+    /**
+		 * Set segmentedCrawling
+		 *
+		 * @param boolean $segmentedCrawling
+		 *
+		 * @return Work
+		 */
+    public function setSegmentedCrawling($segmentedCrawling)
+    {
+			$this->SegmentedCrawling = $segmentedCrawling;
+
+			return $this;
+    }
+
+    /**
+		 * Get segmentedCrawling
+		 *
+		 * @return boolean
+		 */
+    public function getSegmentedCrawling()
+    {
+			return $this->SegmentedCrawling;
     }
 
     /**

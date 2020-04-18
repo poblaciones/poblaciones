@@ -3,6 +3,7 @@
 namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * ClippingRegionItem
@@ -65,8 +66,8 @@ class ClippingRegionItem
 
     /**
      * @var \helena\entities\backoffice\ClippingRegion
-     *exclude
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\ClippingRegion")
+		 * @Exclude
+		 * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\ClippingRegion")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="cli_clipping_region_id", referencedColumnName="clr_id", nullable=true)
      * })

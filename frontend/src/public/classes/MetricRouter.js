@@ -80,7 +80,7 @@ MetricRouter.prototype.parseMetric = function (metricString) {
 	var pinnedLevel = h.getSafeValue(values, 'l', '');
 	var showDescriptions = h.getSafeValue(values, 'd', '0');
 	var showValues = h.getSafeValue(values, 's', '0');
-	var ranking = h.getSafeValue(values, 'r', null);
+	var ranking = h.getSafeValue(values, 'k', null);
 	var customPattern = h.getSafeValue(values, 'p', '');
 	var transparency = h.getSafeValue(values, 't', 'M');
 	var variableStates = h.getSafeValue(values, 'w', null);
@@ -132,7 +132,7 @@ MetricRouter.prototype.AddRanking = function (metric) {
 	if (!metric.ShowRanking) {
 		return '';
 	}
-	var ret = '!r';
+	var ret = '!k';
 	if (metric.RankingSize != 10) {
 		ret += metric.RankingSize;
 	}

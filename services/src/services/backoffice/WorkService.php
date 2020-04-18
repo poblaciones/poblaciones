@@ -38,6 +38,7 @@ class WorkService extends BaseService
 		$work->setMetricLabelsChanged(false);
 		$work->setMetricDataChanged(false);
 		$work->setIsIndexed(false);
+		$work->setSegmentedCrawling(false);
 		$work->setIsPrivate(false);
 		$work->setShard(Context::Settings()->Shard()->CurrentShard);
 
@@ -239,6 +240,8 @@ class WorkService extends BaseService
 		}
 		$caches = new CacheManager();
 		$caches->CleanPdfMetadata($draftWork->getMetadata()->getId());
+		$caches->CleanWorkHandlesCache($workId);
+
 		// Actualiza cachés
 		$publisher = new PublishSnapshots();
 		$publisher->UpdateWorkVisibility($workId);
@@ -393,6 +396,7 @@ class WorkService extends BaseService
 								wrk_metric_data_changed) HasChanges
 								, wrk_is_private IsPrivate
 								, wrk_is_indexed IsIndexed
+								, wrk_segmented_crawling SegmentedCrawling
 								, wrk_type Type
 								, wrk_unfinished Unfinished
 								, (SELECT MIN(wkp_permission) FROM draft_work_permission WHERE wkp_work_id = wrk_id AND wkp_user_id = ?) privileges

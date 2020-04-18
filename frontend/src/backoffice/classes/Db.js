@@ -85,6 +85,15 @@ Db.prototype.UpdateWorkIndexing = function (item) {
 		{ w: item.Id, v: (item.IsIndexed ? '1' : '0') }, 'cambiar la indexación de la obra');
 };
 
+Db.prototype.UpdateWorkSegmentedCrawling = function (item) {
+	return axiosClient.getPromise(window.host + '/services/admin/UpdateWorkSegmentedCrawling',
+		{ w: item.Id, v: (item.SegmentedCrawling ? '1' : '0') }, 'cambiar el tipo indexación de la obra');
+};
+
+Db.prototype.GetClippingRegions = function () {
+	return axiosClient.getPromise(window.host + '/services/admin/GetClippingRegions',
+		{}, 'obtener la lista de regiones');
+};
 Db.prototype.GetUsers = function () {
 	return axiosClient.getPromise(window.host + '/services/admin/GetUsers',
 			{ }, 'obtener la lista de usuarios');
@@ -102,6 +111,12 @@ Db.prototype.DeleteUser = function (user, callback) {
 		});
 };
 
+Db.prototype.UpdateClippingRegion = function (region) {
+	return axiosClient.postPromise(window.host + '/services/admin/UpdateClippingRegion',
+		{ r: region }, 'actualizar la región').then(function () {
+
+		});
+};
 
 Db.prototype.UpdateUser = function (user, password, verification) {
 	return axiosClient.postPromise(window.host + '/services/admin/UpdateUser',

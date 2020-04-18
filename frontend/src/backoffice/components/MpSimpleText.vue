@@ -4,8 +4,8 @@
 			<label class="mp-label" :style="(this.multiline ? 'top: 6px !important' : '')">
 				{{ this.label }}</label>
 			<md-input :class="(isDisabled ? 'mpDisabled' : '')" md-toggle-password v-if="!this.multiline" :placeholder="(placeholder ? placeholder : '')"  :type="type" :disabled="isDisabled"
-								style="font-size: 19px" v-model="localValue" :ref="inputId"  :maxlength="(!isDisabled ? maxlength : 0)" :id="inputId" />
-			<md-textarea v-if="this.multiline" :disabled="isDisabled"
+								style="font-size: 19px" autocomplete="off"  v-model="localValue" :ref="inputId"  :maxlength="(!isDisabled ? maxlength : 0)" :id="inputId" />
+			<md-textarea v-if="this.multiline" :disabled="isDisabled" autocomplete="off"
 									 class="mp-area" :class="(isDisabled ? 'mpDisabled' : '')" :style="minHeightRows" v-model="localValue"
 									 :maxlength="(canEdit ? maxlength : 0)" :ref="inputId" :id="inputId" />
 

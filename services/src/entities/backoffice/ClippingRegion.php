@@ -3,6 +3,7 @@
 namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * ClippingRegion
@@ -12,6 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ClippingRegion
 {
+		// Propiedades no almacenada en la base de datos
+		public $Level;
+		public $ChildCount = 0;
     /**
      * @var integer
      *
@@ -59,14 +63,21 @@ class ClippingRegion
     /**
      * @var boolean
      *
-     * @ORM\Column(name="clr_labels_min_zoom", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="clr_is_crawler_indexer", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $IsCrawlerIndexer;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="clr_labels_min_zoom", type="integer", precision=0, scale=0, nullable=false, unique=false)
      */
     private $LabelsMinZoom;
 
     /**
-     * @var boolean
+     * @var integer
      *
-     * @ORM\Column(name="clr_labels_max_zoom", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="clr_labels_max_zoom", type="integer", precision=0, scale=0, nullable=false, unique=false)
      */
     private $LabelsMaxZoom;
 
@@ -82,6 +93,7 @@ class ClippingRegion
 
     /**
      * @var \helena\entities\backoffice\ClippingRegionItem
+		 * @Exclude
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\ClippingRegionItem")
      * @ORM\JoinColumns({
@@ -221,6 +233,30 @@ class ClippingRegion
     }
 
     /**
+     * Set isCrawlerIndexer
+     *
+     * @param boolean $isCrawlerIndexer
+     *
+     * @return ClippingRegion
+     */
+    public function setIsCrawlerIndexer($isCrawlerIndexer)
+    {
+        $this->IsCrawlerIndexer = $isCrawlerIndexer;
+
+        return $this;
+    }
+
+    /**
+     * Get isCrawlerIndexer
+     *
+     * @return boolean
+     */
+    public function getIsCrawlerIndexer()
+    {
+        return $this->IsCrawlerIndexer;
+    }
+
+    /**
      * Set noAutocomplete
      *
      * @param boolean $noAutocomplete
@@ -247,7 +283,7 @@ class ClippingRegion
     /**
      * Set labelsMinZoom
      *
-     * @param boolean $labelsMinZoom
+     * @param integer $labelsMinZoom
      *
      * @return ClippingRegion
      */
@@ -261,7 +297,7 @@ class ClippingRegion
     /**
      * Get labelsMinZoom
      *
-     * @return boolean
+     * @return integer
      */
     public function getLabelsMinZoom()
     {

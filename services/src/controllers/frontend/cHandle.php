@@ -9,17 +9,21 @@ use minga\framework\Arr;
 use minga\framework\Str;
 use helena\classes\Session;
 use helena\classes\Links;
-
+use helena\entities\frontend\geometries\Envelope;
 use helena\services\frontend\SelectedMetricService;
 use minga\framework\ErrorException;
 use helena\services\frontend\WorkService;
-use helena\services\common\MetadataService;
+use helena\db\frontend\ClippingRegionItemModel;
+use minga\framework\Profiling;
+use helena\caches\WorkHandlesCache;
+
 use helena\db\frontend\MetadataModel;
 
 
 class cHandle extends cPublicController
 {
 	private $cleanRoute;
+	private $cleanRouteBase;
 
 	public function Show()
 	{
@@ -27,51 +31,49 @@ class cHandle extends cPublicController
 		// Tiene las posibles estructura:
 		// (A) /handle/workid/metricid/metricName
 		//		 /handle/123/12/segregacion
-		// (B) /handle/workid/metricid/regionid/regionName_metricName // Listado de 
+		// (B) /handle/workid/metricid/regionid/regionName_metricName // Listado de
 		//		 /handle/123/12/1/provincias_segregacion
 		// (C) /handle/workid/metricid/regionid/regionItemId/regionItemName_metricName
 		//		 /handle/123/12/1/1012/catamarca_segregacion
 		$parts = explode('/', $uri);
 		array_shift($parts);
-		if ($parts[0] !== 'handle') 
+		if ($parts[0] !== 'handle')
 			throw new ErrorException("Ruta inválida.");
 		array_shift($parts);
 		// Al último le saca el posible sufijo textual
 		$last = sizeof($parts) - 1;
 		if (Str::Contains($parts[$last], "_"))
 			 $parts[$last] = Str::EatFrom($parts[$last], "_");
-		
+
 		$this->AddValue("debugParam", Params::Get("debug"));
 		$workId = Params::CheckParseIntValue($parts[0]);
 		if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
 		$metricId = $this->GetMetricId($parts);
-		$regionId = $this->GetRegionId($parts);
 		$regionItemId = $this->GetRegionItemId($parts);
-		$this->cleanRoute = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($workId, $metricId, $regionId, $regionItemId));
-	
+		$this->cleanRoute = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($workId, $metricId, $regionItemId));
+		$this->cleanRouteBase = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($workId, $metricId, null));
+
 		if (Request::IsGoogle() || Params::Get("debug"))
 		{
-			if ($regionItemId !== null) 
-				$this->ShowWorkMetricRegionItem($workId, $metricId, $regionId, $regionItemId);
-			else if ($regionId !== null) 
-				$this->ShowWorkMetricRegion($workId, $metricId, $regionId);
-			else if ($metricId !== null)
-				$this->ShowWorkMetric($workId, $metricId);		
-			else 
+			if ($metricId !== null)
+			{
+				$this->ShowWorkMetric($workId, $metricId, $regionItemId);
+			}
+			else
 				$this->ShowWork($workId);
-			return $this->Render("handle.html.twig");		
+
+			if (Params::Get("debug"))
+				$this->AddValue("selfNavigateLink", $this->cleanRoute);
+
+			return $this->Render("handle.html.twig");
 		}
-		else 
+		else
 		{
-			if ($regionItemId !== null) 
-				return $this->RedirectWorkMetricRegionItem($workId, $metricId, $regionId, $regionItemId);
-			else if ($regionId !== null) 
-				return $this->RedirectWorkMetricRegion($workId, $metricId, $regionId);
-			else if ($metricId !== null)
-				return $this->RedirectWorkMetric($workId, $metricId);		
-			else 
-				return $this->RedirectWork($workId);		
+			if ($metricId !== null)
+				return $this->RedirectWorkMetric($workId, $metricId, $regionItemId);
+			else
+				return $this->RedirectWork($workId);
 		}
   }
 
@@ -80,40 +82,32 @@ class cHandle extends cPublicController
 		if(sizeof($parts) >= 2)
 			return Params::CheckParseIntValue($parts[1]);
 		else
-			return null;	
+			return null;
 	}
 
-	private function GetRegionId($parts)
+	private function GetRegionItemId($parts)
 	{
 		if(sizeof($parts) >= 3)
 			return Params::CheckParseIntValue($parts[2]);
 		else
-			return null;	
+			return null;
 	}
 
-	
-	private function GetRegionItemId($parts)
-	{
-		if(sizeof($parts) >= 4)
-			return Params::CheckParseIntValue($parts[3]);
-		else
-			return null;	
-	}
 
-	private function GetMetadata($work) 
+	private function GetMetadata($work)
 	{
 		$metadataId = $work->MetadataId;
 		$model = new MetadataModel(false);
 		return $model->GetMetadata($metadataId);
 	}
-	
 
-	private function AddMetricLinks ($work) 
-	{	
+
+	private function AddMetricLinks ($work)
+	{
 		$links = [];
 		foreach($work->Metrics as $metric)
-			$links[] = [ 'Id' => $metric['Id'], 
-																	'UrlName' => Str::CrawlerUrlEncode($metric['Name']), 
+			$links[] = [ 'Id' => $metric['Id'],
+																	'UrlName' => Str::CrawlerUrlEncode($metric['Name']),
 																	'Name' => $metric['Name']];
 		$this->AddValue('links', $links);
 	}
@@ -121,20 +115,21 @@ class cHandle extends cPublicController
 	public function AddMetadata(&$metadata, $url)
 	{
 		$this->AddValue('htmltitle', $metadata['met_title']);
-		$map = [	'citation_title' => 'met_title', 
-							'citation_publication_date' => 'met_online_since', 
-							'citation_date' => 'met_online_since', 
-							'citation_year' => 'met_online_since', 
-							'citation_author' => 'met_authors', 
-							'citation_journal_title' => 'Poblaciones', 
-							'citation_pdf_url' => $url . '/metadata', 
-							'citation_language' => 'met_title', 
-							'citation_external_url' => $url, 
+		$map = [	'citation_title' => 'met_title',
+							'citation_publication_date' => 'met_online_since',
+							'citation_date' => 'met_online_since',
+							'citation_year' => 'met_online_since',
+							'citation_author' => 'met_authors',
+							'citation_journal_title' => 'Poblaciones',
+							'citation_pdf_url' => $url . '/metadata',
+							'citation_language' => 'met_title',
+							'citation_external_url' => $url,
 							'description' => 'met_abstract'];
 		$tags = $this->MapTags($metadata, $map);
 
-		$this->AddValue('metadata', $tags); 
-		$this->AddValue('canonical', $this->cleanRoute); 
+		$this->AddValue('metadata', $tags);
+		$this->AddValue('canonical', $this->cleanRoute);
+		$this->AddValue('canonical_base', $this->cleanRouteBase);
 	}
 
 	private function MapTags($values, $map)
@@ -150,7 +145,7 @@ class cHandle extends cPublicController
 		}
 		return $ret;
 	}
-	
+
 	private function ShowWork($workId)
 	{
 		$workService = new WorkService();
@@ -161,80 +156,156 @@ class cHandle extends cPublicController
 		$this->AddMetadata($metadata, $work->Url);
 		$this->AddMetricLinks($work);
 
-		$items[] = ['Name' => $metadata['met_title'], 'Value' => $metadata['met_abstract']];
-		$this->AddValue("items", $items);		
-		
+		$this->AddValue('handleTitle', $metadata['met_title']);
+
+		$items[] = ['Name' => 'Resumen', 'Value' => $metadata['met_abstract']];
+		$this->AddValue("items", $items);
+
 		$this->AddValue("metadata_pdf", $work->Url . '/metadata');
 	}
 
-	private function PreppendMap($title) 
+	private function PreppendMap($title)
 	{
-		if (Str::StartsWith(Str::ToLower($title), "map") == false) 
+		if (Str::StartsWith(Str::ToLower($title), "map") == false)
 			return "Mapa de " . $title;
-		else 
+		else
 			return $title;
 	}
 
-	private function ShowWorkMetric($workId, $metricId)
+	private function ShowWorkMetric($workId, $metricId, $regionId)
 	{
 		$workService = new WorkService();
 		$work = $workService->GetWork($workId);
 		$metadata = $this->GetMetadata($work);
+
 		$model = new MetadataModel();
 
 		$items = [];
 		$metadataId = $work->MetadataId;
 		$sources = $model->GetMetadataSources($metadataId);
-		//$dataset = $model->GetDatasetMetadata($datasetId);
+		$metricName = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
+		$metric = $this->PreppendMap($metricName);
 
-		$metric = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
-		$metric = $this->PreppendMap($metric);
-
-		$this->addInfo($metadata, $metric, $items);
-		$this->addSources($sources, $items);
-		$this->AddValue("items", $items);		
-
-		$metadata['met_title'] = $metric;
+		$this->AddInfo($metadata, $metric, $items);
+		$this->AddSources($sources, $items);
+		$this->AddValue("items", $items);
 		$this->AddMetadata($metadata, $work->Url);
+		$outVersions = '';
+		$this->AddVariables($workId, $metricId, $outVersions);
+		$metadata['met_title'] = $metric;
+
+		if ($regionId != null)
+		{
+			$model = new ClippingRegionItemModel();
+			$clippingRegionItem = $model->GetClippingRegionItem($regionId, true);
+			$this->AddValue("clippingRegionItem", $clippingRegionItem['Name']);
+			$this->AddValue("clippingRegion", $clippingRegionItem['Type']);
+			$this->AddValueIfNotNull("parentCaption", $clippingRegionItem['parentCaption']);
+			$this->AddValueIfNotNull("grandParentCaption", $clippingRegionItem['grandParentCaption']);
+		}
+		if ($metadata['Extents'] !== null && Session::IsWorkPublicSegmentedCrawled($workId))
+		{
+			$extents = Envelope::FromDb($metadata['Extents']);
+			$this->AddRegions($workId, $metricId, $outVersions, $metricName, $extents, $regionId);
+		}
+	}
+
+	private function AddRegions($workId, $metricId, $versionIds, $metricName, $extents, $regionId)
+	{
+		// Lo busca en el caché
+		$key = WorkHandlesCache::CreateKey($metricId, $regionId);
+
+		$data = null;
+		if (!WorkHandlesCache::Cache()->HasData($workId, $key, $data))
+		{
+			$data = $this->CalculateRegionData($metricId, $versionIds, $metricName, $extents, $regionId);
+			// Lo agrega al caché...
+			WorkHandlesCache::Cache()->PutData($workId, $key, $data);
+		}
+		$this->AddValue("metricUrlName", Str::CrawlerUrlEncode($metricName));
+		$this->AddValue("regions", $data);
+	}
+
+	private function CalculateRegionData($metricId, $versionIds, $metricName, $extents, $regionId)
+	{
+		Profiling::BeginTimer();
+		$model = new ClippingRegionItemModel();
+		$clippingRegionItemIds = $model->GetCrawlerItemsIntersectingEnvelope($metricId, $versionIds, $extents, $regionId);
+		// Si no tiene regionId, se queda con los que no tienen padre en la lista
+		if ($regionId == null)
+		{
+			$idDictionary = [];
+			foreach($clippingRegionItemIds as $clippingRegionItem)
+				$idDictionary[] = $clippingRegionItem['Id'];
+			//asort($idDictionary);
+			// recorre viendo cuáles no tienen el padre en la lista
+			$newList = [];
+			foreach($clippingRegionItemIds as $clippingRegionItem)
+				//if (!Arr::BinarySearchContains($idDictionary, $clippingRegionItem['cli_parent_id']))
+				if (! in_array($clippingRegionItem['cli_parent_id'], $idDictionary))
+				{
+					$newList[] = $clippingRegionItem;
+				}
+			$clippingRegionItemIds = $newList;
+		}
+		foreach($clippingRegionItemIds as &$clippingRegionItem)
+		{
+			$clippingRegionItem['UrlName'] = Str::CrawlerUrlEncode($clippingRegionItem['Name']);
+		}
+		$data = Arr::FromSortedToKeyed($clippingRegionItemIds, 'clr_caption');
+		Profiling::EndTimer();
+		return $data;
+	}
+	private function AddVariables($workId, $metricId, &$outVersions)
+	{
+		$outVersions = '';
 		// Trae los niveles y variables...
 		$selectedService = new SelectedMetricService();
 		$selectedMetric = $selectedService->GetSelectedMetric($metricId);
 		$variables = [];
-		foreach($selectedMetric->Versions as $version)	
+		foreach($selectedMetric->Versions as $version)
 		{
 			if ($version->Version->WorkId === $workId)
 			{
-				// Lo representa
-				foreach($version->Levels as $level)	
+				$maxGeography = 0;
+				foreach($version->Levels as $level)
 				{
-					foreach($level->Variables as $variable)	
+					// el version lo tiene que acompañar (para lo de regiones) del
+					// geographyId su level más bajo
+					if ($level->GeographyId > $maxGeography)
+						$maxGeography = $level->GeographyId;
+
+					foreach($level->Variables as $variable)
 					{
 						$line = $variable->Name;
 						$vals = "";
-						foreach($variable->ValueLabels as $value)	
+						foreach($variable->ValueLabels as $value)
 						{
 							if ($vals != "") $vals .= ", ";
 							$vals .= $value->Name;
 						}
 						$fullName = Str::Concat($line, $vals, ": ");
-						$fullName .= " (" . $level->Name . ", " . $version->Version->Name . ")"; 
+						$fullName .= " (" . $level->Name . ", " . $version->Version->Name . ")";
 						$variables[] = $fullName;
 					}
 				}
+				$outVersions .= ($outVersions != '' ? ' OR ' : '') . ' (miv_metric_version_id = ' . $version->Version->Id
+														. ' AND miv_geography_id = ' . $maxGeography . ') ';
 			}
 		}
-		$this->AddValue("variables", $variables);		
+		$this->AddValue("variables", $variables);
 	}
 
-	private function addInfo($metadata, $metric, &$items) 
+	private function AddInfo($metadata, $metric, &$items)
 	{
-		$items[] = ['Name' => $metric, 'Value' => ''];
+		$this->AddValue("handleTitle", $metric);
+
 		$workTitle = $metadata['met_title'];
 		if (trim($metadata["met_abstract"]) === "") $metadata["met_abstract"] = '-';
-		$tags = ["met_abstract" => $workTitle, "met_authors" => "Autores", "ins_caption" => "Institución", "con_person" => "Contacto"];
+		$tags = ["met_abstract" => $workTitle, "met_authors" => "Autores", "ins_caption" => "Institución"];
 		foreach($tags as $tag => $label)
 		{
-			if (array_key_exists($tag, $metadata)) 
+			if (array_key_exists($tag, $metadata))
 			{
 				$val = $metadata[$tag];
 				if ($val !== null && trim($val) !== '')
@@ -245,7 +316,7 @@ class cHandle extends cPublicController
 		}
 	}
 
-	private function addSources($sources, &$items) 
+	private function AddSources($sources, &$items)
 	{
 		$n = sizeof($sources);
 		if ($n == 0)
@@ -270,33 +341,18 @@ class cHandle extends cPublicController
 		}
 	}
 
-	private function ShowWorkMetricRegion($workId, $metricId, $regionId)
-	{
-	}
-
-	private function ShowWorkMetricRegionItem($workId, $metricId, $regionId, $regionItemId)
-	{
-	}
-
 	private function RedirectWork($workId)
 	{
 		// http://localhost:8000/map/3701
 		return $this->RedirectJs(Links::GetWorkUrl($workId));
 	}
 
-	private function RedirectWorkMetric($workId, $metricId)
+	private function RedirectWorkMetric($workId, $metricId, $regionItemId)
 	{
-		// http://localhost:8000/map/3701/#/l=6201
-		return $this->RedirectJs(Links::GetWorkMetricUrl($workId, $metricId));
+		// http://localhost:8000/map/3501/#/l=6301&!r19166
+		return $this->RedirectJs(Links::GetWorkMetricUrl($workId, $metricId, $regionItemId));
 	}
 
-	private function RedirectWorkMetricRegion($workId, $metricId, $regionId)
-	{
-	}
-
-	private function RedirectWorkMetricRegionItem($workId, $metricId, $regionId, $regionItemId)
-	{
-	}
 
 	private function RedirectJs($url)
 	{

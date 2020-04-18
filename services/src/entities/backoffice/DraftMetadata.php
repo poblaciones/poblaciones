@@ -52,6 +52,13 @@ class DraftMetadata
      */
     private $Status;
 
+		/**
+     * @var geometry
+     *
+     * @ORM\Column(name="met_extents", type="geometry", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Extents;
+
     /**
      * @var string
      *
@@ -334,6 +341,32 @@ class DraftMetadata
     {
         return $this->Abstract;
     }
+
+		 /**
+     * Set extents
+     *
+     * @param geometry $extents
+     *
+     * @return DraftMetadata
+     */
+    public function setExtents($extents)
+    {
+        $this->Extents = $extents;
+
+        return $this;
+    }
+
+    /**
+     * Get extents
+     *
+     * @return geometry
+     */
+    public function getExtents()
+    {
+        return $this->Extents;
+    }
+
+
 
     /**
      * Set status

@@ -36,7 +36,10 @@
 									<md-switch class="md-primary"  v-model="item.IsIndexed"
 											@change="onIndexedChanged(item)" />
 								</md-table-cell>
-								<md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
+								<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Segmentado">
+									<md-switch class="md-primary" v-model="item.SegmentedCrawling"
+														 @change="onSegmentedCrawlingChanged(item)" :disabled="!item.IsIndexed" />
+								</md-table-cell><md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
 										<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
 									<div class="extraIconContainer">
 										<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
@@ -290,6 +293,10 @@ export default {
 		onIndexedChanged(item) {
 			this.$refs.invoker.do(window.Db,
 														window.Db.UpdateWorkIndexing, item);	
+		},
+		onSegmentedCrawlingChanged(item) {
+			this.$refs.invoker.do(window.Db,
+				window.Db.UpdateWorkSegmentedCrawling, item);
 		},
 		onRevoke(item) {
 			this.$refs.stepper.startUrl = window.Db.GetStartWorkRevokeUrl(item.Id);

@@ -1,4 +1,10 @@
 [CURRENT]
+- Fix: detección de encoding en CSV identificaba como mac-files archivos con mayúsculas acentuadas acentos.
+- La grilla de datos del dataset en backoffice hace encoding del html que pueda estar en las celdas.
+- Mejoras crawling segmentado.
+- Autogeneración de carpetas de storage.
+- Fix: la publicación pisaba los extents si no había modificaciones de datos.
+- Administración: listado de regiones.
 
 v2.18 (2020-04-15)
 - Posibilidad de agregar indicadores externos en una cartografía a la lista de indicadores del panel superior.

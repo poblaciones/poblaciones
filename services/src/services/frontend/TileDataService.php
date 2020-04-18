@@ -2,7 +2,6 @@
 
 namespace helena\services\frontend;
 
-use helena\classes\App;
 use minga\framework\Profiling;
 
 use minga\framework\Performance;
