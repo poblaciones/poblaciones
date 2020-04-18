@@ -62,7 +62,7 @@ class ShardSettings
 	public function IsValidBackofficeShardLow($shard)
 	{
 		return true;
-		return $this->IsValidBackofficeShard($shard % 100);
+		// return $this->IsValidBackofficeShard($shard % 100);
 	}
 	public function IsValidBackofficeShard($shard)
 	{

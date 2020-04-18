@@ -23,6 +23,6 @@ class cTestTransactionOrm extends cController
 		$current = App::Db()->fetchScalarInt("select max(con_id) from draft_contact");
 		echo "Current: " . $current . "<br>";
 		throw new ErrorException('failed' . $current);
-		return "Done!";
+		// return "Done!";
 	}
 }
