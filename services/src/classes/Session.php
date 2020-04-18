@@ -93,21 +93,39 @@ class Session
 		return $ret;
 	}
 
-	public static function IsWorkPublicOrAccessible($workId)
+	private static function GetWorkPublicOrAccessible($workId)
 	{
 		Profiling::BeginTimer();
 		$res = null;
 		if (!WorkVisiblityCache::Cache()->HasData($workId, $res))
 		{
-			$res = App::Db()->fetchAssoc("SELECT wrk_is_private, wrk_access_link FROM work WHERE wrk_id = ? LIMIT 1", array($workId));
+			$res = App::Db()->fetchAssoc("SELECT wrk_is_private, wrk_is_indexed, wrk_segmented_crawling, wrk_access_link FROM work WHERE wrk_id = ? LIMIT 1", array($workId));
 			WorkVisiblityCache::Cache()->PutData($workId, $res);
 		}
+		Profiling::EndTimer();
+		return $res;
+	}
+	public static function IsWorkPublicOrAccessible($workId)
+	{
+		Profiling::BeginTimer();
+		$res = self::GetWorkPublicOrAccessible($workId);
+
 		if (!$res['wrk_is_private'])
 			$ret = self::IsLinkAccessible($res['wrk_access_link']);
 		else if (!Session::IsAuthenticated())
 			$ret = false;
 		else
 			$ret = self::IsWorkReaderShardified($workId);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public static function IsWorkPublicSegmentedCrawled($workId)
+	{
+		Profiling::BeginTimer();
+		$res = self::GetWorkPublicOrAccessible($workId);
+
+		$ret = !$res['wrk_is_private'] && $res['wrk_is_indexed'] && $res['wrk_segmented_crawling'];
 		Profiling::EndTimer();
 		return $ret;
 	}
