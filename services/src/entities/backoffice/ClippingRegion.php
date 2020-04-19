@@ -307,7 +307,7 @@ class ClippingRegion
     /**
      * Set labelsMaxZoom
      *
-     * @param boolean $labelsMaxZoom
+     * @param int $labelsMaxZoom
      *
      * @return ClippingRegion
      */
@@ -321,7 +321,7 @@ class ClippingRegion
     /**
      * Get labelsMaxZoom
      *
-     * @return boolean
+     * @return int
      */
     public function getLabelsMaxZoom()
     {

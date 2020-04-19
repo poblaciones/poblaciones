@@ -1,22 +1,26 @@
+includes:
+	- src/framework/phpstan.neon
+
 parameters:
 	excludes_analyse:
-		- src/services/backoffice/metrics/test/JenksFisher/testJenksFisher.php
-		- src/services/backoffice/metrics/test/NtilesBreaks/testNtilesBreaks.php
+		- vendor
+		- routes
+		- compilation_cache
+		- doctrine_proxies
+		- web/phpinfo2.php
+		- web/index.php
+		- tests/routesTest.php
 	autoload_files:
 		- vendor/autoload.php
 	ignoreErrors:
-		- '#Property .* does not accept .*null.*#'
-		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\bit.#'
 		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\geometry.#'
 		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\point.#'
-		- '#Property .* has unknown class helena\\entities\\backoffice\\bit as its type.#'
 		- '#Property .* has unknown class helena\\entities\\backoffice\\geometry as its type.#'
 		- '#Property .* has unknown class helena\\entities\\backoffice\\point as its type.#'
-		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\bit.#'
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\geometry.#'
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\point.#'
-		- '#filename of function imagejpeg expects string|null, resource|false given.#'
 		- '#Function time_elapsed not found.#'
+		- '#Function outwrite not found.#'
 		- '#Function vd not found.*#'
 		- '#Function pr not found.*#'
 		- '#Function ec not found.*#'

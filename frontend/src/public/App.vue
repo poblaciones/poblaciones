@@ -2,7 +2,9 @@
 	<div id="holder" style="height: 100%;">
 		<div id="panMain" class="split split-horizontal" style="position: relative">
 
-			<Search/><MapPanel/>
+			<Search/>
+			<LeftPanel/>
+			<MapPanel/>
 			<WorkPanel :work="work" ref="workPanel" />
 			<Fab ref="fabPanel" />
 			<Edit v-if="work.Current" ref="editPanel" :work="work" />
@@ -22,6 +24,7 @@ import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
 import MapPanel from '@/public/components/panels/mapPanel';
 import Fab from '@/public/components/widgets/fabButton';
+import LeftPanel from '@/public/components/panels/leftPanel';
 import Edit from '@/public/components/widgets/editButton';
 import SummaryPanel from '@/public/components/panels/summaryPanel';
 import Search from '@/public/components/widgets/search';
@@ -38,6 +41,7 @@ export default {
 		MapPanel,
 		Edit,
 		Fab,
+		LeftPanel,
 		WorkPanel
 	},
 	created() {

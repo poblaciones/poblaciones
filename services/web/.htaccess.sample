@@ -1,15 +1,12 @@
 <IfModule mod_rewrite.c>
-    Options -MultiViews
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
 
-    RewriteEngine On
-
-  RewriteBase /
-
-  RewriteEngine On
-
-	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteCond %{REQUEST_URI} !=/favicon.ico
-	RewriteRule ^ index.php [L]
-
+# Pass all requests not referring directly to files in the filesystem to
+# index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !=/favicon.ico
+RewriteRule ^ index.php [L]
 </IfModule>

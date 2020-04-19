@@ -12,3 +12,5 @@
 /build/release
 
 thumbs.db
+.ignore
+tags

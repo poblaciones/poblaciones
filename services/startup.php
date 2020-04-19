@@ -47,7 +47,7 @@ if(Context::Settings()->Debug()->debug)
 	Profiling::BeginTimer("Debug");
 	$app['debug'] = true;
 	Debug::enable();
-	
+
 	Context::Settings()->Debug()->showErrors = true;
 
 	$app['twig.options'] = array('cache' => false);
@@ -62,7 +62,7 @@ if(Context::Settings()->Debug()->debug)
 	$app->register(new WebProfilerServiceProvider(), array(
 		'profiler.cache_dir' => __DIR__.'/var/cache/profiler',
 	));*/
-	Profiling::EndTimer("Debug");
+	Profiling::EndTimer();
 }
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
