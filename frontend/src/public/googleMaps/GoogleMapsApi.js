@@ -227,7 +227,7 @@ GoogleMapsApi.prototype.CircleCompleted = function (circle) {
 			Lon: h.trimNumber(Math.abs(radius.lng() - center.lng())),
 		},
 	};
-	this.segmentedMap.Clipping.SetClippingRegionCircle(clippingCircle);
+	this.segmentedMap.Clipping.SetClippingCircle(clippingCircle);
 
 	//borra el círculo
 	circle.setMap(null);

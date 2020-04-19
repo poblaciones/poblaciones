@@ -5,6 +5,9 @@
 - Autogeneración de carpetas de storage.
 - Fix: la publicación pisaba los extents si no había modificaciones de datos.
 - Administración: listado de regiones.
+- Al seleccionar una región o círculo de buffer se perdía el fijado de nivel.
+- Fix: 'zoom al indicador' cuando había un clipping pequeño (< 90% de la cobertura del indicador) no liberaba la selección.
+
 
 v2.18 (2020-04-15)
 - Posibilidad de agregar indicadores externos en una cartografía a la lista de indicadores del panel superior.

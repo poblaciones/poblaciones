@@ -69,6 +69,10 @@ Mercator.prototype.ProjectGeoJsonFeatures = function(features) {
 		features: retFeatures
 	};
 };
+Mercator.prototype.ProjectCoordinate = function (coord) {
+	var p = this.fromLatLngToPoint({ lat: coord.Lat, lng: coord.Lon });
+	return { Lat: p.y, Lon: p.x };
+};
 
 Mercator.prototype.ProjectCoords = function (coords) {
 	var coordsGroup = [];
@@ -145,17 +149,15 @@ Mercator.prototype.rectanglesIntersection = function (R1free, R2free) {
 			}
 		};
 	} else {
-		return {
-			Min: {
-				Lat: Math.min(R1.Min.Lat, R2.Min.Lat),
-				Lon: Math.min(R1.Min.Lon, R2.Min.Lon)
-			},
-			Max: {
-				Lat: Math.max(R1.Max.Lat, R2.Max.Lat),
-				Lon: Math.max(R1.Max.Lon, R2.Max.Lon)
-			}
-		};
+		return null;
 	}
+};
+Mercator.prototype.rectanglePixelArea = function (r) {
+	var rProjected = {
+		Min: this.ProjectCoordinate(r.Min),
+		Max: this.ProjectCoordinate(r.Max)
+	};
+	return Math.abs((rProjected.Max.Lat - rProjected.Min.Lat) * (rProjected.Max.Lon - rProjected.Min.Lon));
 };
 
 Mercator.prototype.rectanglesIntersect = function (R1free, R2free) {

@@ -12,7 +12,7 @@
 									:style="'padding-left: ' + (item.Level * 18) + 'px'">{{ item.Caption }} ({{ item.LabelsMinZoom }}-{{ item.LabelsMaxZoom }})</span></md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Código">{{ item.FieldCodeName }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Ícono">{{ item.Symbol }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Elementos">{{ item.ChildCount }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Ítems">{{ item.ChildCount }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Buscador">{{ formatBool(!item.NoAutocomplete) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Segmenta">{{ formatBool(item.IsCrawlerIndexer) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">

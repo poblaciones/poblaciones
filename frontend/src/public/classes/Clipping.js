@@ -38,9 +38,8 @@ Clipping.prototype.ProcessFrameMoved = function (bounds) {
 	}
 };
 
-Clipping.prototype.SetClippingRegionCircle = function (clippingCircle) {
+Clipping.prototype.SetClippingCircle = function (clippingCircle) {
 	this.frame.ClippingCircle = clippingCircle;
-	this.SegmentedMap.ReleasePins();
 	this.SegmentedMap.ClearMyLocation();
 	this.CreateClipping(true, true);
 };
@@ -90,7 +89,6 @@ Clipping.prototype.ResetClippingRegion = function () {
 };
 Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, clipForZoomOnly) {
 	this.frame.ClippingCircle = null;
-	this.SegmentedMap.ReleasePins();
 	this.SegmentedMap.ClearMyLocation();
 	this.frame.ClippingRegionId = clippingRegionId;
 	this.CreateClipping(true, moveCenter, clipForZoomOnly);

@@ -70,18 +70,39 @@ export default {
 			var extents = this.metric.SelectedLevel().Extents;
 			if (!window.SegMap.Clipping.FrameHasNoClipping()) {
 				var m = new Mercator();
-				extents = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
+				if (window.SegMap.Clipping.FrameHasClippingCircle()) {
+					var intersect = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
+					if (this.shouldClearSelection(intersect, extents)) {
+						window.SegMap.Clipping.ResetClippingCircle();
+					}
+				}
+				if (window.SegMap.Clipping.FrameHasClippingCircle() == false &&
+								window.SegMap.Clipping.FrameHasClippingRegionId()) {
+					var intersect = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
+					if (this.shouldClearSelection(intersect, extents)) {
+						window.SegMap.Clipping.ResetClippingRegion();
+					}
+				}
 			}
 			window.SegMap.MapsApi.FitEnvelope(extents);
 			this.$refs.zoomExtentsBtn.blur();
 		},
+		shouldClearSelection(intersect, extents) {
+			if (intersect === null) {
+				return true;
+			}
+			var m = new Mercator();
+			// Se fija si el área de intersección es menor al área del indicador
+			// con 10% de tolerancia
+			var area1 = m.rectanglePixelArea(intersect);
+			var area2 = m.rectanglePixelArea(extents);
+			return area1 < area2 * .9;
+		}
 	},
 	computed: {
 
 	}
-};
-
-</script>
+};</script>
 
 <style scoped>
   .vellipsis:after {

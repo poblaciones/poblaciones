@@ -105,6 +105,8 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 		this.cancelUpdateSummary('cancelled');
 	}
 	this.IsUpdatingSummary = true;
+	this.IsUpdatingRanking = true;
+
 	window.SegMap.Get(window.host + '/services/metrics/GetSummary', {
 		params: h.getSummaryParams(metric, window.SegMap.frame),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateSummary = c; }),
