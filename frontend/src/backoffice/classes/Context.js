@@ -7,7 +7,7 @@ import axiosClient from '@/common/js/axiosClient';
 export default Context;
 
 function Context() {
-	// 	(window.Context.User.privileges puede ser:
+	// 	(window.Context.User.Privileges puede ser:
 	// 'A': Administrador, 'E': Editor de datos públicos,
 	// 'L': Lector de datos públicos, 'P': Usuario estándar
 	this.User = null;

@@ -19,9 +19,7 @@ export default {
 		return {	};
 	},
 	computed: {
-		user() {
-			return window.Context.User;
-		}
+
 	},
 	methods: {
 		goAdmin() {

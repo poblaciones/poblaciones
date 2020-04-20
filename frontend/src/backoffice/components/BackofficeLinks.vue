@@ -24,9 +24,6 @@ export default {
 	},
 	computed: {
 		Work() { return window.Context.CurrentWork; },
-		user() {
-			return window.Context.User;
-		},
 		url() {
 			return this.Work.properties.Metadata.Url;		
 		}

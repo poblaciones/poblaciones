@@ -67,12 +67,12 @@ ActiveWork.prototype.ThisWorkLabel = function () {
 };
 
 ActiveWork.prototype.CanEdit = function () {
-	if (window.Context.User.privileges === 'A' ||
-		(this.IsPublicData() && window.Context.User.privileges === 'E')) {
+	if (window.Context.User.Privileges === 'A' ||
+		(this.IsPublicData() && window.Context.User.Privileges === 'E')) {
 		return true;
 	}
 	for (var i = 0; i < this.Permissions.length; i++) {
-		if (this.Permissions[i].User.Email === window.Context.User.user
+		if (this.Permissions[i].User.Email === window.Context.User.User
 			&& this.Permissions[i].Permission !== 'V') {
 			return true;
 		}
@@ -95,11 +95,11 @@ ActiveWork.prototype.GetMetricsList = function () {
 };
 
 ActiveWork.prototype.CanAdmin = function () {
-	if (window.Context.User.privileges === 'A') {
+	if (window.Context.User.Privileges === 'A') {
 		return true;
 	}
 	for (var i = 0; i < this.Permissions.length; i++) {
-		if (this.Permissions[i].User.Email === window.Context.User.user && this.Permissions[i].Permission === 'A') {
+		if (this.Permissions[i].User.Email === window.Context.User.User && this.Permissions[i].Permission === 'A') {
 			return true;
 		}
 	}

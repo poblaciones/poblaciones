@@ -95,7 +95,7 @@ export default {
 }
 
 .rankingBox {
-		padding: 16px 0px 0px 0px;
-	}
+	padding: 16px 0px 0px 0px;
+}
 
 </style>

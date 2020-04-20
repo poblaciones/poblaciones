@@ -8,7 +8,7 @@ module.exports = {
 				withCredentials: true,
 				params: {}
 			}).then(function(res) {
-				if(res.data.logged === false) {
+				if(res.data.Logged === false) {
 					loc.redirectLogin();
 				} else {
 					setter(res.data);
@@ -24,7 +24,19 @@ module.exports = {
 		url = this.AppendParam(url, 'ask', 1);
 		document.location = url;
 	},
-	AppendParam(url, param, value){
+	redirectBackoffice() {
+		var url = window.host + '/users';
+		document.location = url;
+	},
+	redirectAdmin() {
+		var url = window.host + '/admins';
+		document.location = url;
+	},
+	logoff() {
+		var url = window.host + '/authenticate/logoff';
+		document.location = url;
+	},
+	AppendParam(url, param, value) {
 		url += (url.split('?')[1] ? '&' : '?') + param + '=' + encodeURIComponent(value);
 		return url;
 	}

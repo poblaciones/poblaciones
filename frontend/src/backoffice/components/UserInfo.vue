@@ -1,11 +1,12 @@
 <template>
 	<div v-if="this.user" class="userInfo">
-    <div>Usuario: {{ (user.master ? user.master + ' como ': '') }} {{ user.user }}</div>
+    <div>Usuario: {{ (user.master ? user.master + ' como ': '') }} {{ user.User }}</div>
 		<div><a class="whiteLink" @click="logoff">Cerrar sesión</a></div>
   </div>
 </template>
 
 <script>
+import a from '@/common/js/authentication';
 
 export default {
 	name: 'userInfo',
@@ -21,8 +22,7 @@ export default {
 	},
 	methods: {
 		logoff() {
-				var url = window.host + '/authenticate/logoff';
-				document.location = url;
+				a.logoff();
 		}
 	}
 };

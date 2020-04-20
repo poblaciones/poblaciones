@@ -1,6 +1,6 @@
 <template>
 	<div style="height: 100%">
-		<div v-if="user && user.logged == true" id="app">
+		<div v-if="user && user.Logged == true" id="app">
 			<router-view></router-view>
 		</div>
 		<invoker ref="invoker" />

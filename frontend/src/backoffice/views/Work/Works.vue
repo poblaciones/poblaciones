@@ -143,7 +143,7 @@ export default {
 			return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 		},
 		showIndexingColumn() {
-			return this.offerAdminActions && this.user.privileges === 'A';
+			return this.offerAdminActions && this.user.Privileges === 'A';
 		},
 		user() {
 			return window.Context.User;
@@ -232,10 +232,10 @@ export default {
 			}
 		},
 		canEdit(item){
-			if (window.Context.User.privileges === 'A') {
+			if (window.Context.User.Privileges === 'A') {
 				return true;
 			}
-			if (this.filter === 'P' && window.Context.User.privileges === 'E') {
+			if (this.filter === 'P' && window.Context.User.Privileges === 'E') {
 				return true;
 			}
 			return item.Privileges !== 'V';
