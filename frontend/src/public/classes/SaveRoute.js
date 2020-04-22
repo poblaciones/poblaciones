@@ -137,10 +137,12 @@ SaveRoute.prototype.callSubscriber = function (subscriber, coord) {
 		var group = res[g];
 		var groupValue = '';
 		for (var i = 0; i < group.length; i++) {
-			if (groupValue.length > 0 && !groupValue.endsWith(config.itemSeparator)) {
+			var nextValue = this.appendValue(group[i]);
+			if (groupValue.length > 0 && !groupValue.endsWith(config.itemSeparator)
+						&& nextValue) {
 				groupValue += config.itemSeparator;
 			}
-			groupValue += this.appendValue(group[i]);
+			groupValue += nextValue;
 		}
 		value += groupValue;
 	}
