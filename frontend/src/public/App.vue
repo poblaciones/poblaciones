@@ -3,7 +3,7 @@
 		<div id="panMain" class="split split-horizontal" style="position: relative">
 
 			<Search/>
-			<LeftPanel/>
+			<LeftPanel ref='leftPanel'/>
 			<MapPanel/>
 			<WorkPanel :work="work" ref="workPanel" />
 			<Fab ref="fabPanel" />
@@ -28,6 +28,7 @@ import LeftPanel from '@/public/components/panels/leftPanel';
 import Edit from '@/public/components/widgets/editButton';
 import SummaryPanel from '@/public/components/panels/summaryPanel';
 import Search from '@/public/components/widgets/search';
+
 import Split from 'split.js';
 import axios from 'axios';
 import Vue from 'vue';
@@ -46,6 +47,7 @@ export default {
 	},
 	created() {
 		window.Popups = {};
+		window.Panels = {};
 	},
 	data() {
 		return {
@@ -106,6 +108,7 @@ export default {
 			var start = new StartMap(loc.work, loc, loc.SetupMap);
 			start.Start();
 		});
+		window.Panels.Left = this.$refs.leftPanel;
 	},
 	methods: {
 		GetConfiguration() {

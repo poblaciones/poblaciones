@@ -8,6 +8,9 @@ import RestoreRoute from '@/public/classes/RestoreRoute';
 import Queue from './Queue';
 import axios from 'axios';
 import str from '@/common/js/str';
+import Vue from "vue";
+
+import InfoPanel from '@/public/components/panels/infoPanel';
 
 import h from '@/public/js/helper';
 import err from '@/common/js/err';
@@ -201,33 +204,40 @@ SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset) 
 	window.SegMap.Get(window.host + '/services/metrics/GetInfoWindowData', {
 		params: { f: fid, l: parent.MetricId, a: parent.LevelId, v: parent.MetricVersionId }
 	}).then(function (res) {
-		var text = '';
-		var data = res.data;
-		text += "<div style='max-width: 250px;'>";
-		text += "<div style='padding-bottom: 0px; padding-top:2px; font-size: 9px; text-transform: uppercase'>" + data.Type + '</div>';
-		text += "<div style='padding-bottom: 3px; padding-top:2px; font-size: 15px; font-weight: 500'>";
-		if (data.Title) {
-			text += data.Title;
-		} else if (data.Code) {
-			text += data.Code;
-		}
-		text += '</div>';
+		if(false) {
+			let InfoPanelClass = Vue.extend(InfoPanel);
+			res.data.position = position;
+			res.data.fid = fid;
+			let infoPanel = new InfoPanelClass({
+				propsData: { dt: res.data }
+			});
+			window.Panels.Left.Add(infoPanel, res.data);
+		} else {
+			var text = '';
+			var data = res.data;
+			text += "<div style='max-width: 250px;'>";
+			text += "<div style='padding-bottom: 0px; padding-top:2px; font-size: 9px; text-transform: uppercase'>" + data.Type + '</div>';
+			text += "<div style='padding-bottom: 3px; padding-top:2px; font-size: 15px; font-weight: 500'>";
+			if (data.Title) {
+				text += data.Title;
+			} else if (data.Code) {
+				text += data.Code;
+			}
+			text += '</div>';
 
-		text += "<div style='max-height: 300px;'>";
-		if (data.Code && data.Title) {
-			text += loc.InfoRequestedFormatLine({ Name: 'Código', Value: data.Code });
+			text += "<div style='max-height: 300px;'>";
+			if (data.Code && data.Title) {
+				text += loc.InfoRequestedFormatLine({ Name: 'Código', Value: data.Code });
+			}
+			data.Items.forEach(function (item) {
+				text += loc.InfoRequestedFormatLine(item);
+			});
+			text += "<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: "
+				+ h.trimNumber(position.Coordinate.Lat) + ',' + h.trimNumber(position.Coordinate.Lon) + '.</div>';
+			text += '</div>';
+			text += '</div>';
+			loc.MapsApi.ShowInfoWindow(text, position.Coordinate, offset);
 		}
-		data.Items.forEach(function (item) {
-			text += loc.InfoRequestedFormatLine(item);
-		});
-		if(text === '') {
-			//TODO: buscar un mejor mensaje o directamente sacar esto.
-			text += '<div>Sin datos.' + '</div>';
-		}
-		text += "<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: " + h.trimNumber(position.Coordinate.Lat) + ',' + h.trimNumber(position.Coordinate.Lon) + '.</div>';
-		text += '</div>';
-		text += '</div>';
-		loc.MapsApi.ShowInfoWindow(text, position.Coordinate, offset);
 	}).catch(function (error) {
 		err.errDialog('GetInfoWindowData', 'traer la información para el elemento seleccionado', error);
 	});
@@ -247,6 +257,7 @@ SegmentedMap.prototype.InfoRequestedFormatLine = function (item) {
 	text += '</div>';
 	return text;
 };
+
 SegmentedMap.prototype.AddMetricByIdAndWork = function (id, workId) {
 	return this.doAddMetricById(id, function (activeSelectedMetric) {
 		return activeSelectedMetric.GetVersionIndexByWorkId(workId);
