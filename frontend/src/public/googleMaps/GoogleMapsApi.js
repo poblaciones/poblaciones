@@ -71,7 +71,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 
 	var myMapOptions = {
 		mapTypeControlOptions: {
-			style: this.google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+//			style: this.google.maps.MapTypeControlStyle.DROPDOWN_MENU,
 			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
 		},
 	 scaleControl: true,

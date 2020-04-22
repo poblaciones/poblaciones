@@ -1,10 +1,15 @@
 import h from '@/public/js/helper';
 import str from '@/common/js/str';
 
+import FrameRouter from '@/public/router/FrameRouter';
+import ClippingRouter from '@/public/router/ClippingRouter';
+import SelectedMetricsRouter from '@/public/router/SelectedMetricsRouter';
+import LeftPanelRouter from '@/public/router/LeftPanelRouter';
+
 export default SaveRoute;
 
 // clase que administra la ruta. el formato es:
-//    /#@<lat>,<long>,<zoom>z&l<summaryClippingLevel>!r<clippingRegionId>!f<clippingFeatureId>!c<clippingCircle>/l=<metricsInfo>
+//    #/@<lat>,<long>,<zoom>z&l<summaryClippingLevel>!r<clippingRegionId>!f<clippingFeatureId>!c<clippingCircle>/l=<metricsInfo>
 // donde:
 // - clippingCircle: <centerLat>,<centerLong>,<radiusLat>,<radiusLong>
 // - metricsInfo: <metric>;<metric>;...<metricN>
@@ -19,6 +24,11 @@ function SaveRoute(map) {
 	this.Disabled = false;
 	this.DisableOnce = false;
 	this.lastState = null;
+
+	this.subscribers = [	new FrameRouter(),
+												new ClippingRouter(),
+		new SelectedMetricsRouter(),
+		new LeftPanelRouter()];
 };
 
 SaveRoute.prototype.UpdateRoute = function (coord) {
@@ -37,7 +47,7 @@ SaveRoute.prototype.UpdateRoute = function (coord) {
 	this.lastState = args;
 	var urlPath = document.location.pathname;
 	urlPath = h.ensureFinalBar(urlPath);
-	urlPath += '#/' + args;
+	urlPath += '#' + args;
 
 	window.history.pushState({ 'route': args }, '', urlPath);
 };
@@ -52,73 +62,104 @@ SaveRoute.prototype.RemoveWork = function () {
 		pathArray.pop();
 	}
 	var urlPath = pathArray.join('/');
-	urlPath += '/#/' + args;
+	urlPath += '/#' + args;
 
 	window.history.pushState({ 'route': args }, '', urlPath);
 };
 
 SaveRoute.prototype.calculateState = function (coord) {
-	var ret = this.framingToRoute(coord);
-	ret += this.calculateMetricsState();
+	var blocks = {};
+	for (var n = 0; n < this.subscribers.length; n++) {
+		var subscriber = this.subscribers[n];
+		var value = this.callSubscriber(subscriber, coord);
+		if (value !== '') {
+			// Lo pone en el bloque que le corresponde
+			var blockSignature = this.getFirstSignature(subscriber);
+			var existing = blocks[blockSignature];
+			var ele = { subscriber: subscriber, value: value };
+			if (existing) {
+				existing.push(ele);
+			} else {
+				blocks[blockSignature] = [ele];
+			}
+		}
+	}
+	// Lo pasa de bloques a string;
+	var ret = '';
+	for (var key in blocks) {
+    // check if the property/key is defined in the object itself, not in parent
+    if (blocks.hasOwnProperty(key)) {
+			var block = blocks[key];
+			var blockSignature = this.getFirstSignature(block[0].subscriber);
+			ret += '/' + blockSignature;
+			ret += this.addRecursive(block, null);
+		 }
+	}
 	return ret;
 };
 
-SaveRoute.prototype.calculateMetricsState = function () {
-	var segmentedMap = this.segmentedMap;
-	if (segmentedMap.Metrics.metrics.length === 0) {
+SaveRoute.prototype.getFirstSignature = function (subscriber) {
+	var config = subscriber.GetSettings();
+	var blockSignature = (Array.isArray(config.blockSignature) ? config.blockSignature[0] : config.blockSignature);
+	return blockSignature;
+};
+
+SaveRoute.prototype.addRecursive = function(valueList, startChar) {
+	for (var n = 0; n < valueList.length; n++) {
+		var config = valueList[n].subscriber.GetSettings();
+		if (config.startChar === startChar) {
+			var ret = valueList[n].value;
+			if (config.endChar) {
+				var continuation = this.addRecursive(valueList, config.endChar);
+				if (continuation !== '') {
+					ret += config.endChar + continuation;
+					return ret;
+				}
+			}
+			return ret;
+		}
+	}
+	return '';
+};
+
+SaveRoute.prototype.callSubscriber = function (subscriber, coord) {
+	var value = '';
+	var res = subscriber.ToRoute(coord);
+	// Lo formatea
+	var config = subscriber.GetSettings();
+	if (!config.groupSeparator) {
+		res = [res];
+	}
+	for (var g = 0; g < res.length; g++) {
+		if (value.length > 0 && !value.endsWith(config.groupSeparator)) {
+			value += config.groupSeparator;
+		}
+		var group = res[g];
+		var groupValue = '';
+		for (var i = 0; i < group.length; i++) {
+			if (groupValue.length > 0 && !groupValue.endsWith(config.itemSeparator)) {
+				groupValue += config.itemSeparator;
+			}
+			groupValue += this.appendValue(group[i]);
+		}
+		value += groupValue;
+	}
+	return value;
+};
+
+SaveRoute.prototype.appendValue = function (val) {
+	if (!Array.isArray(val)) {
+		return '' + val;
+	}
+	if (val.length === 3 && val[1] === val[2]) {
 		return '';
 	}
-	var metricsInfo = '';
-	for (var l = 0; l < segmentedMap.Metrics.metrics.length; l++) {
-		metricsInfo += (metricsInfo !== '' ? ';' : '') + segmentedMap.Metrics.metrics[l].$Router.ToRoute();
+	if (val.length === 1) {
+		return '' + val[0];
 	}
-	return '/l=' + metricsInfo;
+	if (val.length === 2 || val.length === 3) {
+		return '' + val[0] + val[1];
+	}
+	return '';
 };
 
-SaveRoute.prototype.framingToRoute = function (coord) {
-	var segmentedMap = this.segmentedMap;
-	var center;
-	if (coord === undefined) {
-		center = this.calculateCenter(segmentedMap.frame.Envelope);
-	} else {
-		center = this.coordinateToParam(coord);
-	}
-	var ret = '@' + center + ',' + segmentedMap.frame.Zoom + 'z';
-	var mapType = this.segmentedMap.GetMapTypeState();
-	if (mapType !== 'r') {
-		ret += ',' + mapType;
-	}
-	var clippingLevel = '';
-	if (segmentedMap.Clipping.clipping.Region.SelectedLevelIndex !== segmentedMap.Clipping.clipping.Region.Levels.length - 1 &&
-		segmentedMap.Clipping.clipping.Region.Levels && segmentedMap.Clipping.clipping.Region.SelectedLevelIndex < segmentedMap.Clipping.clipping.Region.Levels.length) {
-		clippingLevel = 'l' + segmentedMap.Clipping.clipping.Region.Levels[segmentedMap.Clipping.clipping.Region.SelectedLevelIndex].Revision;
-	}
-	if (segmentedMap.Clipping.FrameHasNoClipping() === false || clippingLevel !== '') {
-		ret += '&' + clippingLevel;
-		if (segmentedMap.frame.ClippingRegionId) {
-			ret += '!r' + segmentedMap.frame.ClippingRegionId;
-		}
-		if (segmentedMap.frame.ClippingFeatureId) {
-			ret += '!f' + segmentedMap.frame.ClippingFeatureId;
-		}
-		if (segmentedMap.frame.ClippingCircle) {
-			ret += '!c' + this.coordinateToParam(segmentedMap.frame.ClippingCircle.Center) + ',' +
-				segmentedMap.frame.ClippingCircle.Radius.Lat + ',' +
-				segmentedMap.frame.ClippingCircle.Radius.Lon;
-		}
-	}
-	return ret;
-};
-
-SaveRoute.prototype.calculateCenter = function (envelope) {
-	var coordinate = this.calculateCenterAsCoordinate(envelope);
-	return this.coordinateToParam(coordinate);
-};
-SaveRoute.prototype.calculateCenterAsCoordinate = function (envelope) {
-	var coordinate = { Lat: (envelope.Min.Lat + envelope.Max.Lat) / 2, Lon: (envelope.Min.Lon + envelope.Max.Lon) / 2 };
-	return coordinate;
-};
-
-SaveRoute.prototype.coordinateToParam = function (coordinate) {
-	return Number(coordinate.Lat).toFixed(7) + ',' + Number(coordinate.Lon).toFixed(7);
-};

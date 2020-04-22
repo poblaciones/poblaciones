@@ -3,14 +3,14 @@
 		<div id="panMain" class="split split-horizontal" style="position: relative">
 
 			<Search/>
-			<LeftPanel/>
+			<LeftPanel v-if="config.UsePanels" />
 			<MapPanel/>
 			<WorkPanel :work="work" ref="workPanel" />
 			<Fab ref="fabPanel" />
 			<Edit v-if="work.Current" ref="editPanel" :work="work" />
 		</div>
 		<div id="panRight" class="split split-horizontal">
-			<SummaryPanel :metrics="metrics"
+			<SummaryPanel :metrics="metrics" :config="config"
 				:clipping="clipping" :frame="frame" :user="user"
 				:toolbarStates="toolbarStates"></SummaryPanel>
 		</div>
@@ -150,6 +150,7 @@ export default {
 			segMap.Work = this.work;
 			segMap.afterCallback = afterLoaded;
 			window.SegMap = segMap;
+
 			this.$refs.fabPanel.loadFabMetrics();
 			mapApi.SetSegmentedMap(segMap);
 			segMap.SaveRoute.DisableOnce = true;

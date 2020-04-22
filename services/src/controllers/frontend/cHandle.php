@@ -15,6 +15,7 @@ use minga\framework\ErrorException;
 use helena\services\frontend\WorkService;
 use helena\db\frontend\ClippingRegionItemModel;
 use minga\framework\Profiling;
+use minga\framework\Performance;
 use helena\caches\WorkHandlesCache;
 
 use helena\db\frontend\MetadataModel;
@@ -27,6 +28,8 @@ class cHandle extends cPublicController
 
 	public function Show()
 	{
+		Performance::SetController('handle', 'get', true);
+
 		$uri = Request::GetRequestURI(true);
 		// Tiene las posibles estructura:
 		// (A) /handle/workid/metricid/metricName

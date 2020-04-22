@@ -47,7 +47,7 @@ class Links
 	public static function GetWorkMetricUrl($workId, $metricId, $regionItemId)
 	{
  		// http://desa.poblaciones.org/map/3501/#/l=6301&!r19166
-		return self::GetWorkUrl($workId) . '/#/l=' . $metricId . ($regionItemId ? '&!r' . $regionItemId : '');
+		return self::GetWorkUrl($workId) . '/#' . ($regionItemId ? '/&!r' . $regionItemId : '') . '/l=' . $metricId;
 	}
 	public static function GetWorkHandleUrl($workId, $metricId = null, $regionId = null, $regionItemId = null)
 	{

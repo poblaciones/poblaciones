@@ -192,11 +192,22 @@ module.exports = {
 		}
 		return ret;
 	},
+	getSafeValueBool(arr, key, def) {
+		var ret = this.getSafeValue(arr, key, def);
+		if (ret !== def) {
+			ret = (ret && ret !== '0');
+		}
+		return ret;
+	},
 	getSafeValue(arr, key, def) {
 		if (key in arr) {
 			return arr[key];
 		} else {
-			return def;
+			if (def === undefined) {
+				throw new Error('Parámetro no válido.');
+			} else {
+				return def;
+			}
 		}
 	},
 	getGeojsonCenter(feature) {

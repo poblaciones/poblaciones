@@ -21,6 +21,13 @@
 				<button type="button" class="btn btn-default btn-xs" data-toggle="dropdown" title="Compartir">
 					<i class="fas fa-share-alt" />
 				</button>
+				<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+					<a class="addthis_button_preferred_1"></a>
+					<a class="addthis_button_preferred_2"></a>
+					<a class="addthis_button_preferred_3"></a>
+					<a class="addthis_button_preferred_4"></a>
+					<a class="addthis_button_compact"></a>
+				</div>
 				<ul class="shareIt dropdown-menu">
 					<li>
 						<div class="dToolboxBox">
@@ -45,8 +52,8 @@
 					<i class="fas fa-user" />
 
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-						<li><a @click="authenticate.redirectBackoffice">Mis cartografías</a></li>
-						<li v-if="user.Privileges === 'A'"><a @click="authenticate.redirectAdmin">Administración</a></li>
+						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
+						<li v-if="user.Privileges === 'A'"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
 						<li><a href="#">Cuenta</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.logoff">Cerrar sesión</a></li>
@@ -71,6 +78,7 @@ export default {
 	props: [
 		'frame',
 		'user',
+		'config',
 		'toolbarStates'
 	],
 	components: {
@@ -153,7 +161,7 @@ export default {
 	},
 	computed: {
 		useGradients() {
-			return true;
+			return (this.config.UseGradients);
 		},
 		authenticate() {
 			return a;

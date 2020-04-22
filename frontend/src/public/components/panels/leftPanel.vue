@@ -15,7 +15,8 @@ export default {
 	// },
 	data() {
 		return {
-			open: false,
+			open: true,
+			collapsed: false,
 			panelWidth: '0',
 		};
 	},
@@ -33,26 +34,41 @@ export default {
 	methods: {
 		doClose(e) {
 			this.open = false;
+			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		doToggle(e) {
+			this.collapsed = !this.collapsed;
+			window.SegMap.SaveRoute.UpdateRoute();
+		},
+		updatePanel() {
 			var mapType = document.getElementsByClassName('gmnoprint gm-style-mtc');
 			var fav = document.getElementsByClassName('fab-wrapper');
 			var search = document.getElementsByClassName('searchBar');
-			if(this.panelWidth == '0') {
+
+			if (!this.collapsed) {
 				this.panelWidth = '300px';
-				mapType[0].style.left = '300px';
+				if (mapType.length) {
+					mapType[0].style.left = '300px';
+				}
 				fav[0].style.left = '315px';
 				search[0].style.left = '500px';
 				search[0].style.width = 'calc(100% - 700px)';
 			} else {
 				this.panelWidth = '0';
-				mapType[0].style.left = '0';
+				if (mapType.length) {
+					mapType[0].style.left = '0';
+				}
 				fav[0].style.left = '15px';
 				search[0].style.left = '300px';
 				search[0].style.width = 'calc(100% - 500px)';
 			}
 		},
 	},
+		watch: {
+			collapsed() {
+				this.updatePanel();
+			}
+		}
 };
 </script>
 

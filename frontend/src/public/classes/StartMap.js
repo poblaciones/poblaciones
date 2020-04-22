@@ -1,14 +1,7 @@
-import ActiveSelectedMetric from '@/public/classes/ActiveSelectedMetric';
-import ActiveLabels from '@/public/classes/ActiveLabels';
-import MetricsList from '@/public/classes/MetricsList';
-import SaveRoute from '@/public/classes/SaveRoute';
-import Clipping from '@/public/classes/Clipping';
-import Tutorial from '@/public/classes/Tutorial';
+import SelectedMetricsRouter from '@/public/router/SelectedMetricsRouter';
 import RestoreRoute from '@/public/classes/RestoreRoute';
 import axios from 'axios';
 import str from '@/common/js/str';
-
-import h from '@/public/js/helper';
 import err from '@/common/js/err';
 
 export default StartMap;
@@ -118,7 +111,8 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 			list.push({ Id: metrics[n] });
 		}
 	}
-	window.SegMap.RestoreRoute.LoadMetrics(list, true, true);
+	var router = new SelectedMetricsRouter();
+	router.LoadMetrics(list, true, true);
 };
 
 StartMap.prototype.StartByUrl = function () {

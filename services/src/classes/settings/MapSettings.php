@@ -14,5 +14,6 @@ class MapSettings
 
 	public $UseTileBlocks = false;
 	public $UseGradients = false;
+	public $UsePanels = false;
 	public $MaxQueueRequests = 5;
 }

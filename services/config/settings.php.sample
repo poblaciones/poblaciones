@@ -11,6 +11,11 @@ App::SetDebug(true);
 // **** Servidores
 Context::Settings()->Servers()->RegisterServers("http://servidor.poblaciones.org", "http://poblaciones.org");
 
+// **** Opcionales
+// Context::Settings()->Map()->UseTileBlocks = false;
+// Context::Settings()->Map()->UseGradients = false;
+
+
 // **** Keys de terceros
 Context::Settings()->Keys()->GoogleMapsKey = "GOOGLE_MAPS_KEY";
 
