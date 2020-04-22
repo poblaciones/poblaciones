@@ -3,9 +3,8 @@
 		<div style='padding-bottom: 0px; padding-top:2px; font-size: 9px; text-transform: uppercase'>{{ dt.Type }}</div>;
 		<div style='padding-bottom: 3px; padding-top:2px; font-size: 15px; font-weight: 500'>{{ title }}</div>
 		<div style='max-height: 300px;'>
-			{{ codeTitle }}
-			<span v-html="lines"></span>
-			<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: {{ lat }},{{ lon }}.</div>
+			<span v-html='codeTitle'></span>
+			<span v-html='lines'></span>			<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: {{ lat }},{{ lon }}.</div>
 		</div>
 	</div>
 </template>
@@ -23,7 +22,7 @@ export default {
 	data() {
 		return {
 			open: true,
-			myColor: '#' + (Math.random() * 0xFFFFFF << 0).toString(16),
+			myColor: 'pink',
 			fid: 0,
 		};
 	},
@@ -35,6 +34,9 @@ export default {
 		this.fid = this.dt.fid;
 	},
 	computed: {
+		// myColor() {
+		// 	return '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
+		// },
 		title() {
 			if (this.dt.Title) {
 				return this.dt.Title;

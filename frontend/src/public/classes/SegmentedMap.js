@@ -9,7 +9,7 @@ import Queue from './Queue';
 import axios from 'axios';
 import str from '@/common/js/str';
 import Vue from "vue";
-
+import PanelType from '@/public/enums/PanelType';
 import InfoPanel from '@/public/components/panels/infoPanel';
 
 import h from '@/public/js/helper';
@@ -206,13 +206,10 @@ SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset) 
 		params: { f: fid, l: parent.MetricId, a: parent.LevelId, v: parent.MetricVersionId }
 	}).then(function (res) {
 		if(loc.UsePanels) {
-			let InfoPanelClass = Vue.extend(InfoPanel);
 			res.data.position = position;
 			res.data.fid = fid;
-			let infoPanel = new InfoPanelClass({
-				propsData: { dt: res.data }
-			});
-			window.Panels.Left.Add(infoPanel, res.data);
+			res.data.type = PanelType.InfoPanel;
+			window.Panels.Left.Add(res.data);
 		} else {
 			var text = '';
 			var data = res.data;

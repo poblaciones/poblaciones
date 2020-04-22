@@ -4,26 +4,31 @@
 		<div v-on:click="doToggle" class='fa fa-2x fa-caret-left hand left-arrow'
 			  v-bind:class="{ 'fa-caret-left' : isCaretLeft, 'fa-caret-right': !isCaretLeft }"
 			  v-bind:style='{ left: panelWidth }'></div>
+
 		<div>
-			<span v-html="panel"></span>
+			<InfoPanel v-bind:dt="dt" v-if="typeInfo"/>
 		</div>
 	</div>
 </template>
 
 <script>
+import InfoPanel from '@/public/components/panels/infoPanel';
+import PanelType from '@/public/enums/PanelType';
 
 export default {
 	name: 'leftPanel',
-	// components: {
-	// },
+	components: {
+		InfoPanel,
+	},
 	data() {
 		return {
 			open: true,
 			collapsed: false,
 			panelWidth: '300px',
 			container: '',
-			panel: '',
 			panels: [],
+			dt: {},
+			typeInfo: false,
 		};
 	},
 	// created () {
@@ -45,24 +50,27 @@ export default {
 		Close() {
 			this.doClose();
 		},
-		Add(panel) {
-			panel.$mount();
+		Add(dt) {
 			if(this.open == false) {
 				this.open = true;
 				this.doToggle();
 			}
-			const i = this.panels.findIndex(function(el) {
-				return panel.fid === el.fid;
+			const index = this.panels.findIndex(function(el) {
+				return dt.fid === el.fid;
 			});
-			if(i > -1) {
-				this.panels.splice(i, 1);
+			if(index > -1) {
+				this.panels.splice(index, 1);
 			}
-			this.panels.push(panel);
+			this.panels.push(dt);
 			this.showPanel();
 		},
 		showPanel() {
 			const top = this.panels[this.panels.length - 1];
-			this.panel = top.$el.outerHTML;
+			// this.panel = top.$el.outerHTML;
+			this.dt = top;
+			if(this.dt.type == PanelType.InfoPanel) {
+				this.typeInfo = true;
+			}
 		},
 		doClose() {
 			if(this.panels.length > 1) {
@@ -93,7 +101,7 @@ export default {
 				search[0].style.width = 'calc(100% - 700px)';
 				this.showPanel();
 			} else {
-				this.panel = '';
+				this.typeInfo = false;
 				this.panelWidth = '0';
 				mapType[0].style.left = '0';
 				fav[0].style.left = '15px';
@@ -118,7 +126,7 @@ export default {
 	left:0;
 	top:0;
 	z-index:1;
-	background-color: red;
+	background-color: white;
 }
 .left-arrow {
 	position:absolute;
