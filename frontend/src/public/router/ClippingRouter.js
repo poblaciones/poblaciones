@@ -46,46 +46,58 @@ ClippingRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	var segmentedMap = window.SegMap;
 
 	// Reconoce el clipping del frame
-	var clippingRegionId = h.getSafeValue(args, 'r', null);
-	var clippingFeatureId = h.getSafeValue(args, 'f', null);
-	var clippingCircle = this.getClippingCircle(h.getSafeValue(args, 'c', null));
-	var clippingLevelName = h.getSafeValue(args, 'l', null);
-	if (clippingRegionId === null && clippingFeatureId === null && clippingCircle === null) {
-		return;
-	}
+	var clipping = this.clippingFromRoute(args);
+
 	segmentedMap.SaveRoute.Disabled = true;
-	if (this.clippingChanged(segmentedMap.frame,
-				 clippingRegionId, clippingFeatureId, clippingCircle, clippingLevelName)) {
-		segmentedMap.frame.ClippingFeatureId = clippingFeatureId;
-		segmentedMap.frame.ClippingRegionId = clippingRegionId;
-		segmentedMap.frame.ClippingCircle = clippingCircle;
+	if (this.clippingChanged(segmentedMap.frame, clipping)) {
+		segmentedMap.frame.ClippingFeatureId = clipping.ClippingFeatureId;
+		segmentedMap.frame.ClippingRegionId = clipping.ClippingRegionId;
+		segmentedMap.frame.ClippingCircle = clipping.ClippingCircle;
 		var loc = this;
 		if (segmentedMap.Clipping.FrameHasNoClipping()) {
 			segmentedMap.Clipping.ClippingCallback = function() {
-				segmentedMap.Clipping.RestoreClipping(clippingLevelName);
+				segmentedMap.Clipping.RestoreClipping(clipping.ClippingLevelName);
 			};
 		} else {
-			segmentedMap.Clipping.RestoreClipping(clippingLevelName, false);
+			segmentedMap.Clipping.RestoreClipping(clipping.ClippingLevelName, true);
 		}
 	}
 	segmentedMap.SaveRoute.Disabled = false;
 };
 
-ClippingRouter.prototype.clippingChanged = function (frame1, clippingRegionId, clippingFeatureId, clippingCircle, clippingLevelName) {
-	if (frame1.ClippingRegionId !== clippingRegionId ||
-		frame1.ClippingFeatureId !== clippingFeatureId) {
+ClippingRouter.prototype.clippingFromRoute = function (args) {
+	if (!args) {
+		args = [];
+	}
+	var clippingRegionId = h.getSafeValue(args, 'r', null);
+	var clippingFeatureId = h.getSafeValue(args, 'f', null);
+	var clippingCircle = this.getClippingCircle(h.getSafeValue(args, 'c', null));
+	var clippingLevelName = h.getSafeValue(args, 'l', null);
+
+	var clipping = {
+		ClippingRegionId: clippingRegionId,
+		ClippingCircle: clippingCircle,
+		ClippingLevelName: clippingLevelName,
+		ClippingFeatureId: clippingFeatureId
+	};
+	return clipping;
+};
+
+ClippingRouter.prototype.clippingChanged = function (frame1, clipping) {
+	if (frame1.ClippingRegionId !== clipping.ClippingRegionId ||
+		frame1.ClippingFeatureId !== clipping.ClippingFeatureId) {
 		return true;
 	}
-	if ((frame1.ClippingCircle === null) !== (clippingCircle === null)) {
+	if ((frame1.ClippingCircle === null) !== (clipping.ClippingCircle === null)) {
 		return true;
 	}
-	if (frame1.ClippingCircle === null && clippingCircle === null) {
+	if (frame1.ClippingCircle === null && clipping.ClippingCircle === null) {
 		return false;
 	}
-	if (frame1.ClippingCircle.Center.Lat !== clippingCircle.Center.Lat ||
-		frame1.ClippingCircle.Center.Lon !== clippingCircle.Center.Lon ||
-		frame1.ClippingCircle.Radius.Lat !== clippingCircle.Radius.Lat ||
-		frame1.ClippingCircle.Radius.Lon !== clippingCircle.Radius.Lon) {
+	if (frame1.ClippingCircle.Center.Lat !== clipping.ClippingCircle.Center.Lat ||
+		frame1.ClippingCircle.Center.Lon !== clipping.ClippingCircle.Center.Lon ||
+		frame1.ClippingCircle.Radius.Lat !== clipping.ClippingCircle.Radius.Lat ||
+		frame1.ClippingCircle.Radius.Lon !== clipping.ClippingCircle.Radius.Lon) {
 		return true;
 	}
 	return false;

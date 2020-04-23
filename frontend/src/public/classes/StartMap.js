@@ -105,7 +105,13 @@ StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 StartMap.prototype.LoadStartMetrics = function (startup) {
 	// Carga la lista de indicadores
 	var list = [];
-	if (startup.ActiveMetrics) {
+
+	var selectedMetricsRouter = new SelectedMetricsRouter();
+	var metricsFromRoute = new RestoreRoute().parseRoute(this.hash, selectedMetricsRouter);
+	if (metricsFromRoute) {
+		list = selectedMetricsRouter.parseMetrics(metricsFromRoute);
+	}
+	if (startup.ActiveMetrics && list.length === 0) {
 		var metrics = startup.ActiveMetrics.split(',');
 		for (var n = 0; n < metrics.length; n++) {
 			list.push({ Id: metrics[n] });
