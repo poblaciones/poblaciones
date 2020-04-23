@@ -4,7 +4,8 @@
 		<div style='padding-bottom: 3px; padding-top:2px; font-size: 15px; font-weight: 500'>{{ title }}</div>
 		<div style='max-height: 300px;'>
 			<span v-html='codeTitle'></span>
-			<span v-html='lines'></span>			<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: {{ lat }},{{ lon }}.</div>
+			<span v-html='lines'></span>
+			<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: {{ lat }},{{ lon }}.</div>
 		</div>
 	</div>
 </template>

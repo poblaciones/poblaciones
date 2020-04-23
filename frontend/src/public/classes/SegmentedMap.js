@@ -10,7 +10,6 @@ import axios from 'axios';
 import str from '@/common/js/str';
 import Vue from "vue";
 import PanelType from '@/public/enums/PanelType';
-import InfoPanel from '@/public/components/panels/infoPanel';
 
 import h from '@/public/js/helper';
 import err from '@/common/js/err';
