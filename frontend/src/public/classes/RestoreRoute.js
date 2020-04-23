@@ -105,7 +105,7 @@ RestoreRoute.prototype.getPart = function (route, config) {
 RestoreRoute.prototype.RouteHasLocation = function (route) {
 	var subscriber = new FrameRouter();
 	var arr = this.parseRoute(route, subscriber);
-	if (subscriber.frameFromRoute(arr) !== null) {
+ 	if (subscriber.frameFromRoute(arr) !== null) {
 		return true;
 	}
 	subscriber = new ClippingRouter();
