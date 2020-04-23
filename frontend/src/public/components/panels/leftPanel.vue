@@ -92,7 +92,7 @@ export default {
 			var mapType = document.getElementsByClassName('gmnoprint gm-style-mtc');
 			var fav = document.getElementsByClassName('fab-wrapper');
 			var search = document.getElementsByClassName('searchBar');
-
+			/*
 			if (!this.collapsed) {
 				this.panelWidth = '300px';
 				mapType[0].style.left = '300px';
@@ -107,7 +107,7 @@ export default {
 				fav[0].style.left = '15px';
 				search[0].style.left = '300px';
 				search[0].style.width = 'calc(100% - 500px)';
-			}
+			}*/
 		},
 	},
 		watch: {

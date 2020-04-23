@@ -19,8 +19,7 @@ export default SaveRoute;
 // - varState: <varVisible><valueVisible><valueVisible>...<valueVisibleN> (todos en 0 o 1)
 //          Defaults: si todos los valueVisible están en 1, se omiten.
 
-function SaveRoute(map) {
-	this.segmentedMap = map;
+function SaveRoute() {
 	this.Disabled = false;
 	this.DisableOnce = false;
 	this.lastState = null;
