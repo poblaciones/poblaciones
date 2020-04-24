@@ -78,16 +78,16 @@ class SnapshotMetricVersionItemVariableModel
 	{
 		Profiling::BeginTimer();
 		// Calcula para cada level
-		$sql = "SELECT
-					ST_AsText(SELECT
-								PolygonEnvelope(LineString(
-				POINT(Min(ST_X(PointN(ExteriorRing(miv_envelope), 1))),
+		$sql = "SELECT ST_AsText(PolygonEnvelope(LineString(
+                POINT(Min(ST_X(PointN(ExteriorRing(miv_envelope), 1))),
 				MIN(ST_Y(PointN(ExteriorRing(miv_envelope), 1)))),
+
 				POINT(Max(ST_X(PointN(ExteriorRing(miv_envelope), 3))),
-				MAX(ST_Y(PointN(ExteriorRing(miv_envelope), 3)))))) AS Extents
-				FROM  snapshot_metric_version_item_variable
-				JOIN dataset ON dat_id = mvl_dataset_id
-				WHERE miv_metric_version_id = mvl_metric_version_id AND miv_geography_id = dat_geography_id)
+				MAX(ST_Y(PointN(ExteriorRing(miv_envelope), 3))))
+                              )))
+				FROM  metric_version_level
+                JOIN dataset ON dat_id = mvl_dataset_id
+                JOIN snapshot_metric_version_item_variable ON miv_metric_version_id = mvl_metric_version_id AND miv_geography_id = dat_geography_id
 				WHERE mvl_id = ?";
 		$res = App::Db()->fetchAssoc($sql, array($metricVersionLevel['mvl_id']));
 		$envelope = Envelope::FromDb($res);
