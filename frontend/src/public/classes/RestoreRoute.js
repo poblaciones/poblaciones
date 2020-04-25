@@ -3,16 +3,16 @@ import err from '@/common/js/err';
 
 import FrameRouter from '@/public/router/FrameRouter';
 import ClippingRouter from '@/public/router/ClippingRouter';
-import SelectedMetricsRouter from '@/public/router/SelectedMetricsRouter';
+import SaveRoute from './SaveRoute';
 
 export default RestoreRoute;
 
-function RestoreRoute(map) {
-	this.segmentedMap = map;
+function RestoreRoute() {
+
 };
 
 RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
-	this.subscribers = this.segmentedMap.SaveRoute.subscribers;
+	this.subscribers = new SaveRoute().subscribers;
 	// Restaura desde subscribers
 	for (var n = 0; n < this.subscribers.length; n++) {
 		var subscriber = this.subscribers[n];
@@ -105,6 +105,11 @@ RestoreRoute.prototype.getPart = function (route, config) {
 RestoreRoute.prototype.RouteHasLocation = function (route) {
 	var subscriber = new FrameRouter();
 	var arr = this.parseRoute(route, subscriber);
-	return (subscriber.frameFromRoute(arr) !== null);
+ 	if (subscriber.frameFromRoute(arr) !== null) {
+		return true;
+	}
+	subscriber = new ClippingRouter();
+	arr = this.parseRoute(route, subscriber);
+	return arr && Object.keys(arr).length > 0;
 };
 

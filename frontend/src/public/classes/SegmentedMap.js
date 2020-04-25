@@ -31,8 +31,8 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.DefaultTitle = 'Poblaciones';
 	this._axios = this.CreateAxios();
 	this.Metrics = new MetricsList(this, selectedMetricCollection);
-	this.SaveRoute = new SaveRoute(this);
-	this.RestoreRoute = new RestoreRoute(this);
+	this.SaveRoute = new SaveRoute();
+	this.RestoreRoute = new RestoreRoute();
 	this.afterCallback = null;
 	this.afterCallback2 = null;
 	this.Labels = new ActiveLabels(config);
