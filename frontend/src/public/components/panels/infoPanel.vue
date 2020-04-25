@@ -1,12 +1,18 @@
 <template>
-	<div v-if="open" style='max-width: 250px; overflow-y:auto' v-bind:style="{ 'background-color': myColor }">
-		<div style='padding-bottom: 0px; padding-top:2px; font-size: 9px; text-transform: uppercase'>{{ dt.Type }}</div>;
-		<div style='padding-bottom: 3px; padding-top:2px; font-size: 15px; font-weight: 500'>{{ title }}</div>
-		<div style='max-height: 300px;'>
-			<span v-html='codeTitle'></span>
-			<span v-html='lines'></span>
-			<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: {{ lat }},{{ lon }}.</div>
+	<div class='info'>
+		<div v-on:click="doBack" v-if='dt.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
+		<div v-on:click="doClose" v-else class='fa fa-times hand' style='float:right;margin:5px'></div>
+		<div class='type'>{{ dt.Type }}</div>
+		<div class='title'>{{ title }}</div>
+		<div class='item' v-if="dt.Code && dt.Title">
+			Código: {{ val }}
 		</div>
+		<span v-for="item in dt.Items" :key="item.Name">
+			<div class='item'>
+				{{ capitalize(item.Name) }}: {{ getValue(item) }}
+			</div>
+		</span>
+		<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 	</div>
 </template>
 
@@ -14,30 +20,14 @@
 import h from '@/public/js/helper';
 
 export default {
-	name: 'leftPanel',
+	name: 'infoPanel',
 	props: [
 		'dt',
 	],
-	// components: {
-	// },
-	data() {
-		return {
-			open: true,
-			myColor: 'pink',
-			fid: 0,
-		};
-	},
-	// created () {
-	// },
-	// beforeDestroy () {
-	// },
-	mounted() {
-		this.fid = this.dt.fid;
-	},
+	// components: { },
+	// data() { },
+	// beforeDestroy () { },
 	computed: {
-		// myColor() {
-		// 	return '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
-		// },
 		title() {
 			if (this.dt.Title) {
 				return this.dt.Title;
@@ -46,46 +36,79 @@ export default {
 			}
 			return '';
 		},
-		codeTitle() {
-			if (this.dt.Code && this.dt.Title) {
-				return this.InfoRequestedFormatLine({ Name: 'Código', Value: this.dt.Code });
-			}
-			return '';
-		},
-		lines() {
-			let ret = '';
-			const loc = this;
-			this.dt.Items.forEach(function (item) {
-				ret += loc.InfoRequestedFormatLine(item);
-			});
-			return ret;
+		val() {
+			return h.ensureFinalDot(this.isNullDash(this.dt.Code));
 		},
 		lat() {
-			return h.trimNumber(this.dt.position.Coordinate.Lat);
+			if(this.dt.position && this.dt.position.Coordinate && this.dt.position.Coordinate.Lat) {
+				return h.trimNumber(this.dt.position.Coordinate.Lat);
+			}
+			return 0;
 		},
 		lon() {
-			return h.trimNumber(this.dt.position.Coordinate.Lon);
+			if(this.dt.position && this.dt.position.Coordinate && this.dt.position.Coordinate.Lon) {
+				return h.trimNumber(this.dt.position.Coordinate.Lon);
+			}
+			return 0;
 		},
 	},
 	methods: {
-		InfoRequestedFormatLine(item) {
-			var text = "<div style='padding-top: 4px'>";
-			var val = (item.Caption !== null && item.Caption !== undefined ? item.Caption : item.Value);
-			if (val === null) {
-				val = '-';
+		doBack() {
+			this.$parent.doCloseInfo();
+		},
+		doClose() {
+			this.$parent.doClose(this.dt.fid);
+		},
+		capitalize(name) {
+			return h.capitalize(name);
+		},
+		isNullDash(str) {
+			if (str === undefined || str === null) {
+				return '-';
 			}
-			val = (val + '').trim();
-			if (val.length > 0 && val.substr(val.length - 1) !== '.') {
-				val += '.';
+			return str;
+		},
+		getValue(item) {
+			var val = item.Value;
+			if(item.Caption !== null && item.Caption !== undefined) {
+				val = item.Caption;
 			}
-			text += h.capitalize(item.Name) + ': ' + val;
-			text += '</div>';
-			return text;
+			return h.ensureFinalDot(this.isNullDash(val));
 		},
 	},
 };
 </script>
 
 <style scoped>
+.info {
+	border-radius: 6px;
+	border: solid 1px;
+	margin:4px;
+	overflow-y:auto;
+}
+.type {
+	padding-bottom: 0px;
+	padding-top: 2px;
+	font-size: 9px;
+	text-transform: uppercase;
+	text-align: center;
+}
+.title {
+	padding-bottom: 3px;
+	padding-top: 2px;
+	font-size: 15px;
+	font-weight: 500;
+	text-align: center;
+	font-weight: bold;
+}
+.pos {
+	padding-top: 11px;
+	font-size: 11px;
+	text-align: center;
+}
+.item {
+	margin-left: 10px;
+	padding-top: 4px
+}
 </style>
 

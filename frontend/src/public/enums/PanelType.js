@@ -1,7 +1,6 @@
-
 export default {
+	None: 0,
 	InfoPanel: 1,
-	OtherPanel: 2,
+	ListPanel: 2,
 };
-
 
