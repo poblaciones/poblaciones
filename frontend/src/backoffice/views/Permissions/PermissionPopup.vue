@@ -44,7 +44,7 @@ export default {
 		},
 	},
 	methods: {
-		show(){
+		show() {
 			this.user = '';
 			this.level = 'E';
 			this.openAdd = true;
@@ -53,7 +53,7 @@ export default {
       }, 100);
 
 		},
-		onAddOk(){
+		onAddOk() {
 			let loc = this;
 			this.$refs.invoker.do(this.Work,
 														this.Work.AddPermission,

@@ -94,7 +94,7 @@ ActiveSelectedMetric.prototype.SetSelectedVariableByName = function (name) {
 };
 
 ActiveSelectedMetric.prototype.Visible = function () {
-	return this.properties.Visible && this.SelectedLevel().SelectedVariableIndex !== -1 ;
+	return this.properties.Visible && this.SelectedLevel().SelectedVariableIndex !== -1;
 };
 
 ActiveSelectedMetric.prototype.UpdateSummary = function () {

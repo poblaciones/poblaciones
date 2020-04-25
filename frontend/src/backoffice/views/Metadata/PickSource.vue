@@ -19,7 +19,7 @@
 				<div class="md-layout-item">
 					<md-table v-model="sources" md-sort="caption" md-sort-order="asc" md-card="">
 						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell @click.native="selected = item; save(); "  class="selectable" md-label="Nombre" :md-sort-by="item.Caption">{{ item.Caption }}</md-table-cell>
+							<md-table-cell @click.native="selected = item; save(); " class="selectable" md-label="Nombre" :md-sort-by="item.Caption">{{ item.Caption }}</md-table-cell>
 							<md-table-cell @click.native="selected = item; save(); " md-label="Edición" class="selectable" :md-sort-by="item.Version">{{ item.Version }}</md-table-cell>
 							<md-table-cell @click.native="selected = item; save(); " md-label="Institución" class="selectable" :md-sort-by="getInstitutionCaption(item)">{{ getInstitutionCaption(item) }}</md-table-cell>
 						</md-table-row>
@@ -58,7 +58,7 @@ export default {
 		}
   },
   methods: {
-    CreateNewSource(){
+    CreateNewSource() {
 			var loc = this;
 			window.Context.Factory.GetCopy('Source', function(data) {
 					data.Work = loc.Work.properties;

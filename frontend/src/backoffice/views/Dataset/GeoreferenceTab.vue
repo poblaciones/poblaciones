@@ -39,7 +39,7 @@
 							<md-field>
 								<label for="state">Latitud</label>
 								<md-select v-model="latitude">
-									<md-option v-for="column in Dataset.GetNumericColumns()" v-bind:key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
+									<md-option v-for="column in Dataset.GetNumericColumns()" :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
 								</md-select>
 							</md-field>
 						</div>
@@ -49,7 +49,7 @@
 							<md-field>
 							<label for="state">Longitud</label>
 							<md-select v-model="longitude">
-								<md-option v-for="column in Dataset.GetNumericColumns()" v-bind:key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
+								<md-option v-for="column in Dataset.GetNumericColumns()" :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
 							</md-select>
 						</md-field>
 					</div>

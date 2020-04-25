@@ -13,30 +13,30 @@
 								label="Nombre de la fuente" ref="datasetInput" helper="Indique el nombre completo de la fuente,
 					evitando siglas o acrónimos. No incluya el año de producción de la información.
 					Ej. Censo Nacional Económico."
-									:maxlength="200"  v-model="item.Caption" />
+									:maxlength="200" v-model="item.Caption" />
 						</div>
 						<div class="md-layout-item md-size-30 md-small-size-100">
 							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 							label="Edición" helper="Año de producción de la fuente o versión"
-								:maxlength="15"  v-model="item.Version" />
+								:maxlength="15" v-model="item.Version" />
 						</div>
 						<div class="md-layout-item md-size-55 md-small-size-100">
 							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 											label="Autores" helper="Autores personales si correspondiera (Ej. Juana Méndez)"
-											:maxlength="200"  v-model="item.Authors" />
+											:maxlength="200" v-model="item.Authors" />
 						</div>
 
 						<div class="md-layout-item md-size-50 md-small-size-100">
 							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 											label="Página web" helper="Sitio web correspondiente a la fuente (Ej. https://mical.gov/datum/2010)"
-											:maxlength="255"  v-model="item.Web" />
+											:maxlength="255" v-model="item.Web" />
 						</div>
 						<div class="md-layout-item md-size-10 md-small-size-0">
 						</div>
 						<div class="md-layout-item md-size-40 md-small-size-100">
 							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 											label="Entrada en Wikipedia" helper="(Ej. https://es.wikipedia.org/wiki/Cen2010)"
-											:maxlength="200"  v-model="item.Wiki" />
+											:maxlength="200" v-model="item.Wiki" />
 						</div>
 					</div>
 				</md-tab>
@@ -50,7 +50,7 @@
 				<md-tab md-label="Contacto">
 					<div v-if="item.Contact" class="md-layout md-gutter">
 							<div class="md-layout-item md-size-80">
-								<mp-simple-text  label="Nombre" :canEdit="Work.CanEdit()" @enter="save"
+								<mp-simple-text label="Nombre" :canEdit="Work.CanEdit()" @enter="save"
 									helper="Nombre completo de la persona a contactar por consultas. Ej. Catalina Gorriti."
 									v-model="item.Contact.Person" :maxlength="200" />
 							</div>

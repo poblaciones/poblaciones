@@ -17,28 +17,28 @@
 				<div class="md-layout-item md-size-50 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 									label="Correo electrónico" helper="Dirección de correo electrónico institucional."
-									:maxlength="50"  v-model="item.Email" />
+									:maxlength="50" v-model="item.Email" />
 				</div>
 
 				<div class="md-layout-item md-size-50 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 									label="Teléfono" helper="Sitio web correspondiente a la fuente (Ej. https://mical.gov/datum/2010)"
-									:maxlength="50"  v-model="item.Phone" />
+									:maxlength="50" v-model="item.Phone" />
 				</div>
 				<div class="md-layout-item md-size-65 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 									label="Dirección postal" helper="Ubicación de la institución (Ej. Carreli 1720 (2321) Montevideo"
-									:maxlength="200"  v-model="item.Address" />
+									:maxlength="200" v-model="item.Address" />
 				</div>
 				<div class="md-layout-item md-size-35 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 									label="País" helper="País correspondiente a la dirección indicada (Ej. Uruguay)"
-									:maxlength="50"  v-model="item.Country" />
+									:maxlength="50" v-model="item.Country" />
 				</div>
 				<div class="md-layout-item md-size-65 md-small-size-100">
-					<mp-simple-text :canEdit="Work.CanEdit()"  @enter="save"
+					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 									label="Página web" helper="Sitio web de la institución (Ej. https://vedol.gov/)"
-									:maxlength="255"  v-model="item.Web" />
+									:maxlength="255" v-model="item.Web" />
 				</div>
 			</div>
 

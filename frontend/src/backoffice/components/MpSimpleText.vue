@@ -3,8 +3,8 @@
 		<md-field>
 			<label class="mp-label" :style="(this.multiline ? 'top: 6px !important' : '')">
 				{{ this.label }}</label>
-			<md-input :class="(isDisabled ? 'mpDisabled' : '')" md-toggle-password v-if="!this.multiline" :placeholder="(placeholder ? placeholder : '')"  :type="type" :disabled="isDisabled"
-								style="font-size: 19px" autocomplete="off"  v-model="localValue" :ref="inputId"  :maxlength="(!isDisabled ? maxlength : 0)" :id="inputId" />
+			<md-input :class="(isDisabled ? 'mpDisabled' : '')" md-toggle-password v-if="!this.multiline" :placeholder="(placeholder ? placeholder : '')" :type="type" :disabled="isDisabled"
+								style="font-size: 19px" autocomplete="off" v-model="localValue" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" :id="inputId" />
 			<md-textarea v-if="this.multiline" :disabled="isDisabled" autocomplete="off"
 									 class="mp-area" :class="(isDisabled ? 'mpDisabled' : '')" :style="minHeightRows" v-model="localValue"
 									 :maxlength="(canEdit ? maxlength : 0)" :ref="inputId" :id="inputId" />
@@ -27,7 +27,7 @@ export default {
   name: 'MpSimpleText',
 		components: {
   },
-	methods:  {
+	methods: {
 		ProcessTip(text) {
 			text = str.Replace(text, "<br>", "#__BR__#");
 			var encoded = this.htmlEncode(text);
@@ -68,7 +68,7 @@ export default {
 			return 'md-layout-item md-size-' + (this.size ? this.size : 100);
 		},
 		minHeightRows() {
-			return { 'min-height' : (32 + 17 * this.rows) + 'px' };
+			return { 'min-height': (32 + 17 * this.rows) + 'px' };
 		},
 		isDisabled() {
 			return !this.canEdit || this.$attrs.disabled;
@@ -100,7 +100,7 @@ export default {
   props: {
     label: String,
 		maxlength: Number,
-		minimum:  { type: Number, default: -1 },
+		minimum: { type: Number, default: -1 },
 		maximum: { type: Number, default: -1 },
 		multiline: Boolean,
 		canEdit: { type: Boolean, default: true },

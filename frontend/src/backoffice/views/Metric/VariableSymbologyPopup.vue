@@ -91,7 +91,7 @@
 						<div class="md-layout-item md-size-100" >
 							<div class="separator">{{ CategoriesLabel }}</div>
 							<md-list style="overflow-y: auto;" :style="(this.CutMode === 'V' ? 'height: 156px;':'height: 185px;')">
-								<md-list-item v-for="item in Variable.Values" v-bind:key="item.Id"
+								<md-list-item v-for="item in Variable.Values" :key="item.Id"
 															:value="item.Id" class="itemSmall">
 									<mp-color-picker :canEdit="canEdit" :isDisabledObject="item"
 													:ommitHexaSign="true" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
@@ -134,8 +134,8 @@
 
 						<div class="md-layout-item md-size-100">
 							<div class="helper" style="margin-bottom: -10px">Colores</div>
-							<md-radio v-model="Variable.Symbology.PaletteType"  :disabled="!canEdit" class="md-primary" value="P">Paleta</md-radio>
-							<md-radio v-model="Variable.Symbology.PaletteType"  :disabled="!canEdit" class="md-primary" value="G">Gradiente</md-radio>
+							<md-radio v-model="Variable.Symbology.PaletteType" :disabled="!canEdit" class="md-primary" value="P">Paleta</md-radio>
+							<md-radio v-model="Variable.Symbology.PaletteType" :disabled="!canEdit" class="md-primary" value="G">Gradiente</md-radio>
 						</div>
 
 						<div class="md-layout-item md-size-100" style="position: relative;">
@@ -146,7 +146,7 @@
 								<md-field style="max-width: 265px">
 									<label>Paleta</label>
 									<md-select :disabled="!canEdit" v-model="Variable.Symbology.Rainbow" md-dense ref="paletteSelect">
-										<md-option v-for="palette in palettes" v-bind:key="palette.Id" :value="palette.Id">
+										<md-option v-for="palette in palettes" :key="palette.Id" :value="palette.Id">
 											{{ palette.Caption }}
 											<span v-if="palette.Id !== 100" class="palette"
 													:style="'position: absolute; top: 7px; background-position: 0px ' + paletteOffset(palette.Id) + 'px;'">
@@ -217,7 +217,7 @@ const DEFAULT_TO_COLOR = 'fb0000';
 
 export default {
   name: 'variableGroups',
-  methods:  {
+  methods: {
 		swapColors() {
 			var t = this.Variable.Symbology.ColorFrom;
 			this.Variable.Symbology.ColorFrom = this.Variable.Symbology.ColorTo;
@@ -271,7 +271,7 @@ export default {
 			var isLast = (n === this.Variable.Values.length - 1);
 			var isNull = (item.Value === null);
 			if (isNull) {
-				this.nullValueLabel = item.Caption; 
+				this.nullValueLabel = item.Caption;
 				this.activateNullValueLabel = true;
 			} else {
 				this.$refs.valuePopup.show(this.Variable, this.customColors, item, previous, isLast);

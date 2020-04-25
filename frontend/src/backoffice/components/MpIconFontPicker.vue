@@ -1,5 +1,5 @@
 <template>
-	<div id="iconPicker" v-if="showPicker"  v-on-clickaway="hide">
+	<div id="iconPicker" v-if="showPicker" v-on-clickaway="hide">
 		<div class="iconPicker__header">
 			<input type="text" :placeholder="searchPlaceholder" @keyup="filterIcons($event)">
 		</div>
@@ -21,7 +21,7 @@ export default {
     MpIconFontPanel
 	},
 	props: {
-					'searchBox' : String,
+					'searchBox': String,
 					'value': String },
 	mixins: [ clickaway ],
 	data () {

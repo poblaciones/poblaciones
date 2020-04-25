@@ -96,10 +96,10 @@ export default {
 					return 'Indeterminado';
 			}
 		},
-		onAdd(){
+		onAdd() {
 			this.$refs.editPopup.show();
 		},
-		onDelete(item){
+		onDelete(item) {
 			if (this.Work.IsLastAdministrator(item)) {
 				alert('Debe asignar otro administrador antes de poder remover al último administrador de ' + this.Work.ThisWorkLabel() + '.');
 				return;

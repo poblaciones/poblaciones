@@ -45,7 +45,7 @@ module.exports = {
 		}
 	},
 	ReplaceByIdOrAdd(arr, item) {
-		if (!this.ContainsById(arr, item.Id)){
+		if (!this.ContainsById(arr, item.Id)) {
 			this.Add(arr, item);
 		} else {
 			this.ReplaceById(arr, item.Id, item);

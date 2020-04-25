@@ -9,7 +9,7 @@
 						<a type="button" class="close" @click="cancel">x</a>
 						<h4 class="title">
 							<slot name="title">
-							{{title}}
+							{{ title }}
 							</slot>
 						</h4>
 						</slot>
@@ -21,8 +21,8 @@
 					<!--Footer-->
 					<div class="modal-footer" v-if="showOk">
 						<slot name="footer">
-						<button v-if="showCancel" type="button" :class="cancelClass" @click="cancel">{{cancelText}}</button>
-						<button type="button" :class="okClass" @click="ok">{{okText}}</button>
+						<button v-if="showCancel" type="button" :class="cancelClass" @click="cancel">{{ cancelText }}</button>
+						<button type="button" :class="okClass" @click="ok">{{ okText }}</button>
 						</slot>
 					</div>
 				</div>

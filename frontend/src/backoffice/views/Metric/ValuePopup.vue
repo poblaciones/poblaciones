@@ -12,9 +12,9 @@
 									  v-model="previousValue"
 								></mp-simple-text>
 				</div>
-				<div  v-if="!isLast" class="md-layout-item md-size-45 md-small-size-100">
+				<div v-if="!isLast" class="md-layout-item md-size-45 md-small-size-100">
 						<mp-simple-text @enter="save"
-							label="Hasta"  ref="maxInput"
+							label="Hasta" ref="maxInput"
 							helper="Indique el valor máximo."
 							  v-model="itemValue"
 								></mp-simple-text>
@@ -39,7 +39,7 @@ export default {
   name: 'ValuePopup',
 	components: {
 	},
-  methods:  {
+  methods: {
 		show(variable, customColors, item, previous, isLast) {
 			this.variable = variable;
 			this.item = item;

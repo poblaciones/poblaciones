@@ -25,7 +25,7 @@ export default {
 	computed: {
 		Work() { return window.Context.CurrentWork; },
 		url() {
-			return this.Work.properties.Metadata.Url;		
+			return this.Work.properties.Metadata.Url;
 		}
 	},
 	methods: {
@@ -54,7 +54,7 @@ export default {
 	},
 	watch: {
 		'Work.pendingChanges'() {
-			
+
 		}
 	}
 };

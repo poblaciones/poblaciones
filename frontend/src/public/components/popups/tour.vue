@@ -215,19 +215,19 @@ export default {
     };
   },
   computed: {
-    isFirstStep(){
+    isFirstStep() {
       return (this.step === 1);
     },
-    isLastStep(){
+    isLastStep() {
       return (this.step === this.max);
     },
-    hasDots(){
+    hasDots() {
       return (this.max > 1 && this.showDots);
     },
-    x_multiplier(){
+    x_multiplier() {
       return (this.orientation === 'row' ? -1 : 0);
     },
-    y_multiplier(){
+    y_multiplier() {
       return (this.orientation === 'row' ? 0 : -1);
     },
     axis() {
@@ -260,7 +260,7 @@ export default {
       this.modal.isOpen = !this.modal.isOpen;
       if(this.modal.isOpen) {
         let self = this;
-        setTimeout(function(){
+        setTimeout(function() {
           self.$sections = self.$el.querySelectorAll('section');
           self.max = self.$sections.length;
           self.goToStep(step);
@@ -277,7 +277,7 @@ export default {
       }
       this.toggleModal();
     },
-    setCssVars(){
+    setCssVars() {
       this.$el.style.setProperty('--x', (((this.step * 100) - 100) * this.x_multiplier) + '%');
       this.$el.style.setProperty('--y', (((this.step * 100) - 100) * this.y_multiplier) + '%');
       this.$el.style.setProperty('--axis', this.axis);
@@ -286,24 +286,24 @@ export default {
       this.$el.style.setProperty('--cross-reverse', this.crossReverse);
       // this.$el.style.setProperty('--vision', this.xray);
     },
-    goToStep(step){
+    goToStep(step) {
       this.step = step > this.max ? this.max : step < 1 ? 1 : step;
       this.currentSection = this.$sections[this.step - 1];
-      this.$sections.forEach(function(section){
+      this.$sections.forEach(function(section) {
         section.classList.remove('current');
       });
       this.currentSection.classList.add('current');
       this.currentSection.scrollTop = 0;
       this.setCssVars();
     },
-    skip(step){
+    skip(step) {
       this.step += step;
       this.goToStep(this.step);
     },
-    reset(){
+    reset() {
       this.goToStep(1);
     },
-    finish(){
+    finish() {
       this.toggleModal();
     }
   }

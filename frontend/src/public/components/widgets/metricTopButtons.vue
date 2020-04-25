@@ -102,7 +102,8 @@ export default {
 	computed: {
 
 	}
-};</script>
+};
+</script>
 
 <style scoped>
   .vellipsis:after {

@@ -1,5 +1,5 @@
 <template>
-	<Modal title="Descargar" ref="dialog" :showCancel="false"  :showOk="false">
+	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false">
 		<div v-if="metric">
 			<table class="localTable">
 				<tbody>

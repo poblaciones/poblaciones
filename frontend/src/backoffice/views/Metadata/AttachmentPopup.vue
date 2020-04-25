@@ -183,11 +183,11 @@ export default {
 			}
 			this.sending = true;
     },
-    afterComplete(file, response){
+    afterComplete(file, response) {
 			this.sending = false;
 			this.hasFiles = true;
     },
-    afterSuccess(file, response){
+    afterSuccess(file, response) {
 			this.sending = false;
 			this.hasFiles = true;
     }

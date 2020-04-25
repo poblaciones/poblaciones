@@ -17,15 +17,15 @@
 			<div class="summaryBlock">
 				<div class="summaryRow">
 					Habitantes <span class="pull-right" :class="getMuted()">
-						<animatedNumber v-bind:value="population" /></span>
+						<animatedNumber :value="population" /></span>
 				</div>
 				<div class="summaryRow">
 					Hogares <span class="pull-right" :class="getMuted()">
-						<animatedNumber v-bind:value="households" /></span>
+						<animatedNumber :value="households" /></span>
 				</div>
 				<div class="summaryRow">
 					Área (km<sup>2</sup>) <span class="pull-right" :class="getMuted()">
-						<animatedNumber v-bind:value="areaKm2" format="km" /></span>
+						<animatedNumber :value="areaKm2" format="km" /></span>
 				</div>
 			</div>
 			</h4>

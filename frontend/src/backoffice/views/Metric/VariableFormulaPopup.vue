@@ -1,6 +1,6 @@
 <template>
 	<div>
-	<md-dialog :md-active.sync="showDialog"  :md-click-outside-to-close="false">
+	<md-dialog :md-active.sync="showDialog" :md-click-outside-to-close="false">
 		<md-dialog-title>{{ title }}</md-dialog-title>
 		<md-dialog-content>
 		<invoker ref="invoker"></invoker>
@@ -62,7 +62,7 @@ export default {
 	name: 'metricVariables',
 	components: {
 	},
-	methods:  {
+	methods: {
 
 		formatColumn(column) {
 			return f.formatColumn(column);

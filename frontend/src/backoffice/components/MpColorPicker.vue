@@ -13,10 +13,10 @@
 			</div>
 			<div slot="popover">
 				<chrome-picker :disableAlpha="true" v-show="showPickerAdvanced" v-model="localValue" @input="updateValue"
-										class=""  />
+										class="" />
 				<compact-picker v-show="!showPickerAdvanced" v-model="localValue" @input="updateValue"
 										 :palette="palette"
-										class="floatCompact"  />
+										class="floatCompact" />
 				<div class="extraColor" @click="showPickerAdvanced = !showPickerAdvanced">
 					<md-icon v-if="showPickerAdvanced">arrow_drop_up</md-icon>
 					<md-icon v-else>arrow_drop_down</md-icon>
@@ -42,7 +42,7 @@ export default {
 		CompactPicker,
 		ChromePicker
 	},
-	methods:  {
+	methods: {
 		updateValue()
 		{
 			var val = this.localValueHex;

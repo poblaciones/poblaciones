@@ -18,7 +18,7 @@
 					v-model="contact.Phone" :maxlength="50" />
 			</div>
     </div>
-  </div>      
+  </div>
 </template>
 
 <script>

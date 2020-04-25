@@ -41,8 +41,8 @@ export default {
 		},
 	},
 	props: {
-		welcomeMessage:  { type: String, default: 'Bienvenido a Poblaciones' },
-		offerAdminLink:  { type: Boolean, default: false },
+		welcomeMessage: { type: String, default: 'Bienvenido a Poblaciones' },
+		offerAdminLink: { type: Boolean, default: false },
 		backColor: { type: String, default: null }
 	},
 	mounted() {

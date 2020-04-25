@@ -16,8 +16,8 @@
 				<div class="md-layout-item md-size-90 md-small-size-100">
 						<mp-simple-text :canEdit="selectedMetric === null"
 											label="Nuevo indicador" ref="metricInput"
-											helper="Ej. Acceso a agua potable"  @enter="save"
-											:maxlength="75"  v-model="newMetricName"
+											helper="Ej. Acceso a agua potable" @enter="save"
+											:maxlength="75" v-model="newMetricName"
 									></mp-simple-text>
 				</div>
 
@@ -34,9 +34,9 @@
 				<div class="md-layout-item md-size-60 md-small-size-100">
 					<mp-simple-text
 									ref="metricVersionInput"
-									label="Edición"  @enter="save"
+									label="Edición" @enter="save"
 									helper="Año de referencia de la edición o serie de datos. Ej. 2010"
-									:maxlength="20"  v-model="newMetricVersion"
+									:maxlength="20" v-model="newMetricVersion"
 								></mp-simple-text>
 				</div>
 
@@ -106,7 +106,7 @@ export default {
 			}, 100);
 
 		},
-		save(){
+		save() {
 			var loc = this;
 			if (this.newMetricName.trim().length === 0) {
 				alert('Debe indicar un nombre para el indicador.');

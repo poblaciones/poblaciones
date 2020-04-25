@@ -1,5 +1,5 @@
 <template>
-  <Modal :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false"  :showOk="false">
+  <Modal :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false" :showOk="false">
 		<div v-if="metric || work">
 			<table class="localTable">
 				<tbody>

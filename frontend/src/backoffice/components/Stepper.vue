@@ -32,7 +32,7 @@
 								<p>{{ errorDetail }}</p>
 							</div>
 							<div v-else="">
-								<img style="width: 120px; margin-top: 16px" :src="imageSrc"  alt="Listo">
+								<img style="width: 120px; margin-top: 16px" :src="imageSrc" alt="Listo">
 							</div>
 						</div>
 						<div>
@@ -55,7 +55,7 @@ import err from '@/common/js/err';
 
 export default {
   name: 'stepper',
-  methods:  {
+  methods: {
 		Start(startupState) {
 			// Se pone visible
 			this.Reset(startupState);

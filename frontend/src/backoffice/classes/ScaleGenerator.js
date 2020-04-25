@@ -193,7 +193,7 @@ ScaleGenerator.prototype.CopySymbology = function (variable, singleColor, custom
 	if (variable.Symbology.CutMode === 'M') {
 		// Copia los valores
 		var values = [];
-		var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+		var valuesNoNullElement = this.GetValuesNoNullElement(variable);
 		for (var n = 0; n < valuesNoNullElement.length; n++) {
 			values.push(valuesNoNullElement[n].Value);
 		}
@@ -354,7 +354,7 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 };
 
 ScaleGenerator.prototype.recalculateColors = function (variable, customColors) {
-	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable);
 	for (var n = 0; n < valuesNoNullElement.length; n++) {
 		var color = this.CalculateColor(variable, n, valuesNoNullElement.length, customColors);
 		valuesNoNullElement[n].FillColor = color;
@@ -366,7 +366,7 @@ ScaleGenerator.prototype.saveVisibilities = function (variable) {
 	if (!variable.Values) {
 		return ret;
 	}
-	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable);
 	for (var n = 0; n < valuesNoNullElement.length; n++) {
 		ret.Values.push(valuesNoNullElement[n].Visible);
 	}
@@ -380,7 +380,7 @@ ScaleGenerator.prototype.applyVisibilities = function (variable, previousVisibil
 	if (!variable.Values) {
 		return;
 	}
-	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable);
 	for (var n = 0; n < valuesNoNullElement.length; n++) {
 		if (n >= previousVisibilities.Values.length) {
 			break;
@@ -477,7 +477,7 @@ ScaleGenerator.prototype.CreateManualCategories = function (variable) {
 	next += 10;
 	variable.Values[variable.Values.length - 1].Value = next;
 	next += 10;
-	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable);
 	for (var n = valuesNoNullElement.length; n < total; n++) {
 		var value = ScaleGenerator.CreateValue('Etiqueta ' + (n + 1), next, null, n + 1);
 		next += 10;
@@ -489,7 +489,7 @@ ScaleGenerator.prototype.CreateManualCategories = function (variable) {
 ScaleGenerator.prototype.FixManualRanges = function (variable) {
 	// Regenera captions
 	var lastValue = 0;
-	var valuesNoNullElement = this.GetValuesNoNullElement(variable); 
+	var valuesNoNullElement = this.GetValuesNoNullElement(variable);
 	var total = valuesNoNullElement.length;
 	for (var n = 0; n < total; n++) {
 		var value = valuesNoNullElement[n].Value;
