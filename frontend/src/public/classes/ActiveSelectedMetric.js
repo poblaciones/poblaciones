@@ -191,6 +191,28 @@ ActiveSelectedMetric.prototype.GetVersionIndexByWorkId = function (id) {
 	return -1;
 };
 
+ActiveSelectedMetric.prototype.GetVersionById = function (id) {
+	var index = this.GetVersionIndex(id);
+	if (index === -1) {
+		return null;
+	}
+	return this.prop.Versions[index];
+};
+
+ActiveSelectedMetric.prototype.GetVariableById = function (variableId) {
+	var versions = this.properties.Versions;
+	for (var v = 0; v < versions.length; v++) {
+		for (var l = 0; v < versions[v].Levels.length; l++) {
+			for (var i = 0; i < versions[v].Levels[l].Variables.length; i++) {
+				if (versions[v].Levels[l].Variables[i].Id == variableId) {
+					return versions[v].Levels[l].Variables[i];
+				}
+			}
+		}
+	}
+	return null;
+};
+
 ActiveSelectedMetric.prototype.GetVersionIndex = function (id) {
 	for (var l = 0; l < this.properties.Versions.length; l++) {
 		if (this.properties.Versions[l].Version.Id === id) {

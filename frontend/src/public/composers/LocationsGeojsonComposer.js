@@ -58,6 +58,9 @@ LocationsGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResu
 				if (dataElement['Description']) {
 					mapItem['properties'].Description = dataElement['Description'];
 				}
+				if (!this.activeSelectedMetric.SelectedVariable().IsSimpleCount) {
+					mapItem.properties.Value = this.FormatValue(dataElement);
+				}
 				filtered.push(mapItem);
 
 				// Pone el texto
@@ -145,7 +148,6 @@ LocationsGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 			if (loc.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
 				element.addListener('click', function (e) {
 					var parentInfo = {
-						MetricName: metric.properties.Metric.Name,
 						MetricId: metric.properties.Metric.Id,
 						MetricVersionId: metric.SelectedVersion().Version.Id,
 						LevelId: metric.SelectedLevel().Id,
@@ -159,17 +161,17 @@ LocationsGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 			}
 			element.addListener('mouseover', function (e) {
 				var parentInfo = {
-					MetricName: metric.properties.Metric.Name,
 					MetricId: metric.properties.Metric.Id,
 					MetricVersionId: metric.SelectedVersion().Version.Id,
 					LevelId: metric.SelectedLevel().Id,
 					VariableId: metric.SelectedVariable().Id
 				};
-				loc.MapsApi.selector.markerMouseOver(e, parentInfo, feature.getId(), feature.getProperty('Description'));
+				loc.MapsApi.selector.markerMouseOver(e, parentInfo, feature.getId(),
+					feature.getProperty('Description'),
+					feature.getProperty('Value'));
 			});
 			element.addListener('mouseout', function (e) {
 				var parentInfo = {
-					MetricName: metric.properties.Metric.Name,
 					MetricId: metric.properties.Metric.Id,
 					MetricVersionId: metric.SelectedVersion().Version.Id,
 					LevelId: metric.SelectedLevel().Id,

@@ -1,5 +1,6 @@
 import Mercator from '@/public/js/Mercator';
 import h from '@/public/js/helper';
+import str from '@/common/js/str';
 
 export default FeatureSelector;
 
@@ -57,18 +58,23 @@ FeatureSelector.prototype.getFeature = function (event) {
 	for (var n = 0; n < ele.length; n++) {
 		if (ele[n].nodeName === 'path' && ele[n].parentElement.attributes['isFIDContainer'] &&
 					ele[n].id !== null) {
+			var variableId = ele[n].parentElement.attributes['variableId'].value;
+			var metricId = ele[n].parentElement.attributes['metricId'].value;
 			var parentInfo = {
-				MetricName: ele[n].parentElement.attributes['metricName'].value,
-				MetricId: ele[n].parentElement.attributes['metricId'].value,
+				MetricId: metricId,
 				MetricVersionId: ele[n].parentElement.attributes['metricVersionId'].value,
 				LevelId: ele[n].parentElement.attributes['levelId'].value,
-				VariableId: ele[n].parentElement.attributes['variableId'].value
+				VariableId: variableId
 			};
 			var desc = null;
+			var value = null;
 			if (ele[n].attributes.description) {
 				desc = ele[n].attributes.description.value;
 			}
-			return { position: position, parentInfo: parentInfo, id: ele[n].id, description: desc };
+			if (ele[n].attributes.value) {
+				value = ele[n].attributes.value.value;
+			}
+			return { position: position, parentInfo: parentInfo, id: ele[n].id, description: desc, value: value };
 		}
 	}
 	return null;
@@ -110,21 +116,47 @@ FeatureSelector.prototype.showTooltip = function () {
 		style += ' ibTooltipNoYOffset';
 	}
 	var outStyle = "ibTooltipOffsetLeft mapLabels";
-	loc.tooltipOverlay = window.SegMap.MapsApi.Write(loc.tooltipCandidate.description, coord, 10000000, outStyle, style, true);
+	var html = loc.RenderTooltip(loc.tooltipCandidate);
+	loc.tooltipOverlay = window.SegMap.MapsApi.Write(html, coord, 10000000, outStyle, style, true);
 	loc.createTooltipKiller();
 };
 
-FeatureSelector.prototype.startTooltipCandidate = function (feature) {
+FeatureSelector.prototype.RenderTooltip = function (feature) {
+	var parentInfo = feature.parentInfo;
+	var caption = null;
+	var value = null;
+	if (feature.value) {
+		var varName = window.SegMap.GetVariableName(feature.parentInfo.MetricId, feature.parentInfo.VariableId);
+		value = str.EscapeHtml(varName) + ': ' + str.EscapeHtml(feature.value);
+	}
 	if (feature.description) {
+		caption = feature.description;
+	}
+	var divider = (value !== null ? 'tpValueTitle' : '');
+	var html = '';
+	if (caption) {
+		html = "<div class='" + divider + "'>" + str.EscapeHtml(caption) + '</div>';
+	}
+	if (value) {
+		html += '<div>' + str.EscapeHtml(value) + '</div>';
+	}
+	if (html === '') {
+		html = null;
+	}
+	return html;
+};
+
+FeatureSelector.prototype.startTooltipCandidate = function (feature) {
+	if (feature.description || feature.value) {
 		var loc = window.SegMap.MapsApi.selector;
 		loc.tooltipCandidate = feature;
 		loc.tooltipTimer = setTimeout(loc.showTooltip, 100);
 	}
 };
 
-FeatureSelector.prototype.markerMouseOver = function (event, metricVersion, fid, description) {
+FeatureSelector.prototype.markerMouseOver = function (event, metricVersion, fid, description, value) {
 	var loc = window.SegMap.MapsApi.selector;
-	var feature = { id: fid, description: description };
+	var feature = { id: fid, description: description, value: value };
 	loc.tooltipLocation = h.getPosition(event);
 	if (!loc.resetTooltip(feature)) {
 		// Sale porque está en el mismo feature del cual se está mostrando el tooltip

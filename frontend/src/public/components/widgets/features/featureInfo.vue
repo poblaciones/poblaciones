@@ -95,7 +95,8 @@ export default {
 	text-align: center;
 }
 .item {
-	padding-top: 4px
+	padding-top: 1px;
+	padding-bottom: 10px
 }
 </style>
 

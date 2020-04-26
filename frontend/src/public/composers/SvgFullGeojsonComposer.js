@@ -34,7 +34,6 @@ SvgFullGeojsonComposer.prototype.SVG = function (h, w, z) {
 	svgElem.setAttributeNS(null, 'width', boxWidth);
 	svgElem.setAttributeNS(null, 'height', boxHeight);
 	svgElem.setAttributeNS(null, 'isFIDContainer', 1);
-	svgElem.setAttributeNS(null, 'metricName', this.activeSelectedMetric.properties.Metric.Name);
 	svgElem.setAttributeNS(null, 'metricId', this.activeSelectedMetric.properties.Metric.Id);
 	svgElem.setAttributeNS(null, 'metricVersionId', this.activeSelectedMetric.SelectedVersion().Version.Id);
 	svgElem.setAttributeNS(null, 'levelId', this.activeSelectedMetric.SelectedLevel().Id);
@@ -129,7 +128,9 @@ SvgFullGeojsonComposer.prototype.processFeature = function (tileUniqueId, id, da
 	if (dataElement.Description) {
 		mapItem.properties.description = dataElement.Description;
 	}
-
+	if (!this.activeSelectedMetric.SelectedVariable().IsSimpleCount) {
+		mapItem.properties.value = this.FormatValue(dataElement);
+	}
 	if (this.patternUseFillStyles(patternValue)) {
 		mapItem.properties.style = 'fill: url(#cs' + val + ');';
 	}
@@ -179,7 +180,8 @@ SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div,
 
 	var attributes = [{ property: 'id', type: 'dynamic', key: 'FID' },
 		{ property: 'properties.className', type: 'dynamic', key: 'class' },
-		{ property: 'properties.description', type: 'dynamic', key: 'description' }];
+		{ property: 'properties.description', type: 'dynamic', key: 'description' },
+		{ property: 'properties.value', type: 'dynamic', key: 'value' }];
 
 	if (this.patternUseFillStyles(patternValue)) {
 		attributes.push({ property: 'properties.style', type: 'dynamic', key: 'style' });

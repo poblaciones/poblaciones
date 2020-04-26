@@ -1,4 +1,7 @@
 [CURRENT]
+- Los tooltips en el mapa muestra un panel con el valor actual para el feature.
+
+v2.19 (2020-04-26)
 - Fix: detección de encoding en CSV identificaba como mac-files archivos con mayúsculas acentuadas acentos.
 - La grilla de datos del dataset en backoffice hace encoding del html que pueda estar en las celdas.
 - Mejoras crawling segmentado.

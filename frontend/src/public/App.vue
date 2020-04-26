@@ -292,7 +292,7 @@ a:hover {
 	max-height: 200px!important;
 	overflow: auto!important;
 	box-shadow: 0 4px 10px rgba(60,64,67,.28);
-	padding-top: 20px;
+	margin-top: 20px;
 	padding-left: 0px;
 }
 .innerBox {
@@ -316,7 +316,17 @@ a:hover {
 	text-decoration: none !important;
 }
 .ibTooltipNoYOffset {
-	margin-top: -18px;
+	margin-top: 0px;
+}
+
+.tpValueTitle {
+	border-bottom: 1px solid #666;
+	padding-bottom: 4px;
+	padding-right: 8px;
+	margin-left: -8px;
+	margin-right: -8px;
+	font-weight: 500;
+	margin-bottom: 5px;
 }
 
 .ibTooltip {
