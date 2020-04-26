@@ -1,6 +1,6 @@
 <template>
 	<div v-if="dt">
-		<element-info :dt='detail' v-if='showDetail'/>
+		<feature-info :dt='detail' v-if='showDetail' @clickBack='doCloseInfo' />
 		<div class='info' v-else>
 			<mp-close-button v-on:click="doClose" />
 
@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import ElementInfo from './featureInfo';
+import FeatureInfo from './featureInfo';
 import h from '@/public/js/helper';
 
 export default {
@@ -26,7 +26,7 @@ export default {
 		'dt',
 	],
 	components: {
-		ElementInfo,
+		FeatureInfo,
 	},
 	data() {
 		return {
@@ -50,13 +50,14 @@ export default {
 		},
 	},
 	methods: {
-		doClose() {
-			this.$parent.doClose(this.dt.fid);
+		doClose(e) {
+			e.preventDefault();
+			this.$emit('clickClose', e, this.dt.fid);
 		},
 		doCloseItem(index) {
 			this.dt.Items.splice(index, 1);
 		},
-		doCloseInfo() {
+		doCloseInfo(e) {
 			this.showDetail = false;
 			this.detail = {};
 		},

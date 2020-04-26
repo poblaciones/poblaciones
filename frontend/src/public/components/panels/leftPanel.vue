@@ -2,8 +2,8 @@
 	<div>
 		<div v-show='hasContent && !collapsed' class='left-panel'>
 			<div v-if="isFullFront">
-				<feature-list :dt='Full' ref='Full' v-if='isFullList'/>
-				<feature-info :dt='Full' v-if='isFullInfo'/>
+				<feature-list :dt='Full' ref='Full' v-if='isFullList' @clickClose='doClose'/>
+				<feature-info :dt='Full' v-if='isFullInfo' @clickClose='doClose'/>
 			</div>
 			<div v-else>
 				<div id="panTop" class="split split-vertical">
@@ -187,7 +187,7 @@ export default {
 			this.splitVisibility();
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
-		doClose(fid) {
+		doClose(e, fid) {
 			let panel = this.getLocated(fid);
 			if(panel === null) {
 				return;

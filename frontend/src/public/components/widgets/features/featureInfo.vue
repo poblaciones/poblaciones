@@ -53,11 +53,13 @@ export default {
 		},
 	},
 	methods: {
-		doBack() {
-			this.$parent.doCloseInfo();
+		doBack(e) {
+			e.preventDefault();
+			this.$emit('clickBack', e);
 		},
-		doClose() {
-			this.$parent.doClose(this.dt.fid);
+		doClose(e) {
+			e.preventDefault();
+			this.$emit('clickClose', e, this.dt.fid);
 		},
 		capitalize(name) {
 			return h.capitalize(name);
@@ -79,7 +81,6 @@ export default {
 </script>
 
 <style scoped>
-
 .type {
 	padding-bottom: 0px;
 	padding-top: 2px;
