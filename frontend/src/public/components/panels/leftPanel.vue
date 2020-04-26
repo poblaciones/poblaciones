@@ -2,17 +2,23 @@
 	<div>
 		<div v-show='hasContent && !collapsed' class='left-panel'>
 			<div v-if="isFullFront">
-				<feature-list :dt='Full' ref='Full' v-if='isFullList' @clickClose='doClose'/>
-				<feature-info :dt='Full' v-if='isFullInfo' @clickClose='doClose'/>
+				<transition name="fade" mode='out-in'>
+					<feature-list :dt='Full' ref='Full' v-if='isFullList' @clickClose='doClose'/>
+					<feature-info :dt='Full' v-if='isFullInfo' @clickClose='doClose'/>
+				</transition>
 			</div>
 			<div v-else>
 				<div id="panTop" class="split split-vertical">
-					<list-panel :dt='Top' ref='Top' v-if='isTopList'/>
-					<info-panel :dt='Top' v-if='isTopInfo'/>
+					<transition name="fade" mode='out-in'>
+						<list-panel :dt='Top' ref='Top' v-if='isTopList'/>
+						<info-panel :dt='Top' v-if='isTopInfo'/>
+					</transition>
 				</div>
 				<div id="panBottom" class="split split-vertical">
-					<list-panel :dt='Bottom' ref='Bottom' v-if='isBottomList'/>
-					<info-panel :dt='Bottom' v-if='isBottomInfo'/>
+					<transition name="fade" mode='out-in'>
+						<list-panel :dt='Bottom' ref='Bottom' v-if='isBottomList'/>
+						<info-panel :dt='Bottom' v-if='isBottomInfo'/>
+					</transition>
 				</div>
 			</div>
 		</div>
@@ -42,7 +48,8 @@ export default {
 			Bottom: null,
 			Full: null,
 			isFullFront: true,
-			onlyFull: false,		};
+			onlyFull: false,
+		};
 	},
 	// created () { },
 	mounted() {
@@ -286,6 +293,12 @@ export default {
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 	z-index:1;
 	background-color: white;
+}
+.fade-enter-active, .fade-leave-active {
+	transition: opacity .35s;
+}
+.fade-enter, .fade-leave-to {
+	opacity: 0;
 }
 </style>
 

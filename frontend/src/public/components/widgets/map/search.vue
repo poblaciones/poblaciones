@@ -11,28 +11,28 @@
 		<div class='auto' id="auto" v-if="hasSelected()" v-on-clickaway="escapeKey">
 			<ul>
 				<li v-on:click="select(item)" v-for="(item, index) in autolist" :key="item.Id" :class="item.Class"
-					v-on:mouseover="over(item, index)"
-					v-on:mouseout="out(item, index)">
-          <div v-if="item.Type === 'L'">
+						v-on:mouseover="over(item, index)"
+						v-on:mouseout="out(item, index)">
+					<div v-if="item.Type === 'L'">
 						<span>{{ item.Highlighted }}</span>
-            <br/>
-             <em class='text-softer small'>{{ item.Extra }}</em>
-            </div>
-          <div v-if="item.Type === 'C'">
-            <em class='text-softer small'>{{ item.Extra }}</em>
-            <br/>
+						<br/>
+						<em class='text-softer small'>{{ item.Extra }}</em>
+					</div>
+					<div v-if="item.Type === 'C'">
+						<em class='text-softer small'>{{ item.Extra }}</em>
+						<br/>
 						<span>{{ item.Highlighted }}</span>
-          </div>
-          <div v-if="item.Type === 'F' || item.Type === 'P'">
-            <em class='text-softer small'>{{ item.Extra }}</em>
-            <br/>
-            <span>{{ item.Highlighted }}</span>
-          </div>
-				 <div v-if="item.Type === 'N'">
-					<em class='text-softer small'>{{ item.Extra }}</em>
-					<br/>
-					 <span>{{ item.Highlighted }}</span>
-				 </div>
+					</div>
+					<div v-if="item.Type === 'F' || item.Type === 'P'">
+						<em class='text-softer small'>{{ item.Extra }}</em>
+						<br/>
+						<span>{{ item.Highlighted }}</span>
+					</div>
+					<div v-if="item.Type === 'N'">
+						<em class='text-softer small'>{{ item.Extra }}</em>
+						<br/>
+						<span>{{ item.Highlighted }}</span>
+					</div>
 				</li>
 			</ul>
 		</div>
