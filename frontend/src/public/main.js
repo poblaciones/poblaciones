@@ -28,6 +28,10 @@ window.SegMap = null;
 // enable axios post cookie, default false
 axios.defaults.withCredentials = true;
 
+import MpCloseButton from '@/public/components/controls/MpCloseButton';
+
+Vue.component('mp-close-button', MpCloseButton);
+
 Vue.use(Clipboard);
 
 Vue.config.productionTip = false;

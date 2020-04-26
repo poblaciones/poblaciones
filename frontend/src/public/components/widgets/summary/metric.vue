@@ -24,10 +24,10 @@
 </template>
 
 <script>
-import MetricVariables from '@/public/components/widgets/metricVariables';
-import MetricTopButtons from '@/public/components/widgets/metricTopButtons';
-import MetricSource from '@/public/components/widgets/metricSource';
-import Ranking from '@/public/components/widgets/ranking';
+import MetricVariables from './metricVariables';
+import MetricTopButtons from './metricTopButtons';
+import MetricSource from './metricSource';
+import Ranking from './ranking';
 import Mercator from '@/public/js/Mercator';
 
 export default {

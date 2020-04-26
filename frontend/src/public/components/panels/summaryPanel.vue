@@ -20,12 +20,12 @@
 </template>
 
 <script>
-import Metric from '@/public/components/widgets/metric';
-import Clipping from '@/public/components/widgets/clipping';
+import Metric from '@/public/components/widgets/summary/metric';
+import Clipping from '@/public/components/widgets/summary/clipping';
 import WorkMetadata from '@/public/components/popups/workMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
 import AddMetric from '@/public/components/popups/addMetric';
-import Toolbar from '@/public/components/widgets/toolbar';
+import Toolbar from '@/public/components/widgets/summary/toolbar';
 import MetricDownload from '@/public/components/popups/metricDownload';
 import draggable from 'vuedraggable';
 import arr from '@/common/js/arr';

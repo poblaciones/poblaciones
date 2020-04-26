@@ -193,7 +193,7 @@
 </template>
 
 <script>
-import boardal from '@/public/components/widgets/boardal';
+import boardal from '@/public/components/controls/boardal';
 import CloseIcon from 'vue-material-design-icons/close.vue';
 
 export default {

@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import metricValues from '@/public/components/widgets/metricValues';
+import metricValues from './metricValues';
 import ChevronDownIcon from 'vue-material-design-icons/ChevronDown.vue';
 import ChevronUpIcon from 'vue-material-design-icons/ChevronUp.vue';
 // https://materialdesignicons.com/cdn/1.9.32/

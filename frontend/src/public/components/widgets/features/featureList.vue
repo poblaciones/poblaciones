@@ -1,31 +1,32 @@
 <template>
 	<div v-if="dt">
-		<InfoPanel :dt='detail' v-if='showDetail'/>
+		<element-info :dt='detail' v-if='showDetail'/>
 		<div class='info' v-else>
-			<div v-on:click="doClose" class='fa fa-times hand' style='float:right;margin:5px'></div>
+			<mp-close-button v-on:click="doClose" />
+
 			<div class='type'>{{ dt.Type }}</div>
 			<div class='title'>{{ title }}</div>
-			<span v-for="(item, index) in dt.Items" :key="item.Name">
+			<div v-for="(item, index) in dt.Items" :key="item.Name">
 				<div v-on:click="doCloseItem(index)" class='fa fa-times hand' style='float:right;margin:5px'></div>
 				<div class='item hand' v-on:click='openDetail(item)'>
 					{{ item.Name }}
 				</div>
-			</span>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import InfoPanel from '@/public/components/panels/infoPanel';
+import ElementInfo from './featureInfo';
 import h from '@/public/js/helper';
 
 export default {
-	name: 'listPanel',
+	name: 'featureList',
 	props: [
 		'dt',
 	],
 	components: {
-		InfoPanel,
+		ElementInfo,
 	},
 	data() {
 		return {

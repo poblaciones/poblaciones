@@ -29,7 +29,6 @@ import MpConfirm from '@/backoffice/components/MpConfirm';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
 import MpSelect from '@/backoffice/components/MpSelect';
 import MpHelp from '@/backoffice/components/MpHelp';
-import HelpIcon from 'vue-material-design-icons/HelpCircleOutline.vue';
 import Clipboard from 'v-clipboard';
 
 Vue.component('title-bar', TitleBar);

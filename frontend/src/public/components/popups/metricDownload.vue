@@ -97,7 +97,7 @@ import axios from 'axios';
 import h from '@/public/js/helper';
 import DownloadIcon from 'vue-material-design-icons/download.vue';
 import CloseIcon from 'vue-material-design-icons/close.vue';
-import creativeCommons from '@/public/components/widgets/creativeCommons.vue';
+import creativeCommons from '@/public/components/controls/creativeCommons.vue';
 import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
 import err from '@/common/js/err';
 import arr from '@/common/js/arr';

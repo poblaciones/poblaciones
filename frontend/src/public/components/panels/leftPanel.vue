@@ -2,8 +2,8 @@
 	<div>
 		<div v-show='hasContent && !collapsed' class='left-panel'>
 			<div v-if="isFullFront">
-				<list-panel :dt='Full' ref='Full' v-if='isFullList'/>
-				<info-panel :dt='Full' v-if='isFullInfo'/>
+				<feature-list :dt='Full' ref='Full' v-if='isFullList'/>
+				<feature-info :dt='Full' v-if='isFullInfo'/>
 			</div>
 			<div v-else>
 				<div id="panTop" class="split split-vertical">
@@ -14,14 +14,15 @@
 					<list-panel :dt='Bottom' ref='Bottom' v-if='isBottomList'/>
 					<info-panel :dt='Bottom' v-if='isBottomInfo'/>
 				</div>
-			</div>		</div>
-		<collapse-button v-if='hasContent' :collapsed='collapsed' />
+			</div>
+		</div>
+		<collapse-button v-if='hasContent' :collapsed='collapsed' @click="doToggle" />
 	</div>
 </template>
 
 <script>
-import InfoPanel from '@/public/components/panels/infoPanel';
-import ListPanel from '@/public/components/panels/listPanel';
+import FeatureInfo from '@/public/components/widgets/features/featureInfo';
+import FeatureList from '@/public/components/widgets/features/featureList';
 import PanelType from '@/public/enums/PanelType';
 import CollapseButton from '@/public/components/controls/collapseButton';
 import Split from 'split.js';
@@ -29,8 +30,8 @@ import h from '@/public/js/helper';
 export default {
 	name: 'leftPanel',
 	components: {
-		ListPanel,
-		InfoPanel,
+		FeatureInfo,
+		FeatureList,
 		CollapseButton,
 	},
 	data() {
@@ -217,10 +218,10 @@ export default {
 			}
 			if (this.collapsed) {
 				window.SegMap.SetTypeControlsDefault();
-				//css.style.transform = 'scale(0.8)';
+				css.style.transform = ''; // scale(0.8)
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				css.style.transform = 'translate(333px)';
+				css.style.transform = 'translate(350px)';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
@@ -281,6 +282,7 @@ export default {
 	width:300px;
 	left:0;
 	top:0;
+	overflow-y: auto;
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 	z-index:1;
 	background-color: white;

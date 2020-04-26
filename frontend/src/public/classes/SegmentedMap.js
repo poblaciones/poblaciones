@@ -229,8 +229,6 @@ SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset) 
 			res.data.parent = parent;
 			res.data.panelType = PanelType.InfoPanel;
 			window.Panels.Left.Add(res.data);
-			// window.Panels.Left.AddTop(res.data);
-			// window.Panels.Left.AddBottom(res.data);
 		} else {
 			var data = res.data;
 			var text = "<div style='max-width: 250px;'>";

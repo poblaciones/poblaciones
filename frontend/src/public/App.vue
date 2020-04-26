@@ -23,11 +23,11 @@ import StartMap from '@/public/classes/StartMap';
 import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
 import MapPanel from '@/public/components/panels/mapPanel';
-import Fab from '@/public/components/widgets/fabButton';
+import Fab from '@/public/components/widgets/map/fabButton';
 import LeftPanel from '@/public/components/panels/leftPanel';
-import Edit from '@/public/components/widgets/editButton';
+import Edit from '@/public/components/widgets/map/editButton';
 import SummaryPanel from '@/public/components/panels/summaryPanel';
-import Search from '@/public/components/widgets/search';
+import Search from '@/public/components/widgets/map/search';
 
 import Split from 'split.js';
 import axios from 'axios';

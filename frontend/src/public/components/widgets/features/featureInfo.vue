@@ -1,20 +1,17 @@
 <template>
-	<div class='panel card panel-body info'>
+	<div class='panel card panel-body'>
 		<div v-on:click="doBack" v-if='dt.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
-		<div v-on:click="doClose" v-else class='fa fa-times hand' style='float:right;margin:5px'></div>
+		<mp-close-button v-else v-on:click="doClose" />
+
 		<h4 class="title">{{ title }}</h4>
 		<div class='stats' style="padding-top: 8px"><a href="aa" style="color: rgb(167, 167, 167);">{{ dt.Type }}</a></div>
 		<hr class="moderateHr">
 		<div class='item' v-if="dt.Code && dt.Title">
 			Código: {{ val }}
-
-
 		</div>
-		<span v-for="item in dt.Items" :key="item.Name">
-			<div class='item'>
-				{{ capitalize(item.Name) }}: {{ getValue(item) }}
-			</div>
-		</span>
+		<div v-for="item in dt.Items" class='item' :key="item.Name">
+			{{ capitalize(item.Name) }}: {{ getValue(item) }}
+		</div>
 		<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 	</div>
 </template>
@@ -23,7 +20,7 @@
 import h from '@/public/js/helper';
 
 export default {
-	name: 'infoPanel',
+	name: 'featureInfo',
 	props: [
 		'dt',
 	],
@@ -82,12 +79,7 @@ export default {
 </script>
 
 <style scoped>
-.info {
-	border-radius: 6px;
-	border: solid 1px;
-	margin:4px;
-	overflow-y:auto;
-}
+
 .type {
 	padding-bottom: 0px;
 	padding-top: 2px;
@@ -95,21 +87,13 @@ export default {
 	text-transform: uppercase;
 	text-align: center;
 }
-.title {
-	padding-bottom: 3px;
-	padding-top: 2px;
-	font-size: 15px;
-	font-weight: 500;
-	text-align: center;
-	font-weight: bold;
-}
+
 .pos {
 	padding-top: 11px;
 	font-size: 11px;
 	text-align: center;
 }
 .item {
-	margin-left: 10px;
 	padding-top: 4px
 }
 </style>

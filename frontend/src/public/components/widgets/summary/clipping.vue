@@ -1,16 +1,15 @@
 <template>
 	<div>
 		<div v-if="hasSummary && clipping.Region.Summary.Name && clipping.IsUpdating !== '1'" class="clippingBlock cards">
-			<button title="Quitar zona seleccionada" type="button" v-on:click="removeRegion" class="close buttonMargin">
-				<close-icon title="Quitar"/>
-			</button>
+			<mp-close-button v-on:click="removeRegion" title="Quitar zona seleccionada" />
+
 			<div class="clippingBlockHeader">{{ clipping.Region.Summary.TypeName }}</div>
-			<div class="hand" v-on:click="fitRegion" style="position: relative; margin-right: 20px;" >
+			<div class="hand" v-on:click="fitRegion" style="position: relative; margin-right: 20px;">
 				<span style="font-size: 2em;">{{ clipping.Region.Summary.Name }}</span>
 
 			</div>
 			<ClippingSource v-if="clipping.Region.Summary.Metadata && clipping.Region.Summary.Metadata.Id"
-					 :useIcon="true" :clipping="clipping" :metadata="clipping.Region.Summary.Metadata" />
+											:useIcon="true" :clipping="clipping" :metadata="clipping.Region.Summary.Metadata" />
 		</div>
 		<div v-if="clipping.Region.Summary && selectedLevel()">
 			<h4 class="title">
@@ -45,15 +44,13 @@
 </template>
 
 <script>
-import ClippingSource from '@/public/components/widgets/clippingSource';
-import CloseIcon from 'vue-material-design-icons/close.vue';
-import AnimatedNumber from './animatedNumber.vue';
+import ClippingSource from './clippingSource';
+import AnimatedNumber from '@/public/components/controls/animatedNumber.vue';
 
 export default {
 	name: 'clipping',
 	components: {
 		ClippingSource,
-		CloseIcon,
 		AnimatedNumber
 	},
 	props: [
@@ -142,9 +139,6 @@ export default {
 {
 	font-size: 16px;
 	line-height: 1.8em;
-}
-.buttonMargin {
-	margin-right: -2px;
 }
 </style>
 
