@@ -1,7 +1,7 @@
 <template>
 	<div v-on:click="doToggle" class='fa fa-2x hand left-arrow'
 		  :class="{ 'fa-caret-left': !collapsed, 'fa-caret-right': collapsed }"
-		  :style='{ left: left }'>
+		  :style="{ left: left + 'px' }">
 		<div class="border-left"></div>
 	</div>
 </template>
@@ -11,15 +11,19 @@ export default {
 	name: 'collapseButton',
 	props: [
 		'collapsed',
+		'startLeft',
 	],
 	data() {
 		return {
-			left: '300px',
+			left: 0,
 		};
+	},
+	mounted() {
+		this.left = this.startLeft;
 	},
 	computed: {
 		onLoc() {
-			return '300px';
+			return this.startLeft;
 		},
 		offLoc() {
 			return 0;

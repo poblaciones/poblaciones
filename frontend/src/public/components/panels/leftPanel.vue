@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div v-show='hasContent && !collapsed' class='left-panel'>
+		<div v-show='hasContent && !collapsed' class='left-panel' :style="{ width: width + 'px' }">
 			<div v-if="isFullFront">
 				<transition name="fade" mode='out-in'>
 					<feature-list :dt='Full' ref='Full' v-if='isFullList' @clickClose='doClose'/>
@@ -22,7 +22,7 @@
 				</div>
 			</div>
 		</div>
-		<collapse-button v-if='hasContent' :collapsed='collapsed' @click="doToggle" />
+		<collapse-button v-if='hasContent' :startLeft='width' :collapsed='collapsed' @click="doToggle" />
 	</div>
 </template>
 
@@ -42,6 +42,7 @@ export default {
 	},
 	data() {
 		return {
+			width: 300,
 			hasContent: false,
 			collapsed: true,
 			Top: null,
@@ -228,7 +229,7 @@ export default {
 				css.style.transform = ''; // scale(0.8)
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				css.style.transform = 'translate(333px)';
+				css.style.transform = 'translate(' + (this.width + 33) + 'px)';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
@@ -270,12 +271,13 @@ export default {
 			this.showPanel();
 			this.updateMapTypeControl();
 			this.updateSuroundings('fab-wrapper',
-				{ transform: 'translate(300px)' },
+				{ transform: 'translate('+ this.width + 'px)' },
 				{ transform: '' }
 			);
+
 			this.updateSuroundings('searchBar',
-				{ left: '500px', width: 'calc(100% - 700px)' },
-				{ left: '300px', width: 'calc(100% - 500px)' }
+				{ left: (this.width + 200) + 'px', width: 'calc(100% - 700px)' },
+				{ left: this.width + 'px', width: 'calc(100% - 500px)' }
 			);
 		},
 	},
@@ -286,7 +288,6 @@ export default {
 .left-panel {
 	position:absolute;
 	height:100%;
-	width:300px;
 	left:0;
 	top:0;
 	overflow-y: auto;
