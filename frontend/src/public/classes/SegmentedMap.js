@@ -13,6 +13,7 @@ import PanelType from '@/public/enums/PanelType';
 import InfoPanel from '@/public/components/panels/infoPanel';
 
 import h from '@/public/js/helper';
+import m from '@/public/js/Mercator';
 import err from '@/common/js/err';
 
 export default SegmentedMap;
@@ -198,6 +199,16 @@ SegmentedMap.prototype.SetSelectionMode = function (mode) {
 
 SegmentedMap.prototype.EndSelecting = function () {
 	this.MapsApi.selector.ClearSelectorCanvas();
+};
+
+SegmentedMap.prototype.InfoRequestedInteractive = function (position, parent, fid, offset) {
+	if (this.UsePanels) {
+		if (position && (!position.Point || position.Point.X < 350)) {
+			this.PanTo(position.Coordinate);
+		}
+		window.Panels.Left.collapsed = false;
+	}
+	this.InfoRequested(position, parent, fid, offset);
 };
 
 SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset) {

@@ -385,7 +385,7 @@ GoogleMapsApi.prototype.SetClippingCanvas = function (canvas) {
 };
 
 GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid, offset) {
-	window.SegMap.InfoRequested(h.getPosition(event), metricVersion, fid, offset);
+	window.SegMap.InfoRequestedInteractive(h.getPosition(event), metricVersion, fid, offset);
 };
 
 GoogleMapsApi.prototype.getBounds = function() {

@@ -46,7 +46,7 @@
 			<button v-if='!user.Logged' type="button" class="btn btn-default btn-xs" title="Ingresar/Registrarse"
 							v-on:click="authenticate.redirectLogin()"><i class="fas fa-sign-in-alt"></i></button>
 			<span v-else="" class="dropdown">
-				<button v-if='this.useExtraToolbar()' type="button"
+				<button type="button"
 								id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
 								data-toggle="dropdown" :title="userTooltip">
 					<i class="fas fa-user" />

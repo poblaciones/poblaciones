@@ -297,6 +297,7 @@ text-decoration: underline;
 	right: unset!important;
 	max-height: 200px!important;
 	overflow: auto!important;
+	box-shadow: 0 4px 10px rgba(60,64,67,.28);
 	padding-top: 20px;
 	padding-left: 0px;
 }
@@ -326,10 +327,12 @@ text-decoration: underline;
 
 .ibTooltip {
 	color: #5a626d;
-	background-color: #f9f9e0;
-	padding: 2px;
-	border: 1px solid gray;
 	pointer-events: none;
+	cursor: pointer;
+  background-color: #ffffff;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(60,64,67,.28);
 }
 .ibTooltipOffsetLeft {
 	margin-left: 9px;

@@ -20,6 +20,7 @@ Mercator.prototype.fromPointToLatLng = function (point) {
 		Lon: (point.x - 128) / (256 / 360)
 	};
 };
+
 Mercator.prototype.fromGoogleLatLngToLatLon = function (point) {
 	return { Lat: point.lat(), Lon: point.lng() };
 };

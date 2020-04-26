@@ -1,10 +1,14 @@
 <template>
-	<div v-if="open" style='max-width: 250px; overflow-y:auto' v-bind:style="{ 'background-color': myColor }">
-		<div style='padding-bottom: 0px; padding-top:2px; font-size: 9px; text-transform: uppercase'>{{ dt.Type }}</div>;
-		<div style='padding-bottom: 3px; padding-top:2px; font-size: 15px; font-weight: 500'>{{ title }}</div>
-		<div style='max-height: 300px;'>
-			<span v-html='codeTitle'></span>
-			<span v-html='lines'></span>			<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: {{ lat }},{{ lon }}.</div>
+	<div v-if="open" style='overflow-y:auto'
+			 v-bind:style="{ 'background-color': myColor }">
+		<div class="panel card panel-body">
+			<h4 class="title">{{ title }}</h4>
+			<div class='stats' style="padding-top: 8px"><a href="aa" style="color: rgb(167, 167, 167);">{{ dt.Type }}</a></div>
+			<hr class="moderateHr">
+			<div style='font-weight: 300'>
+				<span v-html='codeTitle'></span>
+				<span v-html='lines'></span>			<div style='padding-top: 11px; font-size: 11px;text-align: center'>Posición: {{ lat }},{{ lon }}.</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -68,7 +72,7 @@ export default {
 	},
 	methods: {
 		InfoRequestedFormatLine(item) {
-			var text = "<div style='padding-top: 4px'>";
+			var text = "<div style='padding-top: 12px'>";
 			var val = (item.Caption !== null && item.Caption !== undefined ? item.Caption : item.Value);
 			if (val === null) {
 				val = '-';

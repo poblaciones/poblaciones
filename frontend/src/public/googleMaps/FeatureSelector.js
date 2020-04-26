@@ -171,7 +171,7 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 	window.SegMap.MapsApi.ResetInfoWindow();
 	var feature = loc.getFeature(event);
 	if (feature !== null) {
-		window.SegMap.InfoRequested(feature.position, feature.parentInfo, feature.id, null);
+		window.SegMap.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id, null);
 	}
 };
 
