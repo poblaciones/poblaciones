@@ -26,8 +26,9 @@ export default {
 		},
 	},
 	methods: {
-		doToggle() {
-			this.$emit('click');
+		doToggle(e) {
+			e.preventDefault();
+			this.$emit('click', e);
 		},
 	},
 	watch: {

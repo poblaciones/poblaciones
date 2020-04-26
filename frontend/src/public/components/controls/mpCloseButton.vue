@@ -24,8 +24,8 @@ export default {
 		};
 	},
 	methods: {
-		onClose() {
-			this.$emit('click');
+		onClose(e) {
+			this.$emit('click', e);
 		},
 	},
 };
