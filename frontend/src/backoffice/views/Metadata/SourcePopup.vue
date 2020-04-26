@@ -35,7 +35,7 @@
 						</div>
 						<div class="md-layout-item md-size-40 md-small-size-100">
 							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
-											label="Entrada en Wikipedia" helper="(Ej. https://es.wikipedia.org/wiki/Cen2010)"
+											label="Entrada en Wikipedia" helper="Ej. https://es.wikipedia.org/wiki/Cen2010"
 											:maxlength="200"  v-model="item.Wiki" />
 						</div>
 					</div>

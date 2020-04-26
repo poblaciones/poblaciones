@@ -22,7 +22,7 @@
 
 				<div class="md-layout-item md-size-50 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
-									label="Teléfono" helper="Sitio web correspondiente a la fuente (Ej. https://mical.gov/datum/2010)"
+									label="Teléfono" helper="Teléfono institucional, incluyendo códigos de área. (Ej. +54 11 524-1124.)"
 									:maxlength="50"  v-model="item.Phone" />
 				</div>
 				<div class="md-layout-item md-size-65 md-small-size-100">
