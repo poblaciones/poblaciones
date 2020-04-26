@@ -221,7 +221,7 @@ export default {
 				css.style.transform = ''; // scale(0.8)
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				css.style.transform = 'translate(350px)';
+				css.style.transform = 'translate(333px)';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
@@ -263,7 +263,7 @@ export default {
 			this.showPanel();
 			this.updateMapTypeControl();
 			this.updateSuroundings('fab-wrapper',
-				{ transform: 'translate(315px)' },
+				{ transform: 'translate(300px)' },
 				{ transform: '' }
 			);
 			this.updateSuroundings('searchBar',
