@@ -14,7 +14,7 @@
 				<div class="md-layout-item">
 					<md-table v-model="list" md-sort="caption" md-sort-order="asc" md-card="">
 						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell @click.native="selected = item; save(); "  class="selectable" md-label="Nombre" :md-sort-by="item.Metric.Caption">{{ item.Metric.Caption }}</md-table-cell>
+							<md-table-cell @click.native="selected = item; save(); " class="selectable" md-label="Nombre" :md-sort-by="item.Metric.Caption">{{ item.Metric.Caption }}</md-table-cell>
 							<md-table-cell @click.native="selected = item; save(); " md-label="Version" class="selectable" :md-sort-by="item.Caption">{{ item.Caption }}</md-table-cell>
 						</md-table-row>
 					</md-table>

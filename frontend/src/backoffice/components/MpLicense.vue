@@ -94,7 +94,7 @@ export default {
     ButtonPanel
 	},
 	mixins: [ clickaway ],
-	methods:  {
+	methods: {
 		cancel(oldValue) {
 			this.localValue = this.value;
 			this.decoded = JSON.parse(this.localValue);
@@ -115,7 +115,7 @@ export default {
 				if (this.valueChanged) {
           this.$refs.buttonPanel.showPrompt();
         } else {
-          if (this.$refs.buttonPanel && this.$refs.buttonPanel.editableMode){
+          if (this.$refs.buttonPanel && this.$refs.buttonPanel.editableMode) {
             this.$refs.buttonPanel.Cancel();
           }
         }

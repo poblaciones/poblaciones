@@ -8,7 +8,7 @@
 								 :disabled="isDisabled"
 								 @md-selected="selected">
 				<md-option v-if="allowNull" :value="-1111111">{{ nullLabel }}</md-option>
-				<md-option v-for="item in list" v-bind:key="item[listKey]" :value="item[listKey]">
+				<md-option v-for="item in list" :key="item[listKey]" :value="item[listKey]">
 					{{ format(item) }}
 				</md-option>
 			</md-select>
@@ -28,7 +28,7 @@ export default {
   name: 'MpSelect',
 	components: {
   },
-	methods:  {
+	methods: {
 		focus() {
 			this.$nextTick(() => {
 				this.input.$el.focus();
@@ -143,8 +143,8 @@ export default {
   props: {
     label: String,
 		list: Array,
-		listKey:  { type: String, default: 'Id' },
-		listCaption:  { type: String, default: 'Caption' },
+		listKey: { type: String, default: 'Id' },
+		listCaption: { type: String, default: 'Caption' },
 		value: {},
 		render: { type: Function, default: null },
 		modelKey: { type: Boolean, default: false },

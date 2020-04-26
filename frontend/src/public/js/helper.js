@@ -10,9 +10,8 @@ module.exports = {
 		}
 		if (tot === 0) {
 			return '-';
-		} else {
-			return Number(Number(num) / Number(tot) * 100).toFixed(1).toLocaleString('es');
 		}
+		return Number(Number(num) / Number(tot) * 100).toFixed(1).toLocaleString('es');
 	},
 	capitalize(cad) {
 		if (cad === null || cad === undefined || cad === '') {
@@ -35,7 +34,9 @@ module.exports = {
 		var b2 = y2 + h2;
 		var r2 = x2 + w2;
 
-		if (b1 < y2 || y1 > b2 || r1 < x2 || x1 > r2) return false;
+		if (b1 < y2 || y1 > b2 || r1 < x2 || x1 > r2) {
+			return false;
+		}
 		return true;
 	},
 	formatPercentNumber(num) {
@@ -43,6 +44,13 @@ module.exports = {
 			return '-';
 		}
 		return Number(num).toFixed(1).toLocaleString('es');
+	},
+	ensureFinalDot(str) {
+		str = (str + '').trim();
+		if (str.length > 0 && str.substr(str.length - 1) !== '.') {
+			return str + '.';
+		}
+		return str;
 	},
 	ensureFinalBar(urlPath) {
 		if (urlPath.length === 0 || urlPath.substr(urlPath.length - 1, 1) !== '/') {
@@ -53,9 +61,9 @@ module.exports = {
 	formatKm(num) {
 		function isInteger(value) {
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
-			return typeof value === 'number' &&
-				isFinite(value) &&
-				Math.floor(value) === value;
+			return typeof value === 'number'
+				&& isFinite(value)
+				&& Math.floor(value) === value;
 		};
 		if (num === '') {
 			return '-';
@@ -120,9 +128,7 @@ module.exports = {
 		if(file.indexOf('.') == -1) {
 			return '';
 		}
-		else {
-			return file.split(".").pop().toLowerCase();
-		}
+		return file.split(".").pop().toLowerCase();
 	},
 	extractFilename(file) {
 		var ext = this.extractFileExtension(file);
@@ -132,10 +138,10 @@ module.exports = {
 		return file.substr(0, file.length - ext.length);
 	},
 	getCssRule(d, name) {
-    var rules = {};
-    for (var i=0; i<d.styleSheets.length; ++i) {
+		for (var i = 0; i<d.styleSheets.length; ++i) {
 			var cssRules = null;
-			if (d.styleSheets[i].ownerNode && d.styleSheets[i].ownerNode.localName == 'style') {
+			if (d.styleSheets[i].ownerNode
+				&& d.styleSheets[i].ownerNode.localName == 'style') {
 				if (d.styleSheets[i]['cssRules'] !== undefined) {
 					cssRules = d.styleSheets[i].cssRules;
 				} else if (d.styleSheets[i]['rules'] !== undefined) {
@@ -143,13 +149,14 @@ module.exports = {
 				}
 			}
 			if (cssRules) {
-				for (var j = 0; j < cssRules.length; ++j)
+				for (var j = 0; j < cssRules.length; ++j) {
 					if (name === cssRules[j].selectorText) {
 						return cssRules[j];
 					}
+				}
 			}
-    }
-    return null;
+		}
+		return null;
 	},
 	quickFormat(format, fix, number) {
 		if (number === '' || number === '-' || number === 'n/d') {
@@ -159,14 +166,14 @@ module.exports = {
 		return format(number, 100);
 	},
 	l(a, b, c, d, e, f, g, h) {
-		if(a === undefined) { a = ''; }
-		if(b === undefined) { b = ''; }
-		if(c === undefined) { c = ''; }
-		if(d === undefined) { d = ''; }
-		if(e === undefined) { e = ''; }
-		if(f === undefined) { f = ''; }
-		if(g === undefined) { g = ''; }
-		if(h === undefined) { h = ''; }
+		if(a === undefined) { return; }
+		if(b === undefined) { console.log(a); return; }
+		if(c === undefined) { console.log(a, b); return; }
+		if(d === undefined) { console.log(a, b, c); return; }
+		if(e === undefined) { console.log(a, b, c, d); return; }
+		if(f === undefined) { console.log(a, b, c, d, e); return; }
+		if(g === undefined) { console.log(a, b, c, d, e, f); return; }
+		if(h === undefined) { console.log(a, b, c, d, e, f, g); return; }
 		console.log(a, b, c, d, e, f, g, h);
 	},
 	qualifyURL(url) {
@@ -202,13 +209,11 @@ module.exports = {
 	getSafeValue(arr, key, def) {
 		if (key in arr) {
 			return arr[key];
-		} else {
-			if (def === undefined) {
-				throw new Error('Parámetro no válido.');
-			} else {
-				return def;
-			}
 		}
+		if (def === undefined) {
+			throw new Error('Parámetro no válido.');
+		}
+		return def;
 	},
 	getGeojsonCenter(feature) {
 		var bounds = new window.google.maps.LatLngBounds();
@@ -406,31 +411,31 @@ module.exports = {
 		return ret;
 	},
 	hasCircle(circle) {
-		if(circle === null ||
-			circle.Center === null ||
-			circle.Radius === null ||
-			circle.Center.Lat === 0 ||
-			circle.Center.Lon === 0 ||
-			circle.Radius.Lat === 0 ||
-			circle.Radius.Lon === 0) {
+		if(circle === null
+			|| circle.Center === null
+			|| circle.Radius === null
+			|| circle.Center.Lat === 0
+			|| circle.Center.Lon === 0
+			|| circle.Radius.Lat === 0
+			|| circle.Radius.Lon === 0) {
 			return false;
 		}
 		return true;
 	},
 	getCircleParam(circle) {
-		return circle.Center.Lat + ',' + circle.Center.Lon +
-			';' + circle.Radius.Lat + ',' + circle.Radius.Lon;
+		return circle.Center.Lat + ',' + circle.Center.Lon
+			+ ';' + circle.Radius.Lat + ',' + circle.Radius.Lon;
 	},
 	getEnvelopeParam(envelope) {
-		return envelope.Min.Lat + ',' + envelope.Min.Lon +
-			';' + envelope.Max.Lat + ',' + envelope.Max.Lon;
+		return envelope.Min.Lat + ',' + envelope.Min.Lon
+			+ ';' + envelope.Max.Lat + ',' + envelope.Max.Lon;
 	},
 	scaleEnvelope(envelope, scale) {
 		scale = 1 - ((1 - scale) / 2);
 
 		var center = {
-										Lat: (envelope.Max.Lat + envelope.Min.Lat) / 2,
-										Lon: (envelope.Max.Lon + envelope.Min.Lon) / 2,
+			Lat: (envelope.Max.Lat + envelope.Min.Lat) / 2,
+			Lon: (envelope.Max.Lon + envelope.Min.Lon) / 2,
 		};
 		return {
 			Min: {

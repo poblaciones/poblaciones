@@ -26,8 +26,8 @@ import flatIconsList from '@/common/js/flatIconsList';
 export default {
 	name: 'mpIconFontPanel',
 	props: {
-					'searchBox' : String,
-					'collection' : String,
+					'searchBox': String,
+					'collection': String,
 					'value': String },
 	data () {
 		return {

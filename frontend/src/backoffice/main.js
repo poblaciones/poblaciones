@@ -63,7 +63,7 @@ window.ApplicationName = process.env.ApplicationName;
 window.Db = new Db();
 
 var sharedObject = new Context();
-var tmpVm = new Vue({ data : { sharedObject } });
+var tmpVm = new Vue({ data: { sharedObject } });
 window.Context = tmpVm.sharedObject;
 
 // enable axios post cookie, default false
@@ -75,8 +75,8 @@ const store = window.Context.CreateStore();
 
 var appBackoffice = new Vue({
 	el: '#wrapper',
-  router,
-  store,
-  template: '<App/>',
-  components: { App }
+	router,
+	store,
+	template: '<App/>',
+	components: { App }
 });

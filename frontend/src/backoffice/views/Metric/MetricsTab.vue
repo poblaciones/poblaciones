@@ -208,7 +208,7 @@ export default {
 			return 'No';
 		}
 	},
-	openEdition(item){
+	openEdition(item) {
 		this.$refs.editPopup.show(item);
 	},
 	onDelete(item) {
@@ -237,10 +237,10 @@ export default {
 	down(level, variable) {
 		this.$refs.invoker.do(this.Dataset, this.Dataset.MoveVariableDown, level, variable);
 	},
-	openVariableFormulaEdition(item, variable){
+	openVariableFormulaEdition(item, variable) {
 		this.$refs.editVariableFormulaPopup.show(item, variable);
 	},
-	openVariableSymbologyEdition(item, variable){
+	openVariableSymbologyEdition(item, variable) {
 			/*var hasCalculatedColumns = (variable.Data !== null && variable.Data !== 'O') ||
 																	(variable.Normalization !== null && variable.Normalization !== 'O');
 			if (hasCalculatedColumns && !this.Dataset.properties.Geocoded) {
@@ -263,7 +263,7 @@ export default {
 										open);
 			}
 		},
-		openVariableOptionsEdition(item, variable){
+		openVariableOptionsEdition(item, variable) {
 			this.$refs.editVariableOptionsPopup.show(item, variable);
 		},
 		onDeleteVariable(item, variable) {

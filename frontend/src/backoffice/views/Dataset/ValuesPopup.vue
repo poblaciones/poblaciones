@@ -24,7 +24,7 @@
 
 				<div class="md-layout md-gutter">
 					<div style="position: relative; padding-left: 10px;">
-						<div v-if="canEdit && Work.CanEdit()"  style="position: absolute; right: -10px">
+						<div v-if="canEdit && Work.CanEdit()" style="position: absolute; right: -10px">
 							<md-button @click="upOnClick()" class="md-icon-button" :disabled="upDisabled">
 								<md-icon>arrow_upward</md-icon>
 							</md-button>

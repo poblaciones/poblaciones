@@ -16,36 +16,34 @@ import err from '@/common/js/err';
 
 export default {
 	name: 'App',
-	components: {
-	},
+	// components: { },
 	data() {
 		return {
 			user: null,
-      menu: [ { caption: 'Cartografías', link: 'cartographies' } ],
-      works: null,
-      context: window.Context
+			menu: [ { caption: 'Cartografías', link: 'cartographies' } ],
+			works: null,
+			context: window.Context
 		};
 	},
 	mounted() {
 		this.RegisterErrorHandler();
 		this.InitializePage();
-		},
+	},
 	methods: {
 		InitializePage() {
-      const loc = this;
-      authentication.loadHeaderBar(loc.LoadData);
-    },
-    LoadData(userInfo) {
+			const loc = this;
+			authentication.loadHeaderBar(loc.LoadData);
+		},
+		LoadData(userInfo) {
 			// Inicia sesión autenticada
-      this.user = userInfo;
-      const loc = this;
-      window.Context.User = this.user;
-      this.$refs.invoker.do(window.Db, window.Db.LoadWorks).then(
-					function() {
-						loc.works = window.Db.Works;
-				});
+			this.user = userInfo;
+			const loc = this;
+			window.Context.User = this.user;
+			this.$refs.invoker.do(window.Db, window.Db.LoadWorks).then(function() {
+				loc.works = window.Db.Works;
+			});
 			window.Context.LoadStaticLists();
-    },
+		},
 		RegisterErrorHandler() {
 			Vue.config.errorHandler = err.HandleError;
 			window.onerror = err.HandleError;
@@ -71,46 +69,41 @@ html, body {
 	margin-bottom: 7px;
 }
 
-
-.gm-fullscreen-control
-{
+.gm-fullscreen-control {
 	zoom: 0.8;
 	-moz-transform: scale(0.8);
 }
-.gm-bundled-control
-{
+.gm-bundled-control {
 	transform: scale(0.8);
 	margin: 0px 0px -24px 0px !important;
 }
-.gm-style-mtc
-{
+.gm-style-mtc {
 	zoom: 0.8;
 	-moz-transform: scale(0.8);
 }
 
-
 .md-table-cell-container {
-    padding-right: 0px!important;
+	padding-right: 0px!important;
 }
-.md-tab{
+.md-tab {
 	overflow-x: hidden;
 }
 .md-tabs.md-theme-default .md-tabs-navigation {
 	background-color: unset !important;
 	margin-bottom: 25px !important;
-  border-bottom: #eee solid 1px !important;
+	border-bottom: #eee solid 1px !important;
 }
 .md-dialog-title {
-    padding: 12px 12px 10px !important;
-    background-color: #00A0D2;
-    color: white;
+	padding: 12px 12px 10px !important;
+	background-color: #00A0D2;
+	color: white;
 }
 .md-title {
-   font-weight: normal ! important;
+	font-weight: normal ! important;
 }
 .md-card {
-   margin-top: 8px;
-   margin-bottom: 8px;
+	margin-top: 8px;
+	margin-bottom: 8px;
 }
 .md-dialog {
 	min-width: 400px !important;
@@ -120,13 +113,13 @@ html, body {
 	max-width: 380px!important;
 }
 .md-dialog-actions {
-    border-top: 0.5px solid #e6e5e5;
+	border-top: 0.5px solid #e6e5e5;
 }
 .whiteLink {
-    color: white !important;
+	color: white !important;
 }
 .whiteLink:hover {
-    text-decoration: none !important;
+	text-decoration: none !important;
 }
 
 .md-button {
@@ -163,70 +156,65 @@ html, body {
 }
 
 .topBarContainer {
-
 }
 .gridStatusBar {
-  font-size: 13px;
-  padding-top: 3px;
-  padding-left: 2px;
-  color: #777;
+	font-size: 13px;
+	padding-top: 3px;
+	padding-left: 2px;
+	color: #777;
 	min-height: 1li;
 }
 
-.jqx-widget-content
-{
+.jqx-widget-content {
 	font-family: Roboto,Noto Sans,-apple-system,BlinkMacSystemFont,sans-serif;
 }
-.jqx-grid-content
-{
+.jqx-grid-content {
 	cursor: default;
 }
-.jqx-widget
-{
+.jqx-widget {
 	font-family: Roboto,Noto Sans,-apple-system,BlinkMacSystemFont,sans-serif;
 }
 
 .tooltip {
 	z-index: 11;
 	background-color: #fff;
-  -webkit-border-radius: 2px;
-  border-radius: 2px;
-  -webkit-box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2);
-  box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2);
-  padding: 8px 16px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	-webkit-box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2);
+	box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2);
+	padding: 8px 16px;
 	font-size: 13px;
-  position: relative;
+	position: relative;
 	max-width: 350px;
 }
 
 .md-field.md-theme-default.md-disabled:after {
-    background-image: unset ! important;
+	background-image: unset ! important;
 }
 .md-field {
 	margin-bottom: 6px!important;
 }
 
-
 .mp-label {
-    padding-left: 0 !important;
-		left: 0 !important;
-		margin-bottom: 2px;
-    line-height: 1.1em;
-		color: #888!important;
-		font-size: 14px!important;
+	padding-left: 0 !important;
+	left: 0 !important;
+	margin-bottom: 2px;
+	line-height: 1.1em;
+	color: #888!important;
+	font-size: 14px!important;
 }
 
 .mp-area {
-		left: 0 !important;
-		margin-bottom: 2px;
-		color: #448aff!important;
-		font-size: 14px!important;
-		border: 1px solid whitesmoke!important;
-    margin-top: 10px;
-    margin-bottom: 5px;
-		line-height: 1.3em;
-    padding-top: 6px;
-    padding-left: 6px !important;
+	left: 0 !important;
+	margin-bottom: 2px;
+	color: #448aff!important;
+	font-size: 14px!important;
+	border: 1px solid whitesmoke!important;
+	margin-top: 10px;
+	margin-bottom: 5px;
+	line-height: 1.3em;
+	padding-top: 6px;
+	padding-left: 6px !important;
 }
 
 .dParagrah {
@@ -236,13 +224,10 @@ html, body {
 	padding-bottom: 20px;
 }
 
-
-.tooltipLarge
-{
+.tooltipLarge {
 	max-width: 600px !important;
 }
-.tooltipInTitleBar
-{
+.tooltipInTitleBar {
 	margin-top: -28px !important;
 }
 .tooltipNoBorder {
@@ -252,31 +237,29 @@ html, body {
 .helpTooltip {
 	max-width: 450px;
 }
-.tooltipInPopup
-{
+.tooltipInPopup {
 	margin-top: 0px !important;
 	z-index: 2500!important;
 }
 
 .tooltip .tooltip-inner {
-  background: white;
-  border-radius: 16px;
-  padding: 5px 10px 4px;
+	background: white;
+	border-radius: 16px;
+	padding: 5px 10px 4px;
 }
 
 .tooltip .tooltip-arrow {
-  width: 0;
-  height: 0;
-  border-style: solid;
-  position: absolute;
-  margin: 0px;
-  border-color: transparent;
-  z-index: 11;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	position: absolute;
+	margin: 0px;
+	border-color: transparent;
+	z-index: 11;
 }
 
-
 .tooltip[x-placement^="top"] {
-  margin-bottom: 5px;
+	margin-bottom: 5px;
 }
 .gutterBottom {
 	margin-bottom: 18px;
@@ -286,91 +269,90 @@ html, body {
 	margin-top: 18px;
 }
 .tooltip[x-placement^="top"] .tooltip-arrow {
-  border-width: 5px 5px 0 5px;
-  border-left-color: transparent !important;
-  border-right-color: transparent !important;
-  border-bottom-color: transparent !important;
-  bottom: -5px;
-  left: calc(50% - 5px);
-  margin-top: 0;
-  margin-bottom: 0;
+	border-width: 5px 5px 0 5px;
+	border-left-color: transparent !important;
+	border-right-color: transparent !important;
+	border-bottom-color: transparent !important;
+	bottom: -5px;
+	left: calc(50% - 5px);
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 .tooltip[x-placement^="bottom"] {
-  margin-top: 5px;
+	margin-top: 5px;
 }
 
 .tooltip[x-placement^="bottom"] .tooltip-arrow {
-  border-width: 0 5px 5px 5px;
-  border-left-color: transparent !important;
-  border-right-color: transparent !important;
-  border-top-color: transparent !important;
-  top: -5px;
-  left: calc(50% - 5px);
-  margin-top: 0;
-  margin-bottom: 0;
+	border-width: 0 5px 5px 5px;
+	border-left-color: transparent !important;
+	border-right-color: transparent !important;
+	border-top-color: transparent !important;
+	top: -5px;
+	left: calc(50% - 5px);
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 .tooltip[x-placement^="right"] {
-  margin-left: 5px;
+	margin-left: 5px;
 }
 
 .tooltip[x-placement^="right"] .tooltip-arrow {
-  border-width: 5px 5px 5px 0;
-  border-left-color: transparent !important;
-  border-top-color: transparent !important;
-  border-bottom-color: transparent !important;
-  left: -5px;
-  top: calc(50% - 5px);
-  margin-left: 0;
-  margin-right: 0;
+	border-width: 5px 5px 5px 0;
+	border-left-color: transparent !important;
+	border-top-color: transparent !important;
+	border-bottom-color: transparent !important;
+	left: -5px;
+	top: calc(50% - 5px);
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .tooltip[x-placement^="left"] {
-  margin-right: 5px;
+	margin-right: 5px;
 }
 
 .tooltip[x-placement^="left"] .tooltip-arrow {
-  border-width: 5px 0 5px 5px;
-  border-top-color: transparent !important;
-  border-right-color: transparent !important;
-  border-bottom-color: transparent !important;
-  right: -5px;
-  top: calc(50% - 5px);
-  margin-left: 0;
-  margin-right: 0;
+	border-width: 5px 0 5px 5px;
+	border-top-color: transparent !important;
+	border-right-color: transparent !important;
+	border-bottom-color: transparent !important;
+	right: -5px;
+	top: calc(50% - 5px);
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .tooltip.popover .popover-inner {
-  background: #f9f9f9;
-  color: black;
-  padding: 24px;
-  border-radius: 5px;
-  box-shadow: 0 5px 30px rgba(black, .1);
+	background: #f9f9f9;
+	color: black;
+	padding: 24px;
+	border-radius: 5px;
+	box-shadow: 0 5px 30px rgba(black, .1);
 }
 
 .tooltip.popover .popover-arrow {
-  border-color: #f9f9f9;
+	border-color: #f9f9f9;
 }
 
 .tooltip[aria-hidden='true'] {
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity .15s, visibility .15s;
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity .15s, visibility .15s;
 }
 .mpNoWrap {
 	white-space: nowrap;
 }
 .tooltip[aria-hidden='false'] {
-  visibility: visible;
-  opacity: 1;
-  transition: opacity .15s;
+	visibility: visible;
+	opacity: 1;
+	transition: opacity .15s;
 }
 
 .popover {
 	z-index: 11;
-		background-color: #ffffff;
-
+	background-color: #ffffff;
 }
 .hand {
 	cursor: pointer;
@@ -379,7 +361,7 @@ html, body {
 	cursor: pointer;
 }
 .md-icon-button {
-    margin: 0 0px;
+	margin: 0 0px;
 }
 .mp-right-toolbar {
 	position: absolute;
@@ -390,38 +372,38 @@ html, body {
 	bottom: 15px;
 }
 .md-helper-text {
-    bottom: -18px ! important;
+	bottom: -18px ! important;
 }
 
 .helper {
 	font-size: 11.5px;
-  line-height: 1.4em;
-  color: #a0a0a0!important;
+	line-height: 1.4em;
+	color: #a0a0a0!important;
 }
 
 .selectable {
 	cursor: pointer;
 }
 .mpLabel {
-  position: absolute;
-  line-height: 0.3em;
+	position: absolute;
+	line-height: 0.3em;
 	font-size: 14px!important;
-  color: #999 !important;
+	color: #999 !important;
 }
 .userInfo {
 	float: right;
 	font-size: 12px;
 	margin-top: -8px;
-	}
+}
 .md-field.md-has-textarea:not(.md-autogrow) .md-count {
-    bottom: -22px!important;
+	bottom: -22px!important;
 }
 .normalTextLink {
 	color: #444444!important
 }
 
 a.normalTextLink:hover {
-  text-decoration: none!important;
+	text-decoration: none!important;
 }
 
 .split p, .split-flex p {

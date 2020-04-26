@@ -74,7 +74,7 @@ export default {
 					return res;
 				});
 		},
-    call(method, args){
+    call(method, args) {
       var self = this;
       this.showDialog = true;
       if (args !== null && args !== undefined) {

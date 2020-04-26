@@ -99,17 +99,17 @@ export default {
 		getAttachUrl(item) {
 			return window.host + '/services/backoffice/GetMetadataFile?m=' + this.Work.properties.Metadata.Id + '&f=' + item.File.Id;
 		},
-		openEdition(item){
+		openEdition(item) {
 			this.$refs.editPopup.show(item);
 		},
 		onDelete(item) {
 			this.$refs.invoker.confirmDo('Eliminar archivo adjunto', 'El adjunto seleccionado será eliminado',
 					this.Work, this.Work.DeleteFile, item);
 		},
-    up(item){
+    up(item) {
       this.$refs.invoker.do(this.Work, this.Work.MoveFileUp, item);
     },
-    down(item){
+    down(item) {
       this.$refs.invoker.do(this.Work, this.Work.MoveFileDown, item);
     },
   },

@@ -55,7 +55,7 @@
 										</div>
 									</div>
 								</template>
-							
+
 							<div class="floatRadio largeOption">
 								<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()" class="md-primary" @change="UpdateClearLink" :value="3"></md-radio>
 							</div>
@@ -108,7 +108,7 @@
 							</div>
 						</md-card-content>
 					</md-card>
-				
+
 		</div>
 
 			</div>
@@ -135,9 +135,9 @@ export default {
 		accessLinkUrl() {
 			if (this.Work.properties.Metadata.Url) {
 				if (this.Work.properties.AccessLink) {
-				 return str.AbsoluteUrl(this.Work.properties.Metadata.Url) + '/' + this.Work.properties.AccessLink;
+					return str.AbsoluteUrl(this.Work.properties.Metadata.Url) + '/' + this.Work.properties.AccessLink;
 				} else if (this.Work.properties.LastAccessLink) {
-				 return str.AbsoluteUrl(this.Work.properties.Metadata.Url) + '/' + this.Work.properties.LastAccessLink;
+					return str.AbsoluteUrl(this.Work.properties.Metadata.Url) + '/' + this.Work.properties.LastAccessLink;
 				} else {
 					return "(no utilizado)";
 				}
@@ -208,15 +208,15 @@ export default {
 		doUpdate() {
 			this.Work.properties.IsPrivate = this.visibilityMode === 3;
 			this.$refs.invoker.do(this.Work,
-					this.Work.UpdateVisibility);
+				this.Work.UpdateVisibility);
 			return true;
 		},
 		askReview() {
 			this.$refs.invoker.do(this.Work,
-					this.Work.RequestReview).then(
-		function () {
-			window.alert('Revisión solicitada con éxito.');
-		});
+				this.Work.RequestReview).then(
+					function () {
+						window.alert('Revisión solicitada con éxito.');
+					});
 		}
 	},
 	components: {
@@ -226,7 +226,8 @@ export default {
 			this.CalculateMode();
 		}
 	}
-};</script>
+};
+</script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 

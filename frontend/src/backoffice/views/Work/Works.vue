@@ -33,7 +33,7 @@
           			<md-table-cell @click.native="select(item)" class="selectable" md-label="Datasets">{{ item.DatasetCount }}</md-table-cell>
 								<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores">{{ item.MetricCount }}</md-table-cell>
 								<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado">
-									<md-switch class="md-primary"  v-model="item.IsIndexed"
+									<md-switch class="md-primary" v-model="item.IsIndexed"
 											@change="onIndexedChanged(item)" />
 								</md-table-cell>
 								<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Segmentado">
@@ -61,7 +61,7 @@ Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblida
 								<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
 									<md-icon>edit</md-icon>
 								</md-button>
-								<md-button v-if="canEdit(item)" @click="onDuplicate(item)"  title="Duplicar" class="md-icon-button">
+								<md-button v-if="canEdit(item)" @click="onDuplicate(item)" title="Duplicar" class="md-icon-button">
 									<md-icon>file_copy</md-icon>
 								</md-button>
 									<md-button v-if="canEdit(item)" title="Eliminar" class="md-icon-button" v-on:click="onDelete(item)">
@@ -135,8 +135,8 @@ export default {
 	},
 	props: {
 		filter: String,
-		createEnabled:  { type: Boolean, default: true },
-		offerAdminActions:  { type: Boolean, default: false },
+		createEnabled: { type: Boolean, default: true },
+		offerAdminActions: { type: Boolean, default: false },
 	},
 	computed: {
 		showingWelcome() {
@@ -231,7 +231,7 @@ export default {
 				return { label: 'Publicada' + privacy, tag: 'published', icon: 'check_circle_outline', color: '#44b10f' };
 			}
 		},
-		canEdit(item){
+		canEdit(item) {
 			if (window.Context.User.Privileges === 'A') {
 				return true;
 			}
@@ -240,7 +240,7 @@ export default {
 			}
 			return item.Privileges !== 'V';
 		},
-		onDelete(item){
+		onDelete(item) {
 			var loc = this;
 			this.source = item;
 			this.$refs.invoker.confirm('Eliminar ' + this.entityName.single,
@@ -274,11 +274,11 @@ export default {
 						window.Db.ReleaseWork(item.Id);
 						});
 		},
-		onNewWork(){
+		onNewWork() {
 			this.newWorkName = '';
 			this.activateNewWork = true;
 		},
-		onNewWorkStart(){
+		onNewWorkStart() {
 			if (this.newWorkName.trim().length === 0) {
 				alert('Debe indicar un nombre.');
 				var loc = this;
@@ -292,7 +292,7 @@ export default {
 		},
 		onIndexedChanged(item) {
 			this.$refs.invoker.do(window.Db,
-														window.Db.UpdateWorkIndexing, item);	
+														window.Db.UpdateWorkIndexing, item);
 		},
 		onSegmentedCrawlingChanged(item) {
 			this.$refs.invoker.do(window.Db,
@@ -346,7 +346,7 @@ export default {
   border-radius: 10px;
   overflow: hidden;
   height: 13px;
- 
+
 }
 .extraIcon {
 	 background-color: white;

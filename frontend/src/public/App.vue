@@ -142,11 +142,10 @@ export default {
 			if (window.SegMap) {
 				if (window.SegMap.MapIsInitialized) {
 					afterLoaded();
-					return;
 				} else {
 					window.SegMap.afterCallback2 = afterLoaded;
-					return;
 				}
+				return;
 			}
 			var mapApi = new GoogleMapsApi(window.google);
 			var segMap = new SegmentedMap(mapApi, this.frame, this.clipping, this.toolbarStates, this.metrics, this.config);
@@ -183,18 +182,15 @@ html, body {
 .gAlpha {
 	opacity: 0;
 }
-.gm-fullscreen-control
-{
+.gm-fullscreen-control {
 	zoom: 0.8;
 	-moz-transform: scale(0.8);
 }
-.gm-bundled-control
-{
+.gm-bundled-control {
 	transform: scale(0.8);
 	margin: 0px 0px -24px 0px !important;
 }
-.gm-style-mtc
-{
+.gm-style-mtc {
 	zoom: 0.8;
 	-moz-transform: scale(0.8);
 }
@@ -210,13 +206,11 @@ html, body {
 	position: absolute;
 	left: 90px;
 }
-.action-muted
-{
+.action-muted {
 	color: #DDDDDD;
 }
 
-.moderateHr
-{
+.moderateHr {
 	margin-top: 12px;
 	margin-bottom: 12px;
 }
@@ -242,16 +236,16 @@ html, body {
 }
 .superSmallButton {
 	border: 1px solid #68B3C8;
-  padding: 0px 3px;
-  margin-left: 2px;
+	padding: 0px 3px;
+	margin-left: 2px;
 }
 .gutter.gutter-vertical {
-	background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
 	cursor: ns-resize;
 }
 
 .gutter.gutter-horizontal {
-	background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
 	cursor: ew-resize;
 }
 
@@ -259,22 +253,23 @@ html, body {
 	height: 100%;
 	float: left;
 }
+
+.split.split-vertical, .gutter.gutter-vertical {
+	width: 100%;
+}
 // fin de settings de split
 
-.drop
-{
+.drop {
 	font-size: 11px;
 	vertical-align: top !important;
 	padding-top: 5px;
 }
-.dropMetric
-{
+.dropMetric {
 	cursor: pointer;
 	cursor: hand;
 	color: rgb(99, 150, 234);
 }
-.dropMetricMuted
-{
+.dropMetricMuted {
 	cursor: pointer;
 	cursor: hand;
 	color: #DDDDDD;
@@ -289,11 +284,10 @@ html, body {
 }
 
 a:hover {
-text-decoration: underline;
+	text-decoration: underline;
 }
 
-.innerBoxTooltip
-{
+.innerBoxTooltip {
 	right: unset!important;
 	max-height: 200px!important;
 	overflow: auto!important;
@@ -356,22 +350,19 @@ text-decoration: underline;
 	text-align: center;
 }
 
-.sourceRow
-{
+.sourceRow {
 	position: relative;
 	padding: 4px 0px 0px 0px;
 }
 
-.coverageBox
-{
+.coverageBox {
 	padding: 8px 0px 0px 0px;
 	font-size: 9px;
 	line-height: 1.42857143;
 	color: #252422;
 }
 
-.mapLabelsSat
-{
+.mapLabelsSat {
 	text-shadow: .75px .75px 1px #000, -.75px -1px 1px #000, -.75px .75px 1px #000, .75px -1px 1px #000, .75px .75px 1px #000, -.75px -1px 1px #000, -.75px 1px 1px #000, .75px -.75px 1px #000 !important;
 }
 .mapLabels {
@@ -383,7 +374,7 @@ text-decoration: underline;
 	color: #333;
 	font-size: 12px;
 	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff,
-							.75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
+	.75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
 }
 
 .mapLabelsLarger {
@@ -437,8 +428,7 @@ text-decoration: underline;
 .text-softer {
 	color: #777;
 }
-.popupSubTitle
-{
+.popupSubTitle {
 	font-weight: 600;
 	text-transform: uppercase;
 	font-size: 12px;
@@ -480,7 +470,7 @@ text-decoration: underline;
 }
 
 .btn-default.active.focus, .btn-default.active:focus, .btn-default.active:hover, .btn-default:active.focus, .btn-default:active:focus, .btn-default:active:hover, .open>.dropdown-toggle.btn-default.focus, .open>.dropdown-toggle.btn-default:focus, .open>.dropdown-toggle.btn-default:hover {
-border-color: #66615B;
+	border-color: #66615B;
 }
 .btn:hover, .btn:focus, .btn:active, .open > .btn.dropdown-toggle,
 .navbar .navbar-nav > li > a.btn:hover,
@@ -497,14 +487,12 @@ border-color: #66615B;
 	border-color: #66615B;
 }
 
-.summaryRow
-{
+.summaryRow {
 	padding: 0px 0px 6px 0px;
 	font-size: 0.9em;
 	color: #777;
 }
-.summaryBlock
-{
+.summaryBlock {
 	padding: 2px 0px 4px 0px;
 }
 

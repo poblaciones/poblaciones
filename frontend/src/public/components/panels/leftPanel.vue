@@ -1,124 +1,276 @@
 <template>
-	<div v-if="open" class='left-panel' v-bind:style='{ width: panelWidth }'>
-		<button title="Quitar" type="button" v-on:click="doClose"
-						class="close buttonMargin">
-			<close-icon title="Quitar" />
-		</button>
-		<div v-on:click="doToggle" class='fa fa-2x fa-caret-left hand left-arrow' title="{ isCaretLeft ? 'Contraer' : 'Expandir' { 'fa-caret-left' : isCaretLeft) panel lateral"
-				 v-bind:class="{ 'fa-caret-left' : isCaretLeft, 'fa-caret-right': !isCaretLeft }"
-				 v-bind:style='{ left: panelWidth }'></div>
-		<div>
-			<InfoPanel v-bind:dt="dt" v-if="typeInfo" />
-		</div>
+	<div>
+		<div v-show='hasContent && !collapsed' class='left-panel'>
+			<div v-if="isFullFront">
+				<list-panel :dt='Full' ref='Full' v-if='isFullList'/>
+				<info-panel :dt='Full' v-if='isFullInfo'/>
+			</div>
+			<div v-else>
+				<div id="panTop" class="split split-vertical">
+					<list-panel :dt='Top' ref='Top' v-if='isTopList'/>
+					<info-panel :dt='Top' v-if='isTopInfo'/>
+				</div>
+				<div id="panBottom" class="split split-vertical">
+					<list-panel :dt='Bottom' ref='Bottom' v-if='isBottomList'/>
+					<info-panel :dt='Bottom' v-if='isBottomInfo'/>
+				</div>
+			</div>		</div>
+		<collapse-button v-if='hasContent' :collapsed='collapsed' />
 	</div>
 </template>
 
 <script>
 import InfoPanel from '@/public/components/panels/infoPanel';
+import ListPanel from '@/public/components/panels/listPanel';
 import PanelType from '@/public/enums/PanelType';
-import CloseIcon from 'vue-material-design-icons/close.vue';
-
+import CollapseButton from '@/public/components/controls/collapseButton';
+import Split from 'split.js';
+import h from '@/public/js/helper';
 export default {
 	name: 'leftPanel',
 	components: {
+		ListPanel,
 		InfoPanel,
-		CloseIcon
+		CollapseButton,
 	},
 	data() {
 		return {
-			open: true,
-			collapsed: false,
-			panelWidth: '330px',
-			container: '',
-			panels: [],
-			dt: {},
-			typeInfo: false,
-		};
+			hasContent: false,
+			collapsed: true,
+			Top: null,
+			Bottom: null,
+			Full: null,
+			isFullFront: true,
+			onlyFull: false,		};
 	},
-	// created () {
-	// },
-	// beforeDestroy () {
-	// },
+	// created () { },
 	mounted() {
-		this.updatePanel();
+		this.initSplit();
+		window.addEventListener('resize', this.onResize);
+	},
+	beforeDestroy () {
+		window.removeEventListener('resize', this.onResize);
 	},
 	computed: {
-		isCaretLeft() {
-			return this.panelWidth != '0';
+		isFullList() {
+			return this.Full !== null
+				&& this.Full.panelType == PanelType.ListPanel;
+		},
+		isTopList() {
+			return this.Top !== null
+				&& this.Top.panelType == PanelType.ListPanel;
+		},
+		isBottomList() {
+			return this.Bottom !== null
+				&& this.Bottom.panelType == PanelType.ListPanel;
+		},
+		isFullInfo() {
+			return this.Full !== null
+				&& this.Full.panelType == PanelType.InfoPanel;
+		},
+		isTopInfo() {
+			return this.Top !== null
+				&& this.Top.panelType == PanelType.InfoPanel;
+		},
+		isBottomInfo() {
+			return this.Bottom !== null
+				&& this.Bottom.panelType == PanelType.InfoPanel;
 		},
 	},
 	methods: {
-		Toggle() {
-			this.doToggle();
+		onResize() {
+			this.onlyFull = window.innerHeight < 500;
 		},
-		Close() {
-			this.doClose();
+		initSplit() {
+			if(this.isFullFront == false
+				&& this.hasSplit()) {
+				//TODO: no funciona
+				//TODO: ver si guardar porcentajes en url...
+				Split(['#panTop', '#panBottom'], {
+					direction: 'vertical',
+					sizes: [50, 50],
+					minSizes: 200,
+					gutterSize: 6,
+				});
+			}
 		},
-		Add(dt) {
-			if(this.open == false) {
-				this.open = true;
-				this.doToggle();
+		splitVisibility() {
+			let gutter = document.getElementsByClassName('gutter gutter-vertical');
+			if(gutter.length == 0) {
+				this.initSplit();
+				gutter = document.getElementsByClassName('gutter gutter-vertical');
+				if(gutter.length == 0) {
+					return;
+				}
 			}
-			const index = this.panels.findIndex(function(el) {
-				return dt.fid === el.fid;
-			});
-			if(index > -1) {
-				this.panels.splice(index, 1);
+			//TODO: no funciona
+			if(this.isFullFront == false
+				&& this.hasSplit()) {
+				gutter[0].style.visibility = 'visible';
+			} else {
+				gutter[0].style.visibility = 'hidden';
 			}
-			this.panels.push(dt);
+		},
+		hasAny() {
+			return this.Top !== null
+				|| this.Bottom !== null
+				|| this.Full !== null;
+		},
+		hasSplit() {
+			return this.Top !== null
+				&& this.Bottom !== null;
+		},
+		getLocated(fid) {
+			if(this.Top !== null
+				&& this.Top.fid === fid) {
+				return 'Top';
+			}
+			if(this.Bottom !== null
+				&& this.Bottom.fid === fid) {
+				return 'Bottom';
+			}
+			if(this.Full !== null
+				&& this.Full.fid === fid) {
+				return 'Full';
+			}
+			return null;
+		},
+		Add(dt, index) {
+			this.isFullFront = true;
+			this.doAdd(dt, 'Full', index);
+		},
+		AddTop(dt, index) {
+			this.isFullFront = false;
+			this.doAdd(dt, 'Top', index);
+		},
+		AddBottom(dt, index) {
+			this.isFullFront = false;
+			if(this.Top !== null
+				&& this.Top.fid === dt.fid) {
+				if(index !== undefined
+					&& this.Top.panelType == PanelType.ListPanel) {
+					this.Top.detailIndex = index;
+				}
+				return;
+			}
+			this.doAdd(dt, 'Bottom', index);
+		},
+		doAdd(dt, panel, index) {
+			if(this.onlyFull) {
+				panel = 'Full';
+				this.isFullFront = true;
+				this.Top = null;
+				this.Bottom = null;
+			}
+
+			this.hasContent = true;
+			this.collapsed = false;
+			this[panel] = dt;
+
+			if(index !== undefined
+				&& this[panel].panelType == PanelType.ListPanel) {
+				this[panel].detailIndex = index;
+			}
 			this.showPanel();
 		},
 		showPanel() {
-			const top = this.panels[this.panels.length - 1];
-			// this.panel = top.$el.outerHTML;
-			this.dt = top;
-			if(this.dt.type == PanelType.InfoPanel) {
-				this.typeInfo = true;
-			}
-		},
-		doClose() {
-			if(this.panels.length > 1) {
-				this.panels.pop();
-				this.showPanel();
+			if(this.collapsed || this.hasAny() == false) {
+				window.SegMap.SaveRoute.UpdateRoute();
 				return;
 			}
-			if(this.panelWidth != '0') {
-				this.doToggle();
+			if(this.Top === null
+				&& this.Bottom !== null) {
+				this.Top = this.Bottom;
+				this.Bottom = null;
 			}
-			this.open = false;
+			this.splitVisibility();
 			window.SegMap.SaveRoute.UpdateRoute();
+		},
+		doClose(fid) {
+			let panel = this.getLocated(fid);
+			if(panel === null) {
+				return;
+			}
+			this[panel] = null;
+
+			if(this.Full === null) {
+				this.isFullFront = false;
+			}
+
+			if(this.Top === null
+				&& this.Bottom === null) {
+				this.isFullFront = true;
+			}
+			if(this.hasAny() == false) {
+				this.hasContent = false;
+				this.collapsed = true;
+			}
+			this.showPanel();
 		},
 		doToggle() {
-			this.collapsed = !this.collapsed;
-			window.SegMap.SaveRoute.UpdateRoute();
+			this.collapsed = ! this.collapsed;
 		},
-		updatePanel() {
-			var mapType = document.getElementsByClassName('gmnoprint gm-style-mtc');
-			var fav = document.getElementsByClassName('fab-wrapper');
-			var search = document.getElementsByClassName('searchBar');
-
-			if (!this.collapsed) {
-				this.panelWidth = '330px';
-				mapType[0].style.left = '330px';
-				fav[0].style.left = '315px';
-				search[0].style.left = '500px';
-				search[0].style.width = 'calc(100% - 700px)';
-				this.showPanel();
+		updateMapTypeControl() {
+			var css = h.getCssRule(document, '.gm-style-mtc');
+			if(css === null) {
+				css = { style: { transform: '' } };
+			}
+			if (this.collapsed) {
+				window.SegMap.SetTypeControlsDefault();
+				//css.style.transform = 'scale(0.8)';
 			} else {
-				this.typeInfo = false;
-				this.panelWidth = '0';
-				mapType[0].style.left = '0';
-				fav[0].style.left = '15px';
-				search[0].style.left = '300px';
-				search[0].style.width = 'calc(100% - 500px)';
+				window.SegMap.SetTypeControlsDropDown();
+				css.style.transform = 'translate(333px)';
+			}
+		},
+		setCss(el, collapsed, onValue, offValue) {
+			if (collapsed) {
+				Object.assign(el.style, offValue);
+			} else {
+				Object.assign(el.style, onValue);
+			}
+		},
+		updateSuroundings(cssClass, onValue, offValue) {
+			let el = document.getElementsByClassName(cssClass);
+			if (el.length > 0) {
+				this.setCss(el[0], this.collapsed, onValue, offValue);
+			} else {
+				const loc = this;
+				var checkExist = setInterval(function() {
+					let el = document.getElementsByClassName(cssClass);
+					if (el.length > 0) {
+						clearInterval(checkExist);
+						loc.setCss(el[0], loc.collapsed, onValue, offValue);
+					}
+				}, 50);
 			}
 		},
 	},
-		watch: {
-			collapsed() {
-				this.updatePanel();
+	watch: {
+		onlyFull() {
+			if(this.onlyFull) {
+				if(this.Full == null) {
+					this.Full = this.Top;
+				}
+				this.isFullFront = true;
+				this.Top = null;
+				this.Bottom = null;
+				this.showPanel();
 			}
-		}
+		},
+		collapsed() {
+			this.showPanel();
+			this.updateMapTypeControl();
+			this.updateSuroundings('fab-wrapper',
+				{ transform: 'translate(315px)' },
+				{ transform: '' }
+			);
+			this.updateSuroundings('searchBar',
+				{ left: '500px', width: 'calc(100% - 700px)' },
+				{ left: '300px', width: 'calc(100% - 500px)' }
+			);
+		},
+	},
 };
 </script>
 
@@ -126,26 +278,12 @@ export default {
 .left-panel {
 	position:absolute;
 	height:100%;
-	width:330px;
+	width:300px;
 	left:0;
 	top:0;
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 	z-index:1;
 	background-color: white;
-}
-.left-arrow {
-	position:absolute;
-	height: 48px;
-	width: 23px;
-	top: 50px;
-	font-size: 14px;
-	padding-top: 17px;
-  padding-right: 2px;
-  color: #767676;
-	left: 330px;
-  background: rgba(255,255,255,0.9) url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAUCAQAAAAXDMSnAAAAi0lEQ…ueTldC08kcT5YOY9xYujqQM03XKXuaLmEtNF1e1Nz89gbL+0do6OEwRwAAAABJRU5ErkJggg==) 7px center/7px 10px no-repeat;
-  border-left: 1px solid #D4D4D4;
-  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
 }
 </style>
 

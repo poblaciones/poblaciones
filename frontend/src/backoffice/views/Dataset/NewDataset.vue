@@ -11,7 +11,7 @@
 							<div>
 								<mp-simple-text @enter="performNewDataset"
 	label="Indique el nombre del dataset" ref="datasetInput" helper="Ej. Escuelas primarias."
-																placeholder="Nuevo dataset..." :maxlength="100"  v-model="newDatasetName"
+																placeholder="Nuevo dataset..." :maxlength="100" v-model="newDatasetName"
 									></mp-simple-text>
 
 							</div>
@@ -55,7 +55,7 @@ export default {
     };
 	},
 	methods: {
-		performNewDataset(){
+		performNewDataset() {
 			var loc = this;
 			if (this.newDatasetName.trim().length === 0) {
 				alert('Debe indicar un nombre.');

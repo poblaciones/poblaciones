@@ -39,7 +39,7 @@ export default {
     ButtonPanel
 	},
 	mixins: [ clickaway ],
-	methods:  {
+	methods: {
 		cancel() {
 			this.localValue = this.value;
 		},
@@ -53,7 +53,7 @@ export default {
         if (this.valueChanged) {
           this.$refs.buttonPanel.showPrompt();
         } else {
-          if (this.$refs.buttonPanel && this.$refs.buttonPanel.editableMode){
+          if (this.$refs.buttonPanel && this.$refs.buttonPanel.editableMode) {
             this.$refs.buttonPanel.Cancel();
           }
         }
@@ -122,7 +122,7 @@ export default {
 			return this.localValue !== this.value;
 		},
 		minHeightRows() {
-			return { 'min-height' : (32 + 17 * this.rows) + 'px' };
+			return { 'min-height': (32 + 17 * this.rows) + 'px' };
 		},
 		errorMessage() {
 			var ret = '';

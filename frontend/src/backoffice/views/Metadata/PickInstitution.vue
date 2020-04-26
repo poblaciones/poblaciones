@@ -19,7 +19,7 @@
 				<div class="md-layout-item">
 					<md-table v-model="institutions" md-sort="caption" md-sort-order="asc" md-card="">
 						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell @click.native="setSelected(item); "  class="selectable" md-label="Nombre" :md-sort-by="item.Caption">{{ item.Caption }}</md-table-cell>
+							<md-table-cell @click.native="setSelected(item); " class="selectable" md-label="Nombre" :md-sort-by="item.Caption">{{ item.Caption }}</md-table-cell>
 							<md-table-cell @click.native="setSelected(item)" md-label="País" class="selectable" :md-sort-by="item.Country">{{ item.Country }}</md-table-cell>
 						</md-table-row>
 					</md-table>
@@ -54,7 +54,7 @@ export default {
     },
   },
   methods: {
-    CreateNewInstitution(){
+    CreateNewInstitution() {
 			var loc = this;
 			window.Context.Factory.GetCopy('Institution', function(data) {
 					data.IsEditableByCurrentUser = true;

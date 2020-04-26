@@ -8,7 +8,7 @@
 						<md-input ref="inputName" placeholder="Buscar..." v-model="filter" @input="doSearch" />
 					</md-field>
 					<md-list>
-						<md-list-item v-for="item in autolist" v-bind:key="item.Id" :value="item.Id"
+						<md-list-item v-for="item in autolist" :key="item.Id" :value="item.Id"
 													@click="select(item)">
 							<div class="md-list-item-text">
 								<div>{{ item.Extra }}</div>

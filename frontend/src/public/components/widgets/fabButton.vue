@@ -37,25 +37,23 @@ export default {
 	components: {
 		fab
 	},
-	data(){
-      return {
-          bgColor: '#00A0D2',
-					action: {
-						Metrics: []
-					},
-					fabMetrics: [],
-          position: 'bottom-left',
-      };
-		},
+	data() {
+		return {
+			bgColor: '#00A0D2',
+			action: {
+				Metrics: []
+			},
+			fabMetrics: [],
+			position: 'bottom-left',
+		};
+	},
 	created () {
 		window.addEventListener('keydown', this.keyProcess);
 	},
 	beforeDestroy () {
 		window.removeEventListener('keydown', this.keyProcess);
 	},
-	mounted() {
-		
-	},
+	// mounted() { },
 	computed: {
 		fabActions() {
 			var ret = [];
@@ -67,16 +65,16 @@ export default {
 			return ret;
 		}
 	},
-  methods:{
+	methods: {
 		loadFabMetrics() {
 			const loc = this;
-				axios.get(window.host + '/services/metrics/GetFabMetrics', {
-					params: { w : window.SegMap.Revisions.FabMetrics }
-				}).then(function (res) {
-					loc.fabMetrics = res.data;
-				}).catch(function (error) {
-					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
-				});
+			axios.get(window.host + '/services/metrics/GetFabMetrics', {
+				params: { w: window.SegMap.Revisions.FabMetrics }
+			}).then(function (res) {
+				loc.fabMetrics = res.data;
+			}).catch(function (error) {
+				err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
+			});
 		},
 		keyProcess(e) {
 			if (e.key === "Escape") {
@@ -85,17 +83,17 @@ export default {
 				}
 			}
 		},
-    selected(n){
+		selected(n) {
 			this.action = this.fabMetrics[n];
 			window.Popups.AddMetric.show(this.action.Metrics);
 		}
-  },
+	},
 };
 </script>
 
 <style scoped>
-	.fab-wrapper {
-		z-index: 1!important;
-	}
+.fab-wrapper {
+	z-index: 1!important;
+}
 </style>
 

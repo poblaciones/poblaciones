@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="showDialog"  :md-click-outside-to-close="false">
+		<md-dialog :md-active.sync="showDialog" :md-click-outside-to-close="false">
 			<md-dialog-title>{{ title }}</md-dialog-title>
 			<md-dialog-content>
 				<invoker ref="invoker"></invoker>
@@ -59,7 +59,7 @@ import f from '@/backoffice/classes/Formatter';
 
 export default {
   name: 'variableSymbology',
-  methods:  {
+  methods: {
 	show(level, variable) {
 			// Se pone visible
 			this.Level = level;

@@ -20,10 +20,10 @@ export default {
 		'canClickMask'
 	],
 	methods: {
-    clickX(){
+    clickX() {
       this.$emit('toggle');
     },
-    clickMask(){
+    clickMask() {
       if(this.canClickMask) {
         this.$emit('toggle');
       }

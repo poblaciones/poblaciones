@@ -60,7 +60,7 @@ import arr from '@/common/js/arr';
 					loc.openEdition(data);
 			});
     },
-		openEdition(item){
+		openEdition(item) {
 			this.$refs.editPopup.show(item);
 		},
 		popupSaved(item) {

@@ -9,7 +9,7 @@
 					<mp-simple-text :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
 										label="Nombre" ref="metricInput" @enter="save"
 										helper="Ej. Acceso a agua potable"
-										:maxlength="75"  v-model="newMetricVersionLevel.MetricVersion.Metric.Caption"
+										:maxlength="75" v-model="newMetricVersionLevel.MetricVersion.Metric.Caption"
 								>
 					</mp-simple-text>
 
@@ -26,9 +26,9 @@
 
 				<div class="md-layout-item md-size-60 md-small-size-100">
 					<mp-simple-text
-									label="Edición" ref="metricInput"  @enter="save"
+									label="Edición" ref="metricInput" @enter="save"
 									helper="Año de referencia de la edición o serie de datos. Ej. 2010"
-									:maxlength="20"  v-model="newMetricVersionLevel.MetricVersion.Caption"
+									:maxlength="20" v-model="newMetricVersionLevel.MetricVersion.Caption"
 								></mp-simple-text>
 				</div>
 			</div>
@@ -51,7 +51,7 @@ export default {
   name: 'MetricPopup',
 	components: {
 	},
-  methods:  {
+  methods: {
 		show(level) {
 			// Se pone visible
 			this.MetricVersionLevel = level;

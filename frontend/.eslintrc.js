@@ -11,14 +11,17 @@ module.exports = {
 	},
 	// https://github.com/feross/standard/blob/master/RULES.md#javascript-standard-style
 	extends: [
-          'plugin:vue/recommended'
-      ],
+		'plugin:vue/recommended'
+	],
 	// required to lint *.vue files
 	plugins: [
-		'html', 'vue'
+		'vue', 'html'
 	],
 	// add your custom rules here
 	'rules': {
+		'vue/html-closing-bracket-newline': 0,
+		'vue/multiline-html-element-content-newline': 0,
+		'vue/attribute-hyphenation': 0,
 		// allow paren-less arrow functions
 		'arrow-parens': 0,
 		// allow async-await
@@ -59,10 +62,10 @@ module.exports = {
 		'spaced-comment': 0, // ['warn', 'always', { 'line': { 'markers': ['TODO:', 'REVISAR:'], 'exceptions': ['-', '+'], }, }],
 		'semi': ['error', 'always'],
 	}
-,
- // Other configs...
-  "globals": {
-    "$": true,
-    "jQuery": true
-  }
+	,
+	// Other configs...
+	"globals": {
+		"$": true,
+		"jQuery": true
+	}
 };

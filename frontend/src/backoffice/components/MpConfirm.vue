@@ -22,7 +22,7 @@ export default {
   components: {
 
 	},
-	methods:  {
+	methods: {
 		show() {
 			this.dialog = true;
 			this.statusSent = false;
