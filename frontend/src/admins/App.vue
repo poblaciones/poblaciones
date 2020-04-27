@@ -70,16 +70,14 @@ html, body {
 }
 
 .gm-fullscreen-control {
-	zoom: 0.8;
-	-moz-transform: scale(0.8);
+	transform: scale(0.8);
 }
 .gm-bundled-control {
 	transform: scale(0.8);
 	margin: 0px 0px -24px 0px !important;
 }
 .gm-style-mtc {
-	zoom: 0.8;
-	-moz-transform: scale(0.8);
+	transform: scale(0.8);
 }
 
 .md-table-cell-container {
@@ -426,12 +424,12 @@ a.normalTextLink:hover {
 }
 
 .gutter.gutter-vertical {
-	background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
 	cursor: ns-resize;
 }
 
 .gutter.gutter-horizontal {
-	background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
 	cursor: ew-resize;
 }
 

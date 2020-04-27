@@ -183,16 +183,14 @@ html, body {
 	opacity: 0;
 }
 .gm-fullscreen-control {
-	zoom: 0.8;
-	-moz-transform: scale(0.8);
+	transform: scale(0.8);
 }
 .gm-bundled-control {
 	transform: scale(0.8);
 	margin: 0px 0px -24px 0px !important;
 }
 .gm-style-mtc {
-	zoom: 0.8;
-	-moz-transform: scale(0.8);
+	transform: scale(0.8);
 }
 
 .hand {
@@ -333,10 +331,10 @@ a:hover {
 	color: #5a626d;
 	pointer-events: none;
 	cursor: pointer;
-  background-color: #ffffff;
-  padding: 8px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(60,64,67,.28);
+	background-color: #ffffff;
+	padding: 8px;
+	border-radius: 8px;
+	box-shadow: 0 4px 10px rgba(60,64,67,.28);
 }
 .ibTooltipOffsetLeft {
 	margin-left: 9px;
@@ -510,7 +508,6 @@ a:hover {
 	.no-print, .no-print * {
 		display: none !important;
 	}
-
 	.always-print {
 		visible: visible;
 	}

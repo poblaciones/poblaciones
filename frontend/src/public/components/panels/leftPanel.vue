@@ -226,10 +226,10 @@ export default {
 			}
 			if (this.collapsed) {
 				window.SegMap.SetTypeControlsDefault();
-				css.style.transform = ''; // scale(0.8)
+				css.style.transform = 'scale(0.8)';
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				css.style.transform = 'translate(' + (this.width + 33) + 'px)';
+				css.style.transform = 'translate(' + (this.width + 33) + 'px) scale(0.8)';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
