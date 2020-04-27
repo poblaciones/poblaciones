@@ -1,11 +1,12 @@
 <template>
 	<div v-if="dt">
 		<feature-info :dt='detail' v-if='showDetail' @clickBack='doCloseInfo' />
-		<div class='info' v-else>
+		<div class='panel card panel-body' v-else>
 			<mp-close-button v-on:click="doClose" />
 
-			<div class='type'>{{ dt.Type }}</div>
+			<div class='stats' style="padding-top: 8px">{{ dt.Type }}</div>
 			<div class='title'>{{ title }}</div>
+			<hr class="moderateHr">
 			<div v-for="(item, index) in dt.Items" :key="item.Name">
 				<div v-on:click="doCloseItem(index)" class='fa fa-times hand' style='float:right;margin:5px'></div>
 				<div class='item hand' v-on:click='openDetail(item)'>
@@ -84,12 +85,6 @@ export default {
 </script>
 
 <style scoped>
-.info {
-	border-radius: 6px;
-	border: solid 1px;
-	margin:4px;
-	overflow-y:auto;
-}
 .type {
 	padding-bottom: 0px;
 	padding-top: 2px;
@@ -97,20 +92,9 @@ export default {
 	text-transform: uppercase;
 	text-align: center;
 }
-.title {
-	padding-bottom: 3px;
-	padding-top: 2px;
-	font-size: 15px;
-	font-weight: 500;
-	text-align: center;
-	font-weight: bold;
-}
 .item {
-	margin-left: 10px;
-	padding-top: 4px;
-	border-radius: 6px;
-	border: solid 1px;
-	margin:4px;
+	padding-top: 1px;
+	padding-bottom: 10px
 }
 </style>
 

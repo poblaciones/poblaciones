@@ -23,6 +23,7 @@ LeftPanelRouter.prototype.ToRoute = function () {
 	if (window.Panels.Left.hasContent) {
 		vals.push(['c', (window.Panels.Left.collapsed ? 1 : 0), 0]);
 		vals.push(['f', (window.Panels.Left.isFullFront ? 1 : 0), 0]);
+		vals.push(['h', window.Panels.Left.topHeight, 50]);
 		if(window.Panels.Left.Full !== null) {
 			this.toValues(vals, 'f', window.Panels.Left.Full);
 		}
@@ -41,6 +42,7 @@ LeftPanelRouter.prototype.FromRoute = function (args) {
 	let tt = h.getSafeValue(args, 'tt', PanelType.None);
 	let bt = h.getSafeValue(args, 'bt', PanelType.None);
 	window.Panels.Left.isFullFront = h.getSafeValueBool(args, 'f', false);
+	window.Panels.Left.topHeight = h.getSafeValue(args, 'h', 50);
 
 	//El orden importa para ver cuál
 	//queda arriba

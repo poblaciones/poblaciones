@@ -88,7 +88,6 @@ export default {
 	text-transform: uppercase;
 	text-align: center;
 }
-
 .pos {
 	padding-top: 11px;
 	font-size: 11px;

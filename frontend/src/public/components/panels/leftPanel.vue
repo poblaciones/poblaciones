@@ -3,23 +3,21 @@
 		<div v-show='hasContent && !collapsed' class='left-panel' :style="{ width: width + 'px' }">
 			<div v-if="isFullFront">
 				<transition name="fade" mode='out-in'>
-					<feature-list :dt='Full' ref='Full' v-if='isFullList' @clickClose='doClose'/>
+				<feature-list :dt='Full' v-if='isFullList' @clickClose='doClose'/>
 					<feature-info :dt='Full' v-if='isFullInfo' @clickClose='doClose'/>
 				</transition>
 			</div>
-			<div v-else>
-				<div id="panTop" class="split split-vertical">
-					<transition name="fade" mode='out-in'>
-						<list-panel :dt='Top' ref='Top' v-if='isTopList'/>
-						<info-panel :dt='Top' v-if='isTopInfo'/>
-					</transition>
-				</div>
-				<div id="panBottom" class="split split-vertical">
-					<transition name="fade" mode='out-in'>
-						<list-panel :dt='Bottom' ref='Bottom' v-if='isBottomList'/>
-						<info-panel :dt='Bottom' v-if='isBottomInfo'/>
-					</transition>
-				</div>
+			<div id="panTop" class="split" v-if="!isFullFront">
+				<transition name="fade" mode='out-in'>
+				<feature-list :dt='Top' v-if='isTopList' @clickClose='doClose'/>
+					<feature-info :dt='Top' v-if='isTopInfo' @clickClose='doClose'/>
+				</transition>
+			</div>
+			<div id="panBottom" class="split" v-if="!isFullFront">
+				<transition name="fade" mode='out-in'>
+				<feature-list :dt='Bottom' v-if='isBottomList' @clickClose='doClose'/>
+					<feature-info :dt='Bottom' v-if='isBottomInfo' @clickClose='doClose'/>
+				</transition>
 			</div>
 		</div>
 		<collapse-button v-if='hasContent' :startLeft='width' :collapsed='collapsed' @click="doToggle" />
@@ -50,6 +48,8 @@ export default {
 			Full: null,
 			isFullFront: true,
 			onlyFull: false,
+			split: null,
+			topHeight: 50,
 		};
 	},
 	// created () { },
@@ -93,31 +93,23 @@ export default {
 		initSplit() {
 			if(this.isFullFront == false
 				&& this.hasSplit()) {
-				//TODO: no funciona
-				//TODO: ver si guardar porcentajes en url...
-				Split(['#panTop', '#panBottom'], {
+				this.split = Split(['#panTop', '#panBottom'], {
 					direction: 'vertical',
-					sizes: [50, 50],
-					minSizes: 200,
+					sizes: [this.topHeight, 100 - this.topHeight],
+					minSize: 100,
 					gutterSize: 6,
 				});
 			}
 		},
 		splitVisibility() {
-			let gutter = document.getElementsByClassName('gutter gutter-vertical');
-			if(gutter.length == 0) {
-				this.initSplit();
-				gutter = document.getElementsByClassName('gutter gutter-vertical');
-				if(gutter.length == 0) {
-					return;
-				}
-			}
-			//TODO: no funciona
 			if(this.isFullFront == false
 				&& this.hasSplit()) {
-				gutter[0].style.visibility = 'visible';
+					this.initSplit();
 			} else {
-				gutter[0].style.visibility = 'hidden';
+				if(this.split == null) {
+					return;
+				}
+				this.split.destroy();
 			}
 		},
 		hasAny() {

@@ -1,7 +1,6 @@
 <template>
 	<div id="holder" style="height: 100%;">
 		<div id="panMain" class="split split-horizontal" style="position: relative">
-
 			<Search/>
 			<LeftPanel v-show="config.UsePanels" ref='leftPanel'/>
 			<MapPanel/>
