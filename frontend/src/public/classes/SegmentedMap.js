@@ -141,6 +141,8 @@ SegmentedMap.prototype.GetMapTypeState = function () {
 };
 SegmentedMap.prototype.SetMapTypeState = function (mapType) {
 	this.MapsApi.SetMapTypeState(mapType);
+	this.MapTypeChanged(mapType);
+
 };
 
 SegmentedMap.prototype.SetCenter = function (coord) {
@@ -167,8 +169,19 @@ SegmentedMap.prototype.SetTypeControlsDefault = function () {
 	this.MapsApi.SetTypeControlsDefault();
 };
 
-SegmentedMap.prototype.MapTypeChanged = function(mapTypeState) {
-	this.SaveRoute.UpdateRoute();
+SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
+	var showLabels = !mapTypeState.startsWith('s');
+	if (showLabels) {
+		if (!this.Labels.Visible()) {
+			// Lo empieza a mostrar
+			this.Labels.Show();
+		}
+	} else {
+		if (this.Labels.Visible()) {
+			// Las oculta
+			this.Labels.Hide();
+		}
+	}
 };
 SegmentedMap.prototype.ZoomChanged = function (zoom) {
 	if (this.frame.Zoom !== zoom) {
@@ -217,6 +230,25 @@ SegmentedMap.prototype.InfoRequestedInteractive = function (position, parent, fi
 	this.InfoRequested(position, parent, fid, offset, true);
 };
 
+
+SegmentedMap.prototype.InfoListRequested = function (parent, forceExpand) {
+	const loc = this;
+	var page = 0;
+	window.SegMap.Get(window.host + '/services/metrics/GetInfoListData', {
+		params: { l: parent.MetricId, a: parent.LevelId, v: parent.MetricVersionId, p: page }
+	}).then(function (res) {
+			res.data.parent = parent;
+			res.data.panelType = PanelType.InfoPanel;
+			window.Panels.Content.FeatureList = res.data;
+			window.Panels.Left.Add(res.data);
+			if (forceExpand) {
+				window.Panels.Left.collapsed = false;
+			}
+	}).catch(function (error) {
+		err.errDialog('GetInfoWindowData', 'traer la información para el elemento seleccionado', error);
+	});
+};
+
 SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset, forceExpand) {
 	const loc = this;
 	window.SegMap.Get(window.host + '/services/metrics/GetInfoWindowData', {
@@ -227,6 +259,7 @@ SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset, 
 			res.data.fid = fid;
 			res.data.parent = parent;
 			res.data.panelType = PanelType.InfoPanel;
+			window.Panels.Content.FeatureInfo = res.data;
 			window.Panels.Left.Add(res.data);
 			if (forceExpand) {
 				window.Panels.Left.collapsed = false;

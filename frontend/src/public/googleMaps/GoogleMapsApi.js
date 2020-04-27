@@ -140,6 +140,7 @@ GoogleMapsApi.prototype.BindEvents = function () {
 
 	this.gMap.addListener('maptypeid_changed', function () {
 		loc.segmentedMap.MapTypeChanged(loc.GetMapTypeState());
+		loc.segmentedMap.SaveRoute.UpdateRoute();
 		loc.UpdateClippingStyle();
 	});
 	this.google.maps.event.addListener(this.drawingManager, 'circlecomplete', function (circle) {

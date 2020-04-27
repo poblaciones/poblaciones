@@ -5,6 +5,9 @@ import FrameRouter from '@/public/router/FrameRouter';
 import ClippingRouter from '@/public/router/ClippingRouter';
 import SelectedMetricsRouter from '@/public/router/SelectedMetricsRouter';
 import LeftPanelRouter from '@/public/router/LeftPanelRouter';
+import FeatureInfoRouter from '@/public/router/FeatureInfoRouter';
+import FeatureListRouter from '@/public/router/FeatureListRouter';
+
 
 export default SaveRoute;
 
@@ -27,7 +30,9 @@ function SaveRoute() {
 	this.subscribers = [	new FrameRouter(),
 												new ClippingRouter(),
 		new SelectedMetricsRouter(),
-		new LeftPanelRouter()];
+		new LeftPanelRouter(),
+	/*	new FeatureInfoRouter(),
+		new FeatureListRouter() */ ];
 };
 
 SaveRoute.prototype.UpdateRoute = function (coord) {

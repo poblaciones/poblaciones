@@ -54,7 +54,7 @@
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
 						<li v-if="user.Privileges === 'A'"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
-						<li><a href="/users#/account">Cuenta</a></li>
+						<li v-if="false"><a href="/users#/account">Cuenta</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.logoff">Cerrar sesión</a></li>
 					</ul>
