@@ -93,11 +93,16 @@ export default {
 		initSplit() {
 			if(this.isFullFront == false
 				&& this.hasSplit()) {
+				const loc = this;
 				this.split = Split(['#panTop', '#panBottom'], {
 					direction: 'vertical',
 					sizes: [this.topHeight, 100 - this.topHeight],
 					minSize: 100,
 					gutterSize: 6,
+					onDragEnd: function(sizes) {
+						loc.topHeight = sizes[0];
+						window.SegMap.SaveRoute.UpdateRoute();
+					},
 				});
 			}
 		},

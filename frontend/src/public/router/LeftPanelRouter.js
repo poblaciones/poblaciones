@@ -23,7 +23,7 @@ LeftPanelRouter.prototype.ToRoute = function () {
 	if (window.Panels.Left.hasContent) {
 		vals.push(['c', (window.Panels.Left.collapsed ? 1 : 0), 0]);
 		vals.push(['f', (window.Panels.Left.isFullFront ? 1 : 0), 0]);
-		vals.push(['h', window.Panels.Left.topHeight, 50]);
+		vals.push(['h', Math.round(window.Panels.Left.topHeight), 50]);
 		if(window.Panels.Left.Full !== null) {
 			this.toValues(vals, 'f', window.Panels.Left.Full);
 		}
@@ -77,7 +77,9 @@ LeftPanelRouter.prototype.toValues = function (vals, prefix, panel) {
 	vals.push([prefix + 'l', panel.parent.MetricId, 0]);
 	vals.push([prefix + 'a', panel.parent.LevelId, 0]);
 	vals.push([prefix + 'v', panel.parent.MetricVersionId, 0]);
-	vals.push([prefix + 'i', panel.detailIndex, null]);
+	if(panel.detailIndex != null) {
+		vals.push([prefix + 'i', panel.detailIndex, null]);
+	}
 	// vals.push([prefix + 'x', panel.position.Coordinates.Lat, 0]);
 	// vals.push([prefix + 'y', panel.position.Coordinates.Lon, 0]);
 };
