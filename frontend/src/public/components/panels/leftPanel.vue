@@ -217,16 +217,25 @@ export default {
 			this.collapsed = ! this.collapsed;
 		},
 		updateMapTypeControl() {
-			var css = h.getCssRule(document, '.gm-style-mtc');
-			if(css === null) {
-				css = { style: { transform: '' } };
+			var css1 = h.getCssRule(document, '.gm-style-mtc:first-of-type');
+			var css2 = h.getCssRule(document, '.gm-style-mtc');
+			var css3 = h.getCssRule(document, '.gm-style-mtc:last-of-type');
+
+			if(css1 === null) {
+				css1 = { style: { transform: '' } };
+				css2 = { style: { transform: '' } };
+				css3 = { style: { transform: '' } };
 			}
 			if (this.collapsed) {
 				window.SegMap.SetTypeControlsDefault();
-				css.style.transform = 'scale(0.8)';
+				css1.style.transform = 'translateX(9px) scale(0.8)';
+				css2.style.transform = 'translateX(-8px) scale(0.8)';
+				css3.style.transform = 'translateX(-26px) scale(0.8)';
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				css.style.transform = 'translate(' + (this.width + 33) + 'px) scale(0.8)';
+				css2.style.transform = 'translate(' + (this.width + 7) + 'px) scale(0.85)';
+				css1.style.transform = '';
+				css3.style.transform = '';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
@@ -271,7 +280,10 @@ export default {
 				{ transform: 'translate('+ this.width + 'px)' },
 				{ transform: '' }
 			);
-
+			this.updateSuroundings('edit-button',
+				{ transform: 'translate(' + this.width + 'px)' },
+				{ transform: '' }
+			);
 			this.updateSuroundings('searchBar',
 				{ left: (this.width + 200) + 'px', width: 'calc(100% - 700px)' },
 				{ left: this.width + 'px', width: 'calc(100% - 500px)' }

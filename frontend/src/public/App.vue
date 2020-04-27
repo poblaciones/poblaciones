@@ -188,8 +188,15 @@ html, body {
 	transform: scale(0.8);
 	margin: 0px 0px -24px 0px !important;
 }
+
+.gm-style-mtc:first-of-type {
+	transform: translateX(9px) scale(0.8);
+}
 .gm-style-mtc {
-	transform: scale(0.8);
+	transform: translateX(-8px) scale(0.8);
+}
+.gm-style-mtc:last-of-type {
+	transform: translateX(-26px) scale(0.8);
 }
 
 .hand {
@@ -492,6 +499,9 @@ a:hover {
 	background-color: #66615B;
 	color: rgba(255, 255, 255, 0.7);
 	border-color: #66615B;
+}
+.addthis_toolbox {
+	display: none;
 }
 
 .summaryRow {
