@@ -16,14 +16,17 @@ class Paths
 	{
 		return Context::Paths()->GetRoot() . "/resources";
 	}
+
 	public static function GetMessageTemplatesPath()
 	{
 		return Context::Paths()->GetRoot() . "/templates/messages";
 	}
+
 	public static function GetDbEntitiesPath()
 	{
 		return Context::Paths()->GetRoot() . '/src/entities/backoffice';
 	}
+
 	public static function GetTemplatePaths()
 	{
 		return self::GetCommonPaths('templates');
@@ -32,10 +35,10 @@ class Paths
 	private static function GetCommonPaths($preffix, $suffix = '')
 	{
 		$ret = array(Context::Paths()->GetRoot() . "/" . $preffix . "/common" . $suffix,
-								 Context::Paths()->GetRoot() . "/" . $preffix . "/authenticate" . $suffix,
-								 Context::Paths()->GetRoot() . "/" . $preffix . "/backoffice" . $suffix,
-								 Context::Paths()->GetRoot() . "/" . $preffix . "/logs" . $suffix,
-								 Context::Paths()->GetRoot() . "/" . $preffix . "/frontend" . $suffix);
+			Context::Paths()->GetRoot() . "/" . $preffix . "/authenticate" . $suffix,
+			Context::Paths()->GetRoot() . "/" . $preffix . "/backoffice" . $suffix,
+			Context::Paths()->GetRoot() . "/" . $preffix . "/logs" . $suffix,
+			Context::Paths()->GetRoot() . "/" . $preffix . "/frontend" . $suffix);
 		$ret = self::CleanPaths($ret);
 		return $ret;
 	}
@@ -44,6 +47,7 @@ class Paths
 	{
 		return self::GetCommonPaths('templates', '/macros');
 	}
+
 	public static function GetMessagesPaths()
 	{
 		return self::GetCommonPaths('templates', '/messages');
@@ -57,6 +61,7 @@ class Paths
 				$ret[] = $path;
 		return $ret;
 	}
+
 	public static function GetSitemapFolder()
 	{
 		return Context::Paths()->GetStorageRoot(). '/sitemaps';
@@ -66,6 +71,7 @@ class Paths
 	{
 		return Context::Paths()->GetStorageRoot(). '/gradients';
 	}
+
 	public static function GetSerializerPath()
 	{
 		$ret = Context::Paths()->GetRoot() . '/serializer_cache';
@@ -85,14 +91,27 @@ class Paths
 		$ret = Context::Paths()->GetStorageRoot() .'/stats';
 		return $ret;
 	}
+
 	public static function GetAdminCacheLocalPath()
 	{
 		$ret = Context::Paths()->GetStorageData() .'/admin/cache';
 		IO::EnsureExists($ret);
 		return $ret;
 	}
+
 	public static function GetImagesLocalPath()
 	{
 		return Context::Paths()->GetRoot() . '/images';
 	}
+
+	public static function GetTestsLocalPath()
+	{
+		return Context::Paths()->GetRoot() . "/src/tests";
+	}
+
+	public static function GetTestsDataLocalPath()
+	{
+		return self::GetTestsLocalPath() . "/data";
+	}
+
 }
