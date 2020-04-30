@@ -60,28 +60,28 @@ Context.prototype.CreateStore = function () {
 
 
 Context.prototype.IsAdmin = function () {
-	return (this.User.privileges === 'A');
+	return (this.User.Privileges === 'A');
 };
 
 Context.prototype.CanCreatePublicData = function () {
-	return (this.User.privileges === 'A' || this.User.privileges === 'E');
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
 };
 
 Context.prototype.CanCreatePublicData = function () {
-	return (this.User.privileges === 'A' || this.User.privileges === 'E');
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
 };
 
 Context.prototype.CanAccessAdminSite = function () {
-	return (this.User.privileges === 'A' || this.User.privileges === 'E' || this.User.privileges === 'L');
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E' || this.User.Privileges === 'L');
 };
 
 Context.prototype.CanViewPublicData = function () {
-	return (this.User.privileges === 'A' || this.User.privileges === 'E' || this.User.privileges === 'L') ||
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E' || this.User.Privileges === 'L') ||
 		this.HasPublicData();
 };
 
 Context.prototype.CanEditStaticLists = function () {
-	return (this.User.privileges === 'A' || this.User.privileges === 'E');
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
 };
 
 Context.prototype.LoadStaticLists = function () {

@@ -7,6 +7,7 @@ function ActiveLabels(config) {
 	this.$Segment = null;
 	this.index = -1;
 	this.isBaseMetric = true;
+	this.visible = true;
 	this.KillDuplicateds = false;
 	if (config.Blocks.UseTileBlocks) {
 		this.blockSize = config.Blocks.LabelsBlockSize;
@@ -19,7 +20,7 @@ ActiveLabels.prototype.ResolveSegment = function () {
 	this.$Segment = window.SegMap.Metrics.LabelsSegment;
 };
 ActiveLabels.prototype.Visible = function () {
-	return true;
+	return this.visible;
 };
 
 ActiveLabels.prototype.UpdateMap = function () {
@@ -62,6 +63,16 @@ ActiveLabels.prototype.GetSubset = function (coord, boundsRectRequired) {
 	} else {
 		return null;
 	}
+};
+
+ActiveLabels.prototype.Show = function () {
+	this.visible = true;
+	window.SegMap.Metrics.UpdateMetric(this);
+};
+
+ActiveLabels.prototype.Hide = function () {
+	this.visible = false;
+	window.SegMap.Metrics.Remove(this, true);
 };
 
 ActiveLabels.prototype.UpdateOpacity = function (zoom) {

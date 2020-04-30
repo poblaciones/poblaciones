@@ -21,13 +21,6 @@ RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
 			subscriber.FromRoute(arr, updateRoute);
 		}
 	}
-	// se fija si tiene que autocompletarse
-/* TODO	var requiresUpdate = (frame.MapType === undefined);
-	segmentedMap.Clipping.RestoreClipping(frame.ClippingLevelName, requiresUpdate);
-	if (requiresUpdate) {
-		segmentedMap.SaveRoute.UpdateRoute();
-	}
-	*/
 };
 
 RestoreRoute.prototype.parseRoute = function (route, subscriber) {

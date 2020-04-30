@@ -46,7 +46,7 @@ export default {
 	},
 	created() {
 		window.Popups = {};
-		window.Panels = {};
+		window.Panels = { Content: { FeatureInfo: null, FeatureList: null }};
 	},
 	data() {
 		return {

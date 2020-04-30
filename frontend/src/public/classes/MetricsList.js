@@ -137,9 +137,11 @@ MetricsList.prototype.UpdateMetric = function (activeMetric) {
 	}
 };
 
-MetricsList.prototype.Remove = function (activeMetric) {
+MetricsList.prototype.Remove = function (activeMetric, doNotUpdateRoute) {
 	this.doRemove(activeMetric);
-	window.SegMap.SaveRoute.UpdateRoute();
+	if (!doNotUpdateRoute) {
+		window.SegMap.SaveRoute.UpdateRoute();
+	}
 };
 
 MetricsList.prototype.doRemove = function (activeMetric) {

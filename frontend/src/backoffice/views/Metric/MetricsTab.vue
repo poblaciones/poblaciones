@@ -28,7 +28,7 @@
 				<md-icon>add_circle_outline</md-icon>
 				Completar nivel
 			</md-button>
-			<md-button @click="levelDataset">
+			<md-button @click="levelDataset" v-if="canLevel">
 				<md-icon>view_week</md-icon>
 				Nivelar
 			</md-button>
@@ -152,6 +152,12 @@ export default {
 		},
 		f() {
 			return f;
+		},
+		canLevel() {
+			if (!this.Dataset) {
+				return false;
+			}
+			return this.Work.properties.Type === 'P' && list.length > 0;
 		}
 	},
 	methods: {

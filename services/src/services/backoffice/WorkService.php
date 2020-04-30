@@ -409,7 +409,7 @@ class WorkService extends BaseService
 											LEFT JOIN draft_metadata ON wrk_metadata_id = met_id WHERE " . $condition .
 						" ORDER BY met_title";
 			$ret = App::Db()->fetchAll($sql, array($userId));
-			Arr::IntToBoolean($ret, array('IsPrivate', 'IsIndexed'));
+			Arr::IntToBoolean($ret, array('IsPrivate', 'IsIndexed', 'SegmentedCrawling'));
 			Profiling::EndTimer();
 			return $ret;
 	}

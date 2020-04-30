@@ -58,6 +58,7 @@ export default {
 			this.$emit('clickBack', e);
 		},
 		doClose(e) {
+			window.Panels.Content.FeatureInfo = null;
 			e.preventDefault();
 			this.$emit('clickClose', e, this.dt.fid);
 		},
