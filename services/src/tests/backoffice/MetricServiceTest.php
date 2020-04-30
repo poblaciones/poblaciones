@@ -2,6 +2,7 @@
 
 namespace helena\tests\backoffice;
 
+use helena\classes\Account;
 use helena\classes\Session;
 use helena\services\backoffice\MetricService;
 use minga\framework\PhpSession;
@@ -11,32 +12,24 @@ class MetricServiceTest extends TestCaseBase
 {
 	public function setUp()
 	{
+		Account::Impersonate('admin');
 	}
 
 	public function testGetCartographyMetrics()
 	{
-		// PhpSession::SetSessionValue('user', 'admin');
-		//  public 'user' => string 'admin' (length=5)
-		//   public 'password' => string '$2y$10$3ZM..N0URJfcwxgeL7QHQepGCbbbWYxrWsDk4yS.MfmMJB53UE6Zi' (length=60)
-		//   public 'userId' => int 1
-		//   public 'firstName' => string 'Administrador' (length=13)
-		//   public 'lastName' => string 'Administrador' (length=13)
-		//   public 'privileges' => string 'A' (length=1)
-		//   public 'facebookOauthId' => null
-		//   public 'googleOauthId' => null
-		//   public 'isActive' => int 1
-		//   protected 'geographies' => null
-
-		$this->markTestIncomplete('Resolver qué hacer con login');
 		$controller = new MetricService();
 		$ret = $controller->GetCartographyMetrics();
+		$this->assertIsArray($ret);
 	}
 
 	public function testGetPublicMetrics()
 	{
-		$this->markTestIncomplete('Resolver qué hacer con login');
 		$controller = new MetricService();
 		$ret = $controller->GetPublicMetrics();
+		$this->assertIsArray($ret);
+		$this->assertGreaterThan(0, count($ret));
+		$this->assertGreaterThan(0, $ret[0]['Id']);
+		$this->assertNotEmpty($ret[0]['Caption']);
 	}
 
 	public function testGetWorkMetricVersions()
@@ -49,10 +42,14 @@ class MetricServiceTest extends TestCaseBase
 
 	public function testGetDatasetMetricVersionLevels()
 	{
-		$this->markTestIncomplete('Resolver qué hacer con login');
 		$datasetId = 119;
 		$controller = new MetricService();
 		$ret = $controller->GetDatasetMetricVersionLevels($datasetId);
+		$this->assertIsArray($ret);
+		$this->assertInstanceOf(\stdClass::class, $ret[0]);
+		$this->assertGreaterThan(0, $ret[0]->Id);
+		$this->assertInstanceOf(\stdClass::class, $ret[0]->MetricVersion);
+		$this->assertGreaterThan(0, $ret[0]->MetricVersion->Id);
 	}
 
 	public function testGetColumnDistributions()
