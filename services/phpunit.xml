@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/7.1/phpunit.xsd"
+	bootstrap="startup.php"
+	forceCoversAnnotation="true"
+	beStrictAboutCoversAnnotation="true"
+	beStrictAboutOutputDuringTests="true"
+	beStrictAboutTodoAnnotatedTests="true"
+	verbose="false">
+	<testsuites>
+		<testsuite name="poblaciones">
+			<directory suffix="Test.php">src/tests</directory>
+		</testsuite>
+		<testsuite name="framework">
+			<directory suffix="Test.php">src/framework/src/tests</directory>
+		</testsuite>
+	</testsuites>
+
+	<filter>
+		<whitelist processUncoveredFilesFromWhitelist="true">
+			<directory suffix=".php">./</directory>
+		</whitelist>
+	</filter>
+</phpunit>
