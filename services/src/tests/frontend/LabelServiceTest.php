@@ -8,13 +8,14 @@ use minga\framework\tests\TestCaseBase;
 
 class LabelServiceTest extends TestCaseBase
 {
-	public function testLabelService()
+	public function testGetLabels()
 	{
-		$controller = new LabelsService();
 		$x = 85;
 		$y = 156;
 		$z = 8;
 		$b = null;
+
+		$controller = new LabelsService();
 		$ret = $controller->GetLabels($x, $y, $z, $b);
 		$this->assertInstanceOf(LabelsDataInfo::class, $ret);
 		$this->assertNotEmpty($ret->EllapsedMs);

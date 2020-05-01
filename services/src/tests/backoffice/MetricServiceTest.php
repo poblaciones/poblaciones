@@ -5,7 +5,6 @@ namespace helena\tests\backoffice;
 use helena\classes\Account;
 use helena\classes\Session;
 use helena\services\backoffice\MetricService;
-use minga\framework\PhpSession;
 use minga\framework\tests\TestCaseBase;
 
 class MetricServiceTest extends TestCaseBase
@@ -35,6 +34,7 @@ class MetricServiceTest extends TestCaseBase
 	public function testGetWorkMetricVersions()
 	{
 		$workId = 37;
+		$this->assertNull(Session::CheckIsWorkReader($workId));
 		$controller = new MetricService();
 		$ret = $controller->GetWorkMetricVersions($workId);
 		$this->assertIsArray($ret);
@@ -43,6 +43,7 @@ class MetricServiceTest extends TestCaseBase
 	public function testGetDatasetMetricVersionLevels()
 	{
 		$datasetId = 119;
+		$this->assertNull(Session::CheckIsDatasetReader($datasetId));
 		$controller = new MetricService();
 		$ret = $controller->GetDatasetMetricVersionLevels($datasetId);
 		$this->assertIsArray($ret);
@@ -61,6 +62,7 @@ class MetricServiceTest extends TestCaseBase
 		$oi = 9741;
 		$s = 100;
 
+		$this->assertNull(Session::CheckIsDatasetReader($k));
 		$controller = new MetricService();
 		$ret = $controller->GetColumnDistributions($k, $c, $ci, $o, $oi, $s);
 		$this->assertInstanceOf(\stdClass::class, $ret);

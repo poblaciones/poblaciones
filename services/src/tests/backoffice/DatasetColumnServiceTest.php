@@ -2,15 +2,23 @@
 
 namespace helena\tests\backoffice;
 
-use helena\services\backoffice\DatasetColumnService;
+use helena\classes\Account;
+use helena\classes\Session;
 use helena\entities\backoffice\DraftDatasetColumn;
+use helena\services\backoffice\DatasetColumnService;
 use minga\framework\tests\TestCaseBase;
 
 class DatasetColumnServiceTest extends TestCaseBase
 {
-	public function testDatsetColumn()
+	public function setUp()
+	{
+		Account::Impersonate('admin');
+	}
+
+	public function testGetDatasetColumns()
 	{
 		$datasetId = 119;
+		$this->assertNull(Session::CheckIsDatasetReader($datasetId));
 		$controller = new DatasetColumnService();
 		$ret = $controller->GetDatasetColumns($datasetId);
 		$this->assertIsArray($ret);
@@ -20,10 +28,11 @@ class DatasetColumnServiceTest extends TestCaseBase
 		$this->assertNotEmpty($ret[0]->getField());
 	}
 
-	public function testDatsetColumnLabels()
+	public function testGetDatasetColumnsLabels()
 	{
-		$controller = new DatasetColumnService();
 		$datasetId = 119;
+		$this->assertNull(Session::CheckIsDatasetReader($datasetId));
+		$controller = new DatasetColumnService();
 		$ret = $controller->GetDatasetColumnsLabels($datasetId);
 		$this->assertIsArray($ret);
 	}

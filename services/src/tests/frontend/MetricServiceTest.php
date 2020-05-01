@@ -9,7 +9,7 @@ use minga\framework\tests\TestCaseBase;
 
 class MetricServiceTest extends TestCaseBase
 {
-	public function testMetricService()
+	public function testGetFabMetrics()
 	{
 		$controller = new MetricService();
 		$ret = $controller->GetFabMetrics();

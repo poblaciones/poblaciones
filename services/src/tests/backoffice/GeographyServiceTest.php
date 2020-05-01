@@ -8,7 +8,7 @@ use minga\framework\tests\TestCaseBase;
 
 class GeographyServiceTest extends TestCaseBase
 {
-	public function testGeographyService()
+	public function testGetAllGeographies()
 	{
 		$controller = new GeographyService();
 		$ret = $controller->GetAllGeographies();

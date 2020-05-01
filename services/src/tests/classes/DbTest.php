@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace helena\tests;
+namespace helena\tests\classes;
 
 use helena\classes\App;
 use helena\db\admin\ContactModel;
@@ -9,7 +9,7 @@ use minga\framework\tests\TestCaseBase;
 
 class DbTest extends TestCaseBase
 {
-	public function testDbSave()
+	public function testDbSaveWithRollback()
 	{
 		$contactModel = new ContactModel();
 		$contactInfo = new Contact();

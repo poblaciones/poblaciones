@@ -14,7 +14,7 @@ use minga\framework\tests\TestCaseBase;
 
 class ClippingServiceTest extends TestCaseBase
 {
-	public function testClippingService()
+	public function testGetDefaultFrame()
 	{
 		$controller = new ClippingService();
 		$ret = $controller->GetDefaultFrame();
@@ -24,18 +24,19 @@ class ClippingServiceTest extends TestCaseBase
 	/**
 	 * @dataProvider ParamProvider
 	 */
-	public function testCreateClipping($params)
+	public function testCreateClipping($a, $e, $z, $r, $c,
+		$retHasCanvas, $retHasEnvelope, $retHasLevels)
 	{
 		$controller = new ClippingService();
 
 		$frame = new Frame();
-		$frame->Zoom = $params['z'];
-		$frame->Envelope =  Envelope::TextDeserialize($params['e']);
-		$frame->ClippingRegionId = $params['r'];
-		$frame->ClippingCircle = Circle::TextDeserialize($params['c']);
+		$frame->Zoom = $z;
+		$frame->Envelope =  Envelope::TextDeserialize($e);
+		$frame->ClippingRegionId = $r;
+		$frame->ClippingCircle = Circle::TextDeserialize($c);
 		$frame->ClippingFeatureId = null;
 
-		$levelId = $params['a'];
+		$levelId = $a;
 		$levelName = null;
 		$urbanity = null;
 		$ret = $controller->CreateClipping($frame, $levelId, $levelName, $urbanity);
@@ -45,7 +46,7 @@ class ClippingServiceTest extends TestCaseBase
 		$this->assertInstanceOf(SelectionInfo::class, $ret->Summary);
 		$this->assertIsInt($ret->Summary->Population);
 
-		if($params['retHasCanvas'])
+		if($retHasCanvas)
 		{
 			$this->assertIsArray($ret->Canvas);
 			$this->assertIsArray($ret->Canvas);
@@ -53,14 +54,14 @@ class ClippingServiceTest extends TestCaseBase
 			$this->assertIsArray($ret->Canvas['features']);
 		}
 
-		if($params['retHasEnvelope'])
+		if($retHasEnvelope)
 		{
 			$this->assertInstanceOf(Envelope::class, $ret->Envelope);
 			$this->assertInstanceOf(Coordinate::class, $ret->Envelope->Min);
 			$this->assertInstanceOf(Coordinate::class, $ret->Envelope->Max);
 		}
 
-		if($params['retHasLevels'])
+		if($retHasLevels)
 		{
 			$this->assertIsArray($ret->Levels);
 			$this->assertInstanceOf(ClippingLevelInfo::class, $ret->Levels[0]);
@@ -71,7 +72,7 @@ class ClippingServiceTest extends TestCaseBase
 	public function ParamProvider()
 	{
 		return [
-			[[
+			[
 				'a' => 86,
 				'e' => '-36.321756,-56.568096;-38.339494,-61.822308',
 				'z' => 8,
@@ -80,8 +81,8 @@ class ClippingServiceTest extends TestCaseBase
 				'retHasCanvas' => true,
 				'retHasEnvelope' => true,
 				'retHasLevels' => true,
-			]],
-		  	[[
+			],
+		  	[
 				'a' => 90,
 				'e' => '-36.321756,-56.568096;-38.339494,-61.822308',
 				'z' => 8,
@@ -90,8 +91,8 @@ class ClippingServiceTest extends TestCaseBase
 				'retHasCanvas' => false,
 				'retHasEnvelope' => false,
 				'retHasLevels' => true,
-			]],
-		  	[[
+			],
+		  	[
 				'a' => 90,
 				'e' => '-37.359188,-59.742139;-37.374946,-59.783188',
 				'z' => 15,
@@ -100,7 +101,7 @@ class ClippingServiceTest extends TestCaseBase
 				'retHasCanvas' => true,
 				'retHasEnvelope' => true,
 				'retHasLevels' => true,
-			]],
+			],
 		];
 	}
 }

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace helena\tests;
+namespace helena\tests\classes;
 
 use helena\classes\App;
 use helena\entities\backoffice\DraftContact;
@@ -11,10 +11,9 @@ class TransactionOrmTest extends TestCaseBase
 {
 	public function testOrmTransaction()
 	{
-		$current = 0;
-		$sql = "SELECT MAX(con_id) FROM draft_contact";
 		try
 		{
+			$sql = "SELECT MAX(con_id) FROM draft_contact";
 			$draftContact = new DraftContact();
 			$draftContact->setPerson('Test');
 			$draftContact->setEmail('test@test.com');

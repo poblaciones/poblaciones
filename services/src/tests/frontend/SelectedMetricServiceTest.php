@@ -9,13 +9,11 @@ use minga\framework\tests\TestCaseBase;
 
 class SelectedMetricServiceTest extends TestCaseBase
 {
-	public function testSelectedMetricService()
+	public function testPublicGetSelectedMetric()
 	{
-		$controller = new SelectedMetricService();
-
 		$metricId = 3401;
+		$controller = new SelectedMetricService();
 		$ret = $controller->PublicGetSelectedMetric($metricId);
-
 		$this->assertInstanceOf(SelectedMetric::class, $ret);
 		$this->assertNotEmpty($ret->EllapsedMs);
 		$this->assertInstanceOf(MetricInfo::class, $ret->Metric);

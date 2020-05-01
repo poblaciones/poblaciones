@@ -8,10 +8,11 @@ use minga\framework\tests\TestCaseBase;
 
 class WorkServiceTest extends TestCaseBase
 {
-	public function testWorkService()
+	public function testGetWorkInfo()
 	{
 		$this->markTestIncomplete('Da error, El elemento no existe ne la base de datos');
 		$workId = 37;
+		$this->assertNull(Session::CheckIsWorkReader($workId));
 		$controller = new WorkService();
 		$ret = $controller->GetWorkInfo($workId);
 	}
