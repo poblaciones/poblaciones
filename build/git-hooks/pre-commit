@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# A git hook script to find and fix trailing whitespace
+# in your commits.
+# Also removes BOM bytes.
+# Bypass it with the --no-verify option to git-commit
+#
+# usage: make a soft link to this file, e.g., ln -s ~/config/pre-commit.git.sh ~/some_project/.git/hooks/pre-commit
+
+# detect platform
+platform="win"
+uname_result=`uname`
+if [[ "$uname_result" == "Linux" ]]; then
+	platform="linux"
+elif [[ "$uname_result" == "Darwin" ]]; then
+	echo "Mac not supported"
+	exit 1
+fi
+
+# change IFS to ignore filename's space in |for|
+IFS="
+"
+
+# autoremove trailing whitespace
+for line in `git diff --check --cached | sed '/^[+-]/d' | sed -r 's/:[0-9]+: .*//' | uniq | grep -i -v "\.sln" | grep -i -v "\.csproj" | grep -i -v "\.suo"` ; do
+	file=`echo "$line"`
+	# display tips
+	echo -e "auto remove trailing whitespace in \033[31m$file\033[0m!"
+	# since $file in working directory isn't always equal to $file in index, so we backup it
+	mv -f "$file" "${file}.spacessave"
+	# discard changes in working directory
+	git checkout -- "$file"
+	# remove trailing whitespace
+	if [[ "$platform" == "win" ]]; then
+		# in windows, `sed -i` adds ready-only attribute to $file(I don't kown why), so we use temp file instead
+		sed 's/[[:space:]]*$//' "$file" > "${file}.spacesbak"
+		mv -f "${file}.spacesbak" "$file"
+	else
+		sed -i 's/[[:space:]]*$//' "$file"
+	fi
+	git add "$file"
+	# restore the $file
+	sed 's/[[:space:]]*$//' "${file}.spacessave" > "$file"
+	rm "${file}.spacessave"
+done
+
+
+# Remueve BOM de los archivos con esos bytes
+for line in `git diff --cached --name-only --diff-filter=ACMR | grep -i -v "\.sln" | grep -i -v "\.csproj" | grep -i -v "\.suo"` ; do
+	file=`echo ${line}`
+	if [[ -f ${file} && `head -c 3 ${file}` == $'\xef\xbb\xbf' ]]; then
+		# file exists and has UTF-8 BOM
+		mv -f "$file" "${file}.bomsave"
+		git checkout -- "$file"
+
+		mv ${file} ${file}.bombak
+		tail --bytes=+4 ${file}.bombak > ${file}
+		rm "${file}.bombak"
+
+		git add "$file"
+		tail --bytes=+4 ${file}.bomsave > ${file}
+		rm "${file}.bomsave"
+		echo -e "Removed BOM in \033[31m${file}\033[0m!"
+	fi
+done
+
+
+if [[ "x`git status -s | grep '^[A|R|D|M]'`" == "x" ]]; then
+	# empty commit
+	echo
+	echo -e "\033[31mNO CHANGES ADDED, ABORT COMMIT!\033[0m"
+	exit 1
+fi
+
+# Now we can commit
+exit
