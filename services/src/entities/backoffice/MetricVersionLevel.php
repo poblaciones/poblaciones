@@ -29,7 +29,7 @@ class MetricVersionLevel
     private $PartialCoverage;
 
 		/**
-     * @var geometry
+     * @var \CrEOF\Spatial\DBAL\Types\GeometryType
      *
      * @ORM\Column(name="mvl_extents", type="geometry", precision=0, scale=0, nullable=true, unique=false)
      */
@@ -127,11 +127,11 @@ class MetricVersionLevel
     {
         return $this->Dataset;
     }
-
+		/*
 		/**
      * Set extents
      *
-     * @param geometry $extents
+     * @param \CrEOF\Spatial\DBAL\Types\GeometryType $extents
      *
      * @return MetricVersionLevel
      */
@@ -145,13 +145,13 @@ class MetricVersionLevel
     /**
      * Get extents
      *
-     * @return geometry
+     * @return \CrEOF\Spatial\DBAL\Types\GeometryType
      */
     public function getExtents()
     {
         return $this->Extents;
     }
-
+		*/
     /**
      * Set metricVersion
      *

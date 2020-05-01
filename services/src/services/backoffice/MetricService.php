@@ -268,9 +268,13 @@ class MetricService extends BaseService
 	public function UpdateVariable($datasetId, $level, $variable)
 	{
 		Profiling::BeginTimer();
+
 		$variableConnected = App::Orm()->Reconnect(entities\DraftVariable::class, $variable);
+
+		$level = $variableConnected->getMetricVersionLevel();
+
 		if ($variableConnected->getMetricVersionLevel() === null) {
-			$variableConnected->setMetricVersionLevel($level);
+				$variableConnected->setMetricVersionLevel($level);
 		}
 		// Graba el symbology
 		App::Orm()->save($variableConnected->getSymbology());

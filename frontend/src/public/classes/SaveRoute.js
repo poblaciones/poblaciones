@@ -6,7 +6,6 @@ import ClippingRouter from '@/public/router/ClippingRouter';
 import SelectedMetricsRouter from '@/public/router/SelectedMetricsRouter';
 import LeftPanelRouter from '@/public/router/LeftPanelRouter';
 import FeatureInfoRouter from '@/public/router/FeatureInfoRouter';
-import FeatureListRouter from '@/public/router/FeatureListRouter';
 
 
 export default SaveRoute;
@@ -29,10 +28,9 @@ function SaveRoute() {
 
 	this.subscribers = [	new FrameRouter(),
 												new ClippingRouter(),
-		new SelectedMetricsRouter(),
-		new LeftPanelRouter(),
-	/*	new FeatureInfoRouter(),
-		new FeatureListRouter() */ ];
+												new SelectedMetricsRouter(),
+												new LeftPanelRouter(),
+												new FeatureInfoRouter()	];
 };
 
 SaveRoute.prototype.UpdateRoute = function (coord) {
@@ -129,26 +127,28 @@ SaveRoute.prototype.addRecursive = function(valueList, startChar) {
 SaveRoute.prototype.callSubscriber = function (subscriber, coord) {
 	var value = '';
 	var res = subscriber.ToRoute(coord);
-	// Lo formatea
-	var config = subscriber.GetSettings();
-	if (!config.groupSeparator) {
-		res = [res];
-	}
-	for (var g = 0; g < res.length; g++) {
-		if (value.length > 0 && !value.endsWith(config.groupSeparator)) {
-			value += config.groupSeparator;
+	if (res !== null) {
+		// Lo formatea
+		var config = subscriber.GetSettings();
+		if (!config.groupSeparator) {
+			res = [res];
 		}
-		var group = res[g];
-		var groupValue = '';
-		for (var i = 0; i < group.length; i++) {
-			var nextValue = this.appendValue(group[i]);
-			if (groupValue.length > 0 && !groupValue.endsWith(config.itemSeparator)
-						&& nextValue) {
-				groupValue += config.itemSeparator;
+		for (var g = 0; g < res.length; g++) {
+			if (value.length > 0 && !value.endsWith(config.groupSeparator)) {
+				value += config.groupSeparator;
 			}
-			groupValue += nextValue;
+			var group = res[g];
+			var groupValue = '';
+			for (var i = 0; i < group.length; i++) {
+				var nextValue = this.appendValue(group[i]);
+				if (groupValue.length > 0 && !groupValue.endsWith(config.itemSeparator)
+					&& nextValue) {
+					groupValue += config.itemSeparator;
+				}
+				groupValue += nextValue;
+			}
+			value += groupValue;
 		}
-		value += groupValue;
 	}
 	return value;
 };

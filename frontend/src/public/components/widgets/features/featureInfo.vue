@@ -1,15 +1,17 @@
 <template>
 	<div class='panel card panel-body'>
-		<div v-on:click="doBack" v-if='dt.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
+		<div v-on:click="doBack" v-if='panelInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 		<mp-close-button v-else v-on:click="doClose" />
 
 		<h4 class="title">{{ title }}</h4>
-		<div class='stats' style="padding-top: 8px"><a href="aa" style="color: rgb(167, 167, 167);">{{ dt.Type }}</a></div>
+		<div class='stats' style="padding-top: 8px">
+			<span style="color: rgb(167, 167, 167);">{{ panelInfo.Type }}</span>
+		</div>
 		<hr class="moderateHr">
-		<div class='item' v-if="dt.Code && dt.Title">
+		<div class='item' v-if="panelInfo.Code && panelInfo.Title">
 			Código: {{ val }}
 		</div>
-		<div v-for="item in dt.Items" class='item' :key="item.Name">
+		<div v-for="item in panelInfo.Items" class='item' :key="item.Name">
 			{{ capitalize(item.Name) }}: {{ getValue(item) }}
 		</div>
 		<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
@@ -22,32 +24,32 @@ import h from '@/public/js/helper';
 export default {
 	name: 'featureInfo',
 	props: [
-		'dt',
+		'panelInfo',
 	],
 	// components: { },
 	// data() { },
 	// beforeDestroy () { },
 	computed: {
 		title() {
-			if (this.dt.Title) {
-				return this.dt.Title;
-			} else if (this.dt.Code) {
-				return this.dt.Code;
+			if (this.panelInfo.Title) {
+				return this.panelInfo.Title;
+			} else if (this.panelInfo.Code) {
+				return this.panelInfo.Code;
 			}
 			return '';
 		},
 		val() {
-			return h.ensureFinalDot(this.isNullDash(this.dt.Code));
+			return h.ensureFinalDot(this.isNullDash(this.panelInfo.Code));
 		},
 		lat() {
-			if(this.dt.position && this.dt.position.Coordinate && this.dt.position.Coordinate.Lat) {
-				return h.trimNumber(this.dt.position.Coordinate.Lat);
+			if(this.panelInfo.position && this.panelInfo.position.Coordinate && this.panelInfo.position.Coordinate.Lat) {
+				return h.trimNumber(this.panelInfo.position.Coordinate.Lat);
 			}
 			return 0;
 		},
 		lon() {
-			if(this.dt.position && this.dt.position.Coordinate && this.dt.position.Coordinate.Lon) {
-				return h.trimNumber(this.dt.position.Coordinate.Lon);
+			if(this.panelInfo.position && this.panelInfo.position.Coordinate && this.panelInfo.position.Coordinate.Lon) {
+				return h.trimNumber(this.panelInfo.position.Coordinate.Lon);
 			}
 			return 0;
 		},
@@ -58,9 +60,9 @@ export default {
 			this.$emit('clickBack', e);
 		},
 		doClose(e) {
-			window.Panels.Content.FeatureInfo = null;
+			window.Panels.Content.FeatureInfoKey = null;
 			e.preventDefault();
-			this.$emit('clickClose', e, this.dt.fid);
+			this.$emit('clickClose', e, this.panelInfo.Key.Id);
 		},
 		capitalize(name) {
 			return h.capitalize(name);

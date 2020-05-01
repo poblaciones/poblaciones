@@ -157,7 +157,7 @@ export default {
 			if (!this.Dataset) {
 				return false;
 			}
-			return this.Work.properties.Type === 'P' && list.length > 0;
+			return this.Work.properties.Type === 'P' && this.list && this.list.length > 0;
 		}
 	},
 	methods: {

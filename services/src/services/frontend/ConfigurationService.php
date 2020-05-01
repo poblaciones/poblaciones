@@ -23,7 +23,6 @@ class ConfigurationService extends BaseService
 		return array('Revisions' => $revisions,
 									'Blocks' => $blockStrategy,
 									'UseGradients' => Context::Settings()->Map()->UseGradients,
-									'UsePanels' => Context::Settings()->Map()->UsePanels,
 									'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests,
 									'User' => $user);
 	}

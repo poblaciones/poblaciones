@@ -112,10 +112,10 @@ FeatureSelector.prototype.showTooltip = function () {
 	var m = new Mercator();
 	var coord = m.fromLatLonToGoogleLatLng(loc.tooltipLocation.Coordinate);
 	var style = 'ibTooltip';
-	if (loc.tooltipMarker) {
-		style += ' ibTooltipNoYOffset';
-	}
 	var outStyle = "ibTooltipOffsetLeft mapLabels";
+	if (loc.tooltipMarker) {
+		outStyle += ' ibTooltipNoYOffset';
+	}
 	var html = loc.RenderTooltip(loc.tooltipCandidate);
 	loc.tooltipOverlay = window.SegMap.MapsApi.Write(html, coord, 10000000, outStyle, style, true);
 	loc.createTooltipKiller();

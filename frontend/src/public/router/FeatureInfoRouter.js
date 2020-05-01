@@ -18,18 +18,15 @@ FeatureInfoRouter.prototype.GetSettings = function() {
 };
 
 FeatureInfoRouter.prototype.ToRoute = function () {
-	var feature = window.Panels.Content.FeatureInfo;
-	if (feature == null) {
+	var key = window.Panels.Content.FeatureInfoKey;
+	if (key == null) {
 		return null;
 	}
 	var vals = [];
-	vals.push(['f', feature.fid]);
-	vals.push(['l', feature.parent.MetricId]);
-	vals.push(['a', feature.parent.LevelId]);
-	vals.push(['v', feature.parent.MetricVersionId]);
-
-	// vals.push([prefix + 'x', feature.position.Coordinates.Lat, 0]);
-	// vals.push([prefix + 'y', feature.position.Coordinates.Lon, 0]);
+	vals.push(['f', key.Id]);
+	vals.push(['l', key.MetricId, null]);
+	vals.push(['a', key.LevelId, null]);
+	vals.push(['v', key.MetricVersionId, null]);
 	return vals;
 };
 
@@ -38,10 +35,10 @@ FeatureInfoRouter.prototype.FromRoute = function (args) {
 		return;
 	}
 	let parent = {
-		MetricId: h.getSafeValue(args, 'l', 0),
-		MetricVersionId: h.getSafeValue(args, 'v', 0),
-		LevelId: h.getSafeValue(args, 'a', 0),
+		MetricId: h.getSafeValue(args, 'l', null),
+		MetricVersionId: h.getSafeValue(args, 'v', null),
+		LevelId: h.getSafeValue(args, 'a', null),
 	};
-	let fid = h.getSafeValue(args, 'f', 0);
-	window.SegMap.InfoRequested({}, parent, fid, 0);
+	let fid = h.getSafeValue(args, 'f', null);
+	window.SegMap.InfoRequested({}, parent, fid, null);
 };

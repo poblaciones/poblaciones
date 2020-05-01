@@ -202,10 +202,11 @@ ActiveSelectedMetric.prototype.GetVersionById = function (id) {
 ActiveSelectedMetric.prototype.GetVariableById = function (variableId) {
 	var versions = this.properties.Versions;
 	for (var v = 0; v < versions.length; v++) {
-		for (var l = 0; v < versions[v].Levels.length; l++) {
-			for (var i = 0; i < versions[v].Levels[l].Variables.length; i++) {
-				if (versions[v].Levels[l].Variables[i].Id == variableId) {
-					return versions[v].Levels[l].Variables[i];
+		for (var l = 0; l < versions[v].Levels.length; l++) {
+			var level = versions[v].Levels[l];
+			for (var i = 0; i < level.Variables.length; i++) {
+				if (level.Variables[i].Id == variableId) {
+					return level.Variables[i];
 				}
 			}
 		}

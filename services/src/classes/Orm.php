@@ -29,7 +29,6 @@ class Orm
 			Profiling::BeginTimer();
 			$isDevMode = Context::Settings()->Debug()->debug;
 			$dir = Paths::GetDbEntitiesPath();
-
 			Type::addType('geometry', 'CrEOF\Spatial\DBAL\Types\GeometryType');
 			Type::addType('point', 'CrEOF\Spatial\DBAL\Types\Geometry\PointType');
 			Type::addType('polygon', 'CrEOF\Spatial\DBAL\Types\Geometry\PolygonType');
@@ -100,6 +99,10 @@ class Orm
 			try
 			{
 				$connection = self::$entityManager->getConnection();
+				$connection->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'geometry');
+				$connection->getDatabasePlatform()->registerDoctrineTypeMapping('point', 'point');
+				$connection->getDatabasePlatform()->registerDoctrineTypeMapping('polygon', 'polygon');
+				$connection->getDatabasePlatform()->registerDoctrineTypeMapping('linestring', 'linestring');
 			}
 			catch (\Doctrine\DBAL\Exception\ConnectionException $e)
 			{

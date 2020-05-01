@@ -1,22 +1,22 @@
 <template>
 	<div>
-		<div v-show='hasContent && !collapsed' class='left-panel' :style="{ width: width + 'px' }">
+		<div v-show='hasContent && !collapsed' class='left-panelPositionEnum' :style="{ width: width + 'px' }">
 			<div v-if="isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :dt='Full' v-if='isFullList' @clickClose='doClose'/>
-					<feature-info :dt='Full' v-if='isFullInfo' @clickClose='doClose'/>
+				<feature-list :panelInfo='Full' v-if='isFullList' @clickClose='doClose'/>
+					<feature-info :panelInfo='Full' v-if='isFullInfo' @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panTop" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :dt='Top' v-if='isTopList' @clickClose='doClose'/>
-					<feature-info :dt='Top' v-if='isTopInfo' @clickClose='doClose'/>
+				<feature-list :panelInfo='Top' v-if='isTopList' @clickClose='doClose'/>
+					<feature-info :panelInfo='Top' v-if='isTopInfo' @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panBottom" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :dt='Bottom' v-if='isBottomList' @clickClose='doClose'/>
-					<feature-info :dt='Bottom' v-if='isBottomInfo' @clickClose='doClose'/>
+				<feature-list :panelInfo='Bottom' v-if='isBottomList' @clickClose='doClose'/>
+					<feature-info :panelInfo='Bottom' v-if='isBottomInfo' @clickClose='doClose'/>
 				</transition>
 			</div>
 		</div>
@@ -106,7 +106,7 @@ export default {
 				});
 			}
 		},
-		splitVisibility() {
+		arrangeSplitter() {
 			if(this.isFullFront == false
 				&& this.hasSplit()) {
 					this.initSplit();
@@ -128,42 +128,42 @@ export default {
 		},
 		getLocated(fid) {
 			if(this.Top !== null
-				&& this.Top.fid === fid) {
+				&& this.Top.Key.Id === fid) {
 				return 'Top';
 			}
 			if(this.Bottom !== null
-				&& this.Bottom.fid === fid) {
+				&& this.Bottom.Key.Id === fid) {
 				return 'Bottom';
 			}
 			if(this.Full !== null
-				&& this.Full.fid === fid) {
+				&& this.Full.Key.Id === fid) {
 				return 'Full';
 			}
 			return null;
 		},
-		Add(dt, index) {
+		Add(panelInfo, index) {
 			this.isFullFront = true;
-			this.doAdd(dt, 'Full', index);
+			this.doAdd(panelInfo, 'Full', index);
 		},
-		AddTop(dt, index) {
+		AddTop(panelInfo, index) {
 			this.isFullFront = false;
-			this.doAdd(dt, 'Top', index);
+			this.doAdd(panelInfo, 'Top', index);
 		},
-		AddBottom(dt, index) {
+		AddBottom(panelInfo, index) {
 			this.isFullFront = false;
 			if(this.Top !== null
-				&& this.Top.fid === dt.fid) {
+				&& this.Top.Key.Id === panelInfo.Key.Id) {
 				if(index !== undefined
 					&& this.Top.panelType == PanelType.ListPanel) {
 					this.Top.detailIndex = index;
 				}
 				return;
 			}
-			this.doAdd(dt, 'Bottom', index);
+			this.doAdd(panelInfo, 'Bottom', index);
 		},
-		doAdd(dt, panel, index) {
+		doAdd(panelInfo, panelPositionEnum, index) {
 			if(this.onlyFull) {
-				panel = 'Full';
+				panelPositionEnum = 'Full';
 				this.isFullFront = true;
 				this.Top = null;
 				this.Bottom = null;
@@ -171,17 +171,16 @@ export default {
 
 			this.hasContent = true;
 			this.collapsed = false;
-			this[panel] = dt;
+			this[panelPositionEnum] = panelInfo;
 
 			if(index !== undefined
-				&& this[panel].panelType == PanelType.ListPanel) {
-				this[panel].detailIndex = index;
+				&& this[panelPositionEnum].panelType == PanelType.ListPanel) {
+				this[panelPositionEnum].detailIndex = index;
 			}
-			this.showPanel();
+			this.arrangePanels();
 		},
-		showPanel() {
+		arrangePanels() {
 			if(this.collapsed || this.hasAny() == false) {
-				window.SegMap.SaveRoute.UpdateRoute();
 				return;
 			}
 			if(this.Top === null
@@ -189,15 +188,14 @@ export default {
 				this.Top = this.Bottom;
 				this.Bottom = null;
 			}
-			this.splitVisibility();
-			window.SegMap.SaveRoute.UpdateRoute();
+			this.arrangeSplitter();
 		},
 		doClose(e, fid) {
-			let panel = this.getLocated(fid);
-			if(panel === null) {
+			let panelPositionEnum = this.getLocated(fid);
+			if(panelPositionEnum === null) {
 				return;
 			}
-			this[panel] = null;
+			this[panelPositionEnum] = null;
 
 			if(this.Full === null) {
 				this.isFullFront = false;
@@ -211,7 +209,8 @@ export default {
 				this.hasContent = false;
 				this.collapsed = true;
 			}
-			this.showPanel();
+			this.arrangePanels();
+			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		doToggle() {
 			this.collapsed = ! this.collapsed;
@@ -270,11 +269,11 @@ export default {
 				this.isFullFront = true;
 				this.Top = null;
 				this.Bottom = null;
-				this.showPanel();
+				this.arrangePanels();
 			}
 		},
 		collapsed() {
-			this.showPanel();
+			this.arrangePanels();
 			this.updateMapTypeControl();
 			this.updateSuroundings('fab-wrapper',
 				{ transform: 'translate('+ this.width + 'px)' },
@@ -294,7 +293,7 @@ export default {
 </script>
 
 <style scoped>
-.left-panel {
+.left-panelPositionEnum {
 	position:absolute;
 	height:100%;
 	left:0;

@@ -161,24 +161,25 @@ group: 'Metadatos',
 		childrenExtraNodes: null
 	},
 
+
 	{
-		group: 'Administración',
-		path: '/cartographies/:workId/permissions',
+		group: 'Publicar',
+		path: '/cartographies/:workId/customize',
 		component: Layout,
-		redirect: '/cartographies/:workId/permissions',
-		icon: 'fa fa-user',
-		name: 'Permisos',
+		redirect: '/cartographies/:workId/customize',
+		icon: 'fas fa-sliders-h',
+		name: 'Personalizar',
 		children: [
 			{
-				path: '/cartographies/:workId/permissions',
-				name: 'PermisosTarget',
-				component: () => import('@/backoffice/views/Permissions/Permissions.vue'),
+				path: '/cartographies/:workId/customize',
+				name: 'CustomizeTarget',
+				component: () => import('@/backoffice/views/Customize/Customize.vue'),
 			}
 		]
 	},
 
 	{
-		group: 'Administración',
+		group: 'Publicar',
 		path: '/cartographies/:workId/visibility',
 		component: Layout,
 		redirect: '/cartographies/:workId/visibility',
@@ -194,17 +195,17 @@ group: 'Metadatos',
 	},
 
 	{
-		group: 'Administración',
-		path: '/cartographies/:workId/customize',
+		group: 'Publicar',
+		path: '/cartographies/:workId/permissions',
 		component: Layout,
-		redirect: '/cartographies/:workId/customize',
-		icon: 'fas fa-sliders-h',
-		name: 'Personalizar',
+		redirect: '/cartographies/:workId/permissions',
+		icon: 'fa fa-user',
+		name: 'Permisos',
 		children: [
 			{
-				path: '/cartographies/:workId/customize',
-				name: 'CustomizeTarget',
-				component: () => import('@/backoffice/views/Customize/Customize.vue'),
+				path: '/cartographies/:workId/permissions',
+				name: 'PermisosTarget',
+				component: () => import('@/backoffice/views/Permissions/Permissions.vue'),
 			}
 		]
 	},
