@@ -10,19 +10,20 @@ use helena\classes\Session;
 
 use minga\framework\Performance;
 use minga\framework\Headers;
+use minga\framework\Params;
 use minga\framework\Profiling;
 use minga\framework\Log;
 use minga\framework\PhpSession;
 use minga\framework\Traffic;
 if (PhpSession::GetSessionValue('started', null) === null) {
-	PhpSession::SetSessionValue('started', $_SERVER['REQUEST_TIME']);
+	PhpSession::SetSessionValue('started', Params::SafeServer('REQUEST_TIME'));
 }
 ob_start();
 
 App::$app->before(function(Request $request) {
 	Profiling::BeginTimer("Request");
 
-	$add = $_SERVER['REMOTE_ADDR'];
+	$add = Params::SafeServer('REMOTE_ADDR');
 	Traffic::RegisterIP($add);
 
 	Performance::Begin();
