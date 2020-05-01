@@ -17,7 +17,11 @@
 			<label>Dirección de email: <input name="email" type="text" value=""></label>
 			<input name="submit" type="submit" value="Enviar">
 		</form>
-		<div>{{ message }}</div>
+		<div>
+			{% if message is defined %}
+			{{ message }}
+			{% endif %}
+		</div>
 	</div>
 	<br>
 	<div class="dSeparatorNewLine">
