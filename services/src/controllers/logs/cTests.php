@@ -7,7 +7,9 @@ use helena\classes\Paths;
 use helena\classes\Session;
 use helena\controllers\common\cController;
 use minga\framework\Context;
+use minga\framework\Date;
 use minga\framework\IO;
+use minga\framework\Mail;
 use minga\framework\Params;
 use minga\framework\Str;
 use minga\framework\System;
@@ -59,10 +61,29 @@ class cTests extends cController
 			'group_tests' => '/logs/tests?group=',
 			'version' => System::GetVersion(),
 			'html_title' => 'Tests',
+			'action_url' => '/logs/tests',
+			'test_email' => 'pablodg@gmail.com',
 		]);
 
 		Menu::RegisterAdmin($this->templateValues);
 		return $this->Render('tests.html.twig');
+	}
+
+	public function Post()
+	{
+		if ($app = Session::CheckIsMegaUser())
+			return $app;
+
+		$email = Params::SafePost('email');
+		$mail = new Mail();
+		$mail->to = $email;
+
+		$mail->subject = 'Prueba de email en Mapas de Acta Académica - ' . Date::FormattedArNow();
+		$mail->message =  "Contenido esdrújulo del mail.";
+		$mail->Send(false, true);
+
+		$this->AddValue('message', 'Email enviado');
+		return $this->Show();
 	}
 
 	private function RunTest($tests)

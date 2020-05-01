@@ -8,6 +8,18 @@
 {{ include('tabbedContentMenu.html.twig') }}
 
 <div class="contenedorAdmin">
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Prueba de envío de email:</div>
+	</div>
+	<div>
+		<form method='post' action='{{ action_url }}'>
+			<label>Dirección de email: <input name="email" type="text" value=""></label>
+			<input name="submit" type="submit" value="Enviar">
+		</form>
+		<div>{{ message }}</div>
+	</div>
+	<br>
 	<div class="dSeparatorNewLine">
 		<div class='dText'>Tests</div>
 	</div>
@@ -21,9 +33,9 @@
 			{% for key, testgroup in tests %}
 			<li><a href="{{ group_tests }}{{ key }}" target="_blank">Correr todos los tests de {{ key }}</a></li>
 			<ul>
-			{% for test in testgroup %}
-			<li><a href="{{ test.url }}" target="_blank">{{ test.name }}</a></li>
-			{% endfor %}
+				{% for test in testgroup %}
+				<li><a href="{{ test.url }}" target="_blank">{{ test.name }}</a></li>
+				{% endfor %}
 			</ul>
 			{% endfor %}
 		</ul>
