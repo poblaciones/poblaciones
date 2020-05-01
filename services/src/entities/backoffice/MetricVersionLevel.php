@@ -151,7 +151,7 @@ class MetricVersionLevel
     {
         return $this->Extents;
     }
-		*/
+
     /**
      * Set metricVersion
      *
