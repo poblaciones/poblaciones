@@ -11,7 +11,7 @@ use minga\framework\tests\TestCaseBase;
 
 class SummaryServiceTest extends TestCaseBase
 {
-	public function testSummaryService()
+	public function testGetSummary()
 	{
 		$l = 3401;
 		$v = 201;

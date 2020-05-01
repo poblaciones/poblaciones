@@ -6,7 +6,7 @@
 	beStrictAboutCoversAnnotation="true"
 	beStrictAboutOutputDuringTests="true"
 	beStrictAboutTodoAnnotatedTests="true"
-	verbose="false">
+	stderr="true" verbose="false">
 	<testsuites>
 		<testsuite name="poblaciones">
 			<directory suffix="Test.php">src/tests</directory>
@@ -19,6 +19,9 @@
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">./</directory>
+			<exclude>
+				<directory suffix=".php">./vendor</directory>
+			</exclude>
 		</whitelist>
 	</filter>
 </phpunit>

@@ -4,12 +4,11 @@ namespace helena\tests\backoffice;
 
 use helena\classes\Session;
 use helena\services\backoffice\DatasetService;
-// use helena\entities\backoffice\DraftDatasetColumn;
 use minga\framework\tests\TestCaseBase;
 
 class DatasetServiceTest extends TestCaseBase
 {
-	public function testDatasetData()
+	public function testGetDatasetData()
 	{
 		$k = 119;
 		$filterscount = 0;
@@ -21,6 +20,8 @@ class DatasetServiceTest extends TestCaseBase
 		$page = 0;
 
 		$datasetId = $k;
+
+		$this->assertNull(Session::CheckIsDatasetReader($datasetId));
 
 		$rows = $pagesize;
 		$from = $page * $rows;

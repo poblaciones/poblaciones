@@ -2,19 +2,18 @@
 # fileencoding=utf8
 # lineends=linux
 
-# Sube relese a servidor de producci�n o beta
-# par�metros:
+# Sube relese a servidor de producción o beta
+# parámetros:
 #    vendor (default false): sube directorio vendor
 #
 
 vendor=false
 output=./release
-release=true
 
-# manejo de par�metros
+# manejo de parámetros
 
 if [ "$2" == "" ]; then
-	echo "*** Para marcar el tag en git, agregarlo como par�metro ***"
+	echo "*** Para marcar el tag en git, agregarlo como parámetro ***"
 else
 	echo "*** Marcando el tag v$2 ***"
 	git tag v$2
@@ -32,10 +31,33 @@ do
 	shift
 done
 
+cd ../services
+echo "*** Test y compilación pre release... ***"
+echo "Compilando..."
+if [[ `./vendor/bin/phpstan analyse -c phpstan.neon -l 5 --memory-limit 1024M -q . || echo Err` ]]; then
+	echo "Error en complilación, cancelando build."
+	echo
+	read -n1 -r -p "Press any key to continue..." key
+	exit 1
+fi
+echo "Compilado OK"
+echo
+
+echo "Corriendo tests..."
+if [[ `./vendor/bin/phpunit --stop-on-failure 2> /dev/null || echo Err` ]]; then
+	echo "Error en tests, cancelando build."
+	echo
+	read -n1 -r -p "Press any key to continue..." key
+	exit 1
+fi
+echo "Tests OK"
+echo
+
+cd -
 
 echo "*** Preparando en $output ***"
 
-echo "*** Borra release anterior si hab�a y/o crea el directorio"
+echo "*** Borra release anterior si había y/o crea el directorio"
 rm -f $output.tar.bz2
 rm -rf $output
 mkdir -p $output
@@ -91,6 +113,6 @@ cp $output/templates/admins.html.twig $output/templates/frontend/>>$output-4_cop
 echo "*** 5. Crea release comprimido"
 tar cjvf $output.tar.bz2 -C $output . >$output-5_tar.log
 
-echo "*** Release generado con �xito"
+echo "*** Release generado con éxito"
 
 read -n1 -r -p "Press any key to continue..." key

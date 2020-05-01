@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Script de pre-push: llama al compilador y ejecuta los tests antes de hacer push,
+# si alguno de los dos comandos da error cancela el push.
+
+cd services
+echo "Compilando..."
+if [[ `./vendor/bin/phpstan analyse -c phpstan.neon -l 5 --memory-limit 1024M -q . || echo Err` ]]; then
+	echo "Error en complilación, cancelando push."
+	echo
+	exit 1
+fi
+echo "Compilado OK"
+echo
+
+echo "Corriendo tests..."
+if [[ `./vendor/bin/phpunit --stop-on-failure 2> /dev/null || echo Err` ]]; then
+	echo "Error en tests, cancelando push."
+	echo
+	exit 1
+fi
+echo "Tests OK"
+echo
+
+cd -
+
+exit 0
+

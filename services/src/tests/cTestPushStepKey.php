@@ -6,7 +6,7 @@ use helena\classes\App;
 use helena\services\backoffice\PublishService;
 use minga\framework\tests\TestCaseBase;
 
-class PushStepKeyTest extends TestCaseBase
+class cTestPushStepKey extends TestCaseBase
 {
 	public function testPushStepKey()
 	{

@@ -71,7 +71,7 @@ require_once('authenticate.php');
 require_once('frontend.php');
 require_once('common.php');
 
-if (!$isPublic)
+if (isset($isPublic) == false || $isPublic == false)
 {
 	require_once('logs.php');
 

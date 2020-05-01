@@ -11,7 +11,7 @@ use minga\framework\tests\TestCaseBase;
 
 class TileDataServiceTest extends TestCaseBase
 {
-	public function testTileDataService()
+	public function testGetTileData()
 	{
 		$l = 3401;
 		$v = 201;

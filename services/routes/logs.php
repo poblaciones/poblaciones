@@ -6,6 +6,7 @@ use helena\controllers\logs as controllers;
 App::RegisterControllerGetPost('/logs/traffic', controllers\cTraffic::class);
 App::RegisterControllerGetPost('/logs/platform', controllers\cPlatform::class);
 App::RegisterControllerGetPost('/logs/caches', controllers\cCaches::class);
+App::RegisterControllerGetPost('/logs/tests', controllers\cTests::class);
 App::RegisterControllerGetPost('/logs/performance', controllers\cPerformance::class);
 App::RegisterControllerGetPost('/logs/search', controllers\cSearchLog::class);
 
