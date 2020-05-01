@@ -1,0 +1,33 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+{% set menu = 'TESTS' %}
+{% block content %}
+
+{{ macros.Title('Tests') }}
+
+{{ include('tabbedContentMenu.html.twig') }}
+
+<div class="contenedorAdmin">
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Tests</div>
+	</div>
+	<div>{{ version.name }}: {{ version.value }}</div>
+	<p>
+	<div>
+		<strong><a href="{{ all_tests }}" target="_blank">Correr todos los tests</a></strong>
+	</div>
+	<div>
+		<ul>
+			{% for key, testgroup in tests %}
+			<li><a href="{{ group_tests }}{{ key }}" target="_blank">Correr todos los tests de {{ key }}</a></li>
+			<ul>
+			{% for test in testgroup %}
+			<li><a href="{{ test.url }}" target="_blank">{{ test.name }}</a></li>
+			{% endfor %}
+			</ul>
+			{% endfor %}
+		</ul>
+	</div>
+	<div class='dBlockNewLineS3'></div>
+</div>
+{% endblock %}
