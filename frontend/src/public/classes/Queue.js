@@ -28,7 +28,13 @@ Queue.prototype.startOne = function () {
 		if (queueItem.running === false) {
 			queueItem.running = true;
 			this.runningRequests++;
-			queueItem.call.apply(queueItem.context, queueItem.params);
+			var params = queueItem.params;
+			if (Array.isArray(queueItem.params)) {
+				params = params.unshift(this);
+			} else {
+				params = [this, params];
+			}
+			queueItem.call.apply(queueItem.context, params);
 			// se fija si debe iniciar otros
 			this.startOne();
 			break;

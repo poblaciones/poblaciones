@@ -7,6 +7,11 @@ use minga\framework\IO;
 
 class Paths
 {
+	public static function GetPHPUnitPath()
+	{
+		return Context::Paths()->GetRoot() . "/vendor/bin/phpunit";
+	}
+
 	public static function GetPythonScriptsPath()
 	{
 		return Context::Paths()->GetRoot() . "/py";

@@ -93,7 +93,7 @@ ActiveLabels.prototype.CreateComposer = function() {
 };
 
 ActiveLabels.prototype.GetCartographyService = function () {
-	return { url: null, useDatasetId: false, revision: null };
+	return { url: null, revision: null };
 };
 
 

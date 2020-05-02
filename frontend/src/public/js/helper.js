@@ -206,6 +206,24 @@ module.exports = {
 		}
 		return ret;
 	},
+	removeAllChildren(e) {
+		var child = e.lastElementChild;
+    while (child) {
+        e.removeChild(child);
+        child = e.lastElementChild;
+    }
+	},
+	getVariableFrameKey(v, x, y, z, boundsRectRequired) {
+		var args = 'v=' + v + '&' + this.getFrameKey(x, y, z, boundsRectRequired);
+		return args;
+	},
+	getFrameKey(x, y, z, boundsRectRequired) {
+		var args = 'x=' + x + '&y=' + y + '&z=' + z;
+		if (boundsRectRequired) {
+			args += '&b=1';
+		}
+		return args;
+	},
 	getSafeValue(arr, key, def) {
 		if (key in arr) {
 			return arr[key];

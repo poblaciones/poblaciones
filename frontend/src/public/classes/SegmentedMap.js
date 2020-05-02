@@ -42,8 +42,13 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	} else {
 		this.tileDataBlockSize = null;
 	}
-	this.UseGradients = config.UseGradients;
+	this.Configuration = config;
 	this.Queue = new Queue(config.MaxQueueRequests);
+	if (window.host !== config.GeographyServer) {
+		this.GeographyQueue = new Queue(config.MaxQueueRequests);
+	} else {
+		this.GeographyQueue = this.Queue;
+	}
 };
 
 SegmentedMap.prototype.Get = function (url, params) {

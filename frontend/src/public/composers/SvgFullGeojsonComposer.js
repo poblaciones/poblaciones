@@ -1,5 +1,5 @@
 import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
-import Helper from '@/public/js/helper';
+import h from '@/public/js/helper';
 import Pattern from '@/public/composers/Pattern';
 import SvgOverlay from '@/public/googleMaps/SvgOverlay';
 import Mercator from '@/public/js/Mercator';
@@ -15,11 +15,11 @@ function SvgFullGeojsonComposer(mapsApi, activeSelectedMetric) {
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.keysInTile = [];
 	this.styles = [];
-	this.useOverlaySvg = false;
 	this.svgInTile = [];
 	this.index = this.activeSelectedMetric.index;
 	this.labelsVisibility = [];
 	this.AbstractConstructor();
+	this.useGradients = window.SegMap.Configuration.UseGradients;
 };
 SvgFullGeojsonComposer.prototype = new AbstractTextComposer();
 
@@ -98,7 +98,9 @@ SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResult
 	var svg = this.CreateSVGOverlay(tileUniqueId, div, filtered, projected, tileBounds, z, patternValue, gradient);
 
 	if (svg !== null) {
-		this.svgInTile[tileKey] = svg;
+		var v = this.activeSelectedMetric.SelectedVariable().Id;
+		var simpleKey = h.getVariableFrameKey(v, x, y, z, this.MapsApi.TileBoundsRequired());
+		this.svgInTile[simpleKey] = svg;
 	}
 	return { 'type': 'FeatureCollection', 'features': [] };
 };
@@ -144,7 +146,7 @@ SvgFullGeojsonComposer.prototype.getCentroid = function (mapElement) {
 	if (mapElement['properties'] && mapElement['properties'].centroid) {
 		return new window.google.maps.LatLng(mapElement['properties'].centroid[0], mapElement['properties'].centroid[1]);
 	} else {
-		return Helper.getGeojsonCenter(mapElement);
+		return h.getGeojsonCenter(mapElement);
 	}
 };
 
@@ -210,7 +212,7 @@ SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div,
 	}
 
 	var maskId = null;
-	if (gradient) {
+	if (this.useGradients && gradient) {
 		// test mask: https://jsfiddle.net/ycLsr32k/
 		var image = o2.image("data:" + gradient.ImageType + ";base64," + gradient.Data, 256, 256);
 		// rectángulo de transparencia global
@@ -235,14 +237,9 @@ SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div,
 		oSvg.appendChild(svg);
 	});
 
-
-	if (this.useOverlaySvg) {
-		var SVGsOverlay = new SvgOverlay(this.MapsApi.gMap, oSvg, 1000 - this.activeSelectedMetric.index, tileBounds);
-		return SVGsOverlay;
-	} else {
-		div.appendChild(oSvg);
-		return null;
-	}
+	h.removeAllChildren(div);
+	div.appendChild(oSvg);
+	return oSvg;
 };
 
 SvgFullGeojsonComposer.prototype.appendPatterns = function (o2, labels, scales) {
@@ -295,7 +292,6 @@ SvgFullGeojsonComposer.prototype.clear = function () {
 SvgFullGeojsonComposer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
 	if (this.svgInTile.hasOwnProperty(tileKey)) {
-		this.svgInTile[tileKey].Release();
 		delete this.svgInTile[tileKey];
 	}
 };

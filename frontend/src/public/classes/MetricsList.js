@@ -171,5 +171,6 @@ MetricsList.prototype.ZoomChanged = function () {
 			this.metrics[i].UpdateMap();
 		}
 	}
+
 };
 

@@ -16,8 +16,6 @@ use minga\framework\System;
 
 class cTests extends cController
 {
-	private const BIN = 'vendor/bin/phpunit';
-
 	public function Show()
 	{
 		if ($app = Session::CheckIsMegaUser())
@@ -113,10 +111,7 @@ class cTests extends cController
 
 	private function GetCommand($path = '', $part = '')
 	{
-		$pre = '';
-		if(System::IsWindows() == false)
-			$pre = './';
-		return $pre . self::BIN . ' --verbose 2>&1 ';
+		return Paths::GetPHPUnitPath() . ' --verbose 2>&1 ';
 	}
 
 	private static function EndsWithTest($name)

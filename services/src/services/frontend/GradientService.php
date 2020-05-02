@@ -18,14 +18,14 @@ class GradientService extends BaseService
 		{
 			// Obtiene la imagen como una subimagen
 			$deltaZ = $z - $gradientLimit;
-			$newX = (int) ($x / pow(2, $deltaZ));
-			$newY = (int) ($y / pow(2, $deltaZ));
-			$newZ = 11;
+			$sourceX = (int) ($x / pow(2, $deltaZ));
+			$sourceY = (int) ($y / pow(2, $deltaZ));
+			$sourceZ = $gradientLimit;
 			$newSize = 256 / pow(2, $deltaZ);
-			$offsetX = 256 * (($x / pow(2, $deltaZ)) - $newX);
-			$offsetY = 256 * (($y / pow(2, $deltaZ)) - $newY);
+			$offsetX = 256 * (($x / pow(2, $deltaZ)) - $sourceX);
+			$offsetY = 256 * (($y / pow(2, $deltaZ)) - $sourceY);
 			// genera la imagen de salida
-			$container = $this->GetImageFromDb($gradientId, $newX, $newY, $newZ);
+			$container = $this->GetImageFromDb($gradientId, $sourceX, $sourceY, $sourceZ);
 			// listo
 			if ($container)
 			{

@@ -433,8 +433,12 @@ GoogleMapsApi.prototype.RemoveOverlay = function (index) {
 	this.gMap.overlayMapTypes.removeAt(index);
 };
 
+GoogleMapsApi.prototype.TileBoundsRequired = function () {
+	return (this.gMap.getTilt() !== 0);
+};
+
 GoogleMapsApi.prototype.TileBoundsRequiredString = function (tile) {
-	if (this.gMap.getTilt() === 0) {
+	if (!this.TileBoundsRequired()) {
 		return null;
 	}
 	var m = new Mercator();

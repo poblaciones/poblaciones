@@ -1,17 +1,20 @@
 [CURRENT]
 - Los tooltips en el mapa muestra un panel con el valor actual para el feature.
-- Al desmarcar el ver etiquetas en el modo 'satélite' remueve las etiquetas del mapa.
+- Fix: Al desmarcar el 'ver etiquetas' en el modo 'satélite' remueve las etiquetas del mapa.
+- Muestra la información de los items en un panel lateral
+- Para los datasets de polígonos y códigos, se reduce el efecto de repintado en los cambios de zoom.
+- Se permite configurar un servidor secundario para las cartografía de base (servidor de geographies).
 
 v2.19 (2020-04-26)
+- El mapa ofrece elementos en la barra de acciones superior del panel derecho para iniciar y cerrar sesión.
 - Fix: detección de encoding en CSV identificaba como mac-files archivos con mayúsculas acentuadas acentos.
 - La grilla de datos del dataset en backoffice hace encoding del html que pueda estar en las celdas.
-- Mejoras crawling segmentado.
-- Autogeneración de carpetas de storage.
+- Mejoras para ofrecer crawling segmentado (se habilitaa en configuración de región y configuración administrativa de cartografía).
+- Autogeneración de carpetas de storage para ambientes nuevos.
 - Fix: la publicación pisaba los extents si no había modificaciones de datos.
-- Administración: listado de regiones.
-- Al seleccionar una región o círculo de buffer se perdía el fijado de nivel.
+- Administración muestra listado de regiones.
+- Fix: Al seleccionar una región o círculo de buffer se perdía el fijado de nivel.
 - Fix: 'zoom al indicador' cuando había un clipping pequeño (< 90% de la cobertura del indicador) no liberaba la selección.
-- El mapa ofrece elementos en la barra de acciones para iniciar y cerrar sesión.
 
 v2.18 (2020-04-15)
 - Posibilidad de agregar indicadores externos en una cartografía a la lista de indicadores del panel superior.

@@ -5,7 +5,7 @@ import err from '@/common/js/err';
 
 export default TileRequest;
 
-function TileRequest(queue, selectedMetricOverlay, coord, zoom, boundsRectRequired, key, div) {
+function TileRequest(queue, geographyQueue, selectedMetricOverlay, coord, zoom, boundsRectRequired, key, div) {
 	this.selectedMetricOverlay = selectedMetricOverlay;
 	this.coord = coord;
 	this.zoom = zoom;
@@ -14,6 +14,7 @@ function TileRequest(queue, selectedMetricOverlay, coord, zoom, boundsRectRequir
 	this.boundsRectRequired = boundsRectRequired;
 	this.cancel1 = null;
 	this.cancel2 = null;
+	this.preCancel2Queue = null;
 	this.preCancel1 = null;
 	this.preCancel2 = null;
 	this.CancelToken1 = axios.CancelToken;
@@ -27,6 +28,7 @@ function TileRequest(queue, selectedMetricOverlay, coord, zoom, boundsRectRequir
 	this.cancelled = false;
 	this.dataBlockRequest = null;
 	this.queue = queue;
+	this.geographyQueue = geographyQueue;
 }
 
 TileRequest.prototype.CancelHttpRequests = function () {
@@ -50,7 +52,7 @@ TileRequest.prototype.CancelHttpRequests = function () {
 		this.cancel2('cancelled');
 	}
 	if (this.preCancel2 !== null) {
-		this.queue.Release(this.preCancel2);
+		this.preCancel2Queue.Release(this.preCancel2);
 	}
 };
 
@@ -71,7 +73,9 @@ TileRequest.prototype.GetTile = function () {
 		this.queue.Enlist(this, this.startDataRequest, null, function (p) { loc.preCancel1 = p; }, info);
 	}
 	if (this.selectedMetricOverlay.geographyService.url) {
-		this.queue.Enlist(this, this.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
+		var geoQueue = (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest ? this.queue : this.geographyQueue);
+		this.preCancel2Queue = geoQueue;
+		geoQueue.Enlist(this, this.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
 	}
 };
 
@@ -114,18 +118,18 @@ TileRequest.prototype.allSubscribersAreCancelled = function () {
 };
 
 
-TileRequest.prototype.startDataRequest = function () {
+TileRequest.prototype.startDataRequest = function (queue) {
 	var loc = this;
 	var params = this.params;
 	window.SegMap.Get(window.host + '/services/' + this.url, {
 		params: params,
 		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; }),
 	}).then(function (res) {
-		loc.queue.Release(loc.preCancel1);
+		queue.Release(loc.preCancel1);
 		loc.notifyDataSubscribers(res.data);
 		loc.processDataResponse(res.data);
 	}).catch(function (error) {
-		loc.queue.Release(loc.preCancel1);
+		queue.Release(loc.preCancel1);
 		var q = params;
 		if (error.message !== 'cancelled') {
 			loc.selectedMetricOverlay.SetDivFailure(loc.div);
@@ -134,12 +138,12 @@ TileRequest.prototype.startDataRequest = function () {
 	});
 };
 
-TileRequest.prototype.startGeographyRequest = function () {
+TileRequest.prototype.startGeographyRequest = function (queue) {
 	var loc = this;
 
 	var geographyId = this.selectedMetricOverlay.activeSelectedMetric.SelectedLevel().GeographyId;
 	var geographyParams = { x: this.coord.x, y: this.coord.y, z: this.zoom, w: this.selectedMetricOverlay.geographyService.revision };
-	if (this.selectedMetricOverlay.geographyService.useDatasetId) {
+	if (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest) {
 		geographyParams.d = this.selectedMetricOverlay.activeSelectedMetric.SelectedLevel().Dataset.Id;
 	} else {
 		geographyParams.a = geographyId;
@@ -150,12 +154,12 @@ TileRequest.prototype.startGeographyRequest = function () {
 	if (this.boundsRectRequired) {
 		geographyParams.b = this.boundsRectRequired;
 	};
-	var url = window.host + '/services/' + this.selectedMetricOverlay.geographyService.url;
+	var url = this.selectedMetricOverlay.geographyService.url;
 	window.SegMap.Get(url, {
 		params: geographyParams,
 		cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; }),
 	}).then(function (res) {
-		loc.queue.Release(loc.preCancel2);
+		queue.Release(loc.preCancel2);
 		loc.receiveMapData(res.data);
 		var total = (res.data.TotalPages ? res.data.TotalPages : 1);
 		var next = (res.data.Page ? res.data.Page + 1 : 1);
@@ -164,10 +168,10 @@ TileRequest.prototype.startGeographyRequest = function () {
 			loc.ProcessResultsIfCompleted();
 		} else {
 			loc.Page = next;
-			this.queue.Enlist(loc, loc.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
+			queue.Enlist(loc, loc.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
 		}
 	}).catch(function (error1) {
-		loc.queue.Release(loc.preCancel2);
+		queue.Release(loc.preCancel2);
 		if (error1.message !== 'cancelled') {
 			loc.selectedMetricOverlay.SetDivFailure(loc.div);
 		}

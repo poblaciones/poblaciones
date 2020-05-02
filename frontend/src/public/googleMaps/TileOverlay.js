@@ -15,6 +15,21 @@ function TileOverlay(map, google, activeSelectedMetric) {
 	this.composer = activeSelectedMetric.CreateComposer();
 	this.geographyService = activeSelectedMetric.GetCartographyService();
 	this.requestedTiles = [];
+	this.zoomListener = null;
+	// Guarda lo relacionado al preview de tile
+	this.lastZoom = this.map.getZoom();
+	var loc = this;
+	if (loc.composer.svgInTile !== undefined) {
+		this.svgInTileBackup = {};
+		this.zoomListener = this.map.addListener('zoom_changed', function () {
+			// guarda
+			loc.svgInTileBackup[loc.lastZoom] = loc.composer.svgInTile;
+			// actualiza
+			loc.composer.svgInTile = [];
+			loc.lastZoom = loc.map.getZoom();
+		});
+	}
+
 }
 
 TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
@@ -26,13 +41,9 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	div.style.width = this.tileSize.width + 'px';
 	div.style.height = this.tileSize.height + 'px';
 	div.style.fontSize = '10';
-	div.style.borderWidth = '1px';
 
 	var boundsRectRequired = window.SegMap.TileBoundsRequiredString({ x: coord.x, y: coord.y, z: zoom });
-	var args = 'z=' + zoom + '&x=' + coord.x + '&y=' + coord.y;
-	if (boundsRectRequired) {
-		args += '&b=' + boundsRectRequired;
-	}
+	var args = h.getFrameKey(coord.x, coord.y, zoom, boundsRectRequired);
   // si no se agrega idCounter, google maps hace coexistir
   // tiles con key duplicado
 	var key = args + '&s=' + (this.idCounter++);
@@ -45,11 +56,118 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 		return div;
 	}
 
-	var dataRequest = new TileRequest(window.SegMap.Queue, this, coord, zoom, boundsRectRequired, key, div);
+	var dataRequest = new TileRequest(window.SegMap.Queue, window.SegMap.GeographyQueue, this, coord, zoom, boundsRectRequired, key, div);
 	dataRequest.GetTile();
-	//div.innerHTML = '<div style="padding: 4px; "><a href="' + args + '">' + args + '</a></div>';
+	//div.innerHTML = '<div style="padding: 4px; ">XXXXXXXXXXXX<a href="' + args + '">' + args + '</a></div>';
 
+	if (this.geographyService.url) {
+		var ele = this.getPreview(coord, zoom);
+		if (ele) {
+			div.appendChild(ele);
+		}
+	}
 	this.requestedTiles[key] = dataRequest;
+	return div;
+};
+
+TileOverlay.prototype.getPreview = function (coord, zoom) {
+	if (this.svgInTileBackup === undefined) {
+		return null;
+	}
+	if (!this.activeSelectedMetric || !this.activeSelectedMetric.HasSelectedVariable()) {
+		return null;
+	}
+	var v = this.activeSelectedMetric.SelectedVariable().Id;
+
+	for (var n = zoom; n > 0; n--) {
+		var svg = this.CreateBestPossibleSvg(v, coord, zoom, n);
+		if (svg) {
+			return svg;
+		}
+	}
+	for (var n = zoom + 1; n < 22; n++) {
+		var svg = this.CreateBestPossibleSvg(v, coord, zoom, n);
+		if (svg) {
+			return svg;
+		}
+	}
+	return null;
+};
+
+TileOverlay.prototype.CreateBestPossibleSvg = function (v, coord, zoom, previousZoom) {
+	if (!this.svgInTileBackup.hasOwnProperty(previousZoom)) {
+		return null;
+	}
+	var svgs = this.svgInTileBackup[previousZoom];
+	// Puede ser mayor o menor
+	if (zoom >= previousZoom) {
+		// Calcula las coordenadas y el offset del contenedor
+		var deltaZ = zoom - previousZoom;
+		var sourceX = Math.trunc(coord.x / Math.pow(2, deltaZ));
+		var sourceY = Math.trunc(coord.y / Math.pow(2, deltaZ));
+		var sourceZ = previousZoom;
+		// Calcula la escala
+		var times = Math.pow(2, deltaZ);
+		var newSize = 256 / times;
+		var offsetX = 256 * ((coord.x / Math.pow(2, deltaZ)) - sourceX);
+		var offsetY = 256 * ((coord.y / Math.pow(2, deltaZ)) - sourceY);
+		// se fija si lo tiene
+		var sourceKey = h.getVariableFrameKey(v, sourceX, sourceY, sourceZ);
+		if (svgs.hasOwnProperty(sourceKey)) {
+			// lo devuelve
+			var ret = svgs[sourceKey].cloneNode(true);
+			ret.setAttribute("viewBox", offsetX + " " + offsetY + " " + newSize + " " + newSize);
+			return ret;
+		}
+	} else {
+		// Calcula cuál es la esquina de inicio
+		var deltaZ = previousZoom - zoom;
+		var sourceX = coord.x * Math.pow(2, deltaZ);
+		var sourceY = coord.y * Math.pow(2, deltaZ);
+		var sourceZ = previousZoom;
+		// Calcula la escala
+		var times = Math.pow(2, deltaZ);
+		var newSize = 256 / times;
+		// se fija si lo tiene
+		var i = 0;
+		var root = this.createDiv(256, 256);
+
+		for (var y = 0; y < times; y++) {
+			var row = this.createDiv(256, newSize);
+			row.style.whiteSpace = 'nowrap';
+			for (var x = 0; x < times; x++) {
+				var sourceKey = h.getVariableFrameKey(v, sourceX + x, sourceY + y, sourceZ);
+				var svg = null;
+				if (svgs.hasOwnProperty(sourceKey)) {
+					// lo devuelve
+					var svg = svgs[sourceKey].cloneNode(true);
+					svg.setAttribute("viewBox", "0 0 256 256");
+					svg.style.maxWidth = newSize + 'px';
+					svg.style.maxHeight = newSize + 'px';
+					svg.style.display = 'inline-block';
+					i++;
+				}
+				else {
+					svg = this.createDiv(newSize, newSize);
+					svg.style.display = 'inline-block';
+				}
+				row.appendChild(svg);
+			}
+			root.appendChild(row);
+		}
+		if (i > 0) {
+			return root;
+		}
+	}
+	return null;
+};
+
+TileOverlay.prototype.createDiv = function (width, height) {
+	var div = document.createElement("div");
+	if (width && height) {
+		div.style.width = width + "px";
+		div.style.height = height + "px";
+	}
 	return div;
 };
 
@@ -129,4 +247,8 @@ TileOverlay.prototype.IsOutOfClipping = function (coord, zoom) {
 
 TileOverlay.prototype.clear = function () {
 	this.composer.clear();
+	this.svgInTileBackup = {};
+	if (this.zoomListener) {
+		this.zoomListener.remove();
+	}
 };

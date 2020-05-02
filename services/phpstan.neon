@@ -9,6 +9,7 @@ parameters:
 		- doctrine_proxies
 		- web/phpinfo2.php
 		- web/index.php
+		- web/b.php
 		- tests/routesTest.php
 	autoload_files:
 		- vendor/autoload.php
