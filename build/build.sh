@@ -4,21 +4,22 @@
 
 # Sube relese a servidor de producción o beta
 # parámetros:
-#    vendor (default false): sube directorio vendor
+#    vendor (opcional): sube directorio vendor
+#    [TAG] (opcional): un valor para agregar como tag de versión de git
 #
 
 vendor=false
+#compile and test: cyt
+cyt=true
 output=./release
 
 # manejo de parámetros
-
 if [ "$2" == "" ]; then
 	echo "*** Para marcar el tag en git, agregarlo como parámetro ***"
 else
 	echo "*** Marcando el tag v$2 ***"
 	git tag v$2
 fi
-
 
 while test $# -gt 0
 do
@@ -31,29 +32,31 @@ do
 	shift
 done
 
-cd ../services
-echo "*** Test y compilación pre release... ***"
-echo "Compilando..."
-if [[ `./vendor/bin/phpstan analyse -c phpstan.neon -l 5 --memory-limit 1024M -q . || echo Err` ]]; then
-	echo "Error en complilación, cancelando build."
+if [ $cyt = true ]; then
+	cd ../services
+	echo "*** Test y compilación pre release... ***"
+	echo "Compilando..."
+	if [[ `./vendor/bin/phpstan analyse -c phpstan.neon -l 5 --memory-limit 1024M -q . || echo Err` ]]; then
+		echo "Error en complilación, cancelando build."
+		echo
+		read -n1 -r -p "Press any key to continue..." key
+		exit 1
+	fi
+	echo "Compilado OK"
 	echo
-	read -n1 -r -p "Press any key to continue..." key
-	exit 1
-fi
-echo "Compilado OK"
-echo
 
-echo "Corriendo tests..."
-if [[ `./vendor/bin/phpunit --stop-on-failure 2> /dev/null || echo Err` ]]; then
-	echo "Error en tests, cancelando build."
+	echo "Corriendo tests..."
+	if [[ `./vendor/bin/phpunit --stop-on-failure 2> /dev/null || echo Err` ]]; then
+		echo "Error en tests, cancelando build."
+		echo
+		read -n1 -r -p "Press any key to continue..." key
+		exit 1
+	fi
+	echo "Tests OK"
 	echo
-	read -n1 -r -p "Press any key to continue..." key
-	exit 1
-fi
-echo "Tests OK"
-echo
 
-cd -
+	cd -
+fi
 
 echo "*** Preparando en $output ***"
 
