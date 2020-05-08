@@ -4,21 +4,23 @@
 
 			<invoker ref="invoker"></invoker>
 			<md-dialog-title>
-				Calcular indicador. Paso {{ step }} de 3.
+				Calcular indicador{{ segun }}
+				Paso {{ step }}{{ maxSteps }}
 			</md-dialog-title>
 
 			<md-dialog-content>
 				<div v-if="step == 1">
-					<step1 @formulaClick="formulaClick" @radarClick="radarClick" @rulerClick="rulerClick" />
+					<calculated-type @formulaClick="formulaClick" @radarClick="radarClick" @rulerClick="rulerClick" />
 				</div>
 				<div v-if="step == 2">
-					<step2 :newMetric="newMetric" />
+					<calculated-objective :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
-				<div v-if="step == 3">
-					<step3 :newMetric="newMetric" />
+				<div v-if="step == 3 && newMetric.Type == 'radar'">
+					<calculated-area :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
-				<div v-if="step == 4">
-					<step4 />
+				<div v-if="isLast">
+					<calculated-ruler-output v-if="newMetric.Type == 'ruler'" :canEdit="canEdit" :newMetric="newMetric" />
+					<calculated-radar-output v-if="newMetric.Type == 'radar'" :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 			</md-dialog-content>
 
@@ -26,8 +28,8 @@
 				<div>
 					<md-button @click="openPopup = false">Cancelar</md-button>
 					<md-button class="md-primary" v-if="step != 1" @click="prev">Anterior</md-button>
-					<md-button class="md-primary" v-if="step > 1 && step < 4" @click="next">Siguiente</md-button>
-					<md-button class="md-primary" v-if="step == 3" @click="last">Calcular</md-button>
+					<md-button class="md-primary" v-if="step != 1 && !isLast" @click="next">Siguiente</md-button>
+					<md-button class="md-primary" v-if="isLast" @click="save">Calcular</md-button>
 				</div>
 			</md-dialog-actions>
 		</md-dialog>
@@ -35,41 +37,78 @@
 </template>
 
 <script>
-import Step1 from './Step1.vue';
-import Step2 from './Step2.vue';
-import Step3 from './Step3.vue';
-import Step4 from './Step4.vue';
+import CalculatedType from './CalculatedWizard/CalculatedType.vue';
+import CalculatedObjective from './CalculatedWizard/CalculatedObjective.vue';
+import CalculatedArea from './CalculatedWizard/CalculatedArea.vue';
+import CalculatedRadarOutput from './CalculatedWizard/CalculatedRadarOutput.vue';
+import CalculatedRulerOutput from './CalculatedWizard/CalculatedRulerOutput.vue';
+import str from '@/common/js/str';
 
 export default {
 	name: 'calculateMetric',
 	components: {
-		Step1,
-		Step2,
-		Step3,
-		Step4,
+		CalculatedType,
+		CalculatedObjective,
+		CalculatedArea,
+		CalculatedRadarOutput,
+		CalculatedRulerOutput,
 	},
 	data() {
 		return {
 			step: 1,
-			type: '',
 			newMetric: {},
-
-			newMetricName: '',
-			newMetricGroup: null,
-			newMetricVersion: '',
-			selectedMetric: null,
 			openPopup: false,
-			};
+		};
 	},
 	computed: {
-		//TODO: agregar como propiedad
-		// canEdit() {
-		// 	if (this.Work) {
-		// 		return this.Work.CanEdit();
-		// 	} else {
-		// 		return false;
-		// 	}
-		// },
+		Work() {
+			return window.Context.CurrentWork;
+		},
+		Dataset() {
+			return window.Context.CurrentDataset;
+		},
+		isLast() {
+			return this.step == 4
+				|| (this.step == 3 && this.newMetric.Type != 'radar');
+		},
+		maxSteps() {
+			if(this.step == 1) {
+				return '.';
+			} else if(this.newMetric.Type == 'radar') {
+				return ' de 4.';
+			}
+			return ' de 3.';
+		},
+		segun() {
+			let ret = '.';
+			if(this.newMetric.Type == 'formula') {
+				//TODO: definir.
+				ret = ' según fórmula.';
+			} else if(this.newMetric.Type == 'ruler') {
+				ret = ' según distancia.';
+				if(this.step == 2) {
+					ret += ' > Objetivo.';
+				} else if(this.step == 3) {
+					ret += ' > Objetivo > Salida.';
+				}
+			} else if(this.newMetric.Type == 'radar') {
+				ret = ' según contenido.';
+				if(this.step == 2) {
+					ret += ' > Objetivo.';
+				} else if(this.step == 3) {
+					ret += ' > Objetivo > Área.';
+				} else if(this.step == 4) {
+					ret += ' > Objetivo > Área > Salida.';
+				}
+			}
+			return ret;
+		},
+		canEdit() {
+			if (this.Work) {
+				return this.Work.CanEdit();
+			}
+			return false;
+		},
 	},
 	mounted() {
 		this.newMetric = this.initNewMetric();
@@ -77,19 +116,45 @@ export default {
 	methods: {
 		initNewMetric() {
 			return {
-				BaseMetric: { },
+				BaseMetric: {},
+
+				Id: null,
+				Type: '',
 				//TODO: revisar defaults
-				Description: false,
-				Distance: false,
-				Value: false,
-				Coords: true,
-				NormalizationValue: false,
-				MaxDistance: false,
-				SameProvince: false,
-				ValueLabels: [],
+				HasDescription: false,
+				HasDistance: false,
+				HasValue: false,
+				HasCoords: true,
+				HasNormalizationValue: false,
+
+				HasMaxDistance: false,
+				MaxDistance: 0,
+				InSameProvince: false,
+
+				HasAdditionValue: false,
+				HasMaxValue: false,
+				HasMinValue: false,
+				HasCount: false,
+
+				ValueLabelIds: [],
+
+				IsInclusionPoint: false,
+				InclusionDistance: 0,
+				IsInclussionFull: true,
+
+				VersionId: null,
+				LevelId: null,
+				VariableId: null,
+
+				SelectedVersion: null,
+				SelectedLevel: null,
+				SelectedVariable: null,
 			};
 		},
 		next() {
+			if(this.validate() == false) {
+				return;
+			}
 			if(this.step < 4) {
 				this.step++;
 			}
@@ -102,95 +167,80 @@ export default {
 				this.newMetric = this.initNewMetric();
 			}
 		},
-		last() {
-			this.step = 1;
-		},
 		formulaClick() {
-			this.type = 'formula';
+			this.newMetric.Type = 'formula';
 			this.step = 2;
-			console.log('final formula click');
 		},
 		rulerClick() {
-			this.type = 'ruler';
+			this.newMetric.Type = 'ruler';
 			this.step = 2;
-			console.log('ruler click');
 		},
 		radarClick() {
-			this.type = 'radar';
+			this.newMetric.Type = 'radar';
 			this.step = 2;
-			console.log('radar click');
 		},
 		show() {
-			// this.newMetricName = '';
-			// this.newMetricVersion = '';
-			// this.newMetricGroup = null;
-			// this.selectedMetric = null;
-			this.openPopup = true;
 			this.newMetric = this.initNewMetric();
 			this.step = 1;
-			// setTimeout(() => {
-			// 	// this.$refs.metricInput.focus();
-			// }, 100);
+			this.openPopup = true;
 		},
 		save() {
-			// var loc = this;
-			// if (this.newMetricName.trim().length === 0) {
-			// 	alert('Debe indicar un nombre para el indicador.');
-			// 	this.$nextTick(() => {
-			// 		this.$refs.metricInput.focus();
-			// 	});
-			// 	return;
-			// }
-			// if (this.newMetricVersion.trim().length === 0) {
-			// 	alert('Debe indicar una edición para el indicador.');
-			// 	this.$nextTick(() => {
-			// 		this.$refs.metricVersionInput.focus();
-			// 	});
-			// 	return;
-			// }
-			// if (this.Work.IsPublicData() && this.newMetricGroup === null) {
-			// 	alert('Debe indicar una categoría para el indicador.');
-			// 	this.$nextTick(() => {
-			// 		this.$refs.categoryInput.$el.focus();
-			// 	});
-			// 	return;
-			// }
-			// window.Context.Factory.GetCopy('MetricVersionLevel',
-			// 	function(level) {
-			// 		loc.SaveAndClose(level);
-			// });
+			if(this.validate() == false) {
+				return;
+			}
+			// this.openPopup = false;
+			const loc = this;
+			this.$refs.invoker.do(this.Dataset,
+				loc.Dataset.CalculateNewMetric, loc.newMetric)
+			.then(function(data) {
+				loc.openPopup = false;
+			});
 		},
-		SaveAndClose(level) {
-			// var loc = this;
-			// if (this.selectedMetric !== null) {
-			// 	level.MetricVersion.Metric = this.selectedMetric;
-			// }
-			// level.MetricVersion.Caption = loc.newMetricVersion.trim();
-			// level.MetricVersion.Metric.Caption = loc.newMetricName.trim();
-			// level.MetricVersion.Metric.MetricGroup = loc.newMetricGroup;
-			// level.MetricVersion.Metric.IsBasicMetric = false;
-			// level.Variables = [];
-			// this.$refs.invoker.do(this.Dataset,
-			// 	loc.Dataset.UpdateMetricVersionLevel, level).then(function(data) {
-			// 		loc.openPopup = false;
-			// 	});
-		},
-		pickMetric() {
-			// this.$refs.pickMetric.show();
-		},
-		onSelectMetric(metric) {
-			// this.selectedMetric = metric;
-			// this.newMetricVersion = "";
-			// var groupId = metric.GroupId;
-			// this.newMetricGroup = arr.GetById(this.MetricGroups, groupId, null);
-			// this.newMetricName = metric.Caption;
-			// this.$refs.metricVersionInput.focus();
+		validate() {
+			if(this.step == 2) {
+				if(this.newMetric.BaseMetric.Metric == null) {
+					alert("Debe seleccionar un indicador.");
+					return false;
+				}
+				if(this.newMetric.VersionId == null) {
+					alert("Debe seleccionar una versión.");
+					return false;
+				}
+				if(this.newMetric.LevelId == null) {
+					alert("Debe seleccionar un nivel.");
+					return false;
+				}
+				if(this.newMetric.VariableId == null) {
+					alert("Debe seleccionar una variable.");
+					return false;
+				}
+				//TODO: ver si es obligatorio
+				if(this.newMetric.ValueLabelIds.length == 0) {
+					alert("Debe seleccionar al menos una categoría.");
+					return false;
+				}
+			}
+			if(this.step == 3) {
+				if(this.newMetric.Type == 'ruler') {
+					if(this.newMetric.HasMaxDistance
+						&& str.IsIntegerGreaterThan0(this.newMetric.MaxDistance) == false) {
+						alert("Debe ingresar la distancia máxima en kms.");
+						return false;
+					}
+				} else if(this.newMetric.Type == 'radar') {
+					if(this.newMetric.IsInclusionPoint
+						&& str.IsIntegerGreaterThan0(this.newMetric.InclusionDistance) == false) {
+						alert("Debe ingresar la distancia máxima en kms.");
+						return false;
+					}
+				}
+			}
+			return true;
 		},
 	},
 };
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
-
+<style scoped>
 </style>
 

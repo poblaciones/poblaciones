@@ -232,6 +232,62 @@ ActiveDataset.prototype.UpdateVariable = function (level, variable) {
 		});
 };
 
+ActiveDataset.prototype.CalculateNewMetric = function(newMetric) {
+	const loc = this;
+	//TODO:
+	// var levelNoVariables = f.clone(level);
+	// levelNoVariables.Variables = null;
+	// this.Work.WorkChanged();
+
+	return axiosClient.getPromise(window.host + '/services/backoffice/CalculateNewMetric', {
+		//TODO: Definir parámetros...
+		'k': loc.properties.Id,
+		'param00': newMetric.Id,
+		'param01': newMetric.Type,
+
+		'param02': newMetric.BaseMetric.Metric.Id,
+		'param03': (newMetric.HasDescription ? 1 : 0),
+		'param04': (newMetric.HasDistance ? 1 : 0),
+		'param05': (newMetric.HasValue ? 1 : 0),
+		'param06': (newMetric.HasCoords ? 1 : 0),
+		'param07': (newMetric.HasNormalizationValue ? 1 : 0),
+
+		'param08': (newMetric.HasMaxDistance ? 1 : 0),
+		'param09': newMetric.MaxDistance,
+		'param10': (newMetric.InSameProvince ? 1 : 0),
+
+		'param11': (newMetric.HasAdditionValue ? 1 : 0),
+		'param12': (newMetric.HasMaxValue ? 1 : 0),
+		'param13': (newMetric.HasMinValue ? 1 : 0),
+		'param14': (newMetric.HasCount ? 1 : 0),
+
+		'param15': newMetric.ValueLabelIds, //(array)
+
+		'param16': (newMetric.IsInclusionPoint ? 1 : 0),
+		'param17': newMetric.InclusionDistance,
+		'param18': (newMetric.IsInclussionFull ? 1 : 0),
+
+		'param19': newMetric.VersionId,
+		'param20': newMetric.LevelId,
+		'param21': newMetric.VariableId,
+
+	}, 'calculando el indicador').then(function (data) {
+		//TODO: agregar al listado si es nuevo o modificar, etc...?
+		alert('No implementado...');
+
+		// var isNew = level.Id === 0 || level.Id === null;
+		// if (isNew) {
+		// 	loc.MetricVersionLevels.push(level);
+		// 	window.Db.LoadWorks();
+		// } else {
+		// 	arr.ReplaceById(loc.MetricVersionLevels, level.Id, level);
+		// }
+		// window.Context.RefreshMetrics();
+		// loc.Work.MetricVersions.Refresh();
+		// return data;
+	});
+};
+
 ActiveDataset.prototype.UpdateMetricVersionLevel = function (level) {
 	var loc = this;
 	var levelNoVariables = f.clone(level);

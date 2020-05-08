@@ -12,7 +12,8 @@
 import ImageButton from '@/backoffice/components/ImageButton.vue';
 
 export default {
-	name: 'step1',
+	// Step 1
+	name: 'calculatedType',
 	components: {
 		ImageButton,
 	},
@@ -41,6 +42,5 @@ export default {
 </script>
 
 <style scoped>
-
 </style>
 
