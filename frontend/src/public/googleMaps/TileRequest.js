@@ -5,7 +5,7 @@ import err from '@/common/js/err';
 
 export default TileRequest;
 
-function TileRequest(queue, geographyQueue, selectedMetricOverlay, coord, zoom, boundsRectRequired, key, div) {
+function TileRequest(queue, staticQueue, selectedMetricOverlay, coord, zoom, boundsRectRequired, key, div) {
 	this.selectedMetricOverlay = selectedMetricOverlay;
 	this.coord = coord;
 	this.zoom = zoom;
@@ -14,6 +14,7 @@ function TileRequest(queue, geographyQueue, selectedMetricOverlay, coord, zoom, 
 	this.boundsRectRequired = boundsRectRequired;
 	this.cancel1 = null;
 	this.cancel2 = null;
+	this.preCancel1Queue = null;
 	this.preCancel2Queue = null;
 	this.preCancel1 = null;
 	this.preCancel2 = null;
@@ -28,7 +29,7 @@ function TileRequest(queue, geographyQueue, selectedMetricOverlay, coord, zoom, 
 	this.cancelled = false;
 	this.dataBlockRequest = null;
 	this.queue = queue;
-	this.geographyQueue = geographyQueue;
+	this.staticQueue = staticQueue;
 }
 
 TileRequest.prototype.CancelHttpRequests = function () {
@@ -44,7 +45,7 @@ TileRequest.prototype.CancelHttpRequests = function () {
 				this.cancel1('cancelled');
 			}
 			if (this.preCancel1 !== null) {
-				this.queue.Release(this.preCancel1);
+				this.preCancel1Queue.Release(this.preCancel1);
 			}
 		}
 	}
@@ -63,17 +64,19 @@ TileRequest.prototype.GetTile = function () {
 	this.params = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParams(this.coord, this.boundsRectRequired);
 	this.subset = (this.selectedMetricOverlay.activeSelectedMetric.GetSubset ? this.selectedMetricOverlay.activeSelectedMetric.GetSubset(this.coord, this.boundsRectRequired) : null);
 
-	var info = this.url + JSON.stringify(this.params);
+	var info = this.url.path + JSON.stringify(this.params);
 
 	var existing = this.queue.GetSameRequest(info);
 	if (existing) {
 		this.dataBlockRequest = existing;
 		existing.dataSubscribe(this);
 	} else {
-		this.queue.Enlist(this, this.startDataRequest, null, function (p) { loc.preCancel1 = p; }, info);
+		var dataQueue = (!this.url.useStaticQueue ? this.queue : this.staticQueue);
+		this.preCancel1Queue = dataQueue;
+		dataQueue.Enlist(this, this.startDataRequest, null, function (p) { loc.preCancel1 = p; }, info);
 	}
 	if (this.selectedMetricOverlay.geographyService.url) {
-		var geoQueue = (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest ? this.queue : this.geographyQueue);
+		var geoQueue = (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest ? this.queue : this.staticQueue);
 		this.preCancel2Queue = geoQueue;
 		geoQueue.Enlist(this, this.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
 	}
@@ -121,7 +124,7 @@ TileRequest.prototype.allSubscribersAreCancelled = function () {
 TileRequest.prototype.startDataRequest = function (queue) {
 	var loc = this;
 	var params = this.params;
-	window.SegMap.Get(window.host + '/services/' + this.url, {
+	window.SegMap.Get(this.url.server + this.url.path, {
 		params: params,
 		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; }),
 	}).then(function (res) {

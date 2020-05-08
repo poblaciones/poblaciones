@@ -385,6 +385,23 @@ module.exports = {
 		};
 		return ret;
 	},
+	resolveMultiUrl(servers, path) {
+		if (!Array.isArray(servers)) {
+			return servers + path;
+		}
+		var ret = [];
+		for (var n = 0; n < servers.length; n++) {
+			ret.push(servers[n] + path);
+		}
+		return ret;
+	},
+	selectMultiUrl(url) {
+		if (!Array.isArray(url)) {
+			// tiene múltiples fuentes
+			return url;
+		}
+		return url[Math.floor(Math.random() * url.length)];
+	},
 	getRankingParams(metric, frame, size, direction) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		const level = ver.Levels[ver.SelectedLevelIndex];

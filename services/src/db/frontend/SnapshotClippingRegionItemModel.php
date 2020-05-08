@@ -164,7 +164,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 
 		if ($trackingLevels)
 		{
-			$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_caption, C1.geo_revision,
+			$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
           C1.geo_partial_coverage, metadata.*, ins_caption
           FROM geography C1
 					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
@@ -176,7 +176,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		}
 		else
 		{
-			$sql = "SELECT geo_id, geo_max_zoom, geo_caption, geo_revision, geo_partial_coverage,
+			$sql = "SELECT geo_id, geo_max_zoom, geo_min_zoom, geo_caption, geo_revision, geo_partial_coverage,
 								met_id, met_title, met_abstract, met_publication_date, met_license,
 								met_authors, ins_caption
 							FROM clipping_region_item
@@ -194,7 +194,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 	public function CalculateLevelsFromPoint($coordinate)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_caption, C1.geo_revision,
+		$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
           C1.geo_partial_coverage, metadata.*, ins_caption
           FROM geography C1
 					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
@@ -210,19 +210,19 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
-	public function CalculateLevelsFromEnvelope($envelope)
+	public function CalculateLevelsFromEnvelope($envelope, $zoom)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_caption, C1.geo_revision,
+		$sql = "SELECT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
           C1.geo_partial_coverage, metadata.*, ins_caption
-          FROM geography C1
-					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
-					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
+          FROM (SELECT min(geo_id) geo_id FROM geography
+								WHERE ? >= geo_min_zoom AND ? <= geo_max_zoom
+								GROUP BY geo_revision) C0
+					JOIN geography C1 ON C0.geo_id = C1.geo_id
+					LEFT JOIN metadata ON geo_metadata_id = met_id
 					LEFT JOIN institution ON met_institution_id = ins_id
-					WHERE EXISTS (SELECT * FROM snapshot_geography_item WHERE C2.geo_id = giw_geography_id
-					AND MBRIntersects(giw_geometry_r3, ST_PolygonFromText('" . $envelope->ToWKT() . "')) AND giw_geography_is_tracking_level = 1)
 					ORDER BY C1.geo_revision";
-		$ret = App::Db()->fetchAll($sql);
+		$ret = App::Db()->fetchAll($sql, array($zoom, $zoom));
 
 		Profiling::EndTimer();
 		return $ret;

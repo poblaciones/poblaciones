@@ -56,7 +56,7 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 		return div;
 	}
 
-	var dataRequest = new TileRequest(window.SegMap.Queue, window.SegMap.GeographyQueue, this, coord, zoom, boundsRectRequired, key, div);
+	var dataRequest = new TileRequest(window.SegMap.Queue, window.SegMap.StaticQueue, this, coord, zoom, boundsRectRequired, key, div);
 	dataRequest.GetTile();
 	//div.innerHTML = '<div style="padding: 4px; ">XXXXXXXXXXXX<a href="' + args + '">' + args + '</a></div>';
 

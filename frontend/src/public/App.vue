@@ -179,7 +179,7 @@ html, body {
 	right: 0px !important;
 }
 .gAlpha {
-	opacity: 0;
+	opacity: .45;
 }
 .gm-fullscreen-control {
 	transform: scale(0.8);

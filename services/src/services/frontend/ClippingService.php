@@ -212,7 +212,7 @@ class ClippingService extends BaseService
 		}
 		else if ($frame->Envelope != null)
 		{
-			$rows = $table->CalculateLevelsFromEnvelope($frame->Envelope);
+			$rows = $table->CalculateLevelsFromEnvelope($frame->Envelope, $frame->Zoom);
 		}
 		else
 		{

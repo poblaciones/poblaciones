@@ -44,10 +44,10 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	}
 	this.Configuration = config;
 	this.Queue = new Queue(config.MaxQueueRequests);
-	if (window.host !== config.GeographyServer) {
-		this.GeographyQueue = new Queue(config.MaxQueueRequests);
+	if (Array.isArray(config.StaticServer) || window.host !== config.StaticServer) {
+		this.StaticQueue = new Queue(config.MaxStaticQueueRequests);
 	} else {
-		this.GeographyQueue = this.Queue;
+		this.StaticQueue = this.Queue;
 	}
 };
 
@@ -57,6 +57,7 @@ SegmentedMap.prototype.Get = function (url, params) {
 		if (!params.headers) { params.headers = {}; }
 		params.headers['Access-Link'] = window.accessLink;
 	}
+	url = h.selectMultiUrl(url);
 	return this._axios.get(url, params).then(function (res) {
 		if ((!res.response || res.response.status === undefined) && res.message === 'cancelled') {
 			throw { message: 'cancelled', origin: 'segmented' };

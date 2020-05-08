@@ -22,9 +22,10 @@ class ConfigurationService extends BaseService
 
 		$ret = array('Revisions' => $revisions,
 									'Blocks' => $blockStrategy,
-									'GeographyServer' => Context::Settings()->Servers()->GetServer('geography')->publicUrl,
+									'StaticServer' => Context::Settings()->Servers()->GetServer('static')->publicUrl,
 									'UseGradients' => Context::Settings()->Map()->UseGradients,
 									'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests,
+									'MaxStaticQueueRequests' => Context::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user);
 		return $ret;
 	}

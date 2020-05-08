@@ -1,9 +1,12 @@
 [CURRENT]
+
+v2.20 (2020-05-08)
 - Los tooltips en el mapa muestra un panel con el valor actual para el feature.
 - Fix: Al desmarcar el 'ver etiquetas' en el modo 'satélite' remueve las etiquetas del mapa.
 - Muestra la información de los items en un panel lateral
 - Para los datasets de polígonos y códigos, se reduce el efecto de repintado en los cambios de zoom.
-- Se permite configurar un servidor secundario para las cartografía de base (servidor de geographies).
+- Se permite configurar un servidor secundario para las cartografía de base (statics).
+- El cálculo de resumen de clipping utiliza el nivel correspondiente al zoom activo.
 
 v2.19 (2020-04-26)
 - El mapa ofrece elementos en la barra de acciones superior del panel derecho para iniciar y cerrar sesión.

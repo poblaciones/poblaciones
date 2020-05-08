@@ -113,7 +113,8 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 	this.SegmentedMap.InvalidateSummaries();
 
 	const loc = this;
-	this.SegmentedMap.Get(window.host + '/services/clipping/CreateClipping', {
+	var url = h.resolveMultiUrl(this.SegmentedMap.Configuration.StaticServer, '/services/clipping/CreateClipping');
+	this.SegmentedMap.Get(url, {
 		params: args,
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
 	}).then(function (res) {

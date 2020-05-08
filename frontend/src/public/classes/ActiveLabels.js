@@ -39,9 +39,9 @@ ActiveLabels.prototype.UseBlockedRequests = function (boundsRectRequired) {
 
 ActiveLabels.prototype.GetDataService = function (boundsRectRequired) {
 	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return 'clipping/GetBlockLabels';
+		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer), path: '/services/clipping/GetBlockLabels', useStaticQueue: true };
 	} else {
-		return 'clipping/GetLabels';
+		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer), path: '/services/clipping/GetLabels', useStaticQueue: true };
 	}
 };
 

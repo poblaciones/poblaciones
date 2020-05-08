@@ -37,12 +37,11 @@ if [ $cyt = true ]; then
 	echo "*** Test y compilación pre release... ***"
 	echo "Compilando..."
 	if [[ `./vendor/bin/phpstan analyse -c phpstan.neon -l 5 --memory-limit 1024M -q . || echo Err` ]]; then
-		echo "Error en complilación, cancelando build."
+		echo "Error en compilación, cancelando build."
 		echo
 		read -n1 -r -p "Press any key to continue..." key
 		exit 1
 	fi
-	echo "Compilado OK"
 	echo
 
 	echo "Corriendo tests..."
@@ -52,7 +51,6 @@ if [ $cyt = true ]; then
 		read -n1 -r -p "Press any key to continue..." key
 		exit 1
 	fi
-	echo "Tests OK"
 	echo
 
 	cd -
@@ -72,6 +70,7 @@ rm -rf ./doctrine_proxies
 cd ../build
 
 echo "*** 1. Copia todo lo que hay que subir"
+echo >$output-1_copy.log
 cp -vr ../services/startup.php $output>>$output-1_copy.log
 cp -vr ../services/py $output>>$output-1_copy.log
 cp -vr ../services/src $output>>$output-1_copy.log

@@ -459,7 +459,7 @@ ActiveSelectedMetric.prototype.CalculateProperLevel = function () {
 	for (var l = 0; l < currentVersion.Levels.length; l++) {
 		currentLevelIndex = l;
 		currentLevel = currentVersion.Levels[currentLevelIndex];
-		if (clippingPassed && currentZoom <= currentLevel.MaxZoom) {
+		if (clippingPassed && currentZoom >= currentLevel.MinZoom && currentZoom <= currentLevel.MaxZoom) {
 			break;
 		}
 		if (clippingPassed === false) {
@@ -553,7 +553,7 @@ ActiveSelectedMetric.prototype.GetCartographyService = function () {
 	case 'L':
 			return { url: null, revision: null };
 	case 'D':
-		return { url: window.SegMap.Configuration.GeographyServer + '/services/geographies/GetGeography', revision: window.SegMap.Revisions.Geography };
+		return { url: h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, '/services/geographies/GetGeography'), revision: window.SegMap.Revisions.Geography };
 	case 'S':
 		return { url: window.host + '/services/shapes/GetDatasetShapes', isDatasetShapeRequest: true, revision: this.properties.Metric.Revision };
 	default:
@@ -567,9 +567,9 @@ ActiveSelectedMetric.prototype.UseBlockedRequests = function (boundsRectRequired
 
 ActiveSelectedMetric.prototype.GetDataService = function (boundsRectRequired) {
 	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return 'metrics/GetBlockTileData';
+		return { server: window.host, path: '/services/metrics/GetBlockTileData', useStaticQueue: false };
 	} else {
-		return 'metrics/GetTileData';
+		return { server: window.host, path: '/services/metrics/GetTileData', useStaticQueue: false };
 	}
 };
 

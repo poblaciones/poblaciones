@@ -10,6 +10,7 @@ class ClippingLevelInfo extends BaseMapModel
 	public $Name;
 	public $Revision;
 	public $Metadata;
+	public $MinZoom;
 	public $MaxZoom;
 	public $PartialCoverage;
 
@@ -19,6 +20,7 @@ class ClippingLevelInfo extends BaseMapModel
 			'geo_id' => 'Id',
 			'geo_caption' => 'Name',
 			'geo_revision' => 'Revision',
+			'geo_min_zoom' => 'MinZoom',
 			'geo_max_zoom' => 'MaxZoom',
 			'geo_partial_coverage' => 'PartialCoverage');
 	}

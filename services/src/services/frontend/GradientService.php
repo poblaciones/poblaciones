@@ -27,7 +27,7 @@ class GradientService extends BaseService
 			// genera la imagen de salida
 			$container = $this->GetImageFromDb($gradientId, $sourceX, $sourceY, $sourceZ);
 			// listo
-			if ($container)
+			if ($container && $newSize >= 1)
 			{
 				$im = imagecreatefromstring($container);
 				$target = imagecreate($newSize, $newSize);
