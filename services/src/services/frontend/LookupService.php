@@ -45,7 +45,7 @@ class LookupService extends BaseService
 			if (sizeof($ret) === 10) break;
 		}
 		// Si no encontró, complementa con features
-		if (sizeof($ret) === 0 && $filter != 'r')
+		if (sizeof($ret) === 0 && $filter != 'r' && $filter != 'm')
 		{
 			$resFeatures = $modelLookup->SearchFeatures($query);
 			$this->appendResults($ret, $resFeatures, 10 - sizeof($ret));

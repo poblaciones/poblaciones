@@ -252,12 +252,15 @@ export default {
 		},
 		removeMetric(metric) {
 			var loc = this;
-			this.$refs.invoker.confirmDo('Eliminar indicador', 'El indicador seleccionado será eliminado',
-				this.Work,
-				this.Work.RemoveExtraMetric, metric).then(
-					function () {
-						 arr.Remove(loc.Work.ExtraMetrics, metric);
-					});
+			this.$refs.invoker.confirm('Eliminar indicador', 'El indicador seleccionado será eliminado',
+				function () {
+					loc.$refs.invoker.do(
+						loc.Work,
+						loc.Work.RemoveExtraMetric, metric).then(
+							function () {
+								arr.Remove(loc.Work.ExtraMetrics, metric);
+							});
+				});
 		},
 		regionSelected(item) {
 			this.Startup.ClippingRegionItemId = item.Id;
