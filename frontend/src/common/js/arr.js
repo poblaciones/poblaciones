@@ -26,9 +26,15 @@ module.exports = {
 	ContainsById(arr, id) {
 		return this.IndexById(arr, id) !== -1;
 	},
-	IndexById(arr, id) {
-		for (var i = 0; i < arr.length; i++) {
-			if (arr[i].Id === id) {
+	IndexById(arr, id, property) {
+		for (let i = 0; i < arr.length; i++) {
+			let itemId = null;
+			if(property === undefined) {
+				 itemId = arr[i].Id;
+			} else {
+				itemId = arr[i][property].Id;
+			}
+			if (itemId === id) {
 				return i;
 			}
 		}

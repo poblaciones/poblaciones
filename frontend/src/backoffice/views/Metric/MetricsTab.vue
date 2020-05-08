@@ -16,6 +16,9 @@
 		<new-metric ref="newMetric">
 		</new-metric>
 
+		<calculate-metric ref="calculateMetric">
+		</calculate-metric>
+
 		<pick-metric-version ref="pickMetricVersion" :list="unUsedWorkVersionsList" @onSelectMetricVersion="onCompleteLevel">
 		</pick-metric-version>
 
@@ -24,6 +27,10 @@
 				<md-icon>add_circle_outline</md-icon>
 				Agregar indicador
 			</md-button>
+			<!-- <md&#45;button @click="calculateNewMetric()"> -->
+			<!-- 	<md&#45;icon>add_circle_outline</md&#45;icon> -->
+			<!-- 	Calcular indicador -->
+			<!-- </md&#45;button> -->
 			<md-button @click="createNewLevel()" v-if="Dataset !== null && Dataset.properties.MultilevelMatrix !== null" :disabled="unUsedWorkVersionsList.length === 0">
 				<md-icon>add_circle_outline</md-icon>
 				Completar nivel
@@ -123,6 +130,7 @@ import VariableFormulaPopup from './VariableFormulaPopup.vue';
 import VariableSymbologyPopup from './VariableSymbologyPopup.vue';
 import VariableOptionsPopup from './VariableOptionsPopup.vue';
 import NewMetric from './NewMetric.vue';
+import CalculateMetric from './CalculateMetric.vue';
 import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
 import LevelPopup from "@/backoffice/views/Dataset/LevelPopup";
@@ -161,92 +169,95 @@ export default {
 		}
 	},
 	methods: {
-	createNewMetric() {
-		this.$refs.newMetric.show();
-	},
-	createNewLevel() {
-		this.$refs.pickMetricVersion.show();
-	},
-	formatScaleFormula(variable) {
-		if (variable.Normalization === null) {
-			return '';
-		}
-		switch(variable.NormalizationScale) {
-			case 1:
-			return '';
-			case 100:
-			return ' * 100';
-			case 1000:
-			return ' * 1000';
-			case 10000:
-			return ' * 10.000';
-			case 100000:
-			return ' * 100.000';
-			case 1000000:
-			return ' * 1.000.000';
-			default:
-			return '';
-		}
-	},
-	formatGroup(item) {
-		if (item === null) {
-			return '-';
-		} else {
-			return item.Caption;
-		}
-	},
-	onCompleteLevel(metricVersion) {
-		this.$refs.invoker.do(this.Dataset.LevelGenerator, this.Dataset.LevelGenerator.CompleteLevel, metricVersion);
-	},
-	levelDataset() {
-		var loc = this;
-		this.$refs.invoker.do(this.Dataset, this.Dataset.GetRelatedDatasets).then(function(datasets) {
-			// se saca a sí mismo
-			var i = arr.IndexById(datasets, loc.Dataset.properties.Id);
-			arr.RemoveAt(datasets, i);
-			loc.$refs.levelPopup.show(datasets);
-		});
-  },
-	formatMultilevel(item) {
-		if (item.MetricVersion.Multilevel) {
-			return 'Sí';
-		} else {
-			return 'No';
-		}
-	},
-	openEdition(item) {
-		this.$refs.editPopup.show(item);
-	},
-	onDelete(item) {
-		this.$refs.invoker.confirmDo('Eliminar indicador', 'El indicador seleccionado será eliminado',
-		this.Dataset, this.Dataset.DeleteMetricVersionLevel, item);
-	},
-	// DE VARIABLES
-	createNewVariable(item) {
-	var loc = this;
-	window.Context.Factory.GetCopy('Variable', function(data) {
-	data.Values = [];
-	var value = ScaleGenerator.CreateValue('Total', 1, DEFAULT_SINGLE_COLOR, 1);
-	data.Values.push(value);
-	loc.openVariableFormulaEdition(item, data);
-	});
-	},
-	isFirst(level, variable) {
-		return level.Variables[0] === variable;
-	},
-	isLast(level, variable) {
-		return level.Variables[level.Variables.length - 1] === variable;
-	},
-	up(level, variable) {
-		this.$refs.invoker.do(this.Dataset, this.Dataset.MoveVariableUp, level, variable);
-	},
-	down(level, variable) {
-		this.$refs.invoker.do(this.Dataset, this.Dataset.MoveVariableDown, level, variable);
-	},
-	openVariableFormulaEdition(item, variable) {
-		this.$refs.editVariableFormulaPopup.show(item, variable);
-	},
-	openVariableSymbologyEdition(item, variable) {
+		createNewMetric() {
+			this.$refs.newMetric.show();
+		},
+		calculateNewMetric() {
+			this.$refs.calculateMetric.show();
+		},
+		createNewLevel() {
+			this.$refs.pickMetricVersion.show();
+		},
+		formatScaleFormula(variable) {
+			if (variable.Normalization === null) {
+				return '';
+			}
+			switch(variable.NormalizationScale) {
+				case 1:
+					return '';
+				case 100:
+					return ' * 100';
+				case 1000:
+					return ' * 1000';
+				case 10000:
+					return ' * 10.000';
+				case 100000:
+					return ' * 100.000';
+				case 1000000:
+					return ' * 1.000.000';
+				default:
+					return '';
+			}
+		},
+		formatGroup(item) {
+			if (item === null) {
+				return '-';
+			} else {
+				return item.Caption;
+			}
+		},
+		onCompleteLevel(metricVersion) {
+			this.$refs.invoker.do(this.Dataset.LevelGenerator, this.Dataset.LevelGenerator.CompleteLevel, metricVersion);
+		},
+		levelDataset() {
+			var loc = this;
+			this.$refs.invoker.do(this.Dataset, this.Dataset.GetRelatedDatasets).then(function(datasets) {
+				// se saca a sí mismo
+				var i = arr.IndexById(datasets, loc.Dataset.properties.Id);
+				arr.RemoveAt(datasets, i);
+				loc.$refs.levelPopup.show(datasets);
+			});
+		},
+		formatMultilevel(item) {
+			if (item.MetricVersion.Multilevel) {
+				return 'Sí';
+			} else {
+				return 'No';
+			}
+		},
+		openEdition(item) {
+			this.$refs.editPopup.show(item);
+		},
+		onDelete(item) {
+			this.$refs.invoker.confirmDo('Eliminar indicador', 'El indicador seleccionado será eliminado',
+				this.Dataset, this.Dataset.DeleteMetricVersionLevel, item);
+		},
+		// DE VARIABLES
+		createNewVariable(item) {
+			var loc = this;
+			window.Context.Factory.GetCopy('Variable', function(data) {
+				data.Values = [];
+				var value = ScaleGenerator.CreateValue('Total', 1, DEFAULT_SINGLE_COLOR, 1);
+				data.Values.push(value);
+				loc.openVariableFormulaEdition(item, data);
+			});
+		},
+		isFirst(level, variable) {
+			return level.Variables[0] === variable;
+		},
+		isLast(level, variable) {
+			return level.Variables[level.Variables.length - 1] === variable;
+		},
+		up(level, variable) {
+			this.$refs.invoker.do(this.Dataset, this.Dataset.MoveVariableUp, level, variable);
+		},
+		down(level, variable) {
+			this.$refs.invoker.do(this.Dataset, this.Dataset.MoveVariableDown, level, variable);
+		},
+		openVariableFormulaEdition(item, variable) {
+			this.$refs.editVariableFormulaPopup.show(item, variable);
+		},
+		openVariableSymbologyEdition(item, variable) {
 			/*var hasCalculatedColumns = (variable.Data !== null && variable.Data !== 'O') ||
 																	(variable.Normalization !== null && variable.Normalization !== 'O');
 			if (hasCalculatedColumns && !this.Dataset.properties.Geocoded) {
@@ -259,14 +270,14 @@ export default {
 			}
 			var loc = this;
 			var open = function () {
-					loc.$refs.editVariableSymbologyPopup.show(item, variable);
+				loc.$refs.editVariableSymbologyPopup.show(item, variable);
 			};
 			if (this.Dataset.ScaleGenerator.HasData(variable)) {
 				open();
 			} else {
 				this.$refs.invoker.do(this.Dataset.ScaleGenerator,
-								this.Dataset.ScaleGenerator.GetColumnDistributions, variable).then(
-										open);
+					this.Dataset.ScaleGenerator.GetColumnDistributions, variable).then(
+						open);
 			}
 		},
 		openVariableOptionsEdition(item, variable) {
@@ -274,7 +285,7 @@ export default {
 		},
 		onDeleteVariable(item, variable) {
 			this.$refs.invoker.confirmDo('Eliminar variable', 'La variable seleccionada será quitada del indicador',
-						this.Dataset, this.Dataset.DeleteVariable, item, variable);
+				this.Dataset, this.Dataset.DeleteVariable, item, variable);
 		},
 		filterNotMatched(data) {
 			var ret = [];
@@ -304,54 +315,55 @@ export default {
 		},
 		ReloadUnUsedMetricVersions() {
 			var loc = this;
-				this.Work.MetricVersions.GetAll(function(data) {
-						loc.unUsedWorkVersionsList = loc.filterNotMatched(data);
-				});
+			this.Work.MetricVersions.GetAll(function(data) {
+				loc.unUsedWorkVersionsList = loc.filterNotMatched(data);
+			});
 		}
-  },
+	},
 	watch: {
 		"Work.MetricVersions.list"() {
 			this.ReloadUnUsedMetricVersions();
 		}
 	},
-  components: {
-      MetricPopup,
-			VariableFormulaPopup,
-			VariableSymbologyPopup,
-			VariableOptionsPopup,
-			LevelPopup,
-			NewMetric,
-			PickMetricVersion,
-  }
+	components: {
+		MetricPopup,
+		VariableFormulaPopup,
+		VariableSymbologyPopup,
+		VariableOptionsPopup,
+		LevelPopup,
+		NewMetric,
+		CalculateMetric,
+		PickMetricVersion,
+	}
 };
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
 .md-layout-item .md-size-15 {
-    padding: 0 !important;
+	padding: 0 !important;
 }
 
 .md-layout-item .md-size-25 {
-    padding: 0 !important;
+	padding: 0 !important;
 }
 
 .md-layout-item .md-size-20 {
-    padding: 0 !important;
+	padding: 0 !important;
 }
 
 .md-layout-item .md-size-10 {
-    padding: 0 !important;
+	padding: 0 !important;
 }
 
 .md-avatar {
-    min-width: 200px;
-    min-height: 200px;
-    border-radius: 200px;
+	min-width: 200px;
+	min-height: 200px;
+	border-radius: 200px;
 }
 
 .md-dialog-actions {
-  padding: 8px 20px 8px 24px !important;
+	padding: 8px 20px 8px 24px !important;
 }
 
 .innerList {
@@ -361,10 +373,10 @@ export default {
 }
 
 .close-button {
-    min-width: unset;
-    height: unset;
-    margin: unset;
-    float: right;
+	min-width: unset;
+	height: unset;
+	margin: unset;
+	float: right;
 }
 
 </style>

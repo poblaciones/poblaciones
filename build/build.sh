@@ -10,7 +10,7 @@
 
 vendor=false
 #compile and test: cyt
-cyt=true
+cyt=false
 output=./release
 
 # manejo de parámetros
