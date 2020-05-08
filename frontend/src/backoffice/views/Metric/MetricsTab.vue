@@ -23,14 +23,14 @@
 		</pick-metric-version>
 
 		<div v-if="Work.CanEdit()" class="md-layout">
-			<md-button @click="createNewMetric()">
+			<md-button @click="createNewMetric">
 				<md-icon>add_circle_outline</md-icon>
 				Agregar indicador
 			</md-button>
-			<!-- <md&#45;button @click="calculateNewMetric()"> -->
-			<!-- 	<md&#45;icon>add_circle_outline</md&#45;icon> -->
-			<!-- 	Calcular indicador -->
-			<!-- </md&#45;button> -->
+			<md-button v-if="calculateEnabled" @click="calculateNewMetric">
+				<md-icon>add_circle_outline</md-icon>
+				Calcular indicador
+			</md-button>
 			<md-button @click="createNewLevel()" v-if="Dataset !== null && Dataset.properties.MultilevelMatrix !== null" :disabled="unUsedWorkVersionsList.length === 0">
 				<md-icon>add_circle_outline</md-icon>
 				Completar nivel
@@ -142,7 +142,9 @@ export default {
 	name: 'MetricsTab',
 	data() {
 		return {
-			unUsedWorkVersionsList: []
+			unUsedWorkVersionsList: [],
+			//TODO: quitar esta variable
+			calculateEnabled: false,
 		};
 	},
 	mounted() {
