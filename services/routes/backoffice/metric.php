@@ -168,3 +168,44 @@ App::GetOrPost('/services/backoffice/UpdateVariable', function (Request $request
 
 	return App::Json($controller->UpdateVariable($datasetId, $level, $variable));
 });
+
+//TODO: programar esto...
+App::GetOrPost('/services/backoffice/CalculateNewMetric', function (Request $request) {
+	$controller = new services\MetricService();
+	$datasetId = Params::GetIntMandatory('k');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId))
+		return $denied;
+
+	$param00 = Params::Get('Id');
+	$param01 = Params::Get('Type');
+
+	$param02 = Params::Get('BaseMetric.Metric.Id');
+	$param03 = Params::Get('HasDescription');
+	$param04 = Params::Get('HasDistance');
+	$param05 = Params::Get('HasValue');
+	$param06 = Params::Get('HasCoords');
+	$param07 = Params::Get('HasNormalizationValue');
+
+	$param08 = Params::Get('HasMaxDistance');
+	$param09 = Params::Get('MaxDistance');
+	$param10 = Params::Get('InSameProvince');
+
+	$param11 = Params::Get('HasAdditionValue');
+	$param12 = Params::Get('HasMaxValue');
+	$param13 = Params::Get('HasMinValue');
+	$param14 = Params::Get('HasCount');
+
+	$param15 = Params::Get('ValueLabelIds'); //(array);
+
+	$param16 = Params::Get('IsInclusionPoint');
+	$param17 = Params::Get('InclusionDistance');
+	$param18 = Params::Get('IsInclussionFull');
+
+	$param19 = Params::Get('VersionId');
+	$param20 = Params::Get('LevelId');
+	$param21 = Params::Get('VariableId');
+
+	return App::Json(['error' => 1, 'msg' => 'No implementado']);
+	// return App::Json($controller->CalculateNewMetric($datasetId, $etc, $etc));
+});
+
