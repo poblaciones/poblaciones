@@ -31,6 +31,10 @@ module.exports = {
 	isNumeric(n) {
 		return !isNaN(parseFloat(n)) && isFinite(n);
 	},
+	IsIntegerGreaterThan0(str) {
+		let n = Number(str);
+		return Number.isInteger(n) && n > 0;
+	},
 	AddDot(str) {
 		if (str !== null && this.EndsWith(str, ".") === false) {
 			return str + '.';
