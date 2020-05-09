@@ -33,7 +33,11 @@ Context::Settings()->Mail()->SMTPSecure = "";
 Context::Settings()->Mail()->SMTPHost = "localhost";
 
 // Base de datos MySQL
-Context::Settings()->Db()->SetDatabase("SERVIDOR", "BASE_DE_DATOS", "USUARIO", "CONTRASE�A");
+Context::Settings()->Db()->SetDatabase("SERVIDOR", "BASE_DE_DATOS", "USUARIO", "CONTRASEÑA");
 
-// Ubicaci�n de python
+// Ubicación de python
 Context::Settings()->Servers()->Python27 = 'C:/Python27/python.exe';
+
+// Ubicación del binario de php para ejecutar en línea de comandos
+Context::Settings()->Servers()->PhpCli = 'php';
+

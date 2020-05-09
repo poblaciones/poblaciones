@@ -9,7 +9,7 @@ class Paths
 {
 	public static function GetPHPUnitPath()
 	{
-		return Context::Paths()->GetRoot() . "/vendor/bin/phpunit";
+		return Context::Paths()->GetRoot() . "/vendor/phpunit/phpunit/phpunit";
 	}
 
 	public static function GetPythonScriptsPath()
