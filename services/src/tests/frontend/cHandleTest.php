@@ -3,6 +3,7 @@
 namespace helena\tests\frontend;
 
 use helena\controllers\frontend\cHandle;
+use minga\framework\Context;
 use minga\framework\Reflection;
 use minga\framework\tests\TestCaseBase;
 
@@ -12,8 +13,13 @@ class cHandleTest extends TestCaseBase
 	private $metricId = 5101;
 	private $regionId = 15476;
 
-	public function testShowWork()
+	/**
+	 * @dataProvider CacheSettingProvider
+	 */
+	public function testShowWork($cacheSetting)
 	{
+		Context::Settings()->Cache()->Enabled = $cacheSetting;
+
 		$controller = new cHandle();
 		Reflection::CallPrivateMethod($controller, 'ShowWork', $this->workId);
 
