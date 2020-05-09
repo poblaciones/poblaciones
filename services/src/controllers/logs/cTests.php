@@ -91,15 +91,15 @@ class cTests extends cController
 		$group = Params::SafeGet('group');
 		$res = [];
 		if($group == 'all')
-			$res = System::RunCommandOnPath($this->GetCommand(), Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand(), Context::Paths()->GetRoot(), false);
 		else if($group == 'framework' && $file == '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath(), Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath(), Context::Paths()->GetRoot(), false);
 		else if($group == 'framework' && $file != '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath() . '/' . $file, Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath() . '/' . $file, Context::Paths()->GetRoot(), false);
 		else if($group != '' && $file == '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $group, Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $group, Context::Paths()->GetRoot(), false);
 		else if($file != '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $file, Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $file, Context::Paths()->GetRoot(), false);
 		else
 			throw new \Exception('Error en parámetros');
 
