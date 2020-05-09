@@ -66,11 +66,10 @@ class cHandleTest extends TestCaseBase
 		$this->assertEquals($controller->templateValues['clippingRegion'], 'Distritos');
 		$this->assertEquals($controller->templateValues['parentCaption'], 'Argentina');
 
-		unset($controller->templateValues['clippingRegionItem']);
-		unset($controller->templateValues['clippingRegion']);
-		unset($controller->templateValues['parentCaption']);
-
-		$this->assertEquals($prevResult, $controller->templateValues);
+		$this->assertEquals($prevResult['htmltitle'], $controller->templateValues['htmltitle']);
+		$this->assertEquals($prevResult['metadata'], $controller->templateValues['metadata']);
+		$this->assertEquals($prevResult['items'], $controller->templateValues['items']);
+		$this->assertEquals($prevResult['variables'], $controller->templateValues['variables']);
 	}
 
 }
