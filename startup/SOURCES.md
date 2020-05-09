@@ -11,7 +11,13 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 3. Instalar Python 2.7 (sólo requerido para conversiones de archivos SPSS) (https://www.python.org/downloads/release/python-2716/)
 
-4. Instalar MySql 5.6 o superior (https://dev.mysql.com/downloads/mysql/).
+4. Instalar las dependencias de Python: 
+
+pip install savReaderWriter
+pip install ijson
+pip install numpy
+
+5. Instalar MySql 5.6 o superior (https://dev.mysql.com/downloads/mysql/).
 
 ## 2. Descargar los fuentes del repositorio.
 
