@@ -60,7 +60,7 @@ TileRequest.prototype.CancelHttpRequests = function () {
 TileRequest.prototype.GetTile = function () {
 	var loc = this;
 
-	this.url = this.selectedMetricOverlay.activeSelectedMetric.GetDataService(this.boundsRectRequired);
+	this.url = this.selectedMetricOverlay.activeSelectedMetric.GetDataService(this.boundsRectRequired, this.coord.x);
 	this.params = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParams(this.coord, this.boundsRectRequired);
 	this.subset = (this.selectedMetricOverlay.activeSelectedMetric.GetSubset ? this.selectedMetricOverlay.activeSelectedMetric.GetSubset(this.coord, this.boundsRectRequired) : null);
 
@@ -158,6 +158,9 @@ TileRequest.prototype.startGeographyRequest = function (queue) {
 		geographyParams.b = this.boundsRectRequired;
 	};
 	var url = this.selectedMetricOverlay.geographyService.url;
+
+	url = h.selectMultiUrl(url, this.coord.x);
+
 	window.SegMap.Get(url, {
 		params: geographyParams,
 		cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; }),

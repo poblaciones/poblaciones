@@ -237,7 +237,7 @@ ActiveDataset.prototype.CalculateNewMetric = function(newMetric) {
 	//TODO:
 	// var levelNoVariables = f.clone(level);
 	// levelNoVariables.Variables = null;
-	// this.Work.WorkChanged();
+	this.Work.WorkChanged();
 
 	return axiosClient.getPromise(window.host + '/services/backoffice/CalculateNewMetric', {
 		//TODO: Definir parámetros...

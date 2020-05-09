@@ -11,13 +11,19 @@
 		<md-switch v-if="newMetric.SelectedVariable.HasTotals" class="md-primary" :disabled="!canEdit" v-model="newMetric.HasNormalizationValue">Valor de normalización</md-switch>
 
 		<div>Limitar coincidencias:</div>
-
-		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.HasMaxDistance">Distancia máxima:</md-switch>
-		<md-field class="md-size-10">
-			<mp-simple-text class="md-size-10" :disabled="!canEdit || !newMetric.HasMaxDistance" :maxlength="3" type="number" v-model="newMetric.MaxDistance"></mp-simple-text>
-			Kms.
-		</md-field>
-		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.InSameProvince">Coincidencias en misma provincia</md-switch>
+		<div class="md-layout">
+			<div class="md-layout-item md-size-40 md-small-size-100">
+				<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.HasMaxDistance">Distancia máxima:</md-switch>
+			</div>
+			<div class="md-layout-item md-size-40 md-small-size-100">
+				<mp-simple-text :disabled="!canEdit || !newMetric.HasMaxDistance"
+												:maxlength="3" type="number" v-model="newMetric.MaxDistance"></mp-simple-text>
+				Kms.
+			</div>
+			<div class="md-layout-item md-size-40 md-small-size-100">
+				<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.InSameProvince">Coincidencias en misma provincia</md-switch>
+			</div>
+		</div>
 	</div>
 </template>
 

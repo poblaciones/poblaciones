@@ -175,6 +175,8 @@ class Account
 
 	public function Login($password)
 	{
+		Session::CheckReadonlyForMaintenance();
+
 		if ($this->EnsureDbInfo(false) == false)
 			return false;
 		else
@@ -188,6 +190,8 @@ class Account
 
 	public function BeginActivation($password, $firstName, $lastName, $to)
 	{
+		Session::CheckReadonlyForMaintenance();
+
 		if ($password == '')
 			MessageBox::ThrowBackMessage('La contraseña no puede ser nula.');
 		if ($firstName == '')

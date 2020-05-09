@@ -1,4 +1,5 @@
 [CURRENT]
+- Implementación de readonlyForMaintenance.
 
 v2.20 (2020-05-08)
 - Los tooltips en el mapa muestra un panel con el valor actual para el feature.

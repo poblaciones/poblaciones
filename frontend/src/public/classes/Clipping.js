@@ -114,6 +114,8 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 
 	const loc = this;
 	var url = h.resolveMultiUrl(this.SegmentedMap.Configuration.StaticServer, '/services/clipping/CreateClipping');
+	url = h.selectMultiUrl(url, this.SegmentedMap.frame.ClippingRegionId);
+
 	this.SegmentedMap.Get(url, {
 		params: args,
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),

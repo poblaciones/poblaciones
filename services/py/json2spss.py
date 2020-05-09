@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import os
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
 
 import savReaderWriter
 import traceback
@@ -6,11 +10,10 @@ import ijson
 import json
 import glob
 import sys
-import os
 
 def main():
   if len(sys.argv) != 4:
-    print 'Usage: ' + sys.argv[0] + ' headfile datafile outputfile'
+    print ('Usage: ' + sys.argv[0] + ' headfile datafile outputfile')
     os._exit(1)
 
   try:
@@ -35,9 +38,9 @@ def main():
       for f in glob.glob(data_path):
         os.remove(f)
 
-      print 'File ' + sys.argv[3] + ' successfully created.'
+      print ('File ' + sys.argv[3] + ' successfully created.')
   except:
-      print 'Error: ', sys.exc_info()
+      print ('Error: ', sys.exc_info())
       traceback.print_exc()
       os._exit(1)
 

@@ -2,7 +2,7 @@
 
 namespace helena\classes;
 
-use minga\framework\Params;
+use minga\framework\Context;
 use minga\framework\MessageBox;
 use minga\framework\PhpSession;
 use helena\caches\WorkPermissionsCache;
@@ -41,6 +41,25 @@ class Session
 	{
 		$account = Account::Current();
 		return $account->IsSiteReader();
+	}
+	public static function CheckReadonlyForMaintenance()
+	{
+		if (Context::Settings()->readonlyForMaintenance)
+		{
+			MessageBox::ThrowBackMessage('Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre información. Por favor, vuelva a intentar más tarde.');
+		}
+	}
+
+	public static function CheckReadonlyForMaintenanceService()
+	{
+		if (Context::Settings()->readonlyForMaintenance)
+		{
+			return self::ReadonlyForMaintenance();
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	public static function CheckIsWorkPublicOrAccessible($workId)
@@ -235,6 +254,13 @@ class Session
 		MessageBox::ThrowMessage("El usuario ingresado ('" . $account->user . "') no dispone de suficientes permisos para acceder a esta opción
 				<br><br>Seleccione continuar para identificarse con otra cuenta.", $url);
 	}
+	public static function ReadonlyForMaintenance()
+	{
+		$url = App::RedirectLoginUrl();
+		http_response_code(404);
+		MessageBox::ThrowMessage("Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre información. Por favor, vuelva a intentar más tarde.", $url);
+	}
+
 	private static function ElementNotFound()
 	{
 		MessageBox::ThrowMessage("El elemento indicado no ha sido encontrado.");
@@ -242,6 +268,9 @@ class Session
 	public static function CheckIsWorkEditor($workId)
 	{
 		Profiling::BeginTimer();
+		if ($readonly = self::CheckReadonlyForMaintenanceService())
+			return $readonly;
+
 		if ($app = Session::CheckSessionAlive())
 			$ret = $app;
 		// Se fija los permisos
@@ -256,6 +285,9 @@ class Session
 	public static function CheckIsDatasetEditor($datasetId)
 	{
 		Profiling::BeginTimer();
+		if ($readonly = self::CheckReadonlyForMaintenanceService())
+			return $readonly;
+
 		if ($app = Session::CheckSessionAlive())
 			$ret = $app;
 		else

@@ -57,7 +57,6 @@ SegmentedMap.prototype.Get = function (url, params) {
 		if (!params.headers) { params.headers = {}; }
 		params.headers['Access-Link'] = window.accessLink;
 	}
-	url = h.selectMultiUrl(url);
 	return this._axios.get(url, params).then(function (res) {
 		if ((!res.response || res.response.status === undefined) && res.message === 'cancelled') {
 			throw { message: 'cancelled', origin: 'segmented' };

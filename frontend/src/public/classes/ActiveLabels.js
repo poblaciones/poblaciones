@@ -37,11 +37,11 @@ ActiveLabels.prototype.UseBlockedRequests = function (boundsRectRequired) {
 	return this.blockSize && !boundsRectRequired;
 };
 
-ActiveLabels.prototype.GetDataService = function (boundsRectRequired) {
+ActiveLabels.prototype.GetDataService = function (boundsRectRequired, seed) {
 	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer), path: '/services/clipping/GetBlockLabels', useStaticQueue: true };
+		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed / this.blockSize), path: '/services/clipping/GetBlockLabels', useStaticQueue: true };
 	} else {
-		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer), path: '/services/clipping/GetLabels', useStaticQueue: true };
+		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed), path: '/services/clipping/GetLabels', useStaticQueue: true };
 	}
 };
 

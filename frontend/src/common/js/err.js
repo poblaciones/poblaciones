@@ -53,6 +53,8 @@ module.exports = {
 			pre = 'El servidor no se encuentra disponible. En consecuencia, no fue posible ';
 		} else if (msg === 'Request failed with status code 401' || msg === 'Request failed with status code 403') {
 			pre = 'El usuario actual no posee los permisos suficientes para ';
+		} else if (msg === 'Request failed with status code 404') {
+			pre = 'Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre información. Por favor, vuelva a intentar más tarde para ';
 		} else if (msg === 'Request failed with status code 405') {
 			pre = 'Se ha utilizado un método HTTP (post, get, etc) no aceptado por el servidor al ';
 		} else {

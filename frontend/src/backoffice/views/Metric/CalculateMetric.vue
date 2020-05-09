@@ -127,7 +127,7 @@ export default {
 				HasCoords: true,
 				HasNormalizationValue: false,
 
-				HasMaxDistance: false,
+				HasMaxDistance: 20,
 				MaxDistance: 0,
 				InSameProvince: false,
 
@@ -197,6 +197,7 @@ export default {
 			});
 		},
 		validate() {
+			return true;
 			if(this.step == 2) {
 				if(this.newMetric.BaseMetric.Metric == null) {
 					alert("Debe seleccionar un indicador.");

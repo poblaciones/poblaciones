@@ -395,12 +395,18 @@ module.exports = {
 		}
 		return ret;
 	},
-	selectMultiUrl(url) {
+	selectMultiUrl(url, seed) {
 		if (!Array.isArray(url)) {
 			// tiene múltiples fuentes
 			return url;
 		}
-		return url[Math.floor(Math.random() * url.length)];
+		var pos;
+		if (seed) {
+			pos = seed % url.length;
+		} else {
+			pos = Math.floor(Math.random() * url.length);
+		}
+		return url[pos];
 	},
 	getRankingParams(metric, frame, size, direction) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
