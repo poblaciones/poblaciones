@@ -30,7 +30,8 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.toolbarStates = toolbarStates;
 	this.MapIsInitialized = false;
 	this.DefaultTitle = 'Poblaciones';
-	this._axios = this.CreateAxios();
+	this._axios = this.CreateAxios(true);
+	this._axiosNoCredentials = this.CreateAxios(false);
 	this.Metrics = new MetricsList(this, selectedMetricCollection);
 	this.SaveRoute = new SaveRoute();
 	this.RestoreRoute = new RestoreRoute();
@@ -51,13 +52,14 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	}
 };
 
-SegmentedMap.prototype.Get = function (url, params) {
+SegmentedMap.prototype.Get = function (url, params, noCredencials) {
 	if (window.accessLink) {
 		if (!params) { params = {}; }
 		if (!params.headers) { params.headers = {}; }
 		params.headers['Access-Link'] = window.accessLink;
 	}
-	return this._axios.get(url, params).then(function (res) {
+	var axios = (noCredencials ? this._axiosNoCredentials : this._axios);
+	return axios.get(url, params).then(function (res) {
 		if ((!res.response || res.response.status === undefined) && res.message === 'cancelled') {
 			throw { message: 'cancelled', origin: 'segmented' };
 		} else if (res.status === 200) {
@@ -93,8 +95,8 @@ SegmentedMap.prototype.Get = function (url, params) {
 	});
 };
 
-SegmentedMap.prototype.CreateAxios = function () {
-	var api = axios.create({ withCredentials: true });
+SegmentedMap.prototype.CreateAxios = function (withCredentials) {
+	var api = axios.create({ withCredentials: withCredentials });
 	return api;
 };
 

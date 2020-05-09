@@ -72,6 +72,8 @@ cd ../build
 echo "*** 1. Copia todo lo que hay que subir"
 echo >$output-1_copy.log
 cp -vr ../services/startup.php $output>>$output-1_copy.log
+cp -vr ../services/phpstan.neon $output>>$output-1_copy.log
+cp -vr ../services/phpunit.xml $output>>$output-1_copy.log
 cp -vr ../services/py $output>>$output-1_copy.log
 cp -vr ../services/src $output>>$output-1_copy.log
 cp -vr ../services/config $output>>$output-1_copy.log

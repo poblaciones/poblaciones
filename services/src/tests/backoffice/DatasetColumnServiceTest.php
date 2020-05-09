@@ -12,7 +12,7 @@ class DatasetColumnServiceTest extends TestCaseBase
 {
 	public function setUp()
 	{
-		Account::Impersonate('admin');
+		Account::Impersonate('test');
 	}
 
 	public function testGetDatasetColumns()

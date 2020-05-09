@@ -402,7 +402,7 @@ module.exports = {
 		}
 		var pos;
 		if (seed) {
-			pos = seed % url.length;
+			pos = Math.floor(seed) % url.length;
 		} else {
 			pos = Math.floor(Math.random() * url.length);
 		}

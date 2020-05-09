@@ -1,6 +1,5 @@
 <?php
 use helena\classes\App;
-
 use helena\controllers\logs as controllers;
 
 App::RegisterControllerGetPost('/logs/traffic', controllers\cTraffic::class);

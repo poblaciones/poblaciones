@@ -118,8 +118,9 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 
 	this.SegmentedMap.Get(url, {
 		params: args,
-		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
-	}).then(function (res) {
+		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; })},
+		true
+	).then(function (res) {
 		loc.ProcessClipping(res.data, fitRegion, moveCenter);
 		loc.ResetClippingRequest(args);
 		if (clipForZoomOnly) {

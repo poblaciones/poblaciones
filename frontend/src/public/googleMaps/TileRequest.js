@@ -66,15 +66,17 @@ TileRequest.prototype.GetTile = function () {
 
 	var info = this.url.path + JSON.stringify(this.params);
 
-	var existing = this.queue.GetSameRequest(info);
+	// Resuelve el data
+	var dataQueue = (!this.url.useStaticQueue ? this.queue : this.staticQueue);
+	var existing = dataQueue.GetSameRequest(info);
 	if (existing) {
 		this.dataBlockRequest = existing;
 		existing.dataSubscribe(this);
 	} else {
-		var dataQueue = (!this.url.useStaticQueue ? this.queue : this.staticQueue);
 		this.preCancel1Queue = dataQueue;
 		dataQueue.Enlist(this, this.startDataRequest, null, function (p) { loc.preCancel1 = p; }, info);
 	}
+	// Resuelve el geography
 	if (this.selectedMetricOverlay.geographyService.url) {
 		var geoQueue = (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest ? this.queue : this.staticQueue);
 		this.preCancel2Queue = geoQueue;
@@ -124,10 +126,13 @@ TileRequest.prototype.allSubscribersAreCancelled = function () {
 TileRequest.prototype.startDataRequest = function (queue) {
 	var loc = this;
 	var params = this.params;
+
 	window.SegMap.Get(this.url.server + this.url.path, {
 		params: params,
-		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; }),
-	}).then(function (res) {
+		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; })
+		},
+		this.url.useStaticQueue
+	).then(function (res) {
 		queue.Release(loc.preCancel1);
 		loc.notifyDataSubscribers(res.data);
 		loc.processDataResponse(res.data);
@@ -160,10 +165,12 @@ TileRequest.prototype.startGeographyRequest = function (queue) {
 	var url = this.selectedMetricOverlay.geographyService.url;
 
 	url = h.selectMultiUrl(url, this.coord.x);
+	var noCredentials = (this.queue == queue);
 
 	window.SegMap.Get(url, {
 		params: geographyParams,
 		cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; }),
+		noCredentials
 	}).then(function (res) {
 		queue.Release(loc.preCancel2);
 		loc.receiveMapData(res.data);
