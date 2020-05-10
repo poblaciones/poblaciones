@@ -15,7 +15,7 @@ use helena\entities\backoffice as entities;
 
 // ********************************* Servicios *********************************
 
-// ******* Administración *********************************
+// ******* AdministraciÃ³n *********************************
 
 
 App::GetOrPost('/services/admin/UpdateUser', function (Request $request) {

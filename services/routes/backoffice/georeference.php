@@ -11,7 +11,7 @@ use minga\framework\Params;
 
 // ********************************* Servicios *********************************
 
-// ******* Georreferenciación *********************************
+// ******* GeorreferenciaciÃ³n *********************************
 
 App::Get('/services/backoffice/CreateMultiGeoreferenceByLatLong', function (Request $request) {
 	$controller = new services\GeoreferenceService();

@@ -338,7 +338,7 @@ App::$app->get('/services/metrics/GetBlockTileData', function (Request $request)
 	$b = Params::Get('b');
 	if (!Context::Settings()->Map()->UseTileBlocks ||
 			$s !== Context::Settings()->Map()->TileDataBlockSize)
-			throw new ErrorException('Argumentos no válidos.');
+			throw new ErrorException('Argumentos no vÃ¡lidos.');
 	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b));
 });
 
@@ -352,7 +352,7 @@ App::$app->get('/services/clipping/GetBlockLabels', function (Request $request) 
 	$b = Params::Get('b');
 	if (!Context::Settings()->Map()->UseTileBlocks ||
 			$s !== Context::Settings()->Map()->LabelsBlockSize)
-			throw new ErrorException('Argumentos no válidos.');
+			throw new ErrorException('Argumentos no vÃ¡lidos.');
 	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z, $b));
 });
 

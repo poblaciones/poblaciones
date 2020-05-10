@@ -11,12 +11,12 @@ require_once __DIR__.'/../routes/routes.php';
 
 // Read-write a storage
 
-// Conexión a la base de datos
+// ConexiÃ³n a la base de datos
 
-// Auto-navegación con ruta en config
+// Auto-navegaciÃ³n con ruta en config
 
 // Error de permisos: "./pdfinfo64 -enc UTF-8 '/home2/aacademica2/mapa.poblaciones.org/storage/buckets/pablodg@gmail.com-15644932606730000/file.dat'". (silently processed)
 
-// Envío de mail
+// EnvÃ­o de mail
 
 // Seteo de keys
