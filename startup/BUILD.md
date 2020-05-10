@@ -1,4 +1,4 @@
 # poblaciones
-Herramienta para la publicación colaborativa de datos espaciales de población
+Herramienta para la publicaciÃ³n colaborativa de datos espaciales de poblaciÃ³n
 
   
