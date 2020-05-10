@@ -61,7 +61,6 @@ class cTests extends cController
 			'version' => System::GetVersion(),
 			'html_title' => 'Tests',
 			'action_url' => '/logs/tests',
-			'test_email' => 'pablodg@gmail.com',
 		]);
 
 		Menu::RegisterAdmin($this->templateValues);
