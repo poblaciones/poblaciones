@@ -177,7 +177,7 @@ class DatasetColumnService extends DbSession
 		$newColumn->setColumnWidth(8);
 		$newColumn->setFieldWidth(8);
     $newColumn->setDecimals(0);
-    $newColumn->setFormat(5); // F (numérico)
+    $newColumn->setFormat(5); // F (numÃ©rico)
     $newColumn->setMeasure(1); // nominal
     $newColumn->setAlignment(1); //right
 

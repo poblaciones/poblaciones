@@ -151,7 +151,7 @@ class WorkModel extends BaseModel
 	public function RevokeWork($workId)
 	{
 		// Pasos de revoke.
-		echo '<br>Prepar·ndose para purgar una obra missing...';
+		echo '<br>Prepar√°ndose para purgar una obra missing...';
 		echo '<br>STEP_DELETE_DEFINITIONS:';
 					$publisher = new PublishDataTables();
 					$publisher->DeleteWorkTables($workId, true);

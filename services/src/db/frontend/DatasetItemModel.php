@@ -95,7 +95,7 @@ class DatasetItemModel
 		Profiling::BeginTimer();
 		if ($itemId != null)
 		{
-			// trae los datos de la columna de título
+			// trae los datos de la columna de tÃ­tulo
 			$captionColumn = $dataset['caption_column_field'];
 			if ($captionColumn == null)
 				$title = 'null Title';

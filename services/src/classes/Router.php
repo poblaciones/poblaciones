@@ -28,7 +28,7 @@ class Router
 
 	private static function isWork($text)
 	{
-		// solo valida que sea una forma numérica
+		// solo valida que sea una forma numÃ©rica
 		return is_numeric($text);
 	}
 }

@@ -114,14 +114,14 @@ class SpatialConditions
 
 		if ($datasetType == 'L')
 		{
-			// Si es un metric de puntos, eval鷄 la ubicaci髇 del punto
+			// Si es un metric de puntos, eval煤a la ubicaci贸n del punto
 			$from		= "";
 			$where	= "";
 			$select = $this->preffix . "_location as value";
 		}
 		else if ($datasetType == 'S')
 		{
-			// Si es un metric de formas, eval鷄 la ubicaci髇 del shape
+			// Si es un metric de formas, eval煤a la ubicaci贸n del shape
 			$from		= "";
 			$where	= "";
 			$select = "geometry_r" . $rZoom . " as value";
@@ -142,13 +142,13 @@ class SpatialConditions
 	{
 		if ($effectiveDatasetType == 'L')
 		{
-			// Si es un metric de puntos, eval鷄 la ubicaci髇 del punto
+			// Si es un metric de puntos, eval煤a la ubicaci贸n del punto
 			$sql = " AND EllipseContains(". $circle->Center->ToMysqlPoint() . ", " .
 				$circle->RadiusToMysqlPoint() . ", " . $this->preffix . "_location)";
 		}
 		else if ($effectiveDatasetType == 'S')
 		{
-			// Si es un metric de formas, eval鷄 la ubicaci髇 del shape
+			// Si es un metric de formas, eval煤a la ubicaci贸n del shape
 			$sql = " AND EXISTS (SELECT 1 FROM snapshot_shape_dataset_item WHERE sdi_feature_id = miv_feature_id " .
 				" AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
 				$circle->RadiusToMysqlPoint() . ", sdi_geometry_r3))";
@@ -157,7 +157,7 @@ class SpatialConditions
 		}
 		else if ($effectiveDatasetType == 'D')
 		{
-			// Si es un metric de datos, eval鷄 la ubicaci髇 del geography
+			// Si es un metric de datos, eval煤a la ubicaci贸n del geography
 			$sql = " AND EXISTS (SELECT 1 FROM snapshot_geography_item WHERE giw_geography_item_id = " . $this->preffix . "_geography_item_id " .
 				" AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
 				$circle->RadiusToMysqlPoint() . ", giw_geometry_r3))";
@@ -170,7 +170,7 @@ class SpatialConditions
 	public function UrbanityCondition($urbanity)
 	{
 		$field = $this->preffix . "_urbanity";
-		if (strlen($urbanity) > 4) throw new ErrorException('Valor inv醠ido para ' . $urbanity);
+		if (strlen($urbanity) > 4) throw new ErrorException('Valor inv谩lido para ' . $urbanity);
 		if ($urbanity === null) return '';
 		$sql = $field . " IN ('N'";
 		foreach(['U', 'D', 'R', 'L'] as $validFilter)

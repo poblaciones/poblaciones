@@ -19,7 +19,7 @@ class TileDataService extends BaseService
 {
 	// Los niveles de zoom se mapean con la calidad de imagen
 	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
-	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, m·ximo C5.
+	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, m√°ximo C5.
 	const TILE_SIZE = 256;
 
 	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)

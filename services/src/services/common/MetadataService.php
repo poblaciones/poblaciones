@@ -35,7 +35,7 @@ class MetadataService extends BaseService
 		if ($metadata === null || sizeof($metadata) < 2) throw new ErrorException('Metadatos no encontrados.');
 		$friendlyName = $metadata['met_title'] . '.pdf';
 
-		// se fija en el caché
+		// se fija en el cachÃ©
 		$key = PdfMetadataCache::CreateKey($datasetId);
 		$data = null;
 		if ($fromDraft === false && PdfMetadataCache::Cache()->HasData($metadataId, $key, $data))

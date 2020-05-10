@@ -170,7 +170,7 @@ class GeoJson
 			foreach ($simplifiedLine->getPoints() as $point) {
 				$newArr[] = array($point->getLng(), $point->getLat());
 			}
-			// repone el último para cerrarlo
+			// repone el Ãºltimo para cerrarlo
 			$newArr[] = $newArr[0];
 //			$compress =  sizeof($newArr) / $init;
 			$coordinates[0] = $newArr;

@@ -157,7 +157,7 @@ class MetadataModel extends BaseModel
 		{
 			$variable['mvv_formula'] = Variable::FormulaToString($variable);
 		}
-		// Trae las categorías
+		// Trae las categorÃ­as
 		$sql = "select mvv_id, vvl_caption, vvl_fill_color
 								FROM " . $metricToVariableJoin . "
 								JOIN " . $this->draftPreffix . "variable_value_label ON vvl_variable_id = mvv_id
@@ -165,7 +165,7 @@ class MetadataModel extends BaseModel
 
 		$values = App::Db()->fetchAll($sql, array($datasetId));
 		$diccionary = Arr::FromSortedToKeyed($values, 'mvv_id');
-		// Completa categorías
+		// Completa categorÃ­as
 		foreach($variables as &$variable)
 			 $variable['values'] = Arr::SafeGet($diccionary, $variable['mvv_id'], null);
 		// Agrupa por metric

@@ -20,7 +20,7 @@ class InfoWindowService extends BaseService
 			$level = $version->GetLevel($levelId);
 			$datasetId = $level->Dataset->Id;
 			$datasetType = $level->Dataset->Type;
-			// Según el tipo de Dataset, el FID puede ser el geographyItemId o el Id en el dataset
+			// SegÃºn el tipo de Dataset, el FID puede ser el geographyItemId o el Id en el dataset
 			if ($datasetType === 'L' || $datasetType === 'S')
 			{
 				$id = $featureId & 0xFFFFFFFF;

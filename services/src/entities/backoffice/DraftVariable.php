@@ -13,7 +13,7 @@ use JMS\Serializer\Annotation\Exclude;
  */
 class DraftVariable
 {
-		// Colección no mapeada
+		// ColecciÃ³n no mapeada
 		public $Values;
 
     /**

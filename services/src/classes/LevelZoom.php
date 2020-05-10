@@ -9,7 +9,7 @@ class LevelZoom
 {
 	public static function RemoveZoomHoles($selectedVersionInfo)
 	{
-		// Recorre los levels quitando límites de zoom no cubiertos
+		// Recorre los levels quitando lÃ­mites de zoom no cubiertos
 		// Tiene que haber de 0 a 22
 		// Cada level tiene un MaxZoom y un MinZoom (ej. MinZoom: 12, MaxZoom: 14)
 		// Expande los MinZoom primero si tiene, para corregir.
@@ -24,7 +24,7 @@ class LevelZoom
 	{
 		foreach($toRemoveRanges as $toRemoveRange)
 		{
-			// Se fija si está dentro de algún range
+			// Se fija si estÃ¡ dentro de algÃºn range
 			$remainingParts = array();
 			foreach($ranges as $container)
 			{
@@ -65,7 +65,7 @@ class LevelZoom
 			$upper = null;
 			foreach($levels as $level)
 			{
-				// Se fija para cada missingRange cuáles son los adyacentes
+				// Se fija para cada missingRange cuÃ¡les son los adyacentes
 				if ($level->MinZoom - 1 === $missingRange->MaxZoom)
 					$lower = $level;
 				if ($level->MaxZoom + 1 === $missingRange->MinZoom)

@@ -26,7 +26,7 @@ class cMetricGroupsItem extends cController
 		$this->templateValues['id'] = $id;
 		$this->templateValues['groups'] = $metricGroupsModel->GetMetricGroupsForCombo();
 		$this->templateValues['metricGroup'] = $metricGroup;
-		$this->templateValues['html_title'] = 'Categorías';
+		$this->templateValues['html_title'] = 'CategorÃ­as';
 
 		Menu::RegisterAdmin($this->templateValues);
 

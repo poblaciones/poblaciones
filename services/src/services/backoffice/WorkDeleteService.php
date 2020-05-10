@@ -19,7 +19,7 @@ class WorkDeleteService extends BaseService
 
 	public function StartDeleteWork($workId, $name = null)
 	{
-		// Este multipaso invoca primero a los pasos de revocar publicación, y luego
+		// Este multipaso invoca primero a los pasos de revocar publicaciÃ³n, y luego
 		// ejecuta sus pasos.
 		$revoke = new RevokeService();
 		$this->state = WorkStateBag::Create($workId);
@@ -35,7 +35,7 @@ class WorkDeleteService extends BaseService
 		$this->state->LoadFromKey($key);
 		$delete = new WorkDelete($this->state);
 
-		// Se fija si está revocando...
+		// Se fija si estÃ¡ revocando...
 		$revoke = new RevokeService($this->state);
 		if ($this->state->Step() < $revoke->TotalSteps())
 		{

@@ -128,7 +128,7 @@ class MetadataFileService extends BaseService
 	private function SaveMetadataFile($metadataFile, $tempFilename = null)
 	{
 		// Trae de la base de datos lo actual. Lo hace por sql porque lo que
-		// vino desde el client está reconectado.
+		// vino desde el client estÃ¡ reconectado.
 		if ($metadataFile->getId() !== 0 && $metadataFile->getId() !== null)
 			$previuosFileId = App::Db()->fetchScalarInt("SELECT mfi_file_id FROM draft_metadata_file WHERE mfi_id = ?", array($metadataFile->getId()));
 		else
@@ -141,7 +141,7 @@ class MetadataFileService extends BaseService
 		// Guarda la metadata
 		App::Orm()->save($metadataFile);
 
-		// Borra huérfanos
+		// Borra huÃ©rfanos
 		if ($previuosFileId !== null)
 		{
 			if ($metadataFile->getFile() === null || $metadataFile->getFile()->getId() !== $previuosFileId)
@@ -170,7 +170,7 @@ class MetadataFileService extends BaseService
 
 		// Tiene que insertar en la base de datos
 		$fileId = $fileObject->getId();
-		// Guarda por si filename cambió o es nuevo
+		// Guarda por si filename cambiÃ³ o es nuevo
 		$fileObject->setSize(filesize($tempFilename));
 		App::Orm()->save($fileObject);
 		$fileId = $fileObject->getId();
@@ -179,7 +179,7 @@ class MetadataFileService extends BaseService
 		{
 			// resuelve type
 			$fileObject->setType('application/pdf');
-			// resuelve páginas
+			// resuelve pÃ¡ginas
 			$pages = PdfReader::GetPageCount($tempFilename);
 			if ($pages == 0) $pages = null;
 			$fileObject->setPages($pages);

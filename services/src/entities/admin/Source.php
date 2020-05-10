@@ -27,13 +27,13 @@ class Source extends BaseMapModelLabeled
 	{
 		return array(
 			array('src_id', 'Id'),
-			array('src_caption', 'Caption', 'Título'),
-			array('', 'Institution', 'Institución'),
+			array('src_caption', 'Caption', 'TÃ­tulo'),
+			array('', 'Institution', 'InstituciÃ³n'),
 			array('src_institution_id', 'InstitutionId'),
 			array('src_authors', 'Authors', 'Autores'),
-			array('src_version', 'Version', 'Edición'),
+			array('src_version', 'Version', 'EdiciÃ³n'),
 			array('src_wiki', 'Wiki', 'Wikipedia'),
-			array('src_web', 'Web', 'Página web'),
+			array('src_web', 'Web', 'PÃ¡gina web'),
 			array('src_is_global', 'IsGlobal', 'Global'),
 			array('src_contact_id', 'ContactId'),
 			array('', 'Contact', '#CONTACT#Punto de Contacto'));

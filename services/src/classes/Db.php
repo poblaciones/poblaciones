@@ -215,10 +215,10 @@ class Db
 	}
 	public function execDDL($sql, $params = array())
 	{
-		// Los cambios de estructura finalizan la transacción activa
+		// Los cambios de estructura finalizan la transacciÃ³n activa
 		$wasInTransaction = $this->isInTransaction;
 		if ($wasInTransaction) {
-			// Cierra si había una
+			// Cierra si habÃ­a una
 			$this->commit();
 		}
 		$ret = $this->executeQuery($sql, $params);

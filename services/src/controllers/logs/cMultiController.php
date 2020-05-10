@@ -10,7 +10,7 @@ use helena\classes\Menu;
 
 abstract class cMultiController extends cController
 {
-	public $type; // valores posibles: 'P'= publicos, 'R' = investigación.
+	public $type; // valores posibles: 'P'= publicos, 'R' = investigaciÃ³n.
 	public $mode; // valores posibles: 'P'= publicados, 'D' = borradores.
 
 	protected function FromDraft()

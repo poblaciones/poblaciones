@@ -135,7 +135,7 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 
 		if ($datasetType == 'L')
 		{
-			// Si es un metric de puntos, trae la ubicaci髇 del punto
+			// Si es un metric de puntos, trae la ubicaci贸n del punto
 			$select .= ", round(ST_Y(miv_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(miv_location), ". GeoJson::PRECISION .")  as Lon";
 		}
 		$from = $this->tableName;
@@ -198,12 +198,12 @@ class SnapshotMetricVersionItemVariableModel extends BaseModel
 		}
 		else if ($datasetType == 'L' || $datasetType == 'S')
 		{
-			// Pone la ubicaci髇
+			// Pone la ubicaci贸n
 			$select .= ", CONCAT('[', round(ST_Y(miv_location), ". GeoJson::PRECISION ."), ',', round(ST_X(miv_location), ". GeoJson::PRECISION ."), ']') Name ";
 		}
 		else
 		{
-			// Pone descripci髇 o c骴igo
+			// Pone descripci贸n o c贸digo
 			$select .= ", (SELECT IFNULL(gei_caption, gei_code) FROM geography_item WHERE gei_id = miv_geography_item_id) Name ";
 		}
 		$from = $this->tableName;
