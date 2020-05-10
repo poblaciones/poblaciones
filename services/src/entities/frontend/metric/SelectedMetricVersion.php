@@ -21,7 +21,7 @@ class SelectedMetricVersion
 	public $ExcludedValues = array();
 
 	/// <summary>
-	/// Niveles de datos disponibles en geografías
+	/// Niveles de datos disponibles en geografÃ­as
 	/// </summary>
 	public $Levels = array();
 

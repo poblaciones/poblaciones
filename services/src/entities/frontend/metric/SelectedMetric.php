@@ -24,8 +24,8 @@ class SelectedMetric extends BaseMapModel
 	// - N (default): Cantidad absoluta.
 	// - P: Porcentaje
 	// - K: Area en KM2
-	// - H: Area en Hectáreas (100x100m)
-	// - A: Porcentaje del área total.
+	// - H: Area en HectÃ¡reas (100x100m)
+	// - A: Porcentaje del Ã¡rea total.
 	// - D: Densidad (cantidad absoluta / km2)
 	// valores posibles: 'U': Urbano denso, 'UD': Urbano total, 'R': Rural
 	//									 'D': Urbano disperso, 'N': No indicado (todo)
@@ -48,7 +48,7 @@ class SelectedMetric extends BaseMapModel
 		foreach($this->Versions as $version)
 			if ($version->Version->Id == $versionId)
 				return $version;
-		throw new ErrorException('La edición del indicador no ha sido encontrada.');
+		throw new ErrorException('La ediciÃ³n del indicador no ha sido encontrada.');
 	}
 }
 

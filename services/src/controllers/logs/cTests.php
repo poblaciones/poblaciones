@@ -2,6 +2,7 @@
 
 namespace helena\controllers\logs;
 
+use helena\classes\App;
 use helena\classes\Menu;
 use helena\classes\Paths;
 use helena\classes\Session;
@@ -90,17 +91,17 @@ class cTests extends cController
 		$group = Params::SafeGet('group');
 		$res = [];
 		if($group == 'all')
-			$res = System::RunCommandOnPath($this->GetCommand(), Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand(), Context::Paths()->GetRoot(), false);
 		else if($group == 'framework' && $file == '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath(), Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath(), Context::Paths()->GetRoot(), false);
 		else if($group == 'framework' && $file != '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath() . '/' . $file, Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath() . '/' . $file, Context::Paths()->GetRoot(), false);
 		else if($group != '' && $file == '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $group, Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $group, Context::Paths()->GetRoot(), false);
 		else if($file != '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $file, Context::Paths()->GetRoot());
+			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $file, Context::Paths()->GetRoot(), false);
 		else
-			throw new \Exception('Error');
+			throw new \Exception('Error en parámetros');
 
 		echo '<!doctype html><html><head><meta charset="utf-8"><title>Test: ' . htmlentities($group) . '/' . htmlentities($file) . '</title></head><body><pre>';
 		echo '<h2>Corriendo test: ' . htmlentities($group) . '/' . htmlentities($file) . '</h2>';
@@ -111,7 +112,7 @@ class cTests extends cController
 
 	private function GetCommand($path = '', $part = '')
 	{
-		return Paths::GetPHPUnitPath() . ' --verbose 2>&1 ';
+		return App::GetPhpCli() . ' ' . Paths::GetPHPUnitPath() . ' --verbose 2>&1 ';
 	}
 
 	private static function EndsWithTest($name)

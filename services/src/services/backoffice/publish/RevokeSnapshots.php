@@ -67,7 +67,7 @@ class RevokeSnapshots extends BaseService
 			$this->cacheManager->CleanMetadataPdfCache($row['dat_work_id']);
 		}
 
-		// Si hubo uso de datasets que antes no estaban o sacó alguno, tiene que regenerar
+		// Si hubo uso de datasets que antes no estaban o sacÃ³ alguno, tiene que regenerar
 		if (sizeof($datasetsToDelete) > 0)
 			$this->work['wrk_dataset_data_changed'] = true;
 
@@ -103,7 +103,7 @@ class RevokeSnapshots extends BaseService
 			VersionUpdater::Increment('FAB_METRICS');
 			$this->cacheManager->CleanFabMetricsCache();
 		}
-		// Identifica qué borrar
+		// Identifica quÃ© borrar
 		$removedMetricVersions = $previousMetricVersions;
 
 		// Borra
@@ -113,7 +113,7 @@ class RevokeSnapshots extends BaseService
 		{
 			$this->snapshotsManager->CleanMetricVersionData($row);
 		}
-		// Libera los metadatos del metric en el que están las versiones y de los borrados
+		// Libera los metadatos del metric en el que estÃ¡n las versiones y de los borrados
 		foreach(Arr::UniqueByField('mvr_metric_id', array_merge($previousMetricVersions, $metricVersions)) as $row)
 		{
 			$this->cacheManager->ClearMetricMetadata($row['mvr_metric_id']);

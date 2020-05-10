@@ -16,7 +16,7 @@ class Contact extends BaseMapModelLabeled
 		return array (
 			array('con_id', 'Id'),
 			array('con_person', 'Person', 'Nombre y apellido'),
-			array('con_email', 'Email', 'Correo electrónico'),
-			array('con_phone', 'Phone', 'Teléfono'));
+			array('con_email', 'Email', 'Correo electrÃ³nico'),
+			array('con_phone', 'Phone', 'TelÃ©fono'));
 	}
 }

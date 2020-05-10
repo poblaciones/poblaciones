@@ -419,20 +419,21 @@ class App
 		return;
 	}
 
+	public static function GetPhpCli()
+	{
+		return Context::Settings()->Servers()->PhpCli;
+	}
+
 	public static function GetPythonPath()
 	{
-		if (Context::Settings()->Servers()->Python27 === null)
+		if (Context::Settings()->Servers()->Python27 === null
+			&& isset(self::$app['python']))
 		{
-			if (array_key_exists('python', self::$app))
 				return self::$app['python'];
-			else
-				return Context::Settings()->Servers()->Python27;
 		}
-		else
-		{
-			return Context::Settings()->Servers()->Python27;
-		}
+		return Context::Settings()->Servers()->Python27;
 	}
+
 	public static function GetSetting($key)
 	{
 		return self::$app[$key];

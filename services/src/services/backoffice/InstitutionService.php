@@ -24,7 +24,7 @@ class InstitutionService extends BaseService
 		$wk = new WorkService();
 		$wk->CompleteInstitution($institution);
 		if (!$institution->getIsEditableByCurrentUser())
-			throw new ErrorException('No tiene permisos para editar esta institución.');
+			throw new ErrorException('No tiene permisos para editar esta instituciÃ³n.');
 		App::Orm()->Save($institution);
 		$institution->setIsEditableByCurrentUser(true);
 		return $institution;

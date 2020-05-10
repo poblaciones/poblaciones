@@ -65,7 +65,7 @@ class MetricsManager
 		$field = $this->resolveFieldValues($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale);
 		$dataTableSql = "SELECT dat_table FROM draft_dataset WHERE dat_id = ?";
 		$table = App::Db()->fetchScalar($dataTableSql, array($datasetId));
-		// Se fija si tiene que hacer el join a la geografía
+		// Se fija si tiene que hacer el join a la geografÃ­a
 		$geoJoin = '';
 		$hasGeoFields = Variable::HasGeoFields($dataColumn, $normalization);
 		if ($hasGeoFields)

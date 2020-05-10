@@ -56,7 +56,7 @@ class GeoreferenceAttributes extends BaseService
 	public function UpdateGeoreferencingAttributesIfChanged($datasetId, $attributes)
 	{
 		$newValue = json_encode($attributes);
-		// actualiza el dat_georeference_attributes del dataset como json si cambió
+		// actualiza el dat_georeference_attributes del dataset como json si cambiÃ³
 		$dat = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		$currentValue = $dat->getGeoreferenceAttributes();
 		if ($newValue != $currentValue)

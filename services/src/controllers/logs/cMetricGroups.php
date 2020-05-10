@@ -29,7 +29,7 @@ class cMetricGroups extends cController
 		$this->LoadLinks($metricGroups);
 		$this->templateValues['metricGroups'] = $metricGroups;
 
-		$this->templateValues['html_title'] = 'Categorías';
+		$this->templateValues['html_title'] = 'CategorÃ­as';
 
 		Menu::RegisterAdmin($this->templateValues);
 

@@ -58,7 +58,7 @@ class StateBag
 		$bucket = FileBucket::Load($key);
 		$folder = $bucket->GetBucketFolder();
 		if(is_dir($folder) == false)
-			throw new ErrorException('El proceso está finalizado. Por favor, recomience nuevamente la operación.');
+			throw new ErrorException('El proceso estÃ¡ finalizado. Por favor, recomience nuevamente la operaciÃ³n.');
 
 		$this->state = IO::ReadJson($folder . '/' . self::STATE_FILE);
 		Log::AppendExtraInfo($this->state);

@@ -118,14 +118,14 @@ class SnapshotMetricVersionItemVariableModel
 								gei_id, gei_urbanity, " . $variable->Id() . ", ";
 		// Calcula el valor
 		$sql .= $variable->CalculateValueField() . ",";
-		// Calcula la categoría
+		// Calcula la categorÃ­a
 		$valueForSegmentation = $variable->CalculateSegmentationValueField();
 		$valueLabel = $variable->CalculateVersionValueLabelId($valueForSegmentation);
 		$sql .= $valueLabel . ",";
 
-		// Descripción
+		// DescripciÃ³n
 		$sql .= $this->GetDescriptionColumn($metricVersionLevel) . ",";
-		// total de normalización
+		// total de normalizaciÃ³n
 		$sql .= $variable->CalculateNormalizationField() . ",";
 		// featureId
 		$sql .= $this->GetFeatureIdField($metricVersionLevel) . ", ";

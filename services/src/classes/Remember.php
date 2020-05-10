@@ -13,7 +13,7 @@ use minga\framework\Log;
 
 class Remember
 {
-	const ValidRenew = 30; // en días
+	const ValidRenew = 30; // en dÃ­as
 	const ValidCreate = 365;
 	const CookieName = 'remember';
 	const SectionName = 'Remember';
@@ -44,12 +44,12 @@ class Remember
 		if($cookie == '')
 			return false;
 
-		//Si está mal formada...
+		//Si estÃ¡ mal formada...
 		$parts = explode('|', $cookie);
 		if(count($parts) != 2)
 			return self::RemoveAndFail();
 
-		//Si tiene contenido inválido...
+		//Si tiene contenido invÃ¡lido...
 		$user = self::DecryptUser($parts[0]);
 		if($user == '')
 			return self::RemoveAndFail();
@@ -66,17 +66,17 @@ class Remember
 		if($section == null)
 			return self::RemoveAndFail();
 
-		//Si no está vencida desde que entró la última vez...
+		//Si no estÃ¡ vencida desde que entrÃ³ la Ãºltima vez...
 		$update = Date::FormattedDate(strtotime($section['ses_last_login']));
 		if(Date::DateNotPast($update, self::ValidRenew) == false)
 			return self::RemoveAndFail($account, $section);
 
-		//Si no está vencida desde creación...
+		//Si no estÃ¡ vencida desde creaciÃ³n...
 		$create = Date::FormattedDate(strtotime($section['ses_create']));
 		if(Date::DateNotPast($create, self::ValidCreate) == false)
 			return self::RemoveAndFail($account, $section);
 
-		//Es válido, puede loguear...
+		//Es vÃ¡lido, puede loguear...
 		Cookies::RenewCookie(self::CookieName, self::ValidRenew);
 		self::RenewLogin($account, $section);
 		$account->Begin();

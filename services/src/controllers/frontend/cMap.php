@@ -44,7 +44,7 @@ class cMap extends cPublicController
 	{
 		$this->AddValue('application_name' , 'Poblaciones');
 		$this->AddValue('description', 'Plataforma abierta de datos espaciales de la Argentina');
-		// Se fija si está sirviendo para una cartografía en particular
+		// Se fija si estÃ¡ sirviendo para una cartografÃ­a en particular
 		if ($this->workId)
 		{
 			$service = new MetadataModel();

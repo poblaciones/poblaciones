@@ -79,7 +79,7 @@ class SourceService extends BaseService
 		if (!$source->getIsEditableByCurrentUser())
 			throw new ErrorException('No tiene permisos para editar esta fuente.');
 		App::Orm()->Save($source);
-		// Si no está asociada, la agrega
+		// Si no estÃ¡ asociada, la agrega
 		$this->AddSourceToWork($workId, $source->getId());
 		// Repone los flags de permisos
 		$wk->CompleteSource($source);
@@ -92,7 +92,7 @@ class SourceService extends BaseService
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
 		$source = App::Orm()->find(entities\DraftSource::class, $sourceId);
 		$metadata = $work->getMetadata();
-		// Se fija si ya está asociado
+		// Se fija si ya estÃ¡ asociado
 		$existing = App::Db()->fetchScalarIntNullable("SELECT * FROM draft_metadata_source WHERE msc_metadata_id = ? AND msc_source_id = ?",
 				array($metadata->getId(), $source->getId()));
 		if ($existing !== null && $existing > 0) return self::OK;
@@ -164,7 +164,7 @@ class SourceService extends BaseService
 	{
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
 		$metadataId = $work->getMetadata()->getId();
-		// Si hay algo idéntico, sale
+		// Si hay algo idÃ©ntico, sale
 		$sql = "DELETE FROM draft_metadata_source WHERE msc_metadata_id = ? AND	msc_source_id = ?";
 		App::Db()->exec($sql, array($metadataId, $sourceId));
 

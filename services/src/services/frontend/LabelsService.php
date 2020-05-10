@@ -115,8 +115,8 @@ class LabelsService extends BaseService
 				{
 					if ($row['FIDs'] !== null)
 					{
-						// Lo agrega como no visible para la semaforización por ejemplo de escuelas, que llegan
-						// desde Labels y luego se cargan con información que se prende o se apaga.
+						// Lo agrega como no visible para la semaforizaciÃ³n por ejemplo de escuelas, que llegan
+						// desde Labels y luego se cargan con informaciÃ³n que se prende o se apaga.
 						$ret[] = array('type' => $row['type'], 'Show' => 0, 'FIDs' => $row['FIDs'], 'Lat' => $row['Lat'], 'Lon' => $row['Lon']);
 					}
 				}
@@ -167,13 +167,13 @@ class LabelsService extends BaseService
 
 	private function CalculateSize($z, $size)
 	{
-		// Se establece tamaños iniciales en base a tamaños poblacionales
+		// Se establece tamaÃ±os iniciales en base a tamaÃ±os poblacionales
 		if ($z === 4 || $z === 5 || $z === 6) {
 			$t = 4 - ($z - 5);
 			if ($size > 20000)
 				// 20 millones
 				$t -= 2	;
-		} else if ($size > 1000) { // 1 millón
+		} else if ($size > 1000) { // 1 millÃ³n
 			$t = 1;
 		} else if ($size > 500) {
 			$t = 2;
@@ -191,7 +191,7 @@ class LabelsService extends BaseService
 		if ($z > 15 && $t > 1 && $size > 0) {
 			$t--;
 		}
-		// Las etiquetas de features llegan con 0 y se ven desde nivel 15 a tamaño chico
+		// Las etiquetas de features llegan con 0 y se ven desde nivel 15 a tamaÃ±o chico
 		if ($z >= 15 && $t < 4 && $size == 0) {
 			$t++;
 		}

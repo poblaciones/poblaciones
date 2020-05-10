@@ -16,7 +16,7 @@ class GeographyService extends BaseService
 {
 	// Los niveles de zoom se mapean con la calidad de imagen
 	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
-	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
+	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, mÃ¡ximo C5.
 	private const PAGE_SIZE = 25000;
 
 	public function GetGeography($geographyId, $x, $y, $z, $b, $page = 0)
@@ -37,8 +37,8 @@ class GeographyService extends BaseService
 
 	private function CalculateGeography($geographyId, $x, $y, $z, $b, $page)
 	{
-		// calcula los GeoData (según indicado por campo 'resumen' en el ABM)
-		// para cada categoría del metric indicado en la región clipeada.
+		// calcula los GeoData (segÃºn indicado por campo 'resumen' en el ABM)
+		// para cada categorÃ­a del metric indicado en la regiÃ³n clipeada.
 		$table = new SnapshotGeographyItemModel();
 
 		if ($b != null)

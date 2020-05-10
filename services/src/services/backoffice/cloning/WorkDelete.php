@@ -105,7 +105,7 @@ class WorkDelete
 	}
 	private function IsLastParent($contact)
 	{
-		// Se fija si era el último
+		// Se fija si era el Ãºltimo
 		$childrenSql = "SELECT count(*) FROM draft_metadata WHERE met_contact_id = ?";
 		$sibilings = App::Db()->fetchScalarInt($childrenSql, array($contact->getId()));
 		return ($sibilings <= 1);

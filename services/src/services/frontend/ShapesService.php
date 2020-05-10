@@ -45,7 +45,7 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 	private function CalculateDatasetShapes($datasetId, $x, $y, $z, $b)
 	{
 		// por ahora hace la truchada de traerlo desde un metric... si se generan
-		// los tiles, esto es irrelevante. Si se mantiene así, habría que hacer
+		// los tiles, esto es irrelevante. Si se mantiene asÃ­, habrÃ­a que hacer
 		// una vista de shapes del metrics.
 
 		$table = new SnapshotShapesModel();

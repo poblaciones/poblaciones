@@ -56,7 +56,7 @@ class PublishSnapshots extends BaseService
 		$workModel = new WorkModel();
 		$metricVersions = $workModel->GetMetricVersions($workId);
 
-		// Los datos cambian por metricVersion; los metadatos sólo por metric.
+		// Los datos cambian por metricVersion; los metadatos sÃ³lo por metric.
 		if (sizeof($metricVersions) === 0)
 		{
 			$snapshotsManager->DeleteMetricVersionsByWork($workId);
@@ -78,7 +78,7 @@ class PublishSnapshots extends BaseService
 			// Libera los metadatos del metric (summary, selected, getTile)
 			$cacheManager->ClearMetricMetadata($metricVersion['mvr_metric_id']);
 		}
-		// Actualiza los metadatos del metric en el que están las versiones
+		// Actualiza los metadatos del metric en el que estÃ¡n las versiones
 		$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
 		if ($work['wrk_type'] === 'P')
 		{
@@ -116,7 +116,7 @@ class PublishSnapshots extends BaseService
 
 	public function UpdateWorkVisibility($workId)
 	{
-		// Es llamado cuando cambia el isIndexed, el isPrivate, el accesLink o el workType de una cartografía.
+		// Es llamado cuando cambia el isIndexed, el isPrivate, el accesLink o el workType de una cartografÃ­a.
 		// 1. Trae los metrics ya publicados
 		$publicWorkModel = new WorkModel(false);
 		$workIdShardified = PublishDataTables::Shardified($workId);

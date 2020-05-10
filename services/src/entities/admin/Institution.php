@@ -20,9 +20,9 @@ class Institution extends BaseMapModelLabeled
 			array('ins_id', 'Id'),
 			array('ins_caption', 'Name', 'Nombre'),
 			array('ins_web', 'Web', 'Web'),
-			array('ins_email', 'Email', 'Correo electrónico'),
-			array('ins_address', 'Address', 'Dirección postal'),
-			array('ins_phone', 'Phone', 'Teléfono'),
-			array('ins_country', 'Country', 'País'));
+			array('ins_email', 'Email', 'Correo electrÃ³nico'),
+			array('ins_address', 'Address', 'DirecciÃ³n postal'),
+			array('ins_phone', 'Phone', 'TelÃ©fono'),
+			array('ins_country', 'Country', 'PaÃ­s'));
 	}
 }

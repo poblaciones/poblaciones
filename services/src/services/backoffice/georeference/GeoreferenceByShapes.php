@@ -45,7 +45,7 @@ class GeoreferenceByShapes extends GeoreferenceBase
 //    $select = "id, GeomFromText(" . $shapesField . ") g";
 //    $rows = $this->QueryColumns($select, $from, $pageSize);
 
-//    // Los trae, calcula el ·rea y si el geometry es v·lido.
+//    // Los trae, calcula el √°rea y si el geometry es v√°lido.
 //    foreach($data as $rows)
 //    {
 //      $id = $row['g'];
