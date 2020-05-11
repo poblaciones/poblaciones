@@ -1,5 +1,9 @@
 [CURRENT]
 - Implementación de readonlyForMaintenance.
+- Retry en queries del mapa (1 vez).
+- Modo CDN para servers para compatibilidad con CloudFlare.
+- Soporte a búsquedas para palabras especiales de menos de 3 caracteres.
+- Tests automatizados: integración a interfaz y migración a PHP Unit.
 
 v2.20 (2020-05-08)
 - Los tooltips en el mapa muestra un panel con el valor actual para el feature.
@@ -116,7 +120,7 @@ v2.7 (2019-11-07)
 - Fix: shapefile tiene límite de cantidad de columnas (255). Se ignoran las siguientes en lugar de dar error.
 
 v2.6 (2019-10-28)
-- Habilitación de caching entre sesiones del navegador. 
+- Habilitación de caching entre sesiones del navegador.
 - Filtro de entidades inferiores a un pixel (< 1/300 tile) (hasta x20 en tiempos para indicadores a nivel radio)
 - Mejora en uso de RAM en el browser (baja a menos de un tercio en mapas con muchas entidades).
 - Permite descargar en format shapefile.
@@ -130,7 +134,7 @@ v2.5 (2019-10-18)
 - Los 'Valores' de columna pasan a llamarse 'Categorías'.
 - El agrupamiento por 'Variable' pasa a llamarse 'Categorías'.
 - Fix: baja de categorías tomaba los elementos en el orden equivocado.
-- Filtra geometrías de menos de 1/300 tile 
+- Filtra geometrías de menos de 1/300 tile
 - Fix: la restauración por ruta no se completaba bien si el centro se encontraba en alguna ubicación fuera del territorio nacional.
 
 v2.4 (2019-10-10)

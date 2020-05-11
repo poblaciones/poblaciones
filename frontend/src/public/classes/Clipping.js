@@ -113,7 +113,7 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 	this.SegmentedMap.InvalidateSummaries();
 
 	const loc = this;
-	var url = h.resolveMultiUrl(this.SegmentedMap.Configuration.StaticServer, '/services/clipping/CreateClipping');
+	var url = h.resolveMultiUrl(this.SegmentedMap.Configuration.StaticServer, '/services/frontend/clipping/CreateClipping');
 	url = h.selectMultiUrl(url, this.SegmentedMap.frame.ClippingRegionId);
 
 	this.SegmentedMap.Get(url, {
@@ -167,7 +167,7 @@ Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
 	this.SetClippingRequest('*');
 	this.SegmentedMap.MapsApi.ClearClippingCanvas();
 	this.SegmentedMap.RefreshSummaries();
-	this.SegmentedMap.Get(window.host + '/services/clipping/CreateClipping', {
+	this.SegmentedMap.Get(window.host + '/services/frontend/clipping/CreateClipping', {
 		params: h.getCreateClippingParamsByName(loc.frame, clippingName, this.SegmentedMap.Revisions.Clipping),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
 	}).then(function (res) {

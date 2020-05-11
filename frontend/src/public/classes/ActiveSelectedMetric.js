@@ -107,7 +107,7 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 	this.IsUpdatingSummary = true;
 	this.IsUpdatingRanking = true;
 
-	window.SegMap.Get(window.host + '/services/metrics/GetSummary', {
+	window.SegMap.Get(window.host + '/services/frontend/metrics/GetSummary', {
 		params: h.getSummaryParams(metric, window.SegMap.frame),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateSummary = c; }),
 	}).then(function (res) {
@@ -156,7 +156,7 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 	}
 	this.IsUpdatingRanking = true;
 
-	window.SegMap.Get(window.host + '/services/metrics/GetRanking', {
+	window.SegMap.Get(window.host + '/services/frontend/metrics/GetRanking', {
 		params: h.getRankingParams(metric, window.SegMap.frame, this.RankingSize, this.RankingDirection),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateRanking = c; }),
 	}).then(function (res) {
@@ -553,9 +553,9 @@ ActiveSelectedMetric.prototype.GetCartographyService = function () {
 	case 'L':
 			return { url: null, revision: null };
 	case 'D':
-		return { url: h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, '/services/geographies/GetGeography'), revision: window.SegMap.Revisions.Geography };
+		return { url: h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, '/services/frontend/geographies/GetGeography'), revision: window.SegMap.Revisions.Geography };
 	case 'S':
-		return { url: window.host + '/services/shapes/GetDatasetShapes', isDatasetShapeRequest: true, revision: this.properties.Metric.Revision };
+		return { url: window.host + '/services/frontend/shapes/GetDatasetShapes', isDatasetShapeRequest: true, revision: this.properties.Metric.Revision };
 	default:
 		throw new Error('Unknown dataset metric type');
 	}
@@ -567,9 +567,9 @@ ActiveSelectedMetric.prototype.UseBlockedRequests = function (boundsRectRequired
 
 ActiveSelectedMetric.prototype.GetDataService = function (boundsRectRequired) {
 	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return { server: window.host, path: '/services/metrics/GetBlockTileData', useStaticQueue: false };
+		return { server: window.host, path: '/services/frontend/metrics/GetBlockTileData', useStaticQueue: false };
 	} else {
-		return { server: window.host, path: '/services/metrics/GetTileData', useStaticQueue: false };
+		return { server: window.host, path: '/services/frontend/metrics/GetTileData', useStaticQueue: false };
 	}
 };
 

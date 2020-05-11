@@ -9,7 +9,7 @@ function ActiveLabels(config) {
 	this.isBaseMetric = true;
 	this.visible = true;
 	this.KillDuplicateds = false;
-	if (config.Blocks.UseTileBlocks) {
+	if (config.Blocks.UseLabelTileBlocks) {
 		this.blockSize = config.Blocks.LabelsBlockSize;
 	} else {
 		this.blockSize = null;
@@ -39,9 +39,9 @@ ActiveLabels.prototype.UseBlockedRequests = function (boundsRectRequired) {
 
 ActiveLabels.prototype.GetDataService = function (boundsRectRequired, seed) {
 	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed / this.blockSize), path: '/services/clipping/GetBlockLabels', useStaticQueue: true };
+		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed / this.blockSize), path: '/services/frontend/clipping/GetBlockLabels', useStaticQueue: true };
 	} else {
-		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed), path: '/services/clipping/GetLabels', useStaticQueue: true };
+		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed), path: '/services/frontend/clipping/GetLabels', useStaticQueue: true };
 	}
 };
 

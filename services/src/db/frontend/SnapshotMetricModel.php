@@ -5,6 +5,7 @@ namespace helena\db\frontend;
 use helena\classes\App;
 use minga\framework\Profiling;
 use minga\framework\Str;
+use minga\framework\Context;
 use helena\services\backoffice\publish\PublishDataTables;
 
 class SnapshotMetricModel extends BaseModel
@@ -87,6 +88,8 @@ class SnapshotMetricModel extends BaseModel
 	{
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
+		$specialWordsCondition = $this->calculateSpecialWordsCondition($originalQuery);
+
 		Profiling::BeginTimer();
 		$sql = "SELECT mvw_metric_id Id,
 										mvw_metric_caption Caption,
@@ -95,12 +98,14 @@ class SnapshotMetricModel extends BaseModel
 										MAX(MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`,
 										`mvw_variable_value_captions`, `mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (?)) Relevance
 										FROM snapshot_metric_version
-										WHERE MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
-										`mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (? IN BOOLEAN MODE)
-										AND mvw_work_is_indexed = 1 AND mvw_work_is_private = 0
+										WHERE (MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
+										`mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (? IN BOOLEAN MODE) " .
+										$specialWordsCondition . "
+										) AND mvw_work_is_indexed = 1 AND mvw_work_is_private = 0
 										GROUP BY mvw_metric_id, mvw_metric_caption
 										ORDER BY Relevance DESC
 										LIMIT 0, 10";
+
 		$ret = App::Db()->fetchAll($sql, array($query, $query));
 		if ($inBackoffice)
 		{
@@ -111,6 +116,30 @@ class SnapshotMetricModel extends BaseModel
 		}
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	private function calculateSpecialWordsCondition($originalQuery)
+	{
+		$specialWords = Context::Settings()->Db()->SpecialWords;
+		$matches = Str::TextContainsWordList($specialWords, Str::ReplaceGroup($originalQuery, "'\+-@()[],.;|/", " "));
+
+		if (sizeof($matches) > 0)
+		{
+			$likeCondition =  " OR (0 ";
+			foreach($matches as $match)
+			{
+				$matchEscaped = Str::Replace($match, "'", "\'");
+				$fields = [ 'mvw_metric_caption', 'mvw_caption', 'mvw_metric_caption', 'mvw_variable_captions',
+											 'mvw_variable_value_captions', 'mvw_work_caption', 'mvw_work_authors', 'mvw_work_institution' ];
+				foreach($fields as $field)
+					$likeCondition .=  " OR " . $field . " REGEXP '[[:<:]]" . $matchEscaped . "[[:>:]]' ";
+			}
+			$likeCondition .= ") ";
+		}
+		else
+			$likeCondition = "";
+
+		return $likeCondition;
 	}
 }
 

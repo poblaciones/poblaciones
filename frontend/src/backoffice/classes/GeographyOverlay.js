@@ -10,7 +10,7 @@ function GeographyOverlay(map, geographyId) {
 
 GeographyOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	var div = ownerDocument.createElement('div');
-	var tileUrl = window.host + '/services/geographies/GetGeography';
+	var tileUrl = window.host + '/services/frontend/geographies/GetGeography';
 	var args = {
 		x: coord.x,
 		y: coord.y,

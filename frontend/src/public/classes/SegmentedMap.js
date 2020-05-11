@@ -38,7 +38,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.afterCallback = null;
 	this.afterCallback2 = null;
 	this.Labels = new ActiveLabels(config);
-	if (config.Blocks.UseTileBlocks) {
+	if (config.Blocks.UseDataTileBlocks) {
 		this.tileDataBlockSize = config.Blocks.TileDataBlockSize;
 	} else {
 		this.tileDataBlockSize = null;
@@ -52,12 +52,13 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	}
 };
 
-SegmentedMap.prototype.Get = function (url, params, noCredencials) {
+SegmentedMap.prototype.Get = function (url, params, noCredencials, isRetry) {
 	if (window.accessLink) {
 		if (!params) { params = {}; }
 		if (!params.headers) { params.headers = {}; }
 		params.headers['Access-Link'] = window.accessLink;
 	}
+	var loc = this;
 	var axios = (noCredencials ? this._axiosNoCredentials : this._axios);
 	return axios.get(url, params).then(function (res) {
 		if ((!res.response || res.response.status === undefined) && res.message === 'cancelled') {
@@ -74,7 +75,7 @@ SegmentedMap.prototype.Get = function (url, params, noCredencials) {
 		var data = null;
 		if (res.response) {
 			data = res.response.data;
-			if (data !== null && typeof data === 'string') {
+			if (data !== null && typeof data === 'string' && data.length < 25000) {
 				var debug = 'Whoops, looks like something went wrong.';
 				var debugText = '<p class="break-long-words trace-message">';
 				if (data.includes(debug) && data.includes(debugText)) {
@@ -92,6 +93,22 @@ SegmentedMap.prototype.Get = function (url, params, noCredencials) {
 				data: data
 			}
 		};
+	}).catch(function (res) {
+		var cancellation = res && res.message === 'cancelled';
+
+		if (!isRetry && !cancellation) {
+			let prom = new Promise((resolve, reject) => {
+				setTimeout(function () {
+					loc.Get(url, params, noCredencials, true).then(
+						function (res) { resolve(res); }
+					).catch(
+						function (res) { reject(res); }
+					);
+				}, 3500);
+			});
+			return prom;
+		}
+		throw(res);
 	});
 };
 

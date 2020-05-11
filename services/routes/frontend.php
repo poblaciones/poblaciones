@@ -121,7 +121,7 @@ App::$app->get('/services/download/GetFile', function (Request $request) {
 	return services\DownloadService::GetFileBytes($type, $workId, $datasetId, $clippingItemId);
 });
 
-App::$app->get('/services/search', function (Request $request) {
+App::$app->get('/services/frontend/search', function (Request $request) {
 	$query = Params::Get('q');
 	$controller = new services\LookupService();
 	$filter = Params::Get('f', '');
@@ -139,7 +139,7 @@ App::$app->get('/services/clipping/GetDefaultFrame', function (Request $request)
 });
 
 // ej. http://mapas/services/clipping/CreateClipping
-App::$app->get('/services/clipping/CreateClipping', function (Request $request) {
+App::$app->get('/services/frontend/clipping/CreateClipping', function (Request $request) {
 	$controller = new services\ClippingService();
 	$frame = Frame::FromParams();
 	$levelId = Params::GetInt('a', 0);
@@ -149,7 +149,7 @@ App::$app->get('/services/clipping/CreateClipping', function (Request $request) 
 });
 
 // ej. http://mapas/services/metrics/GetSummary?l=8&v=12&a=62&r=7160
-App::$app->get('/services/metrics/GetSummary', function (Request $request) {
+App::$app->get('/services/frontend/metrics/GetSummary', function (Request $request) {
 	$controller = new services\SummaryService();
 	$metricId = Params::GetIntMandatory('l');
 	$metricVersionId = Params::GetIntMandatory('v');
@@ -164,7 +164,7 @@ App::$app->get('/services/metrics/GetSummary', function (Request $request) {
 
 
 // ej. http://mapas/services/metrics/GetRanking?l=8&v=12&a=62&r=7160&s=10
-App::$app->get('/services/metrics/GetRanking', function (Request $request) {
+App::$app->get('/services/frontend/metrics/GetRanking', function (Request $request) {
 	$controller = new services\RankingService();
 	$metricId = Params::GetIntMandatory('l');
 	$metricVersionId = Params::GetIntMandatory('v');
@@ -265,7 +265,7 @@ App::$app->get('/services/works/GetWorkImage', function (Request $request) {
 });
 
 // ej. http://mapas/services/clipping/GetLabels?x=1382&y=2468&e=-34.569622,-58.257501%3B-34.667663,-58.608033&z=12&r=1692
-App::$app->get('/services/clipping/GetLabels', function (Request $request) {
+App::$app->get('/services/frontend/clipping/GetLabels', function (Request $request) {
 	$controller = new services\LabelsService();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
@@ -275,7 +275,7 @@ App::$app->get('/services/clipping/GetLabels', function (Request $request) {
 });
 
 // ej. http://mapas/services/geographies/GetGeography?a=62&z=12&x=1380&y=2468
-App::$app->get('/services/geographies/GetGeography', function (Request $request) {
+App::$app->get('/services/frontend/geographies/GetGeography', function (Request $request) {
 	$controller = new services\GeographyService();
 	$levelId = Params::GetIntMandatory('a');
 	$x = Params::GetIntMandatory('x');
@@ -289,7 +289,7 @@ App::$app->get('/services/geographies/GetGeography', function (Request $request)
 });
 
 // ej. http://mapas/services/shapes/GetDatasetShapes?a=62&z=12&x=1380&y=2468
-App::$app->get('/services/shapes/GetDatasetShapes', function (Request $request) {
+App::$app->get('/services/frontend/shapes/GetDatasetShapes', function (Request $request) {
 	$controller = new services\ShapesService();
 	$datasetId = Params::GetInt('d');
 	$x = Params::GetIntMandatory('x');
@@ -303,7 +303,7 @@ App::$app->get('/services/shapes/GetDatasetShapes', function (Request $request) 
 });
 
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470
-App::$app->get('/services/metrics/GetTileData', function (Request $request) {
+App::$app->get('/services/frontend/metrics/GetTileData', function (Request $request) {
 	$controller = new services\TileDataService();
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
@@ -322,7 +322,7 @@ App::$app->get('/services/metrics/GetTileData', function (Request $request) {
 
 
 // ej. http://mapas/services/metrics/GetBlockTileData?l=8&s=4&v=12&a=62&z=12&x=1383&y=2470
-App::$app->get('/services/metrics/GetBlockTileData', function (Request $request) {
+App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request $request) {
 	$controller = new services\TileDataService();
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
@@ -336,21 +336,21 @@ App::$app->get('/services/metrics/GetBlockTileData', function (Request $request)
 	$s = Params::GetIntMandatory('s');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
 	$b = Params::Get('b');
-	if (!Context::Settings()->Map()->UseTileBlocks ||
+	if (!Context::Settings()->Map()->UseDataTileBlocks ||
 			$s !== Context::Settings()->Map()->TileDataBlockSize)
 			throw new ErrorException('Argumentos no válidos.');
 	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b));
 });
 
 // ej. http://mapas/services/clipping/GetBlockLabels?s=4&x=1382&y=2468&e=-34.569622,-58.257501%3B-34.667663,-58.608033&z=12&r=1692
-App::$app->get('/services/clipping/GetBlockLabels', function (Request $request) {
+App::$app->get('/services/frontend/clipping/GetBlockLabels', function (Request $request) {
 	$controller = new services\LabelsService();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$s = Params::GetIntMandatory('s');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
 	$b = Params::Get('b');
-	if (!Context::Settings()->Map()->UseTileBlocks ||
+	if (!Context::Settings()->Map()->UseLabelTileBlocks ||
 			$s !== Context::Settings()->Map()->LabelsBlockSize)
 			throw new ErrorException('Argumentos no válidos.');
 	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z, $b));

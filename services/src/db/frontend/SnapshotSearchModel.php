@@ -3,6 +3,7 @@
 namespace helena\db\frontend;
 
 use minga\framework\Str;
+use minga\framework\Context;
 use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use minga\framework\Profiling;

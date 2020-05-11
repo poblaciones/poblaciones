@@ -90,6 +90,8 @@ if (isset($isPublic) == false || $isPublic == false)
 	require_once('backoffice/import.php');
 	require_once('backoffice/mock.php');
 	require_once('backoffice/test.php');
+
+	require_once('admin/admin.php');
 }
 require_once('tests.php');
 App::$app->get('/phpinfo2', function (Request $request) {
