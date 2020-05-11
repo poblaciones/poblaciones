@@ -10,17 +10,17 @@
 
 			<md-dialog-content>
 				<div v-if="step == 1">
-					<calculated-type @formulaClick="formulaClick" @radarClick="radarClick" @rulerClick="rulerClick" />
+					<step-type @formulaClick="formulaClick" @radarClick="radarClick" @rulerClick="rulerClick" />
 				</div>
 				<div v-if="step == 2">
-					<calculated-objective :canEdit="canEdit" :newMetric="newMetric" />
+					<step-objective :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 				<div v-if="step == 3 && newMetric.Type == 'radar'">
-					<calculated-area :canEdit="canEdit" :newMetric="newMetric" />
+					<step-area :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 				<div v-if="isLast">
-					<calculated-ruler-output v-if="newMetric.Type == 'ruler'" :canEdit="canEdit" :newMetric="newMetric" />
-					<calculated-radar-output v-if="newMetric.Type == 'radar'" :canEdit="canEdit" :newMetric="newMetric" />
+					<step-ruler-output v-if="newMetric.Type == 'ruler'" :canEdit="canEdit" :newMetric="newMetric" />
+					<step-radar-output v-if="newMetric.Type == 'radar'" :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 			</md-dialog-content>
 
@@ -37,21 +37,21 @@
 </template>
 
 <script>
-import CalculatedType from './CalculatedWizard/CalculatedType.vue';
-import CalculatedObjective from './CalculatedWizard/CalculatedObjective.vue';
-import CalculatedArea from './CalculatedWizard/CalculatedArea.vue';
-import CalculatedRadarOutput from './CalculatedWizard/CalculatedRadarOutput.vue';
-import CalculatedRulerOutput from './CalculatedWizard/CalculatedRulerOutput.vue';
+import StepType from './CalculatedWizard/StepType.vue';
+import StepObjective from './CalculatedWizard/StepObjective.vue';
+import StepArea from './CalculatedWizard/StepArea.vue';
+import StepRadarOutput from './CalculatedWizard/StepRadarOutput.vue';
+import StepRulerOutput from './CalculatedWizard/StepRulerOutput.vue';
 import str from '@/common/js/str';
 
 export default {
 	name: 'calculateMetric',
 	components: {
-		CalculatedType,
-		CalculatedObjective,
-		CalculatedArea,
-		CalculatedRadarOutput,
-		CalculatedRulerOutput,
+		StepType,
+		StepObjective,
+		StepArea,
+		StepRadarOutput,
+		StepRulerOutput,
 	},
 	data() {
 		return {
