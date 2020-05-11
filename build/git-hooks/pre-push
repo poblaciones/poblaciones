@@ -26,7 +26,7 @@ fi
 
 # Si entre todos los commits que se van a "pushear" hay algún archivo .php
 # compila y ejecuta los tests.
-for line in `git log --pretty=format: --name-only ${remote}/${master}..HEAD`; do
+for line in `git log --pretty=format: --name-only ${remote}/${branch}..HEAD`; do
 	if [[ $line == *.php ]]; then
 		run=true
 		break
