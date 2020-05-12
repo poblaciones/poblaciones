@@ -13,7 +13,7 @@
 					<step-type @formulaClick="formulaClick" @radarClick="radarClick" @distanceClick="distanceClick" />
 				</div>
 				<div v-if="step == 2">
-					<step-objective :canEdit="canEdit" :newMetric="newMetric" />
+					<step-source :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 				<div v-if="step == 3 && newMetric.Type == 'radar'">
 					<step-area :canEdit="canEdit" :newMetric="newMetric" />
