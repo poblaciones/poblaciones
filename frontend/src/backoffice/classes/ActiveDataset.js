@@ -248,27 +248,6 @@ ActiveDataset.prototype.CalculateNewMetric = function(newMetric) {
 		'o': JSON.stringify(newMetric.Output),
 		'a': JSON.stringify(newMetric.Area),
 		's': JSON.stringify(newMetric.Source),
-		// Output.HasDescription
-		// Output.HasDistance
-		// Output.HasValue
-		// Output.HasCoords
-		// Output.HasNormalizationValue
-		// Output.HasMaxDistance
-		// Output.MaxDistance
-		// Output.InSameProvince
-		// Output.HasAdditionValu
-		// Output.HasMaxValue
-		// Output.HasMinValue
-		// Output.HasCount
-
-		// Area.IsInclusionPoint
-		// Area.InclusionDistance
-		// Area.IsInclussionFull
-
-		// Source.ValueLabelIds
-		// Source.VersionId
-		// Source.LevelId
-		// Source.VariableId
 	}, 'calculando el indicador').then(function (data) {
 		//TODO: agregar al listado si es nuevo o modificar, etc...?
 		alert('No implementado...');
