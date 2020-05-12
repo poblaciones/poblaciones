@@ -30,8 +30,8 @@
 <script>
 
 export default {
-	//Step 4 para Ruler
-	name: 'calculatedRulerOutput',
+	//Step 4 para distance
+	name: 'stepDistanceOutput',
 	props: {
 		newMetric: {
 			type: Object,

@@ -19,7 +19,7 @@
 
 export default {
 	//Step 3 para Radar
-	name: 'calculatedRadarOutput',
+	name: 'stepRadarOutput',
 	props: {
 		newMetric: {
 			type: Object,

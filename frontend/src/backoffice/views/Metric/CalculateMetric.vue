@@ -10,7 +10,7 @@
 
 			<md-dialog-content>
 				<div v-if="step == 1">
-					<step-type @formulaClick="formulaClick" @radarClick="radarClick" @rulerClick="rulerClick" />
+					<step-type @formulaClick="formulaClick" @radarClick="radarClick" @distanceClick="distanceClick" />
 				</div>
 				<div v-if="step == 2">
 					<step-objective :canEdit="canEdit" :newMetric="newMetric" />
@@ -19,7 +19,7 @@
 					<step-area :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 				<div v-if="isLast">
-					<step-ruler-output v-if="newMetric.Type == 'ruler'" :canEdit="canEdit" :newMetric="newMetric" />
+					<step-distance-output v-if="newMetric.Type == 'distance'" :canEdit="canEdit" :newMetric="newMetric" />
 					<step-radar-output v-if="newMetric.Type == 'radar'" :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 			</md-dialog-content>
@@ -38,20 +38,20 @@
 
 <script>
 import StepType from './CalculatedWizard/StepType.vue';
-import StepObjective from './CalculatedWizard/StepObjective.vue';
+import StepSource from './CalculatedWizard/StepSource.vue';
 import StepArea from './CalculatedWizard/StepArea.vue';
 import StepRadarOutput from './CalculatedWizard/StepRadarOutput.vue';
-import StepRulerOutput from './CalculatedWizard/StepRulerOutput.vue';
+import StepDistanceOutput from './CalculatedWizard/StepDistanceOutput.vue';
 import str from '@/common/js/str';
 
 export default {
 	name: 'calculateMetric',
 	components: {
 		StepType,
-		StepObjective,
+		StepSource,
 		StepArea,
 		StepRadarOutput,
-		StepRulerOutput,
+		StepDistanceOutput,
 	},
 	data() {
 		return {
@@ -84,7 +84,7 @@ export default {
 			if(this.newMetric.Type == 'formula') {
 				//TODO: definir.
 				ret = ' según fórmula.';
-			} else if(this.newMetric.Type == 'ruler') {
+			} else if(this.newMetric.Type == 'distance') {
 				ret = ' según distancia.';
 				if(this.step == 2) {
 					ret += ' > Objetivo.';
@@ -118,7 +118,7 @@ export default {
 			//TODO: revisar todos los defaults
 			let defaultIsInclusionPoint = false;
 			return {
-				BaseMetric: {},
+				SourceMetric: {},
 				DefaultIsInclusionPoint: defaultIsInclusionPoint,
 				SelectedVersion: null,
 				SelectedLevel: null,
@@ -127,7 +127,7 @@ export default {
 				Id: null,
 				Type: '',
 				Output: {
-					//Ruler
+					//Distance
 					HasDescription: false,
 					HasDistance: false,
 					HasValue: false,
@@ -150,7 +150,7 @@ export default {
 					InclusionDistance: 0,
 					IsInclussionFull: false,
 				},
-				Objective: {
+				Source: {
 					VersionId: null,
 					LevelId: null,
 					VariableId: null,
@@ -178,8 +178,8 @@ export default {
 			this.newMetric.Type = 'formula';
 			this.step = 2;
 		},
-		rulerClick() {
-			this.newMetric.Type = 'ruler';
+		distanceClick() {
+			this.newMetric.Type = 'distance';
 			this.step = 2;
 		},
 		radarClick() {
@@ -204,29 +204,29 @@ export default {
 		},
 		validate() {
 			if(this.step == 2) {
-				if(this.newMetric.BaseMetric.Metric == null) {
+				if(this.newMetric.SourceMetric.Metric == null) {
 					alert("Debe seleccionar un indicador.");
 					return false;
 				}
-				if(this.newMetric.Objective.VersionId == null) {
+				if(this.newMetric.Source.VersionId == null) {
 					alert("Debe seleccionar una versión.");
 					return false;
 				}
-				if(this.newMetric.Objective.LevelId == null) {
+				if(this.newMetric.Source.LevelId == null) {
 					alert("Debe seleccionar un nivel.");
 					return false;
 				}
-				if(this.newMetric.Objective.VariableId == null) {
+				if(this.newMetric.Source.VariableId == null) {
 					alert("Debe seleccionar una variable.");
 					return false;
 				}
-				if(this.newMetric.Objective.ValueLabelIds.length == 0) {
+				if(this.newMetric.Source.ValueLabelIds.length == 0) {
 					alert("Debe seleccionar al menos una categoría.");
 					return false;
 				}
 			}
 			if(this.step == 3) {
-				if(this.newMetric.Type == 'ruler') {
+				if(this.newMetric.Type == 'distance') {
 					if(this.newMetric.Output.HasMaxDistance
 						&& str.IsIntegerGreaterThan0(this.newMetric.Output.MaxDistance) == false) {
 						alert("Debe ingresar la distancia máxima en kms.");

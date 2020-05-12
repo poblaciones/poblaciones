@@ -19,8 +19,8 @@
 <script>
 
 export default {
-	// Step 3 para ruler
-	name: 'calculatedArea',
+	// Step 3 para Distance
+	name: 'stepArea',
 	props: {
 		newMetric: {
 			type: Object,

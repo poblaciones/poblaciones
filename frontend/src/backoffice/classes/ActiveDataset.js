@@ -241,10 +241,13 @@ ActiveDataset.prototype.CalculateNewMetric = function(newMetric) {
 
 	return axiosClient.getPromise(window.host + '/services/backoffice/CalculateNewMetric', {
 		'k': loc.properties.Id,
-		'metric': newMetric.Id,
-		'type': newMetric.Type,
-		'source': newMetric.BaseMetric.Metric.Id,
-		'output': JSON.stringify(newMetric.Output),
+		'w': loc.Work.Id,
+		'm': newMetric.Id,
+		't': newMetric.Type,
+		'b': newMetric.SourceMetric.Metric.Id,
+		'o': JSON.stringify(newMetric.Output),
+		'a': JSON.stringify(newMetric.Area),
+		's': JSON.stringify(newMetric.Source),
 		// Output.HasDescription
 		// Output.HasDistance
 		// Output.HasValue
@@ -258,16 +261,14 @@ ActiveDataset.prototype.CalculateNewMetric = function(newMetric) {
 		// Output.HasMinValue
 		// Output.HasCount
 
-		'area': JSON.stringify(newMetric.Area),
 		// Area.IsInclusionPoint
 		// Area.InclusionDistance
 		// Area.IsInclussionFull
 
-		'objective': JSON.stringify(newMetric.Objective),
-		// Objective.ValueLabelIds
-		// Objective.VersionId
-		// Objective.LevelId
-		// Objective.VariableId
+		// Source.ValueLabelIds
+		// Source.VersionId
+		// Source.LevelId
+		// Source.VariableId
 	}, 'calculando el indicador').then(function (data) {
 		//TODO: agregar al listado si es nuevo o modificar, etc...?
 		alert('No implementado...');
