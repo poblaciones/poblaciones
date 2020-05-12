@@ -170,19 +170,25 @@ export default {
 			if(this.step > 1) {
 				this.step--;
 			}
-			if(this.step == 1) {
-				this.newMetric = this.initNewMetric();
-			}
 		},
 		formulaClick() {
+			if(this.newMetric.Type != 'formula') {
+				this.newMetric = this.initNewMetric();
+			}
 			this.newMetric.Type = 'formula';
 			this.step = 2;
 		},
 		distanceClick() {
+			if(this.newMetric.Type != 'distance') {
+				this.newMetric = this.initNewMetric();
+			}
 			this.newMetric.Type = 'distance';
 			this.step = 2;
 		},
 		radarClick() {
+			if(this.newMetric.Type != 'radar') {
+				this.newMetric = this.initNewMetric();
+			}
 			this.newMetric.Type = 'radar';
 			this.step = 2;
 		},
