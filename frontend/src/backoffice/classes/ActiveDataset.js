@@ -240,37 +240,34 @@ ActiveDataset.prototype.CalculateNewMetric = function(newMetric) {
 	this.Work.WorkChanged();
 
 	return axiosClient.getPromise(window.host + '/services/backoffice/CalculateNewMetric', {
-		//TODO: Definir parámetros...
 		'k': loc.properties.Id,
-		'param00': newMetric.Id,
-		'param01': newMetric.Type,
+		'metric': newMetric.Id,
+		'type': newMetric.Type,
+		'source': newMetric.BaseMetric.Metric.Id,
+		'output': JSON.stringify(newMetric.Output),
+		// Output.HasDescription
+		// Output.HasDistance
+		// Output.HasValue
+		// Output.HasCoords
+		// Output.HasNormalizationValue
+		// Output.HasMaxDistance
+		// Output.MaxDistance
+		// Output.InSameProvince
+		// Output.HasAdditionValu
+		// Output.HasMaxValue
+		// Output.HasMinValue
+		// Output.HasCount
 
-		'param02': newMetric.BaseMetric.Metric.Id,
-		'param03': (newMetric.HasDescription ? 1 : 0),
-		'param04': (newMetric.HasDistance ? 1 : 0),
-		'param05': (newMetric.HasValue ? 1 : 0),
-		'param06': (newMetric.HasCoords ? 1 : 0),
-		'param07': (newMetric.HasNormalizationValue ? 1 : 0),
+		'area': JSON.stringify(newMetric.Area),
+		// Area.IsInclusionPoint
+		// Area.InclusionDistance
+		// Area.IsInclussionFull
 
-		'param08': (newMetric.HasMaxDistance ? 1 : 0),
-		'param09': newMetric.MaxDistance,
-		'param10': (newMetric.InSameProvince ? 1 : 0),
-
-		'param11': (newMetric.HasAdditionValue ? 1 : 0),
-		'param12': (newMetric.HasMaxValue ? 1 : 0),
-		'param13': (newMetric.HasMinValue ? 1 : 0),
-		'param14': (newMetric.HasCount ? 1 : 0),
-
-		'param15': newMetric.ValueLabelIds, //(array)
-
-		'param16': (newMetric.IsInclusionPoint ? 1 : 0),
-		'param17': newMetric.InclusionDistance,
-		'param18': (newMetric.IsInclussionFull ? 1 : 0),
-
-		'param19': newMetric.VersionId,
-		'param20': newMetric.LevelId,
-		'param21': newMetric.VariableId,
-
+		'objective': JSON.stringify(newMetric.Objective),
+		// Objective.ValueLabelIds
+		// Objective.VersionId
+		// Objective.LevelId
+		// Objective.VariableId
 	}, 'calculando el indicador').then(function (data) {
 		//TODO: agregar al listado si es nuevo o modificar, etc...?
 		alert('No implementado...');

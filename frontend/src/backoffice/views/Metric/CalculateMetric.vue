@@ -115,40 +115,47 @@ export default {
 	},
 	methods: {
 		initNewMetric() {
+			//TODO: revisar todos los defaults
+			let defaultIsInclusionPoint = false;
 			return {
 				BaseMetric: {},
-
-				Id: null,
-				Type: '',
-				//TODO: revisar defaults
-				HasDescription: false,
-				HasDistance: false,
-				HasValue: false,
-				HasCoords: true,
-				HasNormalizationValue: false,
-
-				HasMaxDistance: 20,
-				MaxDistance: 0,
-				InSameProvince: false,
-
-				HasAdditionValue: false,
-				HasMaxValue: false,
-				HasMinValue: false,
-				HasCount: false,
-
-				ValueLabelIds: [],
-
-				IsInclusionPoint: false,
-				InclusionDistance: 0,
-				IsInclussionFull: true,
-
-				VersionId: null,
-				LevelId: null,
-				VariableId: null,
-
+				DefaultIsInclusionPoint: defaultIsInclusionPoint,
 				SelectedVersion: null,
 				SelectedLevel: null,
 				SelectedVariable: null,
+
+				Id: null,
+				Type: '',
+				Output: {
+					//Ruler
+					HasDescription: false,
+					HasDistance: false,
+					HasValue: false,
+					HasCoords: false,
+					HasMaxDistance: 20,
+					MaxDistance: 0,
+
+					//Radar
+					HasAdditionValue: false,
+					HasMaxValue: false,
+					HasMinValue: false,
+					HasCount: false,
+
+					//Ambos
+					HasNormalizationValue: false,
+					InSameProvince: false,
+				},
+				Area: {
+					IsInclusionPoint: defaultIsInclusionPoint,
+					InclusionDistance: 0,
+					IsInclussionFull: false,
+				},
+				Objective: {
+					VersionId: null,
+					LevelId: null,
+					VariableId: null,
+					ValueLabelIds: [],
+				},
 			};
 		},
 		next() {
@@ -188,7 +195,6 @@ export default {
 			if(this.validate() == false) {
 				return;
 			}
-			// this.openPopup = false;
 			const loc = this;
 			this.$refs.invoker.do(this.Dataset,
 				loc.Dataset.CalculateNewMetric, loc.newMetric)
@@ -197,40 +203,38 @@ export default {
 			});
 		},
 		validate() {
-			return true;
 			if(this.step == 2) {
 				if(this.newMetric.BaseMetric.Metric == null) {
 					alert("Debe seleccionar un indicador.");
 					return false;
 				}
-				if(this.newMetric.VersionId == null) {
+				if(this.newMetric.Objective.VersionId == null) {
 					alert("Debe seleccionar una versión.");
 					return false;
 				}
-				if(this.newMetric.LevelId == null) {
+				if(this.newMetric.Objective.LevelId == null) {
 					alert("Debe seleccionar un nivel.");
 					return false;
 				}
-				if(this.newMetric.VariableId == null) {
+				if(this.newMetric.Objective.VariableId == null) {
 					alert("Debe seleccionar una variable.");
 					return false;
 				}
-				//TODO: ver si es obligatorio
-				if(this.newMetric.ValueLabelIds.length == 0) {
+				if(this.newMetric.Objective.ValueLabelIds.length == 0) {
 					alert("Debe seleccionar al menos una categoría.");
 					return false;
 				}
 			}
 			if(this.step == 3) {
 				if(this.newMetric.Type == 'ruler') {
-					if(this.newMetric.HasMaxDistance
-						&& str.IsIntegerGreaterThan0(this.newMetric.MaxDistance) == false) {
+					if(this.newMetric.Output.HasMaxDistance
+						&& str.IsIntegerGreaterThan0(this.newMetric.Output.MaxDistance) == false) {
 						alert("Debe ingresar la distancia máxima en kms.");
 						return false;
 					}
 				} else if(this.newMetric.Type == 'radar') {
-					if(this.newMetric.IsInclusionPoint
-						&& str.IsIntegerGreaterThan0(this.newMetric.InclusionDistance) == false) {
+					if(this.newMetric.Area.IsInclusionPoint
+						&& str.IsIntegerGreaterThan0(this.newMetric.Area.InclusionDistance) == false) {
 						alert("Debe ingresar la distancia máxima en kms.");
 						return false;
 					}

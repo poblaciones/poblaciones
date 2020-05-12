@@ -12,37 +12,42 @@
 
 		<search-popup ref="addMetricPopup" @selected="metricSelected" :getDraftMetrics="false" searchType="m" />
 		<md-field>
-			<label>Edición</label>
-			<md-select :disabled="!canEdit || !newMetric.BaseMetric.Metric" v-model="newMetric.VersionId">
+			<div class="md-title" v-if="newMetric.BaseMetric.Metric && versions.length == 1">Edición: {{ newMetric.SelectedVersion.Version.Name }}</div>
+			<label v-if="versions.length != 1">Edición</label>
+			<md-select :disabled="!canEdit || !newMetric.BaseMetric.Metric" v-model="newMetric.Objective.VersionId" v-if="versions.length != 1">
 				<md-option v-for='version in versions' :key='version.Version.Id' :value='version.Version.Id'>
 					{{ version.Version.Name }}
 				</md-option>
 			</md-select>
 		</md-field>
 		<md-field>
-			<label>Nivel</label>
-			<md-select :disabled="!canEdit || !newMetric.BaseMetric.Metric" v-model="newMetric.LevelId" v-if="levels">
+			<div class="md-title" v-if="newMetric.BaseMetric.Metric && levels.length == 1">Nivel: {{ newMetric.SelectedLevel.Name }}</div>
+			<label v-if="levels.length != 1">Nivel</label>
+			<md-select :disabled="!canEdit || !newMetric.BaseMetric.Metric" v-model="newMetric.Objective.LevelId" v-if="levels.length != 1">
 				<md-option v-for='level in levels' :key='level.Id' :value='level.Id'>
 					{{ level.Name }}
 				</md-option>
 			</md-select>
 		</md-field>
 		<md-field>
-			<label>Variable</label>
-			<md-select :disabled="!canEdit || !newMetric.BaseMetric.Metric" v-model="newMetric.VariableId">
+			<div class="md-title" v-if="newMetric.BaseMetric.Metric && variables.length == 1">Variable: {{ newMetric.SelectedVariable.Name }}</div>
+			<label v-if="variables.length != 1">Variable</label>
+			<md-select :disabled="!canEdit || !newMetric.BaseMetric.Metric" v-model="newMetric.Objective.VariableId" v-if="variables.length != 1">
 				<md-option v-for='variable in variables' :key='variable.Id' :value='variable.Id'>
 					{{ variable.Name }}
 				</md-option>
 			</md-select>
 		</md-field>
-		<md-field>
-			<label>Categorías</label>
-			<md-select :disabled="!canEdit || !newMetric.BaseMetric.Metric" v-model="newMetric.ValueLabelIds" multiple>
-				<md-option v-for='valueLabel in valueLabels' :key='valueLabel.Id' :value='valueLabel.Id'>
-					{{ valueLabel.Name }}
-				</md-option>
-			</md-select>
-		</md-field>
+		<div>
+			<div>Categorías</div>
+			<br>
+			<div v-if="valueLabels.length > 1">
+				<md-checkbox class="md-primary" v-model="todos" @change="selectAll">Seleccionar todos / ninguno</md-checkbox>
+			</div>
+			<div v-for='valueLabel in valueLabels' :key='valueLabel.Id' :value='valueLabel.Id'>
+				<md-checkbox class="md-primary" v-model="newMetric.Objective.ValueLabelIds" :value="valueLabel.Id">{{ valueLabel.Name }}</md-checkbox>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -67,6 +72,11 @@ export default {
 		},
 		canEdit: Boolean,
 	},
+	data() {
+		return {
+			todos: false,
+		};
+	},
 	computed: {
 		caption() {
 			if(this.newMetric.BaseMetric.Metric != null) {
@@ -81,34 +91,34 @@ export default {
 			return [];
 		},
 		levels() {
-			if(this.newMetric.VersionId != null) {
+			if(this.newMetric.Objective.VersionId != null) {
 				return this.newMetric.SelectedVersion.Levels;
 			}
 			return [];
 		},
 		variables() {
-			if(this.newMetric.LevelId != null) {
+			if(this.newMetric.Objective.LevelId != null) {
 				return this.newMetric.SelectedLevel.Variables;
 			}
 			return [];
 		},
 		valueLabels() {
-			if(this.newMetric.VariableId != null) {
+			if(this.newMetric.Objective.VariableId != null) {
 				return this.newMetric.SelectedVariable.ValueLabels;
 			}
 			return [];
 		},
 		versionIndex() {
 			return arr.IndexById(this.newMetric.BaseMetric.Versions,
-				this.newMetric.VersionId, 'Version');
+				this.newMetric.Objective.VersionId, 'Version');
 		},
 		levelIndex() {
 			return arr.IndexById(this.newMetric.SelectedVersion.Levels,
-				this.newMetric.LevelId);
+				this.newMetric.Objective.LevelId);
 		},
 		variableIndex() {
 			return arr.IndexById(this.newMetric.SelectedLevel.Variables,
-				this.newMetric.VariableId);
+				this.newMetric.Objective.VariableId);
 		},
 	},
 	methods: {
@@ -116,53 +126,73 @@ export default {
 			this.$refs.addMetricPopup.show();
 		},
 		metricSelected(metric) {
+			this.newMetric.BaseMetric = {};
+			this.newMetric.Objective.VersionId = null;
+			this.newMetric.Objective.VariableId = null;
+			this.newMetric.Objective.LevelId = null;
+			this.newMetric.Objective.ValueLabelIds = [];
+
 			const loc = this;
 			axios.get(window.host + '/services/metrics/GetSelectedMetric', {
 				params: { l: metric.Id }
 			}).then(function (res) {
 				loc.newMetric.BaseMetric = res.data;
-				if(res.data.Versions.length == 1) {
-					loc.newMetric.VersionId = res.data.Versions[0].Version.Id;
+				if(res.data.Versions.length > 0) {
+					loc.newMetric.Objective.VersionId = res.data.Versions[res.data.Versions.length - 1].Version.Id;
 				}
 			}).catch(function (error) {
-				err.err('Step2', error);
+				err.err('Step Objective', error);
 			});
+		},
+		selectAll() {
+			this.newMetric.Objective.ValueLabelIds = [];
+			if(this.todos) {
+				const loc = this;
+				this.valueLabels.forEach(function(item) {
+					loc.newMetric.Objective.ValueLabelIds.push(item.Id);
+				});
+			}
 		},
 	},
 	watch: {
-		"newMetric.VersionId"() {
-			if(this.newMetric.VersionId != null) {
+		"newMetric.Objective.VersionId"() {
+			if(this.newMetric.Objective.VersionId != null) {
 				this.newMetric.SelectedVersion = this.newMetric.BaseMetric.Versions[this.versionIndex];
-				if(this.newMetric.SelectedVersion.Levels.length == 1) {
-					this.newMetric.LevelId = this.newMetric.SelectedVersion.Levels[0].Id;
+				if(this.newMetric.SelectedVersion.Levels.length > 0) {
+					let i = this.newMetric.SelectedVersion.Levels.findIndex(function(item) {
+						return item.Name == "Radios";
+					});
+					if(i == -1) {
+						i = 0;
+					}
+					this.newMetric.Objective.LevelId = this.newMetric.SelectedVersion.Levels[i].Id;
 				}
 			} else {
 				this.newMetric.SelectedVersion = null;
 			}
 		},
-		"newMetric.LevelId"() {
-			if(this.newMetric.LevelId != null) {
+		"newMetric.Objective.LevelId"() {
+			if(this.newMetric.Objective.LevelId != null) {
 				this.newMetric.SelectedLevel = this.newMetric.SelectedVersion.Levels[this.levelIndex];
 				if(this.newMetric.SelectedLevel.Dataset.Type != 'L') {
-					this.newMetric.IsInclusionPoint = true;
+					this.newMetric.Area.IsInclusionPoint = true;
 				}
-				if(this.newMetric.SelectedLevel.Variables.length == 1) {
-					this.newMetric.VariableId = this.newMetric.SelectedLevel.Variables[0].Id;
+				if(this.newMetric.SelectedLevel.Variables.length > 0) {
+					this.newMetric.Objective.VariableId = this.newMetric.SelectedLevel.Variables[0].Id;
 				}
 			} else {
 				this.newMetric.SelectedLevel = null;
-				//TODO: ver default, y volver a ese valor
-				this.newMetric.IsInclusionPoint = false;
+				this.newMetric.Area.IsInclusionPoint = this.newMetric.DefaultIsInclusionPoint;
 			}
 		},
-		"newMetric.VariableId"() {
-			if(this.newMetric.VariableId != null) {
+		"newMetric.Objective.VariableId"() {
+			if(this.newMetric.Objective.VariableId != null) {
 				this.newMetric.SelectedVariable = this.newMetric.SelectedLevel.Variables[this.variableIndex];
 			} else {
 				this.newMetric.SelectedVariable = null;
 			}
 		},
-	}
+	},
 };
 </script>
 

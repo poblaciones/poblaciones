@@ -4,24 +4,24 @@
 
 		<div>Guardar por cada coincidencia:</div>
 
-		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.HasDescription">Descripción</md-switch>
-		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.HasDistance">Distancia (km)</md-switch>
-		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.HasValue">Valor</md-switch>
-		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.HasCoords">Coordenada</md-switch>
-		<md-switch v-if="newMetric.SelectedVariable.HasTotals" class="md-primary" :disabled="!canEdit" v-model="newMetric.HasNormalizationValue">Valor de normalización</md-switch>
+		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.Output.HasDescription">Descripción</md-switch>
+		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.Output.HasDistance">Distancia (km)</md-switch>
+		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.Output.HasValue">Valor</md-switch>
+		<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.Output.HasCoords">Coordenada</md-switch>
+		<md-switch v-if="newMetric.SelectedVariable.HasTotals" class="md-primary" :disabled="!canEdit" v-model="newMetric.Output.HasNormalizationValue">Valor de normalización</md-switch>
 
 		<div>Limitar coincidencias:</div>
 		<div class="md-layout">
 			<div class="md-layout-item md-size-40 md-small-size-100">
-				<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.HasMaxDistance">Distancia máxima:</md-switch>
+				<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.Output.HasMaxDistance">Distancia máxima:</md-switch>
 			</div>
 			<div class="md-layout-item md-size-40 md-small-size-100">
-				<mp-simple-text :disabled="!canEdit || !newMetric.HasMaxDistance"
-												:maxlength="3" type="number" v-model="newMetric.MaxDistance"></mp-simple-text>
+				<mp-simple-text :disabled="!canEdit || !newMetric.Output.HasMaxDistance"
+					:maxlength="3" type="number" v-model="newMetric.Output.MaxDistance"></mp-simple-text>
 				Kms.
 			</div>
 			<div class="md-layout-item md-size-40 md-small-size-100">
-				<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.InSameProvince">Coincidencias en misma provincia</md-switch>
+				<md-switch class="md-primary" :disabled="!canEdit" v-model="newMetric.Output.InSameProvince">Coincidencias en misma provincia</md-switch>
 			</div>
 		</div>
 	</div>
@@ -41,13 +41,13 @@ export default {
 		},
 		canEdit: Boolean,
 	},
-	computed: {
-		// "newMetric.MaxDistance"() {
-		// 	if(this.newMetric.MaxDistance != null
-		// 		&& Number(this.newMetric.MaxDistance) < 0) {
-		// 		this.newMetric.MaxDistance = 0;
-		// 	}
-		// },
+	watch: {
+		"newMetric.Output.MaxDistance"() {
+			if(this.newMetric.Output.MaxDistance != null
+				&& Number(this.newMetric.Output.MaxDistance) < 0) {
+				this.newMetric.Output.MaxDistance = 0;
+			}
+		},
 	},
 };
 </script>
