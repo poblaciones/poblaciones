@@ -424,6 +424,17 @@ class App
 		return Context::Settings()->Servers()->PhpCli;
 	}
 
+	public static function GetPython3Path()
+	{
+		if (Context::Settings()->Servers()->Python3 === null
+			&& isset(self::$app['python']))
+		{
+				return self::$app['python'];
+		}
+		return Context::Settings()->Servers()->Python3;
+	}
+
+	//TODO: Deprecated
 	public static function GetPythonPath()
 	{
 		if (Context::Settings()->Servers()->Python27 === null
