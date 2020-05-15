@@ -36,6 +36,7 @@ Context::Settings()->Mail()->SMTPHost = "localhost";
 Context::Settings()->Db()->SetDatabase("SERVIDOR", "BASE_DE_DATOS", "USUARIO", "CONTRASEÑA");
 
 // Ubicación de python
+Context::Settings()->Servers()->Python3 = 'C:/Python38/python.exe';
 Context::Settings()->Servers()->Python27 = 'C:/Python27/python.exe';
 
 // Ubicación del binario de php para ejecutar en línea de comandos

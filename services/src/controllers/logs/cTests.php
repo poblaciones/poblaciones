@@ -61,7 +61,6 @@ class cTests extends cController
 			'version' => System::GetVersion(),
 			'html_title' => 'Tests',
 			'action_url' => '/logs/tests',
-			'test_email' => 'pablodg@gmail.com',
 		]);
 
 		Menu::RegisterAdmin($this->templateValues);
@@ -93,26 +92,35 @@ class cTests extends cController
 		if($group == 'all')
 			$res = System::RunCommandOnPath($this->GetCommand(), Context::Paths()->GetRoot(), false);
 		else if($group == 'framework' && $file == '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath(), Context::Paths()->GetRoot(), false);
+			$res = System::RunCommandOnPath($this->GetCommand() . '"' . Context::Paths()->GetFrameworkTestsPath() . '"', Context::Paths()->GetRoot(), false);
 		else if($group == 'framework' && $file != '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Context::Paths()->GetFrameworkTestsPath() . '/' . $file, Context::Paths()->GetRoot(), false);
+			$res = System::RunCommandOnPath($this->GetCommand() . '"' . Context::Paths()->GetFrameworkTestsPath() . '/' . $file . '"', Context::Paths()->GetRoot(), false);
 		else if($group != '' && $file == '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $group, Context::Paths()->GetRoot(), false);
+			$res = System::RunCommandOnPath($this->GetCommand() . '"' . Paths::GetTestsLocalPath() . '/' . $group . '"', Context::Paths()->GetRoot(), false);
 		else if($file != '')
-			$res = System::RunCommandOnPath($this->GetCommand() . Paths::GetTestsLocalPath() . '/' . $file, Context::Paths()->GetRoot(), false);
+			$res = System::RunCommandOnPath($this->GetCommand() . '"' . Paths::GetTestsLocalPath() . '/' . $file . '"', Context::Paths()->GetRoot(), false);
 		else
 			throw new \Exception('Error en parámetros');
 
-		echo '<!doctype html><html><head><meta charset="utf-8"><title>Test: ' . htmlentities($group) . '/' . htmlentities($file) . '</title></head><body><pre>';
-		echo '<h2>Corriendo test: ' . htmlentities($group) . '/' . htmlentities($file) . '</h2>';
+		echo '<!doctype html><html><head><meta charset="utf-8"><title>Test: ' . $this->GetTestName($group, $file) . '</title></head><body><pre>';
+		echo '<h2>Corriendo test: ' . $this->GetTestName($group, $file) . '</h2>';
 		echo implode("\n", $res);
 		echo '</pre></body></html>';
 		die;
 	}
 
-	private function GetCommand($path = '', $part = '')
+	private function GetTestName($group, $file)
 	{
-		return App::GetPhpCli() . ' ' . Paths::GetPHPUnitPath() . ' --verbose 2>&1 ';
+		if($file == '')
+			return htmlentities($group);
+		if(Str::StartsWith($file, $group))
+			return htmlentities($file);
+		return htmlentities($group) . '/' . htmlentities($file);
+	}
+
+	private function GetCommand()
+	{
+		return '"' . App::GetPhpCli() . '" "' . Paths::GetPHPUnitPath() . '" --verbose 2>&1 ';
 	}
 
 	private static function EndsWithTest($name)

@@ -2,10 +2,10 @@
 	<div>
 		<div>Establezca los criterios de inclusión para el contenido en las áreas:</div>
 
-		<md-radio v-if="newMetric.SelectedLevel.Dataset.Type != 'L'" class="md-primary" :disabled="!canEdit" :value="false" v-model="newMetric.IsInclusionPoint">Por polígono del elemento</md-radio>
-		<md-radio class="md-primary" :disabled="!canEdit" :value="true" v-model="newMetric.IsInclusionPoint">Por distancia desde el centroide / punto:</md-radio>
+		<md-radio v-if="newMetric.SelectedLevel.Dataset.Type != 'L'" class="md-primary" :disabled="!canEdit" :value="false" v-model="newMetric.Area.IsInclusionPoint">Por polígono del elemento</md-radio>
+		<md-radio class="md-primary" :disabled="!canEdit" :value="true" v-model="newMetric.Area.IsInclusionPoint">Por distancia desde el centroide / punto:</md-radio>
 		<md-field class="md-size-10">
-			<mp-simple-text class="md-size-10" :disabled="!canEdit || !newMetric.IsInclusionPoint" :maxlength="3" type="number" v-model="newMetric.InclusionDistance"></mp-simple-text>
+			<mp-simple-text class="md-size-10" :disabled="!canEdit || !newMetric.Area.IsInclusionPoint" :maxlength="3" type="number" v-model="newMetric.Area.InclusionDistance"></mp-simple-text>
 			Kms.
 		</md-field>
 
@@ -19,8 +19,8 @@
 <script>
 
 export default {
-	// Step 3 para ruler
-	name: 'calculatedArea',
+	// Step 3 para Distance
+	name: 'stepArea',
 	props: {
 		newMetric: {
 			type: Object,
@@ -31,10 +31,10 @@ export default {
 		canEdit: Boolean,
 	},
 	watch: {
-		"newMetric.InclusionDistance"() {
-			if(this.newMetric.InclusionDistance != null
-				&& Number(this.newMetric.InclusionDistance) < 0) {
-				this.newMetric.InclusionDistance = 0;
+		"newMetric.Area.InclusionDistance"() {
+			if(this.newMetric.Area.InclusionDistance != null
+				&& Number(this.newMetric.Area.InclusionDistance) < 0) {
+				this.newMetric.Area.InclusionDistance = 0;
 			}
 		},
 	},

@@ -1,24 +1,32 @@
 #!/bin/bash
 
 # Script de pre-push:
-# Se fija dentro de los archivos que están en el push si hay
-# archivos .php, si hay llama al compilador y ejecuta los tests
-# antes de hacer push, si alguno de los dos comandos da error
-# cancela el push.
-# Si no hay pasa directo.
-#
-# Posibles problemas: siempre chequea con branch master.
+# Si hay que hacer pull avisa y cancela el push con error.
+# Si no, se fija dentro de los archivos que están en el push si
+# hay archivos .php, si hay llama al compilador y ejecuta los
+# tests antes de hacer push, si alguno de los dos comandos da
+# error cancela el push.
+# Si no hay archivos php, pasa directo.
 
 
 # change IFS to ignore filename's space in |for|
 IFS="
 "
-
 remote=$1
+branch=$(git rev-parse --abbrev-ref HEAD)
 run=false
+
+# Este comando vuelve vacío si no hay diferencia en los commits
+# con respecto al remote, si trae datos hay que hacer pull
+if [[ $(git log HEAD..${remote}/${branch} --oneline) ]]; then
+	 echo "Hay que hacer *pull* antes de poder hacer push..."
+	 echo "Cancelando el push."
+	 exit 1
+fi
+
 # Si entre todos los commits que se van a "pushear" hay algún archivo .php
 # compila y ejecuta los tests.
-for line in `git log --pretty=format: --name-only ${remote}/master..HEAD`; do
+for line in `git log --pretty=format: --name-only ${remote}/${branch}..HEAD`; do
 	if [[ $line == *.php ]]; then
 		run=true
 		break

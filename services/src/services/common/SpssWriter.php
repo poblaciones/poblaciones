@@ -34,8 +34,18 @@ class SpssWriter extends JsonWriter
 		IO::WriteJson($hFile, $head, true);
 
 		$lines = array();
-		$ret = System::Execute(App::GetPythonPath(), array(
-			Paths::GetPythonScriptsPath() .'/json2spss.py',
+
+		$python = App::GetPython3Path();
+		$p3 = '3';
+		if($python == null)
+		{
+			$python = App::GetPythonPath();
+			$p3 = '';
+		}
+
+
+		$ret = System::Execute($python, array(
+			Paths::GetPythonScriptsPath() . '/json2spss' . $p3 . '.py',
 			$hFile,
 			$this->state->Get('dFile'),
 			$this->state->Get('outFile'),
@@ -49,9 +59,9 @@ class SpssWriter extends JsonWriter
 				. "\n" . implode("\n", $lines);
 			if(App::Debug())
 				$err = $detail;
-			else {
+			else
 				Log::HandleSilentException(new ErrorException($detail));
-			}
+
 			throw new ErrorException('Error en creación de archivo spss.' . $err);
 		}
 	}
