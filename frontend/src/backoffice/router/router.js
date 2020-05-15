@@ -35,6 +35,45 @@ export const constantRouterMap = [
 },
 
 {
+	group: 'Datasets',
+		path: '/cartographies/:workId/newDataset',
+			component: Layout,
+				redirect: '/cartographies/:workId/newDataset',
+					icon: 'fas fa-plus-circle',
+						name: 'Nuevo dataset',
+							children: [
+								{
+									path: '/cartographies/:workId/newDataset',
+									name: 'NewDatasetTarget',
+									component: () => import('@/backoffice/views/Dataset/NewDataset.vue')
+			}
+		]
+},
+
+{	// este item oculto hace falta para que se inserten bien los datasets existentes
+	group: 'Datasets',
+	path: '/cartographies/:workId',
+		component: Layout,
+			redirect: '/cartographies/:workId/content',
+			name: 'Datasets',
+			icon: 'fa fa-table',
+			hidden: true,
+			meta: { title: 'Datasets', icon: 'example' },
+			children: [
+			{
+				hidden: true,
+				path: 'datasets/:datasetId',
+				alias: ['datasets/:datasetId/data', 'datasets/:datasetId/variables',
+							'datasets/:datasetId/georeference', 'datasets/:datasetId/identity',
+							'datasets/:datasetId/multilevel'],
+				name: 'DatasetEdit',
+				component: () => import('@/backoffice/views/Dataset/Dataset.vue')
+			}
+		],
+		childrenExtraNodes: null
+	},
+
+{
 	group: 'Metadatos',
 	path: '/cartographies/:workId/content',
 	alias: '/cartographies/:workId',
@@ -121,46 +160,6 @@ group: 'Metadatos',
 		}
 	]
 },
-
-{
-	group: 'Datasets',
-		path: '/cartographies/:workId/newDataset',
-			component: Layout,
-				redirect: '/cartographies/:workId/newDataset',
-					icon: 'fas fa-plus-circle',
-						name: 'Nuevo dataset',
-							children: [
-								{
-									path: '/cartographies/:workId/newDataset',
-									name: 'NewDatasetTarget',
-									component: () => import('@/backoffice/views/Dataset/NewDataset.vue')
-			}
-		]
-},
-
-{
-	group: 'Datasets',
-	path: '/cartographies/:workId',
-		component: Layout,
-			redirect: '/cartographies/:workId/table',
-			name: 'Datasets',
-			icon: 'fa fa-table',
-			hidden: true,
-			meta: { title: 'Datasets', icon: 'example' },
-			children: [
-			{
-				hidden: true,
-				path: 'datasets/:datasetId',
-				alias: ['datasets/:datasetId/data', 'datasets/:datasetId/variables',
-								'datasets/:datasetId/georeference', 'datasets/:datasetId/identity',
-								'datasets/:datasetId/multilevel'],
-				name: 'DatasetEdit',
-				component: () => import('@/backoffice/views/Dataset/Dataset.vue')
-			}
-		],
-		childrenExtraNodes: null
-	},
-
 
 	{
 		group: 'Publicar',

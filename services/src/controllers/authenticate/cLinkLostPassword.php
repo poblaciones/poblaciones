@@ -7,6 +7,7 @@ use helena\classes\Account;
 use helena\classes\Register;
 use helena\classes\Session;
 use helena\classes\App;
+use helena\classes\Links;
 
 use minga\framework\Str;
 use minga\framework\Params;
@@ -38,7 +39,8 @@ class cLinkLostPassword extends cController
 		Register::CheckNewPassword($password, $verification);
 
 		$account->SavePassword($password);
-
+		if (!$to)
+			$to = Links::GetHomeUrl();
 		return App::Redirect($to);
 	}
 }

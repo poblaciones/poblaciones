@@ -91,13 +91,22 @@ class SnapshotMetricVersionItemVariableModel
 				WHERE mvl_id = ?";
 
 		$res = App::Db()->fetchAssoc($sql, array($metricVersionLevel['mvl_id']));
-		$envelope = Envelope::FromDb($res['extents']);
+
+		if ($res['extents'] !== null)
+		{
+			$envelope = Envelope::FromDb($res['extents']);
+			$rect = "ST_PolygonFromText('" . $envelope->ToWKT() . "')";
+		}
+		else
+		{
+			$rect = 'null';
+		}
 		// Lo pone
 		$id = $metricVersionLevel['mvl_id'];
 		$unShardifiedId = PublishDataTables::Unshardify($id);
-		$update = "UPDATE draft_metric_version_level SET mvl_extents = ST_PolygonFromText('" . $envelope->ToWKT() . "') WHERE mvl_id = ?";
+		$update = "UPDATE draft_metric_version_level SET mvl_extents = " . $rect . " WHERE mvl_id = ?";
 		App::Db()->exec($update, array($unShardifiedId));
-		$update = "UPDATE metric_version_level SET mvl_extents = ST_PolygonFromText('" . $envelope->ToWKT() . "') WHERE mvl_id = ?";
+		$update = "UPDATE metric_version_level SET mvl_extents = " . $rect . " WHERE mvl_id = ?";
 		App::Db()->exec($update, array($metricVersionLevel['mvl_id']));
 		// Listo
 		Profiling::EndTimer();

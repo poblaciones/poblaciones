@@ -31,7 +31,7 @@ class GeoreferenceService extends BaseService
 	const GEO_CODES = 2;
 	const GEO_SHAPES = 3;
 
-	const MAX_ROWS = 10000;
+	const MAX_ROWS = 5000;
 
 	private $start = 0.0;
 

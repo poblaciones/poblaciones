@@ -66,10 +66,6 @@ Db.prototype.RebindAndFocusLastDataset = function (router) {
 	});
 };
 
-Db.prototype.RebindCurrentWork = function () {
-	return window.Db.ReBindWork(window.Context.CurrentWork.properties.Id);
-};
-
 Db.prototype.ServerClipboardCopy = function (text) {
 	return axiosClient.postPromise(window.host + '/services/backoffice/ClipboardCopy',
 		{ t: text}, 'copiar la información');
@@ -130,8 +126,10 @@ Db.prototype.LoginAs = function (user) {
 			{ u: user.Id }, 'ingresar como el usuario indicado');
 };
 
-Db.prototype.ReBindWork = function (workId) {
+Db.prototype.RebindCurrentWork = function () {
+	var workId = window.Context.CurrentWork.properties.Id;
 	const loc = this;
+	const vue = Vue;
 	this.ReleaseWork(workId);
 
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetWorkInfo',

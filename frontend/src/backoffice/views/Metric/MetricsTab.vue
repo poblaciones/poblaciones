@@ -3,7 +3,7 @@
 		<invoker ref="invoker"></invoker>
 		<level-popup ref="levelPopup"></level-popup>
 
-		<metric-popup ref="editPopup">
+		<metric-popup ref="metricPopup">
 		</metric-popup>
 
 		<variable-formula-popup ref="editVariableFormulaPopup">
@@ -143,8 +143,6 @@ export default {
 	data() {
 		return {
 			unUsedWorkVersionsList: [],
-			//TODO: quitar esta variable
-			calculateEnabled: false,
 		};
 	},
 	mounted() {
@@ -162,6 +160,9 @@ export default {
 		},
 		f() {
 			return f;
+		},
+		calculateEnabled() {
+			return window.Context.Configuration.UseCalculated;
 		},
 		canLevel() {
 			if (!this.Dataset) {
@@ -228,7 +229,7 @@ export default {
 			}
 		},
 		openEdition(item) {
-			this.$refs.editPopup.show(item);
+			this.$refs.metricPopup.show(item);
 		},
 		onDelete(item) {
 			this.$refs.invoker.confirmDo('Eliminar indicador', 'El indicador seleccionado será eliminado',

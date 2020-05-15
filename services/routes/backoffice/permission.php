@@ -15,6 +15,11 @@ use minga\framework\ErrorException;
 
 // ******* Permisos *********************************
 
+App::$app->get('/services/backoffice/GetConfiguration', function (Request $request) {
+	$configuration = new services\ConfigurationService();
+	return App::Json($configuration->GetConfiguration());
+});
+
 App::$app->get('/services/backoffice/GetWorkPermissions', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;

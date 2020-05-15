@@ -42,9 +42,11 @@ class GeoreferenceByCodes extends GeoreferenceBase
 	private function MatchSql()
 	{
 		$codeField = $this->state->Get('code');
-
+		/*
+		hacer concat('', convert($codeFied, SIGNED)) si es numérico
+		*/
 		return "SELECT gei_id FROM geography_item WHERE gei_geography_id = " . $this->state->GeographyId()
-								. " AND gei_code = " . $codeField;
+								. " AND gei_code_as_number = CONVERT(" . $codeField . ", SIGNED) ";
 	}
 }
 

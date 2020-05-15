@@ -116,7 +116,7 @@ abstract class GeoreferenceBase
 	}
 	protected function IsNullOrEmptySql($field)
 	{
-		return '(' . $field . ' IS NULL OR ' . $field . " = '') ";
+		return '(' . $field . " IS NULL OR CONCAT('', " . $field . ") = '') ";
 	}
 	protected function ExecuteUpdate($from, $pageSize, $totalRows, $value)
 	{

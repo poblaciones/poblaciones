@@ -75,6 +75,7 @@ if (isset($isPublic) == false || $isPublic == false)
 {
 	require_once('logs.php');
 	App::RegisterControllerGet('/users', helena\controllers\backoffice\cBackoffice::class);
+	App::RegisterControllerGet('/users/', helena\controllers\backoffice\cBackoffice::class);
 	App::RegisterControllerGet('/users/{any}', helena\controllers\backoffice\cBackoffice::class)->assert("any", ".*");
 
 	App::RegisterControllerGet('/admins', helena\controllers\admins\cAdmins::class);

@@ -400,9 +400,12 @@ module.exports = {
 			// tiene múltiples fuentes
 			return url;
 		}
+		if (url.length === 1) {
+			return url[0];
+		}
 		var pos;
 		if (seed) {
-			pos = Math.floor(seed) % url.length;
+			pos = Math.floor(Math.floor(seed) % url.length);
 		} else {
 			pos = Math.floor(Math.random() * url.length);
 		}

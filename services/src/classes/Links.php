@@ -17,23 +17,23 @@ class Links
 	}
 	public static function GetHomeUrl()
 	{
-		return Context::Settings()->GetMainServerPublicUrl();
+		return Context::Settings()->GetHomePublicUrl();
 	}
 	public static function GetTermsUrl()
 	{
-		return Context::Settings()->GetMainServerPublicUrl() . '/terminos';
+		return Context::Settings()->GetHomePublicUrl() . '/terminos';
 	}
 	public static function GetPrivacyUrl()
 	{
-		return Context::Settings()->GetMainServerPublicUrl() . '/privacidad';
+		return Context::Settings()->GetHomePublicUrl() . '/privacidad';
 	}
 	public static function GetInstitutionalUrl()
 	{
-		return Context::Settings()->GetMainServerPublicUrl() . '/institucional';
+		return Context::Settings()->GetHomePublicUrl() . '/institucional';
 	}
 	public static function GetContactUrl()
 	{
-		return Context::Settings()->GetMainServerPublicUrl() . '/contacto';
+		return Context::Settings()->GetHomePublicUrl() . '/contacto';
 	}
 	public static function TooltipUrl()
 	{

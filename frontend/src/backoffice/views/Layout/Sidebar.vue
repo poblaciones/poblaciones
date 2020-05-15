@@ -3,6 +3,7 @@
 		<sidebar-menu :menu="menuItems" theme="white-theme"
 									:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
 		<import-popup ref="importPopup"></import-popup>
+		<stepper ref="stepper"></stepper>
 	</div>
 
 
@@ -92,6 +93,21 @@ export default {
 		showUpload() {
 			this.$refs.importPopup.show(true);
 		},
+		publish() {
+			var counts = this.Work.UpdateDatasetGeorreferencedCount();
+			if (counts.DatasetCount > counts.GeorreferencedCount) {
+				alert('Todos los datasets deben estar georreferenciados para poder realizarse la publicación.');
+				return;
+			}
+			var loc = this;
+			this.$refs.stepper.startUrl = window.Db.GetStartWorkPublishUrl(this.Work.properties.Id);
+			this.$refs.stepper.stepUrl = window.Db.GetStepWorkPublishUrl();
+			this.$refs.stepper.setTitle('Publicando');
+			this.$refs.stepper.Start().then(function () {
+				loc.Work.WorkPublished();
+				window.Db.RebindCurrentWork();
+			});
+		},
 		createBadge(dataset) {
 			if (dataset.properties.MultilevelMatrix === null &&
 					dataset.properties.Geocoded) {
@@ -119,6 +135,22 @@ export default {
 				}
 			};
 			return badge;
+		},
+		createBadgePublish() {
+			var badge = {
+				text: '',
+				class: 'vsm-badge badgeWhite default-badge badgeall badgewith fas fa-globe-americas',
+				attributes: {
+					title: 'Publicar',
+					onclick: 'window.openPublish(); return false;'
+				}
+			};
+			if (!this.Work.HasChanges()) {
+				badge.attributes.title = 'No hay cambios para publicar';
+				badge.attributes.onclick = '';
+				badge.class = 'badgeDisabled ' + badge.class;
+			}
+			return badge;
 		}
   },
 	mounted() {
@@ -126,12 +158,14 @@ export default {
 		window.openUpload = function () {
 			loc.showUpload();
 		};
+		window.openPublish = function () {
+			loc.publish();
+		};
 	},
   computed: {
     ...mapGetters([
       'sidebar'
     ]),
-
     Work () {
 			return window.Context.CurrentWork;
 		},
@@ -154,6 +188,9 @@ export default {
 					men.badge = this.createBadgeUpload();
 					this.addDatasets(ret);
 				}
+				if (route.name === 'Personalizar') {
+					men.badge = this.createBadgePublish();
+				}
 			}
 			return ret;
     },
@@ -171,9 +208,12 @@ export default {
    margin:0px 0px 0px 0px;
    text-decoration:none;
 }
-.badgewith {
-	min-width: 18px;
+.warningIcon {
+	background-color: #f3f095!important;
 }
+.badgewith {
+		min-width: 18px;
+	}
 .badgeall {
 	color: #525151!important;
 }
@@ -208,10 +248,18 @@ export default {
 .badge9 {
 	background-color: #c5a400!important;
 }
+
 .badgeWhite {
 	background-color: white!important;
 	border: 1px solid #e2e2e2;
 }
+
+.badgeDisabled {
+	cursor: default;
+	background-color: #e0e0e0 !important;
+	color: #888 !important;
+}
+
 .v-sidebar-menu
 {
 	position: relative;

@@ -4,11 +4,11 @@ const err = require('@/common/js/err');
 module.exports = {
 	loadHeaderBar(setter) {
 		var loc = this;
-		axios.get(window.host + '/services/authentication/status', {
+		axios.get(window.host + '/services/backoffice/GetConfiguration', {
 				withCredentials: true,
 				params: {}
 			}).then(function(res) {
-				if(res.data.Logged === false) {
+				if(res.data.User.Logged === false) {
 					loc.redirectLogin();
 				} else {
 					setter(res.data);

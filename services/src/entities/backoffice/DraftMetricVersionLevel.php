@@ -50,13 +50,6 @@ class DraftMetricVersionLevel
      */
     private $MetricVersion;
 
-		/**
-     * @var \CrEOF\Spatial\DBAL\Types\GeometryType
-     *
-     * @ORM\Column(name="mvl_extents", type="geometry", precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $Extents;
-
     /**
      * Get id
      *
@@ -129,29 +122,6 @@ class DraftMetricVersionLevel
         return $this->Dataset;
     }
 
-		/**
-     * Set extents
-     *
-     * @param \CrEOF\Spatial\DBAL\Types\GeometryType $extents
-     *
-     * @return DraftMetricVersionLevel
-     */
-    public function setExtents($extents)
-    {
-        $this->Extents = $extents;
-
-        return $this;
-    }
-
-    /**
-     * Get extents
-     *
-     * @return \CrEOF\Spatial\DBAL\Types\GeometryType
-     */
-    public function getExtents()
-    {
-        return $this->Extents;
-    }
 
     /**
      * Set metricVersion

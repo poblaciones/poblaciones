@@ -1,13 +1,11 @@
 <template>
 	<div class="adminButton">
-		<md-button @click="onPublish" v-if="Work.CanEdit() && (Work.HasChanges() || Work.properties.pendingChanges == 1)" class="md-raised">
+		<md-button @click="onPublish" v-if="Work.CanEdit() && Work.HasChanges()" class="md-raised">
 			<md-icon>public</md-icon> Publicar cambios
 		</md-button>
 		<md-button @click="goMap" v-if="url" class="md-raised">
 			<md-icon>map</md-icon> Visitar mapa {{ (Work.HasChanges() ? 'actual' : '') }}
 		</md-button>
-		<stepper ref="stepper">
-		</stepper>
 	</div>
 </template>
 
@@ -26,6 +24,9 @@ export default {
 		Work() { return window.Context.CurrentWork; },
 		url() {
 			return this.Work.properties.Metadata.Url;
+		},
+		Keys() {
+			return window.Context.Keys;
 		}
 	},
 	methods: {
@@ -37,26 +38,9 @@ export default {
 				window.open(url, '_blank');
 		},
 		onPublish() {
-			var counts = this.Work.UpdateDatasetGeorreferencedCount();
-			if (counts.DatasetCount > counts.GeorreferencedCount) {
-				alert('Todos los datasets deben estar georreferenciados para poder realizarse la publicación.');
-				return;
-			}
-			var loc = this;
-			this.$refs.stepper.startUrl = window.Db.GetStartWorkPublishUrl(this.Work.properties.Id);
-			this.$refs.stepper.stepUrl = window.Db.GetStepWorkPublishUrl();
-			this.$refs.stepper.setTitle('Publicando');
-			this.$refs.stepper.Start().then(function () {
-					loc.Work.WorkPublished();
-					window.Db.ReBindWork(loc.Work.properties.Id);
-			});
+			window.openPublish();
 		},
 	},
-	watch: {
-		'Work.pendingChanges'() {
-
-		}
-	}
 };
 </script>
 

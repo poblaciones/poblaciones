@@ -11,6 +11,7 @@ function Context() {
 	// 'A': Administrador, 'E': Editor de datos públicos,
 	// 'L': Lector de datos públicos, 'P': Usuario estándar
 	this.User = null;
+	this.BooleanKeys = { WorkTopBarPublish: 1 };
 	this.Cartographies = [];
 	this.CartographiesStarted = false;
 	this.ErrorSignaled = { value: 0 };

@@ -4,6 +4,10 @@
 - Modo CDN para servers para compatibilidad con CloudFlare.
 - Soporte a búsquedas para palabras especiales de menos de 3 caracteres.
 - Tests automatizados: integración a interfaz y migración a PHP Unit.
+- Fix: actualización de botón de Publicar cambios.
+- Badge de publicar en barra lateral.
+- Fix: redirect tras cambiar contraseña por link.
+- Fix: link a términos y condiciones desde pantalla de ingresar.
 
 v2.20 (2020-05-08)
 - Los tooltips en el mapa muestra un panel con el valor actual para el feature.
