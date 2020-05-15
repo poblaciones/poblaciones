@@ -20,7 +20,7 @@
 
 export default {
 	// Step 3 para Distance
-	name: 'stepArea',
+	name: 'stepCoverage',
 	props: {
 		newMetric: {
 			type: Object,

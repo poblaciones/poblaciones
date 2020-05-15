@@ -32,6 +32,7 @@ import Invoker from '@/backoffice/components/Invoker';
 import MpText from '@/backoffice/components/MpText';
 import MpColorPicker from '@/backoffice/components/MpColorPicker';
 import MpConfirm from '@/backoffice/components/MpConfirm';
+import MpLargeButton from '@/backoffice/components/MpLargeButton';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
 import MpSelect from '@/backoffice/components/MpSelect';
 

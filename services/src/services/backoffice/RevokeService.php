@@ -35,7 +35,7 @@ class RevokeService extends BaseService
 	}
 	public function TotalSteps()
 	{
-		return 4;
+		return self::STEP_COMPLETED;
 	}
 	public function StepRevoke($key, $isSubStepper = false)
 	{

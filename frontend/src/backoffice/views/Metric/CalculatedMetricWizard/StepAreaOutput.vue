@@ -18,8 +18,8 @@
 <script>
 
 export default {
-	//Step 3 para Radar
-	name: 'stepRadarOutput',
+	//Step 3 para area
+	name: 'stepAreaOutput',
 	props: {
 		newMetric: {
 			type: Object,

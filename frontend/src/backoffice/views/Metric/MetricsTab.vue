@@ -16,8 +16,8 @@
 		<new-metric ref="newMetric">
 		</new-metric>
 
-		<calculate-metric ref="calculateMetric">
-		</calculate-metric>
+		<calculated-metric-wizard ref="calculatedMetricWizard">
+		</calculated-metric-wizard>
 
 		<pick-metric-version ref="pickMetricVersion" :list="unUsedWorkVersionsList" @onSelectMetricVersion="onCompleteLevel">
 		</pick-metric-version>
@@ -130,7 +130,7 @@ import VariableFormulaPopup from './VariableFormulaPopup.vue';
 import VariableSymbologyPopup from './VariableSymbologyPopup.vue';
 import VariableOptionsPopup from './VariableOptionsPopup.vue';
 import NewMetric from './NewMetric.vue';
-import CalculateMetric from './CalculateMetric.vue';
+import CalculatedMetricWizard from './CalculatedMetricWizard/Wizard.vue';
 import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
 import LevelPopup from "@/backoffice/views/Dataset/LevelPopup";
@@ -176,7 +176,7 @@ export default {
 			this.$refs.newMetric.show();
 		},
 		calculateNewMetric() {
-			this.$refs.calculateMetric.show();
+			this.$refs.calculatedMetricWizard.show();
 		},
 		createNewLevel() {
 			this.$refs.pickMetricVersion.show();
@@ -335,7 +335,7 @@ export default {
 		VariableOptionsPopup,
 		LevelPopup,
 		NewMetric,
-		CalculateMetric,
+		CalculatedMetricWizard,
 		PickMetricVersion,
 	}
 };

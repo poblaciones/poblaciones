@@ -144,6 +144,21 @@ App::$app->get('/services/backoffice/CloneDataset', function (Request $request) 
 	return App::Json(array('datasetId' => $newDatasetId, 'completed' => true));
 });
 
+
+App::$app->get('/services/backoffice/StartCalculatedDistance', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$controller = new services\CalculateDistanceService();
+	return App::Json($controller->StartCalculate($workId));
+});
+
+App::$app->get('/services/backoffice/StepCalculatedDistance', function (Request $request) {
+	$controller = new services\CalculateDistanceService();
+	$key = Params::GetMandatory('k');
+	return App::Json($controller->StepCalculate($key));
+});
+
 // ej. http://mapas/services/backoffice/DeleteDataset?w=5&k=24
 App::$app->get('/services/backoffice/DeleteDataset', function (Request $request) {
 	$controller = new services\DatasetService();

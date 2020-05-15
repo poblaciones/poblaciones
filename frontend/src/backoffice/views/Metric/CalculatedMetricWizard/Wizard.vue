@@ -3,6 +3,7 @@
 		<md-dialog :md-active.sync="openPopup">
 
 			<invoker ref="invoker"></invoker>
+
 			<md-dialog-title>
 				Calcular indicador{{ segun }}
 				Paso {{ step }}{{ maxSteps }}
@@ -10,26 +11,26 @@
 
 			<md-dialog-content>
 				<div v-if="step == 1">
-					<step-type @formulaClick="formulaClick" @radarClick="radarClick" @distanceClick="distanceClick" />
+					<step-type ref="stepType" />
 				</div>
 				<div v-if="step == 2">
 					<step-source :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
-				<div v-if="step == 3 && newMetric.Type == 'radar'">
-					<step-area :canEdit="canEdit" :newMetric="newMetric" />
+				<div v-if="step == 3 && newMetric.Type == 'area'">
+					<step-coverage :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 				<div v-if="isLast">
 					<step-distance-output v-if="newMetric.Type == 'distance'" :canEdit="canEdit" :newMetric="newMetric" />
-					<step-radar-output v-if="newMetric.Type == 'radar'" :canEdit="canEdit" :newMetric="newMetric" />
+					<step-area-output v-if="newMetric.Type == 'area'" :canEdit="canEdit" :newMetric="newMetric" />
 				</div>
 			</md-dialog-content>
 
 			<md-dialog-actions>
 				<div>
-					<md-button @click="openPopup = false">Cancelar</md-button>
-					<md-button class="md-primary" v-if="step != 1" @click="prev">Anterior</md-button>
-					<md-button class="md-primary" v-if="step != 1 && !isLast" @click="next">Siguiente</md-button>
-					<md-button class="md-primary" v-if="isLast" @click="save">Calcular</md-button>
+					<md-button @click="openPopup = false" style="float: left">Cancelar</md-button>
+					<md-button class="md-primary" :disabled="step == 1" @click="prev">Anterior</md-button>
+					<md-button class="md-primary" v-if="!isLast" @click="next">Siguiente</md-button>
+					<md-button class="md-primary" v-if="isLast" @click="save">Finalizar</md-button>
 				</div>
 			</md-dialog-actions>
 		</md-dialog>
@@ -37,11 +38,11 @@
 </template>
 
 <script>
-import StepType from './CalculatedWizard/StepType.vue';
-import StepSource from './CalculatedWizard/StepSource.vue';
-import StepArea from './CalculatedWizard/StepArea.vue';
-import StepRadarOutput from './CalculatedWizard/StepRadarOutput.vue';
-import StepDistanceOutput from './CalculatedWizard/StepDistanceOutput.vue';
+import StepType from './StepType.vue';
+import StepSource from './StepSource.vue';
+import StepCoverage from './StepCoverage.vue';
+import StepAreaOutput from './StepAreaOutput.vue';
+import StepDistanceOutput from './StepDistanceOutput.vue';
 import str from '@/common/js/str';
 
 export default {
@@ -49,8 +50,8 @@ export default {
 	components: {
 		StepType,
 		StepSource,
-		StepArea,
-		StepRadarOutput,
+		StepCoverage,
+		StepAreaOutput,
 		StepDistanceOutput,
 	},
 	data() {
@@ -69,12 +70,12 @@ export default {
 		},
 		isLast() {
 			return this.step == 4
-				|| (this.step == 3 && this.newMetric.Type != 'radar');
+				|| (this.step == 3 && this.newMetric.Type != 'area');
 		},
 		maxSteps() {
 			if(this.step == 1) {
 				return '.';
-			} else if(this.newMetric.Type == 'radar') {
+			} else if(this.newMetric.Type == 'area') {
 				return ' de 4.';
 			}
 			return ' de 3.';
@@ -91,7 +92,7 @@ export default {
 				} else if(this.step == 3) {
 					ret += ' > Objetivo > Salida.';
 				}
-			} else if(this.newMetric.Type == 'radar') {
+			} else if(this.newMetric.Type == 'area') {
 				ret = ' según contenido.';
 				if(this.step == 2) {
 					ret += ' > Objetivo.';
@@ -135,7 +136,7 @@ export default {
 					HasMaxDistance: 20,
 					MaxDistance: 0,
 
-					//Radar
+					// Area
 					HasAdditionValue: false,
 					HasMaxValue: false,
 					HasMinValue: false,
@@ -151,9 +152,6 @@ export default {
 					IsInclussionFull: false,
 				},
 				Source: {
-					VersionId: null,
-					LevelId: null,
-					VariableId: null,
 					ValueLabelIds: [],
 				},
 			};
@@ -161,6 +159,9 @@ export default {
 		next() {
 			if(this.validate() == false) {
 				return;
+			}
+			if (this.step === 1) {
+				this.defineType(this.$refs.stepType.type);
 			}
 			if(this.step < 4) {
 				this.step++;
@@ -171,12 +172,11 @@ export default {
 				this.step--;
 			}
 		},
-		formulaClick() {
-			if(this.newMetric.Type != 'formula') {
+		defineType(type) {
+			if (this.newMetric.Type != type) {
 				this.newMetric = this.initNewMetric();
 			}
-			this.newMetric.Type = 'formula';
-			this.step = 2;
+			this.newMetric.Type = type;
 		},
 		distanceClick() {
 			if(this.newMetric.Type != 'distance') {
@@ -185,15 +185,14 @@ export default {
 			this.newMetric.Type = 'distance';
 			this.step = 2;
 		},
-		radarClick() {
-			if(this.newMetric.Type != 'radar') {
+		areaClick() {
+			if(this.newMetric.Type != 'area') {
 				this.newMetric = this.initNewMetric();
 			}
-			this.newMetric.Type = 'radar';
+			this.newMetric.Type = 'area';
 			this.step = 2;
 		},
 		show() {
-			this.newMetric = this.initNewMetric();
 			this.step = 1;
 			this.openPopup = true;
 		},
@@ -214,15 +213,15 @@ export default {
 					alert("Debe seleccionar un indicador.");
 					return false;
 				}
-				if(this.newMetric.Source.VersionId == null) {
+				if(this.newMetric.SelectedVersion == null) {
 					alert("Debe seleccionar una versión.");
 					return false;
 				}
-				if(this.newMetric.Source.LevelId == null) {
+				if(this.newMetric.SelectedLevel == null) {
 					alert("Debe seleccionar un nivel.");
 					return false;
 				}
-				if(this.newMetric.Source.VariableId == null) {
+				if(this.newMetric.SelectedVariable == null) {
 					alert("Debe seleccionar una variable.");
 					return false;
 				}
@@ -238,7 +237,7 @@ export default {
 						alert("Debe ingresar la distancia máxima en kms.");
 						return false;
 					}
-				} else if(this.newMetric.Type == 'radar') {
+				} else if(this.newMetric.Type == 'area') {
 					if(this.newMetric.Area.IsInclusionPoint
 						&& str.IsIntegerGreaterThan0(this.newMetric.Area.InclusionDistance) == false) {
 						alert("Debe ingresar la distancia máxima en kms.");
