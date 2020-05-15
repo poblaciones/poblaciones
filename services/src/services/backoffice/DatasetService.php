@@ -24,6 +24,12 @@ class DatasetService extends DbSession
 		$caption = trim($caption);
 		$dataset = $this->Create($workId, $caption);
 
+		$this->CreateDefaultMetric($dataset, $caption);
+		return $dataset;
+	}
+
+	private function CreateDefaultMetric($dataset, $caption)
+	{
 		// Crea el metric, metricVersion y metricVersionLevel
 		$metricService = new MetricService();
 
@@ -48,9 +54,8 @@ class DatasetService extends DbSession
 		$variable->setMetricVersionLevel($level);
 
 		$metricService->UpdateVariable($dataset->getId(), $level, $variable);
-
-		return $dataset;
 	}
+
 	public function Create($workId, $caption = '')
 	{
 		Profiling::BeginTimer();

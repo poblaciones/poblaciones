@@ -149,12 +149,12 @@ App::$app->get('/services/backoffice/StartCalculatedDistance', function (Request
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
 
-	$controller = new services\CalculateDistanceService();
+	$controller = new services\CalculatedDistanceService();
 	return App::Json($controller->StartCalculate($workId));
 });
 
 App::$app->get('/services/backoffice/StepCalculatedDistance', function (Request $request) {
-	$controller = new services\CalculateDistanceService();
+	$controller = new services\CalculatedDistanceService();
 	$key = Params::GetMandatory('k');
 	return App::Json($controller->StepCalculate($key));
 });

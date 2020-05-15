@@ -9,7 +9,7 @@ use helena\services\backoffice\metrics\MetricsCalculator;
 use helena\services\backoffice\publish\WorkStateBag;
 use minga\framework\ErrorException;
 
-class CalculateDistanceService extends BaseService
+class CalculatedDistanceService extends BaseService
 {
 	const STEP_CREATE_VARIABLES = 0;
 	const STEP_UPDATE_ROWS = 1;
@@ -53,7 +53,7 @@ class CalculateDistanceService extends BaseService
 				$calculator = new MetricsCalculator();
 				if ($calculator->UpdateDatasetDistance($workId, $this->state->Slice(), $totalSlices) == false)
 				{
-					$this->NextSlice($totalSlices);
+					// $this->NextSlice($totalSlices);
 				}
 				else
 				{
@@ -68,7 +68,7 @@ class CalculateDistanceService extends BaseService
 			default:
 				throw new ErrorException('Invalid step.');
 		}
-		$done = ($this->state->Step() == self::STEP_COMPLETED && !$isSubStepper);
+		$done = ($this->state->Step() == self::STEP_COMPLETED);
 		return $this->state->ReturnState($done);
 	}
 }
