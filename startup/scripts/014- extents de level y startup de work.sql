@@ -70,11 +70,11 @@ ALTER TABLE `snapshot_lookup` ADD UNIQUE `ix_clipping_regionItem` (`clv_clipping
 update metric_version_level
 JOIN dataset ON dat_id = mvl_dataset_id
 set mvl_extents =
- (SELECT Envelope(LineString(
-POINT(Min(X(PointN(ExteriorRing(miv_envelope), 1))),
-min(Y(PointN(ExteriorRing(miv_envelope), 1)))),
-POINT(Max(X(PointN(ExteriorRing(miv_envelope), 3))),
-Max(Y(PointN(ExteriorRing(miv_envelope), 3))))))
+ (SELECT ST_Envelope(LineString(
+POINT(MIN(ST_X(ST_POINTN(ST_ExteriorRing(miv_envelope), 1))),
+MIN(ST_Y(ST_POINTN(ST_ExteriorRing(miv_envelope), 1)))),
+POINT(MAX(ST_X(ST_POINTN(ST_ExteriorRing(miv_envelope), 3))),
+MAX(ST_Y(ST_POINTN(ST_ExteriorRing(miv_envelope), 3))))))
 FROM  snapshot_metric_version_item_variable
 WHERE miv_metric_version_id = mvl_metric_version_id AND miv_geography_id = dat_geography_id)
 WHERE mvl_extents is null;
@@ -84,11 +84,11 @@ update metadata
 		JOIN dataset ON wrk_id = dat_work_id
 		set met_extents =
 		 (SELECT
-			Envelope(LineString(
-			POINT(Min(X(PointN(ExteriorRing(mvl_extents), 1))),
-			min(Y(PointN(ExteriorRing(mvl_extents), 1)))),
-			POINT(Max(X(PointN(ExteriorRing(mvl_extents), 3))),
-			Max(Y(PointN(ExteriorRing(mvl_extents), 3))))))
+			ST_Envelope(LineString(
+			POINT(MIN(ST_X(ST_POINTN(ST_ExteriorRing(mvl_extents), 1))),
+			MIN(ST_Y(ST_POINTN(ST_ExteriorRing(mvl_extents), 1)))),
+			POINT(MAX(ST_X(ST_POINTN(ST_ExteriorRing(mvl_extents), 3))),
+			MAX(ST_Y(ST_POINTN(ST_ExteriorRing(mvl_extents), 3))))))
 			FROM  metric_version_level
 			WHERE dat_id = mvl_dataset_id);
 
