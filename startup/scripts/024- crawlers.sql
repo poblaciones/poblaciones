@@ -1,4 +1,4 @@
-ALTER TABLE `clipping_region` ADD `clr_is_crawler_indexer` TINYINT NOT NULL DEFAULT '0' COMMENT 'Indica si debe usarse como criterio de segmentación hacia crawlers' AFTER `clr_priority`;
+ALTER TABLE `clipping_region` ADD `clr_is_crawler_indexer` TINYINT NOT NULL DEFAULT '0' COMMENT 'Indica si debe usarse como criterio de segmentaciÃ³n hacia crawlers' AFTER `clr_priority`;
 
 ALTER TABLE `draft_work` ADD `wrk_segmented_crawling` TINYINT(1) NOT NULL DEFAULT '0' COMMENT 'Indica si se segmenta al indexarse para crawlers' AFTER `wrk_is_indexed`;
 

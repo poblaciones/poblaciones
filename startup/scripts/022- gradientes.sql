@@ -1,4 +1,4 @@
-CREATE TABLE `gradient` ( `grd_id` INT NOT NULL AUTO_INCREMENT  COMMENT 'Id', `grd_country_id` INT NOT NULL COMMENT 'PaÌs de pertenencia', `grd_caption` VARCHAR(100) NOT NULL COMMENT 'DescripciÛn del gradiente. Ej. AR-2010', `grd_image_type` VARCHAR(20) NOT NULL COMMENT 'Tipo de im·genes. image/jpeg o image/png', `grd_max_zoom_level` INT NOT NULL COMMENT 'Nivel zoom hasta el que dispone de datos', PRIMARY KEY (`grd_id`)) ENGINE = InnoDB COMMENT = 'Cabecera de gradientes para ajustar polÌgonos';
+CREATE TABLE `gradient` ( `grd_id` INT NOT NULL AUTO_INCREMENT  COMMENT 'Id', `grd_country_id` INT NOT NULL COMMENT 'Pa√≠s de pertenencia', `grd_caption` VARCHAR(100) NOT NULL COMMENT 'Descripci√≥n del gradiente. Ej. AR-2010', `grd_image_type` VARCHAR(20) NOT NULL COMMENT 'Tipo de im√°genes. image/jpeg o image/png', `grd_max_zoom_level` INT NOT NULL COMMENT 'Nivel zoom hasta el que dispone de datos', PRIMARY KEY (`grd_id`)) ENGINE = InnoDB COMMENT = 'Cabecera de gradientes para ajustar pol√≠gonos';
 
 ALTER TABLE `gradient` ADD CONSTRAINT `fk_gradient_country` FOREIGN KEY (`grd_country_id`) REFERENCES `clipping_region_item`(`cli_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
@@ -6,7 +6,7 @@ CREATE TABLE `gradient_item` ( `gri_id` INT NOT NULL AUTO_INCREMENT COMMENT 'Id'
 
 ALTER TABLE `gradient_item` ADD CONSTRAINT `fk_gradient_item` FOREIGN KEY (`gri_gradient_id`) REFERENCES `gradient`(`grd_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
-ALTER TABLE `geography` ADD `geo_gradient_id` INT NULL COMMENT 'Gradiente con el cual suavizar la informaciÛn' AFTER `geo_metadata_id`;
+ALTER TABLE `geography` ADD `geo_gradient_id` INT NULL COMMENT 'Gradiente con el cual suavizar la informaci√≥n' AFTER `geo_metadata_id`;
 
 ALTER TABLE `geography` ADD `geo_gradient_luminance` FLOAT NULL COMMENT 'Intensidad predeterminada del gradiente' AFTER `geo_gradient_id`;
 
