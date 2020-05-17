@@ -5,9 +5,10 @@ namespace helena\services\frontend;
 use helena\services\common\BaseService;
 use helena\caches\SummaryCache;
 use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
+use helena\db\frontend\SnapshotMetricVersionItemVariableModel_v2;
 use helena\entities\frontend\clipping\SummaryInfo;
 use helena\entities\frontend\clipping\SummaryItemInfo;
-use helena\classes\App;
+use minga\framework\Context;
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
 use minga\framework\ErrorException;
@@ -53,20 +54,23 @@ class SummaryService extends BaseService
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
 
-		$table = new SnapshotMetricVersionItemVariableModel();
+		if (Context::Settings()->Map()->NewPublishingMethod)
+			$table = new SnapshotMetricVersionItemVariableModel_v2($level->Dataset->Table . "_snapshot");
+		else
+			$table = new SnapshotMetricVersionItemVariableModel();
 		$gradientId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionSummaryByCircle($metricVersionId, $level->HasSummary, $gradientId, $urbanity, $frame->ClippingCircle, $level->Dataset->Type);
+			$rows = $table->GetMetricVersionSummaryByCircle($metricVersionId, $level->Variables, $level->HasSummary, $gradientId, $urbanity, $frame->ClippingCircle, $level->Dataset->Type);
 		}
 		else if ($frame->ClippingRegionId != NULL)
 		{
-			$rows = $table->GetMetricVersionSummaryByRegionId($metricVersionId, $level->HasSummary, $gradientId, $urbanity, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type);
+			$rows = $table->GetMetricVersionSummaryByRegionId($metricVersionId, $level->Variables, $level->HasSummary, $gradientId, $urbanity, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionSummaryByEnvelope($metricVersionId, $level->HasSummary, $gradientId, $urbanity, $frame->Envelope);
+			$rows = $table->GetMetricVersionSummaryByEnvelope($metricVersionId, $level->Variables, $level->HasSummary, $gradientId, $urbanity, $frame->Envelope);
 		}
 		$data = $this->CreateSummaryInfo($rows);
 		return $data;

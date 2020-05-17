@@ -221,12 +221,12 @@ GoogleMapsApi.prototype.CircleCompleted = function (circle) {
 
 	var clippingCircle = {
 		Center: {
-			Lat: h.trimNumber(center.lat()),
-			Lon: h.trimNumber(center.lng()),
+			Lat: h.trimNumberCoords(center.lat()),
+			Lon: h.trimNumberCoords(center.lng()),
 		},
 		Radius: {
-			Lat: h.trimNumber(Math.abs(radius.lat() - center.lat())),
-			Lon: h.trimNumber(Math.abs(radius.lng() - center.lng())),
+			Lat: h.trimNumberCoords(Math.abs(radius.lat() - center.lat())),
+			Lon: h.trimNumberCoords(Math.abs(radius.lng() - center.lng())),
 		},
 	};
 	this.segmentedMap.Clipping.SetClippingCircle(clippingCircle);
@@ -411,12 +411,12 @@ GoogleMapsApi.prototype.getBounds = function() {
 	var sw = this.gMap.getBounds().getSouthWest();
 	return {
 		Min: {
-			Lat: h.trimNumber(ne.lat()),
-			Lon: h.trimNumber(ne.lng()),
+			Lat: h.trimNumberCoords(ne.lat()),
+			Lon: h.trimNumberCoords(ne.lng()),
 		},
 		Max: {
-			Lat: h.trimNumber(sw.lat()),
-			Lon: h.trimNumber(sw.lng()),
+			Lat: h.trimNumberCoords(sw.lat()),
+			Lon: h.trimNumberCoords(sw.lng()),
 		},
 		Zoom: this.gMap.getZoom(),
 	};

@@ -39,6 +39,28 @@ class WorkModel extends BaseModel
 	}
 
 
+	public function GetDataset($datasetId)
+	{
+		Profiling::BeginTimer();
+		$params = array($datasetId);
+
+		$sql = "SELECT d.*, geography.*,
+							caption.dco_field AS dat_caption_field,
+							longitude.dco_field AS dat_longitude_field,
+							latitude.dco_field AS dat_latitude_field
+							FROM " . $this->resolveTableName('dataset') . " d
+							LEFT JOIN dataset_column latitude ON latitude.dco_id = dat_latitude_column_id
+							LEFT JOIN dataset_column longitude ON longitude.dco_id = dat_longitude_column_id
+							LEFT JOIN dataset_column caption ON caption.dco_id = dat_caption_column_id
+
+						 LEFT JOIN geography ON geo_id = dat_geography_id
+							WHERE dat_id = ?";
+		$ret = App::Db()->fetchAssoc($sql, $params);
+
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetWork($workId)
 	{
 		Profiling::BeginTimer();

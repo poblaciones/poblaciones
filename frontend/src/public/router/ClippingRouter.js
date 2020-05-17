@@ -34,7 +34,8 @@ ClippingRouter.prototype.ToRoute = function () {
 			ret.push(['f', segmentedMap.frame.ClippingFeatureId]);
 		}
 		if (segmentedMap.frame.ClippingCircle) {
-			ret.push(['c', this.coordinateToParam(segmentedMap.frame.ClippingCircle.Center) + ',' +
+			ret.push(['c', h.trimNumberCoords(segmentedMap.frame.ClippingCircle.Center.Lat) + ',' +
+				 h.trimNumberCoords(segmentedMap.frame.ClippingCircle.Center.Lon) + ',' +
 				segmentedMap.frame.ClippingCircle.Radius.Lat + ',' +
 				segmentedMap.frame.ClippingCircle.Radius.Lon]);
 		}

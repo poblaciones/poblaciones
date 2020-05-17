@@ -73,49 +73,10 @@ class ClippingRegionItemModel extends BaseModel
 
 	public function GetCrawlerItemsIntersectingEnvelope($metricId, $versionIds, $envelope, $parentId)
 	{
-	/*
-	VALIDO 1:
-
-SELECT cli_id Id, cli_caption Name, cli_parent_id, clr_id, clr_caption FROM clipping_region_item JOIN clipping_region ON cli_clipping_region_id = clr_id WHERE ST_INTERSECTS(cli_geometry_r1, ST_PolygonFromText('POLYGON((-72.88671 -54.83585, -53.63833 -54.83585, -53.63833 -21.87661, -72.88671 -21.87661, -72.88671 -54.83585))')) AND ST_AREA(ST_INTERSECTION(cli_geometry_r1, ST_PolygonFromText('POLYGON((-72.88671 -54.83585, -53.63833 -54.83585, -53.63833 -21.87661, -72.88671 -21.87661, -72.88671 -54.83585))'))) > 0.5 * ST_AREA(cli_geometry_r1) AND clr_is_crawler_indexer = 1 AND EXISTS(SELECT 1 FROM snapshot_metric_version_item_variable JOIN snapshot_clipping_region_item_geography_item ON cgv_geography_item_id = miv_geography_item_id WHERE miv_metric_id = 3801 AND miv_metric_version_id = 1101 AND cgv_clipping_region_item_id = cli_id) AND cli_parent_id = 11900 ORDER BY clr_caption, clr_id, cli_caption, cli_id
-
-VALIDO 2: 5 sec.
-
-SELECT cli_id ´Id´, cli_caption ´Name´, cli_parent_id, clr_id, clr_caption FROM clipping_region_item JOIN clipping_region ON cli_clipping_region_id = clr_id
-JOIN snapshot_clipping_region_item_geography_item ON cgv_clipping_region_item_id = cli_id
-JOIN snapshot_metric_version_item_variable  ON cgv_geography_item_id = miv_geography_item_id
-
-WHERE ST_INTERSECTS(cli_geometry_r1, ST_PolygonFromText('POLYGON((-72.88671 -54.83585, -53.63833 -54.83585, -53.63833 -21.87661, -72.88671 -21.87661, -72.88671 -54.83585))')) AND ST_AREA(ST_INTERSECTION(cli_geometry_r1, ST_PolygonFromText('POLYGON((-72.88671 -54.83585, -53.63833 -54.83585, -53.63833 -21.87661, -72.88671 -21.87661, -72.88671 -54.83585))'))) > 0.5 * ST_AREA(cli_geometry_r1) AND clr_is_crawler_indexer = 1
-AND miv_metric_id = 3801 AND miv_metric_version_id = 1101 AND cli_parent_id = 11900
-GROUP BY cli_id , cli_caption, cli_parent_id, clr_id, clr_caption
-ORDER BY clr_caption, clr_id, cli_caption, cli_id
-
-VALIDO 3: 1.28
-
-SELECT cli_id ´Id´, cli_caption ´Name´, cli_parent_id, clr_id, clr_caption FROM clipping_region_item JOIN clipping_region ON cli_clipping_region_id = clr_id
-JOIN snapshot_clipping_region_item_geography_item ON cgv_clipping_region_item_id = cli_id
-JOIN snapshot_metric_version_item_variable  ON cgv_geography_item_id = miv_geography_item_id
-
-WHERE clr_is_crawler_indexer = 1
-AND miv_metric_id = 3801 AND miv_metric_version_id = 1101 AND cli_parent_id = 11900
-GROUP BY cli_id , cli_caption, cli_parent_id, clr_id, clr_caption
-ORDER BY clr_caption, clr_id, cli_caption, cli_id
-*/
 		Profiling::BeginTimer();
 		// Trae regiones que coincidan con la región de la cartografía
 		// y que tengan contenidos dentro del clipping_region_item.
-/*		$sql = "SELECT cli_id Id, cli_caption Name, cli_parent_id, clr_id, clr_caption FROM clipping_region_item
-							JOIN clipping_region ON cli_clipping_region_id = clr_id
-							WHERE ST_INTERSECTS(cli_geometry_r1,
-											ST_PolygonFromText('" . $envelope->ToWKT() . "'))
-										AND ST_AREA(ST_INTERSECTION(cli_geometry_r1,
-											ST_PolygonFromText('" . $envelope->ToWKT() . "'))) > 0.5 *
-												ST_AREA(cli_geometry_r1)
-										AND clr_is_crawler_indexer = 1
-										AND EXISTS(SELECT 1 FROM snapshot_metric_version_item_variable
-													JOIN metric_version ON mvr_id = miv_metric_version_id
-													JOIN snapshot_clipping_region_item_geography_item ON cgv_geography_item_id = miv_geography_item_id
-													WHERE mvr_work_id = ? AND miv_metric_id = ? AND cgv_clipping_region_item_id = cli_id)";
-	*/
+
 		$sql = "SELECT cli_id Id, cli_caption Name, cli_parent_id, clr_id, clr_caption
 						FROM clipping_region_item JOIN clipping_region ON cli_clipping_region_id = clr_id
 						JOIN snapshot_clipping_region_item_geography_item ON cgv_clipping_region_item_id = cli_id
@@ -124,7 +85,36 @@ ORDER BY clr_caption, clr_id, cli_caption, cli_id
 						AND miv_metric_id = ? AND ( " . $versionIds . ") " . ($parentId ? ' AND cli_parent_id = ' . $parentId : '') . "
 						GROUP BY cli_id , cli_caption, cli_parent_id, clr_id, clr_caption
 						ORDER BY clr_caption, clr_id, cli_caption, cli_id";
+
 		$ret = App::Db()->fetchAll($sql, array($metricId));
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public function v2_GetCrawlerItemsIntersectingEnvelope($metricId, $datasetTables, $envelope, $parentId)
+	{
+		Profiling::BeginTimer();
+		// Trae regiones que coincidan con la región de la cartografía
+		// y que tengan contenidos dentro del clipping_region_item.
+		$datasetPart = '';
+		foreach($datasetTables as $datasetTable)
+		{
+			if ($datasetPart != '') $datasetPart .= " OR ";
+			$datasetPart .= " EXISTS (SELECT * FROM " . $datasetTable . " WHERE sna_geography_item_id = cgv_geography_item_id) ";
+		}
+		$datasetPart = " (" . $datasetPart . ")";
+
+		$sql = "SELECT cli_id Id, cli_caption Name, cli_parent_id, clr_id, clr_caption
+						FROM clipping_region_item JOIN clipping_region ON cli_clipping_region_id = clr_id
+						JOIN snapshot_clipping_region_item_geography_item ON cgv_clipping_region_item_id = cli_id
+						WHERE " .
+						$datasetPart . "
+						AND clr_is_crawler_indexer = 1
+						" . ($parentId ? ' AND cli_parent_id = ' . $parentId : '') . "
+						GROUP BY cli_id , cli_caption, cli_parent_id, clr_id, clr_caption
+						ORDER BY clr_caption, clr_id, cli_caption, cli_id";
+
+		$ret = App::Db()->fetchAll($sql);
 		Profiling::EndTimer();
 		return $ret;
 	}

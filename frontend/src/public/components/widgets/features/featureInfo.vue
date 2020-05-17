@@ -43,13 +43,13 @@ export default {
 		},
 		lat() {
 			if(this.panelInfo.position && this.panelInfo.position.Coordinate && this.panelInfo.position.Coordinate.Lat) {
-				return h.trimNumber(this.panelInfo.position.Coordinate.Lat);
+				return h.trimNumberCoords(this.panelInfo.position.Coordinate.Lat);
 			}
 			return 0;
 		},
 		lon() {
 			if(this.panelInfo.position && this.panelInfo.position.Coordinate && this.panelInfo.position.Coordinate.Lon) {
-				return h.trimNumber(this.panelInfo.position.Coordinate.Lon);
+				return h.trimNumberCoords(this.panelInfo.position.Coordinate.Lon);
 			}
 			return 0;
 		},

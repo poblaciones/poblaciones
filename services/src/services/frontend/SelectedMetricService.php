@@ -43,13 +43,13 @@ class SelectedMetricService extends BaseService
 	}
 	public function PublicGetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false)
 	{
-		$ret = self::GetSelectedMetric($metricId, $throwError, $filterByPermissions);
+		$ret = self::GetSelectedMetric($metricId, $throwError, $filterByPermissions, true);
 		if ($ret !== null)
 			Statistics::StoreSelectedMetricHit($ret);
 		return $ret;
 	}
 
-	public function GetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false)
+	public function GetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false, $filterTables = false)
 	{
 		$data = null;
 		Profiling::BeginTimer();
@@ -76,9 +76,23 @@ class SelectedMetricService extends BaseService
 		if(sizeof($data->Versions) == 0)
 			return null;
 		else
+		{
+			if ($filterTables)
+			{
+				$data = $this->filterTables($data);
+			}
 			return $data;
+		}
 	}
-
+	private function filterTables($data)
+	{
+		foreach($data->Versions as $version)
+		{
+			foreach($version->Levels as $level)
+				$level->Dataset->Table = null;
+		}
+		return $data;
+	}
 	private function RemovePrivateVersions($data)
 	{
 		for($n = sizeof($data->Versions) - 1; $n >= 0; $n--)

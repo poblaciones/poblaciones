@@ -1,8 +1,8 @@
 var TWEEN = require('@tweenjs/tween.js');
 
 module.exports = {
-	trimNumber(n) {
-		return parseFloat(n.toFixed(6));
+	trimNumberCoords(n) {
+		return parseFloat(Number('' + n).toFixed(6));
 	},
 	formatPercent(num, tot) {
 		if (num === '') {

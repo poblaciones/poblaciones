@@ -10,6 +10,7 @@ use helena\caches\TileDataCache;
 use helena\services\common\BaseService;
 
 use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
+use helena\db\frontend\SnapshotMetricVersionItemVariableModel_v2;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 use minga\framework\Context;
@@ -79,8 +80,10 @@ class TileDataService extends BaseService
 		$metric = $selectedService->GetSelectedMetric($metricId);
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
-
-		$table = new SnapshotMetricVersionItemVariableModel();
+		if (Context::Settings()->Map()->NewPublishingMethod)
+			$table = new SnapshotMetricVersionItemVariableModel_v2($level->Dataset->Table . "_snapshot");
+		else
+			$table = new SnapshotMetricVersionItemVariableModel();
 		$gradientId = $level->GeographyId;
 
 		if ($b != null)
@@ -95,15 +98,15 @@ class TileDataService extends BaseService
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $gradientId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $level->Variables, $gradientId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
 		else if ($frame->ClippingRegionId != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByRegionId($metricVersionId, $gradientId, $urbanity, $envelope, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByRegionId($metricVersionId, $level->Variables, $gradientId, $urbanity, $envelope, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $gradientId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $level->Variables, $gradientId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions);
 		}
 
 		$data = $this->CreateTileDataInfo($rows);

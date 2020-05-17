@@ -25,8 +25,8 @@ FrameRouter.prototype.ToRoute = function (coord) {
 		coord = this.calculateCenterAsCoordinate(segmentedMap.frame.Envelope);
 	}
 	var ret = [];
-	ret.push(this.coordinateToParam(coord.Lat));
-	ret.push(this.coordinateToParam(coord.Lon));
+	ret.push(h.trimNumberCoords(coord.Lat));
+	ret.push(h.trimNumberCoords(coord.Lon));
 	ret.push(segmentedMap.frame.Zoom + 'z');
 	var mapType = segmentedMap.GetMapTypeState();
 	if (mapType !== 'r') {
@@ -38,10 +38,6 @@ FrameRouter.prototype.ToRoute = function (coord) {
 FrameRouter.prototype.calculateCenterAsCoordinate = function (envelope) {
 	var coordinate = { Lat: (envelope.Min.Lat + envelope.Max.Lat) / 2, Lon: (envelope.Min.Lon + envelope.Max.Lon) / 2 };
 	return coordinate;
-};
-
-FrameRouter.prototype.coordinateToParam = function (coordinate) {
-	return Number(coordinate).toFixed(6);
 };
 
 FrameRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {

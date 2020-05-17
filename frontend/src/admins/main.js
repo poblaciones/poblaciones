@@ -34,6 +34,7 @@ import MpColorPicker from '@/backoffice/components/MpColorPicker';
 import MpConfirm from '@/backoffice/components/MpConfirm';
 import MpLargeButton from '@/backoffice/components/MpLargeButton';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
+import MpHelp from '@/backoffice/components/MpHelp';
 import MpSelect from '@/backoffice/components/MpSelect';
 
 Vue.component('title-bar', TitleBar);
@@ -42,6 +43,8 @@ Vue.component('stepper', Stepper);
 Vue.component('mp-select', MpSelect);
 Vue.component('mp-confirm', MpConfirm);
 Vue.component('mp-text', MpText);
+Vue.component('mp-large-button', MpLargeButton);
+Vue.component('mp-help', MpHelp);
 Vue.component('mp-color-picker', MpColorPicker);
 Vue.component('mp-simple-text', MpSimpleText);
 

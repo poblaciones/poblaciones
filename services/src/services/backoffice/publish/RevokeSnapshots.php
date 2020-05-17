@@ -5,6 +5,7 @@ namespace helena\services\backoffice\publish;
 use helena\services\common\BaseService;
 use helena\db\admin\WorkModel;
 use helena\classes\VersionUpdater;
+use helena\classes\App;
 
 use minga\framework\Profiling;
 use minga\framework\Arr;
@@ -56,7 +57,12 @@ class RevokeSnapshots extends BaseService
 
 		$datasets = $this->workModel->GetDatasets($this->workId);
 
-		// Borra
+		//
+		foreach($datasetsToDelete as $row)
+		{
+			$table = $row['dat_table'] . '_snapshot';
+			App::Db()->dropTable($table);
+		}
 		foreach($datasetsToDelete as $row)
 		{
 			$this->cacheManager->ClearDataset($row['dat_id']);

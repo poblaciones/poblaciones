@@ -8,6 +8,8 @@ use helena\classes\App;
 
 class SnapshotMetricVersionModel
 {
+	const SNAPSHOPT_CAPTIONS_MAX_LENGTH = 500;
+
 	public function RegenMetric($metricId)
 	{
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
@@ -23,13 +25,13 @@ class SnapshotMetricVersionModel
 						wrk_type, wrk_is_private,
 						wrk_is_indexed, wrk_access_link, ";
 						// Hace un subselect con los nombres de variables
-		$sql .= "(SELECT GROUP_CONCAT(mvv_caption ORDER BY mvv_order SEPARATOR '\n')
+		$sql .= "(SELECT LEFT(GROUP_CONCAT(mvv_caption ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOPT_CAPTIONS_MAX_LENGTH . ")
 							FROM variable
 							JOIN metric_version_level ON mvv_metric_version_level_id = mvl_id
 							WHERE mvl_metric_version_id = mvr_id
 									),";
 						// Hace un subselect distinct con los valores de variables
-		$sql .= "(SELECT GROUP_CONCAT(SUB.V1 ORDER BY mvv_order SEPARATOR '\n')
+		$sql .= "(SELECT LEFT(GROUP_CONCAT(SUB.V1 ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOPT_CAPTIONS_MAX_LENGTH . ")
 							FROM
 									(SELECT mvr_id, mvv_id, mvv_order, GROUP_CONCAT(DISTINCT vvl_caption ORDER BY vvl_variable_id, vvl_order SEPARATOR '\r') AS V1
 									FROM metric_version
@@ -51,6 +53,7 @@ class SnapshotMetricVersionModel
 						GROUP BY mvr_id, mvr_metric_id, mtr_revision, mtr_caption, mtr_metric_group_id, mvr_caption, wrk_id, met_title,
 										met_authors, ins_caption, wrk_type, wrk_is_private, wrk_is_indexed, wrk_access_link";
 
+		App::Db()->exec("SET group_concat_max_len = 10240");
 		App::Db()->exec($sql, array($metricIdShardified, $metricIdShardified));
 		Profiling::EndTimer();
 	}

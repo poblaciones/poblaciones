@@ -5,9 +5,11 @@ namespace helena\services\frontend;
 use helena\services\common\BaseService;
 use helena\caches\RankingCache;
 use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
+use helena\db\frontend\SnapshotMetricVersionItemVariableModel_v2;
 use helena\entities\frontend\clipping\RankingInfo;
 use helena\entities\frontend\clipping\RankingItemInfo;
 use helena\classes\App;
+use minga\framework\Context;
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
 use minga\framework\ErrorException;
@@ -54,7 +56,11 @@ class RankingService extends BaseService
 		$level = $version->GetLevel($levelId);
 		$hasDescriptions = $level->HasDescriptions;
 
-		$table = new SnapshotMetricVersionItemVariableModel();
+		if (Context::Settings()->Map()->NewPublishingMethod)
+			$table = new SnapshotMetricVersionItemVariableModel_v2($level->Dataset->Table . "_snapshot");
+		else
+			$table = new SnapshotMetricVersionItemVariableModel();
+
 		$gradientId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)

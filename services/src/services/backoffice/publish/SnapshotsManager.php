@@ -3,6 +3,7 @@
 namespace helena\services\backoffice\publish;
 
 use minga\framework\Profiling;
+use minga\framework\Context;
 
 use helena\services\common\BaseService;
 use helena\classes\DatasetTypeEnum;
@@ -37,9 +38,11 @@ class SnapshotsManager extends BaseService
 
 		$this->CleanMetricVersionData($metricVersion);
 
-		$model = new SnapshotMetricVersionItemVariableModel();
-		$model->RegenMetricVersion($metricVersion['mvr_id']);
-
+		if (!Context::Settings()->Map()->NewPublishingMethod)
+		{
+			$model = new SnapshotMetricVersionItemVariableModel();
+			$model->RegenMetricVersion($metricVersion['mvr_id']);
+		}
 		Profiling::EndTimer();
 	}
 
@@ -66,7 +69,15 @@ class SnapshotsManager extends BaseService
 
 		Profiling::EndTimer();
 	}
+	public function UpdateDatasetMetrics($row)
+	{
+		Profiling::BeginTimer();
 
+		$model = new SnapshotMetricVersionItemVariableModel();
+		$model->v2_RegenDatasetLevels($row['dat_id']);
+
+		Profiling::EndTimer();
+	}
 	public function UpdateDatasetData($row)
 	{
 		Profiling::BeginTimer();

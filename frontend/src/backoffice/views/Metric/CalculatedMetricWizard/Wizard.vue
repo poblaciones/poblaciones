@@ -178,20 +178,6 @@ export default {
 			}
 			this.newMetric.Type = type;
 		},
-		distanceClick() {
-			if(this.newMetric.Type != 'distance') {
-				this.newMetric = this.initNewMetric();
-			}
-			this.newMetric.Type = 'distance';
-			this.step = 2;
-		},
-		areaClick() {
-			if(this.newMetric.Type != 'area') {
-				this.newMetric = this.initNewMetric();
-			}
-			this.newMetric.Type = 'area';
-			this.step = 2;
-		},
 		show() {
 			this.step = 1;
 			this.openPopup = true;
