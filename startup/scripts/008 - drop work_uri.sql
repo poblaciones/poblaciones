@@ -1,4 +1,4 @@
--- se migró a met_url
+-- se migrÃ³ a met_url
 ALTER TABLE `work` DROP `wrk_uri`;
 ALTER TABLE `draft_work` DROP `wrk_uri`;
 

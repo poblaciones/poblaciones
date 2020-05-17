@@ -17,10 +17,10 @@ ALTER TABLE `work` DROP `wrk_start_clipping_region_id`;
 ALTER TABLE `work` DROP `wrk_start_center`;
 ALTER TABLE `work` DROP `wrk_start_zoom`;
 
-CREATE TABLE `draft_work_startup` ( `wst_id` INT NOT NULL AUTO_INCREMENT , `wst_work_id` INT NOT NULL COMMENT 'Cartograf韆 de la que indica las opciones de inicio' , `wst_type` CHAR(1) NOT NULL DEFAULT 'D' COMMENT 'Tipo de inicio: D=din醡ico, R=regi髇, L=ubicaci髇' , `wst_clipping_region_item_id` INT NULL COMMENT 'Regi髇 de referencia' , `wst_clipping_region_item_selected` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Indica si la regi髇 debe iniciarse como selecci髇 activa' ,`wst_center` POINT NULL COMMENT 'Ubicaci髇 del dentro de la vista' ,`wst_zoom` TINYINT(1) NULL COMMENT 'Nivel de acercamiento para la vista' , PRIMARY KEY (`wst_id`)) ENGINE = InnoDB;
+CREATE TABLE `draft_work_startup` ( `wst_id` INT NOT NULL AUTO_INCREMENT , `wst_work_id` INT NOT NULL COMMENT 'Cartograf铆a de la que indica las opciones de inicio' , `wst_type` CHAR(1) NOT NULL DEFAULT 'D' COMMENT 'Tipo de inicio: D=din谩mico, R=regi贸n, L=ubicaci贸n' , `wst_clipping_region_item_id` INT NULL COMMENT 'Regi贸n de referencia' , `wst_clipping_region_item_selected` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Indica si la regi贸n debe iniciarse como selecci贸n activa' ,`wst_center` POINT NULL COMMENT 'Ubicaci贸n del dentro de la vista' ,`wst_zoom` TINYINT(1) NULL COMMENT 'Nivel de acercamiento para la vista' , PRIMARY KEY (`wst_id`)) ENGINE = InnoDB;
 
 
-CREATE TABLE `work_startup` ( `wst_id` INT NOT NULL AUTO_INCREMENT , `wst_work_id` INT NOT NULL COMMENT 'Cartograf韆 de la que indica las opciones de inicio' , `wst_type` CHAR(1) NOT NULL DEFAULT 'D' COMMENT 'Tipo de inicio: D=din醡ico, R=regi髇, L=ubicaci髇' , `wst_clipping_region_item_id` INT NULL COMMENT 'Regi髇 de referencia' , `wst_clipping_region_item_selected` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Indica si la regi髇 debe iniciarse como selecci髇 activa' ,`wst_center` POINT NULL COMMENT 'Ubicaci髇 del dentro de la vista' ,`wst_zoom` TINYINT(1) NULL COMMENT 'Nivel de acercamiento para la vista' , PRIMARY KEY (`wst_id`)) ENGINE = InnoDB;
+CREATE TABLE `work_startup` ( `wst_id` INT NOT NULL AUTO_INCREMENT , `wst_work_id` INT NOT NULL COMMENT 'Cartograf铆a de la que indica las opciones de inicio' , `wst_type` CHAR(1) NOT NULL DEFAULT 'D' COMMENT 'Tipo de inicio: D=din谩mico, R=regi贸n, L=ubicaci贸n' , `wst_clipping_region_item_id` INT NULL COMMENT 'Regi贸n de referencia' , `wst_clipping_region_item_selected` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Indica si la regi贸n debe iniciarse como selecci贸n activa' ,`wst_center` POINT NULL COMMENT 'Ubicaci贸n del dentro de la vista' ,`wst_zoom` TINYINT(1) NULL COMMENT 'Nivel de acercamiento para la vista' , PRIMARY KEY (`wst_id`)) ENGINE = InnoDB;
 
 
 ALTER TABLE `draft_work_startup` ADD CONSTRAINT `fk_draft_work_startup_region`
@@ -40,14 +40,14 @@ select wrk_id from draft_work;
 insert into work_startup (wst_work_id)
 select wrk_id from work;
 
-ALTER TABLE `draft_work` ADD `wrk_startup_id` INT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf韆' AFTER `wrk_last_access_link`;
-ALTER TABLE `work` ADD `wrk_startup_id` INT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf韆' AFTER `wrk_access_link`;
+ALTER TABLE `draft_work` ADD `wrk_startup_id` INT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf铆a' AFTER `wrk_last_access_link`;
+ALTER TABLE `work` ADD `wrk_startup_id` INT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf铆a' AFTER `wrk_access_link`;
 
 UPDATE draft_work SET wrk_startup_id = (SELECT wst_id FROM draft_work_startup WHERE wst_work_id = wrk_id);
 UPDATE work SET wrk_startup_id = (SELECT wst_id FROM work_startup WHERE wst_work_id = wrk_id);
 
-ALTER TABLE `draft_work` CHANGE `wrk_startup_id` `wrk_startup_id` INT(11) NOT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf韆';
-ALTER TABLE `work` CHANGE `wrk_startup_id` `wrk_startup_id` INT(11) NOT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf韆';
+ALTER TABLE `draft_work` CHANGE `wrk_startup_id` `wrk_startup_id` INT(11) NOT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf铆a';
+ALTER TABLE `work` CHANGE `wrk_startup_id` `wrk_startup_id` INT(11) NOT NULL COMMENT 'Referencia a los atributos de inicio del visor para la cartograf铆a';
 
 
 

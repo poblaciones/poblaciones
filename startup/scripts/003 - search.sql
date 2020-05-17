@@ -1,4 +1,4 @@
-ALTER TABLE `snapshot_metric_versions` ADD `mvw_work_authors` VARCHAR(200) NULL COMMENT 'Autores de la cartografía' AFTER `mvw_work_caption`, ADD `mvw_work_institution` VARCHAR(200) NULL COMMENT 'Institución de la cartografía' AFTER `mvw_work_authors`;
+ALTER TABLE `snapshot_metric_versions` ADD `mvw_work_authors` VARCHAR(200) NULL COMMENT 'Autores de la cartografÃ­a' AFTER `mvw_work_caption`, ADD `mvw_work_institution` VARCHAR(200) NULL COMMENT 'InstituciÃ³n de la cartografÃ­a' AFTER `mvw_work_authors`;
 
 ALTER TABLE `snapshot_metric_versions` DROP INDEX `ix_version_fulltext`, ADD FULLTEXT `ix_version_fulltext` (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`, `mvw_work_caption`, `mvw_work_authors`, `mvw_work_institution`);
 
