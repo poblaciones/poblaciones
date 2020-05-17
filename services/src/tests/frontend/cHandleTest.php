@@ -9,8 +9,8 @@ use minga\framework\tests\TestCaseBase;
 
 class cHandleTest extends TestCaseBase
 {
-	private $workId = 3801;
-	private $metricId = 5101;
+	private $workId = 3601;
+	private $metricId = 6201;
 	private $regionId = 15476;
 
 	/**

@@ -33,7 +33,7 @@ class PublishSnapshots extends BaseService
 			if ($work['wrk_dataset_data_changed'])
 			{
 				$cacheManager->ClearDatasetData($row['dat_id']);
-				$snapshotsManager->UpdateDatasetData($workId, $row);
+				$snapshotsManager->UpdateDatasetData($row);
 			}
 			if (Context::Settings()->Map()->NewPublishingMethod)
 			{
