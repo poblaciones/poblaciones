@@ -133,8 +133,8 @@ export default {
 					HasDistance: false,
 					HasValue: false,
 					HasCoords: false,
-					HasMaxDistance: 20,
-					MaxDistance: 0,
+					HasMaxDistance: false,
+					MaxDistance: 20,
 
 					// Area
 					HasAdditionValue: false,

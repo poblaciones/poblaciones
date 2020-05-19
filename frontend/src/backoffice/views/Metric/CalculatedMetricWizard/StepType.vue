@@ -22,12 +22,12 @@ export default {
 		distanceClick(e) {
 			this.type = 'distance';
 			e.preventDefault();
-//			this.$emit('distanceClick', e);
+			// this.$emit('distanceClick', e);
 		},
 		areaClick(e) {
 			this.type = 'area';
 			e.preventDefault();
-	//		this.$emit('areaClick', e);
+			// this.$emit('areaClick', e);
 		},
 	},
 };
