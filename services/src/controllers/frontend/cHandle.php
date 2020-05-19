@@ -155,7 +155,7 @@ class cHandle extends cPublicController
 		$workService = new WorkService();
 		$work = $workService->GetWork($workId);
 		$metadata = $this->GetMetadata($work);
-		$metadata['met_title'] = $this->PreppendMap($metadata['met_title']);
+		//$metadata['met_title'] = $this->PreppendMap($metadata['met_title']);
 
 		$this->AddMetadata($metadata, $work->Url);
 		$this->AddMetricLinks($work);
@@ -188,7 +188,8 @@ class cHandle extends cPublicController
 		$metadataId = $work->MetadataId;
 		$sources = $model->GetMetadataSources($metadataId);
 		$metricName = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
-		$metric = $this->PreppendMap($metricName);
+		//$metric = $this->PreppendMap($metricName);
+		$metric = $metricName;
 
 		$this->AddInfo($metadata, $metric, $items);
 		$this->AddSources($sources, $items);

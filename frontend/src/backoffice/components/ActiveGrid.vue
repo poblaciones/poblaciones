@@ -27,6 +27,8 @@
         :rendergridrows="rendergridrows"
 				@rowselect="selectionChanged"
         @rowunselect="selectionChanged"
+				editmode="dblclick"
+				:editable="Work.CanEdit()"
         :showfilterrow="true"
 				:rowsheight="22"
         :filterable="true"
@@ -150,7 +152,35 @@ export default {
         this.requiresBinding = false;
         this.createGrid();
       }
-    },
+		},
+		validateCellEdit(cell, value) {
+			// 1. se fija si cambió... si es igual, sale
+			var column = this.Dataset.GetColumnFromVariable(cell.datafield);
+			var setValues = [{ columnId: column.Id, value: value }];
+			var previousValue = this.Grid.getcellvalue(cell.row, cell.datafield);
+			if ('' + previousValue === '' + value) {
+				return true;
+			}
+			// 2. valida
+
+			// cell.format: d0, '', d5 ()
+			// return { result: false, message: "Quantity should be in the 0-100 interval" };
+
+			// 3. graba
+			if ('' + previousValue !== '' + value) {
+				var loc = this;
+				loc.showWait();
+				this.Dataset.UpdateRowValues(this.selectedId(), setValues).then(function () {
+					loc.hideWait();
+				}).catch(function () {
+					loc.Grid.setcellvalue(cell.row, cell.datafield, previousValue);
+					loc.DataPager.Clear();
+					loc.hideWait();
+				});
+			}
+
+			return true;
+		},
 		confirmDelete() {
 			this.$refs.confirmDialog.show();
 		},
@@ -236,10 +266,8 @@ export default {
 			});
 		},
 		updateSelectedRowValue(field, value) {
-			var row = this.getSelectedRowData();
-			var ids = this.gridNativeSelectedIds();
-			row[field] = value;
-			this.Grid.updaterow(ids[0], row);
+			var index = this.getSelectedRowIndex();
+			this.Grid.setcellvalue(index, field, value);
 			this.DataPager.Clear();
 		},
     selectionChanged() {
@@ -288,7 +316,7 @@ export default {
       this.DataPager.Clear();
       this.statusBarText = "";
       if (this.Dataset.Columns !== null) {
-        this.Grid.columns = this.Dataset.GetColumnsForJqxGrid(this.showingErrors);
+				this.Grid.columns = this.Dataset.GetColumnsForJqxGrid(this.showingErrors, this.validateCellEdit);
         this.isBinding = true;
         this.Grid.source = this.getAdapter();
       } else {
@@ -397,6 +425,14 @@ export default {
 				return null;
 			} else {
 				return ids[0];
+			}
+		},
+		getSelectedRowIndex() {
+			let selectedRowsIndexes = this.getSelectedRowIndexes();
+			if (selectedRowsIndexes.length > 0) {
+				return selectedRowsIndexes[0];
+			} else {
+				throw new Error('No hay filas seleccionadas.');
 			}
 		},
 		getSelectedRowIndexes() {

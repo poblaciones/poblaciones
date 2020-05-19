@@ -700,7 +700,7 @@ ActiveDataset.prototype.GetColumnUniqueValues = function () {
 	return columns;
 };
 
-ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors) {
+ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors, validate) {
 	if (this.Columns === null) {
 		return [];
 	}
@@ -731,7 +731,10 @@ ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors) {
 		newColumn.cellsalign = this.spssAlignmentToGridAligment(datasetColumn.Alignment);
 		newColumn.width = (datasetColumn.ColumnWidth < 30 ? datasetColumn.ColumnWidth * 10 : 200);
 		newColumn.cellsrenderer = this.cellsRenderer;
-
+		if (validate) {
+			newColumn.editable = true;
+			newColumn.validation = validate;
+		}
 		columns.push(newColumn);
 	}
 	return columns;
@@ -759,6 +762,18 @@ ActiveDataset.prototype.spssAlignmentToGridAligment = function (align) {
 		default:
 			return 'center';
 	}
+};
+
+ActiveDataset.prototype.GetDataFieldByColumnId = function (showingErrors, columnId) {
+	var column = this.GetColumnById(columnId);
+	var dataFields = this.GetDataFieldsForJqxGrid(showingErrors);
+	for (let i = 0; i < dataFields.length; i++) {
+		let dataField = dataFields[i];
+		if (dataField.name === column.Variable) {
+			return dataField;
+		}
+	}
+	throw new Error('DataField no encontrado.');
 };
 
 ActiveDataset.prototype.GetDataFieldByColumnId = function (showingErrors, columnId) {

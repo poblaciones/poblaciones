@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>
-        Acta Académica -
+        Poblaciones
         </title>
         <meta lang='es' name='keywords' content='pdf, artículos, revistas, documentos, congresos, investigación, jornadas'>
         <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
