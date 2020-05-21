@@ -4,10 +4,10 @@ namespace helena\tests\classes;
 
 use helena\classes\CsvReader;
 use helena\classes\Paths;
+use helena\classes\TestCase;
 use minga\framework\IO;
-use minga\framework\tests\TestCaseBase;
 
-class CsvReaderTest extends TestCaseBase
+class CsvReaderTest extends TestCase
 {
 	public function testReadFile()
 	{

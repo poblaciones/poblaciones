@@ -3,15 +3,15 @@
 namespace helena\tests\backoffice;
 
 use helena\classes\Session;
+use helena\classes\TestCase;
 use helena\services\backoffice\WorkService;
-use minga\framework\tests\TestCaseBase;
 
-class WorkServiceTest extends TestCaseBase
+class WorkServiceTest extends TestCase
 {
 	public function testGetWorkInfo()
 	{
 		$this->markTestIncomplete('Da error, El elemento no existe ne la base de datos');
-		$workId = 37;
+		$workId = $this->Get();
 		$this->assertNull(Session::CheckIsWorkReader($workId));
 		$controller = new WorkService();
 		$ret = $controller->GetWorkInfo($workId);

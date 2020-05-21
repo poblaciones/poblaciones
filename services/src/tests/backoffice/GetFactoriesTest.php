@@ -2,6 +2,7 @@
 
 namespace helena\tests\backoffice;
 
+use helena\classes\TestCase;
 use helena\entities\backoffice\DraftInstitution;
 use helena\entities\backoffice\DraftMetadataFile;
 use helena\entities\backoffice\DraftMetricVersionLevel;
@@ -13,9 +14,8 @@ use helena\services\backoffice\InstitutionService;
 use helena\services\backoffice\MetadataFileService;
 use helena\services\backoffice\MetricService;
 use helena\services\backoffice\SourceService;
-use minga\framework\tests\TestCaseBase;
 
-class GetFactoriesTest extends TestCaseBase
+class GetFactoriesTest extends TestCase
 {
 	public function testGetFactories()
 	{

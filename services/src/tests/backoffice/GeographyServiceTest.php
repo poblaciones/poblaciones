@@ -2,11 +2,11 @@
 
 namespace helena\tests\backoffice;
 
+use helena\classes\TestCase;
 use helena\entities\backoffice\Geography;
 use helena\services\backoffice\GeographyService;
-use minga\framework\tests\TestCaseBase;
 
-class GeographyServiceTest extends TestCaseBase
+class GeographyServiceTest extends TestCase
 {
 	public function testGetAllGeographies()
 	{

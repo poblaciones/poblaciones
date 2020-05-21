@@ -4,25 +4,25 @@ namespace helena\tests\frontend;
 
 use helena\classes\App;
 use helena\classes\Session;
+use helena\classes\TestCase;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Frame;
 use helena\services\frontend\TileDataService;
-use minga\framework\tests\TestCaseBase;
 
-class TileDataServiceTest extends TestCaseBase
+class TileDataServiceTest extends TestCase
 {
 	public function testGetTileData()
 	{
-		$l = 3401;
-		$v = 201;
-		$a = 8501;
+		$l = $this->Get('l');
+		$v = $this->Get('v');
+		$a = $this->Get('a');
 
-		$u = 'N';
-		$x = 86;
-		$y = 156;
-		$e = '-36.31489,-56.568096;-38.33281,-61.822308';
-		$z = 8;
-		$b = null;
+		$u = $this->Get('u');
+		$x = $this->Get('x');
+		$y = $this->Get('y');
+		$e = $this->Get('e');
+		$z = $this->Get('z');
+		$b = $this->Get('b');
 
 		$controller = new TileDataService();
 		$metricId = $l;

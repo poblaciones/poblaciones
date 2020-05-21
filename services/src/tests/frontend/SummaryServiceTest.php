@@ -4,23 +4,22 @@ namespace helena\tests\frontend;
 
 use helena\classes\App;
 use helena\classes\Session;
+use helena\classes\TestCase;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Frame;
 use helena\services\frontend\SummaryService;
-use minga\framework\tests\TestCaseBase;
 
-class SummaryServiceTest extends TestCaseBase
+class SummaryServiceTest extends TestCase
 {
 	public function testGetSummary()
 	{
-		$l = 3401;
-		$v = 201;
-		$a = 8501;
+		$l = $this->Get('l');
+		$v = $this->Get('v');
+		$a = $this->Get('a');
 
-		$u = 'N';
-		$e = '-36.31489,-56.568096;-38.33281,-61.822308';
-		$z = 8;
-
+		$u = $this->Get('u');
+		$e = $this->Get('e');
+		$z = $this->Get('z');
 
 		$controller = new SummaryService();
 		$metricId = $l;

@@ -3,21 +3,21 @@
 namespace helena\tests\backoffice;
 
 use helena\classes\Session;
+use helena\classes\TestCase;
 use helena\services\backoffice\DatasetService;
-use minga\framework\tests\TestCaseBase;
 
-class DatasetServiceTest extends TestCaseBase
+class DatasetServiceTest extends TestCase
 {
 	public function testGetDatasetData()
 	{
-		$k = 119;
-		$filterscount = 0;
-		$groupscount = 0;
-		$pagenum = 0;
-		$pagesize = 50;
-		$recordstartindex = 0;
-		$recordendindex = 50;
-		$page = 0;
+		$k = $this->Get('k');
+		$filterscount = $this->Get('filterscount');
+		$groupscount = $this->Get('groupscount');
+		$pagenum = $this->Get('pagenum');
+		$pagesize = $this->Get('pagesize');
+		$recordstartindex = $this->Get('recordstartindex');
+		$recordendindex = $this->Get('recordendindex');
+		$page = $this->Get('page');
 
 		$datasetId = $k;
 

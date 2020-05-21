@@ -2,16 +2,23 @@
 
 namespace helena\tests\frontend;
 
+use helena\classes\TestCase;
 use helena\controllers\frontend\cHandle;
 use minga\framework\Context;
 use minga\framework\Reflection;
-use minga\framework\tests\TestCaseBase;
 
-class cHandleTest extends TestCaseBase
+class cHandleTest extends TestCase
 {
-	private $workId = 3801;
-	private $metricId = 5101;
-	private $regionId = 15476;
+	private $workId;
+	private $metricId;
+	private $regionId;
+
+	public function setUp()
+	{
+		$this->workId = $this->Get('workId');
+		$this->metricId = $this->Get('metricId');
+		$this->regionId = $this->Get('regionId');
+	}
 
 	/**
 	 * @dataProvider CacheSettingProvider
