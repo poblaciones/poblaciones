@@ -2,12 +2,12 @@
 
 namespace helena\tests\frontend;
 
+use helena\classes\TestCase;
 use helena\entities\frontend\metric\MetricGroupInfo;
 use helena\entities\frontend\metric\MetricInfo;
 use helena\services\frontend\MetricService;
-use minga\framework\tests\TestCaseBase;
 
-class MetricServiceTest extends TestCaseBase
+class MetricServiceTest extends TestCase
 {
 	public function testGetFabMetrics()
 	{

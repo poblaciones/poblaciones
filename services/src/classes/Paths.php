@@ -119,4 +119,9 @@ class Paths
 		return self::GetTestsLocalPath() . "/data";
 	}
 
+	public static function GetTestsConfigLocalPath()
+	{
+		return self::GetTestsLocalPath() . "/config";
+	}
+
 }

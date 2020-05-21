@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * Renombrar este archivo a customSettings.php y completar el array con el mismo
+ * formato que la configuración default de los tests (defaultSettings.php), el
+ * código hará array merge de ese archivo con este, sobreescribiendo los valores
+ * de allí con los de aquí.
+ *
+ * El archivo customSettings.php no se agrega al repositorio ya que son valores
+ * propios del entorno del desarrollador.
+ *
+ */
+
+
+return [
+	// Completar acá.
+];
+

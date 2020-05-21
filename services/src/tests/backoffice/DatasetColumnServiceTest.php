@@ -4,20 +4,20 @@ namespace helena\tests\backoffice;
 
 use helena\classes\Account;
 use helena\classes\Session;
+use helena\classes\TestCase;
 use helena\entities\backoffice\DraftDatasetColumn;
 use helena\services\backoffice\DatasetColumnService;
-use minga\framework\tests\TestCaseBase;
 
-class DatasetColumnServiceTest extends TestCaseBase
+class DatasetColumnServiceTest extends TestCase
 {
 	public function setUp()
 	{
-		Account::Impersonate('test');
+		Account::Impersonate($this->GetGlobal('dbuser'));
 	}
 
 	public function testGetDatasetColumns()
 	{
-		$datasetId = 119;
+		$datasetId = $this->Get();
 		$this->assertNull(Session::CheckIsDatasetReader($datasetId));
 		$controller = new DatasetColumnService();
 		$ret = $controller->GetDatasetColumns($datasetId);
@@ -30,7 +30,7 @@ class DatasetColumnServiceTest extends TestCaseBase
 
 	public function testGetDatasetColumnsLabels()
 	{
-		$datasetId = 119;
+		$datasetId = $this->Get();
 		$this->assertNull(Session::CheckIsDatasetReader($datasetId));
 		$controller = new DatasetColumnService();
 		$ret = $controller->GetDatasetColumnsLabels($datasetId);

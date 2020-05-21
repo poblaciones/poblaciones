@@ -3,10 +3,10 @@
 namespace helena\tests\classes;
 
 use helena\classes\App;
+use helena\classes\TestCase;
 use helena\entities\backoffice\DraftMetadata;
-use minga\framework\tests\TestCaseBase;
 
-class OrmSerializeTest extends TestCaseBase
+class OrmSerializeTest extends TestCase
 {
 	public function testOrmSerialize()
 	{

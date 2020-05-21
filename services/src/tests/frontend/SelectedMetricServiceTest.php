@@ -2,13 +2,13 @@
 
 namespace helena\tests\frontend;
 
+use helena\classes\TestCase;
 use helena\entities\frontend\metric\MetricInfo;
 use helena\entities\frontend\metric\SelectedMetric;
 use helena\services\frontend\SelectedMetricService;
 use minga\framework\Context;
-use minga\framework\tests\TestCaseBase;
 
-class SelectedMetricServiceTest extends TestCaseBase
+class SelectedMetricServiceTest extends TestCase
 {
 	/**
 	 * @dataProvider CacheSettingProvider
@@ -17,7 +17,7 @@ class SelectedMetricServiceTest extends TestCaseBase
 	{
 		Context::Settings()->Cache()->Enabled = $cacheSetting;
 
-		$metricId = 3401;
+		$metricId = $this->Get();
 		$controller = new SelectedMetricService();
 		$ret = $controller->PublicGetSelectedMetric($metricId);
 		$this->assertInstanceOf(SelectedMetric::class, $ret);

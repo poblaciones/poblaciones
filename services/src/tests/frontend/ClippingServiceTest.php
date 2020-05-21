@@ -2,6 +2,7 @@
 
 namespace helena\tests\frontend;
 
+use helena\classes\TestCase;
 use helena\entities\frontend\clipping\ClippingInfo;
 use helena\entities\frontend\clipping\ClippingLevelInfo;
 use helena\entities\frontend\clipping\SelectionInfo;
@@ -10,9 +11,8 @@ use helena\entities\frontend\geometries\Coordinate;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Frame;
 use helena\services\frontend\ClippingService;
-use minga\framework\tests\TestCaseBase;
 
-class ClippingServiceTest extends TestCaseBase
+class ClippingServiceTest extends TestCase
 {
 	public function testGetDefaultFrame()
 	{
@@ -71,37 +71,6 @@ class ClippingServiceTest extends TestCaseBase
 
 	public function ParamProvider()
 	{
-		return [
-			[
-				'a' => 86,
-				'e' => '-36.321756,-56.568096;-38.339494,-61.822308',
-				'z' => 8,
-				'r' => 13903,
-				'c' => null,
-				'retHasCanvas' => true,
-				'retHasEnvelope' => true,
-				'retHasLevels' => true,
-			],
-		  	[
-				'a' => 90,
-				'e' => '-36.321756,-56.568096;-38.339494,-61.822308',
-				'z' => 8,
-				'r' => null,
-				'c' => null,
-				'retHasCanvas' => false,
-				'retHasEnvelope' => false,
-				'retHasLevels' => true,
-			],
-		  	[
-				'a' => 90,
-				'e' => '-37.359188,-59.742139;-37.374946,-59.783188',
-				'z' => 15,
-				'r' => 19517,
-				'c' => '-37.366931,-59.761601;0.005383,0.006773',
-				'retHasCanvas' => true,
-				'retHasEnvelope' => true,
-				'retHasLevels' => true,
-			],
-		];
+		return $this->Get();
 	}
 }

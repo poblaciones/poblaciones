@@ -3,11 +3,11 @@
 namespace helena\tests\classes;
 
 use helena\classes\App;
+use helena\classes\TestCase;
 use helena\db\admin\ContactModel;
 use helena\entities\admin\Contact;
-use minga\framework\tests\TestCaseBase;
 
-class DbTest extends TestCaseBase
+class DbTest extends TestCase
 {
 	public function testDbSaveWithRollback()
 	{

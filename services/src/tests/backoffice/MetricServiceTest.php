@@ -4,14 +4,14 @@ namespace helena\tests\backoffice;
 
 use helena\classes\Account;
 use helena\classes\Session;
+use helena\classes\TestCase;
 use helena\services\backoffice\MetricService;
-use minga\framework\tests\TestCaseBase;
 
-class MetricServiceTest extends TestCaseBase
+class MetricServiceTest extends TestCase
 {
 	public function setUp()
 	{
-		Account::Impersonate('test');
+		Account::Impersonate($this->GetGlobal('dbuser'));
 	}
 
 	public function testGetCartographyMetrics()
@@ -33,7 +33,7 @@ class MetricServiceTest extends TestCaseBase
 
 	public function testGetWorkMetricVersions()
 	{
-		$workId = 37;
+		$workId = $this->Get();
 		$this->assertNull(Session::CheckIsWorkReader($workId));
 		$controller = new MetricService();
 		$ret = $controller->GetWorkMetricVersions($workId);
@@ -42,7 +42,7 @@ class MetricServiceTest extends TestCaseBase
 
 	public function testGetDatasetMetricVersionLevels()
 	{
-		$datasetId = 119;
+		$datasetId = $this->Get();
 		$this->assertNull(Session::CheckIsDatasetReader($datasetId));
 		$controller = new MetricService();
 		$ret = $controller->GetDatasetMetricVersionLevels($datasetId);
@@ -55,12 +55,12 @@ class MetricServiceTest extends TestCaseBase
 
 	public function testGetColumnDistributions()
 	{
-		$k = 209;
-		$c = 'O';
-		$ci = 9744;
-		$o = 'O';
-		$oi = 9741;
-		$s = 100;
+		$k = $this->Get('k');
+		$c = $this->Get('c');
+		$ci = $this->Get('ci');
+		$o = $this->Get('o');
+		$oi = $this->Get('oi');
+		$s = $this->Get('s');
 
 		$this->assertNull(Session::CheckIsDatasetReader($k));
 		$controller = new MetricService();

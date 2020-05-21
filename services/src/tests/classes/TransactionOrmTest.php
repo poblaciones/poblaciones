@@ -3,11 +3,11 @@
 namespace helena\tests\classes;
 
 use helena\classes\App;
+use helena\classes\TestCase;
 use helena\entities\backoffice\DraftContact;
 use minga\framework\ErrorException;
-use minga\framework\tests\TestCaseBase;
 
-class TransactionOrmTest extends TestCaseBase
+class TransactionOrmTest extends TestCase
 {
 	public function testOrmTransaction()
 	{
