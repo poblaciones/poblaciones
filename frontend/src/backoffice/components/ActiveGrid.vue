@@ -93,11 +93,13 @@ import axios from "axios";
 import Fix from './Fix.vue';
 import DataPager from "@/backoffice/classes/DataPager";
 import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
-
+import str from '@/common/js/str';
 import Localization from "@/backoffice/classes/Localization";
 import JqxGrid from "jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue";
 import JqxTooltip from "jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue";
 // https://www.jqwidgets.com/vue/vue-grid/
+
+var columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
 export default {
   name: "activeGrid",
@@ -157,12 +159,30 @@ export default {
 			// 1. se fija si cambió... si es igual, sale
 			var column = this.Dataset.GetColumnFromVariable(cell.datafield);
 			var setValues = [{ columnId: column.Id, value: value }];
-			var previousValue = this.Grid.getcellvalue(cell.row, cell.datafield);
+			var previousValue = cell.value;
 			if ('' + previousValue === '' + value) {
 				return true;
 			}
 			// 2. valida
-
+			if (column.Format === columnFormatEnum.NUMBER) {
+				// numérico
+				if (!str.isNumericFlex(value)) {
+					return {
+						result: false, message: "El valor debe ser numérico."
+					};
+				}
+			} else if (column.Format === columnFormatEnum.STRING) {
+				if (value && value.length > column.FieldWidth) {
+					if (column.FieldWidth == 1) {
+						return {
+							result: false, message: "El valor no puede tener más de un caracter."
+						};
+					}
+					return {
+						result: false, message: "El valor no puede exceder los " + column.FieldWidth + " caracteres."
+					};
+				}
+			}
 			// cell.format: d0, '', d5 ()
 			// return { result: false, message: "Quantity should be in the 0-100 interval" };
 

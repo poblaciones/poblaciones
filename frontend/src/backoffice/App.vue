@@ -73,6 +73,10 @@ html, body {
 }
 
 
+.jqx-grid-content :first-child
+{
+	overflow: initial!important
+}
 .gm-fullscreen-control {
 	transform: scale(0.8);
 }

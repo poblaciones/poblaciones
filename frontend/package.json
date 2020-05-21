@@ -33,7 +33,7 @@
 				"eslint-plugin-vue": "^6.2.2",
 				"geojson2svg": "^1.2.3",
 				"html2canvas": "^1.0.0-rc.3",
-				"jqwidgets-scripts": "^7.2.0",
+				"jqwidgets-scripts": "^9.1.6",
 				"js-cookie": "^2.2.0",
 				"lodash": ">=4.17.13",
 				"lodash.debounce": "^4.0.8",

@@ -8,6 +8,8 @@ import LevelGenerator from './LevelGenerator';
 import Vue from 'vue';
 import err from '@/common/js/err';
 
+var columnFormatEnum = require("@/common/enums/columnFormatEnum");
+
 export default ActiveDataset;
 
 function ActiveDataset(work, dataset) {
@@ -645,7 +647,7 @@ ActiveDataset.prototype.GetNumericWithLabelColumns = function () {
 	}
 	var columns = [];
 	for (let i = 0; i < this.Columns.length; i++) {
-		if (this.Columns[i].Format === 5) {
+		if (this.Columns[i].Format === columnFormatEnum.NUMBER) {
 			var labels = this.Labels[this.Columns[i].Id];
 			if (labels && labels.length > 0) {
 				columns.push(this.Columns[i]);
@@ -661,7 +663,7 @@ ActiveDataset.prototype.GetNumericColumns = function () {
 	}
 	var columns = [];
 	for (let i = 0; i < this.Columns.length; i++) {
-		if (this.Columns[i].Format === 5) {
+		if (this.Columns[i].Format === columnFormatEnum.NUMBER) {
 			columns.push(this.Columns[i]);
 		}
 	}
@@ -674,7 +676,7 @@ ActiveDataset.prototype.GetTextColumns = function () {
 	}
 	var columns = [];
 	for (let i = 0; i < this.Columns.length; i++) {
-		if (this.Columns[i].Format === 1) {
+		if (this.Columns[i].Format === columnFormatEnum.STRING) {
 			columns.push(this.Columns[i]);
 		}
 	}
@@ -693,7 +695,7 @@ ActiveDataset.prototype.GetColumnUniqueValues = function () {
 	}
 	var columns = [];
 	for (let i = 0; i < this.Columns.length; i++) {
-		if (this.Columns[i].Format === 5) {
+		if (this.Columns[i].Format === columnFormatEnum.NUMBER) {
 			columns.push(newColumn);
 		}
 	}
@@ -725,7 +727,7 @@ ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors, validate
 			newColumn.filtertype = 'list';
 			newColumn.filteritems = this.getLabelList(currentLabels);
 		}
-		if (datasetColumn.Format === 5) {
+		if (datasetColumn.Format === columnFormatEnum.NUMBER) {
 			newColumn.cellsformat = 'd' + datasetColumn.Decimals;
 		}
 		newColumn.cellsalign = this.spssAlignmentToGridAligment(datasetColumn.Alignment);
@@ -800,7 +802,7 @@ ActiveDataset.prototype.GetDataFieldsForJqxGrid = function (showingErrors) {
 			let datafield = {};
 			datafield.name = column.Variable;
 			datafield.map = '' + datafields.length;
-			if (column.Format === 5) {
+			if (column.Format === columnFormatEnum.NUMBER) {
 				datafield.type = 'number';
 			} else {
 				datafield.type = 'string';

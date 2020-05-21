@@ -31,6 +31,22 @@ module.exports = {
 	isNumeric(n) {
 		return !isNaN(parseFloat(n)) && isFinite(n);
 	},
+	isNumericFlex(n) {
+		var t = '' + n;
+		t = t.replace(",", ".");
+		if (this.countMatches(t, ".") > 1) {
+			return false;
+		}
+		return !isNaN(parseFloat(t)) && isFinite(t);
+	},
+	countMatches(cad, item) {
+		var ret = 0;
+		var i = 0;
+		while ((i = cad.indexOf(item, i) + 1) !== 0) {
+			ret++;
+		}
+		return ret;
+	},
 	IsIntegerGreaterThan0(str) {
 		let n = Number(str);
 		return Number.isInteger(n) && n > 0;

@@ -72,6 +72,7 @@ import Localization from '@/backoffice/classes/Localization';
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue';
 import JqxTooltip from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue';
 // https://www.jqwidgets.com/vue/vue-grid/
+var columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
 export default {
 	name: 'columnsGrid',
@@ -191,7 +192,7 @@ export default {
 			let ret = [];
 			for(let i = 0; i < selectedRows.length; i++) {
 				let col = this.Dataset.GetColumnById(selectedRows[i]);
-				if (col.Format !== 1) {
+				if (col.Format !== columnFormatEnum.STRING) {
 					return false;
 				}
 			}

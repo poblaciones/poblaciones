@@ -116,6 +116,7 @@ import Localization from '@/backoffice/classes/Localization';
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue';
 import JqxTooltip from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue';
 // https://www.jqwidgets.com/vue/vue-grid/
+var columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
 export default {
 	name: 'valuesPopup',
@@ -353,13 +354,13 @@ export default {
 				alert("Ya existe un elemento para el valor '" + this.CurrentVarValue + "'.");
 				return;
 			}
-			if (this.column.Format == 1) {
+			if (this.column.Format == columnFormatEnum.STRING) {
 				// texto
 				if (this.CurrentVarValue.length > this.column.FieldWidth) {
 					alert("La longitud del valor debe ser menor o igual a " + this.column.FieldWidth + " caracteres.");
 					return;
 				}
-			} else if (this.column.Format == 5) {
+			} else if (this.column.Format == columnFormatEnum.NUMBER) {
 				// numérico
 				if (this.CurrentVarValue.indexOf('.') >= 0 || this.CurrentVarValue.indexOf(',') >= 0) {
 					alert("El valor debe ser un número entero (sin decimales).");
