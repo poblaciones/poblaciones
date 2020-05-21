@@ -96,7 +96,7 @@ class Variable
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\MetricVersionLevel")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="mvv_metric_version_level_id", referencedColumnName="mvr_id", nullable=true)
+     *   @ORM\JoinColumn(name="mvv_metric_version_level_id", referencedColumnName="mvl_id", nullable=true)
      * })
      */
     private $MetricVersionLevel;
