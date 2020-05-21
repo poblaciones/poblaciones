@@ -22,7 +22,3 @@ parameters:
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\point.#'
 		- '#Function time_elapsed not found.#'
 		- '#Function outwrite not found.#'
-		- '#Function vd not found.*#'
-		- '#Function pr not found.*#'
-		- '#Function ec not found.*#'
-
