@@ -14,6 +14,9 @@ parameters:
 	autoload_files:
 		- vendor/autoload.php
 	ignoreErrors:
+		- '#Function vd not found.#'
+		- '#Function pr not found.#'
+		- '#Function ec not found.#'
 		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\geometry.#'
 		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\point.#'
 		- '#Property .* has unknown class helena\\entities\\backoffice\\geometry as its type.#'
