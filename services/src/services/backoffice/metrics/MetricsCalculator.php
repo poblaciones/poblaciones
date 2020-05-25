@@ -135,12 +135,12 @@ class MetricsCalculator
 		$value = $this->GetValueFields($source, $output, $cols);
 		$total = $this->GetTotalFields($source, $cols);
 
-		$crossProduct = 'SELECT dataset.id datid,
+		$crossProduct = 'SELECT id datid,
 				' . $coords['crossField'] . '
 				' . $description['crossField'] . '
 				' . $value['crossField'] . '
 				' . $total['crossField'] . '
-				ST_DISTANCE_SPHERE(dataset.centroid, sna_location) distance
+				ST_DISTANCE_SPHERE(centroid, sna_location) distance
 			FROM
 				(SELECT id, centroid
 				FROM ' . $datasetTable . '
@@ -216,6 +216,8 @@ class MetricsCalculator
 		}
 
 		$limit = round(self::CrossProductMax / $snapshotRows);
+		if($limit == 0)
+			$limit = 1;
 		return [
 			'limit' => $limit,
 			'totalSlices' => ceil($datasetRows / $limit),
@@ -232,7 +234,7 @@ class MetricsCalculator
 	private function GetDistanceWhere($output)
 	{
 		if($output['HasMaxDistance'])
-			return ' AND ST_DISTANCE_SPHERE(dataset.centroid, sna_location) <= ?';
+			return ' AND ST_DISTANCE_SPHERE(centroid, sna_location) <= ?';
 		return '';
 	}
 
