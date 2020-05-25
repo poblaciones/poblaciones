@@ -36,6 +36,16 @@ export default {
 		},
 		canEdit: Boolean,
 	},
+	methods: {
+		validate() {
+			if (this.newMetric.Output.HasMaxDistance
+				&& str.IsIntegerGreaterThan0(this.newMetric.Output.MaxDistance) == false) {
+				alert("Debe ingresar la distancia máxima en kms.");
+				return false;
+			}
+			return true;
+		}
+	},
 	watch: {
 		"newMetric.Output.MaxDistance"() {
 			if(this.newMetric.Output.MaxDistance != null

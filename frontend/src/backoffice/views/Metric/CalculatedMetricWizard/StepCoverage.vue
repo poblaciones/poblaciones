@@ -30,6 +30,16 @@ export default {
 		},
 		canEdit: Boolean,
 	},
+	methods: {
+		validate() {
+			if (this.newMetric.Area.IsInclusionPoint
+				&& str.IsIntegerGreaterThan0(this.newMetric.Area.InclusionDistance) == false) {
+				alert("Debe ingresar la distancia máxima en kms.");
+				return false;
+			}
+			return true;
+		}
+	},
 	watch: {
 		"newMetric.Area.InclusionDistance"() {
 			if(this.newMetric.Area.InclusionDistance != null

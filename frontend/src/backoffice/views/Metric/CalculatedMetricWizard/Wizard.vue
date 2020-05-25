@@ -11,27 +11,19 @@
 			</md-dialog-title>
 
 			<md-dialog-content>
-				<div v-if="step == 1">
-					<step-type ref="stepType" />
-				</div>
-				<div v-if="step == 2">
-					<step-source :canEdit="canEdit" :newMetric="newMetric" />
-				</div>
-				<div v-if="step == 3 && newMetric.Type == 'area'">
-					<step-coverage :canEdit="canEdit" :newMetric="newMetric" />
-				</div>
-				<div v-if="isLast">
-					<step-distance-output v-if="newMetric.Type == 'distance'" :canEdit="canEdit" :newMetric="newMetric" />
-					<step-area-output v-if="newMetric.Type == 'area'" :canEdit="canEdit" :newMetric="newMetric" />
-				</div>
+				<step-type v-show="currentStep == stepType" ref="stepType" />
+				<step-source v-show="currentStep == stepSource" ref="stepSource" :newMetric="newMetric" />
+				<step-coverage v-show="currentStep == stepCoverage" ref="stepCoverage" :newMetric="newMetric" />
+				<step-distance-output v-show="currentStep == stepDistanceOutput" ref="stepDistanceOutput" :newMetric="newMetric" />
+				<step-area-output  v-show="currentStep == stepAreaOutput" ref="stepAreaOutput" :newMetric="newMetric" />
 			</md-dialog-content>
 
 			<md-dialog-actions>
 				<div v-if="columnExists" style='color:red;margin:auto'>Sobreescribiendo</div>
 				<div>
 					<md-button @click="openPopup = false" style="float: left">Cancelar</md-button>
-					<md-button class="md-primary" :disabled="step == 1 || finish == false" @click="prev">Anterior</md-button>
-					<md-button class="md-primary" :disabled="finish == false" v-if="!isLast" @click="next">Siguiente</md-button>
+					<md-button class="md-primary" :disabled="step == 1 || processing" @click="prev">Anterior</md-button>
+					<md-button class="md-primary" :disabled="processing" v-if="!isLast" @click="next">Siguiente</md-button>
 					<md-button class="md-primary" v-if="isLast" @click="save">Finalizar</md-button>
 				</div>
 			</md-dialog-actions>
@@ -45,8 +37,7 @@ import StepSource from './StepSource.vue';
 import StepCoverage from './StepCoverage.vue';
 import StepAreaOutput from './StepAreaOutput.vue';
 import StepDistanceOutput from './StepDistanceOutput.vue';
-import axios from 'axios';
-import str from '@/common/js/str';
+
 
 export default {
 	name: 'calculateMetric',
@@ -62,8 +53,11 @@ export default {
 			step: 1,
 			newMetric: {},
 			openPopup: false,
-			columnExists: false,
-			finish: true,
+			processing: true,
+			steps: {
+				'area': ['stepType', 'stepSource', 'stepCoverage', 'stepAreaOutput'],
+				'distance': ['stepType', 'stepSource', 'stepDistanceOutput']
+			}
 		};
 	},
 	computed: {
@@ -73,37 +67,42 @@ export default {
 		Dataset() {
 			return window.Context.CurrentDataset;
 		},
+		columnExists() {
+			return (this.$refs.stepSource.columnExists);
+		},
 		isLast() {
-			return this.step == 4
-				|| (this.step == 3 && this.newMetric.Type != 'area');
+			return this.calculateStep(this.step + 1) === null;
 		},
 		maxSteps() {
-			if(this.step == 1) {
+			if (this.step == 1) {
 				return '.';
-			} else if(this.newMetric.Type == 'area') {
+			} else if (this.newMetric.Type == 'area') {
 				return ' de 4.';
 			}
 			return ' de 3.';
 		},
+		currentStep() {
+			return this.calculateStep(this.step);
+		},
 		segun() {
 			let ret = '.';
-			if(this.newMetric.Type == 'formula') {
+			if (this.newMetric.Type == 'formula') {
 				//TODO: definir.
 				ret = ' según fórmula.';
-			} else if(this.newMetric.Type == 'distance') {
+			} else if (this.newMetric.Type == 'distance') {
 				ret = ' según distancia.';
-				if(this.step == 2) {
+				if (this.step == 2) {
 					ret += ' > Objetivo.';
-				} else if(this.step == 3) {
+				} else if (this.step == 3) {
 					ret += ' > Objetivo > Salida.';
 				}
-			} else if(this.newMetric.Type == 'area') {
+			} else if (this.newMetric.Type == 'area') {
 				ret = ' según contenido.';
-				if(this.step == 2) {
+				if (this.step == 2) {
 					ret += ' > Objetivo.';
-				} else if(this.step == 3) {
+				} else if (this.step == 3) {
 					ret += ' > Objetivo > Área.';
-				} else if(this.step == 4) {
+				} else if (this.step == 4) {
 					ret += ' > Objetivo > Área > Salida.';
 				}
 			}
@@ -161,27 +160,27 @@ export default {
 				},
 			};
 		},
+		calculateStep(step) {
+			if (this.step == 1) {
+				return "stepType";
+			}
+			var steps = this.steps[this.newMetric.Type];
+			if (step < steps.length) {
+				return steps[step];
+			} else {
+				return null;
+			}
+		},
 		next() {
-			if(this.validate() == false) {
+			if (!this.validate()) {
 				return;
 			}
-			//TODO: hack no funciona bien, hay que esperar que termine axios CalculatedMetricExists
-			if(this.step == 2 && this.finish == false) {
-				return;
-			}
-
 			if (this.step === 1) {
 				this.defineType(this.$refs.stepType.type);
 			}
-			if(this.step < 4) {
-				this.step++;
-			}
+			this.step++;
 		},
 		prev() {
-			//TODO: hack no funciona bien, hay que esperar que termine axios CalculatedMetricExists
-			if(this.step == 2 && this.finish == false) {
-				return;
-			}
 			if(this.step > 1) {
 				this.step--;
 			}
@@ -197,7 +196,7 @@ export default {
 			this.openPopup = true;
 		},
 		save() {
-			if(this.validate() == false) {
+			if (!this.validate()) {
 				return;
 			}
 			let stepper = this.$refs.stepper;
@@ -236,69 +235,31 @@ export default {
 					break;
 				case STEP_COMPLETED:
 					stepper.complete = 'Creación exitosa.';
+					this.openPopup = false;
 					break;
 				default:
 					stepper.error = 'Paso desconocido.';
 					break;
 			}
-
-			//TODO: Acá hay que cerrar o qué?
-			this.openPopup = false;
 		},
 		validate() {
-			if(this.step == 2) {
-				if(this.newMetric.SourceMetric.Metric == null) {
-					alert("Debe seleccionar un indicador.");
-					return false;
-				}
-				if(this.newMetric.SelectedVersion == null) {
-					alert("Debe seleccionar una versión.");
-					return false;
-				}
-				if(this.newMetric.SelectedLevel == null) {
-					alert("Debe seleccionar un nivel.");
-					return false;
-				}
-				if(this.newMetric.SelectedVariable == null) {
-					alert("Debe seleccionar una variable.");
-					return false;
-				}
-				if(this.newMetric.Source.ValueLabelIds.length == 0) {
-					alert("Debe seleccionar al menos una categoría.");
-					return false;
-				}
-				const loc = this;
-				loc.finish = false;
-				axios.get(window.host + '/services/backoffice/CalculatedMetricExists', {
-					params: { k: loc.Dataset.properties.Id, v: loc.newMetric.Source.VariableId }
-				}).then(function (res) {
-					loc.columnExists = res.data.columnExists;
-					loc.finish = true;
-				}).catch(function (error) {
-					err.err('CalculatedMetricExists', error);
+			var loc = this;
+			var currentStepControl = this.$refs[this.currentStep];
+			if (currentStepControl.asyncValidate) {
+				loc.processing = true;
+				currentStepControl.asyncValidate().then(function () {
+					loc.processing = false;
+					return loc.validate();
+				}).catch(function (ret) {
+					loc.processing = false;
+					return ret;
 				});
-
-				if(this.columnExists
-					&& confirm('El indicador ya fue calculado con este Dataset, ¿desea continuar y sobreescribirlo?') == false) {
-					return false;
-				}
 			}
-			if(this.step == 3) {
-				if(this.newMetric.Type == 'distance') {
-					if(this.newMetric.Output.HasMaxDistance
-						&& str.IsIntegerGreaterThan0(this.newMetric.Output.MaxDistance) == false) {
-						alert("Debe ingresar la distancia máxima en kms.");
-						return false;
-					}
-				} else if(this.newMetric.Type == 'area') {
-					if(this.newMetric.Area.IsInclusionPoint
-						&& str.IsIntegerGreaterThan0(this.newMetric.Area.InclusionDistance) == false) {
-						alert("Debe ingresar la distancia máxima en kms.");
-						return false;
-					}
-				}
+			if (currentStepControl.validate) {
+				return currentStepControl.validate();
+			} else {
+				return true;
 			}
-			return true;
 		},
 	},
 };

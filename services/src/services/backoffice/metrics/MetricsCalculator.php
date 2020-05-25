@@ -105,30 +105,29 @@ class MetricsCalculator
 		return $col->getField();
 	}
 
-	public function UpdateDatasetDistance($datasetId, $cols, $source, $output, $slice, $limit)
+	public function UpdateDatasetDistance($datasetId, $cols, $source, $output, $slice, $pageSize)
 	{
 		Profiling::BeginTimer();
-		try
-		{
-			$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-			$srcDataset = $this->GetSrcDataset($source['VariableId']);
 
-			$offset = $slice * $limit;
+		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+		$srcDataset = $this->GetSrcDataset($source['VariableId']);
 
-			$sql = $this->GetUpdateQuery($dataset->getTable(),
-			  	$this->getSnapshotTable($srcDataset),
-				$output, $cols, $source, $offset, $limit);
+		$offset = $slice * $pageSize;
 
-			$where = $this->GetDistanceWhereValues($output);
-			return App::Db()->exec($sql, $where);
-		}
-		finally
-		{
-			Profiling::EndTimer();
-		}
+		$sql = $this->GetUpdateQuery($dataset->getTable(),
+			  $this->getSnapshotTable($srcDataset),
+			$output, $cols, $source, $offset, $pageSize);
+
+		$where = $this->GetDistanceWhereParams($output);
+		echo $sql;
+		throw new \Exception('aa');
+		$ret = App::Db()->exec($sql, $where);
+
+		Profiling::EndTimer();
+		return $ret;
 	}
 
-	private function GetUpdateQuery($datasetTable, $snapshotTable, $output, $cols, $source, $offset, $count)
+	private function GetUpdateQuery($datasetTable, $snapshotTable, $output, $cols, $source, $offset, $pageSize)
 	{
 		$coords = $this->GetCoordsFields($output, $cols);
 		$description = $this->GetDescriptionFields($output, $cols);
@@ -145,7 +144,7 @@ class MetricsCalculator
 				(SELECT id, centroid
 				FROM ' . $datasetTable . '
 				WHERE centroid IS NOT NULL
-				LIMIT ' . $offset . ',' . $count . ') dataset
+				LIMIT ' . $offset . ',' . $pageSize . ') dataset
 			CROSS JOIN
 				' . $snapshotTable . ' snap
 			WHERE
@@ -210,15 +209,15 @@ class MetricsCalculator
 		if($snapshotRows == 0)
 		{
 			return [
-				'limit' => $datasetRows,
+				'pageSize' => $datasetRows,
 				'totalSlices' => 1,
 			];
 		}
 
-		$limit = round(self::CrossProductMax / $snapshotRows);
+		$pageSize = round(self::CrossProductMax / $snapshotRows);
 		return [
-			'limit' => $limit,
-			'totalSlices' => ceil($datasetRows / $limit),
+			'pageSize' => $pageSize,
+			'totalSlices' => ceil($datasetRows / $pageSize),
 		];
 	}
 
@@ -243,7 +242,7 @@ class MetricsCalculator
 		return '';
 	}
 
-	private function GetDistanceWhereValues($output)
+	private function GetDistanceWhereParams($output)
 	{
 		if($output['HasMaxDistance'])
 			return [(int)$output['MaxDistance']];

@@ -30,7 +30,7 @@
 				Categorías
 			</div>
 			<div v-if="valueLabels.length > 1" class="md-layout-item md-size-30 md-small-size-50">
-				<md-checkbox class="md-primary" v-model="todos" @change="selectAll">[Seleccionar todos] </md-checkbox>
+				<md-checkbox class="md-primary" v-model="allCategories" @change="selectAll">[Seleccionar todos] </md-checkbox>
 			</div>
 			<div v-for='valueLabel in valueLabels' :key='valueLabel.Id' :value='valueLabel.Id'
 				  class="md-layout-item md-size-30 md-small-size-50">
@@ -43,9 +43,8 @@
 
 <script>
 import SearchPopup from '@/backoffice/components/SearchPopup.vue';
-import axios from 'axios';
 import err from '@/common/js/err';
-import arr from '@/common/js/arr';
+import axiosClient from '@/common/js/axiosClient';
 
 export default {
 	//Step 2
@@ -64,7 +63,8 @@ export default {
 	},
 	data() {
 		return {
-			todos: false,
+			allCategories: false,
+			columnExists: false,
 		};
 	},
 	computed: {
@@ -120,26 +120,58 @@ export default {
 			this.newMetric.SelectedVariable = null;
 
 			const loc = this;
-			axios.get(window.host + '/services/metrics/GetSelectedMetric', {
-				params: { l: metric.Id }
-			}).then(function (res) {
+			axiosClient.getPromise(window.host + '/services/metrics/GetSelectedMetric',
+				{ l: metric.Id }, 'consultar el indicador').then(function (res) {
 				loc.newMetric.SourceMetric = res.data;
 				if(res.data.Versions.length > 0) {
 					loc.newMetric.SelectedVersion = res.data.Versions[res.data.Versions.length - 1];
 				}
-			}).catch(function (error) {
-				err.err('Step Source', error);
 			});
 		},
 		selectAll() {
 			this.newMetric.Source.ValueLabelIds = [];
-			if(this.todos) {
+			if (this.allCategories) {
 				const loc = this;
 				this.valueLabels.forEach(function(item) {
 					loc.newMetric.Source.ValueLabelIds.push(item.Id);
 				});
 			}
 		},
+		asyncValidate() {
+			const loc = this;
+			return axiosClient(window.host + '/services/backoffice/CalculatedMetricExists',
+				{ k: loc.Dataset.properties.Id, v: loc.newMetric.Source.VariableId }, 'verificar si ya existe un indicador calculado'
+			).then(function (res) {
+				loc.columnExists = res.data.columnExists;
+			});
+		},
+		validate() {
+			if (this.newMetric.SourceMetric.Metric == null) {
+				alert("Debe seleccionar un indicador.");
+				return false;
+			}
+			if (this.newMetric.SelectedVersion == null) {
+				alert("Debe seleccionar una versión.");
+				return false;
+			}
+			if (this.newMetric.SelectedLevel == null) {
+				alert("Debe seleccionar un nivel.");
+				return false;
+			}
+			if (this.newMetric.SelectedVariable == null) {
+				alert("Debe seleccionar una variable.");
+				return false;
+			}
+			if (this.newMetric.Source.ValueLabelIds.length == 0) {
+				alert("Debe seleccionar al menos una categoría.");
+				return false;
+			}
+			if (this.columnExists
+				&& confirm('El indicador ya fue calculado con este Dataset, ¿desea continuar y sobreescribirlo?') == false) {
+				return false;
+			}
+			return true;
+		}
 	},
 	watch: {
 		"newMetric.SelectedVersion"() {
@@ -178,8 +210,8 @@ export default {
 			}
 		},
 		"newMetric.Source.ValueLabelIds"() {
-			if(this.todos && this.valueLabels.length != this.newMetric.Source.ValueLabelIds.length) {
-				this.todos = false;
+			if (this.allCategories && this.valueLabels.length != this.newMetric.Source.ValueLabelIds.length) {
+				this.allCategories = false;
 			}
 		}
 	}

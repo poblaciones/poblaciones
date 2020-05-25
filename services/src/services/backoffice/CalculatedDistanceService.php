@@ -55,11 +55,11 @@ class CalculatedDistanceService extends BaseService
 			case self::STEP_UPDATE_ROWS:
 				$slice = $this->state->Slice();
 				if($slice == 0)
-					$this->SetUpdateRowsStateLimits($datasetId, $source);
+					$this->SetUpdateRowsStatePageSizes($datasetId, $source);
 
-				$limit = $this->state->Get('limit');
+				$pageSize = $this->state->Get('pageSize');
 				$cols = $this->state->Get('cols');
-				$ret = $calculator->UpdateDatasetDistance($datasetId, $cols, $source, $output, $slice, $limit);
+				$ret = $calculator->UpdateDatasetDistance($datasetId, $cols, $source, $output, $slice, $pageSize);
 				if ($ret > 0)
 					$this->state->NextSlice();
 				else
@@ -76,11 +76,11 @@ class CalculatedDistanceService extends BaseService
 		return $this->state->ReturnState($this->IsCompleted());
 	}
 
-	private function SetUpdateRowsStateLimits($datasetId, $source)
+	private function SetUpdateRowsStatePageSizes($datasetId, $source)
 	{
 		$calculator = new MetricsCalculator();
 		$ret = $calculator->GetTotalSlices($datasetId, $source);
-		$this->state->Set('limit', $ret['limit']);
+		$this->state->Set('pageSize', $ret['pageSize']);
 		$this->state->SetTotalSlices($ret['totalSlices']);
 	}
 
