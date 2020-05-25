@@ -36,4 +36,25 @@ class DatasetColumnServiceTest extends TestCase
 		$ret = $controller->GetDatasetColumnsLabels($datasetId);
 		$this->assertIsArray($ret);
 	}
+
+	public function testGetCopyColumnName()
+	{
+		$controller = new DatasetColumnService();
+		$ret = $controller->GetCopyColumnName('dst_', 'Dataset (náme)', 'name');
+		$this->assertEquals('dst_Dataset_name_name', $ret);
+
+		$ret = $controller->GetCopyColumnName('', '1234567890', 'abc', 10);
+		$this->assertEquals('123456_abc', $ret);
+
+		$ret = $controller->GetCopyColumnName('', '1234567890', 'abcdefghij', 10);
+		$this->assertEquals('_abcdefghi', $ret);
+
+		$ret = $controller->GetCopyColumnName('p_', '1234567890', 'abcdefghij', 10);
+		$this->assertEquals('p__abcdefg', $ret);
+
+		$ret = $controller->GetCopyColumnName('p_', '1234567890', 'abcdefghij', 14);
+		$this->assertEquals('p_1_abcdefghij', $ret);
+	}
+
+
 }

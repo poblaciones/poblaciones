@@ -3,6 +3,7 @@
 		<md-dialog :md-active.sync="openPopup">
 
 			<invoker ref="invoker"></invoker>
+			<stepper ref="stepper" @completed="stepperComplete" title="Calcular indicador"></stepper>
 
 			<md-dialog-title>
 				Calcular indicador{{ segun }}
@@ -26,10 +27,11 @@
 			</md-dialog-content>
 
 			<md-dialog-actions>
+				<div v-if="columnExists" style='color:red;margin:auto'>Sobreescribiendo</div>
 				<div>
 					<md-button @click="openPopup = false" style="float: left">Cancelar</md-button>
-					<md-button class="md-primary" :disabled="step == 1" @click="prev">Anterior</md-button>
-					<md-button class="md-primary" v-if="!isLast" @click="next">Siguiente</md-button>
+					<md-button class="md-primary" :disabled="step == 1 || finish == false" @click="prev">Anterior</md-button>
+					<md-button class="md-primary" :disabled="finish == false" v-if="!isLast" @click="next">Siguiente</md-button>
 					<md-button class="md-primary" v-if="isLast" @click="save">Finalizar</md-button>
 				</div>
 			</md-dialog-actions>
@@ -43,6 +45,7 @@ import StepSource from './StepSource.vue';
 import StepCoverage from './StepCoverage.vue';
 import StepAreaOutput from './StepAreaOutput.vue';
 import StepDistanceOutput from './StepDistanceOutput.vue';
+import axios from 'axios';
 import str from '@/common/js/str';
 
 export default {
@@ -59,6 +62,8 @@ export default {
 			step: 1,
 			newMetric: {},
 			openPopup: false,
+			columnExists: false,
+			finish: true,
 		};
 	},
 	computed: {
@@ -130,7 +135,6 @@ export default {
 				Output: {
 					//Distance
 					HasDescription: false,
-					HasDistance: false,
 					HasValue: false,
 					HasCoords: false,
 					HasMaxDistance: false,
@@ -153,6 +157,7 @@ export default {
 				},
 				Source: {
 					ValueLabelIds: [],
+					VariableId: null,
 				},
 			};
 		},
@@ -160,6 +165,11 @@ export default {
 			if(this.validate() == false) {
 				return;
 			}
+			//TODO: hack no funciona bien, hay que esperar que termine axios CalculatedMetricExists
+			if(this.step == 2 && this.finish == false) {
+				return;
+			}
+
 			if (this.step === 1) {
 				this.defineType(this.$refs.stepType.type);
 			}
@@ -168,6 +178,10 @@ export default {
 			}
 		},
 		prev() {
+			//TODO: hack no funciona bien, hay que esperar que termine axios CalculatedMetricExists
+			if(this.step == 2 && this.finish == false) {
+				return;
+			}
 			if(this.step > 1) {
 				this.step--;
 			}
@@ -186,12 +200,50 @@ export default {
 			if(this.validate() == false) {
 				return;
 			}
-			const loc = this;
-			this.$refs.invoker.do(this.Dataset,
-				loc.Dataset.CalculateNewMetric, loc.newMetric)
-			.then(function(data) {
-				loc.openPopup = false;
-			});
+			let stepper = this.$refs.stepper;
+			stepper.startUrl = this.Dataset.CalculateNewMetricUrl();
+			stepper.stepUrl = this.Dataset.StepCalculateNewMetricUrl();
+			stepper.args = this.args();
+			stepper.Start();
+		},
+		args() {
+			return {
+				k: this.Dataset.properties.Id,
+				t: this.newMetric.Type,
+				a: JSON.stringify(this.newMetric.Area),
+				s: JSON.stringify(this.newMetric.Source),
+				o: JSON.stringify(this.newMetric.Output),
+			};
+		},
+		stepperComplete() {
+			const STEP_CREATE_VARIABLES = 0;
+			const STEP_UPDATE_ROWS = 1;
+			const STEP_CREATE_METRIC = 2;
+			const STEP_COMPLETED = 3;
+
+			var stepper = this.$refs.stepper;
+			//TODO: ver como implementar esto.
+			switch (stepper.step)
+			{
+				case STEP_CREATE_VARIABLES:
+					// stepper.error = 'Falló en.';
+					break;
+				case STEP_UPDATE_ROWS:
+					// stepper.error = 'Falló en.';
+					break;
+				case STEP_CREATE_METRIC:
+					// stepper.error = 'Falló en.';
+					break;
+				case STEP_COMPLETED:
+					stepper.complete = 'Creación exitosa.';
+					break;
+				default:
+					stepper.error = 'Paso desconocido.';
+					break;
+			}
+
+			//TODO: Acá hay que cerrar o qué?
+			this.openPopup = false;
 		},
 		validate() {
 			if(this.step == 2) {
@@ -213,6 +265,21 @@ export default {
 				}
 				if(this.newMetric.Source.ValueLabelIds.length == 0) {
 					alert("Debe seleccionar al menos una categoría.");
+					return false;
+				}
+				const loc = this;
+				loc.finish = false;
+				axios.get(window.host + '/services/backoffice/CalculatedMetricExists', {
+					params: { k: loc.Dataset.properties.Id, v: loc.newMetric.Source.VariableId }
+				}).then(function (res) {
+					loc.columnExists = res.data.columnExists;
+					loc.finish = true;
+				}).catch(function (error) {
+					err.err('CalculatedMetricExists', error);
+				});
+
+				if(this.columnExists
+					&& confirm('El indicador ya fue calculado con este Dataset, ¿desea continuar y sobreescribirlo?') == false) {
 					return false;
 				}
 			}

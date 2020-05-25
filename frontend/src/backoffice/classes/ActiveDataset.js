@@ -234,37 +234,12 @@ ActiveDataset.prototype.UpdateVariable = function (level, variable) {
 		});
 };
 
-ActiveDataset.prototype.CalculateNewMetric = function(newMetric) {
-	const loc = this;
-	//TODO:
-	// var levelNoVariables = f.clone(level);
-	// levelNoVariables.Variables = null;
-	this.Work.WorkChanged();
+ActiveDataset.prototype.CalculateNewMetricUrl = function () {
+	return window.host + '/services/backoffice/CalculateNewMetric';
+};
 
-	return axiosClient.getPromise(window.host + '/services/backoffice/CalculateNewMetric', {
-		'k': loc.properties.Id,
-		'w': loc.Work.Id,
-		'm': newMetric.Id,
-		't': newMetric.Type,
-		'b': newMetric.SourceMetric.Metric.Id,
-		'o': JSON.stringify(newMetric.Output),
-		'a': JSON.stringify(newMetric.Area),
-		's': JSON.stringify(newMetric.Source),
-	}, 'calculando el indicador').then(function (data) {
-		//TODO: agregar al listado si es nuevo o modificar, etc...?
-		alert('No implementado...');
-
-		// var isNew = level.Id === 0 || level.Id === null;
-		// if (isNew) {
-		// 	loc.MetricVersionLevels.push(level);
-		// 	window.Db.LoadWorks();
-		// } else {
-		// 	arr.ReplaceById(loc.MetricVersionLevels, level.Id, level);
-		// }
-		// window.Context.RefreshMetrics();
-		// loc.Work.MetricVersions.Refresh();
-		// return data;
-	});
+ActiveDataset.prototype.StepCalculateNewMetricUrl = function () {
+	return window.host + '/services/backoffice/StepCalculateNewMetric';
 };
 
 ActiveDataset.prototype.UpdateMetricVersionLevel = function (level) {
