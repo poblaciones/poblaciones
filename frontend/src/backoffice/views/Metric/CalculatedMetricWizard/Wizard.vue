@@ -27,10 +27,11 @@
 			</md-dialog-content>
 
 			<md-dialog-actions>
+				<div v-if="columnExists" style='color:red;margin:auto'>Sobreescribiendo</div>
 				<div>
 					<md-button @click="openPopup = false" style="float: left">Cancelar</md-button>
-					<md-button class="md-primary" :disabled="step == 1" @click="prev">Anterior</md-button>
-					<md-button class="md-primary" v-if="!isLast" @click="next">Siguiente</md-button>
+					<md-button class="md-primary" :disabled="step == 1 || finish == false" @click="prev">Anterior</md-button>
+					<md-button class="md-primary" :disabled="finish == false" v-if="!isLast" @click="next">Siguiente</md-button>
 					<md-button class="md-primary" v-if="isLast" @click="save">Finalizar</md-button>
 				</div>
 			</md-dialog-actions>
@@ -44,6 +45,7 @@ import StepSource from './StepSource.vue';
 import StepCoverage from './StepCoverage.vue';
 import StepAreaOutput from './StepAreaOutput.vue';
 import StepDistanceOutput from './StepDistanceOutput.vue';
+import axios from 'axios';
 import str from '@/common/js/str';
 
 export default {
@@ -60,6 +62,8 @@ export default {
 			step: 1,
 			newMetric: {},
 			openPopup: false,
+			columnExists: false,
+			finish: true,
 		};
 	},
 	computed: {
@@ -161,6 +165,11 @@ export default {
 			if(this.validate() == false) {
 				return;
 			}
+			//TODO: hack no funciona bien, hay que esperar que termine axios CalculatedMetricExists
+			if(this.step == 2 && this.finish == false) {
+				return;
+			}
+
 			if (this.step === 1) {
 				this.defineType(this.$refs.stepType.type);
 			}
@@ -169,6 +178,10 @@ export default {
 			}
 		},
 		prev() {
+			//TODO: hack no funciona bien, hay que esperar que termine axios CalculatedMetricExists
+			if(this.step == 2 && this.finish == false) {
+				return;
+			}
 			if(this.step > 1) {
 				this.step--;
 			}
@@ -252,6 +265,21 @@ export default {
 				}
 				if(this.newMetric.Source.ValueLabelIds.length == 0) {
 					alert("Debe seleccionar al menos una categoría.");
+					return false;
+				}
+				const loc = this;
+				loc.finish = false;
+				axios.get(window.host + '/services/backoffice/CalculatedMetricExists', {
+					params: { k: loc.Dataset.properties.Id, v: loc.newMetric.Source.VariableId }
+				}).then(function (res) {
+					loc.columnExists = res.data.columnExists;
+					loc.finish = true;
+				}).catch(function (error) {
+					err.err('CalculatedMetricExists', error);
+				});
+
+				if(this.columnExists
+					&& confirm('El indicador ya fue calculado con este Dataset, ¿desea continuar y sobreescribirlo?') == false) {
 					return false;
 				}
 			}
