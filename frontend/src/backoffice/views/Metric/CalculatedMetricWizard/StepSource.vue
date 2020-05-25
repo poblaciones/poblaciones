@@ -118,6 +118,7 @@ export default {
 			this.newMetric.SelectedVersion = null;
 			this.newMetric.SelectedLevel = null;
 			this.newMetric.SelectedVariable = null;
+			this.newMetric.columnExists = null;
 
 			const loc = this;
 			axiosClient.getPromise(window.host + '/services/metrics/GetSelectedMetric',

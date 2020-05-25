@@ -11,11 +11,11 @@
 			</md-dialog-title>
 
 			<md-dialog-content>
-				<step-type v-show="currentStep == stepType" ref="stepType" />
-				<step-source v-show="currentStep == stepSource" ref="stepSource" :newMetric="newMetric" />
-				<step-coverage v-show="currentStep == stepCoverage" ref="stepCoverage" :newMetric="newMetric" />
-				<step-distance-output v-show="currentStep == stepDistanceOutput" ref="stepDistanceOutput" :newMetric="newMetric" />
-				<step-area-output  v-show="currentStep == stepAreaOutput" ref="stepAreaOutput" :newMetric="newMetric" />
+				<step-type v-show="currentStep == 'stepType'" ref="stepType" />
+				<step-source v-show="currentStep == 'stepSource'" ref="stepSource" :newMetric="newMetric" />
+				<step-coverage v-show="currentStep == 'stepCoverage'" ref="stepCoverage" :newMetric="newMetric" />
+				<step-distance-output v-show="currentStep == 'stepDistanceOutput'" ref="stepDistanceOutput" :newMetric="newMetric" />
+				<step-area-output  v-show="currentStep == 'stepAreaOutput'" ref="stepAreaOutput" :newMetric="newMetric" />
 			</md-dialog-content>
 
 			<md-dialog-actions>
@@ -68,7 +68,7 @@ export default {
 			return window.Context.CurrentDataset;
 		},
 		columnExists() {
-			return (this.$refs.stepSource.columnExists);
+			return (this.$refs.stepSource && this.$refs.stepSource.columnExists);
 		},
 		isLast() {
 			return this.calculateStep(this.step + 1) === null;

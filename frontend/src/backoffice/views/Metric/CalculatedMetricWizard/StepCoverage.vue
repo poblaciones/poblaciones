@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-if="newMetric.SelectedLevel">
 		<div>Establezca los criterios de inclusión para el contenido en las áreas:</div>
 
 		<md-radio v-if="newMetric.SelectedLevel.Dataset.Type != 'L'" class="md-primary" :disabled="!canEdit" :value="false" v-model="newMetric.Area.IsInclusionPoint">Por polígono del elemento</md-radio>
