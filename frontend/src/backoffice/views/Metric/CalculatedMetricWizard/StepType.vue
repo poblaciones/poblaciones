@@ -15,7 +15,7 @@ export default {
 	name: 'stepType',
 	data() {
 		return {
-			type: 'distance',
+			type: null,
 		};
 	},
 	methods: {
@@ -29,6 +29,13 @@ export default {
 			e.preventDefault();
 			// this.$emit('areaClick', e);
 		},
+		validate() {
+			if (this.type === null) {
+				alert('Debe seleccionar un tipo de indicador calculado.');
+				return false;
+			}
+			return true;
+		}
 	},
 };
 </script>

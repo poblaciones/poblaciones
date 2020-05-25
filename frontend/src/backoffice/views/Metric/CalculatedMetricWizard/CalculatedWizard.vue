@@ -1,13 +1,13 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openPopup">
+		<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false">
 
 			<invoker ref="invoker"></invoker>
 			<stepper ref="stepper" @completed="stepperComplete" title="Calcular indicador"></stepper>
 
 			<md-dialog-title>
-				Calcular indicador{{ segun }}
-				Paso {{ step }}{{ maxSteps }}
+				Calcular indicador {{ by }}
+				Paso {{ step }} {{ maxSteps }}
 			</md-dialog-title>
 
 			<md-dialog-content>
@@ -22,8 +22,8 @@
 				<div v-if="columnExists" style='color:red;margin:auto'>Sobreescribiendo</div>
 				<div>
 					<md-button @click="openPopup = false" style="float: left">Cancelar</md-button>
-					<md-button class="md-primary" :disabled="step == 1 || processing" @click="prev">Anterior</md-button>
-					<md-button class="md-primary" :disabled="processing" v-if="!isLast" @click="next">Siguiente</md-button>
+					<md-button class="md-primary" :disabled="step == 1 || processing" @click="prev()">Anterior</md-button>
+					<md-button class="md-primary" :disabled="processing" v-if="!isLast" @click="next()">Siguiente</md-button>
 					<md-button class="md-primary" v-if="isLast" @click="save">Finalizar</md-button>
 				</div>
 			</md-dialog-actions>
@@ -53,10 +53,10 @@ export default {
 			step: 1,
 			newMetric: {},
 			openPopup: false,
-			processing: true,
+			processing: false,
 			steps: {
-				'area': ['stepType', 'stepSource', 'stepCoverage', 'stepAreaOutput'],
-				'distance': ['stepType', 'stepSource', 'stepDistanceOutput']
+				'area': ['stepSource', 'stepCoverage', 'stepAreaOutput'],
+				'distance': ['stepSource', 'stepDistanceOutput']
 			}
 		};
 	},
@@ -75,44 +75,37 @@ export default {
 		},
 		maxSteps() {
 			if (this.step == 1) {
-				return '.';
-			} else if (this.newMetric.Type == 'area') {
-				return ' de 4.';
+				return '';
+			} else {
+				return ' de ' + (this.steps[this.newMetric.Type].length + 1) + '.';
 			}
-			return ' de 3.';
 		},
 		currentStep() {
 			return this.calculateStep(this.step);
 		},
-		segun() {
-			let ret = '.';
+		by() {
+			let ret = '';
 			if (this.newMetric.Type == 'formula') {
 				//TODO: definir.
-				ret = ' según fórmula.';
+				ret = ' según fórmula';
 			} else if (this.newMetric.Type == 'distance') {
-				ret = ' según distancia.';
+				ret = ' según distancia';
 				if (this.step == 2) {
-					ret += ' > Objetivo.';
+					ret += ' > Objetivo';
 				} else if (this.step == 3) {
-					ret += ' > Objetivo > Salida.';
+					ret += ' > Objetivo > Salida';
 				}
 			} else if (this.newMetric.Type == 'area') {
-				ret = ' según contenido.';
+				ret = ' según contenido';
 				if (this.step == 2) {
-					ret += ' > Objetivo.';
+					ret += ' > Objetivo';
 				} else if (this.step == 3) {
-					ret += ' > Objetivo > Área.';
+					ret += ' > Objetivo > Área';
 				} else if (this.step == 4) {
-					ret += ' > Objetivo > Área > Salida.';
+					ret += ' > Objetivo > Área > Salida';
 				}
 			}
 			return ret;
-		},
-		canEdit() {
-			if (this.Work) {
-				return this.Work.CanEdit();
-			}
-			return false;
 		},
 	},
 	mounted() {
@@ -134,8 +127,8 @@ export default {
 				Output: {
 					//Distance
 					HasDescription: false,
-					HasValue: false,
-					HasCoords: false,
+					HasValue: true,
+					HasCoords: true,
 					HasMaxDistance: false,
 					MaxDistance: 20,
 
@@ -165,13 +158,28 @@ export default {
 				return "stepType";
 			}
 			var steps = this.steps[this.newMetric.Type];
+			step -= 2;
 			if (step < steps.length) {
 				return steps[step];
 			} else {
 				return null;
 			}
 		},
-		next() {
+		next(assyncPassed) {
+			var loc = this;
+			var currentStepControl = this.$refs[this.currentStep];
+			if (currentStepControl.asyncValidate && !assyncPassed) {
+				loc.processing = true;
+				currentStepControl.asyncValidate().then(function (passed) {
+					loc.processing = false;
+					return loc.next(passed);
+				}).catch(function (ret) {
+					loc.processing = false;
+					return ret;
+					});
+				return;
+			}
+
 			if (!this.validate()) {
 				return;
 			}
@@ -243,18 +251,7 @@ export default {
 			}
 		},
 		validate() {
-			var loc = this;
 			var currentStepControl = this.$refs[this.currentStep];
-			if (currentStepControl.asyncValidate) {
-				loc.processing = true;
-				currentStepControl.asyncValidate().then(function () {
-					loc.processing = false;
-					return loc.validate();
-				}).catch(function (ret) {
-					loc.processing = false;
-					return ret;
-				});
-			}
 			if (currentStepControl.validate) {
 				return currentStepControl.validate();
 			} else {

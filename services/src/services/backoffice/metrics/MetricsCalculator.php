@@ -119,8 +119,6 @@ class MetricsCalculator
 			$output, $cols, $source, $offset, $pageSize);
 
 		$where = $this->GetDistanceWhereParams($output);
-		echo $sql;
-		throw new \Exception('aa');
 		$ret = App::Db()->exec($sql, $where);
 
 		Profiling::EndTimer();
@@ -215,8 +213,8 @@ class MetricsCalculator
 		}
 
 		$pageSize = round(self::CrossProductMax / $snapshotRows);
-		if($limit == 0)
-			$limit = 1;
+		if($pageSize == 0)
+			$pageSize = 1;
 		return [
 			'pageSize' => $pageSize,
 			'totalSlices' => ceil($datasetRows / $pageSize),

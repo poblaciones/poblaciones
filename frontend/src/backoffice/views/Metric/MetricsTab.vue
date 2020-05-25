@@ -130,7 +130,7 @@ import VariableFormulaPopup from './VariableFormulaPopup.vue';
 import VariableSymbologyPopup from './VariableSymbologyPopup.vue';
 import VariableOptionsPopup from './VariableOptionsPopup.vue';
 import NewMetric from './NewMetric.vue';
-import CalculatedMetricWizard from './CalculatedMetricWizard/Wizard.vue';
+import CalculatedMetricWizard from './CalculatedMetricWizard/CalculatedWizard.vue';
 import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
 import LevelPopup from "@/backoffice/views/Dataset/LevelPopup";

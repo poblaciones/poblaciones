@@ -6,7 +6,7 @@
 			</div>
 			<div class="md-layout-item md-size-80 md-small-size-100" style="line-height: 4em">
 				Indicador: {{ caption }}
-				<md-button :disabled="!canEdit" class="md-raised" @click="addMetric">
+				<md-button class="md-raised" @click="addMetric">
 					<md-icon>search</md-icon>
 					Seleccionar...
 				</md-button>
@@ -59,12 +59,11 @@ export default {
 				return {};
 			},
 		},
-		canEdit: Boolean,
 	},
 	data() {
 		return {
 			allCategories: false,
-			columnExists: false,
+			columnExists: null,
 		};
 	},
 	computed: {
@@ -73,6 +72,9 @@ export default {
 				return this.newMetric.SourceMetric.Metric.Name;
 			}
 			return '';
+		},
+		Dataset() {
+			return window.Context.CurrentDataset;
 		},
 		versions() {
 			if (this.newMetric.SourceMetric.Versions != null) {
@@ -123,9 +125,9 @@ export default {
 			const loc = this;
 			axiosClient.getPromise(window.host + '/services/metrics/GetSelectedMetric',
 				{ l: metric.Id }, 'consultar el indicador').then(function (res) {
-				loc.newMetric.SourceMetric = res.data;
-				if(res.data.Versions.length > 0) {
-					loc.newMetric.SelectedVersion = res.data.Versions[res.data.Versions.length - 1];
+				loc.newMetric.SourceMetric = res;
+				if(res.Versions.length > 0) {
+					loc.newMetric.SelectedVersion = res.Versions[res.Versions.length - 1];
 				}
 			});
 		},
@@ -140,10 +142,19 @@ export default {
 		},
 		asyncValidate() {
 			const loc = this;
-			return axiosClient(window.host + '/services/backoffice/CalculatedMetricExists',
+			// Si ya la tiene, no la pide
+			if (this.columnExists !== null) {
+				return new Promise((resolve, reject) => {
+					// devuelve true para indicar que ya fue resuelta con éxito
+					// la validación asincrónica
+					resolve(true);
+				});
+			}
+			// Consulta en el servidor
+			return axiosClient.getPromise(window.host + '/services/backoffice/CalculatedMetricExists',
 				{ k: loc.Dataset.properties.Id, v: loc.newMetric.Source.VariableId }, 'verificar si ya existe un indicador calculado'
 			).then(function (res) {
-				loc.columnExists = res.data.columnExists;
+				loc.columnExists = res.columnExists;
 			});
 		},
 		validate() {
@@ -168,7 +179,7 @@ export default {
 				return false;
 			}
 			if (this.columnExists
-				&& confirm('El indicador ya fue calculado con este Dataset, ¿desea continuar y sobreescribirlo?') == false) {
+				&& confirm("El indicador ya fue calculado con este dataset. \n\n¿Desea continuar y sobreescribirlo?") == false) {
 				return false;
 			}
 			return true;
@@ -204,6 +215,7 @@ export default {
 			}
 		},
 		"newMetric.SelectedVariable"() {
+			this.columnExists = null;
 			if(this.newMetric.SelectedVariable != null) {
 				this.newMetric.Source.VariableId = this.newMetric.SelectedVariable.Id;
 			} else {

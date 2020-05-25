@@ -38,7 +38,7 @@ export default {
 		padding-bottom: 12px;
 	}
 	.mdtoggled {
-		background-color: #eee;
+		background-color: #ddd;
 	}
 
 </style>
