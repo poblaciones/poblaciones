@@ -3,6 +3,7 @@
 		<md-dialog :md-active.sync="openPopup">
 
 			<invoker ref="invoker"></invoker>
+			<stepper ref="stepper" @completed="stepperComplete" title="Calcular indicador"></stepper>
 
 			<md-dialog-title>
 				Calcular indicador{{ segun }}
@@ -130,7 +131,6 @@ export default {
 				Output: {
 					//Distance
 					HasDescription: false,
-					HasDistance: false,
 					HasValue: false,
 					HasCoords: false,
 					HasMaxDistance: false,
@@ -153,6 +153,7 @@ export default {
 				},
 				Source: {
 					ValueLabelIds: [],
+					VariableId: null,
 				},
 			};
 		},
@@ -186,12 +187,50 @@ export default {
 			if(this.validate() == false) {
 				return;
 			}
-			const loc = this;
-			this.$refs.invoker.do(this.Dataset,
-				loc.Dataset.CalculateNewMetric, loc.newMetric)
-			.then(function(data) {
-				loc.openPopup = false;
-			});
+			let stepper = this.$refs.stepper;
+			stepper.startUrl = this.Dataset.CalculateNewMetricUrl();
+			stepper.stepUrl = this.Dataset.StepCalculateNewMetricUrl();
+			stepper.args = this.args();
+			stepper.Start();
+		},
+		args() {
+			return {
+				k: this.Dataset.properties.Id,
+				t: this.newMetric.Type,
+				a: JSON.stringify(this.newMetric.Area),
+				s: JSON.stringify(this.newMetric.Source),
+				o: JSON.stringify(this.newMetric.Output),
+			};
+		},
+		stepperComplete() {
+			const STEP_CREATE_VARIABLES = 0;
+			const STEP_UPDATE_ROWS = 1;
+			const STEP_CREATE_METRIC = 2;
+			const STEP_COMPLETED = 3;
+
+			var stepper = this.$refs.stepper;
+			//TODO: ver como implementar esto.
+			switch (stepper.step)
+			{
+				case STEP_CREATE_VARIABLES:
+					// stepper.error = 'Falló en.';
+					break;
+				case STEP_UPDATE_ROWS:
+					// stepper.error = 'Falló en.';
+					break;
+				case STEP_CREATE_METRIC:
+					// stepper.error = 'Falló en.';
+					break;
+				case STEP_COMPLETED:
+					stepper.complete = 'Creación exitosa.';
+					break;
+				default:
+					stepper.error = 'Paso desconocido.';
+					break;
+			}
+
+			//TODO: Acá hay que cerrar o qué?
+			this.openPopup = false;
 		},
 		validate() {
 			if(this.step == 2) {
