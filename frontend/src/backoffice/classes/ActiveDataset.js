@@ -242,6 +242,16 @@ ActiveDataset.prototype.StepCalculateNewMetricUrl = function () {
 	return window.host + '/services/backoffice/StepCalculateNewMetric';
 };
 
+ActiveDataset.prototype.CalculatedMetricExists = function (variableId) {
+	return axios.get(window.host + '/services/backoffice/CalculatedMetricExists', {
+		params: { k: this.properties.Id, v: variableId }
+	}).then(function (res) {
+		return res.data.columnExists;
+	}).catch(function (error) {
+		err.err('CalculatedMetricExists', error);
+	});
+};
+
 ActiveDataset.prototype.UpdateMetricVersionLevel = function (level) {
 	var loc = this;
 	var levelNoVariables = f.clone(level);
