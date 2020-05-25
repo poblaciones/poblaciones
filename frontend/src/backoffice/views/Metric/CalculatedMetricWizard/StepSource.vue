@@ -13,18 +13,18 @@
 			</div>
 			<div class="md-layout-item md-size-50 md-small-size-100">
 				<mp-select :list="versions" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-										label="Edición" helper="Edición a utilizar" listKey="Id"
-										v-model="newMetric.SelectedVersion" :render="formatVersion" />
+					label="Edición" helper="Edición a utilizar" listKey="Id"
+					v-model="newMetric.SelectedVersion" :render="formatVersion" />
 			</div>
 			<div class="md-layout-item md-size-50 md-small-size-100">
 				<mp-select :list="levels" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-									 label="Nivel" helper="Nivel de agregación a utilizar"
-									 v-model="newMetric.SelectedLevel" listCaption="Name" />
+					label="Nivel" helper="Nivel de agregación a utilizar"
+					v-model="newMetric.SelectedLevel" listCaption="Name" />
 			</div>
 			<div class="md-layout-item md-size-100 md-small-size-100">
 				<mp-select :list="variables" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-									 label="Variable" helper="Variable a utilizar"
-									 v-model="newMetric.SelectedVariable" listCaption="Name" />
+					label="Variable" helper="Variable a utilizar"
+					v-model="newMetric.SelectedVariable" listCaption="Name" />
 			</div>
 			<div v-if="valueLabels.length > 0" class="md-layout-item md-size-100 md-small-size-100">
 				Categorías
@@ -33,7 +33,7 @@
 				<md-checkbox class="md-primary" v-model="todos" @change="selectAll">[Seleccionar todos] </md-checkbox>
 			</div>
 			<div v-for='valueLabel in valueLabels' :key='valueLabel.Id' :value='valueLabel.Id'
-						class="md-layout-item md-size-30 md-small-size-50">
+				  class="md-layout-item md-size-30 md-small-size-50">
 				<md-checkbox class="md-primary" v-model="newMetric.Source.ValueLabelIds" :value="valueLabel.Id">{{ valueLabel.Name }}</md-checkbox>
 			</div>
 			<search-popup ref="addMetricPopup" @selected="metricSelected" :getDraftMetrics="false" searchType="m" />
@@ -102,14 +102,6 @@ export default {
 			}
 			return [];
 		},
-		levelIndex() {
-			return arr.IndexById(this.newMetric.SelectedVersion.Levels,
-				this.newMetric.Source.LevelId);
-		},
-		variableIndex() {
-			return arr.IndexById(this.newMetric.SelectedLevel.Variables,
-				this.newMetric.Source.VariableId);
-		},
 	},
 	methods: {
 		addMetric() {
@@ -120,10 +112,12 @@ export default {
 		},
 		metricSelected(metric) {
 			this.newMetric.SourceMetric = {};
-			this.newMetric.Source.Version = null;
-			this.newMetric.Source.Variable = null;
-			this.newMetric.Source.Level = null;
+			this.newMetric.Source.VariableId = null;
 			this.newMetric.Source.ValueLabelIds = [];
+
+			this.newMetric.SelectedVersion = null;
+			this.newMetric.SelectedLevel = null;
+			this.newMetric.SelectedVariable = null;
 
 			const loc = this;
 			axios.get(window.host + '/services/metrics/GetSelectedMetric', {
@@ -131,7 +125,7 @@ export default {
 			}).then(function (res) {
 				loc.newMetric.SourceMetric = res.data;
 				if(res.data.Versions.length > 0) {
-					loc.newMetric.Source.Version = res.data.Versions[res.data.Versions.length - 1];
+					loc.newMetric.SelectedVersion = res.data.Versions[res.data.Versions.length - 1];
 				}
 			}).catch(function (error) {
 				err.err('Step Source', error);
@@ -147,6 +141,48 @@ export default {
 			}
 		},
 	},
+	watch: {
+		"newMetric.SelectedVersion"() {
+			if(this.newMetric.SelectedVersion != null) {
+				if(this.newMetric.SelectedVersion.Levels.length > 0) {
+					let i = this.newMetric.SelectedVersion.Levels.findIndex(function(item) {
+						return item.Name == "Radios";
+					});
+					if(i == -1) {
+						i = 0;
+					}
+					this.newMetric.SelectedLevel = this.newMetric.SelectedVersion.Levels[i];
+				}
+			} else {
+				this.newMetric.SelectedLevel = null;
+			}
+		},
+		"newMetric.SelectedLevel"() {
+			if(this.newMetric.SelectedLevel != null) {
+				if(this.newMetric.SelectedLevel.Dataset.Type != 'L') {
+					this.newMetric.Area.IsInclusionPoint = true;
+				}
+				if(this.newMetric.SelectedLevel.Variables.length > 0) {
+					this.newMetric.SelectedVariable = this.newMetric.SelectedLevel.Variables[0];
+				}
+			} else {
+				this.newMetric.SelectedVariable = null;
+				this.newMetric.Area.IsInclusionPoint = this.newMetric.DefaultIsInclusionPoint;
+			}
+		},
+		"newMetric.SelectedVariable"() {
+			if(this.newMetric.SelectedVariable != null) {
+				this.newMetric.Source.VariableId = this.newMetric.SelectedVariable.Id;
+			} else {
+				this.newMetric.Source.VariableId = null;
+			}
+		},
+		"newMetric.Source.ValueLabelIds"() {
+			if(this.todos && this.valueLabels.length != this.newMetric.Source.ValueLabelIds.length) {
+				this.todos = false;
+			}
+		}
+	}
 };
 </script>
 
