@@ -149,7 +149,7 @@ class SpatialConditions
 		else if ($effectiveDatasetType == 'S')
 		{
 			// Si es un metric de formas, evalúa la ubicación del shape
-			$sql = " AND EXISTS (SELECT 1 FROM snapshot_shape_dataset_item WHERE sdi_feature_id = miv_feature_id " .
+			$sql = " AND EXISTS (SELECT 1 FROM snapshot_shape_dataset_item WHERE sdi_feature_id = " . $this->preffix . "_feature_id " .
 				" AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
 				$circle->RadiusToMysqlPoint() . ", sdi_geometry_r3))";
 			/*$sql = " AND EllipseContains(". $circle->Center->ToMysqlPoint() . ", " .

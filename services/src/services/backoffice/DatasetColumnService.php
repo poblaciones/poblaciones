@@ -2,6 +2,7 @@
 
 namespace helena\services\backoffice;
 
+use minga\framework\MessageException;
 use minga\framework\ErrorException;
 use minga\framework\Profiling;
 
@@ -20,7 +21,14 @@ class DatasetColumnService extends DbSession
 		Profiling::BeginTimer();
 		// Graba
 		DatasetColumns::FixCaption($column);
+		DatasetColumns::FixName($column);
+		$duplicated  = "SELECT COUNT(*) FROM draft_dataset_column WHERE dco_variable = ? AND dco_id != ? AND dco_dataset_id = ?";
+		$count = App::Db()->fetchScalarInt($duplicated, array($column->getVariable(), $column->getId(), $datasetId));
 
+		if ($count > 0)
+		{
+			throw new MessageException("Ya existe una columna con ese nombre.");
+		}
 		App::Orm()->save($column);
 		// Marca work
 		DatasetService::DatasetChangedById($datasetId, true);

@@ -325,16 +325,21 @@ class CsvToJson
 
 	private static function GetVarNames(array $names)
 	{
+		$ret = [];
 		for($i = 0; $i < count($names); $i++)
 		{
-			$names[$i] = Variable::FixName(trim($names[$i]));
+			$varname = trim($names[$i]);
+			if ($varname === '')
+				break;
+			$names[$i] = Variable::FixName($varname);
 			if($names[$i] == '')
 				$names[$i] = 'x';
 			elseif(Str::IsNumber($names[$i]) || $names[$i][0] == '_')
 				$names[$i] = 'x' . $names[$i];
+			$ret[] = $names[$i];
 		}
 
-		return self::NumerateDuplicates($names);
+		return self::NumerateDuplicates($ret);
 	}
 
 	private static function NumerateDuplicates($names)

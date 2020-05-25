@@ -102,23 +102,15 @@ class RevokeSnapshots extends BaseService
 
 		$previousMetricVersions = PublishDataTables::UnshardifyList($this->publicWorkModel->GetMetricVersions($this->shardifiedWorkId),
 																																								array('mvr_id', 'mvr_metric_id'));
-
 		// Limpia el fabCache
 		if ($this->work['wrk_type'] === 'P')
 		{
 			VersionUpdater::Increment('FAB_METRICS');
 			$this->cacheManager->CleanFabMetricsCache();
 		}
-		// Identifica qué borrar
-		$removedMetricVersions = $previousMetricVersions;
-
 		// Borra
 		$this->snapshotsManager->DeleteMetricVersionsByWork($this->workId);
 
-		foreach($removedMetricVersions as $row)
-		{
-			$this->snapshotsManager->CleanMetricVersionData($row);
-		}
 		// Libera los metadatos del metric en el que están las versiones y de los borrados
 		foreach(Arr::UniqueByField('mvr_metric_id', array_merge($previousMetricVersions, $metricVersions)) as $row)
 		{

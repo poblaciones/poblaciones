@@ -311,7 +311,7 @@ class DatasetModel extends BaseModel
 	private function GetGeographyOtherColumns($table, $name)
 	{
 		$cols = array();
-		$carto = $this->SanitizeName($name);
+		$carto = Str::RemoveAccents($name);
 		$sufix =  ' ('.$name.')';
 
 		$cols[] = $this->GetCustomCol($table.'.gei_population', $carto.'_poblacion_total', 'Población total'.$sufix,
@@ -326,16 +326,6 @@ class DatasetModel extends BaseModel
 			Format::F, 9, 19, 2, Measurement::Scale, Alignment::Right);
 		return $cols;
 	}
-
-	private function SanitizeName($name)
-	{
-		$unwanted = array(' ' => '_', 'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'ç' => 'c',
-			'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i', 'ñ' => 'n',
-			'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u');
-		return strtr(Str::ToLower($name), $unwanted);
-	}
-
-
 
 	public function GetDatasetColumns($id, $inSummary = false)
 	{

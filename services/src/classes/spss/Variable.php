@@ -26,7 +26,7 @@ class Variable
 	private static function FixRules($name)
 	{
 		// inicios
-		$forbiddenStarts = array(".", "_", "#", "$");
+		$forbiddenStarts = array(".", "_", "#", "$", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 		if (in_array($name[0], $forbiddenStarts))
 			$name = "@" . $name;
 		// keywords
@@ -38,7 +38,8 @@ class Variable
 	}
 	private static function FixContent($name)
 	{
-		$validChars = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑŎÒÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïðñòóôõöŏōøùúûüýÿABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_$@#.';
+		$name = Str::RemoveAccents($name);
+		$validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_$@#.';
 		for($i = 0; $i < strlen($name); $i++)
 		{
 			if(Str::Contains($validChars, $name[$i]) == false)

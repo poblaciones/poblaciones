@@ -25,22 +25,20 @@ class PublishSnapshots extends BaseService
 
 		$datasets = $workModel->GetDatasets($workId);
 
-		// Actualiza datos
 		$totalSlices = sizeof($datasets);
 		if ($slice < $totalSlices)
 		{
 			$row = $datasets[$slice];
+			// Actualiza lookup y shapes
 			if ($work['wrk_dataset_data_changed'])
 			{
 				$cacheManager->ClearDatasetData($row['dat_id']);
 				$snapshotsManager->UpdateDatasetData($row);
 			}
-			if (Context::Settings()->Map()->NewPublishingMethod)
+			// Actualiza métricas
+			if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
 			{
-				if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
-				{
-					$snapshotsManager->UpdateDatasetMetrics($row);
-				}
+				$snapshotsManager->UpdateDatasetMetrics($row);
 			}
 		}
 
@@ -49,7 +47,7 @@ class PublishSnapshots extends BaseService
 		return $slice == $totalSlices;
 	}
 
-	public function UpdateWorkMetricVersions($workId, $slice, &$totalSlices)
+	public function UpdateWorkMetricVersions($workId)
 	{
 		Profiling::BeginTimer();
 
@@ -68,42 +66,33 @@ class PublishSnapshots extends BaseService
 			$snapshotsManager->DeleteMetricVersionsByWork($workId);
 			$this->ClearRemovedMetrics($workId, $metricVersions);
 			Profiling::EndTimer();
-			return true;
+			return;
 		}
-		$metricVersion = $metricVersions[$slice];
-
 		// Actualiza los metric
 		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
 		{
-			// En el primero se asegura de dejar limpio
-			if ($slice === 0)
-			{
-				$snapshotsManager->DeleteMetricVersionsByWork($workId);
-				$this->ClearRemovedMetrics($workId, $metricVersions);
-			}
-			// Libera los metadatos del metric (summary, selected, getTile)
-			$cacheManager->ClearMetricMetadata($metricVersion['mvr_metric_id']);
+			// Se asegura de dejar limpio
+			$snapshotsManager->DeleteMetricVersionsByWork($workId);
+			$this->ClearRemovedMetrics($workId, $metricVersions);
 		}
-		// Actualiza los metadatos del metric en el que están las versiones
-		$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
+		foreach($metricVersions as $metricVersion)
+		{
+			// Actualiza los metric
+			if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
+			{
+				// Libera los metadatos del metric (summary, selected, getTile)
+				$cacheManager->ClearMetricMetadata($metricVersion['mvr_metric_id']);
+			}
+			// Actualiza los metadatos del metric en el que están las versiones
+			$snapshotsManager->UpdateMetricMetadata($metricVersion['mvr_metric_id']);
+		}
 		if ($work['wrk_type'] === 'P')
 		{
 			VersionUpdater::Increment('FAB_METRICS');
 			$cacheManager->CleanFabMetricsCache();
 		}
-		// Actualiza los version
-		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'])
-			$snapshotsManager->UpdateMetricVersionData($metricVersion);
 
 		Profiling::EndTimer();
-
-		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
-		{
-			$totalSlices = sizeof($metricVersions) - 1;
-			return $slice == $totalSlices;
-		}
-		else
-			return true;
 	}
 
 	private function ClearRemovedMetrics($workId, $metricVersions)

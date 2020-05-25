@@ -10,6 +10,7 @@ use minga\framework\ErrorException;
 use minga\framework\System;
 
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use helena\services\backoffice\import\PhpSpreadSheetCsv;
 
 use helena\services\common\BaseService;
 use helena\classes\Paths;
@@ -170,11 +171,15 @@ class ImportService extends BaseService
 		$uploadFolder = $bucket->path;
 		$sourceFile =  $uploadFolder . '/file.dat';
 		$xlsFile =  $uploadFolder . '/file_xls.dat';
+		if (file_exists($xlsFile))
+			// es un reintento
+			return;
+
 		IO::Move($sourceFile, $xlsFile);
 
 		$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($xlsFile);
 		$loadedSheetNames = $spreadsheet->getSheetNames();
-		$writer = new Csv($spreadsheet);
+		$writer = new PhpSpreadSheetCsv($spreadsheet);
 
 		foreach($loadedSheetNames as $sheetIndex => $loadedSheetName) {
 				$writer->setSheetIndex($sheetIndex);

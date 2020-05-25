@@ -9,8 +9,7 @@ use helena\classes\GlobalTimer;
 use helena\caches\TileDataCache;
 use helena\services\common\BaseService;
 
-use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
-use helena\db\frontend\SnapshotMetricVersionItemVariableModel_v2;
+use helena\db\frontend\SnapshotByDataset;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 use minga\framework\Context;
@@ -80,10 +79,8 @@ class TileDataService extends BaseService
 		$metric = $selectedService->GetSelectedMetric($metricId);
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
-		if (Context::Settings()->Map()->NewPublishingMethod)
-			$table = new SnapshotMetricVersionItemVariableModel_v2($level->Dataset->Table . "_snapshot");
-		else
-			$table = new SnapshotMetricVersionItemVariableModel();
+
+		$table = new SnapshotByDataset($level->Dataset->Table . "_snapshot");
 		$gradientId = $level->GeographyId;
 
 		if ($b != null)

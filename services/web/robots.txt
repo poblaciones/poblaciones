@@ -19,3 +19,4 @@ Disallow: /admins/
 Disallow: /users/
 
 Allow: /map/*/metadata
+Allow: /handle/

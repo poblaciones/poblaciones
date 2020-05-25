@@ -30,7 +30,7 @@ VariableNameValidator.prototype.CheckEnding = function (name) {
 
 VariableNameValidator.prototype.CheckRules = function (name) {
 	// inicios
-	var forbiddenStarts = [".", "_", "#", "$"];
+	var forbiddenStarts = [".", "_", "#", "$", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 	for (var n = 0; n < forbiddenStarts.length; n++) {
 		if (name[0] === forbiddenStarts[n]) {
 			return "El nombre de la variable no puede comenzar con '" + name[0] + "'.";
@@ -46,7 +46,7 @@ VariableNameValidator.prototype.CheckRules = function (name) {
 };
 
 VariableNameValidator.prototype.CheckContent = function (name) {
-	var validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑŎÒÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïðñòóôõöŏōøùúûüýÿabcdefghijklmnopqrstuvwxyz1234567890_@#.$';
+	var validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_@#.$';
 	for (var i = 0; i < name.length; i++) {
 		if (validChars.includes(name[i]) == false) {
 			if (name[i] === ')' || name[i] === '(') {

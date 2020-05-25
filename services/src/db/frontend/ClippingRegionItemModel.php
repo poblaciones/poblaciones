@@ -71,27 +71,7 @@ class ClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
-	public function GetCrawlerItemsIntersectingEnvelope($metricId, $versionIds, $envelope, $parentId)
-	{
-		Profiling::BeginTimer();
-		// Trae regiones que coincidan con la región de la cartografía
-		// y que tengan contenidos dentro del clipping_region_item.
-
-		$sql = "SELECT cli_id Id, cli_caption Name, cli_parent_id, clr_id, clr_caption
-						FROM clipping_region_item JOIN clipping_region ON cli_clipping_region_id = clr_id
-						JOIN snapshot_clipping_region_item_geography_item ON cgv_clipping_region_item_id = cli_id
-						JOIN snapshot_metric_version_item_variable  ON cgv_geography_item_id = miv_geography_item_id
-						WHERE clr_is_crawler_indexer = 1
-						AND miv_metric_id = ? AND ( " . $versionIds . ") " . ($parentId ? ' AND cli_parent_id = ' . $parentId : '') . "
-						GROUP BY cli_id , cli_caption, cli_parent_id, clr_id, clr_caption
-						ORDER BY clr_caption, clr_id, cli_caption, cli_id";
-
-		$ret = App::Db()->fetchAll($sql, array($metricId));
-		Profiling::EndTimer();
-		return $ret;
-	}
-
-	public function v2_GetCrawlerItemsIntersectingEnvelope($metricId, $datasetTables, $envelope, $parentId)
+	public function GetCrawlerItemsIntersectingEnvelope($metricId, $datasetTables, $envelope, $parentId)
 	{
 		Profiling::BeginTimer();
 		// Trae regiones que coincidan con la región de la cartografía

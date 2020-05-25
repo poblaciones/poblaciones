@@ -1,5 +1,11 @@
 [CURRENT]
 
+v2.20 (2020-05-26)
+- Refactoring tabla snapshots.
+- Fix: las cuentas nuevas no se activaban automáticamente al recibirse un permiso a una cartografía.
+- Fix: identificación de columnas en archivos Excel (para títulos con celdas vacías)
+- Fix: descarga de SAV con columnas con caracteres extendidos.
+
 v2.21 (2020-05-19)
 - Implementación de readonlyForMaintenance.
 - Retry en queries del mapa (1 vez).

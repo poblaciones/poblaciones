@@ -3,6 +3,7 @@
 namespace helena\services\backoffice\import;
 
 use helena\classes\App;
+use helena\classes\spss\Variable;
 use minga\framework\Str;
 use helena\entities\backoffice\DraftDatasetColumn;
 use helena\entities\backoffice\DraftDataset;
@@ -15,6 +16,7 @@ class DatasetColumns
 	{
        $this->headers = $headers;
 	}
+
 	public static function FixCaption($column)
 	{
 			if (Str::IsNullOrEmpty($column->getLabel()))
@@ -22,6 +24,15 @@ class DatasetColumns
 			else
 				$column->setCaption($column->getLabel());
 	}
+
+	public static function FixName($column)
+	{
+		$name = $column->getVariable();
+		$newName = Variable::FixName($name);
+		if ($newName !== $name)
+				$column->setVariable($newName);
+	}
+
   public function InsertColumnDescriptions($datasetId)
 	{
 		$dataset = App::Orm()->find(DraftDataset::class, $datasetId);

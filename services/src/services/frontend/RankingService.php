@@ -4,8 +4,7 @@ namespace helena\services\frontend;
 
 use helena\services\common\BaseService;
 use helena\caches\RankingCache;
-use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
-use helena\db\frontend\SnapshotMetricVersionItemVariableModel_v2;
+use helena\db\frontend\SnapshotByDataset;
 use helena\entities\frontend\clipping\RankingInfo;
 use helena\entities\frontend\clipping\RankingItemInfo;
 use helena\classes\App;
@@ -56,10 +55,7 @@ class RankingService extends BaseService
 		$level = $version->GetLevel($levelId);
 		$hasDescriptions = $level->HasDescriptions;
 
-		if (Context::Settings()->Map()->NewPublishingMethod)
-			$table = new SnapshotMetricVersionItemVariableModel_v2($level->Dataset->Table . "_snapshot");
-		else
-			$table = new SnapshotMetricVersionItemVariableModel();
+		$table = new SnapshotByDataset($level->Dataset->Table . "_snapshot");
 
 		$gradientId = $level->GeographyId;
 

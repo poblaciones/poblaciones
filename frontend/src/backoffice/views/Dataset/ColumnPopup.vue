@@ -59,7 +59,7 @@
 <script>
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/js/arr';
-import Validator from '@/backoffice/classes/VariableNameValidator';
+import VariableNameValidator from '@/backoffice/classes/VariableNameValidator';
 
 export default {
   name: "ColumnPopup",
@@ -97,7 +97,7 @@ export default {
 		},
 		save() {
 			var loc = this;
-			var validator = new Validator();
+			var validator = new VariableNameValidator();
 			var msg = validator.Validate(this.variable.Variable);
 			if (msg !== '') {
 				alert(msg);

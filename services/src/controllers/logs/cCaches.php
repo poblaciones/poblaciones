@@ -71,7 +71,8 @@ class cCaches extends cController
 			$n = $model->IncrementAllRevisions();
 			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores.';
 			$cm = new CacheManager();
-			$cm->CleanAllMetricCaches();		} else if (array_key_exists('clearTempTables', $_POST)) {
+			$cm->CleanAllMetricCaches();
+		} else if (array_key_exists('clearTempTables', $_POST)) {
 			$model = new PublishDataTables();
 			$n = $model->CleanTempTables();
 			$this->message = 'Liberadas ' . $n . ' tablas.';

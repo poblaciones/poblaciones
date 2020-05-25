@@ -195,8 +195,7 @@ class cHandle extends cPublicController
 		$this->AddSources($sources, $items);
 		$this->AddValue("items", $items);
 		$this->AddMetadata($metadata, $work->Url);
-		$outVersions = '';
-		$this->AddVariables($workId, $metricId, $outVersions, $outDatasetTables);
+		$this->AddVariables($workId, $metricId, $outDatasetTables);
 		$metadata['met_title'] = $metric;
 
 		if ($regionId != null)
@@ -211,11 +210,11 @@ class cHandle extends cPublicController
 		if ($metadata['Extents'] !== null && Session::IsWorkPublicSegmentedCrawled($workId))
 		{
 			$extents = Envelope::FromDb($metadata['Extents']);
-			$this->AddRegions($workId, $metricId, $outVersions, $outDatasetTables, $metricName, $extents, $regionId);
+			$this->AddRegions($workId, $metricId, $outDatasetTables, $metricName, $extents, $regionId);
 		}
 	}
 
-	private function AddRegions($workId, $metricId, $versionIds, $datasetTables, $metricName, $extents, $regionId)
+	private function AddRegions($workId, $metricId, $datasetTables, $metricName, $extents, $regionId)
 	{
 		// Lo busca en el caché
 		$key = WorkHandlesCache::CreateKey($metricId, $regionId);
@@ -223,7 +222,7 @@ class cHandle extends cPublicController
 		$data = null;
 		if (!WorkHandlesCache::Cache()->HasData($workId, $key, $data))
 		{
-			$data = $this->CalculateRegionData($metricId, $versionIds, $datasetTables, $metricName, $extents, $regionId);
+			$data = $this->CalculateRegionData($metricId, $datasetTables, $metricName, $extents, $regionId);
 			// Lo agrega al caché...
 			WorkHandlesCache::Cache()->PutData($workId, $key, $data);
 		}
@@ -231,19 +230,12 @@ class cHandle extends cPublicController
 		$this->AddValue("regions", $data);
 	}
 
-	private function CalculateRegionData($metricId, $versionIds, $datasetTables, $metricName, $extents, $regionId)
+	private function CalculateRegionData($metricId, $datasetTables, $metricName, $extents, $regionId)
 	{
 		Profiling::BeginTimer();
 
 		$model = new ClippingRegionItemModel();
-		if (Context::Settings()->Map()->NewPublishingMethod)
-		{
-			$clippingRegionItemIds = $model->v2_GetCrawlerItemsIntersectingEnvelope($metricId, $datasetTables, $extents, $regionId);
-		}
-		else
-		{
-			$clippingRegionItemIds = $model->GetCrawlerItemsIntersectingEnvelope($metricId, $versionIds, $extents, $regionId);
-		}
+		$clippingRegionItemIds = $model->GetCrawlerItemsIntersectingEnvelope($metricId, $datasetTables, $extents, $regionId);
 		// Si no tiene regionId, se queda con los que no tienen padre en la lista
 		if ($regionId == null)
 		{
@@ -269,9 +261,8 @@ class cHandle extends cPublicController
 		Profiling::EndTimer();
 		return $data;
 	}
-	private function AddVariables($workId, $metricId, &$outVersions, &$outDatasetTables)
+	private function AddVariables($workId, $metricId, &$outDatasetTables)
 	{
-		$outVersions = '';
 		$outDatasetTables = [];
 		// Trae los niveles y variables...
 		$selectedService = new SelectedMetricService();
@@ -306,8 +297,6 @@ class cHandle extends cPublicController
 						$variables[] = $fullName;
 					}
 				}
-				$outVersions .= ($outVersions != '' ? ' OR ' : '') . ' (miv_metric_version_id = ' . $version->Version->Id
-														. ' AND miv_geography_id = ' . $maxGeography . ') ';
 				if ($maxTable != '' && !in_array($maxTable, $outDatasetTables))
 						$outDatasetTables[] = $maxTable;
 			}

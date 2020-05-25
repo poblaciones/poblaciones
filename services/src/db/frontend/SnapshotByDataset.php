@@ -11,7 +11,7 @@ use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
 
-class SnapshotMetricVersionItemVariableModel_v2 extends BaseModel
+class SnapshotByDataset extends BaseModel
 {
 	const LOCATIONS_LIMIT_PER_TILE = 500;
 	private $spatialConditions;
@@ -274,7 +274,7 @@ class SnapshotMetricVersionItemVariableModel_v2 extends BaseModel
 			if ($where != '') $where .= ' AND ';
 			$where .= " IFNULL(sna_" . $variableId . "_total, 0) > 0 ";
 		}
-		$params = array($metricVersionId, $geographyId, $variableId);
+		$params = array();
 
 		if ($hasTotals)
 		{

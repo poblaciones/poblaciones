@@ -17,16 +17,16 @@ use minga\framework\ErrorException;
 
 class PublishService extends BaseService
 {
+
 	const STEP_DELETE_DATASETS = 0;
 	const STEP_DELETE_SNAPSHOTS_DATASETS = 1;
 	const STEP_DELETE_SNAPSHOTS_METRICS_AND_DEFINITIONS = 2;
 	const STEP_COPY_DEFINITIONS = 3;
 	const STEP_COPY_DATASETS = 4;
 	const STEP_CREATE_SNAPSHOTS_DATASETS = 5;
-	const STEP_CREATE_SNAPSHOTS_METRICS = 6;
-	const STEP_UPDATE_EXTENTS = 7;
-	const STEP_RESET_FLAGS = 8;
-	const STEP_COMPLETED = 9;
+	const STEP_UPDATE_EXTENTS = 6;
+	const STEP_RESET_FLAGS = 7;
+	const STEP_COMPLETED = 8;
 
 	private $state = null;
 
@@ -87,7 +87,7 @@ class PublishService extends BaseService
 				}
 				else
 				{
-					$this->state->NextStep('Indexando datos');
+					$this->state->NextStep('Precalculando indicadores');
 				}
 				break;
 			case self::STEP_CREATE_SNAPSHOTS_DATASETS:
@@ -98,22 +98,12 @@ class PublishService extends BaseService
 				}
 				else
 				{
-					$this->state->NextStep('Precalculando indicadores');
-				}
-				break;
-			case self::STEP_CREATE_SNAPSHOTS_METRICS:
-				$manager = new PublishSnapshots();
-				if ($manager->UpdateWorkMetricVersions($workId, $this->state->Slice(), $totalSlices) == false)
-				{
-					$this->NextSlice($totalSlices);
-				}
-				else
-				{
-					$this->state->NextStep('Actualizando dimensiones');
+					$this->state->NextStep('Actualizando metadatos');
 				}
 				break;
 			case self::STEP_UPDATE_EXTENTS:
 				$manager = new PublishSnapshots();
+				$manager->UpdateWorkMetricVersions($workId);
 				$manager->UpdateExtents($workId);
 				$this->state->NextStep('Completando');
 				break;

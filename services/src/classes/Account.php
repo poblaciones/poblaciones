@@ -120,6 +120,12 @@ class Account
 		$this->EnsureDbInfo();
 		return $this->userId;
 	}
+	private function RefreshDbInfo()
+	{
+		$this->privileges = '';
+		$this->EnsureDbInfo();
+	}
+
 	private function EnsureDbInfo($throwException = true)
 	{
 		if ($this->privileges === '')
@@ -292,6 +298,7 @@ class Account
 	{
 		$sql = "UPDATE user SET usr_firstname = ?, usr_lastname = ?, usr_password = ?, usr_is_active = 1 WHERE usr_id = ?";
 		App::Db()->exec($sql, array($firstName, $lastName, $passwordHashed, $this->userId));
+		$this->RefreshDbInfo();
 	}
 
 	public function SaveOauthActivation($data, $isCreate = true)

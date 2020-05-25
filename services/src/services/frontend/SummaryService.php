@@ -4,8 +4,7 @@ namespace helena\services\frontend;
 
 use helena\services\common\BaseService;
 use helena\caches\SummaryCache;
-use helena\db\frontend\SnapshotMetricVersionItemVariableModel;
-use helena\db\frontend\SnapshotMetricVersionItemVariableModel_v2;
+use helena\db\frontend\SnapshotByDataset;
 use helena\entities\frontend\clipping\SummaryInfo;
 use helena\entities\frontend\clipping\SummaryItemInfo;
 use minga\framework\Context;
@@ -54,10 +53,7 @@ class SummaryService extends BaseService
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
 
-		if (Context::Settings()->Map()->NewPublishingMethod)
-			$table = new SnapshotMetricVersionItemVariableModel_v2($level->Dataset->Table . "_snapshot");
-		else
-			$table = new SnapshotMetricVersionItemVariableModel();
+		$table = new SnapshotByDataset($level->Dataset->Table . "_snapshot");
 		$gradientId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)

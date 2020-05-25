@@ -44,6 +44,8 @@ class DatasetTable
 			$c = 0;
 			foreach($item as $value)
 			{
+				if ($c >= sizeof($headers))
+					break;
 				if ($value === '' && $headers[$c]->IsNumeric()) $value = null;
 				$sql .=	',' . SqlBuilder::FormatValue($value);
 				$c++;
