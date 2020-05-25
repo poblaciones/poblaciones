@@ -169,38 +169,38 @@ App::GetOrPost('/services/backoffice/UpdateVariable', function (Request $request
 	return App::Json($controller->UpdateVariable($datasetId, $level, $variable));
 });
 
-//TODO: programar esto...
 App::GetOrPost('/services/backoffice/CalculateNewMetric', function (Request $request) {
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId))
 		return $denied;
 
-		// 'w': loc.Work.Id,
-		$workId = Params::Get('w');
-		// 'm': newMetric.Id,
-		$metricId = Params::Get('m');
-		// 't': newMetric.Type,
-		$type = Params::Get('t');
-		// 'b': newMetric.SourceMetric.Metric.Id,
-		$sourceMetricId = Params::Get('b');
-		// 'o': JSON.stringify(newMetric.Output),
-		$output = Params::GetJson('o');
-		// 'a': JSON.stringify(newMetric.Area),
-		$area = Params::GetJson('a');
-		// 's': JSON.stringify(newMetric.Source),
-		$source = Params::GetJson('s');
+	$type = Params::Get('t');
+	$source = Params::GetJson('s', true);
+	$area = Params::GetJson('a', true);
+	$output = Params::GetJson('o', true);
 
-		if($type == 'distance')
-		{
-			$controller = CalculatedDistanceService();
-			return App::Json($controller->StartCalculate($workId,
-				$datasetId, $metricId, $sourceMetricId, $output, $area, $source
-			));
-		}
-		elseif($type == 'area')
-			return App::Json(['error' => 1, 'msg' => 'No implementado']);
-
+	if($type == 'distance')
+	{
+		$controller = new services\CalculatedDistanceService();
+		return App::Json($controller->StartCalculate($datasetId, $source, $output));
+	}
+	//elseif($type == 'area')
 	return App::Json(['error' => 1, 'msg' => 'No implementado']);
-	// return App::Json($controller->CalculateNewMetric($datasetId, $etc, $etc));
 });
 
+App::GetOrPost('/services/backoffice/StepCalculateNewMetric', function (Request $request) {
+	$controller = new services\CalculatedDistanceService();
+	$key = Params::GetMandatory('k');
+	return App::Json($controller->StepCalculate($key));
+});
+
+App::GetOrPost('/services/backoffice/CalculatedMetricExists', function (Request $request) {
+	$controller = new services\metrics\MetricsCalculator();
+	$datasetId = Params::GetIntMandatory('k');
+	$variableId = Params::GetInt('v');
+
+	if ($denied = Session::CheckIsDatasetEditor($datasetId))
+		return $denied;
+
+	return App::Json(['columnExists' => $controller->DistanceColumnExists($datasetId, $variableId)]);
+});

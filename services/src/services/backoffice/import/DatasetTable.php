@@ -2,16 +2,14 @@
 
 namespace helena\services\backoffice\import;
 
+use helena\classes\App;
 use helena\classes\spss\Alignment;
 use helena\classes\spss\Format;
 use helena\classes\spss\Measurement;
-
-use minga\framework\Profiling;
-use helena\classes\App;
-use minga\framework\Str;
-use minga\framework\ErrorException;
-
 use helena\services\backoffice\cloning\SqlBuilder;
+use minga\framework\ErrorException;
+use minga\framework\Profiling;
+use minga\framework\Str;
 
 class DatasetTable
 {
@@ -199,13 +197,13 @@ class DatasetTable
 				$decimals = $last;
 			}
 			$spssType = Format::GetCode(substr($format, 0, 1));
-			$fieldWith = intval(substr($first, 1));
+			$fieldWidth = intval(substr($first, 1));
 			///
 
-			$sqlType = self::SpssToMySqlDataType($spssType, $fieldWith);
+			$sqlType = self::SpssToMySqlDataType($spssType, $fieldWidth);
 			$fieldName = "dt_col" . (sizeof($array) + 1);
 
-			$fileTableHeader = new FileTableHeader($varName, $fieldName, $sqlType, $spssType, $fieldWith, $columnWidth, $label, $measureLevels, $alignment, $decimals);
+			$fileTableHeader = new FileTableHeader($varName, $fieldName, $sqlType, $spssType, $fieldWidth, $columnWidth, $label, $measureLevels, $alignment, $decimals);
 
 			if (array_key_exists($varName, $header["varLabels"]))
 			{
@@ -225,24 +223,19 @@ class DatasetTable
 		return $array;
 	}
 
-	private static function SpssToMySqlDataType($varType, $fieldWidth)
+	public static function SpssToMySqlDataType($varType, $fieldWidth)
 	{
-		// 5 = float
-		// 13 = point
-		// 14 = geomertry
-		if ($varType == 5)
+		if ($varType == Format::F)
 			return "NUMERIC(28,8)";
-		if ($varType == 13)
+		if ($varType == Format::Point)
 			return "POINT";
-		else if ($varType == 14)
+		else if ($varType == Format::Geometry)
 			return "GEOMETRY";
-		else
-		{	// TEXTO
-			if ($fieldWidth > 255)
-				return "TEXT";
-			else
-				return "VARCHAR(" . $fieldWidth . ")";
-		}
+
+		// TEXTO
+		if ($fieldWidth > 255)
+			return "TEXT";
+		return "VARCHAR(" . $fieldWidth . ")";
 	}
 }
 

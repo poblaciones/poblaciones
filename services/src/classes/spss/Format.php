@@ -1,6 +1,7 @@
 <?php
 namespace helena\classes\spss;
 
+use helena\classes\spss\Format;
 use minga\framework\ErrorException;
 
 // The print/write format for the data.
@@ -8,11 +9,11 @@ use minga\framework\ErrorException;
 class Format
 {
 	const NotUsed1 = 0;
-	const A = 1;
+	const A = 1; //Alfabético
 	const AHEX = 2;
 	const COMMA = 3;
 	const DOLLAR = 4;
-	const F = 5;
+	const F = 5; //Numérico
 	const IB = 6;
 	const PIBHEX = 7;
 	const P = 8;
@@ -20,8 +21,13 @@ class Format
 	const PK = 10;
 	const RB = 11;
 	const RBHEX = 12;
+
 	const NotUsed2 = 13;
+	const Point = 13;
+
 	const NotUsed3 = 14;
+	const Geometry = 14;
+
 	const Z = 15;
 	const N = 16;
 	const E = 17;

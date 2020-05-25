@@ -2,16 +2,19 @@
 
 namespace helena\services\backoffice;
 
-use minga\framework\ErrorException;
-use minga\framework\Profiling;
-
+use helena\caches\BackofficeDownloadCache;
+use helena\caches\DatasetColumnCache;
 use helena\classes\App;
+use helena\classes\spss\Alignment;
+use helena\classes\spss\Format;
+use helena\classes\spss\Measurement;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\cloning\SqlBuilder;
-use helena\caches\DatasetColumnCache;
-use helena\caches\BackofficeDownloadCache;
 use helena\services\backoffice\import\DatasetColumns;
-
+use helena\services\backoffice\import\DatasetTable;
+use minga\framework\ErrorException;
+use minga\framework\Profiling;
+use minga\framework\Str;
 
 class DatasetColumnService extends DbSession
 {
@@ -147,54 +150,131 @@ class DatasetColumnService extends DbSession
 		return false;
 	}
 
+	public function GetMaxOrder($datasetId)
+	{
+		$sql = "SELECT MAX(dco_order) FROM draft_dataset_column WHERE dco_dataset_id = ?";
+		return App::Db()->fetchScalarInt($sql, [$datasetId]);
+	}
+
+	public function UpdateOrder($colId, $datasetId, $position)
+	{
+		// Incrementa el order de las posteriores
+		$sql = "UPDATE draft_dataset_column SET dco_order = dco_order + 1 WHERE
+			dco_id != ? AND dco_dataset_id = ? AND dco_order >= ?";
+		return App::Db()->exec($sql, [$colId, $datasetId, $position]);
+	}
+
+	public function DeleteColumn($datasetId, $name)
+	{
+		$column = $this->GetColumnByVariable($datasetId, $name);
+		if($column != null)
+			$this->DeleteColumns($datasetId, [$column->getId()]);
+	}
+
+	public function CreateColumn($dataset, $field, $variable, $caption, $label, $columnWidth, $fieldWidth,
+		$decimals, $format, $measure, $alignment, $useInSummary, $useInExport, $position = null, $after = '')
+	{
+		Profiling::BeginTimer();
+		try
+		{
+			$newColumn = new entities\DraftDatasetColumn();
+			$newColumn->setDataset($dataset);
+			$newColumn->setField($field);
+			$newColumn->setVariable($variable);
+			$newColumn->setCaption($caption);
+			$newColumn->setLabel($label);
+
+			$newColumn->setColumnWidth($columnWidth);
+			$newColumn->setFieldWidth($fieldWidth);
+			$newColumn->setDecimals($decimals);
+			$newColumn->setFormat($format);
+			$newColumn->setMeasure($measure);
+			$newColumn->setAlignment($alignment);
+
+			$newColumn->setUseInSummary($useInSummary);
+			$newColumn->setUseInExport($useInExport);
+
+			$order = $position;
+			if($position === null)
+				$order = $this->GetMaxOrder($dataset->getId()) + 1;
+			$newColumn->setOrder($order);
+
+			App::Orm()->save($newColumn);
+
+			if($position !== null)
+				$this->UpdateOrder($newColumn->getId(), $dataset->getId(), $position);
+
+			if($after !== '')
+				$after = "AFTER " . $after;
+
+			$dataType = DatasetTable::SpssToMySqlDataType($format, $fieldWidth);
+			$alter = "ALTER TABLE " . $dataset->getTable() . " ADD COLUMN " . $field . " " . $dataType . " NULL DEFAULT NULL " . $after;
+			App::Db()->execDDL($alter);
+
+			return $newColumn;
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
+
+	public function GetCopyColumnName($prefix, $datasetName, $srcColumnName, $maxLength = 64)
+	{
+		// El máximo de un nombre de columna en mysql es 64 por
+		// eso el default de $maxLength = 64.
+		$clean = Str::RemoveAccents($datasetName);
+		$clean = Str::RemoveNonAlphanumeric($clean);
+		$clean = Str::Replace($clean, ' ', '_');
+		$len = Str::Length($clean) + Str::Length($prefix) + Str::Length($srcColumnName) + 1;
+		if($len > $maxLength)
+		{
+			$newLen = Str::Length($clean) - ($len - $maxLength);
+			if($newLen >= 0)
+				$clean = Str::Substr($clean, 0, $newLen);
+			else
+			{
+				$clean = '';
+				$srcColumnName = Str::Substr($srcColumnName, 0, Str::Length($srcColumnName) + $newLen);
+			}
+		}
+
+		return $prefix . $clean . '_' . $srcColumnName;
+	}
+
+	private function GetColumnByVariable($datasetId, $variable)
+	{
+		return App::Orm()->findByProperties(entities\DraftDatasetColumn::class,
+			['Variable' => $variable, 'Dataset.Id' => $datasetId]);
+	}
+
+	public function ColumnExists($datasetId, $variable)
+	{
+		return $this->GetColumnByVariable($datasetId, $variable) !== null;
+	}
+
 	private function CreateNumericColumn($dataset, $name, $originalField, $label, $summary, $position)
 	{
 		Profiling::BeginTimer();
-		// Valida name
-		$existing = App::Orm()->findByProperties(entities\DraftDatasetColumn::class,
-					array('Variable' => $name, 'Dataset.Id' => $dataset->getId()));
-		if ($existing !== null) throw new ErrorException("Ya existe una variable con el nombre '" . $name . "'.");
-
-		// 1. METADATOS
-		// Crea la columna
-		$newColumn = new entities\DraftDatasetColumn();
-		$newColumn->setVariable($name);
-		$newColumn->setLabel($label);
-		if ($label === null || $label === "")
+		try
 		{
-			$newColumn->setCaption($name);
+			// Valida name
+			if ($this->ColumnExists($dataset->getId(), $name))
+				throw new ErrorException("Ya existe una variable con el nombre '" . $name . "'.");
+
+			$field = $this->resolveUniqueFieldName($dataset->getId(), $originalField);
+			$caption = $label;
+			if ($label === null || $label === "")
+				$caption = $name;
+
+			return $this->CreateColumn($dataset, $field, $name, $caption, $label,
+				8, 8, 0, Format::F, Measurement::Nominal, Alignment::Right,
+				$summary, true, $position, $originalField);
 		}
-		else
+		finally
 		{
-			$newColumn->setCaption($label);
+			Profiling::EndTimer();
 		}
-		$newColumn->setOrder($position);
-		$newColumn->setField($this->resolveUniqueFieldName($dataset->getId(), $originalField));
-		$newColumn->setDataset($dataset);
-		$newColumn->setUseInSummary(false);
-		$newColumn->setUseInExport(true);
-
-		$newColumn->setColumnWidth(8);
-		$newColumn->setFieldWidth(8);
-    $newColumn->setDecimals(0);
-    $newColumn->setFormat(5); // F (numérico)
-    $newColumn->setMeasure(1); // nominal
-    $newColumn->setAlignment(1); //right
-
-		App::Orm()->save($newColumn);
-
-		// Incrementa el order de las posteriores
-		$updateOrder = "UPDATE draft_dataset_column SET dco_order = dco_order + 1 WHERE
-										dco_id != ? AND dco_dataset_id = ? AND dco_order >= ?";
-		App::Db()->exec($updateOrder, array($newColumn->getId(), $dataset->getId(), $position));
-
-		// 2. DATOS
-		// Hace el alterTable
-		$alter = "ALTER TABLE " . $dataset->getTable() . " ADD COLUMN " . $newColumn->getField() . " INT(11) NULL DEFAULT NULL AFTER " . $originalField;
-		App::Db()->execDDL($alter);
-
-		Profiling::EndTimer();
-		return $newColumn;
 	}
 
 	private function RecodeValues($dataset, $column, $targetColumn, $labels)
