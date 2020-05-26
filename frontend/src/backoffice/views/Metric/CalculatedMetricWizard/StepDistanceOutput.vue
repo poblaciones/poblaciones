@@ -10,10 +10,10 @@
 
 		<div>Limitar coincidencias:</div>
 		<div class="md-layout">
-			<div class="md-layout-item md-size-40 md-small-size-100">
+			<div class="md-layout-item md-size-40 md-small-size-100" style="display: inline-flex;">
 				<md-switch class="md-primary" v-model="newMetric.Output.HasMaxDistance">
 				</md-switch>
-				<mp-simple-text type="number" label="Distancia máxima en kilómetros" :disabled="!newMetric.Output.HasMaxDistance"
+				<mp-simple-text type="number" label="Distancia máxima (kilómetros)" :disabled="!newMetric.Output.HasMaxDistance"
 												v-model="newMetric.Output.MaxDistance"></mp-simple-text>
 
 			</div>
