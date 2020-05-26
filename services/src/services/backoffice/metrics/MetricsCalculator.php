@@ -44,7 +44,9 @@ class MetricsCalculator
 			if($output['HasValue'])
 			{
 				$cols['value'] = $this->CreateColumn($dataset, $datasetName, 'value', 'Valor');
-				$cols['total'] = $this->CreateColumn($dataset, $datasetName, 'total', 'Total');
+				$variable = App::Orm()->find(entities\Variable::class, $source['VariableId']);
+				if($variable->getNormalization() !== null)
+					$cols['total'] = $this->CreateColumn($dataset, $datasetName, 'total', 'Total');
 			}
 			else
 			{
