@@ -4,7 +4,7 @@
 
 		<div>Guardar por cada coincidencia:</div>
 
-		<md-switch class="md-primary" v-model="newMetric.Output.HasDescription">Descripción</md-switch>
+		<md-switch class="md-primary" v-show="hasDescription" v-model="newMetric.Output.HasDescription">Descripción</md-switch>
 		<md-switch class="md-primary" v-model="newMetric.Output.HasValue">Valor</md-switch>
 		<md-switch class="md-primary" v-model="newMetric.Output.HasCoords">Coordenada</md-switch>
 
@@ -33,6 +33,14 @@ export default {
 			default: function() {
 				return {};
 			},
+		},
+	},
+	computed: {
+		hasDescription() {
+			if(this.newMetric.SelectedLevel != null) {
+				return this.newMetric.SelectedLevel.HasDescriptions;
+			}
+			return false;
 		},
 	},
 	methods: {
