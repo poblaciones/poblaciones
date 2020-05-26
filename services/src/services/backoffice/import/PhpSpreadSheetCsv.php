@@ -84,7 +84,7 @@ class PhpSpreadSheetCsv extends BaseWriter
      *
      * @param string $pFilename
      *
-     * @throws Exception
+     * FALLA EN COMPILADOR: @ throws Exception
      */
     public function save($pFilename)
     {
@@ -99,7 +99,7 @@ class PhpSpreadSheetCsv extends BaseWriter
         // Open file
         $fileHandle = fopen($pFilename, 'wb+');
         if ($fileHandle === false) {
-            throw new Exception("Could not open file $pFilename for writing.");
+            throw new \Exception("Could not open file $pFilename for writing.");
         }
 
         if ($this->excelCompatibility) {
