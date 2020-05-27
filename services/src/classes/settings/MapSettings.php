@@ -15,6 +15,8 @@ class MapSettings
 	public $UseDataTileBlocks = false;
 	public $UseLabelTileBlocks = true;
 
+	public $ContentServerWorks = [];
+
 	public $UseCalculated = false;
 
 	public $UseGradients = false;

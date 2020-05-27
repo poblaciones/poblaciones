@@ -186,8 +186,8 @@ class SnapshotByDatasetModel
 		}
 		else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
 		{
-			$point = "POINT(" . $dataset['dat_longitude_field'] . ", " .
-																$dataset['dat_latitude_field'] . ")";
+			$point = "POINT(CONVERT(" . $dataset['dat_longitude_field'] . ", SIGNED), CONVERT(" .
+																$dataset['dat_latitude_field'] . ", SIGNED))";
 			$envelopeTarget = $point;
 			$location = $point;
 		}

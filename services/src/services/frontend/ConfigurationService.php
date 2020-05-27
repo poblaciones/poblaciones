@@ -24,6 +24,7 @@ class ConfigurationService extends BaseService
 		$ret = array('Revisions' => $revisions,
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
+									'StaticWorks' =>  Context::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => Context::Settings()->Map()->UseGradients,
 									'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => Context::Settings()->Map()->MaxStaticQueueRequests,
