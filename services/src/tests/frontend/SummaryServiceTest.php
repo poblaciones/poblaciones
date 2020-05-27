@@ -39,8 +39,6 @@ class SummaryServiceTest extends TestCase
 		$denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId);
 		$this->assertNull($denied);
 
-		$this->markTestIncomplete('Falla en producción y desa con estos parámetros, revisarlos para terminar este test');
-
 		$ret = $controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity);
 
 	}

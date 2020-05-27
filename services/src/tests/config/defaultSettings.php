@@ -26,10 +26,10 @@ return [
 		"testGetDatasetColumnsLabels" => 119,
 	],
 	"helena\\tests\\backoffice\\WorkServiceTest" => [
-		'testGetWorkInfo' => 37,
+		'testGetWorkInfo' => 36,
 	],
 	"helena\\tests\\backoffice\\MetricServiceTest" => [
-		"testGetWorkMetricVersions" => 37,
+		"testGetWorkMetricVersions" => 36,
 		"testGetDatasetMetricVersionLevels" => 119,
 		"testGetColumnDistributions" => [
 			'k' => 209,
@@ -106,8 +106,8 @@ return [
 	"helena\\tests\\frontend\\TileDataServiceTest" => [
 		"testGetTileData" => [
 			'l' => 3401,
-			'v' => 201,
-			'a' => 8501,
+			'v' => 601,
+			'a' => 18801,
 
 			'u' => 'N',
 			'x' => 86,
@@ -120,8 +120,8 @@ return [
 	"helena\\tests\\frontend\\SummaryServiceTest" => [
 		"testGetSummary" => [
 			'l' => 3401,
-			'v' => 201,
-			'a' => 8501,
+			'v' => 601,
+			'a' => 18801,
 
 			'u' => 'N',
 			'e' => '-36.31489,-56.568096;-38.33281,-61.822308',

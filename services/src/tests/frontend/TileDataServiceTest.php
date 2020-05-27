@@ -31,8 +31,6 @@ class TileDataServiceTest extends TestCase
 		$denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId);
 		$this->assertNull($denied);
 
-		$this->markTestIncomplete('Falla en producción y desa con estos parámetros, revisarlos para terminar este test');
-
 		$levelId = $a;
 		$urbanity = App::SanitizeUrbanity('N');
 		$frame = new Frame();
