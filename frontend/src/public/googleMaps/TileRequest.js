@@ -195,7 +195,7 @@ TileRequest.prototype.startGeographyRequest = function (queue) {
 
 TileRequest.prototype.ProcessResultsIfCompleted = function () {
 	if (this.requestIsComplete()) {
-		this.selectedMetricOverlay.process(this.div.dataMetric, this.mapDone, this.dataDone, this.gradient, this.key, this.div, this.coord.x, this.coord.y, this.zoom);
+		this.selectedMetricOverlay.process(this.mapDone, this.dataDone, this.gradient, this.key, this.div, this.coord.x, this.coord.y, this.zoom);
 	}
 };
 

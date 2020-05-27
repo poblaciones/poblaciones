@@ -22,9 +22,7 @@ function GoogleMapsApi(google) {
 GoogleMapsApi.prototype.SetSegmentedMap = function(segmentedMap) {
 	this.segmentedMap = segmentedMap;
 };
-GoogleMapsApi.prototype.BindDataMetric = function (dataMetric) {
-	dataMetric.setMap(this.gMap);
-};
+
 GoogleMapsApi.prototype.ResetInfoWindow = function (text, coordinate, offset) {
 	if(this.infoWindow !== null) {
 		this.infoWindow.close();
@@ -429,7 +427,7 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 };
 
 GoogleMapsApi.prototype.RemoveOverlay = function (index) {
-	this.gMap.overlayMapTypes.getAt(index).clear();
+	this.gMap.overlayMapTypes.getAt(index).dispose();
 	this.gMap.overlayMapTypes.removeAt(index);
 };
 

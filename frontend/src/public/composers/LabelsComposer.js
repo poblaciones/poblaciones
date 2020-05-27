@@ -15,7 +15,7 @@ function LabelsComposer(mapsApi, activeLabelMetric) {
 };
 LabelsComposer.prototype = new AbstractTextComposer();
 
-LabelsComposer.prototype.renderGeoJson = function(dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
+LabelsComposer.prototype.render = function(mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
 	var dataItems = dataResults.Data;
 
 	for (var i = 0; i < dataItems.length; i++) {
@@ -29,11 +29,6 @@ LabelsComposer.prototype.renderGeoJson = function(dataMetric, mapResults, dataRe
 			this.SetTextOverlay(null, dataElement['FIDs'], tileKey, location, null, null, null, '', null, true);
 		}
 	}
-
-	return { 'type': 'FeatureCollection', 'features': [] };
-};
-
-LabelsComposer.prototype.bindStyles = function (dataMetric, tileKey) {
 };
 
 LabelsComposer.prototype.removeTileFeatures = function (tileKey) {
@@ -44,6 +39,6 @@ LabelsComposer.prototype.UpdateTextStyle = function (size) {
 	this.textStyle = 'mapLabels ml' + size;
 };
 
-LabelsComposer.prototype.clear = function () {
+LabelsComposer.prototype.dispose = function () {
 	this.clearText();
 };

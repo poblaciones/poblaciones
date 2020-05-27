@@ -2,6 +2,7 @@ import axios from 'axios';
 import h from '@/public/js/helper';
 import Mercator from '@/public/js/Mercator';
 import TileRequest from '@/public/googleMaps/TileRequest';
+import PreviewHandler from './PreviewHandler';
 
 export default TileOverlay;
 
@@ -15,21 +16,9 @@ function TileOverlay(map, google, activeSelectedMetric) {
 	this.composer = activeSelectedMetric.CreateComposer();
 	this.geographyService = activeSelectedMetric.GetCartographyService();
 	this.requestedTiles = [];
-	this.zoomListener = null;
+	this.disposed = false;
 	// Guarda lo relacionado al preview de tile
-	this.lastZoom = this.map.getZoom();
-	var loc = this;
-	if (loc.composer.svgInTile !== undefined) {
-		this.svgInTileBackup = {};
-		this.zoomListener = this.map.addListener('zoom_changed', function () {
-			// guarda
-			loc.svgInTileBackup[loc.lastZoom] = loc.composer.svgInTile;
-			// actualiza
-			loc.composer.svgInTile = [];
-			loc.lastZoom = loc.map.getZoom();
-		});
-	}
-
+	this.preview = (this.composer.svgInTile !== undefined ? new PreviewHandler(this) : null);
 }
 
 TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
@@ -49,8 +38,6 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	var key = args + '&s=' + (this.idCounter++);
 	div.setAttribute('key', key);
 
-	//
-	div.dataMetric = new this.google.maps.Data();
 	// se fija si tiene sentido pedirlo
 	if (!this.IsTileVisible(boundsRectRequired, coord, zoom)) {
 		return div;
@@ -61,113 +48,14 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	//div.innerHTML = '<div style="padding: 4px; ">XXXXXXXXXXXX<a href="' + args + '">' + args + '</a></div>';
 
 	if (this.geographyService.url) {
-		var ele = this.getPreview(coord, zoom);
-		if (ele) {
-			div.appendChild(ele);
+		if (this.preview) {
+			var ele = this.preview.getPreview(coord, zoom);
+			if (ele) {
+				div.appendChild(ele);
+			}
 		}
 	}
 	this.requestedTiles[key] = dataRequest;
-	return div;
-};
-
-TileOverlay.prototype.getPreview = function (coord, zoom) {
-	if (this.svgInTileBackup === undefined) {
-		return null;
-	}
-	if (!this.activeSelectedMetric || !this.activeSelectedMetric.HasSelectedVariable()) {
-		return null;
-	}
-	var v = this.activeSelectedMetric.SelectedVariable().Id;
-
-	for (var n = zoom; n > 0; n--) {
-		var svg = this.CreateBestPossibleSvg(v, coord, zoom, n);
-		if (svg) {
-			return svg;
-		}
-	}
-	for (var n = zoom + 1; n < 22; n++) {
-		var svg = this.CreateBestPossibleSvg(v, coord, zoom, n);
-		if (svg) {
-			return svg;
-		}
-	}
-	return null;
-};
-
-TileOverlay.prototype.CreateBestPossibleSvg = function (v, coord, zoom, previousZoom) {
-	if (!this.svgInTileBackup.hasOwnProperty(previousZoom)) {
-		return null;
-	}
-	var svgs = this.svgInTileBackup[previousZoom];
-	// Puede ser mayor o menor
-	if (zoom >= previousZoom) {
-		// Calcula las coordenadas y el offset del contenedor
-		var deltaZ = zoom - previousZoom;
-		var sourceX = Math.trunc(coord.x / Math.pow(2, deltaZ));
-		var sourceY = Math.trunc(coord.y / Math.pow(2, deltaZ));
-		var sourceZ = previousZoom;
-		// Calcula la escala
-		var times = Math.pow(2, deltaZ);
-		var newSize = 256 / times;
-		var offsetX = 256 * ((coord.x / Math.pow(2, deltaZ)) - sourceX);
-		var offsetY = 256 * ((coord.y / Math.pow(2, deltaZ)) - sourceY);
-		// se fija si lo tiene
-		var sourceKey = h.getVariableFrameKey(v, sourceX, sourceY, sourceZ);
-		if (svgs.hasOwnProperty(sourceKey)) {
-			// lo devuelve
-			var ret = svgs[sourceKey].cloneNode(true);
-			ret.setAttribute("viewBox", offsetX + " " + offsetY + " " + newSize + " " + newSize);
-			return ret;
-		}
-	} else {
-		// Calcula cuál es la esquina de inicio
-		var deltaZ = previousZoom - zoom;
-		var sourceX = coord.x * Math.pow(2, deltaZ);
-		var sourceY = coord.y * Math.pow(2, deltaZ);
-		var sourceZ = previousZoom;
-		// Calcula la escala
-		var times = Math.pow(2, deltaZ);
-		var newSize = 256 / times;
-		// se fija si lo tiene
-		var i = 0;
-		var root = this.createDiv(256, 256);
-
-		for (var y = 0; y < times; y++) {
-			var row = this.createDiv(256, newSize);
-			row.style.whiteSpace = 'nowrap';
-			for (var x = 0; x < times; x++) {
-				var sourceKey = h.getVariableFrameKey(v, sourceX + x, sourceY + y, sourceZ);
-				var svg = null;
-				if (svgs.hasOwnProperty(sourceKey)) {
-					// lo devuelve
-					var svg = svgs[sourceKey].cloneNode(true);
-					svg.setAttribute("viewBox", "0 0 256 256");
-					svg.style.maxWidth = newSize + 'px';
-					svg.style.maxHeight = newSize + 'px';
-					svg.style.display = 'inline-block';
-					i++;
-				}
-				else {
-					svg = this.createDiv(newSize, newSize);
-					svg.style.display = 'inline-block';
-				}
-				row.appendChild(svg);
-			}
-			root.appendChild(row);
-		}
-		if (i > 0) {
-			return root;
-		}
-	}
-	return null;
-};
-
-TileOverlay.prototype.createDiv = function (width, height) {
-	var div = document.createElement("div");
-	if (width && height) {
-		div.style.width = width + "px";
-		div.style.height = height + "px";
-	}
 	return div;
 };
 
@@ -191,8 +79,8 @@ TileOverlay.prototype.SetDivFailure = function (div) {
 	div.style.backgroundColor = 'rgba(100, 100, 100, 0.25)';
 };
 
-TileOverlay.prototype.process = function (dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z) {
-	if ((tileKey in this.requestedTiles) === false) {
+TileOverlay.prototype.process = function (mapResults, dataResults, gradient, tileKey, div, x, y, z) {
+	if ((tileKey in this.requestedTiles) === false || this.disposed) {
 		return;
 	}
 	delete this.requestedTiles[tileKey];
@@ -200,25 +88,15 @@ TileOverlay.prototype.process = function (dataMetric, mapResults, dataResults, g
 	this.composer.textInTile[tileKey] = [];
 	var mercator = new Mercator();
 	var tileBounds = mercator.getTileBoundsLatLon({ x: x, y: y, z: z });
-	var filtered = this.composer.renderGeoJson(dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds);
-	// Los agrega
-	this.composer.bindStyles(dataMetric, tileKey);
-	dataMetric.addGeoJson(filtered);
-	// Listo
-	window.SegMap.MapsApi.BindDataMetric(dataMetric);
+	this.composer.render(mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds);
 };
 
 TileOverlay.prototype.releaseTile = function(tile) {
-	if (tile.dataMetric) {
-		tile.dataMetric.setMap(null);
-		var key = tile.getAttribute('key');
-
-		this.killIfRunning(key);
-		this.composer.removeTileFeatures(key);
-
-		tile.dataMetric = null;
-	}
+	var key = tile.getAttribute('key');
+	this.killIfRunning(key);
+	this.composer.removeTileFeatures(key);
 };
+
 TileOverlay.prototype.killIfRunning = function(key) {
 	if ((key in this.requestedTiles) === false) {
 		return false;
@@ -245,10 +123,10 @@ TileOverlay.prototype.IsOutOfClipping = function (coord, zoom) {
 	}
 };
 
-TileOverlay.prototype.clear = function () {
-	this.composer.clear();
-	this.svgInTileBackup = {};
-	if (this.zoomListener) {
-		this.zoomListener.remove();
+TileOverlay.prototype.dispose = function () {
+	this.disposed = true;
+	this.composer.dispose();
+	if (this.preview) {
+		this.preview.dispose();
 	}
 };

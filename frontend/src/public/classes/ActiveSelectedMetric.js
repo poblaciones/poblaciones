@@ -1,5 +1,5 @@
-import LocationsGeojsonComposer from '@/public/composers/LocationsGeojsonComposer';
-import SvgFullGeojsonComposer from '@/public/composers/SvgFullGeojsonComposer';
+import LocationsComposer from '@/public/composers/LocationsComposer';
+import SvgComposer from '@/public/composers/SvgComposer';
 import Vue from 'vue';
 
 import MetricRouter from '@/public/classes/MetricRouter';
@@ -291,21 +291,12 @@ ActiveSelectedMetric.prototype.Remove = function () {
 ActiveSelectedMetric.prototype.CreateComposer = function() {
 	if (this.SelectedLevel().Dataset.Type === 'L') {
 		//case 'L':
-		return new LocationsGeojsonComposer(window.SegMap.MapsApi, this);
+		return new LocationsComposer(window.SegMap.MapsApi, this);
 		/*case 'S':
 	case 'D':*/
 	} else {
-		return new SvgFullGeojsonComposer(window.SegMap.MapsApi, this);
+		return new SvgComposer(window.SegMap.MapsApi, this);
 	}
-	//if (Number(this.GetPattern()) > 1) {
-	//	// Pattern
-	//	return new SvgGeojsonComposer(window.SegMap.MapsApi, this);
-	//} else {
-	//	return new DataGeojsonComposer(window.SegMap.MapsApi, this);
-	//}
-	/*default:
-		throw new Error('Unknown dataset metric type');*/
-	//}
 };
 
 ActiveSelectedMetric.prototype.GetSymbolInfo = function () {
@@ -375,13 +366,12 @@ ActiveSelectedMetric.prototype.ResolveVisibility = function (labelId) {
 	return false;
 };
 
-ActiveSelectedMetric.prototype.ResolveStyle = function (labelId) {
-	var variable = this.SelectedVariable();
+ActiveSelectedMetric.prototype.ResolveStyle = function (variable, labelId) {
 	for (let i = 0; i < variable.ValueLabels.length; i++) {
 		var value = variable.ValueLabels[i];
 		if (value['Id'] === labelId) {
 			var fillColor = value.FillColor;
-			if (this.GetPattern() === 1) {
+			if (this.GetPattern(variable) === 1) {
 				return /** @type {google.maps.Data.StyleOptions} */({
 					fillColor: 'transparent',
 					strokeColor: fillColor,
@@ -403,11 +393,14 @@ ActiveSelectedMetric.prototype.ResolveStyle = function (labelId) {
 	}
 };
 
-ActiveSelectedMetric.prototype.GetPattern = function () {
-	if (this.SelectedVariable().CustomPattern === '') {
-		return this.SelectedVariable().Pattern;
+ActiveSelectedMetric.prototype.GetPattern = function (variable) {
+	if (!variable) {
+		variable = this.SelectedVariable();
+	}
+	if (variable.CustomPattern === '') {
+		return variable.Pattern;
 	} else {
-		return this.SelectedVariable().CustomPattern;
+		return variable.CustomPattern;
 	}
 };
 ActiveSelectedMetric.prototype.ReleasePins = function () {
@@ -565,12 +558,24 @@ ActiveSelectedMetric.prototype.UseBlockedRequests = function (boundsRectRequired
 	return this.blockSize && !boundsRectRequired;
 };
 
-ActiveSelectedMetric.prototype.GetDataService = function (boundsRectRequired) {
+ActiveSelectedMetric.prototype.GetDataService = function (boundsRectRequired, seed) {
+	var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
+	var path = '';
+	var server = '';
+
 	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return { server: window.host, path: '/services/frontend/metrics/GetBlockTileData', useStaticQueue: false };
+		path: '/services/frontend/metrics/GetBlockTileData';
+		seed = seed / this.blockSize;
 	} else {
-		return { server: window.host, path: '/services/frontend/metrics/GetTileData', useStaticQueue: false };
+		path = '/services/frontend/metrics/GetTileData';
 	}
+
+	if (useStaticQueue) {
+		server = h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed);
+	} else {
+		server = window.host;
+	}
+	return { server: server, path: path, useStaticQueue: useStaticQueue };
 };
 
 ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord, boundsRectRequired) {

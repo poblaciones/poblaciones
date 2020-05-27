@@ -1,4 +1,8 @@
 [CURRENT]
+- Permite la distribución selectiva de works a servidores secundarios.
+- Fix: los markers se crean en forma directa con el estilo seleccionado (no regenera el marker rojo).
+- Fix: no quedan marquers huérfanos.
+- Mejoras en la reutilización de svgs para preview.
 
 v2.20 (2020-05-26)
 - Refactoring tabla snapshots.

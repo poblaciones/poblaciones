@@ -5,9 +5,9 @@ import SvgOverlay from '@/public/googleMaps/SvgOverlay';
 import Mercator from '@/public/js/Mercator';
 import SVG from 'svg.js';
 
-export default SvgFullGeojsonComposer;
+export default SvgComposer;
 
-function SvgFullGeojsonComposer(mapsApi, activeSelectedMetric) {
+function SvgComposer(mapsApi, activeSelectedMetric) {
 	// api usada de geojson2svg en js: https://github.com/gagan-bansal/geojson2svg
 	// api usada de svg: http://svgjs.com/elements/#svg-pattern
 	// posible api de php https://github.com/chrishadi/geojson2svg/blob/master/geojson2svg.php
@@ -21,51 +21,22 @@ function SvgFullGeojsonComposer(mapsApi, activeSelectedMetric) {
 	this.AbstractConstructor();
 	this.useGradients = window.SegMap.Configuration.UseGradients;
 };
-SvgFullGeojsonComposer.prototype = new AbstractTextComposer();
 
-SvgFullGeojsonComposer.uniqueCssId = 1;
+SvgComposer.prototype = new AbstractTextComposer();
+SvgComposer.uniqueCssId = 1;
 
-SvgFullGeojsonComposer.prototype.SVG = function (h, w, z) {
-	var xmlns = 'http://www.w3.org/2000/svg';
-	var boxWidth = h;
-	var boxHeight = w;
-
-	var svgElem = document.createElementNS(xmlns, 'svg');
-	svgElem.setAttributeNS(null, 'width', boxWidth);
-	svgElem.setAttributeNS(null, 'height', boxHeight);
-	svgElem.setAttributeNS(null, 'isFIDContainer', 1);
-	svgElem.setAttributeNS(null, 'metricId', this.activeSelectedMetric.properties.Metric.Id);
-	svgElem.setAttributeNS(null, 'metricVersionId', this.activeSelectedMetric.SelectedVersion().Version.Id);
-	svgElem.setAttributeNS(null, 'levelId', this.activeSelectedMetric.SelectedLevel().Id);
-	svgElem.setAttributeNS(null, 'variableId', this.activeSelectedMetric.SelectedVariable().Id);
-	svgElem.style.display = 'block';
-	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
-	if (patternValue === 0 || patternValue === 2) {
-		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
-	} else if (patternValue === 1) {
-		svgElem.style.strokeWidth = (z < 16 ? '2.5px' : '4px');
-	} else if (this.patternIsPipeline(patternValue)) {
-		// 3,4,5,6 son cañerías
-		svgElem.style.strokeWidth = '0px';
-	} else {
-		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
-		svgElem.style.strokeOpacity = this.activeSelectedMetric.currentOpacity;
-	}
-	return svgElem;
-};
-
-SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
+SvgComposer.prototype.render = function (mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
 	var filtered = [];
 	var allKeys = [];
 	var mapItems = mapResults.Data.features;
 	var projected = mapResults.Data.projected;
 	var dataItems = dataResults.Data;
 	if (this.activeSelectedMetric.HasSelectedVariable() === false) {
-		return { 'type': 'FeatureCollection', 'features': [] };
+		return;
 	}
 	var variableId = this.activeSelectedMetric.SelectedVariable().Id;
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
-	var tileUniqueId = SvgFullGeojsonComposer.uniqueCssId++;
+	var tileUniqueId = SvgComposer.uniqueCssId++;
 	var id;
 	var varId;
 	var iMapa = 0;
@@ -102,13 +73,9 @@ SvgFullGeojsonComposer.prototype.renderGeoJson = function (dataMetric, mapResult
 		var simpleKey = h.getVariableFrameKey(v, x, y, z, this.MapsApi.TileBoundsRequired());
 		this.svgInTile[simpleKey] = svg;
 	}
-	return { 'type': 'FeatureCollection', 'features': [] };
 };
 
-SvgFullGeojsonComposer.prototype.bindStyles = function (dataMetric, tileKey) {
-};
-
-SvgFullGeojsonComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, mapElement, tileKey, tileBounds, filtered, allKeys, patternValue, colorMap) {
+SvgComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, mapElement, tileKey, tileBounds, filtered, allKeys, patternValue, colorMap) {
 	// Se fija si por etiqueta está visible
 	var val = dataElement['ValueId'];
 	var valKey = 'K' + val;
@@ -118,7 +85,6 @@ SvgFullGeojsonComposer.prototype.processFeature = function (tileUniqueId, id, da
 	if (this.labelsVisibility[valKey] === false) {
 		return;
 	}
-
 	// Lo agrega
 	var centroid = 	this.getCentroid(mapElement);
 	var mapItem = {
@@ -142,7 +108,8 @@ SvgFullGeojsonComposer.prototype.processFeature = function (tileUniqueId, id, da
 	filtered.push(mapItem);
 };
 
-SvgFullGeojsonComposer.prototype.getCentroid = function (mapElement) {
+
+SvgComposer.prototype.getCentroid = function (mapElement) {
 	if (mapElement['properties'] && mapElement['properties'].centroid) {
 		return new window.google.maps.LatLng(mapElement['properties'].centroid[0], mapElement['properties'].centroid[1]);
 	} else {
@@ -150,21 +117,50 @@ SvgFullGeojsonComposer.prototype.getCentroid = function (mapElement) {
 	}
 };
 
-SvgFullGeojsonComposer.prototype.AddFeatureText = function (val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap) {
+SvgComposer.prototype.AddFeatureText = function (val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap) {
 	if (this.inTile(tileBounds, centroid)) {
 		this.ResolveValueLabel(dataElement, centroid, tileKey, colorMap[val]);
 	}
 };
 
-SvgFullGeojsonComposer.prototype.patternUseFillStyles = function (patternValue) {
+SvgComposer.prototype.SVG = function (h, w, z) {
+	var xmlns = 'http://www.w3.org/2000/svg';
+	var boxWidth = h;
+	var boxHeight = w;
+
+	var svgElem = document.createElementNS(xmlns, 'svg');
+	svgElem.setAttributeNS(null, 'width', boxWidth);
+	svgElem.setAttributeNS(null, 'height', boxHeight);
+	svgElem.setAttributeNS(null, 'isFIDContainer', 1);
+	svgElem.setAttributeNS(null, 'metricId', this.activeSelectedMetric.properties.Metric.Id);
+	svgElem.setAttributeNS(null, 'metricVersionId', this.activeSelectedMetric.SelectedVersion().Version.Id);
+	svgElem.setAttributeNS(null, 'levelId', this.activeSelectedMetric.SelectedLevel().Id);
+	svgElem.setAttributeNS(null, 'variableId', this.activeSelectedMetric.SelectedVariable().Id);
+	svgElem.style.display = 'block';
+	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
+	if (patternValue === 0 || patternValue === 2) {
+		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
+	} else if (patternValue === 1) {
+		svgElem.style.strokeWidth = (z < 16 ? '2.5px' : '4px');
+	} else if (this.patternIsPipeline(patternValue)) {
+		// 3,4,5,6 son cañerías
+		svgElem.style.strokeWidth = '0px';
+	} else {
+		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
+		svgElem.style.strokeOpacity = this.activeSelectedMetric.currentOpacity;
+	}
+	return svgElem;
+};
+
+SvgComposer.prototype.patternUseFillStyles = function (patternValue) {
 	return (patternValue > 2);
 };
 
-SvgFullGeojsonComposer.prototype.patternIsPipeline = function (patternValue) {
+SvgComposer.prototype.patternIsPipeline = function (patternValue) {
 	return (patternValue >= 3 && patternValue <= 6);
 };
 
-SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, projected, tileBounds, z, patternValue, gradient) {
+SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, projected, tileBounds, z, patternValue, gradient) {
 	var m = new Mercator();
 	var projectedFeatures;
 	if (projected) {
@@ -242,7 +238,7 @@ SvgFullGeojsonComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div,
 	return oSvg;
 };
 
-SvgFullGeojsonComposer.prototype.appendPatterns = function (o2, labels, scales) {
+SvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
 	// crea un pattern para cada tipo de etiqueta
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
 	var width = (this.patternIsPipeline(patternValue) ? '; stroke-width: ' + scales.ang + 'px;' : '');
@@ -256,7 +252,7 @@ SvgFullGeojsonComposer.prototype.appendPatterns = function (o2, labels, scales) 
 	}
 };
 
-SvgFullGeojsonComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask) {
+SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask) {
 	// crea una clase para cada tipo de etiqueta
 	var styles = "<style type='text/css'>";
 	var fillBlock = (patternValue === 1 || patternValue === 2 ? '; fill: transparent ' : '');
@@ -280,23 +276,23 @@ SvgFullGeojsonComposer.prototype.appendStyles = function (oSvg, tileUniqueId, la
 	oSvg.appendChild(svgStyles);
 };
 
-SvgFullGeojsonComposer.prototype.createPattern = function (o2, scale) {
+SvgComposer.prototype.createPattern = function (o2, scale) {
 	var pattern = new Pattern(this.activeSelectedMetric.GetPattern(), scale);
 	return pattern.GetPattern(o2);
 };
 
-SvgFullGeojsonComposer.prototype.clear = function () {
+SvgComposer.prototype.dispose = function () {
 	this.clearText();
 };
 
-SvgFullGeojsonComposer.prototype.removeTileFeatures = function (tileKey) {
+SvgComposer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
 	if (this.svgInTile.hasOwnProperty(tileKey)) {
 		delete this.svgInTile[tileKey];
 	}
 };
 
-SvgFullGeojsonComposer.prototype.defineScaleCriteria = function(z) {
+SvgComposer.prototype.defineScaleCriteria = function(z) {
 	var divi = 4;
 	switch (z) {
 	case 11:
