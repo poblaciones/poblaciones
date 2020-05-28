@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import str from '@/common/js/str';
 
 export default {
 	// Step 3 para Distance

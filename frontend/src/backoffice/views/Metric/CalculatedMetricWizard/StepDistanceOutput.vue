@@ -45,10 +45,17 @@ export default {
 	},
 	methods: {
 		validate() {
-			if (this.newMetric.Output.HasMaxDistance
-				&& str.IsIntegerGreaterThan0(this.newMetric.Output.MaxDistance) == false) {
-				alert("Debe ingresar la distancia máxima en kms.");
-				return false;
+			const MAX_VALID_DISTANCE = 5500;
+
+			if (this.newMetric.Output.HasMaxDistance) {
+				if(str.IsIntegerGreaterThan0(this.newMetric.Output.MaxDistance) == false) {
+					alert("Debe ingresar la distancia máxima en kms.");
+					return false;
+				}
+				if(str.IsIntegerGreaterThan(this.newMetric.Output.MaxDistance, MAX_VALID_DISTANCE)) {
+					alert("La distancia debe ser menor a " + MAX_VALID_DISTANCE + " kms.");
+					return false;
+				}
 			}
 			return true;
 		}

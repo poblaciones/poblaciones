@@ -86,7 +86,6 @@ export default {
 		by() {
 			let ret = '';
 			if (this.newMetric.Type == 'formula') {
-				//TODO: definir.
 				ret = ' según fórmula';
 			} else if (this.newMetric.Type == 'distance') {
 				ret = ' según distancia';
@@ -113,11 +112,12 @@ export default {
 	},
 	methods: {
 		initNewMetric() {
-			//TODO: revisar todos los defaults
 			let defaultIsInclusionPoint = false;
+			let defaultHasDescription = false;
 			return {
 				SourceMetric: {},
 				DefaultIsInclusionPoint: defaultIsInclusionPoint,
+				DefaultHasDescription: defaultHasDescription,
 				SelectedVersion: null,
 				SelectedLevel: null,
 				SelectedVariable: null,
@@ -125,22 +125,17 @@ export default {
 				Id: null,
 				Type: '',
 				Output: {
-					//Distance
-					HasDescription: false,
+					HasDescription: defaultHasDescription,
 					HasValue: true,
 					HasCoords: true,
 					HasMaxDistance: false,
 					MaxDistance: 20,
-
-					// Area
+				},
+				OutputArea: {
 					HasAdditionValue: false,
 					HasMaxValue: false,
 					HasMinValue: false,
 					HasCount: false,
-
-					//Ambos
-					HasNormalizationValue: false,
-					InSameProvince: false,
 				},
 				Area: {
 					IsInclusionPoint: defaultIsInclusionPoint,
@@ -214,26 +209,32 @@ export default {
 			stepper.Start();
 		},
 		args() {
-			return {
-				k: this.Dataset.properties.Id,
-				t: this.newMetric.Type,
-				a: JSON.stringify(this.newMetric.Area),
-				s: JSON.stringify(this.newMetric.Source),
-				o: JSON.stringify(this.newMetric.Output),
-			};
+			if(this.newMetric.Type == 'distance') {
+				return {
+					k: this.Dataset.properties.Id,
+					t: this.newMetric.Type,
+					s: JSON.stringify(this.newMetric.Source),
+					o: JSON.stringify(this.newMetric.Output),
+				};
+			}
+			// Definir
+			return {};
 		},
 		stepperComplete() {
 			const STEP_CREATE_VARIABLES = 0;
-			const STEP_UPDATE_ROWS = 1;
-			const STEP_CREATE_METRIC = 2;
-			const STEP_COMPLETED = 3;
+			const STEP_PREPARE_DATA = 1;
+			const STEP_UPDATE_ROWS = 2;
+			const STEP_CREATE_METRIC = 3;
+			const STEP_COMPLETED = 4;
 
 			var stepper = this.$refs.stepper;
-			//TODO: ver como implementar esto.
+			//TODO: implementar.
 			switch (stepper.step)
 			{
 				case STEP_CREATE_VARIABLES:
 					// stepper.error = 'Falló en.';
+					break;
+				case STEP_PREPARE_DATA:
 					break;
 				case STEP_UPDATE_ROWS:
 					// stepper.error = 'Falló en.';

@@ -199,6 +199,7 @@ export default {
 				}
 			} else {
 				this.newMetric.SelectedLevel = null;
+				this.newMetric.Output.HasDescription = false;
 			}
 		},
 		"newMetric.SelectedLevel"() {

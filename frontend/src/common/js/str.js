@@ -47,9 +47,12 @@ module.exports = {
 		}
 		return ret;
 	},
-	IsIntegerGreaterThan0(str) {
+	IsIntegerGreaterThan(str, than) {
 		let n = Number(str);
-		return Number.isInteger(n) && n > 0;
+		return Number.isInteger(n) && n > than;
+	},
+	IsIntegerGreaterThan0(str) {
+		return this.IsIntegerGreaterThan(str, 0);
 	},
 	AddDot(str) {
 		if (str !== null && this.EndsWith(str, ".") === false) {
