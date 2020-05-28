@@ -8,20 +8,11 @@ use helena\classes\spss\Format;
 use helena\classes\spss\Measurement;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\DatasetColumnService;
-use minga\framework\ErrorException;
 use minga\framework\Profiling;
-use minga\framework\Db;
+use minga\framework\Str;
 
 class MetricsCalculator
 {
-	// El máximo de registros que procesa para calcular la distancia se basa en
-	// un producto cruzado de "todos contra todos", para calcular el tamaño de
-	// los slices toma en cuenta cuantos registros puede multiplicar en un
-	// tiempo determinado, 5 millones equivale a procesar mil registros por
-	// vez contra un snapshot de 5000 registros. Ajustar en función de los
-	// recursos del servidor.
-	const CrossProductMax = 5000000;
-
 	const ColPrefix = 'dst_';
 
 	public function StepCreateColumn($datasetId, $source, $output)
@@ -80,7 +71,6 @@ class MetricsCalculator
 		$datasetColumn->DeleteColumn($dataset->getId(), $name);
 	}
 
-
 	private function CreateColumn($dataset, $datasetName, $field, $caption, $width = 11, $decimals = 2)
 	{
 		$datasetColumn = new DatasetColumnService();
@@ -107,120 +97,148 @@ class MetricsCalculator
 		return $col->getField();
 	}
 
-	public function UpdateDatasetDistance($datasetId, $cols, $source, $output, $slice, $pageSize)
+	public function StepPrepareData($datasetId, $cols, $source)
 	{
 		Profiling::BeginTimer();
+		try
+		{
+			$srcDataset = $this->GetSrcDataset($source['VariableId']);
+			$snapshotTable = $this->getSnapshotTable($srcDataset);
+			$this->CreateTempTable($snapshotTable, $source);
 
-		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$srcDataset = $this->GetSrcDataset($source['VariableId']);
+			$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+			$this->ResetCols($dataset->getTable(), $cols);
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
 
-		$offset = $slice * $pageSize;
+	public function StepUpdateDatasetDistance($datasetId, $cols, $source, $output)
+	{
+		Profiling::BeginTimer();
+		try
+		{
+			$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+			$srcDataset = $this->GetSrcDataset($source['VariableId']);
 
-		$sql = $this->GetUpdateQuery($dataset->getTable(),
-			  $this->getSnapshotTable($srcDataset),
-			$output, $cols, $source, $offset, $pageSize);
+			$sql = $this->GetUpdateQuery($dataset->getTable(),
+			  	$this->getSnapshotTable($srcDataset),
+				$this->GetDistanceColumn($dataset), $output, $cols, $source);
 
-		$where = $this->GetDistanceWhereParams($output);
-		$ret = App::Db()->exec($sql, $where);
+			$where = $this->GetDistanceWhereParams($output);
+			return App::Db()->exec($sql, $where);
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
 
-		Profiling::EndTimer();
+	private function GetDistanceColumn($dataset)
+	{
+		$ret = [
+			'col' => '',
+			'join' => '',
+			'where' => '1',
+		];
+		if ($dataset->getType() == 'L')
+		{
+			$ret['col'] = 'POINT(' . $dataset->getLongitudeColumn . ',' . $dataset->getLatitudeColumn . ')';
+			$ret['where'] = $dataset->getLongitudeColumn . ' IS NOT NULL AND ' . $dataset->getLatitudeColumn . ' IS NOT NULL';
+		}
+		else if ($dataset->getType() == 'S')
+		{
+			$ret['col'] = 'centroid';
+			$ret['where'] = 'centroid IS NOT NULL';
+		}
+		else if ($dataset->getType() == 'D')
+		{
+			$ret['col'] = 'gei_centroid';
+			$ret['join'] = 'JOIN geography_item ON gei_id = geography_item_id';
+		}
 		return $ret;
 	}
 
-	private function GetUpdateQuery($datasetTable, $snapshotTable, $output, $cols, $source, $offset, $pageSize)
+	private function CreateTempTable($snapshotTable, $source)
 	{
-		$coords = $this->GetCoordsFields($output, $cols);
-		$description = $this->GetDescriptionFields($output, $cols);
-		$value = $this->GetValueFields($source, $output, $cols);
-		$total = $this->GetTotalFields($source, $cols);
+		Profiling::BeginTimer();
+		try
+		{
+			$drop = 'DROP TABLE IF EXISTS tmp_calculate_metric';
+			$create = 'CREATE TABLE tmp_calculate_metric AS (
+					SELECT sna_id, sna_location
+					FROM ' . $snapshotTable . '
+					WHERE sna_location IS NOT NULL
+					' . $this->GetValueLabelsWhere($source) . ')';
+			$index = 'CREATE SPATIAL INDEX sna_location ON tmp_calculate_metric (sna_location)';
 
-		$crossProduct = 'SELECT id datid,
-				' . $coords['crossField'] . '
-				' . $description['crossField'] . '
-				' . $value['crossField'] . '
-				' . $total['crossField'] . '
-				ST_DISTANCE_SPHERE(centroid, sna_location) distance
-			FROM
-				(SELECT id, centroid
-				FROM ' . $datasetTable . '
-				WHERE centroid IS NOT NULL
-				LIMIT ' . $offset . ',' . $pageSize . ') dataset
-			CROSS JOIN
-				' . $snapshotTable . ' snap
-			WHERE
-				sna_location IS NOT NULL '
-				. $this->GetDistanceWhere($output)
-				. $this->GetValueLabelsWhere($source);
+			App::Db()->execDDL($drop);
+			App::Db()->execDDL($create);
+			App::Db()->execDDL($index);
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
 
+	private function ResetCols($datasetTable, $cols)
+	{
+		Profiling::BeginTimer();
+		try
+		{
+			$update = 'UPDATE ' . $datasetTable . '
+				SET ' . implode(' = null, ', $cols) . ' = null';
+			return App::Db()->exec($update);
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
 
-		$update = 'UPDATE
-				' . $datasetTable . ' dest
-			JOIN
-				(SELECT datid,
-					' . $coords['field'] . '
-					' . $description['field'] . '
-					' . $value['field'] . '
-					' . $total['field'] . '
-					distance
-				FROM
-					(SELECT @prev := -1, @n := 0) init
-				JOIN
-					(SELECT *, @n := IF(datid != @prev, 1, @n + 1) AS rownum, @prev := datid
-					FROM
-						(' . $crossProduct . ') crossproduct
-					ORDER BY datid, distance) valores
-					WHERE rownum = 1) datos
-			SET
-				' . $coords['updateSet'] . '
-				' . $description['updateSet'] . '
-				' . $value['updateSet'] . '
-				' . $total['updateSet'] . '
-				' . $cols['distance'] . ' = CAST(distance AS DECIMAL(28, 8))
-			WHERE dest.id = datid';
+	private function UseSTDistanceFunction() : int
+	{
+		Profiling::BeginTimer();
+		try
+		{
+			$sql = 'SELECT VERSION()';
+			$ret = App::Db()->fetchColumn($sql);
+			if(Str::ContainsI($ret, 'mariadb') == false && version_compare($ret, '5.7.6', '>='))
+				return 1;
+			return 0;
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
+
+	private function GetUpdateQuery($datasetTable, $snapshotTable, $distance, $output, $cols, $source)
+	{
+		//TODO: Definir un máximo.
+		$distMts = 5500 * 1000;
+		if($output['HasMaxDistance'])
+			$distMts = $output['MaxDistance'] * 1000;
+
+		$useST = $this->UseSTDistanceFunction();
+
+		$update = 'UPDATE ' . $datasetTable . '
+			JOIN ' . $snapshotTable . '
+			ON sna_id = NearestSnapshot(' . rand() . ', ' . $distance['col'] . ', ' . $distMts . ', ' . $useST . ')
+			' . $distance['join'] . '
+			SET '
+			. $this->GetCoordsSet($output, $cols)
+			. $this->GetDescriptionSet($output, $cols)
+			. $this->GetValueSet($source, $output, $cols)
+			. $this->GetTotalSet($source, $cols)
+			. $cols['distance'] . ' = DistanceSphere(' . $distance['col'] . ', sna_location, ' . $useST . ')
+			WHERE ' . $distance['where'] . '
+			' . $this->GetDistanceWhere($output, $distance) . ';';
 
 		return $update;
-	}
-
-	private function GetTotalDatasetRows($dataset)
-	{
-		$sql = 'SELECT COUNT(*) FROM '
-			. $dataset->getTable()
-			. ' WHERE centroid IS NOT NULL';
-		return App::Db()->fetchScalarInt($sql);
-	}
-
-	private function GetTotalSnapshotRows($dataset, $source)
-	{
-		$sql = 'SELECT COUNT(*) FROM '
-			. $this->getSnapshotTable($dataset)
-			. ' WHERE sna_location IS NOT NULL'
-			. $this->GetValueLabelsWhere($source);
-		return App::Db()->fetchScalarInt($sql);
-	}
-
-	public function GetTotalSlices($datasetId, $source)
-	{
-		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$srcDataset = $this->GetSrcDataset($source['VariableId']);
-
-		$datasetRows = $this->GetTotalDatasetRows($dataset);
-		$snapshotRows = $this->GetTotalSnapshotRows($srcDataset, $source);
-
-		if($snapshotRows == 0)
-		{
-			return [
-				'pageSize' => $datasetRows,
-				'totalSlices' => 1,
-			];
-		}
-
-		$pageSize = round(self::CrossProductMax / $snapshotRows);
-		if($pageSize == 0)
-			$pageSize = 1;
-		return [
-			'pageSize' => $pageSize,
-			'totalSlices' => ceil($datasetRows / $pageSize),
-		];
 	}
 
 	private function GetSrcDataset($variableId)
@@ -230,10 +248,10 @@ class MetricsCalculator
 		return $versionLevel->getDataset();
 	}
 
-	private function GetDistanceWhere($output)
+	private function GetDistanceWhere($output, $distance)
 	{
 		if($output['HasMaxDistance'])
-			return ' AND ST_DISTANCE_SPHERE(centroid, sna_location) <= ?';
+			return ' AND ST_DISTANCE_SPHERE(' . $distance['col'] . ', sna_location) <= ?';
 		return '';
 	}
 
@@ -247,65 +265,36 @@ class MetricsCalculator
 	private function GetDistanceWhereParams($output)
 	{
 		if($output['HasMaxDistance'])
-			return [(int)$output['MaxDistance']];
+			return [(int)$output['MaxDistance'] * 1000];
 		return [];
 	}
 
-	private function GetEmptyFields()
+	private function GetCoordsSet($output, $cols)
 	{
-		return [
-			'field' => '',
-			'crossField' => '',
-			'updateSet' => '',
-		];
+		if($output['HasCoords'])
+			return $cols['lat'] . ' = ST_Y(sna_location),' . $cols['lon'] . ' = ST_X(sna_location),';
+		return '';
 	}
 
-	private function GetCoordsFields($output, $cols)
+	private function GetDescriptionSet($output, $cols)
 	{
-		if($output['HasCoords'] == false)
-			return $this->GetEmptyFields();
-
-		return [
-			'field' => 'lat,lon,',
-			'crossField' => 'ST_Y(sna_location) lat,ST_X(sna_location) lon,',
-			'updateSet' => $cols['lat'] . ' = lat,' . $cols['lon'] . ' = lon,',
-		];
+		if($output['HasDescription'])
+			return $cols['description'] . ' = sna_description,';
+		return '';
 	}
 
-	private function GetDescriptionFields($output, $cols)
+	private function GetValueSet($source, $output, $cols)
 	{
-		if($output['HasDescription'] == false)
-			return $this->GetEmptyFields();
-
-		return [
-			'field' => 'description,',
-			'crossField' => 'sna_description description,',
-			'updateSet' => $cols['description'] . ' = description,',
-		];
+		if($output['HasValue'])
+			return $cols['value'] . ' = sna_' . $source['VariableId'] . '_value,';
+		return '';
 	}
 
-	private function GetValueFields($source, $output, $cols)
+	private function GetTotalSet($source, $cols)
 	{
-		if($output['HasValue'] == false || isset($cols['value']) == false)
-			return $this->GetEmptyFields();
-
-		return [
-			'field' => 'val,',
-			'crossField' => 'sna_' . $source['VariableId'] . '_value val,',
-			'updateSet' => $cols['value'] . ' = val,',
-		];
-	}
-
-	private function GetTotalFields($source, $cols)
-	{
-		if(isset($cols['total']) == false)
-			return $this->GetEmptyFields();
-
-		return [
-			'field' => 'total,',
-			'crossField' => 'sna_' . $source['VariableId'] . '_total total,',
-			'updateSet' => $cols['total'] . ' = total,',
-		];
+		if(isset($cols['total']))
+			return $cols['total'] . ' = sna_' . $source['VariableId'] . '_total,';
+		return '';
 	}
 
 	private function getSnapshotTable($dataset)

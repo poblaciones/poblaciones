@@ -11,9 +11,10 @@ use minga\framework\Profiling;
 class CalculatedDistanceService extends BaseService
 {
 	const STEP_CREATE_VARIABLES = 0;
-	const STEP_UPDATE_ROWS = 1;
-	const STEP_CREATE_METRIC = 2;
-	const STEP_COMPLETED = 3;
+	const STEP_PREPARE_DATA = 1;
+	const STEP_UPDATE_ROWS = 2;
+	const STEP_CREATE_METRIC = 3;
+	const STEP_COMPLETED = 4;
 
 	private $state = null;
 
@@ -43,6 +44,7 @@ class CalculatedDistanceService extends BaseService
 		$datasetId = $this->state->Get('datasetId');
 		$source = $this->state->Get('source');
 		$output = $this->state->Get('output');
+		$cols = $this->state->Get('cols');
 
 		$calculator = new MetricsCalculator();
 		switch($this->state->Step())
@@ -50,20 +52,15 @@ class CalculatedDistanceService extends BaseService
 			case self::STEP_CREATE_VARIABLES:
 				$cols = $calculator->StepCreateColumn($datasetId, $source, $output);
 				$this->state->Set('cols', $cols);
+				$this->state->NextStep('Preparando datos');
+				break;
+			case self::STEP_PREPARE_DATA:
+				$calculator->StepPrepareData($datasetId, $cols, $source);
 				$this->state->NextStep('Calculando distancias');
 				break;
 			case self::STEP_UPDATE_ROWS:
-				$slice = $this->state->Slice();
-				if($slice == 0)
-					$this->SetUpdateRowsStatePageSizes($datasetId, $source);
-
-				$pageSize = $this->state->Get('pageSize');
-				$cols = $this->state->Get('cols');
-				$ret = $calculator->UpdateDatasetDistance($datasetId, $cols, $source, $output, $slice, $pageSize);
-				if ($ret > 0)
-					$this->state->NextSlice();
-				else
-					$this->state->NextStep('Creando indicador');
+				$calculator->StepUpdateDatasetDistance($datasetId, $cols, $source, $output);
+				$this->state->NextStep('Creando indicador');
 				break;
 			case self::STEP_CREATE_METRIC:
 				//$metric = new MetricService();
@@ -74,14 +71,6 @@ class CalculatedDistanceService extends BaseService
 				throw new ErrorException('Invalid step.');
 		}
 		return $this->state->ReturnState($this->IsCompleted());
-	}
-
-	private function SetUpdateRowsStatePageSizes($datasetId, $source)
-	{
-		$calculator = new MetricsCalculator();
-		$ret = $calculator->GetTotalSlices($datasetId, $source);
-		$this->state->Set('pageSize', $ret['pageSize']);
-		$this->state->SetTotalSlices($ret['totalSlices']);
 	}
 
 	private function IsCompleted()

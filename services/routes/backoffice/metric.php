@@ -176,7 +176,6 @@ App::GetOrPost('/services/backoffice/CalculateNewMetric', function (Request $req
 
 	$type = Params::Get('t');
 	$source = Params::GetJson('s', true);
-	$area = Params::GetJson('a', true);
 	$output = Params::GetJson('o', true);
 
 	if($type == 'distance')
@@ -185,6 +184,7 @@ App::GetOrPost('/services/backoffice/CalculateNewMetric', function (Request $req
 		return App::Json($controller->StartCalculate($datasetId, $source, $output));
 	}
 	//elseif($type == 'area')
+	// $area = Params::GetJson('a', true);
 	return App::Json(['error' => 1, 'msg' => 'No implementado']);
 });
 
