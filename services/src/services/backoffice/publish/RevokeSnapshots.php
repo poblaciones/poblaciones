@@ -6,6 +6,7 @@ use helena\services\common\BaseService;
 use helena\db\admin\WorkModel;
 use helena\classes\VersionUpdater;
 use helena\classes\App;
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 
 use minga\framework\Profiling;
 use minga\framework\Arr;
@@ -60,7 +61,7 @@ class RevokeSnapshots extends BaseService
 		//
 		foreach($datasetsToDelete as $row)
 		{
-			$table = $row['dat_table'] . '_snapshot';
+			$table = SnapshotByDatasetModel::SnapshotTable($row['dat_table']);
 			App::Db()->dropTable($table);
 		}
 		foreach($datasetsToDelete as $row)

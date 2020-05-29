@@ -1,11 +1,11 @@
 <template>
 	<div>
-		<div class="md-layout">
+		<div class="md-layout md-gutter">
 			<div class="md-layout-item md-size-100">
 				Indique los elementos a incluir en la búsqueda:
 			</div>
-			<div class="md-layout-item md-size-80 md-small-size-100" style="line-height: 4em">
-				Indicador: {{ caption }}
+			<div class="md-layout-item md-size-100 metricRow">
+				{{ caption }}
 				<md-button class="md-raised" @click="addMetric">
 					<md-icon>search</md-icon>
 					Seleccionar...
@@ -143,7 +143,7 @@ export default {
 		asyncValidate() {
 			const loc = this;
 			// Si ya la tiene, no la pide
-			if (this.columnExists !== null) {
+			if (this.columnExists !== null || !loc.newMetric.Source.VariableId) {
 				return new Promise((resolve, reject) => {
 					// devuelve true para indicar que ya fue resuelta con éxito
 					// la validación asincrónica
@@ -233,5 +233,11 @@ export default {
 </script>
 
 <style scoped>
+
+	.metricRow {
+		line-height: 3.1em;
+		display: inline-flex;
+		font-size: 16px;
+	}
 </style>
 

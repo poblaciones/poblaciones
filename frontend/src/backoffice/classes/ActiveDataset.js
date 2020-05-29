@@ -722,10 +722,19 @@ ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors, validate
 			newColumn.editable = true;
 			newColumn.validation = validate;
 		}
+		this.setRenderer(newColumn);
+
 		columns.push(newColumn);
 	}
 	return columns;
 };
+
+ActiveDataset.prototype.setRenderer = function(col) {
+	col.rendered = function (ele, alignment, height) {
+		ele.html('<span style="cursor: default;" title="' + col.text.replace('"', "&quot;") + '">' + str.EscapeHtml(col.text) + '</span>');
+	};
+};
+
 ActiveDataset.prototype.cellsRenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
 	return '<span style="margin: 4px; float: ' + columnproperties.cellsalign + ';">' + str.EscapeHtml(value) + '</span>';
 };

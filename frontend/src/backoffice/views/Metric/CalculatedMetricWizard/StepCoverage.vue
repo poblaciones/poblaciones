@@ -34,7 +34,7 @@ export default {
 		validate() {
 			if (this.newMetric.Area.IsInclusionPoint
 				&& str.IsIntegerGreaterThan0(this.newMetric.Area.InclusionDistance) == false) {
-				alert("Debe ingresar la distancia máxima en kms.");
+				alert("Debe ingresar la distancia máxima en kilómetros.");
 				return false;
 			}
 			return true;

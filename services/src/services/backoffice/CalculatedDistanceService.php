@@ -50,21 +50,38 @@ class CalculatedDistanceService extends BaseService
 		switch($this->state->Step())
 		{
 			case self::STEP_CREATE_VARIABLES:
-				$cols = $calculator->StepCreateColumn($datasetId, $source, $output);
+				$cols = $calculator->StepCreateColumns($datasetId, $source, $output);
 				$this->state->Set('cols', $cols);
 				$this->state->NextStep('Preparando datos');
 				break;
 			case self::STEP_PREPARE_DATA:
-				$calculator->StepPrepareData($datasetId, $cols, $source);
+				$calculator->StepPrepareData($datasetId, $cols);
 				$this->state->NextStep('Calculando distancias');
 				break;
 			case self::STEP_UPDATE_ROWS:
-				$calculator->StepUpdateDatasetDistance($datasetId, $cols, $source, $output);
-				$this->state->NextStep('Creando indicador');
+				$totalSlices = $this->state->GetTotalSlices();
+				if ($totalSlices == 0)
+				{
+					$totalSlices = $calculator->GetTotalSlices($datasetId);
+					$this->state->SetTotalSlices($totalSlices);
+				}
+				if ($calculator->StepUpdateDatasetDistance($key, $datasetId, $cols, $source,
+							$output, $this->state->Slice(), $totalSlices) == false)
+				{
+					$this->state->NextSlice();
+				}
+				else
+				{
+					$this->state->NextStep('Creando indicador');
+				}
 				break;
 			case self::STEP_CREATE_METRIC:
 				//$metric = new MetricService();
 				//$metric->CreateMetric($datasetId);
+				//// Marca work
+				//$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+				//WorkFlags::SetMetricDataChanged($dataset->getWork()->getId());
+
 				$this->state->NextStep('Listo');
 				break;
 			default:

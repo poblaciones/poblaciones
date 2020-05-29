@@ -34,6 +34,11 @@ time_elapsed('settings');
 
 Context::Settings()->Shard()->CheckCurrentIsSet();
 
+if (!Context::Settings()->allowPHPsession)
+{
+	ini_set('session.use_cookies', '0');
+}
+
 $db = App::GetDbConfig();
 $db['host'] = Context::Settings()->Db()->Host;
 $db['dbname'] = Context::Settings()->Db()->Name;

@@ -30,8 +30,8 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
 
 	.largeButton {
-		width: 120px;
-		height: 120px;
+		width: 150px;
+		height: 150px;
 	}
 	.largeIco {
 		font-size: 50px;

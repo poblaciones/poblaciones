@@ -176,6 +176,10 @@ export default {
 			this.$refs.newMetric.show();
 		},
 		calculateNewMetric() {
+			if (!this.Dataset.properties.Geocoded) {
+				alert('Para definir un indicador calculado es necesario antes georreferenciar el dataset.');
+				return;
+			}
 			this.$refs.calculatedMetricWizard.show();
 		},
 		createNewLevel() {
@@ -261,12 +265,6 @@ export default {
 			this.$refs.editVariableFormulaPopup.show(item, variable);
 		},
 		openVariableSymbologyEdition(item, variable) {
-			/*var hasCalculatedColumns = (variable.Data !== null && variable.Data !== 'O') ||
-																	(variable.Normalization !== null && variable.Normalization !== 'O');
-			if (hasCalculatedColumns && !this.Dataset.properties.Geocoded) {
-				alert('La fórmula del indicador incluye variables calculadas a partir de la cartografía. Para definir su simbología es necesario antes georreferenciar el dataset.');
-				return;
-			}*/
 			if (!this.Dataset.properties.Geocoded) {
 				alert('Para definir la simbología del indicador es necesario antes georreferenciar el dataset.');
 				return;

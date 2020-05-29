@@ -8,6 +8,7 @@ use helena\db\frontend\SnapshotByDataset;
 use helena\entities\frontend\clipping\RankingInfo;
 use helena\entities\frontend\clipping\RankingItemInfo;
 use helena\classes\App;
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use minga\framework\Context;
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
@@ -55,7 +56,8 @@ class RankingService extends BaseService
 		$level = $version->GetLevel($levelId);
 		$hasDescriptions = $level->HasDescriptions;
 
-		$table = new SnapshotByDataset($level->Dataset->Table . "_snapshot");
+		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
+		$table = new SnapshotByDataset($snapshotTable);
 
 		$gradientId = $level->GeographyId;
 

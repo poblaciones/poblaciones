@@ -46,12 +46,17 @@ class SnapshotByDatasetModel
 		Profiling::EndTimer();
 	}
 
+	public static function SnapshotTable($table)
+	{
+		return $table . "_snapshot";
+	}
+
 	private function CreateTable($dataset, $columns)
 	{
 		Profiling::BeginTimer();
 
 		// Hace el drop preventivo
-		$table = $dataset['dat_table']. '_snapshot';
+		$table = self::SnapshotTable($dataset['dat_table']);
 		App::Db()->dropTable($table);
 
 		// Hace el create
@@ -76,7 +81,7 @@ class SnapshotByDatasetModel
 			$sqlValues .= "," . ($column[2] === null ? "null" :  $column[2]);
 		// Arma el FROM
 		$table = $dataset['dat_table'];
-		$sql = "INSERT INTO " . $table . "_snapshot (" . substr($sqlCols, 1) . ")
+		$sql = "INSERT INTO " . self::SnapshotTable($table) . " (" . substr($sqlCols, 1) . ")
 						SELECT " . substr($sqlValues, 1);
 		// Pne valores
 		$sql .= " FROM " . $table . ", geography_item WHERE gei_id = geography_item_id";
@@ -135,7 +140,7 @@ class SnapshotByDatasetModel
 				POINT(Max(ST_X(PointN(ExteriorRing(sna_envelope), 3))),
 				MAX(ST_Y(PointN(ExteriorRing(sna_envelope), 3))))
                               ))) extents
-				FROM  " . $dataset['dat_table'] . "_snapshot";
+				FROM  " . self::SnapshotTable($dataset['dat_table']);
 
 		$res = App::Db()->fetchAssoc($sql);
 

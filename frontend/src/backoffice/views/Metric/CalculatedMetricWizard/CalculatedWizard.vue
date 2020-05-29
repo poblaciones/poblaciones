@@ -3,19 +3,23 @@
 		<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false">
 
 			<invoker ref="invoker"></invoker>
-			<stepper ref="stepper" @completed="stepperComplete" title="Calcular indicador"></stepper>
+			<stepper ref="stepper" @closed="stepperClosed" title="Calcular indicador"></stepper>
 
 			<md-dialog-title>
 				Calcular indicador {{ by }}
-				Paso {{ step }} {{ maxSteps }}
+				<div class="stepProgress">
+					Paso {{ step }} {{ maxSteps }}
+				</div>
 			</md-dialog-title>
 
 			<md-dialog-content>
-				<step-type v-show="currentStep == 'stepType'" ref="stepType" />
-				<step-source v-show="currentStep == 'stepSource'" ref="stepSource" :newMetric="newMetric" />
-				<step-coverage v-show="currentStep == 'stepCoverage'" ref="stepCoverage" :newMetric="newMetric" />
-				<step-distance-output v-show="currentStep == 'stepDistanceOutput'" ref="stepDistanceOutput" :newMetric="newMetric" />
-				<step-area-output  v-show="currentStep == 'stepAreaOutput'" ref="stepAreaOutput" :newMetric="newMetric" />
+				<div style="min-height: 300px">
+					<step-type v-show="currentStep == 'stepType'" ref="stepType" />
+					<step-source v-show="currentStep == 'stepSource'" ref="stepSource" :newMetric="newMetric" />
+					<step-coverage v-show="currentStep == 'stepCoverage'" ref="stepCoverage" :newMetric="newMetric" />
+					<step-distance-output v-show="currentStep == 'stepDistanceOutput'" ref="stepDistanceOutput" :newMetric="newMetric" />
+					<step-area-output v-show="currentStep == 'stepAreaOutput'" ref="stepAreaOutput" :newMetric="newMetric" />
+				</div>
 			</md-dialog-content>
 
 			<md-dialog-actions>
@@ -77,7 +81,7 @@ export default {
 			if (this.step == 1) {
 				return '';
 			} else {
-				return ' de ' + (this.steps[this.newMetric.Type].length + 1) + '.';
+				return ' de ' + (this.steps[this.newMetric.Type].length + 1);
 			}
 		},
 		currentStep() {
@@ -92,16 +96,16 @@ export default {
 				if (this.step == 2) {
 					ret += ' > Objetivo';
 				} else if (this.step == 3) {
-					ret += ' > Objetivo > Salida';
+					ret += ' > Salida';
 				}
 			} else if (this.newMetric.Type == 'area') {
 				ret = ' según contenido';
 				if (this.step == 2) {
 					ret += ' > Objetivo';
 				} else if (this.step == 3) {
-					ret += ' > Objetivo > Área';
+					ret += ' > Área';
 				} else if (this.step == 4) {
-					ret += ' > Objetivo > Área > Salida';
+					ret += ' > Salida';
 				}
 			}
 			return ret;
@@ -220,35 +224,12 @@ export default {
 			// Definir
 			return {};
 		},
-		stepperComplete() {
-			const STEP_CREATE_VARIABLES = 0;
-			const STEP_PREPARE_DATA = 1;
-			const STEP_UPDATE_ROWS = 2;
-			const STEP_CREATE_METRIC = 3;
-			const STEP_COMPLETED = 4;
-
-			var stepper = this.$refs.stepper;
-			//TODO: implementar.
-			switch (stepper.step)
-			{
-				case STEP_CREATE_VARIABLES:
-					// stepper.error = 'Falló en.';
-					break;
-				case STEP_PREPARE_DATA:
-					break;
-				case STEP_UPDATE_ROWS:
-					// stepper.error = 'Falló en.';
-					break;
-				case STEP_CREATE_METRIC:
-					// stepper.error = 'Falló en.';
-					break;
-				case STEP_COMPLETED:
-					stepper.complete = 'Creación exitosa.';
-					this.openPopup = false;
-					break;
-				default:
-					stepper.error = 'Paso desconocido.';
-					break;
+		stepperClosed() {
+			let stepper = this.$refs.stepper;
+			if (stepper.complete) {
+				this.openPopup = false;
+				this.Dataset.ReloadColumns();
+				this.Dataset.ScaleGenerator.Clear();
 			}
 		},
 		validate() {
@@ -264,5 +245,9 @@ export default {
 </script>
 
 <style scoped>
+	.stepProgress
+	{
+		float: right;
+	}
 </style>
 

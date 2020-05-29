@@ -1,5 +1,5 @@
 const str = require('./str');
-const auth = require('./authentication');
+const login = require('./redirectLogin');
 
 module.exports = {
 	err(method, err) {
@@ -20,7 +20,7 @@ module.exports = {
 			if (err.response && err.response.status === 403)
 			{
 				alert('La sesión ya no se encuentra activa. Deberá volver a identificarse para poder continuar.');
-				auth.redirectLogin();
+				login.redirectLogin();
 				return;
 			}
 			if (err.message) {

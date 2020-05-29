@@ -8,6 +8,7 @@ use minga\framework\Performance;
 use helena\classes\GlobalTimer;
 use helena\caches\TileDataCache;
 use helena\services\common\BaseService;
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 
 use helena\db\frontend\SnapshotByDataset;
 use helena\entities\frontend\clipping\TileDataInfo;
@@ -80,7 +81,8 @@ class TileDataService extends BaseService
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
 
-		$table = new SnapshotByDataset($level->Dataset->Table . "_snapshot");
+		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
+		$table = new SnapshotByDataset($snapshotTable);
 		$gradientId = $level->GeographyId;
 
 		if ($b != null)

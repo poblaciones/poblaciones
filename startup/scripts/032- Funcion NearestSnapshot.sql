@@ -2,32 +2,40 @@ DROP FUNCTION IF EXISTS `NearestSnapshot`;
 
 DELIMITER $$
 
-CREATE FUNCTION `NearestSnapshot`(sessionId int, p POINT, sizeM DOUBLE, useST BOOL) RETURNS
+CREATE FUNCTION `NearestSnapshot`(sessionId VARCHAR(20), p POINT, sizeM DOUBLE, r INT) RETURNS
 	INT(11)
 	READS SQL DATA
 	DETERMINISTIC
 	SQL SECURITY INVOKER
 BEGIN
 	DECLARE ret INTEGER;
+	SET ret = NULL;
 
-	SET ret = 0;
-
-	IF ret = 0 AND sizeM > 1000 THEN
-		SET ret = (SELECT sna_id FROM tmp_calculate_metric
-		WHERE MBRCONTAINS(SquareBuffer(p, 1000), sna_location)
-		ORDER BY DistanceSphere(p, sna_location, useST) LIMIT 1);
+	IF sizeM > 1000 THEN
+		SET ret = (select sna_id FROM
+			(SELECT sna_id, DistanceSphere(p, sna_location) d FROM tmp_calculate_metric
+				WHERE MBRCONTAINS(SquareBuffer(p, 1000), sna_location) AND (r IS NULL
+                OR sna_r = r)
+				ORDER BY DistanceSphere(p, sna_location) LIMIT 1) as candidate
+                WHERE d <= sizeM);
 	END IF;
 
-	IF ret = 0 AND sizeM > 10000 THEN
-		SET ret = (SELECT sna_id FROM tmp_calculate_metric
-		WHERE MBRCONTAINS(SquareBuffer(p, 10000), sna_location)
-		ORDER BY DistanceSphere(p, sna_location, useST) LIMIT 1);
+	IF ret IS NULL AND sizeM > 10000 THEN
+		SET ret = (select sna_id FROM
+			(SELECT sna_id, DistanceSphere(p, sna_location) d FROM tmp_calculate_metric
+				WHERE MBRCONTAINS(SquareBuffer(p, 10000), sna_location) AND (r IS NULL
+                OR sna_r = r)
+				ORDER BY DistanceSphere(p, sna_location) LIMIT 1) as candidate
+                WHERE d <= sizeM);
 	END IF;
 
-	IF ret = 0 THEN
-		SET ret = (SELECT sna_id FROM tmp_calculate_metric
-		WHERE MBRCONTAINS(SquareBuffer(p, sizeM), sna_location)
-		ORDER BY DistanceSphere(p, sna_location, useST) LIMIT 1);
+	IF ret IS NULL THEN
+		SET ret = (select sna_id FROM
+			(SELECT sna_id, DistanceSphere(p, sna_location) d FROM tmp_calculate_metric
+				WHERE MBRCONTAINS(SquareBuffer(p, sizeM), sna_location) AND (r IS NULL
+                OR sna_r = r)
+				ORDER BY DistanceSphere(p, sna_location) LIMIT 1) as candidate
+                WHERE d <= sizeM);
 	END IF;
 
 	RETURN ret;

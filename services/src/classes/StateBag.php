@@ -82,6 +82,8 @@ class StateBag
 	public function NextStep($caption = -1)
 	{
 		$this->SetStep($this->Step() + 1, $caption);
+		$this->SetTotalSlices(0);
+		$this->SetSlice(0);
 	}
 	public function Slice()
 	{

@@ -337,13 +337,14 @@ export default {
       this.statusBarText = "";
       if (this.Dataset.Columns !== null) {
 				this.Grid.columns = this.Dataset.GetColumnsForJqxGrid(this.showingErrors, this.validateCellEdit);
+
         this.isBinding = true;
         this.Grid.source = this.getAdapter();
       } else {
         this.Grid.columns = [];
         this.Grid.source = null;
       }
-    },
+		},
     getAdapter() {
       const loc = this;
       let source = {

@@ -2,6 +2,7 @@
 
 namespace helena\controllers\frontend;
 
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\controllers\common\cPublicController;
 use minga\framework\Request;
 use minga\framework\Params;
@@ -280,7 +281,7 @@ class cHandle extends cPublicController
 					// geographyId su level más bajo
 					if ($level->GeographyId > $maxGeography)
 					{
-						$maxTable = $level->Dataset->Table . "_snapshot";
+						$maxTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 						$maxGeography = $level->GeographyId;
 					}
 					foreach($level->Variables as $variable)

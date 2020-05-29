@@ -62,11 +62,14 @@ class DatasetColumnService extends DbSession
 		$columns = "DELETE FROM draft_dataset_column WHERE dco_dataset_id = ? AND dco_id IN (" . join(',', $ids) . ")";
 		App::Db()->exec($columns, array($datasetId));
 
-		// Hace el query de alter table en los datos
 		// Ejecuta el drop de los datos
 		App::Db()->execDDL($deleteData);
 		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
 		DatasetColumnCache::Cache()->Clear($datasetId);
+
+		// Marca work
+		DatasetService::DatasetChangedById($datasetId);
+
 		Profiling::EndTimer();
 		return $ret;
 	}

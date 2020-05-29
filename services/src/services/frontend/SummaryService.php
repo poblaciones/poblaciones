@@ -8,6 +8,8 @@ use helena\db\frontend\SnapshotByDataset;
 use helena\entities\frontend\clipping\SummaryInfo;
 use helena\entities\frontend\clipping\SummaryItemInfo;
 use minga\framework\Context;
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
+
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
 use minga\framework\ErrorException;
@@ -53,7 +55,8 @@ class SummaryService extends BaseService
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
 
-		$table = new SnapshotByDataset($level->Dataset->Table . "_snapshot");
+		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
+		$table = new SnapshotByDataset($snapshotTable);
 		$gradientId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)

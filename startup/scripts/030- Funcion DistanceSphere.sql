@@ -1,22 +1,17 @@
 DROP FUNCTION IF EXISTS `DistanceSphere`;
 
 DELIMITER //
-CREATE FUNCTION `DistanceSphere`(`pt1` POINT, `pt2` POINT, `useST` BOOL) RETURNS
+CREATE FUNCTION `DistanceSphere`(`pt1` POINT, `pt2` POINT) RETURNS
 	DOUBLE
 	NO SQL
 	DETERMINISTIC
 	SQL SECURITY INVOKER
 BEGIN
-	IF useST THEN
-		RETURN ST_DISTANCE_SPHERE(pt1, pt2);
-	ELSE
-		RETURN 6371000 * 2 * ASIN(SQRT(
-			POWER(SIN((ST_Y(pt2) - ST_Y(pt1)) * PI() / 180 / 2), 2)
-			+ COS(ST_Y(pt1) * PI() / 180) * COS(ST_Y(pt2)
-			* PI() / 180) * POWER(
-			SIN((ST_X(pt2) - ST_X(pt1)) * PI() / 180 / 2), 2)
-		));
-	END IF;
+	RETURN 12742000 * ASIN(SQRT(
+			POWER(SIN((ST_Y(pt2) - ST_Y(pt1)) * 0.0087266472), 2)
+			+ COS(ST_Y(pt1) * 0.0174532944) * COS(ST_Y(pt2)
+			* 0.0174532944) * POWER(
+			SIN((ST_X(pt2) - ST_X(pt1)) * 0.0087266472), 2)));
 END//
 DELIMITER ;
 

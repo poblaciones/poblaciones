@@ -72,6 +72,14 @@ html, body {
 	margin-bottom: 7px;
 }
 
+.md-layout-item-separation
+{
+	height: 60px;
+	min-width: 100%;
+}
+.md-layout-item-separated {
+	margin-top: 20px;
+}
 
 .jqx-grid-content :first-child
 {

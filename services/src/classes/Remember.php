@@ -20,6 +20,9 @@ class Remember
 
 	public static function SetRemember($account)
 	{
+		if (!Context::Settings()->allowPHPsession)
+			return;
+
 		self::CleanExpiredSections($account);
 
 		$token = random_bytes(32);
@@ -39,6 +42,9 @@ class Remember
 
 	public static function CheckCookie()
 	{
+		if (!Context::Settings()->allowPHPsession)
+			return true;
+
 		$cookie = Cookies::GetCookie(self::CookieName);
 		//Si no hay cookie...
 		if($cookie == '')
