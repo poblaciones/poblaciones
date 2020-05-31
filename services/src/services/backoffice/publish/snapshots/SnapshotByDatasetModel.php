@@ -172,7 +172,10 @@ class SnapshotByDatasetModel
 		$columns[] = ['sna_id', 'int(11) AUTO_INCREMENT PRIMARY KEY', null];
 		$columns[] = ['sna_geography_item_id', 'int(11) NOT NULL', 'gei_id'];
 		$columns[] = ['sna_urbanity', "char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N'", 'gei_urbanity'];
-		$columns[] = ['sna_description', 'varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL', 'LEFT(' . $this->GetDescriptionColumn($dataset) . ', 250)'];
+		$description = $this->GetDescriptionColumn($dataset);
+		if ($description !== 'null')
+		 $description = 'LEFT(' . $description . ', 250)';
+		$columns[] = ['sna_description', 'varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL', $description];
 
 		$columns[] = ['sna_feature_id', 'bigint(11) NOT NULL', $this->GetFeatureIdField($dataset)];
 		$columns[] = ['sna_area_m2', 'double NOT NULL', $this->GetArea($dataset)];
@@ -191,8 +194,8 @@ class SnapshotByDatasetModel
 		}
 		else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
 		{
-			$point = "POINT(CONVERT(" . $dataset['dat_longitude_field'] . ", SIGNED), CONVERT(" .
-																$dataset['dat_latitude_field'] . ", SIGNED))";
+			$point = "POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
+																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )";
 			$envelopeTarget = $point;
 			$location = $point;
 		}
@@ -208,7 +211,7 @@ class SnapshotByDatasetModel
 	private function BuildVariableColumns($metricVersionLevel, $variable, &$columns)
 	{
 		// Calcula el valor
-		$columns[] = ['sna_' . $variable->Id() . '_value', 'double NOT NULL', $variable->CalculateValueField()];
+		$columns[] = ['sna_' . $variable->Id() . '_value', 'double NULL', $variable->CalculateValueField()];
 
 		// Calcula la categoría
 		$valueForSegmentation = $variable->CalculateSegmentationValueField();

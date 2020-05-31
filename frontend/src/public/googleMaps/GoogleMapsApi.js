@@ -267,8 +267,13 @@ GoogleMapsApi.prototype.SetZoom = function (zoom) {
 	this.isSettingZoom = false;
 };
 
-GoogleMapsApi.prototype.FitEnvelope = function (envelopeOrig) {
-	var envelope = h.scaleEnvelope(envelopeOrig, .5);
+GoogleMapsApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch) {
+	var envelope;
+	if (exactMatch) {
+		envelope = envelopeOrig;
+	} else {
+		envelope = h.scaleEnvelope(envelopeOrig, .5);
+	}
 	var min = new this.google.maps.LatLng(envelope.Min.Lat, envelope.Min.Lon);
 	var max = new this.google.maps.LatLng(envelope.Max.Lat, envelope.Max.Lon);
 	var bounds = new this.google.maps.LatLngBounds();

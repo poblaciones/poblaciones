@@ -39,12 +39,9 @@ AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, l
 
 AbstractTextComposer.prototype.FormatValue = function (dataElement) {
 	var number = value;
-	var value = dataElement['Value'];
-	var summary = dataElement['Summary'];
-	var total = dataElement['Total'];
-	if (summary) {
-		number = summary;
-	}
+	var value = dataElement.Value;
+	var total = dataElement.Total;
+	number = value;
 	if (total) {
 		number = Helper.formatPercent(value, total);
 		if (number !== '-') {

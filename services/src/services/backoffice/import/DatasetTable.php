@@ -120,6 +120,17 @@ class DatasetTable
 								FROM work_dataset_draft WHERE wdd_table LIKE 'work_dataset_draft_%'
 										OR wdd_table LIKE 'tmp_work_dataset_draft_%'
 							UNION
+								SELECT replace(
+												replace(
+												replace(
+												replace(
+												replace(dat_table, '_shard_1_', '_draft_'),
+												'_shard_2_', '_draft_'),
+												'_shard_3_', '_draft_'),
+												'_shard_4_', '_draft_'),
+												'_shard_5_', '_draft_') t
+								FROM dataset
+							UNION
 									SELECT dat_table t FROM draft_dataset) l";
 		$currentTableName =  App::Db()->fetchScalar($query);
 		$n = self::GetNumberPart($currentTableName);

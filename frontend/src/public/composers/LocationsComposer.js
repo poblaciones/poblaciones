@@ -142,6 +142,17 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature) {
 	};
 
 	element = new loc.MapsApi.google.maps.Marker(params);
+	this.addMarkerListeners(metric, element, feature, z);
+	//}
+
+	if (loc.keysInTile.hasOwnProperty(tileKey) === false) {
+		loc.keysInTile[tileKey] = [];
+	}
+	loc.keysInTile[tileKey].push(element);
+};
+
+LocationsComposer.prototype.addMarkerListeners = function (metric, element, feature, z) {
+	var loc = this;
 	if (loc.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
 		element.addListener('click', function (e) {
 			var parentInfo = {
@@ -177,12 +188,6 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature) {
 		loc.MapsApi.selector.markerMouseOut(e, parentInfo, feature.id,
 			new loc.MapsApi.google.maps.Size(0, -1 * h.getScaleFactor(z)));
 	});
-	//}
-
-	if (loc.keysInTile.hasOwnProperty(tileKey) === false) {
-		loc.keysInTile[tileKey] = [];
-	}
-	loc.keysInTile[tileKey].push(element);
 };
 
 LocationsComposer.prototype.objectClone = function (obj) {
