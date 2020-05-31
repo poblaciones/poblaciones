@@ -168,6 +168,7 @@ export default {
 						LevelId: this.metric.SelectedLevel().Id,
 						VariableId: this.metric.SelectedVariable().Id
 					};
+			window.SegMap.SetZoom(14);
 			window.SegMap.InfoRequestedInteractive(position, parentInfo, item.FID);
 		},
 		changeSize(itemSize) {

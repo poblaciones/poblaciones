@@ -5,7 +5,8 @@
 		<md-radio v-if="newMetric.SelectedLevel.Dataset.Type != 'L'" class="md-primary" :value="false" v-model="newMetric.Area.IsInclusionPoint">Por polígono del elemento</md-radio>
 		<md-radio class="md-primary" :value="true" v-model="newMetric.Area.IsInclusionPoint">Por distancia desde el centroide / punto:</md-radio>
 		<md-field class="md-size-10">
-			<mp-simple-text class="md-size-10" :disabled="!newMetric.Area.IsInclusionPoint" type="number" v-model="newMetric.Area.InclusionDistance"></mp-simple-text>
+			<mp-simple-text class="md-size-10" :disabled="!newMetric.Area.IsInclusionPoint" preffix="km"
+											type="number" v-model="newMetric.Area.InclusionDistance"></mp-simple-text>
 			Kms.
 		</md-field>
 

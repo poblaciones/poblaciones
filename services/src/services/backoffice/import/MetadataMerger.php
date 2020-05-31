@@ -116,13 +116,16 @@ class MetadataMerger
 		$datasetInfo['entityId'] = 'vsy_id';
 		$message = "La variable de segmentación del indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'vsy_cut_column_id', $message);
+
 		// De variables de indicadores
 		$datasetInfo['table'] = 'draft_variable';
 		$datasetInfo['datasetField'] = '(SELECT mvl_dataset_id FROM draft_metric_version_level WHERE mvl_id = mvv_metric_version_level_id)';
 		$datasetInfo['fieldCaption'] = "(SELECT CONCAT(mtr_caption, ' (', mvr_caption, ')') FROM draft_metric, draft_metric_version, draft_metric_version_level WHERE mvr_metric_id = mtr_id AND mvl_metric_version_id = mvl_id AND mvl_id = mvv_metric_version_level_id)";
 		$datasetInfo['entityId'] = 'mvv_id';
+
 		$message = "La variable del indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_data_column_id', $message);
+
 		$message = "La variable de normalización para el indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_normalization_column_id', $message);
 
@@ -193,6 +196,9 @@ class MetadataMerger
 		$update = "UPDATE " . $table . " JOIN " . $subTable . " ON " . $fieldColumn . " = matches.dco_old_id
 								SET " . $fieldColumn . " =  matches.dco_new_id
 								WHERE " . $fieldColumn . " IS NOT NULL AND " . $datasetField . " = " . $this->targetDatasetId;
+
+		echo "<br>" . $update . "<br>";
+
 		App::Db()->exec($update);
 		// Listo
 		return $changedToNull;

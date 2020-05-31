@@ -310,10 +310,11 @@ class MetricService extends BaseService
 		// Borra valores
 		$this->ClearValues($variable->getId());
 		// Borra variable
-		$symbology = $variable->getSymbology();
+		$symbologyId = $variable->getSymbology()->getId();
 		App::Orm()->delete($variable);
 		// Borra el symbology
-		App::Orm()->delete($symbology);
+		App::Db()->exec("DELETE FROM draft_symbology WHERE vsy_id = ? AND NOT EXISTS(
+										SELECT * FROM draft_variable WHERE mvv_symbology_id = ?)", array($symbologyId, $symbologyId));
 		// Marca work
 		WorkFlags::SetMetricDataChanged($level->getDataset()->getWork()->getId());
 		// Listo

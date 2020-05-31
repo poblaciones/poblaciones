@@ -41,7 +41,7 @@ fi
 cd services
 echo "Compilando..."
 if [[ `./vendor/bin/phpstan analyse -c phpstan.neon -l 5 --memory-limit 1024M -q . || echo Err` ]]; then
-	echo "Error en complilación, cancelando push."
+	echo "Error en compilación, cancelando push."
 	echo
 	exit 1
 fi

@@ -279,16 +279,19 @@ export default {
 			this.activateNewWork = true;
 		},
 		onNewWorkStart() {
+			var loc = this;
 			if (this.newWorkName.trim().length === 0) {
 				alert('Debe indicar un nombre.');
-				var loc = this;
 				this.$nextTick(() => {
 					loc.activateNewWork = true;
 				});
 				return;
 			}
 			this.$refs.invoker.do(window.Db,
-														window.Db.CreateWork, this.newWorkName.trim(), this.filter);
+				window.Db.CreateWork, this.newWorkName.trim(), this.filter).then(
+				function (res) {
+					loc.select(res);
+				});
 		},
 		onIndexedChanged(item) {
 			this.$refs.invoker.do(window.Db,

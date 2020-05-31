@@ -2,8 +2,10 @@
 
 namespace helena\services\backoffice;
 
+use helena\classes\App;
 use helena\services\backoffice\metrics\MetricsCalculator;
 use helena\services\backoffice\publish\CalculateMetricStateBag;
+
 use helena\services\common\BaseService;
 use minga\framework\ErrorException;
 use minga\framework\Profiling;
@@ -29,6 +31,15 @@ class CalculatedDistanceService extends BaseService
 		$this->state->SetTotalSteps($this->TotalSteps());
 		$this->state->SetProgressLabel('Creando variables');
 		return $this->state->ReturnState(false);
+	}
+
+	private function CompleteSource(& $source)
+	{
+		$calculator = new MetricsCalculator();
+		$dataset = $calculator->GetSourceDatasetByVariableId($source['VariableId']);
+
+		$source['datasetType'] = $dataset->getType();
+		$source['datasetTable'] = $dataset->getTable();
 	}
 
 	public function TotalSteps()

@@ -30,6 +30,7 @@ v2.20 (2020-05-08)
 - Para los datasets de polígonos y códigos, se reduce el efecto de repintado en los cambios de zoom.
 - Se permite configurar un servidor secundario para las cartografía de base (statics).
 - El cálculo de resumen de clipping utiliza el nivel correspondiente al zoom activo.
+- Fix: salida de foco de controles de edición.
 
 v2.19 (2020-04-26)
 - El mapa ofrece elementos en la barra de acciones superior del panel derecho para iniciar y cerrar sesión.

@@ -94,18 +94,18 @@ export default {
 			} else if (this.newMetric.Type == 'distance') {
 				ret = ' según distancia';
 				if (this.step == 2) {
-					ret += ' > Objetivo';
+					ret += '. Objetivo';
 				} else if (this.step == 3) {
-					ret += ' > Salida';
+					ret += '. Salida';
 				}
 			} else if (this.newMetric.Type == 'area') {
 				ret = ' según contenido';
 				if (this.step == 2) {
-					ret += ' > Objetivo';
+					ret += '. Objetivo';
 				} else if (this.step == 3) {
-					ret += ' > Área';
+					ret += '. Área';
 				} else if (this.step == 4) {
-					ret += ' > Salida';
+					ret += '. Salida';
 				}
 			}
 			return ret;

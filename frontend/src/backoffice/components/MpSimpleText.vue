@@ -4,11 +4,11 @@
 			<label class="mp-label" :style="(this.multiline ? 'top: 6px !important' : '')">
 				{{ this.label }}</label>
 			<md-input :class="(isDisabled ? 'mpDisabled' : '')" md-toggle-password v-if="!this.multiline" :placeholder="(placeholder ? placeholder : '')" :type="type" :disabled="isDisabled"
-								style="font-size: 19px" autocomplete="off" v-model="localValue" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" :id="inputId" />
+								style="font-size: 19px; width: 100%" autocomplete="off" v-model="localValue" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" :id="inputId" />
 			<md-textarea v-if="this.multiline" :disabled="isDisabled" autocomplete="off"
 									 class="mp-area" :class="(isDisabled ? 'mpDisabled' : '')" :style="minHeightRows" v-model="localValue"
 									 :maxlength="(canEdit ? maxlength : 0)" :ref="inputId" :id="inputId" />
-
+			<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 			<div v-if="helper" style="line-height: 1em; position: absolute;
 					 left: 0px; width: 100%; bottom: -2px;">
 				<span class="md-helper-text helper" :style="(!isDisabled && maxlength > 0 ? 'padding-right: 34px' : '') + '; bottom: -18px;'">
@@ -106,6 +106,7 @@ export default {
 		canEdit: { type: Boolean, default: true },
 		type: { type: String, default: null },
 		placeholder: String,
+		suffix: String,
 		rows: Number,
     value: {},
 		helper: { type: String, default: '' },

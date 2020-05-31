@@ -23,7 +23,7 @@ class MetricsCalculator
 		Profiling::BeginTimer();
 
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$srcDataset = $this->GetSrcDataset($source['VariableId']);
+		$srcDataset = $this->GetSourceDatasetByVariableId($source['VariableId']);
 		$datasetName = $srcDataset->getCaption();
 
 		$cols = [];
@@ -117,21 +117,22 @@ class MetricsCalculator
 		return ceil($count / self::STEP);
 	}
 
-	public function StepUpdateDatasetDistance($key, $datasetId, $cols, $source, $output, $slice, $totalSlices)
+	public function StepUpdateDatasetDistance($key, $datasetId, $cols, $source,
+																						$output, $slice, $totalSlices)
 	{
 		Profiling::BeginTimer();
 
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$srcDataset = $this->GetSrcDataset($source['VariableId']);
 
 		// Crea la temporal
-		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($srcDataset->getTable());
-		$this->CreateTempTable($snapshotTable, $source);
+		$this->CreateTempTable($source, $dataset);
 
 		$offset = $slice * self::STEP;
 		// Actualiza el bloque
-		$sql = $this->GetUpdateQuery($dataset->getTable(), SnapshotByDatasetModel::SnapshotTable($srcDataset->getTable()),
-						$this->GetDistanceColumn($dataset), $output, $cols, $source, $offset, self::STEP);
+		$sql = $this->GetUpdateQuery($dataset->getTable(),
+						SnapshotByDatasetModel::SnapshotTable($source['datasetTable']),
+						$this->GetDistanceColumn($dataset, $source['datasetType']),
+						$output, $cols, $source, $offset, self::STEP);
 		// Listo
 		App::Db()->exec($sql, array($key));
 
@@ -140,11 +141,15 @@ class MetricsCalculator
 		return $slice + 1 >=  $totalSlices;
 	}
 
-	private function GetDistanceColumn($dataset)
+	private function GetDistanceColumn($dataset, $sourceType)
 	{
 		$ret = [
 			'col' => '',
+			'geo' => '',
+			'distanceFn' => 'DistanceSphere',
+			'nearestFn' => 'NearestSnapshotPoint',
 			'join' => '',
+			'srcJoin' => '',
 			'where' => '1',
 		];
 		if ($dataset->getType() == 'L')
@@ -155,7 +160,6 @@ class MetricsCalculator
 		else if ($dataset->getType() == 'S')
 		{
 			$ret['col'] = 'centroid';
-			$ret['where'] = 'centroid IS NOT NULL';
 		}
 		else if ($dataset->getType() == 'D')
 		{
@@ -166,25 +170,63 @@ class MetricsCalculator
 		{
 			throw new ErrorException('Tipo de dataset no reconocido');
 		}
+
+		if ($sourceType == 'S')
+		{
+			$ret['srcJoin'] = 'JOIN snapshot_shape_dataset_item ON sdi_feature_id = sna_feature_id';
+			$ret['geo'] = 'coalesce(sdi_geometry_r3, sdi_geometry_r2, sdi_geometry_r1)';
+			$ret['distanceFn'] = 'DistanceSphereGeometry';
+			$ret['nearestFn'] = 'NearestSnapshotShape';
+		}
+		else if ($sourceType == 'D')
+		{
+			$ret['srcJoin'] = 'JOIN geography_item ON gei_id = sna_geography_item_id';
+			$ret['geo'] = 'coalesce(gei_geometry_r3, gei_geometry_r2, gei_geometry_r1)';
+			$ret['distanceFn'] = 'DistanceSphereGeometry';
+			$ret['nearestFn'] = 'NearestSnapshotGeography';
+		}
+
 		return $ret;
 	}
 
-	private function CreateTempTable($snapshotTable, $source)
+	private function CreateTempTable($source, $dataset)
 	{
 		Profiling::BeginTimer();
 
+		$sourceSnapshotTable = SnapshotByDatasetModel::SnapshotTable($source['datasetTable']);
+
+		$id = $this->getGeometryFieldId($source['datasetType']);
+
 		$create = 'CREATE TEMPORARY TABLE tmp_calculate_metric (sna_id int(11) not null,
-												sna_location POINT NOT NULL, sna_r INT(11) NULL,
+												sna_location POINT NOT NULL, sna_r INT(11) NULL, sna_feature_id BIGINT,
 											SPATIAL INDEX (sna_location)) ENGINE=MYISAM';
-		$insert = 'INSERT INTO tmp_calculate_metric (sna_id, sna_location, sna_r)
-									SELECT  sna_id, sna_location, 0
-									FROM ' . $snapshotTable . '
+
+		$insert = 'INSERT INTO tmp_calculate_metric (sna_id, sna_location, sna_r' .
+									($id ? ', sna_feature_id ' : '') . ')
+									SELECT  sna_id, sna_location, 0 ' . ($id ? ',' . $id : '') . '
+									FROM ' . $sourceSnapshotTable . '
 									WHERE 1 ' . $this->GetValueLabelsWhere($source);
 
 		App::Db()->execDDL($create);
 		App::Db()->exec($insert);
 
 		Profiling::EndTimer();
+	}
+
+	private function getGeometryFieldId($type)
+	{
+		if ($type == 'L')
+		{
+			return null;
+		}
+		else if ($type == 'S' || $type == 'D')
+		{
+			return 'sna_feature_id';
+		}
+		else
+		{
+			throw new ErrorException('Tipo de dataset no reconocido');
+		}
 	}
 
 	private function ResetCols($datasetTable, $cols)
@@ -200,7 +242,7 @@ class MetricsCalculator
 		return $ret;
 	}
 
-	private function GetUpdateQuery($datasetTable, $snapshotTable, $distance, $output, $cols, $source, $offset, $pageSize)
+	private function GetUpdateQuery($datasetTable, $sourceSnapshotTable, $distance, $output, $cols, $source, $offset, $pageSize)
 	{
 		$distMts = 100 * 1000 * 1000;
 		if($output['HasMaxDistance'])
@@ -211,26 +253,21 @@ class MetricsCalculator
 		$ranges = App::Db()->fetchAssoc($rangesSql);
 
 		$update = 'UPDATE ' . $datasetTable . '
-			JOIN ' . $snapshotTable . '
-			ON sna_id = NearestSnapshot(?, ' . $distance['col'] . ', ' . $distMts . ', null) '
-				. $distance['join'] . '
-			SET '
+			JOIN ' . $sourceSnapshotTable . '
+			ON sna_id = ' . $distance['nearestFn'] . '(?, ' . $distance['col'] . ', ' . $distMts . ', null) '
+				. $distance['join']
+				. $distance['srcJoin']
+			. ' SET '
 			. $this->GetCoordsSet($output, $cols)
 			. $this->GetDescriptionSet($output, $cols)
 			. $this->GetValueSet($source, $output, $cols)
 			. $this->GetTotalSet($source, $cols)
-			. $cols['distance'] . ' = ROUND(DistanceSphere(' . $distance['col'] . ', sna_location) / 1000, 3)
+			. $cols['distance'] . ' = ROUND(' . $distance['distanceFn'] . '(' . $distance['col'] . ', sna_location' .
+						($distance['geo'] ? ',' . $distance['geo'] : '') . ') / 1000, 3)
 			WHERE ' . $distance['where'] . '
 						AND id >= ' . $ranges['mi'] . ' AND id <= ' . $ranges['ma'];
 
 		return $update;
-	}
-
-	private function GetSrcDataset($variableId)
-	{
-		$variable = App::Orm()->find(entities\Variable::class, $variableId);
-		$versionLevel = $variable->getMetricVersionLevel();
-		return $versionLevel->getDataset();
 	}
 
 	private function GetValueLabelsWhere($source)
@@ -275,10 +312,17 @@ class MetricsCalculator
 
 	public function DistanceColumnExists($datasetId, $variableId)
 	{
-		$srcDataset = $this->GetSrcDataset($variableId);
+		$srcDataset = $this->GetSourceDatasetByVariableId($variableId);
+
 		$datasetColumn = new DatasetColumnService();
 		$name = $datasetColumn->GetCopyColumnName(self::ColPrefix, $srcDataset->getCaption(), 'distancia_kms');
 		return $datasetColumn->ColumnExists($datasetId, $name);
 	}
 
+	public function GetSourceDatasetByVariableId($variableId)
+	{
+		$variable = App::Orm()->find(entities\Variable::class, $variableId);
+		$versionLevel = $variable->getMetricVersionLevel();
+		return $versionLevel->getDataset();
+	}
 }

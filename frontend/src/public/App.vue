@@ -340,6 +340,7 @@ a:hover {
 	background-color: #ffffff;
 	padding: 8px;
 	border-radius: 8px;
+	overflow: hidden;
 	box-shadow: 0 4px 10px rgba(60,64,67,.28);
 }
 .ibTooltipOffsetLeft {

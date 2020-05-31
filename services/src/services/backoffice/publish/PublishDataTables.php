@@ -369,24 +369,22 @@ class PublishDataTables
 													dat_caption_column_id = NULL
 									WHERE dat_work_id = ?" . $datasetCondition;
 		App::Db()->exec($queryCols, array($workId));
-		// 2. Pone en null las referencias a columnas en metricversion
-		$queryCols = "UPDATE " . $drafting . "metric_version_level INNER JOIN " . $drafting . "variable ON mvv_metric_version_level_id = mvl_id INNER JOIN " . $drafting . "dataset ON mvl_dataset_id = dat_id
-									SET mvv_normalization_column_id = NULL
-									WHERE dat_work_id = ?" . $datasetCondition;
+		// 2. Pone en null las referencias en variables
+		$queryCols = "UPDATE " . $drafting . "variable
+									SET mvv_normalization_column_id = NULL, mvv_data_column_id = NULL
+									WHERE EXISTS (SELECT * from " . $drafting . "dataset_column
+									JOIN " . $drafting . "dataset ON dat_id = dco_dataset_id
+									WHERE (dco_id = mvv_data_column_id
+									OR dco_id = mvv_normalization_column_id) AND dat_work_id = ? " . $datasetCondition . ")";
 		App::Db()->exec($queryCols, array($workId));
-		// 3. Pone en null las referencias en variables
-		$queryCols = "UPDATE " . $drafting . "metric_version_level INNER JOIN " . $drafting . "variable ON mvv_metric_version_level_id = mvl_id INNER JOIN " . $drafting . "dataset ON mvl_dataset_id = dat_id
-									SET mvv_data_column_id = NULL
-									WHERE dat_work_id = ?" . $datasetCondition;
-		App::Db()->exec($queryCols, array($workId));
-		// 4. Pone en null las referencias circulares a columnas
+		// 3. Pone en null las referencias circulares a columnas
 		$circularCols = "UPDATE " . $drafting . "dataset_column INNER JOIN " . $drafting . "dataset ON dco_dataset_id = dat_id SET dco_aggregation_weight_id = NULL
-									WHERE dat_work_id = ?" . $datasetCondition;
+									WHERE dat_work_id = ? " . $datasetCondition;
 		App::Db()->exec($circularCols, array($workId));
-	// 5. Pone en null las referencias a symbology
+		// 4. Pone en null las referencias a symbology
 		$queryCols = "UPDATE " . $drafting . "symbology INNER JOIN " . $drafting . "variable ON mvv_symbology_id = vsy_id INNER JOIN " . $drafting . "metric_version_level ON mvv_metric_version_level_id = mvl_id INNER JOIN " . $drafting . "dataset ON mvl_dataset_id = dat_id
 									SET vsy_cut_column_id = NULL
-									WHERE dat_work_id = ?" . $datasetCondition;
+									WHERE dat_work_id = ? " . $datasetCondition;
 		App::Db()->exec($queryCols, array($workId));
 	}
 	private function CleanWork($workId, $branches)

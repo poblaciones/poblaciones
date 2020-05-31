@@ -213,6 +213,7 @@ Db.prototype.CreateWork = function (newWorkName, type) {
 				res.Caption = newWorkName;
 				res.MetadataLastOnline = null;
 				window.Context.Cartographies.push(res);
+				return res;
 	});
 };
 

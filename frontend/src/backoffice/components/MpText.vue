@@ -4,12 +4,16 @@
 			<div class="md-layout-item md-size-75" v-on:dblclick="StartEdit">
 				<md-field style="margin-bottom: 0px">
 					<label class="mp-label" :style="(this.multiline ? 'top: 6px !important' : '')">
-						{{ this.label }}</label>
-					<md-input v-if="!this.multiline" :type="type" style="font-size: 19px" autocomplete="off"
-										:placeholder="(placeholder ? placeholder : '')" v-model="localValue"
+						{{ this.label }}
+					</label>
+					<md-input v-if="!this.multiline" :type="type" style="font-size: 19px; width: 100%" autocomplete="off"
+										:placeholder="(placeholder ? placeholder : '')"
+										:class="(!editMode ? 'unselectable' : '')"
+										v-on:mousedown="mouseDown" v-on:mouseup="mouseUp" v-model="localValue"
 										:disabled="isDisabled" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
 					<md-textarea v-if="this.multiline" class="mp-area" :style="minHeightRows" autocomplete="off"
 											 :disabled="isDisabled" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
+					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>
 				<div :style="'line-height: 1em;' + (!isDisabled && maxlength > 0 ? ' padding-right: 34px' : '')">
 					<span class="md-helper-text helper" style="bottom: -18px;"
@@ -78,16 +82,27 @@ export default {
 				this.input.$el.selectionStart = 0;
 				this.input.$el.selectionEnd = len;
 			} else {
-				this.input.$el.selectionStart = 0;
-				this.input.$el.selectionEnd = 0;
+				var loc = this;
+
 			}
+			this.editMode = mode;
 		},
 		htmlEncode(html ) {
 	   return document.createElement( 'a' ).appendChild(
         document.createTextNode( html ) ).parentNode.innerHTML;
 		},
-		away() {
-      if (this.$refs.buttonPanel && this.$refs.buttonPanel.editableMode) {
+		mouseUp() {
+			this.pendingMouseUp = false;
+		},
+		mouseDown() {
+			this.pendingMouseUp = true;
+		},
+		away(e) {
+			if (this.$refs.buttonPanel && this.$refs.buttonPanel.editableMode) {
+				if (this.pendingMouseUp) {
+					this.pendingMouseUp = false;
+					return;
+				}
 				if (this.valueChanged) {
           this.$refs.buttonPanel.showPrompt();
         } else {
@@ -168,7 +183,9 @@ export default {
 	data() {
 		return {
 			localValue: '',
-			localError: ''
+			localError: '',
+			editMode: false,
+			pendingMouseUp: false
 		};
 	},
   props: {
@@ -177,6 +194,7 @@ export default {
     error: String,
 		canEdit: { type: Boolean, default: true },
 		multiline: Boolean,
+		suffix: String,
 		type: { type: String, default: null },
 		rows: Number,
 		placeholder: String,
