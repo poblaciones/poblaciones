@@ -1,10 +1,11 @@
-[CURRENT]
+v2.23 (2020-06-01)
 - Permite la distribución selectiva de works a servidores secundarios.
 - Fix: los markers se crean en forma directa con el estilo seleccionado (no regenera el marker rojo).
 - Fix: no quedan marquers huérfanos.
+- Implementa registro de picos de uso de RAM.
 - Mejoras en la reutilización de svgs para preview.
 
-v2.20 (2020-05-26)
+v2.22 (2020-05-26)
 - Refactoring tabla snapshots.
 - Fix: las cuentas nuevas no se activaban automáticamente al recibirse un permiso a una cartografía.
 - Fix: identificación de columnas en archivos Excel (para títulos con celdas vacías)
