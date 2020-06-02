@@ -1,5 +1,5 @@
 # Poblaciones
-Esta guía detalla cómo generar a partir de los fuentes un un entorno instalable. 
+Esta guía detalla cómo generar a partir de los fuentes un entorno instalable. 
 
 ## 1. Armar el entorno de fuentes
 
