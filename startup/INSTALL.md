@@ -39,12 +39,10 @@ pip install numpy
  
 2. Indicar dentro de ese archivo:
   * los datos de conexión a la base de datos (Context::Settings()->Db()->SetDatabase())). 
-  * la dirección en la se accederá al mapa (Context::Settings()->Servers()->RegisterServers(<url del servidor>, [opcional] <ruta a la home page institucional>*)) 
-  * indicar una clave para utilizar la api de Google Maps (Context::Settings()->Keys()->GoogleMapsKey).
+  * la dirección en la se accederá al mapa (Context::Settings()->Servers()->RegisterServers(<url del servidor>, [opcional] <ruta a la home page institucional>)). La ruta a la homepage institucional se utiliza para redirigir a los usuarios al hacerse logoff, y para generar los links de términos y condiciones (http://<homepage>/terminos) 
+  * una clave para utilizar la api de Google Maps (Context::Settings()->Keys()->GoogleMapsKey).
   
 3. Opcionalmente, indicar configuraciones para el envío de notificaciones por correo electrónico, y  autenticación de OpenAuth de Google y Facebook (generando las claves necesarios para esos servicios).
-
-* la ruta a la homepage institucional se utiliza para redirigir a los usuarios al hacerse logoff, y para generar los links de términos y condiciones (http://<homepage>/terminos)
 
 4. En la carpeta /web, renombrar el archivo .htaccess.sample a .htaccess.
 
