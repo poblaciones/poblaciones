@@ -1,7 +1,7 @@
 # Poblaciones
 Esta guía detalla los pasos necesarios para descargar e instalar la aplicación. Para ejecutar requiere de MySql 5.7 (o MariaDB) y un servidor web que puede ejecutar páginas PHP. Puede ser alojado en un servidor compartido (shared hosting) que cumpla estos dos requisitos.
 
-## 1. Instalar el software necesario.
+## 1. Instalar el software necesario
 
 1. Instalar PHP 7.1 en Apache o IIS (Windows) (https://www.php.net/downloads.php).
 
@@ -15,7 +15,7 @@ pip install numpy
 
 4. Instalar MySql 5.7 (https://dev.mysql.com/downloads/mysql/).
 
-## 2. Descargar la versión de Poblaciones.
+## 2. Descargar la versión de Poblaciones
 
 1. Ingresar a https://github.com/poblaciones/poblaciones/releases y descargar la versión más reciente.
 
