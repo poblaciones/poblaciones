@@ -1,7 +1,7 @@
 # Poblaciones
 Esta guía detalla los pasos necesarios para inicializar una instalación de desarrollo de Poblaciones.
 
-## 1. Instalar el software necesario.
+## 1. Instalar el software necesario
 
 1. Para instalar VueJS. Descargar e instalar NodeJs https://nodejs.org/en/. Es necesario correr la instalación completa instalando las herramientas para compilar paquetes en C o C++. El instalador descarga e instala todas las dependencias. 
 
@@ -19,7 +19,7 @@ pip install numpy
 
 5. Instalar MySql 5.6 o superior (https://dev.mysql.com/downloads/mysql/).
 
-## 2. Descargar los fuentes del repositorio.
+## 2. Descargar los fuentes del repositorio
 
 1. Hacer `git clone https://github.com/poblaciones/poblaciones` en una carpeta local.
 
@@ -35,7 +35,7 @@ pip install numpy
 
 4. El usuario predeterminado para acceder luego a la aplicación es 'admin', cuya contraseña es 'admin001'. Se recomienda modificarla en el primer uso.
 
-## 4. Actualizar las dependencias.
+## 4. Actualizar las dependencias
 
 Los fuente se descargan sin las dependencias que utilizan. Para descargarlas ne forma automática ejecutar:
 

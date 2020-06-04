@@ -45,11 +45,11 @@ El sitio se encuentra operativo con datos demográficos, sociales y políticos d
 En youtube pueden encontrar tutoriales técnicos para mantener, extender y mejorar el código en https://bit.ly/2x0PXFm.
 # Instalación
 
-Para generar una versión para instalar: [guía de compilación](startup/BUILD.md)
-
 Para instalar un ambiente productivo: [guía de instalación](startup/INSTALL.md)
 
-Para instalar un ambiente de desarrollo: [guía para desarrollo](startup/SOURCES.md)
+Para armar un ambiente de desarrollo: [guía para desarrollo](startup/SOURCES.md)
+
+Para generar una versión para instalar: [guía de compilación](startup/BUILD.md)
 
 # Licencia
 Poblaciones - Plataforma abierta de datos espaciales de población.
