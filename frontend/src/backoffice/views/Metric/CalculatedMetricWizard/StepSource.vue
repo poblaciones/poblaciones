@@ -187,6 +187,7 @@ export default {
 	},
 	watch: {
 		"newMetric.SelectedVersion"() {
+			this.allCategories = false;
 			if(this.newMetric.SelectedVersion != null) {
 				if(this.newMetric.SelectedVersion.Levels.length > 0) {
 					let i = this.newMetric.SelectedVersion.Levels.findIndex(function(item) {
@@ -203,6 +204,7 @@ export default {
 			}
 		},
 		"newMetric.SelectedLevel"() {
+			this.allCategories = false;
 			if(this.newMetric.SelectedLevel != null) {
 				if(this.newMetric.SelectedLevel.Dataset.Type != 'L') {
 					this.newMetric.Area.IsInclusionPoint = true;
@@ -216,6 +218,7 @@ export default {
 			}
 		},
 		"newMetric.SelectedVariable"() {
+			this.allCategories = false;
 			this.columnExists = null;
 			if(this.newMetric.SelectedVariable != null) {
 				this.newMetric.Source.VariableId = this.newMetric.SelectedVariable.Id;
