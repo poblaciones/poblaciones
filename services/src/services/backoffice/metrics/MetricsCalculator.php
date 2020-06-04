@@ -3,15 +3,17 @@
 namespace helena\services\backoffice\metrics;
 
 use helena\classes\App;
-use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\classes\spss\Alignment;
 use helena\classes\spss\Format;
 use helena\classes\spss\Measurement;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\DatasetColumnService;
-use minga\framework\Profiling;
-use minga\framework\ErrorException;
 use helena\services\backoffice\DatasetService;
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
+use helena\services\frontend\SelectedMetricService;
+use minga\framework\ErrorException;
+use minga\framework\Profiling;
+use minga\framework\Str;
 
 class MetricsCalculator
 {
@@ -23,24 +25,26 @@ class MetricsCalculator
 		Profiling::BeginTimer();
 
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$srcDataset = $this->GetSourceDatasetByVariableId($source['VariableId']);
+		$variable = App::Orm()->find(entities\Variable::class, $source['VariableId']);
+		$versionLevel = $variable->getMetricVersionLevel();
+		$srcDataset = $versionLevel->getDataset();
 		$datasetName = $srcDataset->getCaption();
+		$metric = $this->GetMetricElements($source);
 
 		$cols = [];
 
-		$cols['distance'] = $this->CreateColumn($dataset, $datasetName, 'distancia_kms', 'Distancia (kms)');
+		$cols['distance'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'distancia_kms', 'Distancia');
 
 		if($output['HasDescription'])
-			$cols['description'] = $this->CreateTextColumn($dataset, $datasetName, 'description', 'Descripción');
+			$cols['description'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'description', 'Descripción', 0, 100, 250, Format::A);
 		else
 			$this->DeleteColumn($dataset, $datasetName, 'description');
 
 		if($output['HasValue'])
 		{
-			$cols['value'] = $this->CreateColumn($dataset, $datasetName, 'value', 'Valor');
-			$variable = App::Orm()->find(entities\Variable::class, $source['VariableId']);
+			$cols['value'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'value', 'Valor');
 			if($variable->getNormalization() !== null)
-				$cols['total'] = $this->CreateColumn($dataset, $datasetName, 'total', 'Total');
+				$cols['total'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'total', 'Total');
 		}
 		else
 		{
@@ -50,8 +54,8 @@ class MetricsCalculator
 
 		if($output['HasCoords'])
 		{
-			$cols['lat'] = $this->CreateColumn($dataset, $datasetName, 'latitud', 'Latitud', 11, 6);
-			$cols['lon'] = $this->CreateColumn($dataset, $datasetName, 'longitud', 'Longitud', 11, 6);
+			$cols['lat'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'latitud', 'Latitud', 6);
+			$cols['lon'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'longitud', 'Longitud', 6);
 		}
 		else
 		{
@@ -69,32 +73,27 @@ class MetricsCalculator
 	private function DeleteColumn($dataset, $datasetName, $field)
 	{
 		$datasetColumn = new DatasetColumnService();
-		$name = $datasetColumn->GetCopyColumnName(self::ColPrefix, $datasetName, $field);
+		$name = $this->GetColumnName(self::ColPrefix, $datasetName, $field);
 		$datasetColumn->DeleteColumn($dataset->getId(), $name);
 	}
 
-	private function CreateColumn($dataset, $datasetName, $field, $caption, $width = 11, $decimals = 2)
+	private function CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName,
+		$field, $caption, $decimals = 2, $colWidth = 11, $fieldWidth = 11, $format = Format::F)
 	{
 		$datasetColumn = new DatasetColumnService();
-		$name = $datasetColumn->GetCopyColumnName(self::ColPrefix, $datasetName, $field);
-		if($datasetColumn->ColumnExists($dataset->getId(), $name))
+		$name = $this->GetColumnName(self::ColPrefix, $datasetName, $field);
+		$caption = $this->GetColumnCaption($metric, $variable, $source, $output, $caption);
+
+		$col = $datasetColumn->GetColumnByVariable($dataset->getId(), $name);
+		if($col != null)
+		{
+			if($col->getCaption() != $caption)
+				$datasetColumn->UpdateCaption($col, $caption);
 			return $name;
+		}
 
 		$col = $datasetColumn->CreateColumn($dataset, $name, $name,
-			$caption, null, $width, $width, $decimals, Format::F,
-			Measurement::Nominal, Alignment::Left, false, true);
-		return $col->getField();
-	}
-
-	private function CreateTextColumn($dataset, $datasetName, $field, $caption)
-	{
-		$datasetColumn = new DatasetColumnService();
-		$name = $datasetColumn->GetCopyColumnName(self::ColPrefix, $datasetName, $field);
-		if($datasetColumn->ColumnExists($dataset->getId(), $name))
-			return $name;
-
-		$col = $datasetColumn->CreateColumn($dataset, $name, $name,
-			$caption, null, 100, 250, 0, Format::A,
+			$caption, null, $colWidth, $fieldWidth, $decimals, $format,
 			Measurement::Nominal, Alignment::Left, false, true);
 		return $col->getField();
 	}
@@ -138,7 +137,7 @@ class MetricsCalculator
 
 		Profiling::EndTimer();
 
-		return $slice + 1 >=  $totalSlices;
+		return $slice + 1 >= $totalSlices;
 	}
 
 	private function GetDistanceColumn($dataset, $sourceType)
@@ -193,9 +192,9 @@ class MetricsCalculator
 	{
 		Profiling::BeginTimer();
 
-		$sourceSnapshotTable = SnapshotByDatasetModel::SnapshotTable($source['datasetTable']);
+		$sourceSnapshotTable = SnapshotByDatasetModel::SnapshotTable($dataset->getTable());
 
-		$id = $this->getGeometryFieldId($source['datasetType']);
+		$id = $this->getGeometryFieldId($dataset->getType());
 
 		$create = 'CREATE TEMPORARY TABLE tmp_calculate_metric (sna_id int(11) not null,
 												sna_location POINT NOT NULL, sna_r INT(11) NULL, sna_feature_id BIGINT,
@@ -203,7 +202,7 @@ class MetricsCalculator
 
 		$insert = 'INSERT INTO tmp_calculate_metric (sna_id, sna_location, sna_r' .
 									($id ? ', sna_feature_id ' : '') . ')
-									SELECT  sna_id, sna_location, 0 ' . ($id ? ',' . $id : '') . '
+									SELECT sna_id, sna_location, 0 ' . ($id ? ',' . $id : '') . '
 									FROM ' . $sourceSnapshotTable . '
 									WHERE 1 ' . $this->GetValueLabelsWhere($source);
 
@@ -315,7 +314,7 @@ class MetricsCalculator
 		$srcDataset = $this->GetSourceDatasetByVariableId($variableId);
 
 		$datasetColumn = new DatasetColumnService();
-		$name = $datasetColumn->GetCopyColumnName(self::ColPrefix, $srcDataset->getCaption(), 'distancia_kms');
+		$name = $this->GetColumnName(self::ColPrefix, $srcDataset->getCaption(), 'distancia_kms');
 		return $datasetColumn->ColumnExists($datasetId, $name);
 	}
 
@@ -325,4 +324,119 @@ class MetricsCalculator
 		$versionLevel = $variable->getMetricVersionLevel();
 		return $versionLevel->getDataset();
 	}
+
+	private function GetMetricElements($source)
+	{
+		$metricService = new SelectedMetricService();
+		$metric = $metricService->PublicGetSelectedMetric($source['MetricId']);
+		$version = $this->FindById($metric->Versions, $source['VersionId'], true);
+		$level = $this->FindById($version->Levels, $source['LevelId']);
+		$variable = $this->FindById($level->Variables, $source['VariableId']);
+
+		return [
+			'metric' => $metric,
+			'version' => $version,
+			'level' => $level,
+			'variable' => $variable,
+		];
+	}
+
+	private function GetColumnName($prefix, $datasetName, $srcColumnName, $maxLength = 64)
+	{
+		// El máximo de un nombre de columna en mysql es 64 por
+		// eso el default de $maxLength = 64.
+		$clean = Str::RemoveAccents($datasetName);
+		$clean = Str::RemoveNonAlphanumeric($clean);
+		$clean = Str::Replace($clean, ' ', '_');
+		$len = Str::Length($clean) + Str::Length($prefix) + Str::Length($srcColumnName) + 1;
+		if($len > $maxLength)
+		{
+			$newLen = Str::Length($clean) - ($len - $maxLength);
+			if($newLen >= 0)
+				$clean = Str::Substr($clean, 0, $newLen);
+			else
+			{
+				$clean = '';
+				$srcColumnName = Str::Substr($srcColumnName, 0, Str::Length($srcColumnName) + $newLen);
+			}
+		}
+
+		return $prefix . $clean . '_' . $srcColumnName;
+	}
+
+	private function GetColumnCaption($metric, $variable, $source, $output, $caption, $maxLength = 255)
+	{
+		// - Distancia a radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
+		// - Valor de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
+		// - Latitud de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
+		$str = $caption . $this->GetDeA($caption)
+			. $this->GetLevelName($metric)
+			. $this->GetVariableName($metric, $variable)
+			. $this->GetVersionName($metric)
+			. $this->GetValueLabelsCaption($metric, $source)
+			. $this->GetDistanceCaption($output);
+
+		return Str::Ellipsis($str, $maxLength);
+	}
+
+	private function GetDeA($caption)
+	{
+		if($caption == 'Distancia')
+			return ' a';
+		return ' de';
+	}
+
+	private function GetLevelName($metric)
+	{
+		if(count($metric['version']->Levels) > 1)
+			return ' ' . $metric['level']->Name . ' con';
+		return '';
+	}
+
+	private function GetVariableName($metric, $variable)
+	{
+		if($variable->getData() == 'O')
+			return ' ' . $variable->getCaption();
+		return ' ' . $metric['metric']->Metric->Name;
+	}
+
+	private function GetVersionName($metric)
+	{
+		return ' (' . $metric['version']->Version->Name . ')';
+	}
+
+	private function GetValueLabelsCaption($metric, $source)
+	{
+		if(count($metric['variable']->ValueLabels) == count($source['ValueLabelIds']))
+			return '';
+
+		$ret = ' (';
+		foreach($metric['variable']->ValueLabels as $label)
+		{
+			if(in_array($label->Id, $source['ValueLabelIds']))
+				$ret .= $label->Name . ', ';
+		}
+		return Str::RemoveEnding($ret, ', ') . ')';
+	}
+
+	private function GetDistanceCaption($output)
+	{
+		if($output['HasMaxDistance'])
+			return ' hasta ' . $output['MaxDistance'] . ' km';
+		return '';
+	}
+
+	private function FindById($arr, $id, $isVersion = false)
+	{
+		foreach($arr as $i => $value)
+		{
+			if(($isVersion && $value->Version->Id == $id)
+				|| ($isVersion == false && $value->Id == $id))
+			{
+				return $arr[$i];
+			}
+		}
+		return [];
+	}
+
 }
