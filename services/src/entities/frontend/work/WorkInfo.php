@@ -50,7 +50,7 @@ class WorkInfo extends BaseMapModel
 		foreach($rows as $row)
 		{
 			$versions = array();
-			foreach(explode('\t', $row['Versions']) as $version)
+			foreach(explode("\t", $row['Versions']) as $version)
 				$versions[] = array('Name' => $version);
 			$arr[] = array('Id' => $row['Id'], 'Name' => $row['Name'], 'Versions' => $versions);
 

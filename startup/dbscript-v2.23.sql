@@ -3202,3 +3202,7 @@ DELIMITER ;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2020-06-01 15:26:13
+
+INSERT INTO `user` VALUES (1,'admin','Administrador','Administrador',NULL,NULL,'$2y$10$3ZM..N0URJfcwxgeL7QHQepGCbbbWYxrWsDk4yS.MfmMJB53UE6Zi','2019-07-12 21:19:02','A',0,1),(181,'test','Test','User',NULL,NULL,'$NO_INTERACTIVE','2020-01-01 14:00:00','A',0,1);
+
+INSERT INTO version (ver_name, ver_value ) VALUES ('DB', '034');

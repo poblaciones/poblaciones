@@ -306,7 +306,7 @@ SegmentedMap.prototype.GetVariableName = function (metricId, variableId) {
 
 SegmentedMap.prototype.AddMetricByIdAndWork = function (id, workId) {
 	return this.doAddMetricById(id, function (activeSelectedMetric) {
-		return activeSelectedMetric.GetVersionIndexByWorkId(workId);
+		return activeSelectedMetric.GetFirstValidVersionIndexByWorkId(workId);
 	});
 };
 

@@ -71,7 +71,7 @@ class WorkModel extends BaseModel
 		$params = array($workId, $workId, $workId);
 
 		$sql = "SELECT mtr_id Id, mtr_caption Name,
-								GROUP_CONCAT(DISTINCT mvr_caption ORDER BY mvr_caption DESC SEPARATOR '\t')
+								GROUP_CONCAT(DISTINCT mvr_caption ORDER BY mvr_caption ASC SEPARATOR '\t')
 								Versions,
                 GROUP_CONCAT(DISTINCT (CASE WHEN mvr_work_id = ? THEN mvr_caption ELSE '' END) ORDER BY mvr_caption DESC SEPARATOR '\t')
 								LocalVersions

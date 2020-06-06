@@ -14,7 +14,7 @@
       </div>
       <div class="md-layout-item md-size-50 md-small-size-100">
 				<mp-text :canEdit="Work.CanEdit()" label="Teléfono" @update="Update"
-					helper="Teléfono de contacto, incluyendo códigos de área. Ej. +54 11 524-1124."
+					helper="Teléfono de contacto a publicar (opcional). Ej. +54 11 524-1124."
 					v-model="contact.Phone" :maxlength="50" />
 			</div>
     </div>

@@ -182,7 +182,12 @@ ActiveSelectedMetric.prototype.SelectVersion = function (index) {
 };
 
 
-ActiveSelectedMetric.prototype.GetVersionIndexByWorkId = function (id) {
+ActiveSelectedMetric.prototype.GetFirstValidVersionIndexByWorkId = function (id) {
+	// Prioriza el actualmente seleccionado
+	if (this.SelectedVersion().Work.Id == id) {
+		return this.properties.SelectedVersionIndex;
+	}
+	// Busca uno alternativo
 	for (var l = 0; l < this.properties.Versions.length; l++) {
 		if (this.properties.Versions[l].Work.Id === id) {
 			return l;

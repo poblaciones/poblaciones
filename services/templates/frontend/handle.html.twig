@@ -5,12 +5,7 @@
 <html lang="es">
 	<head>
 	<meta charset="utf-8">
-	<title>{% if clippingRegion is defined %}
-		{{ clippingRegionItem }}{% if parentCaption is
-		defined %}, {{ parentCaption }} - {%
-	else %}{%
-	endif %}{%
-	endif %}{{ handleTitle }}
+	<title>{{ handleTitle }}
 	</title>
 	<meta name='keywords' content='mapas, georreferenciación, datos espaciales, cartografías'>
 	{% for meta in metadata %}{{
@@ -21,14 +16,7 @@
 	<link rel="shortcut icon" href="/favicon.ico">
 	</head>
 	<body>
-	<h2>{{ handleTitle }}
-	{% if clippingRegion is defined %}
-		- {{ clippingRegionItem }}{%
-	endif %}{% if parentCaption is
-		defined %}, {{ parentCaption }}{%
-	endif %}{% if grandParentCaption is
-		defined %}, {{ grandParentCaption }}
-	{% endif %} (mapa)
+	<h2>{{ handleTitle }} (mapa)
 	{% if selfNavigateLink is defined %}
 		-&gt; <a target="_blank" href='{{ selfNavigateLink }}'>link</a>
 	{% endif %}
