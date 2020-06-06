@@ -213,6 +213,10 @@ export default {
 			stepper.Start();
 		},
 		args() {
+			this.newMetric.Source.MetricId = this.newMetric.SourceMetric.Metric.Id;
+			this.newMetric.Source.VersionId = this.newMetric.SelectedVersion.Version.Id;
+			this.newMetric.Source.LevelId = this.newMetric.SelectedLevel.Id;
+
 			if(this.newMetric.Type == 'distance') {
 				return {
 					k: this.Dataset.properties.Id,
