@@ -119,11 +119,11 @@ class cHandle extends cPublicController
 
 	public function AddMetadata(&$metadata, $url, $metricName, $regionId = null)
 	{
-		$metadata['met_title'] = $this->GetFullTitle($metricName, $regionId);
-		$fullTitle = $metadata['met_title'];
-		$this->AddValue("handleTitle", $fullTitle);
+		$fullTitle = $this->GetFullTitle($metricName, $regionId);
 
-		$this->AddValue('htmltitle', $metadata['met_title']);
+		$metadata['met_title'] = $fullTitle;
+		$this->AddValue("handleTitle", $fullTitle);
+		$this->AddValue('htmltitle', $fullTitle);
 
 		$map = [	'citation_title' => 'met_title',
 							'citation_publication_date' => 'met_online_since',
@@ -191,7 +191,6 @@ class cHandle extends cPublicController
 		$metadataId = $work->MetadataId;
 		$sources = $model->GetMetadataSources($metadataId);
 		$metricName = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
-		//$metric = $this->PreppendMap($metricName);
 		$metric = $metricName;
 
 		$this->AddInfo($metadata, $metric, $items);

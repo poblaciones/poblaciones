@@ -176,7 +176,9 @@ class MetricService extends BaseService
 		else
 		{
 			// No es administrador, sólo se basa en lo que tiene permitido
-			return $this->GetAllowedByType('P');
+			$carto = $this->GetAllowedByType('R');
+			$public = $this->GetAllowedByType('P');
+			return array_merge($carto, $public);
 		}
 	}
 	public function GetPublicMetrics()
@@ -194,7 +196,7 @@ class MetricService extends BaseService
 	}
 	private function VersionsSubselect()
 	{
-		return "(SELECT GROUP_CONCAT(DISTINCT mvr_caption ORDER BY mvr_caption DESC SEPARATOR '\t')
+		return "(SELECT GROUP_CONCAT(DISTINCT mvr_caption ORDER BY mvr_caption ASC SEPARATOR '\t')
 													FROM draft_metric_version
 													WHERE mvr_metric_id = mtr_id) Versions";
 	}

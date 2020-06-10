@@ -197,8 +197,6 @@ class MetadataMerger
 								SET " . $fieldColumn . " =  matches.dco_new_id
 								WHERE " . $fieldColumn . " IS NOT NULL AND " . $datasetField . " = " . $this->targetDatasetId;
 
-		echo "<br>" . $update . "<br>";
-
 		App::Db()->exec($update);
 		// Listo
 		return $changedToNull;

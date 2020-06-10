@@ -74,9 +74,7 @@ class cHandleTest extends TestCase
 	{
 		$controller = new cHandle();
 		Reflection::CallPrivateMethod($controller, 'ShowWorkMetric', $this->workId, $this->metricId, $this->regionId);
-
-		//$this->assertEquals($prevResult['htmltitle'], $controller->templateValues['htmltitle']);
-		//$this->assertEquals($prevResult['metadata'], $controller->templateValues['metadata']);
+		$this->assertEquals('Ciudad Autónoma de Buenos Aires (CABA), Establecimientos de nivel universitario - Argentina', $controller->templateValues['htmltitle']);
 		$this->assertEquals($prevResult['items'], $controller->templateValues['items']);
 		$this->assertEquals($prevResult['variables'], $controller->templateValues['variables']);
 	}
