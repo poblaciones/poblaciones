@@ -1,3 +1,8 @@
+[CURRENT]
+- El editor de dataset permite cambiar el ancho de columnas de texto.
+- Se puede indicar una columna con URLs de imágenes.
+- Fix: error al dar de baja cartografías con indicadores adicionales.
+
 v2.23 (2020-06-01)
 - Permite la distribución selectiva de works a servidores secundarios.
 - Fix: los markers se crean en forma directa con el estilo seleccionado (no regenera el marker rojo).

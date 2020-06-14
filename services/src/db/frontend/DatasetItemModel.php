@@ -27,6 +27,7 @@ class DatasetItemModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
 	public function doGetInfo($datasetId, $itemId, $geographyItemId = null)
 	{
 		$datasetModel = new DatasetModel();
@@ -37,20 +38,9 @@ class DatasetItemModel
 		$columns = $datasetModel->GetDatasetColumns($datasetId, true);
 		$captionColumn = null;
 		$cols = $this->ResolveTitle($dataset, $itemId, $geographyItemId, $captionColumn);
-		$n = 0;
-		foreach($columns as $column)
-		{
-			if ($captionColumn != $column['field'])
-			{
-				$cols .= ', ' . $column['field'] . ' c' . $n;
-				if ($column['id'] != null)
-					$cols .= ', (SELECT dla_caption FROM dataset_column_value_label WHERE dla_dataset_column_id = ' . $column['id'] . ' AND dla_value = ' . $column['field'] . ') l' . $n;
-				else
-					$cols .= ', null l' . $n;
-				$n++;
-			}
-		}
-		// arma el select con subselects a labels
+		$cols .= $this->ResolveImage($dataset);
+		$cols .= $this->ResolveColumns($columns, $captionColumn);
+
 		$from = ' FROM ' . $table;
 		$params = array();
 		if($itemId == null)
@@ -65,30 +55,70 @@ class DatasetItemModel
 		}
 
 		$sql = "SELECT " . $cols . $from . $where . " LIMIT 1";
-		$ret = App::Db()->fetchAssoc($sql, $params);
+		$row = App::Db()->fetchAssoc($sql, $params);
 
 		$info = new InfoWindowInfo();
-		$info->Title = $ret['Title'];
-		$info->Code = $ret['Code'];
-		$info->Type = $ret['Type'];
+		$info->Title = $row['Title'];
+		$info->Code = $row['Code'];
+		$info->Type = $row['Type'];
+		$info->Image = $row['Image'];
+		if ($info->Image !== null) $info->Image = trim($info->Image);
 
-		$n = 0;
+		$items = $this->FormatItems($row, $columns, $captionColumn);
+		$info->Items = $items;
+
+		return $info;
+	}
+
+	private function FormatItems($row, $columns, $captionColumn)
+	{
 		$items = array();
+		$n = 0;
 		foreach($columns as $column)
 		{
 			if ($captionColumn != $column['field'])
 			{
-				$val = $ret['c' . $n];
+				$val = $row['c' . $n];
 				if (is_numeric($val) && (substr((string)$val, 0, 1) !== '0' || substr((string)$val, 0, 2) === '0.'))
 				{
 					$val = (float) Str::FormatNumber((float) $val, $column['decimals']);
 				}
-				$items[] = array('Name' => $column['caption'], 'Value' => $val, 'Caption' => $ret['l' . $n]);
+				$items[] = array('Name' => $column['caption'], 'Value' => $val, 'Caption' => $row['l' . $n]);
 				$n++;
 			}
 		}
-		$info->Items = $items;
-		return $info;
+		return $items;
+	}
+	private function ResolveImage($dataset)
+	{
+		if ($dataset['images_column_id'])
+		{
+			return ", " . $dataset['images_column_field'] . " as Image";
+		}
+		else
+		{
+			return ", null as Image";
+		}
+	}
+
+	private function ResolveColumns($columns, $captionColumn)
+	{
+		$cols = "";
+		// agrega las columnas
+		$n = 0;
+		foreach($columns as $column)
+		{
+			if ($captionColumn != $column['field'])
+			{
+				$cols .= ', ' . $column['field'] . ' c' . $n;
+				if ($column['id'] != null)
+					$cols .= ', (SELECT dla_caption FROM dataset_column_value_label WHERE dla_dataset_column_id = ' . $column['id'] . ' AND dla_value = ' . $column['field'] . ') l' . $n;
+				else
+					$cols .= ', null l' . $n;
+				$n++;
+			}
+		}
+		return $cols;
 	}
 	private function ResolveTitle($dataset, $itemId, $geographyItemId, &$captionColumn)
 	{

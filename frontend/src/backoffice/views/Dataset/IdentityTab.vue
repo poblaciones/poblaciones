@@ -1,56 +1,64 @@
 <template>
 	<div v-if="Dataset && Dataset.Columns">
 		<invoker ref="invoker"></invoker>
-		<div class="dParagrah" style="padding-bottom: 0px;">
-			Indique, si corresponde, una variable para reconocer la descripción o nombre en el mapa
-			de los elementos del dataset.
+		<div class="dParagrah">
+			Indique, si corresponde, una variable para reconocer la descripción de los elementos del dataset o imágenes (urls a las imágenes) de los mismos.
 		</div>
-		<div class='md-layout'>
-			<div class='md-layout-item md-size-50 md-small-size-100'>
-				<mp-select label='Variable' :allowNull='true'
+		<div class='md-layout md-gutter'>
+			<div class='md-layout-item md-size-45 md-small-size-90'>
+				<mp-select label='Descripción' :allowNull='true'
 									 @selected='Update' :canEdit='canEdit'
 									 helper='Variable con descripción. Ej. Nombre de la escuela. '
 									 :list='Dataset.Columns' v-model='Dataset.properties.CaptionColumn'
-									:render="formatColumn" />
-				</div>
+									 :render="formatColumn" />
+			</div>
+			<div class='md-layout-item md-size-10 md-small-size-10'>
+			</div>
+			<div class='md-layout-item md-size-40 md-small-size-90'>
+				<mp-select label='Imágenes' :allowNull='true'
+									 @selected='Update' :canEdit='canEdit'
+									 helper='Variable con ruta hacia imágenes. Ej. Foto de la escuela. '
+									 :list='Dataset.Columns' v-model='Dataset.properties.ImagesColumn'
+									 :render="formatColumn" />
+			</div>
 		</div>
-		<div v-if="Dataset && Dataset.Columns">
-			<invoker ref="invoker"></invoker>
-			<div class="dParagrah" style="padding-bottom: 0px; padding-top: 20px">
-				Recuadro desplegable de resumen al hacer click en elementos del mapa.
-			</div>
-			<div class='md-layout'>
-				<div class='md-layout-item md-size-50 md-small-size-100'>
-					<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
-						{{ infoEnabledStatus }}
-					</md-switch>
-				</div>
-			</div>
-			<div v-if="Dataset.properties.Type == 'L'">
-				<div class="dParagrah" style="padding-top: 20px">
-					Indique opcionalmente un ícono para los elementos del dataset.
+			<div v-if="Dataset && Dataset.Columns">
+				<invoker ref="invoker"></invoker>
+				<div class="dParagrah" style="padding-bottom: 0px; padding-top: 20px">
+					Mostrar panel con infomración al hacer click en elementos del mapa.
 				</div>
 				<div class='md-layout'>
-					<div class='md-layout-item md-size-90 md-size-small-90'>
-						<div class='mp-label'>
-							Ícono
-						</div>
-						<div class='currentIcon'>
-							<i v-if='Dataset.properties.Symbol' :class="Dataset.properties.Symbol"></i>
-							<span v-else style="font-size: 14px;">[Ninguno]</span>
-							<template v-if="canEdit">
-								<md-button @click="showPicker" class="md-raised" style="margin-top: -6px;">
-									Seleccionar
-									<md-icon>edit</md-icon>
-								</md-button>
-								<mp-icon-font-picker ref="iconPicker" v-model="Dataset.properties.Symbol" searchBox="Buscar..." v-on:selectIcon="iconSelected"></mp-icon-font-picker>
-							</template>
+					<div class='md-layout-item md-size-50 md-small-size-100'>
+						<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
+							{{ infoEnabledStatus }}
+						</md-switch>
+					</div>
+				</div>
+				<div v-if="Dataset.properties.Type == 'L'">
+					<div class="dParagrah" style="padding-top: 20px">
+						Indique opcionalmente un ícono para los elementos del dataset.
+					</div>
+					<div class='md-layout'>
+						<div class='md-layout-item md-size-90 md-size-small-90'>
+							<div class='mp-label'>
+								Ícono
+							</div>
+							<div class='currentIcon'>
+								<i v-if='Dataset.properties.Symbol' :class="Dataset.properties.Symbol"></i>
+								<span v-else style="font-size: 14px;">[Ninguno]</span>
+								<template v-if="canEdit">
+									<md-button @click="showPicker" class="md-raised" style="margin-top: -6px;">
+										Seleccionar
+										<md-icon>edit</md-icon>
+									</md-button>
+									<mp-icon-font-picker ref="iconPicker" v-model="Dataset.properties.Symbol" searchBox="Buscar..." v-on:selectIcon="iconSelected"></mp-icon-font-picker>
+								</template>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 </template>
 
 <script>

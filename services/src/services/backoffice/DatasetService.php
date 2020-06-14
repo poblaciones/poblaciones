@@ -132,7 +132,7 @@ class DatasetService extends DbSession
 		$this->DeleteFromErrors($table, $ids);
 		DatasetColumnCache::Cache()->Clear($datasetId);
 		// Marca work
-		DatasetService::DatasetChanged($dataset, true);
+		DatasetService::DatasetChanged($dataset);
 		Profiling::EndTimer();
 		return $ret;
 	}
@@ -167,7 +167,7 @@ class DatasetService extends DbSession
 
 		DatasetColumnCache::Cache()->Clear($datasetId);
 		// Marca work
-		DatasetService::DatasetChanged($dataset, true);
+		DatasetService::DatasetChanged($dataset);
 		Profiling::EndTimer();
 		return self::OK;
 	}

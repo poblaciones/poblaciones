@@ -3,20 +3,20 @@
 		<div v-show='hasContent && !collapsed' class='left-panelPositionEnum' :style="{ width: width + 'px' }">
 			<div v-if="isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :panelInfo='Full' v-if='isFullList' @clickClose='doClose'/>
-					<feature-info :panelInfo='Full' v-if='isFullInfo' @clickClose='doClose'/>
+				<feature-list :featureInfo='Full' v-if='isFullList' @clickClose='doClose'/>
+					<feature-info :featureInfo='Full' v-if='isFullInfo' @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panTop" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :panelInfo='Top' v-if='isTopList' @clickClose='doClose'/>
-					<feature-info :panelInfo='Top' v-if='isTopInfo' @clickClose='doClose'/>
+				<feature-list :featureInfo='Top' v-if='isTopList' @clickClose='doClose'/>
+					<feature-info :featureInfo='Top' v-if='isTopInfo' @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panBottom" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :panelInfo='Bottom' v-if='isBottomList' @clickClose='doClose'/>
-					<feature-info :panelInfo='Bottom' v-if='isBottomInfo' @clickClose='doClose'/>
+				<feature-list :featureInfo='Bottom' v-if='isBottomList' @clickClose='doClose'/>
+					<feature-info :featureInfo='Bottom' v-if='isBottomInfo' @clickClose='doClose'/>
 				</transition>
 			</div>
 		</div>
@@ -141,27 +141,27 @@ export default {
 			}
 			return null;
 		},
-		Add(panelInfo, index) {
+		Add(featureInfo, index) {
 			this.isFullFront = true;
-			this.doAdd(panelInfo, 'Full', index);
+			this.doAdd(featureInfo, 'Full', index);
 		},
-		AddTop(panelInfo, index) {
+		AddTop(featureInfo, index) {
 			this.isFullFront = false;
-			this.doAdd(panelInfo, 'Top', index);
+			this.doAdd(featureInfo, 'Top', index);
 		},
-		AddBottom(panelInfo, index) {
+		AddBottom(featureInfo, index) {
 			this.isFullFront = false;
 			if(this.Top !== null
-				&& this.Top.Key.Id === panelInfo.Key.Id) {
+				&& this.Top.Key.Id === featureInfo.Key.Id) {
 				if(index !== undefined
 					&& this.Top.panelType == PanelType.ListPanel) {
 					this.Top.detailIndex = index;
 				}
 				return;
 			}
-			this.doAdd(panelInfo, 'Bottom', index);
+			this.doAdd(featureInfo, 'Bottom', index);
 		},
-		doAdd(panelInfo, panelPositionEnum, index) {
+		doAdd(featureInfo, panelPositionEnum, index) {
 			if(this.onlyFull) {
 				panelPositionEnum = 'Full';
 				this.isFullFront = true;
@@ -171,7 +171,7 @@ export default {
 
 			this.hasContent = true;
 			this.collapsed = false;
-			this[panelPositionEnum] = panelInfo;
+			this[panelPositionEnum] = featureInfo;
 
 			if(index !== undefined
 				&& this[panelPositionEnum].panelType == PanelType.ListPanel) {

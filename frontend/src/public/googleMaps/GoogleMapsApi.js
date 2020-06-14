@@ -74,6 +74,10 @@ GoogleMapsApi.prototype.Initialize = function () {
 		},
 		scaleControl: true,
 		styles: [{
+			featureType: 'landscape.natural',
+			elementType: 'labels',
+			stylers: [{ visibility: 'off' }]
+		},{
 			featureType: 'poi.attraction',
 			elementType: 'labels',
 			stylers: [{ visibility: 'off' }]

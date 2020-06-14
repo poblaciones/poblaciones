@@ -22,6 +22,10 @@ class DatasetColumnService extends DbSession
 	public function SaveColumn($datasetId, $column)
 	{
 		Profiling::BeginTimer();
+		// Trae el ancho de la columna
+		$fieldWidthSql = "SELECT dco_field_width FROM
+																		draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?";
+		$fieldWidth = App::Db()->fetchScalarInt($fieldWidthSql, array($column->getId(), $datasetId));
 		// Graba
 		DatasetColumns::FixCaption($column);
 		DatasetColumns::FixName($column);
@@ -35,8 +39,32 @@ class DatasetColumnService extends DbSession
 		App::Orm()->save($column);
 		// Marca work
 		DatasetService::DatasetChangedById($datasetId, true);
+		// Si los anchos difieren, cambia la columna en la base de datos
+		if ($fieldWidth !== $column->getFieldWidth())
+		{
+			$this->resizeColumn($datasetId, $column);
+			DatasetService::DatasetChangedById($datasetId);
+		}
 		Profiling::EndTimer();
 		return $column;
+	}
+
+	private function resizeColumn($datasetId, $column)
+	{
+		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+		$table = $dataset->getTable();
+		$newSize = $column->getFieldWidth();
+		$field = $column->getField();
+		$type = $column->getFormat();
+		if ($type !== Format::A)
+			throw new ErrorException("No es posible cambiar el tamaño de un campo numérico");
+		// Reduce tamaños
+		$sqlFixLengths = "UPDATE " . $table . " SET " . $field . " = LEFT(" . $field . ", " . $newSize . ") WHERE
+																		LENGTH(" . $field . ") > " . $newSize;
+		App::Db()->exec($sqlFixLengths);
+		// Cambia el campo
+		$sqlAlter = "ALTER TABLE " . $table . " MODIFY " . $field . " VARCHAR(" . $newSize . ")";
+		App::Db()->execDDL($sqlAlter);
 	}
 
 	public function DeleteColumns($datasetId, $ids)

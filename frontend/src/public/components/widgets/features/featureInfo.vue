@@ -1,20 +1,28 @@
 <template>
-	<div class='panel card panel-body'>
-		<div v-on:click="doBack" v-if='panelInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
-		<mp-close-button v-else v-on:click="doClose" />
+	<div>
+		<div ref="topImage" v-if="featureInfo.Image && isImageUrl(featureInfo.Image)"
+				 :style="'background-image:url('
+										+ featureInfo.Image + ');'"
+				 class="topImage">
+		</div>
 
-		<h4 class="title">{{ title }}</h4>
-		<div class='stats' style="padding-top: 8px">
-			<span style="color: rgb(167, 167, 167);">{{ panelInfo.Type }}</span>
+		<div class='panel card panel-body'>
+			<div v-on:click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
+			<mp-close-button v-else v-on:click="doClose" />
+
+			<h4 class="title">{{ title }}</h4>
+			<div class='stats' style="padding-top: 8px">
+				<span style="color: rgb(167, 167, 167);">{{ featureInfo.Type }}</span>
+			</div>
+			<hr class="moderateHr">
+			<div class='item' v-if="featureInfo.Code && featureInfo.Title">
+				Código: {{ val }}
+			</div>
+			<div v-for="item in featureInfo.Items" class='item' :key="item.Name">
+				{{ capitalize(item.Name) }}: {{ getValue(item) }}
+			</div>
+			<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 		</div>
-		<hr class="moderateHr">
-		<div class='item' v-if="panelInfo.Code && panelInfo.Title">
-			Código: {{ val }}
-		</div>
-		<div v-for="item in panelInfo.Items" class='item' :key="item.Name">
-			{{ capitalize(item.Name) }}: {{ getValue(item) }}
-		</div>
-		<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 	</div>
 </template>
 
@@ -24,32 +32,29 @@ import h from '@/public/js/helper';
 export default {
 	name: 'featureInfo',
 	props: [
-		'panelInfo',
+		'featureInfo',
 	],
-	// components: { },
-	// data() { },
-	// beforeDestroy () { },
 	computed: {
 		title() {
-			if (this.panelInfo.Title) {
-				return this.panelInfo.Title;
-			} else if (this.panelInfo.Code) {
-				return this.panelInfo.Code;
+			if (this.featureInfo.Title) {
+				return this.featureInfo.Title;
+			} else if (this.featureInfo.Code) {
+				return this.featureInfo.Code;
 			}
 			return '';
 		},
 		val() {
-			return h.ensureFinalDot(this.isNullDash(this.panelInfo.Code));
+			return h.ensureFinalDot(this.isNullDash(this.featureInfo.Code));
 		},
 		lat() {
-			if(this.panelInfo.position && this.panelInfo.position.Coordinate && this.panelInfo.position.Coordinate.Lat) {
-				return h.trimNumberCoords(this.panelInfo.position.Coordinate.Lat);
+			if(this.featureInfo.position && this.featureInfo.position.Coordinate && this.featureInfo.position.Coordinate.Lat) {
+				return h.trimNumberCoords(this.featureInfo.position.Coordinate.Lat);
 			}
 			return 0;
 		},
 		lon() {
-			if(this.panelInfo.position && this.panelInfo.position.Coordinate && this.panelInfo.position.Coordinate.Lon) {
-				return h.trimNumberCoords(this.panelInfo.position.Coordinate.Lon);
+			if(this.featureInfo.position && this.featureInfo.position.Coordinate && this.featureInfo.position.Coordinate.Lon) {
+				return h.trimNumberCoords(this.featureInfo.position.Coordinate.Lon);
 			}
 			return 0;
 		},
@@ -62,10 +67,22 @@ export default {
 		doClose(e) {
 			window.Panels.Content.FeatureInfoKey = null;
 			e.preventDefault();
-			this.$emit('clickClose', e, this.panelInfo.Key.Id);
+			this.$emit('clickClose', e, this.featureInfo.Key.Id);
 		},
 		capitalize(name) {
 			return h.capitalize(name);
+		},
+		isImageUrl(image) {
+			if (image === null) {
+				return false;
+			}
+			if (image.toLowerCase().startsWith("http") == false) {
+				return false;
+			}
+			if (image.trim().indexOf(" ") !== -1) {
+				return false;
+			}
+			return true;
 		},
 		isNullDash(str) {
 			if (str === undefined || str === null) {
@@ -98,7 +115,14 @@ export default {
 }
 .item {
 	padding-top: 1px;
-	padding-bottom: 10px
+	padding-bottom: 10px;
+	word-wrap: break-word;
+}
+.topImage {
+	background-position: 50% 50%;
+	height: 200px;
+	width: 100%;
+	background-size: cover;
 }
 </style>
 

@@ -19,7 +19,7 @@
 									v-model="variable.FormatFormatted" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Ancho" :disabled="true" type="number" :minimum="1" :maximum="40"
+						<mp-simple-text label="Ancho" :disabled="(!variableIsString)" type="number" :minimum="1" :maximum="32767"
 									v-model="variable.FieldWidth" @enter="save" />
 					</div>
 
@@ -61,6 +61,8 @@ import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/js/arr';
 import VariableNameValidator from '@/backoffice/classes/VariableNameValidator';
 
+var columnFormatEnum = require("@/common/enums/columnFormatEnum");
+
 export default {
   name: "ColumnPopup",
   data() {
@@ -75,9 +77,12 @@ export default {
     },
     Dataset() {
       return window.Context.CurrentDataset;
-    },
+		},
+		variableIsString() {
+			return this.variable.Format === columnFormatEnum.STRING;
+		},
 		currentValidMeasures() {
-			if (this.variable.Format === 1) {
+			if (this.variable.Format === columnFormatEnum.STRING) {
 				return this.Dataset.ValidMeasuresString();
 			} else {
 				return this.Dataset.ValidMeasures();

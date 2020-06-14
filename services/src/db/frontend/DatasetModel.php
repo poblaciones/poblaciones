@@ -50,6 +50,8 @@ class DatasetModel extends BaseModel
 			d1.dat_table `table`,
 			d1.dat_type `type`,
 			d1.dat_caption_column_id `caption_column_id`,
+			d1.dat_images_column_id `images_column_id`,
+			(SELECT dco_field FROM ' . $this->draftPreffix() . 'dataset_column WHERE dco_id = d1.dat_images_column_id) images_column_field,
 			(SELECT dco_field FROM ' . $this->draftPreffix() . 'dataset_column WHERE dco_id = d1.dat_caption_column_id) caption_column_field,
 			d1.dat_geography_id
 			FROM ' . $this->draftPreffix() . 'dataset d1

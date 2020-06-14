@@ -462,6 +462,7 @@ ActiveDataset.prototype.SaveColumn = function (variable) {
 		{ 'k': this.properties.Id, 'c': variable },
 		'actualizar los atributos de la variable');
 };
+
 ActiveDataset.prototype.SkipRows = function (rowIds) {
 	var loc = this;
 	this.Work.WorkChanged();

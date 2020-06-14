@@ -26,6 +26,8 @@ App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}', controllers\cHandl
 App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}', controllers\cHandle::class);
 App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}/{path4}/{path5}', controllers\cHandle::class);
 
+App::RegisterControllerGet('/datasets', controllers\cDatasets::class);
+
 
 // ej. http://mapas/map/3701/metadata
 App::$app->get('/map/metadata', function (Request $request) {
