@@ -508,6 +508,7 @@ class Symbology
         return $this->ShowLabels;
     }
 
+
     /**
      * Set showTotals
      *

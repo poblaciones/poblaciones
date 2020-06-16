@@ -39,13 +39,13 @@
 						Indique opcionalmente un ícono para los elementos del dataset.
 					</div>
 					<div class='md-layout'>
-						<div class='md-layout-item md-size-90 md-size-small-90'>
+						<div class='md-layout-item md-size-100 md-size-small-100'>
 							<div class='mp-label'>
 								Ícono
 							</div>
 							<div class='currentIcon'>
 								<i v-if='Dataset.properties.Symbol' :class="Dataset.properties.Symbol"></i>
-								<span v-else style="font-size: 14px;">[Ninguno]</span>
+								<span v-else style="font-size: 14px;">[Predeterminado]</span>
 								<template v-if="canEdit">
 									<md-button @click="showPicker" class="md-raised" style="margin-top: -6px;">
 										Seleccionar
@@ -55,8 +55,15 @@
 								</template>
 							</div>
 						</div>
+						<div class='md-layout-item md-size-100 md-size-small-100'>
+							<md-switch v-model="Dataset.properties.ScaleSymbol" :disabled="!canEdit" class="md-primary" @change="Update">
+								Redimensionar el ícono al cambiar el zoom.
+							</md-switch>
+						</div>
+
 					</div>
-				</div>
+
+					</div>
 			</div>
 		</div>
 </template>

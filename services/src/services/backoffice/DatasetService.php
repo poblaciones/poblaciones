@@ -66,6 +66,7 @@ class DatasetService extends DbSession
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
 		$dataset->setWork($work);
 		$dataset->setType('L');
+		$dataset->setScaleSymbol(true);
 		$dataset->setShowInfo(true);
 		$dataset->setExportable(true);
 		$dataset->setGeoreferenceStatus(0);

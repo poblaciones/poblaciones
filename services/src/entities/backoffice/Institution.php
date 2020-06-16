@@ -71,6 +71,16 @@ class Institution
      */
     private $Country;
 
+		/**
+     * @var \helena\entities\backoffice\File
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\File",
+													cascade={"persist", "remove"}, fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="ins_watermark_id", referencedColumnName="fil_id", nullable=true)
+     * })
+     */
+    private $Watermark;
 
     /**
      * Get id
@@ -190,6 +200,30 @@ class Institution
     public function getIsGlobal()
     {
         return $this->IsGlobal;
+    }
+
+    /**
+     * Set watermark
+     *
+     * @param \helena\entities\backoffice\File $watermark
+     *
+     * @return Institution
+     */
+    public function setWatermark($watermark)
+    {
+        $this->Watermark = $watermark;
+
+        return $this;
+    }
+
+    /**
+     * Get watermark
+     *
+     * @return \helena\entities\backoffice\File
+     */
+    public function getWatermark()
+    {
+        return $this->Watermark;
     }
 
     /**

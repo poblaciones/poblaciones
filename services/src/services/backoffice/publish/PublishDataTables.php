@@ -27,14 +27,22 @@ class PublishDataTables
 
 		$metadataMatrix = array('class' => entities\Metadata::class, 'parentKey' => 'wrk_metadata_id',
 														'children' => array(
-															array('class' => entities\Institution::class, 'parentKey' => 'met_institution_id'),
+															array('class' => entities\Institution::class, 'parentKey' => 'met_institution_id',
+																		'children' => array(
+																			array('class' => entities\File::class, 'parentKey' => 'ins_watermark_id',
+																						'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id'))))
+																		),
 															array('class' => entities\Contact::class, 'parentKey' => 'met_contact_id'),
 
 															array('class' => entities\MetadataSource::class, 'childKey' => 'msc_metadata_id',
 																		'children' => array(
 																				array('class' => entities\Source::class, 'parentKey' => 'msc_source_id',
 																				'children' => array(
-																											array('class' => entities\Institution::class, 'parentKey' => 'src_institution_id'),
+																											array('class' => entities\Institution::class, 'parentKey' => 'src_institution_id',
+																														'children' => array(
+																															array('class' => entities\File::class, 'parentKey' => 'ins_watermark_id',
+																																		'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id'))))
+																											),
 																											array('class' => entities\Contact::class, 'parentKey' => 'src_contact_id'))))),
 															array('class' => entities\MetadataFile::class, 'childKey' => 'mfi_metadata_id',
 																		'children' => array(

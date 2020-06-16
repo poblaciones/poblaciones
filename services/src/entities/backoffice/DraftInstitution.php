@@ -76,6 +76,16 @@ class DraftInstitution
      */
     private $IsEditableByCurrentUser = false;
 
+		/**
+     * @var \helena\entities\backoffice\DraftFile
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftFile",
+													cascade={"persist", "remove"}, fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="ins_watermark_id", referencedColumnName="fil_id", nullable=true)
+     * })
+     */
+    private $Watermark;
 
     /**
      * Get id
@@ -170,6 +180,32 @@ class DraftInstitution
     {
         return $this->IsGlobal;
     }
+
+
+    /**
+     * Set watermark
+     *
+     * @param \helena\entities\backoffice\DraftFile $watermark
+     *
+     * @return DraftInstitution
+     */
+    public function setWatermark($watermark)
+    {
+        $this->Watermark = $watermark;
+
+        return $this;
+    }
+
+    /**
+     * Get watermark
+     *
+     * @return \helena\entities\backoffice\DraftFile
+     */
+    public function getWatermark()
+    {
+        return $this->Watermark;
+    }
+
 
     /**
      * Set email

@@ -44,6 +44,13 @@ class Dataset
      */
     private $Symbol;
 
+		/**
+     * @var boolean
+     *
+     * @ORM\Column(name="dat_scale_symbol", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $ScaleSymbol;
+
     /**
      * @var string
      *
@@ -294,6 +301,30 @@ class Dataset
     public function getTable()
     {
         return $this->Table;
+    }
+
+		/**
+     * Set scaleSymbol
+     *
+     * @param boolean $scaleSymbol
+     *
+     * @return Dataset
+     */
+    public function setScaleSymbol($scaleSymbol)
+    {
+        $this->ScaleSymbol = $scaleSymbol;
+
+        return $this;
+    }
+
+    /**
+     * Get scaleSymbol
+     *
+     * @return boolean
+     */
+    public function getScaleSymbol()
+    {
+        return $this->ScaleSymbol;
     }
 
     /**
