@@ -52,7 +52,9 @@ class GeoreferenceByLatLon extends GeoreferenceBase
 		$latField = $this->state->Get('lat');
 		$lonField = $this->state->Get('lon');
 
-		return "GetGeographyByPoint( " . $this->state->GeographyId() . ", POINT(" . $lonField . ", " . $latField . "))";
+		return "IFNULL(
+							GetGeographyByPoint( " . $this->state->GeographyId() . ", POINT(" . $lonField . ", " . $latField . ")),
+							GetGeographyByPoint( " . $this->state->GeographyId() . ", POINT(" . $lonField . " + 0.001, " . $latField . ")))";
 	}
 }
 

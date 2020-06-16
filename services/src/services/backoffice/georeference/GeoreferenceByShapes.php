@@ -60,11 +60,11 @@ class GeoreferenceByShapes extends GeoreferenceBase
 		$shapesField = $this->state->Get('shape');
 
 		return "IFNULL(GetGeographyByPoint( " . $this->state->GeographyId() . ",
-											ST_CENTROID(GeomFromText(FixGeoJson(" . $shapesField . ")))),
+											GeometryCentroid(GeomFromText(FixGeoJson(" . $shapesField . ")))),
 	  								GetGeographyByPoint( " . $this->state->GeographyId() . ",
 											POINT(
-											ST_X(ST_CENTROID(GeomFromText(FixGeoJson(" . $shapesField . ")))) + 0.001,
-											ST_Y(ST_CENTROID(GeomFromText(FixGeoJson(" . $shapesField . "))))
+											ST_X(GeometryCentroid(GeomFromText(FixGeoJson(" . $shapesField . ")))) + 0.001,
+											ST_Y(GeometryCentroid(GeomFromText(FixGeoJson(" . $shapesField . "))))
 											)
 									))";
 	}

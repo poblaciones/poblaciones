@@ -25,7 +25,7 @@
 			<div v-if="Dataset && Dataset.Columns">
 				<invoker ref="invoker"></invoker>
 				<div class="dParagrah" style="padding-bottom: 0px; padding-top: 20px">
-					Mostrar panel con infomración al hacer click en elementos del mapa.
+					Mostrar panel con información al hacer click en elementos del mapa.
 				</div>
 				<div class='md-layout'>
 					<div class='md-layout-item md-size-50 md-small-size-100'>

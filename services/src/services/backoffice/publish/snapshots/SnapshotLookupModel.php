@@ -82,7 +82,7 @@ class SnapshotLookupModel
 	{
 		if ($dataset["dat_type"] == 'S')
 		{
-			return "centroid(geometry)";
+			return "GeometryCentroid(geometry)";
 		}
 		else if ($dataset["dat_type"] == 'L')
 		{
