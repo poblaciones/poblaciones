@@ -238,14 +238,14 @@ module.exports = {
 		var polygons = feature.geometry.coordinates;
 		if (feature.geometry.type === 'Point') {
 			this.getPolygonCoords([[polygons]], bounds);
-		} else if (feature.geometry.type === 'Polygon') {
+		} else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'LineString') {
 			this.getPolygonCoords(polygons, bounds);
-		} else {
-			if (feature.geometry.type === 'MultiPolygon') {
-				for (var p = 0; p < polygons.length; p++) {
-					this.getPolygonCoords(polygons[p], bounds);
-				}
+		} else if (feature.geometry.type === 'MultiPolygon' || feature.geometry.type === 'MultiLineString') {
+			for (var p = 0; p < polygons.length; p++) {
+				this.getPolygonCoords(polygons[p], bounds);
 			}
+		} else {
+			throw new Error('Tipo de geomeptry no válido (' + feature.geometry.type + ').');
 		}
 		return bounds.getCenter();
 	},

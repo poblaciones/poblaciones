@@ -167,6 +167,11 @@ html, body {
 	}
 }
 
+	.gridCell {
+		padding: 4px;
+		text-overflow: ellipsis;
+	}
+
 .only-print {
 	display: none;
 }

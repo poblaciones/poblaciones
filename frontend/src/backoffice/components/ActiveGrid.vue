@@ -509,7 +509,7 @@ export default {
     },
     refreshOnClick() {
       this.createGrid();
-    },
+		},
     rendergridrows(obj) {
       var rows = obj.data;
       return rows;

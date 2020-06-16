@@ -49,18 +49,16 @@ Mercator.prototype.ProjectGeoJsonFeatures = function(features) {
 		var feature = features[f];
 		var polygons = feature.geometry.coordinates;
 		var coords;
-		if (feature.geometry.type === 'Polygon') {
-			coords = this.ProjectCoords(polygons);
-		} else {
-			if (feature.geometry.type === 'MultiPolygon') {
-				coords = [];
-				for (var p = 0; p < polygons.length; p++) {
-					coords.push(this.ProjectCoords(polygons[p]));
-				}
-			} else {
-				coords = [];
-			}
+		if (feature.geometry.type === 'LineString') {
+			coords = this.Project1LevelCoords(polygons);
+		} else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiLineString') {
+			coords = this.Project2LevelCoords(polygons);
+		} else if (feature.geometry.type === 'MultiPolygon' || feature.geometry.type === '') {
+			coords = this.Project3LevelCoords(polygons);
+		}	else {
+			throw new Error('Tipo de geomeptry no válido (' + feature.geometry.type + ').');
 		}
+
 		var geo = { type: feature.geometry.type, coordinates: coords };
 		var polygon = { id: feature.id, type: feature.type, properties: feature.properties, geometry: geo };
 		retFeatures.push(polygon);
@@ -75,17 +73,30 @@ Mercator.prototype.ProjectCoordinate = function (coord) {
 	return { Lat: p.y, Lon: p.x };
 };
 
-Mercator.prototype.ProjectCoords = function (coords) {
-	var coordsGroup = [];
-	for (var r = 0; r < coords.length; r++) {
-		var retcoords = [];
-		for (var i = 0; i < coords[r].length; i++) {
-			var p = this.fromLatLngToPoint({ lat: coords[r][i][1], lng: coords[r][i][0] });
-			retcoords.push([p.x, -p.y]);
-		}
-		coordsGroup.push(retcoords);
+Mercator.prototype.Project3LevelCoords = function (inCoords) {
+	var outCoords = [];
+	for (var p = 0; p < inCoords.length; p++) {
+		outCoords.push(this.Project2LevelCoords(inCoords[p]));
 	}
-	return coordsGroup;
+	return outCoords;
+};
+
+Mercator.prototype.Project2LevelCoords = function (inCoords) {
+	var outCoords = [];
+	for (var r = 0; r < inCoords.length; r++) {
+		var retcoords = this.Project1LevelCoords(inCoords[r]);
+		outCoords.push(retcoords);
+	}
+	return outCoords;
+};
+
+Mercator.prototype.Project1LevelCoords = function (inCoords) {
+	var outCoords = [];
+	for (var i = 0; i < inCoords.length; i++) {
+		var p = this.fromLatLngToPoint({ lat: inCoords[i][1], lng: inCoords[i][0] });
+		outCoords.push([p.x, -p.y]);
+	}
+	return outCoords;
 };
 
 Mercator.prototype.getTileBoundsLatLon = function (tile) {

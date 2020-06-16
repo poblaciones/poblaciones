@@ -41,42 +41,6 @@ class GeoreferenceByShapes extends GeoreferenceBase
 		return $ret;
 	}
 
-//$shapesField = $this->state->Get('shape');
-//    $select = "id, GeomFromText(" . $shapesField . ") g";
-//    $rows = $this->QueryColumns($select, $from, $pageSize);
-
-//    // Los trae, calcula el área y si el geometry es válido.
-//    foreach($data as $rows)
-//    {
-//      $id = $row['g'];
-//      $data = unpack("@4/a*", $row['g']);
-//      $geometry = \geoPHP::load($data, 'wkb');
-//      // Valida
-//      if ($geometry->isValid() == false)
-//        $area = null;
-//      else
-//      {
-//        // Simplifica
-//        $r1 = ;
-//        $r2 = ;
-//        $r3 = ;
-//        $r4 = ;
-//        $r5 = ;
-//        $r6 = ;
-//        // Proyecta para area
-
-//        // Calcula area
-
-//      }
-//      // Inserta geometry, g1, g2, g3, g4, g5, g6 area y centroide
-
-//    }
-//    $condition = " area IS NULL ";
-
-//    // Luego valida los valores de area
-//    return $this->ExecuteValidate(self::ERROR_INVALID_GEOMETRY, $from, $pageSize, $condition);
-//  }
-
 	public function Update($from, $pageSize, $totalRows)
 	{
 		Profiling::BeginTimer();
@@ -95,7 +59,14 @@ class GeoreferenceByShapes extends GeoreferenceBase
 	{
 		$shapesField = $this->state->Get('shape');
 
-		return "GetGeographyByPoint( " . $this->state->GeographyId() . ", ST_CENTROID(GeomFromText(FixGeoJson(" . $shapesField . "))))";
+		return "IFNULL(GetGeographyByPoint( " . $this->state->GeographyId() . ",
+											ST_CENTROID(GeomFromText(FixGeoJson(" . $shapesField . ")))),
+	  								GetGeographyByPoint( " . $this->state->GeographyId() . ",
+											POINT(
+											ST_X(ST_CENTROID(GeomFromText(FixGeoJson(" . $shapesField . ")))) + 0.001,
+											ST_Y(ST_CENTROID(GeomFromText(FixGeoJson(" . $shapesField . "))))
+											)
+									))";
 	}
 }
 

@@ -6,6 +6,8 @@ DROP FUNCTION IF EXISTS NearestSnapshotGeography;
 DROP FUNCTION IF EXISTS NearestSnapshotShape;
 DROP FUNCTION IF EXISTS NearestSnapshotRangePoint;
 DROP FUNCTION IF EXISTS NearestSnapshotPoint;
+DROP FUNCTION IF EXISTS MultiPolygonIsValid;
+DROP FUNCTION IF EXISTS EllipseContainsMultiPolygon;
 
 DELIMITER $$
 CREATE FUNCTION `DistanceSphere`(`pt1` POINT, `pt2` POINT) RETURNS double
@@ -173,22 +175,8 @@ BEGIN
 
 	RETURN ret;
 END$$
-DELIMITER ;
 
 DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP FUNCTION IF EXISTS `EllipseContainsMultiPolygon` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
 
 DELIMITER ;;
 CREATE  FUNCTION `EllipseContainsMultiPolygon`(`center` POINT, `radius` POINT, `ele` GEOMETRY) RETURNS tinyint(4)
@@ -232,19 +220,7 @@ DELIMITER ;
 
 
 DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP FUNCTION IF EXISTS `MultiPolygonIsValid` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+
 DELIMITER ;;
 CREATE  FUNCTION `MultiPolygonIsValid`(`ele` GEOMETRY) RETURNS tinyint(4)
     NO SQL
@@ -284,4 +260,3 @@ END ;;
 DELIMITER ;
 
 UPDATE version SET ver_value = '034' WHERE ver_name = 'DB';
-
