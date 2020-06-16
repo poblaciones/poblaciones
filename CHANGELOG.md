@@ -1,12 +1,16 @@
 [CURRENT]
+
+v2.24 (2020-06-16)
+- Fix: overflow de texto en grilla de edición.
+- Soporte para georreferenciar y visualizar línea y líneas mútiples.
 - El editor de dataset permite cambiar el ancho de columnas de texto.
 - Se puede indicar una columna con URLs de imágenes.
 - Fix: error al dar de baja cartografías con indicadores adicionales.
 
 v2.23 (2020-06-01)
-- Permite la distribución selectiva de works a servidores secundarios.
-- Fix: los markers se crean en forma directa con el estilo seleccionado (no regenera el marker rojo).
-- Fix: no quedan marquers huérfanos.
+- Permite la distribución selectiva de cartografías a servidores secundarios.
+- Fix: los markers se crean en forma directa con el estilo seleccionado (evita presentar el marker rojo al redibujar).
+- Fix: no quedan markers huérfanos al cambiar el zoom antes de completar el redibujado.
 - Implementa registro de picos de uso de RAM.
 - Mejoras en la reutilización de svgs para preview.
 

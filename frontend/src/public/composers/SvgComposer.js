@@ -86,9 +86,11 @@ SvgComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, 
 		return;
 	}
 	// Lo agrega
-	var centroid = 	this.getCentroid(mapElement);
+	var centroid = this.getCentroid(mapElement);
+	var isLineString = (mapElement.geometry.type === 'LineString' || mapElement.geometry.type === 'MultiLineString' ? ' ls' : '');
 	var mapItem = {
-		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry, properties: { className: 'e' + tileUniqueId + '_' + val }
+		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry,
+					properties: { className: 'e' + tileUniqueId + '_' + val + isLineString }
 	};
 	if (!this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
 		mapItem.id = null;

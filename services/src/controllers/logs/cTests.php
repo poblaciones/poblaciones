@@ -76,7 +76,7 @@ class cTests extends cController
 		$mail = new Mail();
 		$mail->to = $email;
 
-		$mail->subject = 'Prueba de email en Mapas de Acta Académica - ' . Date::FormattedArNow();
+		$mail->subject = 'Prueba de email en Poblaciones - ' . Date::FormattedArNow();
 		$mail->message =  "Contenido esdrújulo del mail.";
 		$mail->Send(false, true);
 

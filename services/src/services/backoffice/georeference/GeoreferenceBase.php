@@ -108,7 +108,14 @@ abstract class GeoreferenceBase
 
 		$sql = "INSERT INTO " . $this->state->ErrorsTable() . " (row_id, error_code) " .
 							" SELECT id, " . $errorCode . " FROM (SELECT * " . $fromWhere . ") as t WHERE " . $condition;
-
+		/*
+{
+echo $errorCode;
+echo '<br>';
+	echo $sql;
+echo '<br>----------------------------------------';
+//	throw new \Exception('stopped 2');
+}*/
 		$rows = App::Db()->exec($sql);
 		$this->state->IncrementErrors($rows);
 
