@@ -8,10 +8,10 @@
 			</h4>
 			<MetricVariables :metric="metric" />
 			<div class="sourceRow">
-				<div class="btn-group">
+				<div class="btn-group" style="float: left">
 					<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button" v-on:click="changeSelectedVersionIndex(index)" class="btn btn-default btn-xs" :class="getActive(index)">{{ ver.Version.Name }}</button>
 				</div>
-				<MetricSource :metric="metric" :clipping="clipping" />
+				<MetricSource :metric="metric" :clipping="clipping" style="float:right" />
 			</div>
 			<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
 				Cobertura: {{ metric.SelectedVersion().Version.PartialCoverage }}.

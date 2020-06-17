@@ -105,31 +105,18 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature) {
 	var params = {};
 	var element;
 
-	//TODO: definir cómo saber si es círculo o ícono.
-	/* if(function() { return false; }()) {
-		params = loc.objectClone(style);
-		params.map = loc.MapsApi.gMap;
-		params.center = geo;
-
-		var r = 100;
-		// efecto visual: a partir del zoom 14, crecen a la mitad del ritmo.
-		if (z >= 14) {
-			r = r / Math.pow(2, (z - 13) / 2);
-		}
-		params.radius = r;
-		element = new loc.MapsApi.google.maps.Circle(params);
-	} else {*/
 	params.map = loc.MapsApi.gMap;
 	params.position = geo;
 	params.icon = loc.objectClone(style);
 	params.icon.fillOpacity = 1;
 	params.icon.path = Svg.markerPinche;
 
-	var adjust = 21;
-	var n = h.getScaleFactor(z) / adjust;
-
-	var symbol = loc.activeSelectedMetric.GetSymbolInfo();
-
+	var symbol = metric.GetSymbolInfo();
+	var n = 1;
+	if (metric.SelectedLevel().Dataset.ScaleSymbol) {
+		var adjust = 21;
+		n = h.getScaleFactor(z) / adjust;
+	}
 	params.icon.scale = n;
 	params.icon.anchor = new loc.MapsApi.google.maps.Point(10.5, 32);
 	params.icon.labelOrigin = new loc.MapsApi.google.maps.Point(11.5, 11);
