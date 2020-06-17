@@ -30,6 +30,7 @@ class MetricVersionModel extends BaseModel
 										dat_caption,
 										dat_caption_column_id,
 										dat_symbol,
+										dat_scale_symbol,
 										dat_table,
 										dat_show_info,
 										carto_meta.met_wiki

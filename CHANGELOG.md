@@ -1,4 +1,5 @@
 [CURRENT]
+- Permite indicar que no deben escalarse los íconos de un indicador (para datos dispersos).
 
 v2.24 (2020-06-16)
 - Fix: overflow de texto en grilla de edición.

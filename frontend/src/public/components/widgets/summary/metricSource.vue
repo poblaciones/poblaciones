@@ -47,9 +47,7 @@ export default {
 <style scoped>
 .sourceInfo
 {
-  position: absolute;
-  top: 10px;
-  right: 0px;
+  padding-top: 6px;
   font-size: 12px;
 }
 

@@ -66,6 +66,12 @@ class cCaches extends cController
 			$this->message = 'Regeneradas ' . $model->RegenClippingRegions() . ' filas.';
 			$cm = new CacheManager();
 			$cm->CleanLabelsCache();
+		} else if (array_key_exists('selectedMetric', $_POST)) {
+			$model = new SnapshotMetricVersionModel();
+			$n = $model->IncrementAllRevisions();
+			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores y vaciado el cache de selectedMetrics.';
+			$cm = new CacheManager();
+			$cm->CleanSelectedMetricCache();
 		} else if (array_key_exists('regenMetricRevisions', $_POST)) {
 			$model = new SnapshotMetricVersionModel();
 			$n = $model->IncrementAllRevisions();

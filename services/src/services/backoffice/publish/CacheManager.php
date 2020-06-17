@@ -74,7 +74,11 @@ class CacheManager
 	{
 		LabelsCache::Cache()->Clear();
 	}
-
+	public function CleanSelectedMetricCache()
+	{
+		FabMetricsCache::Cache()->Clear();
+		SelectedMetricsMetadataCache::Cache()->Clear();
+	}
 	public function CleanAllMetricCaches()
 	{
 		SummaryCache::Cache()->Clear();
