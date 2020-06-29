@@ -7,6 +7,9 @@ use helena\classes\App;
 
 class Callbacks extends FrameworkCallbacks
 {
+	public static $AddressQueried = 0;
+	public static $MapsOpened = 0;
+
 	public function RenderTemplate($template, $vals = null)
 	{
 		return App::RenderResponse($template, $vals);
@@ -22,5 +25,13 @@ class Callbacks extends FrameworkCallbacks
 	public function Db()
 	{
 		return App::Db();
+	}
+	public function ExtraHitsLabels()
+	{
+		return ['MapsOpened', 'AddressQuery'];
+	}
+	public function ExtraHits()
+	{
+		return [ self::$MapsOpened, self::$AddressQueried ];
 	}
 }

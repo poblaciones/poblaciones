@@ -3,11 +3,11 @@
 namespace helena\services\frontend;
 
 use helena\services\common\BaseService;
+use helena\db\frontend\AddressServiceModel;
 use helena\db\frontend\SnapshotMetricModel;
-use helena\db\frontend\SnapshotLookupModel;
 use helena\db\frontend\SnapshotSearchModel;
-use helena\classes\App;
 use minga\framework\Arr;
+use minga\framework\Context;
 use minga\framework\SearchLog;
 use minga\framework\Profiling;
 
@@ -21,6 +21,7 @@ class LookupService extends BaseService
 
 		$modelMetrics = new SnapshotMetricModel();
 		$modelLookup = new SnapshotSearchModel();
+		$addressLookup = new AddressServiceModel();
 
 		// Trae los indicadores que coinciden
 		if ($filter != 'r')
@@ -49,7 +50,15 @@ class LookupService extends BaseService
 		{
 			$resFeatures = $modelLookup->SearchFeatures($query);
 			$this->appendResults($ret, $resFeatures, 10 - sizeof($ret));
+
+			// Si tampoco encontró, prueba con direcciones
+			if (sizeof($ret) < 10 && Context::Settings()->Keys()->GoogleGeocodingKey)
+			{
+				$resFeatures = $addressLookup->SearchFeatures($query);
+				$this->appendResults($ret, $resFeatures, 10 - sizeof($ret));
+			}
 		}
+		// Listo
 		$log->RegisterSearch($query, sizeof($ret));
 
 		Profiling::EndTimer();

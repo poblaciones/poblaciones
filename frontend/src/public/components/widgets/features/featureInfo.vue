@@ -10,7 +10,7 @@
 			<div v-on:click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 			<mp-close-button v-else v-on:click="doClose" />
 
-			<h4 class="title">{{ title }}</h4>
+			<h4 class="title"><mp-label :text="'' + title" /></h4>
 			<div class='stats' style="padding-top: 8px">
 				<span style="color: rgb(167, 167, 167);">{{ featureInfo.Type }}</span>
 			</div>
@@ -18,8 +18,8 @@
 			<div class='item' v-if="featureInfo.Code && featureInfo.Title">
 				Código: {{ val }}
 			</div>
-			<div v-for="item in featureInfo.Items" class='item' :key="item.Name">
-				{{ capitalize(item.Name) }}: {{ getValue(item) }}
+			<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
+				{{ capitalize(item.Name) }}: <mp-label :text="getValue(item)" />
 			</div>
 			<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 		</div>
@@ -85,16 +85,18 @@ export default {
 			return true;
 		},
 		isNullDash(str) {
-			if (str === undefined || str === null) {
-				return '-';			}
-			return str;
+			if (str === undefined || str === '' || str === null) {
+				return '-';
+			} else {
+				return '' + str;
+			}
 		},
 		getValue(item) {
 			var val = item.Value;
-			if(item.Caption !== null && item.Caption !== undefined) {
+			if (item.Caption !== null && item.Caption !== undefined) {
 				val = item.Caption;
 			}
-			return h.ensureFinalDot(this.isNullDash(val));
+			return this.isNullDash(val);
 		},
 	},
 };

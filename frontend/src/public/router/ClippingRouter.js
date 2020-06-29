@@ -60,7 +60,8 @@ ClippingRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 				segmentedMap.Clipping.RestoreClipping(clipping.ClippingLevelName);
 			};
 		} else {
-			segmentedMap.Clipping.RestoreClipping(clipping.ClippingLevelName, true);
+			var fitRegion = ! segmentedMap.Clipping.FrameHasLocation();
+			segmentedMap.Clipping.RestoreClipping(clipping.ClippingLevelName, fitRegion);
 		}
 	}
 	segmentedMap.SaveRoute.Disabled = false;

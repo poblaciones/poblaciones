@@ -89,14 +89,12 @@
 <script>
 
 import Relocate from './Relocate.vue';
-import axios from "axios";
 import Fix from './Fix.vue';
 import DataPager from "@/backoffice/classes/DataPager";
 import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import str from '@/common/js/str';
 import Localization from "@/backoffice/classes/Localization";
 import JqxGrid from "jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue";
-import JqxTooltip from "jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue";
 // https://www.jqwidgets.com/vue/vue-grid/
 
 var columnFormatEnum = require("@/common/enums/columnFormatEnum");
@@ -158,7 +156,6 @@ export default {
 		validateCellEdit(cell, value) {
 			// 1. se fija si cambió... si es igual, sale
 			var column = this.Dataset.GetColumnFromVariable(cell.datafield);
-			var setValues = [{ columnId: column.Id, value: value }];
 			var previousValue = cell.value;
 			if ('' + previousValue === '' + value) {
 				return true;
@@ -166,7 +163,7 @@ export default {
 			// 2. valida
 			if (column.Format === columnFormatEnum.NUMBER) {
 				// numérico
-				if (!str.isNumericFlex(value)) {
+				if (value !== '' && !str.isNumericFlex(value)) {
 					return {
 						result: false, message: "El valor debe ser numérico."
 					};
@@ -187,10 +184,15 @@ export default {
 			// return { result: false, message: "Quantity should be in the 0-100 interval" };
 
 			// 3. graba
-			if ('' + previousValue !== '' + value) {
+			if ('' + (previousValue === null ? '' : previousValue) !== '' + value) {
 				var loc = this;
 				loc.showWait();
-				this.Dataset.UpdateRowValues(this.selectedId(), setValues).then(function () {
+				var setValues = [{ columnId: column.Id, value: value }];
+				if (column.Format === columnFormatEnum.NUMBER && ('' + value).trim() === '') {
+					setValues[0].value = null;
+				}
+				var currentId = this.getIdByIndex(cell.row);
+				this.Dataset.UpdateRowValues(currentId, setValues).then(function () {
 					loc.hideWait();
 				}).catch(function () {
 					loc.Grid.setcellvalue(cell.row, cell.datafield, previousValue);
@@ -473,12 +475,14 @@ export default {
       let ret = [];
       for (let i = 0; i < selectedRows.length; i++) {
         let selectedrowindex = selectedRows[i];
-        let data = this.Grid.getrowdata(selectedrowindex);
-        let id = data[this.source.id];
-        ret.push(id);
+				ret.push(this.getIdByIndex(selectedrowindex));
       }
       return ret;
-    },
+		},
+		getIdByIndex(rowIndex) {
+			let data = this.Grid.getrowdata(rowIndex);
+			return data[this.source.id];
+		},
 		getSelectedRowData() {
       let selectedRows = this.getSelectedRowIndexes();
       for (let i = 0; i < selectedRows.length; i++) {

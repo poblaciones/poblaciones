@@ -353,7 +353,7 @@ class MetricService extends BaseService
 			$maxSql = "SELECT MAX(mvv_order) + 1 FROM draft_variable WHERE mvv_metric_version_level_id = ?";
 			$maxOrder = null;
 			if ($level !== null)
-				App::Db()->fetchScalarInt($maxSql, array($level->getId()));
+				$maxOrder = App::Db()->fetchScalarInt($maxSql, array($level->getId()));
 			if ($maxOrder === null) $maxOrder = 1;
 			$variableConnected->setOrder($maxOrder);
 		}

@@ -18,16 +18,16 @@ SelectedMetricsRouter.prototype.GetSettings = function() {
 	};
 };
 
-SelectedMetricsRouter.prototype.ToRoute = function () {
+SelectedMetricsRouter.prototype.ToRoute = function (askeyarray) {
 	var segmentedMap = window.SegMap;
 	var ret = [];
 	for (var n = 0; n < segmentedMap.Metrics.metrics.length; n++) {
-		ret.push(this.SelectedMetricToRoute(segmentedMap.Metrics.metrics[n]));
+		ret.push(this.SelectedMetricToRoute(segmentedMap.Metrics.metrics[n], askeyarray));
 	}
 	return ret;
 };
 
-SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelectedMetric) {
+SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelectedMetric, askeyarray) {
 	if (activeSelectedMetric.properties === null) {
 		throw new Error('No properties has been set.');
 	}
@@ -63,7 +63,21 @@ SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelected
 	//$metric = Params::Get('m');
 	//$variableId = Params::Get('i');
 	//$urbanity = Params::Get('u');
+	if (askeyarray) {
+		ret = this.transformArrayListToKeyList(ret);
+	}
+	return ret;
+};
 
+SelectedMetricsRouter.prototype.transformArrayListToKeyList = function (list) {
+	var ret = {};
+	for (var n = 0; n < list.length; n++) {
+		if (list[n].length === 1) {
+			ret[''] = list[n][0];
+		} else {
+				ret[list[n][0]] = list[n][1];
+		}
+	}
 	return ret;
 };
 
@@ -140,7 +154,7 @@ SelectedMetricsRouter.prototype.LoadMetrics = function (metrics, updateRoute, sk
 		segmentedMap.Metrics.ClearUserMetrics();
 		return;
 	}
-	var currentMetrics = this.parseMetrics(this.ToRoute());
+	var currentMetrics = this.parseMetrics(this.ToRoute(true));
 	// Si cambiaron, recarga todos
 	// Una vez cargadas (o si no cambiaron) les setea los estados
 	if (this.metricsChanged(metrics, currentMetrics)) {

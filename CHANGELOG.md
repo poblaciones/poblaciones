@@ -1,5 +1,12 @@
 [CURRENT]
+
+v2.24 (2020-06-28)
 - Permite indicar que no deben escalarse los íconos de un indicador (para datos dispersos).
+- Mejoras uso de comas para separar decimales (grilla de datos y carga de categoría manual).
+- Fix: fallaba al publicar cartografías luego de eliminárseles todos los datasets.
+- Resuelve direcciones y lugares desde el buscador del visor del mapa.
+- Panel lateral del visor genera links en attributos con URLs como contenido.
+- Fix: actualización en datos de grilla impactaba en fila cliqueada (no en la seleccionada).
 
 v2.24 (2020-06-16)
 - Fix: overflow de texto en grilla de edición.

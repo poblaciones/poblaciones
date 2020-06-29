@@ -201,7 +201,11 @@ class PdfCreator
 		$this->pdf->WriteIndentedPairTitle('Nombre', 'Etiqueta');
 		foreach($this->dataset['columns'] as $column)
 		{
-			$this->pdf->WriteIndentedPair($column['dco_variable'], $column['dco_label'], true, false);
+			$label = $column['dco_label'];
+			if ($label === null || trim($label) === '') {
+				$label = '-';
+			}
+			$this->pdf->WriteIndentedPair($column['dco_variable'], $label, true, false);
 			if (array_key_exists('values', $column) && $column['values'] != null)
 			{
 				foreach($column['values'] as $value)

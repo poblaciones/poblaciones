@@ -7,6 +7,7 @@ use helena\services\common\AuthenticationService;
 
 use helena\db\frontend\RevisionsModel;
 use minga\framework\Context;
+use helena\classes\Callbacks;
 
 class ConfigurationService extends BaseService
 {
@@ -29,6 +30,9 @@ class ConfigurationService extends BaseService
 									'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => Context::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user);
+
+		Callbacks::$MapsOpened++;
+
 		return $ret;
 	}
 }

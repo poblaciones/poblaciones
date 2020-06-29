@@ -9,8 +9,9 @@ class LocalSettings extends Settings
 {
 	private static $map = NULL;
 	private static $shard = NULL;
+	private static $limits = NULL;
 
-	public static function Map()
+	public function Map()
 	{
 		if (self::$map == NULL)
 			self::$map = new MapSettings();
@@ -18,11 +19,21 @@ class LocalSettings extends Settings
 		return self::$map;
 	}
 
-	public static function Shard()
+	public function Shard()
 	{
 		if (self::$shard == NULL)
 			self::$shard = new ShardSettings();
 
 		return self::$shard;
 	}
+
+
+	public function Limits()
+	{
+		if (self::$limits == NULL)
+			self::$limits = new LocalMonitorLimits();
+
+		return self::$limits;
+	}
+
 }

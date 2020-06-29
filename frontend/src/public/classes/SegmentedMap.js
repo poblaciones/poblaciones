@@ -169,9 +169,9 @@ SegmentedMap.prototype.SetMapTypeState = function (mapType) {
 };
 
 SegmentedMap.prototype.SetCenter = function (coord) {
-//	this.SaveRoute.lastCenter = coord;
 	this.frame.Envelope.Min = coord;
 	this.frame.Envelope.Max = coord;
+	this.frame.Center = coord;
 	this.MapsApi.SetCenter(coord);
 };
 

@@ -22,7 +22,11 @@ export default {
 	computed: {
 		Work() { return window.Context.CurrentWork; },
 		url() {
-			return this.Work.properties.Metadata.Url;
+			var ret = this.Work.properties.Metadata.Url;
+			if (this.Work.properties.AccessLink) {
+				ret += '/' + this.Work.properties.AccessLink;
+			}
+			return ret;
 		},
 		Keys() {
 			return window.Context.Keys;

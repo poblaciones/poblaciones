@@ -27,8 +27,16 @@ class SelectedMetric extends BaseMapModel
 	// - H: Area en Hectáreas (100x100m)
 	// - A: Porcentaje del área total.
 	// - D: Densidad (cantidad absoluta / km2)
-	// valores posibles: 'U': Urbano denso, 'UD': Urbano total, 'R': Rural
-	//									 'D': Urbano disperso, 'N': No indicado (todo)
+	// valores posibles (sumas de) :
+	//					U: Urbano agrupado,
+	//					D: Urbano disperso,
+	//					R: Rural agrupado,
+	//					L: Rural disperso,
+	//					N: No indicado (todo, excluyente)
+	//
+	//					R y L corresponden a las categorias 2 y 3 de la variable URP del Censo.
+	//					U y D corresponden a la categoría 1 de URP, siendo D aquellas con < de 250 habitantes por km2.'
+
 	public $SelectedUrbanity = 'N';
 
 	public $Versions = array();

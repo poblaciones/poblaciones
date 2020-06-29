@@ -104,10 +104,10 @@ export default {
 				return;
 			}
 			if (this.previous !== null) {
-				this.previous.Value = this.previousValue;
+				this.previous.Value = min;
 			}
 			if (!this.isLast) {
-				this.item.Value = this.itemValue;
+				this.item.Value = max;
 			}
 			this.Dataset.ScaleGenerator.FixManualRanges(this.variable, this.customColors);
 			this.hide();

@@ -22,4 +22,6 @@ class MapSettings
 	public $UseGradients = false;
 	public $MaxQueueRequests = 4;
 	public $MaxStaticQueueRequests = 6;
+
+	public $GoogleGeocodingArea = '';
 }

@@ -289,13 +289,15 @@ class PublishDataTables
 		// Copia work_dataset_draft_xxxx si hace falta
 		$workModel = new WorkModel();
 		$datasets = $workModel->GetDatasets($workId);
-		$dataset = $datasets[$slice];
-		$this->CopyWorkDatasetTable($dataset['dat_table']);
-
+		if ($slice < sizeof($datasets))
+		{
+			$dataset = $datasets[$slice];
+			$this->CopyWorkDatasetTable($dataset['dat_table']);
+		}
 		Profiling::EndTimer();
 
 		$totalSlices = sizeof($datasets) - 1;
-		return $slice == $totalSlices;
+		return $slice >= $totalSlices;
 	}
 
 	private function FixProperties($shard, $workId)

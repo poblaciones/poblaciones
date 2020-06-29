@@ -151,6 +151,10 @@ Clipping.prototype.FrameHasNoClipping = function () {
 		this.frame.ClippingRegionId === null;
 };
 
+Clipping.prototype.FrameHasLocation = function () {
+	return this.frame.Zoom && this.frame.Center && this.frame.Center.Lat && this.frame.Center.Lon;
+};
+
 Clipping.prototype.FrameHasClippingCircle = function () {
 	return this.frame.ClippingCircle !== null;
 };
@@ -171,7 +175,7 @@ Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
 		params: h.getCreateClippingParamsByName(loc.frame, clippingName, this.SegmentedMap.Revisions.Clipping),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
 	}).then(function (res) {
-		loc.ProcessClipping(res.data, true, fitRegion === true);
+		loc.ProcessClipping(res.data, fitRegion, fitRegion === true);
 		loc.ResetClippingRequest('*');
 	}).catch(function (error) {
 		loc.ResetClippingRequest('*');

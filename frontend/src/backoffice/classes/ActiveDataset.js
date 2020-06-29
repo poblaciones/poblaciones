@@ -738,7 +738,11 @@ ActiveDataset.prototype.setRenderer = function(col) {
 };
 
 ActiveDataset.prototype.cellsRenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
-	return '<div class="gridCell" style="overflow: hidden !important;text-align:' + columnproperties.cellsalign + '">' + str.EscapeHtml(value) + '</div>';
+	var text = '' + str.EscapeHtml(value);
+	if (columnproperties.cellsformat && columnproperties.cellsformat[0] == 'd') {
+		text = text.replace('.', ',');
+	}
+	return '<div class="gridCell" style="overflow: hidden !important;text-align:' + columnproperties.cellsalign + '">' + text + '</div>';
 };
 
 ActiveDataset.prototype.getLabelList = function (list) {
