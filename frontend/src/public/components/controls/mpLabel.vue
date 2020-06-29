@@ -1,8 +1,5 @@
 <template>
-	<span class="mpLabelItem">
-		<template v-if="isHref(text)">
-			<a target="_blank" :href="text">{{ text }}</a>
-		</template><template v-else>{{ text }}</template>
+	<span class="mpLabelItem" v-html="process(text)">
 	</span>
 </template>
 
@@ -24,6 +21,12 @@ export default {
 		};
 	},
 	methods: {
+		process(val) {
+			var linkifyStr = require('linkifyjs/string');
+			return linkifyStr(val, {
+				defaultProtocol: 'https'
+			});
+		},
 		isHref(val) {
 			if (val) {
 				val = ('' + val).toLowerCase();
