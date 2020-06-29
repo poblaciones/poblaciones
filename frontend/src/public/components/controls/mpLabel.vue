@@ -1,5 +1,5 @@
 <template>
-	<span class="label">
+	<span class="mpLabelItem">
 		<template v-if="isHref(text)">
 			<a target="_blank" :href="text">{{ text }}</a>
 		</template><template v-else>{{ text }}</template>
@@ -37,8 +37,8 @@ export default {
 </script>
 
 <style scoped>
-.label {
-	word-wrap: break-word;
-}
+	.mpLabelItem {
+		word-wrap: break-word;
+	}
 </style>
 
