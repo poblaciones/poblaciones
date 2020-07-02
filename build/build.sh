@@ -110,6 +110,7 @@ cp ../services/web/static/js/js.js $output/web/static/js/js.js>$output-4_copy.lo
 cp ../services/web/static/css/styles.css $output/web/static/css/styles.css>>$output-4_copy.log
 cp ../services/web/static/css/authenticate.css $output/web/static/css/authenticate.css>>$output-4_copy.log
 cp -r ../services/web/static/img $output/web/static/>>$output-4_copy.log
+cp -r ../services/web/static/download $output/web/static/>>$output-4_copy.log
 cp $output/templates/index.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/backoffice.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/admins.html.twig $output/templates/frontend/>>$output-4_copy.log

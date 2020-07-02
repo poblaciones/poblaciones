@@ -11,6 +11,7 @@
 						<li>Archivos Excel (.xls, xlsx)</li>
 						<li>Archivos de datos de SPSS (.sav)</li>
 						<li>Archivos de texto separados por comas (.csv)</li>
+						<li>Archivos de texto estructurados en tags (.kml/.kmz). <a href="/static/download/kmx2csv.zip" download><blockquote>Haga click aquí si quiere descargar el conversor KML/KMZ a CSV</blockquote></a></li>
 					</ul>
 					<!--
 					https://poblaciones.org/wp-content/uploads/2019/11/Poblaciones-Como-convertir-shapefiles-a-CSV-con-QGIS.pdf
@@ -49,6 +50,7 @@
 				</div>
       </md-dialog-content>
 			<input-popup ref="datasetDialog" @selected="CreateDataset" />
+			<list-selection-popup ref="datasetSelectionDialog" @selected="SaveDatasetSelected" />
 			<invoker ref="invoker"></invoker>
 
       <md-dialog-actions>
@@ -61,6 +63,7 @@
 
 <script>
 import InputPopup from "@/backoffice/components/InputPopup";
+import ListSelectionPopup from "@/backoffice/components/ListSelectionPopup";
 import vueDropzone from "vue2-dropzone";
 import "vue2-dropzone/dist/vue2Dropzone.min.css";
 import h from '@/public/js/helper';
@@ -69,29 +72,32 @@ export default {
   name: "General",
 	components: {
 		vueDropzone,
-		InputPopup
+		InputPopup,
+		ListSelectionPopup
 	},
   data() {
     return {
-      openImport: false,
-      extension: "",
-      sending: false,
-			hasFiles: false,
-      bucketId: 0,
-			keepLabels: true,
-			saveRequested: false,
-			createdDataset: null,
-			forceCreateNewDataset: false,
-			dropzoneOptions: {
-        url: this.getCreateFileUrl,
-        thumbnailWidth: 150,
-        withCredentials: true,
-				maxFiles: 1,
-				acceptedFiles: '.csv,.txt,.sav,.xls,.xlsx',
-				dictDefaultMessage: "Arrastre su archivo aquí o haga click para examinar.",
-    		forceChunking: true,
-		    chunking: true,
-				chunkSize: 500000,
+		openImport: false,
+		extension: "",
+		sending: false,
+		hasFiles: false,
+		bucketId: 0,
+		keepLabels: true,
+		saveRequested: false,
+		createdDataset: null,
+		forceCreateNewDataset: false,
+		dropzoneOptions: {
+		url: this.getCreateFileUrl,
+		thumbnailWidth: 150,
+		withCredentials: true,
+		maxFiles: 1,
+		acceptedFiles: '.csv,.txt,.sav,.kml,.kmz,.xls,.xlsx',
+		dictDefaultMessage: "Arrastre su archivo aquí o haga click para examinar.",
+		forceChunking: true,
+		chunking: true,
+		chunkSize: 500000,
+		datasetname: null,
+		datasets: null,
         chunksUploaded: function(file, done) {
           done();
         }
@@ -100,11 +106,11 @@ export default {
   },
   computed: {
     Work() {
-      return window.Context.CurrentWork;
+		return window.Context.CurrentWork;
     },
     Dataset() {
-			return (this.forceCreateNewDataset ? null : window.Context.CurrentDataset);
-    },
+		return (this.forceCreateNewDataset ? null : window.Context.CurrentDataset);
+	},
   },
   methods: {
     getCreateFileUrl() {
@@ -117,6 +123,8 @@ export default {
 			this.extension = h.extractFileExtension(file.name);
 			this.filename = h.extractFilename(file.name);
 			this.createdDataset = null;
+			this.datasets = null;
+			this.datasetname = null;
 			this.sending = true;
     },
 		maxfilesexceeded(file) {
@@ -127,26 +135,57 @@ export default {
 			this.$refs.myVueDropzone.removeAllFiles();
 			this.generateBucketId();
 			this.hasFiles = false;
+			this.datasets = null;
+			this.datasetname = null;
 		},
     afterSuccess(file, response) {
       this.sending = false;
       if (this.saveRequested) {
         this.save();
       }
-    },
+	},
+	verifyDatasets(bucketId, fileExtension) {
+		var loc = this;
+		this.Work.VerifyDatasetsImportFile(bucketId, fileExtension).then(
+			function (list) {
+				if (list.length > 1) {
+					loc.datasets = list;
+					loc.RequestDatasetSelection();
+				}
+			});
+	},
+	RequestDatasetSelection() {
+		this.$refs.datasetSelectionDialog.show(
+			'Selección de dataset',
+			'Seleccione uno de los datasets dentro del archivo a importar',
+			this.datasetname,
+			this.datasets);
+	},
+	SaveDatasetSelected(name) {
+		var loc = this;
+		loc.datasetname = name;
+		if (loc.datasetname == ''){
+			loc.clear();
+		}
+	},
     afterComplete(file) {
-      this.sending = false;
-			this.hasFiles = true;
+		this.sending = false;
+		this.hasFiles = true;
+		if (this.extension == 'kml' || this.extension == 'kmz') {
+			this.verifyDatasets(this.getBucketId(), this.extension);
+		}
     },
-		save() {
+	save() {
       var stepper = this.$refs.stepper;
       stepper.startUrl = this.Work.GetDatasetFileImportUrl(this.keepLabels);
       stepper.stepUrl = this.Work.GetStepDatasetFileImportUrl();
       let bucketId = this.getBucketId();
-      let extension = this.extension;
+	  let extension = this.extension;
+	  let datasetname = this.datasetname;
 			if (extension !== 'sav' && extension !== 'csv' && extension !== 'txt'
-						&& extension !== 'xls' && extension !== 'xlsx') {
-				alert('La extensión del archivo debe ser SAV, XLS, XLSX, CSV o TXT.');
+						&& extension !== 'xls' && extension !== 'xlsx'
+						&& extension !== 'kml' && extension !== 'kmz') {
+				alert('La extensión del archivo debe ser SAV, XLS, XLSX, CSV, TXT, KML o KMZ.');
 				return;
 			}
 			if (!this.Dataset && !this.createdDataset) {
@@ -154,7 +193,7 @@ export default {
 				return;
 			}
 			let datasetId = (this.Dataset ? this.Dataset.properties.Id : this.createdDataset.Id);
-			stepper.args = { b: bucketId, d: datasetId, fe: extension };
+			stepper.args = { b: bucketId, d: datasetId, fe: extension, dsn: datasetname};
 			let loc = this;
 			stepper.Start().then(function() {
 				loc.Work.WorkChanged();
@@ -185,7 +224,6 @@ export default {
 					loc.createdDataset = dataset;
 					loc.save();
 				});
-
 		},
 		generateBucketId() {
 			this.bucketId = new Date().getTime() * 10000;

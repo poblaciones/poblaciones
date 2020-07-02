@@ -1,6 +1,8 @@
 ./pip install savReaderWriter
 ./pip install ijson
 ./pip install numpy
+./pip install bs4
+./pip install lxml
 
 # En hosting compartido hacer antes:
 #> virtualenv python

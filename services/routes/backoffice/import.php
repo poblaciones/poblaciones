@@ -25,10 +25,18 @@ App::GetOrPost('/services/backoffice/Dataset/CreateMultiImportFile', function (R
 	$datasetId = Params::GetIntMandatory('d');
 	$bucketId = Params::GetMandatory('b');
 	$fileExtension = Params::GetMandatory('fe');
+	$datasetName = Params::Get('dsn');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
 
 	$keepLabels = Params::GetIntMandatory('k') === 1;
-	return App::Json($controller->CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels));
+	return App::Json($controller->CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $datasetName));
+});
+
+App::GetOrPost('/services/backoffice/Dataset/VerifyDatasetsImportFile', function (Request $request) {
+	$controller = new services\ImportService();
+	$bucketId = Params::GetMandatory('b');
+	$fileExtension = Params::GetMandatory('fe');
+	return App::Json($controller->VerifyDatasetsImportFile($bucketId, $fileExtension));
 });
 
 App::$app->get('/services/backoffice/Dataset/StepMultiImportFile', function (Request $request) {
