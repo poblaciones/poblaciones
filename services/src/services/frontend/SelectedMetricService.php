@@ -224,6 +224,8 @@ class SelectedMetricService extends BaseService
 			$variableInfo->Fill($variable);
 			$variableInfo->IsCategorical = $variable['vsy_cut_mode'] === 'V';
 			$variableInfo->IsSimpleCount = $variable['mvv_normalization'] === null && $variable['mvv_data'] === SpecialColumnEnum::Count;
+			if ($variableInfo->IsSimpleCount)
+				$variableInfo->ShowValues = false;
 			$variableInfo->HasTotals = $variable['mvv_normalization'] !== null;
 			$this->AddVariablesValues($variableInfo);
 			if ($variableInfo->IsDefault)

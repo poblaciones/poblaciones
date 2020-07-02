@@ -1,5 +1,5 @@
 <template>
-	<span class="mpLabelItem" v-html="process(text)">
+	<span class="mpLabelItem" v-html="process(text)" :class="(!hasSpaces(text) ? 'wrapAllPlaces' : '')">
 	</span>
 </template>
 
@@ -27,10 +27,9 @@ export default {
 				defaultProtocol: 'https'
 			});
 		},
-		isHref(val) {
+		hasSpaces(val) {
 			if (val) {
-				val = ('' + val).toLowerCase();
-				return val.startsWith("http://") || val.startsWith("https://");
+				return val.indexOf(' ') !== -1;
 			} else {
 				return false;
 			}
@@ -42,6 +41,9 @@ export default {
 <style scoped>
 	.mpLabelItem {
 		word-wrap: break-word;
+	}
+	.wrapAllPlaces {
+		word-break: break-all;
 	}
 </style>
 

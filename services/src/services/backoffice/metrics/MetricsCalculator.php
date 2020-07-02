@@ -124,7 +124,8 @@ class MetricsCalculator
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 
 		// Crea la temporal
-		$this->CreateTempTable($source, $dataset);
+		$srcDataset = $this->GetSourceDatasetByVariableId($source['VariableId']);
+		$this->CreateTempTable($source, $srcDataset);
 
 		$offset = $slice * self::STEP;
 		// Actualiza el bloque
@@ -153,8 +154,8 @@ class MetricsCalculator
 		];
 		if ($dataset->getType() == 'L')
 		{
-			$ret['col'] = 'POINT(' . $dataset->getLongitudeColumn . ',' . $dataset->getLatitudeColumn . ')';
-			$ret['where'] = $dataset->getLongitudeColumn . ' IS NOT NULL AND ' . $dataset->getLatitudeColumn . ' IS NOT NULL';
+			$ret['col'] = 'POINT(' . $dataset->getLongitudeColumn()->getField() . ',' . $dataset->getLatitudeColumn()->getField() . ')';
+			$ret['where'] = $dataset->getLongitudeColumn()->getField() . ' IS NOT NULL AND ' . $dataset->getLatitudeColumn()->getField() . ' IS NOT NULL';
 		}
 		else if ($dataset->getType() == 'S')
 		{

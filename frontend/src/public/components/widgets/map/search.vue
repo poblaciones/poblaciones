@@ -18,20 +18,20 @@
 						<br/>
 						<em class='text-softer small'>{{ item.Extra }}</em>
 					</div>
-					<div v-if="item.Type === 'C'">
+					<div v-else>
 						<em class='text-softer small'>{{ item.Extra }}</em>
 						<br/>
 						<span>{{ item.Highlighted }}</span>
-					</div>
-					<div v-if="item.Type === 'F' || item.Type === 'P'">
-						<em class='text-softer small'>{{ item.Extra }}</em>
-						<br/>
-						<span>{{ item.Highlighted }}</span>
-					</div>
-					<div v-if="item.Type === 'N'">
-						<em class='text-softer small'>{{ item.Extra }}</em>
-						<br/>
-						<span>{{ item.Highlighted }}</span>
+						<div v-if="item.Lat && item.Lon" style="float: right; margin-top: 2px; font-size: 12px">
+							<a href="#" v-clipboard="() => formatCoord(item)" title="Copiar"
+								  v-clipboard:success="clipboardSuccessHandler"
+				        v-clipboard:error="clipboardErrorHandler"
+								@click.prevent="click">
+								<i class="far fa-copy"></i>
+							</a>
+							{{ formatCoord(item) }}
+						</div>
+						<div style="clear: both"></div>
 					</div>
 				</li>
 			</ul>
@@ -71,6 +71,14 @@ export default {
 			}
 			return true;
 		},
+		clipboardSuccessHandler({ value, event }) {
+			event.preventDefault();
+			event.stopPropagation();
+		},
+		clipboardErrorHandler({ value, event }) {
+			event.preventDefault();
+			event.stopPropagation();
+		},
 		getLoading() {
 			return {
 				'loading': this.loading,
@@ -100,6 +108,9 @@ export default {
 			}
 			this.text = '';
 			this.autolist = [];
+		},
+		formatCoord(item) {
+			return h.trimNumberCoords(item.Lat) + ',' + h.trimNumberCoords(item.Lon);
 		},
 		doSearch: debounce(function(e)
 			{

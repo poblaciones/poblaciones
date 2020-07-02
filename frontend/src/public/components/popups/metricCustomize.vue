@@ -26,8 +26,8 @@
 						</div>
 					</td>
 				</tr>
-				<tr>
-					<td>Valores:</td>
+				<tr v-if="!metric.SelectedVariable().IsSimpleCount">
+					<td class="nowrapwords">Mostrar valores:</td>
 					<td>
 						<label class="radio-inline">
 							<input type="radio" name="valores" value="1" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowValues">Sí
@@ -156,5 +156,8 @@ export default {
 </script>
 
 <style scoped>
+	.nowrapwords {
+		white-space: nowrap;
+	}
 </style>
 

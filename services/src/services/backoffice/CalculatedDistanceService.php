@@ -27,6 +27,7 @@ class CalculatedDistanceService extends BaseService
 
 	public function StartCalculate($datasetId, $source, $output)
 	{
+		$this->CompleteSource($source);
 		$this->state = CalculateMetricStateBag::Create($datasetId, $source, $output);
 		$this->state->SetTotalSteps($this->TotalSteps());
 		$this->state->SetProgressLabel('Creando variables');
