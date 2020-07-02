@@ -77,27 +77,27 @@ export default {
 	},
   data() {
     return {
-		openImport: false,
-		extension: "",
-		sending: false,
-		hasFiles: false,
-		bucketId: 0,
-		keepLabels: true,
-		saveRequested: false,
-		createdDataset: null,
-		forceCreateNewDataset: false,
-		dropzoneOptions: {
-		url: this.getCreateFileUrl,
-		thumbnailWidth: 150,
-		withCredentials: true,
-		maxFiles: 1,
-		acceptedFiles: '.csv,.txt,.sav,.kml,.kmz,.xls,.xlsx',
-		dictDefaultMessage: "Arrastre su archivo aquí o haga click para examinar.",
-		forceChunking: true,
-		chunking: true,
-		chunkSize: 500000,
-		datasetname: null,
-		datasets: null,
+        openImport: false,
+        extension: "",
+        sending: false,
+        hasFiles: false,
+        bucketId: 0,
+        keepLabels: true,
+        saveRequested: false,
+        createdDataset: null,
+        forceCreateNewDataset: false,
+        dropzoneOptions: {
+        url: this.getCreateFileUrl,
+        thumbnailWidth: 150,
+        withCredentials: true,
+        maxFiles: 1,
+        acceptedFiles: '.csv,.txt,.sav,.kml,.kmz,.xls,.xlsx',
+        dictDefaultMessage: "Arrastre su archivo aquí o haga click para examinar.",
+        forceChunking: true,
+        chunking: true,
+        chunkSize: 500000,
+        datasetname: null,
+        datasets: null,
         chunksUploaded: function(file, done) {
           done();
         }
@@ -106,11 +106,11 @@ export default {
   },
   computed: {
     Work() {
-		return window.Context.CurrentWork;
+        return window.Context.CurrentWork;
     },
     Dataset() {
-		return (this.forceCreateNewDataset ? null : window.Context.CurrentDataset);
-	},
+        return (this.forceCreateNewDataset ? null : window.Context.CurrentDataset);
+    },
   },
   methods: {
     getCreateFileUrl() {
@@ -143,45 +143,45 @@ export default {
       if (this.saveRequested) {
         this.save();
       }
-	},
-	verifyDatasets(bucketId, fileExtension) {
-		var loc = this;
-		this.Work.VerifyDatasetsImportFile(bucketId, fileExtension).then(
-			function (list) {
-				if (list.length > 1) {
-					loc.datasets = list;
-					loc.RequestDatasetSelection();
-				}
-			});
-	},
-	RequestDatasetSelection() {
-		this.$refs.datasetSelectionDialog.show(
-			'Selección de dataset',
-			'Seleccione uno de los datasets dentro del archivo a importar',
-			this.datasetname,
-			this.datasets);
-	},
-	SaveDatasetSelected(name) {
-		var loc = this;
-		loc.datasetname = name;
-		if (loc.datasetname == ''){
-			loc.clear();
-		}
-	},
-    afterComplete(file) {
-		this.sending = false;
-		this.hasFiles = true;
-		if (this.extension == 'kml' || this.extension == 'kmz') {
-			this.verifyDatasets(this.getBucketId(), this.extension);
-		}
     },
-	save() {
+    verifyDatasets(bucketId, fileExtension) {
+        var loc = this;
+        this.Work.VerifyDatasetsImportFile(bucketId, fileExtension).then(
+            function (list) {
+                if (list.length > 1) {
+                    loc.datasets = list;
+                    loc.RequestDatasetSelection();
+                }
+            });
+    },
+    RequestDatasetSelection() {
+        this.$refs.datasetSelectionDialog.show(
+            'Selección de dataset',
+            'Seleccione uno de los datasets dentro del archivo a importar',
+            this.datasetname,
+            this.datasets);
+    },
+    SaveDatasetSelected(name) {
+        var loc = this;
+        loc.datasetname = name;
+        if (loc.datasetname == ''){
+            loc.clear();
+        }
+    },
+    afterComplete(file) {
+        this.sending = false;
+        this.hasFiles = true;
+        if (this.extension == 'kml' || this.extension == 'kmz') {
+            this.verifyDatasets(this.getBucketId(), this.extension);
+        }
+    },
+    save() {
       var stepper = this.$refs.stepper;
       stepper.startUrl = this.Work.GetDatasetFileImportUrl(this.keepLabels);
       stepper.stepUrl = this.Work.GetStepDatasetFileImportUrl();
       let bucketId = this.getBucketId();
-	  let extension = this.extension;
-	  let datasetname = this.datasetname;
+      let extension = this.extension;
+      let datasetname = this.datasetname;
 			if (extension !== 'sav' && extension !== 'csv' && extension !== 'txt'
 						&& extension !== 'xls' && extension !== 'xlsx'
 						&& extension !== 'kml' && extension !== 'kmz') {
