@@ -37,7 +37,7 @@ class ImportService extends BaseService
 
 	private $state;
 
-	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels){
+	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $datasetName){
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetDatasetDataChanged($dataset->getWork()->getId());
 
@@ -58,8 +58,25 @@ class ImportService extends BaseService
 		{
 			return $this->SPSStoJson($bucket);
 		}
+		else if ($fileExtension == "kml" || $fileExtension == "kmz")
+		{
+			$generate_files = true;
+			$this->ConvertKMX($bucket, $fileExtension, $generate_files, $datasetName);
+			return $this->CSVtoJson($bucket);
+		}
 
-		throw new ErrorException('La extensión del archivo debe ser .SAV o .CSV. Extensión recibida: ' . $fileExtension);
+		throw new ErrorException('La extensión del archivo debe ser SAV, CSV, KML o KMZ. Extensión recibida: ' . $fileExtension);
+	}
+
+	public function VerifyDatasetsImportFile($bucketId, $fileExtension){
+		$fileExtension = Str::ToLower($fileExtension);
+		if ($fileExtension == "kml" || $fileExtension == "kmz")
+		{
+			$bucket = FileBucket::Load($bucketId);
+			$generate_files=false;
+			return $this->ConvertKMX($bucket, $fileExtension, $generate_files);
+		}
+		return array();
 	}
 
 	public function FileChunkImport($bucketId) {
@@ -240,6 +257,63 @@ class ImportService extends BaseService
 
 		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
 		return $this->state->ReturnState(false);
+	}
+
+	private function ConvertKMX($bucket, $fileExtension, $generate_files=true, $datasetName=null)
+	{
+		$python = App::GetPython3Path();
+		$p3 = '3';
+		if($python == null) {
+			$python = App::GetPythonPath();
+			$p3 = '';
+		}
+		$conversor_py = Paths::GetPythonScriptsPath() .'/kmx2csv' . $p3 .'.py';
+
+		if (IO::Exists($python) === false) {
+			throw new ErrorException('El ejecutable de python no fue encontrado en ' . $python);
+		}
+
+		$uploadFolder = $bucket->GetBucketFolder();
+		$sourceFile =  $uploadFolder . '/file.dat';
+		$gen_files_arg = $generate_files? 'true': 'false';
+
+		$lines = array();
+
+		$ret = System::Execute($python, array(
+			$conversor_py,
+			$fileExtension,
+			$sourceFile,
+			$uploadFolder,
+			$gen_files_arg
+		), $lines, false);
+
+		if($ret !== 0) {
+			$err = '';
+			$detail = "\nScript: " . $conversor_py
+				. "\nFile extension: " . $fileExtension
+				. "\nSource: " . $sourceFile
+				. "\nFolder: " . $uploadFolder
+				. "\nGenerate files: " . $gen_files_arg
+				. "\nPython: " . $python
+				. "\nReturn: " . $ret
+				. "\nScript Output was: \n----------------------\n" . implode("\n", $lines) . "\n----------------------\n";
+			if(App::Debug()) {
+				$err = $detail;
+			}
+			else {
+				Log::HandleSilentException(new ErrorException($detail));
+			}
+			throw new ErrorException('Error en la subida de archivo KML/KMZ.' . $err);
+		}
+
+		if ($generate_files == true) {
+			$csv_file = $sourceFile;
+			if (!is_null($datasetName)) {
+				$csv_file = $uploadFolder . '/' . $datasetName;
+			}
+			IO::Copy($csv_file . '_out.csv', $sourceFile);
+		}
+		return $lines;
 	}
 
 	private function CreateTables()

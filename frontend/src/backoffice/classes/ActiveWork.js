@@ -147,6 +147,12 @@ ActiveWork.prototype.GetDatasetFileImportUrl = function (keepLabels) {
 	return window.host + '/services/backoffice/Dataset/CreateMultiImportFile?k=' + (keepLabels ? '1' : 0);
 };
 
+ActiveWork.prototype.VerifyDatasetsImportFile = function (bucketId, fileExtension) {
+	var args = { 'b': bucketId, 'fe': fileExtension };
+	return axiosClient.getPromise(window.host + '/services/backoffice/Dataset/VerifyDatasetsImportFile', args,
+		'verificar si el archivo tiene múltiple datasets');
+};
+
 ActiveWork.prototype.GetStepDatasetFileImportUrl = function () {
 	return window.host + '/services/backoffice/Dataset/StepMultiImportFile';
 };
