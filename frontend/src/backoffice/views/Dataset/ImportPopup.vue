@@ -11,7 +11,7 @@
 						<li>Archivos Excel (.xls, xlsx)</li>
 						<li>Archivos de datos de SPSS (.sav)</li>
 						<li>Archivos de texto separados por comas (.csv)</li>
-						<li>Archivos de texto estructurados en tags (.kml/.kmz). <a href="/static/download/kmx2csv.zip" download><blockquote>Haga click aquí si quiere descargar el conversor KML/KMZ a CSV</blockquote></a></li>
+						<li>Archivos de texto estructurados en tags (.kml/.kmz)</li>
 					</ul>
 					<!--
 					https://poblaciones.org/wp-content/uploads/2019/11/Poblaciones-Como-convertir-shapefiles-a-CSV-con-QGIS.pdf
@@ -96,7 +96,7 @@ export default {
         forceChunking: true,
         chunking: true,
         chunkSize: 500000,
-        datasetname: null,
+        sheetName: null,
         datasets: null,
         chunksUploaded: function(file, done) {
           done();
@@ -124,7 +124,7 @@ export default {
 			this.filename = h.extractFilename(file.name);
 			this.createdDataset = null;
 			this.datasets = null;
-			this.datasetname = null;
+			this.sheetName = null;
 			this.sending = true;
     },
 		maxfilesexceeded(file) {
@@ -136,7 +136,7 @@ export default {
 			this.generateBucketId();
 			this.hasFiles = false;
 			this.datasets = null;
-			this.datasetname = null;
+			this.sheetName = null;
 		},
     afterSuccess(file, response) {
       this.sending = false;
@@ -158,13 +158,13 @@ export default {
       this.$refs.datasetSelectionDialog.show(
         'Selección de dataset',
         'Seleccione uno de los datasets dentro del archivo a importar',
-        this.datasetname,
+        this.sheetName,
         this.datasets);
     },
     SaveDatasetSelected(name) {
       var loc = this;
-      loc.datasetname = name;
-      if (loc.datasetname == ''){
+      loc.sheetName = name;
+      if (loc.sheetName == ''){
         loc.clear();
       }
     },
@@ -181,7 +181,7 @@ export default {
       stepper.stepUrl = this.Work.GetStepDatasetFileImportUrl();
       let bucketId = this.getBucketId();
       let extension = this.extension;
-      let datasetname = this.datasetname;
+      let sheetName = this.sheetName;
       if (extension !== 'sav' && extension !== 'csv' && extension !== 'txt'
           && extension !== 'xls' && extension !== 'xlsx'
           && extension !== 'kml' && extension !== 'kmz') {
@@ -193,7 +193,7 @@ export default {
         return;
       }
 			let datasetId = (this.Dataset ? this.Dataset.properties.Id : this.createdDataset.Id);
-			stepper.args = { b: bucketId, d: datasetId, fe: extension, dsn: datasetname};
+			stepper.args = { b: bucketId, d: datasetId, fe: extension, dsn: sheetName};
 			let loc = this;
 			stepper.Start().then(function() {
 				loc.Work.WorkChanged();

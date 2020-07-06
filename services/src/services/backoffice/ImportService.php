@@ -37,7 +37,7 @@ class ImportService extends BaseService
 
 	private $state;
 
-	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $datasetName){
+	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $sheetName){
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetDatasetDataChanged($dataset->getWork()->getId());
 
@@ -61,7 +61,7 @@ class ImportService extends BaseService
 		else if ($fileExtension == "kml" || $fileExtension == "kmz")
 		{
 			$generate_files = true;
-			$this->ConvertKMX($bucket, $fileExtension, $generate_files, $datasetName);
+			$this->ConvertKMX($bucket, $fileExtension, $generate_files, $sheetName);
 			return $this->CSVtoJson($bucket);
 		}
 
@@ -259,7 +259,7 @@ class ImportService extends BaseService
 		return $this->state->ReturnState(false);
 	}
 
-	private function ConvertKMX($bucket, $fileExtension, $generate_files=true, $datasetName=null)
+	private function ConvertKMX($bucket, $fileExtension, $generate_files=true, $sheetName=null)
 	{
 		$python = App::GetPython3Path();
 		$p3 = '3';
@@ -308,8 +308,8 @@ class ImportService extends BaseService
 
 		if ($generate_files == true) {
 			$csv_file = $sourceFile;
-			if (!is_null($datasetName)) {
-				$csv_file = $uploadFolder . '/' . $datasetName;
+			if (!is_null($sheetName)) {
+				$csv_file = $uploadFolder . '/' . $sheetName;
 			}
 			IO::Copy($csv_file . '_out.csv', $sourceFile);
 		}

@@ -38,6 +38,7 @@ class PublishSnapshots extends BaseService
 			// Actualiza métricas
 			if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
 			{
+				$cacheManager->ClearDatasetData($row['dat_id']);
 				$snapshotsManager->UpdateDatasetMetrics($row);
 			}
 		}

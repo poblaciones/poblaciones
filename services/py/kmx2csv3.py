@@ -19,7 +19,7 @@ import io
 
 def main():
     if len(sys.argv) < 4 or len(sys.argv) > 6:
-        #print(f'Usage: {sys.argv[0]} file_extesion in_file out_path [generate_files] [folder_name]')
+        print(f'Usage: {sys.argv[0]} file_extesion in_file out_path [generate_files] [folder_name]')
         os._exit(1)
     if len(sys.argv) == 4:
         sys.argv.append('true')
@@ -44,8 +44,8 @@ def main():
             print(file)
         return files_list
     except:
-        #print('Error: ', sys.exc_info())
-        # traceback.print_exc()
+        print('Error: ', sys.exc_info())
+        traceback.print_exc()
         os._exit(1)
 
 
