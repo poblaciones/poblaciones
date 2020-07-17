@@ -340,6 +340,12 @@ class App
 	{
 		if(Str::EndsWith($filename, '.sav'))
 			return 'application/x-vnd.spss-statistics-spd';
+		else if(Str::EndsWith($filename, '.xlsx'))
+			return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+		else if(Str::EndsWith($filename, '.zip'))
+			return 'application/zip';
+		else if(Str::EndsWith($filename, '.dta'))
+			return 'application/x-stata';
 		else if(Str::EndsWith($filename, '.csv'))
 			return 'text/csv;charset=ISO-8859-1';
 		else

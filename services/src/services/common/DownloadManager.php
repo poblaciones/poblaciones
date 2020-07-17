@@ -4,6 +4,12 @@ namespace helena\services\common;
 
 use minga\framework\ErrorException;
 
+use helena\classes\writers\SpssWriter;
+use helena\classes\writers\CsvWriter;
+use helena\classes\writers\StataWriter;
+use helena\classes\writers\XlsxWriter;
+use helena\classes\writers\ShpWriter;
+
 use helena\classes\DownloadStateBag;
 use helena\db\frontend\DatasetModel;
 use helena\db\frontend\ClippingRegionItemModel;
@@ -22,6 +28,8 @@ class DownloadManager
 	const FILE_SPSS = 1;
 	const FILE_CSV = 2;
 	const FILE_SHP = 3;
+	const FILE_XLSX = 4;
+	const FILE_STATA = 5;
 
 	const OUTPUT_LATIN3_WINDOWS_ISO = false;
 
@@ -34,7 +42,7 @@ class DownloadManager
 			$this->start = microtime(true);
 	}
 
-	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $fromDraft = false)
+	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $fromDraft = false, $extraColumns = array())
 	{
 		self::ValidateType($type);
 		self::ValidateClippingItem($clippingItemId);
@@ -44,8 +52,8 @@ class DownloadManager
 			return array('done' => true);
 
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
-		$this->PrepareNewModel($type, $datasetId, $clippingItemId, $fromDraft);
-		$this->PrepareNewState($type, $datasetId, $clippingItemId, $fromDraft);
+		$this->PrepareNewModel($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns);
+		$this->PrepareNewState($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns);
 		return $this->GenerateNextFilePart();
 	}
 
@@ -108,12 +116,16 @@ class DownloadManager
 			$ext = 'sav';
 		elseif($type[0] == 'z')
 			$ext = 'zsav';
+		elseif($type[0] == 't')
+			$ext = 'dta';
 		elseif($type[0] == 'c')
 			$ext = 'csv';
+		elseif($type[0] == 'x')
+			$ext = 'xlsx';
 		elseif($type[0] == 'h')
 			$ext = 'zip';
 		else
-			throw new ErrorException('Tipo de descarga inválido');
+			throw new ErrorException('Tipo de archivo inválido');
 
 		$name = 'dataset' . $datasetId . $type;
 		if($clippingItemId != 0)
@@ -156,8 +168,29 @@ class DownloadManager
 
 	private static function ValidateType($type)
 	{
-		if($type != 's' && $type != 'sw' && $type != 'sg' && $type != 'h' && $type != 'hw' && $type != 'c' && $type != 'cw' && $type != 'cg' && $type != 'zw' && $type != 'zg')
-			throw new ErrorException('Tipo de descarga inválido');
+		// La primera letra es el tipo de archivo:
+		// s = spss
+		// z = spss zipped
+		// c = csv
+		// x = excel
+		// t = stata
+		// h = shapefile
+
+		// La segunda letra (opcional) es:
+		// w = wkt
+		// g = geojson
+
+		if ($type === 'h') return;
+		if (strlen($type) > 0)
+		{
+			if ($type[0] === 's' || $type[0] === 'z' || $type[0] === 'c' || $type[0] === 't' || $type[0] === 'x')
+			{
+				// puede no pedir parte geográfica, o pedir geojson, o wkt
+				if (strlen($type) == 1 || ($type[1] === 'w' || $type[1] === 'g'))
+					return;
+			}
+		}
+		throw new ErrorException('Tipo de descarga inválido');
 	}
 
 	private static function ValidateClippingItem($clippingItemId)
@@ -179,18 +212,20 @@ class DownloadManager
 	private function LoadModel()
 	{
 		$this->model = new DatasetModel($this->state->Get('fullQuery'), $this->state->Get('countQuery'),
-								$this->state->Cols(), $this->state->Get('fullParams'), $this->state->Get('wktIndex'));
+								$this->state->Cols(), $this->state->Get('fullParams'), $this->state->Get('wktIndex'),
+								$this->state->ExtraColumns());
 		$this->model->fromDraft = $this->state->FromDraft();
 	}
 
-	private function PrepareNewModel($type, $datasetId, $clippingItemId, $fromDraft)
+	private function PrepareNewModel($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns)
 	{
 		$this->model = new DatasetModel();
 		$this->model->fromDraft = $fromDraft;
+		$this->model->extraColumns = $extraColumns;
 		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $this->GetPolygon($type));
 	}
 
-	private function PrepareNewState($type, $datasetId, $clippingItemId, $fromDraft)
+	private function PrepareNewState($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns)
 	{
 		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $this->model, $fromDraft);
 		$this->state->SetStep(self::STEP_BEGIN);
@@ -201,6 +236,7 @@ class DownloadManager
 		$latLon = $this->model->GetLatLongColumns($datasetId);
 		$this->state->Set('latVariable', $latLon['lat']);
 		$this->state->Set('lonVariable', $latLon['lon']);
+		$this->state->Set('extraColumns', $extraColumns);
 		$this->state->Save();
 	}
 
@@ -210,22 +246,29 @@ class DownloadManager
 			return self::FILE_SPSS;
 		else if ($this->state->Get('type')[0] == 'h')
 			return self::FILE_SHP;
+		else if ($this->state->Get('type')[0] == 't')
+			return self::FILE_STATA;
+		else if ($this->state->Get('type')[0] == 'x')
+			return self::FILE_XLSX;
 		else if ($this->state->Get('type')[0] == 'c')
 			return self::FILE_CSV;
 		else
-			throw new ErrorException('Tipo de descarga inválido');
+			throw new ErrorException('Tipo de descarga no reconocido');
 	}
-
 	private function getWriter($fileType)
 	{
 		if ($fileType === self::FILE_SPSS)
 			return new SpssWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_CSV)
 			return new CsvWriter($this->model, $this->state);
+		else if ($fileType === self::FILE_STATA)
+			return new StataWriter($this->model, $this->state);
+		else if ($fileType === self::FILE_XLSX)
+			return new XlsxWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_SHP)
 			return new ShpWriter($this->model, $this->state);
 		else
-			throw new ErrorException('Tipo de descarga inválido');
+			throw new ErrorException('Tipo de escritura no reconocida');
 	}
 
 	private function CreateNextFilePart()

@@ -66,6 +66,9 @@ class Variable
 	}
 	public function CalculateValueField()
 	{
+		if ($this->attributes['mvv_data_column_is_categorical'])
+			return 1;
+
 		$field = self::GetRichColumn($this->attributes, "mvv_data");
 
 		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
@@ -204,7 +207,7 @@ class Variable
 						($normalization !== SpecialColumnEnum::NullValue &&
 						$normalization !== SpecialColumnEnum::Other);
 	}
-	
+
 	public static function GetRichColumnVariable($col, $fieldVariable)
 	{
 		$specialColumnEnum = $col;
@@ -260,14 +263,14 @@ class Variable
 		return $label;
 	}
 	public static function FormulaToString($variable)
-	{/*
-				$variable['dataCaption'] = Variable::GetRichColumnCaption($variable['mvv_data'], $variable['mvv_data_column_caption']);
-			$variable['normalizationCaption'] = Variable::GetRichColumnCaption($variable['mvv_normalization'], $variable['mvv_normalization_column_caption']);
-		*/
+	{
+		if ($variable['mvv_data_column_is_categorical'])
+			$dataVariable = '[' . self::SpecialColumnToLabel(SpecialColumnEnum::Count) . ']';
+		else
+			$dataVariable = self::GetRichColumnVariable($variable['mvv_data'], $variable['mvv_data_column_variable']);
 
-		$dataVariable = self::GetRichColumnVariable($variable['mvv_data'], $variable['mvv_data_column_variable']);
 		$normalizationVariable = self::GetRichColumnVariable($variable['mvv_normalization'], $variable['mvv_normalization_column_variable']);
-			
+
 		$ret = $dataVariable;
 		if ($normalizationVariable)
 		{

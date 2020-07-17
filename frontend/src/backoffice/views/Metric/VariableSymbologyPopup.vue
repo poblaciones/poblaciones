@@ -10,7 +10,7 @@
 
 		<div v-if="Dataset && Variable">
 		<div class="md-layout md-gutter">
-			<div class="md-layout-item md-size-100">
+			<div class="md-layout-item md-size-100" v-if="!Variable.DataColumnIsCategorical">
 				<md-card>
 					<md-card-content>
 						<div class="md-layout">

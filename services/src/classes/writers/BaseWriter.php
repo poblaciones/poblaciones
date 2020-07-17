@@ -1,6 +1,6 @@
 <?php
 
-namespace helena\services\common;
+namespace helena\classes\writers;
 
 use helena\classes\spss\Measurement;
 use helena\classes\GeoJson;

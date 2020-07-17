@@ -67,6 +67,13 @@ class Variable
      */
     private $IsDefault;
 
+		/**
+     * @var boolean
+     *
+     * @ORM\Column(name="mvv_data_column_is_categorical", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $DataColumnIsCategorical;
+
     /**
      * @var string
      *
@@ -207,6 +214,31 @@ class Variable
     public function getIsDefault()
     {
         return $this->IsDefault;
+    }
+
+
+		/**
+     * Set dataColumnIsCategorical
+     *
+     * @param boolean $dataColumnIsCategorical
+     *
+     * @return Variable
+     */
+    public function setDataColumnIsCategorical($dataColumnIsCategorical)
+    {
+        $this->DataColumnIsCategorical = $dataColumnIsCategorical;
+
+        return $this;
+    }
+
+    /**
+     * Get dataColumnIsCategorical
+     *
+     * @return boolean
+     */
+    public function getDataColumnIsCategorical()
+    {
+        return $this->DataColumnIsCategorical;
     }
 
 		/**

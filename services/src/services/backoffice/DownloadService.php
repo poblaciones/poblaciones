@@ -10,7 +10,7 @@ class DownloadService extends BaseService
 	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId)
 	{
 		$dm = new DownloadManager();
-		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, true);
+		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, true, null);
 	}
 
 	public function StepMultiRequestFile($key)

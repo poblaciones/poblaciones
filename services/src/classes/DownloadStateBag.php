@@ -27,6 +27,7 @@ class DownloadStateBag extends StateBag
 			'fullQuery' => $model->fullQuery,
 			'countQuery' => $model->countQuery,
 			'fullParams' => $model->fullParams,
+			'extraColumns' => null,
 			'cols' => $model->fullCols,
 			'fromDraft' => $fromDraft,
 			'wktIndex' => $model->wktIndex,
@@ -42,6 +43,10 @@ class DownloadStateBag extends StateBag
 		$this->state['cols'][$keyCol]['field_width'] = $value;
 	}
 
+	public function ExtraColumns()
+	{
+		return $this->state['extraColumns'];
+	}
 	public function Cols()
 	{
 		return $this->state['cols'];

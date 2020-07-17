@@ -178,7 +178,7 @@ html, body {
 
 .topbar {
 	position: fixed; overflow: hidden;
-	padding: 14px; top: 0px; width: 20px;
+	padding: 13px; top: 0px; width: 20px;
 	height: 52px; z-index: 10000;
 	background-color: #00A0D2;
 	color: #fff;
@@ -231,7 +231,9 @@ html, body {
 	margin-bottom: 6px!important;
 }
 
-
+.md-field .md-input[disabled], .md-field .md-textarea[disabled] {
+	pointer-events: none;
+}
 .mp-label {
 	padding-left: 0 !important;
 	left: 0 !important;

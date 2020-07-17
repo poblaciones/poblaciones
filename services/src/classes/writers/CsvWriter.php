@@ -1,11 +1,11 @@
 <?php
 
-namespace helena\services\common;
+namespace helena\classes\writers;
 
 use minga\framework\ErrorException;
 use minga\framework\Str;
-use helena\classes\spss\Format;
 
+use helena\classes\spss\Format;
 
 class CsvWriter extends BaseWriter
 {
@@ -56,6 +56,7 @@ class CsvWriter extends BaseWriter
 				}
 				$text = $this->GetCSVField($k, $value, $isNumericColumn, $this->state->Get('labels'), ($k + 1 == $count));
 				$text = $this->MakeOutputEncoding($text);
+
 				$rowText .= $text;
 				$c++;
 			}
@@ -66,9 +67,11 @@ class CsvWriter extends BaseWriter
 
 		return true;
 	}
+
 	public function Flush()
 	{
 	}
+
 	private function MakeOutputEncoding($utf8text)
 	{
 		if (self::$OUTPUT_LATIN3_WINDOWS_ISO)

@@ -76,6 +76,7 @@ cp -vr ../services/phpstan.neon $output>>$output-1_copy.log
 cp -vr ../services/phpunit.xml $output>>$output-1_copy.log
 cp -vr ../services/py $output>>$output-1_copy.log
 cp -vr ../services/src $output>>$output-1_copy.log
+rm -rf $output/src/framework/data
 cp -vr ../services/config $output>>$output-1_copy.log
 cp -vr ../services/resources $output>>$output-1_copy.log
 cp -vr ../services/web $output>>$output-1_copy.log
@@ -85,6 +86,7 @@ cp -vr ../services/doctrine_proxies $output>>$output-1_copy.log
 
 if [ $vendor = true ]; then
 	cp -vr ../services/vendor $output>>$output-1_copy.log
+	cp -vr ../services/src/framework/data $output>>$output-1_copy.log
 fi
 
 echo "*** 2. Borra lo que no se sube"
@@ -110,7 +112,6 @@ cp ../services/web/static/js/js.js $output/web/static/js/js.js>$output-4_copy.lo
 cp ../services/web/static/css/styles.css $output/web/static/css/styles.css>>$output-4_copy.log
 cp ../services/web/static/css/authenticate.css $output/web/static/css/authenticate.css>>$output-4_copy.log
 cp -r ../services/web/static/img $output/web/static/>>$output-4_copy.log
-cp -r ../services/web/static/download $output/web/static/>>$output-4_copy.log
 cp $output/templates/index.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/backoffice.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/admins.html.twig $output/templates/frontend/>>$output-4_copy.log

@@ -174,7 +174,6 @@ class SnapshotByDataset extends BaseModel
 		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
 
 		$multiQuery = new MultiQuery($baseQuery, $envelopeQuery, $query, $extraQuery);
-		//$multiQuery->dump();
 		$ret = $multiQuery->fetchAll();
 
 		$extraFields = [];

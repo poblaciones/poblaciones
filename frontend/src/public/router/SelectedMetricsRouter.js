@@ -33,7 +33,7 @@ SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelected
 	}
 	var ret = [];
 	ret.push([activeSelectedMetric.properties.Metric.Id]);
-	ret.push(['v', activeSelectedMetric.properties.SelectedVersionIndex, 0]);
+	ret.push(['v', activeSelectedMetric.properties.SelectedVersionIndex, -1]);
 	ret.push(['a', activeSelectedMetric.SelectedVersion().SelectedLevelIndex, 0]);
 	ret.push(['i', activeSelectedMetric.SelectedLevel().SelectedVariableIndex, 0]);
 	ret.push(['k', this.GetRanking(activeSelectedMetric), '']);
@@ -217,7 +217,7 @@ SelectedMetricsRouter.prototype.parseMetrics = function (args) {
 
 SelectedMetricsRouter.prototype.parseMetric = function (values) {
 	var id = h.getSafeValue(values, '');
-	var versionIndex = h.getSafeValue(values, 'v', 0);
+	var versionIndex = h.getSafeValue(values, 'v', -1);
 	var levelIndex = h.getSafeValue(values, 'a', 0);
 	var variableIndex = h.getSafeValue(values, 'i', 0);
 	var labelsCollapsed = h.getSafeValue(values, 'c', false);
@@ -267,7 +267,7 @@ SelectedMetricsRouter.prototype.RestoreMetricState = function (activeSelectedMet
 	var mapChanged = false;
 	var selectedMetric = activeSelectedMetric.properties;
 	var versionIndex = parseInt(state.VersionIndex);
-	if (versionIndex !== selectedMetric.SelectedVersionIndex &&
+	if (versionIndex !== -1 && versionIndex !== selectedMetric.SelectedVersionIndex &&
 		versionIndex < selectedMetric.Versions.length) {
 		selectedMetric.SelectedVersionIndex = versionIndex;
 		mapChanged = true;

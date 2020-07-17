@@ -1,5 +1,13 @@
 [CURRENT]
 
+v2.25 (2020-07-17)
+- Mejora en la detección de filas vacías (importanción de CSV y Excel).
+- Adaptación para variables categoriales (UI).
+- Permite descargar archivos en formato Excel (xlsx).
+- Permite descargar archivos en formato Stata (sta).
+- Tests para conversores y ejecución de scripts.
+- Final de compatibilidad con Python 2.7.
+
 v2.24 (2020-06-28)
 - Permite indicar que no deben escalarse los íconos de un indicador (para datos dispersos).
 - Mejoras uso de comas para separar decimales (grilla de datos y carga de categoría manual).

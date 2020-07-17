@@ -1,18 +1,18 @@
-<template>
-	<div :class="this.classSize" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
-		<div class="md-layout">
+<template >
+	<div :class="this.classSize" class="defaultColor" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
+		<div class="md-layout ">
 			<div class="md-layout-item md-size-75" v-on:dblclick="StartEdit">
 				<md-field style="margin-bottom: 0px">
-					<label class="mp-label" :style="(this.multiline ? 'top: 6px !important' : '')">
+					<label class="mp-label unselectable" :style="(this.multiline ? 'top: 6px !important' : '')">
 						{{ this.label }}
 					</label>
-					<md-input v-if="!this.multiline" :type="type" style="font-size: 19px; width: 100%" autocomplete="off"
+					<md-input v-if="!this.multiline" :type="type" style="text-overflow: ellipsis; width: 100%" autocomplete="off"
 										:placeholder="(placeholder ? placeholder : '')"
 										:class="(!editMode ? 'unselectable' : '')"
 										v-on:mousedown="mouseDown" v-on:mouseup="mouseUp" v-model="localValue"
-										:disabled="isDisabled" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
+										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
 					<md-textarea v-if="this.multiline" class="mp-area" :style="minHeightRows" autocomplete="off"
-											 :disabled="isDisabled" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
+											 :disabled="isDisabled || !editMode" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>
 				<div :style="'line-height: 1em;' + (!isDisabled && maxlength > 0 ? ' padding-right: 34px' : '')">
@@ -22,7 +22,7 @@
 				</div>
 			</div>
 			<div v-if="!isDisabled" class="md-layout-item md-size-25">
-				<button-panel ref="buttonPanel"
+				<button-panel ref="buttonPanel" style="position: absolute"
 					@onCancel="cancel" @onUpdate="Update" @onEditModeChange="ChangeEditableMode" @onFocus="focus"
 						></button-panel>
 			</div>
@@ -49,7 +49,10 @@ export default {
 		},
 		StartEdit() {
 			if (!this.isDisabled && !this.$refs.buttonPanel.editableMode) {
-				this.$refs.buttonPanel.EditField();
+				var loc = this;
+				setTimeout(() => {
+					loc.$refs.buttonPanel.EditField();
+				}, 75);
 			}
 		},
 		CheckBluring(ele) {
@@ -76,16 +79,26 @@ export default {
      	this.input.$el.focus();
 		},
 		ChangeEditableMode(mode) {
-      this.input.$el.disabled = !mode;
-			if (mode) {
+      if (mode) {
 				var len = this.input.$el.value.length;
 				this.input.$el.selectionStart = 0;
 				this.input.$el.selectionEnd = len;
 			} else {
-				var loc = this;
-
+				this.clearSelection();
 			}
 			this.editMode = mode;
+		},
+		clearSelection() {
+			this.input.$el.selectionStart = 0;
+			this.input.$el.selectionEnd = 0;
+			var sel = window.getSelection ? window.getSelection() : document.selection;
+			if (sel) {
+				if (sel.removeAllRanges) {
+					sel.removeAllRanges();
+				} else if (sel.empty) {
+					sel.empty();
+				}
+			}
 		},
 		htmlEncode(html ) {
 	   return document.createElement( 'a' ).appendChild(
@@ -171,12 +184,18 @@ export default {
     };
     this.input.$el.onkeydown = function(e) {
 			if (e.keyCode === 13 && !loc.multiline) {
-				loc.$refs.buttonPanel.Save();
-				return false;
+				setTimeout(() => {
+					loc.$refs.buttonPanel.Save();
+					loc.input.$el.blur();
+				}, 75);
+  			return false;
 			}
 			if (e.keyCode === 27) {
-				loc.$refs.buttonPanel.Cancel();
-				return false;
+				setTimeout(() => {
+					loc.$refs.buttonPanel.Cancel();
+					loc.input.$el.blur();
+				}, 75);
+  			return false;
 			}
     };
 	},
@@ -223,6 +242,14 @@ export default {
 	font-size: 11px;
 }
 
+.md-field.md-theme-default.md-focused .md-input, .md-field.md-theme-default.md-focused .md-textarea, .md-field.md-theme-default.md-has-value .md-input, .md-field.md-theme-default.md-has-value .md-textarea {
+	-webkit-text-fill-color: unset !important;
+	font-size: unset !important;
+}
+	.defaultColor {
+		-webkit-text-fill-color: rgba(0,0,0,0.87);
+		font-size: 19px;
+	}
 
 .md-layout-item .md-size-25 {
   padding: 0 !important;

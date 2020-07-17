@@ -32,8 +32,8 @@
 					<tr>
 						<td>Cita (APA):</td>
 						<td class="quotation">
-							<span v-html="citationAPA(work)"> </span>
-							<a href="#" v-clipboard="() => citationAPAText(work)" class="superSmallButton">
+							<span v-html="citationAPA()"> </span>
+							<a href="#" v-clipboard="() => citationAPAText()" class="superSmallButton">
 								Copiar
 							</a>
 						</td>
@@ -127,9 +127,9 @@ export default {
 			return apa.onlineMapCitation(this.htmlEncode(this.work.Authors), this.htmlEncode(this.formattedYear),
 					this.htmlEncode(this.work.Name), this.completeUrl(this.work.Url));
 		},
-		citationAPAText(work) {
-			return apa.onlineMapCitation(work.Authors, work.ReleaseDate,
-				work.Name, this.completeUrl(work.Url), true);
+		citationAPAText() {
+			return apa.onlineMapCitation(this.work.Authors, this.formattedYear,
+				this.work.Name, this.completeUrl(this.work.Url), true);
 		},
 		htmlEncode(html) {
 			return document.createElement('a').appendChild(

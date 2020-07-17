@@ -18,6 +18,7 @@ class MapSettings
 	public $ContentServerWorks = [];
 
 	public $UseCalculated = false;
+	public $UseKmz = false;
 
 	public $UseGradients = false;
 	public $MaxQueueRequests = 4;

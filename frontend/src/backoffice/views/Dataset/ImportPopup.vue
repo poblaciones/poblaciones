@@ -11,7 +11,7 @@
 						<li>Archivos Excel (.xls, xlsx)</li>
 						<li>Archivos de datos de SPSS (.sav)</li>
 						<li>Archivos de texto separados por comas (.csv)</li>
-						<li>Archivos de texto estructurados en tags (.kml/.kmz)</li>
+						<li v-if="UseKmz">Archivos de texto estructurados en tags (.kml/.kmz)</li>
 					</ul>
 					<!--
 					https://poblaciones.org/wp-content/uploads/2019/11/Poblaciones-Como-convertir-shapefiles-a-CSV-con-QGIS.pdf
@@ -110,7 +110,10 @@ export default {
     },
     Dataset() {
       return (this.forceCreateNewDataset ? null : window.Context.CurrentDataset);
-    },
+		},
+		UseKmz() {
+			return window.Context.Configuration.UseKmz;
+		}
   },
   methods: {
     getCreateFileUrl() {

@@ -3,6 +3,7 @@
 namespace helena\classes;
 
 use helena\classes\Paths;
+use minga\framework\IO;
 use minga\framework\Context;
 use minga\framework\settings\CacheSettings;
 use minga\framework\tests\TestCaseBase;
@@ -17,6 +18,17 @@ class TestCase extends TestCaseBase
 			'Sin Cache' => [CacheSettings::Disabled],
 			'Con Cache' => [CacheSettings::Enabled],
 		];
+	}
+
+
+	public function assertFile($path, $expectedSize = -1, $description = "")
+	{
+		$this->assertTrue(IO::Exists($path), "Archivo no existe. " . $description);
+		if (IO::Exists($path) && $expectedSize != -1)
+		{
+			$size = filesize($path);
+			$this->assertEquals($expectedSize, $size, "Tamaño de archivo. " . $description);
+		}
 	}
 
 	public function GetGlobal($index = null)

@@ -26,6 +26,8 @@ use helena\services\backoffice\import\DatasetColumns;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\entities\backoffice as entities;
 
+use helena\classes\Python;
+
 
 class ImportService extends BaseService
 {
@@ -221,39 +223,9 @@ class ImportService extends BaseService
 		$uploadFolder = $bucket->path;
 		$sourceFile =  $uploadFolder . '/file.dat';
 
-		$python = App::GetPython3Path();
-		$p3 = '3';
-		if($python == null)
-		{
-			$python = App::GetPythonPath();
-			$p3 = '';
-		}
+		$args = [$sourceFile, $folder];
 
-		if (IO::Exists($python) === false)
-			throw new ErrorException('El ejecutable de python no fue encontrado en ' . $python);
-
-		$lines = array();
-
-		$ret = System::Execute($python, array(
-			Paths::GetPythonScriptsPath() . '/spss2json' . $p3 . '.py',
-			$sourceFile,
-			$folder
-		), $lines);
-
-		if($ret !== 0)
-		{
-			$err = '';
-			$detail = "\nScript: " . Paths::GetPythonScriptsPath() . '/spss2json' . $p3 . '.py'
-				. "\nSource: " . $sourceFile
-				. "\nFolder: " . $folder
-				. "\nScript Output was: \n----------------------\n" . implode("\n", $lines) . "\n----------------------\n";
-			if(App::Debug())
-				$err = $detail;
-			else
-				Log::HandleSilentException(new ErrorException($detail));
-
-			throw new ErrorException('Error en la subida de archivo spss.' . $err);
-		}
+		Python::Execute('spss2json3.py', $args);
 
 		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
 		return $this->state->ReturnState(false);
@@ -261,50 +233,13 @@ class ImportService extends BaseService
 
 	private function ConvertKMX($bucket, $fileExtension, $generate_files=true, $sheetName=null)
 	{
-		$python = App::GetPython3Path();
-		$p3 = '3';
-		if($python == null) {
-			$python = App::GetPythonPath();
-			$p3 = '';
-		}
-		$conversor_py = Paths::GetPythonScriptsPath() .'/kmx2csv' . $p3 .'.py';
-
-		if (IO::Exists($python) === false) {
-			throw new ErrorException('El ejecutable de python no fue encontrado en ' . $python);
-		}
-
 		$uploadFolder = $bucket->GetBucketFolder();
 		$sourceFile =  $uploadFolder . '/file.dat';
-		$gen_files_arg = $generate_files? 'true': 'false';
+		$gen_files_arg = $generate_files ? 'true': 'false';
 
-		$lines = array();
+		$args = array($fileExtension, $sourceFile, $uploadFolder, $gen_files_arg);
 
-		$ret = System::Execute($python, array(
-			$conversor_py,
-			$fileExtension,
-			$sourceFile,
-			$uploadFolder,
-			$gen_files_arg
-		), $lines, false);
-
-		if($ret !== 0) {
-			$err = '';
-			$detail = "\nScript: " . $conversor_py
-				. "\nFile extension: " . $fileExtension
-				. "\nSource: " . $sourceFile
-				. "\nFolder: " . $uploadFolder
-				. "\nGenerate files: " . $gen_files_arg
-				. "\nPython: " . $python
-				. "\nReturn: " . $ret
-				. "\nScript Output was: \n----------------------\n" . implode("\n", $lines) . "\n----------------------\n";
-			if(App::Debug()) {
-				$err = $detail;
-			}
-			else {
-				Log::HandleSilentException(new ErrorException($detail));
-			}
-			throw new ErrorException('Error en la subida de archivo KML/KMZ.' . $err);
-		}
+		$lines = Python::Execute('kmx2csv3.py', $args);
 
 		if ($generate_files == true) {
 			$csv_file = $sourceFile;

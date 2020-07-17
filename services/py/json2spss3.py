@@ -15,7 +15,7 @@ import sys
 def main():
     if len(sys.argv) != 4:
         print ('Usage: ' + sys.argv[0] + ' headfile datafile outputfile')
-        os._exit(1)
+        sys.exit(1)
 
     try:
         with open(sys.argv[1], 'r') as head_file:
@@ -40,10 +40,11 @@ def main():
                 os.remove(f)
 
             print ('File ' + sys.argv[3] + ' successfully created.')
+            return
     except:
         print ('Error: ', sys.exc_info())
         traceback.print_exc()
-        os._exit(1)
+        sys.exit(1)
 
 def replace_last(s, old, new, occurrence=1):
     ''' Reemplaza la(s) última(s) ocurrencia(s) de un string.

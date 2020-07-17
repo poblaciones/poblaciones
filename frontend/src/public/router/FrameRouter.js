@@ -1,7 +1,4 @@
-import ActiveSelectedMetric from '@/public/classes/ActiveSelectedMetric';
-import MetricRouter from '@/public/classes/MetricRouter';
 import h from '@/public/js/helper';
-import err from '@/common/js/err';
 
 export default FrameRouter;
 

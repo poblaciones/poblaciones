@@ -1,19 +1,14 @@
 <?php
 
-namespace helena\services\common;
+namespace helena\classes\writers;
 
 use minga\framework\IO;
-use minga\framework\Log;
-use minga\framework\ErrorException;
-use minga\framework\Str;
-use minga\framework\System;
-use helena\classes\Paths;
 use helena\classes\spss\Alignment;
 use helena\classes\spss\Variable;
 use helena\classes\spss\Format;
 use helena\classes\spss\Measurement;
 
-use helena\classes\App;
+use helena\classes\Python;
 
 class SpssWriter extends JsonWriter
 {
@@ -30,40 +25,11 @@ class SpssWriter extends JsonWriter
 		if(isset($head['valueLabels']) == false)
 			$head['valueLabels'] = new \stdClass();
 
-		$hFile = $this->state->Get('outFile') . '_head.json';
-		IO::WriteJson($hFile, $head, true);
+		$headerFile = $this->state->Get('outFile') . '_head.json';
+		IO::WriteJson($headerFile, $head, true);
 
-		$lines = array();
-
-		$python = App::GetPython3Path();
-		$p3 = '3';
-		if($python == null)
-		{
-			$python = App::GetPythonPath();
-			$p3 = '';
-		}
-
-
-		$ret = System::Execute($python, array(
-			Paths::GetPythonScriptsPath() . '/json2spss' . $p3 . '.py',
-			$hFile,
-			$this->state->Get('dFile'),
-			$this->state->Get('outFile'),
-		), $lines);
-
-		if($ret !== 0)
-		{
-			$err = '';
-			$detail = "\nHeader: " . $hFile
-				. "\nData: " . $this->state->Get('dFile') . ' (' . $this->state->Get('index') . ')'
-				. "\n" . implode("\n", $lines);
-			if(App::Debug())
-				$err = $detail;
-			else
-				Log::HandleSilentException(new ErrorException($detail));
-
-			throw new ErrorException('Error en creación de archivo spss.' . $err);
-		}
+		$args = array($headerFile, $this->state->Get('dFile'), $this->state->Get('outFile'));
+		Python::Execute('json2spss3.py', $args);
 	}
 
 	private function ProcessColumn(array $col, array $head)

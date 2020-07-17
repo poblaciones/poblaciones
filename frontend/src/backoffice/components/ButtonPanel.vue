@@ -32,8 +32,11 @@ export default {
   },
   methods: {
     EditField() {
-      this.ChangeEditableMode();
-			this.SetFocus();
+			this.ChangeEditableMode();
+			var loc = this;
+			setTimeout(() => {
+				loc.SetFocus();
+			}, 25);
 		},
 		showPrompt() {
 			this.$refs.confirmDialog.show();

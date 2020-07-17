@@ -64,7 +64,10 @@
 								<md-list-item v-for="variable in item.Variables" style="display: -webkit-box"
 															:key='variable.Id' :value='variable.Id'>
 									<span :style="'font-size: 13px; white-space: normal;' + (variable.IsDefault && item.Variables.length > 1 ? 'font-weight: bold': '')">
-										<span :title="Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn)">
+										<span v-if="variable.DataColumnIsCategorical">
+											Conteo
+										</span>
+										<span v-else :title="Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn)">
 											{{ Dataset.formatTwoColumnVariable(variable.Data, variable.DataColumn, true) }}
 										</span>
 										<template v-if="variable.Normalization !== null">

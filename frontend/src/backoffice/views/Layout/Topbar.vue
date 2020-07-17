@@ -2,19 +2,23 @@
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar">
 			<user-info></user-info>
-			<backoffice-links ></backoffice-links>
+			<backoffice-links></backoffice-links>
 			<div style="float: left">
 				<router-link :to="getBackRoute">
 					<BackIcon class="icon" style="font-size: 28px; color: #fff" />
 				</router-link>
 			</div>
 			<div class="titleLine">
-				<span>
-					{{ Work.properties.Metadata.Title }}
-				</span>
+				<div class="md-layout md-gutter" style="margin-top: -21px">
+					<div class="md-layout-item md-size-100">
+						<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :maxlength="150" class="fieldWhite"
+										 :required="true" @update="UpdateTitle"
+										 v-model="Work.properties.Metadata.Title" />
+					</div>
+				</div>
 			</div>
 		</div>
-
+		<invoker ref="invoker"></invoker>
 		<stepper ref="TestStepper" title="Asistente de prueba">
 		</stepper>
 	</div>
@@ -62,6 +66,14 @@ export default {
 			var parentwidth = document.getElementById('topBarContainer').offsetWidth;
 			document.getElementById('topBar').style.width = parentwidth + 'px';
 		},
+		UpdateTitle() {
+			var loc = this;
+			this.$refs.invoker.do(this.Work,
+				this.Work.UpdateMetadata).then(function () {
+					window.Db.RenameWork(loc.Work.properties.Id, loc.Work.properties.Metadata.Title);
+				});
+			return true;
+		},
 		beginTest() {
 			this.$refs.TestStepper.startUrl = this.Work.GetStartWorkTestUrl();
 			this.$refs.TestStepper.stepUrl = this.Work.GetStepWorkTestUrl();
@@ -82,13 +94,22 @@ export default {
 	color: #FFF;
 	}
 
+.fieldWhite {
+	-webkit-text-fill-color: white!important;
+	font-size: 24px!important;
+}
+
+.fieldWhite .md-input {
+	-webkit-text-fill-color: white!important;
+	font-size: 24px!important;
+}
+
 .titleLine {
 	margin-left: 38px;
 	color: white;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	font-size: 24px;
-	height: 1.14em;
 	line-height: 1.2em;
 	overflow: hidden;
 }

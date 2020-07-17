@@ -3,7 +3,7 @@
 		<div id="topBar" class="topbar" :style="(backColor ? 'background-color: ' + backColor : '')">
 			<user-info></user-info>
 			<admin-links v-if="showAdminButton"></admin-links>
-			<div style="padding-top: 2px; font-size: 24px; ">
+			<div style="padding-top: 4px; font-size: 24px; ">
 					{{ welcomeMessage }}
 			</div>
 		</div>

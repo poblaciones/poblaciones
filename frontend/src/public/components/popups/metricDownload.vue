@@ -5,7 +5,7 @@
 				<tbody>
 					<tr>
 						<td style="width: 250px">Fuente:</td>
-						<td style="width: 500px">{{ version.Work.Name }}</td>
+						<td style="width: 600px">{{ version.Work.Name }}</td>
 					</tr>
 					<tr v-if="version.Work.Type !=='P' && version.Work.Authors">
 						<td>Autores:</td>
@@ -159,8 +159,10 @@ export default {
 		},
 		getDataFormats() {
 			var ret = [];
-			ret.push({ caption: 'SPSS (.sav)', key: 's' });
 			ret.push({ caption: 'Texto (.csv)', key: 'c' });
+			ret.push({ caption: 'Excel (.xlsx)', key: 'x' });
+			ret.push({ caption: 'SPSS (.sav)', key: 's' });
+			ret.push({ caption: 'Stata (.dta)', key: 't' });
 			if (!this.level.HasArea) {
 				ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
 			}
@@ -180,10 +182,10 @@ export default {
 		},
 		getSpatialFormats() {
 			var ret = [];
-			ret.push({ caption: 'SPSS con GeoJSON (.sav)', key: 'sg' });
-			ret.push({ caption: 'SPSS con WKT (.sav)', key: 'sw' });
 			ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
 			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
+			ret.push({ caption: 'Excel con GeoJSON (.xlsx)', key: 'xg' });
+			ret.push({ caption: 'Excel con WKT (.xlsx)', key: 'xw' });
 			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
 			return ret;
 		},

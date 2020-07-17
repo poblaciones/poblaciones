@@ -25,8 +25,9 @@ class DatasetModel extends BaseModel
 	public $fullParams = array();
 	public $wktIndex = -1;
 	public $fromDraft = false;
+	public $extraColumns = null;
 
-	public function __construct($fullQuery = '', $countQuery = '', $fullCols = array(), $fullParams = array(), $wktIndex = -1)
+	public function __construct($fullQuery = '', $countQuery = '', $fullCols = array(), $fullParams = array(), $wktIndex = -1, $extraColumns = null)
 	{
 		$this->tableName = 'dataset';
 		$this->idField = 'dat_id';
@@ -35,7 +36,8 @@ class DatasetModel extends BaseModel
 		$this->fullQuery = $fullQuery;
 		$this->countQuery = $countQuery;
 		$this->fullCols = $fullCols;
-	  	$this->fullParams = $fullParams;
+  	$this->fullParams = $fullParams;
+		$this->extraColumns = $extraColumns;
 		$this->wktIndex = $wktIndex;
 		if($fullQuery !== '')
 			$this->prepared = true;
@@ -112,16 +114,9 @@ class DatasetModel extends BaseModel
 		$effectiveGeographyId = $dataset['dat_geography_id'];
 
 		$cols = array();
-		$cols = $this->AppendGeographyTree($cols, $joins, $effectiveGeographyId);
 
-		if($dataset['type'] == 'S')
-			$cols = $this->AppendShapeColumns($cols);
+		$this->AppendExtraColumns($cols, $dataset, $joins, $effectiveGeographyId, $getPolygon);
 
-		if ($getPolygon != null)
-		{
-			$cols = $this->AppendPolygon($cols, $dataset, $getPolygon);
-			$this->wktIndex = count($cols) - 1;
-		}
 		$cols = array_merge($cols, $this->GetDatasetColumns($dataset['id']));
 
 		$cols = $this->Deduplicate($cols);
@@ -137,6 +132,26 @@ class DatasetModel extends BaseModel
 		$this->prepared = true;
 
 		Profiling::EndTimer();
+	}
+	private function AppendExtraColumns(&$cols, $dataset, &$joins, &$effectiveGeographyId, $getPolygon)
+	{
+		if ($this->extraColumns == 'basic' || $getPolygon != null)
+		{
+			// agrega los joins para columnas extra y/o para getPolygon:
+			$cols = $this->AppendGeographyTree($cols, $joins, $effectiveGeographyId);
+			if($dataset['type'] == 'S')
+				$cols = $this->AppendShapeColumns($cols);
+		}
+
+		if ($this->extraColumns === null)
+			// si no le interesan las columnas extra, se asegura de no ponerlas en el select
+			$cols = array();
+		// se fija si van con polígono
+		if ($getPolygon != null)
+		{
+			$cols = $this->AppendPolygon($cols, $dataset, $getPolygon);
+			$this->wktIndex = count($cols) - 1;
+		}
 	}
 
 	public function GetCols()

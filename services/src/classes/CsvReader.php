@@ -330,19 +330,32 @@ class CsvReader
 			if($isHeader)
 				return $line;
 
-			//hace que las filas tengan al menos la mismas cantidad de elementos que el header.
-			if(count($line) < $this->headLength)
-				$line = array_merge($line, array_fill(0, $this->headLength - count($line), null));
-
-			if($byCol)
+			// solo agrega filas que tengan contenido
+			if ($this->LineHasContent($line))
 			{
-				for($j = 0; $j < count($line); $j++)
-					$data[$j][] = $line[$j];
+				//hace que las filas tengan al menos la mismas cantidad de elementos que el header.
+				if(count($line) < $this->headLength)
+					$line = array_merge($line, array_fill(0, $this->headLength - count($line), null));
+
+				if($byCol)
+				{
+					for($j = 0; $j < count($line); $j++)
+						$data[$j][] = $line[$j];
+				}
+				else
+					$data[] = $line;
 			}
-			else
-				$data[] = $line;
 		}
 		return $data;
+	}
+	private function LineHasContent($line)
+	{
+		for($j = 0; $j < count($line); $j++)
+		{
+			if ($line[$j] !== null && $line[$j] !== '')
+				return true;
+		}
+		return false;
 	}
 
 	private function ReadLines($count)

@@ -12,7 +12,7 @@ class CsvReaderTest extends TestCase
 	public function testReadFile()
 	{
 		$reader = new CsvReader();
-		$reader->Open(Paths::GetTestsDataLocalPath() . '/test.csv');
+		$reader->Open(Paths::GetTestsDataLocalPath() . '/testBasico.csv');
 
 		$header = $reader->GetHeader();
 		$this->assertEquals($header, ['a', 'b', 'c']);

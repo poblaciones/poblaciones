@@ -46,7 +46,7 @@ def main():
     except:
         print('Error: ', sys.exc_info())
         traceback.print_exc()
-        os._exit(1)
+        sys.exit(1)
 
 
 def process_kmz(in_file, out_file, out_path, generate_files, folder_name):

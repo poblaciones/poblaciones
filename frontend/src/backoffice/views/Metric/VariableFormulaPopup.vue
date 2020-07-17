@@ -14,11 +14,11 @@
 										 :list='Dataset.GetNumericAndRichColumns()'
 										 :render='formatColumn'
 										 @selected="updateValues"
-										 helper='Valor numérico para el cálculo del indicador.'
+										 helper='Variable de categorías o valor numérico para el cálculo del indicador.'
 										 />
 				</div>
 
-			<div class='md-layout-item md-size-75 md-small-size-100'>
+			<div class='md-layout-item md-size-75 md-small-size-100' v-show="!DataColumnIsCategorical">
 				<mp-select label='Normalización' :canEdit='canEdit'
 										v-model='newNormalization'
 										list-key='Id'
@@ -94,7 +94,7 @@ export default {
 			this.$refs.invoker.do(this.Dataset,
 					this.Dataset.UpdateVariable, this.Level, this.Variable).then(function() {
 					loc.hide();
-					});
+				});
 		},
 		receiveValue() {
 			this.newVariable = this.Dataset.fromTwoColumnVariable(this.Variable.Data, this.Variable.DataColumn);
@@ -102,18 +102,41 @@ export default {
 		},
 		updateValues() {
 			// Resuelve valor
+			var wasCategorical = this.Variable.DataColumnIsCategorical;
+
 			var data = this.Dataset.toTwoColumnVariable(this.newVariable);
 			this.Variable.Data = data.Info;
 			this.Variable.DataColumn = data.Column;
-			// Resuelve normalización
-			var normalization = this.Dataset.toTwoColumnVariable(this.newNormalization);
-			this.Variable.Normalization = normalization.Info;
-			this.Variable.NormalizationColumn = normalization.Column;
+			this.Variable.DataColumnIsCategorical = this.DataColumnIsCategorical;
+
+			if (this.Variable.DataColumnIsCategorical) {
+				// La pone como variable de corte
+				this.Variable.Symbology.CutMode = 'V';
+				this.Variable.Symbology.CutColumn = this.Variable.DataColumn;
+				this.Variable.Normalization = null;
+				this.Variable.NormalizationColumn = null;
+			} else {
+				// Resuelve normalización
+				var normalization = this.Dataset.toTwoColumnVariable(this.newNormalization);
+				this.Variable.Normalization = normalization.Info;
+				this.Variable.NormalizationColumn = normalization.Column;
+				// No deja categorías zombies
+				if (wasCategorical) {
+					this.Variable.Symbology.CutMode = 'S';
+					this.Variable.Symbology.CutColumn = null;
+				}
+			}
 		},
 	},
 	computed: {
 		Dataset() {
 			return window.Context.CurrentDataset;
+		},
+		DataColumnIsCategorical() {
+			if (!this.Variable || !this.Variable.DataColumn) {
+				return false;
+			}
+			return this.Dataset.ColumnHasLabels(this.Variable.DataColumn);
 		},
 		Work() {
 			return window.Context.CurrentWork;

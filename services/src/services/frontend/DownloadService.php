@@ -11,7 +11,7 @@ class DownloadService extends BaseService
 	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId)
 	{
 		$dm = new DownloadManager();
-		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, false);
+		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, false, 'basic');
 	}
 
 	public function StepMultiRequestFile($key)
@@ -23,7 +23,7 @@ class DownloadService extends BaseService
 	public static function GetFileBytes($type, $workId, $datasetId, $clippingItemId)
 	{
 		Statistics::StoreDownloadDatasetHit($workId, $datasetId, $type);
-		return DownloadManager::GetFileBytes($type, $datasetId, $clippingItemId,false);
+		return DownloadManager::GetFileBytes($type, $datasetId, $clippingItemId, false);
 	}
 }
 

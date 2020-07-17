@@ -147,7 +147,7 @@ html, body {
 
 .topbar {
 	position: fixed; overflow: hidden;
-	padding: 14px; top: 0px; width: 20px;
+	padding: 13px; top: 0px; width: 20px;
 	height: 52px; z-index: 10000;
 	background-color: #00A0D2;
 	color: #fff;

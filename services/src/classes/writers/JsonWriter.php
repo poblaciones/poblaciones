@@ -1,6 +1,6 @@
 <?php
 
-namespace helena\services\common;
+namespace helena\classes\writers;
 
 use minga\framework\IO;
 use minga\framework\Log;

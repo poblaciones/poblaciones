@@ -18,7 +18,7 @@ def main():
 
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print('Usage: ' + sys.argv[0] + ' inputfile [outputpath]')
-        os._exit(1)
+        sys.exit(1)
 
     if len(sys.argv) == 2:
         sys.argv.append('')
@@ -60,12 +60,12 @@ def main():
 
         print('Files successfully created.')
 
-        os._exit(0)
+        return
 
     except:
         print("Error: ", sys.exc_info())
         traceback.print_exc()
-        os._exit(1)
+        sys.exit(1)
 
 
 def chunks(lst, n):

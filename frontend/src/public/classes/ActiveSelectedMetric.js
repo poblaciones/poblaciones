@@ -2,7 +2,6 @@ import LocationsComposer from '@/public/composers/LocationsComposer';
 import SvgComposer from '@/public/composers/SvgComposer';
 import Vue from 'vue';
 
-import MetricRouter from '@/public/classes/MetricRouter';
 import h from '@/public/js/helper';
 import err from '@/common/js/err';
 import axios from 'axios';
@@ -15,7 +14,6 @@ export default ActiveSelectedMetric;
 function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 
 	this.$Segment = null;
-	this.$Router = new MetricRouter(this);
 	this.$calculatedSymbol = null;
 	this.cancelUpdateSummary = null;
 	this.cancelUpdateRanking = null;
