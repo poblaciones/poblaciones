@@ -144,6 +144,7 @@ class MetadataModel extends BaseModel
 								c1.dco_variable AS mvv_data_column_variable, c1.dco_caption AS mvv_data_column_caption,
 								c2.dco_variable AS mvv_normalization_column_variable, c2.dco_caption AS mvv_normalization_column_caption,
 								mvv_normalization, mvv_normalization_scale, mvv_normalization_column_id,
+								mvv_data_column_is_categorical,
 								mvv_data, mvv_data_column_id, geo_caption, geo_revision
 								FROM " . $metricToVariableJoin . "
 								JOIN " . $this->draftPreffix . "dataset ON mvl_dataset_id = dat_id
