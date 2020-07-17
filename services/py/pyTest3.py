@@ -10,7 +10,7 @@ def main():
 		os._exit(1)
 
 	try:
-		print ('running ok')
+		print('running ok')
 		return
 
 	except:

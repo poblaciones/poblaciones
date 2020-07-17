@@ -174,13 +174,13 @@ class DownloadManager
 		// c = csv
 		// x = excel
 		// t = stata
-		// h = shapefile
+		// hw = shapefile
 
 		// La segunda letra (opcional) es:
 		// w = wkt
 		// g = geojson
 
-		if ($type === 'h') return;
+		if ($type === 'hw') return;
 		if (strlen($type) > 0)
 		{
 			if ($type[0] === 's' || $type[0] === 'z' || $type[0] === 'c' || $type[0] === 't' || $type[0] === 'x')
