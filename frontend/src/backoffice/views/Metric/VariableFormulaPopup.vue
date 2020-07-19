@@ -18,7 +18,7 @@
 										 />
 				</div>
 
-			<div class='md-layout-item md-size-75 md-small-size-100' v-show="!DataColumnIsCategorical">
+			<div class='md-layout-item md-size-75 md-small-size-100' v-show="!DataColumnIsCategorical()">
 				<mp-select label='Normalización' :canEdit='canEdit'
 										v-model='newNormalization'
 										list-key='Id'
@@ -100,6 +100,12 @@ export default {
 			this.newVariable = this.Dataset.fromTwoColumnVariable(this.Variable.Data, this.Variable.DataColumn);
 			this.newNormalization = this.Dataset.fromTwoColumnVariable(this.Variable.Normalization, this.Variable.NormalizationColumn);
 		},
+		DataColumnIsCategorical() {
+			if (!this.Variable || !this.Variable.DataColumn) {
+				return false;
+			}
+			return this.Dataset.ColumnHasLabels(this.Variable.DataColumn);
+		},
 		updateValues() {
 			// Resuelve valor
 			var wasCategorical = this.Variable.DataColumnIsCategorical;
@@ -107,7 +113,7 @@ export default {
 			var data = this.Dataset.toTwoColumnVariable(this.newVariable);
 			this.Variable.Data = data.Info;
 			this.Variable.DataColumn = data.Column;
-			this.Variable.DataColumnIsCategorical = this.DataColumnIsCategorical;
+			this.Variable.DataColumnIsCategorical = this.DataColumnIsCategorical();
 
 			if (this.Variable.DataColumnIsCategorical) {
 				// La pone como variable de corte
@@ -131,12 +137,6 @@ export default {
 	computed: {
 		Dataset() {
 			return window.Context.CurrentDataset;
-		},
-		DataColumnIsCategorical() {
-			if (!this.Variable || !this.Variable.DataColumn) {
-				return false;
-			}
-			return this.Dataset.ColumnHasLabels(this.Variable.DataColumn);
 		},
 		Work() {
 			return window.Context.CurrentWork;

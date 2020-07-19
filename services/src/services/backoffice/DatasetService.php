@@ -48,6 +48,7 @@ class DatasetService extends DbSession
 		// Crea la variable default
 		$variable = $metricService->GetNewVariable();
 		$variable->setIsDefault(true);
+		$variable->setDataColumnIsCategorical(false);
 		$variable->setOrder(1);
 		$variable->setCaption('');
 		$variable->setData('N');

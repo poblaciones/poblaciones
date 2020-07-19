@@ -631,7 +631,10 @@ ActiveDataset.prototype.GetRichColumns = function () {
 
 ActiveDataset.prototype.ColumnHasLabels = function (column) {
 	var labels = this.Labels[column.Id];
-	return (labels && labels.length > 0);
+	if (!labels)
+		return false;
+	else
+		return (labels.length > 0);
 };
 
 
