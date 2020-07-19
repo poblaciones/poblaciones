@@ -40,6 +40,7 @@ class MetricService extends BaseService
 		$variable->setNormalizationScale(100);
 		$variable->setIsDefault(false);
 		$variable->setDefaultMeasure('N');
+		$variable->setDataColumnIsCategorical(false);
 
 		$symbology = new entities\DraftSymbology();
 		$symbology->setCategories(4);
