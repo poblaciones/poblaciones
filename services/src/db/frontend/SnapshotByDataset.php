@@ -72,7 +72,7 @@ class SnapshotByDataset extends BaseModel
 
 				$from = $this->tableName;
 
-				$where = $this->spatialConditions->UrbanityCondition($urbanity);
+				$where = str_replace('AND ', '', $this->spatialConditions->UrbanityCondition($urbanity));
 
 				$baseQuery = new QueryPart($from, $where, null, $select, $groupBy);
 
@@ -169,7 +169,7 @@ class SnapshotByDataset extends BaseModel
 		}
 		$from = $this->tableName;
 
-		$where = $this->spatialConditions->UrbanityCondition($urbanity);
+		$where = str_replace('AND ', '', $this->spatialConditions->UrbanityCondition($urbanity));
 
 		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
 
@@ -270,7 +270,7 @@ class SnapshotByDataset extends BaseModel
 		}
 		$from = $this->tableName;
 
-		$where = $this->spatialConditions->UrbanityCondition($urbanity);
+		$where = str_replace('AND ', '', $this->spatialConditions->UrbanityCondition($urbanity));
 
 		if ($hasTotals)
 		{

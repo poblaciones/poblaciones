@@ -10,6 +10,7 @@ use helena\db\frontend\MetadataModel;
 use helena\services\frontend as services;
 use helena\controllers\frontend as controllers;
 use helena\services\common as commonServices;
+use helena\services\backoffice\InstitutionService;
 
 use helena\classes\GlobalTimer;
 use helena\classes\App;
@@ -254,6 +255,14 @@ App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) 
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
 	return $controller->GetMetadataPdf($metadataId, $datasetId, false, $workId);
+});
+
+App::$app->get('/services/works/GetInstitutionWatermark', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+	$watermarkId = Params::GetIntMandatory('iwmid');
+	$controller = new InstitutionService();
+	return $controller->GetInstitutionWatermark($watermarkId, false);
 });
 
 // ej. http://mapas/services/works/GetWorkImage?w=12

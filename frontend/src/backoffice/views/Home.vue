@@ -100,7 +100,8 @@ export default {
 }
 
 .transparentTab {
-	background-color: #fafafa; padding: 4px;
-	margin-top: -10px;
+	background-color: #fafafa;
+	padding: 4px;
+	//margin-top: -10px;
 }
 </style>

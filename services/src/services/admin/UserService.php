@@ -16,7 +16,8 @@ class UserService extends BaseService
 {
 	public function GetNewUser()
 	{
-		$entity = new entities\User();
+		$entity = new entities\User();		
+		$entity->setDeleted(false);
 		$entity->setPrivileges('P');
 		return $entity;
 	}
@@ -41,6 +42,7 @@ class UserService extends BaseService
 	public function UpdateUser($user, $password, $verification)
 	{
 		Profiling::BeginTimer();
+		$user->setDeleted(false);
 		App::Orm()->Save($user);
 		if ($password !== null && strlen($password) > 0)
 		{

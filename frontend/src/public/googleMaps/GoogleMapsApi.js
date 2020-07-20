@@ -70,6 +70,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 	var myMapOptions = {
 		mapTypeControlOptions: {
 			style: this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+			position: google.maps.ControlPosition.TOP_LEFT,
 			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
 		},
 		scaleControl: true,
@@ -154,7 +155,7 @@ GoogleMapsApi.prototype.AddCopyright = function () {
 	var controlDiv = document.createElement('DIV');
 	controlDiv.innerHTML = "<div class='copyrightText'>Poblaciones © 2020 CONICET/ODSA-UCA. " +
 		"<a class='copyrightText' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. " +
-		"<a class='copyrightText' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments'></i> Contacto</a></div>";
+		"<a class='copyrightText' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a></div>";
 	controlDiv.className = "copyright";
 	controlDiv.index = 0;
 	this.gMap.controls[this.google.maps.ControlPosition.BOTTOM_RIGHT].push(controlDiv);

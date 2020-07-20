@@ -39,7 +39,6 @@ export default {
 	},
 	data() {
 		return {
-			bgColor: '#00A0D2',
 			action: {
 				Metrics: []
 			},
@@ -63,8 +62,17 @@ export default {
 				ret.push(fabAction);
 			}
 			return ret;
+		},
+		bgColor(){
+			if (this.work && this.work.Current && this.work.Current.PrimaryColor){
+				return '#' + this.work.Current.PrimaryColor;
+			}
+			return '#00A0D2';
 		}
 	},
+	props: [
+		'work',
+	],
 	methods: {
 		loadFabMetrics() {
 			const loc = this;
@@ -92,8 +100,8 @@ export default {
 </script>
 
 <style scoped>
-.fab-wrapper {
-	z-index: 1!important;
-}
+	.fab-wrapper {
+		z-index: 2!important;
+	}
 </style>
 

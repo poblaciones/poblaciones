@@ -3,7 +3,7 @@
 		<div v-for="(variable, index) in level.Variables" :key="variable.Id">
 			<div class="variableBlock">
 				<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')" class="variableRow hand" v-on:click="clickVariable(index)">
-					<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle"></i>
+					<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle circulo"></i>
 					{{ (variable.Name ? variable.Name : 'Conteo') }}
 					<span v-if="index === level.SelectedVariableIndex || level.Variables.length == 1" v-on:click="toggleVariable()" class='hand'>
 						<chevron-down-icon v-if="version.LabelsCollapsed"
@@ -91,15 +91,15 @@ export default {
 <style scoped>
 .variableRow
 {
-	padding: 2px 0px 0px 0px;
+	padding: 0.2rem 0rem 0rem 0rem;
 }
 .variableBlock
 {
-	padding: 4px 0px 4px 0px;
+	padding: 0.2rem 0rem 0.2rem 0rem;
 }
 .variablesBlock
 {
-	padding: 6px 0px 10px 0px;
+	padding: 0.3rem 0rem 0.4rem 0rem;
 }
 .fa-left
 {

@@ -236,7 +236,7 @@ export default {
 }
 .localTableCompact td {
 	border: 0px;
-	padding: 3px;
+	padding: 2px;
 	vertical-align: top;
 }
 
