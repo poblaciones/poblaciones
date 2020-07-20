@@ -13,6 +13,8 @@ class Institution extends BaseMapModelLabeled
 	public $Address;
 	public $Phone;
 	public $Country;
+	public $WatermarkId;
+	puclic $PrimaryColor;
 
 	public static function GetMapLabeled()
 	{
@@ -23,6 +25,8 @@ class Institution extends BaseMapModelLabeled
 			array('ins_email', 'Email', 'Correo electrónico'),
 			array('ins_address', 'Address', 'Dirección postal'),
 			array('ins_phone', 'Phone', 'Teléfono'),
-			array('ins_country', 'Country', 'País'));
+			array('ins_country', 'Country', 'País'),
+			array('ins_watermark_id', 'WatermarkId', 'Logo'),
+			array('ins_color', 'PrimaryColor', 'PrimaryColor'));
 	}
 }

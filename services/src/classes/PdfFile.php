@@ -117,14 +117,14 @@ class PdfFile
 	{
 		Profiling::BeginTimer();
 		if ($mail != '')
-				$this->WriteIndentedPair('Correo electrónico', $this->FormatEmail($mail), false);
+				$this->WriteIndentedPair('Correo electrónico:', $this->FormatEmail($mail), false, false);
 		Profiling::EndTimer();
 	}
 	public function WriteDoubleIndentedMail($mail)
 	{
 		Profiling::BeginTimer();
 		if ($mail != '')
-				$this->WriteDoubleIndentedPair('Correo electrónico', $this->FormatEmail($mail), false);
+				$this->WriteDoubleIndentedPair('Correo electrónico:', $this->FormatEmail($mail), false, false);
 		Profiling::EndTimer();
 	}
 	public function WriteIndentedPair($label, $text, $escape = true, $addDots = true)
@@ -163,7 +163,8 @@ class PdfFile
 			return;
 		Profiling::BeginTimer();
 		if ($addDots && Str::EndsWith($text, ".") == false) $text .= ".";
-		$this->WriteIndenterTable($label . ":", $text, "2", $escape);
+		if ($addDots) $label .= ":";
+		$this->WriteIndenterTable($label, $text, "2", $escape);
 		Profiling::EndTimer();
 	}
 
@@ -205,9 +206,15 @@ class PdfFile
 	}
 	public function WriteIndentedPairLink($label, $url, $escape = true)
 	{
-		$label = trim($label);
+		$label = trim($label) . ':';
 		$link = $this->FormatLink($url, $url);
 		$this->WriteIndentedPair($label, $link, false, false);
+	}
+	public function WriteDoubleIndentedPairLink($label, $url, $escape = true)
+	{
+		$label = trim($label) . ':';
+		$link = $this->FormatLink($url, $url);
+		$this->WriteDoubleIndentedPair($label, $link, false, false);
 	}
 	public function WritePair($label, $text, $escape = true)
 	{
@@ -221,7 +228,7 @@ class PdfFile
 
 		if (Str::StartsWith($text, 'http'))
 			$text = "<a class='link' href='" . $text . "'>" . $text . '</a>';
-		if (Str::EndsWith($text, ".") == false) $text .= ".";
+		elseif (Str::EndsWith($text, ".") == false) $text .= ".";
 		$this->WriteIndentedText($text, false);
 		Profiling::EndTimer();
 	}

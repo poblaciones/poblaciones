@@ -10,16 +10,17 @@ import os
 import sys
 import re
 import io
+from string import capwords
 
-# python3 kmx2csv.py test.kmz
-# dependencies: /usr/bin/python -m pip install -U bs4
-# python -m pip install BeautifulSoup4
+# dependencies: bs4 lxml unicodecsv
+# pip install bs4 lxml unicodecsv
 # Usage: python kmx2csv.py [kmz|kml] in_file out_path [true|false] [all|folder_name]
 
 
 def main():
     if len(sys.argv) < 4 or len(sys.argv) > 6:
-        print(f'Usage: {sys.argv[0]} file_extesion in_file out_path [generate_files] [folder_name]')
+        print(
+            f'Usage: {sys.argv[0]} file_extesion in_file out_path [generate_files] [folder_name]')
         os._exit(1)
     if len(sys.argv) == 4:
         sys.argv.append('true')
@@ -70,7 +71,8 @@ def process_kml(in_file, out_file, tmp_dir, generate_files, folder_name):
     ''' Procesa un archivo KML '''
     files_kml = []
     with io.open(in_file, 'r', encoding='utf8') as kml_file:
-        kml_file = kml_file.read().replace('’', "'").replace('“', '"').replace('”', '"')
+        kml_file = kml_file.read().replace('’', "'").replace('“', "'").replace('”', "'").replace('<br><br>', '<br>').replace(
+            '<br>', ' /// ').replace('descripción: ', 'Descripción: ').replace('nombre: ', 'Nombre: ')
         kml_as_xml = BeautifulSoup(kml_file, 'xml')
         doc = Document(kml_as_xml)
         if len(doc.get_folders()) > 1:
@@ -95,7 +97,6 @@ def process_kml(in_file, out_file, tmp_dir, generate_files, folder_name):
                                     row = createRow(folder, placemark, place)
                                     awriter.writerow(row)
         else:
-            # print(out_file)
             filename, _ = os.path.splitext(Path(out_file).stem)
             files_kml.append(filename)
             if generate_files == True:
@@ -127,16 +128,16 @@ def urlify(text):
 def createTitle():
     title = [
         'Nombre Folder',
-        'Descripcion Folder',
+        #'Descripción Folder',
         'Nombre Placemark',
-        'Descripcion Placemark',
-        'ExtendedData',
+        'Descripción Placemark',
+        'Extended Data',
         'Nombre Place',
-        'Descripcion Place',
-        'Longitude',
-        'Latitude',
-        'Altitude',
-        'GeoJson'
+        'Descripción Place',
+        'Longitud',
+        'Latitud',
+        'Altitud',
+        'GeoJSON'
     ]
     return title
 
@@ -144,12 +145,12 @@ def createTitle():
 def createRow(folder, placemark, place):
     row = place.get_row()  # 4 elementos: x,y,z,GeoJson
     row.insert(0, formatLine(folder.get_name()))
-    row.insert(1, formatLine(folder.get_description()))
-    row.insert(2, formatLine(placemark.get_name()))
-    row.insert(3, formatLine(placemark.get_description()))
-    row.insert(4, formatLine(placemark.get_extended_data()))
-    row.insert(5, formatLine(place.get_name()))
-    row.insert(6, formatLine(place.get_description()))
+    #row.insert(1, formatLine(folder.get_description()))
+    row.insert(1, formatLine(placemark.get_name()))
+    row.insert(2, formatLine(placemark.get_description()))
+    row.insert(3, formatLine(placemark.get_extended_data()))
+    row.insert(4, formatLine(place.get_name()))
+    row.insert(5, formatLine(place.get_description()))
     # row = [placemark.get_extended_data()]
     return row
 
@@ -157,8 +158,8 @@ def createRow(folder, placemark, place):
 def formatLine(line):
     # return line
     if line == None:
-        return '<br></br>'
-    return '<br>' + line + '</br>'
+        return ''
+    return line.strip()
 
 
 class Document:
@@ -274,7 +275,9 @@ class Address:
         self.__parse__(xml)
 
     def __parse__(self, xml):
-        xy = xml.text.strip().split(' ')
+        coord_text = xml.text.strip()
+        coord_text = re.sub(r'\s+', ' ', coord_text)
+        xy = coord_text.split(' ')
         coord_str = xy[1] + ',' + xy[0] + ',0'
         self.coordinates.append(Coordinate(coord_str))
 
@@ -379,20 +382,21 @@ class ExtendedData:
             if len(data_value) != 0:
                 data_value = data_value[0]
                 data_value = data_value.replace('\n', '')
-                data_value = data_value.replace('\xa0', '')
+                data_value = re.sub(r'\\x..', '', data_value) # data_value.replace('\xa0', ' ')
                 self.data[data['name']] = data_value
 
     def get_data(self):
         extData = ''
         for key in self.data:
-            extData = extData + '<br><b>' + key + \
-                '</b>' + ':' + self.data[key] + '</br>'
+            extData = extData + capwords(key) + \
+                ': ' + self.data[key] + ' /// '
         return extData
 
     def get_row(self):
         extData = ''
         for key in self.data:
-            extData = extData + key + ':' + self.data[key] + '\n'
+            extData = extData + capwords(key) + \
+                ': ' + self.data[key] + ' /// '
         return extData
 
 

@@ -158,7 +158,7 @@ class Db
 		$ret = $this->db->fetchAssoc($sql, $params);
 		Performance::EndDbWait();
 		Profiling::EndTimer();
-		if (sizeof($ret) == 0 || $ret == null)
+		if ((is_array($ret) && sizeof($ret) == 0) || $ret == null)
 			return null;
 		return $ret[array_keys($ret)[0]];
 	}
@@ -170,7 +170,7 @@ class Db
 		$ret = $this->db->fetchAssoc($sql, $params);
 		Performance::EndDbWait();
 		Profiling::EndTimer();
-		if (sizeof($ret) == 0 || $ret == null)
+		if ((is_array($ret) && sizeof($ret) == 0) || $ret == null)
 			throw new ErrorException("Scalar query returned no results.");
 		return $ret[array_keys($ret)[0]];
 	}

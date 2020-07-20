@@ -41,6 +41,8 @@ class SourceModel extends BaseModel
 										i2.ins_address as src_ins_address,
 										i2.ins_phone as src_ins_phone,
 										i2.ins_country as src_ins_country,
+										i2.ins_watermark_id as src_ins_watermark_id,
+										i2.ins_color as src_ins_color,
 										c2.con_id as src_con_id,
 										c2.con_person as src_con_person,
 										c2.con_email as src_con_email,

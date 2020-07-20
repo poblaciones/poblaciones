@@ -1,12 +1,11 @@
 <template>
 	<div>
 		<div class="btn-group pull-right" style="clear:both">
-			<h4 class="title">
+			<h5 class="title">
 				<mp-close-button v-on:click="clickQuitar" />
 
 				<button title="Opciones" type="button" class="close "
-								v-on:click="clickCustomize" style="margin-right: 7px; margin-left: -2px; margin-top: 4px;
-font-size: 12px">
+								v-on:click="clickCustomize" style="margin-right: 7px; margin-left: -2px; margin-top: 3px; font-size: 0.8rem">
 					<i class="fas fa-sliders-h"></i>
 				</button>
 
@@ -21,7 +20,36 @@ font-size: 12px">
 					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px;" />
 				</button>
 
-			</h4>
+				<span class="dropdown">
+					<button type="button" class="close lightButton" data-toggle="dropdown" title="Urbano/Rural">
+						<i class="fas fa-users" v-text="getUrbanityTextActive()"/>
+					</button>
+					<ul class="dropdown-menu dropdownMargin">
+						<li>
+							<button type="button" class="close lightButton btn-full" v-on:click="changeUrbanity('N')">Todo</button>
+						</li>
+						<li>
+							<button type="button" class="close lightButton btn-full" v-on:click="changeUrbanity('UD')">Urbano</button>
+						</li>
+						<li>
+							<button type="button" class="close lightButton btn-full" v-on:click="changeUrbanity('U')">Urbano Agrupado</button>
+						</li>
+						<li>
+							<button type="button" class="close lightButton btn-full" v-on:click="changeUrbanity('D')">Urbano Disperso</button>
+						</li>
+						<li>
+							<button type="button" class="close lightButton btn-full" v-on:click="changeUrbanity('RL')">Rural</button>
+						</li>
+						<li>
+							<button type="button" class="close lightButton btn-full" v-on:click="changeUrbanity('R')">Rural Agrupado</button>
+						</li>
+						<li>
+							<button type="button" class="close lightButton btn-full" v-on:click="changeUrbanity('L')">Rural Disperso</button>
+						</li>
+					</ul>
+				</span>
+
+			</h5>
 		</div>
 	</div>
 </template>
@@ -43,6 +71,7 @@ export default {
 	data() {
 		return {
 			work: {},
+			urbanity: '',
 		};
 	},
 	methods: {
@@ -85,6 +114,29 @@ export default {
 			window.SegMap.MapsApi.FitEnvelope(extents, true);
 			this.$refs.zoomExtentsBtn.blur();
 		},
+		getUrbanityTextActive() {
+			if(this.urbanity === 'N') {
+				return '';
+			}else if(this.urbanity === 'UD') {
+				return ' - U';
+			}else if(this.urbanity === 'U') {
+				return ' - UA';
+			}else if(this.urbanity === 'D') {
+				return ' - UD';
+			}else if(this.urbanity === 'RL') {
+				return ' - R';
+			}else if(this.urbanity === 'R') {
+				return ' - RA';
+			}else if(this.urbanity === 'L') {
+				return ' - RD';
+			}
+		},
+		changeUrbanity(mode) {
+			this.metric.properties.SelectedUrbanity = mode;
+			window.SegMap.SaveRoute.UpdateRoute();
+			window.SegMap.UpdateMap();
+			this.urbanity = mode;
+		},
 		shouldClearSelection(intersect, extents) {
 			if (intersect === null) {
 				return true;
@@ -117,5 +169,13 @@ export default {
 
 .activeButton {
 	opacity: .45;
+}
+.btn-full {
+	width: 100%;
+}
+.dropdownMargin {
+	left: -70px;
+	right: auto;
+	margin-top: 25px;
 }
 </style>

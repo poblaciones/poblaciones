@@ -87,6 +87,7 @@ ClippingRouter.prototype.clippingFromRoute = function (args) {
 
 ClippingRouter.prototype.clippingChanged = function (frame1, clipping) {
 	if (frame1.ClippingRegionId !== clipping.ClippingRegionId ||
+		frame1.ClippingRegionId !== clipping.ClippingLevelName || /* TODO Bugfix */
 		frame1.ClippingFeatureId !== clipping.ClippingFeatureId) {
 		return true;
 	}

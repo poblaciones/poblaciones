@@ -10,7 +10,7 @@
 			<div v-on:click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 			<mp-close-button v-else v-on:click="doClose" />
 
-			<h4 class="title"><mp-label :text="'' + title" /></h4>
+			<h5 class="title"><mp-label :text="'' + title" /></h5>
 			<div class='stats' style="padding-top: 8px">
 				<span style="color: rgb(167, 167, 167);">{{ featureInfo.Type }}</span>
 			</div>

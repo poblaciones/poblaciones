@@ -3,9 +3,9 @@
 		<hr class="moderateHr"/>
 		<div>
 			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index" @RankingShown="rankingShown" />
-			<h4 class="title">
+			<h5 class="title">
 				<span class="drag">{{ metric.properties.Metric.Name }}</span>
-			</h4>
+			</h5>
 			<MetricVariables :metric="metric" />
 			<div class="sourceRow">
 				<div class="btn-group" style="float: left">
@@ -80,7 +80,7 @@ export default {
 
 .metricBlock
 {
-	padding-top: 2px;
+	padding-top: 1px;
 	cursor: default;
 }
 .drag {

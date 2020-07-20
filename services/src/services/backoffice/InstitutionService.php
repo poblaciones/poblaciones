@@ -6,7 +6,9 @@ use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\Arr;
+use minga\framework\IO;
 use minga\framework\ErrorException;
+use helena\db\frontend\FileModel;
 use helena\classes\Session;
 
 class InstitutionService extends BaseService
@@ -56,6 +58,24 @@ class InstitutionService extends BaseService
 		return $records;
 	}
 
+	public function GetInstitutionWatermark($watermarkId, $fromDraft=true)
+	{
+		$fileModel = new FileModel($fromDraft);
+		$outFile = IO::GetTempFilename() . '.tmp';
+		$fileModel->ReadFileToFile($watermarkId, $outFile);
+		$fileController = new FileService();
+		$dataURL = $fileController->ConvertFiletoBase64($outFile);
+		IO::Delete($outFile);
+		return $dataURL;
+	}
 
+	public function GetNewWatermark($institution)
+	{
+		$new = new entities\DraftFile(true);
+		$new->setName('watermark_'. uniqid());
+		$new->setType('image/*');
+		$institution->setWatermark($new);
+		return $institution;
+	}
 }
 
