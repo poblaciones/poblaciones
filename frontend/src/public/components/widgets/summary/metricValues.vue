@@ -26,7 +26,7 @@
 						<template v-if="label.Visible" class="labelRow">
 							<td class="dataBox">
 								<!-- 2575fb -->
-								<i :style="'color: ' + label.FillColor" class="fa drop fa-tint"></i>
+								<i :style="'color: ' + label.FillColor" class="fa drop fa-tint gotas"></i>
 							</td>
 							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
@@ -37,7 +37,7 @@
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted">
-								<i class="fa drop fa-tint"></i>
+								<i class="fa drop fa-tint gotas"></i>
 							</td>
 							<td class="dataBox text-muted" style="width: 100%">
 								{{ label.Name }}
@@ -424,7 +424,7 @@ export default {
 }
 .localTableCompact td {
 	border: 0px;
-	padding: 3px;
+	padding: 2px;
 	vertical-align: top;
 }
 

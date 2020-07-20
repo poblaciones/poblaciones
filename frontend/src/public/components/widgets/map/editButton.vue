@@ -1,5 +1,5 @@
 <template>
-	<div style="left: 15px!important; top: 195px; cursor: pointer; position: fixed"
+	<div id="edit-button" :style="bgColor"
 			 class="edit-button" title="Editar cartografía" @click="goEdit">
 		<span data-v-ac5aa574="" aria-label="Descargar" role="img" class="material-design-icon pencil-icon">
 			<svg fill="currentColor" style="width: 2em; height: 2em; margin-left: -10px;" class="material-design-icon__svg">
@@ -22,15 +22,20 @@ export default {
 	},
 	data() {
       return {
+		  bgColor: {},
       };
-  },
+    },
 	mounted() {
-
-		},
+		if (this.work.Current.PrimaryColor){
+			this.bgColor = {
+				'background-color': '#' + this.work.Current.PrimaryColor
+			};
+		}
+	},
 	props: [
 		'work',
 	],
-  methods: {
+    methods: {
 		absoluteMap(url) {
 			return str.AbsoluteUrl(url);
 		},
@@ -58,6 +63,11 @@ export default {
 		justify-content: center;
 	}
 
-
+	#edit-button {
+		left: 15px!important;
+		top: 25rem;
+		cursor: pointer;
+		position: fixed;
+	}
 </style>
 

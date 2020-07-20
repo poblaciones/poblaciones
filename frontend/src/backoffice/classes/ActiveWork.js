@@ -138,7 +138,6 @@ ActiveWork.prototype.GetUploadUrl = function () {
 	return window.host + '/services/backoffice/UploadFile';
 };
 
-
 ActiveWork.prototype.GetCreateFileUrl = function (bucketId) {
 	return window.host + '/services/backoffice/PostImportChunk?b=' + bucketId;
 };
@@ -194,8 +193,8 @@ ActiveWork.prototype.GetLevelToUse = function (allVersions, metricVersion) {
 	}
 };
 
-ActiveWork.prototype.UpdateInstitution = function (institution, container) {
-	var args = { 'w': this.properties.Id, 'i': institution };
+ActiveWork.prototype.UpdateInstitution = function (institution, container, watermarkImage) {
+	var args = { 'w': this.properties.Id, 'i': institution, 'iwm': watermarkImage };
 	var loc = this;
 	this.WorkChanged();
 	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateInstitution', args,
@@ -278,6 +277,11 @@ ActiveWork.prototype.GetGeographyItems = function (geographyId) {
 		{ 'g': geographyId }, 'obtener los ítems de la geografía');
 };
 
+ActiveWork.prototype.GetInstitutionWatermark = function (institution) {
+	var args = { 'w': this.properties.Id, 'iwmid': institution.Watermark.Id };
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetInstitutionWatermark', args,
+		'obtener el logo de la institución');
+};
 
 ActiveWork.prototype.UpdateMultilevelMatrix = function () {
 	var datasetMatrix = {};

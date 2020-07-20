@@ -22,7 +22,7 @@
 
 <script>
 import ClippingMetadata from '@/public/components/popups/clippingMetadata';
-import DownloadIcon from 'vue-material-design-icons/download.vue';
+import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
 
 export default {

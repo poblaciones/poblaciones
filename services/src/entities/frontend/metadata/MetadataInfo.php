@@ -23,6 +23,8 @@ class MetadataInfo extends BaseMapModel
 			'met_publication_date' => 'Date',
 			'met_license' => 'License',
 			'ins_caption' => 'Institution',
+			'ins_watermark_id' => 'WatermarkId',
+			'ins_color' => 'PrimaryColor',
 			'met_authors' => 'Authors');
 	}
 

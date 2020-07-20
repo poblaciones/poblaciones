@@ -2,11 +2,11 @@
 	<div class="toolbar no-print" style="display: block">
 	<div class="btn-group">
 		<button type="button" class="btn btn-default btn-xs"
-							title="Guardar como PNG..." v-on:click="capturePng()"><i class="fas fa-camera"/></button>
+							title="Guardar como PNG..." v-on:click="captureFullPng()"><i class="fas fa-camera"/></button>
+		<button type="button" class="btn btn-default btn-xs"
+							title="Guardar como PDF..." v-on:click="captureMapPdf(metrics)"><i class="fas fa-file-pdf"/></button>
 		<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" v-on:click="geolocate()"><i class="far fa-dot-circle"/></button>
-
-
 		<button v-if="useGradients" type="button" class="btn btn-default btn-xs"
 							:title="'Máscara poblacional ' + currentGradientOpacity" v-on:click="changeGradientOpacity(.25)"><i class="fas fa-satellite"/></button>
 	</div>
@@ -31,6 +31,13 @@
 				<ul class="shareIt dropdown-menu">
 					<li>
 						<div class="dToolboxBox">
+							<button type="button" class="btn btn-default btn-xs" title="Embeber mapa actual" v-on:click="showEmbeddedMapPopUp()">
+								<i class="fas fa-link"/>
+							</button>
+						</div>
+					</li>
+					<li>
+						<div class="dToolboxBox">
 							<div class="addthis_inline_share_toolbox"></div>
 						</div>
 					</li>
@@ -39,7 +46,7 @@
 			<button type="button" class="btn btn-default btn-xs" title="Guía de uso" v-on:click="showTutorial()">
 				<help-circle-icon title="Guía de uso" />
 			</button>
-			<button v-if='user.Logged && this.useExtraToolbar()' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos..." v-on:click="setFavorite()">
+			<button v-if='user.Logged && useExtraToolbar()' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos..." v-on:click="setFavorite()">
 				<i class="far fa-heart" />
 			</button>
 
@@ -63,32 +70,37 @@
 		</div>
 		<div style="clear: both"></div>
     <tour ref="Tour"></tour>
+    <embedded ref="Embedded"></embedded>
   </div>
 </template>
 
 <script>
+import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 import tour from '@/public/components/popups/tour';
+import embedded from '@/public/components/popups/embedded';
 import h from '@/public/js/helper';
 import a from '@/common/js/authentication';
 
 export default {
 	name: 'toolbar',
 	data() {
-			return {
-				currentGradientOpacity: 0.35
-			};
+		return {
+			currentGradientOpacity: 0.35
+		};
 	},
 	props: [
 		'frame',
 		'user',
 		'config',
-		'toolbarStates'
+		'toolbarStates',
+		'metrics'
 	],
 	components: {
-    tour,
-    HelpCircleIcon
+		tour,
+		HelpCircleIcon,
+		embedded,
 	},
 	methods: {
 		selectionModes() {
@@ -100,11 +112,14 @@ export default {
 				return [];
 			}
 		},
-    showTutorial() {
-      this.$refs.Tour.toggleModal();
-    },
-    useExtraToolbar() {
-      return window.UISettings_ExtraToolbar;
+		showTutorial() {
+			this.$refs.Tour.toggleModal();
+		},
+		showEmbeddedMapPopUp() {
+			this.$refs.Embedded.toggleModal();
+		},
+		useExtraToolbar() {
+			return window.UISettings_ExtraToolbar;
 		},
 		ignore(ele) {
 			return (ele.nodeName === 'IFRAME');
@@ -113,28 +128,128 @@ export default {
 			var loc = this;
 			window.SegMap.MapsApi.gMap.set('disableDefaultUI', true);
 			window.setTimeout(function() {
-				var mapObj = document.getElementById('map');
-				mapObj.style.overflow = 'unset';
+				var mapObj = loc.changeOverflowById(document.getElementById('map'), 'unset');
 				html2canvas(mapObj, { useCORS: true, ignoreElements: loc.ignore }).then(function(canvas) {
-					mapObj.style.overflow = 'hidden';
-					window.SegMap.MapsApi.gMap.set('disableDefaultUI', false);
-					var a = document.createElement('a');
-					// toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
-					a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-					a.download = 'mapa.png';
-					document.body.appendChild(a);
-					a.click();
-					a.parentNode.removeChild(a);
+					loc.changeOverflowById(mapObj, 'hidden');
+					loc.generatePng(canvas);
 				});
 			}, 100);
+		},
+		changeDisplayById(idObj, newValue) {
+			if (idObj !== null){
+				idObj.style.display = newValue;
+			}
+			return idObj;
+		},
+		changeDisplayByClass(classObjs, newValue) {
+			for (var i = 0; i < classObjs.length; i++) {
+				classObjs[i].style.display = newValue;
+			}
+			return classObjs;
+		},
+		removeClassAddText(classname, classToRemove, textToAdd){
+			var classObjs= document.getElementsByClassName(classname);
+			for (var i = 0; i < classObjs.length; i++) {
+				classObjs[i].classList.remove(classToRemove);
+				classObjs[i].innerHTML = textToAdd;
+			}
+			return classObjs;
+		},
+		addClassRemoveText(classObjs, classToAdd){
+			for (var i = 0; i < classObjs.length; i++) {
+				classObjs[i].classList.add(classToAdd);
+				classObjs[i].innerHTML = '';
+			}
+		},
+		changeOverflowById(idObj, newValue){
+			idObj.style.overflow = newValue;
+			return idObj;
+		},
+		generatePng(canvas, metrics){
+			window.SegMap.MapsApi.gMap.set('disableDefaultUI', false);
+			var a = document.createElement('a');
+			// toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
+			a.href = canvas.toDataURL('image/png');
+			a.download = 'mapa.png';
+			document.body.appendChild(a);
+			a.click();
+			a.parentNode.removeChild(a);
+		},
+		generatePdf(canvas, metrics) {
+			window.SegMap.MapsApi.gMap.set('disableDefaultUI', false);
+			var doc = new jsPDF({ orientation: 'landscape' });
+			var img = canvas.toDataURL('image/png');
+			var imgHeightMax = 175;
+			var imgWidthMax = 270;
+			var imgPosition = 25;
+
+			doc.setFontSize(20);
+			doc.text(15, 15, 'Poblaciones');
+			if(metrics.length > 0) {
+				var metricNames = metrics.map(m => m.properties.Metric.Name);
+				doc.setFontSize(10);
+				doc.text(15, 20, metricNames.join(' - '));
+			} else {
+				imgPosition = 20;
+				imgHeightMax = 180;
+			}
+			var imgHeight = imgHeightMax;
+			var imgWidth =  parseInt(imgHeight * (canvas.width / canvas.height), 10);
+			if (imgWidth > imgWidthMax){
+				imgWidth = imgWidthMax;
+				imgHeight =  parseInt(imgWidth * (canvas.height / canvas.width), 10);
+			}
+			doc.addImage(img,'PNG', 15, imgPosition, imgWidth, imgHeight, 'map', 'NONE');
+			doc.setFontSize(8);
+			doc.text(15, 205, window.location.href);
+			doc.save("mapaPoblaciones.pdf");
+		},
+		prepareMapAndExport(exportFunction, metrics){
+			var loc = this;
+			window.SegMap.MapsApi.gMap.set('disableDefaultUI', true);
+			window.setTimeout(function() {
+				var bodyObj = loc.changeOverflowById(document.body, 'visible');
+				var holderObj = loc.changeOverflowById(document.querySelector('#holder'), 'visible');
+				var toolbarTop = loc.changeDisplayById(document.querySelector('#toolbar-top'), 'none');
+				var collapseButtonRight = loc.changeDisplayById(document.querySelector('#collapseButtonRight'), 'none');
+				var searchBar = loc.changeDisplayById(document.querySelector('#search-bar'), 'none');
+				var fabPanel = loc.changeDisplayById(document.querySelector('#fab-panel'), 'none');
+				var editButton = loc.changeDisplayById(document.querySelector('#edit-button'), 'none');
+				var dropdown = loc.changeDisplayByClass(document.getElementsByClassName('dropdown'), 'none');
+				var btnGroup = loc.changeDisplayByClass(document.getElementsByClassName('btn-group pull-right'), 'none');
+				var circulos= loc.removeClassAddText('circulo','fa-circle','&#9679;');
+				var gotas= loc.removeClassAddText('gotas','fa-tint', '&#9670;');
+				var contacto= loc.removeClassAddText('contacto','fa-comments', '&#128172;');
+
+				html2canvas(bodyObj, { useCORS: true, ignoreElements: loc.ignore }).then(function(canvas) {
+					loc.changeOverflowById(bodyObj, 'hidden');
+					loc.changeOverflowById(holderObj, 'hidden');
+					loc.changeDisplayById(toolbarTop, 'block');
+					loc.changeDisplayById(collapseButtonRight, 'block');
+					loc.changeDisplayById(searchBar, 'block');
+					loc.changeDisplayById(fabPanel, 'flex');
+					loc.changeDisplayById(editButton, 'unset');
+					loc.changeDisplayByClass(dropdown, 'unset');
+					loc.changeDisplayByClass(btnGroup, 'unset');
+					loc.addClassRemoveText(circulos, 'fa-circle');
+					loc.addClassRemoveText(gotas, 'fa-tint');
+					loc.addClassRemoveText(contacto, 'fa-comments');
+
+					exportFunction(canvas, metrics);
+				});
+			}, 100);
+		},
+		captureFullPng() {
+			this.prepareMapAndExport(this.generatePng, []);
+		},
+		captureMapPdf(metrics) {
+			this.prepareMapAndExport(this.generatePdf, metrics);
 		},
 		hasGeolocation() {
 			return navigator && navigator.geolocation;
 		},
 		geolocate() {
-
 			if (navigator.geolocation) {
-
 				navigator.geolocation.getCurrentPosition(function (position) {
 					var coord = { Lat: position.coords.latitude, Lon: position.coords.longitude };
 					window.SegMap.SetMyLocation(coord);

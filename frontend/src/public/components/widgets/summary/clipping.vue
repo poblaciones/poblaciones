@@ -12,7 +12,7 @@
 											:useIcon="true" :clipping="clipping" :metadata="clipping.Region.Summary.Metadata" />
 		</div>
 		<div v-if="clipping.Region.Summary && selectedLevel()">
-			<h4 class="title">
+			<h3 class="title">
 			<div class="summaryBlock">
 				<div class="summaryRow">
 					Habitantes <span class="pull-right" :class="getMuted()">
@@ -27,7 +27,7 @@
 						<animatedNumber :value="areaKm2" format="km" /></span>
 				</div>
 			</div>
-			</h4>
+			</h3>
 
 			<div class="sourceRow">
 				<div class="btn-group">

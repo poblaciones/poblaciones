@@ -1,11 +1,11 @@
 <template>
-	<nav id="workPanel" class="navbar-fixed-top workPanel">
+	<nav id="workPanel" class="workPanel">
 		<div>
-			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody">
+			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody" :style="bgColor">
 				<!--button title="Cerrar" type="button" v-on:click="work.Current = null" class="close">
 					<span aria-hidden="true">&times;</span>
 				</button -->
-				<div class="title pull-right" style="margin-top: -1px">
+				<div class="title pull-right" style="margin-top: -2px">
 					<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
 					<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
 					<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
@@ -49,6 +49,7 @@ export default {
 		return {
 			showZones: false,
 			showPresentation: false,
+			bgColor: {},
 		};
 	},
 	methods: {
@@ -88,18 +89,26 @@ export default {
 				calculatedHeight = workPanelBody.offsetHeight + 'px';
 			}
 			var currentHeight = bar.style.height;
-
+			if (this.work.Current.PrimaryColor){
+				this.bgColor = {
+					'background-color': '#' + this.work.Current.PrimaryColor
+				};
+			}
 			if (visible !== currentVisible || (visible && currentHeight !== calculatedHeight)) {
 				if (visible) {
 					bar.style.height = calculatedHeight;
 					bar.style.display = 'block';
-					document.body.style.paddingTop = calculatedHeight;
+					var holder = document.querySelector('#holder');
+					holder.style.height = `calc(100% - ${calculatedHeight}px)`;
+					holder.style.top = calculatedHeight + 'px';
 					if (window.SegMap) {
 						window.SegMap.TriggerResize();
 					}
 				} else {
 					bar.style.display = 'none';
-					document.body.style.paddingTop = '0px';
+					var holder = document.querySelector('#holder');
+					holder.style.height = '100%';
+					holder.style.top = '0px';
 					this.work.Current = null;
 					if (window.SegMap) {
 						window.SegMap.SaveRoute.RemoveWork();
@@ -116,7 +125,10 @@ export default {
 				loc.updateWork();
 				// hack por problemas en chrome y firefox con navbar-fixed-top en la inicialización
 				var height = (loc.work.Current && loc.$refs.barBody ? loc.$refs.barBody.offsetHeight : 0);
-				document.body.style.paddingTop = height + "px";
+				var holder = document.querySelector('#holder');
+				holder.style.height = `calc(100% - ${height}px)`;
+				holder.style.offsetHeight = `calc(100% - ${height}px)`;
+				holder.style.top = height + 'px';
 			}, 50);
 		}
 	}
@@ -129,30 +141,31 @@ export default {
 	display: none;
 	background-color: white;
 	z-index: 1;
+	position: initial;
+	width: 100%;
 }
 .littleRow {
 	width: 100%;
-  text-overflow: ellipsis;
-  color: white;
-  margin-left: 1px;
-	font-size: 11px;
+	text-overflow: ellipsis;
+	color: white;
+	margin-left: 1px;
+	font-size: 1.1rem;
 }
 .sourceInfo
 {
-	margin-left: 10px;
-  font-size: 12.5px;
-  margin-top: 9px;
+	margin-left: 20px;
+	font-size: 1.1rem;
+	margin-top: 5px;
 }
 .preTitleRow {
-  text-transform: uppercase;
-  margin-bottom: 3px;
-  margin-top: -4px;
+	text-transform: uppercase;
+	margin-bottom: 3px;
+	margin-top: -4px;
 }
 .postTitleRow {
-  margin-bottom: -2px;
-  margin-top: -2px;
+	margin-bottom: -2px;
+	margin-top: -2px;
 }
-
 .titleRow {
 	line-height: 1.1em;
 	padding-bottom: 7px;
@@ -160,7 +173,7 @@ export default {
 	width: 100%;
 	text-overflow: ellipsis;
 	color: white;
-	font-size: 27px;
+	font-size: 2.2rem;
 }
 .infoRow {
 	padding: 7px 0px 0px 0px;
@@ -168,19 +181,17 @@ export default {
 }
 .smallButton {
 	color: white;
-  padding: 4px 14px;
-  border-color: white;
+	padding: 4px 14px;
+	border-color: white;
 }
 .spaceNext {
 	margin-right: 8px;
 }
-
 .workPanelBody {
 	background-color: #00A0D2;
-  color: #fff!important;
+	color: #fff!important;
 	border-radius: 1px;
-  padding: 12px 15px 6px 15px;
+	padding: 12px 2px 6px 12px;
 	box-shadow: 0 1px 4px 0 rgba(90,90,90,.32);
 }
-
 </style>

@@ -7,11 +7,11 @@
 					<div class="modal-header">
 						<slot name="header">
 						<a type="button" class="close" @click="cancel">x</a>
-						<h4 class="title">
+						<h5 class="title">
 							<slot name="title">
 							{{ title }}
 							</slot>
-						</h4>
+						</h5>
 						</slot>
 					</div>
 					<!--Container-->

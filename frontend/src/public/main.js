@@ -30,11 +30,13 @@ axios.defaults.withCredentials = true;
 
 import MpCloseButton from '@/public/components/controls/mpCloseButton';
 import MpLabel from '@/public/components/controls/mpLabel';
+import VueMobileDetection from 'vue-mobile-detection';
 
 Vue.component('mp-close-button', MpCloseButton);
 Vue.component('mp-label', MpLabel);
 
 Vue.use(Clipboard);
+Vue.use(VueMobileDetection);
 
 Vue.config.productionTip = false;
 Vue.use(VueHotkey);

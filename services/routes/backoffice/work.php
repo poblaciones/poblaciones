@@ -72,12 +72,30 @@ App::GetOrPost('/services/backoffice/UpdateInstitution', function (Request $requ
 
 	$controller = new services\InstitutionService();
 	$institution = App::ReconnectJsonParam(entities\DraftInstitution::class, 'i');
+	// Traigo el base64 de la nueva imagen
+	$watermarkImage = Params::Get('iwm');
+
+	if (!is_null($watermarkImage) && !empty($watermarkImage)){
+		$fileController = new services\FileService();
+		$bucket = $fileController->ConvertBase64toFile($watermarkImage);
+		$controller->GetNewWatermark($institution);
+		$fileController->SaveFile($institution->getWatermark(), $bucket->path . '/file.dat', true, 'image/png');
+	}
+
 	return App::OrmJson($controller->Update($institution));
 });
 
 App::$app->get('/services/backoffice/GetCurrentUserWorks', function (Request $request) {
 	$controller = new services\WorkService();
 	return App::Json($controller->GetCurrentUserWorks());
+});
+
+App::$app->get('/services/backoffice/GetInstitutionWatermark', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+	$watermarkId = Params::GetIntMandatory('iwmid');
+	$controller = new services\InstitutionService();
+	return $controller->GetInstitutionWatermark($watermarkId);
 });
 
 App::$app->get('/services/backoffice/GetWorkInfo', function (Request $request) {
