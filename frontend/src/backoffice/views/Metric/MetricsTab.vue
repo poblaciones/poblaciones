@@ -49,11 +49,11 @@
 								{{ item.MetricVersion.Metric.Caption }} ({{ item.MetricVersion.Caption }})
 							</div>
 							<template v-if="Work.CanEdit()">
-								<md-button class="md-icon-button" title="Agregar variable" @click="createNewVariable(item)">
-									<md-icon>add_circle_outline</md-icon>
-								</md-button>
 								<md-button v-if="Work.CanEdit()" class="md-icon-button" :title="'Cambiar el nombre' + (Work.properties.Type === 'P' ? ', la categoría': '') + ' o la edición'" @click="openEdition(item)">
 									<md-icon>edit</md-icon>
+								</md-button>
+								<md-button class="md-icon-button" title="Agregar variable" @click="createNewVariable(item)">
+									<md-icon>add_circle_outline</md-icon>
 								</md-button>
 							</template>
 						</md-table-cell>
