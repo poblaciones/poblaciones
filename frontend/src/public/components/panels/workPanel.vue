@@ -1,7 +1,7 @@
 <template>
 	<nav id="workPanel" class="workPanel">
 		<div>
-			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody" :style="bgColor">
+			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody" :style="'background-color: ' + backgroundColor">
 				<!--button title="Cerrar" type="button" v-on:click="work.Current = null" class="close">
 					<span aria-hidden="true">&times;</span>
 				</button -->
@@ -20,8 +20,8 @@
 
 					</div>
 				</div>
-				<div v-if="work.Current.Institution" class="littleRow preTitleRow">
-					{{ work.Current.Institution }}
+				<div v-if="work.Current.Institution.Name" class="littleRow preTitleRow">
+					{{ work.Current.Institution.Name }}
 				</div>
 				<div class="h3 title titleRow">
 					{{ work.Current.Name }}
@@ -41,6 +41,7 @@ export default {
 	name: 'workPanel',
 	props: [
 		'work',
+		'backgroundColor'
 	],
 	components: {
 		LinkIcon,
@@ -49,7 +50,6 @@ export default {
 		return {
 			showZones: false,
 			showPresentation: false,
-			bgColor: {},
 		};
 	},
 	methods: {
@@ -73,7 +73,7 @@ export default {
 			if (this.showButtonsInInSingleRow()) {
 				return 'margin-top: -24px; margin-left: -90px;';
 			}
-			if (this.work.Current.Institution) {
+			if (this.work.Current.Institution.Name) {
 				return '';
 			} else {
 				return 'margin-top: 3px';
@@ -89,11 +89,6 @@ export default {
 				calculatedHeight = workPanelBody.offsetHeight + 'px';
 			}
 			var currentHeight = bar.style.height;
-			if (this.work.Current.PrimaryColor){
-				this.bgColor = {
-					'background-color': '#' + this.work.Current.PrimaryColor
-				};
-			}
 			if (visible !== currentVisible || (visible && currentHeight !== calculatedHeight)) {
 				if (visible) {
 					bar.style.height = calculatedHeight;
@@ -154,7 +149,7 @@ export default {
 .sourceInfo
 {
 	margin-left: 20px;
-	font-size: 1.1rem;
+	font-size: 1.30rem;
 	margin-top: 5px;
 }
 .preTitleRow {

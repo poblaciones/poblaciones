@@ -1,5 +1,5 @@
 <template>
-	<div id="edit-button" :style="bgColor"
+	<div id="edit-button" :style="'background-color: ' + backgroundColor"
 			 class="edit-button" title="Editar cartografía" @click="goEdit">
 		<span data-v-ac5aa574="" aria-label="Descargar" role="img" class="material-design-icon pencil-icon">
 			<svg fill="currentColor" style="width: 2em; height: 2em; margin-left: -10px;" class="material-design-icon__svg">
@@ -21,19 +21,13 @@ export default {
 	components: {
 	},
 	data() {
-      return {
-		  bgColor: {},
-      };
-    },
-	mounted() {
-		if (this.work.Current.PrimaryColor){
-			this.bgColor = {
-				'background-color': '#' + this.work.Current.PrimaryColor
-			};
-		}
-	},
+    return {
+
+    };
+  },
 	props: [
 		'work',
+		'backgroundColor'
 	],
     methods: {
 		absoluteMap(url) {

@@ -1,14 +1,14 @@
 <template>
 	<div>
-		<WorkPanel :work="work" ref="workPanel" />
+		<WorkPanel :work="work" ref="workPanel" :backgroundColor="workColor" />
 		<div id="holder">
 			<div id="panMain" class="split split-horizontal" style="position: relative">
 				<Search id="search-bar"/>
 				<LeftPanel ref='leftPanel'/>
 				<MapPanel/>
-				<Fab ref="fabPanel" :work="work" id="fab-panel"/>
-				<LogoFloat v-if="work.Current && work.Current.WatermarkId" :work="work" ref="logoFloatIcon"/>
-				<Edit v-if="work.Current" ref="editPanel" :work="work" />
+				<FabButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel"/>
+				<WatermarkFloat v-if="work.Current && work.Current.Institution.WatermarkId" :work="work" />
+				<EditButton v-if="work.Current" ref="editPanel" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
@@ -26,12 +26,12 @@ import StartMap from '@/public/classes/StartMap';
 import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
 import MapPanel from '@/public/components/panels/mapPanel';
-import Fab from '@/public/components/widgets/map/fabButton';
+import FabButton from '@/public/components/widgets/map/fabButton';
 import LeftPanel from '@/public/components/panels/leftPanel';
-import Edit from '@/public/components/widgets/map/editButton';
+import EditButton from '@/public/components/widgets/map/editButton';
 import SummaryPanel from '@/public/components/panels/summaryPanel';
 import Search from '@/public/components/widgets/map/search';
-import LogoFloat from '@/public/components/widgets/map/logoFloat';
+import WatermarkFloat from '@/public/components/widgets/map/watermarkFloat';
 import CollapseButtonRight from '@/public/components/controls/collapseButtonRight';
 
 import Split from 'split.js';
@@ -45,11 +45,11 @@ export default {
 		SummaryPanel,
 		Search,
 		MapPanel,
-		Edit,
-		Fab,
+		EditButton,
+		FabButton,
 		LeftPanel,
 		WorkPanel,
-		LogoFloat,
+		WatermarkFloat,
 		CollapseButtonRight,
 	},
 	created() {
@@ -124,6 +124,14 @@ export default {
 			//loc.UpdateMapsControls();
 		});
 		window.Panels.Left = this.$refs.leftPanel;
+	},
+	computed: {
+		workColor() {
+			if (this.work && this.work.Current && this.work.Current.Institution.Color) {
+				return '#' + this.work.Current.Institution.Color;
+			}
+			return '#00A0D2';
+		}
 	},
 	methods: {
 		GetConfiguration() {

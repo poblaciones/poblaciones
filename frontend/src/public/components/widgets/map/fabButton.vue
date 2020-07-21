@@ -6,7 +6,7 @@
 					 z-index="1000000095"
 					 :enable-rotation="false"
 					 :position="position"
-					 :bg-color="bgColor"
+					 :bg-color="backgroundColor"
 					 :actions="fabActions"
 					 @selected0="selected(0)"
 					 @selected1="selected(1)"
@@ -63,15 +63,9 @@ export default {
 			}
 			return ret;
 		},
-		bgColor(){
-			if (this.work && this.work.Current && this.work.Current.PrimaryColor){
-				return '#' + this.work.Current.PrimaryColor;
-			}
-			return '#00A0D2';
-		}
 	},
 	props: [
-		'work',
+		'backgroundColor'
 	],
 	methods: {
 		loadFabMetrics() {

@@ -36,9 +36,6 @@ class WorkInfo extends BaseMapModel
 			'met_url' => 'Url',
 			'met_abstract' => 'Abstract',
 			'met_coverage_caption' => 'Coverage',
-			'ins_caption' => 'Institution',
-			'ins_watermark_id' => 'WatermarkId',
-			'ins_color' => 'PrimaryColor',
 
 			'wrk_type' => 'Type',
 			'wrk_is_private' => 'IsPrivate',
@@ -68,6 +65,12 @@ class WorkInfo extends BaseMapModel
 			$arr[] = array('Caption' => $row['Caption'], 'Web' => $row['Web'], 'FileId' => $row['FileId']);
 		}
 		$this->Files = $arr;
+	}
+
+	public function FillInstitution($row)
+	{
+		$this->Institution = new InstitutionInfo();
+		$this->Institution->Fill($row);
 	}
 
 	public function FillStartup($row)

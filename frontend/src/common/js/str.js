@@ -21,6 +21,16 @@ module.exports = {
 			return null;
 		}
 	},
+	AppendParam(url, param, value) {
+		var parts = url.split('#');
+		var n = parts[0].indexOf('?');
+		var separator = (n >= 0 ? '&' : '?');
+		var ret = parts[0] + separator + param + "=" + value;
+		if (parts.length > 1) {
+			ret += "#" + parts[1];
+		}
+		return ret;
+	},
 	LowerFirstIfOnlyUpper(cad) {
 		if (cad.length === 1 || cad.substring(1) === cad.substring(1).toLowerCase()) {
 			return cad.toLowerCase();

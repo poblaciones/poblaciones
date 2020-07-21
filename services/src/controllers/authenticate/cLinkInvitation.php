@@ -41,12 +41,12 @@ class cLinkInvitation extends cController
 		if ($isActive)
 		{
 			$this->AddValue("login", true);
-			$this->AddValue("login_url_post", '/authenticate/linkAction');
+			$this->AddValue('login_url_post', "/authenticate/login?post");
 		}
 		else
 		{
 			$this->AddValue("login", false);
-			$this->AddValue("new_url_post", '/authenticate/linkAction');
+			$this->AddValue('new_url_post', "/authenticate/register?post");
 		}
 
 		// tiene que registrarse, loguear o activar la cuenta... (no tiene password)

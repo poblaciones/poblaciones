@@ -16,18 +16,13 @@
           </div>
           <div class="articleContent">
             <div>
-              <div>Para embeber este mapa copiar el siguiente HTML y pegarlo en el código fuente de su página de su sitio web.</div>
+              <div>Para incluir este mapa en otro sitio puede copiar el siguiente HTML y pegarlo en el código fuente de la página.</div>
             </div>
             <textarea v-model="iframeCode" id="testing-code" style="padding: 10px 10px;" />
           </div>
         </section>
       </article>
       <footer>
-        <div class="cancel-actions">
-          <button type="button" class="accent save" @click="finish()">
-            <i class="fas fa-times fa-lg"></i>
-          </button>
-        </div>
         <div class="copy-actions">
           <button type="button" class="copy iframe" @click="copyIframeCode()">{{ "COPIAR" }}</button>
         </div>
@@ -39,6 +34,7 @@
 <script>
 import boardal from "@/public/components/controls/boardal";
 import CloseIcon from "vue-material-design-icons/Close.vue";
+import str from '@/common/js/str';
 
 export default {
   name: "embedded",
@@ -57,15 +53,15 @@ export default {
   },
   computed: {
     iframeCode: () => {
-      const url = window.location.href;
+			const url = str.AppendParam(window.location.href, 'emb', 1);
 
       var iframe_code = `<div style="margin-top: 2.5rem;">
     <div style="text-align: left; width: 100%;">
         <a style="margin-left: 1rem; position: relative; z-index: 2; text-decoration: none; vertical-align: middle; color: rgb(86, 86, 86); font-family: Roboto, Arial, sans-serif; font-size: 1rem; background-color: rgb(255, 255, 255); padding: 0.5rem 1rem; border-bottom-right-radius: 0.125rem; border-top-right-radius: 0.125rem; box-shadow: rgba(0, 0, 0, 0.3) 0rem 0.0625rem 0.25rem -0.0625rem; min-width: 4rem; border-left: 0rem none; top: 3rem;"
-           type="button" target="_blank" href="${url}">Ir a mapa completo</a>
+           type="button" target="_blank" href="` + url + `">Ir a mapa completo</a>
     </div>
     <iframe width="98%" height="83%" frameborder="0" style="border:0; margin-top: -2.5rem; position: relative;"
-        src="${url}"
+        src="` + url + `"
         allowfullscreen="true" scrolling="false" allowtransparency="true">
     </iframe>
 </div>`;
@@ -114,7 +110,6 @@ export default {
 #testing-code {
   height: 220px;
   width: 750px;
-  border-radius: 25px;
   overflow: hidden;
   position: fixed;
   text-align: justify;

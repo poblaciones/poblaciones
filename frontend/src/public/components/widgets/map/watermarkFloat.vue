@@ -1,6 +1,7 @@
 <template>
-  <div v-if="image" class="logoDiv">
-    <img class="logoIcon" :src="image" />
+  <div v-if="image" class="logoDiv" @click="institutionClicked"
+			 :style="(!work.Current.Institution.Url ? 'pointer-events: none' : 'cursor: pointer')">
+    <img class="logoIcon" :src="image" :title="work.Current.Institution.Name" />
   </div>
 </template>
 
@@ -9,7 +10,7 @@ import axios from "axios";
 import err from "@/common/js/err";
 
 export default {
-  name: "logoFloat",
+  name: "watermarkFloat",
   props: ["work"],
   data() {
     return {
@@ -21,13 +22,16 @@ export default {
     this.getInstitutionWatermark();
   },
   methods: {
+		institutionClicked() {
+			window.open(this.work.Current.Institution.Url);
+		},
     getInstitutionWatermark() {
       const loc = this;
       return axios
         .get(window.host + "/services/works/GetInstitutionWatermark", {
           params: {
             w: loc.work.Current.Id,
-            iwmid: loc.work.Current.WatermarkId
+            iwmid: loc.work.Current.Institution.WatermarkId
           }
         })
         .then(function(res) {
@@ -36,7 +40,7 @@ export default {
         .catch(function(error) {
           err.errDialog(
             "GetInstitutionWatermark",
-            "obtener el logo de la institución"
+            "obtener la imagen de la institución"
           );
         });
     }
@@ -47,8 +51,8 @@ export default {
 <style scoped>
 .logoDiv {
   opacity: 75%;
-  bottom: 2.5rem;
-  right: 46px;
+  bottom: 2.1rem;
+  right: 48px;
   z-index: 1;
   position: absolute;
   background: seashell;

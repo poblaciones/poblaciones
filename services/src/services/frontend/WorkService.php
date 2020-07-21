@@ -38,6 +38,7 @@ class WorkService extends BaseService
 		$ret->Fill($work);
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
 		$ret->FillStartup($work);
+		$ret->FillInstitution($work);
 		return $ret;
 	}
 

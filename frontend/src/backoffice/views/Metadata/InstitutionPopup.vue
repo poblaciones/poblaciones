@@ -7,57 +7,73 @@
 			<invoker ref="invoker"></invoker>
 
 			<div class="md-layout md-gutter">
-				<div class="md-layout-item md-size-80 md-small-size-100">
+				<div class="md-layout-item md-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 									label="Nombre de la institución" ref="datasetInput"
-									helper="Indique el nombre de la institución, evitando siglas o acrónimos. Ej. Instituto de Estadística Nacional."
+									helper="Indique el nombre completo de la institución. Ej. Instituto de Estadística Nacional."
 									:maxlength="200" v-model="item.Caption" />
 				</div>
-				<div class="md-layout-item md-size-50 md-small-size-100">
+				<div class="md-layout-item md-size-55 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
 									label="Correo electrónico" helper="Dirección de correo electrónico institucional."
 									:maxlength="50" v-model="item.Email" />
 				</div>
-				<div class="md-layout-item md-size-50 md-small-size-100">
+				<div class="md-layout-item md-size-45 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
-									label="Teléfono" helper="Teléfono institucional, incluyendo códigos de área. (Ej. +54 11 524-1124.)"
+									label="Teléfono" helper="Incluir códigos de área y prefijos."
 									:maxlength="50" v-model="item.Phone" />
 				</div>
-				<div class="md-layout-item md-size-65 md-small-size-100">
+				<div class="md-layout-item md-size-55 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
-									label="Dirección postal" helper="Ubicación de la institución (Ej. Carreli 1720 (2321) Montevideo"
+									label="Dirección postal" helper="Ej. Carreli 1720 (2321), Montevideo."
 									:maxlength="200" v-model="item.Address" />
 				</div>
-				<div class="md-layout-item md-size-35 md-small-size-100">
+				<div class="md-layout-item md-size-45 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
-									label="País" helper="País correspondiente a la dirección indicada (Ej. Uruguay)"
+									label="País" helper="Ej. Uruguay."
 									:maxlength="50" v-model="item.Country" />
 				</div>
-				<div class="md-layout-item md-size-65 md-small-size-100">
+				<div class="md-layout-item md-size-55 md-small-size-100">
 					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
-									label="Página web" helper="Sitio web de la institución (Ej. https://vedol.gov/)"
-									:maxlength="255" v-model="item.Web" />
+													label="Sitio web de la institución" helper="Ej. https://vedol.gov/."
+													:maxlength="255" v-model="item.Web" />
+					<div>
+						<div class="mp-label">Color primario</div>
+						<mp-color-picker :canEdit="Work.CanEdit()" :ommitHexaSign="true" v-model="currentColor" />
+						<div class="md-helper-text helper">Fondo a utilizar en los marcos superiores de las cartografías de la institución.</div>
+					</div>
 				</div>
-				<div class="md-layout-item md-size-35 md-small-size-100">
-					<div class="label-primary-color">Selección de color primario</div>
-					<mp-color-picker :canEdit="Work.CanEdit()" :ommitHexaSign="true" v-model="item.PrimaryColor" />
-				</div>
-				<div class="md-layout-item md-size-65 md-small-size-100">
-					<img class="imagen-preview" style="" :src="this.watermarkImage" alt="">
-					<md-button style="float: right; background-color: #ececec;"
-								v-if="watermarkImage"
-								title="Quitar"
-								class="md-icon-button md-button-mini"
-								v-on:click="clear">
-						<md-icon>close</md-icon>
-					</md-button>
-					<label class="file-select">
-						<div class="select-button">
-							<md-icon>add_circle_outline</md-icon>
-							Agregar logo
+				<div class="md-layout-item md-size-45 md-small-size-100">
+					<div class="mp-label" style="margin-top: 6px">Marca de agua</div>
+						<div v-if="this.watermarkImage">
+							<img  class="imagen-preview" style="" :src="this.watermarkImage" alt="">
+							<div style="display: inline-block">
+								<md-button style="background-color: #ececec;"
+													 title="Quitar"
+													 class="md-icon-button md-button-mini"
+													 v-on:click="clear">
+									<md-icon>close</md-icon>
+								</md-button>
+								<label class="file-select">
+									<div class="edit-button">
+										<md-icon>edit</md-icon>
+									</div>
+									<input @change="handleImage" class="file-select" type="file" accept="image/*" />
+								</label>
+							</div>
 						</div>
-						<input @change="handleImage" class="file-select" type="file" accept="image/*"/>
-					</label>
+
+						<div>
+							<label class="file-select"  v-if="!watermarkImage">
+								<div class="select-button">
+									<md-icon>add_circle_outline</md-icon>
+									Agregar imagen
+								</div>
+								<input @change="handleImage" class="file-select" type="file" accept="image/*" />
+							</label>
+						</div>
+
+					<div class="md-helper-text helper">Imagen para utilizar como marca de agua sobre el mapa.</div>
 				</div>
 			</div>
 
@@ -76,16 +92,20 @@
 
 <script>
 	import Context from '@/backoffice/classes/Context';
-  	import h from '@/public/js/helper';
+	import h from '@/public/js/helper';
+	import f from '@/backoffice/classes/Formatter';
+
 
 	export default {
 	name: 'InstitutionPopup',
 	data() {
 		return {
 			item: null,
+			defaultColor: '00A0D2',
 			closeParentCallback: null,
 			openEditableInstitution: false,
 			watermarkImage: null,
+			currentColor: null,
 			imageHasChanged: false,
 			extension: null,
 		};
@@ -104,7 +124,11 @@
 	},
 	methods: {
 		show(item, closeParentCallback) {
-			this.item = item;
+			this.item = f.clone(item);
+			this.currentColor = item.PrimaryColor;
+			if (!this.currentColor) {
+				this.currentColor = this.defaultColor;
+			}
 			if (closeParentCallback) {
 				this.closeParentCallback = closeParentCallback;
 			} else {
@@ -134,6 +158,7 @@
 			const selectedImage = e.target.files[0];
 			this.extension = h.extractFileExtension(selectedImage.name);
 			this.createBase64Image(selectedImage);
+			e.target.value = '';
 		},
 		createBase64Image(fileObject) {
 			const reader = new FileReader();
@@ -153,6 +178,11 @@
 				return;
 			}
 			var loc = this;
+			if (this.currentColor === this.defaultColor) {
+				this.item.PrimaryColor = null;
+			} else {
+				this.item.PrimaryColor = this.currentColor;
+			}
 			this.$refs.invoker.do(
 				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageHasChanged? this.watermarkImage: null
 			).then(
@@ -203,14 +233,22 @@
   width: 30px;
   min-width: 30px;
   height: 30px;
-  margin: 20px 2px;
+}
+.select-button {
+	cursor: pointer;
+	padding: 3px 0px;
+}
+.edit-button {
+	cursor: pointer;
+	padding: 8px;
 }
 
 .imagen-preview {
-	min-height: unset ! important;
-	padding: 6px !important;
-  width: 80%;
-  margin-top: 20px;
+	min-height: unset !important;
+	width: auto;
+	max-height: 100px;
+	max-width: 195px;
+	width: auto;
 }
 
 .file-select > input[type="file"] {
