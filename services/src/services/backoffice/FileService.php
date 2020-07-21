@@ -7,6 +7,7 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\PdfReader;
 use minga\framework\FileBucket;
+use minga\framework\ErrorException;
 
 class FileService extends BaseService
 {

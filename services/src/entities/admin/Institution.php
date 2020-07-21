@@ -14,7 +14,7 @@ class Institution extends BaseMapModelLabeled
 	public $Phone;
 	public $Country;
 	public $WatermarkId;
-	puclic $PrimaryColor;
+	public $PrimaryColor;
 
 	public static function GetMapLabeled()
 	{

@@ -5,7 +5,7 @@
 				<!--button title="Cerrar" type="button" v-on:click="work.Current = null" class="close">
 					<span aria-hidden="true">&times;</span>
 				</button -->
-				<div class="title pull-right" style="margin-top: -2px">
+				<div class="title pull-right" style="margin-top: -1px">
 					<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
 					<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
 					<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
@@ -67,17 +67,13 @@ export default {
 			window.Popups.WorkMetadata.show(this.work.Current);
 		},
 		showButtonsInInSingleRow() {
-			return this.work.Current && (!this.work.Current.Institution && !this.work.Current.Authors);
+			return this.work.Current && (!this.work.Current.Institution.Name && !this.work.Current.Authors);
 		},
 		getMetadataStyle() {
 			if (this.showButtonsInInSingleRow()) {
 				return 'margin-top: -24px; margin-left: -90px;';
 			}
-			if (this.work.Current.Institution.Name) {
-				return '';
-			} else {
-				return 'margin-top: 3px';
-			}
+			return 'margin-top: 4px';
 		},
 		updateWork() {
 			var visible = (this.work.Current !== null);
@@ -148,9 +144,9 @@ export default {
 }
 .sourceInfo
 {
-	margin-left: 20px;
+	margin-left: 13px;
 	font-size: 1.30rem;
-	margin-top: 5px;
+	margin-top: 8px;
 }
 .preTitleRow {
 	text-transform: uppercase;
@@ -168,7 +164,7 @@ export default {
 	width: 100%;
 	text-overflow: ellipsis;
 	color: white;
-	font-size: 2.2rem;
+	font-size: 2.7rem;
 }
 .infoRow {
 	padding: 7px 0px 0px 0px;

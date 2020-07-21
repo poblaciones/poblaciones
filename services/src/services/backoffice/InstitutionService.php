@@ -71,7 +71,7 @@ class InstitutionService extends BaseService
 
 	public function GetNewWatermark($institution)
 	{
-		$new = new entities\DraftFile(true);
+		$new = new entities\DraftFile();
 		$new->setName('watermark_'. uniqid());
 		$new->setType('image/*');
 		$institution->setWatermark($new);
