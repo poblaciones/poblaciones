@@ -8,6 +8,7 @@ class VariableInfo extends BaseMapModel
 {
 	public $Id;
 	public $Name;
+	public $Normalization;
 	public $NormalizationScale;
 	public $IsDefault = false;
 
@@ -30,6 +31,7 @@ class VariableInfo extends BaseMapModel
 		return array (
 			'mvv_id' => 'Id',
 			'mvv_caption' => 'Name',
+			'mvv_normalization' => 'Normalization',
 			'mvv_normalization_scale' => 'NormalizationScale',
 			'mvv_is_default' => 'IsDefault',
 			'mvv_default_measure' => 'DefaultMeasure',

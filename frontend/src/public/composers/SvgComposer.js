@@ -98,14 +98,15 @@ SvgComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, 
 	if (dataElement.Description) {
 		mapItem.properties.description = dataElement.Description;
 	}
-	if (!this.activeSelectedMetric.SelectedVariable().IsSimpleCount) {
-		mapItem.properties.value = this.FormatValue(dataElement);
+	var variable = this.activeSelectedMetric.SelectedVariable();
+	if (!variable.IsSimpleCount) {
+		mapItem.properties.value = this.FormatValue(variable, dataElement);
 	}
 	if (this.patternUseFillStyles(patternValue)) {
 		mapItem.properties.style = 'fill: url(#cs' + val + ');';
 	}
 
-	this.AddFeatureText(val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap);
+	this.AddFeatureText(variable, val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap);
 
 	filtered.push(mapItem);
 };
@@ -119,9 +120,9 @@ SvgComposer.prototype.getCentroid = function (mapElement) {
 	}
 };
 
-SvgComposer.prototype.AddFeatureText = function (val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap) {
+SvgComposer.prototype.AddFeatureText = function (variable, val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap) {
 	if (this.inTile(tileBounds, centroid)) {
-		this.ResolveValueLabel(dataElement, centroid, tileKey, colorMap[val]);
+		this.ResolveValueLabel(variable, dataElement, centroid, tileKey, colorMap[val]);
 	}
 };
 

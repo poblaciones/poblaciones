@@ -1,6 +1,6 @@
 <template>
   <div v-if="metadata">
-    <div class="sourceInfo" :style="(useIcon ? 'top: 45px; right: 17px;' : '')">
+    <div class="sourceInfo exp-hiddable-block" :style="(useIcon ? 'top: 45px; right: 17px;' : '')">
 			<a v-if="false" href="#" v-on:click="clickDescargar"><download-icon
 				title="Descargar"/> Descargar</a>
       &nbsp;

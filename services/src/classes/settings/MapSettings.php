@@ -19,8 +19,13 @@ class MapSettings
 
 	public $UseCalculated = false;
 	public $UseKmz = false;
-
 	public $UseGradients = false;
+	public $UseFavorites = false;
+	public $UseEmbedding = false;
+	public $UseCreatePdf = false;
+	public $UseCollapsePanel = false;
+	public $UseRural = false;
+
 	public $MaxQueueRequests = 4;
 	public $MaxStaticQueueRequests = 6;
 

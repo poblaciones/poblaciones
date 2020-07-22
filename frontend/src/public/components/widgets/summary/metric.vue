@@ -1,11 +1,12 @@
 <template>
 	<div class="metricBlock">
-		<hr class="moderateHr"/>
+		<hr class="moderateHr exp-hiddable-block"/>
 		<div>
-			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index" @RankingShown="rankingShown" />
-			<h5 class="title">
+			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index"
+						class="exp-hiddable-block" @RankingShown="rankingShown" />
+			<h4 class="title">
 				<span class="drag">{{ metric.properties.Metric.Name }}</span>
-			</h5>
+			</h4>
 			<MetricVariables :metric="metric" />
 			<div class="sourceRow">
 				<div class="btn-group" style="float: left">

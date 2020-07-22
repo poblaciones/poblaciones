@@ -2,7 +2,6 @@ module.exports = {
 	NODE_ENV: '"production"',
 	UPLOAD_ENV: '"upload"',
 	host: '""', // Toma en forma predeterminada el mismo servidor y protocolo
-	UISettings_ExtraToolbar: false,
 	ApplicationName: '"Poblaciones"',
 	google_analytics_key: '"{{ google_analytics_key }}"', // No cambiar, esto es reemplazado por twig en el server beta o prod.
 	add_this_key: '"{{ add_this_key }}"', // No cambiar, esto es reemplazado por twig en el server beta o prod.

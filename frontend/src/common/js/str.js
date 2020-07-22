@@ -82,6 +82,9 @@ module.exports = {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
 	},
+	applySymbols(cad) {
+		return cad.replace('km2', 'km²');
+	},
 	EscapeHtml(unsafe) {
     return ('' + unsafe)
          .replace(/&/g, "&amp;")

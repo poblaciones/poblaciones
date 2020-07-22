@@ -20,7 +20,7 @@
 								<!-- 2575fb -->
 								<i :style="'color: ' + getColor(item)" class="fas fa-circle"></i>
 							</td>
-							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(getValue(item)) }}</td>
+							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getFormattedValue(item) }}</td>
 						</template>
 					</tr>
 				</tbody>
@@ -52,7 +52,6 @@ export default {
 	components: {
 	},
   mounted() {
-    var format = this.getFormat();
 		this.updateRanking();
   },
   data() {
@@ -118,42 +117,10 @@ export default {
 			}
 		},
 		getValueHeader() {
-			if (this.variable.HasTotals) {
-				switch (this.variable.NormalizationScale) {
-					case 100:
-						return '%';
-					case 1:
-						return '/1';
-					case 1000:
-						return '/k';
-					case 10000:
-						return '/10k';
-					case 100000:
-						return '/100k';
-				}
-				return 'N/A';
-			} else {
-				return 'N';
-			}
+			return h.ResolveNormalizationCaption(this.variable, true);
 		},
-		getValueFormatted(value) {
-			if (value === '-') {
-				return '-';
-			} else if (this.variable.HasTotals) {
-				return h.formatPercentNumber(value);
-			} else {
-				return h.formatNum(value);
-			}
-		},
-		getValue(item) {
-			if (item.Value === '-') {
-				return '-';
-			}
-			if (this.variable.HasTotals) {
-				return (item.Total > 0 ? item.Value * this.variable.NormalizationScale / item.Total : 0);
-			} else {
-				return item.Value;
-			}
+		getFormattedValue(item) {
+			return h.renderMetricValue(item.Value, item.Total, this.variable.HasTotals, this.variable.NormalizationScale);
 		},
 		getColor(item) {
 			var label = h.getValueLabel(this.variable.ValueLabels, item.ValueId);

@@ -9,8 +9,8 @@
 					<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
 					<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
 					<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>
-					<div style="position: relative; z-index: 10;" :style="(showButtonsInInSingleRow() ? 'width: 1px' : '')">
-						<div class="sourceInfo" :style="getMetadataStyle()">
+					<div style="position: relative; z-index: 10;" :style="(showButtonsInSingleRow() ? 'width: 1px' : '')">
+						<div class="sourceInfo exp-hiddable-block" :style="getMetadataStyle()">
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
 								 v-on:click="clickFuente" style="color: #FFF">
 								<link-icon />
@@ -66,14 +66,28 @@ export default {
 			e.preventDefault();
 			window.Popups.WorkMetadata.show(this.work.Current);
 		},
-		showButtonsInInSingleRow() {
-			return this.work.Current && (!this.work.Current.Institution.Name && !this.work.Current.Authors);
+		showButtonsInSingleRow() {
+			return this.titleRowsCount() === 1;
+		},
+		showButtonsInDoubleRow() {
+			return this.titleRowsCount() === 2;
+		},
+		titleRowsCount() {
+			if (!this.work.Current) {
+				return 0;
+			}
+			var ret = (this.work.Current.Name ? 1 : 0) + (this.work.Current.Institution.Name ? 1 : 0)
+				+ (this.work.Current.Authors ? 1 : 0);
+			return ret;
 		},
 		getMetadataStyle() {
-			if (this.showButtonsInInSingleRow()) {
+			if (this.showButtonsInSingleRow()) {
 				return 'margin-top: -24px; margin-left: -90px;';
+			} else if (this.showButtonsInDoubleRow()) {
+				return 'margin-top: 3px';
+			} else {
+				return 'margin-top: 8px';
 			}
-			return 'margin-top: 4px';
 		},
 		updateWork() {
 			var visible = (this.work.Current !== null);

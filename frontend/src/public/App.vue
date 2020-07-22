@@ -3,13 +3,13 @@
 		<WorkPanel :work="work" ref="workPanel" :backgroundColor="workColor" />
 		<div id="holder">
 			<div id="panMain" class="split split-horizontal" style="position: relative">
-				<Search id="search-bar"/>
+				<Search class="exp-hiddable-block"/>
 				<LeftPanel ref='leftPanel'/>
 				<MapPanel/>
 				<FabButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel"/>
 				<WatermarkFloat v-if="work.Current && work.Current.Institution.WatermarkId" :work="work" />
 				<EditButton v-if="work.Current" ref="editPanel" :backgroundColor="workColor" :work="work" />
-				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" />
+				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" v-show="Use.UseCollapsePanel" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
 				<SummaryPanel :metrics="metrics" :config="config"
@@ -54,7 +54,8 @@ export default {
 	},
 	created() {
 		window.Popups = {};
-		window.Panels = { Content: { FeatureInfo: null, FeatureList: null }};
+		window.Panels = { Content: { FeatureInfo: null, FeatureList: null } };
+		window.Use = {};
 	},
 	data() {
 		return {
@@ -131,7 +132,10 @@ export default {
 				return '#' + this.work.Current.Institution.Color;
 			}
 			return '#00A0D2';
-		}
+		},
+		Use() {
+			return window.Use;
+		},
 	},
 	methods: {
 		GetConfiguration() {
@@ -278,8 +282,8 @@ html, body {
 }
 
 .moderateHr {
-	margin-top: 0.7rem;
-	margin-bottom: 1rem;
+	margin-top: 1.2rem;
+	margin-bottom: 1.1rem;
 }
 
 /* settings de split */
@@ -328,7 +332,6 @@ html, body {
 /* fin de settings de split */
 
 .drop {
-	font-size: 11px;
 	vertical-align: top !important;
 	padding-top: 5px;
 }
@@ -431,7 +434,7 @@ a:hover {
 
 .sourceRow {
 	position: relative;
-	padding: 0.2rem 0rem 0rem 0rem;
+	padding: 0.6rem 0rem 0rem 0rem;
 }
 
 .coverageBox {
@@ -570,8 +573,8 @@ a:hover {
 }
 
 .summaryRow {
-	padding: 0rem 0rem 0.3rem 0rem;
-	font-size: 0.75em;
+	padding: 0rem 0rem 0.475rem 0rem;
+  font-size: 0.75em;
 	color: #777;
 }
 .summaryBlock {

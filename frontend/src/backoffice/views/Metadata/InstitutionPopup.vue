@@ -184,7 +184,7 @@
 				this.item.PrimaryColor = this.currentColor;
 			}
 			this.$refs.invoker.do(
-				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageHasChanged? this.watermarkImage: null
+				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageHasChanged ? this.watermarkImage: null
 			).then(
 				function () {
 					loc.openEditableInstitution = false;

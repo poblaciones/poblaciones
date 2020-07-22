@@ -21,7 +21,6 @@ if (window.host === '') {
 	window.host = host;
 }
 
-window.UISettings_ExtraToolbar = process.env.UISettings_ExtraToolbar;
 window.ApplicationName = process.env.ApplicationName;
 window.SegMap = null;
 

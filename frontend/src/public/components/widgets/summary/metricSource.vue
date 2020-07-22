@@ -1,9 +1,9 @@
 <template>
   <div v-if="metric">
-    <div class="sourceInfo">
+    <div class="sourceInfo exp-hiddable-block">
       <a href="#" v-on:click="clickDescargar" style="color: #a7a7a7"><download-icon title="Descargar"/> Descargar</a>
       &nbsp;
-      <a href="#" :title="'Fuente de ' + metric.properties.Name"
+      <a href="#" :title="'Fuente de ' + metric.properties.Metric.Name"
 					v-on:click="clickFuente" style="color: #a7a7a7">
 				<link-icon />
 				Fuente

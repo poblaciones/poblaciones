@@ -1,4 +1,4 @@
-import Helper from '@/public/js/helper';
+import h from '@/public/js/helper';
 
 export default AbstractTextComposer;
 
@@ -10,10 +10,10 @@ AbstractTextComposer.prototype.AbstractConstructor = function (value, total, des
 	this.textInTile = [];
 };
 
-AbstractTextComposer.prototype.ResolveValueLabel = function (dataElement, location, tileKey, backColor) {
+AbstractTextComposer.prototype.ResolveValueLabel = function (variable, dataElement, location, tileKey, backColor) {
 	var number = null;
-	if (this.activeSelectedMetric.SelectedVariable().ShowValues == 1) {
-		number = this.FormatValue(dataElement);
+	if (variable.ShowValues == 1) {
+		number = this.FormatValue(variable, dataElement);
 	} else {
 		var pattern = this.activeSelectedMetric.GetPattern();
 		if (pattern === 2) {
@@ -37,18 +37,10 @@ AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, l
 
 };
 
-AbstractTextComposer.prototype.FormatValue = function (dataElement) {
-	var number = value;
-	var value = dataElement.Value;
-	var total = dataElement.Total;
-	number = value;
-	if (total) {
-		number = Helper.formatPercent(value, total);
-		if (number !== '-') {
-			number += '%';
-		}
-	}
-	return number;
+AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
+	var ret = h.renderMetricValue(dataElement.Value, dataElement.Total,
+		variable.HasTotals, variable.NormalizationScale) + ' ' + h.ResolveNormalizationCaption(variable);
+	return ret.trimRight();
 };
 
 

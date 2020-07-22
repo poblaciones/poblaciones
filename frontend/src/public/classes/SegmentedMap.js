@@ -44,6 +44,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 		this.tileDataBlockSize = null;
 	}
 	this.Configuration = config;
+	window.Use = config;
 	this.Queue = new Queue(config.MaxQueueRequests);
 	if (Array.isArray(config.StaticServer) || window.host !== config.StaticServer) {
 		this.StaticQueue = new Queue(config.MaxStaticQueueRequests);

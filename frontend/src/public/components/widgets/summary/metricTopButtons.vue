@@ -5,7 +5,7 @@
 				<mp-close-button v-on:click="clickQuitar" />
 
 				<button title="Opciones" type="button" class="close "
-								v-on:click="clickCustomize" style="margin-right: 7px; margin-left: -2px; margin-top: 3px; font-size: 0.8rem">
+								v-on:click="clickCustomize" style="margin-right: 6px; margin-left: -2px; margin-top: 4px; font-size: 1.2rem">
 					<i class="fas fa-sliders-h"></i>
 				</button>
 
@@ -20,7 +20,7 @@
 					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px;" />
 				</button>
 
-				<span class="dropdown">
+				<span class="dropdown" v-show="Use.UseUrbanity">
 					<button type="button" class="close lightButton" data-toggle="dropdown" title="Urbano/Rural">
 						<i class="fas fa-users" v-text="getUrbanityTextActive()"/>
 					</button>
@@ -150,7 +150,9 @@ export default {
 		}
 	},
 	computed: {
-
+		Use() {
+				return window.Use;
+			}
 	}
 };
 </script>

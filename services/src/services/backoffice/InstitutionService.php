@@ -20,13 +20,23 @@ class InstitutionService extends BaseService
 		return $new;
 	}
 
-	public function Update($institution)
+	public function Update($institution, $watermarkImage)
 	{
 		// Verifica el permiso
 		$wk = new WorkService();
 		$wk->CompleteInstitution($institution);
 		if (!$institution->getIsEditableByCurrentUser())
 			throw new ErrorException('No tiene permisos para editar esta institución.');
+
+		if ($watermarkImage)
+		{
+			$fileController = new FileService();
+			$bucket = $fileController->ConvertBase64toFile($watermarkImage);
+			$wat = $this->GetNewWatermark($institution);
+			$institution->setWatermark($wat);
+			$fileController->SaveFile($institution->getWatermark(), $bucket->path . '/file.dat', true, 'image/png');
+		}
+
 		App::Orm()->Save($institution);
 		$institution->setIsEditableByCurrentUser(true);
 		return $institution;
@@ -69,13 +79,12 @@ class InstitutionService extends BaseService
 		return $dataURL;
 	}
 
-	public function GetNewWatermark($institution)
+	private function GetNewWatermark($institution)
 	{
-		$new = new entities\DraftFile();
-		$new->setName('watermark_'. uniqid());
-		$new->setType('image/*');
-		$institution->setWatermark($new);
-		return $institution;
+		$wat = new entities\DraftFile();
+		$wat->setName('watermark_'. uniqid());
+		$wat->setType('image/*');
+		return $wat;
 	}
 }
 

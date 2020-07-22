@@ -75,14 +75,7 @@ App::GetOrPost('/services/backoffice/UpdateInstitution', function (Request $requ
 	// Traigo el base64 de la nueva imagen
 	$watermarkImage = Params::Get('iwm');
 
-	if (!is_null($watermarkImage) && !empty($watermarkImage)){
-		$fileController = new services\FileService();
-		$bucket = $fileController->ConvertBase64toFile($watermarkImage);
-		$controller->GetNewWatermark($institution);
-		$fileController->SaveFile($institution->getWatermark(), $bucket->path . '/file.dat', true, 'image/png');
-	}
-
-	return App::OrmJson($controller->Update($institution));
+	return App::OrmJson($controller->Update($institution, $watermarkImage));
 });
 
 App::$app->get('/services/backoffice/GetCurrentUserWorks', function (Request $request) {

@@ -3,6 +3,7 @@ import axiosClient from '@/common/js/axiosClient';
 import arr from '@/common/js/arr';
 import str from '@/common/js/str';
 import f from '@/backoffice/classes/Formatter';
+import h from '@/public/js/helper';
 
 export default ScaleGenerator;
 
@@ -575,68 +576,8 @@ ScaleGenerator.prototype.ResolveRangeCaption = function (variable, isFirst, isLa
 		ret = lastRoundedValue + ' a ' + roundedValue;
 	}
 	ret = str.Replace(ret, '.', ',');
-	ret += this.ResolveNormalizationCaption(variable);
-	return ret;
-};
-
-ScaleGenerator.prototype.ResolveNormalizationCaption = function (variable) {
-	if (variable.Normalization === null) {
-		return '';
-	}
-	var unit = this.ResolveNormalizationUnit(variable);
-	var ret = '';
-	switch (variable.NormalizationScale) {
-		case 100:
-			ret = ' %';
-			break;
-		case 1:
-			ret = '';
-			break;
-		case 1000:
-			ret = ' / mil ' + unit;
-			break;
-		case 10000:
-			ret = ' / 10 mil ' + unit;
-			if (unit === 'm2')
-				ret = ' / ha';
-			break;
-		case 100000:
-			ret = ' / 100 mil ' + unit;
-			if (unit === 'm2')
-				ret = ' / 0,1 km2';
-			break;
-		case 1000000:
-			ret = ' / 1 millón de ' + unit;
-			if (unit === 'm2')
-				ret = ' / km2';
-			break;
-	}
-	return ret;
-};
-
-ScaleGenerator.prototype.ResolveNormalizationUnit = function (variable) {
-	switch (variable.Normalization) {
-		case 'P':
-			return ' hab.';
-		case 'H':
-			return 'hog.';
-		case 'A':
-			return 'adultos';
-		case 'C':
-			return 'niños';
-		case 'P':
-			return ' hab.';
-		case 'H':
-			return 'hog.';
-		case 'N':
-			return '';
-		case 'M':
-			return 'm2';
-		case 'O':
-			return (variable.NormalizationColumn ? variable.NormalizationColumn.Caption : '');
-		default:
-			return 'unidad no reconocida';
-	}
+	ret += ' ' + h.ResolveNormalizationCaption(variable);
+	return ret.trimRight();
 };
 
 ScaleGenerator.prototype.GetRainbow = function (rainbow) {

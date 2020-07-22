@@ -3,11 +3,11 @@
 	<div class="btn-group">
 		<button type="button" class="btn btn-default btn-xs"
 							title="Guardar como PNG..." v-on:click="captureFullPng()"><i class="fas fa-camera"/></button>
-		<button type="button" class="btn btn-default btn-xs"
+		<button type="button" class="btn btn-default btn-xs" v-if="Use.UseCreatePdf"
 							title="Guardar como PDF..." v-on:click="captureMapPdf(metrics)"><i class="fas fa-file-pdf"/></button>
 		<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" v-on:click="geolocate()"><i class="far fa-dot-circle"/></button>
-		<button v-if="useGradients" type="button" class="btn btn-default btn-xs"
+		<button v-if="Use.UseGradients" type="button" class="btn btn-default btn-xs"
 							:title="'Máscara poblacional ' + currentGradientOpacity" v-on:click="changeGradientOpacity(.25)"><i class="fas fa-satellite"/></button>
 	</div>
 		<div class="btn-group">
@@ -18,7 +18,7 @@
 
 		<div class="pull-right">
 			<span class="dropdown">
-				<button type="button" class="btn btn-default btn-xs" data-toggle="dropdown" title="Compartir">
+				<button type="button" class="btn btn-default btn-xs" v-if="Use.UseEmbedding" data-toggle="dropdown" title="Compartir">
 					<i class="fas fa-share-alt" />
 				</button>
 				<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
@@ -46,7 +46,7 @@
 			<button type="button" class="btn btn-default btn-xs" title="Guía de uso" v-on:click="showTutorial()">
 				<help-circle-icon title="Guía de uso" />
 			</button>
-			<button v-if='user.Logged && useExtraToolbar()' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos..." v-on:click="setFavorite()">
+			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos..." v-on:click="setFavorite()">
 				<i class="far fa-heart" />
 			</button>
 
@@ -118,9 +118,6 @@ export default {
 		showEmbeddedMapPopUp() {
 			this.$refs.Embedded.toggleModal();
 		},
-		useExtraToolbar() {
-			return window.UISettings_ExtraToolbar;
-		},
 		ignore(ele) {
 			return (ele.nodeName === 'IFRAME');
 		},
@@ -141,11 +138,19 @@ export default {
 			}
 			return idObj;
 		},
-		changeDisplayByClass(classObjs, newValue) {
+		changeDisplayByClass(classname, newValue) {
+			var classObjs = document.getElementsByClassName(classname);
 			for (var i = 0; i < classObjs.length; i++) {
 				classObjs[i].style.display = newValue;
 			}
 			return classObjs;
+		},
+		swapClasses(classname, classToAdd, classToRemove) {
+			var classObjs = document.getElementsByClassName(classname);
+			for (var i = 0; i < classObjs.length; i++) {
+				classObjs[i].classList.add(classToAdd);
+				classObjs[i].classList.remove(classToRemove);
+			}
 		},
 		removeClassAddText(classname, classToRemove, textToAdd){
 			var classObjs= document.getElementsByClassName(classname);
@@ -210,31 +215,39 @@ export default {
 			window.setTimeout(function() {
 				var bodyObj = loc.changeOverflowById(document.body, 'visible');
 				var holderObj = loc.changeOverflowById(document.querySelector('#holder'), 'visible');
-				var toolbarTop = loc.changeDisplayById(document.querySelector('#toolbar-top'), 'none');
-				var collapseButtonRight = loc.changeDisplayById(document.querySelector('#collapseButtonRight'), 'none');
-				var searchBar = loc.changeDisplayById(document.querySelector('#search-bar'), 'none');
+
+				loc.changeDisplayByClass("exp-hiddable-block", "none");
+
+				var gotas = loc.swapClasses('moderateHr', 'fa-circle', 'fa-tint');
+
+
 				var fabPanel = loc.changeDisplayById(document.querySelector('#fab-panel'), 'none');
 				var editButton = loc.changeDisplayById(document.querySelector('#edit-button'), 'none');
-				var dropdown = loc.changeDisplayByClass(document.getElementsByClassName('dropdown'), 'none');
+				var dropdown = loc.changeDisplayByClass('dropdown', 'none');
+
 				var btnGroup = loc.changeDisplayByClass(document.getElementsByClassName('btn-group pull-right'), 'none');
-				var circulos= loc.removeClassAddText('circulo','fa-circle','&#9679;');
-				var gotas= loc.removeClassAddText('gotas','fa-tint', '&#9670;');
+				var circulos = loc.removeClassAddText('exp-variable-bullets', 'fa-circle', '&#9679;');
+
+				//var gotas = loc.removeClassAddText('exp-category-bullets', 'fa-tint', '&#9679;');
+				var gotas = loc.swapClasses('exp-category-bullets', 'fa-circle', 'fa-tint');
+
 				var contacto= loc.removeClassAddText('contacto','fa-comments', '&#128172;');
 
 				html2canvas(bodyObj, { useCORS: true, ignoreElements: loc.ignore }).then(function(canvas) {
-					loc.changeOverflowById(bodyObj, 'hidden');
+				/*	loc.changeOverflowById(bodyObj, 'hidden');
 					loc.changeOverflowById(holderObj, 'hidden');
-					loc.changeDisplayById(toolbarTop, 'block');
-					loc.changeDisplayById(collapseButtonRight, 'block');
-					loc.changeDisplayById(searchBar, 'block');
+
+					loc.changeDisplayByClass("exp-hiddable-block", "block");
+
 					loc.changeDisplayById(fabPanel, 'flex');
 					loc.changeDisplayById(editButton, 'unset');
+
 					loc.changeDisplayByClass(dropdown, 'unset');
 					loc.changeDisplayByClass(btnGroup, 'unset');
-					loc.addClassRemoveText(circulos, 'fa-circle');
-					loc.addClassRemoveText(gotas, 'fa-tint');
+					loc.addClassRemoveText(exp-variable-bullets, 'fa-circle');
+					loc.addClassRemoveText(exp-category-bullets, 'fa-tint');
 					loc.addClassRemoveText(contacto, 'fa-comments');
-
+					*/
 					exportFunction(canvas, metrics);
 				});
 			}, 100);
@@ -281,8 +294,8 @@ export default {
 		}
 	},
 	computed: {
-		useGradients() {
-			return (this.config.UseGradients);
+		Use() {
+			return this.config;
 		},
 		authenticate() {
 			return a;

@@ -33,6 +33,7 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 		this.keysInTile[tileKey] = [];
 	}
 
+	var variable = this.activeSelectedMetric.SelectedVariable();
 
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
@@ -53,18 +54,18 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 				mapItem.lon = dataElement['Lon'];
 
 				mapItem.LabelId = val;
-				if (this.activeSelectedMetric.SelectedVariable().ShowValues == 1) {
+				if (variable.ShowValues == 1) {
 					mapItem.Value = dataElement['Value'];
 				}
 				if (dataElement['Description']) {
 					mapItem.Description = dataElement['Description'];
 				}
-				if (!this.activeSelectedMetric.SelectedVariable().IsSimpleCount) {
-					mapItem.Value = this.FormatValue(dataElement);
+				if (! variable.IsSimpleCount) {
+					mapItem.Value = this.FormatValue(variable, dataElement);
 				}
 
 				// Pone el texto
-				this.AddFeatureText(val, dataElement, tileKey, tileBounds, colorMap);
+				this.AddFeatureText(variable, val, dataElement, tileKey, tileBounds, colorMap);
 
 				allKeys.push(id);
 
@@ -74,14 +75,14 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 	}
 };
 
-LocationsComposer.prototype.AddFeatureText = function (val, dataElement, tileKey, tileBounds, colorMap) {
+LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElement, tileKey, tileBounds, colorMap) {
 	if (this.activeSelectedMetric.showText() === false) {
 		return;
 	}
 	var location = new window.google.maps.LatLng(parseFloat(dataElement['Lat']), parseFloat(dataElement['Lon']));
 
 	if (this.inTile(tileBounds, location)) {
-		this.ResolveValueLabel(dataElement, location, tileKey, colorMap[val]);
+		this.ResolveValueLabel(variable, dataElement, location, tileKey, colorMap[val]);
 	}
 };
 

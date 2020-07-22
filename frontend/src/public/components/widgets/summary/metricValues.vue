@@ -26,7 +26,7 @@
 						<template v-if="label.Visible" class="labelRow">
 							<td class="dataBox">
 								<!-- 2575fb -->
-								<i :style="'color: ' + label.FillColor" class="fa drop fa-tint gotas"></i>
+								<i :style="'color: ' + label.FillColor" class="fa drop fa-tint exp-category-bullets"></i>
 							</td>
 							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
@@ -37,10 +37,10 @@
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted">
-								<i class="fa drop fa-tint gotas"></i>
+								<i class="fa drop fa-tint exp-category-bullets"></i>
 							</td>
 							<td class="dataBox text-muted" style="width: 100%">
-								{{ label.Name }}
+								{{ applySymbols(label.Name) }}
 								<div class="bar-muted" :style="getLength( getValue(label.Values, variable.ValueLabels), variable)"></div>
 							</td>
 							<td class='text-muted textRight'><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
@@ -176,6 +176,9 @@ export default {
 	methods: {
 		displayLabel(label) {
 			return label.Values && (this.variable.ShowEmptyCategories || label.Values.Count !== '');
+		},
+		applySymbols(cad) {
+			return str.applySymbols(cad);
 		},
 		togglePin() {
 			if (this.level.Pinned) {
@@ -424,7 +427,7 @@ export default {
 }
 .localTableCompact td {
 	border: 0px;
-	padding: 2px;
+	padding: 3px;
 	vertical-align: top;
 }
 

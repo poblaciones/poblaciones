@@ -67,10 +67,13 @@ class CsvToJson
 					$decimal = $csv->DetectDecimalSeparator($data);
 				foreach($header['varNames'] as $k => $varName)
 				{
-					$lengths[$varName] = self::GetLengths($data[$k], $lengths, $varName);
-					$header['isNumber'][$varName] = self::GetIsNumber($data[$k], $header['isNumber'], $varName, $decimal);
-					$header['alignments'][$varName] = self::GetAlignments($header['isNumber'], $varName);
-					$varFormats[$varName] = self::GetVarFormatsParts($data[$k], $lengths, $header['isNumber'], $varFormats, $varName);
+					if (array_key_exists($k, $data))
+					{
+						$lengths[$varName] = self::GetLengths($data[$k], $lengths, $varName);
+						$header['isNumber'][$varName] = self::GetIsNumber($data[$k], $header['isNumber'], $varName, $decimal);
+						$header['alignments'][$varName] = self::GetAlignments($header['isNumber'], $varName);
+						$varFormats[$varName] = self::GetVarFormatsParts($data[$k], $lengths, $header['isNumber'], $varFormats, $varName);
+					}
 				}
 
 				$json = json_encode(self::PivotArray($data), JSON_PARTIAL_OUTPUT_ON_ERROR);

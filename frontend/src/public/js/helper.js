@@ -39,11 +39,94 @@ module.exports = {
 		}
 		return true;
 	},
+	renderMetricValue(value, total, hasTotals, normalizationScale) {
+		if (value === '-') {
+			return '-';
+		}
+		var calculatedValue;
+		if (hasTotals) {
+			calculatedValue = (total > 0 ? value * normalizationScale / total : 0);
+		} else {
+			calculatedValue = value;
+		}
+		return this.getValueFormatted(calculatedValue, hasTotals);
+	},
+	getValueFormatted(value, hasTotals) {
+		if (value === '-') {
+			return '-';
+		} else if (hasTotals) {
+			return this.formatPercentNumber(value);
+		} else {
+			return this.formatNum(value);
+		}
+	},
 	formatPercentNumber(num) {
 		if (num === '') {
 			return '-';
 		}
 		return Number(num).toFixed(1).toLocaleString('es');
+	},
+	ResolveNormalizationCaption(variable, preffixN) {
+		var pref = (preffixN ? 'N' : '');
+		if (variable.Normalization === null) {
+			return pref;
+		}
+		var unit = this.ResolveNormalizationUnit(variable);
+		var ret = '';
+		switch (variable.NormalizationScale) {
+			case 100:
+				ret = '%';
+				break;
+			case 1:
+				ret = '';
+				break;
+			case 1000:
+				ret = ' / mil ' + unit;
+				break;
+			case 10000:
+				ret = ' / 10 mil ' + unit;
+				if (unit === 'm²')
+					ret = ' / ha';
+				break;
+			case 100000:
+				ret = ' / 100 mil ' + unit;
+				if (unit === 'm²')
+					ret = ' / ,1 km²';
+				break;
+			case 1000000:
+				ret = ' / millón de ' + unit;
+				if (unit === 'm²')
+					ret = ' / km²';
+				break;
+		}
+		if (ret !== '%') {
+			ret = pref + ret;
+		}
+		return ret.trimLeft();
+	},
+	ResolveNormalizationUnit(variable) {
+		switch (variable.Normalization) {
+			case 'P':
+				return 'hab.';
+			case 'H':
+				return 'hog.';
+			case 'A':
+				return 'adultos';
+			case 'C':
+				return 'niños';
+			case 'P':
+				return 'hab.';
+			case 'H':
+				return 'hog.';
+			case 'N':
+				return '';
+			case 'M':
+				return 'm²';
+			case 'O':
+				return (variable.NormalizationColumn ? variable.NormalizationColumn.Caption : '');
+			default:
+				return 'unidad no reconocida';
+		}
 	},
 	ensureFinalDot(str) {
 		str = (str + '').trim();

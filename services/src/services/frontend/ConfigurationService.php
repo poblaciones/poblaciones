@@ -27,6 +27,13 @@ class ConfigurationService extends BaseService
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
 									'StaticWorks' =>  Context::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => Context::Settings()->Map()->UseGradients,
+
+									'UseFavorites' => Context::Settings()->Map()->UseFavorites,
+									'UseCreatePdf' => Context::Settings()->Map()->UseCreatePdf,
+									'UseEmbedding' => Context::Settings()->Map()->UseEmbedding,
+									'UseCollapsePanel' => Context::Settings()->Map()->UseCollapsePanel,
+									'UseRural' => Context::Settings()->Map()->UseRural,
+
 									'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => Context::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user);
