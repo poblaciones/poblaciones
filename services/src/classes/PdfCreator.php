@@ -144,7 +144,7 @@ class PdfCreator
 			if ($source['con_person'] != '')
 			{
 				$this->pdf->WriteIndentedPair('Contacto', $source['con_person']);
-				$this->pdf->WriteDoubleIndentedPair('Correo electrónico', $source['con_email']);
+				$this->pdf->WriteDoubleIndentedMail($source['con_email']);
 				$this->pdf->WriteDoubleIndentedPair('Teléfono', $source['con_phone']);
 			}
 			// Institución
@@ -219,7 +219,7 @@ class PdfCreator
 			if ($label === null || trim($label) === '') {
 				$label = '-';
 			}
-			$this->pdf->WriteIndentedPair($column['dco_variable'], $label, true, false);
+			$this->pdf->WriteIndentedPair($column['dco_variable'], $label, true, true);
 			if (array_key_exists('values', $column) && $column['values'] != null)
 			{
 				foreach($column['values'] as $value)
@@ -231,9 +231,15 @@ class PdfCreator
 	private function WriteDatasetMetrics()
 	{
 		$this->pdf->WriteHeading4('Indicadores');
-		foreach($this->dataset['metrics'] as $metricId => $variables)
+		$lastMetric = null;
+		foreach($this->dataset['metricsVersions'] as $_ => $variables)
 		{
-			$this->pdf->WriteIndentedPairTitle('Nombre:', $variables[0]['mtr_caption']);
+			$metricCaption = $variables[0]['mtr_caption'];
+			if ($metricCaption !== $lastMetric)
+			{
+				$this->pdf->WriteIndentedPairTitle('Nombre:', $metricCaption);
+				$lastMetric = $metricCaption;
+			}
 			$this->pdf->WriteIndentedPair('Versión', $variables[0]['mvr_caption']);
 			$this->pdf->WriteIndentedText('Variables');
 			$isFirst = true;
@@ -263,7 +269,7 @@ class PdfCreator
 						}
 						$valuesBlock .= $this->pdf->HtmlEncode($value['vvl_caption']) . '<br>';
 					}
-					$this->pdf->WriteExtraIndentedPair('Categorías', $valuesBlock, false, false);
+					$this->pdf->WriteExtraIndentedPair('Categorías', $valuesBlock, false);
 				}
 			}
 		}

@@ -125,14 +125,14 @@ class MetadataModel extends BaseModel
 		$ret = App::Db()->fetchAssoc($sql, array($datasetId));
 		// Trae columnas e indicadores
 		$ret['columns'] = $this->GetDatasetColumnsMetadata($datasetId);
-		$ret['metrics'] = $this->GetDatasetMetricsMetadata($datasetId);
+		$ret['metricsVersions'] = $this->GetDatasetMetricVersionsMetadata($datasetId);
 
 		// Listo
 		Profiling::EndTimer();
 		return $ret;
 	}
 
-	private function GetDatasetMetricsMetadata($datasetId)
+	private function GetDatasetMetricVersionsMetadata($datasetId)
 	{
 		Profiling::BeginTimer();
 		$metricToVariableJoin = $this->draftPreffix . "metric
@@ -140,7 +140,7 @@ class MetadataModel extends BaseModel
 								JOIN " . $this->draftPreffix . "metric_version_level ON mvl_metric_version_id = mvr_id
 								JOIN " . $this->draftPreffix . "variable ON mvv_metric_version_level_id = mvl_id ";
 		// Trae las variables
-		$sql = "select mtr_id, mtr_caption, mvr_caption, mvv_id, mvv_caption,
+		$sql = "select mtr_id, mtr_caption, mvr_caption, mvr_id, mvv_id, mvv_caption,
 								c1.dco_variable AS mvv_data_column_variable, c1.dco_caption AS mvv_data_column_caption,
 								c2.dco_variable AS mvv_normalization_column_variable, c2.dco_caption AS mvv_normalization_column_caption,
 								mvv_normalization, mvv_normalization_scale, mvv_normalization_column_id,
@@ -151,7 +151,8 @@ class MetadataModel extends BaseModel
 								LEFT JOIN geography ON dat_geography_id = geo_id
 								LEFT JOIN " . $this->draftPreffix . "dataset_column c1 ON c1.dco_id = mvv_data_column_id
 								LEFT JOIN " . $this->draftPreffix . "dataset_column c2 ON c2.dco_id = mvv_normalization_column_id
-								WHERE mvl_dataset_id = ? ORDER BY mtr_caption, mtr_id, mvr_caption, mvv_caption, geo_revision";
+								WHERE mvl_dataset_id = ?
+						ORDER BY mtr_caption, mtr_id, mvr_caption, mvr_id, mvv_caption, geo_revision";
 		$variables = App::Db()->fetchAll($sql, array($datasetId));
 		// Completa los nombres de variables
 		foreach($variables as &$variable)
@@ -170,10 +171,10 @@ class MetadataModel extends BaseModel
 		foreach($variables as &$variable)
 			 $variable['values'] = Arr::SafeGet($diccionary, $variable['mvv_id'], null);
 		// Agrupa por metric
-		$metrics = Arr::FromSortedToKeyed($variables, 'mtr_id');
+		$metricsVersions = Arr::FromSortedToKeyed($variables, 'mvr_id');
 
 		Profiling::EndTimer();
-		return $metrics;
+		return $metricsVersions;
 	}
 
 	private function GetDatasetColumnsMetadata($datasetId)

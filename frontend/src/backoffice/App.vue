@@ -240,6 +240,7 @@ html, body {
 	margin-bottom: 2px;
 	line-height: 1.1em;
 	color: #888!important;
+	-webkit-text-fill-color: #888 !important;
 	font-size: 14px!important;
 }
 
@@ -418,6 +419,7 @@ html, body {
 }
 .md-helper-text {
 	bottom: -18px ! important;
+	-webkit-text-fill-color: #888 !important;
 }
 
 .helper {
@@ -433,7 +435,7 @@ html, body {
 	position: absolute;
 	line-height: 0.3em;
 	font-size: 14px!important;
-	color: #999 !important;
+	color: #888 !important;
 }
 
 .md-field.md-has-textarea:not(.md-autogrow) .md-count {

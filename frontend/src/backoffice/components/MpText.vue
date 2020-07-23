@@ -7,12 +7,13 @@
 						{{ this.label }}
 					</label>
 					<md-input v-if="!this.multiline" :type="type" style="text-overflow: ellipsis; width: 100%" autocomplete="off"
+										:style="'font-size: ' + (largeFont ? '24' : '19') + 'px'"
 										:placeholder="(placeholder ? placeholder : '')"
 										:class="(!editMode ? 'unselectable' : '')"
 										v-on:mousedown="mouseDown" v-on:mouseup="mouseUp" v-model="localValue"
 										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
-					<md-textarea v-if="this.multiline" class="mp-area" :style="minHeightRows" autocomplete="off"
-											 :disabled="isDisabled || !editMode" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
+					<md-textarea v-if="this.multiline" class="mp-area" :style="minHeightRows + highlightBorder" autocomplete="off"
+											 :readonly="isDisabled || !editMode" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>
 				<div :style="'line-height: 1em;' + (!isDisabled && maxlength > 0 ? ' padding-right: 34px' : '')">
@@ -81,8 +82,18 @@ export default {
 		ChangeEditableMode(mode) {
       if (mode) {
 				var len = this.input.$el.value.length;
+				var offset = -1;
+				if (this.multiline) {
+					offset = this.input.$el.scrollTop;
+				}
 				this.input.$el.selectionStart = 0;
 				this.input.$el.selectionEnd = len;
+				if (offset != -1) {
+					var loc = this;
+					setTimeout(() => {
+						loc.input.$el.scrollTop = offset;
+					}, 50);
+				}
 			} else {
 				this.clearSelection();
 			}
@@ -152,6 +163,13 @@ export default {
 		minHeightRows() {
 			return { 'min-height': (32 + 17 * this.rows) + 'px' };
 		},
+		highlightBorder() {
+			if (this.editMode) {
+				return '; border: 1px solid #448aff!important;';
+			} else {
+				return '';
+			}
+		},
 		errorMessage() {
 			var ret = '';
 			if (this.error) {
@@ -212,6 +230,7 @@ export default {
     size: String,
     error: String,
 		canEdit: { type: Boolean, default: true },
+		largeFont: { type: Boolean, default: false},
 		multiline: Boolean,
 		suffix: String,
 		type: { type: String, default: null },
@@ -244,12 +263,12 @@ export default {
 
 .md-field.md-theme-default.md-focused .md-input, .md-field.md-theme-default.md-focused .md-textarea, .md-field.md-theme-default.md-has-value .md-input, .md-field.md-theme-default.md-has-value .md-textarea {
 	-webkit-text-fill-color: unset !important;
-	font-size: unset !important;
 }
-	.defaultColor {
-		-webkit-text-fill-color: rgba(0,0,0,0.87);
-		font-size: 19px;
-	}
+
+.defaultColor {
+	-webkit-text-fill-color: rgba(0,0,0,0.87);
+}
+
 
 .md-layout-item .md-size-25 {
   padding: 0 !important;

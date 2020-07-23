@@ -132,6 +132,7 @@ class PublishDataTables
 		$cacheManager->CleanPdfMetadata($work->getMetadata()->getId());
 		$cacheManager->CleanWorkHandlesCache($workId);
 		$cacheManager->CleanWorkVisiblityCache($workId);
+		$cacheManager->ClearWorkSelectedMetricMetadata($workId);
 	}
 
 	public function RevokeOnlineDates($workId)

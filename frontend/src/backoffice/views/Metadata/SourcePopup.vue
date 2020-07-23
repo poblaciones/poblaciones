@@ -10,8 +10,7 @@
 					<div class="md-layout md-gutter">
 						<div class="md-layout-item md-size-70 md-small-size-100">
 							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
-								label="Nombre de la fuente" ref="datasetInput" helper="Indique el nombre completo de la fuente,
-					evitando siglas o acrónimos. No incluya el año de producción de la información.
+								label="Nombre completo de la fuente" ref="datasetInput" helper="Evite siglas o acrónimos. No incluya el año de producción de la información.
 					Ej. Censo Nacional Económico."
 									:maxlength="200" v-model="item.Caption" />
 						</div>

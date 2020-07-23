@@ -11,7 +11,7 @@
 			<div class="titleLine">
 				<div class="md-layout md-gutter" style="margin-top: -21px">
 					<div class="md-layout-item md-size-100">
-						<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :maxlength="150" class="fieldWhite"
+						<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :largeFont="true" :maxlength="150" class="fieldWhite"
 										 :required="true" @update="UpdateTitle"
 										 v-model="Work.properties.Metadata.Title" />
 					</div>
@@ -101,7 +101,6 @@ export default {
 
 .fieldWhite .md-input {
 	-webkit-text-fill-color: white!important;
-	font-size: 24px!important;
 }
 
 .titleLine {

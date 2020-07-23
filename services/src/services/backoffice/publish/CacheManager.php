@@ -20,6 +20,8 @@ use helena\caches\TileDataCache;
 use helena\caches\GeographyCache;
 use helena\caches\LabelsCache;
 
+use helena\db\admin\WorkModel;
+
 class CacheManager
 {
 	// Dataset
@@ -97,6 +99,17 @@ class CacheManager
 	}
 
 	// Metric
+	public function ClearWorkSelectedMetricMetadata($workId)
+	{
+		$publicWorkModel = new WorkModel(false);
+		$workIdShardified = PublishDataTables::Shardified($workId);
+		$metricVersions = PublishDataTables::UnshardifyList($publicWorkModel->GetMetricVersions($workIdShardified),
+																																				array('mvr_metric_id'));
+		foreach($metricVersions as $row)
+		{
+			$this->ClearMetricMetadata($row['mvr_metric_id']);
+		}
+	}
 	public function ClearSelectedMetricMetadata($metricId)
 	{
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
