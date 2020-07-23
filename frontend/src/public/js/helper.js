@@ -494,7 +494,7 @@ module.exports = {
 		}
 		return url[pos];
 	},
-	getRankingParams(metric, frame, size, direction) {
+	getRankingParams(metric, frame, size, direction, hiddenValueLabels) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		const level = ver.Levels[ver.SelectedLevelIndex];
 		const variable = level.Variables[level.SelectedVariableIndex];
@@ -507,7 +507,8 @@ module.exports = {
 			u: metric.SelectedUrbanity,
 			w: metric.Metric.Revision,
 			s: size,
-			d: direction
+			d: direction,
+			h: hiddenValueLabels
 		}, this.getFrameParams(frame));
 	},
 	getSummaryParams(metric, frame) {

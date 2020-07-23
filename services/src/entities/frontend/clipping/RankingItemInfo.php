@@ -13,6 +13,7 @@ class RankingItemInfo extends BaseMapModel
 	public $FID;
 	public $Lat;
 	public $Lon;
+	public $Envelope;
 }
 
 

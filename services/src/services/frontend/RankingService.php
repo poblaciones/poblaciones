@@ -2,22 +2,22 @@
 
 namespace helena\services\frontend;
 
-use helena\services\common\BaseService;
-use helena\caches\RankingCache;
+use minga\framework\Performance;
+use minga\framework\ErrorException;
+
+use helena\classes\GlobalTimer;
 use helena\db\frontend\SnapshotByDataset;
+use helena\caches\RankingCache;
+use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\clipping\RankingInfo;
 use helena\entities\frontend\clipping\RankingItemInfo;
-use helena\classes\App;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
-use minga\framework\Context;
-use minga\framework\Performance;
-use helena\classes\GlobalTimer;
-use minga\framework\ErrorException;
+use helena\services\common\BaseService;
 
 
 class RankingService extends BaseService
 {
-	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction)
+	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels)
 	{
 		$data = null;
 		$this->CheckNotNullNumeric($metricId);
@@ -28,7 +28,7 @@ class RankingService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new ErrorException("A spatial indication must be specified (envelope, circle or region).");
 
-		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $hasTotals);
+		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $hasTotals, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && RankingCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -38,7 +38,7 @@ class RankingService extends BaseService
 		{
 			Performance::CacheMissed();
 		}
-		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction);
+		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)
 			RankingCache::Cache()->PutData($metricId, $key, $data);
@@ -48,7 +48,7 @@ class RankingService extends BaseService
 		return $data;
 	}
 
-	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction)
+	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -63,15 +63,15 @@ class RankingService extends BaseService
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionRankingByCircle($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction);
+			$rows = $table->GetMetricVersionRankingByCircle($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		else if ($frame->ClippingRegionId != NULL)
 		{
-			$rows = $table->GetMetricVersionRankingByRegionId($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction);
+			$rows = $table->GetMetricVersionRankingByRegionId($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionRankingByEnvelope($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->Envelope, $level->Dataset->Type, $hasDescriptions, $size, $direction);
+			$rows = $table->GetMetricVersionRankingByEnvelope($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->Envelope, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		$data = $this->CreateRankingInfo($rows);
 		return $data;
@@ -90,6 +90,7 @@ class RankingService extends BaseService
 			$item->Name = $row['Name'];
 			$item->Lat = $row['Lat'] ;
 			$item->Lon = $row['Lon'];
+			$item->Envelope = Envelope::FromDb($row['Envelope']);
 			$ret->Items[] = $item;
 		}
 		return $ret;

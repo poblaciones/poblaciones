@@ -143,9 +143,9 @@ SegmentedMap.prototype.SetMyLocation = function (coord) {
 	this.SaveRoute.Disabled = false;
 
 	this.MapsApi.CreateMyLocationMarker(coord);
-	window.SegMap.SetZoom(13);
-	window.SegMap.PanTo(coord);
-	window.SegMap.SaveRoute.UpdateRoute(coord);
+	this.SetZoom(13);
+	this.PanTo(coord);
+	this.SaveRoute.UpdateRoute(coord);
 };
 
 SegmentedMap.prototype.TriggerResize = function () {
@@ -246,8 +246,13 @@ SegmentedMap.prototype.EndSelecting = function () {
 };
 
 SegmentedMap.prototype.InfoRequestedInteractive = function (position, parent, fid, offset) {
-	if (position && (!position.Point || position.Point.X < 350)) {
-		this.PanTo(position.Coordinate);
+	if (position) {
+		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
+					|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
+			this.MapsApi.FitEnvelope(position.Envelope);
+		} else if (!position.Point || position.Point.X < 350) {
+			this.PanTo(position.Coordinate);
+		}
 	}
 	this.InfoRequested(position, parent, fid, offset, true);
 };

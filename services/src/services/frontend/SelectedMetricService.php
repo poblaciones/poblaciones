@@ -203,7 +203,7 @@ class SelectedMetricService extends BaseService
 		// Crea el nivel
 		$level = new LevelInfo();
 		$level->Fill($selectedVersionLevelInfo);
-		$level->CanSetUrbanity = ($selectedVersionLevelInfo['geo_field_urbanity_name'] != null);
+		$level->HasUrbanity = ($selectedVersionLevelInfo['geo_field_urbanity_name'] != null);
 		$level->SelectedVariableIndex = 0;
 		if ($selectedVersionLevelInfo['mvl_extents'])
 			$level->Extents = Envelope::FromDb($selectedVersionLevelInfo['mvl_extents'])->Trim();

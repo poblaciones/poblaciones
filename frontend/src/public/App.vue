@@ -518,6 +518,12 @@ a:hover {
 	padding-bottom: 4px;
 }
 
+.lightButton {
+	font-size: 12px;
+	padding: 4px 4px 4px 4px !important;
+	line-height: 1em;
+}
+
 .dropdown-menu > li:last-child > a {
 	border-bottom-left-radius: 4px;
 	border-bottom-right-radius: 4px;

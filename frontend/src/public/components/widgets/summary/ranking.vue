@@ -84,31 +84,6 @@ export default {
 		},
 	},
 	methods: {
-		getFormat() {
-			var format = '';
-			if (this.variable.HasTotals) {
-				switch (this.variable.NormalizationScale) {
-					case 100:
-						format = '%100';
-						break;
-					case 1:
-						format = '%1';
-						break;
-					case 1000:
-						format = '%1000';
-						break;
-					case 10000:
-						format = '%10000';
-						break;
-					case 100000:
-						format = '%100000';
-						break;
-				}
-			} else {
-				format = 'num';
-			}
-			return format;
-		},
 		getMuted() {
 			if (this.metric.IsUpdatingRanking) {
 				return ' text-muted';
@@ -127,7 +102,8 @@ export default {
 			return (label ? label.FillColor : '');
 		},
 		clickItem(item) {
-			var position = { Coordinate: { Lat: item.Lat, Lon: item.Lon }};
+			var position = { Coordinate: { Lat: item.Lat, Lon: item.Lon },
+												Envelope: item.Envelope };
 			var parentInfo = {
 						MetricName: this.metric.properties.Metric.Name,
 						MetricId: this.metric.properties.Metric.Id,
@@ -135,7 +111,6 @@ export default {
 						LevelId: this.metric.SelectedLevel().Id,
 						VariableId: this.metric.SelectedVariable().Id
 					};
-			window.SegMap.SetZoom(14);
 			window.SegMap.InfoRequestedInteractive(position, parentInfo, item.FID);
 		},
 		changeSize(itemSize) {

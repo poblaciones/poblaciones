@@ -153,9 +153,10 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 		this.cancelUpdateRanking('cancelled');
 	}
 	this.IsUpdatingRanking = true;
+	var hiddenValueLabels = this.getHiddenValueLabels(variable);
 
 	window.SegMap.Get(window.host + '/services/frontend/metrics/GetRanking', {
-		params: h.getRankingParams(metric, window.SegMap.frame, this.RankingSize, this.RankingDirection),
+		params: h.getRankingParams(metric, window.SegMap.frame, this.RankingSize, this.RankingDirection, hiddenValueLabels),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateRanking = c; }),
 	}).then(function (res) {
 		loc.cancelUpdateRanking = null;
@@ -168,6 +169,18 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 	}).catch(function (error) {
 		err.errDialog('GetRanking', 'obtener el ranking', error);
 	});
+};
+
+ActiveSelectedMetric.prototype.getHiddenValueLabels = function (variables) {
+	var ret = '';
+	for (var n = 0; n < variables.ValueLabels.length; n++)
+		if (!variables.ValueLabels[n].Visible) {
+			ret += ',' + variables.ValueLabels[n].Id;
+		}
+	if (ret.length > 0) {
+		ret = ret.substring(1);
+	}
+	return ret;
 };
 
 ActiveSelectedMetric.prototype.SelectVersion = function (index) {

@@ -1,4 +1,6 @@
 [CURRENT]
+- El ranking responde al filtro por categoría.
+- El click en item de ranking hace pan al envelope del polígono.
 
 v2.25 (2020-07-17)
 - Mejora en la detección de filas vacías (importanción de CSV y Excel).

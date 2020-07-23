@@ -178,10 +178,12 @@ App::$app->get('/services/frontend/metrics/GetRanking', function (Request $reque
 	$frame = Frame::FromParams();
 	$size = Params::GetIntRangeMandatory('s', 10, 100);
 	$direction = Params::GetMandatory('d');
+	$hiddenValueLabels = Params::GetIntArray('h');
+
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
-	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction));
+	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels));
 });
 
 

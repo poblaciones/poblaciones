@@ -1,21 +1,46 @@
 <template>
-	<span>
+	<div>
 		<table class="localTableCompact">
 			<tbody>
 				<tr>
-					<td class="statsHeader" style="width: 25px; "></td>
-					<td colspan="2" class="statsHeader">
-						<span v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="(version.Levels.length > 1 ? 'margin-right: -15px;' : '')">
-							{{ level.Name }}
-							<span v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
-										class="hand" v-on:click="togglePin">
+					<td colspan="3" class="statsHeader">
+						<span v-if="hasUrbanityFilter && urbanity != 'N'" style="float: left; padding-top: 4px;"
+									:title="getUrbanityTextTooltip">
+							{{ getUrbanityTextActive }}
+						</span>
+						<div v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="levelLabelMargin">
+							<button type="button" style="padding-left: 2px!important;"
+											class="lightButton close"
+											v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
+											v-on:click="togglePin">
 								<PinIcon v-if="!level.Pinned" class="icon" />
 								<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
-									-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />
+								-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />
+							</button>
+							<span style="line-height: 2.3rem">
+								{{ level.Name }}
 							</span>
-						</span>
+						</div>
 					</td>
-					<td class="statsHeader textRight" style="min-width: 75px">
+					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
+						<span class="dropdown" v-show="Use.UseUrbanity && hasUrbanityFilter" style="float: left">
+							<button type="button"
+											:class="(urbanity != 'N' ? 'activeFilter' : '')"
+											class="filterDropdownButton lightButton close" data-toggle="dropdown"
+											:title="getUrbanityTextActive">
+								<i class="fas fa-filter" />
+							</button>
+							<ul class="dropdown-menu filterDropdownMargin">
+								<li v-for="(value, key) in urbanityFilters" :key="key">
+									<button type="button" class="filterDropdownItem close" v-on:click="changeUrbanity(key)">
+										<i class="fa-circle" :class="(key === urbanity ? 'fas activeFilter' : 'far')"
+											 style="font-size: 10px;" :style="'margin-left: '+ (value.level * 8) +'px'" aria-hidden="true" />
+										{{ value.item }}
+									</button>
+								</li>
+							</ul>
+						</span>
+
 						<span class="hand" :title="currentMetric.Title" v-on:click="clickMetric(currentMetric.Next.Key)"
 									v-html="getValueHeader()">
 						</span>
@@ -61,13 +86,14 @@
 				</tr>
 			</tbody>
 		</table>
-	</span>
+	</div>
 </template>
 
 <script>
 import Helper from '@/public/js/helper';
 import PinIcon from '@/public/assets/pin-outline.svg';
 import UnpinIcon from '@/public/assets/pin-off-outline.svg';
+import str from '@/common/js/str';
 
 export default {
 	name: 'metricValues',
@@ -104,6 +130,39 @@ export default {
 		},
 	},
 	computed: {
+		Use() {
+			return window.Use;
+		},
+		urbanityFilters() {
+			return {
+				'N': { item: 'Todo', level: 0, label: '', tooltip: ''},
+				'UD': { item: 'Urbano', level: 1, label: 'Urbano', tooltip: 'Áreas de 2 mil habitantes y más (URP=1)' },
+				'U': { item: 'Agrupado', level: 2, label: 'Urbano agrupado', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con 250 habitantes por km2 y más' },
+				'D': { item: 'Disperso', level: 2, label: 'Urbano disperso', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con menos de 250 habitantes por km2' },
+				'RL': { item: 'Rural', level: 1, label: 'Rural', tooltip: 'Áreas de menos de 2 mil habitantes (URP=2+3)' },
+				'R': { item: 'Agrupado', level: 2, label: 'Rural agrupado', tooltip: 'Áreas de menos de 2 mil habitantes agrupadas (URP=2)' },
+				'L': { item: 'Disperso', level: 2, label: 'Rural disperso', tooltip: 'Áreas de menos de 2 mil habitantes dispersas (URP=3)' }
+			};
+		},
+		urbanity() {
+			return this.metric.properties.SelectedUrbanity;
+		},
+		hasUrbanityFilter() {
+			return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
+		},
+		getUrbanityTextTooltip() {
+			return this.urbanityFilters[this.urbanity].tooltip;
+		},
+		getUrbanityTextActive() {
+			return this.urbanityFilters[this.urbanity].label;
+		},
+		levelLabelMargin() {
+			var margin = 0;
+			if (this.version.Levels.length > 1) {
+				margin -= 20;
+			}
+			return 'margin-right: ' + margin + 'px;';
+		},
 		total() {
 			if(this.metric.properties.SummaryMetric === 'P' ||
 				this.metric.properties.SummaryMetric === 'A') {
@@ -179,6 +238,11 @@ export default {
 		},
 		applySymbols(cad) {
 			return str.applySymbols(cad);
+		},
+		changeUrbanity(mode) {
+			this.metric.properties.SelectedUrbanity = mode;
+			window.SegMap.SaveRoute.UpdateRoute();
+			window.SegMap.UpdateMap();
 		},
 		togglePin() {
 			if (this.level.Pinned) {
@@ -431,5 +495,29 @@ export default {
 	vertical-align: top;
 }
 
+	.filterDropdownItem {
+		width: 100%;
+		font-weight: 500;
+		color: black;
+		opacity: .6;
+		text-align: left;
+		padding: 4px;
+		font-size: 13px;
+	}
+
+.filterDropdownButton {
+	font-size: 11px;
+	float: none;
+}
+.filterDropdownMargin {
+	left: -40px;
+	right: auto;
+	min-width: 100px;
+	margin-top: 0px;
+}
+	.activeFilter {
+		opacity: 1;
+		color: #6d6d6d;
+	}
 </style>
 

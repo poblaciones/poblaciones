@@ -221,7 +221,7 @@ class SnapshotByDataset extends BaseModel
 		return $ret;
 	}
 
-	public function GetMetricVersionRankingByRegionId($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionId, $circle, $datasetType, $hasDescriptions, $size, $direction)
+	public function GetMetricVersionRankingByRegionId($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionId, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
 		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionId, $geographyId);
 
@@ -230,30 +230,30 @@ class SnapshotByDataset extends BaseModel
 		else
 			$circleQuery = null;
 
-		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query, $circleQuery);
+		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query, $circleQuery);
 	}
 
-	public function GetMetricVersionRankingByEnvelope($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $envelope, $datasetType, $hasDescriptions, $size, $direction)
+	public function GetMetricVersionRankingByEnvelope($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $envelope, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
 
 		$query = $this->spatialConditions->CreateSimpleEnvelopeQuery($envelope);
 
-		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query);
+		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query);
 	}
 
-	public function GetMetricVersionRankingByCircle($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $circle, $datasetType, $hasDescriptions, $size, $direction)
+	public function GetMetricVersionRankingByCircle($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
 		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
 
-		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query);
+		return $this->ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query);
 	}
 
-	private function ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $query, $extraQuery = null)
+	private function ExecRankingQuery($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
 
 		$select = "IFNULL(sna_" . $variableId . "_value, 0) Value, IFNULL(sna_" . $variableId . "_total, 0) Total, sna_feature_id FeatureId,
-								sna_" . $variableId . "_value_label_id ValueId, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
+								sna_" . $variableId . "_value_label_id ValueId, ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
 		if ($hasDescriptions)
 		{
 			$select .= ", sna_description Name ";
@@ -270,7 +270,9 @@ class SnapshotByDataset extends BaseModel
 		}
 		$from = $this->tableName;
 
-		$where = $this->spatialConditions->UrbanityCondition($urbanity);
+		$where = $this->hiddenValuesCondition($variableId, $hiddenValueLabels);
+
+		$where .= $this->spatialConditions->UrbanityCondition($urbanity);
 
 		if ($hasTotals)
 		{
@@ -300,6 +302,15 @@ class SnapshotByDataset extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
+	private function hiddenValuesCondition($variableId, $hiddenValueLabels)
+	{
+		if (sizeof($hiddenValueLabels) === 0)
+			return "";
+		else
+			return " AND sna_" . $variableId . "_value_label_id NOT IN(" . implode(",", $hiddenValueLabels) . ") ";
+	}
+
 }
 
 

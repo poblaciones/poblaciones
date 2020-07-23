@@ -26,7 +26,6 @@ class LevelInfo extends BaseMapModel
 	public $MinZoom;
 	public $HasArea;
 	public $HasDescriptions;
-	public $CanSetUrbanity;
 	public $SelectedVariableIndex;
 
 

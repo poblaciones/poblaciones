@@ -32,7 +32,7 @@ class ConfigurationService extends BaseService
 									'UseCreatePdf' => Context::Settings()->Map()->UseCreatePdf,
 									'UseEmbedding' => Context::Settings()->Map()->UseEmbedding,
 									'UseCollapsePanel' => Context::Settings()->Map()->UseCollapsePanel,
-									'UseRural' => Context::Settings()->Map()->UseRural,
+									'UseUrbanity' => Context::Settings()->Map()->UseUrbanity,
 
 									'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => Context::Settings()->Map()->MaxStaticQueueRequests,
