@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div v-if="hasSummary && clipping.Region.Summary.Name && clipping.IsUpdating !== '1'" class="clippingBlock cards">
-			<mp-close-button v-on:click="removeRegion" title="Quitar zona seleccionada" />
+			<mp-close-button v-on:click="removeRegion" title="Quitar zona seleccionada" class="exp-hiddable-block" />
 
 			<div class="clippingBlockHeader">{{ clipping.Region.Summary.TypeName }}</div>
 			<div class="hand" v-on:click="fitRegion" style="position: relative; margin-right: 20px;">

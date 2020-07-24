@@ -145,6 +145,13 @@ export default {
 			}
 			return classObjs;
 		},
+		changeVisibilityByClass(classname, newValue) {
+			var classObjs = document.getElementsByClassName(classname);
+			for (var i = 0; i < classObjs.length; i++) {
+				classObjs[i].style.visibility = newValue;
+			}
+			return classObjs;
+		},
 		swapClasses(classname, classToAdd, classToRemove) {
 			var classObjs = document.getElementsByClassName(classname);
 			for (var i = 0; i < classObjs.length; i++) {
@@ -152,7 +159,14 @@ export default {
 				classObjs[i].classList.remove(classToRemove);
 			}
 		},
-		removeClassAddText(classname, classToRemove, textToAdd){
+		removeClass(classname, classToRemove) {
+			var classObjs = document.getElementsByClassName(classname);
+			for (var i = 0; i < classObjs.length; i++) {
+				classObjs[i].classList.remove(classToRemove);
+			}
+			return classObjs;
+		},
+		removeClassAddText(classname, classToRemove, textToAdd) {
 			var classObjs= document.getElementsByClassName(classname);
 			for (var i = 0; i < classObjs.length; i++) {
 				classObjs[i].classList.remove(classToRemove);
@@ -160,7 +174,14 @@ export default {
 			}
 			return classObjs;
 		},
-		addClassRemoveText(classObjs, classToAdd){
+		addClass(classname, classToAdd) {
+			var classObjs = document.getElementsByClassName(classname);
+			for (var i = 0; i < classObjs.length; i++) {
+				classObjs[i].classList.add(classToAdd);
+			}
+		},
+		addClassRemoveText(classname, classToAdd){
+			var classObjs = document.getElementsByClassName(classname);
 			for (var i = 0; i < classObjs.length; i++) {
 				classObjs[i].classList.add(classToAdd);
 				classObjs[i].innerHTML = '';
@@ -212,42 +233,35 @@ export default {
 		prepareMapAndExport(exportFunction, metrics){
 			var loc = this;
 			window.SegMap.MapsApi.gMap.set('disableDefaultUI', true);
+
 			window.setTimeout(function() {
 				var bodyObj = loc.changeOverflowById(document.body, 'visible');
 				var holderObj = loc.changeOverflowById(document.querySelector('#holder'), 'visible');
 
 				loc.changeDisplayByClass("exp-hiddable-block", "none");
+				loc.changeDisplayByClass("exp-hiddable-unset", "none");
+				loc.changeVisibilityByClass("exp-hiddable-visiblity", "hidden");
 
-				var gotas = loc.swapClasses('moderateHr', 'fa-circle', 'fa-tint');
+				loc.addClassRemoveText("fa-tint", 'mpCircles');
+				loc.removeClassAddText('exp-category-bullets', 'fa-tint', "<div class='borderBullet'></div>");
 
+				loc.addClass("card panel-body", "exp-panel");
 
-				var fabPanel = loc.changeDisplayById(document.querySelector('#fab-panel'), 'none');
-				var editButton = loc.changeDisplayById(document.querySelector('#edit-button'), 'none');
-				var dropdown = loc.changeDisplayByClass('dropdown', 'none');
-
-				var btnGroup = loc.changeDisplayByClass(document.getElementsByClassName('btn-group pull-right'), 'none');
-				var circulos = loc.removeClassAddText('exp-variable-bullets', 'fa-circle', '&#9679;');
-
-				//var gotas = loc.removeClassAddText('exp-category-bullets', 'fa-tint', '&#9679;');
-				var gotas = loc.swapClasses('exp-category-bullets', 'fa-circle', 'fa-tint');
-
-				var contacto= loc.removeClassAddText('contacto','fa-comments', '&#128172;');
+				//var contacto= loc.removeClassAddText('contacto','fa-comments', '&#128172;');
 
 				html2canvas(bodyObj, { useCORS: true, ignoreElements: loc.ignore }).then(function(canvas) {
-				/*	loc.changeOverflowById(bodyObj, 'hidden');
+					loc.changeDisplayByClass("exp-hiddable-block", "block");
+					loc.changeDisplayByClass("exp-hiddable-unset", "unset");
+					loc.removeClass("card panel-body", "exp-panel");
+					loc.changeVisibilityByClass("exp-hiddable-visiblity", "visible");
+
+					loc.changeOverflowById(bodyObj, 'hidden');
 					loc.changeOverflowById(holderObj, 'hidden');
 
-					loc.changeDisplayByClass("exp-hiddable-block", "block");
+					loc.addClassRemoveText("exp-category-bullets", 'fa-tint');
+					loc.removeClassAddText('fa-tint', 'mpCircles', '');
 
-					loc.changeDisplayById(fabPanel, 'flex');
-					loc.changeDisplayById(editButton, 'unset');
-
-					loc.changeDisplayByClass(dropdown, 'unset');
-					loc.changeDisplayByClass(btnGroup, 'unset');
-					loc.addClassRemoveText(exp-variable-bullets, 'fa-circle');
-					loc.addClassRemoveText(exp-category-bullets, 'fa-tint');
-					loc.addClassRemoveText(contacto, 'fa-comments');
-					*/
+					//loc.addClassRemoveText("contacto", 'fa-comments');
 					exportFunction(canvas, metrics);
 				});
 			}, 100);

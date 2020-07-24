@@ -23,7 +23,7 @@
 						</div>
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
-						<span class="dropdown" v-show="Use.UseUrbanity && hasUrbanityFilter" style="float: left">
+						<span class="dropdown exp-hiddable-unset" v-show="Use.UseUrbanity && hasUrbanityFilter" style="float: left">
 							<button type="button"
 											:class="(urbanity != 'N' ? 'activeFilter' : '')"
 											class="filterDropdownButton lightButton close" data-toggle="dropdown"
@@ -51,7 +51,7 @@
 						<template v-if="label.Visible" class="labelRow">
 							<td class="dataBox">
 								<!-- 2575fb -->
-								<i :style="'color: ' + label.FillColor" class="fa drop fa-tint exp-category-bullets"></i>
+								<i :style="'border-color: ' + label.FillColor + '; color: ' + label.FillColor" class="fa drop fa-tint exp-category-bullets"></i>
 							</td>
 							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
@@ -489,28 +489,33 @@ export default {
 }
 .localTableCompact {
 }
+
 .localTableCompact td {
 	border: 0px;
 	padding: 3px;
 	vertical-align: top;
 }
 
-	.filterDropdownItem {
-		width: 100%;
-		font-weight: 500;
-		color: black;
-		opacity: .6;
-		text-align: left;
-		padding: 4px;
-		font-size: 13px;
-	}
+.filterDropdownItem {
+	width: 100%;
+	font-weight: 500;
+	color: black;
+	opacity: .6;
+	text-align: left;
+	padding: 6px 4px;
+	font-size: 13px;
+}
+
+.filterDropdownItem:hover {
+	background-color: #eeeeee;
+}
 
 .filterDropdownButton {
 	font-size: 11px;
 	float: none;
 }
 .filterDropdownMargin {
-	left: -40px;
+	left: -42px;
 	right: auto;
 	min-width: 100px;
 	margin-top: 0px;

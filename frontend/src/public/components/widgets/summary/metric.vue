@@ -1,6 +1,6 @@
 <template>
 	<div class="metricBlock">
-		<hr class="moderateHr exp-hiddable-block"/>
+		<hr class="moderateHr exp-hiddable-visiblity"/>
 		<div>
 			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index"
 						class="exp-hiddable-block" @RankingShown="rankingShown" />

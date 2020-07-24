@@ -6,9 +6,9 @@
 				<Search class="exp-hiddable-block"/>
 				<LeftPanel ref='leftPanel'/>
 				<MapPanel/>
-				<FabButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel"/>
+				<FabButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
 				<WatermarkFloat v-if="work.Current && work.Current.Institution.WatermarkId" :work="work" />
-				<EditButton v-if="work.Current" ref="editPanel" :backgroundColor="workColor" :work="work" />
+				<EditButton v-if="work.Current" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" v-show="Use.UseCollapsePanel" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
@@ -280,11 +280,29 @@ html, body {
 .action-muted {
 	color: #DDDDDD;
 }
+	.mpCircles {
+		margin-top: -3px !important;
+	}
+	.exp-panel {
+		padding: 10px !important;
+		border-width: 8px !important;
+		border-color: white !important;
+		border-style: solid !important;
+		box-shadow: unset!important;
+	}
 
-.moderateHr {
-	margin-top: 1.2rem;
-	margin-bottom: 1.1rem;
-}
+	.borderBullet {
+	border-width: 8px;
+	border-style: solid;
+	border-color: inherit;
+	border-radius: 8px;
+	width: 1px;
+	height: 1px;
+	}
+	.moderateHr {
+		margin-top: 1.2rem;
+		margin-bottom: 1.1rem;
+	}
 
 /* settings de split */
 .split p, .split-flex p {

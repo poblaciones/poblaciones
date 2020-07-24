@@ -20,7 +20,7 @@
 				</transition>
 			</div>
 		</div>
-		<collapse-button v-if='hasContent' :startLeft='width' :collapsed='collapsed' @click="doToggle" />
+		<collapse-button v-if='hasContent' :startLeft='width' class="exp-hiddable-block" :collapsed='collapsed' @click="doToggle" />
 	</div>
 </template>
 
