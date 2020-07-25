@@ -6,10 +6,30 @@ export default Queue;
 function Queue(max) {
 	this.id = 0;
 	this.queue = [];
+	this.onceNotificationIdle = [];
 	this.runningRequests = 0;
 	this.maxRequests = max;
 	if (max <= 0) max = 10000;
 }
+
+Queue.prototype.RequestOnceNotificationIdle = function () {
+	var targetCall;
+	var readyPromise = new Promise(resolve => {
+		targetCall = resolve;
+	});
+	this.onceNotificationIdle.push(targetCall);
+	this.CheckQueueIdle();
+	return readyPromise;
+};
+
+Queue.prototype.CheckQueueIdle = function () {
+	if (this.runningRequests === 0 && this.queue.length === 0) {
+		for (var n = 0; n < this.onceNotificationIdle.length; n++) {
+			this.onceNotificationIdle[n]();
+		}
+		this.onceNotificationIdle = [];
+	}
+};
 
 Queue.prototype.Enlist = function (context, callback, params, idSetter, info) {
 	if (this.id > 100000000) { this.id = 1; }
@@ -56,6 +76,7 @@ Queue.prototype.Release = function (id) {
 				}
 				this.startOne();
 			}
+			this.CheckQueueIdle();
 		}
 	}
 };

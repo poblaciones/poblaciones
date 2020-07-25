@@ -53,6 +53,19 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	}
 };
 
+SegmentedMap.prototype.WaitForFullLoading = function () {
+	var loc = this;
+	return this.Queue.RequestOnceNotificationIdle().then(function () {
+		return loc.StaticQueue.RequestOnceNotificationIdle();
+	});
+};
+
+SegmentedMap.prototype.SetTimeout = function (delay) {
+	return new Promise(function (resolve) {
+		setTimeout(resolve, delay);
+	});
+};
+
 SegmentedMap.prototype.Get = function (url, params, noCredencials, isRetry) {
 	if (window.accessLink) {
 		if (!params) { params = {}; }

@@ -198,7 +198,7 @@ Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 			if (moveCenter) {
 				this.FitCurrentRegion();
 			}
-			this.SetClippingCanvas(canvas);
 		}
+		this.SetClippingCanvas(canvas);
 	}
 };

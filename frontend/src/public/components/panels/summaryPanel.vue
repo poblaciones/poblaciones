@@ -1,6 +1,6 @@
 <template>
 	<div style="background-color: white; width: 100%;">
-		<Toolbar :metrics="metrics" :frame="frame" :user="user" :config="config" :toolbarStates="toolbarStates" class="exp-hiddable-block"/>
+		<Toolbar :metrics="metrics" :frame="frame" :user="user" :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates" class="exp-hiddable-block"/>
 		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
 				 style="background-color: transparent; padding-bottom: 13px; padding-right: 5px;">
 			<Clipping :clipping="clipping" :frame="frame" />
@@ -14,6 +14,7 @@
 			<WorkMetadata ref="showFuente" />
 			<MetricDownload ref="showDescargar" />
 			<MetricCustomize ref="showCustomize" />
+			<WaitMessage ref="showWaitMessage" />
 			<AddMetric ref="addMetric" />
 		</div>
 	</div>
@@ -24,6 +25,7 @@ import Metric from '@/public/components/widgets/summary/metric';
 import Clipping from '@/public/components/widgets/summary/clipping';
 import WorkMetadata from '@/public/components/popups/workMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
+import WaitMessage from '@/public/components/popups/waitMessage';
 import AddMetric from '@/public/components/popups/addMetric';
 import Toolbar from '@/public/components/widgets/summary/toolbar';
 import MetricDownload from '@/public/components/popups/metricDownload';
@@ -37,6 +39,7 @@ export default {
 		Clipping,
 		AddMetric,
 		WorkMetadata,
+		WaitMessage,
 		MetricCustomize,
 		MetricDownload,
 		Toolbar,
@@ -46,6 +49,7 @@ export default {
 		'clipping',
 		'frame',
 		'config',
+		'currentWork',
 		'user',
 		'toolbarStates',
 		'metrics'
@@ -60,6 +64,7 @@ export default {
 	mounted() {
 		window.Popups.MetricDownload = this.$refs.showDescargar;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
+		window.Popups.WaitMessage = this.$refs.showWaitMessage;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AddMetric = this.$refs.addMetric;
 	},

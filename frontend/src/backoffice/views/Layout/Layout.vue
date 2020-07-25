@@ -5,7 +5,7 @@
 				<sidebar v-if="this.Work" @collapse="onCollapse" class="" ></sidebar>
 			</div>
 			<div id="panRight" class="split split-horizontal" style="overflow-y: hidden; position: relative">
-				<div class="mainPanel" style="margin-top: 55px;">
+				<div class="mainPanel"  style="margin-top: 55px;">
 					<app-main v-if="this.Work"></app-main>
 				</div>
 			</div>

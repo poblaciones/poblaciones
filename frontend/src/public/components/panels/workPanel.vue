@@ -5,7 +5,7 @@
 				<!--button title="Cerrar" type="button" v-on:click="work.Current = null" class="close">
 					<span aria-hidden="true">&times;</span>
 				</button -->
-				<div class="title pull-right" style="margin-top: -1px">
+				<div class="title pull-right exp-hiddable-block" style="margin-top: -1px">
 					<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Indicadores</button>
 					<button v-show="false" type="button" class="btn smallButton" @click="showZones = true">Zonas destacadas</button>
 					<button type="button" v-show="false" class="btn smallButton" @click="showPresentation = true">Presentación</button>

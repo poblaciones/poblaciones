@@ -1,10 +1,20 @@
 <template>
 	<div class="toolbar no-print" style="display: block">
 	<div class="btn-group">
-		<button type="button" class="btn btn-default btn-xs"
-							title="Guardar como PNG..." v-on:click="captureFullPng()"><i class="fas fa-camera"/></button>
-		<button type="button" class="btn btn-default btn-xs" v-if="Use.UseCreatePdf"
-							title="Guardar como PDF..." v-on:click="captureMapPdf(metrics)"><i class="fas fa-file-pdf"/></button>
+		<button type="button"
+						id="dropdownCaptureButton" class="btn btn-default btn-xs dropdown-toggle"
+						style="border-top-right-radius: 0px; border-bottom-right-radius: 0px;"
+						data-toggle="dropdown">
+			<i class="fas fa-camera" title="Guardar como" />
+
+			<ul class="dropdown-menu dropdown-menu-left dropCapture" aria-labelledby="dropdownCaptureButton">
+				<li><a @click="captureMapImage('jpeg')">Guardar como JPG</a></li>
+				<li><a @click="captureMapImage('png')">Guardar como PNG</a></li>
+				<li class="divider"></li>
+				<li><a @click="captureMapPdf(false)">Guardar como PDF</a></li>
+				<li><a @click="captureMapPdf(true)">Guardar como PDF (apaisado)</a></li>
+			</ul>
+		</button>
 		<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" v-on:click="geolocate()"><i class="far fa-dot-circle"/></button>
 		<button v-if="Use.UseGradients" type="button" class="btn btn-default btn-xs"
@@ -46,7 +56,7 @@
 			<button type="button" class="btn btn-default btn-xs" title="Guía de uso" v-on:click="showTutorial()">
 				<help-circle-icon title="Guía de uso" />
 			</button>
-			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos..." v-on:click="setFavorite()">
+			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" v-on:click="setFavorite()">
 				<i class="far fa-heart" />
 			</button>
 
@@ -55,8 +65,8 @@
 			<span v-else="" class="dropdown">
 				<button type="button"
 								id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
-								data-toggle="dropdown" :title="userTooltip">
-					<i class="fas fa-user" />
+								data-toggle="dropdown" >
+					<i class="fas fa-user" :title="userTooltip" />
 
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
@@ -75,12 +85,11 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import dom from '@/common/js/dom';
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 import tour from '@/public/components/popups/tour';
+import MapExport from '@/public/classes/MapExport';
 import embedded from '@/public/components/popups/embedded';
-import h from '@/public/js/helper';
 import a from '@/common/js/authentication';
 
 export default {
@@ -94,6 +103,7 @@ export default {
 		'frame',
 		'user',
 		'config',
+		'currentWork',
 		'toolbarStates',
 		'metrics'
 	],
@@ -118,159 +128,13 @@ export default {
 		showEmbeddedMapPopUp() {
 			this.$refs.Embedded.toggleModal();
 		},
-		ignore(ele) {
-			return (ele.nodeName === 'IFRAME');
+		captureMapImage(format) {
+			var mapExport = new MapExport(this.currentWork);
+			mapExport.ExportImage(format);
 		},
-		capturePng() {
-			var loc = this;
-			window.SegMap.MapsApi.gMap.set('disableDefaultUI', true);
-			window.setTimeout(function() {
-				var mapObj = loc.changeOverflowById(document.getElementById('map'), 'unset');
-				html2canvas(mapObj, { useCORS: true, ignoreElements: loc.ignore }).then(function(canvas) {
-					loc.changeOverflowById(mapObj, 'hidden');
-					loc.generatePng(canvas);
-				});
-			}, 100);
-		},
-		changeDisplayById(idObj, newValue) {
-			if (idObj !== null){
-				idObj.style.display = newValue;
-			}
-			return idObj;
-		},
-		changeDisplayByClass(classname, newValue) {
-			var classObjs = document.getElementsByClassName(classname);
-			for (var i = 0; i < classObjs.length; i++) {
-				classObjs[i].style.display = newValue;
-			}
-			return classObjs;
-		},
-		changeVisibilityByClass(classname, newValue) {
-			var classObjs = document.getElementsByClassName(classname);
-			for (var i = 0; i < classObjs.length; i++) {
-				classObjs[i].style.visibility = newValue;
-			}
-			return classObjs;
-		},
-		swapClasses(classname, classToAdd, classToRemove) {
-			var classObjs = document.getElementsByClassName(classname);
-			for (var i = 0; i < classObjs.length; i++) {
-				classObjs[i].classList.add(classToAdd);
-				classObjs[i].classList.remove(classToRemove);
-			}
-		},
-		removeClass(classname, classToRemove) {
-			var classObjs = document.getElementsByClassName(classname);
-			for (var i = 0; i < classObjs.length; i++) {
-				classObjs[i].classList.remove(classToRemove);
-			}
-			return classObjs;
-		},
-		removeClassAddText(classname, classToRemove, textToAdd) {
-			var classObjs= document.getElementsByClassName(classname);
-			for (var i = 0; i < classObjs.length; i++) {
-				classObjs[i].classList.remove(classToRemove);
-				classObjs[i].innerHTML = textToAdd;
-			}
-			return classObjs;
-		},
-		addClass(classname, classToAdd) {
-			var classObjs = document.getElementsByClassName(classname);
-			for (var i = 0; i < classObjs.length; i++) {
-				classObjs[i].classList.add(classToAdd);
-			}
-		},
-		addClassRemoveText(classname, classToAdd){
-			var classObjs = document.getElementsByClassName(classname);
-			for (var i = 0; i < classObjs.length; i++) {
-				classObjs[i].classList.add(classToAdd);
-				classObjs[i].innerHTML = '';
-			}
-		},
-		changeOverflowById(idObj, newValue){
-			idObj.style.overflow = newValue;
-			return idObj;
-		},
-		generatePng(canvas, metrics){
-			window.SegMap.MapsApi.gMap.set('disableDefaultUI', false);
-			var a = document.createElement('a');
-			// toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
-			a.href = canvas.toDataURL('image/png');
-			a.download = 'mapa.png';
-			document.body.appendChild(a);
-			a.click();
-			a.parentNode.removeChild(a);
-		},
-		generatePdf(canvas, metrics) {
-			window.SegMap.MapsApi.gMap.set('disableDefaultUI', false);
-			var doc = new jsPDF({ orientation: 'landscape' });
-			var img = canvas.toDataURL('image/png');
-			var imgHeightMax = 175;
-			var imgWidthMax = 270;
-			var imgPosition = 25;
-
-			doc.setFontSize(20);
-			doc.text(15, 15, 'Poblaciones');
-			if(metrics.length > 0) {
-				var metricNames = metrics.map(m => m.properties.Metric.Name);
-				doc.setFontSize(10);
-				doc.text(15, 20, metricNames.join(' - '));
-			} else {
-				imgPosition = 20;
-				imgHeightMax = 180;
-			}
-			var imgHeight = imgHeightMax;
-			var imgWidth =  parseInt(imgHeight * (canvas.width / canvas.height), 10);
-			if (imgWidth > imgWidthMax){
-				imgWidth = imgWidthMax;
-				imgHeight =  parseInt(imgWidth * (canvas.height / canvas.width), 10);
-			}
-			doc.addImage(img,'PNG', 15, imgPosition, imgWidth, imgHeight, 'map', 'NONE');
-			doc.setFontSize(8);
-			doc.text(15, 205, window.location.href);
-			doc.save("mapaPoblaciones.pdf");
-		},
-		prepareMapAndExport(exportFunction, metrics){
-			var loc = this;
-			window.SegMap.MapsApi.gMap.set('disableDefaultUI', true);
-
-			window.setTimeout(function() {
-				var bodyObj = loc.changeOverflowById(document.body, 'visible');
-				var holderObj = loc.changeOverflowById(document.querySelector('#holder'), 'visible');
-
-				loc.changeDisplayByClass("exp-hiddable-block", "none");
-				loc.changeDisplayByClass("exp-hiddable-unset", "none");
-				loc.changeVisibilityByClass("exp-hiddable-visiblity", "hidden");
-
-				loc.addClassRemoveText("fa-tint", 'mpCircles');
-				loc.removeClassAddText('exp-category-bullets', 'fa-tint', "<div class='borderBullet'></div>");
-
-				loc.addClass("card panel-body", "exp-panel");
-
-				//var contacto= loc.removeClassAddText('contacto','fa-comments', '&#128172;');
-
-				html2canvas(bodyObj, { useCORS: true, ignoreElements: loc.ignore }).then(function(canvas) {
-					loc.changeDisplayByClass("exp-hiddable-block", "block");
-					loc.changeDisplayByClass("exp-hiddable-unset", "unset");
-					loc.removeClass("card panel-body", "exp-panel");
-					loc.changeVisibilityByClass("exp-hiddable-visiblity", "visible");
-
-					loc.changeOverflowById(bodyObj, 'hidden');
-					loc.changeOverflowById(holderObj, 'hidden');
-
-					loc.addClassRemoveText("exp-category-bullets", 'fa-tint');
-					loc.removeClassAddText('fa-tint', 'mpCircles', '');
-
-					//loc.addClassRemoveText("contacto", 'fa-comments');
-					exportFunction(canvas, metrics);
-				});
-			}, 100);
-		},
-		captureFullPng() {
-			this.prepareMapAndExport(this.generatePng, []);
-		},
-		captureMapPdf(metrics) {
-			this.prepareMapAndExport(this.generatePdf, metrics);
+		captureMapPdf(landscape) {
+			var mapExport = new MapExport(this.currentWork);
+			mapExport.ExportPdf(landscape);
 		},
 		hasGeolocation() {
 			return navigator && navigator.geolocation;
@@ -301,7 +165,7 @@ export default {
 				result = 0.1;
 			}
 			this.currentGradientOpacity = result;
-			var rule = h.getCssRule(document, '.gAlpha');
+			var rule = dom.getCssRule(document, '.gAlpha');
 			if (rule) {
 				rule.style.opacity = result;
 			}
@@ -357,8 +221,8 @@ export default {
   background-color: #fff;
   padding: 8px;
   border: 1px solid transparent;
-  -webkit-box-shadow: 0 0px 1px rgba(0, 0, 0, 0.7);
-  box-shadow: 0 0px 1px rgba(0,0,0,.7);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 
 .dToolboxBox {
@@ -367,6 +231,10 @@ export default {
   background-color: White;
   padding-left: 4px;
   padding-top: 4px;
+}
+.dropCapture {
+	margin-top: 7px;
+    margin-left: -8px;
 }
 .shareIt {
   min-width: 37px;

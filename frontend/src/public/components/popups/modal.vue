@@ -4,18 +4,19 @@
 			<div class="modal-dialog" :class="modalClass" @click.self="clickMask" ref="dialog">
 				<div class="modal-content card">
 					<!--Header-->
-					<div class="modal-header">
+					<div class="modal-header mpHeader unselectable">
 						<slot name="header">
-						<a type="button" class="close" @click="cancel">x</a>
+						<a v-if="showClose" type="button" class="close" style="padding: 3px; margin-right: 2px;" @click="cancel">x</a>
 						<h5 class="title">
 							<slot name="title">
-							{{ title }}
+								<img src="/static/img/spinner.gif" class="waitImg" v-if="!hasBody" />
+								{{ title }}
 							</slot>
 						</h5>
 						</slot>
 					</div>
 					<!--Container-->
-					<div class="modal-body">
+					<div class="modal-body" v-if="hasBody">
 						<slot></slot>
 					</div>
 					<!--Footer-->
@@ -47,6 +48,14 @@ export default {
 			type: Boolean,
 			default: true
 		},
+		showClose: {
+			type: Boolean,
+			default: true
+		},
+		hasBody: {
+			type: Boolean,
+			default: true
+		},
 		title: {
 			type: String,
 			default: 'Modal'
@@ -63,9 +72,9 @@ export default {
 			type: Boolean,
 			default: false
 		},
-		force: {
+		clickOutsideToClose: {
 			type: Boolean,
-			default: false
+			default: true
 		},
 		transition: {
 			type: String,
@@ -153,11 +162,14 @@ export default {
 		show() {
 			this.showDialog = true;
 		},
+		close() {
+			this.showDialog = false;
+		},
 		hide() {
 			this.showDialog = false;
 		},
 		clickMask () {
-			if (!this.force) {
+			if (this.clickOutsideToClose) {
 				this.cancel();
 			}
 		}
@@ -186,6 +198,16 @@ export default {
 .modal-enter .modal-backdrop, .modal-leave .modal-backdrop {
 	opacity: 0;
 }
+
+.mpHeader {
+	padding: 8px!important;
+  padding-left: 12px!important;
+}
+.mpHeaderClose {
+	margin-top: 0px;
+	padding: 3px;
+  margin-right: 2px;
+}
 .modal-transition {
 	transition: all .6s ease;
 }
@@ -198,6 +220,14 @@ export default {
 .modal-enter .modal-dialog, .modal-leave .modal-dialog {
 	opacity: 0;
 	transform: translateY(-30%);
+}
+
+.waitImg {
+	float: left;
+	padding-right: 8px;
+  padding-bottom: 1px;
+  margin-top: 1px;
+  margin-bottom: -1px;
 }
 </style>
 

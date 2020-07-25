@@ -10,7 +10,7 @@
 						</span>
 						<div v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="levelLabelMargin">
 							<button type="button" style="padding-left: 2px!important;"
-											class="lightButton close"
+											class="lightButton close exp-hiddable-visiblity"
 											v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
 											v-on:click="togglePin">
 								<PinIcon v-if="!level.Pinned" class="icon" />
@@ -62,7 +62,7 @@
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted">
-								<i class="fa drop fa-tint exp-category-bullets"></i>
+								<i class="fa drop fa-tint exp-category-bullets" style="border-color: inherit"></i>
 							</td>
 							<td class="dataBox text-muted" style="width: 100%">
 								{{ applySymbols(label.Name) }}
@@ -511,7 +511,7 @@ export default {
 }
 
 .filterDropdownButton {
-	font-size: 11px;
+	font-size: 12px;
 	float: none;
 }
 .filterDropdownMargin {

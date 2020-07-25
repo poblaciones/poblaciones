@@ -11,6 +11,7 @@ function GoogleMapsApi(google) {
 	this.gMap = null;
 	this.drawingManager = null;
 	this.dragging = false;
+	this.idle = true;
 	this.myLocationMarket = null;
 	this.isSettingZoom = false;
 	this.clippingCanvas = null;
@@ -27,6 +28,22 @@ GoogleMapsApi.prototype.ResetInfoWindow = function (text, coordinate, offset) {
 	if(this.infoWindow !== null) {
 		this.infoWindow.close();
 	}
+};
+
+
+GoogleMapsApi.prototype.WaitForFullLoading = function () {
+	var targetCall;
+	var readyPromise = new Promise(resolve => {
+		targetCall = resolve;
+	});
+	if (this.idle) {
+		targetCall();
+	} else {
+		this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
+			targetCall();
+		});
+	}
+	return readyPromise;
 };
 
 GoogleMapsApi.prototype.ShowInfoWindow = function(text, coordinate, offset) {
@@ -119,13 +136,19 @@ GoogleMapsApi.prototype.Initialize = function () {
 	});
 };
 
+
+
 GoogleMapsApi.prototype.BindEvents = function () {
 	var loc = this;
 	this.gMap.addListener('bounds_changed', function () {
+		loc.idle = false;
 		if (loc.dragging === false) {
 			loc.segmentedMap.FrameMoved(loc.getBounds());
 			loc.segmentedMap.BoundsChanged();
 		}
+	});
+	this.gMap.addListener('idle', function () {
+		loc.idle = true;
 	});
 	this.gMap.addListener('zoom_changed', function () {
 		//	if (loc.isSettingZoom === false) {
@@ -155,7 +178,7 @@ GoogleMapsApi.prototype.AddCopyright = function () {
 	var controlDiv = document.createElement('DIV');
 	controlDiv.innerHTML = "<div class='copyrightText'>Poblaciones © 2020 CONICET/ODSA-UCA. " +
 		"<a class='copyrightText' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. " +
-		"<a class='copyrightText' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a></div>";
+		"<a class='copyrightText exp-hiddable-unset' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a></div>";
 	controlDiv.className = "copyright";
 	controlDiv.index = 0;
 	this.gMap.controls[this.google.maps.ControlPosition.BOTTOM_RIGHT].push(controlDiv);

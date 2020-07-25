@@ -1,18 +1,16 @@
 <template>
 	<div class="variablesBlock">
-		<div v-for="(variable, index) in level.Variables" :key="variable.Id">
-			<div class="variableBlock">
-				<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')" class="variableRow hand" v-on:click="clickVariable(index)">
-					<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle exp-hiddable-block"></i>
-					{{ (variable.Name ? variable.Name : 'Conteo') }}
-					<span v-if="index === level.SelectedVariableIndex || level.Variables.length == 1" v-on:click="toggleVariable()" class='hand exp-hiddable-block'>
-						<chevron-down-icon v-if="version.LabelsCollapsed"
-																title="Mostrar categorías"/>
-						<chevron-up-icon v-else title="Ocultar categorías"/>
-					</span>
-				</div>
-				<metricValues v-show="!version.LabelsCollapsed && (index === level.SelectedVariableIndex || level.Variables.length == 1)" :metric="metric" :variable="variable" />
+		<div v-for="(variable, index) in level.Variables" :key="variable.Id" class="variableBlock" :class="rowClass(index)">
+			<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')" class="variableRow hand" v-on:click="clickVariable(index)">
+				<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"></i>
+				{{ (variable.Name ? variable.Name : 'Conteo') }}
+				<span v-if="index === level.SelectedVariableIndex || level.Variables.length == 1" v-on:click="toggleVariable()" class='hand exp-hiddable-inline'>
+					<chevron-down-icon v-if="version.LabelsCollapsed"
+															title="Mostrar categorías"/>
+					<chevron-up-icon v-else title="Ocultar categorías"/>
+				</span>
 			</div>
+			<metricValues v-show="!version.LabelsCollapsed && (index === level.SelectedVariableIndex || level.Variables.length == 1)" :metric="metric" :variable="variable" />
 		</div>
 	</div>
 </template>
@@ -60,6 +58,13 @@ export default {
 				return 'dropMetric';
 			} else {
 				return 'dropMetricMuted';
+			}
+		},
+		rowClass(index) {
+			if (this.level.SelectedVariableIndex === index) {
+				return '';
+			} else {
+				return 'exp-hiddable-block';
 			}
 		},
 		clickVariable(index) {

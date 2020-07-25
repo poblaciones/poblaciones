@@ -111,8 +111,8 @@ FeatureSelector.prototype.showTooltip = function () {
 	var loc = window.SegMap.MapsApi.selector;
 	var m = new Mercator();
 	var coord = m.fromLatLonToGoogleLatLng(loc.tooltipLocation.Coordinate);
-	var style = 'ibTooltip';
-	var outStyle = "ibTooltipOffsetLeft mapLabels";
+	var style = 'ibTooltip exp-hiddable-block';
+	var outStyle = "ibTooltipOffsetLeft  mapLabels";
 	if (loc.tooltipMarker) {
 		outStyle += ' ibTooltipNoYOffset';
 	}

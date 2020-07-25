@@ -18,7 +18,7 @@
 							</td>
 							<td class="dataBox" :class="getMuted()">
 								<!-- 2575fb -->
-								<i :style="'color: ' + getColor(item)" class="fas fa-circle"></i>
+								<i :style="'border-color: ' + getColor(item) + '; color: ' + getColor(item)" class="fas fa-circle exp-category-bullets"></i>
 							</td>
 							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getFormattedValue(item) }}</td>
 						</template>
@@ -26,7 +26,7 @@
 				</tbody>
 			</table>
 		</div>
-		<div class="sourceRow">
+		<div class="sourceRow exp-hiddable-block">
 			<div class="btn-group">
 				<button v-for="sizeItem in possibleSizes" type="button" :key="sizeItem" :id="sizeItem"
 								 onmouseup="this.blur()" class="btn btn-default btn-xs" :class="getActiveSize(sizeItem)"

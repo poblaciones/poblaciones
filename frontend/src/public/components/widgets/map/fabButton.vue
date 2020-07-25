@@ -94,8 +94,6 @@ export default {
 </script>
 
 <style scoped>
-	.fab-wrapper {
-		z-index: 2!important;
-	}
+
 </style>
 

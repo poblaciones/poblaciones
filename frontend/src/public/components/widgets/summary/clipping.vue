@@ -31,7 +31,7 @@
 
 			<div class="sourceRow">
 				<div class="btn-group">
-					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index" class="btn btn-default btn-xs" :class="getActive(index)" v-on:mouseup="changeClipping(index)" v-on:click="falseChangeClipping(index)">{{ level.Revision }}</button>
+					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index" class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)" v-on:mouseup="changeClipping(index)" v-on:click="falseChangeClipping(index)">{{ level.Revision }}</button>
 				</div>
 				<ClippingSource :metadata="selectedLevel().Metadata" />
 			</div>

@@ -12,8 +12,8 @@
 				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" v-show="Use.UseCollapsePanel" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
-				<SummaryPanel :metrics="metrics" :config="config"
-					:clipping="clipping" :frame="frame" :user="user"
+				<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
+					:clipping="clipping" :frame="frame" :user="user" :currentWork="work.Current"
 					:toolbarStates="toolbarStates"></SummaryPanel>
 			</div>
 		</div>
@@ -128,7 +128,7 @@ export default {
 	},
 	computed: {
 		workColor() {
-			if (this.work && this.work.Current && this.work.Current.Institution.Color) {
+			if (this.work && this.work.Current && this.work.Current.Institution && this.work.Current.Institution.Color) {
 				return '#' + this.work.Current.Institution.Color;
 			}
 			return '#00A0D2';
@@ -279,30 +279,42 @@ html, body {
 }
 .action-muted {
 	color: #DDDDDD;
+	border-color: #DDDDDD!important;
 }
-	.mpCircles {
-		margin-top: -3px !important;
-	}
-	.exp-panel {
-		padding: 10px !important;
-		border-width: 8px !important;
-		border-color: white !important;
-		border-style: solid !important;
-		box-shadow: unset!important;
-	}
 
-	.borderBullet {
+.exp-circles {
+	margin-top: 5px !important;
+	color: white!important;
+	font-size: 0px;
+}
+.exp-circles:after {
 	border-width: 8px;
 	border-style: solid;
 	border-color: inherit;
 	border-radius: 8px;
+	visibility: visible;
 	width: 1px;
 	height: 1px;
-	}
-	.moderateHr {
-		margin-top: 1.2rem;
-		margin-bottom: 1.1rem;
-	}
+	content: '';
+}
+.exp-logodiv-right {
+	right: 8px !important;
+}
+.exp-panel {
+	padding: 10px !important;
+	border-width: 8px !important;
+	border-color: white !important;
+	border-style: solid !important;
+	box-shadow: unset!important;
+}
+.exp-rounded {
+	border-radius: 26px!important;
+}
+
+.moderateHr {
+	margin-top: 1.2rem;
+	margin-bottom: 1.1rem;
+}
 
 /* settings de split */
 .split p, .split-flex p {
@@ -440,6 +452,18 @@ a:hover {
 .ibLink:hover {
 	color: #2e8cff;
 	text-decoration: none !important;
+}
+.fab-wrapper {
+	z-index: 2 !important;
+}
+
+.unselectable {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .bottomBox {

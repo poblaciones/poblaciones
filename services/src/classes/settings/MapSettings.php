@@ -23,7 +23,6 @@ class MapSettings
 	public $UseFavorites = false;
 
 	public $UseEmbedding = false;
-	public $UseCreatePdf = false;
 	public $UseCollapsePanel = false;
 	public $UseUrbanity = false;
 

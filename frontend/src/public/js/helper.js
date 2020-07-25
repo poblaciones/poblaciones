@@ -220,27 +220,6 @@ module.exports = {
 		}
 		return file.substr(0, file.length - ext.length);
 	},
-	getCssRule(d, name) {
-		for (var i = 0; i<d.styleSheets.length; ++i) {
-			var cssRules = null;
-			if (d.styleSheets[i].ownerNode
-				&& d.styleSheets[i].ownerNode.localName == 'style') {
-				if (d.styleSheets[i]['cssRules'] !== undefined) {
-					cssRules = d.styleSheets[i].cssRules;
-				} else if (d.styleSheets[i]['rules'] !== undefined) {
-					cssRules = d.styleSheets[i].rules;
-				}
-			}
-			if (cssRules) {
-				for (var j = 0; j < cssRules.length; ++j) {
-					if (name === cssRules[j].selectorText) {
-						return cssRules[j];
-					}
-				}
-			}
-		}
-		return null;
-	},
 	quickFormat(format, fix, number) {
 		if (number === '' || number === '-' || number === 'n/d') {
 			return number;

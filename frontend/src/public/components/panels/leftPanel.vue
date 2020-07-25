@@ -30,7 +30,8 @@ import FeatureList from '@/public/components/widgets/features/featureList';
 import PanelType from '@/public/enums/PanelType';
 import CollapseButton from '@/public/components/controls/collapseButton';
 import Split from 'split.js';
-import h from '@/public/js/helper';
+import dom from '@/common/js/dom';
+
 export default {
 	name: 'leftPanel',
 	components: {
@@ -216,9 +217,9 @@ export default {
 			this.collapsed = ! this.collapsed;
 		},
 		updateMapTypeControl() {
-			var css1 = h.getCssRule(document, '.gm-style-mtc:first-of-type');
-			var css2 = h.getCssRule(document, '.gm-style-mtc');
-			var css3 = h.getCssRule(document, '.gm-style-mtc:last-of-type');
+			var css1 = dom.getCssRule(document, '.gm-style-mtc:first-of-type');
+			var css2 = dom.getCssRule(document, '.gm-style-mtc');
+			var css3 = dom.getCssRule(document, '.gm-style-mtc:last-of-type');
 
 			if(css1 === null) {
 				css1 = { style: { transform: '' } };
