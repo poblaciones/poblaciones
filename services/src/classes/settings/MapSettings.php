@@ -24,7 +24,8 @@ class MapSettings
 
 	public $UseEmbedding = false;
 	public $UseCollapsePanel = false;
-	public $UseUrbanity = false;
+
+	public $UseUrbanity = true;
 
 	public $MaxQueueRequests = 4;
 	public $MaxStaticQueueRequests = 6;

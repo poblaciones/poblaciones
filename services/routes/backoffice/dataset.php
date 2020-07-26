@@ -68,7 +68,7 @@ App::$app->get('/services/backoffice/StartDownload', function (Request $request)
 	$datasetId = Params::GetInt('d');
 	if ($denied = Session::CheckIsDatasetReader($datasetId)) return $denied;
 	$type = Params::Get('t');
-	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, null));
+	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, null, null));
 });
 
 // http://mapas.aacademica.org/services/download/GetFile?t=ss&l=8&r=1692&a=X
@@ -76,8 +76,10 @@ App::$app->get('/services/backoffice/GetFile', function (Request $request) {
 	$datasetId = Params::GetInt('d');
 	if ($denied = Session::CheckIsDatasetReader($datasetId)) return $denied;
 	$clippingItemId = null;
+	$clippingCircle = null;
+	$urbanity = null;
 	$type = Params::Get('t');
-	return services\DownloadService::GetFileBytes($type, $datasetId, $clippingItemId);
+	return services\DownloadService::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity);
 });
 
 App::$app->get('/services/backoffice/StepDownload', function (Request $request) {

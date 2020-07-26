@@ -10,9 +10,13 @@ class DownloadCache extends BaseCache
 	{
 		return new TwoLevelFileFileCache("Datasets/Downloads");
 	}
-	public static function CreateKey($type, $clippingItemId)
+	public static function CreateKey($type, $clippingItemId, $clippingCircle, $urbanity)
 	{
 		$key = $type . "r" . $clippingItemId;
+		if ($urbanity)
+			$key .= "u" . $urbanity;
+		if ($clippingCircle)
+			$key .= "c" . $clippingCircle->TextSerialize();
 		return $key;
 	}
 	public static function Clear($datasetId)

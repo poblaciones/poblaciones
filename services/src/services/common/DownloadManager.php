@@ -3,6 +3,7 @@
 namespace helena\services\common;
 
 use minga\framework\ErrorException;
+use minga\framework\Str;
 
 use helena\classes\writers\SpssWriter;
 use helena\classes\writers\CsvWriter;
@@ -42,18 +43,18 @@ class DownloadManager
 			$this->start = microtime(true);
 	}
 
-	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $fromDraft = false, $extraColumns = array())
+	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false, $extraColumns = array())
 	{
 		self::ValidateType($type);
 		self::ValidateClippingItem($clippingItemId);
 
 		// Si está cacheado, sale
-		if(self::IsCached($type, $datasetId, $clippingItemId, $fromDraft))
+		if(self::IsCached($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft))
 			return array('done' => true);
 
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
-		$this->PrepareNewModel($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns);
-		$this->PrepareNewState($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns);
+		$this->PrepareNewModel($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns);
+		$this->PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns);
 		return $this->GenerateNextFilePart();
 	}
 
@@ -84,14 +85,14 @@ class DownloadManager
 			return $this->state->ReturnState(false);
 	}
 
-	private static function IsCached($type, $datasetId, $clippingItemId, $fromDraft)
+	private static function IsCached($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft)
 	{
-		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId);
+		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity);
 		$filename = null;
 		return self::getCache($fromDraft)->HasData($datasetId, $cacheKey, $filename);
 	}
 
-	public static function GetFileBytes($type, $datasetId, $clippingItemId, $fromDraft = false)
+	public static function GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false)
 	{
 		self::ValidateType($type);
 
@@ -99,8 +100,8 @@ class DownloadManager
 		{
 			self::ValidateClippingItem($clippingItemId);
 		}
-		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId);
-		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $type);
+		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type);
 		$cache = self::getCache($fromDraft);
 		// Lo devuelve desde el cache
 		$filename = null;
@@ -110,7 +111,7 @@ class DownloadManager
 			throw new ErrorException('File must be created before.');
 	}
 
-	private static function GetFileName($datasetId, $clippingItemId, $type)
+	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type)
 	{
 		if($type[0] == 's')
 			$ext = 'sav';
@@ -129,17 +130,19 @@ class DownloadManager
 
 		$name = 'dataset' . $datasetId . $type;
 		if($clippingItemId != 0)
-			$name .= 'r'.$clippingItemId;
+			$name .= 'r' . $clippingItemId;
+		if($urbanity)
+			$name .= 'u' . Str::ToLower($urbanity);
 
 		return $name . '.' . $ext;
 	}
 
-	private static function createKey($fromDraft, $type, $clippingItemId)
+	private static function createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity)
 	{
 		if ($fromDraft)
 			return BackofficeDownloadCache::CreateKey($type);
 		else
-			return DownloadCache::CreateKey($type, $clippingItemId);
+			return DownloadCache::CreateKey($type, $clippingItemId, $clippingCircle, $urbanity);
 	}
 
 	private static function getCache($fromDraft)
@@ -217,20 +220,20 @@ class DownloadManager
 		$this->model->fromDraft = $this->state->FromDraft();
 	}
 
-	private function PrepareNewModel($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns)
+	private function PrepareNewModel($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns)
 	{
 		$this->model = new DatasetModel();
 		$this->model->fromDraft = $fromDraft;
 		$this->model->extraColumns = $extraColumns;
-		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $this->GetPolygon($type));
+		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, $this->GetPolygon($type));
 	}
 
-	private function PrepareNewState($type, $datasetId, $clippingItemId, $fromDraft, $extraColumns)
+	private function PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns)
 	{
-		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $this->model, $fromDraft);
+		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $this->model, $fromDraft);
 		$this->state->SetStep(self::STEP_BEGIN);
 		$this->state->SetTotalSteps(2);
-		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $type);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type);
 		$this->state->Set('friendlyName', $friendlyName);
 		$this->state->Set('totalRows', $this->model->GetCountRows());
 		$latLon = $this->model->GetLatLongColumns($datasetId);

@@ -9,6 +9,7 @@ use helena\classes\App;
 use minga\framework\Str;
 use minga\framework\ErrorException;
 
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\db\frontend\GeographyModel;
 
 use helena\classes\spss\Alignment;
@@ -97,18 +98,36 @@ class DatasetModel extends BaseModel
 	{
 		return ($this->fromDraft ? 'draft_' : '');
 	}
-	public function PrepareFileQuery($datasetId, $clippingItemId, $getPolygon)
+	public function PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, $getPolygon)
 	{
 		Profiling::BeginTimer();
 		$params = array();
 
 		$dataset = $this->GetDatasetById($datasetId);
 
+		$where = '';
 		$joins = ' ';
+
+		$addSnapshotJoin = false;
+
+		// Filtra por clipping
 		if($clippingItemId != 0)
 		{
 			$joins = ' JOIN snapshot_clipping_region_item_geography_item ON spss1.geography_item_id = cgv_geography_item_id AND cgv_clipping_region_item_id = ? ';
 			$params[] = (int)$clippingItemId;
+		} else if ($clippingCircle)
+		{
+			$spatialConditions = new SpatialConditions('sna');
+			$where = " AND " . $spatialConditions->CreateCircleQuery($clippingCircle, $dataset['type'])->Where;
+			$joins .= " JOIN " . SnapshotByDatasetModel::SnapshotTable($dataset['table']) . " ON spss1.Id = sna_id ";
+		}
+
+		// Filtra por urbanity
+		if ($urbanity)
+		{
+			$spatialConditions = new SpatialConditions('urba.gei');
+			$where .= $spatialConditions->UrbanityCondition($urbanity);
+			$joins .= " JOIN geography_item urba ON spss1.geography_item_id = urba.gei_id ";
 		}
 
 		$effectiveGeographyId = $dataset['dat_geography_id'];
@@ -121,10 +140,14 @@ class DatasetModel extends BaseModel
 
 		$cols = $this->Deduplicate($cols);
 
-		$fullSql = 'SELECT ' . $this->GetFields($cols) . ' FROM ' . $this->EscapeTable($dataset['table']) . '
-										AS spss1 ' . $joins;
-		$countSql = 'SELECT COUNT(*) FROM ' . $this->EscapeTable($dataset['table']) . '
-										AS spss1 ' . $joins;
+		$wherePart = ($where !== '' ? ' WHERE ' . substr($where, 4) : '');
+
+		$query = ' FROM ' . $dataset['table'] . '
+										AS spss1 ' . $joins . $wherePart;
+
+		$fullSql = 'SELECT ' . $this->GetFields($cols) . $query;
+		$countSql = 'SELECT COUNT(*) ' . $query;
+
 		$this->fullQuery = $fullSql;
 		$this->countQuery = $countSql;
 		$this->fullParams = $params;

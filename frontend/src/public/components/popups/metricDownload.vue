@@ -22,7 +22,7 @@
 					<tr>
 						<td>Licencia:</td>
 						<td>
-							<creativeCommons :license="version.Work.License"/>
+							<creativeCommons :license="version.Work.License" />
 						</td>
 					</tr>
 					<tr>
@@ -32,18 +32,29 @@
 								<option v-for="(level, index) in version.Levels" :key="level.Id" :value="index">{{ level.Name }}</option>
 							</select>
 							<div v-if="useFilter && levelOverflows" class="warningBox">
-								Las áreas del nivel '{{ level.Name }}' pueden exceder a la región '{{ clipping.Region.Summary.Name }}'. Cuando esto
-								suceda, serán incluidas en forma completa en la descarga.
+								Las áreas del nivel '{{ level.Name }}' pueden exceder a la región '{{ clipping.clipping.Region.Summary.Name }}'. Cuando esto
+								suceda, las áreas parcialmente coincidentes serán incluidas en forma completa en la descarga.
 							</div>
 						</td>
 						<td v-else="">{{ level.Name }}</td>
 					</tr>
-					<tr v-if="clipping.Region.Summary.Name">
+					<tr v-if="this.level.HasUrbanity">
+						<td>Filtro:</td>
+						<td>
+							<select :disabled="!visibleUrl" v-model="downloadUrbanity">
+								<option v-for="(value, key) in metric.GetUrbanityFilters()" :key="key" :value="key">{{ value.label }}</option>
+							</select>
+							<div class="warningBox">
+								{{ metric.GetUrbanityFilters()[downloadUrbanity].tooltip }}
+							</div>
+						</td>
+					</tr>
+					<tr v-if="clipping.clipping.Region.Summary.Name">
 						<td>Selección:</td>
 						<td>
 							<div>
 								<a class="btn btn-social btn-dropbox" v-if="useFilter" v-on:click="useFilter = !useFilter">
-									<close-icon title="Quitar"/> {{ clipping.Region.Summary.Name }}
+									<close-icon title="Quitar" /> {{ clipping.clipping.Region.Summary.Name }}
 								</a>
 							</div>
 						</td>
@@ -57,32 +68,33 @@
 						<td>
 							<span v-if="visibleUrl">
 								<button v-on:click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="downloadButton">
-									<download-icon title="Descargar"/> {{ format.caption }}
+									<download-icon title="Descargar" /> {{ format.caption }}
 								</button>
 								<button @click="sendFile(resolveMetadataUrl(), true)" class="downloadButton">
-									<file-pdf-icon title="Descargar"/> Metadatos
+									<file-pdf-icon title="Descargar" /> Metadatos
 								</button>
 							</span>
 							<span v-else="">
 								<img src="/static/img/spinner.gif"> Generando archivo. El proceso puede demorar varios minutos... {{ (progress ? '(' + progress + '%)' : '') }}
-						</span>
+							</span>
 						</td>
 					</tr>
 					<tr v-if="version.Work.Files && version.Work.Files.length > 0">
 						<td>Adjuntos:</td>
-						<td>
+						<td><div class="attachmentsDownloadPanel">
 							<span v-for="file in version.Work.Files" :key="file.Id">
 								<a target="_blank" :href="resolveFileUrl(file)">
-									<file-pdf-icon title="Descargar"/> {{ file.Caption }}
+									<file-pdf-icon title="Descargar" /> {{ file.Caption }}
 								</a>
 							</span>
+							</div>
 						</td>
 					</tr>
 					<tr v-if="level.HasArea">
 						<td>Descarga con polígonos:</td>
 						<td>
 							<button v-on:click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="downloadButton">
-								<download-icon title="Descargar"/> {{ format.caption }}
+								<download-icon title="Descargar" /> {{ format.caption }}
 							</button>
 						</td>
 					</tr>
@@ -120,19 +132,28 @@ export default {
 	data() {
 		return {
 			metric: null,
-			clipping: null,
 			visibleUrl: true,
 			useFilter: true,
 			progress: null,
 			downloadLevel: 0,
+			downloadUrbanity: 'N'
 		};
 	},
 	computed: {
 		version() {
 			return this.metric.properties.Versions[this.metric.properties.SelectedVersionIndex];
 		},
+		clipping() {
+			return window.SegMap.Clipping;
+		},
 		level() {
 			return this.version.Levels[this.downloadLevel];
+		},
+		Use() {
+			return window.Use;
+		},
+		hasUrbanityFilter() {
+			return this.Use.UseUrbanity && this.level.HasUrbanity;
 		},
 		levelOverflows() {
 			var selectedLevel = this.level;
@@ -141,7 +162,7 @@ export default {
 				if (level.Id === selectedLevel.Id) {
 					return false;
 				}
-				if (this.useFilter && window.SegMap.Clipping.LevelMachLevels(level)) {
+				if (this.useFilter && this.clipping.LevelMachLevels(level)) {
 					return true;
 				}
 			}
@@ -149,12 +170,11 @@ export default {
 		}
 	},
 	methods: {
-		show(metric, clipping) {
+		show(metric) {
 			this.metric = metric;
-			this.clipping = clipping;
 			this.useFilter = true;
 			this.downloadLevel = this.version.SelectedLevelIndex;
-
+			this.downloadUrbanity = this.metric.properties.SelectedUrbanity;
 			this.$refs.dialog.show();
 		},
 		getDataFormats() {
@@ -172,7 +192,7 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.MetadataId + '&f=' + file.FileId + h.urlParam('l', window.accessLink);
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.MetadataId + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
 			} else {
 				return '#';
 			}
@@ -266,11 +286,18 @@ export default {
 			return window.host + '/services/download/StepDownload';
 		},
 		urlArgs(type) {
-			var cliId = 0;
-			if(this.useFilter && this.clipping.Region.Summary.Id !== null) {
-				cliId = this.clipping.Region.Summary.Id;
+			var clippingRegionId = null;
+			var circle = null;
+			if (this.useFilter) {
+				if (this.clipping.FrameHasClippingCircle()) {
+					circle = h.getCircleParam(this.clipping.frame.ClippingCircle);
+				} else if (this.clipping.FrameHasClippingRegionId()) {
+					clippingRegionId = this.clipping.clipping.Region.Summary.Id;
+				}
 			}
-			return 't=' + type + '&d=' + this.level.Dataset.Id + '&r=' + cliId + '&w=' + this.version.Work.Id;
+			var urbanity = (this.level.HasUrbanity ? this.downloadUrbanity : null);
+			return 't=' + type + h.urlParam('d', this.level.Dataset.Id) + h.urlParam('c', circle) + h.urlParam('r', clippingRegionId)
+				+ h.urlParam('u', urbanity) + h.urlParam('w', this.version.Work.Id);
 		}
 	},
 };

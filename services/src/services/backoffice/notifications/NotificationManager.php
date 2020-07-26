@@ -64,7 +64,7 @@ class NotificationManager
 			$message = $user . 'publicado la cartografía llamada ' . $named;
 		}
 		$vals = array();
-		$vals['title'] = "";
+		$vals['title'] = $mail->subject;
 		$vals['message'] = $message;
 		$metadata = $work->getMetadata();
 		$vals['url'] = Context::Settings()->GetPublicUrl() . $metadata->getUrl();

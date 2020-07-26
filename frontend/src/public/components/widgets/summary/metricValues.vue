@@ -31,7 +31,7 @@
 								<i class="fas fa-filter" />
 							</button>
 							<ul class="dropdown-menu filterDropdownMargin">
-								<li v-for="(value, key) in urbanityFilters" :key="key">
+								<li v-for="(value, key) in metric.GetUrbanityFilters()" :key="key">
 									<button type="button" class="filterDropdownItem close" v-on:click="changeUrbanity(key)">
 										<i class="fa-circle" :class="(key === urbanity ? 'fas activeFilter' : 'far')"
 											 style="font-size: 10px;" :style="'margin-left: '+ (value.level * 8) +'px'" aria-hidden="true" />
@@ -133,17 +133,6 @@ export default {
 		Use() {
 			return window.Use;
 		},
-		urbanityFilters() {
-			return {
-				'N': { item: 'Todo', level: 0, label: '', tooltip: ''},
-				'UD': { item: 'Urbano', level: 1, label: 'Urbano', tooltip: 'Áreas de 2 mil habitantes y más (URP=1)' },
-				'U': { item: 'Agrupado', level: 2, label: 'Urbano agrupado', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con 250 habitantes por km2 y más' },
-				'D': { item: 'Disperso', level: 2, label: 'Urbano disperso', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con menos de 250 habitantes por km2' },
-				'RL': { item: 'Rural', level: 1, label: 'Rural', tooltip: 'Áreas de menos de 2 mil habitantes (URP=2+3)' },
-				'R': { item: 'Agrupado', level: 2, label: 'Rural agrupado', tooltip: 'Áreas de menos de 2 mil habitantes agrupadas (URP=2)' },
-				'L': { item: 'Disperso', level: 2, label: 'Rural disperso', tooltip: 'Áreas de menos de 2 mil habitantes dispersas (URP=3)' }
-			};
-		},
 		urbanity() {
 			return this.metric.properties.SelectedUrbanity;
 		},
@@ -151,10 +140,10 @@ export default {
 			return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
 		},
 		getUrbanityTextTooltip() {
-			return this.urbanityFilters[this.urbanity].tooltip;
+			return this.metric.GetSelectedUrbanityInfo().tooltip;
 		},
 		getUrbanityTextActive() {
-			return this.urbanityFilters[this.urbanity].label;
+			return this.metric.GetSelectedUrbanityInfo().label;
 		},
 		levelLabelMargin() {
 			var margin = 0;

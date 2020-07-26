@@ -74,6 +74,45 @@ class WorkModel extends BaseModel
 		return $ret;
 	}
 
+	public function GetInstitutionsByWork($workId)
+	{
+		Profiling::BeginTimer();
+		$params = array($workId, $workId);
+
+		$sql = "SELECT DISTINCT institution_id FROM (
+						SELECT met_institution_id AS institution_id FROM " . $this->resolveTableName('work') . ", " . $this->resolveTableName('metadata')
+							. " WHERE wrk_metadata_id = met_id AND wrk_id = ? AND met_institution_id IS NOT NULL
+							UNION
+						SELECT src_institution_id AS institution_id FROM " . $this->resolveTableName('work') .
+							" JOIN " . $this->resolveTableName('metadata') . " ON wrk_metadata_id = met_id
+							  JOIN " . $this->resolveTableName('metadata_source') . " ON msc_metadata_id = met_id
+							  JOIN " . $this->resolveTableName('source') . " ON src_id = msc_source_id
+							  WHERE wrk_id = ? AND src_institution_id IS NOT NULL) as Q";
+
+		$ret = App::Db()->fetchAll($sql, $params);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public function GetWorkAndMetadataIdsByInstitution($institutionId)
+	{
+		Profiling::BeginTimer();
+		$params = array($institutionId, $institutionId);
+
+		$sql = "SELECT wrk_id, met_id FROM " . $this->resolveTableName('work') . ", " . $this->resolveTableName('metadata')
+							. " WHERE wrk_metadata_id = met_id AND met_institution_id = ?
+							UNION
+						SELECT DISTINCT wrk_id, met_id FROM " . $this->resolveTableName('work') .
+							" JOIN " . $this->resolveTableName('metadata') . " ON wrk_metadata_id = met_id
+							  JOIN " . $this->resolveTableName('metadata_source') . " ON msc_metadata_id = met_id
+							  JOIN " . $this->resolveTableName('source') . " ON src_id = msc_source_id
+							  WHERE src_institution_id = ?";
+
+		$ret = App::Db()->fetchAll($sql, $params);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetMetricVersions($workId)
 	{
 		Profiling::BeginTimer();

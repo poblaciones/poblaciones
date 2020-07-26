@@ -133,6 +133,33 @@ class PublishDataTables
 		$cacheManager->CleanWorkHandlesCache($workId);
 		$cacheManager->CleanWorkVisiblityCache($workId);
 		$cacheManager->ClearWorkSelectedMetricMetadata($workId);
+		$this->CleanWorkMetadataCaches($workId, $work->getMetadata()->getId());
+
+		// Limpia efectos de haber editado la institución y ahora publicarla
+		$workModel = new WorkModel();
+		$works = $workModel->GetInstitutionsByWork($workId);
+		foreach($works as $work)
+		{
+			$this->CleanWorkMetadataCachesByInstitution($work['institution_id']);
+		}
+
+	}
+	private function CleanWorkMetadataCachesByInstitution($institutionId)
+	{
+		// Limpia a los cachés de metadatos de works de la misma institución
+		$workModel = new WorkModel(false);
+		$institutionIdShardified = self::Shardified($institutionId);
+		$works = $workModel->GetWorkAndMetadataIdsByInstitution($institutionIdShardified);
+		foreach($works as $work)
+		{
+			$this->CleanWorkMetadataCaches($work['wrk_id'], $work['met_id']);
+		}
+	}
+	private function CleanWorkMetadataCaches($workId, $metadataId)
+	{
+		$cacheManager = new CacheManager();
+		$cacheManager->ClearWorkSelectedMetricMetadata($workId);
+		$cacheManager->CleanPdfMetadata($metadataId);
 	}
 
 	public function RevokeOnlineDates($workId)

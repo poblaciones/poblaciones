@@ -73,7 +73,7 @@
 							</label>
 						</div>
 
-					<div class="md-helper-text helper">Imagen para utilizar como marca de agua sobre el mapa.</div>
+					<div class="md-helper-text helper">Imagen para utilizar como marca de agua sobre el mapa (altura recomendada: 240px).</div>
 				</div>
 			</div>
 

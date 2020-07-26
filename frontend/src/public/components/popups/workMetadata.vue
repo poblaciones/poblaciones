@@ -67,12 +67,13 @@
 					</tr>
 					<tr v-if="work.Files && work.Files.length > 0">
 						<td>Adjuntos:</td>
-						<td>
+						<td><div class="attachmentsDownloadPanel">
 							<span v-for="file in work.Files" :key="file.Id">
 								<a target="_blank" :href="resolveFileUrl(file)">
 									<file-pdf-icon title="Descargar" /> {{ file.Caption }}
 								</a>
 							</span>
+						</div>
 						</td>
 					</tr>
 				</tbody>

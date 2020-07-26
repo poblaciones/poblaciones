@@ -1,6 +1,8 @@
 {% import "messages.html.twig" as styles %}
 {{ include('header.html.twig') }}
 	<div {{ styles.sectionTitle }}>
+		{{ header | nl2br }}
+	</div>
 	<div {{ styles.sectionContent }}>
 	<p {{ stylesP | raw }}>
 	{{ message }}.

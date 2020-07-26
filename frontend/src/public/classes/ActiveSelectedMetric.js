@@ -46,6 +46,22 @@ ActiveSelectedMetric.prototype.UpdateOpacity = function (zoom) {
 	}
 };
 
+ActiveSelectedMetric.prototype.GetSelectedUrbanityInfo = function () {
+	return this.GetUrbanityFilters()[this.properties.SelectedUrbanity];
+};
+
+ActiveSelectedMetric.prototype.GetUrbanityFilters = function () {
+	return {
+		'N': { item: 'Todo', level: 0, label: 'Todo', tooltip: '' },
+		'UD': { item: 'Urbano', level: 1, label: 'Urbano', tooltip: 'Áreas de 2 mil habitantes y más (URP=1)' },
+		'U': { item: 'Agrupado', level: 2, label: 'Urbano agrupado', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con 250 habitantes por km2 y más' },
+		'D': { item: 'Disperso', level: 2, label: 'Urbano disperso', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con menos de 250 habitantes por km2' },
+		'RL': { item: 'Rural', level: 1, label: 'Rural', tooltip: 'Áreas de menos de 2 mil habitantes (URP=2+3)' },
+		'R': { item: 'Agrupado', level: 2, label: 'Rural agrupado', tooltip: 'Áreas de menos de 2 mil habitantes agrupadas (URP=2)' },
+		'L': { item: 'Disperso', level: 2, label: 'Rural disperso', tooltip: 'Áreas de menos de 2 mil habitantes dispersas (URP=3)' }
+	};
+};
+
 ActiveSelectedMetric.prototype.fillEmptySummaries = function () {
 	this.properties.Versions.forEach(function (version) {
 		version.Levels.forEach(function (level) {

@@ -23,8 +23,7 @@ export default {
 		LinkIcon
 	},
 	props: [
-    'metric',
-    'clipping'
+    'metric'
 	],
 	data() {
 		return {
@@ -34,7 +33,7 @@ export default {
   methods: {
 		clickDescargar(e) {
 			e.preventDefault();
-			window.Popups.MetricDownload.show(this.metric, this.clipping);
+			window.Popups.MetricDownload.show(this.metric);
 		},
 		clickFuente(e) {
 			e.preventDefault();

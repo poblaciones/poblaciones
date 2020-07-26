@@ -23,7 +23,7 @@ class Size
 	}
 	public static function TextDeserialize($text)
 	{
-		if ($text == null) return null;
+		if ($text == null || $text == '') return null;
 
 		$parts = explode(',', $text);
 		if (count($parts) != 2)

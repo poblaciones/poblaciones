@@ -79,6 +79,7 @@ class SnapshotByDatasetModel
 		$sqlValues = '';
 		foreach($columns as $column)
 			$sqlValues .= "," . ($column[2] === null ? "null" :  $column[2]);
+
 		// Arma el FROM
 		$table = $dataset['dat_table'];
 		$sql = "INSERT INTO " . self::SnapshotTable($table) . " (" . substr($sqlCols, 1) . ")
@@ -169,7 +170,7 @@ class SnapshotByDatasetModel
 	{
 		// $dataset = recibe $dataset + geography
 		$columns = [];
-		$columns[] = ['sna_id', 'int(11) AUTO_INCREMENT PRIMARY KEY', null];
+		$columns[] = ['sna_id', 'int(11) PRIMARY KEY', 'id'];
 		$columns[] = ['sna_geography_item_id', 'int(11) NOT NULL', 'gei_id'];
 		$columns[] = ['sna_urbanity', "char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N'", 'gei_urbanity'];
 		$description = $this->GetDescriptionColumn($dataset);

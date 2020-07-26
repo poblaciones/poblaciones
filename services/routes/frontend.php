@@ -5,6 +5,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use helena\entities\frontend\geometries\Frame;
 use helena\entities\frontend\geometries\Coordinate;
+use helena\entities\frontend\geometries\Circle;
 use helena\db\frontend\MetadataModel;
 
 use helena\services\frontend as services;
@@ -81,12 +82,16 @@ App::$app->get('/', function (Request $request) {
 App::$app->get('/services/download/StartDownload', function (Request $request) {
 	$controller = new services\DownloadService();
 	$datasetId = Params::GetInt('d');
+
+	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
 	$clippingItemId = Params::GetInt('r');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+
 	$type = Params::Get('t');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
 
-	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId));
+	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity));
 });
 
 App::$app->get('/services/download/StepDownload', function (Request $request) {
@@ -99,9 +104,12 @@ App::$app->get('/services/download/TestFile', function (Request $request) {
 	$controller = new services\DownloadService();
 	$datasetId = Params::GetInt('d');
 	$clippingItemId = Params::GetInt('r');
+	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+
 	$type = Params::Get('t');
 	echo 'Starting...<br>';
-	$status = $controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId);
+	$status = $controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity);
 	$key = $status['key'];
 	echo 'Started. Key: ' . $key . '<br>';
 	while($status['done'] == false)
@@ -117,11 +125,14 @@ App::$app->get('/services/download/GetFile', function (Request $request) {
 	$datasetId = Params::GetIntMandatory('d');
 	$workId = Params::GetIntMandatory('w');
 	$clippingItemId = Params::GetInt('r');
+	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
+ 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+
 	$type = Params::Get('t');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
-	return services\DownloadService::GetFileBytes($type, $workId, $datasetId, $clippingItemId);
+	return services\DownloadService::GetFileBytes($type, $workId, $datasetId, $clippingItemId, $clippingCircle, $urbanity);
 });
 
 App::$app->get('/services/frontend/search', function (Request $request) {

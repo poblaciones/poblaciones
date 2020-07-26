@@ -161,7 +161,7 @@
               </div>
             </div>
           <div style="clear: both">
-            <p>
+            <p style="padding-bottom: 0px;">
               <button class="accent" @click="reset()">Volver a empezar</button>
               <button style="float:right" class="accent" @click="toggleModal">¡Gracias!</button>
             </p>

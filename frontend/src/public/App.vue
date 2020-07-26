@@ -387,7 +387,9 @@ html, body {
 a:hover {
 	text-decoration: underline;
 }
-
+.attachmentsDownloadPanel {
+	max-height: 120px;
+}
 .innerBoxTooltip {
 	right: unset!important;
 	max-height: 200px!important;

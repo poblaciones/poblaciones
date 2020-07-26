@@ -7,10 +7,10 @@ use helena\services\common\DownloadManager;
 
 class DownloadService extends BaseService
 {
-	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId)
+	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity)
 	{
 		$dm = new DownloadManager();
-		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, true, null);
+		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, true, null);
 	}
 
 	public function StepMultiRequestFile($key)
@@ -19,9 +19,9 @@ class DownloadService extends BaseService
 		return $dm->StepMultiRequestFile($key);
 	}
 
-	public static function GetFileBytes($type, $datasetId, $clippingItemId)
+	public static function GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity)
 	{
-		return DownloadManager::GetFileBytes($type, $datasetId, $clippingItemId,true);
+		return DownloadManager::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, true);
 	}
 }
 
