@@ -76,7 +76,6 @@ cp -vr ../services/phpstan.neon $output>>$output-1_copy.log
 cp -vr ../services/phpunit.xml $output>>$output-1_copy.log
 cp -vr ../services/py $output>>$output-1_copy.log
 cp -vr ../services/src $output>>$output-1_copy.log
-rm -rf $output/src/framework/data
 cp -vr ../services/config $output>>$output-1_copy.log
 cp -vr ../services/resources $output>>$output-1_copy.log
 cp -vr ../services/web $output>>$output-1_copy.log
@@ -86,7 +85,8 @@ cp -vr ../services/doctrine_proxies $output>>$output-1_copy.log
 
 if [ $vendor = true ]; then
 	cp -vr ../services/vendor $output>>$output-1_copy.log
-	cp -vr ../services/src/framework/data $output>>$output-1_copy.log
+else
+	rm -rf $output/src/framework/data
 fi
 
 echo "*** 2. Borra lo que no se sube"

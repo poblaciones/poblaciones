@@ -38,7 +38,7 @@
 						</td>
 						<td v-else="">{{ level.Name }}</td>
 					</tr>
-					<tr v-if="this.level.HasUrbanity">
+					<tr v-if="hasUrbanityFilter">
 						<td>Filtro:</td>
 						<td>
 							<select :disabled="!visibleUrl" v-model="downloadUrbanity">
