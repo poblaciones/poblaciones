@@ -9,15 +9,28 @@
 					<i class="fas fa-sliders-h"></i>
 				</button>
 
+				<button type="button" v-if="Use.UseUrbanity && hasUrbanityFilter" id="filterDropId"
+								class="filterDropdownButton lightButton close" data-toggle="dropdown"
+								title="Agregar filtro">
+					<i class="fas fa-filter" />
+				</button>
+				<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
+					<li v-for="(value, key) in metric.GetUrbanityFilters(true)" :key="key" :class="(value.border ? 'liDividerNext' : '')">
+						<a :style="'padding-left: '+ (15 + value.level * 14) +'px'"
+										v-on:click="changeUrbanity(key)">
+							{{ value.label }}
+						</a>
+					</li>
+				</ul>
+
 				<button type="button" v-on:click="toogleRankings" v-if="metric.useRankings()" onmouseup="this.blur()"
 								class="close lightButton" :class="(metric.ShowRanking ? 'activeButton' : '')" :title="(metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking')">
-					<i class="fa fa-signal" style="margin-left: -6px;" />
+					<i class="fa fa-signal" style="margin-left: -8px;" />
 				</button>
-				<span v-else style="width: 2px; height: 1px; float:right">&nbsp;</span>
 
 				<button v-if="metric.SelectedLevel().Extents" ref="zoomExtentsBtn" type="button"
 								class="close lightButton" title="Zoom al indicador" v-on:click="zoomExtents()">
-					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px;" />
+					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px; margin-right: 2px;" />
 				</button>
 			</h5>
 		</div>
@@ -62,6 +75,11 @@ export default {
 				this.$emit('RankingShown');
 			}
 		},
+		changeUrbanity(mode) {
+			this.metric.properties.SelectedUrbanity = mode;
+			window.SegMap.SaveRoute.UpdateRoute();
+			window.SegMap.UpdateMap();
+		},
 		zoomExtents() {
 			var extents = this.metric.SelectedLevel().Extents;
 			if (!window.SegMap.Clipping.FrameHasNoClipping()) {
@@ -97,8 +115,14 @@ export default {
 	},
 	computed: {
 		Use() {
-				return window.Use;
-			}
+			return window.Use;
+		},
+		urbanity() {
+			return this.metric.properties.SelectedUrbanity;
+		},
+		hasUrbanityFilter() {
+			return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
+		},
 	}
 };
 </script>
@@ -113,5 +137,14 @@ export default {
 	opacity: .45;
 }
 
+.filterDropdownButton {
+	font-size: 11px;
+	margin-left: -5px;
+	margin-right: 3px;
+}
 
+.dropFilter {
+  margin-top: 0px;
+	cursor: pointer;
+}
 </style>

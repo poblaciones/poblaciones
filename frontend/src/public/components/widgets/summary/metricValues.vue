@@ -4,10 +4,6 @@
 			<tbody>
 				<tr>
 					<td colspan="3" class="statsHeader">
-						<span v-if="hasUrbanityFilter && urbanity != 'N'" style="float: left; padding-top: 4px;"
-									:title="getUrbanityTextTooltip">
-							{{ getUrbanityTextActive }}
-						</span>
 						<div v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="levelLabelMargin">
 							<button type="button" style="padding-left: 2px!important;"
 											class="lightButton close exp-hiddable-visiblity"
@@ -23,24 +19,6 @@
 						</div>
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
-						<span class="dropdown exp-hiddable-unset" v-show="Use.UseUrbanity && hasUrbanityFilter" style="float: left">
-							<button type="button"
-											:class="(urbanity != 'N' ? 'activeFilter' : '')"
-											class="filterDropdownButton lightButton close" data-toggle="dropdown"
-											:title="getUrbanityTextActive">
-								<i class="fas fa-filter" />
-							</button>
-							<ul class="dropdown-menu filterDropdownMargin">
-								<li v-for="(value, key) in metric.GetUrbanityFilters()" :key="key">
-									<button type="button" class="filterDropdownItem close" v-on:click="changeUrbanity(key)">
-										<i class="fa-circle" :class="(key === urbanity ? 'fas activeFilter' : 'far')"
-											 style="font-size: 10px;" :style="'margin-left: '+ (value.level * 8) +'px'" aria-hidden="true" />
-										{{ value.item }}
-									</button>
-								</li>
-							</ul>
-						</span>
-
 						<span class="hand" :title="currentMetric.Title" v-on:click="clickMetric(currentMetric.Next.Key)"
 									v-html="getValueHeader()">
 						</span>
@@ -130,21 +108,6 @@ export default {
 		},
 	},
 	computed: {
-		Use() {
-			return window.Use;
-		},
-		urbanity() {
-			return this.metric.properties.SelectedUrbanity;
-		},
-		hasUrbanityFilter() {
-			return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
-		},
-		getUrbanityTextTooltip() {
-			return this.metric.GetSelectedUrbanityInfo().tooltip;
-		},
-		getUrbanityTextActive() {
-			return this.metric.GetSelectedUrbanityInfo().label;
-		},
 		levelLabelMargin() {
 			var margin = 0;
 			if (this.version.Levels.length > 1) {
@@ -227,11 +190,6 @@ export default {
 		},
 		applySymbols(cad) {
 			return str.applySymbols(cad);
-		},
-		changeUrbanity(mode) {
-			this.metric.properties.SelectedUrbanity = mode;
-			window.SegMap.SaveRoute.UpdateRoute();
-			window.SegMap.UpdateMap();
 		},
 		togglePin() {
 			if (this.level.Pinned) {
@@ -485,33 +443,5 @@ export default {
 	vertical-align: top;
 }
 
-.filterDropdownItem {
-	width: 100%;
-	font-weight: 500;
-	color: black;
-	opacity: .6;
-	text-align: left;
-	padding: 6px 4px;
-	font-size: 13px;
-}
-
-.filterDropdownItem:hover {
-	background-color: #eeeeee;
-}
-
-.filterDropdownButton {
-	font-size: 12px;
-	float: none;
-}
-.filterDropdownMargin {
-	left: -42px;
-	right: auto;
-	min-width: 100px;
-	margin-top: 0px;
-}
-	.activeFilter {
-		opacity: 1;
-		color: #6d6d6d;
-	}
 </style>
 

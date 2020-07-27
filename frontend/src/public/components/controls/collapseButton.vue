@@ -1,5 +1,5 @@
 <template>
-	<div v-on:click="doToggle" class='fa fa-2x hand left-arrow'
+	<div v-on:click="doToggle" class='fa fa-2x hand left-arrow' :title="tooltipText"
 		  :class="{ 'fa-caret-left': !collapsed, 'fa-caret-right': collapsed }"
 		  :style="{ left: left + 'px' }">
 		<div class="border-left"></div>
@@ -12,6 +12,7 @@ export default {
 	props: [
 		'collapsed',
 		'startLeft',
+		'tooltip'
 	],
 	data() {
 		return {
@@ -22,6 +23,13 @@ export default {
 		this.left = this.startLeft;
 	},
 	computed: {
+		tooltipText() {
+			var inicio = (this.collapsed ? 'Mostrar' : 'Ocultar');
+			if (this.tooltip) {
+				inicio += ' ' + this.tooltip;
+			}
+			return inicio;
+		},
 		onLoc() {
 			return this.startLeft;
 		},

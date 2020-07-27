@@ -1,7 +1,7 @@
 <template>
 	<div
 		id="collapseButtonRight"
-		v-on:click="doToggle"
+		v-on:click="doToggle" :title="tooltipText"
 		class="fa fa-2x hand right-arrow"
 		:class="{ 'fa-caret-right': !collapsed, 'fa-caret-left': collapsed }"
 		:style="{ right: '0px' }"
@@ -13,10 +13,19 @@
 <script>
 export default {
 	name: "collapseButtonRight",
-	props: ["collapsed"],
+	props: ["collapsed", "tooltip"],
 	data() {
 		return {
 		};
+	},
+	computed: {
+		tooltipText() {
+			var inicio = (this.collapsed ? 'Mostrar' : 'Ocultar');
+			if (this.tooltip) {
+				inicio += ' ' + this.tooltip;
+			}
+			return inicio;
+		}
 	},
 	methods: {
 		doToggle(e) {
@@ -30,12 +39,11 @@ export default {
 <style scoped>
 .right-arrow {
 	position: absolute;
-	height: 39px;
-	width: 26px;
-	border-radius: 20px 0px 0px 20px;
-	top: 50px;
-	font-size: 20px;
-	padding-top: 9px;
+	height: 48px;
+	width: 23px;
+	top: 55px;
+	font-size: 14px;
+	padding-top: 17px;
 	padding-left: 5px;
 	color: #666;
 	background: rgba(255, 255, 255, 0.9);

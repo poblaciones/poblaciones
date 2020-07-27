@@ -234,7 +234,7 @@ export default {
 }
 .dropCapture {
 	margin-top: 7px;
-    margin-left: -8px;
+  margin-left: -8px;
 }
 .shareIt {
   min-width: 37px;

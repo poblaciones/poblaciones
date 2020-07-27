@@ -31,7 +31,7 @@
 								</div>
 								<div class="md-layout md-gutter">
 									<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
-									Dinámico
+									Interactivo
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
 									Al ingresar a la cartografía el mapa se ubicará en la zona del país en que se encuentre el visitante, determinado a partir de su dirección IP.
@@ -69,7 +69,7 @@
 							</div>
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
-									Ubicación
+									Fijo
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
 									Inicia la cartografía en una ubicación fija, determinada por latitud, longitud y zoom.

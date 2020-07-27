@@ -4,6 +4,7 @@ import Vue from 'vue';
 
 import h from '@/public/js/helper';
 import err from '@/common/js/err';
+import arr from '@/common/js/arr';
 import axios from 'axios';
 import fontAwesomeIconsList from '@/common/js/fontAwesomeIconsList.js';
 import flatIconsList from '@/common/js/flatIconsList.js';
@@ -50,16 +51,20 @@ ActiveSelectedMetric.prototype.GetSelectedUrbanityInfo = function () {
 	return this.GetUrbanityFilters()[this.properties.SelectedUrbanity];
 };
 
-ActiveSelectedMetric.prototype.GetUrbanityFilters = function () {
-	return {
-		'N': { item: 'Todo', level: 0, label: 'Todo', tooltip: '' },
-		'UD': { item: 'Urbano', level: 1, label: 'Urbano', tooltip: 'Áreas de 2 mil habitantes y más (URP=1)' },
-		'U': { item: 'Agrupado', level: 2, label: 'Urbano agrupado', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con 250 habitantes por km2 y más' },
-		'D': { item: 'Disperso', level: 2, label: 'Urbano disperso', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con menos de 250 habitantes por km2' },
-		'RL': { item: 'Rural', level: 1, label: 'Rural', tooltip: 'Áreas de menos de 2 mil habitantes (URP=2+3)' },
-		'R': { item: 'Agrupado', level: 2, label: 'Rural agrupado', tooltip: 'Áreas de menos de 2 mil habitantes agrupadas (URP=2)' },
-		'L': { item: 'Disperso', level: 2, label: 'Rural disperso', tooltip: 'Áreas de menos de 2 mil habitantes dispersas (URP=3)' }
+ActiveSelectedMetric.prototype.GetUrbanityFilters = function (skipAllElement) {
+	var ret = {
+		'N': { label: 'Sin filtro', tooltip: '' },
+		'UD': { label: 'Urbano total', tooltip: 'Áreas de 2 mil habitantes y más (URP=1)' },
+		'U': { label: 'Urbano agrupado', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con 250 habitantes por km2 y más' },
+		'D': { label: 'Urbano disperso', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con menos de 250 habitantes por km2', border: true },
+		'RL': { label: 'Rural total', tooltip: 'Áreas de menos de 2 mil habitantes (URP=2+3)' },
+		'R': { label: 'Rural agrupado', tooltip: 'Áreas de menos de 2 mil habitantes agrupadas (URP=2)' },
+		'L': { label: 'Rural disperso', tooltip: 'Áreas de menos de 2 mil habitantes dispersas (URP=3)' }
 	};
+	if (skipAllElement) {
+		arr.RemoveByKey(ret, 'N');
+	}
+	return ret;
 };
 
 ActiveSelectedMetric.prototype.fillEmptySummaries = function () {
@@ -476,22 +481,42 @@ ActiveSelectedMetric.prototype.CalculateProperLevel = function () {
 	if (currentVersion.Levels.length < 2) {
 		return 0;
 	}
-	var clippingPassed = !window.SegMap.Clipping.HasClippingLevels();
-
 	var currentLevel = null;
 	var currentZoom = window.SegMap.frame.Zoom;
-	var currentLevelIndex = null;
-	for (var l = 0; l < currentVersion.Levels.length; l++) {
-		currentLevelIndex = l;
-		currentLevel = currentVersion.Levels[currentLevelIndex];
-		if (clippingPassed && currentZoom >= currentLevel.MinZoom && currentZoom <= currentLevel.MaxZoom) {
-			break;
-		}
-		if (clippingPassed === false) {
-			clippingPassed = window.SegMap.Clipping.LevelMachLevels(currentLevel);
+	var currentVersion = this.SelectedVersion();
+	var validFrom = this.LevelValidFrom();
+	if (currentZoom < currentVersion.Levels[validFrom].MinZoom) {
+		// Si es más chico que el primero, devuelve ese
+		return validFrom;
+	}
+	var last = currentVersion.Levels.length - 1;
+	if (currentZoom > currentVersion.Levels[last].MaxZoom) {
+		// Si es más grande que el máximo, devuelve ese
+		return last;
+	}
+	for (var l = validFrom; l < currentVersion.Levels.length; l++) {
+		var currentLevel = currentVersion.Levels[l];
+		if (currentZoom >= currentLevel.MinZoom && currentZoom <= currentLevel.MaxZoom) {
+			return l;
 		}
 	}
-	return currentLevelIndex;
+	// Trata de devolver uno válido, incluso si no está en el rango de zoom
+	return currentVersion.Levels.length - 1;
+};
+
+ActiveSelectedMetric.prototype.LevelValidFrom = function() {
+	if (!window.SegMap.Clipping.HasClippingLevels()) {
+		// si no hay clipping region, todos valen
+		return 0;
+	}
+	var currentVersion = this.SelectedVersion();
+	for (var l = 0; l < currentVersion.Levels.length; l++) {
+		var currentLevel = currentVersion.Levels[l];
+		if (window.SegMap.Clipping.LevelMachLevels(currentLevel)) {
+			return l;
+		}
+	}
+	return 0;
 };
 
 ActiveSelectedMetric.prototype.getValidPatterns = function () {

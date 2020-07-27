@@ -9,7 +9,7 @@
 				<FabButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
 				<WatermarkFloat v-if="work.Current && work.Current.Institution.WatermarkId" :work="work" />
 				<EditButton v-if="work.Current" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" v-show="Use.UseCollapsePanel" class="exp-hiddable-block" />
+				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
 				<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
@@ -389,6 +389,7 @@ a:hover {
 }
 .attachmentsDownloadPanel {
 	max-height: 120px;
+  overflow-y: auto;
 }
 .innerBoxTooltip {
 	right: unset!important;
@@ -586,6 +587,10 @@ a:hover {
 	transform: translate3d(5px, 1px, 0px);
 	background-color: white;
 }
+.liDividerNext {
+	border-bottom: 1px solid #f1eae0;
+}
+
 @media (max-width: 991px) {
 	.dropdown-menu {
 		display: block;

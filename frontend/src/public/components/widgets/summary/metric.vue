@@ -3,10 +3,18 @@
 		<hr class="moderateHr exp-hiddable-visiblity"/>
 		<div>
 			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index"
-						class="exp-hiddable-block" @RankingShown="rankingShown" />
+												class="exp-hiddable-block" @RankingShown="rankingShown" />
 			<h4 class="title">
 				<span class="drag">{{ metric.properties.Metric.Name }}</span>
 			</h4>
+			<div class="filterElement" v-if="hasUrbanityFilter && urbanity != 'N'"
+					 :title="getUrbanityTextTooltip">
+				{{ getUrbanityTextActive }}
+				<mp-close-button v-on:click="changeUrbanity('N')" title="Quitar filtro"
+												 style="font-size: 16px; margin-top: -1px; margin-left: 2px;"
+												 class="exp-hiddable-block" />
+			</div>
+
 			<MetricVariables :metric="metric" />
 			<div class="sourceRow">
 				<div class="btn-group" style="float: left">
@@ -55,6 +63,11 @@ export default {
 		changeSelectedVersionIndex(index) {
 			this.metric.SelectVersion(index);
 		},
+		changeUrbanity(mode) {
+			this.metric.properties.SelectedUrbanity = mode;
+			window.SegMap.SaveRoute.UpdateRoute();
+			window.SegMap.UpdateMap();
+		},
 		changeMetricVisibility() {
 			this.metric.ChangeMetricVisibility();
 		},
@@ -72,7 +85,21 @@ export default {
 		}
 	},
 	computed: {
-
+		Use() {
+			return window.Use;
+		},
+		urbanity() {
+			return this.metric.properties.SelectedUrbanity;
+		},
+		hasUrbanityFilter() {
+			return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
+		},
+		getUrbanityTextTooltip() {
+			return this.metric.GetSelectedUrbanityInfo().tooltip;
+		},
+		getUrbanityTextActive() {
+			return this.metric.GetSelectedUrbanityInfo().label;
+		},
 	}
 };
 </script>
@@ -95,6 +122,20 @@ export default {
 	cursor: grabbing;
 	cursor: -moz-grabbing;
 	cursor: -webkit-grabbing;
+}
+.filterElement {
+	color: #888888;
+	font-weight: 300;
+	font-size: 13px;
+	padding: 2px 6px;
+	margin-top: 9px;
+	background-color: #dddddd;
+	margin-left: -3px;
+	margin-bottom: -3px;
+	display: inline-block;
+	border-radius: 4px;
+	border: 1px solid #dddddd;
+	text-transform: uppercase;
 }
 
 .rankingBox {

@@ -19,6 +19,14 @@ module.exports = {
 		}
 		return (index >= 0);
 	},
+	RemoveByKey(arr, key) {
+		if (arr.hasOwnProperty(key)) {
+			delete arr[key];
+			return true;
+		} else {
+			return false;
+		}
+	},
 	RemoveById(arr, id) {
 		var index = this.IndexById(arr, id);
 		return this.RemoveAt(arr, index);

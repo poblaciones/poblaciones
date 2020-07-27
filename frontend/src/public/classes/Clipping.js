@@ -45,7 +45,8 @@ Clipping.prototype.SetClippingCircle = function (clippingCircle) {
 };
 
 Clipping.prototype.HasClippingLevels = function () {
-	return this.GetClippingLevels() !== null;
+	var levels = this.GetClippingLevels();
+	return levels !== null && levels.length > 0;
 };
 
 Clipping.prototype.LevelMachLevels = function (level) {

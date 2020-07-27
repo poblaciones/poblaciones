@@ -1,6 +1,16 @@
 [CURRENT]
-- El ranking responde al filtro por categoría.
+
+v2.26 (2020-07-27)
+- Ruralidad: filtro de ruralidad/urbanidad al visualizar indicadores de puntos o de nivel radios (¡Gracias Force for Good!).
+- Fix: la descarga respeta el criterio de 'selección por círculo' al generar los datos.
+- El ranking responde al filtro por categoría y por ruralidad.
 - El click en item de ranking hace pan al envelope del polígono.
+- Fix: selección automática de niveles al cambiar el zoom.
+- Panel derecho colapsable y mejoras para visualizar en dispositivos móviles (¡Gracias Force for Good!).
+- Mejoras en salida a PNG: se incorpora el panel de referencias a la exportación. Mejora en la resolución de la imagen (calidad imprimible). Admite exportar en formato JPG.
+- Salida a PDF de las visualizaciones (¡Gracias Force for Good!).
+- Fix: asignación de ruralidad para radios en CABA en los datos censales de 1991.
+- Permite cargar una imagen ('marca de agua') para las instituciones productoras de cartografías y la superpone en la visualización de los mapas (¡Gracias Force for Good!).
 
 v2.25 (2020-07-17)
 - Mejora en la detección de filas vacías (importanción de CSV y Excel).
