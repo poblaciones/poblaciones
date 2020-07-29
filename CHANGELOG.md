@@ -11,6 +11,7 @@ v2.26 (2020-07-27)
 - Salida a PDF de las visualizaciones (¡Gracias Force for Good!).
 - Fix: asignación de ruralidad para radios en CABA en los datos censales de 1991.
 - Permite cargar una imagen ('marca de agua') para las instituciones productoras de cartografías y la superpone en la visualización de los mapas (¡Gracias Force for Good!).
+- El tutorial deja de ofrecerse (abrirse) luego de tres visualizaciones.
 
 v2.25 (2020-07-17)
 - Mejora en la detección de filas vacías (importanción de CSV y Excel).

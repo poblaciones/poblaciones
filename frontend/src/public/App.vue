@@ -287,6 +287,16 @@ html, body {
 	color: white!important;
 	font-size: 0px;
 }
+
+	.exp-high-contrast {
+		color: #000000 !important;
+		background-color: #ffffff !important;
+	}
+.exp-high-button {
+	color: #ffffff !important;
+}
+
+
 .exp-circles:after {
 	border-width: 8px;
 	border-style: solid;

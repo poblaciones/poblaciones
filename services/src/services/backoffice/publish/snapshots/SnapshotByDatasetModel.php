@@ -161,6 +161,7 @@ class SnapshotByDatasetModel
 		App::Db()->exec($update, array($unShardifiedId));
 		$update = "UPDATE metric_version_level SET mvl_extents = " . $rect . " WHERE mvl_id = ?";
 		App::Db()->exec($update, array($metricVersionLevel['mvl_id']));
+
 		// Listo
 		Profiling::EndTimer();
 	}

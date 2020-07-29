@@ -87,8 +87,6 @@ MapExport.prototype.generatePdf = function (canvas) {
 				imgHeight =  parseInt(imgWidth * (canvas.height / canvas.width), 10);
 			}
 			doc.addImage(img,'JPEG', imgPositionX, imgPositionY, imgWidth, imgHeight, 'map', 'NONE');
-			//doc.setFontSize(8);
-			//doc.text(15, 205, window.location.href);
 			doc.save("mapa.pdf");
 };
 
@@ -127,6 +125,12 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 		{ class: 'logoDiv', extraclass: 'exp-logodiv-right' },
 		// botones de series
 		{ class: 'exp-serie-item', extraclass: 'exp-rounded' },
+		// contraste a textos grises
+		{ class: 'summaryRow', extraclass: 'exp-high-contrast' },
+		{ class: 'statsHeader', extraclass: 'exp-high-contrast' },
+		{ class: 'stats', extraclass: 'exp-high-contrast' },
+		{ class: 'filterElement', extraclass: 'exp-high-contrast' },
+		{ class: 'exp-serie-item', extraclass: 'exp-high-button' },
 		// referencias de colores
 		{ class: 'exp-category-bullets', extraclass: 'exp-circles' }
 	];

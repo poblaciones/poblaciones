@@ -135,14 +135,13 @@ class PublishDataTables
 		$cacheManager->ClearWorkSelectedMetricMetadata($workId);
 		$this->CleanWorkMetadataCaches($workId, $work->getMetadata()->getId());
 
-		// Limpia efectos de haber editado la institución y ahora publicarla
+		// Limpia efectos de haber editado la institución y ahora republicarla
 		$workModel = new WorkModel();
 		$works = $workModel->GetInstitutionsByWork($workId);
 		foreach($works as $work)
 		{
 			$this->CleanWorkMetadataCachesByInstitution($work['institution_id']);
 		}
-
 	}
 	private function CleanWorkMetadataCachesByInstitution($institutionId)
 	{
