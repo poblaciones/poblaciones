@@ -17,6 +17,7 @@ class WorkInfo extends BaseMapModel
 	public $IsPrivate;
 	public $CanEdit;
 	public $Coverage;
+	public $Extents;
 	public $Institution;
 	public $Url;
 	public $FileUrl;

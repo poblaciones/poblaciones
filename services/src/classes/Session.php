@@ -5,8 +5,11 @@ namespace helena\classes;
 use minga\framework\Context;
 use minga\framework\MessageBox;
 use minga\framework\PhpSession;
-use helena\caches\WorkPermissionsCache;
+use minga\framework\Request;
 use minga\framework\Profiling;
+use minga\framework\Str;
+
+use helena\caches\WorkPermissionsCache;
 use helena\services\frontend\SelectedMetricService;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\caches\WorkVisiblityCache;
@@ -157,6 +160,13 @@ class Session
 		{
 			if (array_key_exists('HTTP_ACCESS_LINK', $_SERVER))
 				self::$AccessLink = $_SERVER['HTTP_ACCESS_LINK'];
+			else
+			{
+				if (Str::Contains(Request::Referer(), $link))
+				{
+					self::$AccessLink = $link;
+				}
+			}
 		}
 		if (! self::$AccessLink) return false;
 		return (self::$AccessLink === $link);

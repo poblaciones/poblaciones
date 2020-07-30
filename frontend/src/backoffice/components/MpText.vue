@@ -253,9 +253,6 @@ export default {
 };
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
-.md-layout-item .md-size-15 {
-  padding: 0 !important;
-}
 
 .error {
 	font-size: 11px;

@@ -9,6 +9,8 @@ import sys
 import pandas as pd
 import traceback
 
+from stata3writer import StataWriter117 as statawriter
+
 
 def main():
 	if len(sys.argv) != 3:
@@ -17,7 +19,13 @@ def main():
 
 	try:
 		df = pd.read_spss(sys.argv[1])
-		df.to_stata(sys.argv[2])
+
+		# Llama al módulo local para evitar BUG de filas vacías
+		writer = statawriter(sys.argv[2], df)
+		writer.write_file()
+
+		#df.to_stata(sys.argv[2])
+		#df.to_stata(sys.argv[2], version=117, convert_strl = df.columns[df.all()].tolist())
 		return
 
 	except:

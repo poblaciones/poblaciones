@@ -68,7 +68,7 @@ App::$app->get('/services/backoffice/StartDownload', function (Request $request)
 	$datasetId = Params::GetInt('d');
 	if ($denied = Session::CheckIsDatasetReader($datasetId)) return $denied;
 	$type = Params::Get('t');
-	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, null, null));
+	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, null, null, null));
 });
 
 // http://mapas.aacademica.org/services/download/GetFile?t=ss&l=8&r=1692&a=X

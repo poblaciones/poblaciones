@@ -31,7 +31,7 @@ def main():
             for f in sorted(glob.glob(data_path)):
                 with open(f, 'r') as data_file:
                     for record in ijson.items(data_file, 'item'):
-                        writer.writerow(record)
+                        writer.writerow([x if not x is None else '' for x in record])
 
 
             os.remove(sys.argv[1])

@@ -1,11 +1,16 @@
 <template>
 	<div class="metricBlock">
 		<hr class="moderateHr exp-hiddable-visiblity"/>
-		<div>
+		<div class="metricPanel">
+			<div class="dragHandle exp-hiddable-block">
+				<div style="top: -10px; position: absolute; left: 0; right: 0">
+					<drag-horizontal title="Arrastrar para reubicar" />
+				</div>
+			</div>
 			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index"
 												class="exp-hiddable-block" @RankingShown="rankingShown" />
 			<h4 class="title">
-				<span class="drag">{{ metric.properties.Metric.Name }}</span>
+				{{ metric.properties.Metric.Name }}
 			</h4>
 			<div class="filterElement" v-if="hasUrbanityFilter && urbanity != 'N'"
 					 :title="getUrbanityTextTooltip">
@@ -39,20 +44,22 @@ import MetricVariables from './metricVariables';
 import MetricTopButtons from './metricTopButtons';
 import MetricSource from './metricSource';
 import Ranking from './ranking';
+import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
 import Mercator from '@/public/js/Mercator';
 
 export default {
 	name: 'metric',
+	components: {
+		MetricTopButtons,
+		MetricSource,
+		DragHorizontal,
+		MetricVariables,
+		Ranking,
+	},
 	props: [
 		'metric',
 		'clipping',
 	],
-	components: {
-		MetricTopButtons,
-		MetricSource,
-		MetricVariables,
-		Ranking,
-	},
 	methods: {
 		getActive(index) {
 			if(this.metric.properties.SelectedVersionIndex === index) {
@@ -110,18 +117,6 @@ export default {
 {
 	padding-top: 1px;
 	cursor: default;
-}
-.drag {
-	cursor: move; /* fallback if grab cursor is unsupported */
-	cursor: grab;
-	cursor: -moz-grab;
-	cursor: -webkit-grab;
-}
-.drag:active {
-	cursor: move; /* fallback if grab cursor is unsupported */
-	cursor: grabbing;
-	cursor: -moz-grabbing;
-	cursor: -webkit-grabbing;
 }
 .filterElement {
 	color: #888888;

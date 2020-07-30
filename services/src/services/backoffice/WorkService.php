@@ -63,7 +63,7 @@ class WorkService extends BaseService
 	private function CreateStartup()
 	{
 		$startup = new entities\DraftWorkStartup();
-		$startup->setType('D');
+		$startup->setType('E');
 		$startup->setClippingRegionItemSelected(true);
 		App::Orm()->Save($startup);
 		return $startup;

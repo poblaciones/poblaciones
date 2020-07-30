@@ -114,25 +114,44 @@ class SnapshotByDatasetModel
 							LEFT JOIN dataset_column caption ON caption.dco_id = dat_caption_column_id
 
 							WHERE dat_id = ?";
-		$ret = App::Db()->fetchAll($sql, array($datasetId));
 
+		$ret = App::Db()->fetchAll($sql, array($datasetId));
+		foreach($ret as &$metricVersionLevel)
+		{
+			$variables = Variable::GetVariables($metricVersionLevel);
+			$metricVersionLevel['variables'] = $variables;
+		}
 		Profiling::EndTimer();
 		return $ret;
 	}
 
 	private function ProcessDatasetLevel($metricVersionLevel, &$columns)
 	{
-		$variables = Variable::GetVariables($metricVersionLevel);
+		$variables = $metricVersionLevel['variables'];
 		foreach ($variables as $variable)
 		{
 			$this->BuildVariableColumns($metricVersionLevel, $variable, $columns);
 		}
+		return $variables;
 	}
 
 
 	private function UpdateExtents($dataset, $metricVersionLevel)
 	{
 		Profiling::BeginTimer();
+
+		// Calcula la condición que muestra que tiene valores en esas
+		// filas cuando son categoriales
+		$variables = $metricVersionLevel['variables'];
+		$notNullCondition = "";
+		foreach ($variables as $variable)
+		{
+			if ($variable->attributes['vsy_cut_mode'] === 'V')
+			{
+				$col = 'sna_' . $variable->Id() . '_value_label_id';
+				$notNullCondition .= " AND " . $col . " <> 0 AND " . $col . " IS NOT NULL ";
+			}
+		}
 		// Calcula para cada level
 		$sql = "SELECT ST_AsText(PolygonEnvelope(LineString(
                 POINT(Min(ST_X(PointN(ExteriorRing(sna_envelope), 1))),
@@ -142,6 +161,8 @@ class SnapshotByDatasetModel
 				MAX(ST_Y(PointN(ExteriorRing(sna_envelope), 3))))
                               ))) extents
 				FROM  " . self::SnapshotTable($dataset['dat_table']);
+		if ($notNullCondition !== '')
+			$sql .= " WHERE " . substr($notNullCondition, 4);
 
 		$res = App::Db()->fetchAssoc($sql);
 
@@ -155,13 +176,10 @@ class SnapshotByDatasetModel
 			$rect = 'null';
 		}
 		// Lo pone
-		$id = $metricVersionLevel['mvl_id'];
-		$unShardifiedId = PublishDataTables::Unshardify($id);
+		$metricVersionLevelId = $metricVersionLevel['mvl_id'];
+		$unShardifiedId = PublishDataTables::Unshardify($metricVersionLevelId);
 		$update = "UPDATE draft_metric_version_level SET mvl_extents = " . $rect . " WHERE mvl_id = ?";
 		App::Db()->exec($update, array($unShardifiedId));
-		$update = "UPDATE metric_version_level SET mvl_extents = " . $rect . " WHERE mvl_id = ?";
-		App::Db()->exec($update, array($metricVersionLevel['mvl_id']));
-
 		// Listo
 		Profiling::EndTimer();
 	}

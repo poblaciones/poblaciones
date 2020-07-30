@@ -218,7 +218,8 @@ App::$app->get('/services/works/GetWorkAndDefaultFrame', function (Request $requ
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 	$work = $controller->GetWork($workId);
 
-	if ($work->Startup->Type === 'D')
+	if ($work->Startup->Type === 'D' ||
+				($work->Startup->Type === 'E' && !$work->Extents))
 	{
 		$controller = new services\ClippingService();
 		$paramCoordinate = Params::Get('p');

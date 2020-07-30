@@ -109,7 +109,7 @@ export default {
 	mounted() {
 		this.splitPanels = Split(['#panMain', '#panRight'], {
 			sizes: [75, 25],
-			minSizes: [10, 300],
+			minSize: [10, 275],
 			expandToMin: true,
 			gutterSize: 5
 		});
@@ -273,6 +273,52 @@ html, body {
 .indented1 {
 	margin-left: 90px;
 }
+
+.dragHandle:hover {
+	visibility: visible;
+}
+.metricPanel > .dragHandle {
+	visibility: hidden;
+}
+
+.metricPanel:hover > .dragHandle {
+	visibility: visible;
+}
+
+.metricPanel {
+	padding-top: 4px;
+	padding-bottom: 4px
+}
+.dragHandle {
+	visibility: visible;
+	height: 14px;
+	margin-top: -13px;
+	color: #cccccc;
+	position: relative;
+	overflow: hidden;
+	cursor: move;
+	text-align: center;
+	font-size: 24px;
+}
+
+
+.md-layout-item .md-size-15 {
+	padding: 0 !important;
+}
+
+.md-layout-item .md-size-25 {
+	padding: 0 !important;
+}
+
+.md-layout-item .md-size-20 {
+	padding: 0 !important;
+}
+
+.md-layout-item .md-size-10 {
+	padding: 0 !important;
+}
+
+
 .tab1 {
 	position: absolute;
 	left: 90px;
@@ -288,10 +334,10 @@ html, body {
 	font-size: 0px;
 }
 
-	.exp-high-contrast {
-		color: #000000 !important;
-		background-color: #ffffff !important;
-	}
+.exp-high-contrast {
+	color: #000000 !important;
+	background-color: #ffffff !important;
+}
 .exp-high-button {
 	color: #ffffff !important;
 }

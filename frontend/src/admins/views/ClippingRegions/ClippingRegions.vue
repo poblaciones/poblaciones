@@ -91,12 +91,6 @@ import arr from '@/common/js/arr';
     padding: 0 !important;
 }
 
-.md-avatar {
-    min-width: 200px;
-    min-height: 200px;
-    border-radius: 200px;
-}
-
 .md-dialog-actions {
   padding: 8px 20px 8px 24px !important;
 }

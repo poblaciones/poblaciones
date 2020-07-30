@@ -103,26 +103,6 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.md-layout-item .md-size-15 {
-    padding: 0 !important;
-}
 
-.md-layout-item .md-size-25 {
-    padding: 0 !important;
-}
-
-.md-layout-item .md-size-20 {
-    padding: 0 !important;
-}
-
-.md-layout-item .md-size-10 {
-    padding: 0 !important;
-}
-
-.md-avatar {
-    min-width: 200px;
-    min-height: 200px;
-    border-radius: 200px;
-}
 
 </style>

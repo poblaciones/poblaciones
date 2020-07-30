@@ -1,4 +1,6 @@
 [CURRENT]
+- Fix: descargas desde cartografía pública por link fallaban.
+- Nuevo tipo de ubicación de inicio: extensión (predeterminada).
 
 v2.26 (2020-07-27)
 - Ruralidad: filtro de ruralidad/urbanidad al visualizar indicadores de puntos o de nivel radios (¡Gracias Force for Good!).

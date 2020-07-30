@@ -601,6 +601,11 @@ class PublishDataTables
 		return $id * 100 + Context::Settings()->Shard()->CurrentShard;
 	}
 
+	public static function ShardifiedDb($field)
+	{
+		return '(' . $field . ' * 100 + ' . Context::Settings()->Shard()->CurrentShard . ')';
+	}
+
 	public static function Unshardify($id)
 	{
 		return intval($id / 100);

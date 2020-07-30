@@ -11,6 +11,8 @@ use helena\db\frontend\WorkModel;
 use helena\db\frontend\FileModel;
 use helena\classes\App;
 use helena\classes\Session;
+use helena\entities\frontend\geometries\Envelope;
+
 
 class WorkService extends BaseService
 {
@@ -36,6 +38,8 @@ class WorkService extends BaseService
 		$ret = new WorkInfo();
 		$ret->CanEdit = Session::IsWorkEditor($workId);
 		$ret->Fill($work);
+		if ($work['met_extents'])
+			$ret->Extents = Envelope::FromDb($work['met_extents'])->Trim();
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
 		$ret->FillStartup($work);
 		$ret->FillInstitution($work);

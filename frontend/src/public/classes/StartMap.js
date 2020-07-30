@@ -80,6 +80,13 @@ StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 			window.SegMap.Clipping.SetClippingRegion(startup.ClippingRegionItemId, true, !startup.Selected);
 		};
 	}
+	else if (startup.Type === 'E' && this.workReference.Current.Extents) {
+		var loc = this;
+		setMapPosition = function () {
+			loc.frameReference.frame.Envelope = loc.workReference.Current.Extents;
+			window.SegMap.FitCurrentEnvelope();
+		};
+	}
 	else if (startup.Type === 'L') {
 		this.frameReference.frame.Envelope.Min = startup.Center;
 		this.frameReference.frame.Envelope.Max = startup.Center;

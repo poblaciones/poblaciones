@@ -2,9 +2,9 @@
 	<div style="background-color: white; width: 100%;">
 		<Toolbar :metrics="metrics" :frame="frame" :user="user" :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates" class="exp-hiddable-block"/>
 		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
-				 style="background-color: transparent; padding-bottom: 13px; padding-right: 5px;">
+				 style="background-color: transparent; padding-bottom: 13px;">
 			<Clipping :clipping="clipping" :frame="frame" />
-			<draggable v-model="propMetrics" @end="itemMoved">
+			<draggable v-model="propMetrics" @end="itemMoved" handle=".dragHandle">
 				<transition-group name="fade">
 					<Metric v-for="(value, index) in metrics" :metric="value" :clipping="clipping" :key="index"></Metric>
 				</transition-group>

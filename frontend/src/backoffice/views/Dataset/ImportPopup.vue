@@ -188,7 +188,7 @@ export default {
       if (extension !== 'sav' && extension !== 'csv' && extension !== 'txt'
           && extension !== 'xls' && extension !== 'xlsx'
           && extension !== 'kml' && extension !== 'kmz') {
-        alert('La extensión del archivo debe ser SAV, XLS, XLSX, CSV, TXT, KML o KMZ.');
+				alert('La extensión del archivo debe ser CSV, TXT, XLS, XLSX, SAV, KML o KMZ.');
         return;
       }
       if (!this.Dataset && !this.createdDataset) {

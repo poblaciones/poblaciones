@@ -36,7 +36,8 @@ class PublishSnapshots extends BaseService
 				$snapshotsManager->UpdateDatasetData($row);
 			}
 			// Actualiza métricas
-			if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
+			if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed']
+						|| $work['wrk_metric_labels_changed'])
 			{
 				$cacheManager->ClearDatasetData($row['dat_id']);
 				$snapshotsManager->UpdateDatasetMetrics($row);
@@ -140,29 +141,32 @@ class PublishSnapshots extends BaseService
 	public function UpdateExtents($workId)
 	{
 		Profiling::BeginTimer();
+		$workIdShardified = PublishDataTables::Shardified($workId);
 
-		$workModel = new WorkModel();
-		$work = $workModel->GetWork($workId);
-		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'])
-		{
-			// Calcula el del work
-			$sql = "UPDATE metadata
-					JOIN work ON wrk_metadata_id = met_id
-					JOIN dataset ON wrk_id = dat_work_id
-					SET met_extents =
-					 (SELECT
-									Envelope(LineString(
-					POINT(Min(ST_X(PointN(ExteriorRing(mvl_extents), 1))),
-					MIN(ST_Y(PointN(ExteriorRing(mvl_extents), 1)))),
-					POINT(Max(ST_X(PointN(ExteriorRing(mvl_extents), 3))),
-					MAX(ST_Y(PointN(ExteriorRing(mvl_extents), 3))))))
-					FROM  metric_version_level
-					WHERE dat_id = mvl_dataset_id)
+		// Los actualiza desde drafts
+		$update = "UPDATE metric_version_level m JOIN dataset ON
+				dat_id = m.mvl_dataset_id SET mvl_extents =
+		(SELECT d.mvl_extents FROM draft_metric_version_level d WHERE m.mvl_id = "
+			. PublishDataTables::ShardifiedDb("d.mvl_id") . ")  WHERE dat_work_id = ?";
+		App::Db()->exec($update, array($workIdShardified));
 
-					WHERE wrk_id = ?";
-			$workIdShardified = PublishDataTables::Shardified($workId);
-			App::Db()->exec($sql, array($workIdShardified));
-		}
+		// Calcula el del work
+		$sql = "UPDATE metadata
+				JOIN work ON wrk_metadata_id = met_id
+				JOIN dataset ON wrk_id = dat_work_id
+				SET met_extents =
+					(SELECT
+								ST_Envelope(LineString(
+				POINT(Min(ST_X(PointN(ExteriorRing(mvl_extents), 1))),
+				MIN(ST_Y(PointN(ExteriorRing(mvl_extents), 1)))),
+				POINT(Max(ST_X(PointN(ExteriorRing(mvl_extents), 3))),
+				MAX(ST_Y(PointN(ExteriorRing(mvl_extents), 3))))))
+				FROM  metric_version_level
+				WHERE dat_id = mvl_dataset_id)
+
+				WHERE wrk_id = ?";
+		App::Db()->exec($sql, array($workIdShardified));
+
 		Profiling::EndTimer();
 	}
 }

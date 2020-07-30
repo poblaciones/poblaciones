@@ -271,18 +271,18 @@ class ImportService extends BaseService
 
 		$files = IO::GetFilesStartsWith($this->state->GetFileFolder(), "data_");
 		$this->state->SetTotalSlices(sizeof($files));
-
-		$file = $files[$this->state->Slice()];
-		$filePath = $this->state->GetFileFolder() . "/" . $file;
-		$datasetTable->InsertDatafile($tableName, $headers, $filePath);
-
-		$this->state->NextSlice();
+		if (sizeof($files) > 0)
+		{
+			$file = $files[$this->state->Slice()];
+			$filePath = $this->state->GetFileFolder() . "/" . $file;
+			$datasetTable->InsertDatafile($tableName, $headers, $filePath);
+			$this->state->NextSlice();
+		}
 		if ($this->state->Slice() == $this->state->GetTotalSlices())
 		{
 			$this->state->SetStep(self::STEP_INSERTED, 'Actualizando dataset');
 		}
 		return $this->state->ReturnState(false);
 	}
-
 }
 

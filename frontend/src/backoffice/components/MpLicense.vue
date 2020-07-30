@@ -336,9 +336,6 @@ export default {
 };
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
-.md-layout-item .md-size-15 {
-  padding: 0 !important;
-}
 
 .mp-text-label{
     padding-left: 0 !important;
@@ -367,7 +364,4 @@ export default {
 }
 
 
-.md-layout-item .md-size-25 {
-  padding: 0 !important;
-}
 </style>
