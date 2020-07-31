@@ -16,6 +16,6 @@ class StataTest extends TestCase
 
 		StataWriter::SpssToStata($spssData, $outSta);
 
-		$this->assertFile($outSta, 21835);
+		$this->assertFile($outSta, 22330);
 	}
 }
