@@ -33,6 +33,8 @@
 						<md-button style="float:left;background-color: #ececec;" v-if="hasFiles" title="Quitar" class="md-icon-button" v-on:click="clear">
 							<md-icon>close</md-icon>
 						</md-button>
+						<div class="messageBlock" v-if="verifying">Verificando archivo...</div>
+						<div class="messageBlock" v-if="sheetName !== null && sheetName !== '' && sheetName !== false">Dataset: {{ sheetName }}</div>
           </div>
 					<div v-if="Dataset !== null && Dataset.Columns !== null && Dataset.Columns.length > 0" class="md-layout-item md-size-100" style="margin-top: -10px; margin-bottom: 12px;">
 						<p>
@@ -55,7 +57,7 @@
 
       <md-dialog-actions>
         <md-button @click="openImport = false">Cancelar</md-button>
-        <md-button class="md-primary" :disabled="sending" @click="save()">Aceptar</md-button>
+        <md-button class="md-primary" :disabled="sending || verifying" @click="save()">Aceptar</md-button>
       </md-dialog-actions>
     </md-dialog>
   </div>
@@ -79,9 +81,11 @@ export default {
     return {
       openImport: false,
       extension: "",
-      sending: false,
+			sending: false,
+			verifying: false,
       hasFiles: false,
       bucketId: 0,
+			sheetName: null,
       keepLabels: true,
       saveRequested: false,
       createdDataset: null,
@@ -96,7 +100,6 @@ export default {
         forceChunking: true,
         chunking: true,
         chunkSize: 500000,
-        sheetName: null,
         datasets: null,
         chunksUploaded: function(file, done) {
           done();
@@ -148,25 +151,39 @@ export default {
       }
     },
     verifyDatasets(bucketId, fileExtension) {
-      var loc = this;
-      this.Work.VerifyDatasetsImportFile(bucketId, fileExtension).then(
-        function (list) {
-          if (list.length > 1) {
-            loc.datasets = list;
-            loc.RequestDatasetSelection();
-          }
-        });
+			var loc = this;
+			this.verifying = true;
+			this.Work.VerifyDatasetsImportFile(bucketId, fileExtension).then(
+				function (list) {
+					if (list.length > 1) {
+						loc.datasets = list;
+						loc.RequestDatasetSelection();
+					} else if (list.length == 1) {
+						loc.sheetName = list[0];
+					} else {
+						loc.sheetName = null;
+					}
+				}).finally(function () {
+					loc.verifying = false;
+				});
     },
     RequestDatasetSelection() {
       this.$refs.datasetSelectionDialog.show(
         'Selección de dataset',
         'Seleccione uno de los datasets dentro del archivo a importar',
         this.sheetName,
-        this.datasets);
-    },
-    SaveDatasetSelected(name) {
+        this.asItems(this.datasets));
+		},
+		asItems(list) {
+			var ret = [];
+			for (var n = 0; n < list.length; n++) {
+				ret.push({ Value: list[n], Caption: list[n] });
+			}
+			return ret;
+		},
+    SaveDatasetSelected(item) {
       var loc = this;
-      loc.sheetName = name;
+			loc.sheetName = item.Value;
       if (loc.sheetName == ''){
         loc.clear();
       }
@@ -214,8 +231,12 @@ export default {
 			}
 		},
 		RequestDataset() {
+			var suggested = this.filename;
+			if (this.sheetName) {
+				suggested += ' - ' + this.sheetName;
+			}
 			this.$refs.datasetDialog.show('Importar', 'Indique un nombre para el dataset',
-								'', 'Ej. Escuelas primarias.', this.filename, 100);
+								'', 'Ej. Escuelas primarias.', suggested, 100);
 		},
 		CreateDataset(name) {
 			var loc = this;
@@ -234,6 +255,7 @@ export default {
 			this.extension = '';
 			this.generateBucketId();
 			this.sending = false;
+			this.sheetName = null;
 			this.hasFiles = false;
 			this.openImport = true;
 			this.createdDataset = null;
@@ -274,5 +296,10 @@ export default {
 .dropzone .dz-preview {
   background: #666;
   height: 100px !important;
+}
+
+.messageBlock {
+	padding: 10px;
+	float: left;
 }
 </style>

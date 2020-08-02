@@ -325,6 +325,8 @@ class PhpSpreadSheetCsv extends BaseWriter
         foreach ($pValues as $element) {
             // Escape enclosures
             $element = str_replace($this->enclosure, $this->enclosure . $this->enclosure, $element);
+						// remove new lines
+						$element = str_replace("\n", " ", $element);
 
             // Add delimiter
             if ($writeDelimiter) {

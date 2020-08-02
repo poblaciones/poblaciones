@@ -23,8 +23,6 @@ class MapSettings
 	public $UseFavorites = false;
 
 	public $UseEmbedding = false;
-	public $UseCollapsePanel = false;
-
 	public $UseUrbanity = true;
 
 	public $MaxQueueRequests = 4;

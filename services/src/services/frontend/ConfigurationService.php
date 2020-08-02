@@ -30,7 +30,6 @@ class ConfigurationService extends BaseService
 
 									'UseFavorites' => Context::Settings()->Map()->UseFavorites,
 									'UseEmbedding' => Context::Settings()->Map()->UseEmbedding,
-									'UseCollapsePanel' => Context::Settings()->Map()->UseCollapsePanel,
 									'UseUrbanity' => Context::Settings()->Map()->UseUrbanity,
 
 									'MaxQueueRequests' => Context::Settings()->Map()->MaxQueueRequests,

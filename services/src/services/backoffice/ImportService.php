@@ -63,7 +63,7 @@ class ImportService extends BaseService
 		else if ($fileExtension == "kml" || $fileExtension == "kmz")
 		{
 			$generate_files = true;
-			$this->ConvertKMX($bucket, $fileExtension, $generate_files, $sheetName);
+			$this->ConvertKMX($bucket, $fileExtension, $sheetName);
 			return $this->CSVtoJson($bucket);
 		}
 
@@ -76,7 +76,7 @@ class ImportService extends BaseService
 		{
 			$bucket = FileBucket::Load($bucketId);
 			$generate_files=false;
-			return $this->ConvertKMX($bucket, $fileExtension, $generate_files);
+			return $this->GetKMXFolders($bucket, $fileExtension);
 		}
 		return array();
 	}
@@ -230,25 +230,36 @@ class ImportService extends BaseService
 		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
 		return $this->state->ReturnState(false);
 	}
-
-	private function ConvertKMX($bucket, $fileExtension, $generate_files=true, $sheetName=null)
+	private function GetKMXFolders($bucket, $fileExtension)
 	{
 		$uploadFolder = $bucket->GetBucketFolder();
 		$sourceFile =  $uploadFolder . '/file.dat';
-		$gen_files_arg = $generate_files ? 'true': 'false';
+		$kmxFile =  $uploadFolder . '/file_kmx.dat';
+		if (!file_exists($kmxFile))
+			// es un reintento
+			IO::Move($sourceFile, $kmxFile);
 
-		$args = array($fileExtension, $sourceFile, $uploadFolder, $gen_files_arg);
+		$args = array($fileExtension, $kmxFile, $uploadFolder, 'false');
+		Python::Execute('kmx2csv3.py', $args);
 
-		$lines = Python::Execute('kmx2csv3.py', $args);
+		$outFile = $kmxFile . '_folders.txt';
+		$ret = IO::ReadAllLines($outFile);
+		return $ret;
+	}
 
-		if ($generate_files == true) {
-			$csv_file = $sourceFile;
-			if (!is_null($sheetName)) {
-				$csv_file = $uploadFolder . '/' . $sheetName;
-			}
-			IO::Copy($csv_file . '_out.csv', $sourceFile);
-		}
-		return $lines;
+	private function ConvertKMX($bucket, $fileExtension, $sheetName)
+	{
+		$uploadFolder = $bucket->GetBucketFolder();
+		$sourceFile =  $uploadFolder . '/file.dat';
+		$kmxFile =  $uploadFolder . '/file_kmx.dat';
+		if (!file_exists($kmxFile))
+			// es un reintento
+			IO::Move($sourceFile, $kmxFile);
+
+		$args = array($fileExtension, $kmxFile, $uploadFolder, 'true', $sheetName);
+
+		Python::Execute('kmx2csv3.py', $args);
+		IO::Copy($kmxFile . '_out.csv', $sourceFile);
 	}
 
 	private function CreateTables()
