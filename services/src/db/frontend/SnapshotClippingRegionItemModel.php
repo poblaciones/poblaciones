@@ -190,7 +190,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 						FROM geography C1
 						LEFT JOIN metadata ON geo_metadata_id = met_id
 						LEFT JOIN institution ON met_institution_id = ins_id
-						WHERE " . $this->existsBlock($regionItemIds, "EXISTS (SELECT * FROM snapshot_clipping_region_item_geography_item WHERE C1 .geo_id = cgv_geography_id
+						WHERE " . $this->existsBlock($regionItemIds, "EXISTS (SELECT * FROM snapshot_clipping_region_item_geography_item WHERE C1.geo_id = cgv_geography_id
 																			AND cgv_clipping_region_item_id = ? AND cgv_level > 0) ") . "
 						ORDER BY geo_revision";
 				$levels = App::Db()->fetchAll($sql);

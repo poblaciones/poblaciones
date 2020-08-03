@@ -18,5 +18,7 @@ class XlsxReaderTest extends TestCase
 
 		$file = Paths::GetTestsDataLocalPath() . '/testLibros.xls';
 		$tester->testReadFile($file, 'Sheet1', 6120, 224591);
+
+		$tester->cleanUp();
 	}
 }

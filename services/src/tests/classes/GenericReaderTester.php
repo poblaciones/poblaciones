@@ -14,9 +14,15 @@ use minga\framework\FileBucket;
 class GenericReaderTester
 {
 	private $test;
+	private $bucket = null;
 	function __construct($test)
 	{
 		$this->test = $test;
+	}
+	public function cleanUp()
+	{
+		if ($this->bucket)
+			$this->bucket->Delete();
 	}
 	public function testReadFile($file, $sheetName, $expectedHeaderSize, $expectedOutSize)
 	{
@@ -24,6 +30,8 @@ class GenericReaderTester
 		$fileOnly = IO::GetFilenameNoExtension($file);
 
 		$bucket = FileBucket::Create();
+		$this->bucket = $bucket;
+
 		IO::Copy($file, $bucket->path . '/file.dat');
 
 		$reader = BaseReader::CreateReader($bucket->path, $extension);

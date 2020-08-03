@@ -12,6 +12,8 @@ import json
 import glob
 import sys
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 def main():
     if len(sys.argv) != 4:
         print ('Usage: ' + sys.argv[0] + ' headfile datafile outputfile')

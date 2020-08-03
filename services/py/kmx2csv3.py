@@ -19,6 +19,7 @@ from string import capwords
 # pip install bs4 lxml unicodecsv
 # Usage: python kmx2csv.py [kmz|kml] in_file out_path [true|false] [all|folder_name]
 
+sys.stdout.reconfigure(encoding='utf-8')
 
 def main():
 		if len(sys.argv) < 4 or len(sys.argv) > 6:
@@ -299,7 +300,17 @@ class Placemark:
 				self.extended_data = ''
 				self.extended_data_obj = None
 				self.__parse__(xml)
-
+		def get_all_chidren_names(self, node):
+			ret = []
+			for j in node.find_all(recursive=False):
+				ret.append(j.name)
+			return ret
+		def get_all_chidren_dump(self, node):
+			ret = []
+			for j in node.find_all(recursive=False):
+				value = " ('" + j.string + "')" if j else ''
+				ret.append(j.name + value)
+			return ret
 		def __parse__(self, xml):
 				self.name = xml.find('name')
 				self.description = xml.find('description')
@@ -316,16 +327,18 @@ class Placemark:
 						if not linestring is None:
 							self.places.append(LineString(linestring))
 						else:
-							multigeometry = xml.find('MultiGeometry')
-							if not multigeometry is None:
-								# faltaría implementar MultiGeometry
-								raise Exception("Multigeometry no soportado")
-							else:
-								address = xml.find('address')
-								if not address is None:
-									self.places.append(Address(address))
-								else:
-									raise Exception("Tipo de geometría no soportado")
+							self.places.append(UnrecognizedGeometry(linestring))
+						#	multigeometry = xml.find('MultiGeometry')
+						#	if not multigeometry is None:
+						#		# faltaría implementar MultiGeometry
+						#		raise Exception("Multigeometry no soportado")
+						#	else:
+						#		address = xml.find('address')
+						#		if not address is None:
+						#			self.places.append(Address(address))
+						#		else:
+						#			elements = self.get_all_chidren_dump(xml)
+						#			raise Exception("Tipo de geometría no soportado. Nodo: " + ','.join(elements))
 				ext_data = xml.find('ExtendedData')
 				self.extended_data_obj = ExtendedData(ext_data)
 				self.extended_data = self.extended_data_obj.get_data() if ext_data else ''
@@ -384,6 +397,29 @@ class Point:
 						'coordinates': [coords]
 				}
 
+class UnrecognizedGeometry:
+		def __init__(self, xml):
+				self.name = ''
+				self.description = ''
+				self.coordinates = []
+				self.__parse__(xml)
+
+		def __parse__(self, xml):
+				self.description = xml
+
+		def get_row(self):
+			row = ['', '', '']
+			row.append(self.__get_geodata())
+			return row
+
+		def __get_geodata(self):
+				return None
+
+		def get_name(self):
+				return self.name.string if self.name else ''
+
+		def get_description(self):
+				return self.description.string if self.description else ''
 
 class Address:
 		def __init__(self, xml):
@@ -432,15 +468,8 @@ class Polygon:
 
 		def __parse__(self, xml):
 				for coordinate in xml.find_all('coordinates'):
-						coordinates = []
-						for coord_strs in coordinate:
-								coord_str = coord_strs.split(' ')
-								for string_with_coordinate in coord_str:
-										string_with_coordinate = string_with_coordinate.strip('\n')
-										if string_with_coordinate != '':
-												coordinates.append(
-														Coordinate(string_with_coordinate))
-						self.rings.append(coordinates)
+						coord_result = Coordinate.parse_coordinates(coordinate);
+						self.rings.append(coord_result)
 
 		def get_row(self):
 				row = ['', '', '']
@@ -478,13 +507,8 @@ class LineString:
 
 		def __parse__(self, xml):
 				for coordinate in xml.find_all('coordinates'):
-						for coord_strs in coordinate:
-								coord_str = coord_strs.split(' ')
-								for string_with_coordinate in coord_str:
-										string_with_coordinate = string_with_coordinate.strip('\n')
-										if string_with_coordinate != '':
-												self.coordinates.append(
-														Coordinate(string_with_coordinate))
+					coord_result = Coordinate.parse_coordinates(coordinate);
+					self.coordinates.extend(coord_result)
 
 		def get_row(self):
 				row = ['', '', '']
@@ -512,16 +536,16 @@ class LineString:
 
 class Coordinate:
 		def __init__(self, coord_str):
-				try:
-						xyz = coord_str.strip().split(',')
-						self.x = xyz[0].replace(',', '.')
-						self.y = xyz[1].replace(',', '.')
-						self.z = xyz[2].replace(',', '.')
-				except:
-						xyz = coord_str.strip().split(',')
-						self.x = xyz[0].replace(',', '.')
-						self.y = xyz[1].replace(',', '.')
-						self.z = 0
+				xyz = coord_str.strip().split(',')
+				self.x = xyz[0].replace(',', '.')
+				if len(xyz) > 1:
+					self.y = xyz[1].replace(',', '.')
+				else:
+					self.y = 0
+				if len(xyz) > 2:
+					self.z = xyz[2].replace(',', '.')
+				else:
+					self.z = 0
 
 		def get_xyz_row(self):
 				return [self.x, self.y, self.z]
@@ -530,8 +554,18 @@ class Coordinate:
 				return [self.x, self.y]
 
 		def get_xy_row_float(self):
-				return [float(self.x), float(self.y)]
+				return [float(self.x) if self.x != '' else '', float(self.y) if self.y != '' else '']
 
+		def parse_coordinates(coordinateNode):
+			coordinates = []
+			for coord_strs in coordinateNode:
+				coord_str = coord_strs.split(' ')
+				for string_with_coordinate in coord_str:
+						string_with_coordinate = string_with_coordinate.strip('\n').strip('\t').strip('\r')
+						if string_with_coordinate != '':
+								coordinates.append(
+										Coordinate(string_with_coordinate))
+			return coordinates
 
 class ExtendedData:
 		def __init__(self, xml):
@@ -539,6 +573,8 @@ class ExtendedData:
 				self.__parse__(xml)
 
 		def __parse__(self, xml):
+				if not xml:
+					return
 				for adata in xml.find_all('SchemaData'):
 						for data in adata.find_all('SimpleData'):
 								if (data['name'] != None and data.string != None):

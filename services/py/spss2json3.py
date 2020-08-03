@@ -11,6 +11,8 @@ import json
 import sys
 import re
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 def main():
 
     MAX_ROWS = 5000

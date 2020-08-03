@@ -15,5 +15,7 @@ class SavReaderTest extends TestCase
 
 		$file = Paths::GetTestsDataLocalPath() . '/testRadios.sav';
 		$tester->testReadFile($file, '', 14258, 8939);
+
+		$tester->cleanUp();
 	}
 }

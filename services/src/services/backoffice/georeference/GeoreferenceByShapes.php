@@ -11,11 +11,11 @@ class GeoreferenceByShapes extends GeoreferenceBase
 		Profiling::BeginTimer();
 
 		$shapesField = $this->state->Get('shape');
-		$valid = "GeometryIsValid(GeomFromText(FixGeoJson(" . $shapesField . ")))";
+		$valid = "GeometryIsValid(GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . ")))";
 
 		$condition1 = $this->IsNullOrEmptySql($shapesField);
-		$condition2 = "RIGHT(FixGeoJson(" . $shapesField . "), 1) != CONVERT(')' USING utf8)";
-		$condition3 = "GeomFromText(FixGeoJson(" . $shapesField . ")) IS NULL ";
+		$condition2 = "RIGHT(GeoJsonOrWktToWkt(" . $shapesField . "), 1) != CONVERT(')' USING utf8)";
+		$condition3 = "ST_GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . ")) IS NULL ";
 		$condition4 = $valid . " != 100 ";
 
 		$conditions = array($condition1, $condition2, $condition3);
@@ -60,11 +60,11 @@ class GeoreferenceByShapes extends GeoreferenceBase
 		$shapesField = $this->state->Get('shape');
 
 		return "IFNULL(GetGeographyByPoint( " . $this->state->GeographyId() . ",
-											GeometryCentroid(GeomFromText(FixGeoJson(" . $shapesField . ")))),
+											GeometryCentroid(GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . ")))),
 	  								GetGeographyByPoint( " . $this->state->GeographyId() . ",
 											POINT(
-											ST_X(GeometryCentroid(GeomFromText(FixGeoJson(" . $shapesField . ")))) + 0.001,
-											ST_Y(GeometryCentroid(GeomFromText(FixGeoJson(" . $shapesField . "))))
+											ST_X(GeometryCentroid(GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . ")))) + 0.001,
+											ST_Y(GeometryCentroid(GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . "))))
 											)
 									))";
 	}

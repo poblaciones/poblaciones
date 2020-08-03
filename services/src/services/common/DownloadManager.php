@@ -129,7 +129,11 @@ class DownloadManager
 			throw new ErrorException('Tipo de archivo inválido');
 
 		$name = 'dataset' . $datasetId . $type;
-		$name .= 'r' . Str::JoinInts($clippingItemId, '-');
+		if (is_array($clippingItemId))
+			$name .= 'r' . Str::JoinInts($clippingItemId, '-');
+		else
+			$name .= 'r' . $clippingItemId;
+
 		if($urbanity)
 			$name .= 'u' . Str::ToLower($urbanity);
 

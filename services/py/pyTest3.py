@@ -4,6 +4,8 @@ import os
 import sys
 import traceback
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 def main():
 	if len(sys.argv) != 3:
 		print ('Usage: ' + sys.argv[0] + ' arg1 arg2')

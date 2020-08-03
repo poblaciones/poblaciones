@@ -20,6 +20,8 @@ class KmxReaderTest extends TestCase
 		$tester->testReadFile($file2, 'registrados en 2017', 5796, 523809);
 
 		$file3 = Paths::GetTestsDataLocalPath() . '/testOriginarias.kml';
-		$tester->testReadFile($file3, 'false', 3403, 615273);
+		$tester->testReadFile($file3, 'false', 3403, 615243);
+
+		$tester->cleanUp();
 	}
 }

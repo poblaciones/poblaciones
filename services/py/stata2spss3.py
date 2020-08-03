@@ -10,6 +10,8 @@ import pandas as pd
 import traceback
 import pyreadstat
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 def main():
 	if len(sys.argv) != 3:
 		print ('Usage: ' + sys.argv[0] + ' stafile spssfile')

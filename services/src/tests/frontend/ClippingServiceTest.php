@@ -32,7 +32,7 @@ class ClippingServiceTest extends TestCase
 		$frame = new Frame();
 		$frame->Zoom = $z;
 		$frame->Envelope =  Envelope::TextDeserialize($e);
-		$frame->ClippingRegionId = $r;
+		$frame->ClippingRegionId = ($r !== null ? array($r) : null);
 		$frame->ClippingCircle = Circle::TextDeserialize($c);
 		$frame->ClippingFeatureId = null;
 
@@ -49,9 +49,8 @@ class ClippingServiceTest extends TestCase
 		if($retHasCanvas)
 		{
 			$this->assertIsArray($ret->Canvas);
-			$this->assertIsArray($ret->Canvas);
-			$this->assertArrayHasKey('type', $ret->Canvas);
-			$this->assertIsArray($ret->Canvas['features']);
+			$this->assertArrayHasKey('type', $ret->Canvas[0]);
+			$this->assertIsArray($ret->Canvas[0]['features']);
 		}
 
 		if($retHasEnvelope)

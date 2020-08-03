@@ -11,6 +11,7 @@ import traceback
 
 from stata3writer import StataWriter117 as statawriter
 
+sys.stdout.reconfigure(encoding='utf-8')
 
 def main():
 	if len(sys.argv) != 3:
