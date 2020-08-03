@@ -1,4 +1,5 @@
 import h from '@/public/js/helper';
+import arr from '@/common/js/arr';
 
 export default ClippingRouter;
 
@@ -28,7 +29,7 @@ ClippingRouter.prototype.ToRoute = function () {
 	if (segmentedMap.Clipping.FrameHasNoClipping() === false || clippingLevel !== '') {
 		ret.push(['l', clippingLevel, '']);
 		if (segmentedMap.frame.ClippingRegionId) {
-			ret.push(['r', segmentedMap.frame.ClippingRegionId]);
+			ret.push(['r', segmentedMap.frame.ClippingRegionId.join(',')]);
 		}
 		if (segmentedMap.frame.ClippingFeatureId) {
 			ret.push(['f', segmentedMap.frame.ClippingFeatureId]);
@@ -71,7 +72,8 @@ ClippingRouter.prototype.clippingFromRoute = function (args) {
 	if (!args) {
 		args = [];
 	}
-	var clippingRegionId = h.getSafeValue(args, 'r', null);
+	var clippingRegionIdvalue = h.getSafeValue(args, 'r', null);
+	var clippingRegionId = (clippingRegionIdvalue ? arr.ToIntArray(clippingRegionIdvalue.split(',')) : null);
 	var clippingFeatureId = h.getSafeValue(args, 'f', null);
 	var clippingCircle = this.getClippingCircle(h.getSafeValue(args, 'c', null));
 	var clippingLevelName = h.getSafeValue(args, 'l', null);
@@ -86,7 +88,7 @@ ClippingRouter.prototype.clippingFromRoute = function (args) {
 };
 
 ClippingRouter.prototype.clippingChanged = function (frame1, clipping) {
-	if (frame1.ClippingRegionId !== clipping.ClippingRegionId ||
+	if (!arr.AreEquals(frame1.ClippingRegionId, clipping.ClippingRegionId) ||
 		frame1.ClippingRegionId !== clipping.ClippingLevelName || /* TODO Bugfix */
 		frame1.ClippingFeatureId !== clipping.ClippingFeatureId) {
 		return true;

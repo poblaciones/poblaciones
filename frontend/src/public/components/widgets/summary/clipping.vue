@@ -1,32 +1,62 @@
 <template>
 	<div>
-		<div v-if="hasSummary && clipping.Region.Summary.Name && clipping.IsUpdating !== '1'" class="clippingBlock cards">
-			<mp-close-button v-on:click="removeRegion" title="Quitar zona seleccionada" class="exp-hiddable-block" />
+		<div v-if="hasSummaryName" class="clippingBlock cards">
+			<div v-if="!Use.UseMultiselect">
+				<div v-for="region in clipping.Region.Summary.Regions" :key="region.Id">
+					<mp-close-button v-on:click="removeRegion(region)" title="Quitar zona seleccionada" class="exp-hiddable-block" />
 
-			<div class="clippingBlockHeader">{{ clipping.Region.Summary.TypeName }}</div>
-			<div class="hand" v-on:click="fitRegion" style="position: relative; margin-right: 20px;">
-				<span style="font-size: 2em;">{{ clipping.Region.Summary.Name }}</span>
+					<div class="clippingBlockHeader" style="font-size: 16px; line-height: 32px; margin-top: -2px;" :class="getColorMuted()">{{ region.TypeName }}</div>
+					<div class="hand" :class="getColorMuted()" v-on:click="fitRegion(region)" style="position: relative; line-height: 32px;margin-right: 20px;">
+						<span style="font-size: 2em;">{{ region.Name }}</span>
 
+					</div>
+					<div class="exp-hiddable-block" style="top: 40px;right: 15px; position: absolute; font-size: 1.75em;">
+						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id"
+																		 :useIcon="true" :region="region" :metadata="region.Metadata" />
+					</div>
+				</div>
 			</div>
-			<ClippingSource v-if="clipping.Region.Summary.Metadata && clipping.Region.Summary.Metadata.Id"
-											:useIcon="true" :clipping="clipping" :metadata="clipping.Region.Summary.Metadata" />
+			<div v-else style="margin-right: -.32em" :style="'font-size: ' + clippingElementSize">
+
+				<mp-close-button v-on:click="clickQuitar" title="Quitar selección" class="exp-hiddable-block" />
+
+				<button type="button" class="close lightButton exp-hiddable-block"
+								title="Zoom a la selección" v-on:click="fitSelection">
+					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px; margin-right: 2px;" />
+				</button>
+
+				<div v-for="region in clipping.Region.Summary.Regions" :key="region.Id" :class="getColorMuted()" class="clippingElement">
+					<div style="position: relative; padding-right: 15px; ">
+						<div v-on:click="fitRegion(region)" v-if="clipping.Region.Summary.Regions.length < 8" class="clippingBlockHeader hand">{{ region.TypeName }}</div>
+						<div v-on:click="fitRegion(region)" class="hand">{{ region.Name }}</div>
+						<mp-close-button v-on:click="removeRegion(region)" title="Quitar zona seleccionada"
+														 style="float: none; top: 0; margin-top: -2px; position: absolute; right: -2px; font-size: .75em" class="exp-hiddable-block" />
+						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id" style="position: absolute;
+										    bottom: -.4em; right: -1px"
+																		 :region="region" :metadata="region.Metadata" />
+					</div>
+				</div>
+			</div>
 		</div>
 		<div v-if="clipping.Region.Summary && selectedLevel()">
 			<h3 class="title">
-			<div class="summaryBlock">
-				<div class="summaryRow">
-					Habitantes <span class="pull-right" :class="getMuted()">
-						<animatedNumber :value="population" /></span>
+				<div class="summaryBlock">
+					<div class="summaryRow">
+						Habitantes <span class="pull-right" :class="getMuted()">
+							<animatedNumber :value="population" />
+						</span>
+					</div>
+					<div class="summaryRow">
+						Hogares <span class="pull-right" :class="getMuted()">
+							<animatedNumber :value="households" />
+						</span>
+					</div>
+					<div class="summaryRow">
+						Área (km<sup>2</sup>) <span class="pull-right" :class="getMuted()">
+							<animatedNumber :value="areaKm2" format="km" />
+						</span>
+					</div>
 				</div>
-				<div class="summaryRow">
-					Hogares <span class="pull-right" :class="getMuted()">
-						<animatedNumber :value="households" /></span>
-				</div>
-				<div class="summaryRow">
-					Área (km<sup>2</sup>) <span class="pull-right" :class="getMuted()">
-						<animatedNumber :value="areaKm2" format="km" /></span>
-				</div>
-			</div>
 			</h3>
 
 			<div class="sourceRow">
@@ -45,12 +75,14 @@
 
 <script>
 import ClippingSource from './clippingSource';
+import ClippingSelectionSource from './clippingSelectionSource';
 import AnimatedNumber from '@/public/components/controls/animatedNumber.vue';
 
 export default {
 	name: 'clipping',
 	components: {
 		ClippingSource,
+		ClippingSelectionSource,
 		AnimatedNumber
 	},
 	props: [
@@ -66,11 +98,27 @@ export default {
 		hasSummary() {
 			return this.clipping && this.clipping.Region && this.clipping.Region.Summary;
 		},
+		hasSummaryName() {
+			return this.hasSummary && this.clipping.Region.Summary.Regions &&
+				this.clipping.Region.Summary.Regions.length > 0 && this.clipping.Region.Summary.Regions[0].Name;
+		},
 		population() {
 			if(this.hasSummary) {
 				return this.clipping.Region.Summary.Population;
 			} else {
 				return 0;
+			}
+		},
+		Use() {
+			return window.Use;
+		},
+		clippingElementSize() {
+			if (this.clipping.Region.Summary.Regions.length === 3) {
+				return '2rem';
+			} else if (this.clipping.Region.Summary.Regions.length > 3) {
+				return '1.75rem';
+			} else {
+				return '2.5rem';
 			}
 		},
 		households() {
@@ -96,6 +144,13 @@ export default {
 				return '';
 			}
 		},
+		getColorMuted() {
+			if (this.clipping.IsUpdating === '1') {
+				return ' color-muted';
+			} else {
+				return '';
+			}
+		},
 		getActive(index) {
 			return {
 				'active': this.clipping.Region.SelectedLevelIndex === index,
@@ -112,23 +167,44 @@ export default {
 		falseChangeClipping(index) {
 			this.clipping.Region.SelectedLevelIndex = index;
 		},
-		removeRegion(e) {
-			e.preventDefault();
+		clickQuitar() {
 			if (window.SegMap.Clipping.FrameHasClippingCircle()) {
 				window.SegMap.Clipping.ResetClippingCircle();
 			} else {
 				window.SegMap.Clipping.ResetClippingRegion();
 			}
 		},
-		fitRegion(e) {
-			e.preventDefault();
-			window.SegMap.Clipping.FitCurrentRegion();
+		fitSelection() {
+			window.SegMap.Clipping.FitEnvelope(this.clipping.Region.Envelope);
+		},
+		removeRegion(region) {
+			if (window.SegMap.Clipping.FrameHasClippingCircle()) {
+				window.SegMap.Clipping.ResetClippingCircle();
+			} else {
+				window.SegMap.Clipping.ResetClippingRegion(region.Id);
+			}
+		},
+		fitRegion(region) {
+			window.SegMap.Clipping.FitEnvelope(region.Envelope);
 		},
 	},
 };
 </script>
 
 <style scoped>
+	.clippingElement {
+		display: inline-block;
+		margin-right: .32em;
+		margin-bottom: .32em;
+		border: 1px solid #efefef;
+		min-width: 5em;
+		background-color: #efefef;
+		line-height: 1.4em;
+		color: #444444;
+		border-radius: .2em;
+		padding: .32em .32em .16em .32em;
+		position: relative
+	}
 
 .clippingBlock
 {
@@ -137,8 +213,8 @@ export default {
 }
 .clippingBlockHeader
 {
-	font-size: 16px;
-	line-height: 1.8em;
+	line-height: 1.2em;
+	font-size: .52em;
 }
 </style>
 

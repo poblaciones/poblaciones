@@ -129,8 +129,7 @@ class DownloadManager
 			throw new ErrorException('Tipo de archivo inválido');
 
 		$name = 'dataset' . $datasetId . $type;
-		if($clippingItemId != 0)
-			$name .= 'r' . $clippingItemId;
+		$name .= 'r' . Str::JoinInts($clippingItemId, '-');
 		if($urbanity)
 			$name .= 'u' . Str::ToLower($urbanity);
 
@@ -196,13 +195,16 @@ class DownloadManager
 		throw new ErrorException('Tipo de descarga inválido');
 	}
 
-	private static function ValidateClippingItem($clippingItemId)
+	private static function ValidateClippingItem($clippingItemIds)
 	{
-		if($clippingItemId != 0)
+		if($clippingItemIds)
 		{
-			$model = new ClippingRegionItemModel();
-			if(is_numeric($clippingItemId) == false || $model->Exists($clippingItemId) == false)
-				throw new ErrorException('ClippingRegionItem no encontrada');
+			foreach($clippingItemIds as $clippingItemId)
+			{
+				$model = new ClippingRegionItemModel();
+				if(is_numeric($clippingItemId) == false || $model->Exists($clippingItemId) == false)
+					throw new ErrorException('ClippingRegionItem no encontrada');
+			}
 		}
 	}
 

@@ -218,8 +218,8 @@ export default {
 			else {
 				if (this.splitPanels === null) {
 					this.splitPanels = Split(['#panMain', '#panRight'], {
-						sizes: [75, 25],
-						minSizes: [10, 300],
+						sizes: [70, 30],
+						minSizes: [10, 350],
 						expandToMin: true,
 						gutterSize: 5
 					});
@@ -544,7 +544,28 @@ a:hover {
 	line-height: 1.42857143;
 	color: #252422;
 }
-
+.filterElement-close {
+	font-size: 16px;
+  margin-left: 1px!important;
+  margin-right: -4px!important;
+  margin-top: -1px!important;
+}
+.filterElement {
+	color: #444444;
+	font-weight: 300;
+	font-size: 13px;
+	padding: 2px 6px;
+	margin-right: 10px;
+	background-color: #efefef;
+	margin-bottom: -3px;
+	display: inline-block;
+	border-radius: 4px;
+	border: 1px solid #efefef;
+	text-transform: uppercase;
+}
+.color-muted {
+	color: #999!important;
+}
 .mapLabelsSat {
 	text-shadow: .75px .75px 1px #000, -.75px -1px 1px #000, -.75px .75px 1px #000, .75px -1px 1px #000, .75px .75px 1px #000, -.75px -1px 1px #000, -.75px 1px 1px #000, .75px -.75px 1px #000 !important;
 }

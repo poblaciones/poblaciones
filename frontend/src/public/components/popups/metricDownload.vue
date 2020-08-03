@@ -32,7 +32,7 @@
 								<option v-for="(level, index) in version.Levels" :key="level.Id" :value="index">{{ level.Name }}</option>
 							</select>
 							<div v-if="useFilter && levelOverflows" class="warningBox">
-								Las áreas del nivel '{{ level.Name }}' pueden exceder a la región '{{ clipping.clipping.Region.Summary.Name }}'. Cuando esto
+								Las áreas del nivel '{{ level.Name }}' pueden exceder a las regiones seleccionadas. Cuando esto
 								suceda, las áreas parcialmente coincidentes serán incluidas en forma completa en la descarga.
 							</div>
 						</td>
@@ -49,13 +49,16 @@
 							</div>
 						</td>
 					</tr>
-					<tr v-if="clipping.clipping.Region.Summary.Name">
+					<tr v-if="useFilter">
 						<td>Selección:</td>
 						<td>
-							<div>
-								<a class="btn btn-social btn-dropbox" v-if="useFilter" v-on:click="useFilter = !useFilter">
-									<close-icon title="Quitar" /> {{ clipping.clipping.Region.Summary.Name }}
-								</a>
+							<div style="margin-bottom: -7px;">
+								<div v-for="region in regions" :key="region.Id"
+										 class="filterElement" style="margin-bottom: 7px;">
+									{{ region.Name }}
+									<mp-close-button v-on:click="removeFilter(region.Id)" title="Quitar filtro"
+																	 class="exp-hiddable-block filterElement-close" />
+								</div>
 							</div>
 						</td>
 					</tr>
@@ -108,7 +111,6 @@
 import axios from 'axios';
 import h from '@/public/js/helper';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
-import CloseIcon from 'vue-material-design-icons/Close.vue';
 import creativeCommons from '@/public/components/controls/creativeCommons.vue';
 import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
 import err from '@/common/js/err';
@@ -126,14 +128,13 @@ export default {
     creativeCommons,
     DownloadIcon,
 		FilePdfIcon,
-    CloseIcon,
-		Modal
+    Modal
 	},
 	data() {
 		return {
 			metric: null,
+			regions: [],
 			visibleUrl: true,
-			useFilter: true,
 			progress: null,
 			downloadLevel: 0,
 			downloadUrbanity: 'N'
@@ -151,6 +152,9 @@ export default {
 		},
 		Use() {
 			return window.Use;
+		},
+		useFilter() {
+			return this.regions && this.regions.length > 0;
 		},
 		hasUrbanityFilter() {
 			return this.Use.UseUrbanity && this.level.HasUrbanity;
@@ -172,7 +176,10 @@ export default {
 	methods: {
 		show(metric) {
 			this.metric = metric;
-			this.useFilter = true;
+			this.regions = [];
+			if (Array.isArray(this.clipping.clipping.Region.Summary.Regions)) {
+				this.regions = this.regions.concat(this.clipping.clipping.Region.Summary.Regions);
+			}
 			this.downloadLevel = this.version.SelectedLevelIndex;
 			this.downloadUrbanity = this.metric.properties.SelectedUrbanity;
 			this.$refs.dialog.show();
@@ -285,14 +292,17 @@ export default {
 		stepDownloadUrl() {
 			return window.host + '/services/download/StepDownload';
 		},
+		removeFilter(regionId) {
+			arr.RemoveById(this.regions, regionId);
+		},
 		urlArgs(type) {
 			var clippingRegionId = null;
 			var circle = null;
 			if (this.useFilter) {
 				if (this.clipping.FrameHasClippingCircle()) {
 					circle = h.getCircleParam(this.clipping.frame.ClippingCircle);
-				} else if (this.clipping.FrameHasClippingRegionId()) {
-					clippingRegionId = this.clipping.clipping.Region.Summary.Id;
+				} else if (this.regions) {
+					clippingRegionId = arr.GetIds(this.regions).join(',');
 				}
 			}
 			var urbanity = (this.level.HasUrbanity ? this.downloadUrbanity : null);

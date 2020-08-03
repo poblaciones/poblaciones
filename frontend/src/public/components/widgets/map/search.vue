@@ -10,7 +10,7 @@
 		<transition name="fade">
 		<div class='auto' id="auto" v-if="hasSelected()" v-on-clickaway="escapeKey">
 			<ul>
-				<li v-on:click="select(item)" v-for="(item, index) in autolist" :key="item.Id" :class="item.Class"
+				<li v-on:click="select($event, item)" v-for="(item, index) in autolist" :key="item.Id" :class="item.Class"
 						v-on:mouseover="over(item, index)"
 						v-on:mouseout="out(item, index)">
 					<div v-if="item.Type === 'L'">
@@ -99,12 +99,12 @@ export default {
 			item.class = 'lihover';
 			this.selindex = index;
 		},
-		select(item) {
+		select(event, item) {
 			if (item.Type === 'P') {
 				window.SegMap.SetMyLocation(item);
 			}
 			else {
-				window.SegMap.SelectId(item.Type, item.Id, item.Lat, item.Lon);
+				window.SegMap.SelectId(item.Type, item.Id, item.Lat, item.Lon, event.ctrlKey);
 			}
 			this.text = '';
 			this.autolist = [];

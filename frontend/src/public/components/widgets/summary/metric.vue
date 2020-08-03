@@ -12,12 +12,11 @@
 			<h4 class="title">
 				{{ metric.properties.Metric.Name }}
 			</h4>
-			<div class="filterElement" v-if="hasUrbanityFilter && urbanity != 'N'"
+			<div class="filterElement" style="margin-top: 9px; 	margin-left: -3px;" v-if="hasUrbanityFilter && urbanity != 'N'"
 					 :title="getUrbanityTextTooltip">
 				{{ getUrbanityTextActive }}
 				<mp-close-button v-on:click="changeUrbanity('N')" title="Quitar filtro"
-												 style="font-size: 16px; margin-top: -1px; margin-left: 2px;"
-												 class="exp-hiddable-block" />
+												 class="exp-hiddable-block filterElement-close" />
 			</div>
 
 			<MetricVariables :metric="metric" />
@@ -117,20 +116,6 @@ export default {
 {
 	padding-top: 1px;
 	cursor: default;
-}
-.filterElement {
-	color: #888888;
-	font-weight: 300;
-	font-size: 13px;
-	padding: 2px 6px;
-	margin-top: 9px;
-	background-color: #dddddd;
-	margin-left: -3px;
-	margin-bottom: -3px;
-	display: inline-block;
-	border-radius: 4px;
-	border: 1px solid #dddddd;
-	text-transform: uppercase;
 }
 
 .rankingBox {

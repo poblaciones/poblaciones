@@ -84,7 +84,7 @@ App::$app->get('/services/download/StartDownload', function (Request $request) {
 	$datasetId = Params::GetInt('d');
 
 	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
-	$clippingItemId = Params::GetInt('r');
+	$clippingItemId = Params::GetIntArray('r');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 
 	$type = Params::Get('t');
@@ -103,7 +103,7 @@ App::$app->get('/services/download/StepDownload', function (Request $request) {
 App::$app->get('/services/download/TestFile', function (Request $request) {
 	$controller = new services\DownloadService();
 	$datasetId = Params::GetInt('d');
-	$clippingItemId = Params::GetInt('r');
+	$clippingItemId = Params::GetIntArray('r');
 	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 
@@ -124,7 +124,7 @@ App::$app->get('/services/download/TestFile', function (Request $request) {
 App::$app->get('/services/download/GetFile', function (Request $request) {
 	$datasetId = Params::GetIntMandatory('d');
 	$workId = Params::GetIntMandatory('w');
-	$clippingItemId = Params::GetInt('r');
+	$clippingItemId = Params::GetIntArray('r');
 	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
  	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 

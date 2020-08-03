@@ -35,6 +35,20 @@ class Envelope extends BaseMapModel
 		return $ret;
 	}
 
+	public function Merge($envelope)
+	{
+		$min = new Coordinate();
+		$min->Lat = min($this->Min->Lat, $envelope->Min->Lat);
+		$min->Lon = min($this->Min->Lon, $envelope->Min->Lon);
+
+		$max = new Coordinate();
+		$max->Lat = max($this->Max->Lat, $envelope->Max->Lat);
+		$max->Lon = max($this->Max->Lon, $envelope->Max->Lon);
+
+		$ret = new Envelope($min, $max);
+		return $ret;
+	}
+
 	public static function FromDb($field)
 	{
 		$coords = Str::PolygonToCoordinates($field);

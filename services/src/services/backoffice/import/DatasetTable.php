@@ -247,8 +247,9 @@ class DatasetTable
 
 		// TEXTO
 		if ($fieldWidth > 255)
-			return "TEXT";
-		return "VARCHAR(" . $fieldWidth . ")";
+			return "MEDIUMTEXT";
+		else
+			return "VARCHAR(" . $fieldWidth . ")";
 	}
 }
 

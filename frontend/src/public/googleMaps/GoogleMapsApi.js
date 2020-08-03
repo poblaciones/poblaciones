@@ -147,6 +147,7 @@ GoogleMapsApi.prototype.BindEvents = function () {
 			loc.segmentedMap.BoundsChanged();
 		}
 	});
+
 	this.gMap.addListener('idle', function () {
 		loc.idle = true;
 	});
@@ -300,7 +301,7 @@ GoogleMapsApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch) {
 	if (exactMatch) {
 		envelope = envelopeOrig;
 	} else {
-		envelope = h.scaleEnvelope(envelopeOrig, .5);
+		envelope = h.scaleEnvelope(envelopeOrig, .75);
 	}
 	var min = new this.google.maps.LatLng(envelope.Min.Lat, envelope.Min.Lon);
 	var max = new this.google.maps.LatLng(envelope.Max.Lat, envelope.Max.Lon);
@@ -403,7 +404,7 @@ GoogleMapsApi.prototype.UpdateClippingStyle = function () {
 	});
 };
 
-GoogleMapsApi.prototype.SetClippingCanvas = function (canvas) {
+GoogleMapsApi.prototype.SetClippingCanvas = function (canvasList) {
 	this.ClearClippingCanvas();
 
 	var zeroItem = [
@@ -416,21 +417,28 @@ GoogleMapsApi.prototype.SetClippingCanvas = function (canvas) {
 		[-180, 90],
 		[0, 90]
 	];
-	if (canvas.features[0].geometry.type === 'MultiPolygon') {
-		var polygons = canvas.features[0].geometry.coordinates;
-		var coords = [zeroItem];
-		for (var p = 0; p < polygons.length; p++) {
-			for (var i = 0; i < polygons[p].length; i++) {
-				coords.push(polygons[p][i]);
+	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] }};
+	featureMask.geometry.coordinates.push(zeroItem);
+
+	for (var c = 0; c < canvasList.length; c++) {
+		var canvas = canvasList[c];
+		if (canvas.features[0].geometry.type === 'MultiPolygon') {
+			var polygons = canvas.features[0].geometry.coordinates;
+			for (var p = 0; p < polygons.length; p++) {
+				for (var i = 0; i < polygons[p].length; i++) {
+					featureMask.geometry.coordinates.push(polygons[p][i]);
+				}
 			}
+		} else {
+			// polygon
+			featureMask.geometry.coordinates = featureMask.geometry.coordinates.concat(
+													canvas.features[0].geometry.coordinates);
 		}
-		canvas.features[0].geometry.coordinates = coords;
-		canvas.features[0].geometry.type = 'Polygon';
-	} else {
-		canvas.features[0].geometry.coordinates.unshift(zeroItem);
 	}
+	var mask = { type: 'FeatureCollection', features: [featureMask] };
+
 	this.UpdateClippingStyle();
-	this.clippingCanvas = this.gMap.data.addGeoJson(canvas);
+	this.clippingCanvas = this.gMap.data.addGeoJson(mask);
 };
 
 GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid, offset) {

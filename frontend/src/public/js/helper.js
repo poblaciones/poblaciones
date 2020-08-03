@@ -507,7 +507,7 @@ module.exports = {
 			z: frame.Zoom,
 		};
 		if(frame.ClippingRegionId) {
-			ret.r = frame.ClippingRegionId;
+			ret.r = (frame.ClippingRegionId ? frame.ClippingRegionId.join(',') : null);
 		}
 		if(this.hasCircle(frame.ClippingCircle)) {
 			ret.c = this.getCircleParam(frame.ClippingCircle);

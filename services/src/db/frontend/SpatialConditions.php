@@ -16,14 +16,14 @@ class SpatialConditions
 		$this->preffix = $preffix;
 	}
 
-	public function CreateRegionQuery($clippingRegionId, $levelId = null)
+	public function CreateRegionQuery($clippingRegionIds, $levelId = null)
 	{
 		$from = "snapshot_clipping_region_item_geography_item ";
 
 		$where = $this->preffix . "_geography_item_id = cgv_geography_item_id AND "
-			. " cgv_clipping_region_item_id = ? ";
+			. " cgv_clipping_region_item_id IN (" . Str::JoinInts($clippingRegionIds) . ") ";
 
-		$params = array($clippingRegionId);
+		$params = array();
 
 		if ($levelId != null)
 		{

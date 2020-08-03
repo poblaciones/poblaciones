@@ -18,7 +18,8 @@ class MapSettings
 	public $ContentServerWorks = [];
 
 	public $UseCalculated = false;
-	public $UseKmz = false;
+
+	public $UseMultiselect = false;
 	public $UseGradients = false;
 	public $UseFavorites = false;
 

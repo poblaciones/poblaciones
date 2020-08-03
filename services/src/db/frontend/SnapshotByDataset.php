@@ -24,9 +24,9 @@ class SnapshotByDataset extends BaseModel
 		$this->spatialConditions = new SpatialConditions('sna');
 	}
 
-	public function GetMetricVersionSummaryByRegionId($metricVersionId, $variables, $hasSummary, $geographyId, $urbanity, $clippingRegionId, $circle, $datasetType)
+	public function GetMetricVersionSummaryByRegionId($metricVersionId, $variables, $hasSummary, $geographyId, $urbanity, $clippingRegionIds, $circle, $datasetType)
 	{
-		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionId, $geographyId);
+		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
 
 		if ($circle != null)
 			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType, $metricVersionId, $geographyId);
@@ -128,9 +128,9 @@ class SnapshotByDataset extends BaseModel
 		return $this->ExecTileDataQuery($metricVersionId, $variables, $geographyId, $urbanity, $envelope, $datasetType, $hasDescriptions);
 	}
 
-	public function GetMetricVersionTileDataByRegionId($metricVersionId, $variables, $geographyId, $urbanity, $envelope, $clippingRegionId, $circle, $datasetType, $hasDescriptions)
+	public function GetMetricVersionTileDataByRegionId($metricVersionId, $variables, $geographyId, $urbanity, $envelope, $clippingRegionIds, $circle, $datasetType, $hasDescriptions)
 	{
-		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionId, $geographyId);
+		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
 
 		if ($circle != null)
 			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
@@ -221,9 +221,9 @@ class SnapshotByDataset extends BaseModel
 		return $ret;
 	}
 
-	public function GetMetricVersionRankingByRegionId($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionId, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
+	public function GetMetricVersionRankingByRegionId($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionIds, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
-		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionId, $geographyId);
+		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
 
 		if ($circle != null)
 			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);

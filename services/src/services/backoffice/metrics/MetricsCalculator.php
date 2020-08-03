@@ -273,7 +273,7 @@ class MetricsCalculator
 	private function GetValueLabelsWhere($source)
 	{
 		if(count($source['ValueLabelIds']) > 0)
-			return ' AND sna_' . $source['VariableId'] . '_value_label_id IN (' . implode(',', array_map('intval', $source['ValueLabelIds'])) . ')';
+			return ' AND sna_' . $source['VariableId'] . '_value_label_id IN (' . Str::JoinInts($source['ValueLabelIds']) . ')';
 		else
 			return '';
 	}

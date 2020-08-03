@@ -19,6 +19,25 @@ module.exports = {
 		}
 		return (index >= 0);
 	},
+	ToIntArray(arr) {
+		return arr.map(function (x) {
+			return parseInt(x, 10);
+		});
+	},
+	GetIds(arr) {
+		return arr.map(function (x) {
+			return x.Id;
+		});
+	},
+	AreEquals(a, b) {
+		if (a === b) return true;
+		if (a == null || b == null) return false;
+		if (a.length !== b.length) return false;
+		for (var i = 0; i < a.length; ++i) {
+			if (a[i] !== b[i]) return false;
+		}
+		return true;
+	},
 	RemoveByKey(arr, key) {
 		if (arr.hasOwnProperty(key)) {
 			delete arr[key];

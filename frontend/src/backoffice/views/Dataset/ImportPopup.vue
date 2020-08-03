@@ -11,7 +11,7 @@
 						<li>Archivos Excel (.xls, xlsx)</li>
 						<li>Archivos de datos de SPSS (.sav)</li>
 						<li>Archivos de texto separados por comas (.csv)</li>
-						<li v-if="UseKmz">Archivos de texto estructurados en tags (.kml/.kmz)</li>
+						<li>Archivos de texto estructurados en tags (.kml/.kmz)</li>
 					</ul>
 					<!--
 					https://poblaciones.org/wp-content/uploads/2019/11/Poblaciones-Como-convertir-shapefiles-a-CSV-con-QGIS.pdf
@@ -33,7 +33,7 @@
 						<md-button style="float:left;background-color: #ececec;" v-if="hasFiles" title="Quitar" class="md-icon-button" v-on:click="clear">
 							<md-icon>close</md-icon>
 						</md-button>
-						<div class="messageBlock" v-if="verifying">Verificando archivo...</div>
+						<div class="messageBlock" v-if="verifying">Analizando archivo...</div>
 						<div class="messageBlock" v-if="sheetName !== null && sheetName !== '' && sheetName !== false">Dataset: {{ sheetName }}</div>
           </div>
 					<div v-if="Dataset !== null && Dataset.Columns !== null && Dataset.Columns.length > 0" class="md-layout-item md-size-100" style="margin-top: -10px; margin-bottom: 12px;">
@@ -114,9 +114,6 @@ export default {
     Dataset() {
       return (this.forceCreateNewDataset ? null : window.Context.CurrentDataset);
 		},
-		UseKmz() {
-			return window.Context.Configuration.UseKmz;
-		}
   },
   methods: {
     getCreateFileUrl() {
@@ -191,7 +188,8 @@ export default {
     afterComplete(file) {
       this.sending = false;
       this.hasFiles = true;
-      if (this.extension == 'kml' || this.extension == 'kmz') {
+			if (this.extension == 'kml' || this.extension == 'kmz' ||
+				this.extension == 'xlsx' || this.extension == 'xls') {
         this.verifyDatasets(this.getBucketId(), this.extension);
       }
     },

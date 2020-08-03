@@ -19,7 +19,7 @@ class Frame
 		$ret = new Frame();
 		$ret->Zoom = Params::GetInt('z', null);
 		$ret->Envelope =  Envelope::TextDeserialize(Params::Get('e'));
-		$ret->ClippingRegionId = Params::GetInt('r');
+		$ret->ClippingRegionId = Params::GetIntArray('r');
 		$ret->ClippingCircle = Circle::TextDeserialize(Params::Get('c'));
 		$ret->ClippingFeatureId = Params::GetInt('f');
 
@@ -28,7 +28,7 @@ class Frame
 
 	public function GetKeyNoFeature()
 	{
-		return ($this->ClippingRegionId != null ? $this->ClippingRegionId : "0") . "@" .
+		return $this->ClippingRegionPart() . "@" .
 			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "");
 	}
 
@@ -37,13 +37,19 @@ class Frame
 		if ($this->ClippingFeatureId != null)
 			return $this->ClippingFeatureId;
 		else
-			return ($this->ClippingRegionId != null ? $this->ClippingRegionId : "0") . "@" .
+			return $this->ClippingRegionPart() . "@" .
 			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "");
 	}
-
+	private function ClippingRegionPart()
+	{
+		if (!$this->ClippingRegionId || sizeof($this->ClippingRegionId) === 0)
+			return "0";
+		else
+			return implode($this->ClippingRegionId, ",");
+	}
 	public function GetClippingKey()
 	{
-		return ($this->ClippingRegionId != null ? $this->ClippingRegionId : "0") . "@" .
+		return $this->ClippingRegionPart() . "@" .
 			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "") . "@" .
 			($this->ClippingFeatureId != null ? $this->ClippingFeatureId : "");
 	}
@@ -52,7 +58,7 @@ class Frame
 		if ($this->ClippingFeatureId != null)
 			return $this->ClippingFeatureId;
 		else if ($this->ClippingRegionId != null || $this->ClippingCircle != null)
-			return ($this->ClippingRegionId != null ? $this->ClippingRegionId : "0") . "@" .
+			return $this->ClippingRegionPart() . "@" .
 			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "");
 		else
 			return "0@@" . $this->Envelope->TextSerialize();

@@ -1,6 +1,6 @@
 <template>
 	<Modal title="Fuente" ref="showFuente" :showCancel="false" :showOk="false">
-		<div>
+		<div v-if="metadata">
 			<div>
 				<table class="localTable">
 					<tbody>
@@ -81,12 +81,16 @@ import Modal from '@/public/components/popups/modal';
 export default {
 	name: 'clippingMetadataPopup',
 	props: [
-		'metadata',
 	],
 	components: {
     creativeCommons,
 		FilePdfIcon,
 		Modal
+	},
+	data() {
+		return {
+			metadata: null
+		};
 	},
   methods: {
 		resolveFileUrl(file) {
@@ -98,7 +102,8 @@ export default {
 				return '#';
 			}
 		},
-		show() {
+		show(metadata) {
+			this.metadata = metadata;
 			this.$refs.showFuente.show();
 		},
 		citationAPA(metadata) {

@@ -12,6 +12,7 @@
 		</div>
 		<div>
 			<WorkMetadata ref="showFuente" />
+			<ClippingMetadata ref="showClippingMetadata" />
 			<MetricDownload ref="showDescargar" />
 			<MetricCustomize ref="showCustomize" />
 			<WaitMessage ref="showWaitMessage" />
@@ -24,6 +25,7 @@
 import Metric from '@/public/components/widgets/summary/metric';
 import Clipping from '@/public/components/widgets/summary/clipping';
 import WorkMetadata from '@/public/components/popups/workMetadata';
+import ClippingMetadata from '@/public/components/popups/clippingMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
 import WaitMessage from '@/public/components/popups/waitMessage';
 import AddMetric from '@/public/components/popups/addMetric';
@@ -39,6 +41,7 @@ export default {
 		Clipping,
 		AddMetric,
 		WorkMetadata,
+		ClippingMetadata,
 		WaitMessage,
 		MetricCustomize,
 		MetricDownload,
@@ -64,6 +67,7 @@ export default {
 	mounted() {
 		window.Popups.MetricDownload = this.$refs.showDescargar;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
+		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
 		window.Popups.WaitMessage = this.$refs.showWaitMessage;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AddMetric = this.$refs.addMetric;

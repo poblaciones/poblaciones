@@ -7,15 +7,12 @@ use minga\framework\Log;
 use minga\framework\Str;
 use minga\framework\FileBucket;
 use minga\framework\ErrorException;
-use minga\framework\System;
 
-use PhpOffice\PhpSpreadsheet\Writer\Csv;
-use helena\services\backoffice\import\PhpSpreadSheetCsv;
+use helena\classes\readers\BaseReader;
 
 use helena\services\common\BaseService;
 use helena\classes\Paths;
 use helena\classes\App;
-use helena\classes\CsvToJson;
 
 use helena\entities\backoffice\DraftDataset;
 
@@ -25,8 +22,6 @@ use helena\services\backoffice\import\DatasetTable;
 use helena\services\backoffice\import\DatasetColumns;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\entities\backoffice as entities;
-
-use helena\classes\Python;
 
 
 class ImportService extends BaseService
@@ -39,7 +34,8 @@ class ImportService extends BaseService
 
 	private $state;
 
-	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $sheetName){
+	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $sheetName)
+	{
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetDatasetDataChanged($dataset->getWork()->getId());
 
@@ -47,38 +43,26 @@ class ImportService extends BaseService
 		$this->PrepareNewState($datasetId, $keepLabels, $bucketId);
 		$this->state->SetTotalSteps(self::STEP_END);
 		$fileExtension = Str::ToLower($fileExtension);
-		if ($fileExtension == "csv" || $fileExtension == "txt"
-				|| $fileExtension == "xlsx"  || $fileExtension == "xls")
-		{
-			if ($fileExtension == "xlsx"  || $fileExtension == "xls")
-			{
-				$this->ExcelToCsv($fileExtension, $bucket);
-			}
-			return $this->CSVtoJson($bucket);
-		}
-		else if ($fileExtension == "sav")
-		{
-			return $this->SPSStoJson($bucket);
-		}
-		else if ($fileExtension == "kml" || $fileExtension == "kmz")
-		{
-			$generate_files = true;
-			$this->ConvertKMX($bucket, $fileExtension, $sheetName);
-			return $this->CSVtoJson($bucket);
-		}
 
-		throw new ErrorException('La extensión del archivo debe ser SAV, CSV, KML o KMZ. Extensión recibida: ' . $fileExtension);
+		// obtiene la instancia del reader
+		$reader = BaseReader::CreateReader($bucket->path, $fileExtension);
+
+		// Ejecuta los dos pasos de un reader
+		$reader->Prepare($sheetName);
+		$reader->WriteJson($sheetName);
+
+		// Listo
+		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
+		return $this->state->ReturnState(false);
 	}
 
-	public function VerifyDatasetsImportFile($bucketId, $fileExtension){
+	public function VerifyDatasetsImportFile($bucketId, $fileExtension)
+	{
+		$bucket = FileBucket::Load($bucketId);
 		$fileExtension = Str::ToLower($fileExtension);
-		if ($fileExtension == "kml" || $fileExtension == "kmz")
-		{
-			$bucket = FileBucket::Load($bucketId);
-			$generate_files=false;
-			return $this->GetKMXFolders($bucket, $fileExtension);
-		}
-		return array();
+
+		$reader = BaseReader::CreateReader($bucket->path, $fileExtension);
+		return $reader->ReadSheetNames();
 	}
 
 	public function FileChunkImport($bucketId) {
@@ -183,83 +167,6 @@ class ImportService extends BaseService
 		$headers = $this->state->GetHeaders();
 		$datasetColumns = new DatasetColumns($headers);
 		$datasetColumns->InsertColumnDescriptions($datasetId);
-	}
-
-	private function ExcelToCsv($fileExtension, $bucket)
-	{
-		$uploadFolder = $bucket->path;
-		$sourceFile =  $uploadFolder . '/file.dat';
-		$xlsFile =  $uploadFolder . '/file_xls.dat';
-		if (file_exists($xlsFile))
-			// es un reintento
-			return;
-
-		IO::Move($sourceFile, $xlsFile);
-
-		$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($xlsFile);
-		$loadedSheetNames = $spreadsheet->getSheetNames();
-		$writer = new PhpSpreadSheetCsv($spreadsheet);
-
-		foreach($loadedSheetNames as $sheetIndex => $loadedSheetName) {
-				$writer->setSheetIndex($sheetIndex);
-				$writer->save($sourceFile);
-				break;
-		}
-	}
-
-	private function CSVtoJson($bucket)
-	{
-		$folder = $this->state->GetFileFolder();
-		$uploadFolder = $bucket->path;
-		$sourceFile =  $uploadFolder . '/file.dat';
-		CsvToJson::Convert($sourceFile, $folder);
-		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
-		return $this->state->ReturnState(false);
-	}
-
-	private function SPSStoJson($bucket)
-	{
-		$folder = $this->state->GetFileFolder();
-		$uploadFolder = $bucket->path;
-		$sourceFile =  $uploadFolder . '/file.dat';
-
-		$args = [$sourceFile, $folder];
-
-		Python::Execute('spss2json3.py', $args);
-
-		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
-		return $this->state->ReturnState(false);
-	}
-	private function GetKMXFolders($bucket, $fileExtension)
-	{
-		$uploadFolder = $bucket->GetBucketFolder();
-		$sourceFile =  $uploadFolder . '/file.dat';
-		$kmxFile =  $uploadFolder . '/file_kmx.dat';
-		if (!file_exists($kmxFile))
-			// es un reintento
-			IO::Move($sourceFile, $kmxFile);
-
-		$args = array($fileExtension, $kmxFile, $uploadFolder, 'false');
-		Python::Execute('kmx2csv3.py', $args);
-
-		$outFile = $kmxFile . '_folders.txt';
-		$ret = IO::ReadAllLines($outFile);
-		return $ret;
-	}
-
-	private function ConvertKMX($bucket, $fileExtension, $sheetName)
-	{
-		$uploadFolder = $bucket->GetBucketFolder();
-		$sourceFile =  $uploadFolder . '/file.dat';
-		$kmxFile =  $uploadFolder . '/file_kmx.dat';
-		if (!file_exists($kmxFile))
-			// es un reintento
-			IO::Move($sourceFile, $kmxFile);
-
-		$args = array($fileExtension, $kmxFile, $uploadFolder, 'true', $sheetName);
-
-		Python::Execute('kmx2csv3.py', $args);
-		IO::Copy($kmxFile . '_out.csv', $sourceFile);
 	}
 
 	private function CreateTables()

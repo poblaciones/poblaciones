@@ -3,6 +3,7 @@
 namespace helena\db\frontend;
 
 use helena\classes\App;
+use minga\framework\Str;
 use minga\framework\Profiling;
 
 class ClippingRegionItemModel extends BaseModel
@@ -15,15 +16,14 @@ class ClippingRegionItemModel extends BaseModel
 
 	}
 
-	public function GetClippingRegionItemGeometry($clippingRegionId)
+	public function GetClippingRegionItemGeometry($clippingRegionIds)
 	{
 		Profiling::BeginTimer();
-		$params = array($clippingRegionId);
 
 		$sql = "SELECT cli_geometry_r1 Geometry, ST_AsText(PolygonEnvelope(cli_geometry_r1)) Envelope ".
-			"FROM clipping_region_item WHERE cli_id = ? LIMIT 1";
+			"FROM clipping_region_item WHERE cli_id IN (" . Str::JoinInts($clippingRegionIds) . ")";
 
-		$ret = App::Db()->fetchAssoc($sql, $params);
+		$ret = App::Db()->fetchAll($sql);
 		Profiling::EndTimer();
 		return $ret;
 	}
@@ -89,7 +89,7 @@ class ClippingRegionItemModel extends BaseModel
 						JOIN snapshot_clipping_region_item_geography_item ON cgv_clipping_region_item_id = cli_id
 						WHERE " .
 						$datasetPart . "
-						AND clr_is_crawler_indexer = 1
+						AND clr_is_crawler_indexer = 1 AND cgv_level > 0
 						" . ($parentId ? ' AND cli_parent_id = ' . $parentId : '') . "
 						GROUP BY cli_id , cli_caption, cli_parent_id, clr_id, clr_caption
 						ORDER BY clr_caption, clr_id, cli_caption, cli_id";

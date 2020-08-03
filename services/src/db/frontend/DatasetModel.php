@@ -108,13 +108,11 @@ class DatasetModel extends BaseModel
 		$where = '';
 		$joins = ' ';
 
-		$addSnapshotJoin = false;
-
 		// Filtra por clipping
-		if($clippingItemId != 0)
+		if($clippingItemId)
 		{
-			$joins = ' JOIN snapshot_clipping_region_item_geography_item ON spss1.geography_item_id = cgv_geography_item_id AND cgv_clipping_region_item_id = ? ';
-			$params[] = (int)$clippingItemId;
+			$joins = ' JOIN snapshot_clipping_region_item_geography_item ON spss1.geography_item_id = cgv_geography_item_id
+										AND cgv_clipping_region_item_id IN (' . Str::JoinInts($clippingItemId) . ') ';
 		} else if ($clippingCircle)
 		{
 			$spatialConditions = new SpatialConditions('sna');

@@ -10,6 +10,7 @@ use minga\framework\ErrorException;
 use helena\entities\frontend\clipping\ClippingInfo;
 use helena\entities\frontend\clipping\ClippingLevelInfo;
 use helena\entities\frontend\clipping\SelectionInfo;
+use helena\entities\frontend\clipping\SelectionRegionInfo;
 
 use helena\entities\frontend\metadata\MetadataInfo;
 
@@ -78,7 +79,7 @@ class ClippingService extends BaseService
 	{
 		Profiling::BeginTimer();
 		$frame = new Frame();
-		$frame->ClippingRegionId = null;
+		$newClippingRegion = null;
 
 		$table = new SnapshotClippingRegionItemModel();
 		if ($current === null)
@@ -96,23 +97,23 @@ class ClippingService extends BaseService
 			// más chico que matchee.
 			$item = $table->GetClippingRegionItemByLocation($current, false, 0.01);
 			if ($item != null)
-				$frame->ClippingRegionId = $item['Id'];
+				$newClippingRegion = $item['Id'];
 		}
 
-		if ($frame->ClippingRegionId == null)
+		if ($newClippingRegion == null)
 		{
 			// si no las recibió o no había nada, abre en la primera de la
 			// región con más prioridad
 			$item = $table->GetFirstClippingRegion();
 			if ($item == null)
 				throw new ErrorException("The 'Region clipping views' has no data. Rebuild region clipping views.");
-			$frame->ClippingRegionId = $item['Id'];
+			$newClippingRegion = $item['Id'];
 			$isDefaultRegion = true;
 		}
 
-		if ($frame->ClippingRegionId != null)
+		if ($newClippingRegion != null)
 		{
-			$item = $table->GetClippingRegionItemEnvelope($frame->ClippingRegionId);
+			$item = $table->GetClippingRegionItemEnvelope($newClippingRegion);
 			if ($item != null)
 				$frame->Envelope = Envelope::FromDb($item['Envelope'])->Trim();
 			else
@@ -122,6 +123,7 @@ class ClippingService extends BaseService
 		$frame->Zoom = null;
 		$frame->ClippingCircle = null;
 		$frame->ClippingFeatureId = null;
+		$frame->ClippingRegionId = array($newClippingRegion);
 		Profiling::EndTimer();
 		return $frame;
 	}
@@ -177,20 +179,32 @@ class ClippingService extends BaseService
 		if ($frame->ClippingCircle != null)
 		{
 			$geo = new GeoJson();
-			$clipping->Canvas = $geo->GenerateFromEllipsis($frame->ClippingCircle);
-			$clipping->Envelope = Envelope::FromCircle($frame->ClippingCircle)->Trim();
+			$envelope = Envelope::FromCircle($frame->ClippingCircle)->Trim();
+			$canvas = $geo->GenerateFromEllipsis($frame->ClippingCircle);
+
+			$clipping->Canvas = [$canvas];
+			$clipping->Envelope = $envelope;
 		}
 		else if ($frame->ClippingRegionId != null)
 		{ // resuelve el canvas para regionId
 			$table = new ClippingRegionItemModel();
-			$item = $table->GetClippingRegionItemGeometry($frame->ClippingRegionId);
-			if ($item != null)
+			$items = $table->GetClippingRegionItemGeometry($frame->ClippingRegionId);
+			$canvasList = [];
+			$overallEnvelope = null;
+			foreach($items as $item)
 			{
 				$geo = new GeoJson();
-				$clipping->Canvas = $geo->GenerateFromBinary(array(array('name'=>'', 'value' => $item['Geometry'], 'FID' => $frame->ClippingRegionId)));
-				$clipping->Canvas['features'][0]['geometry']['coordinates'] =  GeoJson::TrimRecursive($clipping->Canvas['features'][0]['geometry']['coordinates']);
-				$clipping->Envelope = Envelope::FromDb($item['Envelope'])->Trim();
+				$envelope = Envelope::FromDb($item['Envelope'])->Trim();
+				$canvas = $geo->GenerateFromBinary(array(array('name'=>'', 'value' => $item['Geometry'], 'FID' => $frame->ClippingRegionId)));
+				$canvas['features'][0]['geometry']['coordinates'] =  GeoJson::TrimRecursive($canvas['features'][0]['geometry']['coordinates']);
+				$canvasList[] = $canvas;
+				if ($overallEnvelope === null)
+					$overallEnvelope = $envelope;
+				else
+					$overallEnvelope = $overallEnvelope->Merge($envelope);
 			}
+			$clipping->Canvas = $canvasList;
+			$clipping->Envelope = $overallEnvelope;
 		}
 
 		//$clipping->Stats = GlobalTimer::GetValues();
@@ -252,25 +266,31 @@ class ClippingService extends BaseService
 		}
 	}
 
-	private function CalculateRegionFromId($clippingRegionId, $levelId, $urbanity)
+	private function CalculateRegionFromId($clippingRegionIds, $levelId, $urbanity)
 	{
-		$table = new SnapshotClippingRegionItemModel();
-		$item = $table->GetSelectionInfoById($clippingRegionId, $levelId, $urbanity);
+	$table = new SnapshotClippingRegionItemModel();
+		$item = $table->GetSelectionInfoById($clippingRegionIds, $levelId, $urbanity);
 		if ($item != null)
-			return $this->CreateSelectionInfo($clippingRegionId, $item);
+			return $this->CreateSelectionInfo($item);
 		else
 		{
 			$ret = SelectionInfo::GetEmpty();
+
 			$table = new ClippingRegionItemModel();
-			$ret->Id = $clippingRegionId;
-			$data = $table->GetClippingRegionItem($clippingRegionId);
-			if ($data != null)
+			foreach($clippingRegionIds as $clippingRegionId)
 			{
-				$ret->Name = $data['Name'];
-				$ret->TypeName = $data['Type'];
-				$ret->Location = Coordinate::FromDb($data['Location'])->Trim();
-				$ret->Metadata = new MetadataInfo();
-				$ret->Metadata->Fill($data);
+				$region = new SelectionRegionInfo();
+				$region->Id = $clippingRegionId;
+				$data = $table->GetClippingRegionItem($clippingRegionId);
+				if ($data != null)
+				{
+					$region->Name = $data['Name'];
+					$region->TypeName = $data['Type'];
+					$region->Location = Coordinate::FromDb($data['Location'])->Trim();
+					$region->Metadata = new MetadataInfo();
+					$region->Metadata->Fill($data);
+				}
+				$ret->Regions[] = $region;
 			}
 			return $ret;
 		}
@@ -281,7 +301,7 @@ class ClippingService extends BaseService
 		$table = new SnapshotClippingRegionItemModel();
 		$item = $table->GetSelectionInfoByEnvelope($envelope, $levelId, $urbanity);
 
-		$info = $this->CreateSelectionInfo(null, $item);
+		$info = $this->CreateSelectionInfo($item);
 
 		$info->Location = $envelope->GetCentroid()->Trim();
 
@@ -292,45 +312,47 @@ class ClippingService extends BaseService
 	{
 		$table = new SnapshotClippingRegionItemModel();
 
-		GlobalTimer::Begin('GetSelectionInfoByCircle');
 		$item = $table->GetSelectionInfoByCircle($circle, $levelId, $urbanity);
-		GlobalTimer::End();
 
-		$info = $this->CreateSelectionInfo(null, $item);
-
-		$info->Location = $circle->Center->Trim();
-
-		GlobalTimer::Begin('GetClippingRegionItemByLocation');
 		$region = $table->GetClippingRegionItemByLocation($circle->Center, true);
-		GlobalTimer::End();
-		if ($region != null)
+		$info = $this->CreateSelectionInfo($item);
+		if ($region != null && sizeof($info->Regions) > 0)
 		{
-			$info->Name = "Selección en " . $region['Name'];
-			$info->Metadata = new MetadataInfo();
-			$info->Metadata->Fill($region);
+			$info->Regions[0]->Name = "Selección en " . $region['Name'];
+			$info->Regions[0]->Location = $circle->Center->Trim();
+			$info->Regions[0]->Envelope = $circle->GetEnvelope();
 		}
 		return $info;
 	}
 
 
-	private function CreateSelectionInfo($clippingRegionId, $item)
+	private function CreateSelectionInfo($item)
 	{
 		$info = new SelectionInfo();
-
-		$info->Id = $clippingRegionId;
-		$info->Name = $item['Name'];
-		$info->TypeName = $item['Type'];
-
-		if (array_key_exists('Location', $item))
-			$info->Location = Coordinate::FromDb($item['Location'])->Trim();
 
 		$info->Population = intval($item['Population']);
 		$info->Households = intval($item['Households']);
 		$info->Children = intval($item['Children']);
 
 		$info->AreaKm2 = $item['AreaM2'] / 1000 / 1000;
-		$info->Metadata = new MetadataInfo();
-		$info->Metadata->Fill($item);
+
+		if (array_key_exists('Regions', $item))
+		{
+			foreach($item['Regions'] as $region)
+			{
+				$regionInfo = new SelectionRegionInfo();
+				$regionInfo->Id = $region['Id'];
+				$regionInfo->Name = $region['Name'];
+				$regionInfo->TypeName = $region['Type'];
+				if (array_key_exists('Location', $region))
+					$regionInfo->Location = Coordinate::FromDb($region['Location'])->Trim();
+				if (array_key_exists('Envelope', $region))
+					$regionInfo->Envelope = Envelope::FromDb($region['Envelope'])->Trim();
+				$regionInfo->Metadata = new MetadataInfo();
+				$regionInfo->Metadata->Fill($region);
+				$info->Regions[] = $regionInfo;
+			}
+		}
 		return $info;
 	}
 

@@ -364,20 +364,20 @@ SegmentedMap.prototype.ChangeMetricIndex = function (oldIndex, newIndex) {
 	this.SaveRoute.UpdateRoute();
 };
 
-SegmentedMap.prototype.SelectId = function (type, item, lat, lon) {
+SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelection) {
 	if (type === 'C') {
 		// mueve el mapa y actualiza clipping.
 		var itemParts2 = str.Split(item, ',');
 		var clipping = itemParts2[0];
-		this.Clipping.SetClippingRegion(clipping, true);
+		this.Clipping.SetClippingRegion(clipping, true, false, appendSelection);
 	} else if (type === 'L') {
+		// selecciona el metric y lo agrega...
 		var itemParts1 = str.Split(item, ',');
 		var metric = itemParts1[0];
-		// selecciona el metric y lo agrega...
 		this.AddMetricById(metric);
 	} else if (type === 'F') {
+		// seleccionaron un feature
 		var id = item;
-
 		var parentInfo = {
 			MetricId: null,
 			MetricVersionId: null,
@@ -394,6 +394,15 @@ SegmentedMap.prototype.SelectId = function (type, item, lat, lon) {
 		this.PanTo({ Lat: lat, Lon: lon });
 		this.SetZoom(15);
 	}*/
+};
+
+
+SegmentedMap.prototype.UpdateMapLevels = function () {
+	var metrics = this.Metrics.metrics;
+	for (var l = 0; l < metrics.length; l++) {
+		if (metrics[l].UpdateLevel())
+			metrics[l].UpdateMap();
+	}
 };
 
 SegmentedMap.prototype.UpdateMap = function () {

@@ -710,7 +710,7 @@ ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors, validate
 		newColumn = {};
 		newColumn.text = 'Problema';
 		newColumn.datafield = 'internal__Err';
-		newColumn.width = 130;
+		newColumn.width = 320;
 		newColumn.cellsrenderer = this.cellsRenderer;
 		newColumn.pinned = true;
 		columns.push(newColumn);

@@ -1,25 +1,25 @@
 <template>
-  <div v-if="metadata">
-    <div class="sourceInfo exp-hiddable-block">
-			<a href="#" v-on:click="clickFuente"
-				 title="Fuente de habitantes, hogares y área" style="color: #a7a7a7">
-				<link-icon />
-				Fuente
+  <span v-if="metadata">
+    <span class="sourceInfo exp-hiddable-block">
+			<a href="#" :title="'Fuente de delimitación para ' + region.Name"
+					v-on:click="clickFuente" style="color: #a7a7a7">
+				<link-icon style="font-size: 13px; padding-top: 20px;" :title="'Fuente de delimitación para ' + region.Name" />
 			</a>
-    </div>
-  </div>
+    </span>
+  </span>
 </template>
 
 <script>
 import LinkIcon from 'vue-material-design-icons/Link.vue';
 
 export default {
-	name: 'clippingSourceInfo',
+	name: 'clippingSelectionSource',
 	components: {
-   LinkIcon,
+		LinkIcon,
 	},
 	props: [
-    'metadata'
+    'metadata',
+    'region'
 	],
 	data() {
 		return {
@@ -44,12 +44,8 @@ export default {
 </script>
 
 <style scoped>
-.sourceInfo
-{
-  position: absolute;
-  top: 12px;
-  right: 0px;
-  font-size: 12px;
-}
+	.sourceInfo {
+		font-size: .5em;
+	}
 
 </style>

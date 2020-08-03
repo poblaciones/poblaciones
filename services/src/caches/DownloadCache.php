@@ -3,6 +3,7 @@
 namespace helena\caches;
 
 use minga\framework\caching\TwoLevelFileFileCache;
+use minga\framework\Str;
 
 class DownloadCache extends BaseCache
 {
@@ -12,7 +13,7 @@ class DownloadCache extends BaseCache
 	}
 	public static function CreateKey($type, $clippingItemId, $clippingCircle, $urbanity)
 	{
-		$key = $type . "r" . $clippingItemId;
+		$key = $type . "r" . Str::JoinInts($clippingItemId, '-');
 		if ($urbanity)
 			$key .= "u" . $urbanity;
 		if ($clippingCircle)

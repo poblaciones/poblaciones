@@ -15,7 +15,6 @@ class ConfigurationService extends BaseService
 		$user = $userService->GetStatus();
 
 		$ret = array('UseCalculated' => Context::Settings()->Map()->UseCalculated,
-									'UseKmz' => Context::Settings()->Map()->UseKmz,
 									'User' => $user);
 		return $ret;
 	}

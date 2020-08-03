@@ -1,6 +1,7 @@
 import axios from 'axios';
 import h from '@/public/js/helper';
 import err from '@/common/js/err';
+import arr from '@/common/js/arr';
 
 export default Clipping;
 
@@ -11,6 +12,10 @@ function Clipping(segmentedMap, frame, clipping) {
 	this.ClippingRequest = null;
 	this.ClippingCallback = null;
 	this.cancelCreateClipping = null;
+};
+
+Clipping.prototype.FitEnvelope = function(envelope) {
+	this.SegmentedMap.MapsApi.FitEnvelope(envelope);
 };
 
 Clipping.prototype.FitCurrentRegion = function() {
@@ -81,17 +86,46 @@ Clipping.prototype.ResetClippingCircle = function () {
 	this.SegmentedMap.SaveRoute.UpdateRoute();
 };
 
-Clipping.prototype.ResetClippingRegion = function () {
+Clipping.prototype.ResetClippingRegion = function (regionToRemove) {
+	if (regionToRemove && this.frame.ClippingRegionId !== null &&
+				this.frame.ClippingRegionId.length > 1) {
+		this.SetClippingRegion(regionToRemove, true, false, true);
+		return;
+	}
 	this.frame.ClippingRegionId = null;
 	this.SegmentedMap.MapsApi.ClearClippingCanvas();
 	this.ClippingChanged();
 	this.SegmentedMap.SaveRoute.UpdateRoute();
 	this.SegmentedMap.UpdateMap();
 };
-Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, clipForZoomOnly) {
+Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, clipForZoomOnly, appendSelection) {
+	if (!window.Use.UseMultiselect) {
+		appendSelection = false;
+	}
+
 	this.frame.ClippingCircle = null;
 	this.SegmentedMap.ClearMyLocation();
-	this.frame.ClippingRegionId = clippingRegionId;
+	var newClippingRegionId = clippingRegionId;
+	if (!Array.isArray(clippingRegionId)) {
+		clippingRegionId = parseInt(clippingRegionId, 10);
+		if (appendSelection && this.frame.ClippingRegionId !== null) {
+			// si ya lo tiene, lo saca
+			if (this.frame.ClippingRegionId.includes(clippingRegionId)) {
+				arr.Remove(this.frame.ClippingRegionId, clippingRegionId);
+				newClippingRegionId = this.frame.ClippingRegionId;
+				if (newClippingRegionId.length === 0) {
+					newClippingRegionId = null;
+				}
+			} else {
+				// si no lo tiene, lo agrega
+				newClippingRegionId = this.frame.ClippingRegionId;
+				newClippingRegionId.push(clippingRegionId);
+			}
+		} else {
+			newClippingRegionId = [clippingRegionId];
+		}
+	}
+	this.frame.ClippingRegionId = newClippingRegionId;
 	this.CreateClipping(true, moveCenter, clipForZoomOnly);
 };
 
@@ -184,14 +218,27 @@ Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
 	});
 };
 
+Clipping.prototype.GetClippingName = function () {
+	var regiones = this.clipping.Region.Summary.Regions;
+	if (regiones && regiones.length > 1 && regiones[0].Name) {
+		var ret = [];
+		for (var n = 0; n < regiones.length; n++)
+			ret.push(regiones[n].Name);
+		return ret.join(' - ');
+	} else {
+		return null;
+	}
+};
+
 Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 	this.cancelCreateClipping = null;
 	var canvas = data.Canvas;
 	data.Canvas = null;
 	if (data.Summary !== null) {
 		this.clipping.Region = data;
-		if (this.clipping.Region.Summary.Name) {
-			document.title = this.clipping.Region.Summary.Name;
+		var name = this.GetClippingName();
+		if (name) {
+			document.title = name;
 		} else {
 			document.title = this.SegmentedMap.DefaultTitle;
 		}
@@ -200,6 +247,8 @@ Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 				this.FitCurrentRegion();
 			}
 		}
+		this.SegmentedMap.UpdateMapLevels();
 		this.SetClippingCanvas(canvas);
 	}
+
 };
