@@ -4,7 +4,6 @@ namespace helena\tests\spatialdb;
 
 class AreaFunctionsTest extends SpatialTestBase
 {
-
 	public function testAreaPolygons2()
 	{
 		$polygons = $this->getPolygons();
