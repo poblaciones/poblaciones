@@ -10,7 +10,7 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\FileBucket;
 use helena\db\frontend\FileModel;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\services\backoffice\publish\WorkFlags;
 
 class MetadataFileService extends BaseService
@@ -32,7 +32,7 @@ class MetadataFileService extends BaseService
 		if ($metadataFile->getMetadata() !== null)
 		{
 		 if ($metadataFile->getMetadata() !== $metadata)
-			throw new ErrorException('Invalid metadata.');
+			throw new PublicException('Los metadatos indicados no coinciden con el adjunto.');
 		}
 		else
 		{
@@ -65,7 +65,7 @@ class MetadataFileService extends BaseService
 		$metadata = $work->getMetadata();
 		$metadataFile = App::Orm()->find(entities\DraftMetadataFile::class, $metadataFileId);
 		if ($metadataFile->getMetadata() !== $metadata)
-			throw new ErrorException('Invalid metadata.');
+			throw new PublicException('Los metadatos indicados no coinciden con el adjunto.');
 		return $metadataFile;
 	}
 	public function DeleteMetadataFile($workId, $metadataFileId)
@@ -163,7 +163,7 @@ class MetadataFileService extends BaseService
 	private function SaveFile($fileObject, $tempFilename, $toDrafts)
 	{
 		if ($fileObject === null && $tempFilename !== null)
-			throw new ErrorException('File object must be specified in order to save the file.');
+			throw new PublicException('Para guardar el adjunto debe haber un archivo.');
 
 		if ($fileObject === null) return null;
 		if ($tempFilename === null) return $fileObject;
@@ -195,7 +195,7 @@ class MetadataFileService extends BaseService
 		App::Db()->exec("DELETE FROM " . $this->makeTableName('file_chunk', $toDrafts) . " WHERE chu_file_id = ?", array($fileId));
 		$unread = filesize($tempFilename);
 		if (!file_exists($tempFilename))
-			throw new ErrorException('No se ha transferido correctamente el archivo al servidor.');
+			throw new PublicException('No se ha transferido correctamente el archivo al servidor.');
 		$handle = fopen($tempFilename, "rb");
 
 		while($unread > 0)
@@ -217,7 +217,7 @@ class MetadataFileService extends BaseService
 	{
 		$metadataFile = $this->GetMetadataFileByFileId($metadataId, $fileId);
 		if ($metadataFile == null)
-		  throw new ErrorException("Invalid file for metadata.");
+		  throw new PublicException("No se ha encontrado el adjunto especificado.");
 		$friendlyName = $metadataFile['mfi_caption'];
 		if (Str::EndsWith($friendlyName, '.pdf') == false)
 				$friendlyName .= '.pdf';

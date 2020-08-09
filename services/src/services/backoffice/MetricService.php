@@ -10,7 +10,7 @@ use helena\services\common\BaseService;
 use helena\caches\DatasetColumnCache;
 use helena\services\backoffice\metrics\MetricsManager;
 use helena\entities\backoffice as entities;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Serializator;
 use minga\framework\Date;
 
@@ -112,7 +112,7 @@ class MetricService extends BaseService
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		$variable = App::Orm()->find(entities\DraftVariable::class, $variableId);
 		if ($variable->getMetricVersionLevel()->getDataset() !== $dataset)
-			throw new ErrorException('Invalid variable.');
+			throw new PublicException('La variable no pertenece al dataset indicado.');
 		return $variable;
 	}
 
@@ -308,7 +308,7 @@ class MetricService extends BaseService
 		$level = $variable->getMetricVersionLevel();
 		if ($levelId !== $level->getId() ||
 				$datasetId !== $level->getDataset()->getId()) {
-				throw new \ErrorException('Invalid dataset.');
+				throw new PublicException('La variable no pertenece al dataset indicado.');
 		}
 		// Borra valores
 		$this->ClearValues($variable->getId());
@@ -330,7 +330,7 @@ class MetricService extends BaseService
 		Profiling::BeginTimer();
 		$level = App::Orm()->find(entities\DraftMetricVersionLevel::class, $levelId);
 		if ($datasetId !== $level->getDataset()->getId()) {
-				throw new \ErrorException('Invalid dataset.');
+				throw new PublicException('El nivel no pertenece al dataset indicado.');
 		}
 		$variables = App::Orm()->findManyByProperty(entities\DraftVariable::class,
 													'MetricVersionLevel.Id', $levelId);
@@ -474,7 +474,7 @@ class MetricService extends BaseService
 	{
 		$caption = $metricVersion->getCaption();
 		if ($caption === null || trim($caption) === "") {
-			throw new ErrorException('La Versión no puede ser nula.');
+			throw new PublicException('La versión no puede ser nula.');
 		}
 	}
 	private function varName($variable)

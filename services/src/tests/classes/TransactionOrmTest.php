@@ -28,7 +28,7 @@ class TransactionOrmTest extends TestCase
 		}
 		catch(ErrorException $e)
 		{
-	  	}
+	  }
 	}
 }
 

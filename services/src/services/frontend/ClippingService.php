@@ -5,7 +5,7 @@ use helena\services\common\BaseService;
 
 use helena\caches\ClippingCache;
 use helena\caches\ClippingSummaryCache;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\entities\frontend\clipping\ClippingInfo;
 use helena\entities\frontend\clipping\ClippingLevelInfo;
@@ -106,7 +106,7 @@ class ClippingService extends BaseService
 			// región con más prioridad
 			$item = $table->GetFirstClippingRegion();
 			if ($item == null)
-				throw new ErrorException("The 'Region clipping views' has no data. Rebuild region clipping views.");
+				throw new PublicException("La vista de regiones de recorte no tiene datos. Contacte a un administrador para solicitar que la vista sea reconstruida.");
 			$newClippingRegion = $item['Id'];
 			$isDefaultRegion = true;
 		}
@@ -117,7 +117,7 @@ class ClippingService extends BaseService
 			if ($item != null)
 				$frame->Envelope = Envelope::FromDb($item['Envelope'])->Trim();
 			else
-				throw new ErrorException('La región de clipping indicada no pudo ser encontrada.');
+				throw new PublicException('La región indicada no pudo ser encontrada.');
 		}
 		// los demás los tiene que definir el cliente.
 		$frame->Zoom = null;
@@ -230,7 +230,7 @@ class ClippingService extends BaseService
 		}
 		else
 		{
-			throw new ErrorException('Frame has no spatial specification.');
+			throw new PublicException('El frame actual no tiene indicaciones espaciales para generar una selección.');
 		}
 
 		$ret = array();
@@ -262,7 +262,7 @@ class ClippingService extends BaseService
 		}
 		else
 		{
-			throw new ErrorException('Frame has no spatial specification.');
+			throw new PublicException('El frame actual no tiene indicaciones espaciales para generar una selección.');
 		}
 	}
 

@@ -1,7 +1,7 @@
 <?php
 
 namespace helena\classes\spss;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 // The alignment of the variable for display purposes
 class Alignment
@@ -26,7 +26,7 @@ class Alignment
 			case self::Center:
 				return 'center';
 			default:
-				throw new ErrorException('Unknown alignment code: ' . $value);
+				throw new PublicException('Tipo de alineación incorrecta');
 		}
 	}
 
@@ -41,7 +41,7 @@ class Alignment
 			case 'center':
 				return self::Center;
 			default:
-				throw new ErrorException('Unknown measurement: ' . $value);
+				throw new PublicException('Tipo de alineación incorrecta');
 		}
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace helena\classes\writers;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Str;
 
 use helena\classes\spss\Format;
@@ -15,7 +15,7 @@ class CsvWriter extends BaseWriter
 	{
 		$file = fopen($this->state->Get('outFile'), 'a');
 		if($file === false)
-			throw new ErrorException('Error en creación de archivo');
+			throw new PublicException('Error en creación de archivo');
 
 		$count = count($this->state->Cols());
 
@@ -33,7 +33,7 @@ class CsvWriter extends BaseWriter
 
 		$file = fopen($this->state->Get('outFile'), 'a');
 		if($file === false)
-			throw new ErrorException('Error en creación de archivo');
+			throw new PublicException('Error en creación de archivo');
 		$cols = $this->state->Cols();
 		$count = count($cols);
 
@@ -61,7 +61,7 @@ class CsvWriter extends BaseWriter
 				$c++;
 			}
 			if(fwrite($file, $rowText) === false)
-				throw new ErrorException('Error en creación de archivo');
+				throw new PublicException('Error en creación de archivo');
 		}
 		fclose($file);
 
@@ -88,7 +88,7 @@ class CsvWriter extends BaseWriter
 			$text = $this->FormatCSVField($col['caption'], ($k + 1 == $count));
 			$text = $this->MakeOutputEncoding($text);
 			if(fwrite($file, $text) === false)
-				throw new ErrorException('Error en creación de archivo');
+				throw new PublicException('Error en creación de archivo');
 
 			$res = $this->GetValueLabels($col);
 			if(count($res) > 0)

@@ -6,7 +6,7 @@
 			<md-dialog-content>
 				<div class="md-layout">
 					<div class="md-layout-item md-small-hide">
-						<div style="min-width: 450px; height: 1px"></div>
+						<div style="width: 450px; height: 1px"></div>
 					</div>
 				</div>
 				<center>
@@ -27,7 +27,7 @@
 
 					<div v-if="completed">
 						<div style="height: 155px">
-							<div v-if="error">
+							<div v-if="error" style="max-width: 450px">
 								<p>{{ error }}</p>
 								<p>{{ errorDetail }}</p>
 							</div>
@@ -119,9 +119,12 @@ export default {
 			var ret = error.message;
 			if (error.response && error.response.data) {
 				var msgtext = error.response.data.trim();
-				if (msgtext.startsWith('[ME-E]:')) {
+				if (msgtext.startsWith('[PE-E]:')) {
 					ret = msgtext.substr(7).trim();
 				}
+			}
+			if (ret == 'Request failed with status code 500') {
+				ret = 'Si el problema persiste, escriba a contacto@poblaciones.org para recibir ayuda para resolver el incidente.';
 			}
 			return ret;
 		},

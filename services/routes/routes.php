@@ -89,7 +89,6 @@ if (isset($isPublic) == false || $isPublic == false)
 	require_once('backoffice/metadata.php');
 	require_once('backoffice/georeference.php');
 	require_once('backoffice/import.php');
-	require_once('backoffice/mock.php');
 	require_once('backoffice/test.php');
 
 	require_once('admin/admin.php');

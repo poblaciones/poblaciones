@@ -8,7 +8,7 @@ use minga\framework\Arr;
 use helena\caches\MetricGroupsMetadataCache;
 use helena\caches\FabMetricsCache;
 use helena\services\common\BaseService;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\entities\frontend\metric\MetricVersionInfo;
 use helena\entities\frontend\metric\MetricInfo;
@@ -98,7 +98,7 @@ class MetricService extends BaseService
 		if ($item == null)
 		{
 			if ($errorOnNotFound)
-				throw new ErrorException("El indicador no existe en la base de datos.");
+				throw new PublicException("El indicador no existe en la base de datos.");
 			else
 				return null;
 		}

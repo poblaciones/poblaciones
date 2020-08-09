@@ -11,7 +11,7 @@ use minga\framework\Str;
 use minga\framework\MessageBox;
 use minga\framework\Context;
 use minga\framework\MessageException;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class Account
 {
@@ -88,7 +88,7 @@ class Account
 			return $this->googleOauthId;
 		else if ($provider === 'facebook')
 			return $this->facebookOauthId;
-		else throw new ErrorException("Provider no reconocido.");
+		else throw new PublicException("Proveedor de autenticación no reconocido");
 	}
 	public function SetOauthId($provider, $id)
 	{
@@ -97,7 +97,7 @@ class Account
 			$this->googleOauthId = $id;
 		else if ($provider === 'facebook')
 			$this->facebookOauthId = $id;
-		else throw new ErrorException("Provider no reconocido.");
+		else throw new PublicException("Proveedor de autenticación no reconocido");
 	}
 
 	public function GetFirstName()
@@ -352,7 +352,7 @@ class Account
 	{
 		if($this->IsActive() == false)
 		{
-			throw new ErrorException('La cuenta debe ser activada antes de poder ser utilizada.');
+			throw new PublicException('La cuenta debe ser activada antes de poder ser utilizada');
 		}
 		self::$current = $this;
 		if ($masterUser !== null)

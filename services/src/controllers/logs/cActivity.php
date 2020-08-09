@@ -48,7 +48,6 @@ class cActivity extends cController
 		}
 		return $cachedData;
 	}
-
 	public function Post()
 	{
 		$file = self::ResolveData();
@@ -57,6 +56,17 @@ class cActivity extends cController
 		return $this->Show();
 	}
 
+	public function ResolveDbSpacePerUser()
+	{
+		// Obtiene la lista de cartografías del usuario.
+
+		// Obtiene la lista de adjuntos de esas cartografías.
+		// Obtiene la lista de datasets de esas cartografías.
+
+		// Suma los work_draft, work_public y work_public_snapshot de esos datos.
+		// Suma los adjuntos
+
+	}
 	static function ResolveSpace()
 	{
 		$vals = array();

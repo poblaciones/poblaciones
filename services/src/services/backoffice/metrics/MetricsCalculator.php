@@ -11,7 +11,7 @@ use helena\services\backoffice\DatasetColumnService;
 use helena\services\backoffice\DatasetService;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\services\frontend\SelectedMetricService;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Profiling;
 use minga\framework\Str;
 
@@ -168,7 +168,7 @@ class MetricsCalculator
 		}
 		else
 		{
-			throw new ErrorException('Tipo de dataset no reconocido');
+			throw new PublicException('Tipo de dataset no reconocido');
 		}
 
 		if ($sourceType == 'S')
@@ -225,7 +225,7 @@ class MetricsCalculator
 		}
 		else
 		{
-			throw new ErrorException('Tipo de dataset no reconocido');
+			throw new PublicException('Tipo de dataset no reconocido');
 		}
 	}
 

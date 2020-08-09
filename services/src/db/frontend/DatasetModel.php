@@ -7,6 +7,7 @@ use Doctrine\DBAL\Connection;
 use PDO;
 use helena\classes\App;
 use minga\framework\Str;
+use minga\framework\PublicException;
 use minga\framework\ErrorException;
 
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
@@ -61,7 +62,7 @@ class DatasetModel extends BaseModel
 			WHERE d1.dat_id = ? LIMIT 1';
 		$ret = App::Db()->fetchAssoc($sql, array((int)$id));
 		if ($ret == null)
-			throw new ErrorException("El dataset no ha sido encontrado.");
+			throw new PublicException("El dataset no ha sido encontrado.");
 		Profiling::EndTimer();
 		return $ret;
 	}

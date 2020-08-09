@@ -19,6 +19,7 @@ use helena\classes\Links;
 use helena\classes\Session;
 use minga\framework\Params;
 use minga\framework\Context;
+use minga\framework\PublicException;
 
 // CRAWLER
 App::RegisterControllerGet('/sitemap', controllers\cSitemap::class);
@@ -363,7 +364,7 @@ App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request 
 	$b = Params::Get('b');
 	if (!Context::Settings()->Map()->UseDataTileBlocks ||
 			$s !== Context::Settings()->Map()->TileDataBlockSize)
-			throw new ErrorException('Argumentos no válidos.');
+			throw new PublicException('El tamaño de bloque de datos solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
 	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b));
 });
 
@@ -377,7 +378,7 @@ App::$app->get('/services/frontend/clipping/GetBlockLabels', function (Request $
 	$b = Params::Get('b');
 	if (!Context::Settings()->Map()->UseLabelTileBlocks ||
 			$s !== Context::Settings()->Map()->LabelsBlockSize)
-			throw new ErrorException('Argumentos no válidos.');
+			throw new PublicException('El tamaño de bloque de etiquetas solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
 	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z, $b));
 });
 
@@ -428,7 +429,7 @@ App::$app->error(function (\Exception $e, Request $request, $code) {
 	);
 
 	$text = "";
-	if ($e instanceof \minga\framework\MessageException || $e instanceof \minga\framework\ErrorException)
+	if ($e instanceof \minga\framework\MessageException || $e instanceof \minga\framework\PublicException)
 	{
 		$text = $e->getPublicMessage();
 		return new Response($text);
@@ -436,9 +437,5 @@ App::$app->error(function (\Exception $e, Request $request, $code) {
 		$text = $e->getMessage();
 		return new Response($text);
 	}
-	return new Response(App::RenderResolve($templates, array(
-		'code' => $code,
-		'title' => 'Error',
-	)), $code);
 });
 

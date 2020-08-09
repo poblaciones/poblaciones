@@ -7,7 +7,7 @@ use minga\framework\Profiling;
 use minga\framework\Performance;
 use minga\framework\Log;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
@@ -171,7 +171,7 @@ class Db
 		Performance::EndDbWait();
 		Profiling::EndTimer();
 		if ((is_array($ret) && sizeof($ret) == 0) || $ret == null)
-			throw new ErrorException("Scalar query returned no results.");
+			throw new PublicException("No se ha obtenido ningún resultado en la consulta cuando se esperaba uno.");
 		return $ret[array_keys($ret)[0]];
 	}
 

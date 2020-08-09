@@ -5,7 +5,7 @@ namespace helena\classes\readers;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\services\backoffice\import\PhpSpreadSheetCsv;
 
@@ -28,7 +28,7 @@ class XlsxReader extends CsvReader
 				return;
 			}
 		}
-		throw new ErrorException('La hoja indicada no fue encontrada.');
+		throw new PublicException('La hoja de planilla indicada no fue encontrada');
 	}
 
 	public function ReadSheetNames()

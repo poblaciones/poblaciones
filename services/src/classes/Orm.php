@@ -6,7 +6,7 @@ use minga\framework\Str;
 use minga\framework\Context;
 use minga\framework\Profiling;
 use minga\framework\Performance;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\services\backoffice\DbSession;
 
 use Doctrine\ORM\Tools\Setup;
@@ -109,7 +109,7 @@ class Orm
 				if ($isDevMode)
 					throw $e;
 				else
-					throw new ErrorException('No hay disponible una conexión con el servidor de datos');
+					throw new PublicException('No hay disponible una conexión con el servidor de datos');
 			}
 			Profiling::EndTimer();
 		}
@@ -154,7 +154,7 @@ class Orm
 			$start = strpos($message, "Column '") + 8;
 			$end = strpos($message, "'", $start);
 			$field = substr($message, $start, $end - $start);
-			throw new ErrorException('Se ha omitido un valor requerido (' . $field . ')');
+			throw new PublicException('Se ha omitido un valor requerido (' . $field . ')');
 		}
 	}
 
@@ -287,7 +287,7 @@ class Orm
 		if (sizeof($ret) == 0)
 			return null;
 		else if (sizeof($ret) > 1)
-			throw new ErrorException("Query returned more than one row.");
+			throw new PublicException("La consulta devolvió varias filas, cuando se esperaba solamente una.");
 		else
 			return $ret[0];
   }

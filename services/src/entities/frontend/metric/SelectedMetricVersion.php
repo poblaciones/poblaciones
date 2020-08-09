@@ -3,7 +3,7 @@
 namespace helena\entities\frontend\metric;
 
 use helena\entities\BaseMapModel;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class SelectedMetricVersion
 {
@@ -30,6 +30,6 @@ class SelectedMetricVersion
 		foreach($this->Levels as $level)
 			if ($level->Id == $levelId)
 				return $level;
-		throw new ErrorException('El nivel del indicador no ha sido encontrado');
+		throw new PublicException('El nivel del indicador no ha sido encontrado');
 	}
 }

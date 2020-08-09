@@ -4,7 +4,7 @@ namespace helena\entities\frontend\metric;
 
 use helena\entities\BaseMapModel;
 use helena\classes\App;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class SelectedMetric extends BaseMapModel
 {
@@ -56,7 +56,7 @@ class SelectedMetric extends BaseMapModel
 		foreach($this->Versions as $version)
 			if ($version->Version->Id == $versionId)
 				return $version;
-		throw new ErrorException('La edición del indicador no ha sido encontrada.');
+		throw new PublicException('La edición del indicador no ha sido encontrada.');
 	}
 }
 

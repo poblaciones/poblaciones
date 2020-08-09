@@ -7,7 +7,7 @@ use minga\framework\Str;
 use minga\framework\Date;
 use minga\framework\Profiling;
 use minga\framework\Context;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\db\admin\WorkModel;
 use helena\entities\backoffice as entities;
@@ -93,10 +93,10 @@ class PublishDataTables
 		{
 			$data = App::Db()->fetchAssoc("select wrk_shard from draft_work where wrk_id = ?", array($workId));
 			if (!$data)
-				throw new ErrorException('Obra inexistente.');
+				throw new PublicException('Cartografía inexistente.');
 			$shard = intval($data['wrk_shard']);
 			if ($shard != Context::Settings()->Shard()->CurrentShard)
-				throw new ErrorException('El shard de la obra no coincide con el del entorno: w: ' . $workId . ' s:' . $shard . ' vs ' . Context::Settings()->Shard()->CurrentShard);
+				throw new PublicException('El shard de la obra no coincide con el del entorno: w: ' . $workId . ' s:' . $shard . ' vs ' . Context::Settings()->Shard()->CurrentShard);
 			}
 		Profiling::EndTimer();
 

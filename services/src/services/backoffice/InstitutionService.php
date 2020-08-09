@@ -7,7 +7,7 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\Arr;
 use minga\framework\IO;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\db\frontend\FileModel;
 use helena\classes\Session;
 
@@ -26,7 +26,7 @@ class InstitutionService extends BaseService
 		$wk = new WorkService();
 		$wk->CompleteInstitution($institution);
 		if (!$institution->getIsEditableByCurrentUser())
-			throw new ErrorException('No tiene permisos para editar esta institución.');
+			throw new PublicException('No tiene permisos para editar esta institución.');
 
 		if ($watermarkImage)
 		{

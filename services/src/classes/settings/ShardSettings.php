@@ -3,7 +3,7 @@
 namespace helena\classes\settings;
 
 use helena\classes\App;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class ShardSettings
 {
@@ -28,7 +28,7 @@ class ShardSettings
 	public function CheckPublicShard($shard)
 	{
 		if ($this->IsValidPublicShard($shard) == false)
-			throw new ErrorException('Se ha solicitado información correspondiente a un shard no accesible.');
+			throw new PublicException('Se ha solicitado información correspondiente a un shard no accesible');
 	}
 	public function FilterItemsByPublic($list, $shardField)
 	{
@@ -57,7 +57,7 @@ class ShardSettings
 	public function CheckBackofficeShard($shard)
 	{
 		if ($this->IsValidBackofficeShard($shard) == false)
-			throw new ErrorException('Se ha solicitado información correspondiente a un shard no accesible.');
+			throw new PublicException('Se ha solicitado información correspondiente a un shard no accesible');
 	}
 	public function IsValidBackofficeShardLow($shard)
 	{

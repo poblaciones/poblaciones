@@ -4,7 +4,7 @@ namespace helena\classes;
 
 use minga\framework\Str;
 use minga\framework\Profiling;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use Doctrine\DBAL\Logging\SQLLogger as sqlLog;
 
@@ -17,7 +17,7 @@ class SqlLogger implements sqlLog
     public function startQuery($sql, array $params = null, array $types = null)
 		{
 			Profiling::ShowQuery($sql, $params, $types);
-			$e = new ErrorException();
+			$e = new PublicException();
 			$st = explode("\n", $e->getTraceAsString());
 			// Busca lazy loading
 			#4 : Doctrine\ORM\Persisters\Entity\BasicEntityPersister->loadById(Array, Object(DoctrineProxies\__CG__\helena\entities\backoffice\DraftMetadata))

@@ -5,7 +5,7 @@ namespace helena\controllers\frontend;
 use minga\framework\Context;
 use minga\framework\Params;
 use minga\framework\Request;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\classes\Session;
 use helena\controllers\common\cPublicController;
@@ -73,7 +73,7 @@ class cMap extends cPublicController
 			$metricId = null;
 		}
 		else
-			throw new ErrorException('Type of result not supported for redirect');
+			throw new PublicException('No está soportada la redirección para este tipo de elemento');
 
 		return App::Redirect(Links::GetWorkMetricUrl(null, $metricId, $regionId));
 	}

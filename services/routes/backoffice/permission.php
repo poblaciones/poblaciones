@@ -6,7 +6,7 @@ use helena\classes\App;
 use helena\classes\Session;
 use helena\services\backoffice as services;
 use minga\framework\Params;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 // Backoffice
 
@@ -37,7 +37,7 @@ App::$app->get('/services/backoffice/AddWorkPermission', function (Request $requ
 	$userEmail = Params::GetMandatory('u');
 	$permission = Params::GetMandatory('p');
 	if ($permission != 'V' && $permission != 'E' && $permission != 'A')
-	 throw new ErrorException('Invalid argument');
+	 throw new PublicException('Tipo de permiso inválido');
 	$ret = $controller->AssignPermission($workId, $userEmail, $permission);
 	return App::OrmJson($ret);
 });

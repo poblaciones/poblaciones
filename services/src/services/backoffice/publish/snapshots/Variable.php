@@ -4,7 +4,7 @@ namespace helena\services\backoffice\publish\snapshots;
 
 use minga\framework\Arr;
 use minga\framework\Profiling;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\classes\DatasetTypeEnum;
 
 use helena\classes\SpecialColumnEnum;
@@ -99,7 +99,7 @@ class Variable
 			$cutColumnId = $this->attributes['vsy_cut_column_id'];
 			if ($cutColumnId === null)
 			{
-				throw new ErrorException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
+				throw new PublicException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
 					. $this->GetVariableMetricErrorCaption() . " no tiene una variable de segmentación definida. Revise la simbología de la variable.");
 			}
 			return $this->GetFieldFromId($cutColumnId);
@@ -147,7 +147,7 @@ class Variable
 	{
 		$values = $this->attributes['values'];
 		if (sizeof($values) == 0)
-			throw new ErrorException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
+			throw new PublicException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
 				. $this->GetVariableMetricErrorCaption() . " no tiene valores. Revise la symbología de la variable.");
 
 		if (sizeof($values) == 1 && $values[0]['vvl_value'] == null)
@@ -262,7 +262,7 @@ class Variable
 				$label = "Conteo";
 				break;
 			default:
-				throw new ErrorException("La columna indicada no pertenece a la tabla de geografía.");
+				throw new PublicException("La columna indicada no pertenece a la tabla de geografía.");
 		}
 		return $label;
 	}
@@ -349,7 +349,7 @@ class Variable
 				$field = "n";
 				break;
 			default:
-				throw new ErrorException("La columna indicada no pertenece a la tabla de geografía.");
+				throw new PublicException("La columna indicada no pertenece a la tabla de geografía.");
 		}
 		return $field;
 	}

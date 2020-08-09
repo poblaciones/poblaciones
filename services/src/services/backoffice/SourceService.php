@@ -2,7 +2,7 @@
 
 namespace helena\services\backoffice;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\classes\App;
 use helena\services\common\BaseService;
@@ -77,7 +77,7 @@ class SourceService extends BaseService
 		$wk = new WorkService();
 		$wk->CompleteSource($source);
 		if (!$source->getIsEditableByCurrentUser())
-			throw new ErrorException('No tiene permisos para editar esta fuente.');
+			throw new PublicException('No tiene permisos para editar esta fuente.');
 		App::Orm()->Save($source);
 		// Si no está asociada, la agrega
 		$this->AddSourceToWork($workId, $source->getId());
@@ -120,7 +120,7 @@ class SourceService extends BaseService
 		$metadataId = $work->getMetadata()->getId();
 		$metadataSource = App::Orm()->findByProperties(entities\DraftMetadataSource::class, array("Metadata.Id" => $metadataId, "Source.Id" => $sourceId));
 		if ($metadataSource === null)
-			throw new ErrorException('Invalid relation.');
+			throw new PublicException('Invalid relation.');
 		return $metadataSource;
 	}
 	public function MoveSourceUp($workId, $sourceId)

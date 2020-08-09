@@ -6,7 +6,7 @@ use helena\services\common\BaseService;
 
 use helena\services\backoffice\cloning\WorkDelete;
 use helena\services\backoffice\publish\WorkStateBag;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class WorkDeleteService extends BaseService
 {
@@ -60,7 +60,7 @@ class WorkDeleteService extends BaseService
 				$this->state->NextStep('Completando');
 				return $this->state->ReturnState(true);
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 			}
 	}
 }

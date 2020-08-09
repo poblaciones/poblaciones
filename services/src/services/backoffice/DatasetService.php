@@ -3,7 +3,7 @@
 namespace helena\services\backoffice;
 
 use minga\framework\Params;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Profiling;
 use minga\framework\Date;
 
@@ -418,7 +418,7 @@ class DatasetService extends DbSession
 		// Marca work
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		if ($dataset === null)
-			throw new ErrorException("Dataset no encontrado.");
+			throw new PublicException("Dataset no encontrado.");
 		DatasetService::DatasetChanged($dataset);
 
 		$multilevelMatrix = $dataset->getMultilevelMatrix();

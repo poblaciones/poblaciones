@@ -5,7 +5,7 @@ namespace helena\db\frontend;
 use helena\classes\App;
 use minga\framework\Str;
 use minga\framework\Profiling;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\MessageBox;
 
 class UserModel extends BaseModel
@@ -77,7 +77,7 @@ class UserModel extends BaseModel
 		Profiling::BeginTimer();
 		$userId = App::Db()->fetchScalarIntNullable("SELECT usr_id FROM user WHERE usr_email = ?", array($user));
 		if ($userId === null)
-			throw new ErrorException("Usuario no encontrado.");
+			throw new PublicException("Usuario no encontrado.");
 		Profiling::EndTimer();
 		return $userId;
 	}

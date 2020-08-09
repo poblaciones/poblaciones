@@ -7,7 +7,7 @@ use helena\services\backoffice\metrics\MetricsCalculator;
 use helena\services\backoffice\publish\CalculateMetricStateBag;
 
 use helena\services\common\BaseService;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Profiling;
 
 class CalculatedDistanceService extends BaseService
@@ -97,7 +97,7 @@ class CalculatedDistanceService extends BaseService
 				$this->state->NextStep('Listo');
 				break;
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido');
 		}
 		return $this->state->ReturnState($this->IsCompleted());
 	}

@@ -19,7 +19,7 @@ use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\PublishSnapshots;
 use helena\services\backoffice\publish\CacheManager;
 use helena\services\backoffice\publish\WorkFlags;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class WorkService extends BaseService
 {
@@ -27,7 +27,7 @@ class WorkService extends BaseService
 	{
 		$work = new entities\DraftWork();
 		if ($type === 'P' && Session::IsSiteEditor() === false)
-			throw new ErrorException('Not enough permissions.');
+			throw new PublicException('El usuario actual no dispone de suficientes permisos para realizar esta acción.');
 
 		$work->setType($type);
 		$work->setImageType('N');
@@ -107,7 +107,7 @@ class WorkService extends BaseService
 		$workInfo = new WorkInfo();
 		$workInfo->Work = App::Orm()->find(DraftWork::class, $workId);
 		if ($workInfo->Work === null)
-			throw new ErrorException('El elemento no existe en la base de datos.');
+			throw new PublicException('El elemento no existe en la base de datos.');
 		$permissions = new PermissionsService();
 		$workInfo->Permissions = $permissions->GetPermissions($workId);
 		$workInfo->Datasets = $this->GetDatasets($workId);

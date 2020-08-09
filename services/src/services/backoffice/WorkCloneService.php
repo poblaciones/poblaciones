@@ -9,7 +9,7 @@ use helena\services\backoffice\publish\WorkStateBag;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\services\backoffice\cloning\WorkClone;
 use helena\services\backoffice\publish\PublishDataTables;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class WorkCloneService extends BaseService
 {
@@ -63,7 +63,7 @@ class WorkCloneService extends BaseService
 				$this->state->NextStep('Listo');
 				return $this->state->ReturnState(true, array('targetWorkId'));
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 			}
 	}
 }

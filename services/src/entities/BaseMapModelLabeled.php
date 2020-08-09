@@ -1,7 +1,7 @@
 <?php
 
 namespace helena\entities;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class BaseMapModelLabeled extends BaseMapModel
 {
@@ -17,7 +17,7 @@ class BaseMapModelLabeled extends BaseMapModel
 	}
 	public static function GetMapLabeled()
 	{
-		throw new ErrorException("Must implement in child.");
+		throw new PublicException("Must implement in child.");
 	}
 }
 

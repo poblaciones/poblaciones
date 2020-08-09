@@ -9,7 +9,7 @@ use helena\services\backoffice\publish\WorkStateBag;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\services\backoffice\publish\RevokeSnapshots;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class RevokeService extends BaseService
 {
@@ -72,7 +72,7 @@ class RevokeService extends BaseService
 				$this->state->NextStep('Listo');
 				break;
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 		}
 		$done = ($this->state->Step() == self::STEP_COMPLETED && !$isSubStepper);
 		return $this->state->ReturnState($done);

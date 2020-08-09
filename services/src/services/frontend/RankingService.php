@@ -3,7 +3,7 @@
 namespace helena\services\frontend;
 
 use minga\framework\Performance;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\classes\GlobalTimer;
 use helena\db\frontend\SnapshotByDataset;
@@ -26,7 +26,7 @@ class RankingService extends BaseService
 
 		if ($frame->ClippingRegionIds == NULL
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
-			throw new ErrorException("A spatial indication must be specified (envelope, circle or region).");
+			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 
 		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $hasTotals, $hiddenValueLabels);
 

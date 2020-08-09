@@ -8,7 +8,7 @@ use minga\framework\Context;
 
 use minga\framework\Arr;
 use minga\framework\Str;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 
 class RowDuplicator
@@ -133,7 +133,7 @@ class RowDuplicator
 
 		foreach($staticColumns as $key=>$value)
 			if (self::NotInMetadata($key, $columnsList)) {
-				throw new ErrorException("Column does not exist in metadata (" . $key . ")");
+				throw new PublicException("La columna no existe en la definición de metadatos (" . $key . ")");
 			}
 
 		foreach($columnsList as $column)

@@ -2,8 +2,8 @@
 
 namespace helena\classes;
 
-use minga\framework\ErrorException;
-
+use minga\framework\PublicException;
+use minga\framework\Arr;
 use minga\framework\Str;
 
 /**
@@ -96,7 +96,7 @@ class CsvReader
 		if ($this->handle === false)
 		{
 			$this->InternalReset();
-			throw new ErrorException('Could not open file');
+			throw new PublicException('No fue posible abrir el archivo');
 		}
 		$this->DetectLineDelimiter();
 		$this->DetectEncoding();
@@ -177,14 +177,17 @@ class CsvReader
 		$countComma = substr_count($line, ',');
 		$countColon = substr_count($line, ';');
 		$countTab = substr_count($line, "\t");
+		$countPipe = substr_count($line, "|");
 
-		$max = max($countComma, $countColon, $countTab);
+		$counts = [$countComma, $countColon, $countTab, $countPipe];
 
-		if ($max == 0
-			|| ($countComma == $countColon && $countComma == $max)
-			|| ($countColon == $countTab && $countColon == $max)
-			|| ($countComma  == $countTab && $countComma == $max))
-			throw new ErrorException('Could not detect delimiter');
+		$max = max($counts);
+
+		if ($max == 0)
+			throw new PublicException('No fue posible reconocer el delimitador (; , tab |)');
+
+		if (Arr::InArrayCount($counts, $max) > 1)
+			throw new PublicException('No fue posible reconocer el delimitador debido a cantidades iguales de varios delimitadores (; , tab |)');
 
 		if($max == $countComma)
 			$this->delimiter = ',';
@@ -192,12 +195,14 @@ class CsvReader
 			$this->delimiter = ';';
 		else if($max == $countTab)
 			$this->delimiter = "\t";
+		else if($max == $countPipe)
+			$this->delimiter = "|";
 	}
 
 	private function AutodetectTextQualifier($header)
 	{
 		if($this->delimiter === null)
-			throw new ErrorException('Set delimiter first');
+			throw new PublicException('No puede establecer el delimitador de texto sin establecer primero el delimitador de columnas');
 
 		$double = substr_count($header, '"' . $this->delimiter . '"');
 		$single = substr_count($header, "'" . $this->delimiter . "'");
@@ -252,12 +257,24 @@ class CsvReader
 	private function ReadHeaderLine()
 	{
 		if($this->handle === null)
-			throw new ErrorException('Open file first');
+			throw new PublicException('No hay un archivo abierto');
 
 		if($this->start > 0)
-			throw new ErrorException('Header already read');
+			throw new PublicException('Ya se ha superado la lectura de encabezados');
 
-		$res = $this->ReadLines(1);
+		try
+		{
+			$res = $this->ReadLines(1);
+		}
+		catch(\Exception $e)
+		{
+			if (Str::Contains($e->getMessage(), "Detected an illegal character in input string"))
+			{
+				throw new PublicException("La primera línea del archivo no pudo ser leída. Verifique la existencia de caracteres inválidos.", $e);
+			}
+			else
+				throw new PublicException("La primera línea del archivo no pudo ser leída", $e);
+		}
 		return $res[0];
 	}
 
@@ -279,7 +296,7 @@ class CsvReader
 	private function LinesToArray(array $lines, $byCol, $isHeader = false)
 	{
 		if($this->delimiter === null)
-			throw new ErrorException('Must set delimiter or call AutodetectDelimiter');
+			throw new PublicException('No se ha indicado un delimitador de columnas');
 
 		$data = [];
 
@@ -361,7 +378,7 @@ class CsvReader
 	private function ReadLines($count)
 	{
 		if($this->eof)
-			throw new ErrorException('End of file');
+			throw new PublicException('Se ha encontrado el final del archivo');
 
 		$lines = [];
 		for($i = $this->start; $i < $this->start + $count; $i++)

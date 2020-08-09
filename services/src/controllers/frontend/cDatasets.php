@@ -13,7 +13,7 @@ use helena\classes\Session;
 use helena\classes\Links;
 use helena\entities\frontend\geometries\Envelope;
 use helena\services\frontend\SelectedMetricService;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\services\frontend\WorkService;
 use helena\db\frontend\ClippingRegionItemModel;
 use minga\framework\Profiling;

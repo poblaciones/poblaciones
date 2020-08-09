@@ -8,7 +8,7 @@ use helena\services\common\BaseService;
 use helena\services\backoffice\publish\WorkStateBag;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\services\backoffice\cloning\WorkClone;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class WorkTestService extends BaseService
 {
@@ -58,7 +58,7 @@ class WorkTestService extends BaseService
 				$this->state->NextStep('Listo');
 				return $this->state->ReturnState(true);
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 			}
 	}
 }

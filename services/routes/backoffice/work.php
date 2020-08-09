@@ -8,7 +8,7 @@ use helena\services\backoffice as services;
 use helena\services\admin as adminServices;
 use helena\entities\backoffice as entities;
 use minga\framework\Params;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\db\frontend\SnapshotMetricModel;
 
 // ********************************* Servicios *********************************
@@ -20,7 +20,7 @@ App::$app->get('/services/backoffice/CreateWork', function (Request $request) {
 	$title = Params::GetMandatory('c');
 	$type = Params::GetMandatory('t');
 	if ($type !== 'P' && $type !== 'R')
-			throw new ErrorException('Invalid type.');
+			throw new PublicException('Tipo inválido de cartografía');
 
 	$entity = $controller->Create($type, $title);
 	return App::OrmJson($entity);
@@ -139,7 +139,7 @@ App::$app->post('/services/backoffice/UpdateStartup', function (Request $request
 	$startup = App::ReconnectJsonParamMandatory(entities\DraftWorkStartup::class, 's');
 	if ($work->getStartup()->getId() !== $startup->getId())
 	{
-		throw new ErrorException('Invalid startup.');
+		throw new PublicException('Las opciones de inicio indicadas no corresponde a la cartografía');
 	}
 	$controller = new services\WorkService();
 	return App::Json($controller->UpdateStartup($workId, $startup));

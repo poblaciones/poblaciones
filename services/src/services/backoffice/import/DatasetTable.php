@@ -7,6 +7,7 @@ use helena\classes\spss\Alignment;
 use helena\classes\spss\Format;
 use helena\classes\spss\Measurement;
 use helena\services\backoffice\cloning\SqlBuilder;
+use minga\framework\PublicException;
 use minga\framework\ErrorException;
 use minga\framework\Profiling;
 use minga\framework\Str;
@@ -190,7 +191,7 @@ class DatasetTable
 		$header = json_decode($content, TRUE);
 		$array = [];
 		if ($header === null || sizeof($header) === 0){
-			throw new ErrorException('Las columnas del archivo no pudieron ser reconocidas.');
+			throw new PublicException('Las columnas del archivo no pudieron ser reconocidas.');
 		}
 		foreach($header["varNames"] as $varName){
 			$varType = $header["varTypes"][$varName];

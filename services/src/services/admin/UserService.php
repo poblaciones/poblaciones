@@ -5,7 +5,7 @@ namespace helena\services\admin;
 use helena\caches\WorkPermissionsCache;
 use helena\classes\App;
 use helena\classes\Account;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
@@ -25,7 +25,7 @@ class UserService extends BaseService
 	public function LoginAs($userId)
 	{
 		$user = App::Orm()->find(entities\User::class, $userId);
-		if ($user === null) throw new ErrorException("Usuario no encontrado.");
+		if ($user === null) throw new PublicException("Usuario no encontrado.");
 		Account::Impersonate($user->getEmail());
 		return self::OK;
 	}
@@ -48,7 +48,7 @@ class UserService extends BaseService
 		{
 			if ($password !== $verification)
 			{
-				throw new ErrorException("La verificación no coincide con la constraseña.");
+				throw new PublicException("La verificación no coincide con la constraseña.");
 			}
 			$account = new Account();
 			$account->user = $user->getEmail();

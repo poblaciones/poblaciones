@@ -1,6 +1,6 @@
 <?php
 namespace helena\classes\spss;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 // The measurement type of the variable
 class Measurement
@@ -23,7 +23,7 @@ class Measurement
 			case self::Scale:
 				return 'ratio';
 			default:
-				throw new ErrorException('Unknown measurement code: ' . $value);
+				throw new PublicException('Tipo de medida no soportado');
 		}
 	}
 
@@ -40,7 +40,7 @@ class Measurement
 			case 'ratio':
 				return self::Scale;
 			default:
-				throw new ErrorException('Unknown measurement: ' . $value);
+				throw new PublicException('Tipo de medida no soportado');
 		}
 	}
 

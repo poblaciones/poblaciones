@@ -7,7 +7,7 @@ use helena\classes\App;
 use helena\classes\Session;
 use helena\services\backoffice as services;
 use minga\framework\Params;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\entities\backoffice as entities;
 
 
@@ -71,7 +71,7 @@ App::Post('/services/backoffice/SaveColumn', function (Request $request) {
 	if ($column->getId() > 0) {
 		$columnDataset = $column->getDataset();
 		if ($columnDataset->getId() !== $datasetId)
-			throw new ErrorException('Dataset do not match');
+			throw new PublicException('El dataset indicado no corresponde a la columna');
 	}
 	return App::OrmJson($controller->SaveColumn($datasetId, $column));
 });

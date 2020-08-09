@@ -5,7 +5,7 @@ namespace helena\services\common;
 use minga\framework\Date;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use minga\framework\IO;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Performance;
 use helena\caches\PdfMetadataCache;
 use helena\services\common\BaseService;
@@ -22,7 +22,7 @@ class MetadataService extends BaseService
 		$metadataTable = new MetadataModel();
 		$metadataFile = $metadataTable->GetMetadataFileByFileId($metadataId, $fileId);
 		if ($metadataFile == null)
-		  throw new ErrorException("Invalid file for metadata.");
+		  throw new PublicException("El adjunto no se corresponde con los metadatos indicados.");
 		$friendlyName = $metadataFile['mfi_caption'] . '.pdf';
 		$fileModel = new FileModel();
 		return $fileModel->SendFile($fileId, $friendlyName);
@@ -32,7 +32,7 @@ class MetadataService extends BaseService
 	{
 		$model = new MetadataModel($fromDraft);
 		$metadata = $model->GetMetadata($metadataId);
-		if ($metadata === null || sizeof($metadata) < 2) throw new ErrorException('Metadatos no encontrados.');
+		if ($metadata === null || sizeof($metadata) < 2) throw new PublicException('Metadatos no encontrados.');
 		$friendlyName = $metadata['met_title'] . '.pdf';
 
 		// se fija en el caché

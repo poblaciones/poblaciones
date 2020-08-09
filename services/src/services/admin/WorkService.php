@@ -5,7 +5,7 @@ namespace helena\services\admin;
 use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\services\backoffice\publish\PublishSnapshots;
 use helena\services\backoffice\publish\PublishDataTables;
 
@@ -21,7 +21,7 @@ class WorkService extends BaseService
 		$workIdShardified = PublishDataTables::Shardified($workId);
 		$work = App::Orm()->find(entities\Work::class, $workIdShardified);
 		if ($value && $work->getAccessLink()) {
-			throw new ErrorException("No se puede indexar una cartografía con visibilidad por enlace.");
+			throw new PublicException("No se puede indexar una cartografía con visibilidad por enlace.");
 		}
 		if ($work !== null) {
 			$work->setIsIndexed($value);
@@ -43,7 +43,7 @@ class WorkService extends BaseService
 		$workIdShardified = PublishDataTables::Shardified($workId);
 		$work = App::Orm()->find(entities\Work::class, $workIdShardified);
 		if ($value && $work->getAccessLink()) {
-			throw new ErrorException("No se puede indexar una cartografía con visibilidad por enlace.");
+			throw new PublicException("No se puede indexar una cartografía con visibilidad por enlace.");
 		}
 		if ($work !== null) {
 			$work->setSegmentedCrawling($value);

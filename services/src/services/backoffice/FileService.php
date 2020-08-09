@@ -7,7 +7,7 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\PdfReader;
 use minga\framework\FileBucket;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class FileService extends BaseService
 {
@@ -53,7 +53,7 @@ class FileService extends BaseService
 		App::Db()->exec("DELETE FROM " . $this->makeTableName('file_chunk', $toDrafts) . " WHERE chu_file_id = ?", array($fileId));
 		$unread = filesize($tempFilename);
 		if (!file_exists($tempFilename))
-			throw new ErrorException('No se ha transferido correctamente el archivo al servidor.');
+			throw new PublicException('No se ha transferido correctamente el archivo al servidor.');
 		$handle = fopen($tempFilename, "rb");
 
 		while($unread > 0)

@@ -2,7 +2,7 @@
 
 namespace helena\services\backoffice\metrics;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Profiling;
 
 // Migrated from:

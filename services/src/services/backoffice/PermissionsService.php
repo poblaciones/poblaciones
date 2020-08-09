@@ -9,7 +9,7 @@ use helena\classes\Session;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\Profiling;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\db\frontend\UserModel;
 
 class PermissionsService extends BaseService
@@ -63,7 +63,7 @@ class PermissionsService extends BaseService
 			case 'A':
 				return 'para administrar';
 			default:
-				throw new ErrorException('Tipo de permiso no reconocida.');
+				throw new PublicException('Tipo de permiso no reconocido.');
 		}
 	}
 	public static function GetTypeLabel($work)
@@ -77,7 +77,7 @@ class PermissionsService extends BaseService
 			case 'M':
 				return 'el mapeo';
 			default:
-				throw new ErrorException('Tipo de obra no reconocida.');
+				throw new PublicException('Tipo de cartografía no reconocida.');
 		}
 	}
 	public function NotifyPermission($work, $userEmail, $permission)

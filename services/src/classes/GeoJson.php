@@ -3,7 +3,7 @@
 namespace helena\classes;
 
 use minga\framework\Str;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use Location\Processor\Polyline\SimplifyDouglasPeucker;
 use Location\Line;
@@ -185,7 +185,7 @@ class GeoJson
 	*/
 	private static function ProjectLocation($point)
 	{
-		if (sizeof($point) !== 2) throw new ErrorException('Invalid argument to project.');
+		if (sizeof($point) !== 2) throw new PublicException('La coordenada no se encuentra completa.');
 		$lng = $point[0];
 		$lat = $point[1];
 
@@ -245,8 +245,10 @@ class GeoJson
 			return "Multilinestring";
 		elseif(Str::StartsWith($text, "LINESTRING"))
 			return "Linestring";
+		elseif(Str::StartsWith($text, "POINT"))
+			return "Point";
 		else
-			throw new ErrorException('Unsupported GeoType');
+			throw new PublicException('Tipo geográfico no soportado');
 	}
 
 	function GeoTextToArray($text)

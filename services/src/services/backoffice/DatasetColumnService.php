@@ -2,7 +2,7 @@
 
 namespace helena\services\backoffice;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\MessageException;
 use minga\framework\Profiling;
 
@@ -57,7 +57,7 @@ class DatasetColumnService extends DbSession
 		$field = $column->getField();
 		$type = $column->getFormat();
 		if ($type !== Format::A)
-			throw new ErrorException("No es posible cambiar el tamaño de un campo numérico");
+			throw new PublicException("No es posible cambiar el tamaño de un campo numérico");
 		// Reduce tamaños
 		$sqlFixLengths = "UPDATE " . $table . " SET " . $field . " = LEFT(" . $field . ", " . $newSize . ") WHERE
 																		LENGTH(" . $field . ") > " . $newSize;
@@ -282,7 +282,7 @@ class DatasetColumnService extends DbSession
 		{
 			// Valida name
 			if ($this->ColumnExists($dataset->getId(), $name))
-				throw new ErrorException("Ya existe una variable con el nombre '" . $name . "'.");
+				throw new PublicException("Ya existe una variable con el nombre '" . $name . "'.");
 
 			$field = $this->resolveUniqueFieldName($dataset->getId(), $originalField);
 			$caption = $label;
@@ -461,7 +461,7 @@ class DatasetColumnService extends DbSession
 		$dataset= App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		$col = App::Orm()->find(entities\DraftDatasetColumn::class, $columnId);
 		if ($col->getDataset()->getId() != $datasetId)
-			throw new ErrorException('Invalid column Id.');
+			throw new PublicException('El dataset no se corresponde con la columna indicada');
 		$field = "`" . $col->getField() . "`";
 		$rows = App::Db()->fetchAll("
 						SELECT null Id, (@rowNumber := @rowNumber + 1) AS Value, Caption, @rowNumber AS `Order`, Count FROM (
@@ -481,7 +481,7 @@ class DatasetColumnService extends DbSession
 		{
 			$col = App::Orm()->find(entities\DraftDatasetColumn::class, $id);
 			if ($col->getDataset()->getId() != $datasetId)
-				throw new ErrorException('Invalid column Id.');
+				throw new PublicException('Invalid column Id.');
 			$col->setOrder($order);
 			App::Orm()->save($col);
 		}

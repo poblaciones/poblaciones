@@ -7,7 +7,7 @@ use minga\framework\Log;
 use minga\framework\Str;
 use minga\framework\PhpSession;
 use minga\framework\Context;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\FileBucket;
 
 class StateBag
@@ -52,13 +52,13 @@ class StateBag
 	public function LoadFromKey($key)
 	{
 		if ($key == "")
-			throw new ErrorException('Key cannot be null.');
+			throw new PublicException('No se ha indicado el identificador de datos del proceso.');
 		if (Str::Contains($key, "..") || Str::Contains($key, "/") || Str::Contains($key, "\\") || Str::Contains($key, " "))
-			throw new ErrorException('Invalid key.');
+			throw new PublicException('El identificador de datos del proceso no es válido.');
 		$bucket = FileBucket::Load($key);
 		$folder = $bucket->GetBucketFolder();
 		if(is_dir($folder) == false)
-			throw new ErrorException('El proceso está finalizado. Por favor, recomience nuevamente la operación.');
+			throw new PublicException('El proceso está finalizado. Por favor, recomience nuevamente la operación.');
 
 		$this->state = IO::ReadJson($folder . '/' . self::STATE_FILE);
 		Log::AppendExtraInfo($this->state);
@@ -66,10 +66,6 @@ class StateBag
 		IO::Delete($this->ErrorFile());
 
 		Log::$extraErrorTarget = $this->ErrorFile();
-//		if ($this->state['sid'] !== PhpSession::SessionId() && $this->state['sid'] != "")
-	//	{
-		//	throw new ErrorException('Session mismatched in stateBag.');
-	//	}
 	}
 	private function ErrorFile()
 	{

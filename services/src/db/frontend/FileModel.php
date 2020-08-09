@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use helena\classes\App;
 use minga\framework\Profiling;
 use minga\framework\IO;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class FileModel extends BaseModel
 {

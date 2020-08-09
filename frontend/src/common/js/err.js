@@ -59,7 +59,7 @@ module.exports = {
 		var post = '';
 		if (err.response && err.response.data) {
 			var msgtext = err.response.data.trim();
-			if (msgtext.startsWith('[ME-E]:')) {
+			if (msgtext.startsWith('[PE-E]:')) {
 				post = ' ' + msgtext.substr(7);
 				if (!post.endsWith('.')) {
 					post += '.';

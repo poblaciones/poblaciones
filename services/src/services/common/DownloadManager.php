@@ -2,7 +2,7 @@
 
 namespace helena\services\common;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Str;
 
 use helena\classes\writers\SpssWriter;
@@ -108,7 +108,7 @@ class DownloadManager
 		if ($cache->HasData($datasetId, $cacheKey, $filename, true))
 			return App::StreamFile($filename, $friendlyName);
 		else
-			throw new ErrorException('File must be created before.');
+			throw new PublicException('No ha sido posible descargar el archivo.');
 	}
 
 	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type)
@@ -126,7 +126,7 @@ class DownloadManager
 		elseif($type[0] == 'h')
 			$ext = 'zip';
 		else
-			throw new ErrorException('Tipo de archivo inválido');
+			throw new PublicException('Tipo de archivo inválido');
 
 		$name = 'dataset' . $datasetId . $type;
 		if (is_array($clippingItemId))
@@ -162,7 +162,7 @@ class DownloadManager
 			return $this->state->ReturnState(false);
 
 		if (!file_exists($this->state->Get('outFile')) || filesize($this->state->Get('outFile')) == 0)
-			throw new ErrorException("No fue posible generar el archivo (" . $this->state->Get('cacheKey') . ").");
+			throw new PublicException("No fue posible generar el archivo.");
 
 		$cache = self::getCache($this->state->FromDraft());
 		$cache->PutData($this->state->Get('datasetId'), $this->state->Get('cacheKey'), $this->state->Get('outFile'));
@@ -196,7 +196,7 @@ class DownloadManager
 					return;
 			}
 		}
-		throw new ErrorException('Tipo de descarga inválido');
+		throw new PublicException('Tipo de descarga inválido');
 	}
 
 	private static function ValidateClippingItem($clippingItemIds)
@@ -207,7 +207,7 @@ class DownloadManager
 			{
 				$model = new ClippingRegionItemModel();
 				if(is_numeric($clippingItemId) == false || $model->Exists($clippingItemId) == false)
-					throw new ErrorException('ClippingRegionItem no encontrada');
+					throw new PublicException('La región indicada no fue encontrada');
 			}
 		}
 	}
@@ -262,7 +262,7 @@ class DownloadManager
 		else if ($this->state->Get('type')[0] == 'c')
 			return self::FILE_CSV;
 		else
-			throw new ErrorException('Tipo de descarga no reconocido');
+			throw new PublicException('Tipo de descarga no reconocido');
 	}
 	private function getWriter($fileType)
 	{
@@ -277,7 +277,7 @@ class DownloadManager
 		else if ($fileType === self::FILE_SHP)
 			return new ShpWriter($this->model, $this->state);
 		else
-			throw new ErrorException('Tipo de escritura no reconocida');
+			throw new PublicException('Tipo de archivo de descarga no reconocido');
 	}
 
 	private function CreateNextFilePart()

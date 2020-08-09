@@ -12,7 +12,7 @@ use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 
 class SummaryService extends BaseService
@@ -26,7 +26,7 @@ class SummaryService extends BaseService
 
 		if ($frame->ClippingRegionIds == NULL
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
-			throw new ErrorException("A spatial indication must be specified (envelope, circle or region).");
+			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 
 		$key = SummaryCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity);
 

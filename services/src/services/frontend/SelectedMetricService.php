@@ -10,7 +10,7 @@ use helena\db\frontend\MetricVersionModel;
 use helena\db\frontend\VariableModel;
 use helena\db\frontend\VariableValueLabelModel;
 use helena\entities\frontend\geometries\Envelope;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Arr;
 use minga\framework\Profiling;
 
@@ -124,7 +124,7 @@ class SelectedMetricService extends BaseService
 		if (sizeof($selectedMetric->Versions) == 0)
 		{
 			if ($throwError)
-				throw new ErrorException('El indicador seleccionado no posee información.');
+				throw new PublicException('El indicador seleccionado no posee información.');
 			else return null;
 		}
 
@@ -191,7 +191,7 @@ class SelectedMetricService extends BaseService
 					$level->HasDescriptions = true;
 			}
 			else
-				throw new ErrorException('Unknown dataset type: ' . $selectedVersionInfo->Dataset->Type);
+				throw new PublicException('El tipo de dataset no es válido');
 			$selectedVersionInfo->Levels[] = $level;
 		}
 		// Recorre los levels quitando límites de zoom no cubiertos

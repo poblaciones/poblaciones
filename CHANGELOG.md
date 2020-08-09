@@ -5,6 +5,8 @@
 - Cálculo esférico para área de polígono.
 - Variable Área en km2.
 - Fix: importación de archivos SPSS con variables con caracteres extendidos (ej. tildes).
+- Se muestran mensaje de error al usuario más específicos (cuando están disponibles).
+- Soporte a caracter | como delimitador de archivos CSV
 
 v2.27 (2020-08-03)
 - Fix: descargas desde cartografía pública por link fallaban.

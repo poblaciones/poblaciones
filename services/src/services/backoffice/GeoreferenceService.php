@@ -15,7 +15,7 @@ use helena\services\backoffice\georeference\GeoreferenceAttributes;
 use helena\services\backoffice\georeference\GeoreferenceByLatLon;
 use helena\services\backoffice\georeference\GeoreferenceByCodes;
 use helena\services\backoffice\georeference\GeoreferenceByShapes;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class GeoreferenceService extends BaseService
 {
@@ -151,7 +151,7 @@ class GeoreferenceService extends BaseService
 				$done = true;
 				break;
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 		}
 		$this->state->Save();
 		Profiling::EndTimer();
@@ -305,7 +305,7 @@ class GeoreferenceService extends BaseService
 				$status = GeoreferenceAttributes::GEO_STEP_END;
 				break;
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 		}
 		$service = new GeoreferenceAttributes();
 		$service->SetGeoreferencingStatus($this->state->GetDatasetId(), $status);
@@ -327,7 +327,7 @@ class GeoreferenceService extends BaseService
 			case self::GEO_SHAPES:
 				return new GeoreferenceByShapes($this->state);
 			default:
-				throw new ErrorException('Invalid type');
+				throw new PublicException('Tipo de georreferenciación no reconocida');
 		}
 	}
 	private function GetDatasetType()
@@ -341,7 +341,7 @@ class GeoreferenceService extends BaseService
 			case self::GEO_SHAPES:
 				return 'S';
 			default:
-				throw new ErrorException('Invalid type');
+				throw new PublicException('Tipo de georreferenciación inválida');
 		}
 	}
 	private function LoadState($key)
@@ -381,7 +381,7 @@ class GeoreferenceService extends BaseService
 				$step = self::STEP_UPDATING;
 				break;
 			default:
-				throw new ErrorException('Invalid status.');
+				throw new PublicException('La georrefenciación está en un estado inválida. Deberá recomenzar con la misma.');
 		}
 		return $step;
 	}

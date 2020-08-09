@@ -13,7 +13,7 @@ use helena\classes\Session;
 use helena\classes\Links;
 use helena\entities\frontend\geometries\Envelope;
 use helena\services\frontend\SelectedMetricService;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\services\frontend\WorkService;
 use helena\db\frontend\ClippingRegionItemModel;
 use minga\framework\Profiling;
@@ -43,7 +43,7 @@ class cHandle extends cPublicController
 		$parts = explode('/', $uri);
 		array_shift($parts);
 		if ($parts[0] !== 'handle')
-			throw new ErrorException("Ruta inválida.");
+			throw new PublicException("Ruta inválida.");
 		array_shift($parts);
 		// Al último le saca el posible sufijo textual
 		$last = sizeof($parts) - 1;

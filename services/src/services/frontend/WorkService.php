@@ -2,7 +2,7 @@
 
 namespace helena\services\frontend;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\entities\frontend\work\WorkInfo;
 use helena\services\common\BaseService;
 use helena\classes\Links;
@@ -33,7 +33,7 @@ class WorkService extends BaseService
 		$worksTable = new WorkModel();
 		$work = $worksTable->GetWork($workId);
 		if (!$work) {
-			throw new ErrorException("La cartografía no ha sido encontrada.");
+			throw new PublicException("La cartografía no ha sido encontrada.");
 		}
 		$ret = new WorkInfo();
 		$ret->CanEdit = Session::IsWorkEditor($workId);

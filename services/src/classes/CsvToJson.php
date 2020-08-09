@@ -2,7 +2,7 @@
 
 namespace helena\classes;
 
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\classes\spss\Variable;
 use minga\framework\Str;
 
@@ -191,7 +191,7 @@ class CsvToJson
 			return 'nominal';
 		//Implementar ratio y scale??
 
-		throw new ErrorException('MeasureLevel not implemented: ' . $varFormat);
+		throw new PublicException('El nivel de medida indicado no está soportado (' . $varFormat . ')');
 	}
 
 	private static function GetVarFormatsParts(array $col, $lengths, $isNumberList, $prev, $varName)
@@ -267,7 +267,7 @@ class CsvToJson
 		else if($varFormat[0] == 'A')
 			return (int)substr($varFormat, 1);
 		else
-			throw new ErrorException('VarType not implemented: ' . $varFormat);
+			throw new PublicException('El tipo de variable indicado no está soportado (' . $varFormat . ')');
 	}
 
 	/**
@@ -370,7 +370,7 @@ class CsvToJson
 			if(in_array($newName, $names) == false)
 				return $newName;
 		}
-		throw new ErrorException('Could not find new name');
+		throw new PublicException('No ha sido posible calcular un nuevo nombre');
 	}
 
 }

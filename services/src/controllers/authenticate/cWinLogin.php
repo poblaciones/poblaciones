@@ -6,7 +6,7 @@ use helena\controllers\common\cController;
 use helena\classes\Session;
 use helena\classes\App;
 use minga\framework\Context;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Params;
 
 class cWinLogin extends cController
@@ -19,10 +19,10 @@ class cWinLogin extends cController
 		if (Session::IsMegaUser() === false)
 		{
 			Session::Logoff();
-			throw new ErrorException('El usuario debe ser administrador.');
+			throw new PublicException('El usuario debe ser administrador.');
 		}
 		if ($login !== "ok")
-			throw new ErrorException($login);
+			throw new PublicException($login);
 
 		$ret = array();
 		$extra = array();
@@ -55,7 +55,7 @@ class cWinLogin extends cController
 		);
 		$whiteList = array_merge($localList, Context::Settings()->Servers()->RemoteLoginWhiteList);
 		if(!in_array($_SERVER['REMOTE_ADDR'], $whiteList)){
-			throw new ErrorException('El método debe ser invocado localmente o desde una dirección permitida en el archivo de configuración del servidor (Context::Settings()->Servers()->RemoteLoginWhiteList = array(.., ..)).');
+			throw new PublicException('El método debe ser invocado localmente o desde una dirección permitida en el archivo de configuración del servidor (Context::Settings()->Servers()->RemoteLoginWhiteList = array(.., ..)).');
 		}
 	}
 }

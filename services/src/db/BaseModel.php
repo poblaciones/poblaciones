@@ -31,7 +31,7 @@ class BaseModel
 	{
 		if ($this->fromDraft === null)
 		{
-			throw new ErrorException('Debe indicarse el modo de draft');
+			throw new ErrorException('Debe indicarse el modo de trabajo (borrador/publicado)');
 		}
 		if ($this->fromDraft)
 			return 'draft_' . $table;

@@ -9,7 +9,7 @@ use helena\entities\frontend\geometries\Envelope;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
 use helena\classes\DatasetTypeEnum;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\db\admin\WorkModel;
 
 class SnapshotByDatasetModel
@@ -23,7 +23,7 @@ class SnapshotByDatasetModel
 		$dataset = $workModel->GetDataset($datasetIdShardified);
 
 		if (sizeof($dataset) == 0 || $dataset == null)
-			throw new ErrorException("Dataset no encontrado");
+			throw new PublicException("Dataset no encontrado");
 
 		$columns = $this->BuildHeaders($dataset);
 
@@ -220,7 +220,7 @@ class SnapshotByDatasetModel
 			$location = $point;
 		}
 		else
-			throw new ErrorException("Invalid dataset type.");
+			throw new PublicException("Tipo de dataset no reconocido.");
 
 		$columns[] = ['sna_envelope', 'polygon NOT NULL', "PolygonEnvelope(" . $envelopeTarget . ")"];
 		$columns[] = ['sna_location', 'point NOT NULL', $location];

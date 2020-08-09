@@ -4,7 +4,7 @@ namespace helena\db\frontend;
 
 use minga\framework\QueryPart;
 use minga\framework\Profiling;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Str;
 
 class SpatialConditions
@@ -133,7 +133,7 @@ class SpatialConditions
 			$select = "giw_geometry_r" . $rZoom . " as value";
 		}
 		else
-			throw new ErrorException("Invalid datasetType " . $datasetType);
+			throw new PublicException("El tipo de dataset no fue reconocido");
 
 		return new QueryPart($from, $where, $params, $select);
 	}
@@ -163,14 +163,14 @@ class SpatialConditions
 				$circle->RadiusToMysqlPoint() . ", giw_geometry_r3))";
 		}
 		else
-			throw new ErrorException("Invalid datasetType " + $effectiveDatasetType);
+			throw new PublicException("El tipo de dataset no fue reconocido");
 		return $sql;
 	}
 
 	public function UrbanityCondition($urbanity)
 	{
 		$field = $this->preffix . "_urbanity";
-		if (strlen($urbanity) > 4) throw new ErrorException('Valor inválido para ' . $urbanity);
+		if (strlen($urbanity) > 4) throw new PublicException('Valor inválido para urbanidad/ruralidad');
 		if ($urbanity === null) return '';
 		$sql = $field . " IN ('N'";
 		foreach(['U', 'D', 'R', 'L'] as $validFilter)

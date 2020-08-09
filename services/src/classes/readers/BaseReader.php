@@ -3,7 +3,7 @@
 namespace helena\classes\readers;
 
 use minga\framework\IO;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class BaseReader
 {
@@ -33,7 +33,7 @@ class BaseReader
 		else if ($fileExtension == "kml" || $fileExtension == "kmz")
 			return new KmxReader($path, $fileExtension);
 		else
-			throw new ErrorException('La extensión del archivo debe ser SAV, CSV, KML o KMZ. Extensión recibida: ' . $fileExtension);
+			throw new PublicException('La extensión del archivo debe ser CSV, TXT, XLSX, XLS, SAV, KML o KMZ. Extensión recibida: ' . $fileExtension);
 	}
 
 	public function Prepare($sheetName)

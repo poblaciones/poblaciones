@@ -13,7 +13,7 @@ use helena\services\backoffice\publish\RevokeSnapshots;
 use helena\db\admin\WorkModel;
 use helena\classes\App;
 use helena\entities\backoffice as entities;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class PublishService extends BaseService
 {
@@ -121,7 +121,7 @@ class PublishService extends BaseService
 				$this->state->NextStep('Listo');
 				break;
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 		}
 
 		$done = ($this->state->Step() == self::STEP_COMPLETED);

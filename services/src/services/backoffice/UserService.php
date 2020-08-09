@@ -7,7 +7,7 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use helena\classes\Account;
 use minga\framework\Date;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 class UserService extends BaseService
 {
@@ -16,7 +16,7 @@ class UserService extends BaseService
 		$userId = Account::Current()->GetUserId();
 		$user = App::Orm()->find(entities\User::class, $userId);
 		if ($user == null)
-			throw new ErrorException('No current user is active.');
+			throw new PublicException('No hay ningún usuario activo.');
 		return $user;
 	}
 	public function GetOrCreate($email)

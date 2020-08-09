@@ -5,7 +5,7 @@ namespace helena\services\backoffice\cloning;
 use helena\classes\App;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\publish\WorkFlags;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use helena\services\backoffice\import\MetadataMerger;
 use minga\framework\Arr;
 use minga\framework\Str;
@@ -43,7 +43,7 @@ class DatasetClone
 		$maxPreviousId = 0;
 		$this->dataset = App::Orm()->find(entities\DraftDataset::class, $this->sourceDatasetId);
 		if ($this->dataset === null)
-			throw new ErrorException('Dataset no encontrado');
+			throw new PublicException('Dataset no encontrado');
 		// 1. Crea tabla de datos (esto no transacciona por ser DDL)
 		$this->CopyWorkDatasetTables();
 

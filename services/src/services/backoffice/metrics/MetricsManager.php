@@ -4,7 +4,7 @@ namespace helena\services\backoffice\metrics;
 
 use minga\framework\Str;
 use minga\framework\Arr;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\MessageException;
 use minga\framework\Profiling;
 

@@ -6,7 +6,7 @@ use minga\framework\IO;
 use minga\framework\Log;
 use minga\framework\Str;
 use minga\framework\FileBucket;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 use helena\classes\readers\BaseReader;
 
@@ -110,7 +110,7 @@ class ImportService extends BaseService
 					return $this->UpdateMetadata();
 				}
 			default:
-				throw new ErrorException('Invalid step.');
+				throw new PublicException('Paso inválido.');
 		}
 	}
 

@@ -4,7 +4,7 @@ namespace helena\classes\writers;
 
 use minga\framework\IO;
 use minga\framework\Log;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 use minga\framework\Str;
 use minga\framework\System;
 use helena\classes\Paths;

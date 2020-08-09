@@ -2,7 +2,7 @@
 namespace helena\classes\spss;
 
 use helena\classes\spss\Format;
-use minga\framework\ErrorException;
+use minga\framework\PublicException;
 
 // The print/write format for the data.
 // For more info on this see http://www.ibm.com/support/knowledgecenter/SSLVMB_20.0.0/com.ibm.spss.statistics.help/syn_variables_variable_formats.htm
@@ -63,7 +63,7 @@ class Format
 			case self::F:
 				return 'F';
 			default:
-				throw new ErrorException('Unknown format: ' . $value);
+				throw new PublicException('Format de columna no soportado');
 		}
 	}
 
@@ -76,7 +76,7 @@ class Format
 			case 'F':
 				return self::F;
 			default:
-				throw new ErrorException('Format not supported: ' . $value);
+				throw new PublicException('Format de columna no soportado');
 		}
 	}
 }
