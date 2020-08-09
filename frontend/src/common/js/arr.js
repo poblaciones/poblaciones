@@ -107,6 +107,10 @@ module.exports = {
 			this.RemoveAt(arr, index);
 			// inserta
 			this.InsertAt(arr, index - 1, tmp);
+			// intercambia los valores de order
+			var orderTmp = arr[index].Order;
+			arr[index].Order = arr[index - 1].Order;
+			arr[index - 1].Order = orderTmp;
 			return true;
 		}
 		return false;
@@ -122,6 +126,10 @@ module.exports = {
 			this.RemoveAt(arr, index);
 			// inserta
 			this.InsertAt(arr, index + 1, tmp);
+			// intercambia los valores de order
+			var orderTmp = arr[index].Order;
+			arr[index].Order = arr[index + 1].Order;
+			arr[index + 1].Order = orderTmp;
 			return true;
 		}
 		return false;

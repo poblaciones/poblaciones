@@ -32,7 +32,7 @@ class ClippingServiceTest extends TestCase
 		$frame = new Frame();
 		$frame->Zoom = $z;
 		$frame->Envelope =  Envelope::TextDeserialize($e);
-		$frame->ClippingRegionId = ($r !== null ? array($r) : null);
+		$frame->ClippingRegionIds = ($r !== null ? array($r) : null);
 		$frame->ClippingCircle = Circle::TextDeserialize($c);
 		$frame->ClippingFeatureId = null;
 

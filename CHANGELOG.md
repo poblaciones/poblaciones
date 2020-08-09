@@ -1,4 +1,10 @@
 [CURRENT]
+- Fix: backoffice: renombrar variable producía error si el dataset mostraba los datos ordenados por esa variable.
+- Fix: cambiar el order de adjuntos, variables o fuentes hacía fallar la edición posterior sin recargar antes la página.
+- Fix: Kml/Kmz/Csv: la importación fallaba por saltos de línea en los contenidos.
+- Cálculo esférico para área de polígono.
+- Variable Área en km2.
+- Fix: importación de archivos SPSS con variables con caracteres extendidos (ej. tildes).
 
 v2.27 (2020-08-03)
 - Fix: descargas desde cartografía pública por link fallaban.

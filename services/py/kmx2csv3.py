@@ -11,7 +11,6 @@ import traceback
 import unicodecsv as csv
 import os
 import sys
-import re
 import io
 from string import capwords
 
@@ -30,7 +29,7 @@ def main():
 				sys.argv.append('true')
 		if len(sys.argv) == 5:
 				sys.argv.append('all')
-		#print(f'Args: {sys.argv[0]} - {sys.argv[1]} - {sys.argv[2]} - {sys.argv[3]} - {sys.argv[4]} - {sys.argv[5]}')
+
 		try:
 				file_extension = sys.argv[1]
 				in_file = sys.argv[2]

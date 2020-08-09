@@ -248,6 +248,7 @@ class DatasetService extends DbSession
 		$where = "";
 		$tmpdatafield = "";
 		$tmpfilteroperator = "";
+
 		for ($i=0; $i < $filterscount; $i++)
 		{
 			$filtervalue = Params::Get("filtervalue" . $i);
@@ -255,98 +256,19 @@ class DatasetService extends DbSession
 			$filtervariable = Params::Get("filterdatafield" . $i);
 			$filteroperator = Params::Get("filteroperator" . $i);
 			if ($filtervariable === 'internal__Err')
-			{
 				$filterdatafield = 'GeoreferenceErrorWithCode(error_code)';
-			}
 			else
 				$filterdatafield = $this->GetFieldFromVariable($datasetId, $filtervariable);
 
-			if ($tmpdatafield === '')
+			if ($filterdatafield !== null)
 			{
-				$tmpdatafield = $filterdatafield;
-				$where .= "(";
+				$this->AddFilterToQuery($tmpdatafield, $tmpfilteroperator, $where,
+						$filtervalue, $filtercondition, $filtervariable, $filteroperator, $filterdatafield);
 			}
-			else if ($tmpdatafield !== $filterdatafield)
-			{
-				$where .= ") AND (";
-			}
-			else if ($tmpdatafield === $filterdatafield)
-			{
-				if ($tmpfilteroperator === "0")
-				{
-					$where .= " AND ";
-				}
-				else $where .= " OR ";
-			}
-			else $where .= "(";
-
-			// build the "WHERE" clause depending on the filter's condition, value and datafield.
-			switch($filtercondition)
-			{
-				case "CONTAINS":
-					$where .= " " . $filterdatafield . " LIKE '%" . $filtervalue . "%'";
-					break;
-				case "CONTAINS_CASE_SENSITIVE":
-					$where .= " " . $filterdatafield . " LIKE BINARY '%" . $filtervalue . "%'";
-					break;
-				case "DOES_NOT_CONTAIN":
-					$where .= " " . $filterdatafield . " NOT LIKE '%" . $filtervalue . "%'";
-					break;
-				case "DOES_NOT_CONTAIN_CASE_SENSITIVE":
-					$where .= " " . $filterdatafield . " NOT LIKE BINARY '%" . $filtervalue . "%'";
-					break;
-				case "EQUAL":
-					$where .= " " . $filterdatafield . " = '" . $filtervalue . "'";
-					break;
-				case "EQUAL_CASE_SENSITIVE":
-					$where .= " " . $filterdatafield . " LIKE BINARY '" . $filtervalue . "'";
-					break;
-				case "NOT_EQUAL":
-					$where .= " " . $filterdatafield . " NOT LIKE '" . $filtervalue . "'";
-					break;
-				case "NOT_EQUAL_CASE_SENSITIVE":
-					$where .= " " . $filterdatafield . " NOT LIKE BINARY '" . $filtervalue . "'";
-					break;
-				case "GREATER_THAN":
-					$where .= " " . $filterdatafield . " > '" . $filtervalue . "'";
-					break;
-				case "LESS_THAN":
-					$where .= " " . $filterdatafield . " < '" . $filtervalue . "'";
-					break;
-				case "GREATER_THAN_OR_EQUAL":
-					$where .= " " . $filterdatafield . " >= '" . $filtervalue . "'";
-					break;
-				case "LESS_THAN_OR_EQUAL":
-					$where .= " " . $filterdatafield . " <= '" . $filtervalue . "'";
-					break;
-				case "STARTS_WITH":
-					$where .= " " . $filterdatafield . " LIKE '" . $filtervalue . "%'";
-					break;
-				case "STARTS_WITH_CASE_SENSITIVE":
-					$where .= " " . $filterdatafield . " LIKE BINARY '" . $filtervalue . "%'";
-					break;
-				case "ENDS_WITH":
-					$where .= " " . $filterdatafield . " LIKE '%" . $filtervalue . "'";
-					break;
-				case "ENDS_WITH_CASE_SENSITIVE":
-					$where .= " " . $filterdatafield . " LIKE BINARY '%" . $filtervalue . "'";
-					break;
-				case "NULL":
-					$where .= " " . $filterdatafield . " IS NULL";
-					break;
-				case "NOT_NULL":
-					$where .= " " . $filterdatafield . " IS NOT NULL";
-					break;
-			}
-			if ($i === $filterscount - 1)
-			{
-				$where .= ")";
-			}
-			$tmpfilteroperator = $filteroperator;
-			$tmpdatafield = $filterdatafield;
 		}
+		$where .= ")";
 
-		if ($where === "()")
+		if ($where === "()" || $where === ")")
 			$where = "";
 		else if ($where !== "")
 			$where = "AND (" . $where . ")";
@@ -354,16 +276,100 @@ class DatasetService extends DbSession
 		return $where;
 	}
 
+	private function AddFilterToQuery(&$tmpdatafield, &$tmpfilteroperator, &$where,
+					$filtervalue, $filtercondition, $filtervariable, $filteroperator, $filterdatafield)
+	{
+		if ($tmpdatafield === '')
+		{
+			$tmpdatafield = $filterdatafield;
+			$where .= "(";
+		}
+		else if ($tmpdatafield !== $filterdatafield)
+		{
+			$where .= ") AND (";
+		}
+		else if ($tmpdatafield === $filterdatafield)
+		{
+			if ($tmpfilteroperator === "0")
+				$where .= " AND ";
+			else
+				$where .= " OR ";
+		}
+		else $where .= "(";
+
+		// build the "WHERE" clause depending on the filter's condition, value and datafield.
+		switch($filtercondition)
+		{
+			case "CONTAINS":
+				$where .= " " . $filterdatafield . " LIKE '%" . $filtervalue . "%'";
+				break;
+			case "CONTAINS_CASE_SENSITIVE":
+				$where .= " " . $filterdatafield . " LIKE BINARY '%" . $filtervalue . "%'";
+				break;
+			case "DOES_NOT_CONTAIN":
+				$where .= " " . $filterdatafield . " NOT LIKE '%" . $filtervalue . "%'";
+				break;
+			case "DOES_NOT_CONTAIN_CASE_SENSITIVE":
+				$where .= " " . $filterdatafield . " NOT LIKE BINARY '%" . $filtervalue . "%'";
+				break;
+			case "EQUAL":
+				$where .= " " . $filterdatafield . " = '" . $filtervalue . "'";
+				break;
+			case "EQUAL_CASE_SENSITIVE":
+				$where .= " " . $filterdatafield . " LIKE BINARY '" . $filtervalue . "'";
+				break;
+			case "NOT_EQUAL":
+				$where .= " " . $filterdatafield . " NOT LIKE '" . $filtervalue . "'";
+				break;
+			case "NOT_EQUAL_CASE_SENSITIVE":
+				$where .= " " . $filterdatafield . " NOT LIKE BINARY '" . $filtervalue . "'";
+				break;
+			case "GREATER_THAN":
+				$where .= " " . $filterdatafield . " > '" . $filtervalue . "'";
+				break;
+			case "LESS_THAN":
+				$where .= " " . $filterdatafield . " < '" . $filtervalue . "'";
+				break;
+			case "GREATER_THAN_OR_EQUAL":
+				$where .= " " . $filterdatafield . " >= '" . $filtervalue . "'";
+				break;
+			case "LESS_THAN_OR_EQUAL":
+				$where .= " " . $filterdatafield . " <= '" . $filtervalue . "'";
+				break;
+			case "STARTS_WITH":
+				$where .= " " . $filterdatafield . " LIKE '" . $filtervalue . "%'";
+				break;
+			case "STARTS_WITH_CASE_SENSITIVE":
+				$where .= " " . $filterdatafield . " LIKE BINARY '" . $filtervalue . "%'";
+				break;
+			case "ENDS_WITH":
+				$where .= " " . $filterdatafield . " LIKE '%" . $filtervalue . "'";
+				break;
+			case "ENDS_WITH_CASE_SENSITIVE":
+				$where .= " " . $filterdatafield . " LIKE BINARY '%" . $filtervalue . "'";
+				break;
+			case "NULL":
+				$where .= " " . $filterdatafield . " IS NULL";
+				break;
+			case "NOT_NULL":
+				$where .= " " . $filterdatafield . " IS NOT NULL";
+				break;
+		}
+		$tmpfilteroperator = $filteroperator;
+		$tmpdatafield = $filterdatafield;
+	}
+
 	private function resolveJqxGridOrderBy($datasetId)
 	{
-		$orderby = "";
 		$sortvariable = Params::Get("sortdatafield");
-		if ($sortvariable === null) return '';
+		if ($sortvariable === null) return "";
 		if ($sortvariable === 'internal__Err')
 		{
 			$sortdatafield = 'error_code';
 		} else {
 			$sortdatafield = $this->GetFieldFromVariable($datasetId, $sortvariable);
+			if ($sortdatafield === null)
+				return "";
 		}
 		$sortorder = Params::Get("sortorder", 'asc');
 		if ($sortorder !== "asc" && $sortorder !== "desc")
@@ -379,7 +385,7 @@ class DatasetService extends DbSession
 		// Obtiene el campo para la variable
 		$params = array($datasetId, $variable);
 		$sql = "SELECT dco_field FROM draft_dataset_column where dco_dataset_id = ? and dco_variable = ? LIMIT 1";
-		$ret = App::Db()->fetchScalar($sql, $params);
+		$ret = App::Db()->fetchScalarNullable($sql, $params);
 		Profiling::EndTimer();
 		return $ret;
 	}

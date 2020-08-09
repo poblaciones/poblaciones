@@ -110,7 +110,7 @@ class PermissionsService extends BaseService
 		$message->SetValue('level',  $verb);
 		$message->SetValue('link_url',  $url);
 
-		$message->Send('permissionNotification.html.twig');
+//		$message->Send('permissionNotification.html.twig');
 	}
 	public function RemovePermission($workId, $permissionId)
 	{

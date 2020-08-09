@@ -4,6 +4,7 @@ namespace helena\classes;
 
 use minga\framework\IO;
 use minga\framework\Str;
+use minga\framework\Request as FrameworkRequest;
 use minga\framework\Params;
 use minga\framework\Performance;
 use minga\framework\Context;
@@ -128,6 +129,21 @@ class App
 	{
 		$twig = self::getTwigEngine();
 		return $twig->resolveTemplate($templates)->render($args);
+	}
+
+	public static function RedirectKeepingParams($url, $status = 302)
+	{
+		$ret = $url;
+		$params = FrameworkRequest::GetQueryString();
+		if ($params)
+		{
+			if (Str::Contains($ret, "?") == false)
+				$ret .= "?";
+			else
+				$ret .= "&";
+			$ret .= $params;
+		}
+		return self::Redirect($ret, $status);
 	}
 
 	public static function Redirect($url, $status = 302)

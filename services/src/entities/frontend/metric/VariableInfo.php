@@ -20,6 +20,7 @@ class VariableInfo extends BaseMapModel
 	public $ShowEmptyCategories = true;
 	public $Decimals = 0;
 	public $HasTotals = 0;
+	public $IsArea = false;
 	public $IsSimpleCount = false;
 	public $RankingItems = null;
 	public $DefaultMeasure = 'N';

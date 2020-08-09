@@ -44,7 +44,7 @@ class SelectedMetricService extends BaseService
 	public function PublicGetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false)
 	{
 		$ret = self::GetSelectedMetric($metricId, $throwError, $filterByPermissions, true);
-		if ($ret !== null)
+		if ($ret !== null && !Session::IsSiteReader())
 			Statistics::StoreSelectedMetricHit($ret);
 		return $ret;
 	}
@@ -227,6 +227,11 @@ class SelectedMetricService extends BaseService
 																				($variable['mvv_data'] === SpecialColumnEnum::Count || $variable['mvv_data_column_is_categorical']);
 			if ($variableInfo->IsSimpleCount)
 				$variableInfo->ShowValues = false;
+			if ($variable['mvv_data'] === SpecialColumnEnum::AreaKm2)
+				$variableInfo->Decimals = 2;
+			if ($variable['mvv_data'] === SpecialColumnEnum::AreaKm2 || $variable['mvv_data'] === SpecialColumnEnum::AreaM2)
+				$variableInfo->IsArea = true;
+
 			$variableInfo->HasTotals = $variable['mvv_normalization'] !== null;
 			$this->AddVariablesValues($variableInfo);
 			if ($variableInfo->IsDefault)

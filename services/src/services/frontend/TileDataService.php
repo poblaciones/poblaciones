@@ -99,9 +99,9 @@ class TileDataService extends BaseService
 		{
 			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $level->Variables, $gradientId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
-		else if ($frame->ClippingRegionId != NULL)
+		else if ($frame->ClippingRegionIds != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByRegionId($metricVersionId, $level->Variables, $gradientId, $urbanity, $envelope, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByRegionIds($metricVersionId, $level->Variables, $gradientId, $urbanity, $envelope, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
 		else
 		{

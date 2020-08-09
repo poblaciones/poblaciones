@@ -36,7 +36,7 @@
 								<div class="bar" :style="getLength(getValue(label.Values, variable.ValueLabels), variable)"></div>
 							</td>
 							<td class='textRight' :class="getMuted()"><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
-							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(label.Values, variable.ValueLabels) }}</td>
+							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(getValue(label.Values, variable.ValueLabels), variable.Decimals) }}</td>
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted">
@@ -47,7 +47,7 @@
 								<div class="bar-muted" :style="getLength( getValue(label.Values, variable.ValueLabels), variable)"></div>
 							</td>
 							<td class='text-muted textRight'><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
-							<td class='text-muted textRight'>{{ getValueFormatted(label.Values, variable.ValueLabels) }}</td>
+							<td class='text-muted textRight'>{{ getValueFormatted(getValue(label.Values, variable.ValueLabels), variable.Decimals) }}</td>
 						</template>
 					</template>
 				</tr>
@@ -86,9 +86,9 @@ export default {
   mounted() {
     var format = this.getFormat();
 		var total = this.total;
-    Helper.animateNum(this, 'aniTotal', total, total, format);
+		Helper.animateNum(this, 'aniTotal', total, total, format, this.variable.Decimals);
 		var totalCount = this.totalCount;
-    Helper.animateNum(this, 'aniTotalCount', totalCount, totalCount);
+		Helper.animateNum(this, 'aniTotalCount', totalCount, totalCount, this.variable.Decimals);
   },
   data() {
 		return {
@@ -101,10 +101,10 @@ export default {
 	watch: {
 		total(newValue, oldValue) {
 			var format = this.getFormat();
-			Helper.animateNum(this, 'aniTotal', newValue, oldValue, format);
+			Helper.animateNum(this, 'aniTotal', newValue, oldValue, format, this.variable.Decimals);
 		},
 		totalCount(newValue, oldValue) {
-			Helper.animateNum(this, 'aniTotalCount', newValue, oldValue);
+			Helper.animateNum(this, 'aniTotalCount', newValue, oldValue, this.variable.Decimals);
 		},
 	},
 	computed: {
@@ -334,10 +334,9 @@ export default {
 				return '?';
 			}
 		},
-		getValueFormatted(values, labels) {
-			var value = this.getValue(values, labels);
+		getValueFormatted(value, decimals) {
 			if(this.metric.properties.SummaryMetric === 'N') {
-				return Helper.formatNum(value);
+				return Helper.formatNum(value, decimals);
 			} else if(this.metric.properties.SummaryMetric === 'I') {
 				return Helper.formatPercentNumber(value);
 			} else if(this.metric.properties.SummaryMetric === 'P') {

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace helena\tests\classes;
+namespace helena\tests\readers;
 
 use helena\classes\CsvReader;
 use helena\classes\Paths;

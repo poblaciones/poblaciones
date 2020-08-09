@@ -44,7 +44,7 @@ class ClippingService extends BaseService
 	{
 		Profiling::BeginTimer();
 		$frame = new Frame();
-		$frame->ClippingRegionId = null;
+		$frame->ClippingRegionIds = null;
 
 		if ($current === null)
 		{
@@ -56,7 +56,7 @@ class ClippingService extends BaseService
 			}
 		}
 		$frame->Center = $current;
-		$frame->ClippingRegionId = null;
+		$frame->ClippingRegionIds = null;
 		$frame->ClippingCircle = null;
 		$frame->ClippingFeatureId = null;
 		$zoneInfo = $this->GetDefaultFrameAndClipping($current);
@@ -123,7 +123,7 @@ class ClippingService extends BaseService
 		$frame->Zoom = null;
 		$frame->ClippingCircle = null;
 		$frame->ClippingFeatureId = null;
-		$frame->ClippingRegionId = array($newClippingRegion);
+		$frame->ClippingRegionIds = array($newClippingRegion);
 		Profiling::EndTimer();
 		return $frame;
 	}
@@ -185,17 +185,17 @@ class ClippingService extends BaseService
 			$clipping->Canvas = [$canvas];
 			$clipping->Envelope = $envelope;
 		}
-		else if ($frame->ClippingRegionId != null)
+		else if ($frame->ClippingRegionIds != null)
 		{ // resuelve el canvas para regionId
 			$table = new ClippingRegionItemModel();
-			$items = $table->GetClippingRegionItemGeometry($frame->ClippingRegionId);
+			$items = $table->GetClippingRegionItemGeometry($frame->ClippingRegionIds);
 			$canvasList = [];
 			$overallEnvelope = null;
 			foreach($items as $item)
 			{
 				$geo = new GeoJson();
 				$envelope = Envelope::FromDb($item['Envelope'])->Trim();
-				$canvas = $geo->GenerateFromBinary(array(array('name'=>'', 'value' => $item['Geometry'], 'FID' => $frame->ClippingRegionId)));
+				$canvas = $geo->GenerateFromBinary(array(array('name'=>'', 'value' => $item['Geometry'], 'FID' => $item['Id'])));
 				$canvas['features'][0]['geometry']['coordinates'] =  GeoJson::TrimRecursive($canvas['features'][0]['geometry']['coordinates']);
 				$canvasList[] = $canvas;
 				if ($overallEnvelope === null)
@@ -220,9 +220,9 @@ class ClippingService extends BaseService
 			// Actualiza región según círculo
 			$rows = $table->CalculateLevelsFromPoint($frame->ClippingCircle->Center);
 		}
-		else if ($frame->ClippingRegionId != null)
+		else if ($frame->ClippingRegionIds != null)
 		{   // Calcula región
-			$rows = $table->CalculateLevelsFromRegionId($frame->ClippingRegionId, $forceTrackingLevels);
+			$rows = $table->CalculateLevelsFromRegionIds($frame->ClippingRegionIds, $forceTrackingLevels);
 		}
 		else if ($frame->Envelope != null)
 		{
@@ -252,9 +252,9 @@ class ClippingService extends BaseService
 			// Actualiza región según círculo
 			return $this->CalculateRegionFromCircle($frame->ClippingCircle, $levelId, $urbanity);
 		}
-		else if ($frame->ClippingRegionId != null)
+		else if ($frame->ClippingRegionIds != null)
 		{   // Calcula región
-			return $this->CalculateRegionFromId($frame->ClippingRegionId, $levelId, $urbanity);
+			return $this->CalculateRegionFromIds($frame->ClippingRegionIds, $levelId, $urbanity);
 		}
 		else if ($frame->Envelope != null)
 		{
@@ -266,7 +266,7 @@ class ClippingService extends BaseService
 		}
 	}
 
-	private function CalculateRegionFromId($clippingRegionIds, $levelId, $urbanity)
+	private function CalculateRegionFromIds($clippingRegionIds, $levelId, $urbanity)
 	{
 	$table = new SnapshotClippingRegionItemModel();
 		$item = $table->GetSelectionInfoById($clippingRegionIds, $levelId, $urbanity);

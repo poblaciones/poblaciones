@@ -96,7 +96,7 @@ export default {
 					Max: { Lat: 0.0, Lon: 0.0, },
 				},
 				Zoom: 0,
-				ClippingRegionId: null,
+				ClippingRegionIds: null,
 				ClippingCircle: null,
 				ClippingFeatureId: null,
 			},

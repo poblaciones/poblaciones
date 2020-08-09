@@ -255,10 +255,7 @@ class SnapshotByDatasetModel
 
 	private function GetArea($dataset)
 	{
-		if ($dataset['dat_type'] == DatasetTypeEnum::Shapes)
-			return "area_m2";
-		else
-			return Variable::SpecialColumnToField(SpecialColumnEnum::AreaM2);
+		return Variable::SpecialColumnToField(SpecialColumnEnum::AreaM2, $dataset['dat_type']);
 	}
 	private function GetDescriptionColumn($metricVersionLevel)
 	{

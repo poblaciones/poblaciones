@@ -24,7 +24,7 @@ class RankingService extends BaseService
 		$this->CheckNotNullNumeric($metricVersionId);
 		$this->CheckNotNumericNullable($levelId);
 
-		if ($frame->ClippingRegionId == NULL
+		if ($frame->ClippingRegionIds == NULL
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new ErrorException("A spatial indication must be specified (envelope, circle or region).");
 
@@ -65,9 +65,9 @@ class RankingService extends BaseService
 		{
 			$rows = $table->GetMetricVersionRankingByCircle($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
-		else if ($frame->ClippingRegionId != NULL)
+		else if ($frame->ClippingRegionIds != NULL)
 		{
-			$rows = $table->GetMetricVersionRankingByRegionId($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionId, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$rows = $table->GetMetricVersionRankingByRegionIds($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		else
 		{

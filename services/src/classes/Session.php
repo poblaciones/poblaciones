@@ -119,6 +119,7 @@ class Session
 	{
 		Profiling::BeginTimer();
 		$res = null;
+
 		if (!WorkVisiblityCache::Cache()->HasData($workId, $res))
 		{
 			$res = App::Db()->fetchAssoc("SELECT wrk_is_private, wrk_is_indexed, wrk_segmented_crawling, wrk_access_link FROM work WHERE wrk_id = ? LIMIT 1", array($workId));
@@ -127,7 +128,7 @@ class Session
 		Profiling::EndTimer();
 		return $res;
 	}
-	public static function IsWorkPublicOrAccessible($workId)
+	public static function IsWorkPublicOrAccessible($workId, $checkByUser = true)
 	{
 		Profiling::BeginTimer();
 		$res = self::GetWorkPublicOrAccessible($workId);
@@ -138,6 +139,10 @@ class Session
 			$ret = false;
 		else
 			$ret = self::IsWorkReaderShardified($workId);
+
+		if (!$ret && !$checkByUser)
+			$ret = self::IsSiteReader();
+
 		Profiling::EndTimer();
 		return $ret;
 	}
@@ -184,6 +189,10 @@ class Session
 			$ret = false;
 		else
 			$ret = self::IsWorkReaderShardified($res['wrk_id']);
+
+		if (!$ret)
+			$ret = self::IsSiteReader();
+
 		Profiling::EndTimer();
 		return $ret;
 	}

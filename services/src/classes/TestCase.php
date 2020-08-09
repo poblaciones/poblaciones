@@ -27,7 +27,11 @@ class TestCase extends TestCaseBase
 		if (IO::Exists($path) && $expectedSize != -1)
 		{
 			$size = filesize($path);
-			$this->assertEquals($expectedSize, $size, "Tamaño de archivo. " . $description);
+			if (!is_array($expectedSize)) $expectedSize = [$expectedSize];
+			if (in_array($size, $expectedSize))
+				$this->assertEquals($size, $size, "Tamaño de archivo. " . $description);
+			else
+				$this->assertEquals(implode(' OR ', $expectedSize), $size, "Tamaño de archivo. " . $description);
 		}
 	}
 

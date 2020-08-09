@@ -75,7 +75,7 @@ App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any",
 
 
 App::$app->get('/', function (Request $request) {
-		return App::Redirect(Links::GetMapUrl());});
+		return App::RedirectKeepingParams(Links::GetMapUrl());});
 
 // http://mapas.aacademica.org/services/download/CreateFile?t=ss&l=8&r=1692&a=X&k=
 // http://mapas.aacademica.org/services/download/CreateFile?k=e0UN2j

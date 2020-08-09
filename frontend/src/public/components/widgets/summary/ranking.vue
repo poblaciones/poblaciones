@@ -95,7 +95,7 @@ export default {
 			return h.ResolveNormalizationCaption(this.variable, true);
 		},
 		getFormattedValue(item) {
-			return h.renderMetricValue(item.Value, item.Total, this.variable.HasTotals, this.variable.NormalizationScale);
+			return h.renderMetricValue(item.Value, item.Total, this.variable.HasTotals, this.variable.NormalizationScale, this.variable.Decimals);
 		},
 		getColor(item) {
 			var label = h.getValueLabel(this.variable.ValueLabels, item.ValueId);

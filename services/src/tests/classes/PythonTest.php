@@ -11,6 +11,7 @@ class PythonTest extends TestCase
 	{
 		$script = "pyTest3.py";
 		$lines = Python::Execute($script, array(1, 2));
-		$this->assertEquals("running ok", $lines[0]);
+
+		$this->assertEquals("running ok", $lines[sizeof($lines) - 1]);
 	}
 }

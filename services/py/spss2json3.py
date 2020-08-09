@@ -17,6 +17,7 @@ def main():
 
     MAX_ROWS = 5000
     MAX_DECIMALS = 6
+    USE_UTF8 = False
 
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print('Usage: ' + sys.argv[0] + ' inputfile [outputpath]')
@@ -26,7 +27,13 @@ def main():
         sys.argv.append('')
 
     try:
-        with savReaderWriter.SavHeaderReader(sys.argv[1], ioUtf8=False) as header:
+
+        if USE_UTF8:
+          encoding = 'UTF-8'
+        else:
+          encoding = 'unicode_escape'
+
+        with savReaderWriter.SavHeaderReader(sys.argv[1], ioUtf8=USE_UTF8) as header:
             metadata = header.all()
 
         res = {
@@ -50,12 +57,13 @@ def main():
         }
 
         with open(os.path.join(sys.argv[2], 'header.json'), 'w') as h:
-            h.write(json.dumps(convert_recursive(res), indent=4))
+            h.write(json.dumps(convert_recursive(res, encoding), indent=4))
 
-        with savReaderWriter.SavReader(sys.argv[1], ioUtf8=False) as reader:
+
+        with savReaderWriter.SavReader(sys.argv[1], ioUtf8=USE_UTF8) as reader:
             for i, lines in enumerate(chunks(reader, MAX_ROWS), 1):
                 with open(os.path.join(sys.argv[2], 'data_' + str(i).zfill(5) + '.json'), 'w') as f:
-                    encoded = convert_recursive(lines)
+                    encoded = convert_recursive(lines, encoding)
                     jsonText = json.dumps(encoded)
                     # jsonText = truncate_decimals(jsonText, MAX_DECIMALS)
                     f.write(jsonText)
@@ -87,7 +95,7 @@ def truncate_decimals(text, ndigits):
     # Entre paréntesis los grupos para el replace $1, $2 (se borra), $3
     return re.sub(r'(\.\d{' + str(ndigits) + r'})(\d*)([ ,\)\]])', r'\1\3', text)
 
-def convert_recursive(input, enc='cp1252'):
+def convert_recursive(input, enc='unicode_escape'):
     ''' Convierte recursivamente el encoding de un diccionario o un array.
     '''
     if isinstance(input, dict):

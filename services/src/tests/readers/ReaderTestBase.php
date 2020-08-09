@@ -1,30 +1,22 @@
 <?php declare(strict_types=1);
 
-namespace helena\tests\classes;
-
-use helena\classes\CsvReader;
-use helena\classes\Paths;
-use helena\classes\TestCase;
+namespace helena\tests\readers;
 
 use helena\classes\readers\BaseReader;
-
+use helena\classes\TestCase;
 use minga\framework\IO;
 use minga\framework\FileBucket;
 
-class GenericReaderTester
+class ReaderTestBase extends TestCase
 {
-	private $test;
 	private $bucket = null;
-	function __construct($test)
-	{
-		$this->test = $test;
-	}
+
 	public function cleanUp()
 	{
 		if ($this->bucket)
 			$this->bucket->Delete();
 	}
-	public function testReadFile($file, $sheetName, $expectedHeaderSize, $expectedOutSize)
+	public function readAndCheckFile($file, $sheetName, $expectedHeaderSize, $expectedOutSize)
 	{
 		$extension = IO::GetFileExtension($file);
 		$fileOnly = IO::GetFilenameNoExtension($file);
@@ -39,8 +31,8 @@ class GenericReaderTester
 		$reader->Prepare($sheetName);
 		$reader->WriteJson($sheetName);
 
-		$this->test->assertFile($reader->OutputHeaderFilename(), $expectedHeaderSize, 'Header de archivo: ' . $fileOnly . '.' . $extension);
+		$this->assertFile($reader->OutputHeaderFilename(), $expectedHeaderSize, 'Header de archivo: ' . $fileOnly . '.' . $extension);
 
-		$this->test->assertFile($reader->OutputDataFilename(), $expectedOutSize, 'data_00001 de archivo: ' . $fileOnly . '.' . $extension);
+		$this->assertFile($reader->OutputDataFilename(), $expectedOutSize, 'data_00001 de archivo: ' . $fileOnly . '.' . $extension);
 	}
 }

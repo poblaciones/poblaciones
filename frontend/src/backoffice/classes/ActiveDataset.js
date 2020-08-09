@@ -623,7 +623,8 @@ ActiveDataset.prototype.GetRichColumns = function () {
 									{	Id: -2, Caption: 'Hogares', Code: 'H' },
 									{	Id: -3, Caption: 'Adultos (>=18)', Code: 'A' },
 									{	Id: -4, Caption: 'Niños (<18)', Code: 'C' },
-									{	Id: -5, Caption: 'Area m2', Code: 'M' },
+									{	Id: -5, Caption: 'Área m²', Code: 'M' },
+									{	Id: -6, Caption: 'Área km²', Code: 'K' },
 									{	Id: -10, Caption: 'Conteo', Code: 'N' }];
 	return columns;
 };
