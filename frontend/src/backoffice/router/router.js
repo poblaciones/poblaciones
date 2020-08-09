@@ -162,7 +162,7 @@ group: 'Metadatos',
 },
 
 	{
-		group: 'Publicar',
+		group: 'Publicación',
 		path: '/cartographies/:workId/customize',
 		component: Layout,
 		redirect: '/cartographies/:workId/customize',
@@ -178,7 +178,7 @@ group: 'Metadatos',
 	},
 
 	{
-		group: 'Publicar',
+		group: 'Publicación',
 		path: '/cartographies/:workId/visibility',
 		component: Layout,
 		redirect: '/cartographies/:workId/visibility',
@@ -194,7 +194,7 @@ group: 'Metadatos',
 	},
 
 	{
-		group: 'Publicar',
+		group: 'Publicación',
 		path: '/cartographies/:workId/permissions',
 		component: Layout,
 		redirect: '/cartographies/:workId/permissions',

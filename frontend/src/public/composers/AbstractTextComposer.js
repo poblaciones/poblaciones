@@ -39,7 +39,7 @@ AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, l
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
 	var ret = h.renderMetricValue(dataElement.Value, dataElement.Total,
-		variable.HasTotals, variable.NormalizationScale) + ' ' + h.ResolveNormalizationCaption(variable);
+		variable.HasTotals, variable.NormalizationScale, variable.Decimals) + ' ' + h.ResolveNormalizationCaption(variable);
 	return ret.trimRight();
 };
 

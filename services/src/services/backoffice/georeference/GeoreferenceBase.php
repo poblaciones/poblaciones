@@ -154,7 +154,7 @@ echo '<br>----------------------------------------';
 		App::Db()->exec($sql);
 
 		$sql = "UPDATE " . $table . " SET geometry_r1 = geometry,  geometry_r2 = geometry, geometry_r3 = geometry,
-							geometry_r4 = geometry, geometry_r5 = geometry, geometry_r6 = geometry, centroid = GeometryCentroid(geometry), area_m2 = st_area(geometry) * 10326905227 WHERE
+							geometry_r4 = geometry, geometry_r5 = geometry, geometry_r6 = geometry, centroid = GeometryCentroid(geometry), area_m2 = GeometryAreaSphere(geometry) WHERE
 								id IN (SELECT id FROM (SELECT id FROM " . $table . " WHERE ommit = 0 " . $limit . ") tmp)";
 
 		App::Db()->exec($sql);

@@ -15,6 +15,7 @@ use helena\classes\VersionUpdater;
 
 use minga\framework\IO;
 use minga\framework\Arr;
+use helena\classes\App;
 
 
 class cCaches extends cController

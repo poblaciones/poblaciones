@@ -83,8 +83,9 @@ class MetricsManager
 	private function resolveFieldValues($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale)
 	{
 		$sql = "SELECT (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_data_field,
-									 (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_normalization_field";
-		$values = App::Db()->fetchAssoc($sql, array($dataColumnId, $datasetId, $normalizationId, $datasetId));
+									 (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_normalization_field,
+									 (SELECT dat_type FROM draft_dataset WHERE dat_id = ?) as dat_type";
+		$values = App::Db()->fetchAssoc($sql, array($dataColumnId, $datasetId, $normalizationId, $datasetId, $datasetId));
 		$values['mvv_data'] = $dataColumn;
 		$values['mvv_normalization'] = $normalization;
 		$values['mvv_normalization_scale'] = $normalizationScale;

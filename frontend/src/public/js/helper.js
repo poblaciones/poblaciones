@@ -39,7 +39,7 @@ module.exports = {
 		}
 		return true;
 	},
-	renderMetricValue(value, total, hasTotals, normalizationScale) {
+	renderMetricValue(value, total, hasTotals, normalizationScale, decimals) {
 		if (value === '-') {
 			return '-';
 		}
@@ -49,15 +49,15 @@ module.exports = {
 		} else {
 			calculatedValue = value;
 		}
-		return this.getValueFormatted(calculatedValue, hasTotals);
+		return this.getValueFormatted(calculatedValue, hasTotals, decimals);
 	},
-	getValueFormatted(value, hasTotals) {
+	getValueFormatted(value, hasTotals, decimals) {
 		if (value === '-') {
 			return '-';
 		} else if (hasTotals) {
 			return this.formatPercentNumber(value);
 		} else {
-			return this.formatNum(value);
+			return this.formatNum(value, decimals);
 		}
 	},
 	formatPercentNumber(num) {
@@ -175,16 +175,17 @@ module.exports = {
 			return n.toLocaleString('es');
 		}
 	},
-	animateNum(vm, element, newValue, oldValue, format) {
+	animateNum(vm, element, newValue, oldValue, format, decimals) {
 		var fix = 0;
 		if (format === 'km') {
 			format = this.formatKm;
-			fix = 1;
+			fix = 2;
 		} else if (format && format.substr(0, 1) === '%') {
 			format = this.formatPercent;
 			fix = 2;
 		} else {
 			format = this.formatNum;
+			fix = decimals;
 		}
 		if (newValue === '' || newValue === '-' || newValue === 'n/d' || oldValue === '' || oldValue === 'n/d' || oldValue === '-') {
 			vm[element] = this.quickFormat(format, fix, newValue);
@@ -467,6 +468,9 @@ module.exports = {
 		}
 		var pos;
 		if (seed) {
+			if (Array.isArray(seed)) {
+				seed = seed[0];
+			}
 			pos = Math.floor(Math.floor(seed) % url.length);
 		} else {
 			pos = Math.floor(Math.random() * url.length);
@@ -506,8 +510,8 @@ module.exports = {
 			f: frame.ClippingFeatureId,
 			z: frame.Zoom,
 		};
-		if(frame.ClippingRegionId) {
-			ret.r = (frame.ClippingRegionId ? frame.ClippingRegionId.join(',') : null);
+		if(frame.ClippingRegionIds) {
+			ret.r = (frame.ClippingRegionIds ? frame.ClippingRegionIds.join(',') : null);
 		}
 		if(this.hasCircle(frame.ClippingCircle)) {
 			ret.c = this.getCircleParam(frame.ClippingCircle);

@@ -82,7 +82,7 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 		},
 		Zoom: zoom,
 		MapType: mapType,
-		ClippingRegionId: null,
+		ClippingRegionIds: null,
 		ClippingCircle: null,
 		ClippingLevelName: null,
 		ClippingFeatureId: null

@@ -45,7 +45,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		$coordinate->ToParams($params);
 		if ($sizeThreshold !== -1)
 		{
-			$sizeFilter = ' AND (SELECT ST_AREA(cli_geometry_r1) FROM clipping_region_item
+			$sizeFilter = ' AND (SELECT GeometryAreaSphere(cli_geometry_r1) FROM clipping_region_item
 																WHERE cgv_clipping_region_item_id = cli_id) > ' . $sizeThreshold	;
 		}
 		else
@@ -166,7 +166,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		return $ret;
 	}
 
-	public function CalculateLevelsFromRegionId($regionItemIds, $trackingLevels = false)
+	public function CalculateLevelsFromRegionIds($regionItemIds, $trackingLevels = false)
 	{
 		Profiling::BeginTimer();
 		if ($trackingLevels)

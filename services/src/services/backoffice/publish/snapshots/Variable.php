@@ -5,6 +5,7 @@ namespace helena\services\backoffice\publish\snapshots;
 use minga\framework\Arr;
 use minga\framework\Profiling;
 use minga\framework\ErrorException;
+use helena\classes\DatasetTypeEnum;
 
 use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
@@ -69,12 +70,12 @@ class Variable
 		if ($this->attributes['mvv_data_column_is_categorical'])
 			return 1;
 
-		$field = self::GetRichColumn($this->attributes, "mvv_data");
+		$field = self::GetRichColumn($this->attributes, "mvv_data", $this->metricVersionLevel['dat_type']);
 
 		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
 			return $field;
 
-		$normalizationField = self::GetRichColumn($this->attributes, "mvv_normalization");
+		$normalizationField = self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
 		if ($normalizationField == 'null')
 			return $field;
 		else
@@ -88,7 +89,7 @@ class Variable
 		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
 			return 0;
 		else
-			return self::GetRichColumn($this->attributes, "mvv_normalization");
+			return self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
 	}
 	public function CalculateSegmentationValueField()
 	{
@@ -118,11 +119,11 @@ class Variable
 
 	public function CalculateNormalizedValueField($fixDecimales = -1)
 	{
-		$field = self::GetRichColumn($this->attributes, "mvv_data");
+		$field = self::GetRichColumn($this->attributes, "mvv_data", $this->metricVersionLevel['dat_type']);
 		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
 			return $field;
 
-		$normalizationField = self::GetRichColumn($this->attributes, "mvv_normalization");
+		$normalizationField = self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
 		if ($fixDecimales !== -1)
 		{
 			$pre = "ROUND(";
@@ -146,12 +147,10 @@ class Variable
 	{
 		$values = $this->attributes['values'];
 		if (sizeof($values) == 0)
-		// TODO Bugfix: if (is_array($values) && sizeof($values) == 0)
 			throw new ErrorException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
 				. $this->GetVariableMetricErrorCaption() . " no tiene valores. Revise la symbología de la variable.");
 
 		if (sizeof($values) == 1 && $values[0]['vvl_value'] == null)
-		// TODO Bugfix (is_array($values) && sizeof($values) == 1 && is_array($values[0]['vvl_value']) && sizeof($values[0]['vvl_value']) == null)
 			return $values[0]['vvl_id'];
 
 		$cutMode = $this->attributes['vsy_cut_mode'];
@@ -245,7 +244,10 @@ class Variable
 				$label = "Adultos (>=18)";
 				break;
 			case SpecialColumnEnum::AreaM2:
-				$label = "Area m2";
+				$label = "Área m²";
+				break;
+			case SpecialColumnEnum::AreaKm2:
+				$label = "Área km²";
 				break;
 			case SpecialColumnEnum::Children:
 				$label = "Niños (<18)";
@@ -301,7 +303,7 @@ class Variable
 		return $ret;
 	}
 
-	public static function GetRichColumn($col, $field)
+	public static function GetRichColumn($col, $field, $datatasetType)
 	{
 		$specialColumnEnum = $col[$field];
 		if ($specialColumnEnum == SpecialColumnEnum::NullValue)
@@ -311,10 +313,10 @@ class Variable
       return "`" . $col[$field . "_field"] . "`";
 		}
 		else
-			return self::SpecialColumnToField($specialColumnEnum);
+			return self::SpecialColumnToField($specialColumnEnum, $datatasetType);
 	}
 
-	public static function SpecialColumnToField($dc)
+	public static function SpecialColumnToField($dc, $datatasetType)
 	{
 		$field = null;
 		switch ($dc)
@@ -323,7 +325,16 @@ class Variable
 				$field = "gei_population - gei_children";
 				break;
 			case SpecialColumnEnum::AreaM2:
-				$field = "gei_area_m2";
+				if ($datatasetType == DatasetTypeEnum::Shapes)
+					$field = "area_m2";
+				else
+					$field = "gei_area_m2";
+				break;
+			case SpecialColumnEnum::AreaKm2:
+				if ($datatasetType == DatasetTypeEnum::Shapes)
+					$field = "area_m2 / 1000000";
+				else
+					$field = "gei_area_m2 / 1000000";
 				break;
 			case SpecialColumnEnum::Children:
 				$field = "gei_children";

@@ -24,7 +24,7 @@ class UserModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($email);
 
-		$sql = 'SELECT * FROM user WHERE usr_email = ?';
+		$sql = 'SELECT * FROM user WHERE usr_email = ? LIMIT 1';
 
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		Profiling::EndTimer();

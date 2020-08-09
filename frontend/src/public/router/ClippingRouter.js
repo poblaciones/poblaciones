@@ -28,8 +28,8 @@ ClippingRouter.prototype.ToRoute = function () {
 	var ret = [];
 	if (segmentedMap.Clipping.FrameHasNoClipping() === false || clippingLevel !== '') {
 		ret.push(['l', clippingLevel, '']);
-		if (segmentedMap.frame.ClippingRegionId) {
-			ret.push(['r', segmentedMap.frame.ClippingRegionId.join(',')]);
+		if (segmentedMap.frame.ClippingRegionIds) {
+			ret.push(['r', segmentedMap.frame.ClippingRegionIds.join(',')]);
 		}
 		if (segmentedMap.frame.ClippingFeatureId) {
 			ret.push(['f', segmentedMap.frame.ClippingFeatureId]);
@@ -53,7 +53,7 @@ ClippingRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	segmentedMap.SaveRoute.Disabled = true;
 	if (this.clippingChanged(segmentedMap.frame, clipping)) {
 		segmentedMap.frame.ClippingFeatureId = clipping.ClippingFeatureId;
-		segmentedMap.frame.ClippingRegionId = clipping.ClippingRegionId;
+		segmentedMap.frame.ClippingRegionIds = clipping.ClippingRegionIds;
 		segmentedMap.frame.ClippingCircle = clipping.ClippingCircle;
 		var loc = this;
 		if (segmentedMap.Clipping.FrameHasNoClipping()) {
@@ -73,13 +73,13 @@ ClippingRouter.prototype.clippingFromRoute = function (args) {
 		args = [];
 	}
 	var clippingRegionIdvalue = h.getSafeValue(args, 'r', null);
-	var clippingRegionId = (clippingRegionIdvalue ? arr.ToIntArray(clippingRegionIdvalue.split(',')) : null);
+	var clippingRegionIds = (clippingRegionIdvalue ? arr.ToIntArray(clippingRegionIdvalue.split(',')) : null);
 	var clippingFeatureId = h.getSafeValue(args, 'f', null);
 	var clippingCircle = this.getClippingCircle(h.getSafeValue(args, 'c', null));
 	var clippingLevelName = h.getSafeValue(args, 'l', null);
 
 	var clipping = {
-		ClippingRegionId: clippingRegionId,
+		ClippingRegionIds: clippingRegionIds,
 		ClippingCircle: clippingCircle,
 		ClippingLevelName: clippingLevelName,
 		ClippingFeatureId: clippingFeatureId
@@ -87,22 +87,22 @@ ClippingRouter.prototype.clippingFromRoute = function (args) {
 	return clipping;
 };
 
-ClippingRouter.prototype.clippingChanged = function (frame1, clipping) {
-	if (!arr.AreEquals(frame1.ClippingRegionId, clipping.ClippingRegionId) ||
-		frame1.ClippingRegionId !== clipping.ClippingLevelName || /* TODO Bugfix */
-		frame1.ClippingFeatureId !== clipping.ClippingFeatureId) {
+ClippingRouter.prototype.clippingChanged = function (frame, clipping) {
+	if (!arr.AreEquals(frame.ClippingRegionIds, clipping.ClippingRegionIds) ||
+		frame.ClippingRegionIds !== clipping.ClippingLevelName || /* TODO Bugfix */
+		frame.ClippingFeatureId !== clipping.ClippingFeatureId) {
 		return true;
 	}
-	if ((frame1.ClippingCircle === null) !== (clipping.ClippingCircle === null)) {
+	if ((frame.ClippingCircle === null) !== (clipping.ClippingCircle === null)) {
 		return true;
 	}
-	if (frame1.ClippingCircle === null && clipping.ClippingCircle === null) {
+	if (frame.ClippingCircle === null && clipping.ClippingCircle === null) {
 		return false;
 	}
-	if (frame1.ClippingCircle.Center.Lat !== clipping.ClippingCircle.Center.Lat ||
-		frame1.ClippingCircle.Center.Lon !== clipping.ClippingCircle.Center.Lon ||
-		frame1.ClippingCircle.Radius.Lat !== clipping.ClippingCircle.Radius.Lat ||
-		frame1.ClippingCircle.Radius.Lon !== clipping.ClippingCircle.Radius.Lon) {
+	if (frame.ClippingCircle.Center.Lat !== clipping.ClippingCircle.Center.Lat ||
+		frame.ClippingCircle.Center.Lon !== clipping.ClippingCircle.Center.Lon ||
+		frame.ClippingCircle.Radius.Lat !== clipping.ClippingCircle.Radius.Lat ||
+		frame.ClippingCircle.Radius.Lon !== clipping.ClippingCircle.Radius.Lon) {
 		return true;
 	}
 	return false;

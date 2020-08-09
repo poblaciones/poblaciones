@@ -24,7 +24,7 @@ class SnapshotByDataset extends BaseModel
 		$this->spatialConditions = new SpatialConditions('sna');
 	}
 
-	public function GetMetricVersionSummaryByRegionId($metricVersionId, $variables, $hasSummary, $geographyId, $urbanity, $clippingRegionIds, $circle, $datasetType)
+	public function GetMetricVersionSummaryByRegionIds($metricVersionId, $variables, $hasSummary, $geographyId, $urbanity, $clippingRegionIds, $circle, $datasetType)
 	{
 		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
 
@@ -128,7 +128,7 @@ class SnapshotByDataset extends BaseModel
 		return $this->ExecTileDataQuery($metricVersionId, $variables, $geographyId, $urbanity, $envelope, $datasetType, $hasDescriptions);
 	}
 
-	public function GetMetricVersionTileDataByRegionId($metricVersionId, $variables, $geographyId, $urbanity, $envelope, $clippingRegionIds, $circle, $datasetType, $hasDescriptions)
+	public function GetMetricVersionTileDataByRegionIds($metricVersionId, $variables, $geographyId, $urbanity, $envelope, $clippingRegionIds, $circle, $datasetType, $hasDescriptions)
 	{
 		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
 
@@ -221,7 +221,7 @@ class SnapshotByDataset extends BaseModel
 		return $ret;
 	}
 
-	public function GetMetricVersionRankingByRegionId($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionIds, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
+	public function GetMetricVersionRankingByRegionIds($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionIds, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
 		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
 

@@ -32,7 +32,7 @@ class SummaryServiceTest extends TestCase
 		$frame = new Frame();
 		$frame->Zoom = $z;
 		$frame->Envelope =  Envelope::TextDeserialize($e);
-		// $frame->ClippingRegionId = $r;
+		// $frame->ClippingRegionIds = $r;
 		// $frame->ClippingCircle = Circle::TextDeserialize($c);
 		// $frame->ClippingFeatureId = $f;
 

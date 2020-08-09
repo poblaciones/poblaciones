@@ -20,7 +20,7 @@ class ClippingRegionItemModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 
-		$sql = "SELECT cli_geometry_r1 Geometry, ST_AsText(PolygonEnvelope(cli_geometry_r1)) Envelope ".
+		$sql = "SELECT cli_id Id, cli_geometry_r1 Geometry, ST_AsText(PolygonEnvelope(cli_geometry_r1)) Envelope ".
 			"FROM clipping_region_item WHERE cli_id IN (" . Str::JoinInts($clippingRegionIds) . ")";
 
 		$ret = App::Db()->fetchAll($sql);

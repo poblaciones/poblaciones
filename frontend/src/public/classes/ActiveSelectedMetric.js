@@ -557,7 +557,7 @@ ActiveSelectedMetric.prototype.getValidMetrics = function (variable) {
 
 	ret.push({ Key: 'P', Caption: 'Distribución' });
 
-	if (this.SelectedLevel().HasArea) {
+	if (this.SelectedLevel().HasArea && this.SelectedVariable() && !this.SelectedVariable().IsArea) {
 		ret.push({ Key: 'K', Caption: 'Área' });
 		ret.push({ Key: 'A', Caption: 'Distribución de áreas' });
 		ret.push({ Key: 'D', Caption: 'Densidad' });

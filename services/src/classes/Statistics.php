@@ -42,7 +42,7 @@ class Statistics
 		$referer = Params::SafeServer('HTTP_REFERER', '');
 		$remoteAddr = Params::SafeServer('REMOTE_ADDR', '');
 		$user = Account::Current()->user;
-		$time = Date::FormattedArDate();
+		$time = Date::FormattedArNow();
 
 		$line = self::EncodeArray(array('t' => $type, 'id' => $id, 'e' => $extra, 'time' => $time, 'user' => $user, 'ip' => $remoteAddr, 'r' => $referer, 'a' => $agent));
 		$folder = Paths::GetStatisticsPath() . "/" . Date::GetLogMonthFolder();

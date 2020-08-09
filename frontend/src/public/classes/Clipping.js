@@ -68,7 +68,7 @@ Clipping.prototype.LevelMachLevels = function (level) {
 
 Clipping.prototype.GetClippingLevels = function () {
 	var clippingLevels = null;
-	if (this.frame.ClippingRegionId !== null && this.frame.ClippingCircle === null) {
+	if (this.frame.ClippingRegionIds !== null && this.frame.ClippingCircle === null) {
 		clippingLevels = this.clipping.Region.Levels;
 	}
 	return clippingLevels;
@@ -77,8 +77,8 @@ Clipping.prototype.GetClippingLevels = function () {
 Clipping.prototype.ResetClippingCircle = function () {
 	this.frame.ClippingCircle = null;
 	this.SegmentedMap.MapsApi.ClearClippingCanvas();
-	if (this.frame.ClippingRegionId !== null) {
-		this.SetClippingRegion(this.frame.ClippingRegionId, false);
+	if (this.frame.ClippingRegionIds !== null) {
+		this.SetClippingRegion(this.frame.ClippingRegionIds, false);
 	} else {
 		this.ClippingChanged();
 		this.SegmentedMap.UpdateMap();
@@ -87,12 +87,12 @@ Clipping.prototype.ResetClippingCircle = function () {
 };
 
 Clipping.prototype.ResetClippingRegion = function (regionToRemove) {
-	if (regionToRemove && this.frame.ClippingRegionId !== null &&
-				this.frame.ClippingRegionId.length > 1) {
+	if (regionToRemove && this.frame.ClippingRegionIds !== null &&
+				this.frame.ClippingRegionIds.length > 1) {
 		this.SetClippingRegion(regionToRemove, true, false, true);
 		return;
 	}
-	this.frame.ClippingRegionId = null;
+	this.frame.ClippingRegionIds = null;
 	this.SegmentedMap.MapsApi.ClearClippingCanvas();
 	this.ClippingChanged();
 	this.SegmentedMap.SaveRoute.UpdateRoute();
@@ -105,27 +105,27 @@ Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, c
 
 	this.frame.ClippingCircle = null;
 	this.SegmentedMap.ClearMyLocation();
-	var newClippingRegionId = clippingRegionId;
+	var newClippingRegionIds = clippingRegionId;
 	if (!Array.isArray(clippingRegionId)) {
 		clippingRegionId = parseInt(clippingRegionId, 10);
-		if (appendSelection && this.frame.ClippingRegionId !== null) {
+		if (appendSelection && this.frame.ClippingRegionIds !== null) {
 			// si ya lo tiene, lo saca
-			if (this.frame.ClippingRegionId.includes(clippingRegionId)) {
-				arr.Remove(this.frame.ClippingRegionId, clippingRegionId);
-				newClippingRegionId = this.frame.ClippingRegionId;
-				if (newClippingRegionId.length === 0) {
-					newClippingRegionId = null;
+			if (this.frame.ClippingRegionIds.includes(clippingRegionId)) {
+				arr.Remove(this.frame.ClippingRegionIds, clippingRegionId);
+				newClippingRegionIds = this.frame.ClippingRegionIds;
+				if (newClippingRegionIds.length === 0) {
+					newClippingRegionIds = null;
 				}
 			} else {
 				// si no lo tiene, lo agrega
-				newClippingRegionId = this.frame.ClippingRegionId;
-				newClippingRegionId.push(clippingRegionId);
+				newClippingRegionIds = this.frame.ClippingRegionIds;
+				newClippingRegionIds.push(clippingRegionId);
 			}
 		} else {
-			newClippingRegionId = [clippingRegionId];
+			newClippingRegionIds = [clippingRegionId];
 		}
 	}
-	this.frame.ClippingRegionId = newClippingRegionId;
+	this.frame.ClippingRegionIds = newClippingRegionIds;
 	this.CreateClipping(true, moveCenter, clipForZoomOnly);
 };
 
@@ -149,7 +149,7 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 
 	const loc = this;
 	var url = h.resolveMultiUrl(this.SegmentedMap.Configuration.StaticServer, '/services/frontend/clipping/CreateClipping');
-	url = h.selectMultiUrl(url, this.SegmentedMap.frame.ClippingRegionId);
+	url = h.selectMultiUrl(url, this.SegmentedMap.frame.ClippingRegionIds);
 
 	this.SegmentedMap.Get(url, {
 		params: args,
@@ -183,7 +183,7 @@ Clipping.prototype.ResetClippingRequest = function (request) {
 
 Clipping.prototype.FrameHasNoClipping = function () {
 	return this.frame.ClippingCircle === null &&
-		this.frame.ClippingRegionId === null;
+		this.frame.ClippingRegionIds === null;
 };
 
 Clipping.prototype.FrameHasLocation = function () {
@@ -194,7 +194,7 @@ Clipping.prototype.FrameHasClippingCircle = function () {
 	return this.frame.ClippingCircle !== null;
 };
 Clipping.prototype.FrameHasClippingRegionId = function () {
-	return this.frame.ClippingRegionId !== null;
+	return this.frame.ClippingRegionIds !== null;
 };
 
 Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
