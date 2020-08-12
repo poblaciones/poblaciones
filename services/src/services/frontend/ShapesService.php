@@ -44,14 +44,10 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 
 	private function CalculateDatasetShapes($datasetId, $x, $y, $z, $b)
 	{
-		// por ahora hace la truchada de traerlo desde un metric... si se generan
-		// los tiles, esto es irrelevante. Si se mantiene así, habría que hacer
-		// una vista de shapes del metrics.
-
 		$table = new SnapshotShapesModel();
 		$datasetModel = new DatasetModel();
 		$dataset = $datasetModel->GetById($datasetId);
-		$table->tableName	= $dataset['dat_table'];
+		//$table->tableName	= $dataset['dat_table'];
 		$zoom = $z;
 
 		if ($b != null)
@@ -70,7 +66,7 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 
 		$rows = $table->GetShapesByEnvelope($datasetId, $envelope, $zoom, $getCentroids);
 
-		$data = FeaturesInfo::FromRows($rows, $getCentroids);
+		$data = FeaturesInfo::FromRows($rows, $getCentroids, false, $zoom);
 
 		return $data;
 	}

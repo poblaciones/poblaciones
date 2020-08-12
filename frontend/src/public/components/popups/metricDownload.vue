@@ -177,7 +177,7 @@ export default {
 		show(metric) {
 			this.metric = metric;
 			this.regions = [];
-			if (Array.isArray(this.clipping.clipping.Region.Summary.Regions)) {
+			if (this.clipping.FrameHasClippingCircle() || this.clipping.FrameHasClippingRegionId()) {
 				this.regions = this.regions.concat(this.clipping.clipping.Region.Summary.Regions);
 			}
 			this.downloadLevel = this.version.SelectedLevelIndex;

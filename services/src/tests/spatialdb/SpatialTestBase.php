@@ -11,7 +11,7 @@ class SpatialTestBase extends TestCase
 	// Ayuda para crear geometrías:
 	// http://arthur-e.github.io/Wicket/sandbox-gmaps3.html
 
-	protected function evaluateSet($geometries, $dbFunction, $result, $preprocessFunction = null)
+	protected function evaluateSet($geometries, $dbFunction, $result, $preprocessResultFunction = null)
 	{
 		$selects = [];
 		foreach($geometries as $geometry)
@@ -25,9 +25,9 @@ class SpatialTestBase extends TestCase
 			{
 				$expected = number_format ($expected, 6, ".", "");
 			}
-			if ($preprocessFunction)
+			if ($preprocessResultFunction)
 			{
-				$preparedFunction = $preprocessFunction . "(" . $dbFunction . "(";
+				$preparedFunction = $preprocessResultFunction . "(" . $dbFunction . "(";
 				$closing = "))";
 			}
 			else

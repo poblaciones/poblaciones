@@ -105,39 +105,15 @@ class SpatialConditions
 
 		return new QueryPart($from, $where, $params, $select);
 	}
-
-	public function GetGeometry($datasetType, $zoom)
+	public static function ResolveRZoom($zoom)
 	{
-		$params = "";
+		// rango de 1 a 6, donde 1 es el menor nivel de detalle (polígonos livianos)
 		$rZoom = (int) (($zoom + 2) / 3);
 		if ($zoom > 10 || $rZoom > 5) $rZoom = 5;
-
-		if ($datasetType == 'L')
-		{
-			// Si es un metric de puntos, evalúa la ubicación del punto
-			$from		= "";
-			$where	= "";
-			$select = $this->preffix . "_location as value";
-		}
-		else if ($datasetType == 'S')
-		{
-			// Si es un metric de formas, evalúa la ubicación del shape
-			$from		= "";
-			$where	= "";
-			$select = "geometry_r" . $rZoom . " as value";
-		}
-		else if ($datasetType == 'D')
-		{
-			$from		= "snapshot_geography_item";
-			$where	= "giw_geography_item_id = " . $this->preffix . "_geography_item_id ";
-			$select = "giw_geometry_r" . $rZoom . " as value";
-		}
-		else
-			throw new PublicException("El tipo de dataset no fue reconocido");
-
-		return new QueryPart($from, $where, $params, $select);
+		if ($zoom >= 18) $rZoom = 6;
+		if ($zoom < 1) $rZoom = 1;
+		return $rZoom;
 	}
-
 	public function CircleCondition($circle, $effectiveDatasetType)
 	{
 		if ($effectiveDatasetType == 'L')
@@ -151,9 +127,7 @@ class SpatialConditions
 			// Si es un metric de formas, evalúa la ubicación del shape
 			$sql = " AND EXISTS (SELECT 1 FROM snapshot_shape_dataset_item WHERE sdi_feature_id = " . $this->preffix . "_feature_id " .
 				" AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
-				$circle->RadiusToMysqlPoint() . ", sdi_geometry_r3))";
-			/*$sql = " AND EllipseContains(". $circle->Center->ToMysqlPoint() . ", " .
-				$circle->RadiusToMysqlPoint() . ", miv_location)";*/
+				$circle->RadiusToMysqlPoint() . ", sdi_geometry))";
 		}
 		else if ($effectiveDatasetType == 'D')
 		{

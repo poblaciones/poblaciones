@@ -174,7 +174,7 @@ class MetricsCalculator
 		if ($sourceType == 'S')
 		{
 			$ret['srcJoin'] = 'JOIN snapshot_shape_dataset_item ON sdi_feature_id = sna_feature_id';
-			$ret['geo'] = 'coalesce(sdi_geometry_r3, sdi_geometry_r2, sdi_geometry_r1)';
+			$ret['geo'] = 'sdi_geometry)';
 			$ret['distanceFn'] = 'DistanceSphereGeometry';
 			$ret['nearestFn'] = 'NearestSnapshotShape';
 		}

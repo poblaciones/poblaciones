@@ -4,7 +4,7 @@ namespace helena\tests\spatialdb;
 
 class AreaFunctionsTest extends SpatialTestBase
 {
-	public function testAreaPolygons2()
+	public function testAreaPolygons()
 	{
 		$polygons = $this->getPolygons();
 		$this->evaluateSet($polygons, "GeometryAreaSphere", "[Area]");
@@ -25,8 +25,8 @@ class AreaFunctionsTest extends SpatialTestBase
 
 	public function testAreaMultiLineStrings()
 	{
-		$multiPolygons = $this->getMultiLineStrings();
-		$this->evaluateSet($multiPolygons, "GeometryAreaSphere", 0);
+		$multiLineStrings = $this->getMultiLineStrings();
+		$this->evaluateSet($multiLineStrings, "GeometryAreaSphere", 0);
 	}
 
 	public function testAreaMultiPolygons()

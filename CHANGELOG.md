@@ -1,4 +1,5 @@
 [CURRENT]
+- Para datasets de polígonos, hace downsampling al armar el caché de tiles.
 - Fix: backoffice: renombrar variable producía error si el dataset mostraba los datos ordenados por esa variable.
 - Fix: cambiar el order de adjuntos, variables o fuentes hacía fallar la edición posterior sin recargar antes la página.
 - Fix: Kml/Kmz/Csv: la importación fallaba por saltos de línea en los contenidos.
@@ -9,7 +10,7 @@
 - Soporte a caracter | como delimitador de archivos CSV
 
 v2.27 (2020-08-03)
-- Fix: descargas desde cartografía pública por link fallaban.
+- Fix: en ciertos casos, las descargas desde cartografía publicada por link.
 - Nuevo tipo de ubicación de inicio: extensión (predeterminada).
 - Reordenamiento por handle para permitir scroll por touch del panel de estadísticas, en dispositivos móviles.
 - Fix: actualización de selección de niveles al cargar clipping desde ruta.

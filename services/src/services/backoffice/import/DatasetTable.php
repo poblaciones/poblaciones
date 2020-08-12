@@ -28,6 +28,8 @@ class DatasetTable
 
 	public function InsertDatafile($tableName, $headers, $dataFileName)
 	{
+		// App::Db()->exec("SET GLOBAL max_allowed_packet = 1024*1024*2000");
+
 		$content = file_get_contents($dataFileName);
 		$items = json_decode($content, TRUE);
 

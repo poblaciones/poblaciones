@@ -15,10 +15,9 @@ class SnapshotGeographyItemModel extends BaseModel
 	public function GetGeographyByEnvelope($geographyId, $envelope, $zoom, $getCentroids)
 	{
 		Profiling::BeginTimer();
-		$rZoom = (int) (($zoom + 2) / 3);
-		if ($zoom > 10 || $rZoom > 5) $rZoom = 5;
-		if ($zoom >= 18) $rZoom = 6;
-		if ($zoom < 1) $rZoom = 1;
+
+		$rZoom = SpatialConditions::ResolveRZoom($zoom);
+
 		$centroids = ($getCentroids ? ', ST_Y(giw_centroid) as Lat, ST_X(giw_centroid) as Lon' : '');
 
 	//	if ($rZoom === 6)

@@ -1,8 +1,6 @@
 <?php
 
 use Symfony\Component\Debug\Debug;
-use Silex\Provider\MonologServiceProvider;
-use Silex\Provider\WebProfilerServiceProvider;
 use Silex\Provider\VarDumperServiceProvider;
 
 use helena\classes\App;
@@ -63,7 +61,6 @@ if(Context::Settings()->Debug()->debug)
 }
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
-
 
 
 function time_elapsed($label = null)

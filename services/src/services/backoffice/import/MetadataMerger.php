@@ -109,6 +109,7 @@ class MetadataMerger
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_latitude_column_id', $message);
 		$message = "La variable seleccionada para la longitud ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_longitude_column_id', $message);
+
 		// De symbology de indicadores
 		$datasetInfo['table'] = 'draft_symbology';
 		$datasetInfo['datasetField'] = '(SELECT mvl_dataset_id FROM draft_metric_version_level, draft_variable WHERE mvv_metric_version_level_id = mvl_id AND mvv_symbology_id = vsy_id)';
@@ -189,13 +190,15 @@ class MetadataMerger
 		else
 			$entityPart = '';
 
-		$sql = "SELECT " . $fieldCaption . " AS entity_caption,  dco_old_caption AS variable_caption " . $entityPart . " FROM " . $table . ", " . $subTable . " WHERE
-							" . $fieldColumn . " IS NOT NULL AND " . $fieldColumn . " = matches.dco_old_id AND matches.dco_new_id IS NULL AND " . $datasetField . " = " . $this->datasetId;
+		$sql = "SELECT " . $fieldCaption . " AS entity_caption,  dco_old_caption AS variable_caption " .
+									$entityPart . " FROM " . $table . ", " . $subTable . " WHERE
+							" . $fieldColumn . " IS NOT NULL AND " . $fieldColumn . " = matches.dco_old_id
+										AND matches.dco_new_id IS NULL AND " . $this->datasetId . " IN (" . $datasetField . ")";
 		$changedToNull = App::Db()->fetchAll($sql);
 		// Pasa keys
 		$update = "UPDATE " . $table . " JOIN " . $subTable . " ON " . $fieldColumn . " = matches.dco_old_id
 								SET " . $fieldColumn . " =  matches.dco_new_id
-								WHERE " . $fieldColumn . " IS NOT NULL AND " . $datasetField . " = " . $this->targetDatasetId;
+								WHERE " . $fieldColumn . " IS NOT NULL AND " . $this->targetDatasetId . " IN (" . $datasetField . ")";
 
 		App::Db()->exec($update);
 		// Listo

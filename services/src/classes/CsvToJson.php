@@ -189,7 +189,6 @@ class CsvToJson
 			return 'ratio';
 		else if($varFormat[0] == 'A')
 			return 'nominal';
-		//Implementar ratio y scale??
 
 		throw new PublicException('El nivel de medida indicado no está soportado (' . $varFormat . ')');
 	}
