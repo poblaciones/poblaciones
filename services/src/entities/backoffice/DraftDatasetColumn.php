@@ -110,6 +110,14 @@ class DraftDatasetColumn
     private $UseInExport;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="dco_value_labels_are_dirty", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $ValueLabelsAreDirty;
+
+
+    /**
      * @var integer
      *
      * @ORM\Column(name="dco_order", type="integer", precision=0, scale=0, nullable=false, unique=false)
@@ -168,6 +176,31 @@ class DraftDatasetColumn
     public function getId()
     {
         return $this->Id;
+    }
+
+
+		/**
+     * Set valueLabelsAreDirty
+     *
+     * @param boolean $valueLabelsAreDirty
+     *
+     * @return DraftDatasetColumn
+     */
+    public function setValueLabelsAreDirty($valueLabelsAreDirty)
+    {
+        $this->ValueLabelsAreDirty = $valueLabelsAreDirty;
+
+        return $this;
+    }
+
+    /**
+     * Get valueLabelsAreDirty
+     *
+     * @return boolean
+     */
+    public function getValueLabelsAreDirty()
+    {
+        return $this->ValueLabelsAreDirty;
     }
 
 

@@ -10,13 +10,12 @@
 		<invoker ref="invoker">
 		</invoker>
 
-		<div v-if="canCreate && !showingWelcome && createEnabled">
-			<md-button @click="onNewWork">
-				<md-icon>add_circle_outline</md-icon>
-				{{ newLabel }}
-			</md-button>
 		</div>
-		</div>
+
+		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="0">Todas</md-radio>
+		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="7">Últimos 7 días</md-radio>
+		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="30">Últimos 30 días</md-radio>
+		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="90">Últimos 90 días</md-radio>
 
 		<div class="md-layout-item md-size-100">
 			<md-table style="max-width: 1000px;" v-if="list.length > 0" v-model="list" md-sort="title" md-sort-order="asc" md-card>
@@ -26,11 +25,18 @@
 						</md-table-cell>
           		<md-table-cell @click.native="select(item)" class="selectable" md-label="Datasets">{{ item.DatasetCount }}</md-table-cell>
 							<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores">{{ item.MetricCount }}</md-table-cell>
-							<md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
+							<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado">
+								<md-switch class="md-primary" v-model="item.IsIndexed"
+										@change="onIndexedChanged(item)" />
+							</md-table-cell>
+							<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Segmentado">
+								<md-switch class="md-primary" v-model="item.SegmentedCrawling"
+														@change="onSegmentedCrawlingChanged(item)" :disabled="!item.IsIndexed" />
+							</md-table-cell><md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
 									<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
 								<div class="extraIconContainer">
 									<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
-									<md-icon v-if="!item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
+									<md-icon v-if="!showIndexingColumn && !item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
 													class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
 Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.">error_outline</md-icon>
 								</div>
@@ -65,16 +71,6 @@ Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblida
 							No dispone actualmente de {{ entityName.plural }}.
 						</p>
 					</div>
-					<div v-else="">
-						<p style="margin-bottom: 25px; line-height: 2em;">
-							No hay {{ entityName.plural }} disponibles. Para crear {{ entityName.one }}
-							{{ entityName.single }}, <br>seleccione la acción a continuación.
-						</p>
-						<md-button @click="onNewWork" class="md-raised">
-							<md-icon>add_circle_outline</md-icon>
-							{{ newLabel }}
-						</md-button>
-					</div>
 				</div>
 			</div>
 
@@ -88,17 +84,6 @@ Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblida
 				md-cancel-text="Cancelar"
 				@md-confirm="onDuplicateStart">
 		</md-dialog-prompt>
-
-		<md-dialog-prompt
-						:md-active.sync="activateNewWork"
-						v-model="newWorkName"
-						:md-title="'Indique el título de ' + entityName.article + ' ' + newLabel.toLowerCase()"
-						md-input-maxlength="200"
-						:md-input-placeholder="newLabel"
-						md-confirm-text="Aceptar"
-						md-cancel-text="Cancelar"
-				@md-confirm="onNewWorkStart">
-			</md-dialog-prompt>
 	</div>
 </template>
 
@@ -121,18 +106,17 @@ export default {
 		};
 	},
 	props: {
-		filter: String,
-		createEnabled: { type: Boolean, default: true },
+		filter: String
 	},
 	computed: {
 		showingWelcome() {
 			return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 		},
+		showIndexingColumn() {
+			return this.user.Privileges === 'A';
+		},
 		user() {
 			return window.Context.User;
-		},
-		canCreate() {
-			return (this.filter !== 'P' || window.Context.CanCreatePublicData());
 		},
 		entityName() {
 			if (this.filter === 'P') {
@@ -153,17 +137,11 @@ export default {
 			}
 		},
 		list() {
-			var ret = [];
-
-			if (window.Context.Cartographies) {
-				for(var i = 0; i < window.Context.Cartographies.length; i++) {
-					if (window.Context.Cartographies[i].Type === this.filter) {
-						ret.push(window.Context.Cartographies[i]);
-					}
-				}
-			}
-			return ret;
+			return this.works;
 		}
+	},
+	mounted() {
+		this.refreshWorks();
 	},
 	methods: {
 		getWorkUri(element, absoluteUrl) {
@@ -174,7 +152,15 @@ export default {
 			return pre + '/cartographies/' + element.Id + '/content';
 		},
 		select(element) {
-			this.$router.push({ path: this.getWorkUri(element, false) });
+			window.open(this.getWorkUri(element, true), '_blank');
+		},
+		refreshWorks() {
+			var loc = this;
+			this.$refs.invoker.do(window.Db,
+					window.Db.GetWorks, this.filter, this.timeFilter).then(function(data) {
+						arr.Clear(loc.works);
+						arr.AddRange(loc.works, data);
+						});
 		},
 		publishDisabled(item) {
 			return !(item.MetadataLastOnline === null || item.HasChanges !== 0);
@@ -207,7 +193,7 @@ export default {
 			});
 		},
 		onDeleteComplete() {
-			arr.Remove(window.Context.Cartographies, this.source);
+			arr.Remove(this.works, this.source);
 		},
 		onDuplicate(item) {
 			this.source = item;
@@ -225,27 +211,15 @@ export default {
 			this.$refs.stepper.Start().then(function () {
 						item.HasChanges = 0;
 						item.MetadataLastOnline = Date.now();
-						window.Db.ReleaseWork(item.Id);
 						});
 		},
-		onNewWork() {
-			this.newWorkName = '';
-			this.activateNewWork = true;
-		},
-		onNewWorkStart() {
-			var loc = this;
-			if (this.newWorkName.trim().length === 0) {
-				alert('Debe indicar un nombre.');
-				this.$nextTick(() => {
-					loc.activateNewWork = true;
-				});
-				return;
-			}
+		onIndexedChanged(item) {
 			this.$refs.invoker.do(window.Db,
-				window.Db.CreateWork, this.newWorkName.trim(), this.filter).then(
-				function (res) {
-					loc.select(res);
-				});
+														window.Db.UpdateWorkIndexing, item);
+		},
+		onSegmentedCrawlingChanged(item) {
+			this.$refs.invoker.do(window.Db,
+				window.Db.UpdateWorkSegmentedCrawling, item);
 		},
 		onRevoke(item) {
 			this.$refs.stepper.startUrl = window.Db.GetStartWorkRevokeUrl(item.Id);
@@ -253,7 +227,6 @@ export default {
 			this.$refs.stepper.setTitle('Revocando publicación');
 			this.$refs.stepper.Start().then(function () {
 						item.MetadataLastOnline = null;
-						window.Db.ReleaseWork(item.Id);
 					});
 		},
 		onDuplicateStart() {
@@ -269,7 +242,7 @@ export default {
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkCloneUrl();
 			this.$refs.stepper.setTitle('Duplicando ' + this.entityName.single);
 			this.$refs.stepper.Start().then(function() {
-						window.Db.LoadWorks(); });
+						loc.refreshWorks(); });
 		},
 	}
 };

@@ -20,12 +20,16 @@ class WorkService extends BaseService
 		// Si existe publicado, lo cambia también
 		$workIdShardified = PublishDataTables::Shardified($workId);
 		$work = App::Orm()->find(entities\Work::class, $workIdShardified);
-		if ($value && $work->getAccessLink()) {
-			throw new PublicException("No se puede indexar una cartografía con visibilidad por enlace.");
-		}
-		if ($work !== null) {
-			$work->setIsIndexed($value);
-			App::Orm()->save($work);
+		if ($work)
+		{
+			// Esto sólo es necesario si está publicada
+			if ($value && $work->getAccessLink()) {
+				throw new PublicException("No se puede indexar una cartografía con visibilidad por enlace.");
+			}
+			if ($work !== null) {
+				$work->setIsIndexed($value);
+				App::Orm()->save($work);
+			}
 		}
 		// Actualiza cachés
 		$publisher = new PublishSnapshots();

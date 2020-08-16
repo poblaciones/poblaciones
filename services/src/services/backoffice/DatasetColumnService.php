@@ -244,48 +244,45 @@ class DatasetColumnService extends DbSession
 		$decimals, $format, $measure, $alignment, $useInSummary, $useInExport, $position = null, $after = '')
 	{
 		Profiling::BeginTimer();
-		try
-		{
-			$newColumn = new entities\DraftDatasetColumn();
-			$newColumn->setDataset($dataset);
-			$newColumn->setField($field);
-			$newColumn->setVariable($variable);
-			$newColumn->setCaption($caption);
-			$newColumn->setLabel($label);
 
-			$newColumn->setColumnWidth($columnWidth);
-			$newColumn->setFieldWidth($fieldWidth);
-			$newColumn->setDecimals($decimals);
-			$newColumn->setFormat($format);
-			$newColumn->setMeasure($measure);
-			$newColumn->setAlignment($alignment);
+		$newColumn = new entities\DraftDatasetColumn();
+		$newColumn->setDataset($dataset);
+		$newColumn->setField($field);
+		$newColumn->setVariable($variable);
+		$newColumn->setCaption($caption);
+		$newColumn->setLabel($label);
 
-			$newColumn->setUseInSummary($useInSummary);
-			$newColumn->setUseInExport($useInExport);
+		$newColumn->setColumnWidth($columnWidth);
+		$newColumn->setFieldWidth($fieldWidth);
+		$newColumn->setDecimals($decimals);
+		$newColumn->setFormat($format);
+		$newColumn->setMeasure($measure);
+		$newColumn->setAlignment($alignment);
+		$newColumn->setValueLabelsAreDirty(false);
 
-			$order = $position;
-			if($position === null)
-				$order = $this->GetMaxOrder($dataset->getId()) + 1;
-			$newColumn->setOrder($order);
+		$newColumn->setUseInSummary($useInSummary);
+		$newColumn->setUseInExport($useInExport);
 
-			App::Orm()->save($newColumn);
+		$order = $position;
+		if($position === null)
+			$order = $this->GetMaxOrder($dataset->getId()) + 1;
+		$newColumn->setOrder($order);
 
-			if($position !== null)
-				$this->UpdateOrder($newColumn->getId(), $dataset->getId(), $position);
+		App::Orm()->save($newColumn);
 
-			if($after !== '')
-				$after = "AFTER " . $after;
+		if($position !== null)
+			$this->UpdateOrder($newColumn->getId(), $dataset->getId(), $position);
 
-			$dataType = DatasetTable::SpssToMySqlDataType($format, $fieldWidth);
-			$alter = "ALTER TABLE " . $dataset->getTable() . " ADD COLUMN " . $field . " " . $dataType . " NULL DEFAULT NULL " . $after;
-			App::Db()->execDDL($alter);
+		if($after !== '')
+			$after = "AFTER " . $after;
 
-			return $newColumn;
-		}
-		finally
-		{
-			Profiling::EndTimer();
-		}
+		$dataType = DatasetTable::SpssToMySqlDataType($format, $fieldWidth);
+		$alter = "ALTER TABLE " . $dataset->getTable() . " ADD COLUMN " . $field . " " . $dataType . " NULL DEFAULT NULL " . $after;
+		App::Db()->execDDL($alter);
+
+		Profiling::EndTimer();
+
+		return $newColumn;
 	}
 
 	public function GetColumnByVariable($datasetId, $variable)
@@ -401,7 +398,6 @@ class DatasetColumnService extends DbSession
 	{
 		Profiling::BeginTimer();
 		// actualiza labels
-		$valueIds = array();
 		$insertInto = "INSERT INTO draft_dataset_column_value_label (dla_dataset_column_id, dla_value, dla_caption, dla_order) VALUES ";
 		$insertBlock = "";
 		$insertCount = 0;

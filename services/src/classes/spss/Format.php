@@ -66,6 +66,49 @@ class Format
 				throw new PublicException('Format de columna no soportado');
 		}
 	}
+	public static function ThrowUnsupportedFormat($format)
+	{
+		switch($format)
+		{
+			case self::N:
+				$extra = 'numérico restringido';
+				break;
+			case self::PCT:
+				$extra = 'porcentaje';
+				break;
+			case self::COMMA:
+				$extra = 'coma';
+				break;
+			case self::DOT:
+			case self::Point:
+				$extra = 'punto';
+				break;
+			case self::DOLLAR:
+				$extra = 'dólar';
+				break;
+			case self::DATE:
+			case self::TIME:
+			case self::DATETIME:
+			case self::ADATE:
+			case self::JDATE:
+			case self::DTIME:
+			case self::WKDAY:
+			case self::MONTH:
+			case self::MOYR:
+			case self::QYR:
+			case self::WKYR:
+				$extra = 'fecha/hora';
+				break;
+			case self::E:
+				$extra = 'notación científica';
+				break;
+			default:
+				$extra = '';
+		}
+		if ($extra != '') $extra = ': ' . $extra;
+
+		throw new PublicException('Format de columna no soportado' . $extra);
+	}
 
 	public static function GetCode($value)
 	{
@@ -76,7 +119,8 @@ class Format
 			case 'F':
 				return self::F;
 			default:
-				throw new PublicException('Format de columna no soportado');
+				self::ThrowUnsupportedFormat($value);
+				return null;
 		}
 	}
 }

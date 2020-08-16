@@ -103,7 +103,8 @@ class WorkClone
 			RowDuplicator::DuplicateRows(entities\DraftFileChunk::class, $sourceFileId, $static, 'chu_file_id');
 			// Copia el metadataFile
 			$static = array('mfi_metadata_id' => $metadataId, 'mfi_file_id' => $newFileId);
-			RowDuplicator::DuplicateRows(entities\DraftMetadataFile::class, $sourceMetadataId, $static, 'mfi_metadata_id');
+			$sourceMetadataFileId = $file->getId();
+			RowDuplicator::DuplicateRows(entities\DraftMetadataFile::class, $sourceMetadataFileId, $static, 'mfi_id');
 		}
 	}
 	public function CopyPermissions()
@@ -115,7 +116,7 @@ class WorkClone
 	public function SetFinished()
 	{
 		$update = "UPDATE draft_work SET wrk_unfinished = ? WHERE wrk_id = ?";
-		App::Db()->exec($update, array(false, $this->targetWorkId));
+		App::Db()->exec($update, array(0, $this->targetWorkId));
 }
 }
 

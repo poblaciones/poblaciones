@@ -7,7 +7,7 @@ use helena\classes\Python;
 
 class SavReader extends BaseReader
 {
-	public function WriteJson($sheetName)
+	public function WriteJson($selectedSheetIndex)
 	{
 		$args = [$this->sourceFile, $this->folder];
 

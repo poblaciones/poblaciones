@@ -183,12 +183,11 @@ class Orm
       return $this->repository($classname)->find($id, $lockMode, $lockVersion);
   }
 
-	public function findAll($classname, $orderBy = null)
+	public function findAll($classname, $orderBy = null, $limit = null, $offset = null)
   {
-		// ej. $records = App::Orm()->findAll(entities\DraftInstitution::class, array('Caption' => 'ASC'));
 		if ($orderBy !== null && !is_array($orderBy))
 			$orderBy = array($orderBy => 'ASC');
-		return $this->findManyBy($classname, array(), $orderBy);
+		return $this->findManyBy($classname, array(), $orderBy, $limit, $offset);
   }
   public function findManyBy($classname, array $criteria, array $orderBy = null, $limit = null, $offset = null)
   {

@@ -16,10 +16,18 @@ class UserService extends BaseService
 {
 	public function GetNewUser()
 	{
-		$entity = new entities\User();		
+		$entity = new entities\User();
 		$entity->setDeleted(false);
 		$entity->setPrivileges('P');
 		return $entity;
+	}
+
+	public function GetCurrentUser()
+	{
+		$userId = Account::Current()->GetUserId();
+		$user = App::Orm()->find(entities\User::class, $userId);
+		if ($user === null) throw new PublicException("Usuario no encontrado.");
+		return $user;
 	}
 
 	public function LoginAs($userId)
@@ -67,6 +75,15 @@ class UserService extends BaseService
 		// Borra de la base
 		$delete = "DELETE FROM draft_work_permission WHERE wkp_user_id = ?";
 		App::Db()->exec($delete, array($userId));
+
+		// Libera las revisiones
+		$update = "UPDATE revision FROM revision, user
+									SET rev_user_submission_email = usr_email
+									WHERE rev_user_submission_id = usr_id AND rev_user_submission_id = ?";
+		App::Db()->exec($update, array($userId));
+		$delete = "DELETE FROM revision WHERE rev_user_submission_id = ?";
+		App::Db()->exec($delete, array($userId));
+
 		// Borra las sesiones
 		$delete = "DELETE FROM user_session WHERE ses_user_id = ?";
 		App::Db()->exec($delete, array($userId));

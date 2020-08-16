@@ -154,12 +154,12 @@ App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $r
 	return App::Json($controller->UpdateWorkVisibility($workId, $private, $link));
 });
 
-App::$app->get('/services/backoffice/RequestReview', function (Request $request) {
+App::$app->get('/services/backoffice/RequestRevision', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
 
 	$controller = new services\WorkService();
-	return App::Json($controller->RequestReview($workId));
+	return App::Json($controller->RequestRevision($workId));
 });
 
 App::$app->get('/services/backoffice/StartPublishWork', function (Request $request) {

@@ -88,7 +88,7 @@ export default {
 		var total = this.total;
 		Helper.animateNum(this, 'aniTotal', total, total, format, this.variable.Decimals);
 		var totalCount = this.totalCount;
-		Helper.animateNum(this, 'aniTotalCount', totalCount, totalCount, this.variable.Decimals);
+		Helper.animateNum(this, 'aniTotalCount', totalCount, totalCount, format, this.variable.Decimals);
   },
   data() {
 		return {
@@ -104,7 +104,8 @@ export default {
 			Helper.animateNum(this, 'aniTotal', newValue, oldValue, format, this.variable.Decimals);
 		},
 		totalCount(newValue, oldValue) {
-			Helper.animateNum(this, 'aniTotalCount', newValue, oldValue, this.variable.Decimals);
+			var format = this.getFormat();
+			Helper.animateNum(this, 'aniTotalCount', newValue, oldValue, format, this.variable.Decimals);
 		},
 	},
 	computed: {

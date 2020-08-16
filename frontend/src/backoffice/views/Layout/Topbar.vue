@@ -28,7 +28,7 @@
 import { mapGetters } from 'vuex';
 import Context from '@/backoffice/classes/Context';
 import BackIcon from '@/common/assets/back.svg';
-import UserInfo from '@/backoffice/components/UserInfo';
+import UserInfo from '@/common/components/UserInfo';
 import BackofficeLinks from '@/backoffice/components/BackofficeLinks.vue';
 
 export default {

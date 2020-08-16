@@ -38,14 +38,19 @@ export default {
       openDialog: false
     };
   },
-  props: {},
+	props: {
+	},
   computed: {},
   methods: {
-    show(title, text, result, listValues) {
+		show(title, text, result, listValues, allItem) {
       this.title = title;
       this.text = text;
-      this.result = result;
-      this.listValues = listValues;
+			this.result = result;
+			if (allItem) {
+				this.listValues = [{ Id: -1, Caption: '[ TODOS ]' }].concat(listValues);
+			} else {
+				this.listValues = listValues;
+			}
       this.openDialog = true;
     },
     save(item) {

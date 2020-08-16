@@ -101,7 +101,7 @@
 									</div>
 								</template>
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									<md-button v-if="Work.CanEdit()" @click="askReview" class="md-raised">
+									<md-button v-if="Work.CanEdit()" @click="askRevision" class="md-raised">
 										Solicitar revisión
 									</md-button>
 								</div>
@@ -211,9 +211,9 @@ export default {
 				this.Work.UpdateVisibility);
 			return true;
 		},
-		askReview() {
+		askRevision() {
 			this.$refs.invoker.do(this.Work,
-				this.Work.RequestReview).then(
+				this.Work.RequestRevision).then(
 					function () {
 						window.alert('Revisión solicitada con éxito.');
 					});

@@ -1,4 +1,9 @@
 [CURRENT]
+- Fix: niveles duplicados en clipping por agregado de distritos escoalres (1991, 2001, 2001, 2010)
+- Apartado administrativo de revisiones.
+- Fix: clonación de cartografía fallaba si había adjuntos.
+
+v2.28 (2020-08-12)
 - Para datasets de polígonos, hace downsampling al armar el caché de tiles.
 - Fix: backoffice: renombrar variable producía error si el dataset mostraba los datos ordenados por esa variable.
 - Fix: cambiar el order de adjuntos, variables o fuentes hacía fallar la edición posterior sin recargar antes la página.
@@ -8,6 +13,8 @@
 - Fix: importación de archivos SPSS con variables con caracteres extendidos (ej. tildes).
 - Se muestran mensaje de error al usuario más específicos (cuando están disponibles).
 - Soporte a caracter | como delimitador de archivos CSV
+- Fix: kmls/kmz sin datos extendidos.
+- Kmls/kmz: opción de importar todas las carpetas.
 
 v2.27 (2020-08-03)
 - Fix: en ciertos casos, las descargas desde cartografía publicada por link.

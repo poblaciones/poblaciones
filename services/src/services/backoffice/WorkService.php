@@ -6,6 +6,7 @@ use minga\framework\Arr;
 use helena\classes\App;
 use helena\classes\Session;
 use helena\services\common\BaseService;
+use minga\framework\Date;
 use minga\framework\Context;
 use minga\framework\Profiling;
 use helena\db\frontend\RevisionsModel;
@@ -179,11 +180,21 @@ class WorkService extends BaseService
 		return $metrics;
 	}
 
-	public function RequestReview($workId)
+	public function RequestRevision($workId)
 	{
+		// Graba la entrada
+		$userService = new UserService();
+		$user = $userService->GetCurrentUser();
+
+		$revision = new entities\Revision();
+		$revision->setWork(App::Orm()->find(DraftWork::class, $workId));
+		$revision->setUserSubmission($user);
+		$revision->setSubmissionDate(Date::DateTimeArNow());
+		App::Orm()->save($revision);
+
 		// Manda un mensaje administrativo avisando del pedido
 		$nm = new NotificationManager();
-		$nm->NotifyRequestReview($workId);
+		$nm->NotifyRequestRevision($workId);
 		return self::OK;
 	}
 	public function AppendExtraMetric($workId, $metricId)

@@ -7,11 +7,11 @@ use minga\framework\IO;
 
 class KmxReader extends CsvReader
 {
-	public function Prepare($sheetName)
+	public function Prepare($selectedSheetIndex)
 	{
 		$intermediateFile = $this->PrepareIntermediateFile();
 
-		$args = array($this->extension, $intermediateFile, $this->folder, 'true', $sheetName);
+		$args = array($this->extension, $intermediateFile, $this->folder, 'true', $selectedSheetIndex);
 		Python::Execute('kmx2csv3.py', $args);
 
 		IO::Copy($intermediateFile . '_out.csv', $this->sourceFile);
@@ -24,7 +24,16 @@ class KmxReader extends CsvReader
 		Python::Execute('kmx2csv3.py', $args);
 
 		$outFile = $intermediateFile . '_folders.txt';
-		$ret = IO::ReadAllLines($outFile);
+		$lines = IO::ReadAllLines($outFile);
+
+		$ret = [];
+		$n = 1;
+		foreach($lines as $line)
+		{
+			$ret[] = ['Id' => $n, 'Caption' => $line];
+			$n++;
+		}
+
 		return $ret;
 	}
 }

@@ -76,56 +76,6 @@ Db.prototype.ServerClipboardPaste = function (user) {
 		{}, 'pegar la información');
 };
 
-Db.prototype.UpdateWorkIndexing = function (item) {
-	return axiosClient.getPromise(window.host + '/services/admin/UpdateWorkIndexing',
-		{ w: item.Id, v: (item.IsIndexed ? '1' : '0') }, 'cambiar la indexación de la obra');
-};
-
-Db.prototype.UpdateWorkSegmentedCrawling = function (item) {
-	return axiosClient.getPromise(window.host + '/services/admin/UpdateWorkSegmentedCrawling',
-		{ w: item.Id, v: (item.SegmentedCrawling ? '1' : '0') }, 'cambiar el tipo indexación de la obra');
-};
-
-Db.prototype.GetClippingRegions = function () {
-	return axiosClient.getPromise(window.host + '/services/admin/GetClippingRegions',
-		{}, 'obtener la lista de regiones');
-};
-Db.prototype.GetUsers = function () {
-	return axiosClient.getPromise(window.host + '/services/admin/GetUsers',
-			{ }, 'obtener la lista de usuarios');
-};
-
-Db.prototype.GetWorks = function (filter, timeFilter) {
-	return axiosClient.getPromise(window.host + '/services/admin/GetWorks',
-			{ f: filter, t: timeFilter }, 'obtener la lista de cartografías');
-};
-
-Db.prototype.DeleteUser = function (user, callback) {
-	return axiosClient.getPromise(window.host + '/services/admin/DeleteUser',
-		{ u: user.Id }, 'eliminar al usuario').then(function () {
-			callback();
-		});
-};
-
-Db.prototype.UpdateClippingRegion = function (region) {
-	return axiosClient.postPromise(window.host + '/services/admin/UpdateClippingRegion',
-		{ r: region }, 'actualizar la región').then(function () {
-
-		});
-};
-
-Db.prototype.UpdateUser = function (user, password, verification) {
-	return axiosClient.postPromise(window.host + '/services/admin/UpdateUser',
-		{ u: user, p: password, v: verification }, 'actualizar al usuario').then(function () {
-
-		});
-};
-
-Db.prototype.LoginAs = function (user) {
-	return axiosClient.getPromise(window.host + '/services/admin/LoginAs',
-			{ u: user.Id }, 'ingresar como el usuario indicado');
-};
-
 Db.prototype.RebindCurrentWork = function () {
 	var workId = window.Context.CurrentWork.properties.Id;
 	const loc = this;
@@ -160,7 +110,6 @@ Db.prototype.GetStepWorkCloneUrl = function () {
 	return window.host + '/services/backoffice/StepCloneWork';
 };
 
-
 Db.prototype.GetStartWorkDeleteUrl = function (workId) {
 	return window.host + '/services/backoffice/StartDeleteWork?w=' + workId;
 };
@@ -184,7 +133,6 @@ Db.prototype.GetStartWorkRevokeUrl = function (workId) {
 Db.prototype.GetStepWorkRevokeUrl = function () {
 	return window.host + '/services/backoffice/StepRevokeWork';
 };
-
 
 Db.prototype.LoadWorks = function () {
 	const loc = this;

@@ -36,11 +36,11 @@ class BaseReader
 			throw new PublicException('La extensión del archivo debe ser CSV, TXT, XLSX, XLS, SAV, KML o KMZ. Extensión recibida: ' . $fileExtension);
 	}
 
-	public function Prepare($sheetName)
+	public function Prepare($selectedSheetIndex)
 	{
 	}
 
-	public function WriteJson($sheetName)
+	public function WriteJson($selectedSheetIndex)
 	{
 	}
 

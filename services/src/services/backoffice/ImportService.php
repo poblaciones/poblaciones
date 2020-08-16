@@ -34,7 +34,7 @@ class ImportService extends BaseService
 
 	private $state;
 
-	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $sheetName)
+	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $selectedSheetIndex)
 	{
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetDatasetDataChanged($dataset->getWork()->getId());
@@ -48,8 +48,8 @@ class ImportService extends BaseService
 		$reader = BaseReader::CreateReader($bucket->path, $fileExtension);
 
 		// Ejecuta los dos pasos de un reader
-		$reader->Prepare($sheetName);
-		$reader->WriteJson($sheetName);
+		$reader->Prepare($selectedSheetIndex);
+		$reader->WriteJson($selectedSheetIndex);
 
 		// Listo
 		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');

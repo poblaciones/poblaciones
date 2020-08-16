@@ -90,11 +90,11 @@ class NotificationManager
 		}
 	}
 
-	public function NotifyRequestReview($workId)
+	public function NotifyRequestRevision($workId)
 	{
+		// Manda email....
 		if (empty(Context::Settings()->Mail()->NotifyAddress))
 			return;
-		// Manda email....
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
 
 		$type = $work->getType();

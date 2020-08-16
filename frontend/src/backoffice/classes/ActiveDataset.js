@@ -751,7 +751,9 @@ ActiveDataset.prototype.setRenderer = function(col) {
 
 ActiveDataset.prototype.cellsRenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
 	var text = '' + str.EscapeHtml(value);
-	if (columnproperties.cellsformat && columnproperties.cellsformat[0] == 'd') {
+	if (columnproperties.cellsformat && columnproperties.cellsformat[0] == 'd' && text !== '') {
+		var decimals = parseInt(columnproperties.cellsformat.substring(1));
+		text = value.toFixed(decimals);
 		text = text.replace('.', ',');
 	}
 	return '<div class="gridCell" style="overflow: hidden !important;text-align:' + columnproperties.cellsalign + '">' + text + '</div>';

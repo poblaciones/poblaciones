@@ -11,30 +11,29 @@
 					<md-tabs md-sync-route ref="tabs">
 						<template slot="md-tab" slot-scope="{ tab }">
 							{{ tab.label }}
+							<i class="badge" v-if="tab.data.badge">{{ tab.data.badge }}</i>
 							<mp-help :text="tab.data.help" />
 						</template>
+
 						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/" :md-active="isPath('/')" md-label="Usuarios">
 							<users></users>
 						</md-tab>
-						<md-tab class="transparentTab" to="/works" id="works-tab" md-label="Cartografías" :md-active="isPath('/works')"
-										:md-template-data="{ help: `<p>
-											Acceso al listado de cartografías del sitio.
-										</p>
-										` }">
-						<works filter="R" :createEnabled="false" :offerAdminActions="true"></works>
+						<md-tab class="transparentTab" to="/works" id="works-tab" md-label="Cartografías" :md-active="isPath('/works')">
+
+						<works filter="R"></works>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="public-tab" v-if="showPublic" to="/public" :md-active="isPath('/public')" md-label="Datos públicos"
-										:md-template-data="{ help: `
-											<p>
-											Los datos públicos son las cartografías que se ofrecen a los usuarios
-											en el botón inferior (+) del visor.
-										</p>` }">
-							<works filter="P" :createEnabled="false" :offerAdminActions="true"></works>
+						<md-tab class="transparentTab" id="public-tab" v-if="showPublic" to="/public" :md-active="isPath('/public')" md-label="Datos públicos">
+							<works filter="P"></works>
 						</md-tab>
 
 						<md-tab class="transparentTab" id="clipping-regions-tab" v-if="isAdmin" to="/regions" :md-active="isPath('/regions')" md-label="Regiones">
 							<clipping-regions></clipping-regions>
+						</md-tab>
+
+						<md-tab class="transparentTab" id="revisions-tab" v-if="isAdmin" to="/revisions" :md-active="isPath('/revisions')" md-label="Revisiones"
+										:md-template-data="{ badge: (pendingRevisions ? pendingRevisions : '') }">
+							<revisions @pendingUpdated="pendingUpdated"></revisions>
 						</md-tab>
 					</md-tabs>
 				</div>
@@ -44,12 +43,12 @@
 </template>
 
 <script>
-import TopWelcome from '@/backoffice/views/Layout/TopWelcome';
-import Works from '@/backoffice/views/Work/Works';
+import TopWelcome from '@/common/components/TopWelcome';
+
+import Works from './Works/Works';
 import Users from './Users/Users';
+import Revisions from './Revisions/Revisions';
 import ClippingRegions from './ClippingRegions/ClippingRegions';
-import ActiveWork from '@/backoffice/classes/ActiveWork';
-import arr from '@/common/js/arr';
 
 export default {
 	name: 'Layout',
@@ -57,6 +56,7 @@ export default {
 		TopWelcome,
 		Works,
 		ClippingRegions,
+		Revisions,
 		Users
 	},
 	mounted() {
@@ -66,6 +66,7 @@ export default {
 	},
 	data() {
 		return {
+			pendingRevisions: 0
 		};
 	},
 	computed: {
@@ -89,11 +90,16 @@ export default {
 				this.$refs.tabs.activeTab = 'public-tab';
 			} else if (this.$route.path === '/regions' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'clipping-regions-tab';
+			} else if (this.$route.path === '/revisions' && this.$refs.tabs) {
+				this.$refs.tabs.activeTab = 'revisions-tab';
 			} else if (this.$route.path === '/works' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'works-tab';
 			}
 			return this.$route.path === path;
 		},
+		pendingUpdated(pending) {
+			this.pendingRevisions = pending;
+		}
 	}
 };
 </script>
@@ -113,6 +119,23 @@ export default {
 .transparentTab {
 	background-color: #fafafa;
 	padding: 4px;
-	//margin-top: -10px;
 }
+
+	.badge {
+		padding: 2px 6px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: absolute;
+		top: 6px;
+		right: 6px;
+		background: #b7b7b7;
+		border-radius: 6px;
+		color: #fff;
+		font-size: 10px;
+		font-style: normal;
+		font-weight: 600;
+		letter-spacing: -.05em;
+		font-family: 'Roboto Mono', monospace;
+	}
 </style>

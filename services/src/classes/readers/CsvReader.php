@@ -6,7 +6,7 @@ use helena\classes\CsvToJson;
 
 class CsvReader extends BaseReader
 {
-	public function WriteJson($sheetName)
+	public function WriteJson($selectedSheetIndex)
 	{
 		CsvToJson::Convert($this->sourceFile, $this->folder);
 	}

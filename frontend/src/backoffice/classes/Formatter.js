@@ -14,6 +14,18 @@ module.exports = {
 					parsed.getFullYear(),
          ].join('/');
 	},
+	formatFullName(user) {
+		if (user === null) {
+			return '';
+		}
+		var ret = (user.Firstname ? user.Firstname + ' ' : '');
+		ret += (user.Lastname ? user.Lastname : '');
+		ret = ret.trim();
+		if (!ret) {
+			ret = user.Email;
+		}
+		return ret;
+	},
 	formatColumn(column, varnameOnly) {
 		if (column === null) {
 			return '';

@@ -16,7 +16,7 @@ class ReaderTestBase extends TestCase
 		if ($this->bucket)
 			$this->bucket->Delete();
 	}
-	public function readAndCheckFile($file, $sheetName, $expectedHeaderSize, $expectedOutSize)
+	public function readAndCheckFile($file, $selectedSheetIndex, $expectedHeaderSize, $expectedOutSize)
 	{
 		$extension = IO::GetFileExtension($file);
 		$fileOnly = IO::GetFilenameNoExtension($file);
@@ -28,8 +28,8 @@ class ReaderTestBase extends TestCase
 
 		$reader = BaseReader::CreateReader($bucket->path, $extension);
 
-		$reader->Prepare($sheetName);
-		$reader->WriteJson($sheetName);
+		$reader->Prepare($selectedSheetIndex);
+		$reader->WriteJson($selectedSheetIndex);
 
 		$this->assertFile($reader->OutputHeaderFilename(), $expectedHeaderSize, 'Header de archivo: ' . $fileOnly . '.' . $extension);
 

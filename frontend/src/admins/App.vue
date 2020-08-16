@@ -37,15 +37,8 @@ export default {
 		LoadData(data) {
 			// Inicia sesión autenticada
 			this.user = data.User;
-			const loc = this;
-
 			window.Context.User = this.user;
 			window.Context.Configuration = data;
-
-			this.$refs.invoker.do(window.Db, window.Db.LoadWorks).then(function () {
-				loc.works = window.Db.Works;
-			});
-			window.Context.LoadStaticLists();
 		},
 		RegisterErrorHandler() {
 			Vue.config.errorHandler = err.HandleError;

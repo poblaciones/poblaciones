@@ -11,7 +11,7 @@ use helena\services\backoffice\import\PhpSpreadSheetCsv;
 
 class XlsxReader extends CsvReader
 {
-	public function Prepare($sheetName)
+	public function Prepare($selectedSheetIndex)
 	{
 		$intermediateFile = $this->PrepareIntermediateFile();
 
@@ -21,7 +21,7 @@ class XlsxReader extends CsvReader
 
 		foreach($loadedSheetNames as $sheetIndex => $loadedSheetName)
 		{
-			if ($sheetName === $loadedSheetName)
+			if ((int) $selectedSheetIndex === $sheetIndex)
 			{
 				$writer->setSheetIndex($sheetIndex);
 				$writer->save($this->sourceFile);
@@ -40,7 +40,7 @@ class XlsxReader extends CsvReader
 		$ret = [];
 		foreach($loadedSheetNames as $sheetIndex => $loadedSheetName)
 		{
-			$ret[] = $loadedSheetName;
+			$ret[] = ['Id' => $sheetIndex, 'Caption' => $loadedSheetName];
 		}
 		return $ret;
 	}

@@ -86,6 +86,7 @@ class WorkModel extends BaseModel
 								JOIN metric_version ON mvl_metric_version_id = mvr_id
 								WHERE dat_work_id = ?) wMetrics
 								JOIN metric_version ON mvr_metric_id = metricId
+								JOIN metric_version_level ON mvl_metric_version_id = mvr_id
 								JOIN metric ON mtr_id = metricId
 								GROUP BY mtr_id, mtr_caption ORDER BY mtr_caption";
 

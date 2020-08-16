@@ -195,10 +195,13 @@ class SnapshotClippingRegionItemModel extends BaseModel
 						ORDER BY geo_revision";
 				$levels = App::Db()->fetchAll($sql);
 				$ret = [];
-				// No incluye aquellos cuyo padre esté en la lista
+				// No incluye aquellos cuyo padre esté en la lista ...
+				// es decir, no le interesa radio si puede reportar por departamento
 				foreach($levels as $level)
 					if (Arr::GetItemByNamedValue($levels, 'geo_id', $level['geo_parent_id']) === null)
 						$ret[] = $level;
+				// saca los duplicados
+				$ret = Arr::RemoveDuplicatesByNamedKey($ret, 'geo_revision');
 		}
 		return $ret;
 	}

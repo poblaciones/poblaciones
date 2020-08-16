@@ -175,12 +175,13 @@ module.exports = {
 			return n.toLocaleString('es');
 		}
 	},
-	animateNum(vm, element, newValue, oldValue, format, decimals) {
+	animateNum(vm, element, newValue, oldValue, formatMode, decimals) {
 		var fix = 0;
-		if (format === 'km') {
+		var format = null;
+		if (formatMode === 'km') {
 			format = this.formatKm;
 			fix = 2;
-		} else if (format && format.substr(0, 1) === '%') {
+		} else if (formatMode && formatMode.substr(0, 1) === '%') {
 			format = this.formatPercent;
 			fix = 2;
 		} else {

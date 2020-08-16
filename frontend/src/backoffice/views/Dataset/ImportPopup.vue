@@ -34,7 +34,7 @@
 							<md-icon>close</md-icon>
 						</md-button>
 						<div class="messageBlock" v-if="verifying">Analizando archivo...</div>
-						<div class="messageBlock" v-if="sheetName !== null && sheetName !== '' && sheetName !== false">Dataset: {{ sheetName }}</div>
+						<div class="messageBlock" v-if="selectedSheet !== null && selectedSheet.Caption !== '' && selectedSheet.Caption !== false">Dataset: {{ selectedSheet.Caption }}</div>
           </div>
 					<div v-if="Dataset !== null && Dataset.Columns !== null && Dataset.Columns.length > 0" class="md-layout-item md-size-100" style="margin-top: -10px; margin-bottom: 12px;">
 						<p>
@@ -85,7 +85,7 @@ export default {
 			verifying: false,
       hasFiles: false,
       bucketId: 0,
-			sheetName: null,
+			selectedSheet: null,
       keepLabels: true,
       saveRequested: false,
       createdDataset: null,
@@ -127,7 +127,7 @@ export default {
 			this.filename = h.extractFilename(file.name);
 			this.createdDataset = null;
 			this.datasets = null;
-			this.sheetName = null;
+			this.selectedSheet = null;
 			this.sending = true;
     },
 		maxfilesexceeded(file) {
@@ -139,7 +139,7 @@ export default {
 			this.generateBucketId();
 			this.hasFiles = false;
 			this.datasets = null;
-			this.sheetName = null;
+			this.selectedSheet = null;
 		},
     afterSuccess(file, response) {
       this.sending = false;
@@ -156,32 +156,31 @@ export default {
 						loc.datasets = list;
 						loc.RequestDatasetSelection();
 					} else if (list.length == 1) {
-						loc.sheetName = list[0];
+						loc.selectedSheet = list[0];
 					} else {
-						loc.sheetName = null;
+						loc.selectedSheet = null;
 					}
 				}).finally(function () {
 					loc.verifying = false;
 				});
     },
-    RequestDatasetSelection() {
+		RequestDatasetSelection() {
+			var allItem = this.hasAllItemOnSheets();
+			var text =  "Seleccione uno de los datasets dentro del archivo a importar";
+			if (allItem) {
+				text += ", o elija la opción 'TODOS' para incorporar la totalidad de los contenidos del archivo";
+			}
       this.$refs.datasetSelectionDialog.show(
         'Selección de dataset',
-        'Seleccione uno de los datasets dentro del archivo a importar',
-        this.sheetName,
-        this.asItems(this.datasets));
-		},
-		asItems(list) {
-			var ret = [];
-			for (var n = 0; n < list.length; n++) {
-				ret.push({ Value: list[n], Caption: list[n] });
-			}
-			return ret;
+				text,
+				this.selectedSheet,
+				this.datasets,
+				allItem);
 		},
     SaveDatasetSelected(item) {
       var loc = this;
-			loc.sheetName = item.Value;
-      if (loc.sheetName == ''){
+			loc.selectedSheet = item;
+			if (!loc.selectedSheet || loc.selectedSheet.Caption == ''){
         loc.clear();
       }
     },
@@ -192,14 +191,16 @@ export default {
 				this.extension == 'xlsx' || this.extension == 'xls') {
         this.verifyDatasets(this.getBucketId(), this.extension);
       }
-    },
+		},
+		hasAllItemOnSheets() {
+			return this.extension == 'kml' || this.extension == 'kmz';
+		},
     save() {
       var stepper = this.$refs.stepper;
       stepper.startUrl = this.Work.GetDatasetFileImportUrl(this.keepLabels);
       stepper.stepUrl = this.Work.GetStepDatasetFileImportUrl();
       let bucketId = this.getBucketId();
       let extension = this.extension;
-      let sheetName = this.sheetName;
       if (extension !== 'sav' && extension !== 'csv' && extension !== 'txt'
           && extension !== 'xls' && extension !== 'xlsx'
           && extension !== 'kml' && extension !== 'kmz') {
@@ -211,7 +212,7 @@ export default {
         return;
       }
 			let datasetId = (this.Dataset ? this.Dataset.properties.Id : this.createdDataset.Id);
-			stepper.args = { b: bucketId, d: datasetId, fe: extension, dsn: sheetName};
+			stepper.args = { b: bucketId, d: datasetId, fe: extension, s: (this.selectedSheet ? this.selectedSheet.Id : null) };
 			let loc = this;
 			stepper.Start().then(function() {
 				loc.Work.WorkChanged();
@@ -230,8 +231,8 @@ export default {
 		},
 		RequestDataset() {
 			var suggested = this.filename;
-			if (this.sheetName) {
-				suggested += ' - ' + this.sheetName;
+			if (this.selectedSheet && this.selectedSheet.Caption && this.selectedSheet.Caption !== '[ TODOS ]') {
+				suggested += ' - ' + this.selectedSheet.Caption;
 			}
 			this.$refs.datasetDialog.show('Importar', 'Indique un nombre para el dataset',
 								'', 'Ej. Escuelas primarias.', suggested, 100);
@@ -253,7 +254,7 @@ export default {
 			this.extension = '';
 			this.generateBucketId();
 			this.sending = false;
-			this.sheetName = null;
+			this.selectedSheet = null;
 			this.hasFiles = false;
 			this.openImport = true;
 			this.createdDataset = null;

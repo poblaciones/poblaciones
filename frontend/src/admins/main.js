@@ -3,7 +3,7 @@ import Vue from 'vue';
 import 'normalize.css/normalize.css'; // A modern alternative to CSS resets
 
 import '@/backoffice/styles/index.scss'; // global css
-import Db from '@/backoffice/classes/Db';
+import Db from './classes/Db';
 import axios from 'axios';
 
 import App from './App';

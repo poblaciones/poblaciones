@@ -51,6 +51,7 @@ class DatasetColumns
 			$column->setDecimals($header->GetDecimals());
 			$column->setUseInSummary(true);
 			$column->setUseInExport(true);
+			$column->setValueLabelsAreDirty(false);
 			$column->setOrder($order);
 			$column->setDataset($dataset);
 

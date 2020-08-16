@@ -302,9 +302,9 @@ ActiveWork.prototype.AddPermission = function (user, permission) {
 		});
 };
 
-ActiveWork.prototype.RequestReview = function () {
+ActiveWork.prototype.RequestRevision = function () {
 	var loc = this;
-	return axiosClient.getPromise(window.host + '/services/backoffice/RequestReview',
+	return axiosClient.getPromise(window.host + '/services/backoffice/RequestRevision',
 		{ 'w': this.properties.Id }, 'solicitar la revisión');
 };
 
@@ -431,6 +431,19 @@ ActiveWork.prototype.WorkChanged = function () {
 
 ActiveWork.prototype.WorkPublished = function () {
 	this.UpdateHasChanges(0);
+};
+
+ActiveWork.CalculateListItemStatus = function (item) {
+	var privacy = (item.IsPrivate ? ' - Visiblidad: Privada' : '');
+	if (item.Unfinished) {
+		return { label: 'Clonación fallida', tag: 'unfinished', icon: 'error', color: '#ff0000' };
+	} else if (item.Metadata === null || item.MetadataLastOnline === null) {
+		return { label: 'Sin publicar' + privacy, tag: 'unpublished', icon: 'error_outline', color: '#ff7936' };
+	} else if (item.HasChanges !== 0) {
+		return { label: 'Existen cambios sin publicar' + privacy, tag: 'published_changes', icon: 'border_color', color: '#969696' };
+	}	else {
+		return { label: 'Publicada' + privacy, tag: 'published', icon: 'check_circle_outline', color: '#44b10f' };
+}
 };
 
 

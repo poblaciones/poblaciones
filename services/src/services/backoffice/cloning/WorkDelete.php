@@ -29,6 +29,7 @@ class WorkDelete
 
 		$this->doDeleteWorkVersions();
 		$this->doDeleteExtraMetrics();
+		$this->doDeleteRevisions();
 		$this->doDeleteWork();
 		$this->doDeleteMetadata($metadata);
 
@@ -68,6 +69,12 @@ class WorkDelete
 	{
 		// Borra
 		$delete = "DELETE FROM draft_work_extra_metric WHERE wmt_work_id = ?";
+		App::Db()->exec($delete, array($this->workId));
+	}
+	private function doDeleteRevisions()
+	{
+		// Borra
+		$delete = "DELETE FROM revision WHERE rev_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
 	}
 	private function doDeleteWorkVersions()
