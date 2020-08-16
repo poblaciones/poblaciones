@@ -90,7 +90,7 @@ class NotificationManager
 		}
 	}
 
-	public function NotifyRequestRevision($workId)
+	public function NotifyRequestReview($workId)
 	{
 		// Manda email....
 		if (empty(Context::Settings()->Mail()->NotifyAddress))

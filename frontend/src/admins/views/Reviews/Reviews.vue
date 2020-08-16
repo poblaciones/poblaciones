@@ -3,8 +3,8 @@
 		<div class="md-layout">
 			<invoker ref="invoker"></invoker>
 
-			<revision-popup ref="editPopup" @completed="popupSaved">
-			</revision-popup>
+			<review-popup ref="editPopup" @completed="popupSaved">
+			</review-popup>
 			<div class="md-layout-item md-size-100">
 				<md-table style="max-width: 1100px;" v-model="list" md-card="">
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
@@ -17,7 +17,7 @@
 							<md-button class="md-icon-button" title="Modificar revisión" @click="openEdition(item)">
 								<md-icon>edit</md-icon>
 							</md-button>
-							<md-button class="md-icon-button" title="Ver cartografía" @click="select(item)">
+							<md-button class="md-icon-button" title="Ver cartografía" @click="select(item.Work)">
 								<md-icon>visibility</md-icon>
 							</md-button>
 							<md-button class="md-icon-button" title="Eliminar" @click="deleteDecision(item)">
@@ -33,14 +33,14 @@
 
 <script>
 import Context from '@/backoffice/classes/Context';
-import RevisionPopup from './RevisionPopup.vue';
+import ReviewPopup from './ReviewPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/js/arr';
 
 var	DECISIONS = { 'A': 'Publicable', 'C': 'Cambios solicitados', 'R': 'Rechazada' };
 
 export default {
-	name: 'Revisiones',
+	name: 'Reviewes',
 	data() {
 		return {
 			list: []
@@ -52,7 +52,7 @@ export default {
 	mounted() {
 		var loc = this;
 		this.$refs.invoker.do(window.Db,
-				window.Db.GetRevisions).then(function(data) {
+				window.Db.GetReviews).then(function(data) {
 					arr.AddRange(loc.list, data);
 					loc.updatePending();
 					});
@@ -98,7 +98,7 @@ export default {
 		deleteDecision(item) {
 			var loc = this;
 			this.$refs.invoker.confirmDo('Eliminar revisión', 'La revisión seleccionada será eliminada',
-					window.Db, window.Db.DeleteRevision, item, function() {
+					window.Db, window.Db.DeleteReview, item, function() {
 						arr.Remove(loc.list, item);
 						loc.updatePending();
 					});
@@ -112,7 +112,7 @@ export default {
 		},
   },
   components: {
-      RevisionPopup,
+      ReviewPopup,
   }
 };
 </script>

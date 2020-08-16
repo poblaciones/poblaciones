@@ -5,7 +5,7 @@ namespace helena\db\frontend;
 use helena\classes\App;
 use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 
-class RevisionsModel extends BaseModel
+class SignatureModel extends BaseModel
 {
 	public function __construct()
 	{
@@ -14,7 +14,7 @@ class RevisionsModel extends BaseModel
 		$this->captionField = 'ver_name';
 	}
 
-	public function GetRevisions()
+	public function GetSignatures()
 	{
 		$pairs = array('CARTOGRAPHY_VIEW' => array('Geography'),
 										'CARTOGRAPHY_REGION_VIEW' => array('Clipping'),
@@ -36,7 +36,7 @@ class RevisionsModel extends BaseModel
 		return $ret;
 	}
 
-	public function GetLookupRevision()
+	public function GetLookupSignature()
 	{
 		$sql = "SELECT ver_value FROM version WHERE ver_name = 'LOOKUP_VIEW'";
 		return App::Db()->fetchScalar($sql);

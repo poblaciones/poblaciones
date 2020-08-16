@@ -603,9 +603,9 @@ ActiveSelectedMetric.prototype.GetCartographyService = function () {
 	case 'L':
 			return { url: null, revision: null };
 	case 'D':
-		return { url: h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, '/services/frontend/geographies/GetGeography'), revision: window.SegMap.Revisions.Geography };
+		return { url: h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, '/services/frontend/geographies/GetGeography'), revision: window.SegMap.Signatures.Geography };
 	case 'S':
-		return { url: window.host + '/services/frontend/shapes/GetDatasetShapes', isDatasetShapeRequest: true, revision: this.properties.Metric.Revision };
+		return { url: window.host + '/services/frontend/shapes/GetDatasetShapes', isDatasetShapeRequest: true, revision: this.properties.Metric.Signature };
 	default:
 		throw new Error('Unknown dataset metric type');
 	}

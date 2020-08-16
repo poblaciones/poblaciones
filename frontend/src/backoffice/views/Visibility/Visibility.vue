@@ -101,9 +101,12 @@
 									</div>
 								</template>
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									<md-button v-if="Work.CanEdit()" @click="askRevision" class="md-raised">
+									<md-button v-if="Work.CanEdit()" @click="askReview" class="md-raised">
 										Solicitar revisión
 									</md-button>
+									<div style="padding-top: 15px; display: inline-block; padding-left: 10px;" v-if="Work.PendingReviewSince">
+										Solicitud enviada el {{ formatDate(Work.PendingReviewSince) }}.
+									</div>
 								</div>
 							</div>
 						</md-card-content>
@@ -205,17 +208,22 @@ export default {
 			}
 			return this.doUpdate();
 		},
+		formatDate(date) {
+			return f.formatDate(date);
+		},
 		doUpdate() {
 			this.Work.properties.IsPrivate = this.visibilityMode === 3;
 			this.$refs.invoker.do(this.Work,
 				this.Work.UpdateVisibility);
 			return true;
 		},
-		askRevision() {
+		askReview() {
+			var loc = this;
 			this.$refs.invoker.do(this.Work,
-				this.Work.RequestRevision).then(
-					function () {
+				this.Work.RequestReview).then(
+					function (data) {
 						window.alert('Revisión solicitada con éxito.');
+						loc.Work.PendingReviewSince = data;
 					});
 		}
 	},

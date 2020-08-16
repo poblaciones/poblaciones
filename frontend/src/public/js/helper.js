@@ -423,7 +423,7 @@ module.exports = {
 			u: metric.SelectedUrbanity,
 			x: x,
 			y: y,
-			w: metric.Metric.Revision
+			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 		ret.e = null;
 		if (boundsRectRequired) {
@@ -441,7 +441,7 @@ module.exports = {
 			x: x - x % size,
 			y: y - y % size,
 			s: size,
-			w: metric.Metric.Revision
+			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 		ret.e = null;
 		if (boundsRectRequired) {
@@ -489,7 +489,7 @@ module.exports = {
 			i: variable.Id,
 			t: (variable.HasTotals ? 1 : 0),
 			u: metric.SelectedUrbanity,
-			w: metric.Metric.Revision,
+			w: metric.Metric.Signature,
 			s: size,
 			d: direction,
 			h: hiddenValueLabels
@@ -502,7 +502,7 @@ module.exports = {
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
-			w: metric.Metric.Revision
+			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 	},
 	getFrameParams(frame) {

@@ -11,5 +11,6 @@ class WorkInfo
 	public $Sources;
 	public $ExtraMetrics;
 	public $Startup;
+	public $PendingReviewSince;
 }
 

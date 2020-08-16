@@ -46,9 +46,9 @@ ActiveLabels.prototype.GetDataService = function (boundsRectRequired, seed) {
 };
 
 ActiveLabels.prototype.GetDataServiceParams = function (coord, boundsRectRequired) {
-	var rev = window.SegMap.Revisions.BigLabels;
-	if (coord.z >= window.SegMap.Revisions.SmallLabelsFrom) {
-		rev += '_' + window.SegMap.Revisions.SmallLabels;
+	var rev = window.SegMap.Signatures.BigLabels;
+	if (coord.z >= window.SegMap.Signatures.SmallLabelsFrom) {
+		rev += '_' + window.SegMap.Signatures.SmallLabels;
 	}
 	if (this.UseBlockedRequests(boundsRectRequired)) {
 		return h.getBlockLabelsParams(window.SegMap.frame, coord.x, coord.y, boundsRectRequired, rev, this.blockSize);

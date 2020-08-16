@@ -4,7 +4,7 @@ namespace helena\entities\backoffice\structs;
 
 class StartupInfo
 {
-	public $LookupVersion;
+	public $LookupSignature;
 	public $RegionExtraInfo;
 	public $RegionCaption;
 }

@@ -135,7 +135,7 @@ Clipping.prototype.ClippingChanged = function (doNotUpdateMap) {
 
 
 Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoomOnly, doNotUpdateMap) {
-	var args = h.getCreateClippingParams(this.SegmentedMap.frame, this.clipping, this.SegmentedMap.Revisions.Clipping);
+	var args = h.getCreateClippingParams(this.SegmentedMap.frame, this.clipping, this.SegmentedMap.Signatures.Clipping);
 	if (this.ClippingRequest === '*' || this.ClippingRequest === args) {
 		return;
 	}
@@ -207,7 +207,7 @@ Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
 	this.SegmentedMap.MapsApi.ClearClippingCanvas();
 	this.SegmentedMap.RefreshSummaries();
 	this.SegmentedMap.Get(window.host + '/services/frontend/clipping/CreateClipping', {
-		params: h.getCreateClippingParamsByName(loc.frame, clippingName, this.SegmentedMap.Revisions.Clipping),
+		params: h.getCreateClippingParamsByName(loc.frame, clippingName, this.SegmentedMap.Signatures.Clipping),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
 	}).then(function (res) {
 		loc.ProcessClipping(res.data, fitRegion, fitRegion === true);

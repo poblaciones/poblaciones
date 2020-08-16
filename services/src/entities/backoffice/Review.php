@@ -8,12 +8,12 @@ use JMS\Serializer\Annotation\ExclusionPolicy;
 use helena\db\backoffice\annotations\ClientReadonly;
 
 /**
- * Revision
+ * Review
  *
- * @ORM\Table(name="revision", indexes={@ORM\Index(name="fk_draft_work_per", columns={"rev_metric_id"}), @ORM\Index(name="fk_draft_work_pe", columns={"rev_work_id"})})
+ * @ORM\Table(name="review", indexes={@ORM\Index(name="fk_draft_work_per", columns={"rev_metric_id"}), @ORM\Index(name="fk_draft_work_pe", columns={"rev_work_id"})})
  * @ORM\Entity
  */
-class Revision
+class Review
 {
     /**
      * @var integer
@@ -126,7 +126,7 @@ class Revision
      *
      * @param integer $id
      *
-     * @return Revision
+     * @return Review
      */
     public function setId($id)
     {
@@ -140,7 +140,7 @@ class Revision
      *
      * @param \helena\entities\backoffice\DraftWork $work
      *
-     * @return Revision
+     * @return Review
      */
     public function setWork(\helena\entities\backoffice\DraftWork $work = null)
     {
@@ -166,7 +166,7 @@ class Revision
      *
      * @param \DateTime $submissionDate
      *
-     * @return Revision
+     * @return Review
      */
     public function setSubmissionDate($submissionDate)
     {
@@ -191,7 +191,7 @@ class Revision
      *
      * @param \DateTime $resolutionDate
      *
-     * @return Revision
+     * @return Review
      */
     public function setResolutionDate($resolutionDate)
     {
@@ -216,7 +216,7 @@ class Revision
      *
      * @param string $reviewerComments
      *
-     * @return Revision
+     * @return Review
      */
     public function setReviewerComments($reviewerComments)
     {
@@ -241,7 +241,7 @@ class Revision
      *
      * @param string $editorComments
      *
-     * @return Revision
+     * @return Review
      */
     public function setEditorComments($editorComments)
     {
@@ -265,7 +265,7 @@ class Revision
      *
      * @param string $extraComments
      *
-     * @return Revision
+     * @return Review
      */
     public function setExtraComments($extraComments)
     {
@@ -290,7 +290,7 @@ class Revision
      *
      * @param string $decision
      *
-     * @return Revision
+     * @return Review
      */
     public function setDecision($decision)
     {
@@ -315,7 +315,7 @@ class Revision
      *
      * @param \helena\entities\backoffice\User $user
      *
-     * @return Revision
+     * @return Review
      */
     public function setUserSubmission(\helena\entities\backoffice\User $user = null)
     {
@@ -341,7 +341,7 @@ class Revision
      *
      * @param string $email
      *
-     * @return Revision
+     * @return Review
      */
     public function setUserSubmissionEmail($email)
     {
@@ -366,7 +366,7 @@ class Revision
      *
      * @param \helena\entities\backoffice\User $user
      *
-     * @return Revision
+     * @return Review
      */
     public function setUserDecision(\helena\entities\backoffice\User $user = null)
     {

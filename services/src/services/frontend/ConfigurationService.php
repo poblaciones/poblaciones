@@ -5,7 +5,7 @@ namespace helena\services\frontend;
 use helena\services\common\BaseService;
 use helena\services\common\AuthenticationService;
 
-use helena\db\frontend\RevisionsModel;
+use helena\db\frontend\SignatureModel;
 use minga\framework\Context;
 use helena\classes\Callbacks;
 
@@ -13,8 +13,8 @@ class ConfigurationService extends BaseService
 {
 	public function GetConfiguration()
 	{
-		$model = new RevisionsModel();
-		$revisions = $model->GetRevisions();
+		$model = new SignatureModel();
+		$signatures = $model->GetSignatures();
 		$blockStrategy = array('UseDataTileBlocks' => Context::Settings()->Map()->UseDataTileBlocks,
 													 'UseLabelTileBlocks' => Context::Settings()->Map()->UseLabelTileBlocks,
 													 'TileDataBlockSize' => Context::Settings()->Map()->TileDataBlockSize,
@@ -22,7 +22,7 @@ class ConfigurationService extends BaseService
 		$userService = new AuthenticationService();
 		$user = $userService->GetStatus();
 
-		$ret = array('Revisions' => $revisions,
+		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
 									'StaticWorks' =>  Context::Settings()->Map()->ContentServerWorks,

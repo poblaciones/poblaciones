@@ -1,4 +1,4 @@
-CREATE TABLE `revision` (
+CREATE TABLE `review` (
   `rev_id` INT NOT NULL AUTO_INCREMENT,
   `rev_work_id` INT NOT NULL COMMENT 'Cartografía a la que refiere la revisión',
   `rev_submission_time` timestamp NOT NULL COMMENT 'Fecha/hora en la que fue solicitada la revisión',

@@ -17,6 +17,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.MetricVersions.Refresh();
 	this.Files = workInfo.Files;
 	this.Permissions = workInfo.Permissions;
+	this.PendingReviewSince = workInfo.PendingReviewSince;
 	this.Startup = workInfo.Startup;
 	this.ExtraMetrics = workInfo.ExtraMetrics;
 	this.workListMetadata = workListMetadata;
@@ -302,9 +303,9 @@ ActiveWork.prototype.AddPermission = function (user, permission) {
 		});
 };
 
-ActiveWork.prototype.RequestRevision = function () {
+ActiveWork.prototype.RequestReview = function () {
 	var loc = this;
-	return axiosClient.getPromise(window.host + '/services/backoffice/RequestRevision',
+	return axiosClient.getPromise(window.host + '/services/backoffice/RequestReview',
 		{ 'w': this.properties.Id }, 'solicitar la revisión');
 };
 

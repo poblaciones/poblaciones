@@ -9,7 +9,7 @@ use helena\services\common\BaseService;
 use minga\framework\Date;
 use minga\framework\Context;
 use minga\framework\Profiling;
-use helena\db\frontend\RevisionsModel;
+use helena\db\frontend\SignatureModel;
 
 use helena\entities\backoffice\DraftWork;
 use helena\entities\backoffice\structs\WorkInfo;
@@ -117,16 +117,25 @@ class WorkService extends BaseService
 		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
 		$workInfo->Startup = $this->GetStartupInfo($workId);
+		$workInfo->PendingReviewSince = $this->GetPendingReviewSince($workId);
 		Profiling::EndTimer();
 		return $workInfo;
+	}
+
+	private function GetPendingReviewSince($workId)
+	{
+		Profiling::BeginTimer();
+		$review = App::Db()->fetchScalarNullable("SELECT MAX(rev_submission_time) FROM review WHERE rev_work_id = ?", array($workId));
+		Profiling::EndTimer();
+		return $review;
 	}
 
 	public function GetStartupInfo($workId)
 	{
 		Profiling::BeginTimer();
-		$revisions = new RevisionsModel();
+		$signatures = new SignatureModel();
 		$startup = new StartupInfo();
-		$startup->LookupVersion = $revisions->GetLookupRevision();
+		$startup->LookupSignature = $signatures->GetLookupSignature();
 		$extraInfo = $this->GetWorkStartupClippingRegionExtra($workId);
 		$startup->RegionExtraInfo = $extraInfo['extra'];
 		$startup->RegionCaption = $extraInfo['caption'];
@@ -180,13 +189,13 @@ class WorkService extends BaseService
 		return $metrics;
 	}
 
-	public function RequestRevision($workId)
+	public function RequestReview($workId)
 	{
 		// Graba la entrada
 		$userService = new UserService();
 		$user = $userService->GetCurrentUser();
 
-		$revision = new entities\Revision();
+		$revision = new entities\Review();
 		$revision->setWork(App::Orm()->find(DraftWork::class, $workId));
 		$revision->setUserSubmission($user);
 		$revision->setSubmissionDate(Date::DateTimeArNow());
@@ -194,8 +203,8 @@ class WorkService extends BaseService
 
 		// Manda un mensaje administrativo avisando del pedido
 		$nm = new NotificationManager();
-		$nm->NotifyRequestRevision($workId);
-		return self::OK;
+		$nm->NotifyRequestReview($workId);
+		return $this->GetPendingReviewSince($workId);
 	}
 	public function AppendExtraMetric($workId, $metricId)
 	{

@@ -31,9 +31,9 @@
 							<clipping-regions></clipping-regions>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="revisions-tab" v-if="isAdmin" to="/revisions" :md-active="isPath('/revisions')" md-label="Revisiones"
-										:md-template-data="{ badge: (pendingRevisions ? pendingRevisions : '') }">
-							<revisions @pendingUpdated="pendingUpdated"></revisions>
+						<md-tab class="transparentTab" id="reviews-tab" v-if="isAdmin" to="/reviews" :md-active="isPath('/reviews')" md-label="Revisiones"
+										:md-template-data="{ badge: (pendingReviews ? pendingReviews : '') }">
+							<reviews @pendingUpdated="pendingUpdated"></reviews>
 						</md-tab>
 					</md-tabs>
 				</div>
@@ -47,7 +47,7 @@ import TopWelcome from '@/common/components/TopWelcome';
 
 import Works from './Works/Works';
 import Users from './Users/Users';
-import Revisions from './Revisions/Revisions';
+import Reviews from './Reviews/Reviews';
 import ClippingRegions from './ClippingRegions/ClippingRegions';
 
 export default {
@@ -56,7 +56,7 @@ export default {
 		TopWelcome,
 		Works,
 		ClippingRegions,
-		Revisions,
+		Reviews,
 		Users
 	},
 	mounted() {
@@ -66,7 +66,7 @@ export default {
 	},
 	data() {
 		return {
-			pendingRevisions: 0
+			pendingReviews: 0
 		};
 	},
 	computed: {
@@ -90,15 +90,15 @@ export default {
 				this.$refs.tabs.activeTab = 'public-tab';
 			} else if (this.$route.path === '/regions' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'clipping-regions-tab';
-			} else if (this.$route.path === '/revisions' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'revisions-tab';
+			} else if (this.$route.path === '/reviews' && this.$refs.tabs) {
+				this.$refs.tabs.activeTab = 'reviews-tab';
 			} else if (this.$route.path === '/works' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'works-tab';
 			}
 			return this.$route.path === path;
 		},
 		pendingUpdated(pending) {
-			this.pendingRevisions = pending;
+			this.pendingReviews = pending;
 		}
 	}
 };

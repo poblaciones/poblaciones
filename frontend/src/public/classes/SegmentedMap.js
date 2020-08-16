@@ -21,7 +21,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.frame = frame;
 	this.Tutorial = new Tutorial(toolbarStates);
 	this.Clipping = new Clipping(this, frame, clipping);
-	this.Revisions = config.Revisions;
+	this.Signatures = config.Signatures;
 	this.User = config.User;
 	this.MapsApi = mapsApi;
 	this.Work = null;

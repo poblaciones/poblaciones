@@ -34,22 +34,22 @@ Db.prototype.GetWorks = function (filter, timeFilter) {
 			{ f: filter, t: timeFilter }, 'obtener la lista de cartografías');
 };
 
-Db.prototype.GetRevisions = function () {
-	return axiosClient.getPromise(window.host + '/services/admin/GetRevisions',
+Db.prototype.GetReviews = function () {
+	return axiosClient.getPromise(window.host + '/services/admin/GetReviews',
 			{ }, 'obtener la lista de revisiones');
 };
 
 
-Db.prototype.DeleteRevision = function (revision, callback) {
-	return axiosClient.postPromise(window.host + '/services/admin/DeleteRevision',
-		{ r: revision }, 'eliminar la revisión').then(function () {
+Db.prototype.DeleteReview = function (review, callback) {
+	return axiosClient.postPromise(window.host + '/services/admin/DeleteReview',
+		{ r: review }, 'eliminar la revisión').then(function () {
 			callback();
 		});
 };
 
-Db.prototype.UpdateRevision = function (revision) {
-	return axiosClient.postPromise(window.host + '/services/admin/UpdateRevision',
-		{ r: revision }, 'modificar la revisión');
+Db.prototype.UpdateReview = function (review) {
+	return axiosClient.postPromise(window.host + '/services/admin/UpdateReview',
+		{ r: review }, 'modificar la revisión');
 };
 
 

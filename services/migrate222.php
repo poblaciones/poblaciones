@@ -33,7 +33,7 @@ App::Db()->dropTable("snapshot_metric_version_item_variable");
 
 echo "\nDrop de cachés...\n";
 $model = new SnapshotMetricVersionModel();
-$model->IncrementAllRevisions();
+$model->IncrementAllSignatures();
 $cm = new CacheManager();
 $cm->CleanAllMetricCaches();
 

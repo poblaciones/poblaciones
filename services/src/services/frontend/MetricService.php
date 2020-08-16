@@ -112,7 +112,7 @@ class MetricService extends BaseService
 		$metric->Id = $item['myv_metric_id'];
 		$metric->Name = $item['myv_metric_caption'];
 		$metric->MetricGroupId = $item['myv_metric_group_id'];
-		$metric->Revision = $item['myv_metric_revision'];
+		$metric->Signature = $item['myv_metric_revision'];
 		$this->AddVersions($metric, $item);
 		return $metric;
 	}

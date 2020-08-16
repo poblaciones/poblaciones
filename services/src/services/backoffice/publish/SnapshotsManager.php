@@ -26,7 +26,7 @@ class SnapshotsManager extends BaseService
 	{
 		// Regen
 		$modelVersion = new SnapshotMetricVersionModel();
-		$modelVersion->IncrementMetricRevision($metricId);
+		$modelVersion->IncrementMetricSignature($metricId);
 		$modelVersion->ClearMetric($metricId);
 		$modelVersion->RegenMetric($metricId);
 	}

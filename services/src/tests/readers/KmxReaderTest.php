@@ -9,7 +9,7 @@ class KmxReaderTest extends ReaderTestBase
 	public function testReadFile()
 	{
 		$file = Paths::GetTestsDataLocalPath() . '/testCABA.kmz';
-		$this->readAndCheckFile($file, '1', [2732, 2528], 350630);
+		$this->readAndCheckFile($file, '1', [2732, 2528], [352968, 350630]);
 
 		$file2 = Paths::GetTestsDataLocalPath() . '/testMIAA.kmz';
 		$this->readAndCheckFile($file2, '1', 5773, [514391, 523809]);

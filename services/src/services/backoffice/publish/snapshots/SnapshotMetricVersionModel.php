@@ -71,7 +71,7 @@ class SnapshotMetricVersionModel
 		Profiling::EndTimer();
 	}
 
-	public function IncrementAllRevisions()
+	public function IncrementAllSignatures()
 	{
 		Profiling::BeginTimer();
 
@@ -87,7 +87,7 @@ class SnapshotMetricVersionModel
 
 
 
-	public function IncrementMetricRevision($metricId)
+	public function IncrementMetricSignature($metricId)
 	{
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 

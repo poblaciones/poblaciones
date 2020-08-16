@@ -69,13 +69,13 @@ class cCaches extends cController
 			$cm->CleanLabelsCache();
 		} else if (array_key_exists('selectedMetric', $_POST)) {
 			$model = new SnapshotMetricVersionModel();
-			$n = $model->IncrementAllRevisions();
+			$n = $model->IncrementAllSignatures();
 			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores y vaciado el cache de selectedMetrics.';
 			$cm = new CacheManager();
 			$cm->CleanSelectedMetricCache();
-		} else if (array_key_exists('regenMetricRevisions', $_POST)) {
+		} else if (array_key_exists('regenMetricSignatures', $_POST)) {
 			$model = new SnapshotMetricVersionModel();
-			$n = $model->IncrementAllRevisions();
+			$n = $model->IncrementAllSignatures();
 			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores.';
 			$cm = new CacheManager();
 			$cm->CleanAllMetricCaches();

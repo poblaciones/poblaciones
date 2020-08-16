@@ -125,7 +125,7 @@ export default {
 					return;
 				}
 				loc.autolist = [];
-				var s = new Search(this, window.SegMap.Revisions.Search, 'a');
+				var s = new Search(this, window.SegMap.Signatures.Search, 'a');
 				s.StartSearch(t);
 			},
 			500),
