@@ -110,7 +110,7 @@ class Converter:
 
   def process_kml(self, file_kml, out_file, folder_index):
     doc = self.read_file_as_document(file_kml)
-    if (int(folder_index) == -1):
+    if (folder_index == 'false' or int(folder_index) == -1):
        placemarks = doc.get_all_placemarks()
     else:
       placemarks = doc.get_folder_placemarks_by_index(folder_index)
