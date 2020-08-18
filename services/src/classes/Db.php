@@ -9,11 +9,6 @@ use minga\framework\Log;
 
 use minga\framework\PublicException;
 
-use Doctrine\ORM\Tools\Setup;
-use Doctrine\ORM\EntityManager;
-use Doctrine\DBAL\Types\Type;
-
-
 class Db
 {
 	public $db;
@@ -108,10 +103,19 @@ class Db
 		Profiling::EndTimer();
 	}
 
+	public function rowExists($table, $field, $value)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT CASE WHEN EXISTS (SELECT * FROM " . $table . " WHERE " . $field . " = ?) then 1 else 0 end";
+		$ret = $this->fetchScalarInt($sql, array($value));
+		Profiling::EndTimer();
+		return $ret === 1;
+	}
+
 	public function tableExists($table)
 	{
 		if ($table == null)
-			return;
+			return false;
 		Profiling::BeginTimer();
 		$sql = "SHOW TABLES LIKE '" . $table . "'";
 		$ret = $this->fetchAll($sql);

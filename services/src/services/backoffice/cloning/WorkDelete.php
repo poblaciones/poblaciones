@@ -74,7 +74,7 @@ class WorkDelete
 	private function doDeleteRevisions()
 	{
 		// Borra
-		$delete = "DELETE FROM revision WHERE rev_work_id = ?";
+		$delete = "DELETE FROM review WHERE rev_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
 	}
 	private function doDeleteWorkVersions()

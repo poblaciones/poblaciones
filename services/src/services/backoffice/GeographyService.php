@@ -20,7 +20,7 @@ class GeographyService extends DbSession
 	public function GetAllGeographies()
 	{
 		Profiling::BeginTimer();
-		$ret = App::Orm()->findManyByQuery("SELECT g FROM e:Geography g LEFT JOIN g.Parent p ORDER BY g.Revision DESC, p.Id");
+		$ret = App::Orm()->findManyByQuery("SELECT g FROM e:Geography g ORDER BY g.Revision DESC, g.Caption");
 		Profiling::EndTimer();
 		return $ret;
 	}

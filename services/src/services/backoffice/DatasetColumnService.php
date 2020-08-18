@@ -3,7 +3,6 @@
 namespace helena\services\backoffice;
 
 use minga\framework\PublicException;
-use minga\framework\MessageException;
 use minga\framework\Profiling;
 
 use helena\caches\BackofficeDownloadCache;
@@ -34,7 +33,7 @@ class DatasetColumnService extends DbSession
 
 		if ($count > 0)
 		{
-			throw new MessageException("Ya existe una columna con ese nombre.");
+			throw new PublicException("Ya existe una columna con ese nombre.");
 		}
 		App::Orm()->save($column);
 		// Marca work

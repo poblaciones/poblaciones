@@ -6,7 +6,7 @@ use helena\classes\App;
 use minga\framework\Performance;
 use minga\framework\Context;
 use helena\classes\GlobalTimer;
-use minga\framework\MessageException;
+use minga\framework\PublicException;
 
 class BaseService
 {
@@ -47,9 +47,9 @@ class BaseService
 	protected function CheckNotNullNumeric($param)
 	{
 		if ($param === "" || $param === null)
-			throw new MessageException("Parameter required.");
+			throw new PublicException("Parameter required.");
 		if (!is_numeric($param))
-			throw new MessageException("Numeric parameter required.");
+			throw new PublicException("Numeric parameter required.");
 	}
 	protected function CheckNotNumericNullable(& $param)
 	{
@@ -59,7 +59,7 @@ class BaseService
 			return;
 		}
 		if (!is_numeric($param))
-			throw new MessageException("Numeric nullable parameter required.");
+			throw new PublicException("Numeric nullable parameter required.");
 	}
 
 }

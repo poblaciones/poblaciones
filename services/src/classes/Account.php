@@ -10,7 +10,6 @@ use minga\framework\Mail;
 use minga\framework\Str;
 use minga\framework\MessageBox;
 use minga\framework\Context;
-use minga\framework\MessageException;
 use minga\framework\PublicException;
 
 class Account
@@ -133,7 +132,7 @@ class Account
 			if ($this->user === '')
 			{
 				if ($throwException)
-					throw new MessageException("No se ha iniciado sesión.");
+					throw new PublicException("No se ha iniciado sesión.");
 				else
 					return false;
 			}
@@ -142,7 +141,7 @@ class Account
 			if ($attrs == null)
 			{
 				if ($throwException)
-					throw new MessageException("Usuario no encontrado en la base de datos ('" . $this->user . "').");
+					throw new PublicException("Usuario no encontrado en la base de datos ('" . $this->user . "').");
 				else
 					return false;
 			}

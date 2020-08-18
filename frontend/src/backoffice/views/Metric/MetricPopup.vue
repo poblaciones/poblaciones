@@ -77,6 +77,11 @@ export default {
 					loc.Dataset.UpdateMetricVersionLevel, loc.newMetricVersionLevel).then(function(data) {
 						loc.MetricVersionLevel.MetricVersion.Caption = loc.newMetricVersionLevel.MetricVersion.Caption;
 						loc.MetricVersionLevel.MetricVersion.Metric.Caption = loc.newMetricVersionLevel.MetricVersion.Metric.Caption;
+
+						loc.MetricVersionLevel.Id = loc.newMetricVersionLevel.Id;
+						loc.MetricVersionLevel.MetricVersion.Id = loc.newMetricVersionLevel.MetricVersion.Id;
+						loc.MetricVersionLevel.MetricVersion.Metric.Id = loc.newMetricVersionLevel.MetricVersion.Metric.Id;
+
 						loc.hide();
 					});
 		},

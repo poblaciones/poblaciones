@@ -29,6 +29,14 @@ class Geography
      */
     private $Caption;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="geo_root_caption", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $RootCaption;
+
     /**
      * @var string
      *
@@ -114,15 +122,11 @@ class Geography
     private $PartialCoverage;
 
     /**
-     * @var \helena\entities\backoffice\Geography
-     * @Exclude
-     *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Geography")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="geo_parent_id", referencedColumnName="geo_id", nullable=true)
-     * })
+		 * @var integer
+		 *
+		 * @ORM\Column(name="geo_parent_id", type="integer", precision=0, scale=0, nullable=false, unique=false)
      */
-    private $Parent;
+    private $ParentId;
 
     /**
      * @var \helena\entities\backoffice\ClippingRegionItem
@@ -171,6 +175,7 @@ class Geography
 
         return $this;
     }
+
     /**
      * Set caption
      *
@@ -193,6 +198,30 @@ class Geography
     public function getCaption()
     {
         return $this->Caption;
+    }
+
+    /**
+     * Set rootCaption
+     *
+     * @param string $rootCaption
+     *
+     * @return Geography
+     */
+    public function setRootCaption($rootCaption)
+    {
+        $this->RootCaption = $rootCaption;
+
+        return $this;
+    }
+
+    /**
+     * Get rootCaption
+     *
+     * @return string
+     */
+    public function getRootCaption()
+    {
+        return $this->RootCaption;
     }
 
     /**
@@ -485,27 +514,27 @@ class Geography
     }
 
     /**
-     * Set parent
+     * Set parentId
      *
-     * @param \helena\entities\backoffice\Geography $parent
+     * @param integer $parentId
      *
      * @return Geography
      */
-    public function setParent(\helena\entities\backoffice\Geography $parent = null)
+    public function setParent($parentId)
     {
-        $this->Parent = $parent;
+        $this->ParentId = $parentId;
 
         return $this;
     }
 
     /**
-     * Get parent
+     * Get parentId
      *
-     * @return \helena\entities\backoffice\Geography
+     * @return integer
      */
-    public function getParent()
+    public function getParentId()
     {
-        return $this->Parent;
+        return $this->ParentId;
     }
 
     /**

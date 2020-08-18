@@ -9,7 +9,7 @@ use minga\framework\settings\CacheSettings;
 use minga\framework\Context;
 use minga\framework\Log;
 use minga\framework\Str;
-use minga\framework\MessageException;
+use minga\framework\PublicException;
 
 use helena\caches\AddressesCache;
 use helena\classes\Callbacks;
@@ -40,7 +40,7 @@ class AddressServiceModel
 				$current = Performance::ReadTodayExtraValues('AddressQuery');
 				if ($current >= $limit)
 				{
-					Log::HandleSilentException(new MessageException('Se ha llegado al límite diario de consultas de direcciones (AddressQuery).'));
+					Log::HandleSilentException(new PublicException('Se ha llegado al límite diario de consultas de direcciones (AddressQuery).'));
 					Profiling::EndTimer();
 					return [];
 				}

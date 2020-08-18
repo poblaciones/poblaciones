@@ -8,9 +8,18 @@
 								 :disabled="isDisabled"
 								 @md-selected="selected">
 				<md-option v-if="allowNull" :value="-1111111">{{ nullLabel }}</md-option>
-				<md-option v-for="item in list" :key="item[listKey]" :value="item[listKey]">
-					{{ format(item) }}
-				</md-option>
+				<template v-if="listGrouping">
+					<md-optgroup v-for="(groupItem, index) in classifyGroups(list)" :key="index"  :label="groupItem.caption">
+						<md-option v-for="item in groupItem.list" :key="item[listKey]" :value="item[listKey]">
+							{{ format(item) }}
+						</md-option>
+					</md-optgroup>
+				</template>
+				<template v-else>
+					<md-option v-for="item in list" :key="item[listKey]" :value="item[listKey]">
+						{{ format(item) }}
+					</md-option>
+				</template>
 			</md-select>
 		</md-field>
 		<div v-if="helper" style="line-height: 1em; margin-top: -7px;">
@@ -23,6 +32,7 @@
 
 <script>
 
+import arr from '@/common/js/arr';
 
 export default {
   name: 'MpSelect',
@@ -37,6 +47,16 @@ export default {
 		htmlEncode(html ) {
 	   return document.createElement( 'a' ).appendChild(
         document.createTextNode( html ) ).parentNode.innerHTML;
+		},
+		classifyGroups(list) {
+			// los pone como .list y .caption
+			var roots = arr.GetUniqueValues(list, this.listGrouping);
+			// Los pone en sus listas
+			var ret = [];
+			for(var n = 0; n < roots.length; n++) {
+				ret.push({ caption: roots[n], list: arr.FilterByValue(list, this.listGrouping, roots[n]) });
+			}
+			return ret;
 		},
 		selected() {
 			if (this.isInUpdate) {
@@ -144,6 +164,7 @@ export default {
     label: String,
 		list: Array,
 		listKey: { type: String, default: 'Id' },
+		listGrouping: { type: String, default: null },
 		listCaption: { type: String, default: 'Caption' },
 		value: {},
 		render: { type: Function, default: null },

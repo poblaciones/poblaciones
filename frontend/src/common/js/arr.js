@@ -19,6 +19,19 @@ module.exports = {
 		}
 		return (index >= 0);
 	},
+	GetUniqueValues(arr, attribute) {
+		var ret = [];
+		for(var n = 0; n < arr.length; n++) {
+			var val = arr[n][attribute];
+			if (!ret.includes(val)) {
+				ret.push(val);
+			}
+		}
+		return ret;
+	},
+	FilterByValue(arr, attribute, value) {
+		return arr.filter(function(element) { return element[attribute] === value; });
+	},
 	ToIntArray(arr) {
 		return arr.map(function (x) {
 			return parseInt(x, 10);

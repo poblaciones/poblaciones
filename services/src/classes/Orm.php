@@ -189,6 +189,7 @@ class Orm
 			$orderBy = array($orderBy => 'ASC');
 		return $this->findManyBy($classname, array(), $orderBy, $limit, $offset);
   }
+
   public function findManyBy($classname, array $criteria, array $orderBy = null, $limit = null, $offset = null)
   {
       return $this->repository($classname)->findBy($criteria, $orderBy, $limit, $offset);
@@ -249,23 +250,23 @@ class Orm
   public function findByProperty($className, $property, $value)
   {
 		$dql = $this->preparePropertyQuery($className, $property, $value);
-		return App::Orm()->findByQuery($dql, array($value));
+		return $this->findByQuery($dql, array($value));
 	}
 	public function findByProperties($className, $filters)
   {
 		$dql = $this->preparePropertiesQuery($className, $filters);
-		return App::Orm()->findByQuery($dql, array_values($filters));
+		return $this->findByQuery($dql, array_values($filters));
 	}
 
 	public function findManyByProperties($className, $filters, $orderProperty = null)
   {
 		$dql = $this->preparePropertyQuery($className, $filters, $orderProperty);
-		return App::Orm()->findManyByQuery($dql, array_values($filters));
+		return $this->findManyByQuery($dql, array_values($filters));
 	}
 	public function findManyByProperty($className, $property, $value, $orderProperty = null)
   {
 		$dql = $this->preparePropertyQuery($className, $property, $value, $orderProperty);
-		return App::Orm()->findManyByQuery($dql, array($value));
+		return $this->findManyByQuery($dql, array($value));
 	}
   public function findByQuery($dql, array $params = [])
   {

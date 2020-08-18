@@ -71,7 +71,7 @@
 												 v-model="codes" :render="formatColumn" />
 						</div>
 						<div class='md-layout-item md-size-35 md-small-size-100'>
-							<mp-select :canEdit="Work.CanEdit()" :list="geographies"
+							<mp-select :canEdit="Work.CanEdit()" :list="geographies" listGrouping="RootCaption"
 												 :model-key="true" label="Geografía" helper="Nivel para georreferenciar"
 												 v-model="geographyId" :render="formatGeography" />
 							<br />
@@ -148,7 +148,9 @@ export default {
 	mounted() {
 		var loc = this;
 		window.Context.Geographies.GetAll(function(data) {
-			loc.geographies = data;
+			// Los ordena para el combo
+			var sorted = loc.ResolveRootCaptions(data);
+			loc.geographies = sorted;
 			});
 	},
 	data() {
@@ -176,6 +178,25 @@ export default {
 				return '';
 			} else {
 				return geography.Caption + ' (' + geography.Revision + ')';
+			}
+		},
+		ResolveRootCaptions(list) {
+			var ret = [];
+			for(var n = 0; n < list.length; n++) {
+				if (list[n].ParentId === null ) {
+						this.classifyChildrenRecursive(ret, list[n], list, list[n]);
+				}
+			}
+			return ret;
+		},
+		classifyChildrenRecursive(ret, root, list, promotedParent) {
+			ret.push(promotedParent);
+			for(var n = 0; n < list.length; n++) {
+				if (list[n].ParentId === promotedParent.Id) {
+					// Se fija si hay un grupo donde ponerse...
+					list[n].RootCaption = root.RootCaption;
+					this.classifyChildrenRecursive(ret, root, list, list[n]);
+				}
 			}
 		},
 		geocodedMessage() {

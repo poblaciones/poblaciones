@@ -14,7 +14,6 @@ use minga\framework\PublicException;
 use minga\framework\Serializator;
 use minga\framework\Date;
 
-use minga\framework\MessageException;
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\Profiling;
 
@@ -318,6 +317,7 @@ class MetricService extends BaseService
 		// Borra el symbology
 		App::Db()->exec("DELETE FROM draft_symbology WHERE vsy_id = ? AND NOT EXISTS(
 										SELECT * FROM draft_variable WHERE mvv_symbology_id = ?)", array($symbologyId, $symbologyId));
+
 		// Marca work
 		WorkFlags::SetMetricDataChanged($level->getDataset()->getWork()->getId());
 		// Listo
@@ -340,11 +340,40 @@ class MetricService extends BaseService
 		}
 		// Borra level
 		App::Orm()->delete($level);
+
+		// Se fija si tiene que borrar los niveles superiores
+		$this->CheckAndRemoveOrphanVersion($level->getMetricVersion());
+
 		// Marca work
 		WorkFlags::SetMetricDataChanged($level->getDataset()->getWork()->getId());
 		// Listo
 		Profiling::EndTimer();
 		return self::OK;
+	}
+
+	private function CheckAndRemoveOrphanVersionLevel($datasetId, $levelId)
+	{
+		// Si no le quedan variables, borra el nivel
+		if (!App::Db()->rowExists("draft_variable", "mvv_metric_version_level_id", $levelId))
+		{
+			$this->DeleteMetricVersionLevel($datasetId, $levelId);
+		}
+	}
+
+	private function CheckAndRemoveOrphanVersion($version)
+	{
+		$metricVersionId = $version->getId();
+		$metricId = $version->getMetric()->getId();
+		// Si el version no tiene levels, lo borra
+		if (!App::Db()->rowExists("draft_metric_version_level", "mvl_metric_version_id", $metricVersionId))
+		{
+			App::Orm()->delete($version);
+		}
+		// Si el metric no tiene versions, lo borra
+		if (!App::Db()->rowExists("draft_metric_version", "mvr_metric_id", $metricId))
+		{
+			App::Orm()->delete($version->getMetric());
+		}
 	}
 
 	private function SetDefaultOrder($level, $variableConnected)
@@ -408,22 +437,22 @@ class MetricService extends BaseService
 		Profiling::BeginTimer();
 		$metricVersion->setCaption(trim($metricVersion->getCaption()));
 		// Resuelve metricVersion
+
 		// Si no tiene Id...
 		if ($metricVersion->getId() === null || $metricVersion->getId() === 0)
 		{
-			// Se fija si hay otro con ese nombre
+			// Se fija si hay alguno con ese nombre
 			$existingVersion = App::Orm()->findByProperties(entities\DraftMetricVersion::class,
 								 array('Metric.Id' => $metric->getId(), 'Caption' => $metricVersion->getCaption()));
 			if ($existingVersion === null)
 			{
 				$metricVersion->setWork($dataset->getWork());
-
 				App::Orm()->save($metricVersion);
 			}
 			else
 			{
 				$this->ValidateVersionAppend($dataset, $existingVersion);
-				// Lo agrega
+				// Establece esa versión para el nivel
 				$level->setMetricVersion($existingVersion);
 			}
 		}
@@ -442,6 +471,8 @@ class MetricService extends BaseService
 				}
 				App::Orm()->save($metricVersion);
 			}
+			// FALTA EL CASO DE QUE EXISTA UN VERSION CON EL MISMO NOMBRE DEL RENAME
+			// TODO
 		}
 		Profiling::EndTimer();
 	}
@@ -451,7 +482,7 @@ class MetricService extends BaseService
 		// Si es de otro work, sale
 		if ($existingVersion->getWork()->getId() !== $dataset->getWork()->getId())
 		{
-			throw new MessageException("No es posible agregar a este indicador una versión '" .
+			throw new PublicException("No es posible agregar a este indicador una versión '" .
 						$existingVersion->getCaption() . "' debido a que otra obra ya define esa versión para el indicador.");
 		}
 		// Se fija de qué MultiLevelMatrix son las versiones que ya existen
@@ -461,7 +492,7 @@ class MetricService extends BaseService
 		{
 			if ($existingLevel->getDataset()->getMultilevelMatrix() !== $dataset()->getMultilevelMatrix())
 			{
-				throw new MessageException("No es posible agregar a un nivel a la versión '" .
+				throw new PublicException("No es posible agregar a un nivel a la versión '" .
 						$existingVersion->getCaption() . "' debido a que ya tiene niveles en datasets que no están vinculados al dataset
 									actual. Para poder agregar niveles debe primero vincular los datasets desde la solapa 'Multinivel'.
 									\n\nSi lo que desea hacer es agregar una nueva versión, debe elegir nombre de versión
