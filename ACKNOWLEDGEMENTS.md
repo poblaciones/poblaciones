@@ -22,13 +22,13 @@ Spatials
 - [phayes/geophp](https://github.com/phayes/geoPHP). Armado de polígonos.
 
 Input/output
-- [html2canvas](https://html2canvas.hertzen.com). Exportación a imagen.
-- [jspdf](https://github.com/MrRio/jsPDF). Exportación a PDG
-- [mpdf/mpdf](https://mpdf.github.io). Generación de PDF (metadatos).
+- [html2canvas](https://html2canvas.hertzen.com). Exportación de imágenes.
+- [jspdf](https://github.com/MrRio/jsPDF). Exportación en PDF.
+- [mpdf/mpdf](https://mpdf.github.io). Generación de metadatos en PDF.
 - [gasparesganga/php-shapefile](https://github.com/gasparesganga/php-shapefile). Exportación a shapefile.
-- [phpoffice/phpspreadsheet](https://phpspreadsheet.readthedocs.io). Exportación/importación Excel.
-- [savReaderWriter](https://pypi.org/project/savReaderWriter). Exportación/importación SPSS.
-- [pandas/stataReaderWriter](https://pandas.pydata.org). Exportación/importación STATA.
+- [phpoffice/phpspreadsheet](https://phpspreadsheet.readthedocs.io). Exportación/importación a/desde Excel.
+- [savReaderWriter](https://pypi.org/project/savReaderWriter). Exportación/importación a/desde SPSS.
+- [pandas/stataReaderWriter](https://pandas.pydata.org). Exportación/importación a/desde STATA.
 
 Backend
 - [doctrine/orm](https://www.doctrine-project.org). Persistencia en base de datos.
