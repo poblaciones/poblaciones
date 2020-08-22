@@ -59,43 +59,40 @@ Copyright (C) 2018-2019. Consejo Nacional de Investigaciones Científicas y Téc
 El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
 
 ### Reconocimientos
-Poblaciones hace uso y agradece los siguientes proyectos de código abierto:
+Poblaciones hace uso de los siguientes proyectos de código abierto:
 UI
-- [colorbrewer] (https://colorbrewer2.org/)
-- [jqwidgets] (https://www.jqwidgets.com/)
-- [paper-dashboard] ()
-- [parse-svg] ()
-- [vue2-dropzone] ()
-- [vue-color] ()
 - [vuejs] ()
 - [vue-material] ()
+- [paper-dashboard] (https://www.creative-tim.com/product/paper-dashboard)
+- [jqwidgets] (https://www.jqwidgets.com/)
+- [parse-svg] (https://github.com/gagan-bansal/parse-svg)
+- [vue2-dropzone] (https://rowanwins.github.io/vue-dropzone/)
+- [colorbrewer] (https://github.com/saikocat/colorbrewer)
+- [vue-color] (https://github.com/xiaokaike/vue-color)
 
 Icons
-- [flatIcons] ()
-- [fontAwesome] ()
-- [vue-material-design-icons]
+- [flatIcons] (https://www.flaticon.com/iconfonts)
+- [fontAwesome] (https://fontawesome.com/)
+- [vue-material-design-icons] (https://github.com/robcresswell/vue-material-design-icons)
 
 Spatials
-- [geoip2/geoip2]
-- [geojson2svg]
-- [phayes/geophp]
+- [geoip2/geoip2] ()https://github.com/maxmind/GeoIP2-php
+- [geojson2svg] (https://github.com/w8r/geojson2svg)
+- [phayes/geophp] (https://github.com/phayes/geoPHP)
 
 Input/output
-- [html2canvas]
-- [mpdf/mpdf]
-- [jspdf]
-- [gasparesganga/php-shapefile]
-- [phpoffice/phpspreadsheet]
-- [savReaderWriter]
-- [pandas/stataReaderWriter]
-- [unicodecsv]
+- [html2canvas] (https://html2canvas.hertzen.com/)
+- [mpdf/mpdf] (https://mpdf.github.io/)
+- [jspdf] (https://github.com/MrRio/jsPDF)
+- [gasparesganga/php-shapefile] (https://github.com/gasparesganga/php-shapefile)
+- [phpoffice/phpspreadsheet] (https://phpspreadsheet.readthedocs.io/)
+- [savReaderWriter] (https://pypi.org/project/savReaderWriter/)
+- [pandas/stataReaderWriter] (https://pandas.pydata.org/)
+- [unicodecsv] (https://pypi.org/project/unicodecsv/)
 
 Backend
-- [doctrine/orm]
-- [jms/serializer]
-- [minga/framework]
-- [rodrigoq/phpmailersendgrid]
-- [symfony]
-
-
-
+- [doctrine/orm] (https://www.doctrine-project.org/)
+- [jms/serializer] (https://jmsyst.com/libs/serializer)
+- [minga/framework] (https://github.com/laminga/framework)
+- [phpmailersendgrid] (https://github.com/rodrigoq/PHPMailerSendGrid)
+- [symfony] (http://symfony.com/)
