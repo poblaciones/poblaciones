@@ -2,8 +2,8 @@
 Poblaciones hace uso de los siguientes proyectos de código abierto: 
 
 UI
-- [vuejs] (https://vuejs.org). Armardo de interfaz dinámica.
-- [vue-material] (https://vuematerial.io). Layout administrativo.
+- [vuejs](https://vuejs.org). Armardo de interfaz dinámica.
+- [vue-material](https://vuematerial.io). Layout administrativo.
 - [paper-dashboard] (https://www.creative-tim.com/product/paper-dashboard). Layout público.
 - [jqwidgets] (https://www.jqwidgets.com). Grilla de datos.
 - [vue2-dropzone] (https://rowanwins.github.io/vue-dropzone). Subida de archivos.
