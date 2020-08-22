@@ -56,8 +56,6 @@ class WorkCloneService extends BaseService
 				return $this->state->ReturnState(false);
 			case self::STEP_RESET_FLAGS:
 				$targetWorkId = $this->state->Get('targetWorkId');
-				$publisher = new PublishDataTables();
-				$publisher->RevokeOnlineDates($targetWorkId);
 				WorkFlags::SetAll($targetWorkId);
 				$cloner->SetFinished();
 				$this->state->NextStep('Listo');

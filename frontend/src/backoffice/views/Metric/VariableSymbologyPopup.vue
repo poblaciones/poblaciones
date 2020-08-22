@@ -140,18 +140,40 @@
 
 						<div class="md-layout-item md-size-100" style="position: relative;">
 							<div v-if="Variable.Symbology.PaletteType === 'P'" style="margin-top: -5px;">
-								<span v-if="Variable.Symbology.Rainbow !== null && Variable.Symbology.Rainbow !== 100" class="palette selectedPalette"
+								<span v-if="Variable.Symbology.Rainbow !== null && Variable.Symbology.Rainbow < 15 " class="palette selectedPalette"
 									:style="'background-position: 0px ' + paletteOffset(Variable.Symbology.Rainbow) + 'px;'">
 								</span>
+								<div v-if="Variable.Symbology.Rainbow !== null && Variable.Symbology.Rainbow !== 100 && Variable.Symbology.Rainbow >= 30" class="selectedPalette"
+									v-html="renderPalette(paletteNumberToKey(Variable.Symbology.Rainbow), true)">
+								</div>
+
 								<md-field style="max-width: 265px">
 									<label>Paleta</label>
-									<md-select :disabled="!canEdit" v-model="Variable.Symbology.Rainbow" md-dense ref="paletteSelect">
-										<md-option v-for="palette in palettes" :key="palette.Id" :value="palette.Id">
-											{{ palette.Caption }}
-											<span v-if="palette.Id !== 100" class="palette"
-													:style="'position: absolute; top: 7px; background-position: 0px ' + paletteOffset(palette.Id) + 'px;'">
-											</span>
-										</md-option>
+									<md-select :disabled="!canEdit" v-model="Variable.Symbology.Rainbow" class="paletteDropdown" ref="paletteSelect">
+
+										<md-optgroup label="Básicas">
+											<md-option v-for="palette in palettes.basicPalettes" class="max30" :key="palette.Id" :value="palette.Id">
+												-<span class="palette paletteItem palettePos"
+															 :style="'background-position: 0px ' + paletteOffset(palette.Id) + 'px;'">
+												</span>
+											</md-option>
+										</md-optgroup>
+										<md-optgroup label="Secuenciales">
+											<md-option v-for="palette in palettes.sequential" class="max30" :key="palette.Id" :value="palette.Id">
+												-<div v-html="renderPalette(palette.Caption)"></div>
+											</md-option>
+										</md-optgroup>
+										<md-optgroup label="Divergentes">
+											<md-option v-for="palette in palettes.diverging" class="max30" :key="palette.Id" :value="palette.Id">
+												-<div v-html="renderPalette(palette.Caption)"></div>
+											</md-option>
+										</md-optgroup>
+										<md-optgroup label="Nominales">
+											<md-option v-for="palette in palettes.qualitative" class="max30" :key="palette.Id" :value="palette.Id">
+												-<div v-html="renderPalette(palette.Caption)"></div>
+											</md-option>
+										</md-optgroup>
+										<md-option :key="100" :value="100">Personalizada</md-option>
 									</md-select>
 								</md-field>
 								<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.RainbowReverse" @change="reverseCustom">
@@ -213,6 +235,8 @@ const DEFAULT_SINGLE_COLOR = '0ce800';
 
 const DEFAULT_FROM_COLOR = '0ce800';
 const DEFAULT_TO_COLOR = 'fb0000';
+
+const colorbrewer = require('colorbrewer');
 
 
 export default {
@@ -427,6 +451,22 @@ export default {
 		DisplayError(errMessage) {
 			this.error = 'El proceso no ha podido ser completado. ' + errMessage;
 		},
+		paletteNumberToKey(n) {
+			return this.Dataset.ScaleGenerator.paletteNumberToKey(n);
+		},
+		renderPalette(item, skipPalettePos) {
+			var palette = colorbrewer[item];
+			var html = "<div style='display: flex;' class='paletteItem" + (skipPalettePos ? "" : " palettePos") + "'>";
+			var keys = Object.keys(palette);
+			var last = keys[keys.length - 1];
+			var width = 240;
+			var elements = palette[last];
+			var size = width / elements.length;
+			for (var n = 0; n < elements.length; n++) {
+				html += "<div style='height: 25px; width: " + size + "px; background-color: " + elements[n] + "'></div>";
+			}
+			return html + "</div>";
+		}
   },
 	computed: {
 	 Dataset() {
@@ -472,6 +512,9 @@ export default {
 				{ Id: '0.1', Caption: '#,#' },
 				];
 		},
+		palettes() {
+			return this.Dataset.ScaleGenerator.Palettes;
+		},
 		patterns() {
 			return [{ value: 'Pleno', key: 0 },
 							{ value: 'Contorno', key: 1 },
@@ -485,14 +528,6 @@ export default {
 							{ value: 'Diagonal invertida', key: 9 },
 							{ value: 'Vertical', key: 10 },
 							{ value: 'Puntos', key: 11 }];
-		},
-		palettes() {
-			var ret = [];
-			for(var n = 0; n < 15; n++) {
-				ret.push({ Id: n, Caption: ''});
-			}
-			ret.push({ Id: 100, Caption: 'Personalizada'});
-			return ret;
 		}
 	},
 	components: {
@@ -561,9 +596,20 @@ export default {
 	z-index: 10;
 	pointer-events: none;
 	position: absolute;
+	height: 27px;
+	overflow: hidden;
 	width: calc(100% - 48px);
 	top: 20px;
-	height: 25px;
+}
+
+.palettePos {
+	position: absolute;
+	top: 4px;
+}
+
+.paletteItem {
+	border: 1px solid #dadada;
+	width: 240px;
 }
 
 .palette {
@@ -580,5 +626,11 @@ height: 42px;
 .fixeHeightCard {
 	height: 250px;
 }
+.max30 {
+	height: 35px;
+}
+.paletteDropdown md-select-menu md-menu-content-bottom-start md-menu-content-small md-menu-content {
+		width: 100px!important;
+	}
 </style>
 

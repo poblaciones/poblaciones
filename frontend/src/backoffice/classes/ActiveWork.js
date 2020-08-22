@@ -313,8 +313,9 @@ ActiveWork.prototype.UpdateVisibility = function () {
 	var loc = this;
 	return axiosClient.getPromise(window.host + '/services/backoffice/UpdateWorkVisibility',
 		{ 'w': this.properties.Id, 'l': this.properties.AccessLink, 'p': (this.properties.IsPrivate ? '1' : '0') }, 'actualizar la visibilidad').then(
-		function () {
+		function (data) {
 			window.Context.UpdatePrivacy(loc.properties.Id, loc.properties.IsPrivate);
+			return data;
 		});
 };
 
@@ -432,6 +433,7 @@ ActiveWork.prototype.WorkChanged = function () {
 
 ActiveWork.prototype.WorkPublished = function () {
 	this.UpdateHasChanges(0);
+	this.properties.Metadata.LastOnline = Date.now();
 };
 
 ActiveWork.CalculateListItemStatus = function (item) {

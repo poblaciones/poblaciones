@@ -263,8 +263,10 @@ html, body {
 	padding-right: 0px;
 	padding-bottom: 20px;
 }
-
-
+.md-subheader {
+	min-height: 34px !important;
+	margin-top: 4px !important;
+}
 .tooltipLarge
 {
 	max-width: 600px !important;

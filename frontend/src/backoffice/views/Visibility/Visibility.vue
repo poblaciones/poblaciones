@@ -151,7 +151,11 @@ export default {
 		stableUrlHref() {
 			if (this.Work.properties.Metadata.Url) {
 				var url = str.AbsoluteUrl(this.Work.properties.Metadata.Url);
-				return "(<a href='" + url + "' target='_blank'>" + url + "</a>)";
+				if (this.Work.properties.Metadata.LastOnline) {
+					return "(<a href='" + url + "' target='_blank'>" + url + "</a>)";
+				} else {
+					return "(" + url + ")";
+				}
 			} else {
 				return "(será generada al publicarse la cartografía)";
 			}
@@ -159,7 +163,11 @@ export default {
 		accessLinkUrlHref() {
 			if (this.Work.properties.Metadata.Url && this.Work.properties.AccessLink) {
 				var url = this.accessLinkUrl;
-				return "<a href='" + url + "' target='_blank'>" + url + "</a>";
+				if (this.Work.properties.Metadata.LastOnline) {
+					return "<a href='" + url + "' target='_blank'>" + url + "</a>";
+				} else {
+					return url;
+				}
 			} else {
 				return this.accessLinkUrl;
 			}
@@ -190,6 +198,10 @@ export default {
 			this.Work.properties.AccessLink = null;
 			this.UpdateLink();
 		},
+		UpdateLink() {
+			this.Work.properties.AccessLink = '?';
+			return this.doUpdate();
+		},
 		UpdateClearLink() {
 			if (this.Work.properties.AccessLink !== null) {
 				this.Work.properties.LastAccessLink = this.Work.properties.AccessLink;
@@ -203,7 +215,7 @@ export default {
 					this.Work.properties.AccessLink = this.Work.properties.LastAccessLink;
 					this.Work.properties.LastAccessLink = null;
 				} else {
-					this.Work.properties.AccessLink = str.GenerateAccessLink();
+					this.Work.properties.AccessLink = '?';
 				}
 			}
 			return this.doUpdate();
@@ -212,9 +224,15 @@ export default {
 			return f.formatDate(date);
 		},
 		doUpdate() {
+			var loc = this;
 			this.Work.properties.IsPrivate = this.visibilityMode === 3;
+			var receiveLink = (this.Work.properties.AccessLink === '?');
 			this.$refs.invoker.do(this.Work,
-				this.Work.UpdateVisibility);
+				this.Work.UpdateVisibility).then(function (data) {
+					if (receiveLink) {
+						loc.Work.properties.AccessLink = data['link'];
+					}
+				});
 			return true;
 		},
 		askReview() {

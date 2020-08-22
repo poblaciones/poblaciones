@@ -2,6 +2,9 @@
 - Fix: niveles duplicados en clipping por agregado de distritos escoalres (1991, 2001, 2001, 2010)
 - Apartado administrativo de revisiones.
 - Fix: clonación de cartografía fallaba si había adjuntos.
+- Fix: al duplicar cartografías no generaba nuevos links para visibilidad de tipo link.
+- Genera las rutas de acceso (por link o fija) al crear la cartografía.
+- Fix: regenerar link no funcionaba correctamente.
 
 v2.28 (2020-08-12)
 - Para datasets de polígonos, hace downsampling al armar el caché de tiles.

@@ -37,7 +37,7 @@ import ReviewPopup from './ReviewPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/js/arr';
 
-var	DECISIONS = { 'A': 'Publicable', 'C': 'Cambios solicitados', 'R': 'Rechazada' };
+var	DECISIONS = { 'A': 'Publicable', 'S': 'Publicable con sugerencias', 'C': 'Cambios solicitados', 'R': 'Rechazada' };
 
 export default {
 	name: 'Reviewes',

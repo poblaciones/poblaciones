@@ -6,7 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Exclude;
 use helena\db\backoffice\annotations\ClientReadonly;
 
-
 /**
  * DraftMetadata
  *
@@ -184,6 +183,7 @@ class DraftMetadata
 
     /**
      * @var \DateTime
+		 * @ClientReadonly
      *
      * @ORM\Column(name="met_last_online", type="datetime", precision=0, scale=0, nullable=true, unique=false)
      */

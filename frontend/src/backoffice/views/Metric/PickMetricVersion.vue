@@ -63,8 +63,10 @@ export default {
 				alert('No ha seleccionado ninguna versión de indicador.');
 				return;
 			}
-			this.openPopup = false;
-			this.$emit('onSelectMetricVersion', this.selected);
+			if (this.openPopup)	{
+				this.openPopup = false;
+				this.$emit('onSelectMetricVersion', this.selected);
+			}
     },
     show(metricVersions) {
 			this.openPopup = true;

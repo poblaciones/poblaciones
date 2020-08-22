@@ -59,7 +59,7 @@ export default {
 	display: flex;
 	height: 100%;
 	width: auto;
-	max-width: 50%;
+	max-width: 70%;
 	max-height: 64px;
 	overflow: hidden;
 	object-fit: scale-down;

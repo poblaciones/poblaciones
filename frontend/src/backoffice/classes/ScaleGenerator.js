@@ -13,6 +13,37 @@ function ScaleGenerator(dataset) {
 	this.Dataset = dataset;
 	this.InfoCache = {};
 	this.RegenPending = {};
+	this.Palettes = null;
+	this.PaletteValues = null;
+	this.LoadPalettes();
+};
+
+ScaleGenerator.prototype.LoadPalettes = function () {
+	var ret = {};
+	const colorbrewer = require('colorbrewer');
+
+	ret.basicPalettes = [];
+	for(var n = 0; n < 15; n++) {
+		ret.basicPalettes.push({ Id: n, Caption: ''});
+	}
+	ret.sequential = [];
+	n = 30;
+	var list = colorbrewer.schemeGroups.sequential; //.concat(colorbrewer.schemeGroups.singlehue);
+	for (var i = 0; i < list.length; i++) {
+		ret.sequential.push({ Id: n++, Caption: list[i] });
+	}
+	ret.diverging = [];
+	list = colorbrewer.schemeGroups.diverging;
+	for (var i = 0; i < list.length; i++) {
+		ret.diverging.push({ Id: n++, Caption: list[i] });
+	}
+	ret.qualitative = [];
+	list = colorbrewer.schemeGroups.qualitative;
+	for (var i = 0; i < list.length; i++) {
+		ret.qualitative.push({ Id: n++, Caption: list[i] });
+	}
+	this.Palettes = ret;
+	this.PaletteValues = colorbrewer;
 };
 
 ScaleGenerator.prototype.Clear = function () {
@@ -177,13 +208,14 @@ ScaleGenerator.prototype.CalculateColor = function (variable, n, total, customCo
 		// Paleta
 		if (variable.Symbology.Rainbow === 100) {
 			return this.CalculateCustomPaletteColor(variable, n, customColors);
-		} else {
+		} else if (variable.Symbology.Rainbow < 30) {
 			return this.CalculateStandardPaletteColor(variable, ratio);
+		} else {
+			return this.CalculateStandardPaletteColorBrewer(variable, n, total);
 		}
 	} else {
 		throw new Error('Tipo de paleta no reconocido');
 	}
-	return '606060';
 };
 
 ScaleGenerator.prototype.CopySymbology = function (variable, singleColor, customColors) {
@@ -297,6 +329,49 @@ ScaleGenerator.prototype.CalculateStandardPaletteColor = function (variable, rat
 		}
 	}
 	throw new Error('No fue posible calcular el color');
+};
+
+ScaleGenerator.prototype.CalculateStandardPaletteColorBrewer = function (variable, n, total) {
+	var reverse = variable.Symbology.RainbowReverse;
+	if (reverse) {
+		n = total - 1 - n;
+	}
+	// resuelve N = 1 y 2
+	if (total === 1) {
+		total = 3; n = 1;
+	} else if (total == 2) {
+		total = 3;
+		if (n === 1) n = 2;
+	}
+	// averigua la escala
+	var scale = this.paletteNumberToKey(variable.Symbology.Rainbow);
+	var colors = this.PaletteValues[scale];
+	// si tiene más categorías que posible, trae la mayor
+	var values = colors[total];
+	if (!values) {
+		var keys = Object.keys(colors);
+		values = colors[keys[keys.length - 1]];
+	}
+	if (n >= values.length) {
+		n = n % values.length;
+	}
+	return values[n].substring(1);
+};
+
+ScaleGenerator.prototype.paletteNumberToKey = function (n) {
+	var ret = arr.IndexById(this.Palettes.sequential, n);
+	if (ret !== -1) {
+		return this.Palettes.sequential[ret].Caption;
+	}
+	ret = arr.IndexById(this.Palettes.diverging, n);
+	if (ret !== -1) {
+		return this.Palettes.diverging[ret].Caption;
+	}
+	ret = arr.IndexById(this.Palettes.qualitative, n);
+	if (ret !== -1) {
+		return this.Palettes.qualitative[ret].Caption;
+	}
+	throw new Error('Paleta desconocida');
 };
 
 ScaleGenerator.prototype.CalculateGradienteColor = function (color1, color2, ratio) {

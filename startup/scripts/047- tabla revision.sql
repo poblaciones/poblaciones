@@ -3,7 +3,7 @@ CREATE TABLE `review` (
   `rev_work_id` INT NOT NULL COMMENT 'Cartografía a la que refiere la revisión',
   `rev_submission_time` timestamp NOT NULL COMMENT 'Fecha/hora en la que fue solicitada la revisión',
   `rev_resolution_time` timestamp NULL COMMENT 'Fecha/hora en que fue dada la decisión de la revisión',
-  `rev_decision` CHAR(1) NULL COMMENT 'Resultado de la revisión. A: Publicable, C: Cambios solicitados, R: Rechazada' ,
+  `rev_decision` CHAR(1) NULL COMMENT 'Resultado de la revisión. A: Publicable, S: Publicable con sugerencias, C: Cambios solicitados, R: Rechazada' ,
   `rev_reviewer_comments` VARCHAR(2000) NULL COMMENT 'Comentarios de los revisores' ,
   `rev_editor_comments` VARCHAR(2000) NULL COMMENT 'Comentarios del editor' ,
   `rev_extra_comments` VARCHAR(2000) NULL COMMENT 'Comentarios internos del proceso de revisión' ,

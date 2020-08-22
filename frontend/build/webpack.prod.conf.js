@@ -16,13 +16,17 @@ var MiniCssExtractPlugin = require("mini-css-extract-plugin");
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 var SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 const { VueLoaderPlugin } = require('vue-loader');
-
+const TerserPlugin = require('terser-webpack-plugin');
 var env = config.build.env;
 
 process.traceDeprecation = true;
 
 var webpackConfig = merge(baseWebpackConfig, {
 	mode: 'production',
+	optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin()],
+  },
 	module: {
 		rules: utils.styleLoaders({
 			sourceMap: config.build.productionSourceMap,
@@ -105,13 +109,15 @@ var webpackConfig = merge(baseWebpackConfig, {
 			}
 		}),
 		// copy custom static assets
-		new CopyWebpackPlugin([
-			{
-				from: path.resolve(__dirname, '../static'),
-				to: config.build.assetsSubDirectory,
-				ignore: ['.*']
-			},
-		])
+		new CopyWebpackPlugin({
+			patterns: [
+				{
+					from: path.resolve(__dirname, '../static'),
+					to: config.build.assetsSubDirectory,
+					globOptions: { ignore: ['.*'] }
+				},
+			]
+		})
 	]
 });
 

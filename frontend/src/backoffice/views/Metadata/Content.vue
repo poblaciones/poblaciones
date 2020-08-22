@@ -40,7 +40,8 @@
 											<label class="with-area">Dirección:</label>
 										</div>
 										<div class="md-layout-item md-size-60">
-											<a style="color: #989797;" :href="absoluteMap(appendAccessLink(metadata.Url))" target="_blank">{{ absoluteMap(appendAccessLink(metadata.Url)) }}</a>
+											<a v-if="metadata.LastOnline" style="color: #989797;" :href="absoluteMap(appendAccessLink(metadata.Url))" target="_blank">{{ absoluteMap(appendAccessLink(metadata.Url)) }}</a>
+											<span v-else>{{ absoluteMap(appendAccessLink(metadata.Url)) }}</span>
 										</div>
 									</div>
 									<div class="md-layout md-gutter">

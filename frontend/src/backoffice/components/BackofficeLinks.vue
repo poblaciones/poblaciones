@@ -3,7 +3,7 @@
 		<md-button @click="onPublish" v-if="Work.CanEdit() && Work.HasChanges()" class="md-raised">
 			<md-icon>public</md-icon> Publicar cambios
 		</md-button>
-		<md-button @click="goMap" v-if="url" class="md-raised">
+		<md-button @click="goMap" v-if="lastOnline" class="md-raised">
 			<md-icon>map</md-icon> Visitar mapa {{ (Work.HasChanges() ? 'actual' : '') }}
 		</md-button>
 	</div>
@@ -20,6 +20,7 @@ export default {
 		return {	};
 	},
 	computed: {
+		lastOnline() { return this.Work.properties.Metadata.LastOnline !== null; },
 		Work() { return window.Context.CurrentWork; },
 		url() {
 			var ret = this.Work.properties.Metadata.Url;

@@ -3,14 +3,16 @@
 namespace helena\services\backoffice;
 
 use minga\framework\Arr;
-use helena\classes\App;
-use helena\classes\Session;
-use helena\services\common\BaseService;
+use minga\framework\Str;
 use minga\framework\Date;
 use minga\framework\Context;
 use minga\framework\Profiling;
-use helena\db\frontend\SignatureModel;
 
+use helena\classes\App;
+use helena\classes\Links;
+use helena\classes\Session;
+use helena\services\common\BaseService;
+use helena\db\frontend\SignatureModel;
 use helena\entities\backoffice\DraftWork;
 use helena\entities\backoffice\structs\WorkInfo;
 use helena\entities\backoffice\structs\StartupInfo;
@@ -51,6 +53,12 @@ class WorkService extends BaseService
 		$work->setMetadata($metadata);
 		// Graba work
 		App::Orm()->Save($work);
+		$workId = $work->getId();
+		$shardifiedWorkId = PublishDataTables::Shardified($workId);
+		// Pone el url en Work
+		$url = Links::GetWorkUrl($shardifiedWorkId);
+		$metadata->setUrl($url);
+		App::Orm()->Save($metadata);
 		// Agrega permisos
 		$this->AddDefaultPermission($work);
 
@@ -245,6 +253,10 @@ class WorkService extends BaseService
 	}
 	public function UpdateWorkVisibility($workId, $value, $link = null)
 	{
+		if ($link === '?')
+		{
+			$link = Str::GenerateLink();
+		}
 		// Cambia el valor
 		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
 		$draftWork->setIsPrivate($value);
@@ -265,7 +277,7 @@ class WorkService extends BaseService
 		// Actualiza cachés
 		$publisher = new PublishSnapshots();
 		$publisher->UpdateWorkVisibility($workId);
-		return self::OK;
+		return ['result' => self::OK, 'link' => $link];
 	}
 
 	private function GetDatasets($workId)

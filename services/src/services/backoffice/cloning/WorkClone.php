@@ -2,13 +2,15 @@
 
 namespace helena\services\backoffice\cloning;
 
+use minga\framework\Str;
+use minga\framework\Profiling;
+
 use helena\classes\App;
 use helena\entities\backoffice as entities;
 use helena\db\admin\WorkModel;
 use helena\classes\Account;
-use minga\framework\Profiling;
-use minga\framework\Arr;
-use minga\framework\Str;
+use helena\classes\Links;
+use helena\services\backoffice\publish\PublishDataTables;
 
 class WorkClone
 {
@@ -79,11 +81,15 @@ class WorkClone
 		// Copia metadatos
 		$sourceMetadataId = $work->getMetadata()->getId();
 		$newName = $this->state->Get('name');
-		$static = array('met_title' => $newName, 'met_contact_id' => $contactId);
+		$shardifiedWorkId = PublishDataTables::Shardified($this->targetWorkId);
+		$url = Links::GetWorkUrl($shardifiedWorkId);
+		$static = array('met_title' => $newName, 'met_contact_id' => $contactId, 'met_url' => $url, 'met_online_since' => null, 'met_last_online' => null);
 		$metadataId = RowDuplicator::DuplicateRows(entities\DraftMetadata::class, $sourceMetadataId, $static);
-		// Corrige encabezado
-		$update = "UPDATE draft_work SET wrk_metadata_id = ? WHERE wrk_id = ?";
-		App::Db()->exec($update, array($metadataId, $this->targetWorkId));
+		// Corrige encabezado y accessLink
+		$link = $work->getAccessLink();
+		if ($link !== null) $link = Str::GenerateLink();
+		$update = "UPDATE draft_work SET wrk_metadata_id = ?, wrk_last_access_link = null, wrk_access_link = ? WHERE wrk_id = ?";
+		App::Db()->exec($update, array($metadataId, $link, $this->targetWorkId));
 		// Copia metadata_sources
 		$static = array('msc_metadata_id' => $metadataId);
 		RowDuplicator::DuplicateRows(entities\DraftMetadataSource::class, $sourceMetadataId, $static, 'msc_metadata_id');

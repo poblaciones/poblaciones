@@ -59,6 +59,7 @@ export default {
 			decisionDate: null,
 			Decisions: [
 						{ Id: 'A', Caption: 'Publicable' },
+						{ Id: 'S', Caption: 'Publicable con sugerencias' },
 						{ Id: 'C', Caption: 'Cambios solicitados' },
 						{ Id: 'R', Caption: 'Rechazada' }]
     };
