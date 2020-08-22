@@ -1,4 +1,4 @@
-### Reconocimientos
+# Reconocimientos
 Poblaciones hace uso de los siguientes proyectos de código abierto: 
 
 UI
