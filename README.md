@@ -1,7 +1,7 @@
 # Poblaciones
 Aplicación web para la publicación colaborativa de datos espaciales de población
 
-# Introducción
+## Introducción
 
 Poblaciones es una aplicación web que permite visualizar y cargar datos georreferenciados de población.
 
@@ -9,7 +9,7 @@ Funciona como un servidor autónomo de información geoespacial para navegadores
 
 Permite subir datos y metadatos de información espacial mediante una interfaz moderna y simple, permitiendo a los usuarios administrar sus producciones dentro del sitio. 
 
-# Características
+## Características
 
 * La aplicación permite a los usuarios registrarse y crear cartografías. La información subida por los usuarios puede ser georreferenciada a partir de cartografía de base disponible en el sitio (ej. polígonos de provincias, departamentos, radios censales) o por sus coordenadas (latitud/longitud).
 
@@ -27,7 +27,7 @@ Permite subir datos y metadatos de información espacial mediante una interfaz m
 
 * La plataforma produce estadísticas propias de rendimiento y de acceso al sitio, además de integrarse con Google Analytics y AddThis.
 
-# Requerimientos
+## Requerimientos
 
 La aplicación puede ser alojada en un servidor compartido (ej. hostgator), dado que no requiere de la ejecución de instalaciones con permisos de administrador en el servidor. Son sus requisitos de software:
 
@@ -36,14 +36,14 @@ La aplicación puede ser alojada en un servidor compartido (ej. hostgator), dado
 - Python 2.7 o 3.4 (requisito para permitir subir y descargar información en formato SPSS [.sav])
 - SO: indistinto.
 
-# Demo
+## Demo
 
 El sitio se encuentra operativo con datos demográficos, sociales y políticos de la Argentina en https://poblaciones.org.
 
-# Tutoriales técnicos
+## Tutoriales técnicos
 
 En youtube pueden encontrar tutoriales técnicos para mantener, extender y mejorar el código en https://bit.ly/2x0PXFm.
-# Instalación
+## Instalación
 
 Para instalar un ambiente productivo: [guía de instalación](startup/INSTALL.md)
 
@@ -51,9 +51,51 @@ Para armar un ambiente de desarrollo: [guía para desarrollo](startup/SOURCES.md
 
 Para generar una versión para instalar: [guía de compilación](startup/BUILD.md)
 
-# Licencia
+## Licencia
 Poblaciones - Plataforma abierta de datos espaciales de población.
 
 Copyright (C) 2018-2019. Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET) y Universidad Católica Argentina (UCA). 
 
 El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
+
+### Reconocimientos
+Poblaciones hace uso y agradece los siguientes proyectos de código abierto:
+UI
+- [colorbrewer] (https://colorbrewer2.org/)
+- [jqwidgets] (https://www.jqwidgets.com/)
+- [paper-dashboard] ()
+- [parse-svg] ()
+- [vue2-dropzone] ()
+- [vue-color] ()
+- [vuejs] ()
+- [vue-material] ()
+
+Icons
+- [flatIcons] ()
+- [fontAwesome] ()
+- [vue-material-design-icons]
+
+Spatials
+- [geoip2/geoip2]
+- [geojson2svg]
+- [phayes/geophp]
+
+Input/output
+- [html2canvas]
+- [mpdf/mpdf]
+- [jspdf]
+- [gasparesganga/php-shapefile]
+- [phpoffice/phpspreadsheet]
+- [savReaderWriter]
+- [pandas/stataReaderWriter]
+- [unicodecsv]
+
+Backend
+- [doctrine/orm]
+- [jms/serializer]
+- [minga/framework]
+- [rodrigoq/phpmailersendgrid]
+- [symfony]
+
+
+
