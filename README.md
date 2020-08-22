@@ -59,4 +59,6 @@ Copyright (C) 2018-2019. Consejo Nacional de Investigaciones Científicas y Téc
 El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
 
 ### Reconocimientos
-Poblaciones hace uso de los siguientes proyectos de código abierto: [ver lista completa] (ACKNOWLEDGEMENTS.md)
+Poblaciones cuenta con el apoyo del [Observatorio de la Deuda Social Argentina](http://uca.edu.ar/es/observatorio-de-la-deuda-social-argentina) y el [Consejo Nacional de Investigaciones Científicas y Técnicas](https://www.conicet.gov.ar/).
+
+Poblaciones hace uso de los siguientes proyectos de código abierto: [ver lista completa](ACKNOWLEDGEMENTS.md)
