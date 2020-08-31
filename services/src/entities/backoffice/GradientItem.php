@@ -58,7 +58,7 @@ class GradientItem
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Gradient")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="gri_gradient_it", referencedColumnName="grd_id", nullable=false)
+     *   @ORM\JoinColumn(name="gri_gradient_id", referencedColumnName="grd_id", nullable=false)
      * })
      */
     private $Gradient;

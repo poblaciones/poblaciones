@@ -39,6 +39,7 @@ export default {
 			this.user = data.User;
 			window.Context.User = this.user;
 			window.Context.Configuration = data;
+			window.Context.Factory.Refresh();
 		},
 		RegisterErrorHandler() {
 			Vue.config.errorHandler = err.HandleError;

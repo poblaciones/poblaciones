@@ -13,6 +13,7 @@ use helena\entities\backoffice as entities;
 use minga\framework\PublicException;
 use minga\framework\Serializator;
 use minga\framework\Date;
+use minga\framework\ErrorException;
 
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\Profiling;
@@ -46,7 +47,7 @@ class MetricService extends BaseService
 		$symbology->setCutMode('S');
 		$symbology->setPaletteType('P');
 		$symbology->setRainbow(2);
-		$symbology->setOpacity(null);
+		$symbology->setOpacity('M');
 		$symbology->setRainbowReverse(false);
 		$symbology->setShowEmptyCategories(true);
 		$symbology->setColorFrom('0ce800');
@@ -138,6 +139,34 @@ class MetricService extends BaseService
 	{
 		$manager = new MetricsManager();
 		return $manager->GetWorkMetricVersions($workId);
+	}
+
+	public function GetColumnStringDistributions($datasetId, $cutColumnId)
+	{
+		Profiling::BeginTimer();
+		// Trae el distinct de valores, alfabético
+		$column =	$dataset = App::Orm()->find(entities\DraftDatasetColumn::class, $cutColumnId);
+		if ($column === null)
+		{
+			Profiling::EndTimer();
+			return [];
+		}
+
+		$field = $column->getField();
+		$dataset = $column->getDataset();
+		if ($dataset->getId() !== $datasetId)
+			throw new ErrorException('El dataset no coincide con la variable.');
+		$table = $dataset->getTable();
+		$sql = "SELECT DISTINCT " . $field . " as Caption FROM " . $table . " ORDER BY 1 LIMIT 100";
+		$ret = App::Db()->fetchAll($sql);
+		for($n = 0; $n < sizeof($ret); $n++)
+			if ($ret[$n]['Caption'])
+				$ret[$n]['Value'] = $n + 1;
+			else
+				$ret[$n]['Value'] = null;
+
+		Profiling::EndTimer();
+		return $ret;
 	}
 
 	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale)

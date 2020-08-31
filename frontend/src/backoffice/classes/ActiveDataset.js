@@ -8,7 +8,7 @@ import LevelGenerator from './LevelGenerator';
 import Vue from 'vue';
 import err from '@/common/js/err';
 
-var columnFormatEnum = require("@/common/enums/columnFormatEnum");
+const columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
 export default ActiveDataset;
 
@@ -589,6 +589,20 @@ ActiveDataset.prototype.LoadMetricVersionLevels = function () {
 		});
 };
 
+ActiveDataset.prototype.GetNumericTextAndRichColumns = function (includeNull) {
+	var ret = [];
+	if (includeNull) {
+		ret = ret.concat(this.GetNullColumn());
+	}
+	if (this.Columns)
+		ret = ret.concat(this.Columns);
+
+	ret = ret.concat(this.GetSeparator());
+	ret = ret.concat(this.GetRichColumns());
+	return ret;
+};
+
+
 ActiveDataset.prototype.GetNumericAndRichColumns = function (includeNull) {
 	var ret = [];
 	if (includeNull) {
@@ -639,6 +653,11 @@ ActiveDataset.prototype.ColumnHasLabels = function (column) {
 };
 
 
+ActiveDataset.prototype.GetColumnsForCutColumn = function () {
+	var ret = this.GetNumericWithLabelColumns();
+	return ret.concat(this.GetTextColumns());
+};
+
 ActiveDataset.prototype.GetNumericWithLabelColumns = function () {
 	if (this.Columns === null) {
 		return [];
@@ -650,6 +669,19 @@ ActiveDataset.prototype.GetNumericWithLabelColumns = function () {
 			if (labels && labels.length > 0) {
 				columns.push(this.Columns[i]);
 			}
+		}
+	}
+	return columns;
+};
+
+ActiveDataset.prototype.GetTextColumns = function () {
+	if (this.Columns === null) {
+		return [];
+	}
+	var columns = [];
+	for (let i = 0; i < this.Columns.length; i++) {
+		if (this.Columns[i].Format === columnFormatEnum.STRING) {
+			columns.push(this.Columns[i]);
 		}
 	}
 	return columns;

@@ -8,6 +8,7 @@ use minga\framework\Str;
 use helena\classes\writers\SpssWriter;
 use helena\classes\writers\CsvWriter;
 use helena\classes\writers\StataWriter;
+use helena\classes\writers\RWriter;
 use helena\classes\writers\XlsxWriter;
 use helena\classes\writers\ShpWriter;
 
@@ -31,6 +32,10 @@ class DownloadManager
 	const FILE_SHP = 3;
 	const FILE_XLSX = 4;
 	const FILE_STATA = 5;
+	const FILE_R = 6;
+
+	private static $validFileTypes = ['s' => 'sav', 'z' => 'zsav', 't' => 'dta', 'r' => 'rdata',
+																			'c' => 'csv', 'x' => 'xlsx', 'h' => 'zip'];
 
 	const OUTPUT_LATIN3_WINDOWS_ISO = false;
 
@@ -113,18 +118,9 @@ class DownloadManager
 
 	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type)
 	{
-		if($type[0] == 's')
-			$ext = 'sav';
-		elseif($type[0] == 'z')
-			$ext = 'zsav';
-		elseif($type[0] == 't')
-			$ext = 'dta';
-		elseif($type[0] == 'c')
-			$ext = 'csv';
-		elseif($type[0] == 'x')
-			$ext = 'xlsx';
-		elseif($type[0] == 'h')
-			$ext = 'zip';
+		$validFileTypes = self::$validFileTypes;
+		if (array_key_exists($type[0], $validFileTypes))
+			$ext = $validFileTypes[$type[0]];
 		else
 			throw new PublicException('Tipo de archivo inválido');
 
@@ -180,16 +176,20 @@ class DownloadManager
 		// c = csv
 		// x = excel
 		// t = stata
+		// r = R
+		$validFormats = self::$validFileTypes;
 		// h = shapefile
+		$validSpatialOnlyFormats = ['hw', 'h'];
 
 		// La segunda letra (opcional) es:
 		// w = wkt
 		// g = geojson
 
-		if ($type === 'hw' || $type === 'h') return;
+		if (in_array($type, $validSpatialOnlyFormats)) return;
+
 		if (strlen($type) > 0)
 		{
-			if ($type[0] === 's' || $type[0] === 'z' || $type[0] === 'c' || $type[0] === 't' || $type[0] === 'x')
+			if (array_key_exists($type[0], $validFormats))
 			{
 				// puede no pedir parte geográfica, o pedir geojson, o wkt
 				if (strlen($type) == 1 || ($type[1] === 'w' || $type[1] === 'g'))
@@ -257,6 +257,8 @@ class DownloadManager
 			return self::FILE_SHP;
 		else if ($this->state->Get('type')[0] == 't')
 			return self::FILE_STATA;
+		else if ($this->state->Get('type')[0] == 'r')
+			return self::FILE_R;
 		else if ($this->state->Get('type')[0] == 'x')
 			return self::FILE_XLSX;
 		else if ($this->state->Get('type')[0] == 'c')
@@ -272,6 +274,8 @@ class DownloadManager
 			return new CsvWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_STATA)
 			return new StataWriter($this->model, $this->state);
+		else if ($fileType === self::FILE_R)
+			return new RWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_XLSX)
 			return new XlsxWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_SHP)

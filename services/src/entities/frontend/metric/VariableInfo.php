@@ -19,6 +19,7 @@ class VariableInfo extends BaseMapModel
 	public $ShowValues = false;
 	public $ShowEmptyCategories = true;
 	public $Decimals = 0;
+	public $Opacity = 'M';
 	public $HasTotals = 0;
 	public $IsArea = false;
 	public $IsSimpleCount = false;
@@ -26,6 +27,8 @@ class VariableInfo extends BaseMapModel
 	public $DefaultMeasure = 'N';
 	public $IsCategorical;
 	public $ValueLabels = array();
+	public $ValidMetrics = array();
+	public $CurrentOpacity = -1;
 
 	public static function GetMap()
 	{
@@ -38,6 +41,7 @@ class VariableInfo extends BaseMapModel
 			'mvv_default_measure' => 'DefaultMeasure',
 			'dco_decimals' => 'Decimals',
 			'vsy_show_values' => 'ShowValues',
+			'vsy_opacity' => 'Opacity',
 			'vsy_show_labels' => 'ShowDescriptions',
 			'vsy_show_empty_categories' => 'ShowEmptyCategories',
 			'vsy_show_totals' => 'ShowSummaryTotals',

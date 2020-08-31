@@ -1,10 +1,17 @@
 [CURRENT]
+
+
+v2.29 (2020-08-31)
 - Fix: niveles duplicados en clipping por agregado de distritos escoalres (1991, 2001, 2001, 2010)
 - Apartado administrativo de revisiones.
 - Fix: clonación de cartografía fallaba si había adjuntos.
 - Fix: al duplicar cartografías no generaba nuevos links para visibilidad de tipo link.
 - Genera las rutas de acceso (por link o fija) al crear la cartografía.
 - Fix: regenerar link no funcionaba correctamente.
+- Soporte a indicadores por categorías para variables de tipo texto.
+- Test de mapeos de ORM.
+- Parametrización de transparencia predeterminada por indicador.
+- Descarga en formato rdata.
 
 v2.28 (2020-08-12)
 - Para datasets de polígonos, hace downsampling al armar el caché de tiles.

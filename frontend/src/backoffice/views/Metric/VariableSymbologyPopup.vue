@@ -24,7 +24,7 @@
 									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="T">Ntiles</md-radio>
 									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="M">Manual</md-radio>
 								</span>
-								<md-radio v-model="Variable.Symbology.CutMode" class="md-primary" style="float: right; margin-right: 10px;" :disabled="!canEdit || Dataset.Labels.length === 0" value="V">Categorías</md-radio>
+								<md-radio v-model="Variable.Symbology.CutMode" class="md-primary" style="float: right; margin-right: 10px;" :disabled="!canEdit || columnsForCutColumn.length === 0" value="V">Categorías</md-radio>
 							</div>
 							<div class="md-layout-item md-size-100" style="margin-bottom: 10px;">
 								<md-divider></md-divider>
@@ -71,7 +71,7 @@
 										<mp-select label='Variable de categorías' :canEdit='canEdit' style='padding-right: 40px;'
 												v-model='Variable.Symbology.CutColumn'
 												list-key='Id'
-												:list='Dataset.GetNumericWithLabelColumns()'
+												:list='columnsForCutColumn'
 												:render='formatColumn'
 												helper='Seleccione la variable de la cual tomar las categorías'
 										/>
@@ -496,6 +496,9 @@ export default {
 		},
 		CutMode() {
 			return this.Variable.Symbology.CutMode;
+		},
+		columnsForCutColumn() {
+			return this.Dataset.GetColumnsForCutColumn();
 		},
 		CategoriesLabel() {
 			return (this.CutMode === 'V' ? 'categorías' : 'cortes');

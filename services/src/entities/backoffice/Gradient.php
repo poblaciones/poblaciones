@@ -8,7 +8,7 @@ use JMS\Serializer\Annotation\Exclude;
 /**
  * Gradient
  *
- * @ORM\Table(name="file")
+ * @ORM\Table(name="gradient")
  * @ORM\Entity
  */
 class Gradient

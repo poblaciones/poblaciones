@@ -2,173 +2,204 @@
 	<div>
     <!--  The Modal -->
     <boardal v-if="modal.isOpen" :has-mask="modal.hasMask" :can-click-mask="modal.canClickMask" :has-x="modal.hasX" @toggle="toggleModal">
-      <article v-cloak>
-        <section>
-          <div class="articleTitle">
-            <div class="closeButton" v-on:click="toggleModal">
-              <close-icon title="Cerrar" />
-            </div>
-            Bienvenido a Poblaciones
-           </div>
-          <div class="articleContent">
-            <img style="float: left" src="/static/img/onboarding/step1-a.png"/>
-            <div style="margin-left: 182px;">
-              <div style="margin-right: 60px;">
-              Esta guía le permitirá conocer información básica para utilizar nuestro mapa.
-              </div>
-              <div style="float: right; margin-top: 40px; margin-left: 20px">
-                <img src="/static/img/onboarding/step1-b.png"/>
-                <div style="max-width: 200px; font-size: 14px">
-                  Si desea continuar viéndola más tarde, podrá volver a abrirla desde la barra
-                  de acciones.
-                </div>
-              </div>
-              <div style="max-width: 400px">
-                <p>Sólo le llevará dos minutos, y hará más cómodo el uso del sitio.
-                </p>
-              </div>
-                <button class="accent" @click="noThanks">No, gracias.</button> &nbsp;
-                <button class="accent" @click="skip(1)">¡Empecemos!</button>
-              </div>
-          </div>
-        </section>
-        <section>
-          <div class="articleTitle">
-            <div class="closeButton" v-on:click="toggleModal">
-              <close-icon title="Cerrar" />
-            </div>
-            Buscar información
-           </div>
-          <div class="articleContent">
-            <div style="padding-bottom: 30px">
-              En la parte superior, el mapa permite agregar indicadores por medio de la barra de búsqueda.
-            </div>
-            <div>
-              <img style="margin-bottom: 10px; margin-top: 40px" src="/static/img/onboarding/step2-a.png"/>
-              <div style="float:right">
-                <img style="margin-left: 10px;" src="/static/img/onboarding/step2-b.png"/>
-              </div>
-            </div>
-            <div style="font-size: 14px; text-align: right; max-width: 400px">
-              Ingresando descriptores de la información buscada, el sitio muestra las series de datos disponibles.
-            </div>
-           </div>
-        </section>
-        <section style="padding-bottom: 0px">
-          <div class="articleTitle">
-            <div class="closeButton" v-on:click="toggleModal">
-              <close-icon title="Cerrar" />
-            </div>
-            Visualizar series
-           </div>
-          <div class="articleContent">
-            <div style="float:right">
-              <img style="margin-top: -25px;" src="/static/img/onboarding/step3-a.png"/>
-            </div>
-            <div style="max-width: 150px">
-              La información agregada al mapa se controla desde paneles a la derecha asociados a cada indicador.
-            </div>
+			<article v-cloak>
+				<section>
+					<div class="articleTitle">
+						<div class="closeButton" v-on:click="toggleModal">
+							<close-icon title="Cerrar" />
+						</div>
+						Bienvenido a Poblaciones
+					</div>
+					<div class="articleContent">
+						<img style="float: left" src="/static/img/onboarding/step1-a.png" />
+						<div style="margin-left: 182px;">
+							<div style="margin-right: 60px;">
+								Esta guía le permitirá conocer información básica para utilizar nuestro mapa.
+							</div>
+							<div style="float: right; margin-top: 40px; margin-left: 20px">
+								<img src="/static/img/onboarding/step1-b.png" />
+								<div style="max-width: 200px; font-size: 14px">
+									Si desea continuar viéndola más tarde, podrá volver a abrirla desde la barra
+									de acciones.
+								</div>
+							</div>
+							<div style="max-width: 400px">
+								<p>
+									Solo le llevará dos minutos, y hará más cómodo el uso del sitio.
+								</p>
+							</div>
+							<button class="accent" @click="noThanks">No, gracias.</button> &nbsp;
+							<button class="accent" @click="skip(1)">¡Empecemos!</button>
+						</div>
+					</div>
+				</section>
+				<section>
+					<div class="articleTitle">
+						<div class="closeButton" v-on:click="toggleModal">
+							<close-icon title="Cerrar" />
+						</div>
+						Buscar información
+					</div>
+					<div class="articleContent">
+						<div style="padding-bottom: 30px">
+							En la parte superior, el mapa permite agregar indicadores por medio de la barra de búsqueda.
+						</div>
+						<div>
+							<img style="margin-bottom: 10px; margin-top: 40px" src="/static/img/onboarding/step2-a.png" />
+							<div style="float:right">
+								<img style="margin-left: 10px;" src="/static/img/onboarding/step2-b.png" />
+							</div>
+						</div>
+						<div style="font-size: 14px; text-align: right; max-width: 400px">
+							Ingresando descriptores de la información buscada, el sitio muestra las series de datos disponibles.
+						</div>
+					</div>
+				</section>
+				<section style="padding-bottom: 0px">
+					<div class="articleTitle">
+						<div class="closeButton" v-on:click="toggleModal">
+							<close-icon title="Cerrar" />
+						</div>
+						Visualizar series
+					</div>
+					<div class="articleContent">
+						<div style="float:right">
+							<img style="margin-top: -25px;" src="/static/img/onboarding/step3-a.png" />
+						</div>
+						<div style="max-width: 150px">
+							La información agregada al mapa se controla desde paneles a la derecha asociados a cada indicador.
+						</div>
 
-           </div>
-        </section>
-        <section style="padding-bottom: 0px">
-          <div class="articleTitle">
-            <div class="closeButton" v-on:click="toggleModal">
-              <close-icon title="Cerrar" />
-            </div>
-            Segmentación geográfica
-           </div>
-          <div class="articleContent">
-            <div>
-              El sitio ofrece múltiples formas de segmentación por criterios regionales y jurisdiccionales.
-            </div>
-            <div style="margin-top: 20px;">
-              <div class="halves">
-                <span class="step" style="margin-left: -15px;">1</span>
-                <img src="/static/img/onboarding/step4-a.png"/>
-                <div style="margin-top: 10px">
-                  La barra de búsqueda permite identificar regiones, provincias, localidades, municipios, aglomerados y barrios entre otros criterios.
-                </div>
-              </div>
+					</div>
+				</section>
+				<section style="padding-bottom: 0px">
+					<div class="articleTitle">
+						<div class="closeButton" v-on:click="toggleModal">
+							<close-icon title="Cerrar" />
+						</div>
+						Segmentación geográfica
+					</div>
+					<div class="articleContent">
+						<div>
+							El sitio ofrece múltiples formas de segmentación por criterios regionales y jurisdiccionales.
+						</div>
+						<div style="margin-top: 20px;">
+							<div class="halves">
+								<span class="step" style="margin-left: -15px;">1</span>
+								<img src="/static/img/onboarding/step4-a.png" />
+								<div style="margin-top: 10px">
+									La barra de búsqueda permite identificar regiones, provincias, localidades, municipios, aglomerados y barrios entre otros criterios.
+								</div>
+							</div>
 
-              <div class="halves">
-                <span class="step" style="margin-left: -15px;">2</span>
-                <img src="/static/img/onboarding/step4-b.png"/>
-                <div style="margin-top: 10px">
-                  La selección para la segmentación geográfica también puede realizarse haciendo click en las etiquetas del mapa.
-                </div>
-              </div>
-            </div>
-           </div>
-        </section>
-        <section>
-          <div class="articleTitle">
-            <div class="closeButton" v-on:click="toggleModal">
-              <close-icon title="Cerrar" />
-            </div>
-            Visualizar segmentación
-           </div>
-          <div class="articleContent">
-            <div>
-              La segmentación restringe la información en pantalla para ajustarla
-              a la zona seleccionada.
-            </div>
-           <div style="margin-top: 12px;">
-              <div class="halves">
-                <img src="/static/img/onboarding/step5-a.png"/>
-                <div style="margin-top: 10px">
-                  En el mapa, se destaca y colorea solamente la zona activa.
-                </div>
-              </div>
+							<div class="halves">
+								<span class="step" style="margin-left: -15px;">2</span>
+								<img src="/static/img/onboarding/step4-b.png" />
+								<div style="margin-top: 10px">
+									La selección para la segmentación geográfica también puede realizarse haciendo click en las etiquetas del mapa.
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section>
+					<div class="articleTitle">
+						<div class="closeButton" v-on:click="toggleModal">
+							<close-icon title="Cerrar" />
+						</div>
+						Visualizar segmentación
+					</div>
+					<div class="articleContent">
+						<div>
+							La segmentación restringe la información en pantalla para ajustarla
+							a la zona seleccionada.
+						</div>
+						<div style="margin-top: 12px;">
+							<div class="halves">
+								<img src="/static/img/onboarding/step5-a.png" />
+								<div style="margin-top: 10px">
+									En el mapa, se destaca y colorea solamente la zona activa.
+								</div>
+							</div>
 
-              <div class="halves">
-                <img src="/static/img/onboarding/step5-b.png"/>
-                <div style="margin-top: 10px">
-                   A la derecha, en los paneles de información, se muestra información de la zona.
-                </div>
-              </div>
-            </div>
-           </div>
-        </section>
-        <section style="padding-bottom: 0px">
-          <div class="articleTitle">
-            <div class="closeButton" v-on:click="toggleModal">
-              <close-icon title="Cerrar" />
-            </div>
-              ¡Felicitaciones!
-           </div>
-          <div class="articleContent">
-            <div>
-              Ha completado la guía de uso.
-            </div>
-            <div style="margin-top: 30px;">
-              <div class="halves">
-                <h4 style="text-align: center; ">
-                <img src="/static/img/onboarding/step6-a.png"/> &nbsp;Compartir
-                </h4>
-                <div style="margin-top: 10px">
-                  Para guardar una visualización o enviarla a otras personas, puede copiar la ruta activa o utilizar el botón Compartir de la barra de acciones.
-                </div>
-              </div>
+							<div class="halves">
+								<img src="/static/img/onboarding/step5-b.png" />
+								<div style="margin-top: 10px">
+									A la derecha, en los paneles de información, se muestra información de la zona.
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section style="padding-bottom: 0px">
+					<div class="articleTitle">
+						<div class="closeButton" v-on:click="toggleModal">
+							<close-icon title="Cerrar" />
+						</div>
+						Indicadores disponibles
+					</div>
+					<div class="articleContent">
+						<div>
+							El la esquina inferior izquierda encontrará indicadores agrupados por temáticas que pueden
+							agregarse al mapa activo.
+						</div>
+						<div style="margin-top: 12px;">
+							<div class="halves">
+								<img src="/static/img/onboarding/step6-a.png" />
+							</div>
 
-              <div class="halves">
-                <h4 style="text-align: center; ">
-                <img src="/static/img/onboarding/step6-b.png"/> &nbsp;Comentar
-                </h4>
-                <div style="margin-top: 10px">
-                  Si tiene comentarios, pedidos o problemas, utilice la herramienta de asistencia que estará siempre a la izquierda en el mapa.
-                </div>
-              </div>
-            </div>
-          <div style="clear: both">
-            <p style="padding-bottom: 0px;">
-              <button class="accent" @click="reset()">Volver a empezar</button>
-              <button style="float:right" class="accent" @click="toggleModal">¡Gracias!</button>
-            </p>
-          </div>
-        </div>
-        </section>
-      </article>
+							<div class="halves">
+								<div style="margin-top: 0px">
+									La información de esos indicadores proviene de diversas fuentes, y podrá consultar
+									quiénes son sus autores y descargar los datos si desea analizarlos fuera de la plataforma.
+								</div>
+								<div style="margin-top: 20px;">
+									<img src="/static/img/onboarding/step6-b.png" style="float: right" />
+									En las cartografías específicas podrá ver más información eligiendo 'Indicadores' en la barra superior.
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section style="padding-bottom: 0px">
+					<div class="articleTitle">
+						<div class="closeButton" v-on:click="toggleModal">
+							<close-icon title="Cerrar" />
+						</div>
+						¡Felicitaciones!
+					</div>
+					<div class="articleContent">
+						<div>
+							Ha completado la guía de uso.
+						</div>
+						<div style="margin-top: 30px;">
+							<div class="halves">
+								<h4 style="text-align: center; ">
+									<img src="/static/img/onboarding/step7-a.png" /> &nbsp;Compartir
+								</h4>
+								<div style="margin-top: 10px">
+									Para guardar una visualización o enviarla a otras personas, puede copiar la ruta activa o utilizar el botón Compartir de la barra de acciones.
+								</div>
+							</div>
+
+							<div class="halves">
+								<h4 style="text-align: center; ">
+									<img src="/static/img/onboarding/step7-b.png" /> &nbsp;Comentar
+								</h4>
+								<div style="margin-top: 10px">
+									Si tiene comentarios, pedidos o problemas, utilice la herramienta de asistencia que estará siempre a la izquierda en el mapa.
+								</div>
+							</div>
+						</div>
+						<div style="clear: both">
+							<p style="padding-bottom: 0px;">
+								<button class="accent" @click="reset()">Volver a empezar</button>
+								<button style="float:right" class="accent" @click="toggleModal">¡Gracias!</button>
+							</p>
+						</div>
+					</div>
+				</section>
+			</article>
       <footer>
         <div class="forward-actions">
           <!--         <button class="secondary skip" :disabled="isLastStep" v-show="!isLastStep" @click="skip(2)">Skip</button> -->

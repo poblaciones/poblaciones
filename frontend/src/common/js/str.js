@@ -74,6 +74,20 @@ module.exports = {
 	applySymbols(cad) {
 		return cad.replace('km2', 'km²');
 	},
+	ParseColorParts(color) {
+		var r = parseInt(color.substr(1, 2), 16);
+		var g = parseInt(color.substr(3, 2), 16);
+		var b = parseInt(color.substr(5, 2), 16);
+		return [r, g, b];
+	},
+	MakeColor(r, g, b) {
+		return "#" + this.toHex(Math.floor(r)) + this.toHex(Math.floor(g)) + this.toHex(Math.floor(b));
+	},
+	toHex(n) {
+		var ret = n.toString(16);
+		if (ret.length == 1) ret = "0" + ret;
+		return ret;
+	},
 	EscapeHtml(unsafe) {
     return ('' + unsafe)
          .replace(/&/g, "&amp;")

@@ -14,7 +14,7 @@
 	</div>
 	<div>
 		<form method='post' action='{{ action_url }}'>
-			<label>Dirección de email: <input name="email" type="text" value=""></label>
+			<label>Dirección de email: <input name="email" type="text" value="{{ current_user }}"></label>
 			<input name="submit" type="submit" value="Enviar">
 		</form>
 		<div>

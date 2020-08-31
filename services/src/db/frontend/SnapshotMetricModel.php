@@ -88,7 +88,9 @@ class SnapshotMetricModel extends BaseModel
 	{
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
-		$specialWordsCondition = $this->calculateSpecialWordsCondition($originalQuery);
+		$fields = [ 'mvw_metric_caption', 'mvw_caption', 'mvw_metric_caption', 'mvw_variable_captions',
+											 'mvw_variable_value_captions', 'mvw_work_caption', 'mvw_work_authors', 'mvw_work_institution' ];
+		$specialWordsCondition = self::calculateSpecialWordsCondition($originalQuery, $fields);
 
 		Profiling::BeginTimer();
 		$sql = "SELECT mvw_metric_id Id,
@@ -118,7 +120,7 @@ class SnapshotMetricModel extends BaseModel
 		return $ret;
 	}
 
-	private function calculateSpecialWordsCondition($originalQuery)
+	public static function calculateSpecialWordsCondition($originalQuery, $fields)
 	{
 		$specialWords = Context::Settings()->Db()->SpecialWords;
 		$matches = Str::TextContainsWordList($specialWords, Str::ReplaceGroup($originalQuery, "'\+-@()[],.;|/", " "));
@@ -129,8 +131,6 @@ class SnapshotMetricModel extends BaseModel
 			foreach($matches as $match)
 			{
 				$matchEscaped = Str::Replace($match, "'", "\'");
-				$fields = [ 'mvw_metric_caption', 'mvw_caption', 'mvw_metric_caption', 'mvw_variable_captions',
-											 'mvw_variable_value_captions', 'mvw_work_caption', 'mvw_work_authors', 'mvw_work_institution' ];
 				foreach($fields as $field)
 					$likeCondition .=  " OR " . $field . " REGEXP '[[:<:]]" . $matchEscaped . "[[:>:]]' ";
 			}

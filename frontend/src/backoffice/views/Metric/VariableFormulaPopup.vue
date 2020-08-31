@@ -11,7 +11,7 @@
 					<mp-select label='Variable' :canEdit='canEdit'
 										 v-model='newVariable'
 										 list-key='Id'
-										 :list='Dataset.GetNumericAndRichColumns()'
+										 :list='Dataset.GetNumericTextAndRichColumns()'
 										 :render='formatColumn'
 										 @selected="updateValues"
 										 helper='Variable de categorías o valor numérico para el cálculo del indicador.'
@@ -57,6 +57,8 @@
 
 import axios from 'axios';
 import f from '@/backoffice/classes/Formatter';
+
+var columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
 export default {
 	name: 'metricVariables',
@@ -104,7 +106,8 @@ export default {
 			if (!this.Variable || !this.Variable.DataColumn) {
 				return false;
 			}
-			return this.Dataset.ColumnHasLabels(this.Variable.DataColumn);
+			return this.Variable.DataColumn.Format === columnFormatEnum.STRING ||
+								this.Dataset.ColumnHasLabels(this.Variable.DataColumn);
 		},
 		updateValues() {
 			// Resuelve valor

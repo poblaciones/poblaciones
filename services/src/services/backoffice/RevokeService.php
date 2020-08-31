@@ -4,7 +4,6 @@ namespace helena\services\backoffice;
 
 use helena\services\common\BaseService;
 
-use minga\framework\IO;
 use helena\services\backoffice\publish\WorkStateBag;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;

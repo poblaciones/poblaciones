@@ -29,6 +29,7 @@ class SnapshotSearchModel extends BaseModel
 			WHERE MATCH(clc_caption, clc_tooltip) AGAINST (:query IN BOOLEAN MODE)
 			ORDER by clc_population DESC
 			LIMIT 0, 10";
+
 		$ret = App::Db()->fetchAll($sql, array('query' => $query));
 		Profiling::EndTimer();
 		return $ret;
@@ -51,6 +52,7 @@ class SnapshotSearchModel extends BaseModel
 			FROM snapshot_lookup_feature
 			WHERE MATCH(clf_caption) AGAINST (:query IN BOOLEAN MODE)
 			LIMIT 0, 10";
+
 		$ret = App::Db()->fetchAll($sql, array('query' => $query));
 		Profiling::EndTimer();
 		return $ret;

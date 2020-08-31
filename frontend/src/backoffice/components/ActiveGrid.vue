@@ -75,6 +75,9 @@
 					<md-button @click="startDownload('t')">
 						<md-icon>import_export</md-icon> Descargar .DTA
 					</md-button>
+					<md-button @click="startDownload('r')">
+						<md-icon>import_export</md-icon> Descargar .RDATA
+					</md-button>
 				</template>
 				<template v-else>
 					<md-button @click="excelBtnOnClick()">

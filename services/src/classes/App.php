@@ -362,6 +362,8 @@ class App
 			return 'application/zip';
 		else if(Str::EndsWith($filename, '.dta'))
 			return 'application/x-stata';
+		else if(Str::EndsWith($filename, '.rdata'))
+			return 'application/octet-stream';
 		else if(Str::EndsWith($filename, '.csv'))
 			return 'text/csv;charset=ISO-8859-1';
 		else

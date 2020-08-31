@@ -43,9 +43,9 @@ class Symbology
     private $Rainbow;
 
     /**
-     * @var integer
+     * @var string
      *
-     * @ORM\Column(name="vsy_opacity", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     * @ORM\Column(name="vsy_opacity", type="string",  length=1, precision=0, scale=0, nullable=true, unique=false)
      */
     private $Opacity;
 
@@ -391,7 +391,7 @@ class Symbology
     /**
      * Set opacity
      *
-     * @param integer $opacity
+     * @param string $opacity
      *
      * @return Symbology
      */
@@ -405,7 +405,7 @@ class Symbology
     /**
      * Get opacity
      *
-     * @return integer
+     * @return string
      */
     public function getOpacity()
     {

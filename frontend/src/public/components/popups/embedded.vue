@@ -62,11 +62,11 @@ export default {
     </div>
     <iframe width="98%" height="83%" frameborder="0" style="border:0; margin-top: -2.5rem; position: relative;"
         src="` + url + `"
-        allowfullscreen="true" scrolling="false" allowtransparency="true">
+        allowfullscreen="true" scrolling="false" allowOpacity="true">
     </iframe>
 </div>`;
 
-      //return `<iframe src="${url}" width="98%" height="83%" frameborder="0" style="border:0; margin-top:-2 5rem; position:relative;" allowfullscreen="true" scrolling="false" allowtransparency="true"></iframe>`;
+      //return `<iframe src="${url}" width="98%" height="83%" frameborder="0" style="border:0; margin-top:-2 5rem; position:relative;" allowfullscreen="true" scrolling="false" allowOpacity="true"></iframe>`;
       return iframe_code;
     }
   },

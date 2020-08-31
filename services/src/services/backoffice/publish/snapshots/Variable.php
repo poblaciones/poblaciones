@@ -6,7 +6,7 @@ use minga\framework\Arr;
 use minga\framework\Profiling;
 use minga\framework\PublicException;
 use helena\classes\DatasetTypeEnum;
-
+use helena\classes\spss\Format;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
 
@@ -35,11 +35,13 @@ class Variable
 										vsy_cut_mode,
 										vsy_cut_column_id,
 										data.dco_field AS mvv_data_field,
+										cutcolumn.dco_format AS mvv_cut_field_format,
 										normalization.dco_field AS mvv_normalization_field
 						FROM variable
 						JOIN symbology ON mvv_symbology_id = vsy_id
 						LEFT JOIN dataset_column data ON data.dco_id = mvv_data_column_id
 						LEFT JOIN dataset_column normalization ON normalization.dco_id = mvv_normalization_column_id
+						LEFT JOIN dataset_column cutcolumn ON cutcolumn.dco_id = vsy_cut_column_id
 						WHERE mvv_metric_version_level_id = ? ORDER BY mvv_order";
 		$rows = App::Db()->fetchAll($sql, array($metricVersionLevelId));
 		self::AddLabels($rows, $metricVersionLevelId);
@@ -159,9 +161,19 @@ class Variable
 				$firstItem = $values[0];
 				return $firstItem['vvl_id'];
 			case 'V':
-				$sql = "(SELECT vvl_id from variable_value_label
+				if ($this->attributes['mvv_cut_field_format'] === Format::A)
+				{	// Los de tipo texto los igual por contenido
+					$sql = "(SELECT vvl_id from variable_value_label
+					     where vvl_variable_id = " . $this->attributes['mvv_id']
+					  . " and ((vvl_value IS NULL AND NULLIF(" . $valueField . ", '') IS NULL) OR
+									   (vvl_value IS NOT NULL AND vvl_caption <=> " . $valueField . ")))";
+				}
+				else
+				{	// Los numéricos (con etiqueta) los iguales por valor
+					$sql = "(SELECT vvl_id from variable_value_label
 					     where vvl_variable_id = " . $this->attributes['mvv_id']
 					  . " and vvl_value <=> " . $valueField . ")";
+				}
 				return $sql;
 			case 'J':
 			case 'T':

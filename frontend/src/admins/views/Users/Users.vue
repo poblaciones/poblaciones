@@ -2,7 +2,7 @@
 	<div>
 		<div class="md-layout">
 			<div class="md-layout-item md-size-25">
-				<md-button @click="createNewUser()">
+				<md-button @click="createNewUser">
 					<md-icon>add_circle_outline</md-icon>
 					Agregar usuario
 				</md-button>

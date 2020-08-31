@@ -8,6 +8,8 @@ import h from '@/public/js/helper';
 export default ScaleGenerator;
 
 const MAX_VALUE = 9999999217;
+const columnFormatEnum = require("@/common/enums/columnFormatEnum");
+
 
 function ScaleGenerator(dataset) {
 	this.Dataset = dataset;
@@ -121,19 +123,26 @@ ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByLabelChange = function (
 
 ScaleGenerator.prototype.createKey = function (variable) {
 	var ret = 'd';
-	if (variable.Data !== null) {
-		ret += variable.Data;
-	}
-	if (variable.DataColumn !== null) {
-		ret += variable.DataColumn.Id;
-	}
-	ret += 'n';
-	if (variable.Normalization !== null) {
-		ret += variable.Normalization;
-		if (variable.NormalizationColumn !== null) {
-			ret += variable.NormalizationColumn.Id;
+
+	if (variable.Symbology.CutMode === 'V') {
+		if (variable.Symbology.CutColumn !== null) {
+			ret += variable.Symbology.CutColumn.Id;
 		}
-		ret += 'p' + variable.NormalizationScale;
+	} else {
+		if (variable.Data !== null) {
+			ret += variable.Data;
+		}
+		if (variable.DataColumn !== null) {
+			ret += variable.DataColumn.Id;
+		}
+		ret += 'n';
+		if (variable.Normalization !== null) {
+			ret += variable.Normalization;
+			if (variable.NormalizationColumn !== null) {
+				ret += variable.NormalizationColumn.Id;
+			}
+			ret += 'p' + variable.NormalizationScale;
+		}
 	}
 	return ret;
 };
@@ -146,15 +155,26 @@ ScaleGenerator.prototype.HasData = function (variable) {
 
 ScaleGenerator.prototype.GetColumnDistributions = function (variable) {
 	// Trae los grupos calculados para ese par de variables y escalas
-	let url = window.host + '/services/backoffice/GetColumnDistributions';
-	return axiosClient.getPromise(url, {
-		'k': this.Dataset.properties.Id,
-		'c': variable.Data,
-		'ci': (variable.DataColumn ? variable.DataColumn.Id : 0),
-		'o': variable.Normalization,
-		'oi': (variable.NormalizationColumn ? variable.NormalizationColumn.Id : 0),
-		's': variable.NormalizationScale
-	}, 'obtener las distribuciones de la columna');
+	let url = window.host;
+	var args;
+	if (variable.Symbology.CutMode === 'V') {
+		args = {
+			'k': this.Dataset.properties.Id,
+			'c': (variable.Symbology.CutColumn ? variable.Symbology.CutColumn.Id : 0)
+		};
+		url += '/services/backoffice/GetColumnStringDistributions';
+	} else {
+		args = {
+			'k': this.Dataset.properties.Id,
+			'c': variable.Data,
+			'ci': (variable.DataColumn ? variable.DataColumn.Id : 0),
+			'o': variable.Normalization,
+			'oi': (variable.NormalizationColumn ? variable.NormalizationColumn.Id : 0),
+			's': variable.NormalizationScale
+		};
+		url += '/services/backoffice/GetColumnDistributions';
+	}
+	return axiosClient.getPromise(url, args, 'obtener las distribuciones de la columna');
 };
 
 ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
@@ -170,7 +190,9 @@ ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
 		});
 		return ret;
 	}
-	if (data) {
+	if (data || (variable.Symbology.CutMode === 'V' &&
+		variable.Symbology.CutColumn && variable.Symbology.CutColumn.Format === columnFormatEnum.NUMBER)) {
+		// procede a crearlas si ya tiene los datos, o si usa CutColumn y es numérica
 		let ret = new Promise((resolve, reject) => {
 			loc.CreateVariableCategories(level, variable, data);
 			resolve();
@@ -233,13 +255,7 @@ ScaleGenerator.prototype.CopySymbology = function (variable, singleColor, custom
 		data.Values = values;
 	}
 	// Si tiene valores para nulo los graba
-	if (this.HasNullCategory(variable))
-	{
-		data.NullValue = {
-			Caption: variable.Values[0].Caption,
-			FillColor: variable.Values[0].FillColor
-		};
-	}
+	data.NullValue = this.saveNullInfo(variable);
 	// Pasa cutColumn
 	if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null) {
 		data.Symbology.CutColumn = data.Symbology.CutColumn.Variable;
@@ -276,8 +292,8 @@ ScaleGenerator.prototype.ApplySymbology = function (level, variable, newData) {
 		variable.Values.push(value);
 	} else {
 		if (cutMode === 'V') {
-			var column = this.Dataset.GetColumnFromVariable(newData.Symbology.CutVariable, false);
-			variable.Symbology.CutVariable = column;
+			var column = this.Dataset.GetColumnFromVariable(newData.Symbology.CutColumn, false);
+			variable.Symbology.CutColumn = column;
 		}
 	}
 	// Pone la info de visibilidad y nulo, que aún no puede aplicar porque
@@ -292,15 +308,16 @@ ScaleGenerator.prototype.ApplyColors = function (level, variable, newData) {
 	variable.Symbology.CustomColors = newData.Symbology.CustomColors;
 	variable.Symbology.RainbowReverse = newData.Symbology.RainbowReverse;
 	variable.Symbology.PaletteType = newData.Symbology.PaletteType;
-	this.applyNullInfo(variable, newData, false);
+	this.applyNullInfo(variable, newData.NullValue, true);
 };
 
-ScaleGenerator.prototype.applyNullInfo = function (variable, newData, updateCaption) {
-	if (this.HasNullCategory(variable) && newData.NullValue) {
-		if (updateCaption) {
-			variable.Values[0].Caption = newData.NullValue.Caption;
+ScaleGenerator.prototype.applyNullInfo = function (variable, newData, onlyColors) {
+	if (this.HasNullCategory(variable) && newData) {
+		if (!onlyColors) {
+			variable.Values[0].Caption = newData.Caption;
+			variable.Values[0].Visible = newData.Visible;
 		}
-		variable.Values[0].FillColor = newData.NullValue.FillColor;
+		variable.Values[0].FillColor = newData.FillColor;
 	}
 };
 
@@ -390,6 +407,9 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 	var customColors = JSON.parse(variable.Symbology.CustomColors);
 	// Borra y regenera las categorías
 	var previousVisibilities = this.saveVisibilities(variable);
+	// Si tiene valores para nulo los graba
+	var previousNullInfo = this.saveNullInfo(variable);
+
 	var requiresNullCategory;
 	if (data !== null) {
 		requiresNullCategory = data.HasNulls;
@@ -416,14 +436,26 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 		this.CreateManualCategories(variable);
 	}
 	if (variable.Symbology.CutMode === 'V') {
-		this.CreateByVariableCategories(variable);
+			var col = variable.Symbology.CutColumn;
+		if (col !== null) {
+			var currentLabels = [];
+			if (variable.Symbology.CutColumn.Format === columnFormatEnum.NUMBER) {
+				if (this.Dataset.Labels !== null) {
+					currentLabels = this.Dataset.Labels[col.Id];
+				}
+			} else {
+				currentLabels = data;
+			}
+			this.CreateByVariableCategories(variable, currentLabels);
+		}
 	}
 	if (variable.Symbology.PendingPaste)
 	{
-		this.applyNullInfo(variable, variable.Symbology.PendingPaste, true);
+		this.applyNullInfo(variable, variable.Symbology.PendingPaste.NullValue);
 		this.applyVisibilities(variable, variable.Symbology.PendingPaste.Visibilities);
 		variable.Symbology.PendingPaste = null;
 	}	else {
+		this.applyNullInfo(variable, previousNullInfo);
 		this.applyVisibilities(variable, previousVisibilities);
 	}
 	this.recalculateColors(variable, customColors);
@@ -434,6 +466,18 @@ ScaleGenerator.prototype.recalculateColors = function (variable, customColors) {
 	for (var n = 0; n < valuesNoNullElement.length; n++) {
 		var color = this.CalculateColor(variable, n, valuesNoNullElement.length, customColors);
 		valuesNoNullElement[n].FillColor = color;
+	}
+};
+
+ScaleGenerator.prototype.saveNullInfo = function (variable) {
+	if (this.HasNullCategory(variable)) {
+		return {
+			Caption: variable.Values[0].Caption,
+			FillColor: variable.Values[0].FillColor,
+			Visible: variable.Values[0].Visible
+		};
+	} else {
+		return null;
 	}
 };
 
@@ -462,9 +506,6 @@ ScaleGenerator.prototype.applyVisibilities = function (variable, previousVisibil
 			break;
 		}
 		valuesNoNullElement[n].Visible = previousVisibilities.Values[n];
-	}
-	if (this.HasNullCategory(variable)) {
-		variable.Values[0].Visible = previousVisibilities.Null;
 	}
 	return;
 };
@@ -517,13 +558,8 @@ ScaleGenerator.prototype.CreateSingleCategory = function (variable) {
 	variable.Values.push(value);
 };
 
-ScaleGenerator.prototype.CreateByVariableCategories = function (variable) {
+ScaleGenerator.prototype.CreateByVariableCategories = function (variable, currentLabels) {
 	var col = variable.Symbology.CutColumn;
-	if (col === null || this.Dataset.Labels === null ||
-		this.Dataset.Labels[col.Id] === undefined) {
-		return;
-	}
-	var currentLabels = this.Dataset.Labels[col.Id];
 	var total = currentLabels.length;
 	for (var n = 0; n < total; n++) {
 		var label = currentLabels[n];

@@ -190,6 +190,7 @@ export default {
 			ret.push({ caption: 'Excel (.xlsx)', key: 'x' });
 			ret.push({ caption: 'SPSS (.sav)', key: 's' });
 			ret.push({ caption: 'Stata (.dta)', key: 't' });
+			ret.push({ caption: 'R (.rdata)', key: 'r' });
 			if (!this.level.HasArea) {
 				ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
 			}

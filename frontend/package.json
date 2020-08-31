@@ -1,8 +1,8 @@
 {
-		"name": "mapa",
+		"name": "poblaciones",
 		"version": "1.0.0",
-		"description": "descripcionmapa",
-		"author": "autor <example@example.com>",
+		"description": "Poblaciones Frontend",
+		"author": "Pablo De Grande <pablodg@gmail.com>",
 		"private": true,
 		"scripts": {
 				"dev": "node build/dev-server.js",

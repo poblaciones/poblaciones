@@ -44,12 +44,12 @@ SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelected
 	if (activeSelectedMetric.SelectedLevel().Pinned) {
 		ret.push(['l', '1']);
 	}
-	ret.push(['t', activeSelectedMetric.properties.Transparency, 'M']);
 
 	if (activeSelectedMetric.SelectedVariable()) {
 		if (activeSelectedMetric.SelectedVariable().CustomPattern !== activeSelectedMetric.SelectedVariable().Pattern) {
 			ret.push(['p', activeSelectedMetric.SelectedVariable().CustomPattern, '']);
 		}
+		ret.push(['t', activeSelectedMetric.SelectedVariable().Opacity, 'M']);
 		ret.push(['d', this.Boolean(activeSelectedMetric.SelectedVariable().ShowDescriptions), '0']);
 		ret.push(['s', this.Boolean(activeSelectedMetric.SelectedVariable().ShowValues), '0']);
 	}
@@ -228,7 +228,7 @@ SelectedMetricsRouter.prototype.parseMetric = function (values) {
 	var showValues = h.getSafeValue(values, 's', '0');
 	var ranking = h.getSafeValue(values, 'k', null);
 	var customPattern = h.getSafeValue(values, 'p', '');
-	var transparency = h.getSafeValue(values, 't', 'M');
+	var opacity = h.getSafeValue(values, 't', 'M');
 	var variableStates = h.getSafeValue(values, 'w', null);
 
 	return {
@@ -244,7 +244,7 @@ SelectedMetricsRouter.prototype.parseMetric = function (values) {
 		ShowRanking: this.ParseRanking(ranking)['Show'],
 		RankingSize: this.ParseRanking(ranking)['Size'],
 		RankingDirection: this.ParseRanking(ranking)['Direction'],
-		Transparency: transparency,
+		Opacity: opacity,
 		PinnedLevel: pinnedLevel,
 		CustomPattern: (customPattern === '' ? '' : parseInt(customPattern)),
 		VariableStates: (variableStates ? variableStates.split(',') : [])
@@ -327,8 +327,8 @@ SelectedMetricsRouter.prototype.RestoreMetricState = function (activeSelectedMet
 			mapChanged = true;
 		}
 	}
-	if (selectedMetric.Transparency !== state.Transparency) {
-		selectedMetric.Transparency = state.Transparency;
+	if (selectedMetric.Opacity !== state.Opacity) {
+		selectedMetric.Opacity = state.Opacity;
 		mapChanged = true;
 	}
 	if (state.VariableStates.length === level.Variables.length) {

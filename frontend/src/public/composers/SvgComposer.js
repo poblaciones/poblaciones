@@ -1,5 +1,6 @@
 import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
+import str from '@/common/js/str';
 import Pattern from '@/public/composers/Pattern';
 import SvgOverlay from '@/public/googleMaps/SvgOverlay';
 import Mercator from '@/public/js/Mercator';
@@ -150,7 +151,7 @@ SvgComposer.prototype.SVG = function (h, w, z) {
 		svgElem.style.strokeWidth = '0px';
 	} else {
 		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
-		svgElem.style.strokeOpacity = this.activeSelectedMetric.currentOpacity;
+		svgElem.style.strokeOpacity = this.activeSelectedMetric.SelectedVariable().CurrentOpacity;
 	}
 	return svgElem;
 };
@@ -251,7 +252,7 @@ SvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
 		if (patternValue === 11) {
 			pattern.style('fill: ' + labels[l].fillColor + ';');
 		}
-		pattern.style('stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.currentOpacity + width);
+		pattern.style('stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.SelectedVariable().CurrentOpacity + width);
 	}
 };
 
@@ -263,12 +264,22 @@ SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patte
 
 	for (var l = 0; l < labels.length; l++) {
 		if (patternValue === 0) {
+			// Se fija si el contraste entre el border y la figura va a ser demasiado bajo...
+			var color = labels[l].fillColor;
+			var colorParts = str.ParseColorParts(color);
+			var colorAvg = (colorParts[0] + colorParts[1] + colorParts[2]) / 3;
+			var stroke;
+			if (colorAvg < 200) {
+				stroke = color;
+			} else {
+				stroke = str.MakeColor(colorParts[0] * .9, colorParts[1] * .9, colorParts[2] * .9);
+			}
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
-				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + (this.activeSelectedMetric.currentOpacity * 1.1) +
-				maskBlock + '; fill: ' + labels[l].fillColor + '; fill-opacity: ' + this.activeSelectedMetric.currentOpacity + ' } ';
+				' { stroke: ' + stroke + '; stroke-opacity: ' + (this.activeSelectedMetric.SelectedVariable().CurrentOpacity * 1.1) +
+				maskBlock + '; fill: ' + labels[l].fillColor + '; fill-opacity: ' + this.activeSelectedMetric.SelectedVariable().CurrentOpacity + ' } ';
 		} else {
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
-				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.currentOpacity +
+				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.SelectedVariable().CurrentOpacity +
 					fillBlock + maskBlock + ' } ';
 		}
 	}

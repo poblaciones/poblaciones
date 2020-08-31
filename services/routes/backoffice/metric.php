@@ -98,6 +98,15 @@ App::Get('/services/backoffice/GetColumnDistributions', function (Request $reque
 	return App::Json($controller->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalizationColumn, $normalizationColumnId, $normalizationScale));
 });
 
+App::Get('/services/backoffice/GetColumnStringDistributions', function (Request $request) {
+	$controller = new services\MetricService();
+	$datasetId = Params::GetIntMandatory('k');
+	if ($denied = Session::CheckIsDatasetReader($datasetId)) return $denied;
+
+	$cutColumnId = Params::GetIntMandatory('c');
+
+	return App::Json($controller->GetColumnStringDistributions($datasetId, $cutColumnId));
+});
 
 App::GetOrPost('/services/backoffice/UpdateMetricVersionLevel', function (Request $request) {
 	$controller = new services\MetricService();

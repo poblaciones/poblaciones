@@ -6,39 +6,53 @@
 				<invoker ref="invoker"></invoker>
 
 				<div v-if="Variable" class="md-layout md-gutter">
-		<div class="md-layout-item md-size-100 separator">
-			Panel de resumen
-		</div>
-		<div class="md-layout-item md-size-50 md-small-size-100">
-			<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowEmptyCategories">
-				Mostrar categorías sin valores
-			</md-switch>
-		</div>
-		<div class="md-layout-item md-size-100 separator">
-			Mapa
-		</div>
-		<div v-if="Dataset.properties.CaptionColumn !== null" class="md-layout-item md-size-50 md-small-size-100">
-			<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowLabels">
-				Mostrar descripción en el mapa
-			</md-switch>
-		</div>
-		<div class="md-layout-item md-size-50 md-small-size-100">
-			<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowValues">
-				Mostrar valores en el mapa
-			</md-switch>
-		</div>
-		<template v-if="Level.Variables.length > 1">
-			<div class="md-layout-item md-size-100 separator">
-				Variable predeterminada
-			</div>
-			<div class="md-layout-item md-size-70 md-small-size-100">
-				<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.IsDefault">
-					Mostrar como variable inicial del indicador
-				</md-switch>
-			</div>
-		</template>
-	</div>
-			</md-dialog-content>
+					<div class="md-layout-item md-size-100 separator">
+						Panel de resumen
+					</div>
+					<div class="md-layout-item md-size-50 md-small-size-100">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowEmptyCategories">
+							Mostrar categorías sin valores
+						</md-switch>
+					</div>
+
+					<div class="md-layout-item md-size-100 separator">
+						Mapa
+					</div>
+					<div v-if="Dataset.properties.CaptionColumn !== null" class="md-layout-item md-size-50 md-small-size-100">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowLabels">
+							Mostrar descripción en el mapa
+						</md-switch>
+					</div>
+					<div class="md-layout-item md-size-50 md-small-size-100">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowValues">
+							Mostrar valores en el mapa
+						</md-switch>
+					</div>
+					<div class="md-layout-item md-size-100" v-if="Dataset.properties.Type !== 'L'">
+						<div class="md-layout">
+							<div class="md-layout-item md-size-20 md-small-size-100" style="padding-top: 16px;">
+								Transparencia:
+							</div>
+							<div class="md-layout-item md-size-80 md-small-size-100">
+								<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="H">Baja</md-radio>
+								<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="M">Media</md-radio>
+								<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="L">Alta</md-radio>
+							</div>
+						</div>
+					</div>
+
+					<template v-if="Level.Variables.length > 1">
+						<div class="md-layout-item md-size-100 separator">
+							Variable predeterminada
+						</div>
+						<div class="md-layout-item md-size-70 md-small-size-100">
+							<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.IsDefault">
+								Mostrar como variable inicial del indicador
+							</md-switch>
+						</div>
+					</template>
+				</div>
+</md-dialog-content>
 			<md-dialog-actions>
 				<template v-if="canEdit">
 					<md-button @click="hide">Cancelar</md-button>

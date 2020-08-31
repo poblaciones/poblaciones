@@ -28,7 +28,7 @@ class cSearchLog extends cController
 
 		$fixedMethods = array('get', 'cache', 'post');
 
-		$this->AddValue('search_table', SearchLog::GetSearchTable($month));
+		$this->AddValue('search_table', SearchLog::GetSearchTable($month, true));
 
 		$this->title = 'Búsquedas';
 

@@ -8,7 +8,7 @@ export default AsyncCatalog;
 function AsyncCatalog(url) {
 	this.url = url;
 	this.list = [];
-	this.loading = true;
+	this.loading = false;
 	this.notifyQueue = [];
 }
 

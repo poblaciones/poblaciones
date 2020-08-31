@@ -172,6 +172,12 @@ class Orm
 		return $em->getClassMetadata($class);
 	}
 
+	public function getAllMetadata()
+	{
+		$em = $this->GetEntityManager();
+		return $em->getMetadataFactory()->getAllMetadata();
+	}
+
 	private function repository($className)
 	{
 		$em = $this->GetEntityManager();

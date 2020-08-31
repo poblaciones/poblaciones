@@ -23,7 +23,6 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.IsUpdatingSummary = false;
 	this.IsUpdatingRanking = false;
 	this.isBaseMetric = isBaseMetric;
-	this.currentOpacity = -1;
 	this.ShowRanking = false;
 	this.RankingSize = 10;
 	this.RankingDirection = 'D';
@@ -32,18 +31,35 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.blockSize = window.SegMap.tileDataBlockSize;
 };
 
+ActiveSelectedMetric.prototype.GetAllLevels = function () {
+	var ret = [];
+	for (var n = 0; n < this.properties.Versions.length; n++) {
+		ret = ret.concat(this.properties.Versions[n].Levels);
+	}
+	return ret;
+};
+
+ActiveSelectedMetric.prototype.GetAllVariables = function () {
+	var levels = this.GetAllLevels();
+	var ret = [];
+	for (var n = 0; n < levels.length; n++) {
+		ret = ret.concat(levels[n].Variables);
+	}
+	return ret;
+};
+
 ActiveSelectedMetric.prototype.UpdateOpacity = function (zoom) {
 	var opacity = 0.7;
-	if (this.properties.Transparency === 'B') {
+	if (this.SelectedVariable().Opacity === 'H') {
 		opacity = 0.95;
-	} else if (this.properties.Transparency === 'A') {
+	} else if (this.SelectedVariable().Opacity === 'L') {
 		opacity = 0.3;
 	}
 
 	if (zoom <= 17) {
-		this.currentOpacity = opacity;
+		this.SelectedVariable().CurrentOpacity = opacity;
 	} else {
-		this.currentOpacity = opacity * 0.6;
+		this.SelectedVariable().CurrentOpacity = opacity * 0.6;
 	}
 };
 
@@ -412,7 +428,7 @@ ActiveSelectedMetric.prototype.ResolveStyle = function (variable, labelId) {
 				return /** @type {google.maps.Data.StyleOptions} */({
 					fillColor: 'transparent',
 					strokeColor: fillColor,
-					strokeOpacity: this.currentOpacity,
+					strokeOpacity: variable.CurrentOpacity,
 					fillOpacity: 0,
 					strokeWeight: 3,
 					zIndex: 10000 - this.index,
@@ -420,7 +436,7 @@ ActiveSelectedMetric.prototype.ResolveStyle = function (variable, labelId) {
 			} else {
 				return /** @type {google.maps.Data.StyleOptions} */({
 					fillColor: fillColor,
-					fillOpacity: this.currentOpacity,
+					fillOpacity: variable.CurrentOpacity,
 					strokeWeight: 1,
 					strokeColor: '#808080',
 					zIndex: 10000 - this.index,

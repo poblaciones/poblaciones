@@ -1,6 +1,6 @@
 <template>
 	<Modal title="Personalizar" ref="dialog" :showCancel="false" :showOk="false">
-		<div v-if="metric">
+		<div v-if="metric && metric.SelectedVariable()">
 			<table class="localTable">
 				<tr>
 					<td colspan="2">
@@ -19,7 +19,7 @@
 						</div>
 					</td>
 				</tr>
-				<tr>
+				<tr v-if="anyHasArea() || !metric.SelectedVariable().IsSimpleCount">
 					<td colspan="2">
 						<div class="popupSubTitle">
 							Opciones de mapa
@@ -37,17 +37,17 @@
 						</label>
 					</td>
 				</tr>
-				<tr>
+				<tr v-if="anyHasArea()">
 					<td>Transparencia:</td>
 					<td>
 						<div class="btn-group">
-							<button type="button" v-on:click="changeTransparency('B')" class="btn btn-default btn-xs" :class="getActiveTransparency('B')">
+							<button type="button" v-on:click="changeOpacity('H')" class="btn btn-default btn-xs" :class="getActiveOpacity('H')">
 								Baja
 							</button>
-							<button type="button" v-on:click="changeTransparency('M')" class="btn btn-default btn-xs" :class="getActiveTransparency('M')">
+							<button type="button" v-on:click="changeOpacity('M')" class="btn btn-default btn-xs" :class="getActiveOpacity('M')">
 								Media
 							</button>
-							<button type="button" v-on:click="changeTransparency('A')" class="btn btn-default btn-xs" :class="getActiveTransparency('A')">
+							<button type="button" v-on:click="changeOpacity('L')" class="btn btn-default btn-xs" :class="getActiveOpacity('L')">
 								Alta
 							</button>
 						</div>
@@ -108,8 +108,8 @@ export default {
 			this.metric = metric;
 			this.$refs.dialog.show();
 		},
-		getActiveTransparency(key) {
-			if(key === this.metric.properties.Transparency) {
+		getActiveOpacity(key) {
+			if (key === this.metric.SelectedVariable().Opacity) {
 				return ' active';
 			} else {
 				return '';
@@ -136,9 +136,12 @@ export default {
 				this.metric.UpdateMap();
 			}
 		},
-		changeTransparency(key) {
-			if (this.metric.properties.Transparency !== key) {
-				this.metric.properties.Transparency = key;
+		changeOpacity(key) {
+			if (this.metric.SelectedVariable().Opacity !== key) {
+				var variables = this.metric.GetAllVariables();
+				for (var n = 0; n < variables.length; n++) {
+					variables[n].Opacity = key;
+				}
 				this.metric.UpdateMap();
 			}
 		},

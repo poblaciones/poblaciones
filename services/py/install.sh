@@ -12,6 +12,9 @@
 ./pip install pandas
 ./pip install pyreadstat
 
+# r
+./pip install pyreadr
+
 # En hosting compartido hacer antes:
 #> virtualenv python
 #> cd ~/mapas/bin y... ejecutar ~/mapas/bin/pip install savReaderWriter
