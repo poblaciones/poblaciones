@@ -25,7 +25,7 @@ def main():
 
 	try:
 		df = pd.read_spss(sys.argv[1])
-
+    # , compress="gzip"
 		pyreadr.write_rdata(sys.argv[2] + '.tmp', df, df_name="dataset")
 
 		with open(sys.argv[2] + '.tmp', 'rb') as f_in:

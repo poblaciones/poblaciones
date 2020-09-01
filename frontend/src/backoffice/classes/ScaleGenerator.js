@@ -411,7 +411,7 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 	var previousNullInfo = this.saveNullInfo(variable);
 
 	var requiresNullCategory;
-	if (data !== null) {
+	if (data) {
 		requiresNullCategory = data.HasNulls;
 	} else {
 		requiresNullCategory = this.HasNullCategory(variable);

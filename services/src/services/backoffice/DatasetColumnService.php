@@ -523,7 +523,7 @@ class DatasetColumnService extends DbSession
 		// de un dataset en forma de diccionario[id_columna]['Id' => id, 'Value' => value, 'Caption' => caption, 'Order' => order]
 		$sql = "SELECT dla_dataset_column_id, dla_id, dla_value, dla_caption, dla_order
 									FROM draft_dataset_column_value_label JOIN draft_dataset_column ON dco_id = dla_dataset_column_id
-									WHERE dco_dataset_id = ? " . $filter . " ORDER BY dla_dataset_column_id, dla_order, dla_value";
+									WHERE dco_dataset_id = ? " . $filter . " ORDER BY dla_dataset_column_id, dla_order, dla_id";
 		$labels = App::Db()->fetchAllByPos($sql, array($datasetId));
 		$ret = array();
 		$lastColumnId = null;

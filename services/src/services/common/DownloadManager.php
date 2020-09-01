@@ -34,8 +34,13 @@ class DownloadManager
 	const FILE_STATA = 5;
 	const FILE_R = 6;
 
-	private static $validFileTypes = ['s' => 'sav', 'z' => 'zsav', 't' => 'dta', 'r' => 'rdata',
-																			'c' => 'csv', 'x' => 'xlsx', 'h' => 'zip'];
+	private static $validFileTypes = ['s' => [ 'extension' => 'sav', 'type' => self::FILE_SPSS],
+																		'z' => [ 'extension' => 'zsav', 'type' => self::FILE_SPSS],
+																		't' => [ 'extension' => 'dta', 'type' => self::FILE_STATA],
+																		'r' => [ 'extension' => 'rdata', 'type' => self::FILE_R],
+																		'c' => [ 'extension' => 'csv', 'type' => self::FILE_CSV],
+																		'x' => [ 'extension' => 'xlsx', 'type' => self::FILE_XLSX],
+																		'h' => [ 'extension' => 'zip', 'type' => self::FILE_SHP]];
 
 	const OUTPUT_LATIN3_WINDOWS_ISO = false;
 
@@ -120,7 +125,7 @@ class DownloadManager
 	{
 		$validFileTypes = self::$validFileTypes;
 		if (array_key_exists($type[0], $validFileTypes))
-			$ext = $validFileTypes[$type[0]];
+			$ext = $validFileTypes[$type[0]]['extension'];
 		else
 			throw new PublicException('Tipo de archivo inválido');
 
@@ -251,18 +256,10 @@ class DownloadManager
 
 	private function getFileType()
 	{
-		if ($this->state->Get('type')[0] == 's' || $this->state->Get('type')[0] == 'z')
-			return self::FILE_SPSS;
-		else if ($this->state->Get('type')[0] == 'h')
-			return self::FILE_SHP;
-		else if ($this->state->Get('type')[0] == 't')
-			return self::FILE_STATA;
-		else if ($this->state->Get('type')[0] == 'r')
-			return self::FILE_R;
-		else if ($this->state->Get('type')[0] == 'x')
-			return self::FILE_XLSX;
-		else if ($this->state->Get('type')[0] == 'c')
-			return self::FILE_CSV;
+		$validFileTypes = self::$validFileTypes;
+		$type = $this->state->Get('type');
+		if (array_key_exists($type[0], $validFileTypes))
+			return $validFileTypes[$type[0]]['type'];
 		else
 			throw new PublicException('Tipo de descarga no reconocido');
 	}
