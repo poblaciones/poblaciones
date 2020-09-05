@@ -21,7 +21,6 @@ class cTests extends cController
 	{
 		if ($app = Session::CheckIsMegaUser())
 			return $app;
-
 		$filesFramework = array_filter(IO::GetFiles(Context::Paths()->GetFrameworkTestsPath(), '.php'), [__CLASS__, 'EndsWithTest']);
 		$files = array_filter(IO::GetFilesRecursive(Paths::GetTestsLocalPath(), '.php'), [__CLASS__, 'EndsWithTest']);
 
