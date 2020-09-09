@@ -5,6 +5,7 @@ namespace helena\tests\classes;
 use helena\classes\App;
 use helena\classes\TestCase;
 use helena\entities\backoffice\DraftMetadata;
+use helena\entities\backoffice\DraftWork;
 
 class OrmSerializeTest extends TestCase
 {

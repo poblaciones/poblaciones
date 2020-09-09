@@ -1,5 +1,5 @@
 [CURRENT]
-
+- Reporte de espacio y mejoras en administración.
 
 v2.29 (2020-08-31)
 - Fix: niveles duplicados en clipping por agregado de distritos escoalres (1991, 2001, 2001, 2010)

@@ -393,7 +393,7 @@ class WorkService extends BaseService
 	{
 		$condition = "wrk_type = '" . substr($filter, 0, 1) . "' ";
 		// Trae las cartografías
-		$list = $this->GetWorks();
+		$list = $this->GetWorks($condition);
 		return $list;
 	}
 
@@ -413,7 +413,7 @@ class WorkService extends BaseService
 		$list = $this->GetWorks($condition . " wrk_id IN (SELECT wkp_work_id FROM draft_work_permission WHERE wkp_user_id = " . $userId . ")");
 		return $list;
 	}
-	private function GetWorks()
+	private function GetWorks($condition)
 	{
 		Profiling::BeginTimer();
 
@@ -436,7 +436,8 @@ class WorkService extends BaseService
 																				JOIN draft_dataset d2 ON mvl.mvl_dataset_id = d2.dat_id
 																					WHERE d2.dat_work_id = wrk_id) MetricCount
 															FROM draft_work
-											LEFT JOIN draft_metadata ON wrk_metadata_id = met_id ORDER BY met_title";
+											LEFT JOIN draft_metadata ON wrk_metadata_id = met_id
+									WHERE " . $condition . " ORDER BY met_title";
 			$ret = App::Db()->fetchAll($sql, array($userId));
 			Arr::IntToBoolean($ret, array('IsPrivate', 'IsIndexed', 'SegmentedCrawling'));
 			Profiling::EndTimer();
