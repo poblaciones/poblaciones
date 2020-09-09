@@ -29,6 +29,11 @@ Db.prototype.GetUsers = function () {
 			{ }, 'obtener la lista de usuarios');
 };
 
+Db.prototype.CalculateSpaceUsage = function () {
+	return axiosClient.getPromise(window.host + '/services/admin/UpdateWorkSpaceUsage',
+			{  }, 'calcular el espacio por cartografía');
+};
+
 Db.prototype.GetWorks = function (filter, timeFilter) {
 	return axiosClient.getPromise(window.host + '/services/admin/GetWorks',
 			{ f: filter, t: timeFilter }, 'obtener la lista de cartografías');

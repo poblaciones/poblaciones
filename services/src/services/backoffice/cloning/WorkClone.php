@@ -115,9 +115,14 @@ class WorkClone
 	}
 	public function CopyPermissions()
 	{
-		// Copia permisos
 		$static = array('wkp_work_id' => $this->targetWorkId);
 		RowDuplicator::DuplicateRows(entities\DraftWorkPermission::class, $this->sourceWorkId, $static, 'wkp_work_id');
+	}
+
+	public function CopyDiskUsage()
+	{
+		$static = array('wdu_work_id' => $this->targetWorkId, 'wdu_data_bytes' => 0, 'wdu_index_bytes' => 0, 'wdu_attachment_bytes' => 0);
+		RowDuplicator::DuplicateRows(entities\WorkSpaceUsage::class, $this->sourceWorkId, $static, 'wdu_work_id');
 	}
 	public function SetFinished()
 	{

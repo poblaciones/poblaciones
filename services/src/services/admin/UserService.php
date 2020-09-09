@@ -19,6 +19,7 @@ class UserService extends BaseService
 		$entity = new entities\User();
 		$entity->setDeleted(false);
 		$entity->setPrivileges('P');
+		$entity->setIsActive(true);
 		return $entity;
 	}
 
@@ -42,7 +43,17 @@ class UserService extends BaseService
 	{
 		Profiling::BeginTimer();
 		$sql = "SELECT usr_id Id, usr_firstname Firstname, usr_lastname Lastname, usr_email Email,
-							usr_privileges as Privileges, usr_create_time CreateTime, usr_is_active IsActive, (SELECT COUNT(*) FROM draft_work_permission JOIN draft_work ON wrk_id = wkp_work_id WHERE wkp_user_id = usr_id AND wrk_type = 'R') Cartographies, (SELECT COUNT(*) FROM draft_work_permission JOIN draft_work ON wrk_id = wkp_work_id WHERE wkp_user_id = usr_id AND wrk_type = 'P') PublicData, (SELECT MAX(ses_last_login) FROM user_session WHERE ses_user_id = usr_id) LastAccess FROM user ORDER by usr_firstname, usr_lastname";
+							usr_privileges as Privileges, usr_create_time CreateTime, usr_is_active IsActive,
+							(SELECT COUNT(*) FROM draft_work_permission JOIN draft_work ON wrk_id = wkp_work_id
+											WHERE wkp_user_id = usr_id AND wrk_type = 'R') Cartographies,
+							(SELECT GROUP_CONCAT(met_title ORDER BY met_title SEPARATOR '\n') FROM draft_work_permission JOIN draft_work ON wrk_id = wkp_work_id
+											JOIN draft_metadata ON met_id = wrk_metadata_id WHERE wkp_user_id = usr_id AND wrk_type = 'R') CartographiesNames,
+							(SELECT COUNT(*) FROM draft_work_permission JOIN draft_work ON wrk_id = wkp_work_id
+											WHERE wkp_user_id = usr_id AND wrk_type = 'P') PublicData,
+							(SELECT GROUP_CONCAT(met_title ORDER BY met_title SEPARATOR '\n')  FROM draft_work_permission JOIN draft_work ON wrk_id = wkp_work_id
+											JOIN draft_metadata ON met_id = wrk_metadata_id WHERE wkp_user_id = usr_id AND wrk_type = 'P') PublicDataNames,
+							(SELECT MAX(ses_last_login) FROM user_session WHERE ses_user_id = usr_id) LastAccess
+					FROM user ORDER by usr_firstname, usr_lastname";
 		$ret = App::Db()->fetchAll($sql);
 		Profiling::EndTimer();
 		return $ret;
@@ -51,6 +62,9 @@ class UserService extends BaseService
 	{
 		Profiling::BeginTimer();
 		$user->setDeleted(false);
+
+		$this->checkDuplicatedEmail($user);
+
 		App::Orm()->Save($user);
 		if ($password !== null && strlen($password) > 0)
 		{
@@ -65,6 +79,15 @@ class UserService extends BaseService
 		Profiling::EndTimer();
 		return self::OK;
 	}
+
+	private function checkDuplicatedEmail($user)
+	{
+		$exists = "SELECT COUNT(*) FROM user WHERE usr_email = ? AND NOT usr_id <=> ?";
+		$count = App::Db()->fetchScalarInt($exists, array($user->getEmail(), $user->getId()));
+		if ($count > 0)
+				throw new PublicException("Ya existe un usuario con esa dirección de correo electrónico.");
+	}
+
 	public function DeleteUser($userId)
 	{
 		Profiling::BeginTimer();

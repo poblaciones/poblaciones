@@ -24,7 +24,7 @@ class ConfigurationTest extends TestCase
 	public function testPHPVersion()
 	{
 		$version = floatval(phpversion());
-		$this->assertGreaterThanOrEqual(7, $version);
+		$this->assertGreaterThanOrEqual(7.3, $version);
 		$this->assertLessThan(8, $version);
 	}
 

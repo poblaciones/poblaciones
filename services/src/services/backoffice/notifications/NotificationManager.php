@@ -15,7 +15,8 @@ class NotificationManager
 {
 	public function NotifyCreate($work)
 	{
-		if (empty(Context::Settings()->Mail()->NotifyAddress))
+		if (empty(Context::Settings()->Mail()->NotifyAddress) ||
+				! Context::Settings()->Notifications()->NotifyOnNewContent)
 			return;
 		// Manda email....
 		$type = $work->getType();
@@ -119,10 +120,23 @@ class NotificationManager
 		$this->Send($mail);
 	}
 
+	public function NotifyLostPassword($user, $url)
+	{
+		// Manda email....
+		$mail = new Mail();
+		$mail->to = $this->user;
+		$mail->subject = 'Recuperación de contraseña en Poblaciones';
+		$vals = array();
+		$vals['title'] = 'Recuperación de contraseña en Poblaciones';
+		$vals['url'] = $url;
+		$mail->message = Context::Calls()->RenderMessage('lostPassword.html.twig', $vals);
+		$mail->Send();
+	}
 
 	public function NotifyCreateUser($user, $fullName)
 	{
-		if (empty(Context::Settings()->Mail()->NotifyAddress))
+		if (empty(Context::Settings()->Mail()->NotifyAddress) ||
+				! Context::Settings()->Notifications()->NotifyOnNewAccount)
 			return;
 		// Manda email....
 		$mail = new Mail();

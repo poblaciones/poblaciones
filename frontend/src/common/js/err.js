@@ -59,6 +59,14 @@ module.exports = {
 		var post = '';
 		if (err.response && err.response.data) {
 			var msgtext = err.response.data.trim();
+			// extra en desa
+			var pos = msgtext.indexOf('<abbr title="minga\\framework\\PublicException">');
+			if (pos !== -1) {
+				var next = msgtext.indexOf('message">', pos) + 9;
+				var end = msgtext.indexOf('</p>', next);
+				var msgtext = '[PE-E]:' + msgtext.substr(next, end - next);
+			}
+			// continúa
 			if (msgtext.startsWith('[PE-E]:')) {
 				post = ' ' + msgtext.substr(7);
 				if (!post.endsWith('.')) {

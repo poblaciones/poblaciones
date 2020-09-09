@@ -25,19 +25,20 @@ function deleteAll() {
 	<input type='button' class="dButton" value='Eliminar Todos' onclick='deleteAll();'>
 {% endif %}
 	<div class="dTableHeader">
-		<div style='padding-top: 0px' class='dBlockNewLineS1'>Fecha</div>
+		<div style='padding-top: 0px; margin-top: 0px' class='dBlockNewLineS1'>Fecha</div>
 		<div class='dCellSize2 Center'>Usuario</div>
 		<div class='dCellSize2b Center'>Url</div>
 		<div class='dCellSize3Center'>Descripción</div>
 	</div>
 	{% for error in errors %}
-
-	<div class='dBlockNewLineS1'>{{ error.date }}</div>
-	<div class='dCellSize2 Center'>{{ error.user }}</div>
-	<div class='dCellSize2b Center'>{{ error.url | raw}}</div>
-	<div class='dCellSize3'><a {{ error.link | raw}} href='{{ error.error_url}}'>{{ error.description }}</a></div>
-	<div class='dNewLine'></div>
-
+	<div class="dCellsRow">
+		<div class='dBlockNewLineS1'>{{ error.date }}</div>
+		<div class='dCellSize2 Center'>{{ error.user }}</div>
+		<div class='dCellSize2b Center'>{{ error.url | raw}}</div>
+		<div class='dCellSize3'><a {{ error.link | raw}} href='{{ error.error_url}}'>[DETALLE] {{ error.description }}</a></div>
+		<div class='dNewLine'></div>
+		<div style="clear: both"></div>
+	</div>
 	{% else %}
 
 	{% endfor %}

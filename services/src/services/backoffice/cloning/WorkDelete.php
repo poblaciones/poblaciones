@@ -62,6 +62,8 @@ class WorkDelete
 	private function doDeleteWork()
 	{
 		// Borra
+		$delete = "DELETE FROM work_space_usage WHERE wdu_work_id = ?";
+		App::Db()->exec($delete, array($this->workId));
 		$delete = "DELETE FROM draft_work WHERE wrk_id = ?";
 		App::Db()->exec($delete, array($this->workId));
 	}

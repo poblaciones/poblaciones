@@ -14,14 +14,14 @@
 			<user-popup ref="editPopup" @completed="popupSaved">
 			</user-popup>
 			<div class="md-layout-item md-size-100">
-				<md-table style="max-width: 1100px;" v-model="list" md-card="">
+				<md-table style="max-width: 1100px;" v-model="list"  md-sort="FullName" md-sort-order="asc" md-card="">
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre">{{ formatName(item) }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Email">{{ item.Email }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Rol">{{ formatRole(item) }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías">{{ item.Cartographies }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Datos públicos">{{ item.PublicData }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Último ingreso">{{ formatDate(item.LastAccess) }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre" md-sort-by="FullName">{{ item.FullName }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Email" md-sort-by="Email">{{ item.Email }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Rol" md-sort-by="FormattedRole">{{ item.FormattedRole }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Cartographies"><span :title="item.CartographiesNames">{{ item.Cartographies }}</span></md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Datos públicos" md-sort-by="PublicData"><span :title="item.PublicDataNames">{{ item.PublicData }}</span></md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Último ingreso" md-sort-by="LastAccess">{{ formatDate(item.LastAccess) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
 							<md-button class="md-icon-button" title="Modificar" @click="openEdition(item)">
 								<md-icon>edit</md-icon>
@@ -59,9 +59,13 @@ import arr from '@/common/js/arr';
 	mounted() {
 		var loc = this;
 		this.$refs.invoker.do(window.Db,
-				window.Db.GetUsers).then(function(data) {
-					arr.AddRange(loc.list, data);
-					});
+			window.Db.GetUsers).then(function (data) {
+				for (var n = 0; n < data.length; n++) {
+					data[n].FormattedRole = loc.formatRole(data[n]);
+					data[n].FullName = loc.formatName(data[n]);
+				}
+				arr.AddRange(loc.list, data);
+			});
 	},
 	methods: {
 		formatRole(v) {

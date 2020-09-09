@@ -84,6 +84,7 @@ class cErrors extends cController
 			$current = array();
 			$file = $path . '/' . $error;
 			$lines = $this->Get20LinesKeys($file);
+
 			if (sizeof($lines) > 0)
 			{
 				$current['date'] = substr($error, 0, 19);
@@ -145,7 +146,8 @@ class cErrors extends cController
 					{
 						$currentLineKey = trim(substr($currentLine, 3, $n - 3));
 						$currentLineValue = trim(substr($currentLine, $n + 1));
-
+						if (Str::EndsWith($currentLineValue, '<br>'))
+							$currentLineValue = substr($currentLineValue, 0, strlen($currentLineValue) - 4);
 						$ret[$currentLineKey] = $currentLineValue;
 					}
 				}

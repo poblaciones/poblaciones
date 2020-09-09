@@ -274,6 +274,12 @@ class Account
 		$model = new UserModel();
 		$token = $model->CreateUserLink('L', $this->user, $target);
 		$url = App::AbsoluteUrl('linkLostPassword?username=' . urlencode($this->user) . '&id=' . $token);
+
+		$this->SendLostPasswordEmail($this->user, $url);
+	}
+
+	public function SendLostPasswordEmail($user, $url)
+	{
 		// Manda email....
 		$mail = new Mail();
 		$mail->to = $this->user;
@@ -282,7 +288,9 @@ class Account
 		$vals['title'] = 'Recuperación de contraseña en Poblaciones';
 		$vals['url'] = $url;
 		$mail->message = Context::Calls()->RenderMessage('lostPassword.html.twig', $vals);
-		$mail->Send();
+
+		$skipNotification = !Context::Settings()->Notification()->NotifyLostPassword;
+		$mail->Send(true, $skipNotification);
 	}
 
 	public function SavePassword($password)

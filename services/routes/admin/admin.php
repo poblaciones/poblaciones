@@ -43,12 +43,21 @@ App::GetOrPost('/services/admin/UpdateClippingRegion', function (Request $reques
 App::Get('/services/admin/GetWorks', function (Request $request) {
 	if ($app = Session::CheckIsSiteReader())
 		return $app;
-	$controller = new backofficeServices\WorkService();
+	$controller = new services\WorkService();
 	$filter = Params::GetMandatory('f');
 	$timeFilter = Params::GetInt('t', 0);
 	$ret = $controller->GetWorksByType($filter, $timeFilter);
 	return App::Json($ret);
 });
+
+App::Get('/services/admin/UpdateWorkSpaceUsage', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$controller = new services\WorkService();
+	$ret = $controller->UpdateWorkSpaceUsage();
+	return App::Json($ret);
+});
+
 
 App::Get('/services/admin/GetClippingRegions', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())

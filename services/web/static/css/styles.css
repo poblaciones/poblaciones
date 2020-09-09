@@ -483,7 +483,6 @@ input[type=text], input[type=password] {
 
 .dCellSize1 {
 	margin-top: 2px; margin-bottom: 2px;
-	border-bottom: 1px solid #e0e0e0;
 	 min-height: 1.55em;
 	width: 100px;
 	float: left;
@@ -492,7 +491,6 @@ input[type=text], input[type=password] {
 
 .dCellSize2 {
 	margin-top: 2px; margin-bottom: 2px;
-	border-bottom: 1px solid #e0e0e0;
 	width: 150px;
 	min-height: 1.55em;
 	float: left;
@@ -507,7 +505,6 @@ input[type=text], input[type=password] {
 	margin-bottom: 2px;
 	width: 250px;
 	min-height: 1.55em;
-	border-bottom: 1px solid #e0e0e0;
 	float: left;
 	padding-right: 8px;
 	word-wrap: break-word;
@@ -515,17 +512,18 @@ input[type=text], input[type=password] {
 .dCellSize1 {
 	margin-top: 2px;
 	margin-bottom: 2px;
-	border-bottom: 1px solid #e0e0e0;
 	width: 150px;
 	float: left;
 	min-height: 1.55em;
 }
-
+.dCellsRow {
+	border-bottom: 1px solid #e0e0e0;
+}
 .dCellSize3 {
 	margin-top: 2px; margin-bottom: 2px;
-	border-bottom: 1px solid #e0e0e0;
 	 min-height: 1.55em;
 	text-align: left;
+	float: left;
 	word-wrap: break-word;
 }
 

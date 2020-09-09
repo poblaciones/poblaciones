@@ -2,87 +2,88 @@
 	<div class="md-layout">
 		<div class="md-layout-item md-size-100">
 			<stepper ref="DeleteStepper" @completed="onDeleteComplete">
-		</stepper>
-		<stepper ref="SaveAsStepper">
-		</stepper>
-		<stepper ref="stepper">
-		</stepper>
-		<invoker ref="invoker">
-		</invoker>
-
+			</stepper>
+			<stepper ref="SaveAsStepper">
+			</stepper>
+			<stepper ref="stepper">
+			</stepper>
+			<invoker ref="invoker">
+			</invoker>
 		</div>
-
 		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="0">Todas</md-radio>
 		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="7">Últimos 7 días</md-radio>
 		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="30">Últimos 30 días</md-radio>
 		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="90">Últimos 90 días</md-radio>
+		<md-button v-on:click="calculateUsage" style="margin-left: 60px">
+			<md-icon>data_usage</md-icon> Recalcular tamaños
+		</md-button>
 
 		<div class="md-layout-item md-size-100">
-			<md-table style="max-width: 1000px;" v-if="list.length > 0" v-model="list" md-sort="title" md-sort-order="asc" md-card>
-					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="title">
-							<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
-						</md-table-cell>
-          		<md-table-cell @click.native="select(item)" class="selectable" md-label="Datasets">{{ item.DatasetCount }}</md-table-cell>
-							<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores">{{ item.MetricCount }}</md-table-cell>
-							<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado">
-								<md-switch class="md-primary" v-model="item.IsIndexed"
-										@change="onIndexedChanged(item)" />
-							</md-table-cell>
-							<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Segmentado">
-								<md-switch class="md-primary" v-model="item.SegmentedCrawling"
-														@change="onSegmentedCrawlingChanged(item)" :disabled="!item.IsIndexed" />
-							</md-table-cell><md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
-									<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
-								<div class="extraIconContainer">
-									<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
-									<md-icon v-if="!showIndexingColumn && !item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
-													class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
-Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.">error_outline</md-icon>
-								</div>
-							</md-table-cell>
-							<md-table-cell md-label="Acciones">
-							<md-button v-if="!canEdit(item)" title="Consultar" class="md-icon-button" v-on:click="select(item)">
-								<md-icon>remove_red_eye</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item) && !publishDisabled(item)" title="Publicar" class="md-icon-button" v-on:click="onPublish(item)">
-								<md-icon>public</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item) && !revokeDisabled(item)" title="Revocar publicación" class="md-icon-button" v-on:click="onRevoke(item)">
-								<md-icon>pause_circle_filled</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
-								<md-icon>edit</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item)" @click="onDuplicate(item)" title="Duplicar" class="md-icon-button">
-								<md-icon>file_copy</md-icon>
-							</md-button>
-								<md-button v-if="canEdit(item)" title="Eliminar" class="md-icon-button" v-on:click="onDelete(item)">
-									<md-icon>delete</md-icon>
-							</md-button>
-						</md-table-cell>
-					</md-table-row>
-				</md-table>
-			</div>
-			<div class="md-layout-item md-size-100">
-				<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
-					<div v-if="!canCreate" style="">
-						<p>
-							No dispone actualmente de {{ entityName.plural }}.
-						</p>
-					</div>
+			<md-table style="max-width: 1200px;" v-if="list.length > 0" v-model="list" md-sort="Caption" md-sort-order="asc" md-card>
+				<md-table-row slot="md-table-row" slot-scope="{ item }">
+					<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
+						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
+					</md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable" md-label="Tamaño" md-sort-by="TotalSizeBytes"><span :title="formatSizes(item)">{{ totalSizeMB(item) }}</span></md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable" md-label="Datasets" md-sort-by="DatasetCount"><span :title="item.DatasetNames">{{ item.DatasetCount }}</span></md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores" md-sort-by="MetricCount">{{ item.MetricCount }}</md-table-cell>
+					<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado" md-sort-by="IsIndexed">
+						<md-switch class="md-primary" v-model="item.IsIndexed"
+											 @change="onIndexedChanged(item)" />
+					</md-table-cell>
+					<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Segmentado" md-sort-by="SegmentedCrawling">
+						<md-switch class="md-primary" v-model="item.SegmentedCrawling"
+											 @change="onSegmentedCrawlingChanged(item)" :disabled="!item.IsIndexed" />
+					</md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
+						<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
+						<div class="extraIconContainer">
+							<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
+							<md-icon v-if="!showIndexingColumn && !item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
+											 class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
+											 Para que sean incluidos, debe solictar una revisión desde Modificar>Visiblidad > Solicitar revisión.">error_outline</md-icon>
+						</div>
+					</md-table-cell>
+					<md-table-cell md-label="Acciones">
+						<md-button v-if="!canEdit(item)" title="Consultar" class="md-icon-button" v-on:click="select(item)">
+							<md-icon>remove_red_eye</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item) && !publishDisabled(item)" title="Publicar" class="md-icon-button" v-on:click="onPublish(item)">
+							<md-icon>public</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item) && !revokeDisabled(item)" title="Revocar publicación" class="md-icon-button" v-on:click="onRevoke(item)">
+							<md-icon>pause_circle_filled</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
+							<md-icon>edit</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" title="Duplicar" class="md-icon-button">
+							<md-icon>file_copy</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item)" title="Eliminar" class="md-icon-button" v-on:click="onDelete(item)">
+							<md-icon>delete</md-icon>
+						</md-button>
+					</md-table-cell>
+				</md-table-row>
+			</md-table>
+		</div>
+		<div class="md-layout-item md-size-100">
+			<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
+				<div v-if="!canCreate" style="">
+					<p>
+						No dispone actualmente de {{ entityName.plural }}.
+					</p>
 				</div>
 			</div>
-
-		<md-dialog-prompt
-				:md-active.sync="activateSaveAs"
-				:md-title="'Duplicar ' + entityName.single"
-				v-model="newWorkName"
-				md-input-maxlength="100"
-				md-input-placeholder="Nombre de la nueva copia..."
-				md-confirm-text="Guardar"
-				md-cancel-text="Cancelar"
-				@md-confirm="onDuplicateStart">
+		</div>
+		<md-dialog-prompt :md-active.sync="activateSaveAs"
+											:md-title="'Duplicar ' + entityName.single"
+											v-model="newWorkName"
+											md-input-maxlength="100"
+											md-input-placeholder="Nombre de la nueva copia..."
+											md-confirm-text="Guardar"
+											md-cancel-text="Cancelar"
+											@md-confirm="onDuplicateStart">
 		</md-dialog-prompt>
 	</div>
 </template>
@@ -151,6 +152,29 @@ export default {
 			}
 			return pre + '/cartographies/' + element.Id + '/content';
 		},
+		totalSizeMB(item) {
+			return this.formatMB(item.TotalSizeBytes);
+		},
+		formatSizes(item) {
+			var ret = "";
+			if (item.DraftDataBytes + item.DraftIndexBytes + item.DraftAttachmentBytes > 0)
+				ret += "BORRADOR\n";
+			if (item.DraftDataBytes + item.DraftIndexBytes  > 0)
+				ret += "Datos: " + this.formatMB(item.DraftDataBytes + item.DraftIndexBytes) + "\n";
+			if (item.DraftAttachmentBytes > 0)
+				ret += "Adjuntos: " + this.formatMB(item.DraftAttachmentBytes) + "\n";
+
+			if (item.DataBytes + item.IndexBytes + item.AttachmentBytes > 0)
+				ret += "PUBLICADOS\n";
+			if (item.DataBytes + item.IndexBytes > 0)
+				ret += "Datos: " + this.formatMB(item.DataBytes + item.IndexBytes) + "\n";
+			if (item.AttachmentBytes > 0)
+				ret += "Adjuntos: " + this.formatMB(item.AttachmentBytes);
+			return ret;
+		},
+		formatMB(n) {
+			return (n / 1024 / 1024).toFixed(2) + "MB";
+		},
 		select(element) {
 			window.open(this.getWorkUri(element, true), '_blank');
 		},
@@ -161,6 +185,13 @@ export default {
 						arr.Clear(loc.works);
 						arr.AddRange(loc.works, data);
 						});
+		},
+		calculateUsage() {
+			var loc = this;
+			this.$refs.invoker.do(window.Db,
+				window.Db.CalculateSpaceUsage).then(function (data) {
+					loc.refreshWorks();
+				});
 		},
 		publishDisabled(item) {
 			return !(item.MetadataLastOnline === null || item.HasChanges !== 0);

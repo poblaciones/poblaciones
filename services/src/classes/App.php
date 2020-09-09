@@ -222,7 +222,11 @@ class App
 		$response->headers->set('Content-Type', 'application/json');
 		return $response;
 	}
-
+	public static function Response($content, $contentType){
+		$response = new Response($content);
+		$response->headers->set('Content-Type', $contentType);
+		return $response;
+	}
 	private static function GetSerializer(){
 		$encoders = array(new JsonEncoder());
 		$normalizer = new ObjectNormalizer(null, null, null, new ReflectionExtractor());

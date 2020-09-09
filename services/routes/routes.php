@@ -10,6 +10,7 @@ use helena\classes\Session;
 
 use minga\framework\Performance;
 use minga\framework\Headers;
+use minga\framework\Context;
 use minga\framework\Params;
 use minga\framework\Profiling;
 use minga\framework\Log;
@@ -68,8 +69,15 @@ App::$app->options("{anything}", function () {
 })->assert("anything", ".*");
 
 require_once('authenticate.php');
+
+if (Context::Settings()->Map()->LoopLocalPort)
+{
+	require_once('dev.php');
+}
+
 require_once('frontend.php');
 require_once('common.php');
+
 
 if (isset($isPublic) == false || $isPublic == false)
 {
