@@ -17,6 +17,11 @@ import pyreadr
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+# fix a error de pyreader cuando una categorial tiene un valor constante
+def custom_all(*pos, **kwargs):
+  return False
+
+setattr(pd.core.arrays.Categorical, 'all', custom_all)
 
 def main():
 	if len(sys.argv) != 3:
