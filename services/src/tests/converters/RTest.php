@@ -25,7 +25,7 @@ class RTest extends TestCase
 
 		RWriter::SpssToR($spssData, $outR);
 
-		$this->assertFile($outR, [4788, 4789]);
+		$this->assertFile($outR, [4787, 4788, 4789]);
 	}
 	public function testSpssToRValorSimple()
 	{
@@ -34,7 +34,7 @@ class RTest extends TestCase
 
 		RWriter::SpssToR($spssData, $outR);
 
-		$this->assertFile($outR, [174, 175]);
+		$this->assertFile($outR, [173, 174, 175]);
 	}
 	public function testSpssToREtiquetasNoCoincidentes()
 	{
@@ -43,6 +43,6 @@ class RTest extends TestCase
 
 		RWriter::SpssToR($spssData, $outR);
 
-		$this->assertFile($outR, [262]);
+		$this->assertFile($outR, [260, 262]);
 	}
 }

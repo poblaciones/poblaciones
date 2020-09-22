@@ -100,12 +100,10 @@ class UserService extends BaseService
 		App::Db()->exec($delete, array($userId));
 
 		// Libera las revisiones
-		$update = "UPDATE review FROM review, user
-									SET rev_user_submission_email = usr_email
-									WHERE rev_user_submission_id = usr_id AND rev_user_submission_id = ?";
+		$update = "UPDATE review JOIN user ON rev_user_submission_id = usr_id
+									SET rev_user_submission_email = usr_email, rev_user_submission_id = null
+									WHERE rev_user_submission_id = ?";
 		App::Db()->exec($update, array($userId));
-		$delete = "DELETE FROM review WHERE rev_user_submission_id = ?";
-		App::Db()->exec($delete, array($userId));
 
 		// Borra las sesiones
 		$delete = "DELETE FROM user_session WHERE ses_user_id = ?";

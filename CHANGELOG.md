@@ -1,5 +1,6 @@
 [CURRENT]
 - Reporte de espacio y mejoras en administración.
+- Fix a bug de pyreader, usado para exportación a R.
 
 v2.29 (2020-08-31)
 - Fix: niveles duplicados en clipping por agregado de distritos escoalres (1991, 2001, 2001, 2010)
