@@ -9,15 +9,13 @@
 		<div class="md-layout md-gutter">
 		<div class="md-layout-item md-size-80 md-small-size-100">
 		<md-card>
-		<md-card-header>
-		<div class="md-title">
-		Visitas
-		</div>
-		</md-card-header>
 		<md-card-content>
-			<hits-table :list="general" label="General" />
+			<md-tabs>
 
-			<md-tabs style="margin-top: 15px">
+				<md-tab md-label="General">
+					<hits-table :list="general" label="General" style="margin-top: -10px" />
+				</md-tab>
+
 				<md-tab md-label="Consultas">
 					<hits-table :list="hits" label="Indicadores" style="margin-top: -10px" />
 				</md-tab>
@@ -29,7 +27,7 @@
 
 				<md-tab md-label="Visitas por región">
 					<div class="md-layout" style="margin-top: -10px">
-						<div class="md-layout-item md-size-80 md-xlarge-size-50 md-small-size-100">
+						<div class="md-layout-item md-size-90 md-xlarge-size-60 md-small-size-100">
 							<md-table v-model="regions" md-card="">
 								<md-table-row slot="md-table-row" slot-scope="{ item }">
 									<md-table-cell md-label="Visitas por región" :style="padTabbed(item.Caption)">{{ item.Caption }}</md-table-cell>

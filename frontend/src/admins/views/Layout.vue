@@ -7,7 +7,7 @@
 
 		<div class="app-singlebar app-container">
 			<div class="md-layout">
-				<div v-show="showTabs" class="md-layout-item md-size-90 md-small-size-100">
+				<div v-show="showTabs" class="md-layout-item md-size-80 md-small-size-100">
 					<md-tabs md-sync-route ref="tabs">
 						<template slot="md-tab" slot-scope="{ tab }">
 							{{ tab.label }}

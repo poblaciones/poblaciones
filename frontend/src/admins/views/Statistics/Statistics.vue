@@ -2,7 +2,7 @@
 	<div>
 		<div style="display: flex; margin-top: -10px;">
 			<div style="margin-top: 26px;
-    font-size: 16px; margin-left: 22px">Período: </div>
+    font-size: 16px; margin-left: 22px">Período:</div>
 			<md-field style="max-width: 100px; margin-left: 20px;">
 				<md-select md-dense v-model="currentMonth" ref="input" @md-selected="loadData">
 					<md-option v-for="item in months" :key="item" :value="item">
@@ -14,41 +14,55 @@
 				<md-icon>data_usage</md-icon> Recalcular mes
 			</md-button>
 		</div>
-		<div class="md-layout">
-			<invoker ref="invoker"></invoker>
-			<div class="md-layout-item md-size-100">
-				<md-table style="max-width: 1100px;" v-model="works" md-card="" md-sort="Hits" md-sort-order="asc">
-					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Consultas" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Descargas" md-sort-by="Downloads">{{ item.Downloads }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Google" md-sort-by="Google">{{ item.Google }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Backoffice" md-sort-by="Backoffice">{{ item.Backoffice }}</md-table-cell>
-						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<md-button class="md-icon-button" title="Ver cartografía" @click="select(item)">
-								<md-icon>visibility</md-icon>
-							</md-button>
-						</md-table-cell>
-					</md-table-row>
-				</md-table>
-			</div>
+		<invoker ref="invoker"></invoker>
 
-			<div class="md-layout-item md-size-80" style="margin-top: 15px">
-				<md-table style="max-width: 900px;" v-model="metrics" md-sort="Hits" md-sort-order="asc" md-card="">
-					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Indicadores" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Consultas" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Google" md-sort-by="Google">{{ item.Google }}</md-table-cell>
-						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<md-button class="md-icon-button" title="Ver indicador" @click="selectMetric(item)">
-								<md-icon>visibility</md-icon>
-							</md-button>
-						</md-table-cell>
-					</md-table-row>
-				</md-table>
-			</div>
-		</div>
-		</div>
+		<md-card>
+			<md-card-content>
+				<md-tabs>
+					<md-tab md-label="Cartografías">
+						<div class="md-layout">
+							<div class="md-layout-item md-size-100" style="margin-top: -10px">
+								<md-table :key="componentKey" style="max-width: 1100px;" ref="table" v-model="works" md-card="" md-sort="Hits" md-sort-order="asc">
+									<md-table-row slot="md-table-row" slot-scope="{ item }">
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Consultas" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Descargas" md-sort-by="Downloads">{{ item.Downloads }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Google" md-sort-by="Google">{{ item.Google }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Backoffice" md-sort-by="Backoffice">{{ item.Backoffice }}</md-table-cell>
+										<md-table-cell md-label="Acciones" class="mpNoWrap">
+											<md-button class="md-icon-button" title="Ver cartografía" @click="select(item)">
+												<md-icon>visibility</md-icon>
+											</md-button>
+										</md-table-cell>
+									</md-table-row>
+								</md-table>
+							</div>
+						</div>
+					</md-tab>
+
+					<md-tab md-label="Indicadores">
+						<div class="md-layout">
+							<div class="md-layout-item md-size-80" style="margin-top: -10px">
+								<md-table :key="componentKey" style="max-width: 900px;" v-model="metrics" md-sort="Hits" md-sort-order="asc" md-card="">
+									<md-table-row slot="md-table-row" slot-scope="{ item }">
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Indicadores" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Consultas" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Google" md-sort-by="Google">{{ item.Google }}</md-table-cell>
+										<md-table-cell md-label="Acciones" class="mpNoWrap">
+											<md-button class="md-icon-button" title="Ver indicador" @click="selectMetric(item)">
+												<md-icon>visibility</md-icon>
+											</md-button>
+										</md-table-cell>
+									</md-table-row>
+								</md-table>
+							</div>
+						</div>
+					</md-tab>
+				</md-tabs>
+			</md-card-content>
+		</md-card>
+
+	</div>
 </template>
 
 <script>
@@ -66,7 +80,8 @@ export default {
 			localCache: [],
 			mounted: false,
 			isSummarized: false,
-			currentMonth: null
+			currentMonth: null,
+			componentKey: 0,
 			};
 	},
 	computed: {
@@ -132,6 +147,9 @@ export default {
 				arr.Clear(this.months);
 				arr.AddRange(this.months, data.Months);
 			}
+			setTimeout(() => {
+				this.componentKey++;
+			}, 50);
 		},
 		getWorkUri(element) {
 			return '/map/' + element.Id;

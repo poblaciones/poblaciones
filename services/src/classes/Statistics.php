@@ -186,6 +186,8 @@ class Statistics
 			if ($subdivisions > 0 && sizeof($subdivisions) > 0)
 			{
 				$provincia = $subdivisions[0]->names['es'];
+				if ($provincia == 'Buenos Aires C.F.')
+					$provincia = 'Ciudad Autónoma de Buenos Aires';
 				$country .= '|' . $provincia;
 			}
 		}
