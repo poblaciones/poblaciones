@@ -39,6 +39,16 @@ Db.prototype.GetWorks = function (filter, timeFilter) {
 			{ f: filter, t: timeFilter }, 'obtener la lista de cartografías');
 };
 
+Db.prototype.GetStatistics = function (month) {
+	return axiosClient.getPromise(window.host + '/services/admin/GetStatistics',
+			{ m: month }, 'obtener estadísticas mensuales');
+};
+
+Db.prototype.ProcessStatistics = function (month) {
+	return axiosClient.getPromise(window.host + '/services/admin/ProcessStatistics',
+			{ m: month }, 'calcular estadísticas mensuales');
+};
+
 Db.prototype.GetReviews = function () {
 	return axiosClient.getPromise(window.host + '/services/admin/GetReviews',
 			{ }, 'obtener la lista de revisiones');

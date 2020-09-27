@@ -195,6 +195,22 @@ group: 'Metadatos',
 
 	{
 		group: 'Publicación',
+		path: '/cartographies/:workId/stats',
+		component: Layout,
+		redirect: '/cartographies/:workId/stats',
+		icon: 'far fa-chart-bar',
+		name: 'Estadísticas',
+		children: [
+			{
+				path: '/cartographies/:workId/stats',
+				name: 'StatsTarget',
+				component: () => import('@/backoffice/views/Statistics/Statistics.vue'),
+			}
+		]
+	},
+
+	{
+		group: 'Publicación',
 		path: '/cartographies/:workId/permissions',
 		component: Layout,
 		redirect: '/cartographies/:workId/permissions',

@@ -38,6 +38,7 @@ class Review
 
 		/**
      * @var \DateTime
+ 		 * @ClientReadonly
      *
      * @ORM\Column(name="rev_submission_time", type="datetime", precision=0, scale=0, nullable=false, unique=false)
      */

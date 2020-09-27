@@ -24,7 +24,7 @@ class MetadataModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($metadataId, $fileId);
 
-		$sql = "SELECT * FROM " . $this->draftPreffix . "metadata_file WHERE mfi_metadata_id = ? AND mfi_file_id = ? LIMIT 1";
+		$sql = "SELECT m.*, (SELECT wrk_id FROM " . $this->draftPreffix . "work WHERE wrk_metadata_id = mfi_metadata_id) AS work_id FROM " . $this->draftPreffix . "metadata_file m WHERE mfi_metadata_id = ? AND mfi_file_id = ? LIMIT 1";
 
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		Profiling::EndTimer();

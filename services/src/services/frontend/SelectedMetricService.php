@@ -44,7 +44,7 @@ class SelectedMetricService extends BaseService
 	public function PublicGetSelectedMetric($metricId, $throwError = true, $filterByPermissions = false)
 	{
 		$ret = self::GetSelectedMetric($metricId, $throwError, $filterByPermissions, true);
-		if ($ret !== null && !Session::IsSiteReader())
+		if ($ret !== null)
 			Statistics::StoreSelectedMetricHit($ret);
 		return $ret;
 	}

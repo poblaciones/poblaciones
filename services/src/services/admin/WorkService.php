@@ -46,7 +46,14 @@ class WorkService extends BaseService
 		Profiling::BeginTimer();
 		$truncate = "TRUNCATE TABLE work_space_usage";
 		App::Db()->exec($truncate);
+
 		$dbName = Context::Settings()->Db()->Name;
+		$tmp = "CREATE TEMPORARY TABLE IF NOT EXISTS table_metadata ( INDEX(table_name) ) AS (
+								SELECT data_length, index_length, table_name COLLATE utf8_unicode_ci AS table_name FROM
+								information_schema.TABLES
+								WHERE table_schema = '" . $dbName . "')";
+		App::Db()->exec($tmp);
+
 		$sql = "INSERT INTO work_space_usage (wdu_work_id,  wdu_draft_attachment_bytes, wdu_draft_data_bytes, wdu_draft_index_bytes, wdu_attachment_bytes, wdu_data_bytes, wdu_index_bytes)
 							SELECT wrk_id,
 							IFNULL((select sum(fil_size) from draft_metadata
@@ -54,33 +61,46 @@ class WorkService extends BaseService
 							on mfi_metadata_id = met_id
 							join draft_file on fil_id = mfi_file_id
 							where wrk_metadata_id = met_id), 0) as DraftAttachmentsBytes,
-							IFNULL((SELECT SUM(data_length) FROM
-								information_schema.TABLES
-								JOIN draft_dataset ON dat_table COLLATE utf8_general_ci = table_name
-								WHERE table_schema = '" . $dbName . "' AND dat_work_id = wrk_id
-							), 0) as DraftTablesSize,
-							IFNULL((SELECT SUM(index_length) FROM
-								information_schema.TABLES
-								JOIN draft_dataset ON dat_table COLLATE utf8_general_ci = table_name
-								WHERE table_schema = '" . $dbName . "' AND dat_work_id = wrk_id
-							), 0) as DraftIndexesSize,
+							0, 0,
 							IFNULL((select sum(fil_size) from metadata
 							join metadata_file
 							on mfi_metadata_id = met_id
 							join file on fil_id = mfi_file_id
 							where wrk_metadata_id = FLOOR(met_id / 100)), 0) as PublicAttachmentBytes,
-							IFNULL((SELECT SUM(data_length) FROM
-								information_schema.TABLES
-								JOIN dataset ON (dat_table COLLATE utf8_general_ci = table_name OR CONCAT(dat_table COLLATE utf8_general_ci, '_snapshot') = table_name )
-								WHERE table_schema = '" . $dbName . "' AND FLOOR(dat_work_id/100) =  wrk_id
-							), 0) as PublicTablesSize,
-							IFNULL((SELECT SUM(index_length) FROM
-								information_schema.TABLES
-								JOIN dataset ON (dat_table COLLATE utf8_general_ci = table_name OR CONCAT(dat_table COLLATE utf8_general_ci, '_snapshot') = table_name )
-								WHERE table_schema = '" . $dbName . "' AND FLOOR(dat_work_id/100) =  wrk_id
-							), 0) as PublicIndexesSize
+							0, 0
 							FROM draft_work";
 		App::Db()->exec($sql);
+
+		$sql = "UPDATE work_space_usage SET wdu_draft_data_bytes =
+							IFNULL((SELECT SUM(data_length) FROM
+								table_metadata
+								JOIN draft_dataset ON dat_table = table_name
+								WHERE dat_work_id = wdu_work_id), 0);";
+		App::Db()->exec($sql);
+
+		$sql = "UPDATE work_space_usage SET wdu_draft_index_bytes =
+                         IFNULL((SELECT SUM(index_length) FROM
+								table_metadata
+								JOIN draft_dataset ON dat_table = table_name
+								WHERE dat_work_id = wdu_work_id), 0);";
+		App::Db()->exec($sql);
+
+		$sql = "UPDATE work_space_usage SET wdu_data_bytes =
+						IFNULL((SELECT SUM(data_length) FROM
+								table_metadata
+								JOIN dataset ON (dat_table = table_name OR CONCAT(dat_table, '_snapshot') = table_name )
+								WHERE FLOOR(dat_work_id/100) = wdu_work_id
+							), 0);";
+		App::Db()->exec($sql);
+
+		$sql = "UPDATE work_space_usage SET wdu_index_bytes =
+							IFNULL((SELECT SUM(index_length) FROM
+								table_metadata
+								JOIN dataset ON (dat_table = table_name OR CONCAT(dat_table, '_snapshot') = table_name )
+								WHERE FLOOR(dat_work_id/100) = wdu_work_id
+							), 0);";
+		App::Db()->exec($sql);
+
 		Profiling::EndTimer();
 		return self::OK;
 	}

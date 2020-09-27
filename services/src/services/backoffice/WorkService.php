@@ -11,6 +11,7 @@ use minga\framework\Profiling;
 use helena\classes\App;
 use helena\classes\Links;
 use helena\classes\Session;
+use helena\classes\Statistics;
 use helena\services\common\BaseService;
 use helena\db\frontend\SignatureModel;
 use helena\entities\backoffice\DraftWork;
@@ -126,6 +127,9 @@ class WorkService extends BaseService
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
 		$workInfo->Startup = $this->GetStartupInfo($workId);
 		$workInfo->PendingReviewSince = $this->GetPendingReviewSince($workId);
+
+		$workIdShardified = PublishDataTables::Shardified($workId);
+		Statistics::StoreInternalHit($workIdShardified, 'backoffice');
 		Profiling::EndTimer();
 		return $workInfo;
 	}

@@ -20,7 +20,7 @@
 						</md-tab>
 						<md-tab class="transparentTab" to="/works" id="works-tab" md-label="Cartografías" :md-active="isPath('/works')">
 
-						<works filter="R"></works>
+							<works filter="R"></works>
 						</md-tab>
 
 						<md-tab class="transparentTab" id="public-tab" v-if="showPublic" to="/public" :md-active="isPath('/public')" md-label="Datos públicos">
@@ -35,6 +35,10 @@
 										:md-template-data="{ badge: (pendingReviews ? pendingReviews : '') }">
 							<reviews @pendingUpdated="pendingUpdated"></reviews>
 						</md-tab>
+
+						<md-tab class="transparentTab" id="stats-tab" v-if="isAdmin" to="/stats" :md-active="isPath('/stats')" md-label="Estadísticas">
+							<statistics></statistics>
+						</md-tab>
 					</md-tabs>
 				</div>
 			</div>
@@ -47,6 +51,7 @@ import TopWelcome from '@/common/components/TopWelcome';
 
 import Works from './Works/Works';
 import Users from './Users/Users';
+import Statistics from './Statistics/Statistics';
 import Reviews from './Reviews/Reviews';
 import ClippingRegions from './ClippingRegions/ClippingRegions';
 
@@ -56,6 +61,7 @@ export default {
 		TopWelcome,
 		Works,
 		ClippingRegions,
+		Statistics,
 		Reviews,
 		Users
 	},
@@ -92,6 +98,8 @@ export default {
 				this.$refs.tabs.activeTab = 'clipping-regions-tab';
 			} else if (this.$route.path === '/reviews' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'reviews-tab';
+			} else if (this.$route.path === '/stats' && this.$refs.tabs) {
+				this.$refs.tabs.activeTab = 'stats-tab';
 			} else if (this.$route.path === '/works' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'works-tab';
 			}

@@ -11,6 +11,7 @@ use minga\framework\Context;
 use minga\framework\Str;
 use helena\classes\Session;
 use helena\classes\Links;
+use helena\classes\Statistics;
 use helena\entities\frontend\geometries\Envelope;
 use helena\services\frontend\SelectedMetricService;
 use minga\framework\PublicException;
@@ -77,8 +78,12 @@ class cHandle extends cPublicController
 		}
 		else
 		{
+			Statistics::StoreInternalHit($workId, 'google');
 			if ($metricId !== null)
+			{
+				Statistics::StoreInternalHit($workId, 'googleMetric' . $metricId);
 				return $this->RedirectWorkMetric($workId, $metricId, $regionItemId);
+			}
 			else
 				return $this->RedirectWork($workId);
 		}

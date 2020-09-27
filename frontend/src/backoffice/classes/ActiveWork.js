@@ -94,6 +94,23 @@ ActiveWork.prototype.GetMetricsList = function () {
 		'obtener la lista de métricas');
 };
 
+ActiveWork.prototype.PublicUrl = function () {
+	var ret = this.properties.Metadata.Url;
+	if (ret == null) {
+		return null;
+	}
+	if (this.properties.AccessLink) {
+		ret += '/' + this.properties.AccessLink;
+	}
+	return ret;
+};
+
+ActiveWork.prototype.GetWorkStatistics = function () {
+	// Trae sus variables
+	var args = { 'w': this.properties.Id };
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetWorkStatistics', args,
+		'obtener las estadísticas');
+};
 ActiveWork.prototype.CanAdmin = function () {
 	if (window.Context.User.Privileges === 'A') {
 		return true;

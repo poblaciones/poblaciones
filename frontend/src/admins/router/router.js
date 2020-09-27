@@ -24,7 +24,7 @@ export const constantRouterMap = [
 
 {
 	path: '/',
-		alias: [ '/public', '/works', '/regions', '/reviews' ],
+		alias: [ '/public', '/works', '/regions', '/reviews', '/stats' ],
 		name: 'Inicio',
 		hidden: true,
 			component: () => import('@/admins/views/Layout.vue'),

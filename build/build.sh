@@ -85,9 +85,9 @@ cp -vr ../services/doctrine_proxies $output>>$output-1_copy.log
 
 if [ $vendor = true ]; then
 	cp -vr ../services/vendor $output>>$output-1_copy.log
-else
-	rm -rf $output/src/framework/data
 fi
+
+rm -rf $output/src/framework/data
 
 echo "*** 2. Borra lo que no se sube"
 find $output/config ! -name 'settings.php.sample' -type f -exec rm -f {} +

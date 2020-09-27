@@ -53,6 +53,7 @@ export default {
 		var loc = this;
 		this.$refs.invoker.do(window.Db,
 				window.Db.GetReviews).then(function(data) {
+					arr.Clear(loc.list);
 					arr.AddRange(loc.list, data);
 					loc.updatePending();
 					});

@@ -22,24 +22,14 @@ export default {
 	computed: {
 		lastOnline() { return this.Work.properties.Metadata.LastOnline !== null; },
 		Work() { return window.Context.CurrentWork; },
-		url() {
-			var ret = this.Work.properties.Metadata.Url;
-			if (this.Work.properties.AccessLink) {
-				ret += '/' + this.Work.properties.AccessLink;
-			}
-			return ret;
-		},
 		Keys() {
 			return window.Context.Keys;
 		}
 	},
 	methods: {
-		absoluteMap(url) {
-			return str.AbsoluteUrl(url);
-		},
 		goMap() {
-				var url = this.url;
-				window.open(url, '_blank');
+			var url = this.Work.PublicUrl();
+			window.open(url, '_blank');
 		},
 		onPublish() {
 			window.openPublish();

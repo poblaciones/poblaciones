@@ -30,9 +30,9 @@
 			</div>
 			<div class="md-layout">
 				<div class="md-layout-item md-size-80 md-xlarge-size-50 md-small-size-100">
-					<md-table v-model="list" md-sort="title" md-sort-order="asc" md-card="">
+					<md-table v-model="list" md-card="">
 						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell md-label="Usuario" md-sort-by="title">{{ formatUser(item.User) }}</md-table-cell>
+							<md-table-cell md-label="Usuario">{{ formatUser(item.User) }}</md-table-cell>
 							<md-table-cell md-label="Permiso">{{ formatPermission(item.Permission) }}</md-table-cell>
 							<md-table-cell md-label="Acciones" v-if="Work.CanAdmin()" class="mpNoWrap">
 								<md-button v-if="Work.CanAdmin()" title="Quitar permiso" class="md-icon-button" v-on:click="onDelete(item)">

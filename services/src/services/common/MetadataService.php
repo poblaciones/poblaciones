@@ -23,8 +23,14 @@ class MetadataService extends BaseService
 		$metadataFile = $metadataTable->GetMetadataFileByFileId($metadataId, $fileId);
 		if ($metadataFile == null)
 		  throw new PublicException("El adjunto no se corresponde con los metadatos indicados.");
+
 		$friendlyName = $metadataFile['mfi_caption'] . '.pdf';
 		$fileModel = new FileModel();
+
+		$workId = $metadataFile['work_id'];
+		if ($workId)
+			Statistics::StoreDownloadMetadataAttachmentHit($workId, $metadataFile['mfi_id']);
+
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}
 
@@ -59,11 +65,12 @@ class MetadataService extends BaseService
 		$PdfCreator = new PdfCreator();
 		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $dataset);
 
-		if ($workId !== null)
-			Statistics::StoreDownloadMetadataHit($workId);
-
 		if ($fromDraft === false)
+		{
+			if ($workId !== null)
+				Statistics::StoreDownloadMetadataHit($workId);
 			PdfMetadataCache::Cache()->PutData($metadataId, $key, $filename);
+		}
 
 		return App::SendFile($filename)
 			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)

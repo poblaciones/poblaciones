@@ -145,6 +145,13 @@ App::$app->post('/services/backoffice/UpdateStartup', function (Request $request
 	return App::Json($controller->UpdateStartup($workId, $startup));
 });
 
+App::$app->get('/services/backoffice/GetWorkStatistics', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+	$controller = new services\StatisticsService();
+	return App::Json($controller->GetWorkStatistics($workId));
+});
+
 App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
