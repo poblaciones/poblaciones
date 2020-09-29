@@ -13,10 +13,40 @@ use helena\classes\App;
 use helena\classes\Paths;
 use helena\classes\Statistics;
 use helena\services\common\BaseService;
-use helena\services\backoffice\publish\PublishDataTables;
 
 class StatisticsService extends BaseService
 {
+	public function GetStatistics($month)
+	{
+		if ($month === null)
+		{
+			$month = Date::GetLogMonthFolder();
+			$possible = $this->GetPossibleMonths();
+		}
+		else
+			$possible = [];
+
+		$sqlWorks = "SELECT sta_element_id Id, met_title Caption, sta_hits Hits, sta_downloads Downloads, sta_google Google, sta_backoffice Backoffice
+										 FROM statistic JOIN work ON sta_element_id = wrk_id JOIN metadata ON met_id = wrk_metadata_id
+									WHERE sta_month = ? AND sta_type = 'W' ORDER BY sta_hits DESC";
+		$works = App::Db()->fetchAll($sqlWorks, array($month));
+
+		$sqlMetrics = "SELECT sta_element_id Id, mtr_caption Caption, sta_hits Hits, sta_downloads Downloads, sta_google Google, sta_backoffice Backoffice
+										 FROM statistic JOIN metric ON sta_element_id = mtr_id
+									WHERE sta_month = ? AND sta_type = 'M' ORDER BY sta_hits DESC";
+		$metrics = App::Db()->fetchAll($sqlMetrics, array($month));
+		$summarized = $this->IsSummarized($month);
+		return ['Works' => $works, 'Metrics' => $metrics, 'Months' => $possible, 'IsSummarized' => $summarized];
+	}
+
+	private function GetPossibleMonths()
+	{
+		$folder = Paths::GetStatisticsPath();
+		$months = IO::GetDirectories($folder);
+		rsort($months);
+		return $months;
+	}
+
 	public function ProcessStatistics($month)
 	{
 		Profiling::BeginTimer();
@@ -159,125 +189,5 @@ class StatisticsService extends BaseService
 								'Google' => $google, 'Backoffice' => $backoffice ];
 		Profiling::EndTimer();
 		return $ret;
-	}
-
-	public function GetStatistics($month)
-	{
-		if ($month === null)
-		{
-			$month = Date::GetLogMonthFolder();
-			$possible = $this->GetPossibleMonths();
-		}
-		else
-			$possible = [];
-
-		$sqlWorks = "SELECT sta_element_id Id, met_title Caption, sta_hits Hits, sta_downloads Downloads, sta_google Google, sta_backoffice Backoffice
-										 FROM statistic JOIN work ON sta_element_id = wrk_id JOIN metadata ON met_id = wrk_metadata_id
-									WHERE sta_month = ? AND sta_type = 'W' ORDER BY sta_hits DESC";
-		$works = App::Db()->fetchAll($sqlWorks, array($month));
-
-		$sqlMetrics = "SELECT sta_element_id Id, mtr_caption Caption, sta_hits Hits, sta_downloads Downloads, sta_google Google, sta_backoffice Backoffice
-										 FROM statistic JOIN metric ON sta_element_id = mtr_id
-									WHERE sta_month = ? AND sta_type = 'M' ORDER BY sta_hits DESC";
-		$metrics = App::Db()->fetchAll($sqlMetrics, array($month));
-		$summarized = $this->IsSummarized($month);
-		return ['Works' => $works, 'Metrics' => $metrics, 'Months' => $possible, 'IsSummarized' => $summarized];
-	}
-
-	private function GetPossibleMonths()
-	{
-		$folder = Paths::GetStatisticsPath();
-		$months = IO::GetDirectories($folder);
-		rsort($months);
-		return $months;
-	}
-	private function processRegionData($data)
-	{
-		$currentCountry = Context::Settings()->currentCountry;
-		$regions = $data['region'];
-		if (sizeof($regions) == 0 || !$currentCountry) return [];
-		$currentCountryValues = [];
-		$otherCountriesValues = [];
-		$currentCountryArray = [];
-		$otherCountriesArray = [];
-		// Llena los cortes de control y agrupa
-		$separator = "\t";
-		foreach($regions as $key => $values)
-		{
-			if (Str::StartsWith($key, $currentCountry . "|"))
-			{
-				$currentCountryValues = Arr::AddArrayKeys($currentCountryValues, $values);
-				$subKey = substr($key, strlen($currentCountry) + 1);
-				$currentCountryArray[$separator . $subKey] = $values;
-			}
-			else
-			{
-				$otherCountriesValues = Arr::AddArrayKeys($otherCountriesValues, $values);
-				$otherCountriesArray[$separator . $key] = $values;
-			}
-		}
-		// Ordena
-		Arr::SortAssocByKey($otherCountriesArray, 'd0');
-		Arr::SortAssocByKey($currentCountryArray, 'd0');
-		// Hace un array con la combinación de todos
-		$ret = [];
-		if (sizeof($currentCountryArray) > 0) $ret = array_merge($ret, [$currentCountry => $currentCountryValues], $currentCountryArray);
-		if (sizeof($otherCountriesArray) > 0) $ret = array_merge($ret, ['Otros' => $otherCountriesValues], $otherCountriesArray);
-
-		return $ret;
-	}
-
-	private function processAttachmentData($data)
-	{
-		$attachments = $data['attachment'];
-		if (sizeof($attachments) == 0) return [];
-		$ids = Arr::RemoveByValue(array_keys($attachments), 'metadata');
-		if (sizeof($ids) != 0)
-		{
-			$sql = "SELECT mfi_id Id, mfi_caption Caption FROM metadata_file WHERE mfi_id IN (" . Str::JoinInts($ids) . ")";
-			$dictionary = App::Db()->fetchAll($sql);
-			$dictionary[] = ['metadata', 'Metadatos'];
-			$ret = Arr::ReplaceKeys($attachments, Arr::ToKeyArr($dictionary));
-			Arr::SortAssocByKeyDesc($ret, 'd0');
-			return $ret;
-		}
-		else
-			return [];
-	}
-
-	private function processDownloadData($data)
-	{
-		$download = $data['download'];
-		if (sizeof($download) == 0) return [];
-		$ids = array_keys($download);
-		if (sizeof($ids) != 0)
-		{
-			$sql = "SELECT dat_id Id, dat_caption Caption FROM dataset WHERE dat_id IN (" . Str::JoinInts($ids) . ")";
-			$dictionary = App::Db()->fetchAll($sql);
-			$ret = Arr::ReplaceKeys($download, Arr::ToKeyArr($dictionary));
-			Arr::SortAssocByKeyDesc($ret, 'd0');
-			return $ret;
-		}
-		else
-			return [];
-	}
-
-	private function processHitsData($data)
-	{
-		$metrics = $data['metric'];
-		if (sizeof($metrics) == 0) return [];
-
-		$ids = array_keys($metrics);
-		if (sizeof($ids) != 0)
-		{
-			$sql = "SELECT mtr_id Id, mtr_caption Caption FROM metric WHERE mtr_id IN (" . Str::JoinInts($ids) . ")";
-			$dictionary = App::Db()->fetchAll($sql);
-			$dictionary[] = ['work', 'Cartografía'];
-			$ret = Arr::ReplaceKeys($metrics, Arr::ToKeyArr($dictionary));
-			Arr::SortAssocByKeyDesc($ret, 'd0');
-			return $ret;
-		}
-		else
-			return [];
 	}
 }

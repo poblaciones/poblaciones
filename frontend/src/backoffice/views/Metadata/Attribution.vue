@@ -20,8 +20,8 @@
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100">
 									<mp-text :canEdit="Work.CanEdit()" label="Autores"
-									 :helper="'Indique quiénes ' + (Work.IsPublicData() ? 'procesaron la información' : 'elaboraron la cartografía' ) + '. Ej. Petraqui, María y Herández, José.'"
-										@update="Update" :maxlength="200"
+									 :helper="'Indique quiénes elaboraron la cartografía. Ej. Petraqui, María y Herández, José.'"
+										@update="Update" :maxlength="250"
 									 v-model="metadata.Authors" />
 								</div>
 								<div class="md-layout-item md-size-85 md-small-size-100">

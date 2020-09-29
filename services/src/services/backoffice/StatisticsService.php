@@ -25,7 +25,7 @@ class StatisticsService extends BaseService
 		// Reemplaza los ids por nombres de indicadores
 		$data['metric'] = $this->processHitsData($data);
 
-		Arr::SortAssocByKeyDesc($data['work'], 'd0');
+		$this->SortHits($data['work']);
 
 		// Reemplaza los ids por nombres de adjunto
 		$data['attachment'] = $this->processAttachmentData($data);
@@ -62,8 +62,8 @@ class StatisticsService extends BaseService
 			}
 		}
 		// Ordena
-		Arr::SortAssocByKey($otherCountriesArray, 'd0');
-		Arr::SortAssocByKey($currentCountryArray, 'd0');
+		$this->SortHits($otherCountriesArray);
+		$this->SortHits($currentCountryArray);
 		// Hace un array con la combinación de todos
 		$ret = [];
 		if (sizeof($currentCountryArray) > 0) $ret = array_merge($ret, [$currentCountry => $currentCountryValues], $currentCountryArray);
@@ -83,7 +83,7 @@ class StatisticsService extends BaseService
 			$dictionary = App::Db()->fetchAll($sql);
 			$dictionary[] = ['metadata', 'Metadatos'];
 			$ret = Arr::ReplaceKeys($attachments, Arr::ToKeyArr($dictionary));
-			Arr::SortAssocByKeyDesc($ret, 'd0');
+			$this->SortHits($ret);
 			return $ret;
 		}
 		else
@@ -100,7 +100,7 @@ class StatisticsService extends BaseService
 			$sql = "SELECT dat_id Id, dat_caption Caption FROM dataset WHERE dat_id IN (" . Str::JoinInts($ids) . ")";
 			$dictionary = App::Db()->fetchAll($sql);
 			$ret = Arr::ReplaceKeys($download, Arr::ToKeyArr($dictionary));
-			Arr::SortAssocByKeyDesc($ret, 'd0');
+			$this->SortHits($ret);
 			return $ret;
 		}
 		else
@@ -119,10 +119,24 @@ class StatisticsService extends BaseService
 			$dictionary = App::Db()->fetchAll($sql);
 			$dictionary[] = ['work', 'Cartografía'];
 			$ret = Arr::ReplaceKeys($metrics, Arr::ToKeyArr($dictionary));
-			Arr::SortAssocByKeyDesc($ret, 'd0');
+			$this->SortHits($ret);
 			return $ret;
 		}
 		else
 			return [];
+	}
+
+	private function SortHits(&$arr)
+	{
+		uksort($arr, function($ak, $bk) use($arr) {
+		$a = $arr[$ak];
+		$b = $arr[$bk];
+		if ($a['d0'] > $b['d0'])
+			return -1;
+		elseif ($a['d0'] < $b['d0'])
+			return 1;
+		else
+			return strcmp($ak, $bk);
+		});
 	}
 }
