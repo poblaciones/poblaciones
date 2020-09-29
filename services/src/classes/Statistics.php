@@ -10,6 +10,7 @@ use minga\framework\Date;
 use minga\framework\Profiling;
 use helena\caches\WorkPermissionsCache;
 use helena\services\backoffice\publish\PublishDataTables;
+use minga\framework\Log;
 
 class Statistics
 {
@@ -175,7 +176,7 @@ class Statistics
 		return ['download' => [],  'attachment' => [], 'internal' => [], 'work' => [], 'metric' => [], 'region' => []];
 	}
 
-	private static function decodeRegion($ip)
+	public static function decodeRegion($ip)
 	{
 		$countryObj = GeoIp::GetCountry($ip);
 		if (!$countryObj) return 'Otro';
@@ -189,6 +190,11 @@ class Statistics
 				if ($provincia == 'Buenos Aires C.F.')
 					$provincia = 'Ciudad Autónoma de Buenos Aires';
 				$country .= '|' . $provincia;
+			}
+			else
+			{
+				//Log::HandleSilentException(new \Exception("región no reconocida de argentina en ip: " . $ip));
+				$country .= '|Otro';
 			}
 		}
 		return $country;

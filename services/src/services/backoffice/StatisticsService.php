@@ -82,7 +82,9 @@ class StatisticsService extends BaseService
 			$sql = "SELECT mfi_id Id, mfi_caption Caption FROM metadata_file WHERE mfi_id IN (" . Str::JoinInts($ids) . ")";
 			$dictionary = App::Db()->fetchAll($sql);
 			$dictionary[] = ['metadata', 'Metadatos'];
-			$ret = Arr::ReplaceKeys($attachments, Arr::ToKeyArr($dictionary));
+			$keys = Arr::ToKeyArr($dictionary);
+			$attachments = Arr::RemoveMissingKeys($attachments, $keys);
+			$ret = Arr::ReplaceKeys($attachments, $keys);
 			$this->SortHits($ret);
 			return $ret;
 		}
@@ -99,7 +101,9 @@ class StatisticsService extends BaseService
 		{
 			$sql = "SELECT dat_id Id, dat_caption Caption FROM dataset WHERE dat_id IN (" . Str::JoinInts($ids) . ")";
 			$dictionary = App::Db()->fetchAll($sql);
-			$ret = Arr::ReplaceKeys($download, Arr::ToKeyArr($dictionary));
+			$keys = Arr::ToKeyArr($dictionary);
+			$download = Arr::RemoveMissingKeys($download, $keys);
+			$ret = Arr::ReplaceKeys($download, $keys);
 			$this->SortHits($ret);
 			return $ret;
 		}
@@ -118,7 +122,9 @@ class StatisticsService extends BaseService
 			$sql = "SELECT mtr_id Id, mtr_caption Caption FROM metric WHERE mtr_id IN (" . Str::JoinInts($ids) . ")";
 			$dictionary = App::Db()->fetchAll($sql);
 			$dictionary[] = ['work', 'Cartografía'];
-			$ret = Arr::ReplaceKeys($metrics, Arr::ToKeyArr($dictionary));
+			$keys = Arr::ToKeyArr($dictionary);
+			$metrics = Arr::RemoveMissingKeys($metrics, $keys);
+			$ret = Arr::ReplaceKeys($metrics, $keys);
 			$this->SortHits($ret);
 			return $ret;
 		}
