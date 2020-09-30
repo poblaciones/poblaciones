@@ -137,6 +137,11 @@ class StatisticsService extends BaseService
 		uksort($arr, function($ak, $bk) use($arr) {
 		$a = $arr[$ak];
 		$b = $arr[$bk];
+		if ($ak === "\tOtros")
+			return 1;
+		if ($bk === "\tOtros")
+			return -1;
+
 		if ($a['d0'] > $b['d0'])
 			return -1;
 		elseif ($a['d0'] < $b['d0'])

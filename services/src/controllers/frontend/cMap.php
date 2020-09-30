@@ -8,6 +8,7 @@ use minga\framework\Request;
 use minga\framework\PublicException;
 
 use helena\classes\Session;
+use helena\classes\Statistics;
 use helena\controllers\common\cPublicController;
 use helena\services\frontend\LookupService;
 use helena\db\frontend\MetadataModel;
@@ -29,11 +30,17 @@ class cMap extends cPublicController
 		if ($ret = $this->ResolveSearchRedirect())
 			return $ret;
 
+		// Si hay ruta de obra, se fija si está permitida
+		$this->CheckWorkId();
+
+		// Guarda el hit
+		if ($this->workId)
+			Statistics::StoreLanding($this->workId);
+
+		// Renderiza el html
 		$this->AddValue('google_maps_key', Context::Settings()->Keys()->GoogleMapsKey);
 		$this->AddValue('google_analytics_key', Context::Settings()->Keys()->GoogleAnalyticsKey);
 		$this->AddValue('add_this_key', Context::Settings()->Keys()->AddThisKey);
-
-		$this->CheckWorkId();
 
 		$this->RegisterOpenGraphTags();
 		$this->RegisterFacebookId();

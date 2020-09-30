@@ -19,6 +19,28 @@
 		<md-card>
 			<md-card-content>
 				<md-tabs>
+					<md-tab md-label="Resumen">
+						<div class="md-layout">
+							<div class="md-layout-item md-size-80" style="margin-top: -10px">
+								<md-table style="max-width: 900px;" v-model="totals" md-card="">
+									<md-table-row slot="md-table-row" slot-scope="{ item }">
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Visitas">{{ item.Caption }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Valor">{{ item.Hits }}</md-table-cell>
+									</md-table-row>
+								</md-table>
+							</div>
+
+							<div class="md-layout-item md-size-80" style="margin-top: 15px">
+								<md-table style="max-width: 900px;" v-model="resources" md-card="">
+									<md-table-row slot="md-table-row" slot-scope="{ item }">
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Recursos">{{ item.Caption }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Valor">{{ item.Hits }}</md-table-cell>
+									</md-table-row>
+								</md-table>
+							</div>
+						</div>
+					</md-tab>
+
 					<md-tab md-label="Cartografías">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-100" style="margin-top: -10px">
@@ -76,6 +98,8 @@ export default {
 		return {
 			works: [],
 			metrics: [],
+			totals: [],
+			resources: [],
 			months: [],
 			localCache: [],
 			mounted: false,
@@ -138,14 +162,14 @@ export default {
 		},
 		receiveData(data) {
 			this.isSummarized = data.IsSummarized;
-			arr.Clear(this.works);
-			arr.AddRange(this.works, data.Works);
-			arr.Clear(this.metrics);
-			arr.AddRange(this.metrics, data.Metrics);
+			arr.Fill(this.works, data.Works);
+			arr.Fill(this.totals, data.Totals);
+			arr.Fill(this.resources, data.Resources);
+			arr.Fill(this.metrics, data.Metrics);
+
 			if (data.Months.length > 0) {
 				this.currentMonth = this.months[0];
-				arr.Clear(this.months);
-				arr.AddRange(this.months, data.Months);
+				arr.Fill(this.months, data.Months);
 			}
 			setTimeout(() => {
 				this.componentKey++;

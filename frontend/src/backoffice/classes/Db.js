@@ -144,8 +144,7 @@ Db.prototype.LoadWorks = function () {
 			loc.Works.push(data[i]);
 		}
 		loc.SelectedWorkIndex = (loc.Works.length === 0 ? -1 : 0);
-		arr.Clear(window.Context.Cartographies);
-		arr.AddRange(window.Context.Cartographies, loc.Works);
+		arr.Fill(window.Context.Cartographies, loc.Works);
 		window.Context.CartographiesStarted = true;
 	});
 };

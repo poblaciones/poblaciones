@@ -21,6 +21,14 @@ class Statistics
 		Profiling::EndTimer();
 	}
 
+	public static function StoreLanding($workId)
+	{
+		// Poblaciones.org / google.com / facebook.com / ??
+		Profiling::BeginTimer();
+		self::StoreInternalHit($workId, 'referer', true);
+		Profiling::EndTimer();
+	}
+
 	private static function ShouldSaveStats($workId)
 	{
 		if (!Session::IsSiteReader())
@@ -35,13 +43,13 @@ class Statistics
 		}
 	}
 
-	public static function StoreInternalHit($workId, $subtype)
+	public static function StoreInternalHit($workId, $subtype, $saveReferer = false)
 	{
 		// $subtype: google | backoffice
 		Profiling::BeginTimer();
 
 		if (self::ShouldSaveStats($workId))
-			self::SaveData($workId, 'internal', $subtype);
+			self::SaveData($workId, 'internal', $subtype, null, $saveReferer);
 		Profiling::EndTimer();
 	}
 
@@ -134,6 +142,7 @@ class Statistics
 				$time = $lineParts['time'];
 				$type = $lineParts['t'];
 				$id = $lineParts['id'];
+
 				if ($processRegion)
 					$region = self::decodeRegion($lineParts['ip']);
 				else
@@ -179,7 +188,7 @@ class Statistics
 	public static function decodeRegion($ip)
 	{
 		$countryObj = GeoIp::GetCountry($ip);
-		if (!$countryObj) return 'Otro';
+		if (!$countryObj) return 'Otros';
 		$country = $countryObj->names['es'];
 		if ($country === Context::Settings()->currentCountry)
 		{
@@ -193,8 +202,7 @@ class Statistics
 			}
 			else
 			{
-				//Log::HandleSilentException(new \Exception("región no reconocida de argentina en ip: " . $ip));
-				$country .= '|Otro';
+				$country .= '|Otros';
 			}
 		}
 		return $country;
@@ -228,9 +236,12 @@ class Statistics
 		return $folder . "/work" . $workId . ".log";
 	}
 
-	private static function SaveData($workId, $type, $id, $extra = '')
+	private static function SaveData($workId, $type, $id, $extra = '', $saveReferer = false)
 	{
-		$referer = Params::SafeServer('HTTP_REFERER', '');
+		if ($saveReferer)
+			$referer = Params::SafeServer('HTTP_REFERER', '');
+		else
+			$referer = '';
 		$remoteAddr = Params::SafeServer('REMOTE_ADDR', '');
 		$user = Account::Current()->user;
 		$time = Date::FormattedArNow();

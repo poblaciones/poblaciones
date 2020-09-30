@@ -17,6 +17,7 @@ use minga\framework\Log;
 use minga\framework\PhpSession;
 use minga\framework\Traffic;
 if (PhpSession::GetSessionValue('started', null) === null) {
+	Session::StartSession();
 	PhpSession::SetSessionValue('started', Params::SafeServer('REQUEST_TIME'));
 }
 ob_start();

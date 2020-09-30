@@ -2,6 +2,10 @@ module.exports = {
 	Add(arr, value) {
 		arr.push(value);
 	},
+	Fill(arr, arrValues) {
+		this.Clear(arr);
+		this.AddRange(arr, arrValues);
+	},
 	AddRange(arr, arrValues) {
 		arr.push.apply(arr, arrValues);
 	},

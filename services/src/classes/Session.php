@@ -17,6 +17,7 @@ use helena\caches\WorkVisiblityCache;
 class Session
 {
 	public static $AccessLink = null;
+	public static $NewSession = 0;
 
 	public static function GetCurrentUser()
 	{
@@ -29,7 +30,11 @@ class Session
 		$account = Account::Current();
 		return $account->IsEmpty() == false;
 	}
-
+	public static function StartSession()
+	{
+		if (!Request::IsGoogle())
+			self::$NewSession = 1;
+	}
 	public static function IsMegaUser()
 	{
 		$account = Account::Current();

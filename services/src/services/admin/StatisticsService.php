@@ -5,7 +5,7 @@ namespace helena\services\admin;
 use minga\framework\Arr;
 use minga\framework\Str;
 use minga\framework\Date;
-use minga\framework\Context;
+use minga\framework\Performance;
 use minga\framework\Profiling;
 use minga\framework\IO;
 
@@ -36,9 +36,83 @@ class StatisticsService extends BaseService
 									WHERE sta_month = ? AND sta_type = 'M' ORDER BY sta_hits DESC";
 		$metrics = App::Db()->fetchAll($sqlMetrics, array($month));
 		$summarized = $this->IsSummarized($month);
-		return ['Works' => $works, 'Metrics' => $metrics, 'Months' => $possible, 'IsSummarized' => $summarized];
+
+		// Arma el block de resumen mensual
+		$dailyTable = Performance::GetDaylyTable($month);
+		$totals = $this->CreateTotalHits($month, $dailyTable, $works, $metrics);
+		$resources = $this->CreateTotalsResources($month, $dailyTable);
+
+		return ['Totals' => $totals, 'Resources' => $resources, 'Works' => $works, 'Metrics' => $metrics, 'Months' => $possible, 'IsSummarized' => $summarized];
 	}
 
+	private function CreateTotalHits($month, $dailyTable, $works, $metrics)
+	{
+		$ret = [];
+
+		$sessions = Arr::SummarizeValues($dailyTable['Usuarios únicos']);
+		$ret[] = [ 'Caption' => 'Usuarios únicos del mes', 'Hits' => $sessions];
+
+		$metricHits = Arr::SummarizeField($metrics, 'Hits');
+		$ret[] = [ 'Caption' => 'Consulta de indicadores', 'Hits' => $metricHits];
+
+		$downloads = Arr::SummarizeField($works, 'Downloads');
+		$ret[] = [ 'Caption' => 'Descargas', 'Hits' => $downloads];
+
+		$google = Arr::SummarizeField($works, 'Google');
+		$ret[] = [ 'Caption' => 'Ingresos desde Google', 'Hits' => $google];
+
+		$newUsers = $this->GetNewMonthUsers($month);
+		$ret[] = [ 'Caption' => 'Nuevos usuarios', 'Hits' => $newUsers ];
+
+		$backoffice = Arr::SummarizeField($works, 'Backoffice');
+		$ret[] = [ 'Caption' => 'Ingresos a backoffice', 'Hits' => $backoffice];
+
+		return $ret;
+	}
+
+	private function CreateTotalsResources($month, $dailyTable)
+	{
+		$ret = [];
+
+		$globalHits = Arr::SummarizeValues($dailyTable['Hits']);
+		$ret[] = [ 'Caption' => 'Hits totales del mes', 'Hits' => $globalHits ];
+
+		$avgTime = intval(Arr::MeanValues($dailyTable['Promedio (ms.)'], $dailyTable['Hits'])) . ' ms';
+		$ret[] = [ 'Caption' => 'Tiempo promedio', 'Hits' => $avgTime ];
+
+		$emails = Arr::SummarizeValues($dailyTable['Mails']);
+		$ret[] = [ 'Caption' => 'Correos electrónicos enviados', 'Hits' => $emails ];
+
+		$crawler = Arr::SummarizeValues($dailyTable['GoogleBot']);
+		$ret[] = [ 'Caption' => 'Hits de GoogleBot', 'Hits' => $crawler ];
+
+		$mapsKey = Arr::SummarizeValues($dailyTable['MapsOpened']);
+		$ret[] = [ 'Caption' => 'Uso de Google Maps key', 'Hits' => $mapsKey ];
+
+		$addressKey = Arr::SummarizeValues($dailyTable['AddressQuery']);
+		$ret[] = [ 'Caption' => 'Uso de Google Geocoder key', 'Hits' => $addressKey ];
+
+		return $ret;
+	}
+	private function GetNewMonthUsers($month)
+	{
+		$year = intval(substr($month, 0, 4));
+		$month = intval(substr($month, 5, 2));
+		$firstDay = $year . "-" . $month . "-01";
+
+		$nextYear = $year;
+		$nextMonth = $month + 1;
+		if ($nextMonth > 12)
+		{
+			$nextMonth = 1;
+			$nextYear++;
+		}
+		$lastDay = $nextYear . "-" . $nextMonth . "-01";
+
+		$sql = "SELECT COUNT(*) FROM user WHERE usr_create_time >= CAST('" . $firstDay . "' AS DATE) AND usr_create_time < CAST('" . $lastDay . "' AS DATE)";
+		$ret = App::Db()->fetchScalarInt($sql);
+		return $ret;
+	}
 	private function GetPossibleMonths()
 	{
 		$folder = Paths::GetStatisticsPath();
@@ -60,11 +134,13 @@ class StatisticsService extends BaseService
 		// 2. Inserta metrics
 		$sqlInsert = "INSERT INTO statistic (sta_element_id, sta_month, sta_type, sta_google, sta_hits) VALUES ";
 		$values = $this->getInserts($data['metrics'], ['Google', 'Hits'], [ $month, 'M' ]);
-		App::Db()->exec($sqlInsert . $values);
+		if ($values)
+			App::Db()->exec($sqlInsert . $values);
 		// 3. Inserta works
 		$values = $this->getInserts($data['works'], ['Google', 'Hits', 'Downloads', 'Backoffice'], [ $month, 'W' ]);
-		$sqlInsert = "INSERT INTO statistic (sta_element_id, sta_month, sta_type, sta_google, sta_hits, sta_downloads, sta_backoffice) VALUES " . $values;
-		App::Db()->exec($sqlInsert);
+		$sqlInsert = "INSERT INTO statistic (sta_element_id, sta_month, sta_type, sta_google, sta_hits, sta_downloads, sta_backoffice) VALUES ";
+		if ($values)
+			App::Db()->exec($sqlInsert . $values);
 
 		if ($month != Date::GetLogMonthFolder())
 		{

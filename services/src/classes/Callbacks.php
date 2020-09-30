@@ -28,10 +28,10 @@ class Callbacks extends FrameworkCallbacks
 	}
 	public function ExtraHitsLabels()
 	{
-		return ['MapsOpened', 'AddressQuery'];
+		return ['MapsOpened', 'AddressQuery', 'Usuarios únicos'];
 	}
 	public function ExtraHits()
 	{
-		return [ self::$MapsOpened, self::$AddressQueried ];
+		return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession ];
 	}
 }

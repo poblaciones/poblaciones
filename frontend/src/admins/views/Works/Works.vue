@@ -19,7 +19,7 @@
 		</md-button>
 
 		<div class="md-layout-item md-size-100">
-			<md-table style="max-width: 1200px;" v-if="list.length > 0" v-model="list" md-sort="Caption" md-sort-order="asc" md-card>
+			<md-table style="max-width: 1200px;" v-if="works.length > 0" v-model="works" md-sort="Caption" md-sort-order="asc" md-card>
 				<md-table-row slot="md-table-row" slot-scope="{ item }">
 					<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
 						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
@@ -111,7 +111,7 @@ export default {
 	},
 	computed: {
 		showingWelcome() {
-			return window.Context.CartographiesStarted && this.list && this.list.length === 0;
+			return window.Context.CartographiesStarted && this.works && this.works.length === 0;
 		},
 		showIndexingColumn() {
 			return this.user.Privileges === 'A';
@@ -137,9 +137,6 @@ export default {
 				return '(entidad desconocida)';
 			}
 		},
-		list() {
-			return this.works;
-		}
 	},
 	mounted() {
 		this.refreshWorks();
@@ -182,8 +179,7 @@ export default {
 			var loc = this;
 			this.$refs.invoker.do(window.Db,
 					window.Db.GetWorks, this.filter, this.timeFilter).then(function(data) {
-						arr.Clear(loc.works);
-						arr.AddRange(loc.works, data);
+						arr.Fill(loc.works, data);
 						});
 		},
 		calculateUsage() {
