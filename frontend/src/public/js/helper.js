@@ -277,6 +277,13 @@ module.exports = {
         child = e.lastElementChild;
     }
 	},
+	removeAllChildrenButOne(e, exception) {
+		for (var n = e.childNodes.length - 1; n >= 0; n--) {
+			if (e.childNodes[n] !== exception) {
+				e.removeChild(e.childNodes[n]);
+			}
+		}
+	},
 	getVariableFrameKey(v, x, y, z, boundsRectRequired) {
 		var args = 'v=' + v + '&' + this.getFrameKey(x, y, z, boundsRectRequired);
 		return args;

@@ -119,8 +119,7 @@ class TileDataService extends BaseService
 			{
 				$gradientLimit = $gradient['grd_max_zoom_level'];
 				$gradientType = $gradient['grd_image_type'];
-				$gradientLuminance = 1;
-				$data->Texture = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z);
+				$data->Texture = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $x, $y, $z);
 			}
 		}
 		return $data;

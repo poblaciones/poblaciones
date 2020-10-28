@@ -215,14 +215,11 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, 
 
 	var textureMaskId = null;
 	if (this.useTextures && texture && texture.Data) {
-		var gradientOpacity = this.activeSelectedMetric.SelectedVariable().CurrentGradientOpacity;
-		if (gradientOpacity !== 0) {
-			var image = o2.image("data:" + texture.ImageType + ";base64," + texture.Data, 256, 256);
-			var textureMask = o2.pattern();
-			textureMask.add(image);
-			textureMaskId = 'svgPatt' + tileUniqueId;
-			textureMask.attr('id', textureMaskId);
-		}
+		var image = o2.image("data:" + texture.ImageType + ";base64," + texture.Data, 256, 256);
+		var textureMask = o2.pattern();
+		textureMask.add(image);
+		textureMaskId = 'svgPatt' + tileUniqueId;
+		textureMask.attr('id', textureMaskId);
 	}
 	var maskId = null;
 	if (this.useGradients && gradient) {
@@ -254,10 +251,31 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, 
 		oSvg.appendChild(svg);
 	});
 
-	h.removeAllChildren(div);
-	div.appendChild(oSvg);
+	this.ReplaceMinimizingFlickering(div, oSvg, textureMaskId);
+
 	return oSvg;
 };
+
+SvgComposer.prototype.ReplaceMinimizingFlickering = function (div, oSvg, textureMaskId) {
+	if (textureMaskId) {
+		oSvg.style.position = 'absolute';
+		if (div.childNodes.length === 0) {
+			div.appendChild(oSvg);
+		} else {
+			div.insertBefore(oSvg, div.childNodes[0]);
+		}
+		setTimeout(function () {
+			h.removeAllChildrenButOne(div, oSvg);
+		}, 50);
+	} else {
+		if (div.childNodes.length === 0) {
+			div.appendChild(oSvg);
+		} else {
+			div.replaceChild(oSvg, div.childNodes[0]);
+		}
+	}
+};
+
 
 SvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
 	// crea un pattern para cada tipo de etiqueta
@@ -283,7 +301,10 @@ SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patte
 	if (textureMaskId) {
 		textureFill = '; fill: url(#' + textureMaskId + ')';
 	}
-
+	var strokeOpacity = this.activeSelectedMetric.SelectedVariable().CurrentOpacity;
+	if (patternValue === 0 && textureMaskId) {
+		strokeOpacity = 0;
+	}
 	for (var l = 0; l < labels.length; l++) {
 		if (patternValue === 0) {
 			// Se fija si el contraste entre el border y la figura va a ser demasiado bajo...
@@ -298,11 +319,11 @@ SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patte
 			}
 			fillBlock = '; fill: ' + labels[l].fillColor;
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
-				' { stroke: ' + stroke + '; stroke-opacity: ' + (this.activeSelectedMetric.SelectedVariable().CurrentOpacity * 1.1) +
+				' { stroke: ' + stroke + '; stroke-opacity: ' + Math.max(1, strokeOpacity * 1.1) +
 				maskBlock + (textureFill ? textureFill : fillBlock) + '; fill-opacity: ' + this.activeSelectedMetric.SelectedVariable().CurrentOpacity + ' } ';
 		} else {
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
-				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.SelectedVariable().CurrentOpacity +
+				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' +  strokeOpacity +
 					(textureFill ? textureFill : fillBlock) + maskBlock + ' } ';
 		}
 	}

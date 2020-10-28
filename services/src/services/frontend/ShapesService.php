@@ -75,8 +75,7 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 			$controller = new GradientService();
 			$gradientLimit = $carto['max_zoom_level'];
 			$gradientType = $carto['gradient_type'];
-			$gradientLuminance = $carto['gradient_luminance'];
-			$data->Gradient = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z);
+			$data->Gradient = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $x, $y, $z);
 		}
 
 		return $data;

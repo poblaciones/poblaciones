@@ -22,7 +22,7 @@ class GradientService extends BaseService
 		return $row;
 }
 
-	public function GetGradientTile($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z)
+	public function GetGradientTile($gradientId, $gradientLimit, $gradientType, $x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$data = ['Data' => null, 'ImageType' => null];
@@ -64,7 +64,6 @@ class GradientService extends BaseService
 		{
 			$data['Data'] = base64_encode($res);
 			$data['ImageType'] = $gradientType;
-			$data['Luminance'] = $gradientLuminance;
 		}
 		Profiling::EndTimer();
 		return $data;

@@ -96,6 +96,7 @@ PreviewHandler.prototype.CreateBestPossibleSvg = function (v, coord, zoom, previ
 					svg = this.createDiv(newSize, newSize);
 					svg.style.display = 'inline-block';
 				}
+				svg.style.position = '';
 				row.appendChild(svg);
 			}
 			root.appendChild(row);
