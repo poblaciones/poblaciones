@@ -1,54 +1,95 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="showDialog" :md-click-outside-to-close="false">
+		<md-dialog :md-active.sync="showDialog" :md-click-outside-to-close="false" style="min-width: 670px!important;">
 			<md-dialog-title>{{ title }}</md-dialog-title>
 			<md-dialog-content>
 				<invoker ref="invoker"></invoker>
 
 				<div v-if="Variable" class="md-layout md-gutter">
-					<div class="md-layout-item md-size-100 separator">
-						Panel de resumen
-					</div>
-					<div class="md-layout-item md-size-50 md-small-size-100">
-						<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowEmptyCategories">
-							Mostrar categorías sin valores
-						</md-switch>
-					</div>
+					<div class="md-layout-item md-size-100">
+						<md-card>
+							<md-card-content>
+								<div class="md-layout md-gutter">
+									<div class="md-layout-item md-size-100 separator">
+										Mapa
+									</div>
+									<div class="md-layout-item md-size-100" v-if="Dataset.properties.Type !== 'L'">
+										<div class="md-layout">
+											<div class="md-layout-item md-size-30 md-small-size-100" style="padding-top: 16px;">
+												Transparencia:
+											</div>
+											<div class="md-layout-item md-size-70 md-small-size-100">
+												<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="H">Baja</md-radio>
+												<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="M">Media</md-radio>
+												<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="L">Alta</md-radio>
+											</div>
+										</div>
+									</div>
+									<div class="md-layout-item md-size-100" v-if="Dataset.properties.Type !== 'L' && Dataset.properties.Geography.GradientId">
+										<div class="md-layout">
+											<div class="md-layout-item md-size-30 md-small-size-100" style="padding-top: 16px;">
+												Ajuste poblacional:
+												<mp-help :text="`<p><b>¿Qué es el ajuste poblacional?</b></p><p>La geografía que utilizó para georreferenciar
+								contiene estimaciones espaciales de población con resolución de 100m x 100m, facilitada por el proyecto
+								WorldPop (https://www.worldpop.org/). </p><p>Habilitando esta opción, los polígonos en el mapa serán suavizados
+								en la zonas de menor densidad poblaciones, para dar más importancia a las zonas habitadas.
+									</p></p>`" />
 
-					<div class="md-layout-item md-size-100 separator">
-						Mapa
+											</div>
+											<div class="md-layout-item md-size-70 md-small-size-100">
+												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="H">Bajo</md-radio>
+												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="M">Medio</md-radio>
+												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="L">Alto</md-radio>
+												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="N">Deshabilitado</md-radio>
+											</div>
+										</div>
+									</div>
+									<div v-if="Dataset.properties.CaptionColumn !== null" class="md-layout-item md-size-50 md-small-size-100">
+										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowLabels">
+											Mostrar descripciones de los elementos
+										</md-switch>
+									</div>
+									<div class="md-layout-item md-size-50 md-small-size-100">
+										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowValues">
+											Mostrar etiquetas con los valores
+										</md-switch>
+									</div>
+								</div>
+							</md-card-content>
+						</md-card>
 					</div>
-					<div v-if="Dataset.properties.CaptionColumn !== null" class="md-layout-item md-size-50 md-small-size-100">
-						<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowLabels">
-							Mostrar descripción en el mapa
-						</md-switch>
+					<div class="md-layout-item md-small-size-100" :class="(Level.Variables.length > 1 ? 'md-size-50' : 'md-size-100')">
+						<md-card>
+							<md-card-content>
+								<div class="md-layout md-gutter">
+									<div class="md-layout-item md-size-100 separator">
+										Panel de resumen
+									</div>
+									<div class="md-layout-item md-size-100 md-small-size-100">
+										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowEmptyCategories">
+											Mostrar categorías sin valores
+										</md-switch>
+									</div>
+								</div>
+							</md-card-content>
+						</md-card>
 					</div>
-					<div class="md-layout-item md-size-50 md-small-size-100">
-						<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowValues">
-							Mostrar valores en el mapa
-						</md-switch>
-					</div>
-					<div class="md-layout-item md-size-100" v-if="Dataset.properties.Type !== 'L'">
-						<div class="md-layout">
-							<div class="md-layout-item md-size-20 md-small-size-100" style="padding-top: 16px;">
-								Transparencia:
-							</div>
-							<div class="md-layout-item md-size-80 md-small-size-100">
-								<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="H">Baja</md-radio>
-								<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="M">Media</md-radio>
-								<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="L">Alta</md-radio>
-							</div>
-						</div>
-					</div>
-
 					<template v-if="Level.Variables.length > 1">
-						<div class="md-layout-item md-size-100 separator">
-							Variable predeterminada
-						</div>
-						<div class="md-layout-item md-size-70 md-small-size-100">
-							<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.IsDefault">
-								Mostrar como variable inicial del indicador
-							</md-switch>
+						<div class="md-layout-item md-size-50 md-small-size-100">
+							<md-card>
+								<md-card-content>
+									<div class="md-layout md-gutter">
+										<div class="md-layout-item md-size-100 separator">
+											Variable predeterminada
+										</div>
+										<div class="md-layout-item md-size-100 md-small-size-100">
+											<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.IsDefault">
+												Mostrar como variable inicial del indicador
+											</md-switch>
+										</div>
+									</div>
+								</md-card-content>
+							</md-card>
 						</div>
 					</template>
 				</div>

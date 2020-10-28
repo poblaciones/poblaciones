@@ -19,8 +19,7 @@
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre" md-sort-by="FullName">{{ item.FullName }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Email" md-sort-by="Email">{{ item.Email }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Rol" md-sort-by="FormattedRole">{{ item.FormattedRole }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Cartographies"><span :title="item.CartographiesNames">{{ item.Cartographies }}</span></md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Datos públicos" md-sort-by="PublicData"><span :title="item.PublicDataNames">{{ item.PublicData }}</span></md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Cartographies"><span :title="item.CartographiesNames">{{ item.Cartographies + item.PublicData  }}</span></md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Último ingreso" md-sort-by="LastAccess">{{ formatDate(item.LastAccess) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
 							<md-button class="md-icon-button" title="Modificar" @click="openEdition(item)">

@@ -17,5 +17,13 @@ class LabelsCache extends BaseCache
 			$key .= 'b' . $b;
 		return $key;
 	}
+
+	public static function CreateBlockKey($x, $y, $zoom, $size, $b)
+	{
+		$key = 'x' . $x . "y" . $y . "z" . $zoom . "s" . $size;
+		if ($b != null)
+			$key .= 'b' . $b;
+		return $key;
+	}
 }
 

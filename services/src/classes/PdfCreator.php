@@ -5,6 +5,7 @@ namespace helena\classes;
 use minga\framework\CreativeCommons;
 use minga\framework\AttributeEntity;
 use minga\framework\Str;
+use helena\classes\Image;
 use helena\entities\frontend\geometries\Envelope;
 use helena\services\backoffice\InstitutionService;
 
@@ -188,8 +189,10 @@ class PdfCreator
 		$this->pdf->WriteHeading4('Institución');
 		if ($this->metadata['ins_watermark_id'] != ''){
 			$controller = new InstitutionService();
-			$dataURL = $controller->GetInstitutionWatermark($this->metadata['ins_watermark_id'], false);
-			$html = "<img src='" .$dataURL . "' height='50' />";
+			$file = $controller->GetInstitutionWatermarkFile($this->metadata['ins_watermark_id'], false);
+			Image::ResizeToMaxSize($file, null, InstitutionService::MAX_WATERMARK_HEIGHT);
+			$this->pdf->AddImage('institution', file_get_contents($file));
+			$html = "<img src='var:institution' height='50' />";
 			$this->pdf->WriteDoubleIndentedText($html, false);
 		}
 		$this->WriteIndentedValuePair('Nombre', 'ins_caption');

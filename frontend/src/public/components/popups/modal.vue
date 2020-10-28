@@ -186,13 +186,15 @@ export default {
 .modal-dialog {
 	display: table-cell;
 	vertical-align: middle;
+  max-width: 610px;
+	width: 610px;
 }
 .modal-content {
 	max-height: 100%;
   overflow-y: auto;
 	overflow-x: hidden;
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 610px;
 }
 
 .modal-enter .modal-backdrop, .modal-leave .modal-backdrop {

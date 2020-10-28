@@ -21,6 +21,11 @@
 									 :list='Dataset.Columns' v-model='Dataset.properties.ImagesColumn'
 									 :render="formatColumn" />
 			</div>
+			<div v-if="useTextures" class='md-layout-item md-size-50 md-small-size-90'>
+				<mp-select label="Textura" :list="validTextures" :modelKey="true" :canEdit="canEdit"
+									 v-model="Dataset.properties.TextureId" @selected="Update" />
+			</div>
+
 		</div>
 			<div v-if="Dataset && Dataset.Columns">
 				<invoker ref="invoker"></invoker>
@@ -60,9 +65,7 @@
 								Redimensionar el ícono al cambiar el zoom.
 							</md-switch>
 						</div>
-
 					</div>
-
 					</div>
 			</div>
 		</div>
@@ -95,6 +98,14 @@ export default {
 				return false;
 			}
 		},
+		useTextures() {
+			return window.Context.Configuration.UseTextures;
+		},
+		validTextures() {
+			return [{ Id: 0, Caption: 'Ninguna' },
+			{ Id: 3, Caption: 'Confederación Argentina (1873)' },
+			{ Id: 4, Caption: 'Ferrocarriles en explotación (1925)' }];
+		}
 	},
 	data() {
 		return {
@@ -112,6 +123,9 @@ export default {
 			this.Update();
 		},
 		Update() {
+			if (this.Dataset.properties.TextureId === 0) {
+				this.Dataset.properties.TextureId = null;
+			}
       this.$refs.invoker.do(this.Dataset, this.Dataset.Update);
 		}
 	}

@@ -139,6 +139,14 @@ class Dataset
      */
     private $CaptionColumn;
 
+		 /**
+     * @var integer
+		 *
+     * @ORM\Column(name="dat_texture_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $TextureId;
+
+
     /**
      * @var \helena\entities\backoffice\Geography
      *
@@ -182,6 +190,32 @@ class Dataset
 
         return $this;
     }
+
+
+    /**
+     * Get textureId
+     *
+     * @return integer
+     */
+    public function getTextureId()
+    {
+        return $this->TextureId;
+    }
+
+		/**
+     * Set textureId
+     *
+     * @param integer $textureId
+     *
+     * @return Dataset
+     */
+    public function setTextureId($textureId)
+    {
+        $this->TextureId = $textureId;
+
+        return $this;
+    }
+
     /**
      * Set type
      *

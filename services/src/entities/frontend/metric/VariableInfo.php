@@ -20,6 +20,7 @@ class VariableInfo extends BaseMapModel
 	public $ShowEmptyCategories = true;
 	public $Decimals = 0;
 	public $Opacity = 'M';
+	public $GradientOpacity = 'M';
 	public $HasTotals = 0;
 	public $IsArea = false;
 	public $IsSimpleCount = false;
@@ -29,6 +30,7 @@ class VariableInfo extends BaseMapModel
 	public $ValueLabels = array();
 	public $ValidMetrics = array();
 	public $CurrentOpacity = -1;
+	public $CurrentGradientOpacity = -1;
 
 	public static function GetMap()
 	{
@@ -42,6 +44,7 @@ class VariableInfo extends BaseMapModel
 			'dco_decimals' => 'Decimals',
 			'vsy_show_values' => 'ShowValues',
 			'vsy_opacity' => 'Opacity',
+			'vsy_gradient_opacity' => 'GradientOpacity',
 			'vsy_show_labels' => 'ShowDescriptions',
 			'vsy_show_empty_categories' => 'ShowEmptyCategories',
 			'vsy_show_totals' => 'ShowSummaryTotals',

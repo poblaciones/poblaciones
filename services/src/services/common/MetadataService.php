@@ -44,7 +44,10 @@ class MetadataService extends BaseService
 		// se fija en el caché
 		$key = PdfMetadataCache::CreateKey($datasetId);
 		$data = null;
-		if ($fromDraft === false && PdfMetadataCache::Cache()->HasData($metadataId, $key, $data))
+		if ($fromDraft === false && $workId !== null)
+			Statistics::StoreDownloadMetadataHit($workId);
+
+	if ($fromDraft === false && PdfMetadataCache::Cache()->HasData($metadataId, $key, $data))
 		{
 			return App::SendFile($data)
 				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
@@ -62,13 +65,12 @@ class MetadataService extends BaseService
 		$metadata['met_online_since_formatted'] = $this->formatDate($metadata['met_online_since']);
 		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
 
+
 		$PdfCreator = new PdfCreator();
 		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $dataset);
 
 		if ($fromDraft === false)
 		{
-			if ($workId !== null)
-				Statistics::StoreDownloadMetadataHit($workId);
 			PdfMetadataCache::Cache()->PutData($metadataId, $key, $filename);
 		}
 

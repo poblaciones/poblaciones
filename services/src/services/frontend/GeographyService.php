@@ -68,6 +68,7 @@ class GeographyService extends BaseService
 			$data->Page = $page;
 			$data->TotalPages = $totalPages;
 		}
+
 		$gradientId = $carto['gradient_id'];
 		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b)
 		{

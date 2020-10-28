@@ -33,6 +33,7 @@ class MetricVersionModel extends BaseModel
 										dat_scale_symbol,
 										dat_table,
 										dat_show_info,
+										dat_texture_id,
 										carto_meta.met_wiki
 						FROM metric_version_level
 										JOIN dataset ON mvl_dataset_id = dat_id

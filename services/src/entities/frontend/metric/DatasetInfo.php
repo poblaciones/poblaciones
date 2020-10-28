@@ -13,6 +13,8 @@ class DatasetInfo extends BaseMapModel
 	public $ScaleSymbol;
 	public $ShowInfo;
 	public $Table;
+	public $TextureId;
+	public $HasGradient;
 
 	public static function GetMap()
 	{
@@ -23,6 +25,7 @@ class DatasetInfo extends BaseMapModel
 			'dat_scale_symbol' => 'ScaleSymbol',
 			'dat_caption' => 'Name',
 			'dat_table' => 'Table',
+			'dat_texture_id' => 'TextureId',
 			'dat_show_info' => 'ShowInfo');
 	}
 

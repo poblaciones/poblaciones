@@ -266,7 +266,6 @@ App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) 
 	$workId = Params::GetInt('w');
 	$datasetId = Params::GetInt('d', null);
 	Session::$AccessLink = Params::Get('l');
-
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
 	return $controller->GetMetadataPdf($metadataId, $datasetId, false, $workId);

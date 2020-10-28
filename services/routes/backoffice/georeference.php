@@ -17,12 +17,12 @@ App::Get('/services/backoffice/CreateMultiGeoreferenceByLatLong', function (Requ
 	$controller = new services\GeoreferenceService();
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
-	$gradientId = Params::GetIntMandatory('a');
+	$geographyId = Params::GetIntMandatory('a');
 	$latColumnId = Params::GetIntMandatory('lat');
 	$lonColumnId = Params::GetIntMandatory('lon');
 
 	$reset = Params::Get('r');
-	return App::Json($controller->CreateMultiGeoreferenceByLatLong($datasetId, $gradientId, $latColumnId, $lonColumnId, $reset));
+	return App::Json($controller->CreateMultiGeoreferenceByLatLong($datasetId, $geographyId, $latColumnId, $lonColumnId, $reset));
 });
 
 App::Get('/services/backoffice/CreateMultiGeoreferenceByCodes', function (Request $request) {
@@ -30,10 +30,10 @@ App::Get('/services/backoffice/CreateMultiGeoreferenceByCodes', function (Reques
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
 
-	$gradientId = Params::GetIntMandatory('a');
+	$geographyId = Params::GetIntMandatory('a');
 	$codesColumnId = Params::GetIntMandatory('c');
 	$reset = Params::Get('r');
-	return App::Json($controller->CreateMultiGeoreferenceByCodes($datasetId, $gradientId, $codesColumnId, $reset));
+	return App::Json($controller->CreateMultiGeoreferenceByCodes($datasetId, $geographyId, $codesColumnId, $reset));
 });
 
 App::$app->get('/services/backoffice/GetAllGeographies', function (Request $request) {
@@ -46,10 +46,10 @@ App::Get('/services/backoffice/CreateMultiGeoreferenceByShapes', function (Reque
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
 
-	$gradientId = Params::GetIntMandatory('a');
+	$geographyId = Params::GetIntMandatory('a');
 	$shapesColumnId = Params::GetIntMandatory('c');
 	$reset = Params::Get('r');
-	return App::Json($controller->CreateMultiGeoreferenceByShapes($datasetId, $gradientId, $shapesColumnId, $reset));
+	return App::Json($controller->CreateMultiGeoreferenceByShapes($datasetId, $geographyId, $shapesColumnId, $reset));
 });
 
 App::Get('/services/backoffice/StepMultiGeoreference', function (Request $request) {
@@ -61,6 +61,6 @@ App::Get('/services/backoffice/StepMultiGeoreference', function (Request $reques
 
 App::$app->get('/services/backoffice/GetGeographyItems', function (Request $request) {
 	$controller = new services\GeographyService();
-	$gradientId = Params::GetIntMandatory('g');
-	return App::OrmJson($controller->GetGeographyItems($gradientId));
+	$geographyId = Params::GetIntMandatory('g');
+	return App::OrmJson($controller->GetGeographyItems($geographyId));
 });

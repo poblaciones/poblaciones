@@ -13,13 +13,41 @@ use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
 use helena\entities\frontend\clipping\TileDataInfo;
 use minga\framework\Context;
+use minga\framework\Profiling;
 
 
 class LabelsService extends BaseService
 {
 	public function GetBlockLabels($x, $y, $z, $b)
 	{
+		Profiling::BeginTimer();
+		$data = null;
 		$size = Context::Settings()->Map()->LabelsBlockSize;
+		$this->CheckNotNullNumeric($x);
+		$this->CheckNotNullNumeric($y);
+		$this->CheckNotNullNumeric($z);
+		$this->CheckNotNullNumeric($size);
+
+		$key = LabelsCache::CreateBlockKey($x, $y, $z, $size, $b);
+
+		if (LabelsCache::Cache()->HasData($key, $data))
+		{
+			Profiling::EndTimer();
+			return $this->GotFromCache($data);
+		}
+
+		$data = $this->CalculateBlockLabels($x, $y, $z, $size, $b);
+
+		LabelsCache::Cache()->PutData($key, $data);
+		Profiling::EndTimer();
+
+		return $data;
+	}
+
+	private function CalculateBlockLabels($x, $y, $z, $size, $b)
+	{
+		Profiling::BeginTimer();
+
 		$blocks = [];
 		for($ix = $x; $ix < $x + $size; $ix++)
 		{
@@ -34,11 +62,13 @@ class LabelsService extends BaseService
 		$ret->Data = $blocks;
 		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
 
+		Profiling::EndTimer();
+
 		return $ret;
 	}
-
 	public function GetLabels($x, $y, $z, $b)
 	{
+		Profiling::BeginTimer();
 		$data = null;
 		$this->CheckNotNullNumeric($x);
 		$this->CheckNotNullNumeric($y);
@@ -48,17 +78,21 @@ class LabelsService extends BaseService
 
 		if (LabelsCache::Cache()->HasData($key, $data))
 		{
+			Profiling::EndTimer();
 			return $this->GotFromCache($data);
 		}
 
 		$data = $this->CalculateLabels($x, $y, $z, $b);
 
 		LabelsCache::Cache()->PutData($key, $data);
+		Profiling::EndTimer();
+
 		return $data;
 	}
 
 	private function CalculateLabels($x, $y, $z, $b)
 	{
+		Profiling::BeginTimer();
 		$table = new SnapshotSearchModel();
 
 		if ($b != null)
@@ -82,6 +116,8 @@ class LabelsService extends BaseService
 		$rows = $this->CalculateVisibility($rows, $z, $envelope);
 
 		$data = $this->CreateLabelsDataInfo($rows, $z);
+
+		Profiling::EndTimer();
 
 		return $data;
 	}

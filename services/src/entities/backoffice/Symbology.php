@@ -50,6 +50,13 @@ class Symbology
     private $Opacity;
 
 		 /**
+     * @var string
+     *
+     * @ORM\Column(name="vsy_gradient_opacity", type="string",  length=1, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $GradientOpacity;
+
+		 /**
      * @var boolean
      *
      * @ORM\Column(name="vsy_null_category", type="boolean", precision=0, scale=0, nullable=false, unique=false)
@@ -410,6 +417,31 @@ class Symbology
     public function getOpacity()
     {
         return $this->Opacity;
+    }
+
+
+    /**
+     * Set gradientOpacity
+     *
+     * @param string $gradientOpacity
+     *
+     * @return Symbology
+     */
+    public function setGradientOpacity($gradientOpacity)
+    {
+        $this->GradientOpacity = $gradientOpacity;
+
+        return $this;
+    }
+
+    /**
+     * Get gradientOpacity
+     *
+     * @return string
+     */
+    public function getGradientOpacity()
+    {
+        return $this->GradientOpacity;
     }
 
     /**

@@ -27,6 +27,7 @@ class ConfigurationService extends BaseService
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
 									'StaticWorks' =>  Context::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => Context::Settings()->Map()->UseGradients,
+									'UseTextures' => Context::Settings()->Map()->UseTextures,
 
 									'UseFavorites' => Context::Settings()->Map()->UseFavorites,
 									'UseEmbedding' => Context::Settings()->Map()->UseEmbedding,

@@ -42,11 +42,11 @@ class GeoreferenceService extends BaseService
 			$this->start = microtime(true);
 	}
 
-	public function CreateMultiGeoreferenceByLatLong($datasetId, $gradientId, $latColumnId, $lonColumnId, $reset)
+	public function CreateMultiGeoreferenceByLatLong($datasetId, $geographyId, $latColumnId, $lonColumnId, $reset)
 	{
 		Profiling::BeginTimer();
-		$attributes = array('geographyId' => $gradientId, 'latColumnId' => $latColumnId, 'lonColumnId' => $lonColumnId);
-		$this->PrepareNewState($datasetId, self::GEO_LAT_LON, $gradientId, $reset, 'L', $attributes);
+		$attributes = array('geographyId' => $geographyId, 'latColumnId' => $latColumnId, 'lonColumnId' => $lonColumnId);
+		$this->PrepareNewState($datasetId, self::GEO_LAT_LON, $geographyId, $reset, 'L', $attributes);
 		$lat = App::Orm()->find(entities\DraftDatasetColumn::class, $latColumnId);
 		$lon = App::Orm()->find(entities\DraftDatasetColumn::class, $lonColumnId);
 		$this->state->Set('lat', $lat->getField());
@@ -58,12 +58,12 @@ class GeoreferenceService extends BaseService
 		return $ret;
 	}
 
-	public function CreateMultiGeoreferenceByCodes($datasetId, $gradientId, $codesColumnId, $reset)
+	public function CreateMultiGeoreferenceByCodes($datasetId, $geographyId, $codesColumnId, $reset)
 	{
 		Profiling::BeginTimer();
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
-		$attributes = array('geographyId' => $gradientId, 'codesColumnId' => $codesColumnId);
-		$this->PrepareNewState($datasetId, self::GEO_CODES, $gradientId, $reset, 'D', $attributes);
+		$attributes = array('geographyId' => $geographyId, 'codesColumnId' => $codesColumnId);
+		$this->PrepareNewState($datasetId, self::GEO_CODES, $geographyId, $reset, 'D', $attributes);
 		$codesColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $codesColumnId);
 		$this->state->Set('code', $codesColumn->getField());
 		$this->ResetGeocoded();
@@ -73,12 +73,12 @@ class GeoreferenceService extends BaseService
 		return $ret;
 	}
 
-	public function CreateMultiGeoreferenceByShapes($datasetId, $gradientId, $shapesColumnId, $reset)
+	public function CreateMultiGeoreferenceByShapes($datasetId, $geographyId, $shapesColumnId, $reset)
 	{
 		Profiling::BeginTimer();
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
-		$attributes = array('geographyId' => $gradientId, 'shapesColumnId' => $shapesColumnId);
-		$this->PrepareNewState($datasetId, self::GEO_SHAPES, $gradientId, $reset, 'S', $attributes);
+		$attributes = array('geographyId' => $geographyId, 'shapesColumnId' => $shapesColumnId);
+		$this->PrepareNewState($datasetId, self::GEO_SHAPES, $geographyId, $reset, 'S', $attributes);
 		$shapesColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $shapesColumnId);
 		$this->state->Set('shape', $shapesColumn->getField());
 		$this->ResetGeocoded();
@@ -88,7 +88,7 @@ class GeoreferenceService extends BaseService
 		return $ret;
 	}
 
-	private function PrepareNewState($datasetId, $type, $gradientId, $reset, $datasetType, $attributes)
+	private function PrepareNewState($datasetId, $type, $geographyId, $reset, $datasetType, $attributes)
 	{
 		$fromErrors = false;
 		if ($reset)
@@ -101,7 +101,7 @@ class GeoreferenceService extends BaseService
 		}
 		$this->UpdateGeoreferencingAttributesIfChanged($datasetId, $datasetType, $attributes);
 		$caption = $this->GetStepCaption($step);
-		$this->state = GeoreferenceStateBag::Create($datasetId, $type, $gradientId, $fromErrors, $datasetType);
+		$this->state = GeoreferenceStateBag::Create($datasetId, $type, $geographyId, $fromErrors, $datasetType);
 		$this->state->SetTotalSteps(self::STEP_END);
 		$this->state->SetStep($step, $caption);
 		$this->state->Save();

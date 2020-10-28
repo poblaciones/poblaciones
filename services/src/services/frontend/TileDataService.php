@@ -83,7 +83,7 @@ class TileDataService extends BaseService
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		$table = new SnapshotByDataset($snapshotTable);
-		$gradientId = $level->GeographyId;
+		$geographyId = $level->GeographyId;
 
 		if ($b != null)
 		{
@@ -97,19 +97,32 @@ class TileDataService extends BaseService
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $level->Variables, $gradientId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
 		else if ($frame->ClippingRegionIds != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByRegionIds($metricVersionId, $level->Variables, $gradientId, $urbanity, $envelope, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByRegionIds($metricVersionId, $level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $level->Variables, $gradientId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $level->Variables, $geographyId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions);
 		}
 
 		$data = $this->CreateTileDataInfo($rows);
 
+		if (Context::Settings()->Map()->UseTextures && $level->Dataset->TextureId)
+		{
+			$controller = new GradientService();
+			$gradientId = $level->Dataset->TextureId;
+			$gradient = $controller->GetGradient($gradientId);
+			if ($gradient)
+			{
+				$gradientLimit = $gradient['grd_max_zoom_level'];
+				$gradientType = $gradient['grd_image_type'];
+				$gradientLuminance = 1;
+				$data->Texture = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z);
+			}
+		}
 		return $data;
 	}
 

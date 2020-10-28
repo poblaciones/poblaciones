@@ -245,9 +245,6 @@ html, body {
 .ls {
 	stroke-width: 2.5px;
 }
-.gAlpha {
-	opacity: .35;
-}
 .gm-fullscreen-control {
 	transform: scale(0.8);
 }

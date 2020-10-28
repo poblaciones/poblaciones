@@ -209,6 +209,8 @@ class SelectedMetricService extends BaseService
 			$level->Extents = Envelope::FromDb($selectedVersionLevelInfo['mvl_extents'])->Trim();
 		$level->Dataset = new DatasetInfo();
 		$level->Dataset->Fill($selectedVersionLevelInfo);
+		$level->Dataset->HasGradient = ($selectedVersionLevelInfo['geo_gradient_id']
+						&& ($level->Dataset->Type == 'S' || $level->Dataset->Type == 'D') ? 1 : 0);
 		// Agrega variables
 		$this->AddVariables($level);
 		return $level;

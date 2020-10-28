@@ -48,6 +48,7 @@ class MetricService extends BaseService
 		$symbology->setPaletteType('P');
 		$symbology->setRainbow(2);
 		$symbology->setOpacity('M');
+		$symbology->setGradientOpacity('M');
 		$symbology->setRainbowReverse(false);
 		$symbology->setShowEmptyCategories(true);
 		$symbology->setColorFrom('0ce800');

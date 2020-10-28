@@ -7,6 +7,7 @@ use helena\classes\App;
 use helena\classes\GeoJson;
 use helena\classes\GlobalTimer;
 use helena\caches\DatasetShapesCache;
+use minga\framework\Context;
 
 use helena\db\frontend\SnapshotShapesModel;
 use helena\db\frontend\DatasetModel;
@@ -60,13 +61,23 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 		}
 
 		$cartoTable = new GeographyModel();
-		$gradientId = $dataset['dat_geography_id'];
-		$carto = $cartoTable->GetGeographyInfo($gradientId);
+		$geographyId = $dataset['dat_geography_id'];
+		$carto = $cartoTable->GetGeographyInfo($geographyId);
 		$getCentroids = ($carto['geo_min_zoom'] == null || $z >= $carto['geo_min_zoom']);
 
 		$rows = $table->GetShapesByEnvelope($datasetId, $envelope, $zoom, $getCentroids);
 
 		$data = FeaturesInfo::FromRows($rows, $getCentroids, false, $zoom);
+
+		$gradientId = $carto['gradient_id'];
+		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b)
+		{
+			$controller = new GradientService();
+			$gradientLimit = $carto['max_zoom_level'];
+			$gradientType = $carto['gradient_type'];
+			$gradientLuminance = $carto['gradient_luminance'];
+			$data->Gradient = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z);
+		}
 
 		return $data;
 	}

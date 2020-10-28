@@ -45,7 +45,7 @@
 		"indigophp/doctrine-annotation-autoload": "^0.1.0",
 		"lusitanian/oauth": "^0.8.11",
 		"gasparesganga/php-shapefile": "^3.1",
-		"mpdf/mpdf": "^8.0",
+		"mpdf/mpdf": "^8.0.7",
 		"phpoffice/phpspreadsheet": "^1.12",
 		"box/spout": "^3.1",
 		"rodrigoq/phpmailersendgrid": "^1.0"

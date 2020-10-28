@@ -49,6 +49,13 @@ class DraftSymbology
      */
     private $Opacity;
 
+		/**
+     * @var string
+     *
+     * @ORM\Column(name="vsy_gradient_opacity", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $GradientOpacity;
+
     /**
      * @var integer
      *
@@ -408,6 +415,31 @@ class DraftSymbology
     public function getOpacity()
     {
         return $this->Opacity;
+    }
+
+
+    /**
+     * Set gradientGradientOpacity
+     *
+     * @param string $gradientGradientOpacity
+     *
+     * @return DraftSymbology
+     */
+    public function setGradientOpacity($gradientGradientOpacity)
+    {
+        $this->GradientOpacity = $gradientGradientOpacity;
+
+        return $this;
+    }
+
+    /**
+     * Get gradientGradientOpacity
+     *
+     * @return string
+     */
+    public function getGradientOpacity()
+    {
+        return $this->GradientOpacity;
     }
 
     /**

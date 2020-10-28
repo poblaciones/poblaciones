@@ -140,6 +140,13 @@ class Geography
     private $Country;
 
     /**
+     * @var integer
+		 *
+		 * @ORM\Column(name="geo_gradient_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $GradientId;
+
+    /**
      * @var \helena\entities\backoffice\Metadata
      * @Exclude
      *
@@ -535,6 +542,31 @@ class Geography
     public function getParentId()
     {
         return $this->ParentId;
+    }
+
+
+    /**
+     * Set gradientId
+     *
+     * @param integer $gradientId
+     *
+     * @return Geography
+     */
+    public function setGradient($gradientId)
+    {
+        $this->GradientId = $gradientId;
+
+        return $this;
+    }
+
+    /**
+     * Get gradientId
+     *
+     * @return integer
+     */
+    public function getGradientId()
+    {
+        return $this->GradientId;
     }
 
     /**

@@ -59,19 +59,19 @@ class RankingService extends BaseService
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		$table = new SnapshotByDataset($snapshotTable);
 
-		$gradientId = $level->GeographyId;
+		$geographyId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionRankingByCircle($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$rows = $table->GetMetricVersionRankingByCircle($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		else if ($frame->ClippingRegionIds != NULL)
 		{
-			$rows = $table->GetMetricVersionRankingByRegionIds($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$rows = $table->GetMetricVersionRankingByRegionIds($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionRankingByEnvelope($metricVersionId, $gradientId, $variableId, $hasTotals, $urbanity, $frame->Envelope, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$rows = $table->GetMetricVersionRankingByEnvelope($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $frame->Envelope, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		$data = $this->CreateRankingInfo($rows);
 		return $data;

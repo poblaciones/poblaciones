@@ -72,11 +72,14 @@ class Statistics
 		Profiling::BeginTimer();
 
 		$metricId = $selectedMetric->Metric->Id;
-		foreach($selectedMetric->Versions as $version)
+		$size = sizeof($selectedMetric->Versions);
+		for($n = 0; $n < $size; $n++)
 		{
+			$version = $selectedMetric->Versions[$n];
 			$work = $version->Work;
 			$workId = $work->Id;
-			self::SaveData($workId, 'metric', $metricId);
+			$isLast = ($n === $size - 1 ? 1 : 0);
+			self::SaveData($workId, 'metric', $metricId, $isLast);
 		}
 
 		Profiling::EndTimer();
@@ -110,7 +113,7 @@ class Statistics
 		return $monthsToScan;
 	}
 
-	public static function ReadAndSummarizeWorkMonth($workId, $logMonth, &$data, $cuts = null, $processRegion = true) : void
+	public static function ReadAndSummarizeWorkMonth($workId, $logMonth, &$data, $cuts = null, $processRegion = true, $addOnlyLastMetric = false) : void
 	{
 		if (sizeof($data) === 0) $data = self::InitialArray();
 
@@ -132,6 +135,7 @@ class Statistics
 		$file = self::GetFilename($folder, $workId);
 		if (!file_exists($file))
 			return;
+
 		$lines = IO::ReadAllLines($file);
 
 		for($n = sizeof($lines) - 1; $n >= 0; $n--)
@@ -141,6 +145,7 @@ class Statistics
 				$lineParts = self::DecodeArray($lines[$n]);
 				$time = $lineParts['time'];
 				$type = $lineParts['t'];
+				$extra = $lineParts['e'];
 				$id = $lineParts['id'];
 
 				if ($processRegion)
@@ -164,7 +169,14 @@ class Statistics
 				{
 					if (!self::TimeExceeded($cutsText[$d], $time))
 					{
+						if ($type !== 'metric' || !$addOnlyLastMetric || $extra === '' || $extra === '1')
 						self::AddHit($data, 'd' . $d, $sample, $type, $id);
+
+						if ($type == 'download')
+							self::AddHit($data, 'd' . $d, $sample, 'downloadType', $extra);
+						else if ($type == 'attachment')
+							self::AddHit($data, 'd' . $d, $sample, 'downloadType', 'pdf');
+
 						if ($type !== 'internal')
 						{
 							self::AddHit($data, 'd' . $d, $sample, 'work', $generalItem);
@@ -182,7 +194,7 @@ class Statistics
 
 	private static function InitialArray()
 	{
-		return ['download' => [],  'attachment' => [], 'internal' => [], 'work' => [], 'metric' => [], 'region' => []];
+		return ['download' => [],  'attachment' => [], 'internal' => [], 'work' => [], 'metric' => [], 'downloadType' => [], 'region' => []];
 	}
 
 	public static function decodeRegion($ip)

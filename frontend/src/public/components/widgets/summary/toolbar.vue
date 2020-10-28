@@ -17,8 +17,6 @@
 		</button>
 		<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" v-on:click="geolocate()"><i class="far fa-dot-circle"/></button>
-		<button v-if="Use.UseGradients" type="button" class="btn btn-default btn-xs"
-							:title="'Máscara poblacional ' + currentGradientOpacity" v-on:click="changeGradientOpacity(.25)"><i class="fas fa-satellite"/></button>
 	</div>
 		<div class="btn-group">
 			<button v-for="(mode, index) in selectionModes()" :key="mode.Name" type="button"
@@ -158,17 +156,6 @@ export default {
 				return ' active';
 			}
 			return '';
-		},
-		changeGradientOpacity(delta) {
-			var result = this.currentGradientOpacity + delta;
-			if (result > 1) {
-				result = 0.1;
-			}
-			this.currentGradientOpacity = result;
-			var rule = dom.getCssRule(document, '.gAlpha');
-			if (rule) {
-				rule.style.opacity = result;
-			}
 		}
 	},
 	computed: {

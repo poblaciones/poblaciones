@@ -53,6 +53,22 @@
 						</div>
 					</td>
 				</tr>
+				<tr v-if="anyHasArea() && showGradientOptions()">
+					<td>Ajuste poblacional:</td>
+					<td>
+						<div class="btn-group">
+							<button type="button" v-on:click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
+								Baja
+							</button>
+							<button type="button" v-on:click="changeGradientOpacity('M')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('M')">
+								Media
+							</button>
+							<button type="button" v-on:click="changeGradientOpacity('L')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('L')">
+								Alta
+							</button>
+						</div>
+					</td>
+				</tr>
 				<tr v-if="anyHasArea()">
 					<td>Trama:</td>
 					<td>
@@ -108,6 +124,13 @@ export default {
 			this.metric = metric;
 			this.$refs.dialog.show();
 		},
+		getActiveGradientOpacity(key) {
+			if (key === this.metric.SelectedVariable().GradientOpacity) {
+				return ' active';
+			} else {
+				return '';
+			}
+		},
 		getActiveOpacity(key) {
 			if (key === this.metric.SelectedVariable().Opacity) {
 				return ' active';
@@ -144,6 +167,25 @@ export default {
 				}
 				this.metric.UpdateMap();
 			}
+		},
+		changeGradientOpacity(key) {
+			var variables = this.metric.GetAllVariables();
+			var changed = false;
+			for (var n = 0; n < variables.length; n++) {
+				if (variables[n] !== 'N' && variables[n] !== key) {
+					variables[n].GradientOpacity = key;
+					changed = true;
+				}
+			}
+			if (changed) {
+				this.metric.UpdateMap();
+			}
+		},
+		showGradientOptions() {
+			if (!window.SegMap.Configuration.UseGradients || this.metric.SelectedVariable().GradientOpacity === 'N') {
+				return;
+			}
+			return (this.metric.SelectedLevel().Dataset.HasGradient);
 		},
 		anyHasArea() {
 			var ret = false;

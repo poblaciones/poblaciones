@@ -10,7 +10,19 @@ use helena\services\common\BaseService;
 
 class GradientService extends BaseService
 {
-	public function GetGradient($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z)
+	public function GetGradient($gradientId)
+	{
+		Profiling::BeginTimer();
+
+		$sql = "SELECT * FROM gradient WHERE grd_id = ?";
+		$args = array($gradientId);
+		$row = App::Db()->fetchAssoc($sql, $args);
+
+		Profiling::EndTimer();
+		return $row;
+}
+
+	public function GetGradientTile($gradientId, $gradientLimit, $gradientType, $gradientLuminance, $x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$data = ['Data' => null, 'ImageType' => null];

@@ -164,7 +164,7 @@ class DraftDataset
      *
 		 * @ClientReadonly
 		 *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Geography")
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Geography", fetch="EAGER")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="dat_geography_id", referencedColumnName="geo_id", nullable=true)
      * })
@@ -181,6 +181,13 @@ class DraftDataset
      * })
      */
     private $Work;
+
+		 /**
+     * @var integer
+		 *
+     * @ORM\Column(name="dat_texture_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $TextureId;
 
 
     /**
@@ -211,6 +218,32 @@ class DraftDataset
     public function setId($id)
     {
         $this->Id = $id;
+
+        return $this;
+    }
+
+
+
+    /**
+     * Get textureId
+     *
+     * @return integer
+     */
+    public function getTextureId()
+    {
+        return $this->TextureId;
+    }
+
+		/**
+     * Set textureId
+     *
+     * @param integer $textureId
+     *
+     * @return DraftDataset
+     */
+    public function setTextureId($textureId)
+    {
+        $this->TextureId = $textureId;
 
         return $this;
     }

@@ -45,13 +45,15 @@ SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelected
 		ret.push(['l', '1']);
 	}
 
-	if (activeSelectedMetric.SelectedVariable()) {
-		if (activeSelectedMetric.SelectedVariable().CustomPattern !== activeSelectedMetric.SelectedVariable().Pattern) {
-			ret.push(['p', activeSelectedMetric.SelectedVariable().CustomPattern, '']);
+	var variable = activeSelectedMetric.SelectedVariable();
+	if (variable) {
+		if (variable.CustomPattern !== variable.Pattern) {
+			ret.push(['p', variable.CustomPattern, '']);
 		}
-		ret.push(['t', activeSelectedMetric.SelectedVariable().Opacity, 'M']);
-		ret.push(['d', this.Boolean(activeSelectedMetric.SelectedVariable().ShowDescriptions), '0']);
-		ret.push(['s', this.Boolean(activeSelectedMetric.SelectedVariable().ShowValues), '0']);
+		ret.push(['t', variable.Opacity, 'M']);
+		ret.push(['g', variable.GradientOpacity, 'M']);
+		ret.push(['d', this.Boolean(variable.ShowDescriptions), '0']);
+		ret.push(['s', this.Boolean(variable.ShowValues), '0']);
 	}
 	// bloque de estado de variables. las variables van separadas por @, e indican visible y luego lista de visible de valores.
 	var variablesInfo = this.VariablesToRoute(activeSelectedMetric);
@@ -229,6 +231,7 @@ SelectedMetricsRouter.prototype.parseMetric = function (values) {
 	var ranking = h.getSafeValue(values, 'k', null);
 	var customPattern = h.getSafeValue(values, 'p', '');
 	var opacity = h.getSafeValue(values, 't', 'M');
+	var gradientOpacity = h.getSafeValue(values, 'g', 'M');
 	var variableStates = h.getSafeValue(values, 'w', null);
 
 	return {
@@ -245,6 +248,7 @@ SelectedMetricsRouter.prototype.parseMetric = function (values) {
 		RankingSize: this.ParseRanking(ranking)['Size'],
 		RankingDirection: this.ParseRanking(ranking)['Direction'],
 		Opacity: opacity,
+		GradientOpacity: gradientOpacity,
 		PinnedLevel: pinnedLevel,
 		CustomPattern: (customPattern === '' ? '' : parseInt(customPattern)),
 		VariableStates: (variableStates ? variableStates.split(',') : [])
@@ -326,6 +330,10 @@ SelectedMetricsRouter.prototype.RestoreMetricState = function (activeSelectedMet
 			activeSelectedMetric.SelectedVariable().ShowValues = state.ShowValues;
 			mapChanged = true;
 		}
+	}
+	if (selectedMetric.GradientOpacity !== state.GradientOpacity) {
+		selectedMetric.GradientOpacity = state.GradientOpacity;
+		mapChanged = true;
 	}
 	if (selectedMetric.Opacity !== state.Opacity) {
 		selectedMetric.Opacity = state.Opacity;

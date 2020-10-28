@@ -21,6 +21,7 @@ class MapSettings
 
 	public $UseMultiselect = false;
 	public $UseGradients = false;
+	public $UseTextures = false;
 	public $UseFavorites = false;
 
 	public $UseEmbedding = false;

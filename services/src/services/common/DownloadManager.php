@@ -3,6 +3,7 @@
 namespace helena\services\common;
 
 use minga\framework\PublicException;
+use minga\framework\ErrorException;
 use minga\framework\Str;
 
 use helena\classes\writers\SpssWriter;
@@ -34,13 +35,13 @@ class DownloadManager
 	const FILE_STATA = 5;
 	const FILE_R = 6;
 
-	private static $validFileTypes = ['s' => [ 'extension' => 'sav', 'type' => self::FILE_SPSS],
-																		'z' => [ 'extension' => 'zsav', 'type' => self::FILE_SPSS],
-																		't' => [ 'extension' => 'dta', 'type' => self::FILE_STATA],
-																		'r' => [ 'extension' => 'rdata', 'type' => self::FILE_R],
-																		'c' => [ 'extension' => 'csv', 'type' => self::FILE_CSV],
-																		'x' => [ 'extension' => 'xlsx', 'type' => self::FILE_XLSX],
-																		'h' => [ 'extension' => 'zip', 'type' => self::FILE_SHP]];
+	private static $validFileTypes = ['s' => [ 'extension' => 'sav', 'Caption' => 'SPSS', 'type' => self::FILE_SPSS],
+																		'z' => [ 'extension' => 'zsav', 'Caption' => 'SPSS', 'type' => self::FILE_SPSS],
+																		't' => [ 'extension' => 'dta', 'Caption' => 'Stata', 'type' => self::FILE_STATA],
+																		'r' => [ 'extension' => 'rdata', 'Caption' => 'R', 'type' => self::FILE_R],
+																		'c' => [ 'extension' => 'csv', 'Caption' => 'CSV', 'type' => self::FILE_CSV],
+																		'x' => [ 'extension' => 'xlsx', 'Caption' => 'Excel', 'type' => self::FILE_XLSX],
+																		'h' => [ 'extension' => 'zip', 'Caption' => 'Shapefile', 'type' => self::FILE_SHP]];
 
 	const OUTPUT_LATIN3_WINDOWS_ISO = false;
 
@@ -119,6 +120,29 @@ class DownloadManager
 			return App::StreamFile($filename, $friendlyName);
 		else
 			throw new PublicException('No ha sido posible descargar el archivo.');
+	}
+
+	public static function GetFileTypeFromLetter($letter)
+	{
+		if (array_key_exists($letter, self::$validFileTypes))
+			return self::$validFileTypes[$letter]['type'];
+		else
+			throw new ErrorException("Tipo de archivo no reconocido.");
+	}
+
+	private static function GetFileInfoFromFileType($fileType)
+	{
+		foreach (self::$validFileTypes as $key => $value)
+			if ($value['type'] == $fileType)
+				return $value;
+
+		throw new ErrorException("Tipo de archivo no reconocido.");
+	}
+
+	public static function GetFileCaptionFromFileType($fileType)
+	{
+		$info = self::GetFileInfoFromFileType($fileType);
+		return $info['Caption'];
 	}
 
 	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type)
@@ -236,7 +260,7 @@ class DownloadManager
 		$this->model = new DatasetModel();
 		$this->model->fromDraft = $fromDraft;
 		$this->model->extraColumns = $extraColumns;
-		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, $this->GetPolygon($type));
+		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, self::GetPolygon($type));
 	}
 
 	private function PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns)
@@ -308,13 +332,16 @@ class DownloadManager
 		}
 	}
 
-	private function GetPolygon($type)
+	public static function GetPolygon($type)
 	{
+		if (strlen($type) < 2)
+			return null;
 		if (substr($type, 1, 1) === 'w')
 			return 'wkt';
 		else if (substr($type, 1, 1) === 'g')
 			return 'geojson';
-		else return null;
+		else
+			return null;
 	}
 
 }

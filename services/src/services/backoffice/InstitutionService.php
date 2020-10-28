@@ -7,12 +7,15 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\Arr;
 use minga\framework\IO;
+use helena\classes\Image;
 use minga\framework\PublicException;
 use helena\db\frontend\FileModel;
 use helena\classes\Session;
 
 class InstitutionService extends BaseService
 {
+	public const MAX_WATERMARK_HEIGHT = 240;
+
 	public function GetNewInstitution()
 	{
 		$new = new entities\DraftInstitution();
@@ -34,7 +37,10 @@ class InstitutionService extends BaseService
 			$bucket = $fileController->ConvertBase64toFile($watermarkImage);
 			$wat = $this->GetNewWatermark($institution);
 			$institution->setWatermark($wat);
-			$fileController->SaveFile($institution->getWatermark(), $bucket->path . '/file.dat', true, 'image/png');
+			$file = $bucket->path . '/file.dat';
+			Image::ResizeToMaxSize($file, null, self::MAX_WATERMARK_HEIGHT);
+			$fileType = Image::GetImageMimeType($file);
+			$fileController->SaveFile($institution->getWatermark(), $file, true, $fileType);
 		}
 
 		App::Orm()->Save($institution);
@@ -70,13 +76,19 @@ class InstitutionService extends BaseService
 
 	public function GetInstitutionWatermark($watermarkId, $fromDraft=true)
 	{
-		$fileModel = new FileModel($fromDraft);
-		$outFile = IO::GetTempFilename() . '.tmp';
-		$fileModel->ReadFileToFile($watermarkId, $outFile);
+		$outFile = $this->GetInstitutionWatermarkFile($watermarkId, $fromDraft);
 		$fileController = new FileService();
 		$dataURL = $fileController->ConvertFiletoBase64($outFile);
 		IO::Delete($outFile);
 		return $dataURL;
+	}
+
+	public function GetInstitutionWatermarkFile($watermarkId, $fromDraft=true)
+	{
+		$fileModel = new FileModel($fromDraft);
+		$outFile = IO::GetTempFilename() . '.tmp';
+		$fileModel->ReadFileToFile($watermarkId, $outFile);
+		return $outFile;
 	}
 
 	private function GetNewWatermark($institution)

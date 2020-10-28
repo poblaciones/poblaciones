@@ -12,7 +12,7 @@
 		<div class="md-layout md-gutter">
 			<div class="md-layout-item md-size-100" v-if="!Variable.DataColumnIsCategorical">
 				<md-card>
-					<md-card-content>
+					<md-card-content style="padding-bottom: 0px!important;">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-100">
 								<div class="separator">
@@ -41,7 +41,7 @@
 								<div v-if="CutMode === 'S'">
 									<div class="helper">Color</div>
 										<mp-color-picker :canEdit="canEdit" :ommitHexaSign="true"
-													v-model="singleColor" />
+													v-model="singleColor" style="padding-bottom: 12px;" />
 								</div>
 
 								<div v-if="CutMode === 'J' || CutMode === 'M'

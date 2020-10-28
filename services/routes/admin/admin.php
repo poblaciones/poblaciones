@@ -116,13 +116,21 @@ App::Get('/services/admin/UpdateWorkSegmentedCrawling', function (Request $reque
 	return App::Json($ret);
 });
 
+App::$app->get('/services/admin/ProcessAllStatistics', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$controller = new services\StatisticsService();
+	$ret = $controller->ProcessAllStatistics();
+	return App::Json($ret);
+});
+
 App::$app->get('/services/admin/ProcessStatistics', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())
 		return $app;
 	$controller = new services\StatisticsService();
 	$month = Params::GetMonthMandatory('m');
 	$ret = $controller->ProcessStatistics($month);
-	return App::OrmJson($ret);
+	return App::Json($ret);
 });
 
 App::$app->get('/services/admin/GetStatistics', function (Request $request) {

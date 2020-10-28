@@ -80,6 +80,22 @@
 							</div>
 						</div>
 					</md-tab>
+
+					<md-tab md-label="Tipos de descarga">
+						<div class="md-layout">
+							<div class="md-layout-item md-size-80" style="margin-top: -10px">
+								<md-table :key="componentKey" style="max-width: 900px;" v-model="downloadTypes" md-sort="Hits" md-sort-order="asc" md-card="">
+									<md-table-row slot="md-table-row" slot-scope="{ item }">
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Tipo de archivo" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Total" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Dataset" md-sort-by="Datos">{{ item.Datos }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Dataset+WKT" md-sort-by="WKT">{{ item.WKT }}</md-table-cell>
+										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Dataset+GeoJson" md-sort-by="GeoJson">{{ item.GeoJson }}</md-table-cell>
+									</md-table-row>
+								</md-table>
+							</div>
+						</div>
+					</md-tab>
 				</md-tabs>
 			</md-card-content>
 		</md-card>
@@ -98,6 +114,7 @@ export default {
 		return {
 			works: [],
 			metrics: [],
+			downloadTypes: [],
 			totals: [],
 			resources: [],
 			months: [],
@@ -166,6 +183,7 @@ export default {
 			arr.Fill(this.totals, data.Totals);
 			arr.Fill(this.resources, data.Resources);
 			arr.Fill(this.metrics, data.Metrics);
+			arr.Fill(this.downloadTypes, data.DownloadTypes);
 
 			if (data.Months.length > 0) {
 				this.currentMonth = this.months[0];

@@ -50,16 +50,31 @@ ActiveSelectedMetric.prototype.GetAllVariables = function () {
 
 ActiveSelectedMetric.prototype.UpdateOpacity = function (zoom) {
 	var opacity = 0.7;
-	if (this.SelectedVariable().Opacity === 'H') {
+	var variable = this.SelectedVariable();
+	if (variable.Opacity === 'H') {
 		opacity = 0.95;
-	} else if (this.SelectedVariable().Opacity === 'L') {
+	} else if (variable.Opacity === 'L') {
 		opacity = 0.3;
 	}
-
 	if (zoom <= 17) {
-		this.SelectedVariable().CurrentOpacity = opacity;
+		variable.CurrentOpacity = opacity;
 	} else {
-		this.SelectedVariable().CurrentOpacity = opacity * 0.6;
+		variable.CurrentOpacity = opacity * 0.6;
+	}
+
+	// Resuelve la de gradientes
+	var gradientOpacity = 0.65;
+	if (variable.GradientOpacity === 'H') {
+		gradientOpacity = 0.80;
+	} else if (variable.GradientOpacity === 'L') {
+		gradientOpacity = 0.3;
+	} else if (variable.GradientOpacity === 'N') {
+		gradientOpacity = 0;
+	}
+	if (zoom >= 10) {
+		variable.CurrentGradientOpacity = gradientOpacity;
+	} else {
+		variable.CurrentGradientOpacity = gradientOpacity * 1.2;
 	}
 };
 

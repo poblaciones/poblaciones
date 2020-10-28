@@ -64,12 +64,28 @@ html, body {
 	padding: 0;
 }
 
+
 .separator {
 	font-size: 12px;
 	text-transform: uppercase;
 	font-weight: 500;
 	color: #949494;
 	margin-bottom: 7px;
+}
+
+.lineSeparator {
+	font-size: 12px;
+	text-transform: uppercase;
+	font-weight: 500;
+	color: #949494;
+	margin-top: 8px;
+	margin-bottom: 2px;
+	border-top: 1px solid #e0e0e0;
+	padding-top: 17px;
+}
+.lineSeparatorFirst {
+	border-top: 0px;
+	padding-top: 0px;
 }
 
 .md-suffix {
@@ -136,11 +152,14 @@ html, body {
 	min-width: 400px !important;
 	border-radius: 4px !important;
 }
+.md-card-content:last-of-type {
+		padding-bottom: 10px!important;
+}
 .md-menu-content {
 	max-width: 380px!important;
 }
 .md-dialog-actions {
-	border-top: 0.5px solid #e6e5e5;
+	border-top: 0.5px solid #cccccc;
 }
 .whiteLink {
 	color: white !important;
@@ -212,7 +231,7 @@ html, body {
 }
 
 .tooltip {
-	z-index: 11;
+	z-index: 10000;
 	background-color: #fff;
 	-webkit-border-radius: 2px;
 	border-radius: 2px;

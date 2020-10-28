@@ -15,6 +15,7 @@ class ConfigurationService extends BaseService
 		$user = $userService->GetStatus();
 
 		$ret = array('UseCalculated' => Context::Settings()->Map()->UseCalculated,
+								'UseTextures' => Context::Settings()->Map()->UseTextures,
 									'User' => $user);
 		return $ret;
 	}

@@ -108,7 +108,7 @@ html, body {
 	max-width: 380px!important;
 }
 .md-dialog-actions {
-	border-top: 0.5px solid #e6e5e5;
+	border-top: 0.5px solid #cccccc;
 }
 .whiteLink {
 	color: white !important;
@@ -171,7 +171,7 @@ html, body {
 }
 
 .tooltip {
-	z-index: 11;
+	z-index: 10000;
 	background-color: #fff;
 	-webkit-border-radius: 2px;
 	border-radius: 2px;

@@ -32,6 +32,10 @@
 ./python -m pip install lxml
 ./python -m pip install unicodecsv
 
+# resize de imágenes
+./python -m pip install pillow
+
+
 # sta
 ./python -m pip install pandas
 ./python -m pip install pyreadstat

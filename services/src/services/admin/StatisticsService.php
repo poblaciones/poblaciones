@@ -13,6 +13,8 @@ use helena\classes\App;
 use helena\classes\Paths;
 use helena\classes\Statistics;
 use helena\services\common\BaseService;
+use helena\services\common\DownloadManager;
+
 
 class StatisticsService extends BaseService
 {
@@ -35,6 +37,12 @@ class StatisticsService extends BaseService
 										 FROM statistic JOIN metric ON sta_element_id = mtr_id
 									WHERE sta_month = ? AND sta_type = 'M' ORDER BY sta_hits DESC";
 		$metrics = App::Db()->fetchAll($sqlMetrics, array($month));
+
+		$sqlDownloadTypes = "SELECT sta_element_id Id, '-' Caption, sta_hits Hits
+										 FROM statistic WHERE sta_month = ? AND sta_type = 'D' ORDER BY sta_hits DESC";
+		$downloadTypes = App::Db()->fetchAll($sqlDownloadTypes, array($month));
+		$downloadTypes = $this->FormatDownloadTypes($downloadTypes);
+
 		$summarized = $this->IsSummarized($month);
 
 		// Arma el block de resumen mensual
@@ -42,7 +50,7 @@ class StatisticsService extends BaseService
 		$totals = $this->CreateTotalHits($month, $dailyTable, $works, $metrics);
 		$resources = $this->CreateTotalsResources($month, $dailyTable);
 
-		return ['Totals' => $totals, 'Resources' => $resources, 'Works' => $works, 'Metrics' => $metrics, 'Months' => $possible, 'IsSummarized' => $summarized];
+		return ['Totals' => $totals, 'Resources' => $resources, 'Works' => $works, 'Metrics' => $metrics, 'DownloadTypes' => $downloadTypes,'Months' => $possible, 'IsSummarized' => $summarized];
 	}
 
 	private function CreateTotalHits($month, $dailyTable, $works, $metrics)
@@ -120,7 +128,16 @@ class StatisticsService extends BaseService
 		rsort($months);
 		return $months;
 	}
+	public function ProcessAllStatistics()
+	{
+		Profiling::BeginTimer();
+		$possible = $this->GetPossibleMonths();
+		foreach($possible as $month)
+			$this->ProcessStatistics($month);
+		Profiling::EndTimer();
+		return $possible;
 
+	}
 	public function ProcessStatistics($month)
 	{
 		Profiling::BeginTimer();
@@ -139,6 +156,11 @@ class StatisticsService extends BaseService
 		// 3. Inserta works
 		$values = $this->getInserts($data['works'], ['Google', 'Hits', 'Downloads', 'Backoffice'], [ $month, 'W' ]);
 		$sqlInsert = "INSERT INTO statistic (sta_element_id, sta_month, sta_type, sta_google, sta_hits, sta_downloads, sta_backoffice) VALUES ";
+		if ($values)
+			App::Db()->exec($sqlInsert . $values);
+		// 4. Inserta tipos de descarga
+		$values = $this->getInserts($data['downloadTypes'], ['Hits'], [ $month, 'D' ]);
+		$sqlInsert = "INSERT INTO statistic (sta_element_id, sta_month, sta_type, sta_hits) VALUES ";
 		if ($values)
 			App::Db()->exec($sqlInsert . $values);
 
@@ -189,20 +211,91 @@ class StatisticsService extends BaseService
 		$files = IO::GetFiles($folder, 'log');
 		$works = [];
 		$metrics = [];
+		$downloadTypes = [];
 		foreach($files as $file)
 		{
 			$workId = Str::RemoveEnding($file, '.log');
 			$workId = intval(Str::RemoveBegining($workId, 'work'));
 			$data = [];
-			Statistics::ReadAndSummarizeWorkMonth($workId, $month, $data, null, false);
+			Statistics::ReadAndSummarizeWorkMonth($workId, $month, $data, null, false, true);
 
 			$works[] = $this->ProcessWork($data, $workId);
 
 			$this->ProcessMetrics($data, $metrics);
+			$this->ProcessDownloadTypes($data, $downloadTypes);
 		}
 		$metrics = Arr::ToArrFromKeyArr($metrics);
+		$downloadTypes = Arr::ToArrFromKeyArr($downloadTypes);
+		$downloadTypes = $this->DownloadTypesToNumeric($downloadTypes);
+
 		Profiling::EndTimer();
-		return ['works' => $works, 'metrics' => $metrics];
+		return ['works' => $works, 'metrics' => $metrics, 'downloadTypes' => $downloadTypes];
+	}
+
+	private function DownloadTypesToNumeric($downloadTypes)
+	{
+		foreach($downloadTypes as &$downloadType)
+		{
+			$code = $downloadType['Id'];
+			if ($code === 'pdf')
+			{
+				$fileType = 355;
+			}
+			else
+			{
+				$fileType = DownloadManager::GetFileTypeFromLetter(substr($code, 0, 1));
+				$polygon = DownloadManager::GetPolygon($code);
+				if ($polygon && $fileType !== DownloadManager::FILE_SHP)
+				{
+					$fileType += ($polygon == 'wkt' ? 100 : 200);
+				}
+			}
+			$downloadType['Id'] = $fileType;
+		}
+		return $downloadTypes;
+	}
+
+	private function FormatDownloadTypes($downloadTypes)
+	{
+		$ret = [];
+		foreach($downloadTypes as &$downloadType)
+		{
+			$code = $downloadType['Id'];
+			$fileType = $code % 100;
+
+			$this->EnsureExistsItemDownloads($fileType, $ret);
+
+			$ret[$fileType]['Hits'] += $downloadType['Hits'];
+			if ($code === 355)
+			{
+				$ret[$fileType]['Caption'] = 'PDF';
+			}
+			else
+			{
+				if ($code >= 200)
+					$ret[$fileType]['GeoJson'] += $downloadType['Hits'];
+				else if ($code >= 100)
+					$ret[$fileType]['WKT'] += $downloadType['Hits'];
+				else
+					$ret[$fileType]['Datos'] += $downloadType['Hits'];
+				$ret[$fileType]['Caption'] = DownloadManager::GetFileCaptionFromFileType($fileType);
+			}
+		}
+		$ret = Arr::ToArrFromKeyArr($ret);
+		Arr::SortByKeyDesc($ret, 'Hits');
+		return $ret;
+	}
+
+	private function ProcessDownloadTypes($data, &$downloadTypes)
+	{
+		Profiling::BeginTimer();
+		// Suma los tipos de descarga
+		$downloadTypesInfo = $data['downloadType'];
+		foreach($downloadTypesInfo as $downloadType => $values)
+		{
+			$this->EnsureExistsItemHitsGoogle($downloadType, $downloadTypes);
+			$downloadTypes[$downloadType]['Hits'] += $values['d0'];
+		}
 	}
 
 	private function ProcessMetrics($data, &$metrics)
@@ -212,7 +305,7 @@ class StatisticsService extends BaseService
 		$metricsInfo = $data['metric'];
 		foreach($metricsInfo as $metricId => $values)
 		{
-			$this->EnsureExistsMetricInfo($metricId, $metrics);
+			$this->EnsureExistsItemHitsGoogle($metricId, $metrics);
 			$metrics[$metricId]['Hits'] += $values['d0'];
 		}
 
@@ -223,17 +316,26 @@ class StatisticsService extends BaseService
 			if (Str::StartsWith($key, 'googleMetric'))
 			{
 				$metricId = intval(Str::RemoveBegining($key, 'googleMetric'));
-				$this->EnsureExistsMetricInfo($metricId, $metrics);
+				$this->EnsureExistsItemHitsGoogle($metricId, $metrics);
 				$metrics[$metricId]['Google'] += $values['d0'];
 			}
 		}
 		Profiling::EndTimer();
 	}
 
-	private function EnsureExistsMetricInfo($metricId, &$metrics)
+	private function EnsureExistsItemHitsGoogle($key, &$array)
 	{
-		if (!array_key_exists($metricId, $metrics))
-			$metrics[$metricId] = ['Hits' => 0, 'Google' => 0];
+		self::EnsureExistsItem($key, $array, ['Hits' => 0, 'Google' => 0]);
+	}
+	private function EnsureExistsItemDownloads($key, &$array)
+	{
+		self::EnsureExistsItem($key, $array, ['Hits' => 0, 'Datos' => 0, 'WKT' => 0, 'GeoJson' => 0]);
+	}
+
+	private function EnsureExistsItem($key, &$array, $default)
+	{
+		if (!array_key_exists($key, $array))
+			$array[$key] = $default;
 	}
 
 	private function ProcessWork($data, $workId)
