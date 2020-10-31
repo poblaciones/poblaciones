@@ -21,11 +21,11 @@
 									Los cambios en la visibilidad se harán efectivos en forma inmediata, sin necesidad de volver a publicar la cartografía.
 								</div>
 							</div>
-									<div class="floatRadio largeOption">
+									<div class="floatRadio largeOption largeText">
 									<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()" class="md-primary" @change="UpdateClearLink" :value="1"></md-radio>
 								</div>
 								<div class="md-layout md-gutter">
-									<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+									<div class="md-layout-item md-size-100 md-small-size-100 largeOption largeText">
 									Público
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
@@ -34,11 +34,11 @@
 							</div>
 
 								<template v-if="!Work.properties.IsIndexed">
-									<div class="floatRadio largeOption">
+									<div class="floatRadio largeOption largeText">
 										<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()" class="md-primary" @change="UpdateSetLink" :value="2"></md-radio>
 									</div>
 									<div class="md-layout md-gutter">
-										<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+										<div class="md-layout-item md-size-100 md-small-size-100 largeOption largeText">
 											Enlace
 										</div>
 										<div class="md-layout-item md-size-100 md-small-size-100">
@@ -56,11 +56,11 @@
 									</div>
 								</template>
 
-							<div class="floatRadio largeOption">
+							<div class="floatRadio largeOption largeText">
 								<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()" class="md-primary" @change="UpdateClearLink" :value="3"></md-radio>
 							</div>
 							<div class="md-layout md-gutter">
-								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+								<div class="md-layout-item md-size-100 md-small-size-100 largeOption largeText">
 									Privado
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
@@ -257,14 +257,5 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.floatRadio {
-	float: left;
-  padding-top: 3px!important;
-}
-
-.largeOption {
-	font-size: 18px;
-  padding: 18px 0px 6px 12px;
-}
 
 </style>

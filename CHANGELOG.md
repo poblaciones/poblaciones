@@ -1,6 +1,8 @@
 [CURRENT]
 - Muesta en administración estadísticas de descargas por tipo de archivo.
 - Selección de ajuste poblacional por indicador con imágenes integradas desde WorldPpop en backoffice y visualización.
+- Posibilidad de ocultar etiquetes en el mapa de calles desde la barra de herramientas.
+- Suavizados los comercios y centros médicos en el mapa de base.
 
 - probar: https://mapa.poblaciones.org/map/#/@-37.830449,-59.910197,9z/l=12201!v2!a2!i2!p8!s1!w0,0,0,0,0
 

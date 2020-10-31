@@ -33,4 +33,6 @@ class MapSettings
 	public $LoopLocalPort = null;
 
 	public $GoogleGeocodingArea = '';
+
+	public $DefaultRelocateLocation = ['Lat' => -34.511498, 'Lon' => -63.903948];
 }

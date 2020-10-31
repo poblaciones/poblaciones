@@ -176,10 +176,10 @@ SegmentedMap.prototype.ReleasePins = function () {
 SegmentedMap.prototype.GetMapTypeState = function () {
 	return this.MapsApi.GetMapTypeState();
 };
+
 SegmentedMap.prototype.SetMapTypeState = function (mapType) {
 	this.MapsApi.SetMapTypeState(mapType);
 	this.MapTypeChanged(mapType);
-
 };
 
 SegmentedMap.prototype.SetCenter = function (coord) {
@@ -207,19 +207,47 @@ SegmentedMap.prototype.SetTypeControlsDefault = function () {
 };
 
 SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
-	var showLabels = !mapTypeState.startsWith('s');
-	if (showLabels) {
+	if (mapTypeState === 's') {
+		this.toolbarStates.showLabels = false;
+	}
+	if (mapTypeState === 'h') {
+		this.toolbarStates.showLabels = true;
+	}
+	this.UpdateLabelsVisibility();
+};
+
+SegmentedMap.prototype.ToggleShowLabels = function () {
+	// Si está en modo satélite, el toggle implica un cambio de mapa
+	var mapState = this.MapsApi.GetMapTypeState();
+	if (mapState === 'h') {
+		this.SetMapTypeState('s');
+		return;
+	}
+	if (mapState === 's') {
+		this.SetMapTypeState('h');
+		return;
+	}
+	this.toolbarStates.showLabels = !this.toolbarStates.showLabels;
+	this.UpdateLabelsVisibility();
+	this.SaveRoute.UpdateRoute();
+};
+
+SegmentedMap.prototype.UpdateLabelsVisibility = function () {
+	if (this.toolbarStates.showLabels) {
 		if (!this.Labels.Visible()) {
 			// Lo empieza a mostrar
 			this.Labels.Show();
+			this.MapsApi.UpdateLabelsVisibility(true);
 		}
 	} else {
 		if (this.Labels.Visible()) {
 			// Las oculta
 			this.Labels.Hide();
+			this.MapsApi.UpdateLabelsVisibility(false);
 		}
 	}
 };
+
 SegmentedMap.prototype.ZoomChanged = function (zoom) {
 	if (this.frame.Zoom !== zoom) {
 		this.frame.Zoom = zoom;

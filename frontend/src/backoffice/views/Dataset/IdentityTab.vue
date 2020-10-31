@@ -1,74 +1,110 @@
 <template>
 	<div v-if="Dataset && Dataset.Columns">
 		<invoker ref="invoker"></invoker>
-		<div class="dParagrah">
-			Indique, si corresponde, una variable para reconocer la descripción de los elementos del dataset o imágenes (urls a las imágenes) de los mismos.
-		</div>
-		<div class='md-layout md-gutter'>
-			<div class='md-layout-item md-size-45 md-small-size-90'>
-				<mp-select label='Descripción' :allowNull='true'
-									 @selected='Update' :canEdit='canEdit'
-									 helper='Variable con descripción. Ej. Nombre de la escuela. '
-									 :list='Dataset.Columns' v-model='Dataset.properties.CaptionColumn'
-									 :render="formatColumn" />
-			</div>
-			<div class='md-layout-item md-size-10 md-small-size-10'>
-			</div>
-			<div class='md-layout-item md-size-40 md-small-size-90'>
-				<mp-select label='Imágenes' :allowNull='true'
-									 @selected='Update' :canEdit='canEdit'
-									 helper='Variable con ruta hacia imágenes. Ej. Foto de la escuela. '
-									 :list='Dataset.Columns' v-model='Dataset.properties.ImagesColumn'
-									 :render="formatColumn" />
-			</div>
-			<div v-if="useTextures" class='md-layout-item md-size-50 md-small-size-90'>
-				<mp-select label="Textura" :list="validTextures" :modelKey="true" :canEdit="canEdit"
-									 v-model="Dataset.properties.TextureId" @selected="Update" />
-			</div>
+		<div v-if="Dataset && Dataset.Columns">
+			<div class='md-layout md-gutter'>
+				<div class='md-layout-item md-size-100'>
+					<invoker ref="invoker"></invoker>
+					<md-card>
+						<md-card-header class="largeText">
+							 Información adicional <md-icon class="rightIcon">article</md-icon>
+						</md-card-header>
+						<md-card-content>
+							<div class='md-layout md-gutter'>
+								<div class='md-layout-item md-size-50 md-small-size-100'>
+									<mp-select label='Variable con la descripción de los elementos' :allowNull='true'
+														 @selected='Update' :canEdit='canEdit' placeholder="Seleccione la variable..."
+														 helper='Ej. Nombre de la escuela. '
+														 :list='Dataset.Columns' v-model='Dataset.properties.CaptionColumn'
+														 :render="formatColumn" />
+								</div>
+								<div v-if="useTextures" class='md-layout-item md-size-50 md-small-size-100'>
+									<mp-select label="Textura" :list="validTextures" :modelKey="true" :canEdit="canEdit"
+														 v-model="Dataset.properties.TextureId" @selected="Update" />
+								</div>
 
-		</div>
-			<div v-if="Dataset && Dataset.Columns">
-				<invoker ref="invoker"></invoker>
-				<div class="dParagrah" style="padding-bottom: 0px; padding-top: 20px">
-					Mostrar panel con información al hacer click en elementos del mapa.
-				</div>
-				<div class='md-layout'>
-					<div class='md-layout-item md-size-50 md-small-size-100'>
-						<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
-							{{ infoEnabledStatus }}
-						</md-switch>
-					</div>
-				</div>
-				<div v-if="Dataset.properties.Type == 'L'">
-					<div class="dParagrah" style="padding-top: 20px">
-						Indique opcionalmente un ícono para los elementos del dataset.
-					</div>
-					<div class='md-layout'>
-						<div class='md-layout-item md-size-100 md-size-small-100'>
-							<div class='mp-label'>
-								Ícono
+								<div class='md-layout-item md-size-50 md-small-size-100'>
+									<mp-select label='Imágenes' :allowNull='true'
+														 @selected='Update' :canEdit='canEdit'
+														 helper='Especifique la variable con la dirección de las imágenes. Ej. https://wikicommons.org/jupiter.png'
+														 :list='Dataset.Columns' v-model='Dataset.properties.ImagesColumn'
+														 :render="formatColumn" />
+								</div>
+								<div class='md-layout-item md-size-50 md-small-size-100'>
+									<div class="mp-label labelSeparator">
+										Mostrar panel al hacer click en elementos del mapa
+									</div>
+									<div>
+										<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
+											{{ infoEnabledStatus }}
+										</md-switch>
+									</div>
+								</div>
 							</div>
-							<div class='currentIcon'>
-								<i v-if='Dataset.properties.Symbol' :class="Dataset.properties.Symbol"></i>
-								<span v-else style="font-size: 14px;">[Predeterminado]</span>
-								<template v-if="canEdit">
-									<md-button @click="showPicker" class="md-raised" style="margin-top: -6px;">
-										Seleccionar
-										<md-icon>edit</md-icon>
-									</md-button>
-									<mp-icon-font-picker ref="iconPicker" v-model="Dataset.properties.Symbol" searchBox="Buscar..." v-on:selectIcon="iconSelected"></mp-icon-font-picker>
-								</template>
+						</md-card-content>
+					</md-card>
+				</div>
+				<div class='md-layout-item md-size-100'>
+
+					<md-card v-if="Dataset.properties.Type == 'L'">
+						<md-card-header class="largeText">
+							Opciones del marcador <md-icon class="rightIcon">room</md-icon>
+						</md-card-header>
+						<md-card-content>
+							<div class='md-layout md-gutter'>
+								<div class='md-layout-item md-size-50 md-size-small-100'>
+									<div class="mp-label labelSeparator">Tamaño</div>
+									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="S">Normal</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="M">Grande</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="L">Muy grande</md-radio>
+									<div style="margin-top: -15px;">
+										<md-switch v-model="Dataset.properties.Marker.AutoScale" :disabled="!canEdit" class="md-primary" @change="Update">
+											Ajustar tamaño al cambiar el zoom
+										</md-switch>
+									</div>
+								</div>
+								<div class='md-layout-item md-size-50 md-size-small-100'>
+									<div class="mp-label labelSeparator">Marco</div>
+									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="P">Pin</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="C">Círculo</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="B">Cuadrado</md-radio>
+								</div>
+								<div class='md-layout-item md-size-50 md-size-small-100'>
+									<div class='mp-label labelSeparator'>Tipo de contenido</div>
+									<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="Update" value="N">Ninguno</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="Update" value="I">Ícono</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="Update" value="T">Texto</md-radio>
+								</div>
+								<div class='md-layout-item md-size-50 md-size-small-100'>
+									<div class='mp-label labelSeparator'>Contenido</div>
+									<md-radio v-model="Dataset.properties.Marker.Source" :disabled="!canEdit || Dataset.properties.Marker.Type == 'N'" class="md-primary" @change="Update" value="F">Fijo</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Source" :disabled="!canEdit || Dataset.properties.Marker.Type == 'N'" class="md-primary" @change="Update" value="V">Variable</md-radio>
+
+									<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'I' && Dataset.properties.Marker.Source == 'F'">
+										<i v-if='Dataset.properties.Marker.Symbol' :class="Dataset.properties.Marker.Symbol"></i>
+										<span v-else style="font-size: 14px;">[Predeterminado]</span>
+										<template v-if="canEdit">
+											<md-button @click="showPicker" class="md-raised" style="margin-top: -6px;">
+												Seleccionar
+												<md-icon>edit</md-icon>
+											</md-button>
+											<mp-icon-font-picker ref="iconPicker" v-model="Dataset.properties.Marker.Symbol" searchBox="Buscar..." v-on:selectIcon="iconSelected"></mp-icon-font-picker>
+										</template>
+									</div>
+									<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'T' && Dataset.properties.Marker.Source == 'F'"
+											 style="margin-top: -20px">
+										<mp-text :canEdit="canEdit && Dataset.properties.Marker.Type != 'N'" label="" :maxlength="4"
+														 @update="Update" class="smaller"
+														 v-model="Dataset.properties.Marker.Text" style="width: 100px;" />
+									</div>
+								</div>
 							</div>
-						</div>
-						<div class='md-layout-item md-size-100 md-size-small-100'>
-							<md-switch v-model="Dataset.properties.ScaleSymbol" :disabled="!canEdit" class="md-primary" @change="Update">
-								Redimensionar el ícono al cambiar el zoom.
-							</md-switch>
-						</div>
-					</div>
-					</div>
+						</md-card-content>
+					</md-card>
+				</div>
 			</div>
 		</div>
+	</div>
 </template>
 
 <script>
@@ -138,7 +174,22 @@ export default {
 	padding: 9px 0px 9px 6px;
   border-radius: 3px;
   font-size: 28px;
+	display: inline-block;
   color: #777777!important;
 }
+
+	.labelSeparator {
+		margin-top: 16px;
+		margin-bottom: -2px;
+	}
+
+	.rightIcon {
+		margin-top: -4px;
+		-webkit-text-fill-color: #c3c3c3;
+	}
+	.smaller {
+		margin-bottom: -10px;
+		overflow: hidden;
+	}
 </style>
 

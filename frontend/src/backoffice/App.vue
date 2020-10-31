@@ -514,6 +514,21 @@ a.normalTextLink:hover {
 	border: 2px solid #00a0d2;
 }
 
+.floatRadio {
+	float: left;
+	padding-top: 3px !important;
+}
+
+.largeOption {
+	padding: 18px 0px 6px 12px;
+}
+.largeText {
+	font-size: 18px;
+}
+	.largeOption {
+		padding: 18px 0px 6px 12px;
+	}
+
 .superSmallButton {
 	border: 1px solid #68B3C8;
 	padding: 0px 3px;

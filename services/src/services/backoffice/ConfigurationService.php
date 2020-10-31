@@ -16,7 +16,8 @@ class ConfigurationService extends BaseService
 
 		$ret = array('UseCalculated' => Context::Settings()->Map()->UseCalculated,
 								'UseTextures' => Context::Settings()->Map()->UseTextures,
-									'User' => $user);
+								'DefaultRelocateLocation' => Context::Settings()->Map()->DefaultRelocateLocation,
+								'User' => $user);
 		return $ret;
 	}
 }

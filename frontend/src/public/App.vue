@@ -63,7 +63,7 @@ export default {
 			collapsed: false,
 			isMobile: false,
 			splitPanels: null,
-			toolbarStates: { selectionMode: null, tutorialOpened: 0 },
+			toolbarStates: { selectionMode: null, tutorialOpened: 0, showLabels: true },
 			clipping: {
 				IsUpdating: false,
 				Region: {

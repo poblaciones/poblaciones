@@ -18,9 +18,22 @@ function GoogleMapsApi(google) {
 	this.segmentedMap = null;
 	this.infoWindow = null;
 	this.selector = new FeatureSelector(this);
+	this.allwaysHiddenElements = ['landscape.natural', 'landscape.natural.landcover', 'landscape.natural.terrain',
+																	'poi.attraction', 'administrative.locality',
+																	'administrative.country', 'administrative.province'];
+	this.labelElements = ['administrative.land_parcel', 'administrative.neighborhood', 'landscape.man_made',
+													'poi.business', 'poi.government', 'poi.medical', 'poi.park', 'poi.place_of_worship',
+													'poi.school', 'poi.sports_complex', 'transit', 'water' ];
+	this.allwaysVisibleElements = ['road'];
+	this.setColorElements = ['poi.medical', 'poi.business'];
 };
 
-GoogleMapsApi.prototype.SetSegmentedMap = function(segmentedMap) {
+GoogleMapsApi.prototype.UpdateLabelsVisibility = function(showLabels) {
+	var styles = this.generateLabelsArray(showLabels);
+	this.gMap.setOptions({styles: styles });
+};
+
+GoogleMapsApi.prototype.SetSegmentedMap = function (segmentedMap) {
 	this.segmentedMap = segmentedMap;
 };
 
@@ -91,27 +104,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
 		},
 		scaleControl: true,
-		styles: [{
-			featureType: 'landscape.natural',
-			elementType: 'labels',
-			stylers: [{ visibility: 'off' }]
-		},{
-			featureType: 'poi.attraction',
-			elementType: 'labels',
-			stylers: [{ visibility: 'off' }]
-		}, {
-			featureType: 'administrative.locality',
-			elementType: 'labels',
-			stylers: [{ visibility: 'off' }]
-		}, {
-			featureType: 'administrative.country',
-			elementType: 'labels',
-			stylers: [{ visibility: 'off' }]
-		}, {
-			featureType: 'administrative.province',
-			elementType: 'labels',
-			stylers: [{ visibility: 'off' }]
-		}],
+		styles: this.generateLabelsArray(true),
 		clickableIcons: false,
 		center: { lat: -37.1799565, lng: -65.6866910 },
 		zoom: 6
@@ -136,7 +129,22 @@ GoogleMapsApi.prototype.Initialize = function () {
 	});
 };
 
-
+GoogleMapsApi.prototype.generateLabelsArray = function (visibility) {
+	var ret = [];
+	// https://mapstyle.withgoogle.com/
+	for (var ele in this.labelElements) {
+		var item = this.labelElements[ele];
+		var feature = { featureType: item, elementType: 'labels', stylers: [{ visibility: (visibility ? 'on' : 'off') }] };
+		if (this.setColorElements.includes(item)) {
+			feature.stylers.push({ "saturation": -65 });
+		}
+		ret.push(feature);
+	}
+	for (var ele in this.allwaysHiddenElements) {
+		ret.push({ featureType: this.allwaysHiddenElements[ele], elementType: 'labels', stylers: [{ visibility: 'off' }] });
+	}
+	return ret;
+};
 
 GoogleMapsApi.prototype.BindEvents = function () {
 	var loc = this;

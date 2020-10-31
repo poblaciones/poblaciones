@@ -34,6 +34,7 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 	}
 
 	var variable = this.activeSelectedMetric.SelectedVariable();
+	var marker = this.activeSelectedMetric.SelectedLevel().Dataset.Marker;
 
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
@@ -69,7 +70,7 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 
 				allKeys.push(id);
 
-				this.createMarker(tileKey, mapItem);
+				this.createMarker(tileKey, mapItem, marker);
 			}
 		}
 	}
@@ -86,7 +87,7 @@ LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElemen
 	}
 };
 
-LocationsComposer.prototype.createMarker = function (tileKey, feature) {
+LocationsComposer.prototype.createMarker = function (tileKey, feature, marker) {
 	var loc = this;
 	var metric = loc.activeSelectedMetric;
 	var variable = metric.SelectedVariable();
@@ -108,35 +109,88 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature) {
 
 	params.map = loc.MapsApi.gMap;
 	params.position = geo;
-	params.icon = loc.objectClone(style);
-	params.icon.fillOpacity = 1;
-	params.icon.path = Svg.markerPinche;
 
-	var symbol = metric.GetSymbolInfo();
-	var n = 1;
-	if (metric.SelectedLevel().Dataset.ScaleSymbol) {
-		var adjust = 21;
-		n = h.getScaleFactor(z) / adjust;
-	}
-	params.icon.scale = n;
-	params.icon.anchor = new loc.MapsApi.google.maps.Point(10.5, 32);
-	params.icon.labelOrigin = new loc.MapsApi.google.maps.Point(11.5, 11);
-	params.label = {
-		color: 'white',
-		fontSize: (12 * n) + 'px',
-		fontWeight: symbol['weight'],
-		fontFamily: symbol['family'],
-		text: symbol['unicode']
-	};
+	var scale = this.CalculateMarkerScale(marker, z);
+	params.icon = this.CreateIcon(marker, style, scale);
+	params.label = this.CreateLabel(metric, marker, scale);
 
+	// Listo, lo muestra...
 	element = new loc.MapsApi.google.maps.Marker(params);
 	this.addMarkerListeners(metric, element, feature, z);
-	//}
 
 	if (loc.keysInTile.hasOwnProperty(tileKey) === false) {
 		loc.keysInTile[tileKey] = [];
 	}
 	loc.keysInTile[tileKey].push(element);
+};
+
+LocationsComposer.prototype.CreateIcon = function (marker, style, scale) {
+	var icon = this.objectClone(style);
+	icon.fillOpacity = 1;
+	switch (marker.Frame) {
+		case 'P':
+			icon.path = Svg.markerPinche;
+			icon.labelOrigin = new this.MapsApi.google.maps.Point(11.5, 11);
+			icon.anchor = new this.MapsApi.google.maps.Point(10.5, 32);
+			break;
+		case 'C':
+			icon.path = this.MapsApi.google.maps.SymbolPath.CIRCLE;
+			icon.anchor = new this.MapsApi.google.maps.Point(0, 1);
+			scale *= 12;
+			break;
+		case 'B':
+			icon.path = Svg.markerSquare;
+			icon.anchor = new this.MapsApi.google.maps.Point(12, 24);
+			icon.labelOrigin = new this.MapsApi.google.maps.Point(12, 12);
+
+		//		icon.anchor = new this.MapsApi.google.maps.Point(0, 1);
+//			scale *= 12;
+			break;
+		default:
+			throw new Error('Tipo de marco no reconocido.');
+	}
+	icon.scale = scale;
+	return icon;
+};
+
+LocationsComposer.prototype.CreateLabel = function (metric, marker, scale) {
+	if (marker.Type == 'N') {
+		return null;
+	}
+	// Si tiene un contenido...
+	var symbol;
+	if (marker.Type == 'I') {
+		symbol = metric.GetSymbolInfo();
+	} else if (marker.Type == 'T') {
+		symbol = { weight: '400', unicode: marker.Text, family: 'Roboto, Arial, sans-serif' };
+	} else {
+		throw new Error('Tipo de marcador no reconocido.');
+	}
+	if (marker.Frame == 'B') {
+		scale *= 1.5;
+	}
+	var fontSize = (12 * scale).toFixed(1);
+	return {
+			color: 'white',
+			fontSize: fontSize + 'px',
+			fontWeight: symbol['weight'],
+			fontFamily: symbol['family'],
+			text: symbol['unicode']
+		};
+};
+
+LocationsComposer.prototype.CalculateMarkerScale = function (marker, z) {
+	var n = 1;
+	if (marker.AutoScale) {
+		var adjust = 21;
+		n = h.getScaleFactor(z) / adjust;
+	}
+	if (marker.Size === 'M') {
+		n *= 2;
+	} else if (marker.Size === 'L') {
+		n *= 4;
+	}
+	return n;
 };
 
 LocationsComposer.prototype.addMarkerListeners = function (metric, element, feature, z) {

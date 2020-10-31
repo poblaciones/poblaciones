@@ -68,7 +68,9 @@ class PublishDataTables
 																					array('class' => entities\DatasetColumn::class, 'childKey' => 'dco_dataset_id',
 																							'children' => array(
 																								array('class' => entities\DatasetColumnValueLabel::class, 'childKey' => 'dla_dataset_column_id'))
-																						)));
+																						),
+																					array('class' => entities\DatasetMarker::class, 'parentKey' => 'dat_marker_id')
+																				));
 
 		$imageMatrix = array('class' => entities\File::class, 'parentKey' => 'wrk_image_id', 'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')));
 

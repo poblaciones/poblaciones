@@ -26,6 +26,10 @@ FrameRouter.prototype.ToRoute = function (coord) {
 	ret.push(h.trimNumberCoords(coord.Lon));
 	ret.push(segmentedMap.frame.Zoom + 'z');
 	var mapType = segmentedMap.GetMapTypeState();
+	// guarda mapType junto con la negación de etiquetas
+	if (mapType !== 's' && !segmentedMap.toolbarStates.showLabels) {
+		mapType += 'n';
+	}
 	if (mapType !== 'r') {
 		ret.push(mapType);
 	}
@@ -54,6 +58,7 @@ FrameRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 		segmentedMap.SetZoom(framing.Zoom);
 	}
 	if (framing.MapType) {
+		segmentedMap.toolbarStates.showLabels = framing.ShowLabels;
 		segmentedMap.SetMapTypeState(framing.MapType);
 	}
 	segmentedMap.SaveRoute.Disabled = false;
@@ -72,8 +77,15 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 		zoom = 14;
 	}
 	var mapType = 'r';
-	if (args.length === 4) {
-		mapType = args[3];
+	var showLabels = true;
+	if (args.length === 4 && args[3].length > 0) {
+		// Tiene algo indicado
+		if (args[3].endsWith('n')) {
+			showLabels = false;
+		}
+		if (args[3] !== 'n') {
+			mapType = args[3][0];
+		}
 	}
 	var frame = {
 		Center: {
@@ -82,6 +94,7 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 		},
 		Zoom: zoom,
 		MapType: mapType,
+		ShowLabels: showLabels,
 		ClippingRegionIds: null,
 		ClippingCircle: null,
 		ClippingLevelName: null,

@@ -47,7 +47,9 @@ class SnapshotLookupModel
 								ORDER BY id";
 
 		$params = array($datasetIdShardified,
-					$dataset["dat_caption"], $dataset["dat_symbol"], $dataset["dat_caption"]);
+					$dataset["dat_caption"],
+					($dataset["dmk_type"] == 'I' &&  $dataset["dmk_source"] == 'F' ? $dataset["dmk_symbol"] : null),
+					$dataset["dat_caption"]);
 		$r = App::Db()->exec($sql . $sqlInsert, $params);
 
 		VersionUpdater::Increment('LOOKUP');
@@ -61,16 +63,18 @@ class SnapshotLookupModel
 	private function GetDatasetInfo($datasetId)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT dataset.*, cli_id, cli_caption,
+		$sql = "SELECT dataset.*, dataset_marker.*, cli_id, cli_caption,
 												(SELECT dco_field FROM dataset_column
 												 WHERE dco_id = dat_longitude_column_id) as LongitudeColumn,
 												(SELECT dco_field FROM dataset_column
 												 WHERE dco_id = dat_latitude_column_id) as LatitudeColumn,
 												(SELECT dco_field FROM dataset_column
 												 WHERE dco_id = dat_caption_column_id) as CaptionColumn
-												FROM dataset, geography, clipping_region_item
-												WHERE dat_geography_id = geo_id AND
-													geo_country_id = cli_id AND dat_id = ? LIMIT 1";
+												FROM dataset
+												JOIN dataset_marker ON dat_marker_id = dmk_id
+												JOIN geography ON dat_geography_id = geo_id
+												JOIN clipping_region_item ON geo_country_id = cli_id
+												WHERE dat_id = ? LIMIT 1";
 
 		$ret = App::Db()->fetchAssoc($sql, array($datasetId));
 		Profiling::EndTimer();
@@ -119,15 +123,15 @@ class SnapshotLookupModel
 		$sql = $sqlInsert . "select cli_id, cli_parent_id, clr_caption, '0', cli_caption, cli_centroid, " .
 															"clr_labels_min_zoom, clr_labels_max_zoom, featureIds, population, clr_caption, clr_symbol " .
 															"FROM clipping_region_item, clipping_region, " .
-															"(SELECT	clipping_region_item_id, GROUP_CONCAT(geography_item_id SEPARATOR ',') featureIds, 
+															"(SELECT	clipping_region_item_id, GROUP_CONCAT(geography_item_id SEPARATOR ',') featureIds,
 																				MIN(geo_min_zoom) min_zoom, MAX(population) population " .
-																"FROM (	SELECT cgi_clipping_region_item_id clipping_region_item_id,  gei_geography_id , 
-																						(CASE WHEN COUNT(*) = 1 THEN min(cgi_geography_item_id) else NULL END) geography_item_id, 
+																"FROM (	SELECT cgi_clipping_region_item_id clipping_region_item_id,  gei_geography_id ,
+																						(CASE WHEN COUNT(*) = 1 THEN min(cgi_geography_item_id) else NULL END) geography_item_id,
 																						SUM(IFNULL(gei_population, 0)) population
 																				FROM clipping_region_item_geography_item
-																				JOIN geography_item ON gei_id = cgi_geography_item_id 
+																				JOIN geography_item ON gei_id = cgi_geography_item_id
 																				GROUP BY cgi_clipping_region_item_id,  gei_geography_id
-																				) as Geographies 
+																				) as Geographies
 																	JOIN geography ON geo_id = gei_geography_id " .
 																" GROUP BY clipping_region_item_id
 																			) as geographyInfo " .

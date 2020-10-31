@@ -40,20 +40,6 @@ class Dataset
     /**
      * @var string
      *
-     * @ORM\Column(name="dat_symbol", type="string", length=100, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $Symbol;
-
-		/**
-     * @var boolean
-     *
-     * @ORM\Column(name="dat_scale_symbol", type="boolean", precision=0, scale=0, nullable=false, unique=false)
-     */
-    private $ScaleSymbol;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="dat_table", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
      */
     private $Table;
@@ -146,6 +132,16 @@ class Dataset
      */
     private $TextureId;
 
+
+    /**
+     * @var \helena\entities\backoffice\DatasetMarker
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DatasetMarker", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dat_marker_id", referencedColumnName="dmk_id", nullable=false)
+     * })
+     */
+    private $Marker;
 
     /**
      * @var \helena\entities\backoffice\Geography
@@ -457,6 +453,30 @@ class Dataset
     public function getImagesColumn()
     {
         return $this->ImagesColumn;
+    }
+
+    /**
+     * Set marker
+     *
+     * @param \helena\entities\backoffice\DatasetMarker $marker
+     *
+     * @return Dataset
+     */
+    public function setMarker(\helena\entities\backoffice\DatasetMarker $marker = null)
+    {
+        $this->Marker = $marker;
+
+        return $this;
+    }
+
+    /**
+     * Get marker
+     *
+     * @return \helena\entities\backoffice\DatasetMarker
+     */
+    public function getMarker()
+    {
+        return $this->Marker;
     }
 
     /**

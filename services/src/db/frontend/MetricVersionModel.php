@@ -25,18 +25,18 @@ class MetricVersionModel extends BaseModel
 										mvl_partial_coverage,
 										ST_AsText(mvl_extents) mvl_extents,
 										geography.*,
+										dataset_marker.*,
 										dat_id,
 										dat_type,
 										dat_caption,
 										dat_caption_column_id,
-										dat_symbol,
-										dat_scale_symbol,
 										dat_table,
 										dat_show_info,
 										dat_texture_id,
 										carto_meta.met_wiki
 						FROM metric_version_level
 										JOIN dataset ON mvl_dataset_id = dat_id
+										JOIN dataset_marker ON dat_marker_id = dmk_id
 										JOIN work ON wrk_id = dat_work_id
 										JOIN metadata work_meta ON wrk_metadata_id = work_meta.met_id
 										JOIN geography ON geo_id = dat_geography_id

@@ -21,11 +21,11 @@
 
 						<div class="md-layout-item md-size-50 md-small-size-100">
 
-							<div class="floatRadio largeOption">
+							<div class="floatRadio largeOption largeText">
 								<md-radio v-model="Startup.Type" :disabled="!Work.CanEdit()" class="md-primary" @change="Update" :value="'E'"></md-radio>
 							</div>
 							<div class="md-layout md-gutter">
-								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+								<div class="md-layout-item md-size-100 md-small-size-100 largeOption largeText">
 									Extensión (predeterminado)
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
@@ -36,11 +36,11 @@
 						</div>
 						<div class="md-layout-item md-size-50 md-small-size-100">
 
-							<div class="floatRadio largeOption">
+							<div class="floatRadio largeOption largeText">
 								<md-radio v-model="Startup.Type" :disabled="!Work.CanEdit()" class="md-primary" @change="Update" :value="'D'"></md-radio>
 							</div>
 							<div class="md-layout md-gutter">
-								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+								<div class="md-layout-item md-size-100 md-small-size-100 largeOption largeText">
 									Interactiva
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
@@ -50,11 +50,11 @@
 						</div>
 
 						<div class="md-layout-item md-size-50 md-small-size-100">
-							<div class="floatRadio largeOption">
+							<div class="floatRadio largeOption largeText">
 								<md-radio v-model="Startup.Type" :disabled="!Work.CanEdit()" class="md-primary" @change="Update" :value="'R'"></md-radio>
 							</div>
 							<div class="md-layout md-gutter">
-								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+								<div class="md-layout-item md-size-100 md-small-size-100 largeOption largeText">
 									Región
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
@@ -78,11 +78,11 @@
 							</div>
 						</div>
 						<div class="md-layout-item md-size-50 md-small-size-100">
-							<div class="floatRadio largeOption">
+							<div class="floatRadio largeOption largeText">
 								<md-radio v-model="Startup.Type" :disabled="!Work.CanEdit()" class="md-primary" @change="Update" :value="'L'"></md-radio>
 							</div>
 							<div class="md-layout md-gutter">
-								<div class="md-layout-item md-size-100 md-small-size-100 largeOption">
+								<div class="md-layout-item md-size-100 md-small-size-100 largeOption largeText">
 									Ubicación fija
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
@@ -198,11 +198,6 @@ export default {
 	border-radius: 3px;
 }
 
-.floatRadio {
-	float: left;
-  padding-top: 3px!important;
-}
-
 .paddedList {
 	padding: 20px 60px 0px 60px !important;
 }
@@ -210,10 +205,7 @@ export default {
 	margin-left: 0px!important;
 }
 
-.largeOption {
-	font-size: 18px;
-  padding: 18px 0px 6px 12px;
-}
+
 .extraInfo {
 	color: #777;
 	font-size: 85%;

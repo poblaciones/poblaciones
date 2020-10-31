@@ -61,13 +61,20 @@ class DatasetService extends DbSession
 	{
 		Profiling::BeginTimer();
 
-		$dataset = new entities\DraftDataset();
+		$datasetMarker = new entities\DraftDatasetMarker();
+		$datasetMarker->setAutoScale(false);
+		$datasetMarker->setSize('S');
+		$datasetMarker->setType('N');
+		$datasetMarker->setFrame('P');
+		$datasetMarker->setSource('F');
+		App::Orm()->Save($datasetMarker);
 
+		$dataset = new entities\DraftDataset();
 		$dataset->setCaption($caption);
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
+		$dataset->setMarker($datasetMarker);
 		$dataset->setWork($work);
 		$dataset->setType('L');
-		$dataset->setScaleSymbol(true);
 		$dataset->setShowInfo(true);
 		$dataset->setExportable(true);
 		$dataset->setGeoreferenceStatus(0);

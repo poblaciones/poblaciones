@@ -16,13 +16,13 @@ class DatasetInfo extends BaseMapModel
 	public $TextureId;
 	public $HasGradient;
 
+	public $Marker;
+
 	public static function GetMap()
 	{
 		return array (
 			'dat_id' => 'Id',
 			'dat_type' => 'Type',
-			'dat_symbol' => 'Symbol',
-			'dat_scale_symbol' => 'ScaleSymbol',
 			'dat_caption' => 'Name',
 			'dat_table' => 'Table',
 			'dat_texture_id' => 'TextureId',

@@ -51,11 +51,6 @@ export default {
 	border-radius: 3px;
 }
 
-.floatRadio {
-	float: left;
-  padding-top: 3px!important;
-}
-
 .paddedList {
 	padding: 20px 60px 0px 60px !important;
 }
@@ -63,10 +58,6 @@ export default {
 	margin-left: 0px!important;
 }
 
-.largeOption {
-	font-size: 18px;
-  padding: 18px 0px 6px 12px;
-}
 .extraInfo {
 	color: #777;
 	font-size: 85%;

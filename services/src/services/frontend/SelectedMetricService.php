@@ -15,6 +15,7 @@ use minga\framework\Arr;
 use minga\framework\Profiling;
 
 use helena\entities\frontend\metric\DatasetInfo;
+use helena\entities\frontend\metric\MarkerInfo;
 use helena\entities\frontend\metric\SelectedMetric;
 use helena\entities\frontend\metric\SelectedMetricVersion;
 use helena\entities\frontend\metric\VariableInfo;
@@ -211,6 +212,11 @@ class SelectedMetricService extends BaseService
 		$level->Dataset->Fill($selectedVersionLevelInfo);
 		$level->Dataset->HasGradient = ($selectedVersionLevelInfo['geo_gradient_id']
 						&& ($level->Dataset->Type == 'S' || $level->Dataset->Type == 'D') ? 1 : 0);
+		if ($level->Dataset->Type == 'L')
+		{
+			$level->Dataset->Marker = new MarkerInfo();
+			$level->Dataset->Marker->Fill($selectedVersionLevelInfo);
+		}
 		// Agrega variables
 		$this->AddVariables($level);
 		return $level;

@@ -368,13 +368,13 @@ ActiveSelectedMetric.prototype.CreateComposer = function() {
 };
 
 ActiveSelectedMetric.prototype.GetSymbolInfo = function () {
-  // en this.properties.Symbol tiene el símbolo asignada.
+  // en this.properties.Marker.Symbol tiene el símbolo asignada.
 	if (this.$calculatedSymbol !== null) {
 		return this.$calculatedSymbol;
 	}
 	// Si del server vino null, lo pone vacío
 	var ret = { 'family': 'Arial', 'unicode': ' ', 'weight': '400' };
-	var symbol = this.SelectedLevel().Dataset.Symbol;
+	var symbol = this.SelectedLevel().Dataset.Marker.Symbol;
 	if (symbol !== null) {
 		var preffix = symbol.substr(0, 3);
 		var unicode = null;

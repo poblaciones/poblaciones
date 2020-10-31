@@ -1,23 +1,30 @@
 <template>
 	<div class="toolbar no-print" style="display: block">
-	<div class="btn-group">
-		<button type="button"
-						id="dropdownCaptureButton" class="btn btn-default btn-xs dropdown-toggle"
-						style="border-top-right-radius: 0px; border-bottom-right-radius: 0px;"
-						data-toggle="dropdown">
-			<i class="fas fa-camera" title="Guardar como" />
+		<div class="btn-group">
+			<button type="button"
+							id="dropdownCaptureButton" class="btn btn-default btn-xs dropdown-toggle"
+							style="border-top-right-radius: 0px; border-bottom-right-radius: 0px;"
+							data-toggle="dropdown">
+				<i class="fas fa-camera" title="Guardar como" />
+				<ul class="dropdown-menu dropdown-menu-left dropCapture" aria-labelledby="dropdownCaptureButton">
+					<li><a @click="captureMapImage('jpeg')">Guardar como JPG</a></li>
+					<li><a @click="captureMapImage('png')">Guardar como PNG</a></li>
+					<li class="divider"></li>
+					<li><a @click="captureMapPdf(false)">Guardar como PDF</a></li>
+					<li><a @click="captureMapPdf(true)">Guardar como PDF (apaisado)</a></li>
+				</ul>
+			</button>
+			<button type="button" class="btn btn-default btn-xs"
+							:title="(toolbarStates.showLabels ? 'Ocultar etiquetas' : 'Mostrar etiquetas')" v-on:click="toggleLabels()" :class="getLabelsActive()">
+				<i class="fas fa-tags" />
+			</button>
 
-			<ul class="dropdown-menu dropdown-menu-left dropCapture" aria-labelledby="dropdownCaptureButton">
-				<li><a @click="captureMapImage('jpeg')">Guardar como JPG</a></li>
-				<li><a @click="captureMapImage('png')">Guardar como PNG</a></li>
-				<li class="divider"></li>
-				<li><a @click="captureMapPdf(false)">Guardar como PDF</a></li>
-				<li><a @click="captureMapPdf(true)">Guardar como PDF (apaisado)</a></li>
-			</ul>
-		</button>
-		<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
-							title="Ubicación actual" v-on:click="geolocate()"><i class="far fa-dot-circle"/></button>
-	</div>
+			<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
+							title="Ubicación actual" v-on:click="geolocate()">
+				<i class="far fa-dot-circle" />
+			</button>
+		</div>
+
 		<div class="btn-group">
 			<button v-for="(mode, index) in selectionModes()" :key="mode.Name" type="button"
 							v-on:click="setMode(index)" v-on:mouseup="setMode(index)"
@@ -137,6 +144,9 @@ export default {
 		hasGeolocation() {
 			return navigator && navigator.geolocation;
 		},
+		toggleLabels() {
+			window.SegMap.ToggleShowLabels();
+		},
 		geolocate() {
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(function (position) {
@@ -156,7 +166,13 @@ export default {
 				return ' active';
 			}
 			return '';
-		}
+		},
+		getLabelsActive(mode) {
+			if (this.toolbarStates.showLabels) {
+				return ' active';
+			}
+			return ' unselected';
+		},
 	},
 	computed: {
 		Use() {
@@ -223,9 +239,18 @@ export default {
 	margin-top: 7px;
   margin-left: -8px;
 }
+.unselected {
+	background-color: white !important;
+	color: #333!important;
+}
+	.unselected:hover {
+		background-color: #333 !important;
+		color: #d4d4d4 !important;
+		border-color: #8c8c8c !important;
+	}
 .shareIt {
-  min-width: 37px;
-  margin-top: 8px;
-  margin-left: -5px;
+	min-width: 37px;
+	margin-top: 8px;
+	margin-left: -5px;
 }
 </style>
