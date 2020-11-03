@@ -6,11 +6,11 @@ use minga\framework\Performance;
 use minga\framework\PublicException;
 
 use helena\classes\GlobalTimer;
-use helena\db\frontend\SnapshotByDataset;
+use helena\db\frontend\SnapshotByDatasetRanking;
 use helena\caches\RankingCache;
 use helena\entities\frontend\geometries\Envelope;
-use helena\entities\frontend\clipping\RankingInfo;
-use helena\entities\frontend\clipping\RankingItemInfo;
+use helena\entities\frontend\metric\RankingInfo;
+use helena\entities\frontend\metric\RankingItemInfo;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\services\common\BaseService;
 
@@ -57,21 +57,21 @@ class RankingService extends BaseService
 		$hasDescriptions = $level->HasDescriptions;
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		$table = new SnapshotByDataset($snapshotTable);
+		$table = new SnapshotByDatasetRanking($snapshotTable);
 
 		$geographyId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionRankingByCircle($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$rows = $table->GetMetricVersionRankingByCircle($geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		else if ($frame->ClippingRegionIds != NULL)
 		{
-			$rows = $table->GetMetricVersionRankingByRegionIds($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$rows = $table->GetMetricVersionRankingByRegionIds($geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionRankingByEnvelope($metricVersionId, $geographyId, $variableId, $hasTotals, $urbanity, $frame->Envelope, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$rows = $table->GetMetricVersionRankingByEnvelope($geographyId, $variableId, $hasTotals, $urbanity, $frame->Envelope, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 		$data = $this->CreateRankingInfo($rows);
 		return $data;

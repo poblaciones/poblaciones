@@ -1,0 +1,213 @@
+import str from '@/common/js/str';
+import arr from '@/common/js/arr';
+import PanelType from '@/public/enums/PanelType';
+import axios from 'axios';
+
+import h from '@/public/js/helper';
+import err from '@/common/js/err';
+
+export default InfoWindow;
+
+function InfoWindow(segMap) {
+	this.segMap = segMap;
+	this.cancel1 = null;
+	this.cancel2 = null;
+	this.CancelToken1 = axios.CancelToken;
+	this.CancelToken2 = axios.CancelToken;
+};
+
+InfoWindow.prototype.CheckUpdateNavigation = function () {
+	var navigatonKey = this.resolveCurrentFeatureNavigationKey();
+	if (!navigatonKey) {
+		window.Panels.Content.FeatureNavigation.Key = null;
+		arr.Clear(window.Panels.Content.FeatureNavigation.Values);
+		return;
+	}
+	// si no tiene información de navagación para ese conjunto de valores, lo pide
+	if (window.Panels.Content.FeatureNavigation.Key !== navigatonKey &&
+				window.Panels.Content.FeatureNavigation.GettingKey !== navigatonKey) {
+		// Lo actualiza
+		var key = window.Panels.Content.FeatureInfoKey;
+		var metric = this.segMap.Metrics.GetMetricById(key.MetricId);
+		if (!metric) {
+			return;
+		}
+		window.Panels.Content.FeatureNavigation.GettingKey = navigatonKey;
+		const loc = this;
+		var exceptions = this.GetExceptions(key.MetricId, key.VariableId);
+		var params2 = h.getNavigationParams(metric.properties, this.segMap.frame, exceptions);
+		if (this.cancel2 !== null) {
+			this.cancel2('cancelled');
+		}
+		this.segMap.Get(window.host + '/services/metrics/GetMetricNavigationInfo', {
+			params: params2,
+			cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; })
+		}).then(function (res) {
+			loc.cancel2 = null;
+			window.Panels.Content.FeatureNavigation.GettingKey = null;
+			var actualNavigatonKey = loc.resolveCurrentFeatureNavigationKey();
+			if (actualNavigatonKey === navigatonKey) {
+				window.Panels.Content.FeatureNavigation.Key = navigatonKey;
+				key.Exceptions = exceptions;
+				arr.Fill(window.Panels.Content.FeatureNavigation.Values, res.data);
+			}
+		});
+	}
+};
+
+InfoWindow.prototype.resolveCurrentFeatureNavigationKey = function () {
+	var key = window.Panels.Content.FeatureInfoKey;
+	if (!key || !key.VariableId) {
+		return null;
+	}
+	var metric = this.segMap.Metrics.GetMetricById(key.MetricId);
+	if (metric === null) {
+		return null;
+	}
+	var exceptions = this.GetExceptions(key.MetricId, key.VariableId);
+	var params = h.getNavigationParams(metric.properties, this.segMap.frame, exceptions);
+	return JSON.stringify(params);
+};
+
+InfoWindow.prototype.GetExceptions = function (metricId, variableId) {
+	var excep = this.GetUnselectedCategoriesByVariableId(metricId, variableId);
+	if (excep == null) {
+		var key = window.Panels.Content.FeatureInfoKey;
+		if (!key || !key.VariableId) {
+			return '';
+		}
+		excep = key.Exceptions;
+	}
+	return (excep ? excep : '');
+};
+
+InfoWindow.prototype.Previous = function () {
+	var newElement = this.getElement(-1);
+	if (newElement === null) {
+		return;
+	}
+	var newKey = window.Panels.Content.FeatureInfoKey;
+	newKey.Id = newElement.FID;
+	newKey.Sequence = newElement.Sequence;
+
+	this.InfoRequestedInteractive(newElement, newKey, newKey.Id, null);
+};
+
+
+InfoWindow.prototype.Next = function () {
+	var newElement = this.getElement(+1);
+	if (newElement === null) {
+		return;
+	}
+	var newKey = window.Panels.Content.FeatureInfoKey;
+	newKey.Id = newElement.FID;
+	newKey.Sequence = newElement.Sequence;
+	newKey.LabelId = newElement.ValueId;
+	this.InfoRequestedInteractive(newElement, newKey, newKey.Id, null);
+};
+
+InfoWindow.prototype.getElement = function (offset) {
+	var key = window.Panels.Content.FeatureInfoKey;
+	var vals = window.Panels.Content.FeatureNavigation.Values;
+	var curPos = arr.IndexByProperty(vals, 'FID', key.Id);
+	if (curPos == -1) {
+		return null;
+	}
+	curPos += offset;
+	if (curPos === vals.length || curPos < 0) {
+		return;
+	}
+	return vals[curPos];
+};
+
+
+InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid, offset) {
+	if (position) {
+		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
+					|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
+			this.segMap.MapsApi.FitEnvelope(position.Envelope, false, window.Panels.Left.width);
+		} else if (!position.Point || position.Point.X < 350) {
+			this.segMap.PanTo(position.Coordinate, window.Panels.Left.width);
+		}
+	}
+	this.InfoRequested(position, parent, fid, offset, true);
+};
+
+InfoWindow.prototype.InfoRequested = function (position, key, fid, offset, forceExpand) {
+	// Establece qué está obteniendo
+	key.Id = fid;
+	window.Panels.Content.FeatureInfoKey = key;
+	this.CheckUpdateNavigation();
+	var service;
+	var params;
+
+	if (key.VariableId === null) {
+		// es una etiqueta de información
+		service = 'GetLabelInfo';
+		params = { f: fid };
+	} else {
+		// es un elemento de metric
+		service = 'GetMetricItemInfo';
+		params = { f: fid, m: key.MetricId, v: key.VariableId };
+		if (key.Sequence) {
+			var metric = this.segMap.Metrics.GetMetricById(key.MetricId);
+			if (metric) {
+				metric.SetActiveSequenceStep(key.VariableId, key.LabelId, key.Sequence);
+			}
+		}
+	}
+	// Lo busca
+	if (this.cancel1 !== null) {
+		this.cancel1('cancelled');
+	}
+	const loc = this;
+	this.segMap.Get(window.host + '/services/metrics/' + service, {
+		params: params,
+		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; })
+	}).then(function (res) {
+		loc.cancel1 = null;
+		loc.ReceiveInfoWindowData(res, position, key, forceExpand);
+	});
+};
+
+InfoWindow.prototype.ReceiveInfoWindowData = function (res, position, key, forceExpand) {
+	// Lo obtuvo
+	res.data.position = position;
+	res.data.Key = key;
+	res.data.panelType = PanelType.InfoPanel;
+	window.Panels.Left.Add(res.data);
+	// Si viene interactivo, lo abre y lo pone en la ruta
+	if (forceExpand) {
+		window.Panels.Left.collapsed = false;
+		this.segMap.SaveRoute.UpdateRoute();
+	}
+};
+
+InfoWindow.prototype.GetUnselectedCategoriesByVariableId = function(metricId, variableId) {
+	var metric = this.segMap.Metrics.GetMetricById(metricId);
+	if (metric) {
+		var variable = metric.GetVariableById(variableId);
+		if (variable) {
+			return metric.getHiddenValueLabels(variable);
+		}
+	}
+	return null;
+};
+
+InfoWindow.prototype.InfoListRequested = function (parent, forceExpand) {
+	const loc = this;
+	var page = 0;
+	window.SegMap.Get(window.host + '/services/metrics/GetInfoListData', {
+		params: { l: parent.MetricId, a: parent.LevelId, v: parent.MetricVersionId, p: page }
+	}).then(function (res) {
+			res.data.parent = parent;
+			res.data.panelType = PanelType.InfoPanel;
+			window.Panels.Content.FeatureList = res.data;
+			window.Panels.Left.Add(res.data);
+			if (forceExpand) {
+				window.Panels.Left.collapsed = false;
+			}
+	}).catch(function (error) {
+		err.errDialog('GetInfoWindowData', 'traer la información para el elemento seleccionado', error);
+	});
+};

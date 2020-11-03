@@ -8,6 +8,8 @@ class InfoWindowInfo
 	public $Type;
 	public $Code;
 	public $Image;
+	public $Next;
+	public $Previous;
 	public $Items = array();
 }
 

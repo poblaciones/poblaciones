@@ -11,8 +11,19 @@
 			<mp-close-button v-else v-on:click="doClose" class="exp-hiddable-block" />
 
 			<h5 class="title"><mp-label :text="'' + title" /></h5>
+
 			<div class='stats' style="padding-top: 8px">
 				<span style="color: rgb(167, 167, 167);">{{ featureInfo.Type }}</span>
+				<div style="float: right" class="exp-hiddable-block">
+					<button type="button" :disabled="isLast"
+									class="close lightButton smallerButton" :title="(isLast ? '' : positionalData + 'Siguiente')" v-on:click="next()">
+						<i class="fas fa-chevron-right" />
+					</button>
+					<button type="button" :disabled="isFirst" style="margin-right: -2px"
+									class="close lightButton smallerButton" :title="(isFirst ? '' : positionalData + 'Anterior')" v-on:click="previous()">
+						<i class="fas fa-chevron-left" />
+					</button>
+				</div>
 			</div>
 			<hr class="moderateHr exp-hiddable-visiblity">
 			<div class='item' v-if="featureInfo.Code && featureInfo.Title">
@@ -28,6 +39,7 @@
 
 <script>
 import h from '@/public/js/helper';
+import arr from '@/common/js/arr';
 
 export default {
 	name: 'featureInfo',
@@ -43,8 +55,55 @@ export default {
 			}
 			return '';
 		},
+		rows() {
+			return window.Panels.Content.FeatureNavigation.Values;
+		},
 		val() {
 			return h.ensureFinalDot(this.isNullDash(this.featureInfo.Code));
+		},
+		currentPosition() {
+			return arr.IndexByProperty(this.rows, 'FID', this.featureInfo.Key.Id);
+		},
+		positionAndSize() {
+			var curPos = this.currentPosition;
+			if (curPos === -1) {
+				return { position: -1, size: 0 };
+			}
+			var category = this.rows[curPos].ValueId;
+			var pos = 0;
+			for (var n = curPos - 1; n >= 0; n--) {
+				if (this.rows[n].ValueId !== category)
+					break;
+				pos++;
+			}
+			var following = 0;
+			for (var n = curPos + 1; n < this.rows.length; n++) {
+				if (this.rows[n].ValueId !== category)
+					break;
+				following++;
+			}
+			return { position: pos, size: pos + following + 1 };
+		},
+		positionalData() {
+			var curPos = this.positionAndSize;
+			if (curPos.position === -1) {
+				return '';
+			}
+			return (curPos.position + 1) + '/' + curPos.size + " | ";
+		},
+		isFirst() {
+			var curPos = this.positionAndSize;
+			if (curPos.position === -1) {
+				return true;
+			}
+			return curPos.position === 0;
+		},
+		isLast() {
+			var curPos = this.positionAndSize;
+			if (curPos.position === -1) {
+				return true;
+			}
+			return curPos.position + 1 === curPos.size;
 		},
 		lat() {
 			if(this.featureInfo.position && this.featureInfo.position.Coordinate && this.featureInfo.position.Coordinate.Lat) {
@@ -68,6 +127,12 @@ export default {
 			window.Panels.Content.FeatureInfoKey = null;
 			e.preventDefault();
 			this.$emit('clickClose', e, this.featureInfo.Key.Id);
+		},
+		next() {
+			window.SegMap.InfoWindow.Next();
+		},
+		previous() {
+			window.SegMap.InfoWindow.Previous();
 		},
 		capitalize(name) {
 			return h.capitalize(name);
@@ -120,11 +185,14 @@ export default {
 	padding-bottom: 10px;
 	word-wrap: break-word;
 }
-.topImage {
-	background-position: 50% 50%;
-	height: 200px;
-	width: 100%;
-	background-size: cover;
-}
+	.smallerButton {
+		padding: 4px 0px !important;
+	}
+	.topImage {
+		background-position: 50% 50%;
+		height: 200px;
+		width: 100%;
+		background-size: cover;
+	}
 </style>
 

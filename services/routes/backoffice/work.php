@@ -44,6 +44,9 @@ App::$app->get('/services/backoffice/GetFactories', function (Request $request) 
 
 	$ret['Variable'] = $metricService->GetNewVariable();
 
+	$datasetColumnService = new services\DatasetColumnService();
+	$ret['Column'] = $datasetColumnService->GetNewColumn();
+
 	return App::OrmJson($ret);
 });
 

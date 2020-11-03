@@ -6,8 +6,6 @@ import h from '@/public/js/helper';
 import err from '@/common/js/err';
 import arr from '@/common/js/arr';
 import axios from 'axios';
-import fontAwesomeIconsList from '@/common/js/fontAwesomeIconsList.js';
-import flatIconsList from '@/common/js/flatIconsList.js';
 
 
 export default ActiveSelectedMetric;
@@ -15,7 +13,6 @@ export default ActiveSelectedMetric;
 function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 
 	this.$Segment = null;
-	this.$calculatedSymbol = null;
 	this.cancelUpdateSummary = null;
 	this.cancelUpdateRanking = null;
 	this.properties = selectedMetric;
@@ -26,8 +23,10 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.ShowRanking = false;
 	this.RankingSize = 10;
 	this.RankingDirection = 'D';
+	this.composer = null;
 	this.KillDuplicateds = true;
 	this.fillEmptySummaries();
+	this.activeSequenceSteps = {};
 	this.blockSize = window.SegMap.tileDataBlockSize;
 };
 
@@ -223,11 +222,11 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 	});
 };
 
-ActiveSelectedMetric.prototype.getHiddenValueLabels = function (variables) {
+ActiveSelectedMetric.prototype.getHiddenValueLabels = function (variable) {
 	var ret = '';
-	for (var n = 0; n < variables.ValueLabels.length; n++)
-		if (!variables.ValueLabels[n].Visible) {
-			ret += ',' + variables.ValueLabels[n].Id;
+	for (var n = 0; n < variable.ValueLabels.length; n++)
+		if (!variable.ValueLabels[n].Visible) {
+			ret += ',' + variable.ValueLabels[n].Id;
 		}
 	if (ret.length > 0) {
 		ret = ret.substring(1);
@@ -349,6 +348,7 @@ ActiveSelectedMetric.prototype.SelectedVariable = function () {
 ActiveSelectedMetric.prototype.UpdateMap = function () {
 	this.UpdateLevel();
 	window.SegMap.Metrics.UpdateMetric(this);
+	window.SegMap.InfoWindow.CheckUpdateNavigation();
 	window.SegMap.SaveRoute.UpdateRoute();
 };
 
@@ -356,59 +356,57 @@ ActiveSelectedMetric.prototype.Remove = function () {
 	window.SegMap.Metrics.Remove(this);
 };
 
-ActiveSelectedMetric.prototype.CreateComposer = function() {
+ActiveSelectedMetric.prototype.CreateComposer = function () {
+	var ret;
 	if (this.SelectedLevel().Dataset.Type === 'L') {
 		//case 'L':
-		return new LocationsComposer(window.SegMap.MapsApi, this);
+		ret = new LocationsComposer(window.SegMap.MapsApi, this);
 		/*case 'S':
 	case 'D':*/
 	} else {
-		return new SvgComposer(window.SegMap.MapsApi, this);
+		ret = new SvgComposer(window.SegMap.MapsApi, this);
 	}
-};
-
-ActiveSelectedMetric.prototype.GetSymbolInfo = function () {
-  // en this.properties.Marker.Symbol tiene el símbolo asignada.
-	if (this.$calculatedSymbol !== null) {
-		return this.$calculatedSymbol;
-	}
-	// Si del server vino null, lo pone vacío
-	var ret = { 'family': 'Arial', 'unicode': ' ', 'weight': '400' };
-	var symbol = this.SelectedLevel().Dataset.Marker.Symbol;
-	if (symbol !== null) {
-		var preffix = symbol.substr(0, 3);
-		var unicode = null;
-		if (preffix === 'fab' || preffix === 'fas') {
-			unicode = fontAwesomeIconsList.icons[symbol];
-		} else if (preffix === 'fla') {
-			unicode = flatIconsList.icons[symbol];
-		}
-		var family;
-		var weight = 'normal';
-		switch (preffix) {
-			case 'fab':
-				family = 'Font Awesome\\ 5 Brands';
-				weight = '400';
-				break;
-			case 'fas':
-				family = 'Font Awesome\\ 5 Free';
-				weight = '900';
-				break;
-			case 'fla':
-				family = 'Flaticon';
-				break;
-			default:
-				family = '';
-				break;
-		}
-		if (unicode) {
-			ret = { 'family': family, 'unicode': unicode, 'weight': weight };
-		}
-	}
-	this.$calculatedSymbol = ret;
+	this.composer = ret;
 	return ret;
 };
 
+ActiveSelectedMetric.prototype.GetActiveSequenceStep = function (variableId, labelId) {
+	var variable = this.GetVariableById(variableId);
+	if (!variable) {
+		return 1;
+	}
+	for (var n = 0; n < variable.ValueLabels.length; n++) {
+		if (variable.ValueLabels[n].Id === labelId) {
+			return (variable.ValueLabels[n].ActiveStep ? variable.ValueLabels[n].ActiveStep : 1);
+		}
+	}
+	return 1;
+};
+
+ActiveSelectedMetric.prototype.SetActiveSequenceStep = function (variableId, labelId, value) {
+	// Establece la selección
+	var variable = this.GetVariableById(variableId);
+	if (!variable) {
+		return;
+	}
+	// Verifica si hay cambio
+	var keep = this.GetActiveSequenceStep(variableId, labelId);
+	if (keep === value) {
+		return;
+	}
+	// La setea
+	for (var n = 0; n < variable.ValueLabels.length; n++) {
+		if (variable.ValueLabels[n].Id === labelId) {
+			variable.ValueLabels[n].ActiveStep = value;
+		}
+	}
+	// Regenera el anterior y el nuevo seleccionado
+	if (this.composer) {
+		this.composer.SequenceComposer.RecreateSequenceMarker(labelId, keep);
+		this.composer.SequenceComposer.RecreateSequenceMarker(labelId, value);
+	}
+	window.SegMap.SaveRoute.UpdateRoute();
+};
 
 ActiveSelectedMetric.prototype.showText = function () {
 	var minZoom = this.SelectedLevel().MinZoom;

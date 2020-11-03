@@ -502,6 +502,18 @@ module.exports = {
 			h: hiddenValueLabels
 		}, this.getFrameParams(frame));
 	},
+	getNavigationParams(metric, frame, hiddenValueLabels) {
+		const ver = metric.Versions[metric.SelectedVersionIndex];
+		const level = ver.Levels[ver.SelectedLevelIndex];
+		const variable = level.Variables[level.SelectedVariableIndex];
+		return this.mergeObject({
+			l: metric.Metric.Id,
+			i: variable.Id,
+			u: metric.SelectedUrbanity,
+			w: metric.Metric.Signature,
+			h: (hiddenValueLabels ? hiddenValueLabels : null)
+		}, this.getFrameParams(frame));
+	},
 	getSummaryParams(metric, frame) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		return this.mergeObject({

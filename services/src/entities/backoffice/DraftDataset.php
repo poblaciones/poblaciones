@@ -340,30 +340,6 @@ class DraftDataset
         return $this->Caption;
     }
 
-	 /**
-     * Set scaleSymbol
-     *
-     * @param boolean $scaleSymbol
-     *
-     * @return DraftDataset
-     */
-    public function setScaleSymbol($scaleSymbol)
-    {
-        $this->ScaleSymbol = $scaleSymbol;
-
-        return $this;
-    }
-
-    /**
-     * Get scaleSymbol
-     *
-     * @return boolean
-     */
-    public function getScaleSymbol()
-    {
-        return $this->ScaleSymbol;
-    }
-
 		/**
      * Set GeoreferenceStatus
      *
@@ -386,30 +362,6 @@ class DraftDataset
     public function getGeoreferenceStatus()
     {
         return $this->GeoreferenceStatus;
-    }
-
-    /**
-     * Set symbol
-     *
-     * @param string $symbol
-     *
-     * @return DraftDataset
-     */
-    public function setSymbol($symbol)
-    {
-        $this->Symbol = $symbol;
-
-        return $this;
-    }
-
-    /**
-     * Get symbol
-     *
-     * @return string
-     */
-    public function getSymbol()
-    {
-        return $this->Symbol;
     }
 
     /**
@@ -465,7 +417,7 @@ class DraftDataset
      *
      * @param \helena\entities\backoffice\DraftDatasetMarker $marker
      *
-     * @return Dataset
+     * @return DraftDataset
      */
     public function setMarker(\helena\entities\backoffice\DraftDatasetMarker $marker = null)
     {

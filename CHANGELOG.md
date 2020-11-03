@@ -1,10 +1,16 @@
 [CURRENT]
+
+v2.31 (2020-11-03)
 - Muesta en administración estadísticas de descargas por tipo de archivo.
 - Selección de ajuste poblacional por indicador con imágenes integradas desde WorldPpop en backoffice y visualización.
 - Posibilidad de ocultar etiquetes en el mapa de calles desde la barra de herramientas.
 - Suavizados los comercios y centros médicos en el mapa de base.
-
-- probar: https://mapa.poblaciones.org/map/#/@-37.830449,-59.910197,9z/l=12201!v2!a2!i2!p8!s1!w0,0,0,0,0
+- El editor de datos permite crear nuevas variables en los datasets.
+- Identificación: Marcadores: se puede indicar el ícono a partir de una columna.
+- Identificación: Marcadores: se puede indicar el tamaño del ícono.
+- Identificación: Marcadores: se puede indicar el marco del ícono (pin, círculo, recuadro).
+- Identificación: Marcadores: se puede indicar contenido de tipo texto, fijo o relativo a una columna.
+- Secuencias: se pueden definir secuencias en datasets de puntos (desde opciones del indicador).
 
 v2.30 (2020-09-29)
 - Reporte de espacio y mejoras en administración.

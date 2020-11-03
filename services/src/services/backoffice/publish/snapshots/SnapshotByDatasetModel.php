@@ -28,14 +28,17 @@ class SnapshotByDatasetModel
 		$columns = $this->BuildHeaders($dataset);
 
 		$levels = $this->GetDatasetLevels($dataset['dat_id']);
-		foreach ($levels as $level)
+		$variables = $this->GetAllVariables($levels);
+		foreach ($variables as $variable)
 		{
-			$this->ProcessDatasetLevel($level, $columns);
+			$this->BuildVariableColumns($variable, $columns);
 		}
+
 		if (App::Db()->tableExists($dataset['dat_table']))
 		{
 			$this->CreateTable($dataset, $columns);
 			$this->InsertValues($dataset, $columns);
+			$this->UpdateSequences($dataset, $variables);
 
 			foreach ($levels as $level)
 			{
@@ -84,7 +87,7 @@ class SnapshotByDatasetModel
 		$table = $dataset['dat_table'];
 		$sql = "INSERT INTO " . self::SnapshotTable($table) . " (" . substr($sqlCols, 1) . ")
 						SELECT " . substr($sqlValues, 1);
-		// Pne valores
+		// Pone valores
 		$sql .= " FROM " . $table . ", geography_item WHERE gei_id = geography_item_id";
 		// Cierra el select
 		$sql .= " AND gei_geometry_is_null = 0 ORDER BY id";
@@ -125,16 +128,39 @@ class SnapshotByDatasetModel
 		return $ret;
 	}
 
-	private function ProcessDatasetLevel($metricVersionLevel, &$columns)
+	private function GetAllVariables($levels)
 	{
-		$variables = $metricVersionLevel['variables'];
-		foreach ($variables as $variable)
-		{
-			$this->BuildVariableColumns($metricVersionLevel, $variable, $columns);
-		}
-		return $variables;
-	}
+		$ret = [];
+		foreach($levels as $level)
+			$ret = array_merge($ret, $level['variables']);
 
+		return $ret;
+	}
+	private function UpdateSequences($dataset, $variables)
+	{
+		$table = self::SnapshotTable($dataset['dat_table']);
+		foreach($variables as $variable)
+		{
+			if ($variable->IsSequence())
+			{
+				$c1 = 'sna_' . $variable->Id() . '_value_label_id';
+				$c2 = 'sna_' . $variable->Id() . '_sequence_value';
+				$c3 = 'sna_' . $variable->Id() . '_sequence_order';
+				// Arma la lista
+				$sql = "CREATE TEMPORARY TABLE t ENGINE=MEMORY
+									AS (SELECT sna_id, @rowid:= (CASE WHEN @last = " . $c1 . " THEN @rowid + 1 ELSE 1 END)
+												AS pos, @last:= " . $c1 . " last
+											FROM ". $table . ", (SELECT @rowid:=0) as init, (SELECT @last:=0) as last
+									ORDER BY " . $c1 . ", " . $c2 . ")";
+				App::Db()->exec($sql);
+				// Actualiza
+				$update = "UPDATE " . $table . " v JOIN t ON t.sna_id = v.sna_id SET " . $c3 . "= pos";
+				App::Db()->exec($update);
+				// Libera
+				App::Db()->dropTemporaryTable('t');
+			}
+		}
+	}
 
 	private function UpdateExtents($dataset, $metricVersionLevel)
 	{
@@ -194,8 +220,17 @@ class SnapshotByDatasetModel
 		$columns[] = ['sna_urbanity', "char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N'", 'gei_urbanity'];
 		$description = $this->GetDescriptionColumn($dataset);
 		if ($description !== 'null')
-		 $description = 'LEFT(' . $description . ', 250)';
+			 $description = 'LEFT(' . $description . ', 250)';
 		$columns[] = ['sna_description', 'varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL', $description];
+		// resuelve el ícono
+		if ($dataset['dmk_type'] !== 'N' && $dataset['dmk_source'] === 'V')
+		{
+			if ($dataset['dmk_content_field'])
+				$contentField = $dataset['dmk_content_field'];
+			else
+				$contentField = 'null';
+			$columns[] = ['sna_symbol', 'varchar(10240) COLLATE utf8_unicode_ci DEFAULT NULL', $contentField];
+		}
 
 		$columns[] = ['sna_feature_id', 'bigint(11) NOT NULL', $this->GetFeatureIdField($dataset)];
 		$columns[] = ['sna_area_m2', 'double NOT NULL', $this->GetArea($dataset)];
@@ -228,7 +263,7 @@ class SnapshotByDatasetModel
 		return $columns;
 	}
 
-	private function BuildVariableColumns($metricVersionLevel, $variable, &$columns)
+	private function BuildVariableColumns($variable, &$columns)
 	{
 		// Calcula el valor
 		$columns[] = ['sna_' . $variable->Id() . '_value', 'double NULL', $variable->CalculateValueField()];
@@ -240,6 +275,13 @@ class SnapshotByDatasetModel
 
 		// total de normalización
 		$columns[] = ['sna_' . $variable->Id() . '_total', "double NOT NULL DEFAULT '0'", $variable->CalculateNormalizationField()];
+
+		// Se fija si precisa traer el valor de una secuencia
+		if ($variable->IsSequence())
+		{
+			$columns[] = ['sna_' . $variable->Id() . '_sequence_value', "double NOT NULL DEFAULT '0'", $variable->SequenceField()];
+			$columns[] = ['sna_' . $variable->Id() . '_sequence_order', "int NOT NULL DEFAULT '0'", '0'];
+		}
 	}
 
 	private function GetFeatureIdField($dataset)

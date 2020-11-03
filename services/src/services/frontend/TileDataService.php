@@ -10,7 +10,7 @@ use helena\caches\TileDataCache;
 use helena\services\common\BaseService;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 
-use helena\db\frontend\SnapshotByDataset;
+use helena\db\frontend\SnapshotByDatasetTileData;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 use minga\framework\Context;
@@ -82,7 +82,7 @@ class TileDataService extends BaseService
 		$level = $version->GetLevel($levelId);
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		$table = new SnapshotByDataset($snapshotTable);
+		$table = new SnapshotByDatasetTileData($snapshotTable);
 		$geographyId = $level->GeographyId;
 
 		if ($b != null)
@@ -94,18 +94,19 @@ class TileDataService extends BaseService
 			$envelope = Envelope::FromXYZ($x, $y, $z);
 		}
 		$hasDescriptions = $level->HasDescriptions;
+		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByCircle($metricVersionId, $level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByCircle($level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasSymbols, $hasDescriptions);
 		}
 		else if ($frame->ClippingRegionIds != NULL)
 		{
-			$rows = $table->GetMetricVersionTileDataByRegionIds($metricVersionId, $level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByRegionIds($level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasSymbols, $hasDescriptions);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionTileDataByEnvelope($metricVersionId,  $level->Variables, $geographyId, $urbanity, $envelope, $level->Dataset->Type, $hasDescriptions);
+			$rows = $table->GetMetricVersionTileDataByEnvelope($level->Variables, $geographyId, $urbanity, $envelope, $level->Dataset->Type, $hasSymbols, $hasDescriptions);
 		}
 
 		$data = $this->CreateTileDataInfo($rows);
@@ -128,9 +129,7 @@ class TileDataService extends BaseService
 	private function CreateTileDataInfo($rows)
 	{
 		$ret = new TileDataInfo();
-
 		$ret->Data = $rows;
-
 		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
 		return $ret;
 	}

@@ -77,6 +77,15 @@ class Symbology
      */
     private $ShowValues;
 
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="vsy_is_sequence", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $IsSequence;
+
+
     /**
      * @var string
      *
@@ -151,6 +160,15 @@ class Symbology
      */
     private $CutColumn;
 
+		/**
+     * @var \helena\entities\backoffice\DatasetColumn
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DatasetColumn", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="vsy_sequence_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $SequenceColumn;
 
     /**
      * Get id
@@ -298,6 +316,31 @@ class Symbology
     }
 
 
+
+    /**
+     * Set isSequence
+     *
+     * @param boolean $isSequence
+     *
+     * @return Symbology
+     */
+    public function setIsSequence($isSequence)
+    {
+        $this->IsSequence = $isSequence;
+
+        return $this;
+    }
+
+    /**
+     * Get isSequence
+     *
+     * @return boolean
+     */
+    public function getIsSequence()
+    {
+        return $this->IsSequence;
+    }
+
     /**
      * Set palettePaletteType
      *
@@ -370,6 +413,30 @@ class Symbology
         return $this->CutColumn;
     }
 
+
+    /**
+     * Get sequenceColumn
+     *
+     * @return \helena\entities\backoffice\DatasetColumn
+     */
+    public function getSequenceColumn()
+    {
+        return $this->SequenceColumn;
+    }
+
+		/**
+     * Set sequenceColumn
+     *
+     * @param \helena\entities\backoffice\DatasetColumn $sequenceColumn
+     *
+     * @return Symbology
+     */
+    public function setSequenceColumn($sequenceColumn)
+    {
+        $this->SequenceColumn = $sequenceColumn;
+
+        return $this;
+    }
 
     /**
      * Set rainbow

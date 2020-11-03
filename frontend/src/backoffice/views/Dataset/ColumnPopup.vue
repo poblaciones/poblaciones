@@ -5,42 +5,41 @@
 			<md-dialog-content v-if="variable">
 				<invoker ref="invoker"></invoker>
 				<div class="md-layout md-gutter">
-					<div class="md-layout-item md-size-40">
+					<div class="md-layout-item md-size-50">
 						<mp-simple-text label="Nombre" ref="inputName" :maxlength="64"
-										v-model="variable.Variable" @enter="save" />
+														v-model="variable.Variable" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-60">
+					<div class="md-layout-item md-size-50">
 						<mp-simple-text label="Etiqueta" :maxlength="255"
-									v-model="variable.Label" @enter="save" />
+														v-model="variable.Label" @enter="save" />
 					</div>
 
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Tipo" :disabled="true"
-									v-model="variable.FormatFormatted" @enter="save" />
-					</div>
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Ancho" :disabled="(!variableIsString)" type="number" :minimum="1" :maximum="32767"
-									v-model="variable.FieldWidth" @enter="save" />
+					<div class="md-layout-item md-size-50" v-if="!variable.Id">
+						<div class="mp-label labelSeparator">Tipo</div>
+						<md-radio v-model="variable.Format" class="md-primary" :value="1">Texto</md-radio>
+						<md-radio v-model="variable.Format" class="md-primary" :value="5">Numérica</md-radio>
 					</div>
 
-					<div class="md-layout-item md-size-40">
+					<div class="md-layout-item md-size-50">
+						<mp-simple-text label="Ancho" :disabled="!variableIsString" type="number" :minimum="1" :maximum="32767"
+														v-model="variable.FieldWidth" @enter="save" />
+					</div>
+					<div class="md-layout-item md-size-50" v-if="!variableIsString" >
 						<mp-simple-text label="Decimales" type="number" :minimum="0" :maximum="16"
-									v-model="variable.Decimals" @enter="save" />
+														v-model="variable.Decimals" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Columnas" type="number" :minimum="1" :maximum="40"
-									v-model="variable.ColumnWidth" @enter="save" />
+					<div class="md-layout-item md-size-50">
+						<mp-simple-text label="Columnas a mostrar" type="number" :minimum="1" :maximum="50"
+														v-model="variable.ColumnWidth" @enter="save" />
 					</div>
-
-					<div class="md-layout-item md-size-40">
+					<div class="md-layout-item md-size-50">
 						<mp-select label="Alineación" :list="Dataset.ValidAlignments()" :modelKey="true"
-									v-model="variable.Alignment" @enter="save" />
+											 v-model="variable.Alignment" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-40">
+					<div class="md-layout-item md-size-50">
 						<mp-select label="Medida" :list="currentValidMeasures" :modelKey="true"
-									v-model="variable.Measure" @enter="save" />
+											 v-model="variable.Measure" @enter="save" />
 					</div>
-
 					<div class="md-layout-item md-size-100">
 						<md-switch v-model="variable.UseInSummary" class="md-primary">
 							Mostrar en ficha de resumen
@@ -98,7 +97,7 @@ export default {
 			this.activateEdit = true;
 			setTimeout(() => {
 				this.$refs.inputName.focus();
-			}, 100);
+			}, 250);
 		},
 		save() {
 			var loc = this;
@@ -111,9 +110,10 @@ export default {
 			this.$refs.invoker.do(this.Dataset, this.Dataset.SaveColumn,
 							this.variable).then(function(data) {
 								loc.variable.Caption = data.Caption;
+								loc.variable.Order = data.Order;
 								if (loc.variable.Id === null) {
 									loc.variable.Id = data.Id;
-									loc.Dataset.Columms.push(loc.variable);
+									loc.Dataset.Columns.push(loc.variable);
 								} else {
 									arr.ReplaceById(loc.Dataset.Columns, loc.variable.Id, loc.variable);
 								}

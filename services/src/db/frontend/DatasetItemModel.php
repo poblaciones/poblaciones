@@ -33,7 +33,6 @@ class DatasetItemModel
 		$datasetModel = new DatasetModel();
 		$dataset = $datasetModel->GetDatasetById($datasetId);
 		$table = $dataset['table'];
-
 		// trae las columnas para resumen
 		$columns = $datasetModel->GetDatasetColumns($datasetId, true);
 		$captionColumn = null;

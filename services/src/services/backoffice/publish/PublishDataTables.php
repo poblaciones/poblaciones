@@ -69,7 +69,8 @@ class PublishDataTables
 																							'children' => array(
 																								array('class' => entities\DatasetColumnValueLabel::class, 'childKey' => 'dla_dataset_column_id'))
 																						),
-																					array('class' => entities\DatasetMarker::class, 'parentKey' => 'dat_marker_id')
+																					array('class' => entities\DatasetMarker::class, 'parentKey' => 'dat_marker_id',
+																									'postUpdateColumns' => array('dmk_content_column_id'))
 																				));
 
 		$imageMatrix = array('class' => entities\File::class, 'parentKey' => 'wrk_image_id', 'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')));
@@ -344,6 +345,12 @@ class PublishDataTables
 									 d1.dat_geography_item_column_id = d2.dat_geography_item_column_id * 100 + " . $shard . ",
 									 d1.dat_caption_column_id = d2.dat_caption_column_id * 100 + " . $shard;
 		App::Db()->exec($query, array($workId));
+
+		$queryMarkers = "UPDATE dataset_marker d1 JOIN draft_dataset_marker d2 ON d1.dmk_id = d2.dmk_id " .
+									" * 100 + " . $shard . " JOIN draft_dataset ds2 ON ds2.dat_marker_id = d2.dmk_id AND ds2.dat_work_id = ?
+									SET d1.dmk_content_column_id = d2.dmk_content_column_id * 100 + " . $shard;
+		App::Db()->exec($queryMarkers, array($workId));
+
 		// Hace update de publishedby
 		$query = "UPDATE work SET wrk_published_by = ? WHERE wrk_id = ?";
 		App::Db()->exec($query, array(Account::Current()->user, $workIdShardified));
@@ -422,9 +429,13 @@ class PublishDataTables
 		App::Db()->exec($circularCols, array($workId));
 		// 4. Pone en null las referencias a symbology
 		$queryCols = "UPDATE " . $drafting . "symbology INNER JOIN " . $drafting . "variable ON mvv_symbology_id = vsy_id INNER JOIN " . $drafting . "metric_version_level ON mvv_metric_version_level_id = mvl_id INNER JOIN " . $drafting . "dataset ON mvl_dataset_id = dat_id
-									SET vsy_cut_column_id = NULL
+									SET vsy_cut_column_id = NULL, vsy_sequence_column_id = NULL
 									WHERE dat_work_id = ? " . $datasetCondition;
 		App::Db()->exec($queryCols, array($workId));
+		// 5. Pone en null las referencias desde markers
+		$markerCols = "UPDATE " . $drafting . "dataset_marker INNER JOIN " . $drafting . "dataset ON dat_marker_id = dmk_id SET dmk_content_column_id = NULL
+									WHERE dat_work_id = ? " . $datasetCondition;
+		App::Db()->exec($markerCols, array($workId));
 	}
 	private function CleanWork($workId, $branches)
 	{
@@ -487,7 +498,6 @@ class PublishDataTables
 			$queries[] = "SELECT " . $this->GetSuffix($joinsTreeNode['level']['table']) . ".* FROM " . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "") . " WHERE wrk_id = ?";
 		else if ($op == 'INS')
 		{
-			//$queries[] = $joinsTreeNode['level']['class'] . ">INSERT INTO " . $this->GetTablenameFromSuffixedTable($joinsTreeNode['level']['table'])  . " SELECT " . $this->GetSuffix($joinsTreeNode['level']['table']) . ".* FROM " . $tablePreffix . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "");
 			$cols = $this->GetCommonColumns($joinsTreeNode['level']['class'], $this->TransformToDraft($joinsTreeNode['level']['class']), $joinsTreeNode['level']['postUpdateColumns']);
 			$queries[] = "\n INSERT INTO " . $this->GetTablenameFromSuffixedTable($joinsTreeNode['level']['table'])  . "(" . $cols['insert'] . ") SELECT " . $cols['select'] . " FROM " . $tablePreffix . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "") .
 											" WHERE wrk_id = ? ON DUPLICATE KEY UPDATE " . $cols['update'] ;

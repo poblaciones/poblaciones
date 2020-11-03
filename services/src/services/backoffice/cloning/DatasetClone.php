@@ -49,7 +49,8 @@ class DatasetClone
 
 		// 2. Crea el dataset y las columnas
 		$this->doCreateNewDataset($this->newName);
-
+		// 2. Copia datasetMarker
+		$this->CopyMarkerInfo();
 		// 3. Copia indicadores
 		$this->CopyMetricVersions();
 
@@ -72,7 +73,14 @@ class DatasetClone
 		// Listo
 		return $this->targetDatasetId;
 	}
-
+	private function CopyMarkerInfo()
+	{
+		// Duplica la fila
+		$markerId = RowDuplicator::DuplicateRows(entities\DraftDatasetMarker::class, $this->dataset->getMarker()->getId());
+		$update = "UPDATE draft_dataset SET dat_marker_id = ? WHERE dat_id = ?";
+		App::Db()->exec($update, array($markerId, $this->targetDatasetId));
+		// Corrige columnas
+	}
 	private function CopyMetricVersions()
 	{
 		$sql = "SELECT DISTINCT mvr_id FROM draft_metric_version JOIN draft_metric_version_level ON

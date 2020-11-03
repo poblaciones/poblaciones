@@ -24,7 +24,7 @@
 						</span>
 					</td>
 				</tr>
-				<tr v-on:click="click(label)" v-for="label in variable.ValueLabels" class="hand" :key="label.Id">
+				<tr v-on:click="clickLabel(label)" v-for="label in variable.ValueLabels" class="hand" :key="label.Id">
 					<template v-if="displayLabel(label)">
 						<template v-if="label.Visible" class="labelRow">
 							<td class="dataBox">
@@ -395,7 +395,7 @@ export default {
 			var prop = (tot > 0 ? value / tot : 0);
 			return 'width: calc(' + (prop * 100) + '% - ' + (60 * prop) + 'px)';
 		},
-		click(label) {
+		clickLabel(label) {
 			label.Visible = !label.Visible;
 			this.metric.UpdateMap();
 		},

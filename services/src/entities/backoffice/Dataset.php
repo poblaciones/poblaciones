@@ -286,30 +286,6 @@ class Dataset
     }
 
     /**
-     * Set symbol
-     *
-     * @param string $symbol
-     *
-     * @return Dataset
-     */
-    public function setSymbol($symbol)
-    {
-        $this->Symbol = $symbol;
-
-        return $this;
-    }
-
-    /**
-     * Get symbol
-     *
-     * @return string
-     */
-    public function getSymbol()
-    {
-        return $this->Symbol;
-    }
-
-    /**
      * Set table
      *
      * @param string $table
@@ -331,30 +307,6 @@ class Dataset
     public function getTable()
     {
         return $this->Table;
-    }
-
-		/**
-     * Set scaleSymbol
-     *
-     * @param boolean $scaleSymbol
-     *
-     * @return Dataset
-     */
-    public function setScaleSymbol($scaleSymbol)
-    {
-        $this->ScaleSymbol = $scaleSymbol;
-
-        return $this;
-    }
-
-    /**
-     * Get scaleSymbol
-     *
-     * @return boolean
-     */
-    public function getScaleSymbol()
-    {
-        return $this->ScaleSymbol;
     }
 
     /**

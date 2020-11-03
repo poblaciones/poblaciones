@@ -77,6 +77,7 @@ LevelGenerator.prototype.MigrateVariable = function (variable) {
 	variable.DataColumn = this.MigrateColumn(variable.DataColumn, 'a la formula');
 	variable.NormalizationColumn = this.MigrateColumn(variable.NormalizationColumn, 'a la normalización');
 	variable.Symbology.CutColumn = this.MigrateColumn(variable.Symbology.CutColumn, 'al criterio de corte');
+	variable.Symbology.SequenceColumn = this.MigrateColumn(variable.Symbology.SequenceColumn, 'al criterio de secuencia');
 	return variable;
 };
 

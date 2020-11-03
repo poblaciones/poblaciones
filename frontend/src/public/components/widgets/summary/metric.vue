@@ -9,31 +9,44 @@
 			</div>
 			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index"
 												class="exp-hiddable-block" @RankingShown="rankingShown" />
-			<h4 class="title">
-				{{ metric.properties.Metric.Name }}
-			</h4>
-			<div class="filterElement" style="margin-top: 9px; 	margin-left: -3px;" v-if="hasUrbanityFilter && urbanity != 'N'"
-					 :title="getUrbanityTextTooltip">
-				{{ getUrbanityTextActive }}
-				<mp-close-button v-on:click="changeUrbanity('N')" title="Quitar filtro"
-												 class="exp-hiddable-block filterElement-close" />
-			</div>
+			<div v-if="isSimpleMetric">
+				<h4 class="title" v-on:click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
+					<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
+							class="fa drop fa-tint exp-category-bullets smallIcon"></i>
+					<i v-else class="fa drop fa-tint exp-category-bullets smallIcon action-muted" style="border-color: inherit" />
 
-			<MetricVariables :metric="metric" />
+					{{ metric.properties.Metric.Name }} ({{ h.formatNum(singleLabel.Values.Count) }})
+				</h4>
+			</div>
+			<template v-else>
+				<h4 class="title">
+					{{ metric.properties.Metric.Name }}
+				</h4>
+				<div class="filterElement" style="margin-top: 9px; 	margin-left: -3px;" v-if="hasUrbanityFilter && urbanity != 'N'"
+						 :title="getUrbanityTextTooltip">
+					{{ getUrbanityTextActive }}
+					<mp-close-button v-on:click="changeUrbanity('N')" title="Quitar filtro"
+													 class="exp-hiddable-block filterElement-close" />
+				</div>
+				<MetricVariables :metric="metric" />
+			</template>
 			<div class="sourceRow">
-				<div class="btn-group" style="float: left">
-					<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button" v-on:click="changeSelectedVersionIndex(index)" class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)">{{ ver.Version.Name }}</button>
+					<div class="btn-group" style="float: left">
+						<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
+										v-on:click="changeSelectedVersionIndex(index)"
+										class="btn btn-default btn-xs exp-serie-item"
+										:class="getActive(index)">{{ ver.Version.Name }}</button>
+					</div>
+					<MetricSource :metric="metric" style="float:right" />
+					<div style="clear: both; height: 0px">
+					</div>
 				</div>
-				<MetricSource :metric="metric" style="float:right" />
-				<div style="clear: both; height: 0px">
+				<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
+					Cobertura: {{ metric.SelectedVersion().Version.PartialCoverage }}.
 				</div>
-			</div>
-			<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
-				Cobertura: {{ metric.SelectedVersion().Version.PartialCoverage }}.
-			</div>
-			<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
-				<Ranking :metric="metric" :clipping="clipping" />
-			</div>
+				<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
+					<Ranking :metric="metric" :clipping="clipping" />
+				</div>
 		</div>
 	</div>
 </template>
@@ -44,7 +57,7 @@ import MetricTopButtons from './metricTopButtons';
 import MetricSource from './metricSource';
 import Ranking from './ranking';
 import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
-import Mercator from '@/public/js/Mercator';
+import Helper from '@/public/js/helper';
 
 export default {
 	name: 'metric',
@@ -61,10 +74,16 @@ export default {
 	],
 	methods: {
 		getActive(index) {
-			if(this.metric.properties.SelectedVersionIndex === index) {
+			if (this.metric.properties.Versions.length == 1) {
+				return ' frozen';
+			} else if (this.metric.properties.SelectedVersionIndex === index) {
 				return ' active';
 			}
 			return '';
+		},
+		clickLabel(label) {
+			label.Visible = !label.Visible;
+			this.metric.UpdateMap();
 		},
 		changeSelectedVersionIndex(index) {
 			this.metric.SelectVersion(index);
@@ -90,23 +109,34 @@ export default {
 			this.metric.Remove();
 		}
 	},
-	computed: {
-		Use() {
-			return window.Use;
-		},
-		urbanity() {
-			return this.metric.properties.SelectedUrbanity;
-		},
-		hasUrbanityFilter() {
-			return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
-		},
-		getUrbanityTextTooltip() {
-			return this.metric.GetSelectedUrbanityInfo().tooltip;
-		},
-		getUrbanityTextActive() {
-			return this.metric.GetSelectedUrbanityInfo().label;
-		},
-	}
+		computed: {
+			Use() {
+				return window.Use;
+			},
+			urbanity() {
+				return this.metric.properties.SelectedUrbanity;
+			},
+			h() {
+				return Helper;
+			},
+			hasUrbanityFilter() {
+				return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
+			},
+			getUrbanityTextTooltip() {
+				return this.metric.GetSelectedUrbanityInfo().tooltip;
+			},
+			getUrbanityTextActive() {
+				return this.metric.GetSelectedUrbanityInfo().label;
+			},
+			isSimpleMetric() {
+				return (this.metric.SelectedLevel().Variables.length === 1 &&
+					this.metric.SelectedLevel().Variables[0].IsSimpleCount && this.metric.SelectedLevel().Variables[0].ValueLabels.length === 1);
+			},
+			singleLabel() {
+				var variable = this.metric.SelectedLevel().Variables[0];
+				return variable.ValueLabels[0];
+			}
+		}
 };
 </script>
 
@@ -121,5 +151,8 @@ export default {
 .rankingBox {
 	padding: 16px 0px 0px 0px;
 }
-
+	.smallIcon {
+		font-size: 14px;
+		margin-top: 2px
+	}
 </style>

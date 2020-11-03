@@ -6,10 +6,9 @@ import Clipping from '@/public/classes/Clipping';
 import Tutorial from '@/public/classes/Tutorial';
 import RestoreRoute from '@/public/classes/RestoreRoute';
 import Queue from './Queue';
+import InfoWindow from './InfoWindow';
 import axios from 'axios';
 import str from '@/common/js/str';
-import Vue from "vue";
-import PanelType from '@/public/enums/PanelType';
 
 import h from '@/public/js/helper';
 import m from '@/public/js/Mercator';
@@ -20,6 +19,7 @@ export default SegmentedMap;
 function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCollection, config) {
 	this.frame = frame;
 	this.Tutorial = new Tutorial(toolbarStates);
+	this.InfoWindow = new InfoWindow(this);
 	this.Clipping = new Clipping(this, frame, clipping);
 	this.Signatures = config.Signatures;
 	this.User = config.User;
@@ -189,8 +189,8 @@ SegmentedMap.prototype.SetCenter = function (coord) {
 	this.MapsApi.SetCenter(coord);
 };
 
-SegmentedMap.prototype.PanTo = function (coord) {
-	this.MapsApi.PanTo(coord);
+SegmentedMap.prototype.PanTo = function (coord, offsetXpixels) {
+	this.MapsApi.PanTo(coord, offsetXpixels);
 };
 
 SegmentedMap.prototype.SetZoom = function (zoom) {
@@ -286,59 +286,6 @@ SegmentedMap.prototype.EndSelecting = function () {
 	this.MapsApi.selector.ClearSelectorCanvas();
 };
 
-SegmentedMap.prototype.InfoRequestedInteractive = function (position, parent, fid, offset) {
-	if (position) {
-		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
-					|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
-			this.MapsApi.FitEnvelope(position.Envelope);
-		} else if (!position.Point || position.Point.X < 350) {
-			this.PanTo(position.Coordinate);
-		}
-	}
-	this.InfoRequested(position, parent, fid, offset, true);
-};
-
-SegmentedMap.prototype.InfoRequested = function (position, parent, fid, offset, forceExpand) {
-	const loc = this;
-	// Establece qué está obteniendo
-	var key = parent;
-	key.Id = fid;
-	window.Panels.Content.FeatureInfoKey = key;
-	// Lo busca
-	window.SegMap.Get(window.host + '/services/metrics/GetInfoWindowData', {
-		params: { f: fid, l: parent.MetricId, a: parent.LevelId, v: parent.MetricVersionId }
-	}).then(function (res) {
-		// Lo obtuvo
-		res.data.position = position;
-		res.data.Key = key;
-		res.data.panelType = PanelType.InfoPanel;
-		window.Panels.Left.Add(res.data);
-		// Si viene interactivo, lo abre y lo pone en la ruta
-		if (forceExpand) {
-			window.Panels.Left.collapsed = false;
-			loc.SaveRoute.UpdateRoute();
-		}
-	});
-};
-
-SegmentedMap.prototype.InfoListRequested = function (parent, forceExpand) {
-	const loc = this;
-	var page = 0;
-	window.SegMap.Get(window.host + '/services/metrics/GetInfoListData', {
-		params: { l: parent.MetricId, a: parent.LevelId, v: parent.MetricVersionId, p: page }
-	}).then(function (res) {
-			res.data.parent = parent;
-			res.data.panelType = PanelType.InfoPanel;
-			window.Panels.Content.FeatureList = res.data;
-			window.Panels.Left.Add(res.data);
-			if (forceExpand) {
-				window.Panels.Left.collapsed = false;
-			}
-	}).catch(function (error) {
-		err.errDialog('GetInfoWindowData', 'traer la información para el elemento seleccionado', error);
-	});
-};
-
 SegmentedMap.prototype.GetVariableName = function (metricId, variableId) {
 	var metric = this.Metrics.GetMetricById(metricId);
 	if (metric === null) {
@@ -413,7 +360,7 @@ SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelectio
 			VariableId: null
 		};
 		var position = { Coordinate: { Lat: lat, Lon: lon } };
-		this.InfoRequestedInteractive(position, parentInfo, id, null);
+		this.InfoWindow.InfoRequestedInteractive(position, parentInfo, id, null);
 	} else if (type === 'P') {
 		// punto...
 		this.AddMetricById(item);

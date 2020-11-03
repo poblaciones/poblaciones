@@ -31,10 +31,10 @@ export default {
 	},
 	computed: {
 		version() {
-			return this.metric.properties.Versions[this.metric.properties.SelectedVersionIndex];
+			return this.metric.SelectedVersion();
 		},
 		level() {
-			return this.version.Levels[this.version.SelectedLevelIndex];
+			return this.metric.SelectedLevel();
 		},
 
 	},

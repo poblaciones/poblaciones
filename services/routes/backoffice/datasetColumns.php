@@ -68,12 +68,18 @@ App::Post('/services/backoffice/SaveColumn', function (Request $request) {
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
 	$column = App::ReconnectJsonParamMandatory(entities\DraftDatasetColumn::class, 'c');
-	if ($column->getId() > 0) {
+	if ($column->getId() > 0)
+	{
 		$columnDataset = $column->getDataset();
 		if ($columnDataset->getId() !== $datasetId)
 			throw new PublicException('El dataset indicado no corresponde a la columna');
+		return App::OrmJson($controller->SaveColumn($datasetId, $column));
 	}
-	return App::OrmJson($controller->SaveColumn($datasetId, $column));
+	else
+	{
+		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+		return App::OrmJson($controller->CreateColumn($dataset, $column));
+	}
 });
 
 

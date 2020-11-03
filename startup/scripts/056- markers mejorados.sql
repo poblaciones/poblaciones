@@ -3,23 +3,17 @@ CREATE TABLE `dataset_marker` (
   `dmk_type` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'Tipo de marcador. N: Ninguno. I: Ícono. T: Texto.',
   `dmk_source` CHAR(1) NOT NULL DEFAULT 'F' COMMENT 'Tipo de origen. F: Fijo. V: Variable',
   `dmk_size` CHAR(1) NOT NULL DEFAULT 'S' COMMENT 'Tamaño del marcador. S: Pequeño (normal). M: Mediano. L: Grande.',
+  `dmk_description_vertical_alignment` CHAR(1) NOT NULL DEFAULT 'B' COMMENT 'Posición de la descripción respecto del marcador. B: Abajo. M: Superpuesto. T: Arriba.',
   `dmk_frame` CHAR(1) NOT NULL DEFAULT 'P' COMMENT 'Tipo de marco para el marcador. P: Pin. C: Círculo. B: Rectangular.',
   `dmk_auto_scale` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Adaptar el tamaño según el zoom en el mapa.',
-  `dmk_sequence_column_id` INT NULL COMMENT 'Columna contiendo los valores para los marcadores secuenciales.',
-  `dmk_symbol_column_id` INT NULL COMMENT 'Columna conteniendo la columna para los marcadores con símbolo basado en una variable (columna).',
+  `dmk_content_column_id` INT NULL COMMENT 'Columna conteniendo la columna para los marcadores basado en variable (columna).',
   `dmk_symbol` VARCHAR(4096) NULL COMMENT 'Valor seleccionado para los marcadores con ícono fijo.',
   `dmk_text` VARCHAR(4096) NULL COMMENT 'Valor seleccionado para los marcadores de tipo texto fijo.',
   `dmk_image` VARCHAR(4096) NULL COMMENT 'Valor seleccionado para los marcadores de tipo imagen fija.',
   PRIMARY KEY (`dmk_id`),
-  INDEX `fp_dataset_marker_column1_idx` (`dmk_sequence_column_id` ASC),
-  INDEX `fp_dataset_marker_column2_idx` (`dmk_symbol_column_id` ASC),
+  INDEX `fp_dataset_marker_column1_idx` (`dmk_content_column_id` ASC),
   CONSTRAINT `fp_dataset_marker_column1`
-    FOREIGN KEY (`dmk_sequence_column_id`)
-    REFERENCES `dataset_column` (`dco_id`)
-    ON DELETE NO ACTION
-    ON UPDATE RESTRICT,
-  CONSTRAINT `fp_dataset_marker_column2`
-    FOREIGN KEY (`dmk_symbol_column_id`)
+    FOREIGN KEY (`dmk_content_column_id`)
     REFERENCES `dataset_column` (`dco_id`)
     ON DELETE NO ACTION
     ON UPDATE RESTRICT);
@@ -29,23 +23,17 @@ CREATE TABLE `draft_dataset_marker` (
   `dmk_type` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'Tipo de marcador. N: Ninguno. I: Ícono. T: Texto.',
   `dmk_source` CHAR(1) NOT NULL DEFAULT 'F' COMMENT 'Tipo de origen. F: Fijo. V: Variable',
   `dmk_size` CHAR(1) NOT NULL DEFAULT 'S' COMMENT 'Tamaño del marcador. S: Pequeño (normal). M: Mediano. L: Grande.',
+  `dmk_description_vertical_alignment` CHAR(1) NOT NULL DEFAULT 'B' COMMENT 'Posición de la descripción respecto del marcador. B: Abajo. M: Superpuesto. T: Arriba.',
   `dmk_frame` CHAR(1) NOT NULL DEFAULT 'P' COMMENT 'Tipo de marco para el marcador. P: Pin. C: Círculo. B: Rectangular.',
   `dmk_auto_scale` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Adaptar el tamaño según el zoom en el mapa.',
-  `dmk_sequence_column_id` INT NULL COMMENT 'Columna contiendo los valores para los marcadores secuenciales.',
-  `dmk_symbol_column_id` INT NULL COMMENT 'Columna conteniendo la columna para los marcadores con símbolo basado en una variable (columna).',
+  `dmk_content_column_id` INT NULL COMMENT 'Columna conteniendo la columna para los marcadores basados en variable (columna).',
   `dmk_symbol` VARCHAR(4096) NULL COMMENT 'Valor seleccionado para los marcadores con ícono fijo.',
   `dmk_text` VARCHAR(4) NULL COMMENT 'Valor seleccionado para los marcadores de tipo texto fijo.',
   `dmk_image` VARCHAR(4096) NULL COMMENT 'Valor seleccionado para los marcadores de tipo imagen fija.',
   PRIMARY KEY (`dmk_id`),
-  INDEX `fp_draft_dataset_marker_column1_idx` (`dmk_sequence_column_id` ASC),
-  INDEX `fp_draft_dataset_marker_column2_idx` (`dmk_symbol_column_id` ASC),
+  INDEX `fp_draft_dataset_marker_column1_idx` (`dmk_content_column_id` ASC),
   CONSTRAINT `fp_draft_dataset_marker_column1`
-    FOREIGN KEY (`dmk_sequence_column_id`)
-    REFERENCES `draft_dataset_column` (`dco_id`)
-    ON DELETE NO ACTION
-    ON UPDATE RESTRICT,
-  CONSTRAINT `fp_draft_dataset_marker_column2`
-    FOREIGN KEY (`dmk_symbol_column_id`)
+    FOREIGN KEY (`dmk_content_column_id`)
     REFERENCES `draft_dataset_column` (`dco_id`)
     ON DELETE NO ACTION
     ON UPDATE RESTRICT);
@@ -135,13 +123,5 @@ DROP COLUMN `dat_symbol`;
 ALTER TABLE `draft_dataset`
 DROP COLUMN `dat_scale_symbol`,
 DROP COLUMN `dat_symbol`;
-
-ALTER TABLE `dataset`
-ADD UNIQUE INDEX `dat_marker_id_UNIQUE` (`dat_marker_id` ASC);
-;
-
-ALTER TABLE `draft_dataset`
-ADD UNIQUE INDEX `dat_draft_marker_id_UNIQUE` (`dat_marker_id` ASC);
-;
 
 UPDATE version SET ver_value = '056' WHERE ver_name = 'DB';

@@ -84,11 +84,11 @@ ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds = f
 		var level = this.Dataset.MetricVersionLevels[i];
 		for(var q = 0; q < cutColumnIds.length; q++) {
 			var cutColumnId = cutColumnIds[q];
-			var requireSave = false;
 			for(var n = 0; n < level.Variables.length; n++) {
 				var variable = level.Variables[n];
 				if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn.Id === cutColumnId) {
 					variable.Symbology.CutMode = 'S';
+					variable.Symbology.CutColumn = null;
 					this.CreateVariableCategories(level, variable, null);
 					this.Dataset.UpdateVariable(level, variable);
 				}
@@ -96,6 +96,27 @@ ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds = f
 		}
 	}
 };
+
+
+ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedSequenceIds = function (sequenceIds) {
+	// Esto toma los casos en que se removió una variable
+	// de una columna que se está usando como cutColumn
+	for(var i = 0; i < this.Dataset.MetricVersionLevels.length; i++) {
+		var level = this.Dataset.MetricVersionLevels[i];
+		for(var q = 0; q < sequenceIds.length; q++) {
+			var sequenceId = sequenceIds[q];
+			for(var n = 0; n < level.Variables.length; n++) {
+				var variable = level.Variables[n];
+				if (variable.Symbology.SequenceColumn.Id === sequenceId) {
+					variable.Symbology.IsSequence = 'S';
+					variable.Symbology.SequenceColumn = null;
+					this.Dataset.UpdateVariable(level, variable);
+				}
+			}
+		}
+	}
+};
+
 
 ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByLabelChange = function (changedColumn) {
 	// Esto toma los casos en que se cambiaron las etiquetas

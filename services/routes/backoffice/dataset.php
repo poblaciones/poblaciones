@@ -27,6 +27,13 @@ App::GetOrPost('/services/backoffice/UpdateDataset', function (Request $request)
 	return App::Json($controller->UpdateDataset($Dataset));
 });
 
+App::GetOrPost('/services/backoffice/UpdateDatasetRegenData', function (Request $request) {
+	$controller = new services\DatasetService();
+	$Dataset = App::ReconnectJsonParamMandatory(entities\DraftDataset::class, 'd');
+	if ($denied = Session::CheckIsDatasetEditor($Dataset->getId())) return $denied;
+	return App::Json($controller->UpdateDataset($Dataset, true));
+});
+
 App::Get('/services/backoffice/UpdateMultilevelMatrix', function (Request $request) {
 	$controller = new services\DatasetService();
 	$dataset1Id = Params::GetIntMandatory('d1');

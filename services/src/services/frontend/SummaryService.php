@@ -4,7 +4,7 @@ namespace helena\services\frontend;
 
 use helena\services\common\BaseService;
 use helena\caches\SummaryCache;
-use helena\db\frontend\SnapshotByDataset;
+use helena\db\frontend\SnapshotByDatasetSummary;
 use helena\entities\frontend\clipping\SummaryInfo;
 use helena\entities\frontend\clipping\SummaryItemInfo;
 use minga\framework\Context;
@@ -56,20 +56,20 @@ class SummaryService extends BaseService
 		$level = $version->GetLevel($levelId);
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		$table = new SnapshotByDataset($snapshotTable);
+		$table = new SnapshotByDatasetSummary($snapshotTable);
 		$geographyId = $level->GeographyId;
 
 		if ($frame->ClippingCircle != NULL)
 		{
-			$rows = $table->GetMetricVersionSummaryByCircle($metricVersionId, $level->Variables, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingCircle, $level->Dataset->Type);
+			$rows = $table->GetMetricVersionSummaryByCircle($level->Variables, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingCircle, $level->Dataset->Type);
 		}
 		else if ($frame->ClippingRegionIds != NULL)
 		{
-			$rows = $table->GetMetricVersionSummaryByRegionIds($metricVersionId, $level->Variables, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type);
+			$rows = $table->GetMetricVersionSummaryByRegionIds($level->Variables, $level->HasSummary, $geographyId, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type);
 		}
 		else
 		{
-			$rows = $table->GetMetricVersionSummaryByEnvelope($metricVersionId, $level->Variables, $level->HasSummary, $geographyId, $urbanity, $frame->Envelope);
+			$rows = $table->GetMetricVersionSummaryByEnvelope($level->Variables, $level->HasSummary, $geographyId, $urbanity, $frame->Envelope);
 		}
 		$data = $this->CreateSummaryInfo($rows);
 		return $data;

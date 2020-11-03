@@ -162,6 +162,12 @@ ActiveDataset.prototype.Update = function () {
 			{ 'd': this.properties }, 'actualizar los atributos del dataset');
 };
 
+ActiveDataset.prototype.UpdateRegen = function () {
+	this.Work.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateDatasetRegenData',
+			{ 'd': this.properties }, 'actualizar los atributos del dataset');
+};
+
 ActiveDataset.prototype.DeleteMetricVersionLevel = function (level) {
 	var loc = this;
 	this.Work.WorkChanged();
@@ -652,6 +658,9 @@ ActiveDataset.prototype.ColumnHasLabels = function (column) {
 		return (labels.length > 0);
 };
 
+ActiveDataset.prototype.GetColumnsForSequenceColumn = function () {
+	return this.GetNumericColumns();
+};
 
 ActiveDataset.prototype.GetColumnsForCutColumn = function () {
 	var ret = this.GetNumericWithLabelColumns();

@@ -34,6 +34,9 @@ class Variable
 		$sql = "SELECT variable.*,
 										vsy_cut_mode,
 										vsy_cut_column_id,
+										vsy_is_sequence,
+										(CASE WHEN vsy_is_sequence THEN vsy_sequence_column_id ELSE NULL END) AS vsy_sequence_column_id,
+										(CASE WHEN vsy_is_sequence THEN sequencecolumn.dco_field ELSE NULL END) AS vsy_sequence_field,
 										data.dco_field AS mvv_data_field,
 										cutcolumn.dco_format AS mvv_cut_field_format,
 										normalization.dco_field AS mvv_normalization_field
@@ -41,6 +44,7 @@ class Variable
 						JOIN symbology ON mvv_symbology_id = vsy_id
 						LEFT JOIN dataset_column data ON data.dco_id = mvv_data_column_id
 						LEFT JOIN dataset_column normalization ON normalization.dco_id = mvv_normalization_column_id
+						LEFT JOIN dataset_column sequencecolumn ON sequencecolumn.dco_id = vsy_sequence_column_id
 						LEFT JOIN dataset_column cutcolumn ON cutcolumn.dco_id = vsy_cut_column_id
 						WHERE mvv_metric_version_level_id = ? ORDER BY mvv_order";
 		$rows = App::Db()->fetchAll($sql, array($metricVersionLevelId));
@@ -93,6 +97,16 @@ class Variable
 		else
 			return self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
 	}
+
+	public function IsSequence()
+	{
+		return ($this->attributes['vsy_is_sequence']);
+	}
+	public function SequenceField()
+	{
+		return ($this->attributes['vsy_sequence_field']);
+	}
+
 	public function CalculateSegmentationValueField()
 	{
 		$cutMode = $this->attributes['vsy_cut_mode'];

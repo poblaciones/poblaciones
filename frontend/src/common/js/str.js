@@ -105,7 +105,6 @@ module.exports = {
 		}
 		return (cad.toString()).replace(new RegExp(this.EscapeRegExp(text), "g"), text2);
 	},
-
 	GetMonthLabel(m) {
 		switch(m + 1)
 		{

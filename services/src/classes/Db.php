@@ -103,6 +103,15 @@ class Db
 		Profiling::EndTimer();
 	}
 
+	public function dropTemporaryTable($table)
+	{
+		Profiling::BeginTimer();
+		$this->ensureBegin();
+		$sql = "DROP TEMPORARY TABLE `" . $table . "`";
+		$this->exec($sql);
+		Profiling::EndTimer();
+	}
+
 	public function rowExists($table, $field, $value)
 	{
 		Profiling::BeginTimer();

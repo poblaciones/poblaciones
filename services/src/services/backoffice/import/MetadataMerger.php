@@ -110,23 +110,34 @@ class MetadataMerger
 		$message = "La variable seleccionada para la longitud ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_longitude_column_id', $message);
 
-		// De symbology de indicadores
+		// De marker
+		$datasetInfo['table'] = 'draft_dataset_marker';
+		$datasetInfo['datasetField'] = '(SELECT dat_id FROM draft_dataset where dat_marker_id = dmk_id)';
+		$datasetInfo['fieldCaption'] = "(SELECT dat_caption FROM draft_dataset where dat_marker_id = dmk_id)";
+		$datasetInfo['entityId'] = 'dmk_id';
+		$message = "La variable de contenido de marcadores de 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
+		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dmk_content_column_id', $message);
+
+		// Cut, de symbology de indicadores
 		$datasetInfo['table'] = 'draft_symbology';
 		$datasetInfo['datasetField'] = '(SELECT mvl_dataset_id FROM draft_metric_version_level, draft_variable WHERE mvv_metric_version_level_id = mvl_id AND mvv_symbology_id = vsy_id)';
 		$datasetInfo['fieldCaption'] = "(SELECT CONCAT(mtr_caption, ' (', mvr_caption, ')') FROM draft_metric, draft_metric_version, draft_metric_version_level, draft_variable WHERE mvr_metric_id = mtr_id AND mvl_metric_version_id = mvl_id AND mvl_id = mvv_metric_version_level_id AND mvv_metric_version_level_id = mvl_id AND mvv_symbology_id = vsy_id)";
 		$datasetInfo['entityId'] = 'vsy_id';
 		$message = "La variable de segmentación del indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'vsy_cut_column_id', $message);
+		// Sequence, de symbology de indicadores
+		$message = "La variable de secuencia del indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
+		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'vsy_sequence_column_id', $message);
 
 		// De variables de indicadores
 		$datasetInfo['table'] = 'draft_variable';
 		$datasetInfo['datasetField'] = '(SELECT mvl_dataset_id FROM draft_metric_version_level WHERE mvl_id = mvv_metric_version_level_id)';
 		$datasetInfo['fieldCaption'] = "(SELECT CONCAT(mtr_caption, ' (', mvr_caption, ')') FROM draft_metric, draft_metric_version, draft_metric_version_level WHERE mvr_metric_id = mtr_id AND mvl_metric_version_id = mvl_id AND mvl_id = mvv_metric_version_level_id)";
 		$datasetInfo['entityId'] = 'mvv_id';
-
+		// datacolumn
 		$message = "La variable del indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_data_column_id', $message);
-
+		// normalizationcolumn
 		$message = "La variable de normalización para el indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_normalization_column_id', $message);
 

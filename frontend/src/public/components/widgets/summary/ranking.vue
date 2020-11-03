@@ -111,7 +111,7 @@ export default {
 						LevelId: this.metric.SelectedLevel().Id,
 						VariableId: this.metric.SelectedVariable().Id
 					};
-			window.SegMap.InfoRequestedInteractive(position, parentInfo, item.FID);
+			window.SegMap.InfoWindow.InfoRequestedInteractive(position, parentInfo, item.FID);
 		},
 		changeSize(itemSize) {
 			this.metric.RankingSize = itemSize;

@@ -199,16 +199,38 @@ App::$app->get('/services/frontend/metrics/GetRanking', function (Request $reque
 });
 
 
-App::$app->get('/services/metrics/GetInfoWindowData', function (Request $request) {
+App::$app->get('/services/metrics/GetLabelInfo', function (Request $request) {
 	$controller = new services\InfoWindowService();
 
-	$metricId = Params::GetInt('l');
-	$metricVersionId = Params::GetInt('v');
-	$levelId = Params::GetInt('a');
-	// f: puede ser un geographyId o un featureId (datasetId << 32 || id)
-	$featureId = Params::Get('f');
+	// f: es featureId (datasetId << 32 || id)
+	$featureId = Params::GetMandatory('f');
 
-	return App::Json($controller->GetInfo($featureId, $metricId, $metricVersionId, $levelId));
+	return App::Json($controller->GetLabelInfo($featureId));
+});
+
+App::$app->get('/services/metrics/GetMetricNavigationInfo', function (Request $request) {
+	$controller = new services\InfoWindowService();
+
+	$metricId = Params::GetIntMandatory('l');
+	$variableId = Params::GetIntMandatory('i');
+	$unselectedIds = Params::GetIntArray('h');
+
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$frame = Frame::FromParams();
+
+	return App::JsonImmutable($controller->GetMetricNavigationInfo($metricId, $variableId, $frame, $urbanity, $unselectedIds));
+});
+
+App::$app->get('/services/metrics/GetMetricItemInfo', function (Request $request) {
+	$controller = new services\InfoWindowService();
+
+	$metricId = Params::GetIntMandatory('m');
+	$variableId = Params::GetIntMandatory('v');
+
+	// f: puede ser un geographyId o un featureId (datasetId << 32 || id)
+	$featureId = Params::GetMandatory('f');
+
+	return App::Json($controller->GetMetricItemInfo($featureId, $metricId, $variableId));
 });
 
 // ej. http://mapas/services/works/GetWorkAndDefaultFrame?w=12

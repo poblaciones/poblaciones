@@ -98,6 +98,13 @@ class DraftSymbology
      */
     private $ShowTotals;
 
+		/**
+     * @var boolean
+     *
+     * @ORM\Column(name="vsy_is_sequence", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $IsSequence;
+
 		 /**
      * @var float
      *
@@ -143,13 +150,22 @@ class DraftSymbology
 		/**
      * @var \helena\entities\backoffice\DraftDatasetColumn
      *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn")
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn", fetch="EAGER")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="vsy_cut_column_id", referencedColumnName="dco_id", nullable=true)
      * })
      */
     private $CutColumn;
 
+		/**
+     * @var \helena\entities\backoffice\DraftDatasetColumn
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="vsy_sequence_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $SequenceColumn;
 
     /**
      * Get id
@@ -393,6 +409,31 @@ class DraftSymbology
         return $this->CutMode;
     }
 
+
+    /**
+     * Get sequenceColumn
+     *
+     * @return \helena\entities\backoffice\DraftDatasetColumn
+     */
+    public function getSequenceColumn()
+    {
+        return $this->SequenceColumn;
+    }
+
+		/**
+     * Set sequenceColumn
+     *
+     * @param \helena\entities\backoffice\DraftDatasetColumn $sequenceColumn
+     *
+     * @return DraftSymbology
+     */
+    public function setSequenceColumn($sequenceColumn)
+    {
+        $this->SequenceColumn = $sequenceColumn;
+
+        return $this;
+    }
+
     /**
      * Set opacity
      *
@@ -562,6 +603,30 @@ class DraftSymbology
         return $this->ShowTotals;
     }
 
+
+    /**
+     * Set isSequence
+     *
+     * @param boolean $isSequence
+     *
+     * @return DraftSymbology
+     */
+    public function setIsSequence($isSequence)
+    {
+        $this->IsSequence = $isSequence;
+
+        return $this;
+    }
+
+    /**
+     * Get isSequence
+     *
+     * @return boolean
+     */
+    public function getIsSequence()
+    {
+        return $this->IsSequence;
+    }
     /**
      * Set nullCategory
      *

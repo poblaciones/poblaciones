@@ -29,35 +29,35 @@
 				</JqxGrid>
 				<div class="gridStatusBar">{{ statusBarText }}</div>
 				<div>
-						<md-button v-if="canEdit" @click="showModify()" :disabled="modifyDisabled">
-							<md-icon>edit</md-icon>
-							Modificar
-						</md-button>
-						<md-button v-if="canEdit" @click="startAutoRecode" :disabled="autoRecodeDisabled">
-							<md-icon>toc</md-icon>
-							Auto-recodificar
-						</md-button>
-
-						<md-button v-if="canEdit" @click="confirmDelete" :disabled="deleteDisabled">
-							<md-icon>delete</md-icon>
-							Eliminar
-						</md-button>
-
-						<md-button @click="valuesOnClick()" :disabled="valuesDisabled">
-							<md-icon>ballot</md-icon>
-							Categorías
-						</md-button>
-
+					<md-button v-if="canEdit" @click="showNew()">
+						<md-icon>add_circle_outline</md-icon>
+						Nueva
+					</md-button>
+					<md-button v-if="canEdit" @click="showModify()" :disabled="modifyDisabled">
+						<md-icon>edit</md-icon>
+						Modificar
+					</md-button>
+					<md-button v-if="canEdit" @click="startAutoRecode" :disabled="autoRecodeDisabled">
+						<md-icon>toc</md-icon>
+						Auto-recodificar
+					</md-button>
+					<md-button v-if="canEdit" @click="confirmDelete" :disabled="deleteDisabled">
+						<md-icon>delete</md-icon>
+						Eliminar
+					</md-button>
+					<md-button @click="valuesOnClick()" :disabled="valuesDisabled">
+						<md-icon>ballot</md-icon>
+						Categorías
+					</md-button>
 					<md-button @click="excelBtnOnClick()">
-							<md-icon>import_export</md-icon>
-							Exportar a Excel
-						</md-button>
-
-						<md-button @click="csvBtnOnClick()">
-							<md-icon>import_export</md-icon>
-							Exportar a CSV
-						</md-button>
-					</div>
+						<md-icon>import_export</md-icon>
+						Exportar a Excel
+					</md-button>
+					<md-button @click="csvBtnOnClick()">
+						<md-icon>import_export</md-icon>
+						Exportar a CSV
+					</md-button>
+				</div>
 				</div>
 		</div>
 	</div>
@@ -368,6 +368,7 @@ export default {
 			this.Dataset.DeleteColumns(selectedRows).then(function () {
 				loc.hideWait();
 				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds(selectedRows);
+				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedSequenceIds(selectedRows);
 				loc.Grid.clearselection();
 				loc.Grid.deleterow(selectedRows);
 				loc.updateCount();
@@ -416,6 +417,12 @@ export default {
 		showError(text) {
 			this.hideWait();
 			alert('No se ha podido realizar la operación. ' + text);
+		},
+		showNew() {
+			var loc = this;
+			window.Context.Factory.GetCopy('Column', function (data) {
+				loc.$refs.edit.show(data);
+			});
 		},
 		showModify() {
 			let selectedRow = this.selectedId();

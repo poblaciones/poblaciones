@@ -66,6 +66,7 @@ class DatasetService extends DbSession
 		$datasetMarker->setSize('S');
 		$datasetMarker->setType('N');
 		$datasetMarker->setFrame('P');
+		$datasetMarker->setDescriptionVerticalAlignment('B');
 		$datasetMarker->setSource('F');
 		App::Orm()->Save($datasetMarker);
 
@@ -105,12 +106,12 @@ class DatasetService extends DbSession
 		return $ret;
 	}
 
-	public function UpdateDataset($dataset)
+	public function UpdateDataset($dataset, $requiresRegenData = false)
 	{
 		Profiling::BeginTimer();
 		$this->Save(entities\DraftDataset::class, $dataset);
 		// Marca work
-		DatasetService::DatasetChanged($dataset, true);
+		DatasetService::DatasetChanged($dataset, !$requiresRegenData);
 		Profiling::EndTimer();
 		return self::OK;
 	}

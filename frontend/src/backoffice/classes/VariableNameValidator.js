@@ -46,6 +46,9 @@ VariableNameValidator.prototype.CheckRules = function (name) {
 };
 
 VariableNameValidator.prototype.CheckContent = function (name) {
+	if (name === null || name === '') {
+		return "Debe indicar un nombre para la variable.";
+	}
 	var validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_@#.$';
 	for (var i = 0; i < name.length; i++) {
 		if (validChars.includes(name[i]) == false) {

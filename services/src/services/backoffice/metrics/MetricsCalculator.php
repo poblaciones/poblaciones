@@ -92,7 +92,7 @@ class MetricsCalculator
 			return $name;
 		}
 
-		$col = $datasetColumn->CreateColumn($dataset, $name, $name,
+		$col = $datasetColumn->CreateColumnFromFields($dataset, $name, $name,
 			$caption, null, $colWidth, $fieldWidth, $decimals, $format,
 			Measurement::Nominal, Alignment::Left, false, true);
 		return $col->getField();

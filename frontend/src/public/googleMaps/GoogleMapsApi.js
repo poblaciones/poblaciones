@@ -12,7 +12,7 @@ function GoogleMapsApi(google) {
 	this.drawingManager = null;
 	this.dragging = false;
 	this.idle = true;
-	this.myLocationMarket = null;
+	this.myLocationMarker = null;
 	this.isSettingZoom = false;
 	this.clippingCanvas = null;
 	this.segmentedMap = null;
@@ -208,9 +208,9 @@ GoogleMapsApi.prototype.TriggerResize = function () {
 };
 
 GoogleMapsApi.prototype.ClearMyLocationMarker = function () {
-	if (this.myLocationMarket !== null) {
-		this.myLocationMarket.setMap(null);
-		this.myLocationMarket = null;
+	if (this.myLocationMarker !== null) {
+		this.myLocationMarker.setMap(null);
+		this.myLocationMarker = null;
 	}
 };
 
@@ -220,12 +220,23 @@ GoogleMapsApi.prototype.CreateMyLocationMarker = function (coord) {
 	var pos = new this.google.maps.LatLng(coord.Lat, coord.Lon);
 
 	// Create a marker and center map on user location
-	this.myLocationMarket = new this.google.maps.Marker({
+	this.myLocationMarker = new this.google.maps.Marker({
 		position: pos,
 		draggable: true,
+		zIndex: 1000 * 1000,
+		optimized: false,
 		animation: this.google.maps.Animation.DROP,
 		map: this.gMap
 	});
+	var loc = this;
+	this.myLocationMarker.addListener("click", () => {
+
+		 const infowindow = new google.maps.InfoWindow({
+			 content: 'Lat: ' + loc.myLocationMarker.position.lat().toFixed(6) + ", " +
+							  'Lon: ' + loc.myLocationMarker.position.lng().toFixed(6)
+		});
+    infowindow.open(loc.gMap, loc.myLocationMarker);
+  });
 };
 
 
@@ -276,9 +287,28 @@ GoogleMapsApi.prototype.SetCenter = function (coord) {
 	this.gMap.setCenter(c);
 };
 
-GoogleMapsApi.prototype.PanTo = function (coord) {
-	var c = new this.google.maps.LatLng(coord.Lat, coord.Lon);
+GoogleMapsApi.prototype.calculateOffsetX = function (offsetXpixels) {
+	var offsetRad = 0;
+	if (offsetXpixels) {
+		var ret = this.point2LatLng({ x: offsetXpixels, y: 0 }, this.gMap);
+		var ret2 = this.point2LatLng({ x: 0, y: 0 }, this.gMap);
+		offsetRad = (ret.lng() - ret2.lng()) / 2;
+	}
+	return offsetRad;
+};
+
+GoogleMapsApi.prototype.PanTo = function (coord, offsetXpixels) {
+	var offsetRad = this.calculateOffsetX(offsetXpixels);
+	var c = new this.google.maps.LatLng(coord.Lat, coord.Lon - offsetRad);
 	this.gMap.panTo(c);
+};
+
+GoogleMapsApi.prototype.point2LatLng = function (point, map) {
+	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+	var scale = Math.pow(2, map.getZoom());
+	var worldPoint = new google.maps.Point(point.x / scale + bottomLeft.x, point.y / scale + topRight.y);
+	return map.getProjection().fromPointToLatLng(worldPoint);
 };
 
 GoogleMapsApi.prototype.SetTypeControlsDropDown = function () {
@@ -304,7 +334,7 @@ GoogleMapsApi.prototype.SetZoom = function (zoom) {
 	this.isSettingZoom = false;
 };
 
-GoogleMapsApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch) {
+GoogleMapsApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) {
 	var envelope;
 	if (exactMatch) {
 		envelope = envelopeOrig;
@@ -317,6 +347,11 @@ GoogleMapsApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch) {
 	bounds.extend(min);
 	bounds.extend(max);
 	this.gMap.fitBounds(bounds);
+	if (offsetX) {
+		var pos = this.gMap.getCenter();
+		var offsetRad = this.calculateOffsetX(offsetX);
+		this.gMap.setCenter(new this.google.maps.LatLng(pos.lat(), pos.lng() - offsetRad));
+	}
 };
 
 GoogleMapsApi.prototype.ClearClippingCanvas = function () {
@@ -450,7 +485,7 @@ GoogleMapsApi.prototype.SetClippingCanvas = function (canvasList) {
 };
 
 GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid, offset) {
-	window.SegMap.InfoRequestedInteractive(h.getPosition(event), metricVersion, fid, offset);
+	window.SegMap.InfoWindow.InfoRequestedInteractive(h.getPosition(event), metricVersion, fid, offset);
 };
 
 GoogleMapsApi.prototype.getBounds = function() {

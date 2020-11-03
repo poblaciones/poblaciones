@@ -84,6 +84,15 @@ module.exports = {
 		}
 		return -1;
 	},
+	IndexByProperty(arr, property, value) {
+		for (let i = 0; i < arr.length; i++) {
+			let item = arr[i][property];
+			if (item == value) {
+				return i;
+			}
+		}
+		return -1;
+	},
 	GetById(arr, id, defaultValue) {
 		var i = this.IndexById(arr, id);
 		if (i !== -1) {

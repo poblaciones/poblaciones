@@ -1,6 +1,6 @@
 <?php
 
-namespace helena\entities\frontend\clipping;
+namespace helena\entities\frontend\metric;
 
 use helena\entities\BaseMapModel;
 

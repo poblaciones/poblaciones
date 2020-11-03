@@ -54,6 +54,9 @@ SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelected
 		ret.push(['g', variable.GradientOpacity, 'M']);
 		ret.push(['d', this.Boolean(variable.ShowDescriptions), '0']);
 		ret.push(['s', this.Boolean(variable.ShowValues), '0']);
+
+		var activeStepsState = this.activeSequences(variable);
+		ret.push(['a', activeStepsState, null]);
 	}
 	// bloque de estado de variables. las variables van separadas por @, e indican visible y luego lista de visible de valores.
 	var variablesInfo = this.VariablesToRoute(activeSelectedMetric);
@@ -69,6 +72,25 @@ SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelected
 		ret = this.transformArrayListToKeyList(ret);
 	}
 	return ret;
+};
+
+SelectedMetricsRouter.prototype.activeSequences = function (variable) {
+	if (!variable.IsSequence) {
+		return null;
+	}
+	var activeStepsState = '';
+	for (var n = 0; n < variable.ValueLabels.length; n++) {
+		var labelId = variable.ValueLabels[n].Id;
+		var selected = variable.ValueLabels[n].ActiveStep;
+		if (selected && selected > 1) {
+			activeStepsState += "," + labelId + '@' + selected;
+		}
+	}
+	if (activeStepsState === '') {
+		return null;
+	} else {
+		return activeStepsState.substr(1);
+	}
 };
 
 SelectedMetricsRouter.prototype.transformArrayListToKeyList = function (list) {
@@ -185,6 +207,7 @@ SelectedMetricsRouter.prototype.LoadMetrics = function (metrics, updateRoute, sk
 			}
 			segmentedMap.Labels.UpdateMap();
 			segmentedMap.SaveRoute.Disabled = false;
+			segmentedMap.InfoWindow.CheckUpdateNavigation();
 			if (updateRoute) {
 				segmentedMap.SaveRoute.UpdateRoute();
 			}
@@ -228,6 +251,7 @@ SelectedMetricsRouter.prototype.parseMetric = function (values) {
 	var pinnedLevel = h.getSafeValue(values, 'l', '');
 	var showDescriptions = h.getSafeValue(values, 'd', '0');
 	var showValues = h.getSafeValue(values, 's', '0');
+	var activeSequencesSteps = h.getSafeValue(values, 'a', null);
 	var ranking = h.getSafeValue(values, 'k', null);
 	var customPattern = h.getSafeValue(values, 'p', '');
 	var opacity = h.getSafeValue(values, 't', 'M');
@@ -248,6 +272,7 @@ SelectedMetricsRouter.prototype.parseMetric = function (values) {
 		RankingSize: this.ParseRanking(ranking)['Size'],
 		RankingDirection: this.ParseRanking(ranking)['Direction'],
 		Opacity: opacity,
+		ActiveSequencesSteps: activeSequencesSteps,
 		GradientOpacity: gradientOpacity,
 		PinnedLevel: pinnedLevel,
 		CustomPattern: (customPattern === '' ? '' : parseInt(customPattern)),
@@ -356,6 +381,41 @@ SelectedMetricsRouter.prototype.RestoreMetricState = function (activeSelectedMet
 				if (variable.ValueLabels[lb].Visible !== val) {
 					variable.ValueLabels[lb].Visible = val;
 					mapChanged = true;
+				}
+			}
+		}
+	}
+
+	if (this.restoreSequenceActiveSteps(selectedMetric, level, state)) {
+		mapChanged = true;
+	}
+
+	return mapChanged;
+};
+
+SelectedMetricsRouter.prototype.restoreSequenceActiveSteps = function (selectedMetric, level, state) {
+	var mapChanged = false;
+	if (!level || level.SelectedVariableIndex === -1) {
+		return false;
+	}
+	var variable = level.Variables[level.SelectedVariableIndex];
+	if (!variable.IsSequence) {
+		return false;
+	}
+	if (this.activeSequences(selectedMetric) === state.ActiveSequencesSteps) {
+		return false;
+	}
+	var parts = state.ActiveSequencesSteps.split(',');
+	for (var n = 0; n < parts.length; n++) {
+		var set = parts[n].split('@');
+		var labelId = parseInt(set[0]);
+		if (set.length > 1) {
+			var sequence = parseInt(set[1]);
+			for (var lb = 0; lb < variable.ValueLabels.length; lb++) {
+				if (variable.ValueLabels[lb].Id === labelId) {
+					variable.ValueLabels[lb].ActiveStep = sequence;
+					mapChanged = true;
+					break;
 				}
 			}
 		}

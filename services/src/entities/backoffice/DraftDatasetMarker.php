@@ -46,6 +46,14 @@ class DraftDatasetMarker
     /**
      * @var string
      *
+     * @ORM\Column(name="dmk_description_vertical_alignment", type="string", length=1, precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $DescriptionVerticalAlignment;
+
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="dmk_frame", type="string", length=1, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Frame;
@@ -80,18 +88,14 @@ class DraftDatasetMarker
     private $AutoScale;
 
 		/**
-     * @var integer
+     * @var \helena\entities\backoffice\DraftDatasetColumn
      *
-     * @ORM\Column(name="dmk_sequence_column_id", type="integer", precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dmk_content_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
      */
-    private $SequenceColumnId;
-
-		/**
-     * @var integer
-     *
-     * @ORM\Column(name="dmk_symbol_column_id", type="integer", precision=0, scale=0, nullable=false, unique=false)
-     */
-    private $SymbolColumnId;
+    private $ContentColumn;
 
 
     /**
@@ -297,6 +301,32 @@ class DraftDatasetMarker
         return $this;
     }
 
+
+
+    /**
+     * Get descriptionVerticalAlign
+     *
+     * @return string
+     */
+    public function getDescriptionVerticalAlignment()
+    {
+        return $this->DescriptionVerticalAlignment;
+    }
+
+		/**
+     * Set descriptionVerticalAlign
+     *
+     * @param string $descriptionVerticalAlign
+     *
+     * @return DraftDatasetMarker
+     */
+    public function setDescriptionVerticalAlignment($descriptionVerticalAlign)
+    {
+        $this->DescriptionVerticalAlignment = $descriptionVerticalAlign;
+
+        return $this;
+    }
+
     /**
      * Get autoScale
      *
@@ -321,52 +351,26 @@ class DraftDatasetMarker
         return $this;
     }
 
-
     /**
-     * Get symbolColumnId
+     * Get contentColumn
      *
-     * @return integer
+     * @return \helena\entities\backoffice\DraftDatasetColumn
      */
-    public function getSymbolColumnId()
+    public function getContentColumn()
     {
-        return $this->SymbolColumnId;
+        return $this->ContentColumn;
     }
 
 		/**
-     * Set symbolColumnId
+     * Set contentColumn
      *
-     * @param integer $symbolColumnId
-     *
-     * @return DraftDatasetMarker
-     */
-    public function setSymbolColumnId($symbolColumnId)
-    {
-        $this->SymbolColumnId = $symbolColumnId;
-
-        return $this;
-    }
-
-
-    /**
-     * Get sequenceColumnId
-     *
-     * @return integer
-     */
-    public function getSequenceColumnId()
-    {
-        return $this->SequenceColumnId;
-    }
-
-		/**
-     * Set sequenceColumnId
-     *
-     * @param integer $sequenceColumnId
+     * @param \helena\entities\backoffice\DraftDatasetColumn $contentColumn
      *
      * @return DraftDatasetMarker
      */
-    public function setSequenceColumnId($sequenceColumnId)
+    public function setContentColumn($contentColumn)
     {
-        $this->SequenceColumnId = $sequenceColumnId;
+        $this->ContentColumn = $contentColumn;
 
         return $this;
     }

@@ -27,6 +27,7 @@ class VariableInfo extends BaseMapModel
 	public $RankingItems = null;
 	public $DefaultMeasure = 'N';
 	public $IsCategorical;
+	public $IsSequence;
 	public $ValueLabels = array();
 	public $ValidMetrics = array();
 	public $CurrentOpacity = -1;
@@ -48,6 +49,7 @@ class VariableInfo extends BaseMapModel
 			'vsy_show_labels' => 'ShowDescriptions',
 			'vsy_show_empty_categories' => 'ShowEmptyCategories',
 			'vsy_show_totals' => 'ShowSummaryTotals',
+			'vsy_is_sequence' => 'IsSequence',
 			'vsy_pattern' => 'Pattern');
 	}
 

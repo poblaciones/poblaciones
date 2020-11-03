@@ -54,6 +54,19 @@
 											Mostrar etiquetas con los valores
 										</md-switch>
 									</div>
+									<div v-if="Dataset.properties.Type === 'L'" class="md-layout-item md-size-100">
+										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.IsSequence">
+											Organizar los elementos como secuencia
+										</md-switch>
+
+										<mp-select label='Variable de secuencia' v-show="Variable.Symbology.IsSequence" :canEdit='canEdit && Variable.Symbology.IsSequence'
+															 v-model='Variable.Symbology.SequenceColumn'
+															 list-key='Id' :allowNull="true"
+															 :list='columnsForSequenceColumn'
+															 :render='formatColumn'
+															 helper='Seleccione la variable que da el orden a la secuencia' />
+
+									</div>
 								</div>
 							</md-card-content>
 						</md-card>
@@ -127,10 +140,17 @@ export default {
 		hide() {
 			this.showDialog = false;
 		},
+		formatColumn(column) {
+			return f.formatColumn(column);
+		},
 		Save() {
 			if (this.Variable.Data === null) {
 				alert("Debe indicar una variable para el valor para la fórmula.");
-				this.currentTab = 'tab-formula';
+				return;
+			}
+			if (this.Variable.Symbology.IsSequence &&
+				!this.Variable.Symbology.SequenceColumn) {
+				alert("Debe indicar una variable que defina el orden de la secuencia.");
 				return;
 			}
 			var loc = this;
@@ -149,6 +169,9 @@ export default {
 		},
 		Work() {
 			return window.Context.CurrentWork;
+		},
+		columnsForSequenceColumn() {
+			return this.Dataset.GetColumnsForSequenceColumn();
 		},
 		canEdit() {
 			if (this.Work) {

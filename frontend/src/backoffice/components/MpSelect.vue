@@ -149,7 +149,7 @@ export default {
 		}
 	},
 	created() {
-		if (this.value !== null) {
+		if (this.value !== null || this.allowNull) {
 			this.receiveValue();
 		}
 	},

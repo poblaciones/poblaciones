@@ -46,6 +46,7 @@ class MetricService extends BaseService
 		$symbology->setCategories(4);
 		$symbology->setCutMode('S');
 		$symbology->setPaletteType('P');
+		$symbology->setIsSequence(false);
 		$symbology->setRainbow(2);
 		$symbology->setOpacity('M');
 		$symbology->setGradientOpacity('M');

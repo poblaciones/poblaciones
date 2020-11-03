@@ -18,6 +18,21 @@ use helena\services\backoffice\import\DatasetTable;
 
 class DatasetColumnService extends DbSession
 {
+	public function GetNewColumn()
+	{
+		$column = new entities\DraftDatasetColumn();
+		$column->setColumnWidth(20);
+		$column->setFieldWidth(20);
+		$column->setDecimals(0);
+		$column->setFormat(1); // texto
+		$column->setMeasure(1); // nominal
+		$column->setAlignment(0); // izquierda
+		$column->setUseInSummary(true);
+		$column->setUseInExport(true);
+		$column->setValueLabelsAreDirty(false);
+		return $column;
+	}
+
 	public function SaveColumn($datasetId, $column)
 	{
 		Profiling::BeginTimer();
@@ -137,7 +152,8 @@ class DatasetColumnService extends DbSession
 
 		// 3. Pone en null las referencias a columnas en symbology
 		$queryCols = "UPDATE draft_symbology JOIN draft_variable ON mvv_symbology_id = vsy_id JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
-								 SET " . $this->conditionalResetter('vsy_cut_column_id', $colsId) . "
+								 SET " . $this->conditionalResetter('vsy_cut_column_id', $colsId) . ",
+										 " . $this->conditionalResetter('vsy_sequence_column_id', $colsId) . "
 									WHERE mvl_dataset_id = ?";
 		App::Db()->exec($queryCols, array($datasetId));
 		// 4. Pone en null las referencias circulares a columnas
@@ -203,6 +219,24 @@ class DatasetColumnService extends DbSession
 			}
 		}
 	}
+
+	private function resolveStandardFieldName($datasetId)
+	{
+		$field = "dt_col";
+		$columns = $this->GetDatasetColumns($datasetId);
+		$suffix = 1;
+		while(true)
+		{
+			foreach($columns as $column)
+			{
+				$newField = $field . $suffix;
+				if ($this->listHasField($columns, $newField) == false)
+					return $newField;
+				else
+					$suffix++;
+			}
+		}
+	}
 	private function listHasField($columns, $field)
 	{
 		foreach($columns as $column) {
@@ -239,11 +273,9 @@ class DatasetColumnService extends DbSession
 		App::Orm()->save($col);
 	}
 
-	public function CreateColumn($dataset, $field, $variable, $caption, $label, $columnWidth, $fieldWidth,
+	public function CreateColumnFromFields($dataset, $field, $variable, $caption, $label, $columnWidth, $fieldWidth,
 		$decimals, $format, $measure, $alignment, $useInSummary, $useInExport, $position = null, $after = '')
 	{
-		Profiling::BeginTimer();
-
 		$newColumn = new entities\DraftDatasetColumn();
 		$newColumn->setDataset($dataset);
 		$newColumn->setField($field);
@@ -257,15 +289,26 @@ class DatasetColumnService extends DbSession
 		$newColumn->setFormat($format);
 		$newColumn->setMeasure($measure);
 		$newColumn->setAlignment($alignment);
-		$newColumn->setValueLabelsAreDirty(false);
 
 		$newColumn->setUseInSummary($useInSummary);
 		$newColumn->setUseInExport($useInExport);
 
+		$this->CreateColumn($dataset, $newColumn, $position, $after);
+	}
+
+	public function CreateColumn($dataset, $newColumn, $position = null, $after = '')
+	{
+		Profiling::BeginTimer();
+		// Valida nombre
+		$this->ValidateNewColumn($dataset, $newColumn);
+
+		// Define el orden
 		$order = $position;
 		if($position === null)
 			$order = $this->GetMaxOrder($dataset->getId()) + 1;
 		$newColumn->setOrder($order);
+		// Setea el dataset
+		$newColumn->setDataset($dataset);
 
 		App::Orm()->save($newColumn);
 
@@ -275,48 +318,84 @@ class DatasetColumnService extends DbSession
 		if($after !== '')
 			$after = "AFTER " . $after;
 
+		$format = $newColumn->getFormat();
+		$fieldWidth = $newColumn->getFieldWidth();
 		$dataType = DatasetTable::SpssToMySqlDataType($format, $fieldWidth);
+		$field = $newColumn->getField();
 		$alter = "ALTER TABLE " . $dataset->getTable() . " ADD COLUMN " . $field . " " . $dataType . " NULL DEFAULT NULL " . $after;
 		App::Db()->execDDL($alter);
+
+		// Marca el cambio para las republicaciones
+		DatasetService::DatasetChangedById($dataset->getId());
 
 		Profiling::EndTimer();
 
 		return $newColumn;
 	}
 
+	private function ValidateNewColumn($dataset, $newColumn)
+	{
+		$name = $newColumn->getVariable();
+		if ($this->ColumnExists($dataset->getId(), $name))
+			throw new PublicException("Ya existe una variable con el nombre '" . $name . "'.");
+		// Valida field
+		$field = $newColumn->getField();
+		if ($field === null)
+		{
+			$field = $this->resolveStandardFieldName($dataset->getId());
+			$newColumn->setField($field);
+		}
+		else
+		{
+			if ($this->FieldExists($dataset->getId(), $field))
+				throw new PublicException("La columna '" . $field . "' ya existe en el dataset.");
+		}
+
+		// Ajusta caption y nombre
+		DatasetColumns::FixCaption($newColumn);
+		DatasetColumns::FixName($newColumn);
+		$newColumn->setValueLabelsAreDirty(false);
+	}
 	public function GetColumnByVariable($datasetId, $variable)
 	{
 		return App::Orm()->findByProperties(entities\DraftDatasetColumn::class,
 			['Variable' => $variable, 'Dataset.Id' => $datasetId]);
+	}
+	public function GetColumnByField($datasetId, $field)
+	{
+		return App::Orm()->findByProperties(entities\DraftDatasetColumn::class,
+			['Field' => $field, 'Dataset.Id' => $datasetId]);
 	}
 
 	public function ColumnExists($datasetId, $variable)
 	{
 		return $this->GetColumnByVariable($datasetId, $variable) !== null;
 	}
+	public function FieldExists($datasetId, $field)
+	{
+		return $this->GetColumnByField($datasetId, $field) !== null;
+	}
 
 	private function CreateNumericColumn($dataset, $name, $originalField, $label, $summary, $position)
 	{
 		Profiling::BeginTimer();
-		try
-		{
-			// Valida name
-			if ($this->ColumnExists($dataset->getId(), $name))
-				throw new PublicException("Ya existe una variable con el nombre '" . $name . "'.");
 
-			$field = $this->resolveUniqueFieldName($dataset->getId(), $originalField);
-			$caption = $label;
-			if ($label === null || $label === "")
-				$caption = $name;
+		// Valida name
+		if ($this->ColumnExists($dataset->getId(), $name))
+			throw new PublicException("Ya existe una variable con el nombre '" . $name . "'.");
 
-			return $this->CreateColumn($dataset, $field, $name, $caption, $label,
-				8, 8, 0, Format::F, Measurement::Nominal, Alignment::Right,
-				$summary, true, $position, $originalField);
-		}
-		finally
-		{
-			Profiling::EndTimer();
-		}
+		$field = $this->resolveUniqueFieldName($dataset->getId(), $originalField);
+		$caption = $label;
+		if ($label === null || $label === "")
+			$caption = $name;
+
+		$ret = $this->CreateColumnFromFields($dataset, $field, $name, $caption, $label,
+			8, 8, 0, Format::F, Measurement::Nominal, Alignment::Right,
+			$summary, true, $position, $originalField);
+
+		Profiling::EndTimer();
+
+		return $ret;
 	}
 
 	private function RecodeValues($dataset, $column, $targetColumn, $labels)

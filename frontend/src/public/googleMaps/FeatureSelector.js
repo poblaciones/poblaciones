@@ -203,7 +203,7 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 	window.SegMap.MapsApi.ResetInfoWindow();
 	var feature = loc.getFeature(event);
 	if (feature !== null && feature.id) {
-		window.SegMap.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id, null);
+		window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id, null);
 	}
 };
 

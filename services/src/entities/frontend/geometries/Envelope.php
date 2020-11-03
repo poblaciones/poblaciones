@@ -51,6 +51,9 @@ class Envelope extends BaseMapModel
 
 	public static function FromDb($field)
 	{
+		if ($field === null)
+			return null;
+
 		$coords = Str::PolygonToCoordinates($field);
 
 		$min = new Coordinate();

@@ -54,7 +54,11 @@ export default {
 	},
 	created() {
 		window.Popups = {};
-		window.Panels = { Content: { FeatureInfo: null, FeatureList: null } };
+		window.Panels = {
+			Content: {
+				FeatureInfo: null, FeatureList: null, FeatureNavigation: this.featureNavigation
+			}
+		};
 		window.Use = {};
 	},
 	data() {
@@ -63,6 +67,7 @@ export default {
 			collapsed: false,
 			isMobile: false,
 			splitPanels: null,
+			featureNavigation: { Key: null, Values: [], GettingKey: null },
 			toolbarStates: { selectionMode: null, tutorialOpened: 0, showLabels: true },
 			clipping: {
 				IsUpdating: false,
@@ -636,12 +641,23 @@ a:hover {
 	padding-top: 6px;
 	padding-bottom: 4px;
 }
-
+.frozen {
+	pointer-events: none;
+	border-color: #cecece;
+}
 .lightButton {
 	font-size: 12px;
 	padding: 4px 4px 4px 4px !important;
 	line-height: 1em;
 }
+.lightButton[disabled]:hover {
+	opacity: .1!important;
+	cursor: default!important;
+}
+	.lightButton[disabled] {
+		opacity: .1 !important;
+		cursor: default !important;
+	}
 
 .dropdown-menu > li:last-child > a {
 	border-bottom-left-radius: 4px;
