@@ -44,36 +44,9 @@
 					</div>
 				</div>
 				<div class="md-layout-item md-size-45 md-small-size-100">
-					<div class="mp-label" style="margin-top: 6px">Marca de agua</div>
-						<div v-if="this.watermarkImage">
-							<img  class="imagen-preview" style="" :src="this.watermarkImage" alt="">
-							<div style="display: inline-block">
-								<md-button style="background-color: #ececec;"
-													 title="Quitar"
-													 class="md-icon-button md-button-mini"
-													 v-on:click="clear">
-									<md-icon>close</md-icon>
-								</md-button>
-								<label class="file-select">
-									<div class="edit-button">
-										<md-icon>edit</md-icon>
-									</div>
-									<input @change="handleImage" class="file-select" type="file" accept="image/*" />
-								</label>
-							</div>
-						</div>
-
-						<div>
-							<label class="file-select"  v-if="!watermarkImage">
-								<div class="select-button">
-									<md-icon>add_circle_outline</md-icon>
-									Agregar imagen
-								</div>
-								<input @change="handleImage" class="file-select" type="file" accept="image/*" />
-							</label>
-						</div>
-
-					<div class="md-helper-text helper">Imagen para utilizar como marca de agua sobre el mapa (altura recomendada: 240px).</div>
+					<mp-image-upload label="Marca de agua" :previewImage="watermarkPreviewImage"
+													 v-model="imageToSend" @clear="clearImage"
+													 helper="Imagen para utilizar como marca de agua sobre el mapa (altura recomendada: 240px)." />
 				</div>
 			</div>
 
@@ -104,10 +77,10 @@
 			defaultColor: '00A0D2',
 			closeParentCallback: null,
 			openEditableInstitution: false,
-			watermarkImage: null,
+			watermarkPreviewImage: null,
+			imageToSend: null,
 			currentColor: null,
-			imageHasChanged: false,
-			extension: null,
+			imageHasChanged: false
 		};
 	},
 	computed: {
@@ -126,6 +99,7 @@
 		show(item, closeParentCallback) {
 			this.item = f.clone(item);
 			this.currentColor = item.PrimaryColor;
+			this.watermarkPreviewImage = null;
 			if (!this.currentColor) {
 				this.currentColor = this.defaultColor;
 			}
@@ -150,23 +124,9 @@
 				this.Work, this.Work.GetInstitutionWatermark, this.item
 			).then(
 				function (dataUrl) {
-					loc.watermarkImage = dataUrl;
+					loc.watermarkPreviewImage = dataUrl;
 				}
 			);
-		},
-		handleImage(e) {
-			const selectedImage = e.target.files[0];
-			this.extension = h.extractFileExtension(selectedImage.name);
-			this.createBase64Image(selectedImage);
-			e.target.value = '';
-		},
-		createBase64Image(fileObject) {
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				this.watermarkImage = e.target.result;
-				this.imageHasChanged = true;
-			};
-			reader.readAsDataURL(fileObject);
 		},
 		save() {
 			if (this.item.Caption === null || this.item.Caption.trim() === '') {
@@ -184,7 +144,7 @@
 				this.item.PrimaryColor = this.currentColor;
 			}
 			this.$refs.invoker.do(
-				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageHasChanged ? this.watermarkImage: null
+				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageToSend
 			).then(
 				function () {
 					loc.openEditableInstitution = false;
@@ -195,10 +155,8 @@
 				}
 			);
 		},
-		clear() {
+		clearImage() {
 			this.item.Watermark = null;
-			this.watermarkImage = null;
-			this.imageHasChanged = true;
 		}
 	},
  	props: {
@@ -210,49 +168,9 @@
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-/*.form-wrapper {
-  margin: 20px;
-}
-
-.md-card .md-title {
-  margin-top: 0;
-  font-size: 18px;
-  letter-spacing: 0;
-  line-height: 18px;
-}
-
-.md-card-header {
-  padding: 10px;
-}*/
 
 .md-field {
   margin: 12px 0 30px !important;
-}
-
-.md-button-mini{
-  width: 30px;
-  min-width: 30px;
-  height: 30px;
-}
-.select-button {
-	cursor: pointer;
-	padding: 3px 0px;
-}
-.edit-button {
-	cursor: pointer;
-	padding: 8px;
-}
-
-.imagen-preview {
-	min-height: unset !important;
-	width: auto;
-	max-height: 100px;
-	max-width: 195px;
-	width: auto;
-}
-
-.file-select > input[type="file"] {
-  display: none;
 }
 
 .label-primary-color{

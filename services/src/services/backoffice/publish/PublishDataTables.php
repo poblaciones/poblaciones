@@ -75,6 +75,11 @@ class PublishDataTables
 
 		$imageMatrix = array('class' => entities\File::class, 'parentKey' => 'wrk_image_id', 'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')));
 
+		$iconMatrix = array('class' => entities\WorkIcon::class, 'childKey' => 'wic_work_id',
+																		'children' => array(
+																			array('class' => entities\File::class, 'parentKey' => 'wic_file_id',
+																						'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')))));
+
 		$extraMetrics = array('class' => entities\WorkExtraMetric::class, 'childKey' => 'wmt_work_id');
 		$workStartup = array('class' => entities\WorkStartup::class, 'parentKey' => 'wrk_startup_id');
 
@@ -82,6 +87,7 @@ class PublishDataTables
 		$publishMatrix = array('class' => entities\Work::class,
 														'children' => array(
 															$imageMatrix,
+															$iconMatrix,
 															$extraMetrics,
 															$workStartup,
 															$metadataMatrix,

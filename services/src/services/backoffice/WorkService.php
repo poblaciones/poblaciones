@@ -12,6 +12,7 @@ use helena\classes\App;
 use helena\classes\Links;
 use helena\classes\Session;
 use helena\classes\Statistics;
+use helena\db\frontend\FileModel;
 use helena\services\common\BaseService;
 use helena\db\frontend\SignatureModel;
 use helena\entities\backoffice\DraftWork;
@@ -25,8 +26,13 @@ use helena\services\backoffice\publish\CacheManager;
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\PublicException;
 
+
+
 class WorkService extends BaseService
 {
+	private const MAX_ICON_WIDTH = 120;
+	private const MAX_ICON_HEIGHT = 120;
+
 	public function Create($type, $title = '')
 	{
 		$work = new entities\DraftWork();
@@ -123,6 +129,7 @@ class WorkService extends BaseService
 		$workInfo->Datasets = $this->GetDatasets($workId);
 		$workInfo->Sources = $this->GetSources($workId);
 		$workInfo->Files = $this->GetFiles($workId);
+		$workInfo->Icons = $this->GetIcons($workId);
 		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
 		$workInfo->Startup = $this->GetStartupInfo($workId);
@@ -189,6 +196,14 @@ class WorkService extends BaseService
 		return $ret;
 	}
 
+	public function GetIcons($workId)
+	{
+		Profiling::BeginTimer();
+		$files = new FileModel(true);
+		$ret = $files->ReadWorkIcons($workId);
+		Profiling::EndTimer();
+		return $ret;
+	}
 
 	public function GetWorkMetricsList($workId)
 	{
@@ -446,6 +461,70 @@ class WorkService extends BaseService
 			Arr::IntToBoolean($ret, array('IsPrivate', 'IsIndexed', 'SegmentedCrawling'));
 			Profiling::EndTimer();
 			return $ret;
+	}
+
+
+	public function CreateWorkIcon($workId, $name, $image)
+	{
+		$icon = new entities\DraftWorkIcon();
+
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+
+		$file = new entities\DraftFile();
+		$file->setName($name);
+
+		$icon->setWork($draftWork);
+		$icon->setFile($file);
+
+		if (!$image)
+			throw new ErrorException("No se ha recibido la imagen");
+
+		$fileController = new FileService();
+		$fileController->SaveBase64BytesToFile($image, $file,
+										self::MAX_ICON_WIDTH, self::MAX_ICON_HEIGHT);
+
+		App::Orm()->Save($icon);
+
+		WorkFlags::SetMetadataDataChanged($workId);
+
+		return $icon;
+	}
+
+	public function UpdateWorkIcon($workId, $iconId, $name)
+	{
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWorkIcon = App::Orm()->find(entities\DraftWorkIcon::class, $iconId);
+
+		if ($draftWorkIcon->getWork()->getId() !== $workId)
+			throw new ErrorException("El ícono no coincide con la obra");
+
+		$file = $draftWorkIcon->getFile();
+		$file->setName($name);
+		App::Orm()->Save($file);
+
+		WorkFlags::SetMetadataDataChanged($workId);
+
+		return self::OK;
+	}
+
+	public function DeleteWorkIcon($workId, $iconId)
+	{
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWorkIcon = App::Orm()->find(entities\DraftWorkIcon::class, $iconId);
+
+		if ($draftWorkIcon->getWork()->getId() !== $workId)
+			throw new ErrorException("El ícono no coincide con la obra");
+
+		$fileId = $draftWorkIcon->getFile()->getId();
+
+		App::Db()->exec("DELETE FROM draft_work_icon WHERE wic_id = ?", array($iconId));
+
+		$fileService = new FileService();
+		$fileService->DeleteFile($fileId);
+
+		WorkFlags::SetMetadataDataChanged($workId);
+
+		return self::OK;
 	}
 
 }

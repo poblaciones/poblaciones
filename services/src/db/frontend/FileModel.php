@@ -39,6 +39,46 @@ class FileModel extends BaseModel
 		Profiling::EndTimer();
 	}
 
+	public function ReadWorkIcons($workId)
+	{
+		Profiling::BeginTimer();
+		$params = array($workId);
+
+		$sql = "SELECT wic_id, fil_name, fil_type, chu_id, chu_content
+						FROM ". $this->makeTableName('work_icon', $this->fromDraft) . " icon
+						JOIN ". $this->makeTableName('file', $this->fromDraft) . " file ON icon.wic_file_id = fil_id
+						JOIN ". $this->makeTableName('file_chunk', $this->fromDraft) . " chunk ON file.fil_id = chu_file_id
+						WHERE wic_work_id = ? ORDER BY wic_id, fil_id, chu_id";
+		$parts = App::Db()->fetchAll($sql, $params);
+		$ret = [];
+		$lastWicId = null;
+		$item = null;
+		foreach($parts as $part)
+		{
+			if ($part['wic_id'] != $lastWicId)
+			{
+				if ($item !== null) $ret[] = $item;
+				$item = ['Id' => $part['wic_id'], 'Type' => $part['fil_type'], 'Caption' => $part['fil_name'], 'Image' => ''];
+			}
+			$item['Image'] .= $part['chu_content'];
+		}
+		if ($item !== null) $ret[] = $item;
+
+		// Los pasa a base64...
+		foreach($ret as &$item)
+		{
+			$item['Image'] = 'data:'. $item['Type'] . ';base64,'.base64_encode($item['Image']);
+			if (!$this->fromDraft)
+			{
+				unset($item['Id']);
+				unset($item['Type']);
+			}
+		}
+		Profiling::EndTimer();
+
+		return $ret;
+	}
+
 
 	public function SendFile($fileId, $friendlyName = '')
 	{

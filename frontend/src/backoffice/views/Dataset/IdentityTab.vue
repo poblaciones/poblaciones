@@ -1,6 +1,7 @@
 <template>
 	<div v-if="Dataset && Dataset.Columns">
 		<invoker ref="invoker"></invoker>
+		<icon-picker-popup ref="iconPickerDialog" @iconSelected="iconSelected"></icon-picker-popup>
 		<div v-if="Dataset && Dataset.Columns">
 			<div class='md-layout md-gutter'>
 				<div class='md-layout-item md-size-100'>
@@ -96,20 +97,14 @@
 									<md-radio v-model="Dataset.properties.Marker.Source" :disabled="!canEdit || Dataset.properties.Marker.Type == 'N'" class="md-primary" @change="UpdateRegen" value="V">Variable</md-radio>
 									<template v-if="Dataset.properties.Marker.Source == 'F'">
 										<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'I'">
-											<i v-if='Dataset.properties.Marker.Symbol' :class="Dataset.properties.Marker.Symbol"></i>
-											<span v-else style="font-size: 14px;">[Ninguno]</span>
+											<Icon v-if="Dataset.properties.Marker.Symbol" :symbol="Dataset.properties.Marker.Symbol" :work="Work" />
 											<template v-if="canEdit">
-												<md-button @click="showPicker" class="md-raised" style="margin-top: -6px;">
+												<md-button @click="showDialogPicker" class="md-raised" style="margin-top: -3px;">
 													Seleccionar
 													<md-icon>edit</md-icon>
 												</md-button>
-												<mp-icon-font-picker ref="iconPicker" v-model="Dataset.properties.Marker.Symbol" searchBox="Buscar..." v-on:selectIcon="iconSelected"></mp-icon-font-picker>
 											</template>
 										</div>
-										<div style="float: right" v-if="Dataset.properties.Marker.Type == 'I' && Dataset.properties.Marker.Source == 'F' && Dataset.properties.Marker.Symbol">
-											{{ Dataset.properties.Marker.Symbol }}
-										</div>
-
 										<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'T' && Dataset.properties.Marker.Source == 'F'"
 												 style="margin-top: -20px">
 											<mp-text :canEdit="canEdit && Dataset.properties.Marker.Type != 'N'"
@@ -137,13 +132,16 @@
 </template>
 <script>
 
+	import Icon from '@/backoffice/Components/Icon';
 	import f from '@/backoffice/classes/Formatter';
-	import MpIconFontPicker from '@/backoffice/components/MpIconFontPicker';
+	import IconPickerPopup from './IconPickerPopup';
+
 
 	export default {
 		name: 'identityTab',
 		components: {
-			MpIconFontPicker
+			Icon,
+			IconPickerPopup
 		},
 		computed: {
 			Dataset() {
@@ -190,7 +188,11 @@
 			showPicker() {
 				this.$refs.iconPicker.show();
 			},
+			showDialogPicker() {
+				this.$refs.iconPickerDialog.show(this.Dataset.properties.Marker.Symbol);
+			},
 			iconSelected(selectedIcon) {
+				this.Dataset.properties.Marker.Symbol = selectedIcon;
 				this.Update();
 			},
 			Update() {

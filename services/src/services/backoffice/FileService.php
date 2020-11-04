@@ -6,8 +6,11 @@ use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\PdfReader;
+use minga\framework\Str;
 use minga\framework\FileBucket;
 use minga\framework\PublicException;
+use helena\classes\Image;
+
 
 class FileService extends BaseService
 {
@@ -19,13 +22,13 @@ class FileService extends BaseService
 		$fileId = $fileObject->getId();
 		// Guarda por si filename cambió o es nuevo
 		$fileObject->setSize(filesize($tempFilename));
+		$fileObject->setType($fileType);
+
 		App::Orm()->save($fileObject);
 		$fileId = $fileObject->getId();
 		// Ya tiene el id de file, sube los chunks
 		if ($tempFilename != null)
 		{
-			// resuelve type
-			$fileObject->setType($fileType);
 			$pages = null;
 			if ($fileType === 'application/pdf') {
 				// resuelve páginas
@@ -38,6 +41,25 @@ class FileService extends BaseService
 			$this->saveChunks($fileId, $tempFilename, $toDrafts);
 		}
 		return $fileObject;
+	}
+
+	public function SaveBase64BytesToFile($watermarkImage, $fileObject, $maxWidth = null, $maxHeight = null)
+	{
+
+			$fileType = null;
+
+		$bucket = $this->ConvertBase64toFile($watermarkImage);
+		$file = $bucket->path . '/file.dat';
+		if ($maxWidth || $maxHeight)
+		{
+			Image::ResizeToMaxSize($file, $maxWidth, $maxHeight);
+		}
+		if (Str::StartsWith($watermarkImage, "data:image/svg+xml;"))
+			$fileType = "image/svg+xml";
+		else
+			$fileType = Image::GetImageMimeType($file);
+		$this->SaveFile($fileObject, $file, true, $fileType);
+		$bucket->Delete();
 	}
 
 	protected function makeTableName($table, $fromDraft)
@@ -88,7 +110,11 @@ class FileService extends BaseService
 
 		return $bucket;
 	}
-
+	public function DeleteFile($fileId)
+	{
+		App::Db()->exec("DELETE FROM draft_file_chunk WHERE chu_file_id = ?", array($fileId));
+		App::Db()->exec("DELETE FROM draft_file WHERE fil_id = ?", array($fileId));
+	}
 	public function ConvertFiletoBase64($file_path)
 	{
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);

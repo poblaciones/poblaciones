@@ -3,8 +3,7 @@ import Svg from '@/public/js/svg';
 import h from '@/public/js/helper';
 import arr from '@/common/js/arr';
 import SequenceComposer from './SequenceComposer';
-import fontAwesomeIconsList from '@/common/js/fontAwesomeIconsList.js';
-import flatIconsList from '@/common/js/flatIconsList.js';
+import iconManager from '@/common/js/iconManager';
 
 export default LocationsComposer;
 
@@ -17,6 +16,7 @@ function LocationsComposer(mapsApi, activeSelectedMetric) {
 	this.iconsCache = {};
 	this.index = this.activeSelectedMetric.index;
 	this.zIndex = (1000 - this.index) * 100;
+	this.customIcons = this.processCustomIcons(this.activeSelectedMetric.SelectedVersion().Work.Icons);
 	if (this.activeSelectedMetric.HasSelectedVariable()) {
 		this.variable = this.activeSelectedMetric.SelectedVariable();
 	} else {
@@ -133,7 +133,31 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature, markerSet
 	params.zIndex = this.zIndex + (isSequenceInactiveStep ? 5 : 10);
 
 	var scale = this.CalculateMarkerScale(markerSettings, z);
-	if (isSequenceInactiveStep) {
+
+	if (!isSequenceInactiveStep) {
+		// Es un marker normal
+		var content = this.resolveContent(markerSettings, feature.Symbol);
+		params.icon = this.createIcon(markerSettings, style, scale);
+		params.label = this.createMarkerLabel(metric, markerSettings, scale, content);
+		element = new loc.MapsApi.google.maps.Marker(params);
+		// Crea el pseudo-marker con la descripción
+		if (feature.Description) {
+			var descriptionMarker = this.createDescriptionMarker(geo, feature.Description, markerSettings, scale, params.zIndex + 50);
+			loc.keysInTile[tileKey].push(descriptionMarker);
+			element.extraMarker = descriptionMarker;
+		}
+		var isCustom = markerSettings.Type === 'I' && iconManager.isCustom(content);
+		// Crea un pseudo-marker con la imagen
+		if (isCustom) {
+			var imageMarker = this.createImageMarker(geo, content, markerSettings, scale, params.zIndex + 15);
+			if (imageMarker) {
+				loc.keysInTile[tileKey].push(imageMarker);
+				element.extraMarkerImage = imageMarker;
+				this.addMarkerListeners(metric, imageMarker, feature, z);
+			}
+		}
+	} else {
+		// Es solo la pelotita de secuencia
 		var sequenceMarker = {
 			Frame: 'C', Size: markerSettings.Size, AutoScale: markerSettings.AutoScale, Type: 'T',
 			Source: 'F', Text: '' + feature.Sequence, NoDescription: true
@@ -142,30 +166,32 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature, markerSet
 		if (seqScale > 1) {
 			seqScale = 1;
 		}
-		params.icon = this.CreateIcon(sequenceMarker, style, seqScale);
+		params.icon = this.createIcon(sequenceMarker, style, seqScale);
 		params.icon.anchor = new this.MapsApi.google.maps.Point(0, 0);
-		params.label = this.CreateMarkerContent(metric, sequenceMarker, seqScale);
-	} else {
-		params.icon = this.CreateIcon(markerSettings, style, scale);
-		params.label = this.CreateMarkerContent(metric, markerSettings, scale, feature.Symbol);
+		params.label = this.createMarkerLabel(metric, sequenceMarker, seqScale);
+		element = new loc.MapsApi.google.maps.Marker(params);
 	}
 	// Listo, lo muestra...
-	element = new loc.MapsApi.google.maps.Marker(params);
 	this.addMarkerListeners(metric, element, feature, z);
 
 	if (loc.keysInTile.hasOwnProperty(tileKey) === false) {
 		loc.keysInTile[tileKey] = [];
 	}
 	loc.keysInTile[tileKey].push(element);
-	// Crea el pseudo-marker con la descripción
-	if (feature.Description && ! isSequenceInactiveStep) {
-		var descriptionMarker = this.createDescriptionMarker(geo, feature.Description, markerSettings, scale, params.zIndex + 50);
-		loc.keysInTile[tileKey].push(descriptionMarker);
-		element.extraMarker = descriptionMarker;
-	}
+
 	return element;
 };
 
+LocationsComposer.prototype.processCustomIcons = function (icons) {
+	var ret = {};
+	if (!icons) {
+		return ret;
+	}
+	for (var n = 0; n < icons.length; n++) {
+		ret[icons[n].Caption] = icons[n].Image;
+	}
+	return ret;
+};
 
 LocationsComposer.prototype.destroyMarker = function (tileKey, marker) {
 	marker.setMap(null);
@@ -176,41 +202,45 @@ LocationsComposer.prototype.destroyMarker = function (tileKey, marker) {
 	if (marker.extraMarker) {
 		this.destroyMarker(tileKey, marker.extraMarker);
 	}
+	if (marker.extraMarkerImage) {
+		this.destroyMarker(tileKey, marker.extraMarkerImage);
+	}
 };
 
-LocationsComposer.prototype.createDescriptionMarker = function (location, description, marker, scale, zIndex) {
-	var fontScale = (10 * scale);
-	if (scale < 1.5)
-		fontScale *= 1.1;
-	var topOffset;
-	if (marker.DescriptionVerticalAlignment == 'T') {
-		topOffset = -(marker.Frame == 'P' ? 40 : 32) * scale;
-	} else if (marker.DescriptionVerticalAlignment == 'B') {
-		topOffset = 12;
-		if (scale < 1)
-			topOffset *=  0.6;
-	} else if (marker.DescriptionVerticalAlignment == 'M') {
-		topOffset = -(marker.Frame == 'P' ? 20 : 13) * scale;
-	} else {
-		throw new Error("Alineación inválida");
+LocationsComposer.prototype.createImageMarker = function (location, symbol, marker, scale, zIndex) {
+	var anchor;
+	var size;
+	if (marker.Frame === 'P') {
+		anchor = new this.MapsApi.google.maps.Point(5.75 * scale, 28 * scale);
+		size = 14;
+	} else if (marker.Frame === 'C') {
+		anchor = new this.MapsApi.google.maps.Point(7.5 * scale, 19.5 * scale);
+		size = 15.25;
+	} else if (marker.Frame === 'B') {
+		anchor = new this.MapsApi.google.maps.Point(9 * scale, 21 * scale);
+		size = 18;
 	}
 
+	var src = this.customIcons[symbol];
+	if (!src) {
+		return null;
+	}
 	var marker = new this.MapsApi.google.maps.Marker({
-      position: location,
-      map: this.MapsApi.gMap,
-			clickable: true,
-			optimized: false,
-			zIndex: zIndex,
-      label: {   fontSize: fontScale + 'px',
-					text: description },
-      icon: { labelOrigin : new this.MapsApi.google.maps.Point(0, topOffset),
-       	path: 'M 0,0  z',
-      }
+		position: location,
+		map: this.MapsApi.gMap,
+		clickable: true,
+		optimized: false,
+		zIndex: zIndex + 1,
+		icon: {
+			url: src,
+			scaledSize: new this.MapsApi.google.maps.Size(size * scale, size * scale),
+			anchor: anchor
+		}
 	});
 	return marker;
 };
 
-LocationsComposer.prototype.CreateIcon = function (marker, style, scale) {
+LocationsComposer.prototype.createIcon = function (marker, style, scale) {
 	var icon = this.objectClone(style);
 	icon.strokeColor = 'white';
 	icon.fillOpacity = 1;
@@ -232,9 +262,6 @@ LocationsComposer.prototype.CreateIcon = function (marker, style, scale) {
 			icon.path = Svg.markerSquare;
 			icon.anchor = new this.MapsApi.google.maps.Point(12, 24);
 			icon.labelOrigin = new this.MapsApi.google.maps.Point(12, 12);
-
-		//		icon.anchor = new this.MapsApi.google.maps.Point(0, 1);
-//			scale *= 12;
 			break;
 		default:
 			throw new Error('Tipo de marco no reconocido.');
@@ -243,20 +270,54 @@ LocationsComposer.prototype.CreateIcon = function (marker, style, scale) {
 	return icon;
 };
 
-LocationsComposer.prototype.CreateMarkerContent = function (metric, marker, scale, symbol) {
-	if (marker.Type == 'N') {
-		return null;
+LocationsComposer.prototype.createDescriptionMarker = function (location, description, marker, scale, zIndex) {
+	var fontScale = (10 * scale);
+	if (scale < 1.5)
+		fontScale *= 1.1;
+	var topOffset;
+	if (marker.DescriptionVerticalAlignment == 'T') {
+		topOffset = -(marker.Frame == 'P' ? 40 : 32) * scale;
+	} else if (marker.DescriptionVerticalAlignment == 'B') {
+		topOffset = 6 * scale;
+	} else if (marker.DescriptionVerticalAlignment == 'M') {
+		topOffset = -(marker.Frame == 'P' ? 20 : 13) * scale;
+	} else {
+		throw new Error("Alineación inválida");
 	}
+
+	var marker = new this.MapsApi.google.maps.Marker({
+      position: location,
+      map: this.MapsApi.gMap,
+			clickable: true,
+			optimized: false,
+			zIndex: zIndex,
+      label: {   fontSize: fontScale + 'px',
+					text: description },
+      icon: { labelOrigin : new this.MapsApi.google.maps.Point(0, topOffset),
+       	path: 'M 0,0  z',
+      }
+	});
+	return marker;
+};
+
+LocationsComposer.prototype.resolveContent = function (marker, variableSymbol) {
 	// Si tiene un contenido...
 	var content;
 	if (marker.Source === 'V') {
-		content = symbol;
+		content = variableSymbol;
 	} else {
 		if (marker.Type == 'I') {
 			content = marker.Symbol;
 		} else {
 			content = marker.Text;
 		}
+	}
+	return content;
+};
+
+LocationsComposer.prototype.createMarkerLabel = function (metric, marker, scale, content) {
+	if (marker.Type == 'N') {
+		return null;
 	}
 	var symbol;
 	if (marker.Type == 'I') {
@@ -265,6 +326,10 @@ LocationsComposer.prototype.CreateMarkerContent = function (metric, marker, scal
 		symbol = this.formatText(content);
 	} else {
 		throw new Error('Tipo de marcador no reconocido.');
+	}
+	if (!symbol.unicode) {
+		// es custom
+		return null;
 	}
 	if (marker.Frame == 'B') {
 		scale *= 1.5;
@@ -288,38 +353,8 @@ LocationsComposer.prototype.formatIcon = function (symbol) {
 	if (cached) {
 		return cached;
 	}
-	var ret = { 'family': 'Arial', 'unicode': ' ', 'weight': '400' };
-	if (symbol !== null && symbol !== undefined && symbol !== '') {
-		var preffix = symbol.substr(0, 3);
-		var unicode = null;
-		if (preffix === 'fab' || preffix === 'fas') {
-			unicode = fontAwesomeIconsList.icons[symbol];
-		} else if (preffix === 'fla') {
-			unicode = flatIconsList.icons[symbol];
-		}
-		var family;
-		var weight = 'normal';
-		switch (preffix) {
-			case 'fab':
-				family = 'Font Awesome\\ 5 Brands';
-				weight = '400';
-				break;
-			case 'fas':
-				family = 'Font Awesome\\ 5 Free';
-				weight = '900';
-				break;
-			case 'fla':
-				family = 'Flaticon';
-				break;
-			default:
-				family = '';
-				break;
-		}
-		if (unicode) {
-			ret = { 'family': family, 'unicode': unicode, 'weight': weight };
-		}
-	}
-	this.iconsCache[symbol] = ret;;
+	var ret = iconManager.formatIcon(symbol);
+	this.iconsCache[symbol] = ret;
 	return ret;
 };
 

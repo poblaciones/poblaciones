@@ -3,47 +3,49 @@
 		<div class="iconPicker__icons">
 			<a
 				href="#"
-				@click.stop.prevent="iconClicked(key)"
-				:class="`item ${selected === key ? 'selected' : ''}`"
+				@click.stop.prevent="iconClicked(key, value)"
+				:class="'item' + getIsSelectedClass(key, value) + (collection !== 'flaticons' ? ' faItem' : '')"
 				v-for="(value, key) in currentIcons"
-				:key="key"><i :class="getClass(key)"></i>
+				:key="key">
+					<span :title="key" v-html="resolveIcon(key, value)"></span>
 				</a>
-			<a style="font-size: 14px; width: unset"
-				href="#"
-				@click.stop.prevent="iconClicked(null)"
-				:class="`item ${selected === null ? 'selected' : ''}`"
-			>
-				Ninguno
-			</a>
 		</div>
 	</div>
 </template>
 
 <script>
 import fontAwesomeIconsList from '@/common/js/fontAwesomeIconsList';
-import flatIconsList from '@/common/js/flatIconsList';
+import mapIconsList from '@/common/js/mapIconsList';
+import iconManager from '@/common/js/iconManager';
 
 export default {
 	name: 'mpIconFontPanel',
 	props: {
 					'searchBox': String,
 					'collection': String,
+					'customList': Array,
 					'value': String },
 	data () {
 		return {
 			selected: '',
+			selectedId: null,
 		};
 	},
 	computed: {
 		searchPlaceholder () {
 			return this.searchBox || 'search box';
 		},
+		Work() {
+			return window.Context.CurrentWork;
+		},
 		currentIcons() {
 			if (this.collection === 'fontawesome') {
 				return fontAwesomeIconsList.icons;
-			} else {
-				return flatIconsList.icons;
-			}
+			} else if (this.collection === 'flaticons') {
+				return mapIconsList.icons;
+			} else if (this.collection === 'custom') {
+				return this.customList;
+			} else throw new Error('Colección de íconos no reconocida');
 		}
 	},
 	created() {
@@ -53,14 +55,31 @@ export default {
 		getClass(icon) {
 			if (this.collection === 'fontawesome') {
 				return icon;
-			} else {
+			} else if (this.collection === 'flaticons') {
 				return icon.substring(4);
+			} else {
+				return '';
+			}
+		},
+		resolveIcon(key, value) {
+			var symbol = (this.collection !== 'custom' ? key : value.Caption);
+			return iconManager.showIcon(symbol, this.Work.Icons, 20);
+		},
+		getIsSelectedClass(key, value) {
+			if (this.collection === 'custom') {
+				return (this.selected === value.Caption ? ' selected' : '');
+			} else {
+				return (this.selected === key ? ' selected' : '');
 			}
 		},
 		receiveValue() {
 			this.selected = this.value;
 		},
-		iconClicked(key) {
+		iconClicked(key, value) {
+			if (this.collection === 'custom') {
+				key = (value ? value.Caption : value);
+				this.selectedId = value.Id;
+			}
 			this.selected = key;
 			this.selectIcon(key);
 		},
@@ -102,15 +121,19 @@ export default {
 	.iconPicker__icons {
 		display: table;
 	}
+	.faItem {
+		padding: 11px !important;
+		font-size: 26px !important;
+	}
 	.iconPicker__icons .item {
 		float: left;
-	    width: 40px;
-	    height: 40px;
-	    padding: 9px;
-	    margin: 6px 6px 6px 6px;
+	    width: 48px;
+	    height: 48px;
+			padding: 13px 10px;
+			margin: 6px 6px 6px 6px;
 	    text-align: center;
 	    border-radius: 3px;
-	    font-size: 20px;
+	    font-size: 30px;
 	    box-shadow: 0 0 0 1px #ddd;
 	    color: #666 !important;
 	}
@@ -119,8 +142,5 @@ export default {
 	}
 	.iconPicker__icons .item i {
 		box-sizing: content-box;
-	}
-	.fla {
-
 	}
 </style>

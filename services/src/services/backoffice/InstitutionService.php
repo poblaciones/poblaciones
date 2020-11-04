@@ -7,7 +7,6 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\Arr;
 use minga\framework\IO;
-use helena\classes\Image;
 use minga\framework\PublicException;
 use helena\db\frontend\FileModel;
 use helena\classes\Session;
@@ -33,14 +32,12 @@ class InstitutionService extends BaseService
 
 		if ($watermarkImage)
 		{
+			$file = $this->GetNewWatermark($institution);
+			$institution->setWatermark($file);
+
 			$fileController = new FileService();
-			$bucket = $fileController->ConvertBase64toFile($watermarkImage);
-			$wat = $this->GetNewWatermark($institution);
-			$institution->setWatermark($wat);
-			$file = $bucket->path . '/file.dat';
-			Image::ResizeToMaxSize($file, null, self::MAX_WATERMARK_HEIGHT);
-			$fileType = Image::GetImageMimeType($file);
-			$fileController->SaveFile($institution->getWatermark(), $file, true, $fileType);
+			$fileController->SaveBase64BytesToFile($watermarkImage, $file,
+										 null, self::MAX_WATERMARK_HEIGHT);
 		}
 
 		App::Orm()->Save($institution);

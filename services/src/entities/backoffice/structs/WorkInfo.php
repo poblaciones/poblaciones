@@ -9,6 +9,7 @@ class WorkInfo
 	public $Files;
 	public $Permissions;
 	public $Sources;
+	public $Icons;
 	public $ExtraMetrics;
 	public $Startup;
 	public $PendingReviewSince;

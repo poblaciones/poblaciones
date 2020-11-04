@@ -81,6 +81,39 @@ App::GetOrPost('/services/backoffice/UpdateInstitution', function (Request $requ
 	return App::OrmJson($controller->Update($institution, $watermarkImage));
 });
 
+App::GetOrPost('/services/backoffice/CreateWorkIcon', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$controller = new services\WorkService();
+	$name = Params::GetMandatory('n');
+	// Traigo el base64 de la nueva imagen
+	$image = Params::GetMandatory('iwm');
+
+	return App::OrmJson($controller->CreateWorkIcon($workId, $name, $image));
+});
+
+App::GetOrPost('/services/backoffice/UpdateWorkIcon', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$controller = new services\WorkService();
+	$id = Params::GetIntMandatory('i');
+	$name = Params::GetMandatory('n');
+
+	return App::Json($controller->UpdateWorkIcon($workId, $id, $name));
+});
+
+App::GetOrPost('/services/backoffice/DeleteWorkIcon', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$controller = new services\WorkService();
+	$iconId = Params::GetIntMandatory('i');
+
+	return App::Json($controller->DeleteWorkIcon($workId, $iconId));
+});
+
 App::$app->get('/services/backoffice/GetCurrentUserWorks', function (Request $request) {
 	$controller = new services\WorkService();
 	return App::Json($controller->GetCurrentUserWorks());

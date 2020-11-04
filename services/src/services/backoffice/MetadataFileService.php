@@ -76,7 +76,8 @@ class MetadataFileService extends BaseService
 		App::Db()->exec("DELETE FROM draft_metadata_file WHERE mfi_id = ?", array($metadataFileId));
 		if ($file !== null)
 		{
-			$this->DeleteFile($file->getId());
+			$fileService = new FileService();
+			$fileService->DeleteFile($file->getId());
 		}
 		WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
@@ -207,11 +208,7 @@ class MetadataFileService extends BaseService
 		}
 		fclose($handle);
 	}
-	private function DeleteFile($fileId)
-	{
-		App::Db()->exec("DELETE FROM draft_file_chunk WHERE chu_file_id = ?", array($fileId));
-		App::Db()->exec("DELETE FROM draft_file WHERE fil_id = ?", array($fileId));
-	}
+
 
 	public function GetMetadataFile($metadataId, $fileId)
 	{

@@ -22,6 +22,7 @@ use helena\entities\frontend\metric\VariableInfo;
 use helena\entities\frontend\metric\LevelInfo;
 use helena\entities\frontend\metric\ValueLabelInfo;
 
+use helena\db\frontend\FileModel;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\GlobalTimer;
 use helena\classes\App;
@@ -150,7 +151,12 @@ class SelectedMetricService extends BaseService
 			$version->Work = $this->GetWork($version);
 
 			if ($version->Work !== null)
+			{
+				$fileModel = new FileModel();
+				$icons = $fileModel->ReadWorkIcons($version->Work->Id);
+				$version->Work->Icons = $icons;
 				$selectedMetric->Versions[] = $version;
+			}
 		}
 	}
 

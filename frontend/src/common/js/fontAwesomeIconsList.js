@@ -2,3747 +2,3747 @@ module.exports = {
 	license: 'Font awesome icons list',
 	icons: {
 
-		'fas fa-ad':
+		'fa-ad':
 		'\uf641'
 		,
 
-		'fas fa-address-book':
+		'fa-address-book':
 		'\uf2b9'
 		,
 
-		'fas fa-address-card':
+		'fa-address-card':
 		'\uf2bb'
 		,
 
-		'fas fa-adjust':
+		'fa-adjust':
 		'\uf042'
 		,
 
-		'fas fa-air-freshener':
+		'fa-air-freshener':
 		'\uf5d0'
 		,
 
-		'fas fa-align-center':
+		'fa-align-center':
 		'\uf037'
 		,
 
-		'fas fa-align-justify':
+		'fa-align-justify':
 		'\uf039'
 		,
 
-		'fas fa-align-left':
+		'fa-align-left':
 		'\uf036'
 		,
 
-		'fas fa-align-right':
+		'fa-align-right':
 		'\uf038'
 		,
 
-		'fas fa-allergies':
+		'fa-allergies':
 		'\uf461'
 		,
 
-		'fas fa-ambulance':
+		'fa-ambulance':
 		'\uf0f9'
 		,
 
-		'fas fa-american-sign-language-interpreting':
+		'fa-american-sign-language-interpreting':
 		'\uf2a3'
 		,
 
-		'fas fa-anchor':
+		'fa-anchor':
 		'\uf13d'
 		,
 
-		'fas fa-angle-double-down':
+		'fa-angle-double-down':
 		'\uf103'
 		,
 
-		'fas fa-angle-double-left':
+		'fa-angle-double-left':
 		'\uf100'
 		,
 
-		'fas fa-angle-double-right':
+		'fa-angle-double-right':
 		'\uf101'
 		,
 
-		'fas fa-angle-double-up':
+		'fa-angle-double-up':
 		'\uf102'
 		,
 
-		'fas fa-angle-down':
+		'fa-angle-down':
 		'\uf107'
 		,
 
-		'fas fa-angle-left':
+		'fa-angle-left':
 		'\uf104'
 		,
 
-		'fas fa-angle-right':
+		'fa-angle-right':
 		'\uf105'
 		,
 
-		'fas fa-angle-up':
+		'fa-angle-up':
 		'\uf106'
 		,
 
-		'fas fa-angry':
+		'fa-angry':
 		'\uf556'
 		,
 
-		'fas fa-ankh':
+		'fa-ankh':
 		'\uf644'
 		,
 
-		'fas fa-apple-alt':
+		'fa-apple-alt':
 		'\uf5d1'
 		,
 
-		'fas fa-archive':
+		'fa-archive':
 		'\uf187'
 		,
 
-		'fas fa-archway':
+		'fa-archway':
 		'\uf557'
 		,
 
-		'fas fa-arrow-alt-circle-down':
+		'fa-arrow-alt-circle-down':
 		'\uf358'
 		,
 
-		'fas fa-arrow-alt-circle-left':
+		'fa-arrow-alt-circle-left':
 		'\uf359'
 		,
 
-		'fas fa-arrow-alt-circle-right':
+		'fa-arrow-alt-circle-right':
 		'\uf35a'
 		,
 
-		'fas fa-arrow-alt-circle-up':
+		'fa-arrow-alt-circle-up':
 		'\uf35b'
 		,
 
-		'fas fa-arrow-circle-down':
+		'fa-arrow-circle-down':
 		'\uf0ab'
 		,
 
-		'fas fa-arrow-circle-left':
+		'fa-arrow-circle-left':
 		'\uf0a8'
 		,
 
-		'fas fa-arrow-circle-right':
+		'fa-arrow-circle-right':
 		'\uf0a9'
 		,
 
-		'fas fa-arrow-circle-up':
+		'fa-arrow-circle-up':
 		'\uf0aa'
 		,
 
-		'fas fa-arrow-down':
+		'fa-arrow-down':
 		'\uf063'
 		,
 
-		'fas fa-arrow-left':
+		'fa-arrow-left':
 		'\uf060'
 		,
 
-		'fas fa-arrow-right':
+		'fa-arrow-right':
 		'\uf061'
 		,
 
-		'fas fa-arrow-up':
+		'fa-arrow-up':
 		'\uf062'
 		,
 
-		'fas fa-arrows-alt':
+		'fa-arrows-alt':
 		'\uf0b2'
 		,
 
-		'fas fa-arrows-alt-h':
+		'fa-arrows-alt-h':
 		'\uf337'
 		,
 
-		'fas fa-arrows-alt-v':
+		'fa-arrows-alt-v':
 		'\uf338'
 		,
 
-		'fas fa-assistive-listening-systems':
+		'fa-assistive-listening-systems':
 		'\uf2a2'
 		,
 
-		'fas fa-asterisk':
+		'fa-asterisk':
 		'\uf069'
 		,
 
-		'fas fa-at':
+		'fa-at':
 		'\uf1fa'
 		,
 
-		'fas fa-atlas':
+		'fa-atlas':
 		'\uf558'
 		,
 
-		'fas fa-atom':
+		'fa-atom':
 		'\uf5d2'
 		,
 
-		'fas fa-audio-description':
+		'fa-audio-description':
 		'\uf29e'
 		,
 
-		'fas fa-award':
+		'fa-award':
 		'\uf559'
 		,
 
-		'fas fa-baby':
+		'fa-baby':
 		'\uf77c'
 		,
 
-		'fas fa-baby-carriage':
+		'fa-baby-carriage':
 		'\uf77d'
 		,
 
-		'fas fa-backspace':
+		'fa-backspace':
 		'\uf55a'
 		,
 
-		'fas fa-backward':
+		'fa-backward':
 		'\uf04a'
 		,
 
-		'fas fa-bacon':
+		'fa-bacon':
 		'\uf7e5'
 		,
 
-		'fas fa-balance-scale':
+		'fa-balance-scale':
 		'\uf24e'
 		,
 
-		'fas fa-ban':
+		'fa-ban':
 		'\uf05e'
 		,
 
-		'fas fa-band-aid':
+		'fa-band-aid':
 		'\uf462'
 		,
 
-		'fas fa-barcode':
+		'fa-barcode':
 		'\uf02a'
 		,
 
-		'fas fa-bars':
+		'fa-bars':
 		'\uf0c9'
 		,
 
-		'fas fa-baseball-ball':
+		'fa-baseball-ball':
 		'\uf433'
 		,
 
-		'fas fa-basketball-ball':
+		'fa-basketball-ball':
 		'\uf434'
 		,
 
-		'fas fa-bath':
+		'fa-bath':
 		'\uf2cd'
 		,
 
-		'fas fa-battery-empty':
+		'fa-battery-empty':
 		'\uf244'
 		,
 
-		'fas fa-battery-full':
+		'fa-battery-full':
 		'\uf240'
 		,
 
-		'fas fa-battery-half':
+		'fa-battery-half':
 		'\uf242'
 		,
 
-		'fas fa-battery-quarter':
+		'fa-battery-quarter':
 		'\uf243'
 		,
 
-		'fas fa-battery-three-quarters':
+		'fa-battery-three-quarters':
 		'\uf241'
 		,
 
-		'fas fa-bed':
+		'fa-bed':
 		'\uf236'
 		,
 
-		'fas fa-beer':
+		'fa-beer':
 		'\uf0fc'
 		,
 
-		'fas fa-bell':
+		'fa-bell':
 		'\uf0f3'
 		,
 
-		'fas fa-bell-slash':
+		'fa-bell-slash':
 		'\uf1f6'
 		,
 
-		'fas fa-bezier-curve':
+		'fa-bezier-curve':
 		'\uf55b'
 		,
 
-		'fas fa-bible':
+		'fa-bible':
 		'\uf647'
 		,
 
-		'fas fa-bicycle':
+		'fa-bicycle':
 		'\uf206'
 		,
 
-		'fas fa-binoculars':
+		'fa-binoculars':
 		'\uf1e5'
 		,
 
-		'fas fa-biohazard':
+		'fa-biohazard':
 		'\uf780'
 		,
 
-		'fas fa-birthday-cake':
+		'fa-birthday-cake':
 		'\uf1fd'
 		,
 
-		'fas fa-blender':
+		'fa-blender':
 		'\uf517'
 		,
 
-		'fas fa-blender-phone':
+		'fa-blender-phone':
 		'\uf6b6'
 		,
 
-		'fas fa-blind':
+		'fa-blind':
 		'\uf29d'
 		,
 
-		'fas fa-blog':
+		'fa-blog':
 		'\uf781'
 		,
 
-		'fas fa-bold':
+		'fa-bold':
 		'\uf032'
 		,
 
-		'fas fa-bolt':
+		'fa-bolt':
 		'\uf0e7'
 		,
 
-		'fas fa-bomb':
+		'fa-bomb':
 		'\uf1e2'
 		,
 
-		'fas fa-bone':
+		'fa-bone':
 		'\uf5d7'
 		,
 
-		'fas fa-bong':
+		'fa-bong':
 		'\uf55c'
 		,
 
-		'fas fa-book':
+		'fa-book':
 		'\uf02d'
 		,
 
-		'fas fa-book-dead':
+		'fa-book-dead':
 		'\uf6b7'
 		,
 
-		'fas fa-book-medical':
+		'fa-book-medical':
 		'\uf7e6'
 		,
 
-		'fas fa-book-open':
+		'fa-book-open':
 		'\uf518'
 		,
 
-		'fas fa-book-reader':
+		'fa-book-reader':
 		'\uf5da'
 		,
 
-		'fas fa-bookmark':
+		'fa-bookmark':
 		'\uf02e'
 		,
 
-		'fas fa-bowling-ball':
+		'fa-bowling-ball':
 		'\uf436'
 		,
 
-		'fas fa-box':
+		'fa-box':
 		'\uf466'
 		,
 
-		'fas fa-box-open':
+		'fa-box-open':
 		'\uf49e'
 		,
 
-		'fas fa-boxes':
+		'fa-boxes':
 		'\uf468'
 		,
 
-		'fas fa-braille':
+		'fa-braille':
 		'\uf2a1'
 		,
 
-		'fas fa-brain':
+		'fa-brain':
 		'\uf5dc'
 		,
 
-		'fas fa-bread-slice':
+		'fa-bread-slice':
 		'\uf7ec'
 		,
 
-		'fas fa-briefcase':
+		'fa-briefcase':
 		'\uf0b1'
 		,
 
-		'fas fa-briefcase-medical':
+		'fa-briefcase-medical':
 		'\uf469'
 		,
 
-		'fas fa-broadcast-tower':
+		'fa-broadcast-tower':
 		'\uf519'
 		,
 
-		'fas fa-broom':
+		'fa-broom':
 		'\uf51a'
 		,
 
-		'fas fa-brush':
+		'fa-brush':
 		'\uf55d'
 		,
 
-		'fas fa-bug':
+		'fa-bug':
 		'\uf188'
 		,
 
-		'fas fa-building':
+		'fa-building':
 		'\uf1ad'
 		,
 
-		'fas fa-bullhorn':
+		'fa-bullhorn':
 		'\uf0a1'
 		,
 
-		'fas fa-bullseye':
+		'fa-bullseye':
 		'\uf140'
 		,
 
-		'fas fa-burn':
+		'fa-burn':
 		'\uf46a'
 		,
 
-		'fas fa-bus':
+		'fa-bus':
 		'\uf207'
 		,
 
-		'fas fa-bus-alt':
+		'fa-bus-alt':
 		'\uf55e'
 		,
 
-		'fas fa-business-time':
+		'fa-business-time':
 		'\uf64a'
 		,
 
-		'fas fa-calculator':
+		'fa-calculator':
 		'\uf1ec'
 		,
 
-		'fas fa-calendar':
+		'fa-calendar':
 		'\uf133'
 		,
 
-		'fas fa-calendar-alt':
+		'fa-calendar-alt':
 		'\uf073'
 		,
 
-		'fas fa-calendar-check':
+		'fa-calendar-check':
 		'\uf274'
 		,
 
-		'fas fa-calendar-day':
+		'fa-calendar-day':
 		'\uf783'
 		,
 
-		'fas fa-calendar-minus':
+		'fa-calendar-minus':
 		'\uf272'
 		,
 
-		'fas fa-calendar-plus':
+		'fa-calendar-plus':
 		'\uf271'
 		,
 
-		'fas fa-calendar-times':
+		'fa-calendar-times':
 		'\uf273'
 		,
 
-		'fas fa-calendar-week':
+		'fa-calendar-week':
 		'\uf784'
 		,
 
-		'fas fa-camera':
+		'fa-camera':
 		'\uf030'
 		,
 
-		'fas fa-camera-retro':
+		'fa-camera-retro':
 		'\uf083'
 		,
 
-		'fas fa-campground':
+		'fa-campground':
 		'\uf6bb'
 		,
 
-		'fas fa-candy-cane':
+		'fa-candy-cane':
 		'\uf786'
 		,
 
-		'fas fa-cannabis':
+		'fa-cannabis':
 		'\uf55f'
 		,
 
-		'fas fa-capsules':
+		'fa-capsules':
 		'\uf46b'
 		,
 
-		'fas fa-car':
+		'fa-car':
 		'\uf1b9'
 		,
 
-		'fas fa-car-alt':
+		'fa-car-alt':
 		'\uf5de'
 		,
 
-		'fas fa-car-battery':
+		'fa-car-battery':
 		'\uf5df'
 		,
 
-		'fas fa-car-crash':
+		'fa-car-crash':
 		'\uf5e1'
 		,
 
-		'fas fa-car-side':
+		'fa-car-side':
 		'\uf5e4'
 		,
 
-		'fas fa-caret-down':
+		'fa-caret-down':
 		'\uf0d7'
 		,
 
-		'fas fa-caret-left':
+		'fa-caret-left':
 		'\uf0d9'
 		,
 
-		'fas fa-caret-right':
+		'fa-caret-right':
 		'\uf0da'
 		,
 
-		'fas fa-caret-square-down':
+		'fa-caret-square-down':
 		'\uf150'
 		,
 
-		'fas fa-caret-square-left':
+		'fa-caret-square-left':
 		'\uf191'
 		,
 
-		'fas fa-caret-square-right':
+		'fa-caret-square-right':
 		'\uf152'
 		,
 
-		'fas fa-caret-square-up':
+		'fa-caret-square-up':
 		'\uf151'
 		,
 
-		'fas fa-caret-up':
+		'fa-caret-up':
 		'\uf0d8'
 		,
 
-		'fas fa-carrot':
+		'fa-carrot':
 		'\uf787'
 		,
 
-		'fas fa-cart-arrow-down':
+		'fa-cart-arrow-down':
 		'\uf218'
 		,
 
-		'fas fa-cart-plus':
+		'fa-cart-plus':
 		'\uf217'
 		,
 
-		'fas fa-cash-register':
+		'fa-cash-register':
 		'\uf788'
 		,
 
-		'fas fa-cat':
+		'fa-cat':
 		'\uf6be'
 		,
 
-		'fas fa-certificate':
+		'fa-certificate':
 		'\uf0a3'
 		,
 
-		'fas fa-chair':
+		'fa-chair':
 		'\uf6c0'
 		,
 
-		'fas fa-chalkboard':
+		'fa-chalkboard':
 		'\uf51b'
 		,
 
-		'fas fa-chalkboard-teacher':
+		'fa-chalkboard-teacher':
 		'\uf51c'
 		,
 
-		'fas fa-charging-station':
+		'fa-charging-station':
 		'\uf5e7'
 		,
 
-		'fas fa-chart-area':
+		'fa-chart-area':
 		'\uf1fe'
 		,
 
-		'fas fa-chart-bar':
+		'fa-chart-bar':
 		'\uf080'
 		,
 
-		'fas fa-chart-line':
+		'fa-chart-line':
 		'\uf201'
 		,
 
-		'fas fa-chart-pie':
+		'fa-chart-pie':
 		'\uf200'
 		,
 
-		'fas fa-check':
+		'fa-check':
 		'\uf00c'
 		,
 
-		'fas fa-check-circle':
+		'fa-check-circle':
 		'\uf058'
 		,
 
-		'fas fa-check-double':
+		'fa-check-double':
 		'\uf560'
 		,
 
-		'fas fa-check-square':
+		'fa-check-square':
 		'\uf14a'
 		,
 
-		'fas fa-cheese':
+		'fa-cheese':
 		'\uf7ef'
 		,
 
-		'fas fa-chess':
+		'fa-chess':
 		'\uf439'
 		,
 
-		'fas fa-chess-bishop':
+		'fa-chess-bishop':
 		'\uf43a'
 		,
 
-		'fas fa-chess-board':
+		'fa-chess-board':
 		'\uf43c'
 		,
 
-		'fas fa-chess-king':
+		'fa-chess-king':
 		'\uf43f'
 		,
 
-		'fas fa-chess-knight':
+		'fa-chess-knight':
 		'\uf441'
 		,
 
-		'fas fa-chess-pawn':
+		'fa-chess-pawn':
 		'\uf443'
 		,
 
-		'fas fa-chess-queen':
+		'fa-chess-queen':
 		'\uf445'
 		,
 
-		'fas fa-chess-rook':
+		'fa-chess-rook':
 		'\uf447'
 		,
 
-		'fas fa-chevron-circle-down':
+		'fa-chevron-circle-down':
 		'\uf13a'
 		,
 
-		'fas fa-chevron-circle-left':
+		'fa-chevron-circle-left':
 		'\uf137'
 		,
 
-		'fas fa-chevron-circle-right':
+		'fa-chevron-circle-right':
 		'\uf138'
 		,
 
-		'fas fa-chevron-circle-up':
+		'fa-chevron-circle-up':
 		'\uf139'
 		,
 
-		'fas fa-chevron-down':
+		'fa-chevron-down':
 		'\uf078'
 		,
 
-		'fas fa-chevron-left':
+		'fa-chevron-left':
 		'\uf053'
 		,
 
-		'fas fa-chevron-right':
+		'fa-chevron-right':
 		'\uf054'
 		,
 
-		'fas fa-chevron-up':
+		'fa-chevron-up':
 		'\uf077'
 		,
 
-		'fas fa-child':
+		'fa-child':
 		'\uf1ae'
 		,
 
-		'fas fa-church':
+		'fa-church':
 		'\uf51d'
 		,
 
-		'fas fa-circle':
+		'fa-circle':
 		'\uf111'
 		,
 
-		'fas fa-circle-notch':
+		'fa-circle-notch':
 		'\uf1ce'
 		,
 
-		'fas fa-city':
+		'fa-city':
 		'\uf64f'
 		,
 
-		'fas fa-clinic-medical':
+		'fa-clinic-medical':
 		'\uf7f2'
 		,
 
-		'fas fa-clipboard':
+		'fa-clipboard':
 		'\uf328'
 		,
 
-		'fas fa-clipboard-check':
+		'fa-clipboard-check':
 		'\uf46c'
 		,
 
-		'fas fa-clipboard-list':
+		'fa-clipboard-list':
 		'\uf46d'
 		,
 
-		'fas fa-clock':
+		'fa-clock':
 		'\uf017'
 		,
 
-		'fas fa-clone':
+		'fa-clone':
 		'\uf24d'
 		,
 
-		'fas fa-closed-captioning':
+		'fa-closed-captioning':
 		'\uf20a'
 		,
 
-		'fas fa-cloud':
+		'fa-cloud':
 		'\uf0c2'
 		,
 
-		'fas fa-cloud-download-alt':
+		'fa-cloud-download-alt':
 		'\uf381'
 		,
 
-		'fas fa-cloud-meatball':
+		'fa-cloud-meatball':
 		'\uf73b'
 		,
 
-		'fas fa-cloud-moon':
+		'fa-cloud-moon':
 		'\uf6c3'
 		,
 
-		'fas fa-cloud-moon-rain':
+		'fa-cloud-moon-rain':
 		'\uf73c'
 		,
 
-		'fas fa-cloud-rain':
+		'fa-cloud-rain':
 		'\uf73d'
 		,
 
-		'fas fa-cloud-showers-heavy':
+		'fa-cloud-showers-heavy':
 		'\uf740'
 		,
 
-		'fas fa-cloud-sun':
+		'fa-cloud-sun':
 		'\uf6c4'
 		,
 
-		'fas fa-cloud-sun-rain':
+		'fa-cloud-sun-rain':
 		'\uf743'
 		,
 
-		'fas fa-cloud-upload-alt':
+		'fa-cloud-upload-alt':
 		'\uf382'
 		,
 
-		'fas fa-cocktail':
+		'fa-cocktail':
 		'\uf561'
 		,
 
-		'fas fa-code':
+		'fa-code':
 		'\uf121'
 		,
 
-		'fas fa-code-branch':
+		'fa-code-branch':
 		'\uf126'
 		,
 
-		'fas fa-coffee':
+		'fa-coffee':
 		'\uf0f4'
 		,
 
-		'fas fa-cog':
+		'fa-cog':
 		'\uf013'
 		,
 
-		'fas fa-cogs':
+		'fa-cogs':
 		'\uf085'
 		,
 
-		'fas fa-coins':
+		'fa-coins':
 		'\uf51e'
 		,
 
-		'fas fa-columns':
+		'fa-columns':
 		'\uf0db'
 		,
 
-		'fas fa-comment':
+		'fa-comment':
 		'\uf075'
 		,
 
-		'fas fa-comment-alt':
+		'fa-comment-alt':
 		'\uf27a'
 		,
 
-		'fas fa-comment-dollar':
+		'fa-comment-dollar':
 		'\uf651'
 		,
 
-		'fas fa-comment-dots':
+		'fa-comment-dots':
 		'\uf4ad'
 		,
 
-		'fas fa-comment-medical':
+		'fa-comment-medical':
 		'\uf7f5'
 		,
 
-		'fas fa-comment-slash':
+		'fa-comment-slash':
 		'\uf4b3'
 		,
 
-		'fas fa-comments':
+		'fa-comments':
 		'\uf086'
 		,
 
-		'fas fa-comments-dollar':
+		'fa-comments-dollar':
 		'\uf653'
 		,
 
-		'fas fa-compact-disc':
+		'fa-compact-disc':
 		'\uf51f'
 		,
 
-		'fas fa-compass':
+		'fa-compass':
 		'\uf14e'
 		,
 
-		'fas fa-compress':
+		'fa-compress':
 		'\uf066'
 		,
 
-		'fas fa-compress-arrows-alt':
+		'fa-compress-arrows-alt':
 		'\uf78c'
 		,
 
-		'fas fa-concierge-bell':
+		'fa-concierge-bell':
 		'\uf562'
 		,
 
-		'fas fa-cookie':
+		'fa-cookie':
 		'\uf563'
 		,
 
-		'fas fa-cookie-bite':
+		'fa-cookie-bite':
 		'\uf564'
 		,
 
-		'fas fa-copy':
+		'fa-copy':
 		'\uf0c5'
 		,
 
-		'fas fa-copyright':
+		'fa-copyright':
 		'\uf1f9'
 		,
 
-		'fas fa-couch':
+		'fa-couch':
 		'\uf4b8'
 		,
 
-		'fas fa-credit-card':
+		'fa-credit-card':
 		'\uf09d'
 		,
 
-		'fas fa-crop':
+		'fa-crop':
 		'\uf125'
 		,
 
-		'fas fa-crop-alt':
+		'fa-crop-alt':
 		'\uf565'
 		,
 
-		'fas fa-cross':
+		'fa-cross':
 		'\uf654'
 		,
 
-		'fas fa-crosshairs':
+		'fa-crosshairs':
 		'\uf05b'
 		,
 
-		'fas fa-crow':
+		'fa-crow':
 		'\uf520'
 		,
 
-		'fas fa-crown':
+		'fa-crown':
 		'\uf521'
 		,
 
-		'fas fa-crutch':
+		'fa-crutch':
 		'\uf7f7'
 		,
 
-		'fas fa-cube':
+		'fa-cube':
 		'\uf1b2'
 		,
 
-		'fas fa-cubes':
+		'fa-cubes':
 		'\uf1b3'
 		,
 
-		'fas fa-cut':
+		'fa-cut':
 		'\uf0c4'
 		,
 
-		'fas fa-database':
+		'fa-database':
 		'\uf1c0'
 		,
 
-		'fas fa-deaf':
+		'fa-deaf':
 		'\uf2a4'
 		,
 
-		'fas fa-democrat':
+		'fa-democrat':
 		'\uf747'
 		,
 
-		'fas fa-desktop':
+		'fa-desktop':
 		'\uf108'
 		,
 
-		'fas fa-dharmachakra':
+		'fa-dharmachakra':
 		'\uf655'
 		,
 
-		'fas fa-diagnoses':
+		'fa-diagnoses':
 		'\uf470'
 		,
 
-		'fas fa-dice':
+		'fa-dice':
 		'\uf522'
 		,
 
-		'fas fa-dice-d20':
+		'fa-dice-d20':
 		'\uf6cf'
 		,
 
-		'fas fa-dice-d6':
+		'fa-dice-d6':
 		'\uf6d1'
 		,
 
-		'fas fa-dice-five':
+		'fa-dice-five':
 		'\uf523'
 		,
 
-		'fas fa-dice-four':
+		'fa-dice-four':
 		'\uf524'
 		,
 
-		'fas fa-dice-one':
+		'fa-dice-one':
 		'\uf525'
 		,
 
-		'fas fa-dice-six':
+		'fa-dice-six':
 		'\uf526'
 		,
 
-		'fas fa-dice-three':
+		'fa-dice-three':
 		'\uf527'
 		,
 
-		'fas fa-dice-two':
+		'fa-dice-two':
 		'\uf528'
 		,
 
-		'fas fa-digital-tachograph':
+		'fa-digital-tachograph':
 		'\uf566'
 		,
 
-		'fas fa-directions':
+		'fa-directions':
 		'\uf5eb'
 		,
 
-		'fas fa-divide':
+		'fa-divide':
 		'\uf529'
 		,
 
-		'fas fa-dizzy':
+		'fa-dizzy':
 		'\uf567'
 		,
 
-		'fas fa-dna':
+		'fa-dna':
 		'\uf471'
 		,
 
-		'fas fa-dog':
+		'fa-dog':
 		'\uf6d3'
 		,
 
-		'fas fa-dollar-sign':
+		'fa-dollar-sign':
 		'\uf155'
 		,
 
-		'fas fa-dolly':
+		'fa-dolly':
 		'\uf472'
 		,
 
-		'fas fa-dolly-flatbed':
+		'fa-dolly-flatbed':
 		'\uf474'
 		,
 
-		'fas fa-donate':
+		'fa-donate':
 		'\uf4b9'
 		,
 
-		'fas fa-door-closed':
+		'fa-door-closed':
 		'\uf52a'
 		,
 
-		'fas fa-door-open':
+		'fa-door-open':
 		'\uf52b'
 		,
 
-		'fas fa-dot-circle':
+		'fa-dot-circle':
 		'\uf192'
 		,
 
-		'fas fa-dove':
+		'fa-dove':
 		'\uf4ba'
 		,
 
-		'fas fa-download':
+		'fa-download':
 		'\uf019'
 		,
 
-		'fas fa-drafting-compass':
+		'fa-drafting-compass':
 		'\uf568'
 		,
 
-		'fas fa-dragon':
+		'fa-dragon':
 		'\uf6d5'
 		,
 
-		'fas fa-draw-polygon':
+		'fa-draw-polygon':
 		'\uf5ee'
 		,
 
-		'fas fa-drum':
+		'fa-drum':
 		'\uf569'
 		,
 
-		'fas fa-drum-steelpan':
+		'fa-drum-steelpan':
 		'\uf56a'
 		,
 
-		'fas fa-drumstick-bite':
+		'fa-drumstick-bite':
 		'\uf6d7'
 		,
 
-		'fas fa-dumbbell':
+		'fa-dumbbell':
 		'\uf44b'
 		,
 
-		'fas fa-dumpster':
+		'fa-dumpster':
 		'\uf793'
 		,
 
-		'fas fa-dumpster-fire':
+		'fa-dumpster-fire':
 		'\uf794'
 		,
 
-		'fas fa-dungeon':
+		'fa-dungeon':
 		'\uf6d9'
 		,
 
-		'fas fa-edit':
+		'fa-edit':
 		'\uf044'
 		,
 
-		'fas fa-egg':
+		'fa-egg':
 		'\uf7fb'
 		,
 
-		'fas fa-eject':
+		'fa-eject':
 		'\uf052'
 		,
 
-		'fas fa-ellipsis-h':
+		'fa-ellipsis-h':
 		'\uf141'
 		,
 
-		'fas fa-ellipsis-v':
+		'fa-ellipsis-v':
 		'\uf142'
 		,
 
-		'fas fa-envelope':
+		'fa-envelope':
 		'\uf0e0'
 		,
 
-		'fas fa-envelope-open':
+		'fa-envelope-open':
 		'\uf2b6'
 		,
 
-		'fas fa-envelope-open-text':
+		'fa-envelope-open-text':
 		'\uf658'
 		,
 
-		'fas fa-envelope-square':
+		'fa-envelope-square':
 		'\uf199'
 		,
 
-		'fas fa-equals':
+		'fa-equals':
 		'\uf52c'
 		,
 
-		'fas fa-eraser':
+		'fa-eraser':
 		'\uf12d'
 		,
 
-		'fas fa-ethernet':
+		'fa-ethernet':
 		'\uf796'
 		,
 
-		'fas fa-euro-sign':
+		'fa-euro-sign':
 		'\uf153'
 		,
 
-		'fas fa-exchange-alt':
+		'fa-exchange-alt':
 		'\uf362'
 		,
 
-		'fas fa-exclamation':
+		'fa-exclamation':
 		'\uf12a'
 		,
 
-		'fas fa-exclamation-circle':
+		'fa-exclamation-circle':
 		'\uf06a'
 		,
 
-		'fas fa-exclamation-triangle':
+		'fa-exclamation-triangle':
 		'\uf071'
 		,
 
-		'fas fa-expand':
+		'fa-expand':
 		'\uf065'
 		,
 
-		'fas fa-expand-arrows-alt':
+		'fa-expand-arrows-alt':
 		'\uf31e'
 		,
 
-		'fas fa-external-link-alt':
+		'fa-external-link-alt':
 		'\uf35d'
 		,
 
-		'fas fa-external-link-square-alt':
+		'fa-external-link-square-alt':
 		'\uf360'
 		,
 
-		'fas fa-eye':
+		'fa-eye':
 		'\uf06e'
 		,
 
-		'fas fa-eye-dropper':
+		'fa-eye-dropper':
 		'\uf1fb'
 		,
 
-		'fas fa-eye-slash':
+		'fa-eye-slash':
 		'\uf070'
 		,
 
-		'fas fa-fast-backward':
+		'fa-fast-backward':
 		'\uf049'
 		,
 
-		'fas fa-fast-forward':
+		'fa-fast-forward':
 		'\uf050'
 		,
 
-		'fas fa-fax':
+		'fa-fax':
 		'\uf1ac'
 		,
 
-		'fas fa-feather':
+		'fa-feather':
 		'\uf52d'
 		,
 
-		'fas fa-feather-alt':
+		'fa-feather-alt':
 		'\uf56b'
 		,
 
-		'fas fa-female':
+		'fa-female':
 		'\uf182'
 		,
 
-		'fas fa-fighter-jet':
+		'fa-fighter-jet':
 		'\uf0fb'
 		,
 
-		'fas fa-file':
+		'fa-file':
 		'\uf15b'
 		,
 
-		'fas fa-file-alt':
+		'fa-file-alt':
 		'\uf15c'
 		,
 
-		'fas fa-file-archive':
+		'fa-file-archive':
 		'\uf1c6'
 		,
 
-		'fas fa-file-audio':
+		'fa-file-audio':
 		'\uf1c7'
 		,
 
-		'fas fa-file-code':
+		'fa-file-code':
 		'\uf1c9'
 		,
 
-		'fas fa-file-contract':
+		'fa-file-contract':
 		'\uf56c'
 		,
 
-		'fas fa-file-csv':
+		'fa-file-csv':
 		'\uf6dd'
 		,
 
-		'fas fa-file-download':
+		'fa-file-download':
 		'\uf56d'
 		,
 
-		'fas fa-file-excel':
+		'fa-file-excel':
 		'\uf1c3'
 		,
 
-		'fas fa-file-export':
+		'fa-file-export':
 		'\uf56e'
 		,
 
-		'fas fa-file-image':
+		'fa-file-image':
 		'\uf1c5'
 		,
 
-		'fas fa-file-import':
+		'fa-file-import':
 		'\uf56f'
 		,
 
-		'fas fa-file-invoice':
+		'fa-file-invoice':
 		'\uf570'
 		,
 
-		'fas fa-file-invoice-dollar':
+		'fa-file-invoice-dollar':
 		'\uf571'
 		,
 
-		'fas fa-file-medical':
+		'fa-file-medical':
 		'\uf477'
 		,
 
-		'fas fa-file-medical-alt':
+		'fa-file-medical-alt':
 		'\uf478'
 		,
 
-		'fas fa-file-pdf':
+		'fa-file-pdf':
 		'\uf1c1'
 		,
 
-		'fas fa-file-powerpoint':
+		'fa-file-powerpoint':
 		'\uf1c4'
 		,
 
-		'fas fa-file-prescription':
+		'fa-file-prescription':
 		'\uf572'
 		,
 
-		'fas fa-file-signature':
+		'fa-file-signature':
 		'\uf573'
 		,
 
-		'fas fa-file-upload':
+		'fa-file-upload':
 		'\uf574'
 		,
 
-		'fas fa-file-video':
+		'fa-file-video':
 		'\uf1c8'
 		,
 
-		'fas fa-file-word':
+		'fa-file-word':
 		'\uf1c2'
 		,
 
-		'fas fa-fill':
+		'fa-fill':
 		'\uf575'
 		,
 
-		'fas fa-fill-drip':
+		'fa-fill-drip':
 		'\uf576'
 		,
 
-		'fas fa-film':
+		'fa-film':
 		'\uf008'
 		,
 
-		'fas fa-filter':
+		'fa-filter':
 		'\uf0b0'
 		,
 
-		'fas fa-fingerprint':
+		'fa-fingerprint':
 		'\uf577'
 		,
 
-		'fas fa-fire':
+		'fa-fire':
 		'\uf06d'
 		,
 
-		'fas fa-fire-alt':
+		'fa-fire-alt':
 		'\uf7e4'
 		,
 
-		'fas fa-fire-extinguisher':
+		'fa-fire-extinguisher':
 		'\uf134'
 		,
 
-		'fas fa-first-aid':
+		'fa-first-aid':
 		'\uf479'
 		,
 
-		'fas fa-fish':
+		'fa-fish':
 		'\uf578'
 		,
 
-		'fas fa-fist-raised':
+		'fa-fist-raised':
 		'\uf6de'
 		,
 
-		'fas fa-flag':
+		'fa-flag':
 		'\uf024'
 		,
 
-		'fas fa-flag-checkered':
+		'fa-flag-checkered':
 		'\uf11e'
 		,
 
-		'fas fa-flag-usa':
+		'fa-flag-usa':
 		'\uf74d'
 		,
 
-		'fas fa-flask':
+		'fa-flask':
 		'\uf0c3'
 		,
 
-		'fas fa-flushed':
+		'fa-flushed':
 		'\uf579'
 		,
 
-		'fas fa-folder':
+		'fa-folder':
 		'\uf07b'
 		,
 
-		'fas fa-folder-minus':
+		'fa-folder-minus':
 		'\uf65d'
 		,
 
-		'fas fa-folder-open':
+		'fa-folder-open':
 		'\uf07c'
 		,
 
-		'fas fa-folder-plus':
+		'fa-folder-plus':
 		'\uf65e'
 		,
 
-		'fas fa-font':
+		'fa-font':
 		'\uf031'
 		,
 
-		'fas fa-football-ball':
+		'fa-football-ball':
 		'\uf44e'
 		,
 
-		'fas fa-forward':
+		'fa-forward':
 		'\uf04e'
 		,
 
-		'fas fa-frog':
+		'fa-frog':
 		'\uf52e'
 		,
 
-		'fas fa-frown':
+		'fa-frown':
 		'\uf119'
 		,
 
-		'fas fa-frown-open':
+		'fa-frown-open':
 		'\uf57a'
 		,
 
-		'fas fa-funnel-dollar':
+		'fa-funnel-dollar':
 		'\uf662'
 		,
 
-		'fas fa-futbol':
+		'fa-futbol':
 		'\uf1e3'
 		,
 
-		'fas fa-gamepad':
+		'fa-gamepad':
 		'\uf11b'
 		,
 
-		'fas fa-gas-pump':
+		'fa-gas-pump':
 		'\uf52f'
 		,
 
-		'fas fa-gavel':
+		'fa-gavel':
 		'\uf0e3'
 		,
 
-		'fas fa-gem':
+		'fa-gem':
 		'\uf3a5'
 		,
 
-		'fas fa-genderless':
+		'fa-genderless':
 		'\uf22d'
 		,
 
-		'fas fa-ghost':
+		'fa-ghost':
 		'\uf6e2'
 		,
 
-		'fas fa-gift':
+		'fa-gift':
 		'\uf06b'
 		,
 
-		'fas fa-gifts':
+		'fa-gifts':
 		'\uf79c'
 		,
 
-		'fas fa-glass-cheers':
+		'fa-glass-cheers':
 		'\uf79f'
 		,
 
-		'fas fa-glass-martini':
+		'fa-glass-martini':
 		'\uf000'
 		,
 
-		'fas fa-glass-martini-alt':
+		'fa-glass-martini-alt':
 		'\uf57b'
 		,
 
-		'fas fa-glass-whiskey':
+		'fa-glass-whiskey':
 		'\uf7a0'
 		,
 
-		'fas fa-glasses':
+		'fa-glasses':
 		'\uf530'
 		,
 
-		'fas fa-globe':
+		'fa-globe':
 		'\uf0ac'
 		,
 
-		'fas fa-globe-africa':
+		'fa-globe-africa':
 		'\uf57c'
 		,
 
-		'fas fa-globe-americas':
+		'fa-globe-americas':
 		'\uf57d'
 		,
 
-		'fas fa-globe-asia':
+		'fa-globe-asia':
 		'\uf57e'
 		,
 
-		'fas fa-globe-europe':
+		'fa-globe-europe':
 		'\uf7a2'
 		,
 
-		'fas fa-golf-ball':
+		'fa-golf-ball':
 		'\uf450'
 		,
 
-		'fas fa-gopuram':
+		'fa-gopuram':
 		'\uf664'
 		,
 
-		'fas fa-graduation-cap':
+		'fa-graduation-cap':
 		'\uf19d'
 		,
 
-		'fas fa-greater-than':
+		'fa-greater-than':
 		'\uf531'
 		,
 
-		'fas fa-greater-than-equal':
+		'fa-greater-than-equal':
 		'\uf532'
 		,
 
-		'fas fa-grimace':
+		'fa-grimace':
 		'\uf57f'
 		,
 
-		'fas fa-grin':
+		'fa-grin':
 		'\uf580'
 		,
 
-		'fas fa-grin-alt':
+		'fa-grin-alt':
 		'\uf581'
 		,
 
-		'fas fa-grin-beam':
+		'fa-grin-beam':
 		'\uf582'
 		,
 
-		'fas fa-grin-beam-sweat':
+		'fa-grin-beam-sweat':
 		'\uf583'
 		,
 
-		'fas fa-grin-hearts':
+		'fa-grin-hearts':
 		'\uf584'
 		,
 
-		'fas fa-grin-squint':
+		'fa-grin-squint':
 		'\uf585'
 		,
 
-		'fas fa-grin-squint-tears':
+		'fa-grin-squint-tears':
 		'\uf586'
 		,
 
-		'fas fa-grin-stars':
+		'fa-grin-stars':
 		'\uf587'
 		,
 
-		'fas fa-grin-tears':
+		'fa-grin-tears':
 		'\uf588'
 		,
 
-		'fas fa-grin-tongue':
+		'fa-grin-tongue':
 		'\uf589'
 		,
 
-		'fas fa-grin-tongue-squint':
+		'fa-grin-tongue-squint':
 		'\uf58a'
 		,
 
-		'fas fa-grin-tongue-wink':
+		'fa-grin-tongue-wink':
 		'\uf58b'
 		,
 
-		'fas fa-grin-wink':
+		'fa-grin-wink':
 		'\uf58c'
 		,
 
-		'fas fa-grip-horizontal':
+		'fa-grip-horizontal':
 		'\uf58d'
 		,
 
-		'fas fa-grip-lines':
+		'fa-grip-lines':
 		'\uf7a4'
 		,
 
-		'fas fa-grip-lines-vertical':
+		'fa-grip-lines-vertical':
 		'\uf7a5'
 		,
 
-		'fas fa-grip-vertical':
+		'fa-grip-vertical':
 		'\uf58e'
 		,
 
-		'fas fa-guitar':
+		'fa-guitar':
 		'\uf7a6'
 		,
 
-		'fas fa-h-square':
+		'fa-h-square':
 		'\uf0fd'
 		,
 
-		'fas fa-hamburger':
+		'fa-hamburger':
 		'\uf805'
 		,
 
-		'fas fa-hammer':
+		'fa-hammer':
 		'\uf6e3'
 		,
 
-		'fas fa-hamsa':
+		'fa-hamsa':
 		'\uf665'
 		,
 
-		'fas fa-hand-holding':
+		'fa-hand-holding':
 		'\uf4bd'
 		,
 
-		'fas fa-hand-holding-heart':
+		'fa-hand-holding-heart':
 		'\uf4be'
 		,
 
-		'fas fa-hand-holding-usd':
+		'fa-hand-holding-usd':
 		'\uf4c0'
 		,
 
-		'fas fa-hand-lizard':
+		'fa-hand-lizard':
 		'\uf258'
 		,
 
-		'fas fa-hand-middle-finger':
+		'fa-hand-middle-finger':
 		'\uf806'
 		,
 
-		'fas fa-hand-paper':
+		'fa-hand-paper':
 		'\uf256'
 		,
 
-		'fas fa-hand-peace':
+		'fa-hand-peace':
 		'\uf25b'
 		,
 
-		'fas fa-hand-point-down':
+		'fa-hand-point-down':
 		'\uf0a7'
 		,
 
-		'fas fa-hand-point-left':
+		'fa-hand-point-left':
 		'\uf0a5'
 		,
 
-		'fas fa-hand-point-right':
+		'fa-hand-point-right':
 		'\uf0a4'
 		,
 
-		'fas fa-hand-point-up':
+		'fa-hand-point-up':
 		'\uf0a6'
 		,
 
-		'fas fa-hand-pointer':
+		'fa-hand-pointer':
 		'\uf25a'
 		,
 
-		'fas fa-hand-rock':
+		'fa-hand-rock':
 		'\uf255'
 		,
 
-		'fas fa-hand-scissors':
+		'fa-hand-scissors':
 		'\uf257'
 		,
 
-		'fas fa-hand-spock':
+		'fa-hand-spock':
 		'\uf259'
 		,
 
-		'fas fa-hands':
+		'fa-hands':
 		'\uf4c2'
 		,
 
-		'fas fa-hands-helping':
+		'fa-hands-helping':
 		'\uf4c4'
 		,
 
-		'fas fa-handshake':
+		'fa-handshake':
 		'\uf2b5'
 		,
 
-		'fas fa-hanukiah':
+		'fa-hanukiah':
 		'\uf6e6'
 		,
 
-		'fas fa-hard-hat':
+		'fa-hard-hat':
 		'\uf807'
 		,
 
-		'fas fa-hashtag':
+		'fa-hashtag':
 		'\uf292'
 		,
 
-		'fas fa-hat-wizard':
+		'fa-hat-wizard':
 		'\uf6e8'
 		,
 
-		'fas fa-haykal':
+		'fa-haykal':
 		'\uf666'
 		,
 
-		'fas fa-hdd':
+		'fa-hdd':
 		'\uf0a0'
 		,
 
-		'fas fa-heading':
+		'fa-heading':
 		'\uf1dc'
 		,
 
-		'fas fa-headphones':
+		'fa-headphones':
 		'\uf025'
 		,
 
-		'fas fa-headphones-alt':
+		'fa-headphones-alt':
 		'\uf58f'
 		,
 
-		'fas fa-headset':
+		'fa-headset':
 		'\uf590'
 		,
 
-		'fas fa-heart':
+		'fa-heart':
 		'\uf004'
 		,
 
-		'fas fa-heart-broken':
+		'fa-heart-broken':
 		'\uf7a9'
 		,
 
-		'fas fa-heartbeat':
+		'fa-heartbeat':
 		'\uf21e'
 		,
 
-		'fas fa-helicopter':
+		'fa-helicopter':
 		'\uf533'
 		,
 
-		'fas fa-highlighter':
+		'fa-highlighter':
 		'\uf591'
 		,
 
-		'fas fa-hiking':
+		'fa-hiking':
 		'\uf6ec'
 		,
 
-		'fas fa-hippo':
+		'fa-hippo':
 		'\uf6ed'
 		,
 
-		'fas fa-history':
+		'fa-history':
 		'\uf1da'
 		,
 
-		'fas fa-hockey-puck':
+		'fa-hockey-puck':
 		'\uf453'
 		,
 
-		'fas fa-holly-berry':
+		'fa-holly-berry':
 		'\uf7aa'
 		,
 
-		'fas fa-home':
+		'fa-home':
 		'\uf015'
 		,
 
-		'fas fa-horse':
+		'fa-horse':
 		'\uf6f0'
 		,
 
-		'fas fa-horse-head':
+		'fa-horse-head':
 		'\uf7ab'
 		,
 
-		'fas fa-hospital':
+		'fa-hospital':
 		'\uf0f8'
 		,
 
-		'fas fa-hospital-alt':
+		'fa-hospital-alt':
 		'\uf47d'
 		,
 
-		'fas fa-hospital-symbol':
+		'fa-hospital-symbol':
 		'\uf47e'
 		,
 
-		'fas fa-hot-tub':
+		'fa-hot-tub':
 		'\uf593'
 		,
 
-		'fas fa-hotdog':
+		'fa-hotdog':
 		'\uf80f'
 		,
 
-		'fas fa-hotel':
+		'fa-hotel':
 		'\uf594'
 		,
 
-		'fas fa-hourglass':
+		'fa-hourglass':
 		'\uf254'
 		,
 
-		'fas fa-hourglass-end':
+		'fa-hourglass-end':
 		'\uf253'
 		,
 
-		'fas fa-hourglass-half':
+		'fa-hourglass-half':
 		'\uf252'
 		,
 
-		'fas fa-hourglass-start':
+		'fa-hourglass-start':
 		'\uf251'
 		,
 
-		'fas fa-house-damage':
+		'fa-house-damage':
 		'\uf6f1'
 		,
 
-		'fas fa-hryvnia':
+		'fa-hryvnia':
 		'\uf6f2'
 		,
 
-		'fas fa-i-cursor':
+		'fa-i-cursor':
 		'\uf246'
 		,
 
-		'fas fa-ice-cream':
+		'fa-ice-cream':
 		'\uf810'
 		,
 
-		'fas fa-icicles':
+		'fa-icicles':
 		'\uf7ad'
 		,
 
-		'fas fa-id-badge':
+		'fa-id-badge':
 		'\uf2c1'
 		,
 
-		'fas fa-id-card':
+		'fa-id-card':
 		'\uf2c2'
 		,
 
-		'fas fa-id-card-alt':
+		'fa-id-card-alt':
 		'\uf47f'
 		,
 
-		'fas fa-igloo':
+		'fa-igloo':
 		'\uf7ae'
 		,
 
-		'fas fa-image':
+		'fa-image':
 		'\uf03e'
 		,
 
-		'fas fa-images':
+		'fa-images':
 		'\uf302'
 		,
 
-		'fas fa-inbox':
+		'fa-inbox':
 		'\uf01c'
 		,
 
-		'fas fa-indent':
+		'fa-indent':
 		'\uf03c'
 		,
 
-		'fas fa-industry':
+		'fa-industry':
 		'\uf275'
 		,
 
-		'fas fa-infinity':
+		'fa-infinity':
 		'\uf534'
 		,
 
-		'fas fa-info':
+		'fa-info':
 		'\uf129'
 		,
 
-		'fas fa-info-circle':
+		'fa-info-circle':
 		'\uf05a'
 		,
 
-		'fas fa-italic':
+		'fa-italic':
 		'\uf033'
 		,
 
-		'fas fa-jedi':
+		'fa-jedi':
 		'\uf669'
 		,
 
-		'fas fa-joint':
+		'fa-joint':
 		'\uf595'
 		,
 
-		'fas fa-journal-whills':
+		'fa-journal-whills':
 		'\uf66a'
 		,
 
-		'fas fa-kaaba':
+		'fa-kaaba':
 		'\uf66b'
 		,
 
-		'fas fa-key':
+		'fa-key':
 		'\uf084'
 		,
 
-		'fas fa-keyboard':
+		'fa-keyboard':
 		'\uf11c'
 		,
 
-		'fas fa-khanda':
+		'fa-khanda':
 		'\uf66d'
 		,
 
-		'fas fa-kiss':
+		'fa-kiss':
 		'\uf596'
 		,
 
-		'fas fa-kiss-beam':
+		'fa-kiss-beam':
 		'\uf597'
 		,
 
-		'fas fa-kiss-wink-heart':
+		'fa-kiss-wink-heart':
 		'\uf598'
 		,
 
-		'fas fa-kiwi-bird':
+		'fa-kiwi-bird':
 		'\uf535'
 		,
 
-		'fas fa-landmark':
+		'fa-landmark':
 		'\uf66f'
 		,
 
-		'fas fa-language':
+		'fa-language':
 		'\uf1ab'
 		,
 
-		'fas fa-laptop':
+		'fa-laptop':
 		'\uf109'
 		,
 
-		'fas fa-laptop-code':
+		'fa-laptop-code':
 		'\uf5fc'
 		,
 
-		'fas fa-laptop-medical':
+		'fa-laptop-medical':
 		'\uf812'
 		,
 
-		'fas fa-laugh':
+		'fa-laugh':
 		'\uf599'
 		,
 
-		'fas fa-laugh-beam':
+		'fa-laugh-beam':
 		'\uf59a'
 		,
 
-		'fas fa-laugh-squint':
+		'fa-laugh-squint':
 		'\uf59b'
 		,
 
-		'fas fa-laugh-wink':
+		'fa-laugh-wink':
 		'\uf59c'
 		,
 
-		'fas fa-layer-group':
+		'fa-layer-group':
 		'\uf5fd'
 		,
 
-		'fas fa-leaf':
+		'fa-leaf':
 		'\uf06c'
 		,
 
-		'fas fa-lemon':
+		'fa-lemon':
 		'\uf094'
 		,
 
-		'fas fa-less-than':
+		'fa-less-than':
 		'\uf536'
 		,
 
-		'fas fa-less-than-equal':
+		'fa-less-than-equal':
 		'\uf537'
 		,
 
-		'fas fa-level-down-alt':
+		'fa-level-down-alt':
 		'\uf3be'
 		,
 
-		'fas fa-level-up-alt':
+		'fa-level-up-alt':
 		'\uf3bf'
 		,
 
-		'fas fa-life-ring':
+		'fa-life-ring':
 		'\uf1cd'
 		,
 
-		'fas fa-lightbulb':
+		'fa-lightbulb':
 		'\uf0eb'
 		,
 
-		'fas fa-link':
+		'fa-link':
 		'\uf0c1'
 		,
 
-		'fas fa-lira-sign':
+		'fa-lira-sign':
 		'\uf195'
 		,
 
-		'fas fa-list':
+		'fa-list':
 		'\uf03a'
 		,
 
-		'fas fa-list-alt':
+		'fa-list-alt':
 		'\uf022'
 		,
 
-		'fas fa-list-ol':
+		'fa-list-ol':
 		'\uf0cb'
 		,
 
-		'fas fa-list-ul':
+		'fa-list-ul':
 		'\uf0ca'
 		,
 
-		'fas fa-location-arrow':
+		'fa-location-arrow':
 		'\uf124'
 		,
 
-		'fas fa-lock':
+		'fa-lock':
 		'\uf023'
 		,
 
-		'fas fa-lock-open':
+		'fa-lock-open':
 		'\uf3c1'
 		,
 
-		'fas fa-long-arrow-alt-down':
+		'fa-long-arrow-alt-down':
 		'\uf309'
 		,
 
-		'fas fa-long-arrow-alt-left':
+		'fa-long-arrow-alt-left':
 		'\uf30a'
 		,
 
-		'fas fa-long-arrow-alt-right':
+		'fa-long-arrow-alt-right':
 		'\uf30b'
 		,
 
-		'fas fa-long-arrow-alt-up':
+		'fa-long-arrow-alt-up':
 		'\uf30c'
 		,
 
-		'fas fa-low-vision':
+		'fa-low-vision':
 		'\uf2a8'
 		,
 
-		'fas fa-luggage-cart':
+		'fa-luggage-cart':
 		'\uf59d'
 		,
 
-		'fas fa-magic':
+		'fa-magic':
 		'\uf0d0'
 		,
 
-		'fas fa-magnet':
+		'fa-magnet':
 		'\uf076'
 		,
 
-		'fas fa-mail-bulk':
+		'fa-mail-bulk':
 		'\uf674'
 		,
 
-		'fas fa-male':
+		'fa-male':
 		'\uf183'
 		,
 
-		'fas fa-map':
+		'fa-map':
 		'\uf279'
 		,
 
-		'fas fa-map-marked':
+		'fa-map-marked':
 		'\uf59f'
 		,
 
-		'fas fa-map-marked-alt':
+		'fa-map-marked-alt':
 		'\uf5a0'
 		,
 
-		'fas fa-map-marker':
+		'fa-map-marker':
 		'\uf041'
 		,
 
-		'fas fa-map-marker-alt':
+		'fa-map-marker-alt':
 		'\uf3c5'
 		,
 
-		'fas fa-map-pin':
+		'fa-map-pin':
 		'\uf276'
 		,
 
-		'fas fa-map-signs':
+		'fa-map-signs':
 		'\uf277'
 		,
 
-		'fas fa-marker':
+		'fa-marker':
 		'\uf5a1'
 		,
 
-		'fas fa-mars':
+		'fa-mars':
 		'\uf222'
 		,
 
-		'fas fa-mars-double':
+		'fa-mars-double':
 		'\uf227'
 		,
 
-		'fas fa-mars-stroke':
+		'fa-mars-stroke':
 		'\uf229'
 		,
 
-		'fas fa-mars-stroke-h':
+		'fa-mars-stroke-h':
 		'\uf22b'
 		,
 
-		'fas fa-mars-stroke-v':
+		'fa-mars-stroke-v':
 		'\uf22a'
 		,
 
-		'fas fa-mask':
+		'fa-mask':
 		'\uf6fa'
 		,
 
-		'fas fa-medal':
+		'fa-medal':
 		'\uf5a2'
 		,
 
-		'fas fa-medkit':
+		'fa-medkit':
 		'\uf0fa'
 		,
 
-		'fas fa-meh':
+		'fa-meh':
 		'\uf11a'
 		,
 
-		'fas fa-meh-blank':
+		'fa-meh-blank':
 		'\uf5a4'
 		,
 
-		'fas fa-meh-rolling-eyes':
+		'fa-meh-rolling-eyes':
 		'\uf5a5'
 		,
 
-		'fas fa-memory':
+		'fa-memory':
 		'\uf538'
 		,
 
-		'fas fa-menorah':
+		'fa-menorah':
 		'\uf676'
 		,
 
-		'fas fa-mercury':
+		'fa-mercury':
 		'\uf223'
 		,
 
-		'fas fa-meteor':
+		'fa-meteor':
 		'\uf753'
 		,
 
-		'fas fa-microchip':
+		'fa-microchip':
 		'\uf2db'
 		,
 
-		'fas fa-microphone':
+		'fa-microphone':
 		'\uf130'
 		,
 
-		'fas fa-microphone-alt':
+		'fa-microphone-alt':
 		'\uf3c9'
 		,
 
-		'fas fa-microphone-alt-slash':
+		'fa-microphone-alt-slash':
 		'\uf539'
 		,
 
-		'fas fa-microphone-slash':
+		'fa-microphone-slash':
 		'\uf131'
 		,
 
-		'fas fa-microscope':
+		'fa-microscope':
 		'\uf610'
 		,
 
-		'fas fa-minus':
+		'fa-minus':
 		'\uf068'
 		,
 
-		'fas fa-minus-circle':
+		'fa-minus-circle':
 		'\uf056'
 		,
 
-		'fas fa-minus-square':
+		'fa-minus-square':
 		'\uf146'
 		,
 
-		'fas fa-mitten':
+		'fa-mitten':
 		'\uf7b5'
 		,
 
-		'fas fa-mobile':
+		'fa-mobile':
 		'\uf10b'
 		,
 
-		'fas fa-mobile-alt':
+		'fa-mobile-alt':
 		'\uf3cd'
 		,
 
-		'fas fa-money-bill':
+		'fa-money-bill':
 		'\uf0d6'
 		,
 
-		'fas fa-money-bill-alt':
+		'fa-money-bill-alt':
 		'\uf3d1'
 		,
 
-		'fas fa-money-bill-wave':
+		'fa-money-bill-wave':
 		'\uf53a'
 		,
 
-		'fas fa-money-bill-wave-alt':
+		'fa-money-bill-wave-alt':
 		'\uf53b'
 		,
 
-		'fas fa-money-check':
+		'fa-money-check':
 		'\uf53c'
 		,
 
-		'fas fa-money-check-alt':
+		'fa-money-check-alt':
 		'\uf53d'
 		,
 
-		'fas fa-monument':
+		'fa-monument':
 		'\uf5a6'
 		,
 
-		'fas fa-moon':
+		'fa-moon':
 		'\uf186'
 		,
 
-		'fas fa-mortar-pestle':
+		'fa-mortar-pestle':
 		'\uf5a7'
 		,
 
-		'fas fa-mosque':
+		'fa-mosque':
 		'\uf678'
 		,
 
-		'fas fa-motorcycle':
+		'fa-motorcycle':
 		'\uf21c'
 		,
 
-		'fas fa-mountain':
+		'fa-mountain':
 		'\uf6fc'
 		,
 
-		'fas fa-mouse-pointer':
+		'fa-mouse-pointer':
 		'\uf245'
 		,
 
-		'fas fa-mug-hot':
+		'fa-mug-hot':
 		'\uf7b6'
 		,
 
-		'fas fa-music':
+		'fa-music':
 		'\uf001'
 		,
 
-		'fas fa-network-wired':
+		'fa-network-wired':
 		'\uf6ff'
 		,
 
-		'fas fa-neuter':
+		'fa-neuter':
 		'\uf22c'
 		,
 
-		'fas fa-newspaper':
+		'fa-newspaper':
 		'\uf1ea'
 		,
 
-		'fas fa-not-equal':
+		'fa-not-equal':
 		'\uf53e'
 		,
 
-		'fas fa-notes-medical':
+		'fa-notes-medical':
 		'\uf481'
 		,
 
-		'fas fa-object-group':
+		'fa-object-group':
 		'\uf247'
 		,
 
-		'fas fa-object-ungroup':
+		'fa-object-ungroup':
 		'\uf248'
 		,
 
-		'fas fa-oil-can':
+		'fa-oil-can':
 		'\uf613'
 		,
 
-		'fas fa-om':
+		'fa-om':
 		'\uf679'
 		,
 
-		'fas fa-otter':
+		'fa-otter':
 		'\uf700'
 		,
 
-		'fas fa-outdent':
+		'fa-outdent':
 		'\uf03b'
 		,
 
-		'fas fa-pager':
+		'fa-pager':
 		'\uf815'
 		,
 
-		'fas fa-paint-brush':
+		'fa-paint-brush':
 		'\uf1fc'
 		,
 
-		'fas fa-paint-roller':
+		'fa-paint-roller':
 		'\uf5aa'
 		,
 
-		'fas fa-palette':
+		'fa-palette':
 		'\uf53f'
 		,
 
-		'fas fa-pallet':
+		'fa-pallet':
 		'\uf482'
 		,
 
-		'fas fa-paper-plane':
+		'fa-paper-plane':
 		'\uf1d8'
 		,
 
-		'fas fa-paperclip':
+		'fa-paperclip':
 		'\uf0c6'
 		,
 
-		'fas fa-parachute-box':
+		'fa-parachute-box':
 		'\uf4cd'
 		,
 
-		'fas fa-paragraph':
+		'fa-paragraph':
 		'\uf1dd'
 		,
 
-		'fas fa-parking':
+		'fa-parking':
 		'\uf540'
 		,
 
-		'fas fa-passport':
+		'fa-passport':
 		'\uf5ab'
 		,
 
-		'fas fa-pastafarianism':
+		'fa-pastafarianism':
 		'\uf67b'
 		,
 
-		'fas fa-paste':
+		'fa-paste':
 		'\uf0ea'
 		,
 
-		'fas fa-pause':
+		'fa-pause':
 		'\uf04c'
 		,
 
-		'fas fa-pause-circle':
+		'fa-pause-circle':
 		'\uf28b'
 		,
 
-		'fas fa-paw':
+		'fa-paw':
 		'\uf1b0'
 		,
 
-		'fas fa-peace':
+		'fa-peace':
 		'\uf67c'
 		,
 
-		'fas fa-pen':
+		'fa-pen':
 		'\uf304'
 		,
 
-		'fas fa-pen-alt':
+		'fa-pen-alt':
 		'\uf305'
 		,
 
-		'fas fa-pen-fancy':
+		'fa-pen-fancy':
 		'\uf5ac'
 		,
 
-		'fas fa-pen-nib':
+		'fa-pen-nib':
 		'\uf5ad'
 		,
 
-		'fas fa-pen-square':
+		'fa-pen-square':
 		'\uf14b'
 		,
 
-		'fas fa-pencil-alt':
+		'fa-pencil-alt':
 		'\uf303'
 		,
 
-		'fas fa-pencil-ruler':
+		'fa-pencil-ruler':
 		'\uf5ae'
 		,
 
-		'fas fa-people-carry':
+		'fa-people-carry':
 		'\uf4ce'
 		,
 
-		'fas fa-pepper-hot':
+		'fa-pepper-hot':
 		'\uf816'
 		,
 
-		'fas fa-percent':
+		'fa-percent':
 		'\uf295'
 		,
 
-		'fas fa-percentage':
+		'fa-percentage':
 		'\uf541'
 		,
 
-		'fas fa-person-booth':
+		'fa-person-booth':
 		'\uf756'
 		,
 
-		'fas fa-phone':
+		'fa-phone':
 		'\uf095'
 		,
 
-		'fas fa-phone-slash':
+		'fa-phone-slash':
 		'\uf3dd'
 		,
 
-		'fas fa-phone-square':
+		'fa-phone-square':
 		'\uf098'
 		,
 
-		'fas fa-phone-volume':
+		'fa-phone-volume':
 		'\uf2a0'
 		,
 
-		'fas fa-piggy-bank':
+		'fa-piggy-bank':
 		'\uf4d3'
 		,
 
-		'fas fa-pills':
+		'fa-pills':
 		'\uf484'
 		,
 
-		'fas fa-pizza-slice':
+		'fa-pizza-slice':
 		'\uf818'
 		,
 
-		'fas fa-place-of-worship':
+		'fa-place-of-worship':
 		'\uf67f'
 		,
 
-		'fas fa-plane':
+		'fa-plane':
 		'\uf072'
 		,
 
-		'fas fa-plane-arrival':
+		'fa-plane-arrival':
 		'\uf5af'
 		,
 
-		'fas fa-plane-departure':
+		'fa-plane-departure':
 		'\uf5b0'
 		,
 
-		'fas fa-play':
+		'fa-play':
 		'\uf04b'
 		,
 
-		'fas fa-play-circle':
+		'fa-play-circle':
 		'\uf144'
 		,
 
-		'fas fa-plug':
+		'fa-plug':
 		'\uf1e6'
 		,
 
-		'fas fa-plus':
+		'fa-plus':
 		'\uf067'
 		,
 
-		'fas fa-plus-circle':
+		'fa-plus-circle':
 		'\uf055'
 		,
 
-		'fas fa-plus-square':
+		'fa-plus-square':
 		'\uf0fe'
 		,
 
-		'fas fa-podcast':
+		'fa-podcast':
 		'\uf2ce'
 		,
 
-		'fas fa-poll':
+		'fa-poll':
 		'\uf681'
 		,
 
-		'fas fa-poll-h':
+		'fa-poll-h':
 		'\uf682'
 		,
 
-		'fas fa-poo':
+		'fa-poo':
 		'\uf2fe'
 		,
 
-		'fas fa-poo-storm':
+		'fa-poo-storm':
 		'\uf75a'
 		,
 
-		'fas fa-poop':
+		'fa-poop':
 		'\uf619'
 		,
 
-		'fas fa-portrait':
+		'fa-portrait':
 		'\uf3e0'
 		,
 
-		'fas fa-pound-sign':
+		'fa-pound-sign':
 		'\uf154'
 		,
 
-		'fas fa-power-off':
+		'fa-power-off':
 		'\uf011'
 		,
 
-		'fas fa-pray':
+		'fa-pray':
 		'\uf683'
 		,
 
-		'fas fa-praying-hands':
+		'fa-praying-hands':
 		'\uf684'
 		,
 
-		'fas fa-prescription':
+		'fa-prescription':
 		'\uf5b1'
 		,
 
-		'fas fa-prescription-bottle':
+		'fa-prescription-bottle':
 		'\uf485'
 		,
 
-		'fas fa-prescription-bottle-alt':
+		'fa-prescription-bottle-alt':
 		'\uf486'
 		,
 
-		'fas fa-print':
+		'fa-print':
 		'\uf02f'
 		,
 
-		'fas fa-procedures':
+		'fa-procedures':
 		'\uf487'
 		,
 
-		'fas fa-project-diagram':
+		'fa-project-diagram':
 		'\uf542'
 		,
 
-		'fas fa-puzzle-piece':
+		'fa-puzzle-piece':
 		'\uf12e'
 		,
 
-		'fas fa-qrcode':
+		'fa-qrcode':
 		'\uf029'
 		,
 
-		'fas fa-question':
+		'fa-question':
 		'\uf128'
 		,
 
-		'fas fa-question-circle':
+		'fa-question-circle':
 		'\uf059'
 		,
 
-		'fas fa-quidditch':
+		'fa-quidditch':
 		'\uf458'
 		,
 
-		'fas fa-quote-left':
+		'fa-quote-left':
 		'\uf10d'
 		,
 
-		'fas fa-quote-right':
+		'fa-quote-right':
 		'\uf10e'
 		,
 
-		'fas fa-quran':
+		'fa-quran':
 		'\uf687'
 		,
 
-		'fas fa-radiation':
+		'fa-radiation':
 		'\uf7b9'
 		,
 
-		'fas fa-radiation-alt':
+		'fa-radiation-alt':
 		'\uf7ba'
 		,
 
-		'fas fa-rainbow':
+		'fa-rainbow':
 		'\uf75b'
 		,
 
-		'fas fa-random':
+		'fa-random':
 		'\uf074'
 		,
 
-		'fas fa-receipt':
+		'fa-receipt':
 		'\uf543'
 		,
 
-		'fas fa-recycle':
+		'fa-recycle':
 		'\uf1b8'
 		,
 
-		'fas fa-redo':
+		'fa-redo':
 		'\uf01e'
 		,
 
-		'fas fa-redo-alt':
+		'fa-redo-alt':
 		'\uf2f9'
 		,
 
-		'fas fa-registered':
+		'fa-registered':
 		'\uf25d'
 		,
 
-		'fas fa-reply':
+		'fa-reply':
 		'\uf3e5'
 		,
 
-		'fas fa-reply-all':
+		'fa-reply-all':
 		'\uf122'
 		,
 
-		'fas fa-republican':
+		'fa-republican':
 		'\uf75e'
 		,
 
-		'fas fa-restroom':
+		'fa-restroom':
 		'\uf7bd'
 		,
 
-		'fas fa-retweet':
+		'fa-retweet':
 		'\uf079'
 		,
 
-		'fas fa-ribbon':
+		'fa-ribbon':
 		'\uf4d6'
 		,
 
-		'fas fa-ring':
+		'fa-ring':
 		'\uf70b'
 		,
 
-		'fas fa-road':
+		'fa-road':
 		'\uf018'
 		,
 
-		'fas fa-robot':
+		'fa-robot':
 		'\uf544'
 		,
 
-		'fas fa-rocket':
+		'fa-rocket':
 		'\uf135'
 		,
 
-		'fas fa-route':
+		'fa-route':
 		'\uf4d7'
 		,
 
-		'fas fa-rss':
+		'fa-rss':
 		'\uf09e'
 		,
 
-		'fas fa-rss-square':
+		'fa-rss-square':
 		'\uf143'
 		,
 
-		'fas fa-ruble-sign':
+		'fa-ruble-sign':
 		'\uf158'
 		,
 
-		'fas fa-ruler':
+		'fa-ruler':
 		'\uf545'
 		,
 
-		'fas fa-ruler-combined':
+		'fa-ruler-combined':
 		'\uf546'
 		,
 
-		'fas fa-ruler-horizontal':
+		'fa-ruler-horizontal':
 		'\uf547'
 		,
 
-		'fas fa-ruler-vertical':
+		'fa-ruler-vertical':
 		'\uf548'
 		,
 
-		'fas fa-running':
+		'fa-running':
 		'\uf70c'
 		,
 
-		'fas fa-rupee-sign':
+		'fa-rupee-sign':
 		'\uf156'
 		,
 
-		'fas fa-sad-cry':
+		'fa-sad-cry':
 		'\uf5b3'
 		,
 
-		'fas fa-sad-tear':
+		'fa-sad-tear':
 		'\uf5b4'
 		,
 
-		'fas fa-satellite':
+		'fa-satellite':
 		'\uf7bf'
 		,
 
-		'fas fa-satellite-dish':
+		'fa-satellite-dish':
 		'\uf7c0'
 		,
 
-		'fas fa-save':
+		'fa-save':
 		'\uf0c7'
 		,
 
-		'fas fa-school':
+		'fa-school':
 		'\uf549'
 		,
 
-		'fas fa-screwdriver':
+		'fa-screwdriver':
 		'\uf54a'
 		,
 
-		'fas fa-scroll':
+		'fa-scroll':
 		'\uf70e'
 		,
 
-		'fas fa-sd-card':
+		'fa-sd-card':
 		'\uf7c2'
 		,
 
-		'fas fa-search':
+		'fa-search':
 		'\uf002'
 		,
 
-		'fas fa-search-dollar':
+		'fa-search-dollar':
 		'\uf688'
 		,
 
-		'fas fa-search-location':
+		'fa-search-location':
 		'\uf689'
 		,
 
-		'fas fa-search-minus':
+		'fa-search-minus':
 		'\uf010'
 		,
 
-		'fas fa-search-plus':
+		'fa-search-plus':
 		'\uf00e'
 		,
 
-		'fas fa-seedling':
+		'fa-seedling':
 		'\uf4d8'
 		,
 
-		'fas fa-server':
+		'fa-server':
 		'\uf233'
 		,
 
-		'fas fa-shapes':
+		'fa-shapes':
 		'\uf61f'
 		,
 
-		'fas fa-share':
+		'fa-share':
 		'\uf064'
 		,
 
-		'fas fa-share-alt':
+		'fa-share-alt':
 		'\uf1e0'
 		,
 
-		'fas fa-share-alt-square':
+		'fa-share-alt-square':
 		'\uf1e1'
 		,
 
-		'fas fa-share-square':
+		'fa-share-square':
 		'\uf14d'
 		,
 
-		'fas fa-shekel-sign':
+		'fa-shekel-sign':
 		'\uf20b'
 		,
 
-		'fas fa-shield-alt':
+		'fa-shield-alt':
 		'\uf3ed'
 		,
 
-		'fas fa-ship':
+		'fa-ship':
 		'\uf21a'
 		,
 
-		'fas fa-shipping-fast':
+		'fa-shipping-fast':
 		'\uf48b'
 		,
 
-		'fas fa-shoe-prints':
+		'fa-shoe-prints':
 		'\uf54b'
 		,
 
-		'fas fa-shopping-bag':
+		'fa-shopping-bag':
 		'\uf290'
 		,
 
-		'fas fa-shopping-basket':
+		'fa-shopping-basket':
 		'\uf291'
 		,
 
-		'fas fa-shopping-cart':
+		'fa-shopping-cart':
 		'\uf07a'
 		,
 
-		'fas fa-shower':
+		'fa-shower':
 		'\uf2cc'
 		,
 
-		'fas fa-shuttle-van':
+		'fa-shuttle-van':
 		'\uf5b6'
 		,
 
-		'fas fa-sign':
+		'fa-sign':
 		'\uf4d9'
 		,
 
-		'fas fa-sign-in-alt':
+		'fa-sign-in-alt':
 		'\uf2f6'
 		,
 
-		'fas fa-sign-language':
+		'fa-sign-language':
 		'\uf2a7'
 		,
 
-		'fas fa-sign-out-alt':
+		'fa-sign-out-alt':
 		'\uf2f5'
 		,
 
-		'fas fa-signal':
+		'fa-signal':
 		'\uf012'
 		,
 
-		'fas fa-signature':
+		'fa-signature':
 		'\uf5b7'
 		,
 
-		'fas fa-sim-card':
+		'fa-sim-card':
 		'\uf7c4'
 		,
 
-		'fas fa-sitemap':
+		'fa-sitemap':
 		'\uf0e8'
 		,
 
-		'fas fa-skating':
+		'fa-skating':
 		'\uf7c5'
 		,
 
-		'fas fa-skiing':
+		'fa-skiing':
 		'\uf7c9'
 		,
 
-		'fas fa-skiing-nordic':
+		'fa-skiing-nordic':
 		'\uf7ca'
 		,
 
-		'fas fa-skull':
+		'fa-skull':
 		'\uf54c'
 		,
 
-		'fas fa-skull-crossbones':
+		'fa-skull-crossbones':
 		'\uf714'
 		,
 
-		'fas fa-slash':
+		'fa-slash':
 		'\uf715'
 		,
 
-		'fas fa-sleigh':
+		'fa-sleigh':
 		'\uf7cc'
 		,
 
-		'fas fa-sliders-h':
+		'fa-sliders-h':
 		'\uf1de'
 		,
 
-		'fas fa-smile':
+		'fa-smile':
 		'\uf118'
 		,
 
-		'fas fa-smile-beam':
+		'fa-smile-beam':
 		'\uf5b8'
 		,
 
-		'fas fa-smile-wink':
+		'fa-smile-wink':
 		'\uf4da'
 		,
 
-		'fas fa-smog':
+		'fa-smog':
 		'\uf75f'
 		,
 
-		'fas fa-smoking':
+		'fa-smoking':
 		'\uf48d'
 		,
 
-		'fas fa-smoking-ban':
+		'fa-smoking-ban':
 		'\uf54d'
 		,
 
-		'fas fa-sms':
+		'fa-sms':
 		'\uf7cd'
 		,
 
-		'fas fa-snowboarding':
+		'fa-snowboarding':
 		'\uf7ce'
 		,
 
-		'fas fa-snowflake':
+		'fa-snowflake':
 		'\uf2dc'
 		,
 
-		'fas fa-snowman':
+		'fa-snowman':
 		'\uf7d0'
 		,
 
-		'fas fa-snowplow':
+		'fa-snowplow':
 		'\uf7d2'
 		,
 
-		'fas fa-socks':
+		'fa-socks':
 		'\uf696'
 		,
 
-		'fas fa-solar-panel':
+		'fa-solar-panel':
 		'\uf5ba'
 		,
 
-		'fas fa-sort':
+		'fa-sort':
 		'\uf0dc'
 		,
 
-		'fas fa-sort-alpha-down':
+		'fa-sort-alpha-down':
 		'\uf15d'
 		,
 
-		'fas fa-sort-alpha-up':
+		'fa-sort-alpha-up':
 		'\uf15e'
 		,
 
-		'fas fa-sort-amount-down':
+		'fa-sort-amount-down':
 		'\uf160'
 		,
 
-		'fas fa-sort-amount-up':
+		'fa-sort-amount-up':
 		'\uf161'
 		,
 
-		'fas fa-sort-down':
+		'fa-sort-down':
 		'\uf0dd'
 		,
 
-		'fas fa-sort-numeric-down':
+		'fa-sort-numeric-down':
 		'\uf162'
 		,
 
-		'fas fa-sort-numeric-up':
+		'fa-sort-numeric-up':
 		'\uf163'
 		,
 
-		'fas fa-sort-up':
+		'fa-sort-up':
 		'\uf0de'
 		,
 
-		'fas fa-spa':
+		'fa-spa':
 		'\uf5bb'
 		,
 
-		'fas fa-space-shuttle':
+		'fa-space-shuttle':
 		'\uf197'
 		,
 
-		'fas fa-spider':
+		'fa-spider':
 		'\uf717'
 		,
 
-		'fas fa-spinner':
+		'fa-spinner':
 		'\uf110'
 		,
 
-		'fas fa-splotch':
+		'fa-splotch':
 		'\uf5bc'
 		,
 
-		'fas fa-spray-can':
+		'fa-spray-can':
 		'\uf5bd'
 		,
 
-		'fas fa-square':
+		'fa-square':
 		'\uf0c8'
 		,
 
-		'fas fa-square-full':
+		'fa-square-full':
 		'\uf45c'
 		,
 
-		'fas fa-square-root-alt':
+		'fa-square-root-alt':
 		'\uf698'
 		,
 
-		'fas fa-stamp':
+		'fa-stamp':
 		'\uf5bf'
 		,
 
-		'fas fa-star':
+		'fa-star':
 		'\uf005'
 		,
 
-		'fas fa-star-and-crescent':
+		'fa-star-and-crescent':
 		'\uf699'
 		,
 
-		'fas fa-star-half':
+		'fa-star-half':
 		'\uf089'
 		,
 
-		'fas fa-star-half-alt':
+		'fa-star-half-alt':
 		'\uf5c0'
 		,
 
-		'fas fa-star-of-david':
+		'fa-star-of-david':
 		'\uf69a'
 		,
 
-		'fas fa-star-of-life':
+		'fa-star-of-life':
 		'\uf621'
 		,
 
-		'fas fa-step-backward':
+		'fa-step-backward':
 		'\uf048'
 		,
 
-		'fas fa-step-forward':
+		'fa-step-forward':
 		'\uf051'
 		,
 
-		'fas fa-stethoscope':
+		'fa-stethoscope':
 		'\uf0f1'
 		,
 
-		'fas fa-sticky-note':
+		'fa-sticky-note':
 		'\uf249'
 		,
 
-		'fas fa-stop':
+		'fa-stop':
 		'\uf04d'
 		,
 
-		'fas fa-stop-circle':
+		'fa-stop-circle':
 		'\uf28d'
 		,
 
-		'fas fa-stopwatch':
+		'fa-stopwatch':
 		'\uf2f2'
 		,
 
-		'fas fa-store':
+		'fa-store':
 		'\uf54e'
 		,
 
-		'fas fa-store-alt':
+		'fa-store-alt':
 		'\uf54f'
 		,
 
-		'fas fa-stream':
+		'fa-stream':
 		'\uf550'
 		,
 
-		'fas fa-street-view':
+		'fa-street-view':
 		'\uf21d'
 		,
 
-		'fas fa-strikethrough':
+		'fa-strikethrough':
 		'\uf0cc'
 		,
 
-		'fas fa-stroopwafel':
+		'fa-stroopwafel':
 		'\uf551'
 		,
 
-		'fas fa-subscript':
+		'fa-subscript':
 		'\uf12c'
 		,
 
-		'fas fa-subway':
+		'fa-subway':
 		'\uf239'
 		,
 
-		'fas fa-suitcase':
+		'fa-suitcase':
 		'\uf0f2'
 		,
 
-		'fas fa-suitcase-rolling':
+		'fa-suitcase-rolling':
 		'\uf5c1'
 		,
 
-		'fas fa-sun':
+		'fa-sun':
 		'\uf185'
 		,
 
-		'fas fa-superscript':
+		'fa-superscript':
 		'\uf12b'
 		,
 
-		'fas fa-surprise':
+		'fa-surprise':
 		'\uf5c2'
 		,
 
-		'fas fa-swatchbook':
+		'fa-swatchbook':
 		'\uf5c3'
 		,
 
-		'fas fa-swimmer':
+		'fa-swimmer':
 		'\uf5c4'
 		,
 
-		'fas fa-swimming-pool':
+		'fa-swimming-pool':
 		'\uf5c5'
 		,
 
-		'fas fa-synagogue':
+		'fa-synagogue':
 		'\uf69b'
 		,
 
-		'fas fa-sync':
+		'fa-sync':
 		'\uf021'
 		,
 
-		'fas fa-sync-alt':
+		'fa-sync-alt':
 		'\uf2f1'
 		,
 
-		'fas fa-syringe':
+		'fa-syringe':
 		'\uf48e'
 		,
 
-		'fas fa-table':
+		'fa-table':
 		'\uf0ce'
 		,
 
-		'fas fa-table-tennis':
+		'fa-table-tennis':
 		'\uf45d'
 		,
 
-		'fas fa-tablet':
+		'fa-tablet':
 		'\uf10a'
 		,
 
-		'fas fa-tablet-alt':
+		'fa-tablet-alt':
 		'\uf3fa'
 		,
 
-		'fas fa-tablets':
+		'fa-tablets':
 		'\uf490'
 		,
 
-		'fas fa-tachometer-alt':
+		'fa-tachometer-alt':
 		'\uf3fd'
 		,
 
-		'fas fa-tag':
+		'fa-tag':
 		'\uf02b'
 		,
 
-		'fas fa-tags':
+		'fa-tags':
 		'\uf02c'
 		,
 
-		'fas fa-tape':
+		'fa-tape':
 		'\uf4db'
 		,
 
-		'fas fa-tasks':
+		'fa-tasks':
 		'\uf0ae'
 		,
 
-		'fas fa-taxi':
+		'fa-taxi':
 		'\uf1ba'
 		,
 
-		'fas fa-teeth':
+		'fa-teeth':
 		'\uf62e'
 		,
 
-		'fas fa-teeth-open':
+		'fa-teeth-open':
 		'\uf62f'
 		,
 
-		'fas fa-temperature-high':
+		'fa-temperature-high':
 		'\uf769'
 		,
 
-		'fas fa-temperature-low':
+		'fa-temperature-low':
 		'\uf76b'
 		,
 
-		'fas fa-tenge':
+		'fa-tenge':
 		'\uf7d7'
 		,
 
-		'fas fa-terminal':
+		'fa-terminal':
 		'\uf120'
 		,
 
-		'fas fa-text-height':
+		'fa-text-height':
 		'\uf034'
 		,
 
-		'fas fa-text-width':
+		'fa-text-width':
 		'\uf035'
 		,
 
-		'fas fa-th':
+		'fa-th':
 		'\uf00a'
 		,
 
-		'fas fa-th-large':
+		'fa-th-large':
 		'\uf009'
 		,
 
-		'fas fa-th-list':
+		'fa-th-list':
 		'\uf00b'
 		,
 
-		'fas fa-theater-masks':
+		'fa-theater-masks':
 		'\uf630'
 		,
 
-		'fas fa-thermometer':
+		'fa-thermometer':
 		'\uf491'
 		,
 
-		'fas fa-thermometer-empty':
+		'fa-thermometer-empty':
 		'\uf2cb'
 		,
 
-		'fas fa-thermometer-full':
+		'fa-thermometer-full':
 		'\uf2c7'
 		,
 
-		'fas fa-thermometer-half':
+		'fa-thermometer-half':
 		'\uf2c9'
 		,
 
-		'fas fa-thermometer-quarter':
+		'fa-thermometer-quarter':
 		'\uf2ca'
 		,
 
-		'fas fa-thermometer-three-quarters':
+		'fa-thermometer-three-quarters':
 		'\uf2c8'
 		,
 
-		'fas fa-thumbs-down':
+		'fa-thumbs-down':
 		'\uf165'
 		,
 
-		'fas fa-thumbs-up':
+		'fa-thumbs-up':
 		'\uf164'
 		,
 
-		'fas fa-thumbtack':
+		'fa-thumbtack':
 		'\uf08d'
 		,
 
-		'fas fa-ticket-alt':
+		'fa-ticket-alt':
 		'\uf3ff'
 		,
 
-		'fas fa-times':
+		'fa-times':
 		'\uf00d'
 		,
 
-		'fas fa-times-circle':
+		'fa-times-circle':
 		'\uf057'
 		,
 
-		'fas fa-tint':
+		'fa-tint':
 		'\uf043'
 		,
 
-		'fas fa-tint-slash':
+		'fa-tint-slash':
 		'\uf5c7'
 		,
 
-		'fas fa-tired':
+		'fa-tired':
 		'\uf5c8'
 		,
 
-		'fas fa-toggle-off':
+		'fa-toggle-off':
 		'\uf204'
 		,
 
-		'fas fa-toggle-on':
+		'fa-toggle-on':
 		'\uf205'
 		,
 
-		'fas fa-toilet':
+		'fa-toilet':
 		'\uf7d8'
 		,
 
-		'fas fa-toilet-paper':
+		'fa-toilet-paper':
 		'\uf71e'
 		,
 
-		'fas fa-toolbox':
+		'fa-toolbox':
 		'\uf552'
 		,
 
-		'fas fa-tools':
+		'fa-tools':
 		'\uf7d9'
 		,
 
-		'fas fa-tooth':
+		'fa-tooth':
 		'\uf5c9'
 		,
 
-		'fas fa-torah':
+		'fa-torah':
 		'\uf6a0'
 		,
 
-		'fas fa-torii-gate':
+		'fa-torii-gate':
 		'\uf6a1'
 		,
 
-		'fas fa-tractor':
+		'fa-tractor':
 		'\uf722'
 		,
 
-		'fas fa-trademark':
+		'fa-trademark':
 		'\uf25c'
 		,
 
-		'fas fa-traffic-light':
+		'fa-traffic-light':
 		'\uf637'
 		,
 
-		'fas fa-train':
+		'fa-train':
 		'\uf238'
 		,
 
-		'fas fa-tram':
+		'fa-tram':
 		'\uf7da'
 		,
 
-		'fas fa-transgender':
+		'fa-transgender':
 		'\uf224'
 		,
 
-		'fas fa-transgender-alt':
+		'fa-transgender-alt':
 		'\uf225'
 		,
 
-		'fas fa-trash':
+		'fa-trash':
 		'\uf1f8'
 		,
 
-		'fas fa-trash-alt':
+		'fa-trash-alt':
 		'\uf2ed'
 		,
 
-		'fas fa-trash-restore':
+		'fa-trash-restore':
 		'\uf829'
 		,
 
-		'fas fa-trash-restore-alt':
+		'fa-trash-restore-alt':
 		'\uf82a'
 		,
 
-		'fas fa-tree':
+		'fa-tree':
 		'\uf1bb'
 		,
 
-		'fas fa-trophy':
+		'fa-trophy':
 		'\uf091'
 		,
 
-		'fas fa-truck':
+		'fa-truck':
 		'\uf0d1'
 		,
 
-		'fas fa-truck-loading':
+		'fa-truck-loading':
 		'\uf4de'
 		,
 
-		'fas fa-truck-monster':
+		'fa-truck-monster':
 		'\uf63b'
 		,
 
-		'fas fa-truck-moving':
+		'fa-truck-moving':
 		'\uf4df'
 		,
 
-		'fas fa-truck-pickup':
+		'fa-truck-pickup':
 		'\uf63c'
 		,
 
-		'fas fa-tshirt':
+		'fa-tshirt':
 		'\uf553'
 		,
 
-		'fas fa-tty':
+		'fa-tty':
 		'\uf1e4'
 		,
 
-		'fas fa-tv':
+		'fa-tv':
 		'\uf26c'
 		,
 
-		'fas fa-umbrella':
+		'fa-umbrella':
 		'\uf0e9'
 		,
 
-		'fas fa-umbrella-beach':
+		'fa-umbrella-beach':
 		'\uf5ca'
 		,
 
-		'fas fa-underline':
+		'fa-underline':
 		'\uf0cd'
 		,
 
-		'fas fa-undo':
+		'fa-undo':
 		'\uf0e2'
 		,
 
-		'fas fa-undo-alt':
+		'fa-undo-alt':
 		'\uf2ea'
 		,
 
-		'fas fa-universal-access':
+		'fa-universal-access':
 		'\uf29a'
 		,
 
-		'fas fa-university':
+		'fa-university':
 		'\uf19c'
 		,
 
-		'fas fa-unlink':
+		'fa-unlink':
 		'\uf127'
 		,
 
-		'fas fa-unlock':
+		'fa-unlock':
 		'\uf09c'
 		,
 
-		'fas fa-unlock-alt':
+		'fa-unlock-alt':
 		'\uf13e'
 		,
 
-		'fas fa-upload':
+		'fa-upload':
 		'\uf093'
 		,
 
-		'fas fa-user':
+		'fa-user':
 		'\uf007'
 		,
 
-		'fas fa-user-alt':
+		'fa-user-alt':
 		'\uf406'
 		,
 
-		'fas fa-user-alt-slash':
+		'fa-user-alt-slash':
 		'\uf4fa'
 		,
 
-		'fas fa-user-astronaut':
+		'fa-user-astronaut':
 		'\uf4fb'
 		,
 
-		'fas fa-user-check':
+		'fa-user-check':
 		'\uf4fc'
 		,
 
-		'fas fa-user-circle':
+		'fa-user-circle':
 		'\uf2bd'
 		,
 
-		'fas fa-user-clock':
+		'fa-user-clock':
 		'\uf4fd'
 		,
 
-		'fas fa-user-cog':
+		'fa-user-cog':
 		'\uf4fe'
 		,
 
-		'fas fa-user-edit':
+		'fa-user-edit':
 		'\uf4ff'
 		,
 
-		'fas fa-user-friends':
+		'fa-user-friends':
 		'\uf500'
 		,
 
-		'fas fa-user-graduate':
+		'fa-user-graduate':
 		'\uf501'
 		,
 
-		'fas fa-user-injured':
+		'fa-user-injured':
 		'\uf728'
 		,
 
-		'fas fa-user-lock':
+		'fa-user-lock':
 		'\uf502'
 		,
 
-		'fas fa-user-md':
+		'fa-user-md':
 		'\uf0f0'
 		,
 
-		'fas fa-user-minus':
+		'fa-user-minus':
 		'\uf503'
 		,
 
-		'fas fa-user-ninja':
+		'fa-user-ninja':
 		'\uf504'
 		,
 
-		'fas fa-user-nurse':
+		'fa-user-nurse':
 		'\uf82f'
 		,
 
-		'fas fa-user-plus':
+		'fa-user-plus':
 		'\uf234'
 		,
 
-		'fas fa-user-secret':
+		'fa-user-secret':
 		'\uf21b'
 		,
 
-		'fas fa-user-shield':
+		'fa-user-shield':
 		'\uf505'
 		,
 
-		'fas fa-user-slash':
+		'fa-user-slash':
 		'\uf506'
 		,
 
-		'fas fa-user-tag':
+		'fa-user-tag':
 		'\uf507'
 		,
 
-		'fas fa-user-tie':
+		'fa-user-tie':
 		'\uf508'
 		,
 
-		'fas fa-user-times':
+		'fa-user-times':
 		'\uf235'
 		,
 
-		'fas fa-users':
+		'fa-users':
 		'\uf0c0'
 		,
 
-		'fas fa-users-cog':
+		'fa-users-cog':
 		'\uf509'
 		,
 
-		'fas fa-utensil-spoon':
+		'fa-utensil-spoon':
 		'\uf2e5'
 		,
 
-		'fas fa-utensils':
+		'fa-utensils':
 		'\uf2e7'
 		,
 
-		'fas fa-vector-square':
+		'fa-vector-square':
 		'\uf5cb'
 		,
 
-		'fas fa-venus':
+		'fa-venus':
 		'\uf221'
 		,
 
-		'fas fa-venus-double':
+		'fa-venus-double':
 		'\uf226'
 		,
 
-		'fas fa-venus-mars':
+		'fa-venus-mars':
 		'\uf228'
 		,
 
-		'fas fa-vial':
+		'fa-vial':
 		'\uf492'
 		,
 
-		'fas fa-vials':
+		'fa-vials':
 		'\uf493'
 		,
 
-		'fas fa-video':
+		'fa-video':
 		'\uf03d'
 		,
 
-		'fas fa-video-slash':
+		'fa-video-slash':
 		'\uf4e2'
 		,
 
-		'fas fa-vihara':
+		'fa-vihara':
 		'\uf6a7'
 		,
 
-		'fas fa-volleyball-ball':
+		'fa-volleyball-ball':
 		'\uf45f'
 		,
 
-		'fas fa-volume-down':
+		'fa-volume-down':
 		'\uf027'
 		,
 
-		'fas fa-volume-mute':
+		'fa-volume-mute':
 		'\uf6a9'
 		,
 
-		'fas fa-volume-off':
+		'fa-volume-off':
 		'\uf026'
 		,
 
-		'fas fa-volume-up':
+		'fa-volume-up':
 		'\uf028'
 		,
 
-		'fas fa-vote-yea':
+		'fa-vote-yea':
 		'\uf772'
 		,
 
-		'fas fa-vr-cardboard':
+		'fa-vr-cardboard':
 		'\uf729'
 		,
 
-		'fas fa-walking':
+		'fa-walking':
 		'\uf554'
 		,
 
-		'fas fa-wallet':
+		'fa-wallet':
 		'\uf555'
 		,
 
-		'fas fa-warehouse':
+		'fa-warehouse':
 		'\uf494'
 		,
 
-		'fas fa-water':
+		'fa-water':
 		'\uf773'
 		,
 
-		'fas fa-wave-square':
+		'fa-wave-square':
 		'\uf83e'
 		,
 
-		'fas fa-weight':
+		'fa-weight':
 		'\uf496'
 		,
 
-		'fas fa-weight-hanging':
+		'fa-weight-hanging':
 		'\uf5cd'
 		,
 
-		'fas fa-wheelchair':
+		'fa-wheelchair':
 		'\uf193'
 		,
 
-		'fas fa-wifi':
+		'fa-wifi':
 		'\uf1eb'
 		,
 
-		'fas fa-wind':
+		'fa-wind':
 		'\uf72e'
 		,
 
-		'fas fa-window-close':
+		'fa-window-close':
 		'\uf410'
 		,
 
-		'fas fa-window-maximize':
+		'fa-window-maximize':
 		'\uf2d0'
 		,
 
-		'fas fa-window-minimize':
+		'fa-window-minimize':
 		'\uf2d1'
 		,
 
-		'fas fa-window-restore':
+		'fa-window-restore':
 		'\uf2d2'
 		,
 
-		'fas fa-wine-bottle':
+		'fa-wine-bottle':
 		'\uf72f'
 		,
 
-		'fas fa-wine-glass':
+		'fa-wine-glass':
 		'\uf4e3'
 		,
 
-		'fas fa-wine-glass-alt':
+		'fa-wine-glass-alt':
 		'\uf5ce'
 		,
 
-		'fas fa-won-sign':
+		'fa-won-sign':
 		'\uf159'
 		,
 
-		'fas fa-wrench':
+		'fa-wrench':
 		'\uf0ad'
 		,
 
-		'fas fa-x-ray':
+		'fa-x-ray':
 		'\uf497'
 		,
 
-		'fas fa-yen-sign':
+		'fa-yen-sign':
 		'\uf157'
 		,
 
-		'fas fa-yin-yang':
+		'fa-yin-yang':
 		'\uf6ad'
 
 	}

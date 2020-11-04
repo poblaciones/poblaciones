@@ -20,6 +20,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.PendingReviewSince = workInfo.PendingReviewSince;
 	this.Startup = workInfo.Startup;
 	this.ExtraMetrics = workInfo.ExtraMetrics;
+	this.Icons = workInfo.Icons;
 	this.workListMetadata = workListMetadata;
 	if (workInfo.Datasets) {
 		for (var i = 0; i < workInfo.Datasets.length; i++) {
@@ -209,6 +210,30 @@ ActiveWork.prototype.GetLevelToUse = function (allVersions, metricVersion) {
 	} else {
 		throw new Error('No se ha encontrado el nivel para este indicador.');
 	}
+};
+
+ActiveWork.prototype.CreateIcon = function (iconName, image) {
+	var args = { 'w': this.properties.Id, 'n': iconName, 'iwm': image };
+	this.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/CreateWorkIcon', args,
+		'guardar el ícono');
+};
+
+ActiveWork.prototype.UpdateIcon = function (iconId, name) {
+	var args = { 'w': this.properties.Id, 'i': iconId, 'n': name };
+	this.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateWorkIcon', args,
+		'guardar el ícono');
+};
+
+ActiveWork.prototype.DeleteIcon = function (iconId) {
+	var args = { 'w': this.properties.Id, 'i': iconId };
+	this.WorkChanged();
+	var loc = this;
+	return axiosClient.getPromise(window.host + '/services/backoffice/DeleteWorkIcon', args,
+		'eliminar el ícono').then(function () {
+			arr.RemoveById(loc.Icons, iconId);
+			});
 };
 
 ActiveWork.prototype.UpdateInstitution = function (institution, container, watermarkImage) {

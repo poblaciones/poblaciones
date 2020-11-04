@@ -27,6 +27,7 @@ import MpText from '@/backoffice/components/MpText';
 import MpColorPicker from '@/backoffice/components/MpColorPicker';
 import MpConfirm from '@/backoffice/components/MpConfirm';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
+import MpImageUpload from '@/backoffice/components/MpImageUpload';
 import MpLargeButton from '@/backoffice/components/MpLargeButton';
 import MpSelect from '@/backoffice/components/MpSelect';
 import MpHelp from '@/backoffice/components/MpHelp';
@@ -42,6 +43,7 @@ Vue.component('mp-text', MpText);
 Vue.component('mp-help', MpHelp);
 Vue.component('mp-color-picker', MpColorPicker);
 Vue.component('mp-simple-text', MpSimpleText);
+Vue.component('mp-image-upload', MpImageUpload);
 
 Vue.use(Clipboard);
 
