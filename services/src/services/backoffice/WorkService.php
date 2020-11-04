@@ -7,6 +7,7 @@ use minga\framework\Str;
 use minga\framework\Date;
 use minga\framework\Context;
 use minga\framework\Profiling;
+use minga\framework\ErrorException;
 
 use helena\classes\App;
 use helena\classes\Links;

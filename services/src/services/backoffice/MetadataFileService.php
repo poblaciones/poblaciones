@@ -147,7 +147,8 @@ class MetadataFileService extends BaseService
 		{
 			if ($metadataFile->getFile() === null || $metadataFile->getFile()->getId() !== $previuosFileId)
 			{
-				$this->DeleteFile($previuosFileId);
+				$fileService = new FileService();
+				$fileService->DeleteFile($previuosFileId);
 			}
 		}
 		return self::OK;

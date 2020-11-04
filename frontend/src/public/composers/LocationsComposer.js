@@ -160,7 +160,7 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature, markerSet
 		// Es solo la pelotita de secuencia
 		var sequenceMarker = {
 			Frame: 'C', Size: markerSettings.Size, AutoScale: markerSettings.AutoScale, Type: 'T',
-			Source: 'F', Text: '' + feature.Sequence, NoDescription: true
+			Source: 'F', NoDescription: true
 		};
 		var seqScale = scale * .6;
 		if (seqScale > 1) {
@@ -168,7 +168,7 @@ LocationsComposer.prototype.createMarker = function (tileKey, feature, markerSet
 		}
 		params.icon = this.createIcon(sequenceMarker, style, seqScale);
 		params.icon.anchor = new this.MapsApi.google.maps.Point(0, 0);
-		params.label = this.createMarkerLabel(metric, sequenceMarker, seqScale);
+		params.label = this.createMarkerLabel(metric, sequenceMarker, seqScale, '' + feature.Sequence);
 		element = new loc.MapsApi.google.maps.Marker(params);
 	}
 	// Listo, lo muestra...
