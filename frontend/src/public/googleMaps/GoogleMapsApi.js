@@ -81,14 +81,14 @@ GoogleMapsApi.prototype.MoveInfoWindow = function(zoom) {
 	}
 };
 
-GoogleMapsApi.prototype.Write = function(text, location, zIndex, style, innerStyle, ignoreMapMode) {
+GoogleMapsApi.prototype.Write = function(text, location, zIndex, style, innerStyle, ignoreMapMode, type, hidden) {
 	if(!style) {
 		style = 'mapLabels';
 	}
 	if (!ignoreMapMode && this.IsSatelliteType()) {
 		style += ' mapLabelsSat';
 	}
-	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex, innerStyle);
+	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex, innerStyle, type, hidden);
 	return overlay;
 };
 
@@ -136,7 +136,7 @@ GoogleMapsApi.prototype.generateLabelsArray = function (visibility) {
 		var item = this.labelElements[ele];
 		var feature = { featureType: item, elementType: 'labels', stylers: [{ visibility: (visibility ? 'on' : 'off') }] };
 		if (this.setColorElements.includes(item)) {
-			feature.stylers.push({ "saturation": -65 });
+			feature.stylers.push({ "saturation": -45 }, { "lightness": +40 });
 		}
 		ret.push(feature);
 	}
@@ -484,8 +484,8 @@ GoogleMapsApi.prototype.SetClippingCanvas = function (canvasList) {
 	this.clippingCanvas = this.gMap.data.addGeoJson(mask);
 };
 
-GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid, offset) {
-	window.SegMap.InfoWindow.InfoRequestedInteractive(h.getPosition(event), metricVersion, fid, offset);
+GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid) {
+	window.SegMap.InfoWindow.InfoRequestedInteractive(h.getPosition(event), metricVersion, fid);
 };
 
 GoogleMapsApi.prototype.getBounds = function() {

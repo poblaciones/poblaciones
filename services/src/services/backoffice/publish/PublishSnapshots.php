@@ -7,7 +7,7 @@ use minga\framework\Arr;
 use minga\framework\Context;
 
 use helena\classes\App;
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 use helena\services\common\BaseService;
 use helena\classes\VersionUpdater;
 

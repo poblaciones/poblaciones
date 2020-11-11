@@ -3,7 +3,7 @@
 namespace helena\services\backoffice\publish;
 
 use helena\services\common\BaseService;
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 use helena\classes\VersionUpdater;
 use helena\classes\App;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;

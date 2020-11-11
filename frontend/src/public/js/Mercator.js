@@ -55,6 +55,8 @@ Mercator.prototype.ProjectGeoJsonFeatures = function(features) {
 			coords = this.Project2LevelCoords(polygons);
 		} else if (feature.geometry.type === 'MultiPolygon' || feature.geometry.type === '') {
 			coords = this.Project3LevelCoords(polygons);
+		} else if (feature.geometry.type === 'Point') {
+			coords = this.ProjectSingleCoord(polygons);
 		}	else {
 			throw new Error('Tipo de geomeptry no válido (' + feature.geometry.type + ').');
 		}
@@ -88,6 +90,11 @@ Mercator.prototype.Project2LevelCoords = function (inCoords) {
 		outCoords.push(retcoords);
 	}
 	return outCoords;
+};
+
+Mercator.prototype.ProjectSingleCoord = function (inCoord) {
+	var p = this.fromLatLngToPoint({ lat: inCoord[1], lng: inCoord[0] });
+	return [p.x, -p.y];
 };
 
 Mercator.prototype.Project1LevelCoords = function (inCoords) {

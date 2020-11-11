@@ -249,6 +249,7 @@ html, body {
 }
 .ls {
 	stroke-width: 2.5px;
+	fill: none !important;
 }
 .gm-fullscreen-control {
 	transform: scale(0.8);
@@ -330,11 +331,6 @@ html, body {
 	border-color: #DDDDDD!important;
 }
 
-.exp-circles {
-	margin-top: 5px !important;
-	color: white!important;
-	font-size: 0px;
-}
 
 .exp-high-contrast {
 	color: #000000 !important;
@@ -344,9 +340,14 @@ html, body {
 	color: #ffffff !important;
 }
 
+.exp-circles {
+	margin-top: 5px !important;
+	color: white !important;
+	font-size: 0px;
+}
 
 .exp-circles:after {
-	border-width: 8px;
+	border-width: 7px;
 	border-style: solid;
 	border-color: inherit;
 	border-radius: 8px;
@@ -355,6 +356,25 @@ html, body {
 	height: 1px;
 	content: '';
 }
+
+
+.exp-circles-large {
+margin-top: 8px !important;
+color: white !important;
+font-size: 0px!important;
+}
+
+.exp-circles-large:after {
+	border-width: 7px;
+	border-style: solid;
+	border-color: inherit;
+	border-radius: 8px;
+	visibility: visible;
+	width: 1px;
+	height: 1px;
+	content: '';
+}
+
 .exp-logodiv-right {
 	right: 8px !important;
 }
@@ -468,14 +488,23 @@ a:hover {
 	bottom: 0.4em;
 	text-align: center;
 }
+.mapLabelsSat .ibLinkC {
+color: #d4edff !important;
+
+}
+
+.mapLabelsSat .ibLinkC:hover {
+	color: #5591ec !important;
+	text-decoration: none !important;
+}
 
 .mapLabelsSat .ibLink {
-	color: #fff!important;
+color: #fff!important;
 }
 
 .mapLabelsSat .ibLink:hover {
-	color: #5591ec!important;
-	text-decoration: none !important;
+color: #5591ec!important;
+text-decoration: none !important;
 }
 .ibTooltipNoYOffset {
 	margin-top: -10px;
@@ -503,6 +532,16 @@ a:hover {
 }
 .ibTooltipOffsetLeft {
 	margin-left: 9px;
+}
+.ibLinkC {
+	color: #5d89bf;
+	cursor: pointer;
+	pointer-events: all
+}
+
+.ibLinkC:hover {
+	color: #2e8cff;
+	text-decoration: none !important;
 }
 .ibLink {
 	color: #5a626d;
@@ -587,22 +626,33 @@ a:hover {
 	max-width: 250px;
 	font-size: 16px;
 }
-.ml1 {
-	width: 200px;
-	font-size: 18px;
+.ml0 {
+	width: 250px;
+	max-width: 250px;
+	font-size: 24px;
+	padding: 6px 0px;
 }
-.ml2 {
-	width: 200px;
-	font-size: 16px;
-}
-.ml3 {
-	width: 100px;
-	font-size: 14px;
-}
-.ml4 {
-	width: 100px;
-	font-size: 12px;
-}
+
+	.ml1 {
+		width: 200px;
+		font-size: 18px;
+		padding: 5px 0px;
+	}
+	.ml2 {
+		width: 200px;
+		font-size: 16px;
+		padding: 3px 0px;
+	}
+	.ml3 {
+		width: 100px;
+		font-size: 14px;
+		padding: 2px 0px;
+	}
+	.ml4 {
+		width: 100px;
+		font-size: 12px;
+		padding: 1px 0px;
+	}
 
 .bItem {
 	border: 1px solid #999;
@@ -634,6 +684,11 @@ a:hover {
 .text-softer {
 	color: #777;
 }
+
+.card .category, .card label {
+	color: #777777;
+}
+
 .popupSubTitle {
 	font-weight: 600;
 	text-transform: uppercase;

@@ -415,6 +415,21 @@ ActiveSelectedMetric.prototype.showText = function () {
 					(minZoom === null || window.SegMap.frame.Zoom >= parseInt(minZoom));
 };
 
+ActiveSelectedMetric.prototype.CreateParentInfo = function (variable, feature) {
+	var parentInfo = {
+		MetricId: this.properties.Metric.Id,
+		MetricVersionId: this.SelectedVersion().Version.Id,
+		LevelId: this.SelectedLevel().Id,
+		VariableId: variable.Id,
+		Id: feature.FID
+	};
+	if (variable.IsSequence) {
+		parentInfo.LabelId = feature.LabelId;
+		parentInfo.Sequence = feature.Sequence;
+	}
+	return parentInfo;
+};
+
 ActiveSelectedMetric.prototype.isClickeable = function () {
 	var minZoom = this.SelectedLevel().MinZoom;
 	return window.SegMap.frame.Zoom >= parseInt(minZoom);

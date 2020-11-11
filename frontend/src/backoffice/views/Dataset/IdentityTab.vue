@@ -34,7 +34,7 @@
 
 								<div class='md-layout-item md-size-50 md-small-size-100'>
 									<div class="mp-label labelSeparator">
-										Mostrar panel al hacer click en elementos del mapa
+										Mostrar ficha de resumen al hacer click en elementos del mapa
 									</div>
 									<div>
 										<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
@@ -47,14 +47,13 @@
 					</md-card>
 				</div>
 				<div class='md-layout-item md-size-100'>
-
 					<md-card v-if="Dataset.properties.Type == 'L'">
 						<md-card-header class="largeText">
 							Opciones del marcador <md-icon class="rightIcon">room</md-icon>
 						</md-card-header>
 						<md-card-content>
 							<div class='md-layout md-gutter'>
-								<div class='md-layout-item md-size-50 md-size-small-100'>
+								<div class='md-layout-item md-size-45 md-size-small-100'>
 									<div class="mp-label labelSeparator">Tamaño</div>
 									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="S">
 										<md-icon class="optSmall" title="Pequeño">room</md-icon>
@@ -71,58 +70,74 @@
 										</md-switch>
 									</div>
 								</div>
-								<div class='md-layout-item md-size-50 md-size-small-100'>
+								<div class='md-layout-item md-size-40 md-size-small-80'>
 									<div class="mp-label labelSeparator">Marco</div>
 									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="P">Pin</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="C">Círculo</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="B">Cuadrado</md-radio>
 								</div>
-								<div class='md-layout-item md-size-50 md-size-small-100'>
+								<div class='md-layout-item md-size-15 md-size-small-100'>
+									<div class="mp-label labelSeparator">Vista previa</div>
+									<icon-preview :marker="Dataset.properties.Marker" />
+								</div>
+								<div class='md-layout-item md-size-45 md-size-small-100'>
 									<div>
-									<div class='mp-label labelSeparator'>Tipo de contenido</div>
-									<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="Update" value="N">Ninguno</md-radio>
-									<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="UpdateRegen" value="I">Ícono</md-radio>
-									<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="UpdateRegen" value="T">Texto</md-radio>
+										<div class='mp-label labelSeparator'>Contenido</div>
+										<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="UpdateRegen" value="I">Ícono</md-radio>
+										<md-radio v-model="Dataset.properties.Marker.Type" :disabled="!canEdit" class="md-primary" @change="UpdateRegen" value="T">Texto</md-radio>
+										<template v-if="Dataset.properties.Marker.Source == 'F'">
+
+											<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'I'">
+												<Icon v-if="Dataset.properties.Marker.Symbol" :symbol="Dataset.properties.Marker.Symbol" :work="Work" />
+												<md-button title="Quitar" v-if="Dataset.properties.Marker.Symbol"
+																	 class="md-icon-button md-button-mini"
+																	 v-on:click="removeIcon">
+													<md-icon>close</md-icon>
+												</md-button>
+												<template v-if="canEdit">
+													<md-button @click="showDialogPicker" class="md-raised" style="margin-top: -3px;">
+														Seleccionar
+														<md-icon>edit</md-icon>
+													</md-button>
+												</template>
+											</div>
+											<div class='helper' v-if="Dataset.properties.Marker.Type == 'I'">
+												Formato recomendado: SVG. Ej. <a href='https://www.flaticon.es/' target='_blank'>https://www.flaticon.es/</a>
+											</div>
+
+											<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'T'"
+													 style="margin-top: -20px">
+												<mp-text :canEdit="canEdit && Dataset.properties.Marker.Type != 'N'"
+																 label="" :maxlength="4"
+																 @update="Update" class="smaller"
+																 v-model="Dataset.properties.Marker.Text" style="width: 100px;" />
+											</div>
+											<div class='helper' v-if="Dataset.properties.Marker.Type == 'T'">
+												Letra o número a ubicar dentro del marcador. Ej. A, L, 1, 2, 3.
+											</div>
+										</template>
 									</div>
-									<div>
+									<div v-show="false">
 										<div class="mp-label labelSeparator">Ubicación de la descripción</div>
 										<md-radio v-model="Dataset.properties.Marker.DescriptionVerticalAlignment" :disabled="!canEdit" class="md-primary" @change="Update" value="B">Abajo</md-radio>
-										<md-radio v-model="Dataset.properties.Marker.DescriptionVerticalAlignment" :disabled="!canEdit" class="md-primary" @change="Update" value="M">Superpuesto</md-radio>
+										<md-radio v-model="Dataset.properties.Marker.DescriptionVerticalAlignment" :disabled="!canEdit" class="md-primary" @change="Update" value="M">Centro</md-radio>
 										<md-radio v-model="Dataset.properties.Marker.DescriptionVerticalAlignment" :disabled="!canEdit" class="md-primary" @change="Update" value="T">Arriba</md-radio>
 									</div>
 								</div>
 								<div class='md-layout-item md-size-50 md-size-small-100'>
-									<div class='mp-label labelSeparator'>Contenido</div>
+									<div class='mp-label labelSeparator'>Tipo de contenido</div>
 									<md-radio v-model="Dataset.properties.Marker.Source" :disabled="!canEdit || Dataset.properties.Marker.Type == 'N'" class="md-primary" @change="Update" value="F">Fijo</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Source" :disabled="!canEdit || Dataset.properties.Marker.Type == 'N'" class="md-primary" @change="UpdateRegen" value="V">Variable</md-radio>
-									<template v-if="Dataset.properties.Marker.Source == 'F'">
-										<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'I'">
-											<Icon v-if="Dataset.properties.Marker.Symbol" :symbol="Dataset.properties.Marker.Symbol" :work="Work" />
-											<template v-if="canEdit">
-												<md-button @click="showDialogPicker" class="md-raised" style="margin-top: -3px;">
-													Seleccionar
-													<md-icon>edit</md-icon>
-												</md-button>
-											</template>
-										</div>
-										<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'T' && Dataset.properties.Marker.Source == 'F'"
-												 style="margin-top: -20px">
-											<mp-text :canEdit="canEdit && Dataset.properties.Marker.Type != 'N'"
-															 label="" :maxlength="4"
-															 @update="Update" class="smaller"
-															 v-model="Dataset.properties.Marker.Text" style="width: 100px;" />
-										</div>
-									</template>
-									<div class='' v-else style="margin-top: -20px">
-											<mp-select label='' :canEdit="canEdit && Dataset.properties.Marker.Type != 'N'"
+									<div class='' v-if="Dataset.properties.Marker.Source == 'V'" style="margin-top: -20px">
+										<mp-select label='' :canEdit="canEdit && Dataset.properties.Marker.Type != 'N'"
 															 v-model='Dataset.properties.Marker.ContentColumn'
 															 list-key='Id' @selected="UpdateRegen"
 															 :list='columnsForContent'
 															 :render='formatColumn'
 															 helper='Variable de la cual tomar el contenido' />
 									</div>
-									</div>
 								</div>
+							</div>
 						</md-card-content>
 					</md-card>
 				</div>
@@ -135,13 +150,15 @@
 	import Icon from '@/backoffice/Components/Icon';
 	import f from '@/backoffice/classes/Formatter';
 	import IconPickerPopup from './IconPickerPopup';
+	import IconPreview from '@/backoffice/Components/IconPreview';
 
 
 	export default {
 		name: 'identityTab',
 		components: {
 			Icon,
-			IconPickerPopup
+			IconPickerPopup,
+			IconPreview
 		},
 		computed: {
 			Dataset() {
@@ -184,6 +201,10 @@
 		methods: {
 			formatColumn(column) {
 				return f.formatColumn(column);
+			},
+			removeIcon() {
+				this.Dataset.properties.Marker.Symbol = null;
+				this.Update();
 			},
 			showPicker() {
 				this.$refs.iconPicker.show();

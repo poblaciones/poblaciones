@@ -9,7 +9,7 @@ use minga\framework\Profiling;
 use minga\framework\Context;
 use minga\framework\PublicException;
 
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\cloning\RowDuplicator;
 use helena\classes\Links;

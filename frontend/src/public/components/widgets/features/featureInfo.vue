@@ -14,7 +14,7 @@
 
 			<div class='stats' style="padding-top: 8px">
 				<span style="color: rgb(167, 167, 167);">{{ featureInfo.Type }}</span>
-				<div style="float: right" class="exp-hiddable-block">
+				<div style="float: right" class="exp-hiddable-block" v-show="featureInfo.Key && featureInfo.Key.MetricId">
 					<button type="button" :disabled="isLast"
 									class="close lightButton smallerButton" :title="(isLast ? '' : positionalData + 'Siguiente')" v-on:click="next()">
 						<i class="fas fa-chevron-right" />

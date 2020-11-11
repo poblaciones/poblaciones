@@ -206,7 +206,7 @@ export default {
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.version.Work.MetadataId + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
+			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.MetadataId + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
 		},
 		getSpatialFormats() {
 			var ret = [];

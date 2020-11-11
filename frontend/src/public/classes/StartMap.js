@@ -118,10 +118,16 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 	if (metricsFromRoute) {
 		list = selectedMetricsRouter.parseMetrics(metricsFromRoute);
 	}
-	if (startup.ActiveMetrics && list.length === 0) {
-		var metrics = startup.ActiveMetrics.split(',');
-		for (var n = 0; n < metrics.length; n++) {
-			list.push({ Id: metrics[n] });
+	if (list.length === 0) {
+		if (startup.ActiveMetrics) {
+			var metrics = startup.ActiveMetrics.split(',');
+			for (var n = 0; n < metrics.length; n++) {
+				list.push({ Id: metrics[n] });
+			}
+		} else {
+			// no tiene por default y no hay en la ruta
+			var current = this.workReference.Current;
+			window.Popups.AddMetric.show(current.Metrics, current.Id);
 		}
 	}
 	var router = new SelectedMetricsRouter();

@@ -47,7 +47,7 @@
 							<td>Metadatos:</td>
 							<td>
 								<a target="_blank" :href="resolveMetadataUrl()">
-									<file-pdf-icon title="Descargar" /> Descargar
+									<file-pdf-icon title="Consultar" /> Consultar
 								</a>
 							</td>
 						</tr>

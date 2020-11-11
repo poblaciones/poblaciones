@@ -43,7 +43,7 @@ module.exports = {
 	},
 	isNumericFlex(n) {
 		var t = '' + n;
-		t = t.replace(",", ".");
+		t = t.replaceAll(",", ".");
 		if (this.countMatches(t, ".") > 1) {
 			return false;
 		}
@@ -90,11 +90,11 @@ module.exports = {
 	},
 	EscapeHtml(unsafe) {
     return ('' + unsafe)
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
+         .replaceAll(/&/g, "&amp;")
+         .replaceAll(/</g, "&lt;")
+         .replaceAll(/>/g, "&gt;")
+         .replaceAll(/"/g, "&quot;")
+         .replaceAll(/'/g, "&#039;");
 	},
 	EscapeRegExp(str) {
 		return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string

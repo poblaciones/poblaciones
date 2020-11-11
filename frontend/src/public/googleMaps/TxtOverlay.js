@@ -2,19 +2,19 @@ import arr from '@/common/js/arr';
 
 export default TxtOverlay;
 
-function TxtOverlay(map, pos, txt, className, zIndex, innerClassName) {
+function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidden) {
 	this.pos = pos;
 	this.txt = txt;
 	this.tooltip = null;
 	this.clickId = null;
 	this.className = className;
 	this.innerClassName = innerClassName;
-	this.hidden = false;
+	this.hidden = (hidden !== undefined ? hidden : false);
 	this.RefCount = 1;
 	this.map = map;
+	this.type = type;
 	this.FIDs = null;
 	this.zIndex = zIndex;
-	this.type = null;
 	this.div = null;
 	this.Values = [];
 	this.setMap(map);
@@ -47,10 +47,14 @@ TxtOverlay.prototype.RebuildHtml = function () {
 			var tooltip = '';
 			if (this.type === 'C') {
 				tooltip = 'Focalizar en ' + this.txt + ' (' + this.tooltip + ')';
-			} else {
+			} else if (this.tooltip) {
 				tooltip = 'Más información de ' + this.tooltip;
 			}
-			text += "<span title='" + tooltip + "' onClick=\"event.stopPropagation(); window.SegMap.SelectId('" + this.type + "', '" + this.clickId +
+			if (this.clickId.length === 1) {
+				this.clickId = this.clickId[0];
+			}
+			var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
+			text += "<span title='" + tooltip + "' onClick=\"event.stopPropagation(); window.SegMap.SelectId('" + this.type + "', '" + clickIdAsText +
 				"', " + this.pos.lat() + ', ' + this.pos.lng() + ", event.ctrlKey);\" class='ibLink'>";
 		}
 		text += this.txt;
@@ -90,13 +94,51 @@ TxtOverlay.prototype.onAdd = function() {
 
 	this.div = div;
 	this.RebuildHtml();
-	var overlayProjection = this.getProjection();
-	var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-	div.style.left = position.x + 'px';
-	div.style.top = position.y + 'px';
 
 	var panes = this.getPanes();
 	panes.floatPane.appendChild(div);
+
+	if (!this.Overlaps()) {
+		var overlayProjection = this.getProjection();
+		var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+		div.style.left = position.x + 'px';
+		div.style.top = position.y + 'px';
+	}
+	else {
+		div.style.display = 'none';
+	}
+};
+
+TxtOverlay.prototype.Overlaps = function () {
+	if (this.hidden) {
+		return false;
+	}
+	var position2 = this.map.getProjection().fromLatLngToPoint(this.pos);
+	var scale = Math.pow(2, this.map.getZoom());
+	var left = Math.floor(position2.x * scale);
+	var top = Math.floor(position2.y * scale);
+	var w = null;
+	var h = null;
+	if (this.div.firstChild) {
+		var span = this.div.firstChild.firstElementChild;
+		if (span) {
+			w = span.offsetWidth;
+			h = span.offsetHeight;
+		}
+	}
+	if (!w) {
+		w = this.div.offsetWidth;
+	}
+	if (!h) {
+		h = this.div.offsetHeight;
+	}
+	this.Bounds = { left: left - w / 2, top: top, right: left + w / 2, bottom: top + h };
+	if (window.SegMap.OverlapRectangles.Intersects(this)) {
+		this.hidden = true;
+		return true;
+	}
+	window.SegMap.OverlapRectangles.AddRectangle(this);
+	return false;
 };
 
 TxtOverlay.prototype.SetText = function (text, tooltip, clickId) {
@@ -123,27 +165,20 @@ TxtOverlay.prototype.CreateValue = function (value, zindex, backColor) {
 };
 
 TxtOverlay.prototype.draw = function() {
-
 	var overlayProjection = this.getProjection();
-
-	// Retrieve the southwest and northeast coordinates of this overlay
-	// in latlngs and convert them to pixels coordinates.
-	// We'll use these coordinates to resize the div.
 	var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-
 	var div = this.div;
 	div.style.left = position.x + 'px';
 	div.style.top = position.y + 'px';
 	div.style.zIndex = this.zIndex;
-
 };
 
-// Optional: helper methods for removing and toggling the text overlay.
 TxtOverlay.prototype.onRemove = function () {
 	if (this.div != null) {
 		this.div.parentNode.removeChild(this.div);
 		this.div = null;
 	}
+	window.SegMap.OverlapRectangles.RemoveRectangle(this);
 };
 
 TxtOverlay.prototype.Release = function (subFeature) {

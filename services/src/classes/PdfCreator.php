@@ -126,10 +126,7 @@ class PdfCreator
 		if ($n == 0)
 			return;
 		$plural = ($n == 1 ? "" : "s");
-		if ($this->metadata['met_type'] === 'P')
-			$this->pdf->WriteHeading4('Fuente' . $plural);
-		else
-			$this->pdf->WriteHeading4('Fuente' . $plural . ' secundaria' . $plural);
+		$this->pdf->WriteHeading4('Fuente' . $plural);
 
 		for($i = 0; $i < $n; $i++)
 		{

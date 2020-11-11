@@ -154,9 +154,9 @@ FeatureSelector.prototype.startTooltipCandidate = function (feature) {
 	}
 };
 
-FeatureSelector.prototype.markerMouseOver = function (event, metricVersion, fid, description, value) {
+FeatureSelector.prototype.markerMouseOver = function (event, parentInfo, fid, description, value) {
 	var loc = window.SegMap.MapsApi.selector;
-	var feature = { id: fid, description: description, value: value };
+	var feature = { id: fid, description: description, value: value, parentInfo: parentInfo };
 	loc.tooltipLocation = h.getPosition(event);
 	if (!loc.resetTooltip(feature)) {
 		// Sale porque está en el mismo feature del cual se está mostrando el tooltip
@@ -166,7 +166,7 @@ FeatureSelector.prototype.markerMouseOver = function (event, metricVersion, fid,
 	loc.startTooltipCandidate(feature);
 	return false;
 };
-FeatureSelector.prototype.markerMouseOut = function (event, metricVersion, fid, offset) {
+FeatureSelector.prototype.markerMouseOut = function (event) {
 	var loc = window.SegMap.MapsApi.selector;
 	loc.tooltipMarker = null;
 	if (loc.tooltipTimer !== null) {
@@ -203,7 +203,7 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 	window.SegMap.MapsApi.ResetInfoWindow();
 	var feature = loc.getFeature(event);
 	if (feature !== null && feature.id) {
-		window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id, null);
+		window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id);
 	}
 };
 

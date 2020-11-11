@@ -14,6 +14,7 @@ use helena\db\frontend\FileModel;
 use helena\classes\App;
 use helena\classes\PdfCreator;
 use helena\classes\Statistics;
+use helena\db\backoffice\WorkModel;
 
 class MetadataService extends BaseService
 {
@@ -33,11 +34,26 @@ class MetadataService extends BaseService
 
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}
-
+	public function GetWorkMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
+	{
+		if (!$metadataId)
+		{
+			$model = new WorkModel($fromDraft);
+			$work = $model->GetWork($workId);
+			$metadataId = $work['wrk_metadata_id'];
+		}
+		return $this->GetMetadataPdf($metadataId, $datasetId, $fromDraft, $workId);
+	}
 	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
 	{
 		$model = new MetadataModel($fromDraft);
 		$metadata = $model->GetMetadata($metadataId);
+		// Si no indica work, no pueden ser metadatos de un work
+		if (!$workId && $metadata['met_type'] !== 'C')
+		{
+			throw new PublicException('Indicación de metadatos no válida.');
+		}
+
 		if ($metadata === null || sizeof($metadata) < 2) throw new PublicException('Metadatos no encontrados.');
 		$friendlyName = $metadata['met_title'] . '.pdf';
 

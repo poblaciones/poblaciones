@@ -61,7 +61,7 @@
 						<td>Metadatos:</td>
 						<td>
 							<a target="_blank" :href="resolveMetadataUrl()">
-								<file-pdf-icon title="Descargar" /> Descargar
+								<file-pdf-icon title="Consultar" /> Consultar
 							</a>
 						</td>
 					</tr>
@@ -146,7 +146,7 @@ export default {
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.work.MetadataId + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id + h.urlParam('l', window.accessLink);
+			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.work.MetadataId + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id + h.urlParam('l', window.accessLink);
 		},
 	},
 	computed:

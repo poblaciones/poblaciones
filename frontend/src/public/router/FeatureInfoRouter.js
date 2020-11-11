@@ -40,5 +40,5 @@ FeatureInfoRouter.prototype.FromRoute = function (args) {
 		Exceptions: h.getSafeValue(args, 'x', null),
 	};
 	let fid = parseInt(h.getSafeValue(args, 'f', null));
-	window.SegMap.InfoWindow.InfoRequested({}, parent, fid, null);
+	window.SegMap.InfoWindow.InfoRequested({}, parent, fid);
 };

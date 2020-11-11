@@ -43,7 +43,10 @@ class Links
 	{
 		return self::GetMapUrl() . '/' .  $workId;
 	}
-
+	public static function GetWorkMetadataUrl($workId)
+	{
+		return '/services/metadata/GetWorkMetadataPdf?w=' . $workId;
+	}
 	public static function GetWorkMetricUrl($workId, $metricId, $regionItemId)
 	{
  		// http://desa.poblaciones.org/map/3501/#/l=6301&!r19166

@@ -10,17 +10,25 @@ AbstractTextComposer.prototype.AbstractConstructor = function (value, total, des
 	this.textInTile = [];
 };
 
-AbstractTextComposer.prototype.ResolveValueLabel = function (variable, dataElement, location, tileKey, backColor) {
+AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effectiveId, dataElement, location, tileKey, backColor, markerSettings) {
 	var number = null;
-	if (variable.ShowValues == 1) {
+	if (variable.ShowValues == 1 && !variable.IsSimpleCount) {
 		number = this.FormatValue(variable, dataElement);
 	} else {
+		/*
 		var pattern = this.activeSelectedMetric.GetPattern();
 		if (pattern === 2) {
 			number = '&nbsp;&nbsp;';
-		}
+		}*/ ;
 	}
-	this.SetTextOverlay(null, ['' + dataElement['FID']], '' + tileKey, location, null, null, number, backColor);
+	var description = null;
+	if (dataElement.Description !== null && dataElement.Description !== undefined &&
+		(variable.ShowDescriptions || (markerSettings && markerSettings.ShowText))) {
+		description = dataElement.Description;
+	}
+
+	this.SetTextOverlay('F', ['' + dataElement['FID']], '' + tileKey,
+		location, description, description, number, backColor, effectiveId);
 };
 
 AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, location, description, tooltip, number, backColor, clickId, hidden) {
@@ -33,6 +41,10 @@ AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, l
 		var zIndex = 100000 - this.index;
 		v = canvas.CreateValue(number, zIndex, backColor);
 	}
+	// Se fija si se superpone con otros visibles...
+
+	// Si queda visible, lo agrega...
+
 	this.textInTile[tileKey].push({ c: canvas, v: v });
 
 };
@@ -101,13 +113,7 @@ AbstractTextComposer.prototype.clearText = function () {
 AbstractTextComposer.prototype.CreateFeatureTextCanva = function(type, ids, tileKey, location, hidden) {
 	var zIndex = 100000 - this.index;
 	// lo resuelven los hijos
-	var canvas = this.MapsApi.Write('', location, zIndex, this.textStyle);
-	if (type !== null) {
-		canvas.type = type;
-	}
-	if (hidden === true) {
-		canvas.Hide();
-	}
+	var canvas = this.MapsApi.Write('', location, zIndex, this.textStyle, null, null, type, hidden);
 	if (ids) {
 		canvas.SetFeatureIds(ids);
 	}

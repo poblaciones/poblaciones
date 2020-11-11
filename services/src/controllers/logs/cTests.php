@@ -57,7 +57,6 @@ class cTests extends cController
 			'tests' => $tests,
 			'all_tests' => '/logs/tests?group=all',
 			'group_tests' => '/logs/tests?group=',
-			'version' => System::GetVersion(),
 			'html_title' => 'Tests',
 			'action_url' => '/logs/tests',
 		]);

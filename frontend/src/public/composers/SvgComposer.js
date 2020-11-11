@@ -15,7 +15,6 @@ function SvgComposer(mapsApi, activeSelectedMetric) {
 	this.MapsApi = mapsApi;
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.keysInTile = [];
-	this.styles = [];
 	this.svgInTile = [];
 	this.index = this.activeSelectedMetric.index;
 	this.labelsVisibility = [];
@@ -45,7 +44,6 @@ SvgComposer.prototype.render = function (mapResults, dataResults, gradient, tile
 	var iMapa = 0;
 	this.UpdateTextStyle(z);
 	var colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
-	this.styles = [];
 
 	if (mapItems.length === 0) return;
 
@@ -95,9 +93,6 @@ SvgComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, 
 		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry,
 					properties: { className: 'e' + tileUniqueId + '_' + val + isLineString }
 	};
-	if (!this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
-		mapItem.id = null;
-	}
 	if (dataElement.Description) {
 		mapItem.properties.description = dataElement.Description;
 	}
@@ -105,11 +100,16 @@ SvgComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, 
 	if (!variable.IsSimpleCount) {
 		mapItem.properties.value = this.FormatValue(variable, dataElement);
 	}
+	var clickId = null;
+	if (this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
+		clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
+	} else {
+		mapItem.id = null;
+	}
 	if (this.patternUseFillStyles(patternValue)) {
 		mapItem.properties.style = 'fill: url(#cs' + val + ');';
 	}
-
-	this.AddFeatureText(variable, val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap);
+	this.AddFeatureText(variable, val, dataElement, clickId, centroid, tileKey, tileBounds, colorMap);
 
 	filtered.push(mapItem);
 };
@@ -123,9 +123,13 @@ SvgComposer.prototype.getCentroid = function (mapElement) {
 	}
 };
 
-SvgComposer.prototype.AddFeatureText = function (variable, val, mapElement, dataElement, centroid, tileKey, tileBounds, colorMap) {
+SvgComposer.prototype.AddFeatureText = function (variable, val, dataElement, effectiveId, centroid, tileKey, tileBounds, colorMap) {
+	if (variable.ShowValues == 0 && (dataElement.Description === null
+		|| parseInt(variable.ShowDescriptions) == 0)) {
+		return;
+	}
 	if (this.inTile(tileBounds, centroid)) {
-		this.ResolveValueLabel(variable, dataElement, centroid, tileKey, colorMap[val]);
+		this.ResolveValueLabel(variable, effectiveId, dataElement, centroid, tileKey, colorMap[val]);
 	}
 };
 

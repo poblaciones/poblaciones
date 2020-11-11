@@ -129,10 +129,13 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 		{ class: 'summaryRow', extraclass: 'exp-high-contrast' },
 		{ class: 'statsHeader', extraclass: 'exp-high-contrast' },
 		{ class: 'stats', extraclass: 'exp-high-contrast' },
+		{ class: 'frozen', extraclass: 'active' },
 		{ class: 'filterElement', extraclass: 'exp-high-contrast' },
 		{ class: 'exp-serie-item', extraclass: 'exp-high-button' },
 		// referencias de colores
-		{ class: 'exp-category-bullets', extraclass: 'exp-circles' }
+		{ class: 'exp-category-bullets', extraclass: 'exp-circles' },
+		{ class: 'exp-category-bullets-large', extraclass: 'exp-circles-large' }
+
 	];
 	var attributesByClass = [
 		{ attribute: 'display', set: 'none', restore: 'unset', class: 'exp-hiddable-unset' },

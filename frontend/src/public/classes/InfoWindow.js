@@ -61,7 +61,7 @@ InfoWindow.prototype.resolveCurrentFeatureNavigationKey = function () {
 		return null;
 	}
 	var metric = this.segMap.Metrics.GetMetricById(key.MetricId);
-	if (metric === null) {
+	if (metric === null || metric.properties === null || metric.SelectedVariable() === null) {
 		return null;
 	}
 	var exceptions = this.GetExceptions(key.MetricId, key.VariableId);
@@ -121,7 +121,7 @@ InfoWindow.prototype.getElement = function (offset) {
 };
 
 
-InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid, offset) {
+InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid) {
 	if (position) {
 		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
 					|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
@@ -130,10 +130,10 @@ InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid,
 			this.segMap.PanTo(position.Coordinate, window.Panels.Left.width);
 		}
 	}
-	this.InfoRequested(position, parent, fid, offset, true);
+	this.InfoRequested(position, parent, fid, true);
 };
 
-InfoWindow.prototype.InfoRequested = function (position, key, fid, offset, forceExpand) {
+InfoWindow.prototype.InfoRequested = function (position, key, fid, forceExpand) {
 	// Establece qué está obteniendo
 	key.Id = fid;
 	window.Panels.Content.FeatureInfoKey = key;

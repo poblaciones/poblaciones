@@ -513,6 +513,12 @@ a.normalTextLink:hover {
 	border-radius: 5px;
 	border: 2px solid #00a0d2;
 }
+	.md-button-mini {
+		width: 30px !important;
+		background-color: #ececec !important;
+		min-width: 30px !important;
+		height: 30px !important;
+	}
 
 .floatRadio {
 	float: left;

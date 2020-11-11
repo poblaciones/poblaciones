@@ -10,7 +10,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td>Métrica:</td>
+					<td class="col1">Métrica:</td>
 					<td>
 						<div class="btn-group">
 							<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" v-on:click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
@@ -24,6 +24,17 @@
 						<div class="popupSubTitle">
 							Opciones de mapa
 						</div>
+					</td>
+				</tr>
+				<tr v-if="metric.SelectedLevel().HasDescriptions">
+					<td class="nowrapwords">Mostrar descripciones:</td>
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="descripciones" value="1" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
+						</label>
+						<label class="radio-inline">
+							<input type="radio" name="descripciones" value="0" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">No
+						</label>
 					</td>
 				</tr>
 				<tr v-if="!metric.SelectedVariable().IsSimpleCount">
@@ -203,6 +214,9 @@ export default {
 <style scoped>
 	.nowrapwords {
 		white-space: nowrap;
+	}
+	.col1 {
+		width: 150px;
 	}
 </style>
 

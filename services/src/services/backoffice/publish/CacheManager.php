@@ -20,7 +20,7 @@ use helena\caches\TileDataCache;
 use helena\caches\GeographyCache;
 use helena\caches\LabelsCache;
 
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 
 class CacheManager
 {

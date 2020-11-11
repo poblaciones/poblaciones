@@ -4,7 +4,7 @@ namespace helena\services\backoffice\cloning;
 
 use helena\classes\App;
 use helena\entities\backoffice as entities;
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 use helena\services\backoffice\DatasetService;
 use minga\framework\Profiling;
 use helena\caches\WorkPermissionsCache;

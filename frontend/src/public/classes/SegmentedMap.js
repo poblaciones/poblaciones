@@ -6,6 +6,7 @@ import Clipping from '@/public/classes/Clipping';
 import Tutorial from '@/public/classes/Tutorial';
 import RestoreRoute from '@/public/classes/RestoreRoute';
 import Queue from './Queue';
+import OverlapRectangles from './OverlapRectangles';
 import InfoWindow from './InfoWindow';
 import axios from 'axios';
 import str from '@/common/js/str';
@@ -37,6 +38,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.RestoreRoute = new RestoreRoute();
 	this.afterCallback = null;
 	this.afterCallback2 = null;
+	this.OverlapRectangles = new OverlapRectangles();
 	this.Labels = new ActiveLabels(config);
 	if (config.Blocks.UseDataTileBlocks) {
 		this.tileDataBlockSize = config.Blocks.TileDataBlockSize;
@@ -352,15 +354,23 @@ SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelectio
 		this.AddMetricById(metric);
 	} else if (type === 'F') {
 		// seleccionaron un feature
-		var id = item;
-		var parentInfo = {
-			MetricId: null,
-			MetricVersionId: null,
-			LevelId: null,
-			VariableId: null
-		};
+		var id;
+		var parentInfo;
+		if (item.startsWith('{')) {
+			var asText = item.replaceAll('@', '"');
+			parentInfo = JSON.parse(asText);
+			id = parentInfo.Id;
+		} else {
+			id = item;
+			parentInfo = {
+				MetricId: null,
+				MetricVersionId: null,
+				LevelId: null,
+				VariableId: null
+			};
+		}
 		var position = { Coordinate: { Lat: lat, Lon: lon } };
-		this.InfoWindow.InfoRequestedInteractive(position, parentInfo, id, null);
+		this.InfoWindow.InfoRequestedInteractive(position, parentInfo, id);
 	} else if (type === 'P') {
 		// punto...
 		this.AddMetricById(item);

@@ -3,7 +3,7 @@
 namespace helena\controllers\logs;
 
 use helena\controllers\common\cController;
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 
 use helena\classes\Session;
 use helena\classes\Menu;

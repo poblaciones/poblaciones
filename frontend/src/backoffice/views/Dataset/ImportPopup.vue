@@ -231,8 +231,8 @@ export default {
 		},
 		RequestDataset() {
 			var suggested = this.filename;
-			if (this.selectedSheet && this.selectedSheet.Caption && this.selectedSheet.Caption !== '[ TODOS ]') {
-				suggested += ' - ' + this.selectedSheet.Caption;
+			if (this.selectedSheet && this.selectedSheet.Caption && this.selectedSheet.Caption !== 'Sheet1' && this.selectedSheet.Caption !== 'Hoja1' && this.selectedSheet.Caption !== '[ TODOS ]') {
+				suggested = this.selectedSheet.Caption;
 			}
 			this.$refs.datasetDialog.show('Importar', 'Indique un nombre para el dataset',
 								'', 'Ej. Escuelas primarias.', suggested, 100);

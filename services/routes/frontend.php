@@ -50,6 +50,7 @@ App::$app->get('/map/metadata', function (Request $request) {
 // MAPA
 App::RegisterControllerGet('/map', controllers\cMap::class);
 App::RegisterControllerGet('/map/', controllers\cMap::class);
+App::RegisterControllerGet('/services/content/downloads', controllers\cDownloads::class);
 App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
 
 // Parametros:
@@ -281,16 +282,24 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 	return $controller->GetMetadataFile($metadataId, $fileId);
 });
 
-// ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4
-App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) {
+// ej. http://mapas/services/metadata/GetWorkMetadataPdf?w=12&f=4
+App::$app->get('/services/metadata/GetWorkMetadataPdf', function (Request $request) {
 	$controller = new commonServices\MetadataService();
-	$metadataId = Params::GetIntMandatory('m');
-	$workId = Params::GetInt('w');
+	$metadataId = Params::GetInt('m');
+	$workId = Params::GetIntMandatory('w');
 	$datasetId = Params::GetInt('d', null);
 	Session::$AccessLink = Params::Get('l');
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
-	return $controller->GetMetadataPdf($metadataId, $datasetId, false, $workId);
+	return $controller->GetWorkMetadataPdf($metadataId, $datasetId, false, $workId);
+});
+
+// ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4
+App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) {
+	$controller = new commonServices\MetadataService();
+	$metadataId = Params::GetInt('m');
+
+	return $controller->GetMetadataPdf($metadataId, null, false, null);
 });
 
 App::$app->get('/services/works/GetInstitutionWatermark', function (Request $request) {

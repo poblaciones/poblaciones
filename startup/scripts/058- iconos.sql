@@ -34,5 +34,10 @@ CREATE TABLE `work_icon` (
     ON DELETE CASCADE
     ON UPDATE RESTRICT);
 
+update  draft_dataset_marker  set dmk_symbol = case when left(dmk_symbol,4) = 'fla ' then concat('mp', mid(dmk_symbol, 17,100)) else  replace(dmk_symbol, 'fas ', '') end
+where dmk_symbol is not null;
+
+update  dataset_marker  set dmk_symbol = case when left(dmk_symbol,4) = 'fla ' then concat('mp', mid(dmk_symbol, 17,100)) else  replace(dmk_symbol, 'fas ', '') end
+where dmk_symbol is not null;
 
 UPDATE version SET ver_value = '058' WHERE ver_name = 'DB';

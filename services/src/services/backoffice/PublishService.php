@@ -10,7 +10,7 @@ use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\services\backoffice\publish\PublishSnapshots;
 use helena\services\backoffice\publish\RevokeSnapshots;
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 use helena\classes\App;
 use helena\entities\backoffice as entities;
 use minga\framework\PublicException;

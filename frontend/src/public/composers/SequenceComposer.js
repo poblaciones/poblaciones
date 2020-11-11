@@ -1,5 +1,3 @@
-import Svg from '@/public/js/svg';
-import h from '@/public/js/helper';
 import arr from '@/common/js/arr';
 
 export default SequenceComposer;
@@ -18,7 +16,7 @@ function SequenceComposer(mapsApi, composer, activeSelectedMetric) {
 	}
 };
 
-SequenceComposer.prototype.registerSequenceItem = function (tileKey, feature) {
+SequenceComposer.prototype.registerSequenceItem = function (feature) {
 	var key = feature.LabelId + '-' + feature.Sequence;
 	var item = this.sequenceMarkersByTile[key];
 	if (!item) {
@@ -42,7 +40,8 @@ SequenceComposer.prototype.registerByTileSequenceItem = function (tileKey, item)
 };
 
 SequenceComposer.prototype.registerSequenceMarker = function (tileKey, feature, marker, z) {
-	var item = this.registerSequenceItem(tileKey, feature);
+
+	var item = this.registerSequenceItem(feature);
 	item.MarkersByTile[tileKey] = marker;
 	this.registerByTileSequenceItem(tileKey, item);
 
@@ -111,6 +110,7 @@ SequenceComposer.prototype.GetZoomFromTileKey = function (tileKey) {
 
 SequenceComposer.prototype.removeTileSequenceMarker = function (tileKey) {
 	var elements = this.sequenceMarkersByTile[tileKey];
+
 	if (!elements) {
 		return;
 	}
@@ -159,10 +159,15 @@ SequenceComposer.prototype.RecreateSequenceMarker = function (labelId, itemPos) 
 	var newMarkersByTile = {};
 	var markerSettings = this.activeSelectedMetric.SelectedLevel().Dataset.Marker;
 	for (var tileKey in item.MarkersByTile) {
-		// Lo remueve
-		this.composer.destroyMarker(tileKey, item.MarkersByTile[tileKey]);
-		// Lo regenera
-		newMarkersByTile[tileKey] = this.composer.createMarker(item.TileKey, item.Feature, markerSettings);
+		if (item.MarkersByTile.hasOwnProperty(tileKey)) {
+			// Lo remueve
+			this.composer.removeAndDestroyMarker(tileKey, item.MarkersByTile[tileKey]);
+			// Lo regenera
+			var isSequenceInactiveStep = this.composer.isSequenceInactiveStep(item.Feature);
+			var marker = this.composer.markerFactory.CreateMarker(tileKey, item.Feature, markerSettings, isSequenceInactiveStep);
+			this.composer.registerTileMarker(tileKey, marker);
+			newMarkersByTile[tileKey] = marker;
+		}
 	}
 	item.MarkersByTile = newMarkersByTile;
 };
@@ -174,7 +179,14 @@ SequenceComposer.prototype.destroySequenceMarkerItem = function (item, tileKey) 
 		return;
 	}
 	// lo elimina
-	delete item.MarkersByTile[tileKey];
+	var newMarkersByTile = {};
+	for (var iter in item.MarkersByTile) {
+		if (tileKey !== iter && item.MarkersByTile.hasOwnProperty(iter)) {
+			newMarkersByTile[iter] = item.MarkersByTile[iter];
+		}
+	}
+	item.MarkersByTile = newMarkersByTile;
+
 };
 
 SequenceComposer.prototype.createLine = function (startItem, endItem, z, color) {
@@ -185,6 +197,7 @@ SequenceComposer.prototype.createLine = function (startItem, endItem, z, color) 
 			path: coords,
 			geodesic: true,
 			zIndex: this.composer.zIndex,
+			clickable: false,
 			strokeColor: 'white',
 			strokeOpacity: 1.0,
 			strokeWeight: (z / 5 - 1) * 1.5 + 2
@@ -193,6 +206,7 @@ SequenceComposer.prototype.createLine = function (startItem, endItem, z, color) 
 	line.Polygon = new this.MapsApi.google.maps.Polyline({
 			path: coords,
 			geodesic: true,
+			clickable: false,
 			zIndex: this.composer.zIndex + 1,
 			strokeColor: color,
 			strokeOpacity: 1.0,

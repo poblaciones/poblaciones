@@ -10,14 +10,14 @@
 				<md-tabs ref="tabs" @md-changed="setTab">
 					<md-tab md-label="Map Icons" style="padding: 0px" id="mapIcons">
 						<mp-icon-font-panel v-model="symbolMapIcons" collection="flaticons"></mp-icon-font-panel>
-						<div style="padding-top: 20px">
-							Tag:  {{ symbolMapIcons }}
+						<div style="padding-top: 20px" v-if="symbolMapIcons">
+							Tag: {{ symbolMapIcons }} <mp-copy :text="symbolMapIcons" />
 						</div>
 					</md-tab>
 					<md-tab md-label="Fontawesome" style="padding: 0px" id="fontAwesome">
 						<mp-icon-font-panel v-model="symbolFa" collection="fontawesome"></mp-icon-font-panel>
-						<div style="padding-top: 20px">
-							Tag:  {{ symbolFa }}
+						<div style="padding-top: 20px" v-if="symbolFa">
+							Tag: {{ symbolFa }} <mp-copy :text="symbolFa" />
 						</div>
 					</md-tab>
 					<md-tab md-label="Personalizados" style="padding: 0px" id="custom">
@@ -34,11 +34,11 @@
 								</md-button>
 							</div>
 							<div class="md-layout-item md-size-15 tagLabel" v-show="symbolCustom !== null && symbolCustom !== ''">
-								Tag: usu-
+								Tag: <mp-copy :text="symbolCustom" /> usu-
 							</div>
 							<div class="tagText">
 								<mp-text v-show="symbolCustom !== null && symbolCustom !== ''"
-												  v-model="symbolCustomPartial" @update="updateIcon" :maxlength="35" />
+												 v-model="symbolCustomPartial" @update="updateIcon" :maxlength="35" />
 							</div>
 						</div>
 					</md-tab>
@@ -163,6 +163,7 @@ export default {
 			this.$refs.invoker.do(this.Work, this.Work.CreateIcon,
 				name, iconImage).then(function (data) {
 					arr.Add(loc.Work.Icons, { Id: data.Id, Caption: name, Image: iconImage });
+					loc.symbolCustom = name;
 				});
 		},
 		deleteIcon() {
@@ -200,7 +201,7 @@ export default {
 		display: inline-table;
 		padding-right: 60px;
 		margin-top: -15px;
-		margin-left: -54px !important;
+		margin-left: -38px !important;
 		overflow: hidden;
 	}
 	.tagLabel {

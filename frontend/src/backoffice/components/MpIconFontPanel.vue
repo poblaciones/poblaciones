@@ -7,7 +7,7 @@
 				:class="'item' + getIsSelectedClass(key, value) + (collection !== 'flaticons' ? ' faItem' : '')"
 				v-for="(value, key) in currentIcons"
 				:key="key">
-					<span :title="key" v-html="resolveIcon(key, value)"></span>
+					<span :title="resolveTitle(key, value)" v-html="resolveIcon(key, value)"></span>
 				</a>
 		</div>
 	</div>
@@ -64,6 +64,9 @@ export default {
 		resolveIcon(key, value) {
 			var symbol = (this.collection !== 'custom' ? key : value.Caption);
 			return iconManager.showIcon(symbol, this.Work.Icons, 20);
+		},
+		resolveTitle(key, value) {
+			return (this.collection !== 'custom' ? key : value.Caption);
 		},
 		getIsSelectedClass(key, value) {
 			if (this.collection === 'custom') {
@@ -124,6 +127,9 @@ export default {
 	.faItem {
 		padding: 11px !important;
 		font-size: 26px !important;
+	}
+	.iconPicker__icons .item:hover {
+		text-decoration: none
 	}
 	.iconPicker__icons .item {
 		float: left;

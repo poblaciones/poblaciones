@@ -2,12 +2,12 @@ import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 
 export default LabelsComposer;
 
-function LabelsComposer(mapsApi, activeLabelMetric) {
+function LabelsComposer(mapsApi, activeSelectedMetric) {
 	this.AbstractConstructor();
 
 	this.MapsApi = mapsApi;
-	this.activeLabelMetric = activeLabelMetric;
-	this.index = this.activeLabelMetric.index;
+	this.activeSelectedMetric = activeSelectedMetric;
+	this.index = this.activeSelectedMetric.index;
 
 	this.styles = [];
 	this.keysInTile = [];

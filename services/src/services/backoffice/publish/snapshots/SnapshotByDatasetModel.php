@@ -10,7 +10,7 @@ use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
 use helena\classes\DatasetTypeEnum;
 use minga\framework\PublicException;
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 
 class SnapshotByDatasetModel
 {

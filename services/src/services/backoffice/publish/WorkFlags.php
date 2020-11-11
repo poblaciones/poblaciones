@@ -10,7 +10,7 @@ use minga\framework\Context;
 use helena\entities\backoffice\DraftWork;
 use helena\classes\Account;
 use helena\classes\App;
-use helena\db\admin\WorkModel;
+use helena\db\backoffice\WorkModel;
 
 class WorkFlags
 {

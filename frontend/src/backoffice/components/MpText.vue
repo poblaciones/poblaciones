@@ -12,7 +12,7 @@
 										:class="(!editMode ? 'unselectable' : '')"
 										v-on:mousedown="mouseDown" v-on:mouseup="mouseUp" v-model="localValue"
 										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
-					<md-textarea v-if="this.multiline" class="mp-area" :style="minHeightRows + highlightBorder" autocomplete="off"
+					<md-textarea v-if="this.multiline" class="mp-area" :rows="rows" :style="minHeightRows + highlightBorder" autocomplete="off"
 											 :readonly="isDisabled || !editMode" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>

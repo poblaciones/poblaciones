@@ -4,8 +4,7 @@
 		<div v-if="localPreviewImage && showPreview">
 			<img class="imagen-preview" style="" :src="this.localPreviewImage" alt="">
 			<div style="display: inline-block">
-				<md-button style="background-color: #ececec;"
-									 title="Quitar"
+				<md-button title="Quitar"
 									 class="md-icon-button md-button-mini"
 									 v-on:click="clear">
 					<md-icon>close</md-icon>
@@ -90,15 +89,11 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.md-button-mini{
-  width: 30px;
-  min-width: 30px;
-  height: 30px;
-}
-.select-button {
-	cursor: pointer;
-  padding: 6px;
-}
+	.select-button {
+		cursor: pointer;
+		padding: 6px;
+		user-select: none;
+	}
 
 .select-button:hover {
 	background-color: #e8e8e8;
