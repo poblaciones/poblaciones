@@ -84,35 +84,16 @@ class ShpWriter extends BaseWriter
 				// rearma el polígono
 				$polygon = $row[$wktIndex];
 				$geom = $this->createGeom($polygon);
-			} else
+			}
+			else
 			{
 				$geom = new Point(floatval($row[$iLon]), floatval($row[$iLat]));
 			}
-			$i = 0;
-			foreach($cols as $col)
+			if ($geom !== null)
 			{
-				if ($wktIndex !== $i)
-				{
-					if ($col['format'] != Format::F)
-					{
-						$val = $row[$i];
-					}
-					else
-					{
-						$val = $row[$i];
-					}
-					if (strlen($val) > 254)
-					{
-						$val = substr($val, 0, 254);
-					}
-					$geom->setData($col['effectiveVariable'], $val);
-				}
-				$i++;
-				if ($i == Shapefile::DBF_MAX_FIELD_COUNT)
-					break;
+				$this->AddFieldData($cols, $row, $geom, $wktIndex);
+				$Shapefile->writeRecord($geom);
 			}
-			//	Profiling::EndTimer();
-			$Shapefile->writeRecord($geom);
 		}
 		$Shapefile = null;
 		$codepageFile = $this->resolveBaseName() . '.cpg';
@@ -123,6 +104,32 @@ class ShpWriter extends BaseWriter
 		return true;
 	}
 
+	private function AddFieldData($cols, $row, $geom, $wktIndex)
+	{
+		$i = 0;
+		foreach($cols as $col)
+		{
+			if ($wktIndex !== $i)
+			{
+				if ($col['format'] != Format::F)
+				{
+					$val = $row[$i];
+				}
+				else
+				{
+					$val = $row[$i];
+				}
+				if (strlen($val) > 254)
+				{
+					$val = substr($val, 0, 254);
+				}
+				$geom->setData($col['effectiveVariable'], $val);
+			}
+			$i++;
+			if ($i == Shapefile::DBF_MAX_FIELD_COUNT)
+				break;
+		}
+	}
 	public function Flush()
 	{
 		$codepageFile = $this->resolveBaseName() . '.cpg';
@@ -161,7 +168,6 @@ class ShpWriter extends BaseWriter
 
 	private function createGeom($wkt)
 	{
-//		Profiling::BeginTimer();
 		if (Str::StartsWith($wkt, "POLYGON"))
 		{
 			$ret = new Polygon();
@@ -185,12 +191,10 @@ class ShpWriter extends BaseWriter
 		else if (Str::StartsWith($wkt, "MULTIPOINT"))
 		{
 			$ret = new MultiPoint();
+		} else {
+			throw new \Exception("Entidad no reconocida: " . ($wkt === null ? 'null' : $wkt));
 		}
-		else
-			throw new \Exception("Entidad no reconocida.");
-
 		$ret->initFromWKT($wkt);
-		//Profiling::EndTimer();
 		return $ret;
 	}
 

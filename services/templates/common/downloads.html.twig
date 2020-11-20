@@ -55,7 +55,7 @@
 					<li role="presentation" class="{{ (loop.index == selectedIndex ? 'active' : '') }}">
 						<a href="#2016-2017" class="link-prev_def" aria-controls="INDEC" role="tab"
 						   data-toggle="tab" aria-expanded="{{ (loop.index == selectedIndex ? 'true' : 'false') }}">
-							{{ institution }}
+							{{ institution.Short }}
 						</a>
 					</li>
 				{% endfor %}

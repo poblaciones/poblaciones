@@ -310,7 +310,7 @@ class DatasetModel extends BaseModel
 		}
 		if ($dataset['type'] == 'S')
 		{
-			$cols[] = $this->GetCustomCol($fn . '(spss1.geometry_r6)', $varName, 'Geometría en ' . $varName,
+			$cols[] = $this->GetCustomCol($fn . '(spss1.geometry)', $varName, 'Geometría en ' . $varName,
 				Format::A, 10, null, 0, Measurement::Nominal, Alignment::Left);
 		}
 		else

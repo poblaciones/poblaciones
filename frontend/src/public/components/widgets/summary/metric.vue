@@ -9,13 +9,15 @@
 			</div>
 			<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index"
 												class="exp-hiddable-block" @RankingShown="rankingShown" />
-			<div v-if="isSimpleMetric">
+			<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
 				<h4 class="title" v-on:click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
 					<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
 							class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 					<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
 
-					{{ metric.properties.Metric.Name }} ({{ h.formatNum(singleLabel.Values.Count) }})
+					{{ metric.properties.Metric.Name }} <span style="font-size: .95em" v-show="h.formatNum(singleLabel.Values.Count) !== '-'">
+																								({{ h.formatNum(singleLabel.Values.Count) }})
+																							</span>
 				</h4>
 			</div>
 			<template v-else>

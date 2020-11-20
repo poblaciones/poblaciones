@@ -19,7 +19,7 @@ class SnapshotShapeDatasetItemModel
 		$datasetTable = App::Db()->fetchScalar("SELECT dat_table FROM dataset WHERE dat_id = ?", array($datasetIdShardified));
 
 		$sql = "INSERT INTO snapshot_shape_dataset_item(sdi_dataset_id, sdi_dataset_item_id, sdi_feature_id, sdi_geometry, sdi_centroid)
-						SELECT " . $datasetIdShardified . ", id, 0x100000000 * " .  $datasetIdShardified . " + id, geometry, ST_CENTROID(geometry_r6) from " . $datasetTable;
+						SELECT " . $datasetIdShardified . ", id, 0x100000000 * " .  $datasetIdShardified . " + id, geometry, ST_CENTROID(geometry) from " . $datasetTable;
 
 		App::Db()->exec($sql);
 

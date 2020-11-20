@@ -1,4 +1,5 @@
 [CURRENT]
+- Fix exportación a shapefile de datasets con polígonos se interumpía.
 
 v2.31 (2020-11-03)
 - Muesta en administración estadísticas de descargas por tipo de archivo.
