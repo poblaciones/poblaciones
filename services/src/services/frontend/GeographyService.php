@@ -70,7 +70,7 @@ class GeographyService extends BaseService
 		}
 
 		$gradientId = $carto['gradient_id'];
-		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b)
+		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b && !$this->AllAreDense($rows))
 		{
 			$controller = new GradientService();
 			$gradientLimit = $carto['max_zoom_level'];
@@ -78,6 +78,16 @@ class GeographyService extends BaseService
 			$data->Gradient = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $x, $y, $z);
 		}
 		return $data;
+	}
+
+	private function AllAreDense($rows)
+	{
+		foreach($rows as $row)
+		{
+			if (!isset($row['dense']) || !$row['dense'])
+				return false;
+		}
+		return true;
 	}
 }
 

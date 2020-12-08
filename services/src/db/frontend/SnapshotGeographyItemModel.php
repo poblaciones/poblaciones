@@ -7,6 +7,8 @@ use minga\framework\Profiling;
 
 class SnapshotGeographyItemModel extends BaseModel
 {
+	private const TILE_SIZE = 256;
+
 	public function __construct()
 	{
 		$this->tableName = 'snapshot_geography_item';
@@ -20,19 +22,15 @@ class SnapshotGeographyItemModel extends BaseModel
 
 		$centroids = ($getCentroids ? ', ST_Y(giw_centroid) as Lat, ST_X(giw_centroid) as Lon' : '');
 
-	//	if ($rZoom === 6)
-	//		$field = "(select gei_geometry from geography_item WHERE gei_id = giw_geography_item_id)";
-	//else
-
-		// Calcula un 1/256 de ancho y alto
-		$width = ($envelope->Max->Lon - $envelope->Min->Lon) / 300;
-		$height = ($envelope->Max->Lat - $envelope->Min->Lat) / 300;
+		// Calcula filtro de 1 pixel para filtrar
 		$field = "giw_geometry_r" . $rZoom;
+		$filterSize = " AND " . $this->GetSquareFilter($envelope, $field, 1);
+		// Calcula los que representan algo menor a 8 pixels x 8 pixels
+		// o densidad de población mayor a 10 personas por hectárea (m2 * 100 * 100 > 10)
+		$denseAttribute = "NOT " . $this->GetSquareFilter($envelope, $field, 8) .
+											" OR giw_population / giw_area_m2 > 0.001";
 
-		$filterSize = " AND geometryIsMinSize(" . $field .
-											"," . $width . "," . $height . ") ";
-
-		$sql = "SELECT  " . $field . " as value, giw_geography_item_id as FID" . $centroids .
+		$sql = "SELECT  " . $field . " as value, " . $denseAttribute . " dense, giw_geography_item_id as FID" . $centroids .
 			" FROM snapshot_geography_item WHERE giw_geography_id = ? " .
 			" AND (MBRIntersects(" . $field . ", ST_PolygonFromText('" . $envelope->ToWKT() . "'))
 						)" . $filterSize .
@@ -41,5 +39,14 @@ class SnapshotGeographyItemModel extends BaseModel
 		$ret = App::Db()->fetchAll($sql, $params);
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	private function GetSquareFilter($envelope, $field, $pixels)
+	{
+		$ratio = self::TILE_SIZE / $pixels;
+		$width = ($envelope->Max->Lon - $envelope->Min->Lon) / $ratio;
+		$height = ($envelope->Max->Lat - $envelope->Min->Lat) / $ratio;
+		return " geometryIsMinSize(" . $field .
+											"," . $width . "," . $height . ") ";
 	}
 }

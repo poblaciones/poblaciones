@@ -127,7 +127,9 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 		} else {
 			// no tiene por default y no hay en la ruta
 			var current = this.workReference.Current;
-			window.Popups.AddMetric.show(current.Metrics, current.Id);
+			if (current.Metrics.length > 0) {
+				window.Popups.AddMetric.show(current.Metrics, current.Id);
+			}
 		}
 	}
 	var router = new SelectedMetricsRouter();

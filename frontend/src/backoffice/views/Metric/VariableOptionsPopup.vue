@@ -25,7 +25,7 @@
 											</div>
 										</div>
 									</div>
-									<div class="md-layout-item md-size-100" v-if="Dataset.properties.Type !== 'L' && Dataset.properties.Geography.GradientId">
+									<div class="md-layout-item md-size-100" v-if="useGradients && Dataset.properties.Type !== 'L' && Dataset.properties.Geography.GradientId">
 										<div class="md-layout">
 											<div class="md-layout-item md-size-30 md-small-size-100" style="padding-top: 16px;">
 												Ajuste poblacional:
@@ -169,6 +169,9 @@ export default {
 		},
 		Work() {
 			return window.Context.CurrentWork;
+		},
+		useGradients() {
+			return window.Context.Configuration.useGradients;
 		},
 		columnsForSequenceColumn() {
 			return this.Dataset.GetColumnsForSequenceColumn();

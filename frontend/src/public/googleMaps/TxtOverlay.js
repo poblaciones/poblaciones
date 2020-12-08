@@ -48,7 +48,7 @@ TxtOverlay.prototype.RebuildHtml = function () {
 			if (this.type === 'C') {
 				tooltip = 'Focalizar en ' + this.txt + ' (' + this.tooltip + ')';
 			} else if (this.tooltip) {
-				tooltip = 'Más información de ' + this.tooltip;
+				tooltip = 'Más información de ' + this.txt;
 			}
 			if (this.clickId.length === 1) {
 				this.clickId = this.clickId[0];

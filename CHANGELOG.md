@@ -1,5 +1,11 @@
 [CURRENT]
+
+v2.32 (2020-12-07)
 - Fix exportación a shapefile de datasets con polígonos se interumpía.
+- Fix a obtención de panel de información izquierda para etiquetas del mapa.
+- Posibilidad de agregar indicador desde el panel de información de ítem.
+- Fix a creación de archivo .prj en shapefiles.
+- Optimización para evitar ajuste poblacional en tiles altamente poblados.
 
 v2.31 (2020-11-03)
 - Muesta en administración estadísticas de descargas por tipo de archivo.

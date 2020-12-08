@@ -9,6 +9,8 @@ use helena\classes\App;
 use minga\framework\Str;
 use minga\framework\Profiling;
 
+use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
+
 class DatasetItemModel
 {
 
@@ -129,8 +131,10 @@ class DatasetItemModel
 			if ($captionColumn == null)
 				$title = 'null Title';
 			else
-				$title = $captionColumn . ' Title';
-
+			{
+				$field = SnapshotByDatasetModel::ResolveDescriptionField($dataset['caption_column_id'], $captionColumn);
+				$title = $field . ' Title';
+			}
 			$title .= ', null Code, ' . Str::CheapSqlEscape($dataset['caption']) . ' Type';
 		}
 		else

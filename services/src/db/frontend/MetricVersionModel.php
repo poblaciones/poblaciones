@@ -15,6 +15,19 @@ class MetricVersionModel extends BaseModel
 		$this->captionField = 'mvr_caption';
 	}
 
+	public function GetMetricByDatasetId($datasetId)
+	{
+		Profiling::BeginTimer();
+		$params = array($datasetId);
+
+		$sql = 'SELECT mvr_metric_id
+						FROM metric_version_level
+						INNER JOIN metric_version ON mvl_metric_version_id = mvr_id
+						WHERE mvl_dataset_id = ? LIMIT 1';
+		$ret = App::Db()->fetchScalarInt($sql, $params);
+		Profiling::EndTimer();
+		return $ret;
+	}
 
 	public function GetVersionLevelsExtraInfo($versionId)
 	{

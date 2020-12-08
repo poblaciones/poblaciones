@@ -2,17 +2,20 @@
 export default Mercator;
 
 function Mercator() {
+	this.min = null;
+	this.max = null;
 };
 
 Mercator.prototype.fromLatLngToPoint = function (latLng) {
 	var siny = Math.min(Math.max(Math.sin(latLng.lat * (Math.PI / 180)),
 		-0.9999),
 		0.9999);
-	return {
-		x: 128 + latLng.lng * (256 / 360),
-		y: 128 + 0.5 * Math.log((1 + siny) / (1 - siny)) * -(256 / (2 * Math.PI))
-	};
+	var x = 128 + latLng.lng * (256 / 360);
+	var y = 128 + 0.5 * Math.log((1 + siny) / (1 - siny)) * -(256 / (2 * Math.PI));
+
+	return { x: x,	y: y };
 };
+
 Mercator.prototype.fromPointToLatLng = function (point) {
 	return {
 		Lat: (2 * Math.atan(Math.exp((point.y - 128) / -(256 / (2 * Math.PI)))) -
@@ -94,16 +97,32 @@ Mercator.prototype.Project2LevelCoords = function (inCoords) {
 
 Mercator.prototype.ProjectSingleCoord = function (inCoord) {
 	var p = this.fromLatLngToPoint({ lat: inCoord[1], lng: inCoord[0] });
-	return [p.x, -p.y];
+	var r = this.scaleToBoundedPixel(p);
+	return [r.x, -r.y];
 };
 
 Mercator.prototype.Project1LevelCoords = function (inCoords) {
 	var outCoords = [];
+	var last = {};
 	for (var i = 0; i < inCoords.length; i++) {
 		var p = this.fromLatLngToPoint({ lat: inCoords[i][1], lng: inCoords[i][0] });
-		outCoords.push([p.x, -p.y]);
+		var r = this.scaleToBoundedPixel(p);
+		if (r.x !== last.x || r.y !== last.y) {
+			outCoords.push([r.x, -r.y]);
+		}
+		last = r;
 	}
 	return outCoords;
+};
+
+Mercator.prototype.scaleToBoundedPixel  = function (p) {
+	if (this.min) {
+		var xRange = this.max.x - this.min.x;
+		var yRange = this.max.y - this.min.y;
+		return { x: Math.round((p.x - this.min.x) / xRange * 256), y: Math.round((p.y - this.min.y) / yRange * 256) };
+	} else {
+		return p;
+	}
 };
 
 Mercator.prototype.getTileBoundsLatLon = function (tile) {

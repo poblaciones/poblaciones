@@ -4,6 +4,7 @@ namespace helena\services\frontend;
 
 use minga\framework\Performance;
 use minga\framework\PublicException;
+use minga\framework\Log;
 
 use helena\classes\GlobalTimer;
 use helena\db\frontend\SnapshotByDatasetRanking;
@@ -32,12 +33,18 @@ class RankingService extends BaseService
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && RankingCache::Cache()->HasData($metricId, $key, $data))
 		{
-			return $this->GotFromCache($data);
+			try
+			{
+				return $this->GotFromCache($data);
+			}
+			catch(\Exception $e)
+			{
+				Log::HandleSilentException($e);
+				RankingCache::Cache()->Clear($metricId, $key);
+			}
 		}
-		else
-		{
-			Performance::CacheMissed();
-		}
+
+		Performance::CacheMissed();
 		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)

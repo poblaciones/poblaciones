@@ -35,10 +35,10 @@ FeatureInfoRouter.prototype.FromRoute = function (args) {
 		return;
 	}
 	let parent = {
-		MetricId: parseInt(h.getSafeValue(args, 'l', null)),
-		VariableId: parseInt(h.getSafeValue(args, 'v', null)),
-		Exceptions: h.getSafeValue(args, 'x', null),
+		MetricId: h.getSafeValueInt(args, 'l', null),
+		VariableId: h.getSafeValueInt(args, 'v', null),
+		Exceptions: h.getSafeValue(args, 'x', null)
 	};
-	let fid = parseInt(h.getSafeValue(args, 'f', null));
+	let fid = h.getSafeValueInt(args, 'f', null);
 	window.SegMap.InfoWindow.InfoRequested({}, parent, fid);
 };

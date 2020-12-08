@@ -61,13 +61,16 @@ SvgComposer.prototype.render = function (mapResults, dataResults, gradient, tile
 			if (iMapa === mapItems.length) {
 				break;
 			}
-			if (mapItems[iMapa].id == fid) {
-				this.processFeature(tileUniqueId, id, dataItems[i], mapItems[iMapa], tileKey, tileBounds, filtered, allKeys, patternValue, colorMap);
+			var mapItem = mapItems[iMapa];
+			if (mapItem.id == fid) {
+				this.processFeature(tileUniqueId, id, dataItems[i], mapItem, tileKey, tileBounds, filtered, allKeys, patternValue, colorMap);
 			}
 		}
 	}
 	this.keysInTile[tileKey] = allKeys;
-	var svg = this.CreateSVGOverlay(tileUniqueId, div, filtered, projected, tileBounds, z, patternValue, gradient, texture);
+//	console.warn(tileKey + ' ' + (gradient !== null ? 1 : 0));
+	var svg = this.CreateSVGOverlay(tileUniqueId, div, filtered, projected, tileBounds, z, patternValue,
+																			gradient, texture);
 
 	if (svg !== null) {
 		var v = this.activeSelectedMetric.SelectedVariable().Id;
@@ -173,18 +176,20 @@ SvgComposer.prototype.patternIsPipeline = function (patternValue) {
 SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, projected, tileBounds, z, patternValue, gradient, texture) {
 	var m = new Mercator();
 	var projectedFeatures;
+
+	var min = m.fromLatLngToPoint({ lat: tileBounds.Min.Lat, lng: tileBounds.Min.Lon });
+	var max = m.fromLatLngToPoint({ lat: tileBounds.Max.Lat, lng: tileBounds.Max.Lon });
+
 	if (projected) {
 		projectedFeatures = {
 			type: 'FeatureCollection',
 			features: features
 		};
 	} else {
+		m.min = min;
+		m.max = max;
 		projectedFeatures = m.ProjectGeoJsonFeatures(features);
 	}
-
-	var mercator = new Mercator();
-	var min = mercator.fromLatLngToPoint({ lat: tileBounds.Min.Lat, lng: tileBounds.Min.Lon });
-	var max = mercator.fromLatLngToPoint({ lat: tileBounds.Max.Lat, lng: tileBounds.Max.Lon });
 
 	var attributes = [{ property: 'id', type: 'dynamic', key: 'FID' },
 		{ property: 'properties.className', type: 'dynamic', key: 'class' },
@@ -197,7 +202,7 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, 
 	var options = {
 		viewportSize: { width: 256, height: 256 },
 		attributes: attributes,
-		mapExtent: { left: min.x, bottom: -max.y, right: max.x, top: -min.y },
+		mapExtent: { left: 0, bottom: 256, right: 256, top: 0 },
 		output: 'svg'
 	};
 
@@ -247,13 +252,26 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, 
 			mask.attr('id', maskId);
 		}
 	}
-
+	var startTime = performance.now();
 	this.appendStyles(oSvg, tileUniqueId, labels, patternValue, maskId, textureMaskId);
 
-	svgStrings.forEach(function (svgStr) {
-		var svg = parseSVG(svgStr);
+	for (var n = 0; n < svgStrings.length; n++) {
+		var svgStr = svgStrings[n];
+		var svg = null;
+		if (svgStr.startsWith('<path ')) {
+			svg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+			var parts = svgStr.split('"');
+			for (var i = 0; i < parts.length; i += 2) {
+				var key = parts[i].substring(parts[i].indexOf(' ') + 1, parts[i].lastIndexOf('='));
+				if (key) {
+					svg.setAttributeNS(null, key, parts[i + 1]);
+				}
+			}
+		} else {
+			svg = parseSVG(svgStr);
+		}
 		oSvg.appendChild(svg);
-	});
+	}
 
 	this.ReplaceMinimizingFlickering(div, oSvg, textureMaskId);
 

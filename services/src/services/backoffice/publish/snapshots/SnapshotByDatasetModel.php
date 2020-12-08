@@ -309,6 +309,29 @@ class SnapshotByDatasetModel
 				return "gei_caption";
 		}
 		else
-			return $metricVersionLevel['dat_caption_field'];
+		{
+			return self::ResolveDescriptionField($metricVersionLevel['dat_caption_column_id'], $metricVersionLevel['dat_caption_field']);
+		}
+	}
+
+	public static function ResolveDescriptionField($columnId, $field)
+	{
+		// Se fija si hay valueLabels para dat_caption_column_id
+		if (self::HasValueLabels($columnId))
+		{
+			return 'IFNULL((SELECT dla_caption FROM dataset_column_value_label
+								WHERE dla_dataset_column_id = ' . $columnId . ' AND dla_value = ' . $field . '), ' . $field . ')';
+		}
+		else
+		{
+			return $field;
+		}
+	}
+
+	private static function HasValueLabels($columnId)
+	{
+		$ret = App::Db()->fetchScalarInt('SELECT EXISTS(SELECT * FROM dataset_column_value_label
+																	WHERE dla_dataset_column_id = ' . $columnId . ')');
+		return $ret === 1;
 	}
 }

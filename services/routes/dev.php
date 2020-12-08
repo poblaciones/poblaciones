@@ -16,9 +16,22 @@ function resolver($request)
 	$wc->Initialize();
 	$port = Context::Settings()->Map()->LoopLocalPort;
 	$ret = $wc->Get('http://localhost:' . $port . $uri);
-	$content = IO::ReadAllText($ret->file);
-	$type = $ret->contentType;
-	return App::Response($content, $type);
+	if ($ret->error)
+	{
+		$status = 500;
+		$content = "<h2>Poblaciones dev-proxy. No se ha pedido redireccionar el pedido</h2><p>La respuesta recibida fue: <br><li>"
+								 . $ret->error . "<h3>Verifique que el servidor NPM se encuentre iniciado";
+		$type = "text/html";
+	}
+	else
+	{
+		$status = 200;
+		$content = IO::ReadAllText($ret->file);
+		$type = $ret->contentType;
+	}
+	$wc->Finalize();
+	IO::Delete($ret->file);
+	return App::Response($content, $type, $status);
 }
 
 App::$app->get('/__webpack_hmr', function (Request $request) {

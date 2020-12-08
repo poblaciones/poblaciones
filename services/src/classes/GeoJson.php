@@ -132,6 +132,10 @@ class GeoJson
 				'type' => 'Feature');
 		if ($useFID)
 			$ret['id'] = $row['FID'];
+
+		if (isset($row['dense']) && $row['dense'])
+			$ret['dense'] = 1;
+
 		if ($getCentroids)
 		{
 			$ret['properties'] = array('centroid' => self::TrimLocation(array($row['Lat'], $row['Lon'])));

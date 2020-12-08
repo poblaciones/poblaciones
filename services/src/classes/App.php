@@ -131,6 +131,13 @@ class App
 		return $twig->resolveTemplate($templates)->render($args);
 	}
 
+	public static function NotFoundResponse()
+	{
+		$response = self::Response('Page not found.', 'text-html');
+		$response->setStatusCode(404);
+		return $response;
+	}
+
 	public static function RedirectKeepingParams($url, $status = 302)
 	{
 		$ret = $url;
@@ -222,11 +229,14 @@ class App
 		$response->headers->set('Content-Type', 'application/json');
 		return $response;
 	}
-	public static function Response($content, $contentType){
+
+	public static function Response($content, $contentType, $statusCode = 200){
 		$response = new Response($content);
 		$response->headers->set('Content-Type', $contentType);
+		$response->setStatusCode($statusCode);
 		return $response;
 	}
+
 	private static function GetSerializer(){
 		$encoders = array(new JsonEncoder());
 		$normalizer = new ObjectNormalizer(null, null, null, new ReflectionExtractor());

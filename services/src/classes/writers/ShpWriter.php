@@ -47,8 +47,6 @@ class ShpWriter extends BaseWriter
 		$cols = $this->cols;
 		$this->ProcessColumns($Shapefile, $cols);
 		$Shapefile = null;
-		$codepageFile = $this->resolveBaseName() . '.cpg';
-		IO::WriteAllText($codepageFile, self::ENCODING);
 	}
 
 	public function PageData()
@@ -96,8 +94,6 @@ class ShpWriter extends BaseWriter
 			}
 		}
 		$Shapefile = null;
-		$codepageFile = $this->resolveBaseName() . '.cpg';
-		IO::WriteAllText($codepageFile, self::ENCODING);
 
 		$this->state->Increment('index');
 
@@ -134,6 +130,8 @@ class ShpWriter extends BaseWriter
 	{
 		$codepageFile = $this->resolveBaseName() . '.cpg';
 		IO::WriteAllText($codepageFile, self::ENCODING);
+		$prjFile = $this->resolveBaseName() . '.prj';
+		IO::WriteAllText($prjFile, self::PRJ);
 
 		$zipFile = $this->state->Get('outFile');
 		$zip = new Zip($zipFile);

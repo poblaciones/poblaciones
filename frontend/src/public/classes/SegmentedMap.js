@@ -69,13 +69,18 @@ SegmentedMap.prototype.SetTimeout = function (delay) {
 };
 
 SegmentedMap.prototype.Get = function (url, params, noCredencials, isRetry) {
+	if (!params) { params = {}; }
+	if (!params.headers) { params.headers = {}; }
+
 	if (window.accessLink) {
-		if (!params) { params = {}; }
-		if (!params.headers) { params.headers = {}; }
 		params.headers['Access-Link'] = window.accessLink;
 	}
+
+	params.headers['Full-Url'] = document.location.href;
+
 	var loc = this;
 	var axios = (noCredencials ? this._axiosNoCredentials : this._axios);
+
 	return axios.get(url, params).then(function (res) {
 		if ((!res.response || res.response.status === undefined) && res.message === 'cancelled') {
 			throw { message: 'cancelled', origin: 'segmented' };
@@ -269,11 +274,6 @@ SegmentedMap.prototype.BoundsChanged = function () {
 	this.SaveRoute.UpdateRoute();
 };
 
-SegmentedMap.prototype.AxiosClone = function (obj) {
-	return JSON.parse(JSON.stringify(obj));
-};
-
-
 SegmentedMap.prototype.StartClickSelecting = function () {
 	this.MapsApi.selector.SetSelectorCanvas();
 };
@@ -312,6 +312,17 @@ SegmentedMap.prototype.AddMetricByIdAndVersion = function (id, versionId) {
 	});
 };
 
+SegmentedMap.prototype.AddMetricByFID = function (fid) {
+	const loc = this;
+	this.Get(window.host + '/services/metrics/GetSelectedMetricByFID', {
+		params: { f: fid }
+	}).then(function (res) {
+		loc.AddMetricBySelectedMetricInfo(res.data);
+	}).catch(function (error) {
+		err.errDialog('GetSelectedMetric', 'obtener el indicador solicitado', error);
+	});
+};
+
 SegmentedMap.prototype.AddMetricById = function (id) {
 	return this.doAddMetricById(id, null);
 };
@@ -321,18 +332,22 @@ SegmentedMap.prototype.doAddMetricById = function (id, versionSelector) {
 	this.Get(window.host + '/services/metrics/GetSelectedMetric', {
 		params: { l: id }
 	}).then(function (res) {
-		var activeSelectedMetric = new ActiveSelectedMetric(loc.AxiosClone(res.data), false);
-		if (versionSelector) {
-			var index = versionSelector(activeSelectedMetric);
-			if (index !== -1) {
-				activeSelectedMetric.properties.SelectedVersionIndex = index;
-			}
-		}
-		activeSelectedMetric.UpdateLevel();
-		loc.Metrics.AddStandardMetric(activeSelectedMetric);
+		loc.AddMetricBySelectedMetricInfo(res.data, versionSelector);
 	}).catch(function (error) {
 		err.errDialog('GetSelectedMetric', 'obtener el indicador solicitado', error);
 	});
+};
+
+SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricInfo, versionSelector) {
+	var activeSelectedMetric = new ActiveSelectedMetric(selectedMetricInfo, false);
+	if (versionSelector) {
+		var index = versionSelector(activeSelectedMetric);
+		if (index !== -1) {
+			activeSelectedMetric.properties.SelectedVersionIndex = index;
+		}
+	}
+	activeSelectedMetric.UpdateLevel();
+	this.Metrics.AddStandardMetric(activeSelectedMetric);
 };
 
 SegmentedMap.prototype.ChangeMetricIndex = function (oldIndex, newIndex) {
@@ -356,7 +371,7 @@ SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelectio
 		// seleccionaron un feature
 		var id;
 		var parentInfo;
-		if (item.startsWith('{')) {
+		if (item && ('' + item).startsWith('{')) {
 			var asText = item.replaceAll('@', '"');
 			parentInfo = JSON.parse(asText);
 			id = parentInfo.Id;

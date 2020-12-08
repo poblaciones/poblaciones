@@ -77,7 +77,12 @@ App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any",
 
 
 App::$app->get('/', function (Request $request) {
-		return App::RedirectKeepingParams(Links::GetMapUrl());});
+		return App::RedirectKeepingParams(Links::GetMapUrl());
+});
+
+App::$app->post('/', function (Request $request) {
+		return App::NotFoundResponse();
+});
 
 // http://mapas.aacademica.org/services/download/CreateFile?t=ss&l=8&r=1692&a=X&k=
 // http://mapas.aacademica.org/services/download/CreateFile?k=e0UN2j
@@ -430,6 +435,18 @@ App::$app->get('/services/metrics/GetSelectedMetric', function (Request $request
 
 	return App::Json($controller->PublicGetSelectedMetric($metricId));
 });
+
+App::$app->get('/services/metrics/GetSelectedMetricByFID', function (Request $request) {
+	$fid = Params::GetInt('f');
+
+	$info = new services\InfoWindowService();
+	$metricId = $info->GetLabelInfoDefaultMetric($fid);
+
+	// ej. /services/metrics/GetSelectedMetric?l=8
+	$controller = new services\SelectedMetricService();
+	return App::Json($controller->PublicGetSelectedMetric($metricId));
+});
+
 
 App::$app->get('/services/metrics/GetSelectedMetrics', function (Request $request) {
 	$controller = new services\SelectedMetricService();

@@ -4,6 +4,8 @@ namespace helena\services\frontend;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\DatasetItemModel;
+use helena\db\frontend\MetricVersionModel;
+
 use helena\db\frontend\SnapshotByDatasetNeighbors;
 use helena\classes\Session;
 use helena\entities\frontend\metric\NavigationInfo;
@@ -14,6 +16,7 @@ use helena\entities\frontend\geometries\Coordinate;
 
 class InfoWindowService extends BaseService
 {
+
 	public function GetLabelInfo($featureId)
 	{
 		$featureId = floatval($featureId);
@@ -28,6 +31,22 @@ class InfoWindowService extends BaseService
 		$info = $datasetModel->GetInfoById($datasetId, $id);
 
 		return $info;
+	}
+
+	public function GetLabelInfoDefaultMetric($featureId)
+	{
+		$featureId = floatval($featureId);
+
+		$datasetId = intval($featureId / 0x100000000);
+		$id = $featureId & 0xFFFFFFFF;
+		if (!Session::IsWorkPublicOrAccessibleByDataset($datasetId))
+		{
+			throw Session::NotEnoughPermissions();
+		}
+		$metricVersionModel = new MetricVersionModel();
+		$metricId = $metricVersionModel->GetMetricByDatasetId($datasetId);
+
+		return $metricId;
 	}
 
 	public function GetMetricItemInfo($featureId, $metricId, $variableId)

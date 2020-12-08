@@ -304,6 +304,15 @@ module.exports = {
 		}
 		return def;
 	},
+	getSafeValueInt(arr, key, def) {
+		if (key in arr) {
+			return parseInt(arr[key]);
+		}
+		if (def === undefined) {
+			throw new Error('Parámetro no válido.');
+		}
+		return def;
+	},
 	getGeojsonCenter(feature) {
 		var bounds = new window.google.maps.LatLngBounds();
 		var polygons = feature.geometry.coordinates;

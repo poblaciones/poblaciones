@@ -69,13 +69,13 @@
 					<td>
 						<div class="btn-group">
 							<button type="button" v-on:click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
-								Baja
+								Bajo
 							</button>
 							<button type="button" v-on:click="changeGradientOpacity('M')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('M')">
-								Media
+								Medio
 							</button>
 							<button type="button" v-on:click="changeGradientOpacity('L')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('L')">
-								Alta
+								Alto
 							</button>
 						</div>
 					</td>

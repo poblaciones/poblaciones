@@ -13,7 +13,11 @@
 			<h5 class="title"><mp-label :text="'' + title" /></h5>
 
 			<div class='stats' style="padding-top: 8px">
-				<span style="color: rgb(167, 167, 167);">{{ featureInfo.Type }}</span>
+				<a href="#" title="Agregar como indicador"
+					 v-on:click="addMetricFromKey" style="color: #a7a7a7">
+					{{ featureInfo.Type }}
+				</a>
+
 				<div style="float: right" class="exp-hiddable-block" v-show="featureInfo.Key && featureInfo.Key.MetricId">
 					<button type="button" :disabled="isLast"
 									class="close lightButton smallerButton" :title="(isLast ? '' : positionalData + 'Siguiente')" v-on:click="next()">
@@ -131,8 +135,12 @@ export default {
 		next() {
 			window.SegMap.InfoWindow.Next();
 		},
-		previous() {
-			window.SegMap.InfoWindow.Previous();
+		addMetricFromKey() {
+			if (this.featureInfo.MetricId) {
+				window.SegMap.AddMetricById(this.featureInfo.MetricId);
+			} else {
+				window.SegMap.AddMetricByFID(this.featureInfo.Key.Id);
+			}
 		},
 		capitalize(name) {
 			return h.capitalize(name);
