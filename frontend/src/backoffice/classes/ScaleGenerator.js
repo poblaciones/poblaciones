@@ -457,7 +457,7 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 		this.CreateManualCategories(variable);
 	}
 	if (variable.Symbology.CutMode === 'V') {
-			var col = variable.Symbology.CutColumn;
+		var col = variable.Symbology.CutColumn;
 		if (col !== null) {
 			var currentLabels = [];
 			if (variable.Symbology.CutColumn.Format === columnFormatEnum.NUMBER) {
@@ -580,7 +580,9 @@ ScaleGenerator.prototype.CreateSingleCategory = function (variable) {
 };
 
 ScaleGenerator.prototype.CreateByVariableCategories = function (variable, currentLabels) {
-	var col = variable.Symbology.CutColumn;
+	if (!currentLabels) {
+		return;
+	}
 	var total = currentLabels.length;
 	for (var n = 0; n < total; n++) {
 		var label = currentLabels[n];

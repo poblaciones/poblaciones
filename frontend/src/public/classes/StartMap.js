@@ -127,8 +127,10 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 		} else {
 			// no tiene por default y no hay en la ruta
 			var current = this.workReference.Current;
-			if (current.Metrics.length > 0) {
+			if (current.Metrics.length > 1) {
 				window.Popups.AddMetric.show(current.Metrics, current.Id);
+			} else if (current.Metrics.length === 1) {
+				list.push({ Id: current.Metrics[0].Id });
 			}
 		}
 	}

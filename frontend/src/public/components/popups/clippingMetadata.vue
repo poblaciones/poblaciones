@@ -1,5 +1,5 @@
 <template>
-	<Modal title="Fuente" ref="showFuente" :showCancel="false" :showOk="false">
+	<Modal :title="title" ref="showFuente" :showCancel="false" :showOk="false">
 		<div v-if="metadata">
 			<div>
 				<table class="localTable">
@@ -89,7 +89,8 @@ export default {
 	},
 	data() {
 		return {
-			metadata: null
+			metadata: null,
+			title: 'Fuente'
 		};
 	},
   methods: {
@@ -102,8 +103,9 @@ export default {
 				return '#';
 			}
 		},
-		show(metadata) {
+		show(metadata, title) {
 			this.metadata = metadata;
+			this.title = title;
 			this.$refs.showFuente.show();
 		},
 		citationAPA(metadata) {

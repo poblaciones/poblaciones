@@ -1,10 +1,12 @@
 import arr from '@/common/js/arr';
+import iconManager from '@/common/js/iconManager';
 
 export default TxtOverlay;
 
 function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidden) {
 	this.pos = pos;
 	this.txt = txt;
+	this.symbol = null;
 	this.tooltip = null;
 	this.clickId = null;
 	this.className = className;
@@ -39,28 +41,21 @@ TxtOverlay.prototype.RebuildHtml = function () {
 	}
 	var extraStyle = (this.innerClassName ? ' innerBoxTooltip' : '');
 	var text = "<div class='innerBox" + extraStyle + "'>";
+
 	if (this.txt) {
 		if (this.innerClassName) {
 			text += "<div class='" + this.innerClassName + "'>";
 		}
+		var closeSpan = '';
 		if (this.clickId) {
-			var tooltip = '';
-			if (this.type === 'C') {
-				tooltip = 'Focalizar en ' + this.txt + ' (' + this.tooltip + ')';
-			} else if (this.tooltip) {
-				tooltip = 'Más información de ' + this.txt;
-			}
-			if (this.clickId.length === 1) {
-				this.clickId = this.clickId[0];
-			}
-			var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
-			text += "<span title='" + tooltip + "' onClick=\"event.stopPropagation(); window.SegMap.SelectId('" + this.type + "', '" + clickIdAsText +
-				"', " + this.pos.lat() + ', ' + this.pos.lng() + ", event.ctrlKey);\" class='ibLink'>";
+			text += this.resolveLinkPart();
+			closeSpan = '</span>';
+		}
+		if (window.SegMap.frame.Zoom >= 9) {
+			text += this.resolveSymbolPart();
 		}
 		text += this.txt;
-		if (this.clickId && this.type === 'C') {
-			text += '</span>';
-		}
+		text += closeSpan;
 		if (this.innerClassName) {
 			text += '</div>';
 		}
@@ -69,6 +64,23 @@ TxtOverlay.prototype.RebuildHtml = function () {
 	if (this.Values.length > 1) {
 		text += "<span class='bItemGroup'>";
 	}
+	text += this.resolveValuesPart();
+	text += '</div>';
+	this.div.innerHTML = text;
+};
+
+TxtOverlay.prototype.resolveSymbolPart = function () {
+	var size = null;
+	if (this.symbol === 'fa-chart-bar') {
+		// TODO: parametrizar esto según se aclare la necesidad
+		size = .85;
+	}
+	return iconManager.showIcon(this.symbol, null, null, 2, size);
+};
+
+
+TxtOverlay.prototype.resolveValuesPart = function () {
+	var text = '';
 	for (var n = 0; n < this.Values.length; n++) {
 		var value = this.Values[n];
 		text += "<span class='bItem";
@@ -83,12 +95,26 @@ TxtOverlay.prototype.RebuildHtml = function () {
 	if (this.Values.length > 1) {
 		text += '</span>';
 	}
-	text += '</div>';
-	this.div.innerHTML = text;
+	return text;
+};
+
+TxtOverlay.prototype.resolveLinkPart = function () {
+	var tooltip = '';
+	if (this.type === 'C') {
+		tooltip = 'Focalizar en ' + this.txt + ' (' + this.tooltip + ')';
+	} else if (this.tooltip) {
+		tooltip = 'Más información de ' + this.txt;
+	}
+	if (this.clickId.length === 1) {
+		this.clickId = this.clickId[0];
+	}
+	var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
+	return "<span title='" + tooltip + "' onClick=\"event.stopPropagation(); window.SegMap.SelectId('" +
+							this.type + "', '" + clickIdAsText + "', " + this.pos.lat() + ', '
+							+ this.pos.lng() + ", event.ctrlKey);\" class='ibLink'>";
 };
 
 TxtOverlay.prototype.onAdd = function() {
-
 	var div = document.createElement('div');
 	div.className = this.className;
 
@@ -141,9 +167,10 @@ TxtOverlay.prototype.Overlaps = function () {
 	return false;
 };
 
-TxtOverlay.prototype.SetText = function (text, tooltip, clickId) {
+TxtOverlay.prototype.SetText = function (text, tooltip, symbol, clickId) {
 	this.txt = text;
 	this.tooltip = tooltip;
+	this.symbol = symbol;
 	this.clickId = (clickId !== undefined ? clickId : null);
 	this.RebuildHtml();
 };

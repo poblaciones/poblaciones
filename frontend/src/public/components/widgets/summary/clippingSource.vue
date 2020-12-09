@@ -2,7 +2,7 @@
   <div v-if="metadata">
     <div class="sourceInfo exp-hiddable-block">
 			<a href="#" v-on:click="clickFuente"
-				 title="Fuente de habitantes, hogares y área" style="color: #a7a7a7">
+				 :title="sourceTitle" style="color: #a7a7a7">
 				<link-icon />
 				Fuente
 			</a>
@@ -24,6 +24,7 @@ export default {
 	data() {
 		return {
 			work: {},
+			sourceTitle: 'Fuente de habitantes, hogares y área',
 			showDescargar: false,
 		};
 	},
@@ -37,7 +38,7 @@ export default {
 		},
 		clickFuente(e) {
 			e.preventDefault();
-			window.Popups.ClippingMetadata.show(this.metadata);
+			window.Popups.ClippingMetadata.show(this.metadata, this.sourceTitle);
 		},
 	},
 };

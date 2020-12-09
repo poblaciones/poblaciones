@@ -136,8 +136,8 @@ export default {
 			window.SegMap.InfoWindow.Next();
 		},
 		addMetricFromKey() {
-			if (this.featureInfo.MetricId) {
-				window.SegMap.AddMetricById(this.featureInfo.MetricId);
+			if (this.featureInfo.Key.MetricId) {
+				window.SegMap.AddMetricById(this.featureInfo.Key.MetricId);
 			} else {
 				window.SegMap.AddMetricByFID(this.featureInfo.Key.Id);
 			}

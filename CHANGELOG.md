@@ -1,4 +1,8 @@
 [CURRENT]
+- Incorporación de íconos para las etiquetas del mapa.
+- Incorporación de regiones sanitarias.
+- Mejoras en búsqueda por múltiples criterios.
+- Datapack Manager: mejoras mensajes de error. edición de symbol.
 
 v2.32 (2020-12-07)
 - Fix exportación a shapefile de datasets con polígonos se interumpía.

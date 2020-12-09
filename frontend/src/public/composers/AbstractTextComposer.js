@@ -26,27 +26,27 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effective
 		(variable.ShowDescriptions || (markerSettings && markerSettings.ShowText))) {
 		description = dataElement.Description;
 	}
-
-	this.SetTextOverlay('F', ['' + dataElement['FID']], '' + tileKey,
-		location, description, description, number, backColor, effectiveId);
+	var textElement = {
+		type: 'F', FIDs: ['' + dataElement['FID']],
+		caption: description, tooltip: description,
+		clickId: effectiveId
+	};
+	this.SetTextOverlay(textElement, '' + tileKey,
+		location, number, backColor, effectiveId);
 };
 
-AbstractTextComposer.prototype.SetTextOverlay = function (type, fids, tileKey, location, description, tooltip, number, backColor, clickId, hidden) {
-	var canvas = this.GetOrCreate(type, fids, tileKey, location, hidden);
+AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, location,
+																													number, backColor) {
+	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden);
 	var v = null;
-	if (description !== null) {
-		canvas.SetText(description, tooltip, clickId);
+	if (textElement.caption !== null || textElement.symbol) {
+		canvas.SetText(textElement.caption, textElement.tooltip, textElement.symbol, textElement.clickId);
 	}
 	if (number !== null) {
 		var zIndex = 100000 - this.index;
 		v = canvas.CreateValue(number, zIndex, backColor);
 	}
-	// Se fija si se superpone con otros visibles...
-
-	// Si queda visible, lo agrega...
-
 	this.textInTile[tileKey].push({ c: canvas, v: v });
-
 };
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {

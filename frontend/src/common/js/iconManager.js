@@ -4,6 +4,9 @@ const mapIconsList = require('./mapIconsList.js');
 
 module.exports = {
 	getSymbolImage(customIconList, symbol) {
+		if (!customIconList) {
+			return '';
+		}
 		for (var n = 0; n < customIconList.length; n++) {
 			if (customIconList[n].Caption === symbol) {
 				return customIconList[n].Image;
@@ -11,27 +14,45 @@ module.exports = {
 		}
 		return '';
 	},
-	showIcon(symbol, customIconList, maxWidth) {
+	showIcon(symbol, customIconList, maxWidth, rightMargin, sizeEm) {
 		var html;
 		if (!symbol) {
 			return '';
 		}
 		var info = this.formatIcon(symbol);
 		if (info.unicode) {
-			html = "<span style=\"font-family: '" + info['family'] + "';";
-			if (info.weight) {
-				html += "font-weight: " + info.weight + ";";
-			}
-			html += '">' + info.unicode + "</span>";
+			// pone un ícono de fontawesome o mapicons
+			html = this.buildIconBlock(info, rightMargin, sizeEm);
 		} else {
 			var src = this.getSymbolImage(customIconList, symbol);
 			if (src) {
-				var maxv = (maxWidth ? maxWidth : '2rem');
-				html = "<img src='" + src + "' style='max-height: " + maxv + "; max-width: " + maxv + ";'/>";
+				// pone un ícono custom
+				var maxW = (maxWidth ? maxWidth : '2rem');
+				var maxH = maxW;
+				html = "<img src='" + src + "' style='max-height: " + maxH + "; max-width: " + maxW + ";";
+				if (rightMargin) {
+					html += "margin-right: " + rightMargin + "px;";
+				}
+				html += "'/>";
 			} else {
-				html = '';
+				// pone un ícono de error
+				html = this.buildIconBlock(this.formatIcon('fa-exclamation'), rightMargin, sizeEm);
 			}
 		}
+		return html;
+	},
+	buildIconBlock(info, rightMargin, sizeEm) {
+		var html = "<span style=\"font-family: '" + info['family'] + "';";
+		if (info.weight) {
+			html += "font-weight: " + info.weight + ";";
+		}
+		if (sizeEm) {
+			html += "font-size: " + sizeEm + "em;";
+		}
+		if (rightMargin) {
+			html += "margin-right: " + rightMargin + "px;";
+		}
+		html += '">' + info.unicode + "</span>";
 		return html;
 	},
 	isCustom(symbol) {

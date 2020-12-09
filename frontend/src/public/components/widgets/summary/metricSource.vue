@@ -3,7 +3,7 @@
     <div class="sourceInfo exp-hiddable-block">
       <a href="#" v-on:click="clickDescargar" style="color: #a7a7a7"><download-icon title="Descargar"/> Descargar</a>
       &nbsp;
-      <a href="#" :title="'Fuente de ' + metric.properties.Metric.Name"
+      <a href="#" :title="sourceTitle"
 					v-on:click="clickFuente" style="color: #a7a7a7">
 				<link-icon />
 				Fuente
@@ -30,6 +30,11 @@ export default {
 			work: {},
 		};
 	},
+	computed: {
+		sourceTitle() {
+			return this.metric.properties.Metric.Name;
+		}
+	},
   methods: {
 		clickDescargar(e) {
 			e.preventDefault();
@@ -37,7 +42,7 @@ export default {
 		},
 		clickFuente(e) {
 			e.preventDefault();
-			window.Popups.WorkMetadata.showByMetric(this.metric);
+			window.Popups.WorkMetadata.showByMetric(this.metric, this.sourceTitle);
 		},
 	},
 };

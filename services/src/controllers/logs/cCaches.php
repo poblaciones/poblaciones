@@ -15,6 +15,7 @@ use helena\classes\VersionUpdater;
 
 use minga\framework\IO;
 use minga\framework\Arr;
+use minga\framework\Performance;
 use helena\classes\App;
 
 
@@ -50,6 +51,9 @@ class cCaches extends cController
 	public function Post()
 	{
 		$cm = new CacheManager();
+
+		Performance::$allowLongRunningRequest = true;
+
 		if (array_key_exists('calculateSpace', $_POST))
 		{
 			$file = cActivity::ResolveData();

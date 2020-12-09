@@ -22,12 +22,20 @@ LabelsComposer.prototype.render = function(mapResults, dataResults, gradient, ti
 		var dataElement = dataItems[i];
 		var location = new window.google.maps.LatLng(dataElement['Lat'], dataElement['Lon']);
 
+		var textElement = { FIDs: dataElement['FIDs']	};
+
 		if (dataElement['Show']) {
+			textElement.type = dataElement['type'];
+			textElement.caption = dataElement['Caption'];
+			textElement.tooltip = dataElement['Tooltip'];
+			textElement.clickId = (dataElement['FIDs'] === null || dataElement['type'] === 'C' ? dataElement['RID'] : dataElement['FIDs']);
+			textElement.symbol = dataElement['Symbol'];
+
 			this.UpdateTextStyle(dataElement['Size']);
-			this.SetTextOverlay(dataElement['type'], dataElement['FIDs'], tileKey, location, dataElement['Caption'], dataElement['Tooltip'], null, '', (dataElement['FIDs'] === null || dataElement['type'] === 'C' ? dataElement['RID'] : dataElement['FIDs']));
 		} else {
-			this.SetTextOverlay(null, dataElement['FIDs'], tileKey, location, null, null, null, '', null, true);
+			textElement.hidden = true;
 		}
+		this.SetTextOverlay(textElement, tileKey, location, null, '');
 	}
 };
 

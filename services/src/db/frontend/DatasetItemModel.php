@@ -141,7 +141,10 @@ class DatasetItemModel
 		{
 			$geographyModel = new GeographyItemModel();
 			$ret = $geographyModel->GetMetadataById($geographyItemId);
-			$title = Str::CheapSqlEscape($ret['Caption']) . ' Title, ' . Str::CheapSqlEscape($ret['Code']) . ' Code, ' . Str::CheapSqlEscape($ret['Type'] . ' (' . $ret['Revision']. ')') . ' Type';
+			$title = Str::CheapSqlEscape($ret['Caption']) . ' Title, ' .
+											Str::CheapSqlEscape($ret['Code']) . ' Code, ' .
+											Str::CheapSqlEscape($dataset['caption']) . ' Type';
+											// Str::CheapSqlEscape($ret['Type'] . ' (' . $ret['Revision']. ')') . ' Type';
 		}
 		$ret = $title;
 		Profiling::EndTimer();

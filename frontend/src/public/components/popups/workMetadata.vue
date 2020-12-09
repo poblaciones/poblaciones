@@ -1,5 +1,5 @@
 <template>
-  <Modal :title="(metric ? 'Fuente' : 'Metadatos')" ref="dialog" :showCancel="false" :showOk="false">
+  <Modal :title="this.title" ref="dialog" :showCancel="false" :showOk="false">
 		<div v-if="metric || work">
 			<table class="localTable">
 				<tbody>
@@ -101,18 +101,21 @@ export default {
 		return {
 			downloadLevel: 0,
 			metric: null,
-			work: null
+			work: null,
+			title: 'Fuente'
 		};
 	},
   methods: {
-		showByMetric(metric) {
+		showByMetric(metric, title) {
 			this.metric = metric;
+			this.title = title;
 			this.downloadLevel = this.version.SelectedLevelIndex;
 			this.work = metric.SelectedVersion().Work;
 			this.$refs.dialog.show();
 		},
 		show(work) {
 			this.metric = null;
+			this.title = 'Metadatos';
 			this.downloadLevel = null;
 			this.work = work;
 			this.$refs.dialog.show();

@@ -26,7 +26,7 @@ class SnapshotSearchModel extends BaseModel
 			clc_symbol Symbol,
 			Replace(clc_full_parent, '\t', ' > ') Extra
 			FROM snapshot_lookup_clipping_region_item
-			WHERE MATCH(clc_caption, clc_tooltip) AGAINST (:query IN BOOLEAN MODE)
+			WHERE MATCH(clc_caption, clc_tooltip, clc_full_parent) AGAINST (:query IN BOOLEAN MODE)
 			ORDER by clc_population DESC
 			LIMIT 0, 10";
 

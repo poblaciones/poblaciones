@@ -1,7 +1,7 @@
 <template>
   <span v-if="metadata">
     <span class="sourceInfo exp-hiddable-block">
-			<a href="#" :title="'Fuente de delimitación para ' + region.Name"
+			<a href="#" :title="sourceTitle"
 					v-on:click="clickFuente" style="color: #a7a7a7">
 				<link-icon style="font-size: 13px; padding-top: 20px;" :title="'Fuente de delimitación para ' + region.Name" />
 			</a>
@@ -27,6 +27,11 @@ export default {
 			showDescargar: false,
 		};
 	},
+	computed: {
+		sourceTitle() {
+			return 'Fuente de límites de ' + this.region.Name;
+		}
+	},
   methods: {
 		clickDescargar(e) {
 			e.preventDefault();
@@ -37,7 +42,7 @@ export default {
 		},
 		clickFuente(e) {
 			e.preventDefault();
-			window.Popups.ClippingMetadata.show(this.metadata);
+			window.Popups.ClippingMetadata.show(this.metadata, this.sourceTitle);
 		},
 	},
 };

@@ -319,7 +319,7 @@ SegmentedMap.prototype.AddMetricByFID = function (fid) {
 	}).then(function (res) {
 		loc.AddMetricBySelectedMetricInfo(res.data);
 	}).catch(function (error) {
-		err.errDialog('GetSelectedMetric', 'obtener el indicador solicitado', error);
+		err.errDialog('GetSelectedMetricByFID', 'obtener el indicador solicitado', error);
 	});
 };
 

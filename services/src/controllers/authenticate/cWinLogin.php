@@ -16,13 +16,13 @@ class cWinLogin extends cController
 		$this->CheckIsLocalCall();
 		$user = Params::GetMandatory('u');
 		$login = cLoginAjax::ProcessLogin($user);
+		if ($login !== "ok")
+			throw new PublicException($login);
 		if (Session::IsMegaUser() === false)
 		{
 			Session::Logoff();
 			throw new PublicException('El usuario debe ser administrador.');
 		}
-		if ($login !== "ok")
-			throw new PublicException($login);
 
 		$ret = array();
 		$extra = array();
