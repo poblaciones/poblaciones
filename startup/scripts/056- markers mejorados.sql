@@ -1,5 +1,5 @@
 CREATE TABLE `dataset_marker` (
-  `dmk_id` INT NOT NULL COMMENT 'Identificador.',
+  `dmk_id` INT NOT NULL AUTO_INCREMENT COMMENT 'Identificador.',
   `dmk_type` CHAR(1) NOT NULL DEFAULT 'N' COMMENT 'Tipo de marcador. N: Ninguno. I: Ícono. T: Texto.',
   `dmk_source` CHAR(1) NOT NULL DEFAULT 'F' COMMENT 'Tipo de origen. F: Fijo. V: Variable',
   `dmk_size` CHAR(1) NOT NULL DEFAULT 'S' COMMENT 'Tamaño del marcador. S: Pequeño (normal). M: Mediano. L: Grande.',
@@ -42,12 +42,8 @@ CREATE TABLE `draft_dataset_marker` (
 insert into draft_dataset_marker (dmk_type)
 select 'N' FROM draft_dataset;
 
-ALTER TABLE dataset_marker MODIFY COLUMN dmk_id INT auto_increment;
-
 insert into dataset_marker (dmk_type)
 select 'N' FROM dataset;
-
-ALTER TABLE dataset_marker MODIFY COLUMN dmk_id INT;
 
 update dataset_marker set dmk_id = dmk_id  * 100000;
 update dataset_marker set dmk_id = dmk_id  / 1000;
