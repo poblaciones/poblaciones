@@ -6,7 +6,7 @@
 				<Search class="exp-hiddable-block"/>
 				<LeftPanel ref='leftPanel'/>
 				<MapPanel/>
-				<FabButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
+				<MetricsButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
 				<WatermarkFloat v-if="work.Current && work.Current.Institution.WatermarkId" :work="work" />
 				<EditButton v-if="work.Current" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
@@ -26,7 +26,7 @@ import StartMap from '@/public/classes/StartMap';
 import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 import WorkPanel from '@/public/components/panels/workPanel';
 import MapPanel from '@/public/components/panels/mapPanel';
-import FabButton from '@/public/components/widgets/map/fabButton';
+import MetricsButton from '@/public/components/widgets/map/metricsButton';
 import LeftPanel from '@/public/components/panels/leftPanel';
 import EditButton from '@/public/components/widgets/map/editButton';
 import SummaryPanel from '@/public/components/panels/summaryPanel';
@@ -46,7 +46,7 @@ export default {
 		Search,
 		MapPanel,
 		EditButton,
-		FabButton,
+		MetricsButton,
 		LeftPanel,
 		WorkPanel,
 		WatermarkFloat,
