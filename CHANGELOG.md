@@ -3,6 +3,8 @@
 - Incorporación de regiones sanitarias.
 - Mejoras en búsqueda por múltiples criterios.
 - Datapack Manager: mejoras mensajes de error. edición de symbol.
+- Fix a descarga de PDF de metadatos desde edición.
+- Subnivel al botón de agregar indicador
 
 v2.32 (2020-12-07)
 - Fix exportación a shapefile de datasets con polígonos se interumpía.

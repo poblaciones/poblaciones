@@ -4,7 +4,7 @@
 		<div class="fab-triangle" :style="{ 'border-right-color': bgColor }"></div>
 		<div v-if="showScrollButtons" ref="scrollUp" class="fab-scroll-button top-radius" :style="style"
 			@click="scrollUp" @mouseenter="scrollUpStart" @mouseleave="scrollUpStop" v-ripple="rippleEffect">
-			<i :class="[ actionIconSize, 'material-icons', 'no-highlight' ]">arrow_drop_up</i>
+			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_up</i>
 		</div>
 		<div :class="[ 'fab-panel-overflow', scrollBarClass, borderRadiusClass ]" ref="panelScroll" :style="scrollStyle" :id="items.Name">
 			<ul class="fab-panel-list">
@@ -18,7 +18,7 @@
 		</div>
 		<div v-if="showScrollButtons" ref="scrollDown" class="fab-scroll-button bottom-radius"
 			:style="style" @click="scrollDown" @mouseenter="scrollDownStart" @mouseleave="scrollDownStop" v-ripple="rippleEffect">
-			<i :class="[ actionIconSize, 'material-icons', 'no-highlight' ]">arrow_drop_down</i>
+			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_down</i>
 		</div>
 	</div>
 </template>
@@ -59,7 +59,7 @@ export default {
 			},
 		},
 		scrollMode: {
-			default: 'auto',
+			default: 'click',
 			validator: function(value) {
 				// valores válidos:
 				return ['auto', 'click'].indexOf(value) !== -1;
@@ -72,11 +72,11 @@ export default {
 			default: 7,
 		},
 		scrollButtonHeight: {
-			default: 20,
+			default: 19,
 		},
 		ellipsis: {
 			default: function() {
-				return this.$isMobile() == false;
+				return false; //this.$isMobile() == false;
 			},
 		},
 		width: {
@@ -92,9 +92,7 @@ export default {
 			default: true,
 		},
 		hoverColor: {
-			// https://www.sessions.edu/color-calculator/
-			default: '#d24300', // complementario al celeste
-			// default: '#66615b', // marrón de los menús
+			default: '#66615b', // marrón de los menús
 		},
 		scrollColor: {
 			default: '#68abc0',
@@ -268,6 +266,10 @@ export default {
 	box-shadow: 0 10px 10px rgba(0, 0, 0, 0.20), 0 4px 4px rgba(0, 0, 0, 0.15);
 }
 
+.fab-icon-offset {
+	margin-top: -2px;
+}
+
 .fab-panel-overflow {
 	overflow-y: auto;
 	scroll-snap-type: y mandatory;
@@ -301,7 +303,7 @@ export default {
 
 .fab-panel-item {
 	font-size: 14px;
-	padding: 5px 15px;
+	padding: 8px 15px;
 	color: white;
 	cursor: pointer;
 }
