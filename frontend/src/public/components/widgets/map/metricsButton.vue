@@ -8,6 +8,7 @@
 					 :position="position"
 					 :bg-color="backgroundColor"
 					 :actions="fabActions"
+					 :mainTooltip="mainTooltip"
 					 @selectedPanel="selectedPanel"
 					 @selected0="selected(0)"
 					 @selected1="selected(1)"
@@ -43,6 +44,7 @@ export default {
 			},
 			fabMetrics: [],
 			position: 'bottom-left',
+			mainTooltip: "Agregar indicador",
 		};
 	},
 	created () {
