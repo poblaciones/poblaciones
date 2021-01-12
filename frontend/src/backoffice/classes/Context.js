@@ -24,6 +24,7 @@ function Context() {
 	this.PublicMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetPublicMetrics');
 	this.CartographyMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetCartographyMetrics');
 	this.MetricGroups = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricGroups');
+	this.MetricProviders = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricProviders');
 	this.CurrentMetricVersionLevel = null;
 	this.EditableMetricVersionLevel = null;
 }
@@ -93,6 +94,7 @@ Context.prototype.LoadStaticLists = function () {
 	this.PublicMetrics.Refresh();
 	this.CartographyMetrics.Refresh();
 	this.MetricGroups.Refresh();
+	this.MetricProviders.Refresh();
 };
 
 Context.prototype.RefreshMetrics = function()

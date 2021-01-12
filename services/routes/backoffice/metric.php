@@ -39,6 +39,13 @@ App::$app->get('/services/backoffice/GetWorkMetricVersions', function (Request $
 	return $ret;
 });
 
+
+App::$app->get('/services/backoffice/GetAllMetricProviders', function (Request $request) {
+	$controller = new services\MetricService();
+	$ret = App::OrmJson($controller->GetAllMetricProviders());
+	return $ret;
+});
+
 App::$app->get('/services/backoffice/GetAllMetricGroups', function (Request $request) {
 	$controller = new services\MetricService();
 	$ret = App::OrmJson($controller->GetAllMetricGroups());

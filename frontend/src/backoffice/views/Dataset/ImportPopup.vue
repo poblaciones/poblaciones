@@ -87,7 +87,6 @@ export default {
       bucketId: 0,
 			selectedSheet: null,
       keepLabels: true,
-      saveRequested: false,
       createdDataset: null,
       forceCreateNewDataset: false,
       dropzoneOptions: {
@@ -138,20 +137,26 @@ export default {
 			this.$refs.myVueDropzone.removeAllFiles();
 			this.generateBucketId();
 			this.hasFiles = false;
+			this.verifying = false;
 			this.datasets = null;
 			this.selectedSheet = null;
 		},
     afterSuccess(file, response) {
       this.sending = false;
-      if (this.saveRequested) {
-        this.save();
-      }
+			this.hasFiles = true;
+			if (this.extension == 'kml' || this.extension == 'kmz' ||
+				this.extension == 'xlsx' || this.extension == 'xls') {
+				this.verifyDatasets(this.getBucketId(), this.extension);
+			}
     },
     verifyDatasets(bucketId, fileExtension) {
 			var loc = this;
 			this.verifying = true;
 			this.Work.VerifyDatasetsImportFile(bucketId, fileExtension).then(
 				function (list) {
+					if (!loc.verifying || loc.getBucketId() !== bucketId) {
+						return;
+					}
 					if (list.length > 1) {
 						loc.datasets = list;
 						loc.RequestDatasetSelection();
@@ -186,12 +191,7 @@ export default {
     },
     afterComplete(file) {
       this.sending = false;
-      this.hasFiles = true;
-			if (this.extension == 'kml' || this.extension == 'kmz' ||
-				this.extension == 'xlsx' || this.extension == 'xls') {
-        this.verifyDatasets(this.getBucketId(), this.extension);
-      }
-		},
+    },
 		hasAllItemOnSheets() {
 			return this.extension == 'kml' || this.extension == 'kmz';
 		},
@@ -254,6 +254,7 @@ export default {
 			this.extension = '';
 			this.generateBucketId();
 			this.sending = false;
+			this.verifying = false;
 			this.selectedSheet = null;
 			this.hasFiles = false;
 			this.openImport = true;

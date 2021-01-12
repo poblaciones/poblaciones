@@ -18,7 +18,7 @@ class OrmSerializeTest extends TestCase
 			'Status' => null,
 			// 'Extents' => null,
 		  	'Authors' => null, 'CoverageCaption' => null,
-			'PeriodCaption' => null, 'Frequency' => null, 'GroupId' => null, 'License' => null,
+			'PeriodCaption' => null, 'Frequency' => null, 'GroupId' => null, 'ProviderId' => null, 'License' => null,
 			'Type' => null, 'AbstractLong' => null, 'Language' => null, 'Wiki' => null,
 			'Url' => null, 'Contact' => null, 'Institution' => null, 'OnlineSince' => null,
 			'LastOnline' => null,

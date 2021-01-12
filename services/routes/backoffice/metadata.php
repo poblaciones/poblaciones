@@ -80,8 +80,7 @@ App::$app->get('/services/backoffice/GetMetadataPdf', function (Request $request
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
 
 	$work = App::Orm()->find(entities\DraftWork::class, $workId);
-
-	return $controller->GetMetadataPdf($work->getMetadata()->getId(), null, true);
+	return $controller->GetMetadataPdf($work->getMetadata()->getId(), null, true, $work->getId());
 });
 
 

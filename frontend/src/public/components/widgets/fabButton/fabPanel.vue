@@ -8,11 +8,12 @@
 		</div>
 		<div :class="[ 'fab-panel-overflow', scrollBarClass, borderRadiusClass ]" ref="panelScroll"
 			:style="scrollStyle" @wheel="wheel($event)" @scroll="scrolled()">
-			<ul class="fab-panel-list">
-				<li :class="[ 'fab-panel-item', ellipsisClass ]" v-for="item in items" :key="item.Id" :style="style" @click="select(item)"
-					v-tooltip="{ content: item.Name, placement: 'top', classes: 'fab-tooltip', trigger: 'manual' }"
-					@mouseenter="showTooltip($event.target)" @mouseleave="hideTooltip()" ref="liItems"
-					v-ripple="rippleEffect">
+			<ul class="fab-panel-list unselectable">
+				<li v-for="(item, index) in items" :key="item.Id" :class="[ 'fab-panel-item', ellipsisClass, 'unselectable',
+						(item.Header ? (index === 0 && !showScrollButtons ? 'fab-panel-item-header fab-panel-item-header-offset' : 'fab-panel-item-header') : '')]" :style="style" @click="select(item)"
+						v-tooltip="{ content: item.Name, placement: 'top', classes: 'fab-tooltip', trigger: 'manual' }"
+						@mouseenter="showTooltip($event.target)" @mouseleave="hideTooltip()" ref="liItems"
+						v-ripple="rippleEffect">
 					{{ item.Name }}
 				</li>
 			</ul>
@@ -36,7 +37,7 @@ export default {
 	},
 	data() {
 		return {
-			maxMaxHeight: 230,
+			maxHeight: 400,
 			adjust: 0,
 			visible: false,
 			scrollInterval: null,
@@ -69,8 +70,8 @@ export default {
 		scrollTime: {
 			default: 350, //en milisegundos
 		},
-		scrollAt: {
-			default: 7,
+		maxItems: {
+			default: 8,
 		},
 		scrollButtonHeight: {
 			default: 19,
@@ -83,9 +84,9 @@ export default {
 		width: {
 			default: function() {
 				if(this.$isMobile()) {
-					return 250;
-				} else {
 					return 350;
+				} else {
+					return 400;
 				}
 			},
 		},
@@ -120,10 +121,10 @@ export default {
 			return '';
 		},
 		showScrollButtons() {
-			return this.scrollButtons && this.items.length >= this.scrollAt;
+			return this.scrollButtons && this.items.length > this.maxItems;
 		},
 		showScrollRegular() {
-			return this.scrollButtons == false && this.items.length >= this.scrollAt;
+			return this.scrollButtons == false && this.items.length > this.maxItems;
 		},
 		scrollBarClass() {
 			if(this.showScrollButtons) {
@@ -183,18 +184,18 @@ export default {
 		},
 		visibleMaxHeight() {
 			if(this.$refs.liItems && this.$refs.liItems.length > 0) {
-				var total = this.maxMaxHeight + 1;
+				var total = this.maxHeight + 1;
 				this.adjust = 1;
-				while(total > this.maxMaxHeight) {
+				while(total > this.maxHeight) {
 					total = 0;
 					this.adjust--;
-					for (var i = 0; i < Math.min(this.scrollAt + this.adjust - 1, this.$refs.liItems.length); i++) {
+					for (var i = 0; i < Math.min(this.maxItems + this.adjust, this.$refs.liItems.length); i++) {
 						total += this.$refs.liItems[i].scrollHeight;
 					}
 				}
 				return total;
 			}
-			return this.maxMaxHeight;
+			return this.maxHeight;
 		},
 		scrollUpStart() {
 			if(this.scrollMode == 'click') {
@@ -258,7 +259,7 @@ export default {
 						if(delta > 0) {
 							delta = items[i].scrollHeight - delta;
 						}
-						const next = i + this.scrollAt + this.adjust;
+						const next = i + this.maxItems + 1 + this.adjust;
 						for (var j = i + 1; j < next; j++) {
 							delta += items[j].scrollHeight;
 						}
@@ -296,13 +297,13 @@ export default {
 		},
 		scrolled() {
 			const el = this.$refs.panelScroll;
-			if(el) {
-				if(el.scrollTop == 0) {
+			if (el) {
+				if (el.scrollTop == 0 && this.$refs.scrollUp) {
 					this.$refs.scrollUp.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
 				} else {
 					this.$refs.scrollUp.classList.replace('fab-scroll-button-disabled', 'fab-scroll-button');
 				}
-				if(el.scrollTop == el.scrollHeight - el.offsetHeight) {
+				if (el.scrollTop == el.scrollHeight - el.offsetHeight && this.$refs.scrollDown) {
 					this.$refs.scrollDown.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
 				} else {
 					this.$refs.scrollDown.classList.replace('fab-scroll-button-disabled', 'fab-scroll-button');
@@ -397,9 +398,22 @@ export default {
 	color: white;
 	cursor: pointer;
 }
-
 .fab-panel-item:hover {
 	background-color: var(--hover);
+}
+
+.fab-panel-item-header {
+	background-color: #0a94bd;
+	padding: 2px 14px;
+	white-space: nowrap;
+	pointer-events: none;
+	text-transform: uppercase;
+	font-size: 1.1rem;
+}
+.fab-panel-item-header-offset {
+	margin-top: 9px;
+}
+.fab-panel-item-header-content {
 }
 
 .fab-triangle {
@@ -419,6 +433,7 @@ export default {
 	color: white;
 	cursor: pointer;
 	height: var(--height);
+	background-color: #00a8dc;
 }
 
 .fab-scroll-button:hover {
@@ -427,9 +442,10 @@ export default {
 
 .fab-scroll-button-disabled {
 	text-align: center;
-	color: #66615b;
+	color: #278faf;
 	cursor: pointer;
 	height: var(--height);
+	background-color: #0aa6d6;
 }
 
 .no-radius {

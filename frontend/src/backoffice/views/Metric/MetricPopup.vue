@@ -4,34 +4,38 @@
 		<md-dialog-title>Indicador</md-dialog-title>
 		<md-dialog-content>
 		<invoker ref="invoker"></invoker>
-			<div v-if="newMetricVersionLevel" class="md-layout md-gutter">
-				<div class="md-layout-item md-size-100 md-small-size-100">
-					<mp-simple-text :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
-										label="Nombre" ref="metricInput" @enter="save"
-										helper="Ej. Acceso a agua potable"
-										:maxlength="75" v-model="newMetricVersionLevel.MetricVersion.Metric.Caption"
-								>
-					</mp-simple-text>
+		<div v-if="newMetricVersionLevel" class="md-layout md-gutter">
+			<div class="md-layout-item md-size-100 md-small-size-100">
+				<mp-simple-text :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
+												label="Nombre" ref="metricInput" @enter="save"
+												helper="Ej. Acceso a agua potable"
+												:maxlength="75" v-model="newMetricVersionLevel.MetricVersion.Metric.Caption">
+				</mp-simple-text>
 
-				</div>
-				<div v-if="Work.IsPublicData()" class='md-layout-item md-size-75 md-small-size-100'>
-					<mp-select :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
-											label='Categoría'
-										 v-model="newMetricVersionLevel.MetricVersion.Metric.MetricGroup"
-										 list-key='Id'
-										 :list='MetricGroups'
-										 helper='Indique el tipo de información del indicador.'
-										 />
-				</div>
-
-				<div class="md-layout-item md-size-60 md-small-size-100">
-					<mp-simple-text
-									label="Edición" ref="metricInput" @enter="save"
-									helper="Año de referencia de la edición o serie de datos. Ej. 2010"
-									:maxlength="20" v-model="newMetricVersionLevel.MetricVersion.Caption"
-								></mp-simple-text>
-				</div>
 			</div>
+			<div v-if="Work.IsPublicData()" class='md-layout-item md-size-75 md-small-size-100'>
+				<mp-select :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
+									 label='Categoría'
+									 v-model="newMetricVersionLevel.MetricVersion.Metric.MetricGroup"
+									 list-key='Id'
+									 :list='MetricGroups'
+									 helper='Indique el tipo de información del indicador.' />
+			</div>
+			<div v-if="Work.IsPublicData()" class='md-layout-item md-size-75 md-small-size-100'>
+				<mp-select :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
+									 label='Origen'
+									 v-model="newMetricVersionLevel.MetricVersion.Metric.MetricProvider"
+									 list-key='Id'
+									 :list='MetricProviders'
+									 helper='Indique la fuente agrupada del indicador.' />
+			</div>
+
+			<div class="md-layout-item md-size-60 md-small-size-100">
+				<mp-simple-text label="Edición" ref="metricInput" @enter="save"
+												helper="Año de referencia de la edición o serie de datos. Ej. 2010"
+												:maxlength="20" v-model="newMetricVersionLevel.MetricVersion.Caption"></mp-simple-text>
+			</div>
+		</div>
 		</md-dialog-content>
 		<md-dialog-actions>
 				<md-button @click="hide">Cancelar</md-button>
@@ -95,6 +99,9 @@ export default {
     },
 		MetricGroups() {
 			return window.Context.MetricGroups.list;
+		},
+		MetricProviders() {
+			return window.Context.MetricProviders.list;
 		},
 		title() {
 			if (this.metricVersionLevel !== null) {

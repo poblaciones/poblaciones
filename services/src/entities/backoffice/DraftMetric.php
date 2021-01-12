@@ -46,6 +46,15 @@ class DraftMetric
      */
     private $MetricGroup;
 
+		/**
+     * @var \helena\entities\backoffice\MetricProvider
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\MetricProvider", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="mtr_metric_provider_id", referencedColumnName="lpr_id", nullable=true)
+     * })
+     */
+    private $MetricProvider;
     /**
      * Get id
      *
@@ -141,6 +150,31 @@ class DraftMetric
     public function getMetricGroup()
     {
         return $this->MetricGroup;
+    }
+
+
+    /**
+     * Set metricProvider
+     *
+     * @param \helena\entities\backoffice\MetricProvider $metricProvider
+     *
+     * @return DraftMetric
+     */
+    public function setMetricProvider(\helena\entities\backoffice\MetricProvider $metricProvider = null)
+    {
+        $this->MetricProvider = $metricProvider;
+
+        return $this;
+    }
+
+    /**
+     * Get metricProvider
+     *
+     * @return \helena\entities\backoffice\MetricProvider
+     */
+    public function getMetricProvider()
+    {
+        return $this->MetricProvider;
     }
 }
 

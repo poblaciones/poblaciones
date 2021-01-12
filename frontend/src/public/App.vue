@@ -242,6 +242,7 @@ html, body {
 	overflow-y: hidden;
 	margin: 0;
 	padding: 0;
+	user-select: none;
 }
 .gm-ui-hover-effect {
 	top: 0px !important;

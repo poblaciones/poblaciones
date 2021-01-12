@@ -7,6 +7,7 @@ use helena\caches\DatasetShapesCache;
 use helena\caches\FabMetricsCache;
 use helena\caches\SelectedMetricsMetadataCache;
 use helena\caches\MetricGroupsMetadataCache;
+use helena\caches\MetricProvidersMetadataCache;
 use helena\caches\DatasetColumnCache;
 use helena\caches\WorkHandlesCache;
 use helena\caches\ClippingCache;
@@ -80,6 +81,8 @@ class CacheManager
 	{
 		FabMetricsCache::Cache()->Clear();
 		SelectedMetricsMetadataCache::Cache()->Clear();
+		self::CleanMetricGroupsMetadataCache();
+		self::CleanMetricProvidersMetadataCache();
 	}
 	public function CleanAllMetricCaches()
 	{
@@ -96,6 +99,10 @@ class CacheManager
 	public function CleanMetricGroupsMetadataCache()
 	{
 		MetricGroupsMetadataCache::Cache()->Clear();
+	}
+	public function CleanMetricProvidersMetadataCache()
+	{
+		MetricProvidersMetadataCache::Cache()->Clear();
 	}
 
 	// Metric

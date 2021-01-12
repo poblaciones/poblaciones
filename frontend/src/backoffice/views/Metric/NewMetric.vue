@@ -14,30 +14,34 @@
 
 			<md-dialog-content>
 				<div class="md-layout-item md-size-90 md-small-size-100">
-						<mp-simple-text :canEdit="selectedMetric === null"
-											label="Nuevo indicador" ref="metricInput"
-											helper="Ej. Acceso a agua potable" @enter="save"
-											:maxlength="75" v-model="newMetricName"
-									></mp-simple-text>
+					<mp-simple-text :canEdit="selectedMetric === null"
+													label="Nuevo indicador" ref="metricInput"
+													helper="Ej. Acceso a agua potable" @enter="save"
+													:maxlength="75" v-model="newMetricName"></mp-simple-text>
 				</div>
 
 				<div v-if="Work.IsPublicData()" class='md-layout-item md-size-75 md-small-size-100'>
 					<mp-select label='Categoría'
-										ref='categoryInput'
-										v-model="newMetricGroup"
-										list-key='Id'
-										:list='MetricGroups'
-										helper='Indique el tipo de información del indicador.'
-										/>
+										 ref='categoryInput'
+										 v-model="newMetricGroup"
+										 list-key='Id'
+										 :list='MetricGroups'
+										 helper='Indique el tipo de información del indicador.' />
+				</div>
+				<div v-if="Work.IsPublicData()" class='md-layout-item md-size-75 md-small-size-100'>
+					<mp-select label='Origen'
+										 ref='categoryInput'
+										 v-model="newMetricProvider"
+										 list-key='Id'
+										 :list='MetricProviders'
+										 helper='Indique la fuente agrupada del indicador.' />
 				</div>
 
 				<div class="md-layout-item md-size-60 md-small-size-100">
-					<mp-simple-text
-									ref="metricVersionInput"
-									label="Edición" @enter="save"
-									helper="Año de referencia de la edición o serie de datos. Ej. 2010"
-									:maxlength="20" v-model="newMetricVersion"
-								></mp-simple-text>
+					<mp-simple-text ref="metricVersionInput"
+													label="Edición" @enter="save"
+													helper="Año de referencia de la edición o serie de datos. Ej. 2010"
+													:maxlength="20" v-model="newMetricVersion"></mp-simple-text>
 				</div>
 
 				<div class="md-layout-item md-size-80 md-small-size-100">
@@ -75,6 +79,7 @@ export default {
 		return {
 			newMetricName: '',
 			newMetricGroup: null,
+			newMetricProvider: null,
 			newMetricVersion: '',
 			selectedMetric: null,
 			openPopup: false,
@@ -86,6 +91,9 @@ export default {
 		},
 		Dataset() {
 			return window.Context.CurrentDataset;
+		},
+		MetricProviders() {
+			return window.Context.MetricProviders.list;
 		},
 		MetricGroups() {
 			return window.Context.MetricGroups.list;
@@ -142,6 +150,7 @@ export default {
 			level.MetricVersion.Caption = loc.newMetricVersion.trim();
 			level.MetricVersion.Metric.Caption = loc.newMetricName.trim();
 			level.MetricVersion.Metric.MetricGroup = loc.newMetricGroup;
+			level.MetricVersion.Metric.MetricProvider = loc.newMetricProvider;
 			level.MetricVersion.Metric.IsBasicMetric = false;
 			level.Variables = [];
 			this.$refs.invoker.do(this.Dataset,
@@ -156,7 +165,9 @@ export default {
 			this.selectedMetric = metric;
 			this.newMetricVersion = "";
 			var groupId = metric.GroupId;
+			var providerId = metric.ProviderId;
 			this.newMetricGroup = arr.GetById(this.MetricGroups, groupId, null);
+			this.newMetricProvider = arr.GetById(this.MetricProviders, providerId, null);
 			this.newMetricName = metric.Caption;
 			this.$refs.metricVersionInput.focus();
 		},

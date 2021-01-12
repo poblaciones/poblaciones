@@ -121,7 +121,15 @@ class MetricService extends BaseService
 	public function GetAllMetricGroups()
 	{
 		Profiling::BeginTimer();
-		$ret = App::Orm()->findAll(entities\MetricGroup::class, 'Order');
+		$ret = App::Orm()->findAll(entities\MetricGroup::class, 'Caption');
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public function GetAllMetricProviders()
+	{
+		Profiling::BeginTimer();
+		$ret = App::Orm()->findAll(entities\MetricProvider::class, 'Caption');
 		Profiling::EndTimer();
 		return $ret;
 	}
@@ -234,7 +242,7 @@ class MetricService extends BaseService
 	private function GetAllMetricByType($type)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT mtr_id Id, mtr_caption Caption, mtr_metric_group_id GroupId,
+		$sql = "SELECT mtr_id Id, mtr_caption Caption, mtr_metric_group_id GroupId,  mtr_metric_provider_id ProviderId,
 									" . $this->VersionsSubselect() . "
 									FROM draft_metric WHERE
 									EXISTS(SELECT 1 FROM draft_metric_version JOIN draft_work
@@ -249,7 +257,7 @@ class MetricService extends BaseService
 	private function GetAllowedByType($type)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT mt1.mtr_id Id, mt1.mtr_caption Caption, mt1.mtr_metric_group_id GroupId,
+		$sql = "SELECT mt1.mtr_id Id, mt1.mtr_caption Caption, mt1.mtr_metric_group_id GroupId, mt1.mtr_metric_provider_id ProviderId,
 									" . $this->VersionsSubselect() . "
 											FROM draft_work_permission
 											JOIN draft_work ON wrk_id = wkp_work_id

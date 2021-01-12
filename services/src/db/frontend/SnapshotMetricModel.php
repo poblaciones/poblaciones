@@ -32,7 +32,7 @@ class SnapshotMetricModel extends BaseModel
 		{
 			$where = "WHERE mvw_work_is_indexed = 1 AND mvw_work_is_private = 0 ";
 			$having = "HAVING SUM(case when mvw_work_type = 'P' then 1 else 0 end) > 0 ";
-			$orderBy = "ORDER BY myv_metric_group_id, myv_metric_caption ";
+			$orderBy = "ORDER BY myv_metric_group_id, myv_metric_provider_id, myv_metric_caption ";
 		}
 		else
 		{
@@ -45,6 +45,7 @@ class SnapshotMetricModel extends BaseModel
 										MIN(mvw_metric_caption) myv_metric_caption,
 										MAX(mvw_metric_revision) myv_metric_revision,
 										MIN(mvw_metric_group_id) myv_metric_group_id,
+										MIN(mvw_metric_provider_id) myv_metric_provider_id,
 										GROUP_CONCAT(mvw_work_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_ids,
 										GROUP_CONCAT(mvw_work_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_captions,
 										GROUP_CONCAT(mvw_work_is_private ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_private,

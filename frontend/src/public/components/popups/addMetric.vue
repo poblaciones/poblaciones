@@ -1,5 +1,5 @@
 <template>
-	<Modal class="panel card" title="Agregar indicador" ref="showPopup" :showCancel="false" :showOk="false">
+	<Modal title="Agregar indicador" ref="showPopup" :showCancel="false" :showOk="false">
 		<div v-if="list">
 			<div class="listContainer">
 				<table class="localTable">
