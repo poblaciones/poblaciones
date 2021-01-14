@@ -1,7 +1,7 @@
 <template>
 	<div v-show="visible" :class="[ 'fab-panel', outerBorderRadiusClass ]"
 		:style="{ 'background-color': bgColor, 'max-width': width + 'px', 'width': getWidth }" ref="fabPanel">
-		<div class="fab-triangle" :style="{ 'border-right-color': bgColor }"></div>
+		<div class="fab-triangle" :style="{ 'border-right-color': bgColor }" ref="triangle"></div>
 		<div v-if="showScrollButtons" ref="scrollUp" class="fab-scroll-button-disabled top-radius" :style="style"
 			@click="scrollUp" @mouseenter="scrollUpStart" @mouseleave="scrollUpStop">
 			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_up</i>
@@ -71,6 +71,9 @@ export default {
 		},
 		scrollAt: {
 			default: 7,
+		},
+		marginVertical: {
+			default: 15, //Vertical: aplica a top y bottom
 		},
 		scrollButtonHeight: {
 			default: 19,
@@ -152,14 +155,45 @@ export default {
 			return false;
 		},
 	},
+	created() {
+		window.addEventListener("resize", this.position);
+	},
+	destroyed() {
+		window.removeEventListener("resize", this.position);
+	},
 	updated() {
-		var maxHeight = this.visibleMaxHeight();
-		if(this.scrollButtons) {
-			maxHeight += 2 * this.scrollButtonHeight;
-		}
-		this.$refs.fabPanel.style.maxHeight = maxHeight + 'px';
+		this.maxHeight();
+		this.position();
 	},
 	methods: {
+		maxHeight() {
+			var maxHeight = this.visibleMaxHeight();
+			if(this.scrollButtons) {
+				maxHeight += 2 * this.scrollButtonHeight;
+			}
+			this.$refs.fabPanel.style.maxHeight = maxHeight + 'px';
+		},
+		position() {
+			if(this.visible == false) {
+				return;
+			}
+			this.$refs.fabPanel.style.top = "";
+			this.$refs.triangle.style.top = "";
+
+			var rect = this.$refs.fabPanel.getBoundingClientRect();
+			// Se pasa arriba
+			if (rect.top - this.marginVertical < 0) {
+				this.$refs.triangle.style.top = (this.$refs.triangle.offsetTop + rect.top - this.marginVertical) + "px";
+				this.$refs.fabPanel.style.top = this.marginVertical + "px";
+			}
+
+			// Se pasa abajo
+			var outside = rect.bottom - (window.innerHeight || document.documentElement.clientHeight);
+			if (outside + this.marginVertical > 0) {
+				this.$refs.fabPanel.style.top = (this.$refs.fabPanel.offsetTop - outside - this.marginVertical) + "px";
+				this.$refs.triangle.style.top = (this.$refs.triangle.offsetTop + outside + this.marginVertical) + "px";
+			}
+		},
 		show() {
 			this.visible = true;
 		},

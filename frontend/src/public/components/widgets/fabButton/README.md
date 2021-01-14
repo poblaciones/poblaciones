@@ -31,6 +31,7 @@ fabActions.items = [
 - `scrollTime` (en ms) tiempo entre cada desplazamiento en modo ``auto``.
 - `scrollAt` (default `7`), cantidad de ítems para mostrar botones de arriba y abajo o scrollbars.
 - `ellipsis` (default `true`), agrega elipsis si el texto del ítem es muy largo y muestra un tooltip, si es `false`, lo pone en dos renglones (queda bien también).
+- `marginVertical` (default: `15`), margen mínimo para dejar en el panel abajo y arriba.
 - `width` y `fixedWidth`, si `fixedWidth` es `false`, entonces `with` pasa a ser `'max-width'`, sino es fijo, es el valor de `'width'`.
 - (`height`, no tiene propiedad porque se calcula en relación a la cantidad de ítems de `scrollAt`, hace la cuenta y setea `'max-height'` automático).
 - `bgColor`, `scrollColor`, `scrollBgColor` y `hoverColor`, se explican solos. Una nota sobre `hoverColor`, tiene el color complementario al celeste que estaba en lugar del marrón que está en otros menús de la página, tomado de una página que lo calcula (el link está en el código), también está comentado el color marrón por si se quiere usar, descomentar.
