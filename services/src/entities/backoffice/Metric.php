@@ -158,7 +158,7 @@ class Metric
      *
      * @param \helena\entities\backoffice\MetricProvider $metricProvider
      *
-     * @return DraftMetric
+     * @return Metric
      */
     public function setMetricProvider(\helena\entities\backoffice\MetricProvider $metricProvider = null)
     {
