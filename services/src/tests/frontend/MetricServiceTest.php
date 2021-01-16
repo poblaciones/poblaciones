@@ -17,6 +17,7 @@ class MetricServiceTest extends TestCase
 		$this->assertGreaterThan(0, count($ret));
 		$this->assertInstanceOf(MetricGroupInfo::class, $ret[0]);
 		$this->assertTrue(isset($ret[0]->Metrics[0]));
-		$this->assertInstanceOf(MetricInfo::class, $ret[0]->Metrics[0]);
+		$this->assertTrue($ret[0]->Metrics[0]['Header']);
+		$this->assertInstanceOf(MetricInfo::class, $ret[0]->Metrics[1]);
 	}
 }
