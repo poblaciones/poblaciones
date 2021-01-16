@@ -8,6 +8,7 @@ use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionModel;
 use helena\services\backoffice\publish\snapshots\SnapshotGeographiesByRegionModel;
 use helena\services\backoffice\publish\CacheManager;
+use helena\services\backoffice\publish\SnapshotsManager;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\classes\Session;
 use helena\classes\Menu;
@@ -74,6 +75,8 @@ class cCaches extends cController
 		} else if (array_key_exists('selectedMetric', $_POST)) {
 			$model = new SnapshotMetricVersionModel();
 			$n = $model->IncrementAllSignatures();
+			$sm = new SnapshotsManager();
+			$sm->UpdateAllMetricMetadata();
 			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores y vaciado el cache de selectedMetrics.';
 			$cm = new CacheManager();
 			$cm->CleanSelectedMetricCache();

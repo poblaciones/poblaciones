@@ -403,7 +403,7 @@ export default {
 }
 
 .fab-panel-item-header {
-	background-color: #0a94bd;
+	background-color: #66666650;
 	padding: 2px 14px;
 	white-space: nowrap;
 	pointer-events: none;
@@ -412,8 +412,6 @@ export default {
 }
 .fab-panel-item-header-offset {
 	margin-top: 9px;
-}
-.fab-panel-item-header-content {
 }
 
 .fab-triangle {
@@ -433,7 +431,7 @@ export default {
 	color: white;
 	cursor: pointer;
 	height: var(--height);
-	background-color: #00a8dc;
+	background-color: #cccccc30;
 }
 
 .fab-scroll-button:hover {
@@ -442,10 +440,10 @@ export default {
 
 .fab-scroll-button-disabled {
 	text-align: center;
-	color: #278faf;
+	color: #00000028;
 	cursor: pointer;
 	height: var(--height);
-	background-color: #0aa6d6;
+	background-color: #cccccc30;
 }
 
 .no-radius {

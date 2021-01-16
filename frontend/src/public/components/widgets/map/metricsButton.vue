@@ -58,7 +58,7 @@ export default {
 			var ret = [];
 			for(var n = 0; n < this.fabMetrics.length; n++) {
 				var action = this.fabMetrics[n];
-				var fabAction = { name: 'selected' + n, tooltip: action.Name, icon: action.Icon, items: this.addSubHeaders(action.Metrics)};
+				var fabAction = { name: 'selected' + n, tooltip: action.Name, icon: action.Icon, items: action.Metrics};
 				ret.push(fabAction);
 			}
 			return ret;
@@ -78,20 +78,6 @@ export default {
 				err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
 			});
 		},
-		addSubHeaders(list) {
-			var last = null;
-			var ret = [];
-			for (var n = 0; n < list.length; n++) {
-				var item = list[n];
-				if (item.Provider !== last) {
-					var separator = { Id: null, Name: (item.Provider === null ? 'Otras fuentes' : item.Provider), Header: true };
-					ret.push(separator);
-					last = item.Provider;
-				}
-				ret.push(item);
-			}
-			return ret;
-		},
 		keyProcess(e) {
 			if (e.key === "Escape") {
 				if (this.$refs.vuefab.toggle) {
@@ -106,7 +92,7 @@ export default {
 		selected(n) {
 			this.action = this.fabMetrics[n];
 			this.$refs.vuefab.toggle = false;
-			window.Popups.AddMetric.show(this.action.Metrics);
+			window.Popups.AddMetric.show(this.action.Metrics, null, this.action.Name);
 		}
 	},
 };

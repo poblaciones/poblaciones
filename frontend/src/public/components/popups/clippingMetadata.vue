@@ -1,5 +1,5 @@
 <template>
-	<Modal :title="title" ref="showFuente" :showCancel="false" :showOk="false">
+	<Modal :title="title" ref="showFuente" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metadata">
 			<div>
 				<table class="localTable">
@@ -81,6 +81,7 @@ import Modal from '@/public/components/popups/modal';
 export default {
 	name: 'clippingMetadataPopup',
 	props: [
+		'backgroundColor'
 	],
 	components: {
     creativeCommons,

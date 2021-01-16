@@ -71,54 +71,85 @@ class MetricService extends BaseService
 		$sets = $this->GetFabMetricsGrouped();
 		$groups = $this->GetMetricGroups();
 		$providers = $this->GetMetricProviders();
-		$nullProvider = new MetricProviderInfo();
 
 		foreach($groups as $group)
 		{
 			if (array_key_exists($group->Id, $sets))
 			{
-				$metrics = array();
-				// crea los metricInfo a partir del registro de la base de datos
-				foreach($sets[$group->Id] as $metric)
-				{
-					$metricInfo = $this->CreateMetric($metric);
-					// La asigna un provider
-					if ($metricInfo->MetricProviderId)
-						$metricInfo->Provider = Arr::GetItemByProperty($providers, 'Id', $metricInfo->MetricProviderId);
-					else
-						$metricInfo->Provider = $nullProvider;
-					// Lo agrega
-					$metrics[] = $metricInfo;
-				}
+				$metrics = $this->createMetricInfos($sets[$group->Id], $providers);
 				// Los ordena por provider, dejando los nulos al final
 				usort($metrics, array($this, 'sortByOrderDescriptionNullAtEnd'));
-				// cambia objetos por name
+				// inserta los headers
+				$metrics = $this->addSubHeaders($metrics);
+				// saca los provider
 				foreach($metrics as $metric)
 				{
-					if ($metric->Provider)
-						$metric->Provider = $metric->Provider->Name;
+					unset($metric->Provider);
 				}
 				// Listo
-				$group->Metrics[] = $metrics;
+				$group->Metrics = $metrics;
 				$ret[] = $group;
 			}
 		}
 		return $ret;
 	}
+	private function addSubHeaders($list)
+	{
+		$last = null;
+		$ret = [];
+		foreach($list as $metric)
+		{
+			if ($metric->Provider->Name !== $last)
+			{
+					$separator = [ 'Id' => null, 'Name' =>
+										 ($metric->Provider->Name === null ? 'Otras fuentes' : $metric->Provider->Name),
+												'Header' => true ];
+					$ret[] = $separator;
+					$last = $metric->Provider->Name;
+			}
+			$ret[] = $metric;
+		}
+		return $ret;
+	}
+
+	private function createMetricInfos($rows, $providers)
+	{
+		$metrics = array();
+		$nullProvider = new MetricProviderInfo();
+
+		// crea los metricInfo a partir del registro de la base de datos
+		foreach($rows as $metric)
+		{
+			$metricInfo = $this->CreateMetric($metric);
+			// La asigna un provider
+			if ($metricInfo->MetricProviderId)
+				$metricInfo->Provider = Arr::GetItemByProperty($providers, 'Id', $metricInfo->MetricProviderId);
+			else
+				$metricInfo->Provider = $nullProvider;
+			// Lo agrega
+			$metrics[] = $metricInfo;
+		}
+		return $metrics;
+	}
 	private static function sortByOrderDescriptionNullAtEnd($a, $b)
 	{
 		// Primero define el orden...
-		if ($a->Provider->Order !== $a->Provider->Order)
+		if ($a->Provider->Order !== $b->Provider->Order)
 		{
-			if ($a->Provider->Name === null) return 1;
-			if ($b->Provider->Name === null) return -1;
+			if ($a->Provider->Order === null) return 1;
+			if ($b->Provider->Order === null) return -1;
 			return ($a->Provider->Order > $b->Provider->Order ? 1 : -1);
 		}
 		else
 		{
 			if ($a->Provider->Name === null) return 1;
 			if ($b->Provider->Name === null) return -1;
-			return strcasecmp($a->Provider->Name, $b->Provider->Name);
+			$ret = strcasecmp($a->Provider->Name, $b->Provider->Name);
+			if ($ret === 0)
+			{
+				return strcasecmp($a->Name, $b->Name);
+			}
+			return $ret;
 		}
 	}
 	private function GetFabMetricsGrouped()

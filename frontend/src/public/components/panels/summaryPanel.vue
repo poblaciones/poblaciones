@@ -11,12 +11,12 @@
 			</draggable>
 		</div>
 		<div>
-			<WorkMetadata ref="showFuente" />
-			<ClippingMetadata ref="showClippingMetadata" />
-			<MetricDownload ref="showDescargar" />
-			<MetricCustomize ref="showCustomize" />
-			<WaitMessage ref="showWaitMessage" />
-			<AddMetric ref="addMetric" />
+			<WorkMetadata ref="showFuente" :backgroundColor="backgroundColor" />
+			<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
+			<MetricDownload ref="showDescargar" :backgroundColor="backgroundColor" />
+			<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
+			<WaitMessage ref="showWaitMessage" :backgroundColor="backgroundColor" />
+			<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
 		</div>
 	</div>
 </template>
@@ -53,6 +53,7 @@ export default {
 		'frame',
 		'config',
 		'currentWork',
+		'backgroundColor',
 		'user',
 		'toolbarStates',
 		'metrics'

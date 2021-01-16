@@ -30,6 +30,13 @@ class SnapshotsManager extends BaseService
 		$modelVersion->ClearMetric($metricId);
 		$modelVersion->RegenMetric($metricId);
 	}
+	public function UpdateAllMetricMetadata()
+	{
+		// Regen
+		$modelVersion = new SnapshotMetricVersionModel();
+		$modelVersion->ClearAllMetric();
+		$modelVersion->RegenAllMetric();
+	}
 
 	// Dataset
 	public function CleanDataset($datasetId)

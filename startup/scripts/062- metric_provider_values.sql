@@ -1,7 +1,7 @@
 INSERT INTO `metric_provider` (`lpr_caption`) VALUES ('Censos nacionales de población (1991, 2001, 2010)');
 INSERT INTO `metric_provider` (`lpr_caption`) VALUES ('Mapa educativo (2018)');
 INSERT INTO `metric_provider` (`lpr_caption`) VALUES ('Mapa sanitario (2018)');
-INSERT INTO `metric_provider` (`lpr_caption`) VALUES ('Sistema de información cultural (2018)');
+INSERT INTO `metric_provider` (`lpr_caption`, lpr_order) VALUES ('Sistema de información cultural (2018)', 1);
 INSERT INTO `metric_provider` (`lpr_caption`) VALUES ('OpenStreetmap');
 INSERT INTO `metric_provider` (`lpr_caption`) VALUES ('Observatorio de la Deuda Social');
 INSERT INTO `metric_provider` (`lpr_caption`) VALUES ('Dirección nacional electoral (2015)');

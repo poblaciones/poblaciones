@@ -1,5 +1,5 @@
 <template>
-	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false">
+	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metric">
 			<table class="localTable">
 				<tbody>
@@ -123,6 +123,7 @@ export default {
 	name: 'metricDownload',
 	props: [
 		'visible',
+		'backgroundColor'
 	],
 	components: {
     creativeCommons,

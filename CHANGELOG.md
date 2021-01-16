@@ -4,7 +4,10 @@
 - Mejoras en búsqueda por múltiples criterios.
 - Datapack Manager: mejoras mensajes de error. edición de symbol.
 - Fix a descarga de PDF de metadatos desde edición.
-- Subnivel al botón de agregar indicador
+- El botón de agregar indicador muestra los contenidos sobre el mapa.
+- Los indicadores públicos tienen un segundo nivel de agrupamiento.
+- Fix: el botón de agregar indicador no se encima a la ventana de agregar indicador.
+- Fix: en modo satélite, las etiquetas de los valores sobre el mapa no cambiaban a blanco.
 
 v2.32 (2020-12-07)
 - Fix exportación a shapefile de datasets con polígonos se interumpía.

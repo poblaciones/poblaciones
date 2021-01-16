@@ -1,5 +1,5 @@
 <template>
-	<Modal :title="text" id="waitMessage" ref="dialog"
+	<Modal :title="text" id="waitMessage" ref="dialog" :backgroundColor="backgroundColor"
 				 :hasBody="false" :showCancel="false" :showOk="false" :showClose="false" :clickOutsideToClose="false">
 		<div class="popupSubTitle">
 				{{ text }}
@@ -15,7 +15,9 @@ export default {
 	components: {
 		Modal
 	},
-
+	props: [
+		'backgroundColor'
+	],
 	data() {
 		return {
 			text: ''

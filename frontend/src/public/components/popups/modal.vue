@@ -4,10 +4,11 @@
 			<div class="modal-dialog" :class="modalClass" @click.self="clickMask" ref="dialog">
 				<div class="modal-content card">
 					<!--Header-->
-					<div class="modal-header mpHeader unselectable">
+					<div class="modal-header mpHeader unselectable" :style="'background-color: ' + backgroundColor">
 						<slot name="header">
-						<a v-if="showClose" type="button" class="close" style="padding: 3px; margin-right: 2px;" @click="cancel">x</a>
-						<h5 class="title">
+						<a v-if="showClose" type="button" class="close white" style="padding: 3px; margin-right: 2px;
+														    opacity: .75;font-size: 20px; font-weight: 200;" @click="cancel">x</a>
+						<h5 class="title white">
 							<slot name="title">
 								<img src="/static/img/spinner.gif" class="waitImg" v-if="!hasBody" />
 								{{ title }}
@@ -38,12 +39,13 @@
  * Bootstrap Style Modal Component for Vue
  * Depend on Bootstrap.css
  */
-export default {
-	props: {
+	export default {
+		props: {
 		showCancel: {
 			type: Boolean,
 			default: true
 		},
+		backgroundColor: {},
 		showOk: {
 			type: Boolean,
 			default: true
@@ -204,6 +206,9 @@ export default {
 .mpHeader {
 	padding: 8px!important;
   padding-left: 12px!important;
+}
+.white {
+	color: white;
 }
 .mpHeaderClose {
 	margin-top: 0px;

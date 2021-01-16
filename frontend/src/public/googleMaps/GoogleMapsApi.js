@@ -86,7 +86,7 @@ GoogleMapsApi.prototype.Write = function(text, location, zIndex, style, innerSty
 		style = 'mapLabels';
 	}
 	if (!ignoreMapMode && this.IsSatelliteType()) {
-		style += ' mapLabelsSat';
+		style += ' sat';
 	}
 	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex, innerStyle, type, hidden);
 	return overlay;

@@ -1,5 +1,5 @@
 <template>
-	<Modal title="Personalizar" ref="dialog" :showCancel="false" :showOk="false">
+	<Modal title="Personalizar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metric && metric.SelectedVariable()">
 			<table class="localTable">
 				<tr>
@@ -108,7 +108,9 @@ export default {
 	components: {
 		Modal
 	},
-
+	props: [
+		'backgroundColor'
+	],
 	data() {
 		return {
 			metric: null

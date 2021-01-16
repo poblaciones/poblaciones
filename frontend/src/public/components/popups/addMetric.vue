@@ -1,25 +1,18 @@
 <template>
-	<Modal title="Agregar indicador" ref="showPopup" :showCancel="false" :showOk="false">
+	<Modal :title="title" ref="showPopup" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="list">
 			<div class="listContainer">
-				<table class="localTable">
-					<tbody>
-						<tr style="font-size: 1.2em">
-							<td style="width: 390px">Indicador</td>
-							<td style="width: 130px" align="center">Ediciones</td>
-						</tr>
-					</tbody>
-				</table>
-				<div style="height: 240px; max-width: 540px; overflow: auto;
+				<div style="height: 240px; overflow: auto;
 					 border: 1px solid #e2e2e2;">
 					<table class="localTable">
 						<tbody>
 							<tr v-for="(item, index) in list" @mouseover="selected = item"
 									@mouseleave="leave(item)"
 									@click="select(item)" :key="item.Id"
-									:class="(index < list.length - 1 ? 'metricrowborder ' : '') + ' hand ' + (selected === item ? 'selectedRow' : '')">
-								<td class="metricCell" style="width: 390px">{{ item.Name }}</td>
-								<td class="metricCell" align="center" style="width: 150px">{{ joinVersions(item.Versions) }}</td>
+									:class="[(index < list.length - 1 ? 'metricrowborder ' : ''), 'hand',
+														(selected === item ? 'selectedRow' : ''), (item.Header ? 'row-header' : '')]">
+								<td :colspan="(item.Header ? 2 : 1)" class="metricCell" style="width: 396px">{{ item.Name }}</td>
+								<td v-if="!item.Header" class="metricCell" align="center" style="width: 150px">{{ joinVersions(item.Versions) }}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -40,9 +33,13 @@ export default {
 		return {
 			list: [],
 			workId: null,
-			selected: null
+			selected: null,
+			title: ''
 		};
 	},
+	props: [
+		'backgroundColor'
+	],
 	components: {
 		Modal
  },
@@ -63,10 +60,11 @@ export default {
 				}
 			}
 		},
-		show(list, workId) {
+		show(list, workId, title) {
 			if (!list) {
 				list = [];
 			}
+			this.title = (title ? title : 'Agregar indicador');
 			this.workId = workId;
 			this.list = list;
 			this.$refs.showPopup.show();
@@ -89,19 +87,33 @@ export default {
 </script>
 
 <style scoped>
+
 .metricrowborder {
 	border-bottom: 1px solid #e2e2e2;
 }
+
+.row-header {
+  background-color: #efefef;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+	pointer-events: none;
+}
+
+.row-header > td {
+	padding: 2px 6px;
+}
+
 .metricCell {
 	padding-top: 10px;
 	padding-bottom: 10px;
 
 }
 .listContainer {
-	padding-left: 15px; padding-right: 15px; margin-bottom: 8px;
+	padding: 15px;
 }
 
 .selectedRow {
-	background-color: #efefef;
-	}
+	background-color: #66615b;
+	color: hsla(0,0%,100%,.7);
+}
 </style>

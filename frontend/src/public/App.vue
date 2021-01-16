@@ -12,7 +12,7 @@
 				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
-				<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
+				<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
 					:clipping="clipping" :frame="frame" :user="user" :currentWork="work.Current"
 					:toolbarStates="toolbarStates"></SummaryPanel>
 			</div>
@@ -489,21 +489,26 @@ a:hover {
 	bottom: 0.4em;
 	text-align: center;
 }
-.mapLabelsSat .ibLinkC {
-color: #d4edff !important;
 
+.sat {
+	text-shadow: .75px .75px 1px #000, -.75px -1px 1px #000, -.75px .75px 1px #000, .75px -1px 1px #000, .75px .75px 1px #000, -.75px -1px 1px #000, -.75px 1px 1px #000, .75px -.75px 1px #000 !important;
+	color: #fff!important;
 }
 
-.mapLabelsSat .ibLinkC:hover {
+.sat .ibLinkC {
+color: #d4edff !important;
+}
+
+.sat .ibLinkC:hover {
 	color: #5591ec !important;
 	text-decoration: none !important;
 }
 
-.mapLabelsSat .ibLink {
+.sat .ibLink {
 color: #fff!important;
 }
 
-.mapLabelsSat .ibLink:hover {
+.sat .ibLink:hover {
 color: #5591ec!important;
 text-decoration: none !important;
 }
@@ -608,9 +613,7 @@ text-decoration: none !important;
 .color-muted {
 	color: #999!important;
 }
-.mapLabelsSat {
-	text-shadow: .75px .75px 1px #000, -.75px -1px 1px #000, -.75px .75px 1px #000, .75px -1px 1px #000, .75px .75px 1px #000, -.75px -1px 1px #000, -.75px 1px 1px #000, .75px -.75px 1px #000 !important;
-}
+
 .mapLabels {
 	max-width: 200px;
 	background: transparent;

@@ -1,5 +1,5 @@
 <template>
-  <Modal :title="this.title" ref="dialog" :showCancel="false" :showOk="false">
+  <Modal :title="this.title" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metric || work">
 			<table class="localTable">
 				<tbody>
@@ -92,6 +92,9 @@ import Modal from '@/public/components/popups/modal';
 
 export default {
 	name: 'workMetadataPopup',
+	props: [
+		'backgroundColor'
+	],
 	components: {
     creativeCommons,
     FilePdfIcon,
