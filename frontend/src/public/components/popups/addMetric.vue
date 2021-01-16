@@ -2,7 +2,7 @@
 	<Modal :title="title" ref="showPopup" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="list">
 			<div class="listContainer">
-				<div style="height: 240px; overflow: auto;
+				<div style="max-height: 50vh; min-height: 240px; overflow: auto;
 					 border: 1px solid #e2e2e2;">
 					<table class="localTable">
 						<tbody>

@@ -1,13 +1,16 @@
 [CURRENT]
+
+v2.33 (2021-01-15)
 - Incorporación de íconos para las etiquetas del mapa.
 - Incorporación de regiones sanitarias.
 - Mejoras en búsqueda por múltiples criterios.
 - Datapack Manager: mejoras mensajes de error. edición de symbol.
 - Fix a descarga de PDF de metadatos desde edición.
 - El botón de agregar indicador muestra los contenidos sobre el mapa.
-- Los indicadores públicos tienen un segundo nivel de agrupamiento.
+- Los indicadores públicos tienen un segundo nivel de agrupamiento (censo, mapa educativo, etc.).
 - Fix: el botón de agregar indicador no se encima a la ventana de agregar indicador.
 - Fix: en modo satélite, las etiquetas de los valores sobre el mapa no cambiaban a blanco.
+- Mejoras en usabilidad de ventana de popup de indicadores
 
 v2.32 (2020-12-07)
 - Fix exportación a shapefile de datasets con polígonos se interumpía.

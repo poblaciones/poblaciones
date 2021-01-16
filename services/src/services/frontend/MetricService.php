@@ -142,14 +142,13 @@ class MetricService extends BaseService
 		}
 		else
 		{
-			if ($a->Provider->Name === null) return 1;
-			if ($b->Provider->Name === null) return -1;
-			$ret = strcasecmp($a->Provider->Name, $b->Provider->Name);
-			if ($ret === 0)
+			if ($a->Provider->Name === $b->Provider->Name)
 			{
 				return strcasecmp($a->Name, $b->Name);
 			}
-			return $ret;
+			if ($a->Provider->Name === null) return 1;
+			if ($b->Provider->Name === null) return -1;
+			return strcasecmp($a->Provider->Name, $b->Provider->Name);
 		}
 	}
 	private function GetFabMetricsGrouped()

@@ -18,7 +18,6 @@
 								<fabPanel v-if="usePanel" ref="fabPanel" @selected="selectedParent"
 									 :items="action.items"
 									 :actionIconSize="actionIconSize"
-									 :rippleColor="rippleColor"
 									 :bgColor="action.color || bgColor"></fabPanel>
 							</li>
 						</template>
@@ -30,7 +29,6 @@
 								<fabPanel v-if="usePanel" ref="fabPanel" @selected="selectedParent"
 									 :items="action.items"
 									 :actionIconSize="actionIconSize"
-									 :rippleColor="rippleColor"
 									 :bgColor="action.color || bgColor"></fabPanel>
 							</li>
 						</template>
@@ -39,37 +37,18 @@
 			</ul>
 			</transition>
 		</div>
-		<template v-if="rippleShow">
-			<template v-if="mainTooltip">
-				<div v-ripple="rippleColor == 'light' ? 'rgba(255, 255, 255, 0.35)' : ''" @click="toggle = !toggle"
-					v-tooltip="{ content: mainTooltip, placement: tooltipPosition, classes: 'fab-tooltip' }"
-					class="fab-main pointer" :style="{ 'background-color': bgColor, 'padding': paddingAmount }">
-					<i :class="[ mainIconSize, { rotate: toggle && allowRotation }, 'material-icons main', 'no-highlight' ]">{{ mainIcon }}</i>
-					<i :class="[ mainIconSize, { rotate: toggle && allowRotation }, 'material-icons close', 'no-highlight' ]">add</i>
-				</div>
-			</template>
-			<template v-else>
-				<div v-ripple="rippleColor == 'light' ? 'rgba(255, 255, 255, 0.35)' : ''" @click="toggle = !toggle"
-					class="fab-main pointer" :style="{ 'background-color': bgColor, 'padding': paddingAmount }">
-					<i :class="[ mainIconSize, { rotate: toggle && allowRotation }, 'material-icons main', 'no-highlight' ]">{{ mainIcon }}</i>
-					<i :class="[ mainIconSize, { rotate: toggle && allowRotation }, 'material-icons close', 'no-highlight' ]">add</i>
-				</div>
-			</template>
+		<template v-if="mainTooltip">
+			<div @click="toggle = !toggle"
+				v-tooltip="{ content: mainTooltip, placement: tooltipPosition, classes: 'fab-tooltip' }"
+				class="fab-main pointer" :style="{ 'background-color': bgColor, 'padding': paddingAmount }">
+				<i :class="[ mainIconSize, { rotate: toggle && allowRotation }, 'material-icons main', 'no-highlight' ]">{{ mainIcon }}</i>
+			</div>
 		</template>
 		<template v-else>
-			<template v-if="mainTooltip">
-				<div :v-tooltip="{ content: mainTooltip, placement: tooltipPosition, classes: 'fab-tooltip'}"
-						 class="fab-main pointer" :style="{ 'background-color': bgColor, 'padding': paddingAmount }">
-					<i class="material-icons md-36 main" :class="[ 'no-highlight', { rotate: toggle && allowRotation } ]">{{ mainIcon }}</i>
-					<i class="material-icons md-36 close" :class="[ 'no-highlight', { rotate: toggle && allowRotation } ]">add</i>
-				</div>
-			</template>
-			<template v-else>
-				<div class="fab-main pointer" :style="{ 'background-color': bgColor, 'padding': paddingAmount }">
-					<i class="material-icons md-36 main" :class="[ 'no-highlight', { rotate: toggle && allowRotation } ]">{{ mainIcon }}</i>
-					<i class="material-icons md-36 close" :class="[ 'no-highlight', { rotate: toggle && allowRotation } ]">add</i>
-				</div>
-			</template>
+			<div @click="toggle = !toggle"
+				class="fab-main pointer" :style="{ 'background-color': bgColor, 'padding': paddingAmount }">
+				<i :class="[ mainIconSize, { rotate: toggle && allowRotation }, 'material-icons main', 'no-highlight' ]">{{ mainIcon }}</i>
+			</div>
 		</template>
 	</div>
 </template>
@@ -80,7 +59,6 @@
 // https://github.com/PygmySlowLoris/vue-fab
 
 import {mixin as clickaway} from 'vue-clickaway';
-import Ripple from 'vue-ripple-directive';
 import {VTooltip} from 'v-tooltip';
 import fabPanel from '@/public/components/widgets/fabButton/fabPanel';
 
@@ -91,7 +69,6 @@ export default {
 		fabPanel,
 	},
 	directives: {
-		Ripple,
 		tooltip: VTooltip,
 	},
 	data() {
@@ -129,12 +106,6 @@ export default {
 		},
 		zIndex: {
 			default: '999',
-		},
-		rippleShow: {
-			default: true
-		},
-		rippleColor: {
-			default: 'light'
 		},
 		mainIcon: {
 			default: 'add'

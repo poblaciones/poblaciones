@@ -1,7 +1,7 @@
 <template>
 	<div v-show="visible" :class="[ 'fab-panel', outerBorderRadiusClass ]"
 		:style="{ 'background-color': bgColor, 'max-width': width + 'px', 'width': getWidth }" ref="fabPanel">
-		<div class="fab-triangle" :style="{ 'border-right-color': bgColor }"></div>
+		<div class="fab-triangle" :style="{ 'border-right-color': bgColor }" ref="triangle"></div>
 		<div v-if="showScrollButtons" ref="scrollUp" class="fab-scroll-button-disabled top-radius" :style="style"
 			@click="scrollUp" @mouseenter="scrollUpStart" @mouseleave="scrollUpStop">
 			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_up</i>
@@ -12,8 +12,7 @@
 				<li v-for="(item, index) in items" :key="item.Id" :class="[ 'fab-panel-item', ellipsisClass, 'unselectable',
 						(item.Header ? (index === 0 && !showScrollButtons ? 'fab-panel-item-header fab-panel-item-header-offset' : 'fab-panel-item-header') : '')]" :style="style" @click="select(item)"
 						v-tooltip="{ content: item.Name, placement: 'top', classes: 'fab-tooltip', trigger: 'manual' }"
-						@mouseenter="showTooltip($event.target)" @mouseleave="hideTooltip()" ref="liItems"
-						v-ripple="rippleEffect">
+						@mouseenter="showTooltip($event.target)" @mouseleave="hideTooltip()" ref="liItems">
 					{{ item.Name }}
 				</li>
 			</ul>
@@ -27,12 +26,10 @@
 
 <script>
 import {VTooltip} from 'v-tooltip';
-import Ripple from 'vue-ripple-directive';
 
 export default {
 	name: 'fabPanel',
 	directives: {
-		Ripple,
 		tooltip: VTooltip,
 	},
 	data() {
@@ -73,6 +70,9 @@ export default {
 		maxItems: {
 			default: 8,
 		},
+		marginVertical: {
+			default: 15, //Vertical: aplica a top y bottom
+		},
 		scrollButtonHeight: {
 			default: 19,
 		},
@@ -109,9 +109,6 @@ export default {
 		bgColor: {
 			default: '#333333',
 		},
-		rippleColor: {
-			default: 'light'
-		},
 	},
 	computed: {
 		ellipsisClass() {
@@ -146,21 +143,43 @@ export default {
 			}
 			return 'full-radius';
 		},
-		rippleEffect() {
-			if(this.rippleColor == 'light') {
-				return 'rgba(255, 255, 255, 0.35)';
-			}
-			return false;
-		},
+	},
+	created() {
+		window.addEventListener("resize", this.position);
+	},
+	destroyed() {
+		window.removeEventListener("resize", this.position);
 	},
 	updated() {
-		var maxHeight = this.visibleMaxHeight();
-		if(this.scrollButtons) {
-			maxHeight += 2 * this.scrollButtonHeight;
-		}
-		this.$refs.fabPanel.style.maxHeight = maxHeight + 'px';
+		this.updateHeight();
+		this.position();
 	},
 	methods: {
+		updateHeight() {
+			var height = this.calculateHeight();
+			this.$refs.fabPanel.style.maxHeight = height + 'px';
+		},
+		position() {
+			if(this.visible == false) {
+				return;
+			}
+			this.$refs.fabPanel.style.top = "";
+			this.$refs.triangle.style.top = "";
+
+			var rect = this.$refs.fabPanel.getBoundingClientRect();
+			// Se pasa arriba
+			if (rect.top - this.marginVertical < 0) {
+				this.$refs.triangle.style.top = (this.$refs.triangle.offsetTop + rect.top - this.marginVertical) + "px";
+				this.$refs.fabPanel.style.top = this.marginVertical + "px";
+			}
+
+			// Se pasa abajo
+			var outside = rect.bottom - (window.innerHeight || document.documentElement.clientHeight);
+			if (outside + this.marginVertical > 0) {
+				this.$refs.fabPanel.style.top = (this.$refs.fabPanel.offsetTop - outside - this.marginVertical) + "px";
+				this.$refs.triangle.style.top = (this.$refs.triangle.offsetTop + outside + this.marginVertical) + "px";
+			}
+		},
 		show() {
 			this.visible = true;
 		},
@@ -182,20 +201,25 @@ export default {
 				return 'unset';
 			}
 		},
-		visibleMaxHeight() {
-			if(this.$refs.liItems && this.$refs.liItems.length > 0) {
-				var total = this.maxHeight + 1;
+		calculateHeight() {
+			var ret;
+			if (this.$refs.liItems && this.$refs.liItems.length > 0) {
+				ret = this.maxHeight + 1;
 				this.adjust = 1;
-				while(total > this.maxHeight) {
-					total = 0;
+				while (ret > this.maxHeight) {
+					ret = 0;
 					this.adjust--;
 					for (var i = 0; i < Math.min(this.maxItems + this.adjust, this.$refs.liItems.length); i++) {
-						total += this.$refs.liItems[i].scrollHeight;
+						ret += this.$refs.liItems[i].scrollHeight;
 					}
 				}
-				return total;
+			} else {
+				ret = this.maxHeight;
 			}
-			return this.maxHeight;
+			if (this.scrollButtons) {
+				ret += 2 * this.scrollButtonHeight;
+			}
+			return ret;
 		},
 		scrollUpStart() {
 			if(this.scrollMode == 'click') {
@@ -259,7 +283,7 @@ export default {
 						if(delta > 0) {
 							delta = items[i].scrollHeight - delta;
 						}
-						const next = i + this.maxItems + 1 + this.adjust;
+						const next = Math.min(i + this.maxItems + 1 + this.adjust, items.length);
 						for (var j = i + 1; j < next; j++) {
 							delta += items[j].scrollHeight;
 						}
@@ -298,15 +322,19 @@ export default {
 		scrolled() {
 			const el = this.$refs.panelScroll;
 			if (el) {
-				if (el.scrollTop == 0 && this.$refs.scrollUp) {
-					this.$refs.scrollUp.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
-				} else {
-					this.$refs.scrollUp.classList.replace('fab-scroll-button-disabled', 'fab-scroll-button');
+				if (this.$refs.scrollUp) {
+					if (el.scrollTop == 0) {
+						this.$refs.scrollUp.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
+					} else {
+						this.$refs.scrollUp.classList.replace('fab-scroll-button-disabled', 'fab-scroll-button');
+					}
 				}
-				if (el.scrollTop == el.scrollHeight - el.offsetHeight && this.$refs.scrollDown) {
-					this.$refs.scrollDown.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
-				} else {
-					this.$refs.scrollDown.classList.replace('fab-scroll-button-disabled', 'fab-scroll-button');
+				if (this.$refs.scrollDown) {
+					if (el.scrollTop == el.scrollHeight - el.offsetHeight) {
+						this.$refs.scrollDown.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
+					} else {
+						this.$refs.scrollDown.classList.replace('fab-scroll-button-disabled', 'fab-scroll-button');
+					}
 				}
 			}
 		},
