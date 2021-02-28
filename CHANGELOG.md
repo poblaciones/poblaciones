@@ -1,4 +1,5 @@
 [CURRENT]
+- Fix: el filtro de urbanidad/ruralidad no podía ser removida en los indicadores 'compactos' (solo lista de elementos).
 
 v2.33 (2021-01-15)
 - Incorporación de íconos para las etiquetas del mapa.
@@ -6,8 +7,8 @@ v2.33 (2021-01-15)
 - Mejoras en búsqueda por múltiples criterios.
 - Datapack Manager: mejoras mensajes de error. edición de symbol.
 - Fix a descarga de PDF de metadatos desde edición.
-- El botón de agregar indicador muestra los contenidos sobre el mapa.
-- Los indicadores públicos tienen un segundo nivel de agrupamiento (censo, mapa educativo, etc.).
+- El botón de agregar indicador muestra los indicadores disponibles sobre el mapa.
+- Los indicadores públicos tienen un segundo nivel de agrupamiento que representa la fuente (censo, mapa educativo, etc.).
 - Fix: el botón de agregar indicador no se encima a la ventana de agregar indicador.
 - Fix: en modo satélite, las etiquetas de los valores sobre el mapa no cambiaban a blanco.
 - Mejoras en usabilidad de ventana de popup de indicadores

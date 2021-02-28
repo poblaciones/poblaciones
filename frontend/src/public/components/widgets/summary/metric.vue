@@ -12,24 +12,23 @@
 			<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
 				<h4 class="title" v-on:click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
 					<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
-							class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
+						 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 					<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
-
 					{{ metric.properties.Metric.Name }} <span style="font-size: .95em" v-show="h.formatNum(singleLabel.Values.Count) !== '-'">
-																								({{ h.formatNum(singleLabel.Values.Count) }})
-																							</span>
+						({{ h.formatNum(singleLabel.Values.Count) }})
+					</span>
 				</h4>
+				<mp-filter-badge style="margin-top: 0.3rem; margin-bottom: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
+												 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
+												 v-on:click="changeUrbanity('N')" />
 			</div>
 			<template v-else>
 				<h4 class="title">
 					{{ metric.properties.Metric.Name }}
 				</h4>
-				<div class="filterElement" style="margin-top: 9px; 	margin-left: -3px;" v-if="hasUrbanityFilter && urbanity != 'N'"
-						 :title="getUrbanityTextTooltip">
-					{{ getUrbanityTextActive }}
-					<mp-close-button v-on:click="changeUrbanity('N')" title="Quitar filtro"
-													 class="exp-hiddable-block filterElement-close" />
-				</div>
+				<mp-filter-badge style="margin-top: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
+						 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
+												 v-on:click="changeUrbanity('N')" />
 				<MetricVariables :metric="metric" />
 			</template>
 			<div class="sourceRow">

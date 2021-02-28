@@ -28,10 +28,12 @@ window.SegMap = null;
 axios.defaults.withCredentials = true;
 
 import MpCloseButton from '@/public/components/controls/mpCloseButton';
+import MpFilterBadge from '@/public/components/controls/mpFilterBadge';
 import MpLabel from '@/public/components/controls/mpLabel';
 import VueMobileDetection from 'vue-mobile-detection';
 
 Vue.component('mp-close-button', MpCloseButton);
+Vue.component('mp-filter-badge', MpFilterBadge);
 Vue.component('mp-label', MpLabel);
 
 Vue.use(Clipboard);
