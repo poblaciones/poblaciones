@@ -21,10 +21,12 @@ class SnapshotLookupModel
 
 		Profiling::BeginTimer();
 		$sqlDelete = "DELETE FROM snapshot_lookup_feature WHERE clf_dataset_id = ?";
-		App::Db()->exec($sqlDelete, array($datasetIdShardified));
+		$rowsDeleted = App::Db()->exec($sqlDelete, array($datasetIdShardified));
 		VersionUpdater::Increment('LOOKUP');
 
 		Profiling::EndTimer();
+
+		return $rowsDeleted;
 	}
 
 	public function RegenDataset($datasetId)

@@ -1,5 +1,8 @@
 [CURRENT]
 - Fix: el filtro de urbanidad/ruralidad no podía ser removida en los indicadores 'compactos' (solo lista de elementos).
+- Actualización de versión default de Google Maps.
+- Fix a visualización de etiquetas que incluyen comillas.
+- Fix a publicación de elementos no indexados entre las etiquetas del mapa.
 
 v2.33 (2021-01-15)
 - Incorporación de íconos para las etiquetas del mapa.

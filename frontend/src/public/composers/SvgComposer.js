@@ -97,7 +97,7 @@ SvgComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, 
 					properties: { className: 'e' + tileUniqueId + '_' + val + isLineString }
 	};
 	if (dataElement.Description) {
-		mapItem.properties.description = dataElement.Description;
+		mapItem.properties.description = dataElement.Description.replaceAll('"', '&#x22;');
 	}
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	if (!variable.IsSimpleCount) {

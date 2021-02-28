@@ -33,7 +33,13 @@ class PublishSnapshots extends BaseService
 			if ($work['wrk_dataset_data_changed'])
 			{
 				$cacheManager->ClearDatasetData($row['dat_id']);
-				$snapshotsManager->UpdateDatasetData($row);
+				$workIsIndexed = $work['wrk_is_indexed'];
+				$snapshotsManager->UpdateDatasetData($row, $workIsIndexed);
+				if ($workIsIndexed)
+				{
+					$cacheManager->CleanLabelsCache();
+					VersionUpdater::Increment('LOOKUP_REGIONS');
+				}
 			}
 			// Actualiza métricas
 			if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed']

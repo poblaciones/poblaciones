@@ -47,9 +47,11 @@ class SnapshotsManager extends BaseService
 		$mode->Clear($datasetId);
 
 		$model = new SnapshotLookupModel();
-		$model->ClearDataset($datasetId);
+		$labelsRowDeleted = $model->ClearDataset($datasetId);
 
 		Profiling::EndTimer();
+
+		return $labelsRowDeleted;
 	}
 	public function UpdateDatasetMetrics($row)
 	{
@@ -60,7 +62,7 @@ class SnapshotsManager extends BaseService
 
 		Profiling::EndTimer();
 	}
-	public function UpdateDatasetData($row)
+	public function UpdateDatasetData($row, $workIsIndexed)
 	{
 		Profiling::BeginTimer();
 
@@ -70,11 +72,14 @@ class SnapshotsManager extends BaseService
 			$shapeItems = new SnapshotShapeDatasetItemModel();
 			$shapeItems->RegenDataset($row['dat_id']);
 		}
-		if (($row["dat_type"] == DatasetTypeEnum::Shapes || $row["dat_type"] == DatasetTypeEnum::Locations)
-			&& $row["dat_caption_column_id"] !== null)
+		if ($workIsIndexed)
 		{
-			$model = new SnapshotLookupModel();
-			$model->RegenDataset($row['dat_id']);
+			if (($row["dat_type"] == DatasetTypeEnum::Shapes || $row["dat_type"] == DatasetTypeEnum::Locations)
+				&& $row["dat_caption_column_id"] !== null)
+			{
+				$model = new SnapshotLookupModel();
+				$model->RegenDataset($row['dat_id']);
+			}
 		}
 		Profiling::EndTimer();
 	}

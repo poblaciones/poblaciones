@@ -64,10 +64,11 @@ class RevokeSnapshots extends BaseService
 			$table = SnapshotByDatasetModel::SnapshotTable($row['dat_table']);
 			App::Db()->dropTable($table);
 		}
+		$totalLabelsRowDeleted = 0;
 		foreach($datasetsToDelete as $row)
 		{
 			$this->cacheManager->ClearDataset($row['dat_id']);
-			$this->snapshotsManager->CleanDataset($row['dat_id']);
+			$totalLabelsRowDeleted += $this->snapshotsManager->CleanDataset($row['dat_id']);
 		}
 		foreach(Arr::UniqueByField('dat_work_id', $datasetsToDelete) as $row)
 		{
@@ -92,6 +93,11 @@ class RevokeSnapshots extends BaseService
 				$this->cacheManager->CleanMetadataPdfCache($row);
 		}
 
+		if ($totalLabelsRowDeleted > 0 && $this->work['wrk_is_indexed'])
+		{
+			$this->cacheManager->CleanLabelsCache();
+			VersionUpdater::Increment('LOOKUP_REGIONS');
+		}
 		Profiling::EndTimer();
 	}
 
