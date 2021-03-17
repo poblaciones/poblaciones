@@ -4,6 +4,7 @@ namespace helena\services\frontend;
 
 use helena\caches\GeographyCache;
 use minga\framework\Context;
+use helena\classes\Clipper;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\SnapshotGeographyItemModel;
@@ -63,6 +64,12 @@ class GeographyService extends BaseService
 			$rows = array_slice($rows, $page * self::PAGE_SIZE, self::PAGE_SIZE);
 		}
 		$data = FeaturesInfo::FromRows($rows, $getCentroids, $project);
+
+		// recorta el cuadrado
+		$clipper = new Clipper();
+		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $envelope);
+
+		// pagina
 		if ($totalPages > 0)
 		{
 			$data->Page = $page;
@@ -82,6 +89,11 @@ class GeographyService extends BaseService
 
 	private function AllAreDense($rows)
 	{
+		// Considera "todos densos" a bloques con más
+		// de 750 components o menos de un 10% de
+		// bloques no densos. Para ellos, omite el gradiente.
+		if (sizeof($rows) > 750)
+			return true;
 		foreach($rows as $row)
 		{
 			if (!isset($row['dense']) || !$row['dense'])

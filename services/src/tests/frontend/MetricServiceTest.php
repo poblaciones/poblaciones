@@ -5,13 +5,13 @@ namespace helena\tests\frontend;
 use helena\classes\TestCase;
 use helena\entities\frontend\metric\MetricGroupInfo;
 use helena\entities\frontend\metric\MetricInfo;
-use helena\services\frontend\MetricService;
+use helena\services\frontend\FabService;
 
 class MetricServiceTest extends TestCase
 {
 	public function testGetFabMetrics()
 	{
-		$controller = new MetricService();
+		$controller = new FabService();
 		$ret = $controller->GetFabMetrics();
 		$this->assertIsArray($ret);
 		$this->assertGreaterThan(0, count($ret));

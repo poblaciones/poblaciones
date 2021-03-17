@@ -6,7 +6,7 @@
 					<tbody>
 						<tr>
 							<td>Título:</td>
-							<td>{{ metadata.Caption }}</td>
+							<td>{{ metadata.Name }}</td>
 						</tr>
 						<tr v-if="metadata.Authors">
 							<td>Autores:</td>
@@ -111,11 +111,11 @@ export default {
 		},
 		citationAPA(metadata) {
 			return apa.onlineMapCitation(this.htmlEncode(metadata.Authors), this.htmlEncode(metadata.Date),
-					this.htmlEncode(metadata.Caption));
+					this.htmlEncode(metadata.Name));
 		},
 		citationAPAText(metadata) {
 			return apa.onlineMapCitation(metadata.Authors, metadata.Date,
-				metadata.Caption, null, true);
+				metadata.Name, null, true);
 		},
 		htmlEncode(html) {
 			return document.createElement('a').appendChild(

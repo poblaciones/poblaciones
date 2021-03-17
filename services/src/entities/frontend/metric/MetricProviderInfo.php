@@ -9,6 +9,7 @@ class MetricProviderInfo extends BaseMapModel
 	public $Id;
 	public $Name;
 	public $Order;
+	public $Type;
 
 	public static function GetMap()
 	{

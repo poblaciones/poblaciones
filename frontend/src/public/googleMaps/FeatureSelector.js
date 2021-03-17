@@ -57,15 +57,23 @@ FeatureSelector.prototype.getFeature = function (event) {
 	var ele = document.elementsFromPoint(position.Point.X, position.Point.Y);
 	for (var n = 0; n < ele.length; n++) {
 		if (ele[n].nodeName === 'path' && ele[n].parentElement.attributes['isFIDContainer'] &&
-					ele[n].id !== null) {
-			var variableId = ele[n].parentElement.attributes['variableId'].value;
-			var metricId = ele[n].parentElement.attributes['metricId'].value;
-			var parentInfo = {
-				MetricId: metricId,
-				MetricVersionId: ele[n].parentElement.attributes['metricVersionId'].value,
-				LevelId: ele[n].parentElement.attributes['levelId'].value,
-				VariableId: variableId
-			};
+			ele[n].id !== null) {
+			var parentInfo;
+			if (ele[n].parentElement.attributes['variableId']) {
+				var variableId = ele[n].parentElement.attributes['variableId'].value;
+				var metricId = ele[n].parentElement.attributes['metricId'].value;
+				parentInfo = {
+					MetricId: metricId,
+					MetricVersionId: ele[n].parentElement.attributes['metricVersionId'].value,
+					LevelId: ele[n].parentElement.attributes['levelId'].value,
+					VariableId: variableId
+				};
+			} else {
+				var boundaryId = ele[n].parentElement.attributes['boundaryId'].value;
+				parentInfo = {
+					BoundaryId: boundaryId
+				};
+			}
 			var desc = null;
 			var value = null;
 			if (ele[n].attributes.description) {
@@ -186,11 +194,14 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 		// Sale porque está en el mismo feature del cual se está mostrando el tooltip
 		return;
 	}
+
+	pointer = 'url(https://maps.gstatic.com/mapfiles/openhand_8_8.cur),default';
 	if (feature !== null && feature.id) {
-		pointer = 'pointer';
+		if (!feature.parentInfo.BoundaryId) {
+			pointer = 'pointer';
+		}
 		loc.startTooltipCandidate(feature);
 	} else {
-		pointer = 'url(https://maps.gstatic.com/mapfiles/openhand_8_8.cur),default';
 	}
 	var currentPointer = loc.selectorCanvas.cursor;
 	if (currentPointer !== pointer) {
@@ -202,7 +213,7 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 	var loc = window.SegMap.MapsApi.selector;
 	window.SegMap.MapsApi.ResetInfoWindow();
 	var feature = loc.getFeature(event);
-	if (feature !== null && feature.id) {
+	if (feature !== null && feature.id && !feature.parentInfo.BoundaryId) {
 		window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id);
 	}
 };

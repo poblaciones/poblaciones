@@ -44,7 +44,7 @@ export default {
 			},
 			fabMetrics: [],
 			position: 'bottom-left',
-			mainTooltip: "Agregar indicador",
+			mainTooltip: "Agregar",
 		};
 	},
 	created () {
@@ -58,7 +58,7 @@ export default {
 			var ret = [];
 			for(var n = 0; n < this.fabMetrics.length; n++) {
 				var action = this.fabMetrics[n];
-				var fabAction = { name: 'selected' + n, tooltip: action.Name, icon: action.Icon, items: action.Metrics};
+				var fabAction = { name: 'selected' + n, tooltip: action.Name, icon: action.Icon, items: action.Items};
 				ret.push(fabAction);
 			}
 			return ret;
@@ -86,7 +86,11 @@ export default {
 			}
 		},
 		selectedPanel(item) {
-			window.SegMap.AddMetricById(item.Id);
+			if (item.Type === 'B') {
+				window.SegMap.AddBoundaryById(item.Id, item.Name);
+			} else {
+				window.SegMap.AddMetricById(item.Id);
+			}
 			this.$refs.vuefab.toggle = false;
 		},
 		selected(n) {

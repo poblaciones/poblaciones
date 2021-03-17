@@ -5,23 +5,23 @@
 				<tbody>
 					<tr>
 						<td>Título:</td>
-						<td>{{ work.Name }}</td>
+						<td>{{ work.Metadata.Name }}</td>
 					</tr>
-					<tr v-if="work.Authors">
+					<tr v-if="work.Metadata.Authors">
 						<td>Autores:</td>
-						<td>{{ work.Authors }}</td>
+						<td>{{ work.Metadata.Authors }}</td>
 					</tr>
 					<tr v-if="level">
 						<td>Dataset:</td>
 						<td>{{ level.Dataset.Name }}</td>
 					</tr>
-					<tr v-if="work.ReleaseDate">
+					<tr v-if="work.Metadata.ReleaseDate">
 						<td>Publicación:</td>
 						<td>{{ formattedReleaseDate }}</td>
 					</tr>
-					<tr v-if="work.Abstract">
+					<tr v-if="work.Metadata.Abstract">
 						<td>Resumen:</td>
-						<td>{{ work.Abstract }}</td>
+						<td>{{ work.Metadata.Abstract }}</td>
 					</tr>
 					<tr>
 						<td style="width: 120px;">Dirección:</td>
@@ -41,7 +41,7 @@
 					<tr>
 						<td>Licencia:</td>
 						<td>
-							<creativeCommons :license="work.License" />
+							<creativeCommons :license="work.Metadata.License" />
 						</td>
 					</tr>
 					<tr v-if="version">
@@ -65,10 +65,10 @@
 							</a>
 						</td>
 					</tr>
-					<tr v-if="work.Files && work.Files.length > 0">
+					<tr v-if="work.Metadata.Files && work.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
 						<td><div class="attachmentsDownloadPanel">
-							<span v-for="file in work.Files" :key="file.Id">
+							<span v-for="file in work.Metadata.Files" :key="file.Id">
 								<a target="_blank" :href="resolveFileUrl(file)">
 									<file-pdf-icon title="Descargar" /> {{ file.Caption }}
 								</a>
@@ -131,12 +131,12 @@ export default {
 			}
 		},
 		citationAPA() {
-			return apa.onlineMapCitation(this.htmlEncode(this.work.Authors), this.htmlEncode(this.formattedYear),
-					this.htmlEncode(this.work.Name), this.completeUrl(this.work.Url));
+			return apa.onlineMapCitation(this.htmlEncode(this.work.Metadata.Authors), this.htmlEncode(this.formattedYear),
+				this.htmlEncode(this.work.Metadata.Name), this.completeUrl(this.work.Url));
 		},
 		citationAPAText() {
-			return apa.onlineMapCitation(this.work.Authors, this.formattedYear,
-				this.work.Name, this.completeUrl(this.work.Url), true);
+			return apa.onlineMapCitation(this.work.Metadata.Authors, this.formattedYear,
+				this.work.Metadata.Name, this.completeUrl(this.work.Url), true);
 		},
 		htmlEncode(html) {
 			return document.createElement('a').appendChild(
@@ -146,13 +146,13 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.work.MetadataId + '&f=' + file.FileId + h.urlParam('l', window.accessLink);
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.work.Metadata.Id + '&f=' + file.FileId + h.urlParam('l', window.accessLink);
 			} else {
 				return '#';
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.work.MetadataId + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id + h.urlParam('l', window.accessLink);
+			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.work.Metadata.Id + (this.level ? '&d=' + this.level.Dataset.Id : '') + '&w=' + this.work.Id + h.urlParam('l', window.accessLink);
 		},
 	},
 	computed:
@@ -165,7 +165,7 @@ export default {
 			}
 		},
 		formattedYear() {
-			var s = this.work.ReleaseDate;
+			var s = this.work.Metadata.ReleaseDate;
 			if (s === null) {
 				return null;
 			}
@@ -176,7 +176,7 @@ export default {
 			}
 		},
 		formattedReleaseDate() {
-			var s = this.work.ReleaseDate;
+			var s = this.work.Metadata.ReleaseDate;
 			if (s === null) {
 				return null;
 			}

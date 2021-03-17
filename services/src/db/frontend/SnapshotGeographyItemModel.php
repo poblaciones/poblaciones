@@ -28,7 +28,7 @@ class SnapshotGeographyItemModel extends BaseModel
 		// Calcula los que representan algo menor a 8 pixels x 8 pixels
 		// o densidad de población mayor a 10 personas por hectárea (m2 * 100 * 100 > 10)
 		$denseAttribute = "NOT " . $this->GetSquareFilter($envelope, $field, 8) .
-											" OR giw_population / giw_area_m2 > 0.001";
+											" OR giw_population / giw_area_m2 > 0.001"; // 1000 x km2
 
 		$sql = "SELECT  " . $field . " as value, " . $denseAttribute . " dense, giw_geography_item_id as FID" . $centroids .
 			" FROM snapshot_geography_item WHERE giw_geography_id = ? " .

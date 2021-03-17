@@ -18,12 +18,12 @@ class FeaturesInfo extends BaseMapModel
 	public $Page = 0;
 	public $TotalPages = 0;
 
-	public static function FromRows($rows, $getCentroids, $project = false, $zoom = null)
+	public static function FromRows($rows, $getCentroids, $project = false, $zoom = null, $hasCaption = false)
 	{
 		Profiling::BeginTimer();
 		$ret = new FeaturesInfo();
 		$render = new GeoJson();
-		$ret->Data = $render->GenerateFromBinary($rows, $getCentroids, $project);
+		$ret->Data = $render->GenerateFromBinary($rows, $getCentroids, $project, $hasCaption);
 		if ($zoom !== null && $ret->Data !== null)
 		{
 			$ret->Data['features'] = self::SimplifyCollection($ret->Data['features'], $zoom);
@@ -33,7 +33,7 @@ class FeaturesInfo extends BaseMapModel
 		return $ret;
 	}
 
-	private static function SimplifyCollection($fullFeatures, $zoom)
+	public static function SimplifyCollection($fullFeatures, $zoom)
 	{
 		Profiling::BeginTimer();
 		$simplifier = new SimplifyGeometry();

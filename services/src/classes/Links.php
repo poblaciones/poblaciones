@@ -47,6 +47,10 @@ class Links
 	{
 		return '/services/metadata/GetWorkMetadataPdf?w=' . $workId;
 	}
+	public static function GetMetadataUrl($metadataId)
+	{
+		return '/services/metadata/GetMetadataPdf?m=' . $metadataId;
+	}
 	public static function GetWorkMetricUrl($workId, $metricId, $regionItemId)
 	{
  		// http://desa.poblaciones.org/map/3501/#/l=6301&!r19166

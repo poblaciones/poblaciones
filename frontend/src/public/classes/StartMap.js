@@ -1,4 +1,4 @@
-import SelectedMetricsRouter from '@/public/router/SelectedMetricsRouter';
+import SelectedInfoRouter from '@/public/router/SelectedInfoRouter';
 import RestoreRoute from '@/public/classes/RestoreRoute';
 import axios from 'axios';
 import str from '@/common/js/str';
@@ -113,10 +113,10 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 	// Carga la lista de indicadores
 	var list = [];
 
-	var selectedMetricsRouter = new SelectedMetricsRouter();
+	var selectedMetricsRouter = new SelectedInfoRouter();
 	var metricsFromRoute = new RestoreRoute().parseRoute(this.hash, selectedMetricsRouter);
 	if (metricsFromRoute) {
-		list = selectedMetricsRouter.parseMetrics(metricsFromRoute);
+		list = selectedMetricsRouter.parseInfos(metricsFromRoute);
 	}
 	if (list.length === 0) {
 		if (startup.ActiveMetrics) {
@@ -134,8 +134,8 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 			}
 		}
 	}
-	var router = new SelectedMetricsRouter();
-	router.LoadMetrics(list, true, true);
+	var router = new SelectedInfoRouter();
+	router.LoadInfos(list, true, true);
 };
 
 StartMap.prototype.StartByUrl = function () {

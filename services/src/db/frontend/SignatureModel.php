@@ -17,6 +17,7 @@ class SignatureModel extends BaseModel
 	public function GetSignatures()
 	{
 		$pairs = array('CARTOGRAPHY_VIEW' => array('Geography'),
+									 'BOUNDARY_VIEW' => array('Boundary'),
 										'CARTOGRAPHY_REGION_VIEW' => array('Clipping'),
 										'LOOKUP_REGIONS' => array('BigLabels'),
 										'LOOKUP_VIEW' => array('SmallLabels', 'Search'),

@@ -12,6 +12,7 @@ use helena\db\frontend\VariableValueLabelModel;
 use helena\entities\frontend\geometries\Envelope;
 use minga\framework\PublicException;
 use minga\framework\Arr;
+use minga\framework\Str;
 use minga\framework\Profiling;
 
 use helena\entities\frontend\metric\DatasetInfo;
@@ -25,20 +26,27 @@ use helena\entities\frontend\metric\ValueLabelInfo;
 use helena\db\frontend\FileModel;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\GlobalTimer;
-use helena\classes\App;
 use helena\classes\Statistics;
 
 class SelectedMetricService extends BaseService
 {
-	public function PublicGetSelectedMetrics($metricsId)
+	public function PublicGetSelectedInfos($metricsId)
 	{
 		$ids = explode(',', $metricsId);
 		$ret = array();
+		$boundaryService = new BoundaryService();
 		foreach($ids as $id)
 		{
 			if ($id != '')
 			{
-				$ret[] = $this->PublicGetSelectedMetric(intval($id), false, true);
+				if (Str::StartsWith($id, 'b'))
+				{
+					$ret[] = $boundaryService->GetSelectedBoundary(intval(substr($id,1)));
+				}
+				else
+				{
+					$ret[] = $this->PublicGetSelectedMetric(intval($id), false, true);
+				}
 			}
 		}
 		return $ret;

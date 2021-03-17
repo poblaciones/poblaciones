@@ -3,7 +3,7 @@ import str from '@/common/js/str';
 
 import FrameRouter from '@/public/router/FrameRouter';
 import ClippingRouter from '@/public/router/ClippingRouter';
-import SelectedMetricsRouter from '@/public/router/SelectedMetricsRouter';
+import SelectedInfoRouter from '@/public/router/SelectedInfoRouter';
 import LeftPanelRouter from '@/public/router/LeftPanelRouter';
 import FeatureInfoRouter from '@/public/router/FeatureInfoRouter';
 
@@ -28,7 +28,7 @@ function SaveRoute() {
 
 	this.subscribers = [	new FrameRouter(),
 												new ClippingRouter(),
-												new SelectedMetricsRouter(),
+												new SelectedInfoRouter(),
 												new LeftPanelRouter(),
 												new FeatureInfoRouter()	];
 };

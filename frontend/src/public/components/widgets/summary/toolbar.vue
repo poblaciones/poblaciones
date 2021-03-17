@@ -15,7 +15,7 @@
 				</ul>
 			</button>
 			<button type="button" class="btn btn-default btn-xs"
-							:title="(toolbarStates.showLabels ? 'Ocultar etiquetas' : 'Mostrar etiquetas')" v-on:click="toggleLabels()" :class="getLabelsActive()">
+							:title="(toolbarStates.showLabels ? 'Ocultar etiquetas del mapa' : 'Mostrar etiquetas del mapa')" v-on:click="toggleLabels()" :class="getLabelsActive()">
 				<i class="fas fa-tags" />
 			</button>
 

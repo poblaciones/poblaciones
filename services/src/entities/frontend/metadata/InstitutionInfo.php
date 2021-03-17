@@ -1,6 +1,6 @@
 <?php
 
-namespace helena\entities\frontend\work;
+namespace helena\entities\frontend\metadata;
 
 use helena\entities\BaseMapModel;
 use helena\classes\GeoJson;

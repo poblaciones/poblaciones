@@ -1,5 +1,6 @@
 import ActiveSelectedMetric from '@/public/classes/ActiveSelectedMetric';
 import ActiveLabels from '@/public/classes/ActiveLabels';
+import ActiveBoundary from '@/public/classes/ActiveBoundary';
 import MetricsList from '@/public/classes/MetricsList';
 import SaveRoute from '@/public/classes/SaveRoute';
 import Clipping from '@/public/classes/Clipping';
@@ -325,6 +326,19 @@ SegmentedMap.prototype.AddMetricByFID = function (fid) {
 
 SegmentedMap.prototype.AddMetricById = function (id) {
 	return this.doAddMetricById(id, null);
+};
+
+SegmentedMap.prototype.AddBoundaryById = function (id, caption) {
+	const loc = this;
+	this.Get(window.host + '/services/boundaries/GetSelectedBoundary', {
+		params: { a: id }
+	}).then(function (res) {
+		var activeBoundary = new ActiveBoundary(res.data);
+		loc.Metrics.AddStandardMetric(activeBoundary);
+	}).catch(function (error) {
+		err.errDialog('GetSelectedMetric', 'obtener las delimitaciones solicitadas', error);
+	});
+
 };
 
 SegmentedMap.prototype.doAddMetricById = function (id, versionSelector) {

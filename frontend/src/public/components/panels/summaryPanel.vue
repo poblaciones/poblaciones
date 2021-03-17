@@ -6,14 +6,22 @@
 			<Clipping :clipping="clipping" :frame="frame" />
 			<draggable v-model="propMetrics" @end="itemMoved" handle=".dragHandle">
 				<transition-group name="fade">
-					<Metric v-for="(value, index) in metrics" :metric="value" :clipping="clipping" :key="index"></Metric>
+					<template v-for="(value, index) in metrics">
+						<div class="metricBlock" :key="index">
+							<hr class="moderateHr exp-hiddable-visiblity" />
+							<Boundary v-if="value.isBoundary" :boundary="value" :clipping="clipping" :key="index"></Boundary>
+							<Metric v-else :metric="value" :clipping="clipping" :key="index"></Metric>
+						</div>
+					</template>
 				</transition-group>
 			</draggable>
 		</div>
 		<div>
 			<WorkMetadata ref="showFuente" :backgroundColor="backgroundColor" />
 			<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
-			<MetricDownload ref="showDescargar" :backgroundColor="backgroundColor" />
+			<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
+			<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
+			<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
 			<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
 			<WaitMessage ref="showWaitMessage" :backgroundColor="backgroundColor" />
 			<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
@@ -23,14 +31,17 @@
 
 <script>
 import Metric from '@/public/components/widgets/summary/metric';
+import Boundary from '@/public/components/widgets/summary/boundary';
 import Clipping from '@/public/components/widgets/summary/clipping';
 import WorkMetadata from '@/public/components/popups/workMetadata';
 import ClippingMetadata from '@/public/components/popups/clippingMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
+import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
 import WaitMessage from '@/public/components/popups/waitMessage';
 import AddMetric from '@/public/components/popups/addMetric';
 import Toolbar from '@/public/components/widgets/summary/toolbar';
 import MetricDownload from '@/public/components/popups/metricDownload';
+import BoundaryDownload from '@/public/components/popups/boundaryDownload';
 import draggable from 'vuedraggable';
 import arr from '@/common/js/arr';
 
@@ -38,11 +49,14 @@ export default {
 	name: 'summaryPanel',
 	components: {
 		Metric,
+		Boundary,
+		BoundaryDownload,
 		Clipping,
 		AddMetric,
 		WorkMetadata,
 		ClippingMetadata,
 		WaitMessage,
+		BoundaryCustomize,
 		MetricCustomize,
 		MetricDownload,
 		Toolbar,
@@ -66,10 +80,12 @@ export default {
 		};
 	},
 	mounted() {
-		window.Popups.MetricDownload = this.$refs.showDescargar;
+		window.Popups.MetricDownload = this.$refs.showMetricDownload;
+		window.Popups.BoundaryDownload = this.$refs.showBoundaryDownload;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
 		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
 		window.Popups.WaitMessage = this.$refs.showWaitMessage;
+		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AddMetric = this.$refs.addMetric;
 	},

@@ -57,7 +57,8 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		if ($includeName)
 		{
 			$nameFields = ", cli_caption Name, met_id, met_title, met_abstract,
-							met_publication_date, met_license, met_authors, ins_caption, ins_watermark_id, ins_color ";
+							met_publication_date, met_license, met_online_since, met_coverage_caption,
+													met_authors, ins_caption, ins_watermark_id, ins_color ";
 			 $nameJoins = " JOIN clipping_region_item ON cli_id = cgv_clipping_region_item_id
 											JOIN clipping_region ON clr_id = cli_clipping_region_id
 											LEFT JOIN metadata ON met_id = clr_metadata_id
@@ -112,6 +113,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		$sqlRegions = "SELECT cli_id Id, cli_caption Name, clr_caption Type, cli_centroid Location,
 			ST_AsText(PolygonEnvelope(cli_geometry_r1)) Envelope, ".
 			"met_id, met_title, met_abstract, met_publication_date, met_license,
+			met_online_since, met_coverage_caption,
 			 met_authors, ins_caption, ins_watermark_id, ins_color " .
 			"FROM clipping_region JOIN clipping_region_item ON clr_id = cli_clipping_region_id " .
 			"LEFT JOIN metadata ON met_id = clr_metadata_id ".
@@ -154,7 +156,8 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		if ($ret !== null)
 		{
-			$sqlMetadata = "SELECT null Id, null Name, null Type, met_id, met_title, met_abstract, met_publication_date, met_license, met_authors, ins_caption, ins_watermark_id, ins_color " .
+			$sqlMetadata = "SELECT null Id, null Name, null Type, met_id, met_title, met_abstract, met_publication_date,
+							met_license, met_online_since, met_coverage_caption, met_authors, ins_caption, ins_watermark_id, ins_color " .
 							"FROM geography ".
 							"LEFT JOIN metadata ON met_id = geo_metadata_id ".
 							"LEFT JOIN institution ON ins_id = met_institution_id ".
@@ -186,6 +189,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		{
 			$sql = "SELECT geo_id, geo_parent_id, geo_max_zoom, geo_min_zoom, geo_caption, geo_revision, geo_partial_coverage,
 							met_id, met_title, met_abstract, met_publication_date, met_license,
+							met_online_since, met_coverage_caption,
 							met_authors, ins_caption, ins_watermark_id, ins_color
 						FROM geography C1
 						LEFT JOIN metadata ON geo_metadata_id = met_id

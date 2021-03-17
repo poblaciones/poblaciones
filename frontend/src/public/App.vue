@@ -332,7 +332,22 @@ html, body {
 	border-color: #DDDDDD!important;
 }
 
+.downloadButton {
+  border: 1.5px solid #68B3C8;
+  color: #68B3C8;
+  border-radius: 9px; background-color: transparent;
+  padding: 4px; margin-right: 10px;
+  margin-bottom: 5px;
+}
+.warningBox {
+	font-size: 13px;
+  line-height: 1.4em;
+  margin-top: 4px;
+}
 
+.exp-showable-block {
+	display: none;
+}
 .exp-high-contrast {
 	color: #000000 !important;
 	background-color: #ffffff !important;

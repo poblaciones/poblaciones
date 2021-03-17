@@ -1,13 +1,14 @@
 import h from '@/public/js/helper';
 import ActiveSelectedMetric from '@/public/classes/ActiveSelectedMetric';
+import ActiveBoundary from '@/public/classes/ActiveBoundary';
 import err from '@/common/js/err';
 
-export default SelectedMetricsRouter;
+export default SelectedInfoRouter;
 
-function SelectedMetricsRouter() {
+function SelectedInfoRouter() {
 };
 
-SelectedMetricsRouter.prototype.GetSettings = function() {
+SelectedInfoRouter.prototype.GetSettings = function() {
 	return {
 		blockSignature: 'l=',
 		startChar: null,
@@ -18,19 +19,42 @@ SelectedMetricsRouter.prototype.GetSettings = function() {
 	};
 };
 
-SelectedMetricsRouter.prototype.ToRoute = function (askeyarray) {
+SelectedInfoRouter.prototype.ToRoute = function (askeyarray) {
 	var segmentedMap = window.SegMap;
 	var ret = [];
 	for (var n = 0; n < segmentedMap.Metrics.metrics.length; n++) {
-		ret.push(this.SelectedMetricToRoute(segmentedMap.Metrics.metrics[n], askeyarray));
+		ret.push(this.SelectedInfoToRoute(segmentedMap.Metrics.metrics[n], askeyarray));
 	}
 	return ret;
 };
 
-SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelectedMetric, askeyarray) {
+
+SelectedInfoRouter.prototype.SelectedInfoToRoute = function (activeSelectedMetric, askeyarray) {
 	if (activeSelectedMetric.properties === null) {
 		throw new Error('No properties has been set.');
 	}
+	var ret;
+	if (activeSelectedMetric.isBoundary) {
+		ret = this.SelectedBoundaryToRoute(activeSelectedMetric);
+	} else {
+		ret = this.SelectedMetricToRoute(activeSelectedMetric);
+	}
+	if (askeyarray) {
+		ret = this.transformArrayListToKeyList(ret);
+	}
+	return ret;
+};
+
+SelectedInfoRouter.prototype.SelectedBoundaryToRoute = function (activeBoundary) {
+	var ret = [];
+	ret.push([activeBoundary.properties.Id]);
+	ret.push(['t', 'b']); // es boundary
+	ret.push(['v', (activeBoundary.visible ? 1 : 0), 1]);
+	ret.push(['d', (activeBoundary.showDescriptions ? 1 : 0), 1]);
+	return ret;
+};
+
+SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMetric) {
 	var ret = [];
 	ret.push([activeSelectedMetric.properties.Metric.Id]);
 	ret.push(['v', activeSelectedMetric.properties.SelectedVersionIndex, -1]);
@@ -68,13 +92,10 @@ SelectedMetricsRouter.prototype.SelectedMetricToRoute = function (activeSelected
 	//$metric = Params::Get('m');
 	//$variableId = Params::Get('i');
 	//$urbanity = Params::Get('u');
-	if (askeyarray) {
-		ret = this.transformArrayListToKeyList(ret);
-	}
 	return ret;
 };
 
-SelectedMetricsRouter.prototype.activeSequences = function (variable) {
+SelectedInfoRouter.prototype.activeSequences = function (variable) {
 	if (!variable.IsSequence) {
 		return null;
 	}
@@ -93,7 +114,7 @@ SelectedMetricsRouter.prototype.activeSequences = function (variable) {
 	}
 };
 
-SelectedMetricsRouter.prototype.transformArrayListToKeyList = function (list) {
+SelectedInfoRouter.prototype.transformArrayListToKeyList = function (list) {
 	var ret = {};
 	for (var n = 0; n < list.length; n++) {
 		if (list[n].length === 1) {
@@ -105,7 +126,7 @@ SelectedMetricsRouter.prototype.transformArrayListToKeyList = function (list) {
 	return ret;
 };
 
-SelectedMetricsRouter.prototype.GetRanking = function (metric) {
+SelectedInfoRouter.prototype.GetRanking = function (metric) {
 	if (!metric.ShowRanking) {
 		return '';
 	}
@@ -117,7 +138,7 @@ SelectedMetricsRouter.prototype.GetRanking = function (metric) {
 	return ret;
 };
 
-SelectedMetricsRouter.prototype.ParseRanking = function (value) {
+SelectedInfoRouter.prototype.ParseRanking = function (value) {
 	var size = 10;
 	var direction = 'D';
 	var show = false;
@@ -138,11 +159,11 @@ SelectedMetricsRouter.prototype.ParseRanking = function (value) {
 	return { Size: size, Direction: direction, Show: show };
 };
 
-SelectedMetricsRouter.prototype.Boolean = function (value) {
+SelectedInfoRouter.prototype.Boolean = function (value) {
 	return (value && value !== '0' ? '1' : '0');
 };
 
-SelectedMetricsRouter.prototype.VariablesToRoute = function (activeSelectedMetric) {
+SelectedInfoRouter.prototype.VariablesToRoute = function (activeSelectedMetric) {
 	var ret = '';
 	for (var v = 0; v < activeSelectedMetric.SelectedLevel().Variables.length; v++) {
 		var variable = activeSelectedMetric.SelectedLevel().Variables[v];
@@ -166,43 +187,52 @@ SelectedMetricsRouter.prototype.VariablesToRoute = function (activeSelectedMetri
 	return ret;
 };
 
-SelectedMetricsRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
-	var metrics =	this.parseMetrics(args);
-	this.LoadMetrics(metrics, updateRoute, skipRestore);
+SelectedInfoRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
+	var infos =	this.parseInfos(args);
+	this.LoadInfos(infos, updateRoute, skipRestore);
 };
 
-SelectedMetricsRouter.prototype.LoadMetrics = function (metrics, updateRoute, skipRestore) {
-	// Se fija si cambian las métricas
+SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestore) {
+	// Se fija si cambian
 	var segmentedMap = window.SegMap;
-	if (metrics.length === 0) {
+	if (infos.length === 0) {
 		segmentedMap.Metrics.ClearUserMetrics();
 		return;
 	}
-	var currentMetrics = this.parseMetrics(this.ToRoute(true));
+	var currentMetrics = this.parseInfos(this.ToRoute(true));
 	// Si cambiaron, recarga todos
 	// Una vez cargadas (o si no cambiaron) les setea los estados
-	if (this.metricsChanged(metrics, currentMetrics)) {
+	if (this.infosChanged(infos, currentMetrics)) {
 		var loc = this;
-		var metricIds = '';
-		for (var l = 0; l < metrics.length; l++) {
-			metricIds += metrics[l].Id + (l < metrics.length - 1 ? ',' : '');
+		var infoIds = '';
+		for (var l = 0; l < infos.length; l++) {
+			infoIds += (infos[l].IsBoundary ? 'b' : '') + infos[l].Id +
+												(l < infos.length - 1 ? ',' : '');
 		}
-		window.SegMap.Get(window.host + '/services/metrics/GetSelectedMetrics', {
-			params: { l: metricIds },
+		window.SegMap.Get(window.host + '/services/metrics/GetSelectedInfos', {
+			params: { l: infoIds },
 		}).then(function (res) {
 			segmentedMap.SaveRoute.Disabled = true;
 			segmentedMap.Metrics.ClearUserMetrics();
 
-			for (var n = 0; n < metrics.length; n++) {
-				var selectedMetric = res.data[n];
-				if (selectedMetric != null) {
-					var activeMetric = new ActiveSelectedMetric(selectedMetric, false);
-					if (!skipRestore) {
-						loc.RestoreMetricState(activeMetric, metrics[n]);
+			for (var n = 0; n < infos.length; n++) {
+				var selectedInfo = res.data[n];
+				if (selectedInfo != null) {
+					if (selectedInfo.IsBoundary) {
+						var activeBoundary = new ActiveBoundary(selectedInfo);
+						if (!skipRestore) {
+							loc.RestoreBoundaryState(activeBoundary, infos[n]);
+						}
+						segmentedMap.Metrics.AppendStandardMetric(activeBoundary);
+					} else {
+						var activeMetric = new ActiveSelectedMetric(selectedInfo, false);
+						if (!skipRestore) {
+							loc.RestoreMetricState(activeMetric, infos[n]);
+						}
+						activeMetric.properties.SelectedVersionIndex = parseInt(activeMetric.properties.SelectedVersionIndex);
+						activeMetric.UpdateLevel();
+						segmentedMap.Metrics.AppendStandardMetric(activeMetric);
 					}
-					activeMetric.properties.SelectedVersionIndex = parseInt(activeMetric.properties.SelectedVersionIndex);
-					activeMetric.UpdateLevel();
-					segmentedMap.Metrics.AppendStandardMetric(activeMetric);
 				}
 			}
 			segmentedMap.Labels.UpdateMap();
@@ -212,14 +242,14 @@ SelectedMetricsRouter.prototype.LoadMetrics = function (metrics, updateRoute, sk
 				segmentedMap.SaveRoute.UpdateRoute();
 			}
 		}).catch(function (error) {
-			err.errDialog('GetSelectedMetrics', 'obtener la información para los indicadores seleccionados', error);
+			err.errDialog('GetSelectedInfos', 'obtener la información para los elementos solicitados', error);
 		});
 	} else {
-		this.restoreMetricStates(metrics);
+		this.restoreInfoStates(metrics);
 	}
 };
 
-SelectedMetricsRouter.prototype.metricsChanged = function (metrics, currentMetrics) {
+SelectedInfoRouter.prototype.infosChanged = function (metrics, currentMetrics) {
 	if (metrics.length !== currentMetrics.length) {
 		return true;
 	}
@@ -231,16 +261,37 @@ SelectedMetricsRouter.prototype.metricsChanged = function (metrics, currentMetri
 	return false;
 };
 
-SelectedMetricsRouter.prototype.parseMetrics = function (args) {
-	var metrics = [];
-	for (var metricKey in args) {
-		var metric = args[metricKey];
-		metrics.push(this.parseMetric(metric));
+SelectedInfoRouter.prototype.parseInfos = function (args) {
+	var infos = [];
+	for (var key in args) {
+		var info = args[key];
+		infos.push(this.parseInfo(info));
 	}
-	return metrics;
+	return infos;
 };
 
-SelectedMetricsRouter.prototype.parseMetric = function (values) {
+SelectedInfoRouter.prototype.parseInfo = function (values) {
+	var type = h.getSafeValue(values, 't', 'm');
+	if (type === 'b') {
+		return this.parseBoundary(values);
+	} else {
+		return this.parseMetric(values);
+	}
+};
+
+SelectedInfoRouter.prototype.parseBoundary = function (values) {
+	var id = h.getSafeValue(values, '');
+	var visible = h.getSafeValue(values, 'v', 1);
+	var descriptions = h.getSafeValue(values, 'd', 1);
+	return {
+		Id: parseInt(id),
+		IsBoundary: true,
+		Visible: (visible ? true : false),
+		ShowDescriptions: (descriptions ? true : false),
+	};
+};
+
+SelectedInfoRouter.prototype.parseMetric = function (values) {
 	var id = h.getSafeValue(values, '');
 	var versionIndex = h.getSafeValue(values, 'v', -1);
 	var levelIndex = h.getSafeValue(values, 'a', 0);
@@ -281,18 +332,40 @@ SelectedMetricsRouter.prototype.parseMetric = function (values) {
 };
 
 
-SelectedMetricsRouter.prototype.restoreMetricStates = function (states) {
+SelectedInfoRouter.prototype.restoreInfoStates = function (states) {
 	var segmentedMap = window.SegMap;
 	for (var n = 0; n < segmentedMap.Metrics.metrics.length; n++) {
-		var activeMetric = segmentedMap.Metrics.metrics[n];
+		var info = segmentedMap.Metrics.metrics[n];
 		var state = states[n];
-		if (this.RestoreMetricState(activeMetric, state)) {
-			activeMetric.UpdateMap();
+		if (state.IsBoundary) {
+				if (this.RestoreBoundaryState(info, state)) {
+					activeMetric.UpdateMap();
+			}
+		} else {
+			if (this.RestoreMetricState(info, state)) {
+				activeMetric.UpdateMap();
+			}
 		}
 	}
 };
 
-SelectedMetricsRouter.prototype.RestoreMetricState = function (activeSelectedMetric, state) {
+
+SelectedInfoRouter.prototype.RestoreBoundaryState = function (boundary, state) {
+	var mapChanged = false;
+
+	if (state.Visible !== boundary.visible) {
+		boundary.visible = state.Visible;
+		mapChanged = true;
+	}
+
+	if (state.ShowDescriptions !== boundary.showDescriptions) {
+		boundary.showDescriptions = state.ShowDescriptions;
+		mapChanged = true;
+	}
+	return mapChanged;
+};
+
+SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric, state) {
 	var mapChanged = false;
 	var selectedMetric = activeSelectedMetric.properties;
 	var versionIndex = parseInt(state.VersionIndex);
@@ -393,7 +466,7 @@ SelectedMetricsRouter.prototype.RestoreMetricState = function (activeSelectedMet
 	return mapChanged;
 };
 
-SelectedMetricsRouter.prototype.restoreSequenceActiveSteps = function (selectedMetric, level, state) {
+SelectedInfoRouter.prototype.restoreSequenceActiveSteps = function (selectedMetric, level, state) {
 	var mapChanged = false;
 	if (!level || level.SelectedVariableIndex === -1) {
 		return false;

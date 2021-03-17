@@ -15,10 +15,13 @@ use helena\classes\writers\ShpWriter;
 
 use helena\classes\DownloadStateBag;
 use helena\db\frontend\DatasetModel;
+use helena\db\frontend\BoundaryDownloadModel;
 use helena\db\frontend\ClippingRegionItemModel;
 use helena\caches\DownloadCache;
 use helena\caches\BackofficeDownloadCache;
+use helena\caches\BoundaryDownloadCache;
 use helena\classes\App;
+
 
 class DownloadManager
 {
@@ -54,7 +57,7 @@ class DownloadManager
 			$this->start = microtime(true);
 	}
 
-	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false, $extraColumns = array())
+	public function CreateMultiRequestDatasetFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false, $extraColumns = array())
 	{
 		self::ValidateType($type);
 		self::ValidateClippingItem($clippingItemId);
@@ -66,6 +69,18 @@ class DownloadManager
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
 		$this->PrepareNewModel($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns);
 		$this->PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns);
+		return $this->GenerateNextFilePart();
+	}
+	public function CreateMultiRequestBoundaryFile($type, $boundaryId)
+	{
+		self::ValidateType($type);
+		// Si está cacheado, sale
+		if(BoundaryDownloadCache::IsCached($type, $boundaryId))
+			return array('done' => true);
+
+		// Crea la estructura para la creación en varios pasos del archivo a descargar
+		$this->PrepareNewBoundaryModel($type, $boundaryId);
+		$this->PrepareNewBoundaryState($type, $boundaryId);
 		return $this->GenerateNextFilePart();
 	}
 
@@ -122,6 +137,20 @@ class DownloadManager
 			throw new PublicException('No ha sido posible descargar el archivo.');
 	}
 
+	public static function GetBoundaryFileBytes($type, $boundaryId)
+	{
+		self::ValidateType($type);
+
+		$cacheKey = BoundaryDownloadCache::CreateKey($boundaryId, $type);
+		$friendlyName = self::GetBoundaryFileName($boundaryId, $type);
+		$cache = BoundaryDownloadCache::Cache();
+		// Lo devuelve desde el cache
+		$filename = null;
+		if ($cache->HasData($datasetId, $cacheKey, $filename, true))
+			return App::StreamFile($filename, $friendlyName);
+		else
+			throw new PublicException('No ha sido posible descargar el archivo.');
+	}
 	public static function GetFileTypeFromLetter($letter)
 	{
 		if (array_key_exists($letter, self::$validFileTypes))
@@ -143,6 +172,18 @@ class DownloadManager
 	{
 		$info = self::GetFileInfoFromFileType($fileType);
 		return $info['Caption'];
+	}
+	private static function GetBoundaryFileName($boundaryId, $type)
+	{
+		$validFileTypes = self::$validFileTypes;
+		if (array_key_exists($type[0], $validFileTypes))
+			$ext = $validFileTypes[$type[0]]['extension'];
+		else
+			throw new PublicException('Tipo de archivo inválido');
+
+		$name = 'boundary' . $boundaryId . $type;
+
+		return $name . '.' . $ext;
 	}
 
 	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type)
@@ -263,6 +304,13 @@ class DownloadManager
 		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, self::GetPolygon($type));
 	}
 
+	private function PrepareNewBoundaryModel($type, $boundaryId)
+	{
+		$this->model = new BoundaryDownloadModel();
+		$this->model->PrepareFileQuery($boundaryId, self::GetPolygon($type));
+	}
+
+
 	private function PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns)
 	{
 		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $this->model, $fromDraft);
@@ -275,6 +323,17 @@ class DownloadManager
 		$this->state->Set('latVariable', $latLon['lat']);
 		$this->state->Set('lonVariable', $latLon['lon']);
 		$this->state->Set('extraColumns', $extraColumns);
+		$this->state->Save();
+	}
+
+	private function PrepareNewBoundaryState($type, $boundaryId)
+	{
+		$this->state = DownloadBoundaryStateBag::Create($type, $boundaryId, $this->model);
+		$this->state->SetStep(self::STEP_BEGIN);
+		$this->state->SetTotalSteps(2);
+		$friendlyName = self::GetBoundaryFileName($boundaryId, $type);
+		$this->state->Set('friendlyName', $friendlyName);
+		$this->state->Set('totalRows', $this->model->GetCountRows());
 		$this->state->Save();
 	}
 

@@ -141,6 +141,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 		{ attribute: 'display', set: 'none', restore: 'unset', class: 'exp-hiddable-unset' },
 		{ attribute: 'display', set: 'none', restore: 'inline-block', class: 'exp-hiddable-inline' },
 		{ attribute: 'display', set: 'none', restore: 'block', class: 'exp-hiddable-block' },
+		{ attribute: 'display', set: 'block', restore: 'none', class: 'exp-showable-block' },
 		{ attribute: 'visibility', set: 'hidden', restore: 'visible', class: 'exp-hiddable-visiblity' },
 		// permite más contenido en body
 		{ attribute: 'overflow', set: 'visible', restore: 'hidden', class: '#dbody' },

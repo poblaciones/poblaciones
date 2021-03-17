@@ -4,6 +4,8 @@ namespace helena\services\frontend;
 
 use minga\framework\PublicException;
 use helena\entities\frontend\work\WorkInfo;
+use helena\entities\frontend\metadata\MetadataInfo;
+
 use helena\services\common\BaseService;
 use helena\classes\Links;
 use helena\db\frontend\MetadataModel;
@@ -12,7 +14,6 @@ use helena\db\frontend\FileModel;
 use helena\classes\App;
 use helena\classes\Session;
 use helena\entities\frontend\geometries\Envelope;
-
 
 class WorkService extends BaseService
 {
@@ -23,8 +24,8 @@ class WorkService extends BaseService
 		$rows = $worksTable->GetWorkMetricsInfo($workId);
 		$ret->FillMetrics($rows);
 		$metadataTable = new MetadataModel();
-		$rows = $metadataTable->GetMetadataFiles($ret->MetadataId);
-		$ret->FillFiles($rows);
+		$rows = $metadataTable->GetMetadataFiles($ret->Metadata->Id);
+		$ret->Metadata->FillFiles($rows);
 		return $ret;
 	}
 
@@ -38,11 +39,15 @@ class WorkService extends BaseService
 		$ret = new WorkInfo();
 		$ret->CanEdit = Session::IsWorkEditor($workId);
 		$ret->Fill($work);
+		$ret->FillStartup($work);
 		if ($work['met_extents'])
 			$ret->Extents = Envelope::FromDb($work['met_extents'])->Trim();
+
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
-		$ret->FillStartup($work);
-		$ret->FillInstitution($work);
+		$ret->Metadata = new MetadataInfo();
+		$ret->Metadata->Fill($work);
+		$ret->Metadata->FillInstitution($work);
+
 		return $ret;
 	}
 
@@ -62,11 +67,13 @@ class WorkService extends BaseService
 			return null;
 		$ret = new WorkInfo();
 		$ret->Fill($work);
+		$ret->Metadata = new MetadataInfo();
+		$ret->Metadata->Fill($work);
 		// Hace absolute la URL
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
 		$metadataTable = new MetadataModel();
-		$rows = $metadataTable->GetMetadataFiles($ret->MetadataId);
-		$ret->FillFiles($rows);
+		$rows = $metadataTable->GetMetadataFiles($ret->Metadata->Id);
+		$ret->Metadata->FillFiles($rows);
 		return $ret;
 	}
 }

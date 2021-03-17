@@ -11,7 +11,7 @@ class MetricGroupInfo extends BaseMapModel
 	public $Icon;
 	public $Order;
 
-	public $Metrics = array();
+	public $Items = array();
 
 	public static function GetMap()
 	{

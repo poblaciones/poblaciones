@@ -37,7 +37,7 @@
 						</md-switch>
 					</div>
 					* Si modifica estos valores debe actualizar el caché de regiones utilizando  la opción
-					Configuración &gt; Cachés &gt; Lookup de regiones &gt; Actualizar en el módulo
+					Configuración &gt; Cachés &gt; Regiones y delimitaciones&gt; Actualizar en el módulo
 					de 'Logs y Mantenimiento' (sitio/logs).
 				</div>
 			</md-dialog-content>

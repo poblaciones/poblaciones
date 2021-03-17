@@ -97,7 +97,7 @@ class GeoJson
 			return self::ProjectLocation($arr);
 		}
 	}
-	public function GenerateFromBinary($results, $getCentroids = false, $project = false)
+	public function GenerateFromBinary($results, $getCentroids = false, $project = false, $hasCaption = false)
 	{
 		$geojson = array(
 			'type' => 'FeatureCollection',
@@ -107,7 +107,7 @@ class GeoJson
 		$features = array();
 		foreach($results as $res)
 		{
-			$feature = $this->GenerateFeatureFromBinary($res, true, $getCentroids, $project);
+			$feature = $this->GenerateFeatureFromBinary($res, true, $getCentroids, $project, $hasCaption);
 			if ($feature != null)
 			{
 				$features[] = $feature;
@@ -116,7 +116,7 @@ class GeoJson
 		$geojson['features'] = $features;
 		return $geojson;
 	}
-	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false)
+	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false, $hasCaption = false)
 	{
 		if (array_key_exists('valueClipped', $row))
 			$geometry = $row['valueClipped'];
@@ -136,9 +136,17 @@ class GeoJson
 		if (isset($row['dense']) && $row['dense'])
 			$ret['dense'] = 1;
 
-		if ($getCentroids)
+
+		if ($getCentroids || $hasCaption)
 		{
-			$ret['properties'] = array('centroid' => self::TrimLocation(array($row['Lat'], $row['Lon'])));
+			$properties = [];
+			if ($getCentroids)
+					$properties['centroid'] = self::TrimLocation(array($row['Lat'], $row['Lon']));
+			if ($hasCaption)
+			{
+				$properties['Description'] = $row['Caption'];
+			}
+		$ret['properties'] = $properties;
 		}
 		if ($project)
 			$coordinates = self::ProjectRecursive($geometry->asArray());
@@ -151,42 +159,7 @@ class GeoJson
 					);
 		return $ret;
 	}
-	/*
-	private static function simplify($geometry)
-	{
-		// FALTA IMPLEMENTAR LINE, MULTIPOLYGON y MULTILINE
-		$distance = 0.25; // Equivalente a 5 aprox.
 
-		$coordinates = $geometry->asArray();
-		if ($geometry->getGeomType() == 'Polygon')
-		{
-			//echo sizeof($coordinates[0]);
-			$init = sizeof($coordinates[0]);
-			$simplifier = new SimplifyDouglasPeucker($distance); //0.3
-			$polyline = new Polyline();
-			for($n = 1; $n < sizeof($coordinates[0]); $n++) {
-				$point = $coordinates[0][$n];
-				$polyline->addPoint(new Coordinate($point[1], $point[0]));
-			}
-			$simplifiedLine = $simplifier->simplify($polyline);
-			//echo ' ' . sizeof($polyline->getPoints()) . ' <br>';
-			$newArr = array();
-			foreach ($simplifiedLine->getPoints() as $point) {
-				$newArr[] = array($point->getLng(), $point->getLat());
-			}
-			// repone el último para cerrarlo
-			$newArr[] = $newArr[0];
-//			$compress =  sizeof($newArr) / $init;
-			$coordinates[0] = $newArr;
-			//echo ' ' . sizeof($newArr) . ' <br>';
-		}
-		else
-		{
-			echo $geometry->getGeomType();
-		}
-		return $coordinates;
-	}
-	*/
 	private static function ProjectLocation($point)
 	{
 		if (sizeof($point) !== 2) throw new PublicException('La coordenada no se encuentra completa.');
@@ -249,6 +222,8 @@ class GeoJson
 			return "Multilinestring";
 		elseif(Str::StartsWith($text, "LINESTRING"))
 			return "Linestring";
+		elseif(Str::StartsWith($text, "MULTIPOINT"))
+			return "Multipoint";
 		elseif(Str::StartsWith($text, "POINT"))
 			return "Point";
 		else
@@ -259,6 +234,7 @@ class GeoJson
 	{
 		if(Str::StartsWith($text, "MULTI"))
 		{
+			$text = str_replace("MULTIPOINT", "", $text);
 			$text = str_replace("MULTIPOLYGON", "", $text);
 			$text = str_replace("MULTILINESTRING", "", $text);
 			$pols = explode("),(", $text);

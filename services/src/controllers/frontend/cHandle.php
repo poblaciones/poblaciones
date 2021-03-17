@@ -16,6 +16,7 @@ use helena\entities\frontend\geometries\Envelope;
 use helena\services\frontend\SelectedMetricService;
 use minga\framework\PublicException;
 use helena\services\frontend\WorkService;
+use helena\services\frontend\BoundaryService;
 use helena\db\frontend\ClippingRegionItemModel;
 use minga\framework\Profiling;
 use minga\framework\Performance;
@@ -46,6 +47,14 @@ class cHandle extends cPublicController
 		if ($parts[0] !== 'handle')
 			throw new PublicException("Ruta inválida.");
 		array_shift($parts);
+
+		$type = 'M';
+		if ($parts[0] === 'boundaries')
+		{
+			array_shift($parts);
+			$type = 'B';
+		}
+
 		// Al último le saca el posible sufijo textual
 		$last = sizeof($parts) - 1;
 		if (Str::Contains($parts[$last], "_"))
@@ -57,19 +66,25 @@ class cHandle extends cPublicController
 
 		$metricId = $this->GetMetricId($parts);
 		$regionItemId = $this->GetRegionItemId($parts);
-		$this->cleanRoute = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($workId, $metricId, $regionItemId));
-		$this->cleanRouteBase = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($workId, $metricId, null));
+
+		if ($type === "B")
+			$urlId = 'boundaries/' . $workId;
+		else
+			$urlId = $workId;
+
+		$this->cleanRoute = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($urlId, $metricId, $regionItemId));
+		$this->cleanRouteBase = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($urlId, $metricId, null));
 
 		if (Request::IsGoogle() || Params::Get("debug"))
 		{
 			Performance::SetController('handleGoogle', 'get', true);
 
 			if ($metricId !== null)
-			{
 				$this->ShowWorkMetric($workId, $metricId, $regionItemId);
-			}
-			else
+			else if ($type === 'M')
 				$this->ShowWork($workId);
+			else
+				$this->ShowBoundary($workId);
 
 			if (Params::Get("debug"))
 				$this->AddValue("selfNavigateLink", $this->cleanRoute);
@@ -85,7 +100,16 @@ class cHandle extends cPublicController
 				return $this->RedirectWorkMetric($workId, $metricId, $regionItemId);
 			}
 			else
-				return $this->RedirectWork($workId);
+			{
+				if ($type === "M")
+				{
+					return $this->RedirectWork($workId);
+				}
+				else
+				{
+					return $this->RedirectBoundary($workId);
+				}
+			}
 		}
   }
 
@@ -106,9 +130,8 @@ class cHandle extends cPublicController
 	}
 
 
-	private function GetMetadata($work)
+	private function GetMetadata($metadataId)
 	{
-		$metadataId = $work->MetadataId;
 		$model = new MetadataModel(false);
 		return $model->GetMetadata($metadataId);
 	}
@@ -140,8 +163,10 @@ class cHandle extends cPublicController
 							'citation_journal_title' => 'Poblaciones',
 							'citation_pdf_url' => $url . '/metadata',
 							'citation_language' => 'met_title',
-							'citation_external_url' => $url,
 							'description' => 'met_abstract'];
+		if ($url)
+			$map['citation_external_url'] = $url;
+
 		$tags = $this->MapTags($metadata, $map);
 
 		$this->AddValue('metadata', $tags);
@@ -167,7 +192,7 @@ class cHandle extends cPublicController
 	{
 		$workService = new WorkService();
 		$work = $workService->GetWork($workId);
-		$metadata = $this->GetMetadata($work);
+		$metadata = $this->GetMetadata($work->Metadata->Id);
 
 		$this->AddMetadata($metadata, $work->Url, $metadata['met_title']);
 		$this->AddMetricLinks($work);
@@ -177,6 +202,22 @@ class cHandle extends cPublicController
 
 		$this->AddValue("metadata_pdf", $work->Url . '/metadata');
 	}
+
+	private function ShowBoundary($boundaryId)
+	{
+		$boundaryService = new BoundaryService();
+		$boundary = $boundaryService->GetSelectedBoundary($boundaryId);
+		$metadata = $this->GetMetadata($boundary->Metadata->Id);
+
+		$this->AddMetadata($metadata, null, $metadata['met_title']);
+
+		$items[] = ['Name' => 'Resumen', 'Value' => $metadata['met_abstract']];
+		$this->AddValue("items", $items);
+
+		$m = Links::GetFullyQualifiedUrl(Links::GetMetadataUrl($boundary->Metadata->Id));
+		$this->AddValue("metadata_pdf", $m);
+	}
+
 
 	private function PreppendMap($title)
 	{
@@ -190,12 +231,12 @@ class cHandle extends cPublicController
 	{
 		$workService = new WorkService();
 		$work = $workService->GetWork($workId);
-		$metadata = $this->GetMetadata($work);
+		$metadata = $this->GetMetadata($work->Metadata->Id);
 
 		$model = new MetadataModel();
 
 		$items = [];
-		$metadataId = $work->MetadataId;
+		$metadataId = $work->Metadata->Id;
 		$sources = $model->GetMetadataSources($metadataId);
 		$metricName = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
 		$metric = $metricName;
@@ -377,6 +418,11 @@ class cHandle extends cPublicController
 	{
 		// http://localhost:8000/map/3701
 		return $this->RedirectJs(Links::GetWorkUrl($workId));
+	}
+	private function RedirectBoundary($boundaryId)
+	{
+		// http://localhost:8000/map/#/l=2!tb
+		return $this->RedirectJs(Links::GetWorkMetricUrl(null, $boundaryId . "!tb", null));
 	}
 
 	private function RedirectWorkMetric($workId, $metricId, $regionItemId)

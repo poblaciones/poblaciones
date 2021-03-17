@@ -8,6 +8,7 @@ use helena\classes\GeoJson;
 use helena\classes\GlobalTimer;
 use helena\caches\DatasetShapesCache;
 use minga\framework\Context;
+use helena\classes\Clipper;
 
 use helena\db\frontend\SnapshotShapesModel;
 use helena\db\frontend\DatasetModel;
@@ -68,6 +69,10 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 		$rows = $table->GetShapesByEnvelope($datasetId, $envelope, $zoom, $getCentroids);
 
 		$data = FeaturesInfo::FromRows($rows, $getCentroids, false, $zoom);
+
+		// recorta el cuadrado
+		$clipper = new Clipper();
+		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $envelope);
 
 		$gradientId = $carto['gradient_id'];
 		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b)

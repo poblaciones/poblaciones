@@ -5,11 +5,11 @@
 				<tbody>
 					<tr>
 						<td style="width: 250px">Fuente:</td>
-						<td style="width: 600px">{{ version.Work.Name }}</td>
+						<td style="width: 600px">{{ version.Work.Metadata.Name }}</td>
 					</tr>
-					<tr v-if="version.Work.Type !=='P' && version.Work.Authors">
+					<tr v-if="version.Work.Type !=='P' && version.Work.Metadata.Authors">
 						<td>Autores:</td>
-						<td>{{ version.Work.Authors }}</td>
+						<td>{{ version.Work.Metadata.Authors }}</td>
 					</tr>
 					<tr>
 						<td>Dataset:</td>
@@ -22,7 +22,7 @@
 					<tr>
 						<td>Licencia:</td>
 						<td>
-							<creativeCommons :license="version.Work.License" />
+							<creativeCommons :license="version.Work.Metadata.License" />
 						</td>
 					</tr>
 					<tr>
@@ -62,10 +62,6 @@
 							</div>
 						</td>
 					</tr>
-					<tr v-if="version.Work.FileUrl">
-						<td>Metodología:</td>
-						<td>{{ version.Work.FileUrl }}</td>
-					</tr>
 					<tr>
 						<td>Descarga:</td>
 						<td>
@@ -82,7 +78,7 @@
 							</span>
 						</td>
 					</tr>
-					<tr v-if="version.Work.Files && version.Work.Files.length > 0">
+					<tr v-if="version.Work.Metadata.Files && version.Work.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
 						<td><div class="attachmentsDownloadPanel">
 							<span v-for="file in version.Work.Files" :key="file.Id">
@@ -201,13 +197,13 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.MetadataId + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.Metadata.Id + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
 			} else {
 				return '#';
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.MetadataId + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
+			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
 		},
 		getSpatialFormats() {
 			var ret = [];
@@ -286,13 +282,13 @@ export default {
 			});
 		},
 		getFileUrl(type) {
-			return window.host + '/services/download/GetFile?' + this.urlArgs(type);
+			return window.host + '/services/download/GetDatasetFile?' + this.urlArgs(type);
 		},
 		startDownloadUrl(type) {
-			return window.host + '/services/download/StartDownload?' + this.urlArgs(type);
+			return window.host + '/services/download/StartDatasetDownload?' + this.urlArgs(type);
 		},
 		stepDownloadUrl() {
-			return window.host + '/services/download/StepDownload';
+			return window.host + '/services/download/StepDatasetDownload';
 		},
 		removeFilter(regionId) {
 			arr.RemoveById(this.regions, regionId);
@@ -316,17 +312,6 @@ export default {
 </script>
 
 <style scoped>
-.downloadButton {
-  border: 1.5px solid #68B3C8;
-  color: #68B3C8;
-  border-radius: 9px; background-color: transparent;
-  padding: 4px; margin-right: 10px;
-  margin-bottom: 5px;
-}
-.warningBox {
-	font-size: 13px;
-  line-height: 1.4em;
-  margin-top: 4px;
-}
+
 </style>
 

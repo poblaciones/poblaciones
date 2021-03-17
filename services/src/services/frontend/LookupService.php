@@ -18,8 +18,8 @@ class LookupService extends BaseService
 		// $filter:
 		// m = devuelve solo indicadores
 		// r = devuelve solo regiones
-		// null = devuelve indicadores, regiones y direcciones
-		// h = devuelve indicadores o regiones, lo primero que coincida
+		// null = devuelve indicadores, límites, regiones y direcciones
+		// h = devuelve indicadores, límites o regiones, lo primero que coincida
 
 		Profiling::BeginTimer();
 		$log = new SearchLog();
@@ -31,7 +31,7 @@ class LookupService extends BaseService
 
 		// Trae los indicadores que coinciden
 		if ($filter != 'r')
-			$resLay = $modelMetrics->Search($query, $inBackoffice);
+			$resLay = $modelMetrics->SearchMetrics($query, $inBackoffice, ($filter !==  'm'));
 		else
 			$resLay = [];
 

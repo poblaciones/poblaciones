@@ -14,12 +14,6 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effective
 	var number = null;
 	if (variable.ShowValues == 1 && !variable.IsSimpleCount) {
 		number = this.FormatValue(variable, dataElement);
-	} else {
-		/*
-		var pattern = this.activeSelectedMetric.GetPattern();
-		if (pattern === 2) {
-			number = '&nbsp;&nbsp;';
-		}*/ ;
 	}
 	var description = null;
 	if (dataElement.Description !== null && dataElement.Description !== undefined &&

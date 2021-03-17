@@ -1,0 +1,219 @@
+<template>
+	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
+		<div v-if="boundary">
+			<table class="localTable">
+				<tbody>
+					<tr>
+						<td style="width: 250px">Título:</td>
+						<td style="width: 600px">{{ boundary.properties.Metadata.Name }}</td>
+					</tr>
+					<tr v-if="boundary.properties.Metadata.Authors">
+						<td>Autores:</td>
+						<td>{{ boundary.properties.Metadata.Authors }}</td>
+					</tr>
+					<tr>
+						<td>Licencia:</td>
+						<td>
+							<creativeCommons :license="boundary.properties.Metadata.License" />
+						</td>
+					</tr>
+					<tr>
+						<td>Descarga:</td>
+						<td>
+							<span v-if="visibleUrl">
+								<button v-on:click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="downloadButton">
+									<download-icon title="Descargar" /> {{ format.caption }}
+								</button>
+								<button @click="sendFile(resolveMetadataUrl(), true)" class="downloadButton">
+									<file-pdf-icon title="Descargar" /> Metadatos
+								</button>
+							</span>
+							<span v-else="">
+								<img src="/static/img/spinner.gif"> Generando archivo. El proceso puede demorar varios minutos... {{ (progress ? '(' + progress + '%)' : '') }}
+							</span>
+						</td>
+					</tr>
+					<tr v-if="boundary.properties.Metadata.Files && boundary.properties.Metadata.Files.length > 0">
+						<td>Adjuntos:</td>
+						<td><div class="attachmentsDownloadPanel">
+							<span v-for="file in boundary.properties.Metadata.Files" :key="file.Id">
+								<a target="_blank" :href="resolveFileUrl(file)">
+									<file-pdf-icon title="Descargar" /> {{ file.Caption }}
+								</a>
+							</span>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>Descarga con polígonos:</td>
+						<td>
+							<button v-on:click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="downloadButton">
+								<download-icon title="Descargar" /> {{ format.caption }}
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</Modal>
+</template>
+
+<script>
+import axios from 'axios';
+import h from '@/public/js/helper';
+import DownloadIcon from 'vue-material-design-icons/Download.vue';
+import creativeCommons from '@/public/components/controls/creativeCommons.vue';
+import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
+import err from '@/common/js/err';
+import arr from '@/common/js/arr';
+import Modal from '@/public/components/popups/modal';
+
+var debounce = require('lodash.debounce');
+
+export default {
+	name: 'boundaryDownload',
+	props: [
+		'visible',
+		'backgroundColor'
+	],
+	components: {
+    creativeCommons,
+    DownloadIcon,
+		FilePdfIcon,
+    Modal
+	},
+	data() {
+		return {
+			boundary: null,
+			visibleUrl: true,
+			progress: null,
+		};
+	},
+	computed: {
+		Use() {
+			return window.Use;
+		},
+	},
+	methods: {
+		show(boundary) {
+			this.boundary = boundary;
+			this.$refs.dialog.show();
+		},
+		getDataFormats() {
+			var ret = [];
+			ret.push({ caption: 'Texto (.csv)', key: 'c' });
+			ret.push({ caption: 'Excel (.xlsx)', key: 'x' });
+			ret.push({ caption: 'SPSS (.sav)', key: 's' });
+			ret.push({ caption: 'Stata (.dta)', key: 't' });
+			ret.push({ caption: 'R (.rdata)', key: 'r' });
+			ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
+			return ret;
+		},
+		resolveFileUrl(file) {
+			if (file.Web) {
+				return file.Web;
+			} else if (file.FileId) {
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.boundary.properties.Metadata.Id + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
+			} else {
+				return '#';
+			}
+		},
+		resolveMetadataUrl() {
+			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
+		},
+		getSpatialFormats() {
+			var ret = [];
+			ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
+			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
+			ret.push({ caption: 'Excel con GeoJSON (.xlsx)', key: 'xg' });
+			ret.push({ caption: 'Excel con WKT (.xlsx)', key: 'xw' });
+			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
+			return ret;
+		},
+		showUrls: debounce(function() {
+								this.visibleUrl = true;
+							}, 3000)
+		,
+		sendFileByType(type) {
+			var url = this.getFileUrl(type);
+			this.sendFile(url);
+		},
+		sendFile(url, newTab = false) {
+			let a = document.createElement('a');
+			a.style = 'display: none';
+			document.body.appendChild(a);
+			a.href = url;
+			if (newTab) {
+				a.target = '_blank';
+			}
+			a.click();
+			document.body.removeChild(a);
+		},
+		process(e, type) {
+			e.preventDefault();
+			this.visibleUrl = false;
+			this.progress = null;
+			var url = this.startDownloadUrl(type);
+			const loc = this;
+			axios.get(url, {
+				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
+			}).then(function (res) {
+				if(res.data.done === false) {
+					loc.processStep(type, res.data, 0);
+				} else {
+					loc.progress = 100;
+					loc.sendFileByType(type);
+					loc.showUrls();
+				}
+			}).catch(function(error) {
+			loc.showUrls();
+				err.errDialog('process', 'crear el archivo', error);
+			});
+		},
+		processStep(type, data, i) {
+			var key = data.key;
+			if (data.slice && data.totalSlices && data.slice < data.totalSlices) {
+				this.progress = parseInt(data.slice * 100 / data.totalSlices);
+			}
+			const loc = this;
+			return axios.get(loc.stepDownloadUrl(), {
+				params: { k: key },
+				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
+				}).then(function(res) {
+					if(i >= 1000) {
+						throw new Error('Hard limit reached');
+						}
+					i++;
+
+					if(res.data.done === false) {
+						return loc.processStep(type, res.data, i);
+					} else {
+						loc.progress = 100;
+						loc.sendFileByType(type);
+						loc.showUrls();
+					}
+				}).catch(function(error) {
+				loc.showUrls();
+				err.errDialog('processStep', 'crear el archivo', error);
+			});
+		},
+		getFileUrl(type) {
+			return window.host + '/services/download/GetBoundaryFile?' + this.urlArgs(type);
+		},
+		startDownloadUrl(type) {
+			return window.host + '/services/download/StartBoundaryDownload?' + this.urlArgs(type);
+		},
+		stepDownloadUrl() {
+			return window.host + '/services/download/StepBoundaryDownload';
+		},
+		urlArgs(type) {
+			return 't=' + type + '&s=b' + h.urlParam('b', this.boundary.properties.Id);
+		}
+	},
+};
+</script>
+
+<style scoped>
+
+</style>
+

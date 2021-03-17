@@ -2,8 +2,6 @@
 
 namespace helena\db\frontend;
 
-use helena\entities\admin\Work;
-
 use helena\classes\App;
 use helena\classes\Session;
 
@@ -58,7 +56,7 @@ class WorkModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($workId);
 
-		$sql = "SELECT work.*, met_id, met_title, met_authors, met_license, met_url, met_abstract,
+		$sql = "SELECT work.*, met_id, met_publication_date, met_title, met_authors, met_license, met_url, met_abstract,
 							met_coverage_caption, met_online_since, AsText(PolygonEnvelope(met_extents)) met_extents,
 							ins_caption, wst_type, ST_X(wst_center) wst_center_lon, ST_Y(wst_center) wst_center_lat, wst_zoom,
 								wst_clipping_region_item_id, wst_clipping_region_item_selected, wst_active_metrics, ins_watermark_id, ins_web, ins_color FROM work " . $this->MetadataJoins() . " JOIN work_startup ON wrk_startup_id = wst_id "

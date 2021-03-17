@@ -20,14 +20,14 @@
 
 					</div>
 				</div>
-				<div v-if="work.Current.Institution.Name" class="littleRow preTitleRow">
-					{{ work.Current.Institution.Name }}
+				<div v-if="work.Current.Metadata.Institution.Name" class="littleRow preTitleRow">
+					{{ work.Current.Metadata.Institution.Name }}
 				</div>
 				<div class="h3 title titleRow">
-					{{ work.Current.Name }}
+					{{ work.Current.Metadata.Name }}
 				</div>
-				<div v-if="work.Current.Authors" class="littleRow postTitleRow">
-					{{ work.Current.Authors }}
+				<div v-if="work.Current.Metadata.Authors" class="littleRow postTitleRow">
+					{{ work.Current.Metadata.Authors }}
 				</div>
 			</div>
 		</div>
@@ -76,8 +76,8 @@ export default {
 			if (!this.work.Current) {
 				return 0;
 			}
-			var ret = (this.work.Current.Name ? 1 : 0) + (this.work.Current.Institution.Name ? 1 : 0)
-				+ (this.work.Current.Authors ? 1 : 0);
+			var ret = (this.work.Current.Metadata.Name ? 1 : 0) + (this.work.Current.Metadata.Institution.Name ? 1 : 0)
+				+ (this.work.Current.Metadata.Authors ? 1 : 0);
 			return ret;
 		},
 		getMetadataStyle() {

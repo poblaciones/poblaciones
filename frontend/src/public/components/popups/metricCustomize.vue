@@ -1,5 +1,5 @@
 <template>
-	<Modal title="Personalizar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
+	<Modal title="Personalizar indicador" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metric && metric.SelectedVariable()">
 			<table class="localTable">
 				<tr>

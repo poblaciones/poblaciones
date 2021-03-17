@@ -6,12 +6,12 @@ use helena\classes\Statistics;
 use helena\services\common\BaseService;
 use helena\services\common\DownloadManager;
 
-class DownloadService extends BaseService
+class DownloadDatasetService extends BaseService
 {
-	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity)
+	public function CreateMultiRequestDatasetFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity)
 	{
 		$dm = new DownloadManager();
-		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, false, 'basic');
+		return $dm->CreateMultiRequestDatasetFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, false, 'basic');
 	}
 
 	public function StepMultiRequestFile($key)

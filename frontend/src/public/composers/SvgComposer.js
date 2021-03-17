@@ -2,13 +2,15 @@ import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
 import str from '@/common/js/str';
 import Pattern from '@/public/composers/Pattern';
-import SvgOverlay from '@/public/googleMaps/SvgOverlay';
 import Mercator from '@/public/js/Mercator';
 import SVG from 'svg.js';
 
 export default SvgComposer;
 
 function SvgComposer(mapsApi, activeSelectedMetric) {
+	if (!mapsApi) {
+		return;
+	}
 	// api usada de geojson2svg en js: https://github.com/gagan-bansal/geojson2svg
 	// api usada de svg: http://svgjs.com/elements/#svg-pattern
 	// posible api de php https://github.com/chrishadi/geojson2svg/blob/master/geojson2svg.php
@@ -19,124 +21,15 @@ function SvgComposer(mapsApi, activeSelectedMetric) {
 	this.index = this.activeSelectedMetric.index;
 	this.labelsVisibility = [];
 	this.AbstractConstructor();
-	this.useGradients = window.SegMap.Configuration.UseGradients;
-	this.useTextures = window.SegMap.Configuration.UseTextures;
+	this.useGradients = false;
+	this.useTextures = false;
 };
 
 SvgComposer.prototype = new AbstractTextComposer();
 SvgComposer.uniqueCssId = 1;
 
-SvgComposer.prototype.render = function (mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
-	var filtered = [];
-	var allKeys = [];
-	var mapItems = mapResults.Data.features;
-	var projected = mapResults.Data.projected;
-	var dataItems = dataResults.Data;
-	var texture = dataResults.Texture;
-	if (this.activeSelectedMetric.HasSelectedVariable() === false) {
-		return;
-	}
-	var variableId = this.activeSelectedMetric.SelectedVariable().Id;
-	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
-	var tileUniqueId = SvgComposer.uniqueCssId++;
-	var id;
-	var varId;
-	var iMapa = 0;
-	this.UpdateTextStyle(z);
-	var colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
 
-	if (mapItems.length === 0) return;
-
-	for (var i = 0; i < dataItems.length; i++) {
-		varId = dataItems[i]['VariableId'];
-		if (varId === variableId) {
-			id = dataItems[i]['FID'];
-			var fid = parseFloat(id);
-			// avanza en mapa
-			while (mapItems[iMapa].id < fid) {
-				if (++iMapa === mapItems.length) {
-					break;
-				}
-			}
-			if (iMapa === mapItems.length) {
-				break;
-			}
-			var mapItem = mapItems[iMapa];
-			if (mapItem.id == fid) {
-				this.processFeature(tileUniqueId, id, dataItems[i], mapItem, tileKey, tileBounds, filtered, allKeys, patternValue, colorMap);
-			}
-		}
-	}
-	this.keysInTile[tileKey] = allKeys;
-//	console.warn(tileKey + ' ' + (gradient !== null ? 1 : 0));
-	var svg = this.CreateSVGOverlay(tileUniqueId, div, filtered, projected, tileBounds, z, patternValue,
-																			gradient, texture);
-
-	if (svg !== null) {
-		var v = this.activeSelectedMetric.SelectedVariable().Id;
-		var simpleKey = h.getVariableFrameKey(v, x, y, z, this.MapsApi.TileBoundsRequired());
-		this.svgInTile[simpleKey] = svg;
-	}
-};
-
-SvgComposer.prototype.processFeature = function (tileUniqueId, id, dataElement, mapElement, tileKey, tileBounds, filtered, allKeys, patternValue, colorMap) {
-	// Se fija si por etiqueta está visible
-	var val = dataElement['ValueId'];
-	var valKey = 'K' + val;
-	if (!(valKey in this.labelsVisibility)) {
-		this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveVisibility(val);
-	}
-	if (this.labelsVisibility[valKey] === false) {
-		return;
-	}
-	// Lo agrega
-	var centroid = this.getCentroid(mapElement);
-	var isLineString = (mapElement.geometry.type === 'LineString' || mapElement.geometry.type === 'MultiLineString' ? ' ls' : '');
-	var mapItem = {
-		id: mapElement.id, type: mapElement.type, geometry: mapElement.geometry,
-					properties: { className: 'e' + tileUniqueId + '_' + val + isLineString }
-	};
-	if (dataElement.Description) {
-		mapItem.properties.description = dataElement.Description.replaceAll('"', '&#x22;');
-	}
-	var variable = this.activeSelectedMetric.SelectedVariable();
-	if (!variable.IsSimpleCount) {
-		mapItem.properties.value = this.FormatValue(variable, dataElement);
-	}
-	var clickId = null;
-	if (this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
-		clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
-	} else {
-		mapItem.id = null;
-	}
-	if (this.patternUseFillStyles(patternValue)) {
-		mapItem.properties.style = 'fill: url(#cs' + val + ');';
-	}
-	this.AddFeatureText(variable, val, dataElement, clickId, centroid, tileKey, tileBounds, colorMap);
-
-	filtered.push(mapItem);
-};
-
-
-SvgComposer.prototype.getCentroid = function (mapElement) {
-	if (mapElement['properties'] && mapElement['properties'].centroid) {
-		return new window.google.maps.LatLng(mapElement['properties'].centroid[0], mapElement['properties'].centroid[1]);
-	} else {
-		return h.getGeojsonCenter(mapElement);
-	}
-};
-
-SvgComposer.prototype.AddFeatureText = function (variable, val, dataElement, effectiveId, centroid, tileKey, tileBounds, colorMap) {
-	if (variable.ShowValues == 0 && (dataElement.Description === null
-		|| parseInt(variable.ShowDescriptions) == 0)) {
-		return;
-	}
-	if (this.inTile(tileBounds, centroid)) {
-		this.ResolveValueLabel(variable, effectiveId, dataElement, centroid, tileKey, colorMap[val]);
-	}
-};
-
-SvgComposer.prototype.SVG = function (h, w, z) {
+SvgComposer.prototype.SVG = function (h, w, z, parentAttributes) {
 	var xmlns = 'http://www.w3.org/2000/svg';
 	var boxWidth = h;
 	var boxHeight = w;
@@ -145,16 +38,18 @@ SvgComposer.prototype.SVG = function (h, w, z) {
 	svgElem.setAttributeNS(null, 'width', boxWidth);
 	svgElem.setAttributeNS(null, 'height', boxHeight);
 	svgElem.setAttributeNS(null, 'isFIDContainer', 1);
-	svgElem.setAttributeNS(null, 'metricId', this.activeSelectedMetric.properties.Metric.Id);
-	svgElem.setAttributeNS(null, 'metricVersionId', this.activeSelectedMetric.SelectedVersion().Version.Id);
-	svgElem.setAttributeNS(null, 'levelId', this.activeSelectedMetric.SelectedLevel().Id);
-	svgElem.setAttributeNS(null, 'variableId', this.activeSelectedMetric.SelectedVariable().Id);
+	for (var key in parentAttributes) {
+    // check if the property/key is defined in the object itself, not in parent
+		if (parentAttributes.hasOwnProperty(key)) {
+			svgElem.setAttributeNS(null, key, parentAttributes[key]);
+    }
+	}
 	svgElem.style.display = 'block';
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
 	if (patternValue === 0 || patternValue === 2) {
 		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
 	} else if (patternValue === 1) {
-		svgElem.style.strokeWidth = (z < 16 ? '2.5px' : '4px');
+		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
 	} else if (this.patternIsPipeline(patternValue)) {
 		// 3,4,5,6 son cañerías
 		svgElem.style.strokeWidth = '0px';
@@ -173,7 +68,8 @@ SvgComposer.prototype.patternIsPipeline = function (patternValue) {
 	return (patternValue >= 3 && patternValue <= 6);
 };
 
-SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, projected, tileBounds, z, patternValue, gradient, texture) {
+SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features, projected,
+										tileBounds, z, patternValue, gradient, texture) {
 	var m = new Mercator();
 	var projectedFeatures;
 
@@ -211,7 +107,7 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, 
 	var parseSVG = require('parse-svg');
 	var svgStrings = converter.convert(projectedFeatures, options);
 
-	var oSvg = this.SVG(256, 256, z);
+	var oSvg = this.SVG(256, 256, z, parentAttributes);
 
 	var o2 = SVG.adopt(oSvg);
 
@@ -236,12 +132,7 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, features, 
 		if (gradientOpacity !== 0) {
 			// test mask: https://jsfiddle.net/ycLsr32k/
 			var image = o2.image("data:" + gradient.ImageType + ";base64," + gradient.Data, 256, 256);
-			// rectángulo de transparencia global
-			/*var rect = o2.rect(256, 256);
-			rect.style('fill: #FFFFFF;');
-			rect.attr('class', 'gAlpha');*/
 			var rect2 = o2.rect(256, 256);
-			//		rect2.style('fill: #FFFFFF; opacity: ' + gradient.Luminance);
 			rect2.style('fill: #FFFFFF; opacity: ' + gradientOpacity);
 			// rectángulo de transparencia local
 			var mask = o2.mask();
@@ -309,7 +200,7 @@ SvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
 		if (patternValue === 11) {
 			pattern.style('fill: ' + labels[l].fillColor + ';');
 		}
-		pattern.style('stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.SelectedVariable().CurrentOpacity + width);
+		pattern.style('stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.CurrentOpacity + width);
 	}
 };
 
@@ -323,7 +214,7 @@ SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patte
 	if (textureMaskId) {
 		textureFill = '; fill: url(#' + textureMaskId + ')';
 	}
-	var strokeOpacity = this.activeSelectedMetric.SelectedVariable().CurrentOpacity;
+	var strokeOpacity = this.activeSelectedMetric.CurrentOpacity();
 	if (patternValue === 0 && textureMaskId) {
 		strokeOpacity = 0;
 	}
@@ -342,7 +233,7 @@ SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patte
 			fillBlock = '; fill: ' + labels[l].fillColor;
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
 				' { stroke: ' + stroke + '; stroke-opacity: ' + Math.max(1, strokeOpacity * 1.1) +
-				maskBlock + (textureFill ? textureFill : fillBlock) + '; fill-opacity: ' + this.activeSelectedMetric.SelectedVariable().CurrentOpacity + ' } ';
+				maskBlock + (textureFill ? textureFill : fillBlock) + '; fill-opacity: ' + this.activeSelectedMetric.CurrentOpacity + ' } ';
 		} else {
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
 				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' +  strokeOpacity +

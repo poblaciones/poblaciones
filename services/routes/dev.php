@@ -19,7 +19,7 @@ function resolver($request)
 	if ($ret->error)
 	{
 		$status = 500;
-		$content = "<h2>Poblaciones dev-proxy. No se ha pedido redireccionar el pedido</h2><p>La respuesta recibida fue: <br><li>"
+		$content = "<h2>Poblaciones dev-proxy. No se ha podido redireccionar el pedido</h2><p>La respuesta recibida fue: <br><li>"
 								 . $ret->error . "<h3>Verifique que el servidor NPM se encuentre iniciado";
 		$type = "text/html";
 	}

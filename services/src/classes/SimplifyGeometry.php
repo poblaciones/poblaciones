@@ -28,6 +28,7 @@ class SimplifyGeometry
 		switch(strtoupper($geometry['type']))
 		{
 			case "POINT":
+			case "MULTIPOINT":
 				return $geometry;
 			case "LINESTRING":
 				$coordinates = $this->RingDouglasPeuckerSimplify($geometry['coordinates'], $tolerance);

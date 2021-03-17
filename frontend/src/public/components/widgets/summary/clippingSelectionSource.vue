@@ -24,22 +24,14 @@ export default {
 	data() {
 		return {
 			work: {},
-			showDescargar: false,
 		};
 	},
 	computed: {
 		sourceTitle() {
-			return 'Fuente de límites de ' + this.region.Name;
+			return 'Fuente de delimitación de ' + this.region.Name;
 		}
 	},
   methods: {
-		clickDescargar(e) {
-			e.preventDefault();
-			this.showDescargar = true;
-		},
-		closeDescargar() {
-			this.showDescargar = false;
-		},
 		clickFuente(e) {
 			e.preventDefault();
 			window.Popups.ClippingMetadata.show(this.metadata, this.sourceTitle);

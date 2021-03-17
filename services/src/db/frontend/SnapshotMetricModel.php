@@ -30,7 +30,7 @@ class SnapshotMetricModel extends BaseModel
 	{
 		if ($getAllPublicData)
 		{
-			$where = "WHERE mvw_work_is_indexed = 1 AND mvw_work_is_private = 0 ";
+			$where = "WHERE mvw_work_is_private = 0 ";
 			$having = "HAVING SUM(case when mvw_work_type = 'P' then 1 else 0 end) > 0 ";
 			$orderBy = "ORDER BY myv_metric_group_id, myv_metric_provider_id, myv_metric_caption ";
 		}
@@ -85,16 +85,17 @@ class SnapshotMetricModel extends BaseModel
 		return $ret > 0;
 	}
 
-	public function Search($originalQuery, $inBackoffice)
+	public function SearchMetrics($originalQuery, $inBackoffice, $includeBoundaries)
 	{
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
 		$fields = [ 'mvw_metric_caption', 'mvw_caption', 'mvw_metric_caption', 'mvw_variable_captions',
 											 'mvw_variable_value_captions', 'mvw_work_caption', 'mvw_work_authors', 'mvw_work_institution' ];
 		$specialWordsCondition = self::calculateSpecialWordsCondition($originalQuery, $fields);
+		$args = array($query, $query);
 
 		Profiling::BeginTimer();
-		$sql = "SELECT mvw_metric_id Id,
+		$sql = "(SELECT mvw_metric_id Id,
 										mvw_metric_caption Caption,
 										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') Extra,
 										'L' Type,
@@ -106,10 +107,23 @@ class SnapshotMetricModel extends BaseModel
 										$specialWordsCondition . "
 										) AND mvw_work_is_indexed = 1 AND mvw_work_is_private = 0
 										GROUP BY mvw_metric_id, mvw_metric_caption
-										ORDER BY Relevance DESC
-										LIMIT 0, 10";
+										LIMIT 0, 10)";
 
-		$ret = App::Db()->fetchAll($sql, array($query, $query));
+		if ($includeBoundaries) {
+			$boundariesSpecialWordsCondition = self::calculateSpecialWordsCondition($originalQuery, ['bow_caption', 'bow_group']);
+			$boundariesSql = "(SELECT bow_boundary_id Id,
+										bow_caption Caption,
+										CONCAT('Delimitaciones > ', bow_group) Extra,
+										'B' Type,
+										MATCH (`bow_caption`, `bow_group`) AGAINST (?) Relevance
+										FROM snapshot_boundary
+										WHERE MATCH (`bow_caption`, `bow_group`) AGAINST (? IN BOOLEAN MODE) " .
+											$boundariesSpecialWordsCondition . " LIMIT 0, 10)";
+			$sql .= " UNION ALL " . $boundariesSql;
+			$args[] = $query; $args[] = $query;
+		}
+		$sql .= " ORDER BY Relevance DESC";
+		$ret = App::Db()->fetchAll($sql, $args);
 		if ($inBackoffice)
 		{
 			foreach($ret as &$retItem)

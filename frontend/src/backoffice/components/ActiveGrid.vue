@@ -213,16 +213,16 @@ export default {
 			this.$refs.confirmDialog.show();
 		},
 		getStartDownloadUrl() {
-			return window.host + '/services/backoffice/StartDownload';
+			return window.host + '/services/backoffice/StartDatasetDownload';
 		},
 		getStepDownloadUrl() {
-			return window.host + '/services/backoffice/StepDownload';
+			return window.host + '/services/backoffice/StepDatasetDownload';
 		},
 		urlArgs(type) {
 			return 't=' + type + '&d=' + this.Dataset.properties.Id + '&w=' + this.Work.properties.Id;
 		},
 		getFileUrl(type) {
-			return window.host + '/services/backoffice/GetFile?' + this.urlArgs(type);
+			return window.host + '/services/backoffice/GetDatasetFile?' + this.urlArgs(type);
 		},
 		sendFile(type) {
 			let a = document.createElement('a');

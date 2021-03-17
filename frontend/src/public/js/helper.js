@@ -430,6 +430,19 @@ module.exports = {
 			element['on' + eventName] = handler;
 		}
 	},
+	getBoundaryParams(boundary, frame, x, y, boundsRectRequired, rev) {
+		var ret = this.mergeObject({
+			a: boundary.properties.Id,
+			x: x,
+			y: y,
+			w: rev
+		}, this.getFrameParams(frame));
+		ret.e = null;
+		if (boundsRectRequired) {
+			ret.b = boundsRectRequired;
+		};
+		return ret;
+	},
 	getTileParams(metric, frame, x, y, boundsRectRequired) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({

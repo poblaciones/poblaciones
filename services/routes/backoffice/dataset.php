@@ -70,27 +70,27 @@ App::GetOrPost('/services/backoffice/UpdateRowValues', function (Request $reques
 	return App::Json($controller->UpdateRowValues($datasetId, $id, $values));
 });
 
-App::$app->get('/services/backoffice/StartDownload', function (Request $request) {
-	$controller = new services\DownloadService();
+App::$app->get('/services/backoffice/StartDatasetDownload', function (Request $request) {
+	$controller = new services\DownloadDatasetService();
 	$datasetId = Params::GetInt('d');
 	if ($denied = Session::CheckIsDatasetReader($datasetId)) return $denied;
 	$type = Params::Get('t');
-	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, null, null, null));
+	return App::Json($controller->CreateMultiRequestDatasetFile($type, $datasetId, null, null, null));
 });
 
-// http://mapas.aacademica.org/services/download/GetFile?t=ss&l=8&r=1692&a=X
-App::$app->get('/services/backoffice/GetFile', function (Request $request) {
+// http://mapas.aacademica.org/services/download/GetDatasetFile?t=ss&l=8&r=1692&a=X
+App::$app->get('/services/backoffice/GetDatasetFile', function (Request $request) {
 	$datasetId = Params::GetInt('d');
 	if ($denied = Session::CheckIsDatasetReader($datasetId)) return $denied;
 	$clippingItemId = null;
 	$clippingCircle = null;
 	$urbanity = null;
 	$type = Params::Get('t');
-	return services\DownloadService::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity);
+	return services\DownloadDatasetService::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity);
 });
 
-App::$app->get('/services/backoffice/StepDownload', function (Request $request) {
-	$controller = new services\DownloadService();
+App::$app->get('/services/backoffice/StepDatasetDownload', function (Request $request) {
+	$controller = new services\DownloadDatasetService();
 	$key = Params::Get('k');
 	return App::Json($controller->StepMultiRequestFile($key));
 });

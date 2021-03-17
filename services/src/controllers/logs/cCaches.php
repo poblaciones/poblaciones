@@ -5,6 +5,7 @@ use helena\controllers\common\cController;
 
 use helena\services\backoffice\publish\snapshots\SnapshotGeographiesModel;
 use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
+use helena\services\backoffice\publish\snapshots\SnapshotBoundaryModel;
 use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionModel;
 use helena\services\backoffice\publish\snapshots\SnapshotGeographiesByRegionModel;
 use helena\services\backoffice\publish\CacheManager;
@@ -66,12 +67,19 @@ class cCaches extends cController
 
 			$cm = new CacheManager();
 			$cm->CleanGeographyCache();
-			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';		} else if (array_key_exists('regenClipping', $_POST)) {
+			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';
+	} else if (array_key_exists('regenClipping', $_POST)) {
 			$model = new SnapshotLookupModel();
 			$model->ClearClippingRegions();
-			$this->message = 'Regeneradas ' . $model->RegenClippingRegions() . ' filas.';
+			$this->message = 'Regeneradas para lookup: ' . $model->RegenClippingRegions() . ' filas. ';
+
+			$model = new SnapshotBoundaryModel();
+			$model->Clean();
+			$this->message .= 'Regeneradas para límites ' . $model->Regen() . ' filas.';
+
 			$cm = new CacheManager();
 			$cm->CleanLabelsCache();
+			$cm->CleanBoundariesCache();
 		} else if (array_key_exists('selectedMetric', $_POST)) {
 			$model = new SnapshotMetricVersionModel();
 			$n = $model->IncrementAllSignatures();

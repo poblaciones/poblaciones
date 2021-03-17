@@ -9,7 +9,7 @@
 					<i class="fas fa-sliders-h"></i>
 				</button>
 
-				<button type="button" v-if="Use.UseUrbanity && hasUrbanityFilter" id="filterDropId"
+				<button type="button" v-if="hasUrbanityFilter" id="filterDropId"
 								class="filterDropdownButton lightButton close" data-toggle="dropdown"
 								title="Agregar filtro">
 					<i class="fas fa-filter" />
@@ -57,9 +57,6 @@ export default {
 		};
 	},
 	methods: {
-		addMetric(id) {
-			window.SegMap.AddMetricById(id);
-		},
 		clickCustomize(e) {
 			e.preventDefault();
 			window.Popups.MetricCustomize.show(this.metric);

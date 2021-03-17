@@ -1,5 +1,5 @@
 import LocationsComposer from '@/public/composers/LocationsComposer';
-import SvgComposer from '@/public/composers/SvgComposer';
+import DataShapeComposer from '@/public/composers/DataShapeComposer';
 import Vue from 'vue';
 
 import h from '@/public/js/helper';
@@ -364,7 +364,7 @@ ActiveSelectedMetric.prototype.CreateComposer = function () {
 		/*case 'S':
 	case 'D':*/
 	} else {
-		ret = new SvgComposer(window.SegMap.MapsApi, this);
+		ret = new DataShapeComposer(window.SegMap.MapsApi, this);
 	}
 	this.composer = ret;
 	return ret;
@@ -603,7 +603,7 @@ ActiveSelectedMetric.prototype.getValidMetrics = function (variable) {
 
 	if (this.SelectedLevel().HasArea && this.SelectedVariable() && !this.SelectedVariable().IsArea) {
 		ret.push({ Key: 'K', Caption: 'Área' });
-		ret.push({ Key: 'A', Caption: 'Distribución de áreas' });
+		ret.push({ Key: 'A', Caption: 'Distr. de áreas' });
 		ret.push({ Key: 'D', Caption: 'Densidad' });
 	}
 
@@ -626,6 +626,10 @@ ActiveSelectedMetric.prototype.GetStyleColorList = function() {
 		ret.push({ cs: 'cs' + value['Id'], className: value['Id'], fillColor: value.FillColor });
 	}
 	return ret;
+};
+
+ActiveSelectedMetric.prototype.CurrentOpacity = function () {
+	return this.SelectedVariable().CurrentOpacity;
 };
 
 ActiveSelectedMetric.prototype.GetStyleColorDictionary = function () {
