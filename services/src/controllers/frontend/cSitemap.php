@@ -20,7 +20,7 @@ class cSitemap extends cPublicController
 																	SELECT CONCAT('boundaries/', bou_id) as url, DATE_FORMAT(met_update, '%Y-%m-%d') as lastmod, met_title as title
 																	FROM boundary
 																	JOIN metadata ON met_id = bou_metadata_id
-																	WHERE bou_visible = 1
+																	WHERE bou_is_private = 0
 																");
 		// Hace el pseudo-encoding para los nombres
 		foreach($links as &$link)

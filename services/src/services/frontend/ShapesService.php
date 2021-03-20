@@ -47,7 +47,7 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 	private function CalculateDatasetShapes($datasetId, $x, $y, $z, $b)
 	{
 		$table = new SnapshotShapesModel();
-		$datasetModel = new DatasetModel();
+		$datasetModel = new DatasetDownloadModel();
 		$dataset = $datasetModel->GetById($datasetId);
 		//$table->tableName	= $dataset['dat_table'];
 		$zoom = $z;

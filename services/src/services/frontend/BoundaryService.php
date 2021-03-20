@@ -7,6 +7,7 @@ use helena\caches\SelectedBoundaryCache;
 use helena\classes\Clipper;
 
 use helena\services\common\BaseService;
+use helena\db\frontend\BoundaryModel;
 use helena\db\frontend\SnapshotBoundaryItemModel;
 use helena\entities\frontend\clipping\FeaturesInfo;
 use helena\entities\frontend\geometries\Envelope;
@@ -76,7 +77,7 @@ class BoundaryService extends BaseService
 
 	private function CalculateSelectedBoundary($boundaryId)
 	{
-		$table = new SnapshotBoundaryItemModel();
+		$table = new BoundaryModel();
 
 		$row = $table->GetSelectedBoundary($boundaryId);
 

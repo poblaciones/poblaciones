@@ -14,6 +14,7 @@ use helena\classes\writers\XlsxWriter;
 use helena\classes\writers\ShpWriter;
 
 use helena\classes\DownloadStateBag;
+use helena\classes\DownloadBoundaryStateBag;
 use helena\db\frontend\DatasetModel;
 use helena\db\frontend\BoundaryDownloadModel;
 use helena\db\frontend\ClippingRegionItemModel;
@@ -75,7 +76,7 @@ class DownloadManager
 	{
 		self::ValidateType($type);
 		// Si está cacheado, sale
-		if(BoundaryDownloadCache::IsCached($type, $boundaryId))
+		if(BoundaryDownloadCache::Cache()->IsCached($type, $boundaryId))
 			return array('done' => true);
 
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
@@ -146,7 +147,7 @@ class DownloadManager
 		$cache = BoundaryDownloadCache::Cache();
 		// Lo devuelve desde el cache
 		$filename = null;
-		if ($cache->HasData($datasetId, $cacheKey, $filename, true))
+		if ($cache->HasData($cacheKey, $filename, true))
 			return App::StreamFile($filename, $friendlyName);
 		else
 			throw new PublicException('No ha sido posible descargar el archivo.');

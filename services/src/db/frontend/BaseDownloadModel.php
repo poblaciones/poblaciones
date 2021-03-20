@@ -27,13 +27,8 @@ class BaseDownloadModel extends BaseModel
 	public $fullCols = array();
 	public $fullParams = array();
 	public $wktIndex = -1;
-	public $fromDraft = false;
 	public $extraColumns = null;
 
-	protected function draftPreffix()
-	{
-		return ($this->fromDraft ? 'draft_' : '');
-	}
 	public function GetCols()
 	{
 		if($this->prepared == false)
@@ -97,7 +92,7 @@ class BaseDownloadModel extends BaseModel
 			$cartoCols = $this->GetGeographyColumns($table, $car);
 			if($lvl == sizeof($geographies) - 1)
 			{
-				$joins .=  $left .' JOIN geography_item '.$table.' ON '.$table.'.gei_id = spss1.geography_item_id ';
+				$joins .=  $left .' JOIN geography_item '.$table.' ON '.$table.'.gei_id = _data_table.geography_item_id ';
 				$cartoCols = array_merge($cartoCols, $this->GetGeographyOtherColumns($table, $car['geography']));
 			}
 			else
@@ -105,6 +100,32 @@ class BaseDownloadModel extends BaseModel
 
 			$cols = array_merge($cartoCols, $cols);
 		}
+		return $cols;
+	}
+	protected function AppendShapeColumns(array $cols, $preffix = '')
+	{
+		$cols[] = self::GetCustomCol('_data_table.' . $preffix . 'area_m2', 'area_m2', 'Área en m2',
+			Format::F, 9, 19, 2, Measurement::Scale, Alignment::Right);
+		$cols[] = self::GetCustomCol('ROUND(ST_Y(_data_table.' . $preffix . 'centroid), ' . GeoJson::PRECISION .')', 'latitud_centroide', 'Latitud del centroide',
+			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
+		$cols[] = self::GetCustomCol('ROUND(ST_X(_data_table.' . $preffix . 'centroid), ' . GeoJson::PRECISION .')', 'longitud_centroide', 'Longitud del centroide',
+			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
+		return $cols;
+	}
+
+	protected function AppendPolygon($cols, $polygonField, $getPolygonType)
+	{
+		if ($getPolygonType === 'geojson')
+		{
+			$fn = '';
+			$varName = 'GeoJSON';
+		} else
+		{
+			$fn = 'asWKT';
+			$varName = 'WKT';
+		}
+		$cols[] = self::GetCustomCol($fn . '(' . $polygonField . ')', $varName, 'Geometría en ' . $varName,
+			Format::A, 10, null, 0, Measurement::Nominal, Alignment::Left);
 		return $cols;
 	}
 

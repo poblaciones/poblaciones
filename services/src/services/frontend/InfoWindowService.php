@@ -20,7 +20,7 @@ class InfoWindowService extends BaseService
 	public function GetLabelInfo($featureId)
 	{
 		$featureId = floatval($featureId);
-		$datasetModel = new DatasetItemModel();
+		$datasetModel = new DatasetModel();
 
 		$datasetId = intval($featureId / 0x100000000);
 		$id = $featureId & 0xFFFFFFFF;
@@ -52,7 +52,7 @@ class InfoWindowService extends BaseService
 	public function GetMetricItemInfo($featureId, $metricId, $variableId)
 	{
 		$featureId = floatval($featureId);
-		$datasetModel = new DatasetItemModel();
+		$datasetModel = new DatasetModel();
 		$selectedService = new SelectedMetricService();
 
 		$metric = $selectedService->GetSelectedMetric($metricId, true, true);

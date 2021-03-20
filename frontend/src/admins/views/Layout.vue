@@ -27,6 +27,10 @@
 							<works filter="P"></works>
 						</md-tab>
 
+						<md-tab class="transparentTab" id="boundaries-tab" v-if="isAdmin" to="/boundaries" :md-active="isPath('/boundaries')" md-label="Delimitaciones">
+							<boundaries></boundaries>
+						</md-tab>
+
 						<md-tab class="transparentTab" id="clipping-regions-tab" v-if="isAdmin" to="/regions" :md-active="isPath('/regions')" md-label="Regiones">
 							<clipping-regions></clipping-regions>
 						</md-tab>
@@ -54,12 +58,14 @@ import Users from './Users/Users';
 import Statistics from './Statistics/Statistics';
 import Reviews from './Reviews/Reviews';
 import ClippingRegions from './ClippingRegions/ClippingRegions';
+import Boundaries from './Boundaries/Boundaries';
 
 export default {
 	name: 'Layout',
 	components: {
 		TopWelcome,
 		Works,
+		Boundaries,
 		ClippingRegions,
 		Statistics,
 		Reviews,
@@ -94,6 +100,8 @@ export default {
 		isPath(path) {
 			if (this.$route.path === '/public' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'public-tab';
+			} else if (this.$route.path === '/boundaries' && this.$refs.tabs) {
+				this.$refs.tabs.activeTab = 'boundaries-tab';
 			} else if (this.$route.path === '/regions' && this.$refs.tabs) {
 				this.$refs.tabs.activeTab = 'clipping-regions-tab';
 			} else if (this.$route.path === '/reviews' && this.$refs.tabs) {

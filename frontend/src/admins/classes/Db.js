@@ -24,6 +24,17 @@ Db.prototype.GetClippingRegions = function () {
 	return axiosClient.getPromise(window.host + '/services/admin/GetClippingRegions',
 		{}, 'obtener la lista de regiones');
 };
+
+Db.prototype.GetBoundaries = function () {
+	return axiosClient.getPromise(window.host + '/services/admin/GetBoundaries',
+		{}, 'obtener la lista de delimitaciones');
+};
+
+Db.prototype.GetBoundaryGroups = function () {
+	return axiosClient.getPromise(window.host + '/services/admin/GetBoundaryGroups',
+		{}, 'obtener la lista de groups de delimitaciones');
+};
+
 Db.prototype.GetUsers = function () {
 	return axiosClient.getPromise(window.host + '/services/admin/GetUsers',
 			{ }, 'obtener la lista de usuarios');
@@ -72,6 +83,13 @@ Db.prototype.DeleteUser = function (user, callback) {
 	return axiosClient.getPromise(window.host + '/services/admin/DeleteUser',
 		{ u: user.Id }, 'eliminar al usuario').then(function () {
 			callback();
+		});
+};
+
+Db.prototype.UpdateBoundary = function (boundary) {
+	return axiosClient.postPromise(window.host + '/services/admin/UpdateBoundary',
+		{ b: boundary }, 'actualizar la delimitación').then(function () {
+
 		});
 };
 

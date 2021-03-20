@@ -6,9 +6,13 @@ use helena\caches\BoundaryCache;
 use helena\caches\SelectedBoundaryCache;
 use helena\caches\FabMetricsCache;
 
+use helena\caches\BoundaryVisiblityCache;
+use helena\caches\BoundaryDownloadCache;
+
 use minga\framework\Profiling;
 use helena\classes\App;
 use helena\classes\VersionUpdater;
+use helena\services\backoffice\publish\CacheManager;
 
 class SnapshotBoundaryModel
 {
@@ -23,8 +27,10 @@ class SnapshotBoundaryModel
 		VersionUpdater::Increment('BOUNDARY_VIEW');
 
 		FabMetricsCache::Cache()->Clear();
-		BoundaryCache::Cache()->Clear();
-		SelectedBoundaryCache::Cache()->Clear();
+
+		VersionUpdater::Increment('FAB_METRICS');
+		$cacheManager = new CacheManager();
+		$cacheManager->CleanBoundariesCache();
 
 	 	Profiling::EndTimer();
 	}
@@ -34,20 +40,21 @@ class SnapshotBoundaryModel
 
 		 $sql = "INSERT INTO snapshot_boundary(bow_boundary_id, bow_caption, bow_group)
 							SELECT bou_id, bou_caption, bgr_caption FROM boundary JOIN boundary_group ON bgr_id = bou_group_id
-							WHERE bou_visible = 1";
+							WHERE bou_is_private = 0";
 		$ret = App::Db()->exec($sql);
 
 		$sql = "INSERT INTO snapshot_boundary_item
 									(`biw_boundary_id`,
 										`biw_clipping_region_item_id`,
 										`biw_caption`,
+										`biw_code`,
 										`biw_centroid`,
+										biw_area_m2,
 										`biw_geometry_r1`)
-										SELECT bcr_boundary_id, cli_id, cli_caption, cli_centroid, cli_geometry_r1
+										SELECT bcr_boundary_id, cli_id, cli_caption, cli_code, cli_centroid, biw_area_m2, cli_geometry_r1
 										FROM boundary_clipping_region
 									INNER JOIN  boundary ON bou_id = bcr_boundary_id
-									INNER JOIN  clipping_region_item ON cli_clipping_region_id = bcr_clipping_region_id
-									WHERE bou_visible = 1;";
+									INNER JOIN  clipping_region_item ON cli_clipping_region_id = bcr_clipping_region_id";
 
 		$ret = App::Db()->exec($sql);
 

@@ -4,26 +4,26 @@ namespace helena\services\frontend;
 
 use helena\classes\Statistics;
 use helena\services\common\BaseService;
-use helena\services\common\DownloadManager;
+use helena\services\common\BoundaryDownloadManager;
 
 class DownloadBoundaryService extends BaseService
 {
-	public function CreateMultiRequestDatasetFile($type, $boundaryId)
+	public function CreateMultiRequestFile($type, $boundaryId)
 	{
-		$dm = new DownloadManager();
-		return $dm->CreateMultiRequestBoundaryFile($type, $boundaryId, 'basic');
+		$dm = new BoundaryDownloadManager();
+		return $dm->CreateMultiRequestFile($type, $boundaryId);
 	}
 
 	public function StepMultiRequestFile($key)
 	{
-		$dm = new DownloadManager();
+		$dm = new BoundaryDownloadManager();
 		return $dm->StepMultiRequestFile($key);
 	}
 
 	public static function GetFileBytes($type, $boundaryId)
 	{
-		Statistics::StoreDownloadBoundaryHit($boundaryId, $type);
-		return DownloadManager::GetBoundaryFileBytes($type, $boundaryId);
+		//Statistics::StoreDownloadBoundaryHit($boundaryId, $type);
+		return BoundaryDownloadManager::GetFileBytes($type, $boundaryId);
 	}
 }
 

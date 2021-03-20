@@ -2,23 +2,23 @@
 
 namespace helena\caches;
 
-use minga\framework\caching\TwoLevelFileFileCache;
+use minga\framework\caching\FileFileCache;
 use minga\framework\Str;
 
 class BoundaryDownloadCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new TwoLevelFileFileCache("Boundaries/Downloads");
+		return new FileFileCache("Boundaries/Downloads");
 	}
 	public static function CreateKey($type, $boundaryId)
 	{
 		$key = $type . "b" . $boundaryId;
 		return $key;
 	}
-	public static function Clear($datasetId)
+	public static function Clear($boundaryId)
 	{
-		self::Cache()->Clear($datasetId);
+		self::Cache()->Clear($boundaryId);
 	}
 }
 

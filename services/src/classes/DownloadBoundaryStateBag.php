@@ -12,7 +12,7 @@ class DownloadBoundaryStateBag extends StateBag
 		$ret = new DownloadBoundaryStateBag();
 		$ret->Initialize();
 		$folder = $ret->GetFolder();
-		$key = BoundaryDownloadCache::CreateKey($type, $model);
+		$key = BoundaryDownloadCache::CreateKey($type, $boundaryId);
 
 		$ret->SetArray(array(
 			'type' => $type,
@@ -38,6 +38,10 @@ class DownloadBoundaryStateBag extends StateBag
 		$this->state['cols'][$keyCol]['field_width'] = $value;
 	}
 
+	public function ExtraColumns()
+	{
+		return $this->state['extraColumns'];
+	}
 	public function Cols()
 	{
 		return $this->state['cols'];

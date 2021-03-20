@@ -13,6 +13,9 @@ use helena\caches\WorkPermissionsCache;
 use helena\services\frontend\SelectedMetricService;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\caches\WorkVisiblityCache;
+use helena\caches\BoundaryVisiblityCache;
+
+
 
 class Session
 {
@@ -103,6 +106,21 @@ class Session
 		return $ret;
 	}
 
+
+	public static function CheckIsBoundaryPublicOrAccessible($boundaryId)
+	{
+		Profiling::BeginTimer();
+		// Se fija los permisos
+		if (self::IsBoundaryPublicOrAccessible($boundaryId))
+			$ret = null;
+		else
+		{
+			$ret = self::NotEnoughPermissions();
+		}
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public static function CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)
 	{
 		Profiling::BeginTimer();
@@ -133,6 +151,27 @@ class Session
 		Profiling::EndTimer();
 		return $res;
 	}
+
+	public static function IsBoundaryPublicOrAccessible($boundaryId)
+	{
+		Profiling::BeginTimer();
+		$res = null;
+
+		if (!BoundaryVisiblityCache::Cache()->HasData($boundaryId, $resText))
+		{
+			$res = App::Db()->fetchScalarInt("SELECT bou_is_private = 0 FROM boundary WHERE bou_id = ? LIMIT 1", array($boundaryId));
+			$resText = $res . '';
+			BoundaryVisiblityCache::Cache()->PutData($boundaryId, $res . '');
+		}
+		$res = ($resText !== '0' ? true: 0);
+
+		if (!$res)
+			$res = self::IsSiteReader();
+
+		Profiling::EndTimer();
+		return $res;
+	}
+
 	public static function IsWorkPublicOrAccessible($workId, $checkByUser = true)
 	{
 		Profiling::BeginTimer();

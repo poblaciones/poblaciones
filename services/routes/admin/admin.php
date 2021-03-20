@@ -67,6 +67,43 @@ App::Get('/services/admin/GetClippingRegions', function (Request $request) {
 	return App::OrmJson($ret);
 });
 
+
+App::GetOrPost('/services/admin/UpdateClippingRegion', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$region = App::ReconnectJsonParamMandatory(entities\ClippingRegion::class, 'r');
+
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->UpdateClippingRegion($region);
+	return App::Json($ret);
+});
+
+App::Get('/services/admin/GetBoundaries', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$controller = new services\BoundaryService();
+	$ret = $controller->GetBoundaries();
+	return App::OrmJson($ret);
+});
+
+App::Get('/services/admin/GetBoundaryGroups', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$controller = new services\BoundaryService();
+	$ret = $controller->GetBoundaryGroups();
+	return App::OrmJson($ret);
+});
+
+App::GetOrPost('/services/admin/UpdateBoundary', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$boundary = App::ReconnectJsonParamMandatory(entities\Boundary::class, 'b');
+
+	$controller = new services\BoundaryService();
+	$ret = $controller->UpdateBoundary($boundary);
+	return App::Json($ret);
+});
+
 App::Get('/services/admin/GetUsers', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())
 		return $app;

@@ -25,14 +25,14 @@ class ClippingRegionItem
     /**
      * @var string
      *
-     * @ORM\Column(name="cli_code", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="cli_code", type="string", length=20, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Code;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="cli_caption", type="string", length=100, precision=0, scale=0, nullable=true, unique=false)
+     * @ORM\Column(name="cli_caption", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Caption;
 

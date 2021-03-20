@@ -11,6 +11,8 @@ use minga\framework\Params;
 App::$app->get('/services/boundaries/GetSelectedBoundary', function (Request $request) {
 	$controller = new services\BoundaryService();
 	$boundaryId = Params::GetIntMandatory('a');
+
+	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
 	$ret = $controller->GetSelectedBoundary($boundaryId);
 
 	return App::Json($ret);
@@ -20,6 +22,9 @@ App::$app->get('/services/boundaries/GetSelectedBoundary', function (Request $re
 App::$app->get('/services/frontend/boundaries/GetBoundary', function (Request $request) {
 	$controller = new services\BoundaryService();
 	$boundaryId = Params::GetIntMandatory('a');
+
+	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
+
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
@@ -31,10 +36,10 @@ App::$app->get('/services/frontend/boundaries/GetBoundary', function (Request $r
 
 // http://mapas.aacademica.org/services/download/GetBoundaryFile?t=ss&l=8&r=1692&a=X
 App::$app->get('/services/download/GetBoundaryFile', function (Request $request) {
-	$boundaryId = Params::GetIntMandatory('d');
+	$boundaryId = Params::GetIntMandatory('b');
 	$type = Params::Get('t');
 
-	if ($denied = Session::CheckIsBoundaryVisible($boundaryId)) return $denied;
+	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
 
 	return services\DownloadBoundaryService::GetFileBytes($type, $boundaryId);
 });
@@ -45,9 +50,9 @@ App::$app->get('/services/download/StartBoundaryDownload', function (Request $re
 	$boundaryId = Params::GetInt('b');
 	$type = Params::Get('t');
 
-	if ($denied = Session::CheckIsBoundaryVisible($boundaryId)) return $denied;
+	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
 
-	return App::Json($controller->CreateMultiRequestDatasetFile($type, $boundaryId));
+	return App::Json($controller->CreateMultiRequestFile($type, $boundaryId));
 });
 
 App::$app->get('/services/download/StepBoundaryDownload', function (Request $request) {

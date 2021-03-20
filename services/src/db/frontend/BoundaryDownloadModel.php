@@ -38,28 +38,6 @@ class BoundaryDownloadModel extends BaseDownloadModel
 			$this->prepared = true;
 	}
 
-	public function GetDatasetById($id)
-	{
-		Profiling::BeginTimer();
-		$sql = 'SELECT
-			d1.dat_id id,
-			d1.dat_caption caption,
-			d1.dat_table `table`,
-			d1.dat_type `type`,
-			d1.dat_caption_column_id `caption_column_id`,
-			d1.dat_images_column_id `images_column_id`,
-			(SELECT dco_field FROM ' . $this->draftPreffix() . 'dataset_column WHERE dco_id = d1.dat_images_column_id) images_column_field,
-			(SELECT dco_field FROM ' . $this->draftPreffix() . 'dataset_column WHERE dco_id = d1.dat_caption_column_id) caption_column_field,
-			d1.dat_geography_id
-			FROM ' . $this->draftPreffix() . 'dataset d1
-			WHERE d1.dat_id = ? LIMIT 1';
-		$ret = App::Db()->fetchAssoc($sql, array((int)$id));
-		if ($ret == null)
-			throw new PublicException("El dataset no ha sido encontrado.");
-		Profiling::EndTimer();
-		return $ret;
-	}
-
 	public function GetColumnLabels($id, array $ids = array())
 	{
 		if($id === null)
@@ -88,39 +66,27 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		Profiling::EndTimer();
 		return $ret;
 	}
-	private function draftPreffix()
-	{
-		return ($this->fromDraft ? 'draft_' : '');
-	}
 	public function PrepareFileQuery($boundaryId, $getPolygon)
 	{
 		Profiling::BeginTimer();
 		$params = array();
 
-		$boundary = $this->GetBoundaryById($boundaryId);
+		$boundaryModel = new BoundaryModel();
+		$boundary = $boundaryModel->GetBoundaryById($boundaryId);
 
-		$where = '';
 		$joins = ' ';
 
-		$effectiveGeographyId = $dataset['bou_geography_id'];
+		$geographyId = $boundary['bou_geography_id'];
 
-		$cols = array();
+		$cols = $this->GetBoundaryColumns();
 
-		DatasetModel::GetCustomCol();
-
-		(SUBSELECT geography_item_id)
-		$this->AppendExtraColumns($cols, $joins, $effectiveGeographyId, $getPolygon);
-
-
-		$cols = array_merge($cols, $this->GetBoundaryColumns());
-		biw_caption
-		biw_code
+		$this->AppendExtraColumns($cols, $joins, $geographyId, $getPolygon);
 
 		$cols = $this->Deduplicate($cols);
 
-		$wherePart = ($where !== '' ? ' WHERE ' . substr($where, 4) : '');
+		$wherePart = '';
 
-		$query = ' FROM snapshot_boundary_item AS spss1 ' . $joins . $wherePart;
+		$query = ' FROM snapshot_boundary_item AS _data_table ' . $joins . $wherePart;
 
 		$fullSql = 'SELECT ' . $this->GetFields($cols) . $query;
 		$countSql = 'SELECT COUNT(*) ' . $query;
@@ -134,32 +100,31 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		Profiling::EndTimer();
 	}
 
-	private function AppendPolygon($cols, $getPolygon)
+	private function GetBoundaryColumns()
 	{
-		if ($getPolygon === 'geojson')
-		{
-			$fn = '';
-			$varName = 'GeoJSON';
-		} else
-		{
-			$fn = 'asWKT';
-			$varName = 'WKT';
-		}
-
-		$cols[] = $this->GetCustomCol($fn . '(spss1.geometry)', $varName, 'Geometría en ' . $varName,
-				Format::A, 10, null, 0, Measurement::Nominal, Alignment::Left);
+		$cols = [];
+		$cols[] = self::GetCustomCol('_data_table.biw_code', 'codigo', 'Código',
+			Format::A, 0, 20, 0, Measurement::Nominal, Alignment::Left);
+		$cols[] = self::GetCustomCol('_data_table.biw_caption', 'nombre', 'Nombre',
+			Format::A, 0, 100, 0, Measurement::Nominal, Alignment::Left);
 		return $cols;
 	}
 
-	private function AppendExtraColumns(&$cols, &$joins, &$effectiveGeographyId, $getPolygon)
+	private function AppendExtraColumns(&$cols, &$joins, $geographyId, $getPolygonType)
 	{
 		// agrega los joins para columnas extra y/o para getPolygon:
-		$cols = $this->AppendGeographyTree($cols, $joins, $effectiveGeographyId);
-
-		// se fija si van con polígono
-		if ($getPolygon != null)
+		if ($geographyId)
 		{
-			$cols = $this->AppendPolygon($cols, $getPolygon);
+			$cols = $this->AppendGeographyTree($cols, $joins, $geographyId);
+		}
+
+		$cols = $this->AppendShapeColumns($cols, 'biw_');
+		// se fija si van con polígono
+		if ($getPolygonType != null)
+		{
+			$polygonField = 'biw_geometry_r1';
+
+			$cols = $this->AppendPolygon($cols, $polygonField, $getPolygonType);
 			$this->wktIndex = count($cols) - 1;
 		}
 	}
