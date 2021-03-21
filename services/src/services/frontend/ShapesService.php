@@ -11,7 +11,7 @@ use minga\framework\Context;
 use helena\classes\Clipper;
 
 use helena\db\frontend\SnapshotShapesModel;
-use helena\db\frontend\DatasetModel;
+use helena\db\frontend\DatasetDownloadModel;
 use helena\db\frontend\GeographyModel;
 use helena\entities\frontend\clipping\FeaturesInfo;
 use helena\entities\frontend\geometries\Envelope;

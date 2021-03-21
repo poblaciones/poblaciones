@@ -1,4 +1,6 @@
 [CURRENT]
+
+v2.34 (2021-03-21)
 - Se agregan 'delimitaciones' que reunionen una o varias regiones de clipping. Tiene fuente (metadatos), descarga e inserción desde buscador y botón de 'agregar'.
 - Los tiles hacen crop de los polígonos antes de salir del servidor.
 - Fix: el filtro de urbanidad/ruralidad no podía ser removida en los indicadores 'compactos' (solo lista de elementos).
@@ -7,6 +9,7 @@
 - Fix a publicación de elementos no indexados entre las etiquetas del mapa.
 - Panel administrativo de delimitaciones.
 - Privacidad en delimitaciones.
+- Las áreas en las descargas se muestran en km2.
 
 v2.33 (2021-01-15)
 - Incorporación de íconos para las etiquetas del mapa.

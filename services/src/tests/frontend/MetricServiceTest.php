@@ -14,10 +14,9 @@ class MetricServiceTest extends TestCase
 		$controller = new FabService();
 		$ret = $controller->GetFabMetrics();
 		$this->assertIsArray($ret);
-		$this->assertGreaterThan(0, count($ret));
-		$this->assertInstanceOf(MetricGroupInfo::class, $ret[0]);
-		$this->assertTrue(isset($ret[0]->Metrics[0]));
-		$this->assertTrue($ret[0]->Metrics[0]['Header']);
-		$this->assertInstanceOf(MetricInfo::class, $ret[0]->Metrics[1]);
+		$this->assertGreaterThan(0, count($ret), "Has more than zero elements");
+		$this->assertInstanceOf(MetricGroupInfo::class, $ret[1]);
+		$this->assertTrue($ret[1]->Items[0]['Header'], "First is header");
+		$this->assertInstanceOf(MetricInfo::class, $ret[1]->Items[1], "Second element is MetricInfo");
 	}
 }

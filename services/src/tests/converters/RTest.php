@@ -16,7 +16,7 @@ class RTest extends TestCase
 
 		RWriter::SpssToR($spssData, $outR);
 
-		$this->assertFile($outR, [3186, 3188]);
+		$this->assertFile($outR, [3186, 3187, 3188]);
 	}
 	public function testSpssToRLista()
 	{
@@ -43,6 +43,6 @@ class RTest extends TestCase
 
 		RWriter::SpssToR($spssData, $outR);
 
-		$this->assertFile($outR, [260, 262]);
+		$this->assertFile($outR, [260, 261, 262]);
 	}
 }

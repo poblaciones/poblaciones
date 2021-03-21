@@ -101,11 +101,9 @@ class DatasetDownloadModel extends BaseDownloadModel
 
 		$effectiveGeographyId = $dataset['dat_geography_id'];
 
-		$cols = array();
+		$cols = $datasetModel->GetDatasetColumns($dataset['id'], false, $this->fromDraft);
 
 		$this->AppendExtraColumns($cols, $dataset, $joins, $effectiveGeographyId, $getPolygon);
-
-		$cols = array_merge($cols, $this->GetDatasetColumns($dataset['id']));
 
 		$cols = $this->Deduplicate($cols);
 
@@ -128,10 +126,12 @@ class DatasetDownloadModel extends BaseDownloadModel
 
 	private function AppendExtraColumns(&$cols, $dataset, &$joins, &$effectiveGeographyId, $getPolygonType)
 	{
-		if ($this->extraColumns == 'basic' || $getPolygon != null)
+		if ($this->extraColumns == 'basic' || $getPolygonType != null)
 		{
 			// agrega los joins para columnas extra y/o para getPolygon:
-			$cols = $this->AppendGeographyTree($cols, $joins, $effectiveGeographyId);
+			$matchField = '_data_table.geography_item_id';
+			$includeGeographyOtherColumns = $dataset['type'] == 'D';
+			$cols = $this->AppendGeographyTree($cols, $joins, $effectiveGeographyId, $matchField, $includeGeographyOtherColumns);
 			if($dataset['type'] == 'S')
 				$cols = $this->AppendShapeColumns($cols);
 		}
@@ -152,32 +152,6 @@ class DatasetDownloadModel extends BaseDownloadModel
 		}
 	}
 
-
-	public function GetDatasetColumns($id, $inSummary = false)
-	{
-		Profiling::BeginTimer();
-
-		$sql = 'SELECT
-			dco_id id,
-			dco_field field,
-			dco_variable variable,
-			dco_caption caption,
-			dco_format format,
-			dco_column_width column_width,
-			dco_field_width field_width,
-			dco_decimals decimals,
-			dco_measure measure,
-			dco_alignment align
-			FROM ' . $this->draftPreffix() . 'dataset_column
-			WHERE ' . ($inSummary ? 'dco_use_in_summary = 1' : 'dco_use_in_export = 1') . '
-			AND dco_dataset_id = ?
-			ORDER BY dco_order';
-
-		$rows = App::Db()->fetchAll($sql, array((int)$id));
-
-		Profiling::EndTimer();
-		return $rows;
-	}
 
 	protected function draftPreffix()
 	{

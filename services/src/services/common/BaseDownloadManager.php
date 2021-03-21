@@ -24,7 +24,7 @@ use helena\caches\BoundaryDownloadCache;
 use helena\classes\App;
 
 
-class DownloadManagerBase
+abstract class BaseDownloadManager
 {
 	protected const STEP_BEGIN = 0;
 	protected const STEP_ADDING_ROWS = 1;
@@ -32,12 +32,12 @@ class DownloadManagerBase
 	protected const STEP_DATA_COMPLETE = 3;
 	protected const STEP_CACHED = 4;
 
-	protected const FILE_SPSS = 1;
-	protected const FILE_CSV = 2;
-	protected const FILE_SHP = 3;
-	protected const FILE_XLSX = 4;
-	protected const FILE_STATA = 5;
-	protected const FILE_R = 6;
+	public const FILE_SPSS = 1;
+	public const FILE_CSV = 2;
+	public const FILE_SHP = 3;
+	public const FILE_XLSX = 4;
+	public const FILE_STATA = 5;
+	public const FILE_R = 6;
 
 	protected static $validFileTypes = ['s' => [ 'extension' => 'sav', 'Caption' => 'SPSS', 'type' => self::FILE_SPSS],
 																		'z' => [ 'extension' => 'zsav', 'Caption' => 'SPSS', 'type' => self::FILE_SPSS],
@@ -52,6 +52,10 @@ class DownloadManagerBase
 	protected $start = 0.0;
 	protected $model;
 	protected $state;
+
+	abstract protected function PutFileToCache();
+	abstract protected function LoadState($key);
+	abstract protected function LoadModel();
 
 	function __construct()
 	{

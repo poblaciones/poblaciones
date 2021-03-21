@@ -156,7 +156,7 @@ class Session
 	{
 		Profiling::BeginTimer();
 		$res = null;
-
+		$resText = "";
 		if (!BoundaryVisiblityCache::Cache()->HasData($boundaryId, $resText))
 		{
 			$res = App::Db()->fetchScalarInt("SELECT bou_is_private = 0 FROM boundary WHERE bou_id = ? LIMIT 1", array($boundaryId));

@@ -7,6 +7,7 @@ use helena\entities\frontend\metric\InfoWindowInfo;
 use helena\classes\App;
 use minga\framework\Str;
 use minga\framework\Profiling;
+use minga\framework\PublicException;
 
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 
@@ -37,6 +38,35 @@ class DatasetModel
 		return $ret;
 	}
 
+
+	public function GetDatasetColumns($id, $inSummary = false, $fromDraft = false)
+	{
+		Profiling::BeginTimer();
+		$draftPreffix = ($fromDraft ? 'draft_' : '');
+
+		$sql = 'SELECT
+			dco_id id,
+			dco_field field,
+			dco_variable variable,
+			dco_caption caption,
+			dco_format format,
+			dco_column_width column_width,
+			dco_field_width field_width,
+			dco_decimals decimals,
+			dco_measure measure,
+			dco_alignment align
+			FROM ' . $draftPreffix . 'dataset_column
+			WHERE ' . ($inSummary ? 'dco_use_in_summary = 1' : 'dco_use_in_export = 1') . '
+			AND dco_dataset_id = ?
+			ORDER BY dco_order';
+
+		$rows = App::Db()->fetchAll($sql, array((int)$id));
+
+		Profiling::EndTimer();
+		return $rows;
+	}
+
+
 	public function GetInfoById($datasetId, $itemId)
 	{
 		Profiling::BeginTimer();
@@ -58,7 +88,7 @@ class DatasetModel
 		$dataset = $this->GetDatasetById($datasetId);
 		$table = $dataset['table'];
 		// trae las columnas para resumen
-		$columns = $datasetModel->GetDatasetColumns($datasetId, true);
+		$columns = $this->GetDatasetColumns($datasetId, true);
 		$captionColumn = null;
 		$cols = $this->ResolveTitle($dataset, $itemId, $geographyItemId, $captionColumn);
 		$cols .= $this->ResolveImage($dataset);

@@ -13,7 +13,7 @@ use helena\classes\App;
 use helena\classes\Paths;
 use helena\classes\Statistics;
 use helena\services\common\BaseService;
-use helena\services\common\DownloadManager;
+use helena\services\common\BaseDownloadManager;
 
 
 class StatisticsService extends BaseService
@@ -243,9 +243,9 @@ class StatisticsService extends BaseService
 			}
 			else
 			{
-				$fileType = DownloadManager::GetFileTypeFromLetter(substr($code, 0, 1));
-				$polygon = DownloadManager::GetPolygon($code);
-				if ($polygon && $fileType !== DownloadManager::FILE_SHP)
+				$fileType = BaseDownloadManager::GetFileTypeFromLetter(substr($code, 0, 1));
+				$polygon = BaseDownloadManager::GetPolygon($code);
+				if ($polygon && $fileType !== BaseDownloadManager::FILE_SHP)
 				{
 					$fileType += ($polygon == 'wkt' ? 100 : 200);
 				}
@@ -278,7 +278,7 @@ class StatisticsService extends BaseService
 					$ret[$fileType]['WKT'] += $downloadType['Hits'];
 				else
 					$ret[$fileType]['Datos'] += $downloadType['Hits'];
-				$ret[$fileType]['Caption'] = DownloadManager::GetFileCaptionFromFileType($fileType);
+				$ret[$fileType]['Caption'] = BaseDownloadManager::GetFileCaptionFromFileType($fileType);
 			}
 		}
 		$ret = Arr::ToArrFromKeyArr($ret);

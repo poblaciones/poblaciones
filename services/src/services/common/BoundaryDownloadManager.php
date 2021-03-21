@@ -24,7 +24,7 @@ use helena\caches\BoundaryDownloadCache;
 use helena\classes\App;
 
 
-class BoundaryDownloadManager extends DownloadManagerBase
+class BoundaryDownloadManager extends BaseDownloadManager
 {
 	public function CreateMultiRequestFile($type, $boundaryId)
 	{

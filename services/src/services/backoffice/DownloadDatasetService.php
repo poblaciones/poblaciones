@@ -3,25 +3,25 @@
 namespace helena\services\backoffice;
 
 use helena\services\common\BaseService;
-use helena\services\common\DownloadManager;
+use helena\services\common\DatasetDownloadManager;
 
 class DownloadDatasetService extends BaseService
 {
-	public function CreateMultiRequestDatasetFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity)
+	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity)
 	{
-		$dm = new DownloadManager();
-		return $dm->CreateMultiRequestDatasetFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, true, null);
+		$dm = new DatasetDownloadManager();
+		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, true, null);
 	}
 
 	public function StepMultiRequestFile($key)
 	{
-		$dm = new DownloadManager();
+		$dm = new DatasetDownloadManager();
 		return $dm->StepMultiRequestFile($key);
 	}
 
 	public static function GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity)
 	{
-		return DownloadManager::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, true);
+		return DatasetDownloadManager::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, true);
 	}
 }
 

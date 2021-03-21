@@ -3,22 +3,19 @@
 namespace helena\db\frontend;
 
 use minga\framework\Profiling;
-use Doctrine\DBAL\Connection;
 use PDO;
 use helena\classes\App;
 use minga\framework\Str;
-use minga\framework\PublicException;
 use minga\framework\ErrorException;
 use helena\classes\GeoJson;
 
-use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\db\frontend\GeographyModel;
 
 use helena\classes\spss\Alignment;
 use helena\classes\spss\Format;
 use helena\classes\spss\Measurement;
 
-class BaseDownloadModel extends BaseModel
+abstract class BaseDownloadModel extends BaseModel
 {
 
 	public $prepared = false;
@@ -71,7 +68,7 @@ class BaseDownloadModel extends BaseModel
 		}
 	}
 
-	public function AppendGeographyTree($cols, &$joins, $geography_id)
+	public function AppendGeographyTree($cols, &$joins, $geography_id, $matchField, $includeGeographyOtherColumns = false)
 	{
 		//Árbol plano de Geographies
 		$model = new GeographyModel();
@@ -81,7 +78,7 @@ class BaseDownloadModel extends BaseModel
 			$left = " LEFT ";
 		else
 			$left = "";
-
+		$colsToAdd = [];
 		for($lvl = sizeof($geographies) - 1; $lvl >= 0; $lvl--)
 		{
 			$car = $geographies[$lvl];
@@ -92,20 +89,22 @@ class BaseDownloadModel extends BaseModel
 			$cartoCols = $this->GetGeographyColumns($table, $car);
 			if($lvl == sizeof($geographies) - 1)
 			{
-				$joins .=  $left .' JOIN geography_item '.$table.' ON '.$table.'.gei_id = _data_table.geography_item_id ';
-				$cartoCols = array_merge($cartoCols, $this->GetGeographyOtherColumns($table, $car['geography']));
+				$joins .=  $left .' JOIN geography_item '.$table.' ON '.$table.'.gei_id = ' . $matchField. ' ';
+				if ($includeGeographyOtherColumns)
+					$cartoCols = array_merge($cartoCols, $this->GetGeographyOtherColumns($table, $car['geography']));
 			}
 			else
 				$joins .= $left . ' JOIN geography_item '.$table.' ON '.$table.'.gei_id = '.$parent.'.gei_parent_id ';
 
-			$cols = array_merge($cartoCols, $cols);
+			$colsToAdd = array_merge($cartoCols, $colsToAdd);
 		}
+		$cols = array_merge($cols, $colsToAdd);
 		return $cols;
 	}
 	protected function AppendShapeColumns(array $cols, $preffix = '')
 	{
-		$cols[] = self::GetCustomCol('_data_table.' . $preffix . 'area_m2', 'area_m2', 'Área en m2',
-			Format::F, 9, 19, 2, Measurement::Scale, Alignment::Right);
+		$cols[] = self::GetCustomCol('_data_table.' . $preffix . 'area_m2 / 1000 / 1000', 'superficie_km2', 'Superficie en km2',
+			Format::F, 9, 10, 3, Measurement::Scale, Alignment::Right);
 		$cols[] = self::GetCustomCol('ROUND(ST_Y(_data_table.' . $preffix . 'centroid), ' . GeoJson::PRECISION .')', 'latitud_centroide', 'Latitud del centroide',
 			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
 		$cols[] = self::GetCustomCol('ROUND(ST_X(_data_table.' . $preffix . 'centroid), ' . GeoJson::PRECISION .')', 'longitud_centroide', 'Longitud del centroide',
@@ -195,18 +194,17 @@ class BaseDownloadModel extends BaseModel
 	{
 		$cols = array();
 		$carto = Str::RemoveAccents($name);
-		$sufix =  ' ('.$name.')';
 
-		$cols[] = self::GetCustomCol($table.'.gei_population', $carto.'_poblacion_total', 'Población total'.$sufix,
+		$cols[] = self::GetCustomCol($table.'.gei_population', $carto.'_poblacion_total', 'Población total',
 			Format::F, 9, 10, 0, Measurement::Scale, Alignment::Right);
-		$cols[] = self::GetCustomCol($table.'.gei_households', $carto.'_hogares_total', 'Total de hogares'.$sufix,
+		$cols[] = self::GetCustomCol($table.'.gei_households', $carto.'_hogares_total', 'Total de hogares',
 			Format::F, 9, 10, 0, Measurement::Scale, Alignment::Right);
-		$cols[] = self::GetCustomCol('ROUND(ST_Y('.$table.'.gei_centroid), ' . GeoJson::PRECISION .')', $carto.'_latitud_centroide', 'Latitud del centroide'.$sufix,
+		$cols[] = self::GetCustomCol('ROUND(ST_Y('.$table.'.gei_centroid), ' . GeoJson::PRECISION .')', $carto.'_latitud_centroide', 'Latitud del centroide',
 			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
-		$cols[] = self::GetCustomCol('ROUND(ST_X('.$table.'.gei_centroid), ' . GeoJson::PRECISION .')', $carto.'_longitud_centroide', 'Longitud del centroide'.$sufix,
+		$cols[] = self::GetCustomCol('ROUND(ST_X('.$table.'.gei_centroid), ' . GeoJson::PRECISION .')', $carto.'_longitud_centroide', 'Longitud del centroide',
 			Format::F, 6, 19, 11, Measurement::Scale, Alignment::Right);
-		$cols[] = self::GetCustomCol($table.'.gei_area_m2', $carto.'_area_m2', 'Área en m2'.$sufix,
-			Format::F, 9, 19, 2, Measurement::Scale, Alignment::Right);
+		$cols[] = self::GetCustomCol($table.'.gei_area_m2 / 1000 / 1000', $carto.'_superficie_km2', 'Superficie en km2',
+			Format::F, 9, 10, 3, Measurement::Scale, Alignment::Right);
 		return $cols;
 	}
 

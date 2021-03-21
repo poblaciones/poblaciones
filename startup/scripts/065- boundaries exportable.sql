@@ -32,7 +32,7 @@ SELECT bcr_boundary_id, cli_id, cli_caption, cli_code, cli_centroid, cli_area_m2
 									WHERE bou_visible = 1;
 
 ALTER TABLE `boundary`
-CHANGE COLUMN `bou_is_visible` `bou_is_private` TINYINT(1) NOT NULL DEFAULT '1' ;
+CHANGE COLUMN `bou_visible` `bou_is_private` TINYINT(1) NOT NULL DEFAULT '1' ;
 
 update boundary SET bou_is_private = (bou_is_private - 1) * -1;
 

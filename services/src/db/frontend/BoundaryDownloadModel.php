@@ -6,13 +6,7 @@ use minga\framework\Profiling;
 use Doctrine\DBAL\Connection;
 use PDO;
 use helena\classes\App;
-use minga\framework\Str;
 use minga\framework\PublicException;
-use minga\framework\ErrorException;
-use helena\classes\GeoJson;
-
-use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
-use helena\db\frontend\GeographyModel;
 
 use helena\classes\spss\Alignment;
 use helena\classes\spss\Format;
@@ -38,34 +32,6 @@ class BoundaryDownloadModel extends BaseDownloadModel
 			$this->prepared = true;
 	}
 
-	public function GetColumnLabels($id, array $ids = array())
-	{
-		if($id === null)
-			return array();
-		Profiling::BeginTimer();
-		$where = '';
-		$params = array((int)$id);
-		$types = array(PDO::PARAM_INT);
-		if(count($ids) > 0)
-		{
-			$where = ' AND dla_value IN (?)';
-			$params[] = $ids;
-			$types[] = Connection::PARAM_STR_ARRAY;
-		}
-
-		$sql = 'SELECT
-			dla_value value,
-			dla_caption caption
-			FROM ' . $this->draftPreffix() . 'dataset_column_value_label
-			WHERE dla_dataset_column_id = ?' . $where . ' ORDER BY dla_order';
-
-		$items = App::Db()->fetchAll($sql, $params, $types);
-		$ret = array();
-		foreach($items as $item)
-			$ret['_' . $item['value']] = $item['caption'];
-		Profiling::EndTimer();
-		return $ret;
-	}
 	public function PrepareFileQuery($boundaryId, $getPolygon)
 	{
 		Profiling::BeginTimer();
@@ -84,7 +50,8 @@ class BoundaryDownloadModel extends BaseDownloadModel
 
 		$cols = $this->Deduplicate($cols);
 
-		$wherePart = '';
+		$wherePart = ' WHERE biw_boundary_id = ?';
+		$params[] = $boundaryId;
 
 		$query = ' FROM snapshot_boundary_item AS _data_table ' . $joins . $wherePart;
 
@@ -115,7 +82,9 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		// agrega los joins para columnas extra y/o para getPolygon:
 		if ($geographyId)
 		{
-			$cols = $this->AppendGeographyTree($cols, $joins, $geographyId);
+			$matchField = '(SELECT cgv_geography_item_id FROM snapshot_clipping_region_item_geography_item WHERE cgv_clipping_region_item_id = biw_clipping_region_item_id
+														AND cgv_geography_id = ' .  $geographyId . ' LIMIT 1)';
+			$cols = $this->AppendGeographyTree($cols, $joins, $geographyId, $matchField);
 		}
 
 		$cols = $this->AppendShapeColumns($cols, 'biw_');

@@ -3,7 +3,7 @@
 namespace helena\services\frontend;
 
 use helena\services\common\BaseService;
-use helena\db\frontend\DatasetItemModel;
+use helena\db\frontend\DatasetModel;
 use helena\db\frontend\MetricVersionModel;
 
 use helena\db\frontend\SnapshotByDatasetNeighbors;

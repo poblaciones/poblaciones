@@ -52,7 +52,7 @@ class BoundaryGroup
      *
      * @param integer $id
      *
-     * @return Boundary
+     * @return BoundaryGroup
      */
     public function setId($id)
     {
@@ -62,11 +62,11 @@ class BoundaryGroup
     }
 
     /**
-     * Set caption
-     *
+	 * Set caption
+	 *
      * @param string $caption
      *
-     * @return Boundary
+     * @return BoundaryGroup
      */
     public function setCaption($caption)
     {
@@ -90,7 +90,7 @@ class BoundaryGroup
 		 *
 		 * @param integer $order
 		 *
-		 * @return Boundary
+		 * @return BoundaryGroup
 		 */
     public function setOrder($order)
     {

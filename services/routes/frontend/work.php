@@ -40,7 +40,7 @@ App::$app->get('/services/download/StartDatasetDownload', function (Request $req
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
 
-	return App::Json($controller->CreateMultiRequestDatasetFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity));
+	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity));
 });
 
 App::$app->get('/services/download/StepDatasetDownload', function (Request $request) {

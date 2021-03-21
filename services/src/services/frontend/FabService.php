@@ -79,7 +79,7 @@ class FabService extends BaseService
 				// las filtra
 				if ($this->doRemovePrivateBoundaries($group['Items']))
 					$this->fixEmptyGroups($group['Items']);
-				if (sizeof($group['Items']) === 0)
+				if (sizeof($group['Items']) == 0)
 					Arr::Remove($ret, $group);
 				break;
 			}

@@ -24,7 +24,7 @@ use helena\caches\BoundaryDownloadCache;
 use helena\classes\App;
 
 
-class DatasetDownloadManager extends DownloadManagerBase
+class DatasetDownloadManager extends BaseDownloadManager
 {
 
 	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false, $extraColumns = array())
@@ -112,6 +112,25 @@ class DatasetDownloadManager extends DownloadManagerBase
 					throw new PublicException('La región indicada no fue encontrada');
 			}
 		}
+	}
+
+	public static function GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false)
+	{
+		self::ValidateType($type);
+
+		if (!$fromDraft)
+		{
+			self::ValidateClippingItem($clippingItemId);
+		}
+		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type);
+		$cache = self::getCache($fromDraft);
+		// Lo devuelve desde el cache
+		$filename = null;
+		if ($cache->HasData($datasetId, $cacheKey, $filename, true))
+			return App::StreamFile($filename, $friendlyName);
+		else
+			throw new PublicException('No ha sido posible descargar el archivo.');
 	}
 
 	protected function LoadState($key)
