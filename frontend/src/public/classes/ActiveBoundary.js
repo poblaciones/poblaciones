@@ -69,7 +69,8 @@ ActiveBoundary.prototype.CheckTileIsOutOfClipping = function() {
 };
 
 ActiveBoundary.prototype.GetDataService = function (boundsRectRequired, seed) {
-	return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed), path: '/services/frontend/boundaries/GetBoundary', useStaticQueue: true };
+	// h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed)
+	return { server: window.host, path: '/services/frontend/boundaries/GetBoundary', useStaticQueue: false };
 };
 
 ActiveBoundary.prototype.GetDataServiceParams = function (coord, boundsRectRequired) {

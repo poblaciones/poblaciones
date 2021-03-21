@@ -7,16 +7,7 @@ use Doctrine\DBAL\Connection;
 use PDO;
 use helena\classes\App;
 use minga\framework\Str;
-use minga\framework\PublicException;
-use minga\framework\ErrorException;
-use helena\classes\GeoJson;
-
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
-use helena\db\frontend\GeographyModel;
-
-use helena\classes\spss\Alignment;
-use helena\classes\spss\Format;
-use helena\classes\spss\Measurement;
 
 class DatasetDownloadModel extends BaseDownloadModel
 {
@@ -106,7 +97,6 @@ class DatasetDownloadModel extends BaseDownloadModel
 		$this->AppendExtraColumns($cols, $dataset, $joins, $effectiveGeographyId, $getPolygon);
 
 		$cols = $this->Deduplicate($cols);
-
 		$wherePart = ($where !== '' ? ' WHERE ' . substr($where, 4) : '');
 
 		$query = ' FROM ' . $dataset['table'] . '
@@ -126,7 +116,8 @@ class DatasetDownloadModel extends BaseDownloadModel
 
 	private function AppendExtraColumns(&$cols, $dataset, &$joins, &$effectiveGeographyId, $getPolygonType)
 	{
-		if ($this->extraColumns == 'basic' || $getPolygonType != null)
+		if ($this->extraColumns == 'basic' || ($getPolygonType != null &&
+			$this->extraColumns !== null))
 		{
 			// agrega los joins para columnas extra y/o para getPolygon:
 			$matchField = '_data_table.geography_item_id';
@@ -136,9 +127,6 @@ class DatasetDownloadModel extends BaseDownloadModel
 				$cols = $this->AppendShapeColumns($cols);
 		}
 
-		if ($this->extraColumns === null)
-			// si no le interesan las columnas extra, se asegura de no ponerlas en el select
-			$cols = array();
 		// se fija si van con polígono
 		if ($getPolygonType != null)
 		{

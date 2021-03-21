@@ -16,7 +16,7 @@
 					</div>
 					<div class="md-layout-item md-size-80">
 						<mp-select :list="geographies" :allow-null="true"
-											 :model-key="false" label="Geografía"
+											 :model-key="false" label="Geografía a anexar en la descarga (opcional)"
 											 v-model="boundary.Geography" />
 					</div>
 					<div class="md-layout-item md-size-40">

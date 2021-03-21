@@ -25,8 +25,6 @@ function Context() {
 	this.CartographyMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetCartographyMetrics');
 	this.MetricGroups = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricGroups');
 	this.MetricProviders = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricProviders');
-	this.CurrentMetricVersionLevel = null;
-	this.EditableMetricVersionLevel = null;
 }
 
 Context.prototype.GetTrackingLevelGeography = function () {
@@ -63,10 +61,6 @@ Context.prototype.CreateStore = function () {
 
 Context.prototype.IsAdmin = function () {
 	return (this.User.Privileges === 'A');
-};
-
-Context.prototype.CanCreatePublicData = function () {
-	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
 };
 
 Context.prototype.CanCreatePublicData = function () {

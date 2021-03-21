@@ -86,7 +86,6 @@ class BoundaryDownloadModel extends BaseDownloadModel
 														AND cgv_geography_id = ' .  $geographyId . ' LIMIT 1)';
 			$cols = $this->AppendGeographyTree($cols, $joins, $geographyId, $matchField);
 		}
-
 		$cols = $this->AppendShapeColumns($cols, 'biw_');
 		// se fija si van con polígono
 		if ($getPolygonType != null)
