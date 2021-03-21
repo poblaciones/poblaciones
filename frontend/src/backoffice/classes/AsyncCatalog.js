@@ -8,6 +8,7 @@ export default AsyncCatalog;
 function AsyncCatalog(url) {
 	this.url = url;
 	this.list = [];
+	this.hasData = false;
 	this.loading = false;
 	this.notifyQueue = [];
 }
@@ -18,6 +19,7 @@ AsyncCatalog.prototype.Refresh = function () {
 	return axiosClient.getPromise(this.url,
 		{}, 'consultar el listado de entidades').then(function (data) {
 			loc.list = data;
+			loc.hasData = true;
 			// procesa la cola
 			for (var n = 0; n < loc.notifyQueue.length; n++) {
 				var item = loc.notifyQueue[n];
@@ -50,6 +52,9 @@ AsyncCatalog.prototype.resolve = function (callback, clone, type) {
 };
 
 AsyncCatalog.prototype.Get = function (type, callback) {
+	if (!this.hasData && !this.loading) {
+		this.Refresh();
+	}
 	if (this.loading === false) {
 		this.resolve(callback, false, type);
 	} else {
@@ -59,6 +64,9 @@ AsyncCatalog.prototype.Get = function (type, callback) {
 };
 
 AsyncCatalog.prototype.GetCopy = function (type, callback) {
+	if (!this.hasData && !this.loading) {
+		this.Refresh();
+	}
 	if (this.loading === false) {
 		this.resolve(callback, true, type);
 	} else {
@@ -68,6 +76,9 @@ AsyncCatalog.prototype.GetCopy = function (type, callback) {
 };
 
 AsyncCatalog.prototype.GetAll = function (callback) {
+	if (!this.hasData && !this.loading) {
+		this.Refresh();
+	}
 	if (this.loading === false) {
 		this.resolve(callback);
 	} else {
@@ -83,6 +94,9 @@ AsyncCatalog.prototype.GetAllPromise = function () {
 	var readyPromise = new Promise(resolve => {
 		_resolve = resolve;
 	});
+	if (!this.hasData && !this.loading) {
+		this.Refresh();
+	}
 	this.GetAll(_resolve);
 	return readyPromise;
 };
@@ -94,6 +108,9 @@ AsyncCatalog.prototype.GetCopyPromise = function (type) {
 	var readyPromise = new Promise(resolve => {
 		_resolve = resolve;
 	});
+	if (!this.hasData && !this.loading) {
+		this.Refresh();
+	}
 	this.GetCopy(type, _resolve);
 	return readyPromise;
 };

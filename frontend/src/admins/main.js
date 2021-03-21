@@ -8,7 +8,7 @@ import axios from 'axios';
 
 import App from './App';
 import router from './router/router.js';
-import Context from '@/backoffice/classes/Context';
+import Context from '@/admins/classes/Context';
 
 //Material Design
 import VueMaterial from 'vue-material';

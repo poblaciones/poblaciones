@@ -1,8 +1,4 @@
-import axios from 'axios';
-import ActiveWork from '@/backoffice/classes/ActiveWork';
 import axiosClient from '@/common/js/axiosClient';
-import arr from '@/common/js/arr';
-import Vue from 'vue';
 
 export default Db;
 
@@ -28,11 +24,6 @@ Db.prototype.GetClippingRegions = function () {
 Db.prototype.GetBoundaries = function () {
 	return axiosClient.getPromise(window.host + '/services/admin/GetBoundaries',
 		{}, 'obtener la lista de delimitaciones');
-};
-
-Db.prototype.GetBoundaryGroups = function () {
-	return axiosClient.getPromise(window.host + '/services/admin/GetBoundaryGroups',
-		{}, 'obtener la lista de groups de delimitaciones');
 };
 
 Db.prototype.GetUsers = function () {

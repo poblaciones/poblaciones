@@ -11,6 +11,7 @@
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre">{{ item.Caption }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Grupo">{{ item.Group.Caption }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Contenido">{{ item.ClippingRegions }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Geografía">{{ geographyCaption(item) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Público">{{ formatBool(!item.IsPrivate) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
 							<md-button class="md-icon-button" title="Modificar" @click="openEdition(item)">
@@ -36,6 +37,7 @@ import arr from '@/common/js/arr';
 		return {
 			list: [],
 			groups: [],
+			geographies: [],
 			};
 	},
 	computed: {
@@ -47,10 +49,14 @@ import arr from '@/common/js/arr';
 				window.Db.GetBoundaries).then(function(data) {
 					arr.AddRange(loc.list, data);
 			});
-		this.$refs.invoker.do(window.Db,
-			window.Db.GetBoundaryGroups).then(function (data) {
-				arr.AddRange(loc.groups, data);
-			});
+		var loc = this;
+		window.Context.BoundaryGroups.GetAll(function (data) {
+			arr.AddRange(loc.groups, data);
+		});
+		var loc = this;
+		window.Context.Geographies.GetAll(function (data) {
+			arr.AddRange(loc.geographies, data);
+		});
 	},
 	methods: {
 		formatBool(v) {
@@ -61,9 +67,16 @@ import arr from '@/common/js/arr';
 			window.Context.Factory.GetCopy('Boundary', function(data) {
 					loc.openEdition(data);
 			});
-    },
+		},
+		geographyCaption(item) {
+			if (item.Geography) {
+				return item.Geography.Caption;
+			} else {
+				return '-';
+			}
+		},
 		openEdition(item) {
-			this.$refs.editPopup.show(item, this.groups);
+			this.$refs.editPopup.show(item, this.groups, this.geographies);
 		},
 		popupSaved(item) {
 			arr.ReplaceByIdOrAdd(this.list, item);

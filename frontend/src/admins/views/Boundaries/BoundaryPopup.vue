@@ -11,9 +11,13 @@
 					</div>
 					<div class="md-layout-item md-size-80">
 						<mp-select :list="groups"
-											 :model-key="false" label="Group"
+											 :model-key="false" label="Grupo"
 											 v-model="boundary.Group" />
-
+					</div>
+					<div class="md-layout-item md-size-80">
+						<mp-select :list="geographies" :allow-null="true"
+											 :model-key="false" label="Geografía"
+											 v-model="boundary.Geography" />
 					</div>
 					<div class="md-layout-item md-size-40">
 						<mp-simple-text label="Orden"
@@ -46,6 +50,7 @@ export default {
 			activateEdit: false,
 			isPublic: false,
 			boundary: null,
+			geographies: [],
 			groups: [],
     };
   },
@@ -53,8 +58,9 @@ export default {
 
   },
   methods: {
-		show(boundary, groups) {
+		show(boundary, groups, geographies) {
 			this.groups = groups;
+			this.geographies = geographies;
 			this.boundary = f.clone(boundary);
 			this.activateEdit = true;
 			this.isPublic = !boundary.IsPrivate;
