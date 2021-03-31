@@ -27,7 +27,7 @@ class RankingService extends BaseService
 
 		if ($frame->ClippingRegionIds == NULL
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
-			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
+			throw new PublicException("Debe indicarse una delimitaciÃ³n espacial (zona, cÃ­rculo o regiÃ³n).");
 
 		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $hasTotals, $hiddenValueLabels);
 
@@ -64,22 +64,11 @@ class RankingService extends BaseService
 		$hasDescriptions = $level->HasDescriptions;
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		$table = new SnapshotByDatasetRanking($snapshotTable);
+		$table = new SnapshotByDatasetRanking($snapshotTable, $level->Dataset->Type,
+			$variableId, $hasTotals, $urbanity, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 
-		$geographyId = $level->GeographyId;
+		$rows = $table->GetRows($frame);
 
-		if ($frame->ClippingCircle != NULL)
-		{
-			$rows = $table->GetMetricVersionRankingByCircle($geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
-		}
-		else if ($frame->ClippingRegionIds != NULL)
-		{
-			$rows = $table->GetMetricVersionRankingByRegionIds($geographyId, $variableId, $hasTotals, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
-		}
-		else
-		{
-			$rows = $table->GetMetricVersionRankingByEnvelope($geographyId, $variableId, $hasTotals, $urbanity, $frame->Envelope, $level->Dataset->Type, $hasDescriptions, $size, $direction, $hiddenValueLabels);
-		}
 		$data = $this->CreateRankingInfo($rows);
 		return $data;
 	}

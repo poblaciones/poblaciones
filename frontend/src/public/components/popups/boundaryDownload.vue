@@ -17,6 +17,19 @@
 							<creativeCommons :license="boundary.properties.Metadata.License" />
 						</td>
 					</tr>
+					<tr v-if="useFilter">
+						<td>Selección:</td>
+						<td>
+							<div style="margin-bottom: -7px;">
+								<div v-for="region in regions" :key="region.Id"
+										 class="filterElement" style="margin-bottom: 7px;">
+									{{ region.Name }}
+									<mp-close-button v-on:click="removeFilter(region.Id)" title="Quitar filtro"
+																	 class="exp-hiddable-block filterElement-close" />
+								</div>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td>Descarga:</td>
 						<td>
@@ -35,12 +48,13 @@
 					</tr>
 					<tr v-if="boundary.properties.Metadata.Files && boundary.properties.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
-						<td><div class="attachmentsDownloadPanel">
-							<span v-for="file in boundary.properties.Metadata.Files" :key="file.Id">
-								<a target="_blank" :href="resolveFileUrl(file)">
-									<file-pdf-icon title="Descargar" /> {{ file.Caption }}
-								</a>
-							</span>
+						<td>
+							<div class="attachmentsDownloadPanel">
+								<span v-for="file in boundary.properties.Metadata.Files" :key="file.Id">
+									<a target="_blank" :href="resolveFileUrl(file)">
+										<file-pdf-icon title="Descargar" /> {{ file.Caption }}
+									</a>
+								</span>
 							</div>
 						</td>
 					</tr>
@@ -86,6 +100,7 @@ export default {
 		return {
 			boundary: null,
 			visibleUrl: true,
+			regions: [],
 			progress: null,
 		};
 	},
@@ -93,10 +108,20 @@ export default {
 		Use() {
 			return window.Use;
 		},
+		useFilter() {
+			return this.regions && this.regions.length > 0;
+		},
+		clipping() {
+			return window.SegMap.Clipping;
+		},
 	},
 	methods: {
 		show(boundary) {
 			this.boundary = boundary;
+			this.regions = [];
+			if (this.clipping.FrameHasClippingCircle() || this.clipping.FrameHasClippingRegionId()) {
+				this.regions = this.regions.concat(this.clipping.clipping.Region.Summary.Regions);
+			}
 			this.$refs.dialog.show();
 		},
 		getDataFormats() {
@@ -203,11 +228,23 @@ export default {
 		startDownloadUrl(type) {
 			return window.host + '/services/download/StartBoundaryDownload?' + this.urlArgs(type);
 		},
+		removeFilter(regionId) {
+			arr.RemoveById(this.regions, regionId);
+		},
 		stepDownloadUrl() {
 			return window.host + '/services/download/StepBoundaryDownload';
 		},
 		urlArgs(type) {
-			return 't=' + type + '&s=b' + h.urlParam('b', this.boundary.properties.Id);
+			var clippingRegionId = null;
+			var circle = null;
+			if (this.useFilter) {
+				if (this.clipping.FrameHasClippingCircle()) {
+					circle = h.getCircleParam(this.clipping.frame.ClippingCircle);
+				} else if (this.regions) {
+					clippingRegionId = arr.GetIds(this.regions).join(',');
+				}
+			}
+			return 't=' + type + '&s=b' + h.urlParam('b', this.boundary.properties.Id) + h.urlParam('c', circle) + h.urlParam('r', clippingRegionId);
 		}
 	},
 };

@@ -5,6 +5,7 @@ import VueHotkey from 'v-hotkey';
 import App from '@/public/App';
 import axios from 'axios';
 import 'vue-material-design-icons/styles.css';
+import VTooltip from 'v-tooltip';
 import Clipboard from 'v-clipboard';
 
 // Bus para comunicación entre componentes
@@ -29,14 +30,17 @@ axios.defaults.withCredentials = true;
 
 import MpCloseButton from '@/public/components/controls/mpCloseButton';
 import MpFilterBadge from '@/public/components/controls/mpFilterBadge';
+import MpColorPicker from '@/common/components/MpColorPicker';
 import MpLabel from '@/public/components/controls/mpLabel';
 import VueMobileDetection from 'vue-mobile-detection';
 
 Vue.component('mp-close-button', MpCloseButton);
 Vue.component('mp-filter-badge', MpFilterBadge);
 Vue.component('mp-label', MpLabel);
+Vue.component('mp-color-picker', MpColorPicker);
 
 Vue.use(Clipboard);
+Vue.use(VTooltip);
 Vue.use(VueMobileDetection);
 
 Vue.config.productionTip = false;

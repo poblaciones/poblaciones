@@ -96,7 +96,7 @@ export default {
 		selected(n) {
 			this.action = this.fabMetrics[n];
 			this.$refs.vuefab.toggle = false;
-			window.Popups.AddMetric.show(this.action.Metrics, null, this.action.Name);
+			window.Popups.AddMetric.show(this.action.Items, null, this.action.Name);
 		}
 	},
 };

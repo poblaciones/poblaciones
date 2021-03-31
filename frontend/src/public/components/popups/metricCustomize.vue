@@ -10,7 +10,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td class="col1">Métrica:</td>
+					<td class="col1 optionsLabel">Métrica:</td>
 					<td>
 						<div class="btn-group">
 							<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" v-on:click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
@@ -49,7 +49,7 @@
 					</td>
 				</tr>
 				<tr v-if="anyHasArea()">
-					<td>Transparencia:</td>
+					<td class="optionsLabel">Transparencia:</td>
 					<td>
 						<div class="btn-group">
 							<button type="button" v-on:click="changeOpacity('H')" class="btn btn-default btn-xs" :class="getActiveOpacity('H')">
@@ -65,7 +65,7 @@
 					</td>
 				</tr>
 				<tr v-if="anyHasArea() && showGradientOptions()">
-					<td>Ajuste poblacional:</td>
+					<td class="optionsLabel">Ajuste poblacional:</td>
 					<td>
 						<div class="btn-group">
 							<button type="button" v-on:click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
@@ -81,7 +81,7 @@
 					</td>
 				</tr>
 				<tr v-if="anyHasArea()">
-					<td>Trama:</td>
+					<td class="optionsLabel">Trama:</td>
 					<td>
 						<div class="btn-group">
 							<button v-for="pattern in range(metric.getValidPatterns(), 0, 3)" :key="pattern.Key" type="button" v-on:click="changePattern(pattern.Key)" class="btn btn-default btn-xs" :class="getActivePattern(pattern.Key)">

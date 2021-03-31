@@ -62,7 +62,7 @@ class BoundaryService extends BaseService
 		App::Orm()->Save($boundary);
 
 		$cacheManager = new CacheManager();
-		$cacheManager->CleanBoundariesMetadataCache();
+		$cacheManager->CleanBoundariesCache();
 		VersionUpdater::Increment('FAB_METRICS');
 		$cacheManager->CleanFabMetricsCache();
 

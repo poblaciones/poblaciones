@@ -1,4 +1,9 @@
 [CURRENT]
+- Segmentación de delimitaciones por selección.
+- Fix: click en delimitaciones en buscador no las incorporaba.
+- Fix: recuperar contraseña.
+- Cambio de color y ancho de borde para delimitaciones.
+- Fix: gradientes tomaba mal el nivel de transparencia del indicador.
 
 v2.34 (2021-03-21)
 - Se agregan 'delimitaciones' que reunionen una o varias regiones de clipping. Tiene fuente (metadatos), descarga e inserción desde buscador y botón de 'agregar'.

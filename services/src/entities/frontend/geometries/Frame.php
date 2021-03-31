@@ -11,8 +11,29 @@ class Frame
 	public $Center;
 	public $ClippingRegionIds;
 	public $ClippingCircle;
-	// https://stackoverflow.com/questions/11130323/google-map-api-v3-shade-everything-except-for-polygon
-	public $ClippingFeatureId;
+	public $TileEnvelope = null;
+	public $TileEnvelopeKey = null;
+
+	public static function FromTileParams()
+	{
+		$ret = self::FromParams();
+		$x = Params::GetIntMandatory('x');
+		$y = Params::GetIntMandatory('y');
+		$z = Params::GetIntRangeMandatory('z', 0, 23);
+		$b = Params::Get('b');
+		if ($b != null)
+		{
+			$ret->TileEnvelope = Envelope::TextDeserialize($b);
+		}
+		else
+		{
+			$ret->TileEnvelope = Envelope::FromXYZ($x, $y, $z);
+		}
+		$ret->TileEnvelopeKey = "@x" . $x . "y" . $y . "z" . $z;
+		if ($b != null)
+			$ret->TileEnvelopeKey .= 'b' . $b;
+		return $ret;
+	}
 
 	public static function FromParams()
 	{
@@ -21,7 +42,6 @@ class Frame
 		$ret->Envelope =  Envelope::TextDeserialize(Params::Get('e'));
 		$ret->ClippingRegionIds = Params::GetIntArray('r');
 		$ret->ClippingCircle = Circle::TextDeserialize(Params::Get('c'));
-		$ret->ClippingFeatureId = Params::GetInt('f');
 
 		return $ret;
 	}
@@ -34,11 +54,12 @@ class Frame
 
 	public function GetKey()
 	{
-		if ($this->ClippingFeatureId != null)
-			return $this->ClippingFeatureId;
-		else
-			return $this->ClippingRegionPart() . "@" .
+		return $this->ClippingRegionPart() . "@" .
 			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "");
+	}
+	public function GetTileKey()
+	{
+		return $this->TileEnvelopeKey;
 	}
 	private function ClippingRegionPart()
 	{
@@ -50,14 +71,11 @@ class Frame
 	public function GetClippingKey()
 	{
 		return $this->ClippingRegionPart() . "@" .
-			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "") . "@" .
-			($this->ClippingFeatureId != null ? $this->ClippingFeatureId : "");
+			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "");
 	}
 	public function GetSummaryKey()
 	{
-		if ($this->ClippingFeatureId != null)
-			return $this->ClippingFeatureId;
-		else if ($this->ClippingRegionIds != null || $this->ClippingCircle != null)
+		if ($this->ClippingRegionIds != null || $this->ClippingCircle != null)
 			return $this->ClippingRegionPart() . "@" .
 			($this->ClippingCircle != null ? $this->ClippingCircle->TextSerialize() : "");
 		else
@@ -66,7 +84,7 @@ class Frame
 
 	public function HasClippingFactor()
 	{
-		return ($this->ClippingRegionIds != null || $this->ClippingCircle != null || $this->ClippingFeatureId != null);
+		return ($this->ClippingRegionIds != null || $this->ClippingCircle != null);
 	}
 
 }

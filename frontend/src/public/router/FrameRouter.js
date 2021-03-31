@@ -97,8 +97,7 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 		ShowLabels: showLabels,
 		ClippingRegionIds: null,
 		ClippingCircle: null,
-		ClippingLevelName: null,
-		ClippingFeatureId: null
+		ClippingLevelName: null
 	};
 	return frame;
 };

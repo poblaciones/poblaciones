@@ -2,6 +2,7 @@ import h from '@/public/js/helper';
 import ActiveSelectedMetric from '@/public/classes/ActiveSelectedMetric';
 import ActiveBoundary from '@/public/classes/ActiveBoundary';
 import err from '@/common/js/err';
+import str from '@/common/js/str';
 
 export default SelectedInfoRouter;
 
@@ -50,8 +51,14 @@ SelectedInfoRouter.prototype.SelectedBoundaryToRoute = function (activeBoundary)
 	ret.push([activeBoundary.properties.Id]);
 	ret.push(['t', 'b']); // es boundary
 	ret.push(['v', (activeBoundary.visible ? 1 : 0), 1]);
+	ret.push(['w', activeBoundary.borderWidth, 2]);
+	ret.push(['c', this.cleanSign(activeBoundary.color), this.cleanSign(ActiveBoundary.DEFAULT_COLOR)]);
 	ret.push(['d', (activeBoundary.showDescriptions ? 1 : 0), 1]);
 	return ret;
+};
+
+SelectedInfoRouter.prototype.cleanSign = function (color) {
+	return str.Replace(color, '#', '');
 };
 
 SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMetric) {
@@ -245,7 +252,7 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 			err.errDialog('GetSelectedInfos', 'obtener la información para los elementos solicitados', error);
 		});
 	} else {
-		this.restoreInfoStates(metrics);
+		this.restoreInfoStates(infos);
 	}
 };
 
@@ -283,9 +290,14 @@ SelectedInfoRouter.prototype.parseBoundary = function (values) {
 	var id = h.getSafeValue(values, '');
 	var visible = h.getSafeValue(values, 'v', 1);
 	var descriptions = h.getSafeValue(values, 'd', 1);
+	var borderWidth = h.getSafeValueInt(values, 'w', 2);
+	var color = h.getSafeValue(values, 'c', this.cleanSign(ActiveBoundary.DEFAULT_COLOR));
+
 	return {
 		Id: parseInt(id),
 		IsBoundary: true,
+		BorderWidth: borderWidth,
+		Color: '#' + color,
 		Visible: (visible ? true : false),
 		ShowDescriptions: (descriptions ? true : false),
 	};
@@ -357,7 +369,14 @@ SelectedInfoRouter.prototype.RestoreBoundaryState = function (boundary, state) {
 		boundary.visible = state.Visible;
 		mapChanged = true;
 	}
-
+	if (state.BorderWidth !== boundary.borderWidth) {
+		boundary.borderWidth = state.BorderWidth;
+		mapChanged = true;
+	}
+	if (state.Color !== boundary.color) {
+		boundary.color = state.Color;
+		mapChanged = true;
+	}
 	if (state.ShowDescriptions !== boundary.showDescriptions) {
 		boundary.showDescriptions = state.ShowDescriptions;
 		mapChanged = true;

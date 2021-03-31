@@ -359,7 +359,7 @@ export default {
 
 .fab-tooltip.tooltip {
 	display: block !important;
-	padding: 4px;
+	padding: 0px;
 	z-index: 10000;
 }
 

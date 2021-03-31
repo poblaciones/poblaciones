@@ -2,29 +2,35 @@
 
 namespace helena\db\frontend;
 
-use helena\classes\App;
 use minga\framework\Arr;
 use minga\framework\Profiling;
-use helena\classes\DatasetTypeEnum;
 
 use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
 
-class SnapshotByDatasetTileData extends BaseModel
+class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 {
 	const LOCATIONS_LIMIT_PER_TILE = 500;
-	private $spatialConditions;
 
-	public function __construct($snapshortTable)
+	private $variables;
+	private $hasSummary;
+	private $urbanity;
+	private $hasSymbols;
+	private $hasDescriptions;
+
+	public function __construct($snapshotTable, $datasetType, $variables, $urbanity,
+		$hasSymbols, $hasDescriptions)
 	{
-		$this->tableName = $snapshortTable;
-		$this->idField = 'sna_id';
-		$this->captionField = '';
-		$this->spatialConditions = new SpatialConditions('sna');
+		$this->variables = $variables;
+		$this->urbanity = $urbanity;
+		$this->hasSymbols = $hasSymbols;
+		$this->hasDescriptions = $hasDescriptions;
+
+		parent::__construct($snapshotTable, "sna", $datasetType);
 	}
 
-	private function CreateCrossTableQuery($metricVersionId, $hasSummary, $geographyId, $urbanity, $query, $extraQuery = null)
+	private function CreateCrossTableQuery($metricVersionId, $geographyId, $urbanity, $query, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
 		$select = "t1.sna_metric_version_variable_id VariableId, t1.sna_version_value_label_id ValueId, t2.sna_metric_version_variable_id TargetVariableId, t2.sna_version_value_label_id TargetValueId, " .
@@ -48,36 +54,12 @@ class SnapshotByDatasetTileData extends BaseModel
 		return $ret;
 	}
 
-	public function GetMetricVersionTileDataByEnvelope($variables, $geographyId, $urbanity, $envelope, $datasetType, $hasSymbols, $hasDescriptions)
-	{
-		return $this->ExecTileDataQuery($variables, $geographyId, $urbanity, $envelope, $datasetType, $hasSymbols, $hasDescriptions);
-	}
-
-	public function GetMetricVersionTileDataByRegionIds($variables, $geographyId, $urbanity, $envelope, $clippingRegionIds, $circle, $datasetType, $hasSymbols, $hasDescriptions)
-	{
-		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
-
-		if ($circle != null)
-			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
-		else
-			$circleQuery = null;
-
-		return $this->ExecTileDataQuery($variables, $geographyId, $urbanity, $envelope, $datasetType, $hasSymbols, $hasDescriptions, $query, $circleQuery);
-	}
-
-	public function GetMetricVersionTileDataByCircle($variables, $geographyId, $urbanity, $envelope, $circle, $datasetType, $hasSymbols, $hasDescriptions)
-	{
-		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
-
-		return $this->ExecTileDataQuery($variables, $geographyId, $urbanity, $envelope, $datasetType, $hasSymbols, $hasDescriptions, $query);
-	}
-
-	private function ExecTileDataQuery($variables, $geographyId, $urbanity, $envelope, $datasetType, $hasSymbols, $hasDescriptions, $query = null, $extraQuery = null)
+	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
 
 		$select = "sna_feature_id FID";
-		foreach($variables as $variable)
+		foreach($this->variables as $variable)
 		{
 			$select .= ", sna_" . $variable->Id . "_value, sna_" . $variable->Id . "_value_label_id,
 									sna_" . $variable->Id . "_total";
@@ -85,38 +67,37 @@ class SnapshotByDatasetTileData extends BaseModel
 				$select .= ", sna_" . $variable->Id . "_sequence_order";
 		}
 
-		$envelopeQuery =  $this->spatialConditions->CreateEnvelopeQuery($envelope);
-		if ($hasDescriptions)
+		if ($this->hasDescriptions)
 			$select .= ", sna_description Description";
-		if ($hasSymbols)
+		if ($this->hasSymbols)
 			$select .= ", sna_symbol Symbol";
 
-		if ($datasetType == 'L')
+		if ($this->datasetType == 'L')
 		{
 			// Si es un metric de puntos, trae la ubicación del punto
 			$select .= ", round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
 		}
 		$from = $this->tableName;
 
-		$where = $this->spatialConditions->UrbanityCondition($urbanity);
+		$where = $this->spatialConditions->UrbanityCondition($this->urbanity);
 
 		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
 
-		$multiQuery = new MultiQuery($baseQuery, $envelopeQuery, $query, $extraQuery);
+		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
 		$ret = $multiQuery->fetchAll();
 
 		$extraFields = [];
-		if ($hasDescriptions)
+		if ($this->hasDescriptions)
 			$extraFields[] = 'Description';
-		if ($datasetType == 'L')
+		if ($this->datasetType == 'L')
 		{
 			// Si es un metric de puntos, trae la ubicación del punto
 			$extraFields[] = 'Lat';
 			$extraFields[] = 'Lon';
 		}
-		$ret = self::RotateResults($ret, $datasetType, $hasSymbols, $variables, $extraFields);
+		$ret = self::RotateResults($ret, $extraFields);
 
-		if ($datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
+		if ($this->datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
 		{
 			$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
 		}
@@ -125,12 +106,12 @@ class SnapshotByDatasetTileData extends BaseModel
 		return $ret;
 	}
 
-	private function RotateResults($arr, $datasetType, $hasSymbols, $variables, $extraFields)
+	private function RotateResults($arr, $extraFields)
 	{
 		$ret = [];
 		foreach($arr as $row)
 		{
-			foreach($variables as $variable)
+			foreach($this->variables as $variable)
 			{
 				$item = [];
 				foreach($extraFields as $field)
@@ -145,7 +126,7 @@ class SnapshotByDatasetTileData extends BaseModel
 				$item['ValueId'] = $row["sna_" . $variable->Id . "_value_label_id"];
 				if ($variable->IsSequence)
 					$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
-				if ($hasSymbols)
+				if ($this->hasSymbols)
 					$item['Symbol'] = $row['Symbol'];
 
 				$ret[] = $item;

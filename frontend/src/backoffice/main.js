@@ -24,7 +24,7 @@ import TitleBar from '@/backoffice/views/Layout/TitleBar';
 import Stepper from '@/backoffice/components/Stepper';
 import Invoker from '@/backoffice/components/Invoker';
 import MpText from '@/backoffice/components/MpText';
-import MpColorPicker from '@/backoffice/components/MpColorPicker';
+import MpColorPicker from '@/common/components/MpColorPicker';
 import MpConfirm from '@/backoffice/components/MpConfirm';
 import MpCopy from '@/backoffice/components/MpCopy';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';

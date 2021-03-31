@@ -58,7 +58,6 @@ class ClippingService extends BaseService
 		$frame->Center = $current;
 		$frame->ClippingRegionIds = null;
 		$frame->ClippingCircle = null;
-		$frame->ClippingFeatureId = null;
 		$zoneInfo = $this->GetDefaultFrameAndClipping($current);
 		$frame->Zoom = 11;
 		if ($zoneInfo['isDefaultRegion'])
@@ -122,7 +121,6 @@ class ClippingService extends BaseService
 		// los demás los tiene que definir el cliente.
 		$frame->Zoom = null;
 		$frame->ClippingCircle = null;
-		$frame->ClippingFeatureId = null;
 		$frame->ClippingRegionIds = array($newClippingRegion);
 		Profiling::EndTimer();
 		return $frame;

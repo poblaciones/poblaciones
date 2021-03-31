@@ -11,8 +11,8 @@
 									@click="select(item)" :key="item.Id"
 									:class="[(index < list.length - 1 ? 'metricrowborder ' : ''), 'hand',
 														(selected === item ? 'selectedRow' : ''), (item.Header ? 'row-header' : '')]">
-								<td :colspan="(item.Header ? 2 : 1)" class="metricCell" style="width: 396px">{{ item.Name }}</td>
-								<td v-if="!item.Header" class="metricCell" align="center" style="width: 150px">{{ joinVersions(item.Versions) }}</td>
+								<td :colspan="((item.Header || !item.Versions) ? 2 : 1)" class="metricCell" :style="'width: ' + (396 + (!item.Versions ? 150 : 0)) + 'px'">{{ item.Name }}</td>
+								<td v-if="!item.Header && item.Versions" class="metricCell" align="center" style="width: 150px">{{ joinVersions(item.Versions) }}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -25,6 +25,7 @@
 
 <script>
 import h from '@/public/js/helper';
+import arr from '@/common/js/arr';
 import Modal from '@/public/components/popups/modal';
 
 export default {
@@ -66,7 +67,7 @@ export default {
 			}
 			this.title = (title ? title : 'Agregar indicador');
 			this.workId = workId;
-			this.list = list;
+			arr.Fill(this.list, list);
 			this.$refs.showPopup.show();
 		},
 		hide() {

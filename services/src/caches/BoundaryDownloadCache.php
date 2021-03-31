@@ -11,9 +11,11 @@ class BoundaryDownloadCache extends BaseCache
 	{
 		return new FileFileCache("Boundaries/Downloads");
 	}
-	public static function CreateKey($type, $boundaryId)
+	public static function CreateKey($type, $boundaryId, $clippingItemId, $clippingCircle)
 	{
-		$key = $type . "b" . $boundaryId;
+		$key = $type . "b" . $boundaryId .  "r" . Str::JoinInts($clippingItemId, '-');
+		if ($clippingCircle)
+			$key .= "c" . $clippingCircle->TextSerialize();
 		return $key;
 	}
 	public static function Clear($boundaryId)

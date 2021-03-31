@@ -31,8 +31,7 @@ class BoundaryModel extends BaseModel
 	public function GetSelectedBoundary($id)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT boundary.*, metadata.*, ins_caption, ins_watermark_id, ins_color,
-						(SELECT COUNT(*) FROM snapshot_boundary_item WHERE biw_boundary_id = bou_id) AS item_count
+		$sql = "SELECT boundary.*, metadata.*, ins_caption, ins_watermark_id, ins_color
           FROM boundary
 					LEFT JOIN metadata ON met_id = IFNULL(bou_metadata_id,
     (select max(clr_metadata_id) FROM clipping_region JOIN

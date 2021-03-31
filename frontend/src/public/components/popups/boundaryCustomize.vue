@@ -20,6 +20,28 @@
 						</label>
 					</td>
 				</tr>
+				<tr>
+					<td class="optionsLabel">Ancho:</td>
+					<td>
+						<div class="btn-group">
+							<button type="button" v-on:click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
+								Fino
+							</button>
+							<button type="button" v-on:click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
+								Intermedio
+							</button>
+							<button type="button" v-on:click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
+								Grueso
+							</button>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="optionsLabel">Color:</td>
+					<td>
+						<mp-color-picker @selected="colorChanged" :top-padding="false" v-model="boundary.color" />
+					</td>
+				</tr>
 			</table>
 		</div>
 	</Modal>
@@ -55,6 +77,13 @@ export default {
 			this.boundary = boundary;
 			this.$refs.dialog.show();
 		},
+		getActiveWidth(key) {
+			if (key === this.boundary.borderWidth) {
+				return ' active';
+			} else {
+				return '';
+			}
+		},
 		getActiveOpacity(key) {
 			if (key === this.boundary.opacity) {
 				return ' active';
@@ -65,6 +94,15 @@ export default {
 		changeOpacity(key) {
 			if (this.boundary.opacity !== key) {
 				this.boundary.opacity = key;
+				this.boundary.UpdateMap();
+			}
+		},
+		colorChanged() {
+			this.boundary.UpdateMap();
+		},
+		changeWidth(width) {
+			if (this.boundary.borderWidth !== width) {
+				this.boundary.borderWidth = width;
 				this.boundary.UpdateMap();
 			}
 		},

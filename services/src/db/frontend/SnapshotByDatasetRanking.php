@@ -2,65 +2,48 @@
 
 namespace helena\db\frontend;
 
-use helena\classes\App;
-use minga\framework\Arr;
 use minga\framework\Profiling;
-use helena\classes\DatasetTypeEnum;
 
 use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
 
-class SnapshotByDatasetRanking extends BaseModel
+class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 {
-	private $spatialConditions;
+	private $variableId;
+	private $urbanity;
+	private $hiddenValueLabels;
+	private $hasTotals;
+	private $hasDescriptions;
+	private $size;
+	private $direction;
 
-	public function __construct($snapshortTable)
+	public function __construct($snapshotTable, $datasetType,
+		$variableId, $hasTotals, $urbanity, $hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
-		$this->tableName = $snapshortTable;
-		$this->idField = 'sna_id';
-		$this->captionField = '';
-		$this->spatialConditions = new SpatialConditions('sna');
+		$this->variableId = $variableId;
+		$this->urbanity = $urbanity;
+		$this->hiddenValueLabels = $hiddenValueLabels;
+
+		$this->hasTotals = $hasTotals;
+		$this->hasDescriptions = $hasDescriptions;
+		$this->size = $size;
+		$this->direction = $direction;
+
+		parent::__construct($snapshotTable, 'sna', $datasetType);
 	}
 
-	public function GetMetricVersionRankingByRegionIds($geographyId, $variableId, $hasTotals, $urbanity, $clippingRegionIds, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
-	{
-		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
-
-		if ($circle != null)
-			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
-		else
-			$circleQuery = null;
-
-		return $this->ExecRankingQuery($geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query, $circleQuery);
-	}
-
-	public function GetMetricVersionRankingByEnvelope($geographyId, $variableId, $hasTotals, $urbanity, $envelope, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
-	{
-
-		$query = $this->spatialConditions->CreateSimpleEnvelopeQuery($envelope);
-
-		return $this->ExecRankingQuery($geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query);
-	}
-
-	public function GetMetricVersionRankingByCircle($geographyId, $variableId, $hasTotals, $urbanity, $circle, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels)
-	{
-		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
-
-		return $this->ExecRankingQuery($geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query);
-	}
-
-	private function ExecRankingQuery($geographyId, $variableId, $hasTotals, $urbanity, $datasetType, $hasDescriptions, $size, $direction, $hiddenValueLabels, $query, $extraQuery = null)
+	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
 
-		$select = "IFNULL(sna_" . $variableId . "_value, 0) Value, IFNULL(sna_" . $variableId . "_total, 0) Total, sna_feature_id FeatureId,
-								sna_" . $variableId . "_value_label_id ValueId, ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
-		if ($hasDescriptions)
+		$select = "IFNULL(sna_" . $this->variableId . "_value, 0) Value, IFNULL(sna_" . $this->variableId . "_total, 0) Total, sna_feature_id FeatureId,
+								sna_" . $this->variableId . "_value_label_id ValueId, ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
+		if ($this->hasDescriptions)
 		{
 			$select .= ", sna_description Name ";
 		}
-		else if ($datasetType == 'L' || $datasetType == 'S')
+		else if ($this->datasetType == 'L' || $this->datasetType == 'S')
 		{
 			// Pone la ubicación
 			$select .= ", CONCAT('[', round(ST_Y(sna_location), ". GeoJson::PRECISION ."), ',', round(ST_X(sna_location), ". GeoJson::PRECISION ."), ']') Name ";
@@ -72,18 +55,18 @@ class SnapshotByDatasetRanking extends BaseModel
 		}
 		$from = $this->tableName;
 
-		$where = $this->hiddenValuesCondition($variableId, $hiddenValueLabels);
+		$where = $this->hiddenValuesCondition();
 
-		$where .= $this->spatialConditions->UrbanityCondition($urbanity);
+		$where .= $this->spatialConditions->UrbanityCondition($this->urbanity);
 
-		if ($hasTotals)
+		if ($this->hasTotals)
 		{
 			if ($where != '') $where .= ' AND ';
-			$where .= " IFNULL(sna_" . $variableId . "_total, 0) > 0 ";
+			$where .= " IFNULL(sna_" . $this->variableId . "_total, 0) > 0 ";
 		}
 		$params = array();
 
-		if ($hasTotals)
+		if ($this->hasTotals)
 		{
 			$orderBy = "CASE WHEN Total = 0 THEN 0 ELSE Value / Total END";
 		}
@@ -91,13 +74,13 @@ class SnapshotByDatasetRanking extends BaseModel
 		{
 			$orderBy = "Value";
 		}
-		$orderBy .= ($direction === 'D' ? ' DESC' : ' ASC');
+		$orderBy .= ($this->direction === 'D' ? ' DESC' : ' ASC');
 
 		$baseQuery = new QueryPart($from, $where, $params, $select, null, $orderBy);
 
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
 
-		$multiQuery->setMaxRows($size);
+		$multiQuery->setMaxRows($this->size);
 
 		$ret = $multiQuery->fetchAll();
 
@@ -105,12 +88,12 @@ class SnapshotByDatasetRanking extends BaseModel
 		return $ret;
 	}
 
-	private function hiddenValuesCondition($variableId, $hiddenValueLabels)
+	private function hiddenValuesCondition()
 	{
-		if (sizeof($hiddenValueLabels) === 0)
+		if (sizeof($this->hiddenValueLabels) === 0)
 			return "";
 		else
-			return " AND sna_" . $variableId . "_value_label_id NOT IN(" . implode(",", $hiddenValueLabels) . ") ";
+			return " AND sna_" . $this->variableId . "_value_label_id NOT IN(" . implode(",", $this->hiddenValueLabels) . ") ";
 	}
 
 }

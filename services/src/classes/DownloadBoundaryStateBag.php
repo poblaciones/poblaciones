@@ -7,18 +7,20 @@ use helena\caches\BoundaryDownloadCache;
 
 class DownloadBoundaryStateBag extends StateBag
 {
-	public static function Create($type, $boundaryId, $model)
+	public static function Create($type, $boundaryId, $model, $clippingItemId, $clippingCircle)
 	{
 		$ret = new DownloadBoundaryStateBag();
 		$ret->Initialize();
 		$folder = $ret->GetFolder();
-		$key = BoundaryDownloadCache::CreateKey($type, $boundaryId);
+		$key = BoundaryDownloadCache::CreateKey($type, $boundaryId, $clippingItemId, $clippingCircle);
 
 		$ret->SetArray(array(
 			'type' => $type,
 			'boundaryId' => $boundaryId,
 			'cacheKey' => $key,
 			'outFile' => $folder . '/outfile',
+			'clippingItemId' => $clippingItemId,
+			'clippingCircle' => $clippingCircle,
 			'dFile' => $folder . '/intermediate_data.json',
 			'fullQuery' => $model->fullQuery,
 			'countQuery' => $model->countQuery,

@@ -94,8 +94,8 @@
 								<md-list-item v-for="item in Variable.Values" :key="item.Id"
 															:value="item.Id" class="itemSmall">
 									<mp-color-picker :canEdit="canEdit" :isDisabledObject="item"
-													:ommitHexaSign="true" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
-																	 style="width: 45px; padding-top: 0px" />
+													:ommitHexaSign="true" top-padding="false" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
+																	 style="width: 45px;" />
 									<span class="md-list-item-text">{{ item.Caption }}</span>
 									<md-button v-if="canEdit && (CutMode === 'M' || item.Value === null)" class="md-icon-button md-list-action"
 											@click="editValue(item)">

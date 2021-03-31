@@ -1,18 +1,27 @@
 import BoundariesComposer from '@/public/composers/BoundariesComposer';
+
 import h from '@/public/js/helper';
+import err from '@/common/js/err';
+import arr from '@/common/js/arr';
+import axios from 'axios';
 
 export default ActiveBoundary;
+
+ActiveBoundary.DEFAULT_COLOR = '#95a3c1';
 
 function ActiveBoundary(data) {
 	this.$Segment = null;
 	this.index = -1;
 	this.isBoundary = true;
 	this.visible = true;
+	this.IsUpdatingSummary = false;
 	this.opacity = .7;
+	this.cancelUpdateSummary = null;
 	this.showDescriptions = true;
 	this.properties = data;
 	this.KillDuplicateds = false;
-	this.colors = [{ Id: 1, Value: '#95a3c1' }];
+	this.borderWidth = 2;
+	this.color = ActiveBoundary.DEFAULT_COLOR;
 };
 
 ActiveBoundary.prototype.ResolveSegment = function () {
@@ -24,9 +33,7 @@ ActiveBoundary.prototype.Visible = function () {
 
 ActiveBoundary.prototype.GetStyleColorDictionary = function () {
 	var ret = {};
-	for (let i = 0; i < this.colors.length; i++) {
-		ret[this.colors[i].Id] = this.colors[i].Value;
-	}
+	ret[1] = this.color;
 	return ret;
 };
 
@@ -38,17 +45,35 @@ ActiveBoundary.prototype.CurrentOpacity = function () {
 ActiveBoundary.prototype.UpdateRanking = function () {
 };
 
+
 ActiveBoundary.prototype.UpdateSummary = function () {
+	var boundary = this.properties;
+	var loc = this;
+	var CancelToken = axios.CancelToken;
+	if (this.cancelUpdateSummary !== null) {
+		this.cancelUpdateSummary('cancelled');
+	}
+	this.IsUpdatingSummary = true;
+
+	var rev = window.SegMap.Signatures.Boundary;
+	window.SegMap.Get(window.host + '/services/frontend/boundaries/GetBoundarySummary', {
+		params: h.getBoundarySummaryParams(boundary, window.SegMap.frame, rev),
+		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateSummary = c; }),
+	}).then(function (res) {
+		loc.cancelUpdateSummary = null;
+		if (res.message === 'cancelled') {
+			return;
+		}
+		loc.IsUpdatingSummary = false;
+		loc.properties.Count = res.data.Count;
+	}).catch(function (error) {
+		err.errDialog('GetBoundarySummary', 'obtener las estadísticas de resumen de delimitación', error);
+	});
 };
 
 ActiveBoundary.prototype.GetStyleColorList = function() {
 	var ret = [];
-	for (let i = 0; i < this.colors.length; i++) {
-		ret.push({
-			cs: 'cs' + this.colors[i].Id,
-			className: this.colors[i].Id, fillColor: this.colors[i].Value
-		});
-	}
+	ret.push({ cs: 'cs1', className: 1, fillColor: this.color });
 	return ret;
 };
 

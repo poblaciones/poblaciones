@@ -546,10 +546,15 @@ module.exports = {
 			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 	},
+	getBoundarySummaryParams(boundary, frame, rev) {
+		return this.mergeObject({
+			b: boundary.Id,
+			w: rev
+		}, this.getFrameParams(frame));
+	},
 	getFrameParams(frame) {
 		var ret = {
 			e: this.getEnvelopeParam(frame.Envelope),
-			f: frame.ClippingFeatureId,
 			z: frame.Zoom,
 		};
 		if(frame.ClippingRegionIds) {

@@ -34,7 +34,6 @@ class SummaryServiceTest extends TestCase
 		$frame->Envelope =  Envelope::TextDeserialize($e);
 		// $frame->ClippingRegionIds = $r;
 		// $frame->ClippingCircle = Circle::TextDeserialize($c);
-		// $frame->ClippingFeatureId = $f;
 
 		$denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId);
 		$this->assertNull($denied);

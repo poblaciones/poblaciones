@@ -82,32 +82,22 @@ class TileDataService extends BaseService
 		$level = $version->GetLevel($levelId);
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		$table = new SnapshotByDatasetTileData($snapshotTable);
-		$geographyId = $level->GeographyId;
 
 		if ($b != null)
 		{
-			$envelope = Envelope::TextDeserialize($b);
+			$frame->TileEnvelope = Envelope::TextDeserialize($b);
 		}
 		else
 		{
-			$envelope = Envelope::FromXYZ($x, $y, $z);
+			$frame->TileEnvelope = Envelope::FromXYZ($x, $y, $z);
 		}
 		$hasDescriptions = $level->HasDescriptions;
 		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
 
-		if ($frame->ClippingCircle != NULL)
-		{
-			$rows = $table->GetMetricVersionTileDataByCircle($level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingCircle, $level->Dataset->Type, $hasSymbols, $hasDescriptions);
-		}
-		else if ($frame->ClippingRegionIds != NULL)
-		{
-			$rows = $table->GetMetricVersionTileDataByRegionIds($level->Variables, $geographyId, $urbanity, $envelope, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hasSymbols, $hasDescriptions);
-		}
-		else
-		{
-			$rows = $table->GetMetricVersionTileDataByEnvelope($level->Variables, $geographyId, $urbanity, $envelope, $level->Dataset->Type, $hasSymbols, $hasDescriptions);
-		}
+		$table = new SnapshotByDatasetTileData($snapshotTable,
+			$level->Dataset->Type, $level->Variables, $urbanity, $hasSymbols, $hasDescriptions);
+
+		$rows = $table->GetRows($frame);
 
 		$data = $this->CreateTileDataInfo($rows);
 

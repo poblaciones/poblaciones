@@ -49,7 +49,13 @@ SvgComposer.prototype.SVG = function (h, w, z, parentAttributes) {
 	if (patternValue === 0 || patternValue === 2) {
 		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
 	} else if (patternValue === 1) {
-		svgElem.style.strokeWidth = (z < 16 ? '1.5px' : '2px');
+		var width = (z < 16 ? 1.5 : 2);
+		if (this.activeSelectedMetric.borderWidth === 1) {
+			width *= .5;
+		} else if (this.activeSelectedMetric.borderWidth === 3) {
+			width *= 2;
+		}
+		svgElem.style.strokeWidth = width + 'px';
 	} else if (this.patternIsPipeline(patternValue)) {
 		// 3,4,5,6 son cañerías
 		svgElem.style.strokeWidth = '0px';
@@ -132,6 +138,7 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttr
 		if (gradientOpacity !== 0) {
 			// test mask: https://jsfiddle.net/ycLsr32k/
 			var image = o2.image("data:" + gradient.ImageType + ";base64," + gradient.Data, 256, 256);
+		//	image.style('opacity: 0.8');
 			var rect2 = o2.rect(256, 256);
 			rect2.style('fill: #FFFFFF; opacity: ' + gradientOpacity);
 			// rectángulo de transparencia local
@@ -200,7 +207,7 @@ SvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
 		if (patternValue === 11) {
 			pattern.style('fill: ' + labels[l].fillColor + ';');
 		}
-		pattern.style('stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.CurrentOpacity + width);
+		pattern.style('stroke: ' + labels[l].fillColor + '; stroke-opacity: ' + this.activeSelectedMetric.CurrentOpacity() + width);
 	}
 };
 
@@ -233,7 +240,7 @@ SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patte
 			fillBlock = '; fill: ' + labels[l].fillColor;
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
 				' { stroke: ' + stroke + '; stroke-opacity: ' + Math.max(1, strokeOpacity * 1.1) +
-				maskBlock + (textureFill ? textureFill : fillBlock) + '; fill-opacity: ' + this.activeSelectedMetric.CurrentOpacity + ' } ';
+				maskBlock + (textureFill ? textureFill : fillBlock) + '; fill-opacity: ' + this.activeSelectedMetric.CurrentOpacity() + ' } ';
 		} else {
 			styles += '.e' + tileUniqueId + '_' + labels[l].className +
 				' { stroke: ' + labels[l].fillColor + '; stroke-opacity: ' +  strokeOpacity +

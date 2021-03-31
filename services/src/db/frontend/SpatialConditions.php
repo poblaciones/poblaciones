@@ -16,7 +16,7 @@ class SpatialConditions
 		$this->preffix = $preffix;
 	}
 
-	public function CreateRegionQuery($clippingRegionIds, $levelId = null)
+	public function CreateRegionQuery($clippingRegionIds)
 	{
 		$from = "snapshot_clipping_region_item_geography_item ";
 
@@ -24,13 +24,21 @@ class SpatialConditions
 			. " cgv_clipping_region_item_id IN (" . Str::JoinInts($clippingRegionIds) . ") ";
 
 		$params = array();
+		return new QueryPart($from, $where, $params);
+	}
 
-		if ($levelId != null)
-		{
-			$where .= " AND cgv_geography_id = ? ";
-			$params[] = $levelId;
-		}
-
+	public function CreateRegionToRegionQuery($clippingRegionIds)
+	{
+		$from = "";
+		$params = array();
+		$where = "EXISTS (
+								SELECT 1 FROM snapshot_clipping_region_item_geography_item m1
+								JOIN snapshot_clipping_region_item_geography_item m2
+								ON m1.cgv_geography_item_id = m2.cgv_geography_item_id
+								where m1.cgv_clipping_region_item_id = " . $this->preffix . "_clipping_region_item_id
+								AND m2.cgv_clipping_region_item_id IN (" . Str::JoinInts($clippingRegionIds) . ")
+								AND m1.cgv_level >= 1
+								AND m2.cgv_level >= 1)";
 		return new QueryPart($from, $where, $params);
 	}
 
@@ -63,21 +71,11 @@ class SpatialConditions
 	{
 		return "MBRIntersects(" . $this->preffix . "_rich_envelope, RichEnvelope(ST_PolygonFromText('" . $envelope->ToWKT() . "'), " . $metricVersionId . ", " . $geographyId . "))";
 	}
-	public function CreateSimpleEnvelopeQuery($envelope)
-	{
-		$from = "";
-		$where = $this->EnvelopePart($envelope);
-		$select = "";
-		$params = array();
-
-		return new QueryPart($from, $where, $params, $select);
-	}
-
 	public function CreateEnvelopeQuery($envelope)
 	{
 		$from = "";
 		$where = $this->EnvelopePart($envelope);
-		$select = "MBRContains(ST_PolygonFromText('" . $envelope->ToWKT() . "'), " . $this->preffix . "_envelope) as Inside";
+		$select = "";
 		$params = array();
 
 		return new QueryPart($from, $where, $params, $select);
@@ -112,6 +110,12 @@ class SpatialConditions
 			$sql = " AND EXISTS (SELECT 1 FROM snapshot_geography_item WHERE giw_geography_item_id = " . $this->preffix . "_geography_item_id " .
 				" AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
 				$circle->RadiusToMysqlPoint() . ", giw_geometry_r3))";
+		}
+		else if ($effectiveDatasetType == 'B')
+		{
+			// Si es un metric de datos, evalúa la ubicación del geography
+			$sql = " AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
+				$circle->RadiusToMysqlPoint() . ", biw_geometry_r1)";
 		}
 		else
 			throw new PublicException("El tipo de dataset no fue reconocido");

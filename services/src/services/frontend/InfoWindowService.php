@@ -93,22 +93,11 @@ class InfoWindowService extends BaseService
 	private function CalculateNavigationInfo($frame, $level, $variable, $urbanity, $hiddenValueLabels)
 	{
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		$table = new SnapshotByDatasetNeighbors($snapshotTable);
+		$table = new SnapshotByDatasetNeighbors($snapshotTable, $level->Dataset->Type,
+											$variable, $urbanity, $hiddenValueLabels);
 
-		$geographyId = $level->GeographyId;
+		$rows = $table->GetRows($frame);
 
-		if ($frame->ClippingCircle != NULL)
-		{
-			$rows = $table->GetMetricVersionNeighborsByCircle($geographyId, $variable, $urbanity, $frame->ClippingCircle, $level->Dataset->Type, $hiddenValueLabels);
-		}
-		else if ($frame->ClippingRegionIds != NULL)
-		{
-			$rows = $table->GetMetricVersionNeighborsByRegionIds($geographyId, $variable, $urbanity, $frame->ClippingRegionIds, $frame->ClippingCircle, $level->Dataset->Type, $hiddenValueLabels);
-		}
-		else
-		{
-			$rows = $table->GetMetricVersionNeighborsByEnvelope($geographyId, $variable, $urbanity, $frame->Envelope, $level->Dataset->Type, $hiddenValueLabels);
-		}
 		return $this->CreateInfo($rows, $variable);
 	}
 	private function CreateInfo($rows, $variable)

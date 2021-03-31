@@ -31,9 +31,6 @@ ClippingRouter.prototype.ToRoute = function () {
 		if (segmentedMap.frame.ClippingRegionIds) {
 			ret.push(['r', segmentedMap.frame.ClippingRegionIds.join(',')]);
 		}
-		if (segmentedMap.frame.ClippingFeatureId) {
-			ret.push(['f', segmentedMap.frame.ClippingFeatureId]);
-		}
 		if (segmentedMap.frame.ClippingCircle) {
 			ret.push(['c', h.trimNumberCoords(segmentedMap.frame.ClippingCircle.Center.Lat) + ',' +
 				 h.trimNumberCoords(segmentedMap.frame.ClippingCircle.Center.Lon) + ',' +
@@ -52,7 +49,6 @@ ClippingRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 
 	segmentedMap.SaveRoute.Disabled = true;
 	if (this.clippingChanged(segmentedMap.frame, clipping)) {
-		segmentedMap.frame.ClippingFeatureId = clipping.ClippingFeatureId;
 		segmentedMap.frame.ClippingRegionIds = clipping.ClippingRegionIds;
 		segmentedMap.frame.ClippingCircle = clipping.ClippingCircle;
 		var loc = this;
@@ -74,23 +70,20 @@ ClippingRouter.prototype.clippingFromRoute = function (args) {
 	}
 	var clippingRegionIdvalue = h.getSafeValue(args, 'r', null);
 	var clippingRegionIds = (clippingRegionIdvalue ? arr.ToIntArray(clippingRegionIdvalue.split(',')) : null);
-	var clippingFeatureId = h.getSafeValue(args, 'f', null);
 	var clippingCircle = this.getClippingCircle(h.getSafeValue(args, 'c', null));
 	var clippingLevelName = h.getSafeValue(args, 'l', null);
 
 	var clipping = {
 		ClippingRegionIds: clippingRegionIds,
 		ClippingCircle: clippingCircle,
-		ClippingLevelName: clippingLevelName,
-		ClippingFeatureId: clippingFeatureId
+		ClippingLevelName: clippingLevelName
 	};
 	return clipping;
 };
 
 ClippingRouter.prototype.clippingChanged = function (frame, clipping) {
 	if (!arr.AreEquals(frame.ClippingRegionIds, clipping.ClippingRegionIds) ||
-		frame.ClippingRegionIds !== clipping.ClippingLevelName || /* TODO Bugfix */
-		frame.ClippingFeatureId !== clipping.ClippingFeatureId) {
+		frame.ClippingRegionIds !== clipping.ClippingLevelName /* TODO Bugfix */) {
 		return true;
 	}
 	if ((frame.ClippingCircle === null) !== (clipping.ClippingCircle === null)) {

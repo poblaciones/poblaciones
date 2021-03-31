@@ -4,16 +4,15 @@ namespace helena\caches;
 
 use minga\framework\caching\TwoLevelObjectCache;
 
-class BoundaryCache extends BaseCache
+class BoundarySummaryCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new TwoLevelObjectCache("Boundaries/Features");
+		return new TwoLevelObjectCache("Boundaries/Summary");
 	}
 	public static function CreateKey($frame)
 	{
-		$key = $frame->GetClippingKey() . $frame->GetTileKey();
-		return $key;
+		return $frame->GetSummaryKey();
 	}
 }
 

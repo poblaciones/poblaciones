@@ -11,7 +11,7 @@ use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
 
-class SnapshotBoundaryItemModel extends BaseSpatialSnapshotModel
+class SnapshotBoundarySummary extends BaseSpatialSnapshotModel
 {
 	private $boundaryId;
 
@@ -24,11 +24,8 @@ class SnapshotBoundaryItemModel extends BaseSpatialSnapshotModel
 	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
-		$centroids = ', ST_Y(biw_centroid) as Lat, ST_X(biw_centroid) as Lon';
 
-		$field = "biw_geometry_r1";
-
-		$select = $field . " as value, biw_caption Caption, biw_clipping_region_item_id as FID" . $centroids;
+		$select = "count(*) AS itemCount";
 
 		$from = $this->tableName;
 

@@ -289,7 +289,7 @@ class Account
 		$vals['url'] = $url;
 		$mail->message = Context::Calls()->RenderMessage('lostPassword.html.twig', $vals);
 
-		$skipNotification = !Context::Settings()->Notification()->NotifyLostPassword;
+		$skipNotification = !Context::Settings()->Notifications()->NotifyLostPassword;
 		$mail->Send(true, $skipNotification);
 	}
 

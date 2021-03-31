@@ -32,15 +32,28 @@ class BoundaryDownloadModel extends BaseDownloadModel
 			$this->prepared = true;
 	}
 
-	public function PrepareFileQuery($boundaryId, $getPolygon)
+	public function PrepareFileQuery($boundaryId, $getPolygon, $clippingItemId, $clippingCircle)
 	{
 		Profiling::BeginTimer();
 		$params = array();
+		$params[] = $boundaryId;
 
 		$boundaryModel = new BoundaryModel();
 		$boundary = $boundaryModel->GetBoundaryById($boundaryId);
+		$spatialConditions = new SpatialConditions('biw');
 
+		$where = '';
 		$joins = ' ';
+
+		// Filtra por clipping
+		if($clippingItemId)
+		{
+			$where = $spatialConditions->CreateRegionToRegionQuery($clippingItemId)->Where;
+		}
+		else if ($clippingCircle)
+		{
+			$where = $spatialConditions->CreateCircleQuery($clippingCircle, 'B')->Where;
+		}
 
 		$geographyId = $boundary['bou_geography_id'];
 
@@ -49,9 +62,9 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		$this->AppendExtraColumns($cols, $joins, $geographyId, $getPolygon);
 
 		$cols = $this->Deduplicate($cols);
-
-		$wherePart = ' WHERE biw_boundary_id = ?';
-		$params[] = $boundaryId;
+			$wherePart = 'WHERE biw_boundary_id = ?';
+		if ($where !== '')
+			$wherePart .= ' AND ' . $where;
 
 		$query = ' FROM snapshot_boundary_item AS _data_table ' . $joins . $wherePart;
 

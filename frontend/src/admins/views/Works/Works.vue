@@ -25,7 +25,7 @@
 						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable" md-label="Tamaño" md-sort-by="TotalSizeBytes"><span :title="formatSizes(item)">{{ totalSizeMB(item) }}</span></md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable" md-label="Datasets" md-sort-by="DatasetCount"><span :title="item.DatasetNames">{{ item.DatasetCount }}</span></md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable" style="width:50px" md-label="Datasets" md-sort-by="DatasetCount"><span :title="item.DatasetNames">{{ item.DatasetCount }}</span></md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores" md-sort-by="MetricCount">{{ item.MetricCount }}</md-table-cell>
 					<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado" md-sort-by="IsIndexed">
 						<md-switch class="md-primary" v-model="item.IsIndexed"

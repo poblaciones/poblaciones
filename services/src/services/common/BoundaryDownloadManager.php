@@ -26,32 +26,32 @@ use helena\classes\App;
 
 class BoundaryDownloadManager extends BaseDownloadManager
 {
-	public function CreateMultiRequestFile($type, $boundaryId)
+	public function CreateMultiRequestFile($type, $boundaryId, $clippingItemId, $clippingCircle)
 	{
 		self::ValidateType($type);
 		// Si está cacheado, sale
-		if($this->IsCached($type, $boundaryId))
+		if($this->IsCached($type, $boundaryId, $clippingItemId, $clippingCircle))
 			return array('done' => true);
 
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
-		$this->PrepareNewModel($type, $boundaryId);
-		$this->PrepareNewState($type, $boundaryId);
+		$this->PrepareNewModel($type, $boundaryId, $clippingItemId, $clippingCircle);
+		$this->PrepareNewState($type, $boundaryId, $clippingItemId, $clippingCircle);
 		return $this->GenerateNextFilePart();
 	}
 
-	private static function IsCached($type, $boundaryId)
+	private static function IsCached($type, $boundaryId, $clippingItemId, $clippingCircle)
 	{
-		$cacheKey = BoundaryDownloadCache::CreateKey($type, $boundaryId);
+		$cacheKey = BoundaryDownloadCache::CreateKey($type, $boundaryId, $clippingItemId, $clippingCircle);
 		$filename = null;
 		return BoundaryDownloadCache::Cache()->HasData($cacheKey, $filename);
 	}
 
-	public static function GetFileBytes($type, $boundaryId)
+	public static function GetFileBytes($type, $boundaryId, $clippingItemId, $clippingCircle)
 	{
 		self::ValidateType($type);
 
-		$cacheKey = BoundaryDownloadCache::CreateKey($type, $boundaryId);
-		$friendlyName = self::GetFileName($boundaryId, $type);
+		$cacheKey = BoundaryDownloadCache::CreateKey($type, $boundaryId, $clippingItemId, $clippingCircle);
+		$friendlyName = self::GetFileName($boundaryId, $type, $clippingItemId, $clippingCircle);
 		$cache = BoundaryDownloadCache::Cache();
 		// Lo devuelve desde el cache
 		$filename = null;
@@ -63,7 +63,7 @@ class BoundaryDownloadManager extends BaseDownloadManager
 			throw new PublicException('No ha sido posible descargar el archivo.');
 	}
 
-	private static function GetFileName($boundaryId, $type)
+	private static function GetFileName($boundaryId, $type, $clippingItemId, $clippingCircle)
 	{
 		$validFileTypes = self::$validFileTypes;
 		if (array_key_exists($type[0], $validFileTypes))
@@ -72,6 +72,11 @@ class BoundaryDownloadManager extends BaseDownloadManager
 			throw new PublicException('Tipo de archivo inválido');
 
 		$name = 'boundary' . $boundaryId . $type;
+
+		if (is_array($clippingItemId))
+			$name .= 'r' . Str::JoinInts($clippingItemId, '-');
+		else
+			$name .= 'r' . $clippingItemId;
 
 		return $name . '.' . $ext;
 	}
@@ -105,19 +110,19 @@ class BoundaryDownloadManager extends BaseDownloadManager
 								$this->state->Cols(), $this->state->Get('fullParams'), $this->state->Get('wktIndex'),
 								$this->state->ExtraColumns());
 	}
-	protected function PrepareNewModel($type, $boundaryId)
+	protected function PrepareNewModel($type, $boundaryId, $clippingItemId, $clippingCircle)
 	{
 		$this->model = new BoundaryDownloadModel();
-		$this->model->PrepareFileQuery($boundaryId, self::GetPolygon($type));
+		$this->model->PrepareFileQuery($boundaryId, self::GetPolygon($type), $clippingItemId, $clippingCircle);
 	}
 
 
-	private function PrepareNewState($type, $boundaryId)
+	private function PrepareNewState($type, $boundaryId, $clippingItemId, $clippingCircle)
 	{
-		$this->state = DownloadBoundaryStateBag::Create($type, $boundaryId, $this->model);
+		$this->state = DownloadBoundaryStateBag::Create($type, $boundaryId, $this->model, $clippingItemId, $clippingCircle);
 		$this->state->SetStep(self::STEP_BEGIN);
 		$this->state->SetTotalSteps(2);
-		$friendlyName = self::GetFileName($boundaryId, $type);
+		$friendlyName = self::GetFileName($boundaryId, $type, $clippingItemId, $clippingCircle);
 		$this->state->Set('friendlyName', $friendlyName);
 		$this->state->Set('totalRows', $this->model->GetCountRows());
 		$this->state->Save();

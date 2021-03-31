@@ -14,6 +14,7 @@ use helena\caches\BoundaryCache;
 use helena\caches\SelectedBoundaryCache;
 use helena\caches\BoundaryVisiblityCache;
 use helena\caches\BoundaryDownloadCache;
+use helena\caches\BoundarySummaryCache;
 use helena\caches\ClippingCache;
 use helena\caches\RankingCache;
 use helena\caches\BackofficeDownloadCache;
@@ -87,6 +88,7 @@ class CacheManager
 		$this->CleanBoundariesMetadataCache();
 		BoundaryCache::Cache()->Clear();
 		BoundaryDownloadCache::Cache()->Clear();
+		BoundarySummaryCache::Cache()->Clear();
 	}
 	public function CleanBoundariesMetadataCache()
 	{

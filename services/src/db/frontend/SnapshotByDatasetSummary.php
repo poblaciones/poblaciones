@@ -11,53 +11,28 @@ use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
 
-class SnapshotByDatasetSummary extends BaseModel
+class SnapshotByDatasetSummary extends BaseSpatialSnapshotModel
 {
-	private $spatialConditions;
+	private $variables;
+	private $urbanity;
 
-	public function __construct($snapshortTable)
+	public function __construct($snapshotTable, $datasetType, $variables, $urbanity)
 	{
-		$this->tableName = $snapshortTable;
-		$this->idField = 'sna_id';
-		$this->captionField = '';
-		$this->spatialConditions = new SpatialConditions('sna');
+		$this->variables = $variables;
+		$this->urbanity = $urbanity;
+
+		parent::__construct($snapshotTable, "sna", $datasetType);
 	}
 
-	public function GetMetricVersionSummaryByRegionIds($variables, $hasSummary, $geographyId, $urbanity, $clippingRegionIds, $circle, $datasetType)
-	{
-		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
-
-		if ($circle != null)
-			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
-		else
-			$circleQuery = null;
-
-		return $this->ExecSummaryQuery($variables, $hasSummary, $geographyId, $urbanity, $query, $circleQuery);
-	}
-
-	public function GetMetricVersionSummaryByEnvelope($variables, $hasSummary, $geographyId, $urbanity, $envelope)
-	{
-		$query = $this->spatialConditions->CreateEnvelopeQuery($envelope);
-
-		return $this->ExecSummaryQuery($variables, $hasSummary, $geographyId, $urbanity,$query);
-	}
-
-	public function GetMetricVersionSummaryByCircle($variables, $hasSummary, $geographyId, $urbanity, $circle, $datasetType)
-	{
-		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType, $geographyId);
-
-		return $this->ExecSummaryQuery($variables, $hasSummary, $geographyId, $urbanity, $query);
-	}
-
-	private function ExecSummaryQuery($variables, $hasSummary, $geographyId, $urbanity, $query, $extraQuery = null)
+	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
-		if (sizeof($variables))
+		if (sizeof($this->variables))
 		{
 			$sql = "";
 			$paramsTotal = [];
 
-			foreach($variables as $variable)
+			foreach($this->variables as $variable)
 			{
 				$select = "COUNT(*) Areas, " . $variable->Id . " VariableId, Round(SUM(IFNULL(sna_area_m2, 0)) / 1000000, 6) Km2";
 
@@ -71,7 +46,7 @@ class SnapshotByDatasetSummary extends BaseModel
 
 				$from = $this->tableName;
 
-				$where = $this->spatialConditions->UrbanityCondition($urbanity);
+				$where = $this->spatialConditions->UrbanityCondition($this->urbanity);
 
 				$baseQuery = new QueryPart($from, $where, null, $select, $groupBy);
 

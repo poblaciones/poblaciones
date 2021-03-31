@@ -403,6 +403,11 @@ SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelectio
 	} else if (type === 'P') {
 		// punto...
 		this.AddMetricById(item);
+	} else if (type === 'B') {
+		// delimitación...
+		this.AddBoundaryById(item);
+	} else {
+		throw new Error('Tipo de respuesta no reconocida.');
 	}
 /*	if (lat && lon) {
 		this.PanTo({ Lat: lat, Lon: lon });

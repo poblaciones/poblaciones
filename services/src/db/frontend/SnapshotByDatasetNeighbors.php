@@ -11,66 +11,45 @@ use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
 
-class SnapshotByDatasetNeighbors extends BaseModel
+class SnapshotByDatasetNeighbors extends BaseSpatialSnapshotModel
 {
-	private $spatialConditions;
 	private const MAX_ROWS = 250;
 
-	public function __construct($snapshortTable)
+	private $variable;
+	private $urbanity;
+	private $hiddenValueLabels;
+
+	public function __construct($snapshotTable, $datasetType,
+											$variable, $urbanity, $hiddenValueLabels)
 	{
-		$this->tableName = $snapshortTable;
-		$this->idField = 'sna_id';
-		$this->captionField = '';
-		$this->spatialConditions = new SpatialConditions('sna');
+		$this->variable = $variable;
+		$this->urbanity = $urbanity;
+		$this->hiddenValueLabels = $hiddenValueLabels;
+
+		parent::__construct($snapshotTable, 'sna', $datasetType);
 	}
 
-	public function GetMetricVersionNeighborsByRegionIds($geographyId, $variable, $urbanity, $clippingRegionIds, $circle, $datasetType, $hiddenValueLabels)
-	{
-		$query =  $this->spatialConditions->CreateRegionQuery($clippingRegionIds, $geographyId);
-
-		if ($circle != null)
-			$circleQuery =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
-		else
-			$circleQuery = null;
-
-		return $this->ExecNeighborsQuery($geographyId, $variable, $urbanity, $datasetType, $hiddenValueLabels, $query, $circleQuery);
-	}
-
-	public function GetMetricVersionNeighborsByEnvelope($geographyId, $variable, $urbanity, $envelope, $datasetType, $hiddenValueLabels)
-	{
-		$query = $this->spatialConditions->CreateSimpleEnvelopeQuery($envelope);
-
-		return $this->ExecNeighborsQuery($geographyId, $variable, $urbanity, $datasetType, $hiddenValueLabels, $query);
-	}
-
-	public function GetMetricVersionNeighborsByCircle($geographyId, $variable, $urbanity, $circle, $datasetType, $hiddenValueLabels)
-	{
-		$query =  $this->spatialConditions->CreateCircleQuery($circle, $datasetType);
-
-		return $this->ExecNeighborsQuery($geographyId, $variable, $urbanity, $datasetType, $hiddenValueLabels, $query);
-	}
-
-	private function ExecNeighborsQuery($geographyId, $variable, $urbanity, $datasetType, $hiddenValueLabels, $query, $extraQuery = null)
+	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
 
 		$select = "sna_feature_id FeatureId
 								, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat
 								, round(ST_X(sna_location), ". GeoJson::PRECISION .") as Lon";
-		if ($datasetType !== 'L')
+		if ($this->datasetType !== 'L')
 			$select .= ", ST_AsText(sna_envelope) Envelope";
 		else
 			$select .= ", null as Envelope";
 
 		$from = $this->tableName;
 
-		$where = $this->hiddenValuesCondition($variable->Id, $hiddenValueLabels);
+		$where = $this->hiddenValuesCondition($this->variable->Id);
 
-		$where .= $this->spatialConditions->UrbanityCondition($urbanity);
+		$where .= $this->spatialConditions->UrbanityCondition($this->urbanity);
 
 		$params = array();
 
-		$sequenceQuery = $this->resolveSequenceQuery($variable);
+		$sequenceQuery = $this->resolveSequenceQuery();
 
 		$baseQuery = new QueryPart($from, $where, $params, $select);
 
@@ -83,23 +62,23 @@ class SnapshotByDatasetNeighbors extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
-	private function resolveSequenceQuery($variable)
+	private function resolveSequenceQuery()
 	{
-		if (!$variable->IsSequence) return null;
+		if (!$this->variable->IsSequence) return null;
 
-		$variableId = $variable->Id;
+		$variableId = $this->variable->Id;
 		$orderBy = "sna_" . $variableId . "_value_label_id, sna_" . $variableId . "_sequence_order";
 		$select = "sna_" . $variableId . "_value_label_id ValueId, sna_" . $variableId . "_sequence_order Sequence";
 
 		return new QueryPart(null, null, null, $select, null, $orderBy);
 	}
 
-	private function hiddenValuesCondition($variableId, $hiddenValueLabels)
+	private function hiddenValuesCondition($variableId)
 	{
-		if (sizeof($hiddenValueLabels) === 0)
+		if (sizeof($this->hiddenValueLabels) === 0)
 			return "";
 		else
-			return " AND sna_" . $variableId . "_value_label_id NOT IN(" . implode(",", $hiddenValueLabels) . ") ";
+			return " AND sna_" . $variableId . "_value_label_id NOT IN(" . implode(",", $this->hiddenValueLabels) . ") ";
 	}
 
 }

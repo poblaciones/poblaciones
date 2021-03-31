@@ -12,7 +12,7 @@
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
-				{{ boundary.properties.Name }} <span style="font-size: .95em">
+				{{ boundary.properties.Name }} <span style="font-size: .95em" v-if="boundary.properties.Count">
 					({{ h.formatNum(boundary.properties.Count) }})
 				</span>
 			</h4>
@@ -73,7 +73,7 @@ export default {
 				return Helper;
 			},
 			singleLabel() {
-				return { FillColor: this.boundary.colors[0].Value, Visible: this.boundary.visible };
+				return { FillColor: this.boundary.color, Visible: this.boundary.visible };
 			}
 		}
 };
