@@ -7,7 +7,7 @@
 				<LeftPanel ref='leftPanel' />
 				<MapPanel />
 				<MetricsButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
-				<WatermarkFloat v-if="work.Current && work.Current.Institution && work.Current.Institution.WatermarkId" :work="work" />
+				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
 				<EditButton v-if="work.Current" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
@@ -132,8 +132,8 @@
 		},
 		computed: {
 			workColor() {
-				if (this.work && this.work.Current && this.work.Current.Institution && this.work.Current.Institution.Color) {
-					return '#' + this.work.Current.Institution.Color;
+				if (this.work && this.work.Current && this.work.Current.Metadata && this.work.Current.Metadata.Institution && this.work.Current.Metadata.Institution.Color) {
+					return '#' + this.work.Current.Metadata.Institution.Color;
 				}
 				return '#00A0D2';
 			},

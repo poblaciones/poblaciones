@@ -1,7 +1,7 @@
 <template>
   <div v-if="image" class="logoDiv" @click="institutionClicked"
-			 :style="(!work.Current.Institution.Url ? 'pointer-events: none' : 'cursor: pointer')">
-    <img class="logoIcon" :src="image" :title="work.Current.Institution.Name" />
+			 :style="(!work.Current.Metadata.Institution.Url ? 'pointer-events: none' : 'cursor: pointer')">
+    <img class="logoIcon" :src="image" :title="work.Current.Metadata.Institution.Name" />
   </div>
 </template>
 
@@ -23,7 +23,7 @@ export default {
   },
   methods: {
 		institutionClicked() {
-			window.open(this.work.Current.Institution.Url);
+			window.open(this.work.Current.Metadata.Institution.Url);
 		},
     getInstitutionWatermark() {
       const loc = this;
@@ -31,7 +31,7 @@ export default {
         .get(window.host + "/services/works/GetInstitutionWatermark", {
           params: {
             w: loc.work.Current.Id,
-            iwmid: loc.work.Current.Institution.WatermarkId
+            iwmid: loc.work.Current.Metadata.Institution.WatermarkId
           }
         })
         .then(function(res) {
