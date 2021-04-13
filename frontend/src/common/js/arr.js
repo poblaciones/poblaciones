@@ -9,6 +9,9 @@ module.exports = {
 	AddRange(arr, arrValues) {
 		arr.push.apply(arr, arrValues);
 	},
+	Crop(arr, itemsLeft) {
+		arr.splice(itemsLeft, arr.length - itemsLeft);
+	},
 	InsertAt(arr, index, value) {
 		arr.splice(index, 0, value);
 	},

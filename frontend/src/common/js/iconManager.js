@@ -7,6 +7,9 @@ module.exports = {
 		if (!customIconList) {
 			return '';
 		}
+		if (customIconList.length === undefined) {
+			return customIconList[symbol];
+		}
 		for (var n = 0; n < customIconList.length; n++) {
 			if (customIconList[n].Caption === symbol) {
 				return customIconList[n].Image;

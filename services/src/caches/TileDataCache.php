@@ -8,7 +8,7 @@ class TileDataCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new TwoLevelObjectCache("Metrics/GeoData");
+		return new TwoLevelObjectCache("Metrics/TileData");
 	}
 	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $x, $y,$zoom, $b)
 	{

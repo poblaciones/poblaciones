@@ -102,7 +102,7 @@
 												</template>
 											</div>
 											<div class='helper' v-if="Dataset.properties.Marker.Type == 'I'">
-												Formato recomendado: SVG. Ej. <a href='https://www.flaticon.es/' target='_blank'>https://www.flaticon.es/</a>
+												Formato recomendado: PNG 64x64. Ej. <a href='https://www.flaticon.es/' target='_blank'>https://www.flaticon.es/</a>
 											</div>
 
 											<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'T'"
@@ -147,10 +147,10 @@
 </template>
 <script>
 
-	import Icon from '@/backoffice/Components/Icon';
+	import Icon from '@/backoffice/components/Icon';
 	import f from '@/backoffice/classes/Formatter';
-	import IconPickerPopup from './IconPickerPopup';
-	import IconPreview from '@/backoffice/Components/IconPreview';
+	import IconPickerPopup from '@/backoffice/components/IconPickerPopup';
+	import IconPreview from '@/backoffice/components/IconPreview';
 
 
 	export default {

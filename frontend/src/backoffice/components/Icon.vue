@@ -15,12 +15,13 @@ export default {
   },
   methods: {
 		resolveIcon(symbol) {
-			return iconManager.showIcon(symbol, this.work.Icons);
+			return iconManager.showIcon(symbol, this.work.Icons, this.iconMaxSize);
 		},
 	},
 		props: {
 			symbol: String,
-			work: Object
+			work: Object,
+			iconMaxSize: null
 		}
 };
 </script>

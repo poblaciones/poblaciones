@@ -51,7 +51,8 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 	var delegates = this.createDelegates(metric, feature, z);
 	if (!isSequenceInactiveStep) {
 		// Es un marker normal
-		var content = this.resolveContent(markerSettings, feature.Symbol);
+		var categorySymbol = this.activeSelectedMetric.ResolveValueLabelSymbol(labelId);
+		var content = this.resolveContent(markerSettings, feature.Symbol, categorySymbol);
 		params.icon = this.createFrame(markerSettings, style, scale);
 		params.label = this.createLabel(metric, markerSettings, scale, content);
 		element = new loc.MapsApi.google.maps.Marker(params);
@@ -136,7 +137,7 @@ MarkerFactory.prototype.createImageSubMarker = function (location, symbol, marke
 	var anchor;
 	var size;
 	if (marker.Frame === 'P') {
-		anchor = new this.MapsApi.google.maps.Point(5.75 * scale, 28 * scale);
+		anchor = new this.MapsApi.google.maps.Point(7 * scale, 28 * scale);
 		size = 14;
 	} else if (marker.Frame === 'C') {
 		anchor = new this.MapsApi.google.maps.Point(7.5 * scale, 19.5 * scale);
@@ -225,10 +226,12 @@ MarkerFactory.prototype.createDescriptionSubmarker = function (location, descrip
 	return marker;
 };
 
-MarkerFactory.prototype.resolveContent = function (marker, variableSymbol) {
+MarkerFactory.prototype.resolveContent = function (marker, variableSymbol, categorySymbol) {
 	// Si tiene un contenido...
 	var content;
-	if (marker.Source === 'V') {
+	if (categorySymbol) {
+		return categorySymbol;
+	} else if (marker.Source === 'V') {
 		content = variableSymbol;
 	} else {
 		if (marker.Type == 'I') {

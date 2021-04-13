@@ -71,7 +71,7 @@ App::$app->options("{anything}", function () {
 
 require_once('authenticate.php');
 
-if (Context::Settings()->Map()->LoopLocalPort)
+if (Context::Settings()->Servers()->LoopLocalPort)
 {
 	require_once('dev.php');
 }

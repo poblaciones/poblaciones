@@ -5,7 +5,7 @@
 		</md-dialog-title>
 		<md-dialog-content v-if="item">
 			<invoker ref="invoker"></invoker>
-			<md-tabs md-sync-route="">
+			<md-tabs>
 				<md-tab md-label="General">
 					<div class="md-layout md-gutter">
 						<div class="md-layout-item md-size-70 md-small-size-100">
@@ -80,7 +80,6 @@
 </template>
 
 <script>
-import Context from '@/backoffice/classes/Context';
 import InstitutionWidget from '@/backoffice/views/Metadata/InstitutionWidget';
 
 export default {

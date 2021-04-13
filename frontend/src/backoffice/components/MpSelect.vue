@@ -59,10 +59,6 @@ export default {
 			return ret;
 		},
 		selected() {
-			if (this.isInUpdate) {
-				this.isInUpdate = false;
-				return;
-			}
 			this.updateValue();
 			if (this.value === this.localValue ||
 				(this.value === null && (this.localValue === '' || this.localValue === null))) {
@@ -99,7 +95,6 @@ export default {
 		setLocalSelected(val) {
 			if (val !== this.localSelectValue) {
 				this.localSelectValue = val;
-				this.isInUpdate = true;
 			}
 		},
 		findById(val) {
@@ -148,6 +143,9 @@ export default {
 			return this.$refs.input;
 		}
 	},
+	mounted() {
+		this.$refs.input.$el.validity = {};
+	},
 	created() {
 		if (this.value !== null || this.allowNull) {
 			this.receiveValue();
@@ -156,8 +154,7 @@ export default {
 	data() {
 		return {
 			localValue: '',
-			localSelectValue: '',
-			isInUpdate: false
+			localSelectValue: ''
 		};
 	},
   props: {

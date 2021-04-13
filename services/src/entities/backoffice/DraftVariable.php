@@ -3,7 +3,7 @@
 namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\Exclude;
+use \JMS\Serializer\Annotation\Exclude;
 
 /**
  * DraftVariable

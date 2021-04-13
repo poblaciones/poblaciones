@@ -24,9 +24,13 @@ import Layout from '../views/Layout/Layout.vue';
 export const constantRouterMap = [
 //	{ path: '/login', component: () => import('@/backoffice/views/login/index'), hidden: true },
 { path: '/404', component: () => import('@/backoffice/views/404'), hidden: true },
-
 {
-	path: '/',
+	path: '',
+		hidden: true,
+    redirect: '/works', // default child path
+ },
+{
+	path: '/works',
 		alias: [ '/public' ],
 		name: 'Inicio',
 		hidden: true,
@@ -60,9 +64,14 @@ export const constantRouterMap = [
 			hidden: true,
 			meta: { title: 'Datasets', icon: 'example' },
 			children: [
+				{
+					hidden: true,
+					path: 'datasets/:datasetId',
+					redirect: 'datasets/:datasetId/metrics', // default child path
+			 },
 			{
 				hidden: true,
-				path: 'datasets/:datasetId',
+				path: 'datasets/:datasetId/metrics',
 				alias: ['datasets/:datasetId/data', 'datasets/:datasetId/variables',
 							'datasets/:datasetId/georeference', 'datasets/:datasetId/identity',
 							'datasets/:datasetId/multilevel'],

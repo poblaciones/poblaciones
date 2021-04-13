@@ -17,7 +17,7 @@ Context::Settings()->Servers()->RegisterServers("http://mapa.institucional.org",
 // Context::Settings()->Log()->LogMemoryPeaks = true;
 // Context::Settings()->Log()->MemoryPeakMB = 100;
 
-// Context::Settings()->Map()->LoopLocalPort = 8000;
+// Context::Settings()->Servers()->LoopLocalPort = 8000;
 
 
 // **** Keys de terceros

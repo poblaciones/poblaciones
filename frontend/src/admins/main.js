@@ -22,7 +22,6 @@ Vue.use(VueMaterial);
 Vue.use(VTooltip);
 Vue.use(VueRouter);
 
-Vue.component('router-link', Vue.options.components.RouterLink);
 Vue.component('router-view', Vue.options.components.RouterView);
 
 // Globales propios

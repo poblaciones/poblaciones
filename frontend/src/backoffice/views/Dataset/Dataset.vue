@@ -56,7 +56,7 @@
 											</template>
 
 											<md-tab style='flex: 1 0 100% !important;overflow-x: auto;' id="metrics" md-label="Indicadores"
-														:to="makePath('')" :md-active="isPath(makePath(''))"
+														:to="makePath('metrics')" :md-active="isPath(makePath('metrics'))"
 													:md-template-data="{ badge: (Dataset && Dataset.MetricVersionLevels ? Dataset.MetricVersionLevels.length : ''), help: `
 														<p>
 															Los indicadores vuelven la información visible en el mapa.

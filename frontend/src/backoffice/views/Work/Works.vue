@@ -124,46 +124,51 @@ export default {
 		filter: String,
 		createEnabled: { type: Boolean, default: true },
 	},
-	computed: {
-		showingWelcome() {
-			return window.Context.CartographiesStarted && this.list && this.list.length === 0;
-		},
-		user() {
-			return window.Context.User;
-		},
-		canCreate() {
-			return (this.filter !== 'P' || window.Context.CanCreatePublicData());
-		},
-		entityName() {
-			if (this.filter === 'P') {
-				return { single: 'datos públicos', plural: 'datos públicos', one: '', article: 'los' };
-			} else if (this.filter === 'R') {
-				return { single: 'cartografía', plural: 'cartografías', one: 'una', article: 'la' };
-			} else {
-				throw '(entidad desconocida: ' + this.Filter + ')';
-			}
-		},
-		newLabel() {
-			if (this.filter === 'P') {
-				return 'Nuevos datos públicos';
-			} else if (this.filter === 'R') {
-				return 'Nueva cartografía';
-			} else {
-				return '(entidad desconocida)';
-			}
-		},
-		list() {
-			var ret = [];
+		computed: {
+			showingWelcome() {
+				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
+			},
+			user() {
+				return window.Context.User;
+			},
+			canCreate() {
+				return (this.filter !== 'P' || window.Context.CanCreatePublicData());
+			},
+			entityName() {
+				if (this.filter === 'P') {
+					return { single: 'datos públicos', plural: 'datos públicos', one: '', article: 'los' };
+				} else if (this.filter === 'R') {
+					return { single: 'cartografía', plural: 'cartografías', one: 'una', article: 'la' };
+				} else {
+					throw '(entidad desconocida: ' + this.Filter + ')';
+				}
+			},
+			newLabel() {
+				if (this.filter === 'P') {
+					return 'Nuevos datos públicos';
+				} else if (this.filter === 'R') {
+					return 'Nueva cartografía';
+				} else {
+					return '(entidad desconocida)';
+				}
+			},
+			list: {
+				get() {
+					var ret = [];
 
-			if (window.Context.Cartographies) {
-				for(var i = 0; i < window.Context.Cartographies.length; i++) {
-					if (window.Context.Cartographies[i].Type === this.filter) {
-						ret.push(window.Context.Cartographies[i]);
+					if (window.Context.Cartographies) {
+						for (var i = 0; i < window.Context.Cartographies.length; i++) {
+							if (window.Context.Cartographies[i].Type === this.filter) {
+								ret.push(window.Context.Cartographies[i]);
+							}
+						}
 					}
+					return ret;
+				},
+				set(value) {
+
 				}
 			}
-			return ret;
-		}
 	},
 	methods: {
 		getWorkUri(element, absoluteUrl) {
@@ -174,7 +179,7 @@ export default {
 			return pre + '/cartographies/' + element.Id + '/content';
 		},
 		select(element) {
-			this.$router.push({ path: this.getWorkUri(element, false) });
+			this.$router.push({ path: this.getWorkUri(element, false) }).catch();
 		},
 		publishDisabled(item) {
 			return !(item.MetadataLastOnline === null || item.HasChanges !== 0);

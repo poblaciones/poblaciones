@@ -219,6 +219,10 @@ html, body {
 .mpNoWrap {
 	white-space: nowrap;
 }
+
+.md-dialog-container {
+	max-width: 640px !important;
+}
 .hand {
 	cursor: pointer;
 }

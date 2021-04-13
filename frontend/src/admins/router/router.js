@@ -21,9 +21,12 @@ Vue.use(Router);
 export const constantRouterMap = [
 //	{ path: '/login', component: () => import('@/backoffice/views/login/index'), hidden: true },
 { path: '/404', component: () => import('@/backoffice/views/404'), hidden: true },
-
 {
-	path: '/',
+    path: '',
+    redirect: '/users', // default child path
+ },
+{
+	path: '/users',
 		alias: [ '/public', '/works', '/boundaries', '/regions', '/reviews', '/stats' ],
 		name: 'Inicio',
 		hidden: true,

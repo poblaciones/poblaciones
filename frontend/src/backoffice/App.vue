@@ -243,6 +243,11 @@ html, body {
 .md-field .md-input[disabled], .md-field .md-textarea[disabled] {
 	pointer-events: none;
 }
+
+.md-textarea {
+	height: unset !important;
+	max-height: 40vh !important;
+}
 .mp-label {
 	padding-left: 0 !important;
 	left: 0 !important;
@@ -307,7 +312,9 @@ html, body {
 	bottom: -18px ! important;
 	-webkit-text-fill-color: #888 !important;
 }
-
+.md-dialog-container {
+	max-width: 640px!important;
+}
 .helper {
 	font-size: 11.5px;
 	line-height: 1.4em;

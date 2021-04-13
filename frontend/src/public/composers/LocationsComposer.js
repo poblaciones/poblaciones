@@ -13,7 +13,7 @@ function LocationsComposer(mapsApi, activeSelectedMetric) {
 	this.labelsVisibility = [];
 	this.index = this.activeSelectedMetric.index;
 	this.zIndex = (1000 - this.index) * 100;
-	this.customIcons = this.processCustomIcons(this.activeSelectedMetric.SelectedVersion().Work.Icons);
+	this.customIcons = this.activeSelectedMetric.SelectedVersion().Work.Icons;
 	if (this.activeSelectedMetric.HasSelectedVariable()) {
 		this.variable = this.activeSelectedMetric.SelectedVariable();
 	} else {
@@ -53,7 +53,7 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 			var val = dataElement['ValueId'];
 			var valKey = 'K' + val;
 			if (!(valKey in this.labelsVisibility)) {
-				this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveVisibility(val);
+				this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveValueLabelVisibility(val);
 			}
 			if (this.labelsVisibility[valKey]) {
 				var mapItem = [];
@@ -129,17 +129,6 @@ LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElemen
 	if (this.inTile(tileBounds, location)) {
 		this.ResolveValueLabel(variable, clickId, dataElement, location, tileKey, colorMap[val], markerSettings);
 	}
-};
-
-LocationsComposer.prototype.processCustomIcons = function (icons) {
-	var ret = {};
-	if (!icons) {
-		return ret;
-	}
-	for (var n = 0; n < icons.length; n++) {
-		ret[icons[n].Caption] = icons[n].Image;
-	}
-	return ret;
 };
 
 LocationsComposer.prototype.removeTileFeatures = function (tileKey) {

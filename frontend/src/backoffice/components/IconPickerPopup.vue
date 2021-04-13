@@ -7,21 +7,21 @@
 			</md-dialog-title>
 
 			<md-dialog-content>
-				<md-tabs ref="tabs" @md-changed="setTab">
+				<md-tabs ref="tabs" @md-changed="setTab" :md-active-tab="currentTab">
 					<md-tab md-label="Map Icons" style="padding: 0px" id="mapIcons">
-						<mp-icon-font-panel v-model="symbolMapIcons" collection="flaticons"></mp-icon-font-panel>
+						<mp-icon-font-panel v-model="symbolMapIcons" collection="flaticons" @selectIconDoubleClick="save"></mp-icon-font-panel>
 						<div style="padding-top: 20px" v-if="symbolMapIcons">
 							Tag: {{ symbolMapIcons }} <mp-copy :text="symbolMapIcons" />
 						</div>
 					</md-tab>
 					<md-tab md-label="Fontawesome" style="padding: 0px" id="fontAwesome">
-						<mp-icon-font-panel v-model="symbolFa" collection="fontawesome"></mp-icon-font-panel>
+						<mp-icon-font-panel v-model="symbolFa" collection="fontawesome" @selectIconDoubleClick="save"></mp-icon-font-panel>
 						<div style="padding-top: 20px" v-if="symbolFa">
 							Tag: {{ symbolFa }} <mp-copy :text="symbolFa" />
 						</div>
 					</md-tab>
 					<md-tab md-label="Personalizados" style="padding: 0px" id="custom">
-						<mp-icon-font-panel v-model="symbolCustom" style="height: 190px"
+						<mp-icon-font-panel v-model="symbolCustom" style="height: 190px" @selectIconDoubleClick="save"
 													ref="customIcon" collection="custom" :customList="customList"></mp-icon-font-panel>
 
 						<div class="md-layout">
@@ -39,6 +39,9 @@
 							<div class="tagText">
 								<mp-text v-show="symbolCustom !== null && symbolCustom !== ''"
 												 v-model="symbolCustomPartial" @update="updateIcon" :maxlength="35" />
+							</div>
+							<div class='md-layout-item md-size-100 helper'>
+								Formato recomendado: PNG 64x64. Puede obtener más íconos gratuitamente de <a href='https://www.flaticon.es/' target='_blank'>https://www.flaticon.es/</a>
 							</div>
 						</div>
 					</md-tab>
@@ -81,21 +84,32 @@ export default {
 			symbolCustom: '',
 			symbolCustomPartial: '',
 			newImage: null,
-			activeTab: 'mapIcons'
+			currentTab: 'mapIcons',
 		};
 	},
 	methods: {
 		show(symbol) {
-			this.activeTab = 'mapIcons';
+			if (symbol) {
+				if (symbol.startsWith('usu-')) {
+					this.currentTab = 'custom';
+					this.symbolCustom = symbol;
+				} else if (symbol.startsWith('fa-')) {
+					this.currentTab = 'fontAwesome';
+					this.symbolFa = symbol;
+				} else if (symbol.startsWith('mp-')) {
+					this.currentTab = 'mapIcons';
+					this.symbolMapIcons = symbol;
+				};
+			}
 			this.openPopup = true;
 		},
 		save() {
 			var value;
-			if (this.activeTab == 'mapIcons') {
+			if (this.currentTab == 'mapIcons') {
 				value = this.symbolMapIcons;
-			} else if (this.activeTab == 'fontAwesome') {
+			} else if (this.currentTab == 'fontAwesome') {
 				value = this.symbolFa;
-			} else if (this.activeTab == 'custom') {
+			} else if (this.currentTab == 'custom') {
 				value = this.symbolCustom;
 			}
 			if (!value) {
@@ -110,7 +124,9 @@ export default {
 			this.openPopup = false;
 		},
 		setTab(id) {
-			this.activeTab = id;
+			if (this.currentTab != id) {
+				this.currentTab = id;
+			}
 		},
 		sanitize(file) {
 			file = file.toLowerCase();

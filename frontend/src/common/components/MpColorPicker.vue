@@ -1,29 +1,33 @@
 <template>
 	<div :style="'display: inline-block; width: 28px; position: relative; ' + (topPadding ? 'padding-top: 5px' : '')">
-
 		<v-popover popoverClass="tooltipInPopup tooltipNoBorder colorTooltip"
 							 popoverArrowClass="noArrow" :open="showPicker"
 							 :disabled="!canEdit" @hide="popOverClosed" @show="popOverOpened" popoverInnerClass="tooltipNoBorder">
 
 			<div :style="'background-color: ' + localValue" :class="'picked' + (canEdit ? ' hand': '')"
-			v-on:click="show">
+					 v-on:click="show">
 				<div v-show="isDisabledObject && !isDisabledObject.Visible">
 					<div class="line2"></div>
 				</div>
+				<slot></slot>
 			</div>
 			<div slot="popover">
 				<chrome-picker :disableAlpha="true" v-show="showPickerAdvanced" v-model="localValue" @input="updateValue"
-										class="" />
+											 class="" />
 				<compact-picker v-show="!showPickerAdvanced" v-model="localValue" @input="updateValue"
-										 :palette="palette"
-										class="floatCompact" />
-				<div class="extraColor" @click="showPickerAdvanced = !showPickerAdvanced">
+												:palette="palette"
+												class="floatCompact" />
+				<div class="extraColor extraBottomLine" @click="showPickerAdvanced = !showPickerAdvanced">
 					<span v-if="showPickerAdvanced">▲</span>
 					<span v-else>▼</span>
-					<!--md-icon v-if="showPickerAdvanced">arrow_drop_up</!--md-icon>
-	<md-icon v-else>arrow_drop_down</md-icon-->
 				</div>
-				<div v-if="isDisabledObject" class="disabledFeature" v-show="!showPickerAdvanced">
+				<div v-if="canSelectIcon && !showPickerAdvanced && canEdit" class="extraBottomLine" style="left: 3.2rem;">
+					<md-button title="Seleccionar ícono" @click="iconPickerClicked" class="md-raised tinyButton" style="margin-left: 10px;">
+						<i class="far fa-grin"></i>
+					</md-button>
+				</div>
+
+				<div v-if="isDisabledObject" class="smallSwitchPanel" v-show="!showPickerAdvanced">
 					<md-switch class="md-primary smallSwitch" :disabled="!canEdit" @change="disabledChanged" v-model="isDisabled">
 						Oculto al inicio
 					</md-switch>
@@ -56,6 +60,10 @@ export default {
 				this.hide();
 			}
 		},
+		iconPickerClicked() {
+			this.showPicker = false;
+			this.$emit('pickIconClicked');
+		},
 		disabledChanged() {
 			if (this.isDisabledObject) {
 				this.isDisabledObject.Visible = !this.isDisabled;
@@ -81,6 +89,7 @@ export default {
 		},
 		show()
 		{
+			this.showPickerAdvanced = false;
 			if (this.canEdit) {
 				this.isDisabled = (this.isDisabledObject ? !this.isDisabledObject.Visible : false);
 				this.previousValue = this.value;
@@ -148,6 +157,7 @@ export default {
 	},
 	props: {
 		isDisabledObject: null,
+		canSelectIcon: { type: Boolean, default: false },
 		canEdit: { type: Boolean, default: true },
 		topPadding: { type: Boolean, default: true },
 		ommitHexaSign: { type: Boolean, default: false },
@@ -167,15 +177,24 @@ export default {
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped="">
 .picked {
+	position: relative;
 	width: 30px;
 	height: 23px;
 	border-radius: 15px;
 	border: 2px solid #828282;
 }
+.tinyButton {
+	height: 1.1rem;
+	padding-top: 0px;
+	min-width: unset;
+	margin-top: 1px;
+	margin-bottom: 2px;
+	width: 2rem;
+	font-size: .8rem !important ;
+	box-shadow: 0 2px 1px -2px rgba(0, 0, 0, .20), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 0px 2px 0 rgba(0, 0, 0, .41)!important;
+}
 .floatCompact {
-	/* position: absolute;
-	z-index: 10; */
-	width: 246px;
+	width: 230px;
 }
 .noArrow {
 	display: none;
@@ -195,43 +214,46 @@ export default {
              rgba(0,0,0,0) calc(50% + 0.8px),
              rgba(0,0,0,0) 100%);
 }
-.disabledFeature {
-    height: 15px;
-    position: absolute;
-    bottom: 7px;
-		width: 190px;
-    line-height: 1em;
-    right: 0px;
-    color: #7d7d7d;
-    cursor: pointer;
-    background-color: white;
-}
-.smallSwitch {
-	margin: 0px !important;
-	font-size: 20px;
-	-moz-transform: scale(0.65);
-	transform: scale(0.65);
-	transform-origin: right;
-}
+	.smallSwitchPanel {
+		height: 15px;
+		position: absolute;
+		bottom: 7px;
+		text-align: right;
+		line-height: 1em;
+		right: 7px;
+		color: #7d7d7d;
+		background-color: white;
+	}
+	.smallSwitch {
+		margin-top: -2px;
+		margin-right: 0px;
+		margin-left: -65px;
+		font-size: 20px;
+		-moz-transform: scale(0.65);
+		transform: scale(0.65);
+		transform-origin: right;
+	}
 
-.line2 {
-    width: 28px;
-    height: 35px;
-    border-bottom: 2px solid #707170;
-    -webkit-transform: translateY(20px) translateX(5px) rotate(-26deg);
-    position: absolute;
-    top: -41px;
-    left: -11px;
-}
-.extraColor {
-  height: 15px;
-  width: 15px;
+	.line2 {
+		width: 28px;
+		height: 35px;
+		border-bottom: 2px solid #707170;
+		-webkit-transform: translateY(20px) translateX(5px) rotate(-26deg);
+		position: absolute;
+		top: -42px;
+		left: -13px;
+	}
+.extraBottomLine {
   position: absolute;
   bottom: 4px;
+	font-size: 1rem;
   line-height: 1em;
-  left: 4px;
   color: #666;
-  cursor: pointer;
   background-color: white;
 }
+	.extraColor {
+		left: 4px;
+		padding: 2px;
+		cursor: pointer;
+	}
 </style>

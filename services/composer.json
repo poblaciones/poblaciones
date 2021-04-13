@@ -42,7 +42,7 @@
 		"symfony/serializer": "^3.4",
 		"symfony/property-info": "^3.4",
 		"jms/metadata": "^1.6",
-		"indigophp/doctrine-annotation-autoload": "^0.1.0",
+		"yogarine/doctrine-annotation-autoload": "^0.3.0",
 		"lusitanian/oauth": "^0.8.11",
 		"gasparesganga/php-shapefile": "^3.1",
 		"mpdf/mpdf": "^8.0.7",

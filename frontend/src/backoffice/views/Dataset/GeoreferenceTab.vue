@@ -29,7 +29,7 @@
 			</div>
 		</div>
 		<div v-if="Work.CanEdit() && (!Dataset.properties.Geocoded || forceShow)" >
-			<md-tabs md-sync-route="">
+			<md-tabs>
 				<md-tab id="tab-location" md-label="Ubicaciones" @click="tab='location'">
 					<div class="dParagrah">
 						Seleccione las variables que permiten identificar la localización (latitud y longitud) de cada elemento del dataset.

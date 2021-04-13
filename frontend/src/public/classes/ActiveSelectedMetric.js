@@ -435,7 +435,7 @@ ActiveSelectedMetric.prototype.isClickeable = function () {
 	return window.SegMap.frame.Zoom >= parseInt(minZoom);
 };
 
-ActiveSelectedMetric.prototype.ResolveVisibility = function (labelId) {
+ActiveSelectedMetric.prototype.ResolveValueLabelVisibility = function (labelId) {
 	var variable = this.SelectedVariable();
 	for (let i = 0; i < variable.ValueLabels.length; i++) {
 		var value = variable.ValueLabels[i];
@@ -444,6 +444,18 @@ ActiveSelectedMetric.prototype.ResolveVisibility = function (labelId) {
 		}
 	}
 	err.errMessage('ResolveVisibility', 'Label did not match on metricVersion ' + this.SelectedVersion().Version.Id + ' of ' + this.properties.Metric.Name + '. Update views and/or fileCache clear may be required.');
+	return false;
+};
+
+ActiveSelectedMetric.prototype.ResolveValueLabelSymbol = function (labelId) {
+	var variable = this.SelectedVariable();
+	for (let i = 0; i < variable.ValueLabels.length; i++) {
+		var value = variable.ValueLabels[i];
+		if (value['Id'] === labelId) {
+			return value.Symbol;
+		}
+	}
+	err.errMessage('ResolveSymbol', 'Label did not match on metricVersion ' + this.SelectedVersion().Version.Id + ' of ' + this.properties.Metric.Name + '. Update views and/or fileCache clear may be required.');
 	return false;
 };
 

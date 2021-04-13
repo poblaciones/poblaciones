@@ -74,7 +74,7 @@ class DatasetMarker
 		/**
      * @var string
      *
-     * @ORM\Column(name="dmk_symbol", type="string", length=4096, precision=0, scale=0, nullable=true, unique=false)
+     * @ORM\Column(name="dmk_symbol", type="string", length=100, precision=0, scale=0, nullable=true, unique=false)
      */
     private $Symbol;
 		    /**

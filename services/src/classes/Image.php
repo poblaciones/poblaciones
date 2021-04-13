@@ -107,32 +107,17 @@ class Image
 	{
 		$imgType = self::GetImageType($filename);
 		$size = self::GetImageSize($filename);
-		/*
-		if ($imgType == IMAGETYPE_JPEG || $imgType == IMAGETYPE_PNG)
-		{
-			$filenameTarget = $filename;
-			if ($imgType == IMAGETYPE_JPEG)
-				 $filenameTarget .= '.jpg';
-			else
-				 $filenameTarget .= '.png';
-
-			$args = array($filename, $filenameTarget, $newwidth, $newheight);
-			Python::Execute('imgresize.py', $args);
-			if (file_exists($filenameTarget))
-			{
-				IO::Delete($filename);
-				IO::Move($filenameTarget, $filename);
-				return;
-			}
-		}*/
-
 		$width = $size['width'];
 		$height = $size['height'];
 		$src = self::LoadImage($filename);
     $dst = imagecreatetruecolor($newwidth, $newheight);
-				$size = self::GetImageSize($filename);
+		$size = self::GetImageSize($filename);
 
-    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+		imagesavealpha($dst, true);
+		$trans_background = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+    imagefill($dst, 0, 0, $trans_background);
+
+		imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 		imagedestroy($src);
 		self::SaveImage($filename, $dst, $imgType);
 		imagedestroy($dst);

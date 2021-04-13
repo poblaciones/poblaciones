@@ -3,7 +3,7 @@
 namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\Exclude;
+use \JMS\Serializer\Annotation\Exclude;
 
 /**
  * DraftVariableValueLabel
@@ -28,6 +28,13 @@ class DraftVariableValueLabel
 		 * @ORM\Column(name="vvl_caption", type="string", length=50, precision=0, scale=0, nullable=false, unique=false)
 		 */
 		private $Caption;
+
+		/**
+		 * @var string
+		 *
+	 * @ORM\Column(name="vvl_symbol", type="string", length=100, precision=0, scale=0, nullable=true, unique=false)
+		 */
+    private $Symbol;
 
 		/**
 		 * @var boolean
@@ -123,6 +130,31 @@ class DraftVariableValueLabel
 		public function getCaption()
 		{
 				return $this->Caption;
+		}
+
+
+		/**
+		 * Set symbol
+		 *
+		 * @param string $symbol
+		 *
+		 * @return DraftVariableValueLabel
+		 */
+		public function setSymbol($symbol)
+		{
+			$this->Symbol = $symbol;
+
+			return $this;
+		}
+
+		/**
+		 * Get symbol
+		 *
+		 * @return string
+		 */
+		public function getSymbol()
+		{
+			return $this->Symbol;
 		}
 
 		/**

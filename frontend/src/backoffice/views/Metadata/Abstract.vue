@@ -13,7 +13,7 @@
 					<md-card>
 						<md-card-content>
 							<mp-text :canEdit="Work.CanEdit()" label="Descripción ampliada de la cartografía" :maxlength="20000" :multiline="true"
-												 :rows="20"
+												 :rows="30"
 										helper="Incluya aquí precisiones sobre el contenido o elaboración de la información, tal como detalles sobre las fuentes de información, codificaciones realizadas a los datos, limitaciones existentes o definiciones de los tipos de dato involucrados. Longitud: ilimitada." @update="Update"
 										v-model="metadata.AbstractLong" />
 						</md-card-content>

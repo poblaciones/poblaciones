@@ -15,7 +15,7 @@
 							<mp-help :text="tab.data.help" />
 						</template>
 
-						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/" :md-active="isPath('/')" md-label="Usuarios">
+						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/users" :md-active="isPath('/users') || isPath('/')" md-label="Usuarios">
 							<users></users>
 						</md-tab>
 						<md-tab class="transparentTab" to="/works" id="works-tab" md-label="Cartografías" :md-active="isPath('/works')">
@@ -98,19 +98,6 @@ export default {
 	},
 	methods: {
 		isPath(path) {
-			if (this.$route.path === '/public' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'public-tab';
-			} else if (this.$route.path === '/boundaries' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'boundaries-tab';
-			} else if (this.$route.path === '/regions' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'clipping-regions-tab';
-			} else if (this.$route.path === '/reviews' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'reviews-tab';
-			} else if (this.$route.path === '/stats' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'stats-tab';
-			} else if (this.$route.path === '/works' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'works-tab';
-			}
 			return this.$route.path === path;
 		},
 		pendingUpdated(pending) {

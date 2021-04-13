@@ -12,6 +12,7 @@ class ValueLabelInfo extends BaseMapModel
 	public $Value;
 	public $LineColor;
 	public $FillColor;
+	public $Symbol;
 	public $Visible;
 
 
@@ -23,6 +24,7 @@ class ValueLabelInfo extends BaseMapModel
 			'vvl_value' => 'Value',
 			'vvl_line_color' => 'LineColor',
 			'vvl_fill_color' => 'FillColor',
+			'vvl_symbol' => 'Symbol',
 			'vvl_visible' => 'Visible');
 	}
 	public function FixVisible()

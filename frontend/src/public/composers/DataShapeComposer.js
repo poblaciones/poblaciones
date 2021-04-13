@@ -76,7 +76,7 @@ DataShapeComposer.prototype.processFeature = function (tileUniqueId, dataElement
 	var val = dataElement['ValueId'];
 	var valKey = 'K' + val;
 	if (!(valKey in this.labelsVisibility)) {
-		this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveVisibility(val);
+		this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveValueLabelVisibility(val);
 	}
 	if (this.labelsVisibility[valKey] === false) {
 		return;

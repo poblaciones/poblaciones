@@ -42,6 +42,13 @@ class VariableValueLabel
      */
     private $Value;
 
+		/**
+		 * @var string
+		 *
+		 * @ORM\Column(name="vvl_symbol", type="string", length=100, precision=0, scale=0, nullable=true, unique=false)
+		 */
+    private $Symbol;
+
     /**
      * @var string
      *
@@ -121,6 +128,31 @@ class VariableValueLabel
     {
         return $this->Caption;
     }
+
+
+		/**
+		 * Set symbol
+		 *
+		 * @param string $symbol
+		 *
+		 * @return VariableValueLabel
+		 */
+		public function setSymbol($symbol)
+		{
+			$this->Symbol = $symbol;
+
+			return $this;
+		}
+
+		/**
+		 * Get symbol
+		 *
+		 * @return string
+		 */
+		public function getSymbol()
+		{
+			return $this->Symbol;
+		}
 
     /**
      * Set visible

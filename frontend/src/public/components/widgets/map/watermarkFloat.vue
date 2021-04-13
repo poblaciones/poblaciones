@@ -53,9 +53,8 @@ export default {
 	bottom: 21px;
 	right: 48px;
 	position: absolute;
-	background-color: rgba(255, 255, 255, 0.80);
+	background-color: transparent;
 	border-radius: 6px;
-	padding: 4px;
 	display: flex;
 	height: 100%;
 	width: auto;
@@ -72,6 +71,8 @@ export default {
   max-width: 100%;
   max-height: 100%;
   margin: auto;
+	background-color: rgba(255, 255, 255, 0.75);
+  border: 4px solid rgba(255, 255, 255, 0);
 }
 </style>
 

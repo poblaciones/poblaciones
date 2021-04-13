@@ -14,7 +14,7 @@
 							<mp-help :text="tab.data.help" />
 						</template>
 
-						<md-tab class="transparentTab" to="/" md-label="Cartografías" :md-active="isPath('/')"
+						<md-tab class="transparentTab" to="/works" md-label="Cartografías" :md-active="isPath('/works')"
 										:md-template-data="{ help: `<p>
 											Para publicar información en la plataforma es necesario organizarla en cartografías.
 										</p><p>
@@ -78,9 +78,6 @@ export default {
 	},
 	methods: {
 		isPath(path) {
-			if (this.$route.path === '/public' && this.$refs.tabs) {
-				this.$refs.tabs.activeTab = 'public-tab';
-			}
 			return this.$route.path === path;
 		},
 	}

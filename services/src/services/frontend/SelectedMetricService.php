@@ -162,6 +162,7 @@ class SelectedMetricService extends BaseService
 			{
 				$fileModel = new FileModel();
 				$icons = $fileModel->ReadWorkIcons($version->Work->Id);
+				$icons = Arr::ToKeyByNamedValue($icons, "Caption", "Image");
 				$version->Work->Icons = $icons;
 				$selectedMetric->Versions[] = $version;
 			}
@@ -181,9 +182,6 @@ class SelectedMetricService extends BaseService
 		foreach($levels as $levelRow)
 		{
 			$level = $this->CreateLevel($levelRow);
-
-			// TODO: traer el caption $version->SummaryCaption = ;
-			// $level->SummaryCaption = $levelRow[''];
 
 			$level->HasDescriptions = ($levelRow['dat_caption_column_id'] != null);
 			if ($level->Dataset->Type == 'L')

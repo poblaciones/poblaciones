@@ -95,6 +95,8 @@ rm -f $output/web/.htaccess
 rm -f $output/web/IIRF.ini
 rm -f $output/web/web.config
 
+rm -rf $output/web/gpsurbana
+
 rmcache=echo
 echo "*** 3. Compila frontend RELEASE"
 npm run upload --prefix ../frontend/>$output-3_build.log

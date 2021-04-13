@@ -1,9 +1,14 @@
 [CURRENT]
+2021-04-13
 - Segmentación de delimitaciones por selección.
 - Fix: click en delimitaciones en buscador no las incorporaba.
 - Fix: recuperar contraseña.
 - Cambio de color y ancho de borde para delimitaciones.
 - Fix: gradientes tomaba mal el nivel de transparencia del indicador.
+- Actualización de material-vue.
+- Ampliación de cuadro de carga de resumen.
+- Fix: los íconos personalizados no tomaban la transparencia en las imágenes.
+- Se admiten íconos por categoría en mapas de localizaciones.
 
 v2.34 (2021-03-21)
 - Se agregan 'delimitaciones' que reunionen una o varias regiones de clipping. Tiene fuente (metadatos), descarga e inserción desde buscador y botón de 'agregar'.

@@ -28,8 +28,10 @@
 					<template v-if="displayLabel(label)">
 						<template v-if="label.Visible" class="labelRow">
 							<td class="dataBox">
-								<!-- 2575fb -->
-								<i :style="'border-color: ' + label.FillColor + '; color: ' + label.FillColor" class="fa drop fa-tint exp-category-bullets"></i>
+								<div v-if="label.Symbol" class="categoryIcon" :style="'border-color: ' + label.FillColor + '; background-color: ' + label.FillColor">
+									<span v-html="resolveIcon(label.Symbol)"></span>
+								</div>
+								<i v-else :style="'border-color: ' + label.FillColor + '; color: ' + label.FillColor" class="fa drop fa-tint exp-category-bullets"></i>
 							</td>
 							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
@@ -40,7 +42,10 @@
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted">
-								<i class="fa drop fa-tint exp-category-bullets" style="border-color: inherit"></i>
+								<div v-if="label.Symbol" class="categoryIcon categoryMuted">
+									<span v-html="resolveIcon(label.Symbol)"></span>
+								</div>
+								<i v-else class="fa drop fa-tint exp-category-bullets" style="border-color: inherit"></i>
 							</td>
 							<td class="dataBox text-muted" style="width: 100%">
 								{{ applySymbols(label.Name) }}
@@ -72,6 +77,7 @@ import Helper from '@/public/js/helper';
 import PinIcon from '@/public/assets/pin-outline.svg';
 import UnpinIcon from '@/public/assets/pin-off-outline.svg';
 import str from '@/common/js/str';
+import iconManager from '@/common/js/iconManager';
 
 export default {
 	name: 'metricValues',
@@ -202,6 +208,10 @@ export default {
 				this.level.Pinned = true;
 			}
 			window.SegMap.SaveRoute.UpdateRoute();
+		},
+		resolveIcon(symbol) {
+			var customIcons = this.metric.SelectedVersion().Work.Icons;
+			return iconManager.showIcon(symbol, customIcons, '1.3em;vertical-align: unset;padding-top: 3px', null, '1.2r');
 		},
 		toggleShowDescriptions() {
 			this.variable.ShowDescriptions = (this.level.ShowDescriptions === 1 ? 0 : 1);
@@ -429,6 +439,27 @@ export default {
 	text-transform: uppercase;
 }
 
+.categoryMuted {
+	color: #000!important;
+	background-color: #DDDDDD;
+	border-color: #DDDDDD !important;
+	filter: grayscale(1) brightness(.1) invert(1) opacity(1);
+}
+
+.categoryIcon {
+	text-align: center;
+	border: 0px solid;
+	border-radius: 1rem;
+	text-align: center;
+	overflow: hidden;
+	margin-left: 5px;
+  margin-right: 5px;
+	object-fit: scale-down;
+	justify-content: center;
+	width: 2.15rem;
+	height: 2.1rem;
+	color: #fff;
+}
 .dataBox {
 	padding-left: 2px!important;
 	padding-right: 2px!important;

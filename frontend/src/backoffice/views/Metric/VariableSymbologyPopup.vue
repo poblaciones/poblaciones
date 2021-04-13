@@ -4,6 +4,7 @@
 		<md-dialog-title>{{ title }}</md-dialog-title>
 		<md-dialog-content>
 		<invoker ref="invoker"></invoker>
+		<icon-picker-popup ref="iconPickerDialog" @iconSelected="iconSelected"></icon-picker-popup>
 
 		<value-popup ref="valuePopup">
 		</value-popup>
@@ -40,10 +41,21 @@
 								</div>
 								<div v-if="CutMode === 'S'">
 									<div class="helper">Color</div>
-										<mp-color-picker :canEdit="canEdit" :ommitHexaSign="true"
-													v-model="singleColor" style="padding-bottom: 12px;" />
+									<mp-color-picker :canEdit="canEdit" :ommitHexaSign="true" :canSelectIcon="Dataset.properties.Type == 'L'"
+																	 @pickIconClicked="pickIconClicked(singleItem)"
+																	 v-model="singleColor" style="padding-bottom: 12px;">
+										<div class="iconStyle">
+											<Icon v-if="singleItem.Symbol" iconMaxSize="1.2em" :symbol="singleItem.Symbol" :work="Work"  />
+										</div>
+										<div class="tinyCloseButton">
+											<md-button title="Quitar ícono" v-if="singleItem.Symbol && canEdit"
+																 class="md-icon-button"
+																 v-on:click.stop="removeIcon(singleItem)">
+												<md-icon>close</md-icon>
+											</md-button>
+										</div>
+									</mp-color-picker>
 								</div>
-
 								<div v-if="CutMode === 'J' || CutMode === 'M'
 									 || CutMode === 'T'">
 								<div class="md-layout md-gutter">
@@ -78,7 +90,6 @@
 									</div>
 								</div>
 							</div>
-
 						</div>
 					</div>
 					</md-card-content>
@@ -89,16 +100,31 @@
 					<md-card-content class="fixeHeightCard">
 					<div class="md-layout">
 						<div class="md-layout-item md-size-100" >
-							<div class="separator">{{ CategoriesLabel }}</div>
+							<div class="separator">{{ CategoriesLabel
+										}}
+									</div>
 							<md-list style="overflow-y: auto;" :style="(this.CutMode === 'V' ? 'height: 156px;':'height: 185px;')">
 								<md-list-item v-for="item in Variable.Values" :key="item.Id"
 															:value="item.Id" class="itemSmall">
-									<mp-color-picker :canEdit="canEdit" :isDisabledObject="item"
-													:ommitHexaSign="true" top-padding="false" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
-																	 style="width: 45px;" />
+
+									<mp-color-picker :canEdit="canEdit" :canSelectIcon="Dataset.properties.Type == 'L'" :isDisabledObject="item"
+																	 :ommitHexaSign="true" :top-padding="false" @pickIconClicked="pickIconClicked(item);" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
+																	 style="width: 45px;">
+										<div class="iconStyle iconStyleInList">
+											<Icon v-if="item.Symbol" :symbol="item.Symbol" iconMaxSize="1.2em" :work="Work" />
+										</div>
+										<div class="tinyCloseButton">
+											<md-button title="Quitar ícono" v-if="item.Symbol && canEdit"
+																	class="md-icon-button"
+																	v-on:click.stop="removeIcon(item)">
+												<md-icon>close</md-icon>
+											</md-button>
+										</div>
+									</mp-color-picker>
+
 									<span class="md-list-item-text">{{ item.Caption }}</span>
 									<md-button v-if="canEdit && (CutMode === 'M' || item.Value === null)" class="md-icon-button md-list-action"
-											@click="editValue(item)">
+														 @click="editValue(item)">
 										<md-icon>edit</md-icon>
 									</md-button>
 								</md-list-item>
@@ -229,7 +255,9 @@
 
 import axios from 'axios';
 import f from '@/backoffice/classes/Formatter';
+import IconPickerPopup from '@/backoffice/components/IconPickerPopup';
 import ValuePopup from './ValuePopup.vue';
+import Icon from '@/backoffice/components/Icon';
 
 const DEFAULT_SINGLE_COLOR = '0ce800';
 
@@ -246,6 +274,13 @@ export default {
 			var t = this.Variable.Symbology.ColorFrom;
 			this.Variable.Symbology.ColorFrom = this.Variable.Symbology.ColorTo;
 			this.Variable.Symbology.ColorTo = t;
+		},
+		pickIconClicked(item) {
+			this.lastPickerClicked = item;
+			this.$refs.iconPickerDialog.show(item.Symbol);
+		},
+		iconSelected(selectedIcon) {
+			this.lastPickerClicked.Symbol = selectedIcon;
 		},
 		copySymbology() {
 			// Prepara la info
@@ -301,6 +336,9 @@ export default {
 				this.$refs.valuePopup.show(this.Variable, this.customColors, item, previous, isLast);
 			}
 		},
+		removeIcon(item) {
+			item.Symbol = null;
+		},
 		updateNullValueLabel() {
 			this.Variable.Values[0].Caption = this.nullValueLabel;
 		},
@@ -326,6 +364,7 @@ export default {
 			// Se pone visible
 			this.Level = level;
 			this.singleColor = DEFAULT_SINGLE_COLOR;
+			this.singleItem = { Symbol: null };
 			this.receiveVariable(variable);
 			this.checkDefaults();
 			this.showDialog = true;
@@ -455,7 +494,7 @@ export default {
 			return this.Dataset.ScaleGenerator.paletteNumberToKey(n);
 		},
 		renderPalette(item, skipPalettePos) {
-			var palette = colorbrewer[item];
+			var palette = colorbrewer.default[item];
 			var html = "<div style='display: flex;' class='paletteItem" + (skipPalettePos ? "" : " palettePos") + "'>";
 			var keys = Object.keys(palette);
 			var last = keys[keys.length - 1];
@@ -534,7 +573,9 @@ export default {
 		}
 	},
 	components: {
-		ValuePopup
+		ValuePopup,
+		Icon,
+		IconPickerPopup
 	},
 	data() {
 		return {
@@ -542,11 +583,13 @@ export default {
 			Variable: null,
 			showDialog: false,
 			activateNullValueLabel: false,
+			lastPickerClicked: null,
 			nullValueLabel: '',
 			isOpen: false,
 			originalVariable: null,
 			customColors: [],
-			singleColor: '0ce800'
+			singleColor: '0ce800',
+			singleItem: { Symbol: null }
 		};
 	},
 	watch: {
@@ -625,12 +668,29 @@ export default {
 .itemSmall {
 height: 42px;
 }
-
+	.iconStyleInList {
+		padding-top: 3px;
+		margin-top: -0.05rem;
+	}
+	.iconStyle {
+		text-align: center;
+		font-size: .8em;
+		margin-left: 0.0rem;
+		margin-top: -0.1rem;
+		color: #505050;
+		text-shadow: 0.5px 0.5px 0.5px #e8e8e8, -0.5px -0.5px 0.5px #e8e8e8;
+	}
 .fixeHeightCard {
 	height: 250px;
 }
 .max30 {
 	height: 35px;
+}
+.tinyCloseButton {
+	position: absolute;
+	transform: scale(0.6);
+	left: .43rem;
+	top: -1.5rem;
 }
 .paletteDropdown md-select-menu md-menu-content-bottom-start md-menu-content-small md-menu-content {
 		width: 100px!important;

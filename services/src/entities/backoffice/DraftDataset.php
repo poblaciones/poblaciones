@@ -3,9 +3,9 @@
 namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\MaxDepth;
-use JMS\Serializer\Annotation\ExclusionPolicy;
-use JMS\Serializer\Annotation\Exclude;
+use \JMS\Serializer\Annotation\MaxDepth;
+use \JMS\Serializer\Annotation\ExclusionPolicy;
+use \JMS\Serializer\Annotation\Exclude;
 use helena\db\backoffice\annotations\ClientReadonly;
 
 /**

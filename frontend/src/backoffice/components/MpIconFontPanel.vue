@@ -4,6 +4,7 @@
 			<a
 				href="#"
 				@click.stop.prevent="iconClicked(key, value)"
+				@dblclick.stop.prevent="iconDoubleClicked(key)"
 				:class="'item' + getIsSelectedClass(key, value) + (collection !== 'flaticons' ? ' faItem' : '')"
 				v-for="(value, key) in currentIcons"
 				:key="key">
@@ -78,6 +79,9 @@ export default {
 		receiveValue() {
 			this.selected = this.value;
 		},
+		iconDoubleClicked(key) {
+			this.$emit('selectIconDoubleClick', key);
+		},
 		iconClicked(key, value) {
 			if (this.collection === 'custom') {
 				key = (value ? value.Caption : value);
@@ -86,7 +90,7 @@ export default {
 			this.selected = key;
 			this.selectIcon(key);
 		},
-		selectIcon (value) {
+		selectIcon(value) {
 			this.$emit('input', value);
 			this.$emit('selectIcon', value);
 		},

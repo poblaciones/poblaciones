@@ -1,9 +1,9 @@
 <template>
 	<div>
 		<img style="display: none" ref="imageItem" src="../assets/finished.gif" >
-		<md-dialog :md-active.sync="showDialog" :md-click-outside-to-close="completed" @md-closed="OnClosed">
+		<md-dialog  :md-active.sync="showDialog" :md-click-outside-to-close="completed" @md-closed="OnClosed">
 			<md-dialog-title v-if="realTitle !== '' && realTitle !== null">{{ realTitle }}</md-dialog-title>
-			<md-dialog-content>
+			<md-dialog-content style="height: 14.25rem;">
 				<div class="md-layout">
 					<div class="md-layout-item md-small-hide">
 						<div style="width: 450px; height: 1px"></div>
@@ -208,7 +208,7 @@ export default {
 </script>
 
 <style lang="scss" scoped="">
-	.md-dialog {
-	height: 300px;
+	.md-dialog-container {
+
 	}
 </style>
