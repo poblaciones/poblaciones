@@ -1,6 +1,8 @@
 <template>
 	<div>
-		<div>Indique qué valores desea guardar en el dataset durante el cálculo del indicador:</div>
+		<div>
+			Indique qué valores desea guardar como resultado de la búsqueda.
+		</div>
 
 		<div>Guardar:</div>
 

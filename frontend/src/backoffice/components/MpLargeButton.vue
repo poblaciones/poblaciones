@@ -32,6 +32,7 @@ export default {
 	.largeButton {
 		width: 150px;
 		height: 150px;
+		white-space: normal;
 	}
 	.largeIco {
 		font-size: 50px;

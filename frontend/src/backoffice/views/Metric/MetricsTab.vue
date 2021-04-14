@@ -16,9 +16,6 @@
 		<new-metric ref="newMetric">
 		</new-metric>
 
-		<calculated-metric-wizard ref="calculatedMetricWizard">
-		</calculated-metric-wizard>
-
 		<pick-metric-version ref="pickMetricVersion" :list="unUsedWorkVersionsList" @onSelectMetricVersion="onCompleteLevel">
 		</pick-metric-version>
 
@@ -26,10 +23,6 @@
 			<md-button @click="createNewMetric">
 				<md-icon>add_circle_outline</md-icon>
 				Agregar indicador
-			</md-button>
-			<md-button v-if="calculateEnabled" @click="calculateNewMetric">
-				<md-icon>add_circle_outline</md-icon>
-				Calcular indicador
 			</md-button>
 			<md-button @click="createNewLevel()" v-if="Dataset !== null && Dataset.properties.MultilevelMatrix !== null" :disabled="unUsedWorkVersionsList.length === 0">
 				<md-icon>add_circle_outline</md-icon>
@@ -133,7 +126,6 @@ import VariableFormulaPopup from './VariableFormulaPopup.vue';
 import VariableSymbologyPopup from './VariableSymbologyPopup.vue';
 import VariableOptionsPopup from './VariableOptionsPopup.vue';
 import NewMetric from './NewMetric.vue';
-import CalculatedMetricWizard from './CalculatedMetricWizard/CalculatedWizard.vue';
 import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
 import LevelPopup from "@/backoffice/views/Dataset/LevelPopup";
@@ -164,9 +156,6 @@ export default {
 		f() {
 			return f;
 		},
-		calculateEnabled() {
-			return window.Context.Configuration.UseCalculated;
-		},
 		canLevel() {
 			if (!this.Dataset) {
 				return false;
@@ -177,13 +166,6 @@ export default {
 	methods: {
 		createNewMetric() {
 			this.$refs.newMetric.show();
-		},
-		calculateNewMetric() {
-			if (!this.Dataset.properties.Geocoded) {
-				alert('Para definir un indicador calculado es necesario antes georreferenciar el dataset.');
-				return;
-			}
-			this.$refs.calculatedMetricWizard.show();
 		},
 		createNewLevel() {
 			this.$refs.pickMetricVersion.show();
@@ -336,7 +318,6 @@ export default {
 		VariableOptionsPopup,
 		LevelPopup,
 		NewMetric,
-		CalculatedMetricWizard,
 		PickMetricVersion,
 	}
 };

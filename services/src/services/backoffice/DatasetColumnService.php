@@ -293,7 +293,7 @@ class DatasetColumnService extends DbSession
 		$newColumn->setUseInSummary($useInSummary);
 		$newColumn->setUseInExport($useInExport);
 
-		$this->CreateColumn($dataset, $newColumn, $position, $after);
+		return $this->CreateColumn($dataset, $newColumn, $position, $after);
 	}
 
 	public function CreateColumn($dataset, $newColumn, $position = null, $after = '')

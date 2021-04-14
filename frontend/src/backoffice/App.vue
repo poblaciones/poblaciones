@@ -105,7 +105,7 @@ html, body {
 }
 .md-layout-item-separation
 {
-	height: 60px;
+	height: 2.25rem;
 	min-width: 100%;
 }
 .md-layout-item-separated {

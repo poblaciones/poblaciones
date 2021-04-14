@@ -3,7 +3,7 @@
 		<md-dialog :md-active.sync="openPopup">
 
 			<invoker ref="invoker"></invoker>
-			<md-dialog-title>
+			<md-dialog-title style="min-width: 30rem;">
 				Agregar indicador
 			</md-dialog-title>
 

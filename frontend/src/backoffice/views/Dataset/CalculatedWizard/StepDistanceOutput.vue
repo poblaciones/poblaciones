@@ -1,11 +1,11 @@
 <template>
 	<div class="md-layout">
 		<div class="md-layout-item md-size-100">
-			Indique qué valores desea guardar en el dataset durante el cálculo del indicador.
+			Indique qué valores desea guardar como resultado de la búsqueda.
 		</div>
 		<div class="md-layout-item-separation"></div>
 		<div class="md-layout-item md-size-100">
-			Guardar por cada coincidencia:
+			Guardar:
 		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100" v-if="hasDescription" >
 			<md-switch class="md-primary" v-model="newMetric.Output.HasDescription">Descripción</md-switch>
@@ -14,7 +14,7 @@
 			<md-switch class="md-primary" v-model="newMetric.Output.HasValue">Valor</md-switch>
 		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100">
-			<md-switch class="md-primary" v-model="newMetric.Output.HasCoords">Coordenada</md-switch>
+			<md-switch class="md-primary" v-model="newMetric.Output.HasCoords">Coordenadas</md-switch>
 		</div>
 		<div class="md-layout-item md-size-100 md-layout-item-separated">
 			Limitar coincidencias:

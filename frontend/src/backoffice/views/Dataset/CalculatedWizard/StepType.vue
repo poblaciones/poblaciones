@@ -1,12 +1,12 @@
 <template>
 	<div class="md-layout">
 		<div class="md-layout-item md-size-100">
-			Indique el tipo de indicador que desea crear.
+			Indique el tipo de búsqueda a realizar para completar el rastreo:
 		</div>
 		<div class="md-layout-item-separation"></div>
 		<div class="md-layout-item md-size-100">
-			<mp-large-button @click="distanceClick" :toggled="type == 'distance'" text="Distancia" ico="fas fa-ruler" />
-			<mp-large-button @click="areaClick" :toggled="type == 'area'" text="Contenido" ico="fas fa-draw-polygon" />
+			<mp-large-button @click="distanceClick" :toggled="type == 'distance'" text="Encontrar el elemento más próximo" ico="fas fa-ruler" />
+			<mp-large-button @click="areaClick" :toggled="type == 'area'" text="Sumarizar los elementos en un área" ico="fas fa-draw-polygon" />
 		</div>
 	</div>
 </template>
@@ -26,12 +26,12 @@ export default {
 		distanceClick(e) {
 			this.type = 'distance';
 			e.preventDefault();
-			// this.$emit('distanceClick', e);
+			this.$emit('raiseNext', e);
 		},
 		areaClick(e) {
 			this.type = 'area';
 			e.preventDefault();
-			// this.$emit('areaClick', e);
+			this.$emit('raiseNext', e);
 		},
 		validate() {
 			if (this.type === null) {

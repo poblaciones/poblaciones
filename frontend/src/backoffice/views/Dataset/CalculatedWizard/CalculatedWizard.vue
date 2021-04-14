@@ -6,15 +6,15 @@
 			<stepper ref="stepper" @closed="stepperClosed" title="Calcular indicador"></stepper>
 
 			<md-dialog-title>
-				Calcular indicador {{ by }}
+				Paso {{ step }}{{ maxSteps }}{{ by }}
 				<div class="stepProgress">
-					Paso {{ step }} {{ maxSteps }}
+
 				</div>
 			</md-dialog-title>
 
 			<md-dialog-content>
-				<div style="min-height: 300px">
-					<step-type v-show="currentStep == 'stepType'" ref="stepType" />
+				<div style="min-height: 300px; padding-top: 18px">
+					<step-type v-show="currentStep == 'stepType'" ref="stepType" @raiseNext="next()" />
 					<step-source v-show="currentStep == 'stepSource'" ref="stepSource" :newMetric="newMetric" />
 					<step-coverage v-show="currentStep == 'stepCoverage'" ref="stepCoverage" :newMetric="newMetric" />
 					<step-distance-output v-show="currentStep == 'stepDistanceOutput'" ref="stepDistanceOutput" :newMetric="newMetric" />
@@ -89,26 +89,26 @@ export default {
 		},
 		by() {
 			let ret = '';
-			if (this.newMetric.Type == 'formula') {
-				ret = ' según fórmula';
-			} else if (this.newMetric.Type == 'distance') {
-				ret = ' según distancia';
+			if (this.newMetric.Type == 'distance') {
 				if (this.step == 2) {
-					ret += '. Objetivo';
+					ret += 'Objetivo';
 				} else if (this.step == 3) {
-					ret += '. Salida';
+					ret += 'Salida';
 				}
 			} else if (this.newMetric.Type == 'area') {
-				ret = ' según contenido';
 				if (this.step == 2) {
-					ret += '. Objetivo';
+					ret += 'Objetivo';
 				} else if (this.step == 3) {
-					ret += '. Área';
+					ret += 'Área';
 				} else if (this.step == 4) {
-					ret += '. Salida';
+					ret += 'Salida';
 				}
 			}
-			return ret;
+			if (ret == '') {
+				return ret;
+			} else {
+				return ': ' + ret;
+			}
 		},
 	},
 	mounted() {
@@ -143,8 +143,8 @@ export default {
 				},
 				Area: {
 					IsInclusionPoint: defaultIsInclusionPoint,
-					InclusionDistance: 0,
-					IsInclussionFull: false,
+					InclusionDistance: 5,
+					IsInclussionFull: true,
 				},
 				Source: {
 					ValueLabelIds: [],

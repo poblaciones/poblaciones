@@ -4,28 +4,29 @@
 		<ValuesPopup v-if="valuesPopupReset" ref="valuesPopup"></ValuesPopup>
 		<ColumnPopup ref="edit" @completed="completeEditOnClick"></ColumnPopup>
 
+		<calculated-metric-wizard ref="calculatedMetricWizard">
+		</calculated-metric-wizard>
+
 		<div class="md-layout md-gutter">
 			<div style="position: relative">
 				<div v-if="Work.CanEdit()" style="position: absolute; right: -55px">
 					<md-button @click="upOnClick()" class="md-icon-button" :disabled="upDisabled">
 						<md-icon>arrow_upward</md-icon>
 					</md-button>
-					<br/>
+					<br />
 					<md-button @click="downOnClick()" class="md-icon-button" :disabled="downDisabled">
 						<md-icon>arrow_downward</md-icon>
 					</md-button>
 				</div>
-				<mp-confirm
-							ref="confirmDialog"
-							title="Eliminar variables"
-							text="Las variables seleccionadas junto con sus datos serán eliminados. Si deseara luego recuperar estos valores deberá volver a importar los datos al dataset."
-							confirm-text="Eliminar"
-							@confirm="deleteOnClick"/>
-
+				<mp-confirm ref="confirmDialog"
+										title="Eliminar variables"
+										text="Las variables seleccionadas junto con sus datos serán eliminados. Si deseara luego recuperar estos valores deberá volver a importar los datos al dataset."
+										confirm-text="Eliminar"
+										@confirm="deleteOnClick" />
 				<JqxGrid ref="columnsGrid" :width="850" :source="dataAdapter" :columns="columns" :columnsresize="true"
-								:columnsreorder="true" @rowselect="selectionChanged" @rowunselect="selectionChanged"
-								@rowdoubleclick="showModify" :handlekeyboardnavigation="handlekeyboardnavigation"
-							selectionmode='multiplerowsextended' :localization="localization">
+								 :columnsreorder="true" @rowselect="selectionChanged" @rowunselect="selectionChanged"
+								 @rowdoubleclick="showModify" :handlekeyboardnavigation="handlekeyboardnavigation"
+								 selectionmode='multiplerowsextended' :localization="localization">
 				</JqxGrid>
 				<div class="gridStatusBar">{{ statusBarText }}</div>
 				<div>
@@ -40,6 +41,10 @@
 					<md-button v-if="canEdit" @click="startAutoRecode" :disabled="autoRecodeDisabled">
 						<md-icon>toc</md-icon>
 						Auto-recodificar
+					</md-button>
+					<md-button v-if="calculateEnabled" @click="calculateNewMetric">
+						<md-icon>search</md-icon>
+						Rastreo
 					</md-button>
 					<md-button v-if="canEdit" @click="confirmDelete" :disabled="deleteDisabled">
 						<md-icon>delete</md-icon>
@@ -58,7 +63,7 @@
 						Exportar a CSV
 					</md-button>
 				</div>
-				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -69,6 +74,7 @@ import ValuesPopup from './ValuesPopup.vue';
 import arr from '@/common/js/arr';
 import ColumnPopup from './ColumnPopup.vue';
 import Localization from '@/backoffice/classes/Localization';
+import CalculatedMetricWizard from './CalculatedWizard/CalculatedWizard.vue';
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue';
 import JqxTooltip from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue';
 // https://www.jqwidgets.com/vue/vue-grid/
@@ -79,6 +85,7 @@ export default {
 	components: {
 		JqxGrid,
 		ValuesPopup,
+		CalculatedMetricWizard,
 		ColumnPopup
 	},
 	computed: {
@@ -90,6 +97,9 @@ export default {
 		},
 		Grid() {
 			return this.$refs.columnsGrid;
+		},
+		calculateEnabled() {
+			return window.Context.Configuration.UseCalculated;
 		},
 		canEdit() {
 			if (window.Context.CurrentWork) {
@@ -140,6 +150,13 @@ export default {
 		},
 		AlignmentToString(alignment) {
 			return  this.Match(this.Dataset.ValidAlignments(), alignment);
+		},
+		calculateNewMetric() {
+			if (!this.Dataset.properties.Geocoded) {
+				alert('Para definir un indicador calculado es necesario antes georreferenciar el dataset.');
+				return;
+			}
+			this.$refs.calculatedMetricWizard.show();
 		},
 		getData() {
 			if (this.Dataset === null) {
