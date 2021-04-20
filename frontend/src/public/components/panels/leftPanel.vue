@@ -303,6 +303,7 @@ export default {
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 	z-index:1;
 	background-color: white;
+	user-select: text
 }
 .fade-enter-active, .fade-leave-active {
 	transition: opacity .35s;

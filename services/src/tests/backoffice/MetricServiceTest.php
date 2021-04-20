@@ -61,10 +61,11 @@ class MetricServiceTest extends TestCase
 		$o = $this->Get('o');
 		$oi = $this->Get('oi');
 		$s = $this->Get('s');
+		$filter = $this->Get('f');
 
 		$this->assertNull(Session::CheckIsDatasetReader($k));
 		$controller = new MetricService();
-		$ret = $controller->GetColumnDistributions($k, $c, $ci, $o, $oi, $s);
+		$ret = $controller->GetColumnDistributions($k, $c, $ci, $o, $oi, $s, $filter);
 		$this->assertInstanceOf(\stdClass::class, $ret);
 		$this->assertNotEmpty($ret->EllapsedMs);
 		$this->assertIsArray($ret->Groups);

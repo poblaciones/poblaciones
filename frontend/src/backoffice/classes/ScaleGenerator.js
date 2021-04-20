@@ -126,17 +126,19 @@ ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByLabelChange = function (
 		var level = this.Dataset.MetricVersionLevels[i];
 		for (var n = 0; n < level.Variables.length; n++) {
 			var variable = level.Variables[n];
-			if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn.Id === changedColumn.Id) {
-				variable.Symbology.CutColumn = changedColumn;
-				this.CreateVariableCategories(level, variable, null);
-				this.Dataset.UpdateVariable(level, variable);
-			}
+			var requiresUpdate = false;
 			if (variable.NormalizationColumn !== null && variable.NormalizationColumn.Id === changedColumn.Id) {
 				variable.NormalizationColumn = changedColumn;
-				this.Dataset.UpdateVariable(level, variable);
+				requiresUpdate = true;
 			}
 			if (variable.DataColumn !== null && variable.DataColumn.Id === changedColumn.Id) {
 				variable.DataColumn = changedColumn;
+				requiresUpdate = true;
+			}
+			if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn.Id === changedColumn.Id) {
+				variable.Symbology.CutColumn = changedColumn;
+				this.RegenAndSaveVariable(level, variable);
+			} else if (requiresUpdate) {
 				this.Dataset.UpdateVariable(level, variable);
 			}
 		}
@@ -166,6 +168,9 @@ ScaleGenerator.prototype.createKey = function (variable) {
 			ret += 'p' + variable.NormalizationScale;
 		}
 	}
+	if (variable.FilterValue !== null) {
+		ret += 'f' + variable.FilterValue;
+	}
 	return ret;
 };
 
@@ -182,7 +187,8 @@ ScaleGenerator.prototype.GetColumnDistributions = function (variable) {
 	if (variable.Symbology.CutMode === 'V') {
 		args = {
 			'k': this.Dataset.properties.Id,
-			'c': (variable.Symbology.CutColumn ? variable.Symbology.CutColumn.Id : 0)
+			'c': (variable.Symbology.CutColumn ? variable.Symbology.CutColumn.Id : 0),
+			'f': variable.FilterValue
 		};
 		url += '/services/backoffice/GetColumnStringDistributions';
 	} else {
@@ -192,7 +198,8 @@ ScaleGenerator.prototype.GetColumnDistributions = function (variable) {
 			'ci': (variable.DataColumn ? variable.DataColumn.Id : 0),
 			'o': variable.Normalization,
 			'oi': (variable.NormalizationColumn ? variable.NormalizationColumn.Id : 0),
-			's': variable.NormalizationScale
+			's': variable.NormalizationScale,
+			'f': variable.FilterValue
 		};
 		url += '/services/backoffice/GetColumnDistributions';
 	}

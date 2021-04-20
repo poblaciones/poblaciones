@@ -102,7 +102,8 @@ App::Get('/services/backoffice/GetColumnDistributions', function (Request $reque
 	else
 		$normalizationScale = Params::Get('s');
 
-	return App::Json($controller->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalizationColumn, $normalizationColumnId, $normalizationScale));
+	$filter = Params::Get('f');
+	return App::Json($controller->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalizationColumn, $normalizationColumnId, $normalizationScale, $filter));
 });
 
 App::Get('/services/backoffice/GetColumnStringDistributions', function (Request $request) {
@@ -112,7 +113,9 @@ App::Get('/services/backoffice/GetColumnStringDistributions', function (Request 
 
 	$cutColumnId = Params::GetIntMandatory('c');
 
-	return App::Json($controller->GetColumnStringDistributions($datasetId, $cutColumnId));
+	$filter = Params::Get('f');
+
+	return App::Json($controller->GetColumnStringDistributions($datasetId, $cutColumnId, $filter));
 });
 
 App::GetOrPost('/services/backoffice/UpdateMetricVersionLevel', function (Request $request) {
@@ -121,6 +124,7 @@ App::GetOrPost('/services/backoffice/UpdateMetricVersionLevel', function (Reques
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
 
 	$param = Params::GetJsonMandatory('l');
+
 	$level = App::ReconnectJsonParam(entities\DraftMetricVersionLevel::class, 'l');
 
 	return App::Json($controller->UpdateMetricVersionLevel($datasetId, $level));

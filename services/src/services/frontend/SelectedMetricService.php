@@ -251,7 +251,8 @@ class SelectedMetricService extends BaseService
 				$variableInfo->Decimals = 2;
 			if ($variable['mvv_data'] === SpecialColumnEnum::AreaKm2 || $variable['mvv_data'] === SpecialColumnEnum::AreaM2)
 				$variableInfo->IsArea = true;
-
+			if ($variable['mvv_filter_value'] === null)
+				$variableInfo->FilterName = null;
 			$variableInfo->HasTotals = $variable['mvv_normalization'] !== null;
 			$this->AddVariablesValues($variableInfo);
 			if ($variableInfo->IsDefault)

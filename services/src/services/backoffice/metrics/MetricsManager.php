@@ -4,8 +4,6 @@ namespace helena\services\backoffice\metrics;
 
 use minga\framework\Str;
 use minga\framework\Arr;
-use minga\framework\PublicException;
-use minga\framework\MessageException;
 use minga\framework\Profiling;
 
 use helena\classes\App;
@@ -15,10 +13,10 @@ use helena\services\backoffice\publish\snapshots\Variable;
 
 class MetricsManager
 {
-	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to)
+	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter)
 	{
 		$ret = array();
-		$data = $this->GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale);
+		$data = $this->GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $filter);
 		// Indica nulos
 		$hasNulls = $this->resolveNulls($data);
 		// Calcula total
@@ -58,7 +56,7 @@ class MetricsManager
 			return false;
 	}
 
-	private function GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale)
+	private function GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $filter)
 	{
 		Profiling::BeginTimer();
 		// Arma el listado agrupado de [VALOR,PESO]
@@ -70,10 +68,16 @@ class MetricsManager
 		$hasGeoFields = Variable::HasGeoFields($dataColumn, $normalization);
 		if ($hasGeoFields)
 			$geoJoin = " JOIN geography_item ON gei_id = geography_item_id ";
+		// Agrega el filtro
+		if ($filter !== null)
+			$filterWhere = " AND " . Variable::ResolveFilterCondition($datasetId, $filter);
+		else
+			$filterWhere = "";
+
 		// Hace la consulta
 		$sql = "SELECT " . $field . ", COUNT(*) " .
 						" FROM " . $table . $geoJoin .
-						" WHERE ommit = 0 " .
+						" WHERE ommit = 0 " . $filterWhere .
 						" GROUP BY " . $field . " ORDER BY ". $field;
 		$ret = App::Db()->fetchAllByPos($sql);
 		Arr::CastColumnAsFloat($ret, 0);

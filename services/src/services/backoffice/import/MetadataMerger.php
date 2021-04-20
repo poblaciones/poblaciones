@@ -123,6 +123,7 @@ class MetadataMerger
 		$datasetInfo['datasetField'] = '(SELECT mvl_dataset_id FROM draft_metric_version_level, draft_variable WHERE mvv_metric_version_level_id = mvl_id AND mvv_symbology_id = vsy_id)';
 		$datasetInfo['fieldCaption'] = "(SELECT CONCAT(mtr_caption, ' (', mvr_caption, ')') FROM draft_metric, draft_metric_version, draft_metric_version_level, draft_variable WHERE mvr_metric_id = mtr_id AND mvl_metric_version_id = mvl_id AND mvl_id = mvv_metric_version_level_id AND mvv_metric_version_level_id = mvl_id AND mvv_symbology_id = vsy_id)";
 		$datasetInfo['entityId'] = 'vsy_id';
+
 		$message = "La variable de segmentación del indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'vsy_cut_column_id', $message);
 		// Sequence, de symbology de indicadores

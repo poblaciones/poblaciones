@@ -10,7 +10,7 @@ class DatasetColumnCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Datasets/ColumnDistributions");
 	}
-	public static function CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to)
+	public static function CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter)
 	{
 		$key = "c" . $dataColumn;
 		if ($dataColumnId !== null)
@@ -20,6 +20,14 @@ class DatasetColumnCache extends BaseCache
 			$key .= "i" . $normalizationId;
 		$key .= "e" . $normalizationScale;
 		$key .= "f" . $from . "t" . $to;
+		if ($filter !== null)
+		{
+			if (strlen($filter) > 30)
+				$filterData = mhash(MHASH_MD4, $filter);
+			else
+				$filterData = $filter;
+			$key .= "f" . bin2hex($filterData);
+		}
 		return $key;
 	}
 }

@@ -75,7 +75,7 @@ TxtOverlay.prototype.resolveSymbolPart = function () {
 		// TODO: parametrizar esto según se aclare la necesidad
 		size = .85;
 	}
-	return iconManager.showIcon(this.symbol, null, null, 2, size);
+	return iconManager.showIcon(this.symbol, null, null, 2, size, true);
 };
 
 

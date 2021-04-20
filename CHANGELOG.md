@@ -1,4 +1,7 @@
 [CURRENT]
+- Fix: cambio de etiqueta en variable no elimina categorías de simbología.
+- Filtro para dataset x indicador.
+
 2021-04-13
 - Segmentación de delimitaciones por selección.
 - Fix: click en delimitaciones en buscador no las incorporaba.

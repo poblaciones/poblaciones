@@ -5,9 +5,9 @@ import Pattern from '@/public/composers/Pattern';
 import Mercator from '@/public/js/Mercator';
 import SVG from 'svg.js';
 
-export default SvgComposer;
+export default AbstractSvgComposer;
 
-function SvgComposer(mapsApi, activeSelectedMetric) {
+function AbstractSvgComposer(mapsApi, activeSelectedMetric) {
 	if (!mapsApi) {
 		return;
 	}
@@ -25,11 +25,11 @@ function SvgComposer(mapsApi, activeSelectedMetric) {
 	this.useTextures = false;
 };
 
-SvgComposer.prototype = new AbstractTextComposer();
-SvgComposer.uniqueCssId = 1;
+AbstractSvgComposer.prototype = new AbstractTextComposer();
+AbstractSvgComposer.uniqueCssId = 1;
 
 
-SvgComposer.prototype.SVG = function (h, w, z, parentAttributes) {
+AbstractSvgComposer.prototype.SVG = function (h, w, z, parentAttributes) {
 	var xmlns = 'http://www.w3.org/2000/svg';
 	var boxWidth = h;
 	var boxHeight = w;
@@ -66,15 +66,15 @@ SvgComposer.prototype.SVG = function (h, w, z, parentAttributes) {
 	return svgElem;
 };
 
-SvgComposer.prototype.patternUseFillStyles = function (patternValue) {
+AbstractSvgComposer.prototype.patternUseFillStyles = function (patternValue) {
 	return (patternValue > 2);
 };
 
-SvgComposer.prototype.patternIsPipeline = function (patternValue) {
+AbstractSvgComposer.prototype.patternIsPipeline = function (patternValue) {
 	return (patternValue >= 3 && patternValue <= 6);
 };
 
-SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features, projected,
+AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features, projected,
 										tileBounds, z, patternValue, gradient, texture) {
 	var m = new Mercator();
 	var projectedFeatures;
@@ -176,7 +176,7 @@ SvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttr
 	return oSvg;
 };
 
-SvgComposer.prototype.ReplaceMinimizingFlickering = function (div, oSvg, textureMaskId) {
+AbstractSvgComposer.prototype.ReplaceMinimizingFlickering = function (div, oSvg, textureMaskId) {
 	if (textureMaskId) {
 		oSvg.style.position = 'absolute';
 		if (div.childNodes.length === 0) {
@@ -197,7 +197,7 @@ SvgComposer.prototype.ReplaceMinimizingFlickering = function (div, oSvg, texture
 };
 
 
-SvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
+AbstractSvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
 	// crea un pattern para cada tipo de etiqueta
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
 	var width = (this.patternIsPipeline(patternValue) ? '; stroke-width: ' + scales.ang + 'px;' : '');
@@ -211,7 +211,7 @@ SvgComposer.prototype.appendPatterns = function (o2, labels, scales) {
 	}
 };
 
-SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask, textureMaskId) {
+AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask, textureMaskId) {
 	// crea una clase para cada tipo de etiqueta
 	var styles = "<style type='text/css'>";
 	var fillBlock = (patternValue === 1 || patternValue === 2 ? '; fill: transparent ' : '');
@@ -254,23 +254,23 @@ SvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patte
 	oSvg.appendChild(svgStyles);
 };
 
-SvgComposer.prototype.createPattern = function (o2, scale) {
+AbstractSvgComposer.prototype.createPattern = function (o2, scale) {
 	var pattern = new Pattern(this.activeSelectedMetric.GetPattern(), scale);
 	return pattern.GetPattern(o2);
 };
 
-SvgComposer.prototype.dispose = function () {
+AbstractSvgComposer.prototype.dispose = function () {
 	this.clearText();
 };
 
-SvgComposer.prototype.removeTileFeatures = function (tileKey) {
+AbstractSvgComposer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
 	if (this.svgInTile.hasOwnProperty(tileKey)) {
 		delete this.svgInTile[tileKey];
 	}
 };
 
-SvgComposer.prototype.defineScaleCriteria = function(z) {
+AbstractSvgComposer.prototype.defineScaleCriteria = function(z) {
 	var divi = 4;
 	switch (z) {
 	case 11:

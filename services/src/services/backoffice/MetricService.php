@@ -17,6 +17,7 @@ use minga\framework\ErrorException;
 
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\Profiling;
+use helena\services\backoffice\publish\snapshots\Variable;
 
 
 class MetricService extends BaseService
@@ -151,7 +152,7 @@ class MetricService extends BaseService
 		return $manager->GetWorkMetricVersions($workId);
 	}
 
-	public function GetColumnStringDistributions($datasetId, $cutColumnId)
+	public function GetColumnStringDistributions($datasetId, $cutColumnId, $filter)
 	{
 		Profiling::BeginTimer();
 		// Trae el distinct de valores, alfabético
@@ -161,13 +162,18 @@ class MetricService extends BaseService
 			Profiling::EndTimer();
 			return [];
 		}
+		// Agrega el filtro
+		if ($filter !== null)
+			$filterWhere = " WHERE " . Variable::ResolveFilterCondition($datasetId, $filter);
+		else
+			$filterWhere = "";
 
 		$field = $column->getField();
 		$dataset = $column->getDataset();
 		if ($dataset->getId() !== $datasetId)
 			throw new ErrorException('El dataset no coincide con la variable.');
 		$table = $dataset->getTable();
-		$sql = "SELECT DISTINCT " . $field . " as Caption FROM " . $table . " ORDER BY 1 LIMIT 100";
+		$sql = "SELECT DISTINCT " . $field . " as Caption FROM " . $table . $filterWhere . " ORDER BY 1 LIMIT 100";
 		$ret = App::Db()->fetchAll($sql);
 		for($n = 0; $n < sizeof($ret); $n++)
 			if ($ret[$n]['Caption'])
@@ -179,18 +185,18 @@ class MetricService extends BaseService
 		return $ret;
 	}
 
-	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale)
+	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $filter)
 	{
 		Profiling::BeginTimer();
 		$data = null;
 		$from = 1;
 		$to = 10;
-		$key = DatasetColumnCache::CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to);
+		$key = DatasetColumnCache::CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter);
 
 		if (DatasetColumnCache::Cache()->HasData($datasetId, $data) === false)
 		{
 			$metricsManager = new MetricsManager();
-			$data = $metricsManager->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to);
+			$data = $metricsManager->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter);
 			if ($data == null)
 				return null;
 			DatasetColumnCache::Cache()->PutData($datasetId, $key, $data);

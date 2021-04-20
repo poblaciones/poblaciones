@@ -17,7 +17,7 @@ module.exports = {
 		}
 		return '';
 	},
-	showIcon(symbol, customIconList, maxWidth, rightMargin, sizeEm) {
+	showIcon(symbol, customIconList, maxWidth, rightMargin, sizeEm, doNotShowError) {
 		var html;
 		if (!symbol) {
 			return '';
@@ -39,7 +39,11 @@ module.exports = {
 				html += "'/>";
 			} else {
 				// pone un ícono de error
-				html = this.buildIconBlock(this.formatIcon('fa-exclamation'), rightMargin, sizeEm);
+				if (doNotShowError) {
+					html = '';
+				} else {
+					html = this.buildIconBlock(this.formatIcon('fa-exclamation'), rightMargin, sizeEm);
+				}
 			}
 		}
 		return html;

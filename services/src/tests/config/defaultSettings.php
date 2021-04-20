@@ -38,6 +38,7 @@ return [
 			'o' => 'O',
 			'oi' => 9741,
 			's' => 100,
+			'f' => null
 		],
 	],
 	"helena\\tests\\backoffice\\DatasetServiceTest" => [

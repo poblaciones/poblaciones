@@ -205,7 +205,7 @@ class MetricsCalculator
 									($id ? ', sna_feature_id ' : '') . ')
 									SELECT sna_id, sna_location, 0 ' . ($id ? ',' . $id : '') . '
 									FROM ' . $sourceSnapshotTable . '
-									WHERE 1 ' . $this->GetValueLabelsWhere($source);
+									WHERE 1 ' . $this->GetSourceFilterWhere($source) . $this->GetValueLabelsWhere($source);
 
 		App::Db()->execDDL($create);
 		App::Db()->exec($insert);
@@ -268,6 +268,11 @@ class MetricsCalculator
 						AND id >= ' . $ranges['mi'] . ' AND id <= ' . $ranges['ma'];
 
 		return $update;
+	}
+
+	private function GetSourceFilterWhere($source)
+	{
+			return ' AND sna_' . $source['VariableId'] . '_total IS NOT NULL ';
 	}
 
 	private function GetValueLabelsWhere($source)

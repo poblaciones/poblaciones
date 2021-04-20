@@ -1,16 +1,16 @@
-import SvgComposer from './SvgComposer';
+import AbstractSvgComposer from './AbstractSvgComposer';
 import h from '@/public/js/helper';
 
 export default DataShapeComposer;
 
 function DataShapeComposer(mapsApi, activeSelectedMetric) {
-	SvgComposer.call(this, mapsApi, activeSelectedMetric);
+	AbstractSvgComposer.call(this, mapsApi, activeSelectedMetric);
 
 	this.useGradients = window.SegMap.Configuration.UseGradients;
 	this.useTextures = window.SegMap.Configuration.UseTextures;
 };
 
-DataShapeComposer.prototype = new SvgComposer();
+DataShapeComposer.prototype = new AbstractSvgComposer();
 
 DataShapeComposer.prototype.render = function (mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
 	var filtered = [];
@@ -24,7 +24,7 @@ DataShapeComposer.prototype.render = function (mapResults, dataResults, gradient
 	}
 	var variableId = this.activeSelectedMetric.SelectedVariable().Id;
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
-	var tileUniqueId = SvgComposer.uniqueCssId++;
+	var tileUniqueId = AbstractSvgComposer.uniqueCssId++;
 	var id;
 	var varId;
 	var iMapa = 0;

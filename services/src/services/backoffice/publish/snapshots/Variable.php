@@ -3,6 +3,7 @@
 namespace helena\services\backoffice\publish\snapshots;
 
 use minga\framework\Arr;
+use minga\framework\Str;
 use minga\framework\Profiling;
 use minga\framework\PublicException;
 use helena\classes\DatasetTypeEnum;
@@ -10,10 +11,14 @@ use helena\classes\spss\Format;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
 
+use helena\services\backoffice\DatasetColumnService;
+
 class Variable
 {
 	public $attributes;
 	private $metricVersionLevel;
+
+	public const VALID_OPERATORS = ["=", "<>", ">", ">=", "<", "<=", "IS NULL", "IS NOT NULL", "LIKE", "NOT LIKE"];
 
 	public function __construct($metricVersionLevel, $row)
 	{
@@ -98,6 +103,104 @@ class Variable
 			return self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
 	}
 
+	private function RaiseError($problem)
+	{
+		throw new PublicException("Hay un problema con la variable '" . $this->attributes['mvv_caption']. "' de la métrica "
+					. $this->GetVariableMetricErrorCaption() . ". " . $problem);
+	}
+
+	public function CalculateFilterCondition($datasetId)
+	{
+		try
+		{
+			$filter = $this->attributes['mvv_filter_value'];
+			return self::ResolveFilterCondition($datasetId, $filter);
+		}
+		catch(\Exception $e)
+		{
+			$this->RaiseError($e->getMessage());
+		}
+	}
+	private static function ValidateOperator($operator)
+	{
+		foreach(self::VALID_OPERATORS as $op)
+			if ($op === $operator)
+			 return;
+		throw new PublicException("Operador inválido: " . $operator);
+	}
+
+	public static function ResolveFilterCondition($datasetId, $filter)
+	{
+		$filterParts = explode("\t", $filter);
+		// el primero es sí o sí una columna... la resuelve
+		$variable = $filterParts[0];
+		$datasetColumnService = new DatasetColumnService();
+		$column = $datasetColumnService->GetColumnByVariable($datasetId, $variable);
+		if ($column === null)
+			throw new PublicException("La variable '" . $variable . "' indicada como filtro ya no existe en el dataset. Deberá revisar el filtro para poder continuar.");
+		$field = $column->getField();
+		$sql = "(" . $field;
+
+		// el segundo es un operador... va literal
+		$operator = $filterParts[1];
+		self::ValidateOperator($operator);
+		$sql .= " " . $operator;
+
+		if ($operator == "IS NULL")
+			$sql .= " OR " . $field . " = ''";
+		else if ($operator == "IS NOT NULL")
+			$sql .= " AND " . $field . " <> ''";
+
+		if ($operator == "IS NULL" OR $operator == "IS NOT NULL")
+			return $sql . ")";
+
+		// el tercero es el valor a comparar
+		$value = $filterParts[2];
+		if (Str::StartsWith($value, "["))
+		{
+			// Variable
+			$variableName = substr($value, 1, strlen($value) - 2);
+			$column = $datasetColumnService->GetColumnByVariable($datasetId, $variableName);
+			if ($column === null)
+				throw new PublicException("La variable '" . $variableName . "' indicada como valor del filtro ya no existe en el dataset. Deberá revisar el filtro para poder continuar.");
+			$sqlValue = $column->getField();
+		}
+		else if (Str::StartsWith($value, "'"))
+		{	// Texto
+			if (!Str::EndsWith($value, "'"))
+				throw new PublicException("Los valores de texto indicados como criterio de filtro que comienzan con comillas simples y deben finalizar con comillas simples.");
+			$sqlValue = "'" . Str::Replace(substr($value, 1, strlen($value - 2)), "'", "\'") . "'";
+		}
+		else if (Str::StartsWith($value, '"'))
+		{ // Texto
+			if (!Str::EndsWith($value, '"'))
+				throw new PublicException("Los valores de texto indicados como criterio de filtro que comienzan con comillas dobles deben finalizar con comilla dobles.");
+			$sqlValue = '"' . Str::Replace(substr($value, 1, strlen($value - 2)), '"', '\"') . '"';
+		}
+		else
+		{ // Número
+			$value = Str::Replace($value, ",", ".");
+			if (!Str::IsNumber($value))
+				throw new PublicException("El valor indicado no es un número válido. Si desea indicar un texto, añada comillas al inicio y al final del mismo.");
+			$sqlValue = "" . floatval($value);
+		}
+
+		if ($operator === 'LIKE' || $operator === 'NOT LIKE')
+		{
+			$sql .= "CONCAT('%'," . $sqlValue . ", '%')";
+		}
+		else
+		{
+			$sql .= $sqlValue;
+		}
+		return $sql . ")";
+	}
+
+	public function HasFilters()
+	{
+		return ($this->attributes['mvv_filter_value'] !== null);
+	}
+
 	public function IsSequence()
 	{
 		return ($this->attributes['vsy_is_sequence']);
@@ -115,8 +218,7 @@ class Variable
 			$cutColumnId = $this->attributes['vsy_cut_column_id'];
 			if ($cutColumnId === null)
 			{
-				throw new PublicException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
-					. $this->GetVariableMetricErrorCaption() . " no tiene una variable de segmentación definida. Revise la simbología de la variable.");
+				$this->RaiseError("no tiene una variable de segmentación definida. Revise la simbología de la variable.");
 			}
 			return $this->GetFieldFromId($cutColumnId);
 		}

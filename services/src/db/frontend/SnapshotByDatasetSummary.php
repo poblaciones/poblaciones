@@ -39,7 +39,7 @@ class SnapshotByDatasetSummary extends BaseSpatialSnapshotModel
 				$varId = "sna_" . $variable->Id;
 
 				$select .= ", SUM(IFNULL(" . $varId . "_value, 0)) Value,
-											SUM(IFNULL(" . $varId . "_total, 0)) Total," .
+											SUM(" . $varId . "_total) Total," .
 											$varId . "_value_label_id ValueId";
 
 				$groupBy = $varId . "_value_label_id";
@@ -47,6 +47,9 @@ class SnapshotByDatasetSummary extends BaseSpatialSnapshotModel
 				$from = $this->tableName;
 
 				$where = $this->spatialConditions->UrbanityCondition($this->urbanity);
+
+				// Excluye las filas filtradas
+				$where = $this->AddNotNullCondition($where, $varId . "_total");
 
 				$baseQuery = new QueryPart($from, $where, null, $select, $groupBy);
 

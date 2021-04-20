@@ -37,7 +37,9 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 	{
 		Profiling::BeginTimer();
 
-		$select = "IFNULL(sna_" . $this->variableId . "_value, 0) Value, IFNULL(sna_" . $this->variableId . "_total, 0) Total, sna_feature_id FeatureId,
+		$totalField = "sna_" . $this->variableId . "_total";
+
+		$select = "IFNULL(sna_" . $this->variableId . "_value, 0) Value, " . $totalField . " Total, sna_feature_id FeatureId,
 								sna_" . $this->variableId . "_value_label_id ValueId, ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
 		if ($this->hasDescriptions)
 		{
@@ -59,29 +61,29 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 
 		$where .= $this->spatialConditions->UrbanityCondition($this->urbanity);
 
+		// Filtra que no haya totales = 0 si está normalizado
 		if ($this->hasTotals)
 		{
 			if ($where != '') $where .= ' AND ';
-			$where .= " IFNULL(sna_" . $this->variableId . "_total, 0) > 0 ";
+			$where .= $totalField . " > 0 ";
 		}
-		$params = array();
 
+		// Excluye las filas filtradas
+		$where = $this->AddNotNullCondition($where, $totalField);
+
+		// Setea el orden
 		if ($this->hasTotals)
-		{
 			$orderBy = "CASE WHEN Total = 0 THEN 0 ELSE Value / Total END";
-		}
 		else
-		{
 			$orderBy = "Value";
-		}
+		// Setea la dirección
 		$orderBy .= ($this->direction === 'D' ? ' DESC' : ' ASC');
 
+		// Ejecuta la consulta
+		$params = array();
 		$baseQuery = new QueryPart($from, $where, $params, $select, null, $orderBy);
-
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
-
 		$multiQuery->setMaxRows($this->size);
-
 		$ret = $multiQuery->fetchAll();
 
 		Profiling::EndTimer();

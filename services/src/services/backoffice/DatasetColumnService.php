@@ -134,6 +134,7 @@ class DatasetColumnService extends DbSession
 	{
 		return $field . " = (CASE WHEN " . $field . " IN (" . join(',', $colsId) . ") THEN NULL ELSE " . $field . " END)";
 	}
+
 	private function UnlockColumns($datasetId, $colsId)
 	{
 		Profiling::BeginTimer();

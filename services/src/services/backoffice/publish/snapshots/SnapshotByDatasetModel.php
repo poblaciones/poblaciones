@@ -31,7 +31,7 @@ class SnapshotByDatasetModel
 		$variables = $this->GetAllVariables($levels);
 		foreach ($variables as $variable)
 		{
-			$this->BuildVariableColumns($variable, $columns);
+			$this->BuildVariableColumns($datasetId, $variable, $columns);
 		}
 
 		if (App::Db()->tableExists($dataset['dat_table']))
@@ -263,7 +263,7 @@ class SnapshotByDatasetModel
 		return $columns;
 	}
 
-	private function BuildVariableColumns($variable, &$columns)
+	private function BuildVariableColumns($datasetId, $variable, &$columns)
 	{
 		// Calcula el valor
 		$columns[] = ['sna_' . $variable->Id() . '_value', 'double NULL', $variable->CalculateValueField()];
@@ -274,7 +274,16 @@ class SnapshotByDatasetModel
 		$columns[] = ['sna_' . $variable->Id() . '_value_label_id', 'int(11) NOT NULL', $valueLabel];
 
 		// total de normalización
-		$columns[] = ['sna_' . $variable->Id() . '_total', "double NOT NULL DEFAULT '0'", $variable->CalculateNormalizationField()];
+		$totalValue = $variable->CalculateNormalizationField();
+		if ($variable->HasFilters())
+		{
+			$totalSql = "(CASE WHEN " . $variable->CalculateFilterCondition($datasetId) . " THEN " . $totalValue . " ELSE NULL END)";
+		}
+		else
+		{
+			$totalSql = $totalValue;
+		}
+		$columns[] = ['sna_' . $variable->Id() . '_total', "double NULL DEFAULT '0'", $totalSql];
 
 		// Se fija si precisa traer el valor de una secuencia
 		if ($variable->IsSequence())

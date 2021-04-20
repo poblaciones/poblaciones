@@ -76,6 +76,10 @@
 												{{ f.formatColumn(variable.Symbology.CutColumn, true) }}
 											</span>
 										</template>
+										<template v-if="variable.FilterValue !== null">
+											(<span :title="f.formatColumnTooltip(getFilterColumn(variable))"
+														 >{{ f.formatColumn(getFilterColumn(variable), true) }}</span>{{ formatFilterOperator(variable) }}{{ formatFilterValue(variable) }})
+										</template>
 									</span>
 									<md-button class="md-icon-button" title="Fórmula" @click="openVariableFormulaEdition(item, variable)">
 										<md-icon>edit</md-icon>
@@ -161,7 +165,7 @@ export default {
 				return false;
 			}
 			return this.Work.properties.Type === 'P' && this.list && this.list.length > 0;
-		}
+		},
 	},
 	methods: {
 		createNewMetric() {
@@ -197,6 +201,22 @@ export default {
 			} else {
 				return item.Caption;
 			}
+		},
+		getFilterColumn(variable) {
+			if (variable.FilterValue !== null) {
+				var filter = this.Dataset.parseFilter(variable);
+				return filter.Column;
+			} else {
+				return null;
+			}
+		},
+		formatFilterOperator(variable) {
+			var filter = this.Dataset.parseFilter(variable);
+			return filter.FormattedOperator;
+		},
+		formatFilterValue(variable) {
+			var filter = this.Dataset.parseFilter(variable);
+			return filter.FormattedValue;
 		},
 		onCompleteLevel(metricVersion) {
 			this.$refs.invoker.do(this.Dataset.LevelGenerator, this.Dataset.LevelGenerator.CompleteLevel, metricVersion);

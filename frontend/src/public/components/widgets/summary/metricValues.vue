@@ -211,7 +211,7 @@ export default {
 		},
 		resolveIcon(symbol) {
 			var customIcons = this.metric.SelectedVersion().Work.Icons;
-			return iconManager.showIcon(symbol, customIcons, '1.3em;vertical-align: unset;padding-top: 3px', null, '1.2r');
+			return iconManager.showIcon(symbol, customIcons, '1.5em;vertical-align: unset;padding-top: 0px', null, '1.2r');
 		},
 		toggleShowDescriptions() {
 			this.variable.ShowDescriptions = (this.level.ShowDescriptions === 1 ? 0 : 1);

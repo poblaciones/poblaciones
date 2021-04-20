@@ -1,13 +1,13 @@
-import SvgComposer from './SvgComposer';
+import AbstractSvgComposer from './AbstractSvgComposer';
 import h from '@/public/js/helper';
 
 export default BoundariesComposer;
 
 function BoundariesComposer(mapsApi, activeSelectedMetric) {
-	SvgComposer.call(this, mapsApi, activeSelectedMetric);
+	AbstractSvgComposer.call(this, mapsApi, activeSelectedMetric);
 };
 
-BoundariesComposer.prototype = new SvgComposer();
+BoundariesComposer.prototype = new AbstractSvgComposer();
 
 BoundariesComposer.prototype.render = function (mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
 	var filtered = [];
@@ -19,7 +19,7 @@ BoundariesComposer.prototype.render = function (mapResults, dataResults, gradien
 		return;
 	}
 	var patternValue = 1;
-	var tileUniqueId = SvgComposer.uniqueCssId++;
+	var tileUniqueId = AbstractSvgComposer.uniqueCssId++;
 	this.UpdateTextStyle(z);
 	var colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
 

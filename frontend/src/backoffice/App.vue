@@ -90,10 +90,19 @@ html, body {
 	border-top: 0px;
 	padding-top: 0px;
 }
-
+	.md-menu-content {
+		z-index: 90000 !important;
+	}
 .md-suffix {
 	right: 22px;
 	position: absolute;
+}
+.md-dialog-actions {
+	background-color: white !important;
+	z-index: 10 !important;
+}
+.md-field.md-focused label, .md-field.md-has-value label {
+	font-size: 14px!important;
 }
 .unselectable {
 	-webkit-touch-callout: none;

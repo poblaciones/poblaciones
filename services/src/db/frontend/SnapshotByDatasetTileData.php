@@ -30,39 +30,19 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		parent::__construct($snapshotTable, "sna", $datasetType);
 	}
 
-	private function CreateCrossTableQuery($metricVersionId, $geographyId, $urbanity, $query, $extraQuery = null)
-	{
-		Profiling::BeginTimer();
-		$select = "t1.sna_metric_version_variable_id VariableId, t1.sna_version_value_label_id ValueId, t2.sna_metric_version_variable_id TargetVariableId, t2.sna_version_value_label_id TargetValueId, " .
-			"SUM(IFNULL(t1.sna_value, 0)) Value, SUM(IFNULL(t1.sna_total, 0)) Total, Round(SUM(IFNULL(t1.sna_area_m2, 0)) / 1000000, 6) Km2, COUNT(*) Areas ";
-
-		$from = $this->tableName . " t1";
-		$join = " JOIN snapshop_geography_item_geography_item snap ON t1.sna_geography_item_id = snap.gii_from_geography_item_id LEFT JOIN " . $this->tableName . " t2 ON t2.sna_geography_item_id = snap.gii_to_geography_item_id";
-
-		$where = "t1.sna_metric_version_id = ? AND t1.sna_geography_id <=> ? " .	$this->spatialConditions->UrbanityCondition($urbanity);
-		$params = array($metricVersionId, $geographyId);
-
-		$groupBy = "t1.sna_metric_version_variable_id, t1.sna_version_value_label_id, t2.sna_metric_version_variable_id, t2.sna_version_value_label_id";
-
-		// TODO: falta duplicar los subqueries y crear snapshop_geography_item_geography_item
-		$baseQuery = new QueryPart($from, $where, $params, $select, $groupBy);
-
-		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
-
-		$ret = $multiQuery->fetchAll();
-		Profiling::EndTimer();
-		return $ret;
-	}
-
 	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
 
 		$select = "sna_feature_id FID";
+		$hasAnyNotNullTotal = '';
+
 		foreach($this->variables as $variable)
 		{
+			$totalField = "sna_" . $variable->Id . "_total";
 			$select .= ", sna_" . $variable->Id . "_value, sna_" . $variable->Id . "_value_label_id,
-									sna_" . $variable->Id . "_total";
+									" . $totalField;
+			$hasAnyNotNullTotal .= ' OR ' . $totalField . ' IS NOT NULL';
 			if ($variable->IsSequence)
 				$select .= ", sna_" . $variable->Id . "_sequence_order";
 		}
@@ -80,9 +60,12 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$from = $this->tableName;
 
 		$where = $this->spatialConditions->UrbanityCondition($this->urbanity);
+		// Trae filas donde no esté todos excluidos por filtro
+		if ($hasAnyNotNullTotal !== '')
+			$where .= ' AND (' . substr($hasAnyNotNullTotal, 4) . ')';
 
+		// Ejecuta la consulta
 		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
-
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
 		$ret = $multiQuery->fetchAll();
 
@@ -113,23 +96,27 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		{
 			foreach($this->variables as $variable)
 			{
-				$item = [];
-				foreach($extraFields as $field)
-					$item[$field] = $row[$field];
+				$totalField = "sna_" . $variable->Id . "_total";
+				if ($row[$totalField] !== null)
+				{
+					$item = [];
+					foreach($extraFields as $field)
+						$item[$field] = $row[$field];
 
-				$item['FID'] = $row['FID'];
+					$item['FID'] = $row['FID'];
 
-				// Pone lo específico de cada variable
-				$item['VariableId'] = $variable->Id;
-				$item['Value'] = $row["sna_" . $variable->Id . "_value"];
-				$item['Total'] = $row["sna_" . $variable->Id . "_total"];
-				$item['ValueId'] = $row["sna_" . $variable->Id . "_value_label_id"];
-				if ($variable->IsSequence)
-					$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
-				if ($this->hasSymbols)
-					$item['Symbol'] = $row['Symbol'];
+					// Pone lo específico de cada variable
+					$item['VariableId'] = $variable->Id;
+					$item['Value'] = $row["sna_" . $variable->Id . "_value"];
+					$item['Total'] = $row[$totalField];
+					$item['ValueId'] = $row["sna_" . $variable->Id . "_value_label_id"];
+					if ($variable->IsSequence)
+						$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
+					if ($this->hasSymbols)
+						$item['Symbol'] = $row['Symbol'];
 
-				$ret[] = $item;
+					$ret[] = $item;
+				}
 			}
 		}
 		return $ret;

@@ -28,6 +28,13 @@ class Variable
      */
     private $Caption;
 
+		/**
+     * @var string
+     *
+     * @ORM\Column(name="mvv_filter_value", type="string", length=200, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $FilterValue;
+
     /**
      * @var integer
      *
@@ -165,6 +172,30 @@ class Variable
     public function getCaption()
     {
         return $this->Caption;
+    }
+
+    /**
+     * Set filterValue
+     *
+     * @param string $filterValue
+     *
+     * @return Variable
+     */
+    public function setFilterValue($filterValue)
+    {
+        $this->FilterValue = $filterValue;
+
+        return $this;
+    }
+
+    /**
+     * Get filterValue
+     *
+     * @return string
+     */
+    public function getFilterValue()
+    {
+        return $this->FilterValue;
     }
 
     /**

@@ -79,7 +79,6 @@ class DatasetClone
 		$markerId = RowDuplicator::DuplicateRows(entities\DraftDatasetMarker::class, $this->dataset->getMarker()->getId());
 		$update = "UPDATE draft_dataset SET dat_marker_id = ? WHERE dat_id = ?";
 		App::Db()->exec($update, array($markerId, $this->targetDatasetId));
-		// Corrige columnas
 	}
 	private function CopyMetricVersions()
 	{

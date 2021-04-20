@@ -200,15 +200,20 @@ ActiveDataset.prototype.UpdateVariable = function (level, variable) {
 		columnText = 'Conteo';
 	} else if (variable.Data !== 'N') {
 		columnText = f.formatColumnText(column);
+	} else {
+		columnText = 'Conteo';
 	}
-	// Agrega criterio de corte
+	// Agrega criterio de corte tal como se va a ver en el frontend público
 	if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null) {
 		var byText = f.formatColumnText(variable.Symbology.CutColumn);
 		if (columnText.length === 0) {
 			columnText = 'Por ' + byText;
 		} else {
-			columnText += ' por ' + byText; // str.LowerFirstIfOnlyUpper()
+			columnText += ' por ' + byText;
 		}
+	}
+	if (variable.FilterValue !== null) {
+		columnText += ' (' + this.formatFilter(variable) + ')';
 	}
 	variable.Caption = columnText;
 	// graba
@@ -240,6 +245,57 @@ ActiveDataset.prototype.UpdateVariable = function (level, variable) {
 			}
 			return data;
 		});
+};
+ActiveDataset.prototype.makeFilter = function (variable, operator, value) {
+	var ret = variable.Variable + "\t" + operator + "\t";
+	if (operator !== "IS NULL" && operator !== "IS NOT NULL") {
+		ret += value;
+	}
+	return ret;
+};
+
+ActiveDataset.prototype.parseFilter = function (variable) {
+	var parts = variable.FilterValue.split("\t");
+	var operator = parts[1];
+	var isUnary = false;
+	var formattedOperator = operator;
+	if (operator == 'LIKE') {
+		formattedOperator = ' contiene ';
+	} else if (operator == 'NOT LIKE') {
+		formattedOperator = ' no contiene ';
+	} else if (operator == 'IS NULL' || operator == 'IS NOT NULL') {
+		if (operator == 'IS NULL') {
+			formattedOperator = ' = nulo o vacío';
+			isUnary = true;
+		}
+		if (operator == 'IS NOT NULL') {
+			formattedOperator = ' <> nulo o vacío';
+			isUnary = true;
+		}
+	}
+	var value = parts[2];
+	var formattedValue = value;
+	if (value && value.length > 1 && (value.startsWith('"') || value.startsWith("'"))) {
+		formattedValue = value.substring(1, value.length - 2);
+	}
+
+	return {
+		Column: this.GetColumnFromVariable(parts[0], false),
+		Operator: operator,
+		FormattedOperator: formattedOperator,
+		Value: value,
+		FormattedValue: formattedValue,
+		IsUnary: isUnary
+	};
+};
+
+ActiveDataset.prototype.formatFilter = function (variable) {
+	var filter = this.parseFilter(variable);
+	var ret = filter.Column.Caption + filter.FormattedOperator;
+	if (!filter.IsUnary) {
+		ret += filter.FormattedValue;
+	}
+	return ret;
 };
 
 ActiveDataset.prototype.CalculateNewMetricUrl = function () {
@@ -607,7 +663,6 @@ ActiveDataset.prototype.GetNumericTextAndRichColumns = function (includeNull) {
 	ret = ret.concat(this.GetRichColumns());
 	return ret;
 };
-
 
 ActiveDataset.prototype.GetNumericAndRichColumns = function (includeNull) {
 	var ret = [];

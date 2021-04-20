@@ -82,6 +82,13 @@ abstract class BaseSpatialSnapshotModel extends BaseModel
 
 		return $this->ExecQuery($query, $tileQuery);
 	}
+
+	protected function AddNotNullCondition($where, $field)
+	{
+		if ($where != '') $where .= ' AND ';
+		$where .= $field . " IS NOT NULL ";
+		return $where;
+	}
 }
 
 
