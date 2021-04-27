@@ -49,7 +49,7 @@ export default {
       var loc = this;
 			var format = this.resolveFormat();
 			if (endValue === '' || endValue === '-' || endValue === 'n/d' || startValue === '' || startValue === 'n/d' || startValue === '-') {
-				loc.displayValue = h.quickFormat(format, fix, endValue);
+				loc.displayValue = h.quickFormat(format, fix, endValue, true);
 				return;
 			}
       function animate () {
@@ -61,7 +61,7 @@ export default {
       new TWEEN.Tween({ tweeningValue: startValue })
         .to({ tweeningValue: endValue }, 500)
         .onUpdate(function (object) {
-						var number = h.quickFormat(format, loc.fix, object.tweeningValue);
+						var number = h.quickFormat(format, loc.fix, object.tweeningValue, true);
 						loc.displayValue = number;
         })
         .start();

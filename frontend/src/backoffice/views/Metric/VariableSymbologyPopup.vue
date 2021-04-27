@@ -103,7 +103,7 @@
 							<div class="separator">{{ CategoriesLabel
 										}}
 									</div>
-							<md-list style="overflow-y: auto; max-height: calc(30vh);">
+							<md-list style="overflow-y: auto; " :style="(this.CutMode === 'V' ? 'height: 156px;':'height: 185px;')">
 								<md-list-item v-for="item in Variable.Values" :key="item.Id"
 															:value="item.Id" class="itemSmall">
 
@@ -681,7 +681,7 @@ height: 42px;
 		text-shadow: 0.5px 0.5px 0.5px #e8e8e8, -0.5px -0.5px 0.5px #e8e8e8;
 	}
 	.fixeHeightCard {
-		/* height: 250px; */
+		height: 250px;
 	}
 .max30 {
 	height: 35px;

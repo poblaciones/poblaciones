@@ -169,13 +169,13 @@ class Variable
 		{	// Texto
 			if (!Str::EndsWith($value, "'"))
 				throw new PublicException("Los valores de texto indicados como criterio de filtro que comienzan con comillas simples y deben finalizar con comillas simples.");
-			$sqlValue = "'" . Str::Replace(substr($value, 1, strlen($value - 2)), "'", "\'") . "'";
+			$sqlValue = "'" . Str::Replace(substr($value, 1, strlen($value) - 2), "'", "\'") . "'";
 		}
 		else if (Str::StartsWith($value, '"'))
 		{ // Texto
 			if (!Str::EndsWith($value, '"'))
 				throw new PublicException("Los valores de texto indicados como criterio de filtro que comienzan con comillas dobles deben finalizar con comilla dobles.");
-			$sqlValue = '"' . Str::Replace(substr($value, 1, strlen($value - 2)), '"', '\"') . '"';
+			$sqlValue = '"' . Str::Replace(substr($value, 1, strlen($value) - 2), '"', '\"') . '"';
 		}
 		else
 		{ // Número

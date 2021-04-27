@@ -101,7 +101,8 @@ MetricsList.prototype.ClearUserMetrics = function () {
 
 MetricsList.prototype.GetMetricById = function (metricId) {
 	for (var i = 0; i < this.metrics.length; i++) {
-		if (this.metrics[i].properties.Metric.Id == metricId) {
+		if (!this.metrics[i].isBoundary
+			&& this.metrics[i].properties.Metric.Id == metricId) {
 			return this.metrics[i];
 		}
 	}

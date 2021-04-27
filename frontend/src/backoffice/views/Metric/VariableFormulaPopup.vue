@@ -73,7 +73,7 @@
 					</div>
 					<div class='md-layout-item md-size-20 md-small-size-30' v-show="useFilter && filterOperator !== 'IS NULL' && filterOperator !== 'IS NOT NULL'">
 						<md-field style="padding-top: 0px; margin-top: 0px; overflow: hidden;">
-							<md-autocomplete v-model="filterValue" :md-open-on-focus="false" :md-options="columnsForFilter" md-dense>
+							<md-autocomplete v-model="filterValue" ref="filterVal" :md-open-on-focus="false" :md-options="columnsForFilter" md-dense>
 								<label>Valor</label>
 
 							</md-autocomplete>
@@ -96,7 +96,7 @@
 
 <script>
 
-import arr from '@/common/js/arr';
+import str from '@/common/js/str';
 import f from '@/backoffice/classes/Formatter';
 
 var columnFormatEnum = require("@/common/enums/columnFormatEnum");
@@ -127,7 +127,15 @@ export default {
 			this.useFilter = this.Variable.FilterValue !== null;
 			this.showDialog = true;
 			setTimeout(() => {
+				var loc = this;
 				this.$refs.operator.$el.validity = {};
+				this.$refs.filterVal.$el.onkeydown = function (e) {
+					if (e.keyCode === 13) {
+						loc.Save();
+						return false;
+					}
+				};
+
 			}, 50);
 			this.receiveValue();
 		},
@@ -163,16 +171,20 @@ export default {
 				this.Variable.FilterValue = null;
 				return true;
 			}
-			if (this.useFilter && this.filterVariable === null) {
+			if (this.filterVariable === null) {
 				alert("Debe indicar una variable para el filtro.");
 				return false;
 			}
-			if (this.useFilter && (this.filterValue === null || this.filterValue === '')) {
+			if (this.filterValue === null || this.filterValue === '') {
 				alert("Debe indicar un valor para el filtro.");
 				return false;
 			}
-			if (this.useFilter && this.filterOperator === null) {
+			if (this.filterOperator === null) {
 				alert("Debe indicar un operador para el filtro.");
+				return false;
+			}
+			if (!str.isNumericFlex(this.filterValue) && !this.filterValue.startsWith('"') && !this.filterValue.startsWith("'")) {
+				alert('Los valores de filtro de tipo texto deben indicarse entre comillas ("valor")');
 				return false;
 			}
 			this.Variable.FilterValue = this.Dataset.makeFilter(this.filterVariable, this.filterOperator, this.filterValue);

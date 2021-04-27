@@ -6,12 +6,11 @@
 				 class="topImage">
 		</div>
 
-		<div class='panel card panel-body'>
+		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')">
 			<div v-on:click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 			<mp-close-button v-else v-on:click="doClose" class="exp-hiddable-block" />
 
 			<h5 class="title"><mp-label :text="'' + title" /></h5>
-
 			<div class='stats' style="padding-top: 8px">
 				<a href="#" title="Agregar como indicador"
 					 v-on:click="addMetricFromKey" style="color: #a7a7a7">
@@ -49,6 +48,7 @@ export default {
 	name: 'featureInfo',
 	props: [
 		'featureInfo',
+		'enabled'
 	],
 	computed: {
 		title() {

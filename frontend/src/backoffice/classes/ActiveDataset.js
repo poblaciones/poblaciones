@@ -276,7 +276,7 @@ ActiveDataset.prototype.parseFilter = function (variable) {
 	var value = parts[2];
 	var formattedValue = value;
 	if (value && value.length > 1 && (value.startsWith('"') || value.startsWith("'"))) {
-		formattedValue = value.substring(1, value.length - 2);
+		formattedValue = value.substring(1, value.length - 1);
 	}
 
 	return {

@@ -174,7 +174,7 @@
 					lat = defaultLocation.Lat;
 					zoom = 6;
 				}
-				if (!lon || isNan(lon)) {
+				if (!lon || isNaN(lon)) {
 					lon = defaultLocation.Lon;
 					zoom = 6;
 				}

@@ -189,7 +189,7 @@ module.exports = {
 			fix = decimals;
 		}
 		if (newValue === '' || newValue === '-' || newValue === 'n/d' || oldValue === '' || oldValue === 'n/d' || oldValue === '-') {
-			vm[element] = this.quickFormat(format, fix, newValue);
+			vm[element] = this.quickFormat(format, fix, newValue, true);
 			return;
 		}
 		var loc = this;
@@ -202,7 +202,7 @@ module.exports = {
 			.easing(TWEEN.Easing.Quadratic.Out)
 			.to({ tweeningNumber: newValue }, 500)
 			.onUpdate(function (object) {
-				var number = loc.quickFormat(format, fix, object.tweeningNumber);
+				var number = loc.quickFormat(format, fix, object.tweeningNumber, true);
 				vm[element] = number;
 			})
 			.start();
@@ -222,12 +222,15 @@ module.exports = {
 		}
 		return file.substr(0, file.length - ext.length);
 	},
-	quickFormat(format, fix, number) {
+	quickFormat(format, fix, number, tolerantOnZero) {
 		if (number === '' || number === '-' || number === 'n/d') {
 			return number;
 		}
-		number = Number(number).toFixed(fix);
-		return format(number, 100);
+		var numberFormatted = Number(number).toFixed(fix);
+		if (tolerantOnZero && parseFloat(numberFormatted) === 0)
+			numberFormatted = Number(number).toFixed(fix + 2);
+
+		return format(numberFormatted, 100);
 	},
 	l(a, b, c, d, e, f, g, h) {
 		if(a === undefined) { return; }

@@ -529,7 +529,7 @@ ScaleGenerator.prototype.HasNullCategory = function (variable) {
 ScaleGenerator.prototype.CreateSingleCategory = function (variable) {
 	var value = {
 		Id: null,
-		Caption: 'Total2',
+		Caption: 'Total',
 		Visible: true,
 		Value: 10,
 		FillColor: null,

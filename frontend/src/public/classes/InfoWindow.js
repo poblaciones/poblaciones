@@ -161,12 +161,15 @@ InfoWindow.prototype.InfoRequested = function (position, key, fid, forceExpand) 
 		this.cancel1('cancelled');
 	}
 	const loc = this;
+	window.Panels.Left.Disable();
 	this.segMap.Get(window.host + '/services/metrics/' + service, {
 		params: params,
 		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; })
 	}).then(function (res) {
 		loc.cancel1 = null;
 		loc.ReceiveInfoWindowData(res, position, key, forceExpand);
+	}).finally(function() {
+		window.Panels.Left.Enable();
 	});
 };
 

@@ -341,7 +341,9 @@
 		color: #DDDDDD;
 		border-color: #DDDDDD !important;
 	}
-
+	.center {
+		text-align: center;
+	}
 	.downloadButton {
 		border: 1.5px solid #68B3C8;
 		color: #68B3C8;

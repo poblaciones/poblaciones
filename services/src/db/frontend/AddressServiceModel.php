@@ -23,8 +23,9 @@ class AddressServiceModel
 		$wc = new WebClient();
 		$wc->Initialize();
 
-		$encodedQuery = urlencode($originalQuery . "," . Context::Settings()->Map()->GoogleGeocodingArea);
-
+		$encodedQuery = urlencode($originalQuery);
+		if (Context::Settings()->Map()->GoogleGeocodingArea)
+			$encodedQuery .= "&components=" . Context::Settings()->Map()->GoogleGeocodingArea;
 		// Fuerza uso de caché
 		$keepState = Context::Settings()->Cache()->Enabled;
 		Context::Settings()->Cache()->Enabled = CacheSettings::Enabled;

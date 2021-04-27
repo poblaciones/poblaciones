@@ -156,15 +156,19 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; })},
 		true
 	).then(function (res) {
-		loc.ProcessClipping(res.data, fitRegion, moveCenter);
 		loc.ResetClippingRequest(args);
 		if (clipForZoomOnly) {
+			loc.SegmentedMap.MapsApi.FitEnvelope(res.data.Envelope);
 			loc.ResetClippingRegion();
+		} else {
+			loc.ResetClippingRequest(args);
+			loc.ProcessClipping(res.data, fitRegion, moveCenter);
+
+			if (!doNotUpdateMap) {
+				loc.SegmentedMap.UpdateMap();
+			}
+			loc.SegmentedMap.RefreshSummaries();
 		}
-		if (!doNotUpdateMap) {
-			loc.SegmentedMap.UpdateMap();
-		}
-		loc.SegmentedMap.RefreshSummaries();
 }).catch(function (error) {
 		loc.ResetClippingRequest(args);
 		err.errDialog('CreateClipping', 'crear la región seleccionada', error);

@@ -27,7 +27,7 @@
 				<tr v-on:click="clickLabel(label)" v-for="label in variable.ValueLabels" class="hand" :key="label.Id">
 					<template v-if="displayLabel(label)">
 						<template v-if="label.Visible" class="labelRow">
-							<td class="dataBox">
+							<td class="dataBox center">
 								<div v-if="label.Symbol" class="categoryIcon" :style="'border-color: ' + label.FillColor + '; background-color: ' + label.FillColor">
 									<span v-html="resolveIcon(label.Symbol)"></span>
 								</div>
@@ -41,7 +41,7 @@
 							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(getValue(label.Values, variable.ValueLabels), variable.Decimals) }}</td>
 						</template>
 						<template v-else class="labelRow">
-							<td class="dataBox action-muted">
+							<td class="dataBox action-muted center">
 								<div v-if="label.Symbol" class="categoryIcon categoryMuted">
 									<span v-html="resolveIcon(label.Symbol)"></span>
 								</div>

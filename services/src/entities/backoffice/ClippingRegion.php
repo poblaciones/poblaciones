@@ -59,6 +59,12 @@ class ClippingRegion
      * @ORM\Column(name="clr_no_autocomplete", type="boolean", precision=0, scale=0, nullable=false, unique=false)
      */
     private $NoAutocomplete;
+		    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="clr_index_code", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $IndexCode;
 
     /**
      * @var boolean
@@ -278,6 +284,31 @@ class ClippingRegion
     public function getNoAutocomplete()
     {
         return $this->NoAutocomplete;
+    }
+
+
+    /**
+     * Set indexCode
+     *
+     * @param boolean $indexCode
+     *
+     * @return ClippingRegion
+     */
+    public function setIndexCode($indexCode)
+    {
+        $this->IndexCode = $indexCode;
+
+        return $this;
+    }
+
+    /**
+     * Get indexCode
+     *
+     * @return boolean
+     */
+    public function getIndexCode()
+    {
+        return $this->IndexCode;
     }
 
     /**

@@ -1,7 +1,7 @@
 <template>
 	<div v-if="dt">
 		<feature-info :dt='detail' v-if='showDetail' @clickBack='doCloseInfo' />
-		<div class='panel card panel-body' v-else>
+		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')"  v-else>
 			<mp-close-button v-on:click="doClose" class="exp-hiddable-block" />
 
 			<div class='stats' style="padding-top: 8px">{{ dt.Type }}</div>
@@ -25,6 +25,7 @@ export default {
 	name: 'featureList',
 	props: [
 		'dt',
+		'enabled'
 	],
 	components: {
 		FeatureInfo,

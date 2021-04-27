@@ -141,7 +141,7 @@ MarkerFactory.prototype.createImageSubMarker = function (location, symbol, marke
 		size = 14;
 	} else if (marker.Frame === 'C') {
 		anchor = new this.MapsApi.google.maps.Point(7.5 * scale, 19.5 * scale);
-		size = 15.25;
+		size = 16;
 	} else if (marker.Frame === 'B') {
 		anchor = new this.MapsApi.google.maps.Point(9 * scale, 21 * scale);
 		size = 18;

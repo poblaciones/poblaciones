@@ -106,6 +106,7 @@ class SnapshotLookupModel
 		App::Db()->exec($sqlDelete);
 
 		VersionUpdater::Increment('LOOKUP_REGIONS');
+		VersionUpdater::Increment('LOOKUP_VIEW');
 
 		Profiling::EndTimer();
 	}
@@ -117,12 +118,13 @@ class SnapshotLookupModel
 		Profiling::BeginTimer();
 
 		$sqlInsert = "INSERT INTO snapshot_lookup_clipping_region_item (clc_clipping_region_item_id, clc_level, "
-							. "clc_full_parent, clc_full_ids, clc_caption, clc_location, clc_min_zoom, clc_max_zoom, clc_feature_ids, clc_population, clc_tooltip, clc_symbol) ";
+							. "clc_full_parent, clc_full_ids, clc_caption, clc_code, clc_location, clc_min_zoom, clc_max_zoom, clc_feature_ids, clc_population, clc_tooltip, clc_symbol) ";
 
 		// En el siguiente select trae los clipping_region_item que no tengan clr_no_autocomplete en true. Al traerlos
 		// les agrega información de geographyItem a los que tengan una relación de 1 a 1 con la tabla de
 		// geographyItem (ej Salta => Salta). Para todos, calcula desde geography el population.
-		$sql = $sqlInsert . "select cli_id, cli_parent_id, clr_caption, '0', cli_caption, cli_centroid, " .
+		$sql = $sqlInsert . "select cli_id, cli_parent_id, clr_caption, '0', cli_caption, (CASE WHEN
+																		clr_index_code = 1 THEN cli_code ELSE NULL END), cli_centroid, " .
 															"clr_labels_min_zoom, clr_labels_max_zoom, featureIds, population, clr_caption, clr_symbol " .
 															"FROM clipping_region_item, clipping_region, " .
 															"(SELECT	clipping_region_item_id, GROUP_CONCAT(geography_item_id SEPARATOR ',') featureIds,
@@ -148,6 +150,7 @@ class SnapshotLookupModel
 		}
 
 		VersionUpdater::Increment('LOOKUP_REGIONS');
+		VersionUpdater::Increment('LOOKUP_VIEW');
 
 		$ver->SetUpdated();
 

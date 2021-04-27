@@ -3,20 +3,20 @@
 		<div v-show='hasContent && !collapsed' class='left-panelPositionEnum' :style="{ width: width + 'px' }">
 			<div v-if="isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :featureInfo='Full' v-if='isFullList' @clickClose='doClose'/>
-					<feature-info :featureInfo='Full' v-if='isFullInfo' @clickClose='doClose'/>
+				<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose'/>
+					<feature-info :featureInfo='Full' v-if='isFullInfo' :enabled="enabled" @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panTop" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :featureInfo='Top' v-if='isTopList' @clickClose='doClose'/>
-					<feature-info :featureInfo='Top' v-if='isTopInfo' @clickClose='doClose'/>
+				<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose'/>
+					<feature-info :featureInfo='Top' v-if='isTopInfo' :enabled="enabled" @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panBottom" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :featureInfo='Bottom' v-if='isBottomList' @clickClose='doClose'/>
-					<feature-info :featureInfo='Bottom' v-if='isBottomInfo' @clickClose='doClose'/>
+				<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose'/>
+					<feature-info :featureInfo='Bottom' v-if='isBottomInfo' :enabled="enabled" @clickClose='doClose'/>
 				</transition>
 			</div>
 		</div>
@@ -47,6 +47,7 @@ export default {
 			Top: null,
 			Bottom: null,
 			Full: null,
+			enabled: true,
 			isFullFront: true,
 			onlyFull: false,
 			split: null,
@@ -161,6 +162,12 @@ export default {
 				return;
 			}
 			this.doAdd(featureInfo, 'Bottom', index);
+		},
+		Enable() {
+			this.enabled = true;
+		},
+		Disable() {
+			this.enabled = false;
 		},
 		doAdd(featureInfo, panelPositionEnum, index) {
 			if(this.onlyFull) {
