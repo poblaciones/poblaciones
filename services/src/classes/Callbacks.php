@@ -10,15 +10,15 @@ class Callbacks extends FrameworkCallbacks
 	public static $AddressQueried = 0;
 	public static $MapsOpened = 0;
 
-	public function RenderTemplate($template, $vals = null)
+	public function RenderTemplate(string $template, $vals = []) : void
 	{
-		return App::RenderResponse($template, $vals);
+		App::RenderResponse($template, $vals);
 	}
-	public function RenderMessage($template, $vals = null)
+	public function RenderMessage(string $template, $vals = []) : string
 	{
 		return App::RenderMessage($template, $vals);
 	}
-	public function EndRequest()
+	public function EndRequest() : void
 	{
 		App::EndRequest();
 	}
@@ -26,11 +26,11 @@ class Callbacks extends FrameworkCallbacks
 	{
 		return App::Db();
 	}
-	public function ExtraHitsLabels()
+	public function ExtraHitsLabels() : array
 	{
 		return ['MapsOpened', 'AddressQuery', 'Usuarios únicos'];
 	}
-	public function ExtraHits()
+	public function ExtraHits() : array
 	{
 		return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession ];
 	}
