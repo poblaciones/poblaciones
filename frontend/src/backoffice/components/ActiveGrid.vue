@@ -16,7 +16,7 @@
 
       <JqxGrid
         ref="activeGrid"
-        :width="700"
+        :width="gridwidth"
 				:height="(showingErrors ? 300 : 350)"
         @bindingcomplete="bindingcomplete($event)"
         :virtualmode="true"
@@ -118,6 +118,10 @@ export default {
 		latlon: Object,
 		code: Number,
 		polygon: Boolean,
+		gridwidth: {
+			type: Number,
+			default: 700
+		}
   },
 	mounted() {
 		if (this.Dataset !== null && this.Dataset.Columns !== null) {

@@ -9,7 +9,7 @@
 
 		<div class="md-layout md-gutter">
 			<div style="position: relative">
-				<div v-if="Work.CanEdit()" style="position: absolute; right: -55px">
+				<div v-if="Work.CanEdit()" style="position: absolute; left: 850px">
 					<md-button @click="upOnClick()" class="md-icon-button" :disabled="upDisabled">
 						<md-icon>arrow_upward</md-icon>
 					</md-button>
@@ -381,9 +381,11 @@ export default {
 		deleteOnClick() {
 			let loc = this;
 			let selectedRows = this.selectedIds();
+
 			loc.showWait();
 			this.Dataset.DeleteColumns(selectedRows).then(function () {
 				loc.hideWait();
+				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedDataColumnIds(selectedRows);
 				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds(selectedRows);
 				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedSequenceIds(selectedRows);
 				loc.Grid.clearselection();

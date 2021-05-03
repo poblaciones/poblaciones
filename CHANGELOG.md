@@ -1,6 +1,9 @@
 [CURRENT]
 - Fix: cambio de etiqueta en variable no elimina categorías de simbología.
 - Filtro para dataset x indicador.
+- Búsqueda por código (departamento, radio).
+- Fix: delimita por país la búsqueda de direcciones.
+- Fix: cálculo de área en polígonos con huecos.
 
 2021-04-13
 - Segmentación de delimitaciones por selección.

@@ -67,7 +67,7 @@ ScaleStates.prototype.applySymbols = function (variable, previousVisibilities) {
 };
 
 ScaleStates.prototype.applyAttribute = function (variable, previousValues, attribute) {
-	if (!variable.Values) {
+	if (!variable.Values || !previousValues) {
 		return;
 	}
 	var valuesNoNullElement = this.ScaleGenerator.GetValuesNoNullElement(variable);

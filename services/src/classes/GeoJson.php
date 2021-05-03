@@ -4,6 +4,7 @@ namespace helena\classes;
 
 use minga\framework\Str;
 use minga\framework\PublicException;
+use minga\framework\Profiling;
 
 use Location\Processor\Polyline\SimplifyDouglasPeucker;
 use Location\Line;
@@ -99,6 +100,7 @@ class GeoJson
 	}
 	public function GenerateFromBinary($results, $getCentroids = false, $project = false, $hasCaption = false)
 	{
+		Profiling::BeginTimer();
 		$geojson = array(
 			'type' => 'FeatureCollection',
 			'features' => array(),
@@ -114,6 +116,7 @@ class GeoJson
 			}
 		}
 		$geojson['features'] = $features;
+		Profiling::EndTimer();
 		return $geojson;
 	}
 	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false, $hasCaption = false)

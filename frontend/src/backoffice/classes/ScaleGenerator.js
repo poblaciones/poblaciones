@@ -78,6 +78,28 @@ ScaleGenerator.prototype.RegenAndSaveVariable = function (level, variable) {
 	});
 };
 
+ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedDataColumnIds = function (dataColumnIds) {
+	// Esto toma los casos en que se removió una variable
+	// de una columna que se está usando como cutColumn
+	for (var i = 0; i < this.Dataset.MetricVersionLevels.length; i++) {
+		var level = this.Dataset.MetricVersionLevels[i];
+		for (var q = 0; q < dataColumnIds.length; q++) {
+			var dataColumnId = dataColumnIds[q];
+			for (var n = 0; n < level.Variables.length; n++) {
+				var variable = level.Variables[n];
+				if (variable.Data === 'O' && variable.DataColumn && variable.DataColumn.Id === dataColumnId) {
+					variable.DataColumn = null;
+					variable.Data = 'N';
+					variable.Symbology.CutMode = 'S';
+					arr.Crop(variable.Values, 0);
+					this.CreateVariableCategories(level, variable, null);
+					this.Dataset.UpdateVariable(level, variable);
+				}
+			}
+		}
+	}
+};
+
 ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds = function (cutColumnIds) {
 	// Esto toma los casos en que se removió una variable
 	// de una columna que se está usando como cutColumn
@@ -98,17 +120,16 @@ ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds = f
 	}
 };
 
-
 ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedSequenceIds = function (sequenceIds) {
 	// Esto toma los casos en que se removió una variable
 	// de una columna que se está usando como cutColumn
 	for(var i = 0; i < this.Dataset.MetricVersionLevels.length; i++) {
 		var level = this.Dataset.MetricVersionLevels[i];
 		for(var q = 0; q < sequenceIds.length; q++) {
-			var sequenceId = sequenceIds[q];
+			var sequenceId = parseInt(sequenceIds[q]);
 			for(var n = 0; n < level.Variables.length; n++) {
 				var variable = level.Variables[n];
-				if (variable.Symbology.SequenceColumn.Id === sequenceId) {
+				if (variable.Symbology.SequenceColumn && variable.Symbology.SequenceColumn.Id === sequenceId) {
 					variable.Symbology.IsSequence = 'S';
 					variable.Symbology.SequenceColumn = null;
 					this.Dataset.UpdateVariable(level, variable);

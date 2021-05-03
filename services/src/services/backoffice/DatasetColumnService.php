@@ -2,6 +2,8 @@
 
 namespace helena\services\backoffice;
 
+use minga\framework\Arr;
+use minga\framework\Str;
 use minga\framework\PublicException;
 use minga\framework\Profiling;
 
@@ -157,6 +159,9 @@ class DatasetColumnService extends DbSession
 										 " . $this->conditionalResetter('vsy_sequence_column_id', $colsId) . "
 									WHERE mvl_dataset_id = ?";
 		App::Db()->exec($queryCols, array($datasetId));
+		$fixCutMode = "UPDATE draft_symbology JOIN draft_variable ON mvv_symbology_id = vsy_id JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
+										 SET vsy_cut_mode = 'S' WHERE mvl_dataset_id = ? AND vsy_cut_mode = 'V' AND vsy_cut_column_id is null";
+		App::Db()->exec($fixCutMode, array($datasetId));
 		// 4. Pone en null las referencias circulares a columnas
 		$circularCols = "UPDATE draft_dataset_column SET " .
 											$this->conditionalResetter('dco_aggregation_weight_id', $colsId) . "
@@ -174,17 +179,9 @@ class DatasetColumnService extends DbSession
 									WHERE mvl_dataset_id = ?";
 		App::Db()->exec($queryCols, array($datasetId));
 
-		// Elimina variables cuyas columnas que haya quedado como Other y en nulo
-		$deleteVariableCategories = "DELETE draft_variable_value_label FROM  draft_variable_value_label
-							JOIN draft_variable ON mvv_id = vvl_variable_id JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
-								 WHERE mvv_data_column_id IS NULL AND mvv_data = 'O' AND mvl_dataset_id = ?";
-		App::Db()->exec($deleteVariableCategories, array($datasetId));
-		$deleteVariables = "DELETE draft_variable FROM  draft_variable JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
-								 WHERE mvv_data_column_id IS NULL AND mvv_data = 'O' AND mvl_dataset_id = ?";
-		App::Db()->exec($deleteVariables, array($datasetId));
-		$deleteVariableSymbology = "DELETE draft_symbology FROM draft_symbology
-							WHERE NOT EXISTS (SELECT * FROM draft_variable WHERE mvv_symbology_id = vsy_id)";
-		App::Db()->exec($deleteVariableSymbology, array($datasetId));
+		$fixDataCols = "UPDATE draft_variable JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
+								 SET mvv_data = 'N' WHERE mvv_data_column_id IS NULL AND mvv_data = 'O' AND mvl_dataset_id = ?";
+		App::Db()->exec($fixDataCols, array($datasetId));
 
 		$fixNormalizationCols = "UPDATE draft_variable JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
 								 SET mvv_normalization = null WHERE mvv_normalization_column_id IS NULL AND mvv_normalization = 'O' AND mvl_dataset_id = ?";

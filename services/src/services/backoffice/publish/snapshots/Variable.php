@@ -460,9 +460,9 @@ class Variable
 				break;
 			case SpecialColumnEnum::AreaKm2:
 				if ($datatasetType == DatasetTypeEnum::Shapes)
-					$field = "area_m2 / 1000000";
+					$field = "(area_m2 / 1000000)";
 				else
-					$field = "gei_area_m2 / 1000000";
+					$field = "(gei_area_m2 / 1000000)";
 				break;
 			case SpecialColumnEnum::Children:
 				$field = "gei_children";
