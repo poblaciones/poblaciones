@@ -339,17 +339,14 @@ class cHandle extends cPublicController
 		{
 			if ($version->Version->WorkId === $workId)
 			{
-				$maxGeography = 0;
-				$maxTable = '';
 				foreach($version->Levels as $level)
 				{
 					// el version lo tiene que acompañar (para lo de regiones) del
 					// geographyId su level más bajo
-					if ($level->GeographyId > $maxGeography)
-					{
-						$maxTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-						$maxGeography = $level->GeographyId;
-					}
+					$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
+					if (!in_array($snapshotTable, $outDatasetTables))
+						$outDatasetTables[] = $snapshotTable;
+
 					foreach($level->Variables as $variable)
 					{
 						$line = $variable->Name;
@@ -364,8 +361,6 @@ class cHandle extends cPublicController
 						$variables[] = $fullName;
 					}
 				}
-				if ($maxTable != '' && !in_array($maxTable, $outDatasetTables))
-						$outDatasetTables[] = $maxTable;
 			}
 		}
 		$this->AddValue("variables", $variables);

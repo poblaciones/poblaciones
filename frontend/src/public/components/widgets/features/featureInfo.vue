@@ -132,6 +132,9 @@ export default {
 			e.preventDefault();
 			this.$emit('clickClose', e, this.featureInfo.Key.Id);
 		},
+		previous() {
+			window.SegMap.InfoWindow.Previous();
+		},
 		next() {
 			window.SegMap.InfoWindow.Next();
 		},

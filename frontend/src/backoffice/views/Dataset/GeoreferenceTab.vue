@@ -182,9 +182,22 @@ export default {
 		},
 		ResolveRootCaptions(list) {
 			var ret = [];
+			// MArca a los que tienen padres y etiqueta de root
+			for (var n = 0; n < list.length; n++) {
+				if (list[n].RootCaption !== null && list[n].ParentId !== null) {
+					list[n].ParentId = 0;
+				}
+			}
+			// Pone a los de nivel cero
 			for(var n = 0; n < list.length; n++) {
-				if (list[n].ParentId === null ) {
+				if (list[n].ParentId === null) {
 						this.classifyChildrenRecursive(ret, list[n], list, list[n]);
+				}
+			}
+			// Pone al final a los que tienen padres y etiqueta de root
+			for (var n = 0; n < list.length; n++) {
+				if (list[n].ParentId === 0) {
+					this.classifyChildrenRecursive(ret, list[n], list, list[n]);
 				}
 			}
 			return ret;

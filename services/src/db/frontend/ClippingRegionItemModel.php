@@ -93,7 +93,6 @@ class ClippingRegionItemModel extends BaseModel
 						" . ($parentId ? ' AND cli_parent_id = ' . $parentId : '') . "
 						GROUP BY cli_id , cli_caption, cli_parent_id, clr_id, clr_caption
 						ORDER BY clr_caption, clr_id, cli_caption, cli_id";
-
 		$ret = App::Db()->fetchAll($sql);
 		Profiling::EndTimer();
 		return $ret;
