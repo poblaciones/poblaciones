@@ -77,7 +77,7 @@ class cHandle extends cPublicController
 
 		if (Request::IsGoogle() || Params::Get("debug"))
 		{
-			Performance::SetController('handleGoogle', 'get', true);
+			Performance::SetController('handle/GoogleCrawler', 'get', true);
 
 			if ($metricId !== null)
 				$this->ShowWorkMetric($workId, $metricId, $regionItemId);

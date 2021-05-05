@@ -5,26 +5,12 @@ use helena\db\frontend\MetadataModel;
 
 use helena\services\frontend as services;
 use helena\services\common as commonServices;
+$controller = new commonServices\MetadataService();
 
 use helena\classes\App;
 use helena\classes\Session;
 use minga\framework\Params;
 
-
-// ej. http://mapas/map/3701/metadata
-App::$app->get('/map/metadata', function (Request $request) {
-	$controller = new commonServices\MetadataService();
-	$workId = Params::CheckParseIntValue(Params::CheckMandatoryValue(Params::FromPath(2)));
-	Session::$AccessLink = Params::Get('l');
-
-	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
-
-	$workService = new services\WorkService();
-	$work = $workService->GetWorkOnly($workId);
-	$metadataId = $work->Metadata->Id;
-
-	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
-});
 // ej. http://mapas/services/metadata/GetMetadataFile?m=12&f=4
 App::$app->get('/services/metadata/GetMetadataFile', function (Request $request) {
 	$controller = new commonServices\MetadataService();

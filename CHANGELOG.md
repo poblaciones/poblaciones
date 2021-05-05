@@ -4,6 +4,10 @@
 - Búsqueda por código (departamento, radio).
 - Fix: delimita por país la búsqueda de direcciones.
 - Fix: cálculo de área en polígonos con huecos.
+- Fix: orden códigos postales en georreferenciar.
+- Fix: navegación de items (funcionaba bien ir al siguiente pero no al anterior).
+- Fix: crawler por regiones para indicadores con múltiples niveles.
+- Fix: obtención de metadatos por la ruta /map/[id]/metadata no estaba funcionando.
 
 2021-04-13
 - Segmentación de delimitaciones por selección.

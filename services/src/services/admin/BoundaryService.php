@@ -59,8 +59,18 @@ class BoundaryService extends BaseService
 	public function UpdateBoundary($boundary)
 	{
 		Profiling::BeginTimer();
-		App::Orm()->Save($boundary);
 
+		$metadata = $boundary->getMetadata();
+		if ($metadata != null)
+		{
+			if (!$boundary->getId())
+			{
+				$metadata->setCreate(new \DateTime());
+			}
+			$metadata->setUpdate(new \DateTime());
+			App::Orm()->Save($metadata);
+		}
+		App::Orm()->Save($boundary);
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();
 		VersionUpdater::Increment('FAB_METRICS');

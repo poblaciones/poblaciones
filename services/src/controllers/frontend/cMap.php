@@ -7,6 +7,8 @@ use minga\framework\Params;
 use minga\framework\Request;
 use minga\framework\PublicException;
 
+use helena\services\common\MetadataService;
+use helena\services\frontend\WorkService;
 use helena\classes\Session;
 use helena\classes\Statistics;
 use helena\controllers\common\cPublicController;
@@ -33,10 +35,15 @@ class cMap extends cPublicController
 		// Si hay ruta de obra, se fija si está permitida
 		$this->CheckWorkId();
 
-		// Guarda el hit
 		if ($this->workId)
-			Statistics::StoreLanding($this->workId);
+		{
+			// Devuelve metadatos ej. http://mapas/map/3701/metadata
+			$res = $this->ResolveMetadataRequest();
+			if ($res) return $res;
 
+			// Guarda el hit
+			Statistics::StoreLanding($this->workId);
+		}
 		// Renderiza el html
 		$this->AddValue('google_maps_key', Context::Settings()->Keys()->GoogleMapsKey);
 		$this->AddValue('google_analytics_key', Context::Settings()->Keys()->GoogleAnalyticsKey);
@@ -48,6 +55,21 @@ class cMap extends cPublicController
     return $this->Render('index.html.twig');
   }
 
+	private function ResolveMetadataRequest()
+	{
+		$level3 = Request::GetThirdUriPart();
+		if ($level3 == "metadata")
+		{
+			$controller = new MetadataService();
+			$workService = new WorkService();
+			$work = $workService->GetWorkOnly($this->workId);
+			$metadataId = $work->Metadata->Id;
+
+			return $controller->GetMetadataPdf($metadataId, null, false, $this->workId);
+		}
+		else
+			return null;
+	}
 	private function CheckWorkId()
 	{
 		$level2 = Request::GetSecondUriPart();
