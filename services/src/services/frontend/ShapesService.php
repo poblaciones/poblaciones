@@ -9,12 +9,14 @@ use helena\classes\GlobalTimer;
 use helena\caches\DatasetShapesCache;
 use minga\framework\Context;
 use helena\classes\Clipper;
+use helena\classes\ClipperRound;
 
 use helena\db\frontend\SnapshotShapesModel;
 use helena\db\frontend\DatasetDownloadModel;
 use helena\db\frontend\GeographyModel;
 use helena\entities\frontend\clipping\FeaturesInfo;
 use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\geometries\Coordinate;
 
 
 class ShapesService extends BaseService
@@ -22,7 +24,7 @@ class ShapesService extends BaseService
 	// Los niveles de zoom se mapean con la calidad de imagen
 	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, z[7 a 9] = C3, z[10] = C4, z>10 = C5.
-public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
+public function GetDatasetShapes($datasetId, $x, $y, $z)
 	{
 		$data = null;
 		$this->CheckNotNullNumeric($datasetId);
@@ -30,21 +32,21 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 		$this->CheckNotNullNumeric($y);
 		$this->CheckNotNullNumeric($z);
 
-		$key = DatasetShapesCache::CreateKey($x, $y, $z, $b);
+		$key = DatasetShapesCache::CreateKey($x, $y, $z);
 
 		if (DatasetShapesCache::Cache()->HasData($datasetId, $key, $data))
 		{
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateDatasetShapes($datasetId, $x, $y, $z, $b);
+		$data = $this->CalculateDatasetShapes($datasetId, $x, $y, $z);
 
 		DatasetShapesCache::Cache()->PutData($datasetId, $key, $data);
 
 		return $data;
 	}
 
-	private function CalculateDatasetShapes($datasetId, $x, $y, $z, $b)
+	private function CalculateDatasetShapes($datasetId, $x, $y, $z)
 	{
 		$table = new SnapshotShapesModel();
 		$datasetModel = new DatasetDownloadModel();
@@ -52,30 +54,30 @@ public function GetDatasetShapes($datasetId, $x, $y, $z, $b)
 		//$table->tableName	= $dataset['dat_table'];
 		$zoom = $z;
 
-		if ($b != null)
-		{
-			$envelope = Envelope::TextDeserialize($b);
-		}
-		else
-		{
-			$envelope = Envelope::FromXYZ($x, $y, $z);
-		}
+		$envelope = Envelope::FromXYZ($x, $y, $z);
 
 		$cartoTable = new GeographyModel();
 		$geographyId = $dataset['dat_geography_id'];
 		$carto = $cartoTable->GetGeographyInfo($geographyId);
 		$getCentroids = ($carto['geo_min_zoom'] == null || $z >= $carto['geo_min_zoom']);
 
-		$rows = $table->GetShapesByEnvelope($datasetId, $envelope, $zoom, $getCentroids);
+		$rows = $table->GetShapesByEnvelope($datasetId, $envelope, $getCentroids);
 
-		$data = FeaturesInfo::FromRows($rows, $getCentroids, false, $zoom);
+		$project = true;
+		$data = FeaturesInfo::FromRows($rows, $getCentroids, $project, $zoom, false, $envelope);
 
 		// recorta el cuadrado
 		$clipper = new Clipper();
+		if ($project)
+		{
+			$envelope = new Envelope(new Coordinate(0,0), new Coordinate(1024, 1024));
+			$clipper = new ClipperRound();
+		}
+
 		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $envelope);
 
 		$gradientId = $carto['gradient_id'];
-		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b)
+		if (Context::Settings()->Map()->UseGradients && $gradientId)
 		{
 			$controller = new GradientService();
 			$gradientLimit = $carto['max_zoom_level'];

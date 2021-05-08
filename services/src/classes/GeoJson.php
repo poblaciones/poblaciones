@@ -14,6 +14,8 @@ use Location\Polyline;
 class GeoJson
 {
 	const PRECISION = 6;
+	const TILE_SIZE = 256;
+	const TILE_PRJ_SIZE = 8192;
 
 	public function Generate($results)
 	{
@@ -80,25 +82,46 @@ class GeoJson
 			}
 			return $ret;
 	}
-	public static function ProjectRecursive($arr)
+
+	public static function ProjectEnvelope($env)
+	{
+		return new \helena\entities\frontend\geometries\Envelope(self::ProjectCoordinate($env->Min), self::ProjectCoordinate($env->Max));
+	}
+
+	public static function ProjectCoordinate($coord)
+	{
+		$point = [$coord->Lon, $coord->Lat];
+		$prj = self::ProjectLocation($point);
+		return new \helena\entities\frontend\geometries\Coordinate($prj[1], $prj[0]);
+	}
+
+	public static function ProjectRecursive($arr, $projectedEnvelope = null)
 	{
 		if (sizeof($arr) == 0) return $arr;
 
-		if (is_array($arr[0]))
+		$ret = array();
+		$arePoints = !is_array($arr[0][0]);
+		if ($arePoints)
 		{
-			$ret = array();
+			$last = null;
 			foreach($arr as $a)
 			{
-				$ret[] = self::ProjectRecursive($a);
+				$p = self::ProjectLocation($a, $projectedEnvelope);
+				if ($last === null || $last[0] !== $p[0] || $last[1] !== $p[1])
+				{
+					$ret[] = $p;
+					$last = $p;
+				}
 			}
-			return $ret;
 		}
 		else
-		{
-			return self::ProjectLocation($arr);
-		}
+			foreach($arr as $a)
+			{
+				$ret[] = self::ProjectRecursive($a, $projectedEnvelope);
+			}
+		return $ret;
 	}
-	public function GenerateFromBinary($results, $getCentroids = false, $project = false, $hasCaption = false)
+	public function GenerateFromBinary($results, $getCentroids = false, $project = false, $hasCaption = false, $projectEnvelope = null)
 	{
 		Profiling::BeginTimer();
 		$geojson = array(
@@ -107,9 +130,10 @@ class GeoJson
 			'projected' => $project
 		);
 		$features = array();
+		$projectedEnvelope = ($project ? self::ProjectEnvelope($projectEnvelope) : null);
 		foreach($results as $res)
 		{
-			$feature = $this->GenerateFeatureFromBinary($res, true, $getCentroids, $project, $hasCaption);
+			$feature = $this->GenerateFeatureFromBinary($res, true, $getCentroids, $project, $hasCaption, $projectedEnvelope);
 			if ($feature != null)
 			{
 				$features[] = $feature;
@@ -119,7 +143,7 @@ class GeoJson
 		Profiling::EndTimer();
 		return $geojson;
 	}
-	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false, $hasCaption = false)
+	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false, $hasCaption = false, $projectedEnvelope = null)
 	{
 		if (array_key_exists('valueClipped', $row))
 			$geometry = $row['valueClipped'];
@@ -152,7 +176,7 @@ class GeoJson
 		$ret['properties'] = $properties;
 		}
 		if ($project)
-			$coordinates = self::ProjectRecursive($geometry->asArray());
+			$coordinates = self::ProjectRecursive($geometry->asArray(), $projectedEnvelope);
 		else
 			$coordinates = $geometry->asArray(); //self::ReallocRecursive($geometry->asArray());
 
@@ -163,7 +187,7 @@ class GeoJson
 		return $ret;
 	}
 
-	private static function ProjectLocation($point)
+	private static function ProjectLocation($point, $projectedEnvelope = null)
 	{
 		if (sizeof($point) !== 2) throw new PublicException('La coordenada no se encuentra completa.');
 		$lng = $point[0];
@@ -172,7 +196,18 @@ class GeoJson
 		$siny = min(max(sin($lat * (pi() / 180)), -0.9999), 0.9999);
 		$x = 128 + $lng * (256 / 360);
 		$y = 128 + 0.5 * log((1 + $siny) / (1 - $siny)) * -(256 / (2 * pi()));
-		return array($x, $y);
+
+		if ($projectedEnvelope)
+			return self::scaleToBoundedPixel($x, $y, $projectedEnvelope);
+		else
+			return array($x, $y);
+	}
+
+	private static function scaleToBoundedPixel($x, $y, $projectedEnvelope) {
+			$xRange = $projectedEnvelope->Max->Lon - $projectedEnvelope->Min->Lon;
+			$yRange = $projectedEnvelope->Max->Lat - $projectedEnvelope->Min->Lat;
+			return [ round(($x - $projectedEnvelope->Min->Lon) / $xRange * self::TILE_PRJ_SIZE),
+							 round(($y - $projectedEnvelope->Min->Lat) / $yRange * self::TILE_PRJ_SIZE) ];
 	}
 
 	public function GenerateFromEllipsis($circle)

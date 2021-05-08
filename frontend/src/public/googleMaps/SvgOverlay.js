@@ -42,15 +42,6 @@ SvgOverlay.prototype.onAdd = function () {
 	var panes = this.getPanes();
 	// overlayMetric, overlayMouseTarget
 	panes.overlayMetric.appendChild(this.div_);
-
-	/*if (this.clickEvent) {
-		var countries = this.svg.childNodes;
-		var i;
-		for (i = 0; i < countries.length; i++) {
-			countries[i].addEventListener('click', this.clickEvent);
-			countries[i].style.cursor = 'pointer';
-		}
-	}*/
 };
 
 SvgOverlay.prototype.draw = function () {

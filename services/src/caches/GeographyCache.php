@@ -10,11 +10,9 @@ class GeographyCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Geographies/Features");
 	}
-	public static function CreateKey($x, $y, $zoom, $b, $page)
+	public static function CreateKey($x, $y, $zoom, $page)
 	{
 		$key = 'x' . $x . "y" . $y . "z" . $zoom . ($page > 0 ? "p" . $page : "");
-		if ($b != null)
-			$key .= 'b' . $b;
 		return $key;
 	}
 }

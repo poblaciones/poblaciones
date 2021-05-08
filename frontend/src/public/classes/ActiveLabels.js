@@ -4,7 +4,8 @@ import h from '@/public/js/helper';
 export default ActiveLabels;
 
 function ActiveLabels(config) {
-	this.$Segment = null;
+	this.objs = {};
+	this.objs.Segment = null;
 	this.index = -1;
 	this.isBaseMetric = true;
 	this.visible = true;
@@ -17,14 +18,14 @@ function ActiveLabels(config) {
 };
 
 ActiveLabels.prototype.ResolveSegment = function () {
-	this.$Segment = window.SegMap.Metrics.LabelsSegment;
+	this.objs.Segment = window.SegMap.Metrics.LabelsSegment;
 };
 ActiveLabels.prototype.Visible = function () {
 	return this.visible;
 };
 
 ActiveLabels.prototype.UpdateMap = function () {
-	if (window.SegMap && this.$Segment !== null) {
+	if (window.SegMap && this.objs.Segment !== null) {
 		window.SegMap.Metrics.UpdateMetric(this);
 	}
 };
@@ -33,32 +34,32 @@ ActiveLabels.prototype.CheckTileIsOutOfClipping = function() {
 	return false;
 };
 
-ActiveLabels.prototype.UseBlockedRequests = function (boundsRectRequired) {
-	return this.blockSize && !boundsRectRequired;
+ActiveLabels.prototype.UseBlockedRequests = function () {
+	return this.blockSize;
 };
 
-ActiveLabels.prototype.GetDataService = function (boundsRectRequired, seed) {
-	if (this.UseBlockedRequests(boundsRectRequired)) {
+ActiveLabels.prototype.GetDataService = function (seed) {
+	if (this.UseBlockedRequests()) {
 		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed / this.blockSize), path: '/services/frontend/clipping/GetBlockLabels', useStaticQueue: true };
 	} else {
 		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed), path: '/services/frontend/clipping/GetLabels', useStaticQueue: true };
 	}
 };
 
-ActiveLabels.prototype.GetDataServiceParams = function (coord, boundsRectRequired) {
+ActiveLabels.prototype.GetDataServiceParams = function (coord) {
 	var rev = window.SegMap.Signatures.BigLabels;
 	if (coord.z >= window.SegMap.Signatures.SmallLabelsFrom) {
 		rev += '_' + window.SegMap.Signatures.SmallLabels;
 	}
-	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return h.getBlockLabelsParams(window.SegMap.frame, coord.x, coord.y, boundsRectRequired, rev, this.blockSize);
+	if (this.UseBlockedRequests()) {
+		return h.getBlockLabelsParams(window.SegMap.frame, coord.x, coord.y, rev, this.blockSize);
 	} else {
-		return h.getLabelsParams(window.SegMap.frame, coord.x, coord.y, boundsRectRequired, rev);
+		return h.getLabelsParams(window.SegMap.frame, coord.x, coord.y, rev);
 	}
 };
 
-ActiveLabels.prototype.GetSubset = function (coord, boundsRectRequired) {
-	if (this.UseBlockedRequests(boundsRectRequired)) {
+ActiveLabels.prototype.GetSubset = function (coord) {
+	if (this.UseBlockedRequests()) {
 		return [coord.x, coord.y];
 	} else {
 		return null;

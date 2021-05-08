@@ -20,18 +20,8 @@ class Frame
 		$x = Params::GetIntMandatory('x');
 		$y = Params::GetIntMandatory('y');
 		$z = Params::GetIntRangeMandatory('z', 0, 23);
-		$b = Params::Get('b');
-		if ($b != null)
-		{
-			$ret->TileEnvelope = Envelope::TextDeserialize($b);
-		}
-		else
-		{
-			$ret->TileEnvelope = Envelope::FromXYZ($x, $y, $z);
-		}
+		$ret->TileEnvelope = Envelope::FromXYZ($x, $y, $z);
 		$ret->TileEnvelopeKey = "@x" . $x . "y" . $y . "z" . $z;
-		if ($b != null)
-			$ret->TileEnvelopeKey .= 'b' . $b;
 		return $ret;
 	}
 

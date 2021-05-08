@@ -224,8 +224,8 @@ export default {
   background-color: #fff;
   padding: 8px;
   border: 1px solid transparent;
-  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.18);
 }
 
 .dToolboxBox {

@@ -14,6 +14,7 @@ function FeatureSelector(mapsApi) {
 	this.tooltipTimer = null;
 	this.tooltipOverlay = null;
 	this.tooltipKillerTimer = null;
+	this.disabled = false;
 };
 
 FeatureSelector.prototype.SetSelectorCanvas = function () {
@@ -39,9 +40,10 @@ FeatureSelector.prototype.SetSelectorCanvas = function () {
 		fillColor: '#FF0000',
 		fillOpacity: 0
 	});
-	polygon.setMap(this.mapsApi.gMap);
-	//polygon.setZIndex(10);
-//	alert(polygon.getZIndex());
+
+	if (!this.disabled) {
+		polygon.setMap(this.mapsApi.gMap);
+	}
 	this.selectorCanvasEvents = [];
 	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'click', this.selectorClicked));
 	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'mouseout', this.resetTooltip));
@@ -93,6 +95,10 @@ FeatureSelector.prototype.createTooltipKiller = function () {
 };
 
 FeatureSelector.prototype.resetTooltip = function () {
+	if (this.disabled) {
+		return;
+	}
+
 	var loc = window.SegMap.MapsApi.selector;
 	if (loc.tooltipKillerTimer !== null) {
 		clearTimeout(loc.tooltipKillerTimer);
@@ -183,10 +189,17 @@ FeatureSelector.prototype.markerMouseOut = function (event) {
 };
 
 FeatureSelector.prototype.selectorMoved = function (event) {
+	if (this.disabled) {
+		return;
+	}
 	var loc = window.SegMap.MapsApi.selector;
 	if (loc.tooltipMarker !== null) {
 		return;
 	}
+	// TODO: sale porque no pasó 100 ms en el mismo lugar,
+	// o porque ya fue procesado ese lugar;
+	//return;
+
 	var feature = loc.getFeature(event);
 	loc.tooltipLocation = h.getPosition(event);
 	var pointer;

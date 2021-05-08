@@ -5,13 +5,12 @@ import err from '@/common/js/err';
 
 export default TileRequest;
 
-function TileRequest(queue, staticQueue, selectedMetricOverlay, coord, zoom, boundsRectRequired, key, div) {
+function TileRequest(queue, staticQueue, selectedMetricOverlay, coord, zoom, key, div) {
 	this.selectedMetricOverlay = selectedMetricOverlay;
 	this.coord = coord;
 	this.zoom = zoom;
 	this.key = key;
 	this.div = div;
-	this.boundsRectRequired = boundsRectRequired;
 	this.cancel1 = null;
 	this.cancel2 = null;
 	this.preCancel1Queue = null;
@@ -60,9 +59,9 @@ TileRequest.prototype.CancelHttpRequests = function () {
 TileRequest.prototype.GetTile = function () {
 	var loc = this;
 
-	this.url = this.selectedMetricOverlay.activeSelectedMetric.GetDataService(this.boundsRectRequired, this.coord.x);
-	this.params = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParams(this.coord, this.boundsRectRequired);
-	this.subset = (this.selectedMetricOverlay.activeSelectedMetric.GetSubset ? this.selectedMetricOverlay.activeSelectedMetric.GetSubset(this.coord, this.boundsRectRequired) : null);
+	this.url = this.selectedMetricOverlay.activeSelectedMetric.GetDataService(this.coord.x);
+	this.params = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParams(this.coord);
+	this.subset = (this.selectedMetricOverlay.activeSelectedMetric.GetSubset ? this.selectedMetricOverlay.activeSelectedMetric.GetSubset(this.coord) : null);
 
 	var info = this.url.path + JSON.stringify(this.params);
 
@@ -159,9 +158,6 @@ TileRequest.prototype.startGeographyRequest = function (queue) {
 	if (this.Page > 0) {
 		geographyParams.p = this.Page;
 	}
-	if (this.boundsRectRequired) {
-		geographyParams.b = this.boundsRectRequired;
-	};
 	var url = this.selectedMetricOverlay.geographyService.url;
 
 	url = h.selectMultiUrl(url, this.coord.x);

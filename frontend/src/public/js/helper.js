@@ -287,15 +287,12 @@ module.exports = {
 			}
 		}
 	},
-	getVariableFrameKey(v, x, y, z, boundsRectRequired) {
-		var args = 'v=' + v + '&' + this.getFrameKey(x, y, z, boundsRectRequired);
+	getVariableFrameKey(v, x, y, z) {
+		var args = 'v=' + v + '&' + this.getFrameKey(x, y, z);
 		return args;
 	},
-	getFrameKey(x, y, z, boundsRectRequired) {
+	getFrameKey(x, y, z) {
 		var args = 'x=' + x + '&y=' + y + '&z=' + z;
-		if (boundsRectRequired) {
-			args += '&b=1';
-		}
 		return args;
 	},
 	getSafeValue(arr, key, def) {
@@ -393,28 +390,22 @@ module.exports = {
 			n: name, w: revision
 		}, this.getFrameParams(frame));
 	},
-	getLabelsParams(frame, x, y, boundsRectRequired, revision) {
+	getLabelsParams(frame, x, y, revision) {
 		var ret = {
 			x: x,
 			y: y,
 			z: frame.Zoom,
 			w: revision
 		};
-		if (boundsRectRequired) {
-			ret.b = boundsRectRequired;
-		};
 		return ret;
 	},
-	getBlockLabelsParams(frame, x, y, boundsRectRequired, revision, size) {
+	getBlockLabelsParams(frame, x, y, revision, size) {
 		var ret = {
 			x: x - x % size,
 			y: y - y % size,
 			s: size,
 			z: frame.Zoom,
 			w: revision
-		};
-		if (boundsRectRequired) {
-			ret.b = boundsRectRequired;
 		};
 		return ret;
 	},
@@ -433,7 +424,7 @@ module.exports = {
 			element['on' + eventName] = handler;
 		}
 	},
-	getBoundaryParams(boundary, frame, x, y, boundsRectRequired, rev) {
+	getBoundaryParams(boundary, frame, x, y, rev) {
 		var ret = this.mergeObject({
 			a: boundary.properties.Id,
 			x: x,
@@ -441,12 +432,9 @@ module.exports = {
 			w: rev
 		}, this.getFrameParams(frame));
 		ret.e = null;
-		if (boundsRectRequired) {
-			ret.b = boundsRectRequired;
-		};
 		return ret;
 	},
-	getTileParams(metric, frame, x, y, boundsRectRequired) {
+	getTileParams(metric, frame, x, y) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({
 			l: metric.Metric.Id,
@@ -458,12 +446,9 @@ module.exports = {
 			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 		ret.e = null;
-		if (boundsRectRequired) {
-			ret.b = boundsRectRequired;
-		};
 		return ret;
 	},
-	getBlockTileParams(metric, frame, x, y, boundsRectRequired, size) {
+	getBlockTileParams(metric, frame, x, y, size) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({
 			l: metric.Metric.Id,
@@ -476,9 +461,6 @@ module.exports = {
 			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 		ret.e = null;
-		if (boundsRectRequired) {
-			ret.b = boundsRectRequired;
-		};
 		return ret;
 	},
 	resolveMultiUrl(servers, path) {

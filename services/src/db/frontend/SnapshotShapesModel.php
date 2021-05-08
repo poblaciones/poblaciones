@@ -14,7 +14,7 @@ class SnapshotShapesModel extends BaseModel
 		$this->tableName = 'undefined';
 		$this->idField = 'id';
 	}
-	public function GetShapesByEnvelope($datasetId, $envelope, $zoom, $getCentroids)
+	public function GetShapesByEnvelope($datasetId, $envelope, $getCentroids)
 	{
 		Profiling::BeginTimer();
 

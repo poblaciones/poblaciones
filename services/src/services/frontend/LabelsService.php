@@ -18,7 +18,7 @@ use minga\framework\Profiling;
 
 class LabelsService extends BaseService
 {
-	public function GetBlockLabels($x, $y, $z, $b)
+	public function GetBlockLabels($x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$data = null;
@@ -28,7 +28,7 @@ class LabelsService extends BaseService
 		$this->CheckNotNullNumeric($z);
 		$this->CheckNotNullNumeric($size);
 
-		$key = LabelsCache::CreateBlockKey($x, $y, $z, $size, $b);
+		$key = LabelsCache::CreateBlockKey($x, $y, $z, $size);
 
 		if (LabelsCache::Cache()->HasData($key, $data))
 		{
@@ -36,7 +36,7 @@ class LabelsService extends BaseService
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateBlockLabels($x, $y, $z, $size, $b);
+		$data = $this->CalculateBlockLabels($x, $y, $z, $size);
 
 		LabelsCache::Cache()->PutData($key, $data);
 		Profiling::EndTimer();
@@ -44,7 +44,7 @@ class LabelsService extends BaseService
 		return $data;
 	}
 
-	private function CalculateBlockLabels($x, $y, $z, $size, $b)
+	private function CalculateBlockLabels($x, $y, $z, $size)
 	{
 		Profiling::BeginTimer();
 
@@ -54,7 +54,7 @@ class LabelsService extends BaseService
 			$row = [];
 			for($iy = $y; $iy < $y + $size; $iy++)
 			{
-				$row[$iy] = $this->GetLabels($ix, $iy, $z, $b);
+				$row[$iy] = $this->GetLabels($ix, $iy, $z);
 			}
 			$blocks[$ix] = $row;
 		}
@@ -66,7 +66,7 @@ class LabelsService extends BaseService
 
 		return $ret;
 	}
-	public function GetLabels($x, $y, $z, $b)
+	public function GetLabels($x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$data = null;
@@ -74,7 +74,7 @@ class LabelsService extends BaseService
 		$this->CheckNotNullNumeric($y);
 		$this->CheckNotNullNumeric($z);
 
-		$key = LabelsCache::CreateKey($x, $y, $z, $b);
+		$key = LabelsCache::CreateKey($x, $y, $z);
 
 		if (LabelsCache::Cache()->HasData($key, $data))
 		{
@@ -82,7 +82,7 @@ class LabelsService extends BaseService
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateLabels($x, $y, $z, $b);
+		$data = $this->CalculateLabels($x, $y, $z);
 
 		LabelsCache::Cache()->PutData($key, $data);
 		Profiling::EndTimer();
@@ -90,19 +90,12 @@ class LabelsService extends BaseService
 		return $data;
 	}
 
-	private function CalculateLabels($x, $y, $z, $b)
+	private function CalculateLabels($x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$table = new SnapshotSearchModel();
 
-		if ($b != null)
-		{
-			$envelope = Envelope::TextDeserialize($b);
-		}
-		else
-		{
-			$envelope = Envelope::FromXYZ($x, $y, $z);
-		}
+		$envelope = Envelope::FromXYZ($x, $y, $z);
 
 		$size = $envelope->Size();
 		$extendedEnvelope = new Envelope(

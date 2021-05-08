@@ -23,7 +23,7 @@ class TileDataService extends BaseService
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
 	const TILE_SIZE = 256;
 
-	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
+	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z)
 	{
 		$s = Context::Settings()->Map()->TileDataBlockSize;
 		$blocks = [];
@@ -32,7 +32,7 @@ class TileDataService extends BaseService
 			$row = [];
 			for($iy = $y; $iy < $y + $s; $iy++)
 			{
-	 				$row[$iy] = $this->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $ix, $iy, $z, $b);
+	 				$row[$iy] = $this->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $ix, $iy, $z);
 			}
 			$blocks[$ix] = $row;
 		}
@@ -42,7 +42,7 @@ class TileDataService extends BaseService
 		return $ret;
 	}
 
-	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
+	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$data = null;
@@ -53,7 +53,7 @@ class TileDataService extends BaseService
 		$this->CheckNotNullNumeric($y);
 		$this->CheckNotNullNumeric($z);
 
-		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b);
+		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $x, $y, $z);
 
 		if ($frame->ClippingCircle == null && TileDataCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -65,7 +65,7 @@ class TileDataService extends BaseService
 			Performance::CacheMissed();
 		}
 
-		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b);
+		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z);
 
 		if ($frame->ClippingCircle == null)
 			TileDataCache::Cache()->PutData($metricId, $key, $data);
@@ -74,7 +74,7 @@ class TileDataService extends BaseService
 		return $data;
 	}
 
-	private function CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b)
+	private function CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -83,14 +83,8 @@ class TileDataService extends BaseService
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 
-		if ($b != null)
-		{
-			$frame->TileEnvelope = Envelope::TextDeserialize($b);
-		}
-		else
-		{
-			$frame->TileEnvelope = Envelope::FromXYZ($x, $y, $z);
-		}
+		$frame->TileEnvelope = Envelope::FromXYZ($x, $y, $z);
+
 		$hasDescriptions = $level->HasDescriptions;
 		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
 

@@ -82,12 +82,10 @@ class SpatialConditions
 	}
 	public static function ResolveRZoom($zoom)
 	{
-		// rango de 1 a 6, donde 1 es el menor nivel de detalle (polígonos livianos)
-		$rZoom = (int) (($zoom + 2) / 3);
-		if ($zoom > 10 || $rZoom > 5) $rZoom = 5;
-		if ($zoom >= 18) $rZoom = 6;
-		if ($zoom < 1) $rZoom = 1;
-		return $rZoom;
+		if ($zoom < 12)
+			return intval($zoom / 3) + 1;
+		else
+			return intval($zoom / 6) + 3;
 	}
 	public function CircleCondition($circle, $effectiveDatasetType)
 	{

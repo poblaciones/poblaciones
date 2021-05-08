@@ -6,6 +6,7 @@ use helena\caches\BoundaryCache;
 use helena\caches\BoundarySummaryCache;
 use helena\caches\SelectedBoundaryCache;
 use helena\classes\Clipper;
+use helena\classes\GeoJson;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\BoundaryModel;
@@ -16,7 +17,10 @@ use minga\framework\PublicException;
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
 
+use helena\classes\ClipperRound;
 use helena\db\frontend\MetadataModel;
+use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\geometries\Coordinate;
 
 use helena\entities\frontend\clipping\BoundaryInfo;
 use helena\entities\frontend\clipping\BoundarySummaryInfo;
@@ -51,11 +55,20 @@ class BoundaryService extends BaseService
 
 		$rows = $table->GetRows($frame);
 
-		$data = FeaturesInfo::FromRows($rows, true, false, $frame->Zoom, true);
+		$project = true;
+		$projectEnvelope = $frame->TileEnvelope;
+		$data = FeaturesInfo::FromRows($rows, true, $project, $frame->Zoom, true, $projectEnvelope);
 
 		// recorta el cuadrado
 		$clipper = new Clipper();
-		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $frame->TileEnvelope);
+
+		if ($project)
+		{
+			$projectEnvelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
+			$clipper = new ClipperRound();
+		}
+
+		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $projectEnvelope);
 
 		return $data;
 	}

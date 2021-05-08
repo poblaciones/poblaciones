@@ -307,7 +307,7 @@ export default {
 	left:0;
 	top:0;
 	overflow-y: auto;
-	box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 	z-index:1;
 	background-color: white;
 	user-select: text

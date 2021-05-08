@@ -44,8 +44,7 @@ App::$app->get('/services/frontend/clipping/GetLabels', function (Request $reque
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	$b = Params::Get('b');
-	return App::JsonImmutable($controller->GetLabels($x, $y, $z, $b));
+	return App::JsonImmutable($controller->GetLabels($x, $y, $z));
 });
 
 // ej. http://mapas/services/geographies/GetGeography?a=62&z=12&x=1380&y=2468
@@ -56,8 +55,7 @@ App::$app->get('/services/frontend/geographies/GetGeography', function (Request 
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
 	$p = Params::GetInt('p', 0);
-	$b = Params::Get('b');
-	$ret = $controller->GetGeography($levelId, $x, $y, $z, $b, $p);
+	$ret = $controller->GetGeography($levelId, $x, $y, $z, $p);
 
 	return App::JsonImmutable($ret);
 });
@@ -69,11 +67,10 @@ App::$app->get('/services/frontend/clipping/GetBlockLabels', function (Request $
 	$y = Params::GetIntMandatory('y');
 	$s = Params::GetIntMandatory('s');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	$b = Params::Get('b');
 	if (!Context::Settings()->Map()->UseLabelTileBlocks ||
 			$s !== Context::Settings()->Map()->LabelsBlockSize)
 			throw new PublicException('El tamaño de bloque de etiquetas solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
-	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z, $b));
+	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z));
 });
 
 App::$app->get('/services/GetConfiguration', function (Request $request) {

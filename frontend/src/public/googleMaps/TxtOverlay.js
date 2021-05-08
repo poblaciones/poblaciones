@@ -131,7 +131,8 @@ TxtOverlay.prototype.onAdd = function() {
 		div.style.top = position.y + 'px';
 	}
 	else {
-		div.style.display = 'none';
+		div.style.visibility = 'hidden';
+//		div.style.display = 'none';
 	}
 };
 

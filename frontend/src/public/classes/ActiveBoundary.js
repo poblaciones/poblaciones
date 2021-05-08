@@ -10,7 +10,8 @@ export default ActiveBoundary;
 ActiveBoundary.DEFAULT_COLOR = '#95a3c1';
 
 function ActiveBoundary(data) {
-	this.$Segment = null;
+	this.objs = {};
+	this.objs.Segment = null;
 	this.index = -1;
 	this.isBoundary = true;
 	this.visible = true;
@@ -25,7 +26,7 @@ function ActiveBoundary(data) {
 };
 
 ActiveBoundary.prototype.ResolveSegment = function () {
-	this.$Segment = window.SegMap.Metrics.PatternsSegment;
+	this.objs.Segment = window.SegMap.Metrics.PatternsSegment;
 };
 ActiveBoundary.prototype.Visible = function () {
 	return this.visible;
@@ -78,7 +79,7 @@ ActiveBoundary.prototype.GetStyleColorList = function() {
 };
 
 ActiveBoundary.prototype.UpdateMap = function () {
-	if (window.SegMap && this.$Segment !== null) {
+	if (window.SegMap && this.objs.Segment !== null) {
 		window.SegMap.Metrics.UpdateMetric(this);
 		window.SegMap.SaveRoute.UpdateRoute();
 	}
@@ -93,14 +94,14 @@ ActiveBoundary.prototype.CheckTileIsOutOfClipping = function() {
 	return false;
 };
 
-ActiveBoundary.prototype.GetDataService = function (boundsRectRequired, seed) {
+ActiveBoundary.prototype.GetDataService = function (seed) {
 	// h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed)
 	return { server: window.host, path: '/services/frontend/boundaries/GetBoundary', useStaticQueue: false };
 };
 
-ActiveBoundary.prototype.GetDataServiceParams = function (coord, boundsRectRequired) {
+ActiveBoundary.prototype.GetDataServiceParams = function (coord) {
 	var rev = window.SegMap.Signatures.Boundary;
-	return h.getBoundaryParams(this, window.SegMap.frame, coord.x, coord.y, boundsRectRequired, rev);
+	return h.getBoundaryParams(this, window.SegMap.frame, coord.x, coord.y, rev);
 };
 
 ActiveBoundary.prototype.Show = function () {

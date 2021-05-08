@@ -2,7 +2,8 @@ export default AbstractActiveMetric;
 
 function AbstractActiveMetric(selectedMetric) {
 	// IMPLEMENT
-	this.$Segment = null;
+	this.objs = {};
+	this.objs.Segment = null;
 	this.index = -1;
 	this.isBaseMetric = true;
 	this.KillDuplicateds = false;

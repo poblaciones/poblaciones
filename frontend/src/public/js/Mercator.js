@@ -1,6 +1,8 @@
 
 export default Mercator;
 
+const TILE_PRJ_SIZE = 8192;
+
 function Mercator() {
 	this.min = null;
 	this.max = null;
@@ -61,7 +63,7 @@ Mercator.prototype.ProjectGeoJsonFeatures = function(features) {
 		} else if (feature.geometry.type === 'Point') {
 			coords = this.ProjectSingleCoord(polygons);
 		}	else {
-			throw new Error('Tipo de geomeptry no válido (' + feature.geometry.type + ').');
+			throw new Error('Tipo de geometría no válido (' + feature.geometry.type + ').');
 		}
 
 		var geo = { type: feature.geometry.type, coordinates: coords };
@@ -98,7 +100,7 @@ Mercator.prototype.Project2LevelCoords = function (inCoords) {
 Mercator.prototype.ProjectSingleCoord = function (inCoord) {
 	var p = this.fromLatLngToPoint({ lat: inCoord[1], lng: inCoord[0] });
 	var r = this.scaleToBoundedPixel(p);
-	return [r.x, -r.y];
+	return [r.x, r.y];
 };
 
 Mercator.prototype.Project1LevelCoords = function (inCoords) {
@@ -108,7 +110,7 @@ Mercator.prototype.Project1LevelCoords = function (inCoords) {
 		var p = this.fromLatLngToPoint({ lat: inCoords[i][1], lng: inCoords[i][0] });
 		var r = this.scaleToBoundedPixel(p);
 		if (r.x !== last.x || r.y !== last.y) {
-			outCoords.push([r.x, -r.y]);
+			outCoords.push([r.x, r.y]);
 		}
 		last = r;
 	}
@@ -119,7 +121,7 @@ Mercator.prototype.scaleToBoundedPixel  = function (p) {
 	if (this.min) {
 		var xRange = this.max.x - this.min.x;
 		var yRange = this.max.y - this.min.y;
-		return { x: Math.round((p.x - this.min.x) / xRange * 256), y: Math.round((p.y - this.min.y) / yRange * 256) };
+		return { x: Math.round((p.x - this.min.x) / xRange * TILE_PRJ_SIZE), y: Math.round((p.y - this.min.y) / yRange * TILE_PRJ_SIZE) };
 	} else {
 		return p;
 	}
@@ -151,11 +153,6 @@ Mercator.prototype.getTileBounds = function (tile) {
 	return {
 		Min: this.fromLatLonToGoogleLatLng(this.fromPointToLatLng(min)),
 		Max: this.fromLatLonToGoogleLatLng(this.fromPointToLatLng(max))
-	};
-
-	return {
-		Min: window.SegMap.MapsApi.gMap.getProjection().fromPointToLatLng(min),
-		Max: window.SegMap.MapsApi.gMap.getProjection().fromPointToLatLng(max)
 	};
 };
 

@@ -34,17 +34,19 @@ BoundariesComposer.prototype.render = function (mapResults, dataResults, gradien
 	var parentAttributes = {
 		boundaryId: this.activeSelectedMetric.properties.Id,
 	};
-	var svg = this.CreateSVGOverlay(tileUniqueId, div, parentAttributes, filtered, projected, tileBounds, z, patternValue);
 
+	var svg = this.CreateSVGOverlay(tileUniqueId, div, parentAttributes, filtered, projected, tileBounds, z, patternValue);
 	if (svg !== null) {
-		var key = h.getFrameKey(x, y, z, this.MapsApi.TileBoundsRequired());
-		this.svgInTile[key] = svg;
+		this.SaveSvg(svg, x, y, z);
 	}
+};
+
+BoundariesComposer.prototype.GetSvgKey = function (x, y, z) {
+	return h.getFrameKey(x, y, z);
 };
 
 BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElement,
 										tileKey, tileBounds, filtered, colorMap) {
-	//var val = dataElement['ValueId'];
 	var val = 1;
 
 	// Lo agrega

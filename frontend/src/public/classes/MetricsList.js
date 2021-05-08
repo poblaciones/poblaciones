@@ -2,8 +2,7 @@ import arr from '@/common/js/arr';
 
 export default MetricsList;
 
-function MetricsList(map, selectedMetricCollection) {
-	this.map = map;
+function MetricsList(selectedMetricCollection) {
 	this.metrics = selectedMetricCollection;
 
 	this.BaseGeoShapesSegment = [];
@@ -47,20 +46,24 @@ MetricsList.prototype.InsertNonStandardMetric = function (activeMetric, i) {
 
 MetricsList.prototype.doInsert = function (activeMetric, i, insertInMetrics) {
 	activeMetric.ResolveSegment();
-	var segment = activeMetric.$Segment;
+	var segment = activeMetric.objs.Segment;
 	if (i === -1) {
 		i = segment.length;
 	}
 	if (activeMetric.Visible()) {
 		var segmentPos = this.CalculateSegmentPosition(segment, i);
 		arr.InsertAt(segment, segmentPos, activeMetric);
-		if (this.map.MapsApi !== null) {
+		if (window.SegMap.MapsApi !== null) {
 			var mapPos = this.CalculateMapPosition(segment, segmentPos);
-			this.map.MapsApi.InsertSelectedMetricOverlay(activeMetric, mapPos);
+			window.SegMap.MapsApi.InsertSelectedMetricOverlay(activeMetric, mapPos);
 		}
 	}
 	if (insertInMetrics) {
+		var keepObjs = activeMetric.objs;
+		delete activeMetric.objs;
 		arr.InsertAt(this.metrics, i, activeMetric);
+		activeMetric.objs = keepObjs;
+
 		this.updateMetricIndexes();
 		activeMetric.UpdateSummary();
 		activeMetric.UpdateRanking();
@@ -153,17 +156,17 @@ MetricsList.prototype.doRemove = function (activeMetric) {
 };
 
 MetricsList.prototype.removeFromSegment = function (activeMetric) {
-	if (activeMetric.$Segment == null) { return; }
+	if (activeMetric.objs.Segment == null) { return; }
 
-	if (this.map.MapsApi != null) {
-		var segmentPos = activeMetric.$Segment.indexOf(activeMetric);
+	if (window.SegMap.MapsApi != null) {
+		var segmentPos = activeMetric.objs.Segment.indexOf(activeMetric);
 		if (segmentPos !== -1) {
-			var mapPos = this.CalculateMapPosition(activeMetric.$Segment, segmentPos);
-			this.map.MapsApi.RemoveOverlay(mapPos);
+			var mapPos = this.CalculateMapPosition(activeMetric.objs.Segment, segmentPos);
+			window.SegMap.MapsApi.RemoveOverlay(mapPos);
 		}
 	}
-	arr.Remove(activeMetric.$Segment, activeMetric);
-	activeMetric.$Segment = null;
+	arr.Remove(activeMetric.objs.Segment, activeMetric);
+	activeMetric.objs.Segment = null;
 };
 
 MetricsList.prototype.ZoomChanged = function () {

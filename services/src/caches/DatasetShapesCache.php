@@ -10,11 +10,9 @@ class DatasetShapesCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Datasets/Shapes");
 	}
-	public static function CreateKey($x, $y,$zoom, $b)
+	public static function CreateKey($x, $y,$zoom)
 	{
 		$key = "x" . $x . "y" . $y . "z" . $zoom;
-		if ($b != null)
-			$key .= 'b' . $b;
 		return $key;
 	}
 }

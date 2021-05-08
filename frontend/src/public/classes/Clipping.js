@@ -5,28 +5,27 @@ import arr from '@/common/js/arr';
 
 export default Clipping;
 
-function Clipping(segmentedMap, frame, clipping) {
+function Clipping(frame, clipping) {
 	this.frame = frame;
 	this.clipping = clipping;
-	this.SegmentedMap = segmentedMap;
 	this.ClippingRequest = null;
 	this.ClippingCallback = null;
 	this.cancelCreateClipping = null;
 };
 
 Clipping.prototype.FitEnvelope = function(envelope) {
-	this.SegmentedMap.MapsApi.FitEnvelope(envelope);
+	window.SegMap.MapsApi.FitEnvelope(envelope);
 };
 
 Clipping.prototype.FitCurrentRegion = function() {
-	this.SegmentedMap.MapsApi.FitEnvelope(this.clipping.Region.Envelope);
+	window.SegMap.MapsApi.FitEnvelope(this.clipping.Region.Envelope);
 };
 
 Clipping.prototype.SetClippingCanvas = function (canvas) {
 	if (canvas !== null) {
-		this.SegmentedMap.MapsApi.SetClippingCanvas(canvas);
+		window.SegMap.MapsApi.SetClippingCanvas(canvas);
 	} else {
-		this.SegmentedMap.MapsApi.ClearClippingCanvas();
+		window.SegMap.MapsApi.ClearClippingCanvas();
 	}
 };
 
@@ -45,7 +44,7 @@ Clipping.prototype.ProcessFrameMoved = function (bounds) {
 
 Clipping.prototype.SetClippingCircle = function (clippingCircle) {
 	this.frame.ClippingCircle = clippingCircle;
-	this.SegmentedMap.ClearMyLocation();
+	window.SegMap.ClearMyLocation();
 	this.CreateClipping(true, true);
 };
 
@@ -76,14 +75,14 @@ Clipping.prototype.GetClippingLevels = function () {
 
 Clipping.prototype.ResetClippingCircle = function () {
 	this.frame.ClippingCircle = null;
-	this.SegmentedMap.MapsApi.ClearClippingCanvas();
+	window.SegMap.MapsApi.ClearClippingCanvas();
 	if (this.frame.ClippingRegionIds !== null) {
 		this.SetClippingRegion(this.frame.ClippingRegionIds, false);
 	} else {
 		this.ClippingChanged();
-		this.SegmentedMap.UpdateMap();
+		window.SegMap.UpdateMap();
 	}
-	this.SegmentedMap.SaveRoute.UpdateRoute();
+	window.SegMap.SaveRoute.UpdateRoute();
 };
 
 Clipping.prototype.ResetClippingRegion = function (regionToRemove) {
@@ -93,10 +92,10 @@ Clipping.prototype.ResetClippingRegion = function (regionToRemove) {
 		return;
 	}
 	this.frame.ClippingRegionIds = null;
-	this.SegmentedMap.MapsApi.ClearClippingCanvas();
+	window.SegMap.MapsApi.ClearClippingCanvas();
 	this.ClippingChanged();
-	this.SegmentedMap.SaveRoute.UpdateRoute();
-	this.SegmentedMap.UpdateMap();
+	window.SegMap.SaveRoute.UpdateRoute();
+	window.SegMap.UpdateMap();
 };
 Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, clipForZoomOnly, appendSelection) {
 	if (!window.Use.UseMultiselect) {
@@ -104,7 +103,7 @@ Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, c
 	}
 
 	this.frame.ClippingCircle = null;
-	this.SegmentedMap.ClearMyLocation();
+	window.SegMap.ClearMyLocation();
 	var newClippingRegionIds = clippingRegionId;
 	if (!Array.isArray(clippingRegionId)) {
 		clippingRegionId = parseInt(clippingRegionId, 10);
@@ -135,7 +134,7 @@ Clipping.prototype.ClippingChanged = function (doNotUpdateMap) {
 
 
 Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoomOnly, doNotUpdateMap) {
-	var args = h.getCreateClippingParams(this.SegmentedMap.frame, this.clipping, this.SegmentedMap.Signatures.Clipping);
+	var args = h.getCreateClippingParams(window.SegMap.frame, this.clipping, window.SegMap.Signatures.Clipping);
 	if (this.ClippingRequest === '*' || this.ClippingRequest === args) {
 		return;
 	}
@@ -145,29 +144,29 @@ Clipping.prototype.CreateClipping = function (fitRegion, moveCenter, clipForZoom
 		this.cancelCreateClipping('cancelled');
 	}
 	this.SetClippingRequest(args);
-	this.SegmentedMap.InvalidateSummaries();
+	window.SegMap.InvalidateSummaries();
 
 	const loc = this;
-	var url = h.resolveMultiUrl(this.SegmentedMap.Configuration.StaticServer, '/services/frontend/clipping/CreateClipping');
-	url = h.selectMultiUrl(url, this.SegmentedMap.frame.ClippingRegionIds);
+	var url = h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, '/services/frontend/clipping/CreateClipping');
+	url = h.selectMultiUrl(url, window.SegMap.frame.ClippingRegionIds);
 
-	this.SegmentedMap.Get(url, {
+	window.SegMap.Get(url, {
 		params: args,
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; })},
 		true
 	).then(function (res) {
 		loc.ResetClippingRequest(args);
 		if (clipForZoomOnly) {
-			loc.SegmentedMap.MapsApi.FitEnvelope(res.data.Envelope);
+			window.SegMap.MapsApi.FitEnvelope(res.data.Envelope);
 			loc.ResetClippingRegion();
 		} else {
 			loc.ResetClippingRequest(args);
 			loc.ProcessClipping(res.data, fitRegion, moveCenter);
 
 			if (!doNotUpdateMap) {
-				loc.SegmentedMap.UpdateMap();
+				window.SegMap.UpdateMap();
 			}
-			loc.SegmentedMap.RefreshSummaries();
+			window.SegMap.RefreshSummaries();
 		}
 }).catch(function (error) {
 		loc.ResetClippingRequest(args);
@@ -208,10 +207,10 @@ Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
 		this.cancelCreateClipping('cancelled');
 	}
 	this.SetClippingRequest('*');
-	this.SegmentedMap.MapsApi.ClearClippingCanvas();
-	this.SegmentedMap.RefreshSummaries();
-	this.SegmentedMap.Get(window.host + '/services/frontend/clipping/CreateClipping', {
-		params: h.getCreateClippingParamsByName(loc.frame, clippingName, this.SegmentedMap.Signatures.Clipping),
+	window.SegMap.MapsApi.ClearClippingCanvas();
+	window.SegMap.RefreshSummaries();
+	window.SegMap.Get(window.host + '/services/frontend/clipping/CreateClipping', {
+		params: h.getCreateClippingParamsByName(loc.frame, clippingName, window.SegMap.Signatures.Clipping),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelCreateClipping = c; }),
 	}).then(function (res) {
 		loc.ProcessClipping(res.data, fitRegion, fitRegion === true);
@@ -244,14 +243,14 @@ Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 		if (name) {
 			document.title = name;
 		} else {
-			document.title = this.SegmentedMap.DefaultTitle;
+			document.title = window.SegMap.DefaultTitle;
 		}
 		if (fitRegion) {
 			if (moveCenter) {
 				this.FitCurrentRegion();
 			}
 		}
-		this.SegmentedMap.UpdateMapLevels();
+		window.SegMap.UpdateMapLevels();
 		this.SetClippingCanvas(canvas);
 	}
 

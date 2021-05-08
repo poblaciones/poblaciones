@@ -63,12 +63,17 @@ DataShapeComposer.prototype.render = function (mapResults, dataResults, gradient
 	};
 	var svg = this.CreateSVGOverlay(tileUniqueId, div, parentAttributes, filtered, projected, tileBounds, z, patternValue,
 																			gradient, texture);
-
 	if (svg !== null) {
-		var v = this.activeSelectedMetric.SelectedVariable().Id;
-		var simpleKey = h.getVariableFrameKey(v, x, y, z, this.MapsApi.TileBoundsRequired());
-		this.svgInTile[simpleKey] = svg;
+		this.SaveSvg(svg, x, y, z);
 	}
+};
+
+DataShapeComposer.prototype.GetSvgKey = function (x, y, z) {
+	if (!this.activeSelectedMetric || !this.activeSelectedMetric.HasSelectedVariable()) {
+		return null;
+	}
+	var v = this.activeSelectedMetric.SelectedVariable().Id;
+	return h.getVariableFrameKey(v, x, y, z);
 };
 
 DataShapeComposer.prototype.processFeature = function (tileUniqueId, dataElement, mapElement, tileKey, tileBounds, filtered, patternValue, colorMap) {
@@ -102,7 +107,7 @@ DataShapeComposer.prototype.processFeature = function (tileUniqueId, dataElement
 		mapItem.id = null;
 	}
 	if (this.patternUseFillStyles(patternValue)) {
-		mapItem.properties.style = 'fill: url(#cs' + val + ');';
+		mapItem.properties.patternClass = 'cs' + val;
 	}
 	this.AddFeatureText(variable, val, dataElement, clickId, centroid, tileKey, tileBounds, colorMap);
 

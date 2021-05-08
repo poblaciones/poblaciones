@@ -11,8 +11,9 @@ import axios from 'axios';
 export default ActiveSelectedMetric;
 
 function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
-
-	this.$Segment = null;
+	this.objs = {};
+	this.objs.Segment = null;
+	this.objs.composer = null;
 	this.cancelUpdateSummary = null;
 	this.cancelUpdateRanking = null;
 	this.properties = selectedMetric;
@@ -23,7 +24,6 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.ShowRanking = false;
 	this.RankingSize = 10;
 	this.RankingDirection = 'D';
-	this.composer = null;
 	this.KillDuplicateds = true;
 	this.fillEmptySummaries();
 	this.activeSequenceSteps = {};
@@ -366,7 +366,7 @@ ActiveSelectedMetric.prototype.CreateComposer = function () {
 	} else {
 		ret = new DataShapeComposer(window.SegMap.MapsApi, this);
 	}
-	this.composer = ret;
+	this.objs.composer = ret;
 	return ret;
 };
 
@@ -401,9 +401,9 @@ ActiveSelectedMetric.prototype.SetActiveSequenceStep = function (variableId, lab
 		}
 	}
 	// Regenera el anterior y el nuevo seleccionado
-	if (this.composer) {
-		this.composer.SequenceComposer.RecreateSequenceMarker(labelId, keep);
-		this.composer.SequenceComposer.RecreateSequenceMarker(labelId, value);
+	if (this.objs.composer) {
+		this.objs.composer.SequenceComposer.RecreateSequenceMarker(labelId, keep);
+		this.objs.composer.SequenceComposer.RecreateSequenceMarker(labelId, value);
 	}
 	window.SegMap.SaveRoute.UpdateRoute();
 };
@@ -671,17 +671,17 @@ ActiveSelectedMetric.prototype.GetCartographyService = function () {
 	}
 };
 
-ActiveSelectedMetric.prototype.UseBlockedRequests = function (boundsRectRequired) {
-	return this.blockSize && !boundsRectRequired;
+ActiveSelectedMetric.prototype.UseBlockedRequests = function () {
+	return this.blockSize;
 };
 
-ActiveSelectedMetric.prototype.GetDataService = function (boundsRectRequired, seed) {
+ActiveSelectedMetric.prototype.GetDataService = function (seed) {
 	var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
 	var path = '';
 	var server = '';
 
-	if (this.UseBlockedRequests(boundsRectRequired)) {
-		path: '/services/frontend/metrics/GetBlockTileData';
+	if (this.UseBlockedRequests()) {
+		path = '/services/frontend/metrics/GetBlockTileData';
 		seed = seed / this.blockSize;
 	} else {
 		path = '/services/frontend/metrics/GetTileData';
@@ -695,16 +695,16 @@ ActiveSelectedMetric.prototype.GetDataService = function (boundsRectRequired, se
 	return { server: server, path: path, useStaticQueue: useStaticQueue };
 };
 
-ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord, boundsRectRequired) {
-	if (this.UseBlockedRequests(boundsRectRequired)) {
-		return h.getBlockTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, boundsRectRequired, this.blockSize);
+ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord) {
+	if (this.UseBlockedRequests()) {
+		return h.getBlockTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, this.blockSize);
 	} else {
-		return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, boundsRectRequired);
+		return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y);
 	}
 };
 
-ActiveSelectedMetric.prototype.GetSubset = function (coord, boundsRectRequired) {
-	if (this.UseBlockedRequests(boundsRectRequired)) {
+ActiveSelectedMetric.prototype.GetSubset = function (coord) {
+	if (this.UseBlockedRequests()) {
 		return [coord.x, coord.y];
 	} else {
 		return null;
@@ -713,17 +713,17 @@ ActiveSelectedMetric.prototype.GetSubset = function (coord, boundsRectRequired) 
 
 ActiveSelectedMetric.prototype.ResolveSegment = function () {
 	if (this.properties == null) {
-		this.$Segment = window.SegMap.Metrics.ClippingSegment;
+		this.objs.Segment = window.SegMap.Metrics.ClippingSegment;
 	} else {
 		switch (this.SelectedLevel().LevelType) {
 		case 'L':
-			this.$Segment = (this.isBaseMetric ? window.SegMap.Metrics.BaseLocationsSegment : window.SegMap.Metrics.LocationsSegment);
+			this.objs.Segment = (this.isBaseMetric ? window.SegMap.Metrics.BaseLocationsSegment : window.SegMap.Metrics.LocationsSegment);
 			break;
 		case 'D':
-			this.$Segment = (this.isBaseMetric ? window.SegMap.Metrics.BaseGeoShapesSegment : window.SegMap.Metrics.GeoShapesSegment);
+			this.objs.Segment = (this.isBaseMetric ? window.SegMap.Metrics.BaseGeoShapesSegment : window.SegMap.Metrics.GeoShapesSegment);
 			break;
 		case 'S':
-			this.$Segment = (this.isBaseMetric ? window.SegMap.Metrics.BaseGeoShapesSegment : window.SegMap.Metrics.GeoShapesSegment);
+			this.objs.Segment = (this.isBaseMetric ? window.SegMap.Metrics.BaseGeoShapesSegment : window.SegMap.Metrics.GeoShapesSegment);
 			break;
 		default:
 			throw new Error('Unknown dataset metric type');

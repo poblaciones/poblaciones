@@ -63,6 +63,7 @@
 		},
 		data() {
 			return {
+				selfCheckTimer: null,
 				workStartupSetter: null,
 				collapsed: false,
 				isMobile: false,
@@ -186,12 +187,20 @@
 				window.SegMap = segMap;
 
 				this.$refs.fabPanel.loadFabMetrics();
-				mapApi.SetSegmentedMap(segMap);
 				segMap.SaveRoute.DisableOnce = true;
 				mapApi.Initialize();
 				segMap.SetSelectionMode(0);
-				//this.UpdateMapsControls();
-			},
+				/*
+				var loc = this;
+				this.selfCheckTimer = setInterval(function () {
+					if (window.SegMap.MapsApi.__ob__ || window.SegMap.__ob__) {
+						alert('got observed');
+						debugger;
+						clearInterval(loc.selfCheckTimer);
+					}
+				}, 100);
+				*/
+					},
 			RegisterErrorHandler() {
 				Vue.config.errorHandler = err.HandleError;
 				window.onerror = err.HandleError;
@@ -423,14 +432,21 @@
 	.exp-rounded {
 		border-radius: 26px !important;
 	}
-
+	.panel-body {
+		border-radius: 0px !important;
+		box-shadow: 0 2px 2px rgb(0 0 0 / 18%) !important;
+	}
 	.moderateHr {
 		margin-top: 1.2rem;
 		margin-bottom: 1.1rem;
+		border-color: #ccc;
 	}
-
+	.gutter.gutter-horizontal {
+		background-color: #ffffff !important;
+		filter: contrast(0.675);
+	}
 	/* settings de split */
-	.split p, .split-flex p {
+		.split p, .split-flex p {
 		padding: 20px;
 	}
 
@@ -845,7 +861,7 @@
 	.summaryRow {
 		padding: 0rem 0rem 0.475rem 0rem;
 		font-size: 0.75em;
-		color: #777;
+		color: #555;
 	}
 
 	.summaryBlock {

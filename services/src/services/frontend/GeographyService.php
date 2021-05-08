@@ -5,12 +5,15 @@ namespace helena\services\frontend;
 use helena\caches\GeographyCache;
 use minga\framework\Context;
 use helena\classes\Clipper;
+use helena\classes\ClipperRound;
+use helena\classes\GeoJson;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\SnapshotGeographyItemModel;
 use helena\db\frontend\GeographyModel;
 use helena\entities\frontend\clipping\FeaturesInfo;
 use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\geometries\Coordinate;
 
 
 class GeographyService extends BaseService
@@ -20,36 +23,29 @@ class GeographyService extends BaseService
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
 	private const PAGE_SIZE = 25000;
 
-	public function GetGeography($geographyId, $x, $y, $z, $b, $page = 0)
+	public function GetGeography($geographyId, $x, $y, $z, $page = 0)
 	{
 		$data = null;
-		$key = GeographyCache::CreateKey($x, $y, $z, $b, $page);
+		$key = GeographyCache::CreateKey($x, $y, $z, $page);
 		if (GeographyCache::Cache()->HasData($geographyId, $key, $data))
 		{
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateGeography($geographyId, $x, $y, $z, $b, $page);
+		$data = $this->CalculateGeography($geographyId, $x, $y, $z, $page);
 
 		GeographyCache::Cache()->PutData($geographyId, $key, $data);
 
 		return $data;
 	}
 
-	private function CalculateGeography($geographyId, $x, $y, $z, $b, $page)
+	private function CalculateGeography($geographyId, $x, $y, $z, $page)
 	{
 		// calcula los GeoData (según indicado por campo 'resumen' en el ABM)
 		// para cada categoría del metric indicado en la región clipeada.
 		$table = new SnapshotGeographyItemModel();
 
-		if ($b != null)
-		{
-			$envelope = Envelope::TextDeserialize($b);
-		}
-		else
-		{
-			$envelope = Envelope::FromXYZ($x, $y, $z);
-		}
+		$envelope = Envelope::FromXYZ($x, $y, $z);
 
 		$cartoTable = new GeographyModel();
 		$carto = $cartoTable->GetGeographyInfo($geographyId);
@@ -57,16 +53,22 @@ class GeographyService extends BaseService
 
 		$rows = $table->GetGeographyByEnvelope($geographyId, $envelope, $z, $getCentroids);
 
-		$project = false; // $z <= 17;
+		$project = true; // $z <= 17;
 		$totalPages = ceil(sizeof($rows) / self::PAGE_SIZE);
 		if ($totalPages > 1)
 		{
 			$rows = array_slice($rows, $page * self::PAGE_SIZE, self::PAGE_SIZE);
 		}
-		$data = FeaturesInfo::FromRows($rows, $getCentroids, $project);
+		$data = FeaturesInfo::FromRows($rows, $getCentroids, $project, null, false, $envelope);
 
 		// recorta el cuadrado
 		$clipper = new Clipper();
+
+		if ($project)
+		{
+			$envelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
+			$clipper = new ClipperRound();
+		}
 		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $envelope);
 
 		// pagina
@@ -77,7 +79,7 @@ class GeographyService extends BaseService
 		}
 
 		$gradientId = $carto['gradient_id'];
-		if (Context::Settings()->Map()->UseGradients && $gradientId && !$b && !$this->AllAreDense($rows))
+		if (Context::Settings()->Map()->UseGradients && $gradientId && !$this->AllAreDense($rows))
 		{
 			$controller = new GradientService();
 			$gradientLimit = $carto['max_zoom_level'];

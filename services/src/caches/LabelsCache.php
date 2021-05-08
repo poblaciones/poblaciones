@@ -10,19 +10,16 @@ class LabelsCache extends BaseCache
 	{
 		return new ObjectCache("Geographies/Labels");
 	}
-	public static function CreateKey($x, $y, $zoom, $b)
+	public static function CreateKey($x, $y, $zoom)
 	{
 		$key = 'x' . $x . "y" . $y . "z" . $zoom;
-		if ($b != null)
-			$key .= 'b' . $b;
 		return $key;
 	}
 
-	public static function CreateBlockKey($x, $y, $zoom, $size, $b)
+	public static function CreateBlockKey($x, $y, $zoom, $size)
 	{
 		$key = 'x' . $x . "y" . $y . "z" . $zoom . "s" . $size;
-		if ($b != null)
-			$key .= 'b' . $b;
+
 		return $key;
 	}
 }

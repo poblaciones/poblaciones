@@ -121,10 +121,9 @@ App::$app->get('/services/frontend/shapes/GetDatasetShapes', function (Request $
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	$b = Params::Get('b');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
 
-	return App::JsonImmutable($controller->GetDatasetShapes($datasetId, $x, $y, $z, $b));
+	return App::JsonImmutable($controller->GetDatasetShapes($datasetId, $x, $y, $z));
 });
 

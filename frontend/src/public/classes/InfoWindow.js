@@ -8,8 +8,7 @@ import err from '@/common/js/err';
 
 export default InfoWindow;
 
-function InfoWindow(segMap) {
-	this.segMap = segMap;
+function InfoWindow() {
 	this.cancel1 = null;
 	this.cancel2 = null;
 	this.CancelToken1 = axios.CancelToken;
@@ -28,18 +27,18 @@ InfoWindow.prototype.CheckUpdateNavigation = function () {
 				window.Panels.Content.FeatureNavigation.GettingKey !== navigatonKey) {
 		// Lo actualiza
 		var key = window.Panels.Content.FeatureInfoKey;
-		var metric = this.segMap.Metrics.GetMetricById(key.MetricId);
+		var metric = window.SegMap.Metrics.GetMetricById(key.MetricId);
 		if (!metric) {
 			return;
 		}
 		window.Panels.Content.FeatureNavigation.GettingKey = navigatonKey;
 		const loc = this;
 		var exceptions = this.GetExceptions(key.MetricId, key.VariableId);
-		var params2 = h.getNavigationParams(metric.properties, this.segMap.frame, exceptions);
+		var params2 = h.getNavigationParams(metric.properties, window.SegMap.frame, exceptions);
 		if (this.cancel2 !== null) {
 			this.cancel2('cancelled');
 		}
-		this.segMap.Get(window.host + '/services/metrics/GetMetricNavigationInfo', {
+		window.SegMap.Get(window.host + '/services/metrics/GetMetricNavigationInfo', {
 			params: params2,
 			cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; })
 		}).then(function (res) {
@@ -60,12 +59,12 @@ InfoWindow.prototype.resolveCurrentFeatureNavigationKey = function () {
 	if (!key || !key.VariableId) {
 		return null;
 	}
-	var metric = this.segMap.Metrics.GetMetricById(key.MetricId);
+	var metric = window.SegMap.Metrics.GetMetricById(key.MetricId);
 	if (metric === null || metric.properties === null || metric.SelectedVariable() === null) {
 		return null;
 	}
 	var exceptions = this.GetExceptions(key.MetricId, key.VariableId);
-	var params = h.getNavigationParams(metric.properties, this.segMap.frame, exceptions);
+	var params = h.getNavigationParams(metric.properties, window.SegMap.frame, exceptions);
 	return JSON.stringify(params);
 };
 
@@ -125,9 +124,9 @@ InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid)
 	if (position) {
 		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
 					|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
-			this.segMap.MapsApi.FitEnvelope(position.Envelope, false, window.Panels.Left.width);
+			window.SegMap.MapsApi.FitEnvelope(position.Envelope, false, window.Panels.Left.width);
 		} else if (!position.Point || position.Point.X < 350) {
-			this.segMap.PanTo(position.Coordinate, window.Panels.Left.width);
+			window.SegMap.PanTo(position.Coordinate, window.Panels.Left.width);
 		}
 	}
 	this.InfoRequested(position, parent, fid, true);
@@ -150,7 +149,7 @@ InfoWindow.prototype.InfoRequested = function (position, key, fid, forceExpand) 
 		service = 'GetMetricItemInfo';
 		params = { f: fid, m: key.MetricId, v: key.VariableId };
 		if (key.Sequence) {
-			var metric = this.segMap.Metrics.GetMetricById(key.MetricId);
+			var metric = window.SegMap.Metrics.GetMetricById(key.MetricId);
 			if (metric) {
 				metric.SetActiveSequenceStep(key.VariableId, key.LabelId, key.Sequence);
 			}
@@ -162,7 +161,7 @@ InfoWindow.prototype.InfoRequested = function (position, key, fid, forceExpand) 
 	}
 	const loc = this;
 	window.Panels.Left.Disable();
-	this.segMap.Get(window.host + '/services/metrics/' + service, {
+	window.SegMap.Get(window.host + '/services/metrics/' + service, {
 		params: params,
 		cancelToken: new this.CancelToken1(function executor(c) { loc.cancel1 = c; })
 	}).then(function (res) {
@@ -182,12 +181,12 @@ InfoWindow.prototype.ReceiveInfoWindowData = function (res, position, key, force
 	// Si viene interactivo, lo abre y lo pone en la ruta
 	if (forceExpand) {
 		window.Panels.Left.collapsed = false;
-		this.segMap.SaveRoute.UpdateRoute();
+		window.SegMap.SaveRoute.UpdateRoute();
 	}
 };
 
 InfoWindow.prototype.GetUnselectedCategoriesByVariableId = function(metricId, variableId) {
-	var metric = this.segMap.Metrics.GetMetricById(metricId);
+	var metric = window.SegMap.Metrics.GetMetricById(metricId);
 	if (metric) {
 		var variable = metric.GetVariableById(variableId);
 		if (variable) {

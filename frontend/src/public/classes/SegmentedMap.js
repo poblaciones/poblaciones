@@ -21,8 +21,8 @@ export default SegmentedMap;
 function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCollection, config) {
 	this.frame = frame;
 	this.Tutorial = new Tutorial(toolbarStates);
-	this.InfoWindow = new InfoWindow(this);
-	this.Clipping = new Clipping(this, frame, clipping);
+	this.InfoWindow = new InfoWindow();
+	this.Clipping = new Clipping(frame, clipping);
 	this.Signatures = config.Signatures;
 	this.User = config.User;
 	this.MapsApi = mapsApi;
@@ -34,7 +34,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.DefaultTitle = 'Poblaciones';
 	this._axios = this.CreateAxios(true);
 	this._axiosNoCredentials = this.CreateAxios(false);
-	this.Metrics = new MetricsList(this, selectedMetricCollection);
+	this.Metrics = new MetricsList(selectedMetricCollection);
 	this.SaveRoute = new SaveRoute();
 	this.RestoreRoute = new RestoreRoute();
 	this.afterCallback = null;
@@ -452,7 +452,4 @@ SegmentedMap.prototype.BeginDrawingCircle = function () {
 	return this.MapsApi.BeginDrawingCircle();
 };
 
-SegmentedMap.prototype.TileBoundsRequiredString = function (tile) {
-	return this.MapsApi.TileBoundsRequiredString(tile);
-};
 

@@ -2,7 +2,7 @@ import axios from 'axios';
 import h from '@/public/js/helper';
 import Mercator from '@/public/js/Mercator';
 import TileRequest from '@/public/googleMaps/TileRequest';
-import PreviewHandler from './PreviewHandler';
+import PreviewHandler from '@/public/composers/PreviewHandler';
 
 export default TileOverlay;
 
@@ -18,49 +18,68 @@ function TileOverlay(map, google, activeSelectedMetric) {
 	this.requestedTiles = [];
 	this.disposed = false;
 	// Guarda lo relacionado al preview de tile
-	this.preview = (this.composer.svgInTile !== undefined ? new PreviewHandler(this) : null);
+	if (this.composer.usePreviewHandler) {
+		this.previewHandler = new PreviewHandler(this);
+	}
 }
 
 TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 
 	var div = ownerDocument.createElement('div');
-
+	div.style.transform = "translateZ(0)";
 	this.activeSelectedMetric.UpdateOpacity(zoom);
 	div.style.zIndex = this.activeSelectedMetric.index;
 	div.style.width = this.tileSize.width + 'px';
 	div.style.height = this.tileSize.height + 'px';
 	div.style.fontSize = '10';
 
-	var boundsRectRequired = window.SegMap.TileBoundsRequiredString({ x: coord.x, y: coord.y, z: zoom });
-	var args = h.getFrameKey(coord.x, coord.y, zoom, boundsRectRequired);
+	var args = h.getFrameKey(coord.x, coord.y, zoom);
   // si no se agrega idCounter, google maps hace coexistir
   // tiles con key duplicado
 	var key = args + '&s=' + (this.idCounter++);
 	div.setAttribute('key', key);
 
 	// se fija si tiene sentido pedirlo
-	if (!this.IsTileVisible(boundsRectRequired, coord, zoom)) {
+	if (!this.IsTileVisible(coord, zoom)) {
 		return div;
 	}
 
-	var dataRequest = new TileRequest(window.SegMap.Queue, window.SegMap.StaticQueue, this, coord, zoom, boundsRectRequired, key, div);
-	dataRequest.GetTile();
+	var preview = this.resolvePreview(div, coord, zoom);
+
+	if (preview && preview.IsFullCopy) {
+		// es copia completa... lo guarda
+		if (preview.SourceZoom === zoom) {
+			this.composer.SaveSvg(preview.Svg, coord.x, coord.y, zoom);
+		}
+	} else {
+		// pide información
+		var dataRequest = new TileRequest(window.SegMap.Queue, window.SegMap.StaticQueue, this, coord, zoom, key, div);
+		dataRequest.GetTile();
+		this.requestedTiles[key] = dataRequest;
+	}
 	//div.innerHTML = '<div style="padding: 4px; ">XXXXXXXXXXXX<a href="' + args + '">' + args + '</a></div>';
 
-	if (this.geographyService.url) {
-		if (this.preview) {
-			var ele = this.preview.getPreview(coord, zoom);
-			if (ele) {
-				div.appendChild(ele);
-			}
-		}
-	}
-	this.requestedTiles[key] = dataRequest;
 	return div;
 };
 
-TileOverlay.prototype.IsTileVisible = function (boundsRectRequired, coord, zoom) {
-	if (boundsRectRequired === null && this.IsOutOfClipping(coord, zoom)) {
+TileOverlay.prototype.resolvePreview = function (div, coord, zoom) {
+	if (!this.previewHandler) {
+		return null;
+	}
+	var preview = this.previewHandler.getPreview(coord, zoom);
+	if (preview) {
+		// le pide al composer que reaplique los estilos
+		for (var n = 0; n < preview.Parts.length; n++)
+			this.composer.RescaleStylesAndPatterns(preview.Parts[n], zoom, preview.SourceZoom);
+		// lo muestra
+		div.appendChild(preview.Svg);
+	}
+	return preview;
+};
+
+
+TileOverlay.prototype.IsTileVisible = function (coord, zoom) {
+	if (this.IsOutOfClipping(coord, zoom)) {
 		return false;
 	}
 	return true;
