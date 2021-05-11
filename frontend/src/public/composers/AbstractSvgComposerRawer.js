@@ -8,9 +8,9 @@ import SVG from 'svg.js';
 import html2canvas from 'html2canvas';
 import canvg from 'canvg';
 
-export default AbstractSvgComposer;
+export default AbstractSvgComposerRawer;
 
-function AbstractSvgComposer(mapsApi, activeSelectedMetric) {
+function AbstractSvgComposerRawer(mapsApi, activeSelectedMetric) {
 	if (!mapsApi) {
 		return;
 	}
@@ -27,13 +27,14 @@ function AbstractSvgComposer(mapsApi, activeSelectedMetric) {
 	this.useGradients = false;
 	this.useTextures = false;
 	this.usePreviewHandler = true;
+	this.svgStyles = {};
 };
 
-AbstractSvgComposer.prototype = new AbstractTextComposer();
-AbstractSvgComposer.uniqueCssId = 1;
+AbstractSvgComposerRawer.prototype = new AbstractTextComposer();
+AbstractSvgComposerRawer.uniqueCssId = 1;
 
 
-AbstractSvgComposer.prototype.CreateSVG = function (h, w, z, patternValue, tileUniqueId, parentAttributes) {
+AbstractSvgComposerRawer.prototype.CreateSVG = function (h, w, z, patternValue, tileUniqueId, parentAttributes) {
 	var xmlns = 'http://www.w3.org/2000/svg';
 	var boxWidth = h;
 	var boxHeight = w;
@@ -50,6 +51,7 @@ AbstractSvgComposer.prototype.CreateSVG = function (h, w, z, patternValue, tileU
 	svgElem.setAttributeNS(null, 'uID', tileUniqueId);
 	svgElem.setAttributeNS(null, 'viewBox', "0 0 " + TILE_PRJ_SIZE + " " + TILE_PRJ_SIZE);
 
+	this.svgStyles = {};
 
 	for (var key in parentAttributes) {
     // check if the property/key is defined in the object itself, not in parent
@@ -59,14 +61,19 @@ AbstractSvgComposer.prototype.CreateSVG = function (h, w, z, patternValue, tileU
 	}
 	svgElem.style.display = 'block';
 	svgElem.style.strokeWidth = this.resolveStrokeWidth(z, patternValue) * scale + "px";
+
+	this.svgStyles['root'] = { 'stroke-width': svgElem.style.strokeWidth };
+
 	if (patternValue > 6) {
 		svgElem.style.strokeOpacity = this.activeSelectedMetric.SelectedVariable().CurrentOpacity;
+		this.svgStyles['root']['stroke-opacity'] = svgElem.style.strokeOpacity;
 	}
+
 	return svgElem;
 };
-AbstractSvgComposer.prototype.resolveStrokeWidth = function (z, patternValue) {
+AbstractSvgComposerRawer.prototype.resolveStrokeWidth = function (z, patternValue) {
 	if (patternValue === 1) {
-		var width = (z < 16 ? 1 : 1.5);
+		var width = (z < 16 ? 1.5 : 2);
 		if (this.activeSelectedMetric.borderWidth === 1) {
 			width *= .5;
 		} else if (this.activeSelectedMetric.borderWidth === 3) {
@@ -78,18 +85,18 @@ AbstractSvgComposer.prototype.resolveStrokeWidth = function (z, patternValue) {
 		// 3,4,5,6 son cañerías
 		return 0;
 	}
-	return (z < 16 ? 1 : 1.5);
+	return (z < 16 ? 1.5 : 2);
 };
 
-AbstractSvgComposer.prototype.patternUseFillStyles = function (patternValue) {
+AbstractSvgComposerRawer.prototype.patternUseFillStyles = function (patternValue) {
 	return (patternValue > 2);
 };
 
-AbstractSvgComposer.prototype.patternIsPipeline = function (patternValue) {
+AbstractSvgComposerRawer.prototype.patternIsPipeline = function (patternValue) {
 	return (patternValue >= 3 && patternValue <= 6);
 };
 
-AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features, projected,
+AbstractSvgComposerRawer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features, projected,
 	tileBounds, z, patternValue, gradient, texture) {
 	var projectedFeatures;
 
@@ -159,6 +166,21 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 		var feature = projectedFeatures.features[n];
 		var path = svgMake.ConvertGeometry(feature.geometry);
 
+		var className = feature.properties.className;
+		var g;
+		if (!groups.hasOwnProperty(className)) {
+			g = [];
+			groups[className] = g;
+		} else {
+			g = groups[className];
+		}
+		var fill = '';
+		if (useFillPatterns) {
+			fill = 'fill="url(#p' + tileUniqueId + '_' + feature.properties.patternClass + ')" ';
+		}
+		g.push('<path ' + fill + 'd="' + path + '"/>');
+
+		/*
 		var svg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		svg.setAttributeNS(null, 'd', path);
 
@@ -172,6 +194,8 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 		if (useFillPatterns) {
 			svg.setAttributeNS(null, 'style', 'fill: url(#p' + tileUniqueId + '_' + feature.properties.patternClass + ');');
 		}
+
+
 		var className = feature.properties.className;
 		var g;
 		if (!groups.hasOwnProperty(className)) {
@@ -182,28 +206,90 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 			g = groups[className];
 		}
 		g.appendChild(svg);
+		*/
 	}
-
+	var svgPaths = '';
 	for (var g in groups) {
 		if (groups.hasOwnProperty(g)) {
-			oSvg.appendChild(groups[g]);
+			//oSvg.appendChild(groups[g]);
+			svgPaths += '<g ' + this.stylesToText(g) + '>' +
+											groups[g].join('') + '</g>';
 		}
 	}
 
-	var useImgs = false;
-	if (useImgs) {
-			var svgInline = "data:image/svg+xml;base64,";
-			var imgSrc = svgInline + btoa(oSvg.outerHTML);
-			var img = new Image();
-			img.src = imgSrc;
-			this.ReplaceMinimizingFlickering(div, img, textureMaskId);
-	} else {
-		this.ReplaceMinimizingFlickering(div, oSvg, textureMaskId);
-	}
+	//this.ReplaceMinimizingFlickering(div, oSvg, textureMaskId);
+	// Lo pone en un canvas
+	var loc = this;
+	/*
+			var canvas = document.getElementById("canvas");
+			var ctx = canvas.getContext("2d");
+			var svg = "data:image/svg+xml," + oSvg.outerHTML.replace('"', "'");*/
+	/*
+					"<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>",
+							"<foreignObject width='100%' height='100%'>",
+									"<div xmlns='http://www.w3.org/1999/xhtml' style='font-size:40px'>",
+											"<em>I</em> like <span style='color:white; text-shadow:0 0 2px blue;'>cheese</span>",
+									"</div>",
+							"</foreignObject>",
+					"</svg>"
+			].join("");
+			*/
+/*			var img = new Image();
+			img.src = svg;
+			img.onload = function () {
+					ctx.drawImage(img, 0, 0);
+			};*/
+	  //var canvas = document.getElementById("canvas");
+	var rootStyles = this.stylesToText('root');
+	var svgInline = "data:image/svg+xml;utf8,";
+	var svgBase = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 8192 8192" height="256px" width="256px" ' + rootStyles + '>';
+	var imgSrc = svgInline + svgBase + svgPaths + "</svg>";
+	var img = new Image();
+	img.src = imgSrc;
+//	var canvas = this.SvgToCanvas(oSvg);
+
+	this.ReplaceMinimizingFlickering(div, img, textureMaskId);
+
 	return oSvg;
 };
 
-AbstractSvgComposer.prototype.SvgToCanvas = function (oSvg) {
+AbstractSvgComposerRawer.prototype.stylesToText = function (key) {
+	var set = this.svgStyles[key];
+	var ret = "";
+	for (var s in set) {
+		if (set.hasOwnProperty(s)) {
+			var v = set[s];
+			if (v[0] == '#') {
+				v = 'rgb(' + this.hexToRgb(v.substring(1)) + ')';
+			}
+			ret += s + '="' + v + '" ';
+		}
+	}
+	return ret;
+};
+
+
+AbstractSvgComposerRawer.prototype.hexToRgb = function (hex) {
+	var bigint = parseInt(hex, 16);
+	var r = (bigint >> 16) & 255;
+	var g = (bigint >> 8) & 255;
+	var b = bigint & 255;
+
+	return r + "," + g + "," + b;
+};
+
+AbstractSvgComposerRawer.prototype.styleStringToKeyValue = function (stylesText) {
+	var styles = stylesText.split(';');
+	var ret = {};
+	for (var n = 0; n < styles.length; n++) {
+		var parts = styles[n].split(':');
+		ret[parts[0].trim()] = parts[1].trim();
+	}
+	return ret;
+};
+
+
+AbstractSvgComposerRawer.prototype.SvgToCanvas = function (oSvg) {
 	var canvas = document.createElement('canvas');
 	canvas.width = 256;
 	canvas.height = 256;
@@ -219,14 +305,14 @@ AbstractSvgComposer.prototype.SvgToCanvas = function (oSvg) {
 	return canvas;
 };
 
-AbstractSvgComposer.prototype.SaveSvg = function (svg, x, y, z) {
+AbstractSvgComposerRawer.prototype.SaveSvg = function (svg, x, y, z) {
 	var localTileKey = this.GetSvgKey(x, y, z);
 	if (localTileKey) {
 		this.svgInTile[localTileKey] = svg;
 	}
 };
 
-AbstractSvgComposer.prototype.RescaleStylesAndPatterns = function (svgElem, zoom, previousZoom) {
+AbstractSvgComposerRawer.prototype.RescaleStylesAndPatterns = function (svgElem, zoom, previousZoom) {
 	var scale = Math.pow(2, previousZoom - zoom);
 	// Regenera los estilos para un svg que está reutilizando
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
@@ -246,7 +332,7 @@ AbstractSvgComposer.prototype.RescaleStylesAndPatterns = function (svgElem, zoom
 	}
 };
 
-AbstractSvgComposer.prototype.ReplaceMinimizingFlickering = function (div, oSvg, textureMaskId) {
+AbstractSvgComposerRawer.prototype.ReplaceMinimizingFlickering = function (div, oSvg, textureMaskId) {
 	if (textureMaskId) {
 		oSvg.style.position = 'absolute';
 		if (div.childNodes.length === 0) {
@@ -266,7 +352,7 @@ AbstractSvgComposer.prototype.ReplaceMinimizingFlickering = function (div, oSvg,
 	}
 };
 
-AbstractSvgComposer.prototype.clearPatterns = function (o2) {
+AbstractSvgComposerRawer.prototype.clearPatterns = function (o2) {
 	var defs = o2.defs().node.children;
 	for (var n = defs.length - 1; n >= 0; n--) {
 		if (defs[n].tagName === 'pattern') {
@@ -275,7 +361,7 @@ AbstractSvgComposer.prototype.clearPatterns = function (o2) {
 	}
 };
 
-AbstractSvgComposer.prototype.appendPatterns = function (o2, labels, patternValue, z, expansor) {
+AbstractSvgComposerRawer.prototype.appendPatterns = function (o2, labels, patternValue, z, expansor) {
 	// crea un pattern para cada tipo de etiqueta
 	var tileUniqueId = o2.attr('uID');
 	for (var l = 0; l < labels.length; l++) {
@@ -290,7 +376,7 @@ AbstractSvgComposer.prototype.appendPatterns = function (o2, labels, patternValu
 	}
 };
 
-AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask, textureMaskId) {
+AbstractSvgComposerRawer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask, textureMaskId) {
 	// crea una clase para cada tipo de etiqueta
 	var styles = "<style type='text/css'>";
 	var fillBlock = (patternValue === 1 || patternValue === 2 ? '; fill: transparent ' : '');
@@ -305,7 +391,7 @@ AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, label
 		strokeOpacity = 0;
 	}
 	for (var l = 0; l < labels.length; l++) {
-		var currentStyle;
+		var currentStyle = '';
 		if (patternValue === 0) {
 			// Se fija si el contraste entre el border y la figura va a ser demasiado bajo...
 			var color = labels[l].fillColor;
@@ -318,14 +404,15 @@ AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, label
 				stroke = str.MakeColor(colorParts[0] * .9, colorParts[1] * .9, colorParts[2] * .9);
 			}
 			fillBlock = '; fill: ' + labels[l].fillColor;
-			currentStyle = 'stroke: ' + stroke + '; stroke-opacity: ' + Math.max(1, strokeOpacity * 1.1) +
+			currentStyle += 'stroke: ' + stroke + '; stroke-opacity: ' + Math.max(1, strokeOpacity * 1.1) +
 				maskBlock + (textureFill ? textureFill : fillBlock) + '; fill-opacity: ' + this.activeSelectedMetric.CurrentOpacity();
 		} else {
-			currentStyle = 'stroke: ' + labels[l].fillColor + '; stroke-opacity: ' +  strokeOpacity +
+			currentStyle += 'stroke: ' + labels[l].fillColor + '; stroke-opacity: ' +  strokeOpacity +
 					(textureFill ? textureFill : fillBlock) + maskBlock;
 		}
 		var name = 'e' + tileUniqueId + '_' + labels[l].className;
 		styles += '.' + name + " { " + currentStyle + " } ";
+		this.svgStyles[name] = this.styleStringToKeyValue(currentStyle);
 	}
 	styles += '</style>';
 
@@ -335,11 +422,11 @@ AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, label
 };
 
 
-AbstractSvgComposer.prototype.dispose = function () {
+AbstractSvgComposerRawer.prototype.dispose = function () {
 	this.clearText();
 };
 
-AbstractSvgComposer.prototype.removeTileFeatures = function (tileKey) {
+AbstractSvgComposerRawer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
 	if (this.svgInTile.hasOwnProperty(tileKey)) {
 		delete this.svgInTile[tileKey];

@@ -18,12 +18,13 @@ class ConfigurationService extends BaseService
 		$blockStrategy = array('UseDataTileBlocks' => Context::Settings()->Map()->UseDataTileBlocks,
 													 'UseLabelTileBlocks' => Context::Settings()->Map()->UseLabelTileBlocks,
 													 'TileDataBlockSize' => Context::Settings()->Map()->TileDataBlockSize,
-													 'LabelsBlockSize' => Context::Settings()->Map()->LabelsBlockSize);
+													 'LabelsBlockSize' => Context::Settings()->Map()->LabelsBlockSize,);
 		$userService = new AuthenticationService();
 		$user = $userService->GetStatus();
 
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
+									'UseSilverMap' =>  Context::Settings()->Map()->UseSilverMap,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
 									'StaticWorks' =>  Context::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => Context::Settings()->Map()->UseGradients,

@@ -30,7 +30,8 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effective
 };
 
 AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, location,
-																													number, backColor) {
+	number, backColor) {
+
 	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden);
 	var v = null;
 	if (textElement.caption !== null || textElement.symbol) {
@@ -41,6 +42,25 @@ AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, 
 		v = canvas.CreateValue(number, zIndex, backColor);
 	}
 	this.textInTile[tileKey].push({ c: canvas, v: v });
+};
+
+AbstractTextComposer.prototype.SetBackgroundText = function (div, tileBounds, textElement, tileKey, location,
+	number, backColor) {
+
+	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden);
+	var v = null;
+	if (textElement.caption !== null || textElement.symbol) {
+		canvas.SetText(textElement.caption, textElement.tooltip, textElement.symbol, textElement.clickId);
+	}
+	if (number !== null) {
+		var zIndex = 100000 - this.index;
+		v = canvas.CreateValue(number, zIndex, backColor);
+	}
+	var p = window.SegMap.MapsApi.gMap.getProjection();
+	var min = p.fromLatLngToPoint(new window.SegMap.MapsApi.google.maps.LatLng(tileBounds.Min.Lat, tileBounds.Min.Lon));
+	var position2 = p.fromLatLngToPoint(location);
+	canvas.pixelLocation = { x: position2.x - min.x, y: position2.y - min.y };
+	canvas.tileDiv = div;
 };
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {

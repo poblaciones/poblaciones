@@ -55,7 +55,13 @@ PreviewHandler.prototype.ExtractPartialSvg = function (svgs, coord, zoom, previo
 	if (svgs.hasOwnProperty(sourceKey)) {
 		// lo devuelve
 		var ret = svgs[sourceKey].cloneNode(true);
-		ret.setAttribute("viewBox", offsetX + " " + offsetY + " " + newSize + " " + newSize);
+
+			// NO REDUCIDO
+		const TILE_SIZE = 256;
+		const TILE_PRJ_SIZE = 8192;
+		var GLOBAL_FIT = TILE_PRJ_SIZE / TILE_SIZE;
+		ret.setAttribute("viewBox", (offsetX * GLOBAL_FIT) + " " + (offsetY  * GLOBAL_FIT) + " " + (newSize  * GLOBAL_FIT) + " " + (newSize * GLOBAL_FIT) );
+
 		return { Svg: ret, Parts: [ret], SourceZoom: previousZoom, IsFullCopy: !this.hasQualityLoss(zoom, previousZoom) };
 	} else {
 		return null;
@@ -84,7 +90,14 @@ PreviewHandler.prototype.ComposeMosaicSvg = function (svgs, coord, zoom, previou
 			if (svgs.hasOwnProperty(sourceKey)) {
 				// lo devuelve
 				var svg = svgs[sourceKey].cloneNode(true);
-				svg.setAttribute("viewBox", "0 0 256 256");
+
+				// NO REDUCIDO
+				const TILE_SIZE = 256;
+				const TILE_PRJ_SIZE = 8192;
+				var GLOBAL_FIT = TILE_PRJ_SIZE / TILE_SIZE;
+				svg.setAttribute("viewBox", "0 0 " + TILE_PRJ_SIZE + " " + TILE_PRJ_SIZE);
+
+//				svg.setAttribute("viewBox", "0 0 256 256");
 				svg.style.maxWidth = newSize + 'px';
 				svg.style.maxHeight = newSize + 'px';
 				svg.style.display = 'inline-block';
@@ -112,7 +125,7 @@ PreviewHandler.prototype.hasQualityLoss = function (zoom, previousZoom) {
 	// dos casos:
 	// la fuente está enviando en un nivel de calidad de menor calidad para ese zoom
 	// está a más de 3 niveles de zoom
-	return this.resolveRZoom(zoom) < this.resolveRZoom(previousZoom) || (zoom - previousZoom > 2);
+	return this.resolveRZoom(zoom) > this.resolveRZoom(previousZoom); // || (zoom - previousZoom > 2);
 };
 
 PreviewHandler.prototype.resolveRZoom = function (zoom) {

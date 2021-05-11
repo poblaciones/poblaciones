@@ -1,5 +1,6 @@
 <template>
 	<div>
+		<canvas id="canvas" width="256" height="256"></canvas>
 		<WorkPanel :work="work" ref="workPanel" :backgroundColor="workColor" />
 		<div id="holder">
 			<div id="panMain" class="split split-horizontal" style="position: relative">
@@ -526,7 +527,11 @@
 		max-height: 120px;
 		overflow-y: auto;
 	}
-
+	.sl span {
+		opacity: .5;
+		color: #333;
+		text-shadow: 0.75px 0.75px 1px #fff, -0.75px -1px 1px #fff, -0.75px 0.75px 1px #fff, 0.75px -1px 1px #fff;
+	}
 	.innerBoxTooltip {
 		right: unset !important;
 		max-height: 200px !important;
@@ -548,8 +553,12 @@
 		text-align: center;
 	}
 
-	.sat {
-		text-shadow: .75px .75px 1px #000, -.75px -1px 1px #000, -.75px .75px 1px #000, .75px -1px 1px #000, .75px .75px 1px #000, -.75px -1px 1px #000, -.75px 1px 1px #000, .75px -.75px 1px #000 !important;
+	.sat.sl span {
+		opacity: .75!important;
+	}
+
+	.sat span {
+		text-shadow: 0.75px 0.75px 1px #000, -0.75px -1px 1px #000, -0.75px 0.75px 1px #000, 0.75px -1px 1px #000 !important;
 		color: #fff !important;
 	}
 

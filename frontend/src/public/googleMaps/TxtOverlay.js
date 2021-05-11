@@ -19,6 +19,9 @@ function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidd
 	this.zIndex = zIndex;
 	this.div = null;
 	this.Values = [];
+	this.tileDiv = null;
+
+	this.pixelLocation = null;
 	this.setMap(map);
 }
 
@@ -121,14 +124,24 @@ TxtOverlay.prototype.onAdd = function() {
 	this.div = div;
 	this.RebuildHtml();
 
-	var panes = this.getPanes();
-	panes.floatPane.appendChild(div);
+	if (this.tileDiv) {
+		this.tileDiv.appendChild(div);
+	} else {
+		var panes = this.getPanes();
+		panes.floatPane.appendChild(div);
+	}
 
 	if (!this.Overlaps()) {
-		var overlayProjection = this.getProjection();
-		var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-		div.style.left = position.x + 'px';
-		div.style.top = position.y + 'px';
+		if (this.tileDiv) {
+			div.style.left = this.pixelLocation.x + 'px';
+			div.style.top = this.pixelLocation.y + 'px';
+			div.style.position = 'absolute';
+		} else {
+			var overlayProjection = this.getProjection();
+			var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+			div.style.left = position.x + 'px';
+			div.style.top = position.y + 'px';
+		}
 	}
 	else {
 		div.style.visibility = 'hidden';
@@ -192,13 +205,15 @@ TxtOverlay.prototype.CreateValue = function (value, zindex, backColor) {
 	return ret;
 };
 
-TxtOverlay.prototype.draw = function() {
-	var overlayProjection = this.getProjection();
-	var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-	var div = this.div;
-	div.style.left = position.x + 'px';
-	div.style.top = position.y + 'px';
-	div.style.zIndex = this.zIndex;
+TxtOverlay.prototype.draw = function () {
+	if (!this.tileDiv) {
+		var overlayProjection = this.getProjection();
+		var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+		var div = this.div;
+		div.style.left = position.x + 'px';
+		div.style.top = position.y + 'px';
+		div.style.zIndex = this.zIndex;
+	}
 };
 
 TxtOverlay.prototype.onRemove = function () {

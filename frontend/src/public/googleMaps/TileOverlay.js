@@ -26,7 +26,7 @@ function TileOverlay(map, google, activeSelectedMetric) {
 TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 
 	var div = ownerDocument.createElement('div');
-	div.style.transform = "translateZ(0)";
+	//div.style.transform = "translateZ(0)";
 	this.activeSelectedMetric.UpdateOpacity(zoom);
 	div.style.zIndex = this.activeSelectedMetric.index;
 	div.style.width = this.tileSize.width + 'px';
@@ -71,7 +71,20 @@ TileOverlay.prototype.resolvePreview = function (div, coord, zoom) {
 		// le pide al composer que reaplique los estilos
 		for (var n = 0; n < preview.Parts.length; n++)
 			this.composer.RescaleStylesAndPatterns(preview.Parts[n], zoom, preview.SourceZoom);
-		// lo muestra
+
+			// lo muestra
+			/*var svgInline = "data:image/svg+xml;base64,";
+			var imgSrc = svgInline + btoa(preview.Svg.outerHTML);
+			var img = new Image();
+			img.src = imgSrc;
+			img.onload = function () {
+																if (div.childNodes.length === 0) {
+																	div.appendChild(img);
+																} else {
+																	div.replaceChild(img, div.childNodes[0]);
+																}
+															};*/
+
 		div.appendChild(preview.Svg);
 	}
 	return preview;

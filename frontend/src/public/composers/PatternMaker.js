@@ -5,7 +5,13 @@ function PatternMaker(patternId, z, scale) {
 	// posible api de texturas: https://github.com/riccardoscalco/textures
 	// test de Pattern: https://jsfiddle.net/wout/jckwhha7/
 	this.patternId = patternId;
-	this.scale = scale;
+
+	// NO REDUCIDO
+	const TILE_SIZE = 256;
+	const TILE_PRJ_SIZE = 8192;
+	var GLOBAL_FIT = TILE_PRJ_SIZE / TILE_SIZE;
+
+	this.scale = scale * GLOBAL_FIT;
 	this.zoom = z;
 };
 

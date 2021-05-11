@@ -96,7 +96,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 		mapTypeControlOptions: {
 			style: this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
 			position: google.maps.ControlPosition.TOP_LEFT,
-			mapTypeIds: ['light', 'roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
+			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
 		},
 		scaleControl: true,
 		styles: this.generateLabelsArray(true),
@@ -104,16 +104,21 @@ GoogleMapsApi.prototype.Initialize = function () {
 		center: { lat: -37.1799565, lng: -65.6866910 },
 		zoom: 6
 	};
+	if (window.SegMap.Configuration.UseLightMap) {
+		myMapOptions.mapTypeControlOptions.mapTypeIds.unshift('light');
+	}
 //		controlSize: 25,
 
 	var blankMapType = this.CreateBlankMap();
-	var lightMapType = this.CreateLightMap();
 
 	this.gMap = new this.google.maps.Map(document.getElementById('map'), myMapOptions);
 
 	this.gMap.mapTypes.set('blank', blankMapType);
-	this.gMap.mapTypes.set('light', lightMapType);
 
+	if (window.SegMap.Configuration.UseLightMap) {
+		var lightMapType = this.CreateLightMap();
+		this.gMap.mapTypes.set('light', lightMapType);
+	}
 	this.AddCopyright();
 	this.CreateDrawingManager();
 	this.drawingManager.setMap(this.gMap);
@@ -318,10 +323,14 @@ GoogleMapsApi.prototype.SetTypeControlsDefault = function () {
 };
 
 GoogleMapsApi.prototype.SetTypeControls = function (controlType) {
+	var types = ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'];
+	if (window.SegMap.Configuration.UseLightMap) {
+		types.push('light');
+	}
 	this.gMap.setOptions({
 		mapTypeControlOptions: {
 			style: controlType,
-			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank', 'light'],
+			mapTypeIds: types,
 		},
 	});
 };

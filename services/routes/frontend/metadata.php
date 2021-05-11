@@ -28,8 +28,12 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 // ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4
 App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) {
 	$controller = new commonServices\MetadataService();
-	$metadataId = Params::GetInt('m');
+	$metadataId = Params::GetIntMandatory('m');
 
-	return $controller->GetMetadataPdf($metadataId, null, false, null);
+	// x compatibilidad a links viejos
+	$workId = Params::GetInt('w');
+	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
+	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
 });
 

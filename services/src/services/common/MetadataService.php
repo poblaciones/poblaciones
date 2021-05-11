@@ -51,8 +51,6 @@ class MetadataService extends BaseService
 		// Si no indica work, no pueden ser metadatos de un work
 		if (!$workId && $metadata['met_type'] !== 'C')
 		{
-			// soporte para links antiguos?
-
 			throw new PublicException('Indicación de metadatos no válida.');
 		}
 

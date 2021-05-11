@@ -58,20 +58,21 @@ FeatureSelector.prototype.getFeature = function (event) {
 	var position = h.getPosition(event);
 	var ele = document.elementsFromPoint(position.Point.X, position.Point.Y);
 	for (var n = 0; n < ele.length; n++) {
-		if (ele[n].nodeName === 'path' && ele[n].parentElement.attributes['isFIDContainer'] &&
-			ele[n].id !== null) {
+		if (ele[n].nodeName === 'path' && ele[n].parentElement && ele[n].parentElement.parentElement &&
+			ele[n].parentElement.parentElement.attributes['isFIDContainer'] && ele[n].attributes.FID !== null) {
 			var parentInfo;
-			if (ele[n].parentElement.attributes['variableId']) {
-				var variableId = ele[n].parentElement.attributes['variableId'].value;
-				var metricId = ele[n].parentElement.attributes['metricId'].value;
+			var parent = ele[n].parentElement.parentElement;
+			if (parent.attributes['variableId']) {
+				var variableId = parent.attributes['variableId'].value;
+				var metricId = parent.attributes['metricId'].value;
 				parentInfo = {
 					MetricId: metricId,
-					MetricVersionId: ele[n].parentElement.attributes['metricVersionId'].value,
-					LevelId: ele[n].parentElement.attributes['levelId'].value,
+					MetricVersionId: parent.attributes['metricVersionId'].value,
+					LevelId: parent.attributes['levelId'].value,
 					VariableId: variableId
 				};
 			} else {
-				var boundaryId = ele[n].parentElement.attributes['boundaryId'].value;
+				var boundaryId = parent.attributes['boundaryId'].value;
 				parentInfo = {
 					BoundaryId: boundaryId
 				};
@@ -84,7 +85,7 @@ FeatureSelector.prototype.getFeature = function (event) {
 			if (ele[n].attributes.value) {
 				value = ele[n].attributes.value.value;
 			}
-			return { position: position, parentInfo: parentInfo, id: ele[n].id, description: desc, value: value };
+			return { position: position, parentInfo: parentInfo, id: ele[n].attributes.FID.value, description: desc, value: value };
 		}
 	}
 	return null;
@@ -123,6 +124,14 @@ FeatureSelector.prototype.resetTooltip = function () {
 
 FeatureSelector.prototype.showTooltip = function () {
 	var loc = window.SegMap.MapsApi.selector;
+	if (loc.tooltipCandidate === null) {
+		var e = loc.tooltipEvent;
+		var feature = loc.getFeature(e);
+		if (!feature || (!feature.description && !feature.value)) {
+			return;
+		}
+		loc.tooltipCandidate = feature;
+	}
 	var m = new Mercator();
 	var coord = m.fromLatLonToGoogleLatLng(loc.tooltipLocation.Coordinate);
 	var style = 'ibTooltip exp-hiddable-block';
@@ -161,11 +170,9 @@ FeatureSelector.prototype.RenderTooltip = function (feature) {
 };
 
 FeatureSelector.prototype.startTooltipCandidate = function (feature) {
-	if (feature.description || feature.value) {
-		var loc = window.SegMap.MapsApi.selector;
-		loc.tooltipCandidate = feature;
-		loc.tooltipTimer = setTimeout(loc.showTooltip, 100);
-	}
+	var loc = window.SegMap.MapsApi.selector;
+	loc.tooltipCandidate = feature;
+	loc.tooltipTimer = setTimeout(loc.showTooltip, 100);
 };
 
 FeatureSelector.prototype.markerMouseOver = function (event, parentInfo, fid, description, value) {
@@ -189,10 +196,47 @@ FeatureSelector.prototype.markerMouseOut = function (event) {
 };
 
 FeatureSelector.prototype.selectorMoved = function (event) {
-	if (this.disabled) {
+	var loc = window.SegMap.MapsApi.selector;
+	if (loc.disabled) {
 		return;
 	}
+	if (loc.tooltipMarker !== null) {
+		return;
+	}
+	// TODO: sale porque no pasó 100 ms en el mismo lugar,
+	// o porque ya fue procesado ese lugar;
+	//return;
+
+	var feature = loc.getFeature(event);
+	loc.tooltipLocation = h.getPosition(event);
+	loc.tooltipEvent = event;
+
+	if (loc.tooltipOverlay !== null) {
+		// averigua si está en el mismo
+		var feature = loc.getFeature(event);
+		if (!feature || feature.id === loc.tooltipCandidate.id) {
+			return;
+		}
+		if (!loc.resetTooltip()) {
+			// Sale porque está en el mismo feature del cual se está mostrando el tooltip
+			return;
+		}
+	}
+
+	loc.tooltipCandidate = null;
+	if (loc.tooltipTimer !== null) {
+		clearTimeout(loc.tooltipTimer);
+	}
+	loc.tooltipTimer = null;
+
+	loc.startTooltipCandidate(null);
+};
+
+FeatureSelector.prototype.selectorMovedEx = function (event) {
 	var loc = window.SegMap.MapsApi.selector;
+	if (loc.disabled) {
+		return;
+	}
 	if (loc.tooltipMarker !== null) {
 		return;
 	}
@@ -216,6 +260,7 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 		loc.startTooltipCandidate(feature);
 	} else {
 	}
+
 	var currentPointer = loc.selectorCanvas.cursor;
 	if (currentPointer !== pointer) {
 		loc.selectorCanvas.cursor = pointer;

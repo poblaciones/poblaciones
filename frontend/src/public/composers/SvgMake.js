@@ -33,12 +33,19 @@ SvgMake.prototype.ConvertGeometry = function (geom) {
 };
 
 SvgMake.prototype.getCoordString = function (coords) {
-	const TILE_SIZE = 256;
+// NO REDUCIDO
 	const TILE_PRJ_SIZE = 8192;
-	var scale = TILE_PRJ_SIZE / TILE_SIZE;
 
 	var coordStr = coords.map(function (coord) {
-		return (coord[0] / scale) + ',' + (TILE_SIZE - (coord[1] / scale));
+		return coord[0] + ',' + (TILE_PRJ_SIZE - coord[1]);
+	});
+	return coordStr.join(' ');
+};
+
+SvgMake.prototype.getCoordStringEx = function (coords) {
+	var scale = m.TILE_PRJ_SIZE / 256;
+	var coordStr = coords.map(function (coord) {
+		return (coord[0] / scale) + ',' + (256 - (coord[1] / scale));
 	});
 	return coordStr.join(' ');
 };

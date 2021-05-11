@@ -31,10 +31,11 @@ LabelsComposer.prototype.render = function(mapResults, dataResults, gradient, ti
 			textElement.clickId = (dataElement['FIDs'] === null || dataElement['type'] === 'C' ? dataElement['RID'] : dataElement['FIDs']);
 			textElement.symbol = dataElement['Symbol'];
 
-			this.UpdateTextStyle(dataElement['Size']);
+			this.UpdateTextStyle(dataElement['Size'], dataElement['type']);
 		} else {
 			textElement.hidden = true;
 		}
+//		this.SetBackgroundText(div, tileBounds, textElement, tileKey, location, null, '');
 		this.SetTextOverlay(textElement, tileKey, location, null, '');
 	}
 };
@@ -43,8 +44,11 @@ LabelsComposer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
 };
 
-LabelsComposer.prototype.UpdateTextStyle = function (size) {
+LabelsComposer.prototype.UpdateTextStyle = function (size, type) {
 	this.textStyle = 'mapLabels ml' + size;
+	if (type === 'F') {
+		this.textStyle += ' sl';
+	}
 };
 
 LabelsComposer.prototype.dispose = function () {
