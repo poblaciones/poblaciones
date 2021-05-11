@@ -195,7 +195,7 @@ class SimplifyGeometryPlain
 
 		for($n = $start + 1; $n < $end; $n++)
 		{
-			$distance = $this->getPerpendicularDistance($coordinates[$n],
+			$distance = $this->getSqSegDist($coordinates[$n],
 																	$coordinates[$start], $coordinates[$end]);
       if ($distance > $distanceMax)
 			{
@@ -208,75 +208,4 @@ class SimplifyGeometryPlain
 		else
 			return null;
 	}
-
-	private function getPerpendicularDistance($point, $start, $end)
-  {
-	  $firstLinePointLat = $this->deg2radLatitude($start[1]);
-    $firstLinePointLng = $this->deg2radLongitude($start[0]);
-
-    $firstLinePointX = self::ellipsoidRadius * cos($firstLinePointLng) * sin($firstLinePointLat);
-    $firstLinePointY = self::ellipsoidRadius * sin($firstLinePointLng) * sin($firstLinePointLat);
-    $firstLinePointZ = self::ellipsoidRadius * cos($firstLinePointLat);
-
-    $secondLinePointLat = $this->deg2radLatitude($end[1]);
-    $secondLinePointLng = $this->deg2radLongitude($end[0]);
-
-    $secondLinePointX = self::ellipsoidRadius * cos($secondLinePointLng) * sin($secondLinePointLat);
-    $secondLinePointY = self::ellipsoidRadius * sin($secondLinePointLng) * sin($secondLinePointLat);
-    $secondLinePointZ = self::ellipsoidRadius * cos($secondLinePointLat);
-
-    $pointLat = $this->deg2radLatitude($point[1]);
-    $pointLng = $this->deg2radLongitude($point[0]);
-
-    $pointX = self::ellipsoidRadius * cos($pointLng) * sin($pointLat);
-    $pointY = self::ellipsoidRadius * sin($pointLng) * sin($pointLat);
-    $pointZ = self::ellipsoidRadius * cos($pointLat);
-
-    $normalizedX = $firstLinePointY * $secondLinePointZ - $firstLinePointZ * $secondLinePointY;
-    $normalizedY = $firstLinePointZ * $secondLinePointX - $firstLinePointX * $secondLinePointZ;
-    $normalizedZ = $firstLinePointX * $secondLinePointY - $firstLinePointY * $secondLinePointX;
-
-    $length = sqrt($normalizedX * $normalizedX + $normalizedY * $normalizedY + $normalizedZ * $normalizedZ);
-
-    if ($length > 0) {
-        $normalizedX /= $length;
-        $normalizedY /= $length;
-        $normalizedZ /= $length;
-    }
-
-    $thetaPoint = $normalizedX * $pointX + $normalizedY * $pointY + $normalizedZ * $pointZ;
-
-    $length = sqrt($pointX * $pointX + $pointY * $pointY + $pointZ * $pointZ);
-
-    if ($length > 0)
-        $thetaPoint /= $length;
-
-    $distance = abs((self::PI / 2) - acos($thetaPoint));
-
-    return $distance * self::ellipsoidRadius;
-  }
-
-  /**
-    * @param float $latitude
-    *
-    * @return float
-    */
-  protected function deg2radLatitude($latitude)
-  {
-      return deg2rad(90 - $latitude);
-  }
-
-  /**
-    * @param float $longitude
-    *
-    * @return float
-    */
-  protected function deg2radLongitude($longitude)
-  {
-    if ($longitude > 0) {
-        return deg2rad($longitude);
-    }
-
-    return deg2rad($longitude + 360);
-  }
 }

@@ -553,6 +553,13 @@
 		text-align: center;
 	}
 
+	.activePath {
+		stroke: #FFF;
+		stroke-opacity: 1;
+		stroke-width: 2px;
+		fill: none;
+		vector-effect: non-scaling-stroke;
+	}
 	.sat.sl span {
 		opacity: .75!important;
 	}

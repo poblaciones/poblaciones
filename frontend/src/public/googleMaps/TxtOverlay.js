@@ -20,7 +20,7 @@ function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidd
 	this.div = null;
 	this.Values = [];
 	this.tileDiv = null;
-
+	this.alwaysVisible = false;
 	this.pixelLocation = null;
 	this.setMap(map);
 }
@@ -151,6 +151,9 @@ TxtOverlay.prototype.onAdd = function() {
 
 TxtOverlay.prototype.Overlaps = function () {
 	if (this.hidden) {
+		return false;
+	}
+	if (this.alwaysVisible) {
 		return false;
 	}
 	var position2 = this.map.getProjection().fromLatLngToPoint(this.pos);

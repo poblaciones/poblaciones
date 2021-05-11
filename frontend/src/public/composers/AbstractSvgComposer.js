@@ -19,7 +19,6 @@ function AbstractSvgComposer(mapsApi, activeSelectedMetric) {
 	// posible api de php https://github.com/chrishadi/geojson2svg/blob/master/geojson2svg.php
 	this.MapsApi = mapsApi;
 	this.activeSelectedMetric = activeSelectedMetric;
-	this.keysInTile = [];
 	this.svgInTile = [];
 	this.index = this.activeSelectedMetric.index;
 	this.labelsVisibility = [];
@@ -162,7 +161,9 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 		var svg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		svg.setAttributeNS(null, 'd', path);
 
-		svg.setAttributeNS(null, 'FID', feature.id);
+		if (feature.id) {
+			svg.setAttributeNS(null, 'FID', feature.id);
+		}
 		if (feature.properties.description) {
 			svg.setAttributeNS(null, 'description', feature.properties.description);
 		}
@@ -201,22 +202,6 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 		this.ReplaceMinimizingFlickering(div, oSvg, textureMaskId);
 	}
 	return oSvg;
-};
-
-AbstractSvgComposer.prototype.SvgToCanvas = function (oSvg) {
-	var canvas = document.createElement('canvas');
-	canvas.width = 256;
-	canvas.height = 256;
-	const ctx = canvas.getContext('2d');
-	var svgWider = oSvg.outerHTML;
-	var startTime, endTime;
-	startTime = performance.now();
-	var v = canvg.fromString(ctx, svgWider);
-	v.render().then(function () {
-		endTime = performance.now();
-		console.log('done in ' + (endTime - startTime));
-	});
-	return canvas;
 };
 
 AbstractSvgComposer.prototype.SaveSvg = function (svg, x, y, z) {

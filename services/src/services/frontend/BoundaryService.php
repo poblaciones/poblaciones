@@ -29,6 +29,8 @@ use helena\entities\frontend\metadata\MetadataInfo;
 
 class BoundaryService extends BaseService
 {
+	private $project = true;
+
 	public function GetBoundary($frame, $boundaryId)
 	{
 		$data = null;
@@ -55,20 +57,19 @@ class BoundaryService extends BaseService
 
 		$rows = $table->GetRows($frame);
 
-		$project = true;
-		$projectEnvelope = $frame->TileEnvelope;
-		$data = FeaturesInfo::FromRows($rows, true, $project, $frame->Zoom, true, $projectEnvelope);
+		$tileEnvelope = $frame->TileEnvelope;
+		$data = FeaturesInfo::FromRows($rows, true, $this->project, $frame->Zoom, true, $tileEnvelope);
 
 		// recorta el cuadrado
 		$clipper = new Clipper();
 
-		if ($project)
+		if ($this->project)
 		{
 			$projectEnvelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
 			$clipper = new ClipperRound();
 		}
 
-		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $projectEnvelope);
+		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $tileEnvelope);
 
 		return $data;
 	}

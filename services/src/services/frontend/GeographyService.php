@@ -18,11 +18,8 @@ use helena\entities\frontend\geometries\Coordinate;
 
 class GeographyService extends BaseService
 {
-	// Los niveles de zoom se mapean con la calidad de imagen
-	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
-	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
 	private const PAGE_SIZE = 25000;
-
+	private $project = true;
 	public function GetGeography($geographyId, $x, $y, $z, $page = 0)
 	{
 		$data = null;
@@ -49,22 +46,20 @@ class GeographyService extends BaseService
 
 		$cartoTable = new GeographyModel();
 		$carto = $cartoTable->GetGeographyInfo($geographyId);
-		$getCentroids = ($carto['geo_min_zoom'] == null || $z >= $carto['geo_min_zoom']);
 
-		$rows = $table->GetGeographyByEnvelope($geographyId, $envelope, $z, $getCentroids);
+		$rows = $table->GetGeographyByEnvelope($geographyId, $envelope, $z);
 
-		$project = true; // $z <= 17;
 		$totalPages = ceil(sizeof($rows) / self::PAGE_SIZE);
 		if ($totalPages > 1)
 		{
 			$rows = array_slice($rows, $page * self::PAGE_SIZE, self::PAGE_SIZE);
 		}
-		$data = FeaturesInfo::FromRows($rows, $getCentroids, $project, null, false, $envelope);
+		$data = FeaturesInfo::FromRows($rows, false, $this->project, null, false, $envelope);
 
 		// recorta el cuadrado
 		$clipper = new Clipper();
 
-		if ($project)
+		if ($this->project)
 		{
 			$envelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
 			$clipper = new ClipperRound();

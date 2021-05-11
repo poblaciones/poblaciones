@@ -62,7 +62,6 @@ return [
 			'x' => 85,
 			'y' => 156,
 			'z' => 8,
-			'b' => null,
 		],
 	],
 	"helena\\tests\\frontend\\ClippingServiceTest" => [
@@ -115,7 +114,6 @@ return [
 			'y' => 156,
 			'e' => '-36.31489,-56.568096;-38.33281,-61.822308',
 			'z' => 8,
-			'b' => null,
 		],
 	],
 	"helena\\tests\\frontend\\SummaryServiceTest" => [

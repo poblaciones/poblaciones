@@ -15,6 +15,7 @@ function FeatureSelector(mapsApi) {
 	this.tooltipOverlay = null;
 	this.tooltipKillerTimer = null;
 	this.disabled = false;
+	this.tooltipOverlayPaths = null;
 };
 
 FeatureSelector.prototype.SetSelectorCanvas = function () {
@@ -55,41 +56,68 @@ FeatureSelector.prototype.SetSelectorCanvas = function () {
 };
 
 FeatureSelector.prototype.getFeature = function (event) {
+	// Devuelve un elemento a partir de los detectados en ese punto.
+	// Solo devuelve un boundary si no hay otros polígonos coincidentes.
+	var matchBoundary = null;
 	var position = h.getPosition(event);
-	var ele = document.elementsFromPoint(position.Point.X, position.Point.Y);
-	for (var n = 0; n < ele.length; n++) {
-		if (ele[n].nodeName === 'path' && ele[n].parentElement && ele[n].parentElement.parentElement &&
-			ele[n].parentElement.parentElement.attributes['isFIDContainer'] && ele[n].attributes.FID !== null) {
-			var parentInfo;
-			var parent = ele[n].parentElement.parentElement;
-			if (parent.attributes['variableId']) {
-				var variableId = parent.attributes['variableId'].value;
-				var metricId = parent.attributes['metricId'].value;
-				parentInfo = {
-					MetricId: metricId,
-					MetricVersionId: parent.attributes['metricVersionId'].value,
-					LevelId: parent.attributes['levelId'].value,
-					VariableId: variableId
-				};
+	var elements = document.elementsFromPoint(position.Point.X, position.Point.Y);
+
+	for (var n = 0; n < elements.length; n++) {
+		var ele = elements[n];
+		if (ele.nodeName === 'path' && ele.parentElement && ele.parentElement.parentElement &&
+			ele.parentElement.parentElement.attributes['isFIDContainer']) {
+			// sirve...
+			var item = this.createItemFromElement(ele, position);
+			if (item.id !== null || item.description !== null || item.value !== null)
+			if (item.parentInfo.BoundaryId) {
+				if (!matchBoundary) {
+					matchBoundary = item;
+				}
 			} else {
-				var boundaryId = parent.attributes['boundaryId'].value;
-				parentInfo = {
-					BoundaryId: boundaryId
-				};
+				return item;
 			}
-			var desc = null;
-			var value = null;
-			if (ele[n].attributes.description) {
-				desc = ele[n].attributes.description.value;
-			}
-			if (ele[n].attributes.value) {
-				value = ele[n].attributes.value.value;
-			}
-			return { position: position, parentInfo: parentInfo, id: ele[n].attributes.FID.value, description: desc, value: value };
 		}
 	}
-	return null;
+	return matchBoundary;
 };
+
+FeatureSelector.prototype.createItemFromElement = function (element, position) {
+	var parentInfo;
+	var parentAttributes = element.parentElement.parentElement.attributes;
+	if (parentAttributes['variableId']) {
+		parentInfo = {
+			MetricId: parentAttributes['metricId'].value,
+			MetricVersionId: parentAttributes['metricVersionId'].value,
+			LevelId: parentAttributes['levelId'].value,
+			VariableId: parentAttributes['variableId'].value,
+			ShowInfo: (parentAttributes['showInfo'].value === "1")
+		};
+	} else {
+		var boundaryId = parentAttributes['boundaryId'].value;
+		parentInfo = {
+			BoundaryId: boundaryId
+		};
+	}
+	var desc = null;
+	var value = null;
+	var fid = null;
+	if (element.attributes.description) {
+		desc = element.attributes.description.value;
+	}
+	if (element.attributes.value) {
+		value = element.attributes.value.value;
+	}
+	if (element.attributes.FID) {
+		fid = element.attributes.FID.value;
+	}
+	return {
+		position: position, parentInfo: parentInfo,
+		id: fid,
+		description: desc,
+		value: value
+	};
+};
+
 FeatureSelector.prototype.createTooltipKiller = function () {
 	var loc = window.SegMap.MapsApi.selector;
 	loc.tooltipKillerTimer = setTimeout(loc.resetTooltip, 75000);
@@ -101,6 +129,8 @@ FeatureSelector.prototype.resetTooltip = function () {
 	}
 
 	var loc = window.SegMap.MapsApi.selector;
+	loc.resetTooltipOverlays();
+
 	if (loc.tooltipKillerTimer !== null) {
 		clearTimeout(loc.tooltipKillerTimer);
 	}
@@ -141,11 +171,40 @@ FeatureSelector.prototype.showTooltip = function () {
 	}
 	var html = loc.RenderTooltip(loc.tooltipCandidate);
 	loc.tooltipOverlay = window.SegMap.MapsApi.Write(html, coord, 10000000, outStyle, style, true);
+	loc.tooltipOverlay.alwaysVisible = true;
+	loc.setTooltipOverlays();
+
 	loc.createTooltipKiller();
 };
 
+FeatureSelector.prototype.setTooltipOverlays = function () {
+	var items = document.querySelectorAll('path[FID="' + this.tooltipCandidate.id + '"]');
+	if (!items) {
+		return;
+	}
+	this.tooltipOverlayPaths = [];
+	for (var n = 0; n < items.length; n++) {
+		var clone = items[n].cloneNode();
+		clone.setAttribute('class', 'activePath');
+		clone.style.filter = "drop-shadow(10px 0 20px #333)";
+
+		var newParent = items[n].parentElement.parentElement;
+		newParent.appendChild(clone);
+		this.tooltipOverlayPaths.push(clone);
+	}
+};
+
+FeatureSelector.prototype.resetTooltipOverlays = function () {
+	if (!this.tooltipOverlayPaths) {
+		return;
+	}
+	for (var n = 0; n < this.tooltipOverlayPaths.length; n++) {
+		this.tooltipOverlayPaths[n].remove();
+	}
+	this.tooltipOverlayPaths = null;
+};
+
 FeatureSelector.prototype.RenderTooltip = function (feature) {
-	var parentInfo = feature.parentInfo;
 	var caption = null;
 	var value = null;
 	if (feature.value) {
@@ -207,20 +266,16 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 	// o porque ya fue procesado ese lugar;
 	//return;
 
-	var feature = loc.getFeature(event);
 	loc.tooltipLocation = h.getPosition(event);
 	loc.tooltipEvent = event;
 
 	if (loc.tooltipOverlay !== null) {
 		// averigua si está en el mismo
 		var feature = loc.getFeature(event);
-		if (!feature || feature.id === loc.tooltipCandidate.id) {
+		if (feature && feature.id === loc.tooltipCandidate.id) {
 			return;
 		}
-		if (!loc.resetTooltip()) {
-			// Sale porque está en el mismo feature del cual se está mostrando el tooltip
-			return;
-		}
+		loc.resetTooltip();
 	}
 
 	loc.tooltipCandidate = null;
@@ -271,9 +326,15 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 	var loc = window.SegMap.MapsApi.selector;
 	window.SegMap.MapsApi.ResetInfoWindow();
 	var feature = loc.getFeature(event);
-	if (feature !== null && feature.id && !feature.parentInfo.BoundaryId) {
-		window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id);
-	}
+	if (feature === null || !feature.id) return;
+
+	if (feature.parentInfo.BoundaryId) {
+			window.SegMap.SelectId('C', feature.id, null, null, event.ctrlKey);
+		} else {
+			if (feature.parentInfo.ShowInfo) {
+				window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id);
+			}
+		}
 };
 
 FeatureSelector.prototype.ClearSelectorCanvas = function () {

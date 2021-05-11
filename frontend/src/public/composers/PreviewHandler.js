@@ -18,6 +18,10 @@ function PreviewHandler(tileOverlay) {
 };
 
 PreviewHandler.prototype.getPreview = function (coord, zoom) {
+	if (window.SegMap.MapsApi.selector.tooltipOverlayPaths && window.SegMap.MapsApi.selector.tooltipOverlayPaths.length > 0) {
+		// tiene que limpiar para no clonar la selección
+		window.SegMap.MapsApi.selector.resetTooltip();
+	}
 	for (var previousZoom = zoom; previousZoom >= 0; previousZoom--) {
 		if (this.svgInTileForPreview.hasOwnProperty(previousZoom)) {
 			var svgs = this.svgInTileForPreview[previousZoom];

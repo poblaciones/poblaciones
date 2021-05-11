@@ -8,6 +8,9 @@
 - Fix: navegación de items (funcionaba bien ir al siguiente pero no al anterior).
 - Fix: crawler por regiones para indicadores con múltiples niveles.
 - Fix: obtención de metadatos por la ruta /map/[id]/metadata no estaba funcionando.
+- Fix: si hay visible una delimitación, se priorizan los clicks y tooltips de polígonos por sobre la delimitación.
+- Resaltado de polígonos al mostrar tooltips.
+- Las delimitaciones ofrecen tooltips y selección si no hay otra información de polígonos activa en la zona.
 
 2021-04-13
 - Segmentación de delimitaciones por selección.

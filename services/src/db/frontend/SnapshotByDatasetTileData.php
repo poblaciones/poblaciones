@@ -52,11 +52,9 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		if ($this->hasSymbols)
 			$select .= ", sna_symbol Symbol";
 
-		if ($this->datasetType == 'L')
-		{
-			// Si es un metric de puntos, trae la ubicación del punto
-			$select .= ", round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
-		}
+		// Si es un metric de puntos, trae la ubicación del punto
+		$select .= ", round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
+
 		$from = $this->tableName;
 
 		$where = $this->spatialConditions->UrbanityCondition($this->urbanity);
@@ -72,12 +70,9 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$extraFields = [];
 		if ($this->hasDescriptions)
 			$extraFields[] = 'Description';
-		if ($this->datasetType == 'L')
-		{
-			// Si es un metric de puntos, trae la ubicación del punto
-			$extraFields[] = 'Lat';
-			$extraFields[] = 'Lon';
-		}
+		// Si es un metric de puntos, trae la ubicación del punto
+		$extraFields[] = 'Lat';
+		$extraFields[] = 'Lon';
 		$ret = self::RotateResults($ret, $extraFields);
 
 		if ($this->datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
@@ -106,10 +101,10 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 					$item['FID'] = $row['FID'];
 
 					// Pone lo específico de cada variable
-					$item['VariableId'] = $variable->Id;
+					$item['VID'] = $variable->Id;
 					$item['Value'] = $row["sna_" . $variable->Id . "_value"];
 					$item['Total'] = $row[$totalField];
-					$item['ValueId'] = $row["sna_" . $variable->Id . "_value_label_id"];
+					$item['LID'] = $row["sna_" . $variable->Id . "_value_label_id"];
 					if ($variable->IsSequence)
 						$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
 					if ($this->hasSymbols)

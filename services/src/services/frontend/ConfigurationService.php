@@ -24,8 +24,8 @@ class ConfigurationService extends BaseService
 
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
-									'UseSilverMap' =>  Context::Settings()->Map()->UseSilverMap,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
+									'UseLightMap' =>  Context::Settings()->Map()->UseLightMap,
 									'StaticWorks' =>  Context::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => Context::Settings()->Map()->UseGradients,
 									'UseTextures' => Context::Settings()->Map()->UseTextures,

@@ -15,7 +15,7 @@ function LabelsComposer(mapsApi, activeSelectedMetric) {
 };
 LabelsComposer.prototype = new AbstractTextComposer();
 
-LabelsComposer.prototype.render = function(mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
+LabelsComposer.prototype.renderLabels = function(dataResults, tileKey, tileBounds, zoom) {
 	var dataItems = dataResults.Data;
 
 	for (var i = 0; i < dataItems.length; i++) {

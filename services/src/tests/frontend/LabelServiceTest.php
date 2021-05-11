@@ -23,7 +23,7 @@ class LabelServiceTest extends TestCase
 		$b = $this->Get('b');
 
 		$controller = new LabelsService();
-		$ret = $controller->GetLabels($x, $y, $z, $b);
+		$ret = $controller->GetLabels($x, $y, $z);
 		$this->assertInstanceOf(LabelsDataInfo::class, $ret);
 		$this->assertNotEmpty($ret->EllapsedMs);
 		$this->assertIsArray($ret->Data);

@@ -26,7 +26,7 @@ function LocationsComposer(mapsApi, activeSelectedMetric) {
 
 LocationsComposer.prototype = new AbstractTextComposer();
 
-LocationsComposer.prototype.render = function (mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds) {
+LocationsComposer.prototype.renderLabels = function (dataResults, tileKey, tileBounds, zoom) {
 	var dataItems = dataResults.Data;
 	if (this.variable === null) {
 		return;
@@ -42,15 +42,15 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 	}
 
 	var markerSettings = this.activeSelectedMetric.SelectedLevel().Dataset.Marker;
-	this.UpdateTextStyle(z, markerSettings);
+	this.UpdateTextStyle(zoom, markerSettings);
 
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
-		varId = dataElement['VariableId'];
+		varId = dataElement['VID'];
 		if (varId === variableId) {
 			id = dataElement['FID'];
 
-			var val = dataElement['ValueId'];
+			var val = dataElement['LID'];
 			var valKey = 'K' + val;
 			if (!(valKey in this.labelsVisibility)) {
 				this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveValueLabelVisibility(val);
@@ -83,10 +83,10 @@ LocationsComposer.prototype.render = function (mapResults, dataResults, gradient
 				var marker = this.markerFactory.CreateMarker(tileKey, mapItem, markerSettings, isSequenceInactiveStep);
 				this.registerTileMarker(tileKey, marker);
 				if (variable.IsSequence) {
-					this.SequenceComposer.registerSequenceMarker(tileKey, mapItem, marker, z);
+					this.SequenceComposer.registerSequenceMarker(tileKey, mapItem, marker, zoom);
 				}
 				// Pone el texto
-				this.AddFeatureText(variable, val, dataElement, tileKey, tileBounds, colorMap, markerSettings, z);
+				this.AddFeatureText(variable, val, dataElement, tileKey, tileBounds, colorMap, markerSettings, zoom);
 			}
 		}
 	}

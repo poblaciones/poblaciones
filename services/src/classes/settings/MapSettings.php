@@ -14,7 +14,7 @@ class MapSettings
 
 	public $UseDataTileBlocks = false;
 	public $UseLabelTileBlocks = true;
-	public $UseSilverMap = false;
+	public $UseLightMap = false;
 	public $ContentServerWorks = [];
 
 	public $UseCalculated = false;

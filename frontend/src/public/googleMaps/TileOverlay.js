@@ -120,10 +120,15 @@ TileOverlay.prototype.process = function (mapResults, dataResults, gradient, til
 	this.composer.textInTile[tileKey] = [];
 	var mercator = new Mercator();
 	var tileBounds = mercator.getTileBoundsLatLon({ x: x, y: y, z: z });
-	this.composer.render(mapResults, dataResults, gradient, tileKey, div, x, y, z, tileBounds);
+
+	this.composer.renderLabels(dataResults, tileKey, tileBounds, z);
+	if (this.composer.renderPolygons) {
+		this.composer.renderPolygons(mapResults, dataResults, gradient, div, x, y, z, tileBounds);
+	}
 };
 
-TileOverlay.prototype.releaseTile = function(tile) {
+TileOverlay.prototype.releaseTile = function (tile) {
+	var selector = window.SegMap.MapsApi.selector;
 	var key = tile.getAttribute('key');
 	this.killIfRunning(key);
 	this.composer.removeTileFeatures(key);

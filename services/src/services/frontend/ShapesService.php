@@ -21,6 +21,8 @@ use helena\entities\frontend\geometries\Coordinate;
 
 class ShapesService extends BaseService
 {
+	private $project = true;
+
 	// Los niveles de zoom se mapean con la calidad de imagen
 	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, z[7 a 9] = C3, z[10] = C4, z>10 = C5.
@@ -59,18 +61,16 @@ public function GetDatasetShapes($datasetId, $x, $y, $z)
 		$cartoTable = new GeographyModel();
 		$geographyId = $dataset['dat_geography_id'];
 		$carto = $cartoTable->GetGeographyInfo($geographyId);
-		$getCentroids = ($carto['geo_min_zoom'] == null || $z >= $carto['geo_min_zoom']);
 
-		$rows = $table->GetShapesByEnvelope($datasetId, $envelope, $getCentroids);
+		$rows = $table->GetShapesByEnvelope($datasetId, $envelope);
 
-		$project = true;
-		$data = FeaturesInfo::FromRows($rows, $getCentroids, $project, $zoom, false, $envelope);
+		$data = FeaturesInfo::FromRows($rows, false, $this->project, $zoom, false, $envelope);
 
 		// recorta el cuadrado
 		$clipper = new Clipper();
-		if ($project)
+		if ($this->project)
 		{
-			$envelope = new Envelope(new Coordinate(0,0), new Coordinate(1024, 1024));
+			$envelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
 			$clipper = new ClipperRound();
 		}
 

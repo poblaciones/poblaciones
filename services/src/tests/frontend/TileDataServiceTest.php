@@ -22,7 +22,6 @@ class TileDataServiceTest extends TestCase
 		$y = $this->Get('y');
 		$e = $this->Get('e');
 		$z = $this->Get('z');
-		$b = $this->Get('b');
 
 		$controller = new TileDataService();
 		$metricId = $l;
@@ -37,6 +36,6 @@ class TileDataServiceTest extends TestCase
 		$frame->Zoom = $z;
 		$frame->Envelope =  Envelope::TextDeserialize($e);
 
-		$ret = $controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z, $b);
+		$ret = $controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z);
 	}
 }

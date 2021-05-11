@@ -14,13 +14,13 @@ class SnapshotGeographyItemModel extends BaseModel
 		$this->tableName = 'snapshot_geography_item';
 		$this->idField = 'giw_id';
 	}
-	public function GetGeographyByEnvelope($geographyId, $envelope, $zoom, $getCentroids)
+	public function GetGeographyByEnvelope($geographyId, $envelope, $zoom)
 	{
 		Profiling::BeginTimer();
 
 		$rZoom = SpatialConditions::ResolveRZoom($zoom);
 
-		$centroids = ($getCentroids ? ', ST_Y(giw_centroid) as Lat, ST_X(giw_centroid) as Lon' : '');
+		//$centroids = ($getCentroids ? ', ST_Y(giw_centroid) as Lat, ST_X(giw_centroid) as Lon' : '');
 
 		// Calcula filtro de 1 pixel para filtrar
 		$field = "giw_geometry_r" . $rZoom;
@@ -30,7 +30,7 @@ class SnapshotGeographyItemModel extends BaseModel
 		$denseAttribute = "NOT " . $this->GetSquareFilter($envelope, $field, 8) .
 											" OR giw_population / giw_area_m2 > 0.001"; // 1000 x km2
 
-		$sql = "SELECT  " . $field . " as value, " . $denseAttribute . " dense, giw_geography_item_id as FID" . $centroids .
+		$sql = "SELECT  " . $field . " as value, " . $denseAttribute . " dense, giw_geography_item_id as FID" .
 			" FROM snapshot_geography_item WHERE giw_geography_id = ? " .
 			" AND (MBRIntersects(" . $field . ", ST_PolygonFromText('" . $envelope->ToWKT() . "'))
 						)" . $filterSize .
