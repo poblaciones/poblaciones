@@ -20,7 +20,6 @@ class LabelServiceTest extends TestCase
 		$x = $this->Get('x');
 		$y = $this->Get('y');
 		$z = $this->Get('z');
-		$b = $this->Get('b');
 
 		$controller = new LabelsService();
 		$ret = $controller->GetLabels($x, $y, $z);

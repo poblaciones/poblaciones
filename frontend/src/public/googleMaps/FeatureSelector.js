@@ -186,10 +186,12 @@ FeatureSelector.prototype.setTooltipOverlays = function () {
 	for (var n = 0; n < items.length; n++) {
 		var clone = items[n].cloneNode();
 		clone.setAttribute('class', 'activePath');
-		clone.style.filter = "drop-shadow(10px 0 20px #333)";
+		var parent = items[n].parentElement.parentElement;
+		var scaling = parent.getAttribute('scaling');
+		var scale = (scaling ? parseFloat(scaling) : 1);
+		clone.style.filter = "drop-shadow(" + (12 / scale) + "px 0 " + (24 / scale) + "px #333)";
 
-		var newParent = items[n].parentElement.parentElement;
-		newParent.appendChild(clone);
+		parent.appendChild(clone);
 		this.tooltipOverlayPaths.push(clone);
 	}
 };

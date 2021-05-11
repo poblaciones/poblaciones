@@ -65,7 +65,7 @@ class BoundaryService extends BaseService
 
 		if ($this->project)
 		{
-			$projectEnvelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
+			$tileEnvelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
 			$clipper = new ClipperRound();
 		}
 

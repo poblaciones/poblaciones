@@ -64,6 +64,7 @@ PreviewHandler.prototype.ExtractPartialSvg = function (svgs, coord, zoom, previo
 		const TILE_SIZE = 256;
 		const TILE_PRJ_SIZE = 8192;
 		var GLOBAL_FIT = TILE_PRJ_SIZE / TILE_SIZE;
+		ret.setAttribute("scaling", times);
 		ret.setAttribute("viewBox", (offsetX * GLOBAL_FIT) + " " + (offsetY  * GLOBAL_FIT) + " " + (newSize  * GLOBAL_FIT) + " " + (newSize * GLOBAL_FIT) );
 
 		return { Svg: ret, Parts: [ret], SourceZoom: previousZoom, IsFullCopy: !this.hasQualityLoss(zoom, previousZoom) };
@@ -73,6 +74,10 @@ PreviewHandler.prototype.ExtractPartialSvg = function (svgs, coord, zoom, previo
 };
 
 PreviewHandler.prototype.ComposeMosaicSvg = function (svgs, coord, zoom, previousZoom) {
+	// NO REDUCIDO
+	const TILE_SIZE = 256;
+	const TILE_PRJ_SIZE = 8192;
+	var GLOBAL_FIT = TILE_PRJ_SIZE / TILE_SIZE;
 	// Calcula cuál es la esquina de inicio
 	var deltaZ = previousZoom - zoom;
 	var sourceX = coord.x * Math.pow(2, deltaZ);
@@ -80,7 +85,7 @@ PreviewHandler.prototype.ComposeMosaicSvg = function (svgs, coord, zoom, previou
 	var sourceZ = previousZoom;
 	// Calcula la escala
 	var times = Math.pow(2, deltaZ);
-	var newSize = 256 / times;
+	var newSize = TILE_SIZE / times;
 	// se fija si lo tiene
 	var i = 0;
 	var root = this.createDiv(256, 256);
@@ -94,14 +99,8 @@ PreviewHandler.prototype.ComposeMosaicSvg = function (svgs, coord, zoom, previou
 			if (svgs.hasOwnProperty(sourceKey)) {
 				// lo devuelve
 				var svg = svgs[sourceKey].cloneNode(true);
-
-				// NO REDUCIDO
-				const TILE_SIZE = 256;
-				const TILE_PRJ_SIZE = 8192;
-				var GLOBAL_FIT = TILE_PRJ_SIZE / TILE_SIZE;
+				svg.setAttribute("scaling", 1 / times);
 				svg.setAttribute("viewBox", "0 0 " + TILE_PRJ_SIZE + " " + TILE_PRJ_SIZE);
-
-//				svg.setAttribute("viewBox", "0 0 256 256");
 				svg.style.maxWidth = newSize + 'px';
 				svg.style.maxHeight = newSize + 'px';
 				svg.style.display = 'inline-block';
