@@ -5,10 +5,9 @@ import Svg from '@/public/js/svg';
 
 export default MarkerFactory;
 
-function MarkerFactory(MapsApi, activeSelectedMetric, variable, zIndex, customIcons) {
+function MarkerFactory(MapsApi, activeSelectedMetric, variable, customIcons) {
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.variable = variable;
-	this.zIndex = zIndex;
 	this.customIcons = customIcons;
 	this.MapsApi = MapsApi;
 
@@ -37,16 +36,18 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 	var params = {};
 	var element;
 
+	var zIndex = (1000 - this.activeSelectedMetric.index) * 100;
+
 	params.map = loc.MapsApi.gMap;
 	params.position = geo;
 	params.optimized = false;
-	params.zIndex = this.zIndex + (isSequenceInactiveStep ? 5 : 10);
+	params.zIndex = zIndex + (isSequenceInactiveStep ? 5 : 10);
 
 	var scale = this.CalculateMarkerScale(markerSettings, z);
 	var isSmallZoom = scale < .4;
-	if (isSmallZoom) {
+	/*if (isSmallZoom) {
 		params.optimized = true;
-	}
+	}*/
 
 	var delegates = this.createDelegates(metric, feature, z);
 	if (!isSequenceInactiveStep) {

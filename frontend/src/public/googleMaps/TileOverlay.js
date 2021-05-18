@@ -17,8 +17,8 @@ function TileOverlay(map, google, activeSelectedMetric) {
 	this.geographyService = activeSelectedMetric.GetCartographyService();
 	this.requestedTiles = [];
 	this.disposed = false;
-	// Guarda lo relacionado al preview de tile
-	if (this.composer.usePreviewHandler) {
+	this.previewHandler = null;
+	if (this.composer.usePreview) {
 		this.previewHandler = new PreviewHandler(this);
 	}
 }
@@ -44,12 +44,17 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 		return div;
 	}
 
-	var preview = this.resolvePreview(div, coord, zoom);
+	var mercator = new Mercator();
+	var tileBounds = mercator.getTileBoundsLatLon({ x: coord.x, y: coord.y, z: zoom });
+
+	var preview = this.resolvePreview(div, tileBounds, coord, zoom);
 
 	if (preview && preview.IsFullCopy) {
-		// es copia completa... lo guarda
+		// es copia completa... regenera etiquetas y markers
+		this.processLabels(preview.TileData, key, tileBounds, coord.x, coord.y, zoom);
+		// lo guarda si el original
 		if (preview.SourceZoom === zoom) {
-			this.composer.SaveSvg(preview.Svg, coord.x, coord.y, zoom);
+			this.composer.SaveTileData(preview.Svg, preview.TileData, coord.x, coord.y, zoom);
 		}
 	} else {
 		// pide información
@@ -62,34 +67,44 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	return div;
 };
 
-TileOverlay.prototype.resolvePreview = function (div, coord, zoom) {
+TileOverlay.prototype.resolvePreview = function (div, tileBounds, coord, zoom) {
 	if (!this.previewHandler) {
 		return null;
 	}
-	var preview = this.previewHandler.getPreview(coord, zoom);
+	var preview = this.previewHandler.getPreview(tileBounds, coord, zoom);
 	if (preview) {
-		// le pide al composer que reaplique los estilos
-		for (var n = 0; n < preview.Parts.length; n++)
-			this.composer.RescaleStylesAndPatterns(preview.Parts[n], zoom, preview.SourceZoom);
+		if (preview.Svg) {
+			// le pide al composer que reaplique los estilos
+			for (var n = 0; n < preview.SvgParts.length; n++)
+				this.composer.RescaleStylesAndPatterns(preview.SvgParts[n], zoom, preview.SourceZoom);
 
-			// lo muestra
-			/*var svgInline = "data:image/svg+xml;base64,";
-			var imgSrc = svgInline + btoa(preview.Svg.outerHTML);
-			var img = new Image();
-			img.src = imgSrc;
-			img.onload = function () {
-																if (div.childNodes.length === 0) {
-																	div.appendChild(img);
-																} else {
-																	div.replaceChild(img, div.childNodes[0]);
-																}
-															};*/
-
-		div.appendChild(preview.Svg);
+			div.appendChild(preview.Svg);
+		}
 	}
 	return preview;
 };
 
+
+TileOverlay.prototype.process = function (mapResults, dataResults, gradient, tileKey, div, x, y, z) {
+	if ((tileKey in this.requestedTiles) === false || this.disposed) {
+		return;
+	}
+	delete this.requestedTiles[tileKey];
+	var mercator = new Mercator();
+	var tileBounds = mercator.getTileBoundsLatLon({ x: x, y: y, z: z });
+	var features = (dataResults.Data.features !== undefined ? dataResults.Data.features : dataResults.Data);
+	this.processLabels(features, tileKey, tileBounds, x, y, z);
+	var svg = null;
+	if (this.composer.renderPolygons) {
+		svg = this.composer.renderPolygons(mapResults, features, gradient, div, x, y, z, tileBounds, dataResults.Texture);
+	}
+	this.composer.SaveTileData(svg, features, x, y, z);
+};
+
+TileOverlay.prototype.processLabels = function(dataResults, tileKey, tileBounds, x, y, z) {
+	this.composer.textInTile[tileKey] = [];
+	this.composer.renderLabels(dataResults, tileKey, tileBounds, z);
+};
 
 TileOverlay.prototype.IsTileVisible = function (coord, zoom) {
 	if (this.IsOutOfClipping(coord, zoom)) {
@@ -111,24 +126,8 @@ TileOverlay.prototype.SetDivFailure = function (div) {
 	div.style.backgroundColor = 'rgba(100, 100, 100, 0.25)';
 };
 
-TileOverlay.prototype.process = function (mapResults, dataResults, gradient, tileKey, div, x, y, z) {
-	if ((tileKey in this.requestedTiles) === false || this.disposed) {
-		return;
-	}
-	delete this.requestedTiles[tileKey];
-
-	this.composer.textInTile[tileKey] = [];
-	var mercator = new Mercator();
-	var tileBounds = mercator.getTileBoundsLatLon({ x: x, y: y, z: z });
-
-	this.composer.renderLabels(dataResults, tileKey, tileBounds, z);
-	if (this.composer.renderPolygons) {
-		this.composer.renderPolygons(mapResults, dataResults, gradient, div, x, y, z, tileBounds);
-	}
-};
 
 TileOverlay.prototype.releaseTile = function (tile) {
-	var selector = window.SegMap.MapsApi.selector;
 	var key = tile.getAttribute('key');
 	this.killIfRunning(key);
 	this.composer.removeTileFeatures(key);
@@ -163,7 +162,7 @@ TileOverlay.prototype.IsOutOfClipping = function (coord, zoom) {
 TileOverlay.prototype.dispose = function () {
 	this.disposed = true;
 	this.composer.dispose();
-	if (this.preview) {
-		this.preview.dispose();
+	if (this.previewHandler) {
+		this.previewHandler.dispose();
 	}
 };

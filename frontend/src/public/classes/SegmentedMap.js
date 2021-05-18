@@ -259,7 +259,7 @@ SegmentedMap.prototype.UpdateLabelsVisibility = function () {
 SegmentedMap.prototype.ZoomChanged = function (zoom) {
 	if (this.frame.Zoom !== zoom) {
 		this.frame.Zoom = zoom;
-		this.Labels.UpdateMap();
+		//this.Labels.UpdateMap();
 		this.Metrics.ZoomChanged();
 	}
 };
@@ -371,6 +371,9 @@ SegmentedMap.prototype.ChangeMetricIndex = function (oldIndex, newIndex) {
 };
 
 SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelection) {
+	if (this.MapsApi.draggingDelayed) {
+		return;
+	}
 	if (type === 'C') {
 		// mueve el mapa y actualiza clipping.
 		var itemParts2 = str.Split(item, ',');

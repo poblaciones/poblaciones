@@ -20,13 +20,12 @@ function AbstractSvgComposerRawer(mapsApi, activeSelectedMetric) {
 	this.MapsApi = mapsApi;
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.keysInTile = [];
-	this.svgInTile = [];
+	this.tileDataCache = [];
 	this.index = this.activeSelectedMetric.index;
 	this.labelsVisibility = [];
 	this.AbstractConstructor();
 	this.useGradients = false;
 	this.useTextures = false;
-	this.usePreviewHandler = true;
 	this.svgStyles = {};
 };
 
@@ -305,10 +304,10 @@ AbstractSvgComposerRawer.prototype.SvgToCanvas = function (oSvg) {
 	return canvas;
 };
 
-AbstractSvgComposerRawer.prototype.SaveSvg = function (svg, x, y, z) {
-	var localTileKey = this.GetSvgKey(x, y, z);
+AbstractSvgComposerRawer.prototype.SaveTileData = function (svg, x, y, z) {
+	var localTileKey = this.GetTileCacheKey(x, y, z);
 	if (localTileKey) {
-		this.svgInTile[localTileKey] = svg;
+		this.tileDataCache[localTileKey] = svg;
 	}
 };
 
@@ -428,7 +427,7 @@ AbstractSvgComposerRawer.prototype.dispose = function () {
 
 AbstractSvgComposerRawer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
-	if (this.svgInTile.hasOwnProperty(tileKey)) {
-		delete this.svgInTile[tileKey];
+	if (this.tileDataCache.hasOwnProperty(tileKey)) {
+		delete this.tileDataCache[tileKey];
 	}
 };

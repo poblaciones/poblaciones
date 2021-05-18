@@ -125,6 +125,10 @@ InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid)
 		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
 					|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
 			window.SegMap.MapsApi.FitEnvelope(position.Envelope, false, window.Panels.Left.width);
+			setTimeout(() => {
+				window.SegMap.MapsApi.selector.tooltipCandidate = { id: fid };
+				window.SegMap.MapsApi.selector.setTooltipOverlays();
+			}, 750);
 		} else if (!position.Point || position.Point.X < 350) {
 			window.SegMap.PanTo(position.Coordinate, window.Panels.Left.width);
 		}

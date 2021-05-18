@@ -1,22 +1,24 @@
 import AbstractSvgComposer from './AbstractSvgComposer';
+import OverlapCollection from './../classes/OverlapCollection';
+
 import h from '@/public/js/helper';
 
 export default DataShapeComposer;
 
 function DataShapeComposer(mapsApi, activeSelectedMetric) {
 	AbstractSvgComposer.call(this, mapsApi, activeSelectedMetric);
-
+	this.Rectangles = null;
 	this.useGradients = window.SegMap.Configuration.UseGradients;
 	this.useTextures = window.SegMap.Configuration.UseTextures;
 };
 
 DataShapeComposer.prototype = new AbstractSvgComposer();
 
-DataShapeComposer.prototype.renderLabels = function (dataResults, tileKey, tileBounds, zoom) {
-	var dataItems = dataResults.Data;
+DataShapeComposer.prototype.renderLabels = function (dataItems, tileKey, tileBounds, zoom) {
 	if (this.activeSelectedMetric.HasSelectedVariable() === false) {
 		return;
 	}
+	this.Rectangles = new OverlapCollection();
 	this.UpdateTextStyle(zoom);
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	var colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
@@ -31,17 +33,14 @@ DataShapeComposer.prototype.renderLabels = function (dataResults, tileKey, tileB
 			if (showInfo) {
 				clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
 			};
-			this.AddFeatureText(variable, val, dataElement, clickId, tileKey, tileBounds, colorMap);
+			this.AddFeatureText(variable, val, dataElement, clickId, tileKey, tileBounds, colorMap, zoom);
 		}
 	}
 };
 
-DataShapeComposer.prototype.renderPolygons = function (mapResults, dataResults, gradient, div, x, y, z, tileBounds) {
+DataShapeComposer.prototype.renderPolygons = function (mapResults, dataItems, gradient, div, x, y, z, tileBounds, texture) {
 	var filtered = [];
 	var mapItems = mapResults.Data.features;
-	var projected = mapResults.Data.projected;
-	var dataItems = dataResults.Data;
-	var texture = dataResults.Texture;
 	if (this.activeSelectedMetric.HasSelectedVariable() === false) {
 		return;
 	}
@@ -81,14 +80,11 @@ DataShapeComposer.prototype.renderPolygons = function (mapResults, dataResults, 
 		variableId: this.activeSelectedMetric.SelectedVariable().Id,
 		showInfo: (this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo ? "1" : "0")
 	};
-	var svg = this.CreateSVGOverlay(tileUniqueId, div, parentAttributes, filtered, projected, tileBounds, z, patternValue,
+	return this.CreateSVGOverlay(tileUniqueId, div, parentAttributes, filtered, z, patternValue,
 																			gradient, texture);
-	if (svg !== null) {
-		this.SaveSvg(svg, x, y, z);
-	}
 };
 
-DataShapeComposer.prototype.GetSvgKey = function (x, y, z) {
+DataShapeComposer.prototype.GetTileCacheKey = function (x, y, z) {
 	if (!this.activeSelectedMetric || !this.activeSelectedMetric.HasSelectedVariable()) {
 		return null;
 	}
@@ -130,13 +126,15 @@ DataShapeComposer.prototype.processFeature = function (tileUniqueId, dataElement
 	return mapItem;
 };
 
-DataShapeComposer.prototype.AddFeatureText = function (variable, val, dataElement, effectiveId, tileKey, tileBounds, colorMap) {
+DataShapeComposer.prototype.AddFeatureText = function (variable, val, dataElement, effectiveId, tileKey, tileBounds, colorMap, zoom) {
 	if (variable.ShowValues == 0 && (dataElement.Description === null
 		|| parseInt(variable.ShowDescriptions) == 0)) {
 		return;
 	}
 	var centroid = new window.google.maps.LatLng(dataElement['Lat'], dataElement['Lon']);
 	if (this.inTile(tileBounds, centroid)) {
-		this.ResolveValueLabel(variable, effectiveId, dataElement, centroid, tileKey, colorMap[val]);
+		// identifica superposiciones en el mismo tile
+		// y descarta markers
+		this.ResolveValueLabel(variable, effectiveId, dataElement, centroid, tileKey, colorMap[val], null, zoom);
 	}
 };

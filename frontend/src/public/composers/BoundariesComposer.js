@@ -10,8 +10,7 @@ function BoundariesComposer(mapsApi, activeSelectedMetric) {
 BoundariesComposer.prototype = new AbstractSvgComposer();
 
 
-BoundariesComposer.prototype.renderLabels = function (dataResults, tileKey, tileBounds, zoom) {
-	var dataItems = dataResults.Data.features;
+BoundariesComposer.prototype.renderLabels = function (dataItems, tileKey, tileBounds, zoom) {
 	if (dataItems.length === 0) return;
 
 	if (this.activeSelectedMetric.visible === false) {
@@ -21,12 +20,12 @@ BoundariesComposer.prototype.renderLabels = function (dataResults, tileKey, tile
 
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
-		this.AddFeatureText(dataElement, tileKey, tileBounds);
+		this.AddFeatureText(dataElement, tileKey, tileBounds, zoom);
 	}
 };
 
 
-BoundariesComposer.prototype.AddFeatureText = function (dataElement, tileKey, tileBounds) {
+BoundariesComposer.prototype.AddFeatureText = function (dataElement, tileKey, tileBounds, zoom) {
 	if (dataElement.properties.Description === null || !this.activeSelectedMetric.showDescriptions) {
 		return;
 	}
@@ -38,13 +37,12 @@ BoundariesComposer.prototype.AddFeatureText = function (dataElement, tileKey, ti
 		textElement.caption = dataElement.properties.Description;
 		textElement.tooltip = this.activeSelectedMetric.properties.Name;
 		textElement.clickId = dataElement.id;
-		this.SetTextOverlay(textElement, tileKey, location, null, '');
+		this.SetTextOverlay(textElement, tileKey, location, null, '', zoom);
 	}
 };
 
-BoundariesComposer.prototype.renderPolygons = function (mapResults, dataResults, gradient, div, x, y, z, tileBounds) {
-	var filtered = [];
-	var dataItems = dataResults.Data.features;
+BoundariesComposer.prototype.renderPolygons = function (mapResults, dataItems, gradient, div, x, y, z, tileBounds) {
+	var features = [];
 
 	const patternValue = 1;
 
@@ -57,20 +55,16 @@ BoundariesComposer.prototype.renderPolygons = function (mapResults, dataResults,
 	var id;
 	for (var i = 0; i < dataItems.length; i++) {
 		id = dataItems[i].id;
-		this.processFeature(tileUniqueId, dataItems[i], filtered);
+		var feature = this.processFeature(tileUniqueId, dataItems[i]);
+		features.push(feature);
 	}
 	var parentAttributes = {
 		boundaryId: this.activeSelectedMetric.properties.Id,
 	};
-
-	var projected = dataResults.Data.projected;
-	var svg = this.CreateSVGOverlay(tileUniqueId, div, parentAttributes, filtered, projected, tileBounds, z, patternValue);
-	if (svg !== null) {
-		this.SaveSvg(svg, x, y, z);
-	}
+	return this.CreateSVGOverlay(tileUniqueId, div, parentAttributes, features, z, patternValue);
 };
 
-BoundariesComposer.prototype.GetSvgKey = function (x, y, z) {
+BoundariesComposer.prototype.GetTileCacheKey = function (x, y, z) {
 	return h.getFrameKey(x, y, z);
 };
 
@@ -85,7 +79,7 @@ BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElemen
 	if (dataElement.properties.Description) {
 		mapItem.properties.description = dataElement.properties.Description.replaceAll('"', '&#x22;');
 	}
-	filtered.push(mapItem);
+	return mapItem;
 };
 
 BoundariesComposer.prototype.getCentroid = function (mapElement) {

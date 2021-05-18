@@ -1,6 +1,5 @@
 <template>
 	<div>
-		<canvas id="canvas" width="256" height="256"></canvas>
 		<WorkPanel :work="work" ref="workPanel" :backgroundColor="workColor" />
 		<div id="holder">
 			<div id="panMain" class="split split-horizontal" style="position: relative">

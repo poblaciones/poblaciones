@@ -1,8 +1,8 @@
 import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
 import arr from '@/common/js/arr';
-import SequenceComposer from './SequenceComposer';
-import MarkerFactory from '@/public/GoogleMaps/MarkerFactory';
+import SequenceHandler from './SequenceHandler';
+import MarkerFactory from '@/public/googleMaps/MarkerFactory';
 
 export default LocationsComposer;
 
@@ -11,23 +11,20 @@ function LocationsComposer(mapsApi, activeSelectedMetric) {
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.keysInTile = {};
 	this.labelsVisibility = [];
-	this.index = this.activeSelectedMetric.index;
-	this.zIndex = (1000 - this.index) * 100;
 	this.customIcons = this.activeSelectedMetric.SelectedVersion().Work.Icons;
 	if (this.activeSelectedMetric.HasSelectedVariable()) {
 		this.variable = this.activeSelectedMetric.SelectedVariable();
 	} else {
 		this.variable = null;
 	}
-	this.SequenceComposer = new SequenceComposer(mapsApi, this, activeSelectedMetric);
-	this.markerFactory = new MarkerFactory(this.MapsApi, this.activeSelectedMetric, this.variable, this.zIndex, this.customIcons);
+	this.SequenceHandler = new SequenceHandler(mapsApi, this, activeSelectedMetric);
+	this.markerFactory = new MarkerFactory(this.MapsApi, this.activeSelectedMetric, this.variable, this.customIcons);
 	this.AbstractConstructor();
 };
 
 LocationsComposer.prototype = new AbstractTextComposer();
 
-LocationsComposer.prototype.renderLabels = function (dataResults, tileKey, tileBounds, zoom) {
-	var dataItems = dataResults.Data;
+LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBounds, zoom) {
 	if (this.variable === null) {
 		return;
 	}
@@ -83,13 +80,22 @@ LocationsComposer.prototype.renderLabels = function (dataResults, tileKey, tileB
 				var marker = this.markerFactory.CreateMarker(tileKey, mapItem, markerSettings, isSequenceInactiveStep);
 				this.registerTileMarker(tileKey, marker);
 				if (variable.IsSequence) {
-					this.SequenceComposer.registerSequenceMarker(tileKey, mapItem, marker, zoom);
+					this.SequenceHandler.registerSequenceMarker(tileKey, mapItem, marker, zoom);
 				}
 				// Pone el texto
 				this.AddFeatureText(variable, val, dataElement, tileKey, tileBounds, colorMap, markerSettings, zoom);
 			}
 		}
 	}
+};
+
+
+LocationsComposer.prototype.GetTileCacheKey = function (x, y, z) {
+	if (!this.activeSelectedMetric || !this.activeSelectedMetric.HasSelectedVariable()) {
+		return null;
+	}
+	var v = this.activeSelectedMetric.SelectedVariable().Id;
+	return h.getVariableFrameKey(v, x, y, z);
 };
 
 LocationsComposer.prototype.UpdateTextStyle = function (z, markerSettings) {
@@ -127,7 +133,7 @@ LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElemen
 		clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
 	}
 	if (this.inTile(tileBounds, location)) {
-		this.ResolveValueLabel(variable, clickId, dataElement, location, tileKey, colorMap[val], markerSettings);
+		this.ResolveValueLabel(variable, clickId, dataElement, location, tileKey, colorMap[val], markerSettings, z);
 	}
 };
 
@@ -136,7 +142,7 @@ LocationsComposer.prototype.removeTileFeatures = function (tileKey) {
 
 	var items = this.keysInTile[tileKey];
 	if (items) {
-		this.SequenceComposer.removeTileSequenceMarker(tileKey);
+		this.SequenceHandler.removeTileSequenceMarker(tileKey);
 		for (var i = 0; i < items.length; i++) {
 			this.destroyMarker(items[i]);
 		}

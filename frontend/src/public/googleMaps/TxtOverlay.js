@@ -16,16 +16,31 @@ function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidd
 	this.map = map;
 	this.type = type;
 	this.FIDs = null;
+	this.zoom = null;
 	this.zIndex = zIndex;
 	this.div = null;
 	this.Values = [];
+	this.ForeRectangles = [];
+	this.BackRectangles = [];
 	this.tileDiv = null;
 	this.alwaysVisible = false;
 	this.pixelLocation = null;
+	this.isVisible = false;
 	this.setMap(map);
+
 }
 
 TxtOverlay.prototype = new window.google.maps.OverlayView();
+
+
+TxtOverlay.prototype.UpdateTextStyle = function (className) {
+	if (className !== this.className) {
+		this.className = className;
+		if (this.div) {
+			this.div.className = className;
+		}
+	}
+};
 
 TxtOverlay.prototype.SetFeatureIds = function (ids) {
 	this.FIDs = ids;
@@ -64,9 +79,6 @@ TxtOverlay.prototype.RebuildHtml = function () {
 		}
 	}
 	text += "</div><div class='bottomBox'>";
-	if (this.Values.length > 1) {
-		text += "<span class='bItemGroup'>";
-	}
 	text += this.resolveValuesPart();
 	text += '</div>';
 	this.div.innerHTML = text;
@@ -84,19 +96,22 @@ TxtOverlay.prototype.resolveSymbolPart = function () {
 
 TxtOverlay.prototype.resolveValuesPart = function () {
 	var text = '';
-	for (var n = 0; n < this.Values.length; n++) {
-		var value = this.Values[n];
+	var zoom = this.zoom;
+	var valid = this.Values.filter(item => item.z === zoom);
+
+	for (var n = 0; n < valid.length; n++) {
+		var value = valid[n];
 		text += "<span class='bItem";
 		if (n === 0) {
 			text += ' bItemRL';
 		}
-		if (n === this.Values.length - 1) {
+		if (n === valid.length - 1) {
 			text += ' bItemRR';
 		}
 		text += "' style='background-color: " + value.backColor + "'>" + value.value + '</span>';
 	}
-	if (this.Values.length > 1) {
-		text += '</span>';
+	if (valid.length > 1) {
+		text = "<span class='bItemGroup'>" + text + '</span>';
 	}
 	return text;
 };
@@ -142,11 +157,31 @@ TxtOverlay.prototype.onAdd = function() {
 			div.style.left = position.x + 'px';
 			div.style.top = position.y + 'px';
 		}
+		this.isVisible = true;
 	}
 	else {
 		div.style.visibility = 'hidden';
-//		div.style.display = 'none';
+		this.isVisible = false;
 	}
+};
+
+TxtOverlay.prototype.UpdateHiddenAttribute = function (hidden) {
+	/*if (this.hidden === hidden) {
+		return;
+	}*/
+	this.hidden = hidden;
+/*	if (!this.div) {
+		return;
+	}
+	if (hidden) {
+		this.div.style.visibility = 'hidden';
+		this.isVisible = false;
+	} else {
+		if (!this.Overlaps()) {
+			this.div.style.visibility = 'visible';
+			this.isVisible = true;
+		}
+	}*/
 };
 
 TxtOverlay.prototype.Overlaps = function () {
@@ -178,6 +213,7 @@ TxtOverlay.prototype.Overlaps = function () {
 	this.Bounds = { left: left - w / 2, top: top, right: left + w / 2, bottom: top + h };
 	if (window.SegMap.OverlapRectangles.Intersects(this)) {
 		this.hidden = true;
+		this.div.style.backgroundColor = 'red';
 		return true;
 	}
 	window.SegMap.OverlapRectangles.AddRectangle(this);
@@ -192,17 +228,13 @@ TxtOverlay.prototype.SetText = function (text, tooltip, symbol, clickId) {
 	this.RebuildHtml();
 };
 
-TxtOverlay.prototype.Hide = function() {
-	this.hidden = true;
-};
-
-TxtOverlay.prototype.CreateValue = function (value, zindex, backColor) {
+TxtOverlay.prototype.CreateValue = function (value, zindex, backColor, zoom) {
 	for (var n = 0; n < this.Values.length; n++) {
 		if (zindex > this.Values[n].zIndex) {
 			break;
 		}
 	}
-	var ret = { value: value, zIndex: zindex, backColor: backColor };
+	var ret = { value: value, zIndex: zindex, backColor: backColor, z: zoom };
 	arr.InsertAt(this.Values, n, ret);
 	this.RebuildHtml();
 	return ret;

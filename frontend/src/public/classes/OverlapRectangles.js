@@ -4,6 +4,7 @@ export default OverlapRectangles;
 
 function OverlapRectangles() {
 	this.Rectangles = [];
+	this.currentZoomLevel = null;
 }
 
 OverlapRectangles.prototype.AddRectangle = function (rect) {
@@ -14,7 +15,15 @@ OverlapRectangles.prototype.RemoveRectangle = function (rect) {
 	arr.Remove(this.Rectangles, rect);
 };
 
+OverlapRectangles.prototype.CheckZoomLevel = function (zoom) {
+	if (this.currentZoomLevel !== zoom) {
+		this.Rectangles = [];
+		this.currentZoomLevel = zoom;
+	}
+};
+
 OverlapRectangles.prototype.Intersects = function (overlay) {
+	this.CheckZoomLevel(overlay.zoom);
 	var rect = overlay.Bounds;
 	for (var n = 0; n < this.Rectangles.length; n++) {
 		var r2 = this.Rectangles[n].Bounds;

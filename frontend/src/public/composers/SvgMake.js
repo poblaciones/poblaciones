@@ -6,10 +6,7 @@ export default SvgMake;
 
 function SvgMake() {}
 
-
 SvgMake.prototype.SvgMake = function () {
-	this.textStyle = '';
-	this.textInTile = [];
 };
 
 SvgMake.prototype.ConvertGeometry = function (geom) {
@@ -120,3 +117,19 @@ SvgMake.prototype.multiPolygon = function (geom) {
 	return paths.join(' ').replace(/Z/g, '') + 'Z';
 };
 
+
+SvgMake.prototype.SvgToImage = function (svg, div) {
+
+	// lo muestra
+	var svgInline = "data:image/svg+xml;base64,";
+	var imgSrc = svgInline + btoa(svg.outerHTML);
+	var img = new Image();
+	img.src = imgSrc;
+	img.onload = function () {
+		if (div.childNodes.length === 0) {
+			div.appendChild(img);
+		} else {
+			div.replaceChild(img, div.childNodes[0]);
+		}
+	};
+};

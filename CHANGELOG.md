@@ -1,4 +1,5 @@
 [CURRENT]
+- Fix: orden de superposición de los marcadores.
 - Fix: cambio de etiqueta en variable no elimina categorías de simbología.
 - Filtro para dataset x indicador.
 - Búsqueda por código (departamento, radio).

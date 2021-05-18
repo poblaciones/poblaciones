@@ -8,9 +8,11 @@ function AbstractTextComposer() {}
 AbstractTextComposer.prototype.AbstractConstructor = function (value, total, description) {
 	this.textStyle = '';
 	this.textInTile = [];
+	this.tileDataCache = [];
+	this.usePreview = true;
 };
 
-AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effectiveId, dataElement, location, tileKey, backColor, markerSettings) {
+AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effectiveId, dataElement, location, tileKey, backColor, markerSettings, zoom) {
 	var number = null;
 	if (variable.ShowValues == 1 && !variable.IsSimpleCount) {
 		number = this.FormatValue(variable, dataElement);
@@ -26,28 +28,36 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effective
 		clickId: effectiveId
 	};
 	this.SetTextOverlay(textElement, '' + tileKey,
-		location, number, backColor, effectiveId);
+		location, number, backColor, zoom);
+};
+
+AbstractTextComposer.prototype.SaveTileData = function (svg, tileData, x, y, z) {
+	var localTileKey = this.GetTileCacheKey(x, y, z);
+	if (localTileKey) {
+		this.tileDataCache[localTileKey] = { Svg: svg, TileData: tileData };
+	}
 };
 
 AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, location,
-	number, backColor) {
+	number, backColor, zoom) {
 
-	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden);
+	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden, zoom);
 	var v = null;
 	if (textElement.caption !== null || textElement.symbol) {
 		canvas.SetText(textElement.caption, textElement.tooltip, textElement.symbol, textElement.clickId);
 	}
 	if (number !== null) {
 		var zIndex = 100000 - this.index;
-		v = canvas.CreateValue(number, zIndex, backColor);
+		v = canvas.CreateValue(number, zIndex, backColor, zoom);
 	}
 	this.textInTile[tileKey].push({ c: canvas, v: v });
+	return canvas;
 };
 
 AbstractTextComposer.prototype.SetBackgroundText = function (div, tileBounds, textElement, tileKey, location,
-	number, backColor) {
+	number, backColor, zoom) {
 
-	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden);
+	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden, zoom);
 	var v = null;
 	if (textElement.caption !== null || textElement.symbol) {
 		canvas.SetText(textElement.caption, textElement.tooltip, textElement.symbol, textElement.clickId);
@@ -70,10 +80,10 @@ AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
 };
 
 
-AbstractTextComposer.prototype.GetOrCreate = function(type, ids, tileKey, location, hidden) {
-	var canvas = this.GetFeatureTextCanva(ids, hidden);
+AbstractTextComposer.prototype.GetOrCreate = function(type, ids, tileKey, location, hidden, zoom) {
+	var canvas = this.GetFeatureTextCanva(ids, hidden, zoom);
 	if (canvas === null) {
-		canvas = this.CreateFeatureTextCanva(type, ids, tileKey, location, hidden);
+		canvas = this.CreateFeatureTextCanva(type, ids, tileKey, location, hidden, zoom);
 	} else {
 		if (type !== null) {
 			canvas.type = type;
@@ -124,27 +134,27 @@ AbstractTextComposer.prototype.clearText = function () {
 	}
 };
 
-AbstractTextComposer.prototype.CreateFeatureTextCanva = function(type, ids, tileKey, location, hidden) {
+AbstractTextComposer.prototype.CreateFeatureTextCanva = function(type, ids, tileKey, location, hidden, zoom) {
 	var zIndex = 100000 - this.index;
 	// lo resuelven los hijos
 	var canvas = this.MapsApi.Write('', location, zIndex, this.textStyle, null, null, type, hidden);
+	canvas.zoom = zoom;
 	if (ids) {
 		canvas.SetFeatureIds(ids);
 	}
 	return canvas;
 };
 
-AbstractTextComposer.prototype.GetFeatureTextCanva = function(ids, hidden) {
+AbstractTextComposer.prototype.GetFeatureTextCanva = function(ids, hidden, zoom) {
 	if (ids === null) {
 		return null;
 	}
 	for (var i = 0; i < ids.length; i++) {
 		var ret = window.SegMap.textCanvas[ids[i]];
-		if (ret !== undefined) {
+		if (ret !== undefined && ret.zoom === zoom) {
 			ret.RefCount++;
-			if (hidden === true) {
-				ret.Hide();
-			}
+			ret.UpdateHiddenAttribute(hidden);
+			ret.UpdateTextStyle(this.textStyle);
 			return ret;
 		}
 	}

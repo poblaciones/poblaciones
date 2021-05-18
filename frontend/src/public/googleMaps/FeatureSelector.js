@@ -123,13 +123,16 @@ FeatureSelector.prototype.createTooltipKiller = function () {
 	loc.tooltipKillerTimer = setTimeout(loc.resetTooltip, 75000);
 };
 
-FeatureSelector.prototype.resetTooltip = function () {
+FeatureSelector.prototype.resetTooltip = function (feature) {
 	if (this.disabled) {
 		return;
 	}
-
 	var loc = window.SegMap.MapsApi.selector;
-	loc.resetTooltipOverlays();
+	if (feature) {
+		if (loc.tooltipCandidate && feature.id == loc.tooltipCandidate.id) {
+			return false;
+		}
+	}
 
 	if (loc.tooltipKillerTimer !== null) {
 		clearTimeout(loc.tooltipKillerTimer);
@@ -142,20 +145,28 @@ FeatureSelector.prototype.resetTooltip = function () {
 		clearTimeout(loc.tooltipTimer);
 	}
 	loc.tooltipTimer = null;
-	// Si está visible, remueve el tooltip
-	// https://medelbou.wordpress.com/2012/02/03/creating-a-tooltip-for-google-maps-javascript-api-v3/
-	if (loc.tooltipOverlay !== null) {
-		loc.tooltipOverlay.Release();
-		loc.tooltipOverlay = null;
-	}
+	loc.hideTooltip();
 	// https://ux.stackexchange.com/questions/358/how-long-should-the-delay-be-before-a-tooltip-pops-up
 	return true;
 };
 
+FeatureSelector.prototype.hideTooltip = function () {
+	// Si está visible, remueve el tooltip
+	this.resetTooltipOverlays();
+	if (this.tooltipOverlay !== null) {
+		this.tooltipOverlay.Release();
+		this.tooltipOverlay = null;
+	}
+};
+
 FeatureSelector.prototype.showTooltip = function () {
 	var loc = window.SegMap.MapsApi.selector;
+
 	if (loc.tooltipCandidate === null) {
 		var e = loc.tooltipEvent;
+		if (e === null) {
+			return;
+		}
 		var feature = loc.getFeature(e);
 		if (!feature || (!feature.description && !feature.value)) {
 			return;
@@ -232,7 +243,20 @@ FeatureSelector.prototype.RenderTooltip = function (feature) {
 
 FeatureSelector.prototype.startTooltipCandidate = function (feature) {
 	var loc = window.SegMap.MapsApi.selector;
+	loc.tooltipEvent = null;
 	loc.tooltipCandidate = feature;
+	if (loc.tooltipTimer !== null) {
+		clearTimeout(loc.tooltipTimer);
+	}
+	loc.tooltipTimer = setTimeout(loc.showTooltip, 100);
+};
+
+FeatureSelector.prototype.startTooltipCandidateByLocation = function () {
+	var loc = window.SegMap.MapsApi.selector;
+	loc.tooltipCandidate = null;
+	if (loc.tooltipTimer !== null) {
+		clearTimeout(loc.tooltipTimer);
+	}
 	loc.tooltipTimer = setTimeout(loc.showTooltip, 100);
 };
 
@@ -286,7 +310,7 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 	}
 	loc.tooltipTimer = null;
 
-	loc.startTooltipCandidate(null);
+	loc.startTooltipCandidateByLocation();
 };
 
 FeatureSelector.prototype.selectorMovedEx = function (event) {
@@ -325,11 +349,17 @@ FeatureSelector.prototype.selectorMovedEx = function (event) {
 };
 
 FeatureSelector.prototype.selectorClicked = function (event) {
+	if (window.SegMap.MapsApi.draggingDelayed) {
+		return;
+	}
 	var loc = window.SegMap.MapsApi.selector;
-	window.SegMap.MapsApi.ResetInfoWindow();
 	var feature = loc.getFeature(event);
-	if (feature === null || !feature.id) return;
-
+	if (feature === null || !feature.id) {
+		loc.resetTooltip();
+		return;
+	} else {
+		loc.resetTooltip(feature);
+	}
 	if (feature.parentInfo.BoundaryId) {
 			window.SegMap.SelectId('C', feature.id, null, null, event.ctrlKey);
 		} else {

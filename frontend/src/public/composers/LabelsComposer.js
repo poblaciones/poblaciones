@@ -1,4 +1,5 @@
 import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
+import h from '@/public/js/helper';
 
 export default LabelsComposer;
 
@@ -12,12 +13,12 @@ function LabelsComposer(mapsApi, activeSelectedMetric) {
 	this.styles = [];
 	this.keysInTile = [];
 	this.labelsVisibility = [];
+	this.usePreview = false;
+
 };
 LabelsComposer.prototype = new AbstractTextComposer();
 
-LabelsComposer.prototype.renderLabels = function(dataResults, tileKey, tileBounds, zoom) {
-	var dataItems = dataResults.Data;
-
+LabelsComposer.prototype.renderLabels = function(dataItems, tileKey, tileBounds, zoom) {
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
 		var location = new window.google.maps.LatLng(dataElement['Lat'], dataElement['Lon']);
@@ -35,9 +36,12 @@ LabelsComposer.prototype.renderLabels = function(dataResults, tileKey, tileBound
 		} else {
 			textElement.hidden = true;
 		}
-//		this.SetBackgroundText(div, tileBounds, textElement, tileKey, location, null, '');
-		this.SetTextOverlay(textElement, tileKey, location, null, '');
+		this.SetTextOverlay(textElement, tileKey, location, null, '', zoom);
 	}
+};
+
+LabelsComposer.prototype.GetTileCacheKey = function (x, y, z) {
+	return h.getFrameKey(x, y, z);
 };
 
 LabelsComposer.prototype.removeTileFeatures = function (tileKey) {

@@ -3,6 +3,7 @@ import TileOverlay from '@/public/googleMaps/TileOverlay';
 import Mercator from '@/public/js/Mercator';
 import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
+import { setTimeout } from 'core-js';
 
 export default GoogleMapsApi;
 
@@ -11,11 +12,11 @@ function GoogleMapsApi(google) {
 	this.gMap = null;
 	this.drawingManager = null;
 	this.dragging = false;
+	this.draggingDelayed = false;
 	this.idle = true;
 	this.myLocationMarker = null;
 	this.isSettingZoom = false;
 	this.clippingCanvas = null;
-	this.infoWindow = null;
 	this.selector = new FeatureSelector(this);
 	this.allwaysHiddenElements = ['landscape.natural', 'landscape.natural.landcover', 'landscape.natural.terrain',
 																	'poi.attraction', 'administrative.locality',
@@ -32,13 +33,6 @@ GoogleMapsApi.prototype.UpdateLabelsVisibility = function(showLabels) {
 	this.gMap.setOptions({styles: styles });
 };
 
-GoogleMapsApi.prototype.ResetInfoWindow = function (text, coordinate, offset) {
-	if(this.infoWindow !== null) {
-		this.infoWindow.close();
-	}
-};
-
-
 GoogleMapsApi.prototype.WaitForFullLoading = function () {
 	var targetCall;
 	var readyPromise = new Promise(resolve => {
@@ -52,28 +46,6 @@ GoogleMapsApi.prototype.WaitForFullLoading = function () {
 		});
 	}
 	return readyPromise;
-};
-
-GoogleMapsApi.prototype.ShowInfoWindow = function(text, coordinate, offset) {
-	if(offset === undefined) {
-		offset = null;
-	}
-	this.ResetInfoWindow();
-	this.infoWindow = new this.google.maps.InfoWindow({
-		content: text,
-		position: new this.google.maps.LatLng(coordinate.Lat, coordinate.Lon),
-		pixelOffset: offset,
-		zIndex: 9999999,
-	});
-	this.infoWindow.open(this.gMap);
-};
-
-GoogleMapsApi.prototype.MoveInfoWindow = function(zoom) {
-	if(this.infoWindow !== null) {
-		this.infoWindow.setOptions({
-			pixelOffset: new this.google.maps.Size(0, -1 * h.getScaleFactor(zoom)),
-		});
-	}
 };
 
 GoogleMapsApi.prototype.Write = function(text, location, zIndex, style, innerStyle, ignoreMapMode, type, hidden) {
@@ -165,15 +137,19 @@ GoogleMapsApi.prototype.BindEvents = function () {
 	this.gMap.addListener('zoom_changed', function () {
 		//	if (loc.isSettingZoom === false) {
 		window.SegMap.ZoomChanged(loc.gMap.getZoom());
-		//}
-		loc.MoveInfoWindow(loc.gMap.getZoom());
 	});
 	this.gMap.addListener('dragstart', function () {
 		loc.dragging = true;
+		loc.draggingDelayed = true;
 	});
 	this.gMap.addListener('dragend', function () {
 		loc.dragging = false;
 		window.SegMap.BoundsChanged();
+		setTimeout(() => {
+			loc.draggingDelayed = false;
+		}, 250);
+
+//		event.stopPropagation();
 	});
 
 	this.gMap.addListener('maptypeid_changed', function () {
@@ -497,6 +473,9 @@ GoogleMapsApi.prototype.SetClippingCanvas = function (canvasList) {
 };
 
 GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid) {
+	if (this.draggingDelayed) {
+		return;
+	}
 	window.SegMap.InfoWindow.InfoRequestedInteractive(h.getPosition(event), metricVersion, fid);
 };
 
@@ -525,6 +504,15 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 GoogleMapsApi.prototype.RemoveOverlay = function (index) {
 	this.gMap.overlayMapTypes.getAt(index).dispose();
 	this.gMap.overlayMapTypes.removeAt(index);
+};
+
+GoogleMapsApi.prototype.PaintOverlay = function (index) {
+	var overlay = this.gMap.overlayMapTypes.getAt(index);
+	overlay.previewHandler.savePreviewData();
+	setTimeout(() => {
+		this.gMap.overlayMapTypes.removeAt(index + 1);
+	}, 50);
+	this.gMap.overlayMapTypes.insertAt(index, overlay);
 };
 
 

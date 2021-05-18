@@ -19,13 +19,11 @@ function AbstractSvgComposer(mapsApi, activeSelectedMetric) {
 	// posible api de php https://github.com/chrishadi/geojson2svg/blob/master/geojson2svg.php
 	this.MapsApi = mapsApi;
 	this.activeSelectedMetric = activeSelectedMetric;
-	this.svgInTile = [];
 	this.index = this.activeSelectedMetric.index;
 	this.labelsVisibility = [];
 	this.AbstractConstructor();
 	this.useGradients = false;
 	this.useTextures = false;
-	this.usePreviewHandler = true;
 };
 
 AbstractSvgComposer.prototype = new AbstractTextComposer();
@@ -63,6 +61,7 @@ AbstractSvgComposer.prototype.CreateSVG = function (h, w, z, patternValue, tileU
 	}
 	return svgElem;
 };
+
 AbstractSvgComposer.prototype.resolveStrokeWidth = function (z, patternValue) {
 	if (patternValue === 1) {
 		var width = (z < 16 ? 1 : 1.5);
@@ -88,23 +87,8 @@ AbstractSvgComposer.prototype.patternIsPipeline = function (patternValue) {
 	return (patternValue >= 3 && patternValue <= 6);
 };
 
-AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features, projected,
-	tileBounds, z, patternValue, gradient, texture) {
-	var projectedFeatures;
-
-	if (projected) {
-		projectedFeatures = {
-			type: 'FeatureCollection',
-			features: features
-		};
-	} else {
-		var m = new Mercator();
-		var min = m.fromLatLngToPoint({ lat: tileBounds.Min.Lat, lng: tileBounds.Min.Lon });
-		var max = m.fromLatLngToPoint({ lat: tileBounds.Max.Lat, lng: tileBounds.Max.Lon });
-		m.min = min;
-		m.max = max;
-		projectedFeatures = m.ProjectGeoJsonFeatures(features);
-	}
+AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features,
+	z, patternValue, gradient, texture) {
 	var useFillPatterns = this.patternUseFillStyles(patternValue);
 
 	var oSvg = this.CreateSVG(256, 256, z, patternValue, tileUniqueId, parentAttributes);
@@ -154,8 +138,8 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 	var svgMake = new SvgMake();
 
 	var groups = {};
-	for (var n = 0; n < projectedFeatures.features.length; n++) {
-		var feature = projectedFeatures.features[n];
+	for (var n = 0; n < features.length; n++) {
+		var feature = features[n];
 		var path = svgMake.ConvertGeometry(feature.geometry);
 
 		var svg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -191,24 +175,9 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 		}
 	}
 
-	var useImgs = false;
-	if (useImgs) {
-			var svgInline = "data:image/svg+xml;base64,";
-			var imgSrc = svgInline + btoa(oSvg.outerHTML);
-			var img = new Image();
-			img.src = imgSrc;
-			this.ReplaceMinimizingFlickering(div, img, textureMaskId);
-	} else {
-		this.ReplaceMinimizingFlickering(div, oSvg, textureMaskId);
-	}
-	return oSvg;
-};
+	this.ReplaceMinimizingFlickering(div, oSvg, textureMaskId);
 
-AbstractSvgComposer.prototype.SaveSvg = function (svg, x, y, z) {
-	var localTileKey = this.GetSvgKey(x, y, z);
-	if (localTileKey) {
-		this.svgInTile[localTileKey] = svg;
-	}
+	return oSvg;
 };
 
 AbstractSvgComposer.prototype.RescaleStylesAndPatterns = function (svgElem, zoom, previousZoom) {
@@ -326,7 +295,7 @@ AbstractSvgComposer.prototype.dispose = function () {
 
 AbstractSvgComposer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
-	if (this.svgInTile.hasOwnProperty(tileKey)) {
-		delete this.svgInTile[tileKey];
+	if (this.tileDataCache.hasOwnProperty(tileKey)) {
+		delete this.tileDataCache[tileKey];
 	}
 };
