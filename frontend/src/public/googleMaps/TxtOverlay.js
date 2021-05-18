@@ -20,8 +20,6 @@ function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidd
 	this.zIndex = zIndex;
 	this.div = null;
 	this.Values = [];
-	this.ForeRectangles = [];
-	this.BackRectangles = [];
 	this.tileDiv = null;
 	this.alwaysVisible = false;
 	this.pixelLocation = null;
@@ -162,26 +160,15 @@ TxtOverlay.prototype.onAdd = function() {
 	else {
 		div.style.visibility = 'hidden';
 		this.isVisible = false;
+
+		var panes = this.getPanes();
+		panes.floatPane.removeChild(div);
+		this.setMap(null);
 	}
 };
 
 TxtOverlay.prototype.UpdateHiddenAttribute = function (hidden) {
-	/*if (this.hidden === hidden) {
-		return;
-	}*/
 	this.hidden = hidden;
-/*	if (!this.div) {
-		return;
-	}
-	if (hidden) {
-		this.div.style.visibility = 'hidden';
-		this.isVisible = false;
-	} else {
-		if (!this.Overlaps()) {
-			this.div.style.visibility = 'visible';
-			this.isVisible = true;
-		}
-	}*/
 };
 
 TxtOverlay.prototype.Overlaps = function () {
@@ -191,33 +178,53 @@ TxtOverlay.prototype.Overlaps = function () {
 	if (this.alwaysVisible) {
 		return false;
 	}
+	var intersects = false;
+
+	var startTime = performance.now();
+
 	var position2 = this.map.getProjection().fromLatLngToPoint(this.pos);
 	var scale = Math.pow(2, this.map.getZoom());
 	var left = Math.floor(position2.x * scale);
 	var top = Math.floor(position2.y * scale);
+
+	// Hace un cálculo preliminar tomando solo en cuenta el punto de inserción
+	var w = 60;
+	var h = 14;
+	this.Bounds = { left: left - w / 2, top: top, right: left + w / 2, bottom: top + h };
+
+	if (window.SegMap.OverlapRectangles.Intersects(this)) {
+		intersects = true;
+	} else {
+		this.Bounds = this.CalculateBounds(left, top);
+		intersects = window.SegMap.OverlapRectangles.Intersects(this);
+	}
+	if (intersects) {
+		this.hidden = true;
+		return true;
+	} else {
+		window.SegMap.OverlapRectangles.AddRectangle(this);
+		return false;
+	}
+};
+
+TxtOverlay.prototype.CalculateBounds = function (left, top) {
 	var w = null;
 	var h = null;
-	if (this.div.firstChild) {
-		var span = this.div.firstChild.firstElementChild;
+	var div = this.div;
+	if (div.firstChild) {
+		var span = div.firstChild.firstElementChild;
 		if (span) {
 			w = span.offsetWidth;
 			h = span.offsetHeight;
 		}
 	}
 	if (!w) {
-		w = this.div.offsetWidth;
+		w = div.offsetWidth;
 	}
 	if (!h) {
-		h = this.div.offsetHeight;
+		h = div.offsetHeight;
 	}
-	this.Bounds = { left: left - w / 2, top: top, right: left + w / 2, bottom: top + h };
-	if (window.SegMap.OverlapRectangles.Intersects(this)) {
-		this.hidden = true;
-		this.div.style.backgroundColor = 'red';
-		return true;
-	}
-	window.SegMap.OverlapRectangles.AddRectangle(this);
-	return false;
+	return { left: left - w / 2, top: top, right: left + w / 2, bottom: top + h };
 };
 
 TxtOverlay.prototype.SetText = function (text, tooltip, symbol, clickId) {
@@ -241,7 +248,7 @@ TxtOverlay.prototype.CreateValue = function (value, zindex, backColor, zoom) {
 };
 
 TxtOverlay.prototype.draw = function () {
-	if (!this.tileDiv) {
+	if (!this.tileDiv && this.isVisible) {
 		var overlayProjection = this.getProjection();
 		var position = overlayProjection.fromLatLngToDivPixel(this.pos);
 		var div = this.div;
@@ -253,10 +260,14 @@ TxtOverlay.prototype.draw = function () {
 
 TxtOverlay.prototype.onRemove = function () {
 	if (this.div != null) {
-		this.div.parentNode.removeChild(this.div);
+		if (this.div.parentNode) {
+			this.div.parentNode.removeChild(this.div);
+		}
 		this.div = null;
 	}
-	window.SegMap.OverlapRectangles.RemoveRectangle(this);
+	if (this.isVisible) {
+		window.SegMap.OverlapRectangles.RemoveRectangle(this);
+	}
 };
 
 TxtOverlay.prototype.Release = function (subFeature) {

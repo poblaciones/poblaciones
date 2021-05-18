@@ -24,13 +24,20 @@ OverlapRectangles.prototype.CheckZoomLevel = function (zoom) {
 
 OverlapRectangles.prototype.Intersects = function (overlay) {
 	this.CheckZoomLevel(overlay.zoom);
+	var startTime = performance.now();
+
 	var rect = overlay.Bounds;
 	for (var n = 0; n < this.Rectangles.length; n++) {
 		var r2 = this.Rectangles[n].Bounds;
 		if (rect.top <= r2.bottom && rect.bottom >= r2.top
 			&& rect.left <= r2.right && rect.right >= r2.left) {
+		//	var endTime2 = performance.now();
+		//	console.log('done true for ' + this.Rectangles.length + ' in ' + (endTime2 - startTime));
 			return true;
 		}
 	}
+	var endTime = performance.now();
+	console.log('done false for ' + this.Rectangles.length + ' in ' + (endTime - startTime));
+
 	return false;
 };
