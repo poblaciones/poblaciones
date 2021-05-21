@@ -75,7 +75,7 @@
 
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
-						<li v-if="user.Privileges === 'A'"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
+						<li v-if="isAdminReader"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
 						<li v-if="false"><a href="/users#/account">Cuenta</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.logoff">Cerrar sesión</a></li>
@@ -180,6 +180,9 @@ export default {
 		},
 		authenticate() {
 			return a;
+		},
+		isAdminReader() {
+			return this.user.Privileges === 'A' || this.user.Privileges === 'E' || this.user.Privileges === 'L';
 		},
 		userTooltip() {
 			if (!this.user.Logged) {

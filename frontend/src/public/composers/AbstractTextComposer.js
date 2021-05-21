@@ -24,7 +24,8 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effective
 	}
 	var textElement = {
 		type: 'F', FIDs: ['' + dataElement['FID']],
-		caption: description, tooltip: description,
+		caption: description,
+		tooltip: description,
 		clickId: effectiveId
 	};
 	this.SetTextOverlay(textElement, '' + tileKey,

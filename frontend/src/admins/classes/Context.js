@@ -31,6 +31,14 @@ Context.prototype.IsAdmin = function () {
 	return (this.User.Privileges === 'A');
 };
 
+Context.prototype.IsAdminReader = function () {
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E' || this.User.Privileges === 'L');
+};
+
+Context.prototype.IsDataAdmin = function () {
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
+};
+
 Context.prototype.CanCreatePublicData = function () {
 	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
 };

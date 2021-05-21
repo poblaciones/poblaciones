@@ -23,7 +23,7 @@ LabelsComposer.prototype.renderLabels = function(dataItems, tileKey, tileBounds,
 		var dataElement = dataItems[i];
 		var location = new window.google.maps.LatLng(dataElement['Lat'], dataElement['Lon']);
 
-		var textElement = { FIDs: dataElement['FIDs']	};
+		var textElement = { FIDs: dataElement['FIDs'] };
 
 		if (dataElement['Show']) {
 			textElement.type = dataElement['type'];
@@ -36,8 +36,11 @@ LabelsComposer.prototype.renderLabels = function(dataItems, tileKey, tileBounds,
 		} else {
 			textElement.hidden = true;
 		}
-		this.SetTextOverlay(textElement, tileKey, location, null, '', zoom);
+		if (!textElement.hidden) {
+			this.SetTextOverlay(textElement, tileKey, location, null, '', zoom);
+		}
 	}
+
 };
 
 LabelsComposer.prototype.GetTileCacheKey = function (x, y, z) {

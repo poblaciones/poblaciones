@@ -1,4 +1,6 @@
 [CURRENT]
+
+2021-05-19
 - Fix: orden de superposición de los marcadores.
 - Fix: cambio de etiqueta en variable no elimina categorías de simbología.
 - Filtro para dataset x indicador.
@@ -12,6 +14,9 @@
 - Fix: si hay visible una delimitación, se priorizan los clicks y tooltips de polígonos por sobre la delimitación.
 - Resaltado de polígonos al mostrar tooltips.
 - Las delimitaciones ofrecen tooltips y selección si no hay otra información de polígonos activa en la zona.
+- Mejoras en velocidad de carga de mapa.
+- Retoma información para representar en sucesivos niveles de zoom (polígonos y puntos).
+- Fix: seleccionar delimitaciones en el popup fallaba.
 
 2021-04-13
 - Segmentación de delimitaciones por selección.

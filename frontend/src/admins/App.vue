@@ -118,7 +118,9 @@ html, body {
 .whiteLink:hover {
 	text-decoration: none !important;
 }
-
+.md-switch, .md-disabled {
+	filter: grayscale(1);
+}
 .md-button {
 	font-weight: normal !important;
 	text-transform: none !important;

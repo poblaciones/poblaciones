@@ -15,7 +15,7 @@
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Ítems">{{ item.ChildCount }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Buscador">{{ formatBool(!item.NoAutocomplete) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Segmenta">{{ formatBool(item.IsCrawlerIndexer) }}</md-table-cell>
-						<md-table-cell md-label="Acciones" class="mpNoWrap">
+						<md-table-cell md-label="Acciones" class="mpNoWrap" v-if="isAdmin">
 							<md-button class="md-icon-button" title="Modificar" @click="openEdition(item)">
 								<md-icon>edit</md-icon>
 							</md-button>
@@ -41,7 +41,9 @@ import arr from '@/common/js/arr';
 			};
 	},
 	computed: {
-
+		isAdmin() {
+			return window.Context.IsAdmin();
+		},
 	},
 	mounted() {
 		var loc = this;

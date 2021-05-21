@@ -44,7 +44,7 @@
 					<md-tab md-label="Cartografías">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-100" style="margin-top: -10px">
-								<md-table :key="componentKey" style="max-width: 1100px;" ref="table" v-model="works" md-card="" md-sort="Hits" md-sort-order="asc">
+								<md-table :key="componentKey" style="max-width: 1100px;" ref="table" v-model="works" md-card="" md-sort="Hits" md-sort-order="desc">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Consultas" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
@@ -65,7 +65,7 @@
 					<md-tab md-label="Indicadores">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-80" style="margin-top: -10px">
-								<md-table :key="componentKey" style="max-width: 900px;" v-model="metrics" md-sort="Hits" md-sort-order="asc" md-card="">
+								<md-table :key="componentKey" style="max-width: 900px;" v-model="metrics" md-sort="Hits" md-sort-order="desc" md-card="">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Indicadores" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Consultas" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
@@ -84,7 +84,7 @@
 					<md-tab md-label="Tipos de descarga">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-80" style="margin-top: -10px">
-								<md-table :key="componentKey" style="max-width: 900px;" v-model="downloadTypes" md-sort="Hits" md-sort-order="asc" md-card="">
+								<md-table :key="componentKey" style="max-width: 900px;" v-model="downloadTypes" md-sort="Hits" md-sort-order="desc" md-card="">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Tipo de archivo" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Total" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>

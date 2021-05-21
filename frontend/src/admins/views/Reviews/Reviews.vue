@@ -14,13 +14,13 @@
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Respuesta">{{ formatDecision(item.Decision) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Solicitante" :title="(item.UserSubmission ? item.UserSubmission.Email : item.UserSubmissionEmail)">{{ formatFullName(item) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<md-button class="md-icon-button" title="Modificar revisión" @click="openEdition(item)">
+							<md-button class="md-icon-button" :title="(isDataAdmin ? 'Modificar revisión' : 'Ver revisión')" @click="openEdition(item)">
 								<md-icon>edit</md-icon>
 							</md-button>
 							<md-button class="md-icon-button" title="Ver cartografía" @click="select(item.Work)">
 								<md-icon>visibility</md-icon>
 							</md-button>
-							<md-button class="md-icon-button" title="Eliminar" @click="deleteDecision(item)">
+							<md-button class="md-icon-button" v-if="isDataAdmin" title="Eliminar" @click="deleteDecision(item)">
 								<md-icon>delete</md-icon>
 							</md-button>
 						</md-table-cell>
@@ -47,7 +47,9 @@ export default {
 			};
 	},
 	computed: {
-
+		isDataAdmin() {
+			return window.Context.IsDataAdmin();
+		},
 	},
 	mounted() {
 		var loc = this;
@@ -57,6 +59,7 @@ export default {
 					loc.updatePending();
 					});
 	},
+
 	methods: {
 		formatDate(date) {
 			return f.formatDate(date);

@@ -1,5 +1,4 @@
 import AbstractSvgComposer from './AbstractSvgComposer';
-import OverlapCollection from './../classes/OverlapCollection';
 
 import h from '@/public/js/helper';
 
@@ -18,7 +17,6 @@ DataShapeComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 	if (this.activeSelectedMetric.HasSelectedVariable() === false) {
 		return;
 	}
-	this.Rectangles = new OverlapCollection();
 	this.UpdateTextStyle(zoom);
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	var colorMap = this.activeSelectedMetric.GetStyleColorDictionary();

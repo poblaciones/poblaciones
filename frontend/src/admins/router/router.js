@@ -23,11 +23,11 @@ export const constantRouterMap = [
 { path: '/404', component: () => import('@/backoffice/views/404'), hidden: true },
 {
     path: '',
-    redirect: '/users', // default child path
+    redirect: '/public', // default child path
  },
 {
-	path: '/users',
-		alias: [ '/public', '/works', '/boundaries', '/regions', '/reviews', '/stats' ],
+	path: '/public',
+		alias: [ '/works', '/users', '/boundaries', '/regions', '/reviews', '/stats' ],
 		name: 'Inicio',
 		hidden: true,
 			component: () => import('@/admins/views/Layout.vue'),

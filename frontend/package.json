@@ -15,6 +15,7 @@
 		"dependencies": {
 				"@babel/runtime": "^7.12.5",
 				"@fortawesome/fontawesome-free": "^5.15.3",
+				"@googlemaps/markerclustererplus": "^1.1.2",
 				"@tweenjs/tween.js": "^17.6.0",
 				"axios": "^0.21.1",
 				"caniuse-lite": "^1.0.30001207",
@@ -35,6 +36,7 @@
 				"eslint-plugin-vue": "^6.2.2",
 				"geojson2svg": "^1.2.5",
 				"html2canvas": "^1.0.0-rc.7",
+				"is-obj": "^3.0.0",
 				"jqwidgets-scripts": "^9.1.6",
 				"js-cookie": "^2.2.0",
 				"jspdf": "^2.3.1",

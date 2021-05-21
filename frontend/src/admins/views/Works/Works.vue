@@ -116,6 +116,9 @@ export default {
 		showIndexingColumn() {
 			return this.user.Privileges === 'A';
 		},
+		isDataAdmin() {
+			return window.Context.IsDataAdmin();
+		},
 		user() {
 			return window.Context.User;
 		},
@@ -202,10 +205,7 @@ export default {
 			if (window.Context.User.Privileges === 'A') {
 				return true;
 			}
-			if (this.filter === 'P' && window.Context.User.Privileges === 'E') {
-				return true;
-			}
-			return item.Privileges !== 'V';
+			return (window.Context.User.Privileges === 'E');
 		},
 		onDelete(item) {
 			var loc = this;

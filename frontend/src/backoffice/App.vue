@@ -97,6 +97,9 @@ html, body {
 	right: 22px;
 	position: absolute;
 }
+	.md-switch, .md-disabled {
+		filter: grayscale(1);
+	}
 .md-dialog-actions {
 	background-color: white !important;
 	z-index: 10 !important;

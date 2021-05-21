@@ -71,7 +71,7 @@
 									</md-button>
 								</div>
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									<md-switch v-model="Startup.ClippingRegionItemSelected" :disabled="!Work.CanEdit || Startup.Type != 'R'" :class="(Startup.Type == 'R' ? 'md-primary' : '')" @change="Update">
+									<md-switch v-model="Startup.ClippingRegionItemSelected" :disabled="!Work.CanEdit() || Startup.Type != 'R'" :class="(Startup.Type == 'R' ? 'md-primary' : '')" @change="Update">
 										Utilizar como selección activa.
 									</md-switch>
 								</div>

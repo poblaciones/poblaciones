@@ -3,6 +3,7 @@ import h from '@/public/js/helper';
 import arr from '@/common/js/arr';
 import SequenceHandler from './SequenceHandler';
 import MarkerFactory from '@/public/googleMaps/MarkerFactory';
+import MarkerClusterer from '@googlemaps/markerclustererplus';
 
 export default LocationsComposer;
 
@@ -40,6 +41,7 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 
 	var markerSettings = this.activeSelectedMetric.SelectedLevel().Dataset.Marker;
 	this.UpdateTextStyle(zoom, markerSettings);
+	var markers = [];
 
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
@@ -78,6 +80,16 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 
 				var isSequenceInactiveStep = this.isSequenceInactiveStep(mapItem);
 				var marker = this.markerFactory.CreateMarker(tileKey, mapItem, markerSettings, isSequenceInactiveStep);
+			/*
+				{
+					markers.push(marker);
+					if (marker.extraMarkerImage) {
+						markers.push(marker.extraMarkerImage);
+					}
+					if (marker.extraMarker) {
+						markers.push(marker.extraMarker);
+					}
+				}*/
 				this.registerTileMarker(tileKey, marker);
 				if (variable.IsSequence) {
 					this.SequenceHandler.registerSequenceMarker(tileKey, mapItem, marker, zoom);
@@ -87,6 +99,11 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 			}
 		}
 	}
+	/*
+	var new_mc = new MarkerClusterer(window.SegMap.MapsApi.gMap, markers, {
+    maxZoom: 9
+			});
+*/
 };
 
 

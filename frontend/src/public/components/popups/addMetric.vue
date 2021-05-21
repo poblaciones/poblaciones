@@ -50,14 +50,16 @@ export default {
 				this.selected = null;
 			}
 		},
-		select(metric) {
-			this.selected = metric;
-			if (metric !== null) {
+		select(item) {
+			this.selected = item;
+			if (item !== null) {
 				this.hide();
 				if (this.workId) {
-					window.SegMap.AddMetricByIdAndWork(metric.Id, this.workId);
+					window.SegMap.AddMetricByIdAndWork(item.Id, this.workId);
+				} else if (item.Type === 'B') {
+					window.SegMap.AddBoundaryById(item.Id, item.Name);
 				} else {
-					window.SegMap.AddMetricById(metric.Id);
+					window.SegMap.AddMetricById(item.Id);
 				}
 			}
 		},

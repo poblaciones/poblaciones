@@ -15,32 +15,33 @@
 							<mp-help :text="tab.data.help" />
 						</template>
 
-						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/users" :md-active="isPath('/users') || isPath('/')" md-label="Usuarios">
-							<users></users>
-						</md-tab>
-						<md-tab class="transparentTab" to="/works" id="works-tab" md-label="Cartografías" :md-active="isPath('/works')">
-
-							<works filter="R"></works>
-						</md-tab>
-
-						<md-tab class="transparentTab" id="public-tab" v-if="showPublic" to="/public" :md-active="isPath('/public')" md-label="Datos públicos">
+						<md-tab class="transparentTab" id="public-tab" v-if="isAdminReader" to="/public" :md-active="isPath('/public')" md-label="Datos públicos">
 							<works filter="P"></works>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="boundaries-tab" v-if="isAdmin" to="/boundaries" :md-active="isPath('/boundaries')" md-label="Delimitaciones">
+						<md-tab class="transparentTab" id="works-tab" v-if="isDataAdmin" to="/works" md-label="Cartografías" :md-active="isPath('/works')">
+							<works filter="R"></works>
+						</md-tab>
+
+						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/users" :md-active="isPath('/users') || isPath('/')" md-label="Usuarios">
+							<users></users>
+						</md-tab>
+
+
+						<md-tab class="transparentTab" id="boundaries-tab" v-if="isAdminReader" to="/boundaries" :md-active="isPath('/boundaries')" md-label="Delimitaciones">
 							<boundaries></boundaries>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="clipping-regions-tab" v-if="isAdmin" to="/regions" :md-active="isPath('/regions')" md-label="Regiones">
+						<md-tab class="transparentTab" id="clipping-regions-tab" v-if="isAdminReader" to="/regions" :md-active="isPath('/regions')" md-label="Regiones">
 							<clipping-regions></clipping-regions>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="reviews-tab" v-if="isAdmin" to="/reviews" :md-active="isPath('/reviews')" md-label="Revisiones"
+						<md-tab class="transparentTab" id="reviews-tab" v-if="isAdminReader" to="/reviews" :md-active="isPath('/reviews')" md-label="Revisiones"
 										:md-template-data="{ badge: (pendingReviews ? pendingReviews : '') }">
 							<reviews @pendingUpdated="pendingUpdated"></reviews>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="stats-tab" v-if="isAdmin" to="/stats" :md-active="isPath('/stats')" md-label="Estadísticas">
+						<md-tab class="transparentTab" id="stats-tab" v-if="isAdminReader" to="/stats" :md-active="isPath('/stats')" md-label="Estadísticas">
 							<statistics></statistics>
 						</md-tab>
 					</md-tabs>
@@ -84,6 +85,12 @@ export default {
 	computed: {
 		isAdmin() {
 			return window.Context.IsAdmin();
+		},
+		isDataAdmin() {
+			return window.Context.IsDataAdmin();
+		},
+		isAdminReader() {
+			return window.Context.IsAdminReader();
 		},
 		showTabs() {
 			return (window.Context.Cartographies);

@@ -36,8 +36,8 @@ OverlapRectangles.prototype.Intersects = function (overlay) {
 			return true;
 		}
 	}
-	var endTime = performance.now();
-	console.log('done false for ' + this.Rectangles.length + ' in ' + (endTime - startTime));
+	//var endTime = performance.now();
+	//console.log('done false for ' + this.Rectangles.length + ' in ' + (endTime - startTime));
 
 	return false;
 };

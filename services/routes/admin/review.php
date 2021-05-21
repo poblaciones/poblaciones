@@ -11,7 +11,7 @@ use minga\framework\Params;
 // ********************************* Servicios *********************************
 
 App::$app->get('/services/admin/GetReviews', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteReader())
 		return $app;
 	$controller = new services\ReviewService();
 	$ret = $controller->GetReviews();

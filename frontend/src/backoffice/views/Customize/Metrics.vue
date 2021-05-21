@@ -21,7 +21,7 @@
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
 										<md-table-cell md-label="¿Activo?" class="mpNoWrap">
-											<md-switch v-model="item.StartActive" class="md-primary" :disabled="!Work.CanEdit"
+											<md-switch v-model="item.StartActive" class="md-primary" :disabled="!Work.CanEdit()"
 																 @change="value => SetActive(value, item)"></md-switch>
 										</md-table-cell>
 									</md-table-row>
@@ -60,7 +60,7 @@
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
 										<md-table-cell md-label="Activo al inicio">
-											<md-switch v-model="item.StartActive" class="md-primary" :disabled="!Work.CanEdit"
+											<md-switch v-model="item.StartActive" class="md-primary" :disabled="!Work.CanEdit()"
 																 @change="value => handleToggle(value, item)"></md-switch>
 										</md-table-cell>
 										<md-table-cell md-label="Acciones" class="mpNoWrap">

@@ -60,7 +60,7 @@ App::Get('/services/admin/UpdateWorkSpaceUsage', function (Request $request) {
 
 
 App::Get('/services/admin/GetClippingRegions', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteReader())
 		return $app;
 	$controller = new services\ClippingRegionService();
 	$ret = $controller->GetClippingRegions();
@@ -79,7 +79,7 @@ App::GetOrPost('/services/admin/UpdateClippingRegion', function (Request $reques
 });
 
 App::Get('/services/admin/GetBoundaries', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteReader())
 		return $app;
 	$controller = new services\BoundaryService();
 	$ret = $controller->GetBoundaries();
@@ -87,7 +87,7 @@ App::Get('/services/admin/GetBoundaries', function (Request $request) {
 });
 
 App::Get('/services/admin/GetBoundaryGroups', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteReader())
 		return $app;
 	$controller = new services\BoundaryService();
 	$ret = $controller->GetBoundaryGroups();
@@ -162,7 +162,7 @@ App::$app->get('/services/admin/ProcessAllStatistics', function (Request $reques
 });
 
 App::$app->get('/services/admin/ProcessStatistics', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteReader())
 		return $app;
 	$controller = new services\StatisticsService();
 	$month = Params::GetMonthMandatory('m');
@@ -171,7 +171,7 @@ App::$app->get('/services/admin/ProcessStatistics', function (Request $request) 
 });
 
 App::$app->get('/services/admin/GetStatistics', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteReader())
 		return $app;
 	$controller = new services\StatisticsService();
 	$month = Params::GetMonth('m');

@@ -6,19 +6,19 @@
 				<invoker ref="invoker"></invoker>
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-100">
-						<mp-simple-text label="Comentarios de revisión" ref="inputName" :canEdit="(!review.Decision)" :multiline="true"
+						<mp-simple-text label="Comentarios de revisión" ref="inputName" :canEdit="isDataAdmin && (!review.Decision)" :multiline="true"
 														v-model="review.ReviewerComments" :maxlength="2000" :helper="(review.Decision ? 'Los comentarios no pueden editarse una vez asignada una decisión.' : '')" />
 					</div>
 					<div class="md-layout-item md-size-50">
-						<mp-simple-text label="Comentarios editoriales" :maxlength="2000" :multiline="true" :canEdit="(!review.Decision)"
+						<mp-simple-text label="Comentarios editoriales" :maxlength="2000" :multiline="true" :canEdit="isDataAdmin && (!review.Decision)"
 														v-model="review.EditorComments" />
 					</div>
 					<div class="md-layout-item md-size-50">
-						<mp-simple-text label="Comentarios internos" :maxlength="2000" :multiline="true" :canEdit="(!review.Decision)"
+						<mp-simple-text label="Comentarios internos" :maxlength="2000" :multiline="true" :canEdit="isDataAdmin && (!review.Decision)"
 														v-model="review.ExtraComments" />
 					</div>
 					<div class="md-layout-item md-size-50">
-						<mp-select label='Decisión de revisión' :allowNull='true' :modelKey="true"
+						<mp-select label='Decisión de revisión' :allowNull='true' :canEdit="isDataAdmin" :modelKey="true"
 											 :list='Decisions' v-model='review.Decision' />
 					</div>
 					<div class="md-layout-item md-size-50" v-if="review.UserDecision">
@@ -36,8 +36,11 @@
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">Guardar</md-button>
+				<template v-if="isDataAdmin">
+					<md-button @click="activateEdit = false">Cancelar</md-button>
+					<md-button class="md-primary" @click="save">Guardar</md-button>
+				</template>
+				<md-button v-else="" @click="activateEdit = false">Cerrar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -65,7 +68,9 @@ export default {
     };
   },
   computed: {
-
+		isDataAdmin() {
+			return window.Context.IsDataAdmin();
+		},
   },
   methods: {
 		show(review) {
