@@ -3,7 +3,7 @@
 		<md-button @click="goAdmin" class="md-raised">
 			Administración
 		</md-button>
-		<md-button @click="goLogs" class="md-raised">
+		<md-button @click="goLogs" class="md-raised" v-if="isAdmin">
 			Logs
 		</md-button>
 	</div>
@@ -19,7 +19,9 @@ export default {
 		return {	};
 	},
 	computed: {
-
+		isAdmin() {
+			return window.Context.IsAdmin();
+		}
 	},
 	methods: {
 		goAdmin() {

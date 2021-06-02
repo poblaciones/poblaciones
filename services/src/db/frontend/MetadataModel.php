@@ -55,6 +55,27 @@ class MetadataModel extends BaseModel
 		return $ret;
 	}
 
+	public function GetSitemapLinks()
+	{
+		// Lista works indexados, sus métricas y los boundaries
+		$links = App::Db()->fetchAll("SELECT wrk_id as url, DATE_FORMAT(met_update, '%Y-%m-%d') as lastmod
+																	FROM work JOIN metadata ON met_id = wrk_metadata_id
+																	WHERE wrk_is_indexed = 1 AND wrk_is_private = 0
+																UNION ALL
+																	SELECT DISTINCT CONCAT(wrk_id, '/', mvr_metric_id) as url, DATE_FORMAT(met_update, '%Y-%m-%d') as lastmod
+																	FROM work JOIN metadata ON met_id = wrk_metadata_id
+																		JOIN dataset ON dat_work_id = wrk_id
+																		JOIN metric_version_level ON mvl_dataset_id = dat_id
+																		JOIN metric_version ON mvl_metric_version_id = mvr_id
+																		WHERE wrk_is_indexed = 1 AND wrk_is_private = 0
+																UNION ALL
+																	SELECT CONCAT('boundaries/', bou_id) as url, DATE_FORMAT(met_update, '%Y-%m-%d') as lastmod
+																	FROM boundary
+																	JOIN metadata ON met_id = bou_metadata_id
+																	WHERE bou_is_private = 0");
+		return $links;
+	}
+
 	public function GetMetadata($metadataId)
 	{
 		Profiling::BeginTimer();

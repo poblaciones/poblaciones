@@ -141,10 +141,23 @@ class cHandle extends cPublicController
 	{
 		$links = [];
 		foreach($work->Metrics as $metric)
-			$links[] = [ 'Id' => $metric['Id'],
+		{
+			if ($this->HasLocalVersions($metric))
+			{
+				$links[] = [ 'Id' => $metric['Id'],
 																	'UrlName' => Str::CrawlerUrlEncode($metric['Name']),
 																	'Name' => $metric['Name']];
+			}
+		}
 		$this->AddValue('links', $links);
+	}
+
+	private function HasLocalVersions ($metric)
+	{
+		foreach($metric['LocalVersions'] as $version)
+			if ($version['Name'] != '')
+				return true;
+		return false;
 	}
 
 	public function AddMetadata(&$metadata, $url, $metricName, $regionId = null)
@@ -293,7 +306,6 @@ class cHandle extends cPublicController
 			// Lo agrega al caché...
 			WorkHandlesCache::Cache()->PutData($workId, $key, $data);
 		}
-		$this->AddValue("metricUrlName", Str::CrawlerUrlEncode($metricName));
 		$this->AddValue("regions", $data);
 	}
 
@@ -319,10 +331,6 @@ class cHandle extends cPublicController
 					$newList[] = $clippingRegionItem;
 				}
 			$clippingRegionItemIds = $newList;
-		}
-		foreach($clippingRegionItemIds as &$clippingRegionItem)
-		{
-			$clippingRegionItem['UrlName'] = Str::CrawlerUrlEncode($clippingRegionItem['Name']);
 		}
 		$data = Arr::FromSortedToKeyed($clippingRegionItemIds, 'clr_caption');
 		Profiling::EndTimer();

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<sidebar-menu :menu="menuItems" theme="white-theme"
+		<sidebar-menu :menu="menuItems" theme="white-theme" style="padding-bottom: 9px;"
 									:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
 		<import-popup ref="importPopup"></import-popup>
 		<stepper ref="stepper"></stepper>

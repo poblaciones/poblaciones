@@ -12,7 +12,6 @@
 		macros.metaInfo(meta.name, meta.value) }}
 	{% endfor %}
 	<meta name="generator" content="poblaciones.org">
-	<link rel="canonical" href="{{ canonical }}">
 	<link rel="shortcut icon" href="/favicon.ico">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	</head>
@@ -33,7 +32,7 @@
 	{% if links is defined %}
     <h4>Indicadores</h4>
 		{% for link in links %}
-			<p><a href='{{ canonical }}/{{ link.Id }}_{{ link.UrlName }}{{ (debugParam == 1 ? '?debug=1' : '') }}'> {{ link.Name }}</a></p>
+			<p><a href='{{ canonical }}/{{ link.Id }}{{ (debugParam ? '?debug=1' : '') }}'> {{ link.Name }}</a></p>
 	{% endfor %}
 	{% endif %}
 
@@ -49,7 +48,7 @@
 			<h4>{{ regionName }}</h4>
 			<p>
 			{% for item in elements %}
-				<a href='{{ canonical_base }}/{{ item.Id }}_{{ metricUrlName }}_{{ item.UrlName}}{{ (debugParam == 1 ? '?debug=1' : '') }}'> {{ item.Name }}</a>{{
+				<a href='{{ canonical_base }}/{{ item.Id }}{{ (debugParam == 1 ? '?debug=1' : '') }}'> {{ item.Name }}</a>{{
 				(loop.last ? '.' : ', ') }}
 			{% endfor %}
 			</p>

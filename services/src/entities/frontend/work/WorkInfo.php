@@ -36,7 +36,10 @@ class WorkInfo extends BaseMapModel
 			$versions = array();
 			foreach(explode("\t", $row['Versions']) as $version)
 				$versions[] = array('Name' => $version);
-			$arr[] = array('Id' => $row['Id'], 'Name' => $row['Name'], 'Versions' => $versions);
+			$localVersions = array();
+			foreach(explode("\t", $row['LocalVersions']) as $version)
+				$localVersions[] = array('Name' => $version);
+			$arr[] = array('Id' => $row['Id'], 'Name' => $row['Name'], 'Versions' => $versions, 'LocalVersions' => $localVersions);
 
 		}
 		$this->Metrics = $arr;

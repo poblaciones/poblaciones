@@ -5,6 +5,8 @@ namespace helena\controllers\frontend;
 use helena\classes\App;
 use helena\controllers\common\cPublicController;
 use helena\classes\Links;
+use helena\db\frontend\MetadataModel;
+
 use minga\framework\Str;
 
 
@@ -12,19 +14,8 @@ class cSitemap extends cPublicController
 {
 	public function Show()
 	{
-		$links = App::Db()->fetchAll("SELECT wrk_id as url, DATE_FORMAT(met_update, '%Y-%m-%d') as lastmod, met_title as title
-																	FROM work
-																	JOIN metadata ON met_id = wrk_metadata_id
-																	WHERE wrk_is_indexed = 1 AND wrk_is_private = 0
-																UNION ALL
-																	SELECT CONCAT('boundaries/', bou_id) as url, DATE_FORMAT(met_update, '%Y-%m-%d') as lastmod, met_title as title
-																	FROM boundary
-																	JOIN metadata ON met_id = bou_metadata_id
-																	WHERE bou_is_private = 0
-																");
-		// Hace el pseudo-encoding para los nombres
-		foreach($links as &$link)
-			$link['title'] = Str::CrawlerUrlEncode($link['title']);
+		$model = new MetadataModel();
+		$links = $model->GetSitemapLinks();
 
 		$this->AddValue('links', $links);
 		$this->AddValue('baseurl', Links::GetFullyQualifiedUrl(Links::GetHandleUrl()));

@@ -66,6 +66,7 @@ class WorkModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
 	public function GetWorkMetricsInfo($workId)
 	{
 		Profiling::BeginTimer();
