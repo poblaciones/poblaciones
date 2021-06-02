@@ -3,7 +3,7 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 ## 1. Instalar el software necesario
 
-1. Para instalar VueJS. Descargar e instalar NodeJs https://nodejs.org/en/. Es necesario correr la instalación completa instalando las herramientas para compilar paquetes en C o C++. El instalador descarga e instala todas las dependencias. 
+1. Para instalar VueJS. Descargar e instalar NodeJs v.13 https://nodejs.org/en/. Es necesario correr la instalación completa instalando las herramientas para compilar paquetes en C o C++. El instalador descarga e instala todas las dependencias. 
 
 1a. Luego de instalarlo, ejecutar > `npm install vue`.
 
