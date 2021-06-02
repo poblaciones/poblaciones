@@ -33,7 +33,7 @@ La aplicación puede ser alojada en un servidor compartido (ej. hostgator), dado
 
 - MySql 5.7. 
 - PHP 7.1.
-- Python 2.7 o 3.4 (requisito para permitir subir y descargar información en formato SPSS [.sav])
+- Python 3.4 (requisito para permitir subir y descargar información en formato SPSS [.sav])
 - SO: indistinto.
 
 ## Demo
@@ -54,7 +54,7 @@ Para generar una versión para instalar: [guía de compilación](startup/BUILD.m
 ## Licencia
 Poblaciones - Plataforma abierta de datos espaciales de población.
 
-Copyright (C) 2018-2019. Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET) y Universidad Católica Argentina (UCA). 
+Copyright (C) 2018-2021. Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET) y Universidad Católica Argentina (UCA). 
 
 El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
 
