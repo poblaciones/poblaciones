@@ -86,11 +86,12 @@ var path = 'M'+ coords;
 return path;
 };
 
-SvgMake.prototype.multiLineString = function(geom) {
-var paths = multi.explode(geom).map(function(single) {
-  return this.lineString(single);
-});
-return paths.join(' ');
+SvgMake.prototype.multiLineString = function (geom) {
+	var loc = this;
+	var paths = multi.explode(geom).map(function (single) {
+		return loc.lineString(single);
+	});
+	return paths.join(' ');
 };
 
 SvgMake.prototype.polygon = function(geom) {

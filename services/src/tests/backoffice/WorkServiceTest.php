@@ -18,6 +18,6 @@ class WorkServiceTest extends TestCase
 		$workId = $this->Get();
 		$this->assertNull(Session::CheckIsWorkReader($workId));
 		$controller = new WorkService();
-		$ret = $controller->GetWorkInfo($workId);
+		$controller->GetWorkInfo($workId);
 	}
 }

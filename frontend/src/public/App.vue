@@ -261,7 +261,7 @@
 	}
 
 	.ls {
-		stroke-width: 2.5px;
+		stroke-width: 80px;
 		fill: none !important;
 	}
 

@@ -103,6 +103,13 @@ class Geography
     /**
      * @var boolean
      *
+     * @ORM\Column(name="geo_use_for_clipping", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $UseForClipping;
+
+		 /**
+     * @var boolean
+     *
      * @ORM\Column(name="geo_is_tracking_level", type="boolean", precision=0, scale=0, nullable=false, unique=false)
      */
     private $IsTrackingLevel;
@@ -469,6 +476,30 @@ class Geography
     public function getIsTrackingLevel()
     {
         return $this->IsTrackingLevel;
+    }
+
+    /**
+     * Set useForClipping
+     *
+     * @param boolean $useForClipping
+     *
+     * @return Geography
+     */
+    public function setUseForClipping($useForClipping)
+    {
+        $this->UseForClipping = $useForClipping;
+
+        return $this;
+    }
+
+    /**
+     * Get useForClipping
+     *
+     * @return boolean
+     */
+    public function getUseForClipping()
+    {
+        return $this->UseForClipping;
     }
 
 

@@ -182,6 +182,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 					LEFT JOIN institution ON met_institution_id = ins_id
 					WHERE " . $this->existsBlock($regionItemIds, "EXISTS (SELECT * FROM snapshot_clipping_region_item_geography_item WHERE C2.geo_id = cgv_geography_id
 																					AND cgv_clipping_region_item_id = ? AND C2.geo_is_tracking_level = 1) ") . "
+					AND C1.geo_use_for_clipping = 1
 					ORDER BY C1.geo_revision";
 			$ret = App::Db()->fetchAll($sql);
 		}
@@ -196,6 +197,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 						LEFT JOIN institution ON met_institution_id = ins_id
 						WHERE " . $this->existsBlock($regionItemIds, "EXISTS (SELECT * FROM snapshot_clipping_region_item_geography_item WHERE C1.geo_id = cgv_geography_id
 																			AND cgv_clipping_region_item_id = ? AND cgv_level > 0) ") . "
+						AND C1.geo_use_for_clipping = 1
 						ORDER BY geo_revision";
 				$levels = App::Db()->fetchAll($sql);
 				$ret = [];
@@ -231,6 +233,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
 					LEFT JOIN institution ON met_institution_id = ins_id
 					WHERE ST_CONTAINS (giw_geometry_r3 , POINT(?, ?)) AND giw_geography_is_tracking_level = 1
+					AND C1.geo_use_for_clipping = 1
 					ORDER BY C1.geo_revision";
 		$params = array();
 		$coordinate->ToParams($params);
@@ -250,6 +253,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 					JOIN geography C1 ON C0.geo_id = C1.geo_id
 					LEFT JOIN metadata ON geo_metadata_id = met_id
 					LEFT JOIN institution ON met_institution_id = ins_id
+					WHERE C1.geo_use_for_clipping = 1
 					ORDER BY C1.geo_revision";
 		$ret = App::Db()->fetchAll($sql, array($zoom, $zoom));
 
