@@ -1,4 +1,6 @@
 [CURRENT]
+- Fix a ancho linestrings (por cambio de escala en svgs).
+- Fix codigos postales en clipping.
 
 2021-05-19
 - Fix: orden de superposición de los marcadores.
