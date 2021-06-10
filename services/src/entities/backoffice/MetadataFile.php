@@ -31,7 +31,7 @@ class MetadataFile
     /**
      * @var string
      *
-     * @ORM\Column(name="mfi_caption", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="mfi_caption", type="string", length=200, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Caption;
 

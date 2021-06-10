@@ -142,6 +142,7 @@ html, body {
 
 .md-table-cell-container {
 	padding-right: 0px!important;
+	word-break: break-word;
 }
 .md-tab{
 	overflow-x: hidden;

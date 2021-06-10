@@ -81,7 +81,7 @@
 					<tr v-if="version.Work.Metadata.Files && version.Work.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
 						<td><div class="attachmentsDownloadPanel">
-							<span v-for="file in version.Work.Files" :key="file.Id">
+							<span v-for="file in version.Work.Metadata.Files" :key="file.Id">
 								<a target="_blank" :href="resolveFileUrl(file)">
 									<file-pdf-icon title="Descargar" /> {{ file.Caption }}
 								</a>

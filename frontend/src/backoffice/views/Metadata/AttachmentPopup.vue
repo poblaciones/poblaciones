@@ -14,7 +14,7 @@
 				</p>
 				<div v-if="!isNew && this.item !== null" class="md-layout md-gutter">
 						<div class="md-layout-item md-size-100">
-							<mp-simple-text label="Descripción" ref="inputName" length="100"
+							<mp-simple-text label="Descripción" ref="inputName" :maxlength="200"
 															v-model="localCaption" @enter="save()" :canEdit="Work.CanEdit()" />
 						</div>
 				</div>
@@ -46,7 +46,7 @@
 				</div>
 				<div v-if="isNew && this.item !== null" class="md-layout md-gutter">
 						<div class="md-layout-item md-size-100">
-							<mp-simple-text label="Descripción"
+							<mp-simple-text label="Descripción"  :maxlength="200"
 															v-model="localCaption" @enter="save()" :canEdit="Work.CanEdit()" />
 						</div>
 				</div>
