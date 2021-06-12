@@ -5,6 +5,7 @@ export default BoundariesComposer;
 
 function BoundariesComposer(mapsApi, activeSelectedMetric) {
 	AbstractSvgComposer.call(this, mapsApi, activeSelectedMetric);
+	this.strokeWidthScaling = 2;
 };
 
 BoundariesComposer.prototype = new AbstractSvgComposer();
@@ -52,9 +53,7 @@ BoundariesComposer.prototype.renderPolygons = function (mapResults, dataItems, g
 	var tileUniqueId = AbstractSvgComposer.uniqueCssId++;
 
 	if (dataItems.length === 0) return;
-	var id;
 	for (var i = 0; i < dataItems.length; i++) {
-		id = dataItems[i].id;
 		var feature = this.processFeature(tileUniqueId, dataItems[i]);
 		features.push(feature);
 	}
@@ -68,7 +67,7 @@ BoundariesComposer.prototype.GetTileCacheKey = function (x, y, z) {
 	return h.getFrameKey(x, y, z);
 };
 
-BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElement, filtered) {
+BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElement) {
 	var val = 1;
 	// Lo agrega
 	var isLineString = (dataElement.geometry.type === 'LineString' || dataElement.geometry.type === 'MultiLineString' ? ' ls' : '');

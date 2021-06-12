@@ -175,7 +175,6 @@ class ImportService extends BaseService
 		$headers = $this->state->GetHeaders();
 		$tableName = $datasetTable->CreateTable($headers);
 		$this->state->Set('tableName', $tableName);
-		//$this->state->SetStep(self::STEP_METADATA, 'Creando variables');
 		$this->state->SetStep(self::STEP_INSERTING, 'Insertando datos');
 		return $this->state->ReturnState(false);
 	}

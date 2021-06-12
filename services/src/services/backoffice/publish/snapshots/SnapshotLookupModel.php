@@ -70,6 +70,10 @@ class SnapshotLookupModel
 												 WHERE dco_id = dat_longitude_column_id) as LongitudeColumn,
 												(SELECT dco_field FROM dataset_column
 												 WHERE dco_id = dat_latitude_column_id) as LatitudeColumn,
+												 (SELECT dco_field FROM dataset_column
+												 WHERE dco_id = dat_longitude_column_segment_id) as LongitudeColumnSegment,
+												(SELECT dco_field FROM dataset_column
+												 WHERE dco_id = dat_latitude_column_segment_id) as LatitudeColumnSegment,
 												(SELECT dco_field FROM dataset_column
 												 WHERE dco_id = dat_caption_column_id) as CaptionColumn
 												FROM dataset

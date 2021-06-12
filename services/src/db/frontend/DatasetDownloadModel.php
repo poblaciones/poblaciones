@@ -133,7 +133,7 @@ class DatasetDownloadModel extends BaseDownloadModel
 			if ($dataset['type'] == 'S')
 				$polygonField = '(_data_table.geometry)';
 			else
-				$polygonField = '(case when level1.gei_geometry_is_null = 1 then null else level1.gei_geometry_r6 end)';
+				$polygonField = 'level1.gei_geometry_r6';
 
 			$cols = $this->AppendPolygon($cols, $polygonField, $getPolygonType);
 			$this->wktIndex = count($cols) - 1;
@@ -163,10 +163,13 @@ class DatasetDownloadModel extends BaseDownloadModel
 	{
 		Profiling::BeginTimer();
 
-		$sql = 'SELECT lat.dco_variable as lat, lng.dco_variable as lon
+		$sql = 'SELECT lat.dco_variable as lat, lng.dco_variable as lon,
+										latSegment.dco_variable as latSegment, lngSegment.dco_variable as lonSegment
 			FROM ' . $this->draftPreffix() . 'dataset
 			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column lat ON lat.dco_id = dat_latitude_column_id
 			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column lng ON lng.dco_id = dat_longitude_column_id
+			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column latSegment ON latSegment.dco_id = dat_latitude_column_segment_id
+			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column lngSegment ON lngSegment.dco_id = dat_longitude_column_segment_id
 			WHERE dat_id = ?';
 
 		$ret = App::Db()->fetchAssoc($sql, array($datasetId));

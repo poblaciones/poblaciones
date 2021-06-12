@@ -4,7 +4,6 @@
 		<stepper ref="stepper" @completed="stepperComplete" title="Georreferenciar"></stepper>
 		<ErrorsPopup ref="georeferenceStatusPopup" @georeferenceRequested="startGeoreferencing(0)">
 			</ErrorsPopup>
-		<ValuesPopup v-if="valuesPopupReset" ref="valuesPopup"></ValuesPopup>
 
 		<div class="dParagrah">
 			La georreferenciación permite vincular los registros del dataset con referencias
@@ -34,58 +33,54 @@
 					<div class="dParagrah">
 						Seleccione las variables que permiten identificar la localización (latitud y longitud) de cada elemento del dataset.
 					</div>
-					<div class='md-layout'>
-						<div class='md-layout-item md-size-35 md-small-size-100'>
-							<md-field>
-								<label for="state">Latitud</label>
-								<md-select v-model="latitude">
-									<md-option v-for="column in Dataset.GetNumericColumns()" :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
-								</md-select>
-							</md-field>
-						</div>
+					<div class='md-layout md-gutter'>
 						<div class='md-layout-item md-size-50 md-small-size-100'>
+							<div class='mp-label mp-subtitle' v-if="mapSegmentsLatLon">
+								Inicio del segmento
+							</div>
+							<lat-long-selection v-model="start" />
 						</div>
-						<div class='md-layout-item md-size-35 md-small-size-100'>
-							<md-field>
-							<label for="state">Longitud</label>
-							<md-select v-model="longitude">
-								<md-option v-for="column in Dataset.GetNumericColumns()" :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
-							</md-select>
-						</md-field>
+						<div v-if="mapSegmentsLatLon" class="md-layout-item md-size-50 md-small-size-100">
+							<div class='md-layout-item md-size-100 mp-label mp-subtitle'>
+								Fin del segmento
+							</div>
+							<lat-long-selection v-model="end" />
+						</div>
 					</div>
-				</div>
-					<div>
+					<div class="marginTop">
 						<md-button @click="startGeoreferencing(1)" :disabled="startDisabled" class="md-raised">
 							Georreferenciar
 						</md-button>
+					</div>
+					<div>
+						<md-switch class="md-primary" v-model="mapSegmentsLatLon">
+							Georreferenciar segmentos
+						</md-switch>
 					</div>
 				</md-tab>
 				<md-tab id="tab-data" md-label="Códigos" @click="tab='code'">
 					<div class="dParagrah">
 						Seleccione la variable que contiene los códigos de cada elemento del dataset y la geografía a utilizar.
 					</div>
-					<div class='md-layout'>
-						<div class='md-layout-item md-size-35 md-small-size-100'>
-							<mp-select :canEdit="Work.CanEdit()" :list="Dataset.Columns"
-												 :model-key="true" label="Variable" helper="Variable que contiene los códigos geográficos"
-												 v-model="codes" :render="formatColumn" />
-						</div>
-						<div class='md-layout-item md-size-35 md-small-size-100'>
-							<mp-select :canEdit="Work.CanEdit()" :list="geographies" listGrouping="RootCaption"
-												 :model-key="true" label="Geografía" helper="Nivel para georreferenciar"
-												 v-model="geographyId" :render="formatGeography" />
-							<br />
-							<md-button @click="valuesOnClick()" :disabled="valuesDisabled"
-												 style="margin-top: -10px; margin-left: -5px; margin-bottom: 20px;">
-								<md-icon>ballot</md-icon>
-								Consultar valores
-							</md-button>
-						</div>
+					<div class='mp-label mp-subtitle' v-if="mapSegmentsCodes">
+						Inicio del segmento
 					</div>
-					<div>
+					<codes-selection v-model="start" />
+					<div v-if="mapSegmentsCodes">
+						<div class='mp-label mp-subtitle'>
+							Fin del segmento
+						</div>
+						<codes-selection v-model="end" />
+					</div>
+					<div class="marginTop">
 						<md-button @click="startGeoreferencing(1)" :disabled="startDisabled" class="md-raised">
 							Georreferenciar
 						</md-button>
+					</div>
+					<div>
+						<md-switch class="md-primary" v-model="mapSegmentsCodes">
+							Georreferenciar segmentos
+						</md-switch>
 					</div>
 				</md-tab>
 				<md-tab id="tab-shapes" md-label="Polígonos" @click="tab='shape'">
@@ -95,12 +90,11 @@
 					<div class='md-layout'>
 						<div class='md-layout-item md-size-35 md-small-size-100'>
 							<mp-select :canEdit="Work.CanEdit()" :list="Dataset.GetTextColumns()"
-						:model-key="true" label="Polígono" helper="Variable que contiene los polígonos"
-						v-model="polygon" :render="formatColumn"
-											/>
+												 :model-key="true" label="Polígono" helper="Variable que contiene los polígonos"
+												 v-model="polygon" :render="formatColumn" />
 						</div>
 					</div>
-					<div>
+					<div class="marginTop">
 						<md-button @click="startGeoreferencing(1)" :disabled="startDisabled" class="md-raised">
 							Georreferenciar
 						</md-button>
@@ -113,14 +107,16 @@
 
 <script>
 
-import ValuesPopup from './ValuesPopup.vue';
-import ErrorsPopup from './ErrorsPopup.vue';
+import CodesSelection from './CodesSelection';
+import LatLongSelection from './LatLongSelection';
+import ErrorsPopup from './ErrorsPopup';
 import f from '@/backoffice/classes/Formatter';
 
 export default {
 	name: 'georreferenceTab',
 	components: {
-		ValuesPopup,
+		CodesSelection,
+		LatLongSelection,
 		ErrorsPopup
 	},
 	computed: {
@@ -130,14 +126,13 @@ export default {
 		Work() {
 			return window.Context.CurrentWork;
 		},
-		valuesDisabled() {
-			return this.geographyId === null;
-		},
 		startDisabled() {
 			if (this.tab === 'location') {
-				return this.longitude === null || this.latitude === null;
+				return (this.start.longitude === null || this.start.latitude === null) ||
+					(this.mapSegmentsLatLon && (this.end.latitude === null || this.end.longitude === null));
 			} else if (this.tab === 'code') {
-				return this.codes === null || this.geographyId === null;
+					return (this.start.codes === null || this.start.geographyId === null) ||
+						(this.mapSegmentsCodes && (this.end.codes === null || this.end.geographyId === null));
 			} else if (this.tab === 'shape') {
 				return this.polygon === null;
 			} else {
@@ -146,22 +141,25 @@ export default {
 		},
 	},
 	mounted() {
-		var loc = this;
-		window.Context.Geographies.GetAll(function(data) {
-			// Los ordena para el combo
-			var sorted = loc.ResolveRootCaptions(data);
-			loc.geographies = sorted;
-			});
+
 	},
 	data() {
 		return {
-			latitude: null,
-			longitude: null,
 			polygon: null,
-			valuesPopupReset: false,
-			geographyId: null,
-			geographies: [],
-			codes: null,
+			start: {
+				latitude: null,
+				longitude: null,
+				codes: null,
+				geographyId: null,
+			},
+			end: {
+				latitude: null,
+				longitude: null,
+				codes: null,
+				geographyId: null,
+			},
+			mapSegmentsLatLon: false,
+			mapSegmentsCodes: false,
 			forceShow: false,
 			tab: 'location'
 		};
@@ -172,45 +170,6 @@ export default {
 		},
 		formatColumn(column) {
 			return f.formatColumn(column);
-		},
-		formatGeography(geography) {
-			if (geography === null) {
-				return '';
-			} else {
-				return geography.Caption + ' (' + geography.Revision + ')';
-			}
-		},
-		ResolveRootCaptions(list) {
-			var ret = [];
-			// MArca a los que tienen padres y etiqueta de root
-			for (var n = 0; n < list.length; n++) {
-				if (list[n].RootCaption !== null && list[n].ParentId !== null) {
-					list[n].ParentId = 0;
-				}
-			}
-			// Pone a los de nivel cero
-			for(var n = 0; n < list.length; n++) {
-				if (list[n].ParentId === null) {
-						this.classifyChildrenRecursive(ret, list[n], list, list[n]);
-				}
-			}
-			// Pone al final a los que tienen padres y etiqueta de root
-			for (var n = 0; n < list.length; n++) {
-				if (list[n].ParentId === 0) {
-					this.classifyChildrenRecursive(ret, list[n], list, list[n]);
-				}
-			}
-			return ret;
-		},
-		classifyChildrenRecursive(ret, root, list, promotedParent) {
-			ret.push(promotedParent);
-			for(var n = 0; n < list.length; n++) {
-				if (list[n].ParentId === promotedParent.Id) {
-					// Se fija si hay un grupo donde ponerse...
-					list[n].RootCaption = root.RootCaption;
-					this.classifyChildrenRecursive(ret, root, list, list[n]);
-				}
-			}
 		},
 		geocodedMessage() {
 			if (this.Dataset.properties.GeoreferenceAttributes) {
@@ -231,10 +190,14 @@ export default {
 			var numericColumns = this.Dataset.GetNumericColumns();
 			var textColumns = this.Dataset.GetTextColumns();
 			this.forceShow = false;
-			this.codes = null;
-			this.geographyId = null;
-			this.latitude = this.trySelect(numericColumns, ['lat', 'latitud', 'latitude', 'y']);
-			this.longitude = this.trySelect(numericColumns, ['lon', 'ln', 'long', 'longitud', 'longitude', 'x']);
+			this.start.codes = null;
+			this.start.geographyId = null;
+			this.start.latitude = this.trySelect(numericColumns, ['lat', 'latitud', 'latitude', 'y']);
+			this.start.longitude = this.trySelect(numericColumns, ['lon', 'ln', 'long', 'longitud', 'longitude', 'x']);
+			this.end.codes = null;
+			this.end.geographyId = null;
+			this.end.latitude = null;
+			this.end.longitude = null;
 			this.polygon = this.trySelect(textColumns, ['polygon', 'poly', 'shape', 'geojson', 'wkt', 'polígono', 'poligono']);
 		},
 		trySelect(list, values) {
@@ -294,8 +257,10 @@ export default {
 					this.Dataset.properties.Geocoded = true;
 					if (this.tab === 'location') {
 						this.Dataset.properties.Type = 'L';
+						this.Dataset.properties.AreSegments = this.mapSegmentsLatLon;
 					} else if (this.tab === 'code') {
 						this.Dataset.properties.Type = 'D';
+						this.Dataset.properties.AreSegments = this.mapSegmentsCodes;
 					} else if (this.tab === 'shape') {
 						this.Dataset.properties.Type = 'S';
 					}
@@ -321,12 +286,19 @@ export default {
 			if (this.tab === 'location') {
 				return { 'k': this.Dataset.properties.Id,
 									'a': window.Context.GetTrackingLevelGeography().Id,
-									'lat': this.latitude,
-									'lon': this.longitude };
+									'startLat': this.start.latitude,
+									'startLon': this.start.longitude,
+									'endLat': this.end.latitude,
+									'endLon': this.end.longitude,
+									's': (this.mapSegmentsLatLon ? '1' : '0')
+									};
 			} else if (this.tab === 'code') {
 				return { 'k': this.Dataset.properties.Id,
-									'a': this.geographyId,
-									'c': this.codes };
+									'startA': this.start.geographyId,
+									'startC': this.start.codes,
+									'endA': this.end.geographyId,
+									'endC': this.end.codes,
+									's': (this.mapSegmentsCodes ? '1' : '0') };
 			} else if (this.tab === 'shape') {
 				return { 'k': this.Dataset.properties.Id,
 									'a': window.Context.GetTrackingLevelGeography().Id,
@@ -334,22 +306,6 @@ export default {
 									'p': true };
 			}
 		},
-		destroyCallback() {
-			this.valuesPopupReset = false;
-		},
-		valuesOnClick() {
-			// abre popup con los valores de esa geografía
-			var loc = this;
-			// Obtiene los valores
-      this.$refs.invoker.do(this.Work,
-													this.Work.GetGeographyItems, this.geographyId).then(
-														function(values) {
-															loc.valuesPopupReset = true;
-															loc.$nextTick(() => {
-																loc.$refs.valuesPopup.showGeographyValues(values, loc.destroyCallback);
-															});
-														});
-		}
 	},
 	watch: {
 		Dataset() {
@@ -374,5 +330,18 @@ export default {
 .success {
 	color: #11af11!important;
 }
+
+	.mp-subtitle {
+		color: #448aff !important;
+		-webkit-text-fill-color: #448aff !important;
+		padding-bottom: 8px;
+		padding-top: 10px;
+		margin-left: -2px !important;
+		padding-left: 2px !important;
+	}
+
+	.marginTop {
+		margin-top: 20px;
+	}
 </style>
 

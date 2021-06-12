@@ -444,7 +444,7 @@ class Variable
 			return self::SpecialColumnToField($specialColumnEnum, $datatasetType);
 	}
 
-	public static function SpecialColumnToField($dc, $datatasetType)
+	public static function SpecialColumnToField($dc, $datatasetType, $areSegments = false)
 	{
 		$field = null;
 		switch ($dc)
@@ -453,13 +453,17 @@ class Variable
 				$field = "gei_population - gei_children";
 				break;
 			case SpecialColumnEnum::AreaM2:
-				if ($datatasetType == DatasetTypeEnum::Shapes)
+				if ($areSegments)
+					return 0;
+				else if ($datatasetType == DatasetTypeEnum::Shapes)
 					$field = "area_m2";
 				else
 					$field = "gei_area_m2";
 				break;
 			case SpecialColumnEnum::AreaKm2:
-				if ($datatasetType == DatasetTypeEnum::Shapes)
+				if ($areSegments)
+					return 0;
+				else if ($datatasetType == DatasetTypeEnum::Shapes)
 					$field = "(area_m2 / 1000000)";
 				else
 					$field = "(gei_area_m2 / 1000000)";

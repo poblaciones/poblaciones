@@ -109,6 +109,10 @@ class MetadataMerger
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_latitude_column_id', $message);
 		$message = "La variable seleccionada para la longitud ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_longitude_column_id', $message);
+		$message = "La variable seleccionada para la latitud ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
+		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_latitude_column_segment_id', $message);
+		$message = "La variable seleccionada para la longitud ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
+		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'dat_longitude_column_segment_id', $message);
 
 		// De marker
 		$datasetInfo['table'] = 'draft_dataset_marker';

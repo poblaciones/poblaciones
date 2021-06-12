@@ -6,11 +6,6 @@ use minga\framework\Str;
 use minga\framework\PublicException;
 use minga\framework\Profiling;
 
-use Location\Processor\Polyline\SimplifyDouglasPeucker;
-use Location\Line;
-use Location\Coordinate;
-use Location\Polyline;
-
 class GeoJson
 {
 	const PRECISION = 6;

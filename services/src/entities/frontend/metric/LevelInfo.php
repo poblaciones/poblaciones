@@ -8,7 +8,6 @@ class LevelInfo extends BaseMapModel
 {
 	public $Id;
 	public $Name;
-	public $LevelType;
 	public $Revision;
 
 	public $GeographyId;

@@ -95,6 +95,22 @@
 						</div>
 					</td>
 				</tr>
+				<tr v-if="metric.SelectedLevel().Dataset.AreSegments">
+					<td class="optionsLabel">Ancho:</td>
+					<td>
+						<div class="btn-group">
+							<button type="button" v-on:click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
+								Fino
+							</button>
+							<button type="button" v-on:click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
+								Intermedio
+							</button>
+							<button type="button" v-on:click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
+								Grueso
+							</button>
+						</div>
+					</td>
+				</tr>
 			</table>
 		</div>
 	</Modal>
@@ -144,6 +160,13 @@ export default {
 				return '';
 			}
 		},
+		getActiveWidth(key) {
+			if (key === this.metric.SelectedVariable().borderWidth) {
+				return ' active';
+			} else {
+				return '';
+			}
+		},
 		getActiveOpacity(key) {
 			if (key === this.metric.SelectedVariable().Opacity) {
 				return ' active';
@@ -169,6 +192,12 @@ export default {
 			}
 			if (this.metric.SelectedVariable().CustomPattern !== newPattern) {
 				this.metric.SelectedVariable().CustomPattern = newPattern;
+				this.metric.UpdateMap();
+			}
+		},
+		changeWidth(width) {
+			if (this.metric.SelectedVariable().borderWidth !== width) {
+				this.metric.SelectedVariable().borderWidth = width;
 				this.metric.UpdateMap();
 			}
 		},
@@ -203,7 +232,7 @@ export default {
 		anyHasArea() {
 			var ret = false;
 			this.metric.SelectedVersion().Levels.forEach(function (level) {
-				if (level.HasArea) {
+				if (level.HasArea && !level.Dataset.AreSegments) {
 					ret = true;
 				}
 			});

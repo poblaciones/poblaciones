@@ -9,6 +9,9 @@ use minga\framework\Profiling;
 use helena\db\frontend\SpatialConditions;
 use helena\classes\SimplifyGeometry;
 use helena\classes\SimplifyGeometryPlain;
+use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\geometries\Coordinate;
+use helena\classes\ClipperRound;
 
 
 class FeaturesInfo extends BaseMapModel
@@ -37,6 +40,23 @@ class FeaturesInfo extends BaseMapModel
 		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	public static function ProcessGeometry(&$rows, $getCentroids, $project = false, $zoom = null, $hasCaption = false, $projectEnvelope = null)
+	{
+		$geojson = new GeoJson();
+		$projectedEnvelope = ($project ? GeoJson::ProjectEnvelope($projectEnvelope) : null);
+
+		$tileEnvelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
+		$clipper = new ClipperRound();
+
+		for($n = 0; $n < sizeof($rows); $n++)
+		{
+			$feature = $geojson->GenerateFeatureFromBinary($rows[$n], true, $getCentroids, $project, $hasCaption, $projectedEnvelope);
+			$clipped = $clipper->clipCollectionByEnvelope([$feature], $tileEnvelope);
+			$rows[$n]['Geometry'] = $clipped[0]['geometry'];
+			unset($rows[$n]['value']);
+		}
 	}
 
 	public static function SimplifyCollectionProjected($fullFeatures, $zoom)

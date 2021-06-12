@@ -4,6 +4,7 @@ export default PatternMaker;
 function PatternMaker(patternId, z, scale) {
 	// posible api de texturas: https://github.com/riccardoscalco/textures
 	// test de Pattern: https://jsfiddle.net/wout/jckwhha7/
+	// librería usada: https://svgjs.dev/docs/3.0/shape-elements/
 	this.patternId = patternId;
 
 	// NO REDUCIDO

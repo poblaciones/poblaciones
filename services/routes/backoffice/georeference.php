@@ -17,12 +17,19 @@ App::Get('/services/backoffice/CreateMultiGeoreferenceByLatLong', function (Requ
 	$controller = new services\GeoreferenceService();
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
+
+	$georeferenceSegments = Params::GetBoolMandatory('s');
+
 	$geographyId = Params::GetIntMandatory('a');
-	$latColumnId = Params::GetIntMandatory('lat');
-	$lonColumnId = Params::GetIntMandatory('lon');
+
+	$startLatColumnId = Params::GetIntMandatory('startLat');
+	$startLonColumnId = Params::GetIntMandatory('startLon');
+	$endLatColumnId = Params::GetInt('endLat');
+	$endLonColumnId = Params::GetInt('endLon');
 
 	$reset = Params::Get('r');
-	return App::Json($controller->CreateMultiGeoreferenceByLatLong($datasetId, $geographyId, $latColumnId, $lonColumnId, $reset));
+	return App::Json($controller->CreateMultiGeoreferenceByLatLong($datasetId, $geographyId,
+						$startLatColumnId, $startLonColumnId, $endLatColumnId, $endLonColumnId, $georeferenceSegments, $reset));
 });
 
 App::Get('/services/backoffice/CreateMultiGeoreferenceByCodes', function (Request $request) {
@@ -30,10 +37,14 @@ App::Get('/services/backoffice/CreateMultiGeoreferenceByCodes', function (Reques
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
 
-	$geographyId = Params::GetIntMandatory('a');
-	$codesColumnId = Params::GetIntMandatory('c');
+	$startGeographyId = Params::GetIntMandatory('startA');
+	$startCodesColumnId = Params::GetIntMandatory('startC');
+	$endGeographyId = Params::GetInt('endA');
+	$endCodesColumnId = Params::GetInt('endC');
+	$georeferenceSegments = Params::GetBoolMandatory('s');
 	$reset = Params::Get('r');
-	return App::Json($controller->CreateMultiGeoreferenceByCodes($datasetId, $geographyId, $codesColumnId, $reset));
+	return App::Json($controller->CreateMultiGeoreferenceByCodes($datasetId,
+				$startGeographyId, $startCodesColumnId, $endGeographyId, $endCodesColumnId, $georeferenceSegments, $reset));
 });
 
 App::$app->get('/services/backoffice/GetAllGeographies', function (Request $request) {

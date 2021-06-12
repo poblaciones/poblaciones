@@ -41,6 +41,7 @@ class MetricVersionModel extends BaseModel
 										dataset_marker.*,
 										dat_id,
 										dat_type,
+										dat_are_segments,
 										dat_caption,
 										dat_caption_column_id,
 										dat_table,

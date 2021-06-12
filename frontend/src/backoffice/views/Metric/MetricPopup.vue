@@ -31,7 +31,7 @@
 			</div>
 
 			<div class="md-layout-item md-size-60 md-small-size-100">
-				<mp-simple-text label="Edición" ref="metricInput" @enter="save"
+				<mp-simple-text label="Edición" @enter="save"
 												helper="Año de referencia de la edición o serie de datos. Ej. 2010"
 												:maxlength="20" v-model="newMetricVersionLevel.MetricVersion.Caption"></mp-simple-text>
 			</div>
@@ -61,6 +61,10 @@ export default {
 			this.MetricVersionLevel = level;
 			this.newMetricVersionLevel = f.clone(level);
 			this.showDialog = true;
+
+			setTimeout(() => {
+					this.$refs.metricInput.focus();
+				}, 75);
 		},
 		hide() {
 			this.showDialog = false;

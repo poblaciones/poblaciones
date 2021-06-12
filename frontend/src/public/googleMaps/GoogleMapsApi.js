@@ -522,7 +522,7 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 			"elementType": "geometry",
 			"stylers": [
 				{
-					"color": "#f5f5f5"
+					"color": "#ececec"
 				}
 			]
 		},
@@ -546,7 +546,7 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 			"elementType": "labels.text.stroke",
 			"stylers": [
 				{
-					"color": "#f5f5f5"
+					"color": "#ececec"
 				}
 			]
 		},

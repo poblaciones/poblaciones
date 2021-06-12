@@ -80,6 +80,7 @@ class DatasetService extends DbSession
 		$dataset->setExportable(true);
 		$dataset->setGeoreferenceStatus(0);
 		$dataset->setGeocoded(false);
+		$dataset->setAreSegments(false);
 		App::Orm()->Save($dataset);
 		// Marca work
 		DatasetService::DatasetChanged($dataset);

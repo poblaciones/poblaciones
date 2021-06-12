@@ -1,5 +1,6 @@
 import LocationsComposer from '@/public/composers/LocationsComposer';
 import DataShapeComposer from '@/public/composers/DataShapeComposer';
+import SegmentsComposer from '@/public/composers/SegmentsComposer';
 import Vue from 'vue';
 
 import h from '@/public/js/helper';
@@ -358,11 +359,10 @@ ActiveSelectedMetric.prototype.Remove = function () {
 
 ActiveSelectedMetric.prototype.CreateComposer = function () {
 	var ret;
-	if (this.SelectedLevel().Dataset.Type === 'L') {
-		//case 'L':
+	if (this.SelectedLevel().Dataset.AreSegments) {
+		ret = new SegmentsComposer(window.SegMap.MapsApi, this);
+	} else if (this.SelectedLevel().Dataset.Type === 'L') {
 		ret = new LocationsComposer(window.SegMap.MapsApi, this);
-		/*case 'S':
-	case 'D':*/
 	} else {
 		ret = new DataShapeComposer(window.SegMap.MapsApi, this);
 	}
@@ -613,7 +613,8 @@ ActiveSelectedMetric.prototype.getValidMetrics = function (variable) {
 
 	ret.push({ Key: 'P', Caption: 'Distribución' });
 
-	if (this.SelectedLevel().HasArea && this.SelectedVariable() && !this.SelectedVariable().IsArea) {
+	if (this.SelectedLevel().HasArea && this.SelectedVariable() && !this.SelectedVariable().IsArea
+				&& !this.SelectedLevel().Dataset.AreSegments) {
 		ret.push({ Key: 'K', Caption: 'Área' });
 		ret.push({ Key: 'A', Caption: 'Distr. de áreas' });
 		ret.push({ Key: 'D', Caption: 'Densidad' });
@@ -659,7 +660,10 @@ ActiveSelectedMetric.prototype.CheckTileIsOutOfClipping = function() {
 };
 
 ActiveSelectedMetric.prototype.GetCartographyService = function () {
-	switch (this.SelectedLevel().LevelType) {
+	if (this.SelectedLevel().Dataset.AreSegments) {
+		return { url: null, revision: null };
+	}
+	switch (this.SelectedLevel().Dataset.Type) {
 	case 'L':
 			return { url: null, revision: null };
 	case 'D':
@@ -715,7 +719,7 @@ ActiveSelectedMetric.prototype.ResolveSegment = function () {
 	if (this.properties == null) {
 		this.objs.Segment = window.SegMap.Metrics.ClippingSegment;
 	} else {
-		switch (this.SelectedLevel().LevelType) {
+		switch (this.SelectedLevel().Dataset.Type) {
 		case 'L':
 			this.objs.Segment = (this.isBaseMetric ? window.SegMap.Metrics.BaseLocationsSegment : window.SegMap.Metrics.LocationsSegment);
 			break;

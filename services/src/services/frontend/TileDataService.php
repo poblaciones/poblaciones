@@ -3,6 +3,7 @@
 namespace helena\services\frontend;
 
 use minga\framework\Profiling;
+use helena\entities\frontend\clipping\FeaturesInfo;
 
 use minga\framework\Performance;
 use helena\classes\GlobalTimer;
@@ -89,11 +90,14 @@ class TileDataService extends BaseService
 		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
 
 		$table = new SnapshotByDatasetTileData($snapshotTable,
-			$level->Dataset->Type, $level->Variables, $urbanity, $hasSymbols, $hasDescriptions);
+			$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables, $urbanity, $hasSymbols, $hasDescriptions);
 
 		$rows = $table->GetRows($frame);
 
-		$data = $this->CreateTileDataInfo($rows);
+		if ($level->Dataset->AreSegments)
+			$data = $this->CreateTileDataInfoWithGeometries($rows, $frame);
+		else
+			$data = $this->CreateTileDataInfo($rows);
 
 		if (Context::Settings()->Map()->UseTextures && $level->Dataset->TextureId)
 		{
@@ -113,6 +117,14 @@ class TileDataService extends BaseService
 	private function CreateTileDataInfo($rows)
 	{
 		$ret = new TileDataInfo();
+		$ret->Data = $rows;
+		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
+		return $ret;
+	}
+	private function CreateTileDataInfoWithGeometries($rows, $frame)
+	{
+		$ret = new TileDataInfo();
+		FeaturesInfo::ProcessGeometry($rows, true, true, $frame->Zoom, false, $frame->TileEnvelope);
 		$ret->Data = $rows;
 		$ret->EllapsedMs = GlobalTimer::EllapsedMs();
 		return $ret;

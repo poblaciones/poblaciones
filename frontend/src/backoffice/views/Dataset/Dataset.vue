@@ -154,8 +154,8 @@ import ColumnsTab from './ColumnsTab.vue';
 import IdentityTab from './IdentityTab.vue';
 import MetricsTab from './../Metric/MetricsTab.vue';
 import MultilevelTab from './MultilevelTab.vue';
-import GeoreferenceTab from '@/backoffice/views/Dataset/GeoreferenceTab.vue';
-import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
+import GeoreferenceTab from './Georeference/GeoreferenceTab.vue';
+import ImportPopup from "./ImportPopup";
 
 export default {
 	name: 'datasets',

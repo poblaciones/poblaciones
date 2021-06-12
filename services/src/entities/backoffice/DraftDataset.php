@@ -86,6 +86,15 @@ class DraftDataset
      */
     private $Geocoded;
 
+		/**
+     * @var boolean
+		 *
+		 * @ClientReadonly
+		 *
+     * @ORM\Column(name="dat_are_segments", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $AreSegments;
+
     /**
      * @var \helena\entities\backoffice\DraftDatasetColumn
  		 *
@@ -109,6 +118,31 @@ class DraftDataset
      * })
      */
     private $LongitudeColumn;
+
+
+    /**
+     * @var \helena\entities\backoffice\DraftDatasetColumn
+ 		 *
+ 		 * @ClientReadonly
+		 *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dat_latitude_column_segment_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $LatitudeColumnSegment;
+
+    /**
+     * @var \helena\entities\backoffice\DraftDatasetColumn
+     *
+	   * @ClientReadonly
+		 *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dat_longitude_column_segment_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $LongitudeColumnSegment;
 
 
     /**
@@ -461,6 +495,30 @@ class DraftDataset
         return $this->Geocoded;
     }
 
+    /**
+     * Set areSegments
+     *
+     * @param boolean $areSegments
+     *
+     * @return DraftDataset
+     */
+    public function setAreSegments($areSegments)
+    {
+        $this->AreSegments = $areSegments;
+
+        return $this;
+    }
+
+    /**
+     * Get areSegments
+     *
+     * @return boolean
+     */
+    public function getAreSegments()
+    {
+        return $this->AreSegments;
+    }
+
 
     /**
      * Set ShowInfo
@@ -554,6 +612,55 @@ class DraftDataset
     public function getLongitudeColumn()
     {
         return $this->LongitudeColumn;
+    }
+
+
+    /**
+     * Set latitudeColumnSegment
+     *
+     * @param \helena\entities\backoffice\DraftDatasetColumn $latitudeColumnSegment
+     *
+     * @return DraftDataset
+     */
+    public function setLatitudeColumnSegment(\helena\entities\backoffice\DraftDatasetColumn $latitudeColumnSegment = null)
+    {
+        $this->LatitudeColumnSegment = $latitudeColumnSegment;
+
+        return $this;
+    }
+
+    /**
+     * Get latitudeColumnSegment
+     *
+     * @return \helena\entities\backoffice\DraftDatasetColumn
+     */
+    public function getLatitudeColumnSegment()
+    {
+        return $this->LatitudeColumnSegment;
+    }
+
+    /**
+     * Set longitudeColumnSegment
+     *
+     * @param \helena\entities\backoffice\DraftDatasetColumn $longitudeColumnSegment
+     *
+     * @return DraftDataset
+     */
+    public function setLongitudeColumnSegment(\helena\entities\backoffice\DraftDatasetColumn $longitudeColumnSegment = null)
+    {
+        $this->LongitudeColumnSegment = $longitudeColumnSegment;
+
+        return $this;
+    }
+
+    /**
+     * Get longitudeColumnSegment
+     *
+     * @return \helena\entities\backoffice\DraftDatasetColumn
+     */
+    public function getLongitudeColumnSegment()
+    {
+        return $this->LongitudeColumnSegment;
     }
 
     /**

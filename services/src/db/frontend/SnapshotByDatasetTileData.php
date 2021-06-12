@@ -18,12 +18,14 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	private $urbanity;
 	private $hasSymbols;
 	private $hasDescriptions;
+	private $areSegments;
 
-	public function __construct($snapshotTable, $datasetType, $variables, $urbanity,
+	public function __construct($snapshotTable, $datasetType, $areSegments, $variables, $urbanity,
 		$hasSymbols, $hasDescriptions)
 	{
 		$this->variables = $variables;
 		$this->urbanity = $urbanity;
+		$this->areSegments = $areSegments;
 		$this->hasSymbols = $hasSymbols;
 		$this->hasDescriptions = $hasDescriptions;
 
@@ -51,6 +53,8 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 			$select .= ", sna_description Description";
 		if ($this->hasSymbols)
 			$select .= ", sna_symbol Symbol";
+		if ($this->areSegments)
+			$select .= ", sna_segment value";
 
 		// Si es un metric de puntos, trae la ubicación del punto
 		$select .= ", round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
@@ -70,6 +74,8 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$extraFields = [];
 		if ($this->hasDescriptions)
 			$extraFields[] = 'Description';
+		if ($this->areSegments)
+			$extraFields[] = 'value';
 		// Si es un metric de puntos, trae la ubicación del punto
 		$extraFields[] = 'Lat';
 		$extraFields[] = 'Lon';

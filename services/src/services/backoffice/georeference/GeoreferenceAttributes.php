@@ -21,12 +21,13 @@ class GeoreferenceAttributes extends BaseService
 	const GEO_STEP_END = 0;
 
 
-	public function ResetGeoreferencingStatus($datasetId, $type)
+	public function ResetGeoreferencingStatus($datasetId, $type, $georeferenceSegments)
 	{
 		$this->SetGeoreferencingStatus($datasetId, self::GEO_STEP_START);
 		// Guarda el tipo
 		$dat = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		$dat->setType($type);
+		$dat->setAreSegments($georeferenceSegments);
 		App::Orm()->save($dat);
 	}
 	public function SetGeoreferencingStatus($datasetId, $status)

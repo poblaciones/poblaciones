@@ -2,6 +2,7 @@ import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
 import str from '@/common/js/str';
 import PatternMaker from '@/public/composers/PatternMaker';
+import SvgMarkerMaker from '@/public/composers/SvgMarkerMaker';
 import Mercator from '@/public/js/Mercator';
 import SvgMake from './SvgMake';
 import SVG from 'svg.js';
@@ -22,8 +23,10 @@ function AbstractSvgComposer(mapsApi, activeSelectedMetric) {
 	this.index = this.activeSelectedMetric.index;
 	this.labelsVisibility = [];
 	this.AbstractConstructor();
+	this.strokeWidthScaling = 1;
 	this.useGradients = false;
 	this.useTextures = false;
+	this.useSvgMarkers = false;
 };
 
 AbstractSvgComposer.prototype = new AbstractTextComposer();
@@ -55,7 +58,7 @@ AbstractSvgComposer.prototype.CreateSVG = function (h, w, z, patternValue, tileU
     }
 	}
 	svgElem.style.display = 'block';
-	svgElem.style.strokeWidth = this.resolveStrokeWidth(z, patternValue) * scale + "px";
+	svgElem.style.strokeWidth = this.strokeWidthScaling * this.resolveStrokeWidth(z, patternValue) * scale + "px";
 	if (patternValue > 6) {
 		svgElem.style.strokeOpacity = this.activeSelectedMetric.SelectedVariable().CurrentOpacity;
 	}
@@ -135,6 +138,9 @@ AbstractSvgComposer.prototype.CreateSVGOverlay = function (tileUniqueId, div, pa
 		}
 	}
 	this.appendStyles(oSvg, tileUniqueId, labels, patternValue, maskId, textureMaskId);
+	if (this.useSvgMarkers) {
+		this.appendSegmentMarkers(o2, labels, z, 1);
+	}
 	var svgMake = new SvgMake();
 
 	var groups = {};
@@ -190,7 +196,7 @@ AbstractSvgComposer.prototype.RescaleStylesAndPatterns = function (svgElem, zoom
 	const TILE_PRJ_SIZE = 8192;
 	var GLOBAL_FIT = TILE_PRJ_SIZE / TILE_SIZE;
 
-	svgElem.style.strokeWidth = (this.resolveStrokeWidth(zoom, patternValue) * scale * GLOBAL_FIT) + "px";
+	svgElem.style.strokeWidth = this.strokeWidthScaling * (this.resolveStrokeWidth(zoom, patternValue) * scale * GLOBAL_FIT) + "px";
 
 	if (this.patternUseFillStyles(patternValue)) {
 		var o2 = SVG.adopt(svgElem);
@@ -244,6 +250,16 @@ AbstractSvgComposer.prototype.appendPatterns = function (o2, labels, patternValu
 	}
 };
 
+AbstractSvgComposer.prototype.appendSegmentMarkers = function (o2, labels, z, expansor) {
+	// crea un svg marker para cada tipo de etiqueta
+	var tileUniqueId = o2.attr('uID');
+	for (var l = 0; l < labels.length; l++) {
+		var maker = new SvgMarkerMaker(z, expansor);
+		var pattern = maker.CreateCircleMarker(o2, labels[l].fillColor);
+		pattern.attr('id', 'm' + tileUniqueId + '_' + labels[l].cs);
+	}
+};
+
 AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, labels, patternValue, mask, textureMaskId) {
 	// crea una clase para cada tipo de etiqueta
 	var styles = "<style type='text/css'>";
@@ -254,12 +270,14 @@ AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, label
 	if (textureMaskId) {
 		textureFill = '; fill: url(#' + textureMaskId + ')';
 	}
+
 	var strokeOpacity = this.activeSelectedMetric.CurrentOpacity();
 	if (patternValue === 0 && textureMaskId) {
 		strokeOpacity = 0;
 	}
 	for (var l = 0; l < labels.length; l++) {
 		var currentStyle;
+
 		if (patternValue === 0) {
 			// Se fija si el contraste entre el border y la figura va a ser demasiado bajo...
 			var color = labels[l].fillColor;
@@ -277,6 +295,11 @@ AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, label
 		} else {
 			currentStyle = 'stroke: ' + labels[l].fillColor + '; stroke-opacity: ' +  strokeOpacity +
 					(textureFill ? textureFill : fillBlock) + maskBlock;
+		}
+		if (this.useSvgMarkers) {
+			var markers = '; marker-start: url(#m' + tileUniqueId + '_' + labels[l].cs + ')' +
+										'; marker-end: url(#m' + tileUniqueId + '_' + labels[l].cs + ')';
+			currentStyle += markers;
 		}
 		var name = 'e' + tileUniqueId + '_' + labels[l].className;
 		styles += '.' + name + " { " + currentStyle + " } ";

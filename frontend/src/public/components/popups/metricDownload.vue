@@ -89,7 +89,7 @@
 							</div>
 						</td>
 					</tr>
-					<tr v-if="level.HasArea">
+					<tr v-if="level.HasArea && !level.Dataset.AreSegments">
 						<td>Descarga con polígonos:</td>
 						<td>
 							<button v-on:click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="downloadButton">

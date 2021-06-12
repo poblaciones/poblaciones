@@ -88,9 +88,13 @@ class SnapshotByDatasetModel
 		$sql = "INSERT INTO " . self::SnapshotTable($table) . " (" . substr($sqlCols, 1) . ")
 						SELECT " . substr($sqlValues, 1);
 		// Pone valores
-		$sql .= " FROM " . $table . ", geography_item WHERE gei_id = geography_item_id";
+		$sql .= " FROM " . $table .
+						" INNER JOIN geography_item geo ON geo.gei_id = geography_item_id";
+		if ($dataset["dat_are_segments"])
+			$sql .= " INNER JOIN geography_item geo_segment ON geo_segment.gei_id = geography_item_segment_id";
+
 		// Cierra el select
-		$sql .= " AND gei_geometry_is_null = 0 ORDER BY id";
+		$sql .= " ORDER BY id";
 		// Ejecuta
 		App::Db()->exec($sql);
 		Profiling::EndTimer();
@@ -104,7 +108,9 @@ class SnapshotByDatasetModel
 							geo_caption, geo_field_caption_name,
 							caption.dco_field AS dat_caption_field,
 							longitude.dco_field AS dat_longitude_field,
-							latitude.dco_field AS dat_latitude_field
+							latitude.dco_field AS dat_latitude_field,
+							longitudeSegment.dco_field AS dat_longitude_field_segment,
+							latitudeSegment.dco_field AS dat_latitude_field_segment
 
 							FROM metric_version
 							JOIN metric_version_level ON mvl_metric_version_id = mvr_id
@@ -113,6 +119,8 @@ class SnapshotByDatasetModel
 
 							LEFT JOIN dataset_column latitude ON latitude.dco_id = dat_latitude_column_id
 							LEFT JOIN dataset_column longitude ON longitude.dco_id = dat_longitude_column_id
+							LEFT JOIN dataset_column latitudeSegment ON latitudeSegment.dco_id = dat_latitude_column_segment_id
+							LEFT JOIN dataset_column longitudeSegment ON longitudeSegment.dco_id = dat_longitude_column_segment_id
 
 							LEFT JOIN dataset_column caption ON caption.dco_id = dat_caption_column_id
 
@@ -216,8 +224,8 @@ class SnapshotByDatasetModel
 		// $dataset = recibe $dataset + geography
 		$columns = [];
 		$columns[] = ['sna_id', 'int(11) PRIMARY KEY', 'id'];
-		$columns[] = ['sna_geography_item_id', 'int(11) NOT NULL', 'gei_id'];
-		$columns[] = ['sna_urbanity', "char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N'", 'gei_urbanity'];
+		$columns[] = ['sna_geography_item_id', 'int(11) NOT NULL', 'geo.gei_id'];
+		$columns[] = ['sna_urbanity', "char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N'", 'geo.gei_urbanity'];
 		$description = $this->GetDescriptionColumn($dataset);
 		if ($description !== 'null')
 			 $description = 'LEFT(' . $description . ', 250)';
@@ -239,20 +247,43 @@ class SnapshotByDatasetModel
 		$location = '';
 		if ($dataset['dat_type'] == DatasetTypeEnum::Data)
 		{
-			$envelopeTarget = "gei_geometry";
-			$location = "gei_centroid";
+			if ($dataset['dat_are_segments'])
+			{
+  			$segment = "LINESTRING(geo.gei_centroid, geo_segment.gei_centroid)";
+				$envelopeTarget = $segment;
+				$location = "ST_CENTROID(" . $segment . ")";
+				$columns[] = ['sna_segment', 'linestring NOT NULL', $segment];
+			}
+			else
+			{
+				$envelopeTarget = "geo.gei_geometry";
+				$location = "geo.gei_centroid";
+			}
+		}
+		else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
+		{
+			if ($dataset['dat_are_segments'])
+			{
+				$segment = "LINESTRING(POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
+																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )," .
+								"POINT(CAST(" . $dataset['dat_longitude_field_segment'] . " AS DECIMAL(14,8)), CAST(" .
+																$dataset['dat_latitude_field_segment'] . " AS DECIMAL(14,8)) ))";
+				$envelopeTarget = $segment;
+				$location = "ST_CENTROID(" . $segment . ")";
+				$columns[] = ['sna_segment', 'linestring NOT NULL', $segment];
+			}
+			else
+			{
+			$point = "POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
+																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )";
+			$envelopeTarget = $point;
+			$location = $point;
+			}
 		}
 		else if ($dataset['dat_type'] == DatasetTypeEnum::Shapes)
 		{
 			$envelopeTarget = "geometry";
 			$location = "centroid";
-		}
-		else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
-		{
-			$point = "POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
-																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )";
-			$envelopeTarget = $point;
-			$location = $point;
 		}
 		else
 			throw new PublicException("Tipo de dataset no reconocido.");
@@ -296,7 +327,8 @@ class SnapshotByDatasetModel
 	private function GetFeatureIdField($dataset)
 	{
 		if ($dataset['dat_type'] == DatasetTypeEnum::Shapes ||
-			$dataset['dat_type'] == DatasetTypeEnum::Locations)
+			$dataset['dat_type'] == DatasetTypeEnum::Locations ||
+			$dataset['dat_are_segments'] )
 		{
 			return $dataset["dat_id"] . " * 0x100000000 + id";
 		}
@@ -306,13 +338,13 @@ class SnapshotByDatasetModel
 
 	private function GetArea($dataset)
 	{
-		return Variable::SpecialColumnToField(SpecialColumnEnum::AreaM2, $dataset['dat_type']);
+		return Variable::SpecialColumnToField(SpecialColumnEnum::AreaM2, $dataset['dat_type'], $dataset['dat_are_segments']);
 	}
 	private function GetDescriptionColumn($metricVersionLevel)
 	{
 		if ($metricVersionLevel['dat_caption_field'] == null)
 		{
-			if ($metricVersionLevel['geo_field_caption_name'] == "")
+			if ($metricVersionLevel['geo_field_caption_name'] == "" || $metricVersionLevel['dat_are_segments'])
 				return "null";
 			else
 				return "gei_caption";

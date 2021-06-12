@@ -10,7 +10,7 @@
 			<div v-on:click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 			<mp-close-button v-else v-on:click="doClose" class="exp-hiddable-block" />
 
-			<h5 class="title"><mp-label :text="'' + title" /></h5>
+			<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" /></h5>
 			<div class='stats' style="padding-top: 8px">
 				<a href="#" title="Agregar como indicador"
 					 v-on:click="addMetricFromKey" style="color: #a7a7a7">
@@ -28,7 +28,7 @@
 					</button>
 				</div>
 			</div>
-			<hr class="moderateHr exp-hiddable-visiblity">
+			<hr class="moderateHr exp-hiddable-visiblity" v-if="hasTitle">
 			<div class='item' v-if="featureInfo.Code && featureInfo.Title">
 				Código: {{ val }}
 			</div>
@@ -58,6 +58,9 @@ export default {
 				return this.featureInfo.Code;
 			}
 			return '';
+		},
+		hasTitle() {
+			return this.title && this.title.length > 0;
 		},
 		rows() {
 			return window.Panels.Content.FeatureNavigation.Values;

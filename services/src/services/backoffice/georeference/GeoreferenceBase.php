@@ -8,7 +8,7 @@ use helena\entities\backoffice as entities;
 
 abstract class GeoreferenceBase
 {
-	protected $state;
+	public $state;
 	// *** REPLICAR ERRORES NUEVOS EN LA FUNCIÓN DE MYSQL 'GeoreferenceErrorCode' ***
 	// La latitud o la longitud tiene valores vacíos.
 	const ERROR_NULL_COORDINATE_VALUE = 9;
@@ -108,14 +108,7 @@ abstract class GeoreferenceBase
 
 		$sql = "INSERT INTO " . $this->state->ErrorsTable() . " (row_id, error_code) " .
 							" SELECT id, " . $errorCode . " FROM (SELECT * " . $fromWhere . ") as t WHERE " . $condition;
-		/*
-{
-echo $errorCode;
-echo '<br>';
-	echo $sql;
-echo '<br>----------------------------------------';
-//	throw new \Exception('stopped 2');
-}*/
+
 		$rows = App::Db()->exec($sql);
 		$this->state->IncrementErrors($rows);
 
@@ -129,9 +122,11 @@ echo '<br>----------------------------------------';
 	{
 		Profiling::BeginTimer();
 
+		$updateColumn = $this->state->Get('updateColumn');
+
 		$table = $this->state->Table();
 		$limit = ' LIMIT ' . $from . ', ' . $pageSize . ' ';
-		$sql = "UPDATE " . $table . " SET geography_item_id = (" . $value .
+		$sql = "UPDATE " . $table . " SET " . $updateColumn . " = (" . $value .
 				") WHERE id IN (SELECT id FROM (SELECT id FROM " . $table . " WHERE ommit = 0 " . $limit . ") tmp)";
 		App::Db()->exec($sql);
 

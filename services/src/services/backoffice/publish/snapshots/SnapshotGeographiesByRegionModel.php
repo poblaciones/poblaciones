@@ -41,7 +41,7 @@ class SnapshotGeographiesByRegionModel
 						"clipping_region_item_geography_item, " .
 						"clipping_region, " .
 						"geography_item  " .
-						"WHERE gei_geometry_is_null = 0 AND gei_id = cgi_geography_item_id ".
+						"WHERE gei_id = cgi_geography_item_id ".
 						"AND clr_id = cli_clipping_region_id " .
 						"AND cli_id = cgi_clipping_region_item_id";
 		$r = App::Db()->exec($sql);

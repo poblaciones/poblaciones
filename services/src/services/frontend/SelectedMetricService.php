@@ -188,17 +188,14 @@ class SelectedMetricService extends BaseService
 			{
 				$level->Name = "Ubicaciones";
 				$level->HasArea = false;
-				$level->LevelType = 'L';
 			}
 			else if ($level->Dataset->Type == 'S')
 			{
 				$level->Name = "Zonas";
 				$level->HasArea = true;
-				$level->LevelType = 'S';
 			}
 			else if ($level->Dataset->Type == 'D')
 			{
-				$level->LevelType = 'D';
 				$level->HasArea = true;
 				if ($levelRow['geo_field_caption_name'] != null)
 					$level->HasDescriptions = true;

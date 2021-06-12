@@ -6,9 +6,10 @@ export default DataShapeComposer;
 
 function DataShapeComposer(mapsApi, activeSelectedMetric) {
 	AbstractSvgComposer.call(this, mapsApi, activeSelectedMetric);
-	this.Rectangles = null;
-	this.useGradients = window.SegMap.Configuration.UseGradients;
-	this.useTextures = window.SegMap.Configuration.UseTextures;
+	if (window.SegMap) {
+		this.useGradients = window.SegMap.Configuration.UseGradients;
+		this.useTextures = window.SegMap.Configuration.UseTextures;
+	}
 };
 
 DataShapeComposer.prototype = new AbstractSvgComposer();
@@ -46,7 +47,6 @@ DataShapeComposer.prototype.renderPolygons = function (mapResults, dataItems, gr
 	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
 	var tileUniqueId = AbstractSvgComposer.uniqueCssId++;
 	var iMapa = 0;
-	this.UpdateTextStyle(z);
 
 	if (mapItems.length === 0) return;
 

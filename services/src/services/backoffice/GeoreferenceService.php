@@ -4,7 +4,6 @@ namespace helena\services\backoffice;
 
 
 use minga\framework\Profiling;
-use helena\services\backoffice\publish\WorkFlags;
 
 use helena\classes\App;
 use helena\entities\backoffice as entities;
@@ -15,6 +14,7 @@ use helena\services\backoffice\georeference\GeoreferenceAttributes;
 use helena\services\backoffice\georeference\GeoreferenceByLatLon;
 use helena\services\backoffice\georeference\GeoreferenceByCodes;
 use helena\services\backoffice\georeference\GeoreferenceByShapes;
+use helena\services\backoffice\georeference\GeoreferenceSegment;
 use minga\framework\PublicException;
 
 class GeoreferenceService extends BaseService
@@ -42,30 +42,67 @@ class GeoreferenceService extends BaseService
 			$this->start = microtime(true);
 	}
 
-	public function CreateMultiGeoreferenceByLatLong($datasetId, $geographyId, $latColumnId, $lonColumnId, $reset)
+	public function CreateMultiGeoreferenceByLatLong($datasetId, $geographyId, $startLatColumnId, $startLonColumnId,
+																						$endLatColumnId, $endLonColumnId, $georeferenceSegments, $reset)
 	{
 		Profiling::BeginTimer();
-		$attributes = array('geographyId' => $geographyId, 'latColumnId' => $latColumnId, 'lonColumnId' => $lonColumnId);
-		$this->PrepareNewState($datasetId, self::GEO_LAT_LON, $geographyId, $reset, 'L', $attributes);
-		$lat = App::Orm()->find(entities\DraftDatasetColumn::class, $latColumnId);
-		$lon = App::Orm()->find(entities\DraftDatasetColumn::class, $lonColumnId);
-		$this->state->Set('lat', $lat->getField());
-		$this->state->Set('lon', $lon->getField());
+		$attributes = array('geographyId' => $geographyId, 'startLatColumnId' => $startLatColumnId, 'startLonColumnId' => $startLonColumnId,
+																			'endLatColumnId' => $endLatColumnId, 'endLonColumnId' => $endLonColumnId, 'georeferenceSegments' => $georeferenceSegments);
 
-		$this->ResetGeocoded($lat, $lon);
+		$this->PrepareNewState($datasetId, self::GEO_LAT_LON, $geographyId, $reset, 'L', $georeferenceSegments, $attributes);
 
+		$lat = App::Orm()->find(entities\DraftDatasetColumn::class, $startLatColumnId);
+		$lon = App::Orm()->find(entities\DraftDatasetColumn::class, $startLonColumnId);
+		$this->state->Set('startLat', $lat->getField());
+		$this->state->Set('startLon', $lon->getField());
+		if ($georeferenceSegments)
+		{
+			$lat2 = App::Orm()->find(entities\DraftDatasetColumn::class, $endLatColumnId);
+			$lon2 = App::Orm()->find(entities\DraftDatasetColumn::class, $endLonColumnId);
+			$this->state->Set('endLat', $lat->getField());
+			$this->state->Set('endLon', $lon->getField());
+			$this->ResetGeocoded($lat, $lon, $lat2, $lon2);
+		}
+		else
+		{
+			$this->ResetGeocoded($lat, $lon);
+		}
 		$ret = $this->InitializeProcess();
 		return $ret;
 	}
 
-	public function CreateMultiGeoreferenceByCodes($datasetId, $geographyId, $codesColumnId, $reset)
+	public function CreateMultiGeoreferenceByCodes($datasetId,
+															$startGeographyId, $startCodesColumnId, $endGeographyId,
+															$endCodesColumnId, $georeferenceSegments, $reset)
 	{
 		Profiling::BeginTimer();
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
-		$attributes = array('geographyId' => $geographyId, 'codesColumnId' => $codesColumnId);
-		$this->PrepareNewState($datasetId, self::GEO_CODES, $geographyId, $reset, 'D', $attributes);
-		$codesColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $codesColumnId);
-		$this->state->Set('code', $codesColumn->getField());
+		if ($georeferenceSegments)
+		{
+			$attributes = array('startGeographyId' => $startGeographyId, 'startCodesColumnId' => $startCodesColumnId,
+												'endGeographyId' => $endGeographyId, 'endCodesColumnId' => $endCodesColumnId,
+												'georeferenceSegments' => '1');
+		}
+		else
+		{
+			$attributes = array('geographyId' => $startGeographyId, 'codesColumnId' => $startCodesColumnId,
+												'georeferenceSegments' => '0');
+		}
+
+		$this->PrepareNewState($datasetId, self::GEO_CODES, $startGeographyId, $reset, 'D', $georeferenceSegments, $attributes);
+		// Guarda las columnas
+		$codesColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $startCodesColumnId);
+		if ($georeferenceSegments)
+		{
+			$this->state->Set('startCode', $codesColumn->getField());
+			$codesColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $endCodesColumnId);
+			$this->state->Set('endCode', $codesColumn->getField());
+		}
+		else
+		{
+			$this->state->Set('code', $codesColumn->getField());
+		}
+		// Resetea atributos de selección de variables
 		$this->ResetGeocoded();
 
 		$ret = $this->InitializeProcess();
@@ -78,7 +115,7 @@ class GeoreferenceService extends BaseService
 		Profiling::BeginTimer();
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
 		$attributes = array('geographyId' => $geographyId, 'shapesColumnId' => $shapesColumnId);
-		$this->PrepareNewState($datasetId, self::GEO_SHAPES, $geographyId, $reset, 'S', $attributes);
+		$this->PrepareNewState($datasetId, self::GEO_SHAPES, $geographyId, $reset, 'S', false, $attributes);
 		$shapesColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $shapesColumnId);
 		$this->state->Set('shape', $shapesColumn->getField());
 		$this->ResetGeocoded();
@@ -88,7 +125,7 @@ class GeoreferenceService extends BaseService
 		return $ret;
 	}
 
-	private function PrepareNewState($datasetId, $type, $geographyId, $reset, $datasetType, $attributes)
+	private function PrepareNewState($datasetId, $type, $geographyId, $reset, $datasetType, $georefenceSegments, $attributes)
 	{
 		$fromErrors = false;
 		if ($reset)
@@ -101,7 +138,7 @@ class GeoreferenceService extends BaseService
 		}
 		$this->UpdateGeoreferencingAttributesIfChanged($datasetId, $datasetType, $attributes);
 		$caption = $this->GetStepCaption($step);
-		$this->state = GeoreferenceStateBag::Create($datasetId, $type, $geographyId, $fromErrors, $datasetType);
+		$this->state = GeoreferenceStateBag::Create($datasetId, $type, $geographyId, $fromErrors, $datasetType, $georefenceSegments);
 		$this->state->SetTotalSteps(self::STEP_END);
 		$this->state->SetStep($step, $caption);
 		$this->state->Save();
@@ -164,7 +201,7 @@ class GeoreferenceService extends BaseService
 		$datasetId = $this->state->GetDatasetId();
 		$datasetService = new GeoreferenceAttributes();
 		$datasetType = $this->state->GetDatasetType();
-		$datasetService->ResetGeoreferencingStatus($datasetId, $datasetType);
+		$datasetService->ResetGeoreferencingStatus($datasetId, $datasetType, $this->state->GeoreferenceSegments());
 		// Resetea el ommit
 		$resetOmmit = "UPDATE " . $this->state->Table() . " SET ommit = 0 WHERE ommit = 1";
 		App::Db()->exec($resetOmmit);
@@ -273,11 +310,12 @@ class GeoreferenceService extends BaseService
 		$service = new GeoreferenceAttributes();
 		$service->AppendOmmitedAndTotalRows($dat, $res['o'], $res['r'],  $res['c']);
 	}
-	private function ResetGeocoded($lat = null, $lon = null)
+	private function ResetGeocoded($lat = null, $lon = null, $lat2 = null, $lon2 = null)
 	{
 		$dat = App::Orm()->find(entities\DraftDataset::class, $this->state->GetDatasetId());
 		$dat->setGeography($this->state->Geography());
 		$dat->setGeoCoded(false);
+
 		if ($lat != null)
 		{
 			$dat->setLatitudeColumn($lat);
@@ -287,6 +325,16 @@ class GeoreferenceService extends BaseService
 		{
 			$dat->setLatitudeColumn(null);
 			$dat->setLongitudeColumn(null);
+		}
+		if ($lat2 != null)
+		{
+			$dat->setLatitudeColumnSegment($lat2);
+			$dat->setLongitudeColumnSegment($lon2);
+		}
+		else
+		{
+			$dat->setLatitudeColumnSegment(null);
+			$dat->setLongitudeColumnSegment(null);
 		}
 		App::Orm()->save($dat);
 	}
@@ -315,10 +363,19 @@ class GeoreferenceService extends BaseService
 		$dat = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		return $dat->getGeoreferenceStatus();
 	}
-
 	private function GetGeoreferencer()
 	{
-		switch($this->state->GetType())
+		$ret = $this->GetGeoreferencerByType($this->state->GetType());
+		if ($this->state->GeoreferenceSegments())
+		{
+			return new GeoreferenceSegment($ret);
+		}
+		else
+			return $ret;
+	}
+	private function GetGeoreferencerByType($type)
+	{
+		switch($type)
 		{
 			case self::GEO_LAT_LON:
 				return new GeoreferenceByLatLon($this->state);

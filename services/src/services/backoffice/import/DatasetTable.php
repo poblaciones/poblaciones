@@ -158,7 +158,8 @@ class DatasetTable
 		$sql = "CREATE TABLE " . $tableName . " (id INT NOT NULL AUTO_INCREMENT, n INT NOT NULL DEFAULT 1,
 																							r INT NOT NULL DEFAULT 0, ommit BIT(1) NOT NULL DEFAULT 0,
 																							modified BIT(1) NOT NULL DEFAULT 0,
-																							geography_item_id INT NULL,";
+																							geography_item_id INT NULL,
+																							geography_item_segment_id INT NULL,";
 		foreach ($headers as $header) {
 			$sql .= $header->GetField() . " " . $header->GetSqlType() . "  NULL,";
 		}

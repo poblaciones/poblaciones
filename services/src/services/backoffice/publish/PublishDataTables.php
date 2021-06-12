@@ -62,8 +62,10 @@ class PublishDataTables
 																			))));
 
 		$datasetMatrix = array('class' => entities\Dataset::class, 'childKey' => 'dat_work_id',
-																			'postUpdateColumns' => array('dat_caption_column_id', 'dat_latitude_column_id', 'dat_images_column_id',
-																																'dat_longitude_column_id', 'dat_geography_item_column_id'),
+																			'postUpdateColumns' => array('dat_caption_column_id', 'dat_images_column_id',
+																																		'dat_latitude_column_id', 'dat_longitude_column_id',
+																																		'dat_latitude_column_segment_id', 'dat_longitude_column_segment_id',
+																																		'dat_geography_item_column_id'),
 																		'children' => array(
 																					array('class' => entities\DatasetColumn::class, 'childKey' => 'dco_dataset_id',
 																							'children' => array(
@@ -348,6 +350,8 @@ class PublishDataTables
 									 d1.dat_images_column_id = d2.dat_images_column_id * 100 + " . $shard . ",
 									 d1.dat_latitude_column_id = d2.dat_latitude_column_id * 100 + " . $shard . ",
 									 d1.dat_longitude_column_id = d2.dat_longitude_column_id * 100 + " . $shard . ",
+									 d1.dat_latitude_column_segment_id = d2.dat_latitude_column_segment_id * 100 + " . $shard . ",
+									 d1.dat_longitude_column_segment_id = d2.dat_longitude_column_segment_id * 100 + " . $shard . ",
 									 d1.dat_geography_item_column_id = d2.dat_geography_item_column_id * 100 + " . $shard . ",
 									 d1.dat_caption_column_id = d2.dat_caption_column_id * 100 + " . $shard;
 		App::Db()->exec($query, array($workId));
@@ -414,9 +418,12 @@ class PublishDataTables
 		$drafting = ($drafTables ? 'draft_' : '');
 		$datasetCondition = ($datasetId ? ' AND dat_id = ' . $datasetId : '');
 		// 1. Pone en null las referencias a columnas en dataset
-		$queryCols = "UPDATE " . $drafting . "dataset SET dat_latitude_column_id = NULL,
+		$queryCols = "UPDATE " . $drafting . "dataset SET
 													dat_images_column_id = NULL,
+													dat_latitude_column_id = NULL,
 													dat_longitude_column_id = NULL,
+													dat_latitude_column_segment_id = NULL,
+													dat_longitude_column_segment_id = NULL,
 													dat_geography_item_column_id = NULL,
 													dat_caption_column_id = NULL
 									WHERE dat_work_id = ?" . $datasetCondition;
