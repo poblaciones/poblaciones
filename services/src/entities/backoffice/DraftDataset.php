@@ -200,6 +200,18 @@ class DraftDataset
      */
     private $Geography;
 
+		    /**
+     * @var \helena\entities\backoffice\Geography
+     *
+		 * @ClientReadonly
+		 *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Geography", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dat_geography_segment_id", referencedColumnName="geo_id", nullable=true)
+     * })
+     */
+    private $GeographySegment;
+
     /**
      * @var \helena\entities\backoffice\DraftWork
      *
@@ -733,6 +745,31 @@ class DraftDataset
     public function getGeography()
     {
         return $this->Geography;
+    }
+
+
+    /**
+     * Set geography
+     *
+     * @param \helena\entities\backoffice\Geography $geography
+     *
+     * @return DraftDataset
+     */
+    public function setGeographySegment(\helena\entities\backoffice\Geography $geography = null)
+    {
+        $this->GeographySegment = $geography;
+
+        return $this;
+    }
+
+    /**
+     * Get geography
+     *
+     * @return \helena\entities\backoffice\Geography
+     */
+    public function getGeographySegment()
+    {
+        return $this->GeographySegment;
     }
 
     /**

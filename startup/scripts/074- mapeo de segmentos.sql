@@ -41,6 +41,29 @@ ADD CONSTRAINT `fk_datasets_columns_lon_segment`
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
 
+ALTER TABLE `draft_dataset`
+ADD COLUMN `dat_geography_segment_id` INT(11) NULL DEFAULT NULL COMMENT 'Nivel de mapa con el que se vinculan los datos del final del segment en dataset (ej. Radio, Provincia).' AFTER `dat_geography_id`,
+ADD INDEX `fk_draft_datasets_geograph_segment_idx` (`dat_geography_segment_id` ASC);
+;
+ALTER TABLE `draft_dataset`
+ADD CONSTRAINT `fk_draft_datasets_geograph_segment`
+  FOREIGN KEY (`dat_geography_segment_id`)
+  REFERENCES `geography` (`geo_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `dataset`
+ADD COLUMN `dat_geography_segment_id` INT(11) NULL DEFAULT NULL COMMENT 'Nivel de mapa con el que se vinculan los datos del final del segment en dataset (ej. Radio, Provincia).' AFTER `dat_geography_id`,
+ADD INDEX `fk_datasets_geograph_segment_idx` (`dat_geography_segment_id` ASC);
+;
+ALTER TABLE `dataset`
+ADD CONSTRAINT `fk_datasets_geograph_segment`
+  FOREIGN KEY (`dat_geography_segment_id`)
+  REFERENCES `geography` (`geo_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
 
 
 

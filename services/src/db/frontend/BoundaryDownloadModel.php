@@ -105,7 +105,7 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		{
 			$polygonField = 'biw_geometry_r1';
 
-			$cols = $this->AppendPolygon($cols, $polygonField, $getPolygonType);
+			$cols = $this->AppendPolygonColumn($cols, $polygonField, $getPolygonType);
 			$this->wktIndex = count($cols) - 1;
 		}
 	}

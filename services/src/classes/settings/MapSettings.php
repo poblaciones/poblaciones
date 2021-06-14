@@ -30,8 +30,6 @@ class MapSettings
 	public $MaxQueueRequests = 4;
 	public $MaxStaticQueueRequests = 6;
 
-	public $LoopLocalPort = null;
-
 	public $GoogleGeocodingArea = '';
 	public $GoogleMapsApi = "3.44";
 

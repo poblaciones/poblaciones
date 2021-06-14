@@ -11,7 +11,7 @@ use helena\entities\backoffice as entities;
 
 class GeoreferenceStateBag extends StateBag
 {
-	public static function Create($datasetId, $type, $geographyId, $fromErrors, $datasetType, $georefenceSegments)
+	public static function Create($datasetId, $type, $geographyId, $geographySegmentId, $fromErrors, $datasetType, $georefenceSegments)
 	{
 		$ret = new GeoreferenceStateBag();
 		$ret->Initialize();
@@ -24,6 +24,7 @@ class GeoreferenceStateBag extends StateBag
 			'datasetId' => $datasetId,
 			'table' => $dataset->getTable(),
 			'geographyId' => $geographyId,
+			'geographySegmentId' => $geographySegmentId,
 			'progressLabel' => 'Georeferenciando',
 			'errorsFound' => 0,
 			'fromErrors' => $fromErrors,
@@ -36,6 +37,14 @@ class GeoreferenceStateBag extends StateBag
 	{
 		$geographyId = $this->GeographyId();
 		return App::Orm()->find(entities\Geography::class, $geographyId);
+	}
+	public function GeographySegment()
+	{
+		$geographySegmentId = $this->GeographySegmentId();
+		if (!$geographySegmentId)
+			return null;
+		else
+			return App::Orm()->find(entities\Geography::class, $geographySegmentId);
 	}
 	public function Table()
 	{
@@ -53,6 +62,10 @@ class GeoreferenceStateBag extends StateBag
 	public function GeographyId()
 	{
 		return $this->state['geographyId'];
+	}
+	public function GeographySegmentId()
+	{
+		return $this->state['geographySegmentId'];
 	}
 	public function ErrorsTable()
 	{

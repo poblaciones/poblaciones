@@ -7,16 +7,12 @@
 		<md-dialog-content>
 			<div>
 				<p>
-				Indique el nuevo valor para el elemento.
+				Indique el nuevo valor para el polígono.
 				</p>
 				<div style="margin-top: 20px; margin-bottom: -10px">
 					<div class="md-layout md-gutter">
 
-						<div v-if="fixingCode" class="md-layout-item md-size-30">
-							<mp-simple-text
-								label="Código" ref="input" @enter="save" v-model="newValue" />
-						</div>
-						<div v-else class="md-layout-item md-size-70">
+						<div class="md-layout-item md-size-70">
 							<mp-simple-text
 								label="Polígono" :multiline="true" ref="datasetInput" v-model="newValue" />
 						</div>
@@ -38,7 +34,7 @@
 import h from '@/public/js/helper';
 
 export default {
-	name: 'fixValue',
+	name: 'fixPolygon',
   components: {
 
   },
@@ -51,16 +47,11 @@ export default {
 		},
 	},
 	methods: {
-		show(value, codigo) {
+		show(value) {
 			var loc = this;
 			this.openPopup = true;
-			this.fixingCode = codigo;
 		  setTimeout(() => {
-				if (loc.fixingCode) {
-					loc.$refs.input.focus();
-				} else {
-					loc.$refs.datasetInput.focus();
-				}
+				loc.$refs.datasetInput.focus();
 		  }, 75);
 			this.newValue = value;
 		},
@@ -75,7 +66,6 @@ export default {
 		return {
 			newValue: null,
 			openPopup: false,
-			fixingCode: true,
 		};
 	},
 };

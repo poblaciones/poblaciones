@@ -2,7 +2,8 @@
 	<div v-if="Dataset">
 		<invoker ref="invoker"></invoker>
 		<stepper ref="stepper" @completed="stepperComplete" title="Georreferenciar"></stepper>
-		<ErrorsPopup ref="georeferenceStatusPopup" @georeferenceRequested="startGeoreferencing(0)">
+		<ErrorsPopup ref="georeferenceStatusPopup" @georeferenceRequested="startGeoreferencing(0)"
+								 :georeferenceParameters="{ type: tab, start: start, end: end, polygon: polygon}">
 			</ErrorsPopup>
 
 		<div class="dParagrah">
@@ -220,9 +221,6 @@ export default {
 			args.r = reset;
 			stepper.args = args;
 
-			var georeferenceStatusPopup = this.$refs.georeferenceStatusPopup;
-			georeferenceStatusPopup.args = args;
-
 			this.Dataset.properties.Geocoded = false;
 			if (reset) {
 				stepper.Start();
@@ -246,8 +244,7 @@ export default {
 				case STEP_GEOREFERENCING:
 				{
 					stepper.Close();
-					var georeferenceStatusPopup = this.$refs.georeferenceStatusPopup;
-					georeferenceStatusPopup.show();
+					this.$refs.georeferenceStatusPopup.show();
 					break;
 				}
 				case STEP_UPDATING:

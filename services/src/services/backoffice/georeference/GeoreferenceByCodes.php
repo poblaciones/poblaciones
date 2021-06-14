@@ -45,7 +45,7 @@ class GeoreferenceByCodes extends GeoreferenceBase
 		/*
 		hacer concat('', convert($codeFied, SIGNED)) si es numérico
 		*/
-		return "SELECT gei_id FROM geography_item WHERE gei_geography_id = " . $this->state->GeographyId()
+		return "SELECT gei_id FROM geography_item WHERE gei_geography_id = " . $this->state->Get('geographyId')
 								. " AND gei_code_as_number = CONVERT(" . $codeField . ", SIGNED) ";
 	}
 }

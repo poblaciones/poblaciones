@@ -48,6 +48,10 @@ class DownloadBoundaryStateBag extends StateBag
 	{
 		return $this->state['cols'];
 	}
+	public function AreSegments()
+	{
+		return false;
+	}
 
 }
 

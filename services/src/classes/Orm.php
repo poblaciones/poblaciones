@@ -33,9 +33,23 @@ class Orm
 			Type::addType('point', 'CrEOF\Spatial\DBAL\Types\Geometry\PointType');
 			Type::addType('polygon', 'CrEOF\Spatial\DBAL\Types\Geometry\PolygonType');
 			Type::addType('linestring', 'CrEOF\Spatial\DBAL\Types\Geometry\LineStringType');
+
 			$proxyDir = Paths::GetDoctrineProxiesPath();
+			$cache = null; // desde 2.9, cambia el comoprtamiento
+			/*
+			if ($applicationMode == "development") {
+					$cache = new \Doctrine\Common\Cache\ArrayCache;
+			} else {
+					$cache = new \Doctrine\Common\Cache\ApcCache;
+			}*/
+	/*		if ($applicationMode == "development") {
+				$config->setAutoGenerateProxyClasses(true);
+			} else {
+				$config->setAutoGenerateProxyClasses(false);
+			}*/
+			$cache = new \Doctrine\Common\Cache\ArrayCache;
 			$config = Setup::createAnnotationMetadataConfiguration(array($dir),
-								$isDevMode, $proxyDir, null, false);
+								$isDevMode, $proxyDir, $cache, false);
 
 			$config->addCustomNumericFunction('area','CrEOF\Spatial\ORM\Query\AST\Functions\MySql\Area');
 			$config->addCustomNumericFunction('asbinary','CrEOF\Spatial\ORM\Query\AST\Functions\MySql\AsBinary');

@@ -106,7 +106,11 @@ TxtOverlay.prototype.resolveValuesPart = function () {
 		if (n === valid.length - 1) {
 			text += ' bItemRR';
 		}
-		text += "' style='background-color: " + value.backColor + "'>" + value.value + '</span>';
+		text += "' ";
+		if (this.clickId) {
+			text += this.resolveOnClick();
+		}
+		text += " style='background-color: " + value.backColor + "'>" + value.value + '</span>';
 	}
 	if (valid.length > 1) {
 		text = "<span class='bItemGroup'>" + text + '</span>';
@@ -121,13 +125,17 @@ TxtOverlay.prototype.resolveLinkPart = function () {
 	} else if (this.tooltip) {
 		tooltip = 'Más información de ' + this.txt;
 	}
+	return "<span title='" + tooltip + "' " + this.resolveOnClick() + " class='ibLink'>";
+};
+
+TxtOverlay.prototype.resolveOnClick = function () {
+	var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
 	if (this.clickId.length === 1) {
 		this.clickId = this.clickId[0];
 	}
-	var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
-	return "<span title='" + tooltip + "' onClick=\"event.stopPropagation(); window.SegMap.SelectId('" +
-							this.type + "', '" + clickIdAsText + "', " + this.pos.lat() + ', '
-							+ this.pos.lng() + ", event.ctrlKey);\" class='ibLink'>";
+	return "onClick=\"event.stopPropagation(); window.SegMap.SelectId('" +
+		this.type + "', '" + clickIdAsText + "', " + this.pos.lat() + ', '
+		+ this.pos.lng() + ", event.ctrlKey);\"";
 };
 
 TxtOverlay.prototype.onAdd = function() {

@@ -19,6 +19,8 @@ parameters:
 		- '#Function vd not found.#'
 		- '#Function pr not found.#'
 		- '#Function ec not found.#'
+		- '#on an unknown class simple_html_dom#'
+		- '#simple_html_dom not found#'
 		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\geometry.#'
 		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\point.#'
 		- '#Property .* has unknown class helena\\entities\\backoffice\\geometry as its type.#'

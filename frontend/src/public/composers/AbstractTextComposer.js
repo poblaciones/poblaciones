@@ -47,6 +47,9 @@ AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, 
 	if (textElement.caption !== null || textElement.symbol) {
 		canvas.SetText(textElement.caption, textElement.tooltip, textElement.symbol, textElement.clickId);
 	}
+	if (textElement.clickId) {
+		canvas.clickId = textElement.clickId;
+	}
 	if (number !== null) {
 		var zIndex = 100000 - this.index;
 		v = canvas.CreateValue(number, zIndex, backColor, zoom);

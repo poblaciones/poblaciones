@@ -52,26 +52,4 @@ App::$app->get('/robots.txt', function(Request $request) {
 					Disallow: /';
 });
 
-App::$app->error(function (\Exception $e, Request $request, $code) {
-	if (App::Debug())
-		return;
-
-	// 404.html, or 40x.html, or 4xx.html, or error.html
-	$templates = array(
-		$code.'.html.twig',
-		substr($code, 0, 2).'x.html.twig',
-		substr($code, 0, 1).'xx.html.twig',
-		'errDefault.html.twig',
-	);
-
-	$text = "";
-	if ($e instanceof \minga\framework\MessageException || $e instanceof \minga\framework\PublicException)
-	{
-		$text = $e->getPublicMessage();
-		return new Response($text);
-	} else {
-		$text = $e->getMessage();
-		return new Response($text);
-	}
-});
 

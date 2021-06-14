@@ -245,53 +245,57 @@ class SnapshotByDatasetModel
 
 		$envelopeTarget = '';
 		$location = '';
-		if ($dataset['dat_type'] == DatasetTypeEnum::Data)
+		if ($dataset['dat_are_segments'])
 		{
-			if ($dataset['dat_are_segments'])
-			{
-  			$segment = "LINESTRING(geo.gei_centroid, geo_segment.gei_centroid)";
-				$envelopeTarget = $segment;
-				$location = "ST_CENTROID(" . $segment . ")";
-				$columns[] = ['sna_segment', 'linestring NOT NULL', $segment];
-			}
-			else
+			$segment = self::ResolveSegmentPolygon($dataset);
+			$location = "GeometryCentroid(" . $segment . ")";
+			$envelopeTarget = $segment;
+			$columns[] = ['sna_segment', 'linestring NOT NULL', $segment];
+		}
+		else
+		{
+			if ($dataset['dat_type'] == DatasetTypeEnum::Data)
 			{
 				$envelopeTarget = "geo.gei_geometry";
 				$location = "geo.gei_centroid";
 			}
-		}
-		else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
-		{
-			if ($dataset['dat_are_segments'])
+			else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
 			{
-				$segment = "LINESTRING(POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
-																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )," .
-								"POINT(CAST(" . $dataset['dat_longitude_field_segment'] . " AS DECIMAL(14,8)), CAST(" .
-																$dataset['dat_latitude_field_segment'] . " AS DECIMAL(14,8)) ))";
-				$envelopeTarget = $segment;
-				$location = "ST_CENTROID(" . $segment . ")";
-				$columns[] = ['sna_segment', 'linestring NOT NULL', $segment];
+				$point = "POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
+																	$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )";
+				$envelopeTarget = $point;
+				$location = $point;
+			}
+			else if ($dataset['dat_type'] == DatasetTypeEnum::Shapes)
+			{
+				$envelopeTarget = "geometry";
+				$location = "centroid";
 			}
 			else
-			{
-			$point = "POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
-																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )";
-			$envelopeTarget = $point;
-			$location = $point;
-			}
+				throw new PublicException("Tipo de dataset no reconocido.");
 		}
-		else if ($dataset['dat_type'] == DatasetTypeEnum::Shapes)
-		{
-			$envelopeTarget = "geometry";
-			$location = "centroid";
-		}
-		else
-			throw new PublicException("Tipo de dataset no reconocido.");
-
 		$columns[] = ['sna_envelope', 'polygon NOT NULL', "PolygonEnvelope(" . $envelopeTarget . ")"];
 		$columns[] = ['sna_location', 'point NOT NULL', $location];
 
 		return $columns;
+	}
+
+	public static function ResolveSegmentPolygon($dataset)
+	{
+		if ($dataset['dat_type'] == DatasetTypeEnum::Data)
+		{
+			return "LINESTRING(geo.gei_centroid, geo_segment.gei_centroid)";
+		}
+		else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
+		{
+			return "LINESTRING(POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
+																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )," .
+										"POINT(CAST(" . $dataset['dat_longitude_field_segment'] . " AS DECIMAL(14,8)), CAST(" .
+																$dataset['dat_latitude_field_segment'] . " AS DECIMAL(14,8)) ))";
+		}
+		else
+			throw new PublicException("Tipo de dataset no válido para segmentos.");
+
 	}
 
 	private function BuildVariableColumns($datasetId, $variable, &$columns)

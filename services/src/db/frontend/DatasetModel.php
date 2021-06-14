@@ -23,14 +23,30 @@ class DatasetModel
 			d1.dat_id id,
 			d1.dat_caption caption,
 			d1.dat_table `table`,
-			d1.dat_type `type`,
+			d1.dat_type `dat_type`,
+			d1.dat_are_segments,
+			d1.dat_geography_id,
+			d1.dat_geography_segment_id,
+
 			d1.dat_caption_column_id `caption_column_id`,
 			d1.dat_images_column_id `images_column_id`,
-			(SELECT dco_field FROM ' . $draftPreffix . 'dataset_column WHERE dco_id = d1.dat_images_column_id) images_column_field,
-			(SELECT dco_field FROM ' . $draftPreffix . 'dataset_column WHERE dco_id = d1.dat_caption_column_id) caption_column_field,
-			d1.dat_geography_id
-			FROM ' . $draftPreffix . 'dataset d1
-			WHERE d1.dat_id = ? LIMIT 1';
+
+			images_column.dco_field AS images_column_field,
+			caption_column.dco_field AS caption_column_field,
+
+			longitude.dco_field AS dat_longitude_field,
+			latitude.dco_field AS dat_latitude_field,
+			longitudeSegment.dco_field AS dat_longitude_field_segment,
+			latitudeSegment.dco_field AS dat_latitude_field_segment
+		FROM ' . $draftPreffix . 'dataset d1
+			LEFT JOIN ' . $draftPreffix . 'dataset_column images_column ON images_column.dco_id = d1.dat_images_column_id
+			LEFT JOIN ' . $draftPreffix . 'dataset_column caption_column ON caption_column.dco_id = d1.dat_caption_column_id
+
+			LEFT JOIN ' . $draftPreffix . 'dataset_column latitude ON latitude.dco_id = d1.dat_latitude_column_id
+			LEFT JOIN ' . $draftPreffix . 'dataset_column longitude ON longitude.dco_id = d1.dat_longitude_column_id
+			LEFT JOIN ' . $draftPreffix . 'dataset_column latitudeSegment ON latitudeSegment.dco_id = d1.dat_latitude_column_segment_id
+			LEFT JOIN ' . $draftPreffix . 'dataset_column longitudeSegment ON longitudeSegment.dco_id = d1.dat_longitude_column_segment_id
+		WHERE d1.dat_id = ? LIMIT 1';
 		$ret = App::Db()->fetchAssoc($sql, array((int)$id));
 		if ($ret == null)
 			throw new PublicException("El dataset no ha sido encontrado.");

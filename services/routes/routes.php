@@ -45,12 +45,20 @@ App::$app->before(function(Request $request) {
 	}
 }, 10000);
 
-App::$app->error(
-	function ($e) {
-		// notices go here with $e of type. $e is instance of \Symfony\Component\Debug\Exception\ContextErrorException
-		Log::LogException($e);
+App::$app->error(function (\Exception $e, Request $request, $code) {
+	Log::LogException($e);
+	if (App::Debug())
+		return;
+
+	$text = "";
+	if ($e instanceof \minga\framework\MessageException || $e instanceof \minga\framework\PublicException)
+	{
+		$text = $e->getPublicMessage();
+		return new Response($text);
+	} else {
+		return new Response($code . '. Se ha producido un error en el servidor.');
 	}
-);
+});
 
 App::$app->after(function(Request $request, Response $response) {
 	$status = $response->getStatusCode();

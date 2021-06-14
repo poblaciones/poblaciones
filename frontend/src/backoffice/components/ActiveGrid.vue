@@ -1,47 +1,42 @@
 <template>
   <div>
-    <div v-if="Dataset">
+		<div v-if="Dataset">
 			<invoker ref="invoker"></invoker>
 			<stepper ref="stepper" title="Descargar"></stepper>
 			<relocate v-if="showingErrors" @relocated="relocated" ref="Relocate"></relocate>
-			<fix v-if="showingErrors" @fixed="fixed" ref="Fix"></fix>
+			<fix-code v-if="showingErrors" @fixed="fixedCode" ref="FixCode"></fix-code>
+			<fix-polygon v-if="showingErrors" @fixed="fixedPolygon" ref="FixPolygon"></fix-polygon>
 			<import-popup ref="importPopup"></import-popup>
-      <mp-confirm
-        title="Eliminar filas"
-        text="Se removerán las filas seleccionadas. Si deseara luego recuperar estas filas deberá volver a importar los datos al dataset."
-				confirm-text="Eliminar"
-        ref="confirmDialog"
-        @confirm="deleteOnClick"
-      />
-
-      <JqxGrid
-        ref="activeGrid"
-        :width="gridwidth"
-				:height="(showingErrors ? 300 : 350)"
-        @bindingcomplete="bindingcomplete($event)"
-        :virtualmode="true"
-        :pageable="usePagedGrid"
-        :pagermode="('advanced')"
- 				:pagesizeoptions="['25', '50', '100', '500']"
-				:pagesize="(usePagedGrid && !showingErrors ? 50 : 500)"
-        :rendergridrows="rendergridrows"
-				@rowselect="selectionChanged"
-        @rowunselect="selectionChanged"
-				editmode="dblclick"
-				:editable="Work.CanEdit()"
-        :showfilterrow="true"
-				:rowsheight="22"
-        :filterable="true"
-        :columnsresize="true"
-        :sortable="true"
-				theme="metro"
-        selectionmode="multiplerowsextended"
-        :localization="localization"
-        :handlekeyboardnavigation="handlekeyboardnavigation"
-      />
-      <div class="gridStatusBar">{{ statusBarText }}</div>
-      <div class="gridStatusBar">{{ problemText }}</div>
-
+			<mp-confirm title="Eliminar filas"
+									text="Se removerán las filas seleccionadas. Si deseara luego recuperar estas filas deberá volver a importar los datos al dataset."
+									confirm-text="Eliminar"
+									ref="confirmDialog"
+									@confirm="deleteOnClick" />
+			<JqxGrid ref="activeGrid"
+							 :width="gridwidth"
+							 :height="(showingErrors ? 300 : 350)"
+							 @bindingcomplete="bindingcomplete($event)"
+							 :virtualmode="true"
+							 :pageable="usePagedGrid"
+							 :pagermode="('advanced')"
+							 :pagesizeoptions="['25', '50', '100', '500']"
+							 :pagesize="(usePagedGrid && !showingErrors ? 50 : 500)"
+							 :rendergridrows="rendergridrows"
+							 @rowselect="selectionChanged"
+							 @rowunselect="selectionChanged"
+							 editmode="dblclick"
+							 :editable="Work.CanEdit()"
+							 :showfilterrow="true"
+							 :rowsheight="22"
+							 :filterable="true"
+							 :columnsresize="true"
+							 :sortable="true"
+							 theme="metro"
+							 selectionmode="multiplerowsextended"
+							 :localization="localization"
+							 :handlekeyboardnavigation="handlekeyboardnavigation" />
+			<div class="gridStatusBar">{{ statusBarText }}</div>
+			<div class="gridStatusBar">{{ problemText }}</div>
 			<div :style="(showingErrors ? 'margin-bottom: -20px' : 'margin-top: 20px')">
 				<md-button v-if="Work.CanEdit() && !showingErrors" @click="upload()">
 					<md-icon>cloud_upload</md-icon> Importar
@@ -52,14 +47,47 @@
 				<md-button v-if="Work.CanEdit()" @click="confirmDelete" :disabled="deleteDisabled">
 					<md-icon>delete</md-icon> Borrar fila(s)
 				</md-button>
-				<md-button v-if="showingErrors && latlon && latlon.lat" @click="relocate()" :disabled="relocateDisabled">
-					<md-icon>edit_location</md-icon> Relocalizar
-				</md-button>
-				<md-button v-if="showingErrors && code" @click="fix(!polygon)" :disabled="fixDisabled">
-					<md-icon>edit</md-icon> Corregir
-				</md-button>
 
-				<template v-if="!showingErrors">
+				<template v-if="showingErrors">
+					<template v-if="georeferenceParameters.type == 'location'">
+						<template v-if="georeferenceParameters.end.latitude">
+							<md-button @click="relocate(georeferenceParameters.start)" :disabled="relocateDisabled">
+								<md-icon>edit_location</md-icon> Relocalizar inicio
+							</md-button>
+							<md-button @click="relocate(georeferenceParameters.end)" :disabled="relocateDisabled">
+								<md-icon>edit_location</md-icon> Relocalizar fin
+							</md-button>
+						</template>
+						<md-button v-else @click="relocate(georeferenceParameters.start)" :disabled="relocateDisabled">
+							<md-icon>edit_location</md-icon> Relocalizar
+						</md-button>
+					</template>"
+					<template v-if="georeferenceParameters.type == 'code'">
+						<template v-if="georeferenceParameters.end.codes">
+							<md-button @click="fixCode(georeferenceParameters.start)" :disabled="fixDisabled">
+								<md-icon>edit</md-icon> Corregir código (inicio)
+							</md-button>
+							<md-button @click="fixCode(georeferenceParameters.end)" :disabled="fixDisabled">
+								<md-icon>edit</md-icon> Corregir código (fin)
+							</md-button>
+						</template>
+						<md-button v-else @click="fixCode(georeferenceParameters.start)" :disabled="fixDisabled">
+							<md-icon>edit</md-icon> Corregir código
+						</md-button>
+					</template>
+					<template v-if="georeferenceParameters.type == 'shape'">
+						<md-button @click="fixPolygon()" :disabled="fixDisabled">
+							<md-icon>edit</md-icon> Corregir polígono
+						</md-button>
+					</template>
+					<md-button @click="excelBtnOnClick()">
+						<md-icon>import_export</md-icon> Exportar a Excel
+					</md-button>
+					<md-button @click="csvBtnOnClick()">
+						<md-icon>import_export</md-icon> Exportar a CSV
+					</md-button>
+				</template>
+				<template v-else>
 					<md-button @click="createGrid()">
 						<md-icon>refresh</md-icon> Actualizar
 					</md-button>
@@ -79,23 +107,15 @@
 						<md-icon>import_export</md-icon> Descargar .RDATA
 					</md-button>
 				</template>
-				<template v-else>
-					<md-button @click="excelBtnOnClick()">
-						<md-icon>import_export</md-icon> Exportar a Excel
-					</md-button>
-					<md-button @click="csvBtnOnClick()">
-						<md-icon>import_export</md-icon> Exportar a CSV
-					</md-button>
-				</template>
-
 			</div>
-    </div>
+		</div>
   </div>
 </template>
 <script>
 
 import Relocate from './Relocate.vue';
-import Fix from './Fix.vue';
+import FixPolygon from './FixPolygon.vue';
+import FixCode from './FixCode.vue';
 import DataPager from "@/backoffice/classes/DataPager";
 import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import str from '@/common/js/str';
@@ -109,15 +129,14 @@ export default {
   name: "activeGrid",
 		components: {
 		JqxGrid,
-		Fix,
+		FixCode,
+		FixPolygon,
 		ImportPopup,
 		Relocate
   },
-  props: {
+	props: {
+		georeferenceParameters: { type: Object },
     showingErrors: false,
-		latlon: Object,
-		code: Number,
-		polygon: Boolean,
 		gridwidth: {
 			type: Number,
 			default: 700
@@ -247,19 +266,28 @@ export default {
 				stepper.Close();
 				});
 		},
-		relocate() {
+		relocate(coord) {
 			// obtiene el lat/long de la fila seleccionada
 			var row = this.getSelectedRowData();
-			var lat = this.latlon.lat;
-			var lon = this.latlon.lon;
+			var lat = coord.latitude;
+			var lon = coord.longitude;
+			this.currentGeorreferenceEdit = coord;
 			var latDataFields = this.Dataset.GetDataFieldByColumnId(this.showingErrors, lat);
 			var lonDataFields = this.Dataset.GetDataFieldByColumnId(this.showingErrors, lon);
-			this.$refs.Relocate.show(parseFloat(row[latDataFields.name]), parseFloat(row[lonDataFields.name]));
+			this.$refs.Relocate.show(this.parseCoord(row[latDataFields.name]), this.parseCoord(row[lonDataFields.name]));
+		},
+		parseCoord(value) {
+			var ret = ('' + value).replace(",", ".");
+			if (ret == "") {
+				return ret;
+			} else {
+				return parseFloat(ret);
+			}
 		},
 		relocated() {
 			var loc = this;
-			var lat = this.latlon.lat;
-			var lon = this.latlon.lon;
+			var lat = this.currentGeorreferenceEdit.latitude;
+			var lon = this.currentGeorreferenceEdit.longitude;
 			var setValues = [
 									{ columnId: lat, value: this.$refs.Relocate.newLat },
 									{ columnId: lon, value: this.$refs.Relocate.newLon }
@@ -267,6 +295,7 @@ export default {
 			loc.showWait();
 			var latDataFields = loc.Dataset.GetDataFieldByColumnId(loc.showingErrors, lat);
 			var lonDataFields = loc.Dataset.GetDataFieldByColumnId(loc.showingErrors, lon);
+
 			this.updateSelectedRowValue(latDataFields.name, loc.$refs.Relocate.newLat);
 			this.updateSelectedRowValue(lonDataFields.name, loc.$refs.Relocate.newLon);
 
@@ -276,22 +305,33 @@ export default {
 				loc.hideWait();
 			});
 		},
-		fix(fixingCode) {
+		fixPolygon() {
 			var row = this.getSelectedRowData();
-			var code = this.code;
-			var codeDataField = this.Dataset.GetDataFieldByColumnId(this.showingErrors, this.code);
-			this.$refs.Fix.show(row[codeDataField.name], fixingCode);
+			this.$refs.FixPolygon.show(row[codeDataField.name]);
 		},
-		fixed() {
+		fixCode(codeRef) {
+			var row = this.getSelectedRowData();
+			this.currentGeorreferenceEdit = codeRef;
+			var code = codeRef.codes;
+			var codeDataField = this.Dataset.GetDataFieldByColumnId(this.showingErrors, code);
+			this.$refs.FixCode.show(row[codeDataField.name]);
+		},
+		fixedCode() {
+			var codeRef = this.currentGeorreferenceEdit;
+			var setValues = { columnId: codeRef.codes, value: this.$refs.FixCode.newValue };
+			this.UpdateValue(setValues);
+		},
+		fixedPolygon() {
+			var newValue = this.$refs.FixPolygon.newValue;
+			var setValues = { columnId: this.georeferenceParameters.polygon, value: newValue };
+			this.UpdateValue(setValues);
+		},
+		UpdateValue(setValues) {
 			var loc = this;
-			var setValues = [
-									{ columnId: this.code, value: this.$refs.Fix.newValue },
-									];
 			loc.showWait();
-			var codeDataField = loc.Dataset.GetDataFieldByColumnId(loc.showingErrors, this.code);
-			this.updateSelectedRowValue(codeDataField.name, loc.$refs.Fix.newValue);
-
-			this.Dataset.UpdateRowValues(this.selectedId(), setValues).then(function() {
+			var dataField = loc.Dataset.GetDataFieldByColumnId(loc.showingErrors, setValues.columnId);
+			this.updateSelectedRowValue(dataField.name, setValues.value);
+			this.Dataset.UpdateRowValues(this.selectedId(), [setValues]).then(function () {
 				loc.hideWait();
 			}).catch(function () {
 				loc.hideWait();
@@ -541,6 +581,7 @@ export default {
       requiresBinding: false,
       statusBarText: "",
 			problemText: "",
+			currentGeorreferenceEdit: {},
       DataPager: new DataPager()
     };
   },

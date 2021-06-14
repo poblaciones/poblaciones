@@ -8,10 +8,12 @@
 				<p>
 					Indique la ubicación:
 				</p>
-				<div id="map" style="width: 600px; height: 320px;">
+				<div style="position: relative; width: 600px; height: 320px;">
 					<div class="target" style="width: 0px; height: 30px; border-right: 1px solid #0c0c0c;"></div>
 					<div class="target" style="width: 30px; height: 0px; border-top: 1px solid #0c0c0c;"></div>
 					<div class="target" style="width: 30px; height: 30px; border: 1px solid #522020; border-radius: 15px;"></div>
+				<div id="map" style="width: 600px; height: 320px;">
+				</div>
 				</div>
 				<div style="margin-top: 20px; margin-bottom: -10px">
 					<div class="md-layout md-gutter">

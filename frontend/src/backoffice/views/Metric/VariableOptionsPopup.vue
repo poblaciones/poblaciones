@@ -54,7 +54,7 @@
 											Mostrar etiquetas con los valores
 										</md-switch>
 									</div>
-									<div v-if="Dataset.properties.Type === 'L'" class="md-layout-item md-size-100">
+									<div v-if="Dataset.properties.Type === 'L' && !Dataset.properties.AreSegments" class="md-layout-item md-size-100">
 										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.IsSequence">
 											Organizar los elementos como secuencia
 										</md-switch>

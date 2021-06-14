@@ -164,9 +164,10 @@ class DatasetDownloadManager extends BaseDownloadManager
 		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type);
 		$this->state->Set('friendlyName', $friendlyName);
 		$this->state->Set('totalRows', $this->model->GetCountRows());
-		$latLon = $this->model->GetLatLongColumns($datasetId);
-		$this->state->Set('latVariable', $latLon['lat']);
-		$this->state->Set('lonVariable', $latLon['lon']);
+		$info = $this->model->GetExtraStateInfo($datasetId);
+		$this->state->Set('latVariable', $info['lat']);
+		$this->state->Set('lonVariable', $info['lon']);
+		$this->state->Set('areSegments', $info['areSegments']);
 		$this->state->Set('extraColumns', $extraColumns);
 		$this->state->Save();
 	}

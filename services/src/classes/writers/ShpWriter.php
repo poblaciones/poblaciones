@@ -33,7 +33,11 @@ class ShpWriter extends BaseWriter
 
     // Setea el tipo
 		$wktIndex = $this->model->wktIndex;
-		if ($wktIndex !== -1)
+		if ($this->state->AreSegments())
+		{
+			$Shapefile->setShapeType(Shapefile::SHAPE_TYPE_POLYLINE);
+		}
+		else if ($wktIndex !== -1)
 		{
 	    $Shapefile->setShapeType(Shapefile::SHAPE_TYPE_POLYGON);
 		}

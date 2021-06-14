@@ -25,6 +25,7 @@ abstract class BaseDownloadModel extends BaseModel
 	public $fullParams = array();
 	public $wktIndex = -1;
 	public $extraColumns = null;
+	private $treeId = 1;
 
 	public function GetCols()
 	{
@@ -70,9 +71,10 @@ abstract class BaseDownloadModel extends BaseModel
 
 	public function AppendGeographyTree($cols, &$joins, $geography_id, $matchField, $includeGeographyOtherColumns = false)
 	{
-		//Árbol plano de Geographies
+		// Árbol plano de Geographies
 		$model = new GeographyModel();
 		$geographies = $model->GetAllLevels($geography_id);
+		$uniqueTreeId = "t" . ($this->treeId++) . "_";
 
 		if ($this->fromDraft)
 			$left = " LEFT ";
@@ -83,8 +85,8 @@ abstract class BaseDownloadModel extends BaseModel
 		{
 			$car = $geographies[$lvl];
 			$suffix = sizeof($geographies) - $lvl;
-			$table = 'level' . $suffix;
-			$parent = 'level' . ($suffix - 1);
+			$table = $uniqueTreeId . 'level' . $suffix;
+			$parent = $uniqueTreeId . 'level' . ($suffix - 1);
 
 			$cartoCols = $this->GetGeographyColumns($table, $car);
 			if($lvl == sizeof($geographies) - 1)
@@ -112,7 +114,7 @@ abstract class BaseDownloadModel extends BaseModel
 		return $cols;
 	}
 
-	protected function AppendPolygon($cols, $polygonField, $getPolygonType)
+	protected function AppendPolygonColumn($cols, $polygonField, $getPolygonType)
 	{
 		if ($getPolygonType === 'geojson')
 		{

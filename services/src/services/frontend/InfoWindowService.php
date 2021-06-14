@@ -67,7 +67,7 @@ class InfoWindowService extends BaseService
 			throw Session::NotEnoughPermissions();
 		}
 		// Según el tipo de Dataset, el FID puede ser el geographyItemId o el Id en el dataset
-		if ($datasetType === 'L' || $datasetType === 'S')
+		if ($datasetType === 'L' || $datasetType === 'S' || $level->Dataset->AreSegments)
 		{
 			$id = $featureId & 0xFFFFFFFF;
 			$info = $datasetModel->GetInfoById($datasetId, $id);

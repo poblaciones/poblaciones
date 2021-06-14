@@ -32,6 +32,7 @@ class DownloadStateBag extends StateBag
 			'extraColumns' => null,
 			'cols' => $model->fullCols,
 			'fromDraft' => $fromDraft,
+			'areSegments' => false,
 			'wktIndex' => $model->wktIndex,
 			'index' => 0,
 			'start' => 0,
@@ -56,6 +57,11 @@ class DownloadStateBag extends StateBag
 	public function FromDraft()
 	{
 		return $this->state['fromDraft'];
+	}
+
+	public function AreSegments()
+	{
+		return $this->state['areSegments'];
 	}
 
 }

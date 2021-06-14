@@ -651,7 +651,7 @@
 
 	.bottomBox {
 		position: relative;
-		pointer-events: none;
+		/* pointer-events: none; */
 		right: 50%;
 		bottom: 0.4em;
 		text-align: center;

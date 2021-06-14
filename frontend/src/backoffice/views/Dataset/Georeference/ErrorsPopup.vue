@@ -11,8 +11,8 @@
 					identificados y seleccione la acción que corresponda para poder completar el proceso.
 				</p>
 				<div class="md-layout md-gutter">
-					<ActiveGrid ref="grid" :showingErrors="true" :gridwidth="800" :polygon="(args ? args.p : false)"
-											:code="(args ? args.c : null)" :latlon="args"></ActiveGrid>
+					<ActiveGrid ref="grid" :showingErrors="true" :gridwidth="800"
+											:georeferenceParameters="georeferenceParameters"></ActiveGrid>
 				</div>
 			</div>
 		</md-dialog-content>
@@ -51,10 +51,10 @@
 			},
 		},
 		props: {
+			georeferenceParameters: { type: Object}
 		},
 		data() {
 			return {
-				args: null,
 				openPopup: false,
 			};
 		}
