@@ -10,7 +10,10 @@ AbstractTextComposer.prototype.AbstractConstructor = function (value, total, des
 	this.textInTile = [];
 	this.tileDataCache = [];
 	this.usePreview = true;
+	this.layerId = AbstractTextComposer.layerId++;
 };
+
+AbstractTextComposer.layerId = 1;
 
 AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effectiveId, dataElement, location, tileKey, backColor, markerSettings, zoom) {
 	var number = null;
@@ -52,7 +55,8 @@ AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, 
 	}
 	if (number !== null) {
 		var zIndex = 100000 - this.index;
-		v = canvas.CreateValue(number, zIndex, backColor, zoom);
+		var sourceKey = this.layerId;
+		v = canvas.CreateValue(number, zIndex, backColor, zoom, sourceKey);
 	}
 	this.textInTile[tileKey].push({ c: canvas, v: v });
 	return canvas;
@@ -68,7 +72,8 @@ AbstractTextComposer.prototype.SetBackgroundText = function (div, tileBounds, te
 	}
 	if (number !== null) {
 		var zIndex = 100000 - this.index;
-		v = canvas.CreateValue(number, zIndex, backColor);
+		var sourceKey = this.layerId;
+		v = canvas.CreateValue(number, zIndex, backColor, zoom, sourceKey);
 	}
 	var p = window.SegMap.MapsApi.gMap.getProjection();
 	var min = p.fromLatLngToPoint(new window.SegMap.MapsApi.google.maps.LatLng(tileBounds.Min.Lat, tileBounds.Min.Lon));

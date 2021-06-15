@@ -1,5 +1,6 @@
 <template>
 	<div class='md-layout md-gutter'>
+		<invoker ref="invoker"></invoker>
 		<div class='md-layout-item md-size-35 md-small-size-100'>
 			<mp-select :canEdit="Work.CanEdit()" :list="Dataset.Columns"
 								 :model-key="true" label="Variable" helper="Variable que contiene los códigos geográficos"
@@ -17,7 +18,7 @@
 			</md-button>
 		</div>
 		<ValuesPopup v-if="valuesPopupReset" ref="valuesPopup"></ValuesPopup>
-</div>
+	</div>
 </template>
 <script>
 

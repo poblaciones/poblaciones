@@ -1,7 +1,11 @@
 [CURRENT]
+
+2021-06-14
 - Fix a ancho linestrings (por cambio de escala en svgs).
 - Fix codigos postales en clipping.
 - Ampliación a 200 caracteres del nombre de adjuntos.
+- Georreferenciación de segmentos por código y lat/long.
+- Fix de duplicación de cartel de valores en cambios de zoom.
 
 2021-05-19
 - Fix: orden de superposición de los marcadores.

@@ -95,8 +95,7 @@ TxtOverlay.prototype.resolveSymbolPart = function () {
 TxtOverlay.prototype.resolveValuesPart = function () {
 	var text = '';
 	var zoom = this.zoom;
-	var valid = this.Values.filter(item => item.z === zoom);
-
+	var valid = this.removeDuplicates(this.Values, zoom);
 	for (var n = 0; n < valid.length; n++) {
 		var value = valid[n];
 		text += "<span class='bItem";
@@ -116,6 +115,19 @@ TxtOverlay.prototype.resolveValuesPart = function () {
 		text = "<span class='bItemGroup'>" + text + '</span>';
 	}
 	return text;
+};
+
+TxtOverlay.prototype.removeDuplicates = function (arr, zoom) {
+	var done = [];
+	var ret = [];
+	for (var n = 0; n < arr.length; n++) {
+		var item = arr[n];
+		if (item.z === zoom && !done.includes(item.k)) {
+			ret.push(item);
+			done.push(item.k);
+		}
+	}
+	return ret;
 };
 
 TxtOverlay.prototype.resolveLinkPart = function () {
@@ -243,13 +255,13 @@ TxtOverlay.prototype.SetText = function (text, tooltip, symbol, clickId) {
 	this.RebuildHtml();
 };
 
-TxtOverlay.prototype.CreateValue = function (value, zindex, backColor, zoom) {
+TxtOverlay.prototype.CreateValue = function (value, zindex, backColor, zoom, sourceKey) {
 	for (var n = 0; n < this.Values.length; n++) {
 		if (zindex > this.Values[n].zIndex) {
 			break;
 		}
 	}
-	var ret = { value: value, zIndex: zindex, backColor: backColor, z: zoom };
+	var ret = { value: value, zIndex: zindex, backColor: backColor, z: zoom, k: sourceKey };
 	arr.InsertAt(this.Values, n, ret);
 	this.RebuildHtml();
 	return ret;
