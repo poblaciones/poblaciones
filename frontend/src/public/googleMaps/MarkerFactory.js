@@ -1,5 +1,5 @@
 import h from '@/public/js/helper';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import iconManager from '@/common/js/iconManager';
 import Svg from '@/public/js/svg';
 

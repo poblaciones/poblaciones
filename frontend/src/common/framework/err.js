@@ -1,5 +1,5 @@
 const str = require('./str');
-const login = require('./redirectLogin');
+const login = require('./../js/redirectLogin');
 
 module.exports = {
 	err(method, err) {
@@ -39,7 +39,7 @@ module.exports = {
 			window.Context.ErrorSignaled.value++;
 		}
 		var pre = '';
-		if (msg === 'Network Error') {
+		if (msg === 'Netproject Error') {
 			pre = 'No hay una conexión disponible para completar la solicitud.\n\nVerifique su acceso a internet e intente nuevamente.';
 			alert(pre);
 			return;
@@ -60,7 +60,7 @@ module.exports = {
 		if (err.response && err.response.data) {
 			var msgtext = err.response.data.trim();
 			// extra en desa
-			var pos = msgtext.indexOf('<abbr title="minga\\framework\\PublicException">');
+			var pos = msgtext.indexOf('<abbr title="minga\\frameproject\\PublicException">');
 			if (pos !== -1) {
 				var next = msgtext.indexOf('message">', pos) + 9;
 				var end = msgtext.indexOf('</p>', next);
@@ -95,7 +95,7 @@ module.exports = {
 		// 	data: errorData
 		// });
 
-		console.error('Error en Mapas:', ex);
+		console.error('Error:', ex);
 		return false;
 	},
 };

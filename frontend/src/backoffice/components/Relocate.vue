@@ -63,6 +63,7 @@
 	import SegmentedMap from '@/public/classes/SegmentedMap';
 	import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 	import h from '@/public/js/helper';
+	import str from '@/common/framework/str';
 	import GeographyOverlay from '../classes/GeographyOverlay';
 
 	export default {
@@ -137,10 +138,10 @@
 					this.marker = null;
 				}
 				this.map = map;
-				if (this.useOverlay) {
+				/*if (this.useOverlay) {
 					map.overlayMapTypes.insertAt(0, new GeographyOverlay(map,
 						window.Context.GetTrackingLevelGeography().Id));
-				}
+				}*/
 				loc.updateMarkerPosition(latLng);
 
 				if (this.useMarker) {
@@ -198,8 +199,12 @@
 		props: {
 			// Esta propiedad establece si funciona como un popup de captación de posición
 			// por marker o si apartir de la posición actual del mapa revuelve un lat, lon y zoom.
-			useMarker: true,
-			useOverlay: true
+			useMarker: {
+				type: Boolean, default: true
+			},
+			useOverlay: {
+				type: Boolean, default: true
+			},
 		},
 		data() {
 			return {

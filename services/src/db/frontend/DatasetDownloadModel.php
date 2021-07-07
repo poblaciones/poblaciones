@@ -38,12 +38,10 @@ class DatasetDownloadModel extends BaseDownloadModel
 		Profiling::BeginTimer();
 		$where = '';
 		$params = array((int)$id);
-		$types = array(PDO::PARAM_INT);
 		if(count($ids) > 0)
 		{
 			$where = ' AND dla_value IN (?)';
 			$params[] = $ids;
-			$types[] = Connection::PARAM_STR_ARRAY;
 		}
 
 		$sql = 'SELECT
@@ -52,7 +50,7 @@ class DatasetDownloadModel extends BaseDownloadModel
 			FROM ' . $this->draftPreffix() . 'dataset_column_value_label
 			WHERE dla_dataset_column_id = ?' . $where . ' ORDER BY dla_order';
 
-		$items = App::Db()->fetchAll($sql, $params, $types);
+		$items = App::Db()->fetchAll($sql, $params);
 		$ret = array();
 		foreach($items as $item)
 			$ret['_' . $item['value']] = $item['caption'];

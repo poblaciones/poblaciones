@@ -48,7 +48,7 @@
 
 <script>
 
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
 
 export default {
@@ -79,8 +79,9 @@ export default {
 			this.userDecision = f.formatFullName(review.UserDecision);
 			this.submissionDate = f.formatDate(review.SubmissionDate);
 			this.decisionDate = f.formatDate(review.ResolutionDate);
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputName.focus();
+				loc.$refs.inputName.focus();
 			}, 100);
 		},
 		save() {

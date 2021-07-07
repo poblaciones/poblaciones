@@ -1,6 +1,6 @@
 import Mercator from '@/public/js/Mercator';
 import h from '@/public/js/helper';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 export default FeatureSelector;
 

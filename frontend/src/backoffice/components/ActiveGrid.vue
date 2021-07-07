@@ -118,8 +118,9 @@ import FixPolygon from './FixPolygon.vue';
 import FixCode from './FixCode.vue';
 import DataPager from "@/backoffice/classes/DataPager";
 import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 import Localization from "@/backoffice/classes/Localization";
+
 import JqxGrid from "jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue";
 // https://www.jqwidgets.com/vue/vue-grid/
 
@@ -280,9 +281,21 @@ export default {
 			var ret = ('' + value).replace(",", ".");
 			if (ret == "") {
 				return ret;
+			} if (ret.includes('°')) {
+				return this.convertToDecimal(ret);
 			} else {
 				return parseFloat(ret);
 			}
+		},
+		convertToDecimal(dms) {
+			dms = str.Replace(dms, ',', '.').toUpperCase();
+
+			var deg = dms.substr(0, dms.indexOf('°'));
+			var mins = dms.substr(dms.indexOf('°') + 1, dms.indexOf("'") - dms.indexOf('°') - 1);
+			var secs = dms.substr(dms.indexOf("'") + 1, dms.indexOf('"') - dms.indexOf("'") - 1);
+
+			var sign = 1 - 2 * (dms.includes('W') || dms.includes('S') || dms.includes('O'));
+			return sign * (parseFloat(deg) + parseFloat(mins) / 60 + parseFloat(secs) / 3600);
 		},
 		relocated() {
 			var loc = this;

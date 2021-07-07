@@ -68,7 +68,7 @@
 <script>
 
 import PickMetric from './PickMetric.vue';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 
 export default {
 	name: 'newMetric',

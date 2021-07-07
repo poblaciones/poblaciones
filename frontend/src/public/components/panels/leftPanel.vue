@@ -30,7 +30,7 @@ import FeatureList from '@/public/components/widgets/features/featureList';
 import PanelType from '@/public/enums/PanelType';
 import CollapseButton from '@/public/components/controls/collapseButton';
 import Split from 'split.js';
-import dom from '@/common/js/dom';
+import dom from '@/common/framework/dom';
 
 export default {
 	name: 'leftPanel',

@@ -43,7 +43,7 @@
 
 <script>
 import SearchPopup from '@/backoffice/components/SearchPopup.vue';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 import axiosClient from '@/common/js/axiosClient';
 
 export default {

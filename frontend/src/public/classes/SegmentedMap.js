@@ -10,11 +10,11 @@ import Queue from './Queue';
 import OverlapRectangles from './OverlapRectangles';
 import InfoWindow from './InfoWindow';
 import axios from 'axios';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 import h from '@/public/js/helper';
 import m from '@/public/js/Mercator';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 
 export default SegmentedMap;
 

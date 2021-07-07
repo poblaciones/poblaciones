@@ -261,7 +261,8 @@ class cHandle extends cPublicController
 		$this->AddVariables($workId, $metricId, $outDatasetTables);
 		$metadata['met_title'] = $metric;
 
-		if ($metadata['Extents'] !== null && Session::IsWorkPublicSegmentedCrawled($workId))
+		if ($metadata['Extents'] !== null && Session::IsWorkPublicSegmentedCrawled($workId) &&
+				sizeof($outDatasetTables) > 0)
 		{
 			$extents = Envelope::FromDb($metadata['Extents']);
 			$this->AddRegions($workId, $metricId, $outDatasetTables, $metricName, $extents, $regionId);

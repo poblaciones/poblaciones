@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import dom from '@/common/js/dom';
+import dom from '@/common/framework/dom';
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 import tour from '@/public/components/popups/tour';
 import MapExport from '@/public/classes/MapExport';

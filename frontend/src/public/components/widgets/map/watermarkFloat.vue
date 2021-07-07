@@ -7,7 +7,7 @@
 
 <script>
 import axios from "axios";
-import err from "@/common/js/err";
+import err from "@/common/framework/err";
 
 export default {
   name: "watermarkFloat",

@@ -42,7 +42,7 @@
 
 <script>
 import h from '@/public/js/helper';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 
 export default {
 	name: 'featureInfo',

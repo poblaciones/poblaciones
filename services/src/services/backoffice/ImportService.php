@@ -160,7 +160,7 @@ class ImportService extends BaseService
 	private function CreateMetadata()
 	{
 		// Guarda max id previo
-		$maxPreviousId = App::Db()->fetchScalarInt("SELECT max(dco_id) FROM draft_dataset_column");
+		$maxPreviousId = App::Db()->fetchScalarIntNullable("SELECT max(dco_id) FROM draft_dataset_column");
 		$this->state->Set('maxPreviousId', $maxPreviousId);
 		// Inserta columnas
 		$datasetId = $this->state->GetDatasetId();

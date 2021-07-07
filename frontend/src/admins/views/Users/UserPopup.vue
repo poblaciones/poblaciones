@@ -56,9 +56,7 @@
 	</div>
 </template>
 
-<script>
-
-import arr from '@/common/js/arr';
+<script>import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
 
 export default {
@@ -78,8 +76,9 @@ export default {
 		show(user) {
 			this.user = f.clone(user);
 			this.activateEdit = true;
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputName.focus();
+				loc.$refs.inputName.focus();
 			}, 100);
 		},
 		save() {
@@ -98,8 +97,7 @@ export default {
   components: {
 
   }
-};
-</script>
+};</script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 

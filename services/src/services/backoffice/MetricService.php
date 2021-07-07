@@ -70,7 +70,7 @@ class MetricService extends BaseService
 	{
 		$variable = $this->LoadAndValidate($datasetId, $variableId);
 		// Obtiene el anterior
-		$previousVariableId = App::Db()->fetchScalar("SELECT mvv_id FROM draft_variable WHERE mvv_metric_version_level_id = ? AND mvv_order < ? ORDER BY mvv_order DESC LIMIT 1", array($variable->getMetricVersionLevel()->getId(), $variable->getOrder()));
+		$previousVariableId = App::Db()->fetchScalarNullable("SELECT mvv_id FROM draft_variable WHERE mvv_metric_version_level_id = ? AND mvv_order < ? ORDER BY mvv_order DESC LIMIT 1", array($variable->getMetricVersionLevel()->getId(), $variable->getOrder()));
 		$variableAlter = App::Orm()->find(entities\DraftVariable::class, $previousVariableId);
 		if ($variableAlter === null)
 			return self::OK;
@@ -85,7 +85,7 @@ class MetricService extends BaseService
 	{
 		$variable = $this->LoadAndValidate($datasetId, $variableId);
 		// Obtiene el siguiente
-		$nextVariableId = App::Db()->fetchScalar("SELECT mvv_id FROM draft_variable WHERE mvv_metric_version_level_id = ? AND mvv_order > ? ORDER BY mvv_order ASC LIMIT 1", array($variable->getMetricVersionLevel()->getId(), $variable->getOrder()));
+		$nextVariableId = App::Db()->fetchScalarNullable("SELECT mvv_id FROM draft_variable WHERE mvv_metric_version_level_id = ? AND mvv_order > ? ORDER BY mvv_order ASC LIMIT 1", array($variable->getMetricVersionLevel()->getId(), $variable->getOrder()));
 		$variableAlter = App::Orm()->find(entities\DraftVariable::class, $nextVariableId);
 		if ($variableAlter === null)
 			return self::OK;
@@ -428,7 +428,7 @@ class MetricService extends BaseService
 			$maxSql = "SELECT MAX(mvv_order) + 1 FROM draft_variable WHERE mvv_metric_version_level_id = ?";
 			$maxOrder = null;
 			if ($level !== null)
-				$maxOrder = App::Db()->fetchScalarInt($maxSql, array($level->getId()));
+				$maxOrder = App::Db()->fetchScalarIntNullable($maxSql, array($level->getId()));
 			if ($maxOrder === null) $maxOrder = 1;
 			$variableConnected->setOrder($maxOrder);
 		}

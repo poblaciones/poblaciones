@@ -1,7 +1,7 @@
 import axios from 'axios';
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import axiosClient from '@/common/js/axiosClient';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import Vue from 'vue';
 
 export default Db;

@@ -109,8 +109,8 @@ import h from '@/public/js/helper';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import creativeCommons from '@/public/components/controls/creativeCommons.vue';
 import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
-import err from '@/common/js/err';
-import arr from '@/common/js/arr';
+import err from '@/common/framework/err';
+import arr from '@/common/framework/arr';
 import Modal from '@/public/components/popups/modal';
 
 var debounce = require('lodash.debounce');

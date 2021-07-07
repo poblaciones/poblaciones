@@ -43,7 +43,7 @@ import Toolbar from '@/public/components/widgets/summary/toolbar';
 import MetricDownload from '@/public/components/popups/metricDownload';
 import BoundaryDownload from '@/public/components/popups/boundaryDownload';
 import draggable from 'vuedraggable';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 
 export default {
 	name: 'summaryPanel',

@@ -1,4 +1,7 @@
 [CURRENT]
+- Permite georreferenciar coordenadas expresadas en grados, minutos y segundos.
+- Sugeridos en la administración de cartografías.
+- Datos de última modificación en el listado.
 
 2021-06-14
 - Fix a ancho linestrings (por cambio de escala en svgs).

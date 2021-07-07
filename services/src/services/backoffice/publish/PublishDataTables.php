@@ -9,6 +9,7 @@ use minga\framework\Profiling;
 use minga\framework\Context;
 use minga\framework\PublicException;
 
+use helena\classes\Session;
 use helena\db\backoffice\WorkModel;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\cloning\RowDuplicator;
@@ -122,13 +123,17 @@ class PublishDataTables
 
 		$since = $metadata->getOnlineSince();
 		$last = new \DateTime();
-		$last = $last->setTimestamp(Date::ArNow());
 		if ($since === null) {
 			$metadata->setOnlineSince($last);
 			$metadataPublished->setOnlineSince($last);
 		}
 		$metadata->setLastOnline($last);
 		$metadataPublished->setLastOnline($last);
+
+		$userId = Session::GetCurrentUser()->GetUserId();
+		$metadata->setLastOnlineUserId($userId);
+		$metadataPublished->setLastOnlineUserId($userId);
+
 		$metadata->setUpdate($last);
 		$metadataPublished->setUpdate($last);
 		App::Orm()->save($metadata);

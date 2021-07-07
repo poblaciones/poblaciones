@@ -36,18 +36,8 @@ class Orm
 
 			$proxyDir = Paths::GetDoctrineProxiesPath();
 			$cache = null; // desde 2.9, cambia el comoprtamiento
-			/*
-			if ($applicationMode == "development") {
-					$cache = new \Doctrine\Common\Cache\ArrayCache;
-			} else {
-					$cache = new \Doctrine\Common\Cache\ApcCache;
-			}*/
-	/*		if ($applicationMode == "development") {
-				$config->setAutoGenerateProxyClasses(true);
-			} else {
-				$config->setAutoGenerateProxyClasses(false);
-			}*/
-			$cache = new \Doctrine\Common\Cache\ArrayCache;
+			// Opciones: VoidCache, PhpFileCache, FilesystemCache
+			$cache = new \Doctrine\Common\Cache\ArrayCache();
 			$config = Setup::createAnnotationMetadataConfiguration(array($dir),
 								$isDevMode, $proxyDir, $cache, false);
 

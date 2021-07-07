@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 export default {
 	//Step 4 para distance

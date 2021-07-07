@@ -102,7 +102,7 @@ module.exports = {
 			classObjs[i].classList.add(classToAdd);
 		}
 	},
-	addClassRemoveText(classname, classToAdd){
+	addClassRemoveText(classname, classToAdd) {
 		var classObjs = document.getElementsByClassName(classname);
 		for (var i = 0; i < classObjs.length; i++) {
 			classObjs[i].classList.add(classToAdd);

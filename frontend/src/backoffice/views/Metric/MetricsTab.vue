@@ -133,7 +133,7 @@ import NewMetric from './NewMetric.vue';
 import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
 import LevelPopup from "@/backoffice/views/Dataset/LevelPopup";
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 
 const DEFAULT_SINGLE_COLOR = '0ce800';
 

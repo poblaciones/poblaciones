@@ -40,7 +40,7 @@
 
 <script>
 
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
 
 export default {
@@ -64,8 +64,9 @@ export default {
 			this.boundary = f.clone(boundary);
 			this.activateEdit = true;
 			this.isPublic = !boundary.IsPrivate;
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputName.focus();
+				loc.$refs.inputName.focus();
 			}, 100);
 		},
 		save() {

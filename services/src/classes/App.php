@@ -2,6 +2,7 @@
 
 namespace helena\classes;
 
+use minga\framework\Db;
 use minga\framework\IO;
 use minga\framework\Str;
 use minga\framework\Request as FrameworkRequest;
@@ -389,7 +390,7 @@ class App
 		if (self::$db == null)
 		{
 			$connection = self::$app['db'];
-			self::$db = new Db($connection);
+			self::$db = new Db($connection, new SqlLogger());
 		}
 		return self::$db;
 	}

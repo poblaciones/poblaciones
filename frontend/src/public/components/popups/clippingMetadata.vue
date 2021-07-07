@@ -74,7 +74,7 @@
 import h from '@/public/js/helper';
 import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
 import creativeCommons from '@/public/components/controls/creativeCommons.vue';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 import apa from '@/common/js/citationAPA';
 import Modal from '@/public/components/popups/modal';
 

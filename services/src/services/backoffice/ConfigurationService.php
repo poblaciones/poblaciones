@@ -4,6 +4,7 @@ namespace helena\services\backoffice;
 
 use helena\services\common\BaseService;
 use helena\services\common\AuthenticationService;
+use helena\db\frontend\SignatureModel;
 
 use minga\framework\Context;
 
@@ -14,6 +15,9 @@ class ConfigurationService extends BaseService
 		$userService = new AuthenticationService();
 		$user = $userService->GetStatus();
 
+		$model = new SignatureModel();
+		$signatures = $model->GetSignatures();
+
 		if (!$user['Logged'])
 			return array('User' => $user);
 		else
@@ -21,6 +25,7 @@ class ConfigurationService extends BaseService
 								'UseTextures' => Context::Settings()->Map()->UseTextures,
 								'UseGradients' => Context::Settings()->Map()->UseGradients,
 								'DefaultRelocateLocation' => Context::Settings()->Map()->DefaultRelocateLocation,
+								'Signatures' => $signatures,
 								'User' => $user);
 	}
 }

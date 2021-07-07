@@ -89,7 +89,7 @@ class ShpWriter extends BaseWriter
 			}
 			else
 			{
-				$geom = new Point(floatval($row[$iLon]), floatval($row[$iLat]));
+				$geom = new Point($this->parseCoord($row[$iLon]), $this->parseCoord($row[$iLat]));
 			}
 			if ($geom !== null)
 			{
@@ -103,6 +103,27 @@ class ShpWriter extends BaseWriter
 
 		return true;
 	}
+
+	private function parseCoord($coord)
+	{
+		$coord = '' . $coord;
+		$coord = Str::Replace($coord, ",", ".");
+		if (!Str::Contains($coord, "°"))
+		{
+			return floatVal($coord);
+		}
+
+		$dms = Str::ToUpper(trim($coord));
+
+		$deg = mb_substr($dms, 0, mb_strpos($dms, '°'));
+		$mins = mb_substr($dms, mb_strpos($dms, '°') + 1, mb_strpos($dms, "'") - mb_strpos($dms, '°') - 1);
+		$secs = mb_substr($dms, mb_strpos($dms, "'") + 1, mb_strpos($dms, '"') - mb_strpos($dms, "'") - 1);
+
+		$sign = 1 - 2 * (Str::Contains($dms, 'W') || Str::Contains($dms, 'S') || Str::Contains($dms, 'O'));
+
+		return $sign * (floatVal($deg) + floatVal($mins) / 60 + floatVal($secs) / 3600);
+	}
+
 
 	private function AddFieldData($cols, $row, $geom, $wktIndex)
 	{

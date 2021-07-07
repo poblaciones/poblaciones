@@ -1,4 +1,4 @@
-const str = require('@/common/js/str');
+const str = require('@/common/framework/str');
 
 module.exports = {
 	formatDate(date) {

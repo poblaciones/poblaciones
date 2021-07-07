@@ -1,12 +1,12 @@
 import axios from 'axios';
 import f from '@/backoffice/classes/Formatter';
 import axiosClient from '@/common/js/axiosClient';
-import arr from '@/common/js/arr';
-import str from '@/common/js/str';
+import arr from '@/common/framework/arr';
+import str from '@/common/framework/str';
 import ScaleGenerator from './ScaleGenerator';
 import LevelGenerator from './LevelGenerator';
 import Vue from 'vue';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 
 const columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
@@ -664,6 +664,18 @@ ActiveDataset.prototype.GetNumericTextAndRichColumns = function (includeNull) {
 	return ret;
 };
 
+ActiveDataset.prototype.GetNumericAndTextColumns = function (includeNull) {
+	var ret = [];
+	if (includeNull) {
+		ret = ret.concat(this.GetNullColumn());
+	}
+	ret = ret.concat(this.GetSeparator('Variables numéricas'));
+	ret = ret.concat(this.GetNumericColumns());
+	ret = ret.concat(this.GetSeparator('Otras variables', -1000));
+	ret = ret.concat(this.GetTextColumns());
+	return ret;
+};
+
 ActiveDataset.prototype.GetNumericAndRichColumns = function (includeNull) {
 	var ret = [];
 	if (includeNull) {
@@ -689,8 +701,8 @@ ActiveDataset.prototype.GetNullColumn = function () {
 	return [{ Id: 0, Caption: '[Ninguna]', Code: null }];
 };
 
-ActiveDataset.prototype.GetSeparator = function () {
-	return [{ Id: -100, Caption: '- Variables de cartografía -----', Code: 'O' }];
+ActiveDataset.prototype.GetSeparator = function (label = 'Variables de cartografía', id = -100) {
+	return [{ Id: id, Caption: '- ' + label + ' -----', Code: 'O' }];
 };
 ActiveDataset.prototype.GetRichColumns = function () {
 	var columns = [

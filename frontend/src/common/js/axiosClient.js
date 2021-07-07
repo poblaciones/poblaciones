@@ -1,6 +1,6 @@
 const axios = require('axios');
 const querystring = require('querystring');
-const err = require('@/common/js/err');
+const err = require('@/common/framework/err');
 
 module.exports = {
 	getPromise(url, args, errorAction) {

@@ -44,7 +44,7 @@
 import h from '@/public/js/helper';
 import Search from '@/public/classes/Search';
 import { mixin as clickaway } from 'vue-clickaway';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 import axios from 'axios';
 
 var debounce = require('lodash.debounce');

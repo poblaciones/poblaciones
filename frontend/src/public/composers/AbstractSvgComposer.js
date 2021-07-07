@@ -1,6 +1,6 @@
 import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 import PatternMaker from '@/public/composers/PatternMaker';
 import SvgMarkerMaker from '@/public/composers/SvgMarkerMaker';
 import Mercator from '@/public/js/Mercator';

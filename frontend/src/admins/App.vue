@@ -10,7 +10,7 @@
 <script>
 import authentication from '@/common/js/authentication';
 import Vue from 'vue';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 
 export default {
 	name: 'App',

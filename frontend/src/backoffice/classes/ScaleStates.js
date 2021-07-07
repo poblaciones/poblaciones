@@ -1,5 +1,5 @@
-import arr from '@/common/js/arr';
-import str from '@/common/js/str';
+import arr from '@/common/framework/arr';
+import str from '@/common/framework/str';
 
 export default ScaleStates;
 

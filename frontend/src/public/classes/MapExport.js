@@ -1,4 +1,4 @@
-import dom from '@/common/js/dom';
+import dom from '@/common/framework/dom';
 
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';

@@ -1,5 +1,5 @@
 import h from '@/public/js/helper';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 import FrameRouter from '@/public/router/FrameRouter';
 import ClippingRouter from '@/public/router/ClippingRouter';

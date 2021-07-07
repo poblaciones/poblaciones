@@ -2,13 +2,11 @@
 
 namespace helena\services\backoffice\publish;
 
-use minga\framework\Arr;
-use minga\framework\Str;
+use helena\classes\Session;
+use minga\framework\Date;
 use minga\framework\Profiling;
-use minga\framework\Context;
 
 use helena\entities\backoffice\DraftWork;
-use helena\classes\Account;
 use helena\classes\App;
 use helena\db\backoffice\WorkModel;
 
@@ -19,7 +17,7 @@ class WorkFlags
 		Profiling::BeginTimer();
 		$work = App::Orm()->find(DraftWork::class, $workId);
 		$work->setMetadataChanged(true);
-		App::Orm()->save($work);
+		self::Save($work);
 		Profiling::EndTimer();
 	}
 	public static function SetMetricDataChanged($workId)
@@ -27,7 +25,7 @@ class WorkFlags
 		Profiling::BeginTimer();
 		$work = App::Orm()->find(DraftWork::class, $workId);
 		$work->setMetricDataChanged(true);
-		App::Orm()->save($work);
+		self::Save($work);
 		Profiling::EndTimer();
 	}
 	public static function SetDatasetLabelsChanged($workId)
@@ -35,7 +33,7 @@ class WorkFlags
 		Profiling::BeginTimer();
 		$work = App::Orm()->find(DraftWork::class, $workId);
 		$work->setDatasetLabelsChanged(true);
-		App::Orm()->save($work);
+		self::Save($work);
 		Profiling::EndTimer();
 	}
 	public static function SetDatasetDataChanged($workId)
@@ -43,7 +41,7 @@ class WorkFlags
 		Profiling::BeginTimer();
 		$work = App::Orm()->find(DraftWork::class, $workId);
 		$work->setDatasetDataChanged(true);
-		App::Orm()->save($work);
+		self::Save($work);
 		Profiling::EndTimer();
 	}
 	public static function ClearAll($workId)
@@ -59,7 +57,7 @@ class WorkFlags
 		$work->setDatasetDataChanged(false);
 		$work->setMetricLabelsChanged(false);
 		$work->setMetricDataChanged(false);
-		App::Orm()->save($work);
+		self::Save($work);
 		Profiling::EndTimer();
 	}
 	public static function AllAreUnset($workId)
@@ -90,9 +88,23 @@ class WorkFlags
 		$work->setMetricLabelsChanged(true);
 		$work->setMetricDataChanged(true);
 
-		App::Orm()->save($work);
+		self::Save($work);
 
 		Profiling::EndTimer();
 	}
 
+	public static function Save($work)
+	{
+		Profiling::BeginTimer();
+
+		$date = new \DateTime();
+		$work->setUpdate($date);
+
+		$userId = Session::GetCurrentUser()->GetUserId();
+		$work->setUpdateUserId($userId);
+
+		App::Orm()->save($work);
+
+		Profiling::EndTimer();
+	}
 }

@@ -88,6 +88,20 @@ class DraftWork
     private $Shard;
 
 
+		/**
+     * @var \DateTime
+		* @ClientReadonly
+		* @ORM\Column(name="wrk_update", type="datetime", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $Update;
+
+
+		/**
+     * @var integer
+		* @ClientReadonly
+		* @ORM\Column(name="wrk_update_user_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $UpdateUserId;
 
 		/**
 		 * @var boolean
@@ -247,6 +261,57 @@ class DraftWork
     {
         return $this->ImageType;
     }
+
+
+    /**
+     * Set update
+     *
+     * @param \DateTime $update
+     *
+     * @return DraftWork
+     */
+    public function setUpdate($update)
+    {
+        $this->Update = $update;
+
+        return $this;
+    }
+
+    /**
+     * Get update
+     *
+     * @return \DateTime
+     */
+    public function getUpdate()
+    {
+        return $this->Update;
+    }
+
+
+    /**
+     * Set updateUserId
+     *
+     * @param integer $updateUserId
+     *
+     * @return DraftWork
+     */
+    public function setUpdateUserId($updateUserId)
+    {
+        $this->UpdateUserId = $updateUserId;
+
+        return $this;
+    }
+
+    /**
+     * Get updateUserId
+     *
+     * @return integer
+     */
+    public function getUpdateUserId()
+    {
+        return $this->UpdateUserId;
+    }
+
 
     /**
      * Set comments

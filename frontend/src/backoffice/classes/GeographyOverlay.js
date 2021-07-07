@@ -15,17 +15,14 @@ GeographyOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 		x: coord.x,
 		y: coord.y,
 		z: zoom,
-		a: this.geographyId
+		a: this.geographyId,
+		w: window.Context.Configuration.Signatures.Geography
 	};
 
   //div.innerHTML = coord;
   div.style.width = this.tileSize.width + 'px';
   div.style.height = this.tileSize.height + 'px';
- /* div.style.fontSize = '10';
-  div.style.borderStyle = 'solid';
-  div.style.borderWidth = '1px';
-  div.style.borderColor = '#AAAAAA';
-	*/
+
 	div.dataLayer = new google.maps.Data();
 	div.dataLayer.setStyle({
 		fillOpacity: 0,

@@ -43,7 +43,7 @@
 import Context from '@/backoffice/classes/Context';
 import UserPopup from './UserPopup.vue';
 import f from '@/backoffice/classes/Formatter';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 
 	export default {
 	name: 'Usuarios',

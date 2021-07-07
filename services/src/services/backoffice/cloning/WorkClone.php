@@ -11,6 +11,7 @@ use helena\db\backoffice\WorkModel;
 use helena\classes\Account;
 use helena\classes\Links;
 use helena\services\backoffice\publish\PublishDataTables;
+use helena\services\backoffice\publish\WorkFlags;
 
 class WorkClone
 {
@@ -72,6 +73,8 @@ class WorkClone
 		$this->state->Set('name', $newName);
 		$static = array('wrk_unfinished' => true);
 		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId, $static);
+		$cloned = App::Orm()->find(entities\DraftWork::class, $this->targetWorkId);
+		WorkFlags::Save($cloned);
 	}
 	public function CopyMetadata()
 	{

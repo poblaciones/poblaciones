@@ -70,8 +70,9 @@
 				this.filter = '';
 				this.autolist = [];
 				this.openDialog = true;
+				var loc = this;
 				setTimeout(() => {
-					this.$refs.inputName.$el.focus();
+					loc.$refs.inputName.$el.focus();
 				}, 100);
 			},
 			select(item) {

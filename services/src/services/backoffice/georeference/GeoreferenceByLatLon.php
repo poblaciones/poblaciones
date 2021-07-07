@@ -10,8 +10,8 @@ class GeoreferenceByLatLon extends GeoreferenceBase
 	{
 		Profiling::BeginTimer();
 
-		$latField = $this->state->Get('lat');
-		$lonField = $this->state->Get('lon');
+		$latField = "DmsToDecimal(" . $this->state->Get('lat') . ")";
+		$lonField = "DmsToDecimal(" . $this->state->Get('lon') . ")";
 
 		$condition1 = "(" . $this->IsNullOrEmptySql($latField)  . " OR " . $this->IsNullOrEmptySql($lonField) . ")";
 		$condition2 = "(" . $latField ." < -90 OR ". $latField ." > 90 OR "
@@ -49,8 +49,8 @@ class GeoreferenceByLatLon extends GeoreferenceBase
 
 	private function MatchSql()
 	{
-		$latField = $this->state->Get('lat');
-		$lonField = $this->state->Get('lon');
+		$latField = "DmsToDecimal(" . $this->state->Get('lat') . ")";
+		$lonField = "DmsToDecimal(" . $this->state->Get('lon') . ")";
 
 		return "IFNULL(
 							GetGeographyByPoint( " . $this->state->GeographyId() . ", POINT(" . $lonField . ", " . $latField . ")),

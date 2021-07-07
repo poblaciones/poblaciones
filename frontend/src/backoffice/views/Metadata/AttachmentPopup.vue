@@ -71,7 +71,7 @@ import Context from '@/backoffice/classes/Context';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import f from '@/backoffice/classes/Formatter';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 export default {
   name: 'Adjuntos',
@@ -127,8 +127,9 @@ export default {
 			this.localCaption = this.item.Caption;
 	    this.openEditableAttach = true;
 			if (!this.isNew) {
+				var loc = this;
 				setTimeout(() => {
-					this.$refs.inputName.focus();
+					loc.$refs.inputName.focus();
 				}, 100);
 			}
 	 	},

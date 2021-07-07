@@ -13,7 +13,7 @@ class cTestPushCreateKey extends TestCaseBase
 		$workId = 0; //Params::GetInt("id");
 		if ($workId == 0)
 		{
-			$em = App::Db()->GetEntityManager();
+			$em = App::Orm()->GetEntityManager();
 
 			$text = "<br>No se indicó el parámetro id.";
 			$records = $em->getRepository('helena\entities\backoffice\DraftWork')->findAll();
@@ -46,7 +46,7 @@ class cTestPushCreateKey extends TestCaseBase
 // 		$workId = Params::GetInt("id");
 // 		if (!$workId)
 // 		{
-// 			$em = App::Db()->GetEntityManager();
+// 			$em = App::Orm()->GetEntityManager();
 //
 // 			$text = "<br>No se indicó el parámetro id.";
 // 			$records = $em->getRepository('helena\entities\backoffice\DraftWork')->findAll();

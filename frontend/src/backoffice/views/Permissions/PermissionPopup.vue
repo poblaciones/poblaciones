@@ -48,8 +48,9 @@ export default {
 			this.user = '';
 			this.level = 'E';
 			this.openAdd = true;
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputUser.focus();
+				loc.$refs.inputUser.focus();
       }, 100);
 
 		},

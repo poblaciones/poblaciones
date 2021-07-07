@@ -1,6 +1,6 @@
 import app from './moduleApp.js';
 import axiosClient from '@/common/js/axiosClient';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 import f from '@/backoffice/classes/Formatter';
 
 export default AsyncCatalog;

@@ -1,8 +1,8 @@
 import h from '@/public/js/helper';
 import ActiveSelectedMetric from '@/public/classes/ActiveSelectedMetric';
 import ActiveBoundary from '@/public/classes/ActiveBoundary';
-import err from '@/common/js/err';
-import str from '@/common/js/str';
+import err from '@/common/framework/err';
+import str from '@/common/framework/str';
 
 export default SelectedInfoRouter;
 

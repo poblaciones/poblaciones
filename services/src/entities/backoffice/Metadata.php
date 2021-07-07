@@ -86,6 +86,13 @@ class Metadata
      */
     private $GroupId;
 
+		 /**
+     * @var integer
+     *
+     * @ORM\Column(name="met_last_online_user_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $LastOnlineUserId;
+
     /**
      * @var string
      *
@@ -142,14 +149,6 @@ class Metadata
 		* @ORM\Column(name="met_update", type="datetime", precision=0, scale=0, nullable=false, unique=false)
      */
     private $Update;
-
-    /**
-     * @var \DateTime
-		 * @Exclude
-     *
-     * @ORM\Column(name="met_schedule_next_update", type="datetime", precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $ScheduleNextUpdate;
 
     /**
      * @var \helena\entities\backoffice\Contact
@@ -471,7 +470,7 @@ class Metadata
     }
 
     /**
-     * Get groupId
+     * Get lastOnlineUserId
      *
      * @return integer
      */
@@ -480,6 +479,30 @@ class Metadata
         return $this->GroupId;
     }
 
+
+    /**
+     * Set lastOnlineUserId
+     *
+     * @param integer $lastOnlineUserId
+     *
+     * @return Metadata
+     */
+    public function setLastOnlineUserId($lastOnlineUserId)
+    {
+        $this->LastOnlineUserId = $lastOnlineUserId;
+
+        return $this;
+    }
+
+    /**
+     * Get lastOnlineUserId
+     *
+     * @return integer
+     */
+    public function getLastOnlineUserId()
+    {
+        return $this->LastOnlineUserId;
+    }
     /**
      * Set license
      *

@@ -29,7 +29,7 @@
 
 <script>
 import axios from 'axios';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 import fabButton from '@/public/components/widgets/fabButton/fabButton';
 
 export default {

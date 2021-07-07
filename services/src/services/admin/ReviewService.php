@@ -23,7 +23,7 @@ class ReviewService extends BaseService
 			$review->setResolutionDate(null);
 			$review->setUserDecision(null);
 		} else if ($currentStatus !== $review->getDecision()) {
-			$review->setResolutionDate(Date::DateTimeArNow());
+			$review->setResolutionDate(new \DateTime());
 			$userService = new UserService();
 			$user = $userService->GetCurrentUser();
 			$review->setUserDecision($user);

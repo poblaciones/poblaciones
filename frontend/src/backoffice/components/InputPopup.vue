@@ -49,8 +49,9 @@
 				this.helper = helper;
 				this.maxlength = maxlength;
 				this.openDialog = true;
+				var loc = this;
 				setTimeout(() => {
-					this.$refs.inputName.focus();
+					loc.$refs.inputName.focus();
 				}, 100);
 			},
 			save() {

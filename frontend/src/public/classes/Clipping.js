@@ -1,7 +1,7 @@
 import axios from 'axios';
 import h from '@/public/js/helper';
-import err from '@/common/js/err';
-import arr from '@/common/js/arr';
+import err from '@/common/framework/err';
+import arr from '@/common/framework/arr';
 
 export default Clipping;
 

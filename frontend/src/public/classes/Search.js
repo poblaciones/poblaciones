@@ -1,4 +1,4 @@
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 import axios from 'axios';
 
 export default Search;

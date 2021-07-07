@@ -53,7 +53,6 @@ function socketCall($server, $port, $url, $includeHeaders)
 		// open conection
 		$fp = fsockopen($server, $port, $errno, $errstr, 30);
 		if (!$fp) {
-		//	$ret->Error = "$errstr ($errno)";
 			throw new Exception("$errstr ($errno)");
 		}
 		$request = $method . " " . $url . " HTTP/1.1

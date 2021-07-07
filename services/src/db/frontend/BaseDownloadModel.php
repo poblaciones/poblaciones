@@ -52,14 +52,12 @@ abstract class BaseDownloadModel extends BaseModel
 			throw new ErrorException('Query not prepared. Call PrepareFileQuery before.');
 		Profiling::BeginTimer();
 		$params = $this->fullParams;
-		//Todos los parámetros de esta consulta son de tipo int.
-		$types = array_fill(0, count($params), PDO::PARAM_INT);
 
 		$limit = ' LIMIT ' . intval($start) . ', ' . intval($count);
 		try
 		{
 			App::Db()->setFetchMode(PDO::FETCH_NUM);
-			$ret = App::Db()->fetchAll($this->fullQuery . $limit, $params, $types);
+			$ret = App::Db()->fetchAll($this->fullQuery . $limit, $params);
 			Profiling::EndTimer();
 			return $ret;
 		}

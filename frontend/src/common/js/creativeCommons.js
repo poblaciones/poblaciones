@@ -1,4 +1,4 @@
-const Str = require('@/common/js/str');
+const Str = require('@/common/framework/str');
 
 module.exports = {
 	ResolveUrl(entity) {

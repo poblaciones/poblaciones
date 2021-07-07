@@ -1,8 +1,8 @@
 import SelectedInfoRouter from '@/public/router/SelectedInfoRouter';
 import RestoreRoute from '@/public/classes/RestoreRoute';
 import axios from 'axios';
-import str from '@/common/js/str';
-import err from '@/common/js/err';
+import str from '@/common/framework/str';
+import err from '@/common/framework/err';
 
 export default StartMap;
 

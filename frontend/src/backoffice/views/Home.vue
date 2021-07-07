@@ -44,7 +44,7 @@
 import TopWelcome from '@/common/components/TopWelcome';
 import Works from './Work/Works';
 import ActiveWork from '@/backoffice/classes/ActiveWork';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 
 export default {
 	name: 'home',

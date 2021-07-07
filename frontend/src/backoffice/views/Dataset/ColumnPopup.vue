@@ -57,7 +57,7 @@
 
 <script>
 import f from '@/backoffice/classes/Formatter';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import VariableNameValidator from '@/backoffice/classes/VariableNameValidator';
 
 var columnFormatEnum = require("@/common/enums/columnFormatEnum");
@@ -95,8 +95,9 @@ export default {
 			var ele = arr.GetById(this.Dataset.ValidFormats(), this.variable.Format, null);
 			this.variable.FormatFormatted = (ele === null ? 'No reconocido' : ele.Caption);
 			this.activateEdit = true;
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputName.focus();
+				loc.$refs.inputName.focus();
 			}, 250);
 		},
 		save() {

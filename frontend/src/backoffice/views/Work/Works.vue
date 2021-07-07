@@ -1,110 +1,123 @@
 <template>
 	<div class="md-layout">
+		<div class="md-layout-item md-size-100" style="margin-bottom: 10px;">
+			 Sugeridas
+		</div>
+		<div class="md-layout-item md-size-100" style="margin-bottom: 1px;">
+				<mp-large-data-item v-for="item in lastest" :key="item.Id" @click="select(item)" :item="item" />
+		</div>
+
 		<div class="md-layout-item md-size-100">
 			<stepper ref="DeleteStepper" @completed="onDeleteComplete">
-		</stepper>
-		<stepper ref="SaveAsStepper">
-		</stepper>
-		<stepper ref="stepper">
-		</stepper>
-		<invoker ref="invoker">
-		</invoker>
-
-		<div v-if="canCreate && !showingWelcome && createEnabled">
-			<md-button @click="onNewWork">
-				<md-icon>add_circle_outline</md-icon>
-				{{ newLabel }}
-			</md-button>
-		</div>
-		</div>
-
-		<div class="md-layout-item md-size-100">
-			<md-table style="max-width: 1000px;" v-if="list.length > 0" v-model="list" md-sort="title" md-sort-order="asc" md-card>
-					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="title">
-							<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
-						</md-table-cell>
-          		<md-table-cell @click.native="select(item)" class="selectable" md-label="Datasets">{{ item.DatasetCount }}</md-table-cell>
-							<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores">{{ item.MetricCount }}</md-table-cell>
-							<md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
-									<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
-								<div class="extraIconContainer">
-									<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
-									<md-icon v-if="!item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
-													class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
-Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.">error_outline</md-icon>
-								</div>
-							</md-table-cell>
-							<md-table-cell md-label="Acciones">
-							<md-button v-if="!canEdit(item)" title="Consultar" class="md-icon-button" v-on:click="select(item)">
-								<md-icon>remove_red_eye</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item) && !publishDisabled(item)" title="Publicar" class="md-icon-button" v-on:click="onPublish(item)">
-								<md-icon>public</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item) && !revokeDisabled(item)" title="Revocar publicación" class="md-icon-button" v-on:click="onRevoke(item)">
-								<md-icon>pause_circle_filled</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
-								<md-icon>edit</md-icon>
-							</md-button>
-							<md-button v-if="canEdit(item)" @click="onDuplicate(item)" title="Duplicar" class="md-icon-button">
-								<md-icon>file_copy</md-icon>
-							</md-button>
-								<md-button v-if="canEdit(item)" title="Eliminar" class="md-icon-button" v-on:click="onDelete(item)">
-									<md-icon>delete</md-icon>
-							</md-button>
-						</md-table-cell>
-					</md-table-row>
-				</md-table>
+			</stepper>
+			<stepper ref="SaveAsStepper">
+			</stepper>
+			<stepper ref="stepper">
+			</stepper>
+			<invoker ref="invoker">
+			</invoker>
+			<div v-if="canCreate && !showingWelcome && createEnabled">
+				<md-button @click="onNewWork">
+					<md-icon>add_circle_outline</md-icon>
+					{{ newLabel }}
+				</md-button>
 			</div>
-			<div class="md-layout-item md-size-100">
-				<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
-					<div v-if="!canCreate" style="">
-						<p>
-							No dispone actualmente de {{ entityName.plural }}.
-						</p>
-					</div>
-					<div v-else="">
-						<p style="margin-bottom: 25px; line-height: 2em;">
-							No hay {{ entityName.plural }} disponibles. Para crear {{ entityName.one }}
-							{{ entityName.single }}, <br>seleccione la acción a continuación.
-						</p>
-						<md-button @click="onNewWork" class="md-raised">
-							<md-icon>add_circle_outline</md-icon>
-							{{ newLabel }}
+		</div>
+		<div class="md-layout-item md-size-100">
+			<md-table style="max-width: 1000px;" v-if="list.length > 0" v-model="list"
+								:md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder" :md-sort-fn="customSort"
+								md-card>
+				<md-table-row slot="md-table-row" slot-scope="{ item }">
+					<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
+						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
+					</md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable"
+												 md-label="Contenido" md-sort-by="DatasetCount">
+						{{ item.DatasetCount }} <i :title="item.DatasetCount + (item.DatasetCount == 1 ? ' dataset' : ' datasets')"
+																 class="tinyIcon vsm-icon fa fa-table"></i>,
+						{{ item.MetricCount }} <i :title="item.MetricCount + (item.MetricCount == 1 ? ' indicador' : ' indicadores')"
+																class="tinyIcon vsm-icon fa fa-chart-bar"></i>
+						<i v-if="logInfo(item)" :title="logInfo(item)" style="margin-left: 5px; font-size: 11px;"
+																class="tinyIcon vsm-icon fa fa-history"></i>
+					</md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable"
+													md-label="Estado">
+						<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
+						<div class="extraIconContainer">
+							<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
+							<md-icon v-if="!item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
+												class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
+												Para que sean incluidos, debe solictar una revisión desde Modificar>Visiblidad > Solicitar revisión.">error_outline</md-icon>
+						</div>
+					</md-table-cell>
+					<md-table-cell md-label="Acciones">
+						<md-button v-if="!canEdit(item)" title="Consultar" class="md-icon-button" v-on:click="select(item)">
+							<md-icon>remove_red_eye</md-icon>
 						</md-button>
-					</div>
+						<md-button v-if="canEdit(item) && !publishDisabled(item)" title="Publicar" class="md-icon-button" v-on:click="onPublish(item)">
+							<md-icon>public</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item) && !revokeDisabled(item)" title="Revocar publicación" class="md-icon-button" v-on:click="onRevoke(item)">
+							<md-icon>pause_circle_filled</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
+							<md-icon>edit</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" title="Duplicar" class="md-icon-button">
+							<md-icon>file_copy</md-icon>
+						</md-button>
+						<md-button v-if="canEdit(item)" title="Eliminar" class="md-icon-button" v-on:click="onDelete(item)">
+							<md-icon>delete</md-icon>
+						</md-button>
+					</md-table-cell>
+				</md-table-row>
+			</md-table>
+		</div>
+		<div class="md-layout-item md-size-100">
+			<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
+				<div v-if="!canCreate" style="">
+					<p>
+						No dispone actualmente de {{ entityName.plural }}.
+					</p>
+				</div>
+				<div v-else="">
+					<p style="margin-bottom: 25px; line-height: 2em;">
+						No hay {{ entityName.plural }} disponibles. Para crear {{ entityName.one }}
+						{{ entityName.single }}, <br>seleccione la acción a continuación.
+					</p>
+					<md-button @click="onNewWork" class="md-raised">
+						<md-icon>add_circle_outline</md-icon>
+						{{ newLabel }}
+					</md-button>
 				</div>
 			</div>
-
-		<md-dialog-prompt
-				:md-active.sync="activateSaveAs"
-				:md-title="'Duplicar ' + entityName.single"
-				v-model="newWorkName"
-				md-input-maxlength="100"
-				md-input-placeholder="Nombre de la nueva copia..."
-				md-confirm-text="Guardar"
-				md-cancel-text="Cancelar"
-				@md-confirm="onDuplicateStart">
+		</div>
+		<md-dialog-prompt :md-active.sync="activateSaveAs"
+											:md-title="'Duplicar ' + entityName.single"
+											v-model="newWorkName"
+											md-input-maxlength="100"
+											md-input-placeholder="Nombre de la nueva copia..."
+											md-confirm-text="Guardar"
+											md-cancel-text="Cancelar"
+											@md-confirm="onDuplicateStart">
 		</md-dialog-prompt>
-
-		<md-dialog-prompt
-						:md-active.sync="activateNewWork"
-						v-model="newWorkName"
-						:md-title="'Indique el título de ' + entityName.article + ' ' + newLabel.toLowerCase()"
-						md-input-maxlength="200"
-						:md-input-placeholder="newLabel"
-						md-confirm-text="Aceptar"
-						md-cancel-text="Cancelar"
-				@md-confirm="onNewWorkStart">
-			</md-dialog-prompt>
+		<md-dialog-prompt :md-active.sync="activateNewWork"
+											v-model="newWorkName"
+											:md-title="'Indique el título de ' + entityName.article + ' ' + newLabel.toLowerCase()"
+											md-input-maxlength="200"
+											:md-input-placeholder="newLabel"
+											md-confirm-text="Aceptar"
+											md-cancel-text="Cancelar"
+											@md-confirm="onNewWorkStart">
+		</md-dialog-prompt>
 	</div>
 </template>
 
 <script>
 import ActiveWork from '@/backoffice/classes/ActiveWork';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
+import f from '@/backoffice/classes/Formatter';
+import speech from '@/common/js/speech';
 
 export default {
 	name: 'works',
@@ -117,6 +130,8 @@ export default {
 			newWorkName: '',
 			timeFilter: 0,
 			works: [],
+			currentSort: 'Caption',
+			currentSortOrder: 'asc',
 			activateSaveAs: false,
 		};
 	},
@@ -127,6 +142,19 @@ export default {
 		computed: {
 			showingWelcome() {
 				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
+			},
+			lastest() {
+				var loc = this;
+				var listCopy = f.clone(this.list);
+				listCopy.sort((a, b) => {
+					var importantDateA = (a.Updated > a.MetadataLastOnline ?
+						a.Updated : a.MetadataLastOnline);
+					var importantDateB = (b.Updated > b.MetadataLastOnline ?
+						b.Updated : b.MetadataLastOnline);
+
+					return loc.ocompare(importantDateA, importantDateB);
+				});
+				return listCopy.slice(0, 4);
 			},
 			user() {
 				return window.Context.User;
@@ -177,6 +205,21 @@ export default {
 				pre ='/users/#';
 			}
 			return pre + '/cartographies/' + element.Id + '/content';
+		},
+		logInfo(item) {
+			return speech.FormatWorkInfo(item);
+		},
+		ocompare(o1, o2) {
+			return o1 < o2 ? -1 :
+				o1 > o2 ? 1 : 0;
+		},
+		customSort(value) {
+			var loc = this;
+			return value.sort((a, b) => {
+				const sortBy = loc.currentSort;
+				var sign = (loc.currentSortOrder === 'desc' ? -1 : 1);
+				return sign * loc.ocompare(a[sortBy], b[sortBy]);
+			});
 		},
 		select(element) {
 			this.$router.push({ path: this.getWorkUri(element, false) }).catch();
@@ -229,7 +272,10 @@ export default {
 			this.$refs.stepper.setTitle('Publicando ' + this.entityName.single);
 			this.$refs.stepper.Start().then(function () {
 						item.HasChanges = 0;
-						item.MetadataLastOnline = Date.now();
+						item.Updated = new Date();
+						item.UpdateUser = f.formatFullName(window.Context.User);
+						item.MetadataLastOnline = new Date();
+						item.LastOnlineUser = f.formatFullName(window.Context.User);
 						window.Db.ReleaseWork(item.Id);
 						});
 		},
@@ -302,11 +348,16 @@ export default {
   height: 13px;
 
 }
-.extraIcon {
-	 background-color: white;
-  font-size: 15px !important;
-  color: #868686;
-  margin-left: -5px;
-  margin-top: -6px;
-}
+	.tinyIcon {
+		font-size: 10px;
+		margin: 3px 2px 0px 2px;
+	}
+
+	.extraIcon {
+		background-color: white;
+		font-size: 15px !important;
+		color: #868686;
+		margin-left: -5px;
+		margin-top: -6px;
+	}
 </style>

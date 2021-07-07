@@ -76,7 +76,7 @@
 import Helper from '@/public/js/helper';
 import PinIcon from '@/public/assets/pin-outline.svg';
 import UnpinIcon from '@/public/assets/pin-off-outline.svg';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 import iconManager from '@/common/js/iconManager';
 
 export default {

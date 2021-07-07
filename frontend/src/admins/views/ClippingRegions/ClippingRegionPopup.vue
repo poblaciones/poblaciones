@@ -51,7 +51,7 @@
 
 <script>
 
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
 
 export default {
@@ -71,8 +71,9 @@ export default {
 			this.clippingRegion = f.clone(clippingRegion);
 			this.activateEdit = true;
 			this.useInSearch = !clippingRegion.NoAutocomplete;
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputName.focus();
+				loc.$refs.inputName.focus();
 			}, 100);
 		},
 		save() {

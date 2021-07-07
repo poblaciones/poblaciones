@@ -86,7 +86,7 @@
 
 import ButtonPanel from './ButtonPanel';
 import { mixin as clickaway } from 'vue-clickaway';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 export default {
   name: 'MpLicense',

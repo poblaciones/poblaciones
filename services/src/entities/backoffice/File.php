@@ -24,7 +24,7 @@ class File
     /**
      * @var string
      *
-     * @ORM\Column(name="fil_name", type="string", length=50, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="fil_name", type="string", length=200, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Name;
 

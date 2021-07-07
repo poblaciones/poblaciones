@@ -12,7 +12,7 @@ import Db from '@/backoffice/classes/Db';
 import authentication from '@/common/js/authentication';
 import axios from 'axios';
 import Vue from 'vue';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 
 export default {
 	name: 'App',

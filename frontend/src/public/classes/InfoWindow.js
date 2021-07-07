@@ -1,10 +1,10 @@
-import str from '@/common/js/str';
-import arr from '@/common/js/arr';
+import str from '@/common/framework/str';
+import arr from '@/common/framework/arr';
 import PanelType from '@/public/enums/PanelType';
 import axios from 'axios';
 
 import h from '@/public/js/helper';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 
 export default InfoWindow;
 

@@ -49,7 +49,7 @@
 <script>
 
 import axios from 'axios';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 // util: https://ezgif.com/loop-count
 // eventos: completed, closed
 

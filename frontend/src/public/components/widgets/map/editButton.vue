@@ -14,7 +14,7 @@
 
 <script>
 import f from '@/backoffice/classes/Formatter';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 export default {
 	name: 'editButton',

@@ -261,8 +261,8 @@ class SnapshotByDatasetModel
 			}
 			else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
 			{
-				$point = "POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
-																	$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )";
+				$point = "POINT(DmsToDecimal(" . $dataset['dat_longitude_field'] . "), DmsToDecimal(" .
+																	$dataset['dat_latitude_field'] . ") )";
 				$envelopeTarget = $point;
 				$location = $point;
 			}
@@ -288,10 +288,10 @@ class SnapshotByDatasetModel
 		}
 		else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
 		{
-			return "LINESTRING(POINT(CAST(" . $dataset['dat_longitude_field'] . " AS DECIMAL(14,8)), CAST(" .
-																$dataset['dat_latitude_field'] . " AS DECIMAL(14,8)) )," .
-										"POINT(CAST(" . $dataset['dat_longitude_field_segment'] . " AS DECIMAL(14,8)), CAST(" .
-																$dataset['dat_latitude_field_segment'] . " AS DECIMAL(14,8)) ))";
+			return "LINESTRING(POINT(DmsToDecimal(" . $dataset['dat_longitude_field'] . "), DmsToDecimal(" .
+																$dataset['dat_latitude_field'] . ") )," .
+										"POINT(DmsToDecimal(" . $dataset['dat_longitude_field_segment'] . "), DmsToDecimal(" .
+																$dataset['dat_latitude_field_segment'] . ") ))";
 		}
 		else
 			throw new PublicException("Tipo de dataset no válido para segmentos.");

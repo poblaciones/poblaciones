@@ -249,7 +249,7 @@ class DatasetColumnService extends DbSession
 	public function GetMaxOrder($datasetId)
 	{
 		$sql = "SELECT MAX(dco_order) FROM draft_dataset_column WHERE dco_dataset_id = ?";
-		return App::Db()->fetchScalarInt($sql, [$datasetId]);
+		return App::Db()->fetchScalarIntNullable($sql, [$datasetId]);
 	}
 
 	public function UpdateOrder($colId, $datasetId, $position)

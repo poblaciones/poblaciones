@@ -96,7 +96,7 @@
 
 <script>
 
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 import f from '@/backoffice/classes/Formatter';
 
 var columnFormatEnum = require("@/common/enums/columnFormatEnum");

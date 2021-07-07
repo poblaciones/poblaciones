@@ -34,7 +34,7 @@
 <script>
 import boardal from "@/public/components/controls/boardal";
 import CloseIcon from "vue-material-design-icons/Close.vue";
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 export default {
   name: "embedded",

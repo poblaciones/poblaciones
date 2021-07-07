@@ -59,8 +59,10 @@ class WorkService extends BaseService
 		// Crea metadatos
 		$metadata = $this->CreateMetadata($type, $title);
 		$work->setMetadata($metadata);
+
 		// Graba work
-		App::Orm()->Save($work);
+		WorkFlags::Save($work);
+
 		$workId = $work->getId();
 		$shardifiedWorkId = PublishDataTables::Shardified($workId);
 		// Pone el url en Work
@@ -226,7 +228,7 @@ class WorkService extends BaseService
 		$revision = new entities\Review();
 		$revision->setWork(App::Orm()->find(DraftWork::class, $workId));
 		$revision->setUserSubmission($user);
-		$revision->setSubmissionDate(Date::DateTimeArNow());
+		$revision->setSubmissionDate(new \DateTime());
 		App::Orm()->save($revision);
 
 		// Manda un mensaje administrativo avisando del pedido
@@ -440,7 +442,10 @@ class WorkService extends BaseService
 		$userId = Session::GetCurrentUser()->GetUserId();
 		$sql = "SELECT wrk_id Id,
 								met_title Caption,
+								wrk_update Updated,
 								met_last_online MetadataLastOnline,
+								UserFullNameById(met_last_online_user_id) LastOnlineUser,
+								UserFullNameById(wrk_update_user_id) UpdateUser,
 								(wrk_metadata_changed OR wrk_dataset_labels_changed OR
 								wrk_dataset_data_changed OR wrk_metric_labels_changed OR
 								wrk_metric_data_changed) HasChanges

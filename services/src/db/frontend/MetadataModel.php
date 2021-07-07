@@ -129,7 +129,7 @@ class MetadataModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($workId);
 		$sql = "SELECT wrk_access_link FROM " . $this->draftPreffix . "work WHERE wrk_id = ? LIMIT 1";
-		$ret = App::Db()->fetchScalar($sql, $params);
+		$ret = App::Db()->fetchScalarNullable($sql, $params);
 		Profiling::EndTimer();
 		return $ret;
 	}

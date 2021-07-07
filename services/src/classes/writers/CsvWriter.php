@@ -41,6 +41,10 @@ class CsvWriter extends BaseWriter
 		{
 			$rowText = '';
 			$c = 0;
+
+			$keys = array_keys($row);
+			$last = $keys[count($keys) - 1];
+
 			foreach($row as $k => $value)
 			{
 				if($this->model->wktIndex == $k)
@@ -54,7 +58,7 @@ class CsvWriter extends BaseWriter
 						$value = rtrim($value, '.');
 					}
 				}
-				$text = $this->GetCSVField($k, $value, $isNumericColumn, $this->state->Get('labels'), ($k + 1 == $count));
+				$text = $this->GetCSVField($k, $value, $isNumericColumn, $this->state->Get('labels'), $k == $last);
 				$text = $this->MakeOutputEncoding($text);
 
 				$rowText .= $text;

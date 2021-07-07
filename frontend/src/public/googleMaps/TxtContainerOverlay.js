@@ -1,4 +1,4 @@
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import iconManager from '@/common/js/iconManager';
 
 export default TxtContainerOverlay;

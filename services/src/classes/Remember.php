@@ -179,7 +179,6 @@ class Remember
 
 	private static function SaveRememberSection($account, $token)
 	{
-		$date = Date::FormattedArNow();
 		$insert = "INSERT INTO user_session (ses_user_id, ses_token, ses_create,
 					ses_last_login, ses_last_ip, ses_user_agent) values (?, ?, now(), now(), ?, ?)";
 

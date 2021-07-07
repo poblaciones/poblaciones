@@ -41,7 +41,7 @@ class MetadataFileService extends BaseService
 		$order = $metadataFile->getOrder();
 		if ($order === null)
 		{
-			$newOrder = App::Db()->fetchScalarInt("SELECT max(mfi_order) FROM draft_metadata_file WHERE mfi_metadata_id = ?", array($metadata->getId()));
+			$newOrder = App::Db()->fetchScalarIntNullable("SELECT max(mfi_order) FROM draft_metadata_file WHERE mfi_metadata_id = ?", array($metadata->getId()));
 			if ($newOrder == null) $newOrder = 0;
 				$metadataFile->setOrder($newOrder + 1);
 		}
@@ -87,7 +87,7 @@ class MetadataFileService extends BaseService
 	{
 		$metadataFile = $this->LoadAndValidate($workId, $metadataFileId);
 		// Obtiene el anterior
-		$previousFileId = App::Db()->fetchScalar("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order < ? ORDER BY mfi_order DESC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
+		$previousFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order < ? ORDER BY mfi_order DESC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
 		$metadataFileAlter = App::Orm()->find(entities\DraftMetadataFile::class, $previousFileId);
 		if ($metadataFileAlter === null)
 			return self::OK;
@@ -106,7 +106,7 @@ class MetadataFileService extends BaseService
 	{
 		$metadataFile = $this->LoadAndValidate($workId, $metadataFileId);
 		// Obtiene el siguiente
-		$nextFileId = App::Db()->fetchScalar("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order > ? ORDER BY mfi_order ASC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
+		$nextFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order > ? ORDER BY mfi_order ASC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
 		$metadataFileAlter = App::Orm()->find(entities\DraftMetadataFile::class, $nextFileId);
 		if ($metadataFileAlter === null)
 			return self::OK;
@@ -131,7 +131,7 @@ class MetadataFileService extends BaseService
 		// Trae de la base de datos lo actual. Lo hace por sql porque lo que
 		// vino desde el client está reconectado.
 		if ($metadataFile->getId() !== 0 && $metadataFile->getId() !== null)
-			$previuosFileId = App::Db()->fetchScalarInt("SELECT mfi_file_id FROM draft_metadata_file WHERE mfi_id = ?", array($metadataFile->getId()));
+			$previuosFileId = App::Db()->fetchScalarIntNullable("SELECT mfi_file_id FROM draft_metadata_file WHERE mfi_id = ?", array($metadataFile->getId()));
 		else
 			$previuosFileId = null;
 

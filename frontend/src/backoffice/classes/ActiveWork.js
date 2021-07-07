@@ -1,9 +1,10 @@
 import axios from 'axios';
 import ActiveDataset from '@/backoffice/classes/ActiveDataset';
 import axiosClient from '@/common/js/axiosClient';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import AsyncCatalog from './AsyncCatalog';
 import Vue from 'vue';
+import f from '@/backoffice/classes/Formatter';
 
 export default ActiveWork;
 
@@ -516,6 +517,12 @@ ActiveWork.prototype.UpdateHasChanges = function (value) {
 	for (var n = 0; n < this.workListMetadata.length; n++) {
 		if (this.workListMetadata[n].Id === this.properties.Id) {
 			this.workListMetadata[n].HasChanges = value;
+			this.workListMetadata[n].Updated = new Date();
+			this.workListMetadata[n].UpdateUser = f.formatFullName(window.Context.User);
+			if (value == 0) {
+				this.workListMetadata[n].MetadataLastOnline = new Date();
+				this.workListMetadata[n].LastOnlineUser = f.formatFullName(window.Context.User);
+			}
 			break;
 		}
 	}

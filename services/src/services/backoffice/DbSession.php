@@ -13,7 +13,7 @@ class DbSession extends BaseService
 {
 	public function Save($className, &$entity)
 	{
-		$em = App::Db()->GetEntityManager();
+		$em = App::Orm()->GetEntityManager();
 		$sessionEntity = $this->Synchronize($entity, $className, true);
 		$entity = $sessionEntity;
 		$em->persist($entity);
@@ -122,7 +122,7 @@ class DbSession extends BaseService
 
 	function GetClassMetadata($class)
 	{
-		$em = App::Db()->GetEntityManager();
+		$em = App::Orm()->GetEntityManager();
 		return $em->getClassMetadata($class);
 	}
 

@@ -71,7 +71,7 @@
 <script>
 // https://material.io/tools/icons/?style=baseline
 import ValuesPopup from './ValuesPopup.vue';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import ColumnPopup from './ColumnPopup.vue';
 import Localization from '@/backoffice/classes/Localization';
 import CalculatedMetricWizard from './CalculatedWizard/CalculatedWizard.vue';

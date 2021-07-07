@@ -52,7 +52,7 @@
 <script>
 
 import HitsTable from './HitsTable';
-import str from '@/common/js/str';
+import str from '@/common/framework/str';
 
 export default {
 	name: 'Statistics',

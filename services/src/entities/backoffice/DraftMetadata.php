@@ -145,14 +145,6 @@ class DraftMetadata
     private $Update;
 
     /**
-     * @var \DateTime
-		 * @Exclude
-     *
-     * @ORM\Column(name="met_schedule_next_update", type="datetime", precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $ScheduleNextUpdate;
-
-    /**
      * @var \helena\entities\backoffice\DraftContact
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftContact", cascade={"persist"}, fetch="EAGER")
@@ -161,6 +153,13 @@ class DraftMetadata
      * })
      */
     private $Contact;
+
+		 /**
+     * @var integer
+     *
+     * @ORM\Column(name="met_last_online_user_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $LastOnlineUserId;
 
     /**
      * @var \helena\entities\backoffice\DraftInstitution
@@ -285,6 +284,32 @@ class DraftMetadata
     public function getLastOnline()
     {
         return $this->LastOnline;
+    }
+
+
+
+    /**
+     * Set lastOnlineUserId
+     *
+     * @param integer $lastOnlineUserId
+     *
+     * @return DraftMetadata
+     */
+    public function setLastOnlineUserId($lastOnlineUserId)
+    {
+        $this->LastOnlineUserId = $lastOnlineUserId;
+
+        return $this;
+    }
+
+    /**
+     * Get lastOnlineUserId
+     *
+     * @return integer
+     */
+    public function getLastOnlineUserId()
+    {
+        return $this->LastOnlineUserId;
     }
 
     /**

@@ -1,6 +1,6 @@
 import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 import SequenceHandler from './SequenceHandler';
 import MarkerFactory from '@/public/googleMaps/MarkerFactory';
 import MarkerClusterer from '@googlemaps/markerclustererplus';

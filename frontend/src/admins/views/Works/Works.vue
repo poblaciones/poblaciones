@@ -90,7 +90,7 @@
 
 <script>
 import ActiveWork from '@/backoffice/classes/ActiveWork';
-import arr from '@/common/js/arr';
+import arr from '@/common/framework/arr';
 
 export default {
 	name: 'works',
@@ -237,7 +237,7 @@ export default {
 			this.$refs.stepper.setTitle('Publicando ' + this.entityName.single);
 			this.$refs.stepper.Start().then(function () {
 						item.HasChanges = 0;
-						item.MetadataLastOnline = Date.now();
+						item.MetadataLastOnline = new Date();
 						});
 		},
 		onIndexedChanged(item) {

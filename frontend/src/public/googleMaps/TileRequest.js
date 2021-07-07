@@ -1,7 +1,7 @@
 import axios from 'axios';
 import h from '@/public/js/helper';
 import Mercator from '@/public/js/Mercator';
-import err from '@/common/js/err';
+import err from '@/common/framework/err';
 
 export default TileRequest;
 

@@ -6,11 +6,18 @@ module.exports = {
 		this.Clear(arr);
 		this.AddRange(arr, arrValues);
 	},
+	FillAssoc(arr, arrValues) {
+		this.ClearAssoc(arr);
+		this.AddRangeAssoc(arr, arrValues);
+	},
+	AddRangeAssoc(arr, arrValues) {
+		var keys = Object.keys(arrValues);
+		for (var key of keys) {
+			arr[key] = arrValues[key];
+		}
+	},
 	AddRange(arr, arrValues) {
 		arr.push.apply(arr, arrValues);
-	},
-	Crop(arr, itemsLeft) {
-		arr.splice(itemsLeft, arr.length - itemsLeft);
 	},
 	InsertAt(arr, index, value) {
 		arr.splice(index, 0, value);
@@ -38,6 +45,77 @@ module.exports = {
 	},
 	FilterByValue(arr, attribute, value) {
 		return arr.filter(function(element) { return element[attribute] === value; });
+	},
+	ToDictionaryByValue(arr, attribute) {
+		var ret = {};
+		for (var item of arr) {
+			ret[item[attribute]] = item;
+		}
+		return ret;
+	},
+	ToDictionaryPairGroupedByValue(arr, attribute, attributeToIndexKey, attributeToIndexValue) {
+		var ret = {};
+		for (var item of arr) {
+			var attributeValue = item[attribute];
+			if (!ret[attributeValue]) {
+				ret[attributeValue] = {};
+			}
+			ret[attributeValue][item[attributeToIndexKey]] = item[attributeToIndexValue];
+		}
+		return ret;
+	},
+
+	ToDictionaryValueGroupedByValue(arr, attribute, attributeToIndex) {
+		var ret = {};
+		for (var item of arr) {
+			var attributeValue = item[attribute];
+			if (!ret[attributeValue]) {
+				ret[attributeValue] = [];
+			}
+			ret[attributeValue].push(item[attributeToIndex]);
+		}
+		return ret;
+	},
+	ToDictionaryGroupedByValue(arr, attribute) {
+		var ret = {};
+		for (var item of arr) {
+			var attributeValue = item[attribute];
+			if (!ret[attributeValue]) {
+				ret[attributeValue] = [];
+			}
+			ret[attributeValue].push(item);
+		}
+		return ret;
+	},
+	ToDictionaryGroupedByDictionary(arr, attributeList) {
+		var ret = {};
+		for (var item of arr) {
+			var attributeValueList = item[attributeList];
+			if (attributeValueList) {
+				var ids = Object.keys(attributeValueList);
+				for (var i = 0; i < ids.length; i++) {
+					var attributeValue = ids[i];
+					if (!ret[attributeValue]) {
+						ret[attributeValue] = [];
+					}
+					ret[attributeValue].push(item);
+				}
+			}
+		}
+		return ret;
+	},
+	DictionaryIdToDictionaryProperty(collection, dictionary, property, def = {}) {
+		return this.DictionaryIdToCollectionProperty(collection, dictionary, property, def);
+	},
+	DictionaryIdToCollectionProperty(collection, dictionary, property, def = []) {
+		for (var n = 0; n < collection.length; n++) {
+			var value = dictionary[collection[n].Id];
+			if (value) {
+				collection[n][property] = value;
+			} else {
+				collection[n][property] = def;
+			}
+		}
 	},
 	ToIntArray(arr) {
 		return arr.map(function (x) {
@@ -77,7 +155,7 @@ module.exports = {
 		for (let i = 0; i < arr.length; i++) {
 			let itemId = null;
 			if(property === undefined) {
-				 itemId = arr[i].Id;
+				itemId = arr[i].Id;
 			} else {
 				itemId = arr[i][property].Id;
 			}
@@ -87,6 +165,10 @@ module.exports = {
 		}
 		return -1;
 	},
+	IndexByKey(arr, key) {
+		var keys = Object.keys(arr);
+		return keys.indexOf(key);
+	},
 	IndexByProperty(arr, property, value) {
 		for (let i = 0; i < arr.length; i++) {
 			let item = arr[i][property];
@@ -95,6 +177,14 @@ module.exports = {
 			}
 		}
 		return -1;
+	},
+	GetByProperty(arr, property, value) {
+		var i = this.IndexByProperty(arr, property, value);
+		if (i !== -1) {
+			return arr[i];
+		} else {
+			return null;
+		}
 	},
 	GetById(arr, id, defaultValue) {
 		var i = this.IndexById(arr, id);
@@ -165,6 +255,12 @@ module.exports = {
 	},
 	Clear(arr) {
 		return arr.splice(0, arr.length);
+	},
+	ClearAssoc(arr) {
+		var keys = Object.keys(arr);
+		for (var key of keys) {
+			delete arr[key];
+		}
 	},
 	Copy(arr) {
 		return Array.from(arr);

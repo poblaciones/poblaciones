@@ -29,6 +29,21 @@ class Work
      */
     private $Type;
 
+		/**
+     * @var \DateTime
+		* @ClientReadonly
+		* @ORM\Column(name="wrk_update", type="datetime", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Update;
+
+
+		/**
+     * @var integer
+		* @ClientReadonly
+		* @ORM\Column(name="wrk_update_user_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $UpdateUserId;
+
     /**
      * @var string
      *
@@ -222,6 +237,53 @@ class Work
     }
 
 
+    /**
+     * Set updateUserId
+     *
+     * @param integer $updateUserId
+     *
+     * @return Work
+     */
+    public function setUpdateUserId($updateUserId)
+    {
+        $this->UpdateUserId = $updateUserId;
+
+        return $this;
+    }
+
+    /**
+     * Get updateUserId
+     *
+     * @return integer
+     */
+    public function getUpdateUserId()
+    {
+        return $this->UpdateUserId;
+    }
+
+    /**
+     * Set update
+     *
+     * @param \DateTime $update
+     *
+     * @return Work
+     */
+    public function setUpdate($update)
+    {
+        $this->Update = $update;
+
+        return $this;
+    }
+
+    /**
+     * Get update
+     *
+     * @return \DateTime
+     */
+    public function getUpdate()
+    {
+        return $this->Update;
+    }
     /**
 		 * Set isPrivate
 		 *

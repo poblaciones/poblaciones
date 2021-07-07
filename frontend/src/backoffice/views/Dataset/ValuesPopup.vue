@@ -110,8 +110,8 @@
 <script>
 // https://material.io/tools/icons/?style=baseline
 import f from '@/backoffice/classes/Formatter';
-import arr from '@/common/js/arr';
-import str from '@/common/js/str';
+import arr from '@/common/framework/arr';
+import str from '@/common/framework/str';
 import Localization from '@/backoffice/classes/Localization';
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue';
 import JqxTooltip from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue';
@@ -405,8 +405,9 @@ export default {
 			this.CurrentVarLabel = '';
 			this.CurrentIsNew = true;
 			this.activateEdit = true;
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputValue.focus();
+				loc.$refs.inputValue.focus();
 			}, 100);
 		},
 		showModify() {
@@ -419,8 +420,9 @@ export default {
 			this.CurrentVarLabel = col.Caption;
 			this.CurrentIsNew = false;
 			this.activateEdit = true;
+			var loc = this;
 			setTimeout(() => {
-				this.$refs.inputLabel.focus();
+				loc.$refs.inputLabel.focus();
 			}, 100);
 		},
 		getDirtyList() {

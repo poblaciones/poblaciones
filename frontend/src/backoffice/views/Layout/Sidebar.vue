@@ -14,8 +14,8 @@ import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import { SidebarMenu } from 'vue-sidebar-menu';
 import { mapGetters } from 'vuex';
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css';
-import str from '@/common/js/str';
-import arr from '@/common/js/arr';
+import str from '@/common/framework/str';
+import arr from '@/common/framework/arr';
 
 // Doc:
 // https://github.com/yaminncco/vue-sidebar-menu
