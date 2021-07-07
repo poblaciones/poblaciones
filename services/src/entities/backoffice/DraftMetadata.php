@@ -697,30 +697,6 @@ class DraftMetadata
     }
 
     /**
-     * Set scheduleNextUpdate
-     *
-     * @param \DateTime $scheduleNextUpdate
-     *
-     * @return DraftMetadata
-     */
-    public function setScheduleNextUpdate($scheduleNextUpdate)
-    {
-        $this->ScheduleNextUpdate = $scheduleNextUpdate;
-
-        return $this;
-    }
-
-    /**
-     * Get scheduleNextUpdate
-     *
-     * @return \DateTime
-     */
-    public function getScheduleNextUpdate()
-    {
-        return $this->ScheduleNextUpdate;
-    }
-
-    /**
      * Set contact
      *
      * @param \helena\entities\backoffice\DraftContact $contact
