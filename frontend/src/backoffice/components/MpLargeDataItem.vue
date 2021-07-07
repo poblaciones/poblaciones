@@ -59,6 +59,7 @@ export default {
 	.largeIco {
 		font-size: 50px !important;
 		margin-top: 18px;
+		color: #a2a2a2;
 	}
 	.text {
 		text-align: left;

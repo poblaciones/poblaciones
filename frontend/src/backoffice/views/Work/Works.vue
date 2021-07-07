@@ -32,13 +32,13 @@
 						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable"
-												 md-label="Contenido" md-sort-by="DatasetCount">
+												 md-label="Contenido" md-sort-by="History">
+						<i v-if="logInfo(item)" :title="logInfo(item)" style="margin-right: 5px; font-size: 11px;"
+							 class="tinyIcon vsm-icon fa fa-history"></i>
 						{{ item.DatasetCount }} <i :title="item.DatasetCount + (item.DatasetCount == 1 ? ' dataset' : ' datasets')"
 																 class="tinyIcon vsm-icon fa fa-table"></i>,
 						{{ item.MetricCount }} <i :title="item.MetricCount + (item.MetricCount == 1 ? ' indicador' : ' indicadores')"
 																class="tinyIcon vsm-icon fa fa-chart-bar"></i>
-						<i v-if="logInfo(item)" :title="logInfo(item)" style="margin-left: 5px; font-size: 11px;"
-																class="tinyIcon vsm-icon fa fa-history"></i>
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable"
 													md-label="Estado">
@@ -144,16 +144,8 @@ export default {
 				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 			},
 			lastest() {
-				var loc = this;
 				var listCopy = f.clone(this.list);
-				listCopy.sort((a, b) => {
-					var importantDateA = (a.Updated > a.MetadataLastOnline ?
-						a.Updated : a.MetadataLastOnline);
-					var importantDateB = (b.Updated > b.MetadataLastOnline ?
-						b.Updated : b.MetadataLastOnline);
-
-					return loc.ocompare(importantDateA, importantDateB);
-				});
+				this.doSort(listCopy, 'History', 'desc');
 				return listCopy.slice(0, 4);
 			},
 			user() {
@@ -210,15 +202,31 @@ export default {
 			return speech.FormatWorkInfo(item);
 		},
 		ocompare(o1, o2) {
+			if (o1 === o2) {
+				return 0;
+			}
+			if (o1 === null) {
+				return -1;
+			}
+			if (o2 === null) {
+				return 1;
+			}
 			return o1 < o2 ? -1 :
 				o1 > o2 ? 1 : 0;
 		},
 		customSort(value) {
+			return this.doSort(value, this.currentSort, this.currentSortOrder);
+		},
+		doSort(value, sortBy, direction) {
 			var loc = this;
 			return value.sort((a, b) => {
-				const sortBy = loc.currentSort;
-				var sign = (loc.currentSortOrder === 'desc' ? -1 : 1);
-				return sign * loc.ocompare(a[sortBy], b[sortBy]);
+				var sign = (direction === 'desc' ? -1 : 1);
+				if (sortBy === 'History') {
+					return sign * loc.ocompare(speech.GetValidaDate(a), speech.GetValidaDate(b));
+
+				} else {
+					return sign * loc.ocompare(a[sortBy], b[sortBy]);
+				}
 			});
 		},
 		select(element) {

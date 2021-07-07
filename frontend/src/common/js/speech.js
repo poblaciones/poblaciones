@@ -3,6 +3,16 @@ const moment = require('moment');
 const es = require('moment/locale/es');
 
 module.exports = {
+	GetValidaDate(item) {
+		if (item.MetadataLastOnline === null && item.Updated === null) {
+			return null;
+		}
+		if (item.MetadataLastOnline === null || item.Updated > item.MetadataLastOnline) {
+			return item.Updated;
+		} else {
+			return item.MetadataLastOnline;
+		}
+	},
 	FormatWorkInfo(item) {
 		var action;
 		var date;
