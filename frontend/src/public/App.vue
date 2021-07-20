@@ -2,6 +2,9 @@
 	<div>
 		<WorkPanel v-if="!Embedded.HideWorkPanel" :work="work" ref="workPanel" :backgroundColor="workColor" />
 		<div class="embeddedNoOpener"></div>
+		<div class="embedded" @click="embeddedClick" v-if="Embedded.Readonly"
+				 :style="(Embedded.OpenOnClick ? 'cursor: pointer;' : '')"
+				 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
 		<div id="holder">
 			<div id="panMain" class="split split-horizontal" style="position: relative">
 				<Search class="exp-hiddable-block" v-show="!Embedded.HideSearch" />
@@ -10,7 +13,7 @@
 				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
 				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
 				<EditButton v-if="work.Current && !Embedded.Active" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-				<CollapseButtonRight v-show="!Embedded.HideSidePanel" :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
+				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
 				<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
@@ -116,10 +119,10 @@
 		},
 		mounted() {
 			this.splitPanels = Split(['#panMain', '#panRight'], {
-				sizes: [75, 25],
-				minSize: [10, 275],
+				sizes: [70, 30],
+				minSize: [10, 300 + (this.Embedded.Readonly ? 25 : 0)],
 				expandToMin: true,
-				gutterSize: 5
+				gutterSize: (this.Embedded.Readonly ? 0 : 5)
 			});
 
 			if (window.Embedded.HideSidePanel) {
@@ -191,17 +194,17 @@
 						window.open(newUrl, '_blank');
 					}
 					};
+				ret.Readonly = web.getParameterByName('ro') != null;
 				if (ret.Compact) {
 					ret.HideSearch = true;
 					ret.HideSidePanel = true;
 					ret.HideAddMetrics = true;
 					ret.HideWorkPanel = true;
 				} else {
-					ret.HideSearch = web.getParameterByName('ns') != null;
+					ret.HideSearch = ret.Readonly || web.getParameterByName('ns') != null;
 					ret.HideSidePanel = web.getParameterByName('np') != null;
-					ret.HideAddMetrics = web.getParameterByName('na') != null;
+					ret.HideAddMetrics = ret.Readonly || web.getParameterByName('na') != null;
 				}
-				ret.Readonly = web.getParameterByName('ro') != null;
 				if (ret.Readonly && web.getParameterByName('oc') != null) {
 					ret.OpenOnClick = true;
 				}

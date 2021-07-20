@@ -31,9 +31,8 @@
 						<div v-on:click="fitRegion(region)" class="hand">{{ region.Name }}</div>
 						<mp-close-button v-on:click="removeRegion(region)" title="Quitar zona seleccionada"
 														 style="float: none; top: 0; margin-top: -2px; position: absolute; right: -2px; font-size: .75em" class="exp-hiddable-block" />
-						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id" style="position: absolute;
-										    bottom: -.4em; right: -1px"
-																		 :region="region" :metadata="region.Metadata" />
+						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id && !Embedded.Readonly" style="position: absolute;
+										    bottom: -.4em; right: -1px" :region="region" :metadata="region.Metadata" />
 					</div>
 				</div>
 			</div>
@@ -63,7 +62,7 @@
 				<div class="btn-group">
 					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index" class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)" v-on:mouseup="changeClipping(index)" v-on:click="falseChangeClipping(index)">{{ level.Revision }}</button>
 				</div>
-				<ClippingSource :metadata="selectedLevel().Metadata" />
+				<ClippingSource :metadata="selectedLevel().Metadata" v-if="!Embedded.Readonly" />
 			</div>
 
 			<div class="coverageBox" v-if="selectedLevel().PartialCoverage">
@@ -111,6 +110,9 @@ export default {
 		},
 		Use() {
 			return window.Use;
+		},
+		Embedded() {
+			return window.Embedded;
 		},
 		clippingElementSize() {
 			if (this.clipping.Region.Summary.Regions.length === 3) {

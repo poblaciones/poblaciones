@@ -5,7 +5,7 @@
 				<drag-horizontal title="Arrastrar para reubicar" />
 			</div>
 		</div>
-		<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index"
+		<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index" v-if="!Embedded.Readonly"
 											class="exp-hiddable-block" @RankingShown="rankingShown" />
 		<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
 			<h4 class="title" v-on:click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
@@ -36,7 +36,7 @@
 									class="btn btn-default btn-xs exp-serie-item"
 									:class="getActive(index)">{{ ver.Version.Name }}</button>
 				</div>
-				<Source style="float:right" :sourceTitle="metric.properties.Metric.Name"
+				<Source style="float:right" :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly"
 								@clickDownload="clickDescargar" @clickSource="clickFuente" />
 				<div style="clear: both; height: 0px">
 				</div>
@@ -117,6 +117,9 @@ export default {
 	computed: {
 			Use() {
 				return window.Use;
+			},
+			Embedded() {
+				return window.Embedded;
 			},
 			urbanity() {
 				return this.metric.properties.SelectedUrbanity;

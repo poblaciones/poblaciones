@@ -1,6 +1,8 @@
 <template>
 	<div style="background-color: white; width: 100%;">
-		<Toolbar :metrics="metrics" :frame="frame" :user="user" :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates" class="exp-hiddable-block"/>
+		<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
+						 :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates"
+						 class="exp-hiddable-block"/>
 		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
 				 style="background-color: transparent; padding-bottom: 13px;">
 			<Clipping :clipping="clipping" :frame="frame" />
@@ -81,7 +83,12 @@ export default {
 			so: null,
 			back: null
 		};
-	},
+		},
+		computed: {
+			Embedded() {
+				return window.Embedded;
+			}
+		},
 	mounted() {
 		window.Popups.MetricDownload = this.$refs.showMetricDownload;
 		window.Popups.BoundaryDownload = this.$refs.showBoundaryDownload;

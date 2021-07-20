@@ -6,7 +6,7 @@
 			</div>
 		</div>
 		<BoundaryTopButtons :boundary="boundary" :key="boundary.index"
-												class="exp-hiddable-block" />
+												class="exp-hiddable-block" v-if="!Embedded.Readonly" />
 		<div>
 			<h4 class="title" v-on:click="changeVisibility()" style="margin-bottom: 6px;cursor: pointer">
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
@@ -18,7 +18,7 @@
 			</h4>
 		</div>
 
-		<div class="sourceRow">
+		<div class="sourceRow" v-if="!Embedded.Readonly">
 			<Source style="float:right" :sourceTitle="boundary.properties.Name"
 							@clickDownload="clickDescargar" @clickSource="clickFuente" />
 
@@ -68,6 +68,9 @@ export default {
 		computed: {
 			Use() {
 				return window.Use;
+			},
+			Embedded() {
+				return window.Embedded;
 			},
 			h() {
 				return Helper;

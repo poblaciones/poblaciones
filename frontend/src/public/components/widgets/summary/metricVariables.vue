@@ -1,7 +1,7 @@
 <template>
 	<div class="variablesBlock">
 		<div v-for="(variable, index) in level.Variables" :key="variable.Id" class="variableBlock" :class="rowClass(index)">
-			<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')" class="variableRow hand" v-on:click="clickVariable(index)">
+			<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '') && (!Embedded.Readonly || index === level.SelectedVariableIndex) " class="variableRow hand" v-on:click="clickVariable(index)">
 				<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"></i>
 				{{ (variable.Name ? variable.Name : 'Conteo') }}
 				<span v-if="index === level.SelectedVariableIndex || level.Variables.length == 1" v-on:click="toggleVariable()" class='hand exp-hiddable-inline'>
@@ -36,7 +36,9 @@ export default {
 		level() {
 			return this.metric.SelectedLevel();
 		},
-
+		Embedded() {
+			return window.Embedded;
+		},
 	},
 	methods: {
 		getArrow() {

@@ -30,7 +30,7 @@
 					<input type="checkbox" v-model="showSearch" /> Buscar
 					<input type="checkbox" v-model="showAddMetrics" /> Agregar indicadores
 				</div>
-				<div>
+				<div style="width: 285px">
 					<span v-if="size===1">
 						<input type="checkbox" v-model="showSidePanel" /> Panel lateral
 					</span>
