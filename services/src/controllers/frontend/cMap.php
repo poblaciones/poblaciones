@@ -51,6 +51,8 @@ class cMap extends cPublicController
 
 		$this->RegisterOpenGraphTags();
 		$this->RegisterFacebookId();
+		// Header always unset X-Frame-Options
+		// https://www.a2hosting.com/kb/developer-corner/configuring-frames-with-the-x-frame-options-header
 
     return $this->Render('index.html.twig');
   }

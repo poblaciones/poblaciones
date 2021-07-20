@@ -1,16 +1,19 @@
 [CURRENT]
+
+v2.38 (2021-07-19)
 - Permite georreferenciar coordenadas expresadas en grados, minutos y segundos.
 - Sugeridos en la administración de cartografías.
 - Datos de última modificación en el listado.
+- Permite insertar mapas en otros sitios.
 
-2021-06-14
+v2.37 (2021-06-14)
 - Fix a ancho linestrings (por cambio de escala en svgs).
 - Fix codigos postales en clipping.
 - Ampliación a 200 caracteres del nombre de adjuntos.
 - Georreferenciación de segmentos por código y lat/long.
 - Fix de duplicación de cartel de valores en cambios de zoom.
 
-2021-05-19
+v2.36 (2021-05-19)
 - Fix: orden de superposición de los marcadores.
 - Fix: cambio de etiqueta en variable no elimina categorías de simbología.
 - Filtro para dataset x indicador.
@@ -28,7 +31,7 @@
 - Retoma información para representar en sucesivos niveles de zoom (polígonos y puntos).
 - Fix: seleccionar delimitaciones en el popup fallaba.
 
-2021-04-13
+v2.35 (2021-04-13)
 - Segmentación de delimitaciones por selección.
 - Fix: click en delimitaciones en buscador no las incorporaba.
 - Fix: recuperar contraseña.

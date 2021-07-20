@@ -92,7 +92,7 @@ module.exports = {
 		return (cad.toString()).replace(new RegExp(this.EscapeRegExp(text), "g"), text2);
 	},
 	StartsWith(cad, part, pos) {
-		return cat.startsWith(part, pos);
+		return cad.startsWith(part, pos);
 		// return cad.lastIndexOf(part, 0) === 0;
 	},
 	EndsWith(cad, part, len) {

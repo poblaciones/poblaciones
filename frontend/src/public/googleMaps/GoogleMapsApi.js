@@ -76,15 +76,24 @@ GoogleMapsApi.prototype.Initialize = function () {
 		center: { lat: -37.1799565, lng: -65.6866910 },
 		zoom: 6
 	};
+	if (window.Embedded.Active) {
+		if (window.Embedded.Readonly) {
+			myMapOptions.zoomControl = false;
+			myMapOptions.gestureHandling = 'none';
+			myMapOptions.disableDefaultUI = true;
+		}
+		if (window.Embedded.Compact) {
+			myMapOptions.scaleControl = false;
+		}
+		if (!window.Embedded.Readonly) {
+			myMapOptions.fullscreenControl = false;
+		}
+	}
 	if (window.SegMap.Configuration.UseLightMap) {
 		myMapOptions.mapTypeControlOptions.mapTypeIds.unshift('light');
 	}
-//		controlSize: 25,
-
 	var blankMapType = this.CreateBlankMap();
-
 	this.gMap = new this.google.maps.Map(document.getElementById('map'), myMapOptions);
-
 	this.gMap.mapTypes.set('blank', blankMapType);
 
 	if (window.SegMap.Configuration.UseLightMap) {
@@ -94,7 +103,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 	this.AddCopyright();
 	this.CreateDrawingManager();
 	this.drawingManager.setMap(this.gMap);
-
+	this.SetOpenNewWindowLink();
 	//this.gMap.setTilt(45);
 	//https://developers.google.com/maps/documentation/javascript/maptypes#Rotating45DegreeImagery
 
@@ -102,6 +111,17 @@ GoogleMapsApi.prototype.Initialize = function () {
 	this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
 		window.SegMap.MapInitialized();
 	});
+};
+
+GoogleMapsApi.prototype.SetOpenNewWindowLink = function () {
+	if (!window.Embedded.Active) {
+		return;
+	}
+	for (var h of document.links) {
+		if (h.title.startsWith("Abrir esta área en Google")) {
+//			alert('found');
+		}
+	}
 };
 
 GoogleMapsApi.prototype.generateLabelsArray = function (visibility) {
@@ -164,9 +184,17 @@ GoogleMapsApi.prototype.BindEvents = function () {
 
 GoogleMapsApi.prototype.AddCopyright = function () {
 	var controlDiv = document.createElement('DIV');
-	controlDiv.innerHTML = "<div class='copyrightText'>Poblaciones © 2020 CONICET/ODSA-UCA. " +
-		"<a class='copyrightText' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. " +
-		"<a class='copyrightText exp-hiddable-unset' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a></div>";
+	var innerHTML = "<div class='copyrightText'>";
+	if (window.Embedded.Active) {
+		innerHTML += "<a class='copyrightText' href='https://poblaciones.org/' target='_blank'>";
+	}
+	innerHTML += "Poblaciones © 2020 CONICET / ODSA - UCA</a>. " +
+		"<a class='copyrightText' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. ";
+	if (!window.Embedded.Active) {
+		innerHTML += "<a class='copyrightText exp-hiddable-unset' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a>";
+	}
+	innerHTML += "</div> ";
+	controlDiv.innerHTML = innerHTML;
 	controlDiv.className = "copyright";
 	controlDiv.index = 0;
 	this.gMap.controls[this.google.maps.ControlPosition.BOTTOM_RIGHT].push(controlDiv);

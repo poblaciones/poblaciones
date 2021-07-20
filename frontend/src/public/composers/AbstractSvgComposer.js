@@ -1,6 +1,7 @@
 import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
 import str from '@/common/framework/str';
+import color from '@/common/framework/color';
 import PatternMaker from '@/public/composers/PatternMaker';
 import SvgMarkerMaker from '@/public/composers/SvgMarkerMaker';
 import Mercator from '@/public/js/Mercator';
@@ -280,14 +281,14 @@ AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, label
 
 		if (patternValue === 0) {
 			// Se fija si el contraste entre el border y la figura va a ser demasiado bajo...
-			var color = labels[l].fillColor;
-			var colorParts = str.ParseColorParts(color);
+			var fillColor = labels[l].fillColor;
+			var colorParts = color.ParseColorParts(fillColor);
 			var colorAvg = (colorParts[0] + colorParts[1] + colorParts[2]) / 3;
 			var stroke;
 			if (colorAvg < 200) {
-				stroke = color;
+				stroke = fillColor;
 			} else {
-				stroke = str.MakeColor(colorParts[0] * .9, colorParts[1] * .9, colorParts[2] * .9);
+				stroke = color.MakeColor(colorParts[0] * .9, colorParts[1] * .9, colorParts[2] * .9);
 			}
 			fillBlock = '; fill: ' + labels[l].fillColor;
 			currentStyle = 'stroke: ' + stroke + '; stroke-opacity: ' + Math.max(1, strokeOpacity * 1.1) +

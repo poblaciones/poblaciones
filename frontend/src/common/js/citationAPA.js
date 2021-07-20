@@ -1,4 +1,5 @@
 const str = require('@/common/framework/str');
+const date = require('@/common/framework/date');
 
 module.exports = {
 	onlineMapCitation(escapedAuthor, escapedDate, escapedTitle, url, noformat) {
@@ -28,7 +29,7 @@ module.exports = {
 			url = str.AbsoluteUrl(' ');
 		}
 		var dt = new Date();
-		ret += "Recuperado el " + dt.getDate() + " de " + str.GetMonthLabel(dt.getMonth()).toLowerCase() + ", " + dt.getFullYear();
+		ret += "Recuperado el " + dt.getDate() + " de " + date.GetMonthLabel(dt.getMonth()).toLowerCase() + ", " + dt.getFullYear();
 		ret += ", de " + url;
 		return ret;
 	},

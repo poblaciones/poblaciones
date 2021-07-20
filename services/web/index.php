@@ -4,7 +4,6 @@ use helena\classes\App;
 use helena\classes\GlobalTimer;
 
 $isPublic = isPublicPath();
-
 $startTotalTime = microtime(true);
 
 require_once __DIR__.'/../startup.php';

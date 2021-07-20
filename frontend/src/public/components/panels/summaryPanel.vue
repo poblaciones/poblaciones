@@ -21,6 +21,7 @@
 			<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
 			<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
 			<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
+			<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
 			<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
 			<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
 			<WaitMessage ref="showWaitMessage" :backgroundColor="backgroundColor" />
@@ -34,6 +35,7 @@ import Metric from '@/public/components/widgets/summary/metric';
 import Boundary from '@/public/components/widgets/summary/boundary';
 import Clipping from '@/public/components/widgets/summary/clipping';
 import WorkMetadata from '@/public/components/popups/workMetadata';
+import Embedding from '@/public/components/popups/embedding';
 import ClippingMetadata from '@/public/components/popups/clippingMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
 import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
@@ -52,6 +54,7 @@ export default {
 		Boundary,
 		BoundaryDownload,
 		Clipping,
+		Embedding,
 		AddMetric,
 		WorkMetadata,
 		ClippingMetadata,
@@ -82,6 +85,7 @@ export default {
 	mounted() {
 		window.Popups.MetricDownload = this.$refs.showMetricDownload;
 		window.Popups.BoundaryDownload = this.$refs.showBoundaryDownload;
+		window.Popups.Embedding = this.$refs.showEmbedding;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
 		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
 		window.Popups.WaitMessage = this.$refs.showWaitMessage;

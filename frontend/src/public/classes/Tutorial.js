@@ -12,7 +12,7 @@ function Tutorial(toolbarStates) {
 };
 
 Tutorial.prototype.CheckOpenTutorial = function () {
-	if (this.isUnsetOrExpired() && this.tutorialFew()) {
+	if (this.isUnsetOrExpired() && this.tutorialFew() && !window.Embedded.Active) {
 		this.toolbarStates.tutorialOpened = true;
 		this.incrementTutorialTimes();
 	}

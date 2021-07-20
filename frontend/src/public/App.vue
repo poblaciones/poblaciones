@@ -1,15 +1,16 @@
 <template>
 	<div>
-		<WorkPanel :work="work" ref="workPanel" :backgroundColor="workColor" />
+		<WorkPanel v-if="!Embedded.HideWorkPanel" :work="work" ref="workPanel" :backgroundColor="workColor" />
+		<div class="embeddedNoOpener"></div>
 		<div id="holder">
 			<div id="panMain" class="split split-horizontal" style="position: relative">
-				<Search class="exp-hiddable-block" />
+				<Search class="exp-hiddable-block" v-show="!Embedded.HideSearch" />
 				<LeftPanel ref='leftPanel' />
 				<MapPanel />
-				<MetricsButton ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
+				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
 				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
-				<EditButton v-if="work.Current" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-				<CollapseButtonRight :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
+				<EditButton v-if="work.Current && !Embedded.Active" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
+				<CollapseButtonRight v-show="!Embedded.HideSidePanel" :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
 				<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
@@ -38,6 +39,7 @@
 	import axios from 'axios';
 	import Vue from 'vue';
 	import err from '@/common/framework/err';
+	import web from '@/common/framework/web';
 
 	export default {
 		name: 'app',
@@ -60,6 +62,7 @@
 				}
 			};
 			window.Use = {};
+			window.Embedded = this.LoadEmbeddedSettings();
 		},
 		data() {
 			return {
@@ -119,13 +122,21 @@
 				gutterSize: 5
 			});
 
+			if (window.Embedded.HideSidePanel) {
+				this.collapsed = true;
+				this.SplitPanelsRefresh();
+			}
 			this.BindEvents();
 			var loc = this;
 			this.GetConfiguration().then(function () {
 				var start = new StartMap(loc.work, loc, loc.SetupMap);
 				start.Start();
 				loc.isMobile = loc.$isMobile();
-				loc.collapsed = loc.isMobile;
+				if (!loc.Embedded.HideSidePanel) {
+					loc.collapsed = loc.isMobile;
+				} else {
+					loc.collapsed = true;
+				}
 				loc.SplitPanelsRefresh();
 				//loc.UpdateMapsControls();
 			});
@@ -137,6 +148,9 @@
 					return '#' + this.work.Current.Metadata.Institution.Color;
 				}
 				return '#00A0D2';
+			},
+			Embedded() {
+				return window.Embedded;
 			},
 			Use() {
 				return window.Use;
@@ -154,6 +168,45 @@
 					err.errDialog('GetConfiguration', 'conectarse con el servidor', error);
 				});
 			},
+			embeddedClick() {
+				if (window.Embedded.OpenOnClick) {
+					window.Embedded.OpenNewWindow();
+				}
+			},
+			LoadEmbeddedSettings() {
+				var ret = {
+				Compact: web.getParameterByName('co') != null,
+					Active: web.getParameterByName('emb') != null,
+					OpenNewWindow: function () {
+						var url = window.location.href;
+						// quita lo que tenga entre ? y #
+						var i1 = url.indexOf('?');
+						var i2 = url.indexOf('#');
+						var newUrl;
+						if (i1 && i2) {
+							newUrl = url.substring(0, i1) + url.substring(i2);
+						} else {
+							newUrl = url;
+						}
+						window.open(newUrl, '_blank');
+					}
+					};
+				if (ret.Compact) {
+					ret.HideSearch = true;
+					ret.HideSidePanel = true;
+					ret.HideAddMetrics = true;
+					ret.HideWorkPanel = true;
+				} else {
+					ret.HideSearch = web.getParameterByName('ns') != null;
+					ret.HideSidePanel = web.getParameterByName('np') != null;
+					ret.HideAddMetrics = web.getParameterByName('na') != null;
+				}
+				ret.Readonly = web.getParameterByName('ro') != null;
+				if (ret.Readonly && web.getParameterByName('oc') != null) {
+					ret.OpenOnClick = true;
+				}
+				return ret;
+			},
 			BindEvents() {
 				var loc = this;
 				this.RegisterErrorHandler();
@@ -165,10 +218,14 @@
 					}
 				};
 				window.onresize = function (event) {
-					loc.$refs.workPanel.onResize();
+					if (loc.$refs.workPanel) {
+						loc.$refs.workPanel.onResize();
+					}
 				};
 				window.onload = function (event) {
-					loc.$refs.workPanel.onResize();
+					if (loc.$refs.workPanel) {
+						loc.$refs.workPanel.onResize();
+					}
 				};
 			},
 			SetupMap(afterLoaded) {
@@ -609,7 +666,44 @@
 		overflow: hidden;
 		box-shadow: 0 4px 10px rgba(60,64,67,.28);
 	}
+	.embeddedOpener {
+		position: absolute;
+		background-color: #ffffff;
+		color: #666666;
+		opacity: 1;
+		right: 8px;
+		width: 32px;
+		text-align: center;
+		height: 32px;
+		top: 14px;
+		z-index: 2;
+		cursor: pointer;
+		border-radius: 2px;
+		padding: 5px 0px;
+		font-weight: bold;
+		box-shadow: rgb(0, 0, 0, 0.3) 0px 1px 4px -1px;
+	}
 
+
+	.embeddedNoOpener {
+		position: absolute;
+		background-color: transparent;
+		left: 0;
+		bottom: 0;
+		z-index: 1;
+		height: 25px;
+		width: 75px;
+	}
+
+	.embedded {
+		position: absolute;
+		background-color: transparent;
+		left: 0;
+		top: 0;
+		z-index: 10;
+		height: 100%;
+		width: 100%;
+	}
 	.ibTooltipOffsetLeft {
 		margin-left: 9px;
 	}
@@ -922,13 +1016,29 @@
 		user-select: none;
 		height: 14px;
 		line-height: 14px;
-		background-color: #ffffff;
-		opacity: 0.7;
+		background-color: rgba(255, 255, 255, .5);
+		opacity: 0.9;
 		border-top-left-radius: 6px;
 		font-family: Roboto, Arial, sans-serif;
 		font-size: 10px;
 		white-space: nowrap;
 		vertical-align: middle;
+	}
+
+	.gm-style-cc:last-child {
+		display: none !important;
+	}
+
+
+a[title="Abrir esta área en Google&nbsp;Maps (se abre en una ventana nueva)"] {
+ display: none !important;
+}
+
+a[title="Abrir esta área en Google Maps (se abre en una ventana nueva)"]
+{ display: none !important; }
+
+	a[title="Informar a Google errores en las imágenes o el mapa de carreteras."] {
+		display: none !important;
 	}
 
 	#holder {

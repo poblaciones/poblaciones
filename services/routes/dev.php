@@ -64,6 +64,7 @@ Accept-Encoding: gzip, deflate
 Accept-Language: es-ar,es;q=0.8,en-us;q=0.5,en;q=0.3
 Pragma: no-cache";
 		$request .= "\r\n\r\n";
+
     fwrite($fp, $request);
 		$passedHeaders = false;
     while (!feof($fp)) {

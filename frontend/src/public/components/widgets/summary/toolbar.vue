@@ -19,7 +19,7 @@
 				<i class="fas fa-tags" />
 			</button>
 
-			<button v-if="hasGeolocation()" type="button" class="btn btn-default btn-xs"
+			<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" v-on:click="geolocate()">
 				<i class="far fa-dot-circle" />
 			</button>
@@ -31,7 +31,7 @@
 							class="btn btn-default btn-xs" :class="getActive(index)" :title="mode.Name"><i :class="mode.Icon"/></button>
 		</div>
 
-		<div class="pull-right">
+		<div class="pull-right" v-if="!Embedded.Active">
 			<span class="dropdown">
 				<button type="button" class="btn btn-default btn-xs" v-if="Use.UseEmbedding" data-toggle="dropdown" title="Compartir">
 					<i class="fas fa-share-alt" />
@@ -46,7 +46,7 @@
 				<ul class="shareIt dropdown-menu">
 					<li>
 						<div class="dToolboxBox">
-							<button type="button" class="btn btn-default btn-xs" title="Embeber mapa actual" v-on:click="showEmbeddedMapPopUp()">
+							<button type="button" class="btn btn-default btn-xs" title="Insertar en otra página" v-on:click="showEmbeddedMapPopUp">
 								<i class="fas fa-link"/>
 							</button>
 						</div>
@@ -85,7 +85,6 @@
 		</div>
 		<div style="clear: both"></div>
     <tour ref="Tour"></tour>
-    <embedded ref="Embedded"></embedded>
   </div>
 </template>
 
@@ -94,7 +93,6 @@ import dom from '@/common/framework/dom';
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 import tour from '@/public/components/popups/tour';
 import MapExport from '@/public/classes/MapExport';
-import embedded from '@/public/components/popups/embedded';
 import a from '@/common/js/authentication';
 
 export default {
@@ -115,7 +113,6 @@ export default {
 	components: {
 		tour,
 		HelpCircleIcon,
-		embedded,
 	},
 	methods: {
 		selectionModes() {
@@ -131,7 +128,7 @@ export default {
 			this.$refs.Tour.toggleModal();
 		},
 		showEmbeddedMapPopUp() {
-			this.$refs.Embedded.toggleModal();
+			window.Popups.Embedding.show();
 		},
 		captureMapImage(format) {
 			var mapExport = new MapExport(this.currentWork);
@@ -177,6 +174,9 @@ export default {
 	computed: {
 		Use() {
 			return this.config;
+		},
+		Embedded() {
+			return window.Embedded;
 		},
 		authenticate() {
 			return a;

@@ -2,7 +2,7 @@
 	<div v-if="showDialog" :transition="transition">
 		<div class="modal" @click.self="clickMask">
 			<div class="modal-dialog" :class="modalClass" @click.self="clickMask" ref="dialog">
-				<div class="modal-content card">
+				<div class="modal-content card" :style="(maxWidth ? 'max-width: ' + maxWidth + 'px' : '')">
 					<!--Header-->
 					<div class="modal-header mpHeader unselectable" :style="'background-color: ' + backgroundColor">
 						<slot name="header">
@@ -41,6 +41,9 @@
  */
 	export default {
 		props: {
+			maxWidth: {
+				type: Number,
+			},
 		showCancel: {
 			type: Boolean,
 			default: true

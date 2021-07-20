@@ -24,7 +24,7 @@ class MapSettings
 	public $UseTextures = false;
 	public $UseFavorites = false;
 
-	public $UseEmbedding = false;
+	public $UseEmbedding = true;
 	public $UseUrbanity = true;
 
 	public $MaxQueueRequests = 4;

@@ -28,7 +28,7 @@
 								:md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder" :md-sort-fn="customSort"
 								md-card>
 				<md-table-row slot="md-table-row" slot-scope="{ item }">
-					<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
+					<md-table-cell style="min-width: 400px" @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
 						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable"
