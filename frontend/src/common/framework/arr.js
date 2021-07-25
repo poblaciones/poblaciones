@@ -2,6 +2,9 @@ module.exports = {
 	Add(arr, value) {
 		arr.push(value);
 	},
+	Crop(arr, itemsLeft) {
+		arr.splice(itemsLeft, arr.length - itemsLeft);
+	},
 	Fill(arr, arrValues) {
 		this.Clear(arr);
 		this.AddRange(arr, arrValues);

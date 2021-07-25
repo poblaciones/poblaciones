@@ -258,6 +258,7 @@ import f from '@/backoffice/classes/Formatter';
 import IconPickerPopup from '@/backoffice/components/IconPickerPopup';
 import ValuePopup from './ValuePopup.vue';
 import Icon from '@/backoffice/components/Icon';
+import ScaleGenerator from '@/backoffice/classes/ScaleGenerator';
 
 const DEFAULT_SINGLE_COLOR = '0ce800';
 
@@ -471,7 +472,7 @@ export default {
 				var caption = 'Total';
 				var color = this.singleColor;
 				if (this.Variable.Values.length === 0) {
-					var value = this.Dataset.ScaleGenerator.CreateValue(caption, 1, color, 1);
+					var value = ScaleGenerator.CreateValue(caption, 1, color, 1);
 					this.Variable.Values.push(value);
 				}
 				this.Variable.Values[0].Caption = caption;

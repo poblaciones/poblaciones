@@ -141,10 +141,10 @@ TxtOverlay.prototype.resolveLinkPart = function () {
 };
 
 TxtOverlay.prototype.resolveOnClick = function () {
-	var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
 	if (this.clickId.length === 1) {
 		this.clickId = this.clickId[0];
 	}
+	var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
 	return "onClick=\"event.stopPropagation(); window.SegMap.SelectId('" +
 		this.type + "', '" + clickIdAsText + "', " + this.pos.lat() + ', '
 		+ this.pos.lng() + ", event.ctrlKey);\"";

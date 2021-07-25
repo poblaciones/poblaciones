@@ -618,7 +618,7 @@ ScaleGenerator.prototype.FixManualRanges = function (variable) {
 	valuesNoNullElement[valuesNoNullElement.length - 1].Value = MAX_VALUE;
 };
 
-ScaleGenerator.prototype.CreateValue = function (caption, value, color, order) {
+ScaleGenerator.CreateValue = function (caption, value, color, order) {
 	return {
 			Id: null,
 			Caption: caption,
