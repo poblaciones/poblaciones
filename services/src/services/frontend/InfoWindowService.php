@@ -8,7 +8,7 @@ use helena\db\frontend\MetricVersionModel;
 
 use helena\db\frontend\SnapshotByDatasetNeighbors;
 use helena\classes\Session;
-use helena\entities\frontend\metric\NavigationInfo;
+use minga\framework\Str;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
@@ -19,6 +19,11 @@ class InfoWindowService extends BaseService
 
 	public function GetLabelInfo($featureId)
 	{
+		if (Str::StartsWith($featureId, "f[@"))
+		{	// soporte para links viejos
+			$featureId = Str::Replace($featureId, "f[@", "");
+			$featureId = Str::Replace($featureId, "@]", "");
+		}
 		$featureId = floatval($featureId);
 		$datasetModel = new DatasetModel();
 

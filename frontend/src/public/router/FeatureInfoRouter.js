@@ -39,6 +39,14 @@ FeatureInfoRouter.prototype.FromRoute = function (args) {
 		VariableId: h.getSafeValueInt(args, 'v', null),
 		Exceptions: h.getSafeValue(args, 'x', null)
 	};
-	let fid = h.getSafeValueInt(args, 'f', null);
+	//let fid = h.getSafeValueInt(args, 'f', null);
+	let fid = h.getSafeValue(args, 'f', null);
+	if (fid && fid.startsWith('[@')) {
+		// soporte para rutas viejas
+		fid = fid.replace('[@', '').replace('@]', '');
+	};
+	if (fid !== null) {
+		fid = parseInt(fid);
+	}
 	window.SegMap.InfoWindow.InfoRequested({}, parent, fid);
 };

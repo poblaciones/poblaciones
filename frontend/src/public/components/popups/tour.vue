@@ -11,13 +11,13 @@
 						Bienvenido a Poblaciones
 					</div>
 					<div class="articleContent">
-						<img style="float: left" src="/static/img/onboarding/step1-a.png" />
+						<img style="float: left" src="/static/img/tour/step1-a.png" />
 						<div style="margin-left: 182px;">
 							<div style="margin-right: 60px;">
 								Esta guía le permitirá conocer información básica para utilizar nuestro mapa.
 							</div>
 							<div style="float: right; margin-top: 40px; margin-left: 20px">
-								<img src="/static/img/onboarding/step1-b.png" />
+								<img src="/static/img/tour/step1-b.png" />
 								<div style="max-width: 200px; font-size: 14px">
 									Si desea continuar viéndola más tarde, podrá volver a abrirla desde la barra
 									de acciones.
@@ -45,9 +45,9 @@
 							En la parte superior, el mapa permite agregar indicadores por medio de la barra de búsqueda.
 						</div>
 						<div>
-							<img style="margin-bottom: 10px; margin-top: 40px" src="/static/img/onboarding/step2-a.png" />
+							<img style="margin-bottom: 10px; margin-top: 40px" src="/static/img/tour/step2-a.png" />
 							<div style="float:right">
-								<img style="margin-left: 10px;" src="/static/img/onboarding/step2-b.png" />
+								<img style="margin-left: 10px;" src="/static/img/tour/step2-b.png" />
 							</div>
 						</div>
 						<div style="font-size: 14px; text-align: right; max-width: 400px">
@@ -64,7 +64,7 @@
 					</div>
 					<div class="articleContent">
 						<div style="float:right">
-							<img style="margin-top: -25px;" src="/static/img/onboarding/step3-a.png" />
+							<img style="margin-top: -25px;" src="/static/img/tour/step3-a.png" />
 						</div>
 						<div style="max-width: 150px">
 							La información agregada al mapa se controla desde paneles a la derecha asociados a cada indicador.
@@ -86,7 +86,7 @@
 						<div style="margin-top: 20px;">
 							<div class="halves">
 								<span class="step" style="margin-left: -15px;">1</span>
-								<img src="/static/img/onboarding/step4-a.png" />
+								<img src="/static/img/tour/step4-a.png" />
 								<div style="margin-top: 10px">
 									La barra de búsqueda permite identificar regiones, provincias, localidades, municipios, aglomerados y barrios entre otros criterios.
 								</div>
@@ -94,7 +94,7 @@
 
 							<div class="halves">
 								<span class="step" style="margin-left: -15px;">2</span>
-								<img src="/static/img/onboarding/step4-b.png" />
+								<img src="/static/img/tour/step4-b.png" />
 								<div style="margin-top: 10px">
 									La selección para la segmentación geográfica también puede realizarse haciendo click en las etiquetas del mapa.
 								</div>
@@ -116,14 +116,14 @@
 						</div>
 						<div style="margin-top: 12px;">
 							<div class="halves">
-								<img src="/static/img/onboarding/step5-a.png" />
+								<img src="/static/img/tour/step5-a.png" />
 								<div style="margin-top: 10px">
 									En el mapa, se destaca y colorea solamente la zona activa.
 								</div>
 							</div>
 
 							<div class="halves">
-								<img src="/static/img/onboarding/step5-b.png" />
+								<img src="/static/img/tour/step5-b.png" />
 								<div style="margin-top: 10px">
 									A la derecha, en los paneles de información, se muestra información de la zona.
 								</div>
@@ -145,7 +145,7 @@
 						</div>
 						<div style="margin-top: 12px;">
 							<div class="halves">
-								<img src="/static/img/onboarding/step6-a.png" />
+								<img src="/static/img/tour/step6-a.png" />
 							</div>
 
 							<div class="halves">
@@ -154,7 +154,7 @@
 									quiénes son sus autores y descargar los datos si desea analizarlos fuera de la plataforma.
 								</div>
 								<div style="margin-top: 20px;">
-									<img src="/static/img/onboarding/step6-b.png" style="float: right" />
+									<img src="/static/img/tour/step6-b.png" style="float: right" />
 									En las cartografías específicas podrá ver más información eligiendo 'Indicadores' en la barra superior.
 								</div>
 							</div>
@@ -175,7 +175,7 @@
 						<div style="margin-top: 30px;">
 							<div class="halves">
 								<h4 style="text-align: center; ">
-									<img src="/static/img/onboarding/step7-a.png" /> &nbsp;Compartir
+									<img src="/static/img/tour/step7-a.png" /> &nbsp;Compartir
 								</h4>
 								<div style="margin-top: 10px">
 									Para guardar una visualización o enviarla a otras personas, puede copiar la ruta activa o utilizar el botón Compartir de la barra de acciones.
@@ -184,7 +184,7 @@
 
 							<div class="halves">
 								<h4 style="text-align: center; ">
-									<img src="/static/img/onboarding/step7-b.png" /> &nbsp;Comentar
+									<img src="/static/img/tour/step7-b.png" /> &nbsp;Comentar
 								</h4>
 								<div style="margin-top: 10px">
 									Si tiene comentarios, pedidos o problemas, utilice la herramienta de asistencia que estará siempre a la izquierda en el mapa.
