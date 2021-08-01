@@ -197,6 +197,24 @@ App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $r
 	return App::Json($controller->UpdateWorkVisibility($workId, $private, $link));
 });
 
+App::$app->get('/services/backoffice/CheckAllWorksConsistency', function (Request $request) {
+	if ($denied = Session::CheckIsMegaUser()) return $denied;
+
+	$controller = new services\WorkService();
+	return App::Json($controller->CheckAllWorksConsistency());
+});
+
+
+
+App::$app->get('/services/backoffice/CheckWorkConsistency', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$controller = new services\WorkService();
+	return App::Json($controller->CheckWorkConsistency($workId));
+});
+
+
 App::$app->get('/services/backoffice/RequestReview', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;

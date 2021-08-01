@@ -315,9 +315,17 @@ class MetricService extends BaseService
 	public function UpdateVariable($datasetId, $level, $variable)
 	{
 		Profiling::BeginTimer();
-
 		$variableConnected = App::Orm()->Reconnect(entities\DraftVariable::class, $variable);
-
+		// obtiene el symbology que actualmente usa en la base de datos
+		// para no dejar symbologies huérfanos en caso de cambios de
+		// symbology en una variable
+		$previousSymbologyId = null;
+		$varId = $variableConnected->getId();
+		if ($varId)
+		{
+			$previousSymbologyId = App::Db()->fetchScalarInt("SELECT mvv_symbology_id FROM draft_variable WHERE mvv_id = ?", array($varId));
+		}
+		// Recupera o establece el level
 		if ($variableConnected->getMetricVersionLevel() === null) {
 				$variableConnected->setMetricVersionLevel($level);
 		}
@@ -329,6 +337,13 @@ class MetricService extends BaseService
 		$this->SetDefaultOrder($level, $variableConnected);
 		// Graba variable
 		App::Orm()->save($variableConnected);
+		// Verifica por symbology huérfano
+		if ($previousSymbologyId !== null && $previousSymbologyId !== $variableConnected->getSymbology()->getId())
+		{
+			$deleteSymbology = "DELETE FROM draft_symbology WHERE vsy_id = ?
+														AND NOT EXISTS(SELECT * FROM draft_variable WHERE mvv_symbology_id = ?)";
+			App::Db()->exec($deleteSymbology, array($previousSymbologyId, $previousSymbologyId));
+		}
 		// Se fija si afecta el default de otras
 		if ($variableConnected->getIsDefault())
 		{

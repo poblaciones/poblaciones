@@ -457,6 +457,7 @@ class PublishDataTables
 		// 5. Pone en null las referencias desde markers
 		$markerCols = "UPDATE " . $drafting . "dataset_marker INNER JOIN " . $drafting . "dataset ON dat_marker_id = dmk_id SET dmk_content_column_id = NULL
 									WHERE dat_work_id = ? " . $datasetCondition;
+
 		App::Db()->exec($markerCols, array($workId));
 	}
 	private function CleanWork($workId, $branches)

@@ -301,6 +301,113 @@ class WorkService extends BaseService
 		$publisher->UpdateWorkVisibility($workId);
 		return ['result' => self::OK, 'link' => $link];
 	}
+	public function CheckAllWorksConsistency()
+	{
+		$allWorks = App::Db()->fetchAll("SELECT wrk_id FROM draft_work");
+		$ret = [];
+		foreach($allWorks as $work)
+		{
+			$workId = $work['wrk_id'];
+			$check = $this->CheckWorkConsistency($workId);
+			if ($check['status'] !== 'OK')
+				$ret[] = ['workId' => $workId, 'message' => $check['errors']];
+		}
+		return ['workCount' => count($allWorks), 'failedCount' => sizeof($ret), 'failed' => $ret];
+	}
+	public function CheckWorkConsistency($workId)
+	{
+		// Verifica:
+		// - que el datasets usen columnas que les sean propias
+		// - que los symbologies no estén ya usados
+		// - que los dataset_marker no estén ya usados
+		$errors = '';
+		// 1. Trae las referencias a columnas en dataset
+		$queryCols = "SELECT dat_id,
+													dat_images_column_id, GetDatasetOf(dat_images_column_id),
+													dat_latitude_column_id, GetDatasetOf(dat_latitude_column_id),
+													dat_longitude_column_id, GetDatasetOf(dat_longitude_column_id),
+													dat_latitude_column_segment_id, GetDatasetOf(dat_latitude_column_segment_id),
+													dat_longitude_column_segment_id, GetDatasetOf(dat_longitude_column_segment_id),
+													dat_geography_item_column_id, GetDatasetOf(dat_geography_item_column_id),
+													dat_caption_column_id, GetDatasetOf(dat_caption_column_id)
+													FROM draft_dataset WHERE dat_work_id = ?";
+		$columnRefs = App::Db()->fetchAll($queryCols, array($workId));
+		$errors .= $this->CheckOffdatasetColumns($columnRefs);
+		// 2. Trae las referencias en variables
+		$queryCols = "SELECT dat_id,
+										mvv_normalization_column_id, GetDatasetOf(mvv_normalization_column_id),
+										mvv_data_column_id, GetDatasetOf(mvv_data_column_id)
+										FROM draft_variable
+										JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
+										JOIN draft_dataset ON dat_id = mvl_dataset_id
+										WHERE dat_work_id = ?";
+		$variableRefs = App::Db()->fetchAll($queryCols, array($workId));
+		$errors .= $this->CheckOffdatasetColumns($variableRefs);
+
+		// 4. Trae las referencias a symbology
+		$queryCols = "SELECT dat_id,
+										vsy_cut_column_id, GetDatasetOf(vsy_cut_column_id),
+										vsy_sequence_column_id, GetDatasetOf(vsy_sequence_column_id)
+										FROM draft_symbology
+										JOIN draft_variable ON mvv_symbology_id = vsy_id
+										JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
+										JOIN draft_dataset ON dat_id = mvl_dataset_id
+										WHERE dat_work_id = ?";
+		$symbologyRefs = App::Db()->fetchAll($queryCols, array($workId));
+		$errors .= $this->CheckOffdatasetColumns($symbologyRefs);
+
+		// 5. Trae los counts de symbologies
+		$queryCols = "SELECT v2.mvv_id, (SELECT COUNT(*) FROM draft_variable v1 WHERE v1.mvv_symbology_id = v2.mvv_symbology_id) c
+										FROM draft_symbology
+										JOIN draft_variable v2 ON v2.mvv_symbology_id = vsy_id
+										JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
+										JOIN draft_dataset ON dat_id = mvl_dataset_id
+										WHERE dat_work_id = ?";
+		$symbologyCounts = App::Db()->fetchAll($queryCols, array($workId));
+		$errors .= $this->CheckDuplicates($symbologyCounts, 'La simbología para la variable se encuentra duplicada', 'mvv_id');
+
+		// 6. Trae los counts de markers
+		$queryCols = "SELECT dat_id, (SELECT COUNT(*) FROM draft_dataset d1
+																					WHERE d1.dat_marker_id = d2.dat_marker_id) c
+													FROM draft_dataset d2 WHERE dat_work_id = ?";
+		$markerCounts = App::Db()->fetchAll($queryCols, array($workId));
+		$errors .= $this->CheckDuplicates($markerCounts, 'El dataset_marker para el dataset se encuentra duplicado', 'dat_id');
+
+		return ['status' => (strlen($errors) > 0 ? 'Failed' : 'OK'), 'errors' => $errors];
+	}
+
+	private function CheckOffdatasetColumns($rows)
+	{
+		$ret = '';
+		// La primera es el Id... luego son pares de columna <variable>, <id>
+		foreach($rows as $row)
+		{
+			$datId = $row['dat_id'];
+			$keys = array_keys($row);
+			for($n = 1; $n < count($row); $n += 2)
+			{
+				$got = $row[$keys[$n + 1]];
+				if ($got !== null && $got !== $datId)
+				{
+					$ret .= "El dataset para " . $keys[$n] . "=" . $row[$keys[$n]] . " no es el esperado. Esperado: " . $datId . ", obtenido: " . $got . '\n';
+				}
+			}
+		}
+		return $ret;
+	}
+
+	private function CheckDuplicates($rows, $message, $idColumn)
+	{
+		$ret = "";
+		foreach($rows as $row)
+		{
+			if ($row['c'] > 1)
+			{
+				$ret .= $message . ". Identificador " . $idColumn . "=" . $row[$idColumn] . '\n';
+			}
+		}
+		return $ret;
+	}
 
 	private function GetDatasets($workId)
 	{

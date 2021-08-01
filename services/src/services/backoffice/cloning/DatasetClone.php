@@ -9,6 +9,7 @@ use minga\framework\PublicException;
 use helena\services\backoffice\import\MetadataMerger;
 use minga\framework\Arr;
 use minga\framework\Str;
+use helena\services\backoffice\WorkService;
 use helena\services\backoffice\import\DatasetTable;
 
 class DatasetClone
@@ -40,7 +41,8 @@ class DatasetClone
 	{
 		$keepOldMetadata = true;
 		$dropSourceDataset = false;
-		$maxPreviousId = 0;
+		$maxPreviousId = 0; // App::Db()->fetchScalarIntNullable("SELECT max(dco_id) FROM draft_dataset_column");
+
 		$this->dataset = App::Orm()->find(entities\DraftDataset::class, $this->sourceDatasetId);
 		if ($this->dataset === null)
 			throw new PublicException('Dataset no encontrado');
@@ -53,12 +55,18 @@ class DatasetClone
 		$this->CopyMarkerInfo();
 		// 3. Copia indicadores
 		$this->CopyMetricVersions();
-
 		// 4. Repara las referencias a columnas
 		// en dataset y en indicadores
 		$merger = new MetadataMerger($this->sourceDatasetId, $this->targetDatasetId, $keepOldMetadata,
 										$maxPreviousId, $dropSourceDataset);
 		$merger->MergeMetadata();
+
+		// 4b. Verifica la consistencia interna
+		$workService = new WorkService();
+		$res = $workService->CheckWorkConsistency($this->targetWorkId);
+		if ($res['status'] !== 'OK') {
+			throw new \Exception('Ocurrieron problemas de consistencia: ' . $res['errors']);
+		}
 
 		// 5. Toca work
 		WorkFlags::SetMetricDataChanged($this->workId);
@@ -101,35 +109,44 @@ class DatasetClone
 		$static = array('mvr_work_id' => $this->targetWorkId, 'mvr_caption' => $newName);
 		$targetMetricVersionId = RowDuplicator::DuplicateRows(entities\DraftMetricVersion::class, $metricVersionId, $static);
 
-		// Copia levels
-		$static = array('mvl_metric_version_id' => $targetMetricVersionId, 'mvl_dataset_id' => $this->targetDatasetId);
-		RowDuplicator::DuplicateRows(entities\DraftMetricVersionLevel::class, $metricVersionId, $static, 'mvl_metric_version_id');
-		// Copia symbology
-		$static = array();
-		RowDuplicator::DuplicateRows(entities\DraftSymbology::class,
-											"(SELECT mvv_symbology_id FROM draft_variable
-												JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
-												WHERE mvl_metric_version_id = " . $metricVersionId . ")", $static, 'vsy_id IN');
+		$levelsSql = "SELECT mvl_id FROM draft_metric_version_level WHERE mvl_metric_version_id = ? AND mvl_dataset_id = ?";
+		$levels = App::Db()->fetchAll($levelsSql, array($metricVersionId, $this->sourceDatasetId));
+		foreach($levels as $level)
+		{
+			// Copia levels
+			$static = array('mvl_metric_version_id' => $targetMetricVersionId, 'mvl_dataset_id' => $this->targetDatasetId);
+			$sourceLevelId = $level['mvl_id'];
+			$targetLevelId = RowDuplicator::DuplicateRows(entities\DraftMetricVersionLevel::class, $sourceLevelId, $static, 'mvl_id');
+			$this->CopyMetricVersionLevel($sourceLevelId, $targetLevelId);
+		}
+	}
+	private function CopyMetricVersionLevel($metricVersionLevelId, $targetMetricVersionLevelId)
+	{
+		// Trae la lista de variables y copia sus symbologies
+		$variablesSql = "SELECT mvv_id, mvv_symbology_id FROM draft_variable WHERE mvv_metric_version_level_id = ?";
+		$variables = App::Db()->fetchAll($variablesSql, array($metricVersionLevelId));
+		$case = "(CASE ";
+		foreach($variables as $variable)
+		{
+			$sourceSymbologyId = $variable['mvv_symbology_id'];
+			$targetSymbologyId = RowDuplicator::DuplicateRows(entities\DraftSymbology::class, $sourceSymbologyId);
+			$case .= " WHEN mvv_symbology_id = " . $sourceSymbologyId . " THEN " . $targetSymbologyId;
+		}
+		$case .= " END)";
 
-		// Calcula el enganche con symbology
-		$metadata = App::Orm()->getClassMetadata(entities\DraftSymbology::class);
-		$table = $metadata->GetTableName();
-		$symbologyQuery = RowDuplicator::CreatePairingQuery($table, $metricVersionId, $targetMetricVersionId,
-																								"(SELECT mvl_metric_version_id FROM draft_metric_version_level
-																									JOIN draft_variable ON mvv_metric_version_level_id = mvl_id)",
-																									'vsy_id', 'mvv_symbology_id');
 		// Copia variables
-		$static = array('mvv_symbology_id' => $symbologyQuery);
-		$parentInfo = array(entities\DraftMetricVersionLevel::class, $metricVersionId,
-													$targetMetricVersionId, 'mvl_metric_version_id', 'mvv_metric_version_level_id');
-		RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftVariable::class);
+		if (count($variables) > 0)
+		{
+			$static = array('mvv_symbology_id' => [$case], 'mvv_metric_version_level_id' => $targetMetricVersionLevelId);
+			RowDuplicator::DuplicateRows(entities\DraftVariable::class, $metricVersionLevelId, $static, 'mvv_metric_version_level_id');
 
-		// Copia variableValueLabel
-		$parentInfo = array(entities\DraftVariable::class,
-									"(SELECT mvl_id FROM draft_metric_version_level WHERE mvl_metric_version_id = " . $metricVersionId . ")",
-									"(SELECT mvl_id FROM draft_metric_version_level WHERE mvl_metric_version_id = " . $targetMetricVersionId . ")",
-										'mvv_metric_version_level_id IN', 'vvl_variable_id');
-		RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftVariableValueLabel::class);
+			// Copia variableValueLabel
+			$parentInfo = array(entities\DraftVariable::class,
+										$metricVersionLevelId,
+										$targetMetricVersionLevelId,
+										'mvv_metric_version_level_id', 'vvl_variable_id');
+			RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftVariableValueLabel::class);
+		}
 	}
 
 	private function GetTargetVersionByCaption($newName, $targetWorkId)

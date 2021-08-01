@@ -438,13 +438,26 @@ class DatasetService extends DbSession
 		// Borra indicadores
 		$this->DeleteMetricVersionLevels($datasetId);
 		// Borra valueLabels
-		$deleteLabels = "DELETE FROM draft_dataset_column_value_label WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column WHERE dco_dataset_id = ?)";
+		$deleteLabels = "DELETE FROM draft_dataset_column_value_label
+											WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column WHERE dco_dataset_id = ?)";
 		App::Db()->exec($deleteLabels, array($datasetId));
 		// Borra columnas
 		$deleteCols = "DELETE FROM draft_dataset_column WHERE dco_dataset_id = ?";
 		App::Db()->exec($deleteCols, array($datasetId));
+		// Guardar el marker
+		$marker = $dataset->getMarker();
+		if ($marker)
+			$markerId = $marker->getId();
+		else
+			$markerId = null;
 		// Borra dataset
 		App::Orm()->delete($dataset);
+		// Borrar marker_info asociado
+		if ($markerId)
+		{
+			$deleteMarker = "DELETE FROM draft_dataset_marker WHERE dmk_id = ?";
+			App::Db()->exec($deleteMarker, array($markerId));
+		}
 		// Borra tablas
 		$tableName = $dataset->getTable();
 		App::Db()->dropTable($tableName);
@@ -502,12 +515,26 @@ class DatasetService extends DbSession
 	{
 		Profiling::BeginTimer();
 		$metricVersionLevelId = $metricVersionLevel->getId();
-		// Borra las variables
+
 		$variables = "draft_variable WHERE mvv_metric_version_level_id = ?";
+		// Borra los valueLabels
 		$deleteVariableValueLabel = "DELETE FROM draft_variable_value_label WHERE vvl_variable_id IN (SELECT mvv_id FROM " . $variables . ")";
     App::Db()->exec($deleteVariableValueLabel, array($metricVersionLevelId));
+		// Borra las variables guardándose los symbologies
+		$symbologiesSql = "SELECT mvv_symbology_id FROM " . $variables;
+		$symbologies = App::Db()->fetchAll($symbologiesSql, array($metricVersionLevelId));
     $deleteMetricVersionVariable = "DELETE FROM " . $variables;
     App::Db()->exec($deleteMetricVersionVariable, array($metricVersionLevelId));
+		// Borra los symbologies
+		if (count($symbologies) > 0)
+		{
+			$symIds = [];
+			foreach($symbologies as $row)
+				$symIds[] = $row['mvv_symbology_id'];
+			$ids = implode("," , $symIds);
+			App::Db()->exec("DELETE FROM draft_symbology WHERE vsy_id IN (" . $ids . ") AND NOT EXISTS(
+									SELECT * FROM draft_variable WHERE mvv_symbology_id IN (" . $ids ."))");
+		}
 		Profiling::EndTimer();
 	}
 	private function DeleteOrphanMetricVersion($metricVersion)

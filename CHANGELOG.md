@@ -1,4 +1,5 @@
 [CURRENT]
+- Mejoras clonado de dataset y cartografía.
 
 v2.38 (2021-07-19)
 - Permite georreferenciar coordenadas expresadas en grados, minutos y segundos.
