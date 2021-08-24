@@ -38,7 +38,7 @@ class SnapshotLookupModel
 		$dataset = $this->GetDatasetInfo($datasetIdShardified);
 
 		$sql = "INSERT INTO snapshot_lookup_feature (clf_dataset_id, clf_level, "
-								. "clf_full_parent, clf_caption, clf_location, clf_min_zoom, clf_max_zoom, clf_feature_ids, clf_symbol, clf_tooltip) ";
+									. "clf_full_parent, clf_caption, clf_location, clf_min_zoom, clf_max_zoom, clf_feature_ids, clf_symbol, clf_tooltip) ";
 
 		$sqlInsert = "SELECT ?, gei_geography_id,
 								?, " . $dataset['CaptionColumn'] . ", "

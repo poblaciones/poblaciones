@@ -78,6 +78,7 @@ class DatasetService extends DbSession
 		$dataset->setType('L');
 		$dataset->setShowInfo(true);
 		$dataset->setExportable(true);
+		$dataset->setPublicLabels(true);
 		$dataset->setGeoreferenceStatus(0);
 		$dataset->setGeocoded(false);
 		$dataset->setAreSegments(false);

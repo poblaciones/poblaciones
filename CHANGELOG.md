@@ -1,5 +1,7 @@
 [CURRENT]
 - Mejoras clonado de dataset y cartografía.
+- Permite excluir datasets públicos de las etiquetas del mapa base.
+- Los resultados del buscador se pueden seleccionar con flechas y <enter>.
 
 v2.38 (2021-07-19)
 - Permite georreferenciar coordenadas expresadas en grados, minutos y segundos.
@@ -44,7 +46,7 @@ v2.35 (2021-04-13)
 - Se admiten íconos por categoría en mapas de localizaciones.
 
 v2.34 (2021-03-21)
-- Se agregan 'delimitaciones' que reunionen una o varias regiones de clipping. Tiene fuente (metadatos), descarga e inserción desde buscador y botón de 'agregar'.
+- Se agregan 'delimitaciones' que reúnen una o varias regiones de clipping. Tiene fuente (metadatos), descarga e inserción desde buscador y botón de 'agregar'.
 - Los tiles hacen crop de los polígonos antes de salir del servidor.
 - Fix: el filtro de urbanidad/ruralidad no podía ser removida en los indicadores 'compactos' (solo lista de elementos).
 - Actualización de versión default de Google Maps.

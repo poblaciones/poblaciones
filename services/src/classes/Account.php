@@ -313,8 +313,8 @@ class Account
 		$this->EnsureDbInfo();
 		if($isCreate)
 		{
-			$this->firstName = $data->firstName;
-			$this->lastName = $data->lastName;
+			$this->firstName = $data->firstname;
+			$this->lastName = $data->lastname;
 		}
 		$this->SetOauthId($data->provider, $data->id);
 		$this->isActive = true;

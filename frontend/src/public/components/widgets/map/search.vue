@@ -1,7 +1,9 @@
 <template>
 	<div v-hotkey="keymap" class="searchBar no-print">
 		<div class="input-group">
-			<input v-model='text' ref='sfield' id='sfield' autofocus v-on:keyup='doSearch' class="form-control formBorder" :class="getLoading()" type="text" placeholder="Buscar">
+			<input v-model='text' ref='sfield' id='sfield' autofocus autocomplete="off"
+						 v-on:keyup='doSearch' class="form-control formBorder"
+						 :class="getLoading()" type="text" placeholder="Buscar">
 			<span class="input-group-btn">
 				<button v-on:click="doSearch" class="btn btn-default lupa-button" type="button"><i class="fa fa-search"></i>
 				</button>
@@ -86,17 +88,17 @@ export default {
 		},
 		clearHover() {
 			this.autolist.filter(function(el) {
-				el.class = '';
+				el.Class = '';
 			});
 		},
 		out(item, index) {
 			this.clearHover();
-			// item.class = '';
+			// item.Class = '';
 			this.selindex = -1;
 		},
 		over(item, index) {
 			this.clearHover();
-			item.class = 'lihover';
+			item.Class = 'lihover';
 			this.selindex = index;
 		},
 		select(event, item) {
@@ -135,8 +137,8 @@ export default {
 				this.$refs.sfield.focus();
 			} else {
 				loc.autolist.find(function(el) {
-					if(el.class !== '') {
-						loc.select(el);
+					if(el.Class !== '') {
+						loc.select(e, el);
 						return;
 					};
 				});
@@ -151,13 +153,13 @@ export default {
 			this.$refs.sfield.blur();
 
 			if(this.selindex >= 0 && this.selindex < this.autolist.length - 1) {
-				this.autolist[this.selindex].class = '';
+				this.autolist[this.selindex].Class = '';
 				this.selindex++;
 			} else {
-				this.autolist[this.autolist.length - 1].class = '';
+				this.autolist[this.autolist.length - 1].Class = '';
 				this.selindex = 0;
 			}
-			this.autolist[this.selindex].class = 'lihover';
+			this.autolist[this.selindex].Class = 'lihover';
 		},
 		arrowKeyUp(e) {
 			if(this.hasSelected() === false) {
@@ -168,13 +170,13 @@ export default {
 			this.$refs.sfield.blur();
 
 			if(this.selindex > 0) {
-				this.autolist[this.selindex].class = '';
+				this.autolist[this.selindex].Class = '';
 				this.selindex--;
 			} else {
-				this.autolist[0].class = '';
+				this.autolist[0].Class = '';
 				this.selindex = this.autolist.length - 1;
 			}
-			this.autolist[this.selindex].class = 'lihover';
+			this.autolist[this.selindex].Class = 'lihover';
 		},
 		escapeKey(e) {
 			if(this.hasSelected()) {
@@ -274,18 +276,15 @@ ul {
 	padding: 1px;
 	margin: 1px;
 }
-li {
-	padding: 1px;
-	margin: 1px;
-	cursor: pointer;
-	cursor: hand;
-	border-bottom: 1px solid #ccc;
-}
+	li {
+		padding: 1px 5px 3px 5px;
+		margin: 0px;
+		cursor: pointer;
+		cursor: hand;
+		border-bottom: 1px solid #ccc;
+	}
 li:last-child {
 	border-bottom: 0px;
-}
-.lihover {
-	background: lightgrey;
 }
 
 .fade-enter-active, .fade-leave-active {

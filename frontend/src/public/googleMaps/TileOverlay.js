@@ -63,6 +63,7 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 		this.requestedTiles[key] = dataRequest;
 	}
 	//div.innerHTML = '<div style="padding: 4px; ">XXXXXXXXXXXX<a href="' + args + '">' + args + '</a></div>';
+	//div.innerHTML = '<div style="padding: 4px; "><a href="' + args + '">' + args + '</a></div>';
 
 	return div;
 };

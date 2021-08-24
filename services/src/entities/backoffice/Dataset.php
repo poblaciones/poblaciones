@@ -75,6 +75,12 @@ class Dataset
      */
     private $AreSegments;
 
+    /**
+     * @var boolean
+		 *
+     * @ORM\Column(name="dat_public_labels", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $PublicLabels;
 
 		/**
      * @var boolean
@@ -404,6 +410,31 @@ class Dataset
     public function getShowInfo()
     {
         return $this->ShowInfo;
+    }
+
+
+    /**
+     * Set publicLabels
+     *
+     * @param boolean $publicLabels
+     *
+     * @return Dataset
+     */
+    public function setPublicLabels($publicLabels)
+    {
+        $this->PublicLabels = $publicLabels;
+
+        return $this;
+    }
+
+    /**
+     * Get publicLabels
+     *
+     * @return boolean
+     */
+    public function getPublicLabels()
+    {
+        return $this->PublicLabels;
     }
 
     /**

@@ -12,7 +12,7 @@
 				<MapPanel />
 				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
 				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
-				<EditButton v-if="work.Current && !Embedded.Active" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
+				<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
@@ -1013,6 +1013,9 @@
 			text-decoration: none;
 			color: #000000;
 		}
+	.lihover {
+		background: #efefef;
+	}
 
 	.copyright {
 		padding: 0px 5px;

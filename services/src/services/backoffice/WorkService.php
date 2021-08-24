@@ -389,7 +389,7 @@ class WorkService extends BaseService
 				$got = $row[$keys[$n + 1]];
 				if ($got !== null && $got !== $datId)
 				{
-					$ret .= "El dataset para " . $keys[$n] . "=" . $row[$keys[$n]] . " no es el esperado. Esperado: " . $datId . ", obtenido: " . $got . '\n';
+					$ret .= "El dataset para " . $keys[$n] . "=" . $row[$keys[$n]] . " no es el esperado. Esperado: " . $datId . ", obtenido: " . $got . "\n";
 				}
 			}
 		}
@@ -403,7 +403,7 @@ class WorkService extends BaseService
 		{
 			if ($row['c'] > 1)
 			{
-				$ret .= $message . ". Identificador " . $idColumn . "=" . $row[$idColumn] . '\n';
+				$ret .= $message . ". Identificador " . $idColumn . "=" . $row[$idColumn] . "\n";
 			}
 		}
 		return $ret;

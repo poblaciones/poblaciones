@@ -23,7 +23,6 @@
 									<mp-select label="Textura" :list="validTextures" :modelKey="true" :canEdit="canEdit"
 														 v-model="Dataset.properties.TextureId" @selected="Update" />
 								</div>
-
 								<div class='md-layout-item md-size-50 md-small-size-100'>
 									<mp-select label='Imágenes' :allowNull='true'
 														 @selected='Update' :canEdit='canEdit'
@@ -31,7 +30,6 @@
 														 :list='Dataset.Columns' v-model='Dataset.properties.ImagesColumn'
 														 :render="formatColumn" />
 								</div>
-
 								<div class='md-layout-item md-size-50 md-small-size-100'>
 									<div class="mp-label labelSeparator">
 										Mostrar ficha de resumen al hacer click en elementos del mapa
@@ -39,6 +37,17 @@
 									<div>
 										<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
 											{{ infoEnabledStatus }}
+										</md-switch>
+									</div>
+								</div>
+
+								<div class='md-layout-item md-size-50 md-small-size-100' v-if="Work.IsPublicData()">
+									<div class="mp-label labelSeparator">
+										Incluir en las etiquetas públicas del mapa de base
+									</div>
+									<div>
+										<md-switch v-model="Dataset.properties.PublicLabels" :disabled="!canEdit" class="md-primary" @change="Update">
+											{{ publicLabelsStatus }}
 										</md-switch>
 									</div>
 								</div>
@@ -166,6 +175,9 @@
 			},
 			Work() {
 				return window.Context.CurrentWork;
+			},
+			publicLabelsStatus() {
+				return (this.Dataset.properties.PublicLabels ? 'Activado' : 'Desactivado');
 			},
 			infoEnabledStatus() {
 				return (this.Dataset.properties.ShowInfo ? 'Activado' : 'Desactivado');

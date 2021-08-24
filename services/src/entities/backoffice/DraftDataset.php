@@ -86,6 +86,15 @@ class DraftDataset
      */
     private $Geocoded;
 
+
+    /**
+     * @var boolean
+		 *
+     * @ORM\Column(name="dat_public_labels", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $PublicLabels;
+
+
 		/**
      * @var boolean
 		 *
@@ -482,6 +491,30 @@ class DraftDataset
         return $this->Marker;
     }
 
+
+    /**
+     * Set publicLabels
+     *
+     * @param boolean $publicLabels
+     *
+     * @return DraftDataset
+     */
+    public function setPublicLabels($publicLabels)
+    {
+        $this->PublicLabels = $publicLabels;
+
+        return $this;
+    }
+
+    /**
+     * Get publicLabels
+     *
+     * @return boolean
+     */
+    public function getPublicLabels()
+    {
+        return $this->PublicLabels;
+    }
 
     /**
      * Set geocoded

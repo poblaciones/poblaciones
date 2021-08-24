@@ -72,7 +72,7 @@ class SnapshotsManager extends BaseService
 			$shapeItems = new SnapshotShapeDatasetItemModel();
 			$shapeItems->RegenDataset($row['dat_id']);
 		}
-		if ($workIsIndexed)
+		if ($workIsIndexed && $row["dat_public_labels"])
 		{
 			if (($row["dat_type"] == DatasetTypeEnum::Shapes || $row["dat_type"] == DatasetTypeEnum::Locations)
 				&& $row["dat_caption_column_id"] !== null)
