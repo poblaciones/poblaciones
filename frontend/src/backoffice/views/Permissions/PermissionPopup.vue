@@ -56,7 +56,7 @@ export default {
 		},
 		onAddOk() {
 			let loc = this;
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doSave(this.Work,
 														this.Work.AddPermission,
 														this.user, this.level)
 												.then(function() {

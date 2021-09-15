@@ -1,22 +1,22 @@
 <template>
-	<div>
+	<div v-if="newMetric.Type">
 		<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false">
 
 			<invoker ref="invoker"></invoker>
-			<stepper ref="stepper" @closed="stepperClosed" title="Calcular indicador"></stepper>
+			<stepper ref="stepper" @closed="stepperClosed" :title="'Realizando ' + action"></stepper>
 
 			<md-dialog-title>
-				Paso {{ step }}{{ maxSteps }}{{ by }}
+				Asistente de {{ action }}
 				<div class="stepProgress">
 
 				</div>
 			</md-dialog-title>
 
 			<md-dialog-content>
-				<div style="min-height: 300px; padding-top: 18px">
-					<step-type v-show="currentStep == 'stepType'" ref="stepType" @raiseNext="next()" />
+				<div style="padding-top: 18px; min-height: 280px;">
+					<step-distance-welcome v-show="currentStep == 'stepDistanceWelcome'" ref="stepDistanceWelcome" @raiseNext="next()" />
+					<step-area-welcome v-show="currentStep == 'stepAreaWelcome'" ref="stepAreaWelcome" @raiseNext="next()" />
 					<step-source v-show="currentStep == 'stepSource'" ref="stepSource" :newMetric="newMetric" />
-					<step-coverage v-show="currentStep == 'stepCoverage'" ref="stepCoverage" :newMetric="newMetric" />
 					<step-distance-output v-show="currentStep == 'stepDistanceOutput'" ref="stepDistanceOutput" :newMetric="newMetric" />
 					<step-area-output v-show="currentStep == 'stepAreaOutput'" ref="stepAreaOutput" :newMetric="newMetric" />
 				</div>
@@ -36,9 +36,9 @@
 </template>
 
 <script>
-import StepType from './StepType.vue';
+import StepAreaWelcome from './StepAreaWelcome.vue';
+import StepDistanceWelcome from './StepDistanceWelcome.vue';
 import StepSource from './StepSource.vue';
-import StepCoverage from './StepCoverage.vue';
 import StepAreaOutput from './StepAreaOutput.vue';
 import StepDistanceOutput from './StepDistanceOutput.vue';
 
@@ -46,9 +46,9 @@ import StepDistanceOutput from './StepDistanceOutput.vue';
 export default {
 	name: 'calculateMetric',
 	components: {
-		StepType,
+		StepAreaWelcome,
+		StepDistanceWelcome,
 		StepSource,
-		StepCoverage,
 		StepAreaOutput,
 		StepDistanceOutput,
 	},
@@ -59,8 +59,8 @@ export default {
 			openPopup: false,
 			processing: false,
 			steps: {
-				'area': ['stepSource', 'stepCoverage', 'stepAreaOutput'],
-				'distance': ['stepSource', 'stepDistanceOutput']
+				'area': ['stepAreaWelcome', 'stepSource', 'stepAreaOutput'],
+				'distance': ['stepDistanceWelcome', 'stepSource', 'stepDistanceOutput']
 			}
 		};
 	},
@@ -82,6 +82,13 @@ export default {
 				return '';
 			} else {
 				return ' de ' + (this.steps[this.newMetric.Type].length + 1);
+			}
+		},
+		action() {
+			if (this.newMetric.Type == 'distance') {
+				return 'rastreo';
+			} else {
+				return 'conteo';
 			}
 		},
 		currentStep() {
@@ -153,11 +160,8 @@ export default {
 			};
 		},
 		calculateStep(step) {
-			if (this.step == 1) {
-				return "stepType";
-			}
 			var steps = this.steps[this.newMetric.Type];
-			step -= 2;
+			step -= 1;
 			if (step < steps.length) {
 				return steps[step];
 			} else {
@@ -182,9 +186,6 @@ export default {
 			if (!this.validate()) {
 				return;
 			}
-			if (this.step === 1) {
-				this.defineType(this.$refs.stepType.type);
-			}
 			this.step++;
 		},
 		prev() {
@@ -198,8 +199,9 @@ export default {
 			}
 			this.newMetric.Type = type;
 		},
-		show() {
+		show(typeDistance = false) {
 			this.step = 1;
+			this.defineType(typeDistance ? 'distance' : 'area');
 			this.openPopup = true;
 		},
 		save() {
@@ -217,16 +219,17 @@ export default {
 			this.newMetric.Source.VersionId = this.newMetric.SelectedVersion.Version.Id;
 			this.newMetric.Source.LevelId = this.newMetric.SelectedLevel.Id;
 
-			if(this.newMetric.Type == 'distance') {
-				return {
+			var ret = {
 					k: this.Dataset.properties.Id,
 					t: this.newMetric.Type,
 					s: JSON.stringify(this.newMetric.Source),
 					o: JSON.stringify(this.newMetric.Output),
-				};
+			};
+			if (this.newMetric.Type == 'area') {
+				ret.a = JSON.stringify(this.newMetric.Area);
 			}
 			// Definir
-			return {};
+			return ret;
 		},
 		stepperClosed() {
 			let stepper = this.$refs.stepper;

@@ -84,7 +84,7 @@ export default {
 	methods: {
 		LoadData() {
 			var loc = this;
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doMessage('Obteniendo información', this.Work,
 				this.Work.GetWorkStatistics).then(function (data) {
 					loc.regions = loc.processList(data.region);
 					loc.general = loc.processList(data.work);

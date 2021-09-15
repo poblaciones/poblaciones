@@ -87,7 +87,7 @@ export default {
 		save() {
 			var loc = this;
 
-			this.$refs.invoker.do(window.Db, window.Db.UpdateReview,
+			this.$refs.invoker.doSave(window.Db, window.Db.UpdateReview,
 							this.review, this.password, this.verification).then(function(data) {
 								loc.activateEdit = false;
 								loc.$emit('completed', data);

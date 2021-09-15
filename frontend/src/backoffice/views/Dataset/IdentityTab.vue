@@ -232,13 +232,13 @@
 				if (this.Dataset.properties.TextureId === 0) {
 					this.Dataset.properties.TextureId = null;
 				}
-				this.$refs.invoker.do(this.Dataset, this.Dataset.Update);
+				this.$refs.invoker.doSave(this.Dataset, this.Dataset.Update);
 			},
 			UpdateRegen() {
 				if (this.Dataset.properties.TextureId === 0) {
 					this.Dataset.properties.TextureId = null;
 				}
-				this.$refs.invoker.do(this.Dataset, this.Dataset.UpdateRegen);
+				this.$refs.invoker.doSave(this.Dataset, this.Dataset.UpdateRegen);
 			}
 		}
 	};

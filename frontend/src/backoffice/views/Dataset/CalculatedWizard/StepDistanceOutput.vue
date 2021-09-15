@@ -1,23 +1,20 @@
 <template>
-	<div class="md-layout">
-		<div class="md-layout-item md-size-100">
-			Indique qué valores desea guardar como resultado de la búsqueda.
-		</div>
-		<div class="md-layout-item-separation"></div>
-		<div class="md-layout-item md-size-100">
-			Guardar:
+	<div class="md-layout" v-if="newMetric.SelectedVariable">
+		<div class="md-layout-item md-size-100 mp-label">
+			Variables a crear como resultado del rastreo. La distancia será guardada.
 		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100" v-if="hasDescription" >
 			<md-switch class="md-primary" v-model="newMetric.Output.HasDescription">Descripción</md-switch>
 		</div>
-		<div class="md-layout-item md-size-30 md-small-size-100">
+		<div class="md-layout-item md-size-30 md-small-size-100" v-if="!newMetric.SelectedVariable.IsSimpleCount">
 			<md-switch class="md-primary" v-model="newMetric.Output.HasValue">Valor</md-switch>
 		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100">
 			<md-switch class="md-primary" v-model="newMetric.Output.HasCoords">Coordenadas</md-switch>
 		</div>
-		<div class="md-layout-item md-size-100 md-layout-item-separated">
-			Limitar coincidencias:
+
+		<div class="md-layout-item md-size-100 md-layout-item-separated mp-label">
+			Limitar coincidencias
 		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100" style="display: inline-flex;">
 			<md-switch class="md-primary" v-model="newMetric.Output.HasMaxDistance">

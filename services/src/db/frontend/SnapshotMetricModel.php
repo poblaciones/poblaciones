@@ -3,6 +3,7 @@
 namespace helena\db\frontend;
 
 use helena\classes\App;
+use helena\classes\Account;
 use minga\framework\Profiling;
 use minga\framework\Str;
 use minga\framework\Context;
@@ -30,7 +31,7 @@ class SnapshotMetricModel extends BaseModel
 	{
 		if ($getAllPublicData)
 		{
-			$where = "WHERE mvw_work_is_private = 0 ";
+			$where = "WHERE mvw_work_is_private = 0 and mvw_work_is_indexed = 1 ";
 			$having = "HAVING SUM(case when mvw_work_type = 'P' then 1 else 0 end) > 0 ";
 			$orderBy = "ORDER BY myv_metric_group_id, myv_metric_provider_id, myv_metric_caption ";
 		}
@@ -40,7 +41,6 @@ class SnapshotMetricModel extends BaseModel
 			$having = "";
 			$orderBy = "";
 		}
-
 		$sql = "SELECT	mvw_metric_id myv_metric_id,
 										MIN(mvw_metric_caption) myv_metric_caption,
 										MAX(mvw_metric_revision) myv_metric_revision,
@@ -79,8 +79,9 @@ class SnapshotMetricModel extends BaseModel
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 		$sql = "SELECT COUNT(*)
 							FROM snapshot_metric_version
-							WHERE mvw_work_is_indexed = 1 AND mvw_work_is_private = 0";
-		$ret = App::Db()->fetchScalarInt($sql, array($metricIdShardified));
+							WHERE IsAccessibleWork(?, mvw_work_id, mvw_work_is_indexed, mvw_work_is_private) AND mvw_metric_id = ?";
+		$userId = Account::Current()->GetUserIdOrNull();
+		$ret = App::Db()->fetchScalarInt($sql, array($userId, $metricIdShardified));
 		Profiling::EndTimer();
 		return $ret > 0;
 	}
@@ -105,9 +106,12 @@ class SnapshotMetricModel extends BaseModel
 										WHERE (MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
 										`mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (? IN BOOLEAN MODE) " .
 										$specialWordsCondition . "
-										) AND mvw_work_is_indexed = 1 AND mvw_work_is_private = 0
+										) AND IsAccessibleWork(?, mvw_work_id, mvw_work_is_indexed, mvw_work_is_private)
 										GROUP BY mvw_metric_id, mvw_metric_caption
 										LIMIT 0, 10)";
+
+		$userId = Account::Current()->GetUserIdOrNull();
+		$args[] = $userId;
 
 		if ($includeBoundaries) {
 			$boundariesSpecialWordsCondition = self::calculateSpecialWordsCondition($originalQuery, ['bow_caption', 'bow_group']);
@@ -120,7 +124,8 @@ class SnapshotMetricModel extends BaseModel
 										WHERE MATCH (`bow_caption`, `bow_group`) AGAINST (? IN BOOLEAN MODE) " .
 											$boundariesSpecialWordsCondition . " LIMIT 0, 10)";
 			$sql .= " UNION ALL " . $boundariesSql;
-			$args[] = $query; $args[] = $query;
+			$args[] = $query;
+			$args[] = $query;
 		}
 		$sql .= " ORDER BY Relevance DESC";
 		$ret = App::Db()->fetchAll($sql, $args);

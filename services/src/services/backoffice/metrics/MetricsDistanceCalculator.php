@@ -15,9 +15,9 @@ use minga\framework\PublicException;
 use minga\framework\Profiling;
 use minga\framework\Str;
 
-class MetricsCalculator
+class MetricsDistanceCalculator
 {
-	const ColPrefix = 'dst_';
+	const ColPrefix = '';
 	const STEP = 1000;
 
 	public function StepCreateColumns($datasetId, $source, $output)
@@ -252,10 +252,10 @@ class MetricsCalculator
 											ORDER BY id LIMIT ' . $offset . ', ' . $pageSize . ') as li';
 		$ranges = App::Db()->fetchAssoc($rangesSql);
 
-		$update = 'UPDATE ' . $datasetTable . '
-			JOIN ' . $sourceSnapshotTable . '
+		$update = 'UPDATE ' . $datasetTable . ' '
+				. $distance['join'] .
+			' JOIN ' . $sourceSnapshotTable . '
 			ON sna_id = ' . $distance['nearestFn'] . '(?, ' . $distance['col'] . ', ' . $distMts . ', null) '
-				. $distance['join']
 				. $distance['srcJoin']
 			. ' SET '
 			. $this->GetCoordsSet($output, $cols)

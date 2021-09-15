@@ -1,5 +1,5 @@
 <template>
-	<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false">
+	<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false" class="largeDialog">
 		<md-dialog-title>
 			Georreferenciar
 		</md-dialog-title>
@@ -63,7 +63,4 @@
 
 <style lang="scss">
 
-	.md-dialog-container {
-		max-width: 870px !important;
-	}
 </style>

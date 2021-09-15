@@ -2,6 +2,8 @@
   <div>
 		<div v-if="Dataset">
 			<invoker ref="invoker"></invoker>
+			<calculated-metric-wizard ref="calculatedMetricWizard">
+			</calculated-metric-wizard>
 			<stepper ref="stepper" title="Descargar"></stepper>
 			<relocate v-if="showingErrors" @relocated="relocated" ref="Relocate"></relocate>
 			<fix-code v-if="showingErrors" @fixed="fixedCode" ref="FixCode"></fix-code>
@@ -91,6 +93,14 @@
 					<md-button @click="createGrid()">
 						<md-icon>refresh</md-icon> Actualizar
 					</md-button>
+					<md-button v-if="calculateEnabled" @click="calculateNewMetricDistance">
+						<md-icon>radar</md-icon>
+						Rastreo
+					</md-button>
+					<md-button v-if="calculateEnabled" @click="calculateNewMetricAreaCount">
+						<md-icon>functions</md-icon>
+						Conteo
+					</md-button>
 					<md-button @click="startDownload('c')">
 						<md-icon>import_export</md-icon> Descargar .CSV
 					</md-button>
@@ -117,6 +127,7 @@ import Relocate from './Relocate.vue';
 import FixPolygon from './FixPolygon.vue';
 import FixCode from './FixCode.vue';
 import DataPager from "@/backoffice/classes/DataPager";
+import CalculatedMetricWizard from '@/backoffice/views/dataset/CalculatedWizard/CalculatedWizard.vue';
 import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import str from '@/common/framework/str';
 import Localization from "@/backoffice/classes/Localization";
@@ -128,7 +139,8 @@ var columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
 export default {
   name: "activeGrid",
-		components: {
+	components: {
+		CalculatedMetricWizard,
 		JqxGrid,
 		FixCode,
 		FixPolygon,
@@ -137,7 +149,7 @@ export default {
   },
 	props: {
 		georeferenceParameters: { type: Object },
-    showingErrors: false,
+		showingErrors: false,
 		gridwidth: {
 			type: Number,
 			default: 700
@@ -235,6 +247,23 @@ export default {
 		},
 		confirmDelete() {
 			this.$refs.confirmDialog.show();
+		},
+		calculateEnabled() {
+			return window.Context.Configuration.UseCalculated;
+		},
+		calculateNewMetricDistance() {
+			if (!this.Dataset.properties.Geocoded) {
+				alert('Para realizar un rastreo es necesario antes georreferenciar el dataset.');
+				return;
+			}
+			this.$refs.calculatedMetricWizard.show(true);
+		},
+		calculateNewMetricAreaCount() {
+			if (!this.Dataset.properties.Geocoded) {
+				alert('Para definir un conteo es necesario antes georreferenciar el dataset.');
+				return;
+			}
+			this.$refs.calculatedMetricWizard.show();
 		},
 		getStartDownloadUrl() {
 			return window.host + '/services/backoffice/StartDatasetDownload';

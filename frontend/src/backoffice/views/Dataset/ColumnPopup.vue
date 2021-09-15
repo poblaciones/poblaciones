@@ -108,7 +108,7 @@ export default {
 				alert(msg);
 				return;
 			}
-			this.$refs.invoker.do(this.Dataset, this.Dataset.SaveColumn,
+			this.$refs.invoker.doSave(this.Dataset, this.Dataset.SaveColumn,
 							this.variable).then(function(data) {
 								loc.variable.Caption = data.Caption;
 								loc.variable.Order = data.Order;

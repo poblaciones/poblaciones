@@ -47,7 +47,7 @@ import arr from '@/common/framework/arr';
 	},
 	mounted() {
 		var loc = this;
-		this.$refs.invoker.do(window.Db,
+		this.$refs.invoker.doMessage('Obteniendo regiones', window.Db,
 				window.Db.GetClippingRegions).then(function(data) {
 					arr.AddRange(loc.list, data);
 					});

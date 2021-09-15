@@ -169,14 +169,14 @@ export default {
 		updateIcon(name) {
 			var name = "usu-" + this.sanitize(name);
 			var id = this.$refs.customIcon.selectedId;
-			this.$refs.invoker.do(this.Work, this.Work.UpdateIcon,
+			this.$refs.invoker.doSave(this.Work, this.Work.UpdateIcon,
 				id, name).then(function (data) {
 				});
 		},
 		createIcon(iconImage, filename) {
 			var loc = this;
 			var name = this.getNewName(filename);
-			this.$refs.invoker.do(this.Work, this.Work.CreateIcon,
+			this.$refs.invoker.doSave(this.Work, this.Work.CreateIcon,
 				name, iconImage).then(function (data) {
 					arr.Add(loc.Work.Icons, { Id: data.Id, Caption: name, Image: iconImage });
 					loc.symbolCustom = name;

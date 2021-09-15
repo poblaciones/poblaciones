@@ -73,7 +73,7 @@ export default {
 			var loc = this;
 			this.boundary.IsPrivate = !this.isPublic;
 
-			this.$refs.invoker.do(window.Db, window.Db.UpdateBoundary,
+			this.$refs.invoker.doSave(window.Db, window.Db.UpdateBoundary,
 							this.boundary).then(function(data) {
 								loc.activateEdit = false;
 								loc.$emit('completed', loc.boundary);

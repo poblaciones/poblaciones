@@ -4,9 +4,6 @@
 		<ValuesPopup v-if="valuesPopupReset" ref="valuesPopup"></ValuesPopup>
 		<ColumnPopup ref="edit" @completed="completeEditOnClick"></ColumnPopup>
 
-		<calculated-metric-wizard ref="calculatedMetricWizard">
-		</calculated-metric-wizard>
-
 		<div class="md-layout md-gutter">
 			<div style="position: relative">
 				<div v-if="Work.CanEdit()" style="position: absolute; left: 850px">
@@ -42,10 +39,6 @@
 						<md-icon>toc</md-icon>
 						Auto-recodificar
 					</md-button>
-					<md-button v-if="calculateEnabled" @click="calculateNewMetric">
-						<md-icon>search</md-icon>
-						Rastreo
-					</md-button>
 					<md-button v-if="canEdit" @click="confirmDelete" :disabled="deleteDisabled">
 						<md-icon>delete</md-icon>
 						Eliminar
@@ -74,7 +67,6 @@ import ValuesPopup from './ValuesPopup.vue';
 import arr from '@/common/framework/arr';
 import ColumnPopup from './ColumnPopup.vue';
 import Localization from '@/backoffice/classes/Localization';
-import CalculatedMetricWizard from './CalculatedWizard/CalculatedWizard.vue';
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue';
 import JqxTooltip from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue';
 // https://www.jqwidgets.com/vue/vue-grid/
@@ -85,7 +77,6 @@ export default {
 	components: {
 		JqxGrid,
 		ValuesPopup,
-		CalculatedMetricWizard,
 		ColumnPopup
 	},
 	computed: {
@@ -97,9 +88,6 @@ export default {
 		},
 		Grid() {
 			return this.$refs.columnsGrid;
-		},
-		calculateEnabled() {
-			return window.Context.Configuration.UseCalculated;
 		},
 		canEdit() {
 			if (window.Context.CurrentWork) {
@@ -150,13 +138,6 @@ export default {
 		},
 		AlignmentToString(alignment) {
 			return  this.Match(this.Dataset.ValidAlignments(), alignment);
-		},
-		calculateNewMetric() {
-			if (!this.Dataset.properties.Geocoded) {
-				alert('Para definir un indicador calculado es necesario antes georreferenciar el dataset.');
-				return;
-			}
-			this.$refs.calculatedMetricWizard.show();
 		},
 		getData() {
 			if (this.Dataset === null) {

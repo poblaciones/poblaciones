@@ -139,7 +139,7 @@ export default {
 	},
 	methods: {
 		Update() {
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doSave(this.Work,
 				this.Work.UpdateStartup);
 		},
 		regionSelected(item) {

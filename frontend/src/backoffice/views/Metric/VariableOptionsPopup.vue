@@ -154,7 +154,7 @@ export default {
 				return;
 			}
 			var loc = this;
-			this.$refs.invoker.do(this.Dataset,
+			this.$refs.invoker.doSave(this.Dataset,
 					this.Dataset.UpdateVariable, this.Level, this.Variable).then(function() {
 					loc.hide();
 					});

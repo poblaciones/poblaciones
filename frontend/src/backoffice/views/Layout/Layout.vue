@@ -30,7 +30,7 @@ export default {
   },
   mounted() {
     var workId = this.$route.params.workId;
-		this.$refs.invoker.do(window.Db,
+		this.$refs.invoker.doMessage('Obteniendo cartografía', window.Db,
 													window.Db.BindWork,
 													workId);
 		Split(['#panMain', '#panRight'], {

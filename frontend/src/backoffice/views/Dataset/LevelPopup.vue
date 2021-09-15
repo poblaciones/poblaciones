@@ -97,7 +97,7 @@ export default {
 				alert('Debe seleccionar un dataset.');
 				return;
 			}
-			this.$refs.invoker.do(this.Dataset, this.Dataset.LevelMetrics, this.sourceDataset.Id).then(
+			this.$refs.invoker.doSave(this.Dataset, this.Dataset.LevelMetrics, this.sourceDataset.Id).then(
 							function() {
 								loc.openDialog = false;
 							});

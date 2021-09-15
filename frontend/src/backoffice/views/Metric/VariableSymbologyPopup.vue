@@ -482,7 +482,7 @@ export default {
 			if (JSON.stringify(this.originalVariable) === JSON.stringify(this.Variable)) {
 				loc.hide();
 			} else {
-				this.$refs.invoker.do(this.Dataset,
+				this.$refs.invoker.doSave(this.Dataset,
 						this.Dataset.UpdateVariable, this.Level, this.Variable).then(function() {
 						loc.hide();
 						});

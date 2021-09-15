@@ -156,7 +156,7 @@ export default {
 		},
 		calculateStats() {
 			var loc = this;
-			this.$refs.invoker.do(window.Db,
+			this.$refs.invoker.doMessage('Calculando estadísticas', window.Db,
 				window.Db.ProcessStatistics, this.currentMonth).then(function (data) {
 					loc.toCache(null);
 					loc.loadData();
@@ -171,7 +171,7 @@ export default {
 				this.receiveData(fromCache);
 			} else {
 				var loc = this;
-				this.$refs.invoker.do(window.Db, window.Db.GetStatistics, this.currentMonth).then(function (data) {
+				this.$refs.invoker.doMessage('Obteniendo estadísticas', window.Db, window.Db.GetStatistics, this.currentMonth).then(function (data) {
 					loc.toCache(data);
 					loc.receiveData(data);
 				});

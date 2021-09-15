@@ -105,10 +105,10 @@ export default {
 			this.$refs.PickSource.show();
 		},
 	  up(item) {
-      this.$refs.invoker.do(this.Work, this.Work.MoveSourceUp, item);
+      this.$refs.invoker.doSave(this.Work, this.Work.MoveSourceUp, item);
     },
     down(item) {
-      this.$refs.invoker.do(this.Work, this.Work.MoveSourceDown, item);
+      this.$refs.invoker.doSave(this.Work, this.Work.MoveSourceDown, item);
     },
     openEditionWarning(item) {
 			var loc = this;

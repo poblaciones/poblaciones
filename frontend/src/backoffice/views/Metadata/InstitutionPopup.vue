@@ -120,7 +120,7 @@
 		},
 		getInstitutionWatermark(){
 			var loc = this;
-			loc.$refs.invoker.do(
+			loc.$refs.invoker.doMessage('Obteniendo imagen',
 				this.Work, this.Work.GetInstitutionWatermark, this.item
 			).then(
 				function (dataUrl) {
@@ -143,7 +143,7 @@
 			} else {
 				this.item.PrimaryColor = this.currentColor;
 			}
-			this.$refs.invoker.do(
+			this.$refs.invoker.doSave(
 				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageToSend
 			).then(
 				function () {

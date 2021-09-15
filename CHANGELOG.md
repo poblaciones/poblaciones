@@ -2,6 +2,11 @@
 - Mejoras clonado de dataset y cartografía.
 - Permite excluir datasets públicos de las etiquetas del mapa base.
 - Los resultados del buscador se pueden seleccionar con flechas y <enter>.
+- Los indicadores de cartografías a las que se tiene acceso se ofrecen en el buscador.
+- Los indicadores de cartografías a las que se tiene acceso se ofrecen en las métricas externas de una cartografía.
+- Se incorpora la herramienta de rastreo.
+- Se incorpora la herramienta de conteo.
+- Se elimina el cartel modal de 'Aguarde por favor'.
 
 v2.38 (2021-07-19)
 - Permite georreferenciar coordenadas expresadas en grados, minutos y segundos.

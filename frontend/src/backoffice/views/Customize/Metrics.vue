@@ -117,7 +117,7 @@ export default {
 	},
 	methods: {
 		Update() {
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doSave(this.Work,
 				this.Work.UpdateStartup);
 		},
 		IsActive(metricId) {
@@ -140,7 +140,7 @@ export default {
 		},
 		handleToggle(value, metric) {
 			var loc = this;
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doSave(this.Work,
 				this.Work.UpdateExtraMetricStart, metric);
 		},
 		metricSelected(metric) {
@@ -150,7 +150,7 @@ export default {
 				}
 			}
 			var loc = this;
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doSave(this.Work,
 				this.Work.AppendExtraMetric, metric).then(
 					function () {
 						loc.$set(metric, 'StartActive', false);
@@ -161,7 +161,7 @@ export default {
 			var loc = this;
 			this.$refs.invoker.confirm('Eliminar indicador', 'El indicador seleccionado será eliminado',
 				function () {
-					loc.$refs.invoker.do(
+					loc.$refs.invoker.doMessage('Eliminando',
 						loc.Work,
 						loc.Work.RemoveExtraMetric, metric).then(
 							function () {

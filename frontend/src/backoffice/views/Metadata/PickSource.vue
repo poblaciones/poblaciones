@@ -84,7 +84,7 @@ export default {
 				return;
 			}
 			var loc = this;
-			this.$refs.invoker.do(this.Work, this.Work.AddSource, this.selected).then(function() {
+			this.$refs.invoker.doSave(this.Work, this.Work.AddSource, this.selected).then(function() {
 				loc.openSources = false;
 				});
     },

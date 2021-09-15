@@ -234,25 +234,25 @@ export default {
 				});
 				return;
 			}
-			this.$refs.invoker.do(this.Dataset,
+			this.$refs.invoker.doSave(this.Dataset,
 														this.Dataset.CloneDataset,
 															this.Work.properties.Id, this.newDatasetName.trim())
 															.then(function(data) {
-																	loc.$refs.invoker.do(window.Db, window.Db.RebindAndFocusLastDataset, loc.$router);
+																	loc.$refs.invoker.doMessage('Obteniendo dataset', window.Db, window.Db.RebindAndFocusLastDataset, loc.$router);
 															});
 		},
 		deleteDataset() {
 			var loc = this;
 			this.$refs.invoker.confirm("Eliminar dataset", "El dataset con sus indicadores correspondientes serán eliminados",
 					function () {
-							loc.$refs.invoker.do(loc.Dataset, loc.Dataset.DeleteDataset, loc.Work.properties.Id).then(
+							loc.$refs.invoker.doMessage('Eliminando', loc.Dataset, loc.Dataset.DeleteDataset, loc.Work.properties.Id).then(
 								function() {
-									loc.$refs.invoker.do(window.Db, window.Db.RebindAndFocusMetadataContent, loc.$router);
+									loc.$refs.invoker.doMessage('Obteniendo cartografía', window.Db, window.Db.RebindAndFocusMetadataContent, loc.$router);
 								});
 					});
 		},
 		Update() {
-      this.$refs.invoker.do(this.Dataset, this.Dataset.Update);
+      this.$refs.invoker.doSave(this.Dataset, this.Dataset.Update);
 		}
 	},
 	watch: {

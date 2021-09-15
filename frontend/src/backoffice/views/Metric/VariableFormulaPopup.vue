@@ -154,13 +154,13 @@ export default {
 			this.updateValues();
 			if (this.originalFilterValue !== this.Variable.FilterValue) {
 				// El filtro impacta en las escalas... regenera
-				this.$refs.invoker.do(this.Dataset.ScaleGenerator,
+				this.$refs.invoker.doSave(this.Dataset.ScaleGenerator,
 					this.Dataset.ScaleGenerator.RegenAndSaveVariable, this.Level, this.Variable).then(function () {
 						loc.hide();
 					});
 			} else {
 				// Simplemente la graba
-				this.$refs.invoker.do(this.Dataset,
+				this.$refs.invoker.doSave(this.Dataset,
 					this.Dataset.UpdateVariable, this.Level, this.Variable).then(function () {
 						loc.hide();
 					});

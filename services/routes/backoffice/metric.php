@@ -203,8 +203,12 @@ App::GetOrPost('/services/backoffice/CalculateNewMetric', function (Request $req
 		$controller = new services\CalculatedDistanceService();
 		return App::Json($controller->StartCalculate($datasetId, $source, $output));
 	}
-	//elseif($type == 'area')
-	// $area = Params::GetJson('a', true);
+	elseif($type == 'area')
+	{
+		$controller = new services\CalculatedAreaService();
+		$area = Params::GetJson('a', true);
+		return App::Json($controller->StartCalculate($datasetId, $source, $output, $area));
+	}
 	return App::Json(['error' => 1, 'msg' => 'No implementado']);
 });
 
@@ -214,8 +218,8 @@ App::GetOrPost('/services/backoffice/StepCalculateNewMetric', function (Request 
 	return App::Json($controller->StepCalculate($key));
 });
 
-App::GetOrPost('/services/backoffice/CalculatedMetricExists', function (Request $request) {
-	$controller = new services\metrics\MetricsCalculator();
+App::GetOrPost('/services/backoffice/CalculatedMetricDistanceExists', function (Request $request) {
+	$controller = new services\metrics\MetricsDistanceCalculator();
 	$datasetId = Params::GetIntMandatory('k');
 	$variableId = Params::GetInt('v');
 
@@ -223,4 +227,15 @@ App::GetOrPost('/services/backoffice/CalculatedMetricExists', function (Request 
 		return $denied;
 
 	return App::Json(['columnExists' => $controller->DistanceColumnExists($datasetId, $variableId)]);
+});
+
+App::GetOrPost('/services/backoffice/CalculatedMetricAreaExists', function (Request $request) {
+	$controller = new services\metrics\MetricsAreaCalculator();
+	$datasetId = Params::GetIntMandatory('k');
+	$variableId = Params::GetInt('v');
+
+	if ($denied = Session::CheckIsDatasetEditor($datasetId))
+		return $denied;
+
+	return App::Json(['columnExists' => $controller->AreaColumnExists($datasetId, $variableId)]);
 });

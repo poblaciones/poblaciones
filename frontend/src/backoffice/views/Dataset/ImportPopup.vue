@@ -220,7 +220,7 @@ export default {
 					loc.Dataset.ReloadProperties();
 					loc.Dataset.ReloadColumns();
 				} else {
-					loc.$refs.invoker.do(window.Db, window.Db.RebindAndFocusLastDataset, loc.$router);
+					loc.$refs.invoker.doMessage('Obteniendo dataset', window.Db, window.Db.RebindAndFocusLastDataset, loc.$router);
 				}
 			});
 		},
@@ -239,7 +239,7 @@ export default {
 		},
 		CreateDataset(name) {
 			var loc = this;
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doMessage('Creando dataset', this.Work,
 				this.Work.CreateNewDataset,
 				name.trim())
 				.then(function (dataset) {

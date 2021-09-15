@@ -93,7 +93,6 @@ export default {
 		},
 		out(item, index) {
 			this.clearHover();
-			// item.Class = '';
 			this.selindex = -1;
 		},
 		over(item, index) {

@@ -180,14 +180,14 @@ export default {
 		},
 		refreshWorks() {
 			var loc = this;
-			this.$refs.invoker.do(window.Db,
+			this.$refs.invoker.doMessage('Obteniendo cartografías', window.Db,
 					window.Db.GetWorks, this.filter, this.timeFilter).then(function(data) {
 						arr.Fill(loc.works, data);
 						});
 		},
 		calculateUsage() {
 			var loc = this;
-			this.$refs.invoker.do(window.Db,
+			this.$refs.invoker.doMessage('Calculando espacio', window.Db,
 				window.Db.CalculateSpaceUsage).then(function (data) {
 					loc.refreshWorks();
 				});
@@ -241,11 +241,11 @@ export default {
 						});
 		},
 		onIndexedChanged(item) {
-			this.$refs.invoker.do(window.Db,
+			this.$refs.invoker.doSave(window.Db,
 														window.Db.UpdateWorkIndexing, item);
 		},
 		onSegmentedCrawlingChanged(item) {
-			this.$refs.invoker.do(window.Db,
+			this.$refs.invoker.doSave(window.Db,
 				window.Db.UpdateWorkSegmentedCrawling, item);
 		},
 		onRevoke(item) {

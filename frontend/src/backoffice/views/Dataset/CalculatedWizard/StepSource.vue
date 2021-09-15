@@ -1,42 +1,45 @@
 <template>
 	<div>
+		<search-popup ref="addMetricPopup" @selected="metricSelected" :getDraftMetrics="false" searchType="m" />
 		<div class="md-layout md-gutter">
-			<div class="md-layout-item md-size-100">
-				Indique los elementos a incluir en la búsqueda:
+			<div class="md-layout-item md-size-100 mp-label" style="margin-bottom: 8px;
+    padding-left: 12px!important;">
+				Elementos a localizar en el {{ action }} (Escuelas, Nivel educativo, etc.)
 			</div>
-			<div class="md-layout-item md-size-100 metricRow">
-				{{ caption }}
-				<md-button class="md-raised" @click="addMetric">
+			<div class="md-layout-item md-size-100">
+				<md-chip class="md-primary" md-deletable @md-delete="clearMetric" style="margin-top: 4px; margin-bottom: 18px;" v-if="caption.length > 0">{{ caption }}</md-chip>
+				<md-button class="md-raised" @click="addMetric" v-else>
 					<md-icon>search</md-icon>
 					Seleccionar...
 				</md-button>
 			</div>
+		</div>
+		<div class="md-layout md-gutter" v-show="caption.length > 0">
 			<div class="md-layout-item md-size-50 md-small-size-100">
 				<mp-select :list="versions" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-					label="Edición" helper="Edición a utilizar" listKey="Id"
-					v-model="newMetric.SelectedVersion" :render="formatVersion" />
+									 label="Edición" helper="Edición a utilizar" listKey="Id" :canEdit="versions.length > 1"
+									 v-model="newMetric.SelectedVersion" :render="formatVersion" />
 			</div>
 			<div class="md-layout-item md-size-50 md-small-size-100">
 				<mp-select :list="levels" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-					label="Nivel" helper="Nivel de agregación a utilizar"
-					v-model="newMetric.SelectedLevel" listCaption="Name" />
+									 label="Nivel" helper="Nivel de agregación a utilizar" :canEdit="levels.length > 1"
+									 v-model="newMetric.SelectedLevel" listCaption="Name" />
 			</div>
 			<div class="md-layout-item md-size-100 md-small-size-100">
 				<mp-select :list="variables" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-					label="Variable" helper="Variable a utilizar"
-					v-model="newMetric.SelectedVariable" listCaption="Name" />
+									 label="Variable" helper="Variable a utilizar" :canEdit="variables.length > 1"
+									 v-model="newMetric.SelectedVariable" listCaption="Name" />
 			</div>
 			<div v-if="valueLabels.length > 0" class="md-layout-item md-size-100 md-small-size-100">
-				Categorías
+				{{ newMetric.SelectedLevel.HasArea ? 'Universo de ' + newMetric.SelectedLevel.Name + ' /' : '' }} Filtrar por:
 			</div>
 			<div v-if="valueLabels.length > 1" class="md-layout-item md-size-30 md-small-size-50">
 				<md-checkbox class="md-primary" v-model="allCategories" @change="selectAll">[Seleccionar todos] </md-checkbox>
 			</div>
 			<div v-for='valueLabel in valueLabels' :key='valueLabel.Id' :value='valueLabel.Id'
-				  class="md-layout-item md-size-30 md-small-size-50">
+					 class="md-layout-item md-size-30 md-small-size-50">
 				<md-checkbox class="md-primary" v-model="newMetric.Source.ValueLabelIds" :value="valueLabel.Id">{{ valueLabel.Name }}</md-checkbox>
 			</div>
-			<search-popup ref="addMetricPopup" @selected="metricSelected" :getDraftMetrics="false" searchType="m" />
 		</div>
 	</div>
 </template>
@@ -72,6 +75,13 @@ export default {
 				return this.newMetric.SourceMetric.Metric.Name;
 			}
 			return '';
+		},
+		action() {
+			if (this.newMetric.Type == 'distance') {
+				return 'rastreo';
+			} else {
+				return 'conteo';
+			}
 		},
 		Dataset() {
 			return window.Context.CurrentDataset;
@@ -112,7 +122,7 @@ export default {
 		formatVersion(version) {
 			return version.Version.Name;
 		},
-		metricSelected(metric) {
+		clearMetric() {
 			this.newMetric.SourceMetric = {};
 			this.newMetric.Source.VariableId = null;
 			this.newMetric.Source.ValueLabelIds = [];
@@ -121,6 +131,9 @@ export default {
 			this.newMetric.SelectedLevel = null;
 			this.newMetric.SelectedVariable = null;
 			this.newMetric.columnExists = null;
+		},
+		metricSelected(metric) {
+			this.clearMetric();
 
 			const loc = this;
 			axiosClient.getPromise(window.host + '/services/metrics/GetSelectedMetric',
@@ -151,8 +164,14 @@ export default {
 				});
 			}
 			// Consulta en el servidor
-			return axiosClient.getPromise(window.host + '/services/backoffice/CalculatedMetricExists',
-				{ k: loc.Dataset.properties.Id, v: loc.newMetric.Source.VariableId }, 'verificar si ya existe un indicador calculado'
+			var service = '';
+			if (this.newMetric.Type == 'distance') {
+				service = 'CalculatedMetricDistanceExists';
+			} else {
+				service = 'CalculatedMetricAreaExists';
+			}
+			return axiosClient.getPromise(window.host + '/services/backoffice/' + service,
+				{ k: loc.Dataset.properties.Id, v: loc.newMetric.Source.VariableId }, 'verificar si ya existe una variable calculado'
 			).then(function (res) {
 				loc.columnExists = res.columnExists;
 			});
@@ -206,9 +225,7 @@ export default {
 		"newMetric.SelectedLevel"() {
 			this.allCategories = false;
 			if(this.newMetric.SelectedLevel != null) {
-				if(this.newMetric.SelectedLevel.Dataset.Type != 'L') {
-					this.newMetric.Area.IsInclusionPoint = true;
-				}
+				this.newMetric.Area.IsInclusionPoint = true;
 				if(this.newMetric.SelectedLevel.Variables.length > 0) {
 					this.newMetric.SelectedVariable = this.newMetric.SelectedLevel.Variables[0];
 				}
@@ -222,8 +239,17 @@ export default {
 			this.columnExists = null;
 			if(this.newMetric.SelectedVariable != null) {
 				this.newMetric.Source.VariableId = this.newMetric.SelectedVariable.Id;
+				this.newMetric.Output.HasValue = !this.newMetric.SelectedVariable.IsSimpleCount;
+				this.newMetric.OutputArea.HasAdditionValue = !this.newMetric.SelectedVariable.IsSimpleCount;
+				this.newMetric.OutputArea.HasMaxValue = !this.newMetric.SelectedVariable.IsSimpleCount;
+				this.newMetric.OutputArea.HasMinValue = !this.newMetric.SelectedVariable.IsSimpleCount;
+				this.newMetric.OutputArea.HasCount = true;
 			} else {
 				this.newMetric.Source.VariableId = null;
+			}
+			if (this.valueLabels.length > 0) {
+				this.allCategories = true;
+				this.selectAll();
 			}
 		},
 		"newMetric.Source.ValueLabelIds"() {
@@ -237,10 +263,5 @@ export default {
 
 <style scoped>
 
-	.metricRow {
-		line-height: 3.1em;
-		display: inline-flex;
-		font-size: 16px;
-	}
 </style>
 

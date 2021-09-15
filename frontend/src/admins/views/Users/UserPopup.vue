@@ -56,7 +56,8 @@
 	</div>
 </template>
 
-<script>import arr from '@/common/framework/arr';
+<script>
+import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
 
 export default {
@@ -87,7 +88,7 @@ export default {
 				alert('La contraseña y la verificación no coinciden.');
 				return;
 			}
-			this.$refs.invoker.do(window.Db, window.Db.UpdateUser,
+			this.$refs.invoker.doSave(window.Db, window.Db.UpdateUser,
 							this.user, this.password, this.verification).then(function(data) {
 								loc.activateEdit = false;
 								loc.$emit('completed', loc.user);

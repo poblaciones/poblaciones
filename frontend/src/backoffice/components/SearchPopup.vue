@@ -1,5 +1,5 @@
 <template>
-	<md-dialog :md-active.sync="openDialog">
+	<md-dialog :md-active.sync="openDialog" style="z-index: 5001 !important">
 		<md-dialog-title>Seleccionar {{ typeCaption }} </md-dialog-title>
 		<md-dialog-content>
 			<div class='md-layout'>

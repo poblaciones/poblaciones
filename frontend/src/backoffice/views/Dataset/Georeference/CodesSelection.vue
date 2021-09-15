@@ -107,7 +107,7 @@ export default {
 			// abre popup con los valores de esa geografía
 			var loc = this;
 			// Obtiene los valores
-      this.$refs.invoker.do(this.Work,
+      this.$refs.invoker.doMessage('Obteniendo valores', this.Work,
 													this.Work.GetGeographyItems, geographyId).then(
 														function(values) {
 															loc.valuesPopupReset = true;

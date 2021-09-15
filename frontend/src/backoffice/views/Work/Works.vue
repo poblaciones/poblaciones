@@ -300,7 +300,7 @@ export default {
 				});
 				return;
 			}
-			this.$refs.invoker.do(window.Db,
+			this.$refs.invoker.doMessage('Creando cartografía', window.Db,
 				window.Db.CreateWork, this.newWorkName.trim(), this.filter).then(
 				function (res) {
 					loc.select(res);

@@ -53,7 +53,7 @@ export default {
 	},
 	mounted() {
 		var loc = this;
-		this.$refs.invoker.do(window.Db,
+		this.$refs.invoker.doMessage('Obteniendo revisiones', window.Db,
 				window.Db.GetReviews).then(function(data) {
 					arr.Fill(loc.list, data);
 					loc.updatePending();

@@ -158,7 +158,7 @@ name: 'Contenido',
 		},
 		UpdateTitle() {
 			var loc = this;
-		  this.$refs.invoker.do(this.Work,
+		  this.$refs.invoker.doSave(this.Work,
 														this.Work.UpdateMetadata).then(function() {
 							window.Db.RenameWork(loc.Work.properties.Id, loc.metadata.Title);
     	});

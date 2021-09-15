@@ -119,6 +119,19 @@ class Account
 		$this->EnsureDbInfo();
 		return $this->userId;
 	}
+
+	public function GetUserIdOrNull()
+	{
+		if ($this->IsEmpty())
+		{
+			return null;
+		}
+		else
+		{
+			return $this->EnsureDbInfo();
+		}
+	}
+
 	private function RefreshDbInfo()
 	{
 		$this->privileges = '';

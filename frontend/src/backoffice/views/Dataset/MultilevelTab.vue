@@ -68,7 +68,7 @@ export default {
 				item.ds.properties.MultilevelMatrix = this.Dataset.properties.MultilevelMatrix;
 			}
 			// Graba ambos valores
-			this.$refs.invoker.do(this.Dataset,
+			this.$refs.invoker.doSave(this.Dataset,
 						this.Dataset.UpdateMultilevelMatrix,
 						this.Dataset.properties.Id,
 						this.Dataset.properties.MultilevelMatrix,

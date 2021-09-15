@@ -103,7 +103,8 @@ def convert_recursive(input, enc='unicode_escape'):
     elif isinstance(input, list):
         return [convert_recursive(element, enc) for element in input]
     elif isinstance(input, bytes):
-        return input.decode(enc).rstrip('\xa0')
+        input = input.replace(b'\\', b'\\\\')
+        return input.decode(enc, errors="ignore").rstrip('\xa0')
     else:
         return input
 

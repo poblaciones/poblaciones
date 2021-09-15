@@ -162,7 +162,7 @@ export default {
 			var loc = this;
 			var itemToUpdate = f.clone(this.item);
 			itemToUpdate.Caption = this.localCaption;
-      this.$refs.invoker.do(this.Work, this.Work.UpdateFile, itemToUpdate, (this.hasFiles ? this.bucketId : null)).then(
+      this.$refs.invoker.doSave(this.Work, this.Work.UpdateFile, itemToUpdate, (this.hasFiles ? this.bucketId : null)).then(
 					function() {
 						loc.openEditableAttach = false;
 						loc.bucketId = '';

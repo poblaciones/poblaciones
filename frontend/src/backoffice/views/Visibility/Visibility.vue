@@ -227,7 +227,7 @@ export default {
 			var loc = this;
 			this.Work.properties.IsPrivate = this.visibilityMode === 3;
 			var receiveLink = (this.Work.properties.AccessLink === '?');
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doSave(this.Work,
 				this.Work.UpdateVisibility).then(function (data) {
 					if (receiveLink) {
 						loc.Work.properties.AccessLink = data['link'];
@@ -237,7 +237,7 @@ export default {
 		},
 		askReview() {
 			var loc = this;
-			this.$refs.invoker.do(this.Work,
+			this.$refs.invoker.doMessage('Enviando', this.Work,
 				this.Work.RequestReview).then(
 					function (data) {
 						window.alert('Revisión solicitada con éxito.');

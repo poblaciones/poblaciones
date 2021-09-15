@@ -128,7 +128,7 @@ export default {
 				return;
 			}
 			var loc = this;
-		  this.$refs.invoker.do(this.Work,
+		  this.$refs.invoker.doSave(this.Work,
 														this.Work.UpdateSource, this.item).then(
 														function () {
 															loc.openEditableSource = false;

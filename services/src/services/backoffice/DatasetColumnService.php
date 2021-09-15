@@ -613,6 +613,7 @@ class DatasetColumnService extends DbSession
 			{
 				if (sizeof($currentSet) > 0)
 				{
+					Arr::SortByKey($currentSet, 'Order');
 					$ret[$lastColumnId] = $currentSet;
 					$currentSet = array();
 				}
@@ -622,6 +623,7 @@ class DatasetColumnService extends DbSession
 		}
 		if (sizeof($currentSet) > 0)
 		{
+			Arr::SortByKey($currentSet, 'Order');
 			$ret[$lastColumnId] = $currentSet;
 			$currentSet = array();
 		}

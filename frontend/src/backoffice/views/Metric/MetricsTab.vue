@@ -219,11 +219,11 @@ export default {
 			return filter.FormattedValue;
 		},
 		onCompleteLevel(metricVersion) {
-			this.$refs.invoker.do(this.Dataset.LevelGenerator, this.Dataset.LevelGenerator.CompleteLevel, metricVersion);
+			this.$refs.invoker.doMessage('Completando nivel', this.Dataset.LevelGenerator, this.Dataset.LevelGenerator.CompleteLevel, metricVersion);
 		},
 		levelDataset() {
 			var loc = this;
-			this.$refs.invoker.do(this.Dataset, this.Dataset.GetRelatedDatasets).then(function(datasets) {
+			this.$refs.invoker.doMessage('Obteniendo niveles', this.Dataset, this.Dataset.GetRelatedDatasets).then(function(datasets) {
 				// se saca a sí mismo
 				var i = arr.IndexById(datasets, loc.Dataset.properties.Id);
 				arr.RemoveAt(datasets, i);
@@ -261,10 +261,10 @@ export default {
 			return level.Variables[level.Variables.length - 1] === variable;
 		},
 		up(level, variable) {
-			this.$refs.invoker.do(this.Dataset, this.Dataset.MoveVariableUp, level, variable);
+			this.$refs.invoker.doSave(this.Dataset, this.Dataset.MoveVariableUp, level, variable);
 		},
 		down(level, variable) {
-			this.$refs.invoker.do(this.Dataset, this.Dataset.MoveVariableDown, level, variable);
+			this.$refs.invoker.doSave(this.Dataset, this.Dataset.MoveVariableDown, level, variable);
 		},
 		openVariableFormulaEdition(item, variable) {
 			this.$refs.editVariableFormulaPopup.show(item, variable);
@@ -281,7 +281,7 @@ export default {
 			if (this.Dataset.ScaleGenerator.HasData(variable)) {
 				open();
 			} else {
-				this.$refs.invoker.do(this.Dataset.ScaleGenerator,
+				this.$refs.invoker.doMessage('Calculando distribuciones', this.Dataset.ScaleGenerator,
 					this.Dataset.ScaleGenerator.GetColumnDistributions, variable).then(
 						open);
 			}

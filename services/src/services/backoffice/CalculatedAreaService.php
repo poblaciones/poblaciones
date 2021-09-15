@@ -3,14 +3,14 @@
 namespace helena\services\backoffice;
 
 use helena\classes\App;
-use helena\services\backoffice\metrics\MetricsDistanceCalculator;
+use helena\services\backoffice\metrics\MetricsAreaCalculator;
 use helena\services\backoffice\publish\CalculateMetricStateBag;
 
 use helena\services\common\BaseService;
 use minga\framework\PublicException;
 use minga\framework\Profiling;
 
-class CalculatedDistanceService extends BaseService
+class CalculatedAreaService extends BaseService
 {
 	const STEP_CREATE_VARIABLES = 0;
 	const STEP_PREPARE_DATA = 1;
@@ -25,10 +25,10 @@ class CalculatedDistanceService extends BaseService
 		$this->state = $state;
 	}
 
-	public function StartCalculate($datasetId, $source, $output)
+	public function StartCalculate($datasetId, $source, $output, $area)
 	{
 		$this->CompleteSource($source);
-		$this->state = CalculateMetricStateBag::Create($datasetId, $source, $output);
+		$this->state = CalculateMetricStateBag::Create($datasetId, $source, $output, $area);
 		$this->state->SetTotalSteps($this->TotalSteps());
 		$this->state->SetProgressLabel('Creando variables');
 		return $this->state->ReturnState(false);
@@ -36,7 +36,7 @@ class CalculatedDistanceService extends BaseService
 
 	private function CompleteSource(& $source)
 	{
-		$calculator = new MetricsDistanceCalculator();
+		$calculator = new MetricsAreaCalculator();
 		$dataset = $calculator->GetSourceDatasetByVariableId($source['VariableId']);
 
 		$source['datasetType'] = $dataset->getType();
@@ -56,9 +56,10 @@ class CalculatedDistanceService extends BaseService
 		$datasetId = $this->state->Get('datasetId');
 		$source = $this->state->Get('source');
 		$output = $this->state->Get('output');
+		$area = $this->state->Get('area');
 		$cols = $this->state->Get('cols');
 
-		$calculator = new MetricsDistanceCalculator();
+		$calculator = new MetricsAreaCalculator();
 		switch($this->state->Step())
 		{
 			case self::STEP_CREATE_VARIABLES:

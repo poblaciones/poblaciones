@@ -57,7 +57,7 @@ import arr from '@/common/framework/arr';
 	},
 	mounted() {
 		var loc = this;
-		this.$refs.invoker.do(window.Db,
+		this.$refs.invoker.doMessage('Obteniendo usuarios', window.Db,
 			window.Db.GetUsers).then(function (data) {
 				for (var n = 0; n < data.length; n++) {
 					data[n].FormattedRole = loc.formatRole(data[n]);

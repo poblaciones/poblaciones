@@ -107,10 +107,10 @@ export default {
 					this.Work, this.Work.DeleteFile, item);
 		},
     up(item) {
-      this.$refs.invoker.do(this.Work, this.Work.MoveFileUp, item);
+      this.$refs.invoker.doSave(this.Work, this.Work.MoveFileUp, item);
     },
     down(item) {
-      this.$refs.invoker.do(this.Work, this.Work.MoveFileDown, item);
+      this.$refs.invoker.doSave(this.Work, this.Work.MoveFileDown, item);
     },
   },
   components: {

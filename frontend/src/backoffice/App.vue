@@ -41,7 +41,7 @@ export default {
 			const loc = this;
 			window.Context.User = this.user;
 			window.Context.Configuration = data;
-			this.$refs.invoker.do(window.Db, window.Db.LoadWorks)
+			this.$refs.invoker.doMessage('Obteniendo cartografías', window.Db, window.Db.LoadWorks)
 				.then(function() {
 					loc.works = window.Db.Works;
 				});
@@ -121,7 +121,7 @@ html, body {
 	min-width: 100%;
 }
 .md-layout-item-separated {
-	margin-top: 20px;
+	margin-top: 10px;
 }
 
 .jqx-grid-content :first-child
@@ -334,6 +334,9 @@ html, body {
 	color: #a0a0a0!important;
 }
 
+	.largeDialog>.md-dialog-container {
+		max-width: 870px !important;
+	}
 .selectable {
 	cursor: pointer;
 }
@@ -425,4 +428,12 @@ a.normalTextLink:hover {
 	padding: 0px 3px;
 	margin-left: 2px;
 }
+
+	:root {
+		--md-theme-default-primary: #00A0D2 !important;
+		--md-theme-default-accent: #ca4a4a !important;
+		--md-theme-default-theme: light;
+		--md-theme-default-icon-on-background: #767676;
+	}
+
 </style>

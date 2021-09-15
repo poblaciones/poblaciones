@@ -153,7 +153,7 @@ export default {
 			level.MetricVersion.Metric.MetricProvider = loc.newMetricProvider;
 			level.MetricVersion.Metric.IsBasicMetric = false;
 			level.Variables = [];
-			this.$refs.invoker.do(this.Dataset,
+			this.$refs.invoker.doSave(this.Dataset,
 				loc.Dataset.UpdateMetricVersionLevel, level).then(function(data) {
 					loc.openPopup = false;
 				});

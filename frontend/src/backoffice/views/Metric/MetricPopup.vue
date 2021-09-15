@@ -81,7 +81,7 @@ export default {
 				return;
 			}
 			var loc = this;
-			this.$refs.invoker.do(this.Dataset,
+			this.$refs.invoker.doSave(this.Dataset,
 					loc.Dataset.UpdateMetricVersionLevel, loc.newMetricVersionLevel).then(function(data) {
 						loc.MetricVersionLevel.MetricVersion.Caption = loc.newMetricVersionLevel.MetricVersion.Caption;
 						loc.MetricVersionLevel.MetricVersion.Metric.Caption = loc.newMetricVersionLevel.MetricVersion.Metric.Caption;

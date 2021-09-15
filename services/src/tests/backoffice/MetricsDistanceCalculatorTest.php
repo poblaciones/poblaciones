@@ -3,14 +3,14 @@
 namespace helena\tests\backoffice;
 
 use helena\classes\TestCase;
-use helena\services\backoffice\metrics\MetricsCalculator;
+use helena\services\backoffice\metrics\MetricsDistanceCalculator;
 use minga\framework\Reflection;
 
-class MetricsCalculatorTest extends TestCase
+class MetricsDistanceCalculatorTest extends TestCase
 {
 	public function testGetColumnName()
 	{
-		$controller = new MetricsCalculator();
+		$controller = new MetricsDistanceCalculator();
 		$ret = Reflection::CallPrivateMethod($controller, 'GetColumnName', 'dst_', 'Dataset (náme)', 'name');
 		$this->assertEquals('dst_Dataset_name_name', $ret);
 

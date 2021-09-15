@@ -80,7 +80,7 @@ export default {
 			var loc = this;
 			this.clippingRegion.NoAutocomplete = !this.useInSearch;
 
-			this.$refs.invoker.do(window.Db, window.Db.UpdateClippingRegion,
+			this.$refs.invoker.doSave(window.Db, window.Db.UpdateClippingRegion,
 							this.clippingRegion).then(function(data) {
 								loc.activateEdit = false;
 								loc.$emit('completed', loc.clippingRegion);
