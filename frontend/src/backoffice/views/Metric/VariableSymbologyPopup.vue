@@ -32,11 +32,13 @@
 							</div>
 							<div class="md-layout-item md-size-100">
 								<div class="mp-right-toolbar">
-									<md-button class="md-icon-button" title="Copiar simbología" @click="copySymbology">
+									<md-button class="md-icon-button" @click="copySymbology">
 										<md-icon>content_copy</md-icon>
+										<md-tooltip md-direction="bottom">Copiar simbología</md-tooltip>
 									</md-button>
-									<md-button v-if="canEdit" title="Pegar simbología" class="md-icon-button" @click="pasteSymbology">
+									<md-button v-if="canEdit" class="md-icon-button" @click="pasteSymbology">
 										<md-icon>content_paste</md-icon>
+										<md-tooltip md-direction="bottom">Pegar simbología</md-tooltip>
 									</md-button>
 								</div>
 								<div v-if="CutMode === 'S'">
@@ -48,10 +50,11 @@
 											<Icon v-if="singleItem.Symbol" iconMaxSize="1.2em" :symbol="singleItem.Symbol" :work="Work"  />
 										</div>
 										<div class="tinyCloseButton">
-											<md-button title="Quitar ícono" v-if="singleItem.Symbol && canEdit"
+											<md-button v-if="singleItem.Symbol && canEdit"
 																 class="md-icon-button"
 																 v-on:click.stop="removeIcon(singleItem)">
 												<md-icon>close</md-icon>
+												<md-tooltip md-direction="bottom">Quitar ícono</md-tooltip>
 											</md-button>
 										</div>
 									</mp-color-picker>
@@ -114,10 +117,11 @@
 											<Icon v-if="item.Symbol" :symbol="item.Symbol" iconMaxSize="1.2em" :work="Work" />
 										</div>
 										<div class="tinyCloseButton">
-											<md-button title="Quitar ícono" v-if="item.Symbol && canEdit"
-																	class="md-icon-button"
-																	v-on:click.stop="removeIcon(item)">
+											<md-button v-if="item.Symbol && canEdit"
+																 class="md-icon-button"
+																 v-on:click.stop="removeIcon(item)">
 												<md-icon>close</md-icon>
+												<md-tooltip md-direction="bottom">Quitar ícono</md-tooltip>
 											</md-button>
 										</div>
 									</mp-color-picker>
@@ -144,8 +148,9 @@
 
 						<div class="md-layout-item md-size-100">
 							<div class="mp-right-toolbar mp-bottom-toolbar">
-								<md-button v-if="canEdit" title="Pegar coloreo" class="md-icon-button" @click="pasteColors">
+								<md-button v-if="canEdit" class="md-icon-button" @click="pasteColors">
 									<md-icon>content_paste</md-icon>
+									<md-tooltip md-direction="bottom">Pegar coloreo</md-tooltip>
 								</md-button>
 							</div>
 							<md-field>
@@ -212,9 +217,9 @@
 								<mp-color-picker :canEdit="Work.CanEdit()" :ommitHexaSign="true"
 																 vertical-align="top" v-model="Variable.Symbology.ColorFrom" />
 
-								<md-button v-if="Work.CanEdit()" class="md-icon-button"
-								title="Invertir colores del gradiente" @click="swapColors">
+								<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="swapColors">
 									<md-icon>swap_horiz</md-icon>
+									<md-tooltip md-direction="bottom">Invertir colores del gradiente</md-tooltip>
 								</md-button>
 
 								<mp-color-picker :canEdit="Work.CanEdit()" :ommitHexaSign="true"

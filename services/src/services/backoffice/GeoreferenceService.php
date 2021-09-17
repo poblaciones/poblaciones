@@ -62,6 +62,8 @@ class GeoreferenceService extends BaseService
 			$this->state->Set('startLon', $lon->getField());
 			$this->state->Set('endLat', $lat2->getField());
 			$this->state->Set('endLon', $lon2->getField());
+			$this->state->Set('startGeographyId', $geographyId);
+			$this->state->Set('endGeographyId', $geographyId);
 			$this->ResetGeocoded($lat, $lon, $lat2, $lon2);
 		}
 		else

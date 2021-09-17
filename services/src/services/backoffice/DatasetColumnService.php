@@ -220,22 +220,9 @@ class DatasetColumnService extends DbSession
 		}
 	}
 
-	private function resolveStandardFieldName($datasetId)
+	public function resolveStandardFieldName($datasetId)
 	{
-		$field = "dt_col";
-		$columns = $this->GetDatasetColumns($datasetId);
-		$suffix = 1;
-		while(true)
-		{
-			foreach($columns as $column)
-			{
-				$newField = $field . $suffix;
-				if ($this->listHasField($columns, $newField) == false)
-					return $newField;
-				else
-					$suffix++;
-			}
-		}
+		return $this->resolveUniqueFieldName($datasetId, "dt_col");
 	}
 	private function listHasField($columns, $field)
 	{
@@ -259,6 +246,13 @@ class DatasetColumnService extends DbSession
 			dco_id != ? AND dco_dataset_id = ? AND dco_order >= ?";
 		return App::Db()->exec($sql, [$colId, $datasetId, $position]);
 	}
+	public function ResetColumnValues($dataset, $column)
+	{
+		// Incrementa el order de las posteriores
+		$sql = "UPDATE " . $dataset->getTable() . " SET " . $column->getField() . " = NULL";
+		App::Db()->exec($sql);
+	}
+
 
 	public function DeleteColumn($datasetId, $name)
 	{
@@ -267,9 +261,13 @@ class DatasetColumnService extends DbSession
 			$this->DeleteColumns($datasetId, [$column->getId()]);
 	}
 
-	public function UpdateCaption($col, $caption)
+	public function UpdateLabel($col, $label)
 	{
-		$col->setCaption($caption);
+		$variable = $col->getVariable();
+		$showCaption = ($label === null || trim($label) === "" ? $variable : $label);
+		// Actualiza label manteniendo validez en caption
+		$col->setLabel($label);
+		$col->setCaption($showCaption);
 		App::Orm()->save($col);
 	}
 

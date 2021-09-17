@@ -24,8 +24,14 @@
 					<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
 						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
 					</md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable" md-label="Tamaño" md-sort-by="TotalSizeBytes"><span :title="formatSizes(item)">{{ totalSizeMB(item) }}</span></md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable" style="width:50px" md-label="Datasets" md-sort-by="DatasetCount"><span :title="item.DatasetNames">{{ item.DatasetCount }}</span></md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable" md-label="Tamaño" md-sort-by="TotalSizeBytes">
+						{{ totalSizeMB(item) }}
+						<md-tooltip md-direction="bottom">{{ formatSizes(item) }}</md-tooltip>
+					</md-table-cell>
+					<md-table-cell @click.native="select(item)" class="selectable" style="width:50px" md-label="Datasets" md-sort-by="DatasetCount">
+						{{ item.DatasetCount }}
+						<md-tooltip md-direction="bottom">{{ item.DatasetNames }}</md-tooltip>
+					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores" md-sort-by="MetricCount">{{ item.MetricCount }}</md-table-cell>
 					<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado" md-sort-by="IsIndexed">
 						<md-switch class="md-primary" v-model="item.IsIndexed"
@@ -36,32 +42,49 @@
 											 @change="onSegmentedCrawlingChanged(item)" :disabled="!item.IsIndexed" />
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
-						<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
+						<md-icon :style="'color: ' + status(item).color">
+							{{ status(item).icon }}
+							<md-tooltip md-direction="bottom">{{ status(item).label }}</md-tooltip>
+						</md-icon>
 						<div class="extraIconContainer">
-							<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
+							<md-icon v-if="item.IsPrivate" class="extraIcon">
+								lock
+								<md-tooltip md-direction="bottom">Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.</md-tooltip>
+							</md-icon>
 							<md-icon v-if="!showIndexingColumn && !item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
-											 class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
-											 Para que sean incluidos, debe solictar una revisión desde Modificar>Visiblidad > Solicitar revisión.">error_outline</md-icon>
+											 class="extraIcon">
+								error_outline
+								<md-tooltip md-direction="bottom">
+									No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
+									Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.
+								</md-tooltip>
+							</md-icon>
 						</div>
 					</md-table-cell>
 					<md-table-cell md-label="Acciones">
-						<md-button v-if="!canEdit(item)" title="Consultar" class="md-icon-button" v-on:click="select(item)">
+						<md-button v-if="!canEdit(item)" class="md-icon-button" v-on:click="select(item)">
 							<md-icon>remove_red_eye</md-icon>
+							<md-tooltip md-direction="bottom">Consultar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item) && !publishDisabled(item)" title="Publicar" class="md-icon-button" v-on:click="onPublish(item)">
+						<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" v-on:click="onPublish(item)">
 							<md-icon>public</md-icon>
+							<md-tooltip md-direction="bottom">Publicar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item) && !revokeDisabled(item)" title="Revocar publicación" class="md-icon-button" v-on:click="onRevoke(item)">
+						<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" v-on:click="onRevoke(item)">
 							<md-icon>pause_circle_filled</md-icon>
+							<md-tooltip md-direction="bottom">Revocar publicación</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
+						<md-button v-if="canEdit(item)" class="md-icon-button" v-on:click="select(item)">
 							<md-icon>edit</md-icon>
+							<md-tooltip md-direction="bottom">Modificar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" title="Duplicar" class="md-icon-button">
+						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" class="md-icon-button">
 							<md-icon>file_copy</md-icon>
+							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" title="Eliminar" class="md-icon-button" v-on:click="onDelete(item)">
+						<md-button v-if="canEdit(item)" class="md-icon-button" v-on:click="onDelete(item)">
 							<md-icon>delete</md-icon>
+							<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
 						</md-button>
 					</md-table-cell>
 				</md-table-row>

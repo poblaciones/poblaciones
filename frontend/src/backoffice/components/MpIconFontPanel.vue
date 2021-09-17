@@ -8,7 +8,8 @@
 				:class="'item' + getIsSelectedClass(key, value) + (collection !== 'flaticons' ? ' faItem' : '')"
 				v-for="(value, key) in currentIcons"
 				:key="key">
-					<span :title="resolveTitle(key, value)" v-html="resolveIcon(key, value)"></span>
+					<span v-html="resolveIcon(key, value)"></span>
+					<md-tooltip md-direction="bottom">{{ resolveTitle(key, value) }}</md-tooltip>
 				</a>
 		</div>
 	</div>

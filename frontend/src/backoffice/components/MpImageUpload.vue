@@ -4,10 +4,10 @@
 		<div v-if="localPreviewImage && showPreview">
 			<img class="imagen-preview" style="" :src="this.localPreviewImage" alt="">
 			<div style="display: inline-block">
-				<md-button title="Quitar"
-									 class="md-icon-button md-button-mini"
+				<md-button class="md-icon-button md-button-mini"
 									 v-on:click="clear">
 					<md-icon>close</md-icon>
+					<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 				</md-button>
 				<label class="file-select">
 					<div class="edit-button">

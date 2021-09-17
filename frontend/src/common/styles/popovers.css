@@ -19,7 +19,7 @@
 }
 
 .md-snackbar {
-	z-index: 1010 !important;
+	z-index: 101000 !important;
 	background-color: #ffffff !important;
 	color: black !important;
 	font-weight: bold !important;
@@ -173,4 +173,40 @@
 
 .tooltip[x-placement^="top"] {
 	margin-bottom: 5px;
+}
+
+
+.md-tooltip {
+	font-size: .75rem !important;
+	border-radius: 4px !important;
+	background-color: rgba(76, 76, 76, .95) !important;
+	z-index: 10010 !important;
+	height: unset!important;
+	max-width: 180px;
+	white-space: normal!important;
+	text-align: center;
+}
+
+.md-tooltip-bottom-far-less {
+	margin-top: 3px;
+}
+
+.md-tooltip-bottom-far {
+	margin-top: 4px;
+}
+
+.md-tooltip-bottom-near {
+	margin-top: -8px;
+}
+
+.md-tooltip-bottom {
+	transform: translateY(-5px);
+}
+
+.md-tooltip-top {
+	transform: translateY(8px);
+}
+
+.md-tooltip-right {
+	transform: translateX(-7px);
 }

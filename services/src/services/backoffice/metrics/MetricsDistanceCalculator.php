@@ -15,11 +15,8 @@ use minga\framework\PublicException;
 use minga\framework\Profiling;
 use minga\framework\Str;
 
-class MetricsDistanceCalculator
+class MetricsDistanceCalculator extends MetricsBaseCalculator
 {
-	const ColPrefix = '';
-	const STEP = 1000;
-
 	public function StepCreateColumns($datasetId, $source, $output)
 	{
 		Profiling::BeginTimer();
@@ -70,53 +67,7 @@ class MetricsDistanceCalculator
 		return $cols;
 	}
 
-	private function DeleteColumn($dataset, $datasetName, $field)
-	{
-		$datasetColumn = new DatasetColumnService();
-		$name = $this->GetColumnName(self::ColPrefix, $datasetName, $field);
-		$datasetColumn->DeleteColumn($dataset->getId(), $name);
-	}
-
-	private function CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName,
-		$field, $caption, $decimals = 2, $colWidth = 11, $fieldWidth = 11, $format = Format::F)
-	{
-		$datasetColumn = new DatasetColumnService();
-		$name = $this->GetColumnName(self::ColPrefix, $datasetName, $field);
-		$caption = $this->GetColumnCaption($metric, $variable, $source, $output, $caption);
-
-		$col = $datasetColumn->GetColumnByVariable($dataset->getId(), $name);
-		if($col != null)
-		{
-			if($col->getCaption() != $caption)
-				$datasetColumn->UpdateCaption($col, $caption);
-			return $name;
-		}
-
-		$col = $datasetColumn->CreateColumnFromFields($dataset, $name, $name,
-			$caption, null, $colWidth, $fieldWidth, $decimals, $format,
-			Measurement::Nominal, Alignment::Left, false, true);
-		return $col->getField();
-	}
-
-	public function StepPrepareData($datasetId, $cols)
-	{
-		Profiling::BeginTimer();
-
-		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$this->ResetCols($dataset->getTable(), $cols);
-
-		Profiling::EndTimer();
-	}
-
-	public function GetTotalSlices($datasetId)
-	{
-		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$sql = "SELECT count(*) FROM " . $dataset->getTable() . " WHERE ommit = 0";
-		$count = App::Db()->fetchScalarInt($sql);
-		return ceil($count / self::STEP);
-	}
-
-	public function StepUpdateDatasetDistance($key, $datasetId, $cols, $source,
+	public function StepUpdateDataset($key, $datasetId, $cols, $source,
 																						$output, $slice, $totalSlices)
 	{
 		Profiling::BeginTimer();
@@ -145,9 +96,6 @@ class MetricsDistanceCalculator
 	{
 		$ret = [
 			'col' => '',
-			'geo' => '',
-			'distanceFn' => 'DistanceSphere',
-			'nearestFn' => 'NearestSnapshotPoint',
 			'join' => '',
 			'srcJoin' => '',
 			'where' => '1',
@@ -181,66 +129,21 @@ class MetricsDistanceCalculator
 		else if ($sourceType == 'D')
 		{
 			$ret['srcJoin'] = 'JOIN geography_item ON gei_id = sna_geography_item_id';
-			$ret['geo'] = 'coalesce(gei_geometry_r3, gei_geometry_r2, gei_geometry_r1)';
+			$ret['geo'] = 'coalesce(gei_geometry_r5, gei_geometry_r6, gei_geometry)';
 			$ret['distanceFn'] = 'DistanceSphereGeometry';
 			$ret['nearestFn'] = 'NearestSnapshotGeography';
 		}
+		else if ($sourceType == 'L')
+		{
+			$ret['geo'] = '';
+			$ret['distanceFn'] = 'DistanceSphere';
+			$ret['nearestFn'] = 'NearestSnapshotPoint';
+		}
+		else throw new \Exception("Unsupported dataset type.");
 
 		return $ret;
 	}
 
-	private function CreateTempTable($source, $dataset)
-	{
-		Profiling::BeginTimer();
-
-		$sourceSnapshotTable = SnapshotByDatasetModel::SnapshotTable($dataset->getTable());
-
-		$id = $this->getGeometryFieldId($dataset->getType());
-
-		$create = 'CREATE TEMPORARY TABLE tmp_calculate_metric (sna_id int(11) not null,
-												sna_location POINT NOT NULL, sna_r INT(11) NULL, sna_feature_id BIGINT,
-											SPATIAL INDEX (sna_location)) ENGINE=MYISAM';
-
-		$insert = 'INSERT INTO tmp_calculate_metric (sna_id, sna_location, sna_r' .
-									($id ? ', sna_feature_id ' : '') . ')
-									SELECT sna_id, sna_location, 0 ' . ($id ? ',' . $id : '') . '
-									FROM ' . $sourceSnapshotTable . '
-									WHERE 1 ' . $this->GetSourceFilterWhere($source) . $this->GetValueLabelsWhere($source);
-
-		App::Db()->execDDL($create);
-		App::Db()->exec($insert);
-
-		Profiling::EndTimer();
-	}
-
-	private function getGeometryFieldId($type)
-	{
-		if ($type == 'L')
-		{
-			return null;
-		}
-		else if ($type == 'S' || $type == 'D')
-		{
-			return 'sna_feature_id';
-		}
-		else
-		{
-			throw new PublicException('Tipo de dataset no reconocido');
-		}
-	}
-
-	private function ResetCols($datasetTable, $cols)
-	{
-		Profiling::BeginTimer();
-
-		$update = 'UPDATE ' . $datasetTable . '
-								SET ' . implode(' = null, ', $cols) . ' = null';
-		$ret = App::Db()->exec($update);
-
-		Profiling::EndTimer();
-
-		return $ret;
-	}
 
 	private function GetUpdateQuery($datasetTable, $sourceSnapshotTable, $distance, $output, $cols, $source, $offset, $pageSize)
 	{
@@ -268,19 +171,6 @@ class MetricsDistanceCalculator
 						AND id >= ' . $ranges['mi'] . ' AND id <= ' . $ranges['ma'];
 
 		return $update;
-	}
-
-	private function GetSourceFilterWhere($source)
-	{
-			return ' AND sna_' . $source['VariableId'] . '_total IS NOT NULL ';
-	}
-
-	private function GetValueLabelsWhere($source)
-	{
-		if(count($source['ValueLabelIds']) > 0)
-			return ' AND sna_' . $source['VariableId'] . '_value_label_id IN (' . Str::JoinInts($source['ValueLabelIds']) . ')';
-		else
-			return '';
 	}
 
 	private function GetCoordsSet($output, $cols)
@@ -314,6 +204,10 @@ class MetricsDistanceCalculator
 		else
 			return '';
 	}
+	protected function GetCaptionContent()
+	{
+		return ' del elemento más cercano en';
+	}
 
 	public function DistanceColumnExists($datasetId, $variableId)
 	{
@@ -324,125 +218,5 @@ class MetricsDistanceCalculator
 		return $datasetColumn->ColumnExists($datasetId, $name);
 	}
 
-	public function GetSourceDatasetByVariableId($variableId)
-	{
-		$variable = App::Orm()->find(entities\Variable::class, $variableId);
-		$versionLevel = $variable->getMetricVersionLevel();
-		return $versionLevel->getDataset();
-	}
-
-	private function GetMetricElements($source)
-	{
-		$metricService = new SelectedMetricService();
-		$metric = $metricService->PublicGetSelectedMetric($source['MetricId']);
-		$version = $this->FindById($metric->Versions, $source['VersionId'], true);
-		$level = $this->FindById($version->Levels, $source['LevelId']);
-		$variable = $this->FindById($level->Variables, $source['VariableId']);
-
-		return [
-			'metric' => $metric,
-			'version' => $version,
-			'level' => $level,
-			'variable' => $variable,
-		];
-	}
-
-	private function GetColumnName($prefix, $datasetName, $srcColumnName, $maxLength = 64)
-	{
-		// El máximo de un nombre de columna en mysql es 64 por
-		// eso el default de $maxLength = 64.
-		$clean = Str::RemoveAccents($datasetName);
-		$clean = Str::RemoveNonAlphanumeric($clean);
-		$clean = Str::Replace($clean, ' ', '_');
-		$len = Str::Length($clean) + Str::Length($prefix) + Str::Length($srcColumnName) + 1;
-		if($len > $maxLength)
-		{
-			$newLen = Str::Length($clean) - ($len - $maxLength);
-			if($newLen >= 0)
-				$clean = Str::Substr($clean, 0, $newLen);
-			else
-			{
-				$clean = '';
-				$srcColumnName = Str::Substr($srcColumnName, 0, Str::Length($srcColumnName) + $newLen);
-			}
-		}
-
-		return $prefix . $clean . '_' . $srcColumnName;
-	}
-
-	private function GetColumnCaption($metric, $variable, $source, $output, $caption, $maxLength = 255)
-	{
-		// - Distancia a radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
-		// - Valor de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
-		// - Latitud de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
-		$str = $caption . $this->GetDeA($caption)
-			. $this->GetLevelName($metric)
-			. $this->GetVariableName($metric, $variable)
-			. $this->GetVersionName($metric)
-			. $this->GetValueLabelsCaption($metric, $source)
-			. $this->GetDistanceCaption($output);
-
-		return Str::Ellipsis($str, $maxLength);
-	}
-
-	private function GetDeA($caption)
-	{
-		if($caption == 'Distancia')
-			return ' a';
-		return ' de';
-	}
-
-	private function GetLevelName($metric)
-	{
-		if(count($metric['version']->Levels) > 1)
-			return ' ' . $metric['level']->Name . ' con';
-		return '';
-	}
-
-	private function GetVariableName($metric, $variable)
-	{
-		if($variable->getData() == 'O')
-			return ' ' . $variable->getCaption();
-		return ' ' . $metric['metric']->Metric->Name;
-	}
-
-	private function GetVersionName($metric)
-	{
-		return ' (' . $metric['version']->Version->Name . ')';
-	}
-
-	private function GetValueLabelsCaption($metric, $source)
-	{
-		if(count($metric['variable']->ValueLabels) == count($source['ValueLabelIds']))
-			return '';
-
-		$ret = ' (';
-		foreach($metric['variable']->ValueLabels as $label)
-		{
-			if(in_array($label->Id, $source['ValueLabelIds']))
-				$ret .= $label->Name . ', ';
-		}
-		return Str::RemoveEnding($ret, ', ') . ')';
-	}
-
-	private function GetDistanceCaption($output)
-	{
-		if($output['HasMaxDistance'])
-			return ' hasta ' . $output['MaxDistance'] . ' km';
-		return '';
-	}
-
-	private function FindById($arr, $id, $isVersion = false)
-	{
-		foreach($arr as $i => $value)
-		{
-			if(($isVersion && $value->Version->Id == $id)
-				|| ($isVersion == false && $value->Id == $id))
-			{
-				return $arr[$i];
-			}
-		}
-		return [];
-	}
 
 }

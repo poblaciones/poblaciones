@@ -298,12 +298,12 @@ ActiveDataset.prototype.formatFilter = function (variable) {
 	return ret;
 };
 
-ActiveDataset.prototype.CalculateNewMetricUrl = function () {
-	return window.host + '/services/backoffice/CalculateNewMetric';
+ActiveDataset.prototype.CalculateNewMetricUrl = function (type) {
+	return window.host + '/services/backoffice/CalculateNew' + str.Capitalize(type) + 'Metric';
 };
 
-ActiveDataset.prototype.StepCalculateNewMetricUrl = function () {
-	return window.host + '/services/backoffice/StepCalculateNewMetric';
+ActiveDataset.prototype.StepCalculateNewMetricUrl = function (type) {
+	return window.host + '/services/backoffice/StepCalculateNew' + str.Capitalize(type) + 'Metric';
 };
 
 ActiveDataset.prototype.CalculatedMetricExists = function (variableId) {

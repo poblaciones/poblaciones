@@ -52,8 +52,9 @@
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Google" md-sort-by="Google">{{ item.Google }}</md-table-cell>
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Backoffice" md-sort-by="Backoffice">{{ item.Backoffice }}</md-table-cell>
 										<md-table-cell md-label="Acciones" class="mpNoWrap">
-											<md-button class="md-icon-button" title="Ver cartografía" @click="select(item)">
+											<md-button class="md-icon-button" @click="select(item)">
 												<md-icon>visibility</md-icon>
+												<md-tooltip md-direction="bottom">Ver cartografía</md-tooltip>
 											</md-button>
 										</md-table-cell>
 									</md-table-row>
@@ -71,8 +72,9 @@
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Consultas" md-sort-by="Hits">{{ item.Hits }}</md-table-cell>
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Google" md-sort-by="Google">{{ item.Google }}</md-table-cell>
 										<md-table-cell md-label="Acciones" class="mpNoWrap">
-											<md-button class="md-icon-button" title="Ver indicador" @click="selectMetric(item)">
+											<md-button class="md-icon-button" @click="selectMetric(item)">
 												<md-icon>visibility</md-icon>
+												<md-tooltip md-direction="bottom">Ver indicador</md-tooltip>
 											</md-button>
 										</md-table-cell>
 									</md-table-row>

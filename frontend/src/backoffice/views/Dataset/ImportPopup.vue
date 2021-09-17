@@ -30,8 +30,9 @@
               :options="dropzoneOptions"
             >
 						</vue-dropzone>
-						<md-button style="float:left;background-color: #ececec;" v-if="hasFiles" title="Quitar" class="md-icon-button" v-on:click="clear">
+						<md-button style="float:left;background-color: #ececec;" v-if="hasFiles" class="md-icon-button" v-on:click="clear">
 							<md-icon>close</md-icon>
+							<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 						</md-button>
 						<div class="messageBlock" v-if="verifying">Analizando archivo...</div>
 						<div class="messageBlock" v-if="selectedSheet !== null && selectedSheet.Caption !== '' && selectedSheet.Caption !== false">Dataset: {{ selectedSheet.Caption }}</div>

@@ -25,7 +25,7 @@
 									 label="Nivel" helper="Nivel de agregación a utilizar" :canEdit="levels.length > 1"
 									 v-model="newMetric.SelectedLevel" listCaption="Name" />
 			</div>
-			<div class="md-layout-item md-size-100 md-small-size-100">
+			<div class="md-layout-item md-size-75 md-small-size-100">
 				<mp-select :list="variables" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
 									 label="Variable" helper="Variable a utilizar" :canEdit="variables.length > 1"
 									 v-model="newMetric.SelectedVariable" listCaption="Name" />
@@ -225,13 +225,13 @@ export default {
 		"newMetric.SelectedLevel"() {
 			this.allCategories = false;
 			if(this.newMetric.SelectedLevel != null) {
-				this.newMetric.Area.IsInclusionPoint = true;
+				this.newMetric.OutputArea.IsInclusionPoint = true;
 				if(this.newMetric.SelectedLevel.Variables.length > 0) {
 					this.newMetric.SelectedVariable = this.newMetric.SelectedLevel.Variables[0];
 				}
 			} else {
 				this.newMetric.SelectedVariable = null;
-				this.newMetric.Area.IsInclusionPoint = this.newMetric.DefaultIsInclusionPoint;
+				this.newMetric.OutputArea.IsInclusionPoint = this.newMetric.DefaultIsInclusionPoint;
 			}
 		},
 		"newMetric.SelectedVariable"() {
@@ -240,7 +240,7 @@ export default {
 			if(this.newMetric.SelectedVariable != null) {
 				this.newMetric.Source.VariableId = this.newMetric.SelectedVariable.Id;
 				this.newMetric.Output.HasValue = !this.newMetric.SelectedVariable.IsSimpleCount;
-				this.newMetric.OutputArea.HasAdditionValue = !this.newMetric.SelectedVariable.IsSimpleCount;
+				this.newMetric.OutputArea.HasSumValue = !this.newMetric.SelectedVariable.IsSimpleCount;
 				this.newMetric.OutputArea.HasMaxValue = !this.newMetric.SelectedVariable.IsSimpleCount;
 				this.newMetric.OutputArea.HasMinValue = !this.newMetric.SelectedVariable.IsSimpleCount;
 				this.newMetric.OutputArea.HasCount = true;

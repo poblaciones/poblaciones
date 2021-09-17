@@ -22,8 +22,9 @@
 					<span v-else>▼</span>
 				</div>
 				<div v-if="canSelectIcon && !showPickerAdvanced && canEdit" class="extraBottomLine" style="left: 3.2rem;">
-					<md-button title="Seleccionar ícono" @click="iconPickerClicked" class="md-raised tinyButton" style="margin-left: 10px;">
+					<md-button @click="iconPickerClicked" class="md-raised tinyButton" style="margin-left: 10px;">
 						<i class="far fa-grin"></i>
+						<md-tooltip md-direction="bottom">Seleccionar ícono</md-tooltip>
 					</md-button>
 				</div>
 

@@ -21,9 +21,9 @@
 							</md-field>
 						</div>
 						<div class="md-layout-item md-size-10">
-							<md-button class="md-icon-button" @click="swapValues" style="margin-top: 8px;"
-												 title="Intercambiar latitud y longitud">
+							<md-button class="md-icon-button" @click="swapValues" style="margin-top: 8px;">
 								<md-icon>import_export</md-icon>
+								<md-tooltip md-direction="bottom">Intercambiar latitud y longitud</md-tooltip>
 							</md-button>
 						</div>
 						<div class="md-layout-item md-size-20">
@@ -40,8 +40,9 @@
 						</div>
 						<div class="md-layout-item md-size-10">
 							<md-button class="md-icon-button" @click="goto" style="margin-top: 8px;"
-												 title="Ir" :disabled="!(lat !== newLat || lon !== newLon || (!useMarker && zoom !== newZoom))">
+												  :disabled="!(lat !== newLat || lon !== newLon || (!useMarker && zoom !== newZoom))">
 								<md-icon>keyboard_arrow_right</md-icon>
+								<md-tooltip md-direction="bottom">Ir</md-tooltip>
 							</md-button>
 						</div>
 					</div>

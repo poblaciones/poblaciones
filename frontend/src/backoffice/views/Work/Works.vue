@@ -33,41 +33,60 @@
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable"
 												 md-label="Contenido" md-sort-by="History">
-						<i v-if="logInfo(item)" :title="logInfo(item)" style="margin-right: 5px; font-size: 11px;"
-							 class="tinyIcon vsm-icon fa fa-history"></i>
-						{{ item.DatasetCount }} <i :title="item.DatasetCount + (item.DatasetCount == 1 ? ' dataset' : ' datasets')"
-																 class="tinyIcon vsm-icon fa fa-table"></i>,
-						{{ item.MetricCount }} <i :title="item.MetricCount + (item.MetricCount == 1 ? ' indicador' : ' indicadores')"
-																class="tinyIcon vsm-icon fa fa-chart-bar"></i>
+						<span>
+							<i v-if="logInfo(item)" style="margin-right: 5px; font-size: 11px;"
+								 class="tinyIcon vsm-icon fa fa-history"></i>
+							<md-tooltip md-direction="bottom">{{ logInfo(item) }}</md-tooltip>
+						</span>
+						<span>
+							{{ item.DatasetCount }} <i class="tinyIcon vsm-icon fa fa-table"></i>
+							<md-tooltip md-direction="bottom">{{ item.DatasetCount + (item.DatasetCount == 1 ? ' dataset' : ' datasets') }}</md-tooltip>
+						</span>,<span>
+								{{ item.MetricCount }} <i class="tinyIcon vsm-icon fa fa-chart-bar"></i>
+								<md-tooltip md-direction="bottom">{{ item.MetricCount + (item.MetricCount == 1 ? ' indicador' : ' indicadores') }}</md-tooltip>
+							</span>
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable"
 													md-label="Estado">
-						<md-icon :title="status(item).label" :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
+						<md-icon :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
+						<md-tooltip md-direction="bottom">{{ status(item).label }}</md-tooltip>
 						<div class="extraIconContainer">
-							<md-icon v-if="item.IsPrivate" class="extraIcon" title="Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.">lock</md-icon>
+							<md-icon v-if="item.IsPrivate" class="extraIcon">
+								lock
+								<md-tooltip md-direction="bottom">Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.</md-tooltip>
+							</md-icon>
 							<md-icon v-if="!item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
-												class="extraIcon" title="No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
-												Para que sean incluidos, debe solictar una revisión desde Modificar>Visiblidad > Solicitar revisión.">error_outline</md-icon>
+											 class="extraIcon">error_outline</md-icon>
+							<md-tooltip md-direction="bottom">
+								No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
+								Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.
+							</md-tooltip>
 						</div>
 					</md-table-cell>
 					<md-table-cell md-label="Acciones">
-						<md-button v-if="!canEdit(item)" title="Consultar" class="md-icon-button" v-on:click="select(item)">
+						<md-button v-if="!canEdit(item)" class="md-icon-button" v-on:click="select(item)">
 							<md-icon>remove_red_eye</md-icon>
+							<md-tooltip md-direction="bottom">Consultar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item) && !publishDisabled(item)" title="Publicar" class="md-icon-button" v-on:click="onPublish(item)">
+						<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" v-on:click="onPublish(item)">
 							<md-icon>public</md-icon>
+							<md-tooltip md-direction="bottom">Publicar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item) && !revokeDisabled(item)" title="Revocar publicación" class="md-icon-button" v-on:click="onRevoke(item)">
+						<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" v-on:click="onRevoke(item)">
 							<md-icon>pause_circle_filled</md-icon>
+							<md-tooltip md-direction="bottom">Revocar publicación</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" title="Modificar" class="md-icon-button" v-on:click="select(item)">
+						<md-button v-if="canEdit(item)" class="md-icon-button" v-on:click="select(item)">
 							<md-icon>edit</md-icon>
+							<md-tooltip md-direction="bottom">Modificar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" title="Duplicar" class="md-icon-button">
+						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" class="md-icon-button">
 							<md-icon>file_copy</md-icon>
+							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" title="Eliminar" class="md-icon-button" v-on:click="onDelete(item)">
+						<md-button v-if="canEdit(item)" class="md-icon-button" v-on:click="onDelete(item)">
 							<md-icon>delete</md-icon>
+							<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
 						</md-button>
 					</md-table-cell>
 				</md-table-row>
@@ -77,9 +96,10 @@
 			<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
 				<div v-if="!canCreate" style="">
 					<p>
-						No dispone actualmente de {{ entityName.plural }}.
-					</p>
-				</div>
+						No dispone actualmente de {{ entityName.plural
+							}}.
+							</p>
+</div>
 				<div v-else="">
 					<p style="margin-bottom: 25px; line-height: 2em;">
 						No hay {{ entityName.plural }} disponibles. Para crear {{ entityName.one }}

@@ -33,21 +33,26 @@
 							</md-table-cell>
 							<md-table-cell md-label="Acciones" class="mpNoWrap">
 								<div v-if="Work.CanEdit()">
-									<md-button class="md-icon-button" title="Modificar adjunto" @click="openEdition(item)">
+									<md-button class="md-icon-button" @click="openEdition(item)">
 										<md-icon>edit</md-icon>
+										<md-tooltip md-direction="bottom">Modificar adjunto</md-tooltip>
 									</md-button>
-									<md-button v-if="!isFirst(item)" title="Subir una ubicación" class="md-icon-button" @click="up(item)">
+									<md-button v-if="!isFirst(item)" class="md-icon-button" @click="up(item)">
 										<md-icon>arrow_upward</md-icon>
+										<md-tooltip md-direction="bottom">Subir una ubicación</md-tooltip>
 									</md-button>
-									<md-button v-if="!isLast(item)" title="Bajar una ubicación" class="md-icon-button" @click="down(item)">
+									<md-button v-if="!isLast(item)" class="md-icon-button" @click="down(item)">
 										<md-icon>arrow_downward</md-icon>
+										<md-tooltip md-direction="bottom">Bajar una ubicación</md-tooltip>
 									</md-button>
-									<md-button class="md-icon-button" title="Eliminar adjunto" @click="onDelete(item)">
+									<md-button class="md-icon-button" @click="onDelete(item)">
 										<md-icon>delete</md-icon>
+										<md-tooltip md-direction="bottom">Eliminar adjunto</md-tooltip>
 									</md-button>
 								</div>
-								<md-button v-else="" class="md-icon-button" title="Ver adjunto" @click="openEdition(item)">
+								<md-button v-else="" class="md-icon-button" @click="openEdition(item)">
 									<md-icon>remove_red_eye</md-icon>
+									<md-tooltip md-direction="bottom">Ver adjunto</md-tooltip>
 								</md-button>
 
 							</md-table-cell>

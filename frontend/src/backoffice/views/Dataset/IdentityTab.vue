@@ -51,6 +51,7 @@
 										</md-switch>
 									</div>
 								</div>
+
 							</div>
 						</md-card-content>
 					</md-card>
@@ -65,13 +66,16 @@
 								<div class='md-layout-item md-size-45 md-size-small-100'>
 									<div class="mp-label labelSeparator">Tamaño</div>
 									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="S">
-										<md-icon class="optSmall" title="Pequeño">room</md-icon>
+										<md-icon class="optSmall">room</md-icon>
+										<md-tooltip md-direction="bottom">Pequeño</md-tooltip>
 									</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="M">
-										<md-icon class="optMedium" title="Mediano">room</md-icon>
+										<md-icon class="optMedium">room</md-icon>
+										<md-tooltip md-direction="bottom">Mediano</md-tooltip>
 									</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="L">
-										<md-icon class="optLarge" title="Grande">room</md-icon>
+										<md-icon class="optLarge">room</md-icon>
+										<md-tooltip md-direction="bottom">Grande</md-tooltip>
 									</md-radio>
 									<div style="margin-top: -15px;">
 										<md-switch v-model="Dataset.properties.Marker.AutoScale" :disabled="!canEdit" class="md-primary" @change="Update">
@@ -98,10 +102,11 @@
 
 											<div class='currentIcon' v-if="Dataset.properties.Marker.Type == 'I'">
 												<Icon v-if="Dataset.properties.Marker.Symbol" :symbol="Dataset.properties.Marker.Symbol" :work="Work" />
-												<md-button title="Quitar" v-if="Dataset.properties.Marker.Symbol"
+												<md-button v-if="Dataset.properties.Marker.Symbol"
 																	 class="md-icon-button md-button-mini"
 																	 v-on:click="removeIcon">
 													<md-icon>close</md-icon>
+													<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 												</md-button>
 												<template v-if="canEdit">
 													<md-button @click="showDialogPicker" class="md-raised" style="margin-top: -3px;">

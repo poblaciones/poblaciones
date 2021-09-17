@@ -1,10 +1,11 @@
 <template>
 	<span>
-		<a href="#" v-clipboard="() => text" title="Copiar" v-if="text"
+		<a href="#" v-clipboard="() => text" v-if="text"
 			 v-clipboard:success="clipboardSuccessHandler"
 			 v-clipboard:error="clipboardErrorHandler"
 			 @click.prevent="click">
 			<i class="far fa-copy"></i>
+			<md-tooltip md-direction="bottom">Copiar</md-tooltip>
 		</a>
 	</span>
 </template>

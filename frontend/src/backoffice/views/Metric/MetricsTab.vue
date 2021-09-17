@@ -42,11 +42,13 @@
 								{{ item.MetricVersion.Metric.Caption }} ({{ item.MetricVersion.Caption }})
 							</div>
 							<template v-if="Work.CanEdit()">
-								<md-button v-if="Work.CanEdit()" class="md-icon-button" :title="'Cambiar el nombre' + (Work.properties.Type === 'P' ? ', la categoría': '') + ' o la edición'" @click="openEdition(item)">
+								<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="openEdition(item)">
 									<md-icon>edit</md-icon>
+									<md-tooltip md-direction="bottom">Cambiar el nombre {{ (Work.properties.Type === 'P' ? ', la categoría': '') }} o la edición</md-tooltip>
 								</md-button>
-								<md-button class="md-icon-button" title="Agregar variable" @click="createNewVariable(item)">
+								<md-button class="md-icon-button" @click="createNewVariable(item)">
 									<md-icon>add_circle_outline</md-icon>
+									<md-tooltip md-direction="bottom">Agregar variable</md-tooltip>
 								</md-button>
 							</template>
 						</md-table-cell>
@@ -60,29 +62,44 @@
 										<span v-if="variable.DataColumnIsCategorical">
 											Conteo
 										</span>
-										<span v-else :title="Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn)">
+										<span v-else >
 											{{ Dataset.formatTwoColumnVariable(variable.Data, variable.DataColumn, true) }}
+											<md-tooltip md-direction="bottom" v-if="Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn)">
+												{{ Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn) }}
+											</md-tooltip>
 										</span>
 										<template v-if="variable.Normalization !== null">
 											/
-											<span :title="Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn)">
-												{{ Dataset.formatTwoColumnVariable(variable.Normalization, variable.NormalizationColumn, true) }}
+											<span>
+												{{
+ Dataset.formatTwoColumnVariable(variable.Normalization, variable.NormalizationColumn, true)
+												}}
+												<md-tooltip md-direction="bottom" v-if="Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn)">
+													{{ Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn) }}</md-tooltip>
 											</span>
-											{{ formatScaleFormula(variable) }}
-										</template>
+											{{ formatScaleFormula(variable)
+													}}
+</template>
 										<template v-if="variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null">
 											por
-											<span :title="f.formatColumnTooltip(variable.Symbology.CutColumn)">
+											<span>
 												{{ f.formatColumn(variable.Symbology.CutColumn, true) }}
+												<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(variable.Symbology.CutColumn)">
+													{{ f.formatColumnTooltip(variable.Symbology.CutColumn) }}</md-tooltip>
 											</span>
 										</template>
 										<template v-if="variable.FilterValue !== null">
-											(<span :title="f.formatColumnTooltip(getFilterColumn(variable))"
-														 >{{ f.formatColumn(getFilterColumn(variable), true) }}</span>{{ formatFilterOperator(variable) }}{{ formatFilterValue(variable) }})
+											(
+											<span>
+												{{ f.formatColumn(getFilterColumn(variable), true) }}
+													<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(getFilterColumn(variable))">
+														{{  f.formatColumnTooltip(getFilterColumn(variable)) }}
+													</md-tooltip></span>{{ formatFilterOperator(variable) }}{{ formatFilterValue(variable) }})
 										</template>
 									</span>
-									<md-button class="md-icon-button" title="Fórmula" @click="openVariableFormulaEdition(item, variable)">
+									<md-button class="md-icon-button" @click="openVariableFormulaEdition(item, variable)">
 										<md-icon>edit</md-icon>
+										<md-tooltip md-direction="bottom">Fórmula</md-tooltip>
 									</md-button>
 								</md-list-item>
 							</md-list>
@@ -90,26 +107,32 @@
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
 							<md-list v-if="item.Variables.length > 0" class="innerList">
 								<md-list-item v-for="variable in item.Variables" :key='variable.Id' :value='variable.Id'>
-									<md-button class="md-icon-button" title="Simbología y coloreo" @click="openVariableSymbologyEdition(item, variable)">
+									<md-button class="md-icon-button" @click="openVariableSymbologyEdition(item, variable)">
 										<md-icon>format_color_fill</md-icon>
+										<md-tooltip md-direction="bottom">Simbología y coloreo</md-tooltip>
 									</md-button>
-									<md-button class="md-icon-button" title="Opciones" @click="openVariableOptionsEdition(item, variable)">
-											<md-icon>settings</md-icon>
+									<md-button class="md-icon-button" @click="openVariableOptionsEdition(item, variable)">
+										<md-icon>settings</md-icon>
+										<md-tooltip md-direction="bottom">Opciones</md-tooltip>
 									</md-button>
-									<md-button v-if="Work.CanEdit()" class="md-icon-button" title="Quitar variable" @click="onDeleteVariable(item, variable)">
+									<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="onDeleteVariable(item, variable)">
 										<md-icon>delete</md-icon>
+										<md-tooltip md-direction="bottom">Quitar variable</md-tooltip>
 									</md-button>
-									<md-button v-if="Work.CanEdit() && item.Variables.length > 1 && !isFirst(item, variable)" title="Subir una ubicación" class="md-icon-button" @click="up(item, variable)">
+									<md-button v-if="Work.CanEdit() && item.Variables.length > 1 && !isFirst(item, variable)" class="md-icon-button" @click="up(item, variable)">
 										<md-icon>arrow_upward</md-icon>
+										<md-tooltip md-direction="bottom">Subir una ubicación</md-tooltip>
 									</md-button>
-									<md-button v-if="Work.CanEdit() && item.Variables.length > 1 && !isLast(item, variable)" title="Bajar una ubicación" class="md-icon-button" @click="down(item, variable)">
+									<md-button v-if="Work.CanEdit() && item.Variables.length > 1 && !isLast(item, variable)" class="md-icon-button" @click="down(item, variable)">
 										<md-icon>arrow_downward</md-icon>
+										<md-tooltip md-direction="bottom">Bajar una ubicación</md-tooltip>
 									</md-button>
 								</md-list-item>
 							</md-list>
 							<div v-else="">
-								<md-button v-if="Work.CanEdit()" class="md-icon-button" title="Eliminar indicador" @click="onDelete(item)">
+								<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="onDelete(item)">
 									<md-icon>delete</md-icon>
+									<md-tooltip md-direction="bottom">Eliminar indicador</md-tooltip>
 								</md-button>
 							</div>
 						</md-table-cell>

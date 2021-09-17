@@ -61,8 +61,15 @@ module.exports = {
 		let n = Number(str);
 		return Number.isInteger(n) && n > than;
 	},
+	IsNumberGreaterThan(str, than) {
+		let n = Number(str);
+		return n > than;
+	},
 	IsIntegerGreaterThan0(str) {
 		return this.IsIntegerGreaterThan(str, 0);
+	},
+	IsNumberGreaterThan0(str) {
+		return this.IsNumberGreaterThan(str, 0);
 	},
 	AddDot(str) {
 		if (str !== null && this.EndsWith(str, ".") === false) {
@@ -73,6 +80,13 @@ module.exports = {
 	},
 	applySymbols(cad) {
 		return cad.replace('km2', 'km²');
+	},
+	Capitalize(cad) {
+		if (cad.length === 0) {
+			return cad;
+		} else {
+			return cad.charAt(0).toUpperCase() + cad.slice(1);
+		}
 	},
 	EscapeHtml(unsafe) {
 		return ('' + unsafe)

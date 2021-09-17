@@ -189,31 +189,40 @@ App::GetOrPost('/services/backoffice/UpdateVariable', function (Request $request
 	return App::Json($controller->UpdateVariable($datasetId, $level, $variable));
 });
 
-App::GetOrPost('/services/backoffice/CalculateNewMetric', function (Request $request) {
+App::GetOrPost('/services/backoffice/CalculateNewDistanceMetric', function (Request $request) {
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId))
 		return $denied;
 
-	$type = Params::Get('t');
 	$source = Params::GetJson('s', true);
 	$output = Params::GetJson('o', true);
 
-	if($type == 'distance')
-	{
-		$controller = new services\CalculatedDistanceService();
-		return App::Json($controller->StartCalculate($datasetId, $source, $output));
-	}
-	elseif($type == 'area')
-	{
-		$controller = new services\CalculatedAreaService();
-		$area = Params::GetJson('a', true);
-		return App::Json($controller->StartCalculate($datasetId, $source, $output, $area));
-	}
-	return App::Json(['error' => 1, 'msg' => 'No implementado']);
+	$controller = new services\CalculatedDistanceService();
+	return App::Json($controller->StartCalculate($datasetId, $source, $output));
 });
 
-App::GetOrPost('/services/backoffice/StepCalculateNewMetric', function (Request $request) {
+
+App::GetOrPost('/services/backoffice/StepCalculateNewDistanceMetric', function (Request $request) {
 	$controller = new services\CalculatedDistanceService();
+	$key = Params::GetMandatory('k');
+	return App::Json($controller->StepCalculate($key));
+});
+
+App::GetOrPost('/services/backoffice/CalculateNewAreaMetric', function (Request $request) {
+	$datasetId = Params::GetIntMandatory('k');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId))
+		return $denied;
+
+	$source = Params::GetJson('s', true);
+	$output = Params::GetJson('o', true);
+
+	$controller = new services\CalculatedAreaService();
+	return App::Json($controller->StartCalculate($datasetId, $source, $output));
+});
+
+
+App::GetOrPost('/services/backoffice/StepCalculateNewAreaMetric', function (Request $request) {
+	$controller = new services\CalculatedAreaService();
 	$key = Params::GetMandatory('k');
 	return App::Json($controller->StepCalculate($key));
 });

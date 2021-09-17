@@ -14,8 +14,9 @@
 					Seleccionar
 				</md-button>
 
-				<md-button v-if="item !== null && item.IsEditableByCurrentUser" class="md-icon-button" title="Editar institución" @click="openEditionWarning(item)" style="margin-top: 5px;">
+				<md-button v-if="item !== null && item.IsEditableByCurrentUser" class="md-icon-button" @click="openEditionWarning(item)" style="margin-top: 5px;">
 					<md-icon>edit</md-icon>
+					<md-tooltip md-direction="bottom">Editar institución</md-tooltip>
 				</md-button>
 
 			</div>

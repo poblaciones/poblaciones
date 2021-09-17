@@ -4,18 +4,20 @@
 			<i data-v-10cdbda8="" class="largeIco md-icon md-icon-font md-theme-default">{{ icon }}</i>
 		</div>
 		<div class="textbox">
-			<div class="text" :title="(text.length > 40 ? text : '')">
+			<div class="text">
 				{{ text }}
+				<md-tooltip md-direction="top" v-if="text.length > 40">{{ text }}</md-tooltip>
 			</div>
-			<div class="edited" :title="logLegend">{{ logLegend }}</div>
+			<div class="edited">
+				{{ logLegend }}
+				<md-tooltip md-direction="bottom">
+					{{ logLegend }} </md-tooltip>
+			</div>
 		</div>
 	</md-button>
 </template>
-
 <script>
-
 import speech from '@/common/js/speech';
-
 export default {
 	name: 'MpLargeDataItem',
 	components: {
@@ -46,9 +48,7 @@ export default {
 	},
 };
 </script>
-
 <style rel="stylesheet/scss" lang="scss" scoped>
-
 	.largeitem {
 		width: 220px;
 		height: 150px;
@@ -93,7 +93,6 @@ export default {
 		margin-top: 6px;
 		width: 180px;
 	}
-
 	.largeitem.md-button:not([disabled]).md-focused:before, .md-button:not([disabled]):active:before, .md-button:not([disabled]):hover:before {
 		background-color: #e0e0e0;
 		opacity: .2;

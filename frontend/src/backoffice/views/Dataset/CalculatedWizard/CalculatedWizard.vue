@@ -140,18 +140,15 @@ export default {
 					HasValue: true,
 					HasCoords: true,
 					HasMaxDistance: false,
-					MaxDistance: 20,
+					MaxDistance: 10,
 				},
 				OutputArea: {
-					HasAdditionValue: false,
+					HasSumValue: false,
 					HasMaxValue: false,
 					HasMinValue: false,
 					HasCount: false,
-				},
-				Area: {
 					IsInclusionPoint: defaultIsInclusionPoint,
-					InclusionDistance: 5,
-					IsInclussionFull: true,
+					InclusionDistance: 2,
 				},
 				Source: {
 					ValueLabelIds: [],
@@ -209,8 +206,8 @@ export default {
 				return;
 			}
 			let stepper = this.$refs.stepper;
-			stepper.startUrl = this.Dataset.CalculateNewMetricUrl();
-			stepper.stepUrl = this.Dataset.StepCalculateNewMetricUrl();
+			stepper.startUrl = this.Dataset.CalculateNewMetricUrl(this.newMetric.Type);
+			stepper.stepUrl = this.Dataset.StepCalculateNewMetricUrl(this.newMetric.Type);
 			stepper.args = this.args();
 			stepper.Start();
 		},
@@ -221,12 +218,13 @@ export default {
 
 			var ret = {
 					k: this.Dataset.properties.Id,
-					t: this.newMetric.Type,
-					s: JSON.stringify(this.newMetric.Source),
-					o: JSON.stringify(this.newMetric.Output),
+					s: JSON.stringify(this.newMetric.Source)
 			};
+
 			if (this.newMetric.Type == 'area') {
-				ret.a = JSON.stringify(this.newMetric.Area);
+				ret.o = JSON.stringify(this.newMetric.OutputArea);
+			} else {
+				ret.o = JSON.stringify(this.newMetric.Output);
 			}
 			// Definir
 			return ret;

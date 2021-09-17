@@ -12,16 +12,22 @@
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Fecha de envío">{{ formatDate(item.SubmissionDate) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Fecha de respuesta">{{ formatDate(item.ResolutionDate) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Respuesta">{{ formatDecision(item.Decision) }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Solicitante" :title="(item.UserSubmission ? item.UserSubmission.Email : item.UserSubmissionEmail)">{{ formatFullName(item) }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Solicitante">
+							{{ formatFullName(item) }}
+							<md-tooltip md-direction="bottom">{{ (item.UserSubmission ? item.UserSubmission.Email : item.UserSubmissionEmail) }}</md-tooltip>
+						</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<md-button class="md-icon-button" :title="(isDataAdmin ? 'Modificar revisión' : 'Ver revisión')" @click="openEdition(item)">
+							<md-button class="md-icon-button" @click="openEdition(item)">
 								<md-icon>edit</md-icon>
+								<md-tooltip md-direction="bottom">{{ (isDataAdmin ? 'Modificar revisión' : 'Ver revisión') }}</md-tooltip>
 							</md-button>
-							<md-button class="md-icon-button" title="Ver cartografía" @click="select(item.Work)">
+							<md-button class="md-icon-button" @click="select(item.Work)">
 								<md-icon>visibility</md-icon>
+								<md-tooltip md-direction="bottom">Ver cartografía</md-tooltip>
 							</md-button>
-							<md-button class="md-icon-button" v-if="isDataAdmin" title="Eliminar" @click="deleteDecision(item)">
+							<md-button class="md-icon-button" v-if="isDataAdmin" @click="deleteDecision(item)">
 								<md-icon>delete</md-icon>
+								<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
 							</md-button>
 						</md-table-cell>
 					</md-table-row>
@@ -30,15 +36,12 @@
 		</div>
 		</div>
 </template>
-
 <script>
 import Context from '@/backoffice/classes/Context';
 import ReviewPopup from './ReviewPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
-
 var	DECISIONS = { 'A': 'Publicable', 'S': 'Publicable con sugerencias', 'C': 'Cambios solicitados', 'R': 'Rechazada' };
-
 export default {
 	name: 'Reviewes',
 	data() {
@@ -59,7 +62,6 @@ export default {
 					loc.updatePending();
 					});
 	},
-
 	methods: {
 		formatDate(date) {
 			return f.formatDate(date);
@@ -119,18 +121,14 @@ export default {
   }
 };
 </script>
-
 <style rel="stylesheet/scss" lang="scss" scoped>
-
 .md-dialog-actions {
   padding: 8px 20px 8px 24px !important;
 }
-
 .close-button {
     min-width: unset;
     height: unset;
     margin: unset;
     float: right;
 }
-
 </style>

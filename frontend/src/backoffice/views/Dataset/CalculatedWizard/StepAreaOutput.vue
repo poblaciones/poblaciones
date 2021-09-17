@@ -4,26 +4,25 @@
 			Variables a crear como resultado del conteo
 		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100 leftpadding" v-if="!newMetric.SelectedVariable.IsSimpleCount">
-			<md-switch class="md-primary" v-model="newMetric.OutputArea.HasAdditionValue">Valor (suma)</md-switch>
-		</div>
-		<div class="md-layout-item md-size-30 md-small-size-100 leftpadding" v-if="!newMetric.SelectedVariable.IsSimpleCount">
-			<md-switch class="md-primary" v-model="newMetric.OutputArea.HasMaxValue">Valor (máximo)</md-switch>
+			<md-switch class="md-primary" v-model="newMetric.OutputArea.HasSumValue">Valor (suma)</md-switch>
 		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100 leftpadding" v-if="!newMetric.SelectedVariable.IsSimpleCount">
 			<md-switch class="md-primary" v-model="newMetric.OutputArea.HasMinValue">Valor (mínimo)</md-switch>
 		</div>
+		<div class="md-layout-item md-size-30 md-small-size-100 leftpadding" v-if="!newMetric.SelectedVariable.IsSimpleCount">
+			<md-switch class="md-primary" v-model="newMetric.OutputArea.HasMaxValue">Valor (máximo)</md-switch>
+		</div>
 		<div class="md-layout-item md-size-30 md-small-size-100 leftpadding">
 			<md-switch class="md-primary" v-model="newMetric.OutputArea.HasCount" :disabled="newMetric.SelectedVariable.IsSimpleCount">Conteo</md-switch>
 		</div>
-
 		<div class="md-layout-item md-size-100 md-layout-item-separated mp-label">
 			Criterios de inclusión
 		</div>
 		<div class="md-layout-item md-size-45" v-if="Dataset.properties.Type != 'L'">
-			<md-radio class="md-primary" :value="false" v-model="newMetric.Area.IsInclusionPoint">Por polígono del elemento</md-radio>
+			<md-radio class="md-primary" :value="false" v-model="newMetric.OutputArea.IsInclusionPoint">Por polígono del elemento</md-radio>
 		</div>
 		<div class="md-layout-item md-size-55" style="display:flex">
-			<md-radio class="md-primary" :value="true" v-model="newMetric.Area.IsInclusionPoint"
+			<md-radio class="md-primary" :value="true" v-model="newMetric.OutputArea.IsInclusionPoint"
 								v-if="Dataset.properties.Type != 'L'">
 				Por distancia desde el centroide:
 			</md-radio>
@@ -31,22 +30,10 @@
 				Distancia máxima:
 			</div>
 			<mp-simple-text style="padding-bottom: 8px; margin-top: -12px; width: 45px;"
-											class="md-size-10" :disabled="!newMetric.Area.IsInclusionPoint" preffix="km"
-											type="number" v-model="newMetric.Area.InclusionDistance"></mp-simple-text>
+											class="md-size-10" :disabled="!newMetric.OutputArea.IsInclusionPoint" preffix="km"
+											type="number" v-model="newMetric.OutputArea.InclusionDistance"></mp-simple-text>
 			<div style="padding-top: 15px; padding-left: 3px; padding-bottom: 30px;">Kms.</div>
 		</div>
-
-		<template v-if="newMetric.SelectedLevel.Dataset.Type != 'L'">
-			<div class="md-layout-item md-size-100 mp-label">
-				Criterios de inclusión de los objetivos
-			</div>
-			<div class="md-layout-item md-size-45 md-small-size-100">
-				<md-radio class="md-primary" :value="true" v-model="newMetric.Area.IsInclussionFull">Todo el elemento debe estar dentro</md-radio>
-			</div>
-			<div class="md-layout-item md-size-55 md-small-size-100">
-				<md-radio class="md-primary" :value="false" v-model="newMetric.Area.IsInclussionFull">Solamente el centroide debe estar dentro</md-radio>
-			</div>
-		</template>
 	</div>
 </template>
 
@@ -74,16 +61,24 @@ export default {
 	},
 	methods: {
 		validate() {
-			if (this.newMetric.Area.IsInclusionPoint
-				&& str.IsIntegerGreaterThan0(this.newMetric.Area.InclusionDistance) == false) {
-				alert("Debe ingresar la distancia máxima en kilómetros.");
-				return false;
+			const MAX_VALID_DISTANCE = 500;
+
+			if (this.newMetric.OutputArea.IsInclusionPoint) {
+				if (str.IsNumberGreaterThan0(this.newMetric.OutputArea.InclusionDistance) == false) {
+					alert("Debe ingresar la distancia máxima en kilómetros.");
+					return false;
+				}
+				if (str.IsNumberGreaterThan(this.newMetric.OutputArea.InclusionDistance, MAX_VALID_DISTANCE)) {
+					alert("La distancia no puede ser mayor a " + MAX_VALID_DISTANCE + " km.");
+					return false;
+				}
+				this.newMetric.OutputArea.InclusionDistance = Number(this.newMetric.OutputArea.InclusionDistance);
 			}
 			if (!this.newMetric.SelectedVariable.IsSimpleCount) {
 				if (!this.newMetric.OutputArea.HasMaxValue &&
 					!this.newMetric.OutputArea.HasMinValue &&
 					!this.newMetric.OutputArea.HasCount &&
-					!this.newMetric.OutputArea.HasAdditionValue) {
+					!this.newMetric.OutputArea.HasSumValue) {
 					alert("Debe elegir algún valor para guardar.");
 					return false;
 				}
@@ -92,10 +87,10 @@ export default {
 		}
 	},
 	watch: {
-		"newMetric.Area.InclusionDistance"() {
-			if (this.newMetric.Area.InclusionDistance != null
-				&& Number(this.newMetric.Area.InclusionDistance) < 0) {
-				this.newMetric.Area.InclusionDistance = 0;
+		"newMetric.OutputArea.InclusionDistance"() {
+			if (this.newMetric.OutputArea.InclusionDistance != null
+				&& Number(this.newMetric.OutputArea.InclusionDistance) < 0) {
+				this.newMetric.OutputArea.InclusionDistance = 0;
 			}
 		},
 	},

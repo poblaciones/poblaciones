@@ -19,17 +19,25 @@
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre" md-sort-by="FullName">{{ item.FullName }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Email" md-sort-by="Email">{{ item.Email }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Rol" md-sort-by="FormattedRole">{{ item.FormattedRole }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Cartographies"><span :title="item.CartographiesNames">{{ item.Cartographies + item.PublicData  }}</span></md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Último ingreso" md-sort-by="LastAccess">{{ formatDate(item.LastAccess) }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Cartographies">
+							{{ item.Cartographies + item.PublicData  }}
+							<md-tooltip md-direction="bottom"> {{ item.CartographiesNames }}</md-tooltip>
+						</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Último ingreso" md-sort-by="LastAccess">{{ formatDate(item.LastAccess)
+								}}
+</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<md-button class="md-icon-button" title="Modificar" @click="openEdition(item)">
+							<md-button class="md-icon-button" @click="openEdition(item)">
 								<md-icon>edit</md-icon>
+								<md-tooltip md-direction="bottom">Modificar</md-tooltip>
 							</md-button>
-							<md-button class="md-icon-button" :title="'Ingresar como ' + formatName(item)" @click="onLoginAs(item)">
+							<md-button class="md-icon-button" @click="onLoginAs(item)">
 								<md-icon>flight_takeoff</md-icon>
+								<md-tooltip md-direction="bottom">Ingresar como {{ formatName(item) }}</md-tooltip>
 							</md-button>
-							<md-button class="md-icon-button" title="Eliminar" @click="onDelete(item)">
+							<md-button class="md-icon-button" @click="onDelete(item)">
 								<md-icon>delete</md-icon>
+								<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
 							</md-button>
 						</md-table-cell>
 					</md-table-row>

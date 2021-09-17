@@ -65,8 +65,9 @@
 										</md-table-cell>
 										<md-table-cell md-label="Acciones" class="mpNoWrap">
 											<div v-if="Work.CanEdit()">
-												<md-button class="md-icon-button" title="Quitar fuente" @click="removeMetric(item)">
+												<md-button class="md-icon-button" @click="removeMetric(item)">
 													<md-icon>delete</md-icon>
+													<md-tooltip md-direction="bottom">Quitar fuente</md-tooltip>
 												</md-button>
 											</div>
 										</md-table-cell>
