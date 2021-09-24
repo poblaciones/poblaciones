@@ -1,3 +1,5 @@
+USAR PYTHON 3.7.11 (no 3.8)
+
 # spss
 ./pip install savReaderWriter
 ./pip install ijson

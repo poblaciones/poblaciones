@@ -55,7 +55,7 @@ class cHandleTest extends TestCase
 		$controller = new cHandle();
 		Reflection::CallPrivateMethod($controller, 'ShowWorkMetric', $this->workId, $this->metricId, null);
 
-		$this->assertStringContainsString('universitario', $controller->templateValues['handleTitle']);
+		$this->assertStringContainsString('superior', $controller->templateValues['handleTitle']);
 		$this->assertEquals(1, count($controller->templateValues['variables']));
 
 		$this->assertGreaterThan(0, count($controller->templateValues['metadata']));
@@ -74,7 +74,7 @@ class cHandleTest extends TestCase
 	{
 		$controller = new cHandle();
 		Reflection::CallPrivateMethod($controller, 'ShowWorkMetric', $this->workId, $this->metricId, $this->regionId);
-		$this->assertEquals('Ciudad Autónoma de Buenos Aires (CABA), Establecimientos de nivel universitario - Argentina', $controller->templateValues['htmltitle']);
+		$this->assertEquals('Ciudad Autónoma de Buenos Aires (CABA), Establecimientos de nivel superior - Argentina', $controller->templateValues['htmltitle']);
 		$this->assertEquals($prevResult['items'], $controller->templateValues['items']);
 		$this->assertEquals($prevResult['variables'], $controller->templateValues['variables']);
 	}

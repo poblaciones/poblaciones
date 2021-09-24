@@ -5,9 +5,16 @@ namespace helena\tests\backoffice;
 use helena\classes\Session;
 use helena\classes\TestCase;
 use helena\services\backoffice\DatasetService;
+use helena\classes\Account;
+
 
 class DatasetServiceTest extends TestCase
 {
+	public function setUp()
+	{
+		Account::Impersonate($this->GetGlobal('dbuser'));
+	}
+
 	public function testGetDatasetData()
 	{
 		$k = $this->Get('k');
