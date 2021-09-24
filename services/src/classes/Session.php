@@ -9,6 +9,7 @@ use minga\framework\Request;
 use minga\framework\Profiling;
 use minga\framework\Str;
 
+use minga\framework\PublicException;
 use helena\caches\WorkPermissionsCache;
 use helena\services\frontend\SelectedMetricService;
 use helena\services\backoffice\publish\PublishDataTables;
@@ -57,7 +58,7 @@ class Session
 	{
 		if (Context::Settings()->readonlyForMaintenance)
 		{
-			MessageBox::ThrowBackMessage('Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre información. Por favor, vuelva a intentar más tarde.');
+			return self::ReadonlyForMaintenance();
 		}
 	}
 
@@ -319,9 +320,7 @@ class Session
 	}
 	public static function ReadonlyForMaintenance()
 	{
-		$url = App::RedirectLoginUrl();
-		http_response_code(404);
-		MessageBox::ThrowMessage("Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre información. Por favor, vuelva a intentar más tarde.", $url);
+		throw new PublicException("Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre información. Por favor, vuelva a intentar más tarde.");
 	}
 
 	private static function ElementNotFound()
@@ -331,8 +330,7 @@ class Session
 	public static function CheckIsWorkEditor($workId)
 	{
 		Profiling::BeginTimer();
-		if ($readonly = self::CheckReadonlyForMaintenanceService())
-			return $readonly;
+		self::CheckReadonlyForMaintenanceService();
 
 		if ($app = Session::CheckSessionAlive())
 			$ret = $app;

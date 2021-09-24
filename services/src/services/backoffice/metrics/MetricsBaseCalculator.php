@@ -2,23 +2,27 @@
 
 namespace helena\services\backoffice\metrics;
 
+use minga\framework\Log;
+use minga\framework\PublicException;
+use minga\framework\Profiling;
+use minga\framework\Str;
+
 use helena\classes\App;
 use helena\classes\spss\Alignment;
 use helena\classes\spss\Format;
 use helena\classes\spss\Measurement;
 use helena\entities\backoffice as entities;
 use helena\services\backoffice\DatasetColumnService;
-use helena\services\backoffice\DatasetService;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\services\frontend\SelectedMetricService;
-use minga\framework\PublicException;
-use minga\framework\Profiling;
-use minga\framework\Str;
+use helena\services\backoffice\MetricService;
 
-class MetricsBaseCalculator
+
+abstract class MetricsBaseCalculator
 {
-	protected const ColPrefix = '';
 	protected const STEP = 1000;
+
+	abstract protected function GetCaptionContent($element);
 
 	public function StepPrepareData($datasetId, $cols)
 	{
@@ -38,36 +42,74 @@ class MetricsBaseCalculator
 		return ceil($count / self::STEP);
 	}
 
+	public function StepCreateMetrics($datasetId, $cols, $source)
+	{
+		Profiling::BeginTimer();
+
+		$metricService = new MetricService();
+
+		$metricColumns = ['distance', 'count', 'sum', 'min', 'max'];
+		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+
+		foreach($cols as $column => $col)
+		{
+			if (in_array($column, $metricColumns))
+			{
+				// Crea la variable default
+				$variable = $metricService->GetNewVariable();
+				$variable->setIsDefault(false);
+				$variable->setDataColumnIsCategorical(false);
+				$variable->setCaption($col['Caption']);
+				$dataColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $col['Id']);
+				$variable->setData('O');
+				$variable->setDataColumn($dataColumn);
+				// Normalization
+				if ($column === 'sum' && array_key_exists('total', $cols))
+				{
+					$normalizationColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $col['total']);
+					$variable->setNormalization('O');
+					$variable->setNormalizationColumn($normalizationColumn);
+					$originalVariable = App::Orm()->find(entities\Variable::class, $source['VariableId']);
+					$variable->setNormalizationScale($originalVariable->getNormalizationScale());
+				}
+				$caption = $variable->getCaption();
+				$caption = substr($caption, 0, 150);
+				$metricService->CreateMetricByVariable($dataset, $caption, $variable);
+ 			}
+		}
+		Profiling::EndTimer();
+	}
+
 	protected function CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName,
 			$calculatedField, $caption, $decimals = 2, $colWidth = 11, $fieldWidth = 11, $format = Format::F)
-		{
-			$datasetColumn = new DatasetColumnService();
-			$name = $this->GetColumnName(self::ColPrefix, $datasetName, $calculatedField);
-			$label = $this->GetColumnCaption($metric, $variable, $source, $output, $caption);
+	{
+		$datasetColumn = new DatasetColumnService();
+		$name = $this->GetColumnName($datasetName, $calculatedField);
+		$label = $this->GetColumnCaption($metric, $variable, $source, $output, $caption);
 
-			$col = $datasetColumn->GetColumnByVariable($dataset->getId(), $name);
-			if($col == null)
-			{
-				$showCaption = ($label === null || trim($label) === "" ? $name : $label);
-				$field = $datasetColumn->resolveStandardFieldName($dataset->getId());
-				$col = $datasetColumn->CreateColumnFromFields($dataset, $field, $name,
-					$showCaption, $label, $colWidth, $fieldWidth, $decimals, $format,
-					Measurement::Nominal, Alignment::Left, true, true);
-			}
-			else
-			{
-				if($col->getLabel() != $label)
-					$datasetColumn->UpdateLabel($col, $label);
-				// vacía los valores
-				$datasetColumn->ResetColumnValues($dataset, $col);
-			}
-			return $col->getField();
+		$col = $datasetColumn->GetColumnByVariable($dataset->getId(), $name);
+		if($col == null)
+		{
+			$showCaption = ($label === null || trim($label) === "" ? $name : $label);
+			$field = $datasetColumn->resolveStandardFieldName($dataset->getId());
+			$col = $datasetColumn->CreateColumnFromFields($dataset, $field, $name,
+				$showCaption, $label, $colWidth, $fieldWidth, $decimals, $format,
+				Measurement::Nominal, Alignment::Left, true, true);
 		}
+		else
+		{
+			if($col->getLabel() != $label)
+				$datasetColumn->UpdateLabel($col, $label);
+			// vacía los valores
+			$datasetColumn->ResetColumnValues($dataset, $col);
+		}
+		return $col;
+	}
 
 	protected function DeleteColumn($dataset, $datasetName, $calculatedField)
 	{
 		$datasetColumn = new DatasetColumnService();
-		$name = $this->GetColumnName(self::ColPrefix, $datasetName, $calculatedField);
+		$name = $this->GetColumnName($datasetName, $calculatedField);
 		$datasetColumn->DeleteColumn($dataset->getId(), $name);
 	}
 
@@ -103,7 +145,6 @@ class MetricsBaseCalculator
 			return '';
 	}
 
-
 	private function GetSourceFilterWhere($source)
 	{
 			return ' AND sna_' . $source['VariableId'] . '_total IS NOT NULL ';
@@ -112,9 +153,12 @@ class MetricsBaseCalculator
 	private function ResetCols($datasetTable, $cols)
 	{
 		Profiling::BeginTimer();
+		$colNames = "";
+		foreach($cols as $key => $col)
+			$colNames .= ", " . $col['Field'] . " = null";
 
 		$update = 'UPDATE ' . $datasetTable . '
-								SET ' . implode(' = null, ', $cols) . ' = null';
+								SET ' . substr($colNames, 2) . ' = null';
 		$ret = App::Db()->exec($update);
 
 		Profiling::EndTimer();
@@ -140,6 +184,9 @@ class MetricsBaseCalculator
 									SELECT sna_id, sna_location, 0 ' . ($id ? ',' . $id : '') . '
 									FROM ' . $sourceSnapshotTable . '
 									WHERE 1 ' . $this->GetSourceFilterWhere($source) . $this->GetValueLabelsWhere($source);
+
+		Log::AppendExtraInfo($create);
+		Log::AppendExtraInfo($insert);
 
 		App::Db()->execDDL($create);
 		App::Db()->exec($insert);
@@ -174,14 +221,14 @@ class MetricsBaseCalculator
 		}
 	}
 
-	protected function GetColumnName($prefix, $datasetName, $srcColumnName, $maxLength = 64)
+	protected function GetColumnName($datasetName, $srcColumnName, $maxLength = 64)
 	{
 		// El máximo de un nombre de columna en mysql es 64 por
 		// eso el default de $maxLength = 64.
 		$clean = Str::RemoveAccents($datasetName);
 		$clean = Str::RemoveNonAlphanumeric($clean);
 		$clean = Str::Replace($clean, ' ', '_');
-		$len = Str::Length($clean) + Str::Length($prefix) + Str::Length($srcColumnName) + 1;
+		$len = Str::Length($clean) + Str::Length($srcColumnName) + 1;
 		if($len > $maxLength)
 		{
 			$newLen = Str::Length($clean) - ($len - $maxLength);
@@ -194,7 +241,7 @@ class MetricsBaseCalculator
 			}
 		}
 
-		return $prefix . $clean . '_' . $srcColumnName;
+		return $clean . '_' . $srcColumnName;
 	}
 
 	private function GetColumnCaption($metric, $variable, $source, $output, $caption, $maxLength = 255)
@@ -202,9 +249,9 @@ class MetricsBaseCalculator
 		// - Distancia a radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
 		// - Valor de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
 		// - Latitud de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
-		$str = $caption . ' de' . $this->GetCaptionContent()
+
+		$str = $caption . $this->GetCaptionContent($caption)
 			. $this->GetVariableName($metric, $variable)
-			. $this->GetVersionName($metric)
 			. $this->GetValueLabelsCaption($metric, $source)
 			. $this->GetDistanceCaption($output);
 		return Str::Ellipsis($str, $maxLength);
@@ -220,8 +267,15 @@ class MetricsBaseCalculator
 	private function GetVariableName($metric, $variable)
 	{
 		if($variable->getData() == 'O')
-			return ' ' . $variable->getCaption();
-		return ' ' . $metric['metric']->Metric->Name;
+		{
+			// Si tiene la apertura de "por", la incluye solamente si se usaron filtros
+			if ($variable->getSymbology()->getCutMode() == 'V')
+				return ' ' . $variable->getSymbology()->getCutColumn()->getCaption();
+			else
+				return ' ' . $variable->getCaption();
+		}
+		else
+			return ' ' . $metric['metric']->Metric->Name;
 	}
 
 	private function GetVersionName($metric)

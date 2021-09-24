@@ -2,12 +2,13 @@
 	<div>
 		<search-popup ref="addMetricPopup" @selected="metricSelected" :getDraftMetrics="false" searchType="m" />
 		<div class="md-layout md-gutter">
-			<div class="md-layout-item md-size-100 mp-label" style="margin-bottom: 8px;
-    padding-left: 12px!important;">
+			<div class="md-layout-item md-size-100 mp-label" style="margin-bottom: 8px; padding-left: 12px!important;">
 				Elementos a localizar en el {{ action }} (Escuelas, Nivel educativo, etc.)
 			</div>
 			<div class="md-layout-item md-size-100">
-				<md-chip class="md-primary" md-deletable @md-delete="clearMetric" style="margin-top: 4px; margin-bottom: 18px;" v-if="caption.length > 0">{{ caption }}</md-chip>
+				<md-chip class="md-primary" md-deletable @md-delete="clearMetric"
+								 style="margin-top: 4px; margin-bottom: 18px;"
+								 v-if="caption.length > 0">{{ caption }}{{ (versions.length == 1 ? ' (' + newMetric.SelectedVersion.Version.Name + ')': '') }}</md-chip>
 				<md-button class="md-raised" @click="addMetric" v-else>
 					<md-icon>search</md-icon>
 					Seleccionar...
@@ -15,31 +16,33 @@
 			</div>
 		</div>
 		<div class="md-layout md-gutter" v-show="caption.length > 0">
-			<div class="md-layout-item md-size-50 md-small-size-100">
+			<div class="md-layout-item md-size-50 md-small-size-100" v-if="versions.length > 1">
 				<mp-select :list="versions" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-									 label="Edición" helper="Edición a utilizar" listKey="Id" :canEdit="versions.length > 1"
+									 label="Edición" listKey="Id" :canEdit="versions.length > 1"
 									 v-model="newMetric.SelectedVersion" :render="formatVersion" />
 			</div>
-			<div class="md-layout-item md-size-50 md-small-size-100">
+			<div class="md-layout-item md-size-50 md-small-size-100" v-if="levels.length > 1 || showLevelName">
 				<mp-select :list="levels" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-									 label="Nivel" helper="Nivel de agregación a utilizar" :canEdit="levels.length > 1"
+									 label="Nivel" :canEdit="levels.length > 1"
 									 v-model="newMetric.SelectedLevel" listCaption="Name" />
 			</div>
-			<div class="md-layout-item md-size-75 md-small-size-100">
+			<div class="md-layout-item md-size-75 md-small-size-100" v-if="showVariable">
 				<mp-select :list="variables" :allowNull="false" :disabled="!newMetric.SourceMetric.Metric"
-									 label="Variable" helper="Variable a utilizar" :canEdit="variables.length > 1"
+									 label="Variable" :canEdit="variables.length > 1"
 									 v-model="newMetric.SelectedVariable" listCaption="Name" />
 			</div>
-			<div v-if="valueLabels.length > 0" class="md-layout-item md-size-100 md-small-size-100">
-				{{ newMetric.SelectedLevel.HasArea ? 'Universo de ' + newMetric.SelectedLevel.Name + ' /' : '' }} Filtrar por:
-			</div>
-			<div v-if="valueLabels.length > 1" class="md-layout-item md-size-30 md-small-size-50">
-				<md-checkbox class="md-primary" v-model="allCategories" @change="selectAll">[Seleccionar todos] </md-checkbox>
-			</div>
-			<div v-for='valueLabel in valueLabels' :key='valueLabel.Id' :value='valueLabel.Id'
-					 class="md-layout-item md-size-30 md-small-size-50">
-				<md-checkbox class="md-primary" v-model="newMetric.Source.ValueLabelIds" :value="valueLabel.Id">{{ valueLabel.Name }}</md-checkbox>
-			</div>
+			<template v-if="showVariable && newMetric.SelectedVariable.IsCategorical">
+				<div v-if="valueLabels.length > 0" class="md-layout-item md-size-100 md-small-size-100">
+					Filtrar por: {{ showLevelName ? '(' + newMetric.SelectedLevel.Name + ')' : '' }}
+				</div>
+				<div v-if="valueLabels.length > 1" class="md-layout-item md-size-30 md-small-size-50">
+					<md-checkbox class="md-primary" v-model="allCategories" @change="selectAll">[Todos] </md-checkbox>
+				</div>
+				<div v-for='valueLabel in valueLabels' :key='valueLabel.Id' :value='valueLabel.Id'
+						 class="md-layout-item md-size-30 md-small-size-50">
+					<md-checkbox class="md-primary" v-model="newMetric.Source.ValueLabelIds" :value="valueLabel.Id">{{ valueLabel.Name }}</md-checkbox>
+				</div>
+			</template>
 		</div>
 	</div>
 </template>
@@ -82,6 +85,18 @@ export default {
 			} else {
 				return 'conteo';
 			}
+		},
+		showVariable() {
+			if (this.variables.length === 0) {
+				return false;
+			}
+			if (this.variables.length === 1 && this.newMetric.SelectedVariable.IsSimpleCount) {
+				return false;
+			}
+			return true;
+		},
+		showLevelName() {
+			return this.newMetric.SelectedLevel && this.newMetric.SelectedLevel.HasArea && this.newMetric.SelectedLevel.Dataset.Type !== 'S';
 		},
 		Dataset() {
 			return window.Context.CurrentDataset;
@@ -209,10 +224,20 @@ export default {
 			this.allCategories = false;
 			if(this.newMetric.SelectedVersion != null) {
 				if(this.newMetric.SelectedVersion.Levels.length > 0) {
-					let i = this.newMetric.SelectedVersion.Levels.findIndex(function(item) {
+					var i = this.newMetric.SelectedVersion.Levels.findIndex(function(item) {
 						return item.Name == "Radios";
 					});
-					if(i == -1) {
+					if (i == -1) {
+						i = this.newMetric.SelectedVersion.Levels.findIndex(function (item) {
+							return item.Name == "Ubicaciones";
+						});
+					}
+					if (i == -1) {
+						i = this.newMetric.SelectedVersion.Levels.findIndex(function (item) {
+							return item.Name == "Departamentos";
+						});
+					}
+					if (i == -1) {
 						i = 0;
 					}
 					this.newMetric.SelectedLevel = this.newMetric.SelectedVersion.Levels[i];
@@ -225,13 +250,13 @@ export default {
 		"newMetric.SelectedLevel"() {
 			this.allCategories = false;
 			if(this.newMetric.SelectedLevel != null) {
-				this.newMetric.OutputArea.IsInclusionPoint = true;
+				this.newMetric.OutputArea.IsInclusionPoint = (this.Dataset.properties.Type === 'L');
 				if(this.newMetric.SelectedLevel.Variables.length > 0) {
 					this.newMetric.SelectedVariable = this.newMetric.SelectedLevel.Variables[0];
 				}
 			} else {
 				this.newMetric.SelectedVariable = null;
-				this.newMetric.OutputArea.IsInclusionPoint = this.newMetric.DefaultIsInclusionPoint;
+				this.newMetric.OutputArea.IsInclusionPoint = true;
 			}
 		},
 		"newMetric.SelectedVariable"() {
@@ -241,8 +266,8 @@ export default {
 				this.newMetric.Source.VariableId = this.newMetric.SelectedVariable.Id;
 				this.newMetric.Output.HasValue = !this.newMetric.SelectedVariable.IsSimpleCount;
 				this.newMetric.OutputArea.HasSumValue = !this.newMetric.SelectedVariable.IsSimpleCount;
-				this.newMetric.OutputArea.HasMaxValue = !this.newMetric.SelectedVariable.IsSimpleCount;
-				this.newMetric.OutputArea.HasMinValue = !this.newMetric.SelectedVariable.IsSimpleCount;
+				this.newMetric.OutputArea.HasMaxValue = false;
+				this.newMetric.OutputArea.HasMinValue = false;
 				this.newMetric.OutputArea.HasCount = true;
 			} else {
 				this.newMetric.Source.VariableId = null;

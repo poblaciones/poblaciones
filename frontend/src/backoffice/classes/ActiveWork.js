@@ -68,6 +68,15 @@ ActiveWork.prototype.ThisWorkLabel = function () {
 	}
 };
 
+ActiveWork.prototype.GetActiveDatasetById = function (id) {
+	for (var i = 0; i < this.Datasets.length; i++) {
+		if (id === this.Datasets[i].properties.Id) {
+			return this.Datasets[i];
+		}
+	}
+	return null;
+};
+
 ActiveWork.prototype.CanEdit = function () {
 	if (window.Context.User.Privileges === 'A' ||
 		(this.IsPublicData() && window.Context.User.Privileges === 'E')) {
@@ -113,6 +122,7 @@ ActiveWork.prototype.GetWorkStatistics = function () {
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetWorkStatistics', args,
 		'obtener las estadísticas');
 };
+
 ActiveWork.prototype.CanAdmin = function () {
 	if (window.Context.User.Privileges === 'A') {
 		return true;
@@ -170,6 +180,11 @@ ActiveWork.prototype.VerifyDatasetsImportFile = function (bucketId, fileExtensio
 	var args = { 'b': bucketId, 'fe': fileExtension };
 	return axiosClient.getPromise(window.host + '/services/backoffice/Dataset/VerifyDatasetsImportFile', args,
 		'verificar si el archivo tiene múltiple datasets');
+};
+
+ActiveWork.prototype.GetMetricVersionsByMetric = function (metric) {
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetMetricVersionsByMetric',
+		{ 'm': metric.Id, 'w': this.properties.Id }, 'obtener información del indicador');
 };
 
 ActiveWork.prototype.GetStepDatasetFileImportUrl = function () {

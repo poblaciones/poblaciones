@@ -4,7 +4,7 @@ namespace helena\services\backoffice\publish;
 
 use minga\framework\Arr;
 use minga\framework\Str;
-use minga\framework\Date;
+use minga\framework\Log;
 use minga\framework\Profiling;
 use minga\framework\Context;
 use minga\framework\PublicException;
@@ -376,7 +376,7 @@ class PublishDataTables
 	{
 		Profiling::BeginTimer();
 		$queries = array();
-		$this->InsertQueryCreator($queries, 'INS', $branches, $workId);
+		$this->InsertQueryCreator($queries, 'INSERTING', $branches, $workId);
 		// Dump queries
 		//	$this->dumpQueries($queries, $workId);
 		foreach($queries as $query)
@@ -388,8 +388,10 @@ class PublishDataTables
 	}
 	private function queryLog($query, $params, $affected)
 	{
+		$log = $query . " Params: " . print_r($params, true) . ". Affected: " . $affected. "<br>";
+		Log::AppendExtraInfo($log);
 		if ($this->verboseDebug)
-			echo "<br>" . $query . " Params: " . print_r($params, true) . ". Affected: " . $affected. "<br>";
+			echo $log;
 	}
 
 	private function DropTable($table)
@@ -507,7 +509,7 @@ class PublishDataTables
 
 	private function InsertQueryCreator(&$queries, $op, $joinsTreeNode, $workId, $prev = null, $partialQuery = '')
 	{
-		$tablePreffix = ($op == 'INS' ? 'draft_' : '');
+		$tablePreffix = ($op == 'INSERTING' ? 'draft_' : '');
 		if ($prev != null)
 				$partialQuery = " JOIN " . $tablePreffix . $prev['table'] . " ON " . $joinsTreeNode['level']['key'] ."=". $joinsTreeNode['level']['foreignField'] . $partialQuery;
 
@@ -517,9 +519,7 @@ class PublishDataTables
 				$this->InsertQueryCreator($queries, $op, $child, $workId, $joinsTreeNode['level'], $partialQuery);
 		}
 
-		if ($op == 'SEL')
-			$queries[] = "SELECT " . $this->GetSuffix($joinsTreeNode['level']['table']) . ".* FROM " . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "") . " WHERE wrk_id = ?";
-		else if ($op == 'INS')
+		if ($op == 'INSERTING')
 		{
 			$cols = $this->GetCommonColumns($joinsTreeNode['level']['class'], $this->TransformToDraft($joinsTreeNode['level']['class']), $joinsTreeNode['level']['postUpdateColumns']);
 			$queries[] = "\n INSERT INTO " . $this->GetTablenameFromSuffixedTable($joinsTreeNode['level']['table'])  . "(" . $cols['insert'] . ") SELECT " . $cols['select'] . " FROM " . $tablePreffix . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "") .

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import err from '@/common/framework/err';
+import web from '@/common/framework/web';
 
 export default DataPager;
 
@@ -175,7 +176,15 @@ DataPager.prototype.GetPage = function (postdata, page, source, callback, callba
 			loc.cachedPages[key] = res.data;
 			callback();
 		}).catch(function (error) {
-			err.errDialog('FetchData', 'obtener filas del dataset', error);
-			callbackError();
+			var url = source.url;
+			var datasetId = web.getParameterByName('k', url);
+			var livedataset = null;
+			if (window.Context.CurrentWork && datasetId) {
+				livedataset = window.Context.CurrentWork.GetActiveDatasetById(parseInt(datasetId));
+			}
+			if (livedataset && !livedataset.beingDeleted) {
+				err.errDialog('FetchData', 'obtener filas del dataset', error);
+				callbackError();
+			}
 		});
 };

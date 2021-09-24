@@ -94,7 +94,7 @@ class SnapshotMetricVersionModel
 
 		$sql = "UPDATE snapshot_metric_version SET mvw_metric_revision = mvw_metric_revision + 1";
 		App::Db()->exec($sql);
-		$sql = "UPDATE metric SET mtr_revision = mtr_revision + 1";
+		$sql = "UPDATE metric SET mtr_revision = Signature()";
 		$ret = App::Db()->exec($sql);
 
 		Profiling::EndTimer();
@@ -110,7 +110,7 @@ class SnapshotMetricVersionModel
 
 	 	Profiling::BeginTimer();
 
-		 $sql = "UPDATE metric SET mtr_revision = mtr_revision + 1 WHERE mtr_id = ?";
+		 $sql = "UPDATE metric SET mtr_revision = Signature() WHERE mtr_id = ?";
 
 		App::Db()->exec($sql, array($metricIdShardified));
 

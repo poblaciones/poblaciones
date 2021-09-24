@@ -266,7 +266,7 @@ class Variable
 		$values = $this->attributes['values'];
 		if (sizeof($values) == 0)
 			throw new PublicException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
-				. $this->GetVariableMetricErrorCaption() . " no tiene valores. Revise la symbología de la variable.");
+				. $this->GetVariableMetricErrorCaption() . " no tiene valores. Revise la simbología de la variable y vuelva a intentar Publicar.");
 
 		if (sizeof($values) == 1 && $values[0]['vvl_value'] == null)
 			return $values[0]['vvl_id'];

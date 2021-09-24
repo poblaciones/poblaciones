@@ -17,6 +17,7 @@ use helena\db\frontend\SnapshotMetricModel;
 
 App::$app->get('/services/backoffice/CreateWork', function (Request $request) {
 	$controller = new services\WorkService();
+	Session::CheckReadonlyForMaintenanceService();
 	$title = Params::GetMandatory('c');
 	$type = Params::GetMandatory('t');
 	if ($type !== 'P' && $type !== 'R')

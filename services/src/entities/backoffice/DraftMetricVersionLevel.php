@@ -43,7 +43,7 @@ class DraftMetricVersionLevel
     /**
      * @var \helena\entities\backoffice\DraftMetricVersion
      *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftMetricVersion", fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftMetricVersion", fetch="EAGER", cascade={"persist"})
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="mvl_metric_version_id", referencedColumnName="mvr_id", nullable=false)
      * })

@@ -25,7 +25,7 @@ class DraftMetric
     /**
      * @var string
      *
-     * @ORM\Column(name="mtr_caption", type="string", length=75, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="mtr_caption", type="string", length=150, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Caption;
 

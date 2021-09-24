@@ -22,7 +22,8 @@ function deleteItem() {
 	<input type='button' class="dButton" value='Eliminar' onclick='deleteItem();'>
 	{% endif %}
 	<!--input type='button' value='Marcar como no leído'-->
-	<div class='dText'><pre>{{ error_text | raw}}</pre>
+	<div class='dText'>
+		{{ error_text | raw}}
 	</div>
 	<div class='dBlockNewLineS3'></div>
 </div>

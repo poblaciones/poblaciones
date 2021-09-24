@@ -9,15 +9,29 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 2. Instalar PHP 7.1 o posterior en Apache o IIS (Windows) (https://www.php.net/downloads.php).
 
-3. Instalar Python 2.7 (sólo requerido para conversiones de archivos SPSS) (https://www.python.org/downloads/release/python-2716/)
+3. Instalar Python 3.4 o superior (requerido para conversiones de archivos) (https://www.python.org/downloads/release/python-3811/)
 
 4. Instalar las dependencias de Python: 
 
-pip install savReaderWriter
-pip install ijson
-pip install numpy
+# spss
+./pip install savReaderWriter
+./pip install ijson
+./pip install numpy
 
-5. Instalar MySql 5.6 o superior (https://dev.mysql.com/downloads/mysql/).
+# kmz
+./pip install bs4
+./pip install lxml
+./pip install unicodecsv
+
+# sta
+./pip install pandas
+./pip install pyreadstat
+
+# r
+./pip install pyreadr
+
+
+5. Instalar MySql 5.7 o superior (https://dev.mysql.com/downloads/mysql/).
 
 ## 2. Descargar los fuentes del repositorio
 

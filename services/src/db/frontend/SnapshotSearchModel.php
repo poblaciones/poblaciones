@@ -18,6 +18,8 @@ class SnapshotSearchModel extends BaseModel
 		Profiling::BeginTimer();
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
+		$explicitExclusions = $this->ResolveExclusions($originalQuery);
+
 		$sql = "SELECT
 			CAST(clc_clipping_region_item_id AS UNSIGNED INTEGER) Id,
 			clc_caption Caption,
@@ -27,11 +29,29 @@ class SnapshotSearchModel extends BaseModel
 			Replace(clc_full_parent, '\t', ' > ') Extra
 			FROM snapshot_lookup_clipping_region_item
 			WHERE MATCH(clc_caption, clc_tooltip, clc_full_parent, clc_code) AGAINST (:query IN BOOLEAN MODE)
-			ORDER by clc_population DESC
+			" . $explicitExclusions . " ORDER by clc_population DESC
 			LIMIT 0, 10";
 
 		$ret = App::Db()->fetchAll($sql, array('query' => $query));
 		Profiling::EndTimer();
+		return $ret;
+	}
+	private function ResolveExclusions($originalQuery)
+	{
+		$explicitSearchResults = Context::Settings()->Map()->ExplicitRegionSearchResults;
+		if(!$explicitSearchResults)
+		{
+			return '';
+		}
+		$ret = '';
+		foreach($explicitSearchResults as $key => $validations)
+		{
+			if (!Str::ContainsAnyI($originalQuery, (is_array($validations) ? $validations : [$validations])))
+				$ret .= " AND clc_caption NOT LIKE '%" . $key . "%'
+									AND clc_tooltip NOT LIKE '%" . $key . "%'
+									AND clc_full_parent NOT LIKE '%" . $key . "%' ";
+		}
+		if ($ret == '') return '';
 		return $ret;
 	}
 

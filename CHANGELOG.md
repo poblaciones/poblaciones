@@ -7,6 +7,10 @@
 - Se incorpora la herramienta de rastreo.
 - Se incorpora la herramienta de conteo.
 - Se elimina el cartel modal de 'Aguarde por favor'.
+- Agrupador de menú Publicación cambia a Administración.
+- Fix: borrar datasets vacíos.
+- Permite vincular y desvincular versiones de las series de indicadores en forma explícita.
+- Posibilidad de indicar regiones de obtención explícita en el buscador (ExplicitRegionSearchResults).
 
 v2.38 (2021-07-19)
 - Permite georreferenciar coordenadas expresadas en grados, minutos y segundos.

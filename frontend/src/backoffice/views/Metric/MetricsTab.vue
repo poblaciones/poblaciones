@@ -1,6 +1,8 @@
 <template>
 	<div>
 		<invoker ref="invoker"></invoker>
+		<calculated-metric-wizard ref="calculatedMetricWizard" />
+
 		<level-popup ref="levelPopup"></level-popup>
 
 		<metric-popup ref="metricPopup">
@@ -23,6 +25,14 @@
 			<md-button @click="createNewMetric">
 				<md-icon>add_circle_outline</md-icon>
 				Agregar indicador
+			</md-button>
+			<md-button v-if="calculateEnabled" @click="calculateNewMetricDistance">
+				<md-icon>radar</md-icon>
+				Rastreo
+			</md-button>
+			<md-button v-if="calculateEnabled" @click="calculateNewMetricAreaCount">
+				<md-icon>functions</md-icon>
+				Conteo
 			</md-button>
 			<md-button @click="createNewLevel()" v-if="Dataset !== null && Dataset.properties.MultilevelMatrix !== null" :disabled="unUsedWorkVersionsList.length === 0">
 				<md-icon>add_circle_outline</md-icon>
@@ -54,7 +64,7 @@
 						</md-table-cell>
 						<md-table-cell v-if="Work.properties.Type === 'P'" class="selectable" md-label="Categoría">{{ formatGroup(item.MetricVersion.Metric.MetricGroup) }}</md-table-cell>
 						<md-table-cell class="selectable"
-													style="vertical-align: top" md-label="Fórmula">
+													 style="vertical-align: top" md-label="Fórmula">
 							<md-list class="innerList">
 								<md-list-item v-for="variable in item.Variables" style="display: -webkit-box"
 															:key='variable.Id' :value='variable.Id'>
@@ -62,7 +72,7 @@
 										<span v-if="variable.DataColumnIsCategorical">
 											Conteo
 										</span>
-										<span v-else >
+										<span v-else>
 											{{ Dataset.formatTwoColumnVariable(variable.Data, variable.DataColumn, true) }}
 											<md-tooltip md-direction="bottom" v-if="Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn)">
 												{{ Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn) }}
@@ -75,26 +85,30 @@
  Dataset.formatTwoColumnVariable(variable.Normalization, variable.NormalizationColumn, true)
 												}}
 												<md-tooltip md-direction="bottom" v-if="Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn)">
-													{{ Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn) }}</md-tooltip>
+													{{ Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn) }}
+												</md-tooltip>
 											</span>
-											{{ formatScaleFormula(variable)
-													}}
-</template>
+											{{
+ formatScaleFormula(variable)
+											}}
+										</template>
 										<template v-if="variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null">
 											por
 											<span>
 												{{ f.formatColumn(variable.Symbology.CutColumn, true) }}
 												<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(variable.Symbology.CutColumn)">
-													{{ f.formatColumnTooltip(variable.Symbology.CutColumn) }}</md-tooltip>
+													{{ f.formatColumnTooltip(variable.Symbology.CutColumn) }}
+												</md-tooltip>
 											</span>
 										</template>
 										<template v-if="variable.FilterValue !== null">
 											(
 											<span>
 												{{ f.formatColumn(getFilterColumn(variable), true) }}
-													<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(getFilterColumn(variable))">
-														{{  f.formatColumnTooltip(getFilterColumn(variable)) }}
-													</md-tooltip></span>{{ formatFilterOperator(variable) }}{{ formatFilterValue(variable) }})
+												<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(getFilterColumn(variable))">
+													{{  f.formatColumnTooltip(getFilterColumn(variable)) }}
+												</md-tooltip>
+											</span>{{ formatFilterOperator(variable) }}{{ formatFilterValue(variable) }})
 										</template>
 									</span>
 									<md-button class="md-icon-button" @click="openVariableFormulaEdition(item, variable)">
@@ -152,6 +166,7 @@ import MetricPopup from './MetricPopup.vue';
 import VariableFormulaPopup from './VariableFormulaPopup.vue';
 import VariableSymbologyPopup from './VariableSymbologyPopup.vue';
 import VariableOptionsPopup from './VariableOptionsPopup.vue';
+import CalculatedMetricWizard from '@/backoffice/views/dataset/CalculatedWizard/CalculatedWizard.vue';
 import NewMetric from './NewMetric.vue';
 import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
@@ -166,6 +181,16 @@ export default {
 		return {
 			unUsedWorkVersionsList: [],
 		};
+	},
+	components: {
+		MetricPopup,
+		VariableFormulaPopup,
+		VariableSymbologyPopup,
+		VariableOptionsPopup,
+		CalculatedMetricWizard,
+		LevelPopup,
+		NewMetric,
+		PickMetricVersion,
 	},
 	mounted() {
 		this.ReloadUnUsedMetricVersions();
@@ -193,6 +218,23 @@ export default {
 	methods: {
 		createNewMetric() {
 			this.$refs.newMetric.show();
+		},
+		calculateEnabled() {
+			return window.Context.Configuration.UseCalculated;
+		},
+		calculateNewMetricDistance() {
+			if (!this.Dataset.properties.Geocoded) {
+				alert('Para realizar un rastreo es necesario antes georreferenciar el dataset.');
+				return;
+			}
+			this.$refs.calculatedMetricWizard.show(true);
+		},
+		calculateNewMetricAreaCount() {
+			if (!this.Dataset.properties.Geocoded) {
+				alert('Para definir un conteo es necesario antes georreferenciar el dataset.');
+				return;
+			}
+			this.$refs.calculatedMetricWizard.show();
 		},
 		createNewLevel() {
 			this.$refs.pickMetricVersion.show();
@@ -354,15 +396,6 @@ export default {
 			this.ReloadUnUsedMetricVersions();
 		}
 	},
-	components: {
-		MetricPopup,
-		VariableFormulaPopup,
-		VariableSymbologyPopup,
-		VariableOptionsPopup,
-		LevelPopup,
-		NewMetric,
-		PickMetricVersion,
-	}
 };
 </script>
 

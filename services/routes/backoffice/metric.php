@@ -58,6 +58,15 @@ App::$app->get('/services/backoffice/GetPublicMetrics', function (Request $reque
 	return $ret;
 });
 
+App::$app->get('/services/backoffice/GetMetricVersionsByMetric', function (Request $request) {
+	$controller = new services\MetricService();
+	$workId = Params::GetIntMandatory('w');
+	$metricId = Params::GetIntMandatory('m');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+	$ret = App::OrmJson($controller->GetMetricVersionsByMetric($workId, $metricId));
+	return $ret;
+});
+
 App::$app->get('/services/backoffice/GetCartographyMetrics', function (Request $request) {
 	$controller = new services\MetricService();
 	$ret = App::OrmJson($controller->GetCartographyMetrics());

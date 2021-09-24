@@ -5,7 +5,6 @@ namespace helena\services\backoffice;
 use minga\framework\Params;
 use minga\framework\PublicException;
 use minga\framework\Profiling;
-use minga\framework\Date;
 
 use helena\classes\App;
 use helena\caches\DatasetColumnCache;
@@ -33,28 +32,14 @@ class DatasetService extends DbSession
 		// Crea el metric, metricVersion y metricVersionLevel
 		$metricService = new MetricService();
 
-		$level = $metricService->GetNewMetricVersionLevel();
-		$level->setDataset($dataset);
-
-		$version = $level->getMetricVersion();
-		$work = $dataset->getWork();
-		$version->setWork($work);
-
-		$metric = $version->getMetric();
-		$metric->setCaption($caption);
-		$metric->setIsBasicMetric(false);
-		$metricService->UpdateMetricVersionLevel($dataset->getId(), $level);
-
 		// Crea la variable default
 		$variable = $metricService->GetNewVariable();
 		$variable->setIsDefault(true);
 		$variable->setDataColumnIsCategorical(false);
-		$variable->setOrder(1);
-		$variable->setCaption('');
+		$variable->setCaption('Conteo');
 		$variable->setData('N');
-		$variable->setMetricVersionLevel($level);
 
-		$metricService->UpdateVariable($dataset->getId(), $level, $variable);
+		$metricService->CreateMetricByVariable($dataset, $caption, $variable);
 	}
 
 	public function Create($workId, $caption = '')
@@ -461,9 +446,12 @@ class DatasetService extends DbSession
 		}
 		// Borra tablas
 		$tableName = $dataset->getTable();
-		App::Db()->dropTable($tableName);
-		App::Db()->dropTable($tableName . '_errors');
-		App::Db()->dropTable($tableName . '_retry');
+		if ($tableName)
+		{
+			App::Db()->dropTable($tableName);
+			App::Db()->dropTable($tableName . '_errors');
+			App::Db()->dropTable($tableName . '_retry');
+		}
 		$unregister = new DatasetTable();
 		$unregister->UnregisterTable($tableName);
 		// Libera al par de la multilevelMatrix si lo formaban dos miembros

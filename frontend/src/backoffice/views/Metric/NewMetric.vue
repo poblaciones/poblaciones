@@ -7,17 +7,15 @@
 				Agregar indicador
 			</md-dialog-title>
 
-
 			<pick-metric ref="pickMetric" @onSelectedMetric="onSelectMetric">
 			</pick-metric>
-
 
 			<md-dialog-content>
 				<div class="md-layout-item md-size-90 md-small-size-100">
 					<mp-simple-text :canEdit="selectedMetric === null"
 													label="Nuevo indicador" ref="metricInput"
 													helper="Ej. Acceso a agua potable" @enter="save"
-													:maxlength="75" v-model="newMetricName"></mp-simple-text>
+													:maxlength="150" v-model="newMetricName"></mp-simple-text>
 				</div>
 
 				<div v-if="Work.IsPublicData()" class='md-layout-item md-size-75 md-small-size-100'>

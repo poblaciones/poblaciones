@@ -4,14 +4,14 @@
 			<i data-v-10cdbda8="" class="largeIco md-icon md-icon-font md-theme-default">{{ icon }}</i>
 		</div>
 		<div class="textbox">
-			<div class="text">
+			<div class="text" :title="(text.length > 40 ? text : '')">
 				{{ text }}
-				<md-tooltip md-direction="top" v-if="text.length > 40">{{ text }}</md-tooltip>
 			</div>
 			<div class="edited">
 				{{ logLegend }}
 				<md-tooltip md-direction="bottom">
-					{{ logLegend }} </md-tooltip>
+					{{ logLegend }}
+				</md-tooltip>
 			</div>
 		</div>
 	</md-button>

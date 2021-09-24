@@ -22,6 +22,8 @@ function ActiveDataset(work, dataset) {
 	this.MultilevelMatrix = [];
 	this.MetricVersionLevels = [];
 	this.GettingColumns = false;
+	this.beingDeleted = false;
+
 };
 
 ActiveDataset.prototype.Create = function (workId, caption, successCallback) {
@@ -45,6 +47,8 @@ ActiveDataset.prototype.DeleteDataset = function (workId) {
 	var loc = this;
 	let url = window.host + '/services/backoffice/DeleteDataset';
 	this.Work.WorkChanged();
+	this.beingDeleted = true;
+
 	return axiosClient.getPromise(url, { 'w': workId, 'k': this.properties.Id },
 		'eliminar el dataset').then(function () {
 			var datasets = loc.GetMultilevelDatasets();
@@ -52,6 +56,8 @@ ActiveDataset.prototype.DeleteDataset = function (workId) {
 				datasets[0].properties.MultilevelMatrix = null;
 			}
 			window.Db.LoadWorks();
+		}).catch(function () {
+			loc.beingDeleted = false;
 		});
 };
 
@@ -386,14 +392,6 @@ ActiveDataset.prototype.UpdateLabels = function (column, list, deletedList) {
 	this.Work.WorkChanged();
 	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateLabels',
 			{ 'i': list, 'c': column.Id, 'd': deletedList }, 'actualizar las etiquetas');
-};
-
-ActiveDataset.prototype.GetStartDatasetDeleteUrl = function () {
-	return window.host + '/services/backoffice/StartDeleteDataset?w=' + this.properties.Id;
-};
-
-ActiveDataset.prototype.GetStepDatasetDeleteUrl = function () {
-	return window.host + '/services/backoffice/StepDeleteDataset';
 };
 
 ActiveDataset.prototype.GetDataUrl = function () {

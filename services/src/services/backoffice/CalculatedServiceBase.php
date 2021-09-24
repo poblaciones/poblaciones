@@ -3,12 +3,12 @@
 namespace helena\services\backoffice;
 
 use helena\classes\App;
-use helena\services\backoffice\metrics\MetricsAreaCalculator;
 use helena\services\backoffice\publish\CalculateMetricStateBag;
+use helena\services\backoffice\publish\WorkFlags;
+use helena\entities\backoffice as entities;
 
 use helena\services\common\BaseService;
 use minga\framework\PublicException;
-use minga\framework\Profiling;
 
 abstract class CalculatedServiceBase extends BaseService
 {
@@ -52,6 +52,7 @@ abstract class CalculatedServiceBase extends BaseService
 		$source = $this->state->Get('source');
 		$output = $this->state->Get('output');
 		$cols = $this->state->Get('cols');
+		if ($cols) $cols = json_decode($cols, true);
 
 		$calculator = $this->calculator;
 
@@ -59,7 +60,7 @@ abstract class CalculatedServiceBase extends BaseService
 		{
 			case self::STEP_CREATE_VARIABLES:
 				$cols = $calculator->StepCreateColumns($datasetId, $source, $output);
-				$this->state->Set('cols', $cols);
+				$this->state->Set('cols', $this->saveColumns($cols));
 				$this->state->NextStep('Preparando datos');
 				break;
 			case self::STEP_PREPARE_DATA:
@@ -84,11 +85,14 @@ abstract class CalculatedServiceBase extends BaseService
 				}
 				break;
 			case self::STEP_CREATE_METRIC:
-				//$metric = new MetricService();
-				//$metric->CreateMetric($datasetId);
-				//// Marca work
-				//$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-				//WorkFlags::SetMetricDataChanged($dataset->getWork()->getId());
+
+				$calculator->StepCreateMetrics($datasetId, $cols, $source);
+
+				// Marca work
+				$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+				$workId = $dataset->getWork()->getId();
+				WorkFlags::SetMetricDataChanged($workId);
+				WorkFlags::SetDatasetDataChanged($workId);
 
 				$this->state->NextStep('Listo');
 				break;
@@ -103,5 +107,15 @@ abstract class CalculatedServiceBase extends BaseService
 		return $this->state->Step() == self::STEP_COMPLETED;
 	}
 
+	private function saveColumns($cols)
+	{
+		$asString = App::OrmSerialize($cols);
+		$asArray = json_decode($asString, true);
+		foreach($cols as $key => $value)
+		{
+			$asArray[$key]['Field'] = $value->getField();
+		}
+		return json_encode($asArray);
+	}
 }
 

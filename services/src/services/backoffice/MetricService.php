@@ -22,6 +22,26 @@ use helena\services\backoffice\publish\snapshots\Variable;
 
 class MetricService extends BaseService
 {
+	public function CreateMetricByVariable($dataset, $caption, $variable)
+	{
+		$level = $this->GetNewMetricVersionLevel();
+		$level->setDataset($dataset);
+
+		$version = $level->getMetricVersion();
+		$work = $dataset->getWork();
+		$version->setWork($work);
+
+		$metric = $version->getMetric();
+		$metric->setCaption($caption);
+		$metric->setIsBasicMetric(false);
+
+		$this->UpdateMetricVersionLevel($dataset->getId(), $level);
+
+		$variable->setMetricVersionLevel($level);
+
+		$this->UpdateVariable($dataset->getId(), $level, $variable);
+	}
+
 	public function GetNewMetricVersionLevel()
 	{
 		$level = new entities\DraftMetricVersionLevel();
@@ -478,16 +498,13 @@ class MetricService extends BaseService
 
 	private function SaveMetricLevel($dataset, $metricVersionLevel, $metric, $metricVersion)
 	{
-		// Resuelve metric
-		App::Orm()->save($metric);
-
 		$this->saveMetricVersion($dataset, $metricVersionLevel, $metric, $metricVersion);
 
 		// Graba el level
 		if ($metricVersionLevel->getId() === null || $metricVersionLevel->getId() === 0)
 		{
 			$metricVersionLevel->setDataset($dataset);
-	}
+		}
 		App::Orm()->save($metricVersionLevel);
 		Profiling::EndTimer();
 	}
@@ -529,10 +546,16 @@ class MetricService extends BaseService
 					// Si no es único y no está sincronizando, clona
 					$metricVersion->setId(null);
 				}
+				// Trata el caso de que exista una versión con el mismo nombre del rename
+				$caption = $metricVersion->getCaption();
+				$sql = "SELECT COUNT(*) FROM draft_metric_version WHERE mvr_caption = ?
+									AND mvr_metric_id = ?";
+				$existings = App::Db()->fetchScalarInt($sql, array($caption, $metric->getId()));
+				if ($existings > 0)
+					throw new PublicException("Ya existe una versión '" . $caption . "' para este indicador. \n\nSi desea agregar niveles a una versión existente, debe asociar los datasets en la solapa 'multinivel' del dataset.");
+				// Listo, graba
 				App::Orm()->save($metricVersion);
 			}
-			// FALTA EL CASO DE QUE EXISTA UN VERSION CON EL MISMO NOMBRE DEL RENAME
-			// TODO
 		}
 		Profiling::EndTimer();
 	}
@@ -611,6 +634,15 @@ class MetricService extends BaseService
 		}
 		return $ret;
 	}
+
+	public function GetMetricVersionsByMetric($workId, $metricId)
+	{
+		Profiling::BeginTimer();
+		$ret = App::Orm()->findManyByQuery("SELECT v FROM e:DraftMetricVersion v JOIN v.Metric m WHERE m.Id = :p1 ORDER BY v.Order, v.Caption", array($metricId));
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function LevelDatasetMetrics($srcDatasetId, $targetDatasetId)
 	{
 		// Toma los puntos de corte de un dataset y se los pone a otro, emparentando

@@ -5,13 +5,26 @@ Esta guía detalla los pasos necesarios para descargar e instalar la aplicación
 
 1. Instalar PHP 7.1 en Apache o IIS (Windows) (https://www.php.net/downloads.php).
 
-2. Instalar Python 2.7 (sólo requerido para conversiones de archivos SPSS) (https://www.python.org/downloads/release/python-2716/)
+2. Instalar Python 3.4 o superior (solo requerido para conversiones de archivos) (https://www.python.org/downloads/release/python-3811/)
 
 3. Instalar las dependencias de Python: 
 
-pip install savReaderWriter
-pip install ijson
-pip install numpy
+# spss
+./pip install savReaderWriter
+./pip install ijson
+./pip install numpy
+
+# kmz
+./pip install bs4
+./pip install lxml
+./pip install unicodecsv
+
+# sta
+./pip install pandas
+./pip install pyreadstat
+
+# r
+./pip install pyreadr
 
 4. Instalar MySql 5.7 (https://dev.mysql.com/downloads/mysql/).
 

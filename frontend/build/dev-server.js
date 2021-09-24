@@ -81,26 +81,36 @@ app.use(hotMiddleware);
 var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory);
 app.use(staticPath, express.static('./static'));
 
-
-
-var uri = 'http://localhost:' + port;
-
 var _resolve;
 var readyPromise = new Promise(resolve => {
 	_resolve = resolve;
 });
 
+/////////////////// INICIA PHP y el proxy unificador //////////////////
+const appPORT = port;
+const phpPORT = port + 2;
+const vueJSPORT = port + 4;
+var vuejsPaths = ['/map/', '/users/', '/admins', '/users','/static/img', '/admins', '/__webpack_hmr'];
+const singleApp = require('./single-app');
+////////////////// LISTO PHP y el proxy unificador //////////////////
+var uri = 'https://localhost:' + appPORT;
+
 console.log('> Starting dev server...');
 devMiddleware.waitUntilValid(() => {
-	console.log('> Listening at ' + uri + '\n');
+	console.log('> ==============================================');
+	console.log('> Internal VUEJS port listening at ' + vueJSPORT);
+	console.log('> Internal PHP port listening at ' + phpPORT);
+	console.log('> Local DESA running at ' + uri);
+	console.log('> ==============================================');
+
+	singleApp.start(appPORT, phpPORT, vueJSPORT, vuejsPaths);
   // when env is testing, don't need open it
 	if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
 		opn(uri);
 	}
 	_resolve();
 });
-
-var server = app.listen(port);
+var server = app.listen(vueJSPORT);
 
 module.exports = {
 	ready: readyPromise,

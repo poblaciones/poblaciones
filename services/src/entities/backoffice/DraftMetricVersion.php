@@ -47,9 +47,9 @@ class DraftMetricVersion
     /**
      * @var \helena\entities\backoffice\DraftMetric
      *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftMetric", fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftMetric", fetch="EAGER", cascade={"persist"})
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="mvr_metric_id", referencedColumnName="mtr_id", nullable=false)
+     *   @ORM\JoinColumn(name="mvr_metric_id", referencedColumnName="mtr_id",  nullable=false)
      * })
      */
     private $Metric;

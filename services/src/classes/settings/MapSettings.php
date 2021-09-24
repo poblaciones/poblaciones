@@ -17,7 +17,7 @@ class MapSettings
 	public $UseLightMap = false;
 	public $ContentServerWorks = [];
 
-	public $UseCalculated = false;
+	public $UseCalculated = true;
 
 	public $UseMultiselect = false;
 	public $UseGradients = false;
@@ -27,11 +27,13 @@ class MapSettings
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;
 
-	public $MaxQueueRequests = 4;
-	public $MaxStaticQueueRequests = 6;
+	public $MaxQueueRequests = 5;
+	public $MaxStaticQueueRequests = 10;
 
 	public $GoogleGeocodingArea = '';
 	public $GoogleMapsApi = "3.44";
+
+	public $ExplicitRegionSearchResults = [];
 
 	public $DefaultRelocateLocation = ['Lat' => -34.511498, 'Lon' => -63.903948];
 }

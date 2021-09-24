@@ -123,11 +123,9 @@ export default {
 	},
 	methods: {
 		initNewMetric() {
-			let defaultIsInclusionPoint = false;
 			let defaultHasDescription = false;
 			return {
 				SourceMetric: {},
-				DefaultIsInclusionPoint: defaultIsInclusionPoint,
 				DefaultHasDescription: defaultHasDescription,
 				SelectedVersion: null,
 				SelectedLevel: null,
@@ -147,7 +145,7 @@ export default {
 					HasMaxValue: false,
 					HasMinValue: false,
 					HasCount: false,
-					IsInclusionPoint: defaultIsInclusionPoint,
+					IsInclusionPoint: false,
 					InclusionDistance: 2,
 				},
 				Source: {
@@ -205,6 +203,7 @@ export default {
 			if (!this.validate()) {
 				return;
 			}
+			this.Work.WorkChanged();
 			let stepper = this.$refs.stepper;
 			stepper.startUrl = this.Dataset.CalculateNewMetricUrl(this.newMetric.Type);
 			stepper.stepUrl = this.Dataset.StepCalculateNewMetricUrl(this.newMetric.Type);

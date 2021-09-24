@@ -228,6 +228,8 @@ class App
 		$value = self::OrmSerialize($entity);
 		$response = new Response($value);
 		$response->headers->set('Content-Type', 'application/json');
+//		$response->headers->set('Content-Type', 'text/plain');
+
 		return $response;
 	}
 
@@ -301,17 +303,21 @@ class App
 			ini_set('precision', '17');
 			ini_set('serialize_precision', '-1');
 		}
+		$response = new Response(json_encode($value));
 		if ($daysToExpire === -1 || self::Debug())
-			$headers = [ 'Cache-control' => 'private',
-									'Last-Modified' => $sessionTime ];
+		{
+			$response->headers->set('Cache-control', 'private');
+			$response->headers->set('Last-Modified', $sessionTime);
+		}
 		else {
 			$days = $daysToExpire * 86400;
-			$headers = [ 'Cache-control' => 'public' ];
-			header("Pragma: ");
-			header("Cache-Control: max-age=" . $days );
+			$response->headers->set('Pragma', '');
+			$response->headers->set('Cache-Control', 'public, max-age=' . $days);
 		}
-
-		return self::$app->json($value, 200, $headers);
+//		$response->headers->set('Content-Type', 'application/json');
+		$response->headers->set('Content-Type', 'text/plain');
+		return $response;
+//		return self::$app->json($value, 200, $headers);
 	}
 
 	public static function RegisterControllerGetPost($path, $controllerClassName)

@@ -18,13 +18,11 @@
 		<div class="md-layout-item md-size-100 md-layout-item-separated mp-label">
 			Criterios de inclusión
 		</div>
-		<div class="md-layout-item md-size-45" v-if="Dataset.properties.Type != 'L'">
-			<md-radio class="md-primary" :value="false" v-model="newMetric.OutputArea.IsInclusionPoint">Por polígono del elemento</md-radio>
-		</div>
-		<div class="md-layout-item md-size-55" style="display:flex">
+		<div class="md-layout-item md-size-100" style="display:flex">
 			<md-radio class="md-primary" :value="true" v-model="newMetric.OutputArea.IsInclusionPoint"
-								v-if="Dataset.properties.Type != 'L'">
-				Por distancia desde el centroide:
+							 style="margin-left: 10px;"
+							v-if="Dataset.properties.Type != 'L'">
+				Distancia desde el centroide:
 			</md-radio>
 			<div v-else style="padding-top: 15px; padding-right: 15px;" class="leftpadding">
 				Distancia máxima:
@@ -33,6 +31,11 @@
 											class="md-size-10" :disabled="!newMetric.OutputArea.IsInclusionPoint" preffix="km"
 											type="number" v-model="newMetric.OutputArea.InclusionDistance"></mp-simple-text>
 			<div style="padding-top: 15px; padding-left: 3px; padding-bottom: 30px;">Kms.</div>
+		</div>
+		<div class="md-layout-item md-size-100" v-if="Dataset.properties.Type != 'L'"
+				 style="margin-top: -25px">
+			<md-radio class="md-primary" :value="false" style="margin-left: 10px;"
+						 v-model="newMetric.OutputArea.IsInclusionPoint">Polígono del elemento</md-radio>
 		</div>
 	</div>
 </template>

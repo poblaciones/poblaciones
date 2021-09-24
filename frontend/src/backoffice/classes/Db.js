@@ -13,12 +13,10 @@ function Db() {
 };
 
 Db.prototype.BindDataset = function (datasetId) {
-	for (var i = 0; i < window.Context.CurrentWork.Datasets.length; i++) {
-		if (parseInt(datasetId) === window.Context.CurrentWork.Datasets[i].properties.Id) {
-			window.Context.CurrentDataset = window.Context.CurrentWork.Datasets[i];
-			window.Context.CurrentDataset.Selected();
-			break;
-		}
+	var dataset = window.Context.CurrentWork.GetActiveDatasetById(parseInt(datasetId));
+	if (dataset) {
+			window.Context.CurrentDataset = dataset;
+			dataset.Selected();
 	}
 };
 

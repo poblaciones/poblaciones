@@ -122,7 +122,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 		if ($sourceType == 'S')
 		{
 			$ret['srcJoin'] = 'JOIN snapshot_shape_dataset_item ON sdi_feature_id = sna_feature_id';
-			$ret['geo'] = 'sdi_geometry)';
+			$ret['geo'] = 'sdi_geometry';
 			$ret['distanceFn'] = 'DistanceSphereGeometry';
 			$ret['nearestFn'] = 'NearestSnapshotShape';
 		}
@@ -165,7 +165,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 			. $this->GetDescriptionSet($output, $cols)
 			. $this->GetValueSet($source, $output, $cols)
 			. $this->GetTotalSet($source, $cols)
-			. $cols['distance'] . ' = ROUND(' . $distance['distanceFn'] . '(' . $distance['col'] . ', sna_location' .
+			. $cols['distance']['Field'] . ' = ROUND(' . $distance['distanceFn'] . '(' . $distance['col'] . ', sna_location' .
 						($distance['geo'] ? ',' . $distance['geo'] : '') . ') / 1000, 3)
 			WHERE ' . $distance['where'] . '
 						AND id >= ' . $ranges['mi'] . ' AND id <= ' . $ranges['ma'];
@@ -176,7 +176,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 	private function GetCoordsSet($output, $cols)
 	{
 		if($output['HasCoords'])
-			return $cols['lat'] . ' = ST_Y(sna_location),' . $cols['lon'] . ' = ST_X(sna_location),';
+			return $cols['lat']['Field'] . ' = ST_Y(sna_location),' . $cols['lon']['Field'] . ' = ST_X(sna_location),';
 		else
 			return '';
 	}
@@ -184,7 +184,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 	private function GetDescriptionSet($output, $cols)
 	{
 		if($output['HasDescription'])
-			return $cols['description'] . ' = sna_description,';
+			return $cols['description']['Field'] . ' = sna_description,';
 		else
 			return '';
 	}
@@ -192,7 +192,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 	private function GetValueSet($source, $output, $cols)
 	{
 		if($output['HasValue'])
-			return $cols['value'] . ' = sna_' . $source['VariableId'] . '_value,';
+			return $cols['value']['Field'] . ' = sna_' . $source['VariableId'] . '_value,';
 		else
 			return '';
 	}
@@ -200,13 +200,16 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 	private function GetTotalSet($source, $cols)
 	{
 		if(isset($cols['total']))
-			return $cols['total'] . ' = sna_' . $source['VariableId'] . '_total,';
+			return $cols['total']['Field'] . ' = sna_' . $source['VariableId'] . '_total,';
 		else
 			return '';
 	}
-	protected function GetCaptionContent()
+	protected function GetCaptionContent($element)
 	{
-		return ' del elemento más cercano en';
+		if ($element == "Distancia")
+			return " con";
+		else
+			return " del elemento más cercano en";
 	}
 
 	public function DistanceColumnExists($datasetId, $variableId)
@@ -214,7 +217,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 		$srcDataset = $this->GetSourceDatasetByVariableId($variableId);
 
 		$datasetColumn = new DatasetColumnService();
-		$name = $this->GetColumnName(self::ColPrefix, $srcDataset->getCaption(), 'distancia_kms');
+		$name = $this->GetColumnName($srcDataset->getCaption(), 'distancia_kms');
 		return $datasetColumn->ColumnExists($datasetId, $name);
 	}
 

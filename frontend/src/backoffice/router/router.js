@@ -72,8 +72,9 @@ export const constantRouterMap = [
 			{
 				hidden: true,
 				path: 'datasets/:datasetId/metrics',
-				alias: ['datasets/:datasetId/data', 'datasets/:datasetId/variables',
-							'datasets/:datasetId/georeference', 'datasets/:datasetId/identity',
+				alias: [
+							'datasets/:datasetId/georeference', 'datasets/:datasetId/variables',
+							'datasets/:datasetId/data', 'datasets/:datasetId/identity',
 							'datasets/:datasetId/multilevel'],
 				name: 'DatasetEdit',
 				component: () => import('@/backoffice/views/Dataset/Dataset.vue')
@@ -171,7 +172,7 @@ group: 'Metadatos',
 },
 
 	{
-		group: 'Publicación',
+		group: 'Administración',
 		path: '/cartographies/:workId/customize',
 		component: Layout,
 		redirect: '/cartographies/:workId/customize',
@@ -187,7 +188,7 @@ group: 'Metadatos',
 	},
 
 	{
-		group: 'Publicación',
+		group: 'Administración',
 		path: '/cartographies/:workId/visibility',
 		component: Layout,
 		redirect: '/cartographies/:workId/visibility',
@@ -203,7 +204,7 @@ group: 'Metadatos',
 	},
 
 	{
-		group: 'Publicación',
+		group: 'Administración',
 		path: '/cartographies/:workId/stats',
 		component: Layout,
 		redirect: '/cartographies/:workId/stats',
@@ -219,7 +220,7 @@ group: 'Metadatos',
 	},
 
 	{
-		group: 'Publicación',
+		group: 'Administración',
 		path: '/cartographies/:workId/permissions',
 		component: Layout,
 		redirect: '/cartographies/:workId/permissions',

@@ -140,7 +140,14 @@ class RowDuplicator
 		{
 			$col = $column['field'];
 			$shardify = $column['shardify'];
-			if ($retInsert != '') { $retInsert .= ', '; $retSelect .= ', '; $retUpdate .= ', '; }
+			$isIdentifier = $column['isIdentifier'];
+			if ($retInsert != '')
+			{
+				$retInsert .= ', ';
+				$retSelect .= ', ';
+			}
+			if ($retUpdate != '')
+				 $retUpdate .= ', ';
 			$retInsert .= '`' . $col . '`';
 			if (array_key_exists($col, $staticColumns))
 			{
@@ -149,7 +156,9 @@ class RowDuplicator
 			}
 			else
 			{
-				$retUpdate .= '`' . $col . '`=VALUES(`' . $col . '`)';
+				if (!$isIdentifier)
+					$retUpdate .= '`' . $col . '`=VALUES(`' . $col . '`)';
+
 				if ($shardify === false)
 					$retSelect .= '`' . $col . '`';
 				else
@@ -171,7 +180,8 @@ class RowDuplicator
 				$column = array();
 				$column['field'] = $col;
 				$column['property'] = $prop;
-				$column['shardify'] = ($shardifyIds && $metadata1->identifier[0] === $prop);
+				$column['isIdentifier'] = $metadata1->identifier[0] === $prop;
+				$column['shardify'] = ($shardifyIds && $column['isIdentifier']);
 				$ret[] = $column;
 			}
 		}
@@ -186,7 +196,8 @@ class RowDuplicator
 				$column = array();
 				$column['field'] = $col;
 				$column['property'] = $prop;
-				$column['shardify'] = ($shardifyIds && ($metadata1->identifier[0] === $prop ||
+				$column['isIdentifier'] = $metadata1->identifier[0] === $prop;
+				$column['shardify'] = ($shardifyIds && ($column['isIdentifier'] ||
 																				Str::Contains($type, "\\Draft")));
 				$ret[] = $column;
 			}

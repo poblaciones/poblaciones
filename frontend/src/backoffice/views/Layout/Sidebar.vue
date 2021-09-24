@@ -77,7 +77,7 @@ export default {
 						href: replaced,
 						title: dataset.properties.Caption,
 						icon: 'fa fa-table',
-						alias: [replaced + '/variables', replaced + '/georeference',
+						alias: [replaced + '/variables', replaced + '/georeference', replaced + '/data',
 										replaced + '/metrics', replaced + '/identity', replaced + '/multilevel']
 						};
 				var badge = this.createBadge(dataset);

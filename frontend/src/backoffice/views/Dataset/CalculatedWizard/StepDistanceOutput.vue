@@ -57,7 +57,7 @@ export default {
 					alert("Debe ingresar la distancia máxima en kilómetros.");
 					return false;
 				}
-				if (str.IsNumberGreaterThan0(this.newMetric.Output.MaxDistance, MAX_VALID_DISTANCE)) {
+				if (str.IsNumberGreaterThan(this.newMetric.Output.MaxDistance, MAX_VALID_DISTANCE)) {
 					alert("La distancia no puede ser mayor a " + MAX_VALID_DISTANCE + " km.");
 					return false;
 				}

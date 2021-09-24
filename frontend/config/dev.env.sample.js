@@ -7,5 +7,5 @@ module.exports ={
 	google_maps_version: '"3.39"', // Para desarrollo. Las de prod se toman de App.php
 	add_this_key: '""', // Para desarrollo. Las de prod se toman de settings
 	google_analytics_key: '""', // Para desarrollo. Las de prod se toman de settings
-	host: '"http://desa.poblaciones.org"', // al comentar esto usa directo el server de beta
+	host: '"http://desa.poblaciones.org"', //
 };

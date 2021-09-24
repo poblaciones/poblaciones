@@ -87,7 +87,7 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 		// Crea los registros intermedios
 		$sql = $this->CreateAffectedRecords($dataset->getTable(),
 						$datasetTable,
-						$this->GetDistanceColumn($dataset, $source['datasetType']),
+						$this->GetDistanceColumn($dataset, $source['datasetType'], $output),
 						$output, $cols, $source, $ranges);
 		$created = App::Db()->fetchScalarInt($sql, array($key));
 
@@ -105,7 +105,7 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 		return $slice + 1 >= $totalSlices;
 	}
 
-	private function GetDistanceColumn($dataset, $sourceType)
+	private function GetDistanceColumn($dataset, $sourceType, $output)
 	{
 		$ret = [
 			'col' => '',
@@ -119,11 +119,18 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 		}
 		else if ($dataset->getType() == 'S')
 		{
-			$ret['col'] = 'centroid';
+			if ($output['IsInclusionPoint'])
+				$ret['col'] = 'centroid';
+			else
+				$ret['col'] = 'geometry';
 		}
 		else if ($dataset->getType() == 'D')
 		{
-			$ret['col'] = 'gei_centroid';
+			if ($output['IsInclusionPoint'])
+				$ret['col'] = 'gei_centroid';
+			else
+				$ret['col'] = 'coalesce(gei_geometry_r3, gei_geometry_r2, gei_geometry_r1)';
+
 			$ret['join'] = 'JOIN geography_item ON gei_id = geography_item_id';
 		}
 		else
@@ -131,27 +138,33 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 			throw new PublicException('Tipo de dataset no reconocido');
 		}
 
-		if ($sourceType == 'S')
+		if ($output['IsInclusionPoint'])
 		{
-			$ret['aggregateFn'] = 'CoverageSnapshotShape';
+			if ($sourceType == 'S')
+				$ret['aggregateFn'] = 'CoverageSnapshotShape';
+			else if ($sourceType == 'D')
+				$ret['aggregateFn'] = 'CoverageSnapshotGeography';
+			else if ($sourceType == 'L')
+				$ret['aggregateFn'] = 'CoverageSnapshotPoint';
 		}
-		else if ($sourceType == 'D')
+		else
 		{
-			$ret['aggregateFn'] = 'CoverageSnapshotGeography';
+			if ($sourceType == 'S')
+				$ret['aggregateFn'] = 'ContentOfSnapshotShape';
+			else if ($sourceType == 'D')
+				$ret['aggregateFn'] = 'ContentOfSnapshotGeography';
+			else if ($sourceType == 'L')
+				$ret['aggregateFn'] = 'ContentOfSnapshotPoint';
 		}
-		else if ($sourceType == 'L')
-		{
-			$ret['aggregateFn'] = 'CoverageSnapshotPoint';
-		}
-
 		return $ret;
 	}
 
 	private function CreateAffectedRecords($datasetTable, $sourceSnapshotTable, $distance, $output, $cols, $source, $ranges)
 	{
-		$distMts = 1 * 1000;
 		if($output['IsInclusionPoint'])
 			$distMts = $output['InclusionDistance'] * 1000;
+		else
+			$distMts = 'null';
 
 		$update = 'SELECT SUM(' . $distance['aggregateFn'] . '(?, id, ' . $distance['col'] . ', ' . $distMts . ', null))  '
 									. ' FROM ' . $datasetTable . ' '
@@ -189,29 +202,29 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 		if($output['HasSumValue'])
 		{
 			$ret[] = ['get' => 'SUM(sna_' . $source['VariableId'] . '_value) sum_value',
-									'setter' => $cols['sum'] . ' = sum_value'];
+									'setter' => $cols['sum']['Field'] . ' = sum_value'];
 			if(isset($cols['total']))
 				$ret[] = ['get' => 'SUM(sna_' . $source['VariableId'] . '_total) sum_total',
-									'setter' => $cols['total'] . ' = sum_total'];
+									'setter' => $cols['total']['Field'] . ' = sum_total'];
 		}
 		if($output['HasMinValue'])
 			$ret[] = ['get' => 'MIN(sna_' . $source['VariableId'] . '_value) min_value',
-									'setter' => $cols['min'] . ' = min_value'];
+									'setter' => $cols['min']['Field'] . ' = min_value'];
 
 		if($output['HasMaxValue'])
 			$ret[] = ['get' => 'MAX(sna_' . $source['VariableId'] . '_value) max_value',
-									'setter' => $cols['max'] . ' = max_value'];
+									'setter' => $cols['max']['Field'] . ' = max_value'];
 
 		if($output['HasCount'])
 			$ret[] = ['get' => 'COUNT(sna_' . $source['VariableId'] . '_value) count_value',
-									'setter' => $cols['count'] . ' = count_value'];
+									'setter' => $cols['count']['Field'] . ' = count_value'];
 
 		return $ret;
 	}
 
-	protected function GetCaptionContent()
+	protected function GetCaptionContent($element)
 	{
-		return '';
+		return ' de';
 	}
 
 	public function AreaColumnExists($datasetId, $variableId)
@@ -219,7 +232,7 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 		$srcDataset = $this->GetSourceDatasetByVariableId($variableId);
 
 		$datasetColumn = new DatasetColumnService();
-		$name = $this->GetColumnName(self::ColPrefix, $srcDataset->getCaption(), 'count');
+		$name = $this->GetColumnName($srcDataset->getCaption(), 'count');
 		return $datasetColumn->ColumnExists($datasetId, $name);
 	}
 

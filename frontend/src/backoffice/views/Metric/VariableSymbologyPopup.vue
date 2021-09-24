@@ -529,12 +529,7 @@ export default {
 		},
 		title() {
 			if (this.Level) {
-				var varCaption = '';
-				if (this.Variable.Data) {
-					varCaption = this.Dataset.formatTwoColumnVariableTooltip(this.Variable.Data, this.Variable.DataColumn);
-					if (varCaption !== '') varCaption = ' - ' + varCaption;
-				}
-				return this.Level.MetricVersion.Metric.Caption + varCaption;
+				return this.Level.MetricVersion.Metric.Caption;
 			} else {
 				return '';
 			}
