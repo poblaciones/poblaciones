@@ -402,8 +402,8 @@ ActiveSelectedMetric.prototype.SetActiveSequenceStep = function (variableId, lab
 	}
 	// Regenera el anterior y el nuevo seleccionado
 	if (this.objs.composer) {
-		this.objs.composer.SequenceComposer.RecreateSequenceMarker(labelId, keep);
-		this.objs.composer.SequenceComposer.RecreateSequenceMarker(labelId, value);
+		this.objs.composer.SequenceHandler.RecreateSequenceMarker(labelId, keep);
+		this.objs.composer.SequenceHandler.RecreateSequenceMarker(labelId, value);
 	}
 	window.SegMap.SaveRoute.UpdateRoute();
 };

@@ -86,7 +86,7 @@ class SnapshotMetricModel extends BaseModel
 		return $ret > 0;
 	}
 
-	public function SearchMetrics($originalQuery, $inBackoffice, $includeBoundaries)
+	public function SearchMetrics($originalQuery, $inBackoffice, $includeBoundaries, $currentWork)
 	{
 		$query = Str::AppendFullTextEndsWithAndRequiredSigns($originalQuery);
 
@@ -96,6 +96,11 @@ class SnapshotMetricModel extends BaseModel
 		$args = array($query, $query);
 
 		Profiling::BeginTimer();
+		if ($currentWork !== null)
+			$currentWorkCondition = "mvw_work_id = " . $currentWork . ' OR ';
+		else
+			$currentWorkCondition = '';
+
 		$sql = "(SELECT mvw_metric_id Id,
 										mvw_metric_caption Caption,
 										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') Extra,
@@ -105,8 +110,8 @@ class SnapshotMetricModel extends BaseModel
 										FROM snapshot_metric_version
 										WHERE (MATCH (`mvw_metric_caption`, `mvw_caption`, `mvw_variable_captions`, `mvw_variable_value_captions`,
 										`mvw_work_caption`, mvw_work_authors, mvw_work_institution) AGAINST (? IN BOOLEAN MODE) " .
-										$specialWordsCondition . "
-										) AND IsAccessibleWork(?, mvw_work_id, mvw_work_is_indexed, mvw_work_is_private)
+										$specialWordsCondition . ") AND (" . $currentWorkCondition . " IsAccessibleWork(?, mvw_work_id, mvw_work_is_indexed, mvw_work_is_private)
+										)
 										GROUP BY mvw_metric_id, mvw_metric_caption
 										LIMIT 0, 10)";
 
@@ -129,6 +134,7 @@ class SnapshotMetricModel extends BaseModel
 		}
 		$sql .= " ORDER BY Relevance DESC";
 		$ret = App::Db()->fetchAll($sql, $args);
+
 		if ($inBackoffice)
 		{
 			foreach($ret as &$retItem)

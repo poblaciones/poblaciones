@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<search-popup ref="addMetricPopup" @selected="metricSelected" :getDraftMetrics="false" searchType="m" />
+		<search-popup ref="addMetricPopup" @selected="metricSelected" :currentWork="Work.properties.Id" :getDraftMetrics="false" searchType="m" />
 		<div class="md-layout md-gutter">
 			<div class="md-layout-item md-size-100 mp-label" style="margin-bottom: 8px; padding-left: 12px!important;">
 				Elementos a localizar en el {{ action }} (Escuelas, Nivel educativo, etc.)
@@ -100,6 +100,9 @@ export default {
 		},
 		Dataset() {
 			return window.Context.CurrentDataset;
+		},
+		Work() {
+			return window.Context.CurrentWork;
 		},
 		versions() {
 			if (this.newMetric.SourceMetric.Versions != null) {

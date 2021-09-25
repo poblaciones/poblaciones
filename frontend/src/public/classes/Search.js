@@ -3,11 +3,13 @@ import axios from 'axios';
 
 export default Search;
 
-function Search(view, revision, searchType, inBackoffice) {
+function Search(view, revision, searchType, getDraftMetrics, isBackoffice = false, currentWorkId = null) {
 	this.view = view;
 	this.searchType = searchType;
 	this.revision = revision;
-	this.inBackoffice = inBackoffice;
+	this.getDraftMetrics = getDraftMetrics;
+	this.isBackoffice = isBackoffice;
+	this.currentWorkId = currentWorkId;
 };
 
 Search.prototype.StartSearch = function (t) {
@@ -24,8 +26,11 @@ Search.prototype.StartSearch = function (t) {
 	var view = this.view;
 	var loc = this;
 	view.loading = true;
-	axios.get(window.host + '/services/frontend/search', {
-    params: { q: t, f: this.searchType, w: this.revision, b: (this.inBackoffice ? '1' : '0') },
+	var facade = (this.isBackoffice ? 'backoffice' : 'frontend');
+	axios.get(window.host + '/services/' + facade + '/Search', {
+		params: {
+			q: t, f: this.searchType, w: this.revision, b: (this.getDraftMetrics ? '1' : '0'),
+				k: this.currentWorkId },
 		cancelToken: new CancelToken(function executor(c) { retCancel = c; })
 		})
 		.then(function(res) {

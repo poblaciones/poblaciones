@@ -13,7 +13,7 @@ use minga\framework\Profiling;
 
 class LookupService extends BaseService
 {
-	public function Search($query, $filter, $inBackoffice)
+	public function Search($query, $filter, $getDraftMetrics, $currentWork = null)
 	{
 		// $filter:
 		// m = devuelve solo indicadores
@@ -31,7 +31,7 @@ class LookupService extends BaseService
 
 		// Trae los indicadores que coinciden
 		if ($filter != 'r')
-			$resLay = $modelMetrics->SearchMetrics($query, $inBackoffice, ($filter !==  'm'));
+			$resLay = $modelMetrics->SearchMetrics($query, $getDraftMetrics, ($filter !==  'm'), $currentWork);
 		else
 			$resLay = [];
 

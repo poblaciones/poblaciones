@@ -12,13 +12,12 @@ use minga\framework\Params;
 use minga\framework\Context;
 use minga\framework\PublicException;
 
-App::$app->get('/services/frontend/search', function (Request $request) {
+App::$app->get('/services/frontend/Search', function (Request $request) {
 	$query = Params::Get('q');
 	$controller = new services\LookupService();
 	$filter = Params::Get('f', '');
-	$inBackoffice = Params::GetBool('b');
 
-	return App::JsonImmutable($controller->Search($query, $filter, $inBackoffice));
+	return App::JsonImmutable($controller->Search($query, $filter, false));
 });
 
 

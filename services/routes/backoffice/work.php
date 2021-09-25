@@ -27,6 +27,15 @@ App::$app->get('/services/backoffice/CreateWork', function (Request $request) {
 	return App::OrmJson($entity);
 });
 
+App::$app->get('/services/backoffice/Search', function (Request $request) {
+	$query = Params::Get('q');
+	$controller = new helena\services\frontend\LookupService();
+	$filter = Params::Get('f', '');
+	$getDraftMetrics = Params::GetBool('b');
+	$currentWorkId = Params::GetIntMandatory('k');
+
+	return App::JsonImmutable($controller->Search($query, $filter, $getDraftMetrics, $currentWorkId));
+});
 
 App::$app->get('/services/backoffice/GetFactories', function (Request $request) {
 	$ret = array();

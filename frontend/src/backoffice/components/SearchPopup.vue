@@ -44,6 +44,7 @@
 		},
 		props: {
 			searchType: String,
+			currentWork: null,
 			getDraftMetrics: {
 				type: Boolean,
 				default: true,
@@ -66,7 +67,7 @@
 		},
 		methods: {
 			show(type) {
-				this.search = new Search(this, this.Work.Startup.LookupSignature, this.searchType, this.getDraftMetrics);
+				this.search = new Search(this, this.Work.Startup.LookupSignature, this.searchType, this.getDraftMetrics, true, this.currentWork);
 				this.filter = '';
 				this.autolist = [];
 				this.openDialog = true;

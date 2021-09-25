@@ -55,7 +55,7 @@ class cHandleTest extends TestCase
 		$controller = new cHandle();
 		Reflection::CallPrivateMethod($controller, 'ShowWorkMetric', $this->workId, $this->metricId, null);
 
-		$this->assertStringContainsString('superior', $controller->templateValues['handleTitle']);
+		$this->assertStringContainsString('Establecimientos de nivel', $controller->templateValues['handleTitle']);
 		$this->assertEquals(1, count($controller->templateValues['variables']));
 
 		$this->assertGreaterThan(0, count($controller->templateValues['metadata']));

@@ -2,7 +2,7 @@
 	<div class="md-layout md-gutter">
 		<div class="md-layout-item md-size-80 md-small-size-100">
 			<invoker ref="invoker"></invoker>
-			<search-popup ref="searchPopup" @selected="regionSelected" searchType="r" />
+			<search-popup ref="searchPopup" @selected="regionSelected" :currentWork="Work.properties.Id" searchType="r" />
 			<relocate @relocated="relocated" ref="Relocate" :useOverlay="false" :useMarker="false"></relocate>
 
 			<md-card>

@@ -188,7 +188,7 @@ GoogleMapsApi.prototype.AddCopyright = function () {
 	if (window.Embedded.Active) {
 		innerHTML += "<a class='copyrightText' href='https://poblaciones.org/' target='_blank'>";
 	}
-	innerHTML += "Poblaciones © 2020 CONICET / ODSA - UCA</a>. " +
+	innerHTML += "Poblaciones © 2019-" + (new Date().getFullYear()) + " CONICET / ODSA - UCA</a>. " +
 		"<a class='copyrightText' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. ";
 	if (!window.Embedded.Active) {
 		innerHTML += "<a class='copyrightText exp-hiddable-unset' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a>";

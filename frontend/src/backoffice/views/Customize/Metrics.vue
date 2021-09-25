@@ -2,7 +2,7 @@
 	<div>
 		<div class="md-layout md-gutter">
 			<invoker ref="invoker"></invoker>
-			<search-popup ref="addMetricPopup" @selected="metricSelected" searchType="m" />
+			<search-popup ref="addMetricPopup" @selected="metricSelected" :currentWork="Work.properties.Id" searchType="m" />
 
 			<div class="md-layout-item md-size-80 md-small-size-100">
 				<md-card>

@@ -128,7 +128,7 @@ class Account
 		}
 		else
 		{
-			return $this->EnsureDbInfo();
+			return $this->GetUserId();
 		}
 	}
 
