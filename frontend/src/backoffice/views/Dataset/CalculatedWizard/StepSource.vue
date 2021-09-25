@@ -90,7 +90,8 @@ export default {
 			if (this.variables.length === 0) {
 				return false;
 			}
-			if (this.variables.length === 1 && this.newMetric.SelectedVariable.IsSimpleCount) {
+			if (this.variables.length === 1 && (this.newMetric.SelectedVariable.IsSimpleCount
+																&& this.newMetric.SelectedVariable.ValueLabels.length < 2)) {
 				return false;
 			}
 			return true;
