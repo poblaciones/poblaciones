@@ -49,7 +49,7 @@ class DatasetDownloadManager extends BaseDownloadManager
 		return self::getCache($fromDraft)->HasData($datasetId, $cacheKey, $filename);
 	}
 
-	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type)
+	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type, $fromDraft)
 	{
 		$validFileTypes = self::$validFileTypes;
 		if (array_key_exists($type[0], $validFileTypes))
@@ -57,16 +57,28 @@ class DatasetDownloadManager extends BaseDownloadManager
 		else
 			throw new PublicException('Tipo de archivo inválido');
 
-		$name = 'dataset' . $datasetId . $type;
-		if (is_array($clippingItemId))
-			$name .= 'r' . Str::JoinInts($clippingItemId, '-');
-		else
-			$name .= 'r' . $clippingItemId;
+		$datasetName = App::Db()->fetchScalar("SELECT dat_caption FROM " . ($fromDraft ? 'draft_' : '') . "dataset WHERE dat_id = ?", array($datasetId));
+		$name = $datasetName;
 
 		if($urbanity)
-			$name .= 'u' . Str::ToLower($urbanity);
+			$name .= ' - ' . Str::ToLower($urbanity);
 
-		return $name . '.' . $ext;
+		$name .= self::RegionsAsText($clippingItemId);
+
+		return Str::SanitizeFilename($name) . '.' . $ext;
+	}
+
+	public static function RegionsAsText($clippingItemId)
+	{
+		if (!$clippingItemId) return '';
+		if (!is_array($clippingItemId))
+			$clippingItemId = [$clippingItemId];
+
+		$sql = "SELECT GROUP_CONCAT(cli_caption ORDER BY cli_caption SEPARATOR ', ')
+								FROM clipping_region_item
+								WHERE cli_id IN (" . Str::JoinInts($clippingItemId) . ")";
+		$res = App::Db()->fetchScalar($sql);
+		return ' - ' . $res;
 	}
 
 	private static function createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity)
@@ -123,7 +135,7 @@ class DatasetDownloadManager extends BaseDownloadManager
 			self::ValidateClippingItem($clippingItemId);
 		}
 		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity);
-		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type, $fromDraft);
 		$cache = self::getCache($fromDraft);
 		// Lo devuelve desde el cache
 		$filename = null;
@@ -161,7 +173,7 @@ class DatasetDownloadManager extends BaseDownloadManager
 		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $this->model, $fromDraft);
 		$this->state->SetStep(self::STEP_BEGIN);
 		$this->state->SetTotalSteps(2);
-		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type, $fromDraft);
 		$this->state->Set('friendlyName', $friendlyName);
 		$this->state->Set('totalRows', $this->model->GetCountRows());
 		$info = $this->model->GetExtraStateInfo($datasetId);

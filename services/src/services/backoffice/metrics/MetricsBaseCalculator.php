@@ -51,6 +51,7 @@ abstract class MetricsBaseCalculator
 		$metricColumns = ['distance', 'count', 'sum', 'min', 'max'];
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 
+		$ret = [];
 		foreach($cols as $column => $col)
 		{
 			if (in_array($column, $metricColumns))
@@ -75,9 +76,12 @@ abstract class MetricsBaseCalculator
 				$caption = $variable->getCaption();
 				$caption = substr($caption, 0, 150);
 				$metricService->CreateMetricByVariable($dataset, $caption, $variable);
+
+				$ret[] = $variable->getId();
  			}
 		}
 		Profiling::EndTimer();
+		return $ret;
 	}
 
 	protected function CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName,
@@ -85,7 +89,7 @@ abstract class MetricsBaseCalculator
 	{
 		$datasetColumn = new DatasetColumnService();
 		$name = $this->GetColumnName($datasetName, $calculatedField);
-		$label = $this->GetColumnCaption($metric, $variable, $source, $output, $caption);
+		$label = $this->GetColumnCaption($metric, $variable, $source, $output, $caption, $dataset);
 
 		$col = $datasetColumn->GetColumnByVariable($dataset->getId(), $name);
 		if($col == null)
@@ -244,7 +248,7 @@ abstract class MetricsBaseCalculator
 		return $clean . '_' . $srcColumnName;
 	}
 
-	private function GetColumnCaption($metric, $variable, $source, $output, $caption, $maxLength = 255)
+	private function GetColumnCaption($metric, $variable, $source, $output, $caption, $dataset, $maxLength = 255)
 	{
 		// - Distancia a radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
 		// - Valor de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
@@ -252,8 +256,18 @@ abstract class MetricsBaseCalculator
 
 		$str = $caption . $this->GetCaptionContent($caption)
 			. $this->GetVariableName($metric, $variable)
-			. $this->GetValueLabelsCaption($metric, $source)
-			. $this->GetDistanceCaption($output);
+			. $this->GetValueLabelsCaption($metric, $source);
+		$dist = $this->GetDistanceCaption($output);
+		$str .= $dist;
+
+		if ($dist != '')
+			$str .= " de ";
+		else if (isset($output['IsInclusionPoint']) && !$output['IsInclusionPoint'])
+			$str .= " en ";
+		else
+			$str .= " desde ";
+		$str .= $dataset->getCaption();
+
 		return Str::Ellipsis($str, $maxLength);
 	}
 

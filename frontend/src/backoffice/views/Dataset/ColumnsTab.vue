@@ -372,7 +372,7 @@ export default {
 				loc.Grid.clearselection();
 				loc.Grid.deleterow(selectedRows);
 				loc.updateCount();
-				loc.Dataset.ReloadColumns();
+				loc.reloadColumns();
 			}).catch(function() { loc.hideWait(); });
 		},
 		valuesOnClick() {
@@ -435,7 +435,11 @@ export default {
 		refreshOnClick() {
 			this.showWait();
 			this.statusBarText = '';
-			this.Dataset.ReloadColumns();
+			this.reloadColumns();
+		},
+		reloadColumns() {
+			this.$refs.invoker.doMessage('Obteniendo información del dataset', this.Dataset,
+				this.Dataset.ReloadColumns);
 		},
 		loadData() {
 			this.source.localdata = this.getData();

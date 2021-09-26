@@ -47,12 +47,20 @@ class DatasetService extends DbSession
 		Profiling::BeginTimer();
 
 		$datasetMarker = new entities\DraftDatasetMarker();
-		$datasetMarker->setAutoScale(false);
+		$datasetMarker->setAutoScale(true);
 		$datasetMarker->setSize('S');
-		$datasetMarker->setType('N');
-		$datasetMarker->setFrame('P');
+		$datasetMarker->setFrame('C');
 		$datasetMarker->setDescriptionVerticalAlignment('B');
 		$datasetMarker->setSource('F');
+		if (trim($caption) !== "")
+		{
+			$datasetMarker->setType('T');
+			$letter = mb_strtoupper(mb_substr($caption, 0, 1));
+			$datasetMarker->setText($letter);
+		}
+		else
+			$datasetMarker->setType('N');
+
 		App::Orm()->Save($datasetMarker);
 
 		$dataset = new entities\DraftDataset();

@@ -219,11 +219,15 @@ export default {
 				loc.Work.WorkChanged();
 				if (loc.Dataset) {
 					loc.Dataset.ReloadProperties();
-					loc.Dataset.ReloadColumns();
+					loc.reloadColumns();
 				} else {
 					loc.$refs.invoker.doMessage('Obteniendo dataset', window.Db, window.Db.RebindAndFocusLastDataset, loc.$router);
 				}
 			});
+		},
+		reloadColumns() {
+			this.$refs.invoker.doMessage('Obteniendo información del dataset', this.Dataset,
+				this.Dataset.ReloadColumns);
 		},
 		onCloseStepper(success) {
 			if (success) {

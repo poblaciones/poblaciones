@@ -102,6 +102,7 @@ export default {
 		},
 		deleteDecision(item) {
 			var loc = this;
+			this.$refs.invoker.message = 'Eliminando...';
 			this.$refs.invoker.confirmDo('Eliminar revisión', 'La revisión seleccionada será eliminada',
 					window.Db, window.Db.DeleteReview, item, function() {
 						arr.Remove(loc.list, item);

@@ -102,9 +102,10 @@ export default {
 		isLast(item) {
 			return this.Work.Sources[this.Work.Sources.length - 1] === item;
 		},
-    onDelete(item) {
-				this.$refs.invoker.confirmDo('Quitar fuente', 'La fuente será removida de la lista',
-						this.Work, this.Work.RemoveSource, item);
+		onDelete(item) {
+			this.$refs.invoker.message = 'Quitando fuente...';
+			this.$refs.invoker.confirmDo('Quitar fuente', 'La fuente será removida de la lista',
+					this.Work, this.Work.RemoveSource, item);
     },
 		addSource() {
 			this.$refs.PickSource.show();

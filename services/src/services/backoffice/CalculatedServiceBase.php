@@ -86,7 +86,8 @@ abstract class CalculatedServiceBase extends BaseService
 				break;
 			case self::STEP_CREATE_METRIC:
 
-				$calculator->StepCreateMetrics($datasetId, $cols, $source);
+				$metrics = $calculator->StepCreateMetrics($datasetId, $cols, $source);
+				$this->state->SetResult(implode(',', $metrics));
 
 				// Marca work
 				$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);

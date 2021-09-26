@@ -108,6 +108,7 @@ export default {
 			this.$refs.editPopup.show(item);
 		},
 		onDelete(item) {
+			this.$refs.invoker.message = 'Eliminando...';
 			this.$refs.invoker.confirmDo('Eliminar archivo adjunto', 'El adjunto seleccionado será eliminado',
 					this.Work, this.Work.DeleteFile, item);
 		},

@@ -2,6 +2,7 @@ import axios from 'axios';
 import axiosClient from '@/common/js/axiosClient';
 import arr from '@/common/framework/arr';
 import str from '@/common/framework/str';
+import color from '@/common/framework/color';
 import f from '@/backoffice/classes/Formatter';
 import h from '@/public/js/helper';
 import ScaleStates from './ScaleStates';
@@ -227,6 +228,23 @@ ScaleGenerator.prototype.GetColumnDistributions = function (variable) {
 	return axiosClient.getPromise(url, args, 'obtener las distribuciones de la columna');
 };
 
+ScaleGenerator.prototype.GetAndCacheColumnDistributions = function (level, variable) {
+	var key = this.createKey(variable);
+	this.RegenPending[key] = variable;
+	// Trae los grupos calculados para ese par de variables y escalas
+	let url = window.host + '/services/backoffice/GetColumnDistributions';
+	var loc = this;
+	return this.GetColumnDistributions(variable).then(function (data) {
+			loc.InfoCache[key] = data;
+			var varPending = loc.RegenPending[key];
+			loc.RegenPending[key] = null;
+			loc.CreateVariableCategories(level, varPending, data);
+			return data;
+		}).catch(function(err) {
+			loc.RegenPending[key] = false;
+			return err;
+		});
+};
 ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
 	var loc = this;
 	var key = this.createKey(variable);
@@ -249,25 +267,13 @@ ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
 		});
 		return ret;
 	} else {
-		loc.RegenPending[key] = variable;
-		// Trae los grupos calculados para ese par de variables y escalas
-		let url = window.host + '/services/backoffice/GetColumnDistributions';
-		return loc.GetColumnDistributions(variable).then(function (data) {
-				loc.InfoCache[key] = data;
-				var varPending = loc.RegenPending[key];
-				loc.RegenPending[key] = null;
-				loc.CreateVariableCategories(level, varPending, data);
-				return data;
-			}).catch(function(err) {
-				loc.RegenPending[key] = false;
-				return err;
-			});
+		return this.GetAndCacheColumnDistributions(level, variable);
 	}
 };
 ScaleGenerator.prototype.CalculateColor = function (variable, n, total, customColors) {
 	// Resuelve nulo
 	if (n === null) {
-		return 'D0D0D0';
+		return 'b7b7b7';
 	}
 	// Calcula lo demás
 	var ratio = (total <= 1 ? 0 : n / (total - 1));
@@ -499,7 +505,9 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 	} else {
 		this.States.Apply(variable, previousStates);
 	}
-	this.recalculateColors(variable, customColors);
+	if (variable.Symbology.CutMode !== 'S') {
+		this.recalculateColors(variable, customColors);
+	}
 };
 
 ScaleGenerator.prototype.recalculateColors = function (variable, customColors) {
@@ -553,7 +561,7 @@ ScaleGenerator.prototype.CreateSingleCategory = function (variable) {
 		Caption: 'Total',
 		Visible: true,
 		Value: 10,
-		FillColor: null,
+		FillColor: color.GetRandomDefaultColor(),
 		Symbol: null,
 		LineColor: null,
 		Order: 1

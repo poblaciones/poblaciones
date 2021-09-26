@@ -351,11 +351,11 @@ SelectedInfoRouter.prototype.restoreInfoStates = function (states) {
 		var state = states[n];
 		if (state.IsBoundary) {
 				if (this.RestoreBoundaryState(info, state)) {
-					activeMetric.UpdateMap();
+					info.UpdateMap();
 			}
 		} else {
 			if (this.RestoreMetricState(info, state)) {
-				activeMetric.UpdateMap();
+				info.UpdateMap();
 			}
 		}
 	}

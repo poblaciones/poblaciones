@@ -36,6 +36,7 @@ class StateBag
 			'slice' => 0,
 			'visitUrl' => '',
 			'visitCaption' => '',
+			'stepperResult' => '',
 			'totalSteps' => 0,
 			'totalSlices' => 0,
 			'progressLabel' => 'Iniciando'
@@ -108,6 +109,10 @@ class StateBag
 		$this->state['visitUrl'] = $url;
 		$this->state['visitCaption'] = $caption;
 	}
+	public function SetResult($result)
+	{
+		$this->state['stepperResult'] = $result;
+	}
 	public function GetTotalSteps()
 	{
 		return $this->state['totalSteps'];
@@ -137,6 +142,10 @@ class StateBag
 		{
 			$ret['visitUrl']  = $this->state['visitUrl'];
 			$ret['visitCaption']  = $this->state['visitCaption'];
+		}
+		if ($this->state['stepperResult'] != '')
+		{
+			$ret['stepperResult']  = $this->state['stepperResult'];
 		}
 		if ($this->state['totalSteps'] != 0)
 		{

@@ -17,6 +17,9 @@ module.exports = {
 		var dif = (dateMax - date) / 1000 / 60;
 		return dif;
 	},
+	GetCurrentYear() {
+		return new Date().getFullYear();
+	},
 	DateDiffDays(date, dateMax = null) {
 		if (!dateMax) {
 			dateMax = new Date();

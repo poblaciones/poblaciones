@@ -47,7 +47,7 @@
 			<div class="md-layout-item">
 				<md-table v-model="list" md-card="">
 					<md-table-row slot="md-table-row" slot-scope="{ item }" md-alignment-top md-alignment-left-top>
-						<md-table-cell class="selectable" md-label="Nombre">
+						<md-table-cell class="selectable" md-label="Nombre" style="padding-right: 45px">
 							<div style="padding-top: 11px">
 								{{ item.MetricVersion.Metric.Caption }} ({{ item.MetricVersion.Caption }})
 							</div>
@@ -56,7 +56,11 @@
 									<md-icon>edit</md-icon>
 									<md-tooltip md-direction="bottom">Cambiar el nombre {{ (Work.properties.Type === 'P' ? ', la categoría': '') }} o la edición</md-tooltip>
 								</md-button>
-								<md-button class="md-icon-button" @click="createNewVariable(item)">
+								<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="onDelete(item)">
+									<md-icon>delete</md-icon>
+									<md-tooltip md-direction="bottom">Eliminar indicador</md-tooltip>
+								</md-button>
+								<md-button class="md-icon-button" @click="createNewVariable(item)" style="position: absolute; right: 0px">
 									<md-icon>add_circle_outline</md-icon>
 									<md-tooltip md-direction="bottom">Agregar variable</md-tooltip>
 								</md-button>
@@ -143,12 +147,6 @@
 									</md-button>
 								</md-list-item>
 							</md-list>
-							<div v-else="">
-								<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="onDelete(item)">
-									<md-icon>delete</md-icon>
-									<md-tooltip md-direction="bottom">Eliminar indicador</md-tooltip>
-								</md-button>
-							</div>
 						</md-table-cell>
 					</md-table-row>
 				</md-table>
@@ -172,8 +170,7 @@ import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
 import LevelPopup from "@/backoffice/views/Dataset/LevelPopup";
 import arr from '@/common/framework/arr';
-
-const DEFAULT_SINGLE_COLOR = '0ce800';
+import color from '@/common/framework/color';
 
 export default {
 	name: 'MetricsTab',
@@ -306,6 +303,7 @@ export default {
 			this.$refs.metricPopup.show(item);
 		},
 		onDelete(item) {
+			this.$refs.invoker.message = 'Eliminando...';
 			this.$refs.invoker.confirmDo('Eliminar indicador', 'El indicador seleccionado será eliminado',
 				this.Dataset, this.Dataset.DeleteMetricVersionLevel, item);
 		},
@@ -314,7 +312,7 @@ export default {
 			var loc = this;
 			window.Context.Factory.GetCopy('Variable', function(data) {
 				data.Values = [];
-				var value = ScaleGenerator.CreateValue('Total', 1, DEFAULT_SINGLE_COLOR, 1);
+				var value = ScaleGenerator.CreateValue('Total', 1, color.GetRandomDefaultColor(), 1);
 				data.Values.push(value);
 				loc.openVariableFormulaEdition(item, data);
 			});
@@ -355,6 +353,7 @@ export default {
 			this.$refs.editVariableOptionsPopup.show(item, variable);
 		},
 		onDeleteVariable(item, variable) {
+			this.$refs.invoker.message = 'Eliminando...';
 			this.$refs.invoker.confirmDo('Eliminar variable', 'La variable seleccionada será quitada del indicador',
 				this.Dataset, this.Dataset.DeleteVariable, item, variable);
 		},

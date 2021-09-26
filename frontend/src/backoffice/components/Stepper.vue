@@ -56,11 +56,41 @@ import err from '@/common/framework/err';
 
 export default {
   name: 'stepper',
-  methods: {
+		data() {
+			return {
+				totalSteps: 0,
+				step: 0,
+				totalSlices: 0,
+				slice: 0,
+				titleByMethod: null,
+				startUrl: '',
+				stepUrl: '',
+				args: [],
+				errorDetail: '',
+				status: '',
+				imageSrc: '',
+				clientSteps: [],
+				visitCaption: '',
+				visitUrl: '',
+				url: '',
+				key: '',
+				error: '',
+				result: null,
+				completedPromise: null,
+				complete: false,
+				showDialog: false,
+				hideProgress: false
+			};
+		},
+		props: {
+			title: String,
+		},
+	  methods: {
 		Start(startupState) {
 			// Se pone visible
 			this.Reset(startupState);
 			this.complete = false;
+			this.result = null;
 			this.showDialog = true;
 			var loc = this;
 			loc.completedPromise = null;
@@ -139,8 +169,13 @@ export default {
 					loc.visitUrl = res.data.visitUrl;
 					loc.visitCaption = res.data.visitCaption;
 				}
+				if (res.data.stepperResult) {
+					loc.result = res.data.stepperResult;
+				}
 				if (res.data.done) {
-					loc.ShowCompleted();
+					loc.IterateLocalSteps().then(function () {
+						loc.ShowCompleted();
+					});
 				} else {
 					loc.totalSteps = res.data.totalSteps;
 					loc.totalSlices = res.data.totalSlices;
@@ -157,6 +192,15 @@ export default {
 				loc.ShowError(errorText);
 				err.err('Stepper', error);
 			});
+		},
+		async IterateLocalSteps() {
+			this.totalSlices = this.clientSteps.length;
+			this.slice = 0;
+			for (var step of this.clientSteps) {
+				this.status = step.status;
+				await step.do.apply(step.container);
+				this.slice++;
+			}
 		}
   },
 	computed: {
@@ -178,33 +222,6 @@ export default {
 			return ret / this.totalSteps * 100;
 		}
 	},
-	data() {
-		return {
-			totalSteps: 0,
-			step: 0,
-			totalSlices: 0,
-			slice: 0,
-			titleByMethod: null,
-	    startUrl: '',
-			stepUrl: '',
-			args: [],
-			errorDetail: '',
-			status: '',
-			imageSrc: '',
-			visitCaption: '',
-			visitUrl: '',
-			url: '',
-			key: '',
-			error: '',
-			completedPromise: null,
-			complete: false,
-			showDialog: false,
-			hideProgress: false
-		};
-	},
-  props: {
-    title: String,
-  }
 };
 </script>
 

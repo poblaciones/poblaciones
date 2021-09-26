@@ -3,7 +3,7 @@
 		<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false">
 
 			<invoker ref="invoker"></invoker>
-			<stepper ref="stepper" @closed="stepperClosed" :title="'Realizando ' + action"></stepper>
+			<stepper ref="stepper" @closed="stepperClosed" @completed="stepperCompleted"  :title="'Realizando ' + action"></stepper>
 
 			<md-dialog-title>
 				Asistente de {{ action }}
@@ -58,6 +58,7 @@ export default {
 			newMetric: {},
 			openPopup: false,
 			processing: false,
+			clientProcessing: [],
 			steps: {
 				'area': ['stepAreaWelcome', 'stepSource', 'stepAreaOutput'],
 				'distance': ['stepDistanceWelcome', 'stepSource', 'stepDistanceOutput']
@@ -205,9 +206,11 @@ export default {
 			}
 			this.Work.WorkChanged();
 			let stepper = this.$refs.stepper;
+			this.clientProcessing = [];
 			stepper.startUrl = this.Dataset.CalculateNewMetricUrl(this.newMetric.Type);
 			stepper.stepUrl = this.Dataset.StepCalculateNewMetricUrl(this.newMetric.Type);
 			stepper.args = this.args();
+			stepper.clientSteps = this.defineClientSteps();
 			stepper.Start();
 		},
 		args() {
@@ -228,13 +231,89 @@ export default {
 			// Definir
 			return ret;
 		},
+		stepperCompleted() {
+			this.Dataset.ScaleGenerator.Clear();
+		},
 		stepperClosed() {
 			let stepper = this.$refs.stepper;
 			if (stepper.complete) {
 				this.openPopup = false;
-				this.Dataset.ReloadColumns();
-				this.Dataset.ScaleGenerator.Clear();
 			}
+		},
+		GetLevelAndVariable(variableId) {
+			for (var level of this.Dataset.MetricVersionLevels) {
+				for (var variable of level.Variables) {
+					if (variable.Id === variableId) {
+						return { Level: level, Variable: variable };
+					}
+				}
+			}
+			throw new Error('No se ha podido obtener el indicador creado.');
+		},
+		parseVariables(variableIdList) {
+			var varsArr = variableIdList.split(",");
+			var ret = [];
+			for (var varId of varsArr) {
+				ret.push(this.GetLevelAndVariable(parseInt(varId)));
+			}
+			return ret;
+		},
+		GetLargestNTilesCut(size, groups) {
+			for (var n = size; n >= 1; n--) {
+				var elements = groups[n].ntiles.length;
+				if (elements === n - 1 && groups[n].ntiles[elements - 1] !== null) {
+					return n;
+				}
+			}
+			return 0;
+		},
+		fetchDistributions() {
+			var loc = this;
+			var varList = loc.parseVariables(loc.$refs.stepper.result);
+			this.clientProcessing = [];
+			var getters = [];
+			for (var varItem of varList) {
+				getters.push(loc.Dataset.ScaleGenerator.GetAndCacheColumnDistributions(varItem.Level, varItem.Variable).then(
+						function (data) {
+							var n = loc.GetLargestNTilesCut(5, data.Groups);
+							if (n > 1) {
+								varItem.Variable.Symbology.CutMode = 'T';
+								varItem.Variable.Symbology.Round = 0;
+								varItem.Variable.Symbology.Categories = n;
+							} else {
+								varItem.Variable.Symbology.CutMode = 'S';
+							}
+							loc.clientProcessing.push(varItem);
+						}));
+			}
+			return Promise.all(getters);
+		},
+		applySymbologies() {
+			var savers = [];
+			var loc = this;
+			for (var varItem of this.clientProcessing) {
+				savers.push(loc.Dataset.ScaleGenerator.RegenAndSaveVariable(varItem.Level, varItem.Variable));
+			}
+			return Promise.all(savers);
+		},
+		defineClientSteps() {
+			var steps = [];
+			steps.push({
+				status: 'Obteniendo resultados',
+				do: this.Dataset.ReloadColumns,
+				container: this.Dataset
+			});
+			steps.push({
+				status: 'Calculando distribuciones',
+				do: this.fetchDistributions,
+				container: this
+			});
+			steps.push({
+				status: 'Aplicando simbologías',
+				do: this.applySymbologies,
+				container: this
+			});
+			return steps;
 		},
 		validate() {
 			var currentStepControl = this.$refs[this.currentStep];

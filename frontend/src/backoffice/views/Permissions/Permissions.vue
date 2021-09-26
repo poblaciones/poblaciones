@@ -105,6 +105,7 @@ export default {
 				alert('Debe asignar otro administrador antes de poder remover al último administrador de ' + this.Work.ThisWorkLabel() + '.');
 				return;
 			}
+			this.$refs.invoker.message = 'Quitando permiso...';
 			this.$refs.invoker.confirmDo('Quitar permiso', 'El permiso serán eliminado',
 					this.Work, this.Work.DeletePermission, item);
 		},

@@ -1,6 +1,11 @@
 [CURRENT]
-- Fix acceso a indicadores según permisos.
-- Fix selección de categorías para rastreo y conteo.
+- Fix: acceso a indicadores según permisos.
+- Fix: selección de categorías para rastreo y conteo.
+- Colores aleatorios de la paleta a nuevos indicadores.
+- Fix: 'volver' navega hacia a trás en el historial.
+- Nombres amigables en las descargas (nombre de dataset - región seleccionada).
+- Calculados generan n-tiles.
+- Asigna ícono circular con letra de inicio en forma predeterminada.
 
 v3.00 (2021-09-24)
 - Se incorpora la herramienta de rastreo.

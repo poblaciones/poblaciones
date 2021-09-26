@@ -85,8 +85,8 @@
 								</div>
 								<div class='md-layout-item md-size-40 md-size-small-80'>
 									<div class="mp-label labelSeparator">Marco</div>
-									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="P">Pin</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="C">Círculo</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="P">Pin</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="B">Cuadrado</md-radio>
 								</div>
 								<div class='md-layout-item md-size-15 md-size-small-100'>

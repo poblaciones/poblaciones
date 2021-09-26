@@ -51,6 +51,9 @@ ActiveSelectedMetric.prototype.GetAllVariables = function () {
 ActiveSelectedMetric.prototype.UpdateOpacity = function (zoom) {
 	var opacity = 0.7;
 	var variable = this.SelectedVariable();
+	if (!variable) {
+		return;
+	}
 	if (variable.Opacity === 'H') {
 		opacity = 0.95;
 	} else if (variable.Opacity === 'L') {

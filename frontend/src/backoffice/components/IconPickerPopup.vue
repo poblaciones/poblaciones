@@ -185,6 +185,7 @@ export default {
 		deleteIcon() {
 			var loc = this;
 			var id = this.$refs.customIcon.selectedId;
+			this.$refs.invoker.message = 'Eliminando...';
 			this.$refs.invoker.confirmDo('Eliminar ícono', 'El ícono seleccionada será eliminado',
 				this.Work, this.Work.DeleteIcon, id);
 		},

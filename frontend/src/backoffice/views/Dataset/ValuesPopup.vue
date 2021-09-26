@@ -434,6 +434,10 @@ export default {
 			}
 			return ret;
 		},
+		reloadColumns() {
+			this.$refs.invoker.doMessage('Obteniendo información del dataset', this.Dataset,
+				this.Dataset.ReloadColumns);
+		},
 		save() {
 			var loc = this;
 			if (this.doingAutoRecode) {
@@ -446,7 +450,7 @@ export default {
 					if (loc.doingAutoRecode) {
 						loc.Dataset.AutoRecodeValues(loc.column, loc.source.localdata, loc.newName, loc.newLabel).then(
 								function(data) {
-									loc.Dataset.ReloadColumns();
+									loc.reloadColumns();
 									loc.openPopup = false;
 									closeInvoke();
 							});

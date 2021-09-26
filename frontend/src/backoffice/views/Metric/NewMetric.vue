@@ -67,6 +67,7 @@
 
 import PickMetric from './PickMetric.vue';
 import arr from '@/common/framework/arr';
+import date from '@/common/framework/date';
 
 export default {
 	name: 'newMetric',
@@ -78,7 +79,7 @@ export default {
 			newMetricName: '',
 			newMetricGroup: null,
 			newMetricProvider: null,
-			newMetricVersion: '',
+			newMetricVersion: null,
 			selectedMetric: null,
 			openPopup: false,
 			};
@@ -103,7 +104,7 @@ export default {
 	methods: {
 		show() {
 			this.newMetricName = '';
-			this.newMetricVersion = '';
+			this.newMetricVersion = '' + date.GetCurrentYear();
 			this.newMetricGroup = null;
 			this.openPopup = true;
 			this.selectedMetric = null;

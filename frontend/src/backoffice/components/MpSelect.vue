@@ -16,7 +16,7 @@
 					</md-optgroup>
 				</template>
 				<template v-else>
-					<md-option v-for="item in list" :key="item[listKey]" :value="item[listKey]">
+					<md-option v-for="item in list" :key="item[listKey]" :value="item[listKey]" :class="(item.Separator ? 'mpSeparator' : '')">
 						{{ format(item) }}
 					</md-option>
 				</template>

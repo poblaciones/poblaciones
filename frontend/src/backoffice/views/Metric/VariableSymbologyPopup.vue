@@ -25,7 +25,10 @@
 									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="T">Ntiles</md-radio>
 									<md-radio v-model="Variable.Symbology.CutMode" :disabled="!canEdit" class="md-primary" value="M">Manual</md-radio>
 								</span>
-								<md-radio v-model="Variable.Symbology.CutMode" class="md-primary" style="float: right; margin-right: 10px;" :disabled="!canEdit || columnsForCutColumn.length === 0" value="V">Categorías</md-radio>
+								<md-radio v-model="Variable.Symbology.CutMode" class="md-primary"
+													style="float: right; margin-right: 10px;"
+													:disabled="!canEdit || columnsForCutColumn.length === 0"
+													value="V">Categorías</md-radio>
 							</div>
 							<div class="md-layout-item md-size-100" style="margin-bottom: 10px;">
 								<md-divider></md-divider>
@@ -264,8 +267,7 @@ import IconPickerPopup from '@/backoffice/components/IconPickerPopup';
 import ValuePopup from './ValuePopup.vue';
 import Icon from '@/backoffice/components/Icon';
 import ScaleGenerator from '@/backoffice/classes/ScaleGenerator';
-
-const DEFAULT_SINGLE_COLOR = '0ce800';
+import color from '@/common/framework/color';
 
 const DEFAULT_FROM_COLOR = '0ce800';
 const DEFAULT_TO_COLOR = 'fb0000';
@@ -369,7 +371,7 @@ export default {
 		show(level, variable) {
 			// Se pone visible
 			this.Level = level;
-			this.singleColor = DEFAULT_SINGLE_COLOR;
+			this.singleColor = color.GetRandomDefaultColor();
 			this.singleItem = { Symbol: null };
 			this.receiveVariable(variable);
 			this.checkDefaults();
@@ -589,7 +591,7 @@ export default {
 			isOpen: false,
 			originalVariable: null,
 			customColors: [],
-			singleColor: '0ce800',
+			singleColor: color.GetRandomDefaultColor(),
 			singleItem: { Symbol: null }
 		};
 	},

@@ -48,7 +48,7 @@ FrameRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	var framing = this.frameFromRoute(args);
 	var segmentedMap = window.SegMap;
 
-	segmentedMap.SaveRoute.lastState = null;
+	//segmentedMap.SaveRoute.lastState = null;
 	// Setea la posición, el zoom y el tipo de mapa
 	segmentedMap.SaveRoute.Disabled = true;
 	if (framing.Center.Lat && framing.Center.Lon) {

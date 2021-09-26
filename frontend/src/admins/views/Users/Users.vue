@@ -125,6 +125,7 @@ import arr from '@/common/framework/arr';
 		},
 		onDelete(item) {
 			var loc = this;
+			this.$refs.invoker.message = 'Eliminando...';
 			this.$refs.invoker.confirmDo('Eliminar usuario', 'El usuario seleccionado será eliminado',
 					window.Db, window.Db.DeleteUser, item, function() {
 						arr.Remove(loc.list, item);

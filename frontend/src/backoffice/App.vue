@@ -429,11 +429,26 @@ a.normalTextLink:hover {
 	margin-left: 2px;
 }
 
-	:root {
-		--md-theme-default-primary: #00A0D2 !important;
-		--md-theme-default-accent: #ca4a4a !important;
-		--md-theme-default-theme: light;
-		--md-theme-default-icon-on-background: #767676;
+.mpSeparator {
+	background-color: #f3f3f3;
+	height: 29px !important;
+	pointer-events: none;
+}
+
+	.mpSeparator .md-list-item-content {
+		color: #7e7e7e;
+		margin-top: -6px !important;
+		margin-left: -3px;
+		font-variant: all-petite-caps;
+		transform: scale(1.2);
+		transform-origin: left;
 	}
+
+:root {
+	--md-theme-default-primary: #00A0D2 !important;
+	--md-theme-default-accent: #ca4a4a !important;
+	--md-theme-default-theme: light;
+	--md-theme-default-icon-on-background: #767676;
+}
 
 </style>

@@ -58,14 +58,12 @@ class BoundaryDownloadManager extends BaseDownloadManager
 		else
 			throw new PublicException('Tipo de archivo inválido');
 
-		$name = 'boundary' . $boundaryId . $type;
+		$boundaryName = App::Db()->fetchScalar("SELECT bou_caption FROM boundary WHERE bou_id = ?", array($boundaryId));
+		$name = $boundaryName;
 
-		if (is_array($clippingItemId))
-			$name .= 'r' . Str::JoinInts($clippingItemId, '-');
-		else
-			$name .= 'r' . $clippingItemId;
+		$name .= DatasetDownloadManager::RegionsAsText($clippingItemId);
 
-		return $name . '.' . $ext;
+		return Str::SanitizeFilename($name) . '.' . $ext;
 	}
 
 	protected function PutFileToCache()

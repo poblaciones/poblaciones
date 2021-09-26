@@ -32,6 +32,7 @@ class ImportService extends BaseService
 	const STEP_INSERTED = 3;
 	const STEP_END = 4;
 
+	const DEFAULT_NAME_CAPTIONS = ['nombre', 'descripción', 'descripcion'];
 	private $state;
 
 	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $selectedSheetIndex)
@@ -107,10 +108,11 @@ class ImportService extends BaseService
 				{
 					$this->CreateMetadata();
 					$this->MergeOldData();
+					$this->AutoMatchName();
 					return $this->UpdateMetadata();
 				}
 			default:
-				throw new PublicException('Paso inv�lido.');
+				throw new PublicException('Paso inválido.');
 		}
 	}
 
@@ -145,7 +147,8 @@ class ImportService extends BaseService
 		return $this->state->ReturnState(true);
 	}
 
-	private function MergeOldData(){
+	private function MergeOldData()
+	{
 		$datasetId = $this->state->GetDatasetId();
 		$targetDatasetId = $datasetId;
 		$keepOldMetadata = $this->state->GetKeepLabels();
@@ -155,6 +158,19 @@ class ImportService extends BaseService
 		$merger = new MetadataMerger($datasetId, $targetDatasetId, $keepOldMetadata,
 																	$maxPreviousId, $dropSourceDataset);
 		$merger->MergeMetadata();
+	}
+
+	private function AutoMatchName()
+	{
+		$datasetId = $this->state->GetDatasetId();
+		// Se fija si alguna columna tiene que ir como name
+		$sql = "SELECT MIN(dco_id) FROM draft_dataset_column WHERE dco_caption IN('"
+					. implode("','", self::DEFAULT_NAME_CAPTIONS) . "') AND dco_dataset_id = ?";
+		$dcoId = App::Db()->fetchScalarIntNullable($sql, array($datasetId));
+		if ($dcoId) {
+			$update = "UPDATE draft_dataset SET dat_caption_column_id = ? WHERE dat_caption_column_id IS NULL AND dat_id = ?";
+			App::Db()->exec($update, array($dcoId, $datasetId));
+		}
 	}
 
 	private function CreateMetadata()

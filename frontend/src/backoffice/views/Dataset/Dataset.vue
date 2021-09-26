@@ -189,7 +189,8 @@ export default {
 	methods: {
 		EnsureColumns() {
 			if (this.Dataset) {
-				this.Dataset.EnsureColumnsAndExec(null);
+				this.$refs.invoker.doMessage('Obteniendo información del dataset', this.Dataset,
+					this.Dataset.EnsureColumnsAndExec);
 			}
 		},
 		isPath(path) {

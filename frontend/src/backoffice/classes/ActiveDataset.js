@@ -6,6 +6,7 @@ import str from '@/common/framework/str';
 import ScaleGenerator from './ScaleGenerator';
 import LevelGenerator from './LevelGenerator';
 import Vue from 'vue';
+import promises from '@/common/framework/promises';
 import err from '@/common/framework/err';
 
 const columnFormatEnum = require("@/common/enums/columnFormatEnum");
@@ -420,9 +421,10 @@ ActiveDataset.prototype.GetStepMultiGeoreferenceUrl = function () {
 
 ActiveDataset.prototype.Selected = function () {
 	if (this.GettingColumns === false) {
-		this.EnsureColumnsAndExec(null);
 		this.CalculateMultilevelMatrix();
-	}
+		return this.EnsureColumnsAndExec();
+	} else
+		return null;
 };
 
 
@@ -452,7 +454,7 @@ ActiveDataset.prototype.ReloadProperties = function () {
 
 ActiveDataset.prototype.ReloadColumns = function () {
 	this.Columns = null;
-	this.EnsureColumnsAndExec(null);
+	return this.EnsureColumnsAndExec();
 };
 
 ActiveDataset.prototype.GetLabelFromVariable = function (varName) {
@@ -569,58 +571,28 @@ ActiveDataset.prototype.ValidFormats = function () {
 					{ Id: 5, Caption: 'Numérico' }];
 };
 
-ActiveDataset.prototype.EnsureColumnsAndExec = function (callBack) {
+ActiveDataset.prototype.EnsureColumnsAndExec = function () {
 	if (this.Columns !== null && this.Labels !== null) {
-		if (callBack) {
-			callBack();
-		}
-		return;
+		return promises.ReadyPromise();
 	}
-	var bPart1Completed = false;
-	var bPart2Completed = false;
-	var tmpColumns = null;
-	var tmpLabels = null;
 	this.Columns = null;
 	this.Labels = null;
 	this.MetricVersionLevels = null;
 	this.GettingColumns = true;
 	var loc = this;
 
-	var finish = function () {
-		loc.Columns = tmpColumns;
-		loc.Labels = tmpLabels;
-		loc.GettingColumns = false;
-		if (callBack !== null) {
-			callBack();
-		}
-	};
-
 	// Consulta en paralelo las columnas, las etiquetas y los indicadores para recargarlos
-	axios.get(window.host + '/services/backoffice/GetDatasetColumns', {
-		params: { 'k': this.properties.Id },
-	}).then(function (res) {
-		tmpColumns = res.data;
-		bPart1Completed = true;
-		if (bPart2Completed) {
-			finish();
-		}
-	}).catch(function (error) {
-		err.errDialog('GetColumns', 'obtener las variables del dataset', error);
+	var getColumns = axiosClient.getPromise(window.host + '/services/backoffice/GetDatasetColumns',
+		{ 'k': this.properties.Id }, 'Obtener las variables del dataset');
+	var getColumnLabels = axiosClient.getPromise(window.host + '/services/backoffice/GetDatasetColumnsLabels',
+		{ 'k': this.properties.Id }, 'Obtener las etiquetas de las variables');
+	var getLevels = this.LoadMetricVersionLevels();
+	return Promise.all([getColumns, getColumnLabels, getLevels]).then(function (values) {
+		loc.Columns = values[0];
+		loc.Labels = values[1];
+	}).finally(function () {
+		loc.GettingColumns = false;
 	});
-
-	axios.get(window.host + '/services/backoffice/GetDatasetColumnsLabels', {
-		params: { 'k': this.properties.Id },
-	}).then(function (res) {
-		tmpLabels = res.data;
-		bPart2Completed = true;
-		if (bPart1Completed) {
-			finish();
-		}
-	}).catch(function (error) {
-		err.errDialog('GetColumnsLabels', 'obtener las etiquetas de las variables', error);
-	});
-
-	this.LoadMetricVersionLevels();
 };
 
 
@@ -654,10 +626,11 @@ ActiveDataset.prototype.GetNumericTextAndRichColumns = function (includeNull) {
 	if (includeNull) {
 		ret = ret.concat(this.GetNullColumn());
 	}
-	if (this.Columns)
+	if (this.Columns) {
+		ret = ret.concat(this.GetSeparator('Variables del dataset'));
 		ret = ret.concat(this.Columns);
-
-	ret = ret.concat(this.GetSeparator());
+	}
+	ret = ret.concat(this.GetSeparator('Otras variables'));
 	ret = ret.concat(this.GetRichColumns());
 	return ret;
 };
@@ -679,8 +652,9 @@ ActiveDataset.prototype.GetNumericAndRichColumns = function (includeNull) {
 	if (includeNull) {
 		ret = ret.concat(this.GetNullColumn());
 	}
+	ret = ret.concat(this.GetSeparator('Variables del dataset'));
 	ret = ret.concat(this.GetNumericColumns());
-	ret = ret.concat(this.GetSeparator());
+	ret = ret.concat(this.GetSeparator('Otras variables'));
 	ret = ret.concat(this.GetRichColumns());
 	return ret;
 };
@@ -700,18 +674,21 @@ ActiveDataset.prototype.GetNullColumn = function () {
 };
 
 ActiveDataset.prototype.GetSeparator = function (label = 'Variables de cartografía', id = -100) {
-	return [{ Id: id, Caption: '- ' + label + ' -----', Code: 'O' }];
+	return [{ Id: id, Caption: label, Code: 'O', Separator: true }];
 };
 ActiveDataset.prototype.GetRichColumns = function () {
-	var columns = [
-									{	Id: -1, Caption: 'Población total', Code: 'P' },
-									{	Id: -2, Caption: 'Hogares', Code: 'H' },
-									{	Id: -3, Caption: 'Adultos (>=18)', Code: 'A' },
-									{	Id: -4, Caption: 'Niños (<18)', Code: 'C' },
-									{	Id: -5, Caption: 'Área m²', Code: 'M' },
-									{	Id: -6, Caption: 'Área km²', Code: 'K' },
-									{	Id: -10, Caption: 'Conteo', Code: 'N' }];
-	return columns;
+	if (this.properties.Type == 'L') {
+		return [ { Id: -10, Caption: 'Conteo', Code: 'N' }];
+	} else {
+		return [
+			{ Id: -1, Caption: 'Población total', Code: 'P' },
+			{ Id: -2, Caption: 'Hogares', Code: 'H' },
+			{ Id: -3, Caption: 'Adultos (>=18)', Code: 'A' },
+			{ Id: -4, Caption: 'Niños (<18)', Code: 'C' },
+			{ Id: -5, Caption: 'Área m²', Code: 'M' },
+			{ Id: -6, Caption: 'Área km²', Code: 'K' },
+			{ Id: -10, Caption: 'Conteo', Code: 'N' }];
+	}
 };
 
 

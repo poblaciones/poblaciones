@@ -12,7 +12,7 @@ function RestoreRoute() {
 };
 
 RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
-	this.subscribers = new SaveRoute().subscribers;
+	this.subscribers = window.SegMap.SaveRoute.subscribers;
 	// Restaura desde subscribers
 	for (var n = 0; n < this.subscribers.length; n++) {
 		var subscriber = this.subscribers[n];
