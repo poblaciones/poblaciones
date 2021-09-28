@@ -26,6 +26,8 @@ class BaseReader
 	{
 		if ($fileExtension == "csv" || $fileExtension == "txt")
 			return new CsvReader($path, $fileExtension);
+		else if ($fileExtension == "zip" || $fileExtension == "shp")
+			return new ShapefileReader($path, $fileExtension);
 		else if ($fileExtension == "xlsx" || $fileExtension == "xls")
 			return new XlsxReader($path, $fileExtension);
 		else if ($fileExtension == "sav")
@@ -33,7 +35,7 @@ class BaseReader
 		else if ($fileExtension == "kml" || $fileExtension == "kmz")
 			return new KmxReader($path, $fileExtension);
 		else
-			throw new PublicException('La extensión del archivo debe ser CSV, TXT, XLSX, XLS, SAV, KML o KMZ. Extensión recibida: ' . $fileExtension);
+			throw new PublicException('La extensión del archivo debe ser CSV, TXT, XLSX, XLS, SAV, ZIP (shapefiles), KML o KMZ. Extensión recibida: ' . $fileExtension);
 	}
 
 	public function Prepare($selectedSheetIndex)
@@ -48,7 +50,10 @@ class BaseReader
 	{
 		return [];
 	}
-
+	public function CanGeoreference()
+	{
+		return 0;
+	}
 	public function OutputHeaderFilename()
 	{
 		return $this->folder . '/header.json';

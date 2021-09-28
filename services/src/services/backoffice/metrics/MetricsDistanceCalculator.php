@@ -30,7 +30,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 
 		$cols = [];
 
-		$cols['distance'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'distancia_kms', 'Distancia');
+		$cols['distance'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'distancia_km', 'Distancia');
 
 		if($output['HasDescription'])
 			$cols['description'] = $this->CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName, 'description', 'Descripción', 0, 100, 250, Format::A);
@@ -217,7 +217,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 		$srcDataset = $this->GetSourceDatasetByVariableId($variableId);
 
 		$datasetColumn = new DatasetColumnService();
-		$name = $this->GetColumnName($srcDataset->getCaption(), 'distancia_kms');
+		$name = $this->GetColumnName($srcDataset->getCaption(), 'distancia_km');
 		return $datasetColumn->ColumnExists($datasetId, $name);
 	}
 

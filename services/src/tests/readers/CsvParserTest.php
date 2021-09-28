@@ -2,16 +2,16 @@
 
 namespace helena\tests\readers;
 
-use helena\classes\CsvReader;
+use helena\classes\CsvParser;
 use helena\classes\Paths;
 use helena\classes\TestCase;
 use minga\framework\IO;
 
-class CsvReaderTest extends TestCase
+class CsvParserTest extends TestCase
 {
 	public function testReadFile()
 	{
-		$reader = new CsvReader();
+		$reader = new CsvParser();
 		$reader->Open(Paths::GetTestsDataLocalPath() . '/testBasico.csv');
 
 		$header = $reader->GetHeader();
@@ -39,7 +39,7 @@ class CsvReaderTest extends TestCase
 		$file = IO::GetTempFilename();
 		file_put_contents($file, implode("\r\n", $lines));
 
-		$csv = new CsvReader();
+		$csv = new CsvParser();
 		$csv->delimiter = ',';
 		$csv->Open($file);
 

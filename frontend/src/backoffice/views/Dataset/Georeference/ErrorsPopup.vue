@@ -1,7 +1,7 @@
 <template>
 	<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false" class="largeDialog">
 		<md-dialog-title>
-			Georreferenciar
+			Georreferenciando
 		</md-dialog-title>
 
 		<md-dialog-content>

@@ -32,7 +32,7 @@ class ImportService extends BaseService
 	const STEP_INSERTED = 3;
 	const STEP_END = 4;
 
-	const DEFAULT_NAME_CAPTIONS = ['nombre', 'descripción', 'descripcion'];
+	const DEFAULT_NAME_CAPTIONS = ['nombre', 'nombre_place', 'name', 'descripción', 'descripcion'];
 	private $state;
 
 	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $selectedSheetIndex)
@@ -63,7 +63,8 @@ class ImportService extends BaseService
 		$fileExtension = Str::ToLower($fileExtension);
 
 		$reader = BaseReader::CreateReader($bucket->path, $fileExtension);
-		return $reader->ReadSheetNames();
+		$selfImport = $reader->CanGeoreference();
+		return ['Sheets' => $reader->ReadSheetNames(), 'CanGeoreference' => $selfImport];
 	}
 
 	public function FileChunkImport($bucketId) {

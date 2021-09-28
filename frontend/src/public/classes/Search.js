@@ -27,7 +27,7 @@ Search.prototype.StartSearch = function (t) {
 	var loc = this;
 	view.loading = true;
 	var facade = (this.isBackoffice ? 'backoffice' : 'frontend');
-	axios.get(window.host + '/services/' + facade + '/Search', {
+	return axios.get(window.host + '/services/' + facade + '/Search', {
 		params: {
 			q: t, f: this.searchType, w: this.revision, b: (this.getDraftMetrics ? '1' : '0'),
 				k: this.currentWorkId },

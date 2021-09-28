@@ -17,7 +17,7 @@ use minga\framework\Str;
  *
  * También detecta demitador, para ello hay
  * que setearlo como null en el contructor.
- * $csv = new CsvReader(null);
+ * $csv = new CsvParser(null);
  *
  * Devuelve arrays de MAX_ROWS líneas, a menos que
  * se pase por parámetro un valor distinto.
@@ -33,7 +33,7 @@ use minga\framework\Str;
  *
  * Ejemplo de uso:
  *
- * $csv = new CsvReader();
+ * $csv = new CsvParser();
  * // abre el archivo.
  * $csv->Open('file.csv');
  *
@@ -58,7 +58,7 @@ use minga\framework\Str;
  * $csv->Close();
  *
  */
-class CsvReader
+class CsvParser
 {
 	//Este valor depende de la memoria disponible
 	//a menos memoria bajar el varor. Aprox. 5000 = 128mb

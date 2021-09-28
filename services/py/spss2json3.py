@@ -16,7 +16,6 @@ sys.stdout.reconfigure(encoding='utf-8')
 def main():
 
     MAX_ROWS = 5000
-    MAX_DECIMALS = 6
     USE_UTF8 = False
 
     if len(sys.argv) < 2 or len(sys.argv) > 3:
@@ -65,7 +64,6 @@ def main():
                 with open(os.path.join(sys.argv[2], 'data_' + str(i).zfill(5) + '.json'), 'w') as f:
                     encoded = convert_recursive(lines, encoding)
                     jsonText = json.dumps(encoded)
-                    # jsonText = truncate_decimals(jsonText, MAX_DECIMALS)
                     f.write(jsonText)
 
         print('Files successfully created.')
@@ -83,17 +81,6 @@ def chunks(lst, n):
     '''
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
-
-def truncate_decimals(text, ndigits):
-    ''' Trunca decimales a ndigits en números de un string de json.
-    '''
-    # \. = caracter de punto (.)
-    # \d = dígito de 0 a 9
-    #    {n} = cantidad de ocurrencias n
-    # \d* = digitos cantidad de ocurrencias mayor igual a cero
-    # [ ,\)] = alguno de los caracteres entre corchetes: espacio, coma o cierra paréntesis
-    # Entre paréntesis los grupos para el replace $1, $2 (se borra), $3
-    return re.sub(r'(\.\d{' + str(ndigits) + r'})(\d*)([ ,\)\]])', r'\1\3', text)
 
 def convert_recursive(input, enc='unicode_escape'):
     ''' Convierte recursivamente el encoding de un diccionario o un array.

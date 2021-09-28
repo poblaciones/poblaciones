@@ -31,9 +31,14 @@
 
 export default {
 	// Step 1
-		name: 'StepDistanceWelcome',
+	name: 'StepDistanceWelcome',
 	props: {
-		type: null,
+		newMetric: {
+			type: Object,
+			default: function () {
+				return {};
+			},
+		},
 	},
 	methods: {
 		validate() {

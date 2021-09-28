@@ -37,7 +37,7 @@ abstract class MetricsBaseCalculator
 	public function GetTotalSlices($datasetId)
 	{
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
-		$sql = "SELECT count(*) FROM " . $dataset->getTable() . " WHERE ommit = 0";
+		$sql = "SELECT COUNT(*) FROM " . $dataset->getTable() . " WHERE ommit = 0";
 		$count = App::Db()->fetchScalarInt($sql);
 		return ceil($count / self::STEP);
 	}
@@ -46,42 +46,64 @@ abstract class MetricsBaseCalculator
 	{
 		Profiling::BeginTimer();
 
-		$metricService = new MetricService();
-
 		$metricColumns = ['distance', 'count', 'sum', 'min', 'max'];
-		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 
 		$ret = [];
 		foreach($cols as $column => $col)
 		{
 			if (in_array($column, $metricColumns))
 			{
-				// Crea la variable default
-				$variable = $metricService->GetNewVariable();
-				$variable->setIsDefault(false);
-				$variable->setDataColumnIsCategorical(false);
-				$variable->setCaption($col['Caption']);
+				// Obtiene las columnas involucradas
 				$dataColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $col['Id']);
-				$variable->setData('O');
-				$variable->setDataColumn($dataColumn);
-				// Normalization
 				if ($column === 'sum' && array_key_exists('total', $cols))
-				{
 					$normalizationColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $col['total']);
-					$variable->setNormalization('O');
-					$variable->setNormalizationColumn($normalizationColumn);
-					$originalVariable = App::Orm()->find(entities\Variable::class, $source['VariableId']);
-					$variable->setNormalizationScale($originalVariable->getNormalizationScale());
-				}
-				$caption = $variable->getCaption();
-				$caption = substr($caption, 0, 150);
-				$metricService->CreateMetricByVariable($dataset, $caption, $variable);
+				else
+					$normalizationColumn = null;
 
+				// Se fija si ya hay una variable que haga los mismo....
+				$marchingVariable = App::Orm()->findManyByProperties(entities\DraftVariable::class,
+																			['DataColumn' => $dataColumn, 'NormalizationColumn' => $normalizationColumn]);
+				// la retoma, o la crea
+				if (sizeof($marchingVariable) > 0)
+				{
+					$variable = $marchingVariable[0];
+					$variable->setCaption($col['Caption']);
+					App::Orm()->save($variable);
+				}
+				else
+				{
+					$variable = $this->CreateMetricVariable($datasetId, $col, $source, $dataColumn, $normalizationColumn);
+				}
 				$ret[] = $variable->getId();
  			}
 		}
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	private function CreateMetricVariable($datasetId, $col, $source, $dataColumn, $normalizationColumn)
+	{
+		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+		$metricService = new MetricService();
+		// Crea la variable default
+		$variable = $metricService->GetNewVariable();
+		$variable->setIsDefault(false);
+		$variable->setDataColumnIsCategorical(false);
+		$variable->setCaption($col['Caption']);
+		$variable->setData('O');
+		$variable->setDataColumn($dataColumn);
+		// Normalization
+		if ($normalizationColumn)
+		{
+			$variable->setNormalization('O');
+			$variable->setNormalizationColumn($normalizationColumn);
+			$originalVariable = App::Orm()->find(entities\Variable::class, $source['VariableId']);
+			$variable->setNormalizationScale($originalVariable->getNormalizationScale());
+		}
+		$caption = $variable->getCaption();
+		$caption = substr($caption, 0, 150);
+		$metricService->CreateMetricByVariable($dataset, $caption, $variable);
+		return $variable;
 	}
 
 	protected function CreateColumn($metric, $variable, $source, $output, $dataset, $datasetName,
@@ -233,6 +255,7 @@ abstract class MetricsBaseCalculator
 		$clean = Str::RemoveNonAlphanumeric($clean);
 		$clean = Str::Replace($clean, ' ', '_');
 		$len = Str::Length($clean) + Str::Length($srcColumnName) + 1;
+
 		if($len > $maxLength)
 		{
 			$newLen = Str::Length($clean) - ($len - $maxLength);
@@ -327,9 +350,9 @@ abstract class MetricsBaseCalculator
 	private function GetDistanceCaption($output)
 	{
 		if(isset($output['HasMaxDistance']) && $output['HasMaxDistance'])
-			return ' hasta ' . $output['MaxDistance'] . ' km';
+			return ' (hasta ' . $output['MaxDistance'] . ' km))';
 		else if(isset($output['IsInclusionPoint']) && $output['IsInclusionPoint'])
-			return ' hasta ' . $output['InclusionDistance'] . ' km';
+			return ' (hasta ' . $output['InclusionDistance'] . ' km)';
 		return '';
 	}
 

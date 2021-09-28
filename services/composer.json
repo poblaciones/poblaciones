@@ -51,7 +51,8 @@
 		"rodrigoq/phpmailersendgrid": "^1.0",
 		"ezyang/htmlpurifier": "^4.13",
 		"simple-html-dom/simple-html-dom": "^1.5",
-		"symfony/cache": "^3.4"
+		"symfony/cache": "^3.4",
+		"proj4php/proj4php": "^2.0"
 	},
 	"autoload": {
 		"psr-0": {

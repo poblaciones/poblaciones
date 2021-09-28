@@ -38,7 +38,7 @@
 						</div>
 						<div>
 							<md-button v-if="visitUrl" class="md-raised" :href="visitUrl" target="_blank" @click="Close()">{{ visitCaption }}</md-button>
-							<md-button v-else class="md-raised" @click="Close()">Continuar</md-button>
+							<md-button v-else class="md-raised" v-show="useClose" @click="Close()">Continuar</md-button>
 						</div>
 					</div>
 				</center>
@@ -84,6 +84,7 @@ export default {
 		},
 		props: {
 			title: String,
+			useClose: { type: Boolean, default: true },
 		},
 	  methods: {
 		Start(startupState) {

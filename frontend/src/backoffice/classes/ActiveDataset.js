@@ -16,6 +16,7 @@ export default ActiveDataset;
 function ActiveDataset(work, dataset) {
 	this.Work = work;
 	this.properties = dataset;
+	this.GeoreferenceOnce = false;
 	this.Labels = null;
 	this.Columns = null;
 	this.LevelGenerator = new LevelGenerator(this);

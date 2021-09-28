@@ -1,9 +1,9 @@
 <template>
 	<div v-if="Dataset">
 		<invoker ref="invoker"></invoker>
-		<stepper ref="stepper" @completed="stepperComplete" title="Georreferenciar"></stepper>
+		<stepper ref="stepper" @closed="stepperClosed" @completed="stepperComplete" title="Georreferenciando"></stepper>
 		<ErrorsPopup ref="georeferenceStatusPopup" @georeferenceRequested="startGeoreferencing(0)"
-								 :georeferenceParameters="{ type: tab, start: start, end: end, polygon: polygon}">
+								 :georeferenceParameters="{ type: activeTab, start: start, end: end, polygon: polygon}">
 			</ErrorsPopup>
 
 		<div class="dParagrah">
@@ -29,8 +29,8 @@
 			</div>
 		</div>
 		<div v-if="Work.CanEdit() && (!Dataset.properties.Geocoded || forceShow)" >
-			<md-tabs>
-				<md-tab id="tab-location" md-label="Ubicaciones" @click="tab='location'">
+			<md-tabs :md-active-tab="activeTab">
+				<md-tab id="location" md-label="Ubicaciones" @click="activeTab='location'">
 					<div class="dParagrah">
 						Seleccione las variables que permiten identificar la localización (latitud y longitud) de cada elemento del dataset.
 					</div>
@@ -59,7 +59,7 @@
 						</md-switch>
 					</div>
 				</md-tab>
-				<md-tab id="tab-data" md-label="Códigos" @click="tab='code'">
+				<md-tab id="code" md-label="Códigos" @click="activeTab='code'">
 					<div class="dParagrah">
 						Seleccione la variable que contiene los códigos de cada elemento del dataset y la geografía a utilizar.
 					</div>
@@ -84,7 +84,7 @@
 						</md-switch>
 					</div>
 				</md-tab>
-				<md-tab id="tab-shapes" md-label="Polígonos" @click="tab='shape'">
+				<md-tab id="shape" md-label="Polígonos" @click="activeTab='shape'">
 					<div class="dParagrah">
 						Seleccione la variable que contiene el polígono de cada elemento del dataset. El formato de los valores puede ser geoJson o WKT.
 					</div>
@@ -128,13 +128,13 @@ export default {
 			return window.Context.CurrentWork;
 		},
 		startDisabled() {
-			if (this.tab === 'location') {
+			if (this.activeTab === 'location') {
 				return (this.start.longitude === null || this.start.latitude === null) ||
 					(this.mapSegmentsLatLon && (this.end.latitude === null || this.end.longitude === null));
-			} else if (this.tab === 'code') {
+			} else if (this.activeTab === 'code') {
 					return (this.start.codes === null || this.start.geographyId === null) ||
 						(this.mapSegmentsCodes && (this.end.codes === null || this.end.geographyId === null));
-			} else if (this.tab === 'shape') {
+			} else if (this.activeTab === 'shape') {
 				return this.polygon === null;
 			} else {
 				return true;
@@ -147,6 +147,7 @@ export default {
 	data() {
 		return {
 			polygon: null,
+			activeTab: 'location',
 			start: {
 				latitude: null,
 				longitude: null,
@@ -162,7 +163,6 @@ export default {
 			mapSegmentsLatLon: false,
 			mapSegmentsCodes: false,
 			forceShow: false,
-			tab: 'location'
 		};
 	},
 	methods: {
@@ -171,6 +171,9 @@ export default {
 		},
 		formatColumn(column) {
 			return f.formatColumn(column);
+		},
+		stepperClosed() {
+			this.$emit('stepperClosed');
 		},
 		geocodedMessage() {
 			if (this.Dataset.properties.GeoreferenceAttributes) {
@@ -193,17 +196,26 @@ export default {
 			this.forceShow = false;
 			this.start.codes = null;
 			this.start.geographyId = null;
-			this.start.latitude = this.trySelect(numericColumns, ['lat', 'latitud', 'latitude', 'y']);
-			this.start.longitude = this.trySelect(numericColumns, ['lon', 'ln', 'long', 'longitud', 'longitude', 'x']);
+			this.start.latitude = this.trySelect(numericColumns, ['latitud1', 'latitud', 'latitud', 'lat', 'latitude', 'y']);
+			this.start.longitude = this.trySelect(numericColumns, ['longitud1', 'longitud', 'lon', 'ln', 'long', 'longitude', 'x']);
 			this.end.codes = null;
 			this.end.geographyId = null;
 			this.end.latitude = null;
 			this.end.longitude = null;
-			this.polygon = this.trySelect(textColumns, ['polygon', 'poly', 'shape', 'geojson', 'wkt', 'polígono', 'poligono']);
+			this.polygon = this.trySelect(textColumns, ['wkt1', 'wkt', 'geojson', 'polygon', 'poly', 'shape', 'polígono', 'poligono']);
+			if (this.polygon !== null) {
+				this.activeTab = 'shape';
+			}
+			if (this.Dataset.GeoreferenceOnce) {
+				this.Dataset.GeoreferenceOnce = false;
+				if (this.start.latitude || this.polygon) {
+					this.startGeoreferencing(1);
+				}
+			}
 		},
 		trySelect(list, values) {
 			for(var n = 0; n < values.length; n++) {
-				for(var i = 0; i < list.length; i++) {
+				for (var i = list.length - 1; i >= 0; i--) {
 					if (list[i].Variable.toLowerCase() === values[n]) {
 						return list[i].Id;
 					}
@@ -252,13 +264,13 @@ export default {
 					break;
 				case STEP_END:
 					this.Dataset.properties.Geocoded = true;
-					if (this.tab === 'location') {
+					if (this.activeTab === 'location') {
 						this.Dataset.properties.Type = 'L';
 						this.Dataset.properties.AreSegments = this.mapSegmentsLatLon;
-					} else if (this.tab === 'code') {
+					} else if (this.activeTab === 'code') {
 						this.Dataset.properties.Type = 'D';
 						this.Dataset.properties.AreSegments = this.mapSegmentsCodes;
-					} else if (this.tab === 'shape') {
+					} else if (this.activeTab === 'shape') {
 						this.Dataset.properties.Type = 'S';
 					}
 					this.Work.UpdateDatasetGeorreferencedCount();
@@ -271,16 +283,16 @@ export default {
 			}
 		},
 		resolveStartUrl() {
-			if (this.tab === 'location') {
+			if (this.activeTab === 'location') {
 				return this.Dataset.GetMultiGeoreferenceByLatLongUrl();
-			} else if (this.tab === 'code') {
+			} else if (this.activeTab === 'code') {
 				return this.Dataset.GetMultiGeoreferenceByCodesUrl();
-			} else if (this.tab === 'shape') {
+			} else if (this.activeTab === 'shape') {
 				return this.Dataset.GetMultiGeoreferenceByShapesUrl();
 			}
 		},
 		resolveStartArgs() {
-			if (this.tab === 'location') {
+			if (this.activeTab === 'location') {
 				return { 'k': this.Dataset.properties.Id,
 									'a': window.Context.GetTrackingLevelGeography().Id,
 									'startLat': this.start.latitude,
@@ -289,14 +301,14 @@ export default {
 									'endLon': this.end.longitude,
 									's': (this.mapSegmentsLatLon ? '1' : '0')
 									};
-			} else if (this.tab === 'code') {
+			} else if (this.activeTab === 'code') {
 				return { 'k': this.Dataset.properties.Id,
 									'startA': this.start.geographyId,
 									'startC': this.start.codes,
 									'endA': this.end.geographyId,
 									'endC': this.end.codes,
 									's': (this.mapSegmentsCodes ? '1' : '0') };
-			} else if (this.tab === 'shape') {
+			} else if (this.activeTab === 'shape') {
 				return { 'k': this.Dataset.properties.Id,
 									'a': window.Context.GetTrackingLevelGeography().Id,
 									'c': this.polygon,

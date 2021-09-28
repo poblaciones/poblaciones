@@ -85,7 +85,7 @@
 														Polígonos: se identifica la localización de la fila por el reconocimiento de un polígono en alguna de las variables del dataset, en formato Well-known-text (WKT) o GeoJson.
 													</li>
 												</ul>` }">
-												<georeference-tab></georeference-tab>
+												<georeference-tab @stepperClosed="stepperClosed"></georeference-tab>
 											</md-tab>
 											<md-tab style='flex: 1 0 100% !important;' id="data" md-label="Datos" @click="EnsureColumns"
 															:to="makePath('data')" :md-active="isPath(makePath('data'))"
@@ -192,6 +192,9 @@ export default {
 				this.$refs.invoker.doMessage('Obteniendo información del dataset', this.Dataset,
 					this.Dataset.EnsureColumnsAndExec);
 			}
+		},
+		stepperClosed() {
+			this.$router.push({ path: this.makePath('metrics') });
 		},
 		isPath(path) {
 			if (this.$refs.tabs) {

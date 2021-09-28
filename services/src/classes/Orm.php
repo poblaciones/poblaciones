@@ -37,7 +37,7 @@ class Orm
 			$proxyDir = Paths::GetDoctrineProxiesPath();
 			$cache = null; // desde 2.9, cambia el comoprtamiento
 			// Opciones: VoidCache, PhpFileCache, FilesystemCache
-			$cache = new \Doctrine\Common\Cache\ArrayCache();
+			$cache = new ArrayCache();
 			$config = Setup::createAnnotationMetadataConfiguration(array($dir),
 								$isDevMode, $proxyDir, $cache, false);
 
@@ -270,7 +270,7 @@ class Orm
 
 	public function findManyByProperties($className, $filters, $orderProperty = null)
   {
-		$dql = $this->preparePropertyQuery($className, $filters, $orderProperty);
+		$dql = $this->preparePropertiesQuery($className, $filters, $orderProperty);
 		return $this->findManyByQuery($dql, array_values($filters));
 	}
 	public function findManyByProperty($className, $property, $value, $orderProperty = null)

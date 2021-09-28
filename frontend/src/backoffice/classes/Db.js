@@ -64,6 +64,19 @@ Db.prototype.RebindAndFocusLastDataset = function (router) {
 	});
 };
 
+Db.prototype.RebindAndGeorreferenceLastDataset = function (router) {
+	var loc = this;
+	return this.RebindCurrentWork().then(function () {
+		if (window.Context.CurrentWork.Datasets.length === 0) {
+			return this.RebindAndFocusMetadataContent(router);
+		}
+		var newDataset = window.Context.CurrentWork.Datasets[window.Context.CurrentWork.Datasets.length - 1];
+		window.Db.BindDataset(newDataset.properties.Id);
+		newDataset.GeoreferenceOnce = true;
+		router.push({ path: '/cartographies/' + window.Context.CurrentWork.properties.Id + '/datasets/' + newDataset.properties.Id + '/georeference' });
+	});
+};
+
 Db.prototype.ServerClipboardCopy = function (text) {
 	return axiosClient.postPromise(window.host + '/services/backoffice/ClipboardCopy',
 		{ t: text}, 'copiar la información');

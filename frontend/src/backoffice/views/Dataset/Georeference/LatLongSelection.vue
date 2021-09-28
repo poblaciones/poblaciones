@@ -3,16 +3,18 @@
 		<div class='md-layout-item md-size-70 md-small-size-100'>
 			<md-field>
 				<label for="state">Latitud</label>
-				<md-select v-model="value.latitude">
-					<md-option v-for="column in Dataset.GetNumericAndTextColumns()" :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
+				<md-select v-model="value.latitude" md-dense>
+					<md-option v-for="column in Dataset.GetNumericAndTextColumns()" :class="(column.Separator ? 'mpSeparator' : '')"
+										 :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
 				</md-select>
 			</md-field>
 		</div>
 		<div class='md-layout-item md-size-70 md-small-size-100'>
 			<md-field>
 				<label for="state">Longitud</label>
-				<md-select v-model="value.longitude">
-					<md-option v-for="column in Dataset.GetNumericAndTextColumns()" :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
+				<md-select v-model="value.longitude" md-dense>
+					<md-option v-for="column in Dataset.GetNumericAndTextColumns" :class="(column.Separator ? 'mpSeparator' : '')"
+										 :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
 				</md-select>
 			</md-field>
 		</div>

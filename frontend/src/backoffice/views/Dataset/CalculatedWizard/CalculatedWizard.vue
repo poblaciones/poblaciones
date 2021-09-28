@@ -12,17 +12,18 @@
 				</div>
 			</md-dialog-title>
 
-			<md-dialog-content>
+			<md-dialog-content :class="disabledOnStepping">
 				<div style="padding-top: 18px; min-height: 280px;">
-					<step-distance-welcome v-show="currentStep == 'stepDistanceWelcome'" ref="stepDistanceWelcome" @raiseNext="next()" />
-					<step-area-welcome v-show="currentStep == 'stepAreaWelcome'" ref="stepAreaWelcome" @raiseNext="next()" />
-					<step-source v-show="currentStep == 'stepSource'" ref="stepSource" :newMetric="newMetric" />
+					<step-distance-welcome v-show="currentStep == 'stepDistanceWelcome'" ref="stepDistanceWelcome" :newMetric="newMetric"  @raiseNext="next" />
+					<step-area-welcome v-show="currentStep == 'stepAreaWelcome'" ref="stepAreaWelcome" :newMetric="newMetric"  @raiseNext="next" />
+					<step-metric v-show="currentStep == 'stepMetric'" ref="stepMetric" :newMetric="newMetric" @raiseNext="next" @raisePrev="prev" />
+					<step-source v-show="currentStep == 'stepSource'" ref="stepSource" :newMetric="newMetric" @raiseNext="next" @raisePrev="prev" />
 					<step-distance-output v-show="currentStep == 'stepDistanceOutput'" ref="stepDistanceOutput" :newMetric="newMetric" />
 					<step-area-output v-show="currentStep == 'stepAreaOutput'" ref="stepAreaOutput" :newMetric="newMetric" />
 				</div>
 			</md-dialog-content>
 
-			<md-dialog-actions>
+			<md-dialog-actions :class="disabledOnStepping">
 				<div v-if="columnExists" style='color:red;margin:auto'>Sobreescribiendo</div>
 				<div>
 					<md-button @click="openPopup = false" style="float: left">Cancelar</md-button>
@@ -36,11 +37,12 @@
 </template>
 
 <script>
-import StepAreaWelcome from './StepAreaWelcome.vue';
-import StepDistanceWelcome from './StepDistanceWelcome.vue';
-import StepSource from './StepSource.vue';
-import StepAreaOutput from './StepAreaOutput.vue';
-import StepDistanceOutput from './StepDistanceOutput.vue';
+import StepAreaWelcome from './StepAreaWelcome';
+import StepDistanceWelcome from './StepDistanceWelcome';
+import StepMetric from './StepMetric';
+import StepSource from './StepSource';
+import StepAreaOutput from './StepAreaOutput';
+import StepDistanceOutput from './StepDistanceOutput';
 
 
 export default {
@@ -48,6 +50,7 @@ export default {
 	components: {
 		StepAreaWelcome,
 		StepDistanceWelcome,
+		StepMetric,
 		StepSource,
 		StepAreaOutput,
 		StepDistanceOutput,
@@ -57,11 +60,12 @@ export default {
 			step: 1,
 			newMetric: {},
 			openPopup: false,
+			stepperRunning: false,
 			processing: false,
 			clientProcessing: [],
 			steps: {
-				'area': ['stepAreaWelcome', 'stepSource', 'stepAreaOutput'],
-				'distance': ['stepDistanceWelcome', 'stepSource', 'stepDistanceOutput']
+				'area': ['stepAreaWelcome', 'stepMetric', 'stepSource', 'stepAreaOutput'],
+				'distance': ['stepDistanceWelcome', 'stepMetric', 'stepSource', 'stepDistanceOutput']
 			}
 		};
 	},
@@ -92,31 +96,11 @@ export default {
 				return 'conteo';
 			}
 		},
+		disabledOnStepping() {
+			return (this.stepperRunning ? 'disabledDiv' : '');
+		},
 		currentStep() {
 			return this.calculateStep(this.step);
-		},
-		by() {
-			let ret = '';
-			if (this.newMetric.Type == 'distance') {
-				if (this.step == 2) {
-					ret += 'Objetivo';
-				} else if (this.step == 3) {
-					ret += 'Salida';
-				}
-			} else if (this.newMetric.Type == 'area') {
-				if (this.step == 2) {
-					ret += 'Objetivo';
-				} else if (this.step == 3) {
-					ret += 'Área';
-				} else if (this.step == 4) {
-					ret += 'Salida';
-				}
-			}
-			if (ret == '') {
-				return ret;
-			} else {
-				return ': ' + ret;
-			}
 		},
 	},
 	mounted() {
@@ -183,11 +167,18 @@ export default {
 				return;
 			}
 			this.step++;
+			this.focusCurrentStep(true);
 		},
 		prev() {
 			if(this.step > 1) {
 				this.step--;
+				this.focusCurrentStep(false);
 			}
+		},
+		focusCurrentStep(next) {
+			var currentStepControl = this.$refs[this.currentStep];
+			if (currentStepControl.focus)
+				currentStepControl.focus(next);
 		},
 		defineType(type) {
 			if (this.newMetric.Type != type) {
@@ -211,6 +202,7 @@ export default {
 			stepper.stepUrl = this.Dataset.StepCalculateNewMetricUrl(this.newMetric.Type);
 			stepper.args = this.args();
 			stepper.clientSteps = this.defineClientSteps();
+			this.stepperRunning = true;
 			stepper.Start();
 		},
 		args() {
@@ -235,6 +227,7 @@ export default {
 			this.Dataset.ScaleGenerator.Clear();
 		},
 		stepperClosed() {
+			this.stepperRunning = false;
 			let stepper = this.$refs.stepper;
 			if (stepper.complete) {
 				this.openPopup = false;

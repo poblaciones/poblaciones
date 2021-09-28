@@ -3,19 +3,17 @@
     <md-dialog :md-active.sync="openImport">
       <md-dialog-title>Importar datos</md-dialog-title>
 
-      <stepper ref="stepper" title="Importando datos" @closed="onCloseStepper"></stepper>
+      <stepper ref="stepper" title="Importando datos" :useClose="georeference === 0" @closed="onCloseStepper"></stepper>
       <md-dialog-content>
         <div>
           <p>Seleccione el archivo que desea importar. Los tipos de archivo aceptados son:</p>
 					<ul>
-						<li>Archivos Excel (.xls, xlsx)</li>
-						<li>Archivos de datos de SPSS (.sav)</li>
-						<li>Archivos de texto separados por comas (.csv)</li>
-						<li>Archivos de texto estructurados en tags (.kml/.kmz)</li>
+						<li>Archivo geográfico estructurado (.kml/.kmz)</li>
+						<li>ESRI Shapefiles (.zip)</li>
+						<li>Texto separado por comas (.csv)</li>
+						<li>Excel (.xls, xlsx)</li>
+						<li>SPSS (.sav)</li>
 					</ul>
-					<!--
-					https://poblaciones.org/wp-content/uploads/2019/11/Poblaciones-Como-convertir-shapefiles-a-CSV-con-QGIS.pdf
-						-->
         </div>
 
         <div class="md-layout md-gutter">
@@ -87,6 +85,7 @@ export default {
       hasFiles: false,
       bucketId: 0,
 			selectedSheet: null,
+			georeference: 0,
       keepLabels: true,
       createdDataset: null,
       forceCreateNewDataset: false,
@@ -95,7 +94,7 @@ export default {
         thumbnailWidth: 150,
         withCredentials: true,
         maxFiles: 1,
-        acceptedFiles: '.csv,.txt,.sav,.kml,.kmz,.xls,.xlsx',
+        acceptedFiles: '.csv,.txt,.sav,.kml,.kmz,.xls,.xlsx,.zip',
         dictDefaultMessage: "Arrastre su archivo aquí o haga click para examinar.",
         forceChunking: true,
         chunking: true,
@@ -146,7 +145,7 @@ export default {
       this.sending = false;
 			this.hasFiles = true;
 			if (this.extension == 'kml' || this.extension == 'kmz' ||
-				this.extension == 'xlsx' || this.extension == 'xls') {
+				this.extension == 'xlsx' || this.extension == 'xls' || this.extension == 'zip') {
 				this.verifyDatasets(this.getBucketId(), this.extension);
 			}
     },
@@ -154,7 +153,8 @@ export default {
 			var loc = this;
 			this.verifying = true;
 			this.Work.VerifyDatasetsImportFile(bucketId, fileExtension).then(
-				function (list) {
+				function (data) {
+					var list = data.Sheets;
 					if (!loc.verifying || loc.getBucketId() !== bucketId) {
 						return;
 					}
@@ -166,6 +166,7 @@ export default {
 					} else {
 						loc.selectedSheet = null;
 					}
+					loc.georeference = data.CanGeoreference;
 				}).finally(function () {
 					loc.verifying = false;
 				});
@@ -204,8 +205,8 @@ export default {
       let extension = this.extension;
       if (extension !== 'sav' && extension !== 'csv' && extension !== 'txt'
           && extension !== 'xls' && extension !== 'xlsx'
-          && extension !== 'kml' && extension !== 'kmz') {
-				alert('La extensión del archivo debe ser CSV, TXT, XLS, XLSX, SAV, KML o KMZ.');
+				&& extension !== 'kml' && extension !== 'kmz' && extension !== 'zip') {
+				alert('La extensión del archivo debe ser CSV, TXT, XLS, XLSX, SAV, KML, KMZ o ZIP.');
         return;
       }
       if (!this.Dataset && !this.createdDataset) {
@@ -221,7 +222,15 @@ export default {
 					loc.Dataset.ReloadProperties();
 					loc.reloadColumns();
 				} else {
-					loc.$refs.invoker.doMessage('Obteniendo dataset', window.Db, window.Db.RebindAndFocusLastDataset, loc.$router);
+					if (loc.georeference === 0) {
+						loc.$refs.invoker.doMessage('Obteniendo dataset', window.Db,
+								window.Db.RebindAndFocusLastDataset, loc.$router);
+					} else {
+						loc.$refs.invoker.doMessage('Obteniendo dataset', window.Db,
+							window.Db.RebindAndGeorreferenceLastDataset, loc.$router).then(function () {
+								stepper.Close();
+							});
+					}
 				}
 			});
 		},
@@ -262,6 +271,7 @@ export default {
 			this.verifying = false;
 			this.selectedSheet = null;
 			this.hasFiles = false;
+			this.georeference = 0;
 			this.openImport = true;
 			this.createdDataset = null;
 			this.forceCreateNewDataset = forceCreateNewDataset;

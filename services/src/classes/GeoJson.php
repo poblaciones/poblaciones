@@ -116,6 +116,7 @@ class GeoJson
 			}
 		return $ret;
 	}
+
 	public function GenerateFromBinary($results, $getCentroids = false, $project = false, $hasCaption = false, $projectEnvelope = null)
 	{
 		Profiling::BeginTimer();

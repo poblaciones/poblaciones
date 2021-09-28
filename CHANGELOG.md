@@ -6,6 +6,8 @@
 - Nombres amigables en las descargas (nombre de dataset - región seleccionada).
 - Calculados generan n-tiles.
 - Asigna ícono circular con letra de inicio en forma predeterminada.
+- Soporte para importación de shapefiles.
+- Georreferenciación automática para shapefiles y kml/kmz.
 
 v3.00 (2021-09-24)
 - Se incorpora la herramienta de rastreo.

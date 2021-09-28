@@ -17,6 +17,11 @@ class KmxReader extends CsvReader
 		IO::Copy($intermediateFile . '_out.csv', $this->sourceFile);
 	}
 
+	public function CanGeoreference()
+	{
+		return 2;
+	}
+
 	public function ReadSheetNames()
 	{
 		$intermediateFile = $this->PrepareIntermediateFile();

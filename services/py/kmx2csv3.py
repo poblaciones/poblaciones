@@ -177,16 +177,17 @@ class Converter:
       title.append(extraColumn)
     if self.hasAddress:
       title.append('Dirección')
+
+    title.append('Estilo')
+    if self.hasDescription:
+      title.append('Descripción')
+
     if self.hasLatLong:
       title.extend(['Latitud', 'Longitud'])
     if self.hasAltitude:
       title.append('Altitud')
     if self.hasGeoJson:
       title.append('GeoJSON')
-
-    title.append('Estilo')
-    if self.hasDescription:
-      title.append('Descripción')
 
     return title
 
@@ -210,6 +211,10 @@ class Converter:
         else:
           row.append('')
 
+      row.append(self.formatLine(placemark.get_styleUrl()))
+      if self.hasDescription:
+        row.append(self.formatLine(placemark.get_description()))
+
       # Lat, long
       if self.hasLatLong:
         row.extend([placeData[1], placeData[0]])
@@ -218,10 +223,6 @@ class Converter:
       # GeoJson
       if self.hasGeoJson:
         row.append(placeData[3])
-
-      row.append(self.formatLine(placemark.get_styleUrl()))
-      if self.hasDescription:
-        row.append(self.formatLine(placemark.get_description()))
 
       return row
 

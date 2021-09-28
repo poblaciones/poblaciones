@@ -256,7 +256,9 @@ html, body {
 .md-field .md-input[disabled], .md-field .md-textarea[disabled] {
 	pointer-events: none;
 }
-
+.disabledDiv {
+	pointer-events: none;
+}
 .md-textarea {
 	height: unset !important;
 	max-height: 40vh !important;
@@ -434,6 +436,9 @@ a.normalTextLink:hover {
 	height: 29px !important;
 	pointer-events: none;
 }
+	.md-field.md-theme-default.md-focused > .md-icon {
+		color: var(--md-theme-default-icon-on-background, rgba(0,0,0,0.54))!important;
+	}
 
 	.mpSeparator .md-list-item-content {
 		color: #7e7e7e;

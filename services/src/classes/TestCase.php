@@ -29,9 +29,9 @@ class TestCase extends TestCaseBase
 			$size = filesize($path);
 			if (!is_array($expectedSize)) $expectedSize = [$expectedSize];
 			if (in_array($size, $expectedSize))
-				$this->assertEquals($size, $size, "TamaÒo de archivo. " . $description);
+				$this->assertEquals($size, $size, "Tama√±o de archivo. " . $description);
 			else
-				$this->assertEquals(implode(' OR ', $expectedSize), $size, "TamaÒo de archivo. " . $description);
+				$this->assertEquals(implode(' OR ', $expectedSize), $size, "Tama√±o de archivo. " . $description);
 		}
 	}
 

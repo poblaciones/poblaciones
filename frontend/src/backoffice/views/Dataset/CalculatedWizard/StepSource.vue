@@ -1,18 +1,14 @@
 <template>
 	<div>
-		<search-popup ref="addMetricPopup" @selected="metricSelected" :currentWork="Work.properties.Id" :getDraftMetrics="false" searchType="m" />
 		<div class="md-layout md-gutter">
-			<div class="md-layout-item md-size-100 mp-label" style="margin-bottom: 8px; padding-left: 12px!important;">
-				Elementos a localizar en el {{ action }} (Escuelas, Nivel educativo, etc.)
+			<div class="md-layout-item md-size-100 mp-label"
+					 style="margin-bottom: 8px; padding-left: 12px!important; width: 1000px">
+				Elementos a localizar en el {{ action }}
 			</div>
 			<div class="md-layout-item md-size-100">
 				<md-chip class="md-primary" md-deletable @md-delete="clearMetric"
 								 style="margin-top: 4px; margin-bottom: 18px;"
 								 v-if="caption.length > 0">{{ caption }}{{ (versions.length == 1 ? ' (' + newMetric.SelectedVersion.Version.Name + ')': '') }}</md-chip>
-				<md-button class="md-raised" @click="addMetric" v-else>
-					<md-icon>search</md-icon>
-					Seleccionar...
-				</md-button>
 			</div>
 		</div>
 		<div class="md-layout md-gutter" v-show="caption.length > 0">
@@ -48,15 +44,12 @@
 </template>
 
 <script>
-import SearchPopup from '@/backoffice/components/SearchPopup.vue';
-import err from '@/common/framework/err';
 import axiosClient from '@/common/js/axiosClient';
 
 export default {
 	//Step 2
 	name: 'stepSource',
 	components: {
-		SearchPopup,
 	},
 	props: {
 		newMetric: {
@@ -74,7 +67,7 @@ export default {
 	},
 	computed: {
 		caption() {
-			if(this.newMetric.SourceMetric.Metric != null) {
+			if (this.newMetric.SourceMetric && this.newMetric.SourceMetric.Metric != null) {
 				return this.newMetric.SourceMetric.Metric.Name;
 			}
 			return '';
@@ -142,7 +135,7 @@ export default {
 			return version.Version.Name;
 		},
 		clearMetric() {
-			this.newMetric.SourceMetric = {};
+			this.newMetric.SourceMetric = null;
 			this.newMetric.Source.VariableId = null;
 			this.newMetric.Source.ValueLabelIds = [];
 
@@ -150,18 +143,7 @@ export default {
 			this.newMetric.SelectedLevel = null;
 			this.newMetric.SelectedVariable = null;
 			this.newMetric.columnExists = null;
-		},
-		metricSelected(metric) {
-			this.clearMetric();
-
-			const loc = this;
-			axiosClient.getPromise(window.host + '/services/metrics/GetSelectedMetric',
-				{ l: metric.Id }, 'consultar el indicador').then(function (res) {
-				loc.newMetric.SourceMetric = res;
-				if(res.Versions.length > 0) {
-					loc.newMetric.SelectedVersion = res.Versions[res.Versions.length - 1];
-				}
-			});
+			this.$emit('raisePrev');
 		},
 		selectAll() {
 			this.newMetric.Source.ValueLabelIds = [];
@@ -196,7 +178,7 @@ export default {
 			});
 		},
 		validate() {
-			if (this.newMetric.SourceMetric.Metric == null) {
+			if (!this.newMetric.SourceMetric || this.newMetric.SourceMetric.Metric == null) {
 				alert("Debe seleccionar un indicador.");
 				return false;
 			}

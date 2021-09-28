@@ -28,19 +28,23 @@
 
 <script>
 
-
-	export default {
-		// Step 1
-		name: 'StepWelcomeArea',
-		props: {
-			type: null,
+export default {
+	// Step 1
+	name: 'StepWelcomeArea',
+	props: {
+		newMetric: {
+			type: Object,
+			default: function () {
+				return {};
+			},
 		},
-		methods: {
-			validate() {
-				return true;
-			}
-		},
-	};
+	},
+	methods: {
+		validate() {
+			return true;
+		}
+	},
+};
 </script>
 
 <style scoped>
