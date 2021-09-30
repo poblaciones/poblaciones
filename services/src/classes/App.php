@@ -366,8 +366,11 @@ class App
 			IO::ReadFileChunked($filepath);
 		});
 
-		$disposition = $response->headers->makeDisposition(
-			ResponseHeaderBag::DISPOSITION_ATTACHMENT, $name);
+		/*		$disposition = $response->headers->makeDisposition(
+			ResponseHeaderBag::DISPOSITION_ATTACHMENT, $name);*/
+		$disposition = "attachment; filename=\"" . rawurlencode ( $name ) .
+														'"; filename*=UTF-8\'\'' . rawurlencode ( $name );
+
 		$response->headers->set('Content-Disposition', $disposition);
 		$response->headers->set('Content-Type', self::GetMimeType($name));
 		return $response;

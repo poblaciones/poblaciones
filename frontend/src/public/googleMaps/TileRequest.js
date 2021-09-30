@@ -73,13 +73,13 @@ TileRequest.prototype.GetTile = function () {
 		existing.dataSubscribe(this);
 	} else {
 		this.preCancel1Queue = dataQueue;
-		dataQueue.Enlist(this, this.startDataRequest, null, function (p) { loc.preCancel1 = p; }, info);
+		dataQueue.Enlist(this, this.startDataRequest, dataQueue, function (p) { loc.preCancel1 = p; }, info);
 	}
 	// Resuelve el geography
 	if (this.selectedMetricOverlay.geographyService.url) {
 		var geoQueue = (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest ? this.queue : this.staticQueue);
 		this.preCancel2Queue = geoQueue;
-		geoQueue.Enlist(this, this.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
+		geoQueue.Enlist(this, this.startGeographyRequest, geoQueue, function (p) { loc.preCancel2 = p; });
 	}
 };
 
@@ -161,13 +161,13 @@ TileRequest.prototype.startGeographyRequest = function (queue) {
 	var url = this.selectedMetricOverlay.geographyService.url;
 
 	url = h.selectMultiUrl(url, this.coord.x);
-	var noCredentials = (this.queue == queue);
+	var noCredentials = (this.staticQueue == queue);
 
 	window.SegMap.Get(url, {
-		params: geographyParams,
-		cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; }),
-		noCredentials
-	}).then(function (res) {
+			params: geographyParams,
+			cancelToken: new this.CancelToken2(function executor(c) { loc.cancel2 = c; })
+		}, noCredentials
+		).then(function (res) {
 		queue.Release(loc.preCancel2);
 		loc.receiveMapData(res.data);
 		var total = (res.data.TotalPages ? res.data.TotalPages : 1);
@@ -177,7 +177,7 @@ TileRequest.prototype.startGeographyRequest = function (queue) {
 			loc.ProcessResultsIfCompleted();
 		} else {
 			loc.Page = next;
-			queue.Enlist(loc, loc.startGeographyRequest, null, function (p) { loc.preCancel2 = p; });
+			queue.Enlist(loc, loc.startGeographyRequest, queue, function (p) { loc.preCancel2 = p; });
 		}
 	}).catch(function (error1) {
 		queue.Release(loc.preCancel2);

@@ -78,7 +78,11 @@
 									<div class="md-layout-item md-size-100 separator">
 										Panel de resumen
 									</div>
-									<div class="md-layout-item md-size-100 md-small-size-100">
+									<div class="md-layout-item md-size-70 md-small-size-100">
+										<mp-simple-text label="Leyenda" :canEdit="canEdit" :multiline="true"
+																		v-model="Variable.Legend" :maxlength="500" helper="Nota aclaratoria (opcional) que se mostrará al pie del indicador." />
+									</div>
+									<div class="md-layout-item md-size-50 md-small-size-100">
 										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowEmptyCategories">
 											Mostrar categorías sin valores
 										</md-switch>

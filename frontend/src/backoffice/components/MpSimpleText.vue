@@ -11,7 +11,7 @@
 			<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 			<div v-if="helper" style="line-height: 1em; position: absolute;
 					 left: 0px; width: 100%; bottom: -2px;">
-				<span class="md-helper-text helper" :style="(!isDisabled && maxlength > 0 ? 'padding-right: 34px' : '') + '; bottom: -18px;'">
+				<span class="md-helper-text helper" :style="helperPaddingRight + '; bottom: -18px;'">
 					{{ helper }}
 				</span>
 			</div>
@@ -63,9 +63,21 @@ export default {
 			this.$emit('input', this.localValue);
 		}
   },
-	computed: {
+		computed: {
 		classSize() {
 			return 'md-layout-item md-size-' + (this.size ? this.size : 100);
+		},
+		helperPaddingRight() {
+			if (this.isDisabled || this.maxlength === 0) {
+				return '';
+			}
+			if (this.maxlength > 999) {
+				return 'padding-right: 65px';
+			} else if (this.maxlength > 99) {
+				return 'padding-right: 55px';
+			} else {
+				return 'padding-right: 34px';
+			}
 		},
 		minHeightRows() {
 			return { 'min-height': (32 + 17 * this.rows) + 'px' };

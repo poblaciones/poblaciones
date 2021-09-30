@@ -252,6 +252,9 @@ class PdfCreator
 
 				$this->pdf->WriteExtraIndentedPair('Nombre', $variable['mvv_caption']);
 				$this->pdf->WriteExtraIndentedPair('Fórmula', $variable['mvv_formula']);
+
+				$this->pdf->WriteExtraIndentedPair('Leyenda', $variable['mvv_legend']);
+
 				if (array_key_exists('values', $variable) && $variable['values'] != null)
 				{
 					$valuesBlock = '';
@@ -285,7 +288,7 @@ class PdfCreator
 		$licenseUrl = CreativeCommons::ResolveUrl($ele);
 
 		$this->pdf->WriteHeading4('Licencia');
-		$licenseText = CreativeCommons::GetLeyendByUrl($licenseUrl);
+		$licenseText = CreativeCommons::GetLegendByUrl($licenseUrl);
 		$imageFile = CreativeCommons::GetLicenseImageSvgByUrl($licenseUrl);
 		$this->pdf->AddImage('license', file_get_contents(Paths::GetResourcesPath() . $imageFile));
 		$html = "<p style='font-size: 10pt; line-height: 1.4em'><a href='" . $licenseUrl . "'><img src='var:license' style='float: left; margin-right: 5pt'/></a>" .

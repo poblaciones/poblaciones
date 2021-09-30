@@ -1,4 +1,8 @@
 [CURRENT]
+-
+
+v3.01 (2021-09-30)
+- Leyenda opcional en cada variable de indicador.
 - Fix: acceso a indicadores según permisos.
 - Fix: selección de categorías para rastreo y conteo.
 - Colores aleatorios de la paleta a nuevos indicadores.

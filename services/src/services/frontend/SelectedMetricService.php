@@ -235,10 +235,17 @@ class SelectedMetricService extends BaseService
 	{
 		$table = new VariableModel();
 		$variables = $table->GetByVersionLevelId($levelInfo->Id);
+		$asterisk = '*';
+
 		foreach($variables as $variable)
 		{
 			$variableInfo = new VariableInfo();
 			$variableInfo->Fill($variable);
+			if ($variableInfo->Legend !== null && $variableInfo->Legend !== "")
+			{
+				$variableInfo->Asterisk = $asterisk;
+				$asterisk .= '*';
+			}
 			$variableInfo->IsCategorical = $variable['vsy_cut_mode'] === 'V';
 			$variableInfo->IsSimpleCount = $variable['mvv_normalization'] === null &&
 																				($variable['mvv_data'] === SpecialColumnEnum::Count || $variable['mvv_data_column_is_categorical']);

@@ -115,13 +115,20 @@ class DraftVariable
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn", fetch="EAGER")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="mvv_normalization_column_id", referencedColumnName="dco_id", nullable=true)
-     * })
-     */
+		 *   @ORM\JoinColumn(name="mvv_normalization_column_id", referencedColumnName="dco_id", nullable=true)
+		 * })
+		 */
     private $NormalizationColumn;
 
+		/**
+		 * @var string
+		 *
+		 * @ORM\Column(name="mvv_legend", type="string", length=2000, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Legend;
 
-    /**
+
+		/**
      * @var \helena\entities\backoffice\DraftSymbology
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftSymbology", fetch="EAGER")
@@ -298,6 +305,30 @@ class DraftVariable
     public function getDefaultMeasure()
     {
         return $this->DefaultMeasure;
+    }
+
+		/**
+		 * Set legend
+		 *
+		 * @param string $legend
+		 *
+		 * @return DraftVariable
+		 */
+    public function setLegend($legend)
+    {
+			$this->Legend = $legend;
+
+			return $this;
+    }
+
+    /**
+		 * Get legend
+		 *
+		 * @return string
+		 */
+    public function getLegend()
+    {
+			return $this->Legend;
     }
 
     /**

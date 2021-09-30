@@ -760,10 +760,9 @@
 	}
 
 	.coverageBox {
-		padding: 8px 0px 0px 0px;
-		font-size: 9px;
-		line-height: 1.42857143;
-		color: #252422;
+		padding: 0px 0px 12px 0px;
+		font-size: 13px;
+		text-align: justify;
 	}
 
 	.filterElement-close {

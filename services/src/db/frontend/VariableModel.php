@@ -27,7 +27,6 @@ class VariableModel extends BaseModel
 								LEFT JOIN dataset_column ON dco_id = mvv_data_column_id
 								WHERE `mvv_metric_version_level_id` = ?
 							ORDER BY mvv_order';
-
 		$ret = App::Db()->fetchAll($sql, $params);
 		Profiling::EndTimer();
 		return $ret;

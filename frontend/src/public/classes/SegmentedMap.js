@@ -76,9 +76,9 @@ SegmentedMap.prototype.Get = function (url, params, noCredencials, isRetry) {
 	if (window.accessLink) {
 		params.headers['Access-Link'] = window.accessLink;
 	}
-
-	params.headers['Full-Url'] = document.location.href;
-
+	if (!noCredencials) {
+		params.headers['Full-Url'] = document.location.href;
+	}
 	var loc = this;
 	var axios = (noCredencials ? this._axiosNoCredentials : this._axios);
 

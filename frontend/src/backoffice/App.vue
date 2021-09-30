@@ -273,25 +273,25 @@ html, body {
 	font-size: 14px!important;
 }
 
-.mp-area {
-	left: 0 !important;
-	margin-bottom: 2px;
-	color: #448aff!important;
-	font-size: 14px!important;
-	border: 1px solid whitesmoke!important;
-	margin-top: 10px;
-	margin-bottom: 5px;
-	line-height: 1.3em;
-	padding-top: 6px;
-	padding-left: 6px !important;
-}
+	.mp-area {
+		left: 0 !important;
+		margin-bottom: 2px;
+		color: #448aff !important;
+		font-size: 14px !important;
+		border: 1px solid #ebebeb !important;
+		margin-top: 10px;
+		margin-bottom: 5px;
+		line-height: 1.3em;
+		padding-top: 6px;
+		padding-left: 6px !important;
+	}
 
-.dParagrah {
-	padding-top: 0px;
-	padding-left: 0px;
-	padding-right: 0px;
-	padding-bottom: 20px;
-}
+	.dParagrah {
+		padding-top: 0px;
+		padding-left: 0px;
+		padding-right: 0px;
+		padding-bottom: 20px;
+	}
 .md-subheader {
 	min-height: 34px !important;
 	margin-top: 4px !important;

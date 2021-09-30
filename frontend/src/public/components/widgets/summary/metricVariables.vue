@@ -3,7 +3,7 @@
 		<div v-for="(variable, index) in level.Variables" :key="variable.Id" class="variableBlock" :class="rowClass(index)">
 			<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '') && (!Embedded.Readonly || index === level.SelectedVariableIndex) " class="variableRow hand" v-on:click="clickVariable(index)">
 				<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"></i>
-				{{ (variable.Name ? variable.Name : 'Conteo') }}
+				{{ (variable.Name ? variable.Name : 'Conteo') }}<span style="padding-left: 1px;">{{ variable.Asterisk }}</span>
 				<span v-if="index === level.SelectedVariableIndex || level.Variables.length == 1" v-on:click="toggleVariable()" class='hand exp-hiddable-inline'>
 					<chevron-down-icon v-if="version.LabelsCollapsed"
 															title="Mostrar categorías"/>

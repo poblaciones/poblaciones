@@ -81,10 +81,10 @@
 						</md-button>
 					</template>
 					<md-button @click="excelBtnOnClick()">
-						<md-icon>import_export</md-icon> Exportar a Excel
+						<md-icon>file_download</md-icon> Exportar a Excel
 					</md-button>
 					<md-button @click="csvBtnOnClick()">
-						<md-icon>import_export</md-icon> Exportar a CSV
+						<md-icon>file_download</md-icon> Exportar a CSV
 					</md-button>
 				</template>
 				<template v-else>
@@ -92,19 +92,19 @@
 						<md-icon>refresh</md-icon> Actualizar
 					</md-button>
 					<md-button @click="startDownload('c')">
-						<md-icon>import_export</md-icon> Descargar .CSV
+						<md-icon>file_download</md-icon> Descargar .CSV
 					</md-button>
 					<md-button @click="startDownload('x')">
-						<md-icon>import_export</md-icon> Descargar .XLSX
+						<md-icon>file_download</md-icon> Descargar .XLSX
 					</md-button>
 					<md-button @click="startDownload('s')">
-						<md-icon>import_export</md-icon> Descargar .SAV
+						<md-icon>file_download</md-icon> Descargar .SAV
 					</md-button>
 					<md-button @click="startDownload('t')">
-						<md-icon>import_export</md-icon> Descargar .DTA
+						<md-icon>file_download</md-icon> Descargar .DTA
 					</md-button>
 					<md-button @click="startDownload('r')">
-						<md-icon>import_export</md-icon> Descargar .RDATA
+						<md-icon>file_download</md-icon> Descargar .RDATA
 					</md-button>
 				</template>
 			</div>

@@ -110,13 +110,19 @@ class Variable
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\MetricVersionLevel")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="mvv_metric_version_level_id", referencedColumnName="mvl_id", nullable=true)
-     * })
-     */
+		 *   @ORM\JoinColumn(name="mvv_metric_version_level_id", referencedColumnName="mvl_id", nullable=true)
+		 * })
+		 */
     private $MetricVersionLevel;
 
+		/**
+		 * @var string
+		 *
+		 * @ORM\Column(name="mvv_legend", type="string", length=2000, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Legend;
 
-		  /**
+		 /**
      * @var \helena\entities\backoffice\Symbology
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Symbology", fetch="EAGER")
@@ -294,6 +300,30 @@ class Variable
     public function getDefaultMeasure()
     {
         return $this->DefaultMeasure;
+    }
+
+		/**
+		 * Set legend
+		 *
+		 * @param string $legend
+		 *
+		 * @return Variable
+		 */
+    public function setLegend($legend)
+    {
+			$this->Legend = $legend;
+
+			return $this;
+    }
+
+    /**
+		 * Get legend
+		 *
+		 * @return string
+		 */
+    public function getLegend()
+    {
+			return $this->Legend;
     }
 
     /**

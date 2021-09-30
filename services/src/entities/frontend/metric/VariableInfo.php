@@ -11,6 +11,8 @@ class VariableInfo extends BaseMapModel
 	public $Normalization;
 	public $NormalizationScale;
 	public $IsDefault = false;
+	public $Legend;
+	public $Asterisk = '';
 
 	public $Pattern;
 	public $CustomPattern = '';
@@ -40,6 +42,7 @@ class VariableInfo extends BaseMapModel
 			'mvv_caption' => 'Name',
 			'mvv_normalization' => 'Normalization',
 			'mvv_normalization_scale' => 'NormalizationScale',
+			'mvv_legend' => 'Legend',
 			'mvv_is_default' => 'IsDefault',
 			'mvv_default_measure' => 'DefaultMeasure',
 			'dco_decimals' => 'Decimals',
