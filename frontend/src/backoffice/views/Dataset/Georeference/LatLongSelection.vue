@@ -13,7 +13,7 @@
 			<md-field>
 				<label for="state">Longitud</label>
 				<md-select v-model="value.longitude" md-dense>
-					<md-option v-for="column in Dataset.GetNumericAndTextColumns" :class="(column.Separator ? 'mpSeparator' : '')"
+					<md-option v-for="column in Dataset.GetNumericAndTextColumns()" :class="(column.Separator ? 'mpSeparator' : '')"
 										 :key="column.Id" :value="column.Id">{{ formatColumn(column) }}</md-option>
 				</md-select>
 			</md-field>

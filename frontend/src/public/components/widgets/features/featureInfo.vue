@@ -27,7 +27,7 @@
 			</div>
 			<hr class="moderateHr exp-hiddable-visiblity" v-if="hasTitle">
 			<div>
-				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter">
+				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
 					<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
 									title="Seleccionar el perímetro" v-on:click="selectPerimeter">
 						<i class="fas fa-circle-notch" />
@@ -76,6 +76,9 @@ export default {
 		},
 		currentPosition() {
 			return arr.IndexByProperty(this.rows, 'FID', this.featureInfo.Key.Id);
+		},
+		usePerimeter() {
+			return false;
 		},
 		hasPerimeter() {
 			if (!this.featureInfo.Key || !this.featureInfo.Key.VariableId || !this.lat || !this.lon) {

@@ -355,7 +355,9 @@ GoogleMapsApi.prototype.DrawPerimeter = function (center, radius, fillColor) {
             strokeWeight: 1,
             strokeOpacity: strokeOpacity,
             fillColor: fillColor,
-            fillOpacity: 0.1,
+						fillOpacity: 0.1,
+						clickable: false,
+						editable: false,
             radius: radius * 1000
 	});
 };

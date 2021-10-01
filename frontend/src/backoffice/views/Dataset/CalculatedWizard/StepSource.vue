@@ -99,7 +99,7 @@ export default {
 			return window.Context.CurrentWork;
 		},
 		versions() {
-			if (this.newMetric.SourceMetric.Versions != null) {
+			if (this.newMetric.SourceMetric && this.newMetric.SourceMetric.Versions != null) {
 				var ret = this.newMetric.SourceMetric.Versions;
 				for (var n = 0; n < ret.length; n++) {
 					ret[n].Id = ret[n].Version.Id;

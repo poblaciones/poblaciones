@@ -54,12 +54,12 @@
 											Mostrar etiquetas con los valores
 										</md-switch>
 									</div>
-									<div class="md-layout-item md-size-50 md-small-size-100" v-if="!Dataset.properties.AreSegments">
-										<md-switch class="md-primary" :disabled="!canEdit" @change="updatePerimeterVisibility" v-model="usePerimeter">
+									<div class="md-layout-item md-size-50 md-small-size-100" v-if="!Dataset.properties.AreSegments && usePerimeter">
+										<md-switch class="md-primary" :disabled="!canEdit" @change="updatePerimeterVisibility" v-model="showPerimeter">
 											Mostrar perímetro de cobertura
 										</md-switch>
 										<mp-simple-text style="padding-left: 50px; margin-top: -8px" :canEdit="canEdit"
-																		type="number" v-show="usePerimeter" @enter="Save" ref="perimeter" label="Radio del perímetro" suffix="km"
+																		type="number" v-show="showPerimeter" @enter="Save" ref="perimeter" label="Radio del perímetro" suffix="km"
 																		v-model="Variable.Perimeter"></mp-simple-text>
 									</div>
 									<div v-if="Dataset.properties.Type === 'L' && !Dataset.properties.AreSegments" class="md-layout-item md-size-50 md-small-size-100">
@@ -77,18 +77,18 @@
 							</md-card-content>
 						</md-card>
 					</div>
-					<div class="md-layout-item md-small-size-100" :class="(Level.Variables.length > 1 ? 'md-size-50' : 'md-size-100')">
+					<div class="md-layout-item md-small-size-100" :class="(Level.Variables.length > 1 ? 'md-size-60' : 'md-size-100')">
 						<md-card>
 							<md-card-content>
 								<div class="md-layout md-gutter">
 									<div class="md-layout-item md-size-100 separator">
 										Panel de resumen
 									</div>
-									<div class="md-layout-item md-size-70 md-small-size-100">
+									<div class="md-layout-item md-size-100">
 										<mp-simple-text label="Leyenda" :canEdit="canEdit" :multiline="true"
 																		v-model="Variable.Legend" :maxlength="500" helper="Nota aclaratoria (opcional) que se mostrará al pie del indicador." />
 									</div>
-									<div class="md-layout-item md-size-50 md-small-size-100">
+									<div class="md-layout-item md-size-100">
 										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowEmptyCategories">
 											Mostrar categorías sin valores
 										</md-switch>
@@ -98,9 +98,9 @@
 						</md-card>
 					</div>
 					<template v-if="Level.Variables.length > 1">
-						<div class="md-layout-item md-size-50 md-small-size-100">
+						<div class="md-layout-item md-size-40 md-small-size-100">
 							<md-card>
-								<md-card-content>
+								<md-card-content style="min-height: 150px">
 									<div class="md-layout md-gutter">
 										<div class="md-layout-item md-size-100 separator">
 											Variable predeterminada
@@ -139,7 +139,7 @@ export default {
   name: 'variableSymbology',
 	data() {
 		return {
-			usePerimeter: false,
+			showPerimeter: false,
 			Level: null,
 			Variable: null,
 			showDialog: false
@@ -154,11 +154,11 @@ export default {
 				variable.Symbology.CutMode = 'S';
 			}
 			this.Variable = f.clone(variable);
-			this.usePerimeter = this.Variable.Perimeter && this.Variable.Perimeter > 0;
+			this.showPerimeter = this.Variable.Perimeter && this.Variable.Perimeter > 0;
 			this.showDialog = true;
 		},
 		updatePerimeterVisibility() {
-			if (this.usePerimeter) {
+			if (this.showPerimeter) {
 				var loc = this;
 				setTimeout(() => {
 					loc.$refs.perimeter.focus();
@@ -176,7 +176,7 @@ export default {
 				alert("Debe indicar una variable para el valor para la fórmula.");
 				return;
 			}
-			if (this.usePerimeter && !this.Variable.Perimeter) {
+			if (this.usePerimeter && this.showPerimeter && !this.Variable.Perimeter) {
 				alert("El perímetro debe tener un valor numérico.");
 				return;
 			}
@@ -186,7 +186,7 @@ export default {
 				return;
 			}
 			var loc = this;
-			if (!this.usePerimeter) {
+			if (!this.showPerimeter) {
 				this.Variable.Perimeter = null;
 			}
 			this.$refs.invoker.doSave(this.Dataset,
@@ -204,6 +204,9 @@ export default {
 		},
 		Work() {
 			return window.Context.CurrentWork;
+		},
+		usePerimeter() {
+			return false;
 		},
 		useGradients() {
 			return window.Context.Configuration.useGradients;

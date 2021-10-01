@@ -176,6 +176,10 @@ export default {
 				if (res.data.done) {
 					loc.IterateLocalSteps().then(function () {
 						loc.ShowCompleted();
+					}).catch(function (error) {
+						var errorText = loc.formatError(error);
+						loc.ShowError(errorText);
+						err.err('Stepper', error);
 					});
 				} else {
 					loc.totalSteps = res.data.totalSteps;

@@ -48,7 +48,7 @@
 						</label>
 					</td>
 				</tr>
-				<tr v-if="metric.SelectedVariable().Perimeter">
+				<tr v-if="usePerimeter && metric.SelectedVariable().Perimeter">
 					<td class="nowrapwords">Mostrar perímetros:</td>
 					<td>
 						<label class="radio-inline">
@@ -142,6 +142,11 @@ export default {
 		return {
 			metric: null
 		};
+	},
+	computed: {
+		usePerimeter() {
+			return false;
+		}
 	},
 	methods: {
 		getActive(key) {

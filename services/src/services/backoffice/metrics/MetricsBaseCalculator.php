@@ -57,7 +57,7 @@ abstract class MetricsBaseCalculator
 				// Obtiene las columnas involucradas
 				$dataColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $col['Id']);
 				if ($column === 'sum' && array_key_exists('total', $cols))
-					$normalizationColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $col['total']);
+					$normalizationColumn = App::Orm()->find(entities\DraftDatasetColumn::class, $cols['total']['Id']);
 				else
 					$normalizationColumn = null;
 
@@ -358,9 +358,9 @@ abstract class MetricsBaseCalculator
 	private function GetDistanceCaption($output)
 	{
 		if(isset($output['HasMaxDistance']) && $output['HasMaxDistance'])
-			return ' (hasta ' . $output['MaxDistance'] . ' km))';
+			return ', hasta ' . $output['MaxDistance'] . ' km)';
 		else if(isset($output['IsInclusionPoint']) && $output['IsInclusionPoint'])
-			return ' (hasta ' . $output['InclusionDistance'] . ' km)';
+			return ', hasta ' . $output['InclusionDistance'] . ' km';
 		return '';
 	}
 

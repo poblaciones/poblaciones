@@ -123,7 +123,7 @@ class Variable
     private $Legend;
 
 		/**
-		 * @var string
+		 * @var float
 		 *
 		 * @ORM\Column(name="mvv_perimeter", type="float", precision=6, scale=0, nullable=true, unique=false)
      */

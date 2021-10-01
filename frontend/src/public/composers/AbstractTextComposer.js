@@ -64,7 +64,8 @@ AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, 
 };
 
 AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElement, tileKey, tileBounds, colorMap) {
-	if (parseInt(variable.ShowPerimeter) == 0) {
+	var usePerimeter = false;
+	if (parseInt(variable.ShowPerimeter) == 0 || !usePerimeter) {
 		return;
 	}
 	var location = new this.MapsApi.google.maps.LatLng(parseFloat(dataElement['Lat']), parseFloat(dataElement['Lon']));

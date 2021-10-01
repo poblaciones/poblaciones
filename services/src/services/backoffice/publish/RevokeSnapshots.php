@@ -31,7 +31,7 @@ class RevokeSnapshots extends BaseService
 		$this->workModel = new WorkModel();
 		$this->work = $this->workModel->GetWork($workId);
 		$this->publicWorkModel = new WorkModel(false);
-		$this->publicWork = $this->publicWorkModel->GetWork($workId);
+		$this->publicWork = $this->publicWorkModel->GetWork($this->shardifiedWorkId);
 	}
 
 	public function DeleteAllWorkDatasets()
@@ -70,28 +70,17 @@ class RevokeSnapshots extends BaseService
 			$this->cacheManager->ClearDataset($row['dat_id']);
 			$totalLabelsRowDeleted += $this->snapshotsManager->CleanDataset($row['dat_id']);
 		}
-		foreach(Arr::UniqueByField('dat_work_id', $datasetsToDelete) as $row)
-		{
-			$this->cacheManager->CleanMetadataPdfCache($row['dat_work_id']);
-		}
-
 		// Si hubo uso de datasets que antes no estaban o sacó alguno, tiene que regenerar
 		if (sizeof($datasetsToDelete) > 0)
 			$this->work['wrk_dataset_data_changed'] = true;
 
-		// Actualiza metadatos
-		if ($this->work['wrk_dataset_labels_changed'] || $this->work['wrk_dataset_data_changed'])
-		{
-			foreach($datasets as $row)
-				$this->cacheManager->ClearDatasetMetaData($row['dat_id']);
-			foreach($datasetsToDelete as $row)
-				$this->cacheManager->ClearDatasetMetaData($row['dat_id']);
+		// Libera cachés de metadatos
+		foreach($datasets as $row)
+			$this->cacheManager->ClearDatasetMetaData($row['dat_id']);
+		foreach($datasetsToDelete as $row)
+			$this->cacheManager->ClearDatasetMetaData($row['dat_id']);
 
-			foreach(Arr::UniqueByField('dat_work_id', $datasets) as $row)
-				$this->cacheManager->CleanMetadataPdfCache($row);
-			foreach(Arr::UniqueByField('dat_work_id', $datasetsToDelete) as $row)
-				$this->cacheManager->CleanMetadataPdfCache($row);
-		}
+		$this->cacheManager->CleanPdfMetadata($this->work['wrk_metadata_id']);
 
 		if ($totalLabelsRowDeleted > 0 && $this->work['wrk_is_indexed'])
 		{

@@ -141,9 +141,8 @@ export default {
 		},
 		calculateStep(step) {
 			var steps = this.steps[this.newMetric.Type];
-			step -= 1;
-			if (step < steps.length) {
-				return steps[step];
+			if (step - 1 < steps.length) {
+				return steps[step - 1];
 			} else {
 				return null;
 			}
@@ -166,8 +165,10 @@ export default {
 			if (!this.validate()) {
 				return;
 			}
-			this.step++;
-			this.focusCurrentStep(true);
+			if (this.step < this.steps[this.newMetric.Type].length) {
+				this.step++;
+				this.focusCurrentStep(true);
+			}
 		},
 		prev() {
 			if(this.step > 1) {
@@ -188,6 +189,8 @@ export default {
 		},
 		show(typeDistance = false) {
 			this.step = 1;
+			this.stepperRunning = false;
+			this.processing = false;
 			this.defineType(typeDistance ? 'distance' : 'area');
 			this.openPopup = true;
 		},
@@ -266,20 +269,24 @@ export default {
 			this.clientProcessing = [];
 			var getters = [];
 			for (var varItem of varList) {
-				getters.push(loc.Dataset.ScaleGenerator.GetAndCacheColumnDistributions(varItem.Level, varItem.Variable).then(
-						function (data) {
-							var n = loc.GetLargestNTilesCut(5, data.Groups);
-							if (n > 1) {
-								varItem.Variable.Symbology.CutMode = 'T';
-								varItem.Variable.Symbology.Round = 0;
-								varItem.Variable.Symbology.Categories = n;
-							} else {
-								varItem.Variable.Symbology.CutMode = 'S';
-							}
-							loc.clientProcessing.push(varItem);
-						}));
+				getters.push(loc.createDistributionsFetcher(varItem));
 			}
 			return Promise.all(getters);
+		},
+		createDistributionsFetcher(item) {
+			var loc = this;
+			return loc.Dataset.ScaleGenerator.GetAndCacheColumnDistributions(item.Level, item.Variable).then(
+				function (data) {
+					var n = loc.GetLargestNTilesCut(5, data.Groups);
+					if (n > 1) {
+						item.Variable.Symbology.CutMode = 'T';
+						item.Variable.Symbology.Round = 0;
+						item.Variable.Symbology.Categories = n;
+					} else {
+						item.Variable.Symbology.CutMode = 'S';
+					}
+					loc.clientProcessing.push(item);
+				});
 		},
 		applySymbologies() {
 			var savers = [];
