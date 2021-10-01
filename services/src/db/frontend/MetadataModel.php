@@ -161,7 +161,7 @@ class MetadataModel extends BaseModel
 								JOIN " . $this->draftPreffix . "metric_version_level ON mvl_metric_version_id = mvr_id
 								JOIN " . $this->draftPreffix . "variable ON mvv_metric_version_level_id = mvl_id ";
 		// Trae las variables
-		$sql = "select mtr_id, mtr_caption, mvr_caption, mvr_id, mvv_id, mvv_caption, mvv_legend,
+		$sql = "select mtr_id, mtr_caption, mvr_caption, mvr_id, mvv_id, mvv_caption, mvv_legend, mvv_perimeter,
 								c1.dco_variable AS mvv_data_column_variable, c1.dco_caption AS mvv_data_column_caption,
 								c2.dco_variable AS mvv_normalization_column_variable, c2.dco_caption AS mvv_normalization_column_caption,
 								mvv_normalization, mvv_normalization_scale, mvv_normalization_column_id,

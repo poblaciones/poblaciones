@@ -32,6 +32,9 @@ DataShapeComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 			if (showInfo) {
 				clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
 			};
+			// Pone el perímetro
+			this.AddPerimeter(variable, val, dataElement, tileKey, tileBounds, colorMap);
+			// Pone el polígono
 			this.AddFeatureText(variable, val, dataElement, clickId, tileKey, tileBounds, colorMap, zoom);
 		}
 	}

@@ -213,14 +213,6 @@ export default {
 			var customIcons = this.metric.SelectedVersion().Work.Icons;
 			return iconManager.showIcon(symbol, customIcons, '1.5em;vertical-align: unset;padding-top: 0px', null, '1.2r');
 		},
-		toggleShowDescriptions() {
-			this.variable.ShowDescriptions = (this.level.ShowDescriptions === 1 ? 0 : 1);
-			this.metric.UpdateMap();
-		},
-		toggleShowValues() {
-			this.variable.ShowValues = (this.level.ShowValues === 1 ? 0 : 1);
-			this.metric.UpdateMap();
-		},
 		getMutedClass(value) {
 			if (value !== '1') {
 				return ' text-muted';

@@ -246,6 +246,10 @@ class SelectedMetricService extends BaseService
 				$variableInfo->Asterisk = $asterisk;
 				$asterisk .= '*';
 			}
+			if ($variableInfo->Perimeter)
+			{
+				$variableInfo->ShowPerimeter = 1;
+			}
 			$variableInfo->IsCategorical = $variable['vsy_cut_mode'] === 'V';
 			$variableInfo->IsSimpleCount = $variable['mvv_normalization'] === null &&
 																				($variable['mvv_data'] === SpecialColumnEnum::Count || $variable['mvv_data_column_is_categorical']);

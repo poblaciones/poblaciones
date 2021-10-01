@@ -1,27 +1,33 @@
 module.exports = {
+	IsAlmostLightColor(color) {
+		return this.colorForce(color, 180);
+	},
 	IsLightColor(color) {
-		if (!color || color.length === 0) {
-			return false;
-		}
-		if (color[0] !== "#") {
-			color = "#" + color;
-		}
-		var val = parseInt(color.substr(1, 2), 16) +
-			parseInt(color.substr(3, 2), 16) + parseInt(color.substr(5, 2), 16);
-		return val / 3 > 220;
+		return this.colorForce(color, 220);
 	},
 	IsReallyLightColor(color) {
+		return this.colorForce(color, 234);
+	},
+	colorForce(color, force) {
 		if (!color || color.length === 0) {
 			return false;
 		}
+		var parts = this.ParseColorPartsRGB(color);
+		var val = parts.r + parts.g + parts.b;
+		return val / 3 > force;
+	},
+	ReduceColor(color, multiplier) {
+		var parts = this.ParseColorPartsRGB(color);
+		return '#' + this.toHex(Math.floor(parts.r * multiplier)) + this.toHex(Math.floor(parts.g * multiplier)) + this.toHex(Math.floor(parts.b * multiplier));
+	},
+	ParseColorPartsRGB(color) {
+		var parts = this.ParseColorParts(color);
+		return { r: parts[0], g: parts[1], b: parts[2] };
+	},
+	ParseColorParts(color) {
 		if (color[0] !== "#") {
 			color = "#" + color;
 		}
-		var val = parseInt(color.substr(1, 2), 16) +
-			parseInt(color.substr(3, 2), 16) + parseInt(color.substr(5, 2), 16);
-		return val / 3 > 234;
-	},
-	ParseColorParts(color) {
 		var r = parseInt(color.substr(1, 2), 16);
 		var g = parseInt(color.substr(3, 2), 16);
 		var b = parseInt(color.substr(5, 2), 16);

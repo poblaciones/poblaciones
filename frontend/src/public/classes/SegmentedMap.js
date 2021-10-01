@@ -289,16 +289,25 @@ SegmentedMap.prototype.EndSelecting = function () {
 	this.MapsApi.selector.ClearSelectorCanvas();
 };
 
-SegmentedMap.prototype.GetVariableName = function (metricId, variableId) {
+SegmentedMap.prototype.GetVariable = function (metricId, variableId) {
 	var metric = this.Metrics.GetMetricById(metricId);
 	if (metric === null) {
-		return '';
+		return null;
 	}
 	var variable = metric.GetVariableById(variableId);
 	if (variable === null) {
-		return '';
+		return null;
 	}
-	return variable.Name;
+	return variable;
+};
+
+SegmentedMap.prototype.GetVariableName = function (metricId, variableId) {
+	var variable = this.GetVariable(metricId, variableId);
+	if (variable === null) {
+		return '';
+	} else {
+		return variable.Name;
+	}
 };
 
 SegmentedMap.prototype.AddMetricByIdAndWork = function (id, workId) {

@@ -80,20 +80,13 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 
 				var isSequenceInactiveStep = this.isSequenceInactiveStep(mapItem);
 				var marker = this.markerFactory.CreateMarker(tileKey, mapItem, markerSettings, isSequenceInactiveStep);
-			/*
-				{
-					markers.push(marker);
-					if (marker.extraMarkerImage) {
-						markers.push(marker.extraMarkerImage);
-					}
-					if (marker.extraMarker) {
-						markers.push(marker.extraMarker);
-					}
-				}*/
+
 				this.registerTileMarker(tileKey, marker);
 				if (variable.IsSequence) {
 					this.SequenceHandler.registerSequenceMarker(tileKey, mapItem, marker, zoom);
 				}
+				// Pone el perímetro
+				this.AddPerimeter(variable, val, dataElement, tileKey, tileBounds, colorMap);
 				// Pone el texto
 				this.AddFeatureText(variable, val, dataElement, tileKey, tileBounds, colorMap, markerSettings, zoom);
 			}
@@ -156,6 +149,7 @@ LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElemen
 
 LocationsComposer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
+	this.clearTilePerimeters(tileKey);
 
 	var items = this.keysInTile[tileKey];
 	if (items) {
@@ -192,4 +186,5 @@ LocationsComposer.prototype.dispose = function () {
 		}
 	}
 	this.clearText();
+	this.clearPerimeter();
 };

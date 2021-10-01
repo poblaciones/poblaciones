@@ -104,6 +104,7 @@ TileOverlay.prototype.process = function (mapResults, dataResults, gradient, til
 
 TileOverlay.prototype.processLabels = function(dataResults, tileKey, tileBounds, x, y, z) {
 	this.composer.textInTile[tileKey] = [];
+	this.composer.perimetersInTile[tileKey] = [];
 	this.composer.renderLabels(dataResults, tileKey, tileBounds, z);
 };
 

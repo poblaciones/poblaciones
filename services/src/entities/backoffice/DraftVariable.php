@@ -124,9 +124,16 @@ class DraftVariable
 		 * @var string
 		 *
 		 * @ORM\Column(name="mvv_legend", type="string", length=2000, precision=0, scale=0, nullable=true, unique=false)
-     */
+		 */
     private $Legend;
 
+
+		/**
+		 * @var string
+		 *
+		 * @ORM\Column(name="mvv_perimeter", type="float", precision=6, scale=0, nullable=true, unique=false)
+     */
+    private $Perimeter;
 
 		/**
      * @var \helena\entities\backoffice\DraftSymbology
@@ -329,6 +336,30 @@ class DraftVariable
     public function getLegend()
     {
 			return $this->Legend;
+    }
+
+		/**
+		 * Set perimeter
+		 *
+		 * @param float $perimeter
+		 *
+		 * @return DraftVariable
+		 */
+    public function setPerimeter($perimeter)
+    {
+			$this->Perimeter = $perimeter;
+
+			return $this;
+    }
+
+    /**
+		 * Get perimeter
+		 *
+		 * @return float
+		 */
+    public function getPerimeter()
+    {
+			return $this->Perimeter;
     }
 
     /**

@@ -85,6 +85,7 @@ SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMet
 		ret.push(['g', variable.GradientOpacity, 'M']);
 		ret.push(['d', this.Boolean(variable.ShowDescriptions), '0']);
 		ret.push(['s', this.Boolean(variable.ShowValues), '0']);
+		ret.push(['e', this.Boolean(variable.ShowPerimeter), '0']);
 
 		var activeStepsState = this.activeSequences(variable);
 		ret.push(['a', activeStepsState, null]);
@@ -313,6 +314,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 	var urbanity = h.getSafeValue(values, 'u', 'N');
 	var pinnedLevel = h.getSafeValue(values, 'l', '');
 	var showDescriptions = h.getSafeValue(values, 'd', '0');
+	var showPerimeter = h.getSafeValue(values, 'e', '0');
 	var showValues = h.getSafeValue(values, 's', '0');
 	var activeSequencesSteps = h.getSafeValue(values, 'a', null);
 	var ranking = h.getSafeValue(values, 'k', null);
@@ -331,6 +333,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 		Urbanity: urbanity,
 		ShowDescriptions: showDescriptions,
 		ShowValues: showValues,
+		ShowPerimeter: showPerimeter,
 		ShowRanking: this.ParseRanking(ranking)['Show'],
 		RankingSize: this.ParseRanking(ranking)['Size'],
 		RankingDirection: this.ParseRanking(ranking)['Direction'],
@@ -437,6 +440,10 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	if (activeSelectedMetric.SelectedVariable()) {
 		if (activeSelectedMetric.SelectedVariable().ShowDescriptions !== state.ShowDescriptions) {
 			activeSelectedMetric.SelectedVariable().ShowDescriptions = state.ShowDescriptions;
+			mapChanged = true;
+		}
+		if (activeSelectedMetric.SelectedVariable().ShowPerimeter !== state.ShowPerimeter) {
+			activeSelectedMetric.SelectedVariable().ShowPerimeter = state.ShowPerimeter;
 			mapChanged = true;
 		}
 		if (activeSelectedMetric.SelectedVariable().CustomPattern !== state.CustomPattern) {

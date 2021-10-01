@@ -252,7 +252,8 @@ class PdfCreator
 
 				$this->pdf->WriteExtraIndentedPair('Nombre', $variable['mvv_caption']);
 				$this->pdf->WriteExtraIndentedPair('Fórmula', $variable['mvv_formula']);
-
+				if ($variable['mvv_perimeter'])
+					$this->pdf->WriteExtraIndentedPair('Perímetro', $variable['mvv_perimeter'] . ' km');
 				$this->pdf->WriteExtraIndentedPair('Leyenda', $variable['mvv_legend']);
 
 				if (array_key_exists('values', $variable) && $variable['values'] != null)

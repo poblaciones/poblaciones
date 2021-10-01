@@ -1,6 +1,7 @@
 import TxtOverlay from '@/public/googleMaps/TxtOverlay';
 import TileOverlay from '@/public/googleMaps/TileOverlay';
 import Mercator from '@/public/js/Mercator';
+import color from '@/common/framework/color';
 import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
 import { setTimeout } from 'core-js';
@@ -198,9 +199,7 @@ GoogleMapsApi.prototype.AddCopyright = function () {
 	controlDiv.className = "copyright";
 	controlDiv.index = 0;
 	this.gMap.controls[this.google.maps.ControlPosition.BOTTOM_RIGHT].push(controlDiv);
-
 };
-
 
 GoogleMapsApi.prototype.StopDrawing = function () {
 	this.drawingManager.setDrawingMode(null);
@@ -220,7 +219,6 @@ GoogleMapsApi.prototype.ClearMyLocationMarker = function () {
 		this.myLocationMarker = null;
 	}
 };
-
 
 GoogleMapsApi.prototype.CreateMyLocationMarker = function (coord) {
 	this.ClearMyLocationMarker();
@@ -336,6 +334,29 @@ GoogleMapsApi.prototype.SetTypeControls = function (controlType) {
 			style: controlType,
 			mapTypeIds: types,
 		},
+	});
+};
+
+GoogleMapsApi.prototype.DrawPerimeter = function (center, radius, fillColor) {
+	var strokeOpacity = 0.15;
+	var strokeColor = fillColor;
+	if (color.IsReallyLightColor(fillColor)) {
+		strokeOpacity = 1;
+		strokeColor = color.ReduceColor(fillColor, .95);
+	} else if (color.IsLightColor(fillColor)) {
+		strokeOpacity = 1;
+	} else if (color.IsAlmostLightColor(fillColor)) {
+		strokeOpacity = 0.5;
+	}
+	return new google.maps.Circle({
+            center: center,
+            map: this.gMap,
+            strokeColor: strokeColor,
+            strokeWeight: 1,
+            strokeOpacity: strokeOpacity,
+            fillColor: fillColor,
+            fillOpacity: 0.1,
+            radius: radius * 1000
 	});
 };
 

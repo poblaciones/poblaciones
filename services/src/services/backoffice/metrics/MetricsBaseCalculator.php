@@ -42,11 +42,12 @@ abstract class MetricsBaseCalculator
 		return ceil($count / self::STEP);
 	}
 
-	public function StepCreateMetrics($datasetId, $cols, $source)
+	public function StepCreateMetrics($datasetId, $cols, $source, $output)
 	{
 		Profiling::BeginTimer();
 
 		$metricColumns = ['distance', 'count', 'sum', 'min', 'max'];
+		$perimetedColumns = ['count', 'sum', 'min', 'max'];
 
 		$ret = [];
 		foreach($cols as $column => $col)
@@ -61,18 +62,25 @@ abstract class MetricsBaseCalculator
 					$normalizationColumn = null;
 
 				// Se fija si ya hay una variable que haga los mismo....
-				$marchingVariable = App::Orm()->findManyByProperties(entities\DraftVariable::class,
+				$matchingVariable = App::Orm()->findManyByProperties(entities\DraftVariable::class,
 																			['DataColumn' => $dataColumn, 'NormalizationColumn' => $normalizationColumn]);
 				// la retoma, o la crea
-				if (sizeof($marchingVariable) > 0)
+				if (sizeof($matchingVariable) > 0)
 				{
-					$variable = $marchingVariable[0];
+					$variable = $matchingVariable[0];
 					$variable->setCaption($col['Caption']);
 					App::Orm()->save($variable);
 				}
 				else
 				{
 					$variable = $this->CreateMetricVariable($datasetId, $col, $source, $dataColumn, $normalizationColumn);
+				}
+				// Se fija si pone perímetro
+				if (in_array($column, $perimetedColumns) && isset($output['IsInclusionPoint'])
+							&& $output['IsInclusionPoint'])
+				{
+					$variable->setPerimeter($output['InclusionDistance']);
+					App::Orm()->save($variable);
 				}
 				$ret[] = $variable->getId();
  			}

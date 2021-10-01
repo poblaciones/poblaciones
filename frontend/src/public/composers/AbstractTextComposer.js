@@ -8,6 +8,7 @@ function AbstractTextComposer() {}
 AbstractTextComposer.prototype.AbstractConstructor = function (value, total, description) {
 	this.textStyle = '';
 	this.textInTile = [];
+	this.perimetersInTile = [];
 	this.tileDataCache = [];
 	this.usePreview = true;
 	this.layerId = AbstractTextComposer.layerId++;
@@ -60,6 +61,18 @@ AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, 
 	}
 	this.textInTile[tileKey].push({ c: canvas, v: v });
 	return canvas;
+};
+
+AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElement, tileKey, tileBounds, colorMap) {
+	if (parseInt(variable.ShowPerimeter) == 0) {
+		return;
+	}
+	var location = new this.MapsApi.google.maps.LatLng(parseFloat(dataElement['Lat']), parseFloat(dataElement['Lon']));
+	if (this.inTile(tileBounds, location)) {
+		var color = colorMap[val];
+		var polygon = window.SegMap.MapsApi.DrawPerimeter(location, variable.Perimeter, color);
+		this.perimetersInTile[tileKey].push(polygon);
+	}
 };
 
 AbstractTextComposer.prototype.SetBackgroundText = function (div, tileBounds, textElement, tileKey, location,
@@ -134,7 +147,25 @@ AbstractTextComposer.prototype.clearTileText = function (tileKey) {
 	delete this.textInTile[tileKey];
 };
 
+AbstractTextComposer.prototype.clearTilePerimeters = function (tileKey) {
+	// texts
+	var items = this.perimetersInTile[tileKey];
+	if (items) {
+		for (var i = 0; i < items.length; i++) {
+			items[i].setMap(null);
+		}
+	}
+	this.perimetersInTile[tileKey] = [];
+	delete this.perimetersInTile[tileKey];
+};
 
+AbstractTextComposer.prototype.clearPerimeter = function () {
+	for (var k in this.perimetersInTile) {
+		if (this.perimetersInTile.hasOwnProperty(k)) {
+			this.clearTilePerimeters(k);
+		}
+	}
+};
 AbstractTextComposer.prototype.clearText = function () {
 	for (var k in this.textInTile) {
 		if (this.textInTile.hasOwnProperty(k)) {

@@ -12,6 +12,7 @@ class VariableInfo extends BaseMapModel
 	public $NormalizationScale;
 	public $IsDefault = false;
 	public $Legend;
+	public $Perimeter;
 	public $Asterisk = '';
 
 	public $Pattern;
@@ -19,6 +20,7 @@ class VariableInfo extends BaseMapModel
 	public $ShowSummaryTotals = true;
 	public $ShowDescriptions = false;
 	public $ShowValues = false;
+	public $ShowPerimeter = 0;
 	public $ShowEmptyCategories = true;
 	public $Decimals = 0;
 	public $Opacity = 'M';
@@ -43,6 +45,7 @@ class VariableInfo extends BaseMapModel
 			'mvv_normalization' => 'Normalization',
 			'mvv_normalization_scale' => 'NormalizationScale',
 			'mvv_legend' => 'Legend',
+			'mvv_perimeter' => 'Perimeter',
 			'mvv_is_default' => 'IsDefault',
 			'mvv_default_measure' => 'DefaultMeasure',
 			'dco_decimals' => 'Decimals',

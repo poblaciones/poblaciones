@@ -48,6 +48,17 @@
 						</label>
 					</td>
 				</tr>
+				<tr v-if="metric.SelectedVariable().Perimeter">
+					<td class="nowrapwords">Mostrar perímetros:</td>
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="perimeter" value="1" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
+						</label>
+						<label class="radio-inline">
+							<input type="radio" name="perimeter" value="0" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
+						</label>
+					</td>
+				</tr>
 				<tr v-if="anyHasArea()">
 					<td class="optionsLabel">Transparencia:</td>
 					<td>

@@ -5,37 +5,43 @@
 										+ featureInfo.Image + ');'"
 				 class="topImage">
 		</div>
-
 		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')">
 			<div v-on:click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 			<mp-close-button v-else v-on:click="doClose" class="exp-hiddable-block" />
-
 			<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" /></h5>
 			<div class='stats' style="padding-top: 8px">
 				<a href="#" title="Agregar como indicador"
 					 v-on:click="addMetricFromKey" style="color: #a7a7a7">
 					{{ featureInfo.Type }}
 				</a>
-
-				<div style="float: right" class="exp-hiddable-block" v-show="featureInfo.Key && featureInfo.Key.MetricId">
+				<div style="float: right" class="exp-hiddable-block" v-if="featureInfo.Key && featureInfo.Key.MetricId">
 					<button type="button" :disabled="isLast"
-									class="close lightButton smallerButton" :title="(isLast ? '' : positionalData + 'Siguiente')" v-on:click="next()">
+									class="close lightButton smallerButton" :title="(isLast ? '' : 'Siguiente' + positionalData)" v-on:click="next()">
 						<i class="fas fa-chevron-right" />
 					</button>
 					<button type="button" :disabled="isFirst" style="margin-right: -2px"
-									class="close lightButton smallerButton" :title="(isFirst ? '' : positionalData + 'Anterior')" v-on:click="previous()">
+									class="close lightButton smallerButton" :title="(isFirst ? '' : 'Anterior' + positionalData)" v-on:click="previous()">
 						<i class="fas fa-chevron-left" />
 					</button>
 				</div>
 			</div>
 			<hr class="moderateHr exp-hiddable-visiblity" v-if="hasTitle">
-			<div class='item' v-if="featureInfo.Code && featureInfo.Title">
-				Código: {{ val }}
+			<div>
+				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter">
+					<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
+									title="Seleccionar el perímetro" v-on:click="selectPerimeter">
+						<i class="fas fa-circle-notch" />
+
+					</button>
+				</div>
+				<div class='item' v-if="featureInfo.Code && featureInfo.Title">
+					Código: {{ val }}
+				</div>
+				<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
+					{{ capitalize(item.Name) }}: <mp-label :text="getValue(item)" />
+				</div>
+				<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 			</div>
-			<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
-				{{ capitalize(item.Name) }}: <mp-label :text="getValue(item)" />
-			</div>
-			<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 		</div>
 	</div>
 </template>
@@ -71,6 +77,17 @@ export default {
 		currentPosition() {
 			return arr.IndexByProperty(this.rows, 'FID', this.featureInfo.Key.Id);
 		},
+		hasPerimeter() {
+			if (!this.featureInfo.Key || !this.featureInfo.Key.VariableId || !this.lat || !this.lon) {
+				return false;
+			}
+			var variable = window.SegMap.GetVariable(this.featureInfo.Key.MetricId, this.featureInfo.Key.VariableId);
+			if (variable) {
+				return variable.ShowPerimeter;
+			} else {
+				return false;
+			}
+		},
 		positionAndSize() {
 			var curPos = this.currentPosition;
 			if (curPos === -1) {
@@ -96,7 +113,7 @@ export default {
 			if (curPos.position === -1) {
 				return '';
 			}
-			return (curPos.position + 1) + '/' + curPos.size + " | ";
+			return " (" + (curPos.position + 1) + '/' + curPos.size + ")";
 		},
 		isFirst() {
 			var curPos = this.positionAndSize;
@@ -140,6 +157,14 @@ export default {
 		},
 		next() {
 			window.SegMap.InfoWindow.Next();
+		},
+		selectPerimeter() {
+			var variable = window.SegMap.GetVariable(this.featureInfo.Key.MetricId, this.featureInfo.Key.VariableId);
+			if (variable && this.lat && this.lon) {
+				var radius = variable.Perimeter;
+				var pos = { Lat: this.lat, Lon: this.lon };
+				window.SegMap.Clipping.SetClippingCircleKms(pos, radius);
+			}
 		},
 		addMetricFromKey() {
 			if (this.featureInfo.Key.MetricId) {

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import h from '@/public/js/helper';
+import Mercator from '@/public/js/Mercator';
 import err from '@/common/framework/err';
 import arr from '@/common/framework/arr';
 
@@ -40,6 +41,20 @@ Clipping.prototype.ProcessFrameMoved = function (bounds) {
 	} else {
 		return false;
 	}
+};
+
+Clipping.prototype.SetClippingCircleKms = function (center, radius) {
+	var m = new Mercator();
+	var degreesLat = h.trimNumberCoords(m.metersToDegreesLatitude(radius * 1000));
+	var degreesLon = h.trimNumberCoords(m.metersToDegreesLongitude(center.Lat, radius * 1000));
+	var clippingCircle = {
+		Center: center,
+		Radius: {
+			Lat: degreesLat,
+			Lon: degreesLon,
+		},
+	};
+	this.SetClippingCircle(clippingCircle);
 };
 
 Clipping.prototype.SetClippingCircle = function (clippingCircle) {

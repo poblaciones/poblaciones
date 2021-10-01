@@ -46,7 +46,7 @@
 									</div>
 									<div v-if="Dataset.properties.CaptionColumn !== null" class="md-layout-item md-size-50 md-small-size-100">
 										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.ShowLabels">
-											Mostrar descripciones de los elementos
+											Mostrar descripciones
 										</md-switch>
 									</div>
 									<div class="md-layout-item md-size-50 md-small-size-100">
@@ -54,18 +54,24 @@
 											Mostrar etiquetas con los valores
 										</md-switch>
 									</div>
-									<div v-if="Dataset.properties.Type === 'L' && !Dataset.properties.AreSegments" class="md-layout-item md-size-100">
+									<div class="md-layout-item md-size-50 md-small-size-100" v-if="!Dataset.properties.AreSegments">
+										<md-switch class="md-primary" :disabled="!canEdit" @change="updatePerimeterVisibility" v-model="usePerimeter">
+											Mostrar perímetro de cobertura
+										</md-switch>
+										<mp-simple-text style="padding-left: 50px; margin-top: -8px" :canEdit="canEdit"
+																		type="number" v-show="usePerimeter" @enter="Save" ref="perimeter" label="Radio del perímetro" suffix="km"
+																		v-model="Variable.Perimeter"></mp-simple-text>
+									</div>
+									<div v-if="Dataset.properties.Type === 'L' && !Dataset.properties.AreSegments" class="md-layout-item md-size-50 md-small-size-100">
 										<md-switch class="md-primary" :disabled="!canEdit" v-model="Variable.Symbology.IsSequence">
 											Organizar los elementos como secuencia
 										</md-switch>
-
 										<mp-select label='Variable de secuencia' v-show="Variable.Symbology.IsSequence" :canEdit='canEdit && Variable.Symbology.IsSequence'
 															 v-model='Variable.Symbology.SequenceColumn'
 															 list-key='Id' :allowNull="true"
 															 :list='columnsForSequenceColumn'
 															 :render='formatColumn'
 															 helper='Seleccione la variable que da el orden a la secuencia' />
-
 									</div>
 								</div>
 							</md-card-content>
@@ -131,15 +137,33 @@ import f from '@/backoffice/classes/Formatter';
 
 export default {
   name: 'variableSymbology',
+	data() {
+		return {
+			usePerimeter: false,
+			Level: null,
+			Variable: null,
+			showDialog: false
+		};
+	},
   methods: {
 	show(level, variable) {
 			// Se pone visible
 			this.Level = level;
+
 			if (variable.Symbology.CutMode === null) {
 				variable.Symbology.CutMode = 'S';
 			}
 			this.Variable = f.clone(variable);
+			this.usePerimeter = this.Variable.Perimeter && this.Variable.Perimeter > 0;
 			this.showDialog = true;
+		},
+		updatePerimeterVisibility() {
+			if (this.usePerimeter) {
+				var loc = this;
+				setTimeout(() => {
+					loc.$refs.perimeter.focus();
+				}, 100);
+			}
 		},
 		hide() {
 			this.showDialog = false;
@@ -152,12 +176,19 @@ export default {
 				alert("Debe indicar una variable para el valor para la fórmula.");
 				return;
 			}
+			if (this.usePerimeter && !this.Variable.Perimeter) {
+				alert("El perímetro debe tener un valor numérico.");
+				return;
+			}
 			if (this.Variable.Symbology.IsSequence &&
 				!this.Variable.Symbology.SequenceColumn) {
 				alert("Debe indicar una variable que defina el orden de la secuencia.");
 				return;
 			}
 			var loc = this;
+			if (!this.usePerimeter) {
+				this.Variable.Perimeter = null;
+			}
 			this.$refs.invoker.doSave(this.Dataset,
 					this.Dataset.UpdateVariable, this.Level, this.Variable).then(function() {
 					loc.hide();
@@ -194,13 +225,6 @@ export default {
 				return '';
 			}
 		}
-	},
-	data() {
-		return {
-			Level: null,
-			Variable: null,
-			showDialog: false
-		};
 	},
 };
 </script>

@@ -18,6 +18,23 @@ Mercator.prototype.fromLatLngToPoint = function (latLng) {
 	return { x: x,	y: y };
 };
 
+Mercator.prototype.metersToDegreesLatitude = function (meters) {
+	var earth = 6378.137,  //radius of the earth in kilometer
+		pi = Math.PI,
+		m = (1 / ((2 * pi / 360) * earth)) / 1000;  //1 meter in degree
+
+	return meters * m;
+};
+
+Mercator.prototype.metersToDegreesLongitude = function (latitude, meters) {
+var earth = 6378.137,  //radius of the earth in kilometer
+    pi = Math.PI,
+    cos = Math.cos,
+    m = (1 / ((2 * pi / 360) * earth)) / 1000;  //1 meter in degree
+
+	return (meters * m) / cos(latitude * (pi / 180));
+};
+
 Mercator.prototype.fromPointToLatLng = function (point) {
 	return {
 		Lat: (2 * Math.atan(Math.exp((point.y - 128) / -(256 / (2 * Math.PI)))) -

@@ -17,7 +17,6 @@ class MetricsManager
 	{
 		$ret = array();
 		$data = $this->GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $filter);
-		print_r($data);
 		// Indica nulos
 		$hasNulls = $this->resolveNulls($data);
 		// Calcula total

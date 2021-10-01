@@ -315,10 +315,12 @@ AbstractSvgComposer.prototype.appendStyles = function (oSvg, tileUniqueId, label
 
 AbstractSvgComposer.prototype.dispose = function () {
 	this.clearText();
+	this.clearPerimeter();
 };
 
 AbstractSvgComposer.prototype.removeTileFeatures = function (tileKey) {
 	this.clearTileText(tileKey);
+	this.clearTilePerimeters(tileKey);
 	if (this.tileDataCache.hasOwnProperty(tileKey)) {
 		delete this.tileDataCache[tileKey];
 	}
