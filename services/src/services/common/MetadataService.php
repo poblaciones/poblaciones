@@ -4,7 +4,7 @@ namespace helena\services\common;
 
 use minga\framework\Date;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use minga\framework\IO;
+use minga\framework\Str;
 use minga\framework\PublicException;
 use minga\framework\Performance;
 use helena\caches\PdfMetadataCache;
@@ -63,8 +63,10 @@ class MetadataService extends BaseService
 		if ($fromDraft === false && $workId !== null)
 			Statistics::StoreDownloadMetadataHit($workId);
 
-	if ($fromDraft === false && PdfMetadataCache::Cache()->HasData($metadataId, $key, $data))
+		if ($fromDraft === false && PdfMetadataCache::Cache()->HasData($metadataId, $key, $data))
 		{
+			$friendlyName = Str::SanitizeFilename($friendlyName);
+
 			return App::SendFile($data)
 				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
 				->deleteFileAfterSend(true);
@@ -89,6 +91,7 @@ class MetadataService extends BaseService
 		{
 			PdfMetadataCache::Cache()->PutData($metadataId, $key, $filename);
 		}
+		$friendlyName = Str::SanitizeFilename($friendlyName);
 
 		return App::SendFile($filename)
 			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)

@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use helena\classes\App;
 use minga\framework\Profiling;
 use minga\framework\IO;
+use minga\framework\Str;
 use minga\framework\PublicException;
 
 class FileModel extends BaseModel
@@ -83,6 +84,7 @@ class FileModel extends BaseModel
 	public function SendFile($fileId, $friendlyName = '')
 	{
 		if ($friendlyName == "") $friendlyName = $fileId;
+		$friendlyName = Str::SanitizeFilename($friendlyName);
 
 		$outFile = IO::GetTempFilename();
 		$this->ReadFileToFile($fileId, $outFile);

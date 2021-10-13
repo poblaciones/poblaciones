@@ -145,7 +145,7 @@ export default {
 	},
 	computed: {
 		usePerimeter() {
-			return false;
+			return window.SegMap.Configuration.UsePerimeter;
 		}
 	},
 	methods: {

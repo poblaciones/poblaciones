@@ -131,7 +131,6 @@ export default {
 			ret.push({ caption: 'SPSS (.sav)', key: 's' });
 			ret.push({ caption: 'Stata (.dta)', key: 't' });
 			ret.push({ caption: 'R (.rdata)', key: 'r' });
-			ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
 			return ret;
 		},
 		resolveFileUrl(file) {

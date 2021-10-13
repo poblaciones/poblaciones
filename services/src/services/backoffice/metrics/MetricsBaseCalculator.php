@@ -22,7 +22,7 @@ abstract class MetricsBaseCalculator
 {
 	protected const STEP = 1000;
 
-	abstract protected function GetCaptionContent($element);
+	abstract protected function GetCaptionContentConnector($element);
 
 	public function StepPrepareData($datasetId, $cols)
 	{
@@ -119,7 +119,7 @@ abstract class MetricsBaseCalculator
 	{
 		$datasetColumn = new DatasetColumnService();
 		$name = $this->GetColumnName($datasetName, $calculatedField);
-		$label = $this->GetColumnCaption($metric, $variable, $source, $output, $caption, $dataset);
+		$label = $this->GetColumnCaption($metric, $variable, $source, $output, $caption, $dataset, $datasetName);
 
 		$col = $datasetColumn->GetColumnByVariable($dataset->getId(), $name);
 		if($col == null)
@@ -279,14 +279,14 @@ abstract class MetricsBaseCalculator
 		return $clean . '_' . $srcColumnName;
 	}
 
-	private function GetColumnCaption($metric, $variable, $source, $output, $caption, $dataset, $maxLength = 255)
+	private function GetColumnCaption($metric, $variable, $source, $output, $caption, $dataset, $datasetName, $maxLength = 255)
 	{
 		// - Distancia a radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
 		// - Valor de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
 		// - Latitud de radios con Hogares con al menos un indicador de NBI (2010) (> 10%, > 25%) [hasta 25 km]
 
-		$str = $caption . $this->GetCaptionContent($caption)
-			. $this->GetVariableName($metric, $variable)
+		$str = $caption . $this->GetCaptionContentConnector($caption)
+			. $this->GetVariableName($metric, $variable, $source, $datasetName)
 			. $this->GetValueLabelsCaption($metric, $source);
 		$dist = $this->GetDistanceCaption($output);
 		$str .= $dist;
@@ -309,13 +309,18 @@ abstract class MetricsBaseCalculator
 		return '';
 	}
 
-	private function GetVariableName($metric, $variable)
+	private function GetVariableName($metric, $variable, $source, $datasetName)
 	{
 		if($variable->getData() == 'O')
 		{
 			// Si tiene la apertura de "por", la incluye solamente si se usaron filtros
 			if ($variable->getSymbology()->getCutMode() == 'V')
-				return ' ' . $variable->getSymbology()->getCutColumn()->getCaption();
+			{
+				if(!$this->AreAllCategoriesSelected($metric, $source))
+					return ' ' . $variable->getSymbology()->getCutColumn()->getCaption();
+				else
+					return ' ' . $datasetName;
+			}
 			else
 				return ' ' . $variable->getCaption();
 		}
@@ -328,9 +333,14 @@ abstract class MetricsBaseCalculator
 		return ' (' . $metric['version']->Version->Name . ')';
 	}
 
+	private function AreAllCategoriesSelected($metric, $source)
+	{
+		return count($metric['variable']->ValueLabels) == count($source['ValueLabelIds']);
+	}
+
 	private function GetValueLabelsCaption($metric, $source)
 	{
-		if(count($metric['variable']->ValueLabels) == count($source['ValueLabelIds']))
+		if($this->AreAllCategoriesSelected($metric, $source))
 			return '';
 
 		$ret = ' (';

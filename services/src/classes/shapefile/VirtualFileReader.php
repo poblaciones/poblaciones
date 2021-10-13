@@ -26,7 +26,7 @@ class VirtualFileReader
 
 	public function isOpen()
 	{
-		return $this->handle === false;
+		return $this->handle !== false;
 	}
 
 	public function fclose()

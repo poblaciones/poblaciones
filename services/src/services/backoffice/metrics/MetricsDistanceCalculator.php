@@ -204,7 +204,7 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 		else
 			return '';
 	}
-	protected function GetCaptionContent($element)
+	protected function GetCaptionContentConnector($element)
 	{
 		if ($element == "Distancia")
 			return " con";

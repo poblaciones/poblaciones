@@ -206,7 +206,7 @@ export default {
 			return window.Context.CurrentWork;
 		},
 		usePerimeter() {
-			return false;
+			return window.SegMap.Configuration.UsePerimeter;
 		},
 		useGradients() {
 			return window.Context.Configuration.useGradients;

@@ -64,7 +64,7 @@ AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, 
 };
 
 AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElement, tileKey, tileBounds, colorMap) {
-	var usePerimeter = false;
+	var usePerimeter = window.SegMap.Configuration.UsePerimeter;
 	if (parseInt(variable.ShowPerimeter) == 0 || !usePerimeter) {
 		return;
 	}

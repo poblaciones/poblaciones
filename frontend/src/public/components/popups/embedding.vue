@@ -100,6 +100,18 @@ export default {
 			} else {
 				// compacto
 				url = str.AppendParam(url, 'co', 1);
+				// saca el /f= del panel abierto
+				var argStart = url.indexOf('#');
+				if (argStart > 0) {
+					var fStart = url.indexOf('/f=', argStart);
+					if (fStart > 0) {
+						var fEnd = url.indexOf('/', fStart);
+						if (fEnd === -1) {
+							fEnd = url.length;
+						}
+						url = url.substr(0, fEnd);
+					}
+				}
 			}
 			var tabindex = '';
 			// estático?

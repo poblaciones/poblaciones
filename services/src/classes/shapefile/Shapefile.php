@@ -834,7 +834,7 @@ abstract class Shapefile
                         $this->filenames[$type] = realpath($files[$type]);
                         $handle = $vf;
 												//// $handle = fopen($files[$type], $mode);
-                        if ($handle->isOpen()) {
+                        if (!$handle->isOpen()) {
                             throw new ShapefileException(Shapefile::ERR_FILE_OPEN, $files[$type]);
                         }
                         ////$this->filenames[$type] = realpath(stream_get_meta_data($files[$type])['uri']);

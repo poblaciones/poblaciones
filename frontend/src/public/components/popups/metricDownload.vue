@@ -211,6 +211,7 @@ export default {
 			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
 			ret.push({ caption: 'Excel con GeoJSON (.xlsx)', key: 'xg' });
 			ret.push({ caption: 'Excel con WKT (.xlsx)', key: 'xw' });
+			ret.push({ caption: 'SPSS con WKT (.sav)', key: 'sw' });
 			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
 			return ret;
 		},

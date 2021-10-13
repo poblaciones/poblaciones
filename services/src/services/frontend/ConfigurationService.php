@@ -30,6 +30,7 @@ class ConfigurationService extends BaseService
 									'UseGradients' => Context::Settings()->Map()->UseGradients,
 									'UseTextures' => Context::Settings()->Map()->UseTextures,
 
+									'UsePerimeter' =>  Context::Settings()->Map()->UsePerimeter,
 									'UseFavorites' => Context::Settings()->Map()->UseFavorites,
 									'UseEmbedding' => Context::Settings()->Map()->UseEmbedding,
 									'UseUrbanity' => Context::Settings()->Map()->UseUrbanity,

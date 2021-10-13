@@ -78,7 +78,7 @@ export default {
 			return arr.IndexByProperty(this.rows, 'FID', this.featureInfo.Key.Id);
 		},
 		usePerimeter() {
-			return false;
+			return window.SegMap.Configuration.UsePerimeter;
 		},
 		hasPerimeter() {
 			if (!this.featureInfo.Key || !this.featureInfo.Key.VariableId || !this.lat || !this.lon) {

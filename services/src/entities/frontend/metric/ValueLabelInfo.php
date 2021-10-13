@@ -40,6 +40,8 @@ class ValueLabelInfo extends BaseMapModel
 			$this->LineColor = "#" . $this->LineColor;
 		if ($this->FillColor != null && Str::StartsWith($this->FillColor, "#") == false)
 			$this->FillColor = "#" . $this->FillColor;
+		if ($this->FillColor === null)
+			$this->FillColor = "#000000";
 	}
 
 }

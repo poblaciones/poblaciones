@@ -222,7 +222,7 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 		return $ret;
 	}
 
-	protected function GetCaptionContent($element)
+	protected function GetCaptionContentConnector($element)
 	{
 		return ' de';
 	}

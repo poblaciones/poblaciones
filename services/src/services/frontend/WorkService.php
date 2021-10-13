@@ -5,6 +5,7 @@ namespace helena\services\frontend;
 use minga\framework\PublicException;
 use helena\entities\frontend\work\WorkInfo;
 use helena\entities\frontend\metadata\MetadataInfo;
+use helena\services\backoffice\publish\PublishDataTables;
 
 use helena\services\common\BaseService;
 use helena\classes\Links;
@@ -37,7 +38,8 @@ class WorkService extends BaseService
 			throw new PublicException("La cartografía no ha sido encontrada.");
 		}
 		$ret = new WorkInfo();
-		$ret->CanEdit = Session::IsWorkEditor($workId);
+		$workIdUnShardified = PublishDataTables::Unshardify($workId);
+		$ret->CanEdit = Session::IsWorkEditor($workIdUnShardified);
 		$ret->Fill($work);
 		$ret->FillStartup($work);
 		if ($work['met_extents'])

@@ -142,7 +142,7 @@ export default {
 		},
 	},
 	mounted() {
-
+		this.setDefaults();
 	},
 	data() {
 		return {
@@ -191,6 +191,9 @@ export default {
 		},
 		setDefaults() {
 			// busca defaults posibles para latitude, longitude y polygon
+			if (!this.Dataset) {
+				return;
+			}
 			var numericColumns = this.Dataset.GetNumericColumns();
 			var textColumns = this.Dataset.GetTextColumns();
 			this.forceShow = false;
