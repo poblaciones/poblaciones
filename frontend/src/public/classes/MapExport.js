@@ -16,7 +16,7 @@ MapExport.prototype.ExportImage = function (format) {
 	var loc = this;
 	this.imageFormat = format;
 	this.minRatio = .66;
-	loc.prepareMapAndExport(loc.generateImage, 2, []);
+	loc.prepareMapAndExport(loc.generateImage, 2);
 };
 
 MapExport.prototype.ExportPdf = function (landscape) {
@@ -38,7 +38,6 @@ MapExport.prototype.generatePngInternal = function (canvas, scale) {
 	div.style.position = "absolute";
 	div.style.right = '0';
 	div.style.zIndex = 10;
-	//var container = document.body;
 	var container = document.getElementById('holder');
 	container.appendChild(div);
 	return div;
@@ -52,6 +51,13 @@ MapExport.prototype.generateImage = function (canvas) {
 	document.body.appendChild(a);
 	a.click();
 	a.parentNode.removeChild(a);
+};
+
+MapExport.prototype.postImage = function (canvas) {
+	var loc = this;
+	canvas.toBlob(function (blob) {
+		window.SegMap.PostWorkPreview(loc.currentWork, blob);
+	}, 'image/png');
 };
 
 MapExport.prototype.generatePdf = function (canvas) {
@@ -114,10 +120,19 @@ MapExport.prototype.ignoreFilter = function (ele) {
 	return (ele.id === 'waitMessage' || ele.nodeName === 'IFRAME');
 };
 
-MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
+MapExport.prototype.ExportPreview = function () {
 	var loc = this;
-	window.Popups.WaitMessage.show('Completando información del mapa ...');
+	window.SegMap.SetTimeout(5000).then(function () {
+		loc.prepareMapAndExport(loc.postImage, 1, true);
+	//	loc.prepareMapAndExport(loc.generateImage, 1, true);
+	});
+};
 
+MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previewExport = false) {
+	var loc = this;
+	if (!previewExport) {
+		window.Popups.WaitMessage.show('Completando información del mapa ...');
+	}
 	var addClasses = [
 		// saca borde al panel derecho
 		{ class: 'card panel-body', extraclass: 'exp-panel' },
@@ -145,7 +160,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 		{ attribute: 'visibility', set: 'hidden', restore: 'visible', class: 'exp-hiddable-visiblity' },
 		// permite más contenido en body
 		{ attribute: 'overflow', set: 'visible', restore: 'hidden', class: '#dbody' },
-		{ attribute: 'overflow', set: 'visible', restore: 'hidden', class: '#holder' }//,
+		{ attribute: 'overflow', set: 'visible', restore: 'hidden', class: '#holder' },
 	];
 
 	this.hideInteractiveElements(addClasses, attributesByClass);
@@ -153,10 +168,10 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 	var panRight = document.getElementById('panSummary');
 	var panMain = document.getElementById('panMain');
 	var panHolder = document.getElementById('holder');
+	var panRightHeight = panRight.offsetHeight;
 
 	if (window.SegMap.Clipping.FrameHasClippingRegionId() || window.SegMap.Clipping.FrameHasClippingCircle()) {
 		// solo redimensiona el mapa cuando hay una región de clipping o un círculo marcados
-		var panRightHeight = panRight.offsetHeight;
 		var minHeight = panMain.clientWidth * loc.minRatio;
 
 		var newHeight;
@@ -174,7 +189,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 	var keepPanHolder = panHolder.style.height;
 	var keepPanMain = panMain.style.height;
 
-	panHolder.style.height = (Math.max(newHeight, panRight.offsetHeight + 1) + 2) + "px";
+	panHolder.style.height = (Math.max(newHeight, panRightHeight + 1) + 2) + "px";
 	panMain.style.height = newHeight + "px";
 
 	// se asegura de tener los datos
@@ -182,13 +197,17 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 		return window.SegMap.MapsApi.WaitForFullLoading().then(function () {
 			return window.SegMap.WaitForFullLoading().then(function () {
 
-				window.Popups.WaitMessage.show('Preparando visualización ...');
+				if (!previewExport) {
+					window.Popups.WaitMessage.show('Preparando visualización ...');
+				}
 				// saca scrollbar de panel de resumen
 				var hideSecond = [{ attribute: 'overflow-y', set: 'hidden', restore: 'auto', class: '#panRight' },
 				// oculta el spliter
-				{ attribute: 'display', set: 'none', restore: 'block', class: 'gutter gutter-horizontal' },
-				// bordes
-				{ attribute: 'border', set: '1px solid #ddd', restore: 'unset', class: '#holder' }];
+				{ attribute: 'display', set: 'none', restore: 'block', class: 'gutter gutter-horizontal' }];
+				if (!previewExport) {
+					// bordes
+					hideSecond.push({ attribute: 'border', set: '1px solid #ddd', restore: 'unset', class: '#holder' });
+				}
 				var workColor = loc.resolveWorkColor();
 				if (workColor !== null) {
 					hideSecond.push({
@@ -200,15 +219,19 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 				attributesByClass = attributesByClass.concat(hideSecond);
 
 				html2canvas(panRight, { useCORS: true, scale: scale, ignoreElements: loc.ignoreFilter }).then(function (canvasPanRight) {
-					var divPanel = loc.generatePngInternal(canvasPanRight, scale);
-
+					var divPanel = null;
+					if (!previewExport) {
+						divPanel = loc.generatePngInternal(canvasPanRight, scale);
+					}
 					return window.SegMap.SetTimeout(50).then(function () {
-
-						return html2canvas(document.body, { useCORS: true, scale: scale, ignoreElements: loc.ignoreFilter }).then(function (canvasBody) {
+						var ele = (previewExport ? panMain : document.body);
+						return html2canvas(ele, { useCORS: true, scale: scale, ignoreElements: loc.ignoreFilter }).then(function (canvasBody) {
 
 							exportFunction.apply(loc, [canvasBody]);
 
-							loc.restoreInteractiveElements(addClasses, attributesByClass);
+							if (!previewExport) {
+								loc.restoreInteractiveElements(addClasses, attributesByClass);
+							}
 
 							if (keepPanHolder) {
 								panHolder.style.height = keepPanHolder;
@@ -217,7 +240,9 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale) {
 								panMain.style.height = "100%";
 								panHolder.style.height = "100%";
 							}
-							divPanel.parentNode.removeChild(divPanel);
+							if (divPanel) {
+								divPanel.parentNode.removeChild(divPanel);
+							}
 						}).finally(function () { window.Popups.WaitMessage.close(); });
 					});
 				});

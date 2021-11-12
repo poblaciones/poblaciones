@@ -106,13 +106,11 @@
 											</span>
 										</template>
 										<template v-if="variable.FilterValue !== null">
-											(
-											<span>
-												{{ f.formatColumn(getFilterColumn(variable), true) }}
+											(<span>{{ f.formatColumn(getFilterColumn(variable), true) }}
 												<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(getFilterColumn(variable))">
 													{{  f.formatColumnTooltip(getFilterColumn(variable)) }}
 												</md-tooltip>
-											</span>{{ formatFilterOperator(variable) }}{{ formatFilterValue(variable) }})
+											</span><span style="font-family: sans-serif;">{{ formatFilterOperator(variable) }}</span>{{ formatFilterValue(variable) }})
 										</template>
 									</span>
 									<md-button class="md-icon-button" @click="openVariableFormulaEdition(item, variable)">

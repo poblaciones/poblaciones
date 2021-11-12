@@ -48,6 +48,7 @@ class MetricService extends BaseService
 		$version = new entities\DraftMetricVersion();
 		$version->setMultilevel(false);
 		$metric = new entities\DraftMetric();
+		$metric->setIsBasicMetric(false);
 		$level->setMetricVersion($version);
 		$version->setCaption(Date::CurrentYear());
 		$version->setMetric($metric);
@@ -573,7 +574,7 @@ class MetricService extends BaseService
 							'MetricVersion.Id', $existingVersion->getId());
 		foreach($existingLevels as $existingLevel)
 		{
-			if ($existingLevel->getDataset()->getMultilevelMatrix() !== $dataset()->getMultilevelMatrix())
+			if ($existingLevel->getDataset()->getMultilevelMatrix() !== $dataset->getMultilevelMatrix())
 			{
 				throw new PublicException("No es posible agregar a un nivel a la versión '" .
 						$existingVersion->getCaption() . "' debido a que ya tiene niveles en datasets que no están vinculados al dataset

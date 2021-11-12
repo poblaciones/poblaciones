@@ -2,6 +2,7 @@
 - Fix: el botón de editar no estaba apareciendo sobre el mapa incluso si el usuario tenía permisos.
 - Fix: para descarga de delimitaciones, ofrecía 'shapefile sin polígono'.
 - Fix: al embeber compacto no replica el panel izquierdo abierto.
+- Fix: el nombre de la selección active no estaba reflejándose en el nombre de la solapa del navegador.
 
 v3.01 (2021-09-30)
 - Leyenda opcional en cada variable de indicador.

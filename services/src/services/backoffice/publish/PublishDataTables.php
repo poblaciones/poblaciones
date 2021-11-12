@@ -154,10 +154,13 @@ class PublishDataTables
 		// Limpia efectos de haber editado la institución y ahora republicarla
 		$workModel = new WorkModel();
 		$works = $workModel->GetInstitutionsByWork($workId);
-		foreach($works as $work)
+		foreach($works as $selectedWork)
 		{
-			$this->CleanWorkMetadataCachesByInstitution($work['institution_id']);
+			$this->CleanWorkMetadataCachesByInstitution($selectedWork['institution_id']);
 		}
+		// Limpia el caché de previews
+		$work->setPreviewFileId(null);
+		App::Orm()->save($work);
 	}
 	private function CleanWorkMetadataCachesByInstitution($institutionId)
 	{

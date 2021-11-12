@@ -194,12 +194,12 @@ html, body {
 .mp-area {
 	left: 0 !important;
 	margin-bottom: 2px;
+	line-height: 1.5em;
 	color: #448aff!important;
 	font-size: 14px!important;
 	border: 1px solid whitesmoke!important;
 	margin-top: 10px;
 	margin-bottom: 5px;
-	line-height: 1.3em;
 	padding-top: 6px;
 	padding-left: 6px !important;
 }

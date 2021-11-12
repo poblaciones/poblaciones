@@ -264,6 +264,9 @@ SegmentedMap.prototype.ZoomChanged = function (zoom) {
 	}
 };
 SegmentedMap.prototype.FrameMoved = function (bounds) {
+	if (!this.frame) {
+		return;
+	}
 	this.frame.Envelope.Min = bounds.Min;
 	this.frame.Envelope.Max = bounds.Max;
 	if (this.Clipping.ProcessFrameMoved() === false) {
@@ -377,6 +380,16 @@ SegmentedMap.prototype.ChangeMetricIndex = function (oldIndex, newIndex) {
 	this.Metrics.MoveFrom(oldIndex, newIndex);
 	this.UpdateMap();
 	this.SaveRoute.UpdateRoute();
+};
+
+SegmentedMap.prototype.PostWorkPreview = function (work, blobPng) {
+	const FormData2 = require('form-data');
+	const formData = new FormData2();
+	formData.append("ws", work.Id);
+	formData.append('preview', blobPng, 'preview.png');
+	const config = { headers: { 'content-type': 'multipart/form-data' }};
+
+	return this._axios.post(window.host + '/services/backoffice/PostWorkPreview', formData, config);
 };
 
 SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelection) {

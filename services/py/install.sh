@@ -25,7 +25,7 @@ USAR PYTHON 3.7.11 (no 3.8)
 # > which python
 
 # Desde la carpeta de python hacer:
-./python -m pip install savReaderWriter
+./python -m pip install [--user] savReaderWriter
 ./python -m pip install ijson
 ./python -m pip install numpy
 
@@ -33,10 +33,6 @@ USAR PYTHON 3.7.11 (no 3.8)
 ./python -m pip install bs4
 ./python -m pip install lxml
 ./python -m pip install unicodecsv
-
-# resize de imágenes
-./python -m pip install pillow
-
 
 # sta
 ./python -m pip install pandas

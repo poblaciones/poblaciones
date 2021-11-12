@@ -128,7 +128,9 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 			// no tiene por default y no hay en la ruta
 			var current = this.workReference.Current;
 			if (current.Metrics.length > 1) {
-				window.Popups.AddMetric.show(current.Metrics, current.Id);
+				if (!window.Embedded.Active || !window.Embedded.Compact) {
+					window.Popups.AddMetric.show(current.Metrics, current.Id);
+				}
 			} else if (current.Metrics.length === 1) {
 				list.push({ Id: current.Metrics[0].Id });
 			}
@@ -181,10 +183,10 @@ StartMap.prototype.StartByDefaultFrame = function (frame, extrafunc) {
 	};
 	loc.SetupMap(afterLoaded);
 
-	if (this.frameReference.frame.Center.Lat && this.frameReference.frame.Center.Lon) {
+	if (this.frameReference.frame && this.frameReference.frame.Center.Lat && this.frameReference.frame.Center.Lon) {
 		window.SegMap.SetCenter(this.frameReference.frame.Center);
 	}
-	if (this.frameReference.frame.Zoom || this.frameReference.frame.Zoom === 0) {
+	if (this.frameReference.frame && (this.frameReference.frame.Zoom || this.frameReference.frame.Zoom === 0)) {
 		window.SegMap.SetZoom(this.frameReference.frame.Zoom);
 	}
 	this.Finish();

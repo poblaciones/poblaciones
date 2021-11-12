@@ -536,6 +536,7 @@ ActiveWork.prototype.UpdateHasChanges = function (value) {
 			this.workListMetadata[n].UpdateUser = f.formatFullName(window.Context.User);
 			if (value == 0) {
 				this.workListMetadata[n].MetadataLastOnline = new Date();
+				this.workListMetadata[n].PreviewId = null;
 				this.workListMetadata[n].LastOnlineUser = f.formatFullName(window.Context.User);
 			}
 			break;

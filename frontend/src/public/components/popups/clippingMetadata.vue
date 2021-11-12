@@ -6,27 +6,27 @@
 					<tbody>
 						<tr>
 							<td>Título:</td>
-							<td>{{ metadata.Name }}</td>
+							<td class='tdWrappable'>{{ metadata.Name }}</td>
 						</tr>
 						<tr v-if="metadata.Authors">
 							<td>Autores:</td>
-							<td>{{ metadata.Authors }}</td>
+							<td class='tdWrappable'>{{ metadata.Authors }}</td>
 						</tr>
 						<tr v-if="metadata.Institution">
 							<td>Institución:</td>
-							<td>{{ metadata.Institution }}</td>
+							<td class='tdWrappable'>{{ metadata.Institution }}</td>
 						</tr>
 						<tr v-if="metadata.Date">
 							<td>Publicación:</td>
-							<td>{{ metadata.Date }}</td>
+							<td class='tdWrappable'>{{ metadata.Date }}</td>
 						</tr>
 						<tr v-if="metadata.Abstract">
 							<td>Resumen:</td>
-							<td>{{ metadata.Abstract }} </td>
+							<td class='tdWrappable'>{{ metadata.Abstract }} </td>
 						</tr>
 						<tr>
 							<td>Cita (APA):</td>
-							<td class="quotation">
+							<td class="quotation tdWrappable">
 								<span v-html="citationAPA(metadata)"> </span>
 								<a href="#" v-clipboard="() => citationAPAText(metadata)" class="superSmallButton">
 									Copiar
@@ -53,7 +53,7 @@
 						</tr>
 						<tr v-if="metadata.Files && metadata.Files.length > 0">
 							<td>Adjuntos:</td>
-							<td><div class="attachmentsDownloadPanel">
+							<td class='tdWrappable'><div class="attachmentsDownloadPanel">
 								<span v-for="file in metadata.Files" :key="file.Id">
 									<a target="_blank" :href="resolveFileUrl(file)">
 										<file-pdf-icon title="Descargar" /> {{ file.Caption }}

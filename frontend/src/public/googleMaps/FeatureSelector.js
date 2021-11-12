@@ -233,7 +233,7 @@ FeatureSelector.prototype.RenderTooltip = function (feature) {
 		html = "<div class='" + divider + "'>" + str.EscapeHtml(caption) + '</div>';
 	}
 	if (value) {
-		html += '<div>' + str.EscapeHtml(value) + '</div>';
+		html += '<div>' + value + '</div>';
 	}
 	if (html === '') {
 		html = null;

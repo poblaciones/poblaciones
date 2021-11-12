@@ -10,6 +10,8 @@ use helena\entities\backoffice as entities;
 use minga\framework\Params;
 use minga\framework\PublicException;
 use helena\db\frontend\SnapshotMetricModel;
+use helena\services\backoffice\publish\PublishDataTables;
+
 
 // ********************************* Servicios *********************************
 
@@ -129,6 +131,13 @@ App::$app->get('/services/backoffice/GetCurrentUserWorks', function (Request $re
 	return App::Json($controller->GetCurrentUserWorks());
 });
 
+App::$app->get('/services/backoffice/GetWorkPreview', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+	$controller = new services\WorkService();
+	return App::Json($controller->GetWorkPreview($workId));
+});
+
 App::$app->get('/services/backoffice/GetInstitutionWatermark', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
@@ -232,6 +241,21 @@ App::$app->get('/services/backoffice/RequestReview', function (Request $request)
 	$controller = new services\WorkService();
 	return App::Json($controller->RequestReview($workId));
 });
+
+App::$app->post('/services/backoffice/PostWorkPreview', function (Request $request) {
+	$workId = Params::GetIntMandatory('ws');
+	$workIdUnShardified = PublishDataTables::Unshardify($workId);
+
+	if ($denied = Session::CheckIsWorkEditor($workIdUnShardified)) return $denied;
+
+	$controller = new services\WorkService();
+	$tmp = Params::GetUploadedImage('preview', 1024 * 100);
+	$ret = App::Json($controller->PostWorkPreview($workIdUnShardified, $tmp));
+	unlink($tmp);
+	return $ret;
+});
+
+
 
 App::$app->get('/services/backoffice/StartPublishWork', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');

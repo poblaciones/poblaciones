@@ -4,7 +4,7 @@ namespace helena\services\backoffice;
 
 use minga\framework\Arr;
 use minga\framework\Str;
-use minga\framework\Date;
+use minga\framework\IO;
 use minga\framework\Context;
 use minga\framework\Profiling;
 use minga\framework\ErrorException;
@@ -118,6 +118,36 @@ class WorkService extends BaseService
 		$permissionDefault->setPermission('A');
 		$permissionDefault->setWork($work);
 		App::Orm()->Save($permissionDefault);
+	}
+
+	public function GetWorkPreview($workId)
+	{
+		$work = App::Orm()->find(DraftWork::class, $workId);
+		$preview = $work->getPreviewFileId();
+		if (!$preview) {
+			return ['DataUrl' => null];
+		}
+		$fileModel = new FileModel(true);
+		$outFile = IO::GetTempFilename() . '.tmp';
+		$fileModel->ReadFileToFile($preview, $outFile);
+
+		$fileController = new FileService();
+		$dataURL = $fileController->ConvertFiletoBase64($outFile);
+		IO::Delete($outFile);
+		return ['DataUrl' => $dataURL];
+	}
+	public function PostWorkPreview($workId, $tmpFilename)
+	{
+		$fs = new FileService();
+
+		$file = $fs->Create('Preview de ' . $workId, "image/png");
+
+		$fs->SaveFile($file, $tmpFilename, true, "image/png");
+		$work = App::Orm()->find(DraftWork::class, $workId);
+
+		$work->setPreviewFileId($file->getId());
+		App::Orm()->Save($work);
+		return $file->getId();
 	}
 
 	public function GetWorkInfo($workId)
@@ -558,6 +588,8 @@ class WorkService extends BaseService
 								wrk_metric_data_changed) HasChanges
 								, wrk_is_private IsPrivate
 								, wrk_is_indexed IsIndexed
+								, wrk_access_link AccessLink
+								, wrk_preview_file_id PreviewId
 								, wrk_segmented_crawling SegmentedCrawling
 								, wrk_type Type
 								, wrk_unfinished Unfinished

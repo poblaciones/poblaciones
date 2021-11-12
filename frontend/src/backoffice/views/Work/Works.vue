@@ -164,7 +164,8 @@ export default {
 				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 			},
 			lastest() {
-				var listCopy = f.clone(this.list);
+				var listCopy = [];
+				arr.AddRange(listCopy, this.list);
 				this.doSort(listCopy, 'History', 'desc');
 				return listCopy.slice(0, 4);
 			},
@@ -303,6 +304,7 @@ export default {
 						item.Updated = new Date();
 						item.UpdateUser = f.formatFullName(window.Context.User);
 						item.MetadataLastOnline = new Date();
+						item.PreviewId = null;
 						item.LastOnlineUser = f.formatFullName(window.Context.User);
 						window.Db.ReleaseWork(item.Id);
 						});
@@ -332,6 +334,7 @@ export default {
 			this.$refs.stepper.setTitle('Revocando publicación');
 			this.$refs.stepper.Start().then(function () {
 						item.MetadataLastOnline = null;
+						item.PreviewId = null;
 						window.Db.ReleaseWork(item.Id);
 					});
 		},

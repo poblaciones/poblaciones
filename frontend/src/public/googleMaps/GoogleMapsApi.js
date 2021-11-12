@@ -7,6 +7,7 @@ import h from '@/public/js/helper';
 import { setTimeout } from 'core-js';
 
 export default GoogleMapsApi;
+// https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
 
 function GoogleMapsApi(google) {
 	this.google = google;

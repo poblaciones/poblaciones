@@ -83,9 +83,16 @@ class DraftWork
     /**
      * @var integer
      *
-     * @ORM\Column(name="wrk_shard", type="integer", precision=0, scale=0, nullable=false, unique=false)
-     */
+		 * @ORM\Column(name="wrk_shard", type="integer", precision=0, scale=0, nullable=false, unique=false)
+		 */
     private $Shard;
+
+		/**
+		 * @var integer
+		 *
+		 * @ORM\Column(name="wrk_preview_file_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $PreviewFileId;
 
 
 		/**
@@ -624,6 +631,30 @@ class DraftWork
     public function getShard()
     {
         return $this->Shard;
+    }
+
+		/**
+		 * Set previewFileId
+		 *
+		 * @param integer $previewFileId
+		 *
+		 * @return DraftWork
+		 */
+    public function setPreviewFileId($previewFileId)
+    {
+			$this->PreviewFileId = $previewFileId;
+
+			return $this;
+    }
+
+    /**
+		 * Get previewFileId
+		 *
+		 * @return integer
+		 */
+    public function getPreviewFileId()
+    {
+			return $this->PreviewFileId;
     }
 
     /**

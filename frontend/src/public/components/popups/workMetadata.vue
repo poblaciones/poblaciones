@@ -5,33 +5,33 @@
 				<tbody>
 					<tr>
 						<td>Título:</td>
-						<td>{{ work.Metadata.Name }}</td>
+						<td class='tdWrappable'>{{ work.Metadata.Name }}</td>
 					</tr>
 					<tr v-if="work.Metadata.Authors">
 						<td>Autores:</td>
-						<td>{{ work.Metadata.Authors }}</td>
+						<td class='tdWrappable'>{{ work.Metadata.Authors }}</td>
 					</tr>
 					<tr v-if="level">
 						<td>Dataset:</td>
-						<td>{{ level.Dataset.Name }}</td>
+						<td class='tdWrappable'>{{ level.Dataset.Name }}</td>
 					</tr>
 					<tr v-if="work.Metadata.ReleaseDate">
 						<td>Publicación:</td>
-						<td>{{ formattedReleaseDate }}</td>
+						<td class='tdWrappable'>{{ formattedReleaseDate }}</td>
 					</tr>
 					<tr v-if="work.Metadata.Abstract">
 						<td>Resumen:</td>
-						<td>{{ work.Metadata.Abstract }}</td>
+						<td class='tdWrappable'>{{ work.Metadata.Abstract }}</td>
 					</tr>
 					<tr>
 						<td style="width: 120px;">Dirección:</td>
-						<td>
+						<td class='tdWrappable'>
 							<a target="_blank" :href="completeUrl(work.Url)">{{ completeUrl(work.Url) }}</a>
 						</td>
 					</tr>
 					<tr>
 						<td>Cita (APA):</td>
-						<td class="quotation">
+						<td class="quotation tdWrappable">
 							<span v-html="citationAPA()"> </span>
 							<a href="#" v-clipboard="() => citationAPAText()" class="superSmallButton">
 								Copiar
@@ -67,7 +67,7 @@
 					</tr>
 					<tr v-if="work.Metadata.Files && work.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
-						<td><div class="attachmentsDownloadPanel">
+						<td class='tdWrappable'><div class="attachmentsDownloadPanel">
 							<span v-for="file in work.Metadata.Files" :key="file.Id">
 								<a target="_blank" :href="resolveFileUrl(file)">
 									<file-pdf-icon title="Descargar" /> {{ file.Caption }}

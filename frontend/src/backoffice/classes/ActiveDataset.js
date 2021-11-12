@@ -266,8 +266,11 @@ ActiveDataset.prototype.parseFilter = function (variable) {
 	var parts = variable.FilterValue.split("\t");
 	var operator = parts[1];
 	var isUnary = false;
-	var formattedOperator = operator;
-	if (operator == 'LIKE') {
+	var formattedOperator = ' ' + operator + ' ';
+
+	if (operator == '<>') {
+		formattedOperator = ' ≠ ';
+	} else if (operator == 'LIKE') {
 		formattedOperator = ' contiene ';
 	} else if (operator == 'NOT LIKE') {
 		formattedOperator = ' no contiene ';

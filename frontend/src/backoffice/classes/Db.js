@@ -145,6 +145,11 @@ Db.prototype.GetStepWorkRevokeUrl = function () {
 	return window.host + '/services/backoffice/StepRevokeWork';
 };
 
+Db.prototype.GetWorkPreview = function (workId) {
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetWorkPreview',
+		{ 'w': workId }, 'obtener la vista previa');
+};
+
 Db.prototype.LoadWorks = function () {
 	const loc = this;
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetCurrentUserWorks',
@@ -170,6 +175,8 @@ Db.prototype.CreateWork = function (newWorkName, type) {
 				res.GeorreferencedCount = 0;
 				res.Caption = newWorkName;
 				res.MetadataLastOnline = null;
+				res.PreviewId = null;
+
 				window.Context.Cartographies.push(res);
 				return res;
 	});

@@ -61,12 +61,11 @@ class TileDataService extends BaseService
 			Profiling::EndTimer();
 			return $this->GotFromCache($data);
 		}
-		else
-		{
-			Performance::CacheMissed();
-		}
 
 		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z);
+
+		Performance::CacheMissed();
+		Performance::SetMethod("get");
 
 		if ($frame->ClippingCircle == null)
 			TileDataCache::Cache()->PutData($metricId, $key, $data);

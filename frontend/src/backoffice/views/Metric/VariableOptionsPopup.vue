@@ -206,10 +206,10 @@ export default {
 			return window.Context.CurrentWork;
 		},
 		usePerimeter() {
-			return window.SegMap.Configuration.UsePerimeter;
+			return window.Context.Configuration.UsePerimeter;
 		},
 		useGradients() {
-			return window.Context.Configuration.useGradients;
+			return window.Context.Configuration.UseGradients;
 		},
 		columnsForSequenceColumn() {
 			return this.Dataset.GetColumnsForSequenceColumn();

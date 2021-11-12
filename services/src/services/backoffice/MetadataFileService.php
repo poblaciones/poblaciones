@@ -137,7 +137,9 @@ class MetadataFileService extends BaseService
 
 		// Guarda el archivo
 		$toDrafts = true;
-		$this->SaveFile($metadataFile->getFile(), $tempFilename, $toDrafts);
+
+		$fs = new FileService();
+		$fs->SaveFile($metadataFile->getFile(), $tempFilename, $toDrafts, 'application/pdf');
 
 		// Guarda la metadata
 		App::Orm()->save($metadataFile);
@@ -161,55 +163,6 @@ class MetadataFileService extends BaseService
 		else
 			return $table;
 	}
-
-	private function SaveFile($fileObject, $tempFilename, $toDrafts)
-	{
-		if ($fileObject === null && $tempFilename !== null)
-			throw new PublicException('Para guardar el adjunto debe haber un archivo.');
-
-		if ($fileObject === null) return null;
-		if ($tempFilename === null) return $fileObject;
-
-		// Tiene que insertar en la base de datos
-		$fileId = $fileObject->getId();
-		// Guarda por si filename cambió o es nuevo
-		$fileObject->setSize(filesize($tempFilename));
-		App::Orm()->save($fileObject);
-		$fileId = $fileObject->getId();
-		// Ya tiene el id de file, sube los chunks
-		if ($tempFilename != null)
-		{
-			// resuelve type
-			$fileObject->setType('application/pdf');
-			// resuelve páginas
-			$pages = PdfReader::GetPageCount($tempFilename);
-			if ($pages == 0) $pages = null;
-			$fileObject->setPages($pages);
-			App::Orm()->save($fileObject);
-			// Graba
-			$this->saveChunks($fileId, $tempFilename, $toDrafts);
-		}
-		return $fileObject;
-	}
-
-	private function saveChunks($fileId, $tempFilename, $toDrafts)
-	{
-		App::Db()->exec("DELETE FROM " . $this->makeTableName('file_chunk', $toDrafts) . " WHERE chu_file_id = ?", array($fileId));
-		$unread = filesize($tempFilename);
-		if (!file_exists($tempFilename))
-			throw new PublicException('No se ha transferido correctamente el archivo al servidor.');
-		$handle = fopen($tempFilename, "rb");
-
-		while($unread > 0)
-		{
-			$contents = fread($handle, self::PAGESIZE);
-			$sql = "INSERT INTO " . $this->makeTableName('file_chunk', $toDrafts) . " (chu_file_id, chu_content) VALUES (?, ?)";
-			App::Db()->exec($sql, array($fileId, $contents));
-			$unread -= strlen($contents);
-		}
-		fclose($handle);
-	}
-
 
 	public function GetMetadataFile($metadataId, $fileId)
 	{

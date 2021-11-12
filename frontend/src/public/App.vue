@@ -29,6 +29,7 @@
 	import StartMap from '@/public/classes/StartMap';
 	import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 	import WorkPanel from '@/public/components/panels/workPanel';
+	import MapExport from '@/public/classes/MapExport';
 	import MapPanel from '@/public/components/panels/mapPanel';
 	import MetricsButton from '@/public/components/widgets/map/metricsButton';
 	import LeftPanel from '@/public/components/panels/leftPanel';
@@ -132,6 +133,9 @@
 			this.BindEvents();
 			var loc = this;
 			this.GetConfiguration().then(function () {
+				if (loc.Embedded.HideLabels) {
+					loc.toolbarStates.showLabels = false;
+				}
 				var start = new StartMap(loc.work, loc, loc.SetupMap);
 				start.Start();
 				loc.isMobile = loc.$isMobile();
@@ -195,6 +199,12 @@
 					}
 					};
 				ret.Readonly = web.getParameterByName('ro') != null;
+				ret.IsPreview = web.getParameterByName('pv') != null;
+				if (ret.IsPreview) {
+					ret.Readonly = true;
+					ret.Compact = true;
+					ret.HideLabels = true;
+				}
 				if (ret.Compact) {
 					ret.HideSearch = true;
 					ret.HideSidePanel = true;
@@ -245,11 +255,19 @@
 				segMap.Work = this.work;
 				segMap.afterCallback = afterLoaded;
 				window.SegMap = segMap;
-
-				this.$refs.fabPanel.loadFabMetrics();
+				if (!window.Embedded.Compact) {
+					this.$refs.fabPanel.loadFabMetrics();
+				}
 				segMap.SaveRoute.DisableOnce = true;
 				mapApi.Initialize();
 				segMap.SetSelectionMode(0);
+				if (window.Embedded.HideLabels) {
+					segMap.Labels.Hide();
+				}
+				if (window.Embedded.IsPreview) {
+					var mapExport = new MapExport(this.work.Current);
+					mapExport.ExportPreview();
+				}
 				/*
 				var loc = this;
 				this.selfCheckTimer = setInterval(function () {
@@ -866,7 +884,9 @@
 		padding: 6px;
 		vertical-align: top;
 	}
-
+	.tdWrappable {
+		overflow-wrap: anywhere;
+	}
 	.text-softer {
 		color: #777;
 	}

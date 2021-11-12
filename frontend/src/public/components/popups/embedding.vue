@@ -125,7 +125,7 @@ export default {
 			}
 			var frame = "<iframe width='" + this.sizes[this.size].width + "' height='" + this.sizes[this.size].height + "' frameborder='0'" +
 													" src='" + url + "' ";
-			this.url = frame + tabindex + "/>";
+			this.url = frame + tabindex + "></iframe>";
 			this.localUrl = frame + "tabindex='-1' style='" + scale + "; pointer-events: none' />";
     },
 		show() {
@@ -151,6 +151,9 @@ export default {
 		},
 		watch: {
 			showSidePanel() {
+				this.UpdateUrls();
+			},
+			openOnClick() {
 				this.UpdateUrls();
 			},
 			showAddMetrics() {

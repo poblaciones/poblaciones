@@ -238,13 +238,19 @@ Clipping.prototype.RestoreClipping = function (clippingName, fitRegion) {
 
 Clipping.prototype.GetClippingName = function () {
 	var regiones = this.clipping.Region.Summary.Regions;
-	if (regiones && regiones.length > 1 && regiones[0].Name) {
+	if (!regiones || regiones.length === 0) {
+		return null;
+	}
+	if (regiones[0].Name === null) {
+		return null;
+	}
+	if (regiones.length > 1) {
 		var ret = [];
 		for (var n = 0; n < regiones.length; n++)
 			ret.push(regiones[n].Name);
-		return ret.join(' - ');
+		return ret.join(', ');
 	} else {
-		return null;
+		return regiones[0].Name;
 	}
 };
 

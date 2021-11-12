@@ -42,7 +42,15 @@ class FileService extends BaseService
 		}
 		return $fileObject;
 	}
+	public function Create($name, $type)
+	{
+		$file = new entities\DraftFile();
+		$file->setName($name);
+		$file->setType($type);
 
+		App::Orm()->Save($file);
+		return $file;
+	}
 	public function SaveBase64BytesToFile($watermarkImage, $fileObject, $maxWidth = null, $maxHeight = null)
 	{
 

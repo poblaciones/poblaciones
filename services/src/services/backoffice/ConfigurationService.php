@@ -24,6 +24,7 @@ class ConfigurationService extends BaseService
 			return array('UseCalculated' => Context::Settings()->Map()->UseCalculated,
 								'UseTextures' => Context::Settings()->Map()->UseTextures,
 								'UseGradients' => Context::Settings()->Map()->UseGradients,
+								'UsePerimeter' => Context::Settings()->Map()->UsePerimeter,
 								'DefaultRelocateLocation' => Context::Settings()->Map()->DefaultRelocateLocation,
 								'Signatures' => $signatures,
 								'User' => $user);

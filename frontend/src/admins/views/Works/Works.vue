@@ -261,6 +261,7 @@ export default {
 			this.$refs.stepper.Start().then(function () {
 						item.HasChanges = 0;
 						item.MetadataLastOnline = new Date();
+						item.PreviewId = null;
 						});
 		},
 		onIndexedChanged(item) {
@@ -276,7 +277,8 @@ export default {
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkRevokeUrl();
 			this.$refs.stepper.setTitle('Revocando publicación');
 			this.$refs.stepper.Start().then(function () {
-						item.MetadataLastOnline = null;
+					item.MetadataLastOnline = null;
+					item.PreviewId = null;
 					});
 		},
 		onDuplicateStart() {

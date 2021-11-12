@@ -8,7 +8,7 @@ use helena\db\backoffice\WorkModel;
 use helena\services\backoffice\DatasetService;
 use minga\framework\Profiling;
 use helena\caches\WorkPermissionsCache;
-
+use  helena\services\backoffice\FileService;
 
 class WorkDelete
 {
@@ -26,12 +26,14 @@ class WorkDelete
 
 		$work = App::Orm()->find(entities\DraftWork::class, $this->workId);
 		$metadata = $work->getMetadata();
+		$previewId = $work->getPreviewFileId();
 
 		$this->doDeleteWorkVersions();
 		$this->doDeleteExtraMetrics();
 		$this->doDeleteIcons();
 		$this->doDeleteRevisions();
 		$this->doDeleteWork();
+		$this->doDeletePreview($previewId);
 		$this->doDeleteMetadata($metadata);
 
 		Profiling::EndTimer();
@@ -92,6 +94,13 @@ class WorkDelete
 		$delete = "DELETE FROM draft_metric_version WHERE mvr_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
 	}
+
+	private function doDeletePreview($fileId)
+	{
+		$fs = new FileService();
+		$fs->DeleteFile($fileId);
+	}
+
 	private function doDeleteMetadata($metadata)
 	{
 		// Borra las relaciones con fuente
