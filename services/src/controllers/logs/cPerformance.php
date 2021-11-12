@@ -42,7 +42,7 @@ class cPerformance extends cController
 		$fixedZones = array('público', 'backoffice', 'admin');
 
 		$monthNoYesterday = ($month == "yesterday" ? "" : $month);
-		$this->AddValue('dayly_table', Performance::GetDaylyTable($monthNoYesterday));
+		$this->AddValue('dayly_table', Performance::GetDaylyTable($monthNoYesterday, true));
 		$this->AddValue('controller_table', Performance::GetControllerTable($month, false, false, $fixedMethods));
 
 		$this->AddValue('controller_table_admin', Performance::GetControllerTable($month, true, false, $fixedMethods));
