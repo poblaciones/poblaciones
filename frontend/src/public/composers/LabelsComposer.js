@@ -37,7 +37,7 @@ LabelsComposer.prototype.renderLabels = function(dataItems, tileKey, tileBounds,
 			textElement.hidden = true;
 		}
 		if (!textElement.hidden) {
-			this.SetTextOverlay(textElement, tileKey, location, null, '', zoom);
+			this.SetTextOverlay(textElement, tileKey, location, null, '', zoom, false);
 		}
 	}
 

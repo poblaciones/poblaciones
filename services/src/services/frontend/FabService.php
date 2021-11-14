@@ -8,6 +8,7 @@ use helena\classes\Session;
 
 use helena\caches\FabMetricsCache;
 use helena\services\common\BaseService;
+use helena\services\admin\StatisticsService;
 
 use helena\entities\frontend\metric\MetricProviderInfo;
 use helena\db\frontend\BoundaryModel;
@@ -15,6 +16,8 @@ use helena\db\frontend\SnapshotMetricModel;
 
 class FabService extends BaseService
 {
+	private $intensityTarget = null;
+
 	public function GetFabMetrics()
 	{
 		$shard = Context::Settings()->Shard()->CurrentShard;
@@ -31,19 +34,38 @@ class FabService extends BaseService
 
 	private function CalculateFabMetrics()
 	{
-		$ret = array();
+		$metricsService = new MetricService();
+		$providers = $metricsService->GetMetricProviders();
+
+		// Arma los grupos con métricas
+		$ret = $this->CalculateMetrics($providers);
 
 		// Agrega boundaries
 		$boundaries = $this->GetFabBoundaries();
 		if ($boundaries)
-		{
-			$ret[] = $boundaries;
-		}
+			array_unshift($ret, $boundaries);
+
+		// Agrega los recomendados
+		$recommended = $this->GetRecommended($providers);
+		if ($recommended)
+			array_unshift($ret, $recommended);
+
+		return $ret;
+	}
+	private function IntensityTarget()
+	{
+
+	}
+	private function CalculateMetrics($providers)
+	{
+		$ret = [];
 		// Agrega métricas
 		$sets = $this->GetFabMetricsGrouped();
 		$metricsService = new MetricService();
 		$groups = $metricsService->GetMetricGroups();
-		$providers = $metricsService->GetMetricProviders();
+		$step = .012;
+		$intensity = 1 - (sizeof($groups) * $step);
+		$this->intensityTarget = $intensity - $step;
 
 		foreach($groups as $group)
 		{
@@ -61,12 +83,14 @@ class FabService extends BaseService
 				}
 				// Listo
 				$group->Items = $metrics;
+				$group->Intensity = $intensity;
+				$intensity += $step;
 				$ret[] = $group;
 			}
 		}
-
 		return $ret;
 	}
+
 	private function RemovePrivateBoundaries(&$ret)
 	{
 		if (Session::IsSiteReader())
@@ -74,14 +98,19 @@ class FabService extends BaseService
 
 		foreach($ret as &$group)
 		{
-			if (sizeof($group['Items']) > 1 && Arr::SafeGet($group['Items'][1], 'Type', 'M') === 'B')
+			$secondItem = (sizeof($group['Items']) > 1 ? $group['Items'][1] : null);
+			if ($secondItem)
 			{
-				// las filtra
-				if ($this->doRemovePrivateBoundaries($group['Items']))
-					$this->fixEmptyGroups($group['Items']);
-				if (sizeof($group['Items']) == 0)
-					Arr::Remove($ret, $group);
-				break;
+				$type = (is_array($secondItem) ? Arr::SafeGet($secondItem, 'Type', 'M') : $secondItem->Type);
+				if ($type === 'B')
+				{
+					// las filtra
+					if ($this->doRemovePrivateBoundaries($group['Items']))
+						$this->fixEmptyGroups($group['Items']);
+					if (sizeof($group['Items']) == 0)
+						Arr::Remove($ret, $group);
+					break;
+				}
 			}
 		}
 		return $ret;
@@ -198,6 +227,28 @@ class FabService extends BaseService
 		return Arr::FromSortedToKeyed($filtered, 'myv_metric_group_id');
 	}
 
+	private function GetRecommended($providers)
+	{
+		$stats = new StatisticsService();
+		$rows = $stats->GetLastMonthTopMetrics(10);
+		if (sizeof($rows) === 0)
+			return null;
+
+		$metrics = $this->createMetricInfos($rows, $providers);
+		// Los ordena por provider, dejando los nulos al final
+		usort($metrics, array($this, 'sortByOrderDescriptionNullAtEnd'));
+		// inserta los headers
+		$metrics = $this->addSubHeaders($metrics);
+		// saca los provider
+		foreach($metrics as $metric)
+		{
+			unset($metric->Provider);
+		}
+		// Listo
+		return [ 'Id' => null, 'Name' => 'Más consultados', 'Icon' => 'star',
+						'Items' => $metrics, 'Intensity' => 1.05];
+	}
+
 	private function GetFabBoundaries()
 	{
 		$table = new BoundaryModel();
@@ -207,7 +258,7 @@ class FabService extends BaseService
 		if (sizeof($list) === 0)
 			return null;
 		return [ 'Id' => null, 'Name' => 'Delimitaciones', 'Icon' => 'dashboard',
-							'Items' => $list];
+							'Items' => $list, 'Intensity' => $this->intensityTarget];
 	}
 
 	private function addBoundariesSubHeaders($list)

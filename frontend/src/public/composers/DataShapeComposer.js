@@ -128,14 +128,16 @@ DataShapeComposer.prototype.processFeature = function (tileUniqueId, dataElement
 };
 
 DataShapeComposer.prototype.AddFeatureText = function (variable, val, dataElement, effectiveId, tileKey, tileBounds, colorMap, zoom) {
+	var patternValue = parseInt(this.activeSelectedMetric.GetPattern());
+	var isSemaphore = (patternValue === 2);
 	if (variable.ShowValues == 0 && (dataElement.Description === null
-		|| parseInt(variable.ShowDescriptions) == 0)) {
+		|| parseInt(variable.ShowDescriptions) == 0) && !isSemaphore) {
 		return;
 	}
 	var centroid = new window.google.maps.LatLng(dataElement['Lat'], dataElement['Lon']);
 	if (this.inTile(tileBounds, centroid)) {
 		// identifica superposiciones en el mismo tile
 		// y descarta markers
-		this.ResolveValueLabel(variable, effectiveId, dataElement, centroid, tileKey, colorMap[val], null, zoom);
+		this.ResolveValueLabel(variable, effectiveId, dataElement, centroid, tileKey, colorMap[val], null, zoom, isSemaphore);
 	}
 };

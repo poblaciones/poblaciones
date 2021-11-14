@@ -30,6 +30,7 @@
 <script>
 import axios from 'axios';
 import err from '@/common/framework/err';
+import color from '@/common/framework/color';
 import fabButton from '@/public/components/widgets/fabButton/fabButton';
 
 export default {
@@ -58,7 +59,14 @@ export default {
 			var ret = [];
 			for(var n = 0; n < this.fabMetrics.length; n++) {
 				var action = this.fabMetrics[n];
-				var fabAction = { name: 'selected' + n, tooltip: action.Name, icon: action.Icon, items: action.Items};
+				var fabAction = {
+					name: 'selected' + n, tooltip: action.Name,
+					icon: action.Icon,
+					items: action.Items
+				};
+				if (action.Intensity) {
+					fabAction.color = color.ReduceColor(this.backgroundColor, action.Intensity);
+				}
 				ret.push(fabAction);
 			}
 			return ret;
@@ -71,7 +79,10 @@ export default {
 		loadFabMetrics() {
 			const loc = this;
 			axios.get(window.host + '/services/metrics/GetFabMetrics', {
-				params: { w: window.SegMap.Signatures.FabMetrics }
+				params: {
+					w: window.SegMap.Signatures.FabMetrics,
+					h: window.SegMap.Signatures.Suffix
+				}
 			}).then(function (res) {
 				loc.fabMetrics = res.data;
 			}).catch(function (error) {

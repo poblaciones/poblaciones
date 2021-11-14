@@ -57,8 +57,10 @@ ActiveBoundary.prototype.UpdateSummary = function () {
 	this.IsUpdatingSummary = true;
 
 	var rev = window.SegMap.Signatures.Boundary;
+	var suffix = window.SegMap.Signatures.Suffix;
+
 	window.SegMap.Get(window.host + '/services/frontend/boundaries/GetBoundarySummary', {
-		params: h.getBoundarySummaryParams(boundary, window.SegMap.frame, rev),
+		params: h.getBoundarySummaryParams(boundary, window.SegMap.frame, rev, suffix),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateSummary = c; }),
 	}).then(function (res) {
 		loc.cancelUpdateSummary = null;
@@ -101,7 +103,8 @@ ActiveBoundary.prototype.GetDataService = function (seed) {
 
 ActiveBoundary.prototype.GetDataServiceParams = function (coord) {
 	var rev = window.SegMap.Signatures.Boundary;
-	return h.getBoundaryParams(this, window.SegMap.frame, coord.x, coord.y, rev);
+	var preffix = window.SegMap.Signatures.Preffix;
+	return h.getBoundaryParams(this, window.SegMap.frame, coord.x, coord.y, rev, preffix);
 };
 
 ActiveBoundary.prototype.Show = function () {

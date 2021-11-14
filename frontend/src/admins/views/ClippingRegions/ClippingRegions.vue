@@ -8,11 +8,13 @@
 			<div class="md-layout-item md-size-100">
 				<md-table style="max-width: 1100px;" v-model="list" md-card="">
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre"><span
-									:style="'padding-left: ' + (item.Level * 18) + 'px'">{{ item.Caption }} ({{ item.LabelsMinZoom }}-{{ item.LabelsMaxZoom }})</span></md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre">
+							<span :style="'padding-left: ' + (item.Level * 18) + 'px'">{{ item.Caption }}({{ item.LabelsMinZoom }}-{{ item.LabelsMaxZoom }})</span>
+						</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Código">{{ item.FieldCodeName }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Ícono">{{ item.Symbol }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Ítems">{{ item.ChildCount }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Prioridad">{{ item.Priority }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Buscador">{{ formatBool(!item.NoAutocomplete) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Segmenta">{{ formatBool(item.IsCrawlerIndexer) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap" v-if="isAdmin">

@@ -7,7 +7,10 @@ use helena\classes\GlobalTimer;
 use helena\caches\LabelsCache;
 use helena\services\common\BaseService;
 
-use helena\db\frontend\SnapshotSearchModel;
+use helena\db\frontend\SnapshotSearchRegions;
+use helena\db\frontend\SnapshotSearchFeatures;
+
+use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 use helena\entities\frontend\clipping\LabelsDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
@@ -93,7 +96,6 @@ class LabelsService extends BaseService
 	private function CalculateLabels($x, $y, $z)
 	{
 		Profiling::BeginTimer();
-		$table = new SnapshotSearchModel();
 
 		$envelope = Envelope::FromXYZ($x, $y, $z);
 
@@ -104,7 +106,7 @@ class LabelsService extends BaseService
 									new Coordinate($envelope->Max->Lat + $size->Height / 2,
 																 $envelope->Max->Lon + $size->Width / 2));
 
-		$rows = $table->GetLabelsByEnvelope($extendedEnvelope, $z);
+		$rows = $this->GetLabelsByEnvelope($extendedEnvelope, $z);
 
 		$rows = $this->CalculateVisibility($rows, $z, $envelope);
 
@@ -115,6 +117,19 @@ class LabelsService extends BaseService
 		return $data;
 	}
 
+	private function GetLabelsByEnvelope($envelope, $z)
+	{
+		$regionsLookup = new SnapshotSearchRegions();
+		$featuresLookup = new SnapshotSearchFeatures();
+
+		$res = $regionsLookup->GetClippingRegionsLabelsQuery($envelope, $z);
+		if ($z >= SnapshotLookupModel::SMALL_LABELS_FROM)
+		{
+			$features = $featuresLookup->GetFeatureLabelsQuery($envelope, $z);
+			$res = array_merge($res, $features);
+		}
+		return $res;
+	}
 
 	private function CalculateVisibility($rows, $z, $envelope)
 	{

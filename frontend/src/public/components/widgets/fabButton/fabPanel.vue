@@ -424,6 +424,8 @@ export default {
 	font-size: 14px;
 	padding: 8px 15px;
 	color: white;
+	white-space: nowrap;
+	min-width: 260px;
 	cursor: pointer;
 }
 .fab-panel-item:hover {

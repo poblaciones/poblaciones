@@ -10,6 +10,7 @@ class MetricGroupInfo extends BaseMapModel
 	public $Name;
 	public $Icon;
 	public $Order;
+	public $Intensity;
 
 	public $Items = array();
 

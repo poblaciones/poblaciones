@@ -3,6 +3,7 @@
 namespace helena\db\frontend;
 
 use helena\classes\App;
+use minga\framework\Context;
 use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 
 class SignatureModel extends BaseModel
@@ -33,6 +34,7 @@ class SignatureModel extends BaseModel
 					$ret[$key] = $row['value'];
 			}
 		}
+		$ret['Suffix'] = Context::Settings()->Map()->SignatureSuffix;
 		$ret['SmallLabelsFrom'] = SnapshotLookupModel::SMALL_LABELS_FROM;
 		return $ret;
 	}

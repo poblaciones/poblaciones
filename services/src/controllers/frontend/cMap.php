@@ -6,6 +6,7 @@ use minga\framework\Context;
 use minga\framework\Params;
 use minga\framework\Request;
 use minga\framework\PublicException;
+use minga\framework\Performance;
 
 use helena\services\common\MetadataService;
 use helena\services\frontend\WorkService;
@@ -53,6 +54,10 @@ class cMap extends cPublicController
 		$this->RegisterFacebookId();
 		// Header always unset X-Frame-Options
 		// https://www.a2hosting.com/kb/developer-corner/configuring-frames-with-the-x-frame-options-header
+
+		// Si está embebido, lo indica para estadísticas
+		if (Params::Get('emb'))
+				Performance::AppendControllerSuffix('embedded');
 
     return $this->Render('index.html.twig');
   }

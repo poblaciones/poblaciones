@@ -130,7 +130,7 @@ LocationsComposer.prototype.registerTileMarker = function (tileKey, marker) {
 
 LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElement, tileKey, tileBounds, colorMap, markerSettings, z) {
 	if (variable.ShowValues == 0 && (dataElement.Description === null
-		|| parseInt(variable.ShowDescriptions) == 0)) {
+		|| parseInt(variable.ShowDescriptions) == 0) ) {
 		return;
 	}
 	var scale = this.markerFactory.CalculateMarkerScale(markerSettings, z);
@@ -143,7 +143,7 @@ LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElemen
 		clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
 	}
 	if (this.inTile(tileBounds, location)) {
-		this.ResolveValueLabel(variable, clickId, dataElement, location, tileKey, colorMap[val], markerSettings, z);
+		this.ResolveValueLabel(variable, clickId, dataElement, location, tileKey, colorMap[val], markerSettings, z, false);
 	}
 };
 

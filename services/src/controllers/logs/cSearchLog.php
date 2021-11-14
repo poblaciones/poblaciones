@@ -4,6 +4,7 @@ namespace helena\controllers\logs;
 
 use helena\controllers\common\cController;
 use minga\framework\SearchLog;
+use minga\framework\Performance;
 
 use helena\classes\Session;
 use helena\classes\Menu;

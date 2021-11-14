@@ -147,9 +147,13 @@ TileRequest.prototype.startDataRequest = function (queue) {
 
 TileRequest.prototype.startGeographyRequest = function (queue) {
 	var loc = this;
+	var suffix = window.SegMap.Signatures.Suffix;
 
 	var geographyId = this.selectedMetricOverlay.activeSelectedMetric.SelectedLevel().GeographyId;
-	var geographyParams = { x: this.coord.x, y: this.coord.y, z: this.zoom, w: this.selectedMetricOverlay.geographyService.revision };
+	var geographyParams = {
+		x: this.coord.x, y: this.coord.y, z: this.zoom,
+		w: this.selectedMetricOverlay.geographyService.revision, h: suffix
+	};
 	if (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest) {
 		geographyParams.d = this.selectedMetricOverlay.activeSelectedMetric.SelectedLevel().Dataset.Id;
 	} else {

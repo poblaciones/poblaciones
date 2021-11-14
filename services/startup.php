@@ -46,6 +46,7 @@ Context::Settings()->storagePath = Context::Settings()->rootPath . '/storage';
 Context::Settings()->Performance()->PerformancePerUser = true;
 
 $settings = __DIR__.'/config/settings.php';
+
 if (!file_exists($settings)) {
 	echo 'Oops! Todavía falta un paso.
 				<p>Poder habilitar el ambiente debe crear el archivo de configuración de Poblaciones. En ese archivo se indican los datos de conexión para la base de datos y otras opciones de funcionamiento.

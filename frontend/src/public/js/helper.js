@@ -376,36 +376,38 @@ module.exports = {
 		});
 		return res;
 	},
-	getCreateClippingParams(frame, clipping, revision) {
+	getCreateClippingParams(frame, clipping, revision, suffix) {
 		var levelId = null;
 		if (clipping.Region.Levels && clipping.Region.SelectedLevelIndex < clipping.Region.Levels.length) {
 			levelId = clipping.Region.Levels[clipping.Region.SelectedLevelIndex].Id;
 		}
 		return this.mergeObject({
-			a: levelId, w: revision
+			a: levelId, w: revision, h: suffix
 		}, this.getFrameParams(frame));
 	},
-	getCreateClippingParamsByName(frame, name, revision) {
+	getCreateClippingParamsByName(frame, name, revision, suffix) {
 		return this.mergeObject({
-			n: name, w: revision
+			n: name, w: revision, h: suffix
 		}, this.getFrameParams(frame));
 	},
-	getLabelsParams(frame, x, y, revision) {
+	getLabelsParams(frame, x, y, revision, suffix) {
 		var ret = {
 			x: x,
 			y: y,
 			z: frame.Zoom,
-			w: revision
+			w: revision,
+			h: suffix
 		};
 		return ret;
 	},
-	getBlockLabelsParams(frame, x, y, revision, size) {
+	getBlockLabelsParams(frame, x, y, revision, suffix, size) {
 		var ret = {
 			x: x - x % size,
 			y: y - y % size,
 			s: size,
 			z: frame.Zoom,
-			w: revision
+			w: revision,
+			h: suffix
 		};
 		return ret;
 	},
@@ -424,17 +426,18 @@ module.exports = {
 			element['on' + eventName] = handler;
 		}
 	},
-	getBoundaryParams(boundary, frame, x, y, rev) {
+	getBoundaryParams(boundary, frame, x, y, rev, suffix) {
 		var ret = this.mergeObject({
 			a: boundary.properties.Id,
 			x: x,
 			y: y,
-			w: rev
+			w: rev,
+			h: suffix
 		}, this.getFrameParams(frame));
 		ret.e = null;
 		return ret;
 	},
-	getTileParams(metric, frame, x, y) {
+	getTileParams(metric, frame, x, y, suffix) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({
 			l: metric.Metric.Id,
@@ -443,12 +446,13 @@ module.exports = {
 			u: metric.SelectedUrbanity,
 			x: x,
 			y: y,
-			w: metric.Metric.Signature
+			w: metric.Metric.Signature,
+			h: suffix
 		}, this.getFrameParams(frame));
 		ret.e = null;
 		return ret;
 	},
-	getBlockTileParams(metric, frame, x, y, size) {
+	getBlockTileParams(metric, frame, x, y, suffix, size) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({
 			l: metric.Metric.Id,
@@ -458,7 +462,8 @@ module.exports = {
 			x: x - x % size,
 			y: y - y % size,
 			s: size,
-			w: metric.Metric.Signature
+			w: metric.Metric.Signature,
+			h: suffix
 		}, this.getFrameParams(frame));
 		ret.e = null;
 		return ret;
@@ -531,10 +536,11 @@ module.exports = {
 			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 	},
-	getBoundarySummaryParams(boundary, frame, rev) {
+	getBoundarySummaryParams(boundary, frame, rev, suffix) {
 		return this.mergeObject({
 			b: boundary.Id,
-			w: rev
+			w: rev,
+			h: suffix
 		}, this.getFrameParams(frame));
 	},
 	getFrameParams(frame) {

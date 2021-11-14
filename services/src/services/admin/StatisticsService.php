@@ -33,10 +33,7 @@ class StatisticsService extends BaseService
 									WHERE sta_month = ? AND sta_type = 'W' ORDER BY sta_hits DESC";
 		$works = App::Db()->fetchAll($sqlWorks, array($month));
 
-		$sqlMetrics = "SELECT sta_element_id Id, mtr_caption Caption, sta_hits Hits, sta_downloads Downloads, sta_google Google, sta_backoffice Backoffice
-										 FROM statistic JOIN metric ON sta_element_id = mtr_id
-									WHERE sta_month = ? AND sta_type = 'M' ORDER BY sta_hits DESC";
-		$metrics = App::Db()->fetchAll($sqlMetrics, array($month));
+		$metrics = $this->GetMetrics($month);
 
 		$sqlDownloadTypes = "SELECT sta_element_id Id, '-' Caption, sta_hits Hits
 										 FROM statistic WHERE sta_month = ? AND sta_type = 'D' ORDER BY sta_hits DESC";
@@ -51,6 +48,65 @@ class StatisticsService extends BaseService
 		$resources = $this->CreateTotalsResources($month, $dailyTable);
 
 		return ['Totals' => $totals, 'Resources' => $resources, 'Works' => $works, 'Metrics' => $metrics, 'DownloadTypes' => $downloadTypes,'Months' => $possible, 'IsSummarized' => $summarized];
+	}
+
+	private function GetLastSummarizedMonth()
+	{
+		$offset = 1;
+		while($offset < 100)
+		{
+			$month = Date::GetLogMonthFolder(-$offset);
+			if ($this->IsSummarized($month))
+				return $month;
+			$offset++;
+		}
+		return null;
+	}
+
+	public function GetLastMonthTopMetrics($top = 15)
+	{
+		$month = $this->GetLastSummarizedMonth();
+		if (!$month)
+			return [];
+		return $this->GetTopMetrics($month, $top);
+	}
+
+	public function GetTopMetrics($month, $limit)
+	{
+		$sqlMetrics = "SELECT mvw_metric_id myv_metric_id,
+													mvw_metric_caption myv_metric_caption,
+													mvw_metric_group_id myv_metric_group_id,
+													mvw_metric_provider_id myv_metric_provider_id,
+													mvw_metric_revision myv_metric_revision,
+													GROUP_CONCAT(mvw_work_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_ids,
+													GROUP_CONCAT(mvw_work_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_captions,
+													GROUP_CONCAT(mvw_metric_version_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_ids,
+													GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_captions,
+													GROUP_CONCAT(mvw_work_is_private ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_private,
+													GROUP_CONCAT(mvw_work_is_indexed ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_indexed,
+													GROUP_CONCAT(IFNULL(mvw_partial_coverage, '') ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_partial_coverages,
+													MAX(sta_hits) Hits
+										 FROM statistic JOIN snapshot_metric_version ON sta_element_id = mvw_metric_id
+						WHERE sta_month = ? AND sta_type = 'M'
+						GROUP BY myv_metric_id, myv_metric_caption, myv_metric_group_id,
+											myv_metric_provider_id, myv_metric_revision
+						ORDER BY Hits DESC
+						LIMIT " . $limit;
+
+		$metrics = App::Db()->fetchAll($sqlMetrics, array($month));
+		return $metrics;
+	}
+
+	public function GetMetrics($month, $limit = 0)
+	{
+		$sqlMetrics = "SELECT sta_element_id Id, mtr_caption Caption, sta_hits Hits, sta_downloads Downloads, sta_google Google, sta_backoffice Backoffice
+										 FROM statistic JOIN metric ON sta_element_id = mtr_id
+									WHERE sta_month = ? AND sta_type = 'M' ORDER BY sta_hits DESC";
+		if ($limit)
+			$sqlMetrics .= " LIMIT " . $limit;
+
+		$metrics = App::Db()->fetchAll($sqlMetrics, array($month));
+		return $metrics;
 	}
 
 	private function CreateTotalHits($month, $dailyTable, $works, $metrics)

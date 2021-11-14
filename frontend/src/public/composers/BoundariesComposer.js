@@ -38,7 +38,7 @@ BoundariesComposer.prototype.AddFeatureText = function (dataElement, tileKey, ti
 		textElement.caption = dataElement.properties.Description;
 		textElement.tooltip = this.activeSelectedMetric.properties.Name;
 		textElement.clickId = dataElement.id;
-		this.SetTextOverlay(textElement, tileKey, location, null, '', zoom);
+		this.SetTextOverlay(textElement, tileKey, location, null, '', zoom, false);
 	}
 };
 

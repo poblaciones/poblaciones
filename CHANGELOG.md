@@ -1,8 +1,14 @@
 [CURRENT]
+
+v3.02 (2021-11-14)
 - Fix: el botón de editar no estaba apareciendo sobre el mapa incluso si el usuario tenía permisos.
 - Fix: para descarga de delimitaciones, ofrecía 'shapefile sin polígono'.
 - Fix: al embeber compacto no replica el panel izquierdo abierto.
 - Fix: el nombre de la selección active no estaba reflejándose en el nombre de la solapa del navegador.
+- Mejoras en resolución de búsquedas de texto libre.
+- Ofrece "más vistos" en el botón de agregar indicadores indexados.
+- Fix: menú de indicadores apareciendo mal ubicado si se selecciona rápida.
+- Fix: el tipo de trama 'semáforo' ya no requiere de indicar 'mostar valores'.
 
 v3.01 (2021-09-30)
 - Leyenda opcional en cada variable de indicador.

@@ -1,6 +1,8 @@
 # General
 
-Componente de vue basado en [vue-fab](https://github.com/PygmySlowLoris/vue-fab). Agrega un panel que puede cargar una lista de ítems que puede mostrarse `onMouseEnter` u `onClick` y tiene varias opciones de configuración.
+Componente de vue basado en [vue-fab](https://github.com/PygmySlowLoris/vue-fab).
+
+Agrega un panel que puede cargar una lista de ítems que puede mostrarse `onMouseEnter` u `onClick` y tiene varias opciones de configuración.
 
 El formato de la lista a pasar es un array de objetos con las siguientes propiedades:
 

@@ -13,6 +13,8 @@ class MetricInfo extends BaseMapModel
 	public $MetricProviderId;
 	public $Provider;
 	public $Signature;
+	public $Coverage;
+	public $Type;
 
 	public $Versions = array();
 	public static function GetMap()

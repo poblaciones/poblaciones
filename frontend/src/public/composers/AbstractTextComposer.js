@@ -16,7 +16,7 @@ AbstractTextComposer.prototype.AbstractConstructor = function (value, total, des
 
 AbstractTextComposer.layerId = 1;
 
-AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effectiveId, dataElement, location, tileKey, backColor, markerSettings, zoom) {
+AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effectiveId, dataElement, location, tileKey, backColor, markerSettings, zoom, isSemaphore) {
 	var number = null;
 	if (variable.ShowValues == 1 && !variable.IsSimpleCount) {
 		number = this.FormatValue(variable, dataElement);
@@ -33,7 +33,7 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effective
 		clickId: effectiveId
 	};
 	this.SetTextOverlay(textElement, '' + tileKey,
-		location, number, backColor, zoom);
+		location, number, backColor, zoom, isSemaphore);
 };
 
 AbstractTextComposer.prototype.SaveTileData = function (svg, tileData, x, y, z) {
@@ -44,7 +44,7 @@ AbstractTextComposer.prototype.SaveTileData = function (svg, tileData, x, y, z) 
 };
 
 AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, location,
-	number, backColor, zoom) {
+	number, backColor, zoom, isSemaphore) {
 
 	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden, zoom);
 	var v = null;
@@ -54,9 +54,12 @@ AbstractTextComposer.prototype.SetTextOverlay = function (textElement, tileKey, 
 	if (textElement.clickId) {
 		canvas.clickId = textElement.clickId;
 	}
-	if (number !== null) {
+	if (number !== null || isSemaphore) {
 		var zIndex = 100000 - this.index;
 		var sourceKey = this.layerId;
+		if (number === null) {
+			number = '&nbsp;';
+		}
 		v = canvas.CreateValue(number, zIndex, backColor, zoom, sourceKey);
 	}
 	this.textInTile[tileKey].push({ c: canvas, v: v });

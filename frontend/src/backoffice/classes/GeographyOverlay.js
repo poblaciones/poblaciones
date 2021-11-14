@@ -16,7 +16,8 @@ GeographyOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 		y: coord.y,
 		z: zoom,
 		a: this.geographyId,
-		w: window.Context.Configuration.Signatures.Geography
+		w: window.Context.Configuration.Signatures.Geography,
+		h: window.Context.Configuration.Signatures.Suffix
 	};
 
   //div.innerHTML = coord;

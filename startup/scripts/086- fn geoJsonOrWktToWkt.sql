@@ -75,4 +75,4 @@ END$$
 
 DELIMITER ;
 
-UPDATE version SET ver_value = '085' WHERE ver_name = 'DB';
+UPDATE version SET ver_value = '086' WHERE ver_name = 'DB';

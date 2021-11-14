@@ -703,10 +703,11 @@ ActiveSelectedMetric.prototype.GetDataService = function (seed) {
 };
 
 ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord) {
+	var suffix = window.SegMap.Signatures.Suffix;
 	if (this.UseBlockedRequests()) {
-		return h.getBlockTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, this.blockSize);
+		return h.getBlockTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, suffix, this.blockSize);
 	} else {
-		return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y);
+		return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, suffix);
 	}
 };
 

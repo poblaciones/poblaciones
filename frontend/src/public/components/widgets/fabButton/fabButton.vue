@@ -7,7 +7,8 @@
 					<transition :key="action.name"
 						enter-active-class="animated quick zoomIn"
 						leave-active-class="animated quick zoomOut"
-						v-on:after-enter="afterActionsTransitionEnter">
+						v-on:after-enter="afterActionsTransitionEnter"
+						v-on:before-enter="beforeActionsTransitionEnter">
 						<template v-if="action.tooltip">
 							<li v-if="toggle" :style="{ 'background-color': action.color || bgColor }">
 								<div v-tooltip="{ content: action.tooltip, placement: tooltipPosition, classes: 'fab-tooltip', trigger: tooltipTrigger}"
@@ -18,7 +19,7 @@
 								<fabPanel v-if="usePanel" ref="fabPanel" @selected="selectedParent"
 									 :items="action.items"
 									 :actionIconSize="actionIconSize"
-									 :bgColor="action.color || bgColor"></fabPanel>
+									 :bgColor="bgColor"></fabPanel>
 							</li>
 						</template>
 						<template v-else>
@@ -29,7 +30,7 @@
 								<fabPanel v-if="usePanel" ref="fabPanel" @selected="selectedParent"
 									 :items="action.items"
 									 :actionIconSize="actionIconSize"
-									 :bgColor="action.color || bgColor"></fabPanel>
+									 :bgColor="bgColor"></fabPanel>
 							</li>
 						</template>
 					</transition>
@@ -75,6 +76,8 @@ export default {
 		return {
 			toggle: this.startOpened,
 			pos: {},
+			isOpening: false,
+			openHoverTimer: null
 		};
 	},
 	props: {
@@ -231,7 +234,17 @@ export default {
 			if(this.usePanel == false || this.panelOpenMode == 'click') {
 				return;
 			}
-			this.togglePanel(name);
+			if (this.openHoverTimer) {
+				clearTimeout(this.openHoverTimer);
+				this.openHoverTimer = null;
+			}
+			if (!this.isOpening) {
+				this.togglePanel(name);
+			} else {
+				this.openHoverTimer = setTimeout(() => {
+					this.showPanel(name);
+				}, 50);
+			}
 		},
 		hidePanels() {
 			this.$refs.fabPanel.forEach(function(item) {
@@ -317,8 +330,12 @@ export default {
 				}, timeOut);
 			}
 		},
+		beforeActionsTransitionEnter() {
+			this.isOpening = true;
+		},
 		afterActionsTransitionEnter() {
 			this.showTooltip();
+			this.isOpening = false;
 		}
 	},
 	watch: {

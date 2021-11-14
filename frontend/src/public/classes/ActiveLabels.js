@@ -51,10 +51,11 @@ ActiveLabels.prototype.GetDataServiceParams = function (coord) {
 	if (coord.z >= window.SegMap.Signatures.SmallLabelsFrom) {
 		rev += '_' + window.SegMap.Signatures.SmallLabels;
 	}
+	var suffix = window.SegMap.Signatures.Suffix;
 	if (this.UseBlockedRequests()) {
-		return h.getBlockLabelsParams(window.SegMap.frame, coord.x, coord.y, rev, this.blockSize);
+		return h.getBlockLabelsParams(window.SegMap.frame, coord.x, coord.y, rev, suffix, this.blockSize);
 	} else {
-		return h.getLabelsParams(window.SegMap.frame, coord.x, coord.y, rev);
+		return h.getLabelsParams(window.SegMap.frame, coord.x, coord.y, rev, suffix);
 	}
 };
 
