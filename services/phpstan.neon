@@ -9,10 +9,12 @@ parameters:
 		- routes
 		- compilation_cache
 		- doctrine_proxies
+		- src/classes/shapefile
 		- web/phpinfo2.php
 		- web/index.php
 		- web/b.php
 		- tests/routesTest.php
+		- src/classes/readers/ShapefileReader.php
 	autoload_files:
 		- vendor/autoload.php
 	ignoreErrors:
