@@ -84,7 +84,7 @@ class SimplifyGeometryPlain
 
 		//var_dump($markers, $points, $i);
 		for ($i = 0; $i < $len; $i++) {
-			if ($markers[$i]) $newPoints[] = $points[$i];
+			if ($markers[$i] === 1) $newPoints[] = $points[$i];
 		}
 
 		return $newPoints;

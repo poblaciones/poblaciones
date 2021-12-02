@@ -16,6 +16,7 @@ class MetadataInfo extends BaseMapModel
 	public $Coverage;
 	public $License;
 	public $Files;
+	public $Url;
 
 	public static function GetMap()
 	{
