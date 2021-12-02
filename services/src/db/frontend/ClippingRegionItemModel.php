@@ -16,7 +16,7 @@ class ClippingRegionItemModel extends BaseModel
 
 	}
 
-	public function GetClippingRegionItemGeometry($clippingRegionIds)
+	public function GetClippingRegionItemsGeometries($clippingRegionIds)
 	{
 		Profiling::BeginTimer();
 
@@ -45,7 +45,8 @@ class ClippingRegionItemModel extends BaseModel
 		}
 		$sql = "SELECT cli.cli_caption Name, clr_caption Type,
 							cli.cli_centroid Location,
-					 		met_id, met_title, met_abstract, met_publication_date, met_license,
+					 		met_id, met_title, met_abstract, met_publication_date, met_license, met_online_since,
+							 met_coverage_caption,
 							met_authors, ins_caption, ins_watermark_id, ins_color " . $parentSelect . "
 						FROM clipping_region JOIN clipping_region_item cli ON clr_id = cli.cli_clipping_region_id
 						" . $parentJoin . "

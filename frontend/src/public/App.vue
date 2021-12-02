@@ -119,8 +119,14 @@
 			};
 		},
 		mounted() {
+			var sizes;
+			if (window.screen.availWidth < 1000) {
+				sizes = ['calc(100% - 210px)', '200px'];
+			} else {
+				sizes = [70, 30];
+			}
 			this.splitPanels = Split(['#panMain', '#panRight'], {
-				sizes: [70, 30],
+				sizes: sizes,
 				minSize: [10, 300 + (this.Embedded.Readonly ? 25 : 0)],
 				expandToMin: true,
 				gutterSize: (this.Embedded.Readonly ? 0 : 5)

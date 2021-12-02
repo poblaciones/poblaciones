@@ -186,7 +186,7 @@ class ClippingService extends BaseService
 		else if ($frame->ClippingRegionIds != null)
 		{ // resuelve el canvas para regionId
 			$table = new ClippingRegionItemModel();
-			$items = $table->GetClippingRegionItemGeometry($frame->ClippingRegionIds);
+			$items = $table->GetClippingRegionItemsGeometries($frame->ClippingRegionIds);
 			$canvasList = [];
 			$overallEnvelope = null;
 			foreach($items as $item)

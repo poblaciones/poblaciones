@@ -46,7 +46,7 @@ class cMap extends cPublicController
 			Statistics::StoreLanding($this->workId);
 		}
 		// Renderiza el html
-		$this->AddValue('google_maps_key', Context::Settings()->Keys()->GoogleMapsKey);
+		$this->AddValue('google_maps_key', Context::Settings()->Keys()->GetGoogleMapsKey());
 		$this->AddValue('google_analytics_key', Context::Settings()->Keys()->GoogleAnalyticsKey);
 		$this->AddValue('add_this_key', Context::Settings()->Keys()->AddThisKey);
 

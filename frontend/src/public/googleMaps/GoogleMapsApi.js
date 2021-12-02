@@ -73,6 +73,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
 		},
 		scaleControl: true,
+		gestureHandling: "greedy",
 		styles: this.generateLabelsArray(true),
 		clickableIcons: false,
 		center: { lat: -37.1799565, lng: -65.6866910 },
@@ -83,6 +84,8 @@ GoogleMapsApi.prototype.Initialize = function () {
 			myMapOptions.zoomControl = false;
 			myMapOptions.gestureHandling = 'none';
 			myMapOptions.disableDefaultUI = true;
+		} else {
+			myMapOptions.gestureHandling = 'cooperative';
 		}
 		if (window.Embedded.Compact) {
 			myMapOptions.scaleControl = false;

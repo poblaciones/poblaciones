@@ -245,7 +245,7 @@ class FabService extends BaseService
 			unset($metric->Provider);
 		}
 		// Listo
-		return [ 'Id' => null, 'Name' => 'Más consultados', 'Icon' => 'star',
+		return [ 'Id' => null, 'Name' => 'Los más consultados', 'Icon' => 'star',
 						'Items' => $metrics, 'Intensity' => 1.05];
 	}
 
