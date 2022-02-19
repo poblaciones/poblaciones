@@ -1,7 +1,7 @@
 {
 	"config": {
 		"platform": {
-			"php": "7.1.0"
+			"php": "7.3"
 		},
 		"apcu-autoloader": true
 	},
@@ -76,7 +76,7 @@
 		]
 	},
 	"require-dev": {
-		"phpstan/phpstan": "^0.12.19",
+		"phpstan/phpstan": "^1.2",
 		"phpunit/phpunit": "^7.5"
 	}
 }
