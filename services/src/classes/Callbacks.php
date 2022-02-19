@@ -3,6 +3,7 @@
 namespace helena\classes;
 
 use minga\framework\FrameworkCallbacks;
+use minga\framework\Db;
 use helena\classes\App;
 
 class Callbacks extends FrameworkCallbacks
@@ -22,7 +23,7 @@ class Callbacks extends FrameworkCallbacks
 	{
 		App::EndRequest();
 	}
-	public function Db()
+	public function Db() : Db
 	{
 		return App::Db();
 	}

@@ -32,7 +32,7 @@ Context::InjectCallbacks(new Callbacks());
 time_elapsed('InjectCallbacks');
 // toma settings
 Context::Settings()->useVendor = true;
-Context::Settings()->Initialize(dirname(__DIR__), true);
+Context::Settings()->Initialize(dirname(__DIR__));
 time_elapsed('Settings()->Initialize');
 
 time_elapsed('prenewapp');
