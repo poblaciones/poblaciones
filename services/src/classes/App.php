@@ -282,7 +282,7 @@ class App
 	}
 
 	public static function OrmDeserialize($className, $entity){
-		$serializer = App::GetSerializer();
+		$serializer = self::GetSerializer();
 		return $serializer->deserialize($entity, $className, 'json');
 	}
 	public static function JsonImmutable($value)
@@ -317,7 +317,6 @@ class App
 //		$response->headers->set('Content-Type', 'application/json');
 		$response->headers->set('Content-Type', 'text/plain');
 		return $response;
-//		return self::$app->json($value, 200, $headers);
 	}
 
 	public static function RegisterControllerGetPost($path, $controllerClassName)

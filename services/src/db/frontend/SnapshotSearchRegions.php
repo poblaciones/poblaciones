@@ -20,6 +20,9 @@ class SnapshotSearchRegions extends BaseModel
 
 		$explicitExclusions = $this->ResolveExclusions($originalQuery);
 
+		$fields = [ 'clc_caption' ];
+		$specialWordsCondition = SnapshotSearchMetrics::calculateSpecialWordsCondition($originalQuery, $fields);
+
 		$sql = "SELECT
 			CAST(clc_clipping_region_item_id AS UNSIGNED INTEGER) Id,
 			clc_caption Caption,
@@ -30,7 +33,8 @@ class SnapshotSearchRegions extends BaseModel
 			MATCH(clc_caption) AGAINST (:query) Relevance
 			FROM snapshot_lookup_clipping_region_item
 			WHERE
-			MATCH(clc_caption, clc_tooltip, clc_full_parent, clc_code) AGAINST (:query IN BOOLEAN MODE)
+			(MATCH(clc_caption, clc_tooltip, clc_full_parent, clc_code) AGAINST (:query IN BOOLEAN MODE)
+			" . $specialWordsCondition . ")
 			" . $explicitExclusions . " ORDER by
 			Relevance DESC,
 			clc_population DESC

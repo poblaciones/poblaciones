@@ -88,6 +88,8 @@ require_once('frontend.php');
 
 if (Context::Settings()->isAPIEnabled)
 	require_once('api/clipping.php');
+if (Context::Settings()->Map()->isOWSEnabled)
+	require_once('ows/wfs.php');
 
 require_once('common.php');
 

@@ -23,6 +23,8 @@ class MapSettings
 
 	public $UseCalculated = true;
 
+	public $isOWSEnabled = false;
+
 	public $UseMultiselect = false;
 	public $UseGradients = false;
 	public $UseTextures = false;

@@ -56,7 +56,7 @@ class InfoWindowService extends BaseService
 
 	public function GetMetricItemInfo($featureId, $metricId, $variableId)
 	{
-		$featureId = floatval($featureId);
+		$featureId = 0 + $featureId;
 		$datasetModel = new DatasetModel();
 		$selectedService = new SelectedMetricService();
 
