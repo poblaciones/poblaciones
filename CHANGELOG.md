@@ -1,4 +1,5 @@
 [CURRENT]
+- Special words en regiones (para NEA y NOA).
 
 v3.02 (2021-11-14)
 - Fix: el botón de editar no estaba apareciendo sobre el mapa incluso si el usuario tenía permisos.
