@@ -5,7 +5,7 @@ Aplicación web para la publicación colaborativa de datos espaciales de poblaci
 
 Poblaciones es una aplicación web que permite visualizar y cargar datos georreferenciados de población.
 
-Funciona como un servidor autónomo de información geoespacial para navegadores web, apoyado en PHP 7.1 y MySql 5.6. Utiliza Google Maps como provedor del mapa de base, dando en forma permanente acceso a los servicios asociados de StreetView.
+Funciona como un servidor autónomo de información geoespacial para navegadores web, apoyado en PHP 7.4 y MySql 5.7. Utiliza Google Maps como provedor del mapa de base, dando en forma permanente acceso a los servicios asociados de StreetView.
 
 Permite subir datos y metadatos de información espacial mediante una interfaz moderna y simple, permitiendo a los usuarios administrar sus producciones dentro del sitio. 
 
@@ -32,7 +32,7 @@ Permite subir datos y metadatos de información espacial mediante una interfaz m
 La aplicación puede ser alojada en un servidor compartido (ej. hostgator), dado que no requiere de la ejecución de instalaciones con permisos de administrador en el servidor. Son sus requisitos de software:
 
 - MySql 5.7. 
-- PHP 7.1.
+- PHP 7.4.
 - Python 3.4 (requisito para permitir subir y descargar información en formato SPSS [.sav])
 - SO: indistinto.
 
