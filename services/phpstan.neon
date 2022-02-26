@@ -4,7 +4,7 @@ includes:
 parameters:
 	reportUnmatchedIgnoredErrors:
 		false
-	excludes_analyse:
+	excludePaths:
 		- vendor
 		- routes
 		- compilation_cache
@@ -15,8 +15,6 @@ parameters:
 		- web/b.php
 		- tests/routesTest.php
 		- src/classes/readers/ShapefileReader.php
-	autoload_files:
-		- vendor/autoload.php
 	ignoreErrors:
 		- '#Function vd not found.#'
 		- '#Function pr not found.#'
