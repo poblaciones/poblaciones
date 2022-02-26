@@ -7,7 +7,7 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 1a. Luego de instalarlo, ejecutar > `npm install vue`.
 
-2. Instalar PHP 7.1 o posterior en Apache o IIS (Windows) (https://www.php.net/downloads.php).
+2. Instalar PHP 7.4 o posterior en Apache o IIS (Windows) (https://www.php.net/downloads.php).
 
 3. Instalar Python 3.4 o superior (requerido para conversiones de archivos) (https://www.python.org/downloads/release/python-3811/)
 
