@@ -3,7 +3,7 @@ Esta guía detalla los pasos necesarios para descargar e instalar la aplicación
 
 ## 1. Instalar el software necesario
 
-1. Instalar PHP 7.1 en Apache o IIS (Windows) (https://www.php.net/downloads.php).
+1. Instalar PHP 7.4 en Apache o IIS (Windows) (https://www.php.net/downloads.php).
 
 2. Instalar Python 3.4 o superior (solo requerido para conversiones de archivos) (https://www.python.org/downloads/release/python-3811/)
 
