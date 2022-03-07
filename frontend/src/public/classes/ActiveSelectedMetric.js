@@ -446,7 +446,7 @@ ActiveSelectedMetric.prototype.ResolveValueLabelVisibility = function (labelId) 
 			return value.Visible;
 		}
 	}
-	err.errMessage('ResolveVisibility', 'Label did not match on metricVersion ' + this.SelectedVersion().Version.Id + ' of ' + this.properties.Metric.Name + '. Update views and/or fileCache clear may be required.');
+	err.errMessage('ResolveVisibility', 'Label did not match on metricVersion ' + this.SelectedVersion().Version.Id + ' of ' + this.properties.Metric.Name + '. Update views and/or fileCache clear may be required (getTileData cache).');
 	return false;
 };
 

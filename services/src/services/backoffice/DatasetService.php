@@ -5,6 +5,8 @@ namespace helena\services\backoffice;
 use minga\framework\Params;
 use minga\framework\PublicException;
 use minga\framework\Profiling;
+use minga\framework\WebConnection;
+use minga\framework\IO;
 
 use helena\classes\App;
 use helena\caches\DatasetColumnCache;
@@ -111,6 +113,21 @@ class DatasetService extends DbSession
 		return self::OK;
 	}
 
+	public function CreateRow($datasetId)
+	{
+		Profiling::BeginTimer();
+		$dataset = $this->GetDataset($datasetId);
+		$table = $dataset->getTable();
+		// La crea
+		$sql = "INSERT INTO " . $table . " () VALUES ();";
+		App::Db()->exec($sql);
+
+		$ret = array('Id' => App::Db()->lastInsertId());
+
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function OmmitDatasetRows($datasetId, $ids)
 	{
 		Profiling::BeginTimer();
@@ -191,6 +208,39 @@ class DatasetService extends DbSession
 	public function GetDatasetErrors($datasetId, $from, $rows)
 	{
 		return $this->GetDatasetRows($datasetId, $from, $rows, true);
+	}
+
+
+	public function GetGridExport($filename, &$format, $content)
+	{
+		$wc = new WebConnection();
+		$wc->Initialize();
+
+		$uri = "http://jquerygrid.net/export_server/dataexport.php";
+		$ret = $wc->Post($uri, '', ['filename' => $filename, 'format' => $format, 'content' => $content]);
+		if ($ret->error)
+		{
+			throw new ErrorException("No se pudo realizar la exportación: " . $ret->error);
+		}
+		$wc->Finalize();
+		if ($format === "xls")
+		{
+			$format = "xlsx";
+			return $this->ConvertXmlToXlsx($ret->file);
+		}
+		else
+			return $ret->file;
+	}
+
+	private function ConvertXmlToXlsx($file)
+	{
+		$reader = new \PhpOffice\PhpSpreadsheet\Reader\Xml();
+		$spreadsheet = $reader->load($file);
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$temp = IO::GetTempFilename();
+		$writer->save($temp);
+		IO::Delete($file);
+		return $temp;
 	}
 
 	private function GetDatasetRows($datasetId, $from, $rows, $showErrors = false)

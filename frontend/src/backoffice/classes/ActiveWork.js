@@ -116,6 +116,10 @@ ActiveWork.prototype.PublicUrl = function () {
 	return ret;
 };
 
+ActiveWork.prototype.GetGridExportUrl = function () {
+	return window.host + '/services/backoffice/ExportGridService?w=' + this.properties.Id;
+};
+
 ActiveWork.prototype.GetWorkStatistics = function () {
 	// Trae sus variables
 	var args = { 'w': this.properties.Id };

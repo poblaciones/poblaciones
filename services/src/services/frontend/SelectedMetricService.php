@@ -244,7 +244,7 @@ class SelectedMetricService extends BaseService
 			if ($variableInfo->Legend !== null && $variableInfo->Legend !== "")
 			{
 				$variableInfo->Asterisk = $asterisk;
-				$asterisk .= '*';
+				//$asterisk .= '*';
 			}
 			if ($variableInfo->Perimeter)
 			{

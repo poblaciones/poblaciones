@@ -86,7 +86,7 @@ class PhpSpreadSheetCsv extends BaseWriter
      *
      * @throws \Exception
      */
-    public function save($pFilename)
+    public function save($pFilename, int $flags = 0) : void
     {
         // Fetch sheet
         $sheet = $this->spreadsheet->getSheet($this->sheetIndex);

@@ -28,7 +28,7 @@ class LocalSettings extends Settings
 	}
 
 
-	public function Limits()
+	public function MapLimits(): LocalMonitorLimits
 	{
 		if (self::$limits == NULL)
 			self::$limits = new LocalMonitorLimits();

@@ -31,7 +31,7 @@
 		</template>
 		<div class="coverageBox" v-if="hasLegends(metric.SelectedLevel())">
 			<template v-for="variable, index in metric.SelectedLevel().Variables">
-				<div v-if="variable.Legend !== null && variable.Legend !== ''" :key="index">
+				<div v-if="(index === metric.SelectedLevel().SelectedVariableIndex || metric.SelectedLevel().Variables.length == 1) && variable.Legend !== null && variable.Legend !== ''" :key="index">
 					<span style="padding-right: 2px;">{{ variable.Asterisk }}</span>{{ variable.Legend }}
 				</div>
 			</template>

@@ -1,5 +1,7 @@
 [CURRENT]
 - Special words en regiones (para NEA y NOA).
+- Fix en exportación a csv y excel desde grillas admnistrativas.
+- Fix advertencia de formato no coincide en exportación a excel desde grillas administrativas.
 
 v3.02 (2021-11-14)
 - Fix: el botón de editar no estaba apareciendo sobre el mapa incluso si el usuario tenía permisos.

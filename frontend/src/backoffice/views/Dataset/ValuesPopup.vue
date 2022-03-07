@@ -237,10 +237,10 @@ export default {
 			}
     },
 		excelBtnOnClick() {
-				this.Grid.exportdata('xls', 'etiquetas');
+			this.Grid.exportdata('xls', 'etiquetas', true, null, false, this.Work.GetGridExportUrl());
 		},
 		csvBtnOnClick() {
-				this.Grid.exportdata('csv', 'etiquetas');
+			this.Grid.exportdata('csv', 'etiquetas', true, null, false, this.Work.GetGridExportUrl());
 		},
 		downOnClick() {
 			var selectedRows = this.selectedIndexes();

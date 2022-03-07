@@ -35,7 +35,7 @@ class AddressServiceModel
 		{
 			$url = $this->resolveUrl($encodedQuery);
 			// Verifica si hay un límite
-			$limit = Context::Settings()->Limits()->AddressQueryDaylyLimit;
+			$limit = Context::Settings()->MapLimits()->AddressQueryDaylyLimit;
 			if ($limit > 0)
 			{
 				$current = Performance::ReadTodayExtraValues('AddressQuery');

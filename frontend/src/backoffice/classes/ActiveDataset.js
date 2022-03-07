@@ -542,6 +542,16 @@ ActiveDataset.prototype.SkipRows = function (rowIds) {
 	});
 };
 
+ActiveDataset.prototype.CreateRow = function () {
+	this.Work.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/CreateDatasetRow',
+			{	'k': this.properties.Id }, 'crear una nueva fila'
+	).then(function(data) {
+		return data.Id;
+	});
+};
+
+
 ActiveDataset.prototype.DeleteRows = function (rowIds) {
 	var loc = this;
 	this.Work.WorkChanged();

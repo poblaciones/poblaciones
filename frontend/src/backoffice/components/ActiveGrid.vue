@@ -44,10 +44,12 @@
 				<md-button v-if="showingErrors" @click="skipOnClick" :disabled="skipDisabled">
 					<md-icon>skip_next</md-icon> Omitir fila(s)
 				</md-button>
+				<md-button v-if="!showingErrors && Work.CanEdit()" @click="newRow">
+					<md-icon>add_circle_outline</md-icon> Nueva fila
+				</md-button>
 				<md-button v-if="Work.CanEdit()" @click="confirmDelete" :disabled="deleteDisabled">
 					<md-icon>delete</md-icon> Borrar fila(s)
 				</md-button>
-
 				<template v-if="showingErrors">
 					<template v-if="georeferenceParameters.type == 'location'">
 						<template v-if="georeferenceParameters.end.latitude">
@@ -119,6 +121,7 @@ import FixCode from './FixCode.vue';
 import DataPager from "@/backoffice/classes/DataPager";
 import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import str from '@/common/framework/str';
+import err from '@/common/framework/err';
 import Localization from "@/backoffice/classes/Localization";
 
 import JqxGrid from "jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue";
@@ -455,11 +458,11 @@ export default {
 				this.DataPager.Fetch(postdata, adapter, source, callback, callback2);
 			}
 		},
-    excelBtnOnClick() {
-      this.Grid.exportdata("xls", "dataset");
+		excelBtnOnClick() {
+			this.Grid.exportdata("xls", "dataset", true, null, false, this.Work.GetGridExportUrl());
     },
     csvBtnOnClick() {
-      this.Grid.exportdata("csv", "dataset");
+			this.Grid.exportdata("csv", "dataset", true, null, false, this.Work.GetGridExportUrl());
     },
 		deleteSelection() {
 			var selected = this.gridNativeSelectedIds();
@@ -475,6 +478,33 @@ export default {
 				this.createGrid();
 			}
 			this.selectionChanged();
+		},
+		newRow() {
+			var loc = this;
+			loc.showWait();
+			this.Dataset.CreateRow().then(function (rowId) {
+				loc.refreshOnClick();
+				return;
+
+				/*var cols = loc.source.datafields.length;
+				var rowData = new Array(cols).fill('');
+				rowData[cols - 1] = rowId;
+				var named = loc.DataPager.PosFromNames(loc.source, [rowData]);
+				rowData = named[0];
+				loc.Grid.addrow(rowId, rowData);
+				var count = loc.Grid.getdatainformation().rowscount;
+				loc.updateCount(count);
+				loc.selectRowByPos(count - 1);
+				loc.hideWait();*/
+			}).catch (function (error) {
+				loc.hideWait();
+				err.err('AddRow', error);
+			});
+		},
+		selectRowByPos(i) {
+			this.Grid.clearselection();
+			this.Grid.selectrow(i);
+			this.Grid.ensurerowvisible(i);
 		},
     deleteOnClick() {
       let selectedRows = this.selectedIds();

@@ -34,6 +34,21 @@ App::GetOrPost('/services/backoffice/UpdateDatasetRegenData', function (Request 
 	return App::Json($controller->UpdateDataset($Dataset, true));
 });
 
+App::GetOrPost('/services/backoffice/ExportGridService', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+	$controller = new services\DatasetService();
+
+	$filename = Params::GetMandatory("filename");
+	$format = Params::GetMandatory("format");
+	$content = Params::GetMandatory("content");
+
+	$file = $controller->GetGridExport($filename, $format, $content);
+
+	return App::StreamFile($file, $filename . "." . $format);
+});
+
+
 App::Get('/services/backoffice/UpdateMultilevelMatrix', function (Request $request) {
 	$controller = new services\DatasetService();
 	$dataset1Id = Params::GetIntMandatory('d1');
@@ -45,7 +60,15 @@ App::Get('/services/backoffice/UpdateMultilevelMatrix', function (Request $reque
 	return App::Json($controller->UpdateMultilevelMatrix($dataset1Id, $matrix1, $dataset2Id, $matrix2));
 });
 
-App::Post('/services/backoffice/OmmitDatasetRows', function (Request $request) {
+
+App::Get('/services/backoffice/CreateDatasetRow', function (Request $request) {
+	$controller = new services\DatasetService();
+	$datasetId = Params::GetIntMandatory('k');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
+	return App::Json($controller->CreateRow($datasetId));
+});
+
+App::GetOrPost('/services/backoffice/OmmitDatasetRows', function (Request $request) {
 	$controller = new services\DatasetService();
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
@@ -53,7 +76,7 @@ App::Post('/services/backoffice/OmmitDatasetRows', function (Request $request) {
 	return App::Json($controller->OmmitDatasetRows($datasetId, $ids));
 });
 
-App::Post('/services/backoffice/DeleteDatasetRows', function (Request $request) {
+App::GetOrPost('/services/backoffice/DeleteDatasetRows', function (Request $request) {
 	$controller = new services\DatasetService();
 	$datasetId = Params::GetIntMandatory('k');
 	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;

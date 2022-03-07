@@ -245,10 +245,10 @@ export default {
     },
 
 		excelBtnOnClick() {
-				this.Grid.exportdata('xls', 'variables');
+			this.Grid.exportdata('xls', 'variables', true, null, false, this.Work.GetGridExportUrl());
 		},
 		csvBtnOnClick() {
-				this.Grid.exportdata('csv', 'variables');
+			this.Grid.exportdata('csv', 'variables', true, null, false, this.Work.GetGridExportUrl());
 		},
 		downOnClick() {
 			this.keepOrderState();
