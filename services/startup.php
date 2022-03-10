@@ -58,7 +58,7 @@ time_elapsed('presettings');
 require_once $settings;
 time_elapsed('settings');
 
-Context::Settings()->Shard()->CheckCurrentIsSet();
+App::Settings()->Shard()->CheckCurrentIsSet();
 
 if (!Context::Settings()->allowPHPsession)
 {

@@ -14,7 +14,7 @@ class MetadataMerger
 	private	$datasetId;
 	private $keepOldMetadata;
 	private	$maxPreviousId;
-	private $errors = "";
+	public $errors = "";
 	private $lastIdList;
 	private $dropSourceDataset;
 	private $targetDatasetId;

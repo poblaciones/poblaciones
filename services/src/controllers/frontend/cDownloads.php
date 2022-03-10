@@ -16,9 +16,6 @@ use helena\controllers\common\cPublicController;
 
 class cDownloads extends cPublicController
 {
-	private $cleanRoute;
-	private $cleanRouteBase;
-
 	public function Show()
 	{
 		Performance::SetController('downloads', 'get', true);

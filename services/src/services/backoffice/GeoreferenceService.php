@@ -34,13 +34,10 @@ class GeoreferenceService extends BaseService
 
 	const MAX_ROWS = 5000;
 
-	private $start = 0.0;
-
 	private $state;
 
 	function __construct()
 	{
-			$this->start = microtime(true);
 	}
 
 	public function CreateMultiGeoreferenceByLatLong($datasetId, $geographyId, $startLatColumnId, $startLonColumnId,

@@ -16,7 +16,7 @@ class ShardSettings
 	{
 		if ($this->CurrentShard == null)
 		{
-			echo('El archivo de configuración settings.php debe establecer un número de Shard entre 1 y 99 (Context::Settings()->Shard()->CurrentShard = n).');
+			echo('El archivo de configuración settings.php debe establecer un número de Shard entre 1 y 99 (App::Settings()->Shard()->CurrentShard = n).');
 			exit;
 		}
 		if ($this->Exclusions != null && in_array($this->CurrentShard, $this->Exclusions))

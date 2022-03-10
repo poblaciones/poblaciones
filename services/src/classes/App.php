@@ -15,6 +15,7 @@ use minga\framework\GlobalizeDebugSession;
 use minga\framework\settings\CacheSettings;
 
 use helena\classes\Paths;
+use helena\classes\settings\LocalSettings;
 
 use Twig\Environment;
 use Twig\Extension\StringLoaderExtension;
@@ -55,7 +56,7 @@ class App
 				$twig->addGlobal('tooltip_url', Links::TooltipUrl());
 				$twig->addGlobal('home_url', Links::GetHomeUrl());
 				$twig->addGlobal('application_name', Context::Settings()->applicationName);
-				$twig->addGlobal('google_maps_version', Context::Settings()->Map()->GoogleMapsApi);
+				$twig->addGlobal('google_maps_version', App::Settings()->Map()->GoogleMapsApi);
 
 				return $twig;
 			});
@@ -63,6 +64,15 @@ class App
 		return self::$app['twig'];
 	}
 
+	private static $settings = null;
+
+	public static function Settings() : LocalSettings
+	{
+		if(self::$settings == null)
+			self::$settings = new LocalSettings();
+
+		return self::$settings;
+	}
 	private static function getMessageTwigEngine()
 	{
 		if (!array_key_exists('twigMsg', self::$app))

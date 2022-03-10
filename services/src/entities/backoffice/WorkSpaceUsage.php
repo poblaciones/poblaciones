@@ -140,7 +140,7 @@ class WorkSpaceUsage
      */
     public function setDraftAttachmentBytes($draftAttachmentBytes)
     {
-        $this->Id = $draftAttachmentBytes;
+        $this->DraftAttachmentBytes = $draftAttachmentBytes;
 
         return $this;
     }
@@ -165,7 +165,7 @@ class WorkSpaceUsage
      */
     public function setDraftDataBytes($draftDataBytes)
     {
-        $this->Id = $draftDataBytes;
+        $this->DraftDataBytes = $draftDataBytes;
 
         return $this;
     }
@@ -189,7 +189,7 @@ class WorkSpaceUsage
      */
     public function setDraftIndexBytes($draftIndexBytes)
     {
-        $this->Id = $draftIndexBytes;
+        $this->DraftIndexBytes = $draftIndexBytes;
 
         return $this;
     }
@@ -214,7 +214,7 @@ class WorkSpaceUsage
      */
     public function setAttachmentBytes($attachmentBytes)
     {
-        $this->Id = $attachmentBytes;
+        $this->AttachmentBytes = $attachmentBytes;
 
         return $this;
     }
@@ -239,7 +239,7 @@ class WorkSpaceUsage
      */
     public function setDataBytes($dataBytes)
     {
-        $this->Id = $dataBytes;
+        $this->DataBytes = $dataBytes;
 
         return $this;
     }
@@ -263,7 +263,7 @@ class WorkSpaceUsage
      */
     public function setIndexBytes($indexBytes)
     {
-        $this->Id = $indexBytes;
+        $this->IndexBytes = $indexBytes;
 
         return $this;
     }

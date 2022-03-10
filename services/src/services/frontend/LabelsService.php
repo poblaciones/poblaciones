@@ -25,7 +25,7 @@ class LabelsService extends BaseService
 	{
 		Profiling::BeginTimer();
 		$data = null;
-		$size = Context::Settings()->Map()->LabelsBlockSize;
+		$size = App::Settings()->Map()->LabelsBlockSize;
 		$this->CheckNotNullNumeric($x);
 		$this->CheckNotNullNumeric($y);
 		$this->CheckNotNullNumeric($z);

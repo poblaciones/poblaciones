@@ -127,7 +127,7 @@ class RowDuplicator
 		$retInsert = '';
 		$retSelect = '';
 		$retUpdate = '';
-		$shard = Context::Settings()->Shard()->CurrentShard;
+		$shard = App::Settings()->Shard()->CurrentShard;
 
 		$columnsList = self::BuildColumnsList($metadata1, $metadata2, $shardifyIds);
 

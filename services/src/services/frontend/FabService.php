@@ -5,6 +5,7 @@ namespace helena\services\frontend;
 use minga\framework\Context;
 use minga\framework\Arr;
 use helena\classes\Session;
+use helena\classes\App;
 
 use helena\caches\FabMetricsCache;
 use helena\services\common\BaseService;
@@ -20,7 +21,7 @@ class FabService extends BaseService
 
 	public function GetFabMetrics()
 	{
-		$shard = Context::Settings()->Shard()->CurrentShard;
+		$shard = App::Settings()->Shard()->CurrentShard;
 		$data = null;
 
 		if (FabMetricsCache::Cache()->HasData($shard, $data))
@@ -223,7 +224,7 @@ class FabService extends BaseService
 	{
 		$table = new SnapshotMetricModel();
 		$items = $table->GetFabMetricSnapshot();
-		$filtered = Context::Settings()->Shard()->FilterItemsByPublic($items, 'myv_metric_id');
+		$filtered = App::Settings()->Shard()->FilterItemsByPublic($items, 'myv_metric_id');
 		return Arr::FromSortedToKeyed($filtered, 'myv_metric_group_id');
 	}
 

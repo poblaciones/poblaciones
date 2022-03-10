@@ -2,11 +2,13 @@
 
 namespace helena\services\frontend;
 
-use minga\framework\Profiling;
-use helena\entities\frontend\clipping\FeaturesInfo;
-
 use minga\framework\Performance;
+use minga\framework\Profiling;
+
+use helena\entities\frontend\clipping\FeaturesInfo;
+use helena\classes\App;
 use helena\classes\GlobalTimer;
+
 use helena\caches\TileDataCache;
 use helena\services\common\BaseService;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
@@ -14,7 +16,6 @@ use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\db\frontend\SnapshotByDatasetTileData;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
-use minga\framework\Context;
 
 
 class TileDataService extends BaseService
@@ -26,7 +27,7 @@ class TileDataService extends BaseService
 
 	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z)
 	{
-		$s = Context::Settings()->Map()->TileDataBlockSize;
+		$s = App::Settings()->Map()->TileDataBlockSize;
 		$blocks = [];
 		for($ix = $x; $ix < $x + $s; $ix++)
 		{
@@ -98,7 +99,7 @@ class TileDataService extends BaseService
 		else
 			$data = $this->CreateTileDataInfo($rows);
 
-		if (Context::Settings()->Map()->UseTextures && $level->Dataset->TextureId)
+		if (App::Settings()->Map()->UseTextures && $level->Dataset->TextureId)
 		{
 			$controller = new GradientService();
 			$gradientId = $level->Dataset->TextureId;

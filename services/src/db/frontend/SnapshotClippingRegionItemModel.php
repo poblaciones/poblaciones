@@ -21,7 +21,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 	public function GetFirstClippingRegion()
 	{
 		Profiling::BeginTimer();
-		$def = Context::Settings()->Map()->DefaultClippingRegion;
+		$def = App::Settings()->Map()->DefaultClippingRegion;
 		if ($def)
 		{
 			Profiling::EndTimer();

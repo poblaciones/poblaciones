@@ -107,8 +107,8 @@ class PublishDataTables
 			if (!$data)
 				throw new PublicException('Cartografía inexistente.');
 			$shard = intval($data['wrk_shard']);
-			if ($shard != Context::Settings()->Shard()->CurrentShard)
-				throw new PublicException('El shard de la obra no coincide con el del entorno: w: ' . $workId . ' s:' . $shard . ' vs ' . Context::Settings()->Shard()->CurrentShard);
+			if ($shard != App::Settings()->Shard()->CurrentShard)
+				throw new PublicException('El shard de la obra no coincide con el del entorno: w: ' . $workId . ' s:' . $shard . ' vs ' . App::Settings()->Shard()->CurrentShard);
 			}
 		Profiling::EndTimer();
 
@@ -354,7 +354,7 @@ class PublishDataTables
 		// Arregla columnas
 		$query = "UPDATE dataset d1 JOIN draft_dataset d2 ON d1.dat_id = d2.dat_id " .
 									" * 100 + " . $shard . " AND d2.dat_work_id = ?
-									SET d1.dat_table = replace(d2.dat_table, '_draft_', '_shard_" . Context::Settings()->Shard()->CurrentShard . "_' ),
+									SET d1.dat_table = replace(d2.dat_table, '_draft_', '_shard_" . App::Settings()->Shard()->CurrentShard . "_' ),
 									 d1.dat_images_column_id = d2.dat_images_column_id * 100 + " . $shard . ",
 									 d1.dat_latitude_column_id = d2.dat_latitude_column_id * 100 + " . $shard . ",
 									 d1.dat_longitude_column_id = d2.dat_longitude_column_id * 100 + " . $shard . ",
@@ -407,7 +407,7 @@ class PublishDataTables
 	{
 		Profiling::BeginTimer();
 
-		$target = Str::Replace($table, '_draft_', '_shard_' . Context::Settings()->Shard()->CurrentShard . '_');
+		$target = Str::Replace($table, '_draft_', '_shard_' . App::Settings()->Shard()->CurrentShard . '_');
 
 		// Crea la tabla
 		$this->DropTable($target);
@@ -636,12 +636,12 @@ class PublishDataTables
 
 	public static function Shardified($id)
 	{
-		return $id * 100 + Context::Settings()->Shard()->CurrentShard;
+		return $id * 100 + App::Settings()->Shard()->CurrentShard;
 	}
 
 	public static function ShardifiedDb($field)
 	{
-		return '(' . $field . ' * 100 + ' . Context::Settings()->Shard()->CurrentShard . ')';
+		return '(' . $field . ' * 100 + ' . App::Settings()->Shard()->CurrentShard . ')';
 	}
 
 	public static function Unshardify($id)

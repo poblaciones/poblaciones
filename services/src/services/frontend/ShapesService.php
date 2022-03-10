@@ -77,7 +77,7 @@ public function GetDatasetShapes($datasetId, $x, $y, $z)
 		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $envelope);
 
 		$gradientId = $carto['gradient_id'];
-		if (Context::Settings()->Map()->UseGradients && $gradientId)
+		if (App::Settings()->Map()->UseGradients && $gradientId)
 		{
 			$controller = new GradientService();
 			$gradientLimit = $carto['max_zoom_level'];

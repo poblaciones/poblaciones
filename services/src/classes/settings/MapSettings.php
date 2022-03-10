@@ -73,7 +73,7 @@ class MapSettings
 
 		$server = $validServers[($current !== -1 ? $current : 0)];
 		if ($current > 0)
-			Context::Settings()->Map()->SignatureSuffix = Request::Subdomain();
+			App::Settings()->Map()->SignatureSuffix = Request::Subdomain();
 
 		// Servidor
 		Context::Settings()->Servers()->RegisterServers($server, $homeUrl);

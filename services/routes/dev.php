@@ -14,7 +14,7 @@ function resolver($request)
 	$uri = $request->server->get('REQUEST_URI');
 	$wc = new WebConnection();
 	$wc->Initialize();
-	$port = Context::Settings()->Servers()->LoopLocalPort;
+	$port = App::Settings()->Servers()->LoopLocalPort;
 	$ret = $wc->Get('http://localhost:' . $port . $uri);
 	if ($ret->error)
 	{
@@ -43,7 +43,7 @@ function resolverSocket($request)
 {
 	$uri = $request->server->get('REQUEST_URI');
 
-	$port = Context::Settings()->Servers()->LoopLocalPort;
+	$port = App::Settings()->Servers()->LoopLocalPort;
 	socketCall('localhost', $port, $uri, false);
 }
 

@@ -104,8 +104,8 @@ App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request 
 	$y = Params::GetIntMandatory('y');
 	$s = Params::GetIntMandatory('s');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	if (!Context::Settings()->Map()->UseDataTileBlocks ||
-			$s !== Context::Settings()->Map()->TileDataBlockSize)
+	if (!App::Settings()->Map()->UseDataTileBlocks ||
+			$s !== App::Settings()->Map()->TileDataBlockSize)
 		throw new PublicException('El tamaño de bloque de datos solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
 	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z));
 });

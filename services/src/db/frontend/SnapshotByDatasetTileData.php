@@ -14,7 +14,6 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	const LOCATIONS_LIMIT_PER_TILE = 500;
 
 	private $variables;
-	private $hasSummary;
 	private $urbanity;
 	private $hasSymbols;
 	private $hasDescriptions;

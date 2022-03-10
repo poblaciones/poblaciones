@@ -34,7 +34,7 @@ class SignatureModel extends BaseModel
 					$ret[$key] = $row['value'];
 			}
 		}
-		$ret['Suffix'] = Context::Settings()->Map()->SignatureSuffix;
+		$ret['Suffix'] = App::Settings()->Map()->SignatureSuffix;
 		$ret['SmallLabelsFrom'] = SnapshotLookupModel::SMALL_LABELS_FROM;
 		return $ret;
 	}

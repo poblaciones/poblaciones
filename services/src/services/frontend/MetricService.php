@@ -27,7 +27,7 @@ class MetricService extends BaseService
 {
 	public function GetMetricGroups()
 	{
-		$shard = Context::Settings()->Shard()->CurrentShard;
+		$shard = App::Settings()->Shard()->CurrentShard;
 		$data = null;
 
 		if (MetricGroupsMetadataCache::Cache()->HasData($shard, $data))
@@ -40,7 +40,7 @@ class MetricService extends BaseService
 	}
 	public function GetMetricProviders()
 	{
-		$shard = Context::Settings()->Shard()->CurrentShard;
+		$shard = App::Settings()->Shard()->CurrentShard;
 		$data = null;
 
 		if (MetricProvidersMetadataCache::Cache()->HasData($shard, $data))

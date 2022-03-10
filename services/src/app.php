@@ -25,7 +25,7 @@ ErrorHandler::register();
 time_elapsed('ErrorHandler::register');
 
 // Initializa el mingaFramework
-Context::InjectSettings(new LocalSettings());
+Context::InjectSettings(App::Settings());
 time_elapsed('injectSettings');
 // Setea el manejo de EndRequest
 Context::InjectCallbacks(new Callbacks());

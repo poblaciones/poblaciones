@@ -51,7 +51,7 @@ class WorkService extends BaseService
 		$work->setIsIndexed(false);
 		$work->setSegmentedCrawling(false);
 		$work->setIsPrivate(false);
-		$work->setShard(Context::Settings()->Shard()->CurrentShard);
+		$work->setShard(App::Settings()->Shard()->CurrentShard);
 
 		// Crea startup
 		$startup  = $this->CreateStartup();

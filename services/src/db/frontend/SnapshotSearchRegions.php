@@ -47,7 +47,7 @@ class SnapshotSearchRegions extends BaseModel
 
 	private function ResolveExclusions($originalQuery)
 	{
-		$explicitSearchResults = Context::Settings()->Map()->ExplicitRegionSearchResults;
+		$explicitSearchResults = App::Settings()->Map()->ExplicitRegionSearchResults;
 		if(!$explicitSearchResults)
 		{
 			return '';

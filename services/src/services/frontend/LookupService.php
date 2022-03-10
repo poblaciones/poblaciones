@@ -7,6 +7,8 @@ use helena\db\frontend\AddressServiceModel;
 use helena\db\frontend\SnapshotSearchMetrics;
 use helena\db\frontend\SnapshotSearchRegions;
 use helena\db\frontend\SnapshotSearchFeatures;
+use helena\classes\App;
+
 use minga\framework\Arr;
 use minga\framework\Str;
 use minga\framework\Context;
@@ -90,14 +92,14 @@ class LookupService extends BaseService
 
 	private function ResolveStopWords($query)
 	{
-		foreach(Context::Settings()->Map()->Stopwords as $stopWord)
+		foreach(App::Settings()->Map()->Stopwords as $stopWord)
 			$query = Str::Replace(" " . $query . " ", ' ' . $stopWord . ' ', ' ');
 		return trim($query);
 	}
 
 	private function ResolveAutocomplete($query)
 	{
-		foreach(Context::Settings()->Map()->Autocomplete as $key => $value)
+		foreach(App::Settings()->Map()->Autocomplete as $key => $value)
 			$query = Str::ReplaceI($query, $key, $value);
 		return $query;
 	}

@@ -3,7 +3,7 @@
 namespace helena\services\frontend;
 
 use helena\caches\GeographyCache;
-use minga\framework\Context;
+use helena\classes\App;
 use helena\classes\Clipper;
 use helena\classes\ClipperRound;
 use helena\classes\GeoJson;
@@ -74,7 +74,7 @@ class GeographyService extends BaseService
 		}
 
 		$gradientId = $carto['gradient_id'];
-		if (Context::Settings()->Map()->UseGradients && $gradientId && !$this->AllAreDense($rows))
+		if (App::Settings()->Map()->UseGradients && $gradientId && !$this->AllAreDense($rows))
 		{
 			$controller = new GradientService();
 			$gradientLimit = $carto['max_zoom_level'];

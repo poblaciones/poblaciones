@@ -82,6 +82,9 @@ class SelectedMetricService extends BaseService
 		// Quita los que no tenga acceso
 		$this->RemovePrivateVersions($data);
 
+		if ($data->SelectedVersionIndex > sizeof($data->Versions) - 1)
+			$data->SelectedVersionIndex = sizeof($data->Versions) - 1;
+
 		Profiling::EndTimer();
 		if(sizeof($data->Versions) == 0)
 			return null;

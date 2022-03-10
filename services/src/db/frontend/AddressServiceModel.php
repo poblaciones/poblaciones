@@ -13,6 +13,7 @@ use minga\framework\PublicException;
 
 use helena\caches\AddressesCache;
 use helena\classes\Callbacks;
+use helena\classes\App;
 
 class AddressServiceModel
 {
@@ -24,8 +25,8 @@ class AddressServiceModel
 		$wc->Initialize();
 
 		$encodedQuery = urlencode($originalQuery);
-		if (Context::Settings()->Map()->GoogleGeocodingArea)
-			$encodedQuery .= "&components=" . Context::Settings()->Map()->GoogleGeocodingArea;
+		if (App::Settings()->Map()->GoogleGeocodingArea)
+			$encodedQuery .= "&components=" . App::Settings()->Map()->GoogleGeocodingArea;
 		// Fuerza uso de caché
 		$keepState = Context::Settings()->Cache()->Enabled;
 		Context::Settings()->Cache()->Enabled = CacheSettings::Enabled;
@@ -35,7 +36,7 @@ class AddressServiceModel
 		{
 			$url = $this->resolveUrl($encodedQuery);
 			// Verifica si hay un límite
-			$limit = Context::Settings()->MapLimits()->AddressQueryDaylyLimit;
+			$limit = App::Settings()->MapLimits()->AddressQueryDaylyLimit;
 			if ($limit > 0)
 			{
 				$current = Performance::ReadTodayExtraValues('AddressQuery');

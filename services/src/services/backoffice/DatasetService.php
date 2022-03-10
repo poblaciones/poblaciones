@@ -4,6 +4,7 @@ namespace helena\services\backoffice;
 
 use minga\framework\Params;
 use minga\framework\PublicException;
+use minga\framework\ErrorException;
 use minga\framework\Profiling;
 use minga\framework\WebConnection;
 use minga\framework\IO;

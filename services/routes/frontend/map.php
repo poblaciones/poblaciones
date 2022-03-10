@@ -66,8 +66,8 @@ App::$app->get('/services/frontend/clipping/GetBlockLabels', function (Request $
 	$y = Params::GetIntMandatory('y');
 	$s = Params::GetIntMandatory('s');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	if (!Context::Settings()->Map()->UseLabelTileBlocks ||
-			$s !== Context::Settings()->Map()->LabelsBlockSize)
+	if (!App::Settings()->Map()->UseLabelTileBlocks ||
+			$s !== App::Settings()->Map()->LabelsBlockSize)
 			throw new PublicException('El tamaño de bloque de etiquetas solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
 	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z));
 });

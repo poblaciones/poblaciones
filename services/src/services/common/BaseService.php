@@ -19,7 +19,7 @@ class BaseService
 	}
 	public static function Shardified($id)
 	{
-		return $id * 100 + Context::Settings()->Shard()->CurrentShard;
+		return $id * 100 + App::Settings()->Shard()->CurrentShard;
 	}
 
 	public function GotFromCache($data)
