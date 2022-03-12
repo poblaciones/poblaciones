@@ -42,7 +42,7 @@ class DraftWorkStartup
     /**
      * @var PointType
      *
-     * @ORM\Column(name="wst_center", type="CrEOF\Spatial\DBAL\Types\Geometry\PointType", precision=0, scale=0, nullable=true, unique=false)
+     * @ORM\Column(name="wst_center", type="point", precision=0, scale=0, nullable=true, unique=false)
      */
     private $Center;
 
