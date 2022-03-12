@@ -85,7 +85,7 @@ class FeaturesInfo extends BaseMapModel
 		$simplifier = new SimplifyGeometry();
 		$simplifier->discardOversimplified = false;
 
-		$rZoom = SpatialConditions::ResolveRZoom($zoom);
+		$rZoom = SpatialConditions::ResolveRZoom6($zoom);
 		$features = [];
 		for($n = 0; $n < sizeof($fullFeatures); $n++)
 		{

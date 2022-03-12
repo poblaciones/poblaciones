@@ -18,7 +18,7 @@ class SnapshotGeographyItemModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 
-		$rZoom = SpatialConditions::ResolveRZoom($zoom);
+		$rZoom = SpatialConditions::ResolveRZoom6($zoom);
 
 		//$centroids = ($getCentroids ? ', ST_Y(giw_centroid) as Lat, ST_X(giw_centroid) as Lon' : '');
 

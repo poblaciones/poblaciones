@@ -80,12 +80,17 @@ class SpatialConditions
 
 		return new QueryPart($from, $where, $params, $select);
 	}
-	public static function ResolveRZoom($zoom)
+	public static function ResolveRZoom6($zoom)
 	{
 		if ($zoom < 12)
 			return intval($zoom / 3) + 1;
 		else
 			return intval($zoom / 6) + 3;
+	}
+	public static function ResolveRZoom3($zoom)
+	{
+		$z = self::ResolveRZoom6($zoom);
+		return intval(($z + 1) / 2);
 	}
 	public function CircleCondition($circle, $effectiveDatasetType)
 	{
@@ -111,9 +116,9 @@ class SpatialConditions
 		}
 		else if ($effectiveDatasetType == 'B')
 		{
-			// Si es un metric de datos, evalúa la ubicación del geography
+			// Si es un boundary, evalúa la ubicación del elemento
 			$sql = " AND EllipseContainsGeometry(". $circle->Center->ToMysqlPoint() . ", " .
-				$circle->RadiusToMysqlPoint() . ", biw_geometry_r1)";
+				$circle->RadiusToMysqlPoint() . ", biw_geometry_r2)";
 		}
 		else
 			throw new PublicException("El tipo de dataset no fue reconocido");

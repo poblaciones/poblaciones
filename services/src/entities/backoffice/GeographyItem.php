@@ -4,6 +4,9 @@ namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use CrEOF\Spatial\DBAL\Types\GeometryType;
+use CrEOF\Spatial\DBAL\Types\Geometry\PointType;
+
 /**
  * GeographyItem
  *
@@ -36,7 +39,7 @@ class GeographyItem
     private $Caption;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
      * @ORM\Column(name="gei_geometry", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
@@ -50,7 +53,7 @@ class GeographyItem
     private $GeometryIsNull;
 
     /**
-     * @var point
+     * @var PointType
      *
      * @ORM\Column(name="gei_centroid", type="point", precision=0, scale=0, nullable=false, unique=false)
      */
@@ -92,42 +95,42 @@ class GeographyItem
     private $Urbanity;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
      * @ORM\Column(name="gei_geometry_r1", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
     private $GeometryR1;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
      * @ORM\Column(name="gei_geometry_r2", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
     private $GeometryR2;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
      * @ORM\Column(name="gei_geometry_r3", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
     private $GeometryR3;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
      * @ORM\Column(name="gei_geometry_r4", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
     private $GeometryR4;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
 		 * @ORM\Column(name="gei_geometry_r5", type="geometry", precision=0, scale=0, nullable=false, unique=false)
 		 */
     private $GeometryR5;
 
 		/**
-		 * @var geometry
+		 * @var GeometryType
 		 *
 		 * @ORM\Column(name="gei_geometry_r6", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
@@ -227,23 +230,23 @@ class GeographyItem
     }
 
     /**
-     * Set geometry
+     * Set GeometryType
      *
-     * @param geometry $geometry
+     * @param GeometryType $GeometryType
      *
      * @return GeographyItem
      */
-    public function setGeometry($geometry)
+    public function setGeometry($GeometryType)
     {
-        $this->Geometry = $geometry;
+        $this->Geometry = $GeometryType;
 
         return $this;
     }
 
     /**
-     * Get geometry
+     * Get GeometryType
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometry()
     {
@@ -277,7 +280,7 @@ class GeographyItem
     /**
      * Set centroid
      *
-     * @param point $centroid
+     * @param PointType $centroid
      *
      * @return GeographyItem
      */
@@ -291,7 +294,7 @@ class GeographyItem
     /**
      * Get centroid
      *
-     * @return point
+     * @return PointType
      */
     public function getCentroid()
     {
@@ -421,7 +424,7 @@ class GeographyItem
     /**
      * Set geometryR1
      *
-     * @param geometry $geometryR1
+     * @param GeometryType $geometryR1
      *
      * @return GeographyItem
      */
@@ -435,7 +438,7 @@ class GeographyItem
     /**
      * Get geometryR1
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometryR1()
     {
@@ -445,7 +448,7 @@ class GeographyItem
     /**
      * Set geometryR2
      *
-     * @param geometry $geometryR2
+     * @param GeometryType $geometryR2
      *
      * @return GeographyItem
      */
@@ -459,7 +462,7 @@ class GeographyItem
     /**
      * Get geometryR2
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometryR2()
     {
@@ -469,7 +472,7 @@ class GeographyItem
     /**
      * Set geometryR3
      *
-     * @param geometry $geometryR3
+     * @param GeometryType $geometryR3
      *
      * @return GeographyItem
      */
@@ -483,7 +486,7 @@ class GeographyItem
     /**
      * Get geometryR3
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometryR3()
     {
@@ -493,7 +496,7 @@ class GeographyItem
     /**
      * Set geometryR4
      *
-     * @param geometry $geometryR4
+     * @param GeometryType $geometryR4
      *
      * @return GeographyItem
      */
@@ -507,7 +510,7 @@ class GeographyItem
     /**
      * Get geometryR4
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometryR4()
     {
@@ -517,7 +520,7 @@ class GeographyItem
     /**
      * Set geometryR5
      *
-     * @param geometry $geometryR5
+     * @param GeometryType $geometryR5
      *
      * @return GeographyItem
      */
@@ -531,7 +534,7 @@ class GeographyItem
     /**
      * Get geometryR5
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometryR5()
     {
@@ -542,7 +545,7 @@ class GeographyItem
     /**
 		 * Set geometryR6
 		 *
-		 * @param geometry $geometryR6
+		 * @param GeometryType $geometryR6
 		 *
 		 * @return GeographyItem
 		 */
@@ -556,7 +559,7 @@ class GeographyItem
     /**
 		 * Get geometryR6
 		 *
-		 * @return geometry
+		 * @return GeometryType
 		 */
     public function getGeometryR6()
     {

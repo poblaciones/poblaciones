@@ -5,6 +5,8 @@ namespace helena\entities\backoffice;
 use Doctrine\ORM\Mapping as ORM;
 use \JMS\Serializer\Annotation\Exclude;
 
+use CrEOF\Spatial\DBAL\Types\Geometry\PointType;
+use CrEOF\Spatial\DBAL\Types\GeometryType;
 /**
  * ClippingRegionItem
  *
@@ -37,21 +39,36 @@ class ClippingRegionItem
     private $Caption;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
      * @ORM\Column(name="cli_geometry", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
-    private $Geometry;
+    private $GeometryType;
 
     /**
-     * @var geometry
+     * @var GeometryType
      *
      * @ORM\Column(name="cli_geometry_r1", type="geometry", precision=0, scale=0, nullable=false, unique=false)
      */
     private $GeometryR1;
 
+
     /**
-     * @var point
+     * @var GeometryType
+     *
+     * @ORM\Column(name="cli_geometry_r2", type="geometry", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $GeometryR2;
+
+    /**
+     * @var GeometryType
+     *
+     * @ORM\Column(name="cli_geometry_r3", type="geometry", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $GeometryR3;
+
+    /**
+     * @var PointType
      *
      * @ORM\Column(name="cli_centroid", type="point", precision=0, scale=0, nullable=false, unique=false)
      */
@@ -159,13 +176,13 @@ class ClippingRegionItem
     /**
      * Set geometry
      *
-     * @param geometry $geometry
+     * @param GeometryType $geometry
      *
      * @return ClippingRegionItem
      */
     public function setGeometry($geometry)
     {
-        $this->Geometry = $geometry;
+        $this->GeometryType = $geometry;
 
         return $this;
     }
@@ -173,17 +190,17 @@ class ClippingRegionItem
     /**
      * Get geometry
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometry()
     {
-        return $this->Geometry;
+        return $this->GeometryType;
     }
 
     /**
      * Set geometryR1
      *
-     * @param geometry $geometryR1
+     * @param GeometryType $geometryR1
      *
      * @return ClippingRegionItem
      */
@@ -197,17 +214,66 @@ class ClippingRegionItem
     /**
      * Get geometryR1
      *
-     * @return geometry
+     * @return GeometryType
      */
     public function getGeometryR1()
     {
         return $this->GeometryR1;
     }
 
+
+    /**
+     * Set geometryR2
+     *
+     * @param GeometryType $geometryR2
+     *
+     * @return ClippingRegionItem
+     */
+    public function setGeometryR2($geometryR2)
+    {
+        $this->GeometryR2 = $geometryR2;
+
+        return $this;
+    }
+
+    /**
+     * Get geometryR2
+     *
+     * @return GeometryType
+     */
+    public function getGeometryR2()
+    {
+        return $this->GeometryR2;
+    }
+
+    /**
+     * Set geometryR3
+     *
+     * @param GeometryType $geometryR3
+     *
+     * @return ClippingRegionItem
+     */
+    public function setGeometryR3($geometryR3)
+    {
+        $this->GeometryR3 = $geometryR3;
+
+        return $this;
+    }
+
+    /**
+     * Get geometryR3
+     *
+     * @return GeometryType
+     */
+    public function getGeometryR3()
+    {
+        return $this->GeometryR3;
+    }
+
     /**
      * Set centroid
      *
-     * @param point $centroid
+     * @param PointType $centroid
      *
      * @return ClippingRegionItem
      */
@@ -221,7 +287,7 @@ class ClippingRegionItem
     /**
      * Get centroid
      *
-     * @return point
+     * @return PointType
      */
     public function getCentroid()
     {

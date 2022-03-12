@@ -15,7 +15,7 @@ class SimplifyGeometryPlain
 	// y maneja adecuadamente polígonos cerrados.
 
 	// Metros de tolerancia para la simplificación de DouglasPeucker (1 peor calidad, 6 mejor)
-	private static $quality = 3.5;
+	private static $quality = 35;
 
 	public function Simplify($geometry)
 	{

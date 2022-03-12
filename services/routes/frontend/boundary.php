@@ -28,7 +28,6 @@ App::$app->get('/services/frontend/boundaries/GetBoundary', function (Request $r
 
 	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
 
-	//$frame = Frame::FromTileParams();
 	$frame = Frame::FromTileParams();
 
 	$frame->ClippingRegionIds = null;

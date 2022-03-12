@@ -103,7 +103,7 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		// se fija si van con polígono
 		if ($getPolygonType != null)
 		{
-			$polygonField = 'biw_geometry_r1';
+			$polygonField = 'biw_geometry_r3';
 
 			$cols = $this->AppendPolygonColumn($cols, $polygonField, $getPolygonType);
 			$this->wktIndex = count($cols) - 1;

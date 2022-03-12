@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use \JMS\Serializer\Annotation\Exclude;
 use \JMS\Serializer\Annotation\ExclusionPolicy;
 
+use CrEOF\Spatial\DBAL\Types\Geometry\PointType;
+
 /**
  * DraftWorkStartup
  *
@@ -38,9 +40,9 @@ class DraftWorkStartup
     private $ActiveMetrics;
 
     /**
-     * @var point
+     * @var PointType
      *
-     * @ORM\Column(name="wst_center", type="point", precision=0, scale=0, nullable=true, unique=false)
+     * @ORM\Column(name="wst_center", type="CrEOF\Spatial\DBAL\Types\Geometry\PointType", precision=0, scale=0, nullable=true, unique=false)
      */
     private $Center;
 
@@ -165,7 +167,7 @@ class DraftWorkStartup
     /**
      * Set center
      *
-     * @param point $center
+     * @param PointType $center
      *
      * @return DraftWorkStartup
      */
@@ -179,7 +181,7 @@ class DraftWorkStartup
     /**
      * Get center
      *
-     * @return point
+     * @return PointType
      */
     public function getCenter()
     {

@@ -56,7 +56,7 @@ class Frame
 		if (!$this->ClippingRegionIds || sizeof($this->ClippingRegionIds) === 0)
 			return "0";
 		else
-			return implode($this->ClippingRegionIds, ",");
+			return implode(",", $this->ClippingRegionIds);
 	}
 	public function GetClippingKey()
 	{

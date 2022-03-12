@@ -52,6 +52,7 @@ class BoundaryService extends BaseService
 	private function CalculateBoundary($frame, $boundaryId)
 	{
 		$table = new SnapshotBoundaryItemModel($boundaryId);
+		$table->zoom = $frame->Zoom;
 
 		$rows = $table->GetRows($frame);
 

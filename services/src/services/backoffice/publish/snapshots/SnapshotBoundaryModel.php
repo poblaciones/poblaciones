@@ -51,9 +51,13 @@ class SnapshotBoundaryModel
 										`biw_code`,
 										`biw_centroid`,
 										biw_area_m2,
-										`biw_geometry_r1`, biw_envelope)
+										biw_geometry_r1,
+										biw_geometry_r2,
+										biw_geometry_r3,
+										biw_envelope)
 										SELECT bcr_boundary_id, cli_id, cli_caption, cli_code, cli_centroid,
-											cli_area_m2, cli_geometry_r1, PolygonEnvelope(cli_geometry_r1)
+											cli_area_m2, cli_geometry_r1, cli_geometry_r2, cli_geometry_r3,
+											PolygonEnvelope(cli_geometry)
 										FROM boundary_clipping_region
 									INNER JOIN  boundary ON bou_id = bcr_boundary_id
 									INNER JOIN  clipping_region_item ON cli_clipping_region_id = bcr_clipping_region_id";
