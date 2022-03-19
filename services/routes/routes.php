@@ -36,7 +36,7 @@ App::$app->before(function(Request $request) {
 
 	Performance::ResolveControllerFromUri();
 
-	Headers::AcceptAnyCOARS();
+	Headers::AcceptAnyCORS();
 	$route = $request->getPathInfo();
 
 	if (Router::ProcessPath($route)) {
