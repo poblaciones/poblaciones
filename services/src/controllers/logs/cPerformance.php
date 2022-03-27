@@ -34,26 +34,39 @@ class cPerformance extends cController
 
 		Menu::RegisterAdmin($this->templateValues);
 
+		$this->title = 'Rendimiento';
 		// Resuelve lo mensual
 		$path = Context::Paths()->GetPerformanceLocalPath();
-		$month = cStatsSolver::AddMonthlyInfo($this->templateValues, $path, true, true);
+		$month = cStatsSolver::AddMonthlyInfo($this->templateValues, $path, true, true, true);
 
 		$fixedMethods = array('get', 'cache', 'post');
 		$fixedZones = array('público', 'backoffice', 'admin');
 
 		$monthNoYesterday = ($month == "yesterday" ? "" : $month);
-		$this->AddValue('dayly_table', Performance::GetDaylyTable($monthNoYesterday, true));
-		$this->AddValue('controller_table', Performance::GetControllerTable($month, false, false, $fixedMethods));
 
-		$this->AddValue('controller_table_admin', Performance::GetControllerTable($month, true, false, $fixedMethods));
+		if ($month !== 'history')
+		{
+			// Diario
+			$this->AddValue('dayly_table', Performance::GetDaylyTable($monthNoYesterday, true));
 
-		$this->AddValue('user_table', Performance::GetControllerTable($month, false, true, $fixedZones));
+			// Controller
+			$this->AddValue('controller_table', Performance::GetControllerTable($month, false, false, $fixedMethods));
 
-		$this->AddValue('locks_table', Performance::GetLocksTable($month));
+			$this->AddValue('controller_table_admin', Performance::GetControllerTable($month, true, false, $fixedMethods));
+			// Por usuario
+			$this->AddValue('user_table', Performance::GetControllerTable($month, false, true, $fixedZones));
+			// Locks
+			$this->AddValue('locks_table', Performance::GetLocksTable($month));
 
-		$this->title = 'Rendimiento';
+			return $this->Render('performance.html.twig');
+		}
+		else
+		{
+			// Diario
+			$this->AddValue('history_table', Performance::GetHistoryTable($this->templateValues['months']));
 
-		return $this->Render('performance.html.twig');
+			return $this->Render('performanceHistory.html.twig');
+		}
 	}
 
 	public function Post()

@@ -4,7 +4,8 @@
 		<b>Período: </b><select onchange="document.getElementById('monthlyForm').submit();" name='month'>
 			{% for month in months %}
 			<option
-			{% if current_month == month or (current_month == 'yesterday' and month == "Ayer") %}
+			{% if current_month == month or (current_month == 'yesterday' and month == "Ayer")
+							or (current_month == 'history' and month == "Histórico")%}
 			selected
 			{% endif %}>{{ month }}</option>
 			{% endfor %}</select>

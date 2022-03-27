@@ -23,7 +23,7 @@ App::$app->get('/services/backoffice/CreateWork', function (Request $request) {
 	$title = Params::GetMandatory('c');
 	$type = Params::GetMandatory('t');
 	if ($type !== 'P' && $type !== 'R')
-			throw new PublicException('Tipo inválido de cartografía');
+			throw new PublicException('Tipo invÃ¡lido de cartografÃ­a');
 
 	$entity = $controller->Create($type, $title);
 	return App::OrmJson($entity);
@@ -194,7 +194,7 @@ App::$app->post('/services/backoffice/UpdateStartup', function (Request $request
 	$startup = App::ReconnectJsonParamMandatory(entities\DraftWorkStartup::class, 's');
 	if ($work->getStartup()->getId() !== $startup->getId())
 	{
-		throw new PublicException('Las opciones de inicio indicadas no corresponde a la cartografía');
+		throw new PublicException('Las opciones de inicio indicadas no corresponde a la cartografÃ­a');
 	}
 	$controller = new services\WorkService();
 	return App::Json($controller->UpdateStartup($workId, $startup));

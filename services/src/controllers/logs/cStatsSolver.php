@@ -15,18 +15,21 @@ class cStatsSolver
 		return self::doAddMonthlyInfo($vals, $minYear, $minMonth, $addAllItem, $addYesterday);
 	}
 
-	public static function AddMonthlyInfo(&$vals, $path, $addAllItem = true, $addYesterday = false)
+	public static function AddMonthlyInfo(&$vals, $path, $addAllItem = true, $addYesterday = false, $addHistory = false)
 	{
 		self::CalculateMinDate($path, $minYear, $minMonth);
-		return self::doAddMonthlyInfo($vals, $minYear, $minMonth, $addAllItem, $addYesterday);
+		return self::doAddMonthlyInfo($vals, $minYear, $minMonth, $addAllItem, $addYesterday, $addHistory);
 	}
-	private static function doAddMonthlyInfo(&$vals, $minYear, $minMonth, $addAllItem = true, $addYesterday = false)
+
+	private static function doAddMonthlyInfo(&$vals, $minYear, $minMonth, $addAllItem = true, $addYesterday = false, $addHistory = false)
 	{
 		$months= array();
 		if ($addAllItem)
 			$months[] = 'Hoy';
 		if ($addYesterday)
 			$months[] = 'Ayer';
+		if ($addHistory)
+			$months[] = 'Histórico';
 		if ($minYear < 2200)
 		{
 			$now = mktime(0, 0, 0, intval(date('m')), 1, intval(date('Y')));
@@ -49,6 +52,10 @@ class cStatsSolver
 		else if ($_POST['month'] == 'Ayer')
 		{
 			$vals['current_month'] = 'yesterday';
+		}
+		else if ($_POST['month'] == 'Histórico')
+		{
+			$vals['current_month'] = 'history';
 		}
 		else
 			$vals['current_month'] = str_replace('/', '', $_POST['month']);
