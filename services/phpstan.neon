@@ -19,6 +19,7 @@ parameters:
 		- '#Function vd not found.#'
 		- '#Function pr not found.#'
 		- '#Function ec not found.#'
+		- '#of class Symfony\\Component\\Serializer\\Normalizer\\DateTimeNormalizer#'
 		- '#on an unknown class simple_html_dom#'
 		- '#simple_html_dom not found#'
 		- '#Parameter .* has invalid typehint type helena\\entities\\backoffice\\geometry.#'
