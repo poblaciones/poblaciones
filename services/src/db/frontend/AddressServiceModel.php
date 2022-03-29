@@ -42,7 +42,9 @@ class AddressServiceModel
 				$current = Performance::ReadTodayExtraValues('AddressQuery');
 				if ($current >= $limit)
 				{
-					Log::HandleSilentException(new PublicException('Se ha llegado al límite diario de consultas de direcciones (AddressQuery).'));
+					if ($current === $limit)
+						Log::HandleSilentException(new PublicException('Se ha llegado al límite diario de consultas de direcciones (AddressQuery).'));
+
 					Profiling::EndTimer();
 					return [];
 				}

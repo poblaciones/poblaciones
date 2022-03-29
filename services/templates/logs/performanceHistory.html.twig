@@ -1,0 +1,130 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'PERFORMANCE' %}
+
+{% block content %}
+
+{{ macros.Title('Administración') }}
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="contenedorAdmin">
+	<br>
+	<form action='{{ action_post_url }}' method='post'>
+		<div class='dBlockNewLineS1'>Profiling: </div>
+		<div class='dBlockSize3'>{{ profiling }} &nbsp;<input type='submit' name="toggle" value='{{ action }}'>
+		</div>
+	</form>
+
+	{{ include('monthlyPanel.html.twig') }}
+	<script type="text/javascript">
+		var form = getElement('monthlyForm');
+		var combo = form.elements['month'];
+		combo.options[0].text = "Hoy";
+		combo.options[0].value = "";
+	</script>
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Tiempo de ejecución - {{ now }}</div>
+	</div>
+	{{ macros.showTable(history_table, 1, 1, true) }}
+	<br />
+	<p>
+		<b>Métrica: </b><select onchange="createChart();" id='metric'>
+			{% for name, value in history_table %}
+		{% if name != 'Mes'  %}
+			<option>{{ name }}</option>
+		{% endif %}
+			{% endfor %}</select>
+	</p>
+</div>
+
+<script>
+
+var series = {{ history_table | json_encode()|raw }};
+
+window.onload = function () {
+	createChart();
+}
+</script>
+
+<div id="chart" style="height: 370px; width: 1000px"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+	function createChart() {
+
+		var div = document.querySelector("#chart");
+		while(div.firstChild){
+			div.removeChild(div.firstChild);
+		}
+		var metric = getSelectText('metric');
+		serie = [];
+		var headers = series['Mes'];
+		var headersNonZero = [];
+		var dataNonZero = [];
+		for (var n = 0; n < headers.length; n++) {
+			if (headersNonZero.length > 0 || series[metric][n] != 0) {
+				headersNonZero.push(headers[n]);
+				dataNonZero.push(series[metric][n]);
+			}
+		}
+
+		var options = {
+			series: [{
+				name: metric,
+				data: dataNonZero
+			}],
+			chart: {
+				height: 350,
+				type: 'line',
+				zoom: {
+					enabled: false
+				}
+			},
+			yaxis: {
+				labels: {
+					formatter: function (value) {
+						return value.toLocaleString('es');
+					}
+				},
+			},
+			dataLabels: {
+				enabled: false
+			},
+			markers: {
+				shape: "circle",
+				radius: 2,
+				size: 4.5,
+				strokeColors: '#fff',
+				strokeWidth: 2,
+				strokeOpacity: 0.9,
+				strokeDashArray: 0,
+				fillOpacity: 1,
+			},
+			stroke: {
+				curve: 'straight',
+				lineCap: 'butt',
+				width: 2,
+			},
+			title: {
+				text: metric + " mensuales",
+				align: 'center'
+			},
+			grid: {
+				row: {
+					//colors: ['#ddd', 'transparent'], // takes an array which will be repeated on columns
+					opacity: 0.5
+				},
+				borderColor: '#999',
+			},
+			xaxis: {
+				categories: headersNonZero,
+			}
+		};
+
+    var chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+
+	}
+</script>
+
+{% endblock %}

@@ -546,6 +546,8 @@ td.tFontRowHeader {
 	font-style: italic;
 	margin: 0 2 0 2;
 	font-size: 11px;
+	min-width: 170px;
+	word-break: break-word;
 }
 
 td {

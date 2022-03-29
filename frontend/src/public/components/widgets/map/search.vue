@@ -60,6 +60,21 @@ export default {
 			autolist: [],
 			searched: '',
 			selindex: -1,
+			doSearchDebounced: debounce(function (e) {
+				if (e.keyCode === 40 ||
+					e.keyCode === 38 ||
+					e.keyCode === 27) {
+					return;
+				}
+				const loc = this;
+				const t = loc.text.trim().toLowerCase();
+				if (t === '' || loc.searched === t) {
+					return;
+				}
+				loc.autolist = [];
+				var s = new Search(this, window.SegMap.Signatures.Search, 'a');
+				s.StartSearch(t);
+			}.bind(this), 1000),
 			text: '',
 		};
 	},
@@ -113,23 +128,13 @@ export default {
 		formatCoord(item) {
 			return h.trimNumberCoords(item.Lat) + ',' + h.trimNumberCoords(item.Lon);
 		},
-		doSearch: debounce(function(e)
-			{
-				if(e.keyCode === 40 ||
-					e.keyCode === 38 ||
-					e.keyCode === 27) {
-					return;
-				}
-				const loc = this;
-				const t = loc.text.trim().toLowerCase();
-				if(t === '' || loc.searched === t) {
-					return;
-				}
-				loc.autolist = [];
-				var s = new Search(this, window.SegMap.Signatures.Search, 'a');
-				s.StartSearch(t);
-			},
-			500),
+		doSearch(e) {
+			if (e.keyCode === 13) {
+				this.doSearchDebounced.flush();
+			} else {
+				return this.doSearchDebounced(e);
+			}
+		},
 		enterKey(e) {
 			const loc = this;
 			if(loc.hasSelected() === false) {
