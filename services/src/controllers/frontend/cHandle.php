@@ -42,6 +42,7 @@ class cHandle extends cPublicController
 		//		 /handle/123/12/1/provincias_segregacion
 		// (C) /handle/workid/metricid/regionid/regionItemId/regionItemName_metricName
 		//		 /handle/123/12/1/1012/catamarca_segregacion
+		// (D) /handle/boundaries/boundaryId
 		$parts = explode('/', $uri);
 		array_shift($parts);
 		if ($parts[0] !== 'handle')
@@ -62,7 +63,8 @@ class cHandle extends cPublicController
 
 		$this->AddValue("debugParam", Params::Get("debug"));
 		$workId = Params::CheckParseIntValue($parts[0]);
-		if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
+		if ($type !== 'B' && ($denied = Session::CheckIsWorkPublicOrAccessible($workId))) return $denied;
 
 		$metricId = $this->GetMetricId($parts);
 		$regionItemId = $this->GetRegionItemId($parts);

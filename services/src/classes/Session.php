@@ -177,6 +177,8 @@ class Session
 	{
 		Profiling::BeginTimer();
 		$res = self::GetWorkPublicOrAccessible($workId);
+		if ($res === null)
+			return false;
 
 		if (!$res['wrk_is_private'])
 			$ret = self::IsLinkAccessible($res['wrk_access_link']);

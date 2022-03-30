@@ -75,7 +75,7 @@ class NtilesBreaks
 		if ($max == 0)
 			return $lst;
 		for ($i = 0; $i < $max; $i++)
-			$lst[] = $data[$i][0];
+			$lst[] = $data[$i];
 		return $lst;
 	}
 
