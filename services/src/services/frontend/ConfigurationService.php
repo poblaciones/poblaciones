@@ -12,7 +12,7 @@ use helena\classes\App;
 
 class ConfigurationService extends BaseService
 {
-	public function GetConfiguration()
+	public function GetConfiguration($topUrl = null, $clientUrl = null)
 	{
 		$model = new SignatureModel();
 		$signatures = $model->GetSignatures();

@@ -1,7 +1,14 @@
-[CURRENT]
+- Fix: Latitud norte y sur aparecían invertidas en PDF de metadatos.
+- Fix a desplazamiento de paneles de (+)
+- Soporte a imágenes en Google Drive.
+- Estadísticas de visitas en vistas embebidas.
+
+v3.03 (2022-03-30)
 - Special words en regiones (para NEA y NOA).
 - Fix en exportación a csv y excel desde grillas admnistrativas.
 - Fix advertencia de formato no coincide en exportación a excel desde grillas administrativas.
+- Fix a indexación de Delimitaciones en Google.
+- Departamentos y provincias 1980 en mapas base.
 
 v3.02 (2021-11-14)
 - Fix: el botón de editar no estaba apareciendo sobre el mapa incluso si el usuario tenía permisos.

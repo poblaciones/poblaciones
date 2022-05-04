@@ -124,10 +124,11 @@ export default {
 			return this.scrollButtons == false && this.items.length > this.maxItems;
 		},
 		scrollBarClass() {
-			if(this.showScrollButtons) {
+			if (this.showScrollButtons) {
 				return 'no-scroll-bar';
+			} else {
+				return 'fab-scroll-bar';
 			}
-			return 'fab-scroll-bar';
 		},
 		borderRadiusClass() {
 			if(this.showScrollButtons) {
@@ -204,7 +205,7 @@ export default {
 		calculateHeight() {
 			var ret;
 			if (this.$refs.liItems && this.$refs.liItems.length > 0) {
-				ret = this.maxHeight + 1;
+				/*ret = this.maxHeight + 1;
 				this.adjust = 1;
 				while (ret > this.maxHeight) {
 					ret = 0;
@@ -212,6 +213,10 @@ export default {
 					for (var i = 0; i < Math.min(this.maxItems + this.adjust, this.$refs.liItems.length); i++) {
 						ret += this.$refs.liItems[i].scrollHeight;
 					}
+				}*/
+				ret = 0;
+				for (var i = 0; i < Math.min(this.maxItems, this.$refs.liItems.length); i++) {
+					ret += this.$refs.liItems[i].scrollHeight;
 				}
 			} else {
 				ret = this.maxHeight;
@@ -309,7 +314,10 @@ export default {
 			if(el.scrollTop == el.scrollHeight - el.offsetHeight) {
 				return;
 			}
-			el.scroll(0, el.scrollTop + this.nextItemHeight());
+			var maxScrolling = el.scrollHeight - el.offsetHeight - 1;
+			var targetScroll = el.scrollTop + this.nextItemHeight();
+
+			el.scrollTo(0, Math.min(maxScrolling, targetScroll));
 		},
 		wheel(e) {
 			e.preventDefault();
@@ -330,7 +338,9 @@ export default {
 					}
 				}
 				if (this.$refs.scrollDown) {
-					if (el.scrollTop == el.scrollHeight - el.offsetHeight) {
+					console.error("el.scrollTop: " + el.scrollTop + " | el.scrollHeight: " + el.scrollHeight + " | el.offsetHeight: " + el.offsetHeight);
+
+					if (el.scrollTop >= el.scrollHeight - el.offsetHeight - 2) {
 						this.$refs.scrollDown.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
 					} else {
 						this.$refs.scrollDown.classList.replace('fab-scroll-button-disabled', 'fab-scroll-button');

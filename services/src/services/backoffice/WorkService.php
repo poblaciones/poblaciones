@@ -27,6 +27,7 @@ use helena\services\backoffice\publish\CacheManager;
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\PublicException;
 
+use CrEOF\Spatial\DBAL\Types\Geometry\PointType;
 
 
 class WorkService extends BaseService
@@ -297,8 +298,13 @@ class WorkService extends BaseService
 		WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
 	}
+
 	public function UpdateStartup($workId, $startup)
 	{
+		$center = $startup->getCenter();
+		if ($center !== null)
+			$startup->setCenter(new \CrEOF\Spatial\PHP\Types\Geometry\Point($center->x, $center->y, null));
+
 		App::Orm()->save($startup);
 		WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;

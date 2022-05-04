@@ -2,7 +2,7 @@
 	<div>
 		<div ref="topImage" v-if="featureInfo.Image && isImageUrl(featureInfo.Image)"
 				 :style="'background-image:url('
-										+ featureInfo.Image + ');'"
+										+ preProcess(featureInfo.Image) + ');'"
 				 class="topImage">
 		</div>
 		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')">
@@ -154,6 +154,18 @@ export default {
 			window.Panels.Content.FeatureInfoKey = null;
 			e.preventDefault();
 			this.$emit('clickClose', e, this.featureInfo.Key.Id);
+		},
+		preProcess(imageUrl) {
+			if (!imageUrl) {
+				return imageUrl;
+			}
+			if (imageUrl.startsWith('https://drive.google.com/file/')) {
+				var found = imageUrl.match(/d\/([A-Za-z0-9\-]+)/);
+				if (found[1].length) {
+					return 'https://drive.google.com/uc?export=view&id=' + found[1];
+				}
+			}
+			return imageUrl;
 		},
 		previous() {
 			window.SegMap.InfoWindow.Previous();

@@ -29,7 +29,6 @@
 									</md-table-row>
 								</md-table>
 							</div>
-
 							<div class="md-layout-item md-size-80" style="margin-top: 15px">
 								<md-table style="max-width: 900px;" v-model="resources" md-card="">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
@@ -40,7 +39,6 @@
 							</div>
 						</div>
 					</md-tab>
-
 					<md-tab md-label="Cartografías">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-100" style="margin-top: -10px">
@@ -62,7 +60,6 @@
 							</div>
 						</div>
 					</md-tab>
-
 					<md-tab md-label="Indicadores">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-80" style="margin-top: -10px">
@@ -82,7 +79,6 @@
 							</div>
 						</div>
 					</md-tab>
-
 					<md-tab md-label="Tipos de descarga">
 						<div class="md-layout">
 							<div class="md-layout-item md-size-80" style="margin-top: -10px">
@@ -93,6 +89,19 @@
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Dataset" md-sort-by="Datos">{{ item.Datos }}</md-table-cell>
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Dataset+WKT" md-sort-by="WKT">{{ item.WKT }}</md-table-cell>
 										<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Dataset+GeoJson" md-sort-by="GeoJson">{{ item.GeoJson }}</md-table-cell>
+									</md-table-row>
+								</md-table>
+							</div>
+						</div>
+					</md-tab>
+					<md-tab md-label="Embebidos">
+						<div class="md-layout">
+							<div class="md-layout-item md-size-80" style="margin-top: -10px">
+								<md-table :key="componentKey" style="max-width: 900px;" v-model="embedding" md-sort="Hits" md-sort-order="desc" md-card="">
+									<md-table-row slot="md-table-row" slot-scope="{ item }">
+										<md-table-cell md-label="Sitio" md-sort-by="Host"><a :href="item.Host" target="_blank">{{ removeProt(item.Host) }}</a></md-table-cell>
+										<md-table-cell md-label="Hits"><span v-html="joinArray(item.Hits)" /></md-table-cell>
+										<md-table-cell md-label="Cartografía"><span v-html="joinArray(item.Maps, true)" /></md-table-cell>
 									</md-table-row>
 								</md-table>
 							</div>
@@ -117,6 +126,7 @@ export default {
 			works: [],
 			metrics: [],
 			downloadTypes: [],
+			embedding: [],
 			totals: [],
 			resources: [],
 			months: [],
@@ -137,6 +147,23 @@ export default {
 	methods: {
 		formatDate(date) {
 			return f.formatDate(date);
+		},
+		joinArray(a, createHyperlink) {
+			if (createHyperlink) {
+				var b = [];
+				for(var c of a) {
+					b.push("<a href='" + c + "' target='_blank'>" + c.replace(window.host, '') + "</a>");
+				}
+				a = b;
+			}
+			return a.join('<br>');
+		},
+		removeProt(url) {
+			url = url.replace("https://", '');
+			if (url.endsWith('/')) {
+				url = url.substr(0, url.length - 1);
+			}
+			return url;
 		},
 		getFromCache(month) {
 			return this.localCache[month];
@@ -186,6 +213,7 @@ export default {
 			arr.Fill(this.resources, data.Resources);
 			arr.Fill(this.metrics, data.Metrics);
 			arr.Fill(this.downloadTypes, data.DownloadTypes);
+			arr.Fill(this.embedding, data.Embedding);
 
 			if (data.Months.length > 0) {
 				this.currentMonth = this.months[0];

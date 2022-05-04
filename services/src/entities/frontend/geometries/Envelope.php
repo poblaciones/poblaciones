@@ -91,9 +91,9 @@ class Envelope extends BaseMapModel
 	}
 	public function ToFormattedString()
 	{
-		return "Latitud norte: " . Str::FormatLocaleNumber($this->Min->Lat, 6) . ". "
+		return "Latitud norte: " . Str::FormatLocaleNumber($this->Max->Lat, 6) . ". "
 						. "Longitud oeste: " . Str::FormatLocaleNumber($this->Min->Lon, 6) . ". \n"
-						. "Latitud sur: " . Str::FormatLocaleNumber($this->Max->Lat, 6) . ". "
+						. "Latitud sur: " . Str::FormatLocaleNumber($this->Min->Lat, 6) . ". "
 						. "Longitud este: " . Str::FormatLocaleNumber($this->Max->Lon, 6) . ". ";
 	}
 	public function ToWKT()

@@ -7,7 +7,7 @@ use helena\entities\frontend\geometries\Coordinate;
 use helena\services\frontend as services;
 
 use helena\classes\App;
-
+use helena\classes\Statistics;
 use minga\framework\Params;
 use minga\framework\Context;
 use minga\framework\PublicException;
@@ -74,6 +74,12 @@ App::$app->get('/services/frontend/clipping/GetBlockLabels', function (Request $
 
 App::$app->get('/services/GetConfiguration', function (Request $request) {
 	$controller = new services\ConfigurationService();
+	$topUrl = Params::Get('t');
+	if ($topUrl)
+	{
+		$clientUrl = Params::Get('c');
+		Statistics::SaveEmbeddedHit($topUrl, $clientUrl);
+	}
 	return App::Json($controller->GetConfiguration());
 });
 

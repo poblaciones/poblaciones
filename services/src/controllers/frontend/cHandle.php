@@ -9,6 +9,7 @@ use minga\framework\Params;
 use minga\framework\Arr;
 use minga\framework\Context;
 use minga\framework\Str;
+use helena\classes\App;
 use helena\classes\Session;
 use helena\classes\Links;
 use helena\classes\Statistics;
@@ -207,6 +208,9 @@ class cHandle extends cPublicController
 	{
 		$workService = new WorkService();
 		$work = $workService->GetWork($workId);
+		if (!$work)
+			App::NotFoundExit("La cartografía no ha sido encontrada.");
+
 		$metadata = $this->GetMetadata($work->Metadata->Id);
 
 		$this->AddMetadata($metadata, $work->Url, $metadata['met_title']);
@@ -222,6 +226,9 @@ class cHandle extends cPublicController
 	{
 		$boundaryService = new BoundaryService();
 		$boundary = $boundaryService->GetSelectedBoundary($boundaryId);
+		if (!$boundary)
+			App::NotFoundExit("La delimitación no ha sido encontrada.");
+
 		$metadata = $this->GetMetadata($boundary->Metadata->Id);
 
 		$this->AddMetadata($metadata, null, $metadata['met_title']);
@@ -253,7 +260,11 @@ class cHandle extends cPublicController
 		$items = [];
 		$metadataId = $work->Metadata->Id;
 		$sources = $model->GetMetadataSources($metadataId);
-		$metricName = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId)['Name'];
+		$metricInfo = Arr::GetItemByNamedValue($work->Metrics, "Id", $metricId);
+		if (!$metricInfo)
+			App::NotFoundExit("El indicador no ha sido encontrado.");
+
+		$metricName = $metricInfo['Name'];
 		$metric = $metricName;
 
 		$this->AddInfo($metadata, $metric, $items);
@@ -410,11 +421,7 @@ class cHandle extends cPublicController
 			$val = $source['src_caption'];
 			$val = Str::Concat($val, $source['src_version'], ', ');
 			$val = Str::Concat($val, $source['src_authors'], '. ');
-			// Institución
-			if ($source['ins_caption'] != '')
-			{
-				$val = Str::Concat($val, $source['ins_caption'], '. ');
-			}
+			$val = Str::Concat($val, $source['ins_caption'], '. ');
 			$items[] = ['Name' => $caption, 'Value' => $val];
 			$caption = '';
 		}

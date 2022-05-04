@@ -173,13 +173,14 @@ class Session
 		return $res;
 	}
 
-	public static function IsWorkPublicOrAccessible($workId, $checkByUser = true)
+	public static function IsWorkPublicOrAccessible($workId)
 	{
 		Profiling::BeginTimer();
 		$res = self::GetWorkPublicOrAccessible($workId);
 		if ($res === null)
-			return false;
-
+		{
+			return self::IsSiteReader();;
+		}
 		if (!$res['wrk_is_private'])
 			$ret = self::IsLinkAccessible($res['wrk_access_link']);
 		else if (!Session::IsAuthenticated())
@@ -187,7 +188,7 @@ class Session
 		else
 			$ret = self::IsWorkReaderShardified($workId);
 
-		if (!$ret && !$checkByUser)
+		if (!$ret)
 			$ret = self::IsSiteReader();
 
 		Profiling::EndTimer();

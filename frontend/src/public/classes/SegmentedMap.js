@@ -348,7 +348,7 @@ SegmentedMap.prototype.AddBoundaryById = function (id, caption) {
 		var activeBoundary = new ActiveBoundary(res.data);
 		loc.Metrics.AddStandardMetric(activeBoundary);
 	}).catch(function (error) {
-		err.errDialog('GetSelectedMetric', 'obtener las delimitaciones solicitadas', error);
+		err.errDialog('GetSelectedBoundary', 'obtener las delimitaciones solicitadas', error);
 	});
 
 };

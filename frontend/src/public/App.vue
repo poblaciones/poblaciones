@@ -172,8 +172,18 @@
 		methods: {
 			GetConfiguration() {
 				const loc = this;
+				var params = {};
+				if (window.self !== window.top) {
+					var topUrl = (window.location.ancestorOrigin && window.location.ancestorOrigin.length > 0 ?
+														window.location.ancestorOrigin[0] : document.referrer);
+					if (!topUrl || document.location.href.startsWith(topUrl)) {
+						topUrl = '<unknown>';
+					}
+					params.t = topUrl;
+					params.c = document.location.href;
+				}
 				return axios.get(window.host + '/services/GetConfiguration', {
-					params: {}
+					params: params
 				}).then(function (res) {
 					loc.config = res.data;
 					loc.user = res.data.User;

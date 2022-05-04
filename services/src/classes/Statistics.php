@@ -10,7 +10,6 @@ use minga\framework\Date;
 use minga\framework\Profiling;
 use helena\caches\WorkPermissionsCache;
 use helena\services\backoffice\publish\PublishDataTables;
-use minga\framework\Log;
 
 class Statistics
 {
@@ -41,6 +40,15 @@ class Statistics
 				$permission === WorkPermissionsCache::EDIT ||
 				$permission === WorkPermissionsCache::VIEW);
 		}
+	}
+
+	public static function SaveEmbeddedHit($topUrl, $clientUrl)
+	{
+		// Guarda el hit
+		$sql = "INSERT INTO statistic_embedding (emb_month, emb_host_url, emb_map_url, emb_hits)
+				VALUES(?, ?, ?, 1) ON DUPLICATE KEY UPDATE emb_hits = emb_hits + 1";
+		$month = Date::GetLogMonthFolder();
+		App::Db()->exec($sql, [$month, $topUrl, $clientUrl]);
 	}
 
 	public static function StoreInternalHit($workId, $subtype, $saveReferer = false)
@@ -258,7 +266,10 @@ class Statistics
 		$user = Account::Current()->user;
 		$time = Date::FormattedArNow();
 
-		$line = self::EncodeArray(array('time' => $time, 't' => $type, 'id' => $id, 'e' => $extra, 'user' => $user, 'ip' => $remoteAddr, 'r' => $referer));
+		$args = array('time' => $time, 't' => $type, 'id' => $id,
+													'e' => $extra, 'user' => $user,
+													'ip' => $remoteAddr, 'r' => $referer);
+		$line = self::EncodeArray($args);
 		$folder = Paths::GetStatisticsPath() . "/" . Date::GetLogMonthFolder();
 		IO::EnsureExists($folder);
 		$file = self::GetFilename($folder, $workId);

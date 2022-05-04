@@ -10,6 +10,7 @@ use minga\framework\Params;
 use minga\framework\Performance;
 use minga\framework\Context;
 use minga\framework\Profiling;
+use minga\framework\MessageBox;
 use minga\framework\PhpSession;
 use minga\framework\GlobalizeDebugSession;
 use minga\framework\settings\CacheSettings;
@@ -142,11 +143,18 @@ class App
 		return $twig->resolveTemplate($templates)->render($args);
 	}
 
-	public static function NotFoundResponse()
+	public static function NotFoundResponse($text = 'Page not found.')
 	{
-		$response = self::Response('Page not found.', 'text-html');
+		$response = self::Response($text, 'text-html');
 		$response->setStatusCode(404);
 		return $response;
+	}
+
+	public static function NotFoundExit($text = 'Page not found.')
+	{
+		MessageBox::Set404NotFoundHeaders();
+		echo $text;
+		self::EndRequest();
 	}
 
 	public static function RedirectKeepingParams($url, $status = 302)

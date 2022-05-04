@@ -47,7 +47,18 @@ class StatisticsService extends BaseService
 		$totals = $this->CreateTotalHits($month, $dailyTable, $works, $metrics);
 		$resources = $this->CreateTotalsResources($month, $dailyTable);
 
-		return ['Totals' => $totals, 'Resources' => $resources, 'Works' => $works, 'Metrics' => $metrics, 'DownloadTypes' => $downloadTypes,'Months' => $possible, 'IsSummarized' => $summarized];
+		// Embebidos
+		$sqlEmbedding = "SELECT emb_host_url Host, GROUP_CONCAT(emb_map_url ORDER BY emb_hits DESC SEPARATOR '\t') as Maps,
+											GROUP_CONCAT(emb_hits ORDER BY emb_hits DESC SEPARATOR '\t') as Hits FROM statistic_embedding
+											WHERE emb_month = ?
+											GROUP BY emb_host_url";
+		$embedding = App::Db()->fetchAll($sqlEmbedding, array($month));
+		foreach($embedding as &$row)
+		{
+			$row['Maps'] = explode("\t", $row['Maps']);
+			$row['Hits'] = explode("\t", $row['Hits']);
+		}
+		return ['Totals' => $totals, 'Resources' => $resources, 'Works' => $works, 'Metrics' => $metrics, 'DownloadTypes' => $downloadTypes,'Months' => $possible, 'IsSummarized' => $summarized, 'Embedding' => $embedding ];
 	}
 
 	private function GetLastSummarizedMonth()
