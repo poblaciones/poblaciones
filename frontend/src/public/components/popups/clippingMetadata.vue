@@ -47,7 +47,7 @@
 							<td>Metadatos:</td>
 							<td>
 								<a target="_blank" :href="resolveMetadataUrl()">
-									<file-pdf-icon title="Consultar" /> Consultar
+									<i class="far fa-file-pdf" /> Consultar
 								</a>
 							</td>
 						</tr>
@@ -56,7 +56,7 @@
 							<td class='tdWrappable'><div class="attachmentsDownloadPanel">
 								<span v-for="file in metadata.Files" :key="file.Id">
 									<a target="_blank" :href="resolveFileUrl(file)">
-										<file-pdf-icon title="Descargar" /> {{ file.Caption }}
+										<i class="far fa-file-pdf" /> {{ file.Caption }}
 									</a>
 								</span>
 								</div>
@@ -72,7 +72,6 @@
 
 <script>
 import h from '@/public/js/helper';
-import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
 import creativeCommons from '@/public/components/controls/creativeCommons.vue';
 import str from '@/common/framework/str';
 import apa from '@/common/js/citationAPA';
@@ -85,7 +84,6 @@ export default {
 	],
 	components: {
     creativeCommons,
-		FilePdfIcon,
 		Modal
 	},
 	data() {

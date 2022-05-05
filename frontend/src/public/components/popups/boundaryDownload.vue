@@ -38,7 +38,7 @@
 									<download-icon title="Descargar" /> {{ format.caption }}
 								</button>
 								<button @click="sendFile(resolveMetadataUrl(), true)" class="downloadButton">
-									<file-pdf-icon title="Descargar" /> Metadatos
+									<i class="far fa-file-pdf" /> Metadatos
 								</button>
 							</span>
 							<span v-else="">
@@ -52,7 +52,7 @@
 							<div class="attachmentsDownloadPanel">
 								<span v-for="file in boundary.properties.Metadata.Files" :key="file.Id">
 									<a target="_blank" :href="resolveFileUrl(file)">
-										<file-pdf-icon title="Descargar" /> {{ file.Caption }}
+										<i class="far fa-file-pdf" /> {{ file.Caption }}
 									</a>
 								</span>
 							</div>
@@ -77,7 +77,6 @@ import axios from 'axios';
 import h from '@/public/js/helper';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import creativeCommons from '@/public/components/controls/creativeCommons.vue';
-import FilePdfIcon from 'vue-material-design-icons/FilePdf.vue';
 import err from '@/common/framework/err';
 import arr from '@/common/framework/arr';
 import Modal from '@/public/components/popups/modal';
@@ -93,7 +92,6 @@ export default {
 	components: {
     creativeCommons,
     DownloadIcon,
-		FilePdfIcon,
     Modal
 	},
 	data() {

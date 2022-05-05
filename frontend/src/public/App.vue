@@ -170,10 +170,14 @@
 			},
 		},
 		methods: {
+			IsPreview() {
+				var path = window.location.href;
+				return path.indexOf('&pv=1#') > 0;
+			},
 			GetConfiguration() {
 				const loc = this;
 				var params = {};
-				if (window.self !== window.top) {
+				if (window.self !== window.top && !this.IsPreview()) {
 					var topUrl = (window.location.ancestorOrigin && window.location.ancestorOrigin.length > 0 ?
 														window.location.ancestorOrigin[0] : document.referrer);
 					if (!topUrl || document.location.href.startsWith(topUrl)) {
@@ -346,7 +350,7 @@
 		overflow-y: hidden;
 		margin: 0;
 		padding: 0;
-		user-select: none;
+		cursor: default;
 	}
 
 	.gm-ui-hover-effect {

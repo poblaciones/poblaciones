@@ -64,17 +64,22 @@ import arr from '@/common/framework/arr';
 
 	},
 	mounted() {
-		var loc = this;
-		this.$refs.invoker.doMessage('Obteniendo usuarios', window.Db,
-			window.Db.GetUsers).then(function (data) {
-				for (var n = 0; n < data.length; n++) {
-					data[n].FormattedRole = loc.formatRole(data[n]);
-					data[n].FullName = loc.formatName(data[n]);
-				}
-				arr.AddRange(loc.list, data);
-			});
+
 	},
 	methods: {
+		loadData() {
+			if (this.list.length == 0) {
+				var loc = this;
+				this.$refs.invoker.doMessage('Obteniendo usuarios', window.Db,
+					window.Db.GetUsers).then(function (data) {
+						for (var n = 0; n < data.length; n++) {
+							data[n].FormattedRole = loc.formatRole(data[n]);
+							data[n].FullName = loc.formatName(data[n]);
+						}
+						arr.AddRange(loc.list, data);
+					});
+			}
+		},
 		formatRole(v) {
 			var ret = '';
 			if (v.Privileges === 'A') {

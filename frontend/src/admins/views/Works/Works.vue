@@ -164,9 +164,11 @@ export default {
 			}
 		},
 	},
-	mounted() {
-		this.refreshWorks();
-	},
+		mounted() {
+			if (this.filter === 'P') {
+				this.refreshWorks();
+			}
+		},
 	methods: {
 		getWorkUri(element, absoluteUrl) {
 			var pre = '';
@@ -200,6 +202,11 @@ export default {
 		},
 		select(element) {
 			window.open(this.getWorkUri(element, true), '_blank');
+		},
+		loadData() {
+			if (this.works.length == 0) {
+				this.refreshWorks();
+			}
 		},
 		refreshWorks() {
 			var loc = this;

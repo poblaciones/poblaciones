@@ -20,11 +20,11 @@
 						</md-tab>
 
 						<md-tab class="transparentTab" id="works-tab" v-if="isDataAdmin" to="/works" md-label="Cartografías" :md-active="isPath('/works')">
-							<works filter="R"></works>
+							<works filter="R" ref="worksList"></works>
 						</md-tab>
 
 						<md-tab class="transparentTab" id="users-tab" v-if="isAdmin" to="/users" :md-active="isPath('/users') || isPath('/')" md-label="Usuarios">
-							<users></users>
+							<users ref="usersList"></users>
 						</md-tab>
 
 
@@ -76,10 +76,11 @@ export default {
 		document.title = 'Poblaciones';
 		window.Context.CurrentWork = null;
 		window.Context.CurrentDataset = null;
+		this.checkLazyLoading();
 	},
 	data() {
 		return {
-			pendingReviews: 0
+			pendingReviews: 0,
 		};
 	},
 	computed: {
@@ -102,15 +103,33 @@ export default {
 		showPublic() {
 			return (window.Context.Cartographies);
 		},
-	},
-	methods: {
-		isPath(path) {
-			return this.$route.path === path;
 		},
-		pendingUpdated(pending) {
-			this.pendingReviews = pending;
+		beforeRouteUpdate(to, from, next) {
+			next();
+		},
+
+		methods: {
+			isPath(path) {
+				return this.$route.path === path;
+			},
+			checkLazyLoading() {
+				var tabPath = this.$route.path;
+				if (tabPath == '/works') {
+					this.$refs.worksList.loadData();
+				} else if (tabPath == '/users') {
+					this.$refs.usersList.loadData();
+				}
+			},
+			pendingUpdated(pending) {
+				this.pendingReviews = pending;
+			},
+		},
+		watch:
+		{
+			'$route'(to, from) {
+				this.checkLazyLoading();
+			}
 		}
-	}
 };
 </script>
 
