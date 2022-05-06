@@ -2,6 +2,8 @@
 - Fix a desplazamiento de paneles de (+)
 - Soporte a imágenes en Google Drive.
 - Estadísticas de visitas en vistas embebidas.
+- Cambio para no comenzar con foco en búsqueda.
+- Mejoras de acomodamiento de paneles en pantallas chicas.
 
 v3.03 (2022-03-30)
 - Special words en regiones (para NEA y NOA).

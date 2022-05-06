@@ -28,6 +28,8 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.MapsApi = mapsApi;
 	this.Work = null;
 	this.Popups = {};
+	this.IsSmallDevice = true;
+	this.IsNotLarge = false;
 	this.textCanvas = {};
 	this.toolbarStates = toolbarStates;
 	this.MapIsInitialized = false;
@@ -162,7 +164,6 @@ SegmentedMap.prototype.SetMyLocation = function (coord) {
 	this.Clipping.ResetClippingCircle();
 	this.Clipping.ResetClippingRegion();
 	this.SaveRoute.Disabled = false;
-
 	this.MapsApi.CreateMyLocationMarker(coord);
 	this.SetZoom(13);
 	this.PanTo(coord);
@@ -180,6 +181,31 @@ SegmentedMap.prototype.ReleasePins = function () {
 	}
 };
 
+SegmentedMap.prototype.CheckSmallDevice = function () {
+	// Se fija si contraer el selector de tipo de mapa
+	var isNotLarge = window.innerWidth < 992;
+	if (this.IsNotLarge !== isNotLarge) {
+		if (isNotLarge) {
+			this.SetTypeControlsDropDown();
+		} else {
+			this.SetTypeControlsDefault();
+		}
+		this.IsNotLarge = isNotLarge;
+	}
+	// Se fija por el panel
+	var isSmallDevice = window.innerWidth < 768;
+	if (this.IsSmallDevice !== isSmallDevice) {
+		if (isSmallDevice) {
+			this.toolbarStates.collapsed = true;
+		} else {
+			if (!window.Embedded.HideSidePanel) {
+				this.toolbarStates.collapsed = false;
+			}
+		}
+		this.IsSmallDevice = isSmallDevice;
+	}
+
+};
 
 SegmentedMap.prototype.GetMapTypeState = function () {
 	return this.MapsApi.GetMapTypeState();
@@ -211,7 +237,9 @@ this.MapsApi.SetTypeControlsDropDown();
 };
 
 SegmentedMap.prototype.SetTypeControlsDefault = function () {
-	this.MapsApi.SetTypeControlsDefault();
+	if (!this.IsNotLarge) {
+		this.MapsApi.SetTypeControlsDefault();
+	}
 };
 
 SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {

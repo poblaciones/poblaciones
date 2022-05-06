@@ -13,11 +13,11 @@
 				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
 				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
 				<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
+				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='toolbarStates.collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
 			<div id="panRight" class="split split-horizontal">
 				<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
-											:clipping="clipping" :frame="frame" :user="user" :currentWork="work.Current"
+											:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :currentWork="work.Current"
 											:toolbarStates="toolbarStates"></SummaryPanel>
 			</div>
 		</div>
@@ -72,11 +72,12 @@
 			return {
 				selfCheckTimer: null,
 				workStartupSetter: null,
-				collapsed: false,
 				isMobile: false,
 				splitPanels: null,
 				featureNavigation: { Key: null, Values: [], GettingKey: null },
-				toolbarStates: { selectionMode: null, tutorialOpened: 0, showLabels: true },
+				toolbarStates: {
+					selectionMode: null, tutorialOpened: 0, showLabels: true, collapsed: false,
+				 },
 				clipping: {
 					IsUpdating: false,
 					Region: {
@@ -119,23 +120,8 @@
 			};
 		},
 		mounted() {
-			var sizes;
-			if (window.screen.availWidth < 1000) {
-				sizes = ['calc(100% - 210px)', '200px'];
-			} else {
-				sizes = [70, 30];
-			}
-			this.splitPanels = Split(['#panMain', '#panRight'], {
-				sizes: sizes,
-				minSize: [10, 300 + (this.Embedded.Readonly ? 25 : 0)],
-				expandToMin: true,
-				gutterSize: (this.Embedded.Readonly ? 0 : 5)
-			});
-
-			if (window.Embedded.HideSidePanel) {
-				this.collapsed = true;
-				this.SplitPanelsRefresh();
-			}
+			this.toolbarStates.collapsed = true;
+			this.SplitPanelsRefresh();
 			this.BindEvents();
 			var loc = this;
 			this.GetConfiguration().then(function () {
@@ -144,14 +130,7 @@
 				}
 				var start = new StartMap(loc.work, loc, loc.SetupMap);
 				start.Start();
-				loc.isMobile = loc.$isMobile();
-				if (!loc.Embedded.HideSidePanel) {
-					loc.collapsed = loc.isMobile;
-				} else {
-					loc.collapsed = true;
-				}
-				loc.SplitPanelsRefresh();
-				//loc.UpdateMapsControls();
+
 			});
 			window.Panels.Left = this.$refs.leftPanel;
 		},
@@ -254,6 +233,17 @@
 					if (loc.$refs.workPanel) {
 						loc.$refs.workPanel.onResize();
 					}
+					if (window.SegMap) {
+						window.SegMap.CheckSmallDevice();
+					}
+					if (loc.$refs.summaryPanel) {
+						if (loc.$refs.summaryPanel.$el.offsetWidth > 320 && !loc.toolbarStates.collapsed) {
+							loc.toolbarStates.collapsed = true;
+							loc.SplitPanelsRefresh();
+							loc.toolbarStates.collapsed = false;
+							loc.SplitPanelsRefresh();
+						}
+					}
 				};
 				window.onload = function (event) {
 					if (loc.$refs.workPanel) {
@@ -287,6 +277,8 @@
 				if (window.Embedded.IsPreview) {
 					var mapExport = new MapExport(this.work.Current);
 					mapExport.ExportPreview();
+				} else {
+					window.SegMap.CheckSmallDevice();
 				}
 				/*
 				var loc = this;
@@ -303,24 +295,11 @@
 				Vue.config.errorHandler = err.HandleError;
 				window.onerror = err.HandleError;
 			},
-			/*
-			UpdateMapsControls(){
-				if (this.$isMobile()){
-					window.SegMap.MapsApi.gMap.setOptions({
-						mapTypeControlOptions: {
-							style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-							position: google.maps.ControlPosition.LEFT_TOP
-						},
-						fullscreenControl: false
-					});
-				}
-			},*/
 			doToggle() {
-				this.collapsed = !this.collapsed;
-				this.SplitPanelsRefresh();
+				this.toolbarStates.collapsed = !this.toolbarStates.collapsed;
 			},
 			SplitPanelsRefresh() {
-				if (this.collapsed) {
+				if (this.toolbarStates.collapsed) {
 					if (this.splitPanels !== null) {
 						this.splitPanels.destroy();
 						this.splitPanels = null;
@@ -328,9 +307,14 @@
 				}
 				else {
 					if (this.splitPanels === null) {
+						var width = window.innerWidth;
+						var prop = 320 / width * 100;
+						if (prop < 30) { prop = 30; }
+						if (prop > 50) { prop = 95; }
+
 						this.splitPanels = Split(['#panMain', '#panRight'], {
-							sizes: [70, 30],
-							minSizes: [10, 350],
+							sizes: [100 - prop, prop],
+							minSizes: [10, 320],
 							expandToMin: true,
 							gutterSize: 5
 						});
@@ -338,6 +322,11 @@
 				}
 			},
 		},
+		watch: {
+			'toolbarStates.collapsed'() {
+				this.SplitPanelsRefresh();
+			}
+		}
 	};
 
 </script>
@@ -380,7 +369,7 @@
 	}
 
 		.gm-style-mtc:last-of-type {
-			transform: translateX(-26px) scale(0.8);
+			transform: translateX(4px) scale(0.8);
 		}
 
 	.hand {

@@ -1,7 +1,7 @@
 <template>
 	<div v-hotkey="keymap" class="searchBar no-print">
 		<div class="input-group">
-			<input v-model='text' ref='sfield' id='sfield' autofocus autocomplete="off"
+			<input v-model='text' ref='sfield' id='sfield' autocomplete="off"
 						 v-on:keyup='doSearch' class="form-control formBorder"
 						 :class="getLoading()" type="text" placeholder="Buscar">
 			<span class="input-group-btn">
@@ -213,54 +213,21 @@ export default {
 </script>
 
 <style scoped>
-.searchBar {
-	top: 11px;
-	left: 300px;
-	z-index: 1;
-	width: calc(100% - 500px);
-	min-width: 200px;
-	max-width: 800px;
-	position: absolute;
-}
-
-/* condition for screen size minimum of 1300px */
-@media (max-width:1300px) and (orientation: landscape) {
-  .searchBar {
-		min-width: 150px;
-		width: calc(100% - 375px);
+	.searchBar {
+		top: 11px;
+		z-index: 1;
+		left: calc(50% - (max(calc(100% - 550px), 250px))/2)!important;
+		width: max(calc(100% - 500px), 300px);
+		min-width: 200px;
+		max-width: 800px;
+		position: absolute;
 	}
-}
-
-/* condition for screen size minimum of 1300px */
-@media (max-width:1300px) and (orientation: portrait) {
-  .searchBar {
-		min-width: 151px;
-		width: calc(100% - 373px);
-	}
-}
 
 /* condition for screen size minimum of 1000px */
-@media (max-width:1000px) and (orientation: portrait){
-  .searchBar {
-		top: 50px;
-		left: 10px;
-		min-width: 150px;
-		width: calc(100% - 50px);
-	}
-
-	.lupa-button{
-		width: 40px;
-		padding-left: 6px;
-	}
-}
-
-/* condition for screen size minimum of 1000px */
-@media (max-width:600px) and (orientation: landscape) {
-  .searchBar {
-		top: 50px;
-		left: 10px;
-		min-width: 150px;
-		width: calc(100% - 50px);
+@media (max-width:540px) {
+	.searchBar {
+		left: calc(50% - (max(calc(100% - 350px), 150px))/2) !important;
+		width: max(calc(100% - 300px), 200px);
 	}
 
 	.lupa-button{

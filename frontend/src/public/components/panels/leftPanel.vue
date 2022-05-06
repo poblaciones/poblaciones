@@ -237,7 +237,7 @@ export default {
 				window.SegMap.SetTypeControlsDefault();
 				css1.style.transform = 'translateX(9px) scale(0.8)';
 				css2.style.transform = 'translateX(-8px) scale(0.8)';
-				css3.style.transform = 'translateX(-26px) scale(0.8)';
+				css3.style.transform = 'translateX(4px) scale(0.8)';
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
 				css2.style.transform = 'translate(' + (this.width + 7) + 'px) scale(0.85)';
