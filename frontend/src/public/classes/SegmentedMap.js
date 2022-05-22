@@ -425,10 +425,12 @@ SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelectio
 		return;
 	}
 	if (type === 'C') {
-		// mueve el mapa y actualiza clipping.
-		var itemParts2 = str.Split(item, ',');
-		var clipping = itemParts2[0];
-		this.Clipping.SetClippingRegion(clipping, true, false, appendSelection);
+		if (!window.Embedded.DisableClippingSelection) {
+			// mueve el mapa y actualiza clipping.
+			var itemParts2 = str.Split(item, ',');
+			var clipping = itemParts2[0];
+			this.Clipping.SetClippingRegion(clipping, true, false, appendSelection);
+		}
 	} else if (type === 'L') {
 		// selecciona el metric y lo agrega...
 		var itemParts1 = str.Split(item, ',');

@@ -1,6 +1,6 @@
 <template>
 	<div class="metricPanel">
-		<div class="dragHandle exp-hiddable-block">
+		<div class="dragHandle exp-hiddable-block" v-if="!boundary.IsLocked">
 			<div style="top: -10px; position: absolute; left: 0; right: 0">
 				<drag-horizontal title="Arrastrar para reubicar" />
 			</div>

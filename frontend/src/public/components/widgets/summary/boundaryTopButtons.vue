@@ -1,8 +1,8 @@
 <template>
 	<div>
-		<div class="btn-group pull-right exp-hiddable-unset" style="clear:both">
+		<div class="btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: 2px">
 			<h5 class="title">
-				<mp-close-button v-on:click="clickQuitar" title="Quitar" class="exp-hiddable-block" />
+				<mp-close-button v-on:click="clickQuitar" title="Quitar" class="exp-hiddable-block" v-if="!boundary.IsLocked" />
 
 				<button title="Opciones" type="button" class="close "
 								v-on:click="clickCustomize" style="margin-right: 6px; margin-left: -2px; margin-top: 4px; font-size: 1.2rem">

@@ -37,7 +37,7 @@ class MapSettings
 	public $MaxStaticQueueRequests = 10;
 
 	public $GoogleGeocodingArea = '';
-	public $GoogleMapsApi = "3.44";
+	public $GoogleMapsApi = "quarterly";
 
 	public $SignatureSuffix = null;
 	public $ExplicitRegionSearchResults = [];

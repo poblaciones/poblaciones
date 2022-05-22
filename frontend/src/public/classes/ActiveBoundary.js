@@ -15,6 +15,7 @@ function ActiveBoundary(data) {
 	this.index = -1;
 	this.isBoundary = true;
 	this.visible = true;
+	this.IsLocked = false;
 	this.IsUpdatingSummary = false;
 	this.opacity = .7;
 	this.cancelUpdateSummary = null;

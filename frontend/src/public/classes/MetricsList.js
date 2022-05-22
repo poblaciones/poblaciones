@@ -24,9 +24,21 @@ function MetricsList(selectedMetricCollection) {
 	];
 };
 MetricsList.prototype.AddStandardMetric = function (activeMetric) {
-	this.InsertStandardMetric(activeMetric, 0);
+	var locked = this.GetLockedMetricsCount();
+	this.InsertStandardMetric(activeMetric, locked);
 	window.SegMap.SaveRoute.UpdateRoute();
 };
+
+MetricsList.prototype.GetLockedMetricsCount = function () {
+	var ret = 0;
+	for (var metric of this.metrics) {
+		if (metric.IsLocked) {
+			ret++;
+		}
+	}
+	return ret;
+};
+
 MetricsList.prototype.AppendStandardMetric = function (activeMetric) {
 	this.InsertStandardMetric(activeMetric, this.metrics.length);
 	window.SegMap.SaveRoute.UpdateRoute();
@@ -119,6 +131,9 @@ MetricsList.prototype.updateMetricIndexes = function () {
 };
 
 MetricsList.prototype.MoveFrom = function (oldIndex, newIndex) {
+	var locked = this.GetLockedMetricsCount();
+	oldIndex += locked;
+	newIndex += locked;
 	var activeMetric = this.metrics[oldIndex];
 	this.Move(activeMetric, newIndex);
 };

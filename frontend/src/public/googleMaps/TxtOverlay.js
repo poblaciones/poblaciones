@@ -133,6 +133,10 @@ TxtOverlay.prototype.removeDuplicates = function (arr, zoom) {
 TxtOverlay.prototype.resolveLinkPart = function () {
 	var tooltip = '';
 	if (this.type === 'C') {
+		if (window.Embedded.DisableClippingSelection) {
+			tooltip = this.txt + ' (' + this.tooltip + ')';
+			return "<span title='" + tooltip + "' class='ibLinkTooltip'>";
+		}
 		tooltip = 'Focalizar en ' + this.txt + ' (' + this.tooltip + ')';
 	} else if (this.tooltip) {
 		tooltip = 'Más información de ' + this.txt;

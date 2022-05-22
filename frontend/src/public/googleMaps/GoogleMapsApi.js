@@ -1,6 +1,5 @@
 import TxtOverlay from '@/public/googleMaps/TxtOverlay';
 import TileOverlay from '@/public/googleMaps/TileOverlay';
-import Mercator from '@/public/js/Mercator';
 import color from '@/common/framework/color';
 import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
@@ -85,7 +84,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 			myMapOptions.gestureHandling = 'none';
 			myMapOptions.disableDefaultUI = true;
 		} else {
-			myMapOptions.gestureHandling = 'cooperative';
+			myMapOptions.gestureHandling = 'greedy'; //cooperative';
 		}
 		if (window.Embedded.Compact) {
 			myMapOptions.scaleControl = false;

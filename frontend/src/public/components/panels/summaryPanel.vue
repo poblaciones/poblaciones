@@ -5,15 +5,16 @@
 						 class="exp-hiddable-block"/>
 		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
 				 style="background-color: transparent; padding-bottom: 13px;">
-			<Clipping :clipping="clipping" :frame="frame" />
+			<Clipping :clipping="clipping" :frame="frame" v-show="showPopulationTotals" />
+
+			<template v-for="(value, index) in metrics">
+				<MetricItem :metric="value" :metrics="metrics" :clipping="clipping"
+										:key="index" v-if="value.IsLocked"/>
+			</template>
 			<draggable v-model="propMetrics" @end="itemMoved" handle=".dragHandle">
 				<transition-group name="fade">
 					<template v-for="(value, index) in metrics">
-						<div class="metricBlock" :key="index">
-							<hr class="moderateHr exp-hiddable-visiblity" />
-							<Boundary v-if="value.isBoundary" :boundary="value" :clipping="clipping" :key="index"></Boundary>
-							<Metric v-else :metric="value" :clipping="clipping" :key="index"></Metric>
-						</div>
+						<MetricItem :metric="value" :clipping="clipping" :metrics="metrics" :key="index" v-if="!value.IsLocked" />
 					</template>
 				</transition-group>
 			</draggable>
@@ -33,8 +34,7 @@
 </template>
 
 <script>
-import Metric from '@/public/components/widgets/summary/metric';
-import Boundary from '@/public/components/widgets/summary/boundary';
+import MetricItem from './metricItem';
 import Clipping from '@/public/components/widgets/summary/clipping';
 import WorkMetadata from '@/public/components/popups/workMetadata';
 import Embedding from '@/public/components/popups/embedding';
@@ -52,8 +52,7 @@ import arr from '@/common/framework/arr';
 export default {
 	name: 'summaryPanel',
 	components: {
-		Metric,
-		Boundary,
+		MetricItem,
 		BoundaryDownload,
 		Clipping,
 		Embedding,
@@ -84,11 +83,17 @@ export default {
 			back: null
 		};
 		},
-		computed: {
-			Embedded() {
-				return window.Embedded;
-			}
+	computed: {
+		Embedded() {
+			return window.Embedded;
 		},
+		showPopulationTotals() {
+			if (!this.Embedded.Active) {
+				return true;
+			}
+			return !window.SegMap.Clipping.FrameHasNoClipping();
+		}
+	},
 	mounted() {
 		window.Popups.MetricDownload = this.$refs.showMetricDownload;
 		window.Popups.BoundaryDownload = this.$refs.showBoundaryDownload;
@@ -105,6 +110,16 @@ export default {
 			if (evt.oldIndex !== evt.newIndex) {
 				window.SegMap.ChangeMetricIndex(evt.oldIndex, evt.newIndex);
 			}
+		},
+		showSeparatorLine(item) {
+			if (this.isFirst(item)) {
+				return this.showPopulationTotals;
+			} else {
+				return !item.IsLocked;
+			}
+		},
+		isFirst(item) {
+			return this.metrics[0] === item;
 		},
 		removeMetric(index) {
 			arr.RemoveAt(this.metrics, index);

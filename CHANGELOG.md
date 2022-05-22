@@ -1,3 +1,9 @@
+v3.05 (2022-05-22)
+- En modo Embebido, lo indicadores y delimitaciones iniciales no se remueven.
+- Embebido no muestra total de población si no hay selección.
+- Embebido compacto no selecciona regiones.
+
+v3.04 (2022-04-20)
 - Fix: Latitud norte y sur aparecían invertidas en PDF de metadatos.
 - Fix a desplazamiento de paneles de (+)
 - Soporte a imágenes en Google Drive.

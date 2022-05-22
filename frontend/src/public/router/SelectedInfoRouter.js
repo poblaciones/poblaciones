@@ -222,18 +222,20 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 		}).then(function (res) {
 			segmentedMap.SaveRoute.Disabled = true;
 			segmentedMap.Metrics.ClearUserMetrics();
-
+			var locked = window.Embedded.Active;
 			for (var n = 0; n < infos.length; n++) {
 				var selectedInfo = res.data[n];
 				if (selectedInfo != null) {
 					if (selectedInfo.IsBoundary) {
 						var activeBoundary = new ActiveBoundary(selectedInfo);
+						activeBoundary.IsLocked = locked;
 						if (!skipRestore) {
 							loc.RestoreBoundaryState(activeBoundary, infos[n]);
 						}
 						segmentedMap.Metrics.AppendStandardMetric(activeBoundary);
 					} else {
 						var activeMetric = new ActiveSelectedMetric(selectedInfo, false);
+						activeMetric.IsLocked = locked;
 						if (!skipRestore) {
 							loc.RestoreMetricState(activeMetric, infos[n]);
 						}

@@ -19,6 +19,7 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.cancelUpdateRanking = null;
 	this.properties = selectedMetric;
 	this.index = -1;
+	this.IsLocked = false;
 	this.IsUpdatingSummary = false;
 	this.IsUpdatingRanking = false;
 	this.isBaseMetric = isBaseMetric;

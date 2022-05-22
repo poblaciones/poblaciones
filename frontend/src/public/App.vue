@@ -196,23 +196,26 @@
 						}
 						window.open(newUrl, '_blank');
 					}
-					};
+				};
 				ret.Readonly = web.getParameterByName('ro') != null;
 				ret.IsPreview = web.getParameterByName('pv') != null;
 				if (ret.IsPreview) {
 					ret.Readonly = true;
 					ret.Compact = true;
 					ret.HideLabels = true;
+					ret.DisableClippingSelection = true;
 				}
 				if (ret.Compact) {
 					ret.HideSearch = true;
 					ret.HideSidePanel = true;
 					ret.HideAddMetrics = true;
 					ret.HideWorkPanel = true;
+					ret.DisableClippingSelection = true;
 				} else {
 					ret.HideSearch = ret.Readonly || web.getParameterByName('ns') != null;
 					ret.HideSidePanel = web.getParameterByName('np') != null;
 					ret.HideAddMetrics = ret.Readonly || web.getParameterByName('na') != null;
+					ret.DisableClippingSelection = ret.HideSidePanel;
 				}
 				if (ret.Readonly && web.getParameterByName('oc') != null) {
 					ret.OpenOnClick = true;
@@ -748,6 +751,9 @@
 			color: #2e8cff;
 			text-decoration: none !important;
 		}
+	.ibLinkTooltip {
+		pointer-events: all;
+	}
 
 	.ibLink {
 		color: #5a626d;
