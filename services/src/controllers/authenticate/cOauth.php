@@ -39,7 +39,7 @@ class cOauth extends cController
 	{
 		$url = Params::SafeGet('loginUrl');
 		$returnUrl = Params::SafeGet('returnUrl');
-		$terms = Params::SafeGet('reg_terms');
+		$terms = (bool)Params::SafeGet('reg_terms');
 		//Redirige al proveedor de oauth para pedir autorización al usuario.
 		$url = $this->oauth->ResolveRedirectProvider($url, $returnUrl, $terms);
 		return App::Redirect($url);
