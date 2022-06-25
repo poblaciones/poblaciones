@@ -28,7 +28,7 @@ class PermissionsService extends BaseService
 		Profiling::EndTimer();
 		return $records;
 	}
-	public function AssignPermission($workId, $userEmail, $permission)
+	public function AssignPermission($workId, $userEmail, $permission, $notify)
 	{
 		Profiling::BeginTimer();
 		// Si hay algo idéntico, sale
@@ -47,7 +47,8 @@ class PermissionsService extends BaseService
 		WorkPermissionsCache::Clear($workId);
 
 		// 2. Manda el mail notificando
-		$this->NotifyPermission($work, $userEmail, $permission);
+		if ($notify)
+			$this->NotifyPermission($work, $userEmail, $permission);
 
 		Profiling::EndTimer();
 		return $newPermission;

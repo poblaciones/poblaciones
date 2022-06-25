@@ -13,6 +13,7 @@ use helena\services\frontend\LookupService;
 use helena\services\common\BaseService;
 use helena\db\frontend\ClippingRegionItemModel;
 use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\geometries\Geometry;
 use helena\entities\frontend\metadata\MetadataInfo;
 use helena\entities\frontend\geometries\Coordinate;
 
@@ -30,9 +31,8 @@ class ClippingService extends BaseService
 			return null;
 
 		$item = $items[0];
-		$geo = new GeoJson();
 		$envelope = Envelope::FromDb($item['Envelope'])->Trim();
-		$canvas = $geo->GenerateFromBinary(array(array('name'=>'', 'value' => $item['Geometry'], 'FID' => $item['Id'])));
+		$canvas = Geometry::FromDb($item['Geometry'], $item['Id']);
 		$canvas['features'][0]['geometry']['coordinates'] = GeoJson::TrimRecursive($canvas['features'][0]['geometry']['coordinates']);
 		$geom = $canvas['features'][0]['geometry'];
 

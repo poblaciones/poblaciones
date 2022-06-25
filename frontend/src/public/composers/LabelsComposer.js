@@ -21,7 +21,7 @@ LabelsComposer.prototype = new AbstractTextComposer();
 LabelsComposer.prototype.renderLabels = function(dataItems, tileKey, tileBounds, zoom) {
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
-		var location = new window.google.maps.LatLng(dataElement['Lat'], dataElement['Lon']);
+		var location = { Lat: dataElement['Lat'], Lon: dataElement['Lon'] };
 
 		var textElement = { FIDs: dataElement['FIDs'] };
 

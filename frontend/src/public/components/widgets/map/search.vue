@@ -1,20 +1,20 @@
 <template>
-	<div v-hotkey="keymap" class="searchBar no-print">
+	<div v-hotkey="keymap" class="searchBar no-print mapsOvercontrols">
 		<div class="input-group">
 			<input v-model='text' ref='sfield' id='sfield' autocomplete="off"
-						 v-on:keyup='doSearch' class="form-control formBorder"
+						 @keyup='doSearch' class="form-control formBorder"
 						 :class="getLoading()" type="text" placeholder="Buscar">
 			<span class="input-group-btn">
-				<button v-on:click="doSearch" class="btn btn-default lupa-button" type="button"><i class="fa fa-search"></i>
+				<button @click="doSearch" class="btn btn-default lupa-button" type="button"><i class="fa fa-search"></i>
 				</button>
 			</span>
 		</div>
 		<transition name="fade">
 		<div class='auto' id="auto" v-if="hasSelected()" v-on-clickaway="escapeKey">
 			<ul>
-				<li v-on:click="select($event, item)" v-for="(item, index) in autolist" :key="item.Id" :class="item.Class"
-						v-on:mouseover="over(item, index)"
-						v-on:mouseout="out(item, index)">
+				<li @click="select($event, item)" v-for="(item, index) in autolist" :key="item.Id" :class="item.Class"
+						@mouseover="over(item, index)"
+						@mouseout="out(item, index)">
 					<div v-if="item.Type === 'L'">
 						<span>{{ item.Highlighted }}</span>
 						<br/>
@@ -216,17 +216,17 @@ export default {
 	.searchBar {
 		top: 11px;
 		z-index: 1;
-		left: calc(50% - (max(calc(100% - 550px), 250px))/2)!important;
+		left: calc(50% - (max(calc(100% - 550px), 250px))/2);
 		width: max(calc(100% - 500px), 300px);
 		min-width: 200px;
-		max-width: 800px;
+		max-width: 400px;
 		position: absolute;
 	}
 
 /* condition for screen size minimum of 1000px */
 @media (max-width:540px) {
 	.searchBar {
-		left: calc(50% - (max(calc(100% - 350px), 150px))/2) !important;
+		left: calc(50% - (max(calc(100% - 350px), 150px))/2);
 		width: max(calc(100% - 300px), 200px);
 	}
 

@@ -56,7 +56,7 @@
 								<div v-for="region in regions" :key="region.Id"
 										 class="filterElement" style="margin-bottom: 7px;">
 									{{ region.Name }}
-									<mp-close-button v-on:click="removeFilter(region.Id)" title="Quitar filtro"
+									<mp-close-button @click="removeFilter(region.Id)" title="Quitar filtro"
 																	 class="exp-hiddable-block filterElement-close" />
 								</div>
 							</div>
@@ -66,7 +66,7 @@
 						<td>Descarga:</td>
 						<td>
 							<span v-if="visibleUrl">
-								<button v-on:click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="downloadButton">
+								<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="downloadButton">
 									<download-icon title="Descargar" /> {{ format.caption }}
 								</button>
 								<button @click="sendFile(resolveMetadataUrl(), true)" class="downloadButton">
@@ -92,7 +92,7 @@
 					<tr v-if="level.HasArea || level.Dataset.AreSegments">
 						<td>Descarga con polígonos:</td>
 						<td>
-							<button v-on:click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="downloadButton">
+							<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="downloadButton">
 								<download-icon title="Descargar" /> {{ format.caption }}
 							</button>
 						</td>

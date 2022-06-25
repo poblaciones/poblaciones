@@ -71,32 +71,12 @@ AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElemen
 	if (parseInt(variable.ShowPerimeter) == 0 || !usePerimeter) {
 		return;
 	}
-	var location = new this.MapsApi.google.maps.LatLng(parseFloat(dataElement['Lat']), parseFloat(dataElement['Lon']));
+	var location = { Lat: parseFloat(dataElement['Lat']), Lon: parseFloat(dataElement['Lon']) };
 	if (this.inTile(tileBounds, location)) {
 		var color = colorMap[val];
 		var polygon = window.SegMap.MapsApi.DrawPerimeter(location, variable.Perimeter, color);
 		this.perimetersInTile[tileKey].push(polygon);
 	}
-};
-
-AbstractTextComposer.prototype.SetBackgroundText = function (div, tileBounds, textElement, tileKey, location,
-	number, backColor, zoom) {
-
-	var canvas = this.GetOrCreate(textElement.type, textElement.FIDs, tileKey, location, textElement.hidden, zoom);
-	var v = null;
-	if (textElement.caption !== null || textElement.symbol) {
-		canvas.SetText(textElement.caption, textElement.tooltip, textElement.symbol, textElement.clickId);
-	}
-	if (number !== null) {
-		var zIndex = 100000 - this.index;
-		var sourceKey = this.layerId;
-		v = canvas.CreateValue(number, zIndex, backColor, zoom, sourceKey);
-	}
-	var p = window.SegMap.MapsApi.gMap.getProjection();
-	var min = p.fromLatLngToPoint(new window.SegMap.MapsApi.google.maps.LatLng(tileBounds.Min.Lat, tileBounds.Min.Lon));
-	var position2 = p.fromLatLngToPoint(location);
-	canvas.pixelLocation = { x: position2.x - min.x, y: position2.y - min.y };
-	canvas.tileDiv = div;
 };
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
@@ -125,8 +105,8 @@ AbstractTextComposer.prototype.GetOrCreate = function(type, ids, tileKey, locati
 };
 
 AbstractTextComposer.prototype.inTile = function (bounds, latlng) {
-	var latRange = latlng.lat() >= Math.min(bounds.Min.Lat, bounds.Max.Lat) && latlng.lat() < Math.max(bounds.Min.Lat, bounds.Max.Lat);
-	var lngRange = latlng.lng() >= Math.min(bounds.Min.Lon, bounds.Max.Lon) && latlng.lng() < Math.max(bounds.Min.Lon, bounds.Max.Lon);
+	var latRange = latlng.Lat >= Math.min(bounds.Min.Lat, bounds.Max.Lat) && latlng.Lat < Math.max(bounds.Min.Lat, bounds.Max.Lat);
+	var lngRange = latlng.Lon >= Math.min(bounds.Min.Lon, bounds.Max.Lon) && latlng.Lon < Math.max(bounds.Min.Lon, bounds.Max.Lon);
 	return (latRange && lngRange);
 };
 

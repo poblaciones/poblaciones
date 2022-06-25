@@ -6,21 +6,21 @@
 				 class="topImage">
 		</div>
 		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')">
-			<div v-on:click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
-			<mp-close-button v-else v-on:click="doClose" class="exp-hiddable-block" />
-			<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" /></h5>
+			<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
+			<mp-close-button v-else @click="doClose" class="exp-hiddable-block" />
+			<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" :clickeable="!!featureInfo.position" @click='focus()' /></h5>
 			<div class='stats' style="padding-top: 8px">
 				<a href="#" title="Agregar como indicador"
-					 v-on:click="addMetricFromKey" style="color: #a7a7a7">
+					 @click="addMetricFromKey" style="color: #a7a7a7">
 					{{ featureInfo.Type }}
 				</a>
 				<div style="float: right" class="exp-hiddable-block" v-if="featureInfo.Key && featureInfo.Key.MetricId">
 					<button type="button" :disabled="isLast"
-									class="close lightButton smallerButton" :title="(isLast ? '' : 'Siguiente' + positionalData)" v-on:click="next()">
+									class="close lightButton smallerButton" :title="(isLast ? '' : 'Siguiente' + positionalData)" @click="next()">
 						<i class="fas fa-chevron-right" />
 					</button>
 					<button type="button" :disabled="isFirst" style="margin-right: -2px"
-									class="close lightButton smallerButton" :title="(isFirst ? '' : 'Anterior' + positionalData)" v-on:click="previous()">
+									class="close lightButton smallerButton" :title="(isFirst ? '' : 'Anterior' + positionalData)" @click="previous()">
 						<i class="fas fa-chevron-left" />
 					</button>
 				</div>
@@ -29,7 +29,7 @@
 			<div>
 				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
 					<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
-									title="Seleccionar el perímetro" v-on:click="selectPerimeter">
+									title="Seleccionar el perímetro" @click="selectPerimeter">
 						<i class="fas fa-circle-notch" />
 
 					</button>
@@ -152,6 +152,7 @@ export default {
 		},
 		doClose(e) {
 			window.Panels.Content.FeatureInfoKey = null;
+			window.SegMap.MapsApi.ClearSelectedFeature();
 			e.preventDefault();
 			this.$emit('clickClose', e, this.featureInfo.Key.Id);
 		},
@@ -159,6 +160,7 @@ export default {
 			if (!imageUrl) {
 				return imageUrl;
 			}
+			// Soporte para imágenes en google drive
 			if (imageUrl.startsWith('https://drive.google.com/file/')) {
 				var found = imageUrl.match(/d\/([A-Za-z0-9\-]+)/);
 				if (found[1].length) {
@@ -166,6 +168,9 @@ export default {
 				}
 			}
 			return imageUrl;
+		},
+		focus() {
+			window.SegMap.InfoWindow.FocusView(this.featureInfo.position, this.featureInfo.Key, this.featureInfo.Title);
 		},
 		previous() {
 			window.SegMap.InfoWindow.Previous();

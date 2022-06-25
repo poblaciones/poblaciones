@@ -7,6 +7,7 @@ use helena\services\common\AuthenticationService;
 
 use helena\db\frontend\SignatureModel;
 use minga\framework\Context;
+use minga\framework\Performance;
 use helena\classes\Callbacks;
 use helena\classes\App;
 
@@ -37,13 +38,32 @@ class ConfigurationService extends BaseService
 									'UseUrbanity' => App::Settings()->Map()->UseUrbanity,
 									'UseMultiselect' => App::Settings()->Map()->UseMultiselect,
 
+									'MapsAPI' => App::Settings()->Map()->MapsAPI,
+
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user);
 
 		Callbacks::$MapsOpened++;
 
+//		self::CheckMapLimits(Callbacks::$MapsOpened);
+
 		return $ret;
+	}
+
+	private static function CheckMapLimits($mapsOpened)
+	{
+		if ($mapsOpened == Context::Settings()->Limits()->WarningMonthlyMapsPerKey)
+		{
+			Performance::SendPerformanceWarning('apertura de mapas por key cercano al límite',
+				Context::Settings()->Limits()->WarningMonthlyMapsPerKey . ' hits', $mapsOpened . ' hits');
+		}
+
+		if ($mapsOpened == Context::Settings()->Limits()->LimitMonthlyMapsPerKey)
+		{
+			Performance::SendPerformanceWarning('apertura de mapas por key agotado - DENEGACIÓN DE PERMISO',
+				Context::Settings()->Limits()->LimitMonthlyMapsPerKey . ' hits', $mapsOpened . ' hits');
+		}
 	}
 }
 

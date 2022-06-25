@@ -1,7 +1,15 @@
+v3.06 (2022-06-25)
+- Al reponer una url con un elemento seleccionado en el panel izquierdo, recupera su ubicación.
+- Al cliquear en los elementos en el panel izquierdo, los resalta en el mapa (con pines o regiones según el tipo de capa).
+- Resalta en el mapa los elementos de tipo 'feature' seleccionados por medio del buscador.
+- Fix: recuperación de og.png (vista previa desde facebook).
+
 v3.05 (2022-05-22)
 - En modo Embebido, lo indicadores y delimitaciones iniciales no se remueven.
 - Embebido no muestra total de población si no hay selección.
 - Embebido compacto no selecciona regiones.
+- Posibilidad de excluir indicadores públicos de una cartografía pública (categoría: ninguna).
+- Opción de no notificar al usuario al agregarle un permiso.
 
 v3.04 (2022-04-20)
 - Fix: Latitud norte y sur aparecían invertidas en PDF de metadatos.

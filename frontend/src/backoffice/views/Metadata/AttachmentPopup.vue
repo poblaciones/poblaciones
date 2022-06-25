@@ -39,7 +39,7 @@
 																	@vdropzone-max-files-exceeded="maxfilesexceeded"
 											:options="dropzoneOptions">
 										</vue-dropzone>
-							<md-button style="float:left;background-color: #ececec;" v-if="hasFiles" class="md-icon-button" v-on:click="clear">
+							<md-button style="float:left;background-color: #ececec;" v-if="hasFiles" class="md-icon-button" @click="clear">
 								<md-icon>close</md-icon>
 								<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 							</md-button>

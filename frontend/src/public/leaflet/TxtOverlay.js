@@ -1,5 +1,6 @@
 import arr from '@/common/framework/arr';
 import iconManager from '@/common/js/iconManager';
+import Mercator from '@/public/js/Mercator';
 
 export default TxtOverlay;
 
@@ -23,11 +24,20 @@ function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidd
 	this.alwaysVisible = false;
 	this.pixelLocation = null;
 	this.isVisible = false;
-	this.setMap(map);
-
+	this.marker = new L.marker(L.latLng(this.pos.Lat, this.pos.Lon), {
+		icon: L.divIcon({
+			className: 'leaflet-mouse-marker',
+			iconAnchor: [20, 20],
+			iconSize: [40, 40]
+		})
+	});
+//	this.marker2 = L.marker(L.latLng(this.pos.Lat, this.pos.Lon));
+//	this.marker2.addTo(this.map);
+	setTimeout(() => {
+		this.onAdd();
+			}, 10);
 }
 
-TxtOverlay.prototype = new window.google.maps.OverlayView();
 
 
 TxtOverlay.prototype.UpdateTextStyle = function (className) {
@@ -158,27 +168,25 @@ TxtOverlay.prototype.onAdd = function() {
 	div.className = this.className;
 
 	this.div = div;
+
 	this.RebuildHtml();
 
-	var panes = this.getPanes();
-	panes.floatPane.appendChild(div);
-
 	if (!this.Overlaps()) {
-		var overlayProjection = this.getProjection();
-		var position = overlayProjection.fromLatLngToDivPixel(
-				new window.SegMap.MapsApi.google.maps.LatLng(this.pos.Lat, this.pos.Lon));
-		div.style.left = position.x + 'px';
-		div.style.top = position.y + 'px';
 		this.isVisible = true;
-	}
-	else {
+		this.marker.addTo(this.map);
+		this.marker.bindTooltip(this.div, {
+			permanent: true,
+			direction: 'center',
+			className: '',
+			opacity: 1,
+			offset: [0, 0]
+		});
+	} else {
 		div.style.visibility = 'hidden';
 		this.isVisible = false;
-
-		var panes = this.getPanes();
-		panes.floatPane.removeChild(div);
-		this.setMap(null);
+		this.map.removeLayer(this.marker);
 	}
+
 };
 
 TxtOverlay.prototype.UpdateHiddenAttribute = function (hidden) {
@@ -195,9 +203,9 @@ TxtOverlay.prototype.Overlaps = function () {
 	var intersects = false;
 
 	var startTime = performance.now();
+	var m = new Mercator();
+	var position2 = m.fromLatLngToPoint({ lat: this.pos.Lat, lng: this.pos.Lon });
 
-	var position2 = this.map.getProjection().fromLatLngToPoint(
-					new window.SegMap.MapsApi.google.maps.LatLng(this.pos.Lat, this.pos.Lon));
 	var scale = Math.pow(2, this.map.getZoom());
 	var left = Math.floor(position2.x * scale);
 	var top = Math.floor(position2.y * scale);
@@ -263,10 +271,9 @@ TxtOverlay.prototype.CreateValue = function (value, zindex, backColor, zoom, sou
 };
 
 TxtOverlay.prototype.draw = function () {
-	if (this.isVisible) {
+	if (!this.tileDiv && this.isVisible) {
 		var overlayProjection = this.getProjection();
-		var position = overlayProjection.fromLatLngToDivPixel(
-		new window.SegMap.MapsApi.google.maps.LatLng(this.pos.Lat, this.pos.Lon));
+		var position = overlayProjection.fromLatLngToDivPixel(this.pos);
 		var div = this.div;
 		div.style.left = position.x + 'px';
 		div.style.top = position.y + 'px';
@@ -274,15 +281,16 @@ TxtOverlay.prototype.draw = function () {
 	}
 };
 
-TxtOverlay.prototype.onRemove = function () {
-	if (this.div != null) {
+TxtOverlay.prototype.Remove = function () {
+	/*if (this.div != null) {
 		if (this.div.parentNode) {
 			this.div.parentNode.removeChild(this.div);
 		}
 		this.div = null;
-	}
+	}*/
 	if (this.isVisible) {
-		window.SegMap.OverlapRectangles.RemoveRectangle(this);
+		this.map.removeLayer(this.marker);
+		//	window.SegMap.OverlapRectangles.RemoveRectangle(this);
 	}
 };
 
@@ -294,7 +302,7 @@ TxtOverlay.prototype.Release = function (subFeature) {
 				delete window.SegMap.textCanvas[this.FIDs[i]];
 			}
 		}
-		this.setMap(null);
+		this.Remove();
 	} else if (subFeature) {
 		if (arr.Remove(this.Values, subFeature)) {
 			this.RebuildHtml();

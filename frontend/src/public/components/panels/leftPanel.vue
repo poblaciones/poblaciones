@@ -3,19 +3,19 @@
 		<div v-show='hasContent && !collapsed' class='left-panelPositionEnum' :style="{ width: width + 'px' }">
 			<div v-if="isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose'/>
+					<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose'/>
 					<feature-info :featureInfo='Full' v-if='isFullInfo' :enabled="enabled" @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panTop" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose'/>
+					<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose'/>
 					<feature-info :featureInfo='Top' v-if='isTopInfo' :enabled="enabled" @clickClose='doClose'/>
 				</transition>
 			</div>
 			<div id="panBottom" class="split" v-if="!isFullFront">
 				<transition name="fade" mode='out-in'>
-				<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose'/>
+					<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose'/>
 					<feature-info :featureInfo='Bottom' v-if='isBottomInfo' :enabled="enabled" @clickClose='doClose'/>
 				</transition>
 			</div>
@@ -246,10 +246,9 @@ export default {
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
-			if (collapsed) {
-				Object.assign(el.style, offValue);
-			} else {
-				Object.assign(el.style, onValue);
+			var values = (collapsed ? offValue : onValue);
+			for (var key in values) {
+				el.style[key] = values[key];
 			}
 		},
 		updateSuroundings(cssClass, onValue, offValue) {
@@ -292,8 +291,8 @@ export default {
 				{ transform: '' }
 			);
 			this.updateSuroundings('searchBar',
-				{ left: (this.width + 200) + 'px', width: 'calc(100% - 700px)' },
-				{ left: this.width + 'px', width: 'calc(100% - 500px)' }
+				{ left: (this.width + 200) + 'px', width: '300px' },
+				{ left: this.width + 'px', width: 'max(calc(100% - 500px), 400px)' }
 			);
 		},
 	},

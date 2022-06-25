@@ -41,6 +41,8 @@
 				"jqwidgets-scripts": "^9.1.6",
 				"js-cookie": "^2.2.0",
 				"jspdf": "^2.3.1",
+				"leaflet": "^1.8.0",
+				"leaflet-draw": "^1.0.4",
 				"linkifyjs": "^2.1.9",
 				"lodash": "^4.17.21",
 				"lodash.debounce": "^4.0.8",

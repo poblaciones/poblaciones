@@ -1,7 +1,7 @@
 <template>
   <div v-if="metadata">
     <div class="sourceInfo exp-hiddable-block">
-			<a href="#" v-on:click="clickFuente"
+			<a href="#" @click="clickFuente"
 				 :title="sourceTitle" style="color: #a7a7a7">
 				<link-icon />
 				Fuente

@@ -41,6 +41,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.RestoreRoute = new RestoreRoute();
 	this.afterCallback = null;
 	this.afterCallback2 = null;
+	this.ZoomChangedSubscribers = [];
 	this.OverlapRectangles = new OverlapRectangles();
 	this.Labels = new ActiveLabels(config);
 	if (config.Blocks.UseDataTileBlocks) {
@@ -69,6 +70,22 @@ SegmentedMap.prototype.SetTimeout = function (delay) {
 	return new Promise(function (resolve) {
 		setTimeout(resolve, delay);
 	});
+};
+
+SegmentedMap.prototype.IsVariableVisible = function (metricId, variableId) {
+	// se fija si el metric y el variable están visibiles...
+	var metric = window.SegMap.Metrics.GetMetricById(metricId);
+	if (!metric) {
+		return false;
+	}
+	if (!metric.SelectedVariable()) {
+		return false;
+	}
+	var variable = metric.GetVariableById(variableId);
+	if (!variable) {
+		return false;
+	}
+	return true;
 };
 
 SegmentedMap.prototype.Get = function (url, params, noCredencials, isRetry) {
@@ -143,6 +160,7 @@ SegmentedMap.prototype.CreateAxios = function (withCredentials) {
 
 SegmentedMap.prototype.MapInitialized = function () {
 	this.MapIsInitialized = true;
+	this.TriggerResize();
 	this.Metrics.AppendNonStandardMetric(this.Labels);
 	if (this.afterCallback !== null) {
 		this.afterCallback();
@@ -165,8 +183,7 @@ SegmentedMap.prototype.SetMyLocation = function (coord) {
 	this.Clipping.ResetClippingRegion();
 	this.SaveRoute.Disabled = false;
 	this.MapsApi.CreateMyLocationMarker(coord);
-	this.SetZoom(13);
-	this.PanTo(coord);
+	this.PanTo(coord, null, 13);
 	this.SaveRoute.UpdateRoute(coord);
 };
 
@@ -216,15 +233,24 @@ SegmentedMap.prototype.SetMapTypeState = function (mapType) {
 	this.MapTypeChanged(mapType);
 };
 
-SegmentedMap.prototype.SetCenter = function (coord) {
+SegmentedMap.prototype.SetCenter = function (coord, zoom = null) {
 	this.frame.Envelope.Min = coord;
 	this.frame.Envelope.Max = coord;
 	this.frame.Center = coord;
-	this.MapsApi.SetCenter(coord);
+	if (zoom) {
+		this.frame.Zoom = zoom;
+	}
+	this.MapsApi.SetCenter(coord, zoom);
 };
 
-SegmentedMap.prototype.PanTo = function (coord, offsetXpixels) {
-	this.MapsApi.PanTo(coord, offsetXpixels);
+SegmentedMap.prototype.PanTo = function (coord, offsetXpixels, zoom) {
+	this.frame.Envelope.Min = coord;
+	this.frame.Envelope.Max = coord;
+	this.frame.Center = coord;
+	if (zoom) {
+		this.frame.Zoom = zoom;
+	}
+	this.MapsApi.PanTo(coord, offsetXpixels, zoom);
 };
 
 SegmentedMap.prototype.SetZoom = function (zoom) {
@@ -289,6 +315,12 @@ SegmentedMap.prototype.ZoomChanged = function (zoom) {
 		this.frame.Zoom = zoom;
 		//this.Labels.UpdateMap();
 		this.Metrics.ZoomChanged();
+
+		if (this.ZoomChangedSubscribers) {
+			for (var subscriber of this.ZoomChangedSubscribers) {
+				subscriber.ZoomChanged(zoom);
+			}
+		}
 	}
 };
 SegmentedMap.prototype.FrameMoved = function (bounds) {

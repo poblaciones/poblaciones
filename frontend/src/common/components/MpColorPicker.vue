@@ -5,7 +5,7 @@
 							 :disabled="!canEdit" @hide="popOverClosed" @show="popOverOpened" popoverInnerClass="tooltipNoBorder">
 
 			<div :style="'background-color: ' + localValue" :class="'picked' + (canEdit ? ' hand': '')"
-					 v-on:click="show">
+					 @click="show">
 				<div v-show="isDisabledObject && !isDisabledObject.Visible">
 					<div class="line2"></div>
 				</div>

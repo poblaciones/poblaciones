@@ -61,6 +61,7 @@ TileRequest.prototype.GetTile = function () {
 
 	this.url = this.selectedMetricOverlay.activeSelectedMetric.GetDataService(this.coord.x);
 	this.params = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParams(this.coord);
+	this.params.z = this.zoom;
 	this.subset = (this.selectedMetricOverlay.activeSelectedMetric.GetSubset ? this.selectedMetricOverlay.activeSelectedMetric.GetSubset(this.coord) : null);
 
 	var info = this.url.path + JSON.stringify(this.params);

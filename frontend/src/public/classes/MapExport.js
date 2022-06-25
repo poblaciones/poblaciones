@@ -98,8 +98,9 @@ MapExport.prototype.generatePdf = function (canvas) {
 
 MapExport.prototype.hideInteractiveElements = function (addClasses, attributesByClass) {
 
-	window.SegMap.MapsApi.gMap.set('disableDefaultUI', true);
-
+	if (window.SegMap.MapsApi.gMap) {
+		window.SegMap.MapsApi.gMap.set('disableDefaultUI', true);
+	}
 	dom.addClassesByList(addClasses);
 	dom.setStyleAttributesByList(attributesByClass);
 
@@ -112,8 +113,9 @@ MapExport.prototype.restoreInteractiveElements = function (addClasses, attribute
 	dom.unsetStyleAttributesByList(attributesByClass);
 
 	dom.setDisplayByClass("exp-serie-item", "block");
-
-	window.SegMap.MapsApi.gMap.set('disableDefaultUI', false);
+	if (window.SegMap.MapsApi.gMap) {
+		window.SegMap.MapsApi.gMap.set('disableDefaultUI', false);
+	}
 };
 
 MapExport.prototype.ignoreFilter = function (ele) {
@@ -194,7 +196,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 
 	// se asegura de tener los datos
 	window.SegMap.SetTimeout(50).then(function () {
-		return window.SegMap.MapsApi.WaitForFullLoading().then(function () {
+		//return window.SegMap.MapsApi.WaitForFullLoading().then(function () {
 			return window.SegMap.WaitForFullLoading().then(function () {
 
 				if (!previewExport) {
@@ -246,7 +248,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 						}).finally(function () { window.Popups.WaitMessage.close(); });
 					});
 				});
-			});
+		//	});
 		});
 	}).catch(function (error) { window.Popups.WaitMessage.close(); throw error; });
 };

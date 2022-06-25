@@ -7,7 +7,7 @@
 					<div class="metadataInfo" style="position: relative; z-index: 10;" :style="(showButtonsInSingleRow() ? 'width: 1px' : '')">
 						<div class="sourceInfo exp-hiddable-block" :style="getMetadataStyle()">
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
-								 v-on:click="clickFuente" style="color: #FFF">
+								 @click="clickFuente" style="color: #FFF">
 								<link-icon />
 								Metadatos
 							</a>
@@ -208,7 +208,7 @@ export default {
 		background-color: #00A0D2;
 		color: #fff !important;
 		border-radius: 1px;
-		min-height: 54px;
+		min-height: 70px;
 		padding: 12px 2px 6px 12px;
 		box-shadow: 0 1px 4px 0 rgba(90,90,90,.32);
 	}

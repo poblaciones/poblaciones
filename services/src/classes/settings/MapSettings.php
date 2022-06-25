@@ -33,6 +33,8 @@ class MapSettings
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;
 
+	public $MapsAPI = "google";
+
 	public $MaxQueueRequests = 5;
 	public $MaxStaticQueueRequests = 10;
 

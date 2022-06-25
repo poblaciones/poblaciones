@@ -144,14 +144,6 @@ Mercator.prototype.scaleToBoundedPixel  = function (p) {
 	}
 };
 
-Mercator.prototype.getTileBoundsLatLon = function (tile) {
-	var rect = this.getTileBounds(tile);
-	return {
-		Min: this.fromGoogleLatLngToLatLon(rect.Min),
-		Max: this.fromGoogleLatLngToLatLon(rect.Max)
-	};
-};
-
 Mercator.prototype.getTileBounds = function (tile) {
 	tile = this.normalizeTile(tile);
 	var t = Math.pow(2, tile.z);
@@ -164,12 +156,12 @@ Mercator.prototype.getTileBounds = function (tile) {
 		x: tile.x * s + s,
 		y: (tile.y * s)
 	};
-	var min = new window.SegMap.MapsApi.google.maps.Point(sw.x, ne.y);
-	var max = new window.SegMap.MapsApi.google.maps.Point(ne.x, sw.y);
+	var min = { x: sw.x, y: ne.y };
+	var max = { x: ne.x, y: sw.y };
 
 	return {
-		Min: this.fromLatLonToGoogleLatLng(this.fromPointToLatLng(min)),
-		Max: this.fromLatLonToGoogleLatLng(this.fromPointToLatLng(max))
+		Min: this.fromPointToLatLng(min),
+		Max: this.fromPointToLatLng(max)
 	};
 };
 

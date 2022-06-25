@@ -328,11 +328,16 @@ class SnapshotByDatasetModel
 		}
 	}
 
+	public static function UseGeographyItemPolygon($dataset)
+	{
+		return !($dataset['dat_type'] == DatasetTypeEnum::Shapes ||
+			$dataset['dat_type'] == DatasetTypeEnum::Locations ||
+			$dataset['dat_are_segments']);
+	}
+
 	private function GetFeatureIdField($dataset)
 	{
-		if ($dataset['dat_type'] == DatasetTypeEnum::Shapes ||
-			$dataset['dat_type'] == DatasetTypeEnum::Locations ||
-			$dataset['dat_are_segments'] )
+		if (self::UseGeographyItemPolygon($dataset))
 		{
 			return $dataset["dat_id"] . " * 0x100000000 + id";
 		}

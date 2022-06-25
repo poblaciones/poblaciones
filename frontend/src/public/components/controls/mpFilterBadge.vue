@@ -2,7 +2,7 @@
 	<div class="filterElement"
 			 :title="tooltip">
 		{{ title }}
-		<mp-close-button v-on:click="onClose()" title="Quitar"
+		<mp-close-button @click="onClose()" title="Quitar"
 										 class="exp-hiddable-block filterElement-close" />
 	</div>
 </template>

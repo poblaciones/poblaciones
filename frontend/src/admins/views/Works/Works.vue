@@ -14,7 +14,7 @@
 		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="7">Últimos 7 días</md-radio>
 		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="30">Últimos 30 días</md-radio>
 		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="90">Últimos 90 días</md-radio>
-		<md-button v-on:click="calculateUsage" style="margin-left: 60px">
+		<md-button @click="calculateUsage" style="margin-left: 60px">
 			<md-icon>data_usage</md-icon> Recalcular tamaños
 		</md-button>
 
@@ -62,19 +62,19 @@
 						</div>
 					</md-table-cell>
 					<md-table-cell md-label="Acciones">
-						<md-button v-if="!canEdit(item)" class="md-icon-button" v-on:click="select(item)">
+						<md-button v-if="!canEdit(item)" class="md-icon-button" @click="select(item)">
 							<md-icon>remove_red_eye</md-icon>
 							<md-tooltip md-direction="bottom">Consultar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" v-on:click="onPublish(item)">
+						<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" @click="onPublish(item)">
 							<md-icon>public</md-icon>
 							<md-tooltip md-direction="bottom">Publicar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" v-on:click="onRevoke(item)">
+						<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" @click="onRevoke(item)">
 							<md-icon>pause_circle_filled</md-icon>
 							<md-tooltip md-direction="bottom">Revocar publicación</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" v-on:click="select(item)">
+						<md-button v-if="canEdit(item)" class="md-icon-button" @click="select(item)">
 							<md-icon>edit</md-icon>
 							<md-tooltip md-direction="bottom">Modificar</md-tooltip>
 						</md-button>
@@ -82,7 +82,7 @@
 							<md-icon>file_copy</md-icon>
 							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" v-on:click="onDelete(item)">
+						<md-button v-if="canEdit(item)" class="md-icon-button" @click="onDelete(item)">
 							<md-icon>delete</md-icon>
 							<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
 						</md-button>

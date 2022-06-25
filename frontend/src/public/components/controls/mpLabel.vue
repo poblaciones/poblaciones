@@ -1,5 +1,7 @@
 <template>
-	<span class="mpLabelItem" v-html="process(text)" :class="(!hasSpaces(text) ? 'wrapAllPlaces' : '')">
+	<span class="mpLabelItem" @click="clicked" :style="(clickeable ? 'cursor: pointer': '')"
+				v-html="process(text)"
+				:class="(!hasSpaces(text) ? 'wrapAllPlaces' : '')">
 	</span>
 </template>
 
@@ -9,10 +11,8 @@
 export default {
 	name: 'mpLabel',
 	props: {
-		text: {
-			type: String,
-			default: ''
-		},
+		text: { type: String, default: ''	},
+		clickeable: { type: Boolean, default: false }
 	},
 	components: {
 	},
@@ -26,6 +26,11 @@ export default {
 			return linkifyStr(val, {
 				defaultProtocol: 'https'
 			});
+		},
+		clicked(e) {
+			if (this.clickeable) {
+				this.$emit('click', e);
+			}
 		},
 		hasSpaces(val) {
 			if (val) {

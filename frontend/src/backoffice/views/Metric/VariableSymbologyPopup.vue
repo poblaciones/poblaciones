@@ -55,7 +55,7 @@
 										<div class="tinyCloseButton">
 											<md-button v-if="singleItem.Symbol && canEdit"
 																 class="md-icon-button"
-																 v-on:click.stop="removeIcon(singleItem)">
+																 @click.stop="removeIcon(singleItem)">
 												<md-icon>close</md-icon>
 												<md-tooltip md-direction="bottom">Quitar ícono</md-tooltip>
 											</md-button>
@@ -122,7 +122,7 @@
 										<div class="tinyCloseButton">
 											<md-button v-if="item.Symbol && canEdit"
 																 class="md-icon-button"
-																 v-on:click.stop="removeIcon(item)">
+																 @click.stop="removeIcon(item)">
 												<md-icon>close</md-icon>
 												<md-tooltip md-direction="bottom">Quitar ícono</md-tooltip>
 											</md-button>

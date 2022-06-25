@@ -10,7 +10,7 @@
 				<Search class="exp-hiddable-block" v-show="!Embedded.HideSearch" />
 				<LeftPanel ref='leftPanel' />
 				<MapPanel />
-				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset" />
+				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
 				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
 				<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='toolbarStates.collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
@@ -28,6 +28,7 @@
 	import SegmentedMap from '@/public/classes/SegmentedMap';
 	import StartMap from '@/public/classes/StartMap';
 	import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
+	import LeafletApi from '@/public/leaflet/LeafletApi';
 	import WorkPanel from '@/public/components/panels/workPanel';
 	import MapExport from '@/public/classes/MapExport';
 	import MapPanel from '@/public/components/panels/mapPanel';
@@ -170,6 +171,9 @@
 				}).then(function (res) {
 					loc.config = res.data;
 					loc.user = res.data.User;
+					if (web.getParameterByName('leaflet') != null) {
+						loc.config.MapsAPI = 'leaflet';
+					}
 				}).catch(function (error) {
 					err.errDialog('GetConfiguration', 'conectarse con el servidor', error);
 				});
@@ -263,7 +267,14 @@
 					}
 					return;
 				}
-				var mapApi = new GoogleMapsApi(window.google);
+				var mapApi;
+				if (this.config.MapsAPI === 'google') {
+					mapApi = new GoogleMapsApi(window.google);
+				} else if (this.config.MapsAPI === 'leaflet') {
+					mapApi = new LeafletApi();
+				} else {
+					throw new Error("Api no soportada");
+				}
 				var segMap = new SegmentedMap(mapApi, this.frame, this.clipping, this.toolbarStates, this.metrics, this.config);
 				segMap.Work = this.work;
 				segMap.afterCallback = afterLoaded;
@@ -319,9 +330,14 @@
 							sizes: [100 - prop, prop],
 							minSizes: [10, 320],
 							expandToMin: true,
-							gutterSize: 5
+							gutterSize: 5,
+							onDrag: function () { window.SegMap.TriggerResize(); },
+							onDragEnd: function() { window.SegMap.TriggerResize(); }
 						});
 					}
+				}
+				if (window.SegMap) {
+					window.SegMap.TriggerResize();
 				}
 			},
 		},
@@ -344,7 +360,45 @@
 		padding: 0;
 		cursor: default;
 	}
+	.leaflet-tooltip {
+		white-space: unset !important;
+		border: unset !important;
+		background-color: unset !important;
+		box-shadow: unset !important;
+		line-height: 1.15;
+	}
+	.leaflet-popup-content {
+		font-size: 13px !important;
+		margin: 8px 20px 5px 10px !important;
+	}
 
+		.leafletMapButton {
+		background: none padding-box rgb(255, 255, 255);
+		display: table-cell;
+		border: 0px;
+		margin: 0px;
+		padding: 0px 17px;
+		position: relative;
+		cursor: pointer;
+		direction: ltr;
+		overflow: hidden;
+		text-align: center;
+		height: 40px;
+		vertical-align: middle;
+		color: rgb(0, 0, 0);
+		font-family: Roboto, Arial, sans-serif;
+		font-size: 18px;
+		border-bottom-left-radius: 2px;
+		border-top-left-radius: 2px;
+		box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+		min-width: 45px;
+		font-weight: 500;
+		float: left;
+	}
+	.leaflet-control-scale-line {
+		font-size: 9px!important;
+		cursor: default;
+	}
 	.gm-ui-hover-effect {
 		top: 0px !important;
 		right: 0px !important;
@@ -352,6 +406,9 @@
 
 	.ls {
 		fill: none !important;
+	}
+	.mapsOvercontrols {
+		z-index: 1000!important;
 	}
 
 	.gm-fullscreen-control {
@@ -832,6 +889,10 @@
 		color: #333;
 		font-size: 12px;
 		text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
+	}
+	.markerSelectedLabel {
+		text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
+		transform: translateX(calc(50% + 17px));
 	}
 
 	.mapLabelsLarger {

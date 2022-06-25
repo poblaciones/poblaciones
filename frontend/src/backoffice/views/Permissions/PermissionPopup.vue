@@ -7,8 +7,7 @@
 			<invoker ref="invoker"></invoker>
 			<md-dialog-content>
 				<mp-simple-text label="Correo electrónico"
-						ref="inputUser" :maxlength="100" v-model="user"/>
-
+												ref="inputUser" :maxlength="100" v-model="user" />
 				<md-field>
 					<label>Nivel de permiso</label>
 					<md-select v-model="level">
@@ -17,6 +16,7 @@
 						<md-option value="A">Puede administrar</md-option>
 					</md-select>
 				</md-field>
+				<md-checkbox class="md-primary" v-model="sendEmail">Notificar al usuario</md-checkbox>
 			</md-dialog-content>
 			<md-dialog-actions>
 				<md-button @click="openAdd = false">Cancelar</md-button>
@@ -35,7 +35,8 @@ export default {
 		return {
 			user: '',
 			level: '',
-			openAdd: false
+			openAdd: false,
+			sendEmail: true
 		};
 	},
 	computed: {
@@ -58,7 +59,7 @@ export default {
 			let loc = this;
 			this.$refs.invoker.doSave(this.Work,
 														this.Work.AddPermission,
-														this.user, this.level)
+														this.user, this.level, this.sendEmail)
 												.then(function() {
 														loc.openAdd = false;
 														});

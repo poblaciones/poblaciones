@@ -1,7 +1,7 @@
 <template >
 	<div :class="this.classSize" class="defaultColor" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
 		<div class="md-layout ">
-			<div class="md-layout-item md-size-75" v-on:dblclick="StartEdit">
+			<div class="md-layout-item md-size-75" @dblclick="StartEdit">
 				<md-field style="margin-bottom: 0px">
 					<label class="mp-label unselectable" :style="(this.multiline ? 'top: 6px !important' : '')">
 						{{ this.label }}
@@ -10,7 +10,7 @@
 										:style="'font-size: ' + (largeFont ? '24' : '19') + 'px'"
 										:placeholder="(placeholder ? placeholder : '')"
 										:class="(!editMode ? 'unselectable' : '')"
-										v-on:mousedown="mouseDown" v-on:mouseup="mouseUp" v-model="localValue"
+										@mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue"
 										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
 					<md-textarea v-if="this.multiline" class="mp-area" :rows="rows" :style="minHeightRows + highlightBorder" autocomplete="off"
 											 :readonly="isDisabled || !editMode" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />

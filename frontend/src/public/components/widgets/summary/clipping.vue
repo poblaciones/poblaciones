@@ -3,10 +3,10 @@
 		<div v-if="hasSummaryName" class="clippingBlock cards">
 			<div v-if="!Use.UseMultiselect">
 				<div v-for="region in clipping.Region.Summary.Regions" :key="region.Id">
-					<mp-close-button v-on:click="removeRegion(region)" title="Quitar zona seleccionada" class="exp-hiddable-block" />
+					<mp-close-button @click="removeRegion(region)" title="Quitar zona seleccionada" class="exp-hiddable-block" />
 
 					<div class="clippingBlockHeader" style="font-size: 16px; line-height: 32px; margin-top: -2px;" :class="getColorMuted()">{{ region.TypeName }}</div>
-					<div class="hand" :class="getColorMuted()" v-on:click="fitRegion(region)" style="position: relative; line-height: 32px;margin-right: 20px;">
+					<div class="hand" :class="getColorMuted()" @click="fitRegion(region)" style="position: relative; line-height: 32px;margin-right: 20px;">
 						<span style="font-size: 2em;">{{ region.Name }}</span>
 
 					</div>
@@ -18,18 +18,18 @@
 			</div>
 			<div v-else style="margin-right: -.32em" :style="'font-size: ' + clippingElementSize">
 
-				<mp-close-button v-on:click="clickQuitar" title="Quitar selección" class="exp-hiddable-block" />
+				<mp-close-button @click="clickQuitar" title="Quitar selección" class="exp-hiddable-block" />
 
 				<button type="button" class="close lightButton exp-hiddable-block"
-								title="Zoom a la selección" v-on:click="fitSelection">
+								title="Zoom a la selección" @click="fitSelection">
 					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px; margin-right: 2px;" />
 				</button>
 
 				<div v-for="region in clipping.Region.Summary.Regions" :key="region.Id" :class="getColorMuted()" class="clippingElement">
 					<div style="position: relative; padding-right: 15px; ">
-						<div v-on:click="fitRegion(region)" v-if="clipping.Region.Summary.Regions.length < 8" class="clippingBlockHeader hand">{{ region.TypeName }}</div>
-						<div v-on:click="fitRegion(region)" class="hand">{{ region.Name }}</div>
-						<mp-close-button v-on:click="removeRegion(region)" title="Quitar zona seleccionada"
+						<div @click="fitRegion(region)" v-if="clipping.Region.Summary.Regions.length < 8" class="clippingBlockHeader hand">{{ region.TypeName }}</div>
+						<div @click="fitRegion(region)" class="hand">{{ region.Name }}</div>
+						<mp-close-button @click="removeRegion(region)" title="Quitar zona seleccionada"
 														 style="float: none; top: 0; margin-top: -2px; position: absolute; right: -2px; font-size: .75em" class="exp-hiddable-block" />
 						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id && !Embedded.Readonly" style="position: absolute;
 										    bottom: -.4em; right: -1px" :region="region" :metadata="region.Metadata" />
@@ -60,7 +60,9 @@
 
 			<div class="sourceRow" style="padding-bottom: 0.6rem;">
 				<div class="btn-group">
-					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index" class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)" v-on:mouseup="changeClipping(index)" v-on:click="falseChangeClipping(index)">{{ level.Revision }}</button>
+					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index"
+									class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)" @mouseup="changeClipping(index)"
+									@click="falseChangeClipping(index)">{{ level.Revision }}</button>
 				</div>
 				<ClippingSource :metadata="selectedLevel().Metadata" v-if="!Embedded.Readonly" />
 			</div>

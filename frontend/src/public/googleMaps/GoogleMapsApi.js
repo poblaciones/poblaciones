@@ -1,5 +1,6 @@
 import TxtOverlay from '@/public/googleMaps/TxtOverlay';
-import TileOverlay from '@/public/googleMaps/TileOverlay';
+import GoogleTileOverlay from './GoogleTileOverlay';
+import arr from '@/common/framework/arr';
 import color from '@/common/framework/color';
 import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
@@ -18,6 +19,7 @@ function GoogleMapsApi(google) {
 	this.myLocationMarker = null;
 	this.isSettingZoom = false;
 	this.clippingCanvas = null;
+	this.selectedCanvas = null;
 	this.selector = new FeatureSelector(this);
 	this.allwaysHiddenElements = ['landscape.natural', 'landscape.natural.landcover', 'landscape.natural.terrain',
 																	'poi.attraction', 'administrative.locality',
@@ -34,20 +36,6 @@ GoogleMapsApi.prototype.UpdateLabelsVisibility = function(showLabels) {
 	this.gMap.setOptions({styles: styles });
 };
 
-GoogleMapsApi.prototype.WaitForFullLoading = function () {
-	var targetCall;
-	var readyPromise = new Promise(resolve => {
-		targetCall = resolve;
-	});
-	if (this.idle) {
-		targetCall();
-	} else {
-		this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
-			targetCall();
-		});
-	}
-	return readyPromise;
-};
 
 GoogleMapsApi.prototype.Write = function(text, location, zIndex, style, innerStyle, ignoreMapMode, type, hidden) {
 	if(!style) {
@@ -115,6 +103,11 @@ GoogleMapsApi.prototype.Initialize = function () {
 	this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
 		window.SegMap.MapInitialized();
 	});
+};
+
+
+GoogleMapsApi.prototype.getZoom = function () {
+	return this.gMap.getZoom();
 };
 
 GoogleMapsApi.prototype.SetOpenNewWindowLink = function () {
@@ -290,9 +283,12 @@ GoogleMapsApi.prototype.CircleCompleted = function (circle) {
 	window.SegMap.SetSelectionMode(0);
 };
 
-GoogleMapsApi.prototype.SetCenter = function (coord) {
+GoogleMapsApi.prototype.SetCenter = function (coord, zoom) {
 	var c = new this.google.maps.LatLng(coord.Lat, coord.Lon);
 	this.gMap.setCenter(c);
+	if (zoom) {
+		this.SetZoom(zoom);
+	}
 };
 
 GoogleMapsApi.prototype.calculateOffsetX = function (offsetXpixels) {
@@ -305,10 +301,13 @@ GoogleMapsApi.prototype.calculateOffsetX = function (offsetXpixels) {
 	return offsetRad;
 };
 
-GoogleMapsApi.prototype.PanTo = function (coord, offsetXpixels) {
+GoogleMapsApi.prototype.PanTo = function (coord, offsetXpixels, zoom = null) {
 	var offsetRad = this.calculateOffsetX(offsetXpixels);
 	var c = new this.google.maps.LatLng(coord.Lat, coord.Lon - offsetRad);
 	this.gMap.panTo(c);
+	if (zoom) {
+		this.SetZoom(zoom);
+	}
 };
 
 GoogleMapsApi.prototype.point2LatLng = function (point, map) {
@@ -340,9 +339,10 @@ GoogleMapsApi.prototype.SetTypeControls = function (controlType) {
 	});
 };
 
-GoogleMapsApi.prototype.DrawPerimeter = function (center, radius, fillColor) {
+GoogleMapsApi.prototype.DrawPerimeter = function (pos, radius, fillColor) {
 	var strokeOpacity = 0.15;
 	var strokeColor = fillColor;
+	var center = new this.MapsApi.google.maps.LatLng(pos.Lat, pos.Lon);
 	if (color.IsReallyLightColor(fillColor)) {
 		strokeOpacity = 1;
 		strokeColor = color.ReduceColor(fillColor, .95);
@@ -401,6 +401,17 @@ GoogleMapsApi.prototype.ClearClippingCanvas = function () {
 		this.clippingCanvas = null;
 	}
 };
+
+GoogleMapsApi.prototype.ClearSelectedFeature = function () {
+	if (this.selectedCanvas !== null) {
+		var loc = this;
+		this.selectedCanvas.forEach(function (feature) {
+			feature.setMap(null);
+		});
+		this.selectedCanvas = null;
+	}
+};
+
 
 GoogleMapsApi.prototype.GetMapTypeState = function () {
 	if (!this.gMap) {
@@ -507,23 +518,126 @@ GoogleMapsApi.prototype.SetClippingCanvas = function (canvasList) {
 
 	for (var c = 0; c < canvasList.length; c++) {
 		var canvas = canvasList[c];
-		if (canvas.features[0].geometry.type === 'MultiPolygon') {
-			var polygons = canvas.features[0].geometry.coordinates;
-			for (var p = 0; p < polygons.length; p++) {
-				for (var i = 0; i < polygons[p].length; i++) {
-					featureMask.geometry.coordinates.push(polygons[p][i]);
-				}
-			}
-		} else {
-			// polygon
-			featureMask.geometry.coordinates = featureMask.geometry.coordinates.concat(
-													canvas.features[0].geometry.coordinates);
-		}
+		this.AddCanvasToPolygonRings(canvas, featureMask);
 	}
 	var mask = { type: 'FeatureCollection', features: [featureMask] };
 
 	this.UpdateClippingStyle();
 	this.clippingCanvas = this.gMap.data.addGeoJson(mask);
+};
+
+
+GoogleMapsApi.prototype.AddCanvasToPolygonRings = function (canvas, polygonList) {
+	if (canvas.features[0].geometry.type === 'MultiPolygon') {
+		var polygons = canvas.features[0].geometry.coordinates;
+		for (var p = 0; p < polygons.length; p++) {
+			for (var i = 0; i < polygons[p].length; i++) {
+				polygonList.geometry.coordinates.push(polygons[p][i]);
+			}
+		}
+	} else {
+		// polygon
+		polygonList.geometry.coordinates = polygonList.geometry.coordinates.concat(
+			canvas.features[0].geometry.coordinates);
+	}
+};
+
+GoogleMapsApi.prototype.SetSelectedFeature = function (feature, key, title) {
+	this.ClearSelectedFeature();
+
+	this.selectedCanvas = [];
+	if (feature.Canvas) {
+		var canvas = feature.Canvas;
+		if (canvas.features[0].geometry.type === 'MultiPolygon') {
+			for (var polygon of canvas.features[0].geometry.coordinates) {
+				this.CreateSelectedPolygon(polygon);
+			}
+		} else {
+			this.CreateSelectedPolygon(canvas.features[0].geometry.coordinates);
+		}
+	} else {
+		// es un punto...
+		var isVariableVisible = false;
+		if (key && key.MetricId) {
+			isVariableVisible = window.SegMap.IsVariableVisible(key.MetricId, key.VariableId);
+		}
+		// si no, crea un marker
+		if (!isVariableVisible) {
+			var pos = new this.google.maps.LatLng(feature.Coordinate.Lat, feature.Coordinate.Lon);
+			// Create a marker and center map on user location
+			var label = null;
+			if (title) {
+				label = { text: title, className: 'markerSelectedLabel' };
+			}
+			var marker = new this.google.maps.Marker({
+				position: pos,
+				draggable: true,
+				label: label,
+				zIndex: 1000 * 1000,
+				optimized: false,
+				animation: this.google.maps.Animation.DROP,
+				map: this.gMap
+			});
+			this.selectedCanvas.push(marker);
+		}
+		this.CreateSelectedCircle(feature.Coordinate);
+	}
+};
+
+GoogleMapsApi.prototype.CreateSelectedPolygon = function (polygon) {
+	var rings = [];
+	for (var ring of polygon) {
+		var res = [];
+		for (var point of ring) {
+			res.push({ lat: point[1], lng: point[0] });
+		}
+		rings.push(res);
+	}
+	var item = new this.google.maps.Polygon({
+    paths: rings,
+   strokeColor: "#fff",
+    strokeOpacity: 0.75,
+    strokeWeight: 5,
+    fillColor: "#ddd",
+    fillOpacity: 0,
+		clickable: false,
+		editable: false,
+  });
+	item.setMap(this.gMap);
+	this.selectedCanvas.push(item);
+
+	item = new this.google.maps.Polygon({
+    paths: rings,
+   strokeColor: "#ff0000",
+    strokeOpacity: 1,
+    strokeWeight: 1,
+    fillColor: "#ddd",
+    fillOpacity: 0.45,
+		clickable: false,
+		editable: false,
+	});
+
+	item.setMap(this.gMap);
+	this.selectedCanvas.push(item);
+};
+
+
+GoogleMapsApi.prototype.CreateSelectedCircle = function (center) {
+	var radius = 25;
+
+	var item = new google.maps.Circle({
+		center: { lat: center.Lat, lng: center.Lon },
+		strokeColor: "#FFFFFF",
+		strokeWeight: 1,
+		strokeOpacity: .8,
+		fillColor: "#999",
+		fillOpacity: 0.45,
+		clickable: false,
+		editable: false,
+		radius: radius
+	});
+	item.setMap(this.gMap);
+	this.selectedCanvas.push(item);
 };
 
 GoogleMapsApi.prototype.markerClicked = function (event, metricVersion, fid) {
@@ -552,23 +666,13 @@ GoogleMapsApi.prototype.getBounds = function() {
 GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index) {
 //	this.google.maps.event.trigger(this.gMap, 'resize');
 	this.gMap.overlayMapTypes.insertAt(index,
-		new TileOverlay(this.gMap, this.google, activeMetric));
+		new GoogleTileOverlay(activeMetric));
 };
 
 GoogleMapsApi.prototype.RemoveOverlay = function (index) {
 	this.gMap.overlayMapTypes.getAt(index).dispose();
 	this.gMap.overlayMapTypes.removeAt(index);
 };
-
-GoogleMapsApi.prototype.PaintOverlay = function (index) {
-	var overlay = this.gMap.overlayMapTypes.getAt(index);
-	overlay.previewHandler.savePreviewData();
-	setTimeout(() => {
-		this.gMap.overlayMapTypes.removeAt(index + 1);
-	}, 50);
-	this.gMap.overlayMapTypes.insertAt(index, overlay);
-};
-
 
 GoogleMapsApi.prototype.CreateLightMap = function () {
 	var elements = [

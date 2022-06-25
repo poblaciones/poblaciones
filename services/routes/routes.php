@@ -16,6 +16,7 @@ use minga\framework\Profiling;
 use minga\framework\Log;
 use minga\framework\PhpSession;
 use minga\framework\Traffic;
+
 if (PhpSession::GetSessionValue('started', null) === null) {
 	Session::StartSession();
 	PhpSession::SetSessionValue('started', Params::SafeServer('REQUEST_TIME'));
@@ -36,7 +37,7 @@ App::$app->before(function(Request $request) {
 
 	Performance::ResolveControllerFromUri();
 
-	//Headers::AcceptAnyCOARS();
+	Headers::AcceptAnyCORS();
 	$route = $request->getPathInfo();
 
 	if (Router::ProcessPath($route)) {

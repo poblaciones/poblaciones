@@ -29,10 +29,24 @@ class Callbacks extends FrameworkCallbacks
 	}
 	public function ExtraHitsLabels() : array
 	{
-		return ['MapsOpened', 'AddressQuery', 'Usuarios únicos'];
+		if (App::Settings()->Keys()->GetGoogleMapsCount() == 1)
+			return ['MapsOpened', 'AddressQuery', 'Usuarios únicos'];
+		else
+			return ['MapsOpened', 'AddressQuery', 'Usuarios únicos', 'SecondaryMapKey', 'TerciaryMapKey'];
 	}
 	public function ExtraHits() : array
 	{
-		return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession ];
+		if (App::Settings()->Keys()->GetGoogleMapsCount() == 1)
+			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession ];
+		// Tiene varias
+		$useSecondary = (App::Settings()->Keys()->GetGoogleMapsIndex() == 1);
+		$useTertiary = (App::Settings()->Keys()->GetGoogleMapsIndex() == 2);
+		if ($useSecondary)
+			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, self::$MapsOpened, 0 ];
+		else if ($useTertiary)
+			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, 0, self::$MapsOpened ];
+		else
+			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, 0, 0 ];
+
 	}
 }

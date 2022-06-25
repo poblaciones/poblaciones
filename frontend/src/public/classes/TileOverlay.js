@@ -1,24 +1,22 @@
 import axios from 'axios';
 import h from '@/public/js/helper';
 import Mercator from '@/public/js/Mercator';
-import TileRequest from '@/public/googleMaps/TileRequest';
+import TileRequest from '@/public/classes/TileRequest';
 import PreviewHandler from '@/public/composers/PreviewHandler';
 
 export default TileOverlay;
 
-function TileOverlay(map, google, activeSelectedMetric) {
+function TileOverlay(activeSelectedMetric, disablePreview = false) {
 	var TILE_SIZE = 256;
-	this.map = map;
-	this.google = google;
 	this.idCounter = 0;
 	this.activeSelectedMetric = activeSelectedMetric;
-	this.tileSize = new google.maps.Size(TILE_SIZE, TILE_SIZE);
+	this.tileSize = TILE_SIZE;
 	this.composer = activeSelectedMetric.CreateComposer();
 	this.geographyService = activeSelectedMetric.GetCartographyService();
 	this.requestedTiles = [];
 	this.disposed = false;
 	this.previewHandler = null;
-	if (this.composer.usePreview) {
+	if (this.composer.usePreview && !disablePreview) {
 		this.previewHandler = new PreviewHandler(this);
 	}
 }
@@ -29,8 +27,8 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	//div.style.transform = "translateZ(0)";
 	this.activeSelectedMetric.UpdateOpacity(zoom);
 	div.style.zIndex = this.activeSelectedMetric.index;
-	div.style.width = this.tileSize.width + 'px';
-	div.style.height = this.tileSize.height + 'px';
+	div.style.width = this.tileSize + 'px';
+	div.style.height = this.tileSize + 'px';
 	div.style.fontSize = '10';
 
 	var args = h.getFrameKey(coord.x, coord.y, zoom);
@@ -45,7 +43,7 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	}
 
 	var mercator = new Mercator();
-	var tileBounds = mercator.getTileBoundsLatLon({ x: coord.x, y: coord.y, z: zoom });
+	var tileBounds = mercator.getTileBounds({ x: coord.x, y: coord.y, z: zoom });
 
 	var preview = this.resolvePreview(div, tileBounds, coord, zoom);
 
@@ -92,7 +90,7 @@ TileOverlay.prototype.process = function (mapResults, dataResults, gradient, til
 	}
 	delete this.requestedTiles[tileKey];
 	var mercator = new Mercator();
-	var tileBounds = mercator.getTileBoundsLatLon({ x: x, y: y, z: z });
+	var tileBounds = mercator.getTileBounds({ x: x, y: y, z: z });
 	var features = (dataResults.Data.features !== undefined ? dataResults.Data.features : dataResults.Data);
 	this.processLabels(features, tileKey, tileBounds, x, y, z);
 	var svg = null;
@@ -121,7 +119,7 @@ TileOverlay.prototype.SetDivFailure = function (div) {
 	div.style.fontFamily = 'Arial, Helvetica, sans-serif';
 	div.style.borderStyle = 'solid';
 	div.style.textAlign = 'center';
-	div.style.paddingTop = (this.tileSize.height / 3) + 'px';
+	div.style.paddingTop = (this.tileSize / 3) + 'px';
   div.style.borderWidth = '1px';
   div.style.borderColor = '#c0c0c0';
   div.style.color = '#333';
@@ -152,7 +150,7 @@ TileOverlay.prototype.IsOutOfClipping = function (coord, zoom) {
 	}
 	var mercator = new Mercator();
 	var tile = mercator.normalizeTile({ x: coord.x, y: coord.y, z: zoom });
-	var tileBounds = mercator.getTileBoundsLatLon(tile);
+	var tileBounds = mercator.getTileBounds(tile);
 	var clippingBounds = window.SegMap.Clipping.clipping.Region.Envelope;
 	if (clippingBounds) {
 		return !mercator.rectanglesIntersect(tileBounds, clippingBounds);

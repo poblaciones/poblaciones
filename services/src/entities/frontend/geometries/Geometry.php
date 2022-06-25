@@ -2,23 +2,27 @@
 
 namespace helena\entities\frontend\geometries;
 
-use helena\entities\BaseMapModel;
+use helena\classes\GeoJson;
 
 class Geometry
 {
-	public $data;
+	public $features;
+	public $projected = false;
+	public $type;
 
-	public static function FromDb($field)
+	public static function FromDb($field, $fid = -1)
 	{
+		$args = array(array('name'=>'', 'value' => $field, 'FID' => $fid));
+
+		$geo = new GeoJson();
+		$canvas = $geo->GenerateFromBinary($args);
+
 		$ret = new Geometry();
-		$ret->data = $field;
+		$ret->features = $canvas['features'];
+		$ret->type = $canvas['type'];
 		return $ret;
 	}
 
-	public function TextSerialize()
-	{
-		return $this->data;
-	}
 
 }
 

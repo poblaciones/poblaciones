@@ -11,6 +11,10 @@ class InfoWindowInfo
 	public $Next;
 	public $Previous;
 	public $Items = array();
+	public $Centroid;
+	public $Canvas;
+	public $Envelope;
+
 }
 
 

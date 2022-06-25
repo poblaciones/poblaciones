@@ -5,7 +5,7 @@
 			<article v-cloak>
 				<section>
 					<div class="articleTitle">
-						<div class="closeButton" v-on:click="toggleModal">
+						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
 						Bienvenido a Poblaciones
@@ -35,7 +35,7 @@
 				</section>
 				<section>
 					<div class="articleTitle">
-						<div class="closeButton" v-on:click="toggleModal">
+						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
 						Buscar información
@@ -57,7 +57,7 @@
 				</section>
 				<section style="padding-bottom: 0px">
 					<div class="articleTitle">
-						<div class="closeButton" v-on:click="toggleModal">
+						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
 						Visualizar series
@@ -74,7 +74,7 @@
 				</section>
 				<section style="padding-bottom: 0px">
 					<div class="articleTitle">
-						<div class="closeButton" v-on:click="toggleModal">
+						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
 						Segmentación geográfica
@@ -104,7 +104,7 @@
 				</section>
 				<section>
 					<div class="articleTitle">
-						<div class="closeButton" v-on:click="toggleModal">
+						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
 						Visualizar segmentación
@@ -133,7 +133,7 @@
 				</section>
 				<section style="padding-bottom: 0px">
 					<div class="articleTitle">
-						<div class="closeButton" v-on:click="toggleModal">
+						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
 						Indicadores disponibles
@@ -163,7 +163,7 @@
 				</section>
 				<section style="padding-bottom: 0px">
 					<div class="articleTitle">
-						<div class="closeButton" v-on:click="toggleModal">
+						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
 						¡Felicitaciones!

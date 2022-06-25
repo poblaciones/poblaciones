@@ -124,8 +124,8 @@ import arr from '@/common/framework/arr';
 			arr.ReplaceByIdOrAdd(this.list, item);
 		},
 		onLoginAs(item) {
-			window.Db.LoginAs(item).then(function() {
-				document.location = '/users';
+			window.Db.LoginAs(item).then(function () {
+				window.open('/users', '_blank');
 			});
 		},
 		onDelete(item) {

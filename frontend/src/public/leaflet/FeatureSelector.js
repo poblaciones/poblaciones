@@ -19,7 +19,7 @@ function FeatureSelector(mapsApi) {
 };
 
 FeatureSelector.prototype.SetSelectorCanvas = function () {
-	this.ClearSelectorCanvas();
+/*	this.ClearSelectorCanvas();
 	var zeroItem = [
 		{ lat: 0, lng: 90 },
 		{ lat: 180, lng: 90 },
@@ -53,6 +53,7 @@ FeatureSelector.prototype.SetSelectorCanvas = function () {
 	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'mousemove', this.selectorMoved));
 
 	this.selectorCanvas = polygon;
+*/
 };
 
 FeatureSelector.prototype.getFeature = function (event) {
@@ -174,7 +175,7 @@ FeatureSelector.prototype.showTooltip = function () {
 		loc.tooltipCandidate = feature;
 	}
 	var m = new Mercator();
-	var coord = loc.tooltipLocation.Coordinate;
+	var coord = m.fromLatLonToGoogleLatLng(loc.tooltipLocation.Coordinate);
 	var style = 'ibTooltip exp-hiddable-block';
 	var outStyle = "ibTooltipOffsetLeft  mapLabels";
 	if (loc.tooltipMarker) {

@@ -5,7 +5,7 @@
 			<img class="imagen-preview" style="" :src="this.localPreviewImage" alt="">
 			<div style="display: inline-block">
 				<md-button class="md-icon-button md-button-mini"
-									 v-on:click="clear">
+									 @click="clear">
 					<md-icon>close</md-icon>
 					<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 				</md-button>

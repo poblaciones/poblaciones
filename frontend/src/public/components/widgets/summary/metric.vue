@@ -8,7 +8,7 @@
 		<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index" v-if="!Embedded.Readonly"
 											class="exp-hiddable-block" @RankingShown="rankingShown" />
 		<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
-			<h4 class="title" v-on:click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
+			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
@@ -18,7 +18,7 @@
 			</h4>
 			<mp-filter-badge style="margin-top: 0.3rem; margin-bottom: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
-											 v-on:click="changeUrbanity('N')" />
+											 @click="changeUrbanity('N')" />
 		</div>
 		<template v-else>
 			<h4 class="title">
@@ -26,7 +26,7 @@
 			</h4>
 			<mp-filter-badge style="margin-top: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
-											 v-on:click="changeUrbanity('N')" />
+											 @click="changeUrbanity('N')" />
 			<MetricVariables :metric="metric" />
 		</template>
 		<div class="coverageBox" v-if="hasLegends(metric.SelectedLevel())">
@@ -39,7 +39,7 @@
 		<div class="sourceRow">
 			<div class="btn-group" style="float: left">
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
-								v-on:click="changeSelectedVersionIndex(index)"
+								@click="changeSelectedVersionIndex(index)"
 								class="btn btn-default btn-xs exp-serie-item"
 								:class="getActive(index)">
 					{{ ver.Version.Name }}

@@ -11,7 +11,7 @@
 							{{ getValueHeader() }}
 						</td>
 					</tr>
-					<tr v-on:click="clickItem(item)" v-for="item in ranking" class="hand" :key="item.Id">
+					<tr @click="clickItem(item)" v-for="item in ranking" class="hand" :key="item.Id">
 						<template class="labelRow">
 							<td class="dataBox" style="width: 100%" :class="getMuted()">
 								{{ item.Name }}
@@ -30,12 +30,12 @@
 			<div class="btn-group">
 				<button v-for="sizeItem in possibleSizes" type="button" :key="sizeItem" :id="sizeItem"
 								 onmouseup="this.blur()" class="btn btn-default btn-xs" :class="getActiveSize(sizeItem)"
-								v-on:click="changeSize(sizeItem)">{{ sizeItem }}</button>
+								@click="changeSize(sizeItem)">{{ sizeItem }}</button>
 			</div>
 			<div class="btn-group">
 				<button v-for="direction in possibleDirections" type="button" :key="direction.Value" :id="direction.Value"
 								 onmouseup="this.blur()" class="btn btn-default btn-xs" :class="getActiveDirection(direction.Value)"
-								v-on:click="changeDirection(direction.Value)" :title="direction.Tooltip"><i :class="direction.Icon" /></button>
+								@click="changeDirection(direction.Value)" :title="direction.Tooltip"><i :class="direction.Icon" /></button>
 			</div>
 		</div>
 	</div>

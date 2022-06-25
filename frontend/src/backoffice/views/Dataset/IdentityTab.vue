@@ -104,7 +104,7 @@
 												<Icon v-if="Dataset.properties.Marker.Symbol" :symbol="Dataset.properties.Marker.Symbol" :work="Work" />
 												<md-button v-if="Dataset.properties.Marker.Symbol"
 																	 class="md-icon-button md-button-mini"
-																	 v-on:click="removeIcon">
+																	 @click="removeIcon">
 													<md-icon>close</md-icon>
 													<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 												</md-button>

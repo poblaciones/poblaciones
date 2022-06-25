@@ -36,6 +36,8 @@ class Session
 	}
 	public static function StartSession()
 	{
+		PhpSession::CheckPhpSessionStarted();
+
 		if (!Request::IsGoogle())
 			self::$NewSession = 1;
 	}

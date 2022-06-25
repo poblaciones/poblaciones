@@ -49,7 +49,7 @@ ActiveLabels.prototype.GetDataService = function (seed) {
 ActiveLabels.prototype.GetDataServiceParams = function (coord) {
 	var rev = window.SegMap.Signatures.BigLabels;
 	if (coord.z >= window.SegMap.Signatures.SmallLabelsFrom) {
-		rev += '_' + window.SegMap.Signatures.SmallLabels;
+		rev = parseInt(rev) + 100000 * parseInt(window.SegMap.Signatures.SmallLabels);
 	}
 	var suffix = window.SegMap.Signatures.Suffix;
 	if (this.UseBlockedRequests()) {

@@ -8,7 +8,7 @@
 							<button type="button" style="padding-left: 2px!important;"
 											class="lightButton close exp-hiddable-visiblity"
 											v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
-											v-on:click="togglePin">
+											@click="togglePin">
 								<PinIcon v-if="!level.Pinned" class="icon" />
 								<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
 								-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />
@@ -19,12 +19,12 @@
 						</div>
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
-						<span class="hand" :title="currentMetric.Title" v-on:click="clickMetric(currentMetric.Next.Key)"
+						<span class="hand" :title="currentMetric.Title" @click="clickMetric(currentMetric.Next.Key)"
 									v-html="getValueHeader()">
 						</span>
 					</td>
 				</tr>
-				<tr v-on:click="clickLabel(label)" v-for="label in variable.ValueLabels" class="hand" :key="label.Id">
+				<tr @click="clickLabel(label)" v-for="label in variable.ValueLabels" class="hand" :key="label.Id">
 					<template v-if="displayLabel(label)">
 						<template v-if="label.Visible" class="labelRow">
 							<td class="dataBox center">

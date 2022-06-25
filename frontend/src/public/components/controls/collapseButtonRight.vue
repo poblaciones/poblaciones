@@ -1,8 +1,8 @@
 <template>
 	<div
 		id="collapseButtonRight"
-		v-on:click="doToggle" :title="tooltipText"
-		class="fa fa-2x hand right-arrow"
+		@click="doToggle" :title="tooltipText"
+		class="fa fa-2x hand right-arrow mapsOvercontrols"
 		:class="{ 'fa-caret-right': !collapsed, 'fa-caret-left': collapsed }"
 		:style="{ right: '0px' }"
 	>
@@ -48,7 +48,6 @@ export default {
 	color: #666;
 	background: rgba(255, 255, 255, 0.9);
 	box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-	z-index: 1;
 }
 .border-left {
 	position: absolute;

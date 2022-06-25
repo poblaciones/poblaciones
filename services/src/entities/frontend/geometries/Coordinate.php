@@ -63,6 +63,14 @@ class Coordinate
 		return $ret;
 	}
 
+	public static function FromDbLonLat($field)
+	{
+		$parts = unpack('Lpadding/corder/Lgtype/dlatitude/dlongitude', $field);
+		$ret = new Coordinate();
+		$ret->Lat = doubleval($parts['longitude']);
+		$ret->Lon = doubleval($parts['latitude']);
+		return $ret;
+	}
 
 
 }

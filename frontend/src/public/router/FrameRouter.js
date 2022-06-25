@@ -51,11 +51,14 @@ FrameRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	//segmentedMap.SaveRoute.lastState = null;
 	// Setea la posición, el zoom y el tipo de mapa
 	segmentedMap.SaveRoute.Disabled = true;
-	if (framing.Center.Lat && framing.Center.Lon) {
-		segmentedMap.SetCenter(framing.Center);
-	}
+	var newZoom = null;
 	if (framing.Zoom || framing.Zoom === 0) {
-		segmentedMap.SetZoom(framing.Zoom);
+		newZoom = framing.Zoom;
+	}
+	if (framing.Center.Lat && framing.Center.Lon) {
+		segmentedMap.SetCenter(framing.Center, newZoom);
+	} else if (newZoom) {
+		segmentedMap.SetZoom(newZoom);
 	}
 	if (framing.MapType) {
 		segmentedMap.toolbarStates.showLabels = framing.ShowLabels;

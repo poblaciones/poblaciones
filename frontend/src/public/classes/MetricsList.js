@@ -170,24 +170,6 @@ MetricsList.prototype.doRemove = function (activeMetric) {
 	this.updateMetricIndexes();
 };
 
-MetricsList.prototype.paintMetrics = function () {
-	window.SegMap.OverlapRectangles.Rectangles = [];
-	for (var n = 0; n < this.metrics.length; n++) {
-		this.paintMetric(this.metrics[n]);
-	}
-};
-
-MetricsList.prototype.paintMetric = function (activeMetric) {
-	if (activeMetric.objs.Segment == null) { return; }
-	if (window.SegMap.MapsApi != null) {
-		var segmentPos = activeMetric.objs.Segment.indexOf(activeMetric);
-		if (segmentPos !== -1) {
-			var mapPos = this.CalculateMapPosition(activeMetric.objs.Segment, segmentPos);
-			window.SegMap.MapsApi.PaintOverlay(mapPos);
-		}
-	}
-};
-
 MetricsList.prototype.removeFromSegment = function (activeMetric) {
 	if (activeMetric.objs.Segment == null) { return; }
 

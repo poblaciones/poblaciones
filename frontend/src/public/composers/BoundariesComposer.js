@@ -82,7 +82,7 @@ BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElemen
 };
 
 BoundariesComposer.prototype.getCentroid = function (mapElement) {
-	return new window.google.maps.LatLng(mapElement.properties.centroid[0], mapElement.properties.centroid[1]);
+	return { Lat: mapElement.properties.centroid[0], Lon: mapElement.properties.centroid[1] };
 };
 
 

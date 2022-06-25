@@ -137,7 +137,7 @@ LocationsComposer.prototype.AddFeatureText = function (variable, val, dataElemen
 	if (scale < .25) {
 		return;
 	}
-	var location = new this.MapsApi.google.maps.LatLng(parseFloat(dataElement['Lat']), parseFloat(dataElement['Lon']));
+	var location = { Lat: parseFloat(dataElement['Lat']), Lon: parseFloat(dataElement['Lon']) };
 	var clickId = null;
 	if (this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
 		clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);

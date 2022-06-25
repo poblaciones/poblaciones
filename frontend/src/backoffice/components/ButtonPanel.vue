@@ -1,12 +1,12 @@
 <template>
     <div class="flex">
-        <md-button v-show="!editableMode" v-on:click="EditField();" class="md-icon-button">
+        <md-button v-show="!editableMode" @click="EditField();" class="md-icon-button">
             <md-icon>edit</md-icon>
         </md-button>
-        <md-button ref="btnOk" :id="this._uid + 'ok'" v-show="editableMode" v-on:click="Save" class="md-icon-button">
+        <md-button ref="btnOk" :id="this._uid + 'ok'" v-show="editableMode" @click="Save" class="md-icon-button">
             <md-icon>done</md-icon>
         </md-button>
-        <md-button ref="btnCancel" :id="this._uid + 'cancel'" v-show="editableMode" v-on:click="Cancel" class="md-icon-button">
+        <md-button ref="btnCancel" :id="this._uid + 'cancel'" v-show="editableMode" @click="Cancel" class="md-icon-button">
             <md-icon>clear</md-icon>
         </md-button>
 			<mp-confirm title="Cambios pendientes" ref="confirmDialog"

@@ -1,4 +1,5 @@
 import h from '@/public/js/helper';
+import arr from '@/common/framework/arr';
 
 export default PreviewHandler;
 
@@ -6,11 +7,12 @@ function PreviewHandler(tileOverlay) {
 	this.tileOverlay = tileOverlay;
 	this.tileDataCacheForPreview = {};
 	this.zoomListener = null;
-	this.lastZoom = this.tileOverlay.map.getZoom();
-	var loc = this;
-	this.zoomListener = this.tileOverlay.map.addListener('zoom_changed', function () {
-		loc.savePreviewData();
-	});
+	this.lastZoom = window.SegMap.MapsApi.getZoom();
+	window.SegMap.ZoomChangedSubscribers.push(this);
+};
+
+PreviewHandler.prototype.ZoomChanged = function (zoom) {
+		this.savePreviewData();
 };
 
 PreviewHandler.prototype.savePreviewData = function () {
@@ -18,7 +20,7 @@ PreviewHandler.prototype.savePreviewData = function () {
 	this.tileDataCacheForPreview[this.lastZoom] = this.tileOverlay.composer.tileDataCache;
 	// actualiza
 	this.tileOverlay.composer.tileDataCache = [];
-	this.lastZoom = this.tileOverlay.map.getZoom();
+	this.lastZoom = window.SegMap.MapsApi.getZoom();
 };
 
 PreviewHandler.prototype.getPreview = function (tileBounds, coord, zoom) {
@@ -75,7 +77,7 @@ PreviewHandler.prototype.CreatePartialTileData = function (tileData, tileBounds)
 	if (tileData.length === 0) {
 		return ret;
 	}
-	var useCentroid = (tileData[0].Lat === undefined);
+	var useCentroid = (tileData[0].Lat === undefined && tileData[0].properties);
 	if (useCentroid) {
 		for (var n = 0; n < tileData.length; n++) {
 			var lat = tileData[n].properties.centroid[0];
@@ -238,8 +240,5 @@ PreviewHandler.prototype.createDiv = function (width, height) {
 
 PreviewHandler.prototype.dispose = function () {
 	this.tileDataCacheForPreview = {};
-	if (this.zoomListener) {
-		this.zoomListener.remove();
-		this.zoomListener = null;
-	};
+	arr.Remove(window.SegMap.ZoomChangedSubscribers, this);
 };

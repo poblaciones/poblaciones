@@ -2,11 +2,11 @@
 	<div>
 		<div class="btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: 2px">
 			<h5 class="title">
-				<mp-close-button v-on:click="clickQuitar" title="Quitar indicador"
+				<mp-close-button @click="clickQuitar" title="Quitar indicador"
 												 v-if="!metric.IsLocked" class="exp-hiddable-block" />
 
 				<button title="Opciones" v-show="metric.SelectedVariable()" type="button" class="close "
-								v-on:click="clickCustomize" style="margin-right: 6px; margin-left: -2px; margin-top: 4px; font-size: 1.2rem">
+								@click="clickCustomize" style="margin-right: 6px; margin-left: -2px; margin-top: 4px; font-size: 1.2rem">
 					<i class="fas fa-sliders-h"></i>
 				</button>
 
@@ -18,19 +18,19 @@
 				<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
 					<li v-for="(value, key) in metric.GetUrbanityFilters(true)" :key="key" :class="(value.border ? 'liDividerNext' : '')">
 						<a :style="'padding-left: '+ (15 + value.level * 14) +'px'"
-										v-on:click="changeUrbanity(key)">
+										@click="changeUrbanity(key)">
 							{{ value.label }}
 						</a>
 					</li>
 				</ul>
 
-				<button type="button" v-on:click="toogleRankings" v-if="metric.useRankings()" onmouseup="this.blur()"
+				<button type="button" @click="toogleRankings" v-if="metric.useRankings()" onmouseup="this.blur()"
 								class="close lightButton" :class="(metric.ShowRanking ? 'activeButton' : '')" :title="(metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking')">
 					<i class="fa fa-signal" style="margin-left: -8px;" />
 				</button>
 
 				<button v-if="metric.SelectedLevel().Extents" ref="zoomExtentsBtn" type="button"
-								class="close lightButton" title="Zoom al indicador" v-on:click="zoomExtents()">
+								class="close lightButton" title="Zoom al indicador" @click="zoomExtents()">
 					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px; margin-right: 2px;" />
 				</button>
 			</h5>

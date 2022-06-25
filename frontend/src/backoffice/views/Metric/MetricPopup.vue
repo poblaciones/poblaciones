@@ -21,6 +21,8 @@
 											 label='Categoría'
 											 v-model="newMetricVersionLevel.MetricVersion.Metric.MetricGroup"
 											 list-key='Id'
+											 :allow-null="true"
+											 nullLabel="[No incluir en +]"
 											 :list='MetricGroups'
 											 helper='Indique el tipo de información del indicador.' />
 					</div>

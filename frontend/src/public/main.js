@@ -8,6 +8,8 @@ import 'vue-material-design-icons/styles.css';
 import VTooltip from 'v-tooltip';
 import Clipboard from 'v-clipboard';
 
+import "leaflet/dist/leaflet.css";
+
 // Bus para comunicación entre componentes
 // usar window.bus.$emit y window.bus.$on
 window.bus = new Vue();

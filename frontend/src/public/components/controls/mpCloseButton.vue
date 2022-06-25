@@ -1,5 +1,5 @@
 <template>
-	<button :title="title" type="button" class="close buttonMargin" v-on:click="onClose">
+	<button :title="title" type="button" class="close buttonMargin" @click="onClose">
 		<close-icon title="Quitar" />
 	</button>
 </template>

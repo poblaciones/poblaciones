@@ -7,8 +7,8 @@
 					<transition :key="action.name"
 						enter-active-class="animated quick zoomIn"
 						leave-active-class="animated quick zoomOut"
-						v-on:after-enter="afterActionsTransitionEnter"
-						v-on:before-enter="beforeActionsTransitionEnter">
+						@after-enter="afterActionsTransitionEnter"
+						@before-enter="beforeActionsTransitionEnter">
 						<template v-if="action.tooltip">
 							<li v-if="toggle" :style="{ 'background-color': action.color || bgColor }">
 								<div v-tooltip="{ content: action.tooltip, placement: tooltipPosition, classes: 'fab-tooltip', trigger: tooltipTrigger}"
@@ -411,7 +411,7 @@ export default {
 }
 
 .fab-wrapper {
-	z-index: 999;
+	z-index: 1000!important;
 }
 
 .fab-main {
@@ -465,14 +465,14 @@ export default {
 .fab-list {
 	position: relative;
 	z-index: 1;
-	margin: 2vh 0;
+	margin: 1.5vh 0;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
 .fab-list li {
-	margin-top: 2vh;
+	margin-top: 1.5vh;
 	display: flex;
 	align-items: center;
 	border-radius: 100px;

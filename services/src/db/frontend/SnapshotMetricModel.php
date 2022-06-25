@@ -32,7 +32,7 @@ class SnapshotMetricModel extends BaseModel
 		if ($getAllPublicData)
 		{
 			$where = "WHERE mvw_work_is_private = 0 and mvw_work_is_indexed = 1 ";
-			$having = "HAVING SUM(case when mvw_work_type = 'P' then 1 else 0 end) > 0 ";
+			$having = "HAVING SUM(case when mvw_work_type = 'P' then 1 else 0 end) > 0 AND myv_metric_group_id IS NOT NULL ";
 			$orderBy = "ORDER BY myv_metric_group_id, myv_metric_provider_id, myv_metric_caption ";
 		}
 		else

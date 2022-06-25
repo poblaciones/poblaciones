@@ -87,10 +87,32 @@ class SnapshotLookupModel
 		return $ret;
 	}
 
-
-	private function GetCentroidField($dataset)
+	public function GetGeometryField($dataset)
 	{
-		if ($dataset["dat_type"] == 'S')
+		if ($dataset["dat_type"] == 'S' || $dataset['dat_are_segments'])
+		{
+			return "geometry";
+		}
+		else if ($dataset["dat_type"] == 'L')
+		{
+			return "null";
+		}
+		else
+			return "gei_geometry_r6";
+	}
+
+	public function GetEnvelopeField($dataset)
+	{
+		$geom =  $this->GetGeometryField($dataset);
+		if ($geom !== "null")
+			return "ST_AsText(PolygonEnvelope(" . $geom  . "))";
+		else
+			return "null";
+	}
+
+	public function GetCentroidField($dataset)
+	{
+		if ($dataset["dat_type"] == 'S' || $dataset['dat_are_segments'])
 		{
 			return "GeometryCentroid(geometry)";
 		}

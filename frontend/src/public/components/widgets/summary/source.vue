@@ -1,9 +1,9 @@
 <template>
   <div class="sourceInfo exp-hiddable-block">
-    <a href="#" v-on:click="clickDescargar" style="color: #a7a7a7"><download-icon title="Descargar"/> Descargar</a>
+    <a href="#" @click="clickDescargar" style="color: #a7a7a7"><download-icon title="Descargar"/> Descargar</a>
     &nbsp;
     <a href="#" :title="sourceTitle"
-				v-on:click="clickFuente" style="color: #a7a7a7">
+				@click="clickFuente" style="color: #a7a7a7">
 			<link-icon />
 			Fuente
 		</a>

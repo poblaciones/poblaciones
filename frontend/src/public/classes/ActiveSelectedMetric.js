@@ -672,8 +672,16 @@ ActiveSelectedMetric.prototype.GetCartographyService = function () {
 			return { url: null, revision: null };
 	case 'D':
 		return { url: h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, '/services/frontend/geographies/GetGeography'), revision: window.SegMap.Signatures.Geography };
-	case 'S':
-		return { url: window.host + '/services/frontend/shapes/GetDatasetShapes', isDatasetShapeRequest: true, revision: this.properties.Metric.Signature };
+		case 'S':
+			var url = null;
+			var uri = '/services/frontend/shapes/GetDatasetShapes';
+			var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
+			if (useStaticQueue) {
+				url = h.resolveMultiUrl(window.SegMap.Configuration.StaticServer, uri);
+			} else {
+				url = window.host + uri;
+			}
+			return { url: url, isDatasetShapeRequest: true, revision: this.properties.Metric.Signature };
 	default:
 		throw new Error('Unknown dataset metric type');
 	}

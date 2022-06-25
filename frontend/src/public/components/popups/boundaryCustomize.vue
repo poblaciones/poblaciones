@@ -13,10 +13,10 @@
 					<td class="nowrapwords">Mostrar descripciones:</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="descripciones" :value="true" v-on:change="boundary.UpdateMap()" v-model="boundary.showDescriptions">Sí
+							<input type="radio" name="descripciones" :value="true" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">Sí
 						</label>
 						<label class="radio-inline">
-							<input type="radio" name="descripciones" :value="false" v-on:change="boundary.UpdateMap()" v-model="boundary.showDescriptions">No
+							<input type="radio" name="descripciones" :value="false" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">No
 						</label>
 					</td>
 				</tr>
@@ -24,13 +24,13 @@
 					<td class="optionsLabel">Ancho:</td>
 					<td>
 						<div class="btn-group">
-							<button type="button" v-on:click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
+							<button type="button" @click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
 								Fino
 							</button>
-							<button type="button" v-on:click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
+							<button type="button" @click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
 								Intermedio
 							</button>
-							<button type="button" v-on:click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
+							<button type="button" @click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
 								Grueso
 							</button>
 						</div>

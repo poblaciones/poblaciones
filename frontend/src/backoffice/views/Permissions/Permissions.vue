@@ -35,7 +35,7 @@
 							<md-table-cell md-label="Usuario">{{ formatUser(item.User) }}</md-table-cell>
 							<md-table-cell md-label="Permiso">{{ formatPermission(item.Permission) }}</md-table-cell>
 							<md-table-cell md-label="Acciones" v-if="Work.CanAdmin()" class="mpNoWrap">
-								<md-button v-if="Work.CanAdmin()" class="md-icon-button" v-on:click="onDelete(item)">
+								<md-button v-if="Work.CanAdmin()" class="md-icon-button" @click="onDelete(item)">
 									<md-icon>delete</md-icon>
 									<md-tooltip md-direction="bottom">Quitar permiso</md-tooltip>
 								</md-button>

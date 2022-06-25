@@ -356,10 +356,10 @@ ActiveWork.prototype.UpdateMultilevelMatrix = function () {
 		{ 'w': this.properties.Id, 'd': datasetMatrix }, 'actualizar las relaciones de multinivel');
 };
 
-ActiveWork.prototype.AddPermission = function (user, permission) {
+ActiveWork.prototype.AddPermission = function (user, permission, sendEmail) {
 	var loc = this;
 	return axiosClient.getPromise(window.host + '/services/backoffice/AddWorkPermission',
-		{ 'u': user, 'w': this.properties.Id, 'p': permission }, 'agregar el permiso')
+		{ 'u': user, 'w': this.properties.Id, 'p': permission, 'n': sendEmail }, 'agregar el permiso')
 		.then(function (data) {
 			loc.Permissions.push(data);
 		});

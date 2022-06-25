@@ -8,7 +8,7 @@
 		<BoundaryTopButtons :boundary="boundary" :key="boundary.index"
 												class="exp-hiddable-block" v-if="!Embedded.Readonly" />
 		<div>
-			<h4 class="title" v-on:click="changeVisibility()" style="margin-bottom: 6px;cursor: pointer">
+			<h4 class="title" @click="changeVisibility()" style="margin-bottom: 6px;cursor: pointer">
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />

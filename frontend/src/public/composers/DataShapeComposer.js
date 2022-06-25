@@ -134,7 +134,7 @@ DataShapeComposer.prototype.AddFeatureText = function (variable, val, dataElemen
 		|| parseInt(variable.ShowDescriptions) == 0) && !isSemaphore) {
 		return;
 	}
-	var centroid = new window.google.maps.LatLng(dataElement['Lat'], dataElement['Lon']);
+	var centroid = { Lat: dataElement['Lat'], Lon: dataElement['Lon'] };
 	if (this.inTile(tileBounds, centroid)) {
 		// identifica superposiciones en el mismo tile
 		// y descarta markers

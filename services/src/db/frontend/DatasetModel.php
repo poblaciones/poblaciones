@@ -9,7 +9,12 @@ use minga\framework\Str;
 use minga\framework\Profiling;
 use minga\framework\PublicException;
 
+use helena\entities\frontend\geometries\Coordinate;
+use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\geometries\Geometry;
+
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
+use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 
 class DatasetModel
 {
@@ -37,7 +42,13 @@ class DatasetModel
 			longitude.dco_field AS dat_longitude_field,
 			latitude.dco_field AS dat_latitude_field,
 			longitudeSegment.dco_field AS dat_longitude_field_segment,
-			latitudeSegment.dco_field AS dat_latitude_field_segment
+			latitudeSegment.dco_field AS dat_latitude_field_segment,
+
+			(SELECT dco_field FROM dataset_column
+			WHERE dco_id = dat_longitude_column_id) as LongitudeColumn,
+			(SELECT dco_field FROM dataset_column
+			WHERE dco_id = dat_latitude_column_id) as LatitudeColumn
+
 		FROM ' . $draftPreffix . 'dataset d1
 			LEFT JOIN ' . $draftPreffix . 'dataset_column images_column ON images_column.dco_id = d1.dat_images_column_id
 			LEFT JOIN ' . $draftPreffix . 'dataset_column caption_column ON caption_column.dco_id = d1.dat_caption_column_id
@@ -106,10 +117,11 @@ class DatasetModel
 		// trae las columnas para resumen
 		$columns = $this->GetDatasetColumns($datasetId, true);
 		$captionColumn = null;
+		$joins = "";
 		$cols = $this->ResolveTitle($dataset, $itemId, $geographyItemId, $captionColumn);
 		$cols .= $this->ResolveImage($dataset);
 		$cols .= $this->ResolveColumns($columns, $captionColumn);
-
+		$cols .= $this->ResolveSpatialColumns($dataset, $joins);
 		$from = ' FROM ' . $table;
 		$params = array();
 		if($itemId == null)
@@ -123,7 +135,8 @@ class DatasetModel
 			$params[] = $itemId;
 		}
 
-		$sql = "SELECT " . $cols . $from . $where . " LIMIT 1";
+		$sql = "SELECT " . $cols . $from . $joins . $where . " LIMIT 1";
+
 		$row = App::Db()->fetchAssoc($sql, $params);
 
 		$info = new InfoWindowInfo();
@@ -135,6 +148,12 @@ class DatasetModel
 
 		$items = $this->FormatItems($row, $columns, $captionColumn);
 		$info->Items = $items;
+
+		$info->Centroid = Coordinate::FromDbLonLat($row['centroid'])->Trim();
+		if ($row['geometry'])
+			$info->Canvas = Geometry::FromDb($row['geometry']);
+		if ($row['envelope'])
+			$info->Envelope = Envelope::FromDb($row['envelope'])->Trim();
 
 		return $info;
 	}
@@ -158,6 +177,20 @@ class DatasetModel
 		}
 		return $items;
 	}
+
+	private function ResolveSpatialColumns($dataset, &$joins)
+	{
+		$snap = new SnapshotLookupModel();
+		if (SnapshotByDatasetModel::UseGeographyItemPolygon($dataset))
+		{
+			$joins .= " LEFT JOIN geography_item ON gei_id = geography_item_id ";
+		}
+
+		return ", " . $snap->GetCentroidField($dataset) . " AS centroid " .
+						 ", " . $snap->GetEnvelopeField($dataset) . " AS envelope " .
+							", " . $snap->GetGeometryField($dataset) . " AS geometry ";
+	}
+
 	private function ResolveImage($dataset)
 	{
 		if ($dataset['images_column_id'])

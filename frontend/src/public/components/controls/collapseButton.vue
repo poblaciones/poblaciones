@@ -1,5 +1,5 @@
 <template>
-	<div v-on:click="doToggle" class='fa fa-2x hand left-arrow' :title="tooltipText"
+	<div @click="doToggle" class='fa fa-2x hand left-arrow' :title="tooltipText"
 		  :class="{ 'fa-caret-left': !collapsed, 'fa-caret-right': collapsed }"
 		  :style="{ left: left + 'px' }">
 		<div class="border-left"></div>

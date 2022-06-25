@@ -36,9 +36,10 @@ App::$app->get('/services/backoffice/AddWorkPermission', function (Request $requ
 	$controller = new services\PermissionsService();
 	$userEmail = Params::GetMandatory('u');
 	$permission = Params::GetMandatory('p');
+	$notify = Params::GetBoolMandatory('n');
 	if ($permission != 'V' && $permission != 'E' && $permission != 'A')
 	 throw new PublicException('Tipo de permiso inválido');
-	$ret = $controller->AssignPermission($workId, $userEmail, $permission);
+	$ret = $controller->AssignPermission($workId, $userEmail, $permission, $notify);
 	return App::OrmJson($ret);
 });
 

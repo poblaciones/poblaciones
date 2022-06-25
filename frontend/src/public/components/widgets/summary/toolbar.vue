@@ -15,20 +15,21 @@
 				</ul>
 			</button>
 			<button type="button" class="btn btn-default btn-xs"
-							:title="(toolbarStates.showLabels ? 'Ocultar etiquetas del mapa' : 'Mostrar etiquetas del mapa')" v-on:click="toggleLabels()" :class="getLabelsActive()">
+							:title="(toolbarStates.showLabels ? 'Ocultar etiquetas del mapa' : 'Mostrar etiquetas del mapa')" @click="toggleLabels()" :class="getLabelsActive()">
 				<i class="fas fa-tags" />
 			</button>
 
 			<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="btn btn-default btn-xs"
-							title="Ubicación actual" v-on:click="geolocate()">
+							title="Ubicación actual" @click="geolocate()">
 				<i class="far fa-dot-circle" />
 			</button>
 		</div>
 
 		<div class="btn-group">
 			<button v-for="(mode, index) in selectionModes()" :key="mode.Name" type="button"
-							v-on:click="setMode(index)" v-on:mouseup="setMode(index)"
-							class="btn btn-default btn-xs" :class="getActive(index)" :title="mode.Name"><i :class="mode.Icon"/></button>
+							@click="setMode(index)" @mouseup="setMode(index)"
+							class="btn btn-default btn-xs" :class="getActive(index)"
+							:title="mode.Name"><i :class="mode.Icon"/></button>
 		</div>
 
 		<div class="pull-right" v-if="!Embedded.Active">
@@ -46,7 +47,7 @@
 				<ul class="shareIt dropdown-menu">
 					<li>
 						<div class="dToolboxBox">
-							<button type="button" class="btn btn-default btn-xs" title="Insertar en otra página" v-on:click="showEmbeddedMapPopUp">
+							<button type="button" class="btn btn-default btn-xs" title="Insertar en otra página" @click="showEmbeddedMapPopUp">
 								<i class="fas fa-link"/>
 							</button>
 						</div>
@@ -58,15 +59,15 @@
 					</li>
 				</ul>
 			</span>
-			<button type="button" class="btn btn-default btn-xs" title="Guía de uso" v-on:click="showTutorial()">
+			<button type="button" class="btn btn-default btn-xs" title="Guía de uso" @click="showTutorial()">
 				<help-circle-icon title="Guía de uso" />
 			</button>
-			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" v-on:click="setFavorite()">
+			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
 				<i class="far fa-heart" />
 			</button>
 
 			<button v-if='!user.Logged' type="button" class="btn btn-default btn-xs" title="Ingresar/Registrarse"
-							v-on:click="authenticate.redirectLogin()"><i class="fas fa-sign-in-alt"></i></button>
+							@click="authenticate.redirectLogin()"><i class="fas fa-sign-in-alt"></i></button>
 			<span v-else="" class="dropdown">
 				<button type="button"
 								id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"

@@ -2,7 +2,7 @@
   <span v-if="metadata">
     <span class="sourceInfo exp-hiddable-block">
 			<a href="#" :title="sourceTitle"
-					v-on:click="clickFuente" style="color: #a7a7a7">
+					@click="clickFuente" style="color: #a7a7a7">
 				<link-icon style="font-size: 13px; padding-top: 20px;" :title="'Fuente de delimitación para ' + region.Name" />
 			</a>
     </span>

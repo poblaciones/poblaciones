@@ -13,7 +13,7 @@
 					<td class="col1 optionsLabel">Métrica:</td>
 					<td>
 						<div class="btn-group">
-							<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" v-on:click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
+							<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
 								{{ metric.Caption }}
 							</button>
 						</div>
@@ -30,10 +30,10 @@
 					<td class="nowrapwords">Mostrar descripciones:</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="1" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
+							<input type="radio" name="descripciones" value="1" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
 						</label>
 						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="0" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">No
+							<input type="radio" name="descripciones" value="0" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">No
 						</label>
 					</td>
 				</tr>
@@ -41,10 +41,10 @@
 					<td class="nowrapwords">Mostrar valores:</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="valores" value="1" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowValues">Sí
+							<input type="radio" name="valores" value="1" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowValues">Sí
 						</label>
 						<label class="radio-inline">
-							<input type="radio" name="valores" value="0" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowValues">No
+							<input type="radio" name="valores" value="0" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowValues">No
 						</label>
 					</td>
 				</tr>
@@ -52,10 +52,10 @@
 					<td class="nowrapwords">Mostrar perímetros:</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="perimeter" value="1" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
+							<input type="radio" name="perimeter" value="1" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
 						</label>
 						<label class="radio-inline">
-							<input type="radio" name="perimeter" value="0" v-on:change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
+							<input type="radio" name="perimeter" value="0" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
 						</label>
 					</td>
 				</tr>
@@ -63,13 +63,13 @@
 					<td class="optionsLabel">Transparencia:</td>
 					<td>
 						<div class="btn-group">
-							<button type="button" v-on:click="changeOpacity('H')" class="btn btn-default btn-xs" :class="getActiveOpacity('H')">
+							<button type="button" @click="changeOpacity('H')" class="btn btn-default btn-xs" :class="getActiveOpacity('H')">
 								Baja
 							</button>
-							<button type="button" v-on:click="changeOpacity('M')" class="btn btn-default btn-xs" :class="getActiveOpacity('M')">
+							<button type="button" @click="changeOpacity('M')" class="btn btn-default btn-xs" :class="getActiveOpacity('M')">
 								Media
 							</button>
-							<button type="button" v-on:click="changeOpacity('L')" class="btn btn-default btn-xs" :class="getActiveOpacity('L')">
+							<button type="button" @click="changeOpacity('L')" class="btn btn-default btn-xs" :class="getActiveOpacity('L')">
 								Alta
 							</button>
 						</div>
@@ -79,13 +79,13 @@
 					<td class="optionsLabel">Ajuste poblacional:</td>
 					<td>
 						<div class="btn-group">
-							<button type="button" v-on:click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
+							<button type="button" @click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
 								Bajo
 							</button>
-							<button type="button" v-on:click="changeGradientOpacity('M')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('M')">
+							<button type="button" @click="changeGradientOpacity('M')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('M')">
 								Medio
 							</button>
-							<button type="button" v-on:click="changeGradientOpacity('L')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('L')">
+							<button type="button" @click="changeGradientOpacity('L')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('L')">
 								Alto
 							</button>
 						</div>
@@ -95,12 +95,12 @@
 					<td class="optionsLabel">Trama:</td>
 					<td>
 						<div class="btn-group">
-							<button v-for="pattern in range(metric.getValidPatterns(), 0, 3)" :key="pattern.Key" type="button" v-on:click="changePattern(pattern.Key)" class="btn btn-default btn-xs" :class="getActivePattern(pattern.Key)">
+							<button v-for="pattern in range(metric.getValidPatterns(), 0, 3)" :key="pattern.Key" type="button" @click="changePattern(pattern.Key)" class="btn btn-default btn-xs" :class="getActivePattern(pattern.Key)">
 								{{ pattern.Caption }}
 							</button>
 						</div>
 						<div class="btn-group" style="margin-top: 5px">
-							<button v-for="pattern in range(metric.getValidPatterns(), 4, 20)" :key="pattern.Key" type="button" v-on:click="changePattern(pattern.Key)" class="btn btn-default btn-xs" :class="getActivePattern(pattern.Key)">
+							<button v-for="pattern in range(metric.getValidPatterns(), 4, 20)" :key="pattern.Key" type="button" @click="changePattern(pattern.Key)" class="btn btn-default btn-xs" :class="getActivePattern(pattern.Key)">
 								{{ pattern.Caption }}
 							</button>
 						</div>
@@ -110,13 +110,13 @@
 					<td class="optionsLabel">Ancho:</td>
 					<td>
 						<div class="btn-group">
-							<button type="button" v-on:click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
+							<button type="button" @click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
 								Fino
 							</button>
-							<button type="button" v-on:click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
+							<button type="button" @click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
 								Intermedio
 							</button>
-							<button type="button" v-on:click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
+							<button type="button" @click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
 								Grueso
 							</button>
 						</div>
