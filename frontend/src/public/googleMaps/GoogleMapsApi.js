@@ -5,6 +5,7 @@ import color from '@/common/framework/color';
 import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
 import { setTimeout } from 'core-js';
+import MarkerFactory from './MarkerFactory';
 
 export default GoogleMapsApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -223,7 +224,7 @@ GoogleMapsApi.prototype.CreateMyLocationMarker = function (coord) {
 	// Create a marker and center map on user location
 	this.myLocationMarker = new this.google.maps.Marker({
 		position: pos,
-		draggable: true,
+		draggable: false,
 		zIndex: 1000 * 1000,
 		optimized: false,
 		animation: this.google.maps.Animation.DROP,
@@ -283,6 +284,14 @@ GoogleMapsApi.prototype.CircleCompleted = function (circle) {
 	window.SegMap.SetSelectionMode(0);
 };
 
+GoogleMapsApi.prototype.CreateMarkerFactory = function (activeSelectedMetric, variable, customIcons) {
+	return new MarkerFactory(this, activeSelectedMetric, variable, customIcons);
+};
+
+GoogleMapsApi.prototype.FreeMarker = function (marker) {
+	marker.setMap(null);
+};
+
 GoogleMapsApi.prototype.SetCenter = function (coord, zoom) {
 	var c = new this.google.maps.LatLng(coord.Lat, coord.Lon);
 	this.gMap.setCenter(c);
@@ -294,23 +303,23 @@ GoogleMapsApi.prototype.SetCenter = function (coord, zoom) {
 GoogleMapsApi.prototype.calculateOffsetX = function (offsetXpixels) {
 	var offsetRad = 0;
 	if (offsetXpixels) {
-		var ret = this.point2LatLng({ x: offsetXpixels, y: 0 }, this.gMap);
-		var ret2 = this.point2LatLng({ x: 0, y: 0 }, this.gMap);
+		var ret = this.screenPoint2LatLng({ x: offsetXpixels, y: 0 }, this.gMap);
+		var ret2 = this.screenPoint2LatLng({ x: 0, y: 0 }, this.gMap);
 		offsetRad = (ret.lng() - ret2.lng()) / 2;
 	}
 	return offsetRad;
 };
 
 GoogleMapsApi.prototype.PanTo = function (coord, offsetXpixels, zoom = null) {
-	var offsetRad = this.calculateOffsetX(offsetXpixels);
-	var c = new this.google.maps.LatLng(coord.Lat, coord.Lon - offsetRad);
-	this.gMap.panTo(c);
 	if (zoom) {
 		this.SetZoom(zoom);
 	}
+	var offsetRad = this.calculateOffsetX(offsetXpixels);
+	var c = new this.google.maps.LatLng(coord.Lat, coord.Lon - offsetRad);
+	this.gMap.panTo(c);
 };
 
-GoogleMapsApi.prototype.point2LatLng = function (point, map) {
+GoogleMapsApi.prototype.screenPoint2LatLng = function (point, map) {
 	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
 	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
 	var scale = Math.pow(2, map.getZoom());
@@ -404,7 +413,6 @@ GoogleMapsApi.prototype.ClearClippingCanvas = function () {
 
 GoogleMapsApi.prototype.ClearSelectedFeature = function () {
 	if (this.selectedCanvas !== null) {
-		var loc = this;
 		this.selectedCanvas.forEach(function (feature) {
 			feature.setMap(null);
 		});
@@ -571,7 +579,7 @@ GoogleMapsApi.prototype.SetSelectedFeature = function (feature, key, title) {
 			}
 			var marker = new this.google.maps.Marker({
 				position: pos,
-				draggable: true,
+				draggable: false,
 				label: label,
 				zIndex: 1000 * 1000,
 				optimized: false,

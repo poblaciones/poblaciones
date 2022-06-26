@@ -227,7 +227,7 @@ export default {
 			var css1 = dom.getCssRule(document, '.gm-style-mtc:first-of-type');
 			var css2 = dom.getCssRule(document, '.gm-style-mtc');
 			var css3 = dom.getCssRule(document, '.gm-style-mtc:last-of-type');
-
+			var css4 = dom.getCssRule(document, '.leaflet-left .leaflet-control-scale');
 			if(css1 === null) {
 				css1 = { style: { transform: '' } };
 				css2 = { style: { transform: '' } };
@@ -238,11 +238,13 @@ export default {
 				css1.style.transform = 'translateX(9px) scale(0.8)';
 				css2.style.transform = 'translateX(-8px) scale(0.8)';
 				css3.style.transform = 'translateX(4px) scale(0.8)';
+				css4.style.transform = '';
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				css2.style.transform = 'translate(' + (this.width + 7) + 'px) scale(0.85)';
+				css2.style.transform = 'translateX(' + (this.width + 7) + 'px) scale(0.85)';
 				css1.style.transform = '';
 				css3.style.transform = '';
+				css4.style.transform = 'translateX(' + (this.width + 7) + 'px)';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
@@ -307,7 +309,7 @@ export default {
 	top:0;
 	overflow-y: auto;
 	box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-	z-index:1;
+	z-index:1000;
 	background-color: white;
 	user-select: text
 }

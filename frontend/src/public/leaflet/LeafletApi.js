@@ -8,6 +8,7 @@ import L from 'leaflet';
 import Ldraw from 'leaflet-draw';
 import arr from '@/common/framework/arr';
 import Mercator from '@/public/js/Mercator';
+import MarkerFactory from './MarkerFactory';
 
 export default LeafletApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -26,6 +27,7 @@ function LeafletApi() {
 	this.baseLayers = {};
 	this.isSettingZoom = false;
 	this.clippingCanvas = null;
+	this.selectedCanvas = null;
 	this.currentBaseLayer = null;
 	this.baseMapGroup = null;
 	this.showLabels = true;
@@ -355,37 +357,13 @@ LeafletApi.prototype.CreateMyLocationMarker = function (coord) {
 	var pos = L.latLng(coord.Lat, coord.Lon);
 	var content = 'Lat: ' + coord.Lat.toFixed(6) + ", " + 'Lon: ' + coord.Lon.toFixed(6);
 
-	var svg = 'm11.666664,-0.42c-6.06933,0 -10.989998,4.920668 -10.989998,10.989998c0,9.564597 10.989998,12.987835 10.989998,22.46524c0,-9.477405 10.989998,-13.40105 10.989998,-22.46524c0,-6.06933 -4.920668,-10.989998 -10.989998,-10.989998z';
-	var iconUrl = 'data:image/svg+xml;base64,' + btoa(svg);
-	var icon = L.icon( { iconUrl: iconUrl } );
-
-	icon = L.icon({
-		iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAApCAYAAADAk4LOAAAFgUlEQVR4Aa1XA5BjWRTN2oW17d3YaZtr2962HUzbDNpjszW24mRt28p47v7zq/bXZtrp/lWnXr337j3nPCe85NcypgSFdugCpW5YoDAMRaIMqRi6aKq5E3YqDQO3qAwjVWrD8Ncq/RBpykd8oZUb/kaJutow8r1aP9II0WmLKLIsJyv1w/kqw9Ch2MYdB++12Onxee/QMwvf4/Dk/Lfp/i4nxTXtOoQ4pW5Aj7wpici1A9erdAN2OH64x8OSP9j3Ft3b7aWkTg/Fm91siTra0f9on5sQr9INejH6CUUUpavjFNq1B+Oadhxmnfa8RfEmN8VNAsQhPqF55xHkMzz3jSmChWU6f7/XZKNH+9+hBLOHYozuKQPxyMPUKkrX/K0uWnfFaJGS1QPRtZsOPtr3NsW0uyh6NNCOkU3Yz+bXbT3I8G3xE5EXLXtCXbbqwCO9zPQYPRTZ5vIDXD7U+w7rFDEoUUf7ibHIR4y6bLVPXrz8JVZEql13trxwue/uDivd3fkWRbS6/IA2bID4uk0UpF1N8qLlbBlXs4Ee7HLTfV1j54APvODnSfOWBqtKVvjgLKzF5YdEk5ewRkGlK0i33Eofffc7HT56jD7/6U+qH3Cx7SBLNntH5YIPvODnyfIXZYRVDPqgHtLs5ABHD3YzLuespb7t79FY34DjMwrVrcTuwlT55YMPvOBnRrJ4VXTdNnYug5ucHLBjEpt30701A3Ts+HEa73u6dT3FNWwflY86eMHPk+Yu+i6pzUpRrW7SNDg5JHR4KapmM5Wv2E8Tfcb1HoqqHMHU+uWDD7zg54mz5/2BSnizi9T1Dg4QQXLToGNCkb6tb1NU+QAlGr1++eADrzhn/u8Q2YZhQVlZ5+CAOtqfbhmaUCS1ezNFVm2imDbPmPng5wmz+gwh+oHDce0eUtQ6OGDIyR0uUhUsoO3vfDmmgOezH0mZN59x7MBi++WDL1g/eEiU3avlidO671bkLfwbw5XV2P8Pzo0ydy4t2/0eu33xYSOMOD8hTf4CrBtGMSoXfPLchX+J0ruSePw3LZeK0juPJbYzrhkH0io7B3k164hiGvawhOKMLkrQLyVpZg8rHFW7E2uHOL888IBPlNZ1FPzstSJM694fWr6RwpvcJK60+0HCILTBzZLFNdtAzJaohze60T8qBzyh5ZuOg5e7uwQppofEmf2++DYvmySqGBuKaicF1blQjhuHdvCIMvp8whTTfZzI7RldpwtSzL+F1+wkdZ2TBOW2gIF88PBTzD/gpeREAMEbxnJcaJHNHrpzji0gQCS6hdkEeYt9DF/2qPcEC8RM28Hwmr3sdNyht00byAut2k3gufWNtgtOEOFGUwcXWNDbdNbpgBGxEvKkOQsxivJx33iow0Vw5S6SVTrpVq11ysA2Rp7gTfPfktc6zhtXBBC+adRLshf6sG2RfHPZ5EAc4sVZ83yCN00Fk/4kggu40ZTvIEm5g24qtU4KjBrx/BTTH8ifVASAG7gKrnWxJDcU7x8X6Ecczhm3o6YicvsLXWfh3Ch1W0k8x0nXF+0fFxgt4phz8QvypiwCCFKMqXCnqXExjq10beH+UUA7+nG6mdG/Pu0f3LgFcGrl2s0kNNjpmoJ9o4B29CMO8dMT4Q5ox8uitF6fqsrJOr8qnwNbRzv6hSnG5wP+64C7h9lp30hKNtKdWjtdkbuPA19nJ7Tz3zR/ibgARbhb4AlhavcBebmTHcFl2fvYEnW0ox9xMxKBS8btJ+KiEbq9zA4RthQXDhPa0T9TEe69gWupwc6uBUphquXgf+/FrIjweHQS4/pduMe5ERUMHUd9xv8ZR98CxkS4F2n3EUrUZ10EYNw7BWm9x1GiPssi3GgiGRDKWRYZfXlON+dfNbM+GgIwYdwAAAAASUVORK5CYII='
-		, popupAnchor: [20, 0]
-	});
+	var icon = this.defaultMarkerIcon();
 
 	this.myLocationMarker = new L.marker(pos, { icon: icon });
 	this.myLocationMarker.addTo(this.map);
 
 	this.myLocationMarker.bindPopup(content);
-	// Create a marker and center map on user location
-	/*this.myLocationMarker = new this.google.maps.Marker({
-		position: pos,
-		draggable: true,
-		zIndex: 1000 * 1000,
-		optimized: false,
-		animation: this.google.maps.Animation.DROP,
-		map: this.map
-	});*/
-/*	var loc = this;
-	 *
-	this.myLocationMarker.addListener("click", () => {
 
-		 const infowindow = new google.maps.InfoWindow({
-
-		});
-    infowindow.open(loc.L, loc.myLocationMarker);
-  });*/
 };
 
 
@@ -406,36 +384,9 @@ LeafletApi.prototype.CreateDrawingManager = function () {
 	if (this.drawingManager._endLabelText) {
 		this.drawingManager._endLabelText = '';
 	}
-	/*
-	this.drawingManager = new this.google.maps.drawing.DrawingManager({
-		drawingMode: null,
-		drawingControl: false,
-		drawingControlOptions: {
-			position: this.google.maps.ControlPosition.BOTTOM_LEFT,
-			drawingModes: ['circle', 'marker']
-		},
-		circleOptions: {
-			fillColor: '#aaa',
-			fillOpacity: this.getOpacity(),
-			strokeWeight: 1,
-			clickable: false,
-			editable: false,
-			zIndex: 1
-		}
-	});*/
 };
 
 LeafletApi.prototype.CircleCompleted = function (circle) {
-	/* var layer = e.layer;
-  var coords;
-  console.log(e);
-  if (type === 'marker') {
-    coords = JSON.stringify(layer._latlng);
-  }
-  if (type === 'circle') {
-    coords = JSON.stringify(layer._latlng) + " " + layer._mRadius;
-	}
-*/
 	circle = circle.layer;
 
 	this.StopDrawing();
@@ -463,41 +414,56 @@ LeafletApi.prototype.CircleCompleted = function (circle) {
 	window.SegMap.SetSelectionMode(0);
 };
 
+LeafletApi.prototype.CreateMarkerFactory = function (activeSelectedMetric, variable, customIcons) {
+	return new MarkerFactory(this, activeSelectedMetric, variable, customIcons);
+};
+
+LeafletApi.prototype.FreeMarker = function (marker) {
+	this.map.removeLayer(marker);
+};
+
 LeafletApi.prototype.SetCenter = function (coord, zoom) {
 	var c = L.latLng(coord.Lat, coord.Lon);
 	this.map.setView(c, (zoom ? zoom : undefined));
 };
 
-LeafletApi.prototype.calculateOffsetX = function (offsetXpixels) {
+LeafletApi.prototype.calculateOffsetX = function (offsetXpixels, zoom = null) {
 	var offsetRad = 0;
 	if (offsetXpixels) {
-		var ret = this.point2LatLng({ x: offsetXpixels, y: 0 }, this.map);
-		var ret2 = this.point2LatLng({ x: 0, y: 0 }, this.map);
+		var ret = this.screenPoint2LatLng({ x: offsetXpixels, y: 0 }, this.map, zoom);
+		var ret2 = this.screenPoint2LatLng({ x: 0, y: 0 }, this.map, zoom);
 		offsetRad = (ret.lng - ret2.lng) / 2;
 	}
 	return offsetRad;
 };
 
 LeafletApi.prototype.PanTo = function (coord, offsetXpixels, zoom) {
-	var offsetRad = this.calculateOffsetX(offsetXpixels);
+	var offsetRad = this.calculateOffsetX(offsetXpixels, zoom);
 	var c = L.latLng(coord.Lat, coord.Lon - offsetRad);
 	this.map.flyTo(c, (zoom ? zoom : undefined));
 };
 
-LeafletApi.prototype.point2LatLng = function (point, map) {
-	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
-	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
-	var scale = Math.pow(2, map.getZoom());
-	var worldPoint = new google.maps.Point(point.x / scale + bottomLeft.x, point.y / scale + topRight.y);
-	return map.getProjection().fromPointToLatLng(worldPoint);
+LeafletApi.prototype.screenPoint2LatLng = function (point, map, zoom = null) {
+	var m = new Mercator();
+	var topRight = m.fromLatLngToPoint(map.getBounds().getNorthEast());
+	var bottomLeft = m.fromLatLngToPoint(map.getBounds().getSouthWest());
+	if (zoom === null || zoom === undefined) {
+		zoom = map.getZoom();
+	}
+	var scale = Math.pow(2, zoom);
+	var worldPoint = { x: point.x / scale + bottomLeft.x, y: point.y / scale + topRight.y };
+
+	return m.fromPointToLatLng(worldPoint);
 };
 
 LeafletApi.prototype.SetTypeControlsDropDown = function () {
-	this.SetTypeControls(this.google.maps.MapTypeControlStyle.DROPDOWN_MENU);
+	// TODO leaflet
+//	this.SetTypeControls(this.google.maps.MapTypeControlStyle.DROPDOWN_MENU);
 };
 
 LeafletApi.prototype.SetTypeControlsDefault = function () {
-	this.SetTypeControls(this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR);
+	// TODO leaflet
+	//this.SetTypeControls(this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR);
 };
 
 LeafletApi.prototype.SetTypeControls = function (controlType) {
@@ -570,6 +536,16 @@ LeafletApi.prototype.ClearClippingCanvas = function () {
 		this.clippingCanvas = null;
 	}
 };
+
+LeafletApi.prototype.ClearSelectedFeature = function () {
+	if (this.selectedCanvas !== null) {
+		this.selectedCanvas.forEach(function (feature) {
+			this.map.removeLayer(feature);
+		});
+		this.selectedCanvas = null;
+	}
+};
+
 
 LeafletApi.prototype.GetMapTypeState = function () {
 	if (!this.map) {
@@ -648,6 +624,109 @@ LeafletApi.prototype.SetClippingCanvas = function (canvasList) {
 	this.clippingCanvas = L.geoJson(mask, { interactive: false } );
 	this.UpdateClippingStyle();
 	this.clippingCanvas.addTo(this.map);
+};
+
+
+LeafletApi.prototype.SetSelectedFeature = function (feature, key, title) {
+	this.ClearSelectedFeature();
+
+	this.selectedCanvas = [];
+	if (feature.Canvas) {
+		var canvas = feature.Canvas;
+		if (canvas.features[0].geometry.type === 'MultiPolygon') {
+			for (var polygon of canvas.features[0].geometry.coordinates) {
+				this.CreateSelectedPolygon(polygon);
+			}
+		} else {
+			this.CreateSelectedPolygon(canvas.features[0].geometry.coordinates);
+		}
+	} else {
+		// es un punto...
+		var isVariableVisible = false;
+		if (key && key.MetricId) {
+			isVariableVisible = window.SegMap.IsVariableVisible(key.MetricId, key.VariableId);
+		}
+		// si no, crea un marker
+		if (!isVariableVisible) {
+			var pos = new L.latLng(feature.Coordinate.Lat, feature.Coordinate.Lon);
+			// Create a marker and center map on user location
+			var label = null;
+			if (title) {
+				label = { text: title, className: 'markerSelectedLabel' };
+			}
+
+			var icon = this.defaultMarkerIcon();
+
+			var marker = new L.marker(pos, { icon: icon });
+			marker.addTo(this.map);
+
+			// label: label
+			this.selectedCanvas.push(marker);
+		}
+		this.CreateSelectedCircle(feature.Coordinate);
+	}
+};
+
+LeafletApi.prototype.defaultMarkerIcon = function () {
+	var svg = 'm11.666664,-0.42c-6.06933,0 -10.989998,4.920668 -10.989998,10.989998c0,9.564597 10.989998,12.987835 10.989998,22.46524c0,-9.477405 10.989998,-13.40105 10.989998,-22.46524c0,-6.06933 -4.920668,-10.989998 -10.989998,-10.989998z';
+	var iconUrl = 'data:image/svg+xml;base64,' + btoa(svg);
+
+	var icon = L.icon({
+		iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAApCAYAAADAk4LOAAAFgUlEQVR4Aa1XA5BjWRTN2oW17d3YaZtr2962HUzbDNpjszW24mRt28p47v7zq/bXZtrp/lWnXr337j3nPCe85NcypgSFdugCpW5YoDAMRaIMqRi6aKq5E3YqDQO3qAwjVWrD8Ncq/RBpykd8oZUb/kaJutow8r1aP9II0WmLKLIsJyv1w/kqw9Ch2MYdB++12Onxee/QMwvf4/Dk/Lfp/i4nxTXtOoQ4pW5Aj7wpici1A9erdAN2OH64x8OSP9j3Ft3b7aWkTg/Fm91siTra0f9on5sQr9INejH6CUUUpavjFNq1B+Oadhxmnfa8RfEmN8VNAsQhPqF55xHkMzz3jSmChWU6f7/XZKNH+9+hBLOHYozuKQPxyMPUKkrX/K0uWnfFaJGS1QPRtZsOPtr3NsW0uyh6NNCOkU3Yz+bXbT3I8G3xE5EXLXtCXbbqwCO9zPQYPRTZ5vIDXD7U+w7rFDEoUUf7ibHIR4y6bLVPXrz8JVZEql13trxwue/uDivd3fkWRbS6/IA2bID4uk0UpF1N8qLlbBlXs4Ee7HLTfV1j54APvODnSfOWBqtKVvjgLKzF5YdEk5ewRkGlK0i33Eofffc7HT56jD7/6U+qH3Cx7SBLNntH5YIPvODnyfIXZYRVDPqgHtLs5ABHD3YzLuespb7t79FY34DjMwrVrcTuwlT55YMPvOBnRrJ4VXTdNnYug5ucHLBjEpt30701A3Ts+HEa73u6dT3FNWwflY86eMHPk+Yu+i6pzUpRrW7SNDg5JHR4KapmM5Wv2E8Tfcb1HoqqHMHU+uWDD7zg54mz5/2BSnizi9T1Dg4QQXLToGNCkb6tb1NU+QAlGr1++eADrzhn/u8Q2YZhQVlZ5+CAOtqfbhmaUCS1ezNFVm2imDbPmPng5wmz+gwh+oHDce0eUtQ6OGDIyR0uUhUsoO3vfDmmgOezH0mZN59x7MBi++WDL1g/eEiU3avlidO671bkLfwbw5XV2P8Pzo0ydy4t2/0eu33xYSOMOD8hTf4CrBtGMSoXfPLchX+J0ruSePw3LZeK0juPJbYzrhkH0io7B3k164hiGvawhOKMLkrQLyVpZg8rHFW7E2uHOL888IBPlNZ1FPzstSJM694fWr6RwpvcJK60+0HCILTBzZLFNdtAzJaohze60T8qBzyh5ZuOg5e7uwQppofEmf2++DYvmySqGBuKaicF1blQjhuHdvCIMvp8whTTfZzI7RldpwtSzL+F1+wkdZ2TBOW2gIF88PBTzD/gpeREAMEbxnJcaJHNHrpzji0gQCS6hdkEeYt9DF/2qPcEC8RM28Hwmr3sdNyht00byAut2k3gufWNtgtOEOFGUwcXWNDbdNbpgBGxEvKkOQsxivJx33iow0Vw5S6SVTrpVq11ysA2Rp7gTfPfktc6zhtXBBC+adRLshf6sG2RfHPZ5EAc4sVZ83yCN00Fk/4kggu40ZTvIEm5g24qtU4KjBrx/BTTH8ifVASAG7gKrnWxJDcU7x8X6Ecczhm3o6YicvsLXWfh3Ch1W0k8x0nXF+0fFxgt4phz8QvypiwCCFKMqXCnqXExjq10beH+UUA7+nG6mdG/Pu0f3LgFcGrl2s0kNNjpmoJ9o4B29CMO8dMT4Q5ox8uitF6fqsrJOr8qnwNbRzv6hSnG5wP+64C7h9lp30hKNtKdWjtdkbuPA19nJ7Tz3zR/ibgARbhb4AlhavcBebmTHcFl2fvYEnW0ox9xMxKBS8btJ+KiEbq9zA4RthQXDhPa0T9TEe69gWupwc6uBUphquXgf+/FrIjweHQS4/pduMe5ERUMHUd9xv8ZR98CxkS4F2n3EUrUZ10EYNw7BWm9x1GiPssi3GgiGRDKWRYZfXlON+dfNbM+GgIwYdwAAAAASUVORK5CYII='
+		, popupAnchor: [20, 0]
+	});
+	return icon;
+};
+
+LeafletApi.prototype.CreateSelectedPolygon = function (polygon) {
+	var rings = [];
+	for (var ring of polygon) {
+		var res = [];
+		for (var point of ring) {
+			res.push([ point[1], point[0] ]);
+		}
+		rings.push(res);
+	}
+
+	var item = L.polygon(rings,
+		{
+			fillColor: "#ddd",
+			fillOpacity: 0,
+			opacity: 0.75,
+			weight: 5,
+			color: '#fff',
+			interactive: false
+		});
+	item.addTo(this.map);
+	this.selectedCanvas.push(item);
+
+	item = L.polygon(rings,
+		{
+			fillColor: "#ddd",
+			fillOpacity: 0.45,
+			opacity: 1,
+			weight: 1,
+			color: '#ff0000',
+			interactive: false
+		});
+	item.addTo(this.map);
+	this.selectedCanvas.push(item);
+};
+
+LeafletApi.prototype.CreateSelectedCircle = function (center) {
+	var radius = 25;
+
+	var item = new L.circle([ center.Lat, center.Lon ],radius,
+		{
+		color: "#FFFFFF",
+		weight: 1,
+		opacity: .8,
+		fillColor: "#999",
+		fillOpacity: 0.45,
+		interactive: false
+		});
+	item.addTo(this.map);
+	this.selectedCanvas.push(item);
 };
 
 LeafletApi.prototype.markerClicked = function (event, metricVersion, fid) {

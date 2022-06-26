@@ -338,8 +338,6 @@ export default {
 					}
 				}
 				if (this.$refs.scrollDown) {
-					console.error("el.scrollTop: " + el.scrollTop + " | el.scrollHeight: " + el.scrollHeight + " | el.offsetHeight: " + el.offsetHeight);
-
 					if (el.scrollTop >= el.scrollHeight - el.offsetHeight - 2) {
 						this.$refs.scrollDown.classList.replace('fab-scroll-button', 'fab-scroll-button-disabled');
 					} else {

@@ -2,7 +2,6 @@ import AbstractTextComposer from '@/public/composers/AbstractTextComposer';
 import h from '@/public/js/helper';
 import arr from '@/common/framework/arr';
 import SequenceHandler from './SequenceHandler';
-import MarkerFactory from '@/public/googleMaps/MarkerFactory';
 import MarkerClusterer from '@googlemaps/markerclustererplus';
 
 export default LocationsComposer;
@@ -19,7 +18,7 @@ function LocationsComposer(mapsApi, activeSelectedMetric) {
 		this.variable = null;
 	}
 	this.SequenceHandler = new SequenceHandler(mapsApi, this, activeSelectedMetric);
-	this.markerFactory = new MarkerFactory(this.MapsApi, this.activeSelectedMetric, this.variable, this.customIcons);
+	this.markerFactory = mapsApi.CreateMarkerFactory(this.activeSelectedMetric, this.variable, this.customIcons);
 	this.AbstractConstructor();
 };
 
@@ -171,12 +170,12 @@ LocationsComposer.prototype.removeAndDestroyMarker = function (tileKey, marker) 
 
 LocationsComposer.prototype.destroyMarker = function (marker) {
 	if (marker.extraMarker) {
-		marker.extraMarker.setMap(null);
+		this.MapsApi.FreeMarker(marker.extraMarker);
 	}
 	if (marker.extraMarkerImage) {
-		marker.extraMarkerImage.setMap(null);
+		this.MapsApi.FreeMarker(marker.extraMarkerImage);
 	}
-	marker.setMap(null);
+	this.MapsApi.FreeMarker(marker);
 };
 
 LocationsComposer.prototype.dispose = function () {

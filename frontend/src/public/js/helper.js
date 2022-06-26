@@ -608,26 +608,39 @@ module.exports = {
 	},
 	getPosition(event) {
 		var location = null;
-		for (var property in event) {
-			if (event.hasOwnProperty(property)) {
-				// do stuff
-				if (event[property].clientX !== undefined) {
-					location = event[property];
-					break;
+		if (event.layerPoint) {
+			// es leaflet
+			return {
+				Coordinate: {
+					Lat: event.latLng.lat,
+					Lon: event.latLng.lng
+				},
+				Point: {
+					X: layerPoint.x,
+					Y: layerPoint.y,
+				}
+			};
+		} else {
+			for (var property in event) {
+				if (event.hasOwnProperty(property)) {
+					// do stuff
+					if (event[property].clientX !== undefined) {
+						location = event[property];
+						break;
+					}
 				}
 			}
+			return {
+				Coordinate: {
+					Lat: event.latLng.lat(),
+					Lon: event.latLng.lng()
+				},
+				Point: {
+					X: location.clientX,
+					Y: location.clientY,
+				}
+			};
 		}
-
-		return {
-			Coordinate: {
-				Lat: event.latLng.lat(),
-				Lon: event.latLng.lng()
-			},
-			Point: {
-				X: location.clientX,
-				Y: location.clientY,
-			}
-		};
 	},
 };
 

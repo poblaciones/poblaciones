@@ -59,12 +59,6 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 		element = new loc.MapsApi.google.maps.Marker(params);
 
 		if (!isSmallZoom) {
-			/*// Crea el pseudo-marker con la descripción
-			if (feature.Description) {
-				var descriptionMarker = this.createDescriptionSubmarker(geo, feature.Description, markerSettings, scale, params.zIndex + 50);
-				element.extraMarker = descriptionMarker;
-			}
-			*/
 			var isCustom = markerSettings.Type === 'I' && iconManager.isCustom(content);
 			// Crea un pseudo-marker con la imagen
 			if (isCustom) {
@@ -197,36 +191,6 @@ MarkerFactory.prototype.createFrame = function (marker, style, scale) {
 	return icon;
 };
 
-MarkerFactory.prototype.createDescriptionSubmarker = function (location, description, marker, scale, zIndex) {
-	var fontScale = (10 * scale);
-	if (scale < 1.5)
-		fontScale *= 1.1;
-	var topOffset;
-	if (marker.DescriptionVerticalAlignment == 'T') {
-		topOffset = -(marker.Frame == 'P' ? 40 : 32) * scale;
-	} else if (marker.DescriptionVerticalAlignment == 'B') {
-		topOffset = 6 * scale;
-	} else if (marker.DescriptionVerticalAlignment == 'M') {
-		topOffset = -(marker.Frame == 'P' ? 20 : 13) * scale;
-	} else {
-		throw new Error("Alineación inválida");
-	}
-
-	var marker = new this.MapsApi.google.maps.Marker({
-      position: location,
-      map: this.MapsApi.gMap,
-			clickable: true,
-			optimized: false,
-			zIndex: zIndex,
-      label: {   fontSize: fontScale + 'px',
-					text: description },
-      icon: { labelOrigin : new this.MapsApi.google.maps.Point(0, topOffset),
-       	path: 'M 0,0  z',
-      }
-	});
-	return marker;
-};
-
 MarkerFactory.prototype.resolveContent = function (marker, variableSymbol, categorySymbol) {
 	// Si tiene un contenido...
 	var content;
@@ -278,6 +242,9 @@ MarkerFactory.prototype.formatText = function (content) {
 };
 
 MarkerFactory.prototype.formatIcon = function (symbol) {
+	if (symbol.startsWith('fas fa-') || symbol.startsWith('far fa-')) {
+		symbol = symbol.substr(4);
+	}
 	var cached = this.iconsCache[symbol];
 	if (cached) {
 		return cached;
