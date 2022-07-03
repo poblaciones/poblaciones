@@ -7,43 +7,57 @@
 		<invoker ref="invoker"></invoker>
 
 		<div class="md-layout md-gutter">
-		<div class="md-layout-item md-size-80 md-small-size-100">
-		<md-card>
-		<md-card-content>
-			<md-tabs>
-
-				<md-tab md-label="General">
-					<hits-table :list="general" label="General" style="margin-top: -10px" />
-				</md-tab>
-
-				<md-tab md-label="Consultas">
-					<hits-table :list="hits" label="Indicadores" style="margin-top: -10px" />
-				</md-tab>
-
-				<md-tab md-label="Descargas">
-					<hits-table :list="downloads" label="Datasets" style="margin-top: -10px" />
-					<hits-table :list="attachments" label="Adjuntos" style="margin-top: 15px" />
-				</md-tab>
-
-				<md-tab md-label="Visitas por región">
-					<div class="md-layout" style="margin-top: -10px">
-						<div class="md-layout-item md-size-90 md-xlarge-size-60 md-small-size-100">
-							<md-table v-model="regions" md-card="">
-								<md-table-row slot="md-table-row" slot-scope="{ item }">
-									<md-table-cell md-label="Visitas por región" :style="padTabbed(item.Caption)">{{ item.Caption }}</md-table-cell>
-									<md-table-cell md-label="90 días">{{ item.LastQuarter }}</md-table-cell>
-									<md-table-cell md-label="30 días">{{ item.LastMonth }}</md-table-cell>
-									<md-table-cell md-label="7 días">{{ item.LastWeek }}</md-table-cell>
-								</md-table-row>
-							</md-table>
-						</div>
+			<div class="md-layout-item md-size-80 md-small-size-100">
+				<md-card>
+					<div class="md-layout-item md-size-100" style="padding: 10px 18px; margin-bottom: -34px">
+						<span class="largeText">
+							Período:
+						</span>
+						<span>
+							<md-radio v-model="useHistory" class="md-primary medium-radio" @change="UpdateData" :value="false"></md-radio>
+							Recientes
+						</span>
+						<span>
+							<md-radio v-model="useHistory" class="md-primary medium-radio" @change="UpdateData" :value="true"></md-radio>
+							Histórico:
+							<mp-select :modelKey="true" :list="historyPeriods" v-model="currentPeriod" :canEdit="useHistory"
+												 :allow-null="false" @selected="UpdateData" style="width: 220px; margin-left: 10px; display: inline-block"></mp-select>
+						</span>
 					</div>
-				</md-tab>
 
-			</md-tabs>
-		</md-card-content>
-		</md-card>
-		</div>
+					<md-card-content>
+						<md-tabs>
+							<md-tab md-label="General">
+								<hits-table :list="general" label="General" :periods="periods" style="margin-top: -10px" />
+							</md-tab>
+							<md-tab md-label="Consultas">
+								<hits-table :list="hits" label="Indicadores" :periods="periods" style="margin-top: -10px" />
+							</md-tab>
+							<md-tab md-label="Descargas">
+								<hits-table :list="downloads" label="Datasets" :periods="periods" style="margin-top: -10px" />
+								<hits-table :list="attachments" label="Adjuntos" :periods="periods" :showMessageOnEmpty="false" style="margin-top: 15px" />
+							</md-tab>
+							<md-tab md-label="Visitas por región">
+								<div class="md-layout" style="margin-top: -10px">
+									<div class="md-layout-item md-size-90 md-xlarge-size-60 md-small-size-100">
+										<md-table v-model="regions" md-card="" v-if="regions.length > 0">
+											<md-table-row slot="md-table-row" slot-scope="{ item }">
+												<md-table-cell md-label="Visitas por región" :style="padTabbed(item.Caption)">{{ item.Caption }}</md-table-cell>
+												<template v-for="(period, index) in periods">
+													<md-table-cell :md-label="dateFormatter.FormatLabelMonth(period, false)" :key="period">{{ item['Values' + index] }}</md-table-cell>
+												</template>
+											</md-table-row>
+										</md-table>
+										<div v-else>
+											No hay actividad registrada para este período.
+										</div>
+									</div>
+								</div>
+							</md-tab>
+						</md-tabs>
+					</md-card-content>
+				</md-card>
+			</div>
 		</div>
 		</div>
 	</div>
@@ -53,21 +67,47 @@
 
 import HitsTable from './HitsTable';
 import str from '@/common/framework/str';
+import date from '@/common/framework/date';
 
 export default {
 	name: 'Statistics',
 	data() {
 		return {
+			useHistory: false,
+			currentPeriod: null,
 			regions: [],
 			hits: [],
 			downloads: [],
 			attachments: [],
 			general: [],
+			periods: [],
+			dataCache: {}
 		};
 	},
 	computed: {
 		Work() {
 			return window.Context.CurrentWork;
+		},
+		dateFormatter() {
+			return date;
+		},
+		historyPeriods() {
+			var ret = [];
+			for (var item of this.Work.StatsQuarters) {
+				ret.push({ Id: item, Caption: date.FormatLabelQuarter(item) });
+			}
+			/*for (var item of this.Work.StatsMonths) {
+				ret.push({ Id: item, Caption: item });
+			}*/
+			return ret;
+		},
+		key() {
+			var month = (this.useHistory ? this.currentPeriod : null);
+			if (month) {
+				return month;
+			} else {
+				return 'null';
+			}
 		},
 		stableUrlHref() {
 			var url = str.AbsoluteUrl(this.Work.PublicUrl());
@@ -79,20 +119,35 @@ export default {
 		},
 	},
 	mounted() {
-		this.LoadData();
+		if (this.historyPeriods.length > 0) {
+			this.currentPeriod = this.historyPeriods[0].Id;
+		}
+		this.GetData();
 	},
 	methods: {
-		LoadData() {
+		UpdateData() {
+			if (this.dataCache[this.key]) {
+				this.LoadData(this.dataCache[this.key]);
+			} else {
+				this.GetData(this.key);
+			}
+		},
+		GetData(key) {
 			var loc = this;
 			this.$refs.invoker.doMessage('Obteniendo información', this.Work,
-				this.Work.GetWorkStatistics).then(function (data) {
-					loc.regions = loc.processList(data.region);
-					loc.general = loc.processList(data.work);
-					loc.hits = loc.processList(data.metric);
-					loc.downloads = loc.processList(data.download);
-					loc.attachments = loc.processList(data.attachment);
+				this.Work.GetWorkStatistics, key).then(function (data) {
+					loc.dataCache[key] = data;
+					loc.LoadData(data);
 				});
 			return true;
+		},
+		LoadData(data) {
+			this.regions = this.processList(data.region);
+			this.general = this.processList(data.work);
+			this.hits = this.processList(data.metric);
+			this.downloads = this.processList(data.download);
+			this.attachments = this.processList(data.attachment);
+			this.periods = data.periods;
 		},
 		padTabbed(text) {
 			if (text && text.length > 0 && text[0] == "\t") {
@@ -106,7 +161,10 @@ export default {
 			for (var key in list) {
 				// check if the property/key is defined in the object itself, not in parent
 				if (list.hasOwnProperty(key)) {
-					ret.push({ Caption: key, LastQuarter: list[key].d0, LastMonth: list[key].d1, LastWeek: list[key].d2 });
+					ret.push({
+						Caption: key,
+						Values0: list[key].d0, Values1: list[key].d1, Values2: list[key].d2
+					});
 				}
 			}
 			return ret;
@@ -119,6 +177,9 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
+	.medium-radio {
+		margin: 8px 6px 8px 30px;
+		vertical-align: sub;
+	}
 
 </style>

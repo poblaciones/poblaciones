@@ -202,9 +202,10 @@ App::$app->post('/services/backoffice/UpdateStartup', function (Request $request
 
 App::$app->get('/services/backoffice/GetWorkStatistics', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
+	$month = Params::Get('m');
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
 	$controller = new services\StatisticsService();
-	return App::Json($controller->GetWorkStatistics($workId));
+	return App::Json($controller->GetWorkStatistics($workId, $month));
 });
 
 App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $request) {

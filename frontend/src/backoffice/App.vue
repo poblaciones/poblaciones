@@ -189,6 +189,11 @@ html, body {
 	text-transform: none !important;
 }
 
+.md-table-sortable-icon {
+	right: 8px;
+	left: unset!important;
+}
+
 @media print {
 	.no-print, .no-print * {
 		display: none !important;

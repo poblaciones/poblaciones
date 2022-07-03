@@ -15,10 +15,12 @@ use helena\services\backoffice\publish\PublishDataTables;
 
 class StatisticsService extends BaseService
 {
-	public function GetWorkStatistics($workId)
+	public function GetWorkStatistics($workId, $month = null)
 	{
+		// cuando $month es nulo, trae los recientes
+
 		$shardifiedWorkId = PublishDataTables::Shardified($workId);
-		$data = Statistics::ReadAndSummarizeWorkLastPeriods($shardifiedWorkId);
+		$data = Statistics::ReadAndSummarizeWorkLastPeriods($shardifiedWorkId, $month);
 		// Reemplaza los ids por nombres de dataset
 		$data['download'] = $this->processDownloadData($data);
 

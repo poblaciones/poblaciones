@@ -60,6 +60,11 @@ html, body {
 	padding: 0;
 }
 
+.md-table-sortable-icon {
+	right: 8px;
+	left: unset!important;
+}
+
 .separator {
 	font-size: 12px;
 	text-transform: uppercase;

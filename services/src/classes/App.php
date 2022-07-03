@@ -42,6 +42,7 @@ class App
 	public static $app;
 	public static $db = null;
 	public static $orm = null;
+	public static $isJson = false;
 	private static $contentType = null;
 
 	private static function getTwigEngine()
@@ -317,6 +318,8 @@ class App
 		$sessionStarted = PhpSession::GetSessionValue('started', null);
 		$sessionTime = gmdate('D, d M Y H:i:s', intval($sessionStarted)) . ' GMT';
 		//
+		self::$isJson = true;
+
 		if (version_compare(phpversion(), '7.1', '>=')) {
 			ini_set('precision', '17');
 			ini_set('serialize_precision', '-1');
@@ -332,7 +335,7 @@ class App
 			$response->headers->set('Pragma', '');
 			$response->headers->set('Cache-Control', 'public, max-age=' . $days);
 		}
-//		$response->headers->set('Content-Type', 'application/json');
+		// Tiene que ir como text/plain porque si no complica los coars y cachés.
 		$response->headers->set('Content-Type', 'text/plain');
 		return $response;
 	}
@@ -560,7 +563,7 @@ class App
 			'application/json; charset=utf-8',
 			'application/javascript',
 		);
-		if (in_array($contentType, $jsonContentTypes))
+		if (in_array($contentType, $jsonContentTypes) || self::$isJson)
 		{
 			Profiling::$IsJson = true;
 			$content = $res->getContent();
@@ -568,7 +571,7 @@ class App
 			if ($pre == '{')
 				$pre .= ' "Profiling": ';
 			$content = substr($content, 1);
-			$res->setContent($pre . json_encode(Profiling::GetHtmlResults())
+			$res->setContent($pre . json_encode(explode("\n", Profiling::GetHtmlResults()))
 				. "," . $content);
 		}
 	}

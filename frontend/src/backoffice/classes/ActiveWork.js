@@ -2,10 +2,10 @@ import axios from 'axios';
 import ActiveDataset from '@/backoffice/classes/ActiveDataset';
 import axiosClient from '@/common/js/axiosClient';
 import arr from '@/common/framework/arr';
+import date from '@/common/framework/date';
 import AsyncCatalog from './AsyncCatalog';
 import Vue from 'vue';
 import f from '@/backoffice/classes/Formatter';
-
 export default ActiveWork;
 
 function ActiveWork(workInfo, workListMetadata) {
@@ -18,6 +18,8 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.MetricVersions.Refresh();
 	this.Files = workInfo.Files;
 	this.Permissions = workInfo.Permissions;
+	this.StatsMonths = workInfo.StatsMonths;
+	this.StatsQuarters = workInfo.StatsQuarters;
 	this.PendingReviewSince = workInfo.PendingReviewSince;
 	this.Startup = workInfo.Startup;
 	this.ExtraMetrics = workInfo.ExtraMetrics;
@@ -120,9 +122,9 @@ ActiveWork.prototype.GetGridExportUrl = function () {
 	return window.host + '/services/backoffice/ExportGridService?w=' + this.properties.Id;
 };
 
-ActiveWork.prototype.GetWorkStatistics = function () {
+ActiveWork.prototype.GetWorkStatistics = function (month) {
 	// Trae sus variables
-	var args = { 'w': this.properties.Id };
+	var args = { 'w': this.properties.Id, 'm': month };
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetWorkStatistics', args,
 		'obtener las estadísticas');
 };
@@ -536,7 +538,7 @@ ActiveWork.prototype.UpdateHasChanges = function (value) {
 	for (var n = 0; n < this.workListMetadata.length; n++) {
 		if (this.workListMetadata[n].Id === this.properties.Id) {
 			this.workListMetadata[n].HasChanges = value;
-			this.workListMetadata[n].Updated = new Date();
+			this.workListMetadata[n].Updated = date.FormateDateTime(new Date());
 			this.workListMetadata[n].UpdateUser = f.formatFullName(window.Context.User);
 			if (value == 0) {
 				this.workListMetadata[n].MetadataLastOnline = new Date();

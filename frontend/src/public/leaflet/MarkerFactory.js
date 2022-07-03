@@ -128,37 +128,6 @@ MarkerFactory.prototype.destroyMarker = function (tileKey, marker) {
 	}
 };
 
-MarkerFactory.prototype.createImageSubMarker = function (location, symbol, marker, scale, zIndexOffset) {
-	var anchor;
-	var size;
-	if (marker.Frame === 'P') {
-		anchor = new this.LeafletApi.google.maps.Point(7 * scale, 28 * scale);
-		size = 14;
-	} else if (marker.Frame === 'C') {
-		anchor = new this.LeafletApi.google.maps.Point(7.5 * scale, 19.5 * scale);
-		size = 16;
-	} else if (marker.Frame === 'B') {
-		anchor = new this.LeafletApi.google.maps.Point(9 * scale, 21 * scale);
-		size = 18;
-	}
-
-	var src = this.customIcons[symbol];
-	if (!src) {
-		return null;
-	}
-	var marker = new this.LeafletApi.google.maps.Marker({
-		position: location,
-		map: this.LeafletApi.gMap,
-		interactive: true,
-		zIndexOffset: zIndexOffset + 1,
-		icon: {
-			url: src,
-			scaledSize: new this.LeafletApi.google.maps.Size(size * scale, size * scale),
-			anchor: anchor
-		}
-	});
-	return marker;
-};
 
 MarkerFactory.prototype.createFrame = function (frameType, style, scale, labelInfo, srcImage) {
 	var svgStart = '<svg version="1" xmlns="http://www.w3.org/2000/svg" viewBox=';
@@ -168,17 +137,18 @@ MarkerFactory.prototype.createFrame = function (frameType, style, scale, labelIn
 	var image = '';
 	var viewBox = '';
 	var svgEnd = '</svg>';
+
 	// según  el tipo de forma externa, hace un svg con path o con círculo
-	var iconSVGpath = null;
+	var iconSVGpath = "";
 	if (frameType === 'C') {
-		circle = '<circle fill="{mapIconColor}" cx="12" cy="12" r="12"/>';
+		circle = '<circle fill="{mapIconColor}" cx="12" cy="12" r="12" stroke="{strokeColor}" stroke-width="{strokeWeight}" />';
 	} else {
 		// Puede ser P:pin o B:box
-		iconSVGpath = (frameType === 'P' ? Svg.markerPinche : Svg.markerSquare);
-		path = '<path fill="{mapIconColor}" stroke="#FFF" stroke-width="0" stroke-miterlimit="10" d="{path}"/>';
+		iconSVGpath = (frameType === 'P' ? Svg.markerPincheNormal : Svg.markerSquare);
+		path = '<path fill="{mapIconColor}" stroke="{strokeColor}" stroke-width="{strokeWeight}" d="{path}"/>';
 	}
 	if (frameType === 'P') {
-		viewBox = '"0 -1 23 32">';
+		viewBox = '"0 0 24 33">';
 	} else {
 		viewBox = '"0 0 24 24">';
 	}
@@ -195,7 +165,9 @@ MarkerFactory.prototype.createFrame = function (frameType, style, scale, labelIn
 	var svg = svgStart + viewBox + path + circle + image + text + svgEnd;
 
 	var iconSettings = {
-		mapIconColor: style.fillColor, // style.strokeColor, style.strokeWeight, zindex
+		mapIconColor: style.fillColor, // zindex
+		strokeWeight: style.strokeWeight,
+		strokeColor: style.strokeColor,
 		path: iconSVGpath,
 		fontWeight: '',
 		fontFamily: '',
@@ -221,7 +193,7 @@ MarkerFactory.prototype.createFrame = function (frameType, style, scale, labelIn
 	var icon = L.divIcon({
 		className: "",
 		html: L.Util.template(svg, iconSettings),//.replace('#','%23'),
-		iconAnchor: (frameType === 'P' ? [11, 32] : [12, 24]),
+		iconAnchor: [ 12, (frameType === 'P' ? 32 : 24)],
 		iconSize: [22 * scale],
 	});
 

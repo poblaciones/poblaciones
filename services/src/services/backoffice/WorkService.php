@@ -164,6 +164,8 @@ class WorkService extends BaseService
 		$workInfo->Sources = $this->GetSources($workId);
 		$workInfo->Files = $this->GetFiles($workId);
 		$workInfo->Icons = $this->GetIcons($workId);
+		$workInfo->StatsMonths = Statistics::ResolveWorkMonths($workId);
+		$workInfo->StatsQuarters = Statistics::ResolveWorkQuarters($workId);
 		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
 		$workInfo->Startup = $this->GetStartupInfo($workId);

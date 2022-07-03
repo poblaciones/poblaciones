@@ -13,6 +13,8 @@ use helena\services\backoffice\publish\PublishDataTables;
 
 class Statistics
 {
+	private static $cache = [];
+
 	public static function StoreDownloadDatasetHit($workId, $datasetId, $downloadType)
 	{
 		Profiling::BeginTimer();
@@ -40,6 +42,70 @@ class Statistics
 				$permission === WorkPermissionsCache::EDIT ||
 				$permission === WorkPermissionsCache::VIEW);
 		}
+	}
+
+	public static function ResolveWorkMonths($workId)
+	{
+		$months = [];
+		$minYear = '';
+		$minMonth = '';
+		self::CalculateWorkMinDate($workId, $minYear, $minMonth);
+		if ($minYear < 2200)
+		{
+			$now = new \DateTime(date('Y') . "-" . date('m') . "-1");
+			$target = new \DateTime($minYear . "-" . $minMonth . "-1");
+			while($target <= $now)
+			{
+				$months[] = $now->format("Y-m");
+				$now->sub(new \DateInterval('P1M'));
+			}
+		}
+		return $months;
+	}
+
+	public static function ResolveWorkQuarters($workId)
+	{
+		$quarters = [];
+		$minYear = '';
+		$minMonth = '';
+		self::CalculateWorkMinDate($workId, $minYear, $minMonth);
+		if ($minYear < 2200)
+		{
+			$now = new \DateTime(date('Y') . "-" . date('m') . "-1");
+			$target = new \DateTime($minYear . "-" . $minMonth . "-1");
+			while($target <= $now)
+			{
+				$q = (int) ((Date::DateTimeGetMonth($now) + 2) / 3);
+				$qFormatted = $now->format("Y") . "-T" . $q;
+				if (!in_array($qFormatted, $quarters))
+					$quarters[] = $qFormatted;
+				$now->sub(new \DateInterval('P1M'));
+			}
+		}
+		return $quarters;
+	}
+
+	public static function CalculateWorkMinDate($workId, &$minYear, &$minMonth)
+	{
+		$minDate = 2200000;
+		$path = Paths::GetStatisticsPath();
+
+		foreach(IO::GetDirectories($path) as $month)
+		{
+			$folder = Paths::GetStatisticsPath() . "/" . $month;
+			$workIdShardified = PublishDataTables::Shardified($workId);
+			$file = self::GetFilename($folder, $workIdShardified);
+			if (file_exists($file))
+			{
+				$iMonth = intval(str_replace("-", "0", $month));
+				if ($iMonth < $minDate && $iMonth != 0)
+				{
+					$minDate = $iMonth;
+				}
+			}
+		}
+		$minYear = intval(substr($minDate . '', 0, 4));
+		$minMonth = intval(substr($minDate . '', 5, 2));
 	}
 
 	public static function SaveEmbeddedHit($topUrl, $clientUrl)
@@ -92,28 +158,77 @@ class Statistics
 
 		Profiling::EndTimer();
 	}
-	public static function ReadAndSummarizeWorkLastPeriods($workId)
+	public static function ReadAndSummarizeWorkLastPeriods($workId, $month = null)
 	{
-		$fechaActual = Date::DateTimeArNow();
-		$fecha7Dias = clone $fechaActual;
-		$fecha7Dias->sub(new \DateInterval('P6D'));
-		$fecha30Dias = clone $fechaActual;
-		$fecha30Dias->sub(new \DateInterval('P29D'));
-		$fecha90Dias = clone $fechaActual;
-		$fecha90Dias->sub(new \DateInterval('P89D'));
+		$monthsToScan = null;
+		$periods = null;
+		$periodCaptions = null;
+		if (!$month)
+		{
+			$fechaActual = Date::DateTimeArNow();
+			$fechaPasada = clone $fechaActual;
+			$fechaPasada->add(new \DateInterval('P1D'));
+			$fecha7Dias = clone $fechaActual;
+			$fecha7Dias->sub(new \DateInterval('P6D'));
+			$fecha30Dias = clone $fechaActual;
+			$fecha30Dias->sub(new \DateInterval('P29D'));
+			$fecha90Dias = clone $fechaActual;
+			$fecha90Dias->sub(new \DateInterval('P89D'));
 
-		$monthsToScan = self::ResolveMonthsRange($fechaActual, $fecha90Dias);
+			$monthsToScan = self::ResolveMonthsRangeFromNow($fecha90Dias);
+			$periods = [[$fecha90Dias, $fechaPasada], [$fecha30Dias, $fechaPasada], [$fecha7Dias, $fechaPasada]];
+			$periodCaptions = ['90 días', '30 días', '7 días'];
+		}
+		else if (substr($month, 5, 1) == 'T')
+		{
+			$quarter = intval(substr($month, 6, 1));
+			$monthStart = $quarter * 3 - 2;
+			$year = intval(substr($month, 0, 4));
+
+			$fechaInicio = new \DateTime($year . '-' . $monthStart  . '-01');
+			$mes1 = $fechaInicio;
+			$mes2 = clone $fechaInicio;
+			$mes2->add(new \DateInterval('P1M'));
+			$mes3 = clone $fechaInicio;
+			$mes3->add(new \DateInterval('P2M'));
+
+			$fechaPasada = clone $fechaInicio;
+			$fechaPasada->add(new \DateInterval('P3M'));
+
+			$periods = [[$mes1, $mes2], [$mes2, $mes3], [$mes3, $fechaPasada]];
+			$monthsToScan = self::ResolveMonthsRange($mes1, $fechaPasada);
+			$periodCaptions = $monthsToScan;
+		}
+		else
+		{
+			$monthsToScan = [$month];
+			$periodCaptions = [$month];
+		}
 		$data = [];
 
 		foreach($monthsToScan as $month)
 		{
-			self::ReadAndSummarizeWorkMonth($workId, $month, $data, [$fecha90Dias, $fecha30Dias, $fecha7Dias]);
+			self::ReadAndSummarizeWorkMonth($workId, $month, $data, $periods);
 		}
+		$data['periods'] = $periodCaptions;
 		return $data;
 	}
 
-	private static function ResolveMonthsRange($fechaActual, $fechaInicial)
+	private static function ResolveMonthsRange($fechaInicial, $fechaFinal)
 	{
+		$monthsToScan = [];
+		$fechaActual = clone $fechaInicial;
+		while($fechaActual < $fechaFinal)
+		{
+			$monthsToScan[] = Date::GetLogMonthFolderYearMonth(Date::DateTimeGetYear($fechaActual), Date::DateTimeGetMonth($fechaActual));
+			$fechaActual->add(new \DateInterval('P1M'));
+		}
+		return $monthsToScan;
+	}
+
+	private static function ResolveMonthsRangeFromNow($fechaInicial)
+	{
+		$fechaActual = Date::DateTimeArNow();
 		$monthsSpan = Date::AbsoluteMonth($fechaActual) - Date::AbsoluteMonth($fechaInicial);
 		$monthsToScan = [];
 		for($offset = 0; $offset <= $monthsSpan; $offset++)
@@ -123,6 +238,7 @@ class Statistics
 
 	public static function ReadAndSummarizeWorkMonth($workId, $logMonth, &$data, $cuts = null, $processRegion = true, $addOnlyLastMetric = false) : void
 	{
+		Profiling::BeginTimer();
 		if (sizeof($data) === 0) $data = self::InitialArray();
 
 		// Procesa los cortes
@@ -130,13 +246,12 @@ class Statistics
 		{
 			$cutsText = [];
 			foreach($cuts as $cut)
-				$cutsText[] = $cut->format('Y-m-d');
+				$cutsText[] = [$cut[0]->format('Y-m-d'), $cut[1]->format('Y-m-d')];
 		}
 		else
 		{
-			$cutsText = [''];
+			$cutsText = [['', '9999']];
 		}
-
 		$folder = Paths::GetStatisticsPath() . "/" . $logMonth;
 		if (!is_dir($folder)) return;
 
@@ -155,11 +270,7 @@ class Statistics
 				$type = $lineParts['t'];
 				$extra = $lineParts['e'];
 				$id = $lineParts['id'];
-
-				if ($processRegion)
-					$region = self::decodeRegion($lineParts['ip']);
-				else
-					$region = '';
+				$region = null;
 
 				if ($type == 'metadata')
 				{
@@ -177,8 +288,15 @@ class Statistics
 				{
 					if (!self::TimeExceeded($cutsText[$d], $time))
 					{
+						if ($region = null)
+						{
+							if ($processRegion)
+								$region = self::decodeRegion($lineParts['ip']);
+							else
+								$region = '';
+						}
 						if ($type !== 'metric' || !$addOnlyLastMetric || $extra === '' || $extra === '1')
-						self::AddHit($data, 'd' . $d, $sample, $type, $id);
+								self::AddHit($data, 'd' . $d, $sample, $type, $id);
 
 						if ($type == 'download')
 							self::AddHit($data, 'd' . $d, $sample, 'downloadType', $extra);
@@ -192,12 +310,11 @@ class Statistics
 								self::AddHit($data, 'd' . $d, $sample, 'region', $region);
 						}
 					}
-					else if ($n == 0)
-						// sale
-						return;
 				}
 			}
 		}
+		Profiling::EndTimer();
+
 	}
 
 	private static function InitialArray()
@@ -207,6 +324,10 @@ class Statistics
 
 	public static function decodeRegion($ip)
 	{
+		if (isset(self::$cache[$ip]))
+			return self::$cache[$ip];
+	Profiling::BeginTimer();
+
 		$countryObj = GeoIp::GetCountry($ip);
 		if (!$countryObj) return 'Otros';
 		$country = $countryObj->names['es'];
@@ -225,12 +346,16 @@ class Statistics
 				$country .= '|Otros';
 			}
 		}
+		Profiling::EndTimer();
+
+		self::$cache[$ip] = $country;
 		return $country;
 	}
 
 	private static function TimeExceeded($timeLimitText, $time)
 	{
-		return $time < $timeLimitText ;
+		// recibe un array con desde-hasta
+		return $time < $timeLimitText[0] || $time >= $timeLimitText[1];
 	}
 
 	private static function AddHit(&$data, $attribute, $emptySample, $type, $id)

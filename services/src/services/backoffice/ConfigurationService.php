@@ -5,9 +5,8 @@ namespace helena\services\backoffice;
 use helena\services\common\BaseService;
 use helena\services\common\AuthenticationService;
 use helena\db\frontend\SignatureModel;
-
+use helena\classes\Account;
 use helena\classes\App;
-use minga\framework\Context;
 
 class ConfigurationService extends BaseService
 {
@@ -30,5 +29,13 @@ class ConfigurationService extends BaseService
 								'Signatures' => $signatures,
 								'User' => $user);
 	}
+
+	public function SetUserSetting($key, $value)
+	{
+		$user = Account::Current();
+		$user->SetSetting($key, $value);
+		return self::OK;
+	}
+
 }
 

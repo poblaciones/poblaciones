@@ -74,6 +74,7 @@ class LookupService extends BaseService
 		if (sizeof($ret) === 0 && $filter != 'r' && $filter != 'h' && $filter != 'm')
 		{
 			$resFeatures = $featuresLookup->SearchFeatures($query);
+
 			$this->appendResults($ret, $resFeatures, 10 - sizeof($ret));
 
 			// Si tampoco encontró, prueba con direcciones

@@ -10,6 +10,12 @@ module.exports = {
 	DeserializeDate(dateTimeAsString) {
 		return new Date(dateTimeAsString);
 	},
+	FormateDateTime(dateTime) {
+		var date = dateTime.getFullYear() + '-' + ('00' + (dateTime.getMonth() + 1)).slice(-2) + '-' + ('00' + dateTime.getDate()).slice(-2);
+		var time = dateTime.getHours() + ":" + dateTime.getMinutes() + ":" + dateTime.getSeconds();
+		var dateTimeAsString = date + ' ' + time;
+		return dateTimeAsString;
+	},
 	DateDiffMinutes(date, dateMax = null) {
 		if (!dateMax) {
 			dateMax = new Date();
@@ -36,6 +42,34 @@ module.exports = {
 	CalculateUTOffset(date) {
 		var offset = (date - new Date()) / 1000 / 3600;
 		return Math.round(offset);
+	},
+	FormatLabelMonth(yearMonth, includeYear = true) {
+		if (yearMonth.substr(4, 1) !== '-') {
+			return yearMonth;
+		}
+		var year = yearMonth.substr(0, 4);
+		var month = parseInt(yearMonth.substr(5, 2));
+		return (includeYear ? year + " - " : '') + this.GetMonthLabel(month - 1);
+	},
+	FormatLabelQuarter(yearQuarter, includeYear = true) {
+		if (yearQuarter.substr(4, 2) !== '-T') {
+			return yearQuarter;
+		}
+		var year = yearQuarter.substr(0, 4);
+		var quarter = parseInt(yearQuarter.substr(6, 1));
+		return (includeYear ? year + " - " : '') + this.GetQuarterLabel(quarter - 1);
+	},
+	GetQuarterLabel(q) {
+		switch (q + 1) {
+			case 1:
+				return 'Primer trimestre';
+			case 2:
+				return 'Segundo trimestre';
+			case 3:
+				return 'Tercer trimestre';
+			case 4:
+				return 'Cuarto trimestre';
+		}
 	},
 	GetMonthLabel(m) {
 		switch(m + 1)

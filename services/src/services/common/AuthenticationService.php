@@ -17,6 +17,7 @@ class AuthenticationService
 									'Lastname' => $user->GetLastName(),
 									'Master' => Account::GetMasterUser(),
 									'Privileges' => $user->privileges,
+									'Settings' => $user->GetSettings(),
 									'Logged' => true);
 		}
 		else

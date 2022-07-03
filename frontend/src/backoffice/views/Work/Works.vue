@@ -1,7 +1,7 @@
 <template>
 	<div class="md-layout">
 		<div class="md-layout-item md-size-100" style="margin-bottom: 10px;">
-			 Sugeridas
+			 Recientes
 		</div>
 		<div class="md-layout-item md-size-100" style="margin-bottom: 1px;">
 				<mp-large-data-item v-for="item in lastest" :key="item.Id" @click="select(item)" :item="item" />
@@ -32,7 +32,7 @@
 						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
 					</md-table-cell>
 					<md-table-cell @click.native="select(item)" class="selectable"
-												 md-label="Contenido" md-sort-by="History">
+												 md-label="Modificado" md-sort-by="History">
 						<span>
 							<i v-if="logInfo(item)" style="margin-right: 5px; font-size: 11px;"
 								 class="tinyIcon vsm-icon fa fa-history"></i>
@@ -137,6 +137,7 @@
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
+import date from '@/common/framework/date';
 import speech from '@/common/js/speech';
 
 export default {
@@ -150,18 +151,28 @@ export default {
 			newWorkName: '',
 			timeFilter: 0,
 			works: [],
-			currentSort: 'Caption',
-			currentSortOrder: 'asc',
+			currentSort: 'History',
+			currentSortOrder: 'desc',
 			activateSaveAs: false,
 		};
 	},
 	props: {
 		filter: String,
 		createEnabled: { type: Boolean, default: true },
-	},
+		},
+		mounted() {
+			this.currentSort = window.Db.GetUserSetting(this.settingsKey, 'History');
+			this.currentSortOrder = window.Db.GetUserSetting(this.settingsKey + 'Order', 'desc');
+		},
 		computed: {
 			showingWelcome() {
 				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
+			},
+			settingsKey() {
+				return 'worksSort' + this.filter;
+			},
+			speechFormat() {
+				return speech;
 			},
 			lastest() {
 				var listCopy = [];
@@ -204,6 +215,7 @@ export default {
 							}
 						}
 					}
+					this.customSort(ret);
 					return ret;
 				},
 				set(value) {
@@ -232,8 +244,12 @@ export default {
 			if (o2 === null) {
 				return 1;
 			}
-			return o1 < o2 ? -1 :
-				o1 > o2 ? 1 : 0;
+			if (typeof o1 === 'string' && typeof o2 === 'string') {
+				return o1.localeCompare(o2, undefined, { sensitivity: 'accent' });
+			} else {
+				return o1 < o2 ? -1 :
+					o1 > o2 ? 1 : 0;
+			}
 		},
 		customSort(value) {
 			return this.doSort(value, this.currentSort, this.currentSortOrder);
@@ -301,7 +317,7 @@ export default {
 			this.$refs.stepper.setTitle('Publicando ' + this.entityName.single);
 			this.$refs.stepper.Start().then(function () {
 						item.HasChanges = 0;
-						item.Updated = new Date();
+						item.Updated = date.FormateDateTime(new Date());
 						item.UpdateUser = f.formatFullName(window.Context.User);
 						item.MetadataLastOnline = new Date();
 						item.PreviewId = null;
@@ -353,7 +369,15 @@ export default {
 			this.$refs.stepper.Start().then(function() {
 						window.Db.LoadWorks(); });
 		},
-	}
+		},
+		watch: {
+			'currentSort'() {
+				window.Db.SetUserSetting(this.settingsKey, this.currentSort);
+			},
+			'currentSortOrder'() {
+				window.Db.SetUserSetting(this.settingsKey + 'Order', this.currentSortOrder);
+			},
+		}
 };
 </script>
 

@@ -12,6 +12,8 @@ class WorkInfo
 	public $Icons;
 	public $ExtraMetrics;
 	public $Startup;
+	public $StatsMonths;
+	public $StatsQuarters;
 	public $PendingReviewSince;
 }
 

@@ -32,6 +32,7 @@ class SnapshotSearchFeatures extends BaseModel
 			LIMIT 0, 10";
 
 		$ret = App::Db()->fetchAll($sql, array('query' => $query));
+
 		Profiling::EndTimer();
 		return $ret;
 	}

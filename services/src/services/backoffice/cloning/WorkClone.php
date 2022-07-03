@@ -116,6 +116,13 @@ class WorkClone
 			RowDuplicator::DuplicateRows(entities\DraftMetadataFile::class, $sourceMetadataFileId, $static, 'mfi_id');
 		}
 	}
+
+	public function CopyIcons()
+	{
+		$static = array('wic_work_id' => $this->targetWorkId);
+		RowDuplicator::DuplicateRows(entities\DraftWorkIcon::class, $this->sourceWorkId, $static, 'wic_work_id');
+	}
+
 	public function CopyPermissions()
 	{
 		$static = array('wkp_work_id' => $this->targetWorkId);

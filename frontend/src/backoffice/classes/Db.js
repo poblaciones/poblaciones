@@ -2,6 +2,8 @@ import axios from 'axios';
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import axiosClient from '@/common/js/axiosClient';
 import arr from '@/common/framework/arr';
+import date from '@/common/framework/date';
+import f from '@/backoffice/classes/Formatter';
 import Vue from 'vue';
 
 export default Db;
@@ -165,11 +167,31 @@ Db.prototype.LoadWorks = function () {
 	});
 };
 
+Db.prototype.SetUserSetting = function (key, value) {
+	var prevValue = window.Context.User.Settings[key];
+	window.Context.User.Settings[key] = value;
+	return axiosClient.postPromise(window.host + '/services/backoffice/SetUserSetting',
+		{ k: key, v: JSON.stringify(value) }, 'guardar la preferencia de usuario').catch(error => {
+			window.Context.User.Settings[key] = prevValue;
+			throw error;
+		});
+};
+
+Db.prototype.GetUserSetting = function (key, defaultValue) {
+	var val = window.Context.User.Settings[key];
+	if (val !== undefined) {
+		return val;
+	}
+	return defaultValue;
+};
+
 Db.prototype.CreateWork = function (newWorkName, type) {
 	// Guarda en el servidor lo que esté en this.properties.Metadata
 	return axiosClient.getPromise(window.host + '/services/backoffice/CreateWork', {
 			 'c': newWorkName, 't': type }, 'crear el elemento')
 		.then(function (res) {
+				res.Updated = date.FormateDateTime(new Date());
+				res.UpdateUser = f.formatFullName(window.Context.User);
 				res.DatasetCount = 0;
 				res.MetricCount = 0;
 				res.GeorreferencedCount = 0;

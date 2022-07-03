@@ -132,6 +132,24 @@ class Account
 		}
 	}
 
+	public function GetSettings() : array
+	{
+		$this->EnsureDbInfo();
+		$sql = "SELECT `ust_key`, `ust_value` FROM user_setting WHERE ust_user_id = ?";
+		$rows = App::Db()->fetchAll($sql, [$this->userId]);
+		$ret = [];
+		foreach($rows as $row)
+			$ret[$row['ust_key']] = json_decode($row['ust_value'], true);
+		return $ret;
+	}
+
+	public function SetSetting(string $key, $value) : void
+	{
+		$this->EnsureDbInfo();
+		$update = "REPLACE INTO user_setting (ust_user_id, `ust_key`, `ust_value`) VALUES (?, ?, ?)";
+		App::Db()->exec($update, [$this->userId, $key, json_encode($value)]);
+	}
+
 	private function RefreshDbInfo()
 	{
 		$this->privileges = '';
