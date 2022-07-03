@@ -288,7 +288,7 @@ class Statistics
 				{
 					if (!self::TimeExceeded($cutsText[$d], $time))
 					{
-						if ($region = null)
+						if ($region === null)
 						{
 							if ($processRegion)
 								$region = self::decodeRegion($lineParts['ip']);
