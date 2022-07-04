@@ -339,10 +339,10 @@ class SnapshotByDatasetModel
 	{
 		if (self::UseGeographyItemPolygon($dataset))
 		{
-			return $dataset["dat_id"] . " * 0x100000000 + id";
+			return "gei_id";
 		}
 		else
-			return "gei_id";
+			return $dataset["dat_id"] . " * 0x100000000 + id";
 	}
 
 	private function GetArea($dataset)

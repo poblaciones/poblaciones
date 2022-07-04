@@ -28,19 +28,19 @@
 					<md-card-content>
 						<md-tabs>
 							<md-tab md-label="General">
-								<hits-table :list="general" label="General" :periods="periods" style="margin-top: -10px" />
+								<hits-table :list="general" label="General" :loading="loading" :periods="periods" style="margin-top: -10px" />
 							</md-tab>
 							<md-tab md-label="Consultas">
-								<hits-table :list="hits" label="Indicadores" :periods="periods" style="margin-top: -10px" />
+								<hits-table :list="hits" label="Indicadores" :loading="loading" :periods="periods" style="margin-top: -10px" />
 							</md-tab>
 							<md-tab md-label="Descargas">
-								<hits-table :list="downloads" label="Datasets" :periods="periods" style="margin-top: -10px" />
-								<hits-table :list="attachments" label="Adjuntos" :periods="periods" :showMessageOnEmpty="false" style="margin-top: 15px" />
+								<hits-table :list="downloads" label="Datasets" :loading="loading" :periods="periods" style="margin-top: -10px" />
+								<hits-table :list="attachments" label="Adjuntos" :loading="loading" :periods="periods" :showMessageOnEmpty="false" style="margin-top: 15px" />
 							</md-tab>
 							<md-tab md-label="Visitas por región">
 								<div class="md-layout" style="margin-top: -10px">
 									<div class="md-layout-item md-size-90 md-xlarge-size-60 md-small-size-100">
-										<md-table v-model="regions" md-card="" v-if="regions.length > 0">
+										<md-table v-model="regions" md-card="" v-if="!loading && regions.length > 0">
 											<md-table-row slot="md-table-row" slot-scope="{ item }">
 												<md-table-cell md-label="Visitas por región" :style="padTabbed(item.Caption)">{{ item.Caption }}</md-table-cell>
 												<template v-for="(period, index) in periods">
@@ -49,7 +49,9 @@
 											</md-table-row>
 										</md-table>
 										<div v-else>
-											No hay actividad registrada para este período.
+											<span v-if="!loading">
+												No hay actividad registrada para este período.
+											</span>
 										</div>
 									</div>
 								</div>
@@ -81,7 +83,8 @@ export default {
 			attachments: [],
 			general: [],
 			periods: [],
-			dataCache: {}
+			dataCache: {},
+			loading: false
 		};
 	},
 	computed: {
@@ -134,10 +137,14 @@ export default {
 		},
 		GetData(key) {
 			var loc = this;
+			this.loading = true;
 			this.$refs.invoker.doMessage('Obteniendo información', this.Work,
 				this.Work.GetWorkStatistics, key).then(function (data) {
 					loc.dataCache[key] = data;
 					loc.LoadData(data);
+					loc.loading = false;
+				}).catch(function () {
+					loc.loading = false;
 				});
 			return true;
 		},

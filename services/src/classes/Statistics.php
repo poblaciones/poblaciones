@@ -329,7 +329,7 @@ class Statistics
 	Profiling::BeginTimer();
 
 		$countryObj = GeoIp::GetCountry($ip);
-		if (!$countryObj) return 'Otros';
+		if (!$countryObj || $countryObj->names === null) return 'Otros';
 		$country = $countryObj->names['es'];
 		if ($country === Context::Settings()->currentCountry)
 		{

@@ -1,7 +1,7 @@
 <template>
 	<div class="md-layout">
 		<div class="md-layout-item md-size-80 md-xlarge-size-50 md-small-size-100">
-			<md-table v-model="list" md-sort="Values0" md-sort-order="asc" md-card="" v-if="list.length > 0">
+			<md-table v-model="list" md-sort="Values0" md-sort-order="desc" md-card="" v-if="!loading && list.length > 0">
 				<md-table-row slot="md-table-row" slot-scope="{ item }">
 					<md-table-cell :md-label="label" md-sort-by="Caption">{{ item.Caption }}</md-table-cell>
 					<template v-for="(period, index) in periods">
@@ -10,7 +10,9 @@
 				</md-table-row>
 			</md-table>
 			<div v-else v-show="showMessageOnEmpty">
-				No hay actividad registrada para este período.
+				<span v-if="!loading">
+					No hay actividad registrada para este período.
+				</span>
 			</div>
 		</div>
 	</div>
@@ -27,6 +29,7 @@ export default {
 		label: String,
 		list: Array,
 		showMessageOnEmpty: { type: Boolean, default: true},
+		loading: { type: Boolean, default: false },
 		periods: Array
 	},
 	computed: {
