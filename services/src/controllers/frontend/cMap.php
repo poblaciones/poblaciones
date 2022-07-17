@@ -47,6 +47,8 @@ class cMap extends cPublicController
 		}
 		// Renderiza el html
 		$this->AddValue('google_maps_key', Context::Settings()->Keys()->GetGoogleMapsKey());
+		$this->AddValue('maps_api', App::Settings()->Map()->MapsAPI);
+
 		$this->AddValue('google_analytics_key', Context::Settings()->Keys()->GoogleAnalyticsKey);
 		$this->AddValue('add_this_key', Context::Settings()->Keys()->AddThisKey);
 

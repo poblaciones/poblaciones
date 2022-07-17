@@ -1,4 +1,3 @@
-import TxtOverlay from '@/public/googleMaps/TxtOverlay';
 import GoogleTileOverlay from './GoogleTileOverlay';
 import arr from '@/common/framework/arr';
 import color from '@/common/framework/color';
@@ -45,7 +44,8 @@ GoogleMapsApi.prototype.Write = function(text, location, zIndex, style, innerSty
 	if (!ignoreMapMode && this.IsSatelliteType()) {
 		style += ' sat';
 	}
-	var overlay = new TxtOverlay(this.gMap, location, text, style, zIndex, innerStyle, type, hidden);
+	var loader = require('./overlayLoader');
+	var overlay = loader.default.Create(this.gMap, location, text, style, zIndex, innerStyle, type, hidden);
 	return overlay;
 };
 

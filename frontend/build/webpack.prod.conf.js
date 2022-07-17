@@ -73,6 +73,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 			template: 'index.html',
 			metadata: {
 				google_maps_key: env.google_maps_key.replace(/"/g, ''),
+				maps_api: env.maps_api.replace(/"/g, ''),
 				google_analytics_key: env.google_analytics_key.replace(/"/g, ''),
 				add_this_key: env.add_this_key.replace(/"/g, ''),
 			},

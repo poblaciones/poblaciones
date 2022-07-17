@@ -1,53 +1,55 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-		<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="description" content="{{ description }}" />
-		<meta property="og:title" content="{{ application_name }}" />
-		<meta property="og:description" content="{{ description }}" />
-		<meta property="og:image" content="{{ image }}" />
-		<meta property="fb:app_id" content="{{ facebookId }}" />
-
-		<title>{{ application_name }}</title>
-		<!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=<%=htmlWebpackPlugin.options.metadata.google_analytics_key%>"></script>
-		<script>
-			window.dataLayer = window.dataLayer || [];
-			function gtag() { dataLayer.push(arguments); }
-			gtag('js', new Date());
-			gtag('config', '<%=htmlWebpackPlugin.options.metadata.google_analytics_key%>');
-		</script>
-
-		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=<%=htmlWebpackPlugin.options.metadata.add_this_key%>"></script>
-
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+	<meta name="viewport" content="width=device-width" />
+	<meta name="description" content="{{ description }}" />
+	<meta property="og:title" content="{{ application_name }}" />
+	<meta property="og:description" content="{{ description }}" />
+	<meta property="og:image" content="{{ image }}" />
+	<meta property="fb:app_id" content="{{ facebookId }}" />
+	<title>{{ application_name }}</title>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=<%=htmlWebpackPlugin.options.metadata.google_analytics_key%>"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() { dataLayer.push(arguments); }
+		gtag('js', new Date());
+		gtag('config', '<%=htmlWebpackPlugin.options.metadata.google_analytics_key%>');
+	</script>
+	<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=<%=htmlWebpackPlugin.options.metadata.add_this_key%>"></script>
+	<% if (htmlWebpackPlugin.options.metadata.maps_api == 'google' ||
+					htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
+		<% if (htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
+			{% if (maps_api == 'google') %}
+		<% } %>
 		<!-- Google maps -->
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v={{ google_maps_version}}&language=es-419&key=<%=htmlWebpackPlugin.options.metadata.google_maps_key%>&libraries=drawing"></script>
-
-		<!-- Bootstrap Core CSS -->
-		<link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-		<!-- Animation library for notifications   -->
-		<link href="/static/vendor/paper-dashboard/css/animate.min.css" rel="stylesheet" />
-		<!--  Paper Dashboard core CSS    -->
-		<link href="/static/vendor/paper-dashboard/css/paper-dashboard.css" rel="stylesheet" />
-
-		<!-- Custom Fonts -->
-		<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.12.0/css/all.css" crossorigin="anonymous">
-
-		<link href="/static/vendor/paper-dashboard/css/themify-icons.css" rel="stylesheet">
-		<link href='//fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
-
-		<link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
-		<link rel="stylesheet" type="text/css" href="/static/vendor/flaticon/flaticon.css">
-		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-		<!--[if lt IE 9]>
-			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-		<![endif]-->
-	</head>
+		<% if (htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
+			{% endif %}
+		<% } %>
+	<% } %>
+	<!-- Bootstrap Core CSS -->
+	<link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Animation library for notifications   -->
+	<link href="/static/vendor/paper-dashboard/css/animate.min.css" rel="stylesheet" />
+	<!--  Paper Dashboard core CSS    -->
+	<link href="/static/vendor/paper-dashboard/css/paper-dashboard.css" rel="stylesheet" />
+	<!-- Custom Fonts -->
+	<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.12.0/css/all.css" crossorigin="anonymous">
+	<link href="/static/vendor/paper-dashboard/css/themify-icons.css" rel="stylesheet">
+	<link href='//fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" type="text/css" href="/static/vendor/flaticon/flaticon.css">
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+	<![endif]-->
+</head>
 	<body id="dbody">
 		<div id="wrapper"></div>
 		<!-- built files will be auto injected -->

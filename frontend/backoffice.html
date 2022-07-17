@@ -10,8 +10,12 @@
   <script type="text/javascript" src="/static/vendor/jquery/jquery.min.js"></script>
 
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
-
-	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v={{ google_maps_version}}&language=es-419&key=<%=htmlWebpackPlugin.options.metadata.google_maps_key%>&libraries=drawing"></script>
+	<% if (htmlWebpackPlugin.options.metadata.maps_api == 'google' ||
+					htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
+		<!--{% if (maps_api == 'google') %}-->
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v={{ google_maps_version}}&language=es-419&key=<%=htmlWebpackPlugin.options.metadata.google_maps_key%>&libraries=drawing"></script>
+		<!--{% endif %}-->
+	<% } %>
 
 	<link rel="stylesheet" type="text/css" href="/static/vendor/flaticon/flaticon.css">
 

@@ -30,6 +30,8 @@
 						<mp-select :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
 											 label='Origen'
 											 v-model="newMetricVersionLevel.MetricVersion.Metric.MetricProvider"
+											 :allow-null="true"
+											 nullLabel="[Otros]"
 											 list-key='Id'
 											 :list='MetricProviders'
 											 helper='Indique la fuente agrupada del indicador.' />
