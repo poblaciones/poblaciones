@@ -24,7 +24,7 @@ class VariableValueLabel
     /**
      * @var string
      *
-     * @ORM\Column(name="vvl_caption", type="string", length=50, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="vvl_caption", type="string", length=250, precision=0, scale=0, nullable=false, unique=false)
      */
     private $Caption;
 

@@ -95,7 +95,7 @@ class SnapshotByDatasetModel
 
 		// Cierra el select
 		$sql .= " ORDER BY id";
-		// Ejecuta
+
 		App::Db()->exec($sql);
 		Profiling::EndTimer();
 	}

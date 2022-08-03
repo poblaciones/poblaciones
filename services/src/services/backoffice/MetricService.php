@@ -13,6 +13,7 @@ use helena\entities\backoffice as entities;
 use minga\framework\PublicException;
 use minga\framework\Serializator;
 use minga\framework\Date;
+use minga\framework\MessageException;
 use minga\framework\ErrorException;
 
 use helena\services\backoffice\publish\WorkFlags;
@@ -197,11 +198,19 @@ class MetricService extends BaseService
 		$sql = "SELECT DISTINCT " . $field . " as Caption FROM " . $table . $filterWhere . " ORDER BY 1 LIMIT 100";
 		$ret = App::Db()->fetchAll($sql);
 		for($n = 0; $n < sizeof($ret); $n++)
-			if ($ret[$n]['Caption'])
+		{
+			$caption = $ret[$n]['Caption'];
+			if ($caption)
 				$ret[$n]['Value'] = $n + 1;
 			else
 				$ret[$n]['Value'] = null;
-
+			// Valida la longitud
+			$MAX_LENGTH = 250;
+			if ($caption && strlen($caption) > $MAX_LENGTH)
+			{
+				throw new MessageException("La variable no puede ser utilizada como variable de categorías debido a que tiene valores que exceden el máximo permitido de " . $MAX_LENGTH . " caracteres. Valor: '" . $caption . "'.");
+			}
+		}
 		Profiling::EndTimer();
 		return $ret;
 	}

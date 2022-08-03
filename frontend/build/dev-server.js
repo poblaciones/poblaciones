@@ -19,6 +19,9 @@ var autoOpenBrowser = !!config.dev.autoOpenBrowser;
 // Define HTTP proxies to your custom API backend
 // https://github.com/chimurai/http-proxy-middleware
 var proxyTable = config.dev.proxyTable;
+var phpPort = port + 2;
+var php = 'http://localhost:' + phpPort;
+proxyTable = { '/services': php, '/static': php, '/authenticate': php };
 
 var app = express();
 var compiler = webpack(webpackConfig);
@@ -66,7 +69,28 @@ Object.keys(proxyTable).forEach(function (context) {
 	}
 	app.use(proxyMiddleware(options.filter || context, options));
 });
-
+/*app.use(
+  '/services',
+  proxyMiddleware({
+    target: 'http://desa.poblaciones.org',
+    changeOrigin: true,
+  })
+);
+app.use(
+  '/static',
+  proxyMiddleware({
+    target: 'http://desa.poblaciones.org',
+    changeOrigin: true,
+  })
+);
+app.use(
+  '/authenticate',
+  proxyMiddleware({
+    target: 'http://desa.poblaciones.org',
+    changeOrigin: true,
+  })
+);
+*/
 // handle fallback for HTML5 history API
 app.use(require('connect-history-api-fallback')());
 

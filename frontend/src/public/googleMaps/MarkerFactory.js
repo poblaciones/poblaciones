@@ -1,19 +1,14 @@
-import h from '@/public/js/helper';
-import arr from '@/common/framework/arr';
 import iconManager from '@/common/js/iconManager';
 import Svg from '@/public/js/svg';
+import MarkerCreator from '@/public/classes/MarkerCreator';
 
 export default MarkerFactory;
 
-function MarkerFactory(MapsApi, activeSelectedMetric, variable, customIcons) {
-	this.activeSelectedMetric = activeSelectedMetric;
-	this.variable = variable;
-	this.customIcons = customIcons;
-	this.MapsApi = MapsApi;
-
-	this.stylesCache = [];
-	this.iconsCache = {};
+function MarkerFactory(Maps, activeSelectedMetric, variable, customIcons) {
+	MarkerCreator.call(this, Maps, activeSelectedMetric, variable, customIcons);
 };
+
+MarkerFactory.prototype = new MarkerCreator();
 
 MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSettings, isSequenceInactiveStep) {
 	var loc = this;
@@ -31,14 +26,14 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 		style = metric.ResolveStyle(variable, labelId);
 		loc.stylesCache[keyLabel] = style;
 	}
-	var geo = new loc.MapsApi.google.maps.LatLng(feature.lat, feature.lon);
+	var geo = new loc.Maps.google.maps.LatLng(feature.lat, feature.lon);
 	var z = window.SegMap.frame.Zoom;
 	var params = {};
 	var element;
 
 	var zIndex = (1000 - this.activeSelectedMetric.index) * 100;
 
-	params.map = loc.MapsApi.gMap;
+	params.map = loc.Maps.gMap;
 	params.position = geo;
 	params.optimized = false;
 	params.zIndex = zIndex + (isSequenceInactiveStep ? 5 : 10);
@@ -56,7 +51,7 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 		var content = this.resolveContent(markerSettings, feature.Symbol, categorySymbol);
 		params.icon = this.createFrame(markerSettings, style, scale);
 		params.label = this.createLabel(metric, markerSettings, scale, content);
-		element = new loc.MapsApi.google.maps.Marker(params);
+		element = new loc.Maps.google.maps.Marker(params);
 
 		if (!isSmallZoom) {
 			var isCustom = markerSettings.Type === 'I' && iconManager.isCustom(content);
@@ -80,9 +75,9 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 			seqScale = 1;
 		}
 		params.icon = this.createFrame(sequenceMarker, style, seqScale);
-		params.icon.anchor = new this.MapsApi.google.maps.Point(0, 0);
+		params.icon.anchor = new this.Maps.google.maps.Point(0, 0);
 		params.label = this.createLabel(metric, sequenceMarker, seqScale, '' + feature.Sequence);
-		element = new loc.MapsApi.google.maps.Marker(params);
+		element = new loc.Maps.google.maps.Marker(params);
 	}
 	// Listo, lo muestra...
 	this.addMarkerListeners(element, delegates);
@@ -90,55 +85,17 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 	return element;
 };
 
-MarkerFactory.prototype.createDelegates = function (metric, feature, z) {
-	var delegates = {};
-	var loc = this;
-	var parentInfo = metric.CreateParentInfo(loc.variable, feature);
-	var featureId = feature.id;
-
-	if (this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
-		delegates.click = function (e) {
-			loc.MapsApi.markerClicked(e, parentInfo, featureId);
-		};
-	} else {
-		delegates.click = null;
-	}
-	delegates.mouseover = function (e) {
-		loc.MapsApi.selector.markerMouseOver(e, parentInfo, feature.id,
-			feature.Description,
-			feature.Value);
-	};
-	delegates.mouseout = function (e) {
-		loc.MapsApi.selector.markerMouseOut(e);
-	};
-	return delegates;
-};
-
-MarkerFactory.prototype.destroyMarker = function (tileKey, marker) {
-	marker.setMap(null);
-	var tileItems = this.keysInTile[tileKey];
-	if (tileItems) {
-		arr.Remove(tileItems, marker);
-	}
-	if (marker.extraMarker) {
-		this.destroyMarker(tileKey, marker.extraMarker);
-	}
-	if (marker.extraMarkerImage) {
-		this.destroyMarker(tileKey, marker.extraMarkerImage);
-	}
-};
-
 MarkerFactory.prototype.createImageSubMarker = function (location, symbol, marker, scale, zIndex) {
 	var anchor;
 	var size;
 	if (marker.Frame === 'P') {
-		anchor = new this.MapsApi.google.maps.Point(7 * scale, 28 * scale);
+		anchor = new this.Maps.google.maps.Point(7 * scale, 28 * scale);
 		size = 14;
 	} else if (marker.Frame === 'C') {
-		anchor = new this.MapsApi.google.maps.Point(7.5 * scale, 19.5 * scale);
+		anchor = new this.Maps.google.maps.Point(7.5 * scale, 19.5 * scale);
 		size = 16;
 	} else if (marker.Frame === 'B') {
-		anchor = new this.MapsApi.google.maps.Point(9 * scale, 21 * scale);
+		anchor = new this.Maps.google.maps.Point(9 * scale, 21 * scale);
 		size = 18;
 	}
 
@@ -146,15 +103,15 @@ MarkerFactory.prototype.createImageSubMarker = function (location, symbol, marke
 	if (!src) {
 		return null;
 	}
-	var marker = new this.MapsApi.google.maps.Marker({
+	var marker = new this.Maps.google.maps.Marker({
 		position: location,
-		map: this.MapsApi.gMap,
+		map: this.Maps.gMap,
 		clickable: true,
 		optimized: false,
 		zIndex: zIndex + 1,
 		icon: {
 			url: src,
-			scaledSize: new this.MapsApi.google.maps.Size(size * scale, size * scale),
+			scaledSize: new this.Maps.google.maps.Size(size * scale, size * scale),
 			anchor: anchor
 		}
 	});
@@ -168,44 +125,27 @@ MarkerFactory.prototype.createFrame = function (marker, style, scale) {
 	switch (marker.Frame) {
 		case 'P':
 			icon.path = Svg.markerPinche;
-			icon.labelOrigin = new this.MapsApi.google.maps.Point(11.5, 11);
-			icon.anchor = new this.MapsApi.google.maps.Point(11.5, 32);
+			icon.labelOrigin = new this.Maps.google.maps.Point(11.5, 11);
+			icon.anchor = new this.Maps.google.maps.Point(11.5, 32);
 			break;
 		case 'C':
-			icon.path = this.MapsApi.google.maps.SymbolPath.CIRCLE;
-			icon.anchor = new this.MapsApi.google.maps.Point(0, 1);
+			icon.path = this.Maps.google.maps.SymbolPath.CIRCLE;
+			icon.anchor = new this.Maps.google.maps.Point(0, 1);
 			if (scale < 1.5) {
-				icon.labelOrigin = new this.MapsApi.google.maps.Point(0, 0.1);
+				icon.labelOrigin = new this.Maps.google.maps.Point(0, 0.1);
 			}
 			scale *= 12;
 			break;
 		case 'B':
 			icon.path = Svg.markerSquare;
-			icon.anchor = new this.MapsApi.google.maps.Point(12, 24);
-			icon.labelOrigin = new this.MapsApi.google.maps.Point(12, 12);
+			icon.anchor = new this.Maps.google.maps.Point(12, 24);
+			icon.labelOrigin = new this.Maps.google.maps.Point(12, 12);
 			break;
 		default:
 			throw new Error('Tipo de marco no reconocido.');
 	}
 	icon.scale = scale;
 	return icon;
-};
-
-MarkerFactory.prototype.resolveContent = function (marker, variableSymbol, categorySymbol) {
-	// Si tiene un contenido...
-	var content;
-	if (categorySymbol) {
-		return categorySymbol;
-	} else if (marker.Source === 'V') {
-		content = variableSymbol;
-	} else {
-		if (marker.Type == 'I') {
-			content = marker.Symbol;
-		} else {
-			content = marker.Text;
-		}
-	}
-	return content;
 };
 
 MarkerFactory.prototype.createLabel = function (metric, marker, scale, content) {
@@ -237,36 +177,6 @@ MarkerFactory.prototype.createLabel = function (metric, marker, scale, content) 
 		};
 };
 
-MarkerFactory.prototype.formatText = function (content) {
-	return { weight: '400', unicode: content };
-};
-
-MarkerFactory.prototype.formatIcon = function (symbol) {
-	if (symbol.startsWith('fas fa-') || symbol.startsWith('far fa-')) {
-		symbol = symbol.substr(4);
-	}
-	var cached = this.iconsCache[symbol];
-	if (cached) {
-		return cached;
-	}
-	var ret = iconManager.formatIcon(symbol);
-	this.iconsCache[symbol] = ret;
-	return ret;
-};
-
-MarkerFactory.prototype.CalculateMarkerScale = function (marker, z) {
-	var n = 1;
-	if (marker.AutoScale) {
-		var adjust = 21;
-		n = h.getScaleFactor(z) / adjust * .75;
-	}
-	if (marker.Size === 'M') {
-		n *= 1.5;
-	} else if (marker.Size === 'L') {
-		n *= 2;
-	}
-	return n;
-};
 
 MarkerFactory.prototype.addMarkerListeners = function (element, delegates) {
 	if (delegates.click) {
@@ -280,17 +190,4 @@ MarkerFactory.prototype.addMarkerListeners = function (element, delegates) {
 	if (delegates.mouseout) {
 		element.addListener('mouseout', delegates.mouseout);
 	}
-};
-
-MarkerFactory.prototype.objectClone = function (obj) {
-	if (obj === null || typeof obj !== 'object') return obj;
-	var copy = obj.constructor();
-	for (var attr in obj) {
-		if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-	}
-	return copy;
-};
-
-MarkerFactory.prototype.dispose = function () {
-
 };

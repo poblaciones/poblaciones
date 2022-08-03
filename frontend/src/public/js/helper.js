@@ -612,12 +612,12 @@ module.exports = {
 			// es leaflet
 			return {
 				Coordinate: {
-					Lat: event.latLng.lat,
-					Lon: event.latLng.lng
+					Lat: event.latlng.lat,
+					Lon: event.latlng.lng
 				},
 				Point: {
-					X: layerPoint.x,
-					Y: layerPoint.y,
+					X: event.originalEvent.clientX,
+					Y: event.originalEvent.clientY,
 				}
 			};
 		} else {

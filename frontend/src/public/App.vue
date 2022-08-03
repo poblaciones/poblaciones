@@ -524,6 +524,10 @@
 		background-color: #ffffff !important;
 	}
 
+	.leaflet-tile-loaded {
+		pointer-events: all !important;
+	}
+
 	.exp-high-button {
 		color: #ffffff !important;
 	}

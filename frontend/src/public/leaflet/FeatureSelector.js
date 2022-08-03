@@ -5,7 +5,7 @@ import str from '@/common/framework/str';
 export default FeatureSelector;
 
 function FeatureSelector(mapsApi) {
-	this.mapsApi = mapsApi;
+	this.MapsApi = mapsApi;
 	this.tooltipLocation = null;
 	this.selectorCanvas = null;
 	this.selectorCanvasEvents = null;
@@ -19,41 +19,41 @@ function FeatureSelector(mapsApi) {
 };
 
 FeatureSelector.prototype.SetSelectorCanvas = function () {
-/*	this.ClearSelectorCanvas();
+	this.ClearSelectorCanvas();
 	var zeroItem = [
-		{ lat: 0, lng: 90 },
-		{ lat: 180, lng: 90 },
-		{ lat: 180, lng: -90 },
-		{ lat: 0, lng: -90 },
-		{ lat: -180, lng: -90 },
-		{ lat: -180, lng: 0 },
-		{ lat: -180, lng: 90 },
-		{ lat: 0, lng: 90 }
+		[ 0, 90 ],
+		[ 180, 90 ],
+		[ 180, -90 ],
+		[ 0, -90 ],
+		[ -180, -90 ],
+		[ -180, 0 ],
+		[ -180, 90 ],
+		[ 0, 90 ]
 	];
 	// Construct the polygon.
+	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] }};
+	featureMask.geometry.coordinates.push(zeroItem);
+
 	var cursor = 'default';
-	var polygon = new this.mapsApi.google.maps.Polygon({
-		paths: zeroItem,
-		strokeColor: '#FF0000',
-		strokeOpacity: 0.8,
-		strokeWeight: 0,
-		cursor: cursor,
-		fillColor: '#FF0000',
-		fillOpacity: 0
+	var polygon = L.geoJson(featureMask, { interactive: true } );
+	polygon.setStyle({
+			cursor: cursor,
+			color: "#FF0000",
+			weight: 0,
+			fillOpacity: 0
 	});
 
 	if (!this.disabled) {
-		polygon.setMap(this.mapsApi.gMap);
+		polygon.addTo(this.MapsApi.map);
 	}
 	this.selectorCanvasEvents = [];
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'click', this.selectorClicked));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'mouseout', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'zoom_changed', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'center_changed', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'mousemove', this.selectorMoved));
+	this.selectorCanvasEvents.push(polygon.on('click', this.selectorClicked));
+	this.selectorCanvasEvents.push(polygon.on('mouseout', this.resetTooltip));
+	this.selectorCanvasEvents.push(polygon.on('zoom_changed', this.resetTooltip));
+	this.selectorCanvasEvents.push(polygon.on('center_changed', this.resetTooltip));
+	this.selectorCanvasEvents.push(polygon.on('mousemove', this.selectorMoved));
 
 	this.selectorCanvas = polygon;
-*/
 };
 
 FeatureSelector.prototype.getFeature = function (event) {
@@ -175,7 +175,7 @@ FeatureSelector.prototype.showTooltip = function () {
 		loc.tooltipCandidate = feature;
 	}
 	var m = new Mercator();
-	var coord = m.fromLatLonToGoogleLatLng(loc.tooltipLocation.Coordinate);
+	var coord = loc.tooltipLocation.Coordinate;
 	var style = 'ibTooltip exp-hiddable-block';
 	var outStyle = "ibTooltipOffsetLeft  mapLabels";
 	if (loc.tooltipMarker) {
@@ -372,7 +372,7 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 
 FeatureSelector.prototype.ClearSelectorCanvas = function () {
 	if (this.selectorCanvas !== null) {
-		this.selectorCanvas.setMap(null);
+		this.MapsApi.map.removeLayer(this.selectorCanvas);
 		this.selectorCanvas = null;
 		if (this.selectorCanvasEvents) {
 			for (var n = 0; n < this.selectorCanvasEvents.length; n++) {

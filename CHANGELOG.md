@@ -2,6 +2,8 @@
 - Ofrece estadísticas históricas (por trimestre / mes).
 - El listado de cartografías permite ordenar por las más recientes y archivar las antiguas.
 - El listado de cartografías recuerda el orden entre sesiones.
+- Fix al recibir valores para variables categoriales más grandes que el ancho soportado.
+- Ampliación del ancho soportado para variables categoriales en indicadores.
 
 v3.06 (2022-06-25)
 - Al reponer una url con un elemento seleccionado en el panel izquierdo, recupera su ubicación.

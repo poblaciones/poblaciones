@@ -432,7 +432,7 @@ LeafletApi.prototype.calculateOffsetX = function (offsetXpixels, zoom = null) {
 	if (offsetXpixels) {
 		var ret = this.screenPoint2LatLng({ x: offsetXpixels, y: 0 }, this.map, zoom);
 		var ret2 = this.screenPoint2LatLng({ x: 0, y: 0 }, this.map, zoom);
-		offsetRad = (ret.lng - ret2.lng) / 2;
+		offsetRad = (ret.Lon - ret2.Lon) / 2;
 	}
 	return offsetRad;
 };
@@ -526,7 +526,7 @@ LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) 
 	if (offsetX) {
 		var pos = this.map.getCenter();
 		var offsetRad = this.calculateOffsetX(offsetX);
-		this.map.setCenter(L.latLng(pos.lat, pos.lng - offsetRad));
+		this.map.panTo(L.latLng(pos.lat, pos.lng - offsetRad));
 	}
 };
 
@@ -538,9 +538,10 @@ LeafletApi.prototype.ClearClippingCanvas = function () {
 };
 
 LeafletApi.prototype.ClearSelectedFeature = function () {
+	var loc = this;
 	if (this.selectedCanvas !== null) {
 		this.selectedCanvas.forEach(function (feature) {
-			this.map.removeLayer(feature);
+			loc.map.removeLayer(feature);
 		});
 		this.selectedCanvas = null;
 	}

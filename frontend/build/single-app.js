@@ -35,32 +35,15 @@ module.exports = {
 			key: fs.readFileSync('certs/valid-ssl-key.pem', 'utf8'),
 			cert: fs.readFileSync('certs/valid-ssl-cert.pem', 'utf8')
 		}, function (req, res) {
-			if (req.url == '/resetphp') {
-				console.log("Resetting PHP Server...");
-				phpPORT++;
-				loc.startPhpServer(phpPORT);
 
-				res.writeHead(200, { 'Content-Type': 'text/plain' });
-				res.write('PHP reset OK!' + '\n\n');
-				res.end();
-			} else if (req.url == '/' || (req.url.split('/').length === 2 && req.url.endsWith('.js'))
-				|| vuejsPaths.filter(path => req.url.startsWith(path)).length > 0) {
+				// Va vía VUEJS
 				vuejsTarget.web(req, res, 'http://localhost:' + vueJSPORT,
 					function (e) {
 						console.log('>> failed: ' + req.url + ' err: ' + e.message);
 					});
 				if (verbose) {
-					console.log('> serving vuejs ' + req.url);
+					console.log('> serving ' + req.url);
 				}
-			} else {
-				phpTarget.web(req, res, 'http://localhost:' + phpPORT,
-					function (e) {
-						console.log('>> failed: ' + req.url + ' err: ' + e.message);
-					});
-				if (verbose) {
-					console.log('>> serving PHP (' + phpPORT + ')' + req.url);
-				}
-			}
 		});
 		svr.listen(appPORT);
 	},
