@@ -26,6 +26,10 @@ function ActiveBoundary(data) {
 	this.color = ActiveBoundary.DEFAULT_COLOR;
 };
 
+ActiveBoundary.prototype.useTiles = function () {
+	return true;
+};
+
 ActiveBoundary.prototype.ResolveSegment = function () {
 	this.objs.Segment = window.SegMap.Metrics.PatternsSegment;
 };

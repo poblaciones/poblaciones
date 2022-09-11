@@ -22,7 +22,11 @@ module.exports = {
 	},
 	ParseColorPartsRGB(color) {
 		var parts = this.ParseColorParts(color);
-		return { r: parts[0], g: parts[1], b: parts[2] };
+		if (parts.length === 3) {
+			return { r: parts[0], g: parts[1], b: parts[2] };
+		} else {
+				return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] };
+		}
 	},
 	ParseColorParts(color) {
 		if (color[0] !== "#") {
@@ -31,7 +35,12 @@ module.exports = {
 		var r = parseInt(color.substr(1, 2), 16);
 		var g = parseInt(color.substr(3, 2), 16);
 		var b = parseInt(color.substr(5, 2), 16);
-		return [r, g, b];
+		if (color.length === 9) {
+			var a = parseInt(color.substr(7, 2), 16);
+			return [r, g, b, a];
+		} else {
+			return [r, g, b];
+		}
 	},
 	GetRandomDefaultColor() {
 		var palette = ['F44E3B', 'FE9200', 'FCDC00',

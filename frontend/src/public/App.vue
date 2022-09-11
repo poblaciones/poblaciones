@@ -186,7 +186,7 @@
 			LoadEmbeddedSettings() {
 				var ret = {
 				Compact: web.getParameterByName('co') != null,
-					Active: web.getParameterByName('emb') != null,
+					Active: web.getParameterByName('emb') != null || this.inIframe(),
 					OpenNewWindow: function () {
 						var url = window.location.href;
 						// quita lo que tenga entre ? y #
@@ -225,6 +225,13 @@
 					ret.OpenOnClick = true;
 				}
 				return ret;
+			},
+			inIframe() {
+				try {
+					return window.self !== window.top;
+				} catch (e) {
+					return true;
+				}
 			},
 			BindEvents() {
 				var loc = this;

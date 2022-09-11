@@ -361,6 +361,16 @@ ActiveSelectedMetric.prototype.Remove = function () {
 	window.SegMap.Metrics.Remove(this);
 };
 
+ActiveSelectedMetric.prototype.useTiles = function () {
+	if (this.SelectedLevel().Dataset.AreSegments) {
+		return true;
+	} else if (this.SelectedLevel().Dataset.Type === 'L') {
+		return false;
+	} else {
+		return true;
+	}
+};
+
 ActiveSelectedMetric.prototype.CreateComposer = function () {
 	var ret;
 	if (this.SelectedLevel().Dataset.AreSegments) {
@@ -439,6 +449,17 @@ ActiveSelectedMetric.prototype.isClickeable = function () {
 	return window.SegMap.frame.Zoom >= parseInt(minZoom);
 };
 
+ActiveSelectedMetric.prototype.IsFiltering = function () {
+	var variable = this.SelectedVariable();
+	for (let i = 0; i < variable.ValueLabels.length; i++) {
+		var value = variable.ValueLabels[i];
+		if (!value.Visible) {
+			return true;
+		}
+	}
+	return false;
+};
+
 ActiveSelectedMetric.prototype.ResolveValueLabelVisibility = function (labelId) {
 	var variable = this.SelectedVariable();
 	for (let i = 0; i < variable.ValueLabels.length; i++) {
@@ -488,6 +509,7 @@ ActiveSelectedMetric.prototype.ResolveStyle = function (variable, labelId) {
 			}
 		}
 	}
+	return null;
 };
 
 ActiveSelectedMetric.prototype.GetPattern = function (variable) {
@@ -689,6 +711,30 @@ ActiveSelectedMetric.prototype.GetCartographyService = function () {
 
 ActiveSelectedMetric.prototype.UseBlockedRequests = function () {
 	return this.blockSize;
+};
+
+ActiveSelectedMetric.prototype.GetLayerData = function () {
+	var url = this.GetLayerDataService();
+
+	return window.SegMap.Get(url.server + url.path, {
+		params: url.params }, url.useStaticQueue).then(function (res) {
+		return res.data.Data;
+	});
+};
+
+ActiveSelectedMetric.prototype.GetLayerDataService = function (seed) {
+	var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
+	var server = '';
+
+	var path = '/services/frontend/metrics/GetLayerData';
+
+	if (useStaticQueue) {
+		server = h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed);
+	} else {
+		server = window.host;
+	}
+	var params = h.getLayerDataParams(this.properties, window.SegMap.frame);
+	return { server: server, path: path, useStaticQueue: useStaticQueue, params: params };
 };
 
 ActiveSelectedMetric.prototype.GetDataService = function (seed) {

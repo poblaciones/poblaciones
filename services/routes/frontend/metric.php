@@ -72,6 +72,20 @@ App::$app->get('/services/metrics/GetMetricItemInfo', function (Request $request
 	return App::Json($controller->GetMetricItemInfo($featureId, $metricId, $variableId));
 });
 
+
+App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $request) {
+	$controller = new services\TileDataService();
+	$metricId = Params::GetInt('l');
+	$metricVersionId = Params::GetInt('v');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+
+	$frame = Frame::FromParams();
+	$levelId = Params::GetInt('a');
+	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	return App::JsonImmutable($controller->GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity));
+});
+
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470
 App::$app->get('/services/frontend/metrics/GetTileData', function (Request $request) {
 	$controller = new services\TileDataService();

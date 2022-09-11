@@ -38,6 +38,10 @@ ActiveLabels.prototype.UseBlockedRequests = function () {
 	return this.blockSize;
 };
 
+ActiveLabels.prototype.useTiles = function () {
+	return true;
+};
+
 ActiveLabels.prototype.GetDataService = function (seed) {
 	if (this.UseBlockedRequests()) {
 		return { server: h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed / this.blockSize), path: '/services/frontend/clipping/GetBlockLabels', useStaticQueue: true };

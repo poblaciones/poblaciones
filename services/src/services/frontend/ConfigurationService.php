@@ -37,6 +37,8 @@ class ConfigurationService extends BaseService
 									'UseEmbedding' => App::Settings()->Map()->UseEmbedding,
 									'UseUrbanity' => App::Settings()->Map()->UseUrbanity,
 									'UseMultiselect' => App::Settings()->Map()->UseMultiselect,
+									'UseDeckgl' => App::Settings()->Map()->UseDeckgl,
+									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 
 									'MapsAPI' => App::Settings()->Map()->MapsAPI,
 

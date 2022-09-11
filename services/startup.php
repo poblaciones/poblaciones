@@ -4,6 +4,8 @@ use Symfony\Component\Debug\Debug;
 use Silex\Provider\VarDumperServiceProvider;
 
 use helena\classes\App;
+use minga\framework\Str;
+use minga\framework\Request;
 use minga\framework\Context;
 use minga\framework\Profiling;
 
@@ -90,4 +92,15 @@ if(Context::Settings()->Debug()->debug)
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
+// establece seteos de caché iniciales
+$uri = Request::GetRequestURI();
+if (Str::StartsWith($uri, '/services/frontend/clipping/GetBlockLabels') ||
+	Str::StartsWith($uri, '/services/frontend/metrics/GetSummary') ||
+	Str::StartsWith($uri, '/services/frontend/geographies/GetGeography') ||
+	Str::StartsWith($uri, '/services/frontend/metrics/GetTileData') ||
+	Str::StartsWith($uri, '/services/frontend/metrics/GetLayerData') ||
+	Str::StartsWith($uri, '/services/frontend/clipping/GetLabels'))
+	Context::Settings()->allowPHPSessionCacheResults = true;
+
 time_elapsed('fin de startup');
+

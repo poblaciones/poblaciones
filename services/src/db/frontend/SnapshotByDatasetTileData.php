@@ -18,6 +18,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	private $hasSymbols;
 	private $hasDescriptions;
 	private $areSegments;
+	public	$honorTileLimit = true;
 
 	public function __construct($snapshotTable, $datasetType, $areSegments, $variables, $urbanity,
 		$hasSymbols, $hasDescriptions)
@@ -80,7 +81,8 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$extraFields[] = 'Lon';
 		$ret = self::RotateResults($ret, $extraFields);
 
-		if ($this->datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
+		if ($this->datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE &&
+					$this->honorTileLimit)
 		{
 			$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
 		}

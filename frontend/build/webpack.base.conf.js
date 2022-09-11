@@ -17,6 +17,9 @@ module.exports = {
 		appBackoffice: './src/backoffice/main.js',
 		appAdmin: './src/admins/main.js',
 	},
+	node: {
+  fs: 'empty'
+},
 	output: {
 		path: config.build.assetsRoot,
 		filename: '[name].js',

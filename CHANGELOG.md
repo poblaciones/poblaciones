@@ -1,3 +1,6 @@
+- Fix: se pierde la ubicación como 'reciente' tras publicarse una obra desde el listado de cartografías.
+- Fix a pérdida de ruta a cartografía al reponer dirección de cartografía con marco.
+- Fix: cálculo de extents para cartografía con datasets sin indicadores.
 - Fix: los íconos personalizados no se copiaban al duplicar cartografía.
 - Ofrece estadísticas históricas (por trimestre / mes).
 - El listado de cartografías permite ordenar por las más recientes y archivar las antiguas.

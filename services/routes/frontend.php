@@ -16,11 +16,6 @@ use helena\services\backoffice\InstitutionService;
 use helena\classes\GlobalTimer;
 use helena\classes\App;
 use helena\classes\Links;
-use helena\classes\Session;
-use minga\framework\Params;
-use minga\framework\Context;
-use minga\framework\PublicException;
-
 
 App::$app->get('/', function (Request $request) {
 	return App::RedirectKeepingParams(Links::GetMapUrl());

@@ -65,7 +65,7 @@ compiler.hooks.compilation.tap('html-webpack-plugin-after-emit', () => {
 Object.keys(proxyTable).forEach(function (context) {
 	var options = proxyTable[context];
 	if (typeof options === 'string') {
-		options = { target: options };
+		options = { target: options,  logLevel: "debug"  };
 	}
 	app.use(proxyMiddleware(options.filter || context, options));
 });

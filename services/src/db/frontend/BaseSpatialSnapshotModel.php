@@ -69,7 +69,7 @@ abstract class BaseSpatialSnapshotModel extends BaseModel
 
 	public function GetTileQuery($frame)
 	{
-		if ($frame->TileEnvelope)
+		if ($frame->TileEnvelope && $frame->TileEnvelope !== "full")
 			return $this->spatialConditions->CreateEnvelopeQuery($frame->TileEnvelope);
 		else
 			return null;

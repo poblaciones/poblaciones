@@ -319,7 +319,7 @@ export default {
 						item.HasChanges = 0;
 						item.Updated = date.FormateDateTime(new Date());
 						item.UpdateUser = f.formatFullName(window.Context.User);
-						item.MetadataLastOnline = new Date();
+						item.MetadataLastOnline = date.FormateDateTime(new Date());
 						item.PreviewId = null;
 						item.LastOnlineUser = f.formatFullName(window.Context.User);
 						window.Db.ReleaseWork(item.Id);

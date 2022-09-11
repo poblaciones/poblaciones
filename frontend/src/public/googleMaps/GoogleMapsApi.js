@@ -5,6 +5,9 @@ import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
 import { setTimeout } from 'core-js';
 import MarkerFactory from './MarkerFactory';
+import { GoogleMapsOverlay } from "@deck.gl/google-maps";
+import IconOverlay from '@/public/overlays/IconOverlay';
+import GoogleNullOverlay from './GoogleNullOverlay';
 
 export default GoogleMapsApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -57,13 +60,14 @@ GoogleMapsApi.prototype.Initialize = function () {
 	var myMapOptions = {
 		mapTypeControlOptions: {
 			style: this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-			position: google.maps.ControlPosition.TOP_LEFT,
+			position: this.google.maps.ControlPosition.TOP_LEFT,
 			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
 		},
 		scaleControl: true,
 		gestureHandling: "greedy",
 		styles: this.generateLabelsArray(true),
 		clickableIcons: false,
+		draggableCursor: 'auto',
 		center: { lat: -37.1799565, lng: -65.6866910 },
 		zoom: 6
 	};
@@ -672,13 +676,43 @@ GoogleMapsApi.prototype.getBounds = function() {
 };
 
 GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index) {
-//	this.google.maps.event.trigger(this.gMap, 'resize');
-	this.gMap.overlayMapTypes.insertAt(index,
-		new GoogleTileOverlay(activeMetric));
+	if (activeMetric.useTiles() || !window.Use.UseDeckgl) {
+		this.gMap.overlayMapTypes.insertAt(index,
+			new GoogleTileOverlay(activeMetric));
+	} else {
+		var overlay = new GoogleNullOverlay();
+		this.gMap.overlayMapTypes.insertAt(index, overlay);
+		var loc = this;
+		// Trae los datos
+		// -TODO falta:
+		// 1. que muestre que los está trayendo
+		// 2. que cancele si ya no tiene sentido
+		// 3. que lo espere si está exportando
+		activeMetric.GetLayerData().then(function (data) {
+			if (!overlay.disposed) {
+				var iconLayer = new IconOverlay(activeMetric);
+				var deckIconLayer = iconLayer.CreateLayer(data, 1);
+
+				const deckOverlay = new GoogleMapsOverlay({
+					layers: [deckIconLayer]
+				});
+				deckOverlay.setMap(loc.gMap);
+				overlay.deckOverlay = deckOverlay;
+				overlay.ZoomSubscribed = iconLayer;
+				window.SegMap.ZoomChangedSubscribers.push(overlay.ZoomSubscribed);
+				}
+			}
+		);
+	}
 };
 
 GoogleMapsApi.prototype.RemoveOverlay = function (index) {
-	this.gMap.overlayMapTypes.getAt(index).dispose();
+	var overlay = this.gMap.overlayMapTypes.getAt(index);
+	if (overlay.deckOverlay) {
+		overlay.deckOverlay.setMap(null);
+		arr.Remove(window.SegMap.ZoomChangedSubscribers, overlay.ZoomSubscribed);
+	}
+	overlay.dispose();
 	this.gMap.overlayMapTypes.removeAt(index);
 };
 

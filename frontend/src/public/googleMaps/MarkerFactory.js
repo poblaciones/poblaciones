@@ -154,7 +154,11 @@ MarkerFactory.prototype.createLabel = function (metric, marker, scale, content) 
 	}
 	var symbol;
 	if (marker.Type == 'I') {
-		symbol = this.formatIcon(content);
+		if (content) {
+			symbol = this.formatIcon(content);
+		} else {
+			return null;
+		}
 	} else if (marker.Type == 'T') {
 		symbol = this.formatText(content);
 	} else {
@@ -179,6 +183,8 @@ MarkerFactory.prototype.createLabel = function (metric, marker, scale, content) 
 
 
 MarkerFactory.prototype.addMarkerListeners = function (element, delegates) {
+		//element.clickable = false;
+	//return;
 	if (delegates.click) {
 		element.addListener('click', delegates.click);
 	} else {

@@ -23,9 +23,13 @@ class MapSettings
 
 	public $UseCalculated = true;
 
+	public $UseDeckgl = false;
+
 	public $isOWSEnabled = false;
 
 	public $UseMultiselect = false;
+	public $UseNewMenu = false;
+
 	public $UseGradients = false;
 	public $UseTextures = false;
 	public $UseFavorites = false;

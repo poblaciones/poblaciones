@@ -41,16 +41,17 @@ FeatureSelector.prototype.SetSelectorCanvas = function () {
 		fillColor: '#FF0000',
 		fillOpacity: 0
 	});
-
+/*
 	if (!this.disabled) {
 		polygon.setMap(this.mapsApi.gMap);
 	}
+	*/
 	this.selectorCanvasEvents = [];
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'click', this.selectorClicked));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'mouseout', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'zoom_changed', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'center_changed', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(polygon, 'mousemove', this.selectorMoved));
+	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(this.mapsApi.gMap, 'click', this.selectorClicked));
+	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(this.mapsApi.gMap, 'mouseout', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(this.mapsApi.gMap, 'zoom_changed', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(this.mapsApi.gMap, 'center_changed', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.mapsApi.google.maps.event.addListener(this.mapsApi.gMap, 'mousemove', this.selectorMoved));
 
 	this.selectorCanvas = polygon;
 };

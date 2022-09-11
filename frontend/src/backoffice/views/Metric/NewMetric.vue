@@ -131,13 +131,6 @@ export default {
 				});
 				return;
 			}
-			if (this.Work.IsPublicData() && this.newMetricGroup === null) {
-				alert('Debe indicar una categoría para el indicador.');
-				this.$nextTick(() => {
-					this.$refs.categoryInput.$el.focus();
-				});
-				return;
-			}
 			window.Context.Factory.GetCopy('MetricVersionLevel',
 				function(level) {
 					loc.SaveAndClose(level);

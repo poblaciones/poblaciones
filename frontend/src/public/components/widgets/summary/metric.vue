@@ -5,8 +5,12 @@
 				<drag-horizontal title="Arrastrar para reubicar" />
 			</div>
 		</div>
-		<MetricTopButtons :metric="metric" :clipping="clipping" :key="metric.index" v-if="!Embedded.Readonly"
+		<template v-if="!Embedded.Readonly">
+			<MetricDropdown v-if="Use.UseNewMenu && !Embedded.Readonly" :metric="metric" :clipping="clipping" :key="metric.index"
 											class="exp-hiddable-block" @RankingShown="rankingShown" />
+			<MetricTopButtons v-else :metric="metric" :clipping="clipping" :key="metric.index"
+												class="exp-hiddable-block" @RankingShown="rankingShown" />
+		</template>
 		<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
 			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
@@ -61,6 +65,7 @@
 <script>
 import MetricVariables from './metricVariables';
 import MetricTopButtons from './metricTopButtons';
+import MetricDropdown from './metricDropdown';
 import Source from './source';
 import Ranking from './ranking';
 import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
@@ -69,6 +74,7 @@ export default {
 	name: 'metric',
 	components: {
 		MetricTopButtons,
+		MetricDropdown,
 		Source,
 		DragHorizontal,
 		MetricVariables,

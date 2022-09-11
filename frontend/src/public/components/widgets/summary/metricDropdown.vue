@@ -44,7 +44,7 @@ import Mercator from '@/public/js/Mercator';
 // https://materialdesignicons.com/cdn/1.9.32/
 
 export default {
-	name: 'metricDropdown',
+	name: 'metricTopButtons',
 	props: [
 		'metric',
 		'clipping',
