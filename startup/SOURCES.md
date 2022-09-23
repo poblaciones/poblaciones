@@ -5,13 +5,13 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 1. Para instalar VueJS. Descargar e instalar NodeJs v.13 https://nodejs.org/en/. Es necesario correr la instalación completa instalando las herramientas para compilar paquetes en C o C++. El instalador descarga e instala todas las dependencias. 
 
-1a. Luego de instalarlo, ejecutar > `npm install vue`.
+2. Luego de instalar VueJS, ejecutar > `npm install vue`.
 
-2. Instalar PHP 7.4 o posterior en Apache o IIS (Windows) (https://www.php.net/downloads.php).
+3. Instalar PHP 7.4 o posterior. No hace falta configurar Apache o IIS porque el servidor de VueJS se ocupará de resolver localmente en desarrollo los pedidos PHP (por medio del componente https://github.com/sindresorhus/php-server) que en producción resuelve el webserver remoto.
 
-3. Instalar Python 3.4 o superior (requerido para conversiones de archivos) (https://www.python.org/downloads/release/python-3811/)
+4. Instalar Python 3.4 o superior (requerido para conversiones de archivos) (https://www.python.org/downloads/release/python-3811/)
 
-4. Instalar las dependencias de Python: 
+5. Instalar las dependencias de Python: 
 
 # spss
 ./pip install savReaderWriter
@@ -72,31 +72,19 @@ Eso instalará las librerías que precisan los servicios en PHP y cliente VueJS.
  
 5. Indicar dentro de ese archivo un key válido de google maps.
 
-## 5. Crear sitios para el servidor de servicios
+## 6. Navegación e inicialización 
 
-1. Agregar en hosts la entrada desa.poblaciones.org apuntando a 127.0.0.1.
-
-2. Agregar un Site (en IIS o apache) que apunte a la carpeta /services/web, resolviendo con ella la navegación de http://desa.poblaciones.org (o la ruta que se haya elegido).
-
-Ejemplo en apache:
-```
-<VirtualHost *:80>
-    ServerName desa.poblaciones.org
-    DocumentRoot [directorio del código]/services/web
-    ...
-</VirtualHost>
-```
-
-3. Si bien los datos cargados por los usuarios se persisten en la base de datos relacional, varios cachés y otros logs que proceduce la aplicación se almacen en filesystem. La carpeta predeterminada para ello es /services/storage. Revisar que haya sobre esa carpeta permisos de escritura.
-
-4. Iniciar el frontend (el servidor de vuejs) ejecutando:
+1. Iniciar el frontend (el servidor de vuejs) ejecutando:
  ```
     frontend>npm run dev
 ```
-## 6. Navegación e inicialización 
 
-1. Navegar http://localhost:8000/ para utilizar el visor, http://localhost:8000/users#/ para ingresar al backoffice, y http://desa.poblaciones.org/logs para consultar la parte administrativa.
+2. Configurar en el archivo /hosts de Windows o linux la entrada: 
 
-2. Por último, es necesario regenerar las tablas precalculadas de la base de datos. En la consola de administración (http://desa.poblaciones.org/logs), ir a Configuración > Cachés y presionar sucesivamente 'Actualizar' en los cachés de Geografías, Regiones por Geografías y Lookup de Regiones para regenerar los cachés.
+        127.0.0.1     desa.poblaciones.org
+  
+3. Navegar https://desa.poblaciones.org:8000/ para utilizar el visor, https://desa.poblaciones.org:8000/users#/ para ingresar al backoffice, y https://desa.poblaciones.org:8000/logs y https://desa.poblaciones.org:8000/admins para consultar los módulos administrativos.
 
-3. Si se encuentran errores o problemas de CORS en Apache se deben quitar del sitio o directorio virtual todas las referencias `Access-Control...`, las directivas de CORS se resuelven por código.
+4. Por último, es necesario regenerar las tablas precalculadas de la base de datos. En la consola de administración (http://desa.poblaciones.org/logs), ir a Configuración > Cachés y presionar sucesivamente 'Actualizar' en los cachés de Geografías, Regiones por Geografías y Lookup de Regiones para regenerar los cachés.
+
+5. Al navegar, debe indicarse al navegador que acepte el certificado de SSL (para la ruta desa.poblaciones.org) a pesar de no ser un certificado emitido por una entidad raíz registrada. Para consultar esto en chrome, ver: https://support.google.com/chrome/answer/99020
