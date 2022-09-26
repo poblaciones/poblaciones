@@ -20,19 +20,19 @@
 	<div class='dBlockSize3'>
         <input class='dSmallerButton' name="regenGeography" type="submit" value="Actualizar" id='updateGeography' onclick="disableButton('updateGeography');">
         {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_CARTOGRAPHY') }}
-        <div class="dExplanation">Procesar cuando se agrega una geografía.</div>
+        <div class="dExplanation">Procesar cuando se agrega una geografía. Incluye cachés.</div>
     </div>
 	<div class='dBlockNewLineS2  dNoPaddingTop'>Regiones por geografías:</div>
 	<div class='dBlockSize3'>
         <input class='dSmallerButton' name="regenClippingGeography" type="submit" value="Actualizar" id='updateClippingGeography' onclick="disableButton('updateClippingGeography');">
         {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_CARTOGRAPHY_REGION') }}
-        <div class="dExplanation">Procesar cuando se agrega una relación entre geografía y cartografía.</div>
+        <div class="dExplanation">Procesar cuando se agrega una relación entre geografía y cartografía. Incluye cachés.</div>
     </div>
 	<div class='dBlockNewLineS2  dNoPaddingTop'>Delimitaciones y regiones:</div>
 	<div class='dBlockSize3'>
         <input class='dSmallerButton' name="regenClipping" type="submit" value="Actualizar" id='updateClipping' onclick="disableButton('updateClipping');">
         {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_LOOKUP') }}
-        <div class="dExplanation">Procesar cuando se agrega o actualiza una región de clipping o cambian los ítems de una delimitación.</div>
+        <div class="dExplanation">Procesar cuando se agrega o actualiza una región de clipping o cambian los ítems de una delimitación. Incluye cachés.</div>
     </div>
 
 
@@ -43,15 +43,24 @@
 
 	<div class='dBlockNewLineS2  dNoPaddingTop'>Cachés de indicadores</div>
 	<div class='dBlockSize3'>
-        <input class='dSmallerButton' name="regenMetricSignatures" type="submit" value="Liberar" id='regenMetricRevisions' onclick="disableButton('regenMetricRevisions');">
+        <input class='dSmallerButton' name="cleanMetricSignatures" type="submit" value="Liberar"
+							 id='cleanMetricSignatures' onclick="disableButton('cleanMetricSignatures');">
         <div class="dExplanation">Datos de tiledata, summary, selectedmetric, y números de revisión.</div>
     </div>
 
 	<div class='dBlockNewLineS2  dNoPaddingTop'>Cachés de indicadores seleccionados</div>
 	<div class='dBlockSize3'>
-        <input class='dSmallerButton' name="selectedMetric" type="submit" value="Liberar"
-			   id='regenSelectedMetrics' onclick="disableButton('regenSelectedMetrics');">
+        <input class='dSmallerButton' name="clearSelectedMetricsCache" type="submit" value="Liberar"
+			   id='clearSelectedMetricsCache' onclick="disableButton('clearSelectedMetricsCache');">
         <div class="dExplanation">Datos de selectedmetric y fab.</div>
+    </div>
+
+
+	<div class='dBlockNewLineS2  dNoPaddingTop'>Cachés de delimitaciones y regiones</div>
+	<div class='dBlockSize3'>
+        <input class='dSmallerButton' name="clearClippingsCache" type="submit" value="Liberar"
+			   id='clearClippingsCache' onclick="disableButton('clearClippingsCache');">
+        <div class="dExplanation">Datos de clippings y boundaries.</div>
     </div>
 
 	<div class='dBlockNewLineS2  dNoPaddingTop'>Tablas tmp_work_dataset_*:</div>

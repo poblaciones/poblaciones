@@ -1,16 +1,14 @@
 <template>
-	<div :style="'display: inline-block; width: 28px; position: relative; ' + (topPadding ? 'padding-top: 5px' : '')">
+	<div :style="'display: inline-block; width: 28px;'
+							+ (chipVisible ? '' : 'position:absolute;') +
+							+ (offsetY ? 'top:' + offsetY + 'px;' : '') +
+					'position: relative; ' + (topPadding ? 'padding-top: 5px' : '')">
 		<v-popover popoverClass="tooltipInPopup tooltipNoBorder colorTooltip"
 							 popoverArrowClass="noArrow" :open="showPicker"
 							 :disabled="!canEdit" @hide="popOverClosed" @show="popOverOpened" popoverInnerClass="tooltipNoBorder">
+			<mp-color-picker-chip :canEdit="canEdit" :localValue="localValue" v-show="chipVisible"
+														:isDisabledObject="isDisabledObject" @show="show" />
 
-			<div :style="'background-color: ' + localValue" :class="'picked' + (canEdit ? ' hand': '')"
-					 @click="show">
-				<div v-show="isDisabledObject && !isDisabledObject.Visible">
-					<div class="line2"></div>
-				</div>
-				<slot></slot>
-			</div>
 			<div slot="popover">
 				<chrome-picker :disableAlpha="true" v-show="showPickerAdvanced" v-model="localValue" @input="updateValue"
 											 class="" />
@@ -42,12 +40,14 @@
 
 import CompactPicker from 'vue-color/src/components/Compact';
 import ChromePicker from 'vue-color/src/components/Chrome';
+import MpColorPickerChip from './MpColorPickerChip';
 
 export default {
 	name: 'MpColorPicker',
 	components: {
 		CompactPicker,
-		ChromePicker
+		ChromePicker,
+		MpColorPickerChip
 	},
 	methods: {
 		updateValue()
@@ -60,6 +60,7 @@ export default {
 			if (!this.showPickerAdvanced) {
 				this.hide();
 			}
+			this.$emit('valueChanged');
 		},
 		iconPickerClicked() {
 			this.showPicker = false;
@@ -68,6 +69,7 @@ export default {
 		disabledChanged() {
 			if (this.isDisabledObject) {
 				this.isDisabledObject.Visible = !this.isDisabled;
+				this.$emit('valueChanged');
 			}
 		},
 		popOverOpened() {
@@ -80,6 +82,8 @@ export default {
 				}
 			}
 			this.isOpen = false;
+			this.showPickerAdvanced = false;
+			this.showPicker = false;
 		},
 		receiveValue() {
 			if (this.ommitHexaSign) {
@@ -159,6 +163,8 @@ export default {
 	props: {
 		isDisabledObject: null,
 		canSelectIcon: { type: Boolean, default: false },
+		chipVisible: { type: Boolean, default: true },
+		offsetY: 0,
 		canEdit: { type: Boolean, default: true },
 		topPadding: { type: Boolean, default: true },
 		ommitHexaSign: { type: Boolean, default: false },
@@ -177,13 +183,6 @@ export default {
 	};
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped="">
-.picked {
-	position: relative;
-	width: 30px;
-	height: 23px;
-	border-radius: 15px;
-	border: 2px solid #828282;
-}
 .tinyButton {
 	height: 1.1rem;
 	padding-top: 0px;
@@ -235,15 +234,6 @@ export default {
 		transform-origin: right;
 	}
 
-	.line2 {
-		width: 28px;
-		height: 35px;
-		border-bottom: 2px solid #707170;
-		-webkit-transform: translateY(20px) translateX(5px) rotate(-26deg);
-		position: absolute;
-		top: -42px;
-		left: -13px;
-	}
 .extraBottomLine {
   position: absolute;
   bottom: 4px;

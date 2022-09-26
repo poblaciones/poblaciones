@@ -49,7 +49,8 @@ class SnapshotMetricVersionModel
 						// Hace un subselect distinct con los valores de variables
 		$sql .= "(SELECT LEFT(GROUP_CONCAT(SUB.V1 ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOPT_CAPTIONS_MAX_LENGTH . ")
 							FROM
-									(SELECT mvr_id, mvv_id, mvv_order, GROUP_CONCAT(DISTINCT vvl_caption ORDER BY vvl_variable_id, vvl_order SEPARATOR '\r') AS V1
+									(SELECT mvr_id, mvv_id, mvv_order,
+												GROUP_CONCAT(DISTINCT vvl_caption ORDER BY vvl_variable_id, vvl_order SEPARATOR '\r') AS V1
 									FROM metric_version
 									JOIN metric_version_level ON mvl_metric_version_id = mvr_id
 									JOIN variable ON mvv_metric_version_level_id = mvl_id
@@ -69,7 +70,7 @@ class SnapshotMetricVersionModel
 						" GROUP BY mvr_id, mvr_metric_id, mtr_revision, mtr_caption, mtr_metric_group_id, mtr_metric_provider_id, mvr_caption, wrk_id, met_title,
 										met_authors, ins_caption, wrk_type, wrk_is_private, wrk_is_indexed, wrk_access_link";
 
-		App::Db()->exec("SET group_concat_max_len = 10240");
+		App::Db()->exec("SET group_concat_max_len = 102400");
 		$param = ($regenFullTable ? array() : array($metricIdShardified, $metricIdShardified));
 		App::Db()->exec($sql, $param);
 		Profiling::EndTimer();

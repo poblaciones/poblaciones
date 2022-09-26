@@ -574,6 +574,7 @@ ScaleGenerator.prototype.CreateByVariableCategories = function (variable, curren
 		return;
 	}
 	var total = currentLabels.length;
+	var newVals = [];
 	for (var n = 0; n < total; n++) {
 		var label = currentLabels[n];
 		var value = {
@@ -586,8 +587,10 @@ ScaleGenerator.prototype.CreateByVariableCategories = function (variable, curren
 			LineColor: null,
 			Order: n + 1
 		};
-		variable.Values.push(value);
+		newVals.push(value);
 	}
+	//arr.Fill(variable.Values, newVals);
+	variable.Values = newVals;
 };
 
 ScaleGenerator.prototype.CreateManualCategories = function (variable) {

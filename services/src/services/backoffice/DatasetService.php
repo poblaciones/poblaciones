@@ -10,6 +10,7 @@ use minga\framework\WebConnection;
 use minga\framework\IO;
 
 use helena\classes\App;
+use helena\classes\CsvParser;
 use helena\caches\DatasetColumnCache;
 use helena\services\backoffice\cloning\DatasetClone;
 use helena\entities\backoffice as entities;
@@ -17,6 +18,9 @@ use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\services\backoffice\import\DatasetTable;
 use helena\caches\BackofficeDownloadCache;
+use helena\services\backoffice\import\PhpSpreadSheetCsv;
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class DatasetService extends DbSession
 {
@@ -168,6 +172,67 @@ class DatasetService extends DbSession
 		$errors = "DELETE FROM " . $tableErrors . " WHERE row_id IN (" . join(',', $ids) . ")";
 		App::Db()->exec($errors);
 	}
+
+	public function ConvertCsvLabelsFile($data)
+	{
+		$outFile = $this->Base64ToFile($data);
+	  $data = $this->CsvToJson($outFile);
+		IO::Delete($outFile);
+		return $data;
+	}
+
+	private function Base64ToFile($data)
+	{
+		$SEP = ";base64,";
+		$n = strpos($data, $SEP);
+		$outFile = IO::GetTempFilename();
+		IO::WriteAllText($outFile, base64_decode(substr($data, $n + strlen($SEP))));
+		return $outFile;
+	}
+
+	private function CsvToJson($outFile)
+	{
+		$csv = new CsvParser();
+		// abre el archivo.
+		$csv->Open($outFile);
+		// obtiene el header.
+		$csv->GetHeader();
+		$data = [];
+		while($csv->eof == false)
+		{
+			 // obtiene el texto por columnas.
+			 $rows = $csv->GetNextRowsByRow(10000);
+			 foreach($rows as $row)
+			 {
+				 if (sizeof($row) > 1)
+	 				 $data[] = ['Value' => $row[0], 'Caption' => $row[1]];
+			 }
+		}
+		$csv->Close();
+		return $data;
+	}
+
+	public function ConvertExcelLabelsFile($data)
+	{
+		$excelFile = $this->Base64ToFile($data);
+		$outFile = IO::GetTempFilename();
+
+		// Converte el excel a CSV
+		$spreadsheet = IOFactory::load($excelFile);
+		$writer = new PhpSpreadSheetCsv($spreadsheet);
+		$writer->setSheetIndex(0);
+		$writer->save($outFile);
+
+		// Lo lee
+	  $data = $this->CsvToJson($outFile);
+
+		// Sale
+		IO::Delete($excelFile);
+		IO::Delete($outFile);
+
+		return $data;
+	}
+
 	public function UpdateRowValues($datasetId, $id, $values)
 	{
 		Profiling::BeginTimer();

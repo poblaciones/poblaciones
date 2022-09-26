@@ -19,7 +19,7 @@ App::$app->get('/services/admin/GetReviews', function (Request $request) {
 });
 
 App::Post('/services/admin/UpdateReview', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteEditor())
 		return $app;
 
 	$review = App::ReconnectJsonParamMandatory(entities\Review::class, 'r');
@@ -28,7 +28,7 @@ App::Post('/services/admin/UpdateReview', function (Request $request) {
 });
 
 App::Post('/services/admin/DeleteReview', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
+	if ($app = Session::CheckIsSiteEditor())
 		return $app;
 
 	$review = App::ReconnectJsonParamMandatory(entities\Review::class, 'r');

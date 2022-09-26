@@ -304,16 +304,17 @@ class App
 		$serializer = self::GetSerializer();
 		return $serializer->deserialize($entity, $className, 'json');
 	}
-	public static function JsonImmutable($value)
+	public static function JsonImmutable($value, $alreadyEncoded = false, $gzipped = false)
 	{
 		$w = Params::GetIntMandatory('w');
 		if ($w === 0)
 			$expireDays = 0;
 		else
 			$expireDays = 1000;
-		return self::Json($value, $expireDays);
+		return self::Json($value, $expireDays, $alreadyEncoded, $gzipped);
 	}
-	public static function Json($value, $daysToExpire = -1)
+
+	public static function Json($value, $daysToExpire = -1, $alreadyEncoded = false, $gzipped = false)
 	{
 		$sessionStarted = PhpSession::GetSessionValue('started', null);
 		$sessionTime = gmdate('D, d M Y H:i:s', intval($sessionStarted)) . ' GMT';
@@ -324,7 +325,25 @@ class App
 			ini_set('precision', '17');
 			ini_set('serialize_precision', '-1');
 		}
-		$response = new Response(json_encode($value));
+
+		// Procesa la compresión...
+		if ($gzipped)
+		{
+			$acceptsGzip = strstr(Params::SafeServer('HTTP_ACCEPT_ENCODING'), "gzip");
+			if ($acceptsGzip)
+			{
+				// pone los headers...
+				header("X-Compression: gzip");
+				header("Content-Encoding: gzip");
+			}
+			else
+			{
+				// lo expande...
+				$value = gzdecode($value);
+			}
+		}
+
+		$response = new Response($alreadyEncoded ? $value : json_encode($value));
 		if ($daysToExpire === -1 || self::Debug())
 		{
 			$response->headers->set('Cache-control', 'private');
@@ -338,6 +357,109 @@ class App
 		// Tiene que ir como text/plain porque si no complica los coars y cachés.
 		$response->headers->set('Content-Type', 'text/plain');
 		return $response;
+	}
+
+	public static function JsonCacheableImmutable(
+				$cache,
+				$cacheArgs,
+				$dataCalculator,
+				$skipCache = false)
+	{
+		$encodedZipData = null;
+		if (!$skipCache)
+		{
+			if (sizeof($cacheArgs) === 1 && $cache->HasRawData($cacheArgs[0], $encodedZipData))
+				return App::JsonImmutable($encodedZipData, true, true);
+			if (sizeof($cacheArgs) === 2 && $cache->HasRawData($cacheArgs[0], $cacheArgs[1], $encodedZipData))
+				return App::JsonImmutable($encodedZipData, true, true);
+		}
+		$encodedZipData = self::EncodeAndzip($dataCalculator());
+
+		Performance::CacheMissed();
+		Performance::SetMethod("get");
+
+		if (!$skipCache)
+		{
+			if (sizeof($cacheArgs) === 1)
+				$cache->PutRawData($cacheArgs[0], $encodedZipData);
+			else if (sizeof($cacheArgs) === 2)
+				$cache->PutRawData($cacheArgs[0], $cacheArgs[1], $encodedZipData);
+		}
+		return App::JsonImmutable($encodedZipData, true, true);
+	}
+
+	public static function EncodeAndzip($data)
+	{
+		if (sizeof($data->Data) > 25000)
+		{
+			return self::serializeCompressed($data);
+		}
+		else
+			return gzencode(json_encode($data));
+	}
+
+
+	private function serializeCompressed($data, $level='6')
+	{
+		$STEP = 25000;
+		$rows = $data->Data;
+		$data->Data = [];
+		$template = json_encode($data);
+		$nPos = strpos($template, '"Data":[]');
+		$header = substr($template, 0, $nPos + 8);
+		$footer = substr($template, $nPos + 8);
+
+		$dest = IO::GetTempFilename();
+
+    $mode='wb'.$level;
+    if(! ($fp_out=gzopen($dest,$mode)))
+			throw new \ErrorException("No pudo serializarse el resultado.");
+		gzwrite($fp_out, $header);
+		// Pone los chunks
+		$total = 0;
+		for($n = 0; $n < sizeof($rows); $n += $STEP)
+		{
+			$size = min($STEP, sizeof($rows) - $n);
+			$arrayPart = array_slice($rows, 0, $size);
+			$total += $size;
+			$serialize = json_encode($arrayPart);
+			$serialize[0] = ($n > 0 ? ',': ' ');
+			$serialize[strlen($serialize) - 1] = ' ';
+			gzwrite($fp_out,$serialize); // no tiene comas intermedias
+		}
+		$rows = null;
+		gzwrite($fp_out, $footer);
+		gzclose($fp_out);
+
+		$ret = IO::ReadAllText($dest);
+		IO::Delete($dest);
+		return $ret;
+	}
+
+	private function gzcompressfile($source,$dest, $level='9')
+	{
+    $mode='wb'.$level;
+    $error=false;
+    if($fp_out=gzopen($dest,$mode))
+		{
+      if($fp_in=fopen($source,'rb'))
+			{
+				while(!feof($fp_in))
+						gzwrite($fp_out,fread($fp_in,1024*512));
+				fclose($fp_in);
+      }
+      else
+				$error=true;
+
+			gzclose($fp_out);
+		}
+    else
+			$error=true;
+
+		if($error)
+			return false;
+		else
+			return true;
 	}
 
 	public static function RegisterControllerGetPost($path, $controllerClassName)

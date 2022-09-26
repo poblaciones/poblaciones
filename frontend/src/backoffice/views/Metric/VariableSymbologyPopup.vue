@@ -105,36 +105,45 @@
 				<md-card>
 					<md-card-content class="fixeHeightCard">
 					<div class="md-layout">
-						<div class="md-layout-item md-size-100" >
-							<div class="separator">{{ CategoriesLabel
-										}}
-									</div>
+						<div class="md-layout-item md-size-100">
+							<mp-color-picker :canEdit="canEdit" :canSelectIcon="Dataset.properties.Type == 'L'"
+															 :isDisabledObject="currentItem"
+															 :ommitHexaSign="true" @valueChanged="pickerValueUpdated"
+															 @pickIconClicked="pickIconClicked(currentItem);" :offsetY="offsetY"
+															 @selected="colorSelected(currentItem.Value !== null)"
+															 v-model="currentItem.FillColor" :chipVisible="false"
+															 style="width: 45px; margin-left: -10px" ref="picker">
+
+							</mp-color-picker>
+							<div class="separator">
+								{{ CategoriesLabel }}
+							</div>
 							<md-list style="overflow-y: auto; " :style="(this.CutMode === 'V' ? 'height: 156px;':'height: 185px;')">
 								<md-list-item v-for="item in Variable.Values" :key="item.Id"
 															:value="item.Id" class="itemSmall">
 
-									<mp-color-picker :canEdit="canEdit" :canSelectIcon="Dataset.properties.Type == 'L'" :isDisabledObject="item"
-																	 :ommitHexaSign="true" :top-padding="false" @pickIconClicked="pickIconClicked(item);" @selected="colorSelected(item.Value !== null)" v-model="item.FillColor"
-																	 style="width: 45px;">
-										<div class="iconStyle iconStyleInList">
-											<Icon v-if="item.Symbol" :symbol="item.Symbol" iconMaxSize="1.2em" :work="Work" />
-										</div>
-										<div class="tinyCloseButton">
-											<md-button v-if="item.Symbol && canEdit"
-																 class="md-icon-button"
-																 @click.stop="removeIcon(item)">
-												<md-icon>close</md-icon>
-												<md-tooltip md-direction="bottom">Quitar ícono</md-tooltip>
-											</md-button>
-										</div>
-									</mp-color-picker>
+									<mp-color-picker-chip :canEdit="canEdit" :localValue="'#' + item.FillColor"
+																				:isDisabledObject="item" @show="showPicker">
+										<template v-if="item.Symbol">
+											<div class="iconStyle iconStyleInList">
+												<Icon :symbol="item.Symbol" iconMaxSize="1.2em" :work="Work" />
+											</div>
+											<div class="tinyCloseButton">
+												<md-button v-if="canEdit" class="md-icon-button" @click.stop="removeIcon(item)">
+													<md-icon>close</md-icon>
+													<md-tooltip md-direction="bottom">Quitar ícono</md-tooltip>
+												</md-button>
+											</div>
+										</template>
+									</mp-color-picker-chip>
+
 
 									<span class="md-list-item-text">{{ item.Caption }}</span>
 									<md-button v-if="canEdit && (CutMode === 'M' || item.Value === null)" class="md-icon-button md-list-action"
 														 @click="editValue(item)">
 										<md-icon>edit</md-icon>
 									</md-button>
-								</md-list-item>
+</md-list-item>
 							</md-list>
 							<div v-if="this.CutMode === 'V'" class="md-helper-text helper" style="margin-top: 8px">
 								Para agregar o modificar categorías, utilice la opción Categorías en la solapa Variables.
@@ -264,6 +273,7 @@
 import axios from 'axios';
 import f from '@/backoffice/classes/Formatter';
 import IconPickerPopup from '@/backoffice/components/IconPickerPopup';
+import MpColorPickerChip from '@/common/components/MpColorPickerChip';
 import ValuePopup from './ValuePopup.vue';
 import Icon from '@/backoffice/components/Icon';
 import ScaleGenerator from '@/backoffice/classes/ScaleGenerator';
@@ -289,6 +299,13 @@ export default {
 		},
 		iconSelected(selectedIcon) {
 			this.lastPickerClicked.Symbol = selectedIcon;
+			this.listItem.Symbol = selectedIcon;
+		},
+		pickerValueUpdated() {
+			this.listItem.Symbol = this.currentItem.Symbol;
+			this.listItem.FillColor = this.currentItem.FillColor;
+			this.listItem.Value = this.currentItem.Value;
+			this.listItem.Visible = this.currentItem.Visible ;
 		},
 		copySymbology() {
 			// Prepara la info
@@ -367,6 +384,15 @@ export default {
 		},
 		paletteOffset(paletteId) {
 			return -(paletteId * 32);
+		},
+		showPicker(item, offsetY) {
+			this.offsetY = offsetY;
+			this.listItem = item;
+			this.currentItem.Symbol = item.Symbol;
+			this.currentItem.Value = item.Value;
+			this.currentItem.FillColor = item.FillColor;
+			this.currentItem.Visible = item.Visible;
+			this.$refs.picker.show();
 		},
 		show(level, variable) {
 			// Se pone visible
@@ -578,10 +604,16 @@ export default {
 	components: {
 		ValuePopup,
 		Icon,
-		IconPickerPopup
+		IconPickerPopup,
+		MpColorPickerChip
 	},
 	data() {
 		return {
+			currentItem: {
+				Value: null, Symbol: '', Visible: true
+			},
+			listItem: null,
+			offsetY: 0,
 			Level: null,
 			Variable: null,
 			showDialog: false,
@@ -599,6 +631,7 @@ export default {
 		'Variable.Symbology.CutMode'() {
 			this.RegenCategories();
 		},
+
 		'Variable.Symbology.CutColumn'() {
 			this.RegenCategories();
 		},

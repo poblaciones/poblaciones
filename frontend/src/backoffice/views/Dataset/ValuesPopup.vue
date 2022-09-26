@@ -42,37 +42,38 @@
 
 						<div class="gridStatusBar">{{ statusBarText }}</div>
 						<div>
-							<md-button v-if="this.canEdit && this.doingAutoRecode === false" @click="create()">
+							<md-button v-if="canEdit && doingAutoRecode === false" @click="create()">
 								<md-icon>add_circle_outline</md-icon>
 								Agregar
 							</md-button>
-
-							<md-button v-if="this.canEdit" @click="showModify()" :disabled="modifyDisabled">
+							<md-button v-if="canEdit" @click="showModify()" :disabled="modifyDisabled">
 								<md-icon>edit</md-icon>
 								Modificar
 							</md-button>
-
-							<md-button v-if="this.canEdit" @click="deleteOnClick()" :disabled="deleteDisabled">
+							<md-button v-if="canEdit" @click="deleteOnClick()" :disabled="deleteDisabled">
 								<md-icon>delete</md-icon>
 								Eliminar
 							</md-button>
 
-							<md-button @click="excelBtnOnClick()">
-								<md-icon>import_export</md-icon>
+							<md-button @click="excelExportBtnOnClick">
+								<md-icon>download</md-icon>
 								Exportar a Excel
 							</md-button>
-
-							<md-button @click="csvBtnOnClick()">
-								<md-icon>import_export</md-icon>
+							<md-button @click="csvExportBtnOnClick">
+								<md-icon>download</md-icon>
 								Exportar a CSV
 							</md-button>
+
+							<mp-file-upload v-if="canEdit && !doingAutoRecode" label="Importar desde Excel" @changed="excelImportBtn"  accept=".xlsx" />
+							<mp-file-upload v-if="canEdit && !doingAutoRecode" label="Importar desde CSV" @changed="csvImportBtn" accept=".csv" />
+
 						</div>
 					</div>
 				</div>
 			</md-dialog-content>
 
 			<md-dialog-actions>
-				<div v-if="this.canEdit">
+				<div v-if="canEdit">
 					<md-button @click="openPopup = false">Cancelar</md-button>
 					<md-button class="md-primary" @click="save()">Aceptar</md-button>
 				</div>
@@ -90,7 +91,7 @@
 					<mp-simple-text label="Valor"
 								v-model="CurrentVarValue" ref="inputValue" @enter="completeEditOnClick" />
 				</div>
-				<div v-if="!this.doingAutoRecode" class="md-layout-item md-size-100">
+				<div v-if="!doingAutoRecode" class="md-layout-item md-size-100">
 					<mp-simple-text label="Etiqueta" ref="inputLabel"
 							v-model="CurrentVarLabel" @enter="completeEditOnClick" />
 				</div>
@@ -151,7 +152,7 @@ export default {
 						};
 	},
 	methods: {
-		getData() {
+		getData(markDirty = 0) {
 			if (this.bindData === null || this.bindData.length === 0) {
 				return [];
 			}
@@ -163,7 +164,7 @@ export default {
 										'Caption': row.Caption,
 										'Order': row.Order,
 										'Count': (row.Count === undefined ? -1 : row.Count),
-										'Dirty': 0 };
+										'Dirty': markDirty };
 				data.push(item);
 			}
 			return data;
@@ -236,11 +237,50 @@ export default {
 				this.statusBarText = sel + formatted + ' etiquetas.';
 			}
     },
-		excelBtnOnClick() {
+		excelExportBtnOnClick() {
 			this.Grid.exportdata('xls', 'etiquetas', true, null, false, this.Work.GetGridExportUrl());
 		},
-		csvBtnOnClick() {
+		csvExportBtnOnClick() {
 			this.Grid.exportdata('csv', 'etiquetas', true, null, false, this.Work.GetGridExportUrl());
+		},
+		excelImportBtn(data) {
+			var loc = this;
+			this.Dataset.ConvertExcelLabelsFile(this.Work.properties.Id, data).then(function (data) {
+				loc.receiveConvertedData(data);
+			});
+		},
+		csvImportBtn(data) {
+			var loc = this;
+			this.Dataset.ConvertCsvLabelsFile(this.Work.properties.Id, data).then(function (data) {
+				loc.receiveConvertedData(data);
+			});
+		},
+		receiveConvertedData(data) {
+			var ret = [];
+			var n = 1;
+			for (var row of data) {
+				ret.push({
+						'Id': 0,
+						'Value': row.Value,
+						'Caption': row.Caption,
+						'Order': n,
+						'Count': -1,
+						'Dirty': 1
+				});
+				n++;
+			}
+			this.clearAllLabels();
+			this.bindData = ret;
+			this.loadData(1);
+		},
+		clearAllLabels() {
+			for (var n = 0; n < this.source.localdata.length; n++) {
+				if (this.source.localdata[n].Id > 0) {
+					this.deletedList.push(this.source.localdata[n].Id);
+				}
+			}
+			this.bindData = [];
+			this.loadData();
 		},
 		downOnClick() {
 			var selectedRows = this.selectedIndexes();
@@ -464,8 +504,8 @@ export default {
 					}
 			});
 	  },
-		loadData() {
-			this.source.localdata = this.getData();
+		loadData(markDirty = 0) {
+			this.source.localdata = this.getData(markDirty);
 			this.source.totalrecords = this.source.localdata.length;
 			if (this.doingAutoRecode) {
 				this.Grid.showcolumn('Count');

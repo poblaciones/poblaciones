@@ -34,6 +34,22 @@ App::GetOrPost('/services/backoffice/UpdateDatasetRegenData', function (Request 
 	return App::Json($controller->UpdateDataset($Dataset, true));
 });
 
+App::GetOrPost('/services/backoffice/ConvertCsvLabelsFile', function (Request $request) {
+	$controller = new services\DatasetService();
+	$DatasetId = Params::GetIntMandatory("k");
+	if ($denied = Session::CheckIsDatasetEditor($DatasetId)) return $denied;
+	$data = Params::GetMandatory("d");
+	return App::Json($controller->ConvertCsvLabelsFile($data));
+});
+
+App::GetOrPost('/services/backoffice/ConvertExcelLabelsFile', function (Request $request) {
+	$controller = new services\DatasetService();
+	$DatasetId = Params::GetIntMandatory("k");
+	if ($denied = Session::CheckIsDatasetEditor($DatasetId)) return $denied;
+	$data = Params::GetMandatory("d");
+	return App::Json($controller->ConvertExcelLabelsFile($data));
+});
+
 App::GetOrPost('/services/backoffice/ExportGridService', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;

@@ -62,9 +62,7 @@ class BoundaryService extends BaseService
 		// recorta el cuadrado
 		$tileEnvelope = new Envelope(new Coordinate(0,0), new Coordinate(GeoJson::TILE_PRJ_SIZE, GeoJson::TILE_PRJ_SIZE));
 		$clipper = new ClipperRound();
-
 		$data->Data['features'] = $clipper->clipCollectionByEnvelope($data->Data['features'], $tileEnvelope);
-
 		return $data;
 	}
 

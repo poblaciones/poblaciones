@@ -85,21 +85,7 @@ class TileDataService extends BaseService
 		$this->CheckNotNullNumeric($metricVersionId);
 		$this->CheckNotNumericNullable($levelId);
 
-		$key = LayerDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity);
-
-		if ($frame->ClippingCircle == null && LayerDataCache::Cache()->HasData($metricId, $key, $data))
-		{
-			Profiling::EndTimer();
-			return $this->GotFromCache($data);
-		}
-
 		$data = $this->CalculateLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity);
-
-		Performance::CacheMissed();
-		Performance::SetMethod("get");
-
-		if ($frame->ClippingCircle == null)
-			LayerDataCache::Cache()->PutData($metricId, $key, $data);
 
 		Profiling::EndTimer();
 		return $data;

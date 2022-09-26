@@ -91,7 +91,7 @@ export default {
 	},
   mounted() {
     var format = this.getFormat();
-		var total = this.total;
+		var total = this.total.aniTotal;
 		Helper.animateNum(this, 'aniTotal', total, total, format, this.variable.Decimals);
 		var totalCount = this.totalCount;
 		Helper.animateNum(this, 'aniTotalCount', totalCount, totalCount, format, this.variable.Decimals);
@@ -105,7 +105,7 @@ export default {
 		};
 	},
 	watch: {
-		total(newValue, oldValue) {
+		'total.aniTotal'(newValue, oldValue) {
 			var format = this.getFormat();
 			Helper.animateNum(this, 'aniTotal', newValue, oldValue, format, this.variable.Decimals);
 		},
@@ -123,30 +123,41 @@ export default {
 			return 'margin-right: ' + margin + 'px;';
 		},
 		total() {
+			var percTotal = 0;
+			const loc = this;
 			if(this.metric.properties.SummaryMetric === 'P' ||
 				this.metric.properties.SummaryMetric === 'A') {
-				return 100.00;
+				for (var label of this.variable.ValueLabels) {
+					percTotal += Number(loc.getValue(label.Values, this.variable.ValueLabels));
+				};
+				return {
+					aniTotal: 100.00, percTotal: percTotal
+				};
 			}
-			const loc = this;
 			var ret = 0;
 			var tot = 0;
-			this.variable.ValueLabels.forEach(function(label) {
+			var summaryMetric = loc.metric.properties.SummaryMetric;
+			for (var label of this.variable.ValueLabels) {
+				percTotal += Number(loc.getValue(label.Values, this.variable.ValueLabels));
+
 				var tvalue = label.Values.Value;
-				if(loc.metric.properties.SummaryMetric === 'N' || loc.metric.properties.SummaryMetric === 'I') {
+				if(summaryMetric === 'N' || summaryMetric === 'I') {
 					ret += Number(tvalue);
 					tot += Number(label.Values.Total);
-				} else if(loc.metric.properties.SummaryMetric === 'K') {
+				} else if(summaryMetric === 'K') {
 					ret += Number(label.Values.Km2);
-				} else if(loc.metric.properties.SummaryMetric === 'H') {
+				} else if(summaryMetric === 'H') {
 					ret += Number(label.Values.Km2) / 0.01;
-				} else if(loc.metric.properties.SummaryMetric === 'D') {
+				} else if(summaryMetric === 'D') {
 					ret += (label.Values.Km2 > 0 ? Number(tvalue) / Number(label.Values.Km2) : 0);
 				}
-			});
-			if (loc.metric.properties.SummaryMetric === 'I') {
+			}
+			if (summaryMetric === 'I') {
 				ret = (tot > 0 ? ret * this.variable.NormalizationScale / tot : 0);
 			}
-			return ret;
+			return {
+				aniTotal: ret, percTotal: percTotal
+			};
 		},
 		totalCount() {
 			var ret = 0;
@@ -388,11 +399,12 @@ export default {
 			}
 		},
 		getLength(value, variable) {
-			var tot = 0;
+			//return '';
+			var tot = this.total.percTotal;
 			var loc = this;
-			variable.ValueLabels.forEach(function(label) {
+			/*variable.ValueLabels.forEach(function(label) {
 				tot += Number(loc.getValue(label.Values, variable.ValueLabels));
-			});
+			});*/
 			//return 'width:' + ((tot > 0 ? value / tot : 0) * this.panelWidth) + 'px';
 			var prop = (tot > 0 ? value / tot : 0);
 			return 'width: calc(' + (prop * 100) + '% - ' + (60 * prop) + 'px)';

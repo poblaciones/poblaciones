@@ -97,7 +97,7 @@ class Symbology
     /**
      * @var string
      *
-     * @ORM\Column(name="vsy_custom_colors", type="string", length=2048, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="vsy_custom_colors", type="string", length=60000, precision=0, scale=0, nullable=false, unique=false)
      */
     private $CustomColors;
 

@@ -11,16 +11,6 @@ module.exports = {
 
 		const fs = require('fs');
 
-		var phpTarget = httpProxy.createServer({
-			target: {
-				host: 'localhost',
-				port: phpPORT
-			},
-		});
-		phpTarget.on('error', function (e) {
-			console.log('error happened (php): ' + e.message);
-		});
-
 		var vuejsTarget = httpProxy.createServer({
 			target: {
 				host: 'localhost',
@@ -47,13 +37,16 @@ module.exports = {
 		});
 		svr.listen(appPORT);
 	},
+
 	startPhpServer(phpPORT) {
 		var loc = this;
-		if (loc.currentPhpServer) {
-			loc.currentPhpServer.stop();
-		}
+
 		const phpServer = require('php-server');
-		phpServer({ port: phpPORT, base: '../services/web', router: '../services/web/resolve-dev.php' }).then(
+		phpServer({
+			port: phpPORT,
+			base: '../services/web',
+			router: '../services/web/resolve-dev.php'
+		}).then(
 			function (server) {
 				loc.currentPhpServer = server;
 			}).catch(function (e) {

@@ -9,8 +9,9 @@ use helena\services\frontend as services;
 use helena\classes\App;
 use helena\classes\Session;
 use minga\framework\Params;
-use minga\framework\Context;
+use minga\framework\Performance;
 use minga\framework\PublicException;
+use helena\caches\LayerDataCache;
 
 // ej. http://mapas/services/metrics/GetSummary?l=8&v=12&a=62&r=7160
 App::$app->get('/services/frontend/metrics/GetSummary', function (Request $request) {
@@ -74,7 +75,6 @@ App::$app->get('/services/metrics/GetMetricItemInfo', function (Request $request
 
 
 App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $request) {
-	$controller = new services\TileDataService();
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
 
@@ -83,7 +83,18 @@ App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $req
 	$frame = Frame::FromParams();
 	$levelId = Params::GetInt('a');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
-	return App::JsonImmutable($controller->GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity));
+
+	$key = LayerDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity);
+
+	return App::JsonCacheableImmutable(
+				LayerDataCache::Cache(),
+				[$metricId, $key],
+				function() use ($frame, $metricId, $metricVersionId, $levelId, $urbanity) {
+					$controller = new services\TileDataService();
+					return $controller->GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity);
+				},
+				($frame->ClippingCircle != null) // skipCache
+		);
 });
 
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470

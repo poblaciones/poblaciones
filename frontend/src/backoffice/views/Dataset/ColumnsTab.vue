@@ -22,7 +22,7 @@
 										@confirm="deleteOnClick" />
 				<JqxGrid ref="columnsGrid" :width="850" :source="dataAdapter" :columns="columns" :columnsresize="true"
 								 :columnsreorder="true" @rowselect="selectionChanged" @rowunselect="selectionChanged"
-								 @rowdoubleclick="showModify" :handlekeyboardnavigation="handlekeyboardnavigation"
+								 @celldoubleclick="dblClickModify" :handlekeyboardnavigation="handlekeyboardnavigation"
 								 selectionmode='multiplerowsextended' :localization="localization">
 				</JqxGrid>
 				<div class="gridStatusBar">{{ statusBarText }}</div>
@@ -423,6 +423,13 @@ export default {
 			window.Context.Factory.GetCopy('Column', function (data) {
 				loc.$refs.edit.show(data);
 			});
+		},
+		dblClickModify(e) {
+			if (e.args.column.datafield === "ValueLabels") {
+				this.valuesOnClick();
+			} else {
+				this.showModify();
+			}
 		},
 		showModify() {
 			let selectedRow = this.selectedId();

@@ -13,7 +13,6 @@ class ClipperRound
 			// el margin determina qué tan lejos del corte tienen que quedar las líneas
 			// de unión de los polígonos cortados
 			$margin = 32 * GeoJson::TILE_PRJ_SIZE / GeoJson::TILE_SIZE; // 1024
-
 			return $this->clipCollection($fc,
 							round($envelope->Min->Lon),
 							round($envelope->Max->Lon),
@@ -23,7 +22,6 @@ class ClipperRound
 
     function clipCollection($fc, $k1, $k2, $k3, $k4, $offset = 0, $margin = 0)
 		{
-				$ret = array();
 				$filtered = [];
 				foreach($fc as $feature)
 				{
@@ -65,7 +63,7 @@ class ClipperRound
 				$feature['geometry']['coordinates'] = $lines[0];
 				return $feature;
 			}
-			else if ($f['geometry']['type'] === 'Multilinestring')
+			else if ($f['geometry']['type'] === 'MultiLinestring')
 			{
 				$lines = $this->clipLine($this->clipLine($f['geometry']['coordinates'], $k1, $k2, 0, $margin), $k3, $k4, 1, $margin);
 				if (sizeof($lines) === 0) return null;
@@ -79,7 +77,7 @@ class ClipperRound
 				$feature['geometry']['coordinates'] = $lines;
 				return $feature;
 			}
-			else if ($f['geometry']['type'] === 'Multipolygon')
+			else if ($f['geometry']['type'] === 'MultiPolygon')
 			{
 				$coordinates = [];
 				foreach($f['geometry']['coordinates'] as $polygon)

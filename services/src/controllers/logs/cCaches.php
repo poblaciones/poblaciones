@@ -80,7 +80,7 @@ class cCaches extends cController
 			$cm = new CacheManager();
 			$cm->CleanLabelsCache();
 			$cm->CleanBoundariesCache();
-		} else if (array_key_exists('selectedMetric', $_POST)) {
+		} else if (array_key_exists('clearSelectedMetricsCache', $_POST)) {
 			$model = new SnapshotMetricVersionModel();
 			$n = $model->IncrementAllSignatures();
 			$sm = new SnapshotsManager();
@@ -88,12 +88,17 @@ class cCaches extends cController
 			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores y vaciado el cache de selectedMetrics.';
 			$cm = new CacheManager();
 			$cm->CleanSelectedMetricCache();
-		} else if (array_key_exists('regenMetricSignatures', $_POST)) {
+		} else if (array_key_exists('cleanMetricSignatures', $_POST)) {
 			$model = new SnapshotMetricVersionModel();
 			$n = $model->IncrementAllSignatures();
 			$this->message = 'Incrementada la información de ' . $n . ' versiones de indicadores.';
 			$cm = new CacheManager();
 			$cm->CleanAllMetricCaches();
+		} else if (array_key_exists('clearClippingsCache', $_POST)) {
+			$this->message = 'Liberados los cachés.';
+			$cm = new CacheManager();
+			$cm->CleanBoundariesCache();
+			$cm->CleanClippingCache();
 		} else if (array_key_exists('clearTempTables', $_POST)) {
 			$model = new PublishDataTables();
 			$n = $model->CleanTempTables();

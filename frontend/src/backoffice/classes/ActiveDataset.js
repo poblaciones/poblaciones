@@ -45,6 +45,22 @@ ActiveDataset.prototype.CloneDataset = function (workId, caption) {
 		});
 };
 
+ActiveDataset.prototype.ConvertCsvLabelsFile = function (workId, data) {
+	let url = window.host + '/services/backoffice/ConvertCsvLabelsFile';
+	return axiosClient.postPromise(url, { 'w': workId, 'k': this.properties.Id, 'd': data },
+		'importar el archivo').then(function (data) {
+			return data;
+		});
+};
+
+ActiveDataset.prototype.ConvertExcelLabelsFile = function (workId, data) {
+	let url = window.host + '/services/backoffice/ConvertExcelLabelsFile';
+	return axiosClient.postPromise(url, { 'w': workId, 'k': this.properties.Id, 'd': data },
+		'importar el archivo').then(function (data) {
+			return data;
+		});
+};
+
 ActiveDataset.prototype.DeleteDataset = function (workId) {
 	var loc = this;
 	let url = window.host + '/services/backoffice/DeleteDataset';
@@ -577,7 +593,7 @@ ActiveDataset.prototype.ValidMeasures = function () {
 
 ActiveDataset.prototype.ValidMeasuresString = function () {
 	return [ { Id: 1, Caption: 'Nominal' },
-					{ Id: 3, Caption: 'Continua' }];
+					{ Id: 2, Caption: 'Ordinal' }];
 };
 
 ActiveDataset.prototype.ValidFormats = function () {
