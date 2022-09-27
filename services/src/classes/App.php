@@ -327,16 +327,10 @@ class App
 		}
 
 		// Procesa la compresión...
+		$acceptsGzip = strstr(Params::SafeServer('HTTP_ACCEPT_ENCODING'), "gzip");
 		if ($gzipped)
 		{
-			$acceptsGzip = strstr(Params::SafeServer('HTTP_ACCEPT_ENCODING'), "gzip");
-			if ($acceptsGzip)
-			{
-				// pone los headers...
-				header("X-Compression: gzip");
-				header("Content-Encoding: gzip");
-			}
-			else
+			if (!$acceptsGzip)
 			{
 				// lo expande...
 				$value = gzdecode($value);
@@ -354,6 +348,15 @@ class App
 			$response->headers->set('Pragma', '');
 			$response->headers->set('Cache-Control', 'public, max-age=' . $days);
 		}
+
+		// Procesa la compresión...
+		if ($gzipped && $acceptsGzip)
+		{
+			// pone los headers...
+			$response->headers->set("X-Compression", "gzip");
+			$response->headers->set("Content-Encoding", "gzip");
+		}
+
 		// Tiene que ir como text/plain porque si no complica los coars y cachés.
 		$response->headers->set('Content-Type', 'text/plain');
 		return $response;
@@ -417,15 +420,17 @@ class App
 		gzwrite($fp_out, $header);
 		// Pone los chunks
 		$total = 0;
+		ini_set( 'serialize_precision', -1);
 		for($n = 0; $n < sizeof($rows); $n += $STEP)
 		{
 			$size = min($STEP, sizeof($rows) - $n);
-			$arrayPart = array_slice($rows, 0, $size);
+			$arrayPart = array_slice($rows, $n, $size);
 			$total += $size;
+
 			$serialize = json_encode($arrayPart);
 			$serialize[0] = ($n > 0 ? ',': ' ');
 			$serialize[strlen($serialize) - 1] = ' ';
-			gzwrite($fp_out,$serialize); // no tiene comas intermedias
+			gzwrite($fp_out,$serialize);
 		}
 		$rows = null;
 		gzwrite($fp_out, $footer);

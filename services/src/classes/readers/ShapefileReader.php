@@ -74,8 +74,17 @@ class ShapefileReader extends BaseReader
 			'valueLabels' => [],
 		];
 
-//		$shapefile = new GaspareFileReader($filename);
-		$shapefile = new FastShapeFileReader($filename);
+		$dbfExists = true;
+		if (Str::EndsWith(Str::ToLower($filename), ".shp"))
+		{
+			$dbfFile = substr($filename, 0, strlen($filename) - 3) . "dbf";
+			$dbfExists = IO::Exists($dbfFile);
+		}
+		$options = [];
+		if (!$dbfExists)
+			 $options[Shapefile::OPTION_IGNORE_FILE_DBF] = true;
+
+		$shapefile = new FastShapeFileReader($filename, $options);
 
 		$shapeType = $shapefile->getShapeType(Shapefile::FORMAT_STR);
 		$useLatLong = ($shapeType === "Point");
@@ -399,10 +408,10 @@ class ShapefileReader extends BaseReader
 		{
 			$nameOnly = IO::GetFilenameNoExtension($file);
 			// Chequea al candidato...
-			$dbf = self::GetFilenameFromShp($file, 'dbf');
+		//	$dbf = self::GetFilenameFromShp($file, 'dbf');
 			$prj = self::GetFilenameFromShp($file, 'prj');
-			if (!file_exists($dbf))
-				throw new PublicException("El archivo " . $nameOnly .".shp debe estar acompañado de un archivo con los atributos (extensión esperada: dbf).");
+		//	if (!file_exists($dbf))
+		//		throw new PublicException("El archivo " . $nameOnly .".shp debe estar acompañado de un archivo con los atributos (extensión esperada: dbf).");
 			if (!file_exists($prj))
 				throw new PublicException("El archivo " . $nameOnly .".shp debe estar acompañado de un archivo con la proyección de extensión (extensión esperada: prj).");
 			return $file;

@@ -8,7 +8,7 @@ class LayerDataCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new TwoLevelObjectCache("Metrics/LayerData");
+		return new TwoLevelObjectCache("Metrics/LayerData", true);
 	}
 	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity)
 	{

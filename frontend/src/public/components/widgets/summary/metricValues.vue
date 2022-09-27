@@ -139,7 +139,6 @@ export default {
 			var summaryMetric = loc.metric.properties.SummaryMetric;
 			for (var label of this.variable.ValueLabels) {
 				percTotal += Number(loc.getValue(label.Values, this.variable.ValueLabels));
-
 				var tvalue = label.Values.Value;
 				if(summaryMetric === 'N' || summaryMetric === 'I') {
 					ret += Number(tvalue);

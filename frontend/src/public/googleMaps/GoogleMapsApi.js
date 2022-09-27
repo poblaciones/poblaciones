@@ -676,7 +676,14 @@ GoogleMapsApi.prototype.getBounds = function() {
 };
 
 GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index) {
-	if (activeMetric.useTiles() || !window.Use.UseDeckgl) {
+	var deckGlDisabled = (window.Use.UseDeckgl == false);
+	if (deckGlDisabled) {
+		if (activeMetric.SelectedVersion && activeMetric.SelectedVersion() &&
+			activeMetric.SelectedVersion().Work.Id == 130201) {
+			deckGlDisabled = false;
+		}
+	}
+	if (activeMetric.useTiles() || deckGlDisabled) {
 		this.gMap.overlayMapTypes.insertAt(index,
 			new GoogleTileOverlay(activeMetric));
 	} else {
