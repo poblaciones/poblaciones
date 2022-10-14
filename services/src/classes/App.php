@@ -402,7 +402,7 @@ class App
 	}
 
 
-	private function serializeCompressed($data, $level='6')
+	private static function serializeCompressed($data, $level='6')
 	{
 		$STEP = 25000;
 		$rows = $data->Data;
@@ -420,17 +420,17 @@ class App
 		gzwrite($fp_out, $header);
 		// Pone los chunks
 		$total = 0;
-		ini_set( 'serialize_precision', -1);
+		ini_set('serialize_precision', '-1');
 		for($n = 0; $n < sizeof($rows); $n += $STEP)
 		{
 			$size = min($STEP, sizeof($rows) - $n);
 			$arrayPart = array_slice($rows, $n, $size);
 			$total += $size;
 
-			$serialize = json_encode($arrayPart);
+			$serialize = '' . json_encode($arrayPart);
 			$serialize[0] = ($n > 0 ? ',': ' ');
 			$serialize[strlen($serialize) - 1] = ' ';
-			gzwrite($fp_out,$serialize);
+			gzwrite($fp_out, $serialize);
 		}
 		$rows = null;
 		gzwrite($fp_out, $footer);
