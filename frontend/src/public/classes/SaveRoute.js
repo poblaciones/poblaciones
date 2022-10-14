@@ -50,7 +50,6 @@ SaveRoute.prototype.UpdateRoute = function (coord) {
 	var urlPath = document.location.pathname;
 	urlPath = h.ensureFinalBar(urlPath);
 	urlPath += '#' + args;
-	console.log('push: ' + urlPath);
 	window.history.pushState({ 'route': args }, '', urlPath);
 };
 

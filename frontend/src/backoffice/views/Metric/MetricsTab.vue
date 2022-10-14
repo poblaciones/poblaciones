@@ -43,7 +43,7 @@
 				Nivelar
 			</md-button>
 		</div>
-		<div class="md-layout" v-if="Dataset && list">
+		<div class="md-layout" v-if="Dataset && list && Dataset.Columns">
 			<div class="md-layout-item">
 				<md-table v-model="list" md-card="">
 					<md-table-row slot="md-table-row" slot-scope="{ item }" md-alignment-top md-alignment-left-top>

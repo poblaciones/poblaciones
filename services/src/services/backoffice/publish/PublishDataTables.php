@@ -266,7 +266,8 @@ class PublishDataTables
 		$sql = "SELECT DISTINCT mvr_metric_id metricId FROM draft_work_startup
 							JOIN draft_work ON wrk_startup_id = wst_id
 							JOIN draft_metric_version ON wrk_id = mvr_work_id AND FIND_IN_SET(mvr_metric_id, wst_active_metrics)
-							WHERE wrk_id = ?";
+							JOIN draft_metric ON mtr_id = mvr_metric_id
+							WHERE wrk_id = ? ORDER BY mtr_caption";
 		$ownMetric = App::Db()->fetchAll($sql, array($workId));
 		// Obtiene las extra
 		$sql = "SELECT wmt_metric_id metricId FROM draft_work_extra_metric

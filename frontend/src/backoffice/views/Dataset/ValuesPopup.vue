@@ -406,10 +406,6 @@ export default {
 					alert("El valor debe ser un número entero (sin decimales).");
 					return;
 				}
-				if (this.CurrentVarValue.indexOf('-') >= 0) {
-					alert("El valor debe ser un número entero positivo.");
-					return;
-				}
 				if (str.isNumeric(this.CurrentVarValue) === false) {
 					alert("El valor debe ser numérico.");
 					return;

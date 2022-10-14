@@ -186,7 +186,7 @@ SelectedInfoRouter.prototype.VariablesToRoute = function (activeSelectedMetric) 
 				allVisible = false;
 			}
 		}
-		if (!allVisible) ret += vals;
+		if (!allVisible) ret += this.deflateString(vals);
 
 		if (v < activeSelectedMetric.SelectedLevel().Variables.length - 1) {
 			ret += ',';
@@ -344,7 +344,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 		GradientOpacity: gradientOpacity,
 		PinnedLevel: pinnedLevel,
 		CustomPattern: (customPattern === '' ? '' : parseInt(customPattern)),
-		VariableStates: (variableStates ? variableStates.split(',') : [])
+		VariableStates: (variableStates ? this.inflateArr(variableStates.split(',')) : [])
 	};
 };
 
@@ -493,6 +493,69 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 
 	return mapChanged;
 };
+
+SelectedInfoRouter.prototype.addChunk = function (cad, l) {
+	if (l > 4) {
+		return cad + 'e' + l + 'q';
+	} else {
+		return cad.repeat(l);
+	}
+};
+
+SelectedInfoRouter.prototype.deflateString = function (cad) {
+	var ret = '';
+	var buf = '';
+	var len0 = 0;
+	var len1 = 0;
+	for (var n = 0; n < cad.length; n++) {
+		if (cad[n] === '1') {
+			if (len0 > 0) {
+				ret += this.addChunk('0', len0);
+				len0 = 0;
+			}
+			len1++;
+		} else {
+			if (len1 > 0) {
+				ret += this.addChunk('1', len1);
+				len1 = 0;
+			}
+			len0++;
+		}
+	}
+	if (len0 > 0) {
+		ret += this.addChunk('0', len0);
+	} else if (len1 > 0) {
+		ret += this.addChunk('1', len1);
+	}
+	return ret;
+};
+
+SelectedInfoRouter.prototype.inflateString = function (cad) {
+	var ret = '';
+	for (var n = 0; n < cad.length; n++) {
+		if (cad[n] === 'e') {
+			var i = cad.indexOf('q', n);
+			var l = parseInt(cad.substr(n + 1, i - n - 1));
+			ret += cad[n - 1].repeat(l - 1);
+			n = i;
+		} else {
+			ret += cad[n];
+		}
+	}
+	return ret;
+};
+
+SelectedInfoRouter.prototype.inflateArr = function (arr) {
+	if (!arr) {
+		return arr;
+	}
+	var ret = [];
+	for (var n = 0; n < arr.length; n++) {
+		ret.push(this.inflateString(arr[n]));
+	}
+	return ret;
+};
+
 
 SelectedInfoRouter.prototype.restoreSequenceActiveSteps = function (selectedMetric, level, state) {
 	var mapChanged = false;

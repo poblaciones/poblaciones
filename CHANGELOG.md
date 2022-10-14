@@ -1,6 +1,8 @@
 - Fix: las revisiones pueden ser grabadas por usuarios con perfil Editor.
 - Permite importar etiquetas de valores de variables desde Excel o Csv.
 - Ofrecía 'escalar' como tipo de medida para las variables de texto, lo que no es válido.
+- Fix: admite shapefiles sin dbf.
+- Fix: respeta el orden de indicadores predeterminados al abrir una cartografía.
 
 v3.07 (2022-09-12)
 - Fix: se pierde la ubicación como 'reciente' tras publicarse una obra desde el listado de cartografías.

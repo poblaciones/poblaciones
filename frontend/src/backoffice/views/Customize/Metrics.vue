@@ -127,16 +127,13 @@ export default {
 			return activeMetricsList.indexOf('' + metricId) != -1;
 		},
 		SetActive(value, metric) {
-			var activeMetrics = this.Work.properties.Startup.ActiveMetrics;
-			var activeMetricsList = (activeMetrics ? activeMetrics.split(',') : []);
-			var n = activeMetricsList.indexOf('' + metric.Id);
-			if (n !== -1) {
-				arr.RemoveAt(activeMetricsList, n);
+			var ret = [];
+			for (var n = 0; n < this.metricList.length; n++) {
+				if (this.metricList[n].StartActive) {
+					ret.push(this.metricList[n].Id);
+				}
 			}
-			if (value) {
-				activeMetricsList.push(metric.Id);
-			}
-			this.Work.properties.Startup.ActiveMetrics = activeMetricsList.join(',');
+			this.Work.properties.Startup.ActiveMetrics = ret.join(',');
 			this.Update();
 		},
 		handleToggle(value, metric) {
