@@ -10,9 +10,9 @@ class LayerDataCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Metrics/LayerData", true);
 	}
-	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity)
+	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition)
 	{
-		$key = $frame->GetKeyNoFeature() . "@" .  $metricVersionId . "@" . $levelId  . "@" .  ($urbanity ?  $urbanity : '');
+		$key = $frame->GetKeyNoFeature() . "@" .  $metricVersionId . "@" . $levelId  . "@" .  ($urbanity ?  $urbanity : '') . ($partition !== null ?  "@" . $partition : '');
 		return $key;
 	}
 }

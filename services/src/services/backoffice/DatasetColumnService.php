@@ -142,6 +142,7 @@ class DatasetColumnService extends DbSession
 		Profiling::BeginTimer();
 		// 1. Pone en null las referencias a columnas en dataset
 		$queryCols = "UPDATE draft_dataset SET " .
+								$this->conditionalResetter('dat_partition_column_id', $colsId) . "," .
 								$this->conditionalResetter('dat_images_column_id', $colsId) . "," .
 								$this->conditionalResetter('dat_latitude_column_id', $colsId) . "," .
 								$this->conditionalResetter('dat_longitude_column_id', $colsId) . "," .

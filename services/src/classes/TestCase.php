@@ -20,7 +20,6 @@ class TestCase extends TestCaseBase
 		];
 	}
 
-
 	public function assertFile($path, $expectedSize = -1, $description = "")
 	{
 		$this->assertTrue(IO::Exists($path), "Archivo no existe. " . $description);

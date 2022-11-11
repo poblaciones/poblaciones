@@ -7,6 +7,7 @@ use Doctrine\DBAL\Connection;
 use PDO;
 use helena\classes\App;
 use minga\framework\Str;
+use minga\framework\ErrorException;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 
 class DatasetDownloadModel extends BaseDownloadModel
@@ -58,7 +59,7 @@ class DatasetDownloadModel extends BaseDownloadModel
 		return $ret;
 	}
 
-	public function PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, $getPolygon)
+	public function PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $getPolygon)
 	{
 		Profiling::BeginTimer();
 		$params = array();
@@ -87,6 +88,14 @@ class DatasetDownloadModel extends BaseDownloadModel
 			$spatialConditions = new SpatialConditions('urba.gei');
 			$where .= $spatialConditions->UrbanityCondition($urbanity);
 			$joins .= " JOIN geography_item urba ON _data_table.geography_item_id = urba.gei_id ";
+		}
+
+		// Filtra por partition
+		if ($dataset['partition_column_field'])
+		{
+			if ($partition === null)
+				throw new ErrorException("Debe indicarse un valor de particionado.");
+			$where .= 'AND ' . $dataset['partition_column_field'] . ' = ' . intval($partition);
 		}
 
 		// Agrega columnas del dataset

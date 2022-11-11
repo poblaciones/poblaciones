@@ -15,11 +15,13 @@ class SnapshotByDatasetSummary extends BaseSpatialSnapshotModel
 {
 	private $variables;
 	private $urbanity;
+	private $partition;
 
-	public function __construct($snapshotTable, $datasetType, $variables, $urbanity)
+	public function __construct($snapshotTable, $datasetType, $variables, $urbanity, $partition)
 	{
 		$this->variables = $variables;
 		$this->urbanity = $urbanity;
+		$this->partition = $partition;
 
 		parent::__construct($snapshotTable, "sna", $datasetType);
 	}
@@ -47,6 +49,8 @@ class SnapshotByDatasetSummary extends BaseSpatialSnapshotModel
 				$from = $this->tableName;
 
 				$where = $this->spatialConditions->UrbanityCondition($this->urbanity);
+
+				$where = $this->AddPartitionCondition($where, $this->partition);
 
 				// Excluye las filas filtradas
 				$where = $this->AddNotNullCondition($where, $varId . "_total");

@@ -444,6 +444,7 @@ module.exports = {
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
+			g: metric.EffectivePartition,
 			x: x,
 			y: y,
 			w: metric.Metric.Signature,
@@ -459,6 +460,7 @@ module.exports = {
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
+			g: metric.EffectivePartition,
 			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 		delete ret.e;
@@ -473,6 +475,7 @@ module.exports = {
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
+			g: metric.EffectivePartition,
 			x: x - x % size,
 			y: y - y % size,
 			s: size,
@@ -522,6 +525,7 @@ module.exports = {
 			i: variable.Id,
 			t: (variable.HasTotals ? 1 : 0),
 			u: metric.SelectedUrbanity,
+			g: metric.EffectivePartition,
 			w: metric.Metric.Signature,
 			s: size,
 			d: direction,
@@ -536,6 +540,7 @@ module.exports = {
 			l: metric.Metric.Id,
 			i: variable.Id,
 			u: metric.SelectedUrbanity,
+			g: metric.EffectivePartition,
 			w: metric.Metric.Signature,
 			h: (hiddenValueLabels ? hiddenValueLabels : null)
 		}, this.getFrameParams(frame));
@@ -547,6 +552,7 @@ module.exports = {
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
+			g: metric.EffectivePartition,
 			w: metric.Metric.Signature
 		}, this.getFrameParams(frame));
 	},

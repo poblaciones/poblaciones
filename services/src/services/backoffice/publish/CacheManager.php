@@ -60,6 +60,7 @@ class CacheManager
 	public function CleanFabMetricsCache()
 	{
 		FabMetricsCache::Cache()->Clear();
+		self::CleanMetricProvidersMetadataCache();
 	}
 
 	public function CleanWorkHandlesCache($workId)

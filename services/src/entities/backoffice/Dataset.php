@@ -99,6 +99,16 @@ class Dataset
      */
     private $ImagesColumn;
 
+		/**
+     * @var \helena\entities\backoffice\DatasetColumn
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DatasetColumn")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dat_partition_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $PartitionColumn;
+
 
     /**
      * @var \helena\entities\backoffice\DatasetColumn
@@ -510,6 +520,30 @@ class Dataset
         return $this->ImagesColumn;
     }
 
+
+    /**
+     * Set partitionColumn
+     *
+     * @param \helena\entities\backoffice\DatasetColumn $partitionColumn
+     *
+     * @return Dataset
+     */
+    public function setPartitionColumn(\helena\entities\backoffice\DatasetColumn $partitionColumn = null)
+    {
+        $this->PartitionColumn = $partitionColumn;
+
+        return $this;
+    }
+
+    /**
+     * Get partitionColumn
+     *
+     * @return \helena\entities\backoffice\DatasetColumn
+     */
+    public function getPartitionColumn()
+    {
+        return $this->PartitionColumn;
+    }
     /**
      * Set marker
      *

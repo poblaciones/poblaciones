@@ -47,6 +47,14 @@ class MetricVersionModel extends BaseModel
 										dat_table,
 										dat_show_info,
 										dat_texture_id,
+										(SELECT dco_caption FROM dataset_column WHERE dco_id =
+												dat_partition_column_id) dat_partition_column_caption,
+										(SELECT GROUP_CONCAT(dla_value ORDER BY dla_order, dla_id SEPARATOR "\t")
+											FROM dataset_column_value_label
+											WHERE dla_dataset_column_id = dat_partition_column_id) dat_partition_values,
+										(SELECT GROUP_CONCAT(dla_caption ORDER BY dla_order, dla_id SEPARATOR "\t")
+											FROM dataset_column_value_label
+											WHERE dla_dataset_column_id = dat_partition_column_id) dat_partition_captions,
 										carto_meta.met_wiki
 						FROM metric_version_level
 										JOIN dataset ON mvl_dataset_id = dat_id

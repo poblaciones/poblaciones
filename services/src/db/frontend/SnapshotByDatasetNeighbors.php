@@ -17,13 +17,15 @@ class SnapshotByDatasetNeighbors extends BaseSpatialSnapshotModel
 
 	private $variable;
 	private $urbanity;
+	private $partition;
 	private $hiddenValueLabels;
 
 	public function __construct($snapshotTable, $datasetType,
-											$variable, $urbanity, $hiddenValueLabels)
+											$variable, $urbanity, $partition, $hiddenValueLabels)
 	{
 		$this->variable = $variable;
 		$this->urbanity = $urbanity;
+		$this->partition = $partition;
 		$this->hiddenValueLabels = $hiddenValueLabels;
 
 		parent::__construct($snapshotTable, 'sna', $datasetType);
@@ -46,6 +48,8 @@ class SnapshotByDatasetNeighbors extends BaseSpatialSnapshotModel
 		$where = $this->hiddenValuesCondition($this->variable->Id);
 
 		$where .= $this->spatialConditions->UrbanityCondition($this->urbanity);
+
+		$where = $this->AddPartitionCondition($where, $this->partition);
 
 		$params = array();
 

@@ -63,7 +63,7 @@ class PublishDataTables
 																			))));
 
 		$datasetMatrix = array('class' => entities\Dataset::class, 'childKey' => 'dat_work_id',
-																			'postUpdateColumns' => array('dat_caption_column_id', 'dat_images_column_id',
+																			'postUpdateColumns' => array('dat_caption_column_id', 'dat_images_column_id', 'dat_partition_column_id',
 																																		'dat_latitude_column_id', 'dat_longitude_column_id',
 																																		'dat_latitude_column_segment_id', 'dat_longitude_column_segment_id',
 																																		'dat_geography_item_column_id'),
@@ -263,7 +263,7 @@ class PublishDataTables
 	{
 		Profiling::BeginTimer();
 		// Obtiene las propias
-		$sql = "SELECT DISTINCT mvr_metric_id metricId FROM draft_work_startup
+		$sql = "SELECT mvr_metric_id metricId FROM draft_work_startup
 							JOIN draft_work ON wrk_startup_id = wst_id
 							JOIN draft_metric_version ON wrk_id = mvr_work_id AND FIND_IN_SET(mvr_metric_id, wst_active_metrics)
 							JOIN draft_metric ON mtr_id = mvr_metric_id
@@ -356,6 +356,7 @@ class PublishDataTables
 		$query = "UPDATE dataset d1 JOIN draft_dataset d2 ON d1.dat_id = d2.dat_id " .
 									" * 100 + " . $shard . " AND d2.dat_work_id = ?
 									SET d1.dat_table = replace(d2.dat_table, '_draft_', '_shard_" . App::Settings()->Shard()->CurrentShard . "_' ),
+									 d1.dat_partition_column_id = d2.dat_partition_column_id * 100 + " . $shard . ",
 									 d1.dat_images_column_id = d2.dat_images_column_id * 100 + " . $shard . ",
 									 d1.dat_latitude_column_id = d2.dat_latitude_column_id * 100 + " . $shard . ",
 									 d1.dat_longitude_column_id = d2.dat_longitude_column_id * 100 + " . $shard . ",
@@ -430,6 +431,7 @@ class PublishDataTables
 		$datasetCondition = ($datasetId ? ' AND dat_id = ' . $datasetId : '');
 		// 1. Pone en null las referencias a columnas en dataset
 		$queryCols = "UPDATE " . $drafting . "dataset SET
+													dat_partition_column_id = NULL,
 													dat_images_column_id = NULL,
 													dat_latitude_column_id = NULL,
 													dat_longitude_column_id = NULL,

@@ -21,6 +21,8 @@ class SummaryServiceTest extends TestCase
 		$e = $this->Get('e');
 		$z = $this->Get('z');
 
+		$partition = $this->Get('p');
+
 		$controller = new SummaryService();
 		$metricId = $l;
 		$metricVersionId = $v;
@@ -38,7 +40,7 @@ class SummaryServiceTest extends TestCase
 		$denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId);
 		$this->assertNull($denied);
 
-		$ret = $controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity);
+		$ret = $controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
 
 	}
 }

@@ -165,6 +165,17 @@ class DraftDataset
      */
     private $ImagesColumn;
 
+		/**
+     * @var \helena\entities\backoffice\DraftDatasetColumn
+     *
+	   *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="dat_partition_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $PartitionColumn;
+
     /**
      * @var \helena\entities\backoffice\DraftDatasetColumn
  *
@@ -588,6 +599,7 @@ class DraftDataset
     {
         return $this->ShowInfo;
     }
+
     /**
      * Set imagesColumn
      *
@@ -611,6 +623,32 @@ class DraftDataset
     {
         return $this->ImagesColumn;
     }
+
+
+    /**
+     * Set partitionColumn
+     *
+     * @param \helena\entities\backoffice\DraftDatasetColumn $partitionColumn
+     *
+     * @return DraftDataset
+     */
+    public function setPartitionColumn(\helena\entities\backoffice\DraftDatasetColumn $partitionColumn = null)
+    {
+        $this->PartitionColumn = $partitionColumn;
+
+        return $this;
+    }
+
+    /**
+     * Get partitionColumn
+     *
+     * @return \helena\entities\backoffice\DraftDatasetColumn
+     */
+    public function getPartitionColumn()
+    {
+        return $this->PartitionColumn;
+    }
+
     /**
      * Set latitudeColumn
      *

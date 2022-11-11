@@ -47,17 +47,19 @@ class WorkModel extends BaseModel
 							latitude.dco_field AS dat_latitude_field,
 							longitudeSegment.dco_field AS dat_longitude_field_segment,
 							latitudeSegment.dco_field AS dat_latitude_field_segment,
+							partition_column.dco_field AS partition_column_field,
 							marker.dco_field AS dmk_content_field,
 							dmk_type,
 							dmk_source
 							FROM " . $this->resolveTableName('dataset') . " d
-							LEFT JOIN dataset_column latitude ON latitude.dco_id = dat_latitude_column_id
-							LEFT JOIN dataset_column longitude ON longitude.dco_id = dat_longitude_column_id
-							LEFT JOIN dataset_column latitudeSegment ON latitudeSegment.dco_id = dat_latitude_column_segment_id
-							LEFT JOIN dataset_column longitudeSegment ON longitudeSegment.dco_id = dat_longitude_column_segment_id
-							LEFT JOIN dataset_column caption ON caption.dco_id = dat_caption_column_id
-							JOIN dataset_marker ON dmk_id = dat_marker_id
-							LEFT JOIN dataset_column marker ON marker.dco_id = dmk_content_column_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " partition_column ON partition_column.dco_id = dat_partition_column_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " latitude ON latitude.dco_id = dat_latitude_column_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " longitude ON longitude.dco_id = dat_longitude_column_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " latitudeSegment ON latitudeSegment.dco_id = dat_latitude_column_segment_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " longitudeSegment ON longitudeSegment.dco_id = dat_longitude_column_segment_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " caption ON caption.dco_id = dat_caption_column_id
+							JOIN " . $this->resolveTableName('dataset_marker') . " dataset_marker ON dmk_id = dat_marker_id
+							LEFT JOIN " . $this->resolveTableName('dataset_column') . " marker ON marker.dco_id = dmk_content_column_id
 
 						 LEFT JOIN geography ON geo_id = dat_geography_id
 							WHERE dat_id = ?";

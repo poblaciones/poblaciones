@@ -245,6 +245,11 @@ class SnapshotByDatasetModel
 
 		$envelopeTarget = '';
 		$location = '';
+		if ($dataset['partition_column_field'])
+		{
+				$columns[] = ['sna_partition', 'int(11) NOT NULL', $dataset['partition_column_field']];
+		}
+
 		if ($dataset['dat_are_segments'])
 		{
 			$segment = self::ResolveSegmentPolygon($dataset);

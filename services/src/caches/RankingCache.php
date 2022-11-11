@@ -10,14 +10,13 @@ class RankingCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Metrics/Ranking");
 	}
-	public static function CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $hasTotals, $hiddenValueLabels)
+	public static function CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels)
 	{
 		$ret = $frame->GetSummaryKey() . "@" . $metricVersionId . "@" . $levelId . "@" . $size
-									. "@" . $direction . "@" . ($urbanity ?  $urbanity : '') . "@" . $hasTotals;
-		if ($hiddenValueLabels)
-		{
-		 $ret .= "@" . implode('-', $hiddenValueLabels);
-		}
+									. "@" . $direction . "@" . ($urbanity ?  $urbanity : '') . "@" . $hasTotals
+									. "@" . ($partition !== null ?  $partition : '')
+									. "@" . ($hiddenValueLabels ?  implode('-', $hiddenValueLabels) : '');
+
 		return $ret;
 	}
 }

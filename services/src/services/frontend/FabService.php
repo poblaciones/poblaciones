@@ -166,7 +166,7 @@ class FabService extends BaseService
 		$ret = [];
 		foreach($list as $metric)
 		{
-			if ($metric->Provider->Name !== $last)
+			if ($metric->Provider && $metric->Provider->Name !== $last)
 			{
 					$separator = [ 'Id' => null, 'Name' =>
 										 ($metric->Provider->Name === null ? 'Otras fuentes' : $metric->Provider->Name),
@@ -202,6 +202,9 @@ class FabService extends BaseService
 	}
 	private static function sortByOrderDescriptionNullAtEnd($a, $b)
 	{
+	if (!is_object($a->Provider) || !is_object($b->Provider))
+		return 0;
+
 		// Primero define el orden...
 		if ($a->Provider->Order !== $b->Provider->Order)
 		{

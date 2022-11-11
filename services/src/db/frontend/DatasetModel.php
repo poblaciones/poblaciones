@@ -24,6 +24,9 @@ class DatasetModel
 		$draftPreffix = ($fromDraft ? 'draft_' : '');
 
 		Profiling::BeginTimer();
+
+		// Precisa devolver latitud y longitud con dos alias diferentes por el uso en GetCentroidField, para
+		// ser compatible con GetDatasetInfo (revisar refactoring para eso)
 		$sql = 'SELECT
 			d1.dat_id id,
 			d1.dat_caption caption,
@@ -39,19 +42,21 @@ class DatasetModel
 			images_column.dco_field AS images_column_field,
 			caption_column.dco_field AS caption_column_field,
 
+			partition_column.dco_field AS partition_column_field,
+
 			longitude.dco_field AS dat_longitude_field,
 			latitude.dco_field AS dat_latitude_field,
 			longitudeSegment.dco_field AS dat_longitude_field_segment,
 			latitudeSegment.dco_field AS dat_latitude_field_segment,
 
-			(SELECT dco_field FROM dataset_column
-			WHERE dco_id = dat_longitude_column_id) as LongitudeColumn,
-			(SELECT dco_field FROM dataset_column
-			WHERE dco_id = dat_latitude_column_id) as LatitudeColumn
+			longitude.dco_field AS LongitudeColumn,
+			latitude.dco_field AS LatitudeColumn
 
 		FROM ' . $draftPreffix . 'dataset d1
 			LEFT JOIN ' . $draftPreffix . 'dataset_column images_column ON images_column.dco_id = d1.dat_images_column_id
 			LEFT JOIN ' . $draftPreffix . 'dataset_column caption_column ON caption_column.dco_id = d1.dat_caption_column_id
+
+			LEFT JOIN ' . $draftPreffix . 'dataset_column partition_column ON partition_column.dco_id = d1.dat_partition_column_id
 
 			LEFT JOIN ' . $draftPreffix . 'dataset_column latitude ON latitude.dco_id = d1.dat_latitude_column_id
 			LEFT JOIN ' . $draftPreffix . 'dataset_column longitude ON longitude.dco_id = d1.dat_longitude_column_id

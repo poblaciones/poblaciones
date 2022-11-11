@@ -27,29 +27,29 @@ use helena\classes\App;
 class DatasetDownloadManager extends BaseDownloadManager
 {
 
-	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false, $extraColumns = array())
+	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft = false, $extraColumns = array())
 	{
 		self::ValidateType($type);
 		self::ValidateClippingItem($clippingItemId);
 
 		// Si está cacheado, sale
-		if(self::IsCached($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft))
+		if(self::IsCached($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft))
 			return array('done' => true);
 
 		// Crea la estructura para la creación en varios pasos del archivo a descargar
-		$this->PrepareNewModel($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns);
-		$this->PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns);
+		$this->PrepareNewModel($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft, $extraColumns);
+		$this->PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft, $extraColumns);
 		return $this->GenerateNextFilePart();
 	}
 
-	private static function IsCached($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft)
+	private static function IsCached($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft)
 	{
-		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity);
+		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity, $partition);
 		$filename = null;
 		return self::getCache($fromDraft)->HasData($datasetId, $cacheKey, $filename);
 	}
 
-	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type, $fromDraft)
+	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $type, $fromDraft)
 	{
 		$validFileTypes = self::$validFileTypes;
 		if (array_key_exists($type[0], $validFileTypes))
@@ -62,6 +62,12 @@ class DatasetDownloadManager extends BaseDownloadManager
 
 		if($urbanity)
 			$name .= ' - ' . Str::ToLower($urbanity);
+
+		if($partition)
+		{
+			$partitionName = App::Db()->fetchScalar("SELECT dla_caption FROM " . ($fromDraft ? 'draft_' : '') . "dataset_column_value_label WHERE dla_dataset_column_id = (SELECT dat_partition_column_id FROM " . ($fromDraft ? 'draft_' : '') . "dataset WHERE dat_id = ?) AND dla_value = ?", array($datasetId, $partition));
+			$name .= ' - ' . $partitionName;
+		}
 
 		$name .= self::RegionsAsText($clippingItemId);
 
@@ -81,12 +87,12 @@ class DatasetDownloadManager extends BaseDownloadManager
 		return ' - ' . $res;
 	}
 
-	private static function createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity)
+	private static function createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity, $partition)
 	{
 		if ($fromDraft)
 			return BackofficeDownloadCache::CreateKey($type);
 		else
-			return DownloadCache::CreateKey($type, $clippingItemId, $clippingCircle, $urbanity);
+			return DownloadCache::CreateKey($type, $clippingItemId, $clippingCircle, $urbanity, $partition);
 	}
 
 	private static function getCache($fromDraft)
@@ -126,7 +132,7 @@ class DatasetDownloadManager extends BaseDownloadManager
 		}
 	}
 
-	public static function GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft = false)
+	public static function GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft = false)
 	{
 		self::ValidateType($type);
 
@@ -134,8 +140,8 @@ class DatasetDownloadManager extends BaseDownloadManager
 		{
 			self::ValidateClippingItem($clippingItemId);
 		}
-		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity);
-		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type, $fromDraft);
+		$cacheKey = self::createKey($fromDraft, $type, $clippingItemId, $clippingCircle, $urbanity, $partition);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $type, $fromDraft);
 		$cache = self::getCache($fromDraft);
 		// Lo devuelve desde el cache
 		$filename = null;
@@ -159,21 +165,21 @@ class DatasetDownloadManager extends BaseDownloadManager
 		$this->model->fromDraft = $this->state->FromDraft();
 	}
 
-	protected function PrepareNewModel($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns)
+	protected function PrepareNewModel($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft, $extraColumns)
 	{
 		$this->model = new DatasetDownloadModel();
 		$this->model->fromDraft = $fromDraft;
 		$this->model->extraColumns = $extraColumns;
-		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, self::GetPolygon($type));
+		$this->model->PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, self::GetPolygon($type));
 	}
 
 
-	protected  function PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $fromDraft, $extraColumns)
+	protected  function PrepareNewState($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft, $extraColumns)
 	{
-		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $this->model, $fromDraft);
+		$this->state = DownloadStateBag::Create($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $this->model, $fromDraft);
 		$this->state->SetStep(self::STEP_BEGIN);
 		$this->state->SetTotalSteps(2);
-		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $type, $fromDraft);
+		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $type, $fromDraft);
 		$this->state->Set('friendlyName', $friendlyName);
 		$this->state->Set('totalRows', $this->model->GetCountRows());
 		$info = $this->model->GetExtraStateInfo($datasetId);

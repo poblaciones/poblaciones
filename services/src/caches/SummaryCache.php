@@ -10,9 +10,9 @@ class SummaryCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Metrics/Summary");
 	}
-	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity)
+	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition)
 	{
-		return $frame->GetSummaryKey() . "@" . $metricVersionId . "@" . $levelId . "@" .  ($urbanity ?  $urbanity : '');
+		return $frame->GetSummaryKey() . "@" . $metricVersionId . "@" . $levelId . "@" .  ($urbanity ?  $urbanity : '') . ($partition !== null ?  "@" . $partition : '');
 	}
 }
 

@@ -20,6 +20,8 @@
 					({{ h.formatNum(singleLabel.Values.Count) }})
 				</span>
 			</h4>
+			<mp-partition-badge :metric="metric" style="padding-bottom: 7px;" />
+
 			<mp-filter-badge style="margin-top: 0.3rem; margin-bottom: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
 											 @click="changeUrbanity('N')" />
@@ -28,9 +30,11 @@
 			<h4 class="title">
 				{{ metric.properties.Metric.Name }}
 			</h4>
+			<mp-partition-badge :metric="metric" />
+
 			<mp-filter-badge style="margin-top: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
-											 @click="changeUrbanity('N')" />
+											 @click="changeUrbanity('N')"  />
 			<MetricVariables :metric="metric" />
 		</template>
 		<div class="coverageBox" v-if="hasLegends(metric.SelectedLevel())">

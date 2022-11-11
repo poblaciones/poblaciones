@@ -7,7 +7,7 @@ use helena\caches\BackofficeDownloadCache;
 
 class DownloadStateBag extends StateBag
 {
-	public static function Create($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $model, $fromDraft)
+	public static function Create($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $model, $fromDraft)
 	{
 		$ret = new DownloadStateBag();
 		$ret->Initialize();
@@ -15,7 +15,7 @@ class DownloadStateBag extends StateBag
 		if ($fromDraft)
 			$key = BackofficeDownloadCache::CreateKey($type);
 		else
-			$key = DownloadCache::CreateKey($type, $clippingItemId, $clippingCircle, $urbanity);
+			$key = DownloadCache::CreateKey($type, $clippingItemId, $clippingCircle, $urbanity, $partition);
 
 		$ret->SetArray(array(
 			'type' => $type,
@@ -23,6 +23,7 @@ class DownloadStateBag extends StateBag
 			'clippingItemId' => $clippingItemId,
 			'clippingCircle' => $clippingCircle,
 			'urbanity' => $urbanity,
+			'partition' => $partition,
 			'cacheKey' => $key,
 			'outFile' => $folder . '/outfile',
 			'dFile' => $folder . '/intermediate_data.json',

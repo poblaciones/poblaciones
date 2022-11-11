@@ -194,7 +194,11 @@ export default {
 			}
 		},
 		capitalize(name) {
-			return h.capitalize(name);
+			if (name === null) {
+				return '';
+			} else {
+				return h.capitalize(name.trim());
+			}
 		},
 		isImageUrl(image) {
 			if (image === null) {

@@ -62,6 +62,14 @@
 							</div>
 						</td>
 					</tr>
+					<tr v-if="hasPartitions">
+						<td>{{ partitions.Name }}:</td>
+						<td>
+							<select v-model="downloadPartition">
+								<option v-for="item in partitions.Values" :key="item.Value" :value="item.Value">{{ item.Caption }}</option>
+							</select>
+						</td>
+					</tr>
 					<tr>
 						<td>Descarga:</td>
 						<td>
@@ -80,12 +88,13 @@
 					</tr>
 					<tr v-if="version.Work.Metadata.Files && version.Work.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
-						<td><div class="attachmentsDownloadPanel">
-							<span v-for="file in version.Work.Metadata.Files" :key="file.Id">
-								<a target="_blank" :href="resolveFileUrl(file)">
-									<i class="far fa-file-pdf" /> {{ file.Caption }}
-								</a>
-							</span>
+						<td>
+							<div class="attachmentsDownloadPanel">
+								<span v-for="file in version.Work.Metadata.Files" :key="file.Id">
+									<a target="_blank" :href="resolveFileUrl(file)">
+										<i class="far fa-file-pdf" /> {{ file.Caption }}
+									</a>
+								</span>
 							</div>
 						</td>
 					</tr>
@@ -132,7 +141,8 @@ export default {
 			visibleUrl: true,
 			progress: null,
 			downloadLevel: 0,
-			downloadUrbanity: 'N'
+			downloadUrbanity: 'N',
+			downloadPartition: null
 		};
 	},
 	computed: {
@@ -147,6 +157,12 @@ export default {
 		},
 		Use() {
 			return window.Use;
+		},
+		hasPartitions() {
+			return this.partitions !== null;
+		},
+		partitions() {
+			return this.metric.SelectedLevel().Partitions;
 		},
 		useFilter() {
 			return this.regions && this.regions.length > 0;
@@ -177,6 +193,7 @@ export default {
 			}
 			this.downloadLevel = this.version.SelectedLevelIndex;
 			this.downloadUrbanity = this.metric.properties.SelectedUrbanity;
+			this.downloadPartition = this.metric.GetSelectedPartition();
 			this.$refs.dialog.show();
 		},
 		getDataFormats() {
@@ -303,8 +320,9 @@ export default {
 				}
 			}
 			var urbanity = (this.level.HasUrbanity ? this.downloadUrbanity : null);
+			var partition = (this.partitions ? this.downloadPartition : null);
 			return 't=' + type + h.urlParam('d', this.level.Dataset.Id) + h.urlParam('c', circle) + h.urlParam('r', clippingRegionId)
-				+ h.urlParam('u', urbanity) + h.urlParam('w', this.version.Work.Id);
+				+ h.urlParam('u', urbanity) + h.urlParam('g', partition) + h.urlParam('w', this.version.Work.Id);
 		}
 	},
 };

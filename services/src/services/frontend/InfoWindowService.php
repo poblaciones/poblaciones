@@ -84,7 +84,7 @@ class InfoWindowService extends BaseService
 		return $info;
 	}
 
-	public function GetMetricNavigationInfo($metricId, $variableId, $frame, $urbanity, $hiddenValueLabels)
+	public function GetMetricNavigationInfo($metricId, $variableId, $frame, $urbanity, $partition, $hiddenValueLabels)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId, true, true);
@@ -92,14 +92,14 @@ class InfoWindowService extends BaseService
 		$level = $metric->GetLevelAndVariableByVariableId($variableId, $variable);
 
 		// Anexa los subsiguientes
-		return $this->CalculateNavigationInfo($frame, $level, $variable, $urbanity, $hiddenValueLabels);
+		return $this->CalculateNavigationInfo($frame, $level, $variable, $urbanity, $partition, $hiddenValueLabels);
 	}
 
-	private function CalculateNavigationInfo($frame, $level, $variable, $urbanity, $hiddenValueLabels)
+	private function CalculateNavigationInfo($frame, $level, $variable, $urbanity, $partition, $hiddenValueLabels)
 	{
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		$table = new SnapshotByDatasetNeighbors($snapshotTable, $level->Dataset->Type,
-											$variable, $urbanity, $hiddenValueLabels);
+											$variable, $urbanity, $partition, $hiddenValueLabels);
 
 		$rows = $table->GetRows($frame);
 

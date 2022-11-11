@@ -83,7 +83,12 @@ ActiveSelectedMetric.prototype.UpdateOpacity = function (zoom) {
 };
 
 ActiveSelectedMetric.prototype.GetSelectedUrbanityInfo = function () {
-	return this.GetUrbanityFilters()[this.properties.SelectedUrbanity];
+	var ret = this.GetUrbanityFilters()[this.properties.SelectedUrbanity];
+	if (!ret) {
+		return this.GetUrbanityFilters()['N'];
+	} else {
+		return ret;
+	}
 };
 
 ActiveSelectedMetric.prototype.GetUrbanityFilters = function (skipAllElement) {
@@ -147,6 +152,25 @@ ActiveSelectedMetric.prototype.SetSelectedVariableByName = function (name) {
 	}
 };
 
+ActiveSelectedMetric.prototype.GetSelectedPartition = function () {
+	var part = this.properties.SelectedPartition;
+	var info = this.SelectedLevel().Partitions;
+	if (info) {
+		// se fija si existe el valor...
+		for (var n of info.Values) {
+			if (n.Value === part) {
+				return part;
+			}
+		}
+		// Si no existe, devuelve el primero
+		if (info.Values.length > 0) {
+			return info.Values[0].Value;
+		}
+	}
+	return null;
+};
+
+
 ActiveSelectedMetric.prototype.Visible = function () {
 	return this.properties.Visible && this.SelectedLevel().SelectedVariableIndex !== -1;
 };
@@ -160,6 +184,8 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 	}
 	this.IsUpdatingSummary = true;
 	this.IsUpdatingRanking = true;
+
+	this.properties.EffectivePartition = this.GetSelectedPartition();
 
 	window.SegMap.Get(window.host + '/services/frontend/metrics/GetSummary', {
 		params: h.getSummaryParams(metric, window.SegMap.frame),
@@ -210,6 +236,8 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 	}
 	this.IsUpdatingRanking = true;
 	var hiddenValueLabels = this.getHiddenValueLabels(variable);
+
+	this.properties.EffectivePartition = this.GetSelectedPartition();
 
 	window.SegMap.Get(window.host + '/services/frontend/metrics/GetRanking', {
 		params: h.getRankingParams(metric, window.SegMap.frame, this.RankingSize, this.RankingDirection, hiddenValueLabels),
@@ -733,6 +761,7 @@ ActiveSelectedMetric.prototype.GetLayerDataService = function (seed) {
 	} else {
 		server = window.host;
 	}
+	this.properties.EffectivePartition = this.GetSelectedPartition();
 	var params = h.getLayerDataParams(this.properties, window.SegMap.frame);
 	return { server: server, path: path, useStaticQueue: useStaticQueue, params: params };
 };
@@ -759,6 +788,7 @@ ActiveSelectedMetric.prototype.GetDataService = function (seed) {
 
 ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord) {
 	var suffix = window.SegMap.Signatures.Suffix;
+	this.properties.EffectivePartition = this.GetSelectedPartition();
 	if (this.UseBlockedRequests()) {
 		return h.getBlockTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, suffix, this.blockSize);
 	} else {

@@ -19,12 +19,13 @@ App::$app->get('/services/frontend/metrics/GetSummary', function (Request $reque
 	$metricId = Params::GetIntMandatory('l');
 	$metricVersionId = Params::GetIntMandatory('v');
 	$levelId = Params::GetIntMandatory('a');
+	$partition = Params::GetInt('g');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$frame = Frame::FromParams();
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
-	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity));
+	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition));
 });
 
 
@@ -37,6 +38,7 @@ App::$app->get('/services/frontend/metrics/GetRanking', function (Request $reque
 	$variableId = Params::GetIntMandatory('i');
 	$hasTotals = Params::GetBoolMandatory('t');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$partition = Params::GetInt('g');
 	$frame = Frame::FromParams();
 	$size = Params::GetIntRangeMandatory('s', 10, 100);
 	$direction = Params::GetMandatory('d');
@@ -45,7 +47,7 @@ App::$app->get('/services/frontend/metrics/GetRanking', function (Request $reque
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
-	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels));
+	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels));
 });
 
 App::$app->get('/services/metrics/GetMetricNavigationInfo', function (Request $request) {
@@ -54,11 +56,11 @@ App::$app->get('/services/metrics/GetMetricNavigationInfo', function (Request $r
 	$metricId = Params::GetIntMandatory('l');
 	$variableId = Params::GetIntMandatory('i');
 	$unselectedIds = Params::GetIntArray('h');
-
+	$partition = Params::GetInt('g');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$frame = Frame::FromParams();
 
-	return App::JsonImmutable($controller->GetMetricNavigationInfo($metricId, $variableId, $frame, $urbanity, $unselectedIds));
+	return App::JsonImmutable($controller->GetMetricNavigationInfo($metricId, $variableId, $frame, $urbanity, $partition, $unselectedIds));
 });
 
 App::$app->get('/services/metrics/GetMetricItemInfo', function (Request $request) {
@@ -83,15 +85,16 @@ App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $req
 	$frame = Frame::FromParams();
 	$levelId = Params::GetInt('a');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$partition = Params::GetInt('g');
 
-	$key = LayerDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity);
+	$key = LayerDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition);
 
 	return App::JsonCacheableImmutable(
 				LayerDataCache::Cache(),
 				[$metricId, $key],
-				function() use ($frame, $metricId, $metricVersionId, $levelId, $urbanity) {
+				function() use ($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition) {
 					$controller = new services\TileDataService();
-					return $controller->GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity);
+					return $controller->GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
 				},
 				($frame->ClippingCircle != null) // skipCache
 		);
@@ -107,11 +110,12 @@ App::$app->get('/services/frontend/metrics/GetTileData', function (Request $requ
 
 	$levelId = Params::GetInt('a');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$partition = Params::GetInt('g');
 	$frame = Frame::FromParams();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	return App::JsonImmutable($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z));
+	return App::JsonImmutable($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z));
 });
 
 
@@ -124,6 +128,8 @@ App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request 
 
 	$levelId = Params::GetInt('a');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$partition = Params::GetInt('g');
+
 	$frame = Frame::FromParams();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
@@ -132,7 +138,7 @@ App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request 
 	if (!App::Settings()->Map()->UseDataTileBlocks ||
 			$s !== App::Settings()->Map()->TileDataBlockSize)
 		throw new PublicException('El tamaño de bloque de datos solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
-	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z));
+	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z));
 });
 
 App::$app->get('/services/metrics/GetSelectedMetric', function (Request $request) {

@@ -18,7 +18,8 @@ use helena\services\common\BaseService;
 
 class RankingService extends BaseService
 {
-	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels)
+	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId,
+							$hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
 	{
 		$data = null;
 		$this->CheckNotNullNumeric($metricId);
@@ -29,7 +30,7 @@ class RankingService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 
-		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $hasTotals, $hiddenValueLabels);
+		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && RankingCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -45,7 +46,7 @@ class RankingService extends BaseService
 		}
 
 		Performance::CacheMissed();
-		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels);
+		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)
 			RankingCache::Cache()->PutData($metricId, $key, $data);
@@ -55,7 +56,7 @@ class RankingService extends BaseService
 		return $data;
 	}
 
-	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $size, $direction, $hiddenValueLabels)
+	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -65,7 +66,7 @@ class RankingService extends BaseService
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		$table = new SnapshotByDatasetRanking($snapshotTable, $level->Dataset->Type,
-			$variableId, $hasTotals, $urbanity, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+			$variableId, $hasTotals, $urbanity, $partition, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 
 		$rows = $table->GetRows($frame);
 

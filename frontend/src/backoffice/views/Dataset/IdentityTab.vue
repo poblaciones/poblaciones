@@ -41,6 +41,14 @@
 									</div>
 								</div>
 
+								<div class='md-layout-item md-size-50 md-small-size-100'>
+									<mp-select label='Particiones' :allowNull='true'
+														 @selected='UpdateRegen' :canEdit='canEdit'
+														 helper='Elija una variable numérica con etiquetas para segmentar los resultados. Ej. Género: 1. Todos, 2. Mujeres, 3. Varones, 4. Otros.'
+														 :list='Dataset.GetNumericWithLabelColumns()' v-model='Dataset.properties.PartitionColumn'
+														 :render="formatColumn" />
+								</div>
+
 								<div class='md-layout-item md-size-50 md-small-size-100' v-if="Work.IsPublicData()">
 									<div class="mp-label labelSeparator">
 										Incluir en las etiquetas públicas del mapa de base
@@ -51,7 +59,6 @@
 										</md-switch>
 									</div>
 								</div>
-
 							</div>
 						</md-card-content>
 					</md-card>

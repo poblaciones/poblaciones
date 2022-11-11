@@ -10,9 +10,9 @@ class TileDataCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Metrics/TileData");
 	}
-	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $x, $y,$zoom)
+	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition, $x, $y,$zoom)
 	{
-		$key = $frame->GetKeyNoFeature() . "@" .  $metricVersionId . "@" . $levelId  . "@" .  ($urbanity ?  $urbanity : '') . "@x" . $x . "y" . $y . "z" . $zoom;
+		$key = $frame->GetKeyNoFeature() . "@" .  $metricVersionId . "@" . $levelId  . "@" .  ($urbanity ?  $urbanity : '') . "@x" . $x . "y" . $y . "z" . $zoom . ($partition !== null ?  "@" . $partition : '');
 		return $key;
 	}
 }

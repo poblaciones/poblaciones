@@ -71,6 +71,7 @@ SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMet
 	ret.push(['c', this.Boolean(activeSelectedMetric.SelectedVersion().LabelsCollapsed), '0']);
 
 	ret.push(['m', activeSelectedMetric.properties.SummaryMetric, 'N']);
+	ret.push(['x', activeSelectedMetric.GetSelectedPartition(), null]);
 	ret.push(['u', activeSelectedMetric.properties.SelectedUrbanity, 'N']);
 	if (activeSelectedMetric.SelectedLevel().Pinned) {
 		ret.push(['l', '1']);
@@ -314,6 +315,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 	var labelsCollapsed = h.getSafeValue(values, 'c', false);
 	var summaryMetric = h.getSafeValue(values, 'm', 'N');
 	var urbanity = h.getSafeValue(values, 'u', 'N');
+	var partition = h.getSafeValue(values, 'x', null);
 	var pinnedLevel = h.getSafeValue(values, 'l', '');
 	var showDescriptions = h.getSafeValue(values, 'd', '0');
 	var showPerimeter = h.getSafeValue(values, 'e', '0');
@@ -332,6 +334,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 		VariableIndex: variableIndex,
 		LabelsCollapsed: labelsCollapsed,
 		SummaryMetric: summaryMetric,
+		Partition: partition,
 		Urbanity: urbanity,
 		ShowDescriptions: showDescriptions,
 		ShowValues: showValues,
@@ -437,6 +440,10 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	}
 	if (selectedMetric.SelectedUrbanity !== state.Urbanity) {
 		selectedMetric.SelectedUrbanity = state.Urbanity;
+		mapChanged = true;
+	}
+	if (activeSelectedMetric.GetSelectedPartition() !== state.Partition) {
+		selectedMetric.SelectedPartition = state.Partition;
 		mapChanged = true;
 	}
 	if (activeSelectedMetric.SelectedVariable()) {

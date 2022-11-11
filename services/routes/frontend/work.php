@@ -19,12 +19,13 @@ App::$app->get('/services/download/GetDatasetFile', function (Request $request) 
 	$clippingItemId = Params::GetIntArray('r');
 	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$partition = Params::GetInt('g');
 
 	$type = Params::Get('t');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
-	return services\DownloadDatasetService::GetFileBytes($type, $workId, $datasetId, $clippingItemId, $clippingCircle, $urbanity);
+	return services\DownloadDatasetService::GetFileBytes($type, $workId, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition);
 });
 
 // http://mapas.aacademica.org/services/download/StartDatasetDownload?t=ss&l=8&r=1692&a=X&k=
@@ -35,12 +36,13 @@ App::$app->get('/services/download/StartDatasetDownload', function (Request $req
 	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
 	$clippingItemId = Params::GetIntArray('r');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
+	$partition = Params::GetInt('g');
 
 	$type = Params::Get('t');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByDataset($datasetId)) return $denied;
 
-	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity));
+	return App::Json($controller->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition));
 });
 
 App::$app->get('/services/download/StepDatasetDownload', function (Request $request) {

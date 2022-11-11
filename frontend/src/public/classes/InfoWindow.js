@@ -33,6 +33,8 @@ InfoWindow.prototype.CheckUpdateNavigation = function () {
 		}
 		window.Panels.Content.FeatureNavigation.GettingKey = navigatonKey;
 		const loc = this;
+		metric.properties.EffectivePartition = metric.GetSelectedPartition();
+
 		var exceptions = this.GetExceptions(key.MetricId, key.VariableId);
 		var params2 = h.getNavigationParams(metric.properties, window.SegMap.frame, exceptions);
 		if (this.cancel2 !== null) {
@@ -63,6 +65,7 @@ InfoWindow.prototype.resolveCurrentFeatureNavigationKey = function () {
 	if (metric === null || metric.properties === null || metric.SelectedVariable() === null) {
 		return null;
 	}
+	metric.properties.EffectivePartition = metric.GetSelectedPartition();
 	var exceptions = this.GetExceptions(key.MetricId, key.VariableId);
 	var params = h.getNavigationParams(metric.properties, window.SegMap.frame, exceptions);
 	return JSON.stringify(params);

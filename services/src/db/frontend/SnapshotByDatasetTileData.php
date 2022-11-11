@@ -15,16 +15,19 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 
 	private $variables;
 	private $urbanity;
+	private $partition;
 	private $hasSymbols;
 	private $hasDescriptions;
 	private $areSegments;
 	public	$honorTileLimit = true;
 
-	public function __construct($snapshotTable, $datasetType, $areSegments, $variables, $urbanity,
+	public function __construct($snapshotTable, $datasetType, $areSegments, $variables, $urbanity, $partition,
 		$hasSymbols, $hasDescriptions)
 	{
 		$this->variables = $variables;
 		$this->urbanity = $urbanity;
+		$this->partition = $partition;
+
 		$this->areSegments = $areSegments;
 		$this->hasSymbols = $hasSymbols;
 		$this->hasDescriptions = $hasDescriptions;
@@ -62,6 +65,9 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$from = $this->tableName;
 
 		$where = $this->spatialConditions->UrbanityCondition($this->urbanity);
+
+		$where = $this->AddPartitionCondition($where, $this->partition);
+
 		// Trae filas donde no esté todos excluidos por filtro
 		if ($hasAnyNotNullTotal !== '')
 			$where .= ' AND (' . substr($hasAnyNotNullTotal, 4) . ')';

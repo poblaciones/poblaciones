@@ -17,7 +17,7 @@ use minga\framework\PublicException;
 
 class SummaryService extends BaseService
 {
-	public function GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity)
+	public function GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition)
 	{
 		$data = null;
 		$this->CheckNotNullNumeric($metricId);
@@ -28,7 +28,7 @@ class SummaryService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 
-		$key = SummaryCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity);
+		$key = SummaryCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && SummaryCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -38,7 +38,7 @@ class SummaryService extends BaseService
 		{
 			Performance::CacheMissed();
 		}
-		$data = $this->CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity);
+		$data = $this->CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)
 			SummaryCache::Cache()->PutData($metricId, $key, $data);
@@ -48,16 +48,23 @@ class SummaryService extends BaseService
 		return $data;
 	}
 
-	private function CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity)
+	private function CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
 		$version = $metric->GetVersion($metricVersionId);
 		$level = $version->GetLevel($levelId);
-
+		if (!$level->Partitions)
+		{
+			$partition = null;
+		}
+		else if (!$partition)
+		{
+			throw new \ErrorException("Debe indicar una valor para '" . $level->Partitions->Name . "'");
+		}
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		$table = new SnapshotByDatasetSummary($snapshotTable, $level->Dataset->Type,
-										$level->Variables, $urbanity);
+										$level->Variables, $urbanity, $partition);
 		if (sizeof($level->Variables))
 			$rows = $table->GetRows($frame);
 		else

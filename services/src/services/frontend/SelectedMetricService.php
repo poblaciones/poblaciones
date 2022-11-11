@@ -22,6 +22,7 @@ use helena\entities\frontend\metric\SelectedMetricVersion;
 use helena\entities\frontend\metric\VariableInfo;
 use helena\entities\frontend\metric\LevelInfo;
 use helena\entities\frontend\metric\ValueLabelInfo;
+use helena\entities\frontend\metric\PartitionInfo;
 
 use helena\db\frontend\FileModel;
 use helena\classes\SpecialColumnEnum;
@@ -229,9 +230,36 @@ class SelectedMetricService extends BaseService
 			$level->Dataset->Marker = new MarkerInfo();
 			$level->Dataset->Marker->Fill($selectedVersionLevelInfo);
 		}
+		$level->Partitions = $this->parsePartitions($selectedVersionLevelInfo);
 		// Agrega variables
 		$this->AddVariables($level);
 		return $level;
+	}
+
+	private function parsePartitions($selectedVersionLevelInfo)
+	{
+		$name = $selectedVersionLevelInfo['dat_partition_column_caption'];
+		$values = $selectedVersionLevelInfo['dat_partition_values'];
+		if ($values !== null && $name !== null)
+		{
+			$valueList = explode("\t", $values);
+			$captions = $selectedVersionLevelInfo['dat_partition_captions'];
+			$captionList = explode("\t", $captions);
+			$values = [];
+			for($n = 0; $n < sizeof($valueList); $n++)
+			{
+				$values[] = ['Value' => $valueList[$n], 'Caption' => $captionList[$n]];
+			}
+			// devuelve
+			$ret = new PartitionInfo();
+			$ret->Name = $name;
+			$ret->Values = $values;
+			return $ret;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	private function AddVariables(&$levelInfo)

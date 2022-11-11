@@ -27,6 +27,7 @@ class LevelInfo extends BaseMapModel
 	public $HasDescriptions;
 	public $SelectedVariableIndex;
 
+	public $Partitions = null;
 
 	public $Variables = array();
 

@@ -12,6 +12,7 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 {
 	private $variableId;
 	private $urbanity;
+	private $partition;
 	private $hiddenValueLabels;
 	private $hasTotals;
 	private $hasDescriptions;
@@ -19,10 +20,11 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 	private $direction;
 
 	public function __construct($snapshotTable, $datasetType,
-		$variableId, $hasTotals, $urbanity, $hasDescriptions, $size, $direction, $hiddenValueLabels)
+		$variableId, $hasTotals, $urbanity, $partition, $hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
 		$this->variableId = $variableId;
 		$this->urbanity = $urbanity;
+		$this->partition = $partition;
 		$this->hiddenValueLabels = $hiddenValueLabels;
 
 		$this->hasTotals = $hasTotals;
@@ -60,6 +62,8 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 		$where = $this->hiddenValuesCondition();
 
 		$where .= $this->spatialConditions->UrbanityCondition($this->urbanity);
+
+		$where = $this->AddPartitionCondition($where, $this->partition);
 
 		// Filtra que no haya totales = 0 si está normalizado
 		if ($this->hasTotals)

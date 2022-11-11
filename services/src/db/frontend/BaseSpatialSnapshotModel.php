@@ -83,6 +83,16 @@ abstract class BaseSpatialSnapshotModel extends BaseModel
 		return $this->ExecQuery($query, $tileQuery);
 	}
 
+	protected function AddPartitionCondition($where, $partition)
+	{
+		if ($partition !== null)
+		{
+			if ($where != '') $where .= ' AND ';
+			$where .= 'sna_partition = ' . intval($partition);
+		}
+		return $where;
+	}
+
 	protected function AddNotNullCondition($where, $field)
 	{
 		if ($where != '') $where .= ' AND ';

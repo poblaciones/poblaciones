@@ -26,7 +26,7 @@ class TileDataService extends BaseService
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
 	const TILE_SIZE = 256;
 
-	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z)
+	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z)
 	{
 		$s = App::Settings()->Map()->TileDataBlockSize;
 		$blocks = [];
@@ -35,7 +35,7 @@ class TileDataService extends BaseService
 			$row = [];
 			for($iy = $y; $iy < $y + $s; $iy++)
 			{
-	 				$row[$iy] = $this->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $ix, $iy, $z);
+	 				$row[$iy] = $this->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $ix, $iy, $z);
 			}
 			$blocks[$ix] = $row;
 		}
@@ -45,7 +45,7 @@ class TileDataService extends BaseService
 		return $ret;
 	}
 
-	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z)
+	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$data = null;
@@ -56,7 +56,7 @@ class TileDataService extends BaseService
 		$this->CheckNotNullNumeric($y);
 		$this->CheckNotNullNumeric($z);
 
-		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $x, $y, $z);
+		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z);
 
 		if ($frame->ClippingCircle == null && TileDataCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -64,7 +64,7 @@ class TileDataService extends BaseService
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z);
+		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z);
 
 		Performance::CacheMissed();
 		Performance::SetMethod("get");
@@ -77,7 +77,7 @@ class TileDataService extends BaseService
 	}
 
 
-	public function GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity)
+	public function GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition)
 	{
 		Profiling::BeginTimer();
 		$data = null;
@@ -85,14 +85,14 @@ class TileDataService extends BaseService
 		$this->CheckNotNullNumeric($metricVersionId);
 		$this->CheckNotNumericNullable($levelId);
 
-		$data = $this->CalculateLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity);
+		$data = $this->CalculateLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
 
 		Profiling::EndTimer();
 		return $data;
 	}
 
 
-	private function CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $x, $y, $z)
+	private function CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -107,7 +107,7 @@ class TileDataService extends BaseService
 		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
 
 		$table = new SnapshotByDatasetTileData($snapshotTable,
-			$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables, $urbanity, $hasSymbols, $hasDescriptions);
+			$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables, $urbanity, $partition, $hasSymbols, $hasDescriptions);
 
 		$rows = $table->GetRows($frame);
 
@@ -131,7 +131,7 @@ class TileDataService extends BaseService
 		return $data;
 	}
 
-	private function CalculateLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity)
+	private function CalculateLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -146,7 +146,8 @@ class TileDataService extends BaseService
 		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
 
 		$table = new SnapshotByDatasetTileData($snapshotTable,
-			$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables, $urbanity, $hasSymbols, $hasDescriptions);
+											$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables,
+													$urbanity, $partition, $hasSymbols, $hasDescriptions);
 
 		$table->honorTileLimit = false;
 

@@ -32,12 +32,14 @@ axios.defaults.withCredentials = true;
 
 import MpCloseButton from '@/public/components/controls/mpCloseButton';
 import MpFilterBadge from '@/public/components/controls/mpFilterBadge';
+import MpPartitionBadge from '@/public/components/controls/mpPartitionBadge';
 import MpColorPicker from '@/common/components/MpColorPicker';
 import MpLabel from '@/public/components/controls/mpLabel';
 import VueMobileDetection from 'vue-mobile-detection';
 
 Vue.component('mp-close-button', MpCloseButton);
 Vue.component('mp-filter-badge', MpFilterBadge);
+Vue.component('mp-partition-badge', MpPartitionBadge);
 Vue.component('mp-label', MpLabel);
 Vue.component('mp-color-picker', MpColorPicker);
 
