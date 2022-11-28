@@ -333,7 +333,8 @@ html, body {
 	-webkit-text-fill-color: #888 !important;
 }
 .md-dialog-container {
-	max-width: 640px!important;
+	max-width: 640px !important;
+	max-height: 95% !important;
 }
 .helper {
 	font-size: 11.5px;
@@ -341,8 +342,9 @@ html, body {
 	color: #a0a0a0!important;
 }
 
-	.largeDialog>.md-dialog-container {
+	.largeDialog > .md-dialog-container {
 		max-width: 870px !important;
+		max-height: 95% !important;
 	}
 .selectable {
 	cursor: pointer;

@@ -1,5 +1,5 @@
 <template>
-	<div :style="'display: inline-block; width: 28px;'
+	<div :style="'display: inline-block; width: 28px; margin-left: 10px; margin-right: -17px; margin-top: 4px;'
 							+ (chipVisible ? '' : 'position:absolute;') +
 							+ (offsetY ? 'top:' + offsetY + 'px;' : '') +
 					'position: relative; ' + (topPadding ? 'padding-top: 5px' : '')">

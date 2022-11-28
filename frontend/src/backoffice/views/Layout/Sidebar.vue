@@ -102,6 +102,7 @@ export default {
 			var loc = this;
 			this.$refs.stepper.startUrl = window.Db.GetStartWorkPublishUrl(this.Work.properties.Id);
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkPublishUrl();
+			this.$refs.stepper.visitTarget = this.Work.PreviewTarget();
 			this.$refs.stepper.setTitle('Publicando');
 			this.$refs.stepper.Start().then(function () {
 				loc.Work.WorkPublished();

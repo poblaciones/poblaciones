@@ -94,8 +94,14 @@ class DatasetDownloadModel extends BaseDownloadModel
 		if ($dataset['partition_column_field'])
 		{
 			if ($partition === null)
-				throw new ErrorException("Debe indicarse un valor de particionado.");
-			$where .= 'AND ' . $dataset['partition_column_field'] . ' = ' . intval($partition);
+			{
+				if (!$this->fromDraft)
+					throw new ErrorException("Debe indicarse un valor de particionado.");
+			}
+			else
+			{
+				$where .= 'AND ' . $dataset['partition_column_field'] . ' = ' . intval($partition);
+			}
 		}
 
 		// Agrega columnas del dataset

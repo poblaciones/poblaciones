@@ -99,9 +99,9 @@
 							<div class="md-layout-item md-size-80" style="margin-top: -10px">
 								<md-table :key="componentKey" style="max-width: 900px;" v-model="embedding" md-sort="Hits" md-sort-order="desc" md-card="">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
-										<md-table-cell md-label="Sitio" md-sort-by="Host"><a :href="item.Host" target="_blank">{{ removeProt(item.Host) }}</a></md-table-cell>
+										<md-table-cell md-label="Sitio" md-sort-by="Host" style="word-break: break-all; max-width: 150px"><a :href="item.Host" target="_blank">{{ removeProt(item.Host) }}</a></md-table-cell>
 										<md-table-cell md-label="Hits"><span v-html="joinArray(item.Hits)" /></md-table-cell>
-										<md-table-cell md-label="Cartografía"><span v-html="joinArray(item.Maps, true)" /></md-table-cell>
+										<md-table-cell md-label="Cartografía" style="word-break: normal; overflow: hidden; max-width: 150px;"><span v-html="joinArray(item.Maps, true)" /></md-table-cell>
 									</md-table-row>
 								</md-table>
 							</div>

@@ -86,7 +86,10 @@ var webpackConfig = merge(baseWebpackConfig, {
 		new HtmlWebpackPlugin({
 			filename: config.build.indexBackoffice,
 			template: 'backoffice.html',
-			metadata: { google_maps_key: env.google_maps_key.replace(/"/g, '') },
+			metadata: {
+				google_maps_key: env.google_maps_key.replace(/"/g, ''),
+				maps_api: env.maps_api.replace(/"/g, ''),
+			},
 			chunks: ['manifest', 'vendor', 'appBackoffice'],
 			inject: true,
 			minify: {

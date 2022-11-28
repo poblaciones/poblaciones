@@ -1,8 +1,17 @@
+v3.08 (2022-11-25)
 - Fix: las revisiones pueden ser grabadas por usuarios con perfil Editor.
 - Permite importar etiquetas de valores de variables desde Excel o Csv.
 - Ofrecía 'escalar' como tipo de medida para las variables de texto, lo que no es válido.
 - Fix: admite shapefiles sin dbf.
 - Fix: respeta el orden de indicadores predeterminados al abrir una cartografía.
+- Al 'ver mapa' después de publicar, reutiliza la solapa por cartografía.
+- Fix: los usuarios 'editor de datos' no pueden consultar datasets de datos públicos en backoffice.
+- Se mueve la métrica 'Conteo' al inicio de la lista de métricas calculadas.
+- Fix: relocalizar no se abre al geoferenciar.
+- Fix: no debería ofrecer texturas (pleno, contorno, etc) en segmento y en mapa de puntos.
+- La altura de popups aprovecha mejor el alto de la pantalla.
+- Se agrega un botón de 'Omitir todo' en georrefenciar.
+
 
 v3.07 (2022-09-12)
 - Fix: se pierde la ubicación como 'reciente' tras publicarse una obra desde el listado de cartografías.

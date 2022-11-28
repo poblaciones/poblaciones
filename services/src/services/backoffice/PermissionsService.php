@@ -151,7 +151,7 @@ class PermissionsService extends BaseService
 			{
 				// No es administrador y no tiene permiso asignado en la base. Se fija
 				// si tiene permiso para editar datos públicos y lo son.
-				if (Session::IsSiteEditor() === false || $row['wkr_type'] !== 'P')
+				if (Session::IsSiteEditor() === false || $row['wrk_type'] !== 'P')
 				{
 					$ret[$row['mtr_id']] = false;
 				}

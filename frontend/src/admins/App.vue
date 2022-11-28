@@ -229,7 +229,9 @@ html, body {
 
 .md-dialog-container {
 	max-width: 640px !important;
+	max-height: 95% !important;
 }
+
 .hand {
 	cursor: pointer;
 }

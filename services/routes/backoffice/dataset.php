@@ -84,6 +84,13 @@ App::Get('/services/backoffice/CreateDatasetRow', function (Request $request) {
 	return App::Json($controller->CreateRow($datasetId));
 });
 
+App::GetOrPost('/services/backoffice/OmmitDatasetAllRows', function (Request $request) {
+	$controller = new services\DatasetService();
+	$datasetId = Params::GetIntMandatory('k');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
+	return App::Json($controller->OmmitDatasetAllRows($datasetId));
+});
+
 App::GetOrPost('/services/backoffice/OmmitDatasetRows', function (Request $request) {
 	$controller = new services\DatasetService();
 	$datasetId = Params::GetIntMandatory('k');
@@ -124,8 +131,9 @@ App::$app->get('/services/backoffice/GetDatasetFile', function (Request $request
 	$clippingItemId = null;
 	$clippingCircle = null;
 	$urbanity = null;
+	$partition = null;
 	$type = Params::Get('t');
-	return services\DownloadDatasetService::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity);
+	return services\DownloadDatasetService::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition);
 });
 
 App::$app->get('/services/backoffice/StepDatasetDownload', function (Request $request) {

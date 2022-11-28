@@ -319,6 +319,10 @@ ActiveWork.prototype.RemoveExtraMetric = function (metric) {
 		'remover el indicador adicional');
 };
 
+ActiveWork.prototype.PreviewTarget = function () {
+	return '_mapPbl' + this.properties.Id;
+};
+
 ActiveWork.prototype.UpdateStartup = function () {
 	var args = { 'w': this.properties.Id, 's': this.properties.Startup };
 	this.WorkChanged();

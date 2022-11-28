@@ -547,6 +547,17 @@ ActiveDataset.prototype.SaveColumn = function (variable) {
 		'actualizar los atributos de la variable');
 };
 
+ActiveDataset.prototype.SkipAllRows = function () {
+	var loc = this;
+	this.Work.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/OmmitDatasetAllRows',
+		{ 'k': this.properties.Id },  'marcar las filas como omitidas'
+	).then(function(data) {
+		loc.ScaleGenerator.Clear();
+		return data;
+	});
+};
+
 ActiveDataset.prototype.SkipRows = function (rowIds) {
 	var loc = this;
 	this.Work.WorkChanged();
@@ -711,13 +722,13 @@ ActiveDataset.prototype.GetRichColumns = function () {
 		return [ { Id: -10, Caption: 'Conteo', Code: 'N' }];
 	} else {
 		return [
+			{ Id: -10, Caption: 'Conteo', Code: 'N' },
 			{ Id: -1, Caption: 'Población total', Code: 'P' },
 			{ Id: -2, Caption: 'Hogares', Code: 'H' },
 			{ Id: -3, Caption: 'Adultos (>=18)', Code: 'A' },
 			{ Id: -4, Caption: 'Niños (<18)', Code: 'C' },
 			{ Id: -5, Caption: 'Área m²', Code: 'M' },
-			{ Id: -6, Caption: 'Área km²', Code: 'K' },
-			{ Id: -10, Caption: 'Conteo', Code: 'N' }];
+			{ Id: -6, Caption: 'Área km²', Code: 'K' }];
 	}
 };
 

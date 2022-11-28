@@ -29,7 +29,8 @@ export default {
 	methods: {
 		goMap() {
 			var url = this.Work.PublicUrl();
-			window.open(url, '_blank');
+			var target = this.Work.PreviewTarget();
+			window.open(url, target);
 		},
 		onPublish() {
 			window.openPublish();

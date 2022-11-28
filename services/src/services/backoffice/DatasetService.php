@@ -133,6 +133,20 @@ class DatasetService extends DbSession
 		return $ret;
 	}
 
+	public function OmmitDatasetAllRows($datasetId)
+	{
+		Profiling::BeginTimer();
+		$dataset = $this->GetDataset($datasetId);
+		$table = $dataset->getTable();
+		// Lo graba
+		$ommit = "UPDATE " . $table . " SET ommit = 1 WHERE ommit = 0";
+		App::Db()->exec($ommit);
+		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
+		$this->DeleteAllErrors($table);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function OmmitDatasetRows($datasetId, $ids)
 	{
 		Profiling::BeginTimer();
@@ -162,6 +176,15 @@ class DatasetService extends DbSession
 		DatasetService::DatasetChanged($dataset);
 		Profiling::EndTimer();
 		return $ret;
+	}
+	private function DeleteAllErrors($table)
+	{
+		$tableErrors = $table . "_errors";
+		if (App::Db()->tableExists($tableErrors) == false)
+			return;
+
+		$errors = "DELETE FROM " . $tableErrors;
+		App::Db()->exec($errors);
 	}
 	private function DeleteFromErrors($table, $ids)
 	{

@@ -41,6 +41,9 @@
 				<md-button v-if="Work.CanEdit() && !showingErrors" @click="upload()">
 					<md-icon>cloud_upload</md-icon> Importar
 				</md-button>
+				<md-button v-if="showingErrors" @click="skipAllOnClick" :disabled="skipAllDisabled">
+					<md-icon>fast_forward</md-icon> Omitir todo
+				</md-button>
 				<md-button v-if="showingErrors" @click="skipOnClick" :disabled="skipDisabled">
 					<md-icon>skip_next</md-icon> Omitir fila(s)
 				</md-button>
@@ -48,7 +51,7 @@
 					<md-icon>add_circle_outline</md-icon> Nueva fila
 				</md-button>
 				<md-button v-if="Work.CanEdit()" @click="confirmDelete" :disabled="deleteDisabled">
-					<md-icon>delete</md-icon> Borrar fila(s)
+					<md-icon>delete</md-icon> Borrar
 				</md-button>
 				<template v-if="showingErrors">
 					<template v-if="georeferenceParameters.type == 'location'">
@@ -180,7 +183,8 @@ export default {
       this.counter++;
     },
     bindingcomplete() {
-      this.isBinding = false;
+			this.isBinding = false;
+			this.updateCount();
       if (this.requiresBinding) {
         this.requiresBinding = false;
         this.createGrid();
@@ -361,7 +365,7 @@ export default {
     selectionChanged() {
       let grid = this.Grid;
       let rowIndexes = grid.getselectedrowindexes();
-      this.deleteDisabled = rowIndexes.length === 0;
+			this.deleteDisabled = rowIndexes.length === 0;
       this.skipDisabled = rowIndexes.length === 0;
       this.relocateDisabled = rowIndexes.length !== 1;
       this.fixDisabled = rowIndexes.length !== 1;
@@ -372,7 +376,8 @@ export default {
         rowCount = this.Grid.getdatainformation().rowscount;
       }
       let selectedRows = 0;
-      try {
+			this.skipAllDisabled = (rowCount === 0);
+			try {
         selectedRows = this.Grid.getselectedrowindexes().length;
       } catch (err) {}
 
@@ -464,6 +469,14 @@ export default {
     csvBtnOnClick() {
 			this.Grid.exportdata("csv", "dataset", true, null, false, this.Work.GetGridExportUrl());
     },
+		deleteAllRows() {
+			this.Grid.clear();
+			this.DataPager.Clear();
+			this.Grid.clearselection();
+			this.createGrid();
+			this.selectionChanged();
+			this.updateCount();
+		},
 		deleteSelection() {
 			var selected = this.gridNativeSelectedIds();
 			var rowscount = this.Grid.getdatainformation().rowscount;
@@ -478,6 +491,7 @@ export default {
 				this.createGrid();
 			}
 			this.selectionChanged();
+			this.updateCount();
 		},
 		newRow() {
 			var loc = this;
@@ -604,12 +618,22 @@ export default {
 				loc.hideWait();
 			}).catch(function () { loc.hideWait(); });
     },
+		skipAllOnClick() {
+			let loc = this;
+			loc.showWait();
+			this.Dataset.SkipAllRows().then(function () {
+				loc.deleteAllRows();
+				loc.skipAllDisabled = true;
+				loc.hideWait();
+				loc.$emit('submitGrid');
+			}).catch(function () { loc.hideWait(); });
+		},
     refreshOnClick() {
       this.createGrid();
 		},
     rendergridrows(obj) {
-      var rows = obj.data;
-      return rows;
+			var rows = obj.data;
+			return rows;
     }
   },
   data() {
@@ -618,7 +642,8 @@ export default {
       counter: 0,
 			relocateDisabled: true,
       deleteDisabled: true,
-      skipDisabled: true,
+			skipDisabled: true,
+			skipAllDisabled: true,
       fixDisabled: true,
       isBinding: false,
       requiresBinding: false,

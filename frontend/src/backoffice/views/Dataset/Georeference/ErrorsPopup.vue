@@ -11,7 +11,7 @@
 					identificados y seleccione la acción que corresponda para poder completar el proceso.
 				</p>
 				<div class="md-layout md-gutter">
-					<ActiveGrid ref="grid" :showingErrors="true" :gridwidth="800"
+					<ActiveGrid ref="grid" :showingErrors="true" :gridwidth="800" @submitGrid="save"
 											:georeferenceParameters="georeferenceParameters"></ActiveGrid>
 				</div>
 			</div>

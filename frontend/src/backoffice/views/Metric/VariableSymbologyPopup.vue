@@ -165,7 +165,7 @@
 									<md-tooltip md-direction="bottom">Pegar coloreo</md-tooltip>
 								</md-button>
 							</div>
-							<md-field>
+							<md-field v-show="hasArea">
 								<label>Estilo</label>
 								<md-select :disabled="!canEdit" v-model="Variable.Symbology.Pattern">
 									<md-option v-for='i in patterns' :key='i.key' :value='i.key'>
@@ -227,7 +227,8 @@
 							<div v-show="Variable.Symbology.PaletteType === 'G'">
 								<div class="helper">Rango</div>
 								<mp-color-picker :canEdit="Work.CanEdit()" :ommitHexaSign="true"
-																 vertical-align="top" v-model="Variable.Symbology.ColorFrom" />
+																 vertical-align="top" v-model="Variable.Symbology.ColorFrom"
+																 style="margin-right: -7px;"/>
 
 								<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="swapColors">
 									<md-icon>swap_horiz</md-icon>
@@ -547,6 +548,10 @@ export default {
 		},
 		Work() {
 			return window.Context.CurrentWork;
+		},
+		hasArea() {
+			var datasetHasAreas = this.Dataset.properties.Type !== 'L';
+			return datasetHasAreas && !this.Dataset.properties.AreSegments;
 		},
 		canEdit() {
 			if (this.Work) {

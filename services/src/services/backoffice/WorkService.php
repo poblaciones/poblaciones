@@ -367,8 +367,8 @@ class WorkService extends BaseService
 													dat_latitude_column_segment_id, GetDatasetOf(dat_latitude_column_segment_id),
 													dat_longitude_column_segment_id, GetDatasetOf(dat_longitude_column_segment_id),
 													dat_geography_item_column_id, GetDatasetOf(dat_geography_item_column_id),
-													dat_caption_column_id, GetDatasetOf(dat_caption_column_id)
-													dat_partition_column_id, GetDatasetOf(dat_partition_column_id),
+													dat_caption_column_id, GetDatasetOf(dat_caption_column_id),
+													dat_partition_column_id, GetDatasetOf(dat_partition_column_id)
 													FROM draft_dataset WHERE dat_work_id = ?";
 		$columnRefs = App::Db()->fetchAll($queryCols, array($workId));
 		$errors .= $this->CheckOffdatasetColumns($columnRefs);
