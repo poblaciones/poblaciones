@@ -47,6 +47,17 @@
 														 helper='Elija una variable numérica con etiquetas para segmentar los resultados. Ej. Género: 1. Todos, 2. Mujeres, 3. Varones, 4. Otros.'
 														 :list='Dataset.GetNumericWithLabelColumns()' v-model='Dataset.properties.PartitionColumn'
 														 :render="formatColumn" />
+									<div v-show="Dataset.properties.PartitionColumn">
+										<md-switch v-model="Dataset.properties.PartitionMandatory"
+															 style="margin-top: -1rem;" :disabled="!canEdit" class="md-primary" @change="Update">
+											Filtro de partición obligatorio
+										</md-switch>
+										<mp-text v-show="!Dataset.properties.PartitionMandatory" :canEdit="canEdit"
+														 label="Descripción para partición sin filtro" :maxlength="50"
+														 @update="Update" class="smaller"
+														 v-model="Dataset.properties.PartitionAllLabel"
+														 style="width: 100px; margin-top: -0.8rem; margin-left: 3.15rem!important;" />
+									</div>
 								</div>
 
 								<div class='md-layout-item md-size-50 md-small-size-100' v-if="Work.IsPublicData()">

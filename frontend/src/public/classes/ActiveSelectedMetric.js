@@ -133,12 +133,18 @@ ActiveSelectedMetric.prototype.ChangeMetricVisibility = function () {
 	this.UpdateMap();
 };
 
-ActiveSelectedMetric.prototype.ChangeSelectedLevelIndex = function (index) {
+ActiveSelectedMetric.prototype.ChangeSelectedMultiLevelIndex = function (index) {
+	var isUsingMultilevel = (this.SelectedVersion().SelectedMultiLevelIndex
+															== this.SelectedVersion().SelectedLevelIndex);
+
 	// Cambia el level, intentando mantener la variable seleccionado.
 	// La mantiene si el caption coincide.
 	var variable = this.SelectedVariable();
 	var name = (variable !== null ? variable.Name : null);
-	this.SelectedVersion().SelectedLevelIndex = index;
+	this.SelectedVersion().SelectedMultiLevelIndex = index;
+	if (isUsingMultilevel) {
+		this.SelectedVersion().SelectedLevelIndex = index;
+	}
 	this.SetSelectedVariableByName(name);
 };
 
@@ -330,6 +336,14 @@ ActiveSelectedMetric.prototype.SelectedVersion = function () {
 	return this.properties.Versions[this.properties.SelectedVersionIndex];
 };
 
+ActiveSelectedMetric.prototype.SelectedMultiLevelIndex = function () {
+	if (this.properties === null) {
+		throw new Error('No properties has been set.');
+	}
+	var version = this.SelectedVersion();
+	return version.SelectedMultiLevelIndex;
+};
+
 ActiveSelectedMetric.prototype.SelectedLevelIndex = function () {
 	if (this.properties === null) {
 		throw new Error('No properties has been set.');
@@ -338,12 +352,28 @@ ActiveSelectedMetric.prototype.SelectedLevelIndex = function () {
 	return version.SelectedLevelIndex;
 };
 
+ActiveSelectedMetric.prototype.BottomLevel = function () {
+	if (this.properties === null) {
+		throw new Error('No properties has been set.');
+	}
+	var version = this.SelectedVersion();
+	return version.Levels[version.Levels.length - 1];
+};
+
 ActiveSelectedMetric.prototype.SelectedLevel = function () {
 	if (this.properties === null) {
 		throw new Error('No properties has been set.');
 	}
 	var version = this.SelectedVersion();
 	return version.Levels[version.SelectedLevelIndex];
+};
+
+ActiveSelectedMetric.prototype.SelectedMultiLevel = function () {
+	if (this.properties === null) {
+		throw new Error('No properties has been set.');
+	}
+	var version = this.SelectedVersion();
+	return version.Levels[version.SelectedMultiLevelIndex];
 };
 
 ActiveSelectedMetric.prototype.HasSelectedVersion = function () {
@@ -560,14 +590,23 @@ ActiveSelectedMetric.prototype.ReleasePins = function () {
 		}
 	}
 };
+ActiveSelectedMetric.prototype.SetLevel = function (level) {
+	for (var l = 0; l < this.SelectedVersion().Levels.length; l++) {
+		var currentLevel = this.SelectedVersion().Levels[l];
+		if (currentLevel == level) {
+			var currentLevel = this.SelectedVersion().SelectedLevelIndex = l;
+			break;
+		}
+	}
+};
 
 ActiveSelectedMetric.prototype.UpdateLevel = function () {
-	if (this.SelectedLevel().Pinned) {
+	if (this.SelectedMultiLevel().Pinned) {
 		return false;
 	}
 	var l = this.CalculateProperLevel();
-	if (l !== this.SelectedLevelIndex()) {
-		this.ChangeSelectedLevelIndex(l);
+	if (l !== this.SelectedMultiLevelIndex()) {
+		this.ChangeSelectedMultiLevelIndex(l);
 		this.CheckValidMetric();
 		return true;
 	} else {
@@ -586,9 +625,19 @@ ActiveSelectedMetric.prototype.CheckValidMetric = function () {
 	this.properties.SummaryMetric = metrics[0].Key;
 };
 
+ActiveSelectedMetric.prototype.IsMultiLevel = function () {
+	var currentVersion = this.SelectedVersion();
+	return currentVersion.Levels.length > 1;
+};
+
+ActiveSelectedMetric.prototype.LastLevelDontMultilevel = function () {
+	var currentVersion = this.SelectedVersion();
+	return currentVersion.Levels[currentVersion.Levels.length - 1].Dataset.Type !== 'D';
+};
+
 ActiveSelectedMetric.prototype.CalculateProperLevel = function () {
 	var currentVersion = this.SelectedVersion();
-	if (currentVersion.Levels.length < 2) {
+	if (!this.IsMultiLevel()) {
 		return 0;
 	}
 	var currentLevel = null;
@@ -599,19 +648,20 @@ ActiveSelectedMetric.prototype.CalculateProperLevel = function () {
 		// Si es más chico que el primero, devuelve ese
 		return validFrom;
 	}
-	var last = currentVersion.Levels.length - 1;
+	var levelCount = currentVersion.Levels.length - (this.LastLevelDontMultilevel() ? 1 : 0);
+	var last = levelCount - 1;
 	if (currentZoom > currentVersion.Levels[last].MaxZoom) {
 		// Si es más grande que el máximo, devuelve ese
 		return last;
 	}
-	for (var l = validFrom; l < currentVersion.Levels.length; l++) {
+	for (var l = validFrom; l < levelCount; l++) {
 		var currentLevel = currentVersion.Levels[l];
 		if (currentZoom >= currentLevel.MinZoom && currentZoom <= currentLevel.MaxZoom) {
 			return l;
 		}
 	}
 	// Trata de devolver uno válido, incluso si no está en el rango de zoom
-	return currentVersion.Levels.length - 1;
+	return levelCount - 1;
 };
 
 ActiveSelectedMetric.prototype.LevelValidFrom = function() {

@@ -24,6 +24,9 @@ class cActivity extends cController
 		// Pone atributos
 		$cacheData = self::ResolveData();
 		$spaceData = json_decode(IO::ReadAllText($cacheData), true);
+		if (!array_key_exists('total_orphan_size', $spaceData)) $spaceData['total_orphan_size'] = 0;
+		if (!array_key_exists('total_tmp_size', $spaceData)) $spaceData['total_tmp_size'] = 0;
+
 		foreach($spaceData as $key => $value)
 			$this->AddValue($key, $value);
 
@@ -118,6 +121,12 @@ class cActivity extends cController
 		$vals['total_data_size'] = Str::SizeToHumanReadable($indexSpace['data']+$indexSpace['index']);
 		$vals['index_data_size'] = Str::SizeToHumanReadable($indexSpace['data']);
 		$vals['index_index_size'] = Str::SizeToHumanReadable($indexSpace['index']);
+
+		$orphanSpace = App::GetOrphanSize();
+		$vals['total_orphan_size'] = Str::SizeToHumanReadable($orphanSpace['size']);
+
+		$tmpSpace = App::GetTmpSize();
+		$vals['total_tmp_size'] = Str::SizeToHumanReadable($tmpSpace['size']);
 
 		$dirInfo = IO::GetDirectorySize(Context::Paths()->GetRoot());
 

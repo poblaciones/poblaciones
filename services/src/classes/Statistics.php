@@ -134,6 +134,13 @@ class Statistics
 		Profiling::EndTimer();
 	}
 
+	public static function StoreDownloadDictionaryHit($workId)
+	{
+		Profiling::BeginTimer();
+		self::SaveData($workId, 'dictionary', '');
+		Profiling::EndTimer();
+	}
+
 	public static function StoreDownloadMetadataAttachmentHit($workId, $id)
 	{
 		Profiling::BeginTimer();

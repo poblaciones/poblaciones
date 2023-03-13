@@ -4,6 +4,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use helena\classes\App;
 use minga\framework\PhpSession;
+use minga\framework\Str;
 use helena\classes\Session;
 use helena\services\backoffice as services;
 use minga\framework\Params;
@@ -206,6 +207,12 @@ App::GetOrPost('/services/backoffice/CalculateNewDistanceMetric', function (Requ
 	$source = Params::GetJson('s', true);
 	$output = Params::GetJson('o', true);
 
+	$labelsCompact = Params::Get('labelsCompact');
+	$dict = Params::GetJson('labelsDict', true);
+	$expanded = Str::Uncompact($labelsCompact, $dict);
+	if ($expanded != null)
+		$source['ValueLabelIds'] = json_decode($expanded, true);
+
 	$controller = new services\CalculatedDistanceService();
 	return App::Json($controller->StartCalculate($datasetId, $source, $output));
 });
@@ -224,6 +231,12 @@ App::GetOrPost('/services/backoffice/CalculateNewAreaMetric', function (Request 
 
 	$source = Params::GetJson('s', true);
 	$output = Params::GetJson('o', true);
+
+	$labelsCompact = Params::Get('labelsCompact');
+	$dict = Params::GetJson('labelsDict', true);
+	$expanded = Str::Uncompact($labelsCompact, $dict);
+	if ($expanded != null)
+		$source['ValueLabelIds'] = json_decode($expanded, true);
 
 	$controller = new services\CalculatedAreaService();
 	return App::Json($controller->StartCalculate($datasetId, $source, $output));

@@ -2,8 +2,11 @@
 
 namespace helena\classes\writers;
 
-use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
-use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+use OpenSpout\Reader\Common\Creator\ReaderEntityFactory;
+use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
+use OpenSpout\Writer\Common\Creator\Style\StyleBuilder;
+use OpenSpout\Common\Entity\Style\Color;
+use OpenSpout\Writer\XLSX\Entity\SheetView;
 
 use helena\classes\spss\Format;
 
@@ -30,6 +33,18 @@ class XlsxWriter extends CsvWriter
 			$reader->open($fileCsv);
 			$writer->openToFile($fileExcel);
 
+			$writer->getCurrentSheet()->setSheetView(
+            (new SheetView())
+                ->setZoomScale(90)
+                ->setZoomScaleNormal(90)
+                ->setZoomScalePageLayoutView(90)
+                ->setFreezeRow(2)
+        );
+
+			$styleBuilder = new StyleBuilder();
+			$styleBuilder->setBackgroundColor(Color::rgb(217, 217, 217));
+			$style = $styleBuilder->build();
+
 			$firstRow = true;
 			foreach ($reader->getSheetIterator() as $sheet)
 			{
@@ -50,11 +65,17 @@ class XlsxWriter extends CsvWriter
 								$outCells[] = WriterEntityFactory::createCell($val);
 								$col++;
 							}
-							$singleRow = WriterEntityFactory::createRow($outCells);
+							if ($firstRow)
+								$singleRow = WriterEntityFactory::createRow($outCells, $style);
+							else
+								$singleRow = WriterEntityFactory::createRow($outCells);
+
 							$writer->addRow($singleRow);
 							$firstRow = false;
 					}
 			}
+
+
 			$reader->close();
 
 /*			$values = ['Carl', 'is', 'great!'];

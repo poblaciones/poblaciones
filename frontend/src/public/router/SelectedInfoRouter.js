@@ -66,12 +66,17 @@ SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMet
 	ret.push([activeSelectedMetric.properties.Metric.Id]);
 	ret.push(['v', activeSelectedMetric.properties.SelectedVersionIndex, -1]);
 	ret.push(['a', activeSelectedMetric.SelectedVersion().SelectedLevelIndex, 0]);
+	ret.push(['q', activeSelectedMetric.SelectedVersion().SelectedMultiLevelIndex,
+								 activeSelectedMetric.SelectedVersion().SelectedLevelIndex]);
 	ret.push(['i', activeSelectedMetric.SelectedLevel().SelectedVariableIndex, 0]);
 	ret.push(['k', this.GetRanking(activeSelectedMetric), '']);
 	ret.push(['c', this.Boolean(activeSelectedMetric.SelectedVersion().LabelsCollapsed), '0']);
 
 	ret.push(['m', activeSelectedMetric.properties.SummaryMetric, 'N']);
-	ret.push(['x', activeSelectedMetric.GetSelectedPartition(), null]);
+	var part = activeSelectedMetric.GetSelectedPartition();
+	if (part !== '') {
+		ret.push(['x', part, null]);
+	}
 	ret.push(['u', activeSelectedMetric.properties.SelectedUrbanity, 'N']);
 	if (activeSelectedMetric.SelectedLevel().Pinned) {
 		ret.push(['l', '1']);
@@ -311,6 +316,10 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 	var id = h.getSafeValue(values, '');
 	var versionIndex = h.getSafeValue(values, 'v', -1);
 	var levelIndex = h.getSafeValue(values, 'a', 0);
+	var multiLevelIndex = h.getSafeValue(values, 'q', null);
+	if (multiLevelIndex === null) {
+		multiLevelIndex = levelIndex;
+	}
 	var variableIndex = h.getSafeValue(values, 'i', 0);
 	var labelsCollapsed = h.getSafeValue(values, 'c', false);
 	var summaryMetric = h.getSafeValue(values, 'm', 'N');
@@ -331,6 +340,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 		Id: parseInt(id),
 		VersionIndex: versionIndex,
 		LevelIndex: levelIndex,
+		MultiLevelIndex: multiLevelIndex,
 		VariableIndex: variableIndex,
 		LabelsCollapsed: labelsCollapsed,
 		SummaryMetric: summaryMetric,
@@ -406,8 +416,14 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	if (levelIndex !== version.SelectedLevelIndex &&
 		levelIndex < version.Levels.length) {
 		version.SelectedLevelIndex = levelIndex;
+		mapChanged = true;
+	}
+	var multiLevelIndex = parseInt(state.MultiLevelIndex);
+	if (multiLevelIndex !== version.SelectedMultiLevelIndex &&
+		multiLevelIndex < version.Levels.length) {
+		version.SelectedMultiLevelIndex = multiLevelIndex;
 		if (state.PinnedLevel === '1') {
-			activeSelectedMetric.SelectedLevel().Pinned = true;
+			activeSelectedMetric.SelectedMultiLevel().Pinned = true;
 		}
 		mapChanged = true;
 	}

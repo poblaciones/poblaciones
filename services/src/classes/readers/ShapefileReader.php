@@ -6,6 +6,8 @@ use minga\framework\PublicException;
 use minga\framework\IO;
 use minga\framework\Zip;
 use helena\classes\App;
+use minga\framework\Log;
+
 use helena\classes\Projections;
 
 use helena\classes\spss\Variable;
@@ -22,8 +24,8 @@ use helena\classes\shapefile\FastShapeFileReader;
  * uso:
  *
  * CsvReader::Convert(nombre de archivo csv, directorio de destino, ...);
- * Si no se pasan los par·metros opcionales intenta detectarlos
- * autom·ticamente, eso lo hace la clase CsvParser.
+ * Si no se pasan los par√°metros opcionales intenta detectarlos
+ * autom√°ticamente, eso lo hace la clase CsvParser.
  *
  */
 
@@ -43,7 +45,7 @@ class ShapefileReader extends BaseReader
 			$zip->Extract($folder);
 			$masterFile = self::FindMasterFile($folder);
 			if (!$masterFile)
-				throw new PublicException("El archivo indicado no posee un archivo con extensiÛn .shp.");
+				throw new PublicException("El archivo indicado no posee un archivo con extensi√≥n .shp.");
 		}
 		else
 			$masterFile = $this->sourceFile;
@@ -114,15 +116,15 @@ class ShapefileReader extends BaseReader
 			$header['varNames'] = self::NumerateDuplicates($header['varNames']);
 			$latColumn = $header['varNames'][sizeof($header['varNames']) - 2];
 			$lonColumn = $header['varNames'][sizeof($header['varNames']) - 1];
-			self::FormatCoordinateColumn($header, $latColumn, 'Latitud de la ubicaciÛn');
-			self::FormatCoordinateColumn($header, $lonColumn, 'Longitud de la ubicaciÛn');
+			self::FormatCoordinateColumn($header, $latColumn, 'Latitud de la ubicaci√≥n');
+			self::FormatCoordinateColumn($header, $lonColumn, 'Longitud de la ubicaci√≥n');
 		}
 		else
 		{
 			$header['varNames'][] = 'wkt';
 			$header['varNames'] = self::NumerateDuplicates($header['varNames']);
 			$geomColumn = $header['varNames'][sizeof($header['varNames']) - 1];
-			self::FormatTextColumn($header, $geomColumn, 'WKT con polÌgonos', 100000);
+			self::FormatTextColumn($header, $geomColumn, 'WKT con pol√≠gonos', 100000);
 		}
 
 		$header['valueLabels'] = new \stdClass();
@@ -138,17 +140,27 @@ class ShapefileReader extends BaseReader
 		$crsFrom = $projection;
 		$crsTo = "epsg:4326";
 		$needsProjection = !Str::Contains($crsFrom, "GCS_WGS_1984");
-		$projector = new Projections($crsFrom, $crsTo);
+
+		try
+		{
+			$projector = new Projections($crsFrom, $crsTo);
+		}
+		catch(\Exception $e)
+		{
+			$log = "La proyecci√≥n indicada no fue reconocida: " . $crsFrom;
+			Log::HandleSilentException(new PublicException($log));
+			throw new PublicException("La proyecci√≥n indicada no fue reconocida. Procure convertir la informaci√≥n a GCS_WGS_1984 antes de importarla.");
+		}
 
 		if (!$crsFrom)
-			throw new PublicException("No pudo identificarse la proyecciÛn del archivo.");
+			throw new PublicException("No pudo identificarse la proyecci√≥n del archivo.");
 
 		while ($geometry = $shapefile->fetchRecord()) {
       if (!$geometry->isDeleted()) {
 				$data = $geometry->getDataArray();
 				$values = array_values($data);
 
-				// proyecta la geometrÌa
+				// proyecta la geometr√≠a
 				if ($needsProjection)
 					$projected = $projector->ProjectGeometry($geometry);
 				else
@@ -276,7 +288,7 @@ class ShapefileReader extends BaseReader
 		else if($varFormat[0] == 'A')
 			return 'nominal';
 
-		throw new PublicException('El nivel de medida indicado no est· soportado (' . $varFormat . ')');
+		throw new PublicException('El nivel de medida indicado no est√° soportado (' . $varFormat . ')');
 	}
 
 	private static function GetVarFormatsParts(array $col, $lengths, $isNumberList, $prev, $varName)
@@ -292,7 +304,7 @@ class ShapefileReader extends BaseReader
 		  	];
 		}
 
-		// Es numÈrica
+		// Es num√©rica
 		if($prev[$varName]['int'] == 40
 			&& $prev[$varName]['dec'] == 15)
 			return $prev[$varName];
@@ -330,7 +342,7 @@ class ShapefileReader extends BaseReader
 
 	private static function GetVarFormats($isNumber, $size, $decimals)
 	{
-		//Falta implementar el m·ximo para tipo 'A' es A32767
+		//Falta implementar el m√°ximo para tipo 'A' es A32767
 		if($isNumber === false)
 		{
 			return 'A' . $size;
@@ -352,7 +364,7 @@ class ShapefileReader extends BaseReader
 		else if($varFormat[0] == 'A')
 			return (int)substr($varFormat, 1);
 		else
-			throw new PublicException('El tipo de variable indicado no est· soportado (' . $varFormat . ')');
+			throw new PublicException('El tipo de variable indicado no est√° soportado (' . $varFormat . ')');
 	}
 
 	private static function GetVarNames(array $names)
@@ -411,9 +423,9 @@ class ShapefileReader extends BaseReader
 		//	$dbf = self::GetFilenameFromShp($file, 'dbf');
 			$prj = self::GetFilenameFromShp($file, 'prj');
 		//	if (!file_exists($dbf))
-		//		throw new PublicException("El archivo " . $nameOnly .".shp debe estar acompaÒado de un archivo con los atributos (extensiÛn esperada: dbf).");
+		//		throw new PublicException("El archivo " . $nameOnly .".shp debe estar acompa√±ado de un archivo con los atributos (extensi√≥n esperada: dbf).");
 			if (!file_exists($prj))
-				throw new PublicException("El archivo " . $nameOnly .".shp debe estar acompaÒado de un archivo con la proyecciÛn de extensiÛn (extensiÛn esperada: prj).");
+				throw new PublicException("El archivo " . $nameOnly .".shp debe estar acompa√±ado de un archivo con la proyecci√≥n de extensi√≥n (extensi√≥n esperada: prj).");
 			return $file;
 		}
 

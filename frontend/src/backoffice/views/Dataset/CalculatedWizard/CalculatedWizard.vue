@@ -213,9 +213,14 @@ export default {
 			this.newMetric.Source.VersionId = this.newMetric.SelectedVersion.Version.Id;
 			this.newMetric.Source.LevelId = this.newMetric.SelectedLevel.Id;
 
+			var labelIds = JSON.stringify(this.newMetric.Source.ValueLabelIds);
+			this.newMetric.Source.ValueLabelIds = null;
+			var compact = this.compactIdList(labelIds);
 			var ret = {
 					k: this.Dataset.properties.Id,
-					s: JSON.stringify(this.newMetric.Source)
+					s: JSON.stringify(this.newMetric.Source),
+					labelsCompact: compact.values,
+					labelsDict: JSON.stringify(compact.dict),
 			};
 
 			if (this.newMetric.Type == 'area') {
@@ -225,6 +230,42 @@ export default {
 			}
 			// Definir
 			return ret;
+		},
+		compactIdList(labelIds) {
+			var dict = [];
+			var start;
+			var gain = 0;
+			var values = labelIds;
+			var key = 'a';
+			var keyOverhead = 7;
+			var start = labelIds.indexOf(',');
+			if (start < 0) {
+				start = 1;
+			}
+			while (true) {
+				var lastGain = 0;
+				var lastLength = 0;
+				for (var n = 2; n < values.length - start - 1; n++) {
+					var chunk = values.substr(start, n);
+					var newValues = values.replaceAll(chunk, key);
+					var gain = values.length - newValues.length;
+					if (gain < lastGain) {
+						break;
+					} else {
+						lastGain = gain;
+						lastLength = n;
+					}
+				}
+				if (lastGain > 0 && lastGain > lastLength + keyOverhead) {
+					var chunk = values.substr(start, lastLength);
+					values = values.replaceAll(chunk, key);
+					dict.push({ k: key, v: chunk });
+					key = String.fromCharCode(key.charCodeAt() + 1);
+				} else {
+					break;
+				}
+			}
+			return { dict: dict, values: values };
 		},
 		stepperCompleted() {
 			this.Dataset.ScaleGenerator.Clear();

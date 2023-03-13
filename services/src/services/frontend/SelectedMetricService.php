@@ -159,7 +159,12 @@ class SelectedMetricService extends BaseService
 
 			$version->SymbolStackedPosition = -1;
 			$version->SelectedLevelIndex = 0;
-
+			$version->SelectedMultiLevelIndex = 0;
+			if (sizeof($version->Levels) > 1 &&
+				$version->Levels[sizeof($version->Levels) - 1]->Dataset->Type != 'D')
+			{	// Es multinivel y el nivel más bajo no es tipo 'datos'
+				$version->SelectedLevelIndex = sizeof($version->Levels) - 1;
+			}
 			$version->Work = $this->GetWork($version);
 
 			if ($version->Work !== null)
@@ -246,13 +251,20 @@ class SelectedMetricService extends BaseService
 			$captions = $selectedVersionLevelInfo['dat_partition_captions'];
 			$captionList = explode("\t", $captions);
 			$values = [];
+			// devuelve
+			$ret = new PartitionInfo();
+			$ret->Name = $name;
+			$ret->Mandatory = $selectedVersionLevelInfo['dat_partition_mandatory'] == 1;
+			$ret->AllCaption = $selectedVersionLevelInfo['dat_partition_all_label'];
+			if (!$ret->Mandatory)
+			{
+				$values[] = ['Value' => '', 'Caption' => $ret->AllCaption];
+			}
 			for($n = 0; $n < sizeof($valueList); $n++)
 			{
 				$values[] = ['Value' => $valueList[$n], 'Caption' => $captionList[$n]];
 			}
 			// devuelve
-			$ret = new PartitionInfo();
-			$ret->Name = $name;
 			$ret->Values = $values;
 			return $ret;
 		}

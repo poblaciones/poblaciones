@@ -1,7 +1,7 @@
 <template>
 	<div>
     <!--  The Modal -->
-    <boardal v-if="modal.isOpen" :has-mask="modal.hasMask" :can-click-mask="modal.canClickMask" :has-x="modal.hasX" @toggle="toggleModal">
+    <boardal v-if="modal.isOpen" ref="dal" :has-mask="modal.hasMask" :can-click-mask="modal.canClickMask" :has-x="modal.hasX" @toggle="toggleModal">
 			<article v-cloak>
 				<section>
 					<div class="articleTitle">
@@ -288,18 +288,22 @@ export default {
   methods: {
     toggleModal(step) {
       step = step || 1;
-      this.modal.isOpen = !this.modal.isOpen;
-      if(this.modal.isOpen) {
-        let self = this;
+			let self = this;
+      if(!this.modal.isOpen) {
+				this.modal.isOpen = true;
         setTimeout(function() {
           self.$sections = self.$el.querySelectorAll('section');
           self.max = self.$sections.length;
           self.goToStep(step);
         }, 1);
-      } else {
+			} else {
+				this.$refs.dal.close();
         if (this.isLastStep) {
           window.SegMap.Tutorial.DoneWithTutorial();
-        }
+				}
+				setTimeout(function () {
+					self.modal.isOpen = false;
+				}, 500);
       }
     },
     noThanks() {
@@ -563,6 +567,8 @@ button {
     color: var(--accent);
   }
 }
+
+
 
 </style>
 

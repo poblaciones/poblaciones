@@ -102,7 +102,8 @@ class cCaches extends cController
 		} else if (array_key_exists('clearTempTables', $_POST)) {
 			$model = new PublishDataTables();
 			$n = $model->CleanTempTables();
-			$this->message = 'Liberadas ' . $n . ' tablas.';
+			$i = $model->CleanOrphanTables();
+			$this->message = 'Liberadas ' . $n . ' tablas temporales y ' . $i . ' tablas huérfanas.';
 		} else if (array_key_exists('regenClippingGeography', $_POST)) {
 			$model = new SnapshotGeographiesByRegionModel();
 			$model->Clean();

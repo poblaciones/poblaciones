@@ -1,19 +1,25 @@
 <template>
   <transition name="boardal">
-    <div class="boardal">
-      <div class="boardal__mask" v-if="hasMask" @click="clickMask"></div>
-      <div class="boardal__wrapper">
-        <slot></slot>
-        <div class="boardal__x" v-if="hasX" @click="clickX">&times;</div>
-      </div>
-    </div>
+		<div class="boardal">
+			<div class="boardal__mask" v-if="hasMask" @click="clickMask"></div>
+			<transition name="custom-classes-transition"
+									leave-active-class="animated bounceOutTopRight">
+				<div class="boardal__wrapper" v-show="show">
+					<slot></slot>
+					<div class="boardal__x" v-if="hasX" @click="clickX">&times;</div>
+				</div>
+			</transition>
+		</div>
   </transition>
 </template>
 
 <script>
 
 export default {
-	name: 'boardal',
+		name: 'boardal',
+		data() {
+			return { 'show': true };
+		},
 		props: [
 		'hasX',
 		'hasMask',
@@ -22,7 +28,10 @@ export default {
 	methods: {
     clickX() {
       this.$emit('toggle');
-    },
+		},
+		close() {
+			this.show = false;
+		},
     clickMask() {
       if(this.canClickMask) {
         this.$emit('toggle');
@@ -75,16 +84,58 @@ export default {
       opacity: .65;
     }
   }
-  &-enter-active,
-  &-leave-active {
-    transition: opacity .25s
-  }
+	&-enter-active,
+	&-leave-active {
+		transition: opacity .25s;
+	}
   &-enter,
   &-leave-to {
     opacity: 0;
+
   }
 }
 
+
+	.animated {
+		padding-top: 0px;
+		margin-bottom: 60px;
+		-webkit-animation-duration: 1s;
+		animation-duration: 1s;
+		-webkit-animation-fill-mode: both;
+		animation-fill-mode: both;
+	}
+
+	@-webkit-keyframes bounceOutTopRight {
+		0% {
+			-webkit-transform: translateX(0);
+		}
+
+		200% {
+			opacity: 0;
+			-webkit-transform: translate(2000px, -1000px);
+		}
+	}
+
+	@keyframes bounceOutTopRight {
+		0% {
+			transform: translateX(0);
+		}
+
+		50% {
+			opacity: .5;
+			transform: translate(50vw, -46vh) scale(.01);
+		}
+
+		100% {
+			opacity: 0;
+			transform: translate(2000px, -500px) scale(.1);
+		}
+	}
+
+	.bounceOutTopRight {
+		-webkit-animation-name: bounceOutTopRight;
+		animation-name: bounceOutTopRight;
+	}
 
 </style>
 

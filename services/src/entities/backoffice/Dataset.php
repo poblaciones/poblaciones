@@ -69,6 +69,22 @@ class Dataset
 		/**
      * @var boolean
 		 *
+     * @ORM\Column(name="dat_partition_mandatory", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $PartitionMandatory;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dat_partition_all_label", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $PartitionAllLabel;
+
+
+		/**
+     * @var boolean
+		 *
 		 * @ClientReadonly
 		 *
      * @ORM\Column(name="dat_are_segments", type="boolean", precision=0, scale=0, nullable=false, unique=false)
@@ -299,6 +315,29 @@ class Dataset
         return $this->Type;
     }
 
+    /**
+     * Set partitionAllLabel
+     *
+     * @param string $partitionAllLabel
+     *
+     * @return Dataset
+     */
+    public function setPartitionAllLabel($partitionAllLabel)
+    {
+        $this->PartitionAllLabel = $partitionAllLabel;
+
+        return $this;
+    }
+
+    /**
+     * Get partitionAllLabel
+     *
+     * @return string
+     */
+    public function getPartitionAllLabel()
+    {
+        return $this->PartitionAllLabel;
+    }
 
     /**
      * Set multilevelMatrix
@@ -471,6 +510,29 @@ class Dataset
         return $this->Geocoded;
     }
 
+    /**
+     * Set partitionMandatory
+     *
+     * @param boolean $partitionMandatory
+     *
+     * @return Dataset
+     */
+    public function setPartitionMandatory($partitionMandatory)
+    {
+        $this->PartitionMandatory = $partitionMandatory;
+
+        return $this;
+    }
+
+    /**
+     * Get partitionMandatory
+     *
+     * @return boolean
+     */
+    public function getPartitionMandatory()
+    {
+        return $this->PartitionMandatory;
+    }
 
     /**
      * Set areSegments
@@ -544,6 +606,7 @@ class Dataset
     {
         return $this->PartitionColumn;
     }
+
     /**
      * Set marker
      *

@@ -70,6 +70,7 @@
 							</select>
 						</td>
 					</tr>
+
 					<tr>
 						<td>Descarga:</td>
 						<td>
@@ -79,6 +80,9 @@
 								</button>
 								<button @click="sendFile(resolveMetadataUrl(), true)" class="downloadButton">
 									<i class="far fa-file-pdf" /> Metadatos
+								</button>
+								<button @click="sendFile(resolveMetadataDictionaryUrl(), true)" class="downloadButton">
+									<i class="far fa-file-excel" /> Diccionario de datos
 								</button>
 							</span>
 							<span v-else="">
@@ -219,6 +223,9 @@ export default {
 		},
 		resolveMetadataUrl() {
 			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
+		},
+		resolveMetadataDictionaryUrl() {
+			return window.host + '/services/metadata/GetWorkMetadataDictionary?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
 		},
 		getSpatialFormats() {
 			var ret = [];

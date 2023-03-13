@@ -95,7 +95,7 @@ class DatasetDownloadModel extends BaseDownloadModel
 		{
 			if ($partition === null)
 			{
-				if (!$this->fromDraft)
+				if ($dataset['dat_partition_mandatory'] && !$this->fromDraft)
 					throw new ErrorException("Debe indicarse un valor de particionado.");
 			}
 			else

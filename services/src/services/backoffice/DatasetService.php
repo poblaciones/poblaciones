@@ -79,6 +79,8 @@ class DatasetService extends DbSession
 		$dataset->setShowInfo(true);
 		$dataset->setExportable(true);
 		$dataset->setPublicLabels(true);
+		$dataset->setPartitionMandatory(true);
+		$dataset->setPartitionAllLabel('Todos');
 		$dataset->setGeoreferenceStatus(0);
 		$dataset->setGeocoded(false);
 		$dataset->setAreSegments(false);
@@ -139,7 +141,7 @@ class DatasetService extends DbSession
 		$dataset = $this->GetDataset($datasetId);
 		$table = $dataset->getTable();
 		// Lo graba
-		$ommit = "UPDATE " . $table . " SET ommit = 1 WHERE ommit = 0";
+		$ommit = "UPDATE " . $table . " JOIN " . $table . "_errors ON row_id = id SET ommit = 1 WHERE ommit = 0";
 		App::Db()->exec($ommit);
 		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
 		$this->DeleteAllErrors($table);

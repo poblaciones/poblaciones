@@ -21,7 +21,10 @@ class FileService extends BaseService
 		// Tiene que insertar en la base de datos
 		$fileId = $fileObject->getId();
 		// Guarda por si filename cambió o es nuevo
-		$fileObject->setSize(filesize($tempFilename));
+		if ($tempFilename != null)
+		{
+			$fileObject->setSize(filesize($tempFilename));
+		}
 		$fileObject->setType($fileType);
 
 		App::Orm()->save($fileObject);

@@ -1,3 +1,8 @@
+- Multinivel muestra separadas las variables de nivel 0 cuando son polígonos o puntos.
+- Permite que el filtro de partición sea opcional.
+- La exportación a excel formatea y fija primera fila
+- Genera diccionario de datos para descarga
+
 v3.08 (2022-11-25)
 - Fix: las revisiones pueden ser grabadas por usuarios con perfil Editor.
 - Permite importar etiquetas de valores de variables desde Excel o Csv.

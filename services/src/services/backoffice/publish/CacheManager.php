@@ -19,6 +19,8 @@ use helena\caches\ClippingCache;
 use helena\caches\RankingCache;
 use helena\caches\BackofficeDownloadCache;
 use helena\caches\PdfMetadataCache;
+use helena\caches\DictionaryMetadataCache;
+
 use helena\caches\WorkVisiblityCache;
 
 use helena\caches\SummaryCache;
@@ -54,6 +56,7 @@ class CacheManager
 	{
 		$metadataIdShardified = PublishDataTables::Shardified($metadataId);
 		PdfMetadataCache::Cache()->Clear($metadataIdShardified);
+		DictionaryMetadataCache::Cache()->Clear($metadataIdShardified);
 		SelectedBoundaryCache::Cache()->Clear();
 	}
 

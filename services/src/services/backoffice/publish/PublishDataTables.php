@@ -241,6 +241,16 @@ class PublishDataTables
 		}
 		return sizeof($tables);
 	}
+	public function CleanOrphanTables()
+	{
+		$tables = App::GetOrphanSet();
+		foreach($tables as $table)
+		{
+			//echo $table['table'] . '<br>';
+			App::Db()->dropTable($table['table']);
+		}
+		return sizeof($tables);
+	}
 
 	public function CopyDraftTables($workId)
 	{

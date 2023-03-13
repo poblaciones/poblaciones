@@ -71,7 +71,7 @@ LeafletApi.prototype.Initialize = function () {
 
 	this.CreateBaseLayers();
 
-	var options = { zoomControl: false };
+	var options = { zoomControl: false, minZoom: 3 };
 
 	this.map = new L.Map("map", options);
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);

@@ -99,6 +99,19 @@ App::$app->get('/services/metadata/GetWorkMetadataPdf', function (Request $reque
 	return $controller->GetWorkMetadataPdf($metadataId, $datasetId, false, $workId);
 });
 
+
+// ej. http://mapas/services/metadata/GetWorkMetadataDictionary?w=12&f=4
+App::$app->get('/services/metadata/GetWorkMetadataDictionary', function (Request $request) {
+	$controller = new commonServices\MetadataService();
+	$metadataId = Params::GetIntMandatory('m');
+	$workId = Params::GetIntMandatory('w');
+	$datasetId = Params::GetIntMandatory('d', null);
+	Session::$AccessLink = Params::Get('l');
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+
+	return $controller->GetXlsDictionary($metadataId, $datasetId, $workId);
+});
+
 App::$app->get('/services/works/GetInstitutionWatermark', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;

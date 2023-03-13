@@ -144,6 +144,14 @@ PreviewHandler.prototype.ComposeMosaicRenderData = function (tilesData, coord, z
 		return { Svg: null, SvgParts: [] };
 	}
 };
+PreviewHandler.prototype.AreSegments = function () {
+	if (this.tileOverlay.composer.activeSelectedMetric.SelectedLevel &&
+		this.tileOverlay.composer.activeSelectedMetric.SelectedLevel()) {
+		return this.tileOverlay.composer.activeSelectedMetric.SelectedLevel().Dataset.AreSegments;
+	} else {
+		return false;
+	}
+};
 
 PreviewHandler.prototype.ComposeMosaicSvg = function (tilesData, sourceX, sourceY, sourceZ, times) {
 	if (!this.tileOverlay.composer.renderPolygons) {

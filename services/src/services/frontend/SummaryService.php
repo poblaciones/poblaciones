@@ -60,7 +60,8 @@ class SummaryService extends BaseService
 		}
 		else if (!$partition)
 		{
-			throw new \ErrorException("Debe indicar una valor para '" . $level->Partitions->Name . "'");
+			if ($level->Partitions->Mandatory)
+				throw new \ErrorException("Debe indicar una valor para '" . $level->Partitions->Name . "'");
 		}
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		$table = new SnapshotByDatasetSummary($snapshotTable, $level->Dataset->Type,

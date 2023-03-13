@@ -6,9 +6,9 @@
 			{{ selected }}<span class="exp-hiddable-visiblity arrow"></span>
 		</button>
 		<ul aria-labelledby="dropdownMenuButton" class="dropdown-menu dropPartitionFilter">
-			<li v-for="(value, key) in this.List" :key="key" :class="(value.border ? 'liDividerNext' : '')">
-				<a @click="changeValue(key)">
-					{{ value.label }}
+			<li v-for="ele in this.List" :key="ele.key">
+				<a @click="changeValue(ele.key)">
+					{{ ele.label }}
 				</a>
 			</li>
 		</ul>
@@ -43,9 +43,9 @@ export default {
 			if (!this.LevelHasPartitions) {
 				return null;
 			}
-			var ret = {};
+			var ret = [];
 			for (var partition of this.metric.SelectedLevel().Partitions.Values) {
-				ret[partition.Value] = { label: partition.Caption };
+				ret.push({ key: partition.Value, label: partition.Caption });
 			}
 			return ret;
 		},
@@ -62,17 +62,21 @@ export default {
 				this.selected = '-';
 				return;
 			}
+			var vals = this.List;
+			if (!vals || vals.length === 0) {
+				this.selected = '-';
+				return;
+			}
 			var sel = this.metric.GetSelectedPartition();
-			if (!sel) {
-				var vals = this.List;
-				if (!vals || vals.length === 0) {
-					this.selected = '-';
-					return;
-				} else {
-					sel = Object.keys(vals)[0];
+			if (sel ===  null) {
+				sel = vals[0].key;
+			}
+			for (var n of vals) {
+				if (n.key === sel) {
+					this.selected = n.label;
+					break;
 				}
 			}
-			this.selected = this.List[sel].label;
 		}
 	},
 };

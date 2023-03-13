@@ -39,6 +39,9 @@ class DatasetModel
 			d1.dat_caption_column_id `caption_column_id`,
 			d1.dat_images_column_id `images_column_id`,
 
+			d1.dat_partition_mandatory,
+			d1.dat_partition_all_label,
+
 			images_column.dco_field AS images_column_field,
 			caption_column.dco_field AS caption_column_field,
 

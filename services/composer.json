@@ -47,7 +47,7 @@
 		"gasparesganga/php-shapefile": "^3.1",
 		"mpdf/mpdf": "^8.0.7",
 		"phpoffice/phpspreadsheet": "^1.12",
-		"box/spout": "^3.1",
+		"openspout/openspout": "^3.1",
 		"rodrigoq/phpmailersendgrid": "^1.0",
 		"ezyang/htmlpurifier": "^4.13",
 		"simple-html-dom/simple-html-dom": "^1.5",

@@ -68,6 +68,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 		styles: this.generateLabelsArray(true),
 		clickableIcons: false,
 		draggableCursor: 'auto',
+		minZoom: 3,
 		center: { lat: -37.1799565, lng: -65.6866910 },
 		zoom: 6
 	};
