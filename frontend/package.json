@@ -134,7 +134,7 @@
 		"vue-svg-loader": "^0.12.0",
 		"vue-template-compiler": "^2.6.12",
 		"webpack": "^5.76.1",
-		"webpack-bundle-analyzer": "^3.9.0",
+		"webpack-bundle-analyzer": "^4.8.0",
 		"webpack-dev-middleware": "^3.7.3",
 		"webpack-hot-middleware": "^2.25.1",
 		"webpack-merge": "^4.2.2"
