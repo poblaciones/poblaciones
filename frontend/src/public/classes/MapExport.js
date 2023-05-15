@@ -3,6 +3,14 @@ import dom from '@/common/framework/dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+	HTMLCanvasElement.prototype.getContext = function (origFn) {
+	return function (type, attribs) {
+	attribs = attribs || {};
+	attribs.preserveDrawingBuffer = true;
+	return origFn.call(this, type, attribs);
+	};
+	}(HTMLCanvasElement.prototype.getContext);
+
 export default MapExport;
 
 function MapExport(currentWork) {
@@ -227,7 +235,10 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 					}
 					return window.SegMap.SetTimeout(50).then(function () {
 						var ele = (previewExport ? panMain : document.body);
-						return html2canvas(ele, { useCORS: true, scale: scale, ignoreElements: loc.ignoreFilter }).then(function (canvasBody) {
+						return html2canvas(ele, {
+							useCORS: true, scale: scale,
+							ignoreElements: loc.ignoreFilter
+						}).then(function (canvasBody) {
 
 							exportFunction.apply(loc, [canvasBody]);
 

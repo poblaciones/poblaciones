@@ -9,6 +9,9 @@ import Ldraw from 'leaflet-draw';
 import arr from '@/common/framework/arr';
 import Mercator from '@/public/js/Mercator';
 import MarkerFactory from './MarkerFactory';
+import IconOverlay from '@/public/overlays/IconOverlay';
+import { LeafletLayer } from './deck-gl/LeafletLayer';
+import { MapView } from '@deck.gl/core';
 
 export default LeafletApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -284,7 +287,17 @@ LeafletApi.prototype.BindEvents = function () {
 		loc.CheckBaseLayer();
 		loc.BoundsChanged();
 	});
+	/*
+	this.map.on("mousemove", (event) => {
+		let lat = Math.round(event.latlng.lat * 100000) / 100000;
+		let lng = Math.round(event.latlng.lng * 100000) / 100000;
 
+		var elements = document.elementsFromPoint(event.layerPoint.x, event.layerPoint.x);
+		console.log(elements.length);
+		console.log(elements);
+
+	});
+	*/
 	this.map.on("movestart", function() {
 		loc.dragging = true;
 		loc.draggingDelayed = true;
@@ -758,16 +771,60 @@ LeafletApi.prototype.getZoom = function () {
 };
 
 LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index) {
-	// Lo crea
-	var overlay = new LeafletTileOverlay(activeMetric);
+	var deckGlDisabled = (window.Use.UseDeckgl == false);
+	if (deckGlDisabled) {
+		if (activeMetric.SelectedVersion && activeMetric.SelectedVersion() &&
+			activeMetric.SelectedVersion().Work.Id == 130201) {
+			deckGlDisabled = false;
+		}
+	}
+
 	// le aumenta el índice a los siguientes...
 	for (var layer of this.overlayMapTypesLayers) {
 		if (layer.index >= index) {
 			layer.index++;
 		}
 	}
-	// Lo agrega
-	this.overlayMapTypesLayers.push(overlay);
+	var overlay;
+	if (activeMetric.useTiles() || deckGlDisabled) {
+
+		// Lo crea
+		overlay = new LeafletTileOverlay(activeMetric);
+		// Lo agrega
+		this.overlayMapTypesLayers.push(overlay);
+
+	} else {
+		const d = require('./deck-gl/LeafletLayer');
+		overlay = new d.default({
+			views: [
+				new MapView({
+					repeat: true
+				})
+			],
+			layers: []
+		});
+
+		this.overlayMapTypesLayers.push(overlay);
+
+		var loc = this;
+		// Trae los datos
+		// -TODO falta:
+		// 1. que muestre que los está trayendo
+		// 2. que cancele si ya no tiene sentido
+		// 3. que lo espere si está exportando
+		activeMetric.GetLayerData().then(function (data) {
+			if (!overlay.disposed) {
+				var iconLayer = new IconOverlay(activeMetric);
+				var deckIconLayer = iconLayer.CreateLayer(data, 1);
+
+//				overlay.deckOverlay = overlay;
+				overlay.AddLayer(deckIconLayer);
+//				overlay.ZoomSubscribed = iconLayer;
+	//			window.SegMap.ZoomChangedSubscribers.push(overlay.ZoomSubscribed);
+			}
+		});
+	}
+
 	if (index >= this.overlayMapTypesLayers.length) {
 		overlay.index = this.overlayMapTypesLayers.length - 1;
 	} else {

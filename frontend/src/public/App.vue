@@ -2,6 +2,9 @@
 	<div>
 		<WorkPanel v-if="!Embedded.HideWorkPanel" :work="work" ref="workPanel" :backgroundColor="workColor" />
 		<div class="embeddedNoOpener"></div>
+		<div style="height:0px;width:0px">
+			<i class="flaticon-001-cruiser-voyage"></i>
+		</div>
 		<div class="embedded" @click="embeddedClick" v-if="Embedded.Readonly"
 				 :style="(Embedded.OpenOnClick ? 'cursor: pointer;' : '')"
 				 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>

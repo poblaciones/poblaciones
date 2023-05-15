@@ -47,11 +47,19 @@ FeatureSelector.prototype.SetSelectorCanvas = function () {
 		polygon.addTo(this.MapsApi.map);
 	}
 	this.selectorCanvasEvents = [];
-	this.selectorCanvasEvents.push(polygon.on('click', this.selectorClicked));
-	this.selectorCanvasEvents.push(polygon.on('mouseout', this.resetTooltip));
-	this.selectorCanvasEvents.push(polygon.on('zoom_changed', this.resetTooltip));
-	this.selectorCanvasEvents.push(polygon.on('center_changed', this.resetTooltip));
-	this.selectorCanvasEvents.push(polygon.on('mousemove', this.selectorMoved));
+	//this.selectorCanvasEvents.push(polygon.on('click', this.selectorClicked));
+	this.selectorCanvasEvents.push(this.MapsApi.map.on('click', this.selectorClicked));
+
+//	this.selectorCanvasEvents.push(polygon.on('mouseout', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.MapsApi.map.on('mouseout', this.resetTooltip));
+
+	this.selectorCanvasEvents.push(this.MapsApi.map.on('zoom_changed', this.resetTooltip));
+	this.selectorCanvasEvents.push(this.MapsApi.map.on('center_changed', this.resetTooltip));
+	//this.selectorCanvasEvents.push(polygon.on('mousemove', this.selectorMoved));
+	this.selectorCanvasEvents.push(this.MapsApi.map.on('mouseup', this.selectorUp));
+	this.selectorCanvasEvents.push(this.MapsApi.map.on('mousedown', this.selectorDown));
+
+	this.selectorCanvasEvents.push(this.MapsApi.map.on('mousemove', this.selectorMoved));
 
 	this.selectorCanvas = polygon;
 };
@@ -62,9 +70,14 @@ FeatureSelector.prototype.getFeature = function (event) {
 	var matchBoundary = null;
 	var position = h.getPosition(event);
 	var elements = document.elementsFromPoint(position.Point.X, position.Point.Y);
+	var ev = event.originalEvent;
+	var gls = [];
 
 	for (var n = 0; n < elements.length; n++) {
 		var ele = elements[n];
+		if (ele.id == 'deckgl-overlay') {
+			gls.push(ele);
+		}
 		if (ele.nodeName === 'path' && ele.parentElement && ele.parentElement.parentElement &&
 			ele.parentElement.parentElement.attributes['isFIDContainer']) {
 			// sirve...
@@ -72,11 +85,63 @@ FeatureSelector.prototype.getFeature = function (event) {
 			if (item.id !== null || item.description !== null || item.value !== null)
 			if (item.parentInfo.BoundaryId) {
 				if (!matchBoundary) {
+					// lo precasifica
 					matchBoundary = item;
 				}
 			} else {
-				return item;
+				// devuelve el item
+				matchBoundary = item;
+				break;
 			}
+		}
+	} // lo pasa a los elementos de deckGl
+	for (var gl of gls) {
+		if (ev.type != 'mousemove') {
+			var a = 1;
+			a++;
+		}
+		var t = ev.type;
+		if (t == 'mouseup') {
+			t = 'mouseup';
+		}
+		if (t == 'mousedown') {
+			t = 'mousedown';
+		}
+
+		var eventClone = new MouseEvent(t, {
+			altKey: ev.altKey, bubbles: ev.bubbles,
+			button: ev.buton, buttons: ev.buttons,
+			cancelBubble: false,
+			cancelable: true,
+			clientX: ev.clientX,
+			clientY: ev.clientY,
+			composed: true,
+			ctrlKey: ev.ctrlKey,
+			currentTarget: ev.currentTarget,
+			defaultPrevented: false,
+			detail: ev.detail,
+			eventPhase: 0,
+			fromElement: ev.fromElement,
+			layerX: ev.layerX,
+			layerY: ev.layerY,
+			metaKey: false,
+			movementX: ev.movementX,
+			movementY: ev.movementY,
+			offsetX: ev.offsetX,
+			offsetY: ev.offsetY,
+			pageX: ev.pageX,
+			pageY: ev.pageY,
+			relatedTarget: null,
+			returnValue: true,
+			screenX: ev.screenX,
+			screenY: ev.screenY,
+			shiftKey: ev.shiftKey
+		});
+		console.log(ev.type);
+		eventClone.isSelf = true;
+		gl.dispatchEvent(eventClone);
+		if (ev.type == 'click') {
+			gl.click();
 		}
 	}
 	return matchBoundary;
@@ -246,6 +311,7 @@ FeatureSelector.prototype.startTooltipCandidate = function (feature) {
 	var loc = window.SegMap.MapsApi.selector;
 	loc.tooltipEvent = null;
 	loc.tooltipCandidate = feature;
+	console.log('startTooltipCandidate');
 	if (loc.tooltipTimer !== null) {
 		clearTimeout(loc.tooltipTimer);
 	}
@@ -255,6 +321,7 @@ FeatureSelector.prototype.startTooltipCandidate = function (feature) {
 FeatureSelector.prototype.startTooltipCandidateByLocation = function () {
 	var loc = window.SegMap.MapsApi.selector;
 	loc.tooltipCandidate = null;
+	console.log('startTooltipCandidateByLocation');
 	if (loc.tooltipTimer !== null) {
 		clearTimeout(loc.tooltipTimer);
 	}
@@ -264,20 +331,32 @@ FeatureSelector.prototype.startTooltipCandidateByLocation = function () {
 FeatureSelector.prototype.markerMouseOver = function (event, parentInfo, fid, description, value) {
 	var loc = window.SegMap.MapsApi.selector;
 	var feature = { id: fid, description: description, value: value, parentInfo: parentInfo };
-	loc.tooltipLocation = h.getPosition(event);
+	if (!event.latlng) {
+		// viene de deckgl
+		var pt = L.point(event.layerX, event.layerY);
+		var latLng = this.MapsApi.map.containerPointToLatLng(pt);
+		var ev = { originalEvent: event, layerPoint: pt, latlng: latLng };
+		loc.tooltipLocation = h.getPosition(ev);
+	} else {
+		loc.tooltipLocation = h.getPosition(event);
+	}
 	if (!loc.resetTooltip(feature)) {
 		// Sale porque está en el mismo feature del cual se está mostrando el tooltip
 		return false;
 	}
 	loc.tooltipMarker = feature;
 	loc.startTooltipCandidate(feature);
-	return false;
+	return true;
 };
+
 FeatureSelector.prototype.markerMouseOut = function (event) {
 	var loc = window.SegMap.MapsApi.selector;
 	loc.tooltipMarker = null;
 	if (loc.tooltipTimer !== null) {
 		clearTimeout(loc.tooltipTimer);
+		return true;
+	} else {
+		return false;
 	}
 };
 
@@ -286,9 +365,13 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 	if (loc.disabled) {
 		return;
 	}
-	if (loc.tooltipMarker !== null) {
+	if (event.originalEvent && event.originalEvent.isSelf) {
 		return;
 	}
+
+/*	if (loc.tooltipMarker !== null) {
+		return;
+	} */
 	// TODO: sale porque no pasó 100 ms en el mismo lugar,
 	// o porque ya fue procesado ese lugar;
 	//return;
@@ -297,9 +380,9 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 	loc.tooltipEvent = event;
 
 	if (loc.tooltipOverlay !== null) {
-		// averigua si está en el mismo
+		// averigua si está en él mismo
 		var feature = loc.getFeature(event);
-		if (feature && feature.id === loc.tooltipCandidate.id) {
+		if (feature && loc.tooltipCandidate && feature.id === loc.tooltipCandidate.id) {
 			return;
 		}
 		loc.resetTooltip();
@@ -314,50 +397,42 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 	loc.startTooltipCandidateByLocation();
 };
 
-FeatureSelector.prototype.selectorMovedEx = function (event) {
+
+FeatureSelector.prototype.selectorUp = function (event) {
+	if (window.SegMap.MapsApi.draggingDelayed) {
+		return false;
+	}
+	if (event.originalEvent && event.originalEvent.isSelf) {
+		return false;
+	}
 	var loc = window.SegMap.MapsApi.selector;
-	if (loc.disabled) {
-		return;
-	}
-	if (loc.tooltipMarker !== null) {
-		return;
-	}
-	// TODO: sale porque no pasó 100 ms en el mismo lugar,
-	// o porque ya fue procesado ese lugar;
-	//return;
-
 	var feature = loc.getFeature(event);
-	loc.tooltipLocation = h.getPosition(event);
-	var pointer;
-	if (!loc.resetTooltip(feature)) {
-		// Sale porque está en el mismo feature del cual se está mostrando el tooltip
-		return;
-	}
-
-	pointer = 'url(https://maps.gstatic.com/mapfiles/openhand_8_8.cur),default';
-	if (feature !== null && feature.id) {
-		if (!feature.parentInfo.BoundaryId) {
-			pointer = 'pointer';
-		}
-		loc.startTooltipCandidate(feature);
-	} else {
-	}
-
-	var currentPointer = loc.selectorCanvas.cursor;
-	if (currentPointer !== pointer) {
-		loc.selectorCanvas.cursor = pointer;
-	}
 };
+
+FeatureSelector.prototype.selectorDown = function (event) {
+	if (window.SegMap.MapsApi.draggingDelayed) {
+		return false;
+	}
+	if (event.originalEvent && event.originalEvent.isSelf) {
+		return false;
+	}
+	var loc = window.SegMap.MapsApi.selector;
+	var feature = loc.getFeature(event);
+};
+
 
 FeatureSelector.prototype.selectorClicked = function (event) {
 	if (window.SegMap.MapsApi.draggingDelayed) {
-		return;
+		return false;
+	}
+	if (event.originalEvent && event.originalEvent.isSelf) {
+		return false;
 	}
 	var loc = window.SegMap.MapsApi.selector;
 	var feature = loc.getFeature(event);
 	if (feature === null || !feature.id) {
 		loc.resetTooltip();
-		return;
+		return false;
 	} else {
 		loc.resetTooltip(feature);
 	}
@@ -367,7 +442,8 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 			if (feature.parentInfo.ShowInfo) {
 				window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id);
 			}
-		}
+	}
+	return true;
 };
 
 FeatureSelector.prototype.ClearSelectorCanvas = function () {

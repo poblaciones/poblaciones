@@ -10,6 +10,7 @@ export default MarkerFactory;
 function MarkerFactory(maps, activeSelectedMetric, variable, customIcons) {
 	this.errorsCache = {};
 	MarkerCreator.call(this, maps, activeSelectedMetric, variable, customIcons);
+
 	this.canvas = document.createElement("canvas");
 };
 
@@ -169,7 +170,7 @@ MarkerFactory.prototype.createLabel = function (markerType, content) {
 	}
 	if (markerType == 'I') {
 		if (content) {
-			return { text: this.formatIcon(content) };
+			return this.formatIcon(content);
 		} else {
 			return null;
 		}
@@ -210,21 +211,20 @@ MarkerFactory.prototype.createDelegates = function () {
 	if (this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
 		delegates.click = function (feature, event) {
 			var parentInfo = loc.activeSelectedMetric.CreateParentInfo(variable, feature.object);
-				maps.markerClicked(event.srcEvent, parentInfo, feature.object.FID);
-			};
+			return maps.markerClicked(event.srcEvent, parentInfo, feature.object.FID);
+		};
 	} else {
 		delegates.click = null;
 	}
 	delegates.mouseout = function (e) {
-		maps.selector.markerMouseOut(e.srcEvent);
+		return maps.selector.resetTooltip(); // markerMouseOut(e.srcEvent);
 	};
 	delegates.mouseover = function (feature, event) {
 			if (!feature.object) {
-				delegates.mouseout(event.srcEvent);
-				return;
+				return delegates.mouseout(event.srcEvent);
 			}
 			var parentInfo = loc.activeSelectedMetric.CreateParentInfo(variable, feature.object);
-			maps.selector.markerMouseOver(event.srcEvent, parentInfo, feature.object.FID,
+			return maps.selector.markerMouseOver(event.srcEvent, parentInfo, feature.object.FID,
 																			feature.object.Description,
 																			feature.object.Value);
 	};

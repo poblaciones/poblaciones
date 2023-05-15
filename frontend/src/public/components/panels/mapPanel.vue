@@ -1,6 +1,5 @@
 <template>
 	<div style="width: 100%; height: 100%;">
-
 		<div class="embeddedOpener exp-hiddable-block" @click="embeddedClick" v-if="Embedded.Active && !Embedded.Readonly"
 				 title="Abrir en Poblaciones (en nueva ventana)">
 			<i class="fas fa-external-link-alt"></i>

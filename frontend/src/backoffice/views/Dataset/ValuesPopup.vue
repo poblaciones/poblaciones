@@ -157,15 +157,17 @@ export default {
 				return [];
 			}
 			var data = [];
+			var n = 1;
 			for(var i = 0; i < this.bindData.length; i++) {
 				var row = this.bindData[i];
 				var item = {'Id':	row.Id,
 										'Value': row.Value,
 										'Caption': row.Caption,
-										'Order': row.Order,
+										'Order': n,
 										'Count': (row.Count === undefined ? -1 : row.Count),
-										'Dirty': markDirty };
+										'Dirty': markDirty || (row.Order != n) };
 				data.push(item);
+				n++;
 			}
 			return data;
 		},

@@ -37,8 +37,11 @@ IconOverlay.prototype.CreateLayer = function (data, sc = 1) {
 	var markerSettings = this.activeSelectedMetric.SelectedLevel().Dataset.Marker;
 	var isDone = {};
 
+	var now = new Date();
+	var ticks = now.getTime();
+
 	const layer = new IconLayer({
-		id: 'icon-layer',
+		id: 'icon-layer' + ticks,
 		data: dataFiltered,
 		pickable: true,
 		largeZoom: window.SegMap.frame.Zoom > 10,

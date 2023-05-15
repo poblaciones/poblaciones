@@ -31,14 +31,16 @@
 														 :render="formatColumn" />
 								</div>
 								<div class='md-layout-item md-size-50 md-small-size-100'>
-									<div class="mp-label labelSeparator">
-										Mostrar ficha de resumen al hacer click en elementos del mapa
-									</div>
-									<div>
-										<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
-											{{ infoEnabledStatus }}
-										</md-switch>
-									</div>
+									<label class="mp-label">
+										Ficha de resumen
+									</label>
+									<md-switch v-model="Dataset.properties.ShowInfo" :disabled="!canEdit" class="md-primary" @change="Update">
+										Mostrar ficha de resumen al seleccionarse los elementos en el mapa
+									</md-switch>
+
+									<md-switch v-model="Dataset.properties.SkipEmptyFields" :disabled="!canEdit || !Dataset.properties.ShowInfo" class="md-primary" @change="Update">
+										Omitir elementos sin valores en la ficha de resumen
+									</md-switch>
 								</div>
 
 								<div class='md-layout-item md-size-50 md-small-size-100'>

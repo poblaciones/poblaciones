@@ -2,14 +2,14 @@
 	<div style="background-color: white; width: 100%;">
 		<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
 						 :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates"
-						 class="exp-hiddable-block"/>
+						 class="exp-hiddable-block" />
 		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
 				 style="background-color: transparent; padding-bottom: 13px;">
 			<Clipping :clipping="clipping" :frame="frame" v-show="showPopulationTotals" />
 
 			<template v-for="(value, index) in metrics">
 				<MetricItem :metric="value" :metrics="metrics" :clipping="clipping"
-										:key="index" v-if="value.IsLocked"/>
+										:key="index" v-if="value.IsLocked" />
 			</template>
 			<draggable v-model="propMetrics" @end="itemMoved" handle=".dragHandle">
 				<transition-group name="fade">
