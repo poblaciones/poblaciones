@@ -10,8 +10,8 @@ var merge = require('webpack-merge');
 var baseWebpackConfig = require('./webpack.base.conf');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var MiniCssExtractPlugin = require("mini-css-extract-plugin");
-var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 var SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -23,13 +23,15 @@ var webpackConfig = merge(baseWebpackConfig, {
 	mode: 'production',
 	optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin()],
+		minimizer: [new CssMinimizerPlugin()],
   },
 	module: {
-		rules: utils.styleLoaders({
-			sourceMap: config.build.productionSourceMap,
-				extract: true
-		})
+		rules: [
+			{
+				test: /.s?css$/,
+				use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
+			},
+		],
 	},
 	devtool: config.build.productionSourceMap ? '#source-map' : false,
 	output: {
@@ -55,13 +57,7 @@ var webpackConfig = merge(baseWebpackConfig, {
       filename: "[name].css",
       chunkFilename: "[id].css"
     }),
-		// Compress extracted CSS. We are using this plugin so that possible
-		// duplicated CSS from different components can be deduped.
-		new OptimizeCSSPlugin({
-			cssProcessorOptions: {
-				safe: true
-			}
-		}),
+		new MiniCssExtractPlugin(),
 		new SpriteLoaderPlugin(),
 		// generate dist index.html with correct asset hash for caching.
 		// you can customize output by editing /index.html

@@ -17,9 +17,6 @@ module.exports = {
 		appBackoffice: './src/backoffice/main.js',
 		appAdmin: './src/admins/main.js',
 	},
-	node: {
-  fs: 'empty'
-},
 	output: {
 		path: config.build.assetsRoot,
 		filename: '[name].js',
@@ -28,6 +25,9 @@ module.exports = {
       : config.dev.assetsPublicPath
 	},
 	resolve: {
+		fallback: {
+			fs: false
+		},
 		extensions: ['.js', '.vue', '.json'],
 		alias: {
 			'vue$': 'vue/dist/vue.esm.js',
