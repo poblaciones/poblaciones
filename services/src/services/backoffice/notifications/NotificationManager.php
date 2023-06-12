@@ -120,7 +120,7 @@ class NotificationManager
 		$this->Send($mail);
 	}
 
-	public function NotifyCreateUser($user, $fullName)
+	public function NotifyCreateUser($user)
 	{
 		if (empty(Context::Settings()->Mail()->NotifyAddress) ||
 				! Context::Settings()->Notifications()->NotifyOnNewAccount)
@@ -129,7 +129,7 @@ class NotificationManager
 		$mail = new Mail();
 		$mail->to = Context::Settings()->Mail()->NotifyAddress;
 		$mail->subject = 'Nuevo usuario en Poblaciones';
-		$message = 'El usuario ' . $fullName . ' (' . $user . ') ha creado una cuenta en el sitio';
+		$message = 'El usuario ' . $user . ' ha creado una cuenta en el sitio';
 		$vals = array();
 		$vals['title'] = "";
 		$vals['message'] = $message;

@@ -21,7 +21,7 @@ class cLinkActivation extends cController
 		$account = new Account();
 		$account->user = $user;
 
-		$to = $account->Activate($id);
+		$to = $account->ActivateOld($id);
 		// Sale con redirect
 		$account->Begin();
 

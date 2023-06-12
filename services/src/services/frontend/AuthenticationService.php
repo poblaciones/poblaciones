@@ -7,10 +7,10 @@ use minga\framework\PhpSession;
 use minga\framework\Str;
 use helena\classes\Account;
 use helena\classes\App;
-use helena\classes\Register;
+use helena\classes\RegisterUser;
 use helena\classes\Remember;
 use helena\classes\Session;
-use helena\db\backoffice\SecurityUserModel;
+use helena\db\frontend\UserModel;
 use helena\services\common\BaseService;
 
 class AuthenticationService extends BaseService
@@ -36,15 +36,15 @@ class AuthenticationService extends BaseService
 		$res = $this->LoadAndValidateAccount($user);
 		if ($res['status'] == self::ERROR)
 			return $res;
-		$model = new SecurityUserModel();
+		$model = new UserModel();
 		$ret = $model->GetUserLinkDb($user, $code);
 		if ($ret == null)
-			return ['status' => self::ERROR, 'message' => App::Trans('El código no es válido.')];
+			return ['status' => self::ERROR, 'message' => ('El código no es válido.')];
 
 		$account = new Account();
 		$account->user = $user;
 
-		$ret = Register::doCheckNewPassword($password);
+		$ret = RegisterUser::doCheckNewPassword($password);
 		if ($ret['status'] == self::ERROR)
 			return $ret;
 		$account->SavePassword($password);
@@ -62,10 +62,10 @@ class AuthenticationService extends BaseService
 		if ($res['status'] == self::ERROR)
 			return $res;
 
-		$model = new SecurityUserModel();
+		$model = new UserModel();
 		$ret = $model->GetUserLinkDb($user, $code);
 		if ($ret == null)
-			return ['status' => self::ERROR, 'message' => App::Trans('El código no es válido.')];
+			return ['status' => self::ERROR, 'message' => ('El código no es válido.')];
 
 		return ['status' => self::OK, 'type' => $ret['type']];
 	}
@@ -79,7 +79,7 @@ class AuthenticationService extends BaseService
 			$account = $res['account'];
 
 		if ($account->Login($password) == false)
-			return ['status' => self::ERROR, 'message' => App::Trans('Contraseña incorrecta.')];
+			return ['status' => self::ERROR, 'message' => ('Contraseña incorrecta.')];
 
 		Remember::SetRemember($account);
 
@@ -88,11 +88,11 @@ class AuthenticationService extends BaseService
 
 	public function BeginActivation(string $user, string $to) : array
 	{
-		if(Register::CompleteOauthRegistration())
+		if(RegisterUser::CompleteOauthRegistration())
 		{
 			$data = OauthData::DeserializeFromSession();
 			if($data == null)
-				return ['status' => self::ERROR, 'message' => App::Trans('Información incompleta.')];
+				return ['status' => self::ERROR, 'message' => ('Información incompleta.')];
 
 			$returnUrl = PhpSession::GetSessionValue($data->provider . 'OauthReturnUrl');
 			return ['status' => self::OK, 'returnUrl' => $returnUrl];
@@ -101,9 +101,9 @@ class AuthenticationService extends BaseService
 		$account = new Account();
 		$user = Str::ToLower(trim($user));
 		if ($user == "")
-			return ['status' => self::ERROR, 'message' => App::Trans('No se indicó una dirección de correo electrónico.')];
+			return ['status' => self::ERROR, 'message' => ('No se indicó una dirección de correo electrónico.')];
 		if (Str::IsEmail($user) == false)
-			return ['status' => self::ERROR, 'message' => App::Trans('La dirección de correo electrónico no fue indicada correctamente.')];
+			return ['status' => self::ERROR, 'message' => ('La dirección de correo electrónico no fue indicada correctamente.')];
 
 		$account->user = $user;
 
@@ -121,10 +121,10 @@ class AuthenticationService extends BaseService
 
 	public function Activate(string $user, string $password, int $code, string $firstname, string $lastname, string $type) : array
 	{
-		$model = new SecurityUserModel();
+		$model = new UserModel();
 		$link = $model->GetUserLinkDb($user, $code);
 		if ($link == null)
-			return ['status' => self::ERROR, 'message' => App::Trans('El código no es válido.')];
+			return ['status' => self::ERROR, 'message' => ('El código no es válido.')];
 
 		$account = new Account();
 		$account->user = $user;

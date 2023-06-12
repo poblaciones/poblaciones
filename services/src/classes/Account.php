@@ -12,6 +12,7 @@ use minga\framework\MessageBox;
 use minga\framework\Context;
 use minga\framework\PublicException;
 use helena\services\common\BaseService;
+use helena\classes\enums\TokenTypeEnum;
 
 class Account
 {
@@ -288,11 +289,49 @@ class Account
 		$message->Send('activate.html.twig');
 		// Manda notificación
 		$nm = new NotificationManager();
-		$nm->NotifyCreateUser($this->user, $fullName);
+		$nm->NotifyCreateUser($this->user);
 		return $activation;
 	}
 
-	public function Activate($id)
+	public function Activate(int $code, string $password = '', string $firstname = '', string $lastname = '', string $type = TokenTypeEnum::Activation) : array
+	{
+		$model = new UserModel();
+		if ($this->IsActive())
+				return ['status' => BaseService::ERROR, ('La cuenta ya ha sido activada. Para acceder puede ingresar con su usuario y contraseña.')];
+
+		//Puede ser activación o permiso...
+		$target = $model->GetUserLink($type, $this->user, $code);
+		if($target == null)
+			return ['status' => BaseService::ERROR, ('El código es inválido o ha expirado.')];
+
+		// Activa la cuenta
+		$this->ActivateDb($password, $firstname, $lastname);
+		$this->isActive = true;
+
+		return ['status' => BaseService::OK, 'target' => $target];
+	}
+
+	private function ActivateDb(string $password = '', string $firstname = '', string $lastname = '') : void
+	{
+		$setters = "usr_is_active = 1";
+
+		if ($password != '')
+		{
+			$passwordHashed = Str::SecurePasswordHash($password);
+			$setters .= ", usr_password = ?";
+			$args[] = $passwordHashed;
+		}
+		if ($firstname != '' || $lastname != '')
+		{
+			$setters .= ", usr_firstname = ?, usr_lastname = ?";
+			$args[] = $firstname;
+			$args[] = $lastname;
+		}
+		$update = "UPDATE user SET " . $setters . " WHERE usr_id = ?";
+		$args[] = $this->userId;
+		App::Db()->exec($update, $args);
+	}
+	public function ActivateOld($id)
 	{
 		if (strlen($id) == 0)
 			MessageBox::ThrowMessage('No se indicó un número de activación.');

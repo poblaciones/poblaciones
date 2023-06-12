@@ -7,10 +7,12 @@ use minga\framework\Str;
 use minga\framework\Profiling;
 use minga\framework\PublicException;
 use minga\framework\MessageBox;
+use helena\classes\enums\TokenTypeEnum;
 
 class UserModel extends BaseModel
 {
 	const ValidTokens = 7; // en días
+	public const DaysValid = 1;
 
 	public function __construct()
 	{
@@ -110,5 +112,55 @@ class UserModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
+	public function GetUserLinkDb(string $user, int $token) : ?array
+	{
+		Profiling::BeginTimer();
+		$userId = $this->GetUserId($user);
+		$this->ClearOldTokens($userId);
+
+		$sql = "SELECT `to`, `message`, `type` FROM user_link WHERE user_id = ? AND token = ? LIMIT 1";
+		$ret = App::Db()->fetchAssoc($sql, [$userId, $token]);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public function DeleteUserLink(string $user, int $token) : void
+	{
+		Profiling::BeginTimer();
+		$userId = $this->GetUserId($user);
+		$this->ClearOldTokens($userId);
+
+		$sql = "DELETE FROM user_link WHERE user_id = ? AND token = ?";
+		App::Db()->exec($sql, [$userId, $token]);
+
+		Profiling::EndTimer();
+	}
+
+	private function ClearOldTokens(int $userId) : void
+	{
+		$this->ClearEmailNew($userId);
+		$delete = "DELETE FROM user_link WHERE DATE_ADD(time, INTERVAL ? DAY) < NOW()";
+		App::Db()->exec($delete, [self::DaysValid]);
+		App::Db()->ensureCommit();
+		App::Db()->ensureBegin();
+	}
+
+	private function ClearEmailNew(int $userId) : void
+	{
+		//Borra todos menos el último, no puede haber varias validaciones de cambio de mail pendientes.
+		$delete = "DELETE FROM user_link WHERE user_id = ? AND type = ? AND id NOT IN (SELECT MAX(id) FROM (SELECT * FROM user_link) AS ul2 WHERE user_id = user_link.user_id AND type = user_link.type)";
+		App::Db()->exec($delete, [$userId, TokenTypeEnum::ChangeEmail]);
+
+		//Si es que queda uno y no es válido limpia el campo email new...
+		$select = "SELECT user_id FROM user_link WHERE DATE_ADD(time, INTERVAL ? DAY) < NOW() AND user_id = ? AND type = ? LIMIT 1";
+		$id = App::Db()->fetchScalarIntNullable($select, [self::DaysValid, $userId, TokenTypeEnum::ChangeEmail]);
+		if($id === null)
+			return;
+
+		$update = "UPDATE user SET email_new = NULL WHERE id = ?";
+		App::Db()->exec($update, [$id]);
+	}
+
 }
 
