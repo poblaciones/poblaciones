@@ -75,8 +75,9 @@ class DatasetService extends DbSession
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
 		$dataset->setMarker($datasetMarker);
 		$dataset->setWork($work);
-		$dataset->setType('L');
+        $dataset->setType('L');
 		$dataset->setShowInfo(true);
+		$dataset->setSkipEmptyFields(false);
 		$dataset->setExportable(true);
 		$dataset->setPublicLabels(true);
 		$dataset->setPartitionMandatory(true);

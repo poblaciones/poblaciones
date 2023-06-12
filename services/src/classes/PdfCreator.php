@@ -55,8 +55,19 @@ class PdfCreator
 			$env = Envelope::FromDb($this->metadata['Extents']);
 			$this->pdf->WritePair("Extensión geográfica", $env->ToFormattedString());
 		}
-		$this->WriteValuePair("Detalle", 'met_abstract_long');
 
+		$refs = $this->ResolveValue('met_references');
+		$methods = $this->ResolveValue('met_methods');
+		if (trim($refs) !== "" || trim($methods) !== "")
+		{
+			$this->WriteValuePair("Contexto", 'met_abstract_long', false);
+			$this->WriteValuePair("Metodología", 'met_methods', false);
+			$this->WriteValuePair("Referencias", 'met_references', false);
+		}
+		else
+		{
+			$this->WriteValuePair("Detalle", 'met_abstract_long', false);
+		}
 		$this->WriteContact();
 		$this->WriteInstitution();
 
@@ -77,12 +88,12 @@ class PdfCreator
 		else
 			return $this->metadata[$text];
 	}
-	private function WriteValuePair($label, $text)
+	private function WriteValuePair($label, $text, $escape = true)
 	{
 		$value = $this->ResolveValue($text);
 		if (trim($value) === "")
 			return;
-		$this->pdf->WritePair($label, $value);
+		$this->pdf->WritePair($label, $value, $escape);
 	}
 	private function HasValue($text)
 	{

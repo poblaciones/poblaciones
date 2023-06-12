@@ -35,7 +35,7 @@ class DatasetModel
 			d1.dat_are_segments,
 			d1.dat_geography_id,
 			d1.dat_geography_segment_id,
-
+			d1.dat_skip_empty_fields,
 			d1.dat_caption_column_id `caption_column_id`,
 			d1.dat_images_column_id `images_column_id`,
 
@@ -154,8 +154,9 @@ class DatasetModel
 		$info->Image = $row['Image'];
 		if ($info->Image !== null) $info->Image = trim($info->Image);
 
-		$items = $this->FormatItems($row, $columns, $captionColumn);
-		$info->Items = $items;
+        $items = $this->FormatItems($row, $columns, $captionColumn);
+        $items = $this->FilterItems($dataset['dat_skip_empty_fields'], $items);
+        $info->Items = $items;
 
 		$info->Centroid = Coordinate::FromDbLonLat($row['centroid'])->Trim();
 		if ($row['geometry'])
@@ -165,6 +166,18 @@ class DatasetModel
 
 		return $info;
 	}
+    private function FilterItems($filterEmpty, $itemsSrc)
+    {
+        if (!$filterEmpty)
+            return $itemsSrc;
+		$items = array();
+		foreach ($itemsSrc as $item) {
+			if ($item['Value'] != '' && $item['Value'] != 0 && $item['Value'] != '-') {
+                $items[] = $item;
+            }
+        }
+        return $items;
+    }
 
 	private function FormatItems($row, $columns, $captionColumn)
 	{
@@ -177,8 +190,8 @@ class DatasetModel
 				$val = $row['c' . $n];
 				if (is_numeric($val) && (substr((string)$val, 0, 1) !== '0' || substr((string)$val, 0, 2) === '0.'))
 				{
-					$val = (float) Str::FormatNumber((float) $val, $column['decimals']);
-				}
+                   $val = (float) Str::FormatNumber((float) $val, $column['decimals']);
+                }
 				$items[] = array('Name' => $column['caption'], 'Value' => $val, 'Caption' => $row['l' . $n]);
 				$n++;
 			}

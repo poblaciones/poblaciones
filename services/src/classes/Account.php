@@ -11,6 +11,7 @@ use minga\framework\Str;
 use minga\framework\MessageBox;
 use minga\framework\Context;
 use minga\framework\PublicException;
+use helena\services\common\BaseService;
 
 class Account
 {
@@ -224,7 +225,35 @@ class Account
 		}
 	}
 
-	public function BeginActivation($password, $firstName, $lastName, $to)
+	public function BeginActivation(string $to) : array
+	{
+		Session::CheckReadonlyForMaintenance();
+
+		if ($this->IsActive())
+			return ['status' => BaseService::ERROR, 'message' => ('La cuenta de correo electrónico ya se encuentra utilizada.')];
+
+		// La pone en activación
+		$model = new UserModel();
+		$model->CreateUser($this->user);
+		$token = $model->CreateUserLink('A', $this->user, $to);
+		$url = App::AbsoluteUrl('/cr#/activate?email=' . urlencode($this->user) . '&code=' . $token);
+
+		// Manda email....
+		$message = new TemplateMessage();
+		$message->title = ('Activación en Poblaciones');
+		$message->to = $this->user;
+		$message->footer = 2;
+		$message->skipNotify = true;
+		$message->AddViewAction($url, ('Activar'), ('Activar'));
+		$message->SetValue('token', $token);
+		$message->Send('activate.html.twig');
+		// Manda notificación
+		$nm = new NotificationManager();
+		$nm->NotifyCreateUser($this->user);
+		return ['status' => BaseService::OK];
+	}
+
+	public function BeginActivationOld($password, $firstName, $lastName, $to)
 	{
 		Session::CheckReadonlyForMaintenance();
 

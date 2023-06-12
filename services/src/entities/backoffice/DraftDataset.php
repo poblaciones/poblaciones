@@ -269,11 +269,17 @@ class DraftDataset
 
     /**
      * @var boolean
-		 *
+     *
      * @ORM\Column(name="dat_show_info", type="boolean", precision=0, scale=0, nullable=false, unique=false)
      */
     private $ShowInfo;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="dat_skip_empty_fields", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $SkipEmptyFields;
 
     /**
      * Get id
@@ -589,6 +595,31 @@ class DraftDataset
     public function getAreSegments()
     {
         return $this->AreSegments;
+    }
+
+
+    /**
+     * Set SkipEmptyFields
+     *
+     * @param boolean $SkipEmptyFields
+     *
+     * @return DraftDataset
+     */
+    public function setSkipEmptyFields($SkipEmptyFields)
+    {
+        $this->SkipEmptyFields = $SkipEmptyFields;
+
+        return $this;
+    }
+
+    /**
+     * Get SkipEmptyFields
+     *
+     * @return boolean
+     */
+    public function getSkipEmptyFields()
+    {
+        return $this->SkipEmptyFields;
     }
 
 

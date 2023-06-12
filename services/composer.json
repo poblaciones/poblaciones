@@ -3,7 +3,10 @@
 		"platform": {
 			"php": "7.4"
 		},
-		"apcu-autoloader": true
+		"apcu-autoloader": true,
+		"allow-plugins": {
+			"yogarine/doctrine-annotation-autoload": true
+		}
 	},
 	"name": "poblaciones/services",
 	"description": "Plataforma abierta de datos espaciales de población",

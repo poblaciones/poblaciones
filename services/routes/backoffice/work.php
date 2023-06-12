@@ -217,6 +217,29 @@ App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $r
 	return App::Json($controller->UpdateWorkVisibility($workId, $private, $link));
 });
 
+App::$app->post('/services/backoffice/PromoteWork', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if (!Session::IsMegaUser()) return $denied;
+	$controller = new services\WorkService();
+	return App::Json($controller->PromoteWork($workId));
+});
+
+App::$app->post('/services/backoffice/DemoteWork', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if (!Session::IsMegaUser()) return $denied;
+	$controller = new services\WorkService();
+	return App::Json($controller->DemoteWork($workId));
+});
+
+App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	$private = Params::GetBoolMandatory('p');
+	$link = Params::Get('l');
+	$controller = new services\WorkService();
+	return App::Json($controller->UpdateWorkVisibility($workId, $private, $link));
+});
+
 App::$app->get('/services/backoffice/CheckAllWorksConsistency', function (Request $request) {
 	if ($denied = Session::CheckIsMegaUser()) return $denied;
 

@@ -14,7 +14,6 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 var SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 const { VueLoaderPlugin } = require('vue-loader');
-const TerserPlugin = require('terser-webpack-plugin');
 var env = config.build.env;
 
 process.traceDeprecation = true;
@@ -33,7 +32,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 			},
 		],
 	},
-	devtool: config.build.productionSourceMap ? '#source-map' : false,
+	devtool: 'source-map',
 	output: {
 		path: config.build.assetsRoot,
 		filename: utils.assetsPath('js/[name].[chunkhash].js'),
@@ -57,7 +56,6 @@ var webpackConfig = merge(baseWebpackConfig, {
       filename: "[name].css",
       chunkFilename: "[id].css"
     }),
-		new MiniCssExtractPlugin(),
 		new SpriteLoaderPlugin(),
 		// generate dist index.html with correct asset hash for caching.
 		// you can customize output by editing /index.html
@@ -99,6 +97,18 @@ var webpackConfig = merge(baseWebpackConfig, {
 			template: 'admins.html',
 			metadata: { google_maps_key: env.google_maps_key.replace(/"/g, '') },
 			chunks: ['manifest', 'vendor', 'appAdmin'],
+			inject: true,
+			minify: {
+				removeComments: true,
+				collapseWhitespace: true,
+				removeAttributeQuotes: true
+			}
+		}),
+		new HtmlWebpackPlugin({
+			filename: config.build.indexAdmin,
+			template: 'credentials.html',
+			metadata: {  },
+			chunks: ['manifest', 'vendor', 'appCred'],
 			inject: true,
 			minify: {
 				removeComments: true,

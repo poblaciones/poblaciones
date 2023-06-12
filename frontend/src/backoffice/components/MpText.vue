@@ -12,8 +12,12 @@
 										:class="(!editMode ? 'unselectable' : '')"
 										@mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue"
 										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
-					<md-textarea v-if="this.multiline" class="mp-area" :rows="rows" :style="minHeightRows + highlightBorder" autocomplete="off"
-											 :readonly="isDisabled || !editMode" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
+					<md-textarea v-if="this.multiline && !this.formatted" class="mp-area" :rows="rows" :style="minHeightRows + highlightBorder" autocomplete="off"
+											 :readonly="isDisabled || !editMode" @mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
+
+					<mp-rich-area style="width: 100%; margin-top: 10px;" @mousedown="mouseDown" @mouseup="mouseUp" :maxlength="maxlength" :rows="rows" v-if="this.multiline && this.formatted" :canEdit="!isDisabled && editMode"
+												 v-model="localValue"  :ref="inputId" />
+
 					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>
 				<div :style="'line-height: 1em;' + (!isDisabled && maxlength > 0 ? ' padding-right: 34px' : '')">
@@ -37,11 +41,13 @@
 import ButtonPanel from './ButtonPanel';
 import { mixin as clickaway } from 'vue-clickaway';
 import str from '@/common/framework/str';
+import MpRichArea from '@/backoffice/components/MpRichArea';
 
 export default {
   name: 'MpText',
 	components: {
-    ButtonPanel
+		ButtonPanel,
+		MpRichArea
 	},
 	mixins: [ clickaway ],
 	methods: {
@@ -58,7 +64,7 @@ export default {
 		},
 		CheckBluring(ele) {
 			if (this.$refs.buttonPanel.HasFocus() === false && ele !== this.input.$el) {
-        if (this.valueChanged) {
+		    if (this.valueChanged) {
           this.$refs.buttonPanel.showPrompt();
         } else {
           if (this.$refs.buttonPanel && this.$refs.buttonPanel.editableMode) {
@@ -80,6 +86,15 @@ export default {
      	this.input.$el.focus();
 		},
 		ChangeEditableMode(mode) {
+			if (this.formatted && this.multiline) {
+				this.editMode = mode;
+				if (mode) {
+					this.input.focus();
+				}
+				this.input.clearSelection();
+				return;
+			}
+
       if (mode) {
 				var len = this.input.$el.value.length;
 				var offset = -1;
@@ -100,6 +115,10 @@ export default {
 			this.editMode = mode;
 		},
 		clearSelection() {
+			if (this.formatted && this.multiline) {
+				this.input.clearSelection();
+				return;
+			}
 			this.input.$el.selectionStart = 0;
 			this.input.$el.selectionEnd = 0;
 			var sel = window.getSelection ? window.getSelection() : document.selection;
@@ -127,13 +146,32 @@ export default {
 					this.pendingMouseUp = false;
 					return;
 				}
+				var parent = e.target.parentElement;
+				if (this.isCkElement(parent)) {
+					return;
+				}
+				var parent = parent.parentElement;
+				if (this.isCkElement(parent)) {
+					return;
+				}
+
 				if (this.valueChanged) {
           this.$refs.buttonPanel.showPrompt();
         } else {
           this.$refs.buttonPanel.Cancel();
         }
 			}
-    },
+		},
+		isCkElement(ele) {
+			if (ele && ele.className) {
+				if (ele.className.indexOf &&
+					ele.className.indexOf('ck-button') >= 0 ||
+					ele.className.indexOf('ck-toolbar') >= 0) {
+					return true;
+				}
+			}
+		return false;
+		},
 		Update() {
 			this.localValue = this.localValue.trim();
 			const REQUIRED = 'Debe indicar un valor.';
@@ -232,6 +270,7 @@ export default {
 		canEdit: { type: Boolean, default: true },
 		largeFont: { type: Boolean, default: false},
 		multiline: Boolean,
+		formatted: { type: Boolean, default: false },
 		suffix: String,
 		type: { type: String, default: null },
 		rows: Number,

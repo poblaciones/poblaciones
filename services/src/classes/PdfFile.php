@@ -260,7 +260,7 @@ class PdfFile
 		$firstPadding = 45;
 		$bottomMargin = 5;
 		$styles = "body { font-family: sans-serif; font-size: 10pt;  }
-								p { 	text-align: justify; margin-bottom: 4pt;  margin-top:0pt; }
+								p { 	text-align: justify; margin-top: 2pt; margin-bottom: 6pt;  }
 
 								hr {	width: 70%; height: 1px;
 									text-align: center; color: #999999;
@@ -329,11 +329,11 @@ h2 {
 									text-align: left;  page-break-after:avoid; color: #666; }
 
 								h3 {	font-weight: normal; font-size: 26pt; color: #000000;
-									font-family: sans-serif; margin-top: 0pt; margin-bottom: 6pt;
+									font-family: sans-serif; margin-top: 3pt; margin-bottom: 3pt;
 									border-top: 0; border-bottom: 0;
 									text-align: ; page-break-after:avoid; }
 								h4 {	font-weight: normal; font-size: 11pt; color: #444;
-									font-family: sans-serif; margin-top: 2pt; margin-bottom: 2pt;
+									font-family: sans-serif; margin-top: 4pt; margin-bottom: 6pt;
 									text-align: ;  margin-collapse:collapse; page-break-after:avoid; }
 								h5 {	font-weight: bold; font-style:italic; ; font-size: 11pt; color: #000044;
 									font-family: sans-serif; margin-top: 8pt; margin-bottom: 4pt;

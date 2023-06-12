@@ -31,14 +31,10 @@ function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidd
 			iconSize: [40, 40]
 		})
 	});
-//	this.marker2 = L.marker(L.latLng(this.pos.Lat, this.pos.Lon));
-//	this.marker2.addTo(this.map);
 	setTimeout(() => {
 		this.onAdd();
 			}, 10);
 }
-
-
 
 TxtOverlay.prototype.UpdateTextStyle = function (className) {
 	if (className !== this.className) {

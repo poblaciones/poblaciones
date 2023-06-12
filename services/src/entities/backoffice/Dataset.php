@@ -106,6 +106,13 @@ class Dataset
     private $ShowInfo;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="dat_skip_empty_fields", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $SkipEmptyFields;
+
+    /**
      * @var \helena\entities\backoffice\DatasetColumn
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DatasetColumn")
@@ -433,6 +440,30 @@ class Dataset
     public function getExportable()
     {
         return $this->Exportable;
+    }
+
+    /**
+     * Set SkipEmptyFields
+     *
+     * @param boolean $SkipEmptyFields
+     *
+     * @return Dataset
+     */
+    public function setSkipEmptyFields($SkipEmptyFields)
+    {
+        $this->SkipEmptyFields = $SkipEmptyFields;
+
+        return $this;
+    }
+
+    /**
+     * Get SkipEmptyFields
+     *
+     * @return boolean
+     */
+    public function getSkipEmptyFields()
+    {
+        return $this->SkipEmptyFields;
     }
 
 

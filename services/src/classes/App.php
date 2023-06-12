@@ -4,6 +4,7 @@ namespace helena\classes;
 
 use minga\framework\Db;
 use minga\framework\IO;
+use minga\framework\Log;
 use minga\framework\Str;
 use minga\framework\Request as FrameworkRequest;
 use minga\framework\Params;
@@ -40,6 +41,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 class App
 {
 	public static $app;
+	public static $attributes = [];
 	public static $db = null;
 	public static $orm = null;
 	public static $isJson = false;
@@ -47,23 +49,21 @@ class App
 
 	private static function getTwigEngine()
 	{
-		if (!array_key_exists('twig', self::$app))
+		if (!array_key_exists('twig', self::$attributes))
 		{
-			self::$app['twig'] = self::$app->extend('twig', function ($twig, $app) {
+			Profiling::BeginTimer();
+			// instancia un twig para mensajes
+			$paths = array_merge(Paths::GetMacrosPaths(), Paths::GetTemplatePaths());
+			$loaderMsg = new FilesystemLoader($paths);
+			$twigMsg = new Environment($loaderMsg, array('cache' => Context::Paths()->GetTwigCache(),
+				'debug' => Context::Settings()->Debug()->debug));
 
-				$baseUrl = Context::Settings()->GetPublicUrl();
+			$twigMsg->addExtension(new StringLoaderExtension());
 
-				$twig->addGlobal('baseurl', $baseUrl);
-				$twig->addGlobal('title', 'Nombre del sitio');
-				$twig->addGlobal('tooltip_url', Links::TooltipUrl());
-				$twig->addGlobal('home_url', Links::GetHomeUrl());
-				$twig->addGlobal('application_name', Context::Settings()->applicationName);
-				$twig->addGlobal('google_maps_version', App::Settings()->Map()->GoogleMapsApi);
-
-				return $twig;
-			});
+			self::$attributes['twig'] = $twigMsg;
+			Profiling::EndTimer();
 		}
-		return self::$app['twig'];
+		return self::$attributes['twig'];
 	}
 
 	private static $settings = null;
@@ -77,7 +77,7 @@ class App
 	}
 	private static function getMessageTwigEngine()
 	{
-		if (!array_key_exists('twigMsg', self::$app))
+		if (!array_key_exists('twigMsg', self::$attributes))
 		{
 			Profiling::BeginTimer();
 			// instancia un twig para mensajes
@@ -88,10 +88,10 @@ class App
 
 			$twigMsg->addExtension(new StringLoaderExtension());
 
-			self::$app['twigMsg'] = $twigMsg;
+			self::$attributes['twigMsg'] = $twigMsg;
 			Profiling::EndTimer();
 		}
-		return self::$app['twigMsg'];
+		return self::$attributes['twigMsg'];
 	}
 
 	public static function Debug()
@@ -204,6 +204,87 @@ class App
 	public static function RedirectParams($url, $params, $status)
 	{
 		return self::$app->redirect(self::$app['url_generator']->generate($url, $params), $status);
+	}
+
+
+	private static function OrphanSqlWhere()
+	{
+		$db = Context::Settings()->Db()->Name;
+		$tableNameBase = "replace(replace( replace( TABLE_NAME, '_snapshot', ''), '_errors', ''), '_retry', '')";
+		$where =
+		"(TABLE_NAME LIKE 'work_dataset_draft_%' or TABLE_NAME LIKE 'work_dataset_shard_%') AND " .
+		"NOT EXISTS (SELECT * from " . $db . ".draft_dataset WHERE dat_table COLLATE utf8_unicode_ci = " . $tableNameBase . ") AND " .
+		"NOT EXISTS (SELECT * from " . $db . ".dataset WHERE dat_table COLLATE utf8_unicode_ci = " . $tableNameBase . ")";
+		return $where;
+	}
+
+	public static function GetOrphanSet()
+	{
+		try
+		{
+			Profiling::BeginTimer();
+			$sql = "SELECT
+				TABLE_NAME `table`
+				FROM information_schema.tables
+				WHERE table_schema = ? AND " . self::OrphanSqlWhere() . " ORDER BY TABLE_NAME";
+
+			return self::Db()->fetchAll($sql,
+				[Context::Settings()->Db()->Name]);
+		}
+		catch(\Exception $e)
+		{
+			Log::HandleSilentException($e);
+			return '-1';
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
+	public static function GetOrphanSize()
+	{
+		try
+		{
+			Profiling::BeginTimer();
+			$sql = "SELECT
+				SUM(data_length + index_length) AS size
+				FROM information_schema.tables
+				WHERE table_schema = ? AND " . self::OrphanSqlWhere();
+			return self::Db()->fetchAssoc($sql,
+				[Context::Settings()->Db()->Name]);
+		}
+		catch(\Exception $e)
+		{
+			Log::HandleSilentException($e);
+			return '-1';
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
+	}
+
+	public static function GetTmpSize()
+	{
+		try
+		{
+			Profiling::BeginTimer();
+			$sql = "SELECT
+				SUM(data_length + index_length) AS size
+				FROM information_schema.tables
+				WHERE table_schema = ? AND TABLE_NAME like 'tmp_work_dataset_%'";
+			return self::Db()->fetchAssoc($sql,
+				[Context::Settings()->Db()->Name]);
+		}
+		catch(\Exception $e)
+		{
+			Log::HandleSilentException($e);
+			return '-1';
+		}
+		finally
+		{
+			Profiling::EndTimer();
+		}
 	}
 
 	public static function RedirectLogin()

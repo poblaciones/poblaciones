@@ -56,7 +56,7 @@ class cRegister extends cController
 
 		// Manda el mail de activación
 		$to = Params::SafeGet("to");
-		$url = $account->BeginActivation($password, $firstName, $lastName, $to);
+		$url = $account->BeginActivationOld($password, $firstName, $lastName, $to);
 
 		// Redirige...
 		Session::Logoff();

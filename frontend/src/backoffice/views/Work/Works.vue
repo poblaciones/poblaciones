@@ -84,6 +84,14 @@
 							<md-icon>file_copy</md-icon>
 							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
 						</md-button>
+						<md-button v-if="isAdmin  && item.Type !== 'P'" class="md-icon-button" @click="onPromotePublic(item)">
+							<md-icon>playlist_add</md-icon>
+							<md-tooltip md-direction="bottom">Promover a Dato público</md-tooltip>
+						</md-button>
+						<md-button v-if="isAdmin && item.Type === 'P'" class="md-icon-button" @click="onDemotePublic(item)">
+							<md-icon>playlist_remove</md-icon>
+							<md-tooltip md-direction="bottom">Convertir en Cartografía</md-tooltip>
+						</md-button>
 						<md-button v-if="canEdit(item)" class="md-icon-button" @click="onDelete(item)">
 							<md-icon>delete</md-icon>
 							<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
@@ -186,6 +194,9 @@ export default {
 			canCreate() {
 				return (this.filter !== 'P' || window.Context.CanCreatePublicData());
 			},
+			isAdmin() {
+				return window.Context.IsAdmin();
+			},
 			entityName() {
 				if (this.filter === 'P') {
 					return { single: 'datos públicos', plural: 'datos públicos', one: '', article: 'los' };
@@ -286,6 +297,29 @@ export default {
 				return true;
 			}
 			return item.Privileges !== 'V';
+		},
+		onPromotePublic(item) {
+			var loc = this;
+			this.source = item;
+			this.$refs.invoker.confirmDo('Promover ' + this.entityName.single,
+				'La cartografía será convertida a dato público. Los cambios no surtirán efecto hasta que la publique nuevamente teniendo este status.',
+				window.Db, window.Db.PromoteWork, item.Id,
+				function () {
+					item.Type = 'P';
+					arr.Remove(loc.list, item);
+				});
+		},
+		onDemotePublic(item) {
+			var loc = this;
+			this.source = item;
+			this.$refs.invoker.confirmDo('Revocar promoción de ' + this.entityName.single,
+				'El dato público será convertido a cartografía. Los cambios no surtirán efecto hasta que la publique nuevamente teniendo este status.',
+				window.Db, window.Db.DemoteWork, item.Id,
+				function () {
+					item.Type = 'R';
+					arr.Remove(loc.list, item);
+				});
+
 		},
 		onDelete(item) {
 			var loc = this;

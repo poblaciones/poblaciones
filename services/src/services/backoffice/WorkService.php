@@ -311,6 +311,36 @@ class WorkService extends BaseService
 		WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
 	}
+
+	public function PromoteWork($workId)
+	{
+		// Cambia el valor
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWork->setType('P');
+
+		$meta = $draftWork->getMetadata();
+		$meta->setType('P');
+
+		App::Orm()->save($draftWork);
+		App::Orm()->save($meta);
+		return ['result' => self::OK];
+	}
+
+
+	public function DemoteWork($workId)
+	{
+		// Cambia el valor
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWork->setType('R');
+
+		$meta = $draftWork->getMetadata();
+		$meta->setType('R');
+
+		App::Orm()->save($draftWork);
+		App::Orm()->save($meta);
+		return ['result' => self::OK];
+	}
+
 	public function UpdateWorkVisibility($workId, $value, $link = null)
 	{
 		if ($link === '?')

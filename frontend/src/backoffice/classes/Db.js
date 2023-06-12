@@ -152,6 +152,24 @@ Db.prototype.GetWorkPreview = function (workId) {
 		{ 'w': workId }, 'obtener la vista previa');
 };
 
+Db.prototype.PromoteWork = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/PromoteWork',
+		{ w: workId }, 'promover la cartografía').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
+Db.prototype.DemoteWork = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/DemoteWork',
+		{ w: workId }, 'revoca la promoción de la cartografía').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
 Db.prototype.LoadWorks = function () {
 	const loc = this;
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetCurrentUserWorks',

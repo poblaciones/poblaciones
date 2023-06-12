@@ -1162,4 +1162,11 @@ a[title="Abrir esta área en Google Maps (se abre en una ventana nueva)"]
 		width: 100%;
 		position: absolute;
 	}
+
+.leaflet-mouse-marker {
+		transition: none!important;
+}
+	.leaflet-zoom-animated {
+		transition: none !important;
+	}
 </style>

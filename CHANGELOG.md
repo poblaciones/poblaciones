@@ -1,3 +1,8 @@
+v3.09 (2023-06-12)
+- Estilos en resumen ampliado (negrita, itálica y punteos de listas).
+- Metodología y referencias en datos públicos.
+- Fix: leaflet: etiquetas flying.
+- Función de promoción y revocación de datos públicos (administración)
 - Multinivel muestra separadas las variables de nivel 0 cuando son polígonos o puntos.
 - Permite que el filtro de partición sea opcional.
 - La exportación a excel formatea y fija primera fila

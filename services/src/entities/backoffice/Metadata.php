@@ -114,6 +114,21 @@ class Metadata
      */
     private $AbstractLong;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="met_methods", type="text", length=65535, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Methods;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="met_references", type="text", length=65535, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $References;
+
     /**
      * @var string
      *
@@ -573,6 +588,54 @@ class Metadata
     public function getAbstractLong()
     {
         return $this->AbstractLong;
+    }
+
+    /**
+     * Set methods
+     *
+     * @param string $methods
+     *
+     * @return Metadata
+     */
+    public function setMethods($methods)
+    {
+        $this->Methods = $methods;
+
+        return $this;
+    }
+
+    /**
+     * Get methods
+     *
+     * @return string
+     */
+    public function getMethods()
+    {
+        return $this->Methods;
+    }
+
+    /**
+     * Set references
+     *
+     * @param string $references
+     *
+     * @return Metadata
+     */
+    public function setReferences($references)
+    {
+        $this->References = $references;
+
+        return $this;
+    }
+
+    /**
+     * Get references
+     *
+     * @return string
+     */
+    public function getReferences()
+    {
+        return $this->References;
     }
 
     /**

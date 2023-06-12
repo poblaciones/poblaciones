@@ -8,6 +8,8 @@ class PartitionInfo
 {
 	public $Name;
 	public $Values;
+	public $AllCaption;
+	public $Mandatory;
 }
 
 

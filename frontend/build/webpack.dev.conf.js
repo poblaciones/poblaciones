@@ -50,6 +50,15 @@ module.exports = merge(baseWebpackConfig, {
 			inject: true
 		}),
 		new HtmlWebpackPlugin({
+			filename: 'credentials.html',
+			template: 'credentials.html',
+			metadata: {
+
+			},
+			chunks: ['appCred'],
+			inject: true
+		}),
+		new HtmlWebpackPlugin({
 			filename: 'index.html',
 			template: 'index.html',
 			metadata: {

@@ -42,6 +42,8 @@ require_once('frontend/metadata.php');
 require_once('frontend/metric.php');
 require_once('frontend/work.php');
 
+require_once('frontend/authentication.php');
+
 App::$app->get('/robots.txt', function(Request $request) {
 	return 'User-agent: *
 					Disallow: /';

@@ -32,7 +32,10 @@ app.use(function(req, res, next) {
 	 }
 	if (req.url === '/admins/' || req.url === '/admins') {
      req.url = '/admins.html';
-	 }
+	}
+	if (req.url === '/cr/' || req.url === '/cr') {
+		req.url = '/credentials.html';
+	}
 	if (req.url === '/map/' || req.url === '/map') {
      req.url = '/index.html';
    }
@@ -69,28 +72,6 @@ Object.keys(proxyTable).forEach(function (context) {
 	}
 	app.use(proxyMiddleware(options.filter || context, options));
 });
-/*app.use(
-  '/services',
-  proxyMiddleware({
-    target: 'http://desa.poblaciones.org',
-    changeOrigin: true,
-  })
-);
-app.use(
-  '/static',
-  proxyMiddleware({
-    target: 'http://desa.poblaciones.org',
-    changeOrigin: true,
-  })
-);
-app.use(
-  '/authenticate',
-  proxyMiddleware({
-    target: 'http://desa.poblaciones.org',
-    changeOrigin: true,
-  })
-);
-*/
 // handle fallback for HTML5 history API
 app.use(require('connect-history-api-fallback')());
 
@@ -114,7 +95,7 @@ var readyPromise = new Promise(resolve => {
 const appPORT = port;
 const phpPORT = port + 2;
 const vueJSPORT = port + 4;
-var vuejsPaths = ['/map/', '/users/', '/admins', '/users','/static/img', '/admins', '/__webpack_hmr'];
+var vuejsPaths = ['/map/', '/cr', '/users/', '/admins', '/users', '/static/img', '/admins', '/__webpack_hmr'];
 const singleApp = require('./single-app');
 ////////////////// LISTO PHP y el proxy unificador //////////////////
 var uri = 'https://localhost:' + appPORT;

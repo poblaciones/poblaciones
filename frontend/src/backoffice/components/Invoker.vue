@@ -51,7 +51,7 @@
 				this.$refs.confirmDialog.show();
 			},
 			confirmed() {
-				if (this.confirmCallback !== null) {
+				if (this.confirmCallback) {
 					this.confirmCallback();
 					this.confirmCallback = null;
 				}

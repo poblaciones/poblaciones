@@ -10,7 +10,8 @@ use minga\framework\PublicException;
 
 class BaseService
 {
-	const OK = "OK";
+	public const OK = "OK";
+	public const ERROR = "ERROR";
 
 	public function GetBaseUrl()
 	{
