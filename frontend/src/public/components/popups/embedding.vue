@@ -145,7 +145,7 @@ export default {
       testingCodeToCopy.select();
       var successful = document.execCommand("copy");
       var msg = successful ? "successful" : "unsuccessful";
-      console.log(msg);
+      //console.log(msg);
       window.getSelection().removeAllRanges();
 		},
 		},

@@ -352,6 +352,10 @@ SegmentedMap.prototype.EndSelecting = function () {
 	this.MapsApi.selector.ClearSelectorCanvas();
 };
 
+SegmentedMap.prototype.GetActiveMetricByVariableId = function (variableId) {
+	return this.Metrics.GetMetricByVariableId(variableId);
+};
+
 SegmentedMap.prototype.GetVariable = function (metricId, variableId) {
 	var metric = this.Metrics.GetMetricById(metricId);
 	if (metric === null) {

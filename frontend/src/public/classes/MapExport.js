@@ -163,6 +163,9 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 
 	];
 	var attributesByClass = [
+
+		{ attribute: 'display', set: 'none', restore: 'unset', class: 'leaflet-control-zoom' },
+		{ attribute: 'display', set: 'none', restore: 'unset', class: 'gm-style-mtc' },
 		{ attribute: 'display', set: 'none', restore: 'unset', class: 'exp-hiddable-unset' },
 		{ attribute: 'display', set: 'none', restore: 'inline-block', class: 'exp-hiddable-inline' },
 		{ attribute: 'display', set: 'none', restore: 'block', class: 'exp-hiddable-block' },

@@ -1,13 +1,18 @@
 module.exports = {
 	getCssRule(d, name) {
+		const href = window.location.href;
 		for (var i = 0; i<d.styleSheets.length; ++i) {
 			var cssRules = null;
 			if (d.styleSheets[i].ownerNode
-				&& d.styleSheets[i].ownerNode.localName == 'style') {
-				if (d.styleSheets[i]['cssRules'] !== undefined) {
-					cssRules = d.styleSheets[i].cssRules;
-				} else if (d.styleSheets[i]['rules'] !== undefined) {
-					cssRules = d.styleSheets[i].rules;
+				&& (d.styleSheets[i].ownerNode.localName == 'style' ||
+					d.styleSheets[i].ownerNode.localName == 'link')) {
+				if (!d.styleSheets[i].ownerNode.href ||
+					this.isSameOrigin(d.styleSheets[i].ownerNode.href, href)) {
+					if (d.styleSheets[i]['cssRules'] !== undefined) {
+						cssRules = d.styleSheets[i].cssRules;
+					} else if (d.styleSheets[i]['rules'] !== undefined) {
+						cssRules = d.styleSheets[i].rules;
+					}
 				}
 			}
 			if (cssRules) {
@@ -19,6 +24,33 @@ module.exports = {
 			}
 		}
 		return null;
+	},
+	isSameOrigin(a, b) {
+		var urlA = this.parseURL(a);
+		var urlB = this.parseURL(b);
+		if (!urlA || !urlB) {
+			return false;
+		}
+		if (urlA.origin === urlB.origin) {
+			return true;
+		}
+		if (
+			urlA.protocol === urlB.protocol &&
+			urlA.hostname === urlB.hostname &&
+			urlA.port === urlB.port
+		) {
+			return true;
+		}
+		return false;
+	},
+	parseURL(s) {
+		var url = null;
+		try {
+			url = new URL(s);
+		} catch (error) {
+			console.error(error);
+		}
+		return url;
 	},
 	addClassesByList(addClasses) {
 		for (var i = 0; i < addClasses.length; i++) {

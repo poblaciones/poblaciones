@@ -185,6 +185,9 @@ StartMap.prototype.StartByDefaultFrame = function (frame, extrafunc) {
 
 	if (this.frameReference.frame && this.frameReference.frame.Center.Lat && this.frameReference.frame.Center.Lon) {
 		window.SegMap.SetCenter(this.frameReference.frame.Center);
+		setTimeout(() => {
+			window.SegMap.SetCenter(this.frameReference.frame.Center);
+		}, 50);
 	}
 	if (this.frameReference.frame && (this.frameReference.frame.Zoom || this.frameReference.frame.Zoom === 0)) {
 		window.SegMap.SetZoom(this.frameReference.frame.Zoom);

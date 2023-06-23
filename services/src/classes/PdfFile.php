@@ -269,8 +269,9 @@ class PdfFile
 								a {	color: #000066; font-style: normal; text-decoration: none;
 									font-weight: normal; }
 
-								ul {	text-indent: 5mm; margin-bottom: 9pt; }
-								ol {	text-indent: 5mm; margin-bottom: 9pt; }
+								li {	margin-top: 2pt; margin-bottom: 6pt; }
+								ul {	text-indent: 5mm; margin-bottom: 4pt; padding-left: 0pt }
+								ol {	text-indent: 5mm; margin-bottom: 4pt; padding-left: 0pt  }
 
 								.link {	color: #000066; font-style: normal; text-decoration: none;
 									font-weight: normal; }

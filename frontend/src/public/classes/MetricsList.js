@@ -124,6 +124,18 @@ MetricsList.prototype.GetMetricById = function (metricId) {
 	return null;
 };
 
+MetricsList.prototype.GetMetricByVariableId = function (variableId) {
+	for (var i = 0; i < this.metrics.length; i++) {
+		if (!this.metrics[i].isBoundary) {
+			var variable = this.metrics[i].GetVariableById(variableId);
+			if (variable !== null) {
+				return this.metrics[i];
+			}
+		}
+	}
+	return null;
+};
+
 MetricsList.prototype.updateMetricIndexes = function () {
 	for (var i = 0; i < this.metrics.length; i++) {
 		this.metrics[i].index = i;

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div v-show='hasContent && !collapsed' class='left-panelPositionEnum' :style="{ width: width + 'px' }">
+		<div v-show='hasContent && !collapsed' style=" position: absolute; height: 100%; left: 0; top: 0; overflow-y: auto; box-shadow: 0 0 8px rgba(0, 0, 0, 0.3); z-index: 1000; background-color: white; user-select: text" :style="{ width: width + 'px' }">
 			<div v-if="isFullFront">
 				<transition name="fade" mode='out-in'>
 					<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose'/>
@@ -233,6 +233,9 @@ export default {
 				css2 = { style: { transform: '' } };
 				css3 = { style: { transform: '' } };
 			}
+			if (css4 === null) {
+				css4 = { style: { transform: '' } };
+			}
 			if (this.collapsed) {
 				window.SegMap.SetTypeControlsDefault();
 				css1.style.transform = 'translateX(9px) scale(0.8)';
@@ -302,17 +305,6 @@ export default {
 </script>
 
 <style scoped>
-.left-panelPositionEnum {
-	position:absolute;
-	height:100%;
-	left:0;
-	top:0;
-	overflow-y: auto;
-	box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-	z-index:1000;
-	background-color: white;
-	user-select: text
-}
 .fade-enter-active, .fade-leave-active {
 	transition: opacity .35s;
 }

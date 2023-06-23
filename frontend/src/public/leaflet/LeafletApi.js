@@ -74,7 +74,7 @@ LeafletApi.prototype.Initialize = function () {
 
 	this.CreateBaseLayers();
 
-	var options = { zoomControl: false, minZoom: 3 };
+	var options = { zoomControl: false, zoomAnimation: false, /*zoomSnap: 0.25, */ minZoom: 3 };
 
 	this.map = new L.Map("map", options);
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
@@ -523,22 +523,54 @@ LeafletApi.prototype.SetZoom = function (zoom) {
 	this.isSettingZoom = false;
 };
 
-LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) {
+LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offsetX) {
 	var envelope;
-	if (exactMatch) {
-		envelope = envelopeOrig;
-	} else {
-		envelope = h.scaleEnvelope(envelopeOrig, .75);
+//	envelope = envelopeOrig;
+	envelope = h.scaleEnvelope(envelopeOrig, 1.25);
+
+	var offsetRad = 0;
+	if (offsetX) {
+		offsetRad = this.calculateOffsetX(offsetX);
 	}
 	var min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
 	var max = L.latLng(envelope.Max.Lat, envelope.Max.Lon);
 	var bounds = L.latLngBounds();
 	bounds.extend(min);
 	bounds.extend(max);
+	var current = this.map.getBounds();
+	if (current.getEast() < max.lng ||
+		current.getWest() + offsetRad > min.lng ||
+		current.getNorth() < max.lat ||
+		current.getSouth() > min.lat) {
+		this.map.fitBounds(bounds);
+		if (offsetX) {
+			var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
+			this.map.panTo(L.latLng(pos.lat, pos.lng - offsetRad));
+		}
+	}
+};
+
+
+LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) {
+	var envelope;
+	envelope = envelopeOrig;
+	if (exactMatch) {
+		envelope = envelopeOrig;
+	} else {
+		envelope = h.scaleEnvelope(envelopeOrig, 1.25);
+	}
+	var offsetRad = 0;
+	if (offsetX) {
+		offsetRad = this.calculateOffsetX(offsetX);
+	}
+	var min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
+	var max = L.latLng(envelope.Max.Lat, envelope.Max.Lon + offsetRad);
+	var bounds = L.latLngBounds();
+	bounds.extend(min);
+	bounds.extend(max);
 	this.map.fitBounds(bounds);
 	if (offsetX) {
-		var pos = this.map.getCenter();
-		var offsetRad = this.calculateOffsetX(offsetX);
+		var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
 		this.map.panTo(L.latLng(pos.lat, pos.lng - offsetRad));
 	}
 };
@@ -794,8 +826,11 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		this.overlayMapTypesLayers.push(overlay);
 
 	} else {
+		// Lo crea
+		var overlayTiled = new LeafletTileOverlay(activeMetric);
+
 		const d = require('./deck-gl/LeafletLayer');
-		overlay = new d.default({
+		var wrapper = new d.default({
 			views: [
 				new MapView({
 					repeat: true
@@ -804,6 +839,12 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 			layers: []
 		});
 
+		var overlay = L.layerGroup([wrapper, overlayTiled]);
+		overlay.dispose = function () {
+			overlay.eachLayer(function (layer) {
+				layer.dispose();
+			});
+		};
 		this.overlayMapTypesLayers.push(overlay);
 
 		var loc = this;
@@ -818,7 +859,7 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 				var deckIconLayer = iconLayer.CreateLayer(data, 1);
 
 //				overlay.deckOverlay = overlay;
-				overlay.AddLayer(deckIconLayer);
+				wrapper.AddLayer(deckIconLayer);
 //				overlay.ZoomSubscribed = iconLayer;
 	//			window.SegMap.ZoomChangedSubscribers.push(overlay.ZoomSubscribed);
 			}

@@ -96,9 +96,40 @@ FeatureSelector.prototype.getFeature = function (event) {
 		}
 	} // lo pasa a los elementos de deckGl
 	for (var gl of gls) {
-		if (ev.type != 'mousemove') {
-			var a = 1;
-			a++;
+		if (ev.type == 'click' || ev.type == 'mousemove') {
+			var obj = this.getDeckElement(event);
+			// tiene en OBJ lo que precisa...
+			if (obj) {
+				var activeSelectedMetric = window.SegMap.GetActiveMetricByVariableId(obj.VID);
+				var variable = activeSelectedMetric.GetVariableById(obj.VID);
+
+				var parentInfo = activeSelectedMetric.CreateParentInfo(variable, obj);
+
+				/* */
+				var desc = null;
+				var value = null;
+				var fid = null;
+				desc = obj.Description;
+				value = obj.Value;
+				fid = obj.FID;
+				matchBoundary = {
+					position: position, parentInfo: parentInfo,
+					id: fid,
+					description: desc,
+					value: value
+				};
+				if (ev.type == 'click') {
+					this.MapsApi.markerClicked(event, parentInfo, obj.FID);
+					event.originalEvent.cancelBubble = true;
+					event.originalEvent.stopPropagation = true;
+				} else {
+					return matchBoundary;
+				}
+
+				//this.selectorClicked(event);
+				return null; // matchBoundary;
+				//return
+			}
 		}
 		var t = ev.type;
 		if (t == 'mouseup') {
@@ -107,7 +138,7 @@ FeatureSelector.prototype.getFeature = function (event) {
 		if (t == 'mousedown') {
 			t = 'mousedown';
 		}
-
+		/*
 		var eventClone = new MouseEvent(t, {
 			altKey: ev.altKey, bubbles: ev.bubbles,
 			button: ev.buton, buttons: ev.buttons,
@@ -142,9 +173,36 @@ FeatureSelector.prototype.getFeature = function (event) {
 		gl.dispatchEvent(eventClone);
 		if (ev.type == 'click') {
 			gl.click();
-		}
+		}*/
 	}
 	return matchBoundary;
+};
+
+FeatureSelector.prototype.getDeckElement = function (event) {
+	var obj = null;
+	for (var overlay of this.MapsApi.overlayMapTypesLayers) {
+		if (overlay.getLayers) {
+			for (var layer of overlay.getLayers()) {
+				if (layer._deck) {
+					var deck = layer._deck;
+					var feature = null;
+					try {
+						feature = deck.pickObject({
+							x: event.originalEvent.clientX,
+							y: event.originalEvent.clientY
+						});
+					} catch { };
+
+					if (feature && feature.object) {
+						return feature.object;
+					}
+					break;
+				}
+			}
+			break;
+		}
+	}
+	return null;
 };
 
 FeatureSelector.prototype.createItemFromElement = function (element, position) {
@@ -288,7 +346,7 @@ FeatureSelector.prototype.RenderTooltip = function (feature) {
 	var value = null;
 	if (feature.value) {
 		var varName = window.SegMap.GetVariableName(feature.parentInfo.MetricId, feature.parentInfo.VariableId);
-		value = str.EscapeHtml(varName) + ': ' + str.EscapeHtml(feature.value);
+		value = (str.EscapeHtml(varName) + '').trim() + ': ' + str.EscapeHtml(feature.value);
 	}
 	if (feature.description) {
 		caption = feature.description;
@@ -410,14 +468,24 @@ FeatureSelector.prototype.selectorUp = function (event) {
 };
 
 FeatureSelector.prototype.selectorDown = function (event) {
-	if (window.SegMap.MapsApi.draggingDelayed) {
+	/*if (window.SegMap.MapsApi.draggingDelayed) {
 		return false;
-	}
+	}*/
 	if (event.originalEvent && event.originalEvent.isSelf) {
 		return false;
 	}
+
 	var loc = window.SegMap.MapsApi.selector;
 	var feature = loc.getFeature(event);
+	/*	if (feature) {
+		feature = {
+			id: feature.object.id, position: {
+					Coordinate: { Lat: feature.object.Lat, Lon: feature.object.Lon }
+				},
+				id: feature.object.FID
+			};
+		}*/
+
 };
 
 
@@ -429,7 +497,24 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 		return false;
 	}
 	var loc = window.SegMap.MapsApi.selector;
+
 	var feature = loc.getFeature(event);
+
+	/*if (!feature) {
+		feature = this.MapsApi.overlayMapTypesLayers[1].getLayers()[0]._deck.pickObject({
+			x: event.originalEvent.offsetX,
+			y: event.originalEvent.offsetY
+		});
+		if (feature) {
+			feature = {
+				id: feature.object.id, position: {
+					Coordinate: { Lat: feature.object.Lat, Lon: feature.object.Lon }
+				},
+				id: feature.object.FID
+			};
+		}
+	}*/
+
 	if (feature === null || !feature.id) {
 		loc.resetTooltip();
 		return false;

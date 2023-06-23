@@ -50,8 +50,9 @@ export default {
 
 <style scoped>
 .logoDiv {
-	bottom: 21px;
-	right: 48px;
+	bottom: 24px;
+	right: 54px;
+  z-index: 1000;
 	position: absolute;
 	background-color: transparent;
 	border-radius: 6px;

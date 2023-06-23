@@ -5,7 +5,7 @@
 								@confirm="confirmed"></mp-confirm>
 		<md-snackbar id="snackbar" class="" :md-active.sync="showDialog" md-position="left">
 			<div>
-				<img src="@/backoffice/assets/spinner.gif" style="position: absolute; top: 11px">
+				<img :src="asset" style="position: absolute; top: 11px">
 				<div style="width: 220px; margin-left: 35px;">
 					{{ message }}
 				</div>
@@ -30,6 +30,9 @@
 		computed: {
 			ErrorSignaled() {
 				return window.Context.ErrorSignaled.value;
+			},
+			asset() {
+				return require('@/backoffice/assets/spinner.gif').default;
 			}
 		},
 		methods: {

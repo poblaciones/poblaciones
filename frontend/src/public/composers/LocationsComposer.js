@@ -54,7 +54,7 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 				this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveValueLabelVisibility(val);
 			}
 			if (this.labelsVisibility[valKey]) {
-				var mapItem = [];
+				/*var mapItem = [];
 				mapItem.id = dataElement['FID'];
 
 				mapItem.lat = dataElement['Lat'];
@@ -83,7 +83,7 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 				this.registerTileMarker(tileKey, marker);
 				if (variable.IsSequence) {
 					this.SequenceHandler.registerSequenceMarker(tileKey, mapItem, marker, zoom);
-				}
+				}*/
 				// Pone el perímetro
 				this.AddPerimeter(variable, val, dataElement, tileKey, tileBounds, colorMap);
 				// Pone el texto

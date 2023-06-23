@@ -47,6 +47,7 @@ export default {
 	.edit-button {
 		border-radius: 10px;
 		width: 40px;
+		z-index: 1000;
 		height: 40px;
 		padding: 20px;
 		background-color: rgb(0, 160, 210);

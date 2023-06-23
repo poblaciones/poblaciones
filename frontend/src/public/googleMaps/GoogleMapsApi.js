@@ -675,6 +675,9 @@ GoogleMapsApi.prototype.getBounds = function() {
 		Zoom: this.gMap.getZoom(),
 	};
 };
+GoogleMapsApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offsetX) {
+// not implemented
+};
 
 GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index) {
 	var deckGlDisabled = (window.Use.UseDeckgl == false);
@@ -688,7 +691,7 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 		this.gMap.overlayMapTypes.insertAt(index,
 			new GoogleTileOverlay(activeMetric));
 	} else {
-		var overlay = new GoogleNullOverlay();
+		var overlay = new GoogleTileOverlay(activeMetric);
 		this.gMap.overlayMapTypes.insertAt(index, overlay);
 		var loc = this;
 		// Trae los datos

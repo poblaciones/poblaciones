@@ -1,3 +1,6 @@
+- Fix: no respeta posición de startup en leaflet.
+- Fix: pins cliqueables en deck.gl
+
 v3.09 (2023-06-12)
 - Estilos en resumen ampliado (negrita, itálica y punteos de listas).
 - Metodología y referencias en datos públicos.

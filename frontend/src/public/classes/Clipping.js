@@ -15,11 +15,11 @@ function Clipping(frame, clipping) {
 };
 
 Clipping.prototype.FitEnvelope = function(envelope) {
-	window.SegMap.MapsApi.FitEnvelope(envelope);
+	window.SegMap.MapsApi.FitEnvelope(envelope, false, (window.Panels.Left.collapsed ? 0 : window.Panels.Left.width));
 };
 
 Clipping.prototype.FitCurrentRegion = function() {
-	window.SegMap.MapsApi.FitEnvelope(this.clipping.Region.Envelope);
+	this.FitEnvelope(this.clipping.Region.Envelope);
 };
 
 Clipping.prototype.SetClippingCanvas = function (canvas) {

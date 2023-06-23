@@ -134,6 +134,22 @@ InfoWindow.prototype.getElement = function (offset) {
 	return vals[curPos];
 };
 
+
+InfoWindow.prototype.EnsureVisibleView = function (position, key, title) {
+	if (position) {
+		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
+			|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
+			window.SegMap.MapsApi.EnsureEnvelope(position.Envelope, true, window.Panels.Left.width);
+			setTimeout(() => {
+				window.SegMap.MapsApi.selector.tooltipCandidate = { id: key.Id };
+				window.SegMap.MapsApi.selector.setTooltipOverlays();
+			}, 750);
+		}
+		window.SegMap.MapsApi.SetSelectedFeature(position, key, title);
+	}
+};
+
+
 InfoWindow.prototype.FocusView = function (position, key, title) {
 
 	if (position) {
@@ -216,12 +232,17 @@ InfoWindow.prototype.ReceiveInfoWindowData = function (res, position, key, force
 	// Lo marca en el mapa
 	window.SegMap.MapsApi.SetSelectedFeature(res.data.position, key, res.data.Title);
 	// Lo agrega al panel
+	var prevCollapse = window.Panels.Left.collapsed;
 	window.Panels.Left.Add(res.data);
 	// Si viene interactivo, lo abre y lo pone en la ruta
 	if (forceExpand) {
 		window.Panels.Left.collapsed = false;
 		window.SegMap.SaveRoute.UpdateRoute();
-		this.FocusView(res.data.position, key, res.data.Title);
+		if (prevCollapse) {
+			this.FocusView(res.data.position, key, res.data.Title);
+		} else {
+			this.EnsureVisibleView(res.data.position, key, res.data.Title);
+		}
 	}
 };
 

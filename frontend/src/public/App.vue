@@ -2,7 +2,7 @@
 	<div>
 		<WorkPanel v-if="!Embedded.HideWorkPanel" :work="work" ref="workPanel" :backgroundColor="workColor" />
 		<div class="embeddedNoOpener"></div>
-		<div style="height:0px;width:0px">
+		<div style="height:0px;width:0px;overflow:hidden">
 			<i class="flaticon-001-cruiser-voyage"></i>
 		</div>
 		<div class="embedded" @click="embeddedClick" v-if="Embedded.Readonly"
@@ -438,9 +438,9 @@
 		transform: translateX(-8px) scale(0.8);
 	}
 
-		.gm-style-mtc:last-of-type {
-			transform: translateX(4px) scale(0.8);
-		}
+	.gm-style-mtc:last-of-type {
+		transform: translateX(4px) scale(0.8);
+	}
 
 	.hand {
 		cursor: pointer;
@@ -1166,7 +1166,8 @@ a[title="Abrir esta área en Google Maps (se abre en una ventana nueva)"]
 .leaflet-mouse-marker {
 		transition: none!important;
 }
+	/*
 	.leaflet-zoom-animated {
 		transition: none !important;
-	}
+	}*/
 </style>

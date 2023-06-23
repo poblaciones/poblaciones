@@ -1,6 +1,5 @@
 <template>
 	<div>
-		<img style="display: none" ref="imageItem" src="../assets/finished.gif" >
 		<md-dialog  :md-active.sync="showDialog" :md-click-outside-to-close="completed" @md-closed="OnClosed"
 							 style="z-index: 10000!important">
 			<md-dialog-title v-if="realTitle !== '' && realTitle !== null">{{ realTitle }}</md-dialog-title>
@@ -128,7 +127,7 @@ export default {
 		ShowCompleted() {
 			this.hideProgress = true;
 			this.complete = true;
-			this.imageSrc = this.$refs.imageItem.src;
+			this.imageSrc = require('../assets/finished.gif').default; // this.$refs.imageItem.src;
 			this.OnCompleted();
 		},
 		ShowError(errMessage) {

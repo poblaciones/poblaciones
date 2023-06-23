@@ -192,7 +192,8 @@
 
 								<md-field style="max-width: 265px">
 									<label>Paleta</label>
-									<md-select :disabled="!canEdit" v-model="Variable.Symbology.Rainbow" class="paletteDropdown" ref="paletteSelect">
+									<md-select :disabled="!canEdit" v-model="Variable.Symbology.Rainbow"
+														 class="paletteDropdown" ref="paletteSelect">
 
 										<md-optgroup label="Básicas">
 											<md-option v-for="palette in palettes.basicPalettes" class="max30" :key="palette.Id" :value="palette.Id">
@@ -279,6 +280,7 @@ import ValuePopup from './ValuePopup.vue';
 import Icon from '@/backoffice/components/Icon';
 import ScaleGenerator from '@/backoffice/classes/ScaleGenerator';
 import color from '@/common/framework/color';
+import dom from '@/common/framework/dom';
 
 const DEFAULT_FROM_COLOR = '0ce800';
 const DEFAULT_TO_COLOR = 'fb0000';
@@ -542,6 +544,11 @@ export default {
 			return html + "</div>";
 		}
   },
+	mounted() {
+		var ret = require('@/common/assets/palette.png').default;
+		var css1 = dom.getCssRule(document, '.palette');
+		css1.style.backgroundImage = 'url(' + ret + ')';
+	},
 	computed: {
 	 Dataset() {
 			return window.Context.CurrentDataset;
@@ -700,7 +707,7 @@ export default {
 }
 
 .palette {
-	background-image: url('../../../common/assets/palette.png');
+	background-image: url('~@/common/assets/palette.png');
 	height: 27px;
 	background-size: 240px 480px;
 	background-repeat: repeat-y;
@@ -724,6 +731,11 @@ height: 42px;
 	.fixeHeightCard {
 		height: 250px;
 	}
+
+.md-select-menu {
+	width: 295px!important;
+}
+
 .max30 {
 	height: 35px;
 }

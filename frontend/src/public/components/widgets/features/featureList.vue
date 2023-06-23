@@ -64,7 +64,6 @@ export default {
 			this.detail = {};
 		},
 		openDetail(item) {
-			console.log('llego');
 			this.showDetail = true;
 			item.dt.back = true;
 			this.detail = item.dt;

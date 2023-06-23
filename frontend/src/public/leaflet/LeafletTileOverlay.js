@@ -4,7 +4,7 @@ import L from 'leaflet';
 export default LeafletTileOverlay;
 
 function LeafletTileOverlay(activeSelectedMetric) {
-	this.tileOverlay = new TileOverlay(activeSelectedMetric, true);
+	this.tileOverlay = new TileOverlay(activeSelectedMetric, false);
 	this.index = -1;
 	var loc = this;
 	this.on("tileunload", function(tileEvent) {

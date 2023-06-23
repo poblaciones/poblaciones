@@ -170,8 +170,24 @@ export default {
 	}
 
 	.ck-content p {
-		margin: 2px 2px;
+		margin: 4px 4px;
+		text-align: justify;
 		padding: 0px;
+	}
+
+	.ck-content ul {
+		padding-left: 1.6em;
+	}
+
+
+	.ck-content ol {
+		padding-left: 1.6em;
+	}
+
+	.ck-content li {
+		margin-bottom: 6px;
+		margin-right: 4px;
+		text-align: justify;
 	}
 
 	.ck.ck-toolbar {
