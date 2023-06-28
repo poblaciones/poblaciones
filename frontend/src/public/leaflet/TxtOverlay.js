@@ -165,6 +165,9 @@ TxtOverlay.prototype.onAdd = function() {
 
 	this.div = div;
 
+	var container = document.getElementById('panLabelCalculus');
+	container.appendChild(div);
+
 	this.RebuildHtml();
 
 	if (!this.Overlaps()) {
@@ -179,6 +182,7 @@ TxtOverlay.prototype.onAdd = function() {
 		});
 	} else {
 		div.style.visibility = 'hidden';
+		container.removeChild(div);
 		this.isVisible = false;
 		this.map.removeLayer(this.marker);
 	}
@@ -286,7 +290,7 @@ TxtOverlay.prototype.Remove = function () {
 	}*/
 	if (this.isVisible) {
 		this.map.removeLayer(this.marker);
-		//	window.SegMap.OverlapRectangles.RemoveRectangle(this);
+		window.SegMap.OverlapRectangles.RemoveRectangle(this);
 	}
 };
 

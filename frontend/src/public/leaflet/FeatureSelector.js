@@ -316,6 +316,8 @@ FeatureSelector.prototype.showTooltip = function () {
 };
 
 FeatureSelector.prototype.setTooltipOverlays = function () {
+	this.resetTooltipOverlays();
+
 	var items = document.querySelectorAll('path[FID="' + this.tooltipCandidate.id + '"]');
 	if (!items) {
 		return;

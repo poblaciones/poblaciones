@@ -18,6 +18,7 @@
 				<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='toolbarStates.collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
+			<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
 			<div id="panRight" class="split split-horizontal">
 				<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
 											:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :currentWork="work.Current"

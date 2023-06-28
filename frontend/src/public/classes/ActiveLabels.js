@@ -74,8 +74,7 @@ ActiveLabels.prototype.GetSubset = function (coord) {
 
 ActiveLabels.prototype.Show = function () {
 	this.visible = true;
-	window.SegMap.Metrics.AppendNonStandardMetric(this);
-	//window.SegMap.Metrics.UpdateMetric(this);
+	window.SegMap.Metrics.UpdateMetric(this);
 };
 
 ActiveLabels.prototype.Hide = function () {

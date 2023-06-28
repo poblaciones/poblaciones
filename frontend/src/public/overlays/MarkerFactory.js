@@ -73,7 +73,7 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 		iconSVGpath = (frameType === 'P' ? Svg.markerPincheNormal : Svg.markerSquare);
 		path = '<path fill="{mapIconColor}" stroke="{strokeColor}" stroke-width="{strokeWeight}" d="{path}"/>';
 	}
-	const RESOLUTION_EXPANSOR = 4;
+	const RESOLUTION_EXPANSOR = 2;
 	var width = 24;
 	var height = 24;
 	if (frameType === 'P') {

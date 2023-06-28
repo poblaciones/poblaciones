@@ -563,17 +563,22 @@ LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) 
 	} else {
 		envelope = h.scaleEnvelope(envelopeOrig, 1.25);
 	}
-	var offsetRad = 0;
-	if (offsetX) {
-		offsetRad = this.calculateOffsetX(offsetX);
-	}
 	var min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
-	var max = L.latLng(envelope.Max.Lat, envelope.Max.Lon + offsetRad);
+	var max = L.latLng(envelope.Max.Lat, envelope.Max.Lon);
 	var bounds = L.latLngBounds();
 	bounds.extend(min);
 	bounds.extend(max);
 	this.map.fitBounds(bounds);
+
+	var offsetRad = 0;
 	if (offsetX) {
+		offsetRad = this.calculateOffsetX(offsetX);
+		min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
+		max = L.latLng(envelope.Max.Lat, envelope.Max.Lon + offsetRad);
+		var bounds = L.latLngBounds();
+		bounds.extend(min);
+		bounds.extend(max);
+		offsetRad = this.calculateOffsetX(offsetX);
 		var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
 		this.map.panTo(L.latLng(pos.lat, pos.lng - offsetRad));
 	}
