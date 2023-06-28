@@ -60,6 +60,10 @@ TileRequest.prototype.GetTile = function () {
 	var loc = this;
 
 	this.url = this.selectedMetricOverlay.activeSelectedMetric.GetDataService(this.coord.x);
+	if (!this.url) {
+		// puede haber layers que no requieran datos, como los de puntos de deck.gl
+		return;
+	}
 	this.params = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParams(this.coord);
 	this.params.z = this.zoom;
 	this.subset = (this.selectedMetricOverlay.activeSelectedMetric.GetSubset ? this.selectedMetricOverlay.activeSelectedMetric.GetSubset(this.coord) : null);

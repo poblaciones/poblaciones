@@ -12,10 +12,10 @@ function FeatureSelector(mapsApi) {
 	this.tooltipMarker = null;
 	this.tooltipCandidate = null;
 	this.tooltipTimer = null;
-	this.tooltipOverlay = null;
+	this.tooltipOverlays = [];
 	this.tooltipKillerTimer = null;
 	this.disabled = false;
-	this.tooltipOverlayPaths = null;
+	this.tooltipOverlaysPaths = null;
 };
 
 FeatureSelector.prototype.SetSelectorCanvas = function () {
@@ -123,11 +123,11 @@ FeatureSelector.prototype.getFeature = function (event) {
 					event.originalEvent.cancelBubble = true;
 					event.originalEvent.stopPropagation = true;
 				} else {
-					return matchBoundary;
+					//return matchBoundary;
 				}
 
 				//this.selectorClicked(event);
-				return null; // matchBoundary;
+				//return null; // matchBoundary;
 				//return
 			}
 		}
@@ -277,9 +277,11 @@ FeatureSelector.prototype.resetTooltip = function (feature) {
 FeatureSelector.prototype.hideTooltip = function () {
 	// Si está visible, remueve el tooltip
 	this.resetTooltipOverlays();
-	if (this.tooltipOverlay !== null) {
-		this.tooltipOverlay.Release();
-		this.tooltipOverlay = null;
+	if (this.tooltipOverlays.length > 0) {
+		for (var overlay of this.tooltipOverlays) {
+			overlay.Release();
+		}
+		this.tooltipOverlays = [];
 	}
 };
 
@@ -305,8 +307,9 @@ FeatureSelector.prototype.showTooltip = function () {
 		outStyle += ' ibTooltipNoYOffset';
 	}
 	var html = loc.RenderTooltip(loc.tooltipCandidate);
-	loc.tooltipOverlay = window.SegMap.MapsApi.Write(html, coord, 10000000, outStyle, style, true);
-	loc.tooltipOverlay.alwaysVisible = true;
+	var tooltipOverlay = window.SegMap.MapsApi.Write(html, coord, 10000000, outStyle, style, true);
+	loc.tooltipOverlays.push(tooltipOverlay);
+	tooltipOverlay.alwaysVisible = true;
 	loc.setTooltipOverlays();
 
 	loc.createTooltipKiller();
@@ -317,7 +320,7 @@ FeatureSelector.prototype.setTooltipOverlays = function () {
 	if (!items) {
 		return;
 	}
-	this.tooltipOverlayPaths = [];
+	this.tooltipOverlaysPaths = [];
 	for (var n = 0; n < items.length; n++) {
 		var clone = items[n].cloneNode();
 		clone.setAttribute('class', 'activePath');
@@ -327,18 +330,18 @@ FeatureSelector.prototype.setTooltipOverlays = function () {
 		clone.style.filter = "drop-shadow(" + (12 / scale) + "px 0 " + (24 / scale) + "px #333)";
 
 		parent.appendChild(clone);
-		this.tooltipOverlayPaths.push(clone);
+		this.tooltipOverlaysPaths.push(clone);
 	}
 };
 
 FeatureSelector.prototype.resetTooltipOverlays = function () {
-	if (!this.tooltipOverlayPaths) {
+	if (!this.tooltipOverlaysPaths) {
 		return;
 	}
-	for (var n = 0; n < this.tooltipOverlayPaths.length; n++) {
-		this.tooltipOverlayPaths[n].remove();
+	for (var n = 0; n < this.tooltipOverlaysPaths.length; n++) {
+		this.tooltipOverlaysPaths[n].remove();
 	}
-	this.tooltipOverlayPaths = null;
+	this.tooltipOverlaysPaths = null;
 };
 
 FeatureSelector.prototype.RenderTooltip = function (feature) {
@@ -437,7 +440,7 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 	loc.tooltipLocation = h.getPosition(event);
 	loc.tooltipEvent = event;
 
-	if (loc.tooltipOverlay !== null) {
+	if (loc.tooltipOverlays.length > 0) {
 		// averigua si está en él mismo
 		var feature = loc.getFeature(event);
 		if (feature && loc.tooltipCandidate && feature.id === loc.tooltipCandidate.id) {

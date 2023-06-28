@@ -2,7 +2,7 @@
 	<mp-wait ref="wait" class="formRow">
 		<div class="md-layout">
 			<div class="md-layout-item md-size-100" style="padding-right: 155px; padding-left: 150px;">
-				<div class="label">{{ $tc('key.CODE') }}</div>
+				<div class="label">Código</div>
 				<md-field v-on:keydown.native.enter="next" :md-counter="false" @input="clearError" class="customField"
 							style="min-width: 115px!important;">
 					<md-input v-model="code" maxlength="6" ref="code" autocorrect="off"
@@ -10,11 +10,11 @@
 				</md-field>
 			</div>
 			<div class="md-layout-item md-size-100" style="padding-left: 150px;">
-				<span class="label-error" v-if="$v.code.$invalid && hasMessages">{{ $t('Debe indicar el código.') }}</span>
+				<span class="label-error" v-if="$v.code.$invalid && hasMessages">Debe indicar el código.</span>
 				<span class="label-error">{{ serverError }}</span>
 			</div>
 			<div class="md-layout-item md-size-100 formRow">
-				<md-button class="md-primary md-raised fullRowButton" @click="next">{{ $t('Siguiente') }}</md-button>
+				<md-button class="md-primary md-raised fullRowButton" @click="next">Siguiente</md-button>
 			</div>
 		</div>
 	</mp-wait>
@@ -26,7 +26,7 @@ import response from '@/common/framework/response';
 // https://www.npmjs.com/package/vue2-animate#sassscss
 
 export default {
-	name: 'Signup',
+	name: 'EnterCode',
 	components: {
 
 	},

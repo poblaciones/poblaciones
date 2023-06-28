@@ -1,14 +1,14 @@
 <template>
 	<md-dialog :md-click-outside-to-close="false" @md-closed="accept" class="zEnfasis"
 						 :md-active.sync="dialog" @keyup.enter="accept()" @keyup.space="accept()">
-		<md-dialog-title>{{ valueOrDefault(effectiveTitle, valueOrDefault(title, $t('Atención'))) }}</md-dialog-title>
+		<md-dialog-title>{{ valueOrDefault(effectiveTitle, valueOrDefault(title, 'Atención')) }}</md-dialog-title>
 		<md-dialog-content>
 			<div>
 				<p class='text-block'>{{ valueOrDefault(effectiveText, text) }}</p>
 			</div>
 		</md-dialog-content>
 		<md-dialog-actions>
-			<md-button class="md-primary" @click="accept">{{ valueOrDefault(acceptText, $t('Cerrar')) }}</md-button>
+			<md-button class="md-primary" @click="accept">{{ valueOrDefault(acceptText, 'Cerrar') }}</md-button>
 		</md-dialog-actions>
 	</md-dialog>
 </template>

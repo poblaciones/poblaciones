@@ -210,6 +210,10 @@ LeafletApi.prototype.CreateBaseLayers = function () {
             maxZoom: 18,
 		});
 	this.baseLayers['satellite'] = satellite;
+
+	for (var layer in this.baseLayers) {
+		this.baseLayers[layer].setZIndex(0);
+	}
 };
 
 LeafletApi.prototype.generateLabelsArray = function (visibility) {
@@ -872,15 +876,13 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		overlay.index = index;
 	}
 	// lo reinserta
-	var sorted = [];
+	this.overlayMapTypesGroup.addLayer(overlay);
+	// actualiza las posiciones
 	for (var layer of this.overlayMapTypesLayers) {
-		sorted[layer.index] = layer;
+		if (layer.setZIndex) {
+			layer.setZIndex(layer.index);
+		}
 	}
-	this.overlayMapTypesGroup.clearLayers();
-	for (var n = 0; n < this.overlayMapTypesLayers.length; n++) {
-		this.overlayMapTypesGroup.addLayer(sorted[n]);
-	}
-
 };
 
 LeafletApi.prototype.RemoveOverlay = function (index) {

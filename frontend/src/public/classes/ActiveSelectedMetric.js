@@ -817,6 +817,14 @@ ActiveSelectedMetric.prototype.GetLayerDataService = function (seed) {
 };
 
 ActiveSelectedMetric.prototype.GetDataService = function (seed) {
+	var deckGlDisabled = (window.Use.UseDeckgl == false);
+	if (!this.useTiles() && !deckGlDisabled) {
+		var v = this.SelectedVariable();
+		if (v && (!v.ShowDescriptions || v.ShowDescriptions == '0')) {
+			return null;
+		}
+	}
+
 	var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
 	var path = '';
 	var server = '';

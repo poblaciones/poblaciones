@@ -9,7 +9,7 @@
 				 :style="(Embedded.OpenOnClick ? 'cursor: pointer;' : '')"
 				 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
 		<div id="holder">
-			<div id="panMain" class="split split-horizontal" style="position: relative">
+			<div id="panMain" class="split split-horizontal" style="position: relative; overflow: hidden">
 				<Search class="exp-hiddable-block" v-show="!Embedded.HideSearch" />
 				<LeftPanel ref='leftPanel' />
 				<MapPanel />
@@ -804,7 +804,7 @@
 		background-color: transparent;
 		left: 0;
 		top: 0;
-		z-index: 10;
+		z-index: 1000;
 		height: 100%;
 		width: 100%;
 	}

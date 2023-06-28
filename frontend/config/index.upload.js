@@ -8,6 +8,7 @@ module.exports = {
 		index: path.resolve(__dirname, '../../build/release/templates/index.html.twig'),
 		indexBackoffice: path.resolve(__dirname, '../../build/release/templates/backoffice.html.twig'),
 		indexAdmin: path.resolve(__dirname, '../../build/release/templates/admins.html.twig'),
+		indexCredentials: path.resolve(__dirname, '../../build/release/templates/credentials.html.twig'),
 		main: path.resolve(__dirname, '../src/public/main.js'),
 		mainBackoffice: path.resolve(__dirname, '../src/backoffice/main.js'),
 		mainAdmin: path.resolve(__dirname, '../src/admins/main.js'),

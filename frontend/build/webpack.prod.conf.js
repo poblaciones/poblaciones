@@ -105,9 +105,9 @@ var webpackConfig = merge(baseWebpackConfig, {
 			}
 		}),
 		new HtmlWebpackPlugin({
-			filename: config.build.indexAdmin,
+			filename: config.build.indexCredentials,
 			template: 'credentials.html',
-			metadata: {  },
+			metadata: { google_maps_key: env.google_maps_key.replace(/"/g, '') },
 			chunks: ['manifest', 'vendor', 'appCred'],
 			inject: true,
 			minify: {

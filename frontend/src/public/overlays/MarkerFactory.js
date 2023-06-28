@@ -73,15 +73,16 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 		iconSVGpath = (frameType === 'P' ? Svg.markerPincheNormal : Svg.markerSquare);
 		path = '<path fill="{mapIconColor}" stroke="{strokeColor}" stroke-width="{strokeWeight}" d="{path}"/>';
 	}
+	const RESOLUTION_EXPANSOR = 4;
 	var width = 24;
 	var height = 24;
 	if (frameType === 'P') {
 		height = 32;
 	}
 	if (frameType === 'P') {
-		viewBox = '"0 0 24 33" width="' + width * 4 + '" height="' + height * 4 + '">';
+		viewBox = '"0 0 24 33" width="' + width * RESOLUTION_EXPANSOR + '" height="' + height * RESOLUTION_EXPANSOR + '">';
 	} else {
-		viewBox = '"0 0 24 24" width="' + width * 4 + '" height="' + height * 4 + '">';
+		viewBox = '"0 0 24 24" width="' + width * RESOLUTION_EXPANSOR + '" height="' + height * RESOLUTION_EXPANSOR + '">';
 	}
 
 	var iconSettings = {
@@ -130,8 +131,8 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 
 	var icon = {
 		svg: L.Util.template(svg, iconSettings),//.replace('#','%23'),
-		iconAnchor: [ 4 * 12, 4 * (frameType === 'P' ? 32 : 24)],
-		iconSize: [4 * 22, 4 * (frameType === 'P' ? 32 : 24)],
+		iconAnchor: [RESOLUTION_EXPANSOR * 12, RESOLUTION_EXPANSOR * (frameType === 'P' ? 32 : 24)],
+		iconSize: [RESOLUTION_EXPANSOR * 22, RESOLUTION_EXPANSOR * (frameType === 'P' ? 32 : 24)],
 	};
 	return icon;
 };

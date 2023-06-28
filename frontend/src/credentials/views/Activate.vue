@@ -8,7 +8,7 @@
 				<mp-wait ref="wait" class="md-layout">
 					<div class="md-layout-item md-size-100" style="overflow: hidden;">
 						<h3>
-							{{ $t('Activar cuenta') }}
+							Activar cuenta
 						</h3>
 						<div class="md-layout-item md-size-100 formRow center">
 							<md-chip class="userChip">
@@ -16,30 +16,30 @@
 							</md-chip>
 						</div>
 						<div class="minor-text">
-							{{ $t('Para comenzar a utilizar la cuenta complete el siguiente formulario.') }}
+							Para comenzar a utilizar la cuenta complete el siguiente formulario.
 						</div>
 						<div class="md-layout-item md-size-100 formRow">
-							<div class="label">{{ $t('Nombre completo') }}</div>
+							<div class="label">Nombre completo</div>
 							<md-field class="customField" :class="messageClass($v.firstname.$invalid || $v.lastname.$invalid)">
 								<md-input v-on:keydown.native.enter="next" autocorrect="off" autocapitalize="off" spellcheck="false"
-										v-model="firstname" ref="nombre" :placeholder="$t('Nombre')" @input="clearError"></md-input>
+										v-model="firstname" ref="nombre" placeholder="Nombre" @input="clearError"></md-input>
 								<md-input v-on:keydown.native.enter="next" autocorrect="off" autocapitalize="off" spellcheck="false"
-										v-model="lastname" :placeholder="$t('Apellido')" @input="clearError"></md-input>
-								<span class="md-error">{{ $t('Debe indicar su nombre y apellido.') }}</span>
+										v-model="lastname" placeholder="Apellido" @input="clearError"></md-input>
+								<span class="md-error">Debe indicar su nombre y apellido.</span>
 							</md-field>
 						</div>
 
-						<mp-input :label="$t('Contraseña a utilizar')" :placeholder="$t('Contraseña')" @enter="next" :password="true"
+						<mp-input label="Contraseña a utilizar" placeholder="Contraseña" @enter="next" :password="true"
 							@input="clearError" v-model="password" :validation="$v.password.$invalid"
 							:isValidating="hasMessages"
-							:validation-message="$t('Debe indicar una contraseña de al menos 6 caracteres.')" />
+							validation-message="Debe indicar una contraseña de al menos 6 caracteres." />
 
-						<mp-input :validation-message="$t('La contraseña y su verificación deben coincidir.')"
-								:label="$t('Confirmar contraseña')" :placeholder="$t('Verificación')" @enter="next" :password="true"
+						<mp-input validation-message="La contraseña y su verificación deben coincidir."
+								label="Confirmar contraseña" placeholder="Verificación" @enter="next" :password="true"
 								@input="clearError" v-model="passwordCheck" :validation="$v.passwordCheck.$invalid"
 								:isValidating="hasMessages" :extraError="serverError" />
 						<div class="md-layout-item md-size-100 formRowCompact">
-							<md-button class="md-primary md-raised fullRowButton" @click="next">{{ $t('Siguiente') }}</md-button>
+							<md-button class="md-primary md-raised fullRowButton" @click="next">Siguiente</md-button>
 						</div>
 					</div>
 				</mp-wait>
@@ -79,12 +79,12 @@ export default {
 		// valida parámetros
 		this.email = this.$route.query.email;
 		if(str.IsEmail(this.email) == false) {
-			this.$refs.messagebox.show(this.$t('Debe ingresar un correo electrónico válido'));
+			this.$refs.messagebox.show('Debe ingresar un correo electrónico válido');
 			return;
 		}
 		this.code = this.$route.query.code;
 		if(/^\d{6}$/.test(this.code) == false) {
-			this.$refs.messagebox.show(this.$t('Debe indicar el código.'));
+			this.$refs.messagebox.show('Debe indicar el código.');
 			return;
 		}
 		window.Context.ValidateCode(this.email, this.code).then(data => {
@@ -96,7 +96,7 @@ export default {
 				if(this.type == tokenTypeEnum.Permission) {
 					window.Context.AccountExists(this.email, true).then(data => {
 						if (response.IsOK(data.status)) {
-							this.$router.push({ path: this.$t('key.ruta_ingresar'), query: { email: this.email, code: this.code }});
+							this.$router.push({ path: '/signin', query: { email: this.email, code: this.code }});
 						}
 					});
 				}
@@ -152,7 +152,7 @@ export default {
 				this.serverError = data.message;
 				this.$refs.wait.Stop();
 			}).catch(err => {
-				this.serverError = this.$t('Se produjo un error.');
+				this.serverError = 'Se produjo un error.';
 				this.$refs.wait.Stop();
 				throw err;
 			});
