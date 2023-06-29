@@ -22,6 +22,7 @@ function GoogleMapsApi(google) {
 	this.myLocationMarker = null;
 	this.isSettingZoom = false;
 	this.clippingCanvas = null;
+	this.li = null;
 	this.selectedCanvas = null;
 	this.selector = new FeatureSelector(this);
 	this.allwaysHiddenElements = ['landscape.natural', 'landscape.natural.landcover', 'landscape.natural.terrain',
@@ -36,7 +37,14 @@ function GoogleMapsApi(google) {
 
 GoogleMapsApi.prototype.UpdateLabelsVisibility = function(showLabels) {
 	var styles = this.generateLabelsArray(showLabels);
-	this.gMap.setOptions({styles: styles });
+	this.gMap.setOptions({ styles: styles });
+	var lightMapType;
+	if (showLabels) {
+		var lightMapType = this.CreateLightMap();
+	} else {
+		lightMapType = this.CreateLightMapNoLabels();
+	}
+	this.gMap.mapTypes.set('roadLight', lightMapType);
 };
 
 
@@ -58,10 +66,11 @@ GoogleMapsApi.prototype.Initialize = function () {
 	}
 
 	var myMapOptions = {
+
 		mapTypeControlOptions: {
 			style: this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
 			position: this.google.maps.ControlPosition.TOP_LEFT,
-			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
+			mapTypeIds: ['roadLight', 'satellite', 'hybrid', 'blank'],
 		},
 		scaleControl: true,
 		gestureHandling: "greedy",
@@ -72,6 +81,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 		center: { lat: -37.1799565, lng: -65.6866910 },
 		zoom: 6
 	};
+
 	if (window.Embedded.Active) {
 		if (window.Embedded.Readonly) {
 			myMapOptions.zoomControl = false;
@@ -87,16 +97,14 @@ GoogleMapsApi.prototype.Initialize = function () {
 			myMapOptions.fullscreenControl = false;
 		}
 	}
-	if (window.SegMap.Configuration.UseLightMap) {
-		myMapOptions.mapTypeControlOptions.mapTypeIds.unshift('light');
-	}
 	var blankMapType = this.CreateBlankMap();
+
 	this.gMap = new this.google.maps.Map(document.getElementById('map'), myMapOptions);
 	this.gMap.mapTypes.set('blank', blankMapType);
 
 	if (window.SegMap.Configuration.UseLightMap) {
 		var lightMapType = this.CreateLightMap();
-		this.gMap.mapTypes.set('light', lightMapType);
+		this.gMap.mapTypes.set('roadLight', lightMapType);
 	}
 	this.AddCopyright();
 	this.CreateDrawingManager();
@@ -128,6 +136,7 @@ GoogleMapsApi.prototype.SetOpenNewWindowLink = function () {
 };
 
 GoogleMapsApi.prototype.generateLabelsArray = function (visibility) {
+	visibility = false;
 	var ret = [];
 	// https://mapstyle.withgoogle.com/
 	for (var ele in this.labelElements) {
@@ -341,10 +350,7 @@ GoogleMapsApi.prototype.SetTypeControlsDefault = function () {
 };
 
 GoogleMapsApi.prototype.SetTypeControls = function (controlType) {
-	var types = ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'];
-	if (window.SegMap.Configuration.UseLightMap) {
-		types.push('light');
-	}
+	var types = ['roadLight', 'satellite', 'hybrid', 'blank'];
 	this.gMap.setOptions({
 		mapTypeControlOptions: {
 			style: controlType,
@@ -453,10 +459,10 @@ GoogleMapsApi.prototype.SetMapTypeState = function (mapTypeState) {
 	var mapType;
 	switch (mapTypeState.substr(0, 1)) {
 	case 'r':
-		mapType = 'roadmap';
+		mapType = 'roadLight';
 		break;
 	case 't':
-		mapType = 'terrain';
+		mapType = 'roadLight';
 		break;
 	case 's':
 		mapType = 'satellite';
@@ -465,7 +471,7 @@ GoogleMapsApi.prototype.SetMapTypeState = function (mapTypeState) {
 		mapType = 'hybrid';
 			break;
 	case 'l':
-		mapType = 'light';
+		mapType = 'roadLight';
 		break;
 	case 'b':
 		mapType = 'blank';
@@ -495,7 +501,7 @@ GoogleMapsApi.prototype.getOpacity = function () {
 		return 0.4;
 	} else if(this.gMap.getMapTypeId() === 'hybrid') {
 		return 0.4;
-	} else if (this.gMap.getMapTypeId() === 'light') {
+	} else if (this.gMap.getMapTypeId() === 'roadLight') {
 		return 0.4;
 	} else if (this.gMap.getMapTypeId() === 'blank') {
 		return 0.4;
@@ -771,6 +777,15 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 			]
 		},
 		{
+			"featureType": "landscape.man_made",
+			"elementType": "geometry.fill",
+			"stylers": [
+				{
+					"color": "#fafafa"
+				}
+			]
+		},
+		{
 			"featureType": "poi",
 			"elementType": "geometry",
 			"stylers": [
@@ -799,6 +814,15 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 		},
 		{
 			"featureType": "poi.park",
+			"elementType": "geometry.fill",
+			"stylers": [
+				{
+					"color": "#eef3ee"
+				}
+			]
+		},
+		{
+			"featureType": "poi.park",
 			"elementType": "labels.text.fill",
 			"stylers": [
 				{
@@ -808,7 +832,16 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 		},
 		{
 			"featureType": "road",
-			"elementType": "geometry",
+			"elementType": "geometry.stroke",
+			"stylers": [
+				{
+					"color": "#dbdbdb"
+				}
+			]
+		},
+		{
+			"featureType": "road",
+			"elementType": "geometry.fill",
 			"stylers": [
 				{
 					"color": "#ffffff"
@@ -830,15 +863,6 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 			"stylers": [
 				{
 					"color": "#dadada"
-				}
-			]
-		},
-		{
-    "featureType": "road.highway",
-    "elementType": "geometry.stroke",
-    "stylers": [
-				{
-					"weight": 0.5
 				}
 			]
 		},
@@ -883,7 +907,16 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 			"elementType": "geometry",
 			"stylers": [
 				{
-					"color": "#ffffff"
+					"color": "#c9c9c9"
+				}
+			]
+		},
+		{
+			"featureType": "water",
+			"elementType": "geometry.fill",
+			"stylers": [
+				{
+					"color": "#d4dadc"
 				}
 			]
 		},
@@ -897,14 +930,261 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 			]
 		}
 	];
+
 	var labels = this.generateLabelsArray(true);
 
 	var styledMapType = new this.google.maps.StyledMapType(
 		elements.concat(labels),
-		{ name: 'v2' });
+		{ name: 'Mapa' });
 
 	return styledMapType;
 };
+
+GoogleMapsApi.prototype.CreateLightMapNoLabels = function () {
+	var elements = [
+		{
+			"elementType": "geometry",
+			"stylers": [
+				{
+					"color": "#ececec"
+				}
+			]
+		},
+		{
+			"elementType": "labels.icon",
+			"stylers": [
+				{
+					"visibility": "off"
+				}
+			]
+		},
+		{
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#616161"
+				}
+			]
+		},
+		{
+			"elementType": "labels.text.stroke",
+			"stylers": [
+				{
+					"color": "#ececec"
+				}
+			]
+		},
+		{
+			"featureType": "administrative.land_parcel",
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#bdbdbd"
+				}
+			]
+		},
+		{
+			"featureType": "landscape.man_made",
+			"elementType": "geometry.fill",
+			"stylers": [
+				{
+					"color": "#fafafa"
+				}
+			]
+		},
+		{
+			"featureType": "poi",
+			"elementType": "geometry",
+			"stylers": [
+				{
+					"color": "#eeeeee"
+				}
+			]
+		},
+		{
+			"featureType": "poi",
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#757575"
+				}
+			]
+		},
+		{
+			"featureType": "poi.park",
+			"elementType": "geometry",
+			"stylers": [
+				{
+					"color": "#e5e5e5"
+				}
+			]
+		},
+		{
+			"featureType": "poi.park",
+			"elementType": "geometry.fill",
+			"stylers": [
+				{
+					"color": "#eef3ee"
+				}
+			]
+		},
+		{
+			"featureType": "poi.park",
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#9e9e9e"
+				}
+			]
+		},
+		{
+			"featureType": "road",
+			"elementType": "geometry.stroke",
+			"stylers": [
+				{
+					"color": "#dbdbdb"
+				}
+			]
+		},
+		{
+			"featureType": "road",
+			"elementType": "geometry.fill",
+			"stylers": [
+				{
+					"color": "#ffffff"
+				}
+			]
+		},
+		{
+			"featureType": "road.arterial",
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#757575"
+				}
+			]
+		},
+		{
+			"featureType": "road.highway",
+			"elementType": "geometry",
+			"stylers": [
+				{
+					"color": "#dadada"
+				}
+			]
+		},
+		{
+			"featureType": "road.highway",
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#616161"
+				}
+			]
+		},
+		{
+			"featureType": "road.local",
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#9e9e9e"
+				}
+			]
+		},
+		{
+			"featureType": "transit.line",
+			"elementType": "geometry",
+			"stylers": [
+				{
+					"color": "#e5e5e5"
+				}
+			]
+		},
+		{
+			"featureType": "transit.station",
+			"elementType": "geometry",
+			"stylers": [
+				{
+					"color": "#eeeeee"
+				}
+			]
+		},
+		{
+			"featureType": "water",
+			"elementType": "geometry",
+			"stylers": [
+				{
+					"color": "#c9c9c9"
+				}
+			]
+		},
+		{
+			"featureType": "water",
+			"elementType": "geometry.fill",
+			"stylers": [
+				{
+					"color": "#d4dadc"
+				}
+			]
+		},
+		{
+			"featureType": "water",
+			"elementType": "labels.text.fill",
+			"stylers": [
+				{
+					"color": "#9e9e9e"
+				}
+			]
+		},
+
+
+		{
+			'featureType': 'all',
+			'elementType': 'labels',
+			'stylers': [
+				{ 'visibility': 'off' }
+			]
+		},
+		{
+			'featureType': 'all',
+			'elementType': 'labels.text',
+			'stylers': [
+				{ 'visibility': 'off' }]
+		},
+		{
+			'featureType': 'all',
+			'elementType': 'labels.text.fill',
+			'stylers': [
+				{ 'visibility': 'off' }
+			]
+		},
+		{
+			'featureType': 'all',
+			'elementType': 'labels.text.stroke',
+			'stylers': [
+				{ 'visibility': 'off' }
+			]
+		},
+		{
+			'featureType': 'all',
+			'elementType': 'labels.icon',
+			'stylers': [
+				{ 'visibility': 'off' }
+			]
+		},
+
+	];
+
+	var labels = [];// this.generateLabelsArray(false);
+
+	var styledMapType = new this.google.maps.StyledMapType(
+		elements.concat(labels),
+		{ name: 'Mapa' });
+
+	return styledMapType;
+};
+
+
 
 GoogleMapsApi.prototype.CreateBlankMap = function () {
 	var styledMapType = new this.google.maps.StyledMapType(
