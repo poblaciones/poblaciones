@@ -23,7 +23,7 @@ class MapSettings
 
 	public $UseCalculated = true;
 
-	public $UseDeckgl = false;
+	public $UseDeckgl = true;
 
 	public $isOWSEnabled = false;
 

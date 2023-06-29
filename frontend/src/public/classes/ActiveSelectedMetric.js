@@ -793,10 +793,25 @@ ActiveSelectedMetric.prototype.UseBlockedRequests = function () {
 
 ActiveSelectedMetric.prototype.GetLayerData = function () {
 	var url = this.GetLayerDataService();
+	var currentVariableId = this.SelectedVariable().Id;
+	var selectedLevel = this.SelectedLevel();
 
 	return window.SegMap.Get(url.server + url.path, {
-		params: url.params }, url.useStaticQueue).then(function (res) {
-		return res.data.Data;
+		params: url.params
+	}, url.useStaticQueue).then(function (res) {
+		var list = res.data.Data;
+		if (selectedLevel.Variables.length > 1) {
+			// filtra antes de devolverlo...
+			var filtered = [];
+			for (var n = 0; n < list.length; n++) {
+				if (list[n].VID === currentVariableId) {
+					filtered.push(list[n]);
+				}
+			}
+			return filtered;
+		} else {
+			return list;
+		}
 	});
 };
 

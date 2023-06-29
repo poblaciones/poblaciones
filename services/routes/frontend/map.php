@@ -9,6 +9,7 @@ use helena\services\frontend as services;
 use helena\classes\App;
 use helena\classes\Statistics;
 use minga\framework\Params;
+use helena\classes\Session;
 use minga\framework\Context;
 use minga\framework\PublicException;
 
@@ -70,6 +71,13 @@ App::$app->get('/services/frontend/clipping/GetBlockLabels', function (Request $
 			$s !== App::Settings()->Map()->LabelsBlockSize)
 			throw new PublicException('El tamaño de bloque de etiquetas solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
 	return App::JsonImmutable($controller->GetBlockLabels($x, $y, $z));
+});
+
+App::$app->get('/services/frontend/SwitchSessionProvider', function (Request $request) {
+    $controller = new services\ConfigurationService();
+    if ($denied = Session::CheckIsSiteReader())
+        return $denied;
+    return App::Json($controller->SwitchSessionProvider());
 });
 
 App::$app->get('/services/GetConfiguration', function (Request $request) {

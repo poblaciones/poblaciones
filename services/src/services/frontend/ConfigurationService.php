@@ -5,6 +5,8 @@ namespace helena\services\frontend;
 use helena\services\common\BaseService;
 use helena\services\common\AuthenticationService;
 
+use minga\framework\PhpSession;
+
 use helena\db\frontend\SignatureModel;
 use minga\framework\Context;
 use minga\framework\Performance;
@@ -13,6 +15,30 @@ use helena\classes\App;
 
 class ConfigurationService extends BaseService
 {
+	private function GetCurrentMapProvider()
+    {
+        // Se fija la configuración actual
+        $ret = App::Settings()->Map()->MapsAPI;
+        // Se fija el valor en sesión
+		$sessionValue = PhpSession::GetSessionValue('MapsAPI', null);
+        if ($sessionValue)
+            $ret = $sessionValue;
+        return $ret;
+    }
+	public function SwitchSessionProvider()
+    {
+		// Invierte y setea en sesión
+        $current = $this->GetCurrentMapProvider();
+        // Se fija el valor en sesión
+		if ($current == "google")
+			$new = "leaflet";
+		else
+			$new = "google";
+
+        PhpSession::SetSessionValue('MapsAPI', $new);
+        return self::OK;
+    }
+
 	public function GetConfiguration($topUrl = null, $clientUrl = null)
 	{
 		$model = new SignatureModel();
@@ -40,7 +66,7 @@ class ConfigurationService extends BaseService
 									'UseDeckgl' => App::Settings()->Map()->UseDeckgl,
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 
-									'MapsAPI' => App::Settings()->Map()->MapsAPI,
+									'MapsAPI' => $this->GetCurrentMapProvider(),
 
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,

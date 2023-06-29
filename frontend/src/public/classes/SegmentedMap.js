@@ -383,6 +383,12 @@ SegmentedMap.prototype.AddMetricByIdAndWork = function (id, workId) {
 	});
 };
 
+
+SegmentedMap.prototype.SwitchSessionProvider = function () {
+   return this.Get(window.host + '/services/frontend/SwitchSessionProvider');
+};
+
+
 SegmentedMap.prototype.AddMetricByIdAndVersion = function (id, versionId) {
 	return this.doAddMetricById(id, function (activeSelectedMetric) {
 		return activeSelectedMetric.GetVersionIndex(metricVersionId);

@@ -90,43 +90,6 @@ LeafletApi.prototype.Initialize = function () {
 	this.overlayMapTypesGroup = L.layerGroup();
 	this.overlayMapTypesGroup.addTo(this.map);
 
-	/*var myMapOptions = {
-		mapTypeControlOptions: {
-			style: this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-			position: google.maps.ControlPosition.TOP_LEFT,
-			mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'],
-		},
-		scaleControl: true,
-		gestureHandling: "greedy",
-		styles: this.generateLabelsArray(true),
-		clickableIcons: false,
-		center: { lat: -37.1799565, lng: -65.6866910 },
-		zoom: 6
-	};
-	if (window.Embedded.Active) {
-		if (window.Embedded.Readonly) {
-			myMapOptions.zoomControl = false;
-			myMapOptions.gestureHandling = 'none';
-			myMapOptions.disableDefaultUI = true;
-		} else {
-			myMapOptions.gestureHandling = 'greedy'; //cooperative';
-		}
-		if (window.Embedded.Compact) {
-			myMapOptions.scaleControl = false;
-		}
-		if (!window.Embedded.Readonly) {
-			myMapOptions.fullscreenControl = false;
-		}
-	}
-	if (window.SegMap.Configuration.UseLightMap) {
-		myMapOptions.mapTypeControlOptions.mapTypeIds.unshift('light');
-	}
-
-	if (window.SegMap.Configuration.UseLightMap) {
-		var lightMapType = this.CreateLightMap();
-		this.map.mapTypes.set('light', lightMapType);
-	}
-	*/
 	var loc = this;
 	this.map.on("load", function() {
 		window.SegMap.MapInitialized();
@@ -385,6 +348,8 @@ LeafletApi.prototype.CreateMyLocationMarker = function (coord) {
 
 
 LeafletApi.prototype.CreateDrawingManager = function () {
+	// esto puede permitir hacerlo en dos clicks
+	// https://github.com/ThomasG77/leaflet.pm/tree/hook-circle-move
 	this.drawingManager = new L.Draw.Circle(this.map,
 		{
 			shapeOptions: {
@@ -865,7 +830,7 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		activeMetric.GetLayerData().then(function (data) {
 			if (!overlay.disposed) {
 				var iconLayer = new IconOverlay(activeMetric);
-				var deckIconLayer = iconLayer.CreateLayer(data, 1);
+				var deckIconLayer = iconLayer.CreateLayer(data, 1.5);
 
 //				overlay.deckOverlay = overlay;
 				wrapper.AddLayer(deckIconLayer);

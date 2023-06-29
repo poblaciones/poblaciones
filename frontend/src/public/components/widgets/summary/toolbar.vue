@@ -77,6 +77,8 @@
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
 						<li v-if="isAdminReader"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
+						<li v-if="isAdminReader" class="divider"></li>
+						<li v-if="isAdminReader"><a @click="switchMapProvider">Cambiar a {{ altProvider }}</a></li>
 						<li v-if="false"><a href="/users#/account">Cuenta</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.logoff">Cerrar sesión</a></li>
@@ -120,10 +122,15 @@ export default {
 			if (this.frame && this.frame.Zoom >= 10) {
 				return [
 					{ Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' },
-					{ Name: 'Seleccionar una zona', Icon: 'fa fa-circle-notch' }];
+					{ Name: 'Seleccionar una zona arrastrando en el mapa.', Icon: 'fa fa-circle-notch' }];
 			} else {
 				return [];
 			}
+		},
+		switchMapProvider() {
+			window.SegMap.SwitchSessionProvider().then(function () {
+				location.reload();
+			});
 		},
 		showTutorial() {
 			this.$refs.Tour.toggleModal();
@@ -178,6 +185,9 @@ export default {
 		},
 		Embedded() {
 			return window.Embedded;
+		},
+		altProvider() {
+			return (this.config.MapsAPI == 'leaflet' ? 'Google Maps' : 'Leaflet');
 		},
 		authenticate() {
 			return a;

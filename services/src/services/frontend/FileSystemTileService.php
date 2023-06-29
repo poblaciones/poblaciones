@@ -16,7 +16,7 @@ class FileSystemTileService extends BaseService
 	{
 		$data = $this->GetAlpha($geographyId, $x, $y, $z);
 		header('Content-type: image/jpeg');
-    header('Access-Control-Allow-Origin: *');
+		header('Access-Control-Allow-Origin: *');
 		echo base64_decode( $data['Data']);
 		exit;
 	}

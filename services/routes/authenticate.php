@@ -3,6 +3,9 @@ use helena\classes\App;
 
 use helena\controllers\authenticate as controllers;
 
+App::RegisterControllerGet('/cr', controllers\cCredentials::class);
+App::RegisterControllerGet('/cr/{any}', controllers\cCredentials::class)->assert("any", ".*");
+
 App::RegisterControllerGetPost('/authenticate/lostPassword', controllers\cLostPassword::class);
 App::RegisterControllerGetPost('/authenticate/linkActivation', controllers\cLinkActivation::class);
 App::RegisterControllerGetPost('/authenticate/linkLostPassword', controllers\cLinkLostPassword::class);

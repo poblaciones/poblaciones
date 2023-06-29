@@ -48,20 +48,24 @@ FeatureSelector.prototype.SetSelectorCanvas = function () {
 	}
 	this.selectorCanvasEvents = [];
 	//this.selectorCanvasEvents.push(polygon.on('click', this.selectorClicked));
-	this.selectorCanvasEvents.push(this.MapsApi.map.on('click', this.selectorClicked));
+	this.subscribe('click', this.selectorClicked);
 
 //	this.selectorCanvasEvents.push(polygon.on('mouseout', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.MapsApi.map.on('mouseout', this.resetTooltip));
+	this.subscribe('mouseout', this.resetTooltip);
 
-	this.selectorCanvasEvents.push(this.MapsApi.map.on('zoom_changed', this.resetTooltip));
-	this.selectorCanvasEvents.push(this.MapsApi.map.on('center_changed', this.resetTooltip));
+	this.subscribe('zoom_changed', this.resetTooltip);
+	this.subscribe('center_changed', this.resetTooltip);
 	//this.selectorCanvasEvents.push(polygon.on('mousemove', this.selectorMoved));
-	this.selectorCanvasEvents.push(this.MapsApi.map.on('mouseup', this.selectorUp));
-	this.selectorCanvasEvents.push(this.MapsApi.map.on('mousedown', this.selectorDown));
-
-	this.selectorCanvasEvents.push(this.MapsApi.map.on('mousemove', this.selectorMoved));
+	this.subscribe('mouseup', this.selectorUp);
+	this.subscribe('mousedown', this.selectorDown);
+	this.subscribe('mousemove', this.selectorMoved);
 
 	this.selectorCanvas = polygon;
+};
+
+FeatureSelector.prototype.subscribe = function (eventName, callback) {
+	this.MapsApi.map.on(eventName, callback);
+	this.selectorCanvasEvents.push({ eventName: eventName, callback: callback });
 };
 
 FeatureSelector.prototype.getFeature = function (event) {
@@ -180,6 +184,12 @@ FeatureSelector.prototype.getFeature = function (event) {
 
 FeatureSelector.prototype.getDeckElement = function (event) {
 	var obj = null;
+	var yOffset = document.getElementById('holder').style.top;
+	if (!yOffset) {
+		yOffset = 0;
+	} else {
+		yOffset = parseInt(yOffset);
+	}
 	for (var overlay of this.MapsApi.overlayMapTypesLayers) {
 		if (overlay.getLayers) {
 			for (var layer of overlay.getLayers()) {
@@ -189,17 +199,15 @@ FeatureSelector.prototype.getDeckElement = function (event) {
 					try {
 						feature = deck.pickObject({
 							x: event.originalEvent.clientX,
-							y: event.originalEvent.clientY
+							y: event.originalEvent.clientY - yOffset
 						});
 					} catch { };
 
 					if (feature && feature.object) {
 						return feature.object;
 					}
-					break;
 				}
 			}
-			break;
 		}
 	}
 	return null;
@@ -541,8 +549,8 @@ FeatureSelector.prototype.ClearSelectorCanvas = function () {
 		this.MapsApi.map.removeLayer(this.selectorCanvas);
 		this.selectorCanvas = null;
 		if (this.selectorCanvasEvents) {
-			for (var n = 0; n < this.selectorCanvasEvents.length; n++) {
-				this.selectorCanvasEvents[n].remove();
+			for (var selectorCanvasEvent of this.selectorCanvasEvents) {
+				this.MapsApi.map.off(selectorCanvasEvent.eventName, selectorCanvasEvent.callback);
 			}
 			this.selectorCanvasEvents = null;
 		}

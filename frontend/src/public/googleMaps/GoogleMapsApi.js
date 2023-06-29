@@ -734,6 +734,18 @@ GoogleMapsApi.prototype.RemoveOverlay = function (index) {
 };
 
 GoogleMapsApi.prototype.CreateLightMap = function () {
+	var elements = this.CreateLightBase();
+
+	var labels = this.generateLabelsArray(true);
+
+	var styledMapType = new this.google.maps.StyledMapType(
+		elements.concat(labels),
+		{ name: 'Mapa' });
+
+	return styledMapType;
+};
+
+GoogleMapsApi.prototype.CreateLightBase = function () {
 	var elements = [
 		{
 			"elementType": "geometry",
@@ -859,10 +871,10 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 		},
 		{
 			"featureType": "road.highway",
-			"elementType": "geometry",
+			"elementType": "geometry.fill",
 			"stylers": [
 				{
-					"color": "#dadada"
+					"color": "#ffffff"
 				}
 			]
 		},
@@ -930,214 +942,11 @@ GoogleMapsApi.prototype.CreateLightMap = function () {
 			]
 		}
 	];
-
-	var labels = this.generateLabelsArray(true);
-
-	var styledMapType = new this.google.maps.StyledMapType(
-		elements.concat(labels),
-		{ name: 'Mapa' });
-
-	return styledMapType;
+	return elements;
 };
 
 GoogleMapsApi.prototype.CreateLightMapNoLabels = function () {
 	var elements = [
-		{
-			"elementType": "geometry",
-			"stylers": [
-				{
-					"color": "#ececec"
-				}
-			]
-		},
-		{
-			"elementType": "labels.icon",
-			"stylers": [
-				{
-					"visibility": "off"
-				}
-			]
-		},
-		{
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#616161"
-				}
-			]
-		},
-		{
-			"elementType": "labels.text.stroke",
-			"stylers": [
-				{
-					"color": "#ececec"
-				}
-			]
-		},
-		{
-			"featureType": "administrative.land_parcel",
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#bdbdbd"
-				}
-			]
-		},
-		{
-			"featureType": "landscape.man_made",
-			"elementType": "geometry.fill",
-			"stylers": [
-				{
-					"color": "#fafafa"
-				}
-			]
-		},
-		{
-			"featureType": "poi",
-			"elementType": "geometry",
-			"stylers": [
-				{
-					"color": "#eeeeee"
-				}
-			]
-		},
-		{
-			"featureType": "poi",
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#757575"
-				}
-			]
-		},
-		{
-			"featureType": "poi.park",
-			"elementType": "geometry",
-			"stylers": [
-				{
-					"color": "#e5e5e5"
-				}
-			]
-		},
-		{
-			"featureType": "poi.park",
-			"elementType": "geometry.fill",
-			"stylers": [
-				{
-					"color": "#eef3ee"
-				}
-			]
-		},
-		{
-			"featureType": "poi.park",
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#9e9e9e"
-				}
-			]
-		},
-		{
-			"featureType": "road",
-			"elementType": "geometry.stroke",
-			"stylers": [
-				{
-					"color": "#dbdbdb"
-				}
-			]
-		},
-		{
-			"featureType": "road",
-			"elementType": "geometry.fill",
-			"stylers": [
-				{
-					"color": "#ffffff"
-				}
-			]
-		},
-		{
-			"featureType": "road.arterial",
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#757575"
-				}
-			]
-		},
-		{
-			"featureType": "road.highway",
-			"elementType": "geometry",
-			"stylers": [
-				{
-					"color": "#dadada"
-				}
-			]
-		},
-		{
-			"featureType": "road.highway",
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#616161"
-				}
-			]
-		},
-		{
-			"featureType": "road.local",
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#9e9e9e"
-				}
-			]
-		},
-		{
-			"featureType": "transit.line",
-			"elementType": "geometry",
-			"stylers": [
-				{
-					"color": "#e5e5e5"
-				}
-			]
-		},
-		{
-			"featureType": "transit.station",
-			"elementType": "geometry",
-			"stylers": [
-				{
-					"color": "#eeeeee"
-				}
-			]
-		},
-		{
-			"featureType": "water",
-			"elementType": "geometry",
-			"stylers": [
-				{
-					"color": "#c9c9c9"
-				}
-			]
-		},
-		{
-			"featureType": "water",
-			"elementType": "geometry.fill",
-			"stylers": [
-				{
-					"color": "#d4dadc"
-				}
-			]
-		},
-		{
-			"featureType": "water",
-			"elementType": "labels.text.fill",
-			"stylers": [
-				{
-					"color": "#9e9e9e"
-				}
-			]
-		},
-
-
 		{
 			'featureType': 'all',
 			'elementType': 'labels',
@@ -1174,11 +983,11 @@ GoogleMapsApi.prototype.CreateLightMapNoLabels = function () {
 		},
 
 	];
-
-	var labels = [];// this.generateLabelsArray(false);
+	var base = this.CreateLightBase();
+	elements = base.concat(elements);
 
 	var styledMapType = new this.google.maps.StyledMapType(
-		elements.concat(labels),
+		elements,
 		{ name: 'Mapa' });
 
 	return styledMapType;
