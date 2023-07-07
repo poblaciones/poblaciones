@@ -40,14 +40,38 @@ IconOverlay.prototype.CreateLayer = function (data, sc = 1) {
 	var now = new Date();
 	var ticks = now.getTime();
 
+	var units;
+	var min;
+	if (!markerSettings.AutoScale) {
+		units = 'pixels';
+		if (markerSettings.Size === 'S') {
+			sc = .75;
+		} else if (markerSettings.Size === 'M') {
+			sc = 1;
+		} else if (markerSettings.Size === 'L') {
+			sc = 1.5;
+		}
+		min = 10 * sc;
+	} else {
+		units = 'meters';
+		if (markerSettings.Size === 'S') {
+			sc = 1;
+		} else if (markerSettings.Size === 'M') {
+			sc = 1.5;
+		} else if (markerSettings.Size === 'L') {
+			sc = 2;
+		}
+		min = 5 * sc;
+	}
+
 	const layer = new IconLayer({
 		id: 'icon-layer' + ticks,
 		data: dataFiltered,
 		pickable: true,
 		largeZoom: window.SegMap.frame.Zoom > 10,
 		autoHighlight: true,
-		sizeUnits: 'meters',
-		sizeMinPixels: 4 * sc, // 20, 32, 50
+		sizeUnits: units,
+		sizeMinPixels: min, // 20, 32, 50
 		sizeMaxPixels: 40 * sc, // 20, 32, 50
 		//filled: true,
 		getIcon: function (mapItem) {
@@ -71,7 +95,6 @@ IconOverlay.prototype.CreateLayer = function (data, sc = 1) {
 						height: frame.iconSize[1],
 						anchorX: frame.iconAnchor[0],
 						anchorY: frame.iconAnchor[1],
-						//mask: true
 					};
 				}
 			} else {

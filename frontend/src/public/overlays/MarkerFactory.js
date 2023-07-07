@@ -73,7 +73,7 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 		iconSVGpath = (frameType === 'P' ? Svg.markerPincheNormal : Svg.markerSquare);
 		path = '<path fill="{mapIconColor}" stroke="{strokeColor}" stroke-width="{strokeWeight}" d="{path}"/>';
 	}
-	const RESOLUTION_EXPANSOR = 2;
+	const RESOLUTION_EXPANSOR = 3;
 	var width = 24;
 	var height = 24;
 	if (frameType === 'P') {
@@ -90,8 +90,8 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 		strokeWeight: .5,
 		strokeColor: 'white',
 		path: iconSVGpath,
-		fontWeight: '',
-		fontFamily: '',
+		fontWeight: '600',
+		fontFamily: 'Arial',
 		text: '',
 		srcImage: '',
 	};
@@ -115,7 +115,7 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 			var url = '';
 			srcImage = this.htmlToImage(iconSettings.content, iconSettings.fontFamily, 64, iconSettings.fontWeight);
 		} else {
-			text = '<text x="50%" y="13" font-weight="{fontWeight}" fill="#FFFFFF" font-family="{fontFamily}" font-size="14px" dominant-baseline="middle" text-anchor="middle">{content}</text>';
+			text = '<text x="50%" y="13.5" font-weight="{fontWeight}" fill="#FFFFFF" font-family="{fontFamily}" font-size="14px" dominant-baseline="middle" text-anchor="middle">{content}</text>';
 		}
 	}
 	// se fija si tiene una imagen
@@ -158,7 +158,7 @@ MarkerFactory.prototype.htmlToImage = function (txt, fontFamily, fontSize = 24, 
 	//context.fillStyle = "#e9e9e9";
 	//context.fillRect(0, 0, cw + 100, ch + 100);
 	context.fillStyle = "white";
-	var offsetY = (fontFamily == 'Flaticon' ? -10 : 0);
+	var offsetY = -10;
 	context.fillText(txt, margin / 2, margin + offsetY + ch);
 	var dataURL = canvas.toDataURL("image/png");
 	context.clearRect(0, 0, cw, ch);

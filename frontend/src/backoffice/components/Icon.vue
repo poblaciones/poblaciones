@@ -1,6 +1,6 @@
 <template>
 	<span>
-		<span v-if="symbol" v-html="resolveIcon(symbol)"></span>
+		<span v-if="symbol" v-html="resolveIcon(symbol)" :style="(isCustom(symbol) ? '' : 'line-height: 1.4em;')" ></span>
 		<span v-else style="font-size: 14px;">[Ninguno]</span>
 </span>
 </template>
@@ -16,6 +16,9 @@ export default {
   methods: {
 		resolveIcon(symbol) {
 			return iconManager.showIcon(symbol, this.work.Icons, this.iconMaxSize);
+		},
+		isCustom(symbol) {
+			return iconManager.isCustom(symbol);
 		},
 	},
 		props: {

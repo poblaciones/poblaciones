@@ -705,7 +705,7 @@ ScaleGenerator.prototype.ResolveRangeCaption = function (variable, isFirst, isLa
 		ret = lastRoundedValue + ' a ' + roundedValue;
 	}
 	ret = str.Replace(ret, '.', ',');
-	ret += ' ' + h.ResolveNormalizationCaption(variable);
+	ret += h.ResolveNormalizationCaption(variable);
 	return ret.trimRight();
 };
 
