@@ -74,8 +74,9 @@ LeafletApi.prototype.Initialize = function () {
 
 	this.CreateBaseLayers();
 
-	var options = { zoomControl: false, zoomAnimation: false, /*zoomSnap: 0.25, */ minZoom: 3 };
+	var options = { zoomControl: false, zoomAnimation: false, /*zoomSnap: 0.5,*/ minZoom: 3, maxZoom: 17 };
 
+	// Crea el mapa
 	this.map = new L.Map("map", options);
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
 
@@ -254,17 +255,7 @@ LeafletApi.prototype.BindEvents = function () {
 		loc.CheckBaseLayer();
 		loc.BoundsChanged();
 	});
-	/*
-	this.map.on("mousemove", (event) => {
-		let lat = Math.round(event.latlng.lat * 100000) / 100000;
-		let lng = Math.round(event.latlng.lng * 100000) / 100000;
 
-		var elements = document.elementsFromPoint(event.layerPoint.x, event.layerPoint.x);
-		console.log(elements.length);
-		console.log(elements);
-
-	});
-	*/
 	this.map.on("movestart", function() {
 		loc.dragging = true;
 		loc.draggingDelayed = true;
@@ -448,19 +439,6 @@ LeafletApi.prototype.SetTypeControlsDefault = function () {
 	//this.SetTypeControls(this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR);
 };
 
-LeafletApi.prototype.SetTypeControls = function (controlType) {
-	var types = ['roadmap', 'satellite', 'hybrid', 'terrain', 'blank'];
-	if (window.SegMap.Configuration.UseLightMap) {
-		types.push('light');
-	}
-	this.map.setOptions({
-		mapTypeControlOptions: {
-			style: controlType,
-			mapTypeIds: types,
-		},
-	});
-};
-
 LeafletApi.prototype.DrawPerimeter = function (center, radius, fillColor) {
 	var strokeOpacity = 0.15;
 	var strokeColor = fillColor;
@@ -602,7 +580,7 @@ LeafletApi.prototype.UpdateClippingStyle = function () {
 	if (this.clippingCanvas) {
 		this.clippingCanvas.setStyle({
         "color": "#aaa",
-				"weight": 1,
+				"weight": 0.5,
         "opacity": this.getOpacity()
     });
 	}
@@ -674,14 +652,14 @@ LeafletApi.prototype.SetSelectedFeature = function (feature, key, title) {
 			if (title) {
 				label = { text: title, className: 'markerSelectedLabel' };
 			}
-
+			/*
 			var icon = this.defaultMarkerIcon();
 
 			var marker = new L.marker(pos, { icon: icon });
 			marker.addTo(this.map);
 
 			// label: label
-			this.selectedCanvas.push(marker);
+			this.selectedCanvas.push(marker); */
 		}
 		this.CreateSelectedCircle(feature.Coordinate);
 	}
@@ -734,7 +712,7 @@ LeafletApi.prototype.CreateSelectedPolygon = function (polygon) {
 };
 
 LeafletApi.prototype.CreateSelectedCircle = function (center) {
-	var radius = 25;
+	var radius = 15;
 
 	var item = new L.circle([ center.Lat, center.Lon ],radius,
 		{
@@ -830,7 +808,7 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		activeMetric.GetLayerData().then(function (data) {
 			if (!overlay.disposed) {
 				var iconLayer = new IconOverlay(activeMetric);
-				var deckIconLayer = iconLayer.CreateLayer(data, 1.5);
+				var deckIconLayer = iconLayer.CreateLayer(data, 1);
 
 //				overlay.deckOverlay = overlay;
 				wrapper.AddLayer(deckIconLayer);

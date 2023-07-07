@@ -5,7 +5,7 @@
 				href="#"
 				@click.stop.prevent="iconClicked(key, value)"
 				@dblclick.stop.prevent="iconDoubleClicked(key)"
-				:class="'item' + getIsSelectedClass(key, value) + (collection !== 'flaticons' ? ' faItem' : '')"
+				:class="'item' + getIsSelectedClass(key, value) + (collection == 'fontawesome' ? ' faItem' : '')  + (collection == 'custom' ? ' customItem' : '')"
 				v-for="(value, key) in currentIcons"
 				:key="key">
 					<span v-html="resolveIcon(key, value)"></span>
@@ -130,8 +130,10 @@ export default {
 		display: table;
 	}
 	.faItem {
-		padding: 11px !important;
 		font-size: 26px !important;
+	}
+	.customItem {
+		padding: 11px !important;
 	}
 	.iconPicker__icons .item:hover {
 		text-decoration: none
@@ -140,7 +142,7 @@ export default {
 		float: left;
 	    width: 48px;
 	    height: 48px;
-			padding: 13px 10px;
+			padding: 14px 10px;
 			margin: 6px 6px 6px 6px;
 	    text-align: center;
 	    border-radius: 3px;

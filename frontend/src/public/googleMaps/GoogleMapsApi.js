@@ -97,15 +97,16 @@ GoogleMapsApi.prototype.Initialize = function () {
 			myMapOptions.fullscreenControl = false;
 		}
 	}
-	var blankMapType = this.CreateBlankMap();
-
+	// Crea el mapa
 	this.gMap = new this.google.maps.Map(document.getElementById('map'), myMapOptions);
+	// Agrega tipo de estilo
+	var blankMapType = this.CreateBlankMap();
 	this.gMap.mapTypes.set('blank', blankMapType);
-
-	if (window.SegMap.Configuration.UseLightMap) {
-		var lightMapType = this.CreateLightMap();
-		this.gMap.mapTypes.set('roadLight', lightMapType);
-	}
+	// Lo registra
+	var lightMapType = this.CreateLightMap();
+	this.gMap.mapTypes.set('roadLight', lightMapType);
+	// Lo pone por default
+	this.gMap.setMapTypeId('roadLight');
 	this.AddCopyright();
 	this.CreateDrawingManager();
 	this.drawingManager.setMap(this.gMap);
@@ -494,15 +495,15 @@ GoogleMapsApi.prototype.SetMapTypeState = function (mapTypeState) {
 
 GoogleMapsApi.prototype.getOpacity = function () {
 	if(this.gMap.getMapTypeId() === 'roadmap') {
-		return 0.15;
+		return 0.10;
 	} else if(this.gMap.getMapTypeId() === 'terrain') {
-		return 0.15;
+		return 0.10;
 	} else if(this.gMap.getMapTypeId() === 'satellite') {
 		return 0.4;
 	} else if(this.gMap.getMapTypeId() === 'hybrid') {
 		return 0.4;
 	} else if (this.gMap.getMapTypeId() === 'roadLight') {
-		return 0.4;
+		return 0.10;
 	} else if (this.gMap.getMapTypeId() === 'blank') {
 		return 0.4;
 	} else { // Default
@@ -512,7 +513,7 @@ GoogleMapsApi.prototype.getOpacity = function () {
 
 GoogleMapsApi.prototype.UpdateClippingStyle = function () {
 	this.gMap.data.setStyle({
-		strokeWeight: 1,
+		strokeWeight: 0.5,
 		fillOpacity: this.getOpacity(),
 		strokeColor: '#aaa',
 		clickable: false,
@@ -588,7 +589,7 @@ GoogleMapsApi.prototype.SetSelectedFeature = function (feature, key, title) {
 			if (title) {
 				label = { text: title, className: 'markerSelectedLabel' };
 			}
-			var marker = new this.google.maps.Marker({
+			/*var marker = new this.google.maps.Marker({
 				position: pos,
 				draggable: false,
 				label: label,
@@ -597,7 +598,7 @@ GoogleMapsApi.prototype.SetSelectedFeature = function (feature, key, title) {
 				animation: this.google.maps.Animation.DROP,
 				map: this.gMap
 			});
-			this.selectedCanvas.push(marker);
+			this.selectedCanvas.push(marker);*/
 		}
 		this.CreateSelectedCircle(feature.Coordinate);
 	}
@@ -627,7 +628,7 @@ GoogleMapsApi.prototype.CreateSelectedPolygon = function (polygon) {
 
 	item = new this.google.maps.Polygon({
     paths: rings,
-   strokeColor: "#ff0000",
+		strokeColor: "#ff0000",
     strokeOpacity: 1,
     strokeWeight: 1,
     fillColor: "#ddd",
@@ -642,7 +643,7 @@ GoogleMapsApi.prototype.CreateSelectedPolygon = function (polygon) {
 
 
 GoogleMapsApi.prototype.CreateSelectedCircle = function (center) {
-	var radius = 25;
+	var radius = 15;
 
 	var item = new google.maps.Circle({
 		center: { lat: center.Lat, lng: center.Lon },

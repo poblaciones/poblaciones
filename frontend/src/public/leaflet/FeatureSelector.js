@@ -126,58 +126,9 @@ FeatureSelector.prototype.getFeature = function (event) {
 					this.MapsApi.markerClicked(event, parentInfo, obj.FID);
 					event.originalEvent.cancelBubble = true;
 					event.originalEvent.stopPropagation = true;
-				} else {
-					//return matchBoundary;
 				}
-
-				//this.selectorClicked(event);
-				//return null; // matchBoundary;
-				//return
 			}
 		}
-		var t = ev.type;
-		if (t == 'mouseup') {
-			t = 'mouseup';
-		}
-		if (t == 'mousedown') {
-			t = 'mousedown';
-		}
-		/*
-		var eventClone = new MouseEvent(t, {
-			altKey: ev.altKey, bubbles: ev.bubbles,
-			button: ev.buton, buttons: ev.buttons,
-			cancelBubble: false,
-			cancelable: true,
-			clientX: ev.clientX,
-			clientY: ev.clientY,
-			composed: true,
-			ctrlKey: ev.ctrlKey,
-			currentTarget: ev.currentTarget,
-			defaultPrevented: false,
-			detail: ev.detail,
-			eventPhase: 0,
-			fromElement: ev.fromElement,
-			layerX: ev.layerX,
-			layerY: ev.layerY,
-			metaKey: false,
-			movementX: ev.movementX,
-			movementY: ev.movementY,
-			offsetX: ev.offsetX,
-			offsetY: ev.offsetY,
-			pageX: ev.pageX,
-			pageY: ev.pageY,
-			relatedTarget: null,
-			returnValue: true,
-			screenX: ev.screenX,
-			screenY: ev.screenY,
-			shiftKey: ev.shiftKey
-		});
-		console.log(ev.type);
-		eventClone.isSelf = true;
-		gl.dispatchEvent(eventClone);
-		if (ev.type == 'click') {
-			gl.click();
-		}*/
 	}
 	return matchBoundary;
 };
@@ -392,7 +343,6 @@ FeatureSelector.prototype.startTooltipCandidate = function (feature) {
 FeatureSelector.prototype.startTooltipCandidateByLocation = function () {
 	var loc = window.SegMap.MapsApi.selector;
 	loc.tooltipCandidate = null;
-	console.log('startTooltipCandidateByLocation');
 	if (loc.tooltipTimer !== null) {
 		clearTimeout(loc.tooltipTimer);
 	}

@@ -31,9 +31,10 @@ function TxtOverlay(map, pos, txt, className, zIndex, innerClassName, type, hidd
 			iconSize: [40, 40]
 		})
 	});
-	setTimeout(() => {
+	this.onAdd();
+	/*setTimeout(() => {
 		this.onAdd();
-			}, 10);
+			}, 10);*/
 }
 
 TxtOverlay.prototype.UpdateTextStyle = function (className) {

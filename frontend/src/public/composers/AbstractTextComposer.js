@@ -81,7 +81,7 @@ AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElemen
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
 	var ret = h.renderMetricValue(dataElement.Value, dataElement.Total,
-		variable.HasTotals, variable.NormalizationScale, variable.Decimals) + ' ' + h.ResolveNormalizationCaption(variable);
+		variable.HasTotals, variable.NormalizationScale, variable.Decimals) + h.ResolveNormalizationCaption(variable);
 	return ret.trimRight();
 };
 

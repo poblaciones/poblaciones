@@ -54,36 +54,38 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 				this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveValueLabelVisibility(val);
 			}
 			if (this.labelsVisibility[valKey]) {
-				/*var mapItem = [];
-				mapItem.id = dataElement['FID'];
+				if (!this.activeSelectedMetric.IsDeckGLLayer()) {
+					var mapItem = [];
+					mapItem.id = dataElement['FID'];
 
-				mapItem.lat = dataElement['Lat'];
-				mapItem.lon = dataElement['Lon'];
+					mapItem.lat = dataElement['Lat'];
+					mapItem.lon = dataElement['Lon'];
 
-				mapItem.LabelId = val;
-				if (variable.ShowValues == 1) {
-					mapItem.Value = dataElement['Value'];
-				}
-				if (dataElement['Description']) {
-					mapItem.Description = dataElement['Description'];
-				}
-				if (dataElement['Symbol']) {
-					mapItem.Symbol = dataElement['Symbol'];
-				}
-				if (dataElement['Sequence']) {
-					mapItem.Sequence = dataElement['Sequence'];
-				}
-				if (! variable.IsSimpleCount) {
-					mapItem.Value = this.FormatValue(variable, dataElement);
-				}
+					mapItem.LabelId = val;
+					if (variable.ShowValues == 1) {
+						mapItem.Value = dataElement['Value'];
+					}
+					if (dataElement['Description']) {
+						mapItem.Description = dataElement['Description'];
+					}
+					if (dataElement['Symbol']) {
+						mapItem.Symbol = dataElement['Symbol'];
+					}
+					if (dataElement['Sequence']) {
+						mapItem.Sequence = dataElement['Sequence'];
+					}
+					if (!variable.IsSimpleCount) {
+						mapItem.Value = this.FormatValue(variable, dataElement);
+					}
 
-				var isSequenceInactiveStep = this.isSequenceInactiveStep(mapItem);
-				var marker = this.markerFactory.CreateMarker(tileKey, mapItem, markerSettings, isSequenceInactiveStep);
+					var isSequenceInactiveStep = this.isSequenceInactiveStep(mapItem);
+					var marker = this.markerFactory.CreateMarker(tileKey, mapItem, markerSettings, isSequenceInactiveStep);
 
-				this.registerTileMarker(tileKey, marker);
-				if (variable.IsSequence) {
-					this.SequenceHandler.registerSequenceMarker(tileKey, mapItem, marker, zoom);
-				}*/
+					this.registerTileMarker(tileKey, marker);
+					if (variable.IsSequence) {
+						this.SequenceHandler.registerSequenceMarker(tileKey, mapItem, marker, zoom);
+					}
+				}
 				// Pone el perímetro
 				this.AddPerimeter(variable, val, dataElement, tileKey, tileBounds, colorMap);
 				// Pone el texto

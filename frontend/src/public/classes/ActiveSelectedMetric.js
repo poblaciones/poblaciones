@@ -831,9 +831,17 @@ ActiveSelectedMetric.prototype.GetLayerDataService = function (seed) {
 	return { server: server, path: path, useStaticQueue: useStaticQueue, params: params };
 };
 
-ActiveSelectedMetric.prototype.GetDataService = function (seed) {
+ActiveSelectedMetric.prototype.IsDeckGLLayer = function () {
 	var deckGlDisabled = (window.Use.UseDeckgl == false);
 	if (!this.useTiles() && !deckGlDisabled) {
+		return true;
+	} else {
+		return false;
+	}
+};
+ActiveSelectedMetric.prototype.GetDataService = function (seed) {
+	var isDeckGLLayer = this.IsDeckGLLayer();
+	if (isDeckGLLayer) {
 		var v = this.SelectedVariable();
 		if (v && (!v.ShowDescriptions || v.ShowDescriptions == '0')) {
 			return null;

@@ -18,7 +18,11 @@ function LabelsComposer(mapsApi, activeSelectedMetric) {
 };
 LabelsComposer.prototype = new AbstractTextComposer();
 
-LabelsComposer.prototype.renderLabels = function(dataItems, tileKey, tileBounds, zoom) {
+LabelsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBounds, zoom) {
+	var currentZoom = this.MapsApi.getZoom();
+	if (zoom !== currentZoom) {
+		console.error("zoom failed:" + zoom + " != " + currentZoom);
+	}
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
 		var location = { Lat: dataElement['Lat'], Lon: dataElement['Lon'] };

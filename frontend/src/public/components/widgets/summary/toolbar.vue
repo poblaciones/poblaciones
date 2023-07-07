@@ -1,5 +1,5 @@
 <template>
-	<div class="toolbar no-print" style="display: block">
+	<div class="no-print" style="display: block; background-color: #fff; padding: 8px; border: 1px solid transparent; -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.18); box-shadow: 0 1px 1px rgba(0,0,0,0.18);">
 		<div class="btn-group">
 			<button type="button"
 							id="dropdownCaptureButton" class="btn btn-default btn-xs dropdown-toggle"
@@ -233,38 +233,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.toolbar {
-  background-color: #fff;
-  padding: 8px;
-  border: 1px solid transparent;
-  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
-  box-shadow: 0 1px 1px rgba(0,0,0,0.18);
-}
-
-.dToolboxBox {
-  pointer-events: auto;
-  width: 27px;
-  background-color: White;
-  padding-left: 4px;
-  padding-top: 4px;
-}
-.dropCapture {
-	margin-top: 7px;
-  margin-left: -8px;
-}
-.unselected {
-	background-color: white !important;
-	color: #333!important;
-}
-	.unselected:hover {
-		background-color: #333 !important;
-		color: #d4d4d4 !important;
-		border-color: #8c8c8c !important;
-	}
-.shareIt {
-	min-width: 37px;
-	margin-top: 8px;
-	margin-left: -5px;
-}
-</style>

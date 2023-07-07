@@ -67,7 +67,7 @@ module.exports = {
 		return Number(num).toFixed(1).toLocaleString('es');
 	},
 	ResolveNormalizationCaption(variable, preffixN) {
-		var pref = (preffixN ? 'N' : '');
+		var pref = (preffixN ? ' N' : '');
 		if (variable.Normalization === null) {
 			return pref;
 		}
