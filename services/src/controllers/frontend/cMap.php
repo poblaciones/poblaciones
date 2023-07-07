@@ -8,6 +8,7 @@ use minga\framework\Request;
 use minga\framework\PublicException;
 use minga\framework\Performance;
 
+use helena\services\frontend\ConfigurationService;
 use helena\services\common\MetadataService;
 use helena\services\frontend\WorkService;
 use helena\classes\Session;
@@ -45,9 +46,11 @@ class cMap extends cPublicController
 			// Guarda el hit
 			Statistics::StoreLanding($this->workId);
 		}
+        $configuration = new ConfigurationService();
+        $mapsApi = $configuration->GetCurrentMapProvider();
 		// Renderiza el html
 		$this->AddValue('google_maps_key', Context::Settings()->Keys()->GetGoogleMapsKey());
-		$this->AddValue('maps_api', App::Settings()->Map()->MapsAPI);
+		$this->AddValue('maps_api', $mapsApi);
 
 		$this->AddValue('google_analytics_key', Context::Settings()->Keys()->GoogleAnalyticsKey);
 		$this->AddValue('add_this_key', Context::Settings()->Keys()->AddThisKey);

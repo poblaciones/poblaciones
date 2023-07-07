@@ -15,7 +15,7 @@ use helena\classes\App;
 
 class ConfigurationService extends BaseService
 {
-	private function GetCurrentMapProvider()
+	public function GetCurrentMapProvider()
     {
         // Se fija la configuración actual
         $ret = App::Settings()->Map()->MapsAPI;
@@ -53,7 +53,6 @@ class ConfigurationService extends BaseService
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
-									'UseLightMap' =>  App::Settings()->Map()->UseLightMap,
 									'StaticWorks' =>  App::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => App::Settings()->Map()->UseGradients,
 									'UseTextures' => App::Settings()->Map()->UseTextures,

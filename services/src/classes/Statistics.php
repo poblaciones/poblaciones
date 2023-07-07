@@ -275,7 +275,7 @@ class Statistics
 				$lineParts = self::DecodeArray($lines[$n]);
 				$time = $lineParts['time'];
 				$type = $lineParts['t'];
-				$extra = $lineParts['e'];
+                $extra = $lineParts['e'];
 				$id = $lineParts['id'];
 				$region = null;
 
@@ -326,7 +326,7 @@ class Statistics
 
 	private static function InitialArray()
 	{
-		return ['download' => [],  'attachment' => [], 'internal' => [], 'work' => [], 'metric' => [], 'downloadType' => [], 'region' => []];
+		return ['download' => [],  'attachment' => [], 'internal' => [], 'work' => [], 'metric' => [], 'downloadType' => [], 'region' => [], 'dictionary' => []];
 	}
 
 	public static function decodeRegion($ip)
@@ -367,7 +367,10 @@ class Statistics
 
 	private static function AddHit(&$data, $attribute, $emptySample, $type, $id)
 	{
-		$typeArray = &$data[$type];
+        if (!array_key_exists($type, $data))
+            throw new \Exception("El tipo de registro '" . $type . "' no fue indicado en InitialArray.");
+
+        $typeArray = &$data[$type];
 		if (!$id) $id = 'null';
 		if (array_key_exists($id, $typeArray))
 			$idArray = &$typeArray[$id];
