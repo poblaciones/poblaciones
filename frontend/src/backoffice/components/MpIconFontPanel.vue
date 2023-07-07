@@ -65,7 +65,7 @@ export default {
 		},
 		resolveIcon(key, value) {
 			var symbol = (this.collection !== 'custom' ? key : value.Caption);
-			return iconManager.showIcon(symbol, this.Work.Icons, 20);
+			return iconManager.showIcon(symbol, this.Work.Icons, '28px');
 		},
 		resolveTitle(key, value) {
 			return (this.collection !== 'custom' ? key : value.Caption);
