@@ -130,7 +130,7 @@
 		"rimraf": "^2.6.3",
 		"sass": "^1.60.0",
 		"sass-loader": "^10.2.1",
-		"semver": "^5.7.0",
+		"semver": "^5.7.2",
 		"serialize-javascript": "^4.0.0",
 		"shelljs": "^0.8.5",
 		"style-loader": "^3.3.3",
