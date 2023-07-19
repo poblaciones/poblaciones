@@ -153,6 +153,7 @@ export default {
 				var msgtext = error.response.data.trim();
 				if (msgtext.startsWith('[PE-E]:')) {
 					ret = msgtext.substr(7).trim();
+					ret = ret.replace("\n", "<br>");
 				}
 			}
 			if (ret == 'Request failed with status code 500') {

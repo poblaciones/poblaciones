@@ -221,7 +221,8 @@ export default {
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		doToggle() {
-			this.collapsed = ! this.collapsed;
+			this.collapsed = !this.collapsed;
+			window.SegMap.Session.UI.ToggleLeftPanel(!this.collapsed);
 		},
 		updateMapTypeControl() {
 			var css1 = dom.getCssRule(document, '.gm-style-mtc:first-of-type');

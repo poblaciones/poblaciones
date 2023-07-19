@@ -118,6 +118,10 @@ export default {
 					}
 				}
 			}
+			var variable = this.metric.SelectedVariable();
+			if (variable) {
+				window.SegMap.Session.Content.SelectVariable(variable.Id);
+			}
 			this.metric.UpdateMap();
 		},
 		toggleVariable() {

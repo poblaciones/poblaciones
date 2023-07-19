@@ -7,6 +7,7 @@ import Clipping from '@/public/classes/Clipping';
 import Tutorial from '@/public/classes/Tutorial';
 import RestoreRoute from '@/public/classes/RestoreRoute';
 import Queue from './Queue';
+import Session from '@/public/session/Session';
 import OverlapRectangles from './OverlapRectangles';
 import InfoWindow from './InfoWindow';
 import axios from 'axios';
@@ -57,6 +58,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	} else {
 		this.StaticQueue = this.Queue;
 	}
+	this.Session = new Session(config);
 };
 
 SegmentedMap.prototype.WaitForFullLoading = function () {
@@ -150,6 +152,67 @@ SegmentedMap.prototype.Get = function (url, params, noCredencials, isRetry) {
 			return prom;
 		}
 		throw(res);
+	});
+};
+
+
+SegmentedMap.prototype.Post = function (url, args, noCredencials) {
+	if (!args) { args = {}; }
+	var loc = this;
+	var axios = (noCredencials ? this._axiosNoCredentials : this._axios);
+	const config = {
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		}
+	};
+	if(!noCredencials) {
+		config.headers['Full-Url'] = document.location.href;
+	}
+	if(window.accessLink) {
+		config.headers['Access-Link'] = window.accessLink;
+	}
+	for (var n in args) {
+		if (args.hasOwnProperty(n)) {
+			var i = args[n];
+			if (i !== null && (i instanceof Object || Array.isArray(i))) {
+				args[n] = JSON.stringify(i);
+			}
+		}
+	}
+	const querystring = require('querystring');
+	var params = querystring.stringify(args);
+	return axios.post(url, params, config).then(function (res) {
+		if (res.status === 200) {
+			return res;
+		}
+		var status = 0;
+		if (res.status) {
+			status = res.status;
+		} else if (res.response.status) {
+			status = res.response.status;
+		}
+		var data = null;
+		if (res.response) {
+			data = res.response.data;
+			if (data !== null && typeof data === 'string' && data.length < 25000) {
+				var debug = 'Whoops, looks like something went wrong.';
+				var debugText = '<p class="break-long-words trace-message">';
+				if (data.includes(debug) && data.includes(debugText)) {
+					var from = data.indexOf(debugText) + debugText.length;
+					var end = data.indexOf('<', from);
+					var len = end - from;
+					data = '[ME-E]:' + data.substr(from, len);
+				}
+			}
+		}
+		throw {
+			message: res.message, status: status, response: {
+				status: status,
+				data: data
+			}
+		};
+	}).catch(function (res) {
+		throw (res);
 	});
 };
 
@@ -275,6 +338,7 @@ SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
 	if (mapTypeState === 'h') {
 		this.toolbarStates.showLabels = true;
 	}
+	this.Session.UI.BasemapChanged(mapTypeState);
 	this.UpdateLabelsVisibility();
 };
 
@@ -308,6 +372,7 @@ SegmentedMap.prototype.UpdateLabelsVisibility = function () {
 			this.MapsApi.UpdateLabelsVisibility(false);
 		}
 	}
+	this.Session.UI.LabelsChanged(this.toolbarStates.showLabels);
 };
 
 SegmentedMap.prototype.ZoomChanged = function (zoom) {
@@ -315,6 +380,7 @@ SegmentedMap.prototype.ZoomChanged = function (zoom) {
 		this.frame.Zoom = zoom;
 		//this.Labels.UpdateMap();
 		this.Metrics.ZoomChanged();
+		this.Session.UI.ZoomChanged(zoom);
 
 		if (this.ZoomChangedSubscribers) {
 			for (var subscriber of this.ZoomChangedSubscribers) {
@@ -329,6 +395,9 @@ SegmentedMap.prototype.FrameMoved = function (bounds) {
 	}
 	this.frame.Envelope.Min = bounds.Min;
 	this.frame.Envelope.Max = bounds.Max;
+
+	this.Session.UI.BoundsChanged(bounds);
+
 	if (this.Clipping.ProcessFrameMoved() === false) {
 		;
 	}
@@ -407,7 +476,10 @@ SegmentedMap.prototype.AddMetricByFID = function (fid) {
 };
 
 SegmentedMap.prototype.AddMetricById = function (id) {
-	return this.doAddMetricById(id, null);
+	var loc = this;
+	return this.doAddMetricById(id, null).then(function () {
+		loc.Session.Content.AddMetric(id);
+	});
 };
 
 SegmentedMap.prototype.AddBoundaryById = function (id, caption) {
@@ -417,6 +489,7 @@ SegmentedMap.prototype.AddBoundaryById = function (id, caption) {
 	}).then(function (res) {
 		var activeBoundary = new ActiveBoundary(res.data);
 		loc.Metrics.AddStandardMetric(activeBoundary);
+		loc.Session.Content.AddBoundary(id);
 	}).catch(function (error) {
 		err.errDialog('GetSelectedBoundary', 'obtener las delimitaciones solicitadas', error);
 	});
@@ -425,7 +498,7 @@ SegmentedMap.prototype.AddBoundaryById = function (id, caption) {
 
 SegmentedMap.prototype.doAddMetricById = function (id, versionSelector) {
 	const loc = this;
-	this.Get(window.host + '/services/metrics/GetSelectedMetric', {
+	return this.Get(window.host + '/services/metrics/GetSelectedMetric', {
 		params: { l: id }
 	}).then(function (res) {
 		loc.AddMetricBySelectedMetricInfo(res.data, versionSelector);
@@ -442,6 +515,7 @@ SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricI
 			activeSelectedMetric.properties.SelectedVersionIndex = index;
 		}
 	}
+	window.SegMap.Session.Content.SelectSerie(activeSelectedMetric.SelectedVersion());
 	activeSelectedMetric.UpdateLevel();
 	this.Metrics.AddStandardMetric(activeSelectedMetric);
 };

@@ -175,6 +175,7 @@ export default {
 			e.preventDefault();
 			this.visibleUrl = false;
 			this.progress = null;
+			window.SegMap.Session.Content.Download(type);
 			var url = this.startDownloadUrl(type);
 			const loc = this;
 			axios.get(url, {

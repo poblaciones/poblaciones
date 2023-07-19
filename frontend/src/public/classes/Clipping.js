@@ -59,6 +59,7 @@ Clipping.prototype.SetClippingCircleKms = function (center, radius) {
 
 Clipping.prototype.SetClippingCircle = function (clippingCircle) {
 	this.frame.ClippingCircle = clippingCircle;
+	window.SegMap.Session.Content.SelectCircle(clippingCircle);
 	window.SegMap.ClearMyLocation();
 	this.CreateClipping(true, true);
 };
@@ -91,6 +92,7 @@ Clipping.prototype.GetClippingLevels = function () {
 Clipping.prototype.ResetClippingCircle = function () {
 	this.frame.ClippingCircle = null;
 	window.SegMap.MapsApi.ClearClippingCanvas();
+	window.SegMap.Session.Content.ClearCircle();
 	if (this.frame.ClippingRegionIds !== null) {
 		this.SetClippingRegion(this.frame.ClippingRegionIds, false);
 	} else {
@@ -101,6 +103,7 @@ Clipping.prototype.ResetClippingCircle = function () {
 };
 
 Clipping.prototype.ResetClippingRegion = function (regionToRemove) {
+	window.SegMap.Session.Content.ClearRegions([regionToRemove]);
 	if (regionToRemove && this.frame.ClippingRegionIds !== null &&
 				this.frame.ClippingRegionIds.length > 1) {
 		this.SetClippingRegion(regionToRemove, true, false, true);
@@ -119,6 +122,7 @@ Clipping.prototype.SetClippingRegion = function (clippingRegionId, moveCenter, c
 
 	this.frame.ClippingCircle = null;
 	window.SegMap.ClearMyLocation();
+	window.SegMap.Session.Content.SelectRegion([clippingRegionId]);
 	var newClippingRegionIds = clippingRegionId;
 	if (!Array.isArray(clippingRegionId)) {
 		clippingRegionId = parseInt(clippingRegionId, 10);

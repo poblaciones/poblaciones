@@ -127,6 +127,7 @@ ActiveBoundary.prototype.UpdateLevel = function () {
 };
 
 ActiveBoundary.prototype.Remove = function () {
+	window.SegMap.Session.Content.RemoveBoundary(this.properties.Id);
 	window.SegMap.Metrics.Remove(this);
 };
 

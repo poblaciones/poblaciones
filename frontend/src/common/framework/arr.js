@@ -25,6 +25,16 @@ module.exports = {
 	InsertAt(arr, index, value) {
 		arr.splice(index, 0, value);
 	},
+	InsertSortedByValue(arr, newElement, attribute) {
+		// Buscar la posición de inserción
+		var pos = arr.findIndex(element => element[attribute] > newElement[attribute]);
+		// Si no se encontró una posición mayor, agregar al final
+		if (pos === -1) {
+			pos = arr.length;
+		}
+		// Insertar el nuevo elemento en la posición encontrada
+		arr.splice(pos, 0, newElement);
+	},
 	Remove(arr, element) {
 		var index = arr.indexOf(element);
 		return this.RemoveAt(arr, index);
@@ -272,5 +282,11 @@ module.exports = {
 		var cp = this.Copy(arr);
 		cp.sort(sortFunc);
 		return cp;
+	},
+	SortByValue(arr, attribute) {
+		arr.sort(function (a, b) {
+			return (a[attribute] > b[attribute]) - (b[attribute] > a[attribute]);
+		});
+		return arr;
 	}
 };

@@ -112,6 +112,7 @@ export default {
 			this.title = title;
 			this.downloadLevel = this.version.SelectedLevelIndex;
 			this.work = metric.SelectedVersion().Work;
+			window.SegMap.Session.Content.OpenMetadata();
 			this.$refs.dialog.show();
 		},
 		show(work) {
@@ -119,6 +120,7 @@ export default {
 			this.title = 'Metadatos';
 			this.downloadLevel = null;
 			this.work = work;
+			window.SegMap.Session.Content.OpenMetadata();
 			this.$refs.dialog.show();
 		},
 		completeUrl(url) {

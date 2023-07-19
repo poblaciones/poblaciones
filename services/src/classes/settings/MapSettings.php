@@ -65,7 +65,8 @@ class MapSettings
 													'rio negro capital' => 'viedma', 'santa cruz capital' => 'río gallegos',
 													'tierra del fuego capital' => 'ushuaia',
 													'capital federal' => 'ciudad autónoma de buenos aires',
-													'provincia buenos aires' => 'provincia buenos aires -colorado'
+													'provincia buenos aires' => 'provincia buenos aires -colorado',
+													'clubes' => 'club'
 													];
 	public $Stopwords = ['de', 'numero', 'número'];
 

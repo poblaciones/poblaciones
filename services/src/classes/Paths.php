@@ -72,7 +72,12 @@ class Paths
 		return Context::Paths()->GetStorageRoot(). '/sitemaps';
 	}
 
-	public static function GetGradientsFolder()
+    public static function GetNavigationFolder()
+    {
+        return Context::Paths()->GetStorageRoot() . '/navigation';
+    }
+
+    public static function GetGradientsFolder()
 	{
 		return Context::Paths()->GetStorageRoot(). '/gradients';
 	}

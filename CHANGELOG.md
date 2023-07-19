@@ -1,8 +1,12 @@
+- Mejoras en la descripción de 'geometría inválida' en la publicación.
+- Add navigation log.
 - Fix: no respeta posición de startup en leaflet.
 - Fix: pins cliqueables en deck.gl
+- Fix: mejoras en el centrado de íconos (mapa y previsualización de selección)
+- Fix: altura máxima de íconos personalizados
 
 v3.09 (2023-06-12)
-- Estilos en resumen ampliado (negrita, itálica y punteos de listas).
+- Permite utilizar estilos en resumen ampliado (negrita, itálica y punteos de listas).
 - Metodología y referencias en datos públicos.
 - Fix: leaflet: etiquetas flying.
 - Función de promoción y revocación de datos públicos (administración)

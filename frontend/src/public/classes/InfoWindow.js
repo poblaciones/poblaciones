@@ -170,6 +170,11 @@ InfoWindow.prototype.FocusView = function (position, key, title) {
 };
 
 InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid) {
+	if (parent && parent.VariableId) {
+		window.SegMap.Session.Content.SelectFeature(fid, parent.MetricId, parent.VariableId);
+	} else {
+		window.SegMap.Session.Content.SelectFeature(fid);
+	}
 	this.InfoRequested(position, parent, fid, true);
 };
 

@@ -135,7 +135,6 @@
 				}
 				var start = new StartMap(loc.work, loc, loc.SetupMap);
 				start.Start();
-
 			});
 			window.Panels.Left = this.$refs.leftPanel;
 		},
@@ -174,6 +173,7 @@
 					params: params
 				}).then(function (res) {
 					loc.config = res.data;
+					loc.config.IsMobile = loc.$isMobile();
 					loc.user = res.data.User;
 					if (web.getParameterByName('leaflet') != null) {
 						loc.config.MapsAPI = 'leaflet';
@@ -322,6 +322,7 @@
 			},
 			doToggle() {
 				this.toolbarStates.collapsed = !this.toolbarStates.collapsed;
+				window.SegMap.Session.UI.ToggleRightPanel(!this.toolbarStates.collapsed);
 			},
 			SplitPanelsRefresh() {
 				if (this.toolbarStates.collapsed) {

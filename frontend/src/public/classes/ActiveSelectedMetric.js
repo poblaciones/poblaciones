@@ -278,6 +278,8 @@ ActiveSelectedMetric.prototype.SelectVersion = function (index) {
 		return;
 	}
 	this.properties.SelectedVersionIndex = index;
+	window.SegMap.Session.Content.SelectSerie(this.SelectedVersion());
+
 	this.UpdateSummary();
 	this.UpdateMap();
 };
@@ -416,6 +418,7 @@ ActiveSelectedMetric.prototype.UpdateMap = function () {
 };
 
 ActiveSelectedMetric.prototype.Remove = function () {
+	window.SegMap.Session.Content.RemoveMetric(this.properties.Metric.Id);
 	window.SegMap.Metrics.Remove(this);
 };
 

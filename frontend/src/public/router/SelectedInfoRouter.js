@@ -246,6 +246,7 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 							loc.RestoreMetricState(activeMetric, infos[n]);
 						}
 						activeMetric.properties.SelectedVersionIndex = parseInt(activeMetric.properties.SelectedVersionIndex);
+						window.SegMap.Session.Content.SelectSerie(activeMetric.SelectedVersion());
 						activeMetric.UpdateLevel();
 						segmentedMap.Metrics.AppendStandardMetric(activeMetric);
 					}

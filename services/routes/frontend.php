@@ -36,6 +36,7 @@ App::RegisterControllerGet('/datasets', controllers\cDatasets::class);
 
 require_once('frontend/boundary.php');
 require_once('frontend/clipping.php');
+require_once('frontend/session.php');
 require_once('frontend/crawler.php');
 require_once('frontend/map.php');
 require_once('frontend/metadata.php');

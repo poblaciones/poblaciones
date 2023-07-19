@@ -68,7 +68,7 @@ module.exports = {
 			}
 			// continúa
 			if (msgtext.startsWith('[PE-E]:')) {
-				post = ' ' + msgtext.substr(7);
+				post = ' ' + msgtext.substr(7).replace("\n", "<br>");
 				if (!post.endsWith('.')) {
 					post += '.';
 				}
