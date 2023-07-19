@@ -27,8 +27,12 @@ var webpackConfig = merge(baseWebpackConfig, {
 	module: {
 		rules: [
 			{
-				test: /.s?css$/,
-				use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
+				test: /\.(sa|sc|c)ss$/,
+				use: [
+					'style-loader',
+					'css-loader',
+					'sass-loader'
+				]
 			},
 		],
 	},
