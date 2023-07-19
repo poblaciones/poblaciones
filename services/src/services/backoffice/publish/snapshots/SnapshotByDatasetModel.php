@@ -5,6 +5,7 @@ namespace helena\services\backoffice\publish\snapshots;
 use helena\services\backoffice\publish\PublishDataTables;
 
 use minga\framework\Profiling;
+use minga\framework\Str;
 use helena\entities\frontend\geometries\Envelope;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
@@ -72,6 +73,50 @@ class SnapshotByDatasetModel
 		// Listo
 		Profiling::EndTimer();
 	}
+	private function GetNextRow($dataset, $columns)
+	{
+		Profiling::BeginTimer();
+
+		$table = $dataset['dat_table'];
+
+        $sqlOffset = "SELECT COUNT(*) FROM " . self::SnapshotTable($table);
+        $offset = App::Db()->fetchScalarInt($sqlOffset);
+
+		$description = $this->GetDescriptionColumn($dataset);
+		$fields = "";
+		$extra = "";
+		if ($description !== 'null')
+			$fields = "," . $description . ' AS caption';
+		foreach($columns as $column)
+			if ($column[0] == 'sna_location')
+            {
+                $extra = $column[3];
+				break;
+            }
+		if ($extra)
+        {
+            $fields .= "," . $extra . ' AS info';
+        }
+        if (!$fields) {
+            return '';
+        }
+        // Arma el SELECT
+        $sql = "SELECT " . substr($fields, 1);
+        // Pone valores
+        $sql .= " FROM " . $table . " ORDER BY id LIMIT 1 OFFSET " . $offset;
+        $ret = App::Db()->fetchAssoc($sql);
+        $text = "Registro: Posición " . $offset . ". ";
+        if ($ret) {
+            if (array_key_exists('caption', $ret)) {
+                $text .= " Descripción: '" . $ret['caption'] . "'. ";
+            }
+            if (array_key_exists('info', $ret)) {
+                $text .= " Valores: '" . $ret['info'] . "'. ";
+            }
+        }
+        return $text;
+    }
+
 	private function InsertValues($dataset, $columns)
 	{
 		Profiling::BeginTimer();
@@ -95,8 +140,27 @@ class SnapshotByDatasetModel
 
 		// Cierra el select
 		$sql .= " ORDER BY id";
-
-		App::Db()->exec($sql);
+        try
+        {
+            App::Db()->exec($sql);
+        }
+		catch(\Exception $ex)
+        {
+            $msg = $ex->getMessage();
+			if (Str::EndsWith($msg, "Cannot get geometry object from data you send to the GEOMETRY field"))
+            {
+                $text = '';
+                // Obtiene información y armar el error
+                $text = "El dataset '" . $dataset['dat_caption'] . "' contiene elementos cuyas geometrías o valores para ubicaciones no son válidas.\n\n";
+                $text .= $this->GetNextRow($dataset, $columns);
+				$text .= "\n\nVerifique estos valores e intente publicar nuevamente.";
+				throw new PublicException($text);
+            }
+			else
+            {
+                throw $ex;
+            }
+        }
 		Profiling::EndTimer();
 	}
 
@@ -256,31 +320,36 @@ class SnapshotByDatasetModel
 			$location = "GeometryCentroid(" . $segment . ")";
 			$envelopeTarget = $segment;
 			$columns[] = ['sna_segment', 'linestring NOT NULL', $segment];
-		}
+            $location_info = 'CONCAT(' . $dataset['dat_latitude_field'] . ', ' . $dataset['dat_longitude_field'] . ' - '
+				 . $dataset['dat_latitude_field_segment'] . ', ' . $dataset['dat_longitude_field_segment'] . ')';
+        }
 		else
 		{
 			if ($dataset['dat_type'] == DatasetTypeEnum::Data)
 			{
 				$envelopeTarget = "geo.gei_geometry";
 				$location = "geo.gei_centroid";
+                $location_info = "";
 			}
 			else if ($dataset['dat_type'] == DatasetTypeEnum::Locations)
 			{
 				$point = "POINT(DmsToDecimal(" . $dataset['dat_longitude_field'] . "), DmsToDecimal(" .
-																	$dataset['dat_latitude_field'] . ") )";
+                    $dataset['dat_latitude_field'] . ") )";
 				$envelopeTarget = $point;
 				$location = $point;
+                $location_info = 'CONCAT(' . $dataset['dat_latitude_field'] . ', ' . $dataset['dat_longitude_field'] . ')';
 			}
 			else if ($dataset['dat_type'] == DatasetTypeEnum::Shapes)
 			{
 				$envelopeTarget = "geometry";
 				$location = "centroid";
+				$location_info = "ST_AsText(geometry)";
 			}
 			else
 				throw new PublicException("Tipo de dataset no reconocido.");
 		}
 		$columns[] = ['sna_envelope', 'polygon NOT NULL', "PolygonEnvelope(" . $envelopeTarget . ")"];
-		$columns[] = ['sna_location', 'point NOT NULL', $location];
+		$columns[] = ['sna_location', 'point NOT NULL', $location, $location_info];
 
 		return $columns;
 	}

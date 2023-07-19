@@ -7,15 +7,22 @@ use helena\services\common\AuthenticationService;
 
 use minga\framework\PhpSession;
 
+use Defuse\Crypto\Key;
+use Defuse\Crypto\Crypto;
+
 use helena\db\frontend\SignatureModel;
 use minga\framework\Context;
 use minga\framework\Performance;
 use helena\classes\Callbacks;
 use helena\classes\App;
+use minga\framework\Cookies;
 
 class ConfigurationService extends BaseService
 {
-	public function GetCurrentMapProvider()
+    const CookieName = 'nav';
+    const ValidRenew = 3000; // en días
+
+    public function GetCurrentMapProvider()
     {
         // Se fija la configuración actual
         $ret = App::Settings()->Map()->MapsAPI;
@@ -39,9 +46,39 @@ class ConfigurationService extends BaseService
         return self::OK;
     }
 
+	public function GetNavigationCookieId()
+    {
+        $cookie = Cookies::GetCookie(self::CookieName);
+        if ($cookie == '')
+            return '';
+        $key = Key::loadFromAsciiSafeString(Context::Settings()->Keys()->GetRememberKey());
+        $id = Crypto::decrypt(base64_decode($cookie), $key, true);
+        return $id;
+    }
+
+    private function CheckNavigationCookie()
+    {
+        $id = $this->GetNavigationCookieId();
+        return ($id != '');
+    }
+
+	public function CreateNavigationCookie()
+    {
+        $id = PhpSession::SessionId();
+        if ($id == "")
+            $id = uniqid('', true);
+
+        $key = Key::loadFromAsciiSafeString(Context::Settings()->Keys()->GetRememberKey());
+        $enc = Crypto::encrypt($id, $key, true);
+        $value = base64_encode($enc);
+        Cookies::SetCookie(self::CookieName, $value, self::ValidRenew);
+        return $id;
+    }
+
 	public function GetConfiguration($topUrl = null, $clientUrl = null)
 	{
 		$model = new SignatureModel();
+		$session = new SessionService();
 		$signatures = $model->GetSignatures();
 		$blockStrategy = array('UseDataTileBlocks' => App::Settings()->Map()->UseDataTileBlocks,
 													 'UseLabelTileBlocks' => App::Settings()->Map()->UseLabelTileBlocks,
@@ -50,7 +87,12 @@ class ConfigurationService extends BaseService
 		$userService = new AuthenticationService();
 		$user = $userService->GetStatus();
 
-		$ret = array('Signatures' => $signatures,
+		if (!$this->CheckNavigationCookie())
+			$this->CreateNavigationCookie();
+
+		$navigation = $session->GetNavigationId();
+
+        $ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
 									'StaticWorks' =>  App::Settings()->Map()->ContentServerWorks,
@@ -66,7 +108,8 @@ class ConfigurationService extends BaseService
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 
 									'MapsAPI' => $this->GetCurrentMapProvider(),
-
+									'NavigationId' => $navigation['id'],
+									'NavigationMonth' => $navigation['month'],
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user);

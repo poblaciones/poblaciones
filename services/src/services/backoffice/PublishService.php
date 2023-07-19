@@ -14,6 +14,8 @@ use helena\db\backoffice\WorkModel;
 use helena\classes\App;
 use helena\entities\backoffice as entities;
 use minga\framework\PublicException;
+use minga\framework\ConditionalDebug;
+
 
 class PublishService extends BaseService
 {
@@ -51,6 +53,8 @@ class PublishService extends BaseService
 		$workId = $this->state->Get('workId');
 
 		$totalSlices = 0;
+
+        $conditionalDebug = new ConditionalDebug('pablodssg@gmail.com');
 
 		switch($this->state->Step())
 		{
@@ -91,15 +95,18 @@ class PublishService extends BaseService
 				}
 				break;
 			case self::STEP_CREATE_SNAPSHOTS_DATASETS:
-				$manager = new PublishSnapshots();
-				if ($manager->UpdateWorkDatasets($workId, $this->state->Slice(), $totalSlices) == false)
-				{
-					$this->NextSlice($totalSlices);
-				}
-				else
-				{
-					$this->state->NextStep('Actualizando metadatos');
-				}
+                try {
+                    $manager = new PublishSnapshots();
+                    if ($manager->UpdateWorkDatasets($workId, $this->state->Slice(), $totalSlices) == false) {
+                        $this->NextSlice($totalSlices);
+                    } else {
+                        $this->state->NextStep('Actualizando metadatos');
+                    }
+                }
+				catch(\Exception $ex)
+                {
+                    $conditionalDebug->HandleException($ex);
+                }
 				break;
 			case self::STEP_UPDATE_EXTENTS:
 				$manager = new PublishSnapshots();
