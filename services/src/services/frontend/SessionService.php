@@ -9,11 +9,12 @@ use minga\framework\Date;
 use minga\framework\IO;
 use minga\framework\GeoIp;
 use minga\framework\Profiling;
-
+use minga\framework\ErrorException;
 
 class SessionService extends BaseService
 {
     private $db = null;
+    private $path = null;
 
     public function GetNavigationId()
     {
