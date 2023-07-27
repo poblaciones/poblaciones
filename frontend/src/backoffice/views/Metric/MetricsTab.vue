@@ -162,7 +162,7 @@ import MetricPopup from './MetricPopup.vue';
 import VariableFormulaPopup from './VariableFormulaPopup.vue';
 import VariableSymbologyPopup from './VariableSymbologyPopup.vue';
 import VariableOptionsPopup from './VariableOptionsPopup.vue';
-import CalculatedMetricWizard from '@/backoffice/views/dataset/CalculatedWizard/CalculatedWizard.vue';
+import CalculatedMetricWizard from '@/backoffice/views/Dataset/CalculatedWizard/CalculatedWizard.vue';
 import NewMetric from './NewMetric.vue';
 import PickMetricVersion from './PickMetricVersion.vue';
 import f from '@/backoffice/classes/Formatter';
