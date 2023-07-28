@@ -1,4 +1,4 @@
-# poblaciones
+# Poblaciones
 Herramienta para la publicación colaborativa de datos espaciales de población
 
 En esta carpeta se encuentran los elementos necesarios para inicializarse en el uso de Poblaciones.
