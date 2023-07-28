@@ -45,7 +45,7 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 2. Agregar los registros de un 'data-pack' desde https://github.com/poblaciones/data-packs.
 
-3. Ejecutar en la base de datos los scripts de /startup/scripts para actualizar la estructura. Es importante hacer esto para no tener errores por desactualización de script. La manera adecuada de hacerlo es examinar la tabla VERSION, donde hay un registro DB que indica la versión de la base de datos. Si la versión es por ejemplo 95, se deben correr los scripts 096 en adelante de la carpeta [/scripts]/scripts. 
+3. Ejecutar en la base de datos los scripts de /startup/scripts para actualizar la estructura. Es importante hacer esto para no tener errores por desactualización de script. La manera adecuada de hacerlo es examinar la tabla VERSION, donde hay un registro DB que indica la versión de la base de datos. Si la versión es por ejemplo 95, se deben correr los scripts 096 en adelante de la carpeta /startup/scripts. 
 
 4. El usuario predeterminado para acceder luego a la aplicación es 'admin', cuya contraseña es 'admin001'. Se recomienda modificarla en el primer uso.
 
