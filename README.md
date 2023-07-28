@@ -54,7 +54,7 @@ Para generar una versión para instalar: [guía de compilación](startup/BUILD.m
 ## Licencia
 Poblaciones - Plataforma abierta de datos espaciales de población.
 
-Copyright (C) 2018-2021. Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET) y Universidad Católica Argentina (UCA). 
+Copyright (C) 2018-2023. Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET) y Universidad Católica Argentina (UCA). 
 
 El código fuente se encuentra bajo licencia GNU GPL version 3 o posterior.
 
