@@ -12,6 +12,9 @@ import OverlapRectangles from './OverlapRectangles';
 import InfoWindow from './InfoWindow';
 import axios from 'axios';
 import str from '@/common/framework/str';
+import { loadProgressBar } from '@/common/js/axiosProgressBar.js';
+
+// import { loadProgressBar } from 'axios-progress-bar';
 
 import h from '@/public/js/helper';
 import m from '@/public/js/Mercator';
@@ -37,6 +40,8 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.DefaultTitle = 'Poblaciones';
 	this._axios = this.CreateAxios(true);
 	this._axiosNoCredentials = this.CreateAxios(false);
+	loadProgressBar({ showSpinner: false, parent: '#holder' }, this._axios, 0);
+	loadProgressBar({ showSpinner: false, parent: '#holder' }, this._axiosNoCredentials, 1);
 	this.Metrics = new MetricsList(selectedMetricCollection);
 	this.SaveRoute = new SaveRoute();
 	this.RestoreRoute = new RestoreRoute();
@@ -515,7 +520,6 @@ SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricI
 			activeSelectedMetric.properties.SelectedVersionIndex = index;
 		}
 	}
-	window.SegMap.Session.Content.SelectSerie(activeSelectedMetric.SelectedVersion());
 	activeSelectedMetric.UpdateLevel();
 	this.Metrics.AddStandardMetric(activeSelectedMetric);
 };

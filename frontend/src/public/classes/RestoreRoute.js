@@ -9,6 +9,8 @@ function RestoreRoute() {
 
 RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
 	this.subscribers = window.SegMap.SaveRoute.subscribers;
+	window.SegMap.Session.UI.isRegisterEnabled = false;
+
 	// Restaura desde subscribers
 	for (var n = 0; n < this.subscribers.length; n++) {
 		var subscriber = this.subscribers[n];
@@ -17,6 +19,8 @@ RestoreRoute.prototype.LoadRoute = function (route, updateRoute = false) {
 			subscriber.FromRoute(arr, updateRoute);
 		}
 	}
+
+	window.SegMap.Session.UI.isRegisterEnabled = true;
 };
 
 RestoreRoute.prototype.parseRoute = function (route, subscriber) {

@@ -752,6 +752,12 @@
 		margin-top: -10px;
 	}
 
+	#nprogress .bar {
+		background: #29d;
+		height: 1px !important;
+		box-shadow: 0px 1px rgb(34 153 221 / 40%);
+	}
+
 	.tpValueTitle {
 		border-bottom: 1px solid #666;
 		padding-bottom: 4px;
@@ -782,7 +788,7 @@
 		text-align: center;
 		height: 32px;
 		top: 14px;
-		z-index: 2;
+		z-index: 500;
 		cursor: pointer;
 		border-radius: 2px;
 		padding: 5px 0px;

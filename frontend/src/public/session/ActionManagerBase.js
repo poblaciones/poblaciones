@@ -9,17 +9,22 @@ function ActionManagerBase(session, type) {
 	this.type = type;
 	this.states = {};
 };
+ActionManagerBase.prototype.isRegisterEnabled = true;
 
 ActionManagerBase.prototype.RegisterActionChange = function (action, value) {
-	if (this.states['value'] && this.states['value'] === value) {
+	if (this.states[action] && this.states[action] === value) {
 		return;
 	} else {
-		this.states['value'] = value;
+		this.states[action] = value;
 		this.RegisterAction(action, value);
 	}
 };
 
 ActionManagerBase.prototype.RegisterAction = function (action, value) {
+	//alert(isRegisterEnabled);
+	if (!this.isRegisterEnabled) {
+		return;
+	}
 	var time = this.session.GetTimeMs();
 	var action = new Action(this.type, action, value, time);
 	this.session.LastActivity = time;

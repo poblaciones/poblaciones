@@ -9,6 +9,7 @@ import VTooltip from 'v-tooltip';
 import Clipboard from 'v-clipboard';
 
 import "leaflet/dist/leaflet.css";
+import 'axios-progress-bar/dist/nprogress.css';
 
 // Bus para comunicación entre componentes
 // usar window.bus.$emit y window.bus.$on
