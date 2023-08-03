@@ -4782,3 +4782,114 @@ INSERT INTO `version` (`ver_id`, `ver_name`, `ver_value`) VALUES
 (10, 'BOUNDARY_VIEW', '65');
 
 INSERT INTO `user` VALUES (1,'admin','Administrador','Administrador',NULL,NULL,'$2y$10$3ZM..N0URJfcwxgeL7QHQepGCbbbWYxrWsDk4yS.MfmMJB53UE6Zi','2019-07-12 21:19:02','A',0,1),(181,'test','Test','User',NULL,NULL,'$NO_INTERACTIVE','2020-01-01 14:00:00','A',0,1);
+
+ALTER TABLE `dataset`
+ADD COLUMN `dat_partition_mandatory` TINYINT(1) NOT NULL DEFAULT '1' AFTER `dat_partition_column_id`,
+ADD COLUMN `dat_partition_all_label` VARCHAR(50) NOT NULL DEFAULT 'Todos' AFTER `dat_partition_mandatory`;
+
+ALTER TABLE `draft_dataset`
+ADD COLUMN `dat_partition_mandatory` TINYINT(1) NOT NULL DEFAULT '1' AFTER `dat_partition_column_id`,
+ADD COLUMN `dat_partition_all_label` VARCHAR(50) NOT NULL DEFAULT 'Todos' AFTER `dat_partition_mandatory`;
+
+UPDATE version SET ver_value = '097' WHERE ver_name = 'DB';
+
+ALTER TABLE `dataset`
+ADD COLUMN `dat_skip_empty_fields` TINYINT(1) NOT NULL DEFAULT '0' AFTER `dat_show_info`;
+ALTER TABLE `draft_dataset`
+ADD COLUMN `dat_skip_empty_fields` TINYINT(1) NOT NULL DEFAULT '0' AFTER `dat_show_info`;
+
+ALTER TABLE `draft_metadata`
+ADD COLUMN `met_methods` TEXT NULL AFTER `met_abstract_long`,
+ADD COLUMN `met_references` TEXT NULL AFTER `met_methods`,
+CHANGE COLUMN `met_abstract` `met_abstract` VARCHAR(1500) NOT NULL COMMENT 'Resumen' ;
+
+ALTER TABLE `metadata`
+ADD COLUMN `met_methods` TEXT NULL AFTER `met_abstract_long`,
+ADD COLUMN `met_references` TEXT NULL AFTER `met_methods`,
+CHANGE COLUMN `met_abstract` `met_abstract` VARCHAR(1500) NOT NULL COMMENT 'Resumen' ;
+
+
+UPDATE version SET ver_value = '101' WHERE ver_name = 'DB';
+
+DROP FUNCTION `EllipseContainsMultiPolygon`;
+DELIMITER $$
+CREATE FUNCTION `EllipseContainsMultiPolygon`(`center` POINT, `radius` POINT, `ele` GEOMETRY) RETURNS tinyint(4)
+    NO SQL
+    DETERMINISTIC
+    SQL SECURITY INVOKER
+BEGIN
+  DECLARE e POLYGON;
+DECLARE c INT;
+DECLARE n INT;
+DECLARE g GEOMETRY;
+
+SET e = PolygonEnvelope(ele);
+IF EllipseContains(center, radius, ST_PointN(e,1)) AND  EllipseContains(center, radius, ST_PointN(e,2)) AND  EllipseContains(center, radius, ST_PointN(e,3)) AND  EllipseContains(center, radius, ST_PointN(e,4)) THEN
+  RETURN 1;
+END IF;
+
+  SET n = 0;
+  SET c = ST_NumGeometries(ele);
+
+  count_loop: LOOP
+    SET n = n + 1;
+    SET g = ST_GeometryN(ele, n);
+    IF ST_GeometryType(g) = 'POLYGON' THEN
+      IF EllipseContainsPolygon(center, radius, ST_ExteriorRing(g)) = 0 THEN
+        RETURN 0;
+      END IF;
+    ELSEIF EllipseContainsPolygon(center, radius, g) = 0 THEN
+        RETURN 0;
+    END IF;
+
+    IF n >= c THEN
+      LEAVE count_loop;
+    END IF;
+
+  END LOOP;
+
+RETURN 1;
+END$$
+DELIMITER ;
+
+DROP FUNCTION `PolygonsOverlap`;
+DELIMITER $$
+CREATE FUNCTION `PolygonsOverlap`(`ele` GEOMETRY) RETURNS tinyint(4)
+    NO SQL
+    DETERMINISTIC
+    SQL SECURITY INVOKER
+BEGIN
+
+DECLARE c INT;
+DECLARE n INT;
+DECLARE i INT;
+DECLARE res tinyint(4);
+DECLARE g POLYGON;
+DECLARE g2 POLYGON;
+SET n = 0;
+SET c = ST_NumGeometries(ele);
+
+  count2_loop: LOOP
+    SET n = n + 1;
+    SET g = ST_GeometryN(ele, n);
+    SET i = n;
+      count3_loop: LOOP
+      SET i = i + 1;
+      SET g2 = ST_GeometryN(ele, i);
+      IF ST_Intersects(g, g2) AND
+      (ST_Overlaps(g, g2) OR ST_Contains(g, g2) OR ST_Within(g, g2)) THEN
+        RETURN 1;
+      END IF;
+      IF i >= c THEN
+        LEAVE count3_loop;
+      END IF;
+    END LOOP;
+
+    IF n >= c THEN
+        LEAVE count2_loop;
+      END IF;
+ END LOOP;
+
+ RETURN 0;
+END$$
+DELIMITER ;

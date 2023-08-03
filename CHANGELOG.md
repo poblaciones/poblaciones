@@ -1,3 +1,4 @@
+v3.10 (2023-08-02)
 - Mejoras en la descripción de 'geometría inválida' en la publicación.
 - Add navigation log.
 - Fix: no respeta posición de startup en leaflet.
