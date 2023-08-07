@@ -41,7 +41,7 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 ## 3. Iniciar una base de datos para Poblaciones
 
-1. Utilizar el script de inicialización de base de datos [dbscript-v3.08.sql](dbscript-v3.08.sql) para crear una base vacía. 
+1. Utilizar el script de inicialización de base de datos [dbscript-v3.10.sql](dbscript-v3.10.sql) para crear una base vacía. 
 
 2. Agregar los registros de un 'data-pack' desde https://github.com/poblaciones/data-packs.
 
