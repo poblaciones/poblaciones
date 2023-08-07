@@ -12,7 +12,6 @@
 				<center>
 					<div v-if="error === '' && complete === false" v-show="hideProgress === false"
 							 style="margin-top: 30px">
-
 						<p>
 							<md-progress-spinner v-if='totalSteps > 0' md-mode="determinate" :md-value="stepsPercentage"></md-progress-spinner>
 							<md-progress-spinner v-else md-mode="indeterminate"></md-progress-spinner>

@@ -21,7 +21,7 @@ Compare.prototype.GenerateComparableValueLabels = function () {
 		for (var level of this.metric.properties.Versions[v].Levels) {
 			for (var variable of level.Variables) {
 				// Le genera niveles
-				var unit = '&nbsp;pp.';
+				var unit = ' pp.';
 				if (this.UseProportionalDelta(variable)) {
 					unit = '%';
 				}

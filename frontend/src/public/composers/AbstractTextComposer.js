@@ -84,7 +84,7 @@ AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
 		var number = h.getValueFormatted(dataElement.DeltaValue, false, 1);
 		var ret = (dataElement.DeltaValue >= 0 ? '+' : '') + number;
 		if (number !== '-' && number !== 'n/d') {
-			ret += variable.ComparableUnit;
+			ret += variable.ComparableUnit.replace(' ', '&nbsp;');
 		}
 		return ret;
 	} else {
