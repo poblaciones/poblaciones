@@ -155,7 +155,7 @@ FeatureSelector.prototype.hideTooltip = function () {
 	// Si está visible, remueve el tooltip
 	this.resetTooltipOverlays();
 	if (this.tooltipOverlay !== null) {
-		this.tooltipOverlay.Release();
+		this.tooltipOverlay.overlay.Release();
 		this.tooltipOverlay = null;
 	}
 };
@@ -181,7 +181,7 @@ FeatureSelector.prototype.showTooltip = function () {
 	if (loc.tooltipMarker) {
 		outStyle += ' ibTooltipNoYOffset';
 	}
-	var html = loc.RenderTooltip(loc.tooltipCandidate);
+	var html = h.renderTooltip(loc.tooltipCandidate);
 	loc.tooltipOverlay = window.SegMap.MapsApi.Write(html, coord, 10000000, outStyle, style, true);
 	loc.tooltipOverlay.alwaysVisible = true;
 	loc.setTooltipOverlays();
@@ -216,30 +216,6 @@ FeatureSelector.prototype.resetTooltipOverlays = function () {
 		this.tooltipOverlayPaths[n].remove();
 	}
 	this.tooltipOverlayPaths = null;
-};
-
-FeatureSelector.prototype.RenderTooltip = function (feature) {
-	var caption = null;
-	var value = null;
-	if (feature.value) {
-		var varName = window.SegMap.GetVariableName(feature.parentInfo.MetricId, feature.parentInfo.VariableId);
-		value = str.EscapeHtml(varName) + ': ' + str.EscapeHtml(feature.value);
-	}
-	if (feature.description) {
-		caption = feature.description;
-	}
-	var divider = (value !== null ? 'tpValueTitle' : '');
-	var html = '';
-	if (caption) {
-		html = "<div class='" + divider + "'>" + str.EscapeHtml(caption) + '</div>';
-	}
-	if (value) {
-		html += '<div>' + value + '</div>';
-	}
-	if (html === '') {
-		html = null;
-	}
-	return html;
 };
 
 FeatureSelector.prototype.startTooltipCandidate = function (feature) {

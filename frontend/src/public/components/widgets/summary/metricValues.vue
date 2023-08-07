@@ -24,7 +24,7 @@
 						</span>
 					</td>
 				</tr>
-				<tr @click="clickLabel(label)" v-for="label in variable.ValueLabels" class="hand" :key="label.Id">
+				<tr @click="clickLabel(label)" v-for="label in variableValueLabels" class="hand" :key="label.Id">
 					<template v-if="displayLabel(label)">
 						<template v-if="label.Visible" class="labelRow">
 							<td class="dataBox center">
@@ -35,10 +35,10 @@
 							</td>
 							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
-								<div class="bar" :style="getLength(getValue(label.Values, variable.ValueLabels), variable)"></div>
+								<div class="bar" :style="getLength(getValue(label.Values, variableValueLabels), variable)"></div>
 							</td>
 							<td class='textRight' :class="getMuted()"><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
-							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(getValue(label.Values, variable.ValueLabels), variable.Decimals) }}</td>
+							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(getValue(label.Values, variableValueLabels), variable.Decimals) }}</td>
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted center">
@@ -49,10 +49,10 @@
 							</td>
 							<td class="dataBox text-muted" style="width: 100%">
 								{{ applySymbols(label.Name) }}
-								<div class="bar-muted" :style="getLength( getValue(label.Values, variable.ValueLabels), variable)"></div>
+								<div class="bar-muted" :style="getLength( getValue(label.Values, variableValueLabels), variable)"></div>
 							</td>
 							<td class='text-muted textRight'><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
-							<td class='text-muted textRight'>{{ getValueFormatted(getValue(label.Values, variable.ValueLabels), variable.Decimals) }}</td>
+							<td class='text-muted textRight'>{{ getValueFormatted(getValue(label.Values, variableValueLabels), variable.Decimals) }}</td>
 						</template>
 					</template>
 				</tr>
@@ -127,8 +127,8 @@ export default {
 			const loc = this;
 			if(this.metric.properties.SummaryMetric === 'P' ||
 				this.metric.properties.SummaryMetric === 'A') {
-				for (var label of this.variable.ValueLabels) {
-					percTotal += Number(loc.getValue(label.Values, this.variable.ValueLabels));
+				for (var label of this.variableValueLabels) {
+					percTotal += Number(loc.getValue(label.Values, this.variableValueLabels));
 				};
 				return {
 					aniTotal: 100.00, percTotal: percTotal
@@ -137,8 +137,8 @@ export default {
 			var ret = 0;
 			var tot = 0;
 			var summaryMetric = loc.metric.properties.SummaryMetric;
-			for (var label of this.variable.ValueLabels) {
-				percTotal += Number(loc.getValue(label.Values, this.variable.ValueLabels));
+			for (var label of this.variableValueLabels) {
+				percTotal += Number(loc.getValue(label.Values, this.variableValueLabels));
 				var tvalue = label.Values.Value;
 				if(summaryMetric === 'N' || summaryMetric === 'I') {
 					ret += Number(tvalue);
@@ -160,25 +160,33 @@ export default {
 		},
 		totalCount() {
 			var ret = 0;
-			this.variable.ValueLabels.forEach(function(label) {
+			var values = this.variableValueLabels;
+			values.forEach(function(label) {
 				ret += Number(label.Values.Count);
 			});
 			return ret;
+		},
+		variableValueLabels() {
+			if (this.metric.Compare.Active) {
+				return this.variable.ComparableValueLabels;
+			} else {
+				return this.variable.ValueLabels;
+			}
 		},
 		showTotals() {
 			return this.variable.ShowSummaryTotals === 1 &&
 							this.visibleValues !== 1;
 		},
 		visibleValues() {
-			if (!this.variable.ValueLabels) {
+			if (!this.variableValueLabels) {
 				return 0;
 			}
 			if (this.variable.ShowEmptyCategories) {
-				return this.variable.ValueLabels.length;
+				return this.variableValueLabels.length;
 			} else {
 				var c = 0;
-				for(var n = 0; n < this.variable.ValueLabels.length; n++) {
-					if (this.displayLabel(this.variable.ValueLabels[n])) {
+				for(var n = 0; n < this.variableValueLabels.length; n++) {
+					if (this.displayLabel(this.variableValueLabels[n])) {
 						c++;
 					}
 				}
@@ -203,7 +211,8 @@ export default {
 	},
 	methods: {
 		displayLabel(label) {
-			return label.Values && (this.variable.ShowEmptyCategories || label.Values.Count !== '');
+			return label.Values && (this.variable.ShowEmptyCategories || label.Values.Count !== ''
+							|| this.metric.Compare.Active);
 		},
 		applySymbols(cad) {
 			return str.applySymbols(cad);
@@ -401,8 +410,8 @@ export default {
 			//return '';
 			var tot = this.total.percTotal;
 			var loc = this;
-			/*variable.ValueLabels.forEach(function(label) {
-				tot += Number(loc.getValue(label.Values, variable.ValueLabels));
+			/*variableValueLabels.forEach(function(label) {
+				tot += Number(loc.getValue(label.Values, variableValueLabels));
 			});*/
 			//return 'width:' + ((tot > 0 ? value / tot : 0) * this.panelWidth) + 'px';
 			var prop = (tot > 0 ? value / tot : 0);

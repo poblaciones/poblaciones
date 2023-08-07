@@ -64,7 +64,7 @@ SelectedInfoRouter.prototype.cleanSign = function (color) {
 SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMetric) {
 	var ret = [];
 	ret.push([activeSelectedMetric.properties.Metric.Id]);
-	ret.push(['v', activeSelectedMetric.properties.SelectedVersionIndex, -1]);
+	ret.push(['v', this.GetVersions(activeSelectedMetric), -1]);
 	ret.push(['a', activeSelectedMetric.SelectedVersion().SelectedLevelIndex, 0]);
 	ret.push(['q', activeSelectedMetric.SelectedVersion().SelectedMultiLevelIndex,
 								 activeSelectedMetric.SelectedVersion().SelectedLevelIndex]);
@@ -107,6 +107,15 @@ SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMet
 	//$variableId = Params::Get('i');
 	//$urbanity = Params::Get('u');
 	return ret;
+};
+
+
+SelectedInfoRouter.prototype.GetVersions = function (activeSelectedMetric) {
+	if (activeSelectedMetric.Compare.Active) {
+		return activeSelectedMetric.Compare.SelectedVersionIndex + "," + activeSelectedMetric.properties.SelectedVersionIndex;
+	} else {
+		return activeSelectedMetric.properties.SelectedVersionIndex;
+	}
 };
 
 SelectedInfoRouter.prototype.activeSequences = function (variable) {
@@ -202,8 +211,24 @@ SelectedInfoRouter.prototype.VariablesToRoute = function (activeSelectedMetric) 
 };
 
 SelectedInfoRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
-	var infos =	this.parseInfos(args);
-	this.LoadInfos(infos, updateRoute, skipRestore);
+	var infos = this.parseInfos(args);
+	var loc = this;
+	if (this.InfosHaveComparer(infos)) {
+		window.SegMap.GetGeographyTuples().then(function () {
+			loc.LoadInfos(infos, updateRoute, skipRestore);
+		});
+	} else {
+		loc.LoadInfos(infos, updateRoute, skipRestore);
+	}
+};
+
+SelectedInfoRouter.prototype.InfosHaveComparer = function (infos) {
+	for (var info of infos) {
+		if (info.VersionInfo.indexOf(",") > 0) {
+			return true;
+		}
+	}
+	return false;
 };
 
 SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestore) {
@@ -314,7 +339,7 @@ SelectedInfoRouter.prototype.parseBoundary = function (values) {
 
 SelectedInfoRouter.prototype.parseMetric = function (values) {
 	var id = h.getSafeValue(values, '');
-	var versionIndex = h.getSafeValue(values, 'v', -1);
+	var versionInfo = h.getSafeValue(values, 'v', -1);
 	var levelIndex = h.getSafeValue(values, 'a', 0);
 	var multiLevelIndex = h.getSafeValue(values, 'q', null);
 	if (multiLevelIndex === null) {
@@ -338,7 +363,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 
 	return {
 		Id: parseInt(id),
-		VersionIndex: versionIndex,
+		VersionInfo: versionInfo,
 		LevelIndex: levelIndex,
 		MultiLevelIndex: multiLevelIndex,
 		VariableIndex: variableIndex,
@@ -405,7 +430,18 @@ SelectedInfoRouter.prototype.RestoreBoundaryState = function (boundary, state) {
 SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric, state) {
 	var mapChanged = false;
 	var selectedMetric = activeSelectedMetric.properties;
-	var versionIndex = parseInt(state.VersionIndex);
+	var versionIndex = '';
+	if (state.VersionInfo.indexOf(',') > 0 && activeSelectedMetric.properties.Metric.Comparable) {
+		// son dos porque estaba comparando
+		var parts = state.VersionInfo.split(',');
+		var versionCompare = parseInt(parts[0]);
+		activeSelectedMetric.Compare.Active = true;
+		activeSelectedMetric.Compare.SelectedVersionIndex = versionCompare;
+		versionIndex = parseInt(parts[1]);
+	} else {
+		// es uno
+		versionIndex = parseInt(state.VersionInfo);
+	}
 	if (versionIndex !== -1 && versionIndex !== selectedMetric.SelectedVersionIndex &&
 		versionIndex < selectedMetric.Versions.length) {
 		selectedMetric.SelectedVersionIndex = versionIndex;

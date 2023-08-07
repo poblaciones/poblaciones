@@ -25,6 +25,8 @@ class MapSettings
 
 	public $UseDeckgl = true;
 
+	public $UseCompareSeries = false;
+
 	public $isOWSEnabled = false;
 
 	public $UseMultiselect = false;

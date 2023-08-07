@@ -1,6 +1,7 @@
 import LocationsComposer from '@/public/composers/LocationsComposer';
 import DataShapeComposer from '@/public/composers/DataShapeComposer';
 import SegmentsComposer from '@/public/composers/SegmentsComposer';
+import Compare from './Compare.js';
 import Vue from 'vue';
 
 import h from '@/public/js/helper';
@@ -27,9 +28,10 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.RankingSize = 10;
 	this.RankingDirection = 'D';
 	this.KillDuplicateds = true;
-	this.fillEmptySummaries();
 	this.activeSequenceSteps = {};
 	this.blockSize = window.SegMap.tileDataBlockSize;
+	this.Compare = new Compare(this);
+	this.fillEmptySummaries();
 };
 
 ActiveSelectedMetric.prototype.GetAllLevels = function () {
@@ -123,6 +125,20 @@ ActiveSelectedMetric.prototype.fillEmptySummaries = function () {
 						ValueId: label.Id,
 					};
 				});
+				if (variable.ComparableValueLabels) {
+					variable.ComparableValueLabels.forEach(function (label) {
+						label.Values = {
+							Value: '',
+							Summary: '',
+							Count: '',
+							Total: '',
+							Km2: '',
+							VariableId: variable.Id,
+							ValueId: label.Id,
+						};
+					});
+				}
+
 			});
 		});
 	});
@@ -521,10 +537,15 @@ ActiveSelectedMetric.prototype.IsFiltering = function () {
 	return false;
 };
 
+ActiveSelectedMetric.prototype.ResolveVariableValues = function (variable) {
+	return this.Compare.Active ? variable.ComparableValueLabels : variable.ValueLabels;
+};
+
 ActiveSelectedMetric.prototype.ResolveValueLabelVisibility = function (labelId) {
 	var variable = this.SelectedVariable();
-	for (let i = 0; i < variable.ValueLabels.length; i++) {
-		var value = variable.ValueLabels[i];
+	var values = this.ResolveVariableValues(variable);
+	for (let i = 0; i < values.length; i++) {
+		var value = values[i];
 		if (value['Id'] === labelId) {
 			return value.Visible;
 		}
@@ -535,8 +556,9 @@ ActiveSelectedMetric.prototype.ResolveValueLabelVisibility = function (labelId) 
 
 ActiveSelectedMetric.prototype.ResolveValueLabelSymbol = function (labelId) {
 	var variable = this.SelectedVariable();
-	for (let i = 0; i < variable.ValueLabels.length; i++) {
-		var value = variable.ValueLabels[i];
+	var values = this.ResolveVariableValues(variable);
+	for (let i = 0; i < values.length; i++) {
+		var value = values[i];
 		if (value['Id'] === labelId) {
 			return value.Symbol;
 		}
@@ -546,8 +568,9 @@ ActiveSelectedMetric.prototype.ResolveValueLabelSymbol = function (labelId) {
 };
 
 ActiveSelectedMetric.prototype.ResolveStyle = function (variable, labelId) {
-	for (let i = 0; i < variable.ValueLabels.length; i++) {
-		var value = variable.ValueLabels[i];
+	var values = this.ResolveVariableValues(variable);
+	for (let i = 0; i < values.length; i++) {
+		var value = values[i];
 		if (value['Id'] === labelId) {
 			var fillColor = value.FillColor;
 			if (this.GetPattern(variable) === 1) {
@@ -741,8 +764,9 @@ ActiveSelectedMetric.prototype.getValidMetrics = function (variable) {
 ActiveSelectedMetric.prototype.GetStyleColorList = function() {
 	var variable = this.SelectedVariable();
 	var ret = [];
-	for (let i = 0; i < variable.ValueLabels.length; i++) {
-		var value = variable.ValueLabels[i];
+	var values = this.ResolveVariableValues(variable);
+	for (let i = 0; i < values.length; i++) {
+		var value = values[i];
 		ret.push({ cs: 'cs' + value['Id'], className: value['Id'], fillColor: value.FillColor });
 	}
 	return ret;
@@ -755,8 +779,9 @@ ActiveSelectedMetric.prototype.CurrentOpacity = function () {
 ActiveSelectedMetric.prototype.GetStyleColorDictionary = function () {
 	var variable = this.SelectedVariable();
 	var ret = {};
-	for (let i = 0; i < variable.ValueLabels.length; i++) {
-		var value = variable.ValueLabels[i];
+	var values = this.ResolveVariableValues(variable);
+	for (let i = 0; i < values.length; i++) {
+		var value = values[i];
 		ret[value['Id']] = value.FillColor;
 	}
 	return ret;
@@ -879,6 +904,17 @@ ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord) {
 		return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, suffix);
 	}
 };
+
+ActiveSelectedMetric.prototype.GetDataServiceParamsCompare = function (coord) {
+	if (!this.Compare.Active) {
+		return null;
+	}
+	var ret = this.GetDataServiceParams(coord);
+	ret['v'] = this.Compare.SelectedVersion().Version.Id;
+	ret['a'] = this.Compare.SelectedLevel().Id;
+	return ret;
+};
+
 
 ActiveSelectedMetric.prototype.GetSubset = function (coord) {
 	if (this.UseBlockedRequests()) {

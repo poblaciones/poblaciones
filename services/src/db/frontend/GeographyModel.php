@@ -88,4 +88,39 @@ class GeographyModel extends BaseModel
 		$ret = $this->GetCountryGeographies($country);
 		return $this->ArrayToDictionary($ret);
 	}
+
+	public function GetGeographyTuples()
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT
+				gtu_id Id,
+				concat(g1.geo_caption, ' (',  g1.geo_revision , ') -> ', g2.geo_caption, ' (',  g2.geo_revision , ')') Caption,
+				gtu_geography_id GeographyId,
+				gtu_previous_geography_id PreviousGeographyId
+			FROM geography_tuple
+			JOIN geography g1 ON gtu_geography_id = g1.geo_id
+			JOIN geography g2 ON gtu_previous_geography_id = g2.geo_id
+			ORDER BY gtu_id";
+		$ret = App::Db()->fetchAll($sql);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public function GetGeographyTupleItems()
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT
+					gti_geography_tuple_id as TupleId,
+					gti_geography_item_id as ItemId,
+					gti_geography_previous_item_id as PreviousItemId
+				FROM geography_tuple
+				JOIN geography_tuple_item
+				ON gtu_id = gti_geography_tuple_id
+				AND gtu_previous_geography_id = gti_geography_previous_id
+				ORDER BY gti_geography_tuple_id,
+					gti_geography_item_id, gti_geography_previous_id";
+		$ret = App::Db()->fetchAll($sql);
+		Profiling::EndTimer();
+		return $ret;
+	}
 }

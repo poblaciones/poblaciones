@@ -13,20 +13,27 @@ function TileRequest(queue, staticQueue, selectedMetricOverlay, coord, zoom, key
 	this.div = div;
 	this.cancel1 = null;
 	this.cancel2 = null;
+	this.cancel3 = null;
 	this.preCancel1Queue = null;
 	this.preCancel2Queue = null;
+	this.preCancel3Queue = null;
 	this.preCancel1 = null;
 	this.preCancel2 = null;
+	this.preCancel3 = null;
 	this.CancelToken1 = axios.CancelToken;
 	this.CancelToken2 = axios.CancelToken;
-	this.dataDone = null;
+	this.CancelToken3 = axios.CancelToken;
+	this.dataDone = { Main: null, Compare: null };
+	this.requiredDatas = 1;
 	this.mapDone = null;
 	this.gradient = null;
 	this.dataSubscribers = [];
+	this.compareDataSubscribers = [];
 	this.prevMapData = null;
 	this.Page = 0;
 	this.cancelled = false;
 	this.dataBlockRequest = null;
+	this.compareDataBlockRequest = null;
 	this.queue = queue;
 	this.staticQueue = staticQueue;
 }
@@ -45,6 +52,21 @@ TileRequest.prototype.CancelHttpRequests = function () {
 			}
 			if (this.preCancel1 !== null) {
 				this.preCancel1Queue.Release(this.preCancel1);
+			}
+		}
+	}
+	if (this.compareDataBlockRequest) {
+		// Si está suscripto a un pedido en bloque, pide
+		// la cancelación del grupo
+		this.compareDataBlockRequest.CancelHttpRequests();
+	} else {
+		// Si no, evalúa su propia cancelación
+		if (this.allCompareSubscribersAreCancelled() && this.cancelled) {
+			if (this.cancel3 !== null) {
+				this.cancel3('cancelled');
+			}
+			if (this.preCancel3 !== null) {
+				this.preCancel3Queue.Release(this.preCancel3);
 			}
 		}
 	}
@@ -67,9 +89,7 @@ TileRequest.prototype.GetTile = function () {
 	this.params = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParams(this.coord);
 	this.params.z = this.zoom;
 	this.subset = (this.selectedMetricOverlay.activeSelectedMetric.GetSubset ? this.selectedMetricOverlay.activeSelectedMetric.GetSubset(this.coord) : null);
-
 	var info = this.url.path + JSON.stringify(this.params);
-
 	// Resuelve el data
 	var dataQueue = (!this.url.useStaticQueue ? this.queue : this.staticQueue);
 	var existing = dataQueue.GetSameRequest(info);
@@ -80,6 +100,24 @@ TileRequest.prototype.GetTile = function () {
 		this.preCancel1Queue = dataQueue;
 		dataQueue.Enlist(this, this.startDataRequest, dataQueue, function (p) { loc.preCancel1 = p; }, info);
 	}
+	// Y puede haber otros que requieran 2 (para comparar)
+	this.paramsCompare = this.selectedMetricOverlay.activeSelectedMetric.GetDataServiceParamsCompare(this.coord);
+	if (this.paramsCompare) {
+		this.requiredDatas = 2;
+		this.paramsCompare.z = this.zoom;
+		var info = this.url.path + JSON.stringify(this.paramsCompare);
+		// Resuelve el data
+		var dataQueue = (!this.url.useStaticQueue ? this.queue : this.staticQueue);
+		var existing = dataQueue.GetSameRequest(info);
+		if (existing) {
+			this.compareDataBlockRequest = existing;
+			existing.compareDataSubscribe(this);
+		} else {
+			this.preCancel3Queue = dataQueue;
+			dataQueue.Enlist(this, this.startCompareDataRequest, dataQueue, function (p) { loc.preCancel3 = p; }, info);
+		}
+	}
+
 	// Resuelve el geography
 	if (this.selectedMetricOverlay.geographyService.url) {
 		var geoQueue = (this.selectedMetricOverlay.geographyService.isDatasetShapeRequest ? this.queue : this.staticQueue);
@@ -95,17 +133,34 @@ TileRequest.prototype.processDataResponse = function (data) {
 	if (this.subset) {
 		data = data.Data[this.subset[0]][this.subset[1]];
 	}
-	this.dataDone = data;
+	this.dataDone.Main = data;
+	this.ProcessResultsIfCompleted();
+};
+
+
+TileRequest.prototype.processCompareDataResponse = function (data) {
+	if (this.cancelled) {
+		return;
+	}
+	if (this.subset) {
+		data = data.Data[this.subset[0]][this.subset[1]];
+	}
+	this.dataDone.Compare = data;
 	this.ProcessResultsIfCompleted();
 };
 
 TileRequest.prototype.requestIsComplete = function () {
-	return this.dataDone &&
+	return this.dataDone.Main && (this.requiredDatas == 1 || this.dataDone.Compare)
+		&&
 		(this.mapDone || this.selectedMetricOverlay.geographyService.url === null);
 };
 
 TileRequest.prototype.dataSubscribe = function (subscriber) {
 	this.dataSubscribers.push(subscriber);
+};
+
+TileRequest.prototype.compareDataSubscribe = function (subscriber) {
+	this.compareDataSubscribers.push(subscriber);
 };
 
 TileRequest.prototype.notifyDataSubscribers = function (data) {
@@ -115,6 +170,16 @@ TileRequest.prototype.notifyDataSubscribers = function (data) {
 		}
 	}
 };
+
+TileRequest.prototype.notifyCompareDataSubscribers = function (data) {
+	if (this.dataSubscribers.length > 0) {
+		for (var n = 0; n < this.compareDataSubscribers.length; n++) {
+			this.compareDataSubscribers[n].processCompareDataResponse(data);
+		}
+	}
+};
+
+
 TileRequest.prototype.allSubscribersAreCancelled = function () {
 	if (this.dataSubscribers.length > 0) {
 		for (var n = 0; n < this.dataSubscribers.length; n++) {
@@ -126,6 +191,39 @@ TileRequest.prototype.allSubscribersAreCancelled = function () {
 	return true;
 };
 
+TileRequest.prototype.allCompareSubscribersAreCancelled = function () {
+	if (this.compareDataSubscribers.length > 0) {
+		for (var n = 0; n < this.compareDataSubscribers.length; n++) {
+			if (!this.compareDataSubscribers[n].cancelled) {
+				return false;
+			}
+		}
+	}
+	return true;
+};
+
+TileRequest.prototype.startCompareDataRequest = function (queue) {
+	var loc = this;
+	var params = this.paramsCompare;
+
+	window.SegMap.Get(this.url.server + this.url.path, {
+		params: params,
+		cancelToken: new this.CancelToken3(function executor(c) { loc.cancel3 = c; })
+	},
+		this.url.useStaticQueue
+	).then(function (res) {
+		queue.Release(loc.preCancel3);
+		loc.notifyCompareDataSubscribers(res.data);
+		loc.processCompareDataResponse(res.data);
+	}).catch(function (error) {
+		queue.Release(loc.preCancel3);
+		var q = params;
+		if (error.message !== 'cancelled') {
+			loc.selectedMetricOverlay.SetDivFailure(loc.div);
+		}
+		err.err('GetTileCompareData', error);
+	});
+};
 
 TileRequest.prototype.startDataRequest = function (queue) {
 	var loc = this;

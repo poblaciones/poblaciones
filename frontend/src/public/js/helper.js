@@ -1,4 +1,5 @@
-var TWEEN = require('@tweenjs/tween.js');
+const TWEEN = require('@tweenjs/tween.js');
+const str = require('@/common/framework/str');
 
 module.exports = {
 	trimNumberCoords(n) {
@@ -38,6 +39,29 @@ module.exports = {
 			return false;
 		}
 		return true;
+	},
+	renderTooltip(feature) {
+		var caption = null;
+		var value = null;
+		if (feature.value) {
+			var varName = window.SegMap.GetVariableName(feature.parentInfo.MetricId, feature.parentInfo.VariableId);
+			value = (str.EscapeHtml(varName) + '').trim() + ': ' + feature.value;
+		}
+		if (feature.description) {
+			caption = feature.description;
+		}
+		var divider = (value !== null ? 'tpValueTitle' : '');
+		var html = '';
+		if (caption) {
+			html = "<div class='" + divider + "'>" + str.EscapeHtml(caption) + '</div>';
+		}
+		if (value) {
+			html += '<div>' + value + '</div>';
+		}
+		if (html === '') {
+			html = null;
+		}
+		return html;
 	},
 	renderMetricValue(value, total, hasTotals, normalizationScale, decimals) {
 		if (value === '-') {
@@ -167,8 +191,10 @@ module.exports = {
 		return Number(ret).toLocaleString('es');
 	},
 	formatNum(num, decimals = 0) {
-		if (num === '') {
+		if (num === '' || num === '-') {
 			return '-';
+		} else if (num === 'n/d') {
+			return 'n/d';
 		} else {
 			var n = Number(num);
 			n = +n.toFixed(decimals);

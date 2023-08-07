@@ -84,13 +84,20 @@ TileOverlay.prototype.resolvePreview = function (div, tileBounds, coord, zoom) {
 };
 
 
-TileOverlay.prototype.process = function (mapResults, dataResults, gradient, tileKey, div, x, y, z) {
+TileOverlay.prototype.process = function (mapResults, data, gradient, tileKey, div, x, y, z) {
 	if ((tileKey in this.requestedTiles) === false || this.disposed) {
 		return;
 	}
 	delete this.requestedTiles[tileKey];
 	var mercator = new Mercator();
 	var tileBounds = mercator.getTileBounds({ x: x, y: y, z: z });
+	var dataResults = data.Main;
+
+	// Si recibe data.Compare, tiene que iniciar la comparación...
+	if (data.Compare) {
+		this.composer.activeSelectedMetric.Compare.Merge(data.Main, data.Compare);
+	}
+
 	var features = (dataResults.Data.features !== undefined ? dataResults.Data.features : dataResults.Data);
 	this.processLabels(features, tileKey, tileBounds, x, y, z);
 	var svg = null;

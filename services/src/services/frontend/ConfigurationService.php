@@ -105,6 +105,8 @@ class ConfigurationService extends BaseService
 									'UseUrbanity' => App::Settings()->Map()->UseUrbanity,
 									'UseMultiselect' => App::Settings()->Map()->UseMultiselect,
 									'UseDeckgl' => App::Settings()->Map()->UseDeckgl,
+									'UseCompareSeries' => App::Settings()->Map()->UseCompareSeries,
+
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 
 									'MapsAPI' => $this->GetCurrentMapProvider(),

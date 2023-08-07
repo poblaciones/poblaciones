@@ -7,6 +7,7 @@ use helena\classes\App;
 use helena\classes\Clipper;
 use helena\classes\ClipperRound;
 use helena\classes\GeoJson;
+use minga\framework\Arr;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\SnapshotGeographyItemModel;
@@ -97,6 +98,44 @@ class GeographyService extends BaseService
 				return false;
 		}
 		return true;
+	}
+
+	public function GetGeographyTuples()
+	{
+		$cartoTable = new GeographyModel();
+		$tuples = $cartoTable->GetGeographyTuples();
+		$items = $cartoTable->GetGeographyTupleItems();
+		$tree = [];
+
+		foreach($tuples as $tuple)
+		{
+			$tuple['Items'] = [];
+			$tree[] = $tuple;
+		}
+		$currentKey = null;
+		$currentItems = [];
+		$ret = [];
+		foreach ($items as $item)
+		{
+			$key = $item['TupleId'];
+			if ($currentKey !== $key) {
+				if ($currentKey !== null) {
+					$tuple = Arr::GetItemByNamedValue($tree, 'Id', $currentKey);
+					$tuple['Items'] = $currentItems;
+					$ret[$tuple['GeographyId'] . "_" . $tuple['PreviousGeographyId']] = $tuple;
+				}
+				$currentItems = [];
+				$currentKey = $key;
+			}
+			$currentItems[$item['ItemId']] = $item['PreviousItemId'];
+		}
+	    // Asegurarse de que el último conjunto de items también se agregue al árbol
+		if ($currentKey !== null) {
+			$tuple = Arr::GetItemByNamedValue($tree, 'Id', $currentKey);
+			$tuple['Items'] = $currentItems;
+			$ret[$tuple['GeographyId'] . "_" . $tuple['PreviousGeographyId']] = $tuple;
+		}
+		return $ret;
 	}
 }
 

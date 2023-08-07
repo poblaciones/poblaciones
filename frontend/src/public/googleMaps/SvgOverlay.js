@@ -14,13 +14,6 @@ function SvgOverlay(map, svg, index, bounds) {
 
 SvgOverlay.prototype = new window.google.maps.OverlayView();
 
-SvgOverlay.prototype.SetFeatureIds = function (ids) {
-	this.FIDs = ids;
-	for (var i = 0; i < ids.length; i++) {
-		window.SegMap.textCanvas[ids[i]] = this;
-	}
-};
-
 SvgOverlay.prototype.onAdd = function () {
 
 	/*var div = document.createElement('div');

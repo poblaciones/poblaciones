@@ -47,7 +47,7 @@
 			</template>
 		</div>
 		<div class="sourceRow">
-			<div class="btn-group" style="float: left">
+			<div class="btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"
 								class="btn btn-default btn-xs exp-serie-item"
@@ -55,18 +55,31 @@
 					{{ ver.Version.Name }}
 				</button>
 			</div>
-			<Source style="float:right" :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly"
+			<div style="padding: 0px 20px; float: left" v-if="useComparer && metric.Compare.Active">
+				<vue-slider v-model="compareVersions" tooltip="none" :marks="true" :adsorb="true"
+										labelStyle="font-size: 12px;" :width="(35 * versionsArray.length)"
+										labelActiveStyle="active"
+										:dotSize="14" :data="versionsArray" :lazy="true" @change="sliderChanged" :enableCross="false" :minRange="1"></vue-slider>
+			</div>
+			<div class="btn-group" style="float: left" v-if="!Embedded.Readonly && useComparer">
+				<button type="button"
+								@click="toggleCompare()"
+								class="btn btn-default btn-xs exp-serie-item"
+								:class="(metric.Compare.Active ? 'active' : '')">
+					Dif. %
+				</button>
+			</div>
+			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly" style="float: right"
 							@clickDownload="clickDescargar" @clickSource="clickFuente" />
-			<div style="clear: both; height: 0px">
+			<div style="clear: both; height: 0px"></div>
+		</div>
+			<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
+				Cobertura: {{ metric.SelectedVersion().Version.PartialCoverage }}.
+			</div>
+			<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
+				<Ranking :metric="metric" :clipping="clipping" />
 			</div>
 		</div>
-		<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
-			Cobertura: {{ metric.SelectedVersion().Version.PartialCoverage }}.
-		</div>
-		<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
-			<Ranking :metric="metric" :clipping="clipping" />
-		</div>
-	</div>
 </template>
 <script>
 import MetricVariables from './metricVariables';
@@ -76,6 +89,10 @@ import Source from './source';
 import Ranking from './ranking';
 import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
 import Helper from '@/public/js/helper';
+import VueSlider from 'vue-slider-component';
+import 'vue-slider-component/theme/default.css';
+// slider doc: https://nightcatsama.github.io/vue-slider-component/#/api/methods
+
 export default {
 	name: 'metric',
 	components: {
@@ -84,12 +101,19 @@ export default {
 		Source,
 		DragHorizontal,
 		MetricVariables,
+		VueSlider,
 		Ranking,
 	},
 	props: [
 		'metric',
 		'clipping',
-	],
+		],
+	data() {
+		return { compareVersions: [null, null] };
+	},
+	mounted() {
+		this.updateCompareVersions();
+	},
 	methods: {
 		getActive(index) {
 			if (this.metric.properties.Versions.length == 1) {
@@ -109,6 +133,22 @@ export default {
 		clickFuente() {
 			window.Popups.WorkMetadata.showByMetric(this.metric, this.metric.properties.Metric.Name);
 		},
+		toggleCompare() {
+			var loc = this;
+			if (!this.metric.Compare.Active) {
+				// Obtiene los geographyTuples antes de habilitar la opción...
+				window.SegMap.GetGeographyTuples().then(function () {
+					loc.metric.Compare.Active = true;
+					loc.updateCompareVersions();
+					loc.metric.UpdateSummary();
+					loc.metric.UpdateMap();
+				});
+			} else {
+				loc.metric.Compare.Active = false;
+				loc.metric.UpdateSummary();
+				loc.metric.UpdateMap();
+			}
+		},
 		hasLegends(level) {
 			for (var variable of level.Variables) {
 				if (variable.Legend !== null && variable.Legend.length > 0) {
@@ -116,6 +156,17 @@ export default {
 				}
 			}
 			return false;
+		},
+		sliderChanged(value) {
+			var minIndex = this.versionsArray.indexOf(value[0]);
+			var maxIndex = this.versionsArray.indexOf(value[1]);
+
+			if (minIndex != this.metric.Compare.SelectedVersionIndex) {
+				this.metric.Compare.SelectVersion(minIndex);
+			}
+			if (maxIndex != this.metric.SelectedVersionIndex) {
+				this.metric.SelectVersion(maxIndex);
+			}
 		},
 		changeSelectedVersionIndex(index) {
 			this.metric.SelectVersion(index);
@@ -127,6 +178,23 @@ export default {
 		},
 		changeMetricVisibility() {
 			this.metric.ChangeMetricVisibility();
+		},
+		updateCompareVersions() {
+			if (!this.metric.Compare.Active) {
+				return;
+			}
+			var version = this.metric.Compare.SelectedVersion();
+			if (version) {
+				this.compareVersions = [version.Version.Name, this.metric.SelectedVersion().Version.Name];
+				return;
+			}
+			// No tiene nada indicado... pone algo
+			var versionsArray = this.versionsArray;
+			if (versionsArray.length == 1) {
+				this.compareVersions = [versionsArray[0], versionsArray[0]];
+			} else {
+				this.compareVersions = [versionsArray[versionsArray.length - 2], versionsArray[versionsArray.length -1]];
+			}
 		},
 		rankingShown() {
 			var vScrollTo = require('vue-scrollto');
@@ -147,6 +215,9 @@ export default {
 			Embedded() {
 				return window.Embedded;
 			},
+		useComparer() {
+			return window.Use.UseCompareSeries && this.metric.properties.Metric.Comparable && this.metric.properties.Versions.length > 1;
+		},
 			urbanity() {
 				return this.metric.properties.SelectedUrbanity;
 			},
@@ -155,8 +226,15 @@ export default {
 			},
 			hasUrbanityFilter() {
 				return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
-			},
-			getUrbanityTextTooltip() {
+		},
+		versionsArray() {
+			var ret = [];
+			for (var version of this.metric.properties.Versions) {
+				ret.push(version.Version.Name);
+			}
+			return ret;
+		},
+		getUrbanityTextTooltip() {
 				return this.metric.GetSelectedUrbanityInfo().tooltip;
 			},
 			getUrbanityTextActive() {
@@ -173,15 +251,42 @@ export default {
 		}
 };
 </script>
-<style scoped>
-.metricBlock
-{
-	padding-top: 1px;
-	cursor: default;
+<style>
+.vue-slider-process {
+	background-color: #666 !important;
 }
-.rankingBox {
-	padding: 16px 0px 0px 0px;
-}
+	.vue-slider-mark-label {
+		font-size: 12px !important;
+		border-radius: 26px;
+		border-style: solid;
+		padding: 2px 5px;
+		border-radius: 20px;
+		box-sizing: border-box;
+		border-width: 2px;
+		background-color: transparent;
+		font-weight: 500;
+		border-color: #66615B;
+		color: #66615B;
+	}
+
+	.vue-slider-mark-label-active {
+		color: #333;
+		background-color: #d4d4d4;
+	}
+	.vue-slider-dot-handle-focus {
+		box-shadow: 0px 0px 1px 2px rgba(90, 90, 90, 0.36) !important;
+	}
+</style>
+<style scoped >
+	.metricBlock {
+		padding-top: 1px;
+		cursor: default;
+	}
+
+	.rankingBox {
+		padding: 16px 0px 0px 0px;
+	}
+
 	.smallIcon {
 		font-size: 14px;
 		margin-top: 2px

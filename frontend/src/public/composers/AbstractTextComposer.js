@@ -80,9 +80,18 @@ AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElemen
 };
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
-	var ret = h.renderMetricValue(dataElement.Value, dataElement.Total,
-		variable.HasTotals, variable.NormalizationScale, variable.Decimals) + h.ResolveNormalizationCaption(variable);
-	return ret.trimRight();
+	if (dataElement.DeltaValue) {
+		var number = h.getValueFormatted(dataElement.DeltaValue, false, 1);
+		var ret = (dataElement.DeltaValue >= 0 ? '+' : '') + number;
+		if (number !== '-' && number !== 'n/d') {
+			ret += variable.ComparableUnit;
+		}
+		return ret;
+	} else {
+		var ret = h.renderMetricValue(dataElement.Value, dataElement.Total,
+			variable.HasTotals, variable.NormalizationScale, variable.Decimals) + h.ResolveNormalizationCaption(variable);
+		return ret.trimRight();
+	}
 };
 
 
@@ -162,11 +171,11 @@ AbstractTextComposer.prototype.CreateFeatureTextCanva = function(type, ids, tile
 	var zIndex = 100000 - this.index;
 	// lo resuelven los hijos
 	var canvas = this.MapsApi.Write('', location, zIndex, this.textStyle, null, null, type, hidden);
-	canvas.zoom = zoom;
+	canvas.overlay.zoom = zoom;
 	if (ids) {
-		canvas.SetFeatureIds(ids);
+		canvas.overlay.SetFeatureIds(ids);
 	}
-	return canvas;
+	return canvas.overlay;
 };
 
 AbstractTextComposer.prototype.GetFeatureTextCanva = function(ids, hidden, zoom) {
