@@ -252,11 +252,11 @@ class SnapshotByDatasetModel
 		}
 		// Calcula para cada level
 		$sql = "SELECT ST_AsText(PolygonEnvelope(LineString(
-                POINT(Min(ST_X(PointN(ExteriorRing(sna_envelope), 1))),
-				MIN(ST_Y(PointN(ExteriorRing(sna_envelope), 1)))),
+                POINT(Min(ST_X(ST_PointN(ST_ExteriorRing(sna_envelope), 1))),
+				MIN(ST_Y(ST_PointN(ST_ExteriorRing(sna_envelope), 1)))),
 
-				POINT(Max(ST_X(PointN(ExteriorRing(sna_envelope), 3))),
-				MAX(ST_Y(PointN(ExteriorRing(sna_envelope), 3))))
+				POINT(Max(ST_X(ST_PointN(ST_ExteriorRing(sna_envelope), 3))),
+				MAX(ST_Y(ST_PointN(ST_ExteriorRing(sna_envelope), 3))))
                               ))) extents
 				FROM  " . self::SnapshotTable($dataset['dat_table']);
 		if ($notNullCondition !== '')

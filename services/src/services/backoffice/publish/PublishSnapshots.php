@@ -161,10 +161,10 @@ class PublishSnapshots extends BaseService
 						JOIN work ON wrk_metadata_id = met_id
 						SET met_extents = (SELECT
 														ST_Envelope(LineString(
-										POINT(Min(ST_X(PointN(ExteriorRing(mvl_extents), 1))),
-										MIN(ST_Y(PointN(ExteriorRing(mvl_extents), 1)))),
-										POINT(Max(ST_X(PointN(ExteriorRing(mvl_extents), 3))),
-										MAX(ST_Y(PointN(ExteriorRing(mvl_extents), 3))))))
+										POINT(Min(ST_X(ST_PointN(ST_ExteriorRing(mvl_extents), 1))),
+										MIN(ST_Y(ST_PointN(ST_ExteriorRing(mvl_extents), 1)))),
+										POINT(Max(ST_X(ST_PointN(ST_ExteriorRing(mvl_extents), 3))),
+										MAX(ST_Y(ST_PointN(ST_ExteriorRing(mvl_extents), 3))))))
 										FROM dataset, metric_version_level
 										WHERE dat_id = mvl_dataset_id and dat_work_id = ?)
 						WHERE wrk_id = ?";
