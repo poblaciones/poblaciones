@@ -144,6 +144,7 @@
 <script>
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/framework/arr';
+import str from '@/common/framework/str';
 import f from '@/backoffice/classes/Formatter';
 import date from '@/common/framework/date';
 import speech from '@/common/js/speech';
@@ -273,7 +274,7 @@ export default {
 					return sign * loc.ocompare(speech.GetValidaDate(a), speech.GetValidaDate(b));
 
 				} else {
-					return sign * loc.ocompare(a[sortBy], b[sortBy]);
+					return sign * str.humanCompare(a[sortBy], b[sortBy]);
 				}
 			});
 		},

@@ -55,7 +55,7 @@
 					{{ ver.Version.Name }}
 				</button>
 			</div>
-			<div style="padding: 0px 20px; float: left" v-if="useComparer && metric.Compare.Active">
+			<div style="padding: 0px 20px 20px 20px; float: left " v-if="useComparer && metric.Compare.Active">
 				<vue-slider v-model="compareVersions" tooltip="none" :marks="true" :adsorb="true"
 										labelStyle="font-size: 12px;" :width="(35 * versionsArray.length)"
 										labelActiveStyle="active"

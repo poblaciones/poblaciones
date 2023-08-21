@@ -41,6 +41,47 @@ module.exports = {
 	isNumeric(n) {
 		return !isNaN(parseFloat(n)) && isFinite(n);
 	},
+	removeAccents(str) {
+		return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	},
+	padZeros(num, length) {
+		return num.toString().padStart(length, "0");
+	},
+	humanCompare(text1, text2) {
+		// divide el texto en partes, trata números como números
+		// evita acentos.
+		var a = this.humanPrepare(text1);
+		var b = this.humanPrepare(text2);
+		return a.localeCompare(b);
+	},
+	humanPrepare(text) {
+		var tokens = text.split(" ");
+		// Procesar cada token
+		const procesados = tokens.map((token) => {
+			// Remover acentos si el token contiene caracteres acentuados
+			var sinAcentos = this.removeAccents(token);
+
+			// Si el token es un número, aplicar padding de ceros
+			if (sinAcentos.startsWith("(") && sinAcentos.endsWith(")")) {
+				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 2);
+			}
+			if (sinAcentos.startsWith("{") && sinAcentos.endsWith("}")) {
+				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 2);
+			}
+			if (sinAcentos.startsWith("[") && sinAcentos.endsWith("]")) {
+				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 2);
+			}
+			if (sinAcentos.endsWith(".")) {
+				sinAcentos = sinAcentos.substring(0, sinAcentos.length - 1);
+			}
+
+			const esNumero = /^\d+$/.test(sinAcentos);
+			const tokenProcesado = esNumero ? this.padZeros(sinAcentos, 10) : sinAcentos;
+
+			return tokenProcesado;
+		});
+		return procesados.join(" ");
+	},
 	isNumericFlex(n) {
 		var t = '' + n;
 		t = t.replaceAll(",", ".");
@@ -49,6 +90,7 @@ module.exports = {
 		}
 		return !isNaN(parseFloat(t)) && isFinite(t);
 	},
+
 	countMatches(cad, item) {
 		var ret = 0;
 		var i = 0;

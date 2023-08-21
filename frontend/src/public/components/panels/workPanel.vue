@@ -3,7 +3,14 @@
 		<div>
 			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody" :style="'background-color: ' + backgroundColor">
 				<div class="floatBox pull-right exp-hiddable-block" style="margin-top: -1px">
-					<button type="button" class="btn smallButton spaceNext" @click="showMetrics">Agregar indicador</button>
+					<button type="button" class="btn smallButton" :class="spaceRight" @click="showMetrics">Agregar indicador</button>
+					<div style="position: absolute; top: 10px; right: 5px; zoom: 1.22;" v-if="hasOnboarding()">
+						<button type="button" class="btn btn-default btn-xs"
+										style="border-color: #FFF"
+										title="Bienvenida" @click="showOnboarding()">
+							<help-circle-icon style="color: #fff" title="Bienvenida" />
+						</button>
+					</div>
 					<div class="metadataInfo" style="position: relative; z-index: 10;" :style="(showButtonsInSingleRow() ? 'width: 1px' : '')">
 						<div class="sourceInfo exp-hiddable-block" :style="getMetadataStyle()">
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
@@ -12,7 +19,6 @@
 								Metadatos
 							</a>
 						</div>
-
 					</div>
 				</div>
 				<div v-if="work.Current.Metadata.Institution.Name" class="littleRow preTitleRow">
@@ -26,11 +32,14 @@
 				</div>
 			</div>
 		</div>
+		<onboarding ref="Onboarding" :backgroundColor='backgroundColor' :work="work" v-if="work.Current && work.Current.Onboarding.Enabled"></onboarding>
 	</nav>
 </template>
 
 <script>
 import LinkIcon from 'vue-material-design-icons/Link.vue';
+import Onboarding from '../popups/onboarding';
+	import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 
 export default {
 	name: 'workPanel',
@@ -40,12 +49,23 @@ export default {
 	],
 	components: {
 		LinkIcon,
+		Onboarding,
+		HelpCircleIcon
 	},
 	data() {
 		return {
 			showZones: false,
 			showPresentation: false,
 		};
+	},
+	computed: {
+		spaceRight() {
+			if (this.hasOnboarding()) {
+				return 'spaceNextOb';
+			} else {
+				return 'spaceNext';
+			}
+		}
 	},
 	methods: {
 		showMetrics() {
@@ -74,6 +94,12 @@ export default {
 			var ret = (this.work.Current.Metadata.Name ? 1 : 0) + (this.work.Current.Metadata.Institution.Name ? 1 : 0)
 				+ (this.work.Current.Metadata.Authors ? 1 : 0);
 			return ret;
+		},
+		hasOnboarding() {
+			return this.work.Current.Onboarding.Enabled;
+		},
+		showOnboarding() {
+			this.$refs.Onboarding.toggleModal();
 		},
 		getMetadataStyle() {
 			if (this.showButtonsInSingleRow()) {
@@ -204,6 +230,9 @@ export default {
 .spaceNext {
 	margin-right: 8px;
 }
+	.spaceNextOb {
+		margin-right: 41px;
+	}
 	.workPanelBody {
 		background-color: #00A0D2;
 		color: #fff !important;

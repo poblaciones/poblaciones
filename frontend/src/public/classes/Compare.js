@@ -28,17 +28,17 @@ Compare.prototype.GenerateComparableValueLabels = function () {
 				variable.ComparableUnit = unit;
 				variable.ComparableValueLabels = [];
 				this.AddComparableLabel(variable, null, "No disponible");
-				this.AddComparableLabel(variable, 50, "Aumentó 50" + unit + " o más");
-				this.AddComparableLabel(variable, 20, "> 20 a 50" + unit);
-				this.AddComparableLabel(variable, 10, "> 10 a 20" + unit);
-				this.AddComparableLabel(variable, 5, "> 5 a 10" + unit);
-				this.AddComparableLabel(variable, 1, "> 1 a 5" + unit);
-				this.AddComparableLabel(variable, -1, "Sin cambios");
-				this.AddComparableLabel(variable, -5, "< 1 a 5" + unit);
-				this.AddComparableLabel(variable, -10, "< 5 a 10" + unit);
-				this.AddComparableLabel(variable, -20, "< 10 a 20" + unit);
-				this.AddComparableLabel(variable, -50, "< 20 a 50" + unit);
-				this.AddComparableLabel(variable, -100, "Disminuyó 50" + unit + " o más");
+				this.AddComparableLabel(variable, -50, "Disminuyó 50" + unit + " o más");
+				this.AddComparableLabel(variable, -20, "↘ 20 a 50" + unit);
+				this.AddComparableLabel(variable, -10, "↘ 10 a 20" + unit);
+				this.AddComparableLabel(variable, -5, "↘ 5 a 10" + unit);
+				this.AddComparableLabel(variable, -1, "↘ 1 a 5" + unit);
+				this.AddComparableLabel(variable, 1, "Sin cambios");
+				this.AddComparableLabel(variable, 5, "↗ 1 a 5" + unit);
+				this.AddComparableLabel(variable, 10, "↗ 5 a 10" + unit);
+				this.AddComparableLabel(variable, 20, "↗ 10 a 20" + unit);
+				this.AddComparableLabel(variable, 50, "↗ 20 a 50" + unit);
+				this.AddComparableLabel(variable, 10000000, "Aumentó 50" + unit + " o más");
 			}
 		}
 	}
@@ -160,7 +160,7 @@ Compare.prototype.UseProportionalDelta = function (variable) {
 Compare.prototype.CalculateCategory = function (variable, delta) {
 	for (var category of variable.ComparableValueLabels) {
 		if (category.Value !== null &&
-			delta >= category.Value) {
+			delta <= category.Value) {
 			return category.Id;
 		}
 	};

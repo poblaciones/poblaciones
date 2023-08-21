@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-hotkey="keymap">
     <!--  The Modal -->
     <boardal v-if="modal.isOpen" ref="dal" :has-mask="modal.hasMask" :can-click-mask="modal.canClickMask" :has-x="modal.hasX" @toggle="toggleModal">
 			<article v-cloak>
@@ -246,6 +246,14 @@ export default {
     };
   },
   computed: {
+		keymap() {
+			return {
+				enter: this.nextOrToggle,
+				right: this.next,
+				left: this.prev,
+				esc: this.escPressed,
+			};
+		},
     isFirstStep() {
       return (this.step === 1);
     },
@@ -285,8 +293,36 @@ export default {
     orientation: 'setCssVars',
     // xray: 'setCssVars'
   },
-  methods: {
-    toggleModal(step) {
+    methods: {
+			nextOrToggle() {
+				if (!this.modal.isOpen) {
+					return;
+				}
+				if (this.step == this.max) {
+					this.toggleModal();
+				} else {
+					this.next();
+				}
+			},
+			next() {
+				if (!this.modal.isOpen) {
+					return;
+				}
+				this.skip(1);
+			},
+			prev() {
+				if (!this.modal.isOpen) {
+					return;
+				}
+				this.skip(-1);
+			},
+			escPressed(e) {
+				if (!this.modal.isOpen) {
+					return;
+				}
+				this.toggleModal();
+      },
+      toggleModal(step) {
       step = step || 1;
 			let self = this;
       if(!this.modal.isOpen) {
@@ -531,7 +567,7 @@ button {
     transform: scale(.98);
   }
   &:hover {
-    color: blue!important;
+    color: #484848!important;
     border-color: #c0c0c0!important;
   }
   &:focus {

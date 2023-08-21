@@ -83,14 +83,15 @@ export const constantRouterMap = [
 		childrenExtraNodes: null
 	},
 
+
 {
-	group: 'Metadatos',
+	group: 'Publicación',
 	path: '/cartographies/:workId/content',
 	alias: '/cartographies/:workId',
 	component: Layout,
 	redirect: '/cartographies/:workId/content',
 	icon: 'fa fa-tag',
-	name: 'Contenido',
+	name: 'Metadatos',
 	hidden: false,
 	children: [
 			{
@@ -101,8 +102,31 @@ export const constantRouterMap = [
 		]
 	},
 
+	{
+		group: 'Publicación',
+		path: '/cartographies/:workId/onboarding',
+		component: Layout,
+		redirect: '/cartographies/:workId/onboarding/step1',
+		icon: 'fas fa-plane-departure',
+		name: 'Bienvenida',
+		hidden: false,
+		children: [
+			{
+				hidden: false,
+				path: '/cartographies/:workId/onboarding/step1',
+				name: 'Onboarding Target',
+				alias: [
+					'/cartographies/:workId/onboarding/step2',
+					'/cartographies/:workId/onboarding/step3',
+					'/cartographies/:workId/onboarding/step4',
+					'/cartographies/:workId/onboarding/step5'],
+				component: () => import('@/backoffice/views/Metadata/Onboarding.vue'),
+			}
+		]
+	},
+
 {
-	group: 'Metadatos',
+	group: 'Publicación',
 	path: '/cartographies/:workId/attribution',
 	component: Layout,
 	redirect: '/cartographies/:workId/attribution',
@@ -118,8 +142,10 @@ export const constantRouterMap = [
 	]
 },
 
+
+
 {
-group: 'Metadatos',
+group: 'Publicación',
 	path: '/cartographies/:workId/abstract',
 			component: Layout,
 				redirect: '/cartographies/:workId/abstract',
@@ -136,7 +162,7 @@ group: 'Metadatos',
 	},
 
 {
-	group: 'Metadatos',
+	group: 'Publicación',
 	path: '/cartographies/:workId/sources',
 	component: Layout,
 	redirect: '/cartographies/:workId/sources',
@@ -154,7 +180,7 @@ group: 'Metadatos',
 
 
 {
-	group: 'Metadatos',
+	group: 'Publicación',
 	path: '/cartographies/:workId/attachments',
 	component: Layout,
 	redirect: '/cartographies/:workId/attachments',

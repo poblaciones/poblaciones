@@ -116,6 +116,32 @@ App::GetOrPost('/services/backoffice/UpdateWorkIcon', function (Request $request
 	return App::Json($controller->UpdateWorkIcon($workId, $id, $name));
 });
 
+App::GetOrPost('/services/backoffice/UpdateOnboarding', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+
+	$controller = new services\OnboardingService();
+	$onboarding = App::ReconnectJsonParamMandatory(entities\DraftOnboarding::class, 'o');
+	$steps = Params::GetJsonMandatory('s');
+
+	return App::Json($controller->UpdateOnboarding($workId, $onboarding, $steps));
+});
+
+App::GetOrPost('/services/backoffice/UpdateOnboardingStep', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+
+	$controller = new services\OnboardingService();
+	$step = App::ReconnectJsonParamMandatory(entities\DraftOnboardingStep::class, 's');
+	$image = Params::Get('i');
+
+	return App::OrmJson($controller->UpdateOnboardingStep($workId, $step, $image));
+});
+
+
+
 App::GetOrPost('/services/backoffice/DeleteWorkIcon', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
@@ -138,9 +164,18 @@ App::$app->get('/services/backoffice/GetWorkPreview', function (Request $request
 	return App::Json($controller->GetWorkPreview($workId));
 });
 
-App::$app->get('/services/backoffice/GetInstitutionWatermark', function (Request $request) {
+App::$app->get('/services/backoffice/GetStepImage', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+	$step = Params::GetIntMandatory('s');
+	$controller = new services\OnboardingService();
+	return $controller->GetStepImage($workId, $step);
+});
+
+App::$app->get('/services/backoffice/GetInstitutionWatermark', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId))
+		return $denied;
 	$watermarkId = Params::GetIntMandatory('iwmid');
 	$controller = new services\InstitutionService();
 	return $controller->GetInstitutionWatermark($watermarkId);

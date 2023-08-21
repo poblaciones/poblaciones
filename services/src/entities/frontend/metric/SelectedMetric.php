@@ -59,6 +59,18 @@ class SelectedMetric extends BaseMapModel
 		throw new PublicException('La edición del indicador no ha sido encontrada.');
 	}
 
+	public function GetLevel($levelId)
+	{
+		foreach ($this->Versions as $version) {
+			foreach ($version->Levels as $level) {
+					if ($level->Id === $levelId) {
+						return $level;
+					}
+			}
+		}
+		throw new PublicException('El nivel del indicador no ha sido encontrado');
+	}
+
 	public function GetLevelAndVariableByVariableId($variableId, &$outVariable)
 	{
 		foreach($this->Versions as $version)

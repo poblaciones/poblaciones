@@ -1,7 +1,7 @@
 <template >
 	<div :class="this.classSize" class="defaultColor" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
-		<div class="md-layout ">
-			<div class="md-layout-item md-size-75" @dblclick="StartEdit">
+		<div style="position: relative">
+			<div style="padding-right: 85px" @dblclick="StartEdit">
 				<md-field style="margin-bottom: 0px">
 					<label class="mp-label unselectable" :style="(this.multiline ? 'top: 6px !important' : '')">
 						{{ this.label }}
@@ -26,7 +26,7 @@
 					<span class="md-helper-text error" style="color: red; bottom: -18px;">{{ errorMessage }}</span>
 				</div>
 			</div>
-			<div v-if="!isDisabled" class="md-layout-item md-size-25">
+			<div v-if="!isDisabled" style="position: absolute; top: 0px; right: 80px;">
 				<button-panel ref="buttonPanel" style="position: absolute"
 					@onCancel="cancel" @onUpdate="Update" @onEditModeChange="ChangeEditableMode" @onFocus="focus"
 						></button-panel>

@@ -3,6 +3,8 @@
 namespace helena\services\frontend;
 
 use minga\framework\PublicException;
+use minga\framework\IO;
+
 use helena\entities\frontend\work\WorkInfo;
 use helena\entities\frontend\metadata\MetadataInfo;
 use helena\services\backoffice\publish\PublishDataTables;
@@ -11,6 +13,7 @@ use helena\services\common\BaseService;
 use helena\classes\Links;
 use helena\db\frontend\MetadataModel;
 use helena\db\frontend\WorkModel;
+use helena\db\frontend\OnboardingModel;
 use helena\db\frontend\FileModel;
 use helena\classes\App;
 use helena\classes\Session;
@@ -27,6 +30,9 @@ class WorkService extends BaseService
 		$metadataTable = new MetadataModel();
 		$rows = $metadataTable->GetMetadataFiles($ret->Metadata->Id);
 		$ret->Metadata->FillFiles($rows);
+		$onboardingTable = new OnboardingModel();
+		$rows = $onboardingTable->GetOnboardingInfo($workId);
+		$ret->FillOnboarding($rows);
 		return $ret;
 	}
 
@@ -77,6 +83,21 @@ class WorkService extends BaseService
 		$rows = $metadataTable->GetMetadataFiles($ret->Metadata->Id);
 		$ret->Metadata->FillFiles($rows);
 		return $ret;
+	}
+
+	public function GetOnboardingStepImage($workId, $fileId)
+	{
+		// hace el chequeo de seguridad...
+		$onboardingModel = new OnboardingModel();
+		$onboardingModel->CheckOwner($workId, $fileId);
+		// lo devuelve...
+		$fileModel = new FileModel(false);
+		$outFile = IO::GetTempFilename() . '.tmp';
+		$fileModel->ReadFileToFile($fileId, $outFile);
+		// lo convierte
+		$dataURL = IO::ConvertFiletoBase64($outFile);
+		IO::Delete($outFile);
+		return $dataURL;
 	}
 }
 

@@ -78,7 +78,7 @@ class DbSession extends BaseService
 							if (Str::Contains($doc, "@var \\DateTime"))
 								$currentObjectValue = ($currentValue === null ? null : new \DateTime($currentValue));
 							else if (Str::Contains($doc, "@var point") && $currentValue !== null)
-								$currentObjectValue = new \CrEOF\Spatial\PHP\Types\Geometry\Point($currentValue->x, $currentValue->y);
+								$currentObjectValue = new \LongitudeOne\Spatial\PHP\Types\Geometry\Point($currentValue->x, $currentValue->y);
 							else
 								$currentObjectValue = $currentValue;
 

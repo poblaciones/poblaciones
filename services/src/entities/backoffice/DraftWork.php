@@ -172,7 +172,7 @@ class DraftWork
 		 *
 		 * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftMetadata")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="wrk_metadata_id", referencedColumnName="met_id", nullable=true)
+     *   @ORM\JoinColumn(name="wrk_metadata_id", referencedColumnName="met_id", nullable=false)
      * })
      */
     private $Metadata;

@@ -14,7 +14,15 @@
 				<LeftPanel ref='leftPanel' />
 				<MapPanel />
 				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
-				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
+				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId"
+												:url="work.Current.Metadata.Institution.Url"
+												:name="work.Current.Metadata.Institution.Name"
+												:waterMarkId="work.Current.Metadata.Institution.WatermarkId" />
+				<WatermarkFloat v-if="ownerLogo && ownerLogo.Image"
+												:url="ownerLogo.Url"
+												:image="ownerLogo.Image"
+												:name="ownerLogo.Name"
+												float="left" />
 				<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='toolbarStates.collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
 			</div>
@@ -144,6 +152,9 @@
 					return '#' + this.work.Current.Metadata.Institution.Color;
 				}
 				return '#00A0D2';
+			},
+			ownerLogo() {
+				return this.config.OwnerLogo;
 			},
 			Embedded() {
 				return window.Embedded;
@@ -578,6 +589,10 @@
 			height: 1px;
 			content: '';
 		}
+	.leaflet-attribution-flag {
+		width: 0px !important;
+		margin-left: -3px;
+	}
 
 	.exp-logodiv-right {
 		right: 8px !important;

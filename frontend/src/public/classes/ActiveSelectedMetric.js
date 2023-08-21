@@ -129,16 +129,17 @@ ActiveSelectedMetric.prototype.fillEmptySummaries = function () {
 					variable.ComparableValueLabels.forEach(function (label) {
 						label.Values = {
 							Value: '',
+							ValueCompare: '',
 							Summary: '',
 							Count: '',
 							Total: '',
+							TotalCompare: '',
 							Km2: '',
 							VariableId: variable.Id,
 							ValueId: label.Id,
 						};
 					});
 				}
-
 			});
 		});
 	});
@@ -210,7 +211,7 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 	this.properties.EffectivePartition = this.GetSelectedPartition();
 
 	window.SegMap.Get(window.host + '/services/frontend/metrics/GetSummary', {
-		params: h.getSummaryParams(metric, window.SegMap.frame),
+		params: h.getSummaryParams(this, window.SegMap.frame),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateSummary = c; }),
 	}).then(function (res) {
 		loc.cancelUpdateSummary = null;
@@ -220,9 +221,11 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 		loc.IsUpdatingSummary = false;
 		loc.fillEmptySummaries();
 		res.data.Items.forEach(function (num) {
-			var variable = h.getVariable(metric.Versions[metric.SelectedVersionIndex].Levels[metric.Versions[metric.SelectedVersionIndex].SelectedLevelIndex].Variables, num.VariableId);
+			var level = loc.SelectedLevel();
+			var variable = h.getVariable(level.Variables, num.VariableId);
 			if (variable !== null) {
-				var label = h.getValueLabel(variable.ValueLabels, num.ValueId);
+				var values = loc.ResolveVariableValues(variable);
+				var label = h.getValueLabel(values, num.ValueId);
 				if (label !== null) {
 					label.Values = num;
 				}
@@ -731,6 +734,7 @@ ActiveSelectedMetric.prototype.getValidPatterns = function () {
 };
 
 ActiveSelectedMetric.prototype.getValidMetrics = function (variable) {
+	var delta = (this.Compare.Active ? 'Diferencia en ' : '');
 	var ret = [];
 	if (!variable) {
 		variable = this.SelectedVariable();
@@ -738,7 +742,7 @@ ActiveSelectedMetric.prototype.getValidMetrics = function (variable) {
 	ret.push({ Key: 'N', Caption: 'Cantidad' });
 
 	if (variable && variable.HasTotals) {
-		ret.push({ Key: 'I', Caption: 'Incidencia' });
+		ret.push({ Key: 'I', Caption: delta + 'Incidencia' });
 	}
 
 	ret.push({ Key: 'P', Caption: 'Distribución' });

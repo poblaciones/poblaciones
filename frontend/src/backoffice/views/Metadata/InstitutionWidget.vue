@@ -27,7 +27,6 @@
 </template>
 
 <script>
-import Context from '@/backoffice/classes/Context';
 import PickInstitution from './PickInstitution';
 import InstitutionPopup from './InstitutionPopup';
 

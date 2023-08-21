@@ -572,14 +572,20 @@ module.exports = {
 		}, this.getFrameParams(frame));
 	},
 	getSummaryParams(metric, frame) {
-		const ver = metric.Versions[metric.SelectedVersionIndex];
+		const ver = metric.properties.Versions[metric.properties.SelectedVersionIndex];
+		if (metric.Compare.Active) {
+			compare = metric.Compare.SelectedLevel().Id;
+		} else {
+			compare = null;
+		}
 		return this.mergeObject({
-			l: metric.Metric.Id,
+			l: metric.properties.Metric.Id,
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
-			u: metric.SelectedUrbanity,
-			g: metric.EffectivePartition,
-			w: metric.Metric.Signature
+			u: metric.properties.SelectedUrbanity,
+			g: metric.properties.EffectivePartition,
+			w: metric.properties.Metric.Signature,
+			p: compare
 		}, this.getFrameParams(frame));
 	},
 	getBoundarySummaryParams(boundary, frame, rev, suffix) {

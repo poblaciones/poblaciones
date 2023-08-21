@@ -558,6 +558,14 @@ SegmentedMap.prototype.PostWorkPreview = function (work, blobPng) {
 	return this._axios.post(window.host + '/services/backoffice/PostWorkPreview', formData, config);
 };
 
+
+SegmentedMap.prototype.GetOnboardingStepImage = function (work, fileId) {
+	const loc = this;
+	return this.Get(window.host + '/services/frontend/work/GetOnboardingStepImage', {
+		params: { w: work.Id, f: fileId }
+	});
+};
+
 SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelection) {
 	if (this.MapsApi.draggingDelayed) {
 		return;

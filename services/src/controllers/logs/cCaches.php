@@ -104,6 +104,10 @@ class cCaches extends cController
 			$n = $model->CleanTempTables();
 			$i = $model->CleanOrphanTables();
 			$this->message = 'Liberadas ' . $n . ' tablas temporales y ' . $i . ' tablas huérfanas.';
+		} else if (array_key_exists('clearMatrixTables', $_POST)) {
+			$model = new PublishDataTables();
+			$n = $model->CleanMatrixTables();
+			$this->message = 'Liberadas ' . $n . ' tablas de matrices.';
 		} else if (array_key_exists('regenClippingGeography', $_POST)) {
 			$model = new SnapshotGeographiesByRegionModel();
 			$model->Clean();

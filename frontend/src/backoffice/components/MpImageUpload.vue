@@ -1,24 +1,29 @@
 <template>
-	<div style="display: inline-block">
+	<div>
 		<div v-if="label" class="mp-label" style="margin-top: 6px">{{ label }}</div>
-		<div v-if="localPreviewImage && showPreview">
-			<img class="imagen-preview" style="" :src="this.localPreviewImage" alt="">
-			<div style="display: inline-block">
-				<md-button class="md-icon-button md-button-mini"
+		<div v-if="localPreviewImage && showPreview" style="position: relative; overflow: hidden; background-color: #f9f7f7 ">
+			<img class="imagen-preview"
+					 @click="openFile"
+					 :style="sizes + circleStyle + 'margin-right: 40px;'" :src="this.localPreviewImage" alt="">
+			<div style="position: absolute; right: -7px; top: 0px;">
+				<md-button class="md-icon-button md-button-mini" v-if="canEdit"
 									 @click="clear">
 					<md-icon>close</md-icon>
 					<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 				</md-button>
-				<label class="file-select">
-					<div class="edit-button">
+				<br />
+				<label class="file-select" v-if="canEdit">
+					<md-button class="md-icon-button md-button-mini" v-if="canEdit"
+										 @click="openFile" style="margin-top: 6px">
 						<md-icon>edit</md-icon>
-					</div>
-					<input @change="handleImage" class="file-select" type="file" accept="image/*" />
+						<md-tooltip md-direction="bottom">Modificar</md-tooltip>
+					</md-button>
+					<input @change="handleImage" ref="file" class="file-select" type="file" accept="image/*" />
 				</label>
 			</div>
 		</div>
 		<div v-else class="md-ripple" style="display: table-cell">
-			<label class="file-select">
+			<label class="file-select"  v-if="canEdit">
 				<div class="select-button">
 					<md-icon>add_circle_outline</md-icon>
 					Agregar imagen
@@ -32,6 +37,8 @@
 </template>
 
 <script>
+import { integer } from "vuelidate/lib/validators";
+
 
 export default {
 	name: 'MpImageUpload.vue',
@@ -40,17 +47,59 @@ export default {
 			localPreviewImage: null
 		};
 	},
+	props: {
+		container: Object,
+		maxWidth: { type: Number, default: 100 },
+		maxHeight: { type: Number, default: 195 },
+		minWidth: { type: Number, default: -1 },
+		minHeight: { type: Number, default: -1 },
+		canEdit: { type: Boolean, default: true },
+		circlePreview: { type: Boolean, default: false },
+		label: String,
+		helper: String,
+		showPreview: { type: Boolean, default: true },
+		previewImage: String,
+	},
+	components: {
+	},
 	mounted() {
 		this.localPreviewImage = this.previewImage;
 	},
 	computed: {
-
+		sizes() {
+			var ret = '';
+			if (this.minWidth !== -1) {
+				ret += "min-width: " + this.minWidth + "px;";
+			}
+			if (this.minHeight !== -1) {
+				ret += "min-height: " + this.minHeight + "px;";
+			}
+			if (this.maxWidth !== -1) {
+				ret += "max-width: " + this.maxWidth + "px;";
+			}
+			if (this.maxHeight !== -1) {
+				ret += "max-height: " + this.maxHeight + "px;";
+			}
+			return ret;
+		},
+		circleStyle() {
+			if (this.circlePreview) {
+				return 'border-radius: 50vh;';
+			} else {
+				return '';
+			}
+		}
 	},
 	methods: {
 		handleImage(e) {
 			const selectedImage = e.target.files[0];
 			this.createBase64Image(selectedImage);
 			e.target.value = '';
+		},
+		openFile() {
+			if (this.canEdit) {
+				this.$refs.file.click();
+			}
 		},
 		createBase64Image(fileObject) {
 			const reader = new FileReader();
@@ -70,15 +119,6 @@ export default {
 			this.$emit('clear');
 		}
 	},
- 	props: {
-			container: Object,
-			label: String,
-			helper: String,
-			showPreview: { type: Boolean, default: true },
-			previewImage: String,
-	},
-	components: {
-		},
 		watch: {
 			'previewImage'() {
 				this.localPreviewImage = this.previewImage;
@@ -106,10 +146,7 @@ export default {
 }
 
 .imagen-preview {
-	min-height: unset !important;
-	width: auto;
-	max-height: 100px;
-	max-width: 195px;
+	min-height: unset;
 	width: auto;
 }
 

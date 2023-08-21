@@ -10,6 +10,7 @@ class WorkInfo
 	public $Permissions;
 	public $Sources;
 	public $Icons;
+	public $Onboarding;
 	public $ExtraMetrics;
 	public $Startup;
 	public $StatsMonths;

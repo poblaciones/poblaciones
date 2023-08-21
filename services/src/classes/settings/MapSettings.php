@@ -50,6 +50,9 @@ class MapSettings
 	public $SignatureSuffix = null;
 	public $ExplicitRegionSearchResults = [];
 
+	public $OwnerLogo = [ 'Name' => '', 'Image' => '', 'Url' => ''];
+
+
 	public $Autocomplete = ['capital buenos aires' => 'la plata',
 													'capital chaco' => 'resistencia', 'capital chubut' => 'trelew',
 													'capital entre ríos' => 'paraná', 'capital entre rios' => 'paraná',

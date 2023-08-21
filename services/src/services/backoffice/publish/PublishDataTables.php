@@ -83,6 +83,13 @@ class PublishDataTables
 																			array('class' => entities\File::class, 'parentKey' => 'wic_file_id',
 																						'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')))));
 
+		$onboardingMatrix = array('class' => entities\Onboarding::class, 'childKey' => 'onb_work_id',
+																'children' => array(
+																			array('class' => entities\OnboardingStep::class, 'childKey' => 'obs_onboarding_id',
+																					'children' => array(
+																						array('class' => entities\File::class, 'parentKey' => 'obs_image_id',
+																									'children' => array(array('class' => entities\FileChunk::class, 'childKey' => 'chu_file_id')))))));
+
 		$extraMetrics = array('class' => entities\WorkExtraMetric::class, 'childKey' => 'wmt_work_id');
 		$workStartup = array('class' => entities\WorkStartup::class, 'parentKey' => 'wrk_startup_id');
 
@@ -91,6 +98,7 @@ class PublishDataTables
 														'children' => array(
 															$imageMatrix,
 															$iconMatrix,
+															$onboardingMatrix,
 															$extraMetrics,
 															$workStartup,
 															$metadataMatrix,
@@ -241,6 +249,17 @@ class PublishDataTables
 		}
 		return sizeof($tables);
 	}
+	public function CleanMatrixTables()
+	{
+		$sql = "SHOW TABLES LIKE 'work_dataset_shard_%_snapshot_matrix_%'";
+		$tables = App::Db()->fetchAllByPos($sql);
+		foreach($tables as $table)
+		{
+			App::Db()->dropTable($table[0]);
+		}
+		return sizeof($tables);
+	}
+
 	public function CleanOrphanTables()
 	{
 		$tables = App::GetOrphanSet();

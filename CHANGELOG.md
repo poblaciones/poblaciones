@@ -1,3 +1,7 @@
+- Fix: captura de png en leaflet mostraba desplazada la región de recorte.
+- Asistente de bienvenida para cartografías.
+- Se agregar el parámetro OwnerLogo para tener íconos inferior izquierdo de propietario del sitio.
+
 v3.10 (2023-08-02)
 - Mejoras en la descripción de 'geometría inválida' en la publicación.
 - Add navigation log.

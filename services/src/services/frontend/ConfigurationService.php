@@ -108,7 +108,7 @@ class ConfigurationService extends BaseService
 									'UseCompareSeries' => App::Settings()->Map()->UseCompareSeries,
 
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
-
+									'OwnerLogo' => App::Settings()->Map()->OwnerLogo,
 									'MapsAPI' => $this->GetCurrentMapProvider(),
 									'NavigationId' => $navigation['id'],
 									'NavigationMonth' => $navigation['month'],

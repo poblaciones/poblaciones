@@ -84,7 +84,7 @@ export default {
 		},
 		isActive(index) {
 			return this.metric.SelectedLevel() == this.level &&
-				(index === this.level.SelectedVariableIndex || this.level.Variables.length == 1);
+				(index === this.level.SelectedVariableIndex);
 		},
 		clickVariable(index) {
 			var changingLevel = this.metric.SelectedLevel() !== this.level;

@@ -126,11 +126,6 @@ class FileService extends BaseService
 		App::Db()->exec("DELETE FROM draft_file_chunk WHERE chu_file_id = ?", array($fileId));
 		App::Db()->exec("DELETE FROM draft_file WHERE fil_id = ?", array($fileId));
 	}
-	public function ConvertFiletoBase64($file_path)
-	{
-		$finfo = finfo_open(FILEINFO_MIME_TYPE);
-		$type = finfo_file($finfo, $file_path);
-		return 'data:'.$type.';base64,'.base64_encode(file_get_contents($file_path));
-	}
+
 }
 

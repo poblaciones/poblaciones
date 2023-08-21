@@ -74,7 +74,10 @@ LeafletApi.prototype.Initialize = function () {
 
 	this.CreateBaseLayers();
 
-	var options = { zoomControl: false, zoomAnimation: false, /*zoomSnap: 0.5,*/ minZoom: 3, maxZoom: 17 };
+	var options = {
+		zoomControl: false, zoomAnimation: false,
+		renderer: L.canvas(), /*zoomSnap: 0.5,*/ minZoom: 3, maxZoom: 17
+	};
 
 	// Crea el mapa
 	this.map = new L.Map("map", options);
@@ -158,11 +161,11 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] }};
 	featureMask.geometry.coordinates.push(zeroItem);
 	var mask = { type: 'FeatureCollection', features: [featureMask] };
-	var blank = L.geoJson(mask, { interactive: false } );
+	var blank = L.geoJson(mask, { attribution: cp, interactive: false } );
 	blank.setStyle({
         "color": "#e5e3df",
 				"weight": 1,
-        "opacity": this.getOpacity()
+        "fillOpacity": this.getOpacity()
     });
 	this.baseLayers['blank'] = blank;
 	// satélite
@@ -170,7 +173,7 @@ LeafletApi.prototype.CreateBaseLayers = function () {
   var wholink =  'i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
   var satellite = L.tileLayer(
             'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: '&copy; '+mapLink+', '+wholink,
+            attribution: cp,
             maxZoom: 18,
 		});
 	this.baseLayers['satellite'] = satellite;
@@ -566,11 +569,11 @@ LeafletApi.prototype.SetMapTypeState = function (mapTypeState) {
 
 LeafletApi.prototype.getOpacity = function () {
 	if (this.mapTypeState === 'b') {
-		return 0.4;
+		return 1.5 * 0.4;
 	} else if (this.mapTypeState === 'r') {
-		return 0.15;
+		return 1.5 * 0.15;
 	} else if (this.mapTypeState === 's' || this.mapTypeState === 'h') {
-		return 0.4;
+		return 1.5 * 0.4;
 	} else { // Default
 		return 0.15;
 	}
@@ -579,10 +582,10 @@ LeafletApi.prototype.getOpacity = function () {
 LeafletApi.prototype.UpdateClippingStyle = function () {
 	if (this.clippingCanvas) {
 		this.clippingCanvas.setStyle({
-        "color": "#aaa",
+        "color": "#444",
 				"weight": 0.5,
-        "opacity": this.getOpacity()
-    });
+        "fillOpacity": this.getOpacity()
+		});
 	}
 };
 

@@ -164,7 +164,7 @@ class SnapshotByDatasetModel
 		Profiling::EndTimer();
 	}
 
-	private function GetDatasetLevels($datasetId)
+	public function GetDatasetLevels($datasetId)
 	{
 		Profiling::BeginTimer();
 

@@ -19,13 +19,14 @@ App::$app->get('/services/frontend/metrics/GetSummary', function (Request $reque
 	$metricId = Params::GetIntMandatory('l');
 	$metricVersionId = Params::GetIntMandatory('v');
 	$levelId = Params::GetIntMandatory('a');
+	$levelCompareId = Params::GetInt('p');
 	$partition = Params::GetInt('g');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$frame = Frame::FromParams();
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
-	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition));
+	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition));
 });
 
 

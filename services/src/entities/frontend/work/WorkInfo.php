@@ -17,6 +17,7 @@ class WorkInfo extends BaseMapModel
 	public $FileUrl;
 	public $Metrics;
 	public $Startup;
+	public $Onboarding;
 
 	public static function GetMap()
 	{
@@ -54,6 +55,16 @@ class WorkInfo extends BaseMapModel
 		{
 			$this->Startup->Center = ['Lat' => $row['wst_center_lat'], 'Lon' => $row['wst_center_lon']];
 		}
+	}
+
+	public function FillOnboarding($rows)
+	{
+		$this->Onboarding = new OnboardingInfo();
+		if (sizeof($rows) == 0)
+			return;
+		$this->Onboarding->Fill($rows[0]);
+		$this->Onboarding->Enabled = 1;
+		$this->Onboarding->FillSteps($rows);
 	}
 }
 

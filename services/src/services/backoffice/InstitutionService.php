@@ -74,8 +74,7 @@ class InstitutionService extends BaseService
 	public function GetInstitutionWatermark($watermarkId, $fromDraft=true)
 	{
 		$outFile = $this->GetInstitutionWatermarkFile($watermarkId, $fromDraft);
-		$fileController = new FileService();
-		$dataURL = $fileController->ConvertFiletoBase64($outFile);
+		$dataURL = IO::ConvertFiletoBase64($outFile);
 		IO::Delete($outFile);
 		return $dataURL;
 	}

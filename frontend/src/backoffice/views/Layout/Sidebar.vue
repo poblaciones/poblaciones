@@ -45,6 +45,20 @@ export default {
 			if (men.title === 'Fuentes secundarias' && this.Work.IsPublicData()) {
 				men.title = 'Fuentes';
 			}
+			var alias = [];
+			if (route.children) {
+				for (var c of route.children) {
+					alias.push(this.replaceParams(c.path));
+				}
+				if (c.alias) {
+					for (var a of c.alias) {
+						alias.push(this.replaceParams(a));
+					}
+				}
+				if (alias.length > 0) {
+					men.alias = alias;
+				}
+			}
 			if (this.Work.CanEdit() === false) {
 				if (men.title === 'Nuevo dataset' || (men.title === 'Datasets' &&
 							window.Context.CurrentWork.Datasets.length == 0)) {

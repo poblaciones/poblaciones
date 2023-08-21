@@ -23,6 +23,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.Startup = workInfo.Startup;
 	this.ExtraMetrics = workInfo.ExtraMetrics;
 	this.Icons = workInfo.Icons;
+	this.Onboarding = workInfo.Onboarding;
 	this.workListMetadata = workListMetadata;
 	if (workInfo.Datasets) {
 		for (var i = 0; i < workInfo.Datasets.length; i++) {
@@ -240,6 +241,21 @@ ActiveWork.prototype.CreateIcon = function (iconName, image) {
 		'guardar el ícono');
 };
 
+
+ActiveWork.prototype.UpdateOnboarding = function () {
+	var args = { 'w': this.properties.Id, 'o': this.Onboarding, 's': this.Onboarding.Steps};
+	this.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateOnboarding', args,
+		'guardar la bienvenida');
+};
+
+ActiveWork.prototype.UpdateOnboardingStep = function (step, imageToSend) {
+	var args = { 'w': this.properties.Id, 's': step, 'i': imageToSend };
+	this.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateOnboardingStep', args,
+		'guardar el paso de la bienvenida');
+};
+
 ActiveWork.prototype.UpdateIcon = function (iconId, name) {
 	var args = { 'w': this.properties.Id, 'i': iconId, 'n': name };
 	this.WorkChanged();
@@ -344,6 +360,13 @@ ActiveWork.prototype.GetGeographyItems = function (geographyId) {
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetGeographyItems',
 		{ 'g': geographyId }, 'obtener los ítems de la geografía');
 };
+
+ActiveWork.prototype.GetStepImage = function (step) {
+	var args = { 'w': this.properties.Id, 's': step };
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetStepImage', args,
+		'obtener la imagen del paso');
+};
+
 
 ActiveWork.prototype.GetInstitutionWatermark = function (institution) {
 	var args = { 'w': this.properties.Id, 'iwmid': institution.Watermark.Id };

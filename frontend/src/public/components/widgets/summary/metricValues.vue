@@ -123,40 +123,7 @@ export default {
 			return 'margin-right: ' + margin + 'px;';
 		},
 		total() {
-			var percTotal = 0;
-			const loc = this;
-			if(this.metric.properties.SummaryMetric === 'P' ||
-				this.metric.properties.SummaryMetric === 'A') {
-				for (var label of this.variableValueLabels) {
-					percTotal += Number(loc.getValue(label.Values, this.variableValueLabels));
-				};
-				return {
-					aniTotal: 100.00, percTotal: percTotal
-				};
-			}
-			var ret = 0;
-			var tot = 0;
-			var summaryMetric = loc.metric.properties.SummaryMetric;
-			for (var label of this.variableValueLabels) {
-				percTotal += Number(loc.getValue(label.Values, this.variableValueLabels));
-				var tvalue = label.Values.Value;
-				if(summaryMetric === 'N' || summaryMetric === 'I') {
-					ret += Number(tvalue);
-					tot += Number(label.Values.Total);
-				} else if(summaryMetric === 'K') {
-					ret += Number(label.Values.Km2);
-				} else if(summaryMetric === 'H') {
-					ret += Number(label.Values.Km2) / 0.01;
-				} else if(summaryMetric === 'D') {
-					ret += (label.Values.Km2 > 0 ? Number(tvalue) / Number(label.Values.Km2) : 0);
-				}
-			}
-			if (summaryMetric === 'I') {
-				ret = (tot > 0 ? ret * this.variable.NormalizationScale / tot : 0);
-			}
-			return {
-				aniTotal: ret, percTotal: percTotal
-			};
+			return this.getTotal();
 		},
 		totalCount() {
 			var ret = 0;
@@ -211,8 +178,7 @@ export default {
 	},
 	methods: {
 		displayLabel(label) {
-			return label.Values && (this.variable.ShowEmptyCategories || label.Values.Count !== ''
-							|| this.metric.Compare.Active);
+			return label.Values && ((this.variable.ShowEmptyCategories && !this.metric.Compare.Active) || label.Values.Count !== '');
 		},
 		applySymbols(cad) {
 			return str.applySymbols(cad);
@@ -293,6 +259,7 @@ export default {
 			return format;
 		},
 		getValueHeader() {
+			var delta = (this.metric.Compare.Active ? 'Δ ' : '');
 			switch(this.metric.properties.SummaryMetric) {
 			case 'K':
 				return 'Km<sup>2</sup>';
@@ -305,53 +272,23 @@ export default {
 			case 'I':
 				switch(this.variable.NormalizationScale) {
 					case 100:
-						return '%';
+						return delta + '%';
           case 1:
-            return '/1';
+						return delta + '/1';
           case 1000:
-            return '/k';
+						return delta + '/k';
           case 10000:
-            return '/10k';
-          case 100000:
-            return '/100k';
+						return delta + '/10k';
+					case 100000:
+						return delta + '/100k';
+					case 1000000:
+						return delta + '/1M';
         }
-        return 'N/A';
+					return 'N/A';
 			case 'D':
 				return 'N/Km<sup>2</sup>';
 			case 'N':
 				return 'N';
-			default:
-				return '?';
-			}
-		},
-		getValueHeaderTooltip() {
-			switch(this.metric.properties.SummaryMetric) {
-			case 'K':
-				return 'Área (Km²)';
-			case 'H':
-				return 'Área (Ha)';
-			case 'A':
-				return 'Distribución de áreas (% de Km²)';
-			case 'P':
-				return 'Distribución (%)';
-			case 'I':
-				switch(this.variable.NormalizationScale) {
-					case '100':
-            return 'Incidencia (%)';
-          case '1':
-            return 'Incidencia (/n)';
-          case '1000':
-            return 'Incidencia (/1k)';
-          case '10000':
-            return 'Incidencia (/10k)';
-          case '100000':
-            return 'Incidencia (/100k)';
-        }
-        return 'n/d';
-			case 'D':
-				return 'Densidad (N/Km²)';
-			case 'N':
-				return 'N'; //this.level.SummaryCaption;
 			default:
 				return '?';
 			}
@@ -376,45 +313,124 @@ export default {
 			}
 		},
 		getValue(values, labels) {
-			var value = values.Value;
+			if (this.metric.Compare.Active && this.metric.properties.SummaryMetric === 'I') {
+				var tuple = this.getValueTuple(values, labels);
+				var compareTuple = { value: tuple.valueCompare, normalization: tuple.normalizationCompare };
+				return this.calculateCompareValue(tuple, compareTuple);
+			} else {
+				return this.calculateValue(this.getValueTuple(values, labels));
+			}
+		},
+		getTotal() {
+			// calcula el total para barras azules
+			var loc = this;
+			var percTotal = 0;
+			for (var label of this.variableValueLabels) {
+				percTotal += Number(Math.abs(loc.getValue(label.Values, this.variableValueLabels)));
+			};
+			// calcula el total general
+			var total = null, value = 0, totalCompare = null, valueCompare = null;
+			var labels = this.variableValueLabels;
+			labels.forEach(function (label) {
+				var tuple = loc.getValueTuple(label.Values, labels);
+				if (tuple.normalization !== undefined) {
+					total = (total == null ? 0 : total) + tuple.normalization;
+				}
+				if (tuple.normalizationCompare !== undefined) {
+					totalCompare = (total == null ? 0 : totalCompare) + tuple.normalizationCompare;
+				}
+				if (tuple.valueCompare !== undefined) {
+					valueCompare = (valueCompare == null ? 0 : valueCompare) + tuple.valueCompare;
+				}
+				value += Number(tuple.value);
+			});
+			var totalTuple = { value: value, normalization: total };
+			var aniTotal = 100;
+			if (this.metric.properties.SummaryMetric == 'I' && this.metric.Compare.Active) {
+				// calcula la diferencia en puntos porcentajes o %
+				var compareTuple = { value: valueCompare, normalization: totalCompare };
+				aniTotal = this.calculateCompareValue(totalTuple, compareTuple);
+			} else if (this.metric.properties.SummaryMetric !== 'P' && this.metric.properties.SummaryMetric !== 'A') {
+				aniTotal = this.calculateValue(totalTuple);
+			}
+			// devuelve el par
+			return { aniTotal: aniTotal,
+							 percTotal: percTotal };
+		},
+		calculateCompareValue(totalTuple, compareTuple) {
+			var value1 = this.calculateValue(totalTuple);
+			var value2 = this.calculateValue(compareTuple);
+			if (this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable())) {
+				if (value2 === 0) {
+					return '';
+				} else {
+					return (value1 / value2) * 100 - 100;
+				}
+			} else {
+				return value1 - value2;
+			}
+		},
+		calculateValue(tuple) {
+			if (tuple.normalization == 0) {
+				return 0;
+			} else if (tuple.normalization === undefined || tuple.normalization === null) {
+				return tuple.value;
+			} else {
+				return tuple.value / tuple.normalization;
+			}
+		},
+		getNumericValue(values) {
+			if (this.metric.Compare.Active) {
+				return values.Value; // - values.ValueCompare;
+			} else {
+				return values.Value;
+			}
+		},
+		getValueTuple(values, labels) {
+			var value = this.getNumericValue(values);
 			var area = Number(values.Km2);
-			if(this.metric.properties.SummaryMetric === 'N') {
-				return value;
-			} else if(this.metric.properties.SummaryMetric === 'P') {
+			if (this.metric.properties.SummaryMetric === 'N') {
+				return { value: value };
+			} else if (this.metric.properties.SummaryMetric === 'P') {
 				let tot = 0;
-				labels.forEach(function(label) {
-					var tvalue = label.Values.Value;
-					tot += Number(tvalue);
+				var loc = this;
+				labels.forEach(function (label) {
+					var tvalue = loc.getNumericValue(label.Values);
+					tot += Math.abs(Number(tvalue));
 				});
-				return (tot > 0 ? value * 100 / tot : 0);
-			} else if(this.metric.properties.SummaryMetric === 'K') {
-				return area;
-			} else if(this.metric.properties.SummaryMetric === 'I') {
-				var nTotal = Number(values.Total);
-				return (nTotal > 0 ? value * this.variable.NormalizationScale / nTotal : 0);
-			} else if(this.metric.properties.SummaryMetric === 'H') {
-				return area / 0.01;
-			} else if(this.metric.properties.SummaryMetric === 'A') {
+				return { value: Math.abs(value), normalization: tot / 100 };
+			} else if (this.metric.properties.SummaryMetric === 'K') {
+				return { value: area };
+			} else if (this.metric.properties.SummaryMetric === 'I') {
+				if (this.metric.Compare.Active) {
+					return {
+						value: Number(values.Value),
+						valueCompare: Number(values.ValueCompare),
+						normalization: Number(values.Total) / this.variable.NormalizationScale,
+						normalizationCompare: Number(values.TotalCompare) / this.variable.NormalizationScale
+					};
+				} else {
+					var nTotal = Number(values.Total);
+					return { value: value, normalization: nTotal * this.variable.NormalizationScale };
+				}
+			} else if (this.metric.properties.SummaryMetric === 'H') {
+				return { value: area, normalization: 0.01 };
+			} else if (this.metric.properties.SummaryMetric === 'A') {
 				var tot2 = 0;
-				labels.forEach(function(label) {
+				labels.forEach(function (label) {
 					tot2 += Number(label.Values.Km2);
 				});
-				return (tot2 > 0 ? area * 100 / tot2 : 0);
-			} else if(this.metric.properties.SummaryMetric === 'D') {
-				return (area > 0 ? value / area : 0);
+				return { value: area, normalization: tot2 / 100 };
+			} else if (this.metric.properties.SummaryMetric === 'D') {
+				return { value: value, normalization: area };
 			} else {
-				return 0;
+				return { value: 0 };
 			}
 		},
 		getLength(value, variable) {
 			//return '';
 			var tot = this.total.percTotal;
-			var loc = this;
-			/*variableValueLabels.forEach(function(label) {
-				tot += Number(loc.getValue(label.Values, variableValueLabels));
-			});*/
-			//return 'width:' + ((tot > 0 ? value / tot : 0) * this.panelWidth) + 'px';
-			var prop = (tot > 0 ? value / tot : 0);
+			var prop = (tot > 0 ? Math.abs(value) / tot : 0);
 			return 'width: calc(' + (prop * 100) + '% - ' + (60 * prop) + 'px)';
 		},
 		clickLabel(label) {

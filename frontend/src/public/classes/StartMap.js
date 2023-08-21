@@ -3,6 +3,7 @@ import RestoreRoute from '@/public/classes/RestoreRoute';
 import axios from 'axios';
 import str from '@/common/framework/str';
 import err from '@/common/framework/err';
+import Tutorial from './Tutorial';
 
 export default StartMap;
 
@@ -61,6 +62,8 @@ StartMap.prototype.RestoreWork = function (workId, link) {
 		headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
 	}).then(function (res) {
 		loc.workReference.Current = res.data.work;
+		loc.workReference.Current.tutorialOpened = false;
+		loc.workReference.Current.Tutorial = new Tutorial(loc.workReference.Current, res.data.work.Id);
 		loc.ReceiveWorkStartup(loc.workReference.Current.Startup, res.data.frame);
 	}).catch(function (error) {
 		err.errDialog('GetWork', 'obtener la información del servidor', error);

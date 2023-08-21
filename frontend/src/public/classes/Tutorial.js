@@ -6,7 +6,8 @@ export default Tutorial;
 const TokenKey = 'mapsTutorial';
 const TokenKeyTimes = 'mapsTutorialTimes';
 
-function Tutorial(toolbarStates) {
+function Tutorial(toolbarStates, suffix = '') {
+	this.suffix = suffix;
 	this.isOpen = false;
 	this.toolbarStates = toolbarStates;
 };
@@ -15,6 +16,9 @@ Tutorial.prototype.CheckOpenTutorial = function () {
 	if (this.isUnsetOrExpired() && this.tutorialFew() && !window.Embedded.Active) {
 		this.toolbarStates.tutorialOpened = true;
 		this.incrementTutorialTimes();
+		return true;
+	} else {
+		return false;
 	}
 };
 
@@ -30,7 +34,7 @@ Tutorial.prototype.DoneWithTutorial = function () {
 };
 
 Tutorial.prototype.isUnsetOrExpired = function() {
-	var cookie = Cookies.get(TokenKey);
+	var cookie = Cookies.get(TokenKey + this.suffix);
 	if (cookie == null) {
 		return true;
 	} else {
@@ -50,11 +54,11 @@ Tutorial.prototype.incrementTutorialTimes = function () {
 };
 
 Tutorial.prototype.setTutorialTimes = function (times) {
-	return Cookies.set(TokenKeyTimes, times, { expires: 180 });
+	return Cookies.set(TokenKeyTimes + this.suffix, times, { expires: 180 });
 };
 
 Tutorial.prototype.getTutorialTimes = function () {
-	var cookie = Cookies.get(TokenKeyTimes);
+	var cookie = Cookies.get(TokenKeyTimes + this.suffix);
 	if (cookie == null) {
 		return 0;
 	} else {
@@ -66,9 +70,9 @@ Tutorial.prototype.getTutorialTimes = function () {
 };
 
 Tutorial.prototype.setToken = function (token) {
-	return Cookies.set(TokenKey, token, { expires: 180 });
+	return Cookies.set(TokenKey + this.suffix, token, { expires: 180 });
 };
 
 Tutorial.prototype.removeToken = function () {
-	return Cookies.remove(TokenKey);
+	return Cookies.remove(TokenKey + this.suffix);
 };

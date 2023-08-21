@@ -4,8 +4,8 @@ namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
 
-use CrEOF\Spatial\DBAL\Types\GeometryType;
-use CrEOF\Spatial\DBAL\Types\Geometry\PointType;
+use LongitudeOne\Spatial\DBAL\Types\GeometryType;
+use LongitudeOne\Spatial\DBAL\Types\Geometry\PointType;
 
 /**
  * GeographyItem

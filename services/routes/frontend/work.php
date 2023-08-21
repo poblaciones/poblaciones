@@ -144,3 +144,25 @@ App::$app->get('/services/frontend/shapes/GetDatasetShapes', function (Request $
 	return App::JsonImmutable($controller->GetDatasetShapes($datasetId, $x, $y, $z));
 });
 
+
+App::$app->get('/services/frontend/work/GetOnboardingStepImage', function (Request $request) {
+	$controller = new services\WorkService();
+	$workId = Params::GetIntMandatory('w');
+	$fileId = Params::GetIntMandatory('f');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId))
+		return $denied;
+
+	return App::JsonImmutable($controller->GetOnboardingStepImage($workId, $fileId));
+});
+
+
+App::$app->get('/services/backoffice/', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId))
+		return $denied;
+	$step = Params::GetIntMandatory('s');
+	$controller = new services\OnboardingService();
+	return $controller->GetStepImage($workId, $step);
+});
+

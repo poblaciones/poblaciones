@@ -27,7 +27,7 @@ use helena\services\backoffice\publish\CacheManager;
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\PublicException;
 
-use CrEOF\Spatial\DBAL\Types\Geometry\PointType;
+use LongitudeOne\Spatial\DBAL\Types\Geometry\PointType;
 
 
 class WorkService extends BaseService
@@ -63,8 +63,11 @@ class WorkService extends BaseService
 
 		// Graba work
 		WorkFlags::Save($work);
-
+		// Le agrega el onboarding
 		$workId = $work->getId();
+		$onboarding = new OnboardingService();
+		$onboarding->CreateOnboarding($workId);
+
 		$shardifiedWorkId = PublishDataTables::Shardified($workId);
 		// Pone el url en Work
 		$url = Links::GetWorkUrl($shardifiedWorkId);
@@ -132,8 +135,7 @@ class WorkService extends BaseService
 		$outFile = IO::GetTempFilename() . '.tmp';
 		$fileModel->ReadFileToFile($preview, $outFile);
 
-		$fileController = new FileService();
-		$dataURL = $fileController->ConvertFiletoBase64($outFile);
+		$dataURL = IO::ConvertFiletoBase64($outFile);
 		IO::Delete($outFile);
 		return ['DataUrl' => $dataURL];
 	}
@@ -159,11 +161,13 @@ class WorkService extends BaseService
 		if ($workInfo->Work === null)
 			throw new PublicException('El elemento no existe en la base de datos.');
 		$permissions = new PermissionsService();
+		$onboarding = new OnboardingService();
 		$workInfo->Permissions = $permissions->GetPermissions($workId);
 		$workInfo->Datasets = $this->GetDatasets($workId);
 		$workInfo->Sources = $this->GetSources($workId);
 		$workInfo->Files = $this->GetFiles($workId);
 		$workInfo->Icons = $this->GetIcons($workId);
+		$workInfo->Onboarding = $onboarding->GetOnboarding($workId);
 		$workInfo->StatsMonths = Statistics::ResolveWorkMonths($workId);
 		$workInfo->StatsQuarters = Statistics::ResolveWorkQuarters($workId);
 		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
@@ -305,7 +309,7 @@ class WorkService extends BaseService
 	{
 		$center = $startup->getCenter();
 		if ($center !== null)
-			$startup->setCenter(new \CrEOF\Spatial\PHP\Types\Geometry\Point($center->x, $center->y, null));
+			$startup->setCenter(new \LongitudeOne\Spatial\PHP\Types\Geometry\Point($center->x, $center->y, null));
 
 		App::Orm()->save($startup);
 		WorkFlags::SetMetadataDataChanged($workId);
@@ -676,7 +680,6 @@ class WorkService extends BaseService
 
 	public function UpdateWorkIcon($workId, $iconId, $name)
 	{
-		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
 		$draftWorkIcon = App::Orm()->find(entities\DraftWorkIcon::class, $iconId);
 
 		if ($draftWorkIcon->getWork()->getId() !== $workId)

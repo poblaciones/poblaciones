@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use \JMS\Serializer\Annotation\Exclude;
 use \JMS\Serializer\Annotation\ExclusionPolicy;
 
-use CrEOF\Spatial\DBAL\Types\Geometry\PointType;
+use LongitudeOne\Spatial\DBAL\Types\Geometry\PointType;
 
 /**
  * DraftWorkStartup
