@@ -17,7 +17,6 @@ class SnapshotByDatasetCompareSummary extends BaseSpatialSnapshotModel
 	private $variablePairs;
 	private $urbanity;
 	private $partition;
-	private $variablesPair;
 
 	public function __construct($snapshotTable, $datasetType, $variablePairs, $urbanity, $partition)
 	{

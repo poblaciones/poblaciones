@@ -40,7 +40,7 @@ class SummaryServiceTest extends TestCase
 		$denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId);
 		$this->assertNull($denied);
 
-		$ret = $controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
+		$ret = $controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, 0, $urbanity, $partition);
 
 	}
 }
