@@ -35,13 +35,29 @@
 											v-model="metadata.Abstract" />
 								</div>
 								<div class="md-layout-item md-size-100">
-									<div class="md-layout md-gutter gutterBottom" v-if="absoluteMap(metadata.Url)">
+									<div class="md-layout md-gutter gutterBottom" v-if="metadata.Url">
 										<div class="md-layout-item md-size-30 md-xsmall-size-100">
 											<label class="with-area">Dirección:</label>
 										</div>
 										<div class="md-layout-item md-size-60">
 											<a v-if="metadata.LastOnline" style="color: #989797;" :href="absoluteMap(appendAccessLink(metadata.Url))" target="_blank">{{ absoluteMap(appendAccessLink(metadata.Url)) }}</a>
-											<span v-else>{{ absoluteMap(appendAccessLink(metadata.Url)) }}</span>
+											<span v-else>{{ absoluteMap(appendAccessLink(metadata.Url)) }} (sin publicar)</span>
+										</div>
+									</div>
+									<div class="md-layout md-gutter gutterBottom" v-if="metadata.Url && Work.ArkUrl">
+										<div class="md-layout-item md-size-30 md-xsmall-size-100">
+											<label class="with-area">Ark:</label>
+										</div>
+										<div class="md-layout-item md-size-60">
+											<a v-if="metadata.LastOnline" style="color: #989797;" :href="Work.ArkUrl" target="_blank">{{ Work.ArkUrl }}</a>
+											<span v-else>{{ Work.ArkUrl }} (sin publicar)</span>
+											<mp-help :positionInline="true" :text="`<p><b>¿Qué son los identificadores ARK?</b></p><p>
+													Al igual que los DOI, los ARK son identificadores persistentes creados para evitar la pérdida de validez de referencias en internet a lo largo del tiempo.
+													</p><p>
+													Poblaciones ofrece gratuitamente ARKs para las cartografías alojadas. De esta forma, los contenidos pueden ser vinculados en la web con un identificador corto y estable apoyado en la infraestructura de la ARK Alliance.
+													</p><p>
+													Más información: <a href='https://arks.org/' target='_blank'>https://arks.org/</a>
+													</p>`" />
 										</div>
 									</div>
 									<div class="md-layout md-gutter">
@@ -50,7 +66,8 @@
 										</div>
 										<div class="md-layout-item md-size-60">
 											<a style="color: #989797;" :href="resolveMetadataUrl()" target="_blank">
-												<i class="far fa-file-pdf"/> Descargar</a>
+												<i class="far fa-file-pdf" /> Descargar
+											</a>
 										</div>
 									</div>
 

@@ -8,6 +8,8 @@ use minga\framework\IO;
 use minga\framework\Str;
 use minga\framework\PublicException;
 use minga\framework\Performance;
+
+use helena\classes\Links;
 use helena\caches\PdfMetadataCache;
 use helena\caches\DictionaryMetadataCache;
 use helena\services\common\BaseService;
@@ -65,6 +67,8 @@ class MetadataService extends BaseService
 
 		if ($metadata === null || sizeof($metadata) < 2) throw new PublicException('Metadatos no encontrados.');
 		$friendlyName = $metadata['met_title'] . '.pdf';
+		if ($workId)
+			$metadata['met_ark'] = Links::GetWorkArkUrl($workId);
 
 		// se fija en el caché
 		$key = PdfMetadataCache::CreateKey($datasetId);

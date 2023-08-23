@@ -55,7 +55,7 @@ class WorkService extends BaseService
 		$ret->Metadata = new MetadataInfo();
 		$ret->Metadata->Fill($work);
 		$ret->Metadata->FillInstitution($work);
-
+		$ret->ArkUrl = Links::GetWorkArkUrl($workId);
 		return $ret;
 	}
 
@@ -77,6 +77,7 @@ class WorkService extends BaseService
 		$ret->Fill($work);
 		$ret->Metadata = new MetadataInfo();
 		$ret->Metadata->Fill($work);
+		$ret->ArkUrl = Links::GetWorkArkUrl($work['wrk_id']);
 		// Hace absolute la URL
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
 		$metadataTable = new MetadataModel();

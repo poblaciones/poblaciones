@@ -18,6 +18,7 @@ class WorkInfo extends BaseMapModel
 	public $Metrics;
 	public $Startup;
 	public $Onboarding;
+	public $ArkUrl;
 
 	public static function GetMap()
 	{

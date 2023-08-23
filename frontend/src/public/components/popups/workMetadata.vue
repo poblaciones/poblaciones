@@ -29,6 +29,15 @@
 							<a target="_blank" :href="completeUrl(work.Url)">{{ completeUrl(work.Url) }}</a>
 						</td>
 					</tr>
+					<tr v-if="work.ArkUrl">
+						<td style="width: 120px;">Ark:</td>
+						<td class='tdWrappable'>
+							<a target="_blank" :href="work.ArkUrl">{{ work.ArkUrl }}</a>
+							<a href="#" v-clipboard="() => work.ArkUrl" class="superSmallButton">
+								Copiar
+							</a>
+						</td>
+					</tr>
 					<tr>
 						<td>Cita (APA):</td>
 						<td class="quotation tdWrappable">
@@ -67,13 +76,14 @@
 					</tr>
 					<tr v-if="work.Metadata.Files && work.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
-						<td class='tdWrappable'><div class="attachmentsDownloadPanel">
-							<span v-for="file in work.Metadata.Files" :key="file.Id">
-								<a target="_blank" :href="resolveFileUrl(file)">
-									<i class="far fa-file-pdf" /> {{ file.Caption }}
-								</a>
-							</span>
-						</div>
+						<td class='tdWrappable'>
+							<div class="attachmentsDownloadPanel">
+								<span v-for="file in work.Metadata.Files" :key="file.Id">
+									<a target="_blank" :href="resolveFileUrl(file)">
+										<i class="far fa-file-pdf" /> {{ file.Caption }}
+									</a>
+								</span>
+							</div>
 						</td>
 					</tr>
 				</tbody>

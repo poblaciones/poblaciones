@@ -193,7 +193,7 @@ export default {
 };
 </script>
 
-<style rel="stylesheet/scss" scoped>
+<style rel="stylesheet/scss">
 
 	.uploader {
 		border: 1px solid rgb(235, 235, 235);
@@ -201,4 +201,12 @@ export default {
 
 								height: 100%;
 	}
+
+.ck-content p {
+		font-size: 16px;
+		margin-bottom: 1.2em;
+		text-align: left;
+		line-height: 1.4em;
+	}
+
 </style>

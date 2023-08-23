@@ -21,7 +21,7 @@ var autoOpenBrowser = !!config.dev.autoOpenBrowser;
 var proxyTable = config.dev.proxyTable;
 var phpPort = port + 2;
 var php = 'http://localhost:' + phpPort;
-proxyTable = { '/services': php, '/logs': php, '/static/css': php, '/static/js': php, '/static/vendor': php, '/authenticate': php };
+proxyTable = { '/services': php, '/logs': php, '/static/css': php, '/ark:/': php, '/static/js': php, '/static/vendor': php, '/authenticate': php };
 
 var app = express();
 var compiler = webpack(webpackConfig);

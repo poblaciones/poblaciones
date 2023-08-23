@@ -11,12 +11,12 @@
             {{ onboardingName }}
           </div>
           <div class="articleContent">
-            <div :style="floatAlignment(currentStep)" v-if="currentStep.Alignment !== 'C'">
+            <div :style="floatAlignment(currentStep)" class="stepImage" v-if="currentStep.Alignment !== 'C'">
               <img v-if="currentStep.previewImage"
                    style="max-height: 250px;"
                    :src="(currentStep.previewImage ? currentStep.previewImage : '')" />
             </div>
-            <div :style="(currentStep.Alignment !== 'C' ? 'padding: 20px' : 'padding-bottom: 20px')"
+            <div class="articleText" :style="(currentStep.Alignment !== 'C' ? 'padding: 10px 20px 20px 20px;' : 'padding: 0px')"
                  v-html="currentStep.Content">
 
             </div>
@@ -167,9 +167,9 @@ import CloseIcon from 'vue-material-design-icons/Close.vue';
     },
 		floatAlignment(currentStep) {
       if (currentStep.Alignment == 'L') {
-        return 'float: left; padding-right: 30px;';
+        return 'float: left; padding-right: 26px;';
       } else if (currentStep.Alignment == 'R') {
-        return 'float: right; padding-left: 30px;';
+        return 'float: right; padding-left: 26px;';
       } else {
         return '';
       }
@@ -248,12 +248,24 @@ import CloseIcon from 'vue-material-design-icons/Close.vue';
   }
 };
 </script>
+
+<style lang="scss">
+
+.articleText p {
+	font-size: 18px !important;
+	margin-bottom: 1.2em;
+}
+</style>
 <style scoped lang="scss">
 :root {
   --accent: #8fd1f2;
 }
 [v-cloak] {
   display: none;
+}
+
+.stepImage {
+  height: 250px;
 }
 .closeButton {
   float:right;
@@ -293,6 +305,12 @@ article {
 .articleContent {
   position: relative; padding-left: 18px; margin-right: 10px;
 }
+
+.articleContent > p {
+	font-size: 18px;
+	margin-bottom: 1.2em;
+}
+
 .articleTitle {
   padding: 6px 0 6px 12px; font-size: 27px;
   border-top-left-radius: 3px;

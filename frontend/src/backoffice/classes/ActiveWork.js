@@ -20,6 +20,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.StatsMonths = workInfo.StatsMonths;
 	this.StatsQuarters = workInfo.StatsQuarters;
 	this.PendingReviewSince = workInfo.PendingReviewSince;
+	this.ArkUrl = workInfo.ArkUrl;
 	this.Startup = workInfo.Startup;
 	this.ExtraMetrics = workInfo.ExtraMetrics;
 	this.Icons = workInfo.Icons;

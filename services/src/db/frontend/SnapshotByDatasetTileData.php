@@ -12,6 +12,7 @@ use helena\classes\GeoJson;
 class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 {
 	const LOCATIONS_LIMIT_PER_TILE = 500;
+	const LOCATIONS_LIMIT_PER_TILE_SEGMENTS = 1500;
 
 	private $variables;
 	private $urbanity;
@@ -87,10 +88,18 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$extraFields[] = 'Lon';
 		$ret = self::RotateResults($ret, $extraFields);
 
-		if ($this->datasetType == 'L' && sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE &&
-					$this->honorTileLimit)
+		if ($this->datasetType == 'L' && $this->honorTileLimit)
 		{
-			$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
+			if ($this->areSegments)
+			 {
+				if (sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE_SEGMENTS)
+					$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE_SEGMENTS);
+			}
+			 else
+			 {
+				if (sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
+					$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
+			 }
 		}
 		Profiling::EndTimer();
 

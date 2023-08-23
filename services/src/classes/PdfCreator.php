@@ -44,6 +44,8 @@ class PdfCreator
 
 		$this->WriteStableUrl();
 
+		$this->WriteArk();
+
 		$this->WriteValuePair("Autores", 'met_authors');
 
 		$this->WriteValuePair("Período", 'met_period_caption');
@@ -131,6 +133,15 @@ class PdfCreator
 		if ($extra) $value .= '/' . $extra;
 		$this->pdf->WritePair("Dirección", Links::GetFullyQualifiedUrl($value));
 	}
+
+	private function WriteArk()
+	{
+		$value = $this->metadata['met_ark'];
+		if ($value == null)
+			return;
+		$this->pdf->WritePair("Ark", $value);
+	}
+
 	private function WriteSources()
 	{
 		$n = sizeof($this->sources);

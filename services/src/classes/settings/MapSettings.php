@@ -39,6 +39,8 @@ class MapSettings
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;
 
+	public $NAAN = null;
+
 	public $MapsAPI = "google";
 
 	public $MaxQueueRequests = 5;

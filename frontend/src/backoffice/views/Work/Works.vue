@@ -84,11 +84,11 @@
 							<md-icon>file_copy</md-icon>
 							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
 						</md-button>
-						<md-button v-if="isAdmin  && item.Type !== 'P'" class="md-icon-button" @click="onPromotePublic(item)">
+						<md-button v-if="canCreatePublic && item.Type !== 'P'" class="md-icon-button" @click="onPromotePublic(item)">
 							<md-icon>playlist_add</md-icon>
 							<md-tooltip md-direction="bottom">Promover a Dato público</md-tooltip>
 						</md-button>
-						<md-button v-if="isAdmin && item.Type === 'P'" class="md-icon-button" @click="onDemotePublic(item)">
+						<md-button v-if="canCreatePublic && item.Type === 'P'" class="md-icon-button" @click="onDemotePublic(item)">
 							<md-icon>playlist_remove</md-icon>
 							<md-tooltip md-direction="bottom">Convertir en Cartografía</md-tooltip>
 						</md-button>
@@ -195,8 +195,8 @@ export default {
 			canCreate() {
 				return (this.filter !== 'P' || window.Context.CanCreatePublicData());
 			},
-			isAdmin() {
-				return window.Context.IsAdmin();
+			canCreatePublic() {
+				return window.Context.CanCreatePublicData();
 			},
 			entityName() {
 				if (this.filter === 'P') {

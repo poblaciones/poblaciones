@@ -174,6 +174,7 @@ class WorkService extends BaseService
 		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
 		$workInfo->Startup = $this->GetStartupInfo($workId);
 		$workInfo->PendingReviewSince = $this->GetPendingReviewSince($workId);
+		$workInfo->ArkUrl = Links::GetWorkArkUrl($workId);
 
 		$workIdShardified = PublishDataTables::Shardified($workId);
 		Statistics::StoreInternalHit($workIdShardified, 'backoffice');

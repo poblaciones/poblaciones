@@ -1,19 +1,8 @@
 <?php
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
-use helena\entities\frontend\geometries\Frame;
-use helena\entities\frontend\geometries\Coordinate;
-use helena\entities\frontend\geometries\Circle;
-use helena\db\frontend\MetadataModel;
-
-use helena\services\frontend as services;
 use helena\controllers\frontend as controllers;
-use helena\services\common as commonServices;
-use helena\services\backoffice\InstitutionService;
-
-use helena\classes\GlobalTimer;
 use helena\classes\App;
 use helena\classes\Links;
 

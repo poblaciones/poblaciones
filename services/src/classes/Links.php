@@ -39,6 +39,14 @@ class Links
 	{
 		return '/services/frontend/tooltip';
 	}
+	public static function GetWorkArkUrl($workId)
+	{
+		$naan = self::GetArkUrl();
+		if (!$naan)
+			return null;
+		else
+			return $naan . '/' . $workId;
+	}
 	public static function GetWorkUrl($workId)
 	{
 		return self::GetMapUrl() . '/' .  $workId;
@@ -51,7 +59,7 @@ class Links
 	{
 		return '/services/metadata/GetMetadataPdf?m=' . $metadataId;
 	}
-	public static function GetWorkMetricUrl($workId, $metricId, $regionItemId)
+	public static function GetWorkMetricUrl($workId, $metricId, $regionItemId = null)
 	{
  		// http://desa.poblaciones.org/map/3501/#/l=6301&!r19166
 		if ($workId)
@@ -78,6 +86,13 @@ class Links
 	public static function GetMapUrl()
 	{
 		return '/map';
+	}
+	private static function GetArkUrl()
+	{
+		if (!App::Settings()->Map()->NAAN)
+			return null;
+		else
+			return 'https://n2t.net/ark:/' . App::Settings()->Map()->NAAN;
 	}
 }
 

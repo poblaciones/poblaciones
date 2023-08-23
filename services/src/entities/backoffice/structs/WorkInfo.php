@@ -16,5 +16,6 @@ class WorkInfo
 	public $StatsMonths;
 	public $StatsQuarters;
 	public $PendingReviewSince;
+	public $ArkUrl;
 }
 

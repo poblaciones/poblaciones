@@ -254,14 +254,14 @@ App::$app->get('/services/backoffice/UpdateWorkVisibility', function (Request $r
 
 App::$app->post('/services/backoffice/PromoteWork', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
-	if (!Session::IsMegaUser()) return $denied;
+	if ($denied = Session::CheckIsSiteEditor()) return $denied;
 	$controller = new services\WorkService();
 	return App::Json($controller->PromoteWork($workId));
 });
 
 App::$app->post('/services/backoffice/DemoteWork', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
-	if (!Session::IsMegaUser()) return $denied;
+	if ($denied = Session::CheckIsSiteEditor()) return $denied;
 	$controller = new services\WorkService();
 	return App::Json($controller->DemoteWork($workId));
 });
