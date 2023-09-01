@@ -1,22 +1,9 @@
 <template>
 	<div>
-		<title-bar title="Atribución" :help="`<p>
-			La atribución permite indicar los autores individuales y opcionalmente la atribución institucional de los datos publicados.
-		</p><p>
-				La información de contacto hace accesible a los usuarios de la información un canal de comunicación con los responsables de los datos para poder realizar consultas o realimentar el proceso de producción de la información.
-			</p><p>
-				La declaración de licencia permite que quienes descarguen la información tengan un marco explícito del alcance con el que pueden utilizar los datos obtenidos de la plataforma.
-			</p>`" />
-			<div class="app-container">
 			<invoker ref="invoker"></invoker>
 
-			<div class="md-layout md-gutter">
+			<div class="md-layout md-gutter" style="margin-bottom: 10px;">
 				<div class="md-layout-item md-size-80 md-small-size-100">
-					<md-card>
-						<md-card-header>
-							<div class="md-title">Origen</div>
-						</md-card-header>
-						<md-card-content>
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100">
 									<mp-text :canEdit="Work.CanEdit()" label="Autores"
@@ -28,8 +15,6 @@
 									<institution-widget @onSelected="Update()" :container="metadata"></institution-widget>
 								</div>
 							</div>
-						</md-card-content>
-					</md-card>
 				</div>
 
 				<div class="md-layout-item md-size-80 md-small-size-100">
@@ -57,7 +42,6 @@
 							<contact-form></contact-form>
 						</md-card-content>
 					</md-card>
-				</div>
 
 			</div>
 		</div>

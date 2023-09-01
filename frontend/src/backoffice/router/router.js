@@ -58,7 +58,7 @@ export const constantRouterMap = [
 	group: 'Datasets',
 	path: '/cartographies/:workId',
 		component: Layout,
-			redirect: '/cartographies/:workId/content',
+		redirect: '/cartographies/:workId/metadata/content',
 			name: 'Datasets',
 			icon: 'fa fa-table',
 			hidden: true,
@@ -83,6 +83,30 @@ export const constantRouterMap = [
 		childrenExtraNodes: null
 	},
 
+	{
+		group: 'Publicación',
+		path: '/cartographies/:workId/metadata',
+		alias: '/cartographies/:workId',
+		component: Layout,
+		redirect: '/cartographies/:workId/metadata/content',
+		icon: 'fa fa-tag',
+		name: 'Información',
+		hidden: false,
+		children: [
+			{
+				path: '/cartographies/:workId/metadata/content',
+				name: 'MetadatosTab Target',
+				alias: [
+					'/cartographies/:workId/metadata/content',
+					'/cartographies/:workId/metadata/attribution',
+					'/cartographies/:workId/metadata/sources',
+					'/cartographies/:workId/metadata/attachments',
+					'/cartographies/:workId/metadata/abstract'
+				],
+				component: () => import('@/backoffice/views/Metadata/Metadata.vue'),
+			}
+		]
+	},
 
 {
 	group: 'Publicación',
@@ -91,8 +115,8 @@ export const constantRouterMap = [
 	component: Layout,
 	redirect: '/cartographies/:workId/content',
 	icon: 'fa fa-tag',
-	name: 'Metadatos',
-	hidden: false,
+	name: 'Contenidos',
+	hidden: true,
 	children: [
 			{
 				path: '/cartographies/:workId/content',
@@ -132,7 +156,7 @@ export const constantRouterMap = [
 	redirect: '/cartographies/:workId/attribution',
 	icon: 'fab fa-creative-commons-by',
 	name: 'Atribución',
-	hidden: false,
+	hidden: true,
 	children: [
 		{
 			path: '/cartographies/:workId/attribution',
@@ -140,23 +164,22 @@ export const constantRouterMap = [
 			component: () => import('@/backoffice/views/Metadata/Attribution.vue'),
 		}
 	]
-},
+	},
 
-
-
-{
-group: 'Publicación',
-	path: '/cartographies/:workId/abstract',
-			component: Layout,
-				redirect: '/cartographies/:workId/abstract',
-					icon: 'far fa-file-alt',
-						name: 'Resumen',
-								children: [
-									{
-										path: '/cartographies/:workId/abstract',
-										name: 'Resumen Target',
-										component: () => import('@/backoffice/views/Metadata/Abstract.vue'),
-										meta: { title: 'Resumen', icon: 'table' }
+	{
+		group: 'Publicación',
+		path: '/cartographies/:workId/abstract',
+		component: Layout,
+		redirect: '/cartographies/:workId/abstract',
+		icon: 'far fa-file-alt',
+		name: 'Resumen',
+		hidden: true,
+		children: [
+			{
+				path: '/cartographies/:workId/abstract',
+				name: 'Resumen Target',
+				component: () => import('@/backoffice/views/Metadata/Abstract.vue'),
+				meta: { title: 'Resumen', icon: 'table' }
 			}
 		]
 	},
@@ -168,7 +191,7 @@ group: 'Publicación',
 	redirect: '/cartographies/:workId/sources',
 	icon: 'fas fa-quote-right',
 	name: 'Fuentes secundarias',
-	hidden: false,
+	hidden: true,
 	children: [
 		{
 			path: '/cartographies/:workId/sources',
@@ -186,7 +209,7 @@ group: 'Publicación',
 	redirect: '/cartographies/:workId/attachments',
 	icon: 'fas fa-paperclip',
 	name: 'Adjuntos',
-	hidden: false,
+	hidden: true,
 	children: [
 		{
 			path: '/cartographies/:workId/attachments',
@@ -198,7 +221,7 @@ group: 'Publicación',
 },
 
 	{
-		group: 'Administración',
+		group: 'Publicación',
 		path: '/cartographies/:workId/customize',
 		component: Layout,
 		redirect: '/cartographies/:workId/customize',

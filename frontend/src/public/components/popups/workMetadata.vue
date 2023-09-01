@@ -127,7 +127,7 @@ export default {
 		},
 		show(work) {
 			this.metric = null;
-			this.title = 'Metadatos';
+			this.title = 'Información';
 			this.downloadLevel = null;
 			this.work = work;
 			window.SegMap.Session.Content.OpenMetadata();

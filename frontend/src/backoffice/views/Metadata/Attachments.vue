@@ -1,66 +1,52 @@
 <template>
 	<div>
-		<title-bar title="Adjuntos" help="<p>
-			La sección de adjuntos permite agregar archivos que complementen la comprensión o descripción
-			de los datos puestos a disposición.
-			</p><p>Estos pueden incluir artículos publicados en base a los mismos datos, informes del trabajo de
-			campo, especificación del muestreo o las herramientas utilizadas para la construcción de la información,
-			cuestionarios, tablas detalladas de códigos o descriptores geográficos, entre otros.
-			</p><p>No debe incluirse aquí un adjunto con los metadatos generales ni con las listas de variables
-			de los datasets ya que dicha información se brinda a los usuarios en forma automática.
-			</p><p>El tipo de archivo permitido es Acrobat/PDF.
-		</p>" />
+		<invoker ref="invoker"></invoker>
 
-		<div class="app-container">
-			<invoker ref="invoker"></invoker>
+		<attachment-popup ref="editPopup">
+		</attachment-popup>
 
-			<attachment-popup ref="editPopup">
-			</attachment-popup>
-
-			<div v-if="Work.CanEdit()" class="md-layout">
-				<md-button @click="createNewAttachment()">
-					<md-icon>add_circle_outline</md-icon>
-					Agregar adjunto
-				</md-button>
-			</div>
-			<div class="md-layout">
-				<div class="md-layout-item">
-					<md-table v-model="list" md-card="">
-						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre">{{ item.Caption }}</md-table-cell>
-							<md-table-cell md-label="Archivo">
-								<a v-if="item.File !== null" target="_blank" :href="getAttachUrl(item)">{{ formatFile('PDF', item.File.Size, item.File.Pages) }}</a>
-							</md-table-cell>
-							<md-table-cell md-label="Acciones" class="mpNoWrap">
-								<div v-if="Work.CanEdit()">
-									<md-button class="md-icon-button" @click="openEdition(item)">
-										<md-icon>edit</md-icon>
-										<md-tooltip md-direction="bottom">Modificar adjunto</md-tooltip>
-									</md-button>
-									<md-button v-if="!isFirst(item)" class="md-icon-button" @click="up(item)">
-										<md-icon>arrow_upward</md-icon>
-										<md-tooltip md-direction="bottom">Subir una ubicación</md-tooltip>
-									</md-button>
-									<md-button v-if="!isLast(item)" class="md-icon-button" @click="down(item)">
-										<md-icon>arrow_downward</md-icon>
-										<md-tooltip md-direction="bottom">Bajar una ubicación</md-tooltip>
-									</md-button>
-									<md-button class="md-icon-button" @click="onDelete(item)">
-										<md-icon>delete</md-icon>
-										<md-tooltip md-direction="bottom">Eliminar adjunto</md-tooltip>
-									</md-button>
-								</div>
-								<md-button v-else="" class="md-icon-button" @click="openEdition(item)">
-									<md-icon>remove_red_eye</md-icon>
-									<md-tooltip md-direction="bottom">Ver adjunto</md-tooltip>
+		<div v-if="Work.CanEdit()" class="md-layout">
+			<md-button @click="createNewAttachment()">
+				<md-icon>add_circle_outline</md-icon>
+				Agregar adjunto
+			</md-button>
+		</div>
+		<div class="md-layout">
+			<div class="md-layout-item">
+				<md-table v-model="list" md-card="">
+					<md-table-row slot="md-table-row" slot-scope="{ item }">
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre">{{ item.Caption }}</md-table-cell>
+						<md-table-cell md-label="Archivo">
+							<a v-if="item.File !== null" target="_blank" :href="getAttachUrl(item)">{{ formatFile('PDF', item.File.Size, item.File.Pages) }}</a>
+						</md-table-cell>
+						<md-table-cell md-label="Acciones" class="mpNoWrap">
+							<div v-if="Work.CanEdit()">
+								<md-button class="md-icon-button" @click="openEdition(item)">
+									<md-icon>edit</md-icon>
+									<md-tooltip md-direction="bottom">Modificar adjunto</md-tooltip>
 								</md-button>
+								<md-button v-if="!isFirst(item)" class="md-icon-button" @click="up(item)">
+									<md-icon>arrow_upward</md-icon>
+									<md-tooltip md-direction="bottom">Subir una ubicación</md-tooltip>
+								</md-button>
+								<md-button v-if="!isLast(item)" class="md-icon-button" @click="down(item)">
+									<md-icon>arrow_downward</md-icon>
+									<md-tooltip md-direction="bottom">Bajar una ubicación</md-tooltip>
+								</md-button>
+								<md-button class="md-icon-button" @click="onDelete(item)">
+									<md-icon>delete</md-icon>
+									<md-tooltip md-direction="bottom">Eliminar adjunto</md-tooltip>
+								</md-button>
+							</div>
+							<md-button v-else="" class="md-icon-button" @click="openEdition(item)">
+								<md-icon>remove_red_eye</md-icon>
+								<md-tooltip md-direction="bottom">Ver adjunto</md-tooltip>
+							</md-button>
 
-							</md-table-cell>
-						</md-table-row>
-					</md-table>
-				</div>
+						</md-table-cell>
+					</md-table-row>
+				</md-table>
 			</div>
-
 		</div>
 	</div>
 </template>

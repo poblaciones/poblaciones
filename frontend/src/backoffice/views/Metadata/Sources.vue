@@ -1,15 +1,5 @@
 <template>
 	<div>
-		<title-bar :title="'Fuentes' + SecondaryLabel" :help="`
-							 <p>
-								 La sección de fuentes` + SecondaryLabel + ` permite ofrecer la lista de datos o documentación en la que se apoyó
-								 la construcción de la información puesta a disposición.
-							 </p><p>
-								 De esta forma, pueden consignarse como fuentes secundarias censos, encuestas o
-								 cartografías que hayan sido empleadas para el armado de los datos ofrecidos.
-							 </p>`" />
-
-		<div class="app-container">
 		<invoker ref="invoker"></invoker>
 
 			<pick-source ref="PickSource"></pick-source>
@@ -56,7 +46,6 @@
 						</md-table-row>
 					</md-table>
 				</div>
-			</div>
 		</div>
 	</div>
 </template>
@@ -71,18 +60,18 @@ export default {
   name: 'Fuentes',
   data() {
     return {
-
+			sources: [],
     };
-  },
+	},
+	mounted() {
+		this.sources = this.Work.Sources;
+	},
   computed: {
     Work() {
       return window.Context.CurrentWork;
     },
 		SecondaryLabel() {
 			return (this.Work.IsPublicData() ? '' : ' secundarias');
-		},
-		sources() {
-			return this.Work.Sources;
 		},
 		CanEditStaticLists() {
 			return window.Context.CanEditStaticLists();

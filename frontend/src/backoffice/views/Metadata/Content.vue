@@ -1,25 +1,9 @@
 <template>
 	<div>
-		<title-bar title="Contenido" help="<p>
-						Los datos publicados en la plataforma deben poder ser referenciado por quienes hacen
-						uso de ellos.
-						</p><p>
-							Para ello, cada conjunto de datos posee un conjunto de metadatos que
-							describe su origen, autores y contenidos. Estos metadatos se organizan para su carga
-							en Contenido, Detalle, Atribución, Fuentes y Adjuntos.
-						</p>
-						<p>
-							En la sección de Contenido
-							se indica el título del conjunto de datos, un breve resumen de su contenido e información
-							sobre su nivel de cobertura.
-						</p>" />
-		<div class="app-container">
 			<invoker ref="invoker"></invoker>
 
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-80 md-small-size-100">
-					<md-card>
-						<md-card-content>
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100">
 									<mp-text :canEdit="Work.CanEdit()" label="Título" :maxlength="150"
@@ -92,15 +76,11 @@
 
 							</div>
 
-						</md-card-content>
-					</md-card>
 				</div>
 			</div>
 
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-80 md-small-size-100">
-					<md-card>
-						<md-card-content>
 
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-40 md-small-size-100">
@@ -119,9 +99,6 @@
 															v-model="metadata.Frequency" />
 								</div>
 							</div>
-						</md-card-content>
-					</md-card>
-				</div>
 			</div>
 		</div>
 	</div>

@@ -40,8 +40,6 @@ class cArk extends cPublicController
 		if (sizeof($parts) > 0)
 			$metricId = Params::CheckParseIntValue($parts[0]);
 
-		$this->cleanRouteBase = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($workId, $metricId, null));
-
 		if ($metricId !== null)
 			return $this->RedirectWorkMetric($workId, $metricId);
 		else

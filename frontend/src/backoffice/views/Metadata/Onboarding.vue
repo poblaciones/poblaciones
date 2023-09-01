@@ -48,8 +48,6 @@ export default {
 	},
 	data() {
 		return {
-			activateSaveAs: false,
-			newDatasetName: '',
 			stepDefinitions: [{ Id: 'step1', Label: 'Paso 1', Helper: 'En el primer paso puede ser una buena idea poner en contexto la temática o destacar la importancia del problema que trata la cartografía.' },
 				{ Id: 'step2', Label: 'Paso 2', Helper: 'En el segundo paso puede ser útil indicar cómo se abordó el problema (estrategia, proyecto o relevamiento llevado adelante).' },
 				{ Id: 'step3', Label: 'Paso 3', Helper: 'Aquí resumir brevemente los resultados alcanzados.' },

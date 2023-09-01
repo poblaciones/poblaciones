@@ -241,7 +241,7 @@ export default {
 			if (absoluteUrl) {
 				pre ='/users/#';
 			}
-			return pre + '/cartographies/' + element.Id + '/content';
+			return pre + '/cartographies/' + element.Id + '/metadata/content';
 		},
 		logInfo(item) {
 			return speech.FormatWorkInfo(item);

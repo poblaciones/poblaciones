@@ -16,7 +16,7 @@
 							<a href="#" :title="'Metadatos de ' + work.Current.Name"
 								 @click="clickFuente" style="color: #FFF">
 								<link-icon />
-								Metadatos
+								Información
 							</a>
 						</div>
 					</div>
