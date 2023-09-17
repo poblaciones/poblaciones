@@ -21,7 +21,7 @@
 
 										<div class="md-layout-item md-size-100 formRow">
 											<div class="minorText">
-												¿Olvidó su contraseña? <router-link to="newPassword" class="underlined">Recuperarla</router-link>.
+												¿Olvidó su contraseña? <router-link to="recover" class="underlined">Recuperarla</router-link>.
 											</div>
 											</div>
 									</div>
@@ -43,7 +43,7 @@
 									</div>
 									<div class="md-layout-item md-size-100 formRow">
 										<div class="minorText">
-											Ingrese su contraseña para continuar. ¿Olvidó su contraseña? <router-link to="newPassword" class="underlined">Recuperarla</router-link>.
+											Ingrese su contraseña para continuar. ¿Olvidó su contraseña? <router-link to="recover" class="underlined">Recuperarla</router-link>.
 										</div>
 									</div>
 

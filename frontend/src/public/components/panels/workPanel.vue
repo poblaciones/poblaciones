@@ -13,7 +13,7 @@
 					</div>
 					<div class="metadataInfo" style="position: relative; z-index: 10;" :style="(showButtonsInSingleRow() ? 'width: 1px' : '')">
 						<div class="sourceInfo exp-hiddable-block" :style="getMetadataStyle()">
-							<a href="#" :title="'Metadatos de ' + work.Current.Name"
+							<a href="#" :title="'Información de ' + work.Current.Metadata.Name"
 								 @click="clickFuente" style="color: #FFF">
 								<link-icon />
 								Información
@@ -179,7 +179,7 @@ export default {
 }
 .sourceInfo
 {
-	margin-left: 13px;
+	margin-left: 30px;
 	font-size: 1.30rem;
 	margin-top: 8px;
 }

@@ -16,6 +16,8 @@ var SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 var env = config.build.env;
 
+// vuelidate\lib\withParams.js -> remover condicional de env.BUILD === web
+
 process.traceDeprecation = true;
 
 var webpackConfig = merge(baseWebpackConfig, {
@@ -111,7 +113,6 @@ var webpackConfig = merge(baseWebpackConfig, {
 		new HtmlWebpackPlugin({
 			filename: config.build.indexCredentials,
 			template: 'credentials.html',
-			metadata: { google_maps_key: env.google_maps_key.replace(/"/g, '') },
 			chunks: ['manifest', 'vendor', 'appCred'],
 			inject: true,
 			minify: {

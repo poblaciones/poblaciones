@@ -21,15 +21,13 @@ Vue.use(Router);
 export const constantRouterMap = [
 //	{ path: '/login', component: () => import('@/backoffice/views/login/index'), hidden: true },
 { path: '/404', component: () => import('@/backoffice/views/404'), hidden: true },
-
 	{
-    path: '',
+		path: '',
 		redirect: '/signin', // default child path
- },
+	},
 	{
 		path: '/signin',
 		name: 'Ingresar',
-		alias: ['ingresar'],
 		meta: { title: 'Ingresar' },
 		hidden: false,
 		component: () => import('@/credentials/views/Login.vue'),
@@ -37,7 +35,6 @@ export const constantRouterMap = [
 	{
 		path: '/newPassword',
 		name: 'ChangePassword',
-		alias: ['cambiarClave', 'newpassword', 'cambiarclave'],
 		hidden: false,
 		meta: { title: 'Restablecer contraseña' },
 		component: () => import('@/credentials/views/NewPassword.vue'),
@@ -45,14 +42,12 @@ export const constantRouterMap = [
 	{
 		path: '/activate',
 		name: 'Activar',
-		alias: ['activar'],
 		meta: { title: 'Activar cuenta' },
 		hidden: false,
 		component: () => import('@/credentials/views/Activate.vue'),
 	},
 	{
 		path: '/recover',
-		alias: ['recuperar'],
 		name: 'Recuperar',
 		hidden: false,
 		meta: { title: 'Restablecer contraseña' },
@@ -61,7 +56,6 @@ export const constantRouterMap = [
 	{
 		path: '/signup',
 		name: 'Empezar',
-		alias: ['registrarse'],
 		hidden: false,
 		meta: { title: 'Crear cuenta' },
 		component: () => import('@/credentials/views/Signup.vue'),

@@ -3,7 +3,7 @@
     <boardal v-if="modal.isOpen" ref="dal" :has-mask="modal.hasMask" style="z-index: 2000"
              :can-click-mask="modal.canClickMask" :has-x="modal.hasX" @toggle="toggleModal">
       <article v-cloak>
-        <section v-for="currentStep in onboarding.Steps" :key="currentStep.Id">
+        <section v-for="currentStep in onboarding.Steps" :key="currentStep.Id" style="overflow: hidden">
           <div class="articleTitle" :style="'background-color: ' + backgroundColor">
             <div class="closeButton" @click="toggleModal">
               <close-icon title="Cerrar" />

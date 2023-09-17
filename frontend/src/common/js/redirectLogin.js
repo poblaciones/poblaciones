@@ -1,7 +1,7 @@
 module.exports = {
 	redirectLogin() {
 		var actualLink = document.location;
-		var loginUrl = window.host + '/authenticate/login';
+		var loginUrl = window.host + '/cr#';
 		var url = this.AppendParam(loginUrl, 'to', actualLink);
 		url = this.AppendParam(url, 'ask', 1);
 		document.location = url;
