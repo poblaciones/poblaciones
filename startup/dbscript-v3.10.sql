@@ -3402,6 +3402,14 @@ CREATE TABLE `work_startup` (
   `wst_active_metrics` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Indicadores del work que deben estar activos (lista separada por comas)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `work_dataset_draft` (
+  `wdd_id` int(11) NOT NULL AUTO_INCREMENT,
+  `wdd_table` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `wdd_created` datetime NOT NULL,
+  PRIMARY KEY (`wdd_id`),
+  KEY `wdd_table` (`wdd_table`)
+) ENGINE=InnoDB AUTO_INCREMENT=1457 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 --
 -- Indexes for dumped tables
 --
