@@ -118,7 +118,7 @@ class DatasetTable
 	}
 	public static function CreateNewTableName()
 	{
-		$query ="SELECT max(t) FROM (
+		$query = "SELECT max(t) FROM (
 							SELECT replace(wdd_table, 'tmp_', '') t
 								FROM work_dataset_draft WHERE wdd_table LIKE 'work_dataset_draft_%'
 										OR wdd_table LIKE 'tmp_work_dataset_draft_%'
@@ -134,7 +134,9 @@ class DatasetTable
 												'_shard_5_', '_draft_') t
 								FROM dataset
 							UNION
-									SELECT dat_table t FROM draft_dataset) l";
+									SELECT dat_table t FROM draft_dataset
+							UNION
+									SELECT 'work_dataset_draft_000000') l";
 		$currentTableName =  App::Db()->fetchScalar($query);
 		$n = self::GetNumberPart($currentTableName);
 
