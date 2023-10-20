@@ -24,7 +24,7 @@ class MetadataMerger
 		$this->datasetId = intval($datasetId);
 		$this->targetDatasetId = intval($targetDatasetId);
 		$this->keepOldMetadata = $keepOldMetadata;
-		$this->maxPreviousId = $maxPreviousId;
+		$this->maxPreviousId = intval($maxPreviousId);
 		$this->dropSourceDataset = $dropSourceDataset;
 	}
 	public function MergeMetadata()
