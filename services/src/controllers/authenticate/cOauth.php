@@ -9,6 +9,7 @@ use minga\framework\oauth\OauthConnector;
 use helena\services\common\BaseService;
 use helena\classes\Register;
 use minga\framework\Params;
+use minga\framework\MessageException;
 use minga\framework\MessageBox;
 
 class cOauth extends cController
@@ -35,7 +36,7 @@ class cOauth extends cController
 			$data = $this->oauth->RequestData($code, $state);
 			if ($data != null) {
 				if ($data->email == '' || $data->verified == false)
-					$this->RedirectErrorNoEmail();
+					$this->oauth->RedirectErrorNoEmail();
 
 				$this->LoginOrRegister($data);
 				$this->oauth->RedirectSuccess($data, $state);
