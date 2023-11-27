@@ -27,6 +27,7 @@ class UserService extends BaseService
 			// Tiene que crearlo
 			$user = new entities\User();
 			$user->setEmail($email);
+			$user->setCreateTime(new \DateTime('now'));
 			$user->setIsActive(false);
 			$user->setDeleted(false);
 			$user->setPrivileges('P');

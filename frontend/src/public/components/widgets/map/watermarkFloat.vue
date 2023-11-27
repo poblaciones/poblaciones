@@ -1,7 +1,8 @@
 <template>
-  <div v-if="imageUrl" :class="'exp-hiddable-block logoDiv ' + (float == 'left' ? 'logoDivLeft' : 'logoDivRight')" @click="institutionClicked"
-       :style="(!url ? 'pointer-events: none' : 'cursor: pointer')">
-    <img class="logoIcon" :src="imageUrl" :title="name" />
+  <div v-if="image" class="logoDiv" @click="institutionClicked"
+			 :style="(!work.Current.Metadata.Institution.Url ? 'pointer-events: none; ' : 'cursor: pointer; ') +
+            (useStreetMap ? 'right: 145px' : '')">
+    <img class="logoIcon" :src="image" :title="work.Current.Metadata.Institution.Name" />
   </div>
 </template>
 
@@ -11,40 +12,24 @@ import err from "@/common/framework/err";
 
 export default {
   name: "watermarkFloat",
-    props:
-    {
-			float: {
-				type: String,
-				default: 'right'
-			},
-      name: '',
-      url: '',
-      image: '',
-      waterMarkId: null,
-    },
+  props: ["work"],
   data() {
     return {
-      imageObtained: null
+      image: null
     };
   },
   mounted() {
-    // obtiene el file de la imagen
-    if (this.waterMarkId) {
-			this.getInstitutionWatermark();
-    }
+    // Obtiene el file de la Imagen
+    this.getInstitutionWatermark();
   },
   computed: {
-    imageUrl() {
-      if (this.image) {
-        return this.image;
-      } else {
-        return this.imageObtained;
-      }
-    }
+    useStreetMap() {
+      return window.SegMap.Configuration.MapsAPI === 'google';
+    },
   },
   methods: {
 		institutionClicked() {
-			window.open(this.url);
+			window.open(this.work.Current.Metadata.Institution.Url);
 		},
     getInstitutionWatermark() {
       const loc = this;
@@ -52,11 +37,11 @@ export default {
         .get(window.host + "/services/works/GetInstitutionWatermark", {
           params: {
             w: loc.work.Current.Id,
-            iwmid: this.waterMarkId
+            iwmid: loc.work.Current.Metadata.Institution.WatermarkId
           }
         })
         .then(function(res) {
-          loc.imageObtained = res.data;
+          loc.image = res.data;
         })
         .catch(function(error) {
           err.errDialog(
@@ -70,30 +55,22 @@ export default {
 </script>
 
 <style scoped>
-	.logoDivLeft {
-		left: 98px;
-		bottom: 15px;
-		z-index: 500;
-	}
-	.logoDivRight {
-		bottom: 23px;
-		right: 54px;
-		z-index: 1000;
-	}
-
-	.logoDiv {
-			position: absolute;
-			background-color: transparent;
-			border-radius: 6px;
-			display: flex;
-			height: 100%;
-			width: auto;
-			max-width: 70%;
-			max-height: 64px;
-			overflow: hidden;
-			object-fit: scale-down;
-			justify-content: center;
-		}
+.logoDiv {
+	bottom: 22px;
+	right: 95px;
+  z-index: 1000;
+	position: absolute;
+	background-color: transparent;
+	border-radius: 6px;
+	display: flex;
+	height: 100%;
+	width: auto;
+	max-width: 70%;
+	max-height: 64px;
+	overflow: hidden;
+	object-fit: scale-down;
+	justify-content: center;
+}
 
 .logoIcon {
   height: auto;

@@ -5,7 +5,7 @@
 										+ preProcess(featureInfo.Image) + ');'"
 				 class="topImage">
 		</div>
-		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')">
+		<div class='panel card panel-body' style="margin-bottom: 0px; background-color: transparent" :class="(enabled ? '' : 'text-muted')">
 			<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 			<mp-close-button v-else @click="doClose" class="exp-hiddable-block" />
 			<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" :clickeable="!!featureInfo.position" @click='focus()' /></h5>
@@ -25,7 +25,7 @@
 					</button>
 				</div>
 			</div>
-			<hr class="moderateHr exp-hiddable-visiblity" v-if="hasTitle">
+			<hr class="moderateHr exp-hiddable-visiblity">
 			<div>
 				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
 					<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
@@ -35,10 +35,12 @@
 					</button>
 				</div>
 				<div class='item' v-if="featureInfo.Code && featureInfo.Title">
-					Código: {{ val }}
+					<div class="iLabel">Código</div>
+					{{ val }}
 				</div>
 				<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
-					{{ capitalize(item.Name) }}: <mp-label :text="getValue(item)" />
+					<div class="iLabel">{{ capitalize(item.Name) }}</div>
+					<mp-label :text="getValue(item)" />
 				</div>
 				<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 			</div>
@@ -256,6 +258,11 @@ export default {
 		height: 200px;
 		width: 100%;
 		background-size: cover;
+	}
+	.iLabel {
+		font-weight: 600;
+		color: #666666;
+		padding-bottom: 2px;
 	}
 </style>
 

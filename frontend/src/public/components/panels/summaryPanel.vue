@@ -1,10 +1,10 @@
 <template>
-	<div style="background-color: white; width: 100%;">
+	<div style="width: 100%;">
 		<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
-						 :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates"
+						 :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates" style="position: sticky; z-index: 10; top: 0px"
 						 class="exp-hiddable-block" />
 		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
-				 style="background-color: transparent; padding-bottom: 13px;">
+				 style="background-color: transparent; padding-bottom: 11px; margin-bottom: 0px; ">
 			<Clipping :clipping="clipping" :frame="frame" v-show="showPopulationTotals" />
 
 			<template v-for="(value, index) in metrics">
@@ -27,7 +27,6 @@
 			<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
 			<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
 			<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
-			<WaitMessage ref="showWaitMessage" :backgroundColor="backgroundColor" />
 			<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
 		</div>
 	</div>
@@ -41,7 +40,6 @@ import Embedding from '@/public/components/popups/embedding';
 import ClippingMetadata from '@/public/components/popups/clippingMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
 import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
-import WaitMessage from '@/public/components/popups/waitMessage';
 import AddMetric from '@/public/components/popups/addMetric';
 import Toolbar from '@/public/components/widgets/summary/toolbar';
 import MetricDownload from '@/public/components/popups/metricDownload';
@@ -59,7 +57,6 @@ export default {
 		AddMetric,
 		WorkMetadata,
 		ClippingMetadata,
-		WaitMessage,
 		BoundaryCustomize,
 		MetricCustomize,
 		MetricDownload,
@@ -100,7 +97,6 @@ export default {
 		window.Popups.Embedding = this.$refs.showEmbedding;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
 		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
-		window.Popups.WaitMessage = this.$refs.showWaitMessage;
 		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AddMetric = this.$refs.addMetric;

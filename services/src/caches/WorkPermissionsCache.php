@@ -29,12 +29,15 @@ class WorkPermissionsCache extends BaseCache
 		if ($cache->HasData($workId, $rows) === false)
 		{
 			// La resuelve
-			$select = "SELECT usr_email Email, wkp_permission Permission FROM draft_work_permission JOIN user ON wkp_user_id = usr_id WHERE wkp_work_id = ?";
+			$select = "SELECT usr_email Email, wkp_permission Permission
+						FROM draft_work_permission
+						JOIN user ON wkp_user_id = usr_id
+						JOIN draft_work ON wkp_work_id = wrk_id
+						WHERE wkp_work_id = ? AND wrk_is_indexed = 0";
 			$rows = App::Db()->fetchAll($select, array($workId));
 			$cache->PutData($workId, $rows);
 		}
 		// Devuelve lo solicitado
-		$access = null;
 		$view = false;
 		$edit = false;
 		$admin = false;

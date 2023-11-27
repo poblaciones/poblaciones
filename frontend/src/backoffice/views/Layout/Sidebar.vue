@@ -196,6 +196,9 @@ export default {
 					lastGroup = route.group;
 				}
 				var men = this.createMenuFromRoute(route);
+				if (route.name == 'Bienvenida') {
+					route.hidden = !this.Work.IsPublicData();
+				}
 				if (!route.hidden) {
 					ret.push(men);
 				}

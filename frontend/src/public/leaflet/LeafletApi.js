@@ -99,7 +99,7 @@ LeafletApi.prototype.Initialize = function () {
 		window.SegMap.MapInitialized();
 
 		var t = document.createElement("div");
-		t.innerHTML = '<div class="gmnoprint" role="menubar" style="margin: 10px -10px; z-index: 1000; position: absolute; cursor: pointer; left: 0px; top: 0px;">' +
+		t.innerHTML = '<div class="gmnoprint" role="menubar" style="margin: 10px -10px; z-index: 900; position: absolute; cursor: pointer; left: 0px; top: 0px;">' +
 			'<div class="gm-style-mtc" style="float: left; position: relative;">' +
 			'<button title="Mostrar mapa de calles" type="button" class="leafletMapButton" style="font-weight: bold" id="roadTypeButton">Mapa</button>' +
 			'<button title="Mostrar imágenes satelitales" type="button" class="leafletMapButton" id="satelliteTypeButton">Satélite</button>' +
@@ -124,6 +124,7 @@ LeafletApi.prototype.Initialize = function () {
 		loc.mapTypeButtons['b'].addEventListener("click", function () {
 			loc.InteractiveChangeMapType("b");
 		});
+		loc.BoundsChanged();
 	});
 	this.map.setView(new L.LatLng(-37.1799565, -65.6866910), 6);
 	this.CheckBaseLayer();
@@ -299,7 +300,7 @@ LeafletApi.prototype.GetCopyright = function () {
 		innerHTML += "<a class='copyrightText' href='https://poblaciones.org/' target='_blank'>";
 	}
 	innerHTML += "Poblaciones © 2019-" + (new Date().getFullYear()) + " CONICET / ODSA - UCA</a>. " +
-		"<a class='copyrightText' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. ";
+		"<a class='copyrightText exp-hiddable-unset' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. ";
 	if (!window.Embedded.Active) {
 		innerHTML += "<a class='copyrightText exp-hiddable-unset' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a>";
 	}

@@ -30,11 +30,21 @@ class User
      */
     private $Email;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="usr_firstname", type="string", length=255, precision=0, scale=0, nullable=false, unique=false)
-     */
+
+	/**
+	 * @var string
+	 * @ClientReadonly
+	 *
+	 * @ORM\Column(name="usr_email_new", type="string", length=100, nullable=true)
+	 */
+	private $EmailNew;
+
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="usr_firstname", type="string", length=255, precision=0, scale=0, nullable=false, unique=false)
+	 */
     private $Firstname;
 
     /**
@@ -56,7 +66,7 @@ class User
 		 * @Exclude
 		 * @ClientReadonly
      *
-     * @ORM\Column(name="usr_create_time", type="datetime", precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="usr_create_time", type="datetime", precision=0, scale=0, nullable=true, unique=false)
      */
     private $CreateTime;
 
@@ -123,13 +133,38 @@ class User
         return $this->Email;
     }
 
-    /**
-     * Set firstname
-     *
-     * @param string $firstname
-     *
-     * @return User
-     */
+
+	/**
+	 * Set emailNew
+	 *
+	 * @param string $emailNew
+	 *
+	 * @return User
+	 */
+	public function setEmailNew($emailNew)
+	{
+		$this->EmailNew = $emailNew;
+
+		return $this;
+	}
+
+	/**
+	 * Get emailNew
+	 *
+	 * @return string
+	 */
+	public function getEmailNew()
+	{
+		return $this->EmailNew;
+	}
+
+	/**
+	 * Set firstname
+	 *
+	 * @param string $firstname
+	 *
+	 * @return User
+	 */
     public function setFirstname($firstname)
     {
         $this->Firstname = $firstname;

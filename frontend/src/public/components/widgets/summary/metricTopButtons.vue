@@ -10,20 +10,26 @@
 					<i class="fas fa-sliders-h"></i>
 				</button>
 
-				<button type="button" v-if="hasUrbanityFilter" id="filterDropId"
-								class="filterDropdownButton lightButton close" data-toggle="dropdown"
-								title="Agregar filtro">
-					<i class="fas fa-filter" />
-				</button>
-				<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
-					<li v-for="(value, key) in metric.GetUrbanityFilters(true)" :key="key" :class="(value.border ? 'liDividerNext' : '')">
-						<a :style="'padding-left: '+ (15 + value.level * 14) +'px'"
-										@click="changeUrbanity(key)">
-							{{ value.label }}
-						</a>
-					</li>
-				</ul>
-
+				<v-popover v-if="hasUrbanityFilter" popoverClass="tooltipInPopup tooltipNoBorder colorTooltip" style=" display: inline-block; float: right;"
+									 popoverArrowClass="noArrow" :open="showDropDown"
+									 :disabled="false" @hide="dropDownClosed"
+									 popoverInnerClass="tooltipNoBorder">
+					<button type="button" id="filterDropId"
+									class="filterDropdownButton lightButton close"
+									title="Agregar filtro" @click="showDropDown = true;">
+						<i class="fas fa-filter" />
+					</button>
+					<div slot="popover">
+						<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
+							<li v-for="(value, key) in metric.GetUrbanityFilters(true)" :key="key" :class="(value.border ? 'liDividerNext' : '')">
+								<a :style="'padding-left: '+ (15 + value.level * 14) +'px'"
+									 @click="changeUrbanity(key)">
+									{{ value.label }}
+								</a>
+							</li>
+						</ul>
+					</div>
+				</v-popover>
 				<button type="button" @click="toogleRankings" v-if="metric.useRankings()" onmouseup="this.blur()"
 								class="close lightButton" :class="(metric.ShowRanking ? 'activeButton' : '')" :title="(metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking')">
 					<i class="fa fa-signal" style="margin-left: -8px;" />
@@ -39,110 +45,127 @@
 </template>
 
 <script>
-import Mercator from '@/public/js/Mercator';
+	import Mercator from '@/public/js/Mercator';
 
-// https://materialdesignicons.com/cdn/1.9.32/
+	// https://materialdesignicons.com/cdn/1.9.32/
 
-export default {
-	name: 'metricDropdown',
-	props: [
-		'metric',
-		'clipping',
-	],
-	components: {
+	export default {
+		name: 'metricDropdown',
+		props: [
+			'metric',
+			'clipping',
+		],
+		components: {
 
-	},
-	data() {
-		return {
-			work: {},
-		};
-	},
-	methods: {
-		clickCustomize(e) {
-			e.preventDefault();
-			window.Popups.MetricCustomize.show(this.metric);
 		},
-		clickQuitar(e) {
-			e.preventDefault();
-			this.metric.Remove();
+		data() {
+			return {
+				work: {},
+				showDropDown: false,
+				isDropDownOpen: false,
+			};
 		},
-		toogleRankings() {
-			this.metric.ShowRanking = !this.metric.ShowRanking;
-			window.SegMap.SaveRoute.UpdateRoute();
-			if (this.metric.ShowRanking) {
-				this.$emit('RankingShown');
-			}
-		},
-		changeUrbanity(mode) {
-			this.metric.properties.SelectedUrbanity = mode;
-			window.SegMap.SaveRoute.UpdateRoute();
-			window.SegMap.UpdateMap();
-		},
-		zoomExtents() {
-			var extents = this.metric.SelectedLevel().Extents;
-			if (!window.SegMap.Clipping.FrameHasNoClipping()) {
+		methods: {
+			dropDownOpened() {
+
+				if (this.isDropDownOpen) {
+					this.dropDownClosed();
+					alert(0);
+					return;
+				}
+				alert(1);
+				this.isDropDownOpen = true;
+			},
+			dropDownClosed() {
+				this.showDropDown = false;
+				this.isDropDownOpen = false;
+			},
+			clickCustomize(e) {
+				e.preventDefault();
+				window.Popups.MetricCustomize.show(this.metric);
+			},
+			clickQuitar(e) {
+				e.preventDefault();
+				this.metric.Remove();
+			},
+			toogleRankings() {
+				this.metric.ShowRanking = !this.metric.ShowRanking;
+				window.SegMap.SaveRoute.UpdateRoute();
+				if (this.metric.ShowRanking) {
+					this.$emit('RankingShown');
+				}
+			},
+			changeUrbanity(mode) {
+				this.dropDownClosed();
+				this.metric.properties.SelectedUrbanity = mode;
+				window.SegMap.SaveRoute.UpdateRoute();
+				window.SegMap.UpdateMap();
+			},
+			zoomExtents() {
+				var extents = this.metric.SelectedLevel().Extents;
+				if (!window.SegMap.Clipping.FrameHasNoClipping()) {
+					var m = new Mercator();
+					if (window.SegMap.Clipping.FrameHasClippingCircle()) {
+						var intersect = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
+						if (this.shouldClearSelection(intersect, extents)) {
+							window.SegMap.Clipping.ResetClippingCircle();
+						}
+					}
+					if (window.SegMap.Clipping.FrameHasClippingCircle() == false &&
+						window.SegMap.Clipping.FrameHasClippingRegionId()) {
+						var intersect = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
+						if (this.shouldClearSelection(intersect, extents)) {
+							window.SegMap.Clipping.ResetClippingRegion();
+						}
+					}
+				}
+				window.SegMap.MapsApi.FitEnvelope(extents, true);
+				this.$refs.zoomExtentsBtn.blur();
+			},
+			shouldClearSelection(intersect, extents) {
+				if (intersect === null) {
+					return true;
+				}
 				var m = new Mercator();
-				if (window.SegMap.Clipping.FrameHasClippingCircle()) {
-					var intersect = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
-					if (this.shouldClearSelection(intersect, extents)) {
-						window.SegMap.Clipping.ResetClippingCircle();
-					}
-				}
-				if (window.SegMap.Clipping.FrameHasClippingCircle() == false &&
-								window.SegMap.Clipping.FrameHasClippingRegionId()) {
-					var intersect = m.rectanglesIntersection(extents, this.clipping.Region.Envelope);
-					if (this.shouldClearSelection(intersect, extents)) {
-						window.SegMap.Clipping.ResetClippingRegion();
-					}
-				}
+				// Se fija si el área de intersección es menor al área del indicador
+				// con 10% de tolerancia
+				var area1 = m.rectanglePixelArea(intersect);
+				var area2 = m.rectanglePixelArea(extents);
+				return area1 < area2 * .9;
 			}
-			window.SegMap.MapsApi.FitEnvelope(extents, true);
-			this.$refs.zoomExtentsBtn.blur();
 		},
-		shouldClearSelection(intersect, extents) {
-			if (intersect === null) {
-				return true;
-			}
-			var m = new Mercator();
-			// Se fija si el área de intersección es menor al área del indicador
-			// con 10% de tolerancia
-			var area1 = m.rectanglePixelArea(intersect);
-			var area2 = m.rectanglePixelArea(extents);
-			return area1 < area2 * .9;
+		computed: {
+			Use() {
+				return window.Use;
+			},
+			urbanity() {
+				return this.metric.properties.SelectedUrbanity;
+			},
+			hasUrbanityFilter() {
+				return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
+			},
 		}
-	},
-	computed: {
-		Use() {
-			return window.Use;
-		},
-		urbanity() {
-			return this.metric.properties.SelectedUrbanity;
-		},
-		hasUrbanityFilter() {
-			return this.Use.UseUrbanity && this.metric.SelectedLevel().HasUrbanity;
-		},
-	}
-};
+	};
 </script>
 
 <style scoped>
-  .vellipsis:after {
-  content: '\2807';
-  font-size: .8em;
-  }
+	.vellipsis:after {
+		content: '\2807';
+		font-size: .8em;
+	}
 
-.activeButton {
-	opacity: .45;
-}
+	.activeButton {
+		opacity: .45;
+	}
 
-.filterDropdownButton {
-	font-size: 11px;
-	margin-left: -5px;
-	margin-right: 3px;
-}
+	.filterDropdownButton {
+		font-size: 11px;
+		margin-left: -5px;
+		margin-right: 3px;
+	}
 
-.dropFilter {
-  margin-top: 0px;
-	cursor: pointer;
-}
+	.dropFilter {
+		margin-top: 0px;
+		cursor: pointer;
+	}
 </style>

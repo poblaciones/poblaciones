@@ -11,6 +11,7 @@ use helena\caches\MetricProvidersMetadataCache;
 use helena\caches\DatasetColumnCache;
 use helena\caches\WorkHandlesCache;
 use helena\caches\BoundaryCache;
+use helena\caches\WorkPermissionsCache;
 use helena\caches\SelectedBoundaryCache;
 use helena\caches\BoundaryVisiblityCache;
 use helena\caches\BoundaryDownloadCache;
@@ -70,6 +71,12 @@ class CacheManager
 	{
 		WorkHandlesCache::Cache()->Clear($workId);
 	}
+
+	public function CleanWorkPermissionsCache($workId)
+	{
+		WorkPermissionsCache::Clear($workId);
+	}
+
 	public function CleanWorkVisiblityCache($workId)
 	{
 		$workIdShardified = PublishDataTables::Shardified($workId);

@@ -172,12 +172,12 @@ export default {
 					this.$refs.wait.Stop();
 					throw err;
 				});
-			} else {
+			} else { // step = 2
 				// intenta el login...
 				this.$refs.wait.Start();
 				this.serverError = '';
 				window.Context.Login(this.email, this.password).then(data => {
-					// si fue bien, va a /projects
+					// si fue bien, va a /users
 					if (response.IsOK(data.status)) {
 						var to = this.$route.query.to;
 						if (to) {

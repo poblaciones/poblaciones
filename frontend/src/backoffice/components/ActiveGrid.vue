@@ -42,7 +42,7 @@
 					<md-icon>cloud_upload</md-icon> Importar
 				</md-button>
 				<md-button v-if="showingErrors" @click="skipAllOnClick" :disabled="skipAllDisabled">
-					<md-icon>fast_forward</md-icon> Omitir todo
+					<md-icon>fast_forward</md-icon> Omitir todas
 				</md-button>
 				<md-button v-if="showingErrors" @click="skipOnClick" :disabled="skipDisabled">
 					<md-icon>skip_next</md-icon> Omitir fila(s)

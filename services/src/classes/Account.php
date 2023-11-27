@@ -353,43 +353,42 @@ class Account
 
 	public function LoadOrCreate()
 	{
-		if ($this->Exists() == false)
-		{
+		if ($this->Exists() == false) {
 			$model = new UserModel();
 			$model->CreateUser($this->user);
-		}
-		else
-		{
+		} else {
 			$this->EnsureDbInfo();
 		}
 	}
 	public function BeginLostPassword($target)
 	{
 		// busca la carpeta correspondiente
-		if (!$this->IsActive())
-			MessageBox::ThrowBackMessage('La cuenta de correo electrónico indicada no corresponde a una cuenta activa.');
+		if ($this->IsActive() == false)
+			return ['status' => BaseService::ERROR, 'message' => 'El correo electrónico indicado no corresponde a una cuenta activa.'];
 
 		// La pone en el id
 		$model = new UserModel();
-		$token = $model->CreateUserLink('L', $this->user, $target);
-		$url = App::AbsoluteUrl('linkLostPassword?username=' . urlencode($this->user) . '&id=' . $token);
+		$token = $model->CreateUserLink(TokenTypeEnum::LostPassword, $this->user, $target);
+		$url = App::AbsoluteUrl('/cr#/newPassword?email=' . urlencode($this->user) . '&code=' . $token);
 
-		$this->SendLostPasswordEmail($this->user, $url);
+		$this->SendLostPasswordEmail($url, $token);
+		return ['status' => BaseService::OK];
 	}
 
-	public function SendLostPasswordEmail($user, $url)
+	public function SendLostPasswordEmail($url, $token)
 	{
 		// Manda email....
-		$mail = new Mail();
-		$mail->to = $this->user;
-		$mail->subject = 'Recuperación de contraseña en Poblaciones';
-		$vals = array();
-		$vals['title'] = 'Recuperación de contraseña en Poblaciones';
-		$vals['url'] = $url;
-		$mail->message = Context::Calls()->RenderMessage('lostPassword.html.twig', $vals);
-
-		$skipNotification = !Context::Settings()->Notifications()->NotifyLostPassword;
-		$mail->Send(true, $skipNotification);
+		$message = new TemplateMessage();
+		$message->title = 'Restablecer contraseña en Poblaciones';
+		$message->to = $this->user;
+		$this->EnsureDbInfo();
+		$fullname = $this->BuildFullname($this->firstName, $this->lastName);
+		$message->toCaption = $fullname;
+		$message->footer = 2;
+		$message->skipNotify = !Context::Settings()->Notifications()->NotifyLostPassword;
+		$message->AddViewAction($url, 'Continuar', 'Continuar');
+		$message->SetValue('token', $token);
+		$message->Send('lostPassword.html.twig');
 	}
 
 	public function SavePassword($password)

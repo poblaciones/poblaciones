@@ -11,6 +11,7 @@ use helena\entities\backoffice as entities;
 use minga\framework\Profiling;
 use minga\framework\PublicException;
 use helena\db\frontend\UserModel;
+use helena\classes\enums\TokenTypeEnum;
 
 class PermissionsService extends BaseService
 {
@@ -96,9 +97,9 @@ class PermissionsService extends BaseService
 		if ($current === null)
 			$userModel->CreateUser($userEmail);
 		// Crea el token-link
-		$token = $userModel->CreateUserLink('P', $userEmail, $target, $message);
+		$token = $userModel->CreateUserLink(TokenTypeEnum::Permission, $userEmail, $target, $message);
 		// Genera la url
-		$url = App::AbsoluteUrl('/authenticate/linkInvitation?username=' . urlencode($userEmail) . '&id=' . $token);
+		$url = App::AbsoluteUrl('/cr#/activate?email=' . urlencode($userEmail) . '&code=' . $token);
 
 		// Manda email....
 		$message = new TemplateMessage();
@@ -111,7 +112,7 @@ class PermissionsService extends BaseService
 		$message->SetValue('level',  $verb);
 		$message->SetValue('link_url',  $url);
 
-//		$message->Send('permissionNotification.html.twig');
+		$message->Send('permissionNotification.html.twig');
 	}
 	public function RemovePermission($workId, $permissionId)
 	{

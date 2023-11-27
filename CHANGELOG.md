@@ -1,3 +1,17 @@
+No se puede editar obras indexadas con usuarios estándar.
+
+v3.12 (2023-11-27)
+- La georreferenciación distingue entre intersects y touches.
+- Genera Arks (identificadores) para las cartografías
+- 'Metadatos' toma forma de tabs y se llama 'información'
+- Asistente de bienvenida para datos públicos
+- Nueva pantalla de login.
+- En el panel de detalle pone 'ver más' cuando hay más de 5 líneas en un campo.
+
+
+v3.11 (2023-09-19)
+- Paneles flotantes en el visor.
+- Opción de pantalla comppleta en el visor.
 - Fix: captura de png en leaflet mostraba desplazada la región de recorte.
 - Asistente de bienvenida para cartografías.
 - Se agregar el parámetro OwnerLogo para tener íconos inferior izquierdo de propietario del sitio.
@@ -32,7 +46,7 @@ v3.08 (2022-11-25)
 - Fix: relocalizar no se abre al geoferenciar.
 - Fix: no debería ofrecer texturas (pleno, contorno, etc) en segmento y en mapa de puntos.
 - La altura de popups aprovecha mejor el alto de la pantalla.
-- Se agrega un botón de 'Omitir todo' en georrefenciar.
+- Se agrega un botón de 'Omitir todas' en georrefenciar.
 
 
 v3.07 (2022-09-12)

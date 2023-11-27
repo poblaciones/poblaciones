@@ -1,7 +1,8 @@
 <template>
 	<nav id="workPanel" class="workPanel">
 		<div>
-			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody" :style="'background-color: ' + backgroundColor">
+			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody"
+					 :style="'    text-shadow: rgb(118 118 118) 0px 0px 5px;rgba(76, 76, 76, 0.32) 0px 0px 6px 0px inset; background-color: ' + backgroundColor ">
 				<div class="floatBox pull-right exp-hiddable-block" style="margin-top: -1px">
 					<button type="button" class="btn smallButton" :class="spaceRight" @click="showMetrics">Agregar indicador</button>
 					<div style="position: absolute; top: 10px; right: 5px; zoom: 1.22;" v-if="hasOnboarding()">
@@ -229,6 +230,7 @@ export default {
 }
 .spaceNext {
 	margin-right: 8px;
+	margin-left: 8px
 }
 	.spaceNextOb {
 		margin-right: 41px;

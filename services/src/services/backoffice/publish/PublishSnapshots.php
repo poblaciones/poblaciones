@@ -135,6 +135,7 @@ class PublishSnapshots extends BaseService
 		}
 		VersionUpdater::Increment('FAB_METRICS');
 		$cache->CleanFabMetricsCache();
+		$cache->CleanWorkPermissionsCache($workId);
 		$cache->CleanWorkVisiblityCache($workId);
 	}
 

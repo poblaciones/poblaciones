@@ -1,6 +1,7 @@
 <template>
-	<div v-hotkey="keymap" class="searchBar no-print mapsOvercontrols">
-		<div class="input-group">
+	<div v-hotkey="keymap" class="searchBar no-print mapsOvercontrols"
+			 style="box-shadow: rgba(50, 50, 50, 0.18) 0px 0px 12px !important; border-top-right-radius: 20px; border-bottom-right-radius: 20px; ">
+		<div class="input-group" style="margin-bottom: 0px;">
 			<input v-model='text' ref='sfield' id='sfield' autocomplete="off"
 						 @keyup='doSearch' class="form-control formBorder"
 						 :class="getLoading()" type="text" placeholder="Buscar">
@@ -216,7 +217,8 @@ export default {
 	.searchBar {
 		top: 11px;
 		z-index: 1;
-		left: calc(50% - (max(calc(100% - 550px), 250px))/2);
+		left: calc(50%);
+		margin-left: -25%;
 		width: max(calc(100% - 500px), 300px);
 		min-width: 200px;
 		max-width: 400px;

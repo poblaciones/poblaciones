@@ -96,7 +96,11 @@ export default {
 				if(this.type == tokenTypeEnum.Permission) {
 					window.Context.AccountExists(this.email, true).then(data => {
 						if (response.IsOK(data.status)) {
-							this.$router.push({ path: '/signin', query: { email: this.email, code: this.code }});
+							if (data.loggedNow) {
+								document.location = '/users/';
+							} else {
+								this.$router.push({ path: '/signin', query: { email: this.email, code: this.code } });
+							}
 						}
 					});
 				}

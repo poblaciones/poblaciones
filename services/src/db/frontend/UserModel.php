@@ -65,7 +65,9 @@ class UserModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 		$userId = $this->GetUserId($user);
-		$token = rand(100000, 10000000);
+		$token = 0;
+		while (Str::Length('' . $token) < 6)
+			$token = random_int(100000, 999999);
 		$params = array($type, $userId, $token, $to, $message);
 		$sql = "INSERT INTO user_link (lnk_type, lnk_user_id, lnk_token, lnk_to, lnk_time, lnk_message)
 			VALUES(?, ?, ?, ?, NOW(), ?)";
@@ -119,7 +121,7 @@ class UserModel extends BaseModel
 		$userId = $this->GetUserId($user);
 		$this->ClearOldTokens($userId);
 
-		$sql = "SELECT `to`, `message`, `type` FROM user_link WHERE user_id = ? AND token = ? LIMIT 1";
+		$sql = "SELECT lnk_to `to`, lnk_message `message`, lnk_type `type` FROM user_link WHERE lnk_user_id = ? AND lnk_token = ? LIMIT 1";
 		$ret = App::Db()->fetchAssoc($sql, [$userId, $token]);
 		Profiling::EndTimer();
 		return $ret;
@@ -131,7 +133,7 @@ class UserModel extends BaseModel
 		$userId = $this->GetUserId($user);
 		$this->ClearOldTokens($userId);
 
-		$sql = "DELETE FROM user_link WHERE user_id = ? AND token = ?";
+		$sql = "DELETE FROM user_link WHERE lnk_user_id = ? AND lnk_token = ?";
 		App::Db()->exec($sql, [$userId, $token]);
 
 		Profiling::EndTimer();
@@ -140,7 +142,7 @@ class UserModel extends BaseModel
 	private function ClearOldTokens(int $userId) : void
 	{
 		$this->ClearEmailNew($userId);
-		$delete = "DELETE FROM user_link WHERE DATE_ADD(time, INTERVAL ? DAY) < NOW()";
+		$delete = "DELETE FROM user_link WHERE DATE_ADD(lnk_time, INTERVAL ? DAY) < NOW()";
 		App::Db()->exec($delete, [self::DaysValid]);
 		App::Db()->ensureCommit();
 		App::Db()->ensureBegin();
@@ -149,16 +151,16 @@ class UserModel extends BaseModel
 	private function ClearEmailNew(int $userId) : void
 	{
 		//Borra todos menos el último, no puede haber varias validaciones de cambio de mail pendientes.
-		$delete = "DELETE FROM user_link WHERE user_id = ? AND type = ? AND id NOT IN (SELECT MAX(id) FROM (SELECT * FROM user_link) AS ul2 WHERE user_id = user_link.user_id AND type = user_link.type)";
+		$delete = "DELETE FROM user_link WHERE lnk_user_id = ? AND lnk_type = ? AND lnk_id NOT IN (SELECT MAX(lnk_id) FROM (SELECT * FROM user_link) AS ul2 WHERE lnk_user_id = user_link.lnk_user_id AND lnk_type = user_link.lnk_type)";
 		App::Db()->exec($delete, [$userId, TokenTypeEnum::ChangeEmail]);
 
 		//Si es que queda uno y no es válido limpia el campo email new...
-		$select = "SELECT user_id FROM user_link WHERE DATE_ADD(time, INTERVAL ? DAY) < NOW() AND user_id = ? AND type = ? LIMIT 1";
+		$select = "SELECT lnk_user_id FROM user_link WHERE DATE_ADD(lnk_time, INTERVAL ? DAY) < NOW() AND lnk_user_id = ? AND lnk_type = ? LIMIT 1";
 		$id = App::Db()->fetchScalarIntNullable($select, [self::DaysValid, $userId, TokenTypeEnum::ChangeEmail]);
 		if($id === null)
 			return;
 
-		$update = "UPDATE user SET email_new = NULL WHERE id = ?";
+		$update = "UPDATE user SET usr_email_new = NULL WHERE usr_id = ?";
 		App::Db()->exec($update, [$id]);
 	}
 

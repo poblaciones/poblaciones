@@ -291,7 +291,7 @@ export default {
 					break;
 				case 'bottom-left':
 					this.pos.left = '5vw';
-					this.pos.bottom = '4vh';
+					this.pos.bottom = '30px';
 					break;
 				case 'top-left':
 					this.pos.left = '5vw';
@@ -377,7 +377,7 @@ export default {
 .fab-tooltip.tooltip {
 	display: block !important;
 	padding: 0px;
-	z-index: 10000;
+	z-index: 900;
 }
 
 .fab-tooltip.tooltip .tooltip-inner {
@@ -411,7 +411,7 @@ export default {
 }
 
 .fab-wrapper {
-	z-index: 1000!important;
+	z-index: 900!important;
 }
 
 .fab-main {

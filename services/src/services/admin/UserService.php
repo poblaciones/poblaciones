@@ -19,6 +19,7 @@ class UserService extends BaseService
 		$entity = new entities\User();
 		$entity->setDeleted(false);
 		$entity->setPrivileges('P');
+		$entity->setCreateTime(new \DateTime('now'));
 		$entity->setIsActive(true);
 		return $entity;
 	}

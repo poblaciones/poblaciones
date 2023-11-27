@@ -21,7 +21,6 @@ ActionManagerBase.prototype.RegisterActionChange = function (action, value) {
 };
 
 ActionManagerBase.prototype.RegisterAction = function (action, value) {
-	//alert(isRegisterEnabled);
 	if (!this.isRegisterEnabled) {
 		return;
 	}

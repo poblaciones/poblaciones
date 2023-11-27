@@ -42,10 +42,13 @@ MapExport.prototype.generatePngInternal = function (canvas, scale) {
 	img.style.width = (100 / scale) + '%';
 	img.style.height = (100 / scale) + '%';
 	img.style.float = 'right';
+	img.style.border = "2px solid #c0c0c0";
 	div.appendChild(img);
 	div.style.position = "absolute";
+	div.style.padding = '0px';
+	div.style.top = '0';
 	div.style.right = '0';
-	div.style.zIndex = 10;
+	div.style.zIndex = 1000;
 	var container = document.getElementById('holder');
 	container.appendChild(div);
 	return div;
@@ -162,6 +165,8 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 		{ class: 'exp-category-bullets-large', extraclass: 'exp-circles-large' }
 
 	];
+	var collapseButtonRight = document.getElementById('collapseButtonRight');
+	var marginRightCopyright = window.innerWidth - collapseButtonRight.getBoundingClientRect().right;
 	var attributesByClass = [
 
 		{ attribute: 'display', set: 'none', restore: 'unset', class: 'leaflet-control-zoom' },
@@ -176,11 +181,20 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 		{ attribute: 'overflow', set: 'visible', restore: 'hidden', class: '#holder' },
 	];
 
-	this.hideInteractiveElements(addClasses, attributesByClass);
-
 	var panRight = document.getElementById('panSummary');
 	var panMain = document.getElementById('panMain');
 	var panHolder = document.getElementById('holder');
+
+	if (panRight.offsetHeight > panMain.clientHeight) {
+		attributesByClass.push(
+			// mueve copyright
+			{ attribute: 'margin-right', set: marginRightCopyright + 'px', restore: '', class: 'leaflet-control-attribution' },
+			{ attribute: 'margin-right', set: marginRightCopyright + 'px', restore: '', class: 'logoDiv' },
+		);
+	}
+
+	this.hideInteractiveElements(addClasses, attributesByClass);
+
 	var panRightHeight = panRight.offsetHeight;
 
 	if (window.SegMap.Clipping.FrameHasClippingRegionId() || window.SegMap.Clipping.FrameHasClippingCircle()) {
@@ -231,18 +245,20 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 				dom.setStyleAttributesByList(hideSecond);
 				attributesByClass = attributesByClass.concat(hideSecond);
 
+
+				/////
 				html2canvas(panRight, { useCORS: true, scale: scale, ignoreElements: loc.ignoreFilter }).then(function (canvasPanRight) {
 					var divPanel = null;
 					if (!previewExport) {
 						divPanel = loc.generatePngInternal(canvasPanRight, scale);
 					}
 					return window.SegMap.SetTimeout(50).then(function () {
+				/////
 						var ele = (previewExport ? panMain : document.body);
 						return html2canvas(ele, {
 							useCORS: true, scale: scale,
 							ignoreElements: loc.ignoreFilter
 						}).then(function (canvasBody) {
-
 							exportFunction.apply(loc, [canvasBody]);
 
 							if (!previewExport) {
@@ -262,6 +278,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 						}).finally(function () { window.Popups.WaitMessage.close(); });
 					});
 				});
+
 		//	});
 		});
 	}).catch(function (error) { window.Popups.WaitMessage.close(); throw error; });

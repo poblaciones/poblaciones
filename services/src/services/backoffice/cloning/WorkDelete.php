@@ -31,6 +31,7 @@ class WorkDelete
 		$this->doDeleteWorkVersions();
 		$this->doDeleteExtraMetrics();
 		$this->doDeleteIcons();
+		$this->doDeleteOnBoarding();
 		$this->doDeleteRevisions();
 		$this->doDeleteWork();
 		$this->doDeletePreview($previewId);
@@ -82,6 +83,19 @@ class WorkDelete
 		$delete = "DELETE FROM draft_work_icon WHERE wic_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
 	}
+
+	private function doDeleteOnBoarding()
+	{
+		// Borra pasos
+		$delete = "DELETE draft_onboarding_step FROM draft_onboarding_step
+					INNER JOIN draft_onboarding ON onb_id = obs_onboarding_id
+					WHERE onb_work_id = ?";
+		App::Db()->exec($delete, array($this->workId));
+		// Borra principal
+		$delete = "DELETE FROM draft_onboarding WHERE onb_work_id = ?";
+		App::Db()->exec($delete, array($this->workId));
+	}
+
 	private function doDeleteRevisions()
 	{
 		// Borra

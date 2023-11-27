@@ -1,42 +1,49 @@
 <template>
 	<div>
-		<WorkPanel v-if="!Embedded.HideWorkPanel" :work="work" ref="workPanel" :backgroundColor="workColor" />
-		<div class="embeddedNoOpener"></div>
-		<div style="height:0px;width:0px;overflow:hidden">
-			<i class="flaticon-001-cruiser-voyage"></i>
-		</div>
-		<div class="embedded" @click="embeddedClick" v-if="Embedded.Readonly"
-				 :style="(Embedded.OpenOnClick ? 'cursor: pointer;' : '')"
-				 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
-		<div id="holder">
-			<div id="panMain" class="split split-horizontal" style="position: relative; overflow: hidden">
-				<Search class="exp-hiddable-block" v-show="!Embedded.HideSearch" />
-				<LeftPanel ref='leftPanel' />
-				<MapPanel />
-				<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
-				<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId"
-												:url="work.Current.Metadata.Institution.Url"
-												:name="work.Current.Metadata.Institution.Name"
-												:waterMarkId="work.Current.Metadata.Institution.WatermarkId" />
-				<WatermarkFloat v-if="ownerLogo && ownerLogo.Image"
-												:url="ownerLogo.Url"
-												:image="ownerLogo.Image"
-												:name="ownerLogo.Name"
-												float="left" />
-				<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-				<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly" :collapsed='toolbarStates.collapsed' @click="doToggle" tooltip="panel de estadísticas" class="exp-hiddable-block" />
+		<fs v-model="fullscreen" :teleport="teleport" :page-only="pageOnly">
+			<WorkPanel v-if="!Embedded.HideWorkPanel" :work="work" ref="workPanel" :backgroundColor="workColor" />
+			<WaitMessage ref="showWaitMessage" :backgroundColor="workColor" />
+			<div class="embeddedNoOpener"></div>
+			<div style="height:0px;width:0px;overflow:hidden">
+				<i class="flaticon-001-cruiser-voyage"></i>
 			</div>
-			<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
-			<div id="panRight" class="split split-horizontal">
-				<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
-											:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :currentWork="work.Current"
-											:toolbarStates="toolbarStates"></SummaryPanel>
+			<div class="embedded" @click="embeddedClick" v-if="Embedded.Readonly"
+					 :style="(Embedded.OpenOnClick ? 'cursor: pointer;' : '')"
+					 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
+			<div id="holder">
+				<div id="panRight" class="floatRightPanel thinScroll" v-show="!toolbarStates.collapsed" :style="rightPanelOverflow">
+					<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
+												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :currentWork="work.Current"
+												:toolbarStates="toolbarStates"></SummaryPanel>
+				</div>
+				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
+					<Search class="exp-hiddable-block" v-show="!Embedded.HideSearch" />
+					<LeftPanel ref='leftPanel' />
+					<MapPanel />
+					<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
+					<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
+					<WatermarkOwner v-if="ownerLogo && ownerLogo.Image"
+													:url="ownerLogo.Url"
+													:image="ownerLogo.Image"
+													:name="ownerLogo.Name"/>
+					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
+					<FullScreenButton v-if="!Embedded.Readonly" class="exp-hiddable-unset" :fullscreen="fullscreen" />
+					<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly"
+															 :collapsed='toolbarStates.collapsed'
+															 v-if="clippingStarted"
+															 @click="doToggle"
+															 tooltip="panel de estadísticas"
+															 class="exp-hiddable-block"
+															 :style="collapseButtonOffset" />
+				</div>
+				<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
 			</div>
-		</div>
+		</fs>
 	</div>
 </template>
 
 <script>
+	import WaitMessage from '@/public/components/popups/waitMessage';
 	import SegmentedMap from '@/public/classes/SegmentedMap';
 	import StartMap from '@/public/classes/StartMap';
 	import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
@@ -47,9 +54,11 @@
 	import MetricsButton from '@/public/components/widgets/map/metricsButton';
 	import LeftPanel from '@/public/components/panels/leftPanel';
 	import EditButton from '@/public/components/widgets/map/editButton';
+	import FullScreenButton from '@/public/components/widgets/map/fullScreenButton';
 	import SummaryPanel from '@/public/components/panels/summaryPanel';
 	import Search from '@/public/components/widgets/map/search';
 	import WatermarkFloat from '@/public/components/widgets/map/watermarkFloat';
+	import WatermarkOwner from '@/public/components/widgets/map/WatermarkOwner';
 	import CollapseButtonRight from '@/public/components/controls/collapseButtonRight';
 
 	import Split from 'split.js';
@@ -58,18 +67,24 @@
 	import err from '@/common/framework/err';
 	import web from '@/common/framework/web';
 
+	import { component } from 'vue-fullscreen';
+
 	export default {
 		name: 'app',
 		components: {
 			SummaryPanel,
 			Search,
 			MapPanel,
+			WaitMessage,
 			EditButton,
+			FullScreenButton,
 			MetricsButton,
 			LeftPanel,
 			WorkPanel,
 			WatermarkFloat,
+			WatermarkOwner,
 			CollapseButtonRight,
+			fs: component,
 		},
 		created() {
 			window.Popups = {};
@@ -80,9 +95,14 @@
 			};
 			window.Use = {};
 			window.Embedded = this.LoadEmbeddedSettings();
+			window.ToggleFullscreen = this.toggleFullscreen;
 		},
 		data() {
 			return {
+				fullscreen: false,
+				teleport: true,
+				pageOnly: false,
+
 				selfCheckTimer: null,
 				workStartupSetter: null,
 				isMobile: false,
@@ -137,6 +157,7 @@
 			this.SplitPanelsRefresh();
 			this.BindEvents();
 			var loc = this;
+			window.Popups.WaitMessage = this.$refs.showWaitMessage;
 			this.GetConfiguration().then(function () {
 				if (loc.Embedded.HideLabels) {
 					loc.toolbarStates.showLabels = false;
@@ -147,6 +168,15 @@
 			window.Panels.Left = this.$refs.leftPanel;
 		},
 		computed: {
+			collapseButtonOffset() {
+				return (this.toolbarStates.collapsed ? '' : 'right: max(275px, calc(30% - 3px)); z-index: 999!important;');
+			},
+			clippingStarted() {
+				return this.clipping.Region.Summary && !this.clipping.Region.Summary.Empty;
+			},
+			rightPanelOverflow() {
+				return (this.clippingStarted ? 'overflow-y: auto;' : 'overflow-y: hidden');
+			},
 			workColor() {
 				if (this.work && this.work.Current && this.work.Current.Metadata && this.work.Current.Metadata.Institution && this.work.Current.Metadata.Institution.Color) {
 					return '#' + this.work.Current.Metadata.Institution.Color;
@@ -167,6 +197,9 @@
 			IsPreview() {
 				var path = window.location.href;
 				return path.indexOf('&pv=1#') > 0;
+			},
+			toggleFullscreen() {
+				this.fullscreen = !this.fullscreen;
 			},
 			GetConfiguration() {
 				const loc = this;
@@ -336,6 +369,7 @@
 				window.SegMap.Session.UI.ToggleRightPanel(!this.toolbarStates.collapsed);
 			},
 			SplitPanelsRefresh() {
+				return;
 				if (this.toolbarStates.collapsed) {
 					if (this.splitPanels !== null) {
 						this.splitPanels.destroy();
@@ -431,7 +465,7 @@
 		fill: none !important;
 	}
 	.mapsOvercontrols {
-		z-index: 1000!important;
+		z-index: 900!important;
 	}
 
 	.gm-fullscreen-control {
@@ -614,7 +648,7 @@
 		box-shadow: 0 2px 2px rgb(0 0 0 / 18%) !important;
 	}
 	.moderateHr {
-		margin-top: 1.2rem;
+		margin-top: 0.4rem;
 		margin-bottom: 1.1rem;
 		border-color: #ccc;
 	}
@@ -827,7 +861,7 @@
 		background-color: transparent;
 		left: 0;
 		top: 0;
-		z-index: 1000;
+		z-index: 900;
 		height: 100%;
 		width: 100%;
 	}
@@ -973,6 +1007,7 @@
 		padding-right: 6px;
 		padding-left: 6px;
 		border-right-width: 0px;
+		white-space: nowrap;
 	}
 
 	.bItemRL {
@@ -1058,6 +1093,19 @@
 
 	.liDividerNext {
 		border-bottom: 1px solid #f1eae0;
+	}
+
+	.leaflet-control-zoom {
+		border: 0px solid black!important;
+		box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px!important;
+	}
+
+	.leaflet-control-zoom-in  {
+		border-bottom: 1px solid #f0f0f0 !important;
+		color: #666 !important;
+	}
+	.leaflet-control-zoom-out {
+		color: #666 !important
 	}
 
 	@media (max-width: 991px) {
@@ -1179,6 +1227,40 @@ margin-left: -5px;
 		background: #efefef;
 	}
 
+	.thinScroll::-webkit-scrollbar {
+		width: 6px;
+		border-top-right-radius: 2px;
+	}
+
+	.thinScroll::-webkit-scrollbar-thumb {
+		background: #777;
+		border-top-right-radius: 2px;
+		border-bottom-right-radius: 2px;
+	}
+
+	.thinScroll::-webkit-scrollbar-track {
+		background: #ddd;
+		border-top-right-radius: 2px;
+		border-bottom-right-radius: 2px;
+	}
+
+	.floatRightPanel {
+		width: calc(30% - 2.5px);
+		min-width: 275px;
+		position: absolute;
+		right: 0px;
+		z-index: 1000;
+		border: 1px solid rgb(165 164 164 / 75%);
+		border-radius: 2px;
+		max-height: calc(100% - 95px);
+		background-color: #ffffff;
+		height: unset !important;
+		box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 12px !important;
+	}
+	.gm-svpc {
+		left: -111px !important;
+		top: 113px !important;
+	}
 	.copyright {
 		padding: 0px 5px;
 		user-select: none;
