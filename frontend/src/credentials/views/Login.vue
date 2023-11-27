@@ -159,7 +159,7 @@ export default {
 			if (this.step == 1) {
 				this.$refs.wait.Start();
 				window.Context.AccountExists(this.email, true).then(data => {
-					// si fue bien, va a /projects
+					// si fue bien, va a /users
 					if (response.IsOK(data.status)) {
 						this.step++;
 						return;

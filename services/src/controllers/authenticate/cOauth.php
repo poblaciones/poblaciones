@@ -4,6 +4,10 @@ namespace helena\controllers\authenticate;
 
 use helena\classes\App;
 use helena\controllers\common\cController;
+use minga\framework\oauth\OauthData;
+use minga\framework\oauth\OauthConnector;
+use helena\services\common\BaseService;
+use helena\classes\Register;
 use minga\framework\Params;
 use minga\framework\MessageBox;
 
@@ -29,10 +33,31 @@ class cOauth extends cController
 		if($code != '' && $state != '')
 		{
 			$data = $this->oauth->RequestData($code, $state);
-			if($data != null)
+			if ($data != null) {
+				if ($data->email == '' || $data->verified == false)
+					$this->RedirectErrorNoEmail();
+
+				$this->LoginOrRegister($data);
 				$this->oauth->RedirectSuccess($data, $state);
+			}
 		}
 		$this->oauth->RedirectError();
+	}
+
+	private function LoginOrRegister($data): void
+	{
+		if (OauthData::SessionHasTerms()) {
+			// Register
+			if (!Register::CompleteOauthRegistrationEx($data))
+				throw new MessageException('No pudo completarse la registración');
+		} else {
+			// Login
+			$res = cLogin::LoadAndValidateAccount($data->email, true);
+			//TODO: throw message exception???
+			if ($res['status'] == BaseService::ERROR)
+				throw new MessageException($res['message']);
+			$res['account']->Begin();
+		}
 	}
 
 	public function Post()

@@ -16,4 +16,6 @@ App::RegisterControllerGetPost('/authenticate/logoff', controllers\cLogoff::clas
 App::RegisterControllerGetPost('/authenticate/loginAjax', controllers\cLoginAjax::class);
 App::RegisterControllerGetPost('/authenticate/register', controllers\cRegister::class);
 App::RegisterControllerGetPost('/oauthFacebook', controllers\cOauthFacebook::class);
+App::RegisterControllerGetPost('/login', controllers\cLogin::class);
+App::RegisterControllerGetPost('/login.do', controllers\cLogin::class);
 App::RegisterControllerGetPost('/oauthGoogle', controllers\cOauthGoogle::class);

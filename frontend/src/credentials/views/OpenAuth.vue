@@ -27,7 +27,7 @@ export default {
 			if (this.$route.query.to) {
 				return this.$route.query.to;
 			} else {
-				return '/projects';
+				return '/users/#/';
 			}
 		}
 	},

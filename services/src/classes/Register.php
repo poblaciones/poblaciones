@@ -52,6 +52,32 @@ class Register
 		return true;
 	}
 
+	public static function CompleteOauthRegistrationEx($data): bool
+	{
+		if ($data == null)
+			return false;
+		OauthData::ClearSession();
+
+		$user = $data->email;
+		$account = new Account();
+		$account->user = $user;
+		$account->LoadOrCreate();
+		// Activa...
+		$account->SaveOauthActivation($data);
+
+		// TODO: por algo si no hago esto se hace rollback en algo posterior
+		App::Orm()->flush();
+		App::Db()->commit();
+
+		// inicia sesión
+		if (Session::IsAuthenticated())
+			Session::Logoff();
+
+		$account->Begin();
+		Remember::SetRemember($account);
+
+		return true;
+	}
 	public static function CheckNewUser($user, $password, $verification, $firstName, $lastName)
 	{
 		if ($user == "")
