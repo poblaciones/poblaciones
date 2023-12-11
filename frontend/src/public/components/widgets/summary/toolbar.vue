@@ -48,7 +48,7 @@
 					<li>
 						<div class="dToolboxBox">
 							<button type="button" class="btn btn-default btn-xs" title="Insertar en otra página" @click="showEmbeddedMapPopUp">
-								<i class="fas fa-link"/>
+								<i class="fas fa-link" />
 							</button>
 						</div>
 					</li>
@@ -65,13 +65,24 @@
 			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
 				<i class="far fa-heart" />
 			</button>
+			<span v-if='!user.Logged' class="dropdown">
+				<button type="button"
+								id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
+								data-toggle="dropdown" title="Ingresar/Registrarse">
+					<i class="fas fa-sign-in-alt" />
 
-			<button v-if='!user.Logged' type="button" class="btn btn-default btn-xs" title="Ingresar/Registrarse"
-							@click="authenticate.redirectLogin()"><i class="fas fa-sign-in-alt"></i></button>
+					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+						<li><a :href="authenticate.loginUrl()" @click="authenticate.redirectLogin">Ingresar</a></li>
+						<li><a :href="authenticate.registerUrl()" @click="authenticate.redirectRegister">Registrarse</a></li>
+						<li class="divider"></li>
+						<li><a @click="authenticate.redirectHome()" :href="authenticate.homeUrl()">Inicio</a></li>
+					</ul>
+				</button>
+			</span>
 			<span v-else="" class="dropdown">
 				<button type="button"
 								id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
-								data-toggle="dropdown" >
+								data-toggle="dropdown">
 					<i class="fas fa-user" :title="userTooltip" />
 
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -80,6 +91,8 @@
 						<li v-if="isAdminReader" class="divider"></li>
 						<li v-if="isAdminReader"><a @click="switchMapProvider">Cambiar a {{ altProvider }}</a></li>
 						<li v-if="false"><a href="/users#/account">Cuenta</a></li>
+						<li class="divider"></li>
+						<li><a @click="authenticate.redirectHome()" :href="authenticate.homeUrl()">Inicio</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.logoff">Cerrar sesión</a></li>
 					</ul>

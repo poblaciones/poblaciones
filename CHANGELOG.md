@@ -1,4 +1,5 @@
-No se puede editar obras indexadas con usuarios estándar.
+- Bloquea edición de elementos indexados para usuarios estándar y remueve indexación al clonar.
+- Ofrece en el visor menú de registrarse separado de ingresar.
 
 v3.12 (2023-11-27)
 - La georreferenciación distingue entre intersects y touches.

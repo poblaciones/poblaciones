@@ -7,7 +7,6 @@ use helena\classes\Session;
 use helena\classes\App;
 use helena\classes\Account;
 use helena\classes\Remember;
-use helena\classes\Register;
 
 use minga\framework\Context;
 use minga\framework\Str;

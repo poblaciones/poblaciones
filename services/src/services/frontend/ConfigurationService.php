@@ -95,6 +95,7 @@ class ConfigurationService extends BaseService
         $ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
+									'HomePage' =>  Context::Settings()->Servers()->Home()->publicUrl,
 									'StaticWorks' =>  App::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => App::Settings()->Map()->UseGradients,
 									'UseTextures' => App::Settings()->Map()->UseTextures,

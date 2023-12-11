@@ -4,7 +4,7 @@
 		<div class="input-group" style="margin-bottom: 0px;">
 			<input v-model='text' ref='sfield' id='sfield' autocomplete="off"
 						 @keyup='doSearch' class="form-control formBorder"
-						 :class="getLoading()" type="text" placeholder="Buscar">
+						 :class="getLoading()" type="text" placeholder="Buscar indicadores y lugares en Poblaciones">
 			<span class="input-group-btn">
 				<button @click="doSearch" class="btn btn-default lupa-button" type="button"><i class="fa fa-search"></i>
 				</button>

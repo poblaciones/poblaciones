@@ -29,11 +29,11 @@ class WorkPermissionsCache extends BaseCache
 		if ($cache->HasData($workId, $rows) === false)
 		{
 			// La resuelve
-			$select = "SELECT usr_email Email, wkp_permission Permission
+			$select = "SELECT usr_email Email, wkp_permission Permission, wrk_is_indexed Indexed
 						FROM draft_work_permission
 						JOIN user ON wkp_user_id = usr_id
 						JOIN draft_work ON wkp_work_id = wrk_id
-						WHERE wkp_work_id = ? AND wrk_is_indexed = 0";
+						WHERE wkp_work_id = ?";
 			$rows = App::Db()->fetchAll($select, array($workId));
 			$cache->PutData($workId, $rows);
 		}
@@ -45,9 +45,14 @@ class WorkPermissionsCache extends BaseCache
 		{
 			if ($row['Email'] === $email)
 			{
-				if ($row['Permission'] === 'V') $view = true;
-				if ($row['Permission'] === 'E') $edit = true;
-				if ($row['Permission'] === 'A') $admin = true;
+				if ($row['Permission'] === 'V' || $row['Indexed'])
+					$view = true;
+				else {
+					if ($row['Permission'] === 'E')
+						$edit = true;
+					if ($row['Permission'] === 'A')
+						$admin = true;
+				}
 			}
 		}
 		if ($admin) return self::ADMIN;

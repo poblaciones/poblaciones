@@ -15,6 +15,21 @@ module.exports = {
 	redirectLogin() {
 		login.redirectLogin();
 	},
+	redirectRegister() {
+		login.redirectRegister();
+	},
+	redirectHome() {
+		login.redirectHome();
+	},
+	registerUrl() {
+		return login.registerUrl();
+	},
+	loginUrl() {
+		return login.loginUrl();
+	},
+	homeUrl() {
+		return login.homeUrl();
+	},
 	redirectBackoffice() {
 		var url = window.host + '/users';
 		document.location = url;
