@@ -36,6 +36,7 @@ App::$app->get('/services/frontend/metrics/GetRanking', function (Request $reque
 	$metricId = Params::GetIntMandatory('l');
 	$metricVersionId = Params::GetIntMandatory('v');
 	$levelId = Params::GetIntMandatory('a');
+	$levelCompareId = Params::GetInt('p');
 	$variableId = Params::GetIntMandatory('i');
 	$hasTotals = Params::GetBoolMandatory('t');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
@@ -48,7 +49,7 @@ App::$app->get('/services/frontend/metrics/GetRanking', function (Request $reque
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
-	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels));
+	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels));
 });
 
 App::$app->get('/services/metrics/GetMetricNavigationInfo', function (Request $request) {

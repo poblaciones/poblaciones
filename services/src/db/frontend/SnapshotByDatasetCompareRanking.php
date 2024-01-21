@@ -6,11 +6,14 @@ use minga\framework\Profiling;
 
 use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
+use helena\classes\App;
 use helena\classes\GeoJson;
+use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
 
-class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
+class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 {
 	private $variableId;
+	private $variableCompareId;
 	private $urbanity;
 	private $partition;
 	private $hiddenValueLabels;
@@ -20,10 +23,11 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 	private $direction;
 
 	public function __construct($snapshotTable, $datasetType,
-		$variableId, $hasTotals, $urbanity, $partition, $hasDescriptions,
-		$size, $direction, $hiddenValueLabels)
+		$variableId, $variableCompareId, $hasTotals, $urbanity, $partition,
+		$hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
 		$this->variableId = $variableId;
+		$this->variableCompareId = $variableCompareId;
 		$this->urbanity = $urbanity;
 		$this->partition = $partition;
 		$this->hiddenValueLabels = $hiddenValueLabels;
@@ -42,8 +46,13 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 
 		$totalField = "sna_" . $this->variableId . "_total";
 
-		$select = "IFNULL(sna_" . $this->variableId . "_value, 0) Value, " . $totalField . " Total, sna_feature_id FeatureId,
-								sna_" . $this->variableId . "_value_label_id ValueId, ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
+		$select = "IFNULL(sna_" . $this->variableId . "_value, 0) Value, "
+					. $totalField . " Total, "
+					. "IFNULL(sna_" . $this->variableCompareId . "_value, 0) ValueCompare,"
+					. " sna_" . $this->variableCompareId . "_total TotalCompare,"
+					. "	sna_feature_id FeatureId, "
+					. " sna_" . $this->variableId . "_" . $this->variableCompareId . "_value_label_id ValueId, "
+					. "ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
 		if ($this->hasDescriptions)
 		{
 			$select .= ", sna_description Name ";
@@ -70,7 +79,7 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 		if ($this->hasTotals)
 		{
 			if ($where != '') $where .= ' AND ';
-			$where .= $totalField . " > 0 ";
+			$where .= $totalField . " > 0 AND sna_" . $this->variableCompareId . "_total > 0 ";
 		}
 
 		// Excluye las filas filtradas
@@ -78,9 +87,9 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 
 		// Setea el orden
 		if ($this->hasTotals)
-			$orderBy = "CASE WHEN Total = 0 THEN 0 ELSE Value / Total END";
+			$orderBy = "CASE WHEN Total = 0 OR TotalCompare = 0 THEN 0 ELSE (Value / Total) - (ValueCompare / TotalCompare) END";
 		else
-			$orderBy = "Value";
+			$orderBy = "ValueCompare - Value";
 		// Setea la dirección
 		$orderBy .= ($this->direction === 'D' ? ' DESC' : ' ASC');
 
@@ -101,6 +110,17 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 			return "";
 		else
 			return " AND sna_" . $this->variableId . "_value_label_id NOT IN(" . implode(",", $this->hiddenValueLabels) . ") ";
+	}
+
+	public function CheckTableExists($datasetId, $datasetCompareId)
+	{
+		if (App::Db()->tableExists($this->tableName))
+			return;
+		// La crea
+		Profiling::BeginTimer();
+		$c = new MergeSnapshotsByDatasetModel();
+		$c->MergeSnapshots($datasetId, $datasetCompareId);
+		Profiling::EndTimer();
 	}
 
 }

@@ -3,14 +3,11 @@
 namespace helena\db\frontend;
 
 use helena\classes\App;
-use minga\framework\Arr;
 use minga\framework\Profiling;
-use helena\classes\DatasetTypeEnum;
 use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
 
 use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
-use helena\classes\GeoJson;
 
 class SnapshotByDatasetCompareSummary extends BaseSpatialSnapshotModel
 {

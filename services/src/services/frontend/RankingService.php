@@ -13,12 +13,15 @@ use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\metric\RankingInfo;
 use helena\entities\frontend\metric\RankingItemInfo;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
+use helena\db\frontend\SnapshotByDatasetCompareRanking;
+
+use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
 use helena\services\common\BaseService;
 
 
 class RankingService extends BaseService
 {
-	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $variableId,
+	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $variableId,
 							$hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
 	{
 		$data = null;
@@ -30,7 +33,7 @@ class RankingService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 
-		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels);
+		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $compareLevelId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && RankingCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -46,7 +49,7 @@ class RankingService extends BaseService
 		}
 
 		Performance::CacheMissed();
-		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels);
+		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)
 			RankingCache::Cache()->PutData($metricId, $key, $data);
@@ -56,7 +59,7 @@ class RankingService extends BaseService
 		return $data;
 	}
 
-	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
+	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -65,8 +68,31 @@ class RankingService extends BaseService
 		$hasDescriptions = $level->HasDescriptions;
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		$table = new SnapshotByDatasetRanking($snapshotTable, $level->Dataset->Type,
-			$variableId, $hasTotals, $urbanity, $partition, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+		if ($compareLevelId)
+		{
+			$levelCompare = $metric->GetLevel($compareLevelId);
+			$mergeTable = MergeSnapshotsByDatasetModel::TableName($snapshotTable, $levelCompare->Dataset->Id);
+			$compareVariable = MergeSnapshotsByDatasetModel::GetRequiredVariableForLevelPairObjects($level, $levelCompare, $variableId);
+			$variableCompareId = $compareVariable->attributes['mvv_id'];
+			$table = new SnapshotByDatasetCompareRanking(
+				$mergeTable, $level->Dataset->Type,
+				$variableId,
+				$variableCompareId,
+				$hasTotals,
+				$urbanity,
+				$partition,
+				$hasDescriptions,
+				$size,
+				$direction,
+				$hiddenValueLabels
+			);
+			$table->CheckTableExists($level->Dataset->Id, $levelCompare->Dataset->Id);
+		}
+		else
+		{
+			$table = new SnapshotByDatasetRanking($snapshotTable, $level->Dataset->Type,
+				$variableId, $hasTotals, $urbanity, $partition, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+		}
 
 		$rows = $table->GetRows($frame);
 
@@ -82,7 +108,13 @@ class RankingService extends BaseService
 			$item = new RankingItemInfo();
 			$item->Value = $row['Value'] ;
 			$item->Total = $row['Total'] ;
-			$item->ValueId = $row['ValueId'] ;
+			$item->ValueId = $row['ValueId'];
+			// Agrega información comparativa
+			if (array_key_exists('ValueCompare', $row) && $row['ValueCompare'] !== null)
+				$item->ValueCompare = $row['ValueCompare'];
+			if (array_key_exists('TotalCompare', $row) && $row['TotalCompare'] !== null)
+				$item->TotalCompare = $row['TotalCompare'];
+
 			$item->FID = $row['FeatureId'] ;
 			$item->Name = $row['Name'];
 			$item->Lat = $row['Lat'] ;

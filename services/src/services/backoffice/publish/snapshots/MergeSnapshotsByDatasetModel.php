@@ -11,6 +11,7 @@ use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
 use helena\classes\DatasetTypeEnum;
 use minga\framework\PublicException;
+use minga\framework\ErrorException;
 use helena\db\backoffice\WorkModel;
 
 class MergeSnapshotsByDatasetModel
@@ -88,6 +89,19 @@ class MergeSnapshotsByDatasetModel
 			Arr::AddRange($ret, self::GetRequiredVariablesForLevelPair($level, $levelCompare));
 		}
 		return $ret;
+	}
+
+	public static function GetRequiredVariableForLevelPairObjects($level, $levelCompare, $variableId)
+	{
+		$variablePairs = self::GetRequiredVariablesForLevelPairObjects($level, $levelCompare);
+		foreach($variablePairs as $variablePair)
+		{
+			$variable = $variablePair[0];
+			$variableCompare = $variablePair[1];
+			if ($variable->attributes['mvv_id'] === $variableId)
+				return $variableCompare;
+		}
+		throw new ErrorException("No ha podido identificarse la variable de comparación.");
 	}
 
 	public static function GetRequiredVariablesForLevelPairObjects($level, $levelCompare)
