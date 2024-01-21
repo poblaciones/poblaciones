@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<invoker ref="invoker"></invoker>
-		<title-bar title="Bienvenida" help="<p>La sección de bienvenida permite
+		<title-bar title="Bienvenida" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" help="<p>La sección de bienvenida permite
 			definir un asistente de hasta cinco pasos para resumir al visitante el contenido
 		de la cartografía.</p>
 		<p>

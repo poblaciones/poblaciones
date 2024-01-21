@@ -63,6 +63,28 @@ module.exports = {
 		}
 		return html;
 	},
+	calculateCompareValue(useProportionalDelta, totalTuple, compareTuple) {
+		var value1 = this.calculateValue(totalTuple);
+		var value2 = this.calculateValue(compareTuple);
+		if (useProportionalDelta) {
+			if (value2 === 0) {
+				return '';
+			} else {
+				return (value1 / value2) * 100 - 100;
+			}
+		} else {
+			return value1 - value2;
+		}
+	},
+	calculateValue(tuple) {
+		if (tuple.normalization == 0) {
+			return 0;
+		} else if (tuple.normalization === undefined || tuple.normalization === null) {
+			return tuple.value;
+		} else {
+			return tuple.value / tuple.normalization;
+		}
+	},
 	renderMetricValue(value, total, hasTotals, normalizationScale, decimals) {
 		if (value === '-') {
 			return '-';
@@ -540,10 +562,16 @@ module.exports = {
 		}
 		return url[pos];
 	},
-	getRankingParams(metric, frame, size, direction, hiddenValueLabels) {
+	getRankingParams(activeMetric, frame, size, direction, hiddenValueLabels) {
+		const metric = activeMetric.properties;
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		const level = ver.Levels[ver.SelectedLevelIndex];
 		const variable = level.Variables[level.SelectedVariableIndex];
+		if (activeMetric.Compare.Active) {
+			compare = activeMetric.Compare.SelectedLevel().Id;
+		} else {
+			compare = null;
+		}
 		return this.mergeObject({
 			l: metric.Metric.Id,
 			v: ver.Version.Id,
@@ -555,7 +583,8 @@ module.exports = {
 			w: metric.Metric.Signature,
 			s: size,
 			d: direction,
-			h: hiddenValueLabels
+			h: hiddenValueLabels,
+			p: compare
 		}, this.getFrameParams(frame));
 	},
 	getNavigationParams(metric, frame, hiddenValueLabels) {

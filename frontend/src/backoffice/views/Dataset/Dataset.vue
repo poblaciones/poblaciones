@@ -4,21 +4,24 @@
 		<import-popup ref="importPopup"></import-popup>
 
 		<div v-if="Work.CanEdit()">
-				<div class="topToolbar">
-					<md-button @click="beginCloneDataset" >
-						<md-icon>file_copy</md-icon>
-						Duplicar dataset
-					</md-button>
+			<div class="topToolbar">
+				<md-button @click="beginCloneDataset">
+					<md-icon>file_copy</md-icon>
+					Duplicar dataset
+				</md-button>
 
 				<md-button @click="deleteDataset">
-						<md-icon>delete</md-icon>
-						Eliminar dataset
-					</md-button>
-				</div>
+					<md-icon>delete</md-icon>
+					Eliminar dataset
+				</md-button>
+			</div>
 			<div style="height: 48px;"></div>
 		</div>
+		<title-bar v-else title="Dataset" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()">
 
-		<div class="app-container">
+		</title-bar>
+
+		<div :class="(Work.CanEdit() ? 'app-container' : 'app-container')">
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-100">
 					<md-card>

@@ -224,7 +224,7 @@ SelectedInfoRouter.prototype.FromRoute = function (args, updateRoute, skipRestor
 
 SelectedInfoRouter.prototype.InfosHaveComparer = function (infos) {
 	for (var info of infos) {
-		if (info.VersionInfo.indexOf(",") > 0) {
+		if (info.VersionInfo && info.VersionInfo != -1 && info.VersionInfo.indexOf(",") > 0) {
 			return true;
 		}
 	}

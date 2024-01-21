@@ -114,7 +114,8 @@
 										</template>
 									</span>
 									<md-button class="md-icon-button" @click="openVariableFormulaEdition(item, variable)">
-										<md-icon>edit</md-icon>
+										<md-icon v-if="Work.CanEdit()">edit</md-icon>
+										<md-icon v-else>remove_red_eye</md-icon>
 										<md-tooltip md-direction="bottom">Fórmula</md-tooltip>
 									</md-button>
 								</md-list-item>

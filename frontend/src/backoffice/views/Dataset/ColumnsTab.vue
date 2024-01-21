@@ -425,6 +425,9 @@ export default {
 			});
 		},
 		dblClickModify(e) {
+			if (!this.Work.CanEdit()) {
+				return;
+			}
 			if (e.args.column.datafield === "ValueLabels") {
 				this.valuesOnClick();
 			} else {

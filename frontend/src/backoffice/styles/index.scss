@@ -66,6 +66,17 @@ a:hover {
   min-height: 100%
 }
 
+.app-container-no-toolbar {
+	padding: 12px 20px 12px 20px;
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	overflow: auto;
+	border: 0px;
+	top: 55px;
+	height: calc(100% - 55px);
+}
+
 .app-container {
 	padding: 12px 20px 12px 20px;
 	position: absolute;

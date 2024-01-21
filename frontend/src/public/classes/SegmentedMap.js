@@ -33,7 +33,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.MapsApi = mapsApi;
 	this.Work = null;
 	this.Popups = {};
-	this.IsSmallDevice = true;
+	this.IsSmallDevice = null;
 	this.IsNotLarge = false;
 	this.textCanvas = {};
 	this.GeographyTuples = null;
@@ -280,11 +280,14 @@ SegmentedMap.prototype.CheckSmallDevice = function () {
 		this.IsNotLarge = isNotLarge;
 	}
 	// Se fija por el panel
-	var isSmallDevice = window.innerWidth < 768;
+	var isSmallDevice = window.innerWidth < 768 + 120;
 	if (this.IsSmallDevice !== isSmallDevice) {
+		// hubo un cambio
 		if (isSmallDevice) {
 			this.toolbarStates.collapsed = true;
+			this.toolbarStates.repositionSearch = true;
 		} else {
+			this.toolbarStates.repositionSearch = false;
 			if (!window.Embedded.HideSidePanel) {
 				this.toolbarStates.collapsed = false;
 			}

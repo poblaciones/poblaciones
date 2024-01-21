@@ -35,7 +35,6 @@ export default {
 	.buttonMargin {
 		margin-right: -2px;
 		margin-top: -4px;
-		margin-left: -3px;
 	}
 </style>
 

@@ -19,9 +19,9 @@
 												Transparencia:
 											</div>
 											<div class="md-layout-item md-size-70 md-small-size-100">
-												<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="H">Baja</md-radio>
-												<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="M">Media</md-radio>
-												<md-radio class="md-primary" v-model="Variable.Symbology.Opacity" value="L">Alta</md-radio>
+												<md-radio class="md-primary" :disabled="!Work.CanEdit()" v-model="Variable.Symbology.Opacity" value="H">Baja</md-radio>
+												<md-radio class="md-primary" :disabled="!Work.CanEdit()" v-model="Variable.Symbology.Opacity" value="M">Media</md-radio>
+												<md-radio class="md-primary" :disabled="!Work.CanEdit()" v-model="Variable.Symbology.Opacity" value="L">Alta</md-radio>
 											</div>
 										</div>
 									</div>
@@ -37,10 +37,10 @@
 
 											</div>
 											<div class="md-layout-item md-size-70 md-small-size-100">
-												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="H">Bajo</md-radio>
-												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="M">Medio</md-radio>
-												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="L">Alto</md-radio>
-												<md-radio class="md-primary" v-model="Variable.Symbology.GradientOpacity" value="N">Deshabilitado</md-radio>
+												<md-radio class="md-primary" :disabled="!Work.CanEdit()" v-model="Variable.Symbology.GradientOpacity" value="H">Bajo</md-radio>
+												<md-radio class="md-primary" :disabled="!Work.CanEdit()" v-model="Variable.Symbology.GradientOpacity" value="M">Medio</md-radio>
+												<md-radio class="md-primary" :disabled="!Work.CanEdit()" v-model="Variable.Symbology.GradientOpacity" value="L">Alto</md-radio>
+												<md-radio class="md-primary" :disabled="!Work.CanEdit()" v-model="Variable.Symbology.GradientOpacity" value="N">Deshabilitado</md-radio>
 											</div>
 										</div>
 									</div>

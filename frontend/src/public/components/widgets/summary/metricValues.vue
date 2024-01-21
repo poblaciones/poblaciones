@@ -316,9 +316,10 @@ export default {
 			if (this.metric.Compare.Active && this.metric.properties.SummaryMetric === 'I') {
 				var tuple = this.getValueTuple(values, labels);
 				var compareTuple = { value: tuple.valueCompare, normalization: tuple.normalizationCompare };
-				return this.calculateCompareValue(tuple, compareTuple);
+				var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
+				return Helper.calculateCompareValue(useProportionalDelta, tuple, compareTuple);
 			} else {
-				return this.calculateValue(this.getValueTuple(values, labels));
+				return Helper.calculateValue(this.getValueTuple(values, labels));
 			}
 		},
 		getTotal() {
@@ -349,35 +350,14 @@ export default {
 			if (this.metric.properties.SummaryMetric == 'I' && this.metric.Compare.Active) {
 				// calcula la diferencia en puntos porcentajes o %
 				var compareTuple = { value: valueCompare, normalization: totalCompare };
-				aniTotal = this.calculateCompareValue(totalTuple, compareTuple);
+				var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
+				aniTotal = Helper.calculateCompareValue(useProportionalDelta, totalTuple, compareTuple);
 			} else if (this.metric.properties.SummaryMetric !== 'P' && this.metric.properties.SummaryMetric !== 'A') {
-				aniTotal = this.calculateValue(totalTuple);
+				aniTotal = Helper.calculateValue(totalTuple);
 			}
 			// devuelve el par
 			return { aniTotal: aniTotal,
 							 percTotal: percTotal };
-		},
-		calculateCompareValue(totalTuple, compareTuple) {
-			var value1 = this.calculateValue(totalTuple);
-			var value2 = this.calculateValue(compareTuple);
-			if (this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable())) {
-				if (value2 === 0) {
-					return '';
-				} else {
-					return (value1 / value2) * 100 - 100;
-				}
-			} else {
-				return value1 - value2;
-			}
-		},
-		calculateValue(tuple) {
-			if (tuple.normalization == 0) {
-				return 0;
-			} else if (tuple.normalization === undefined || tuple.normalization === null) {
-				return tuple.value;
-			} else {
-				return tuple.value / tuple.normalization;
-			}
 		},
 		getNumericValue(values) {
 			if (this.metric.Compare.Active) {

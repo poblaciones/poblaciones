@@ -19,31 +19,13 @@
 				</transition-group>
 			</draggable>
 		</div>
-		<div>
-			<WorkMetadata ref="showFuente" :backgroundColor="backgroundColor" />
-			<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
-			<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
-			<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
-			<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
-			<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
-			<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
-			<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
-		</div>
 	</div>
 </template>
 
 <script>
 import MetricItem from './metricItem';
 import Clipping from '@/public/components/widgets/summary/clipping';
-import WorkMetadata from '@/public/components/popups/workMetadata';
-import Embedding from '@/public/components/popups/embedding';
-import ClippingMetadata from '@/public/components/popups/clippingMetadata';
-import MetricCustomize from '@/public/components/popups/metricCustomize';
-import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
-import AddMetric from '@/public/components/popups/addMetric';
 import Toolbar from '@/public/components/widgets/summary/toolbar';
-import MetricDownload from '@/public/components/popups/metricDownload';
-import BoundaryDownload from '@/public/components/popups/boundaryDownload';
 import draggable from 'vuedraggable';
 import arr from '@/common/framework/arr';
 
@@ -51,15 +33,7 @@ export default {
 	name: 'summaryPanel',
 	components: {
 		MetricItem,
-		BoundaryDownload,
 		Clipping,
-		Embedding,
-		AddMetric,
-		WorkMetadata,
-		ClippingMetadata,
-		BoundaryCustomize,
-		MetricCustomize,
-		MetricDownload,
 		Toolbar,
 		draggable
 	},
@@ -68,7 +42,6 @@ export default {
 		'frame',
 		'config',
 		'currentWork',
-		'backgroundColor',
 		'user',
 		'toolbarStates',
 		'metrics'
@@ -92,14 +65,6 @@ export default {
 		}
 	},
 	mounted() {
-		window.Popups.MetricDownload = this.$refs.showMetricDownload;
-		window.Popups.BoundaryDownload = this.$refs.showBoundaryDownload;
-		window.Popups.Embedding = this.$refs.showEmbedding;
-		window.Popups.WorkMetadata = this.$refs.showFuente;
-		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
-		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
-		window.Popups.MetricCustomize = this.$refs.showCustomize;
-		window.Popups.AddMetric = this.$refs.addMetric;
 	},
 	methods: {
 		itemMoved(evt) {

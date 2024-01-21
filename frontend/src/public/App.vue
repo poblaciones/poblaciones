@@ -11,13 +11,14 @@
 					 :style="(Embedded.OpenOnClick ? 'cursor: pointer;' : '')"
 					 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
 			<div id="holder">
+				<PopupsPanel :backgroundColor="workColor" />
 				<div id="panRight" class="floatRightPanel thinScroll" v-show="!toolbarStates.collapsed" :style="rightPanelOverflow">
-					<SummaryPanel :metrics="metrics" id="panSummary" :config="config" :backgroundColor="workColor"
+					<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :currentWork="work.Current"
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
-					<Search class="exp-hiddable-block" v-show="!Embedded.HideSearch" />
+					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')" v-show="!Embedded.HideSearch" />
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
 					<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
@@ -25,7 +26,7 @@
 					<WatermarkOwner v-if="ownerLogo && ownerLogo.Image"
 													:url="ownerLogo.Url"
 													:image="ownerLogo.Image"
-													:name="ownerLogo.Name"/>
+													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 					<FullScreenButton v-if="!Embedded.Readonly" class="exp-hiddable-unset" :fullscreen="fullscreen" />
 					<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly"
@@ -49,6 +50,7 @@
 	import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
 	import LeafletApi from '@/public/leaflet/LeafletApi';
 	import WorkPanel from '@/public/components/panels/workPanel';
+	import PopupsPanel from '@/public/components/panels/popupsPanel';
 	import MapExport from '@/public/classes/MapExport';
 	import MapPanel from '@/public/components/panels/mapPanel';
 	import MetricsButton from '@/public/components/widgets/map/metricsButton';
@@ -80,6 +82,7 @@
 			FullScreenButton,
 			MetricsButton,
 			LeftPanel,
+			PopupsPanel,
 			WorkPanel,
 			WatermarkFloat,
 			WatermarkOwner,
@@ -109,7 +112,8 @@
 				splitPanels: null,
 				featureNavigation: { Key: null, Values: [], GettingKey: null },
 				toolbarStates: {
-					selectionMode: null, tutorialOpened: 0, showLabels: true, collapsed: false,
+					selectionMode: null, tutorialOpened: 0, showLabels: true,
+					collapsed: false, repositionSearch: false, leftPanelVisible: false
 				 },
 				clipping: {
 					IsUpdating: false,
@@ -487,6 +491,10 @@
 
 	.gm-style-mtc:last-of-type {
 		transform: translateX(4px) scale(0.8);
+	}
+
+	.trigger {
+		width: 100%;
 	}
 
 	.hand {
@@ -1261,6 +1269,13 @@ margin-left: -5px;
 		left: -111px !important;
 		top: 113px !important;
 	}
+
+	.searchOffsetTop {
+		margin-top: 50px;
+		transform: translateX(-55px)
+}
+
+
 	.copyright {
 		padding: 0px 5px;
 		user-select: none;

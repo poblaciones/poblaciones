@@ -1,6 +1,6 @@
 <template>
 	<div v-if="Work">
-		<title-bar title="Personalizar" :help="`<p>En esta sección se indican opciones que modifican la vista personalizada que se genera para la cartografía.
+		<title-bar title="Personalizar" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" :help="`<p>En esta sección se indican opciones que modifican la vista personalizada que se genera para la cartografía.
 			</p>`" />
 		<div class="app-container">
 

@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<invoker ref="invoker"></invoker>
-		<title-bar title="Información" help="<p>
+		<title-bar title="Información" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" help="<p>
 						Los datos publicados en la plataforma deben poder ser referenciado por quienes hacen
 						uso de ellos.
 						</p><p>

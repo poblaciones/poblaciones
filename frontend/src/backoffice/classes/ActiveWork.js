@@ -80,10 +80,21 @@ ActiveWork.prototype.GetActiveDatasetById = function (id) {
 	return null;
 };
 
+ActiveWork.prototype.ReadOnlyCausedByIndexing = function () {
+	if (window.Context.User.Privileges === 'A' ||
+		(this.IsPublicData() && window.Context.User.Privileges === 'E')) {
+		return false;
+	}
+	return this.properties.IsIndexed;
+};
+
 ActiveWork.prototype.CanEdit = function () {
 	if (window.Context.User.Privileges === 'A' ||
 		(this.IsPublicData() && window.Context.User.Privileges === 'E')) {
 		return true;
+	}
+	if (this.properties.IsIndexed) {
+		return false;
 	}
 	for (var i = 0; i < this.Permissions.length; i++) {
 		if (this.Permissions[i].User.Email === window.Context.User.User

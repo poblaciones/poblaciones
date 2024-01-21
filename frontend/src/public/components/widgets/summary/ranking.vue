@@ -92,13 +92,47 @@ export default {
 			}
 		},
 		getValueHeader() {
-			return h.ResolveNormalizationCaption(this.variable, true);
+			var ret = h.ResolveNormalizationCaption(this.variable, true);
+			if (this.metric.Compare.Active) {
+				switch (ret) {
+					case '%':
+						return 'Δ %';
+					default:
+						return ret;
+				}
+			} else {
+				return ret;
+			}
 		},
 		getFormattedValue(item) {
-			return h.renderMetricValue(item.Value, item.Total, this.variable.HasTotals, this.variable.NormalizationScale, this.variable.Decimals);
+			if (this.metric.Compare.Active) {
+				var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
+				var totalTuple = { value: item.Value, normalization: item.Total };
+				var compareTuple = { value: item.ValueCompare, normalization: item.TotalCompare };
+				if (this.variable.HasTotals) {
+					totalTuple.normalization /= this.variable.NormalizationScale;
+					compareTuple.normalization /= this.variable.NormalizationScale;
+				}
+				var ret = h.formatNum(h.calculateCompareValue(useProportionalDelta, totalTuple, compareTuple), 1);
+				if (ret == 'NaN') {
+					ret = '-';
+				} else if (ret != '-' && ret.length > 0 && ret[0] != '-') {
+					ret = '+' + ret;
+				}
+				return ret;
+			} else {
+				return h.renderMetricValue(item.Value, item.Total, this.variable.HasTotals, this.variable.NormalizationScale, this.variable.Decimals);
+			}
+		},
+		variableValueLabels() {
+			if (this.metric.Compare.Active) {
+				return this.variable.ComparableValueLabels;
+			} else {
+				return this.variable.ValueLabels;
+			}
 		},
 		getColor(item) {
-			var label = h.getValueLabel(this.variable.ValueLabels, item.ValueId);
+			var label = h.getValueLabel(this.variableValueLabels(), item.ValueId);
 			return (label ? label.FillColor : '');
 		},
 		clickItem(item) {

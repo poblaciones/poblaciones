@@ -36,7 +36,7 @@
 											 helper='Indica el modo de normalización. Ej. Porcentaje, 1 cada 10 mil.' />
 					</div>
 					<div class='md-layout-item md-size-100 md-small-size-100'>
-						<md-switch class="md-primary" v-model="useFilter">Aplicar un filtro de filas.</md-switch>
+						<md-switch class="md-primary" :disabled="!Work.CanEdit()" v-model="useFilter">Aplicar un filtro de filas.</md-switch>
 
 					</div>
 					<div class='md-layout-item md-size-0 md-small-size-0' v-show="useFilter">

@@ -6,10 +6,8 @@
 			</div>
 		</div>
 		<template v-if="!Embedded.Readonly">
-			<MetricDropdown v-if="Use.UseNewMenu && !Embedded.Readonly" :metric="metric" :clipping="clipping" :key="metric.index"
+			<MetricDropdown v-if="!Embedded.Readonly" :metric="metric" :clipping="clipping" :key="metric.index"
 											class="exp-hiddable-block" @RankingShown="rankingShown" />
-			<MetricTopButtons v-else :metric="metric" :clipping="clipping" :key="metric.index"
-												class="exp-hiddable-block" @RankingShown="rankingShown" />
 		</template>
 		<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
 			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
@@ -83,7 +81,6 @@
 </template>
 <script>
 import MetricVariables from './metricVariables';
-import MetricTopButtons from './metricTopButtons';
 import MetricDropdown from './metricDropdown';
 import Source from './source';
 import Ranking from './ranking';
@@ -96,7 +93,6 @@ import 'vue-slider-component/theme/default.css';
 export default {
 	name: 'metric',
 	components: {
-		MetricTopButtons,
 		MetricDropdown,
 		Source,
 		DragHorizontal,

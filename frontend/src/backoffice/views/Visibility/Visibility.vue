@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<title-bar title="Visibilidad" :help="`<p>
+		<title-bar title="Visibilidad" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" :help="`<p>
 			La visiblidad establece quiénes pueden ver la información en el mapa y acceder a su descarga una vez publicada.
 			</p>`" />
 			<div class="app-container">
@@ -80,7 +80,10 @@
 						<md-card-content>
 							<div class="md-layout md-gutter">
 								<div v-if="Work.properties.IsIndexed" class="md-layout-item md-size-100 md-small-size-100">
-									Cuando una cartografía se encuentra ‘indexada’ sus indicadores son ofrecidos en el buscador del sitio y es indexada en buscadores externos como Google. Si considera que hizo cambios significativos en su información, puede solicitar una nueva revisión.
+									Cuando una cartografía se encuentra ‘indexada’ sus indicadores son ofrecidos en el buscador del sitio y es indexada en buscadores externos como Google.
+									Mientras esté indexada no es posible hacer modificaciones, por lo que si precisa realizar
+									una corrección a la información deberá conctactarse con los administradores del repositorio
+									para solicitar el permiso.
 								</div>
 								<template v-else>
 									<div class="md-layout-item md-size-100 md-small-size-100">

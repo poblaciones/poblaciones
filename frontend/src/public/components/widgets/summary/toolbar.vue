@@ -80,11 +80,11 @@
 				</button>
 			</span>
 			<span v-else="" class="dropdown">
+
 				<button type="button"
 								id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
 								data-toggle="dropdown">
 					<i class="fas fa-user" :title="userTooltip" />
-
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
 						<li v-if="isAdminReader"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>

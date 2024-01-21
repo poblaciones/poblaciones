@@ -186,6 +186,7 @@ export default {
 				&& this[panelPositionEnum].panelType == PanelType.ListPanel) {
 				this[panelPositionEnum].detailIndex = index;
 			}
+			window.SegMap.toolbarStates.leftPanelVisible = true;
 			this.arrangePanels();
 		},
 		arrangePanels() {
@@ -219,10 +220,12 @@ export default {
 				this.collapsed = true;
 			}
 			this.arrangePanels();
+			window.SegMap.toolbarStates.leftPanelVisible = false;
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		doToggle() {
 			this.collapsed = !this.collapsed;
+			window.SegMap.toolbarStates.leftPanelVisible = !this.collapsed;
 			window.SegMap.Session.UI.ToggleLeftPanel(!this.collapsed);
 		},
 		updateMapTypeControl() {

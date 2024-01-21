@@ -9,7 +9,7 @@
 								@click="clickCustomize" style="margin-right: 6px; margin-left: -2px; margin-top: 4px; font-size: 1.2rem">
 					<i class="fas fa-sliders-h"></i>
 				</button>
-
+				aaaaaaaaaaaa
 				<v-popover v-if="hasUrbanityFilter" popoverClass="tooltipInPopup tooltipNoBorder colorTooltip" style=" display: inline-block; float: right;"
 									 popoverArrowClass="noArrow" :open="showDropDown"
 									 :disabled="false" @hide="dropDownClosed"
@@ -73,7 +73,6 @@
 					alert(0);
 					return;
 				}
-				alert(1);
 				this.isDropDownOpen = true;
 			},
 			dropDownClosed() {

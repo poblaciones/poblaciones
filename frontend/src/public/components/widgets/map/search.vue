@@ -200,10 +200,9 @@ export default {
 				tab: this.arrowKeyDown,
 				'shift+tab': this.arrowKeyUp,
 			};
-		}
+		},
 	},
 	watch: {
-
 		text(t) {
 			if(this.text === '') {
 				this.escapeKey();
@@ -225,10 +224,10 @@ export default {
 		position: absolute;
 	}
 
-/* condition for screen size minimum of 1000px */
-@media (max-width:540px) {
-	.searchBar {
-		left: calc(50% - (max(calc(100% - 350px), 150px))/2);
+		/* condition for screen size minimum of 1000px */
+	@media (max-width:540px) {
+		.searchBar {
+		left: calc(50% - (calc(100% - 350px))/2);
 		width: max(calc(100% - 300px), 200px);
 	}
 

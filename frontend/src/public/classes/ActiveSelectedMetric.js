@@ -98,7 +98,7 @@ ActiveSelectedMetric.prototype.GetUrbanityFilters = function (skipAllElement) {
 		'N': { label: 'Sin filtro', tooltip: '' },
 		'UD': { label: 'Urbano total', tooltip: 'Áreas de 2 mil habitantes y más (URP=1)' },
 		'U': { label: 'Urbano agrupado', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con 250 habitantes por km2 y más' },
-		'D': { label: 'Urbano disperso', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con menos de 250 habitantes por km2', border: true },
+		'D': { label: 'Urbano disperso', tooltip: 'Áreas de 2 mil habitantes y más (URP=1) con menos de 250 habitantes por km2', separator: true },
 		'RL': { label: 'Rural total', tooltip: 'Áreas de menos de 2 mil habitantes (URP=2+3)' },
 		'R': { label: 'Rural agrupado', tooltip: 'Áreas de menos de 2 mil habitantes agrupadas (URP=2)' },
 		'L': { label: 'Rural disperso', tooltip: 'Áreas de menos de 2 mil habitantes dispersas (URP=3)' }
@@ -249,7 +249,6 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 	if (!this.ShowRanking || ! this.useRankings()) {
 		return;
 	}
-	var metric = this.properties;
 	var variable = this.SelectedVariable();
 	if (!variable) {
 		return;
@@ -265,7 +264,7 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 	this.properties.EffectivePartition = this.GetSelectedPartition();
 
 	window.SegMap.Get(window.host + '/services/frontend/metrics/GetRanking', {
-		params: h.getRankingParams(metric, window.SegMap.frame, this.RankingSize, this.RankingDirection, hiddenValueLabels),
+		params: h.getRankingParams(this, window.SegMap.frame, this.RankingSize, this.RankingDirection, hiddenValueLabels),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateRanking = c; }),
 	}).then(function (res) {
 		loc.cancelUpdateRanking = null;

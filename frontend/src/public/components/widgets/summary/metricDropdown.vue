@@ -5,40 +5,8 @@
 				<mp-close-button @click="clickQuitar" title="Quitar indicador"
 												 v-if="!metric.IsLocked" class="exp-hiddable-block" />
 
-				<button title="Opciones" v-show="metric.SelectedVariable()" type="button" class="close "
-								@click="clickCustomize" style="margin-right: 6px; margin-left: -2px; margin-top: 4px; font-size: 1.2rem">
-					<i class="fas fa-sliders-h"></i>
-				</button>
-
-				<v-popover v-if="hasUrbanityFilter"  popoverClass="tooltipInPopup tooltipNoBorder colorTooltip" style=" display: inline-block; float: right;"
-									 popoverArrowClass="noArrow" :open="showDropDown"
-									 :disabled="false" @hide="dropDownClosed"
-									 popoverInnerClass="tooltipNoBorder">
-					<button type="button" id="filterDropId"
-									class="filterDropdownButton lightButton close"
-									title="Agregar filtro" @click="showDropDown = true;">
-						<i class="fas fa-filter" />
-					</button>
-					<div slot="popover">
-						<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
-							<li v-for="(value, key) in metric.GetUrbanityFilters(true)" :key="key" :class="(value.border ? 'liDividerNext' : '')">
-								<a :style="'padding-left: '+ (15 + value.level * 14) +'px'"
-									 @click="changeUrbanity(key)">
-									{{ value.label }}
-								</a>
-							</li>
-						</ul>
-					</div>
-				</v-popover>
-				<button type="button" @click="toogleRankings" v-if="metric.useRankings()" onmouseup="this.blur()"
-								class="close lightButton" :class="(metric.ShowRanking ? 'activeButton' : '')" :title="(metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking')">
-					<i class="fa fa-signal" style="margin-left: -8px;" />
-				</button>
-
-				<button v-if="metric.SelectedLevel().Extents" ref="zoomExtentsBtn" type="button"
-								class="close lightButton" title="Zoom al indicador" @click="zoomExtents()">
-					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px; margin-right: 2px;" />
-				</button>
+				<mp-dropdown-menu :items="menuItems" @itemClick="dropdownSelected"
+											 icon="fas fa-ellipsis-v" />
 			</h5>
 		</div>
 	</div>
@@ -56,36 +24,26 @@
 			'clipping',
 		],
 		components: {
-
 		},
 		data() {
 			return {
 				work: {},
-				showDropDown: false,
-				isDropDownOpen: false,
 			};
 		},
 		methods: {
-			dropDownOpened() {
-
-				if (this.isDropDownOpen) {
-					this.dropDownClosed();
-					alert(0);
-					return;
+			keyValueToList(dict) {
+				var ret = [];
+				for (var key in dict) {
+					var value = dict[key];
+					value.key = key;
+					ret.push(value);
 				}
-				alert(1);
-				this.isDropDownOpen = true;
+				return ret;
 			},
-			dropDownClosed() {
-				this.showDropDown = false;
-				this.isDropDownOpen = false;
-			},
-			clickCustomize(e) {
-				e.preventDefault();
+			clickCustomize() {
 				window.Popups.MetricCustomize.show(this.metric);
 			},
 			clickQuitar(e) {
-				e.preventDefault();
 				this.metric.Remove();
 			},
 			toogleRankings() {
@@ -96,8 +54,7 @@
 				}
 			},
 			changeUrbanity(mode) {
-				this.dropDownClosed();
-				this.metric.properties.SelectedUrbanity = mode;
+				this.metric.properties.SelectedUrbanity = mode.key;
 				window.SegMap.SaveRoute.UpdateRoute();
 				window.SegMap.UpdateMap();
 			},
@@ -120,7 +77,7 @@
 					}
 				}
 				window.SegMap.MapsApi.FitEnvelope(extents, true);
-				this.$refs.zoomExtentsBtn.blur();
+				//this.$refs.zoomExtentsBtn.blur();
 			},
 			shouldClearSelection(intersect, extents) {
 				if (intersect === null) {
@@ -132,11 +89,75 @@
 				var area1 = m.rectanglePixelArea(intersect);
 				var area2 = m.rectanglePixelArea(extents);
 				return area1 < area2 * .9;
+			},
+			dropdownSelected(item) {
+				switch (item.key) {
+					case 'SETTINGS':
+						this.clickCustomize();
+						break;
+					case 'RANKINGS':
+						this.toogleRankings();
+						break;
+					case 'EXTENTS':
+						this.zoomExtents();
+						break;
+					case 'REMOVE':
+						this.clickQuitar();
+						break;
+					default:
+						this.changeUrbanity(item);
+				}
 			}
 		},
 		computed: {
 			Use() {
 				return window.Use;
+			},
+			menuItems() {
+				var ret = [];
+				// opciones
+				if (this.metric.SelectedVariable()) {
+					ret.push({ label: 'Opciones', key: 'SETTINGS', icon: 'fas fa-sliders-h' });
+				}
+				// muestra ránking
+				if (this.metric.useRankings()) {
+					ret.push({
+						label: (this.metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking'),
+						key: 'RANKINGS',
+						/* icon: 'fa fa-signal' */
+					});
+				}
+				if (ret.length > 0) {
+					ret[ret.length - 1].separator = true;
+				}
+				// agrega el filtro de urbano
+				if (this.hasUrbanityFilter) {
+					ret.push({
+						label: 'Filtro', items: this.keyValueToList(this.metric.GetUrbanityFilters(true))
+					});
+				};
+				if (ret.length > 0) {
+					ret[ret.length - 1].separator = true;
+				}
+				ret.push({
+					label: 'Zoom al indicador',
+					key: 'EXTENTS',
+					/* icon: 'fas fa-expand-arrows-alt' */
+				});
+				// agrega las métricas
+				if (this.metric.properties.RelatedMetrics && this.metric.properties.RelatedMetrics.length > 1) {
+					ret.push({
+						label: 'Relacionados', items: this.keyValueToList(this.metric.properties.RelatedMetrics)
+					});
+				};
+				// agregar el quitar
+				if (!this.metric.IsLocked) {
+					if (ret.length > 0) {
+						ret[ret.length - 1].separator = true;
+					}
+					ret.push({ label: 'Quitar', key: 'REMOVE' });
+				}
+				return ret;
 			},
 			urbanity() {
 				return this.metric.properties.SelectedUrbanity;

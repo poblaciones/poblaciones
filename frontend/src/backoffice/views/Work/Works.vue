@@ -297,6 +297,9 @@ export default {
 			if (this.filter === 'P' && window.Context.User.Privileges === 'E') {
 				return true;
 			}
+			if (item.IsIndexed) {
+				return false;
+			}
 			return item.Privileges !== 'V';
 		},
 		onPromotePublic(item) {
