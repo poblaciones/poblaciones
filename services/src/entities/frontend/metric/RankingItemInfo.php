@@ -7,7 +7,9 @@ use helena\entities\BaseMapModel;
 class RankingItemInfo extends BaseMapModel
 {
 	public $Value;
+	public $ValueCompare;
 	public $Total;
+	public $TotalCompare;
 	public $Name;
 	public $ValueId;
 	public $FID;
