@@ -10,6 +10,7 @@ class LocalSettings extends Settings
 	private static $map = NULL;
 	private static $shard = NULL;
 	private static $limits = NULL;
+	private static $help = NULL;
 
 	public function Map()
 	{
@@ -17,6 +18,14 @@ class LocalSettings extends Settings
 			self::$map = new MapSettings();
 
 		return self::$map;
+	}
+
+	public function Help()
+	{
+		if (self::$help == NULL)
+			self::$help = new HelpSettings();
+
+		return self::$help;
 	}
 
 	public function Shard()

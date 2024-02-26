@@ -1,6 +1,6 @@
 <template>
 	<v-popover popoverClass="tooltipInPopup tooltipNoBorder colorTooltip"
-						 style=" display: inline-block;" :style="(child ? 'width: 100%;': ' float: right;')"
+						 style=" display: inline-block;" :style="(child ? 'width: 100%;': (floatRight ? ' float: right;' : ''))"
 						 popoverArrowClass="noArrow" :open="showDropDown"
 						 :disabled="false" @hide="dropDownClosed" @show="dropDownOpened"
 						 popoverInnerClass="tooltipNoBorder">
@@ -8,14 +8,13 @@
 		<li v-if="child" style="position: relative"
 				:class="(currentItem.separator ? 'liDividerNext' : '')" >
 
-			<a :style="' width: 100%; display: inline-block;; padding-left: '+ (15 + (currentItem.level ? currentItem.level : 0) * 14) +'px' ">
+			<a v-if="!currentItem.separator" :style="' width: 100%; display: inline-block;; padding-left: '+ (15 + (currentItem.level ? currentItem.level : 0) * 14) +'px' ">
 				{{ currentItem.label }}
 				<i style="position: absolute; right: 10px; top: 12px;" :class="icon" />
 			</a>
-
 		</li>
-		<button v-else type="button" id="filterDropId"
-						class="lightButton close">
+		<button v-else type="button" id="filterDropId" :title="tooltip"
+						:class="(styleRounded ? 'btn btn-default btn-xs' : 'lightButton close')">
 			{{ label }}
 			<i :style="(label ? 'float: right' : '')" :class="icon" />
 		</button>
@@ -23,14 +22,17 @@
 		<div slot="popover">
 			<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
 				<template v-for="(item, index) in items">
-					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'liDividerNext' : '')" :key="index">
-						<a v-if="!item.items" :style="'padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
-							 @click="itemClicked(item)">
+					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'liDividerNext' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
+						<a v-if="!item.items && !item.separator" :style="'padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
+							 @click="itemClicked(item)" :class="(item.aClass ? item.aClass : '')">
 							{{ item.label }}
 
-							<i v-if="item.icon"
+
+							<i v-if="item.icon && item.icon != 'X'"
 								 style="position: absolute; right: 10px; top: 12px; color: #aaa; font-size: 12px;"
 								 :class="item.icon" />
+
+							<X-Icon v-if="item.icon == 'X'" class="item.icon" style="position: absolute; right: 10px; top: 12px; color: #aaa; font-size: 12px;" />
 						</a>
 
 					</li>
@@ -45,19 +47,24 @@
 <script>
 
 	// https://materialdesignicons.com/cdn/1.9.32/
+	import XIcon from '@/common/assets/xicon.svg';
+
 
 	export default {
 		name: 'dropdown',
 		props: {
+			floatRight: { type: Boolean, default: true },
+			styleRounded: { type: Boolean, default: false },
 			items: { type: Array, default: function () { return []; } },
 			icon: { type: String, default: '' },
 			level: { type: Number, default: 0 },
+			tooltip: { type: String, default: '' },
 			separator: { type: Boolean, default: false },
 			label: { type: String, default: '' },
 			child: { type: Boolean, default: false },
 		},
 		components: {
-
+			XIcon
 		},
 		data() {
 			return {
@@ -69,6 +76,7 @@
 			dropDownOpened() {
 				this.showDropDown = true;
 				this.isDropDownOpen = true;
+				this.$emit('dropDownOpened');
 			},
 			dropDownClosed() {
 				this.showDropDown = false;

@@ -96,6 +96,8 @@ class ConfigurationService extends BaseService
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
 									'HomePage' =>  Context::Settings()->Servers()->Home()->publicUrl,
+
+									'Help' => App::Settings()->Help(),
 									'StaticWorks' =>  App::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => App::Settings()->Map()->UseGradients,
 									'UseTextures' => App::Settings()->Map()->UseTextures,

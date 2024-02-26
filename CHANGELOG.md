@@ -1,5 +1,6 @@
 - Bloquea edición de elementos indexados para usuarios estándar y remueve indexación al clonar.
 - Ofrece en el visor menú de registrarse separado de ingresar.
+- Gestos en mobile para ocultar paneles laterales (swipe)
 
 v3.12 (2023-11-27)
 - La georreferenciación distingue entre intersects y touches.

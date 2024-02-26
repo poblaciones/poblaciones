@@ -38,6 +38,8 @@ import MpDropdownMenu from '@/public/components/controls/mpDropdownMenu';
 import MpColorPicker from '@/common/components/MpColorPicker';
 import MpLabel from '@/public/components/controls/mpLabel';
 import VueMobileDetection from 'vue-mobile-detection';
+import Vue2TouchEvents from 'vue2-touch-events';
+
 
 Vue.component('mp-dropdown-menu', MpDropdownMenu);
 
@@ -50,6 +52,7 @@ Vue.component('mp-color-picker', MpColorPicker);
 Vue.use(Clipboard);
 Vue.use(VTooltip);
 Vue.use(VueMobileDetection);
+Vue.use(Vue2TouchEvents);
 
 Vue.config.productionTip = false;
 Vue.use(VueHotkey);

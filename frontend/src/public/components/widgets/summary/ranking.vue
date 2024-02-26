@@ -116,23 +116,23 @@ export default {
 				var ret = h.formatNum(h.calculateCompareValue(useProportionalDelta, totalTuple, compareTuple), 1);
 				if (ret == 'NaN') {
 					ret = '-';
-				} else if (ret != '-' && ret.length > 0 && ret[0] != '-') {
-					ret = '+' + ret;
+				} else if (ret.length > 0) {
+					var num = parseFloat(ret);
+					if (num <= -1 || num >= 1) {
+						if (ret[0] == '-') {
+							ret = '↘ ' + ret.substring(1);
+						} else {
+							ret = '↗ ' + ret;
+						}
+					}
 				}
 				return ret;
 			} else {
 				return h.renderMetricValue(item.Value, item.Total, this.variable.HasTotals, this.variable.NormalizationScale, this.variable.Decimals);
 			}
 		},
-		variableValueLabels() {
-			if (this.metric.Compare.Active) {
-				return this.variable.ComparableValueLabels;
-			} else {
-				return this.variable.ValueLabels;
-			}
-		},
 		getColor(item) {
-			var label = h.getValueLabel(this.variableValueLabels(), item.ValueId);
+			var label = h.getValueLabel(this.metric.getVariableValueLabels(this.variable), item.ValueId);
 			return (label ? label.FillColor : '');
 		},
 		clickItem(item) {

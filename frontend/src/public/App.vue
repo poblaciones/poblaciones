@@ -10,9 +10,9 @@
 			<div class="embedded" @click="embeddedClick" v-if="Embedded.Readonly"
 					 :style="(Embedded.OpenOnClick ? 'cursor: pointer;' : '')"
 					 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
-			<div id="holder">
+			<div id="holder" style="overflow-x: hidden">
 				<PopupsPanel :backgroundColor="workColor" />
-				<div id="panRight" class="floatRightPanel thinScroll" v-show="!toolbarStates.collapsed" :style="rightPanelOverflow">
+				<div id="panRight" class="animatedFlyAway floatRightPanel thinScroll" v-touch:swipe.right="panRightSwipeClose" :style="rightPanelOverflow">
 					<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :currentWork="work.Current"
 												:toolbarStates="toolbarStates"></SummaryPanel>
@@ -114,7 +114,8 @@
 				toolbarStates: {
 					selectionMode: null, tutorialOpened: 0, showLabels: true,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false
-				 },
+				},
+			  flyRightTimeoutId: null,
 				clipping: {
 					IsUpdating: false,
 					Region: {
@@ -201,6 +202,9 @@
 			IsPreview() {
 				var path = window.location.href;
 				return path.indexOf('&pv=1#') > 0;
+			},
+			panRightSwipeClose() {
+				this.doToggle();
 			},
 			toggleFullscreen() {
 				this.fullscreen = !this.fullscreen;
@@ -403,7 +407,25 @@
 			},
 		},
 		watch: {
-			'toolbarStates.collapsed'() {
+			'toolbarStates.collapsed'(value) {
+				var s = document.getElementById('panRight');
+				if (this.flyRightTimeoutId) {
+					clearTimeout(this.flyRightTimeoutId);
+					this.flyRightTimeoutId = null;
+				}
+				if (!value) {
+					// mostrar
+					s.style.display = 'block';
+					this.flyRightTimeoutId = setTimeout(() => {
+						s.classList.remove('animatedFlyRight');
+					}, 10);
+				} else {
+					// ocultar
+					s.classList.add('animatedFlyRight');
+					this.flyRightTimeoutId = setTimeout(() => {
+						s.style.display = 'none';
+					}, 300);
+				}
 				this.SplitPanelsRefresh();
 			}
 		}
@@ -433,7 +455,7 @@
 		margin: 8px 20px 5px 10px !important;
 	}
 
-		.leafletMapButton {
+	.leafletMapButton {
 		background: none padding-box rgb(255, 255, 255);
 		display: table-cell;
 		border: 0px;
@@ -1080,6 +1102,19 @@
 			cursor: default !important;
 		}
 
+	.animatedFlyAway {
+		transition: transform .3s ease;
+	}
+	.animatedFlyLeft {
+		transform: translateX(-100%);
+		-webkit-transform: translateX(-100%);
+	}
+
+	.animatedFlyRight {
+		transform: translateX(100%);
+		-webkit-transform: translateX(100%);
+	}
+
 	.dropdown-menu > li:last-child > a {
 		border-bottom-left-radius: 4px;
 		border-bottom-right-radius: 4px;
@@ -1140,6 +1175,10 @@
 		background-color: White;
 		padding-left: 4px;
 		padding-top: 4px;
+	}
+
+	.noTopPadding {
+		padding-top: 0px!important;
 	}
 
 	.dropCapture {

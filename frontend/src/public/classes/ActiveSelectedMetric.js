@@ -281,14 +281,23 @@ ActiveSelectedMetric.prototype.UpdateRanking = function () {
 
 ActiveSelectedMetric.prototype.getHiddenValueLabels = function (variable) {
 	var ret = '';
-	for (var n = 0; n < variable.ValueLabels.length; n++)
-		if (!variable.ValueLabels[n].Visible) {
-			ret += ',' + variable.ValueLabels[n].Id;
+	var labels = this.getVariableValueLabels(variable);
+	for (var n = 0; n < labels.length; n++)
+		if (!labels[n].Visible) {
+			ret += ',' + labels[n].Id;
 		}
 	if (ret.length > 0) {
 		ret = ret.substring(1);
 	}
 	return ret;
+};
+
+ActiveSelectedMetric.prototype.getVariableValueLabels = function (variable) {
+	if (this.Compare.Active) {
+		return variable.ComparableValueLabels;
+	} else {
+		return variable.ValueLabels;
+	}
 };
 
 ActiveSelectedMetric.prototype.SelectVersion = function (index) {

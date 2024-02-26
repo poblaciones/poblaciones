@@ -134,11 +134,7 @@ export default {
 			return ret;
 		},
 		variableValueLabels() {
-			if (this.metric.Compare.Active) {
-				return this.variable.ComparableValueLabels;
-			} else {
-				return this.variable.ValueLabels;
-			}
+			return this.metric.getVariableValueLabels(this.variable);
 		},
 		showTotals() {
 			return this.variable.ShowSummaryTotals === 1 &&
@@ -391,7 +387,7 @@ export default {
 					};
 				} else {
 					var nTotal = Number(values.Total);
-					return { value: value, normalization: nTotal * this.variable.NormalizationScale };
+					return { value: value, normalization: nTotal / this.variable.NormalizationScale };
 				}
 			} else if (this.metric.properties.SummaryMetric === 'H') {
 				return { value: area, normalization: 0.01 };

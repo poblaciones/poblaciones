@@ -1,27 +1,29 @@
 <template>
-	<div>
-		<div v-show='hasContent && !collapsed' class="floatLeftPanel thinScroll" :style="{ width: width + 'px' }">
-			<div v-if="isFullFront">
-				<transition name="fade" mode='out-in'>
-					<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose'/>
-					<feature-info :featureInfo='Full' v-if='isFullInfo' :enabled="enabled" @clickClose='doClose'/>
-				</transition>
+	<transition name="lefttrans">
+		<div v-touch:swipe.left="panLeftSwipeClose">
+			<div :class="(hasContent && !collapsed ? '': 'animatedFlyLeft')" class="animatedFlyAway floatLeftPanel thinScroll" :style="{ width: width + 'px' }">
+				<div v-if="isFullFront">
+					<transition name="fade" mode='out-in'>
+						<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose' />
+						<feature-info :featureInfo='Full' v-if='isFullInfo' :enabled="enabled" @clickClose='doClose' />
+					</transition>
+				</div>
+				<div id="panTop" class="split" v-if="!isFullFront">
+					<transition name="fade" mode='out-in'>
+						<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose' />
+						<feature-info :featureInfo='Top' v-if='isTopInfo' :enabled="enabled" @clickClose='doClose' />
+					</transition>
+				</div>
+				<div id="panBottom" class="split" v-if="!isFullFront">
+					<transition name="fade" mode='out-in'>
+						<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose' />
+						<feature-info :featureInfo='Bottom' v-if='isBottomInfo' :enabled="enabled" @clickClose='doClose' />
+					</transition>
+				</div>
 			</div>
-			<div id="panTop" class="split" v-if="!isFullFront">
-				<transition name="fade" mode='out-in'>
-					<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose'/>
-					<feature-info :featureInfo='Top' v-if='isTopInfo' :enabled="enabled" @clickClose='doClose'/>
-				</transition>
-			</div>
-			<div id="panBottom" class="split" v-if="!isFullFront">
-				<transition name="fade" mode='out-in'>
-					<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose'/>
-					<feature-info :featureInfo='Bottom' v-if='isBottomInfo' :enabled="enabled" @clickClose='doClose'/>
-				</transition>
-			</div>
+			<collapse-button v-if='hasContent' :startLeft='width + leftMargin' tooltip="panel" class="exp-hiddable-block" :collapsed='collapsed' @click="doToggle" />
 		</div>
-		<collapse-button v-if='hasContent' :startLeft='width + leftMargin' tooltip="panel" class="exp-hiddable-block" :collapsed='collapsed' @click="doToggle" />
-	</div>
+	</transition>
 </template>
 
 <script>
@@ -87,7 +89,7 @@ export default {
 		isBottomInfo() {
 			return this.Bottom !== null
 				&& this.Bottom.panelType == PanelType.InfoPanel;
-		},
+		}
 	},
 	methods: {
 		onResize() {
@@ -199,6 +201,9 @@ export default {
 				this.Bottom = null;
 			}
 			this.arrangeSplitter();
+		},
+		panLeftSwipeClose() {
+			this.doToggle();
 		},
 		doClose(e, fid) {
 			let panelPositionEnum = this.getLocated(fid);
@@ -314,12 +319,25 @@ export default {
 </script>
 
 <style scoped>
+
+	.lefttrans-enter-active, .lefttrans-leave-active {
+		transition: opacity .35s;
+	}
+
+	.lefttrans-enter, .lefttrans-leave-to {
+		opacity: 0;
+		transition: 10s;
+		left: -100px;
+	}
+
 .fade-enter-active, .fade-leave-active {
 	transition: opacity .35s;
 }
 .fade-enter, .fade-leave-to {
 	opacity: 0;
 }
+
+
 	.floatLeftPanel {
 		position: absolute;
 		max-height: calc(100% - 97px);

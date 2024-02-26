@@ -109,7 +109,7 @@ class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 		if (sizeof($this->hiddenValueLabels) === 0)
 			return "";
 		else
-			return " AND sna_" . $this->variableId . "_value_label_id NOT IN(" . implode(",", $this->hiddenValueLabels) . ") ";
+			return " AND sna_" . $this->variableId . "_" . $this->variableCompareId . "_value_label_id NOT IN(" . implode(",", $this->hiddenValueLabels) . ") ";
 	}
 
 	public function CheckTableExists($datasetId, $datasetCompareId)

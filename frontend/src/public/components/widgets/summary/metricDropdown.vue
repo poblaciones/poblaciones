@@ -117,7 +117,7 @@
 				var ret = [];
 				// opciones
 				if (this.metric.SelectedVariable()) {
-					ret.push({ label: 'Opciones', key: 'SETTINGS', icon: 'fas fa-sliders-h' });
+					ret.push({ label: 'Personalizar', key: 'SETTINGS', icon: 'fas fa-sliders-h' });
 				}
 				// muestra ránking
 				if (this.metric.useRankings()) {
@@ -127,18 +127,14 @@
 						/* icon: 'fa fa-signal' */
 					});
 				}
-				if (ret.length > 0) {
-					ret[ret.length - 1].separator = true;
-				}
 				// agrega el filtro de urbano
 				if (this.hasUrbanityFilter) {
+					ret.push({ 'separator': true });
 					ret.push({
 						label: 'Filtro', items: this.keyValueToList(this.metric.GetUrbanityFilters(true))
 					});
 				};
-				if (ret.length > 0) {
-					ret[ret.length - 1].separator = true;
-				}
+				ret.push({ 'separator': true });
 				ret.push({
 					label: 'Zoom al indicador',
 					key: 'EXTENTS',
@@ -152,9 +148,7 @@
 				};
 				// agregar el quitar
 				if (!this.metric.IsLocked) {
-					if (ret.length > 0) {
-						ret[ret.length - 1].separator = true;
-					}
+					ret.push({ 'separator': true });
 					ret.push({ label: 'Quitar', key: 'REMOVE' });
 				}
 				return ret;
