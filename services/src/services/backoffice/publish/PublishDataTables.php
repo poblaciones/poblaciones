@@ -432,6 +432,7 @@ class PublishDataTables
 	{
 		$table = Str::Replace($table, '_draft', '');
 		App::Db()->dropTable($table);
+		App::Db()->dropTableLikePattern($table . "_snapshot_matrix_%");
 	}
 
 	private function CopyWorkDatasetTable($table)

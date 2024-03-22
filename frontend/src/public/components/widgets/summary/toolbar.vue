@@ -225,6 +225,7 @@
 					ret.push({ label: 'Copiar link', key: 'COPYLINK', icon: 'fas fa-copy', liClass: 'a2a_kit', aClass: 'a2a_button_copy_link' });
 					ret.push({ label: 'Insertar (embeber)', key: 'EMBED', icon: 'fas fa-link' });
 					ret.push({ separator: true });
+					ret.push({ label: 'X', key: 'X', icon: 'X', liClass: 'a2a_kit', aClass: 'a2a_button_twitter' });
 					ret.push({ label: 'Facebook', key: 'FACEBOOK', icon: 'fab fa-facebook', liClass: 'a2a_kit', aClass: 'a2a_button_facebook' });
 					ret.push({ label: 'LinkedIn', key: 'LINKEDIN', icon: 'fab fa-linkedin', liClass: 'a2a_kit', aClass: 'a2a_button_linkedin' });
 					ret.push({ label: 'WhatsApp', key: 'WS', icon: 'fab fa-whatsapp', liClass: 'a2a_kit', aClass: 'a2a_button_whatsapp' });
@@ -242,10 +243,10 @@
 					ret.push({ separator: true });
 				}
 				if (this.helpLinks.ReadGuideLink) {
-					ret.push({ label: 'Guía de uso', key: 'GUIA-USO', icon: 'fas fa-file-pdf' });
+					ret.push({ label: 'Guía para consulta de información', key: 'GUIA-USO', icon: 'fas fa-file-pdf' });
 				}
 				if (this.helpLinks.UploadGuideLink) {
-					ret.push({ label: 'Guía de carga', key: 'GUIA-CARGA', icon: 'fas fa-file-pdf' });
+					ret.push({ label: 'Guía para la creación de mapas', key: 'GUIA-CARGA', icon: 'fas fa-file-pdf' });
 				}
 				if (this.helpLinks.TutorialsLink) {
 					ret.push({ separator: true });
@@ -253,7 +254,7 @@
 				}
 				if (this.helpLinks.AboutLink) {
 					ret.push({ separator: true });
-					ret.push({ label: 'Acerca de ...', key: 'ABOUT' });
+					ret.push({ label: 'Acerca de Poblaciones', key: 'ABOUT' });
 				}
 				if (this.helpLinks.ContactLink) {
 					ret.push({ separator: true });

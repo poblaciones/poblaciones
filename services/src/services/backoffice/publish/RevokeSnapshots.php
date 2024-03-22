@@ -57,12 +57,11 @@ class RevokeSnapshots extends BaseService
 			return;
 
 		$datasets = $this->workModel->GetDatasets($this->workId);
-
-		//
 		foreach($datasetsToDelete as $row)
 		{
 			$table = SnapshotByDatasetModel::SnapshotTable($row['dat_table']);
 			App::Db()->dropTable($table);
+			App::Db()->dropTableLikePattern($table . "_matrix_%");
 		}
 		$totalLabelsRowDeleted = 0;
 		foreach($datasetsToDelete as $row)

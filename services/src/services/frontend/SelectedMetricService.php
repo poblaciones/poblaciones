@@ -176,8 +176,56 @@ class SelectedMetricService extends BaseService
 				$selectedMetric->Versions[] = $version;
 			}
 		}
-	}
 
+		//$this->MarkComparableVariables($selectedMetric);
+	}
+	/*
+	private MarkComparableVariables($selectedMetric)
+	{
+		// Cuando ya tiene todas las versiones, se fijas si con comparables
+		$datasets = [];
+		// Arma la lista de datasets por nombre de nivel (provincia, departamento, etc)
+		foreach($selectedMetric->Versions as $version)
+		{
+			foreach($version->Levels as $level)
+			{
+				if (!array_key_exists($level['Name'], $datasets))
+				{
+					$datasets[$level['Name']] = [];
+				}
+				$datasetId = $level['Dataset']['Id'];
+				if (!in_array($datasetId, $datasets[$level['Name']]))
+				{
+					$datasets[$level['Name']][] = ['datasetId' => $datasetId, 'level' => $level];
+				}
+			}
+		}
+		foreach($datasets as _ => $datasetIds)
+		{
+			foreach ($datasetIds as $dataset)
+			{
+				$datasetId = $dataset['datasetId'];
+				$level = $dataset['level'];
+				foreach ($datasetIds as $datasetCompare)
+				{
+					$datasetCompareId = $datasetCompare['datasetId'];
+					$levelCompare = $datasetCompare['level'];
+					if ($datasetId != $datasetCompareId)
+					{
+						// Obtiene las variables comparables
+						$variablePairs = MergeSnapshotsByDatasetModel::GetComparableVariables($datasetId, $datasetCompareId, false);
+						if (sizeof($variablePairs) > 0)
+						{
+							FlagAllVariablesAsComparable($level, $variablePairs);
+							FlagAllVariablesAsComparable($levelCompare, $variablePairs);
+						}
+
+					}
+				}
+			}
+		}
+	}
+	*/
 	private function GetWork($selectedVersionInfo)
 	{
 		$workService = new WorkService();

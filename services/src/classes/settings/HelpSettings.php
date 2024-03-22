@@ -12,6 +12,6 @@ class HelpSettings
 	public $ContactLink = 'https://poblaciones.org/contacto/';
 	public $TutorialsLink = 'https://www.youtube.com/@poblaciones/playlists';
 	public $ReadGuideLink = 'https://poblaciones.org/guias/guia-para-la-consulta-de-informacion.pdf';
-	public $UploadGuideLink = 'https://poblaciones.org/guias/guia-para-la-carga-de-informacion.pdf';
+	public $UploadGuideLink = 'https://poblaciones.org/guias/guia-para-la-creacion-de-mapas.pdf';
 	public $AboutLink = 'https://poblaciones.org/institucional';
 }

@@ -8,6 +8,7 @@ class VariableInfo extends BaseMapModel
 {
 	public $Id;
 	public $Name;
+	public $ShortName;
 	public $Normalization;
 	public $NormalizationScale;
 	public $IsDefault = false;
@@ -49,6 +50,7 @@ class VariableInfo extends BaseMapModel
 			'mvv_is_default' => 'IsDefault',
 			'mvv_default_measure' => 'DefaultMeasure',
 			'dco_decimals' => 'Decimals',
+			'dco_variable' => 'ShortName',
 			'vsy_show_values' => 'ShowValues',
 			'vsy_opacity' => 'Opacity',
 			'vsy_gradient_opacity' => 'GradientOpacity',

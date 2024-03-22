@@ -16,6 +16,20 @@ use helena\db\backoffice\WorkModel;
 
 class MergeSnapshotsByDatasetModel
 {
+	public function GetComparableVariables($datasetId, $compareDatasetId, $sameDataset)
+	{
+		// Trae info de los levels
+		$snapshotModel = new SnapshotByDatasetModel();
+		$levels = $snapshotModel->GetDatasetLevels($datasetId);
+		$levelsCompare = ($sameDataset ? $levels : $snapshotModel->GetDatasetLevels($compareDatasetId));
+		if (sizeof($levelsCompare) == 0)
+			throw new PublicException("El dataset de comparación no contiene niveles definidos.");
+
+		// Construye la lista de variables que son
+		// comparables de ambos niveles
+		$variablePairs = $this->GetRequiredVariables($levels, $levelsCompare);
+		return $variablePairs;
+	}
 	public function MergeSnapshots($datasetId, $compareDatasetId)
 	{
 		Profiling::BeginTimer();
@@ -25,13 +39,7 @@ class MergeSnapshotsByDatasetModel
 		$dataset = $workModel->GetDataset($datasetId);
 		$datasetCompare = ($sameDataset ? $dataset : $workModel->GetDataset($compareDatasetId));
 
-		// Trae info de los levels
-		$snapshotModel = new SnapshotByDatasetModel();
-		$levels = $snapshotModel->GetDatasetLevels($datasetId);
-		$levelsCompare = ($sameDataset ? $levels : $snapshotModel->GetDatasetLevels($compareDatasetId));
-		if (sizeof($levelsCompare) == 0)
-			throw new PublicException("El dataset de comparación no contiene niveles definidos.");
-
+		$variablePairs = $this->GetComparableVariables($datasetId, $compareDatasetId, $sameDataset);
 
 		// Identifica las tablas
 		$table = SnapshotByDatasetModel::SnapshotTable($dataset['dat_table']);
@@ -47,10 +55,6 @@ class MergeSnapshotsByDatasetModel
 		}
 		else
 			$tuple = null;
-
-		// Construye la lista de variables que son
-		// comparables de ambos niveles
-		$variablePairs = $this->GetRequiredVariables($levels, $levelsCompare);
 
 		// Empieza a preparar las columnas
 		$columns = $this->BuildHeaders($dataset, $sameDataset);
@@ -137,9 +141,9 @@ class MergeSnapshotsByDatasetModel
 	{
 		$ret = [];
 		foreach ($level['variables'] as $variable) {
-			$formula = $variable->CalculateNormalizedValueField();
+			$formula = Variable::FormulaToString($variable->attributes);
 			foreach ($levelCompare['variables'] as $variableCompare) {
-				$formulaCompare = $variableCompare->CalculateNormalizedValueField();
+				$formulaCompare = Variable::FormulaToString($variableCompare->attributes);
 				if ($formula == $formulaCompare)
 					$ret[] = [$variable, $variableCompare];
 			}

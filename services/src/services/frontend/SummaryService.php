@@ -65,7 +65,6 @@ class SummaryService extends BaseService
 			if ($level->Partitions->Mandatory)
 				throw new \ErrorException("Debe indicar una valor para '" . $level->Partitions->Name . "'");
 		}
-
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		if ($compareLevelId)
 		{

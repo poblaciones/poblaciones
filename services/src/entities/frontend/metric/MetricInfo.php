@@ -14,7 +14,6 @@ class MetricInfo extends BaseMapModel
 	public $Provider;
 	public $Signature;
 	public $Coverage;
-	public $Comparable = true;
 	public $Type;
 
 	public $Versions = array();

@@ -43,8 +43,10 @@ class Variable
 										(CASE WHEN vsy_is_sequence THEN vsy_sequence_column_id ELSE NULL END) AS vsy_sequence_column_id,
 										(CASE WHEN vsy_is_sequence THEN sequencecolumn.dco_field ELSE NULL END) AS vsy_sequence_field,
 										data.dco_field AS mvv_data_field,
+										data.dco_variable AS mvv_data_column_variable,
 										cutcolumn.dco_format AS mvv_cut_field_format,
-										normalization.dco_field AS mvv_normalization_field
+										normalization.dco_field AS mvv_normalization_field,
+										normalization.dco_variable AS mvv_normalization_column_variable
 						FROM variable
 						JOIN symbology ON mvv_symbology_id = vsy_id
 						LEFT JOIN dataset_column data ON data.dco_id = mvv_data_column_id

@@ -431,7 +431,7 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	var mapChanged = false;
 	var selectedMetric = activeSelectedMetric.properties;
 	var versionIndex = '';
-	if (state.VersionInfo.indexOf(',') > 0 && activeSelectedMetric.properties.Metric.Comparable) {
+	if (state.VersionInfo.indexOf(',') > 0 && activeSelectedMetric.properties.Comparable) {
 		// son dos porque estaba comparando
 		var parts = state.VersionInfo.split(',');
 		var versionCompare = parseInt(parts[0]);

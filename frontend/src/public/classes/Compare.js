@@ -11,7 +11,7 @@ function Compare(metric) {
 	this.metric = metric;
 	this.SelectedVersionIndex = -1;
 	this.Active = false;
-	if (this.metric.properties.Metric.Comparable) {
+	if (this.metric.properties.Comparable) {
 		this.GenerateComparableValueLabels();
 	}
 };
@@ -193,10 +193,10 @@ Compare.prototype.SelectedVariable = function () {
 	if (!variable) {
 		return null;
 	}
-	var variableName = variable.Name;
+	var variableName = variable.ShortName;
 	var compareLevel = this.SelectedLevel();
 	for (var matchVariable of compareLevel.Variables) {
-		if (matchVariable.Name === variableName) {
+		if (matchVariable.ShortName === variableName) {
 			return matchVariable;
 		}
 	}

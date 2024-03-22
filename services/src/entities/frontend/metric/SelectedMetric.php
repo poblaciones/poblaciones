@@ -19,6 +19,7 @@ class SelectedMetric extends BaseMapModel
 	public $Visible;
 	public $ShowLegendsMetricName;
 
+	public $Comparable = true;
 
 	// Posibles Valores:
 	// - N (default): Cantidad absoluta.

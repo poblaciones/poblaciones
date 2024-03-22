@@ -8,7 +8,7 @@
 		<li v-if="child" style="position: relative"
 				:class="(currentItem.separator ? 'liDividerNext' : '')" >
 
-			<a v-if="!currentItem.separator" :style="' width: 100%; display: inline-block;; padding-left: '+ (15 + (currentItem.level ? currentItem.level : 0) * 14) +'px' ">
+			<a v-if="!currentItem.separator" :style="' width: 100%; display: inline-block; padding-right: 28px; padding-left: '+ (15 + (currentItem.level ? currentItem.level : 0) * 14) +'px' ">
 				{{ currentItem.label }}
 				<i style="position: absolute; right: 10px; top: 12px;" :class="icon" />
 			</a>
@@ -23,16 +23,16 @@
 			<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
 				<template v-for="(item, index) in items">
 					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'liDividerNext' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
-						<a v-if="!item.items && !item.separator" :style="'padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
+						<a v-if="!item.items && !item.separator" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
 							 @click="itemClicked(item)" :class="(item.aClass ? item.aClass : '')">
 							{{ item.label }}
 
 
 							<i v-if="item.icon && item.icon != 'X'"
-								 style="position: absolute; right: 10px; top: 12px; color: #aaa; font-size: 12px;"
+								 style="position: absolute; right: 10px; top: 9px; color: #aaa; font-size: 15px;"
 								 :class="item.icon" />
 
-							<X-Icon v-if="item.icon == 'X'" class="item.icon" style="position: absolute; right: 10px; top: 12px; color: #aaa; font-size: 12px;" />
+							<X-Icon v-if="item.icon == 'X'" class="item.icon" style="position: absolute; right: 6px; top: 6px; width: 25px; height: 25px; color: #aaa; font-size: 12px;" />
 						</a>
 
 					</li>

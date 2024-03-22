@@ -71,7 +71,7 @@ class WorkClone
 			$newName = RowDuplicator::ResolveNewName($newName, 'draft_work, draft_metadata, draft_work_permission', $userId, 'wrk_metadata_id = met_id AND wkp_work_id = wrk_id AND wkp_user_id', 'met_title', false, 150);
 		}
 		$this->state->Set('name', $newName);
-		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => false);
+		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0);
 		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId, $static);
 		$cloned = App::Orm()->find(entities\DraftWork::class, $this->targetWorkId);
 		WorkFlags::Save($cloned);

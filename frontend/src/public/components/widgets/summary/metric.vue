@@ -212,7 +212,7 @@ export default {
 				return window.Embedded;
 			},
 		useComparer() {
-			return window.Use.UseCompareSeries && this.metric.properties.Metric.Comparable && this.metric.properties.Versions.length > 1;
+			return window.Use.UseCompareSeries && this.metric.properties.Comparable && this.metric.properties.Versions.length > 1;
 		},
 			urbanity() {
 				return this.metric.properties.SelectedUrbanity;
