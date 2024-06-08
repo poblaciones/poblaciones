@@ -14,18 +14,13 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 5. Instalar las dependencias de Python: 
 
 # spss
-./pip install savReaderWriter
-./pip install ijson
-./pip install numpy
+./pip install savReaderWriter ijson numpy
 
 # kmz
-./pip install bs4
-./pip install lxml
-./pip install unicodecsv
+./pip install bs4 lxml unicodecsv
 
 # sta
-./pip install pandas
-./pip install pyreadstat
+./pip install pandas pyreadstat
 
 # r
 ./pip install pyreadr
