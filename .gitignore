@@ -16,3 +16,4 @@ thumbs.db
 tags
 /startup/dbdefault-user.sql
 /startup/dbversion.sql
+/services/py/bcup/__pycache__
