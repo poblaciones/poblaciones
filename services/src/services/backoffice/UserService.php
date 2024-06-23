@@ -8,6 +8,7 @@ use helena\entities\backoffice as entities;
 use helena\classes\Account;
 use minga\framework\Date;
 use minga\framework\PublicException;
+use helena\classes\Session;
 
 class UserService extends BaseService
 {
@@ -35,5 +36,20 @@ class UserService extends BaseService
 		}
 		return $user;
 	}
+	public function ClearSetting($key)
+	{
+		$userId = Session::GetCurrentUser()->GetUserId();
+		$params = array($userId, $key);
+		App::Db()->exec("DELETE FROM user_setting WHERE ust_user_id = ? AND ust_key = ?", $params);
+	}
+	public function SetSetting($key, $value)
+	{
+		$this->ClearSetting($key);
+		$userId = Session::GetCurrentUser()->GetUserId();
+		$params = array($userId, $key, $value);
+		App::Db()->exec("INSERT INTO user_setting (ust_user_id, ust_key, ust_value)
+							VALUES (?, ?, ?)", $params);
+	}
+
 }
 

@@ -8,10 +8,12 @@ use minga\framework\Profiling;
 use helena\classes\App;
 use helena\entities\backoffice as entities;
 use helena\db\backoffice\WorkModel;
+use helena\classes\Session;
 use helena\classes\Account;
 use helena\classes\Links;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;
+use helena\services\backoffice\PermissionsService;
 
 class WorkClone
 {
@@ -63,15 +65,18 @@ class WorkClone
 
 	private function doCreateNewWork($newName = null)
 	{
-		if ($newName === null)
+		if ($newName === null || $newName == '')
 		{
 			$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
 			$newName = $work->getMetadata()->getTitle();
 			$userId = Account::Current()->GetUserId();
-			$newName = RowDuplicator::ResolveNewName($newName, 'draft_work, draft_metadata, draft_work_permission', $userId, 'wrk_metadata_id = met_id AND wkp_work_id = wrk_id AND wkp_user_id', 'met_title', false, 150);
+			if (!$work->getIsExample())
+			{
+				$newName = RowDuplicator::ResolveNewName($newName, 'draft_work, draft_metadata, draft_work_permission', $userId, 'wrk_metadata_id = met_id AND wkp_work_id = wrk_id AND wkp_user_id', 'met_title', false, 150);
+			}
 		}
 		$this->state->Set('name', $newName);
-		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0);
+		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0, 'wrk_is_example' => 0);
 		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId, $static);
 		$cloned = App::Orm()->find(entities\DraftWork::class, $this->targetWorkId);
 		WorkFlags::Save($cloned);
@@ -126,7 +131,17 @@ class WorkClone
 	public function CopyPermissions()
 	{
 		$static = array('wkp_work_id' => $this->targetWorkId);
-		RowDuplicator::DuplicateRows(entities\DraftWorkPermission::class, $this->sourceWorkId, $static, 'wkp_work_id');
+
+		$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
+		if (!$work->getIsExample())
+		{
+			// Si no es ejemplo, copia lo existente
+			RowDuplicator::DuplicateRows(entities\DraftWorkPermission::class, $this->sourceWorkId, $static, 'wkp_work_id');
+		}
+		// Se pone como administrador
+		$permissionService = new PermissionsService();
+		$userEmail = Session::GetCurrentUser()->user;
+		$permissionService->AssignPermission($this->targetWorkId, $userEmail, 'A', false);
 	}
 
 	public function CopyDiskUsage()
@@ -138,6 +153,6 @@ class WorkClone
 	{
 		$update = "UPDATE draft_work SET wrk_unfinished = ? WHERE wrk_id = ?";
 		App::Db()->exec($update, array(0, $this->targetWorkId));
-}
+	}
 }
 

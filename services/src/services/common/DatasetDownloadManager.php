@@ -6,15 +6,7 @@ use minga\framework\PublicException;
 use minga\framework\ErrorException;
 use minga\framework\Str;
 
-use helena\classes\writers\SpssWriter;
-use helena\classes\writers\CsvWriter;
-use helena\classes\writers\StataWriter;
-use helena\classes\writers\RWriter;
-use helena\classes\writers\XlsxWriter;
-use helena\classes\writers\ShpWriter;
-
 use helena\classes\DownloadStateBag;
-use helena\classes\DownloadBoundaryStateBag;
 use helena\db\frontend\DatasetDownloadModel;
 use helena\db\frontend\BoundaryDownloadModel;
 use helena\db\frontend\ClippingRegionItemModel;

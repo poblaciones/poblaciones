@@ -166,6 +166,13 @@ export default {
 				badge.class = 'badgeDisabled ' + badge.class;
 			}
 			return badge;
+		},
+		removePermissionsOnExamples(route) {
+			if (route.name == 'Permisos' && this.Work.properties.IsExample) {
+				return true;
+			} else {
+				return false;
+			}
 		}
   },
 	mounted() {
@@ -199,7 +206,7 @@ export default {
 				if (route.name == 'Bienvenida') {
 					route.hidden = !this.Work.IsPublicData();
 				}
-				if (!route.hidden) {
+				if (!route.hidden && ! this.removePermissionsOnExamples(route)) {
 					ret.push(men);
 				}
 				if (route.name === 'Nuevo dataset') {

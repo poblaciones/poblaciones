@@ -76,7 +76,7 @@ class DatasetColumns
 			 if ($values !== "") $values .= ",";
 				$values .= "(" . floatval($key) . ","
 										. Str::CheapSqlEscape(Str::FixEncoding($description)) . ", " .
-											$column->getId() . ")";
+				$column->getId() . ")";
 		}
 		App::Db()->exec($sql . $values);
 	}

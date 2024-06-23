@@ -22,6 +22,7 @@ class SnapshotLookupModel
 		Profiling::BeginTimer();
 		$sqlDelete = "DELETE FROM snapshot_lookup_feature WHERE clf_dataset_id = ?";
 		$rowsDeleted = App::Db()->exec($sqlDelete, array($datasetIdShardified));
+
 		VersionUpdater::Increment('LOOKUP');
 
 		Profiling::EndTimer();
@@ -53,6 +54,7 @@ class SnapshotLookupModel
 					($dataset["dmk_type"] == 'I' &&  $dataset["dmk_source"] == 'F' ? $dataset["dmk_symbol"] : null),
 					$dataset["dat_caption"]);
 		$r = App::Db()->exec($sql . $sqlInsert, $params);
+
 
 		VersionUpdater::Increment('LOOKUP');
 

@@ -259,6 +259,45 @@ App::$app->post('/services/backoffice/PromoteWork', function (Request $request) 
 	return App::Json($controller->PromoteWork($workId));
 });
 
+App::$app->post('/services/backoffice/ArchiveWork', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId))
+		return $denied;
+	$controller = new services\WorkService();
+	return App::Json($controller->ArchiveWork($workId));
+});
+
+App::$app->post('/services/backoffice/UnarchiveWork', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId))
+		return $denied;
+	$controller = new services\WorkService();
+	return App::Json($controller->UnarchiveWork($workId));
+});
+
+App::$app->post('/services/backoffice/HideExample', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	$controller = new services\WorkService();
+	return App::Json($controller->HideExample($workId));
+});
+
+App::$app->post('/services/backoffice/PromoteExample', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsMegaUser())
+		return $denied;
+	$controller = new services\WorkService();
+	return App::Json($controller->PromoteExample($workId));
+});
+
+App::$app->post('/services/backoffice/DemoteExample', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsMegaUser())
+		return $denied;
+	$controller = new services\WorkService();
+	return App::Json($controller->DemoteExample($workId));
+});
+
+
 App::$app->post('/services/backoffice/DemoteWork', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsSiteEditor()) return $denied;

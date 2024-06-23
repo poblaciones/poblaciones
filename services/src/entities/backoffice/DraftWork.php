@@ -135,8 +135,16 @@ class DraftWork
 		 *
 		 * @ORM\Column(name="wrk_is_indexed", type="boolean", precision=0, scale=0, nullable=false, unique=false)
 		 */
-    private $IsIndexed;
+	private $IsIndexed;
 
+	/**
+	 * @var boolean
+	 *
+	 * @ClientReadonly
+	 *
+	 * @ORM\Column(name="wrk_is_example", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+	 */
+    private $IsExample;
 
 		/**
 		 * @var boolean
@@ -344,29 +352,53 @@ class DraftWork
         return $this->Comments;
     }
 
+	/**
+	 * Set isPrivate
+	 *
+	 * @param boolean $isPrivate
+	 *
+	 * @return DraftWork
+	 */
+	public function setIsPrivate($isPrivate)
+	{
+		$this->IsPrivate = $isPrivate;
 
-    /**
-		 * Set isPrivate
-		 *
-		 * @param boolean $isPrivate
-		 *
-		 * @return DraftWork
-		 */
-    public function setIsPrivate($isPrivate)
+		return $this;
+	}
+
+	/**
+	 * Get isPrivate
+	 *
+	 * @return boolean
+	 */
+	public function getIsPrivate()
+	{
+		return $this->IsPrivate;
+	}
+
+
+	/**
+	 * Set isExample
+	 *
+	 * @param boolean $isExample
+	 *
+	 * @return DraftWork
+	 */
+    public function setIsExample($isExample)
     {
-			$this->IsPrivate = $isPrivate;
+			$this->IsExample = $isExample;
 
 			return $this;
     }
 
     /**
-		 * Get isPrivate
+		 * Get isExample
 		 *
 		 * @return boolean
 		 */
-    public function getIsPrivate()
+    public function getIsExample()
     {
-			return $this->IsPrivate;
+			return $this->IsExample;
     }
 
     /**

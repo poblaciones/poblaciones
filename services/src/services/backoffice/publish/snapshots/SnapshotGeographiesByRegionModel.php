@@ -14,7 +14,7 @@ class SnapshotGeographiesByRegionModel
 	{
 	 	Profiling::BeginTimer();
 
-		App::Db()->exec("TRUNCATE TABLE snapshot_clipping_region_item_geography_item");
+		App::Db()->truncate("snapshot_clipping_region_item_geography_item");
 		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
 
 		ClippingCache::Cache()->Clear();
@@ -45,6 +45,7 @@ class SnapshotGeographiesByRegionModel
 						"AND clr_id = cli_clipping_region_id " .
 						"AND cli_id = cgi_clipping_region_item_id";
 		$r = App::Db()->exec($sql);
+
 		$rowsAffected += $r;
 		while ($r != 0)
 		{ // Inserta niveles inferiores
@@ -77,7 +78,7 @@ class SnapshotGeographiesByRegionModel
 		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
 		$ver->SetUpdated();
 
-	 	Profiling::EndTimer();
+		Profiling::EndTimer();
 		return $rowsAffected;
 	}
 }

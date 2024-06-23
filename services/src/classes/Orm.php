@@ -180,6 +180,7 @@ class Orm
 		Performance::BeginDbWait();
 		$this->GetEntityManager()->remove($obj);
 		$this->GetEntityManager()->flush();
+		$this->TouchObject($obj);
 		Performance::EndDbWait();
 		Profiling::EndTimer();
 	}
@@ -191,6 +192,7 @@ class Orm
 		$obj = $this->find($className, $id);
 		$this->GetEntityManager()->remove($obj);
 		$this->GetEntityManager()->flush();
+		$this->TouchObject($obj);
 		Performance::EndDbWait();
 		Profiling::EndTimer();
 	}
@@ -203,6 +205,7 @@ class Orm
 			Performance::BeginDbWait();
 			$this->GetEntityManager()->persist($obj);
 			$this->GetEntityManager()->flush();
+			$this->TouchObject($obj);
 			Performance::EndDbWait();
 			Profiling::EndTimer();
 		}

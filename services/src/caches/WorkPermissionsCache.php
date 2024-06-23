@@ -29,7 +29,7 @@ class WorkPermissionsCache extends BaseCache
 		if ($cache->HasData($workId, $rows) === false)
 		{
 			// La resuelve
-			$select = "SELECT usr_email Email, wkp_permission Permission, wrk_is_indexed Indexed
+			$select = "SELECT usr_email Email, wkp_permission Permission, wrk_is_indexed Indexed, wrk_is_example Example
 						FROM draft_work_permission
 						JOIN user ON wkp_user_id = usr_id
 						JOIN draft_work ON wkp_work_id = wrk_id
@@ -43,6 +43,10 @@ class WorkPermissionsCache extends BaseCache
 		$admin = false;
 		foreach($rows as $row)
 		{
+			if ($row['Example'])
+			{
+				$view = true;
+			}
 			if ($row['Email'] === $email)
 			{
 				if ($row['Permission'] === 'V' || $row['Indexed'])

@@ -16,8 +16,7 @@ class SnapshotMetricVersionModel
 }
 	public function ClearAllMetric()
 	{
-		$sql = "TRUNCATE TABLE snapshot_metric_version";
-		App::Db()->exec($sql);
+		App::Db()->truncate("snapshot_metric_version");
 	}
 
 	public function RegenMetric($metricId, $regenFullTable = false)
@@ -73,6 +72,7 @@ class SnapshotMetricVersionModel
 		App::Db()->exec("SET group_concat_max_len = 102400");
 		$param = ($regenFullTable ? array() : array($metricIdShardified, $metricIdShardified));
 		App::Db()->exec($sql, $param);
+
 		Profiling::EndTimer();
 	}
 
@@ -95,6 +95,7 @@ class SnapshotMetricVersionModel
 
 		$sql = "UPDATE snapshot_metric_version SET mvw_metric_revision = mvw_metric_revision + 1";
 		App::Db()->exec($sql);
+
 		$sql = "UPDATE metric SET mtr_revision = Signature()";
 		$ret = App::Db()->exec($sql);
 

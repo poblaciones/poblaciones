@@ -4,7 +4,7 @@ namespace helena\classes;
 
 use helena\classes\App;
 
-class VersionUpdater 
+class VersionUpdater
 {
 	private $key;
 	public function __construct($key)

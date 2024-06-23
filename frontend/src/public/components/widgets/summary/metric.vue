@@ -45,6 +45,10 @@
 			</template>
 		</div>
 		<div class="sourceRow">
+			<div>
+				{{ this.compareVersions[0] }} -
+				{{ this.compareVersions[1] }}
+			</div>
 			<div class="btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"
@@ -53,7 +57,15 @@
 					{{ ver.Version.Name }}
 				</button>
 			</div>
-			<div style="padding: 0px 20px 20px 20px; float: left " v-if="useComparer && metric.Compare.Active">
+			<div class="btn-group" v-if="useComparer && metric.Compare.Active" style="float: left">
+				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
+								@click="changeSelectedVersionIndexCompare(index)"
+								class="btn btn-default btn-xs exp-serie-item"
+								:class="getActiveCompare(ver)">
+					{{ ver.Version.Name }}
+				</button>
+			</div>
+			<div style="padding: 0px 20px 20px 20px; float: left " v-if="false && useComparer && metric.Compare.Active">
 				<vue-slider v-model="compareVersions" tooltip="none" :marks="true" :adsorb="true"
 										labelStyle="font-size: 12px;" :width="(35 * versionsArray.length)"
 										labelActiveStyle="active"
@@ -105,12 +117,25 @@ export default {
 		'clipping',
 		],
 	data() {
-		return { compareVersions: [null, null] };
+		return {
+			compareVersions: [null, null],
+			lastVersionClicked: -1
+		};
 	},
 	mounted() {
 		this.updateCompareVersions();
 	},
-	methods: {
+		methods: {
+			getActiveCompare(version) {
+				var minIndex = this.compareVersions[0];
+				var maxIndex = this.compareVersions[1];
+				if (this.metric.properties.Versions.length == 1) {
+					return ' frozen';
+				} else if (minIndex === version.Version.Name || maxIndex === version.Version.Name) {
+					return ' active';
+				}
+				return '';
+			},
 		getActive(index) {
 			if (this.metric.properties.Versions.length == 1) {
 				return ' frozen';
@@ -164,6 +189,40 @@ export default {
 				this.metric.SelectVersion(maxIndex);
 			}
 		},
+			changeSelectedVersionIndexCompare(index) {
+				// tiene que decidir si deselecciona el derecho o el izquierdo
+				var minIndex = this.versionsArray.indexOf(this.compareVersions[0]);
+				var maxIndex = this.versionsArray.indexOf(this.compareVersions[1]);
+				if (index === minIndex || index === maxIndex) {
+					return;
+				}
+				// si es inferior al inferior, es compare
+				if (index < minIndex) {
+					this.metric.Compare.SelectVersion(index);
+					this.updateCompareVersions();
+					return;
+				}
+				// si es superior al mayor, es version
+				if (index > maxIndex) {
+					this.metric.SelectVersion(index);
+					this.updateCompareVersions();
+					return;
+				}
+				//
+				if (this.lastVersionClicked !== -1) {
+					if (this.lastVersionClicked == maxIndex) {
+						this.metric.Compare.SelectVersion(index);
+					} else {
+						this.metric.SelectVersion(index);
+					}
+					this.lastVersionClicked = index;
+					this.updateCompareVersions();
+					return;
+				}
+				this.metric.Compare.SelectVersion(index);
+				this.updateCompareVersions();
+				this.lastVersionClicked = index;
+			},
 		changeSelectedVersionIndex(index) {
 			this.metric.SelectVersion(index);
 		},
@@ -179,9 +238,10 @@ export default {
 			if (!this.metric.Compare.Active) {
 				return;
 			}
-			var version = this.metric.Compare.SelectedVersion();
-			if (version) {
-				this.compareVersions = [version.Version.Name, this.metric.SelectedVersion().Version.Name];
+			var versionCompare = this.metric.Compare.SelectedVersion();
+			if (versionCompare) {
+				this.compareVersions = [versionCompare.Version.Name, this.metric.SelectedVersion().Version.Name];
+				window.SegMap.SaveRoute.UpdateRoute();
 				return;
 			}
 			// No tiene nada indicado... pone algo
@@ -191,6 +251,7 @@ export default {
 			} else {
 				this.compareVersions = [versionsArray[versionsArray.length - 2], versionsArray[versionsArray.length -1]];
 			}
+			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		rankingShown() {
 			var vScrollTo = require('vue-scrollto');

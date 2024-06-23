@@ -21,9 +21,9 @@ class SnapshotBoundaryModel
 	{
 	 	Profiling::BeginTimer();
 
-		App::Db()->exec("TRUNCATE TABLE snapshot_boundary_item");;
+		App::Db()->truncate("snapshot_boundary_item");;
 
-		App::Db()->exec("TRUNCATE TABLE snapshot_boundary");;
+		App::Db()->truncate("snapshot_boundary");;
 
 		VersionUpdater::Increment('BOUNDARY_VIEW');
 

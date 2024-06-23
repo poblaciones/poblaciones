@@ -8,20 +8,23 @@
 					<BackIcon class="icon" style="font-size: 28px; color: #fff" />
 				</router-link>
 			</div>
-			<div class="titleLine">
-				<div class="md-layout md-gutter" style="margin-top: -21px">
-					<div class="md-layout-item md-size-100">
-						<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :largeFont="true" :maxlength="150" class="fieldWhite"
-										 :required="true" @update="UpdateTitle"
-										 v-model="Work.properties.Metadata.Title" />
+			<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
+				Ejemplos >
+				</div>
+				<div class="titleLine">
+					<div class="md-layout md-gutter" style="margin-top: -21px">
+						<div class="md-layout-item md-size-100">
+							<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :largeFont="true" :maxlength="150" class="fieldWhite"
+											 :required="true" @update="UpdateTitle"
+											 v-model="Work.properties.Metadata.Title" />
+						</div>
 					</div>
 				</div>
 			</div>
+			<invoker ref="invoker"></invoker>
+			<stepper ref="TestStepper" title="Asistente de prueba">
+			</stepper>
 		</div>
-		<invoker ref="invoker"></invoker>
-		<stepper ref="TestStepper" title="Asistente de prueba">
-		</stepper>
-	</div>
 </template>
 
 <script>

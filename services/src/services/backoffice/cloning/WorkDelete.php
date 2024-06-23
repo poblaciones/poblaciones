@@ -76,12 +76,14 @@ class WorkDelete
 		// Borra
 		$delete = "DELETE FROM draft_work_extra_metric WHERE wmt_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+
 	}
 	private function doDeleteIcons()
 	{
 		// Borra
 		$delete = "DELETE FROM draft_work_icon WHERE wic_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+
 	}
 
 	private function doDeleteOnBoarding()
@@ -91,6 +93,7 @@ class WorkDelete
 					INNER JOIN draft_onboarding ON onb_id = obs_onboarding_id
 					WHERE onb_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+
 		// Borra principal
 		$delete = "DELETE FROM draft_onboarding WHERE onb_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
@@ -140,6 +143,7 @@ class WorkDelete
 		// Borra metadatos
 		$delete = "DELETE FROM draft_metadata WHERE met_id = ?";
 		App::Db()->exec($delete, array($metadata->getId()));
+
 		// Decide si borra Contact
 		$contact = $metadata->getContact();
 		if ($metadata->getType() !== 'P' && $contact != null &&
@@ -162,6 +166,7 @@ class WorkDelete
 		// Copia permisos
 		$metadata = "DELETE FROM draft_work_permission WHERE wkp_work_id = ?";
 		App::Db()->exec($metadata, array($this->workId));
+
 		WorkPermissionsCache::Clear($this->workId);
 	}
 }

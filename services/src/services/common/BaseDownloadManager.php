@@ -13,16 +13,6 @@ use helena\classes\writers\RWriter;
 use helena\classes\writers\XlsxWriter;
 use helena\classes\writers\ShpWriter;
 
-use helena\classes\DownloadStateBag;
-use helena\classes\DownloadBoundaryStateBag;
-use helena\db\frontend\DatasetDownloadModel;
-use helena\db\frontend\BoundaryDownloadModel;
-use helena\db\frontend\ClippingRegionItemModel;
-use helena\caches\DownloadCache;
-use helena\caches\BackofficeDownloadCache;
-use helena\caches\BoundaryDownloadCache;
-use helena\classes\App;
-
 
 abstract class BaseDownloadManager
 {

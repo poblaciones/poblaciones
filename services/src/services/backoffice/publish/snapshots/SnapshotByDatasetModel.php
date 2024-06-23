@@ -143,7 +143,7 @@ class SnapshotByDatasetModel
         try
         {
             App::Db()->exec($sql);
-        }
+		}
 		catch(\Exception $ex)
         {
             $msg = $ex->getMessage();
@@ -278,6 +278,7 @@ class SnapshotByDatasetModel
 		$unShardifiedId = PublishDataTables::Unshardify($metricVersionLevelId);
 		$update = "UPDATE draft_metric_version_level SET mvl_extents = " . $rect . " WHERE mvl_id = ?";
 		App::Db()->exec($update, array($unShardifiedId));
+
 		// Listo
 		Profiling::EndTimer();
 	}

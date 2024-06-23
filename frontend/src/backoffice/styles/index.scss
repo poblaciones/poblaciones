@@ -82,7 +82,8 @@ a:hover {
 	position: absolute;
 	left: 0px;
 	right: 0px;
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
 	border: 0px;
 	top: 107px;
 	height: calc(100% - 107px);
@@ -104,6 +105,22 @@ a:hover {
   max-width: unset !important;
   flex: unset !important;
 }
+
+.md-list-item-content {
+	font-size: .9rem !important;
+	min-height: 36px !important;
+}
+.md-list {
+		padding: 4px 0px!important;
+}
+
+.md-menu-content {
+	background-color: #fff;
+	border-radius: 6px !important;
+	padding-bottom: 2px;
+	padding-top: 2px;
+}
+
 
 .md-input.md-size-lg{
   width: 90vh;

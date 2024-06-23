@@ -32,7 +32,7 @@ class PermissionsService extends BaseService
 	public function AssignPermission($workId, $userEmail, $permission, $notify)
 	{
 		Profiling::BeginTimer();
-		// Si hay algo idéntico, sale
+		// Limpia
 		$clean = "DELETE draft_work_permission FROM draft_work_permission JOIN user ON wkp_user_id = usr_id WHERE wkp_work_id = ? AND usr_email = ? AND wkp_permission = ?";
 		App::Db()->exec($clean, array($workId, $userEmail, $permission));
 		// 1. Crea el permiso

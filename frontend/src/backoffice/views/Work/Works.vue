@@ -1,10 +1,15 @@
 <template>
 	<div class="md-layout">
-		<div class="md-layout-item md-size-100" style="margin-bottom: 10px;">
-			 Recientes
-		</div>
-		<div class="md-layout-item md-size-100" style="margin-bottom: 1px;">
-				<mp-large-data-item v-for="item in lastest" :key="item.Id" @click="select(item)" :item="item" />
+		<div v-if="list.length > 8">
+			<div class="md-layout-item md-size-100" style="margin-bottom: 10px;">
+				Recientes
+			</div>
+			<div class="md-layout-item md-size-100" style="margin-bottom: 1px;">
+				<div style="position: relative; display: inline" v-for="item in lastest" :key="item.Id">
+					<mp-large-data-item @click="select(item)" :item="item" />
+					<work-actions :item="item" actions="I" @action="actionSelected" />
+				</div>
+			</div>
 		</div>
 
 		<div class="md-layout-item md-size-100">
@@ -23,91 +28,17 @@
 				</md-button>
 			</div>
 		</div>
-		<div class="md-layout-item md-size-100">
-			<md-table style="max-width: 1000px;" v-if="list.length > 0" v-model="list"
-								:md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder" :md-sort-fn="customSort"
-								md-card>
-				<md-table-row slot="md-table-row" slot-scope="{ item }">
-					<md-table-cell style="min-width: 400px" @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
-						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
-					</md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable"
-												 md-label="Modificado" md-sort-by="History">
-						<span>
-							<i v-if="logInfo(item)" style="margin-right: 5px; font-size: 11px;"
-								 class="tinyIcon vsm-icon fa fa-history"></i>
-							<md-tooltip md-direction="bottom">{{ logInfo(item) }}</md-tooltip>
-						</span>
-						<span>
-							{{ item.DatasetCount }} <i class="tinyIcon vsm-icon fa fa-table"></i>
-							<md-tooltip md-direction="bottom">{{ item.DatasetCount + (item.DatasetCount == 1 ? ' dataset' : ' datasets') }}</md-tooltip>
-						</span>,<span>
-								{{ item.MetricCount }} <i class="tinyIcon vsm-icon fa fa-chart-bar"></i>
-								<md-tooltip md-direction="bottom">{{ item.MetricCount + (item.MetricCount == 1 ? ' indicador' : ' indicadores') }}</md-tooltip>
-							</span>
-					</md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable"
-													md-label="Estado">
-						<md-icon :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
-						<md-tooltip md-direction="bottom">{{ status(item).label }}</md-tooltip>
-						<div class="extraIconContainer">
-							<md-icon v-if="item.IsPrivate" class="extraIcon">
-								lock
-								<md-tooltip md-direction="bottom">Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.</md-tooltip>
-							</md-icon>
-							<md-icon v-if="!item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
-											 class="extraIcon">error_outline</md-icon>
-							<md-tooltip md-direction="bottom">
-								No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
-								Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.
-							</md-tooltip>
-						</div>
-					</md-table-cell>
-					<md-table-cell md-label="Acciones">
-						<md-button v-if="!canEdit(item)" class="md-icon-button" @click="select(item)">
-							<md-icon>remove_red_eye</md-icon>
-							<md-tooltip md-direction="bottom">Consultar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" @click="onPublish(item)">
-							<md-icon>public</md-icon>
-							<md-tooltip md-direction="bottom">Publicar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" @click="onRevoke(item)">
-							<md-icon>pause_circle_filled</md-icon>
-							<md-tooltip md-direction="bottom">Revocar publicación</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" @click="select(item)">
-							<md-icon>edit</md-icon>
-							<md-tooltip md-direction="bottom">Modificar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" class="md-icon-button">
-							<md-icon>file_copy</md-icon>
-							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
-						</md-button>
-						<md-button v-if="canCreatePublic && item.Type !== 'P'" class="md-icon-button" @click="onPromotePublic(item)">
-							<md-icon>playlist_add</md-icon>
-							<md-tooltip md-direction="bottom">Promover a Dato público</md-tooltip>
-						</md-button>
-						<md-button v-if="canCreatePublic && item.Type === 'P'" class="md-icon-button" @click="onDemotePublic(item)">
-							<md-icon>playlist_remove</md-icon>
-							<md-tooltip md-direction="bottom">Convertir en Cartografía</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" @click="onDelete(item)">
-							<md-icon>delete</md-icon>
-							<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
-						</md-button>
-					</md-table-cell>
-				</md-table-row>
-			</md-table>
-		</div>
+		<work-items :list="list" :filter="filter" @action="actionSelected" actions="I" />
+
+		<work-items :list="listArchived" :filter="filter" icon="archive" @action="actionSelected" actions="A" label="Archivadas" />
+
 		<div class="md-layout-item md-size-100">
 			<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
 				<div v-if="!canCreate" style="">
 					<p>
-						No dispone actualmente de {{ entityName.plural
-							}}.
-							</p>
-</div>
+						No dispone actualmente de {{ entityName.plural }}.
+					</p>
+				</div>
 				<div v-else="">
 					<p style="margin-bottom: 25px; line-height: 2em;">
 						No hay {{ entityName.plural }} disponibles. Para crear {{ entityName.one }}
@@ -120,39 +51,59 @@
 				</div>
 			</div>
 		</div>
+		<div class="md-layout" v-if="this.filter !== 'P' && listExamples.length > 0">
+			<md-button @click="toggle" v-if="list.length > 0" style="margin: 10px 0px 10px 0px">
+				<md-icon>{{ (examplesExpanded ? 'expand_less' : 'expand_more' ) }}</md-icon>
+				<md-icon>lightbulb</md-icon>
+				Ejemplos ({{ listExamples.length }})
+			</md-button>
+			<transition name="fade">
+
+				<div class="md-layout-item md-size-100" style="margin-bottom: 1px;" v-show="examplesExpanded">
+					<div style="position: relative; display: inline" v-for="item in listExamples" :key="item.Id">
+						<mp-large-data-item @click="select(item)" :item="item" :showEdited="false" />
+						<work-actions :item="item" actions="S" @action="actionSelected"></work-actions>
+					</div>
+				</div>
+
+			</transition>
+		</div>
 		<md-dialog-prompt :md-active.sync="activateSaveAs"
-											:md-title="'Duplicar ' + entityName.single"
-											v-model="newWorkName"
-											md-input-maxlength="100"
-											md-input-placeholder="Nombre de la nueva copia..."
-											md-confirm-text="Guardar"
-											md-cancel-text="Cancelar"
-											@md-confirm="onDuplicateStart">
+						  :md-title="'Duplicar ' + entityName.single"
+						  v-model="newWorkName"
+						  md-input-maxlength="100"
+						  md-input-placeholder="Nombre de la nueva copia..."
+						  md-confirm-text="Guardar"
+						  md-cancel-text="Cancelar"
+						  @md-confirm="onDuplicateStart">
 		</md-dialog-prompt>
 		<md-dialog-prompt :md-active.sync="activateNewWork"
-											v-model="newWorkName"
-											:md-title="'Indique el título de ' + entityName.article + ' ' + newLabel.toLowerCase()"
-											md-input-maxlength="200"
-											:md-input-placeholder="newLabel"
-											md-confirm-text="Aceptar"
-											md-cancel-text="Cancelar"
-											@md-confirm="onNewWorkStart">
+						  v-model="newWorkName"
+						  :md-title="'Indique el título de ' + entityName.article + ' ' + newLabel.toLowerCase()"
+						  md-input-maxlength="200"
+						  :md-input-placeholder="newLabel"
+						  md-confirm-text="Aceptar"
+						  md-cancel-text="Cancelar"
+						  @md-confirm="onNewWorkStart">
 		</md-dialog-prompt>
 	</div>
 </template>
 
 <script>
-import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/framework/arr';
 import str from '@/common/framework/str';
 import f from '@/backoffice/classes/Formatter';
 import date from '@/common/framework/date';
 import speech from '@/common/js/speech';
+import WorkActions from './WorkActions';
+import WorkItems from './WorkItems';
+
 
 export default {
 	name: 'works',
 	components: {
-
+		WorkActions,
+		WorkItems
 	},
 	data() {
 		return {
@@ -160,8 +111,7 @@ export default {
 			newWorkName: '',
 			timeFilter: 0,
 			works: [],
-			currentSort: 'History',
-			currentSortOrder: 'desc',
+			examplesExpanded: true,
 			activateSaveAs: false,
 		};
 	},
@@ -170,33 +120,30 @@ export default {
 		createEnabled: { type: Boolean, default: true },
 		},
 		mounted() {
-			this.currentSort = window.Db.GetUserSetting(this.settingsKey, 'History');
-			this.currentSortOrder = window.Db.GetUserSetting(this.settingsKey + 'Order', 'desc');
+			this.examplesExpanded = window.Db.GetUserSetting('examplesExpanded', '1') == '1';
 		},
 		computed: {
 			showingWelcome() {
 				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 			},
-			settingsKey() {
-				return 'worksSort' + this.filter;
-			},
 			speechFormat() {
 				return speech;
-			},
-			lastest() {
-				var listCopy = [];
-				arr.AddRange(listCopy, this.list);
-				this.doSort(listCopy, 'History', 'desc');
-				return listCopy.slice(0, 4);
-			},
-			user() {
-				return window.Context.User;
 			},
 			canCreate() {
 				return (this.filter !== 'P' || window.Context.CanCreatePublicData());
 			},
-			canCreatePublic() {
-				return window.Context.CanCreatePublicData();
+			lastest() {
+				var listCopy = [];
+				var loc = this;
+				arr.AddRange(listCopy, this.list);
+				// Ordena descendiente por fecha
+				listCopy.sort((a, b) => {
+						return -1 * loc.ocompare(speech.GetValidaDate(a), speech.GetValidaDate(b));
+					});
+				return listCopy.slice(0, 4);
+			},
+			user() {
+				return window.Context.User;
 			},
 			entityName() {
 				if (this.filter === 'P') {
@@ -218,33 +165,138 @@ export default {
 			},
 			list: {
 				get() {
-					var ret = [];
-
-					if (window.Context.Cartographies) {
-						for (var i = 0; i < window.Context.Cartographies.length; i++) {
-							if (window.Context.Cartographies[i].Type === this.filter) {
-								ret.push(window.Context.Cartographies[i]);
-							}
-						}
-					}
-					this.customSort(ret);
-					return ret;
+					return this.calculateList(false, false);
 				},
 				set(value) {
 
 				}
-			}
+			},
+			listArchived: {
+				get() {
+					return this.calculateList(true, false);
+				},
+				set(value) {
+
+				}
+			},
+			listExamples: {
+				get() {
+					return this.calculateList(false, false, true);
+				},
+				set(value) {
+
+				}
+			},
 	},
 	methods: {
-		getWorkUri(element, absoluteUrl) {
-			var pre = '';
-			if (absoluteUrl) {
-				pre ='/users/#';
-			}
-			return pre + '/cartographies/' + element.Id + '/metadata/content';
+		getWorkUri(element) {
+			return '/cartographies/' + element.Id + '/metadata/content';
 		},
-		logInfo(item) {
-			return speech.FormatWorkInfo(item);
+		calculateList(archived, deleted, example = false) {
+			var ret = [];
+			if (window.Context.Cartographies) {
+				for (var i = 0; i < window.Context.Cartographies.length; i++) {
+					var item = window.Context.Cartographies[i];
+					if (item.Type === this.filter &&
+						item.IsArchived === archived &&
+						item.IsDeleted === deleted &&
+						item.IsExample === example) {
+						if (example) {
+							var setting = window.Db.GetUserSetting('work_example_hidden_' + item.Id, '0') == '1';
+							if (!setting) {
+								ret.push(item);
+							}
+						} else {
+							ret.push(item);
+						}
+					}
+				}
+			}
+			//this.customSort(ret);
+			return ret;
+		},
+
+		onLogicalDelete(item) {
+			this.$refs.invoker.doMessage('Enviando a la papelera', window.Db, window.Db.DeleteWork, item.Id).then(() => {
+				item.Deleted = true;
+				item.Archived = false;
+			});
+		},
+		toggle() {
+			this.examplesExpanded = !this.examplesExpanded;
+		},
+		onRestore(item) {
+			this.$refs.invoker.doMessage('Restaurando cartografía', window.Db, window.Db.RestoreWork, item.Id).then(() => {
+				item.IsDeleted = false;
+			});
+		},
+		onArchive(item) {
+			this.$refs.invoker.doMessage('Archivando cartografía', window.Db, window.Db.ArchiveWork, item.Id).then(() => {
+				item.IsArchived = true;
+			});
+		},
+		onUnarchive(item) {
+			this.$refs.invoker.doMessage('Reactivando cartografía', window.Db, window.Db.UnarchiveWork, item.Id).then(() => {
+				item.IsArchived = false;
+			});
+		},
+		onPurge(item) {
+			this.$refs.invoker.confirm('Eliminar cartografía', this.$t('key.advertencia_borrar', { caption: item.Caption }),
+				() => { this.onPurgeConfirm(item); });
+		},
+		onPurgeConfirm(item) {
+			this.$refs.invoker.doMessage('Eliminando cartografía', window.Db, window.Db.PurgeWork, item.Id).then(() => {
+				arr.Remove(window.Context.Works, item);
+			});
+		},
+		actionSelected(action, item) {
+			switch (action) {
+				case 'VIEW':
+				case 'EDIT':
+					this.select(item);
+					break;
+				case 'DELETE':
+					if (item.IsExample) {
+						this.onDeleteExample(item);
+					} else {
+						this.onDelete(item);
+					}
+					break;
+				case 'PUBLISH':
+					this.onPublish(item);
+					break;
+				case 'PROMOTEEXAMPLE':
+					this.onPromoteExample(item);
+					break;
+				case 'DEMOTEEXAMPLE':
+					this.onDemoteExample(item);
+					break;
+				case 'REVOKE':
+					this.onRevoke(item);
+					break;
+				case 'PROMOTE':
+					this.onPromotePublic(item);
+					break;
+				case 'DEMOTE':
+					this.onDemotePublic(item);
+					break;
+				case 'ARCHIVE':
+					this.onArchive(item);
+					break;
+				case 'UNARCHIVE':
+					this.onUnarchive(item);
+					break;
+				case 'PURGE':
+					this.onPurge(item);
+					break;
+				case 'DUPLICATE':
+					this.onDuplicate(item, item.IsExample);
+					break;
+				case 'RESTORE':
+					this.onRestore(item);
+					break;
+
+			}
 		},
 		ocompare(o1, o2) {
 			if (o1 === o2) {
@@ -263,44 +315,19 @@ export default {
 					o1 > o2 ? 1 : 0;
 			}
 		},
-		customSort(value) {
-			return this.doSort(value, this.currentSort, this.currentSortOrder);
-		},
-		doSort(value, sortBy, direction) {
-			var loc = this;
-			return value.sort((a, b) => {
-				var sign = (direction === 'desc' ? -1 : 1);
-				if (sortBy === 'History') {
-					return sign * loc.ocompare(speech.GetValidaDate(a), speech.GetValidaDate(b));
 
-				} else {
-					return sign * str.humanCompare(a[sortBy], b[sortBy]);
-				}
+		select(element) {
+			this.$router.push({ path: this.getWorkUri(element) }).catch();
+		},
+		onPromoteExample(item) {
+			this.$refs.invoker.doMessage('Creando ejemplo', window.Db, window.Db.PromoteExample, item.Id).then(() => {
+				item.IsExample = true;
 			});
 		},
-		select(element) {
-			this.$router.push({ path: this.getWorkUri(element, false) }).catch();
-		},
-		publishDisabled(item) {
-			return !(item.MetadataLastOnline === null || item.HasChanges !== 0);
-		},
-		revokeDisabled(item) {
-			return (item.MetadataLastOnline === null);
-		},
-		status(item) {
-			return ActiveWork.CalculateListItemStatus(item);
-		},
-		canEdit(item) {
-			if (window.Context.User.Privileges === 'A') {
-				return true;
-			}
-			if (this.filter === 'P' && window.Context.User.Privileges === 'E') {
-				return true;
-			}
-			if (item.IsIndexed) {
-				return false;
-			}
-			return item.Privileges !== 'V';
+		onDemoteExample(item) {
+			this.$refs.invoker.doMessage('Quitando ejemplo', window.Db, window.Db.DemoteExample, item.Id).then(() => {
+				item.IsExample = false;
+			});
 		},
 		onPromotePublic(item) {
 			var loc = this;
@@ -312,6 +339,18 @@ export default {
 					item.Type = 'P';
 					arr.Remove(loc.list, item);
 				});
+		},
+		onDeleteExample(item) {
+			var loc = this;
+			this.source = item;
+			this.$refs.invoker.confirmDo('Eliminar ejemplo',
+				'Si quita el elemento de su bandeja de ejemplos, no podrá volver a tenerlo disponible en el futuro.',
+				window.Db, window.Db.HideExample, item.Id,
+				function () {
+					arr.Remove(window.Context.Cartographies, item);
+					arr.Remove(loc.listExamples, item);
+				});
+
 		},
 		onDemotePublic(item) {
 			var loc = this;
@@ -340,10 +379,15 @@ export default {
 		onDeleteComplete() {
 			arr.Remove(window.Context.Cartographies, this.source);
 		},
-		onDuplicate(item) {
+		onDuplicate(item, isExample) {
 			this.source = item;
 			this.newWorkName = '';
-			this.activateSaveAs = true;
+			if (!isExample) {
+				this.activateSaveAs = true;
+			} else {
+				this.newWorkName = null;
+				this.onDuplicateStart();
+			}
 		},
 		onPublish(item) {
 			if (item.DatasetCount > item.GeorreferencedCount) {
@@ -394,7 +438,7 @@ export default {
 		},
 		onDuplicateStart() {
 			var loc = this;
-			if (this.newWorkName.trim().length === 0) {
+			if (this.newWorkName !== null && this.newWorkName.trim().length === 0) {
 				alert('Debe indicar un nombre.');
 				this.$nextTick(() => {
 					loc.activateSaveAs = true;
@@ -409,11 +453,8 @@ export default {
 		},
 		},
 		watch: {
-			'currentSort'() {
-				window.Db.SetUserSetting(this.settingsKey, this.currentSort);
-			},
-			'currentSortOrder'() {
-				window.Db.SetUserSetting(this.settingsKey + 'Order', this.currentSortOrder);
+			'examplesExpanded'() {
+				window.Db.SetUserSetting('examplesExpanded', (this.examplesExpanded ? '1' : '0'));
 			},
 		}
 };

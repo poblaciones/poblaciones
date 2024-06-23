@@ -34,6 +34,7 @@ class DatasetTable
 		$items = json_decode($content, TRUE);
 
 		$begin = 'INSERT INTO ' . $tableName . ' (r,';
+
 		foreach($headers as $header){
 			$begin .= $header->GetField() . ',';
 		}

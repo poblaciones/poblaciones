@@ -203,7 +203,15 @@
 				var path = window.location.href;
 				return path.indexOf('&pv=1#') > 0;
 			},
-			panRightSwipeClose() {
+			panRightSwipeClose(direction, event) {
+				if (
+					(event.srcElement && (
+						event.srcElement.className === 'vue-slider-dot-handle' ||
+						event.srcElement.className === 'vue-slider-process' ||
+						event.srcElement.className === 'vue-slider vue-slider-ltr' )) ||
+					window.getSelection().toLocaleString().length > 0) {
+					return;
+				}
 				this.doToggle();
 			},
 			toggleFullscreen() {

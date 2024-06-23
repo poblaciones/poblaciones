@@ -5,7 +5,6 @@ namespace helena\services\backoffice;
 use minga\framework\Arr;
 use minga\framework\Str;
 use minga\framework\IO;
-use minga\framework\Context;
 use minga\framework\Profiling;
 use minga\framework\ErrorException;
 
@@ -52,6 +51,7 @@ class WorkService extends BaseService
 		$work->setIsIndexed(false);
 		$work->setSegmentedCrawling(false);
 		$work->setIsPrivate(false);
+		$work->setIsExample(false);
 		$work->setShard(App::Settings()->Shard()->CurrentShard);
 
 		// Crea startup
@@ -316,6 +316,47 @@ class WorkService extends BaseService
 		WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
 	}
+	public function UnarchiveWork($workId)
+	{
+		$key = 'work_archived_' . $workId;
+		$service = new UserService();
+		$service->ClearSetting($key);
+		return ['result' => self::OK];
+	}
+	public function ArchiveWork($workId)
+	{
+		$key = 'work_archived_' . $workId;
+		$service = new UserService();
+		$service->SetSetting($key, 1);
+		return ['result' => self::OK];
+	}
+
+	public function HideExample($workId)
+	{
+		$key = 'work_example_hidden_' . $workId;
+		$service = new UserService();
+		$service->SetSetting($key, 1);
+		return ['result' => self::OK];
+	}
+
+	public function PromoteExample($workId)
+	{
+		// Cambia el valor
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWork->setIsExample(true);
+		App::Orm()->save($draftWork);
+
+		return ['result' => self::OK];
+	}
+
+	public function DemoteExample($workId)
+	{
+		// Cambia el valor
+		$draftWork = App::Orm()->find(entities\DraftWork::class, $workId);
+		$draftWork->setIsExample(false);
+		App::Orm()->save($draftWork);
+		return ['result' => self::OK];
+	}
 
 	public function PromoteWork($workId)
 	{
@@ -330,7 +371,6 @@ class WorkService extends BaseService
 		App::Orm()->save($meta);
 		return ['result' => self::OK];
 	}
-
 
 	public function DemoteWork($workId)
 	{
@@ -606,14 +646,16 @@ class WorkService extends BaseService
 		// Si no es usuario público, trae todas las cartografías públicas
 		if (Session::IsSiteReader())
 		{
-			$condition = "wrk_type = 'P' OR ";
+			$condition_type = "wrk_type = 'P' OR ";
 		}
 		else
 		{
-			$condition = "";
+			$condition_type = "";
 		}
 		// Trae las cartografías del usuario
-		$list = $this->GetWorks($condition . " wrk_id IN (SELECT wkp_work_id FROM draft_work_permission WHERE wkp_user_id = " . $userId . ")");
+		$conditions = $condition_type . " wrk_id IN (SELECT wkp_work_id FROM draft_work_permission WHERE wkp_user_id = " . $userId . ")"
+			. " OR wrk_is_example = 1";
+		$list = $this->GetWorks($conditions);
 		return $list;
 	}
 	private function GetWorks($condition)
@@ -632,6 +674,10 @@ class WorkService extends BaseService
 								wrk_metric_data_changed) HasChanges
 								, wrk_is_private IsPrivate
 								, wrk_is_indexed IsIndexed
+								, wrk_is_example IsExample
+								, (SELECT COUNT(*) FROM user_setting
+									WHERE ust_user_id = ? AND ust_key = CONCAT('work_archived_', wrk_id)) IsArchived
+								, wrk_is_deleted IsDeleted
 								, wrk_access_link AccessLink
 								, wrk_preview_file_id PreviewId
 								, wrk_segmented_crawling SegmentedCrawling
@@ -646,8 +692,8 @@ class WorkService extends BaseService
 															FROM draft_work
 											LEFT JOIN draft_metadata ON wrk_metadata_id = met_id
 									WHERE " . $condition . " ORDER BY met_title";
-			$ret = App::Db()->fetchAll($sql, array($userId));
-			Arr::IntToBoolean($ret, array('IsPrivate', 'IsIndexed', 'SegmentedCrawling'));
+			$ret = App::Db()->fetchAll($sql, array($userId, $userId));
+			Arr::IntToBoolean($ret, array('IsPrivate', 'IsIndexed', 'SegmentedCrawling', 'IsArchived', 'IsDeleted', 'IsExample'));
 			Profiling::EndTimer();
 			return $ret;
 	}

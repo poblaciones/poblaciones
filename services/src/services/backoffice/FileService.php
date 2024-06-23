@@ -56,8 +56,7 @@ class FileService extends BaseService
 	}
 	public function SaveBase64BytesToFile($watermarkImage, $fileObject, $maxWidth = null, $maxHeight = null)
 	{
-
-			$fileType = null;
+		$fileType = null;
 
 		$bucket = $this->ConvertBase64toFile($watermarkImage);
 		$file = $bucket->path . '/file.dat';
@@ -83,7 +82,8 @@ class FileService extends BaseService
 
 	private function saveChunks($fileId, $tempFilename, $toDrafts)
 	{
-		App::Db()->exec("DELETE FROM " . $this->makeTableName('file_chunk', $toDrafts) . " WHERE chu_file_id = ?", array($fileId));
+		$fileChunkTable = $this->makeTableName('file_chunk', $toDrafts);
+		App::Db()->exec("DELETE FROM " . $fileChunkTable . " WHERE chu_file_id = ?", array($fileId));
 		$unread = filesize($tempFilename);
 		if (!file_exists($tempFilename))
 			throw new PublicException('No se ha transferido correctamente el archivo al servidor.');
@@ -92,7 +92,7 @@ class FileService extends BaseService
 		while($unread > 0)
 		{
 			$contents = fread($handle, self::PAGESIZE);
-			$sql = "INSERT INTO " . $this->makeTableName('file_chunk', $toDrafts) . " (chu_file_id, chu_content) VALUES (?, ?)";
+			$sql = "INSERT INTO " . $fileChunkTable . " (chu_file_id, chu_content) VALUES (?, ?)";
 			App::Db()->exec($sql, array($fileId, $contents));
 			$unread -= strlen($contents);
 		}

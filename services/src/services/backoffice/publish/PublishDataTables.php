@@ -341,6 +341,7 @@ class PublishDataTables
 		$metrics = "DELETE FROM metric
 												WHERE not exists (select 1 from metric_version where mvr_metric_id = mtr_id)";
 		App::Db()->exec($metrics);
+
 		Profiling::EndTimer();
 	}
 
@@ -558,7 +559,8 @@ class PublishDataTables
 		if ($op == 'INSERTING')
 		{
 			$cols = $this->GetCommonColumns($joinsTreeNode['level']['class'], $this->TransformToDraft($joinsTreeNode['level']['class']), $joinsTreeNode['level']['postUpdateColumns']);
-			$queries[] = "\n INSERT INTO " . $this->GetTablenameFromSuffixedTable($joinsTreeNode['level']['table'])  . "(" . $cols['insert'] . ") SELECT " . $cols['select'] . " FROM " . $tablePreffix . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "") .
+			$table = $this->GetTablenameFromSuffixedTable($joinsTreeNode['level']['table']);
+			$queries[] = "\n INSERT INTO " . $table  . "(" . $cols['insert'] . ") SELECT " . $cols['select'] . " FROM " . $tablePreffix . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "") .
 											" WHERE wrk_id = ? ON DUPLICATE KEY UPDATE " . $cols['update'] ;
 		}
 		else if ($op == 'GETCONTACT')

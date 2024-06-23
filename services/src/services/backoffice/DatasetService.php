@@ -144,6 +144,7 @@ class DatasetService extends DbSession
 		// Lo graba
 		$ommit = "UPDATE " . $table . " JOIN " . $table . "_errors ON row_id = id SET ommit = 1 WHERE ommit = 0";
 		App::Db()->exec($ommit);
+
 		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
 		$this->DeleteAllErrors($table);
 		Profiling::EndTimer();
@@ -158,6 +159,7 @@ class DatasetService extends DbSession
 		// Lo graba
 		$ommit = "UPDATE " . $table . " SET ommit = 1 WHERE Id IN (" . join(',', $ids) . ")";
 		App::Db()->exec($ommit);
+
 		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
 		$this->DeleteFromErrors($table, $ids);
 		Profiling::EndTimer();
@@ -172,6 +174,7 @@ class DatasetService extends DbSession
 		// Lo graba
 		$delete = "DELETE FROM " . $table . " WHERE Id IN (" . join(',', $ids) . ")";
 		App::Db()->exec($delete);
+
 		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
 		$this->DeleteFromErrors($table, $ids);
 		DatasetColumnCache::Cache()->Clear($datasetId);
@@ -186,8 +189,7 @@ class DatasetService extends DbSession
 		if (App::Db()->tableExists($tableErrors) == false)
 			return;
 
-		$errors = "DELETE FROM " . $tableErrors;
-		App::Db()->exec($errors);
+		App::Db()->truncate($tableErrors);
 	}
 	private function DeleteFromErrors($table, $ids)
 	{
@@ -197,6 +199,8 @@ class DatasetService extends DbSession
 
 		$errors = "DELETE FROM " . $tableErrors . " WHERE row_id IN (" . join(',', $ids) . ")";
 		App::Db()->exec($errors);
+
+		App::Db()->truncate($tableErrors);
 	}
 
 	public function ConvertCsvLabelsFile($data)
@@ -376,7 +380,7 @@ class DatasetService extends DbSession
 
 		// Listo
 		$ret = array(
-       'TotalRows' => $rowcount,
+		   'TotalRows' => $rowcount,
 		   'Data' => $data
 		);
 		Profiling::EndTimer();
@@ -577,6 +581,7 @@ class DatasetService extends DbSession
 		$deleteLabels = "DELETE FROM draft_dataset_column_value_label
 											WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column WHERE dco_dataset_id = ?)";
 		App::Db()->exec($deleteLabels, array($datasetId));
+
 		// Borra columnas
 		$deleteCols = "DELETE FROM draft_dataset_column WHERE dco_dataset_id = ?";
 		App::Db()->exec($deleteCols, array($datasetId));
@@ -607,8 +612,8 @@ class DatasetService extends DbSession
 		// Libera al par de la multilevelMatrix si lo formaban dos miembros
 		if ($matrixCount === 2)
 		{
-				$query = "UPDATE draft_dataset SET dat_multilevel_matrix = NULL WHERE dat_work_id = ? AND dat_multilevel_matrix = ?";
-				App::Db()->exec($query, array($workId, $multilevelMatrix));
+			$query = "UPDATE draft_dataset SET dat_multilevel_matrix = NULL WHERE dat_work_id = ? AND dat_multilevel_matrix = ?";
+			App::Db()->exec($query, array($workId, $multilevelMatrix));
 		}
 		DatasetColumnCache::Cache()->Clear($datasetId);
 		Profiling::EndTimer();
@@ -658,12 +663,14 @@ class DatasetService extends DbSession
 		$variables = "draft_variable WHERE mvv_metric_version_level_id = ?";
 		// Borra los valueLabels
 		$deleteVariableValueLabel = "DELETE FROM draft_variable_value_label WHERE vvl_variable_id IN (SELECT mvv_id FROM " . $variables . ")";
-    App::Db()->exec($deleteVariableValueLabel, array($metricVersionLevelId));
+		App::Db()->exec($deleteVariableValueLabel, array($metricVersionLevelId));
+
 		// Borra las variables guardándose los symbologies
 		$symbologiesSql = "SELECT mvv_symbology_id FROM " . $variables;
 		$symbologies = App::Db()->fetchAll($symbologiesSql, array($metricVersionLevelId));
-    $deleteMetricVersionVariable = "DELETE FROM " . $variables;
-    App::Db()->exec($deleteMetricVersionVariable, array($metricVersionLevelId));
+		$deleteMetricVersionVariable = "DELETE FROM " . $variables;
+		App::Db()->exec($deleteMetricVersionVariable, array($metricVersionLevelId));
+
 		// Borra los symbologies
 		if (count($symbologies) > 0)
 		{

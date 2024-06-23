@@ -107,6 +107,7 @@ class DatasetColumnService extends DbSession
 
 		// Ejecuta el drop de los datos
 		App::Db()->execDDL($deleteData);
+
 		$ret = array('completed' => true, 'affected' => App::Db()->lastRowsAffected());
 		DatasetColumnCache::Cache()->Clear($datasetId);
 
@@ -165,6 +166,7 @@ class DatasetColumnService extends DbSession
 		$fixCutMode = "UPDATE draft_symbology JOIN draft_variable ON mvv_symbology_id = vsy_id JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
 										 SET vsy_cut_mode = 'S' WHERE mvl_dataset_id = ? AND vsy_cut_mode = 'V' AND vsy_cut_column_id is null";
 		App::Db()->exec($fixCutMode, array($datasetId));
+
 		// 4. Pone en null las referencias circulares a columnas
 		$circularCols = "UPDATE draft_dataset_column SET " .
 											$this->conditionalResetter('dco_aggregation_weight_id', $colsId) . "
@@ -189,6 +191,7 @@ class DatasetColumnService extends DbSession
 		$fixNormalizationCols = "UPDATE draft_variable JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
 								 SET mvv_normalization = null WHERE mvv_normalization_column_id IS NULL AND mvv_normalization = 'O' AND mvl_dataset_id = ?";
 		App::Db()->exec($fixNormalizationCols, array($datasetId));
+
 	}
 
 	private function GetFieldFromId($datasetId, $columnId)
@@ -245,7 +248,9 @@ class DatasetColumnService extends DbSession
 		// Incrementa el order de las posteriores
 		$sql = "UPDATE draft_dataset_column SET dco_order = dco_order + 1 WHERE
 			dco_id != ? AND dco_dataset_id = ? AND dco_order >= ?";
-		return App::Db()->exec($sql, [$colId, $datasetId, $position]);
+		$ret = App::Db()->exec($sql, [$colId, $datasetId, $position]);
+
+		return $ret;
 	}
 	public function ResetColumnValues($dataset, $column)
 	{

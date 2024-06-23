@@ -110,6 +110,7 @@ abstract class GeoreferenceBase
 							" SELECT id, " . $errorCode . " FROM (SELECT * " . $fromWhere . ") as t WHERE " . $condition;
 
 		$rows = App::Db()->exec($sql);
+
 		$this->state->IncrementErrors($rows);
 
 		return $from + $pageSize >= $totalRows;

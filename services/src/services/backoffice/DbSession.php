@@ -18,6 +18,7 @@ class DbSession extends BaseService
 		$entity = $sessionEntity;
 		$em->persist($entity);
 		$em->flush();
+		App::Orm()->TouchObject($entity);
 		return $sessionEntity;
 	}
 

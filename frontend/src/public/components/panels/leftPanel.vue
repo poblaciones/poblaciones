@@ -202,7 +202,11 @@ export default {
 			}
 			this.arrangeSplitter();
 		},
-		panLeftSwipeClose() {
+		panLeftSwipeClose(direction, event) {
+			if (event.srcElement.className === 'vue-slider-dot-handle' ||
+				window.getSelection().toLocaleString().length > 0) {
+				return;
+			}
 			this.doToggle();
 		},
 		doClose(e, fid) {

@@ -227,8 +227,7 @@ class GeoreferenceService extends BaseService
 	{
 		if ($dropFirst)
 		{
-			$delete = "DROP TABLE IF EXISTS " . $this->state->ErrorsTable();
-			App::Db()->execDDL($delete);
+			App::Db()->dropTable($this->state->ErrorsTable());
 		}
 		$create = "CREATE TABLE IF NOT EXISTS " . $this->state->ErrorsTable() . " (row_id INT, error_code INT)";
 		App::Db()->execDDL($create);

@@ -1,5 +1,5 @@
 <template>
-	<md-button class="largeitem md-raised" @click="onClick">
+	<md-button class="largeitem md-raised" @click="onClick" :style="(!showEdited ? 'height: 180px' : '')">
 		<div class="iconContainer" :id="idContainer">
 			<img :src="previewData" class="previewBox" v-if="isPublished && item.PreviewId && previewData" />
 			<iframe v-if="isPublished && !failedLoading && !item.PreviewId" :id="frameId" frameborder="0" @load="checkLoaded"
@@ -11,7 +11,7 @@
 			<div class="text" :title="(text.length > 40 ? text : '')">
 				{{ text }}
 			</div>
-			<div class="edited">
+			<div class="edited" v-if="showEdited">
 				{{ logLegend }}
 				<md-tooltip md-direction="bottom">
 					{{ logLegend }}
@@ -94,7 +94,8 @@ export default {
 		}
 	},
   props: {
-    item: Object,
+		item: Object,
+		showEdited: { type: Boolean, default: true },
 	},
 };
 </script>

@@ -152,9 +152,64 @@ Db.prototype.GetWorkPreview = function (workId) {
 		{ 'w': workId }, 'obtener la vista previa');
 };
 
+Db.prototype.PromoteExample = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/PromoteExample',
+		{ w: workId }, 'crear ejemplo').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
+
+Db.prototype.HideExample = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/HideExample',
+		{ w: workId }, 'ocultar ejemplo').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
+Db.prototype.DemoteExample = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/DemoteExample',
+		{ w: workId }, 'quitar ejemplo').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
+Db.prototype.ArchiveWork = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/ArchiveWork',
+		{ w: workId }, 'archivar la cartografía').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
+Db.prototype.UnarchiveWork = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/UnarchiveWork',
+		{ w: workId }, 'desarchivar la cartografía').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
 Db.prototype.PromoteWork = function (workId, callback = null) {
 	return axiosClient.postPromise(window.host + '/services/backoffice/PromoteWork',
 		{ w: workId }, 'promover la cartografía').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
+Db.prototype.HideExample = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/HideExample',
+		{ w: workId }, 'quitar el ejemplo').then(function () {
 			if (callback) {
 				callback();
 			}
@@ -187,12 +242,14 @@ Db.prototype.LoadWorks = function () {
 
 Db.prototype.SetUserSetting = function (key, value) {
 	var prevValue = window.Context.User.Settings[key];
-	window.Context.User.Settings[key] = value;
-	return axiosClient.postPromise(window.host + '/services/backoffice/SetUserSetting',
-		{ k: key, v: JSON.stringify(value) }, 'guardar la preferencia de usuario').catch(error => {
-			window.Context.User.Settings[key] = prevValue;
-			throw error;
-		});
+	if (window.Context.User.Settings[key] !== value) {
+		window.Context.User.Settings[key] = value;
+		return axiosClient.postPromise(window.host + '/services/backoffice/SetUserSetting',
+			{ k: key, v: JSON.stringify(value) }, 'guardar la preferencia de usuario').catch(error => {
+				window.Context.User.Settings[key] = prevValue;
+				throw error;
+			});
+	}
 };
 
 Db.prototype.GetUserSetting = function (key, defaultValue) {
