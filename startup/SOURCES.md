@@ -13,25 +13,22 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 5. Instalar las dependencias de Python: 
 
-# spss
-./pip install savReaderWriter
-./pip install ijson
-./pip install numpy
+### spss
+./pip install savReaderWriter ijson numpy
 
-# kmz
-./pip install bs4
-./pip install lxml
-./pip install unicodecsv
+### kmz
+./pip install bs4 lxml unicodecsv
 
-# sta
-./pip install pandas
-./pip install pyreadstat
+### sta
+./pip install pandas pyreadstat
 
-# r
+### r
 ./pip install pyreadr
 
+### Todos juntos
+./pip install savReaderWriter ijson numpy bs4 lxml unicodecsv pandas pyreadstat pyreadr
 
-5. Instalar MySql 5.7 o superior (https://dev.mysql.com/downloads/mysql/).
+6. Instalar MySql 5.7 o superior (https://dev.mysql.com/downloads/mysql/).
 
 ## 2. Descargar los fuentes del repositorio
 
