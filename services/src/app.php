@@ -16,7 +16,6 @@ use Symfony\Component\Debug\ErrorHandler;
 use helena\classes\Paths;
 use helena\classes\Callbacks;
 use helena\classes\App;
-use helena\classes\settings\LocalSettings;
 
 use minga\framework\Context;
 
