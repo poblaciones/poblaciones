@@ -266,9 +266,9 @@ class Session
 
 
 
-	public static function IsWorkEditor($workId)
+	public static function IsWorkEditor($workId, $canEditIndexed = false)
 	{
-		$permission = WorkPermissionsCache::GetCurrentUserPermission($workId);
+		$permission = WorkPermissionsCache::GetCurrentUserPermission($workId, $canEditIndexed);
 		if ($permission === WorkPermissionsCache::ADMIN ||
 				$permission === WorkPermissionsCache::EDIT)
 				return true;
@@ -332,7 +332,7 @@ class Session
 	{
 		MessageBox::ThrowMessage("El elemento indicado no ha sido encontrado.");
 	}
-	public static function CheckIsWorkEditor($workId)
+	public static function CheckIsWorkEditor($workId, $canEditIndexed = false)
 	{
 		Profiling::BeginTimer();
 		self::CheckReadonlyForMaintenanceService();
@@ -340,7 +340,7 @@ class Session
 		if ($app = Session::CheckSessionAlive())
 			$ret = $app;
 		// Se fija los permisos
-		else if (self::IsWorkEditor($workId))
+		else if (self::IsWorkEditor($workId, $canEditIndexed))
 			$ret = null;
 		else
 			$ret = self::NotEnoughPermissions();

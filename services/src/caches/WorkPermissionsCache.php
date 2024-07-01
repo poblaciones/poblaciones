@@ -20,7 +20,7 @@ class WorkPermissionsCache extends BaseCache
 	{
 		self::Cache()->Clear($workId);
 	}
-	public static function GetCurrentUserPermission($workId)
+	public static function GetCurrentUserPermission($workId, $canEditIndexed = false)
 	{
 		$account = Account::Current();
 		$email = $account->user;
@@ -49,7 +49,7 @@ class WorkPermissionsCache extends BaseCache
 			}
 			if ($row['Email'] === $email)
 			{
-				if ($row['Permission'] === 'V' || $row['Indexed'])
+				if ($row['Permission'] === 'V' || ($row['Indexed'] && !$canEditIndexed))
 					$view = true;
 				else {
 					if ($row['Permission'] === 'E')

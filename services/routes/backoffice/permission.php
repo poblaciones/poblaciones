@@ -38,7 +38,7 @@ App::$app->get('/services/backoffice/GetWorkPermissions', function (Request $req
 
 App::$app->get('/services/backoffice/AddWorkPermission', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
-	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	if ($denied = Session::CheckIsWorkEditor($workId, true)) return $denied;
 
 	$controller = new services\PermissionsService();
 	$userEmail = Params::GetMandatory('u');
@@ -52,7 +52,7 @@ App::$app->get('/services/backoffice/AddWorkPermission', function (Request $requ
 
 App::$app->get('/services/backoffice/RemoveWorkPermission', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
-	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	if ($denied = Session::CheckIsWorkEditor($workId, true)) return $denied;
 
 	$controller = new services\PermissionsService();
 	$permissionId = Params::GetInt('p');
