@@ -32,9 +32,9 @@ class BackupService extends BaseService
 		$bucket = FileBucket::Create();
 		// guarda $lastBackupDate
 		$this->state['lastBackupDate'] = $lastBackupDate;
-		$this->state['pendigRows'] = -1;
+		$this->state['pendigBytes'] = -1;
 		$this->state['pendingTables'] = -1;
-		$this->state['totalRows'] = -1;
+		$this->state['totalBytes'] = -1;
 		$this->state['totalTables'] = -1;
 
 		// guarda
@@ -56,10 +56,10 @@ class BackupService extends BaseService
 
 		if ($result == 1)
 			return [ 'Status' => 'CONTINUE',
-						'currentRow' => $this->state['totalRows'] - $this->state['pendingRows'],
-						'currentTable' => $this->state['totalTables'] - $this->state['pendingTables'],
-						'totalRows' => $this->state['totalRows'],
-						'totalTables' => $this->state['totalTables']];
+					'currentBytes' => $this->state['totalBytes'] - $this->state['pendingBytes'],
+					'currentTable' => $this->state['totalTables'] - $this->state['pendingTables'],
+					'totalBytes' => $this->state['totalBytes'],
+					'totalTables' => $this->state['totalTables']];
 		if ($result == 2)
 			return [ 'Status' => 'COMPLETE' ];
 		if ($result == 3)
@@ -149,22 +149,22 @@ class BackupService extends BaseService
 		// Ejecuta un paso
 		$args = ["backup", "--host", Context::Settings()->Db()->Host, "--user", Context::Settings()->Db()->User,
 					"--output_path", $this->bucket->path,
-						"--password", Context::Settings()->Db()->Password, "--database", Context::Settings()->Db()->Name,
+			"--password", Context::Settings()->Db()->Password, "--database", Context::Settings()->Db()->Name,
 						"--exclude_tables", "tmp_*", "--step_by_step"];
 
-		if ($this->state['totalRows'] != -1)
+		if ($this->state['totalBytes'] != -1)
 			$args[] = '--resume';
 
 		$output = Python::Execute("bcup", $args);
 
-		$pendingRows = $this->getFromLinesInt($output, 'Pending rows');
+		$pendingBytes = $this->getFromLinesInt($output, 'Pending bytes');
 		$pendingTables = $this->getFromLinesInt($output, 'Pending tables');
 
-		$this->state['pendingRows'] = $pendingRows;
+		$this->state['pendingBytes'] = $pendingBytes;
 		$this->state['pendingTables'] = $pendingTables;
 
-		if ($this->state['totalRows'] == -1)
-			$this->state['totalRows'] = $pendingRows;
+		if ($this->state['totalBytes'] == -1)
+			$this->state['totalBytes'] = $pendingBytes;
 		if ($this->state['totalTables'] == -1)
 			$this->state['totalTables'] = $pendingTables;
 
