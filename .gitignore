@@ -10,9 +10,11 @@
 
 /build/release.tar.bz2
 /build/release
+/build/deploy.ini
 
 thumbs.db
 .ignore
+.flake8
 tags
 /startup/dbdefault-user.sql
 /startup/dbversion.sql

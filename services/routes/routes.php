@@ -91,6 +91,7 @@ if (Context::Settings()->isAPIEnabled)
 {
 	require_once('api/clipping.php');
 	require_once('api/backup.php');
+	require_once('api/update.php');
 }
 if (App::Settings()->Map()->isOWSEnabled)
 	require_once('ows/wfs.php');

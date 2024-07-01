@@ -1,0 +1,6 @@
+[settings]
+; key encodeada en base64 (sin comillas)
+key=
+; Servidores a actualizar separados por coma sin barra al final (sin comillas)
+; ejemplo: https://s1.example.com,https://s2.example.com
+servers=
