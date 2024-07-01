@@ -43,6 +43,8 @@ abstract class GeoreferenceBase
 	const ERROR_CLOCKWISE_REQUIRED = 103;
 	// El perímetro exterior del polígono se intersecta consigo mismo.
 	const ERROR_SELF_INTERSECT = 104;
+	// El perímetro exterior del polígono tiene menos de tres puntos únicos.
+	const ERROR_RING_FEW_POINTS = 112;
 
 	// Uno de los huecos del polígono no posee puntos.
 	const ERROR_INNER_EMPTY = 105;
@@ -52,6 +54,8 @@ abstract class GeoreferenceBase
 	const ERROR_INNER_COUNTER_CLOCKWISE_REQUIRED = 107;
 	// Uno de los huecos del polígono se intersecta consigo mismo.
 	const ERROR_INNER_SELF_INTERSECT = 108;
+	// Uno de los huecos del polígono tiene menos de tres puntos únicos.
+	const ERROR_INNER_RING_FEW_POINTS = 116;
 
 	// Un hueco del polígono excede los límites de su perímetro.
 	const ERROR_INNER_CROSSES_OUTER = 109;
