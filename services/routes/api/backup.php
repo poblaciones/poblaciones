@@ -26,8 +26,9 @@ App::$app->get('/services/api/stepBackup', function (Request $request) {
 	$controller = new services\BackupService();
 	$sessionId = Params::GetMandatory('id');
 	$securityKey = Params::GetMandatory('s');
+	$flow = Params::GetInt('f');
 
-	$ret = $controller->StepJob($securityKey, $sessionId);
+	$ret = $controller->StepJob($securityKey, $sessionId, $flow == "1");
 
 	return App::Json($ret);
 });

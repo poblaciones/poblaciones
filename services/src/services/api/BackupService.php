@@ -43,23 +43,32 @@ class BackupService extends BaseService
 
 		return ['id' => $bucket->id];
 	}
+	private function Status()
+	{
+		return [
+			'Status' => 'CONTINUE',
+			'currentBytes' => $this->state['totalBytes'] - $this->state['pendingBytes'],
+			'currentTable' => $this->state['totalTables'] - $this->state['pendingTables'],
+			'totalBytes' => $this->state['totalBytes'],
+			'totalTables' => $this->state['totalTables']
+		];
+	}
 
-	public function StepJob($securityKey, $key)
+	public function StepJob($securityKey, $key, $returnOnlyFlowControl = false)
 	{
 		if (!App::Settings()->Keys()->IsRemoteBackupAuthKeyValid($securityKey))
 			MessageBox::ThrowAccessDenied();
 
 		$this->LoadFromKey($key);
 
+		if ($returnOnlyFlowControl)
+			return $this->Status();
+
 		$result = $this->Iterate();
 		$this->Save();
 
 		if ($result == 1)
-			return [ 'Status' => 'CONTINUE',
-					'currentBytes' => $this->state['totalBytes'] - $this->state['pendingBytes'],
-					'currentTable' => $this->state['totalTables'] - $this->state['pendingTables'],
-					'totalBytes' => $this->state['totalBytes'],
-					'totalTables' => $this->state['totalTables']];
+			return $this->Status();
 		if ($result == 2)
 			return [ 'Status' => 'COMPLETE' ];
 		if ($result == 3)
