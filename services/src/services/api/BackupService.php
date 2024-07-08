@@ -7,6 +7,7 @@ use helena\classes\Python;
 
 use minga\framework\Context;
 use minga\framework\Log;
+use minga\framework\Performance;
 use minga\framework\IO;
 use minga\framework\Arr;
 use minga\framework\Str;
@@ -56,6 +57,8 @@ class BackupService extends BaseService
 
 	public function StepJob($securityKey, $key, $returnOnlyFlowControl = false)
 	{
+		Performance::$allowLongRunningRequest = true;
+
 		if (!App::Settings()->Keys()->IsRemoteBackupAuthKeyValid($securityKey))
 			MessageBox::ThrowAccessDenied();
 
@@ -79,6 +82,8 @@ class BackupService extends BaseService
 
 	public function StepFiles($securityKey, $key, $n)
 	{
+		Performance::$allowLongRunningRequest = true;
+
 		if (!App::Settings()->Keys()->IsRemoteBackupAuthKeyValid($securityKey))
 			MessageBox::ThrowAccessDenied();
 		$this->LoadFromKey($key);
@@ -120,6 +125,9 @@ class BackupService extends BaseService
 		// send the right headers
 		header('Content-Type: ' . $contentType);
 		header('Content-Length: ' . $size);
+
+		App::StreamFile($filename, $folder . basename($filename));
+
 		header('Content-Disposition: filename="' . stripslashes($folder . basename($filename)) . '"');
 
 		if (ob_get_length())
@@ -131,7 +139,9 @@ class BackupService extends BaseService
 		else if (ob_get_length())
 			ob_end_flush();
 
-		readfile($filename);
+		if (!IO::ReadFileChunked($filename))
+			throw new PublicException("No se pudo enviar el archivo.");
+
 		exit;
 	}
 
@@ -156,10 +166,12 @@ class BackupService extends BaseService
 	private function Iterate()
 	{
 		// Ejecuta un paso
+		$excluded = 'work_dataset_draft_*_retry,work_dataset_draft_*_errors,tmp_*';
+
 		$args = ["backup", "--host", Context::Settings()->Db()->Host, "--user", Context::Settings()->Db()->User,
 					"--output_path", $this->bucket->path,
 			"--password", Context::Settings()->Db()->Password, "--database", Context::Settings()->Db()->Name,
-						"--exclude_tables", "tmp_*", "--step_by_step"];
+						"--exclude_tables", $excluded, "--step_by_step"];
 
 		if ($this->state['totalBytes'] != -1)
 			$args[] = '--resume';

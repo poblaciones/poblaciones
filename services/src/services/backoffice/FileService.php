@@ -10,13 +10,13 @@ use minga\framework\Str;
 use minga\framework\FileBucket;
 use minga\framework\PublicException;
 use helena\classes\Image;
-
+use helena\classes\DbFile;
 
 class FileService extends BaseService
 {
 	const PAGESIZE = 1024 * 1024;
 
-	public function SaveFile($fileObject, $tempFilename, $toDrafts, $fileType)
+	public function SaveFile($fileObject, $tempFilename, $toDrafts, $fileType, $workId = null)
 	{
 		// Tiene que insertar en la base de datos
 		$fileId = $fileObject->getId();
@@ -41,7 +41,7 @@ class FileService extends BaseService
 			$fileObject->setPages($pages);
 			App::Orm()->save($fileObject);
 			// Graba
-			$this->saveChunks($fileId, $tempFilename, $toDrafts);
+			$this->saveChunks($fileId, $tempFilename, $toDrafts, $workId);
 		}
 		return $fileObject;
 	}
@@ -54,7 +54,7 @@ class FileService extends BaseService
 		App::Orm()->Save($file);
 		return $file;
 	}
-	public function SaveBase64BytesToFile($watermarkImage, $fileObject, $maxWidth = null, $maxHeight = null)
+	public function SaveBase64BytesToFile($watermarkImage, $fileObject, $workId = null, $maxWidth = null, $maxHeight = null)
 	{
 		$fileType = null;
 
@@ -68,7 +68,7 @@ class FileService extends BaseService
 			$fileType = "image/svg+xml";
 		else
 			$fileType = Image::GetImageMimeType($file);
-		$this->SaveFile($fileObject, $file, true, $fileType);
+		$this->SaveFile($fileObject, $file, true, $fileType, $workId);
 		$bucket->Delete();
 	}
 
@@ -80,9 +80,9 @@ class FileService extends BaseService
 			return $table;
 	}
 
-	private function saveChunks($fileId, $tempFilename, $toDrafts)
+	private function saveChunks($fileId, $tempFilename, $toDrafts, $workId = null)
 	{
-		$fileChunkTable = $this->makeTableName('file_chunk', $toDrafts);
+		$fileChunkTable = DbFile::GetChunksTableName($toDrafts, $workId);
 		App::Db()->exec("DELETE FROM " . $fileChunkTable . " WHERE chu_file_id = ?", array($fileId));
 		$unread = filesize($tempFilename);
 		if (!file_exists($tempFilename))
@@ -109,8 +109,6 @@ class FileService extends BaseService
 		$ifp = fopen($output_file, 'wb');
 
 		// split the string on commas
-		// $data[ 0 ] == "data:image/png;base64"
-		// $data[ 1 ] == <actual base64 string>
 		$data = explode(',', $base64_string);
 
 		// we could add validation here with ensuring count( $data ) > 1
@@ -121,9 +119,11 @@ class FileService extends BaseService
 
 		return $bucket;
 	}
-	public function DeleteFile($fileId)
+
+
+	public function DeleteFile($fileId, $workId = null)
 	{
-		App::Db()->exec("DELETE FROM draft_file_chunk WHERE chu_file_id = ?", array($fileId));
+		App::Db()->exec("DELETE FROM " . DbFile::GetChunksTableName(true, $workId) . " WHERE chu_file_id = ?", array($fileId));
 		App::Db()->exec("DELETE FROM draft_file WHERE fil_id = ?", array($fileId));
 	}
 

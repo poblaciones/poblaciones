@@ -15,6 +15,7 @@ use helena\entities\backoffice as entities;
 use helena\services\backoffice\cloning\RowDuplicator;
 use helena\classes\Links;
 use helena\classes\Account;
+use helena\classes\DbFile;
 use helena\classes\App;
 
 class PublishDataTables
@@ -284,6 +285,8 @@ class PublishDataTables
 		$this->FixOrphans();
 		// 4. Se asegura de pedir indicadores válidos
 		$this->FixActiveMetrics($workId);
+		// 5. Copa los chunk de archivos
+		$this->CopyFileChunks($workId);
 
 		Profiling::EndTimer();
 	}
@@ -436,6 +439,20 @@ class PublishDataTables
 		App::Db()->dropTableLikePattern($table . "_snapshot_matrix_%");
 	}
 
+	private function CopyFileChunks($workId)
+	{
+		$src_table = DbFile::GetChunksTableName(true, $workId);
+		$target_table = DbFile::GetChunksTableName(false, PublishDataTables::Shardified($workId));
+		// La crea
+		$this->DropTable($target_table);
+		$create = "CREATE TABLE " . $target_table . " (`chu_id` int(11) NOT NULL AUTO_INCREMENT, `chu_file_id` int(11) NOT NULL,`chu_content` longblob, PRIMARY KEY (`chu_id`), KEY `fk_file_chunk_file1_idx` (`chu_file_id`), CONSTRAINT `fk_file_" . $target_table . "` FOREIGN KEY (`chu_file_id`) REFERENCES `file` (`fil_id`) ON DELETE CASCADE ON UPDATE NO ACTION) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;" ;
+		App::Db()->execDDL($create);
+
+		// Pasa las filas
+		$sql = "INSERT INTO " . $target_table . "(chu_file_id, chu_content) SELECT " . $this->ShardifiedDb('chu_file_id') . ", chu_content FROM " . $src_table;
+		App::Db()->exec($sql);
+	}
+
 	private function CopyWorkDatasetTable($table)
 	{
 		Profiling::BeginTimer();
@@ -515,6 +532,9 @@ class PublishDataTables
 		// Preserva metadata
 		$metSql = "SELECT wrk_metadata_id FROM work WHERE wrk_id = ?";
 		$metadataId = App::Db()->fetchScalarIntNullable($metSql, array($workId));
+		// Borra la tabla de chunks de archivos
+		$chunkTable = DbFile::GetChunksTableName(false, $workId);
+		App::Db()->dropTable($chunkTable);
 		// Borra work
 		$query = "DELETE FROM work WHERE wrk_id = ?";
 		App::Db()->exec($query, array($workId));

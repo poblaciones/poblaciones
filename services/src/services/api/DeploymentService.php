@@ -12,35 +12,14 @@ use minga\framework\System;
 use minga\framework\Zip;
 use minga\framework\security\SecureTransport;
 
-class UpdateService extends BaseService
+class DeploymentService extends BaseService
 {
 	private static $validExtensions = ['zip', 'tar.bz2'];
 
-	private function GetUpdateFile(string $ext) : string
+	public function ReceiveFile($securityKey) : array
 	{
-		if($ext == "bz2")
-			return Context::Paths()->GetTempPath() . '/pendingUpdate.tar.bz2';
-		return Context::Paths()->GetTempPath() . '/pendingUpdate.' . $ext;
-	}
-
-	private function GetUpdateExistingFile() : string
-	{
-		foreach(self::$validExtensions as $ext)
-		{
-			$file = $this->GetUpdateFile($ext);
-			if(file_exists($file))
-				return $file;
-		}
-		throw new ErrorException('No se encontró el archivo.');
-	}
-
-	private function GetUpdatePath() : string
-	{
-		return IO::RemoveExtension($this->GetUpdateFile('dummy'));
-	}
-
-	public function ReceiveFile() : array
-	{
+		if (!App::Settings()->Keys()->IsDeploymentAuthKeyValid($securityKey))
+			MessageBox::ThrowAccessDenied();
 		try
 		{
 			$file = Params::GetUploadedFile('file', self::$validExtensions);
@@ -60,8 +39,10 @@ class UpdateService extends BaseService
 		}
 	}
 
-	public function Unzip() : array
+	public function Expand($securityKey) : array
 	{
+		if (!App::Settings()->Keys()->IsDeploymentAuthKeyValid($securityKey))
+			MessageBox::ThrowAccessDenied();
 		try
 		{
 			if(SecureTransport::UriHashIsValid() == false)
@@ -94,8 +75,10 @@ class UpdateService extends BaseService
 		}
 	}
 
-	public function Install() : array
+	public function Install($securityKey) : array
 	{
+		if (!App::Settings()->Keys()->IsDeploymentAuthKeyValid($securityKey))
+			MessageBox::ThrowAccessDenied();
 		try
 		{
 			if(SecureTransport::UriHashIsValid() == false)
@@ -119,9 +102,31 @@ class UpdateService extends BaseService
 		}
 	}
 
+	private function GetUpdateFile(string $ext): string
+	{
+		if ($ext == "bz2")
+			return Context::Paths()->GetTempPath() . '/pendingUpdate.tar.bz2';
+		return Context::Paths()->GetTempPath() . '/pendingUpdate.' . $ext;
+	}
+
+	private function GetUpdateExistingFile(): string
+	{
+		foreach (self::$validExtensions as $ext) {
+			$file = $this->GetUpdateFile($ext);
+			if (file_exists($file))
+				return $file;
+		}
+		throw new ErrorException('No se encontró el archivo.');
+	}
+
+	private function GetUpdatePath(): string
+	{
+		return IO::RemoveExtension($this->GetUpdateFile('dummy'));
+	}
+
 	private function ProcessError(\Exception $e) : array
 	{
-		http_response_code(400);
+		http_response_code(500);
 		return ['Status' => self::ERROR, 'Message' => $e->getMessage()];
 	}
 }

@@ -37,11 +37,12 @@ class MetadataService extends BaseService
 		  throw new PublicException("El adjunto no se corresponde con los metadatos indicados.");
 
 		$friendlyName = $metadataFile['mfi_caption'] . '.pdf';
-		$fileModel = new FileModel();
 
 		$workId = $metadataFile['work_id'];
 		if ($workId)
 			Statistics::StoreDownloadMetadataAttachmentHit($workId, $metadataFile['mfi_id']);
+
+		$fileModel = new FileModel(false, $workId);
 
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}

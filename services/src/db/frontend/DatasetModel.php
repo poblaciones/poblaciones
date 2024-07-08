@@ -172,7 +172,7 @@ class DatasetModel
             return $itemsSrc;
 		$items = array();
 		foreach ($itemsSrc as $item) {
-			if ($item['Value'] != '' && $item['Value'] != 0 && $item['Value'] != '-') {
+			if ($item['Value'] !== '' && $item['Value'] !== 0 && $item['Value'] !== '-') {
                 $items[] = $item;
             }
         }

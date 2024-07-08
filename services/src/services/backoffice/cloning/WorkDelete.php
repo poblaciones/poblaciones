@@ -3,6 +3,7 @@
 namespace helena\services\backoffice\cloning;
 
 use helena\classes\App;
+use helena\classes\DbFile;
 use helena\entities\backoffice as entities;
 use helena\db\backoffice\WorkModel;
 use helena\services\backoffice\DatasetService;
@@ -36,6 +37,7 @@ class WorkDelete
 		$this->doDeleteWork();
 		$this->doDeletePreview($previewId);
 		$this->doDeleteMetadata($metadata);
+		$this->doDeleteChunks();
 
 		Profiling::EndTimer();
 	}
@@ -61,6 +63,13 @@ class WorkDelete
 
 		Profiling::EndTimer();
 		return sizeof($datasets) <= 1;
+	}
+
+	private function doDeleteChunks()
+	{
+		// Borra la tabla de chunks de archivos
+		$chunkTable = DbFile::GetChunksTableName(true, $this->workId);
+		App::Db()->dropTable($chunkTable);
 	}
 
 	private function doDeleteWork()
@@ -115,7 +124,7 @@ class WorkDelete
 	private function doDeletePreview($fileId)
 	{
 		$fs = new FileService();
-		$fs->DeleteFile($fileId);
+		$fs->DeleteFile($fileId, $this->workId);
 	}
 
 	private function doDeleteMetadata($metadata)

@@ -169,7 +169,7 @@ class SelectedMetricService extends BaseService
 
 			if ($version->Work !== null)
 			{
-				$fileModel = new FileModel();
+				$fileModel = new FileModel(false, $version->Work->Id);
 				$icons = $fileModel->ReadWorkIcons($version->Work->Id);
 				$icons = Arr::ToKeyByNamedValue($icons, "Caption", "Image");
 				$version->Work->Icons = $icons;

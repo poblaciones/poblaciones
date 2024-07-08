@@ -16,9 +16,9 @@ import urllib
 BUFFER = 64 * 1024
 CONFIG_FILE = 'deploy.ini'
 
-UPLOAD_API = "/services/api/updateUpload"
-UNZIP_API = "/services/api/updateUnzip"
-INSTALL_API = "/services/api/updateInstall"
+UPLOAD_API = "/services/api/deploymentUpload"
+UNZIP_API = "/services/api/deploymentExpand"
+INSTALL_API = "/services/api/deploymentInstall"
 
 
 def generate_random_hex(length=16):
@@ -38,7 +38,7 @@ def prepare_post_values(args):
 def hash_file(file, size):
     sha = hashlib.sha256()
     with open(file, 'rb') as f:
-        with tqdm(total=size, unit='B', unit_scale=True, desc="Hasheando archivo") as pbar:
+        with tqdm(total=size, unit='B', unit_scale=True, desc="Firmando archivo") as pbar:
             while True:
                 data = f.read(BUFFER)
                 if not data:
@@ -115,8 +115,11 @@ def main():
     parser.add_argument('--ignore_cert', action='store_true', help="No valida la conexión SSL. No usar en producción.")
     args = parser.parse_args()
 
-    config = configparser.ConfigParser()
-    config.read(CONFIG_FILE)
+    if os.path.exists(CONFIG_FILE):
+        config = configparser.ConfigParser()
+        config.read(CONFIG_FILE)
+    else:
+        config = { 'settings' : { 'key': '', 'servers': '' }}
 
     verify_ssl = True
     if args.ignore_cert:

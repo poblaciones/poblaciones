@@ -36,7 +36,7 @@ class InstitutionService extends BaseService
 			$institution->setWatermark($file);
 
 			$fileController = new FileService();
-			$fileController->SaveBase64BytesToFile($watermarkImage, $file,
+			$fileController->SaveBase64BytesToFile($watermarkImage, $file, null,
 										 null, self::MAX_WATERMARK_HEIGHT);
 		}
 

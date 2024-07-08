@@ -62,7 +62,7 @@
 							<md-icon>edit</md-icon>
 							<md-tooltip md-direction="bottom">Modificar</md-tooltip>
 						</md-button>
-						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" class="md-icon-button">
+						<md-button v-if="canEdit(item)" @click="selected('DUPLICATE', item)" class="md-icon-button">
 							<md-icon>file_copy</md-icon>
 							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
 						</md-button>

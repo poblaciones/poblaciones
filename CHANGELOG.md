@@ -1,6 +1,10 @@
+v3.13 (2023-11-27)
 - Bloquea edición de elementos indexados para usuarios estándar y remueve indexación al clonar.
 - Ofrece en el visor menú de registrarse separado de ingresar.
-- Gestos en mobile para ocultar paneles laterales (swipe)
+- Gestos en mobile para ocultar paneles laterales (swipe).
+- Cartografías de ejemplos.
+- Archivar cartografías.
+- Tablas de archivos descentralizadas
 
 v3.12 (2023-11-27)
 - La georreferenciación distingue entre intersects y touches.

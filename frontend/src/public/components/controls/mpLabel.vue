@@ -9,7 +9,7 @@
 		<div v-if="hasMoreText" style="text-align: right; padding-top: 2px; margin-bottom: -5px; position: relative;">
 			<span v-if="!expanded" style="position: absolute; right: 10px; top: -20px;">...</span>
 			<a href="#" @click="toggle"
-				 :title="(expanded ? 'Ver menos' : 'Ver más')" style="font-size: 12px;">
+				 :title="(expanded ? 'Ver menos' : 'Ver más')" style="font-size: 12px; color: #666;">
 				<i v-if="expanded" class="fas fa-angle-up"></i>
 				<i v-else class="fas fa-angle-down"></i>
 				{{ expanded == true ? "menos" : "más" }}

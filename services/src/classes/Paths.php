@@ -102,6 +102,13 @@ class Paths
 		return $ret;
 	}
 
+	public static function GetPluginsPath()
+	{
+		$ret = Context::Paths()->GetStorageRoot() . '/plugins';
+		IO::EnsureExists($ret);
+		return $ret;
+	}
+
 	public static function GetAdminCacheLocalPath()
 	{
 		$ret = Context::Paths()->GetStorageData() .'/admin/cache';

@@ -52,7 +52,7 @@ class MetadataFileService extends BaseService
 			$fileBucket = FileBucket::Load($bucketId);
 			$filename = $fileBucket->path . '/file.dat';
 		}
-		$this->SaveMetadataFile($metadataFile, $filename);
+		$this->SaveMetadataFile($metadataFile, $filename, $workId);
 		if ($fileBucket != null)
 			$fileBucket->Delete();
 
@@ -127,7 +127,7 @@ class MetadataFileService extends BaseService
 		return $records;
 	}
 
-	private function SaveMetadataFile($metadataFile, $tempFilename = null)
+	private function SaveMetadataFile($metadataFile, $tempFilename = null, $workId = null)
 	{
 		// Trae de la base de datos lo actual. Lo hace por sql porque lo que
 		// vino desde el client está reconectado.
@@ -140,7 +140,7 @@ class MetadataFileService extends BaseService
 		$toDrafts = true;
 
 		$fs = new FileService();
-		$fs->SaveFile($metadataFile->getFile(), $tempFilename, $toDrafts, 'application/pdf');
+		$fs->SaveFile($metadataFile->getFile(), $tempFilename, $toDrafts, 'application/pdf', $workId);
 
 		// Guarda la metadata
 		App::Orm()->save($metadataFile);
@@ -151,7 +151,7 @@ class MetadataFileService extends BaseService
 			if ($metadataFile->getFile() === null || $metadataFile->getFile()->getId() !== $previuosFileId)
 			{
 				$fileService = new FileService();
-				$fileService->DeleteFile($previuosFileId);
+				$fileService->DeleteFile($previuosFileId, $workId);
 			}
 		}
 		return self::OK;
@@ -173,9 +173,8 @@ class MetadataFileService extends BaseService
 		$friendlyName = $metadataFile['mfi_caption'];
 		if (Str::EndsWith($friendlyName, '.pdf') == false)
 				$friendlyName .= '.pdf';
-		$type = 'application/pdf';
-
-		$fileModel = new FileModel(true);
+		$workId = $metadataFile['work_id'];
+		$fileModel = new FileModel(true, $workId);
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}
 
@@ -183,7 +182,7 @@ class MetadataFileService extends BaseService
 	{
 		Profiling::BeginTimer();
 		$params = array($metadataId, $fileId);
-		$sql = "SELECT * FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_file_id = ? LIMIT 1";
+		$sql = "SELECT m.*, (SELECT wrk_id FROM draft_work WHERE wrk_metadata_id = mfi_metadata_id) AS work_id FROM draft_metadata_file m WHERE mfi_metadata_id = ? AND mfi_file_id = ? LIMIT 1";
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		Profiling::EndTimer();
 		return $ret;

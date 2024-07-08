@@ -4,6 +4,7 @@ namespace helena\db\frontend;
 
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use helena\classes\App;
+use helena\classes\DbFile;
 use minga\framework\Profiling;
 use minga\framework\IO;
 use minga\framework\Str;
@@ -11,20 +12,26 @@ use minga\framework\PublicException;
 
 class FileModel extends BaseModel
 {
-	public function __construct($fromDraft = false)
+	private $chunkTableName = '';
+
+	// Resuelve las operaciones de lectura de la tabla File y sus chunks por cartografía.
+	public function __construct($fromDraft = false, $workId = null)
 	{
 		$this->fromDraft = $fromDraft;
 		$this->tableName = $this->makeTableName('file', $fromDraft);
+
+		$this->chunkTableName = DbFile::GetChunksTableName($fromDraft, $workId);
+
 		$this->idField = 'fil_id';
 		$this->captionField = 'fil_name';
-
+		$this->workId = $workId;
 	}
+
 	public function ReadFileToFile($fileId, $filename)
 	{
 		Profiling::BeginTimer();
 		$params = array($fileId);
-
-		$sql = "SELECT chu_id FROM ". $this->makeTableName('file_chunk', $this->fromDraft) . " WHERE chu_file_id = ?";
+		$sql = "SELECT chu_id FROM ". $this->chunkTableName . " WHERE chu_file_id = ?";
 		$parts = App::Db()->fetchAll($sql, $params);
 
 		IO::WriteAllText($filename, '');
@@ -32,7 +39,7 @@ class FileModel extends BaseModel
 		foreach($parts as $part)
 		{
 			$params = array($part['chu_id']);
-			$sql = "SELECT chu_content content FROM " . $this->makeTableName('file_chunk', $this->fromDraft) ." WHERE chu_id = ?";
+			$sql = "SELECT chu_content content FROM " . $this->chunkTableName ." WHERE chu_id = ?";
 			$row = App::Db()->fetchAssoc($sql, $params);
 			IO::AppendAllBytes($filename, $row['content']);
 			$row = null;
@@ -48,7 +55,7 @@ class FileModel extends BaseModel
 		$sql = "SELECT wic_id, fil_name, fil_type, chu_id, chu_content
 						FROM ". $this->makeTableName('work_icon', $this->fromDraft) . " icon
 						JOIN ". $this->makeTableName('file', $this->fromDraft) . " file ON icon.wic_file_id = fil_id
-						JOIN ". $this->makeTableName('file_chunk', $this->fromDraft) . " chunk ON file.fil_id = chu_file_id
+						JOIN ". $this->chunkTableName . " chunk ON file.fil_id = chu_file_id
 						WHERE wic_work_id = ? ORDER BY wic_id, fil_id, chu_id";
 		$parts = App::Db()->fetchAll($sql, $params);
 		$ret = [];

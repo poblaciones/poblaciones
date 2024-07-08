@@ -1,0 +1,32 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'PLUGINS' %}
+
+{% block content %}
+
+{{ macros.Title('Plugins') }}
+
+{{ include('tabbedContentMenu.html.twig') }}
+
+<div class="contenedorAdmin">
+    <form method='post' action='{{ action_url }}'>
+
+
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Plugins disponibles</div>
+	</div>
+
+	{% for plugin in plugins %}
+		<div class='dBlockNewLineS1 dNoPaddingTop'>{{ plugin.name }}:</div>
+		<div class='dBlockSize3'>
+			<input class='dSmallerButton' name="open{{plugin.key}}" type="button"
+				   value="Iniciar" onclick="window.open('{{ action_url }}/{{ plugin.key }}', '_blank');">
+		</div>
+	{% else %}
+		<div class='dBlockNewLineS2  dNoPaddingTop'>No hay plugins disponibles.</div>
+	{% endfor %}
+</form>
+</div>
+
+{% endblock %}

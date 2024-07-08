@@ -4,6 +4,7 @@ namespace helena\services\backoffice\cloning;
 
 use minga\framework\Str;
 use minga\framework\Profiling;
+use helena\classes\DbFile;
 
 use helena\classes\App;
 use helena\entities\backoffice as entities;
@@ -11,6 +12,7 @@ use helena\db\backoffice\WorkModel;
 use helena\classes\Session;
 use helena\classes\Account;
 use helena\classes\Links;
+use helena\services\backoffice\WorkService;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\backoffice\publish\WorkFlags;
 use helena\services\backoffice\PermissionsService;
@@ -79,6 +81,24 @@ class WorkClone
 		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0, 'wrk_is_example' => 0);
 		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId, $static);
 		$cloned = App::Orm()->find(entities\DraftWork::class, $this->targetWorkId);
+		// Crea la tabla de trabajo para chunks
+		WorkService::CreateChunksTable($cloned->getId());
+
+		// Copia el file de preview y de imageId
+		$file = $cloned->getImage();
+		if ($file)
+		{
+			$newFileId = $this->DuplicateFile($file->getId());
+			$newFile = App::Orm()->find(entities\DraftFile::class, $newFileId);
+			$cloned->setImage($newFile);
+		}
+		$previewFileId = $cloned->getPreviewFileId();
+		if ($previewFileId)
+		{
+			$newPreviewFileId = $this->DuplicateFile($file->getId());
+			$cloned->setPreviewFileId($newPreviewFileId);
+		}
+		// Guarda y setea cambios
 		WorkFlags::Save($cloned);
 	}
 	public function CopyMetadata()
@@ -109,12 +129,8 @@ class WorkClone
 		$files = App::Orm()->findManyByProperty(entities\DraftMetadataFile::class, "Metadata.Id", $sourceMetadataId);
 		foreach($files as $file)
 		{
-			// Copia el file
-			$static = array();
-			$sourceFileId = $file->getFile()->getId();
-			$newFileId = RowDuplicator::DuplicateRows(entities\DraftFile::class, $sourceFileId, $static, 'fil_id');
-			$static = array('chu_file_id' => $newFileId);
-			RowDuplicator::DuplicateRows(entities\DraftFileChunk::class, $sourceFileId, $static, 'chu_file_id');
+			// Copia el adjunto
+			$newFileId = $this->DuplicateFile($file->getFile()->getId());
 			// Copia el metadataFile
 			$static = array('mfi_metadata_id' => $metadataId, 'mfi_file_id' => $newFileId);
 			$sourceMetadataFileId = $file->getId();
@@ -122,10 +138,37 @@ class WorkClone
 		}
 	}
 
+	private function DuplicateFile($fileId)
+	{
+		// Copia el file
+		$static = array();
+		$sourceFileId = $fileId;
+		$newFileId = RowDuplicator::DuplicateRows(entities\DraftFile::class, $sourceFileId, $static, 'fil_id');
+		$static = array('chu_file_id' => $newFileId);
+		RowDuplicator::DuplicateRows(entities\DraftFileChunk::class, $sourceFileId, $static, 'chu_file_id');
+		// Copia los chunks de work
+		$src_table = DbFile::GetChunksTableName(true, $this->sourceWorkId);
+		$target_table = DbFile::GetChunksTableName(true, $this->targetWorkId);
+		$sql = "INSERT INTO " . $target_table . "(chu_file_id, chu_content) SELECT ?, chu_content FROM " . $src_table . " WHERE chu_file_id = ?";
+		App::Db()->exec($sql, array($newFileId, $sourceFileId));
+		return $newFileId;
+	}
+
 	public function CopyIcons()
 	{
-		$static = array('wic_work_id' => $this->targetWorkId);
-		RowDuplicator::DuplicateRows(entities\DraftWorkIcon::class, $this->sourceWorkId, $static, 'wic_work_id');
+		$src_table = DbFile::GetChunksTableName(true, $this->sourceWorkId);
+		$target_table = DbFile::GetChunksTableName(true, $this->targetWorkId);
+
+		$icons = App::Orm()->findManyByProperty(entities\DraftWorkIcon::class, "Work.Id", $this->sourceWorkId);
+		foreach($icons as $icon)
+		{
+			// Copia el adjunto
+			$newIconId = $this->DuplicateFile($icon->getFile()->getId());
+			// Copia el workIcon
+			$static = array('wic_work_id' => $this->targetWorkId, 'wic_file_id' => $newIconId);
+			$workIconId = $icon->getId();
+			RowDuplicator::DuplicateRows(entities\DraftWorkIcon::class, $workIconId, $static, 'wic_id');
+		}
 	}
 
 	public function CopyPermissions()

@@ -63,7 +63,7 @@ class WorkService extends BaseService
 	{
 		$work = $this->GetWorkOnly($workId);
 		$fileId = $work->ImageId;
-		$fileModel = new FileModel();
+		$fileModel = new FileModel(false, $workId);
 		return $fileModel->SendFile($fileId);
 	}
 	public function GetWorkByMetricVersion($metricVersionId)
@@ -92,7 +92,7 @@ class WorkService extends BaseService
 		$onboardingModel = new OnboardingModel();
 		$onboardingModel->CheckOwner($workId, $fileId);
 		// lo devuelve...
-		$fileModel = new FileModel(false);
+		$fileModel = new FileModel(false, $workId);
 		$outFile = IO::GetTempFilename() . '.tmp';
 		$fileModel->ReadFileToFile($fileId, $outFile);
 		// lo convierte

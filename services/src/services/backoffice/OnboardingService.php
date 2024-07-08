@@ -90,6 +90,7 @@ class OnboardingService extends BaseService
 			$fileController->SaveBase64BytesToFile(
 				$image,
 				$file,
+				$workId,
 				null, self::MAX_ONBOARDING_HEIGHT
 			);
 		}
@@ -113,7 +114,7 @@ class OnboardingService extends BaseService
 				JOIN s.Onboarding o
 				JOIN o.Work w WHERE w.Id = :p1 AND s.Order = :p2", array($workId, $n));
 		// saca el file
-		$fileModel = new FileModel(true);
+		$fileModel = new FileModel(true, $workId);
 		$outFile = IO::GetTempFilename() . '.tmp';
 		if (!$step->getImage())
 		{

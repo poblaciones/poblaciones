@@ -10,6 +10,7 @@ use minga\framework\ErrorException;
 
 use helena\classes\App;
 use helena\classes\Links;
+use helena\classes\DbFile;
 use helena\classes\Session;
 use helena\classes\Statistics;
 use helena\db\frontend\FileModel;
@@ -25,9 +26,6 @@ use helena\services\backoffice\publish\PublishSnapshots;
 use helena\services\backoffice\publish\CacheManager;
 use helena\services\backoffice\publish\WorkFlags;
 use minga\framework\PublicException;
-
-use LongitudeOne\Spatial\DBAL\Types\Geometry\PointType;
-
 
 class WorkService extends BaseService
 {
@@ -69,6 +67,10 @@ class WorkService extends BaseService
 		$onboarding->CreateOnboarding($workId);
 
 		$shardifiedWorkId = PublishDataTables::Shardified($workId);
+
+		// Crea la tabla de chunks de files
+		self::CreateChunksTable($workId);
+
 		// Pone el url en Work
 		$url = Links::GetWorkUrl($shardifiedWorkId);
 		$metadata->setUrl($url);
@@ -131,7 +133,7 @@ class WorkService extends BaseService
 		if (!$preview) {
 			return ['DataUrl' => null];
 		}
-		$fileModel = new FileModel(true);
+		$fileModel = new FileModel(true, $workId);
 		$outFile = IO::GetTempFilename() . '.tmp';
 		$fileModel->ReadFileToFile($preview, $outFile);
 
@@ -145,7 +147,7 @@ class WorkService extends BaseService
 
 		$file = $fs->Create('Preview de ' . $workId, "image/png");
 
-		$fs->SaveFile($file, $tmpFilename, true, "image/png");
+		$fs->SaveFile($file, $tmpFilename, true, "image/png", $workId);
 		$work = App::Orm()->find(DraftWork::class, $workId);
 
 		$work->setPreviewFileId($file->getId());
@@ -237,10 +239,17 @@ class WorkService extends BaseService
 		return $ret;
 	}
 
+	public static function CreateChunksTable($workId)
+	{
+		$chunkTable = DbFile::GetChunksTableName(true, $workId);
+		$sql = "CREATE TABLE " . $chunkTable . "(`chu_id` int(11) NOT NULL AUTO_INCREMENT, `chu_file_id` int(11) NOT NULL,`chu_content` longblob, PRIMARY KEY (`chu_id`), KEY `draft_fk_file_chunk_file1_idx` (`chu_file_id`), CONSTRAINT `fk_draft_file_chunk_" . $chunkTable . "` FOREIGN KEY (`chu_file_id`) REFERENCES `draft_file` (`fil_id`) ON DELETE CASCADE ON UPDATE NO ACTION) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+		App::Db()->execDDL($sql);
+	}
+
 	public function GetIcons($workId)
 	{
 		Profiling::BeginTimer();
-		$files = new FileModel(true);
+		$files = new FileModel(true, $workId);
 		$ret = $files->ReadWorkIcons($workId);
 		Profiling::EndTimer();
 		return $ret;
@@ -715,7 +724,7 @@ class WorkService extends BaseService
 			throw new ErrorException("No se ha recibido la imagen");
 
 		$fileController = new FileService();
-		$fileController->SaveBase64BytesToFile($image, $file,
+		$fileController->SaveBase64BytesToFile($image, $file, $workId,
 										self::MAX_ICON_WIDTH, self::MAX_ICON_HEIGHT);
 
 		App::Orm()->Save($icon);
@@ -754,7 +763,7 @@ class WorkService extends BaseService
 		App::Db()->exec("DELETE FROM draft_work_icon WHERE wic_id = ?", array($iconId));
 
 		$fileService = new FileService();
-		$fileService->DeleteFile($fileId);
+		$fileService->DeleteFile($fileId, $workId);
 
 		WorkFlags::SetMetadataDataChanged($workId);
 

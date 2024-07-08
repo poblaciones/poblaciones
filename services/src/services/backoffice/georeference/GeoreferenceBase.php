@@ -148,7 +148,7 @@ abstract class GeoreferenceBase
 		$shapesField = $this->state->Get('shape');
 
 		$limit = ' LIMIT ' . $from . ', ' . $pageSize . ' ';
-		$sql = "UPDATE " . $table . " SET geometry = GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . ")) WHERE
+		$sql = "UPDATE " . $table . " SET geometry = ST_GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . ")) WHERE
 									id IN (SELECT id FROM (SELECT id FROM " . $table . " WHERE ommit = 0 " . $limit . ") tmp)";
 
 		App::Db()->exec($sql);

@@ -36,6 +36,7 @@ class Menu
 
 		$configurationMenu = array();
 		$configurationMenu[] = self::MenuItem('PLATFORM', '/logs/platform', 'Plataforma');
+		$configurationMenu[] = self::MenuItem('PLUGINS', '/logs/plugins', 'Plugins');
 		$configurationMenu[] = self::MenuItem('CACHES', '/logs/caches', 'Cachés');
 		$configurationMenu[] = self::MenuItem('TESTS', '/logs/tests', 'Tests');
 
