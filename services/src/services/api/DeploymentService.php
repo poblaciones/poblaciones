@@ -2,6 +2,8 @@
 
 namespace helena\services\api;
 
+use helena\classes\App;
+use minga\framework\MessageBox;
 use helena\services\common\BaseService;
 use minga\framework\Context;
 use minga\framework\ErrorException;

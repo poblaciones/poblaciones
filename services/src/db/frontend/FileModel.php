@@ -24,7 +24,6 @@ class FileModel extends BaseModel
 
 		$this->idField = 'fil_id';
 		$this->captionField = 'fil_name';
-		$this->workId = $workId;
 	}
 
 	public function ReadFileToFile($fileId, $filename)

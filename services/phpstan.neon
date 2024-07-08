@@ -10,6 +10,7 @@ parameters:
 		- compilation_cache
 		- doctrine_proxies
 		- src/classes/shapefile
+		- storage
 		- web/phpinfo2.php
 		- web/index.php
 		- web/b.php
