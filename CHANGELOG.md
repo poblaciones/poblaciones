@@ -1,5 +1,6 @@
 v3.13 (2023-11-27)
 - Plugins administrativos.
+- Selección multiple.
 - Apis de distribución y backup.
 - Bloquea edición de elementos indexados para usuarios estándar y remueve indexación al clonar.
 - Ofrece en el visor menú de registrarse separado de ingresar.
@@ -7,6 +8,7 @@ v3.13 (2023-11-27)
 - Cartografías de ejemplos.
 - Archivar cartografías.
 - Tablas de archivos descentralizadas
+- Permite ocultar atributos sin dato en el panel de información, y ofrece un 'más' cuando hay más de 4 renglones.
 
 v3.12 (2023-11-27)
 - La georreferenciación distingue entre intersects y touches.

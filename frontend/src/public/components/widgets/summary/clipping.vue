@@ -1,14 +1,13 @@
 <template>
 	<div>
 		<div v-if="hasSummaryName" class="clippingBlock cards">
-			<div v-if="!Use.UseMultiselect">
+			<div v-if="!Use.UseMultiselect || (clipping.Region.Summary.Regions && clipping.Region.Summary.Regions.length == 1)">
 				<div v-for="region in clipping.Region.Summary.Regions" :key="region.Id">
 					<mp-close-button @click="removeRegion(region)" title="Quitar zona seleccionada" class="exp-hiddable-block" />
 
 					<div class="clippingBlockHeader" style="font-size: 16px; line-height: 32px; margin-top: -2px;" :class="getColorMuted()">{{ region.TypeName }}</div>
 					<div class="hand" :class="getColorMuted()" @click="fitRegion(region)" style="position: relative; line-height: 32px;margin-right: 20px;">
 						<span style="font-size: 2em;">{{ region.Name }}</span>
-
 					</div>
 					<div class="exp-hiddable-block" style="top: 40px;right: 15px; position: absolute; font-size: 1.75em;">
 						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id"
@@ -59,14 +58,28 @@
 			</h3>
 
 			<div class="sourceRow" style="padding-bottom: 0.6rem;">
-				<div class="btn-group">
+				<div class="btn-group" style=" z-index: 100; background-color: white;">
 					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index"
 									class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)" @mouseup="changeClipping(index)"
-									@click="falseChangeClipping(index)">{{ level.Revision }}</button>
+									@click="falseChangeClipping(index)">
+						{{ level.Revision }}
+					</button>
 				</div>
+				<transition
+										enter-active-class="animated quick zoomIn"
+										leave-active-class="animated quick zoomOut">
+					<div v-if="ShowMultiselectInfo" class="infoBoxHolder">
+						<div class="infoBox">
+							<mp-close-button title="Cerrar mensaje" @click="closeMultiselectInfo"
+															 style="float: none; top: 0; margin-top: 0px;
+																		position: absolute; right: 5px; font-size: 1.1em;" class="exp-hiddable-block" />
+
+							Utilice CTRL+click para seleccionar varias zonas
+						</div>
+					</div>
+				</transition>
 				<ClippingSource :metadata="selectedLevel().Metadata" v-if="!Embedded.Readonly" />
 			</div>
-
 			<div class="coverageBox" v-if="selectedLevel().PartialCoverage">
 				Cobertura: {{ selectedLevel().PartialCoverage }}.
 			</div>
@@ -78,6 +91,7 @@
 import ClippingSource from './clippingSource';
 import ClippingSelectionSource from './clippingSelectionSource';
 import AnimatedNumber from '@/public/components/controls/animatedNumber.vue';
+import Cookies from 'js-cookie';
 
 export default {
 	name: 'clipping',
@@ -92,7 +106,7 @@ export default {
 	],
 	data() {
 		return {
-
+			hideMultiselectMsg: false
 		};
 	},
 	computed: {
@@ -115,6 +129,21 @@ export default {
 		},
 		Embedded() {
 			return window.Embedded;
+		},
+		ShowMultiselectInfo() {
+			var ret = Cookies.get('hideMultiselectMsg');
+			if (this.hideMultiselectMsg || ret) {
+				return false;
+			}
+			if (!Use.UseMultiselect) {
+				return false;
+			}
+			if (window.innerWidth < 1600) {
+				return false;
+			}
+			// muestra si hay una seleccionada
+			return this.clipping.Region.Summary.Regions && this.clipping.Region.Summary.Regions.length == 1
+				&& this.clipping.Region.Summary.Regions[0].Name;
 		},
 		clippingElementSize() {
 			if (this.clipping.Region.Summary.Regions.length === 3) {
@@ -140,7 +169,11 @@ export default {
 			}
 		},
 	},
-	methods: {
+		methods: {
+		closeMultiselectInfo() {
+				Cookies.set('hideMultiselectMsg', 1);
+				this.hideMultiselectMsg = true;
+		},
 		getMuted() {
 			if (this.clipping.IsUpdating === '1') {
 				return ' text-muted';
@@ -200,9 +233,9 @@ export default {
 		display: inline-block;
 		margin-right: .32em;
 		margin-bottom: .32em;
-		border: 1px solid #efefef;
+		border: 1px solid #bbbbbb;
+		box-shadow: 0 0 2px 0 #cbcbcb;
 		min-width: 5em;
-		background-color: #efefef;
 		line-height: 1.4em;
 		color: #444444;
 		border-radius: .2em;
@@ -220,5 +253,27 @@ export default {
 	line-height: 1.2em;
 	font-size: .52em;
 }
+	.infoBox {
+		background-color: #eee;
+		padding-top: 4px;
+		padding-bottom: 4px;
+		padding-right: 10px;
+		padding-left: 2px;
+		border-radius: 6px;
+	}
+	.infoBoxHolder {
+		max-width: 40%;
+		position: absolute;
+		left: 100px;
+		margin-left: auto;
+		margin-right: auto;
+		font-size: 12px;
+		bottom: 2px;
+		text-align: center;
+		right: 0;
+		z-index: 10;
+		border-radius: 6px;
+		padding: 0px;
+	}
 </style>
 

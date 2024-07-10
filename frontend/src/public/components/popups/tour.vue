@@ -95,9 +95,9 @@
 							<div class="halves">
 								<span class="step" style="margin-left: -15px;">2</span>
 								<img src="/static/img/tour/step4-b.png" />
-								<div style="margin-top: 10px">
-									La selección para la segmentación geográfica también puede realizarse haciendo click en las etiquetas del mapa.
-								</div>
+                <div style="margin-top: 10px">
+                  La selección también puede realizarse haciendo click en las etiquetas del mapa. Presione CTRL+click para seleccionar varias zonas simultáneamente.
+                </div>
 							</div>
 						</div>
 					</div>

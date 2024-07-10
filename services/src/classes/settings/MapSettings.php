@@ -29,7 +29,7 @@ class MapSettings
 
 	public $isOWSEnabled = false;
 
-	public $UseMultiselect = false;
+	public $UseMultiselect = true;
 	public $UseNewMenu = false;
 
 	public $UseGradients = false;
