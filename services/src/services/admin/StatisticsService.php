@@ -235,6 +235,7 @@ class StatisticsService extends BaseService
 		{
 			$this->SaveDoneSummary($month);
 		}
+		App::Db()->markTableUpdate('statistic');
 		Profiling::EndTimer();
 
 		return self::OK;

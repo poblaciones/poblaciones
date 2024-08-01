@@ -83,9 +83,13 @@ class MetricsDistanceCalculator extends MetricsBaseCalculator
 		$sql = $this->GetUpdateQuery($dataset->getTable(),
 						SnapshotByDatasetModel::SnapshotTable($source['datasetTable']),
 						$this->GetDistanceColumn($dataset, $source['datasetType']),
-						$output, $cols, $source, $offset, self::STEP);
+						$output, $cols,
+			$source,
+			$offset, self::STEP
+		);
 		// Listo
 		App::Db()->exec($sql, array($key));
+		App::Db()->markTableUpdate($dataset->getTable());
 
 		Profiling::EndTimer();
 

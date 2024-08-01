@@ -45,6 +45,7 @@ class SnapshotGeographiesByRegionModel
 						"AND clr_id = cli_clipping_region_id " .
 						"AND cli_id = cgi_clipping_region_item_id";
 		$r = App::Db()->exec($sql);
+		App::Db()->markTableUpdate('snapshot_clipping_region_item_geography_item');
 
 		$rowsAffected += $r;
 		while ($r != 0)

@@ -149,9 +149,17 @@ class WorkService extends BaseService
 
 		$fs->SaveFile($file, $tmpFilename, true, "image/png", $workId);
 		$work = App::Orm()->find(DraftWork::class, $workId);
-
+		// Si había alguno, retiene para borrar
+		$oldFileId = $work->GetPreviewFileId();
+		// Listo
 		$work->setPreviewFileId($file->getId());
 		App::Orm()->Save($work);
+		// Va
+		if ($oldFileId && $oldFileId !== $file->getId())
+		{
+			$fs = new FileService();
+			$fs->DeleteFile($oldFileId, $workId);
+		}
 		return $file->getId();
 	}
 
@@ -290,6 +298,7 @@ class WorkService extends BaseService
 		// La agrega
 		$args = [$workId, $metricId];
 		App::Db()->exec("INSERT INTO draft_work_extra_metric(wmt_work_id, wmt_metric_id) VALUES (?, ?)", $args);
+		App::Db()->markTableUpdate('draft_work_extra_metric');
 		// Listo
 		WorkFlags::SetMetadataDataChanged($workId);
 
@@ -300,6 +309,7 @@ class WorkService extends BaseService
 	{
 		$args = [($active ? 1 : 0), $workId, $metricId];
 		App::Db()->exec("UPDATE draft_work_extra_metric SET wmt_start_active = ? WHERE wmt_work_id = ? AND wmt_metric_id = ?", $args);
+		App::Db()->markTableUpdate('draft_work_extra_metric');
 
 		WorkFlags::SetMetadataDataChanged($workId);
 
@@ -311,6 +321,8 @@ class WorkService extends BaseService
 	{
 		$args = [$workId, $metricId];
 		App::Db()->exec("DELETE FROM draft_work_extra_metric WHERE wmt_work_id = ? AND wmt_metric_id = ?", $args);
+		App::Db()->markTableUpdate('draft_work_extra_metric');
+
 		WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
 	}
@@ -761,6 +773,7 @@ class WorkService extends BaseService
 		$fileId = $draftWorkIcon->getFile()->getId();
 
 		App::Db()->exec("DELETE FROM draft_work_icon WHERE wic_id = ?", array($iconId));
+		App::Db()->markTableUpdate('draft_work_icon');
 
 		$fileService = new FileService();
 		$fileService->DeleteFile($fileId, $workId);

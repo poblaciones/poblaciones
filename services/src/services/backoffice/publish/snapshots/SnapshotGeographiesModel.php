@@ -14,7 +14,9 @@ class SnapshotGeographiesModel
 	{
 	 	Profiling::BeginTimer();
 
-		App::Db()->exec("TRUNCATE TABLE snapshot_geography_item");;
+		App::Db()->exec("TRUNCATE TABLE snapshot_geography_item");
+		App::Db()->markTableUpdate('snapshot_geography_item');
+
 		VersionUpdater::Increment('CARTOGRAPHY_VIEW');
 
 		GeographyCache::Cache()->Clear();
@@ -33,6 +35,7 @@ class SnapshotGeographiesModel
 						. "	from geography_item, geography where gei_geography_id = geo_id";
 
 		$ret = App::Db()->exec($sql);
+		App::Db()->markTableUpdate('snapshot_geography_item');
 
 		VersionUpdater::Increment('CARTOGRAPHY_VIEW');
 

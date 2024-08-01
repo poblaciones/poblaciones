@@ -134,6 +134,7 @@ abstract class GeoreferenceBase
 		$sql = "UPDATE " . $table . " SET " . $updateColumn . " = (" . $value .
 				") WHERE id IN (SELECT id FROM (SELECT id FROM " . $table . " WHERE ommit = 0 " . $limit . ") tmp)";
 		App::Db()->exec($sql);
+		App::Db()->markTableUpdate($table);
 
 		Profiling::EndTimer();
 
@@ -157,6 +158,8 @@ abstract class GeoreferenceBase
 								id IN (SELECT id FROM (SELECT id FROM " . $table . " WHERE ommit = 0 " . $limit . ") tmp)";
 
 		App::Db()->exec($sql);
+
+		App::Db()->markTableUpdate($table);
 
 		Profiling::EndTimer();
 

@@ -74,6 +74,7 @@ class MetadataFileService extends BaseService
 		// Borra
 		$file = $metadataFile->getFile();
 		App::Db()->exec("DELETE FROM draft_metadata_file WHERE mfi_id = ?", array($metadataFileId));
+		App::Db()->markTableUpdate('draft_metadata_file');
 
 		if ($file !== null)
 		{

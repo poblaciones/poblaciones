@@ -99,6 +99,7 @@ class MetricsAreaCalculator extends MetricsBaseCalculator
 							$output, $cols, $source);
 			// Listo
 			App::Db()->exec($sql);
+			App::Db()->markTableUpdate($datasetTable);
 		}
 		Profiling::EndTimer();
 

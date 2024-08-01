@@ -373,12 +373,14 @@ class MetricService extends BaseService
 			$deleteSymbology = "DELETE FROM draft_symbology WHERE vsy_id = ?
 														AND NOT EXISTS(SELECT * FROM draft_variable WHERE mvv_symbology_id = ?)";
 			App::Db()->exec($deleteSymbology, array($previousSymbologyId, $previousSymbologyId));
+			App::Db()->markTableUpdate('draft_symbology');
 		}
 		// Se fija si afecta el default de otras
 		if ($variableConnected->getIsDefault())
 		{
 			App::Db()->exec("UPDATE draft_variable SET mvv_is_default = 0 WHERE mvv_metric_version_level_id = ? AND mvv_id != ?",
 						array($level->getId(), $variableConnected->getId()));
+			App::Db()->markTableUpdate('draft_variable');
 		}
 		// Graba valores
 		$this->SaveValues($variable, $variableConnected);
@@ -407,7 +409,7 @@ class MetricService extends BaseService
 		// Borra el symbology
 		App::Db()->exec("DELETE FROM draft_symbology WHERE vsy_id = ? AND NOT EXISTS(
 										SELECT * FROM draft_variable WHERE mvv_symbology_id = ?)", array($symbologyId, $symbologyId));
-
+		App::Db()->markTableUpdate('draft_symbology');
 		// Marca work
 		WorkFlags::SetMetricDataChanged($level->getDataset()->getWork()->getId());
 		// Listo
@@ -484,6 +486,7 @@ class MetricService extends BaseService
 		if ($variableId) {
 			$delete = "DELETE FROM draft_variable_value_label WHERE vvl_variable_id = ?";
 			App::Db()->exec($delete, array($variableId));
+			App::Db()->markTableUpdate('draft_variable_value_label');
 		}
 	}
 	private function SaveValues($variable, $variableConnected)

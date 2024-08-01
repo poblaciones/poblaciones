@@ -22,6 +22,7 @@ class SnapshotShapeDatasetItemModel
 						SELECT " . $datasetIdShardified . ", id, 0x100000000 * " .  $datasetIdShardified . " + id, geometry, GeometryCentroid(geometry) from " . $datasetTable;
 
 		App::Db()->exec($sql);
+		App::Db()->markTableUpdate('snapshot_shape_dataset_item');
 
 		Profiling::EndTimer();
 	}
@@ -35,6 +36,7 @@ class SnapshotShapeDatasetItemModel
 
 		$sql = "DELETE FROM snapshot_shape_dataset_item WHERE sdi_dataset_id = ?";
 		App::Db()->exec($sql, $params);
+		App::Db()->markTableUpdate('snapshot_shape_dataset_item');
 
 		Profiling::EndTimer();
 	}

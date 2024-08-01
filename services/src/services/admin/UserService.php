@@ -115,6 +115,13 @@ class UserService extends BaseService
 		// Borra al usuario
 		$delete = "DELETE FROM user WHERE usr_id = ?";
 		App::Db()->exec($delete, array($userId));
+
+		App::Db()->markTableUpdate('draft_work_permission');
+		App::Db()->markTableUpdate('review');
+		App::Db()->markTableUpdate('user_session');
+		App::Db()->markTableUpdate('user_link');
+		App::Db()->markTableUpdate('user');
+
 		Profiling::EndTimer();
 		return self::OK;
 	}

@@ -40,6 +40,7 @@ class UserModel extends BaseModel
 			VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE usr_firstname=?, usr_lastname=?';
 
 		App::Db()->executeQuery($sql, $params);
+		App::Db()->markTableUpdate('user');
 		Profiling::EndTimer();
 	}
 	public function CreateUser($user, $firstName = null, $lastName = null, $password = null)
@@ -59,6 +60,10 @@ class UserModel extends BaseModel
 			VALUES(?, 'P', ?, ?, ?)";
 
 		App::Db()->executeQuery($sql, $params);
+		App::Db()->markTableUpdate('user');
+		App::Db()->markTableUpdate('draft_work_permission');
+		App::Db()->markTableUpdate('user_session');
+		App::Db()->markTableUpdate('user_link');
 		Profiling::EndTimer();
 	}
 	public function CreateUserLink($type, $user, $to, $message = null)
@@ -72,6 +77,7 @@ class UserModel extends BaseModel
 		$sql = "INSERT INTO user_link (lnk_type, lnk_user_id, lnk_token, lnk_to, lnk_time, lnk_message)
 			VALUES(?, ?, ?, ?, NOW(), ?)";
 		App::Db()->exec($sql, $params);
+		App::Db()->markTableUpdate('user_link');
 		App::Db()->commit();
 		Profiling::EndTimer();
 		return $token;
@@ -108,6 +114,7 @@ class UserModel extends BaseModel
 		$delete = "DELETE FROM user_link WHERE DATE_ADD(lnk_time, INTERVAL " .  self::ValidTokens . " DAY) < NOW()
 									AND lnk_user_id = ?";
 		App::Db()->exec($delete, array($userId));
+		App::Db()->markTableUpdate('user_link');
 
 		$sql = "SELECT lnk_to `to`, lnk_message `message` FROM user_link WHERE lnk_user_id = ? AND lnk_token = ? AND lnk_type = ? LIMIT 1";
 		$ret = App::Db()->fetchAssoc($sql, array($userId, $token, $type));
@@ -135,6 +142,7 @@ class UserModel extends BaseModel
 
 		$sql = "DELETE FROM user_link WHERE lnk_user_id = ? AND lnk_token = ?";
 		App::Db()->exec($sql, [$userId, $token]);
+		App::Db()->markTableUpdate('user_link');
 
 		Profiling::EndTimer();
 	}
@@ -144,6 +152,7 @@ class UserModel extends BaseModel
 		$this->ClearEmailNew($userId);
 		$delete = "DELETE FROM user_link WHERE DATE_ADD(lnk_time, INTERVAL ? DAY) < NOW()";
 		App::Db()->exec($delete, [self::DaysValid]);
+		App::Db()->markTableUpdate('user_link');
 		App::Db()->ensureCommit();
 		App::Db()->ensureBegin();
 	}
@@ -153,6 +162,7 @@ class UserModel extends BaseModel
 		//Borra todos menos el último, no puede haber varias validaciones de cambio de mail pendientes.
 		$delete = "DELETE FROM user_link WHERE lnk_user_id = ? AND lnk_type = ? AND lnk_id NOT IN (SELECT MAX(lnk_id) FROM (SELECT * FROM user_link) AS ul2 WHERE lnk_user_id = user_link.lnk_user_id AND lnk_type = user_link.lnk_type)";
 		App::Db()->exec($delete, [$userId, TokenTypeEnum::ChangeEmail]);
+		App::Db()->markTableUpdate('user_link');
 
 		//Si es que queda uno y no es válido limpia el campo email new...
 		$select = "SELECT lnk_user_id FROM user_link WHERE DATE_ADD(lnk_time, INTERVAL ? DAY) < NOW() AND lnk_user_id = ? AND lnk_type = ? LIMIT 1";
@@ -162,6 +172,7 @@ class UserModel extends BaseModel
 
 		$update = "UPDATE user SET usr_email_new = NULL WHERE usr_id = ?";
 		App::Db()->exec($update, [$id]);
+		App::Db()->markTableUpdate('user');
 	}
 
 }

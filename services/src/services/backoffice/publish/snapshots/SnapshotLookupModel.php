@@ -22,6 +22,7 @@ class SnapshotLookupModel
 		Profiling::BeginTimer();
 		$sqlDelete = "DELETE FROM snapshot_lookup_feature WHERE clf_dataset_id = ?";
 		$rowsDeleted = App::Db()->exec($sqlDelete, array($datasetIdShardified));
+		App::Db()->markTableUpdate('snapshot_lookup_feature');
 
 		VersionUpdater::Increment('LOOKUP');
 
@@ -54,6 +55,7 @@ class SnapshotLookupModel
 					($dataset["dmk_type"] == 'I' &&  $dataset["dmk_source"] == 'F' ? $dataset["dmk_symbol"] : null),
 					$dataset["dat_caption"]);
 		$r = App::Db()->exec($sql . $sqlInsert, $params);
+		App::Db()->markTableUpdate('snapshot_lookup_feature');
 
 
 		VersionUpdater::Increment('LOOKUP');
@@ -132,6 +134,7 @@ class SnapshotLookupModel
 
 		$sqlDelete = "TRUNCATE TABLE snapshot_lookup_clipping_region_item;";
 		App::Db()->exec($sqlDelete);
+		App::Db()->markTableUpdate('snapshot_lookup_clipping_region_item');
 
 		VersionUpdater::Increment('LOOKUP_REGIONS');
 		VersionUpdater::Increment('LOOKUP_VIEW');
@@ -169,6 +172,7 @@ class SnapshotLookupModel
 																			) as geographyInfo " .
 															"where clr_id = cli_clipping_region_id and cli_id = clipping_region_item_id and clr_no_autocomplete = false";
 		$r = App::Db()->exec($sql);
+		App::Db()->markTableUpdate('snapshot_lookup_clipping_region_item');
 
 		$rowsAffected = $r;
 		while ($r != 0)

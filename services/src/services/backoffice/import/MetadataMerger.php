@@ -54,12 +54,14 @@ class MetadataMerger
 		$columnsWhere = " WHERE dc_old.dco_dataset_id = " . $this->datasetId . $this->getIdRangeCondition();
 		// 2) drop de los valueslables viejos
 		$deleteValues = "DELETE FROM draft_dataset_column_value_label WHERE dla_dataset_column_id IN (SELECT dco_id FROM draft_dataset_column dc_old " .
-													$columnsWhere . ")";
+			$columnsWhere . ")";
 		App::Db()->exec($deleteValues);
+		App::Db()->markTableUpdate('draft_dataset_column_value_label');
 
 		// 3) drop de las columnas viejas
 		$deleteColumns = "DELETE dc_old FROM draft_dataset_column dc_old " . $columnsWhere ;
 		App::Db()->exec($deleteColumns);
+		App::Db()->markTableUpdate('draft_dataset_column');
 	}
 
 	private function MigrateValueLabels()
@@ -74,6 +76,7 @@ class MetadataMerger
 													$this->MatchSubtable() . " ON matches.dco_old_id = dla_dataset_column_id
 													WHERE dco_new_id IS NOT NULL ORDER BY dla_id";
 		App::Db()->exec($insertValues);
+		App::Db()->markTableUpdate('draft_dataset_column_value_label');
 	}
 	private function MigrateBasicColumnAttributes()
 	{
@@ -195,6 +198,7 @@ class MetadataMerger
 		$update = "UPDATE draft_dataset_column JOIN " . $this->MatchSubtable($attributes) . " ON dco_id = matches.dco_new_id
 								SET " . $columns;
 		App::Db()->exec($update);
+		App::Db()->markTableUpdate('draft_dataset_column');
 	}
 
 	private function MigrateColumn($datasetInfo, $fieldColumn)
@@ -221,6 +225,8 @@ class MetadataMerger
 								WHERE " . $fieldColumn . " IS NOT NULL AND " . $this->targetDatasetId . " IN (" . $datasetField . ")";
 
 		App::Db()->exec($update);
+		App::Db()->markTableUpdate($table);
+
 		// Listo
 		return $changedToNull;
 	}
@@ -251,6 +257,7 @@ class MetadataMerger
 		{
 			$sql = "UPDATE draft_dataset_column SET dco_order = (dco_id - " . $minId . " + 1) WHERE dco_dataset_id = ?";
 			App::Db()->exec($sql, array($this->targetDatasetId));
+			App::Db()->markTableUpdate('draft_dataset_column');
 		}
 	}
 

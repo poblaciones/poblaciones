@@ -212,6 +212,7 @@ class GeoreferenceService extends BaseService
 		// Resetea el ommit
 		$resetOmmit = "UPDATE " . $this->state->Table() . " SET ommit = 0 WHERE ommit = 1";
 		App::Db()->exec($resetOmmit);
+		App::Db()->markTableUpdate($this->state->Table());
 		// Crea tabla de errores
 		$this->EnsureErrorsTableExists(true);
 		// Sigue...

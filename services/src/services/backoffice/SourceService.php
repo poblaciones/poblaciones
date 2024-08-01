@@ -167,6 +167,7 @@ class SourceService extends BaseService
 		// Si hay algo idéntico, sale
 		$sql = "DELETE FROM draft_metadata_source WHERE msc_metadata_id = ? AND	msc_source_id = ?";
 		App::Db()->exec($sql, array($metadataId, $sourceId));
+		App::Db()->markTableUpdate('draft_metadata_source');
 
 		return self::OK;
 	}

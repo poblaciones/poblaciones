@@ -84,6 +84,7 @@ class FileService extends BaseService
 	{
 		$fileChunkTable = DbFile::GetChunksTableName($toDrafts, $workId);
 		App::Db()->exec("DELETE FROM " . $fileChunkTable . " WHERE chu_file_id = ?", array($fileId));
+		App::Db()->markTableUpdate($fileChunkTable);
 		$unread = filesize($tempFilename);
 		if (!file_exists($tempFilename))
 			throw new PublicException('No se ha transferido correctamente el archivo al servidor.');
@@ -94,6 +95,7 @@ class FileService extends BaseService
 			$contents = fread($handle, self::PAGESIZE);
 			$sql = "INSERT INTO " . $fileChunkTable . " (chu_file_id, chu_content) VALUES (?, ?)";
 			App::Db()->exec($sql, array($fileId, $contents));
+			App::Db()->markTableUpdate($fileChunkTable);
 			$unread -= strlen($contents);
 		}
 		fclose($handle);
@@ -123,8 +125,11 @@ class FileService extends BaseService
 
 	public function DeleteFile($fileId, $workId = null)
 	{
-		App::Db()->exec("DELETE FROM " . DbFile::GetChunksTableName(true, $workId) . " WHERE chu_file_id = ?", array($fileId));
+		$table = DbFile::GetChunksTableName(true, $workId);
+		App::Db()->exec("DELETE FROM " . $table . " WHERE chu_file_id = ?", array($fileId));
 		App::Db()->exec("DELETE FROM draft_file WHERE fil_id = ?", array($fileId));
+		App::Db()->markTableUpdate($table);
+		App::Db()->markTableUpdate('draft_file');
 	}
 
 }

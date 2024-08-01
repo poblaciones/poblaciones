@@ -100,6 +100,7 @@ class WorkService extends BaseService
 								WHERE FLOOR(dat_work_id/100) = wdu_work_id
 							), 0);";
 		App::Db()->exec($sql);
+		App::Db()->markTableUpdate('work_space_usage');
 
 		Profiling::EndTimer();
 		return self::OK;

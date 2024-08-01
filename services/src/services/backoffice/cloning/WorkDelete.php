@@ -77,14 +77,17 @@ class WorkDelete
 		// Borra
 		$delete = "DELETE FROM work_space_usage WHERE wdu_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('work_space_usage');
 		$delete = "DELETE FROM draft_work WHERE wrk_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_work');
 	}
 	private function doDeleteExtraMetrics()
 	{
 		// Borra
 		$delete = "DELETE FROM draft_work_extra_metric WHERE wmt_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_work_extra_metric');
 
 	}
 	private function doDeleteIcons()
@@ -92,7 +95,7 @@ class WorkDelete
 		// Borra
 		$delete = "DELETE FROM draft_work_icon WHERE wic_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
-
+		App::Db()->markTableUpdate('draft_work_icon');
 	}
 
 	private function doDeleteOnBoarding()
@@ -102,10 +105,13 @@ class WorkDelete
 					INNER JOIN draft_onboarding ON onb_id = obs_onboarding_id
 					WHERE onb_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_onboarding_step');
 
 		// Borra principal
 		$delete = "DELETE FROM draft_onboarding WHERE onb_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_onboarding');
+
 	}
 
 	private function doDeleteRevisions()
@@ -113,12 +119,14 @@ class WorkDelete
 		// Borra
 		$delete = "DELETE FROM review WHERE rev_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('review');
 	}
 	private function doDeleteWorkVersions()
 	{
 		// Borra
 		$delete = "DELETE FROM draft_metric_version WHERE mvr_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_metric_version');
 	}
 
 	private function doDeletePreview($fileId)
@@ -143,15 +151,18 @@ class WorkDelete
 		// Borra metada_files
 		$deleteMetadataFiles = "DELETE FROM draft_metadata_file WHERE mfi_metadata_id = ?";
 		App::Db()->exec($deleteMetadataFiles, array($metadata->getId()));
+		App::Db()->markTableUpdate('draft_metadata_file');
 		// Borra los files
 		if (sizeof($files) > 0)
 		{
 			$deleteFiles = "DELETE draft_file FROM draft_file WHERE fil_id IN (" . join(',', $files) . ")";
 			App::Db()->exec($deleteFiles);
+			App::Db()->markTableUpdate('draft_file');
 		}
 		// Borra metadatos
 		$delete = "DELETE FROM draft_metadata WHERE met_id = ?";
 		App::Db()->exec($delete, array($metadata->getId()));
+		App::Db()->markTableUpdate('draft_metadata');
 
 		// Decide si borra Contact
 		$contact = $metadata->getContact();
@@ -175,6 +186,7 @@ class WorkDelete
 		// Copia permisos
 		$metadata = "DELETE FROM draft_work_permission WHERE wkp_work_id = ?";
 		App::Db()->exec($metadata, array($this->workId));
+		App::Db()->markTableUpdate('draft_work_permission');
 
 		WorkPermissionsCache::Clear($this->workId);
 	}

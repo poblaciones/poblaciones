@@ -109,6 +109,7 @@ class RowDuplicator
 		if ($showDebug)
 			echo $select;
 		App::Db()->exec($insertInto . $select);
+		App::Db()->markTableUpdate($table);
 
 		return App::Db()->lastInsertId();
 	}

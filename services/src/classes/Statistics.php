@@ -115,6 +115,7 @@ class Statistics
 				VALUES(?, ?, ?, 1) ON DUPLICATE KEY UPDATE emb_hits = emb_hits + 1";
 		$month = Date::GetLogMonthFolder();
 		App::Db()->exec($sql, [$month, $topUrl, $clientUrl]);
+		App::Db()->markTableUpdate("statistic_embedding");
 	}
 
 	public static function StoreInternalHit($workId, $subtype, $saveReferer = false)

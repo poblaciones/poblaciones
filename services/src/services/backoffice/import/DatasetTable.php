@@ -18,7 +18,7 @@ class DatasetTable
 
 	public function CreateTable($headers)
 	{
-		$tableName = self::CreateNewTableName();
+		$tableName = self::CreateNewTemporaryTableName();
 		$this->RegisterTable($tableName);
 		$creationQuery = $this->SqlCreateTable($tableName, $headers);
 		App::Db()->execDDL($creationQuery);
@@ -28,8 +28,6 @@ class DatasetTable
 
 	public function InsertDatafile($tableName, $headers, $dataFileName)
 	{
-		// App::Db()->exec("SET GLOBAL max_allowed_packet = 1024*1024*2000");
-
 		$content = file_get_contents($dataFileName);
 		$items = json_decode($content, TRUE);
 
@@ -61,6 +59,9 @@ class DatasetTable
 			}
 		}
 		$this->executeBatch($begin, $batch);
+		$nonTempTableTarget = self::GetNonTemporaryName($tableName);
+		if ($tableName == $nonTempTableTarget)
+			App::Db()->markTableUpdate($tableName);
 	}
 	private function executeBatch($begin, $batch)
 	{
@@ -97,6 +98,7 @@ class DatasetTable
 		// Hace el insert
 		$insert = "INSERT " . $target . " SELECT * FROM " . $table;
 		App::Db()->exec($insert);
+		App::Db()->markTableUpdate($target);
 		Profiling::EndTimer();
 	}
 
@@ -111,13 +113,15 @@ class DatasetTable
 	{
 		$sql = "INSERT INTO work_dataset_draft (wdd_table, wdd_created) VALUES (?, NOW())";
 		App::Db()->exec($sql, array($table));
+		App::Db()->markTableUpdate('work_dataset_draft');
 	}
 	public function UnregisterTable($table)
 	{
 		$sql = "DELETE FROM work_dataset_draft WHERE wdd_table = ?";
 		App::Db()->exec($sql, array($table));
+		App::Db()->markTableUpdate('work_dataset_draft');
 	}
-	public static function CreateNewTableName()
+	public static function CreateNewTemporaryTableName()
 	{
 		$query = "SELECT max(t) FROM (
 							SELECT replace(wdd_table, 'tmp_', '') t

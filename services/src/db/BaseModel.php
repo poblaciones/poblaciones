@@ -77,6 +77,7 @@ class BaseModel
 		Profiling::BeginTimer();
 		$sql = 'DELETE FROM '.$this->EscapeTable($this->tableName).' WHERE '.$this->EscapeColumn($this->idField).' = ?';
 		App::Db()->exec($sql, array((int)$id));
+		App::Db()->markTableUpdate($this->tableName);
 		Profiling::EndTimer();
 	}
 
@@ -104,11 +105,13 @@ class BaseModel
 					$this->GetSqlUpdateFromMap($entity, $map) . " WHERE " . $this->idField . " = ?";
 			$params[] = $entity->Id;
 			App::Db()->executeQuery($sql, $params);
+			App::Db()->markTableUpdate($this->tableName);
 		}
 		else
 		{
 			$sql = "INSERT INTO " . $this->EscapeTable($this->tableName) . " " . $this->GetSqlInsertFromMap($entity, $map);
 			App::Db()->executeQuery($sql, $params);
+			App::Db()->markTableUpdate($this->tableName);
 			$entity->Id = App::Db()->lastInsertId();
 		}
 		return $entity->Id;

@@ -41,6 +41,7 @@ class UserService extends BaseService
 		$userId = Session::GetCurrentUser()->GetUserId();
 		$params = array($userId, $key);
 		App::Db()->exec("DELETE FROM user_setting WHERE ust_user_id = ? AND ust_key = ?", $params);
+		App::Db()->markTableUpdate('user_setting');
 	}
 	public function SetSetting($key, $value)
 	{
@@ -49,6 +50,7 @@ class UserService extends BaseService
 		$params = array($userId, $key, $value);
 		App::Db()->exec("INSERT INTO user_setting (ust_user_id, ust_key, ust_value)
 							VALUES (?, ?, ?)", $params);
+		App::Db()->markTableUpdate('user_setting');
 	}
 
 }

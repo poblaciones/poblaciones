@@ -118,6 +118,7 @@ class WorkClone
 		if ($link !== null) $link = Str::GenerateLink();
 		$update = "UPDATE draft_work SET wrk_metadata_id = ?, wrk_last_access_link = null, wrk_access_link = ? WHERE wrk_id = ?";
 		App::Db()->exec($update, array($metadataId, $link, $this->targetWorkId));
+		App::Db()->markTableUpdate('draft_work');
 		// Copia metadata_sources
 		$static = array('msc_metadata_id' => $metadataId);
 		RowDuplicator::DuplicateRows(entities\DraftMetadataSource::class, $sourceMetadataId, $static, 'msc_metadata_id');
@@ -151,6 +152,7 @@ class WorkClone
 		$target_table = DbFile::GetChunksTableName(true, $this->targetWorkId);
 		$sql = "INSERT INTO " . $target_table . "(chu_file_id, chu_content) SELECT ?, chu_content FROM " . $src_table . " WHERE chu_file_id = ?";
 		App::Db()->exec($sql, array($newFileId, $sourceFileId));
+		App::Db()->markTableUpdate($target_table);
 		return $newFileId;
 	}
 
@@ -196,6 +198,7 @@ class WorkClone
 	{
 		$update = "UPDATE draft_work SET wrk_unfinished = ? WHERE wrk_id = ?";
 		App::Db()->exec($update, array(0, $this->targetWorkId));
+		App::Db()->markTableUpdate('draft_work');
 	}
 }
 

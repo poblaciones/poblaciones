@@ -72,6 +72,7 @@ class SnapshotMetricVersionModel
 		App::Db()->exec("SET group_concat_max_len = 102400");
 		$param = ($regenFullTable ? array() : array($metricIdShardified, $metricIdShardified));
 		App::Db()->exec($sql, $param);
+		App::Db()->markTableUpdate('snapshot_metric_version');
 
 		Profiling::EndTimer();
 	}
@@ -85,6 +86,7 @@ class SnapshotMetricVersionModel
 		$sql = "DELETE FROM snapshot_metric_version WHERE mvw_metric_id = ?";
 
 		App::Db()->exec($sql, array($metricIdShardified));
+		App::Db()->markTableUpdate('snapshot_metric_version');
 
 		Profiling::EndTimer();
 	}
@@ -95,9 +97,11 @@ class SnapshotMetricVersionModel
 
 		$sql = "UPDATE snapshot_metric_version SET mvw_metric_revision = mvw_metric_revision + 1";
 		App::Db()->exec($sql);
+		App::Db()->markTableUpdate('snapshot_metric_version');
 
 		$sql = "UPDATE metric SET mtr_revision = Signature()";
 		$ret = App::Db()->exec($sql);
+		App::Db()->markTableUpdate('metric');
 
 		Profiling::EndTimer();
 
@@ -115,6 +119,7 @@ class SnapshotMetricVersionModel
 		 $sql = "UPDATE metric SET mtr_revision = Signature() WHERE mtr_id = ?";
 
 		App::Db()->exec($sql, array($metricIdShardified));
+		App::Db()->markTableUpdate('metric');
 
 		Profiling::EndTimer();
 	}
@@ -128,6 +133,7 @@ class SnapshotMetricVersionModel
 		$sql = "DELETE FROM snapshot_metric_version WHERE mvw_work_id = ?";
 
 		App::Db()->exec($sql, array($workIdShardified));
+		App::Db()->markTableUpdate('snapshot_metric_version');
 
 		Profiling::EndTimer();
 	}

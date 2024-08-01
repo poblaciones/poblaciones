@@ -173,11 +173,23 @@ class Orm
 		return self::$entityManager;
 	}
 
+	public function MarkClassUpdate($className) {
+		$metadata = $this->getClassMetadata($className);
+		$table = $metadata->GetTableName();
+		App::Db()->markTableUpdate($table);
+	}
+
+	public function MarkObjectUpdate($obj) {
+		$class = get_class($obj);
+		$this->MarkClassUpdate($class);
+	}
+
 	public function delete($obj)
 	{
 		App::Db()->ensureBegin();
 		Profiling::BeginTimer();
 		Performance::BeginDbWait();
+		$this->MarkObjectUpdate($obj);
 		$this->GetEntityManager()->remove($obj);
 		$this->GetEntityManager()->flush();
 		Performance::EndDbWait();
@@ -191,6 +203,7 @@ class Orm
 		$obj = $this->find($className, $id);
 		$this->GetEntityManager()->remove($obj);
 		$this->GetEntityManager()->flush();
+		$this->MarkClassUpdate($className);
 		Performance::EndDbWait();
 		Profiling::EndTimer();
 	}
@@ -203,6 +216,7 @@ class Orm
 			Performance::BeginDbWait();
 			$this->GetEntityManager()->persist($obj);
 			$this->GetEntityManager()->flush();
+			$this->MarkObjectUpdate($obj);
 			Performance::EndDbWait();
 			Profiling::EndTimer();
 		}

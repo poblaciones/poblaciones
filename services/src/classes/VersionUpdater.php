@@ -25,6 +25,7 @@ class VersionUpdater
 	public static function Increment($key)
 	{
 		App::Db()->exec("update version set ver_value = ver_value + 1 where ver_name = ?", array($key));
+		App::Db()->markTableUpdate("version");
 	}
 
 	public function SetUpdated()
@@ -32,5 +33,6 @@ class VersionUpdater
 		$val = App::Db()->fetchScalar("select v2.ver_value from version v2 where v2.ver_name='CARTO_GEO'");
 
 		App::Db()->exec("update version set ver_value = ? where ver_name = ?", array($val, $this->key));
+		App::Db()->markTableUpdate("version");
 	}
 }

@@ -156,6 +156,7 @@ class PublishSnapshots extends BaseService
 		(SELECT d.mvl_extents FROM draft_metric_version_level d WHERE m.mvl_id = "
 			. PublishDataTables::ShardifiedDb("d.mvl_id") . ")  WHERE dat_work_id = ?";
 		App::Db()->exec($update, array($workIdShardified));
+		App::Db()->markTableUpdate("metric_version_level");
 
 		// Calcula el del work
 		$sql = "UPDATE metadata
@@ -170,6 +171,7 @@ class PublishSnapshots extends BaseService
 										WHERE dat_id = mvl_dataset_id and dat_work_id = ?)
 						WHERE wrk_id = ?";
 		App::Db()->exec($sql, array($workIdShardified, $workIdShardified));
+		App::Db()->markTableUpdate("metadata");
 
 		Profiling::EndTimer();
 	}

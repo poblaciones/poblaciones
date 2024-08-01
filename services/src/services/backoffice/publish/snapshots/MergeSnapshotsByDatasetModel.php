@@ -219,6 +219,7 @@ class MergeSnapshotsByDatasetModel
 		$sql = "CREATE TABLE " . $mergeTable . " (" . substr($sqlCols, 1) . ",
 								 INDEX (sna_geography_item_id), SPATIAL INDEX(sna_envelope), SPATIAL INDEX(sna_location)) ENGINE=MyISAM;";
 		App::Db()->execDDL($sql);
+		App::Db()->markTableUpdate($mergeTable);
 
 		// Listo
 		Profiling::EndTimer();
@@ -250,6 +251,7 @@ class MergeSnapshotsByDatasetModel
 		// Cierra el select
 		$sql .= " ORDER BY t1.sna_id";
         App::Db()->exec($sql, array($tupleId));
+		App::Db()->markTableUpdate($mergeTable);
 
 		// AND g.gei_code IN ('067911304', '067911302', '067911301')
 

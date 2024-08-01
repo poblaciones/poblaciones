@@ -171,6 +171,7 @@ class ImportService extends BaseService
 		if ($dcoId) {
 			$update = "UPDATE draft_dataset SET dat_caption_column_id = ? WHERE dat_caption_column_id IS NULL AND dat_id = ?";
 			App::Db()->exec($update, array($dcoId, $datasetId));
+			App::Db()->markTableUpdate('draft_dataset');
 		}
 	}
 

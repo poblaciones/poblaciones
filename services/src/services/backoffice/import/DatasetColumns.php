@@ -79,6 +79,7 @@ class DatasetColumns
 				$column->getId() . ")";
 		}
 		App::Db()->exec($sql . $values);
+		App::Db()->markTableUpdate('draft_dataset_column_value_label');
 	}
 }
 

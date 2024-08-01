@@ -194,6 +194,7 @@ abstract class MetricsBaseCalculator
 		$update = 'UPDATE ' . $datasetTable . '
 								SET ' . substr($colNames, 2) . ' = null';
 		$ret = App::Db()->exec($update);
+		App::Db()->markTableUpdate($datasetTable);
 
 		Profiling::EndTimer();
 

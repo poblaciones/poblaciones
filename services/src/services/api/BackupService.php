@@ -33,7 +33,7 @@ class BackupService extends BaseService
 		$bucket = FileBucket::Create();
 		// guarda $lastBackupDate
 		$this->state['lastBackupDate'] = $lastBackupDate;
-		$this->state['pendigBytes'] = -1;
+		$this->state['pendingBytes'] = -1;
 		$this->state['pendingTables'] = -1;
 		$this->state['totalBytes'] = -1;
 		$this->state['totalTables'] = -1;
@@ -126,7 +126,7 @@ class BackupService extends BaseService
 		header('Content-Type: ' . $contentType);
 		header('Content-Length: ' . $size);
 
-		App::StreamFile($filename, $folder . basename($filename));
+		//App::StreamFile($filename, $folder . basename($filename));
 
 		header('Content-Disposition: filename="' . stripslashes($folder . basename($filename)) . '"');
 
@@ -139,9 +139,11 @@ class BackupService extends BaseService
 		else if (ob_get_length())
 			ob_end_flush();
 
-		if (!IO::ReadFileChunked($filename))
-			throw new PublicException("No se pudo enviar el archivo.");
-
+		if ($_SERVER['REQUEST_METHOD'] !== 'HEAD')
+		{
+			if (!IO::ReadFileChunked($filename))
+				throw new PublicException("No se pudo enviar el archivo.");
+		}
 		exit;
 	}
 
@@ -167,15 +169,21 @@ class BackupService extends BaseService
 	{
 		// Ejecuta un paso
 		$excluded = 'work_dataset_draft_*_retry,work_dataset_draft_*_errors,tmp_*';
+		$forced = 'metadata_source,metadata_file';
 
 		$args = ["backup", "--host", Context::Settings()->Db()->Host, "--user", Context::Settings()->Db()->User,
 					"--output_path", $this->bucket->path,
 			"--password", Context::Settings()->Db()->Password, "--database", Context::Settings()->Db()->Name,
-						"--exclude_tables", $excluded, "--step_by_step"];
+						"--exclude_tables", $excluded, "--forced_tables", $forced, "--step_by_step"];
 
 		if ($this->state['totalBytes'] != -1)
 			$args[] = '--resume';
 
+		if ($this->state['lastBackupDate'])
+		{
+			$args[] = '--from_date';
+			$args[] = $this->state['lastBackupDate'];
+		}
 		$output = Python::Execute("bcup", $args);
 
 		$pendingBytes = $this->getFromLinesInt($output, 'Pending bytes');

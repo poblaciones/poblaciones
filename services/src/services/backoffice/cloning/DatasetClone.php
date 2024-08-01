@@ -87,6 +87,8 @@ class DatasetClone
 		$markerId = RowDuplicator::DuplicateRows(entities\DraftDatasetMarker::class, $this->dataset->getMarker()->getId());
 		$update = "UPDATE draft_dataset SET dat_marker_id = ? WHERE dat_id = ?";
 		App::Db()->exec($update, array($markerId, $this->targetDatasetId));
+		App::Db()->markTableUpdate('draft_dataset');
+
 	}
 	private function CopyMetricVersions()
 	{
@@ -177,7 +179,7 @@ class DatasetClone
 		// Resuelve nombres
 		$table = $this->dataset->getTable();
 		if ($table) {
-			$this->targetTable = DatasetTable::CreateNewTableName();
+			$this->targetTable = DatasetTable::CreateNewTemporaryTableName();
 
 			// Copia
 			$datasetTable = new DatasetTable();
@@ -189,6 +191,7 @@ class DatasetClone
 		// Setea el table
 		$table = "UPDATE draft_dataset SET dat_table = ? WHERE dat_id = ?";
 		App::Db()->exec($table, array($this->targetTable, $this->targetDatasetId));
+		App::Db()->markTableUpdate('draft_dataset');
 	}
 }
 

@@ -247,6 +247,7 @@ class PublishDataTables
 		{
 			App::Db()->dropTable($table['wdd_table']);
 			App::Db()->exec("DELETE FROM work_dataset_draft WHERE wdd_id = ?", array($table['wdd_id']));
+			App::Db()->markTableUpdate('work_dataset_draft');
 		}
 		return sizeof($tables);
 	}
@@ -318,6 +319,7 @@ class PublishDataTables
 		$sql = "UPDATE work_startup JOIN work ON wrk_startup_id = wst_id
 										 SET wst_active_metrics = ? WHERE wrk_id = ?";
 		App::Db()->exec($sql, array($metrics, $workIdShardified));
+		App::Db()->markTableUpdate('work_startup');
 		Profiling::EndTimer();
 	}
 
@@ -338,12 +340,15 @@ class PublishDataTables
 												WHERE not exists (select 1 from source where src_institution_id = ins_id)
 												AND not exists (select 1 from metadata where met_institution_id = ins_id);";
 		App::Db()->exec($institutions);
-		$sources = "DELETE FROM source
-												WHERE not exists (select 1 from metadata_source where msc_source_id = src_id)";
+		App::Db()->markTableUpdate('institution');
+
+		$sources = "DELETE FROM source WHERE not exists (select 1 from metadata_source where msc_source_id = src_id)";
 		App::Db()->exec($sources);
-		$metrics = "DELETE FROM metric
-												WHERE not exists (select 1 from metric_version where mvr_metric_id = mtr_id)";
+		App::Db()->markTableUpdate('source');
+
+		$metrics = "DELETE FROM metric WHERE not exists (select 1 from metric_version where mvr_metric_id = mtr_id)";
 		App::Db()->exec($metrics);
+		App::Db()->markTableUpdate('metric');
 
 		Profiling::EndTimer();
 	}
@@ -398,15 +403,18 @@ class PublishDataTables
 									 d1.dat_geography_item_column_id = d2.dat_geography_item_column_id * 100 + " . $shard . ",
 									 d1.dat_caption_column_id = d2.dat_caption_column_id * 100 + " . $shard;
 		App::Db()->exec($query, array($workId));
+		App::Db()->markTableUpdate('dataset');
 
 		$queryMarkers = "UPDATE dataset_marker d1 JOIN draft_dataset_marker d2 ON d1.dmk_id = d2.dmk_id " .
 									" * 100 + " . $shard . " JOIN draft_dataset ds2 ON ds2.dat_marker_id = d2.dmk_id AND ds2.dat_work_id = ?
 									SET d1.dmk_content_column_id = d2.dmk_content_column_id * 100 + " . $shard;
 		App::Db()->exec($queryMarkers, array($workId));
+		App::Db()->markTableUpdate('dataset_marker');
 
 		// Hace update de publishedby
 		$query = "UPDATE work SET wrk_published_by = ? WHERE wrk_id = ?";
 		App::Db()->exec($query, array(Account::Current()->user, $workIdShardified));
+		App::Db()->markTableUpdate('work');
 
 		Profiling::EndTimer();
 	}
@@ -414,13 +422,18 @@ class PublishDataTables
 	{
 		Profiling::BeginTimer();
 		$queries = array();
-		$this->InsertQueryCreator($queries, 'INSERTING', $branches, $workId);
+		$affectedTables = array();
+		$this->InsertQueryCreator($queries, $affectedTables, 'INSERTING', $branches, $workId);
 		// Dump queries
 		//	$this->dumpQueries($queries, $workId);
 		foreach($queries as $query)
 		{
 			$affected = App::Db()->exec($query, array($workId));
 			$this->queryLog($query, array($workId), $affected);
+		}
+		foreach ($affectedTables as $table)
+		{
+			App::Db()->markTableUpdate($table);
 		}
 		Profiling::EndTimer();
 	}
@@ -449,8 +462,10 @@ class PublishDataTables
 		App::Db()->execDDL($create);
 
 		// Pasa las filas
-		$sql = "INSERT INTO " . $target_table . "(chu_file_id, chu_content) SELECT " . $this->ShardifiedDb('chu_file_id') . ", chu_content FROM " . $src_table;
+		$sql = "INSERT INTO " . $target_table . "(chu_file_id, chu_content) SELECT "
+			. $this->ShardifiedDb('chu_file_id') . ", chu_content FROM " . $src_table . " WHERE chu_file_id IN (SELECT fil_id FROM file)";
 		App::Db()->exec($sql);
+		App::Db()->markTableUpdate($target_table);
 	}
 
 	private function CopyWorkDatasetTable($table)
@@ -467,8 +482,9 @@ class PublishDataTables
 		App::Db()->execDDL($alterTable);
 		// Hace el insert
 		$insert = "INSERT " . $target . " SELECT * FROM " . $table . " WHERE ommit = 0";
-
 		App::Db()->exec($insert);
+
+		App::Db()->markTableUpdate($target);
 
 		Profiling::EndTimer();
 	}
@@ -489,6 +505,7 @@ class PublishDataTables
 													dat_caption_column_id = NULL
 									WHERE dat_work_id = ?" . $datasetCondition;
 		App::Db()->exec($queryCols, array($workId));
+		App::Db()->markTableUpdate($drafting . "dataset");
 
 		// 2. Pone en null las referencias en variables
 		$queryCols = "UPDATE " . $drafting . "variable
@@ -498,30 +515,34 @@ class PublishDataTables
 									WHERE (dco_id = mvv_data_column_id
 									OR dco_id = mvv_normalization_column_id) AND dat_work_id = ? " . $datasetCondition . ")";
 		App::Db()->exec($queryCols, array($workId));
+		App::Db()->markTableUpdate($drafting . "variable");
 
 		// 3. Pone en null las referencias circulares a columnas
 		$circularCols = "UPDATE " . $drafting . "dataset_column INNER JOIN " . $drafting . "dataset ON dco_dataset_id = dat_id SET dco_aggregation_weight_id = NULL
 									WHERE dat_work_id = ? " . $datasetCondition;
 		App::Db()->exec($circularCols, array($workId));
+		App::Db()->markTableUpdate($drafting . "dataset_column");
 
 		// 4. Pone en null las referencias a symbology
 		$queryCols = "UPDATE " . $drafting . "symbology INNER JOIN " . $drafting . "variable ON mvv_symbology_id = vsy_id INNER JOIN " . $drafting . "metric_version_level ON mvv_metric_version_level_id = mvl_id INNER JOIN " . $drafting . "dataset ON mvl_dataset_id = dat_id
 									SET vsy_cut_column_id = NULL, vsy_sequence_column_id = NULL
 									WHERE dat_work_id = ? " . $datasetCondition;
 		App::Db()->exec($queryCols, array($workId));
+		App::Db()->markTableUpdate($drafting . "symbology");
 
 		// 5. Pone en null las referencias desde markers
 		$markerCols = "UPDATE " . $drafting . "dataset_marker INNER JOIN " . $drafting . "dataset ON dat_marker_id = dmk_id SET dmk_content_column_id = NULL
 									WHERE dat_work_id = ? " . $datasetCondition;
-
 		App::Db()->exec($markerCols, array($workId));
+		App::Db()->markTableUpdate($drafting . "dataset_marker");
 	}
 	private function CleanWork($workId, $branches)
 	{
 		Profiling::BeginTimer();
 		// 1. Guarda los contactos previos
 		$deleteContact = array();
-		$this->InsertQueryCreator($deleteContact, 'GETCONTACT', $branches, $workId);
+		$affectedTables = array();
+		$this->InsertQueryCreator($deleteContact, $affectedTables, 'GETCONTACT', $branches, $workId);
 		$query = $deleteContact[0] . " UNION " . $deleteContact[1];
 		$contacts =	App::Db()->fetchAll($query, array($workId, $workId));
 		// 2. Libera referencias a columnas
@@ -529,6 +550,7 @@ class PublishDataTables
 		// 2. Borra work (tiene triggers y cascade para las demás tablas)
 		$query = "DELETE metric_version FROM metric_version WHERE mvr_work_id = ?";
 		App::Db()->exec($query, array($workId));
+		App::Db()->markTableUpdate("metric_version");
 		// Preserva metadata
 		$metSql = "SELECT wrk_metadata_id FROM work WHERE wrk_id = ?";
 		$metadataId = App::Db()->fetchScalarIntNullable($metSql, array($workId));
@@ -538,11 +560,13 @@ class PublishDataTables
 		// Borra work
 		$query = "DELETE FROM work WHERE wrk_id = ?";
 		App::Db()->exec($query, array($workId));
+		App::Db()->markTableUpdate("work");
 		// Borra metadata
 		if ($metadataId !== null)
 		{
 			$query = "DELETE FROM metadata WHERE met_id = ?";
 			App::Db()->exec($query, array($metadataId));
+			App::Db()->markTableUpdate("metadata");
 		}
 		// 3. Borra los contacts que hayan quedado huéfanos
 		$contactList = '';
@@ -553,6 +577,7 @@ class PublishDataTables
 			$deleteQuery = "DELETE FROM contact WHERE con_id IN (" . $contactList . ")
 												AND con_id NOT IN (select src_contact_id FROM source) AND con_id NOT IN (select met_contact_id FROM metadata) ";
 			App::Db()->exec($deleteQuery);
+			App::Db()->markTableUpdate("contact");
 		}
 		Profiling::EndTimer();
 	}
@@ -564,7 +589,7 @@ class PublishDataTables
 		exit();
 	}
 
-	private function InsertQueryCreator(&$queries, $op, $joinsTreeNode, $workId, $prev = null, $partialQuery = '')
+	private function InsertQueryCreator(&$queries, &$affectedTables, $op, $joinsTreeNode, $workId, $prev = null, $partialQuery = '')
 	{
 		$tablePreffix = ($op == 'INSERTING' ? 'draft_' : '');
 		if ($prev != null)
@@ -573,7 +598,7 @@ class PublishDataTables
 		foreach($joinsTreeNode['childLevels'] as $child)
 		{
 			if ($child['level']['inverse']) // is inverse == true
-				$this->InsertQueryCreator($queries, $op, $child, $workId, $joinsTreeNode['level'], $partialQuery);
+				$this->InsertQueryCreator($queries, $affectedTables, $op, $child, $workId, $joinsTreeNode['level'], $partialQuery);
 		}
 
 		if ($op == 'INSERTING')
@@ -582,6 +607,7 @@ class PublishDataTables
 			$table = $this->GetTablenameFromSuffixedTable($joinsTreeNode['level']['table']);
 			$queries[] = "\n INSERT INTO " . $table  . "(" . $cols['insert'] . ") SELECT " . $cols['select'] . " FROM " . $tablePreffix . $joinsTreeNode['level']['table'] . ($partialQuery != '' ? $partialQuery : "") .
 											" WHERE wrk_id = ? ON DUPLICATE KEY UPDATE " . $cols['update'] ;
+			$affectedTables[] = $table;
 		}
 		else if ($op == 'GETCONTACT')
 		{
@@ -591,7 +617,7 @@ class PublishDataTables
 
 		foreach($joinsTreeNode['childLevels'] as $child)
 			if (!$child['level']['inverse']) // is inverse == false
-				$this->InsertQueryCreator($queries, $op, $child, $workId, $joinsTreeNode['level'], $partialQuery);
+				$this->InsertQueryCreator($queries, $affectedTables, $op, $child, $workId, $joinsTreeNode['level'], $partialQuery);
 	}
 	private function TransformToDraft($entityName)
 	{

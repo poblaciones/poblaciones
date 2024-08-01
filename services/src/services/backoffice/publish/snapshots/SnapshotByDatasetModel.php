@@ -70,6 +70,8 @@ class SnapshotByDatasetModel
 		$sql = "CREATE TABLE " . $table . " (" . substr($sqlCols, 1) . ",
 								 INDEX (sna_geography_item_id), SPATIAL INDEX(sna_envelope), SPATIAL INDEX(sna_location)) ENGINE=MyISAM;";
 		App::Db()->execDDL($sql);
+		App::Db()->markTableUpdate($table);
+
 		// Listo
 		Profiling::EndTimer();
 	}
@@ -130,7 +132,8 @@ class SnapshotByDatasetModel
 
 		// Arma el FROM
 		$table = $dataset['dat_table'];
-		$sql = "INSERT INTO " . self::SnapshotTable($table) . " (" . substr($sqlCols, 1) . ")
+		$snapshotTable = self::SnapshotTable($table);
+		$sql = "INSERT INTO " . $snapshotTable . " (" . substr($sqlCols, 1) . ")
 						SELECT " . substr($sqlValues, 1);
 		// Pone valores
 		$sql .= " FROM " . $table .
@@ -143,6 +146,7 @@ class SnapshotByDatasetModel
         try
         {
             App::Db()->exec($sql);
+			App::Db()->markTableUpdate($snapshotTable);
 		}
 		catch(\Exception $ex)
         {
@@ -228,6 +232,8 @@ class SnapshotByDatasetModel
 				// Actualiza
 				$update = "UPDATE " . $table . " v JOIN t ON t.sna_id = v.sna_id SET " . $c3 . "= pos";
 				App::Db()->exec($update);
+				App::Db()->markTableUpdate($table);
+
 				// Libera
 				App::Db()->dropTemporaryTable('t');
 			}
@@ -278,6 +284,7 @@ class SnapshotByDatasetModel
 		$unShardifiedId = PublishDataTables::Unshardify($metricVersionLevelId);
 		$update = "UPDATE draft_metric_version_level SET mvl_extents = " . $rect . " WHERE mvl_id = ?";
 		App::Db()->exec($update, array($unShardifiedId));
+		App::Db()->markTableUpdate('draft_metric_version_level');
 
 		// Listo
 		Profiling::EndTimer();

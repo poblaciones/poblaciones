@@ -185,5 +185,15 @@ App::Get('/services/admin/ClearMetadataPdfCache', function (Request $request) {
 	$controller = new CacheManager();
 	$metadataId = Params::GetMandatory('m');
 	$ret = $controller->CleanPdfMetadata($metadataId);
-	return App::Json($ret);
+	return App::Json(["result" => "OK"]);
+});
+
+App::Get('/services/admin/MarkTable', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$controller = new services\MarkUpdateTableService();
+	$tablesString = Params::GetMandatory('t');
+	$tables = explode(',', $tablesString);
+	$controller->MarkTables($tables);
+	return App::Json(["result" => "OK"]);
 });

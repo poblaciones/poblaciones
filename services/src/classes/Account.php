@@ -150,6 +150,7 @@ class Account
 		$this->EnsureDbInfo();
 		$update = "REPLACE INTO user_setting (ust_user_id, `ust_key`, `ust_value`) VALUES (?, ?, ?)";
 		App::Db()->exec($update, [$this->userId, $key, json_encode($value)]);
+		App::Db()->markTableUpdate("user_setting");
 	}
 
 	private function RefreshDbInfo()
@@ -330,6 +331,7 @@ class Account
 		$update = "UPDATE user SET " . $setters . " WHERE usr_id = ?";
 		$args[] = $this->userId;
 		App::Db()->exec($update, $args);
+		App::Db()->markTableUpdate("user");
 	}
 	public function ActivateOld($id)
 	{
@@ -346,6 +348,7 @@ class Account
 		// Activa la cuenta
 		$update = "UPDATE user SET usr_is_active = 1 WHERE usr_id = ?";
 		App::Db()->exec($update, array($this->userId));
+		App::Db()->markTableUpdate("user");
 		$this->isActive = 1;
 
 		return $link;
@@ -397,12 +400,14 @@ class Account
 		$passwordHashed = Str::SecurePasswordHash($password);
 		$sql = "UPDATE user SET usr_password = ? WHERE usr_id = ?";
 		App::Db()->exec($sql, array($passwordHashed, $this->userId));
+		App::Db()->markTableUpdate("user");
 	}
 
 	public function SaveActivation($firstName, $lastName, $passwordHashed)
 	{
 		$sql = "UPDATE user SET usr_firstname = ?, usr_lastname = ?, usr_password = ?, usr_is_active = 1 WHERE usr_id = ?";
 		App::Db()->exec($sql, array($firstName, $lastName, $passwordHashed, $this->userId));
+		App::Db()->markTableUpdate("user");
 		$this->RefreshDbInfo();
 	}
 
@@ -419,6 +424,7 @@ class Account
 		$sql = "UPDATE user SET usr_firstname = ?, usr_lastname = ?, usr_facebook_oauth_id = ?,
 												usr_google_oauth_id = ?, usr_is_active = 1 WHERE usr_id = ?";
 		App::Db()->exec($sql, array($this->firstName, $this->lastName, $this->facebookOauthId, $this->googleOauthId, $this->userId));
+		App::Db()->markTableUpdate("user");
 	}
 	public function LostPasswordActivate($id)
 	{

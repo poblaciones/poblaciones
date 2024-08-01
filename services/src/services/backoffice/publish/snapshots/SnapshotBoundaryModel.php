@@ -43,6 +43,7 @@ class SnapshotBoundaryModel
 							SELECT bou_id, bou_caption, bgr_caption FROM boundary JOIN boundary_group ON bgr_id = bou_group_id
 							WHERE bou_is_private = 0";
 		$ret = App::Db()->exec($sql);
+		App::Db()->markTableUpdate('snapshot_boundary');
 
 		$sql = "INSERT INTO snapshot_boundary_item
 									(`biw_boundary_id`,
@@ -63,6 +64,7 @@ class SnapshotBoundaryModel
 									INNER JOIN  clipping_region_item ON cli_clipping_region_id = bcr_clipping_region_id";
 
 		$ret = App::Db()->exec($sql);
+		App::Db()->markTableUpdate('snapshot_boundary_item');
 
 		FabMetricsCache::Cache()->Clear();
 

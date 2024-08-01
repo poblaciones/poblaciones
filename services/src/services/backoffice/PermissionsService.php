@@ -35,6 +35,7 @@ class PermissionsService extends BaseService
 		// Limpia
 		$clean = "DELETE draft_work_permission FROM draft_work_permission JOIN user ON wkp_user_id = usr_id WHERE wkp_work_id = ? AND usr_email = ? AND wkp_permission = ?";
 		App::Db()->exec($clean, array($workId, $userEmail, $permission));
+		App::Db()->markTableUpdate('draft_work_permission');
 		// 1. Crea el permiso
 		$newPermission = new entities\DraftWorkPermission();
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
@@ -119,6 +120,8 @@ class PermissionsService extends BaseService
 		Profiling::BeginTimer();
 		$delete = "DELETE FROM draft_work_permission WHERE wkp_work_id = ? AND wkp_id = ?";
 		App::Db()->exec($delete, array($workId, $permissionId));
+		App::Db()->markTableUpdate('draft_work_permission');
+
 		WorkPermissionsCache::Clear($workId);
 		Profiling::EndTimer();
 		return self::OK;
