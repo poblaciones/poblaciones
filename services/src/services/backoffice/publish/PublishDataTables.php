@@ -463,7 +463,7 @@ class PublishDataTables
 
 		// Pasa las filas
 		$sql = "INSERT INTO " . $target_table . "(chu_file_id, chu_content) SELECT "
-			. $this->ShardifiedDb('chu_file_id') . ", chu_content FROM " . $src_table . " WHERE chu_file_id IN (SELECT fil_id FROM file)";
+			. $this->ShardifiedDb('chu_file_id') . ", chu_content FROM " . $src_table . " WHERE " . $this->ShardifiedDb('chu_file_id') . " IN (SELECT fil_id FROM file)";
 		App::Db()->exec($sql);
 		App::Db()->markTableUpdate($target_table);
 	}
