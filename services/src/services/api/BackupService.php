@@ -183,6 +183,8 @@ class BackupService extends BaseService
 		{
 			$args[] = '--from_date';
 			$args[] = $this->state['lastBackupDate'];
+			$args[] = '--from_date_index';
+			$args[] = Context::Paths()->GetTableUpdatePath();
 		}
 		$output = Python::Execute("bcup", $args);
 
