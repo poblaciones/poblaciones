@@ -12,7 +12,8 @@ class ConfigurationService extends BaseService
 {
 	public function GetTransactionServer()
 	{
-
+		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+		return ['Server' => $dynamicServer->publicUrl];
 	}
 
 	public function GetConfiguration()
@@ -21,16 +22,11 @@ class ConfigurationService extends BaseService
 		$user = $userService->GetStatus();
 
 		$model = new SignatureModel();
-		if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures)
-			$signatures = $model->GetSignatures();
-		else
-			$signatures = $model->GetRemoteSignatures(true);
+		$signatures = $model->GetSignatures();
 
-		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
 		$mainServer = App::Settings()->Servers()->Main();
 		if (!$user['Logged'])
-			return array('User' => $user, 'MainServer' => $mainServer->publicUrl,
-				'DynamicServer' => $dynamicServer->publicUrl);
+			return array('User' => $user, 'MainServer' => $mainServer->publicUrl);
 		else
 			return array('UseCalculated' => App::Settings()->Map()->UseCalculated,
 								'UseTextures' => App::Settings()->Map()->UseTextures,
@@ -39,8 +35,7 @@ class ConfigurationService extends BaseService
 								'DefaultRelocateLocation' => App::Settings()->Map()->DefaultRelocateLocation,
 								'Signatures' => $signatures,
 								'User' => $user,
-								'MainServer' => $mainServer->publicUrl,
-								'DynamicServer' => $dynamicServer->publicUrl);
+								'MainServer' => $mainServer->publicUrl);
 	}
 
 	public function SetUserSetting($key, $value)

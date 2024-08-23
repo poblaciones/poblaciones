@@ -88,11 +88,6 @@ App::$app->get('/services/frontend/SwitchSessionProvider', function (Request $re
     return App::Json($controller->SwitchSessionProvider());
 });
 
-App::$app->get('/services/GetSignatures', function (Request $request) {
-	$configuration = new helena\db\frontend\SignatureModel();
-	return App::Json($configuration->GetSignatures());
-});
-
 App::$app->get('/services/GetConfiguration', function (Request $request) {
 	$controller = new services\ConfigurationService();
 	$topUrl = Params::Get('t');

@@ -14,6 +14,7 @@ use minga\framework\Profiling;
 use minga\framework\MessageBox;
 use minga\framework\PhpSession;
 use minga\framework\GlobalizeDebugSession;
+use minga\framework\WebConnection;
 use minga\framework\settings\CacheSettings;
 
 use helena\classes\Paths;
@@ -576,6 +577,22 @@ class App
 	public static function FormFactory()
 	{
 		return self::$app['form.factory'];
+	}
+
+
+	public static function FlushRemoteFile($url, $args = null)
+	{
+		$conn = new WebConnection();
+		$conn->Initialize();
+		$response = $conn->Get($url, '', 0, $args);
+
+		$sending = App::SendFile($response->file, true);
+		if (array_key_exists("content-disposition", $response->headers))
+			$sending->headers->set('content-disposition', $response->headers['content-disposition']);
+
+		$conn->Finalize();
+
+		return $sending;
 	}
 
 	public static function SendFile($file, $deleteAfterSend = false)

@@ -13,41 +13,56 @@ use minga\framework\Params;
 
 // ej. http://mapas/services/metadata/GetMetadataFile?m=12&f=4
 App::$app->get('/services/metadata/GetMetadataFile', function (Request $request) {
-	$controller = new commonServices\MetadataService();
 	$metadataId = Params::GetIntMandatory('m');
 	$fileId = Params::GetIntMandatory('f');
 
-	if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures) {
-
-		$model = new MetadataModel();
-		$workId = $model->GetWorkIdByMetadataId($metadataId);
-		Session::$AccessLink = Params::Get('l');
-		if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId))
-			return $denied;
-
+	if (!App::Settings()->Servers()->IsTransactionServerRequest()) {
+		$controller = new commonServices\RemoteMetadataService();
 		return $controller->GetMetadataFile($metadataId, $fileId);
 	}
-	else
-	{
-		return $controller->GetRemoteMetadataFile($metadataId, $fileId);
-	}
+
+	$controller = new commonServices\MetadataService();
+	$model = new MetadataModel();
+	$workId = $model->GetWorkIdByMetadataId($metadataId);
+	Session::$AccessLink = Params::Get('l');
+	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId))
+		return $denied;
+
+	return $controller->GetMetadataFile($metadataId, $fileId);
 });
 
 // ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4
 App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) {
-	$controller = new commonServices\MetadataService();
+	$workId = Params::GetInt('w');
 	$metadataId = Params::GetIntMandatory('m');
-
-	if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures) {
-
-		// x compatibilidad a links viejos
-		$workId = Params::GetInt('w');
-		if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId))
-			return $denied;
-
-		return $controller->GetMetadataPdf($metadataId, null, false, $workId);
+	if (!App::Settings()->Servers()->IsTransactionServerRequest())
+	{
+		$controller = new commonServices\RemoteMetadataService();
+		return $controller->GetMetadataPdf($metadataId, $workId);
 	}
-	else
-		return $controller->GetRemoteMetadataPdf($metadataId, null, false);
+	$controller = new commonServices\MetadataService();
+	// x compatibilidad a links viejos
+	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId))
+		return $denied;
+
+	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
 });
 
+// ej. http://mapas/services/metadata/GetWorkMetadataPdf?w=12&f=4
+App::$app->get('/services/metadata/GetWorkMetadataPdf', function (Request $request) {
+	$metadataId = Params::GetInt('m');
+	$workId = Params::GetIntMandatory('w');
+	$datasetId = Params::GetInt('d', null);
+	$link = Params::Get('l');
+
+	if (!App::Settings()->Servers()->IsTransactionServerRequest()) {
+		$controller = new commonServices\RemoteMetadataService();
+		return $controller->GetWorkMetadataPdf($metadataId, $datasetId, $workId, $link);
+	}
+
+	$controller = new commonServices\MetadataService();
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId))
+		return $denied;
+	Session::$AccessLink = $link;
+	return $controller->GetWorkMetadataPdf($metadataId, $datasetId, false, $workId);
+});

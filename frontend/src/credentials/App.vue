@@ -10,6 +10,7 @@
 <script>
 import Vue from 'vue';
 import err from '@/common/framework/err';
+import axiosClient from '@/common/js/axiosClient';
 
 export default {
 	name: 'App',
@@ -27,7 +28,11 @@ export default {
 	},
 	methods: {
 		InitializePage() {
-
+			axiosClient.getPromise(window.host + '/services/GetTransactionServer', {},
+				'acceder a la configuración de servidores').then(function (serverConfiguration) {
+					window.mainHost = window.host;
+					window.host = serverConfiguration.Server;
+				});
 		},
 		RegisterErrorHandler() {
 			Vue.config.errorHandler = err.HandleError;

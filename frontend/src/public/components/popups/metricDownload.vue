@@ -216,13 +216,13 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Work.Metadata.Id + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
+				return window.mainHost + '/services/metadata/GetMetadataFile?m=' + this.version.Work.Metadata.Id + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
 			} else {
 				return '#';
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
+			return window.mainHost + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
 		},
 		resolveMetadataDictionaryUrl() {
 			return window.host + '/services/metadata/GetWorkMetadataDictionary?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);

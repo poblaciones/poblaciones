@@ -22,6 +22,12 @@ class ConfigurationService extends BaseService
     const CookieName = 'nav';
     const ValidRenew = 3000; // en días
 
+	public function GetTransactionServer()
+	{
+		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+		return ['Server' => $dynamicServer->publicUrl];
+	}
+
     public function GetCurrentMapProvider()
     {
         // Se fija la configuración actual
@@ -79,10 +85,7 @@ class ConfigurationService extends BaseService
 	{
 		$session = new SessionService();
 		$model = new SignatureModel();
-		if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures)
-			$signatures = $model->GetSignatures();
-		else
-			$signatures = $model->GetRemoteSignatures();
+		$signatures = $model->GetSignatures();
 
 		$blockStrategy = array('UseDataTileBlocks' => App::Settings()->Map()->UseDataTileBlocks,
 													 'UseLabelTileBlocks' => App::Settings()->Map()->UseLabelTileBlocks,
@@ -97,7 +100,6 @@ class ConfigurationService extends BaseService
 		$navigation = $session->GetNavigationId();
 
 		$mainServer = App::Settings()->Servers()->Main();
-		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
 
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
@@ -125,8 +127,7 @@ class ConfigurationService extends BaseService
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user,
-									'MainServer' => $mainServer->publicUrl,
-									'DynamicServer' => $dynamicServer->publicUrl);
+									'MainServer' => $mainServer->publicUrl);
 
 		Callbacks::$MapsOpened++;
 

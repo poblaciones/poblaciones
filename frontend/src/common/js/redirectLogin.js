@@ -4,7 +4,7 @@ module.exports = {
 	},
 	loginUrl() {
 		var actualLink = document.location;
-		var loginUrl = window.host + '/cr#';
+		var loginUrl = window.mainHost + '/cr#';
 		var url = this.AppendParam(loginUrl, 'to', actualLink);
 		url = this.AppendParam(url, 'ask', 1);
 		return url;
@@ -14,7 +14,7 @@ module.exports = {
 	},
 	registerUrl() {
 		var actualLink = document.location;
-		var loginUrl = window.host + '/cr#/signup';
+		var loginUrl = window.mainHost + '/cr#/signup';
 		var url = this.AppendParam(loginUrl, 'to', actualLink);
 		url = this.AppendParam(url, 'ask', 1);
 		return url;

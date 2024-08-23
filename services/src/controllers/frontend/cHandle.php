@@ -148,8 +148,8 @@ class cHandle extends cPublicController
 			if ($this->HasLocalVersions($metric))
 			{
 				$links[] = [ 'Id' => $metric['Id'],
-																	'UrlName' => Str::CrawlerUrlEncode($metric['Name']),
-																	'Name' => $metric['Name']];
+							'UrlName' => Str::CrawlerUrlEncode($metric['Name']),
+							'Name' => $metric['Name']];
 			}
 		}
 		$this->AddValue('links', $links);

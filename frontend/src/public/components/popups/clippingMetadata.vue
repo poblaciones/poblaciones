@@ -97,7 +97,7 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.metadata.Id + '&f=' + file.FileId + h.urlParam('l', window.accessLink);
+				return window.mainHost + '/services/metadata/GetMetadataFile?m=' + this.metadata.Id + '&f=' + file.FileId + h.urlParam('l', window.accessLink);
       } else {
 				return '#';
 			}
@@ -120,7 +120,7 @@ export default {
 				document.createTextNode(html)).parentNode.innerHTML;
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.metadata.Id + h.urlParam('l', window.accessLink);
+			return window.mainHost + '/services/metadata/GetMetadataPdf?m=' + this.metadata.Id + h.urlParam('l', window.accessLink);
 		},
 		calculateHref(workId) {
 		var pathArray = window.location.pathname.split('/');

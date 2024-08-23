@@ -39,7 +39,7 @@ class SignatureModel extends BaseModel
 		return $ret;
 	}
 
-	public function GetRemoteSignatures($backoffice = false)
+/*	public function GetRemoteSignatures($backoffice = false)
 	{
 		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
 		$url = $dynamicServer->publicUrl . '/services/' . ($backoffice ? 'backoffice/' : '') . 'GetSignatures';
@@ -74,7 +74,7 @@ class SignatureModel extends BaseModel
 		}
 		return $data;
 	}
-
+	*/
 	public function GetLookupSignature()
 	{
 		$sql = "SELECT ver_value FROM version WHERE ver_name = 'LOOKUP_VIEW'";

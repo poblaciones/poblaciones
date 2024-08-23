@@ -8,23 +8,6 @@ use helena\services\backoffice as services;
 use minga\framework\Params;
 use minga\framework\PublicException;
 
-// Backoffice
-
-
-// ********************************* Servicios *********************************
-
-// ******* Permisos *********************************
-
-App::$app->get('/services/backoffice/GetSignatures', function (Request $request) {
-	$configuration = new helena\db\frontend\SignatureModel();
-	return App::Json($configuration->GetSignatures());
-});
-
-App::$app->get('/services/backoffice/GetConfiguration', function (Request $request) {
-	$configuration = new services\ConfigurationService();
-	return App::Json($configuration->GetConfiguration());
-});
-
 App::$app->post('/services/backoffice/SetUserSetting', function (Request $request) {
 	$key = Params::GetMandatory('k');
 	$value = Params::GetJsonMandatory('v', true);

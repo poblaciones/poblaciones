@@ -163,7 +163,10 @@
 			this.BindEvents();
 			var loc = this;
 			window.Popups.WaitMessage = this.$refs.showWaitMessage;
-			this.GetConfiguration().then(function () {
+			this.GetServer().then(
+				function(serverConfiguration) {
+					return loc.GetConfiguration(serverConfiguration.data);
+				}).then(function () {
 				if (loc.Embedded.HideLabels) {
 					loc.toolbarStates.showLabels = false;
 				}
@@ -217,7 +220,7 @@
 			toggleFullscreen() {
 				this.fullscreen = !this.fullscreen;
 			},
-			GetConfiguration() {
+			GetConfiguration(serverConfiguration) {
 				const loc = this;
 				var params = {};
 				if (window.self !== window.top && !this.IsPreview()) {
@@ -229,9 +232,10 @@
 					params.t = topUrl;
 					params.c = document.location.href;
 				}
-				return axios.get(window.host + '/services/GetConfiguration', {
+				return axios.get(serverConfiguration.Server + '/services/GetConfiguration', {
 					params: params
 				}).then(function (res) {
+					res.data.DynamicServer = serverConfiguration.Server;
 					window.mainHost = res.data.MainServer;
 					window.host = res.data.DynamicServer;
 					loc.config = res.data;
@@ -242,6 +246,14 @@
 					}
 				}).catch(function (error) {
 					err.errDialog('GetConfiguration', 'conectarse con el servidor', error);
+				});
+			},
+			GetServer() {
+				var params = {};
+				return axios.get(window.host + '/services/GetTransactionServer', {
+					params: params
+				}).catch(function (error) {
+					err.errDialog('GetTransactionServer', 'conectarse con el servidor', error);
 				});
 			},
 			embeddedClick() {

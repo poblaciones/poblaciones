@@ -14,7 +14,6 @@ App::$app->post('/', function (Request $request) {
 	return App::NotFoundResponse();
 });
 
-
 // MAPA
 App::RegisterControllerGet('/map', controllers\cMap::class);
 App::RegisterControllerGet('/map/', controllers\cMap::class);
@@ -23,10 +22,18 @@ App::RegisterControllerGet('/datasets', controllers\cDatasets::class);
 
 App::RegisterControllerGet('/services/content/downloads', controllers\cDownloads::class);
 
-require_once('frontend/map.php');
+if (App::Settings()->Servers()->IsMainServerRequest()) {
+	require_once('frontend/mainServer.php');
+	if (!App::Settings()->Servers()->IsTransactionServerRequest())
+	{
+		require_once('frontend/remoteCrawler.php');
+	}
+}
+
 require_once('frontend/metadata.php');
 
 if (App::Settings()->Servers()->IsTransactionServerRequest()) {
+	require_once('frontend/map.php');
 	require_once('frontend/boundary.php');
 	require_once('frontend/clipping.php');
 	require_once('frontend/session.php');

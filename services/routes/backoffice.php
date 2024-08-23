@@ -12,6 +12,11 @@ App::RegisterControllerGet('/admins/{any}', helena\controllers\admins\cAdmins::c
 
 require_once('backoffice/permission.php');
 
+if (App::Settings()->Servers()->IsMainServerRequest())
+{
+	require_once('backoffice/mainServer.php');
+}
+
 if (App::Settings()->Servers()->IsTransactionServerRequest())
 {
 	require_once('backoffice/work.php');
@@ -26,3 +31,4 @@ if (App::Settings()->Servers()->IsTransactionServerRequest())
 	require_once('admin/review.php');
 	require_once('admin/admin.php');
 }
+

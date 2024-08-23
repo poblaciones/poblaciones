@@ -87,18 +87,6 @@ App::$app->get('/services/works/GetWork', function (Request $request) {
 	return App::Json($controller->GetWork($workId));
 });
 
-// ej. http://mapas/services/metadata/GetWorkMetadataPdf?w=12&f=4
-App::$app->get('/services/metadata/GetWorkMetadataPdf', function (Request $request) {
-	$controller = new commonServices\MetadataService();
-	$metadataId = Params::GetInt('m');
-	$workId = Params::GetIntMandatory('w');
-	$datasetId = Params::GetInt('d', null);
-	Session::$AccessLink = Params::Get('l');
-	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
-
-	return $controller->GetWorkMetadataPdf($metadataId, $datasetId, false, $workId);
-});
-
 
 // ej. http://mapas/services/metadata/GetWorkMetadataDictionary?w=12&f=4
 App::$app->get('/services/metadata/GetWorkMetadataDictionary', function (Request $request) {

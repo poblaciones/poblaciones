@@ -30,8 +30,6 @@ use OpenSpout\Writer\XLSX\Entity\SheetView;
 
 class MetadataService extends BaseService
 {
-	// falta que pase el attachment name, y que funcione para GetWorkMetadataPdf y GetMetadataPdf
-
 	public function GetMetadataFile($metadataId, $fileId)
 	{
 		$metadataTable = new MetadataModel();
@@ -48,21 +46,6 @@ class MetadataService extends BaseService
 		$fileModel = new FileModel(false, $workId);
 
 		return $fileModel->SendFile($fileId, $friendlyName);
-	}
-
-	public function GetRemoteMetadataFile($metadataId, $fileId)
-	{
-		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
-		$url = $dynamicServer->publicUrl . '/services/metadata/GetMetadataFile';
-		$args = ['m' => $metadataId, 'f' => $fileId];
-
-		$conn = new WebConnection();
-		$conn->Initialize();
-		$response = $conn->Get($url, '', 0, $args);
-		$sending = App::SendFile($response->file, true);
-		$conn->Finalize();
-
-		return $sending;
 	}
 
 	public function GetWorkMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
@@ -100,9 +83,8 @@ class MetadataService extends BaseService
 		{
 			$friendlyName = Str::SanitizeFilename($friendlyName);
 
-			return App::SendFile($data)
-				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
-				->deleteFileAfterSend(true);
+			return App::SendFile($data, true)
+				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName);
 		}
 		else
 		{
