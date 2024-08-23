@@ -33,6 +33,7 @@ class VariableInfo extends BaseMapModel
 	public $DefaultMeasure = 'N';
 	public $IsCategorical;
 	public $IsSequence;
+	public $Comparable = false;
 	public $ValueLabels = array();
 	public $ValidMetrics = array();
 	public $CurrentOpacity = -1;

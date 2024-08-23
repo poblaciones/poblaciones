@@ -327,6 +327,32 @@ ActiveSelectedMetric.prototype.GetFirstValidVersionIndexByWorkId = function (id)
 	return -1;
 };
 
+ActiveSelectedMetric.prototype.GetVersionsWithComparableVariables = function () {
+// entre en los levels y en las variable, devolviendo pares de { version:, index:}
+	var ret = [];
+	for (var l = 0; l < this.properties.Versions.length; l++) {
+		var version = this.properties.Versions[l];
+		if (this.hasComparableVariable(version)) {
+			ret.push({ version: version, index: l});
+		}
+	}
+	return ret;
+};
+
+ActiveSelectedMetric.prototype.hasComparableVariable = function (version) {
+	var selected = this.SelectedVariable();
+	for (var level of version.Levels) {
+		for (var variable of level.Variables) {
+			if (selected.Name == variable.Name) {
+				if (variable.Comparable) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+};
+
 ActiveSelectedMetric.prototype.GetVersionById = function (id) {
 	var index = this.GetVersionIndex(id);
 	if (index === -1) {

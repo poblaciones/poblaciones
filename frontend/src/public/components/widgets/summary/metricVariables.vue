@@ -96,6 +96,7 @@ export default {
 			} else {
 				this.selectVariable(index);
 			}
+			this.$emit('variableChanged');
 		},
 		selectVariable(index) {
 			if (this.fixedLevel) {

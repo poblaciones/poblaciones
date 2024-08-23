@@ -10,16 +10,27 @@ use helena\classes\App;
 
 class ConfigurationService extends BaseService
 {
+	public function GetTransactionServer()
+	{
+
+	}
+
 	public function GetConfiguration()
 	{
 		$userService = new AuthenticationService();
 		$user = $userService->GetStatus();
 
 		$model = new SignatureModel();
-		$signatures = $model->GetSignatures();
+		if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures)
+			$signatures = $model->GetSignatures();
+		else
+			$signatures = $model->GetRemoteSignatures(true);
 
+		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+		$mainServer = App::Settings()->Servers()->Main();
 		if (!$user['Logged'])
-			return array('User' => $user);
+			return array('User' => $user, 'MainServer' => $mainServer->publicUrl,
+				'DynamicServer' => $dynamicServer->publicUrl);
 		else
 			return array('UseCalculated' => App::Settings()->Map()->UseCalculated,
 								'UseTextures' => App::Settings()->Map()->UseTextures,
@@ -27,7 +38,9 @@ class ConfigurationService extends BaseService
 								'UsePerimeter' => App::Settings()->Map()->UsePerimeter,
 								'DefaultRelocateLocation' => App::Settings()->Map()->DefaultRelocateLocation,
 								'Signatures' => $signatures,
-								'User' => $user);
+								'User' => $user,
+								'MainServer' => $mainServer->publicUrl,
+								'DynamicServer' => $dynamicServer->publicUrl);
 	}
 
 	public function SetUserSetting($key, $value)

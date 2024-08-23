@@ -19,3 +19,4 @@ tags
 /startup/dbdefault-user.sql
 /startup/dbversion.sql
 /services/py/bcup/__pycache__
+/services/py/bcup

@@ -578,11 +578,13 @@ class App
 		return self::$app['form.factory'];
 	}
 
-	public static function SendFile($file)
+	public static function SendFile($file, $deleteAfterSend = false)
 	{
 		$ret = self::$app->SendFile($file);
+		if ($deleteAfterSend)
+			$ret->deleteFileAfterSend(true);
 		if (self::$contentType !== null)
-	    $ret->headers->set('Content-Type', self::$contentType);
+		    $ret->headers->set('Content-Type', self::$contentType);
 		return $ret;
 	}
 

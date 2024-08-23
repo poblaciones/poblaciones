@@ -132,4 +132,4 @@ UNION
 
 -- USAR LA SALIDA DE AMBAS TABLAS CON EL EXCEL MIGRACION FILE_CHUNKS
 
-UPDATE version SET ver_value = '110' WHERE ver_name = 'DB';
+UPDATE version SET ver_value = '109' WHERE ver_name = 'DB';

@@ -3,7 +3,7 @@
 		<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false">
 
 			<invoker ref="invoker"></invoker>
-			<stepper ref="stepper" @closed="stepperClosed" @completed="stepperCompleted"  :title="'Realizando ' + action"></stepper>
+			<stepper ref="stepper" @closed="stepperClosed" @completed="stepperCompleted" :title="'Realizando ' + action"></stepper>
 
 			<md-dialog-title>
 				Asistente de {{ action }}

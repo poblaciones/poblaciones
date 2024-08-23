@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog  :md-active.sync="showDialog" :md-click-outside-to-close="completed" @md-closed="OnClosed"
+		<md-dialog :md-active.sync="showDialog" :md-click-outside-to-close="completed" @md-closed="OnClosed"
 							 style="z-index: 10000!important">
 			<md-dialog-title v-if="realTitle !== '' && realTitle !== null">{{ realTitle }}</md-dialog-title>
 			<md-dialog-content style="height: 14.25rem;">

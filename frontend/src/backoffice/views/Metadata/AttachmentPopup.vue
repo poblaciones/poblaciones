@@ -47,7 +47,7 @@
 				</div>
 				<div v-if="isNew && this.item !== null" class="md-layout md-gutter">
 						<div class="md-layout-item md-size-100">
-							<mp-simple-text label="Descripción"  :maxlength="200"
+							<mp-simple-text label="Descripción" :maxlength="200"
 															v-model="localCaption" @enter="save()" :canEdit="Work.CanEdit()" />
 						</div>
 				</div>

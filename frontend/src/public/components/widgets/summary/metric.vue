@@ -33,9 +33,9 @@
 			<mp-filter-badge style="margin-top: 0.9rem;" v-if="hasUrbanityFilter && urbanity != 'N'"
 											 :title="getUrbanityTextActive" :tooltip="getUrbanityTextTooltip"
 											 @click="changeUrbanity('N')" />
-			<MetricVariables v-if="metric.IsMultiLevel() && metric.LastLevelDontMultilevel()"
+			<MetricVariables v-if="metric.IsMultiLevel() && metric.LastLevelDontMultilevel()" @variableChanged="variableChanged"
 											 :metric="metric" :fixedLevel="metric.BottomLevel()" style="margin-bottom: -2rem;" />
-			<MetricVariables :metric="metric" />
+			<MetricVariables :metric="metric" @variableChanged="variableChanged" />
 		</template>
 		<div class="coverageBox" v-if="hasLegends(metric.SelectedLevel())">
 			<template v-for="variable, index in metric.SelectedLevel().Variables">
@@ -46,7 +46,7 @@
 		</div>
 		<div class="sourceRow">
 			<div>
-				{{ this.compareVersions[0] }} -
+				{{ this.compareVersions[0] }}
 				{{ this.compareVersions[1] }}
 			</div>
 			<div class="btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
@@ -58,11 +58,11 @@
 				</button>
 			</div>
 			<div class="btn-group" v-if="useComparer && metric.Compare.Active" style="float: left">
-				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
-								@click="changeSelectedVersionIndexCompare(index)"
+				<button v-for="pair in metric.GetVersionsWithComparableVariables()" :key="pair.version.Id" type="button"
+								@click="changeSelectedVersionIndexCompare(pair.index)"
 								class="btn btn-default btn-xs exp-serie-item"
-								:class="getActiveCompare(ver)">
-					{{ ver.Version.Name }}
+								:class="getActiveCompare(pair.version)">
+					{{ pair.version.Version.Name }}
 				</button>
 			</div>
 			<div style="padding: 0px 20px 20px 20px; float: left " v-if="false && useComparer && metric.Compare.Active">
@@ -233,25 +233,42 @@ export default {
 		},
 		changeMetricVisibility() {
 			this.metric.ChangeMetricVisibility();
-		},
-		updateCompareVersions() {
-			if (!this.metric.Compare.Active) {
-				return;
-			}
-			var versionCompare = this.metric.Compare.SelectedVersion();
-			if (versionCompare) {
-				this.compareVersions = [versionCompare.Version.Name, this.metric.SelectedVersion().Version.Name];
+			},
+			variableChanged() {
+				this.updateCompareVersions();
+			},
+			updateCompareVersions() {
+				if (!this.metric.Compare.Active) {
+					return;
+				}
+				var versionsArray = this.metric.GetVersionsWithComparableVariables();
+				var versionCompare = this.metric.Compare.SelectedVersion();
+					if (versionCompare) {
+						// avanza si ambas están en lo comparable
+						if (this.inVersionsArray(versionsArray, versionCompare.Version) && this.inVersionsArray(versionsArray, this.metric.SelectedVersion().Version)) {
+							this.compareVersions = [versionCompare.Version.Name, this.metric.SelectedVersion().Version.Name];
+							window.SegMap.SaveRoute.UpdateRoute();
+							return;
+						}
+					}
+				// No tiene nada indicado... pone algo
+				var v1, v2;
+				if (versionsArray.length == 1) {
+					v1 = versionsArray[0];
+					v2 = versionsArray[0];
+				} else {
+					v1 = versionsArray[versionsArray.length - 2];
+					v2 = versionsArray[versionsArray.length - 1];
+				}
+				// Las actualiza
+				if (this.metric.Compare.SelectedVersionIdex !== v1.index) {
+					this.metric.Compare.SelectVersion(v1.index);
+				}
+				if (this.metric.properties.SelectedVersionIdex !== v2.index) {
+					this.metric.SelectVersion(v2.index);
+				}
+				this.compareVersions = [v1.version.Version.Name, v2.version.Version.Name];
 				window.SegMap.SaveRoute.UpdateRoute();
-				return;
-			}
-			// No tiene nada indicado... pone algo
-			var versionsArray = this.versionsArray;
-			if (versionsArray.length == 1) {
-				this.compareVersions = [versionsArray[0], versionsArray[0]];
-			} else {
-				this.compareVersions = [versionsArray[versionsArray.length - 2], versionsArray[versionsArray.length -1]];
-			}
-			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		rankingShown() {
 			var vScrollTo = require('vue-scrollto');
@@ -259,6 +276,14 @@ export default {
 			setTimeout(function () {
 				vScrollTo.scrollTo(loc.$refs.rankings, 500, { container: '#panRight', force: false });
 			}, 100);
+		},
+		inVersionsArray(versionsArray, version) {
+				for (var arrVersion of versionsArray) {
+					if (arrVersion.version.Version.Name == version.Name) {
+						return true;
+					}
+				}
+				return false;
 		},
 		remove(e) {
 			e.preventDefault();

@@ -102,7 +102,7 @@ if (geom.coordinates.length > 1) {
 }
 var path = 'M'+ mainStr;
 if(holes) {
-  for(var i=0;i<holes.length; i++) {
+  for(var i = 0; i < holes.length; i++) {
     path += ' M' + this.getCoordString(holes[i]);
   }
 }

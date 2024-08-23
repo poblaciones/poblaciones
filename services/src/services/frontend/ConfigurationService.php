@@ -77,9 +77,13 @@ class ConfigurationService extends BaseService
 
 	public function GetConfiguration($topUrl = null, $clientUrl = null)
 	{
-		$model = new SignatureModel();
 		$session = new SessionService();
-		$signatures = $model->GetSignatures();
+		$model = new SignatureModel();
+		if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures)
+			$signatures = $model->GetSignatures();
+		else
+			$signatures = $model->GetRemoteSignatures();
+
 		$blockStrategy = array('UseDataTileBlocks' => App::Settings()->Map()->UseDataTileBlocks,
 													 'UseLabelTileBlocks' => App::Settings()->Map()->UseLabelTileBlocks,
 													 'TileDataBlockSize' => App::Settings()->Map()->TileDataBlockSize,
@@ -92,7 +96,10 @@ class ConfigurationService extends BaseService
 
 		$navigation = $session->GetNavigationId();
 
-        $ret = array('Signatures' => $signatures,
+		$mainServer = App::Settings()->Servers()->Main();
+		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+
+		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
 									'HomePage' =>  Context::Settings()->Servers()->Home()->publicUrl,
@@ -117,7 +124,9 @@ class ConfigurationService extends BaseService
 									'NavigationMonth' => $navigation['month'],
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,
-									'User' => $user);
+									'User' => $user,
+									'MainServer' => $mainServer->publicUrl,
+									'DynamicServer' => $dynamicServer->publicUrl);
 
 		Callbacks::$MapsOpened++;
 

@@ -16,7 +16,7 @@
 											 :readonly="isDisabled || !editMode" @mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 
 					<mp-rich-area style="width: 100%; margin-top: 10px;" @mousedown="mouseDown" @mouseup="mouseUp" :maxlength="maxlength" :rows="rows" v-if="this.multiline && this.formatted" :canEdit="!isDisabled && editMode"
-												 v-model="localValue"  :ref="inputId" />
+												 v-model="localValue" :ref="inputId" />
 
 					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>

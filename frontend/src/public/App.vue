@@ -232,6 +232,8 @@
 				return axios.get(window.host + '/services/GetConfiguration', {
 					params: params
 				}).then(function (res) {
+					window.mainHost = res.data.MainServer;
+					window.host = res.data.DynamicServer;
 					loc.config = res.data;
 					loc.config.IsMobile = loc.$isMobile();
 					loc.user = res.data.User;
@@ -919,6 +921,16 @@
 		}
 	.ibLinkTooltip {
 		pointer-events: all;
+	}
+
+	.btn.active:not(:hover) + .btn.active:not(:hover)::before {
+		content: '';
+		width: 2px;
+		position: absolute;
+		left: -2px;
+		top: 1px;
+		bottom: 1px;
+		background-color: #c3c3c3;
 	}
 
 	.ibLink {

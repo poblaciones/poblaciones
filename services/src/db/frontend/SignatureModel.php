@@ -39,6 +39,42 @@ class SignatureModel extends BaseModel
 		return $ret;
 	}
 
+	public function GetRemoteSignatures($backoffice = false)
+	{
+		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+		$url = $dynamicServer->publicUrl . '/services/' . ($backoffice ? 'backoffice/' : '') . 'GetSignatures';
+		$response = $this->getRemoteJson($url);
+		if ($response === null)
+			throw new \ErrorException("No se pudieron obtener las firmas.");
+		return $response;
+	}
+
+	private function getRemoteJson($url)
+	{
+		if (!App::Settings()->Servers()->VeryifyTransactionServerCertificate)
+		{
+			$context = stream_context_create([
+				'ssl' => [
+					'verify_peer' => false,
+					'verify_peer_name' => false,
+				],
+			]);
+			$jsonString = file_get_contents($url, false, $context);
+		}
+		else
+		{
+			$jsonString = file_get_contents($url);
+		}
+		if ($jsonString === false) {
+			return null; // Error al obtener el contenido
+		}
+		$data = json_decode($jsonString, true);
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			return null; // Error al decodificar el JSON
+		}
+		return $data;
+	}
+
 	public function GetLookupSignature()
 	{
 		$sql = "SELECT ver_value FROM version WHERE ver_name = 'LOOKUP_VIEW'";

@@ -98,7 +98,8 @@ export default {
   components: {
 
   }
-};</script>
+};
+</script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 

@@ -9,7 +9,7 @@
 								 @md-selected="selected">
 				<md-option v-if="allowNull" :value="-1111111">{{ nullLabel }}</md-option>
 				<template v-if="listGrouping">
-					<md-optgroup v-for="(groupItem, index) in classifyGroups(list)" :key="index"  :label="groupItem.caption">
+					<md-optgroup v-for="(groupItem, index) in classifyGroups(list)" :key="index" :label="groupItem.caption">
 						<md-option v-for="item in groupItem.list" :key="item[listKey]" :value="item[listKey]">
 							{{ format(item) }}
 						</md-option>

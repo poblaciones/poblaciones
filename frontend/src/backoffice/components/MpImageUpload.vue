@@ -23,7 +23,7 @@
 			</div>
 		</div>
 		<div v-else class="md-ripple" style="display: table-cell">
-			<label class="file-select"  v-if="canEdit">
+			<label class="file-select" v-if="canEdit">
 				<div class="select-button">
 					<md-icon>add_circle_outline</md-icon>
 					Agregar imagen

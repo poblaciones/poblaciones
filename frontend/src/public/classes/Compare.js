@@ -20,25 +20,27 @@ Compare.prototype.GenerateComparableValueLabels = function () {
 	for (var v = 1; v < this.metric.properties.Versions.length; v++) {
 		for (var level of this.metric.properties.Versions[v].Levels) {
 			for (var variable of level.Variables) {
-				// Le genera niveles
-				var unit = ' pp.';
-				if (this.UseProportionalDelta(variable)) {
-					unit = '%';
+				if (variable.Comparable) {
+					// Le genera niveles
+					var unit = ' pp.';
+					if (this.UseProportionalDelta(variable)) {
+						unit = '%';
+					}
+					variable.ComparableUnit = unit;
+					variable.ComparableValueLabels = [];
+					this.AddComparableLabel(variable, null, "No disponible");
+					this.AddComparableLabel(variable, -50, "Disminuyó 50" + unit + " o más");
+					this.AddComparableLabel(variable, -20, "↘ 20 a 50" + unit);
+					this.AddComparableLabel(variable, -10, "↘ 10 a 20" + unit);
+					this.AddComparableLabel(variable, -5, "↘ 5 a 10" + unit);
+					this.AddComparableLabel(variable, -1, "↘ 1 a 5" + unit);
+					this.AddComparableLabel(variable, 1, "Sin cambios");
+					this.AddComparableLabel(variable, 5, "↗ 1 a 5" + unit);
+					this.AddComparableLabel(variable, 10, "↗ 5 a 10" + unit);
+					this.AddComparableLabel(variable, 20, "↗ 10 a 20" + unit);
+					this.AddComparableLabel(variable, 50, "↗ 20 a 50" + unit);
+					this.AddComparableLabel(variable, 10000000, "Aumentó 50" + unit + " o más");
 				}
-				variable.ComparableUnit = unit;
-				variable.ComparableValueLabels = [];
-				this.AddComparableLabel(variable, null, "No disponible");
-				this.AddComparableLabel(variable, -50, "Disminuyó 50" + unit + " o más");
-				this.AddComparableLabel(variable, -20, "↘ 20 a 50" + unit);
-				this.AddComparableLabel(variable, -10, "↘ 10 a 20" + unit);
-				this.AddComparableLabel(variable, -5, "↘ 5 a 10" + unit);
-				this.AddComparableLabel(variable, -1, "↘ 1 a 5" + unit);
-				this.AddComparableLabel(variable, 1, "Sin cambios");
-				this.AddComparableLabel(variable, 5, "↗ 1 a 5" + unit);
-				this.AddComparableLabel(variable, 10, "↗ 5 a 10" + unit);
-				this.AddComparableLabel(variable, 20, "↗ 10 a 20" + unit);
-				this.AddComparableLabel(variable, 50, "↗ 20 a 50" + unit);
-				this.AddComparableLabel(variable, 10000000, "Aumentó 50" + unit + " o más");
 			}
 		}
 	}

@@ -15,6 +15,11 @@ use minga\framework\PublicException;
 
 // ******* Permisos *********************************
 
+App::$app->get('/services/backoffice/GetSignatures', function (Request $request) {
+	$configuration = new helena\db\frontend\SignatureModel();
+	return App::Json($configuration->GetSignatures());
+});
+
 App::$app->get('/services/backoffice/GetConfiguration', function (Request $request) {
 	$configuration = new services\ConfigurationService();
 	return App::Json($configuration->GetConfiguration());

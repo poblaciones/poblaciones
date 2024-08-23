@@ -5,7 +5,7 @@
 				href="#"
 				@click.stop.prevent="iconClicked(key, value)"
 				@dblclick.stop.prevent="iconDoubleClicked(key)"
-				:class="'item' + getIsSelectedClass(key, value) + (collection == 'fontawesome' ? ' faItem' : '')  + (collection == 'custom' ? ' customItem' : '')"
+				:class="'item' + getIsSelectedClass(key, value) + (collection == 'fontawesome' ? ' faItem' : '') + (collection == 'custom' ? ' customItem' : '')"
 				v-for="(value, key) in currentIcons"
 				:key="key">
 					<span v-html="resolveIcon(key, value)"></span>

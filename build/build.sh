@@ -119,6 +119,9 @@ cp $output/templates/backoffice.html.twig $output/templates/frontend/>>$output-4
 cp $output/templates/credentials.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/admins.html.twig $output/templates/frontend/>>$output-4_copy.log
 
+echo "*** 5. Borra maps"
+rm -f $output/web/static/js/*.map
+
 echo "*** 5. Crea release comprimido"
 tar cjvf $output.tar.bz2 -C $output . >$output-5_tar.log
 

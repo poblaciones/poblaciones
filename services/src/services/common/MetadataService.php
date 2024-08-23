@@ -8,6 +8,7 @@ use minga\framework\IO;
 use minga\framework\Str;
 use minga\framework\PublicException;
 use minga\framework\Performance;
+use minga\framework\WebConnection;
 
 use helena\classes\Links;
 use helena\caches\PdfMetadataCache;
@@ -29,6 +30,8 @@ use OpenSpout\Writer\XLSX\Entity\SheetView;
 
 class MetadataService extends BaseService
 {
+	// falta que pase el attachment name, y que funcione para GetWorkMetadataPdf y GetMetadataPdf
+
 	public function GetMetadataFile($metadataId, $fileId)
 	{
 		$metadataTable = new MetadataModel();
@@ -46,6 +49,22 @@ class MetadataService extends BaseService
 
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}
+
+	public function GetRemoteMetadataFile($metadataId, $fileId)
+	{
+		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+		$url = $dynamicServer->publicUrl . '/services/metadata/GetMetadataFile';
+		$args = ['m' => $metadataId, 'f' => $fileId];
+
+		$conn = new WebConnection();
+		$conn->Initialize();
+		$response = $conn->Get($url, '', 0, $args);
+		$sending = App::SendFile($response->file, true);
+		$conn->Finalize();
+
+		return $sending;
+	}
+
 	public function GetWorkMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
 	{
 		if (!$metadataId)

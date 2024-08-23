@@ -24,6 +24,8 @@ use helena\entities\frontend\metric\LevelInfo;
 use helena\entities\frontend\metric\ValueLabelInfo;
 use helena\entities\frontend\metric\PartitionInfo;
 
+use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
+
 use helena\db\frontend\FileModel;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\GlobalTimer;
@@ -176,11 +178,10 @@ class SelectedMetricService extends BaseService
 				$selectedMetric->Versions[] = $version;
 			}
 		}
-
-		//$this->MarkComparableVariables($selectedMetric);
+		$this->MarkComparableVariables($selectedMetric);
 	}
-	/*
-	private MarkComparableVariables($selectedMetric)
+
+	private function MarkComparableVariables($selectedMetric)
 	{
 		// Cuando ya tiene todas las versiones, se fijas si con comparables
 		$datasets = [];
@@ -189,18 +190,19 @@ class SelectedMetricService extends BaseService
 		{
 			foreach($version->Levels as $level)
 			{
-				if (!array_key_exists($level['Name'], $datasets))
+				if (!array_key_exists($level->Name, $datasets))
 				{
-					$datasets[$level['Name']] = [];
+					$datasets[$level->Name] = [];
 				}
-				$datasetId = $level['Dataset']['Id'];
-				if (!in_array($datasetId, $datasets[$level['Name']]))
+				$datasetId = $level->Dataset->Id;
+				if (!Arr::InArrayByNamedValue($datasets[$level->Name], $datasetId, 'datasetId'))
 				{
-					$datasets[$level['Name']][] = ['datasetId' => $datasetId, 'level' => $level];
+					$datasets[$level->Name][] = ['datasetId' => $datasetId, 'level' => $level];
 				}
 			}
 		}
-		foreach($datasets as _ => $datasetIds)
+		$merger = new MergeSnapshotsByDatasetModel();
+		foreach($datasets as $levelName => $datasetIds)
 		{
 			foreach ($datasetIds as $dataset)
 			{
@@ -213,11 +215,11 @@ class SelectedMetricService extends BaseService
 					if ($datasetId != $datasetCompareId)
 					{
 						// Obtiene las variables comparables
-						$variablePairs = MergeSnapshotsByDatasetModel::GetComparableVariables($datasetId, $datasetCompareId, false);
+						$variablePairs = $merger->GetComparableVariables($datasetId, $datasetCompareId, false);
 						if (sizeof($variablePairs) > 0)
 						{
-							FlagAllVariablesAsComparable($level, $variablePairs);
-							FlagAllVariablesAsComparable($levelCompare, $variablePairs);
+							$this->FlagAllVariablesAsComparable($level, $variablePairs);
+							$this->FlagAllVariablesAsComparable($levelCompare, $variablePairs);
 						}
 
 					}
@@ -225,7 +227,17 @@ class SelectedMetricService extends BaseService
 			}
 		}
 	}
-	*/
+
+	private function FlagAllVariablesAsComparable($level, $variablePairs)
+	{
+		foreach ($level->Variables as $levelVariable) {
+			foreach ($variablePairs as $pair) {
+				if ($levelVariable->Id === $pair[0]->Id() || $levelVariable->Id === $pair[1]->Id())
+					$levelVariable->Comparable = true;
+			}
+		}
+	}
+
 	private function GetWork($selectedVersionInfo)
 	{
 		$workService = new WorkService();

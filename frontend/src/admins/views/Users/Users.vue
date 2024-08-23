@@ -14,13 +14,13 @@
 			<user-popup ref="editPopup" @completed="popupSaved">
 			</user-popup>
 			<div class="md-layout-item md-size-100">
-				<md-table style="max-width: 1100px;" v-model="list"  md-sort="FullName" md-sort-order="asc" md-card="">
+				<md-table style="max-width: 1100px;" v-model="list" md-sort="FullName" md-sort-order="asc" md-card="">
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre" md-sort-by="FullName">{{ item.FullName }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Email" md-sort-by="Email">{{ item.Email }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Rol" md-sort-by="FormattedRole">{{ item.FormattedRole }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Cartographies">
-							{{ item.Cartographies + item.PublicData  }}
+							{{ item.Cartographies + item.PublicData }}
 							<md-tooltip md-direction="bottom"> {{ item.CartographiesNames }}</md-tooltip>
 						</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Último ingreso" md-sort-by="LastAccess">{{ formatDate(item.LastAccess)

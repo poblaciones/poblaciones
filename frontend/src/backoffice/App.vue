@@ -39,6 +39,8 @@ export default {
 			// Inicia sesión autenticada
 			this.user = data.User;
 			const loc = this;
+			window.host = data.DynamicServer;
+			window.mainHost = data.MainServer;
 			window.Context.User = this.user;
 			window.Context.Configuration = data;
 			this.$refs.invoker.doMessage('Obteniendo cartografías', window.Db, window.Db.LoadWorks)

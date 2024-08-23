@@ -17,12 +17,20 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 	$metadataId = Params::GetIntMandatory('m');
 	$fileId = Params::GetIntMandatory('f');
 
-	$model = new MetadataModel();
-	$workId = $model->GetWorkIdByMetadataId($metadataId);
-	Session::$AccessLink = Params::Get('l');
-	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+	if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures) {
 
-	return $controller->GetMetadataFile($metadataId, $fileId);
+		$model = new MetadataModel();
+		$workId = $model->GetWorkIdByMetadataId($metadataId);
+		Session::$AccessLink = Params::Get('l');
+		if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId))
+			return $denied;
+
+		return $controller->GetMetadataFile($metadataId, $fileId);
+	}
+	else
+	{
+		return $controller->GetRemoteMetadataFile($metadataId, $fileId);
+	}
 });
 
 // ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4
@@ -30,10 +38,16 @@ App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) 
 	$controller = new commonServices\MetadataService();
 	$metadataId = Params::GetIntMandatory('m');
 
-	// x compatibilidad a links viejos
-	$workId = Params::GetInt('w');
-	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
+	if (App::Settings()->Servers()->IsTransactionServerRequest() || App::Settings()->Servers()->LoadLocalSignatures) {
 
-	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
+		// x compatibilidad a links viejos
+		$workId = Params::GetInt('w');
+		if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId))
+			return $denied;
+
+		return $controller->GetMetadataPdf($metadataId, null, false, $workId);
+	}
+	else
+		return $controller->GetRemoteMetadataPdf($metadataId, null, false);
 });
 

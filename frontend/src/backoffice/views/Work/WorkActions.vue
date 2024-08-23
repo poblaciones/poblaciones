@@ -11,7 +11,7 @@
 			<md-menu-item v-if="canDuplicate" @click="onDuplicate">Duplicar</md-menu-item>
 			<md-menu-item v-if="canDuplicateExample" @click="onDuplicate">Copiar a mis cartografías</md-menu-item>
 			<md-menu-item v-if="canUnarchive" @click="onUnarchive">Reactivar</md-menu-item>
-			<md-menu-item v-if="canDemoteExample" @click="onDemoteExample">Quitar ejemplo</md-menu-item>
+			<md-menu-item v-if="canDemoteExample" @click="onDemoteExample">Convertir a cartografía</md-menu-item>
 			<md-menu-item v-if="canDelete" @click="onDelete">Eliminar</md-menu-item>
 			<md-menu-item v-if="canRestore" @click="onRestore">Restaurar</md-menu-item>
 			<md-menu-item v-if="canPurge" @click="onPurge">Eliminar</md-menu-item>
