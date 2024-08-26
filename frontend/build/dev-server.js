@@ -22,7 +22,7 @@ var proxyTable = config.dev.proxyTable;
 var phpPort = port + 2;
 var php = 'http://localhost:' + phpPort;
 proxyTable = {
-	'/services': php, '/sitemap': php, '/handle': php, '/logs': php,
+	'/services': php, '/sitemap': php, '/handle': php, '/logs': php, '/oauthGoogle': php, '/oauthFacebook': php,
 	'/static/css': php, '/ark:/': php, '/static/js': php, '/static/vendor': php, '/authenticate': php
 };
 

@@ -35,8 +35,6 @@ export default {
 		LoadData(data) {
 			// Inicia sesión autenticada
 			this.user = data.User;
-			window.host = data.DynamicServer;
-			window.mainHost = data.MainServer;
 			window.Context.User = this.user;
 			window.Context.Configuration = data;
 			window.Context.Factory.Refresh();

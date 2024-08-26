@@ -5,12 +5,15 @@ module.exports = {
 	loadHeaderBar(setter) {
 		axiosClient.getPromise(window.host + '/services/backoffice/GetTransactionServer', {},
 			'acceder a la configuración de servidores').then(function (serverConfiguration) {
-				axiosClient.getPromise(serverConfiguration.data.Server + '/services/backoffice/GetConfiguration', {},
+				window.mainHost = window.host;
+				window.host = serverConfiguration.Server;
+				window.Context.Initialize();
+				axiosClient.getPromise(serverConfiguration.Server + '/services/backoffice/GetConfiguration', {},
 					'acceder a la sesión activa').then(function (res) {
 						if (res.User.Logged === false) {
 							login.redirectLogin();
 						} else {
-							res.DynamicServer = serverConfiguration.data.Server;
+							res.DynamicServer = serverConfiguration.Server;
 							setter(res);
 						}
 					});

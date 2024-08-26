@@ -8,6 +8,12 @@ use helena\services\backoffice as services;
 use minga\framework\Params;
 use minga\framework\PublicException;
 
+App::$app->get('/services/backoffice/GetConfiguration', function (Request $request) {
+	$configuration = new services\ConfigurationService();
+	return App::Json($configuration->GetConfiguration());
+});
+
+
 App::$app->post('/services/backoffice/SetUserSetting', function (Request $request) {
 	$key = Params::GetMandatory('k');
 	$value = Params::GetJsonMandatory('v', true);

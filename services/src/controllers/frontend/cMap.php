@@ -35,10 +35,16 @@ class cMap extends cPublicController
 			return $ret;
 
 		// Si hay ruta de obra, se fija si está permitida
-		$this->CheckWorkId();
-
+		$this->SolveWorkId();
 		if ($this->workId)
 		{
+			if (!App::Settings()->Servers()->IsTransactionServerRequest())
+			{
+				$remoteMap = new cRemoteMap();
+				return $remoteMap->Show();
+			}
+			Session::CheckIsWorkPublicOrAccessible($this->workId);
+
 			// Devuelve metadatos ej. http://mapas/map/3701/metadata
 			$res = $this->ResolveMetadataRequest();
 			if ($res) return $res;
@@ -64,8 +70,8 @@ class cMap extends cPublicController
 		if (Params::Get('emb'))
 				Performance::AppendControllerSuffix('embedded');
 
-    return $this->Render('index.html.twig');
-  }
+		return $this->Render('index.html.twig');
+	}
 
 	private function ResolveMetadataRequest()
 	{
@@ -82,14 +88,13 @@ class cMap extends cPublicController
 		else
 			return null;
 	}
-	private function CheckWorkId()
+	private function SolveWorkId()
 	{
 		$level2 = Request::GetSecondUriPart();
 		if ($level2 && is_numeric($level2))
 		{
 			$this->workId = Params::CheckParseIntValue($level2);
 			Session::$AccessLink = Request::GetThirdUriPart();
-			Session::CheckIsWorkPublicOrAccessible($this->workId);
 		}
 	}
 	private function ResolveSearchRedirect()

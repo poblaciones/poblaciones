@@ -32,8 +32,9 @@ App::$app->before(function(Request $request) {
 	Performance::Begin();
 
 	// Se ocupa del recordar credenciales
-	if (!Session::IsAuthenticated())
-		Remember::CheckCookie();
+	if (App::Settings()->Servers()->IsTransactionServerRequest())
+		if (!Session::IsAuthenticated())
+			Remember::CheckCookie();
 
 	Performance::ResolveControllerFromUri();
 

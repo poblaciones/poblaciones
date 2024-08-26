@@ -51,8 +51,8 @@
 					<i class="fas fa-sign-in-alt" />
 
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-						<li><a :href="authenticate.loginUrl()" @click="authenticate.redirectLogin">Ingresar</a></li>
-						<li><a :href="authenticate.registerUrl()" @click="authenticate.redirectRegister">Registrarse</a></li>
+						<li><a :href="authenticate.loginUrl()" title="Ingresar" @click="authenticate.redirectLogin">Ingresar</a></li>
+						<li><a :href="authenticate.registerUrl()" title="Registrarse" @click="authenticate.redirectRegister">Registrarse</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.redirectHome()" :href="authenticate.homeUrl()">Inicio</a></li>
 					</ul>

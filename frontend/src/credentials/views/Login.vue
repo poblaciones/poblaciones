@@ -201,10 +201,10 @@ export default {
 			this.serverError = '';
 		},
 		googleLogin() {
-			this.$refs.openAuth.show('/oauthGoogle');
+			this.$refs.openAuth.show(window.host + '/oauthGoogle');
 		},
 		facebookLogin() {
-			this.$refs.openAuth.show('/oauthFacebook');
+			this.$refs.openAuth.show(window.host + '/oauthFacebook');
 		},
 	}
 };

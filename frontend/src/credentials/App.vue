@@ -32,7 +32,7 @@ export default {
 				'acceder a la configuración de servidores').then(function (serverConfiguration) {
 					window.mainHost = window.host;
 					window.host = serverConfiguration.Server;
-				});
+			});
 		},
 		RegisterErrorHandler() {
 			Vue.config.errorHandler = err.HandleError;

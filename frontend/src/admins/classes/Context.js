@@ -11,13 +11,16 @@ function Context() {
 	this.Cartographies = [];
 	this.CartographiesStarted = false;
 	this.ErrorSignaled = { value: 0 };
+}
+
+Context.prototype.Initialize = function () {
 	this.Factory = new AsyncCatalog(window.host + '/services/backoffice/GetFactories');
 	this.Geographies = new AsyncCatalog(window.host + '/services/backoffice/GetAllGeographies');
 	this.PublicMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetPublicMetrics');
 	this.CartographyMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetCartographyMetrics');
 	this.MetricGroups = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricGroups');
 	this.BoundaryGroups = new AsyncCatalog(window.host + '/services/admin/GetBoundaryGroups');
-}
+};
 
 Context.prototype.CreateStore = function () {
 	Vue.use(Vuex);

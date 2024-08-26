@@ -10,7 +10,7 @@ function Context() {
 	// 'L': Lector de datos públicos, 'P': Usuario estándar
 	this.User = null;
 	this.ErrorSignaled = { value: 0 };
-}
+};
 
 Context.prototype.CreateStore = function () {
 	Vue.use(Vuex);

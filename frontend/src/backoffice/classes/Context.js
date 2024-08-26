@@ -17,6 +17,9 @@ function Context() {
 	this.ErrorSignaled = { value: 0 };
 	this.CurrentDataset = null;
 	this.CurrentWork = null;
+}
+
+Context.prototype.Initialize = function () {
 	this.Factory = new AsyncCatalog(window.host + '/services/backoffice/GetFactories');
 	this.Sources = new AsyncCatalog(window.host + '/services/backoffice/GetAllSourcesByCurrentUser');
 	this.Geographies = new AsyncCatalog(window.host + '/services/backoffice/GetAllGeographies');
@@ -25,7 +28,7 @@ function Context() {
 	this.CartographyMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetCartographyMetrics');
 	this.MetricGroups = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricGroups');
 	this.MetricProviders = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricProviders');
-}
+};
 
 Context.prototype.GetTrackingLevelGeography = function () {
 	if (this.Geographies.loading) {
