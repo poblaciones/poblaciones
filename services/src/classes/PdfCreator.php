@@ -136,10 +136,13 @@ class PdfCreator
 
 	private function WriteArk()
 	{
-		$value = $this->metadata['met_ark'];
-		if ($value == null)
-			return;
-		$this->pdf->WritePair("Ark", $value);
+		if (array_key_exists('met_ark', $this->metadata))
+		{
+			$value = $this->metadata['met_ark'];
+			if ($value == null)
+				return;
+			$this->pdf->WritePair("Ark", $value);
+		}
 	}
 
 	private function WriteSources()

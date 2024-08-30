@@ -9,30 +9,33 @@ use minga\framework\Context;
 use minga\framework\ErrorException;
 use minga\framework\IO;
 use minga\framework\Params;
+use minga\framework\Log;
 use minga\framework\Str;
 use minga\framework\System;
 use minga\framework\Zip;
-use minga\framework\security\SecureTransport;
 
 class DeploymentService extends BaseService
 {
 	private static $validExtensions = ['zip', 'tar.bz2'];
 
-	public function ReceiveFile($securityKey) : array
+	public function ReceiveFile($securityKey, $from = null, $length = null) : array
 	{
 		if (!App::Settings()->Keys()->IsDeploymentAuthKeyValid($securityKey))
 			MessageBox::ThrowAccessDenied();
 		try
 		{
 			$file = Params::GetUploadedFile('file', self::$validExtensions);
-			if(SecureTransport::PostHashIsValid('file', $file) == false)
-			{
-				IO::Delete($file);
-				throw new ErrorException('Falló validación.');
-			}
 
 			$dest = $this->GetUpdateFile(IO::GetFileExtension($file));
-			IO::Move($file, $dest);
+			if ($from == null || $from == 0)
+				IO::Move($file, $dest);
+			else
+			{
+				if ($length != filesize($file))
+					throw new ErrorException("El tamaño esperado no coincide.");
+				$this->moveFileWithOffset($file, $dest, $from);
+			}
+
 			return ['Status' => self::OK];
 		}
 		catch(\Exception $e)
@@ -41,15 +44,30 @@ class DeploymentService extends BaseService
 		}
 	}
 
+	private function moveFileWithOffset($source, $destination, $offset = 0)
+	{
+		$chunkSize = 256 * 1024;
+		$sourceFile = fopen($source, 'rb');
+		$destFile = fopen($destination, 'cb');
+		if (!$sourceFile || !$destFile) {
+			throw new ErrorException("No se pudieorn abrir los archivos para realizar la operación 'mover'");
+		}
+		fseek($destFile, $offset);
+		while (!feof($sourceFile)) {
+			$chunk = fread($sourceFile, $chunkSize);
+			fwrite($destFile, $chunk);
+		}
+		fclose($sourceFile);
+		fclose($destFile);
+		unlink($source);
+	}
+
 	public function Expand($securityKey) : array
 	{
 		if (!App::Settings()->Keys()->IsDeploymentAuthKeyValid($securityKey))
 			MessageBox::ThrowAccessDenied();
 		try
 		{
-			if(SecureTransport::UriHashIsValid() == false)
-				throw new ErrorException("Pedido inválido.");
-
 			$file = $this->GetUpdateExistingFile();
 			$dest = $this->GetUpdatePath();
 			IO::RemoveDirectory($dest);
@@ -83,18 +101,18 @@ class DeploymentService extends BaseService
 			MessageBox::ThrowAccessDenied();
 		try
 		{
-			if(SecureTransport::UriHashIsValid() == false)
-				throw new ErrorException("Pedido inválido.");
-
 			$source = $this->GetUpdatePath();
 			if(is_dir($source) == false)
 				throw new ErrorException('Archivo no encontrado.');
 
-			IO::MoveDirectory($source, Context::Paths()->GetRoot());
+			IO::MoveDirectoryContents($source, Context::Paths()->GetRoot());
 
 			# Borra el zip/tar inicial.
 			foreach(self::$validExtensions as $ext)
 				IO::Delete($this->GetUpdateFile($ext));
+
+			$twig_cache = Context::Paths()->GetTwigCache();
+			IO::ClearDirectory($twig_cache, true);
 
 			return ['Status' => self::OK];
 		}
@@ -128,8 +146,14 @@ class DeploymentService extends BaseService
 
 	private function ProcessError(\Exception $e) : array
 	{
+		Log::HandleSilentException($e);
 		http_response_code(500);
-		return ['Status' => self::ERROR, 'Message' => $e->getMessage()];
+		if (Context::Settings()->Debug()->debug) {
+			$text = $e->getTraceAsString();
+		} else
+			$text = "";
+
+		return ['Status' => self::ERROR, 'Message' => $e->getMessage(), 'Exception' => $text];
 	}
 }
 
