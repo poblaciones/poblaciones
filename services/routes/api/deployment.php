@@ -8,13 +8,15 @@ use minga\framework\Params;
 App::$app->post('/services/api/deploymentUpload', function() {
 	$controller = new services\DeploymentService();
 	$securityKey = Params::GetMandatory('s');
-	$ret = $controller->ReceiveFile($securityKey);
+	$from = Params::GetInt('f');
+	$length = Params::GetInt('l');
+	$ret = $controller->ReceiveFile($securityKey, $from, $length);
 
 	return App::Json($ret);
 });
 
 // ej. http://mapas/services/api/deploymentExpand
-App::$app->get('/services/api/deploymenExpand', function() {
+App::$app->get('/services/api/deploymentExpand', function() {
 	$securityKey = Params::GetMandatory('s');
 	$controller = new services\DeploymentService();
 	$ret = $controller->Expand($securityKey);
