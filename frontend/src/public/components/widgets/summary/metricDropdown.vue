@@ -58,6 +58,12 @@
 				window.SegMap.SaveRoute.UpdateRoute();
 				window.SegMap.UpdateMap();
 			},
+			clickDescargar() {
+				window.Popups.MetricDownload.show(this.metric);
+			},
+			clickFuente() {
+				window.Popups.WorkMetadata.showByMetric(this.metric, this.metric.properties.Metric.Name);
+			},
 			zoomExtents() {
 				var extents = this.metric.SelectedLevel().Extents;
 				if (!window.SegMap.Clipping.FrameHasNoClipping()) {
@@ -101,6 +107,12 @@
 					case 'EXTENTS':
 						this.zoomExtents();
 						break;
+					case 'DOWNLOAD':
+						this.clickDescargar();
+						break;
+					case 'SOURCE':
+						this.clickFuente();
+						break;
 					case 'REMOVE':
 						this.clickQuitar();
 						break;
@@ -140,8 +152,21 @@
 					key: 'EXTENTS',
 					/* icon: 'fas fa-expand-arrows-alt' */
 				});
+				ret.push({ 'separator': true });
+				ret.push({
+					label: 'Fuente',
+					key: 'SOURCE',
+					/* icon: 'fas fa-expand-arrows-alt' */
+				});
+				ret.push({
+					label: 'Descargar',
+					key: 'DOWNLOAD',
+					/* icon: 'fas fa-expand-arrows-alt' */
+				});
+
 				// agrega las métricas
 				if (this.metric.properties.RelatedMetrics && this.metric.properties.RelatedMetrics.length > 1) {
+					ret.push({ 'separator': true });
 					ret.push({
 						label: 'Relacionados', items: this.keyValueToList(this.metric.properties.RelatedMetrics)
 					});

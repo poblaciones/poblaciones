@@ -18,6 +18,8 @@ USAR PYTHON 3.7.11 (no 3.8)
 ./pip install pandas
 ./pip install pyreadstat
 
+# o también: CFLAGS='-std=c99' python3 -m pip install pyreadstat
+
 # r
 ./pip install pyreadr
 

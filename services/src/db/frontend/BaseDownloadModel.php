@@ -120,7 +120,7 @@ abstract class BaseDownloadModel extends BaseModel
 			$varName = 'GeoJSON';
 		} else
 		{
-			$fn = 'asWKT';
+			$fn = 'ST_asWKT';
 			$varName = 'WKT';
 		}
 		$cols[] = self::GetCustomCol($fn . '(' . $polygonField . ')', $varName, 'Geometría en ' . $varName,

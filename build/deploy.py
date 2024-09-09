@@ -12,6 +12,7 @@ import os
 import requests
 import sys
 import urllib
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 BUFFER = 64 * 1024
 CONFIG_FILE = 'deploy.ini'
@@ -20,6 +21,7 @@ UPLOAD_API = "/services/api/deploymentUpload"
 UNZIP_API = "/services/api/deploymentExpand"
 INSTALL_API = "/services/api/deploymentInstall"
 
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def generate_random_hex(length=16):
     return binascii.hexlify(os.urandom(length)).decode()
@@ -34,26 +36,6 @@ def prepare_post_values(args):
 
     return ret
 
-
-def hash_file(file, size):
-    sha = hashlib.sha256()
-    with open(file, 'rb') as f:
-        with tqdm(total=size, unit='B', unit_scale=True, desc="Firmando archivo") as pbar:
-            while True:
-                data = f.read(BUFFER)
-                if not data:
-                    break
-                sha.update(data)
-                pbar.update(BUFFER)
-
-    return sha.hexdigest()
-
-
-def calculate_hmac(text, key):
-    h = hmac.digest(base64.b64decode(key), text.encode(), hashlib.sha256)
-    return binascii.hexlify(h).decode()
-
-
 def get_mime_type(file):
     if file.endswith('.zip'):
         return 'application/zip'
@@ -67,25 +49,53 @@ def upload(url, file, key, verify_ssl=True):
     size = os.path.getsize(file)
 
     rnd = generate_random_hex()
-    file_hash = hash_file(file, size)
-    data = {'file_hash': file_hash, 'rnd': rnd}
-    data['hmac'] = calculate_hmac(prepare_post_values(data) + rnd, key)
+    data = {}
+
+ #   with open(file, 'rb') as f:
+ #       with tqdm(total=size, unit='B', unit_scale=True, desc="Subiendo archivo") as pbar:
+ #           data["file"] = (os.path.basename(file), f, get_mime_type(file))
+ #           e = MultipartEncoder(fields=data)
+ #           m = MultipartEncoderMonitor(e, lambda monitor: pbar.update(monitor.bytes_read - pbar.n))
+ #           headers = {"Content-Type": m.content_type}
+ #           response = requests.post(url + "?s=" + key, data=m, headers=headers, verify=verify_ssl)
+
+    chunk_size=256*1024
+    file_size = os.path.getsize(file)
 
     with open(file, 'rb') as f:
-        with tqdm(total=size, unit='B', unit_scale=True, desc="Subiendo archivo") as pbar:
-            data["file"] = (os.path.basename(file), f, get_mime_type(file))
-            e = MultipartEncoder(fields=data)
-            m = MultipartEncoderMonitor(e, lambda monitor: pbar.update(monitor.bytes_read - pbar.n))
-            headers = {"Content-Type": m.content_type}
-            response = requests.post(url, data=m, headers=headers, verify=verify_ssl)
+        with tqdm(total=file_size, unit='B', unit_scale=True, desc="Subiendo archivo") as pbar:
+            offset = 0
+            while offset < file_size:
+                chunk = f.read(chunk_size)
+                chunk_length = len(chunk)
 
+                # Añadir los parámetros f y l a la URL
+                chunk_url = f"{url}?s={key}&f={offset}&l={chunk_length}"
+                # Preparar los datos para esta parte
+                chunk_data = data.copy()
+                chunk_data["file"] = (os.path.basename(file), chunk, get_mime_type(file))
+
+                e = MultipartEncoder(fields=chunk_data)
+                # m = MultipartEncoderMonitor(e, lambda monitor: pbar.update(monitor.bytes_read - pbar.n))
+
+                headers = {"Content-Type": e.content_type}
+                response = requests.post(chunk_url, data=e, headers=headers, verify=verify_ssl)
+
+                # Verificar la respuesta del servidor
+                if response.status_code != 200:
+                    print(f"Error al subir el chunk. Código de estado: {response.status_code}")
+                    print(response.text)
+                    return False
+
+                offset += chunk_length
+                pbar.update(chunk_length)
+
+    pbar.update(file_size)
     process_response(url, response)
-
 
 def send_request(url, key, verify_ssl=True):
     rnd = generate_random_hex()
-    full_url = url + "?rnd=" + rnd
-    full_url += '&hmac=' + calculate_hmac(full_url, key)
+    full_url = url + "?rnd=" + rnd + "&s=" + key
 
     response = requests.get(full_url, verify=verify_ssl)
     process_response(url, response)
@@ -99,6 +109,7 @@ def process_response(url, response):
         else:
             print(f"Falló en servidor {url}")
             print(f"Mensaje: {res['Message']}")
+            print(res)
             sys.exit("Saliendo.")
     except Exception:
         print("Error parseando json.")

@@ -76,6 +76,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		// Ejecuta la consulta
 		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
+
 		$ret = $multiQuery->fetchAll();
 
 		$extraFields = [];
