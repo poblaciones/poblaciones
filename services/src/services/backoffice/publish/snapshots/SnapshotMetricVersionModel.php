@@ -70,7 +70,7 @@ class SnapshotMetricVersionModel
 										met_authors, ins_caption, wrk_type, wrk_is_private, wrk_is_indexed, wrk_access_link";
 
 		App::Db()->exec("SET group_concat_max_len = 102400");
-		$param = ($regenFullTable ? array() : array($metricIdShardified, $metricIdShardified));
+		$param = ($regenFullTable ? array() : array($metricIdShardified));
 
 		App::Db()->exec($sql, $param);
 		App::Db()->markTableUpdate('snapshot_metric_version');

@@ -95,7 +95,7 @@ class WorkClone
 		$previewFileId = $cloned->getPreviewFileId();
 		if ($previewFileId)
 		{
-			$newPreviewFileId = $this->DuplicateFile($file->getId());
+			$newPreviewFileId = $this->DuplicateFile($previewFileId);
 			$cloned->setPreviewFileId($newPreviewFileId);
 		}
 		// Guarda y setea cambios
