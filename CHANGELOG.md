@@ -1,3 +1,14 @@
+v4.0 (2024-06-27)
+- Mejoras en regeneración de tablas de indicadores.
+- Distribución remota por https.
+- Backup incremental por https.
+- Opción de uso de base de datos transaccional descentralizada.
+- Descarga y fuente en menú contextual de indicador.
+- Caching para crawler.
+- Opción de depuración por sesión.
+- Estadística de errores.
+- Getway para instalación en carpeta secundaria (simlinks)
+
 v3.13 (2023-11-27)
 - Plugins administrativos.
 - Selección multiple.

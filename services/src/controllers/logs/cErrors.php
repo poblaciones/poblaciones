@@ -3,7 +3,7 @@
 namespace helena\controllers\logs;
 
 use helena\controllers\common\cController;
-use minga\framework\Performance;
+use minga\framework\Params;
 
 use helena\classes\Session;
 use helena\classes\Menu;
@@ -12,6 +12,7 @@ use helena\classes\App;
 use minga\framework\Arr;
 use helena\classes\Account;
 use minga\framework\IO;
+use minga\framework\ErrorException;
 use minga\framework\Context;
 
 class cErrors extends cController
@@ -21,10 +22,20 @@ class cErrors extends cController
 		if ($app = Session::CheckIsMegaUser())
 			return $app;
 
-		$account = Account::Current();
 		// Pone atributos
 		$this->templateValues = array();
 
+		if (Context::Settings()->Debug()->sessionDebug) {
+			$this->AddValue('debugging', "Activado");
+			$this->AddValue('action', "Desactivar");
+		} else {
+			if (Context::Settings()->Debug()->settingsDebug)
+				$this->AddValue('debugging', "Desactivado en sesión (activado desde settings.php)");
+			else
+				$this->AddValue('debugging', "Desactivado");
+			$this->AddValue('action', "Activar");
+		}
+		$this->AddValue('action_post_url', '/logs/errors');
 
 		// se fija si muestra uno individual
 		if (array_key_exists("deleteAll", $_GET))
@@ -119,6 +130,19 @@ class cErrors extends cController
 
 		return $this->Render('errors.html.twig');
 	}
+
+	public function Post()
+	{
+		if ($app = Session::CheckSessionAlive())
+			return $app;
+		if (Params::Get('toggle') != null)
+			Context::Settings()->Debug()->SetSessionDebugging(!Context::Settings()->Debug()->sessionDebug);
+		if (Params::Get('raiseError') != null)
+			throw new ErrorException("Error generado desde test.");
+
+		return $this->Show();
+	}
+
 	private static function myComparerErrors($a, $b)
 	{
 		if ($a['date'] == $b['date'])

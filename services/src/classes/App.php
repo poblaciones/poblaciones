@@ -47,6 +47,7 @@ class App
 	public static $orm = null;
 	public static $isJson = false;
 	private static $contentType = null;
+	private static $debugWasSet = false;
 
 	private static function getTwigEngine()
 	{
@@ -100,17 +101,29 @@ class App
 		return self::$app['debug'];
 	}
 
+	public static function SetSessionDebug($value)
+	{
+		self::doSetSessionDebug($value);
+	}
+
 	public static function SetDebug($value)
 	{
+		Context::Settings()->Debug()->settingsDebug = $value;
+		self::doSetSessionDebug($value);
+	}
+
+	private static function doSetSessionDebug($value)
+	{
+		if (self::$debugWasSet)
+			return;
 		Context::Settings()->Debug()->debug = $value;
 		self::$app['debug'] = $value;
-		if ($value)
-		{
-			GlobalizeDebugSession::GlobalizeDebug();
-			Context::Settings()->Cache()->Enabled = CacheSettings::DisabledWrite;
-			Context::Settings()->Cache()->FileSystemMode = CacheSettings::FILE;
+		if ($value) {
+			//GlobalizeDebugSession::GlobalizeDebug();
+			self::$debugWasSet = true;
 		}
 	}
+
 
 	public static function SetDbConfig($db)
 	{
@@ -294,7 +307,7 @@ class App
 	}
 	public static function AbsoluteUrl($url)
 	{
-		$host = Context::Settings()->GetPublicUrl();
+		$host = App::Settings()->Servers()->Current()->publicUrl;
 		$hasBar = substr($url, 0, 1) === '/';
 		if (!$hasBar)
 		{
@@ -580,18 +593,38 @@ class App
 	}
 
 
-	public static function FlushRemoteFile($url, $args = null)
+	public static function FlushRemoteFile($url, $args = null, $cache = null, $cacheKey = null)
 	{
-		$conn = new WebConnection();
-		$conn->Initialize();
-		$response = $conn->Get($url, '', 0, $args);
+		$response = null;
+		if ($cache)
+		{
+			$data = null;
+			if ($cache->HasData($cacheKey, $data))
+			{
+				$response = $data;
+				$tmp = IO::GetTempFilename();
+				IO::WriteAllText($tmp, Str::Replace($response->content, "<title>", "<meta cached=1><title>"));
+				$response->file = $tmp;
+			}
+		}
+		// Lo trae
+		if ($response === null)
+		{
+			$conn = new WebConnection();
+			$conn->Initialize();
+			$response = $conn->Get($url, '', 0, $args);
+			$conn->Finalize();
+		}
 
 		$sending = App::SendFile($response->file, true);
 		if (array_key_exists("content-disposition", $response->headers))
 			$sending->headers->set('content-disposition', $response->headers['content-disposition']);
 
-		$conn->Finalize();
-
+		if ($cache && ! $response->content)
+		{
+			$response->content = IO::ReadAllText($response->file);
+			$cache->PutData($cacheKey, $response);
+		}
 		return $sending;
 	}
 
@@ -704,8 +737,8 @@ class App
 		$vals['maps_faq_url'] = "/faq";
 		$vals['maps_feedback_url'] =  Links::GetContactUrl();
 		$vals['maps_backoffice_url'] = Links::GetBackofficeUrl();
-
-		$vals['site_maps_url'] = Str::EnsureEndsWith(Context::Settings()->GetPublicUrl(), "/") . "map";
+		$mainUrl = App::Settings()->Servers()->Main()->publicUrl;
+		$vals['site_maps_url'] = Str::EnsureEndsWith($mainUrl, "/") . "map";
 		$vals['logos_url'] = "/static/img/logos";
 		if (array_key_exists('current_user', $vals) === false)
 			$vals['current_user'] = null;

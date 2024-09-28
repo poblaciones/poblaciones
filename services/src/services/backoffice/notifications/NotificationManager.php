@@ -68,7 +68,8 @@ class NotificationManager
 		$vals['title'] = $mail->subject;
 		$vals['message'] = $message;
 		$metadata = $work->getMetadata();
-		$vals['url'] = Context::Settings()->GetPublicUrl() . $metadata->getUrl();
+		$mainUrl = App::Settings()->Servers()->Main()->publicUrl;
+		$vals['url'] = $mainUrl . $metadata->getUrl();
 		$mail->message = App::RenderMessage('publishNotification.html.twig', $vals);
 		$this->Send($mail);
 	}
@@ -133,7 +134,8 @@ class NotificationManager
 		$vals = array();
 		$vals['title'] = "";
 		$vals['message'] = $message;
-		$vals['url'] = Context::Settings()->GetPublicUrl() . "/admins";
+		$mainUrl = App::Settings()->Servers()->Main()->publicUrl;
+		$vals['url'] = $mainUrl . "/admins";
 		$mail->message = App::RenderMessage('createNewUser.html.twig', $vals);
 		$this->Send($mail);
 	}

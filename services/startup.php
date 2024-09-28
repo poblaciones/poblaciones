@@ -47,6 +47,10 @@ Context::Settings()->applicationName = 'Poblaciones';
 Context::Settings()->storagePath = Context::Settings()->rootPath . '/storage';
 Context::Settings()->Performance()->PerformancePerUser = true;
 
+Context::Settings()->Debug()->LoadSessionDebugging();
+if (Context::Settings()->Debug()->sessionDebug)
+	App::SetSessionDebug(true);
+
 $settings = __DIR__.'/config/settings.php';
 
 if (!file_exists($settings)) {

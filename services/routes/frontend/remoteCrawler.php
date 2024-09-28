@@ -10,6 +10,7 @@ App::RegisterControllerGet('/ark:/{path1}/{path2}/{path3}', controllers\cRemoteA
 
 // CRAWLER
 App::RegisterControllerGet('/sitemap', controllers\cRemoteSitemap::class);
+
 App::RegisterControllerGet('/handle/{path1}', controllers\cRemoteHandle::class);
 App::RegisterControllerGet('/handle/{path1}/{path2}', controllers\cRemoteHandle::class);
 App::RegisterControllerGet('/handle/{path1}/{path2}/{path3}', controllers\cRemoteHandle::class);

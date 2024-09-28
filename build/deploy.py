@@ -16,7 +16,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 BUFFER = 64 * 1024
 CONFIG_FILE = 'deploy.ini'
-
+USER_AGENT =   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 UPLOAD_API = "/services/api/deploymentUpload"
 UNZIP_API = "/services/api/deploymentExpand"
 INSTALL_API = "/services/api/deploymentInstall"
@@ -78,7 +78,7 @@ def upload(url, file, key, verify_ssl=True):
                 e = MultipartEncoder(fields=chunk_data)
                 # m = MultipartEncoderMonitor(e, lambda monitor: pbar.update(monitor.bytes_read - pbar.n))
 
-                headers = {"Content-Type": e.content_type}
+                headers = {"Content-Type": e.content_type, "User-Agent": USER_AGENT }
                 response = requests.post(chunk_url, data=e, headers=headers, verify=verify_ssl)
 
                 # Verificar la respuesta del servidor

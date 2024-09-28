@@ -6,7 +6,7 @@ use helena\controllers\common\cPublicController;
 use minga\framework\Request;
 use helena\classes\App;
 use minga\framework\Performance;
-
+use helena\caches\RemoteHandlesCache;
 
 class cRemoteHandle extends cPublicController
 {
@@ -16,6 +16,9 @@ class cRemoteHandle extends cPublicController
 
 		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
 		$uri = $dynamicServer->publicUrl . Request::GetRequestURI();
-		return App::FlushRemoteFile($uri);
+
+		$cache = RemoteHandlesCache::Cache();
+		$key = RemoteHandlesCache::CreateKey($uri);
+		return App::FlushRemoteFile($uri, null, $cache, $key);
 	}
 }

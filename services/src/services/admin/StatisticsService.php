@@ -167,6 +167,9 @@ class StatisticsService extends BaseService
 		$addressKey = Arr::SummarizeValues($dailyTable['AddressQuery']);
 		$ret[] = [ 'Caption' => 'Uso de Google Geocoder key', 'Hits' => $addressKey ];
 
+		$erros = Arr::SummarizeValues($dailyTable['Errors']);
+		$ret[] = ['Caption' => 'Errors', 'Hits' => $erros];
+
 		return $ret;
 	}
 	private function GetNewMonthUsers($month)

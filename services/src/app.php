@@ -51,7 +51,7 @@ $app->register(new ServiceControllerServiceProvider());
 $app->register(new TwigServiceProvider());
 $app->register(new DoctrineServiceProvider(), array(
 	 'db.options' => array(
-		 'driver' => 'mysqli',
+		 'driver' => 'mysqli', // se puede poner pdo_mysql
 		 'charset' => 'utf8',
 	)
 ));

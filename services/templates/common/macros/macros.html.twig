@@ -94,15 +94,17 @@ endmacro %}
 		{% for rowTitle, cells in rows %}
 			{% set isFirst = (n < headerRows) %}
 			{% set n = n+1 %}
-			<tr class="dTableRowAlt">
-					<td class='dTableCellLeft1 {{ (isFirst ? 'tFontHeader4' : 'tFontRowHeader') }}'>{{ rowTitle | raw }}</td>
-				{% set c = 0 %}
-				{% for cell in cells %}
-					{% set c = c + 1 %}
-					<td {{ (n == 1 ? "colspan=" ~ (colspan + (isFirst and c == 1 ? firstExtraColumns : 0)) : "") }} class='dTableCell0 {{ (isFirst ? 'tFontHeader4' : (small ? 'tFont3' : 'tFont4')) }}
-						{{ (colspan > 1 and (n == 1 or (c - firstExtraColumns) % colspan == 0) ? 'tRightBorder' : '') }}'>{{ cell | raw }}</td>
-				{% endfor %}
-			</tr>
+			{% if rowTitle and rowTitle != '' %}
+				<tr class="dTableRowAlt">
+						<td class='dTableCellLeft1 {{ (isFirst ? 'tFontHeader4' : 'tFontRowHeader') }}'>{{ rowTitle | raw }}</td>
+					{% set c = 0 %}
+					{% for cell in cells %}
+						{% set c = c + 1 %}
+						<td {{ (n == 1 ? "colspan=" ~ (colspan + (isFirst and c == 1 ? firstExtraColumns : 0)) : "") }} class='dTableCell0 {{ (isFirst ? 'tFontHeader4' : (small ? 'tFont3' : 'tFont4')) }}
+							{{ (colspan > 1 and (n == 1 or (c - firstExtraColumns) % colspan == 0) ? 'tRightBorder' : '') }}'>{{ cell | raw }}</td>
+					{% endfor %}
+				</tr>
+			{% endif %}
 		{% endfor %}
 	</table>
 {% endmacro %}

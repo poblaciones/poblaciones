@@ -20,7 +20,7 @@ class SnapshotShapesModel extends BaseModel
 
 		$sql = "SELECT sdi_geometry as value, sdi_feature_id as FID " .
 			" FROM snapshot_shape_dataset_item WHERE " .
-			" ST_Intersects(sdi_geometry, ST_PolygonFromText('" . $envelope->ToWKT() . "'))" .
+			" ST_IsValid(sdi_geometry) AND ST_Intersects(sdi_geometry, ST_PolygonFromText('" . $envelope->ToWKT() . "'))" .
 			" AND sdi_dataset_id = ?
 			 ORDER BY sdi_dataset_item_id";
 

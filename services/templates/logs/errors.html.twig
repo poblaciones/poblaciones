@@ -9,6 +9,13 @@
 {{ macros.Title('Administración') }}
 {{ include('tabbedContentMenu.html.twig') }}
 <div class="contenedorAdmin">
+		<br>
+	<form action='{{ action_post_url }}' method='post'>
+		<div class='dBlockNewLineS1'>Debugging: </div>
+		<div class='dBlockSize3'>{{ debugging }} &nbsp;<input type='submit' name="toggle" value='{{ action }}'>
+												<input type='submit' name="raiseError" value='Fallar'>
+		</div>
+	</form>
 
 <script type="text/javascript">
 function deleteAll() {

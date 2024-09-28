@@ -64,57 +64,62 @@ class cHandle extends cPublicController
 
 		$this->AddValue("debugParam", Params::Get("debug"));
 		$workId = Params::CheckParseIntValue($parts[0]);
-
-		if ($type !== 'B' && ($denied = Session::CheckIsWorkPublicOrAccessible($workId))) return $denied;
-
 		$metricId = $this->GetMetricId($parts);
 		$regionItemId = $this->GetRegionItemId($parts);
+		//////////////
 
 		if ($type === "B")
 			$urlId = 'boundaries/' . $workId;
 		else
+		{
+			if ($denied = Session::CheckIsWorkPublicOrAccessible($workId))
+				return $denied;
 			$urlId = $workId;
-
+		}
 		$this->cleanRoute = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($urlId, $metricId, $regionItemId));
 		$this->cleanRouteBase = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($urlId, $metricId, null));
 
 		if (Request::IsGoogle() || Params::Get("debug"))
 		{
-			Performance::SetController('handle-GoogleCrawler', 'get', true);
-
-			if ($metricId !== null)
-				$this->ShowWorkMetric($workId, $metricId, $regionItemId);
-			else if ($type === 'M')
-				$this->ShowWork($workId);
-			else
-				$this->ShowBoundary($workId);
-
-			if (Params::Get("debug"))
-				$this->AddValue("selfNavigateLink", $this->cleanRoute);
-
-			return $this->Render("handle.html.twig");
+			return $this->RenderMetadata($type, $workId, $metricId, $regionItemId);
 		}
 		else
 		{
-			Statistics::StoreInternalHit($workId, 'google');
-			if ($metricId !== null)
-			{
-				Statistics::StoreInternalHit($workId, 'googleMetric' . $metricId);
-				return $this->RedirectWorkMetric($workId, $metricId, $regionItemId);
-			}
-			else
-			{
-				if ($type === "M")
-				{
-					return $this->RedirectWork($workId);
-				}
-				else
-				{
-					return $this->RedirectBoundary($workId);
-				}
+			return $this->HandleRedirect($type, $workId, $metricId, $regionItemId);
+		}
+	}
+
+	private function RenderMetadata($type, $workId, $metricId, $regionItemId)
+	{
+		Performance::SetController('handle-GoogleCrawler', 'get', true);
+
+		if ($metricId !== null)
+			$this->ShowWorkMetric($workId, $metricId, $regionItemId);
+		else if ($type === 'M')
+			$this->ShowWork($workId);
+		else
+			$this->ShowBoundary($workId);
+
+		if (Params::Get("debug"))
+			$this->AddValue("selfNavigateLink", $this->cleanRoute);
+
+		return $this->Render("handle.html.twig");
+	}
+
+	private function HandleRedirect($type, $workId, $metricId, $regionItemId)
+	{
+		Statistics::StoreInternalHit($workId, 'google');
+		if ($metricId !== null) {
+			Statistics::StoreInternalHit($workId, 'googleMetric' . $metricId);
+			return $this->RedirectWorkMetric($workId, $metricId, $regionItemId);
+		} else {
+			if ($type === "M") {
+				return $this->RedirectWork($workId);
+			} else {
+				return $this->RedirectBoundary($workId);
 			}
 		}
-  }
+	}
 
 	private function GetMetricId($parts)
 	{

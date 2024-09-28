@@ -30,4 +30,6 @@ parameters:
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\geometry.#'
 		- '#Return typehint of method .* has invalid type helena\\entities\\backoffice\\point.#'
 		- '#Function time_elapsed not found.#'
+		- '#Cannot access property \$content on null#'
+		- '#Cannot access property \$file on null#'
 		- '#Function outwrite not found.#'

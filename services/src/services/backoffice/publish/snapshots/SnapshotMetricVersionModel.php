@@ -8,7 +8,7 @@ use helena\classes\App;
 
 class SnapshotMetricVersionModel
 {
-	const SNAPSHOPT_CAPTIONS_MAX_LENGTH = 500;
+	const SNAPSHOT_CAPTIONS_MAX_LENGTH = 500;
 
 	public function RegenAllMetric()
 	{
@@ -30,6 +30,7 @@ class SnapshotMetricVersionModel
 		{
 			$metricIdShardified = PublishDataTables::Shardified($metricId);
 		}
+
 	 	$sql = "INSERT INTO snapshot_metric_version ( mvw_metric_version_id, mvw_metric_id, mvw_metric_revision, mvw_metric_caption, mvw_metric_group_id, mvw_metric_provider_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
 			mvw_work_id, mvw_work_caption, mvw_work_authors, mvw_work_institution, mvw_work_type, mvw_work_is_private, mvw_work_is_indexed, mvw_work_access_link, `mvw_variable_captions`, `mvw_variable_value_captions`) ";
 
@@ -40,13 +41,13 @@ class SnapshotMetricVersionModel
 						wrk_type, wrk_is_private,
 						wrk_is_indexed, wrk_access_link, ";
 						// Hace un subselect con los nombres de variables
-		$sql .= "(SELECT LEFT(GROUP_CONCAT(mvv_caption ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOPT_CAPTIONS_MAX_LENGTH . ")
+		$sql .= "(SELECT LEFT(GROUP_CONCAT(mvv_caption ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOT_CAPTIONS_MAX_LENGTH . ")
 							FROM variable
 							JOIN metric_version_level ON mvv_metric_version_level_id = mvl_id
 							WHERE mvl_metric_version_id = mvr_id
 									),";
 						// Hace un subselect distinct con los valores de variables
-		$sql .= "(SELECT LEFT(GROUP_CONCAT(SUB.V1 ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOPT_CAPTIONS_MAX_LENGTH . ")
+		$sql .= "(SELECT LEFT(GROUP_CONCAT(SUB.V1 ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOT_CAPTIONS_MAX_LENGTH . ")
 							FROM
 									(SELECT mvr_id, mvv_id, mvv_order,
 												GROUP_CONCAT(DISTINCT vvl_caption ORDER BY vvl_variable_id, vvl_order SEPARATOR '\r') AS V1
@@ -54,7 +55,6 @@ class SnapshotMetricVersionModel
 									JOIN metric_version_level ON mvl_metric_version_id = mvr_id
 									JOIN variable ON mvv_metric_version_level_id = mvl_id
 									JOIN variable_value_label ON vvl_variable_id = mvv_id
-									WHERE mvr_metric_id = ?
 									GROUP BY mvr_id, mvv_id, mvv_order) AS SUB
 							 WHERE SUB.mvr_id = metric_version.mvr_id)
 						FROM metric_version
@@ -71,6 +71,7 @@ class SnapshotMetricVersionModel
 
 		App::Db()->exec("SET group_concat_max_len = 102400");
 		$param = ($regenFullTable ? array() : array($metricIdShardified, $metricIdShardified));
+
 		App::Db()->exec($sql, $param);
 		App::Db()->markTableUpdate('snapshot_metric_version');
 

@@ -9,7 +9,10 @@ class Links
 	public static function GetFullyQualifiedUrl($url)
 	{
 		if ($url === null || $url === '') return $url;
-		return Context::Settings()->GetPublicUrl() . $url;
+
+		$mainUrl = App::Settings()->Servers()->Main()->publicUrl;
+
+		return $mainUrl . $url;
 	}
 	public static function GetBackofficeUrl()
 	{
@@ -76,7 +79,9 @@ class Links
 	}
 	public static function GetBackofficeWorkUrl($workId)
 	{
-		return Context::Settings()->GetPublicUrl() . "/users/#/cartographies/" . $workId;
+		$mainUrl = App::Settings()->Servers()->Main()->publicUrl;
+
+		return $mainUrl . "/users/#/cartographies/" . $workId;
 	}
 
 	public static function GetHandleUrl()
