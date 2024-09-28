@@ -1,8 +1,8 @@
 <?php
 $settings = __DIR__ . '/config/settings.php';
 
-require_once __DIR__ . '/simlink.php';
-exit;
+//require_once __DIR__ . '/simlink.php';
+//exit;
 
 $isStatic = isStatic();
 if ($isStatic)
