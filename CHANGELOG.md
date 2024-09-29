@@ -1,3 +1,7 @@
+- Fix a error de duplicar cartografía.
+- Fix a error de publicar cartografía.
+
+
 v4.0 (2024-06-27)
 - Mejoras en regeneración de tablas de indicadores.
 - Distribución remota por https.
