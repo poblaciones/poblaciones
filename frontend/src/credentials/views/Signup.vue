@@ -148,10 +148,10 @@ export default {
 			});
 		},
 		googleSignup() {
-			this.$refs.openAuth.show('/oauthGoogle', true);
+			this.$refs.openAuth.show(window.host + '/oauthGoogle', true);
 		},
 		facebookSignup() {
-			this.$refs.openAuth.show('/oauthFacebook', true);
+			this.$refs.openAuth.show(window.host + '/oauthFacebook', true);
 		}
 	}
 };

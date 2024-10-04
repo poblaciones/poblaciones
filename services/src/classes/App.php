@@ -305,9 +305,18 @@ class App
 	{
 		return self::Redirect(self::RedirectLoginUrl());
 	}
-	public static function AbsoluteUrl($url)
+
+	public static function AbsoluteLocalUrl($url)
 	{
-		$host = App::Settings()->Servers()->Main()->publicUrl;
+		return self::AbsoluteUrl($url, true);
+	}
+
+	public static function AbsoluteUrl($url, $locaLink = false)
+	{
+		if ($locaLink)
+			$host = App::Settings()->Servers()->Current()->publicUrl;
+		else
+			$host = App::Settings()->Servers()->Main()->publicUrl;
 		$hasBar = substr($url, 0, 1) === '/';
 		if (!$hasBar)
 		{
@@ -330,8 +339,9 @@ class App
 	}
 	public static function RedirectLoginUrl()
 	{
-		$actual_link = self::AbsoluteUrl('');
-		$url = self::AbsoluteUrl('/authenticate/login');
+		$locaLink = Str::StartsWith(FrameworkRequest::GetRequestURI(), "/logs");
+		$actual_link = self::AbsoluteUrl('', $locaLink);
+		$url = self::AbsoluteUrl('/authenticate/login', $locaLink);
 
 		$url = Str::AppendParam($url, 'ask', 1);
 		$url = Str::AppendParam($url, 'to', $actual_link);
