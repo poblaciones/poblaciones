@@ -26,7 +26,7 @@ ob_start();
 App::$app->before(function(Request $request) {
 	Profiling::BeginTimer("Request");
 
-	$add = Params::SafeServer('REMOTE_ADDR');
+	$add = minga\framework\Request::IP();
 	Traffic::RegisterIP($add);
 
 	Performance::Begin();

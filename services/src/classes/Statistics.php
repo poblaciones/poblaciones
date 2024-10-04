@@ -5,6 +5,7 @@ namespace helena\classes;
 use minga\framework\IO;
 use minga\framework\Context;
 use minga\framework\GeoIp;
+use minga\framework\Request;
 use minga\framework\Params;
 use minga\framework\Date;
 use minga\framework\Profiling;
@@ -398,7 +399,7 @@ class Statistics
 			$referer = Params::SafeServer('HTTP_REFERER', '');
 		else
 			$referer = '';
-		$remoteAddr = Params::SafeServer('REMOTE_ADDR', '');
+		$remoteAddr = Request::IP();
 		$user = Account::Current()->user;
 		$time = Date::FormattedArNow();
 

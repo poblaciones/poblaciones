@@ -51,14 +51,6 @@ def upload(url, file, key, verify_ssl=True):
     rnd = generate_random_hex()
     data = {}
 
- #   with open(file, 'rb') as f:
- #       with tqdm(total=size, unit='B', unit_scale=True, desc="Subiendo archivo") as pbar:
- #           data["file"] = (os.path.basename(file), f, get_mime_type(file))
- #           e = MultipartEncoder(fields=data)
- #           m = MultipartEncoderMonitor(e, lambda monitor: pbar.update(monitor.bytes_read - pbar.n))
- #           headers = {"Content-Type": m.content_type}
- #           response = requests.post(url + "?s=" + key, data=m, headers=headers, verify=verify_ssl)
-
     chunk_size=256*1024
     file_size = os.path.getsize(file)
 
@@ -76,7 +68,6 @@ def upload(url, file, key, verify_ssl=True):
                 chunk_data["file"] = (os.path.basename(file), chunk, get_mime_type(file))
 
                 e = MultipartEncoder(fields=chunk_data)
-                # m = MultipartEncoderMonitor(e, lambda monitor: pbar.update(monitor.bytes_read - pbar.n))
 
                 headers = {"Content-Type": e.content_type, "User-Agent": USER_AGENT }
                 response = requests.post(chunk_url, data=e, headers=headers, verify=verify_ssl)

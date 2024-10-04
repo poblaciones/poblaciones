@@ -8,6 +8,8 @@ use helena\classes\App;
 use minga\framework\Context;
 use minga\framework\PublicException;
 use minga\framework\Params;
+use minga\framework\Request;
+
 
 class cWinLogin extends cController
 {
@@ -54,7 +56,7 @@ class cWinLogin extends cController
 				'::1'
 		);
 		$whiteList = array_merge($localList, Context::Settings()->Servers()->RemoteLoginWhiteList);
-		if(!in_array($_SERVER['REMOTE_ADDR'], $whiteList)){
+		if(!in_array(Request::IP(), $whiteList)){
 			throw new PublicException('El método debe ser invocado localmente o desde una dirección permitida en el archivo de configuración del servidor (Context::Settings()->Servers()->RemoteLoginWhiteList = array(.., ..)).');
 		}
 	}

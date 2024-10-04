@@ -73,6 +73,7 @@ export default {
 		this.step = 1;
 	},
 	mounted() {
+		var loc = this;
 		// valida parámetros
 		this.email = this.$route.query.email;
 		if(str.IsEmail(this.email) == false) {
@@ -84,12 +85,13 @@ export default {
 			this.$refs.messagebox.show('Debe indicar el código.');
 			return;
 		}
-		window.Context.ValidateCode(this.email, this.code).then(data => {
-			if (response.IsError(data.status)) {
-				this.$refs.messagebox.show(data.message);
-				return;
-			}
-		});
+		if (window.Context.ServerLoaded) {
+			this.validateCode();
+		} else {
+			window.Messages.$on('serverLoaded', args => {
+				loc.validateCode();
+			});
+		}
 	},
 	data() {
 		return {
@@ -114,6 +116,14 @@ export default {
 	methods: {
 		msgClosed() {
 			document.location = '/';
+		},
+		validateCode() {
+			window.Context.ValidateCode(this.email, this.code).then(data => {
+				if (response.IsError(data.status)) {
+					this.$refs.messagebox.show(data.message);
+					return;
+				}
+			});
 		},
 		messageClass(value = false) {
 			return {

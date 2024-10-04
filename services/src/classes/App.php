@@ -307,7 +307,7 @@ class App
 	}
 	public static function AbsoluteUrl($url)
 	{
-		$host = App::Settings()->Servers()->Current()->publicUrl;
+		$host = App::Settings()->Servers()->Main()->publicUrl;
 		$hasBar = substr($url, 0, 1) === '/';
 		if (!$hasBar)
 		{

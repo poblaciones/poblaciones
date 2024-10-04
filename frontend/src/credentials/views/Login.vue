@@ -97,22 +97,11 @@ export default {
 	created() {
 		this.step = 1;
 		this.email = this.$route.query.email;
-		if(this.email) {
-			if(str.IsEmail(this.email) == false) {
-				return;
-			}
-			var code = this.$route.query.code;
-			if(/^\d{6}$/.test(code) == false) {
-				return;
-			}
-			window.Context.AccountExists(this.email, true).then(data => {
-				if (response.IsOK(data.status)) {
-					window.Context.ValidateCode(this.email, code).then(data => {
-						if (response.IsOK(data.status)) {
-							this.step = 2;
-						}
-					});
-				}
+		if (window.Context.ServerLoaded) {
+			this.validateEmail();
+		} else {
+			window.Messages.$on('serverLoaded', args => {
+				loc.validateEmail();
 			});
 		}
 	},
@@ -141,6 +130,26 @@ export default {
 			return {
 				'md-invalid': value && (this.hasMessages || this.serverError)
 			};
+		},
+		validateEmail() {
+			if (this.email) {
+				if (str.IsEmail(this.email) == false) {
+					return;
+				}
+				var code = this.$route.query.code;
+				if (/^\d{6}$/.test(code) == false) {
+					return;
+				}
+				window.Context.AccountExists(this.email, true).then(data => {
+					if (response.IsOK(data.status)) {
+						window.Context.ValidateCode(this.email, code).then(data => {
+							if (response.IsOK(data.status)) {
+								this.step = 2;
+							}
+						});
+					}
+				});
+			}
 		},
 		removedUser() {
 			this.serverError = '';

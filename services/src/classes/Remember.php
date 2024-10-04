@@ -9,6 +9,7 @@ use minga\framework\Cookies;
 use minga\framework\Date;
 use minga\framework\Str;
 use minga\framework\Log;
+use minga\framework\Request;
 
 
 class Remember
@@ -182,7 +183,7 @@ class Remember
 		$insert = "INSERT INTO user_session (ses_user_id, ses_token, ses_create,
 					ses_last_login, ses_last_ip, ses_user_agent) values (?, ?, now(), now(), ?, ?)";
 
-		$ip = (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+		$ip = Request::IP();
 		$agent = (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '');
 
 		App::Db()->exec($insert, array($account->userId, $token, $ip, $agent));

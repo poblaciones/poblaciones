@@ -72,10 +72,20 @@ export default {
 			hasMessages: false,
 		};
 	},
-	mounted() {
-		setTimeout(() => {
-			this.$refs.nombre.$el.focus();
-		}, 250);
+		mounted() {
+			var loc = this;
+			setTimeout(() => {
+				this.$refs.nombre.$el.focus();
+			}, 250);
+
+			if (window.Context.ServerLoaded) {
+				this.validateCode();
+			} else {
+				window.Messages.$on('serverLoaded', args => {
+					loc.validateCode();
+				});
+			}
+
 		// valida parámetros
 		this.email = this.$route.query.email;
 		if(str.IsEmail(this.email) == false) {
@@ -87,25 +97,6 @@ export default {
 			this.$refs.messagebox.show('Debe indicar el código.');
 			return;
 		}
-		window.Context.ValidateCode(this.email, this.code).then(data => {
-			if (response.IsError(data.status)) {
-				this.$refs.messagebox.show(data.message);
-				return;
-			} else {
-				this.type = data.type;
-				if(this.type == tokenTypeEnum.Permission) {
-					window.Context.AccountExists(this.email, true).then(data => {
-						if (response.IsOK(data.status)) {
-							if (data.loggedNow) {
-								document.location = '/users/';
-							} else {
-								this.$router.push({ path: '/signin', query: { email: this.email, code: this.code } });
-							}
-						}
-					});
-				}
-			}
-		});
 	},
 	validations: {
 		firstname: {
@@ -125,6 +116,27 @@ export default {
 	methods: {
 		msgClosed() {
 			document.location = '/';
+		},
+		validateCode() {
+			window.Context.ValidateCode(this.email, this.code).then(data => {
+				if (response.IsError(data.status)) {
+					this.$refs.messagebox.show(data.message);
+					return;
+				} else {
+					this.type = data.type;
+					if (this.type == tokenTypeEnum.Permission) {
+						window.Context.AccountExists(this.email, true).then(data => {
+							if (response.IsOK(data.status)) {
+								if (data.loggedNow) {
+									document.location = '/users/';
+								} else {
+									this.$router.push({ path: '/signin', query: { email: this.email, code: this.code } });
+								}
+							}
+						});
+					}
+				}
+			});
 		},
 		messageClass(value = false) {
 			return {

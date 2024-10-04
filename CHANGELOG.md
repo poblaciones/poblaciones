@@ -1,5 +1,6 @@
 - Fix a error de duplicar cartografía.
 - Fix a error de publicar cartografía.
+- Fix a rutas por servidor distribuido en mails y circuito de alta de usuario.
 
 
 v4.0 (2024-06-27)

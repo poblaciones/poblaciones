@@ -60,14 +60,16 @@ class FileService extends BaseService
 
 		$bucket = $this->ConvertBase64toFile($watermarkImage);
 		$file = $bucket->path . '/file.dat';
-		if ($maxWidth || $maxHeight)
-		{
-			Image::ResizeToMaxSize($file, $maxWidth, $maxHeight);
-		}
 		if (Str::StartsWith($watermarkImage, "data:image/svg+xml;"))
 			$fileType = "image/svg+xml";
 		else
+		{
+			if ($maxWidth || $maxHeight)
+			{
+				Image::ResizeToMaxSize($file, $maxWidth, $maxHeight);
+			}
 			$fileType = Image::GetImageMimeType($file);
+		}
 		$this->SaveFile($fileObject, $file, true, $fileType, $workId);
 		$bucket->Delete();
 	}

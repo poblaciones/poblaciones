@@ -28,10 +28,13 @@ export default {
 	},
 	methods: {
 		InitializePage() {
+			var loc = this;
 			axiosClient.getPromise(window.host + '/services/GetTransactionServer', {},
 				'acceder a la configuración de servidores').then(function (serverConfiguration) {
 					window.mainHost = window.host;
 					window.host = serverConfiguration.Server;
+					window.Messages.$emit('serverLoaded');
+					window.Context.ServerLoaded = true;
 			});
 		},
 		RegisterErrorHandler() {

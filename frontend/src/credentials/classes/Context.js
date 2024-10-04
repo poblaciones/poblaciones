@@ -28,7 +28,7 @@ Context.prototype.AccountExists = function(user, shouldBeActive) {
 
 
 Context.prototype.BeginRecover = function (user) {
-	var args = { u: user, t: window.host + '/users/' };
+	var args = { u: user, t: window.mainHost + '/users/' };
 	return axiosClient.postPromise(window.host + '/services/authentication/BeginResetPassword', args,
 		('iniciar la recuperación de contraseña'));
 };
@@ -54,7 +54,7 @@ Context.prototype.Login = function (user, password) {
 };
 
 Context.prototype.Register = function (email) {
-	var args = { u: email, t: window.host + '/users/' };
+	var args = { u: email, t: window.mainHost + '/users/' };
 	return axiosClient.postPromise(window.host + '/services/authentication/BeginActivation', args,
 		('crear la cuenta'));
 };

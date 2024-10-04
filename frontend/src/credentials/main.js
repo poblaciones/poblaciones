@@ -67,6 +67,8 @@ window.Db = new Db();
 var sharedObject = new Context();
 var tmpVm = new Vue({ data: { sharedObject } });
 window.Context = tmpVm.sharedObject;
+window.Context.ServerLoaded = false;
+window.Messages = tmpVm;
 
 // enable axios post cookie, default false
 axios.defaults.withCredentials = true;
