@@ -30,7 +30,8 @@ class Menu
 		$activityMenu = array();
 		$activityMenu[] = self::MenuItem('ADMIN', '/logs/activity', 'Actividad');
 		$activityMenu[] = self::MenuItem('PERFORMANCE', '/logs/performance', 'Rendimiento');
-		$activityMenu[] = self::MenuItem('SEARCHLOG', '/logs/search', 'Búsquedas');
+		if (Context::Settings()->Db()->NoDbConnection() == false)
+			$activityMenu[] = self::MenuItem('SEARCHLOG', '/logs/search', 'Búsquedas');
 		$activityMenu[] = self::MenuItem('TRAFFIC', '/logs/traffic', 'Tráfico');
 		$activityMenu[] = self::MenuItem('ERRORS', '/logs/errors', 'Errores');
 

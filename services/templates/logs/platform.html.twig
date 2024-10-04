@@ -46,6 +46,8 @@
 		</tbody>
 	</table>
 	{% endif %}
+
+	{% if dbHost != '' %}
     <div style="clear: both"></div>
 	<div class="dSeparatorNewLine">
 		<div class='dText'>Base de datos</div>
@@ -58,6 +60,7 @@
 			{{ result.value }}.
 		</div>
 	{% endfor %}
+	{% endif %}
 
 </div>
 

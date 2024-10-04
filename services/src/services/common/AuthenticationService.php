@@ -15,6 +15,7 @@ class AuthenticationService
 			$ret = array('User' => $user->GetEmail(),
 									'Firstname' => $user->GetFirstName(),
 									'Lastname' => $user->GetLastName(),
+									//'UserId' => $user->GetUserId(),
 									'Master' => Account::GetMasterUser(),
 									'Privileges' => $user->privileges,
 									'Settings' => $user->GetSettings(),
@@ -25,6 +26,7 @@ class AuthenticationService
 			$ret = array('User' => '',
 									'FirstName' => '',
 									'Lastname' => '',
+									'UserId' => '',
 									'Master' => '',
 									'Privileges' => '',
 									'Logged' => false);

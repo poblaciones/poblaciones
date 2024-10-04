@@ -153,7 +153,7 @@ def main():
             send_request(server + INSTALL_API, key, verify_ssl)
         print("Fin installs.")
 
-    print("Fin de ejecución.")
+    print("Listo!")
 
 
 if __name__ == '__main__':

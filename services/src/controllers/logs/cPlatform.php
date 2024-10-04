@@ -36,6 +36,7 @@ class cPlatform extends cController
 		$this->templateValues['html_title'] = 'Plataforma';
 
 		$this->templateValues['dbItems'] = System::GetDbInfo();
+		$this->templateValues['dbHost'] = $this->templateValues['dbItems'][0]['value'];
 		$this->templateValues['dbItems'][] = $this->getScriptsVersion();
 
 		return $this->Render('platform.html.twig');
@@ -43,7 +44,11 @@ class cPlatform extends cController
 
 	private function getScriptsVersion()
 	{
-		return [ "name" => "Scripts", "value" => App::Db()->fetchScalar("SELECT ver_value FROM version WHERE ver_name = 'DB';")];
+		if (Context::Settings()->Db()->NoDbConnection())
+			$version = '-';
+		else
+			$version = App::Db()->fetchScalar("SELECT ver_value FROM version WHERE ver_name = 'DB';");
+		return [ "name" => "Scripts", "value" => $version];
 	}
 	private function RunCommand($command)
 	{

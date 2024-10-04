@@ -47,7 +47,7 @@
 				<div class='dBlockSize3'>{{ cache.files_count }} inodes / {{ cache.size }} MB.</div>
 			{% endfor %}
 		</div>
-
+		{% if total_data_size != '-' %}
 		<div style="float: left">
 			<div class='dCategory'>Base de datos</div>
 			<div class='dBlockNewLineS2 dNoPaddingTop'>Total:</div>
@@ -61,6 +61,7 @@
 			<div class='dBlockNewLineS2 dNoPaddingTop'>Huérfanas:</div>
 			<div class='dBlockSize3'>{{ total_orphan_size }}.</div>
 		</div>
+		{% endif %}
 	</div>
 
 </div>

@@ -6,7 +6,9 @@ use helena\db\frontend\UserModel;
 use helena\services\backoffice\notifications\NotificationManager;
 use minga\framework\PhpSession;
 use minga\framework\TemplateMessage;
-use minga\framework\Mail;
+use minga\framework\Performance;
+use minga\framework\WebConnection;
+use minga\framework\IO;
 use minga\framework\Str;
 use minga\framework\MessageBox;
 use minga\framework\Context;
@@ -170,25 +172,57 @@ class Account
 				else
 					return false;
 			}
-			$users = new UserModel();
-			$attrs = $users->GetUserByEmail($this->user);
-			if ($attrs == null)
-			{
-				if ($throwException)
-					throw new PublicException("Usuario no encontrado en la base de datos ('" . $this->user . "').");
-				else
-					return false;
-			}
-			$this->userId = $attrs['usr_id'];
-			$this->privileges = $attrs['usr_privileges'];
-			$this->firstName = $attrs['usr_firstname'];
-			$this->lastName = $attrs['usr_lastname'];
-			$this->facebookOauthId = $attrs['usr_facebook_oauth_id'];
-			$this->googleOauthId = $attrs['usr_google_oauth_id'];
-			$this->isActive = $attrs['usr_is_active'];
-			$this->password = $attrs['usr_password'];
+			if (App::Settings()->Servers()->IsMainServerRequest() && !App::Settings()->Servers()->IsTransactionServerRequest())
+				$this->loadUserRemote();
+			else
+				$this->loadUserFromDatabase($throwException);
 		}
 		return true;
+	}
+	private function loadUserRemote()
+	{
+		$remoteSessionId = PhpSession::GetSessionValue('RemoteCookieSessionId');
+		Performance::SetController('remoteStatus', 'post', true);
+		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+		$uri = $dynamicServer->publicUrl . '/services/authentication/status';
+		$conn = new WebConnection();
+		$conn->Initialize();
+		$conn->SetCookies($remoteSessionId);
+		$response = $conn->Get($uri);
+		$conn->Finalize();
+		$userInfo = IO::ReadJson($response->file);
+		IO::Delete($response->file);
+		if ($userInfo['User'] !== '') {
+			//$this->userId = $userInfo['UserId'];
+			$this->privileges = $userInfo['Privileges'];
+			$this->firstName = $userInfo['Firstname'];
+			$this->lastName = $userInfo['Lastname'];
+			$this->facebookOauthId = '';
+			$this->googleOauthId = '';
+			$this->isActive = true;
+			$this->password = null;
+		}
+	}
+
+	private function loadUserFromDatabase($throwException)
+	{
+		$users = new UserModel();
+		$attrs = $users->GetUserByEmail($this->user);
+		if ($attrs == null)
+		{
+			if ($throwException)
+				throw new PublicException("Usuario no encontrado en la base de datos ('" . $this->user . "').");
+			else
+				return false;
+		}
+		$this->userId = $attrs['usr_id'];
+		$this->privileges = $attrs['usr_privileges'];
+		$this->firstName = $attrs['usr_firstname'];
+		$this->lastName = $attrs['usr_lastname'];
+		$this->facebookOauthId = $attrs['usr_facebook_oauth_id'];
+		$this->googleOauthId = $attrs['usr_google_oauth_id'];
+		$this->isActive = $attrs['usr_is_active'];
+		$this->password = $attrs['usr_password'];
 	}
 
 	private function BuildFullName($first, $last)
@@ -458,7 +492,10 @@ class Account
 		$account->user = $user;
 		$account->Begin(null);
 	}
-
+	public function BeginNoDb()
+	{
+		PhpSession::SetSessionValue('user', $this->user);
+	}
 	public function Begin($masterUser = null)
 	{
 		if($this->IsActive() == false)

@@ -224,7 +224,7 @@ class App
 	private static function OrphanSqlWhere()
 	{
 		$db = Context::Settings()->Db()->Name;
-		$tableNameBase = "replace(replace( replace( TABLE_NAME, '_snapshot', ''), '_errors', ''), '_retry', '')";
+		$tableNameBase = "left(TABLE_NAME, POSITION('_matrix' IN CONCAT(replace(replace(replace(  TABLE_NAME, '_errors', ''), '_retry', ''), '_snapshot', ''), '_matrix')) - 1)";
 		$where =
 		"(TABLE_NAME LIKE 'work_dataset_draft_%' or TABLE_NAME LIKE 'work_dataset_shard_%') AND " .
 		"NOT EXISTS (SELECT * from " . $db . ".draft_dataset WHERE dat_table COLLATE utf8_unicode_ci = " . $tableNameBase . ") AND " .
@@ -237,8 +237,7 @@ class App
 		try
 		{
 			Profiling::BeginTimer();
-			$sql = "SELECT
-				TABLE_NAME `table`
+			$sql = "SELECT TABLE_NAME `table`
 				FROM information_schema.tables
 				WHERE table_schema = ? AND " . self::OrphanSqlWhere() . " ORDER BY TABLE_NAME";
 
@@ -635,6 +634,19 @@ class App
 			$response->content = IO::ReadAllText($response->file);
 			$cache->PutData($cacheKey, $response);
 		}
+		return $sending;
+	}
+	public static function FlushRemotePost($url, $args = null)
+	{
+		$response = null;
+		$conn = new WebConnection();
+		$conn->Initialize();
+		$response = $conn->Post($url, '', $args);
+		$conn->Finalize();
+
+		$sending = App::SendFile($response->file, true);
+		if (array_key_exists("content-disposition", $response->headers))
+			$sending->headers->set('content-disposition', $response->headers['content-disposition']);
 		return $sending;
 	}
 

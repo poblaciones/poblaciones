@@ -110,28 +110,40 @@ class cActivity extends cController
 				$cacheInfo = IO::GetDirectorySize($cachePath . '/services/' . $cacheGroup . '/' . $cacheDir);
 				$cacheData = array('files_count' => $cacheInfo ['inodes'],
 							'size' => round(intval(self::SafeDivKb($cacheInfo ['size'])) / 1024, 2),
-							'label' => 'services/' . $cacheGroup . '/' . $cacheDir);
+							'label' => 'services/' . $cacheGroup . '/' . $cacheDir
+				);
 				$caches[] = $cacheData;
 			}
 		}
 		$vals['caches'] = $caches;
 
-		$indexSpace = App::Db()->GetDBSize();
+		if (Context::Settings()->Db()->NoDbConnection() == false) {
+			$indexSpace = App::Db()->GetDBSize();
 
-		$vals['total_data_size'] = Str::SizeToHumanReadable($indexSpace['data']+$indexSpace['index']);
-		$vals['index_data_size'] = Str::SizeToHumanReadable($indexSpace['data']);
-		$vals['index_index_size'] = Str::SizeToHumanReadable($indexSpace['index']);
+			$vals['total_data_size'] = Str::SizeToHumanReadable($indexSpace['data'] + $indexSpace['index']);
+			$vals['index_data_size'] = Str::SizeToHumanReadable($indexSpace['data']);
+			$vals['index_index_size'] = Str::SizeToHumanReadable($indexSpace['index']);
 
-		$orphanSpace = App::GetOrphanSize();
-		$vals['total_orphan_size'] = Str::SizeToHumanReadable($orphanSpace['size']);
+			$orphanSpace = App::GetOrphanSize();
+			$vals['total_orphan_size'] = Str::SizeToHumanReadable($orphanSpace['size']);
 
-		$tmpSpace = App::GetTmpSize();
-		$vals['total_tmp_size'] = Str::SizeToHumanReadable($tmpSpace['size']);
+			$tmpSpace = App::GetTmpSize();
+			$vals['total_tmp_size'] = Str::SizeToHumanReadable($tmpSpace['size']);
 
+			$totalSize = $dirInfo['size'] + $indexSpace['data'] + $indexSpace['index'];
+			$vals['total_size'] = round($totalSize / 1024 / 1024, 2);
+		}
+		else
+		{
+			$vals['total_data_size'] = '-';
+			$vals['index_data_size'] = '-';
+			$vals['index_index_size'] = '-';
+			$vals['total_orphan_size'] = '-';
+			$vals['total_tmp_size'] = '-';
+			$vals['total_size'] = '-';
+		}
 		$dirInfo = IO::GetDirectorySize(Context::Paths()->GetRoot());
 
-		$totalSize = $dirInfo['size'] + $indexSpace['data'] + $indexSpace['index'];
-		$vals['total_size'] = round($totalSize / 1024 / 1024, 2);
 		$vals['total_disk_size'] = Str::SizeToHumanReadable($dirInfo['size']);
 		$vals['total_inodes'] = $dirInfo['inodes'];
 	}

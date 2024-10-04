@@ -267,7 +267,7 @@ class PublishDataTables
 		$tables = App::GetOrphanSet();
 		foreach($tables as $table)
 		{
-			//echo $table['table'] . '<br>';
+			//echo  $table['aa'] . ' - ' .   $table['table'] . '<br>';
 			App::Db()->dropTable($table['table']);
 		}
 		return sizeof($tables);
