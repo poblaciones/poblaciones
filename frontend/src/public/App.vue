@@ -251,11 +251,17 @@
 					if (web.getParameterByName('leaflet') != null) {
 						loc.config.MapsAPI = 'leaflet';
 					}
-					if (args.workId && res.data.CanAccessContent === false) {
-						if (loc.user.User !== '') {
-							alert('El usuario actual (' +loc.user.User + ') no dispone de acceso para este contenido. Deberá identificarse con otra cuenta para poder ingresar.');
+					if (args.workId) {
+						if (res.data.CanAccessContent === false) {
+							if (loc.user.User !== '') {
+								alert('El usuario actual (' + loc.user.User + ') no dispone de acceso para este contenido. Deberá identificarse con otra cuenta para poder ingresar.');
+							}
+							authentication.redirectLogin();
+						} else {
+							// puede accederlo
+							document.title = res.data.ContentAttributes.Title;
+							document.querySelector('meta[name="description"]').setAttribute("content", res.data.ContentAttributes.Description);
 						}
-						authentication.redirectLogin();
 					}
 				}).catch(function (error) {
 					err.errDialog('GetConfiguration', 'conectarse con el servidor', error);

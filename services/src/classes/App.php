@@ -619,12 +619,19 @@ class App
 		// Lo trae
 		if ($response === null)
 		{
+			// Trae el contenido
 			$conn = new WebConnection();
 			$conn->Initialize();
+			$conn->SetFollowRedirects(false);
+			$conn->SetHeader("INTERNAL", "1");
 			$response = $conn->Get($url, '', 0, $args);
 			$conn->Finalize();
+			// Se fija si recibió un redirect...
+			if ($response->IsRedirect())
+			{
+				return App::Redirect($response->GetLocationHeader(), $response->httpCode);
+			}
 		}
-
 		$sending = App::SendFile($response->file, true);
 		if (array_key_exists("content-disposition", $response->headers))
 			$sending->headers->set('content-disposition', $response->headers['content-disposition']);

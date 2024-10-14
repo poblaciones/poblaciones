@@ -5,6 +5,7 @@ namespace helena\controllers\frontend;
 use minga\framework\Context;
 use minga\framework\Params;
 use minga\framework\Request;
+use minga\framework\Response;
 use minga\framework\PublicException;
 use minga\framework\Performance;
 
@@ -75,6 +76,21 @@ class cMap extends cPublicController
 		$level3 = Request::GetThirdUriPart();
 		if ($level3 == "metadata")
 		{
+			$hasAccess = Session::IsWorkPublicOrAccessible($this->workId);
+			if (!$hasAccess)
+			{
+				if (App::Settings()->Servers()->IsTransactionServerRequest()
+					&& !App::Settings()->Servers()->IsMainServerRequest() && Request::IsInternal())
+				{	// hace un redirect
+					return App::Response("<html><body onload=\"document.location='" . App::AbsoluteLocalUrl(Request::GetRequestURI()) . "';\"></body></html>", "text/html");
+				}
+				else
+				{	// devuelve denied
+					if ($denied = Session::CheckIsWorkPublicOrAccessible($this->workId))
+						return $denied;
+				}
+			}
+
 			$controller = new MetadataService();
 			$workService = new WorkService();
 			$work = $workService->GetWorkOnly($this->workId);
@@ -125,7 +141,7 @@ class cMap extends cPublicController
 		$this->AddValue('application_name' , 'Poblaciones');
 		$this->AddValue('description', 'Plataforma abierta de datos espaciales de la Argentina');
 		// Se fija si está sirviendo para una cartografía en particular
-		if ($this->workId)
+		if ($this->workId && Session::IsWorkPublicOrAccessible($this->workId))
 		{
 			$service = new MetadataModel();
 			$metadata = $service->GetMetadataByWorkId($this->workId);

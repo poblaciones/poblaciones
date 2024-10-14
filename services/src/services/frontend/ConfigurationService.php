@@ -14,6 +14,7 @@ use helena\db\frontend\SignatureModel;
 use minga\framework\Context;
 use minga\framework\Performance;
 use helena\classes\Callbacks;
+use helena\db\frontend\MetadataModel;
 use helena\classes\App;
 use helena\classes\Session;
 use minga\framework\Cookies;
@@ -99,11 +100,22 @@ class ConfigurationService extends BaseService
 			$this->CreateNavigationCookie();
 		$navigation = $session->GetNavigationId();
 
+		$contentAttributes = [];
 		$canAccessContent = true;
 		if ($workId)
 		{
 			Session::$AccessLink = $link;
-			$canAccessContent = Session::IsWorkPublicOrAccessible($workId);
+			$isRestricted = false;
+			$canAccessContent = Session::IsWorkPublicOrAccessible($workId, $isRestricted);
+			if ($isRestricted)
+			{
+				$service = new MetadataModel();
+				$metadata = $service->GetMetadataByWorkId($workId);
+				if ($metadata !== null) {
+					$contentAttributes['Title'] = "Mapa de " . $metadata['met_title'] . " - Poblaciones";
+					$contentAttributes['Description'] = $metadata['met_abstract'];
+				}
+			}
 		}
 
 		$mainServer = App::Settings()->Servers()->Main();
@@ -135,6 +147,7 @@ class ConfigurationService extends BaseService
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user,
 									'CanAccessContent' => $canAccessContent,
+									'ContentAttributes' => $contentAttributes,
 									'MainServer' => $mainServer->publicUrl);
 
 		Callbacks::$MapsOpened++;
