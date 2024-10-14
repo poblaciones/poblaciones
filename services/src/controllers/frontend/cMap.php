@@ -39,11 +39,10 @@ class cMap extends cPublicController
 		if ($this->workId)
 		{
 			if (!App::Settings()->Servers()->IsTransactionServerRequest())
-			{
+			{   // esto tiene sentido desde el client, no desde acá *****************
 				$remoteMap = new cRemoteMap();
 				return $remoteMap->Show();
 			}
-			Session::CheckIsWorkPublicOrAccessible($this->workId);
 
 			// Devuelve metadatos ej. http://mapas/map/3701/metadata
 			$res = $this->ResolveMetadataRequest();
@@ -63,8 +62,6 @@ class cMap extends cPublicController
 
 		$this->RegisterOpenGraphTags();
 		$this->RegisterFacebookId();
-		// Header always unset X-Frame-Options
-		// https://www.a2hosting.com/kb/developer-corner/configuring-frames-with-the-x-frame-options-header
 
 		// Si está embebido, lo indica para estadísticas
 		if (Params::Get('emb'))

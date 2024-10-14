@@ -1,7 +1,10 @@
+v4.1 (2024-10-12)
 - Fix a error de duplicar cartografía.
 - Fix a error de publicar cartografía.
 - Fix a rutas por servidor distribuido en mails y circuito de alta de usuario.
-
+- Filtro en ventana de vinculación de indicadores.
+- Fix a cambio de nombre en series de indicadores multinivel.
+- Soporte para cartografías privadas en servidores distribudos.
 
 v4.0 (2024-06-27)
 - Mejoras en regeneración de tablas de indicadores.

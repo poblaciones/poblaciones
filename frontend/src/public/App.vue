@@ -69,6 +69,9 @@
 	import err from '@/common/framework/err';
 	import web from '@/common/framework/web';
 
+	import login from '@/common/framework/web';
+	import authentication from '@/common/js/authentication';
+
 	import { component } from 'vue-fullscreen';
 
 	export default {
@@ -232,6 +235,10 @@
 					params.t = topUrl;
 					params.c = document.location.href;
 				}
+				var args = StartMap.ResolveWorkIdFromUrl();
+				params.w = args.workId;
+				params.l = args.link;
+
 				return axios.get(serverConfiguration.Server + '/services/GetConfiguration', {
 					params: params
 				}).then(function (res) {
@@ -243,6 +250,12 @@
 					loc.user = res.data.User;
 					if (web.getParameterByName('leaflet') != null) {
 						loc.config.MapsAPI = 'leaflet';
+					}
+					if (args.workId && res.data.CanAccessContent === false) {
+						if (loc.user.User !== '') {
+							alert('El usuario actual (' +loc.user.User + ') no dispone de acceso para este contenido. Deberá identificarse con otra cuenta para poder ingresar.');
+						}
+						authentication.redirectLogin();
 					}
 				}).catch(function (error) {
 					err.errDialog('GetConfiguration', 'conectarse con el servidor', error);

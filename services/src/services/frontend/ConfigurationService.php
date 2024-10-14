@@ -15,6 +15,7 @@ use minga\framework\Context;
 use minga\framework\Performance;
 use helena\classes\Callbacks;
 use helena\classes\App;
+use helena\classes\Session;
 use minga\framework\Cookies;
 
 class ConfigurationService extends BaseService
@@ -81,7 +82,7 @@ class ConfigurationService extends BaseService
         return $id;
     }
 
-	public function GetConfiguration($topUrl = null, $clientUrl = null)
+	public function GetConfiguration($workId, $link)
 	{
 		$session = new SessionService();
 		$model = new SignatureModel();
@@ -96,8 +97,14 @@ class ConfigurationService extends BaseService
 
 		if (!$this->CheckNavigationCookie())
 			$this->CreateNavigationCookie();
-
 		$navigation = $session->GetNavigationId();
+
+		$canAccessContent = true;
+		if ($workId)
+		{
+			Session::$AccessLink = $link;
+			$canAccessContent = Session::IsWorkPublicOrAccessible($workId);
+		}
 
 		$mainServer = App::Settings()->Servers()->Main();
 
@@ -127,6 +134,7 @@ class ConfigurationService extends BaseService
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user,
+									'CanAccessContent' => $canAccessContent,
 									'MainServer' => $mainServer->publicUrl);
 
 		Callbacks::$MapsOpened++;

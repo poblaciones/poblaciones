@@ -257,7 +257,7 @@ export default {
 			}
 		},
 		formatGroup(item) {
-			if (item === null) {
+			if (item === null || item === undefined) {
 				return '-';
 			} else {
 				return item.Caption;

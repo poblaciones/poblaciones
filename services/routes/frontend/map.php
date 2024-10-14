@@ -96,7 +96,10 @@ App::$app->get('/services/GetConfiguration', function (Request $request) {
 		$clientUrl = Params::Get('c');
 		Statistics::SaveEmbeddedHit($topUrl, $clientUrl);
 	}
-	return App::Json($controller->GetConfiguration());
+	$workId = Params::GetInt('w', null);
+	$link = Params::Get('l');
+
+	return App::Json($controller->GetConfiguration($workId, $link));
 });
 
 App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {

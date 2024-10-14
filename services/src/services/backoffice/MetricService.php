@@ -511,14 +511,26 @@ class MetricService extends BaseService
 
 	private function SaveMetricLevel($dataset, $metricVersionLevel, $metric, $metricVersion)
 	{
-		$this->saveMetricVersion($dataset, $metricVersionLevel, $metric, $metricVersion);
-
-		// Graba el level
-		if ($metricVersionLevel->getId() === null || $metricVersionLevel->getId() === 0)
-		{
+		if ($metricVersionLevel->getId() === null || $metricVersionLevel->getId() === 0) {
 			$metricVersionLevel->setDataset($dataset);
 		}
+		$rebindVersion = $this->saveMetricVersion($dataset, $metricVersionLevel, $metric, $metricVersion);
+		if ($rebindVersion != null) {
+			echo 'seteó la rebind: ' . $rebindVersion->getId() . ".<p>";
+			$metricVersionLevel->setMetricVersion($rebindVersion);
+			App::Orm()->save($rebindVersion);
+		}
+		// Graba el level
 		App::Orm()->save($metricVersionLevel);
+		if ($rebindVersion !== null)
+		{
+			// borra si era el último
+			$existingLevels = App::Orm()->findManyByProperty(entities\DraftMetricVersionLevel::class, 'MetricVersion.Id', $metricVersion->getId());
+			if (sizeof($existingLevels) == 0)
+			{
+				App::Orm()->delete($metricVersion);
+			}
+		}
 		Profiling::EndTimer();
 	}
 
@@ -554,23 +566,57 @@ class MetricService extends BaseService
 			$versionInfo = App::Db()->fetchAssoc($sql, array($level->getId(), $metricVersion->getId()));
 			if (strcasecmp($versionInfo['caption'], $metricVersion->getCaption()) !== 0)
 			{
+				// Trata el caso de que exista una versión con el mismo nombre del rename
+				$preExisting = $this->findExistingMetricVersion($metric, $metricVersion, $level);
+				if ($preExisting !== null)
+				{
+					// le restituye la descripción
+					$metricVersion->setCaption($versionInfo['caption']);
+					Profiling::EndTimer();
+					return $preExisting;
+				}
+				// Si no es único y no está sincronizando, clona
 				if ($versionInfo['levels'] !== 0 && !$metricVersion->getMultilevel())
 				{
-					// Si no es único y no está sincronizando, clona
 					$metricVersion->setId(null);
 				}
-				// Trata el caso de que exista una versión con el mismo nombre del rename
-				$caption = $metricVersion->getCaption();
-				$sql = "SELECT COUNT(*) FROM draft_metric_version WHERE mvr_caption = ?
-									AND mvr_metric_id = ?";
-				$existings = App::Db()->fetchScalarInt($sql, array($caption, $metric->getId()));
-				if ($existings > 0)
-					throw new PublicException("Ya existe una versión '" . $caption . "' para este indicador. \n\nSi desea agregar niveles a una versión existente, debe asociar los datasets en la solapa 'multinivel' del dataset.");
 				// Listo, graba
 				App::Orm()->save($metricVersion);
 			}
 		}
 		Profiling::EndTimer();
+		// Devuelve null porque no es necesario reengancharse
+		return null;
+	}
+
+	private function findExistingMetricVersion($metric, $metricVersion, $level)
+	{
+		// Trata el caso de que exista una versión con el mismo nombre del rename
+		$caption = $metricVersion->getCaption();
+		$existings = App::Orm()->findManyByProperties(
+			entities\DraftMetricVersion::class,
+			['Caption' => $caption, 'Metric.Id' => $metric->getId()]
+		);
+		if (sizeof($existings) === 0)
+			return null;
+
+		if (sizeof($existings) == 1) {
+			$existing = $existings[0];
+			if ($metricVersion->getWork()->getId() == $existing->getWork()->getId()) {
+				$existingLevels = App::Orm()->findManyByProperty(entities\DraftMetricVersionLevel::class, 'MetricVersion.Id', $existing->getId());
+				if (sizeof($existingLevels) > 0) {
+					$firstExistingLevel = $existingLevels[0];
+					$existingMultilevelMatrix = $firstExistingLevel->getDataset()->getMultilevelMatrix();
+					$currentMatrix = $level->getDataset()->getMultilevelMatrix();
+					if ($existingMultilevelMatrix == $currentMatrix) {
+						// Se queda con la pre-existente
+						Profiling::EndTimer();
+						return $existing;
+					}
+				}
+			}
+		}
+		throw new PublicException("Ya existe una versión '" . $caption . "' para este indicador. \n\nSi desea agregar niveles a una versión existente, debe asociar los datasets en la solapa 'multinivel' del dataset.");
 	}
 
 	private function ValidateVersionAppend($dataset, $existingVersion)

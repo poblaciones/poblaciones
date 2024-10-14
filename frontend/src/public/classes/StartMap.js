@@ -20,8 +20,8 @@ StartMap.prototype.Start = function () {
 	window.accessWorkId = null;
 	this.workReference.Current = null;
 
-	var args = this.ResolveWorkIdFromUrl();
-	if (args && args.workId) {
+	var args = StartMap.ResolveWorkIdFromUrl();
+	if (args.workId) {
 		// Si tiene un work, va a ese paso
 		this.RestoreWork(args.workId, args.link);
 	} else {
@@ -35,7 +35,7 @@ StartMap.prototype.Start = function () {
 	}
 };
 
-StartMap.prototype.ResolveWorkIdFromUrl = function () {
+StartMap.ResolveWorkIdFromUrl = function () {
 	var pathArray = window.location.pathname.split('/');
 	if (pathArray.length > 0 && pathArray[pathArray.length - 1] === '') {
 		pathArray.pop();
@@ -45,12 +45,13 @@ StartMap.prototype.ResolveWorkIdFromUrl = function () {
 	}
 	var link = null;
 	if (pathArray.length > 0 && pathArray[pathArray.length - 1].length === 18) {
-			link = pathArray.pop();
+		link = pathArray.pop();
 	}
 	if (pathArray.length === 0 || !str.isNumeric(pathArray[pathArray.length - 1])) {
-		return null;
+		return { workId: null, link: null };
+	} else {
+		return { workId: parseInt(pathArray[pathArray.length - 1]), link: link };
 	}
-	return { workId: parseInt(pathArray[pathArray.length - 1]), link: link };
 };
 
 StartMap.prototype.RestoreWork = function (workId, link) {

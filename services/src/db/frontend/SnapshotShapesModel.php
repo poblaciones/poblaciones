@@ -26,7 +26,9 @@ class SnapshotShapesModel extends BaseModel
 
 	//	$params = array();
 		$params = array($datasetId);
-
+		/*echo $sql;
+		print_r($params);
+		exit;*/
 		$ret = App::Db()->fetchAll($sql, $params);
 		Profiling::EndTimer();
 		return $ret;
