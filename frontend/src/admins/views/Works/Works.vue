@@ -18,8 +18,10 @@
 			<md-icon>data_usage</md-icon> Recalcular tamaños
 		</md-button>
 
-		<div class="md-layout-item md-size-100">
-			<md-table style="max-width: 1200px;" v-if="works.length > 0" v-model="works" md-sort="Caption" md-sort-order="asc" md-card>
+		<div class="md-layout-item md-size-100" style="position: relative">
+			<mp-search @search="applyFilters" v-model="search" style="margin-top: 8px" />
+
+			<md-table style="max-width: 1200px;" v-if="works.length > 0" v-model="worksFiltered" md-sort="Caption" md-sort-order="asc" md-card>
 				<md-table-row slot="md-table-row" slot-scope="{ item }">
 					<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
 						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
@@ -126,6 +128,8 @@ export default {
 			newWorkName: '',
 			timeFilter: 0,
 			works: [],
+			search: '',
+			worksFiltered: [],
 			activateSaveAs: false,
 		};
 	},
@@ -213,7 +217,11 @@ export default {
 			this.$refs.invoker.doMessage('Obteniendo cartografías', window.Db,
 					window.Db.GetWorks, this.filter, this.timeFilter).then(function(data) {
 						arr.Fill(loc.works, data);
+						loc.applyFilters();
 						});
+		},
+		applyFilters() {
+			this.worksFiltered = arr.SearchByCaption(this.works, this.search);
 		},
 		calculateUsage() {
 			var loc = this;
@@ -303,7 +311,13 @@ export default {
 			this.$refs.stepper.Start().then(function() {
 						loc.refreshWorks(); });
 		},
-	}
+	},
+		watch: {
+			'works'() {
+				this.search = '';
+				this.applyFilters();
+			},
+		}
 };
 </script>
 

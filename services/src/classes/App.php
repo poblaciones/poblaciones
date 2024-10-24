@@ -7,15 +7,14 @@ use minga\framework\IO;
 use minga\framework\Log;
 use minga\framework\Str;
 use minga\framework\Request as FrameworkRequest;
+use minga\framework\ErrorException;
 use minga\framework\Params;
 use minga\framework\Performance;
 use minga\framework\Context;
 use minga\framework\Profiling;
 use minga\framework\MessageBox;
 use minga\framework\PhpSession;
-use minga\framework\GlobalizeDebugSession;
 use minga\framework\WebConnection;
-use minga\framework\settings\CacheSettings;
 
 use helena\classes\Paths;
 use helena\classes\settings\LocalSettings;
@@ -430,7 +429,7 @@ class App
 			ini_set('serialize_precision', '-1');
 		}
 
-		// Procesa la compresiÛn...
+		// Procesa la compresi√≥n...
 		$acceptsGzip = strstr(Params::SafeServer('HTTP_ACCEPT_ENCODING'), "gzip");
 		if ($gzipped)
 		{
@@ -453,7 +452,7 @@ class App
 			$response->headers->set('Cache-Control', 'public, max-age=' . $days);
 		}
 
-		// Procesa la compresiÛn...
+		// Procesa la compresi√≥n...
 		if ($gzipped && $acceptsGzip)
 		{
 			// pone los headers...
@@ -461,7 +460,7 @@ class App
 			$response->headers->set("Content-Encoding", "gzip");
 		}
 
-		// Tiene que ir como text/plain porque si no complica los coars y cachÈs.
+		// Tiene que ir como text/plain porque si no complica los coars y cach√©s.
 		$response->headers->set('Content-Type', 'text/plain');
 		return $response;
 	}
@@ -520,7 +519,7 @@ class App
 
     $mode='wb'.$level;
     if(! ($fp_out=gzopen($dest,$mode)))
-			throw new \ErrorException("No pudo serializarse el resultado.");
+			throw new ErrorException("No pudo serializarse el resultado.");
 		gzwrite($fp_out, $header);
 		// Pone los chunks
 		$total = 0;
@@ -626,7 +625,11 @@ class App
 			$conn->SetHeader("INTERNAL", "1");
 			$response = $conn->Get($url, '', 0, $args);
 			$conn->Finalize();
-			// Se fija si recibiÛ un redirect...
+			if ($response->httpCode !== 200)
+			{
+				return App::Response("Error: " . $response->httpCode, 'text/html', $response->httpCode);
+			}
+			// Se fija si recibi√≥ un redirect...
 			if ($response->IsRedirect())
 			{
 				return App::Redirect($response->GetLocationHeader(), $response->httpCode);
@@ -774,9 +777,15 @@ class App
 		return;
 	}
 
-	public static function GetPhpCli()
+	public static function GetPhpCli($testExists = false)
 	{
-		return Context::Settings()->Servers()->PhpCli;
+		$file = Context::Settings()->Servers()->PhpCli;
+		if ($testExists)
+		{
+			if (file_exists($file) === false)
+				throw new ErrorException("La ruta indicada para PhpCli no es v√°lida (" . $file . ")");
+		}
+		return $file;
 	}
 
 	public static function GetPython3Path()

@@ -100,10 +100,18 @@ class ConfigurationService extends BaseService
 			$this->CreateNavigationCookie();
 		$navigation = $session->GetNavigationId();
 
+		$staticServers = Context::Settings()->Servers()->GetContentServerUris();
+		$useComparer = App::Settings()->Map()->UseCompareSeries;
+
 		$contentAttributes = [];
 		$canAccessContent = true;
 		if ($workId)
 		{
+			if ($workId == 227201)
+			{
+				//$staticServers = [ Context::Settings()->Servers()->GetTransactionServer()->publicUrl];
+				//$useComparer = true;
+			}
 			Session::$AccessLink = $link;
 			$isRestricted = false;
 			$canAccessContent = Session::IsWorkPublicOrAccessible($workId, $isRestricted);
@@ -122,7 +130,7 @@ class ConfigurationService extends BaseService
 
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
-									'StaticServer' =>  Context::Settings()->Servers()->GetContentServerUris(),
+									'StaticServer' =>  $staticServers,
 									'HomePage' =>  Context::Settings()->Servers()->Home()->publicUrl,
 
 									'Help' => App::Settings()->Help(),
@@ -136,7 +144,7 @@ class ConfigurationService extends BaseService
 									'UseUrbanity' => App::Settings()->Map()->UseUrbanity,
 									'UseMultiselect' => App::Settings()->Map()->UseMultiselect,
 									'UseDeckgl' => App::Settings()->Map()->UseDeckgl,
-									'UseCompareSeries' => App::Settings()->Map()->UseCompareSeries,
+									'UseCompareSeries' => $useComparer,
 
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 									'OwnerLogo' => App::Settings()->Map()->OwnerLogo,

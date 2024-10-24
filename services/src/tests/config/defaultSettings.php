@@ -25,6 +25,9 @@ return [
 		"testGetDatasetColumns" => 119,
 		"testGetDatasetColumnsLabels" => 119,
 	],
+	"helena\\tests\\api\\ClippingServiceTest" => [
+		'testGetFeature' => 7314,
+	],
 	"helena\\tests\\backoffice\\WorkServiceTest" => [
 		'testGetWorkInfo' => 36,
 	],

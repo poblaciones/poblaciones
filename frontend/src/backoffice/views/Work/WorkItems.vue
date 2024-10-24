@@ -6,101 +6,105 @@
 			{{ label }} ({{ list.length }})
 		</md-button>
 		<transition name="fade">
-			<md-table style="max-width: 1000px;" v-if="(expanded || actions == 'I')" v-model="list"
-								:md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder" :md-sort-fn="customSort"
-								md-card>
-				<md-table-row slot="md-table-row" slot-scope="{ item }">
-					<md-table-cell style="min-width: 400px" @click.native="selected('VIEW', item)" class="selectable" md-label="Título" md-sort-by="Caption">
-						<a :href="getWorkUri(item)" class="normalTextLink">{{ item.Caption }}</a>
-					</md-table-cell>
-					<md-table-cell @click.native="selected('VIEW', item)" class="selectable"
-												 md-label="Modificado" md-sort-by="History">
-						<span>
-							<i v-if="logInfo(item)" style="margin-right: 5px; font-size: 11px;"
-								 class="tinyIcon vsm-icon fa fa-history"></i>
-							<md-tooltip md-direction="bottom">{{ logInfo(item) }}</md-tooltip>
-						</span>
-						<span>
-							{{ item.DatasetCount }} <i class="tinyIcon vsm-icon fa fa-table"></i>
-							<md-tooltip md-direction="bottom">{{ item.DatasetCount + (item.DatasetCount == 1 ? ' dataset' : ' datasets') }}</md-tooltip>
-						</span>,<span>
-							{{ item.MetricCount }} <i class="tinyIcon vsm-icon fa fa-chart-bar"></i>
-							<md-tooltip md-direction="bottom">{{ item.MetricCount + (item.MetricCount == 1 ? ' indicador' : ' indicadores') }}</md-tooltip>
-						</span>
-					</md-table-cell>
-					<md-table-cell @click.native="selected('VIEW', item)" class="selectable"
-												 md-label="Estado">
-						<md-icon :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
-						<md-tooltip md-direction="bottom">{{ status(item).label }}</md-tooltip>
-						<div class="extraIconContainer">
-							<md-icon v-if="item.IsPrivate" class="extraIcon">
-								lock
-								<md-tooltip md-direction="bottom">Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.</md-tooltip>
-							</md-icon>
-							<md-icon v-if="!item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
-											 class="extraIcon">error_outline</md-icon>
-							<md-tooltip md-direction="bottom">
-								No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
-								Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.
-							</md-tooltip>
-						</div>
-					</md-table-cell>
-					<md-table-cell md-label="Acciones">
-						<md-button v-if="!canEdit(item)" class="md-icon-button" @click="selected('VIEW', item)">
-							<md-icon>remove_red_eye</md-icon>
-							<md-tooltip md-direction="bottom">Consultar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" @click="selected('PUBLISH', item)">
-							<md-icon>public</md-icon>
-							<md-tooltip md-direction="bottom">Publicar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" @click="selected('REVOKE', item)">
-							<md-icon>pause_circle_filled</md-icon>
-							<md-tooltip md-direction="bottom">Revocar publicación</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" @click="selected('VIEW', item)">
-							<md-icon>edit</md-icon>
-							<md-tooltip md-direction="bottom">Modificar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" @click="selected('DUPLICATE', item)" class="md-icon-button">
-							<md-icon>file_copy</md-icon>
-							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
-						</md-button>
-						<md-button v-if="canCreatePublic && item.Type !== 'P'" class="md-icon-button" @click="selected('PROMOTE', item)">
-							<md-icon>playlist_add</md-icon>
-							<md-tooltip md-direction="bottom">Promover a Dato público</md-tooltip>
-						</md-button>
-						<md-button v-if="isAdmin && item.Type !== 'P'" class="md-icon-button" @click="selected('PROMOTEEXAMPLE', item)">
-							<md-icon>lightbulb</md-icon>
-							<md-tooltip md-direction="bottom">Convertir a ejemplo</md-tooltip>
-						</md-button>
-						<md-button v-if="canCreatePublic && item.Type === 'P'" class="md-icon-button" @click="selected('DEMOTE', item)">
-							<md-icon>playlist_remove</md-icon>
-							<md-tooltip md-direction="bottom">Convertir en Cartografía</md-tooltip>
-						</md-button>
-						<md-button class="md-icon-button" v-if="actions == 'I'" @click="selected('ARCHIVE', item)">
-							<md-icon>archive</md-icon>
-							<md-tooltip md-direction="bottom">Archivar</md-tooltip>
-						</md-button>
-						<md-button class="md-icon-button" v-if="actions == 'A'" @click="selected('UNARCHIVE', item)">
-							<md-icon>unarchive</md-icon>
-							<md-tooltip md-direction="bottom">Desarchivar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" @click="selected('DELETE', item)">
-							<md-icon>delete</md-icon>
-							<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
-						</md-button>
-					</md-table-cell>
-				</md-table-row>
-			</md-table>
-		</transition>
+			<div style="position: relative">
+				<mp-search @search="searchOnTable" v-model="search" />
+				<md-table style="max-width: 1000px;" v-if="(expanded || actions == 'I')" v-model="listFiltered"
+									:md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder" :md-sort-fn="customSort"
+									md-card>
+					<md-table-row slot="md-table-row" slot-scope="{ item }">
+						<md-table-cell style="width: 400px" @click.native="selected('VIEW', item)" class="selectable" md-label="Título" md-sort-by="Caption">
+							<a :href="getWorkUri(item)" class="normalTextLink">{{ item.Caption }}</a>
+						</md-table-cell>
+						<md-table-cell @click.native="selected('VIEW', item)" class="selectable"
+													 md-label="Modificado" md-sort-by="History">
+							<span>
+								<i v-if="logInfo(item)" style="margin-right: 5px; font-size: 11px;"
+									 class="tinyIcon vsm-icon fa fa-history"></i>
+								<md-tooltip md-direction="bottom">{{ logInfo(item) }}</md-tooltip>
+							</span>
+							<span>
+								{{ item.DatasetCount }} <i class="tinyIcon vsm-icon fa fa-table"></i>
+								<md-tooltip md-direction="bottom">{{ item.DatasetCount + (item.DatasetCount == 1 ? ' dataset' : ' datasets') }}</md-tooltip>
+							</span>,<span>
+								{{ item.MetricCount }} <i class="tinyIcon vsm-icon fa fa-chart-bar"></i>
+								<md-tooltip md-direction="bottom">{{ item.MetricCount + (item.MetricCount == 1 ? ' indicador' : ' indicadores') }}</md-tooltip>
+							</span>
+						</md-table-cell>
+						<md-table-cell @click.native="selected('VIEW', item)" class="selectable"
+													 md-label="Estado">
+							<md-icon :style="'color: ' + status(item).color">{{ status(item).icon }}</md-icon>
+							<md-tooltip md-direction="bottom">{{ status(item).label }}</md-tooltip>
+							<div class="extraIconContainer">
+								<md-icon v-if="item.IsPrivate" class="extraIcon">
+									lock
+									<md-tooltip md-direction="bottom">Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.</md-tooltip>
+								</md-icon>
+								<md-icon v-if="!item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
+												 class="extraIcon">error_outline</md-icon>
+								<md-tooltip md-direction="bottom">
+									No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
+									Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.
+								</md-tooltip>
+							</div>
+						</md-table-cell>
+						<md-table-cell md-label="Acciones">
+							<md-button v-if="!canEdit(item)" class="md-icon-button" @click="selected('VIEW', item)">
+								<md-icon>remove_red_eye</md-icon>
+								<md-tooltip md-direction="bottom">Consultar</md-tooltip>
+							</md-button>
+							<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" @click="selected('PUBLISH', item)">
+								<md-icon>public</md-icon>
+								<md-tooltip md-direction="bottom">Publicar</md-tooltip>
+							</md-button>
+							<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" @click="selected('REVOKE', item)">
+								<md-icon>pause_circle_filled</md-icon>
+								<md-tooltip md-direction="bottom">Revocar publicación</md-tooltip>
+							</md-button>
+							<md-button v-if="canEdit(item)" class="md-icon-button" @click="selected('VIEW', item)">
+								<md-icon>edit</md-icon>
+								<md-tooltip md-direction="bottom">Modificar</md-tooltip>
+							</md-button>
+							<md-button v-if="canEdit(item)" @click="selected('DUPLICATE', item)" class="md-icon-button">
+								<md-icon>file_copy</md-icon>
+								<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
+							</md-button>
+							<md-button v-if="canCreatePublic && item.Type !== 'P'" class="md-icon-button" @click="selected('PROMOTE', item)">
+								<md-icon>playlist_add</md-icon>
+								<md-tooltip md-direction="bottom">Promover a Dato público</md-tooltip>
+							</md-button>
+							<md-button v-if="isAdmin && item.Type !== 'P'" class="md-icon-button" @click="selected('PROMOTEEXAMPLE', item)">
+								<md-icon>lightbulb</md-icon>
+								<md-tooltip md-direction="bottom">Convertir a ejemplo</md-tooltip>
+							</md-button>
+							<md-button v-if="canCreatePublic && item.Type === 'P'" class="md-icon-button" @click="selected('DEMOTE', item)">
+								<md-icon>playlist_remove</md-icon>
+								<md-tooltip md-direction="bottom">Convertir en Cartografía</md-tooltip>
+							</md-button>
+							<md-button class="md-icon-button" v-if="actions == 'I'" @click="selected('ARCHIVE', item)">
+								<md-icon>archive</md-icon>
+								<md-tooltip md-direction="bottom">Archivar</md-tooltip>
+							</md-button>
+							<md-button class="md-icon-button" v-if="actions == 'A'" @click="selected('UNARCHIVE', item)">
+								<md-icon>unarchive</md-icon>
+								<md-tooltip md-direction="bottom">Desarchivar</md-tooltip>
+							</md-button>
+							<md-button v-if="canEdit(item)" class="md-icon-button" @click="selected('DELETE', item)">
+								<md-icon>delete</md-icon>
+								<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
+							</md-button>
+						</md-table-cell>
+					</md-table-row>
+				</md-table>
+				</div>
+</transition>
 	</div>
 </template>
 <script>
 
 	import ActiveWork from '@/backoffice/classes/ActiveWork';
-	import arr from '@/common/framework/arr';
+	import str from '@/common/framework/str';
 	import speech from '@/common/js/speech';
+	import arr from '@/common/framework/arr';
 
 	export default {
 		name: 'WorkItems',
@@ -111,6 +115,8 @@
 			return {
 				currentSort: 'History',
 				currentSortOrder: 'desc',
+				search: '',
+				listFiltered: [],
 				expanded: true,
 			};
 		},
@@ -149,6 +155,9 @@
 		methods: {
 			selected(action, item) {
 				this.$emit('action', action, item);
+			},
+			searchOnTable() {
+				this.listFiltered = this.customSort(arr.SearchByCaption(this.list, this.search));
 			},
 			logInfo(item) {
 				return speech.FormatWorkInfo(item);
@@ -223,6 +232,10 @@
 		watch: {
 			'currentSort'() {
 				window.Db.SetUserSetting(this.settingsKey, this.currentSort);
+			},
+			'list'() {
+				this.listFiltered = this.list;
+				this.search = '';
 			},
 			'currentSortOrder'() {
 				window.Db.SetUserSetting(this.settingsKey + 'Order', this.currentSortOrder);

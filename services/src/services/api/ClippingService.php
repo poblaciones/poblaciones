@@ -33,10 +33,11 @@ class ClippingService extends BaseService
 		$item = $items[0];
 		$envelope = Envelope::FromDb($item['Envelope'])->Trim();
 		$canvas = Geometry::FromDb($item['Geometry'], $item['Id']);
-		$canvas['features'][0]['geometry']['coordinates'] = GeoJson::TrimRecursive($canvas['features'][0]['geometry']['coordinates']);
-		$geom = $canvas['features'][0]['geometry'];
+		$firstGeom = $canvas->features[0]['geometry'];
 
-		$ret = ['Id' => $id, 'Envelope' => $envelope, 'Geometry' => $geom];
+		$firstGeom['coordinates'] = GeoJson::TrimRecursive($firstGeom['coordinates']);
+
+		$ret = ['Id' => $id, 'Envelope' => $envelope, 'Geometry' => $firstGeom];
 
 		$data = $table->GetClippingRegionItem($id);
 		if ($data != null)

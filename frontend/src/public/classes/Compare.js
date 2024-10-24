@@ -111,11 +111,18 @@ Compare.prototype.Merge = function (mainData, compareData) {
 	var mainVariable = this.metric.SelectedVariable();
 	var compareVariable = this.SelectedVariable();
 	//
+	if (!mainVariable.ComparableValueLabels) {
+		alert('No hay etiquetas de comparación en la variable principal.');
+		return;
+	}
 	var nullElement = arr.GetByProperty(mainVariable.ComparableValueLabels, "Value", null);
 	// ubica el geographyTuple
 	var tupleKey = mainLevel.GeographyId + "_" + compareLevel.GeographyId;
 	if (!window.SegMap.GeographyTuples[tupleKey]) {
-		alert('No hay tablas de conversión para relacionar ' + tupleKey);
+		if (!window.convertionAlertDone) {
+			alert('No hay tablas de conversión para relacionar ' + tupleKey);
+		}
+		window.convertionAlertDone = true;
 		return;
 	}
 	var tuples = window.SegMap.GeographyTuples[tupleKey].Items;

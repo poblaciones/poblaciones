@@ -15,6 +15,7 @@
 						<md-table-toolbar>
 							<md-field md-clearable class="md-toolbar-section-end">
 								<md-input placeholder="Buscar..." v-model="search" ref="inputSearch" @input="searchOnTable" />
+								<md-icon>search</md-icon>
 							</md-field>
 						</md-table-toolbar>
 
@@ -40,6 +41,7 @@
 
 <script>
 import Context from '@/backoffice/classes/Context';
+import arr from '@/common/framework/arr';
 
 export default {
   name: 'Metrics',
@@ -72,7 +74,7 @@ export default {
 			return 'No se encontraron indicadores coincidentes con la búsqueda indicada.';
 		},
 		searchOnTable() {
-			this.listFiltered = this.searchByName(this.list, this.search);
+			this.listFiltered = arr.SearchByCaption(this.list, this.search);
 		},
 		formatVersions(item) {
 			if (item === null) {
@@ -80,16 +82,6 @@ export default {
 			} else {
 				return item.Versions.join(', ');
 			}
-		},
-		toLower(text) {
-			return text.toString().toLowerCase();
-		},
-		searchByName(items, term) {
-			var loc = this;
-			if (term != '') {
-				return items.filter(item => loc.toLower(item.Caption).includes(loc.toLower(term)));
-			}
-			return items;
 		},
     show() {
 			var loc = this;

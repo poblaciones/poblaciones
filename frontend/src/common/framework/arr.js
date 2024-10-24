@@ -130,6 +130,19 @@ module.exports = {
 			}
 		}
 	},
+	SearchByCaption(items, term) {
+		var loc = this;
+		if (term != '') {
+			return items.filter(item => this.AnyToLower(item.Caption).includes(this.AnyToLower(term)));
+		}
+		return items;
+	},
+	AnyToLower(cad) {
+		if (cad === null || cad === undefined) {
+			return "";
+		}
+		return cad.toString().toLowerCase();
+	},
 	ToIntArray(arr) {
 		return arr.map(function (x) {
 			return parseInt(x, 10);

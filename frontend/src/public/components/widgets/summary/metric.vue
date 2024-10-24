@@ -45,9 +45,8 @@
 			</template>
 		</div>
 		<div class="sourceRow">
-			<div>
-				{{ this.compareVersions[0] }}
-				{{ this.compareVersions[1] }}
+			<div v-if="metric.Compare.Active" style="margin-left: 2px; margin-top: -8px; margin-bottom: 8px;">
+				Comparando {{ this.compareVersions[0] }} con {{ this.compareVersions[1] }}.
 			</div>
 			<div class="btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
@@ -79,6 +78,10 @@
 					Dif. %
 				</button>
 			</div>
+			<div class="btn-group" style="float: left" v-if="!Embedded.Readonly && useComparer">
+				<switches v-model="metric.Compare.Active" theme="bootstrap" color="default" @click="toggleCompare()"></switches> Comparar
+			</div>
+
 			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly" style="float: right"
 							@clickDownload="clickDescargar" @clickSource="clickFuente" />
 			<div style="clear: both; height: 0px"></div>
@@ -93,6 +96,8 @@
 </template>
 <script>
 import MetricVariables from './metricVariables';
+import Switches from 'vue-switches';
+//https://github.com/drewjbartlett/vue-switches
 import MetricDropdown from './metricDropdown';
 import Source from './source';
 import Ranking from './ranking';
@@ -107,6 +112,7 @@ export default {
 	components: {
 		MetricDropdown,
 		Source,
+		Switches,
 		DragHorizontal,
 		MetricVariables,
 		VueSlider,
@@ -358,6 +364,22 @@ export default {
 	.vue-slider-dot-handle-focus {
 		box-shadow: 0px 0px 1px 2px rgba(90, 90, 90, 0.36) !important;
 	}
+	.vue-switcher-theme--bootstrap.vue-switcher-color--default div:after {
+		background-color: #b3b3b3;
+	}
+
+	.vue-switcher-theme--bootstrap.vue-switcher-color--default div {
+		background-color: #d7d7d7;
+	}
+
+	.vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div:after {
+		background-color: #e1e1e1;
+	}
+
+	.vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div {
+		background-color: #ebebeb;
+	}
+
 </style>
 <style scoped >
 	.metricBlock {

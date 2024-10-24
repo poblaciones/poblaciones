@@ -118,7 +118,7 @@ class cTests extends cController
 
 	private function GetCommand()
 	{
-		return '"' . App::GetPhpCli() . '" "' . Paths::GetPHPUnitPath() . '" --verbose 2>&1 ';
+		return '"' . App::GetPhpCli(true) . '" "' . Paths::GetPHPUnitPath() . '" --verbose 2>&1 ';
 	}
 
 	private static function EndsWithTest($name)

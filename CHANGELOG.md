@@ -1,3 +1,5 @@
+- Filtro libre por nombre en listas de cartografías (admin y usuario).
+
 v4.1 (2024-10-12)
 - Fix a error de duplicar cartografía.
 - Fix a error de publicar cartografía.

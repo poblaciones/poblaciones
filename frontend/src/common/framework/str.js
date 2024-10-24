@@ -22,6 +22,12 @@ module.exports = {
 		//TODO: CultureInfo
 		return ('' + parseFloat(n.toFixed(places))).replace(".", ",");
 	},
+	AnyToLower(cad) {
+		if (cad === null || cad === undefined) {
+			return "";
+		}
+		return cad.toString().toLowerCase();
+	},
 	AppendParam(url, param, value) {
 		var parts = url.split('#');
 		var n = parts[0].indexOf('?');
