@@ -173,6 +173,18 @@ class WorkClone
 		}
 	}
 
+	public function CopyCustomizeAndStartup()
+	{
+		// Clona el startup
+		$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
+		$startupId = RowDuplicator::DuplicateRows(entities\DraftWorkStartup::class, $work->getStartup()->getId());
+		$update = "UPDATE draft_work SET wrk_startup_id = ? WHERE wrk_id = ?";
+		App::Db()->exec($update, array($startupId, $this->targetWorkId));
+		// Copia los extra metric
+		$static = array('wmt_work_id' => $this->targetWorkId);
+		RowDuplicator::DuplicateRows(entities\DraftWorkExtraMetric::class, $this->sourceWorkId, $static, 'wmt_work_id');
+	}
+
 	public function CopyPermissions()
 	{
 		$static = array('wkp_work_id' => $this->targetWorkId);

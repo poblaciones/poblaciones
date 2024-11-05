@@ -438,7 +438,7 @@ class SnapshotByDatasetModel
 			if ($metricVersionLevel['geo_field_caption_name'] == "" || $metricVersionLevel['dat_are_segments'])
 				return "null";
 			else
-				return "gei_caption";
+				return "IFNULL(gei_caption, gei_code)";
 		}
 		else
 		{

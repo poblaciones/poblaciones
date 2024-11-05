@@ -7,8 +7,8 @@
 		</md-button>
 		<transition name="fade">
 			<div style="position: relative">
-				<mp-search @search="searchOnTable" v-model="search" />
-				<md-table style="max-width: 1000px;" v-if="(expanded || actions == 'I')" v-model="listFiltered"
+				<mp-search @search="searchOnTable" v-model="search" v-show="(expanded || actions == 'I')" />
+				<md-table style="max-width: 1000px;" v-show="(expanded || actions == 'I')" v-model="listFiltered"
 									:md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder" :md-sort-fn="customSort"
 									md-card>
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
@@ -124,6 +124,8 @@
 			this.currentSort = window.Db.GetUserSetting(this.settingsKey, 'History');
 			this.currentSortOrder = window.Db.GetUserSetting(this.settingsKey + 'Order', 'desc');
 			this.expanded = window.Db.GetUserSetting(this.settingsKey + 'Expanded', '0') == '1';
+			this.search = '';
+			this.listFiltered = this.customSort(arr.SearchByCaption(this.list, this.search));
 		},
 		props: {
 			list: Array,

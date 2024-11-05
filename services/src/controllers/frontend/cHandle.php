@@ -7,7 +7,6 @@ use helena\controllers\common\cPublicController;
 use minga\framework\Request;
 use minga\framework\Params;
 use minga\framework\Arr;
-use minga\framework\Context;
 use minga\framework\Str;
 use helena\classes\App;
 use helena\classes\Session;
@@ -79,7 +78,7 @@ class cHandle extends cPublicController
 		$this->cleanRoute = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($urlId, $metricId, $regionItemId));
 		$this->cleanRouteBase = Links::GetFullyQualifiedUrl(Links::GetWorkHandleUrl($urlId, $metricId, null));
 
-		if (Request::IsGoogle() || Params::Get("debug"))
+		if (self::ShowTextVersion())
 		{
 			return $this->RenderMetadata($type, $workId, $metricId, $regionItemId);
 		}
@@ -88,7 +87,10 @@ class cHandle extends cPublicController
 			return $this->HandleRedirect($type, $workId, $metricId, $regionItemId);
 		}
 	}
-
+	public static function ShowTextVersion()
+	{
+		return Request::IsGoogle() || Params::Get("debug");
+	}
 	private function RenderMetadata($type, $workId, $metricId, $regionItemId)
 	{
 		Performance::SetController('handle-GoogleCrawler', 'get', true);

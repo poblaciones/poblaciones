@@ -1,5 +1,8 @@
+v4.2 (2024-11-05)
 - Filtro libre por nombre en listas de cartografías (admin y usuario).
 - Validación de polígonos confirma auto-intersección para evitar falsos positivos.
+- Fix a bug en filtro de listas de cartografías.
+- Se incorpora como fuente la información de cartografía (la georreferenciación) en el pdf de metadatos.
 
 v4.1 (2024-10-12)
 - Fix a error de duplicar cartografía.

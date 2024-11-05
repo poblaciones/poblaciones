@@ -12,7 +12,7 @@
 							<help-circle-icon style="color: #fff" title="Bienvenida" />
 						</button>
 					</div>
-					<div class="metadataInfo" style="position: relative; z-index: 10;" :style="(showButtonsInSingleRow() ? 'width: 1px' : '')">
+					<div class="metadataInfo" style="position: relative; z-index: 10;" v-if="workHasMetrics" :style="(showButtonsInSingleRow() ? 'width: 1px' : '')">
 						<div class="sourceInfo exp-hiddable-block" :style="getMetadataStyle()">
 							<a href="#" :title="'Información de ' + work.Current.Metadata.Name"
 								 @click="clickFuente" style="color: #FFF">
@@ -66,6 +66,15 @@ export default {
 			} else {
 				return 'spaceNext';
 			}
+		},
+		workHasMetrics() {
+			if (!this.work || !this.work.Current || this.work.Current.Metrics.length == 0) return false;
+			for (var metric of this.work.Current.Metrics) {
+				if (metric.LocalVersions.length > 0 && metric.LocalVersions[0].Name != '') {
+					return true;
+				}
+			}
+			return false;
 		}
 	},
 	methods: {

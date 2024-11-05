@@ -85,6 +85,11 @@ export default {
 						this.classifyChildrenRecursive(ret, list[n], list, list[n]);
 				}
 			}
+			for (var n = 0; n < list.length; n++) {
+				if (list[n].ParentId === null) {
+					this.classifyChildrenRecursive(ret, list[n], list, list[n]);
+				}
+			}
 			// Pone al final a los que tienen padres y etiqueta de root
 			for (var n = 0; n < list.length; n++) {
 				if (list[n].ParentId === 0) {

@@ -161,7 +161,10 @@ class PdfCreator
 			$this->pdf->WriteIndentedPair('Nombre', $source['src_caption']);
 			$this->pdf->WriteIndentedPair('Versión', $source['src_version']);
 			$this->pdf->WriteIndentedPair('Autores', $source['src_authors']);
-			$this->pdf->WriteIndentedPairLink('Página web', $source['src_web']);
+			if ($source['src_web'] != '')
+				$this->pdf->WriteIndentedPairLink('Página web', $source['src_web']);
+			if ($source['src_metadata_url'] != '')
+				$this->pdf->WriteIndentedPairLink('Metadatos', $source['src_metadata_url']);
 			if ($source['src_wiki'] != '')
 				$this->pdf->WriteIndentedPairLink('Wikipedia', $source['src_wiki']);
 			if ($source['con_person'] != '')
@@ -182,7 +185,8 @@ class PdfCreator
 					$this->pdf->WriteDoubleIndentedText($html, false);
 				}
 				$this->pdf->WriteDoubleIndentedPair('Nombre', $source['ins_caption']);
-				$this->pdf->WriteDoubleIndentedPairLink('Página web', $source['ins_web']);
+				if ($source['ins_web'] != '')
+					$this->pdf->WriteDoubleIndentedPairLink('Página web', $source['ins_web']);
 				$this->pdf->WriteDoubleIndentedMail($source['ins_email']);
 				$this->pdf->WriteDoubleIndentedPair('Teléfono', $source['ins_phone']);
 				$this->pdf->WriteDoubleIndentedPair('Dirección', $source['ins_address']);

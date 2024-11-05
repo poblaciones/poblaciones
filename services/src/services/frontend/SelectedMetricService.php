@@ -266,8 +266,8 @@ class SelectedMetricService extends BaseService
 			else if ($level->Dataset->Type == 'D')
 			{
 				$level->HasArea = true;
-				if ($levelRow['geo_field_caption_name'] != null)
-					$level->HasDescriptions = true;
+				//if ($levelRow['geo_field_caption_name'] != null)
+				//	$level->HasDescriptions = true;
 			}
 			else
 				throw new PublicException('El tipo de dataset no es válido');

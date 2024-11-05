@@ -623,10 +623,18 @@ class App
 			$conn->Initialize();
 			$conn->SetFollowRedirects(false);
 			$conn->SetHeader("INTERNAL", "1");
+			$agent = Params::SafeServer('HTTP_USER_AGENT', '');
+			$conn->SetUserAgent($agent);
 			$response = $conn->Get($url, '', 0, $args);
 			$conn->Finalize();
+			if ($response->httpCode == 403)
+			{
+				// los privados van directos
+				return App::Redirect($url);
+			}
 			if ($response->httpCode !== 200)
 			{
+				Log::HandleSilentException(new \Exception('Ha fallado la recuperación remota (Status: ' . $response->httpCode . '. Url: ' . $url . ').'));
 				return App::Response("Error: " . $response->httpCode, 'text/html', $response->httpCode);
 			}
 			// Se fija si recibió un redirect...

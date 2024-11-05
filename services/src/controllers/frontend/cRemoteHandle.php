@@ -7,6 +7,7 @@ use minga\framework\Request;
 use helena\classes\App;
 use minga\framework\Performance;
 use helena\caches\RemoteHandlesCache;
+use minga\framework\Params;
 
 class cRemoteHandle extends cPublicController
 {
@@ -18,7 +19,10 @@ class cRemoteHandle extends cPublicController
 		$uri = $dynamicServer->publicUrl . Request::GetRequestURI();
 
 		$cache = RemoteHandlesCache::Cache();
-		$key = RemoteHandlesCache::CreateKey($uri);
+
+		$isTextVersion = cHandle::ShowTextVersion();
+
+		$key = RemoteHandlesCache::CreateKey($uri, $isTextVersion);
 		return App::FlushRemoteFile($uri, null, $cache, $key);
 	}
 }

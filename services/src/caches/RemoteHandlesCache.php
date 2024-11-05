@@ -10,9 +10,9 @@ class RemoteHandlesCache extends BaseCache
 	{
 		return new ObjectCache("Remote/Handles");
 	}
-	public static function CreateKey($url)
+	public static function CreateKey($url, $isTextVersion)
 	{
-		$key = urlencode($url);
+		$key = urlencode($url) . "#" . ($isTextVersion ? "T" : "M");
 		return $key;
 	}
 }

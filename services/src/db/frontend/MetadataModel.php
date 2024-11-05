@@ -5,6 +5,7 @@ namespace helena\db\frontend;
 use minga\framework\Arr;
 use minga\framework\Profiling;
 use helena\classes\App;
+use helena\classes\Links;
 use helena\services\backoffice\publish\snapshots\Variable;
 
 class MetadataModel extends BaseModel
@@ -101,7 +102,7 @@ class MetadataModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($metadataId);
 
-		$sql = "SELECT * FROM " . $this->draftPreffix . "metadata_source
+		$sql = "SELECT *, '' AS src_metadata_url FROM " . $this->draftPreffix . "metadata_source
 		          INNER JOIN " . $this->draftPreffix . "source ON msc_source_id = src_id
 							LEFT JOIN " . $this->draftPreffix . "institution ON src_institution_id = ins_id
 							LEFT JOIN " . $this->draftPreffix . "contact ON src_contact_id = con_id
@@ -111,6 +112,40 @@ class MetadataModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
+	public function AddGeographyMetadata(&$sources, $datasetId = null, $workId = null)
+	{
+		Profiling::BeginTimer();
+		if (!$datasetId)
+		{
+			$datasetIds = "SELECT dat_id from " . $this->draftPreffix . "dataset WHERE dat_work_id = " . $workId;
+		}
+		else
+			$datasetIds = $datasetId;
+
+		$sql = "SELECT distinct met_title AS src_caption,
+					met_authors AS src_authors,
+					met_period_caption AS src_version,
+					met_id AS met_id,
+					'' src_web,
+					'' src_wiki,
+					institution.*,
+					contact.*
+				 FROM " . $this->draftPreffix . "dataset
+					JOIN geography ON dat_geography_id = geo_id AND dat_type = 'D'
+					JOIN metadata ON geo_metadata_id = met_id
+					LEFT JOIN institution ON met_institution_id = ins_id
+					LEFT JOIN contact ON con_id = null
+					where dat_id IN (" . $datasetIds . ") ORDER BY src_version";
+		$ret = App::Db()->fetchAll($sql);
+		foreach($ret as &$item)
+		{
+			$item['src_metadata_url'] = App::AbsoluteUrl(Links::GetMetadataUrl($item['met_id']));
+			$sources[] = $item;
+		}
+		Profiling::EndTimer();
+	}
+
 	public function GetMetadataFiles($metadataId)
 	{
 		Profiling::BeginTimer();

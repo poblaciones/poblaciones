@@ -93,6 +93,8 @@ class MetadataService extends BaseService
 		$metadata['wrk_access_link'] = $model->GetAccessLink($workId);
 
 		$sources = $model->GetMetadataSources($metadataId);
+		if ($datasetId || $workId)
+			$model->AddGeographyMetadata($sources, $datasetId, $workId);
 		$dataset = $model->GetDatasetMetadata($datasetId);
 
 		$metadata['met_online_since_formatted'] = $this->formatDate($metadata['met_online_since']);

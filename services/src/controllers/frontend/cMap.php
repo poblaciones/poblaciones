@@ -39,12 +39,6 @@ class cMap extends cPublicController
 		$this->SolveWorkId();
 		if ($this->workId)
 		{
-			if (!App::Settings()->Servers()->IsTransactionServerRequest())
-			{   // esto tiene sentido desde el client, no desde acá *****************
-				$remoteMap = new cRemoteMap();
-				return $remoteMap->Show();
-			}
-
 			// Devuelve metadatos ej. http://mapas/map/3701/metadata
 			$res = $this->ResolveMetadataRequest();
 			if ($res) return $res;
@@ -61,7 +55,10 @@ class cMap extends cPublicController
 		$this->AddValue('google_analytics_key', Context::Settings()->Keys()->GoogleAnalyticsKey);
 		$this->AddValue('add_this_key', Context::Settings()->Keys()->AddThisKey);
 
-		$this->RegisterOpenGraphTags();
+		$this->AddValue('application_name', 'Poblaciones');
+		if (App::Settings()->Servers()->IsTransactionServerRequest())
+			$this->RegisterOpenGraphTags();
+
 		$this->RegisterFacebookId();
 
 		// Si está embebido, lo indica para estadísticas
@@ -138,7 +135,6 @@ class cMap extends cPublicController
 	}
 	private function RegisterOpenGraphTags()
 	{
-		$this->AddValue('application_name' , 'Poblaciones');
 		$this->AddValue('description', 'Plataforma abierta de datos espaciales de la Argentina');
 		// Se fija si está sirviendo para una cartografía en particular
 		if ($this->workId && Session::IsWorkPublicOrAccessible($this->workId))

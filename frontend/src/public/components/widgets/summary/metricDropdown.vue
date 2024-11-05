@@ -46,12 +46,20 @@
 			clickQuitar(e) {
 				this.metric.Remove();
 			},
-			toogleRankings() {
+			toggleRankings() {
 				this.metric.ShowRanking = !this.metric.ShowRanking;
 				window.SegMap.SaveRoute.UpdateRoute();
 				if (this.metric.ShowRanking) {
 					this.$emit('RankingShown');
 				}
+			},
+			toggleShowValues() {
+				if (this.metric.SelectedVariable().ShowValues == 1) {
+					this.metric.SelectedVariable().ShowValues = "0";
+				} else {
+					this.metric.SelectedVariable().ShowValues = "1";
+				}
+				this.metric.UpdateMap();
 			},
 			changeUrbanity(mode) {
 				this.metric.properties.SelectedUrbanity = mode.key;
@@ -102,7 +110,10 @@
 						this.clickCustomize();
 						break;
 					case 'RANKINGS':
-						this.toogleRankings();
+						this.toggleRankings();
+						break;
+					case 'SHOWVALUES':
+						this.toggleShowValues();
 						break;
 					case 'EXTENTS':
 						this.zoomExtents();
@@ -127,17 +138,29 @@
 			},
 			menuItems() {
 				var ret = [];
+				var selectedVariable = this.metric.SelectedVariable();
 				// opciones
-				if (this.metric.SelectedVariable()) {
+				if (selectedVariable) {
 					ret.push({ label: 'Personalizar', key: 'SETTINGS', icon: 'fas fa-sliders-h' });
-				}
-				// muestra ránking
-				if (this.metric.useRankings()) {
-					ret.push({
-						label: (this.metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking'),
-						key: 'RANKINGS',
-						/* icon: 'fa fa-signal' */
-					});
+
+					if (!selectedVariable.IsSimpleCount || this.metric.useRankings()) {
+						ret.push({ 'separator': true });
+					}
+					// muestra valores
+					if (!selectedVariable.IsSimpleCount) {
+						ret.push({
+							label: (this.metric.SelectedVariable().ShowValues == '1' ? 'Ocultar valores' : 'Mostrar valores'),
+							key: 'SHOWVALUES',
+						});
+					}
+					// muestra ránking
+					if (this.metric.useRankings()) {
+						ret.push({
+							label: (this.metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking'),
+							key: 'RANKINGS',
+							/* icon: 'fa fa-signal' */
+						});
+					}
 				}
 				// agrega el filtro de urbano
 				if (this.hasUrbanityFilter) {
