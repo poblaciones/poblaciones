@@ -90,6 +90,7 @@ require_once('frontend.php');
 
 if (Context::Settings()->isAPIEnabled)
 {
+	require_once('api/mail.php');
 	require_once('api/clipping.php');
 	require_once('api/backup.php');
 	require_once('api/deployment.php');

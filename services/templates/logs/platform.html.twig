@@ -21,6 +21,19 @@
 		</div>
 	{% endfor %}
 
+	<div style="clear: both"></div>
+	<div class="dSeparatorNewLine">
+		<div class='dText'>Espacio en disco</div>
+	</div>
+	{% for result in diskItems %}
+		<div class='dBlockNewLineS1'>
+			{{ result.name }}:
+		</div>
+		<div class='dBlockSize3'>
+			{{ result.value }}.
+		</div>
+	{% endfor %}
+
 	{% if results %}
 	<div class='dBlockNewLineS3'><br></div>
 	<table id="tableSort" class="dCssTable">

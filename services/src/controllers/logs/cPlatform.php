@@ -35,6 +35,8 @@ class cPlatform extends cController
 		$this->templateValues['architecture'] = System::GetArchitecture();
 		$this->templateValues['html_title'] = 'Plataforma';
 
+		$this->templateValues['diskItems'] = System::GetDiskInfo();
+
 		$this->templateValues['dbItems'] = System::GetDbInfo();
 		$this->templateValues['dbHost'] = $this->templateValues['dbItems'][0]['value'];
 		$this->templateValues['dbItems'][] = $this->getScriptsVersion();

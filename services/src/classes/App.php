@@ -163,6 +163,12 @@ class App
 		$response->setStatusCode(404);
 		return $response;
 	}
+	public static function ForbiddenResponse($text = '403. Forbidden.')
+	{
+		$response = self::Response($text, 'text-html');
+		$response->setStatusCode(403);
+		return $response;
+	}
 
 	public static function NotFoundExit($text = 'Page not found.')
 	{

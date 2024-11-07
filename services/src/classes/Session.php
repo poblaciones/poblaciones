@@ -36,9 +36,9 @@ class Session
 	}
 	public static function StartSession()
 	{
-		PhpSession::CheckPhpSessionStarted();
+		$isStarting = PhpSession::CheckPhpSessionStarted();
 
-		if (!Request::IsGoogle())
+		if ($isStarting && !Request::IsGoogle())
 			self::$NewSession = 1;
 	}
 	public static function IsMegaUser()

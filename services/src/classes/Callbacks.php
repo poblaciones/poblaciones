@@ -38,6 +38,7 @@ class Callbacks extends FrameworkCallbacks
 	public function ExtraHits() : array
 	{
 		$errorCount = Performance::GetCurrentErrorCount();
+
 		if (App::Settings()->Keys()->GetGoogleMapsCount() == 1)
 			return [ self::$MapsOpened, self::$AddressQueried, Session::$NewSession, 0, 0, $errorCount ];
 		// Tiene varias
