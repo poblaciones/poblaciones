@@ -94,7 +94,8 @@ export default {
 	components: {
 		OpenAuth,
 	},
-	created() {
+		created() {
+		var loc = this;
 		this.step = 1;
 		this.email = this.$route.query.email;
 		if (window.Context.ServerLoaded) {

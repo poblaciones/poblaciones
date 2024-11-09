@@ -1,5 +1,6 @@
 import err from '@/common/framework/err';
 import axios from 'axios';
+import session from '@/common/framework/session';
 
 export default Search;
 
@@ -27,13 +28,14 @@ Search.prototype.StartSearch = function (t) {
 	var loc = this;
 	view.loading = true;
 	var facade = (this.isBackoffice ? 'backoffice' : 'frontend');
-	return axios.get(window.host + '/services/' + facade + '/Search', {
+	return axios.get(window.host + '/services/' + facade + '/Search', session.AddSession(window.host, {
 		params: {
 			q: t, f: this.searchType, w: this.revision, b: (this.getDraftMetrics ? '1' : '0'),
 				k: this.currentWorkId },
 		cancelToken: new CancelToken(function executor(c) { retCancel = c; })
-		})
-		.then(function(res) {
+		}))
+		.then(function (res) {
+			session.ReceiveSession(window.host, res);
 			loc.LoadResults(res.data, t);
 			view.loading = false;
 		}).catch(function(error) {

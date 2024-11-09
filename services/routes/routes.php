@@ -75,7 +75,7 @@ App::$app->after(function(Request $request, Response $response) {
 
 App::$app->options("{anything}", function () {
 	$response = new \Symfony\Component\HttpFoundation\JsonResponse(null, 204);
-	$response->headers->set('Access-Control-Allow-Headers', 'Authorization,Cache-Control,X-Requested-With,Full-Url');
+	$response->headers->set('Access-Control-Allow-Headers', 'Authorization,Cache-Control,X-Requested-With,Full-Url,Session-Id');
 	return $response;
 })->assert("anything", ".*");
 

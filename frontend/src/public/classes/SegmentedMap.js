@@ -17,8 +17,7 @@ import { loadProgressBar } from '@/common/js/axiosProgressBar.js';
 
 // import { loadProgressBar } from 'axios-progress-bar';
 
-import h from '@/public/js/helper';
-import m from '@/public/js/Mercator';
+import session from '@/common/framework/session';
 import err from '@/common/framework/err';
 
 export default SegmentedMap;
@@ -110,7 +109,8 @@ SegmentedMap.prototype.Get = function (url, params, noCredencials, isRetry) {
 	var loc = this;
 	var axios = (noCredencials ? this._axiosNoCredentials : this._axios);
 
-	return axios.get(url, params).then(function (res) {
+	return axios.get(url, session.AddSession(url, params)).then(function (res) {
+		session.ReceiveSession(url, res);
 		if ((!res.response || res.response.status === undefined) && res.message === 'cancelled') {
 			throw { message: 'cancelled', origin: 'segmented' };
 		} else if (res.status === 200) {
@@ -188,7 +188,8 @@ SegmentedMap.prototype.Post = function (url, args, noCredencials) {
 	}
 	const querystring = require('querystring');
 	var params = querystring.stringify(args);
-	return axios.post(url, params, config).then(function (res) {
+	return axios.post(url, params, session.AddSession(url, session.AddSession(url, config))).then(function (res) {
+		session.ReceiveSession(url, res);
 		if (res.status === 200) {
 			return res;
 		}
@@ -558,7 +559,10 @@ SegmentedMap.prototype.PostWorkPreview = function (work, blobPng) {
 	formData.append('preview', blobPng, 'preview.png');
 	const config = { headers: { 'content-type': 'multipart/form-data' }};
 
-	return this._axios.post(window.host + '/services/backoffice/PostWorkPreview', formData, config);
+	return this._axios.post(window.host + '/services/backoffice/PostWorkPreview', formData, session.AddSession(window.host, config)).then(function (res) {
+		session.ReceiveSession(window.host, res);
+		return res;
+	});
 };
 
 

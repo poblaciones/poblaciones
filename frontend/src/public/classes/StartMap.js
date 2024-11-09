@@ -4,6 +4,7 @@ import axios from 'axios';
 import str from '@/common/framework/str';
 import err from '@/common/framework/err';
 import Tutorial from './Tutorial';
+import session from '@/common/framework/session';
 
 export default StartMap;
 
@@ -58,10 +59,11 @@ StartMap.prototype.RestoreWork = function (workId, link) {
 	var loc = this;
 	window.accessWorkId = workId;
 	window.accessLink = link;
-	axios.get(window.host + '/services/works/GetWorkAndDefaultFrame', {
+	axios.get(window.host + '/services/works/GetWorkAndDefaultFrame', session.AddSession(window.host, {
 		params: { w: workId },
 		headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
-	}).then(function (res) {
+	})).then(function (res) {
+		session.ReceiveSession(window.host, res);
 		loc.workReference.Current = res.data.work;
 		loc.workReference.Current.tutorialOpened = false;
 		loc.workReference.Current.Tutorial = new Tutorial(loc.workReference.Current, res.data.work.Id);
@@ -156,9 +158,10 @@ StartMap.prototype.StartByUrl = function () {
 
 StartMap.prototype.GetAndStartByDefaultFrame = function () {
 	const loc = this;
-	axios.get(window.host + '/services/clipping/GetDefaultFrame', {
+	axios.get(window.host + '/services/clipping/GetDefaultFrame', session.AddSession(window.host, {
 		params: {}
-	}).then(function(res) {
+	})).then(function (res) {
+		session.ReceiveSession(window.host, res);
 		loc.StartByDefaultFrame(res.data);
 	}).catch(function(error) {
 		err.errDialog('GetDefaultFrame', 'conectarse con el servidor', error);
@@ -204,9 +207,10 @@ StartMap.prototype.Finish = function () {
 
 StartMap.prototype.StartByDefaultFrameAndClipping = function (route) {
 	const loc = this;
-	axios.get(window.host + '/services/clipping/GetDefaultFrameAndClipping', {
+	axios.get(window.host + '/services/clipping/GetDefaultFrameAndClipping', session.AddSession(window.host, {
 		params: {}
-	}).then(function(res) {
+	})).then(function (res) {
+		session.ReceiveSession(window.host, res);
 		var canvas = res.data.clipping.Canvas;
 		res.data.clipping.Canvas = null;
 

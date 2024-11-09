@@ -1,6 +1,7 @@
 const axios = require('axios');
 const querystring = require('querystring');
 const err = require('@/common/framework/err');
+const session = require('@/common/framework/session');
 
 module.exports = {
 	getPromise(url, args, errorAction) {
@@ -43,9 +44,13 @@ module.exports = {
 				}
 			}
 		}
-		return axios.get(url, {
+		var h = { 'Full-Url': document.location.href };
+		return axios.get(url, session.AddSession(url, {
 			params: args,
-			headers: { 'Full-Url': document.location.href }
+			headers: h
+		})).then(function (res) {
+			session.ReceiveSession(url, res);
+			return res;
 		});
 	},
 	postCallback(url, args, callback, errorAction) {
@@ -69,6 +74,9 @@ module.exports = {
 				}
 			}
 		}
-		return axios.post(url, querystring.stringify(args), config);
+		return axios.post(url, querystring.stringify(args), session.AddSession(url, config)).then(function (res) {
+			session.ReceiveSession(url, res);
+			return res;
+		});
 	}
 };

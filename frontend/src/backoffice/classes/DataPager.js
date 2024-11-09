@@ -1,6 +1,7 @@
 import axios from 'axios';
 import err from '@/common/framework/err';
 import web from '@/common/framework/web';
+import session from '@/common/framework/session';
 
 export default DataPager;
 
@@ -167,9 +168,10 @@ DataPager.prototype.GetPage = function (postdata, page, source, callback, callba
 	postdata.page = page;
 	let key = this.getKey(postdata, page);
 	let loc = this;
-	axios.get(source.url, {
+	axios.get(source.url, session.AddSession(source.url, {
 			params: postdata,
-		}).then(function (res) {
+	})).then(function (res) {
+			session.ReceiveSession(source.url, res);
 			if (source.beforeprocessing) {
 				source.beforeprocessing(res.data);
 			}

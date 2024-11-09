@@ -8,6 +8,8 @@ import LevelGenerator from './LevelGenerator';
 import Vue from 'vue';
 import promises from '@/common/framework/promises';
 import err from '@/common/framework/err';
+import session from '@/common/framework/session';
+
 
 const columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
@@ -334,9 +336,10 @@ ActiveDataset.prototype.StepCalculateNewMetricUrl = function (type) {
 };
 
 ActiveDataset.prototype.CalculatedMetricExists = function (variableId) {
-	return axios.get(window.host + '/services/backoffice/CalculatedMetricExists', {
+	return axios.get(window.host + '/services/backoffice/CalculatedMetricExists', session.AddSession(window.host, {
 		params: { k: this.properties.Id, v: variableId }
-	}).then(function (res) {
+	})).then(function (res) {
+		session.ReceiveSession(window.host, res);
 		return res.data.columnExists;
 	}).catch(function (error) {
 		err.err('CalculatedMetricExists', error);
@@ -524,13 +527,14 @@ ActiveDataset.prototype.SetColumnOrder = function (idsArray,
 	var loc = this;
 	var CancelToken = axios.CancelToken;
 	var retCancel = null;
-	axios.get(window.host + '/services/backoffice/SetColumnOrder', {
-			params: {
+	axios.get(window.host + '/services/backoffice/SetColumnOrder', session.AddSession(window.host, {
+		params: {
 				'k': this.properties.Id,
 				'cols': idsArray
 			},
 			cancelToken: new CancelToken(function executor(c) { retCancel = c; })
-	}).then(function (res) {
+	})).then(function (res) {
+		session.ReceiveSession(window.host, res);
 		successCallback();
 	}).catch(function (error) {
 		errorCallback(error.message);

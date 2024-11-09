@@ -69,7 +69,7 @@
 	import err from '@/common/framework/err';
 	import web from '@/common/framework/web';
 
-	import login from '@/common/framework/web';
+	import session from '@/common/framework/session';
 	import authentication from '@/common/js/authentication';
 
 	import { component } from 'vue-fullscreen';
@@ -239,9 +239,10 @@
 				params.w = args.workId;
 				params.l = args.link;
 
-				return axios.get(serverConfiguration.Server + '/services/GetConfiguration', {
+				return axios.get(serverConfiguration.Server + '/services/GetConfiguration', session.AddSession(serverConfiguration.Server, {
 					params: params
-				}).then(function (res) {
+				})).then(function (res) {
+					session.ReceiveSession(serverConfiguration.Server, res);
 					res.data.DynamicServer = serverConfiguration.Server;
 					window.mainHost = res.data.MainServer;
 					window.host = res.data.DynamicServer;
@@ -269,8 +270,11 @@
 			},
 			GetServer() {
 				var params = {};
-				return axios.get(window.host + '/services/GetTransactionServer', {
+				return axios.get(window.host + '/services/GetTransactionServer', session.AddSession(window.host, {
 					params: params
+				})).then(function (res) {
+					session.ReceiveSession(window.host, res);
+					return res;
 				}).catch(function (error) {
 					err.errDialog('GetTransactionServer', 'conectarse con el servidor', error);
 				});

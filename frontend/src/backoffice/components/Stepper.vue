@@ -49,6 +49,7 @@
 
 import axios from 'axios';
 import err from '@/common/framework/err';
+import session from '@/common/framework/session';
 // util: https://ezgif.com/loop-count
 // eventos: completed, closed
 
@@ -162,10 +163,11 @@ export default {
 		},
 		Navigate(url, args2) {
 			let loc = this;
-			axios.get(url, {
+			axios.get(url, session.AddSession(url, {
 				params: args2,
 				headers: { 'Full-Url': document.location.href }
-			}).then(function (res) {
+			})).then(function (res) {
+				session.ReceiveSession(url, res);
 				if (res.data.visitUrl) {
 					loc.visitUrl = res.data.visitUrl;
 					loc.visitCaption = res.data.visitCaption;

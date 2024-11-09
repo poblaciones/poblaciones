@@ -124,6 +124,7 @@ import creativeCommons from '@/public/components/controls/creativeCommons.vue';
 import err from '@/common/framework/err';
 import arr from '@/common/framework/arr';
 import Modal from '@/public/components/popups/modal';
+import session from '@/common/framework/session';
 
 var debounce = require('lodash.debounce');
 
@@ -263,9 +264,10 @@ export default {
 			window.SegMap.Session.Content.Download(type);
 			var url = this.startDownloadUrl(type);
 			const loc = this;
-			axios.get(url, {
+			axios.get(url, session.AddSession(url, {
 				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
-			}).then(function (res) {
+			})).then(function (res) {
+				session.ReceiveSession(url, res);
 				if(res.data.done === false) {
 					loc.processStep(type, res.data, 0);
 				} else {
@@ -284,10 +286,12 @@ export default {
 				this.progress = parseInt(data.slice * 100 / data.totalSlices);
 			}
 			const loc = this;
-			return axios.get(loc.stepDownloadUrl(), {
+			var url = loc.stepDownloadUrl();
+			return axios.get(url, session.AddSession(url, {
 				params: { k: key },
 				headers: (window.accessLink ? { 'Access-Link': window.accessLink } : {})
-				}).then(function(res) {
+			})).then(function (res) {
+					session.ReceiveSession(url, res);
 					if(i >= 1000) {
 						throw new Error('Hard limit reached');
 						}

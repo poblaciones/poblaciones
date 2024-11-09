@@ -487,12 +487,18 @@ module.exports = {
 	},
 	getTileParams(metric, frame, x, y, suffix) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
+		if (metric.Compare.Active) {
+			compare = metric.Compare.SelectedLevel().Id;
+		} else {
+			compare = null;
+		}
 		var ret = this.mergeObject({
 			l: metric.Metric.Id,
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
 			u: metric.SelectedUrbanity,
 			g: metric.EffectivePartition,
+			p: compare,
 			x: x,
 			y: y,
 			w: metric.Metric.Signature,

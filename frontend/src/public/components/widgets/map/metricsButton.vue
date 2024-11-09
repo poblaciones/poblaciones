@@ -32,6 +32,7 @@ import axios from 'axios';
 import err from '@/common/framework/err';
 import color from '@/common/framework/color';
 import fabButton from '@/public/components/widgets/fabButton/fabButton';
+import session from '@/common/framework/session';
 
 export default {
 	name: 'metricsButton',
@@ -78,12 +79,13 @@ export default {
 	methods: {
 		loadFabMetrics() {
 			const loc = this;
-			axios.get(window.host + '/services/metrics/GetFabMetrics', {
+			axios.get(window.host + '/services/metrics/GetFabMetrics', session.AddSession(window.host, {
 				params: {
 					w: window.SegMap.Signatures.FabMetrics,
 					h: window.SegMap.Signatures.Suffix
 				}
-			}).then(function (res) {
+			})).then(function (res) {
+				session.ReceiveSession(window.host, res);
 				loc.fabMetrics = res.data;
 			}).catch(function (error) {
 				err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);

@@ -66,8 +66,8 @@ v3.09 (2023-06-12)
 - Función de promoción y revocación de datos públicos (administración)
 - Multinivel muestra separadas las variables de nivel 0 cuando son polígonos o puntos.
 - Permite que el filtro de partición sea opcional.
-- La exportación a excel formatea y fija primera fila
-- Genera diccionario de datos para descarga
+- La exportación a excel formatea y fija primera fila.
+- Genera diccionario de datos para descarga.
 
 v3.08 (2022-11-25)
 - Fix: las revisiones pueden ser grabadas por usuarios con perfil Editor.
@@ -121,7 +121,6 @@ v3.03 (2022-03-30)
 - Fix en exportación a csv y excel desde grillas admnistrativas.
 - Fix advertencia de formato no coincide en exportación a excel desde grillas administrativas.
 - Fix a indexación de Delimitaciones en Google.
-- Departamentos y provincias 1980 en mapas base.
 
 v3.02 (2021-11-14)
 - Fix: el botón de editar no estaba apareciendo sobre el mapa incluso si el usuario tenía permisos.
@@ -214,7 +213,6 @@ v2.34 (2021-03-21)
 
 v2.33 (2021-01-15)
 - Incorporación de íconos para las etiquetas del mapa.
-- Incorporación de regiones sanitarias.
 - Mejoras en búsqueda por múltiples criterios.
 - Datapack Manager: mejoras mensajes de error. edición de symbol.
 - Fix a descarga de PDF de metadatos desde edición.
