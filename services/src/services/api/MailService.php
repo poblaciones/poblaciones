@@ -53,9 +53,9 @@ class MailService extends BaseService
 
 		foreach($content as $contentElement)
 		{
-			if ($contentElement['type'] = 'text/plain')
+			if ($contentElement['type'] == 'text/plain')
 				$contentText = $contentElement['value'];
-			if ($contentElement['type'] = 'text/html')
+			if ($contentElement['type'] == 'text/html')
 				$contentHtml = $contentElement['value'];
 		}
 		// Arma el mail

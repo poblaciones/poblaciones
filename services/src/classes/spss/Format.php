@@ -1,7 +1,6 @@
 <?php
 namespace helena\classes\spss;
 
-use helena\classes\spss\Format;
 use minga\framework\PublicException;
 
 // The print/write format for the data.

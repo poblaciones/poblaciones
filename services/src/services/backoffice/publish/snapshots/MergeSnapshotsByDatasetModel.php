@@ -303,6 +303,7 @@ class MergeSnapshotsByDatasetModel
 		$sql = "INSERT INTO " . $mergeTable . " (" . substr($sqlCols, 1) . ")
 						SELECT " . substr($sqlValues, 1);
 		// Pone valores
+		$args = [];
 		$sql .= " FROM " . $table1 . " t1 ";
 		if ($table1 !== $table2)
 		{

@@ -34,11 +34,12 @@ class TileDataServiceTest extends TestCase
 		$this->assertNull($denied);
 
 		$levelId = $a;
+		$levelCompareId = null;
 		$urbanity = App::SanitizeUrbanity($u);
 		$frame = new Frame();
 		$frame->Zoom = $z;
 		$frame->Envelope =  Envelope::TextDeserialize($e);
 
-		$ret = $controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z);
+		$ret = $controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z);
 	}
 }

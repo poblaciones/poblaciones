@@ -160,8 +160,6 @@ class ConfigurationService extends BaseService
 
 		Callbacks::$MapsOpened++;
 
-//		self::CheckMapLimits(Callbacks::$MapsOpened);
-
 		return $ret;
 	}
 
