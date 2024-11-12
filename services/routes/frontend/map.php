@@ -60,14 +60,6 @@ App::$app->get('/services/frontend/geographies/GetGeography', function (Request 
 	return App::JsonImmutable($ret);
 });
 
-
-// ej. http://mapas/services/geographies/GetGeographyTuples
-App::$app->get('/services/frontend/geographies/GetGeographyTuples', function (Request $request) {
-	$controller = new services\GeographyService();
-	$ret = $controller->GetGeographyTuples();
-	return App::JsonImmutable($ret);
-});
-
 // ej. http://mapas/services/clipping/GetBlockLabels?s=4&x=1382&y=2468&e=-34.569622,-58.257501%3B-34.667663,-58.608033&z=12&r=1692
 App::$app->get('/services/frontend/clipping/GetBlockLabels', function (Request $request) {
 	$controller = new services\LabelsService();

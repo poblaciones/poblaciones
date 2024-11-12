@@ -64,10 +64,6 @@ ActiveLabels.prototype.GetDataServiceParams = function (coord) {
 	}
 };
 
-ActiveLabels.prototype.GetDataServiceParamsCompare = function (coord) {
-	return null;
-};
-
 ActiveLabels.prototype.GetSubset = function (coord) {
 	if (this.UseBlockedRequests()) {
 		return [coord.x, coord.y];

@@ -25,17 +25,9 @@ export default {
 		return {
 			work: {},
 			sourceTitle: 'Fuente de habitantes, hogares y área',
-			showDescargar: false,
 		};
 	},
   methods: {
-		clickDescargar(e) {
-			e.preventDefault();
-			this.showDescargar = true;
-		},
-		closeDescargar() {
-			this.showDescargar = false;
-		},
 		clickFuente(e) {
 			e.preventDefault();
 			window.Popups.ClippingMetadata.show(this.metadata, this.sourceTitle);

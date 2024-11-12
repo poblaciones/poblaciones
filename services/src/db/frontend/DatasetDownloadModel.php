@@ -24,7 +24,7 @@ class DatasetDownloadModel extends BaseDownloadModel
 		$this->fullQuery = $fullQuery;
 		$this->countQuery = $countQuery;
 		$this->fullCols = $fullCols;
-  	$this->fullParams = $fullParams;
+  		$this->fullParams = $fullParams;
 		$this->extraColumns = $extraColumns;
 		$this->wktIndex = $wktIndex;
 

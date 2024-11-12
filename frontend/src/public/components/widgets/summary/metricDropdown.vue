@@ -55,9 +55,9 @@
 			},
 			toggleShowValues() {
 				if (this.metric.SelectedVariable().ShowValues == 1) {
-					this.metric.SelectedVariable().ShowValues = "0";
+					this.metric.SetShowValuesToSelectedVariableSet("0");
 				} else {
-					this.metric.SelectedVariable().ShowValues = "1";
+					this.metric.SetShowValuesToSelectedVariableSet("1");
 				}
 				this.metric.UpdateMap();
 			},

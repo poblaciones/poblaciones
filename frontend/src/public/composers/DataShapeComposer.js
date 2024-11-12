@@ -18,6 +18,10 @@ DataShapeComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 	if (this.activeSelectedMetric.HasSelectedVariable() === false) {
 		return;
 	}
+	var variable = this.activeSelectedMetric.SelectedVariable();
+	var variableId = variable.Id;
+	var varId;
+
 	this.UpdateTextStyle(zoom);
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	var colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
@@ -25,17 +29,21 @@ DataShapeComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
-		var val = dataElement['LID'];
-		// Se fija si por etiqueta está visible
-		if (this.labelValueIsVisible(val)) {
-			var clickId = null;
-			if (showInfo) {
-				clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
-			};
-			// Pone el perímetro
-			this.AddPerimeter(variable, val, dataElement, tileKey, tileBounds, colorMap);
-			// Pone el polígono
-			this.AddFeatureText(variable, val, dataElement, clickId, tileKey, tileBounds, colorMap, zoom);
+		varId = dataElement['VID'];
+		if (varId === variableId) {
+			var val = dataElement['LID'];
+			// Se fija si por etiqueta está visible
+			// Esto implica el filtro de variable
+			if (this.labelValueIsVisible(val)) {
+				var clickId = null;
+				if (showInfo) {
+					clickId = this.activeSelectedMetric.CreateParentInfo(variable, dataElement);
+				};
+				// Pone el perímetro
+				this.AddPerimeter(variable, val, dataElement, tileKey, tileBounds, colorMap);
+				// Pone el polígono
+				this.AddFeatureText(variable, val, dataElement, clickId, tileKey, tileBounds, colorMap, zoom);
+			}
 		}
 	}
 };
@@ -119,6 +127,11 @@ DataShapeComposer.prototype.processFeature = function (tileUniqueId, dataElement
 	}
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	if (!variable.IsSimpleCount) {
+		if (this.activeSelectedMetric.Compare.Active && variable.Comparable) {
+			var delta = this.activeSelectedMetric.Compare.CalculateDelta(variable,
+										dataElement, { Value: dataElement.ValueCompare, Total: dataElement.TotalCompare });
+			dataElement.DeltaValue = delta;
+		}
 		mapItem.properties.value = this.FormatValue(variable, dataElement);
 	}
 	if (this.patternUseFillStyles(patternValue)) {

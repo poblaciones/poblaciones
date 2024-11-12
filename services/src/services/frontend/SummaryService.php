@@ -9,7 +9,6 @@ use helena\db\frontend\SnapshotByDatasetCompareSummary;
 
 use helena\entities\frontend\clipping\SummaryInfo;
 use helena\entities\frontend\clipping\SummaryItemInfo;
-use minga\framework\Context;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
 use minga\framework\Performance;
@@ -19,7 +18,7 @@ use minga\framework\PublicException;
 
 class SummaryService extends BaseService
 {
-	public function GetSummary($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $urbanity, $partition)
+	public function GetSummary($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition)
 	{
 		$data = null;
 		$this->CheckNotNullNumeric($metricId);
@@ -30,7 +29,7 @@ class SummaryService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 
-		$key = SummaryCache::CreateKey($frame, $metricVersionId, $levelId, $compareLevelId, $urbanity, $partition);
+		$key = SummaryCache::CreateKey($frame, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && SummaryCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -40,7 +39,7 @@ class SummaryService extends BaseService
 		{
 			Performance::CacheMissed();
 		}
-		$data = $this->CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $urbanity, $partition);
+		$data = $this->CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)
 			SummaryCache::Cache()->PutData($metricId, $key, $data);
@@ -50,7 +49,7 @@ class SummaryService extends BaseService
 		return $data;
 	}
 
-	private function CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $urbanity, $partition)
+	private function CalculateSummary($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -66,9 +65,9 @@ class SummaryService extends BaseService
 				throw new \ErrorException("Debe indicar una valor para '" . $level->Partitions->Name . "'");
 		}
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		if ($compareLevelId)
+		if ($levelCompareId)
 		{
-			$levelCompare = $metric->GetLevel($compareLevelId);
+			$levelCompare = $metric->GetLevel($levelCompareId);
 			$mergeTable = MergeSnapshotsByDatasetModel::TableName($snapshotTable, $levelCompare->Dataset->Id);
 			$variablePairs = MergeSnapshotsByDatasetModel::GetRequiredVariablesForLevelPairObjects($level, $levelCompare);
 			$table = new SnapshotByDatasetCompareSummary(
@@ -77,7 +76,7 @@ class SummaryService extends BaseService
 				$urbanity,
 				$partition
 			);
-			$table->CheckTableExists($level->Dataset->Id, $levelCompare->Dataset->Id);
+			MergeSnapshotsByDatasetModel::CheckTableExists($table->tableName, $level->Dataset->Id, $levelCompare->Dataset->Id);
 		}
 		else
 		{

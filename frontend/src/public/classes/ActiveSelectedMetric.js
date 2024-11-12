@@ -146,6 +146,37 @@ ActiveSelectedMetric.prototype.fillEmptySummaries = function () {
 	});
 };
 
+ActiveSelectedMetric.prototype.SetShowDescriptionsToSelectedVariableSet = function (value) {
+	return this.SetValueToSelectedVariableSet("ShowDescriptions", value, true, false);
+};
+
+ActiveSelectedMetric.prototype.SetShowValuesToSelectedVariableSet = function (value) {
+	return this.SetValueToSelectedVariableSet("ShowValues", value, false, true);
+};
+
+ActiveSelectedMetric.prototype.SetValueToSelectedVariableSet = function (attribute, value, requireDescriptions, requireNotToSimpleCounts) {
+	if (!this.HasSelectedVariable()) {
+		return;
+	}
+	// Establece el valor para todas las variables con igual
+	// nombre, sin importar el nivel o la serie.
+	var selectedVariable = this.SelectedVariable();
+	var name = selectedVariable.Name;
+	for (var version of this.properties.Versions) {
+		for (var level of version.Levels) {
+			if (!requireDescriptions || level.HasDescriptions) {
+				for (var variable of level.Variables) {
+					if (!requireNotToSimpleCounts || !variable.IsSimpleCount) {
+						if (variable.Name === name) {
+							variable[attribute] = value;
+						}
+					}
+				}
+			}
+		}
+	}
+};
+
 ActiveSelectedMetric.prototype.ChangeMetricVisibility = function () {
 	this.properties.Visible = !this.properties.Visible;
 	this.UpdateMap();
@@ -295,7 +326,11 @@ ActiveSelectedMetric.prototype.getHiddenValueLabels = function (variable) {
 
 ActiveSelectedMetric.prototype.getVariableValueLabels = function (variable) {
 	if (this.Compare.Active) {
-		return variable.ComparableValueLabels;
+		if (variable.ComparableValueLabels) {
+			return variable.ComparableValueLabels;
+		} else {
+			return [];
+		}
 	} else {
 		return variable.ValueLabels;
 	}
@@ -325,32 +360,6 @@ ActiveSelectedMetric.prototype.GetFirstValidVersionIndexByWorkId = function (id)
 		}
 	}
 	return -1;
-};
-
-ActiveSelectedMetric.prototype.GetVersionsWithComparableVariables = function () {
-// entre en los levels y en las variable, devolviendo pares de { version:, index:}
-	var ret = [];
-	for (var l = 0; l < this.properties.Versions.length; l++) {
-		var version = this.properties.Versions[l];
-		if (this.hasComparableVariable(version)) {
-			ret.push({ version: version, index: l});
-		}
-	}
-	return ret;
-};
-
-ActiveSelectedMetric.prototype.hasComparableVariable = function (version) {
-	var selected = this.SelectedVariable();
-	for (var level of version.Levels) {
-		for (var variable of level.Variables) {
-			if (selected.Name == variable.Name) {
-				if (variable.Comparable) {
-					return true;
-				}
-			}
-		}
-	}
-	return false;
 };
 
 ActiveSelectedMetric.prototype.GetVersionById = function (id) {
@@ -938,22 +947,11 @@ ActiveSelectedMetric.prototype.GetDataServiceParams = function (coord) {
 	var suffix = window.SegMap.Signatures.Suffix;
 	this.properties.EffectivePartition = this.GetSelectedPartition();
 	if (this.UseBlockedRequests()) {
-		return h.getBlockTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, suffix, this.blockSize);
+		return h.getBlockTileParams(this, window.SegMap.frame, coord.x, coord.y, suffix, this.blockSize);
 	} else {
-		return h.getTileParams(this.properties, window.SegMap.frame, coord.x, coord.y, suffix);
+		return h.getTileParams(this, window.SegMap.frame, coord.x, coord.y, suffix);
 	}
 };
-
-ActiveSelectedMetric.prototype.GetDataServiceParamsCompare = function (coord) {
-	if (!this.Compare.Active) {
-		return null;
-	}
-	var ret = this.GetDataServiceParams(coord);
-	ret['v'] = this.Compare.SelectedVersion().Version.Id;
-	ret['a'] = this.Compare.SelectedLevel().Id;
-	return ret;
-};
-
 
 ActiveSelectedMetric.prototype.GetSubset = function (coord) {
 	if (this.UseBlockedRequests()) {

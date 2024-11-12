@@ -21,7 +21,7 @@ use helena\services\common\BaseService;
 
 class RankingService extends BaseService
 {
-	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $variableId,
+	public function GetRanking($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $variableId,
 							$hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
 	{
 		$data = null;
@@ -33,7 +33,7 @@ class RankingService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
 			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 
-		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $compareLevelId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels);
+		$key = RankingCache::CreateKey($frame, $metricVersionId, $levelId, $levelCompareId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && RankingCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -49,7 +49,7 @@ class RankingService extends BaseService
 		}
 
 		Performance::CacheMissed();
-		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels);
+		$data = $this->CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)
 			RankingCache::Cache()->PutData($metricId, $key, $data);
@@ -59,7 +59,7 @@ class RankingService extends BaseService
 		return $data;
 	}
 
-	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $compareLevelId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
+	private function CalculateRanking($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -68,9 +68,9 @@ class RankingService extends BaseService
 		$hasDescriptions = $level->HasDescriptions;
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
-		if ($compareLevelId)
+		if ($levelCompareId)
 		{
-			$levelCompare = $metric->GetLevel($compareLevelId);
+			$levelCompare = $metric->GetLevel($levelCompareId);
 			$mergeTable = MergeSnapshotsByDatasetModel::TableName($snapshotTable, $levelCompare->Dataset->Id);
 			$compareVariable = MergeSnapshotsByDatasetModel::GetRequiredVariableForLevelPairObjects($level, $levelCompare, $variableId);
 			$variableCompareId = $compareVariable->attributes['mvv_id'];
@@ -86,7 +86,7 @@ class RankingService extends BaseService
 				$direction,
 				$hiddenValueLabels
 			);
-			$table->CheckTableExists($level->Dataset->Id, $levelCompare->Dataset->Id);
+			MergeSnapshotsByDatasetModel::CheckTableExists($table->tableName, $level->Dataset->Id, $levelCompare->Dataset->Id);
 		}
 		else
 		{

@@ -212,14 +212,7 @@ SelectedInfoRouter.prototype.VariablesToRoute = function (activeSelectedMetric) 
 
 SelectedInfoRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	var infos = this.parseInfos(args);
-	var loc = this;
-	if (this.InfosHaveComparer(infos)) {
-		window.SegMap.GetGeographyTuples().then(function () {
-			loc.LoadInfos(infos, updateRoute, skipRestore);
-		});
-	} else {
-		loc.LoadInfos(infos, updateRoute, skipRestore);
-	}
+	this.LoadInfos(infos, updateRoute, skipRestore);
 };
 
 SelectedInfoRouter.prototype.InfosHaveComparer = function (infos) {
@@ -500,7 +493,7 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	}
 	if (activeSelectedMetric.SelectedVariable()) {
 		if (activeSelectedMetric.SelectedVariable().ShowDescriptions !== state.ShowDescriptions) {
-			activeSelectedMetric.SelectedVariable().ShowDescriptions = state.ShowDescriptions;
+			activeSelectedMetric.SetShowDescriptionsToSelectedVariableSet(state.ShowDescriptions);
 			mapChanged = true;
 		}
 		if (activeSelectedMetric.SelectedVariable().ShowPerimeter !== state.ShowPerimeter) {
@@ -512,7 +505,7 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 			mapChanged = true;
 		}
 		if (activeSelectedMetric.SelectedVariable().ShowValues !== state.ShowValues) {
-			activeSelectedMetric.SelectedVariable().ShowValues = state.ShowValues;
+			activeSelectedMetric.SetShowValuesToSelectedVariableSet(state.ShowValues);
 			mapChanged = true;
 		}
 	}

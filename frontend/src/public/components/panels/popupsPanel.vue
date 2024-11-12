@@ -1,19 +1,21 @@
 <template>
-		<div>
-			<WorkMetadata ref="showFuente" :backgroundColor="backgroundColor" />
-			<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
-			<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
-			<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
-			<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
-			<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
-			<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
-			<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
-		</div>
+	<div>
+		<WorkMetadata ref="showFuente" :backgroundColor="backgroundColor" />
+		<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
+		<CompareMetadata ref="showCompareMetadata" :backgroundColor="backgroundColor" />
+		<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
+		<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
+		<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
+		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
+		<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
+		<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
+	</div>
 </template>
 
 <script>
 import WorkMetadata from '@/public/components/popups/workMetadata';
 import ClippingMetadata from '@/public/components/popups/clippingMetadata';
+import CompareMetadata from '@/public/components/popups/compareMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
 import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
 import AddMetric from '@/public/components/popups/addMetric';
@@ -29,6 +31,7 @@ export default {
 		WorkMetadata,
 		Embedding,
 		ClippingMetadata,
+		CompareMetadata,
 		BoundaryCustomize,
 		MetricCustomize,
 		MetricDownload,
@@ -42,6 +45,7 @@ export default {
 		window.Popups.Embedding = this.$refs.showEmbedding;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
 		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
+		window.Popups.CompareMetadata = this.$refs.showCompareMetadata;
 		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AddMetric = this.$refs.addMetric;

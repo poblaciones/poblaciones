@@ -93,11 +93,6 @@ TileOverlay.prototype.process = function (mapResults, data, gradient, tileKey, d
 	var tileBounds = mercator.getTileBounds({ x: x, y: y, z: z });
 	var dataResults = data.Main;
 
-	// Si recibe data.Compare, tiene que iniciar la comparación...
-	if (data.Compare) {
-		this.composer.activeSelectedMetric.Compare.Merge(data.Main, data.Compare);
-	}
-
 	var features = (dataResults.Data.features !== undefined ? dataResults.Data.features : dataResults.Data);
 	this.processLabels(features, tileKey, tileBounds, x, y, z);
 	var svg = null;

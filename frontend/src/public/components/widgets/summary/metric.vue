@@ -45,8 +45,8 @@
 			</template>
 		</div>
 		<div class="sourceRow">
-			<div v-if="metric.Compare.Active" style="margin-left: 2px; margin-top: -8px; margin-bottom: 8px;">
-				Comparando {{ this.compareVersions[0] }} con {{ this.compareVersions[1] }}.
+			<div v-if="false && metric.Compare.Active" style="margin-left: 2px; margin-top: -8px; margin-bottom: 8px;">
+
 			</div>
 			<div class="btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
@@ -57,33 +57,32 @@
 				</button>
 			</div>
 			<div class="btn-group" v-if="useComparer && metric.Compare.Active" style="float: left">
-				<button v-for="pair in metric.GetVersionsWithComparableVariables()" :key="pair.version.Id" type="button"
+				<button v-for="pair in metric.Compare.GetVersionsWithComparableVariables()" :key="pair.version.Id" type="button"
 								@click="changeSelectedVersionIndexCompare(pair.index)"
 								class="btn btn-default btn-xs exp-serie-item"
 								:class="getActiveCompare(pair.version)">
 					{{ pair.version.Version.Name }}
 				</button>
 			</div>
-			<div style="padding: 0px 20px 20px 20px; float: left " v-if="false && useComparer && metric.Compare.Active">
-				<vue-slider v-model="compareVersions" tooltip="none" :marks="true" :adsorb="true"
-										labelStyle="font-size: 12px;" :width="(35 * versionsArray.length)"
-										labelActiveStyle="active"
-										:dotSize="14" :data="versionsArray" :lazy="true" @change="sliderChanged" :enableCross="false" :minRange="1"></vue-slider>
-			</div>
-			<div class="btn-group" style="float: left" v-if="!Embedded.Readonly && useComparer">
-				<button type="button"
-								@click="toggleCompare()"
-								class="btn btn-default btn-xs exp-serie-item"
-								:class="(metric.Compare.Active ? 'active' : '')">
-					Dif. %
-				</button>
-			</div>
-			<div class="btn-group" style="float: left" v-if="!Embedded.Readonly && useComparer">
-				<switches v-model="metric.Compare.Active" theme="bootstrap" color="default" @click="toggleCompare()"></switches> Comparar
-			</div>
+			<template v-if="!Embedded.Readonly && useComparer">
+				<div style="float: left; margin-left: 10px; margin-top: 6px;">
+					<switches style="transform: scale(0.8)" title="Comparar" v-model="compare" theme="bootstrap"
+										color="default" @changed="toggleCompare()"></switches>
+				</div>
+				<div v-if="compare" class="compareLabel">
+					{{ compareContent }}
+																<a href="#" @click="clickCompareFuente" v-if="hasCompareMetadata()"
+																	 title="Fuente de comparación" style="color: #a7a7a7">
+																	<link-icon />
+																</a>
+				</div>
+				<div v-else style="color: #ccc; cursor: pointer" class="compareLabel" @click="toggleCompare">
+					Comparar
+				</div>
+			</template>
 
 			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly" style="float: right"
-							@clickDownload="clickDescargar" @clickSource="clickFuente" />
+							@clickDownload="clickDescargar" @clickSource="clickFuente" :small="compare" />
 			<div style="clear: both; height: 0px"></div>
 		</div>
 			<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
@@ -95,15 +94,18 @@
 		</div>
 </template>
 <script>
+
 import MetricVariables from './metricVariables';
 import Switches from 'vue-switches';
 //https://github.com/drewjbartlett/vue-switches
 import MetricDropdown from './metricDropdown';
-import Source from './source';
-import Ranking from './ranking';
+	import Source from './source';
+	import arr from '@/common/framework/arr';
+
+	import Ranking from './ranking';
+	import LinkIcon from 'vue-material-design-icons/Link.vue';
 import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
 import Helper from '@/public/js/helper';
-import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/default.css';
 // slider doc: https://nightcatsama.github.io/vue-slider-component/#/api/methods
 
@@ -115,8 +117,8 @@ export default {
 		Switches,
 		DragHorizontal,
 		MetricVariables,
-		VueSlider,
 		Ranking,
+		LinkIcon
 	},
 	props: [
 		'metric',
@@ -125,11 +127,18 @@ export default {
 	data() {
 		return {
 			compareVersions: [null, null],
-			lastVersionClicked: -1
+			lastVersionClicked: -1,
+			compare: false
 		};
 	},
-	mounted() {
-		this.updateCompareVersions();
+		mounted() {
+			if (this.metric.Compare.Active) {
+				this.compare = true;
+			}
+/*				this.updateCompareVersions();
+				this.metric.UpdateSummary();
+				this.metric.UpdateMap();*/
+
 	},
 		methods: {
 			getActiveCompare(version) {
@@ -160,21 +169,35 @@ export default {
 		clickFuente() {
 			window.Popups.WorkMetadata.showByMetric(this.metric, this.metric.properties.Metric.Name);
 		},
+		hasCompareMetadata() {
+				return this.metric.SelectedLevel().GeographyId !== this.metric.Compare.SelectedLevel().GeographyId;
+		},
+		clickCompareFuente() {
+			var geographyId = this.metric.SelectedLevel().GeographyId;
+			var compareGeographyId = this.metric.Compare.SelectedLevel().GeographyId;
+			var meta = this.metric.properties.ComparableMetadata;
+			for (var item of meta.TupleGeography) {
+				if (item.GeographyId === geographyId && item.CompareGeographyId === compareGeographyId) {
+					var item = arr.GetById(meta.Metadata, item.MetadataId);
+					window.Popups.CompareMetadata.show(item, this.metric.properties.Metric.Name);
+					return;
+				}
+			}
+			alert("No se ha encontrado metadatos para esta comparación.");
+		},
 		toggleCompare() {
 			var loc = this;
 			if (!this.metric.Compare.Active) {
-				// Obtiene los geographyTuples antes de habilitar la opción...
-				window.SegMap.GetGeographyTuples().then(function () {
-					loc.metric.Compare.Active = true;
-					loc.updateCompareVersions();
-					loc.metric.UpdateSummary();
-					loc.metric.UpdateMap();
-				});
+				loc.metric.Compare.Active = true;
+				this.compare = true;
+				loc.updateCompareVersions();
 			} else {
 				loc.metric.Compare.Active = false;
-				loc.metric.UpdateSummary();
-				loc.metric.UpdateMap();
+				this.compare = false;
 			}
+			loc.metric.UpdateSummary();
+			loc.metric.UpdateMap();
+
 		},
 		hasLegends(level) {
 			for (var variable of level.Variables) {
@@ -200,6 +223,7 @@ export default {
 				var minIndex = this.versionsArray.indexOf(this.compareVersions[0]);
 				var maxIndex = this.versionsArray.indexOf(this.compareVersions[1]);
 				if (index === minIndex || index === maxIndex) {
+					this.lastVersionClicked = index;
 					return;
 				}
 				// si es inferior al inferior, es compare
@@ -217,9 +241,9 @@ export default {
 				//
 				if (this.lastVersionClicked !== -1) {
 					if (this.lastVersionClicked == maxIndex) {
-						this.metric.Compare.SelectVersion(index);
-					} else {
 						this.metric.SelectVersion(index);
+					} else {
+						this.metric.Compare.SelectVersion(index);
 					}
 					this.lastVersionClicked = index;
 					this.updateCompareVersions();
@@ -247,16 +271,54 @@ export default {
 				if (!this.metric.Compare.Active) {
 					return;
 				}
-				var versionsArray = this.metric.GetVersionsWithComparableVariables();
+				if (this.metric.Compare.SelectedVersion() &&
+					this.metric.Compare.SelectedVersionIndex > this.metric.properties.SelectedVersionIndex) {
+					this.metric.Compare.SelectedVersionIndex = this.metric.properties.SelectedVersionIndex;
+				}
+				if (this.metric.Compare.SelectedVersion() &&
+					this.metric.Compare.SelectedVersionIndex == 0 && this.metric.properties.SelectedVersionIndex == 0) {
+					this.metric.properties.SelectedVersionIndex = 1;
+				}
+
+				var versionsArray = this.metric.Compare.GetVersionsWithComparableVariables();
 				var versionCompare = this.metric.Compare.SelectedVersion();
-					if (versionCompare) {
-						// avanza si ambas están en lo comparable
-						if (this.inVersionsArray(versionsArray, versionCompare.Version) && this.inVersionsArray(versionsArray, this.metric.SelectedVersion().Version)) {
-							this.compareVersions = [versionCompare.Version.Name, this.metric.SelectedVersion().Version.Name];
-							window.SegMap.SaveRoute.UpdateRoute();
-							return;
+
+				if (versionCompare) {
+					// avanza si ambas están en lo comparable
+					if (this.versionsAreOk(versionsArray)) {
+						this.compareVersions = [versionCompare.Version.Name, this.metric.SelectedVersion().Version.Name];
+						window.SegMap.SaveRoute.UpdateRoute();
+						return;
+					}
+					// Trata de moverlo...
+					// Se fija si lo puede atrasar
+					var selectedVersion = this.metric.SelectedVersion();
+					if (versionCompare.Version === selectedVersion) {
+						for (var i = 1; i < versionsArray.length; i++) {
+							if (versionsArray[i] === versionCompare.Version.Name) {
+								this.metric.Compare.SelectVersion(i - 1);
+								versionCompare = this.metric.Compare.SelectedVersion();
+								break;
+							}
 						}
 					}
+					// Se fija si lo puede adelantar
+					if (versionCompare.Version === selectedVersion.Version) {
+						for (var i = this.metric.SelectedVersionIdex + 1; i < versionsArray.length; i++) {
+							if (versionsArray[i] !== selectedVersion.Version.Name) {
+								this.metric.SelectVersion(i);
+								selectedVersion = this.metric.SelectedVersion();
+								break;
+							}
+						}
+					}
+					if (this.versionsAreOk(versionsArray)) {
+						this.compareVersions = [versionCompare.Version.Name, this.metric.SelectedVersion().Version.Name];
+						window.SegMap.SaveRoute.UpdateRoute();
+						return;
+					}
+				}
+
 				// No tiene nada indicado... pone algo
 				var v1, v2;
 				if (versionsArray.length == 1) {
@@ -276,6 +338,20 @@ export default {
 				this.compareVersions = [v1.version.Version.Name, v2.version.Version.Name];
 				window.SegMap.SaveRoute.UpdateRoute();
 		},
+			versionsAreOk(versionsArray) {
+				var versionCompare = this.metric.Compare.SelectedVersion();
+				if (versionCompare) {
+					// avanza si ambas están en lo comparable
+					var selectedVersion = this.metric.SelectedVersion();
+					if (versionCompare.Version.Name != selectedVersion.Version.Name &&
+						this.inVersionsArray(versionsArray, versionCompare.Version)
+						&& this.inVersionsArray(versionsArray, selectedVersion.Version) &&
+						this.metric.properties.SelectedVersionIndex > this.metric.Compare.SelectedVersionIndex) {
+						return true;
+					}
+				}
+				return false;
+			},
 		rankingShown() {
 			var vScrollTo = require('vue-scrollto');
 			var loc = this;
@@ -302,7 +378,14 @@ export default {
 			},
 			Embedded() {
 				return window.Embedded;
-			},
+		},
+		compareContent() {
+			if (this.compareVersions[0] == null || this.compareVersions[1] == null) {
+				return "Iniciando...";
+			} else {
+				return "Comparando " + this.compareVersions[0] + " con " + this.compareVersions[1];
+			}
+		},
 		useComparer() {
 			return window.Use.UseCompareSeries && this.metric.properties.Comparable && this.metric.properties.Versions.length > 1;
 		},
@@ -336,6 +419,17 @@ export default {
 				var variable = this.metric.SelectedLevel().Variables[0];
 				return variable.ValueLabels[0];
 			}
+		},
+		watch: {
+			'compare'() {
+				this.metric.Compare.Active = this.compare;
+				//this.toggleCompare();
+				if (this.metric.Compare.Active) {
+					this.updateCompareVersions();
+				}
+				this.metric.UpdateSummary();
+				this.metric.UpdateMap();
+			}
 		}
 };
 </script>
@@ -365,7 +459,7 @@ export default {
 		box-shadow: 0px 0px 1px 2px rgba(90, 90, 90, 0.36) !important;
 	}
 	.vue-switcher-theme--bootstrap.vue-switcher-color--default div:after {
-		background-color: #b3b3b3;
+		background-color: #888;
 	}
 
 	.vue-switcher-theme--bootstrap.vue-switcher-color--default div {
@@ -373,7 +467,7 @@ export default {
 	}
 
 	.vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div:after {
-		background-color: #e1e1e1;
+		background-color: #b3b3b3;
 	}
 
 	.vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div {
@@ -394,5 +488,11 @@ export default {
 	.smallIcon {
 		font-size: 14px;
 		margin-top: 2px
+	}
+
+	.compareLabel {
+		margin-top: 4px;
+		margin-left: 4px;
+		float: left;
 	}
 </style>

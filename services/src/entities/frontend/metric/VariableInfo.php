@@ -11,6 +11,7 @@ class VariableInfo extends BaseMapModel
 	public $ShortName;
 	public $Normalization;
 	public $NormalizationScale;
+	public $Formula;
 	public $IsDefault = false;
 	public $Legend;
 	public $Perimeter;

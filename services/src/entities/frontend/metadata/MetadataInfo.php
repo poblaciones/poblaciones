@@ -28,11 +28,7 @@ class MetadataInfo extends BaseMapModel
 			'met_publication_date' => 'Date',
 			'met_online_since' => 'ReleaseDate',
 			'met_license' => 'License',
-			//'met_url' => 'Url',
-			'met_coverage_caption' => 'Coverage'/*,
-			'ins_caption' => 'Institution',
-			'ins_watermark_id' => 'WatermarkId',
-			'ins_color' => 'PrimaryColor',*/);
+			'met_coverage_caption' => 'Coverage');
 	}
 
 	public function FillFiles($rows)

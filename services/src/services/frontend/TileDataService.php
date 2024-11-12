@@ -12,9 +12,12 @@ use helena\classes\GlobalTimer;
 use helena\caches\TileDataCache;
 use helena\caches\LayerDataCache;
 use helena\services\common\BaseService;
+
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
+use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
 
 use helena\db\frontend\SnapshotByDatasetTileData;
+use helena\db\frontend\SnapshotByDatasetCompareTileData;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 
@@ -26,7 +29,7 @@ class TileDataService extends BaseService
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, máximo C5.
 	const TILE_SIZE = 256;
 
-	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z)
+	public function GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z)
 	{
 		$s = App::Settings()->Map()->TileDataBlockSize;
 		$blocks = [];
@@ -35,7 +38,7 @@ class TileDataService extends BaseService
 			$row = [];
 			for($iy = $y; $iy < $y + $s; $iy++)
 			{
-	 				$row[$iy] = $this->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $ix, $iy, $z);
+	 				$row[$iy] = $this->GetTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $ix, $iy, $z);
 			}
 			$blocks[$ix] = $row;
 		}
@@ -45,7 +48,7 @@ class TileDataService extends BaseService
 		return $ret;
 	}
 
-	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z)
+	public function GetTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z)
 	{
 		Profiling::BeginTimer();
 		$data = null;
@@ -56,7 +59,7 @@ class TileDataService extends BaseService
 		$this->CheckNotNullNumeric($y);
 		$this->CheckNotNullNumeric($z);
 
-		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z);
+		$key = TileDataCache::CreateKey($frame, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z);
 
 		if ($frame->ClippingCircle == null && TileDataCache::Cache()->HasData($metricId, $key, $data))
 		{
@@ -64,7 +67,7 @@ class TileDataService extends BaseService
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z);
+		$data = $this->CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z);
 
 		Performance::CacheMissed();
 		Performance::SetMethod("get");
@@ -92,7 +95,7 @@ class TileDataService extends BaseService
 	}
 
 
-	private function CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z)
+	private function CalculateTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -106,9 +109,30 @@ class TileDataService extends BaseService
 		$hasDescriptions = $level->HasDescriptions;
 		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
 
-		$table = new SnapshotByDatasetTileData($snapshotTable,
-			$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables, $urbanity, $partition, $hasSymbols, $hasDescriptions);
-
+		if ($levelCompareId) {
+			$levelCompare = $metric->GetLevel($levelCompareId);
+			$mergeTable = MergeSnapshotsByDatasetModel::TableName($snapshotTable, $levelCompare->Dataset->Id);
+			$variablePairs = MergeSnapshotsByDatasetModel::GetRequiredVariablesForLevelPairObjects($level, $levelCompare);
+			$table = new SnapshotByDatasetCompareTileData(
+				$mergeTable,
+				$level->Dataset->Type, $level->Dataset->AreSegments,
+				$variablePairs,
+				$urbanity,
+				$partition,
+				$hasSymbols,
+				$hasDescriptions
+			);
+			MergeSnapshotsByDatasetModel::CheckTableExists($table->tableName, $level->Dataset->Id, $levelCompare->Dataset->Id);
+		} else {
+			$table = new SnapshotByDatasetTileData(
+				$snapshotTable,
+				$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables,
+				$urbanity,
+				$partition,
+				$hasSymbols,
+				$hasDescriptions
+			);
+		}
 		$rows = $table->GetRows($frame);
 
 		if ($level->Dataset->AreSegments)

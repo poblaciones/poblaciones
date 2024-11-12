@@ -111,13 +111,14 @@ App::$app->get('/services/frontend/metrics/GetTileData', function (Request $requ
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
 	$levelId = Params::GetInt('a');
+	$levelCompareId = Params::GetInt('p');
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$partition = Params::GetInt('g');
 	$frame = Frame::FromParams();
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	return App::JsonImmutable($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z));
+	return App::JsonImmutable($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z));
 });
 
 
@@ -129,6 +130,8 @@ App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request 
 	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
 
 	$levelId = Params::GetInt('a');
+	$levelCompareId = Params::GetInt('p');
+
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$partition = Params::GetInt('g');
 
@@ -140,7 +143,7 @@ App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request 
 	if (!App::Settings()->Map()->UseDataTileBlocks ||
 			$s !== App::Settings()->Map()->TileDataBlockSize)
 		throw new PublicException('El tamaño de bloque de datos solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
-	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition, $x, $y, $z));
+	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z));
 });
 
 App::$app->get('/services/metrics/GetSelectedMetric', function (Request $request) {

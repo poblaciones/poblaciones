@@ -8,7 +8,6 @@ use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\App;
 use helena\classes\GeoJson;
-use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
 
 class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 {
@@ -111,18 +110,6 @@ class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 		else
 			return " AND sna_" . $this->variableId . "_" . $this->variableCompareId . "_value_label_id NOT IN(" . implode(",", $this->hiddenValueLabels) . ") ";
 	}
-
-	public function CheckTableExists($datasetId, $datasetCompareId)
-	{
-		if (App::Db()->tableExists($this->tableName))
-			return;
-		// La crea
-		Profiling::BeginTimer();
-		$c = new MergeSnapshotsByDatasetModel();
-		$c->MergeSnapshots($datasetId, $datasetCompareId);
-		Profiling::EndTimer();
-	}
-
 }
 
 

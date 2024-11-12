@@ -81,7 +81,6 @@ TextOverlay.prototype.RebuildHtml = function () {
 TextOverlay.prototype.resolveSymbolPart = function () {
 	var size = null;
 	if (this.symbol === 'fa-chart-bar') {
-		// TODO: parametrizar esto según se aclare la necesidad
 		size = .85;
 	}
 	return iconManager.showIcon(this.symbol, null, null, 2, size, true);

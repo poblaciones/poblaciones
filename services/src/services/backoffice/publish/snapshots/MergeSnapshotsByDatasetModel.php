@@ -6,13 +6,16 @@ use helena\services\backoffice\publish\PublishDataTables;
 
 use minga\framework\Profiling;
 use minga\framework\Arr;
-use helena\entities\frontend\geometries\Envelope;
+use minga\framework\Str;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
-use helena\classes\DatasetTypeEnum;
+use minga\framework\locking\CreateMergeLock;
 use minga\framework\PublicException;
 use minga\framework\ErrorException;
 use helena\db\backoffice\WorkModel;
+use helena\entities\frontend\metadata\TupleMetadataInfo;
+use helena\entities\frontend\metadata\MetadataInfo;
+
 
 class MergeSnapshotsByDatasetModel
 {
@@ -32,7 +35,6 @@ class MergeSnapshotsByDatasetModel
 	}
 	public function MergeSnapshots($datasetId, $compareDatasetId)
 	{
-		Profiling::BeginTimer();
 		// trae info de los datasets
 		$sameDataset = ($datasetId === $compareDatasetId);
 		$workModel = new WorkModel(false);
@@ -40,18 +42,31 @@ class MergeSnapshotsByDatasetModel
 		$datasetCompare = ($sameDataset ? $dataset : $workModel->GetDataset($compareDatasetId));
 
 		$variablePairs = $this->GetComparableVariables($datasetId, $compareDatasetId, $sameDataset);
-
 		// Identifica las tablas
 		$table = SnapshotByDatasetModel::SnapshotTable($dataset['dat_table']);
 		$tableCompare = SnapshotByDatasetModel::SnapshotTable($datasetCompare['dat_table']);
 		$mergeTable = self::TableName($table, $compareDatasetId);
 
+		// Bloquea para empezar
+		$lock = new CreateMergeLock($mergeTable);
+		$lock->LockWrite();
+		if (App::Db()->tableExists($mergeTable))
+		{	// Fue resuelta desde otro thread
+			$lock->Release();
+			return;
+		}
+		Profiling::BeginTimer();
+
 		// Trae las tuplas que lo conectan
 		if (!$sameDataset)
 		{
 			$tuple = $this->GetTuple($dataset['dat_geography_id'], $datasetCompare['dat_geography_id']);
-			if (!$tuple)
-				throw new PublicException("No hay relación (tuplas definidas) entre los niveles geográficos de ambos datasets.");
+			if (!$tuple && $dataset['dat_geography_id'] !== $datasetCompare['dat_geography_id'])
+			{
+				$lock->Release();
+				throw new PublicException("No hay relación (tuplas definidas) entre los niveles geográficos de los datasets  '" . $dataset['dat_caption']
+						. "' (" . $dataset['dat_geography_id'] . ") y '" . $datasetCompare['dat_caption'] . "' (" .  $datasetCompare['dat_geography_id'] . ").");
+			}
 		}
 		else
 			$tuple = null;
@@ -62,15 +77,24 @@ class MergeSnapshotsByDatasetModel
 		// Agrega las columnas de variables
 		$this->AddColumnsByVariable($columns, $variablePairs, $sameDataset);
 
+		// Prepara el espacio temporal
+		$tmpTable = $mergeTable . "_tmp";
+		App::Db()->dropTable($tmpTable);
+
 		// Hace el insert
-		$this->CreateTable($mergeTable, $columns);
+		$this->CreateTable($tmpTable, $columns);
+
 		try
 		{
-			$this->InsertValues($mergeTable, $table, $tableCompare, $tuple['gtu_id'], $columns);
+			$this->InsertValues($tmpTable, $table, $tableCompare, ($tuple ? $tuple['gtu_id'] : null), $columns);
+			App::Db()->renameTable($tmpTable, $mergeTable);
+
+			$lock->Release();
 		}
 		catch(\Exception $e)
 		{
-			App::Db()->dropTable($mergeTable);
+			App::Db()->dropTable($tmpTable);
+			$lock->Release();
 			throw $e;
 		}
 		Profiling::EndTimer();
@@ -108,6 +132,31 @@ class MergeSnapshotsByDatasetModel
 		throw new ErrorException("No ha podido identificarse la variable de comparación.");
 	}
 
+	public function GetTuplesMetadata($listOfIds)
+	{
+		$asText = Str::JoinInts($listOfIds);
+		$sql = "SELECT gtu_geography_id, gtu_previous_geography_id, gtu_metadata_id
+								   FROM geography_tuple WHERE gtu_geography_id IN (" . $asText . ") OR gtu_previous_geography_id IN (" . $asText . ")";
+		$res = App::Db()->fetchAll($sql);
+		$tupleMetadatas = [];
+		foreach($res as $row)
+		{
+			$metadata = new TupleMetadataInfo();
+			$metadata->Fill($row);
+			$tupleMetadatas[] = $metadata;
+		}
+		$sql = "SELECT distinct m.* FROM geography_tuple JOIN metadata m ON gtu_metadata_id = met_id
+									WHERE gtu_geography_id IN (" . $asText . ") OR gtu_previous_geography_id IN (" . $asText . ")";
+		$res = App::Db()->fetchAll($sql);
+		$metadatadas = [];
+		foreach ($res as $row) {
+			$metadata = new MetadataInfo();
+			$metadata->Fill($row);
+			$metadatadas[] = $metadata;
+		}
+
+		return ['TupleGeography' => $tupleMetadatas, 'Metadata' => $metadatadas];
+	}
 	public static function GetRequiredVariablesForLevelPairObjects($level, $levelCompare)
 	{
 		Profiling::BeginTimer();
@@ -137,15 +186,29 @@ class MergeSnapshotsByDatasetModel
 		return $list;
 	}
 
+	public static function CheckTableExists($tableName, $datasetId, $datasetCompareId)
+	{
+		if (App::Db()->tableExists($tableName))
+			return;
+		// La crea
+		Profiling::BeginTimer();
+		$c = new MergeSnapshotsByDatasetModel();
+		$c->MergeSnapshots($datasetId, $datasetCompareId);
+		Profiling::EndTimer();
+	}
+
 	public static function GetRequiredVariablesForLevelPair($level, $levelCompare)
 	{
 		$ret = [];
 		foreach ($level['variables'] as $variable) {
 			$formula = Variable::FormulaToString($variable->attributes);
+
 			foreach ($levelCompare['variables'] as $variableCompare) {
 				$formulaCompare = Variable::FormulaToString($variableCompare->attributes);
 				if ($formula == $formulaCompare)
+				{
 					$ret[] = [$variable, $variableCompare];
+				}
 			}
 		}
 		return $ret;
@@ -243,14 +306,25 @@ class MergeSnapshotsByDatasetModel
 		$sql .= " FROM " . $table1 . " t1 ";
 		if ($table1 !== $table2)
 		{
-			$sql .= " INNER JOIN geography_tuple_item ON gti_geography_item_id = t1.sna_geography_item_id
+			if ($tupleId)
+			{
+// 					  INNER JOIN geography_item g ON g.gei_id = t1.sna_geography_item_id
+					$sql .= " INNER JOIN geography_tuple_item ON gti_geography_item_id = t1.sna_geography_item_id
 						AND gti_geography_tuple_id = ?
-					  INNER JOIN geography_item g ON g.gei_id = t1.sna_geography_item_id
 					 INNER JOIN " . $table2 . " t2 ON t2.sna_geography_item_id = gti_geography_previous_item_id ";
+				$args = array($tupleId);
+			}
+			else
+			{
+				// Ambos indicadores fueron georreferenciados con la misma geografía
+				$sql .= " INNER JOIN " . $table2 . " t2 ON t2.sna_geography_item_id = t1.sna_geography_item_id ";
+				$args = [];
+			}
+
 		}
 		// Cierra el select
 		$sql .= " ORDER BY t1.sna_id";
-        App::Db()->exec($sql, array($tupleId));
+        App::Db()->exec($sql, $args);
 		App::Db()->markTableUpdate($mergeTable);
 
 		// AND g.gei_code IN ('067911304', '067911302', '067911301')

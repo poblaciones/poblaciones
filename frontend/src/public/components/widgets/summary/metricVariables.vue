@@ -1,7 +1,8 @@
 <template>
 	<div class="variablesBlock">
 		<div v-for="(variable, index) in level.Variables" :key="variable.Id" class="variableBlock" :class="rowClass(index)">
-			<div v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '') && (!Embedded.Readonly || index === level.SelectedVariableIndex) " class="variableRow hand" @click="clickVariable(index)">
+			<div v-if="matchesComparableFilter(variable)" v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')
+					 && (!Embedded.Readonly || index === level.SelectedVariableIndex)" class="variableRow hand" @click="clickVariable(index)">
 				<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"></i>
 				{{ (variable.Name ? variable.Name : 'Conteo') }} {{ divider(variable) }}<span v-if="isActive(index)" style="padding-left: 1px;">{{ variable.Asterisk }}</span>
 				<span v-if="isActive(index)" @click.stop="toggleVariable()" class='hand exp-hiddable-inline'>
@@ -11,6 +12,9 @@
 				</span>
 			</div>
 			<metricValues v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
+		</div>
+		<div v-if="hasNonComparableVariables" class="coverageBox" style="padding: 12px 0px 0px 0px">
+			<sup>+</sup> {{ hiddenLegend }}
 		</div>
 	</div>
 </template>
@@ -44,8 +48,31 @@ export default {
 		Embedded() {
 			return window.Embedded;
 		},
+		useComparer() {
+			return window.Use.UseCompareSeries && this.metric.properties.Comparable && this.metric.properties.Versions.length > 1;
+		},
+		hiddenLegend() {
+			var c = this.getNonComparableVariables().length;
+			if (c == 1) {
+				return "Una variable oculta por no poseer series de comparación.";
+			} else {
+				return c + " variables ocultas por no poseer series de comparación.";
+			}
+		},
+		hasNonComparableVariables() {
+				return this.getNonComparableVariables().length > 0;
+			}
 	},
 	methods: {
+		getNonComparableVariables() {
+			var ret = [];
+			for (var variable of this.level.Variables) {
+				if (!this.matchesComparableFilter(variable)) {
+					ret.push(variable);
+				}
+			}
+			return ret;
+		},
 		getArrow() {
 			if(!this.version.LabelsCollapsed) {
 				return 'fas fa-caret-down';
@@ -59,6 +86,12 @@ export default {
 			} else {
 				return 'keyboard_arrow_down';
 			}
+		},
+		matchesComparableFilter(variable) {
+			if (!this.useComparer) {
+				return true;
+			}
+			return (!this.metric.Compare.Active || variable.Comparable);
 		},
 		dropClass(index) {
 			if (this.isActive(index) && this.level.SelectedVariableIndex === index) {

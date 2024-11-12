@@ -2,10 +2,10 @@
   <div class="sourceInfo exp-hiddable-block">
     <a href="#" @click="clickDescargar" style="color: #a7a7a7"><download-icon title="Descargar"/> Descargar</a>
     &nbsp;
-    <a href="#" :title="sourceTitle"
-				@click="clickFuente" style="color: #a7a7a7">
+		<a href="#" :title="'Fuente de ' + sourceTitle"
+			 @click="clickFuente" style="color: #a7a7a7">
 			<link-icon />
-			Fuente
+			{{ (small ? '' : 'Fuente' )}}
 		</a>
   </div>
 </template>
@@ -22,6 +22,7 @@ export default {
 	},
 	props: [
 		'sourceTitle',
+		'small'
 	],
 	data() {
 		return {

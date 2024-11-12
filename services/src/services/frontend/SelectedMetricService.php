@@ -15,6 +15,8 @@ use minga\framework\Arr;
 use minga\framework\Str;
 use minga\framework\Profiling;
 
+
+use helena\services\backoffice\publish\snapshots\Variable;
 use helena\entities\frontend\metric\DatasetInfo;
 use helena\entities\frontend\metric\MarkerInfo;
 use helena\entities\frontend\metric\SelectedMetric;
@@ -183,30 +185,33 @@ class SelectedMetricService extends BaseService
 
 	private function MarkComparableVariables($selectedMetric)
 	{
-		// Cuando ya tiene todas las versiones, se fijas si con comparables
+		// Cuando ya tiene todas las versiones, se fija si con comparables
 		$datasets = [];
 		// Arma la lista de datasets por nombre de nivel (provincia, departamento, etc)
 		foreach($selectedMetric->Versions as $version)
 		{
 			foreach($version->Levels as $level)
 			{
-				if (!array_key_exists($level->Name, $datasets))
+				$levelName = $level->ShortName;
+				if (!array_key_exists($levelName, $datasets))
 				{
-					$datasets[$level->Name] = [];
+					$datasets[$levelName] = [];
 				}
 				$datasetId = $level->Dataset->Id;
-				if (!Arr::InArrayByNamedValue($datasets[$level->Name], $datasetId, 'datasetId'))
+				if (!Arr::InArrayByNamedValue($datasets[$levelName], $datasetId, 'datasetId'))
 				{
-					$datasets[$level->Name][] = ['datasetId' => $datasetId, 'level' => $level];
+					$datasets[$levelName][] = ['datasetId' => $datasetId, 'level' => $level];
 				}
 			}
 		}
 		$merger = new MergeSnapshotsByDatasetModel();
+		$listOfIds = [];
 		foreach($datasets as $levelName => $datasetIds)
 		{
 			foreach ($datasetIds as $dataset)
 			{
 				$datasetId = $dataset['datasetId'];
+				$listOfIds[] = $dataset['level']->GeographyId;
 				$level = $dataset['level'];
 				foreach ($datasetIds as $datasetCompare)
 				{
@@ -214,6 +219,7 @@ class SelectedMetricService extends BaseService
 					$levelCompare = $datasetCompare['level'];
 					if ($datasetId != $datasetCompareId)
 					{
+
 						// Obtiene las variables comparables
 						$variablePairs = $merger->GetComparableVariables($datasetId, $datasetCompareId, false);
 						if (sizeof($variablePairs) > 0)
@@ -226,6 +232,9 @@ class SelectedMetricService extends BaseService
 				}
 			}
 		}
+		// Con los datasets obtiene la metadata a devolver
+		$metadataInfo = $merger->GetTuplesMetadata($listOfIds);
+		$selectedMetric->ComparableMetadata = $metadataInfo;
 	}
 
 	private function FlagAllVariablesAsComparable($level, $variablePairs)
@@ -344,6 +353,7 @@ class SelectedMetricService extends BaseService
 		{
 			$variableInfo = new VariableInfo();
 			$variableInfo->Fill($variable);
+			$variableInfo->Formula = Variable::FormulaToString($variable);
 			if ($variableInfo->Legend !== null && $variableInfo->Legend !== "")
 			{
 				$variableInfo->Asterisk = $asterisk;

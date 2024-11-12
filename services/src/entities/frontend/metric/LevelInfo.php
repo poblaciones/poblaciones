@@ -8,6 +8,7 @@ class LevelInfo extends BaseMapModel
 {
 	public $Id;
 	public $Name;
+	public $ShortName;
 	public $Revision;
 
 	public $GeographyId;
@@ -16,7 +17,7 @@ class LevelInfo extends BaseMapModel
 	public $SummaryCaption;
 	public $HasUrbanity;
 	public $HasSummary = false;
-	
+
 	public $Pinned = false;
 
 	public $Source;
@@ -38,6 +39,7 @@ class LevelInfo extends BaseMapModel
 
 			'geo_id' => 'GeographyId',
 			'geo_caption' => 'Name',
+			'geo_caption_short' => 'ShortName',
 			'geo_revision' => 'Revision',
 			'geo_max_zoom' => 'MaxZoom',
 			'geo_min_zoom' => 'MinZoom',

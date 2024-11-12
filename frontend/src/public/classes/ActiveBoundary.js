@@ -112,10 +112,6 @@ ActiveBoundary.prototype.GetDataServiceParams = function (coord) {
 	return h.getBoundaryParams(this, window.SegMap.frame, coord.x, coord.y, rev, preffix);
 };
 
-ActiveBoundary.prototype.GetDataServiceParamsCompare = function (coord) {
-	return null;
-};
-
 ActiveBoundary.prototype.Show = function () {
 	this.visible = true;
 	window.SegMap.Metrics.UpdateMetric(this);

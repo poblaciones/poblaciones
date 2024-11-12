@@ -35,7 +35,6 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.IsSmallDevice = null;
 	this.IsNotLarge = false;
 	this.textCanvas = {};
-	this.GeographyTuples = null;
 	this.toolbarStates = toolbarStates;
 	this.MapIsInitialized = false;
 	this.DefaultTitle = 'Poblaciones';
@@ -517,22 +516,6 @@ SegmentedMap.prototype.doAddMetricById = function (id, versionSelector) {
 		err.errDialog('GetSelectedMetric', 'obtener el indicador solicitado', error);
 	});
 };
-
-SegmentedMap.prototype.GetGeographyTuples = function () {
-	const loc = this;
-	if (loc.GeographyTuples) {
-		return promises.ReadyPromise();
-	}
-	return this.Get(window.host + '/services/frontend/geographies/GetGeographyTuples', {
-		params: { w: this.Configuration.Signatures.Geography }
-	}).then(function (res) {
-		loc.GeographyTuples = res.data;
-	}).catch(function (error) {
-		err.errDialog('GetGeographyTuples', 'obtener las relaciones entre geografías', error);
-	});
-};
-
-
 
 SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricInfo, versionSelector) {
 	var activeSelectedMetric = new ActiveSelectedMetric(selectedMetricInfo, false);

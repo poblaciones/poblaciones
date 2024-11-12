@@ -10,9 +10,9 @@ class RankingCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Metrics/Ranking");
 	}
-	public static function CreateKey($frame, $metricVersionId, $levelId, $compareLevelId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels)
+	public static function CreateKey($frame, $metricVersionId, $levelId, $levelCompareId, $size, $direction, $urbanity, $partition, $hasTotals, $hiddenValueLabels)
 	{
-		$ret = $frame->GetSummaryKey() . "@" . $metricVersionId . "@" . $levelId . "@" . $compareLevelId
+		$ret = $frame->GetSummaryKey() . "@" . $metricVersionId . "@" . $levelId . "@" . $levelCompareId
 									. "@" . $size
 									. "@" . $direction . "@" . ($urbanity ?  $urbanity : '') . "@" . $hasTotals
 									. "@" . ($partition !== null ?  $partition : '')

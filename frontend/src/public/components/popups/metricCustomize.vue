@@ -30,10 +30,10 @@
 					<td class="nowrapwords">Mostrar descripciones:</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="1" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
+							<input type="radio" name="descripciones" value="1" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
 						</label>
 						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="0" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowDescriptions">No
+							<input type="radio" name="descripciones" value="0" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">No
 						</label>
 					</td>
 				</tr>
@@ -41,10 +41,10 @@
 					<td class="nowrapwords">Mostrar valores:</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="valores" value="1" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowValues">Sí
+							<input type="radio" name="valores" value="1" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">Sí
 						</label>
 						<label class="radio-inline">
-							<input type="radio" name="valores" value="0" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowValues">No
+							<input type="radio" name="valores" value="0" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">No
 						</label>
 					</td>
 				</tr>
@@ -155,6 +155,16 @@ export default {
 			} else {
 				return '';
 			}
+		},
+		updateShowDescriptions() {
+			var value = this.metric.SelectedVariable().ShowDescriptions;
+			this.metric.SetShowDescriptionsToSelectedVariableSet(value);
+			this.metric.UpdateMap();
+		},
+		updateShowValues() {
+			var value = this.metric.SelectedVariable().ShowValues;
+			this.metric.SetShowValuesToSelectedVariableSet(value);
+			this.metric.UpdateMap();
 		},
 		range(col, from, to) {
 			var ret = [];

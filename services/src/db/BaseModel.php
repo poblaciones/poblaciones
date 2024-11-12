@@ -9,7 +9,8 @@ use minga\framework\ErrorException;
 
 class BaseModel
 {
-	protected $tableName;
+	public $tableName;
+
 	protected $idField;
 	protected $captionField;
 	protected $fromDraft;

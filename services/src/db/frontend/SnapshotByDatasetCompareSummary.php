@@ -36,10 +36,12 @@ class SnapshotByDatasetCompareSummary extends BaseSpatialSnapshotModel
 			{
 				$variable = $variablePair[0];
 				$variableCompare = $variablePair[1];
-				$select = "COUNT(*) Areas, " . $variable->attributes['mvv_id'] . " VariableId, Round(SUM(IFNULL(sna_area_m2, 0)) / 1000000, 6) Km2";
 
 				$varId = "sna_" . $variable->attributes['mvv_id'];
 				$varIdCompare = "sna_" . $variableCompare->attributes['mvv_id'];
+
+				$select = "COUNT(*) Areas, " . $variable->attributes['mvv_id'] . " VariableId, Round(SUM(IFNULL(sna_area_m2, 0)) / 1000000, 6) Km2";
+
 
 
 				$select .= ", SUM(IFNULL(" . $varId . "_value, 0)) Value,
@@ -83,17 +85,6 @@ class SnapshotByDatasetCompareSummary extends BaseSpatialSnapshotModel
 
 		Profiling::EndTimer();
 		return $ret;
-	}
-
-	public function CheckTableExists($datasetId, $datasetCompareId)
-	{
-		if (App::Db()->tableExists($this->tableName))
-			return;
-		// La crea
-		Profiling::BeginTimer();
-		$c = new MergeSnapshotsByDatasetModel();
-		$c->MergeSnapshots($datasetId, $datasetCompareId);
-		Profiling::EndTimer();
 	}
 }
 

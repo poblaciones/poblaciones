@@ -21,6 +21,8 @@ class SelectedMetric extends BaseMapModel
 
 	public $Comparable = true;
 
+	public $ComparableMetadata = [];
+
 	// Posibles Valores:
 	// - N (default): Cantidad absoluta.
 	// - P: Porcentaje

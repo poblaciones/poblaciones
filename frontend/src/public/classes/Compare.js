@@ -103,65 +103,6 @@ Compare.prototype.SelectedVersion = function () {
 	return this.metric.properties.Versions[this.SelectedVersionIndex];
 };
 
-Compare.prototype.Merge = function (mainData, compareData) {
-	// identifica los geographyId
-	var mainLevel = this.metric.SelectedLevel();
-	var compareLevel = this.SelectedLevel();
-	// identifica la Variable activa en
-	var mainVariable = this.metric.SelectedVariable();
-	var compareVariable = this.SelectedVariable();
-	//
-	if (!mainVariable.ComparableValueLabels) {
-		alert('No hay etiquetas de comparación en la variable principal.');
-		return;
-	}
-	var nullElement = arr.GetByProperty(mainVariable.ComparableValueLabels, "Value", null);
-	// ubica el geographyTuple
-	var tupleKey = mainLevel.GeographyId + "_" + compareLevel.GeographyId;
-	if (!window.SegMap.GeographyTuples[tupleKey]) {
-		if (!window.convertionAlertDone) {
-			alert('No hay tablas de conversión para relacionar ' + tupleKey);
-		}
-		window.convertionAlertDone = true;
-		return;
-	}
-	var tuples = window.SegMap.GeographyTuples[tupleKey].Items;
-	// recorre el .Data de ambas anexando el resultado de lo calculado
-	// tiene {"FID":835942,"VID":40701,"Value":4,"Total":78,"LID":836901},
-
-	// indexa los datos de la variable de interés de compareData
-	var compareDataIndexed = {};
-	for (var item of compareData.Data) {
-		if (item['VID'] === compareVariable.Id) {
-			compareDataIndexed[item['FID']] = item;
-		}
-	}
-	// recorre mainData
-	for (var item of mainData.Data) {
-		if (item['VID'] === mainVariable.Id) {
-			// ubica los ids equivalentes
-			var previousItemId = tuples[item['FID']];
-			if (previousItemId) {
-				var element = compareDataIndexed[previousItemId];
-				if (element) {
-					// Calcula el valor de ambos
-					var delta = this.CalculateDelta(mainVariable, item, compareVariable, element);
-					item['DeltaValue'] = delta;
-					item['LID'] = this.CalculateCategory(mainVariable, delta);
-				} else {
-					// le corresponde 'no disponible'
-					item['LID'] = nullElement.Id;
-					item['DeltaValue'] = 'n/d';
-				}
-			} else {
-				// le corresponde 'no disponible'
-				item['LID'] = nullElement.Id;
-				item['DeltaValue'] = 'n/d';
-			}
-		}
-	}
-};
-
 Compare.prototype.UseProportionalDelta = function (variable) {
 	return !variable.HasTotals || variable.NormalizationScale !== 100;
 };
@@ -176,9 +117,9 @@ Compare.prototype.CalculateCategory = function (variable, delta) {
 	return variable.ComparableValueLabels[variable.ComparableValueLabels.length - 1].Id;
 };
 
-Compare.prototype.CalculateDelta = function (variable, item, compareVariable, compareItem) {
+Compare.prototype.CalculateDelta = function (variable, item, compareItem) {
 	var value1 = this.CalculateValue(variable, item);
-	var value2 = this.CalculateValue(compareVariable, compareItem);
+	var value2 = this.CalculateValue(variable, compareItem);
 	if (this.UseProportionalDelta(variable)) {
 		if (value2 === 0) {
 			return '';
@@ -202,10 +143,10 @@ Compare.prototype.SelectedVariable = function () {
 	if (!variable) {
 		return null;
 	}
-	var variableName = variable.ShortName;
+	var variableName = variable.Formula;
 	var compareLevel = this.SelectedLevel();
 	for (var matchVariable of compareLevel.Variables) {
-		if (matchVariable.ShortName === variableName) {
+		if (matchVariable.Formula === variableName) {
 			return matchVariable;
 		}
 	}
@@ -215,13 +156,40 @@ Compare.prototype.SelectedVariable = function () {
 
 Compare.prototype.SelectedLevel = function () {
 	var compareVersion = this.SelectedVersion();
-	var serieName = this.metric.SelectedLevel().Name;
+	var serieName = this.metric.SelectedLevel().ShortName;
 	for (var level of compareVersion.Levels) {
-		if (level.Name === serieName) {
+		if (level.ShortName === serieName) {
 			return level;
 		}
 	}
 	var serie = this.metric.SelectedLevel().Revision;
 	throw new Error('No hay valores para ese indicador en la serie ' + serie);
+};
+
+
+Compare.prototype.GetVersionsWithComparableVariables = function () {
+	// entra en los levels y en las variable, devolviendo pares de { version:, index:}
+	var ret = [];
+	for (var l = 0; l < this.metric.properties.Versions.length; l++) {
+		var version = this.metric.properties.Versions[l];
+		if (this.hasComparableVariable(version)) {
+			ret.push({ version: version, index: l });
+		}
+	}
+	return ret;
+};
+
+Compare.prototype.hasComparableVariable = function (version) {
+	var selected = this.metric.SelectedVariable();
+	for (var level of version.Levels) {
+		for (var variable of level.Variables) {
+			if (selected.Formula == variable.Formula) {
+				if (variable.Comparable) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 };
 

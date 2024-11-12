@@ -486,22 +486,22 @@ module.exports = {
 		return ret;
 	},
 	getTileParams(metric, frame, x, y, suffix) {
-		const ver = metric.Versions[metric.SelectedVersionIndex];
+		const ver = metric.properties.Versions[metric.properties.SelectedVersionIndex];
 		if (metric.Compare.Active) {
 			compare = metric.Compare.SelectedLevel().Id;
 		} else {
 			compare = null;
 		}
 		var ret = this.mergeObject({
-			l: metric.Metric.Id,
+			l: metric.properties.Metric.Id,
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
-			u: metric.SelectedUrbanity,
-			g: metric.EffectivePartition,
+			u: metric.properties.SelectedUrbanity,
+			g: metric.properties.EffectivePartition,
 			p: compare,
 			x: x,
 			y: y,
-			w: metric.Metric.Signature,
+			w: metric.properties.Metric.Signature,
 			h: suffix
 		}, this.getFrameParams(frame));
 		ret.e = null;
@@ -523,17 +523,23 @@ module.exports = {
 		return ret;
 	},
 	getBlockTileParams(metric, frame, x, y, suffix, size) {
-		const ver = metric.Versions[metric.SelectedVersionIndex];
+
+		if (metric.Compare.Active) {
+			compare = metric.Compare.SelectedLevel().Id;
+		} else {
+			compare = null;
+		}
+		const ver = metric.properties.Versions[metric.properties.SelectedVersionIndex];
 		var ret = this.mergeObject({
-			l: metric.Metric.Id,
+			l: metric.properties.Metric.Id,
 			v: ver.Version.Id,
 			a: ver.Levels[ver.SelectedLevelIndex].Id,
-			u: metric.SelectedUrbanity,
-			g: metric.EffectivePartition,
+			u: metric.properties.SelectedUrbanity,
+			g: metric.properties.EffectivePartition,
 			x: x - x % size,
 			y: y - y % size,
 			s: size,
-			w: metric.Metric.Signature,
+			w: metric.properties.Metric.Signature,
 			h: suffix
 		}, this.getFrameParams(frame));
 		ret.e = null;

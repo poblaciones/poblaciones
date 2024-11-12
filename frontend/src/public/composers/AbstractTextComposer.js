@@ -19,6 +19,11 @@ AbstractTextComposer.layerId = 1;
 AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effectiveId, dataElement, location, tileKey, backColor, markerSettings, zoom, isSemaphore) {
 	var number = null;
 	if (variable.ShowValues == 1 && !variable.IsSimpleCount) {
+		if (this.activeSelectedMetric.Compare.Active && variable.Comparable) {
+			var delta = this.activeSelectedMetric.Compare.CalculateDelta(variable,
+				dataElement, { Value: dataElement.ValueCompare, Total: dataElement.TotalCompare });
+			dataElement.DeltaValue = delta;
+		}
 		number = this.FormatValue(variable, dataElement);
 	}
 	var description = null;
@@ -80,7 +85,7 @@ AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElemen
 };
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
-	if (dataElement.DeltaValue) {
+	if (dataElement.DeltaValue !== undefined) {
 		var number = h.getValueFormatted(dataElement.DeltaValue, false, 1);
 		var ret = (dataElement.DeltaValue >= 0 ? '+' : '') + number;
 		if (number !== '-' && number !== 'n/d') {
