@@ -66,7 +66,12 @@ export default {
 					items: action.Items
 				};
 				if (action.Intensity) {
-					fabAction.color = color.ReduceColor(this.backgroundColor, action.Intensity);
+					fabAction.color = color.ReduceColor("#10AADB" /*this.backgroundColor*/, action.Intensity);
+					if (n == 0) {
+						fabAction.color = "#DF613D";
+					} else if (n == 1) {
+						fabAction.color = "#EBA206";
+					}
 				}
 				ret.push(fabAction);
 			}

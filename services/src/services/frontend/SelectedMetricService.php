@@ -198,7 +198,7 @@ class SelectedMetricService extends BaseService
 					$datasets[$levelName] = [];
 				}
 				$datasetId = $level->Dataset->Id;
-				if (!Arr::InArrayByNamedValue($datasets[$levelName], $datasetId, 'datasetId'))
+				if (!Arr::InArrayByNamedValue($datasets[$levelName], $datasetId, 'datasetId') && $level->Dataset->Type == "D")
 				{
 					$datasets[$levelName][] = ['datasetId' => $datasetId, 'level' => $level];
 				}
@@ -219,7 +219,6 @@ class SelectedMetricService extends BaseService
 					$levelCompare = $datasetCompare['level'];
 					if ($datasetId != $datasetCompareId)
 					{
-
 						// Obtiene las variables comparables
 						$variablePairs = $merger->GetComparableVariables($datasetId, $datasetCompareId, false);
 						if (sizeof($variablePairs) > 0)
@@ -235,6 +234,7 @@ class SelectedMetricService extends BaseService
 		// Con los datasets obtiene la metadata a devolver
 		$metadataInfo = $merger->GetTuplesMetadata($listOfIds);
 		$selectedMetric->ComparableMetadata = $metadataInfo;
+		$selectedMetric->Comparable = sizeof($metadataInfo['TupleGeography']) > 0;
 	}
 
 	private function FlagAllVariablesAsComparable($level, $variablePairs)

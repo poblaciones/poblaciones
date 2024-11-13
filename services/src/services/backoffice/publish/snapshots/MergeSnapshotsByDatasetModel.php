@@ -134,6 +134,9 @@ class MergeSnapshotsByDatasetModel
 
 	public function GetTuplesMetadata($listOfIds)
 	{
+		if (sizeof($listOfIds) == 0)
+			return ['TupleGeography' => [], 'Metadata' => []];
+
 		$asText = Str::JoinInts($listOfIds);
 		$sql = "SELECT gtu_geography_id, gtu_previous_geography_id, gtu_metadata_id
 								   FROM geography_tuple WHERE gtu_geography_id IN (" . $asText . ") OR gtu_previous_geography_id IN (" . $asText . ")";

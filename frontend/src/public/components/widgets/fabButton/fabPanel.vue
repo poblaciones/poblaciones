@@ -205,15 +205,6 @@ export default {
 		calculateHeight() {
 			var ret;
 			if (this.$refs.liItems && this.$refs.liItems.length > 0) {
-				/*ret = this.maxHeight + 1;
-				this.adjust = 1;
-				while (ret > this.maxHeight) {
-					ret = 0;
-					this.adjust--;
-					for (var i = 0; i < Math.min(this.maxItems + this.adjust, this.$refs.liItems.length); i++) {
-						ret += this.$refs.liItems[i].scrollHeight;
-					}
-				}*/
 				ret = 0;
 				for (var i = 0; i < Math.min(this.maxItems, this.$refs.liItems.length); i++) {
 					ret += this.$refs.liItems[i].scrollHeight;

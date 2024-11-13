@@ -421,6 +421,9 @@ export default {
 			}
 		},
 		watch: {
+			'metric'() {
+				this.compare = this.metric.Compare.Active;
+			},
 			'compare'() {
 				this.metric.Compare.Active = this.compare;
 				//this.toggleCompare();
