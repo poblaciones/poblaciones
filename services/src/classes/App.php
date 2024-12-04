@@ -462,7 +462,7 @@ class App
 
 				session_cache_limiter('public');
 				session_cache_expire($days);
-				header("Pragma: ", 'public');
+				header("Pragma: public");
 				if ($gzipped && $acceptsGzip) {
 					// pone los headers...
 					header("X-Compression: gzip");
