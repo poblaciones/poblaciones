@@ -18,14 +18,36 @@ class DeploymentService extends BaseService
 {
 	private static $validExtensions = ['zip', 'tar.bz2'];
 
-	public function ReceiveFile($securityKey, $from = null, $length = null) : array
+	private function ReverseFile($filename)
+	{
+		$file = fopen($filename, 'c+b');
+		if ($file)
+		{
+			// Leer el contenido completo del archivo
+			$content = fread($file, filesize($filename));
+			// Invertir el contenido
+			$invertedContent = strrev($content);
+			// Mover el puntero al inicio del archivo
+			rewind($file);
+			// Sobrescribir el archivo con el contenido invertido
+			fwrite($file, $invertedContent);
+			// Cerrar el archivo
+			fclose($file);
+		}
+	}
+	public function ReceiveFile($securityKey, $from = null, $length = null, $inverted = false) : array
 	{
 		if (!App::Settings()->Keys()->IsDeploymentAuthKeyValid($securityKey))
 			MessageBox::ThrowAccessDenied();
 		try
 		{
 			$file = Params::GetUploadedFile('file', self::$validExtensions);
-
+			// invierte los bytes
+			if ($inverted)
+			{
+				$this->ReverseFile($file);
+			}
+			//
 			$dest = $this->GetUpdateFile(IO::GetFileExtension($file));
 			if ($from == null || $from == 0)
 				IO::Move($file, $dest);

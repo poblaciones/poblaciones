@@ -10,7 +10,8 @@ App::$app->post('/services/api/deploymentUpload', function() {
 	$securityKey = Params::GetMandatory('s');
 	$from = Params::GetInt('f');
 	$length = Params::GetInt('l');
-	$ret = $controller->ReceiveFile($securityKey, $from, $length);
+	$inverted = Params::Get('i');
+	$ret = $controller->ReceiveFile($securityKey, $from, $length, $inverted == '1' );
 
 	return App::Json($ret);
 });

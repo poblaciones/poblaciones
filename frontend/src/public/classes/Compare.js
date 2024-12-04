@@ -54,11 +54,26 @@ Compare.prototype.AddComparableLabel = function (variable, cut, caption) {
 		if (cutForColor > maxValue) {
 			cutForColor = maxValue;
 		}
-		var extraComponent = (maxValue - cutForColor) / maxValue * 240;
-		var coreComponent = 200 + (maxValue - cutForColor) / maxValue * 55;
+		var extraComponent = (maxValue - cutForColor) / maxValue * 220;  // 240
+		var coreComponent = 180 + (maxValue - cutForColor) / maxValue * 55; // 200
 		if (cut < 0) {
 			color = c.MakeColor(extraComponent, extraComponent, coreComponent);
+		} else if (cut === 1) {
+			//color = c.MakeColor(219, 219, 217); uno sucio
+			/*color = c.MakeColor(228, 227, 214);
+			color = c.MakeColor(230, 229, 216);
+			color = c.MakeColor(230, 229, 227);
+			color = c.MakeColor(227, 227, 227);
+			color = c.MakeColor(235, 235, 235);
+			color = c.MakeColor(240, 240, 240);
+//			color = c.MakeColor(238, 236, 212); // buen amarillo suave
+			color = c.MakeColor(240, 240, 220);
+			color = c.MakeColor(240, 240, 230);*/
+			color = c.MakeColor(240, 240, 236);
 		} else {
+			// rojo
+			coreComponent = 180 + (maxValue - cutForColor) / maxValue * 75; // 200
+			extraComponent = (maxValue - cutForColor) / maxValue * 255;  // 240
 			color = c.MakeColor(coreComponent, extraComponent, extraComponent);
 		}
 	} else {

@@ -311,13 +311,16 @@ article {
 	margin-bottom: 1.2em;
 }
 
-.articleTitle {
-  padding: 6px 0 6px 12px; font-size: 27px;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  margin: -10px -10px 29px -10px;
-  background-color: #00A0D2; color: #ffffff;
-}
+	.articleTitle {
+		padding: 6px 0 6px 12px;
+		font-size: 25px;
+		border-top-left-radius: 3px;
+		border-top-right-radius: 3px;
+		font-weight: 100;
+		margin: -10px -10px 29px -10px;
+		background-color: #00A0D2;
+		color: #ffffff;
+	}
 section p {
   font-size: 18px;
   padding-left: 0px;

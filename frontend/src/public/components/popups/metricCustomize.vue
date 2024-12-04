@@ -52,10 +52,10 @@
 					<td class="nowrapwords">Mostrar perímetros:</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="perimeter" value="1" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
+							<input type="radio" name="perimeter" value="1" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
 						</label>
 						<label class="radio-inline">
-							<input type="radio" name="perimeter" value="0" @change="metric.UpdateMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
+							<input type="radio" name="perimeter" value="0" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
 						</label>
 					</td>
 				</tr>
@@ -159,12 +159,12 @@ export default {
 		updateShowDescriptions() {
 			var value = this.metric.SelectedVariable().ShowDescriptions;
 			this.metric.SetShowDescriptionsToSelectedVariableSet(value);
-			this.metric.UpdateMap();
+			this.metric.RefreshMap();
 		},
 		updateShowValues() {
 			var value = this.metric.SelectedVariable().ShowValues;
 			this.metric.SetShowValuesToSelectedVariableSet(value);
-			this.metric.UpdateMap();
+			this.metric.RefreshMap();
 		},
 		range(col, from, to) {
 			var ret = [];
@@ -218,13 +218,13 @@ export default {
 			}
 			if (this.metric.SelectedVariable().CustomPattern !== newPattern) {
 				this.metric.SelectedVariable().CustomPattern = newPattern;
-				this.metric.UpdateMap();
+				this.metric.RefreshMap();
 			}
 		},
 		changeWidth(width) {
 			if (this.metric.SelectedVariable().borderWidth !== width) {
 				this.metric.SelectedVariable().borderWidth = width;
-				this.metric.UpdateMap();
+				this.metric.RefreshMap();
 			}
 		},
 		changeOpacity(key) {
@@ -233,7 +233,7 @@ export default {
 				for (var n = 0; n < variables.length; n++) {
 					variables[n].Opacity = key;
 				}
-				this.metric.UpdateMap();
+				this.metric.RefreshMap();
 			}
 		},
 		changeGradientOpacity(key) {
@@ -246,7 +246,7 @@ export default {
 				}
 			}
 			if (changed) {
-				this.metric.UpdateMap();
+				this.metric.RefreshMap();
 			}
 		},
 		showGradientOptions() {

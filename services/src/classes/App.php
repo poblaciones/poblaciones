@@ -452,10 +452,34 @@ class App
 			$response->headers->set('Cache-control', 'private');
 			$response->headers->set('Last-Modified', $sessionTime);
 		}
-		else {
+		else
+		{
 			$days = $daysToExpire * 86400;
-			$response->headers->set('Pragma', '');
-			$response->headers->set('Cache-Control', 'public, max-age=' . $days);
+			if (PhpSession::SessionExists())
+			{
+				$sessionId = session_id();
+				session_write_close();
+
+				session_cache_limiter('public');
+				session_cache_expire($days);
+				header("Pragma: ", 'public');
+				if ($gzipped && $acceptsGzip) {
+					// pone los headers...
+					header("X-Compression: gzip");
+					header("Content-Encoding: gzip");
+				}
+				session_id($sessionId);
+				session_start();
+				// habiendo sesión precisa cerrar el pedido para que
+				// no se arruinen los encabezados de caching
+				echo ($alreadyEncoded ? $value : json_encode($value));
+				App::EndRequest();
+			}
+			else
+			{
+				$response->headers->set('Pragma', '');
+				$response->headers->set('Cache-Control', 'public, max-age=' . $days);
+			}
 		}
 
 		// Procesa la compresión...
@@ -475,7 +499,8 @@ class App
 				$cache,
 				$cacheArgs,
 				$dataCalculator,
-				$skipCache = false)
+				$skipCache = false,
+				$skipClientCache = false)
 	{
 		$encodedZipData = null;
 		if (!$skipCache)
@@ -497,7 +522,10 @@ class App
 			else if (sizeof($cacheArgs) === 2)
 				$cache->PutRawData($cacheArgs[0], $cacheArgs[1], $encodedZipData);
 		}
-		return App::JsonImmutable($encodedZipData, true, true);
+		if ($skipClientCache)
+			return App::Json($encodedZipData, -1, true, true);
+		else
+			return App::JsonImmutable($encodedZipData, true, true);
 	}
 
 	public static function EncodeAndzip($data)

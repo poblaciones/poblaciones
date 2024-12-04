@@ -11,7 +11,7 @@
 		</template>
 		<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
 			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
-				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
+				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor + dropBorder(singleLabel.FillColor)"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
 				{{ metric.properties.Metric.Name }} <span style="font-size: .95em" v-show="h.formatNum(singleLabel.Values.Count) !== '-'">
@@ -101,6 +101,7 @@ import Switches from 'vue-switches';
 import MetricDropdown from './metricDropdown';
 	import Source from './source';
 	import arr from '@/common/framework/arr';
+	import color from '@/common/framework/color';
 
 	import Ranking from './ranking';
 	import LinkIcon from 'vue-material-design-icons/Link.vue';
@@ -135,12 +136,17 @@ export default {
 			if (this.metric.Compare.Active) {
 				this.compare = true;
 			}
-/*				this.updateCompareVersions();
-				this.metric.UpdateSummary();
-				this.metric.UpdateMap();*/
-
 	},
 		methods: {
+			dropBorder(dropColor) {
+				if (color.IsReallyLightColor(dropColor)) {
+					var strokeColor = color.ReduceColor(dropColor, .5);
+					return '; text-shadow: 0 0 1px ' + strokeColor + '; font-size: 13px';
+				}
+				else {
+					return '';
+				}
+			},
 			getActiveCompare(version) {
 				var minIndex = this.compareVersions[0];
 				var maxIndex = this.compareVersions[1];
@@ -161,7 +167,7 @@ export default {
 		},
 		clickLabel(label) {
 			label.Visible = !label.Visible;
-			this.metric.UpdateMap();
+			this.metric.RefreshMap();
 		},
 		clickDescargar() {
 			window.Popups.MetricDownload.show(this.metric);

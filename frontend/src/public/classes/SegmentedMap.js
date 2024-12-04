@@ -37,7 +37,6 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.textCanvas = {};
 	this.toolbarStates = toolbarStates;
 	this.MapIsInitialized = false;
-	this.DefaultTitle = 'Poblaciones';
 	this._axios = this.CreateAxios(true);
 	this._axiosNoCredentials = this.CreateAxios(false);
 	loadProgressBar({ showSpinner: false, parent: '#holder' }, this._axios, 0);

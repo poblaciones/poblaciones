@@ -29,6 +29,7 @@ function ActiveSelectedMetric(selectedMetric, isBaseMetric) {
 	this.RankingDirection = 'D';
 	this.KillDuplicateds = true;
 	this.activeSequenceSteps = {};
+	this.overlay = null;
 	this.blockSize = window.SegMap.tileDataBlockSize;
 	this.Compare = new Compare(this);
 	this.fillEmptySummaries();
@@ -179,7 +180,7 @@ ActiveSelectedMetric.prototype.SetValueToSelectedVariableSet = function (attribu
 
 ActiveSelectedMetric.prototype.ChangeMetricVisibility = function () {
 	this.properties.Visible = !this.properties.Visible;
-	this.UpdateMap();
+	this.RefreshMap();
 };
 
 ActiveSelectedMetric.prototype.ChangeSelectedMultiLevelIndex = function (index) {
@@ -476,6 +477,16 @@ ActiveSelectedMetric.prototype.SelectedVariable = function () {
 ActiveSelectedMetric.prototype.UpdateMap = function () {
 	this.UpdateLevel();
 	window.SegMap.Metrics.UpdateMetric(this);
+	window.SegMap.InfoWindow.CheckUpdateNavigation();
+	window.SegMap.SaveRoute.UpdateRoute();
+};
+
+ActiveSelectedMetric.prototype.RefreshMap = function () {
+	if (this.IsDeckGLLayer()) {
+		return this.UpdateMap();
+	}
+	this.UpdateLevel();
+	this.overlay.refresh();
 	window.SegMap.InfoWindow.CheckUpdateNavigation();
 	window.SegMap.SaveRoute.UpdateRoute();
 };

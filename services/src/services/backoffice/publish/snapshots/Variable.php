@@ -107,7 +107,7 @@ class Variable
 
 	private function RaiseError($problem)
 	{
-		throw new PublicException("Hay un problema con la variable '" . $this->attributes['mvv_caption']. "' de la métrica "
+		throw new PublicException("Hay un problema con la variable '" . $this->attributes['mvv_caption']. "' de "
 					. $this->GetVariableMetricErrorCaption() . ". " . $problem);
 	}
 
@@ -267,8 +267,8 @@ class Variable
 	{
 		$values = $this->attributes['values'];
 		if (sizeof($values) == 0)
-			throw new PublicException("La variable '" . $this->attributes['mvv_caption']. "' de la métrica "
-				. $this->GetVariableMetricErrorCaption() . " no tiene valores. Revise la simbología de la variable y vuelva a intentar Publicar.");
+			throw new PublicException("La variable '" . $this->attributes['mvv_caption']. "' del indicador "
+				. $this->GetVariableMetricErrorCaption() . " no tiene valores. Revise la simbología de la variable y vuelva a intentar publicar.");
 
 		if (sizeof($values) == 1 && $values[0]['vvl_value'] == null)
 			return $values[0]['vvl_id'];
@@ -299,11 +299,14 @@ class Variable
 				// son rangos
 				$first = true;
 				$paletteCase = "(CASE ";
+				$errors = "";
 				for ($n = 0; $n < sizeof($values); $n++)
 				{
 					$item = $values[$n];
-					if ($item['vvl_value'] === null)
+					if ($item['vvl_value'] === null || $item['vvl_value'] === "")
 					{
+						if (!$first)
+							throw new PublicException("El elemento para los 'sin valores' debe estar ubicado en el primer lugar.");
 						// es el que toma los nulos
 						$paletteCase .= " WHEN " . $valueField . " IS NULL";
 					}
@@ -320,10 +323,20 @@ class Variable
 					else
 					{ // es un ítem de la escala
 						$prevItem = $values[$n - 1];
+						if ($prevItem['vvl_value'] === null || $prevItem['vvl_value'] === "")
+						{
+							$errors .= "- La variable '" . $this->attributes['mvv_caption'] . "' de "
+								. $this->GetVariableMetricErrorCaption() .
+								" no tiene definidos correctamente sus valores. Revise la simbología de la variable y vuelva a intentar publicar.\n\n";
+						}
 						$paletteCase .= " WHEN " . $valueField . " BETWEEN " .
 														$prevItem['vvl_value'] . " AND " . ($item['vvl_value'] - 0.000001);
 					}
 					$paletteCase .= " THEN " . $item['vvl_id'];
+				}
+				if (strlen($errors) > 0)
+				{
+					throw new PublicException($errors);
 				}
 				$paletteCase .= " ELSE NULL END) ";
 				return $paletteCase;
@@ -489,11 +502,15 @@ class Variable
 	}
 	private function GetVariableMetricErrorCaption()
 	{
-		$sql = "SELECT mvr_caption, mtr_caption
-						FROM variable, metric_version_level, metric_version, metric
-						WHERE mvv_metric_version_level_id = mvl_id AND
-							mvr_metric_id = mtr_id AND mvl_metric_version_id = mvr_id AND mvv_id = ? LIMIT 1";
+		$sql = "SELECT mvr_caption, mtr_caption, geo_caption, dat_caption
+					FROM variable
+					JOIN metric_version_level ON mvv_metric_version_level_id = mvl_id
+					JOIN metric_version ON mvl_metric_version_id = mvr_id
+					JOIN metric ON mvr_metric_id = mtr_id
+					LEFT JOIN dataset ON mvl_dataset_id = dat_id
+					LEFT JOIN geography ON geo_id = dat_geography_id
+						WHERE mvv_id = ? LIMIT 1";
 		$ret = App::Db()->fetchAssoc($sql, array($this->attributes['mvv_id']));
-		return  "'" . $ret['mtr_caption'] . "' en la revisión '" . $ret['mvr_caption'] . "'";
+		return  "'" . $ret['mtr_caption'] . "' del dataset '" . $ret['dat_caption'] . "' en la revisión " . $ret['mvr_caption'];
 	}
 }

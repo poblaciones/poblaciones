@@ -60,9 +60,13 @@ def upload(url, file, key, verify_ssl=True):
             while offset < file_size:
                 chunk = f.read(chunk_size)
                 chunk_length = len(chunk)
+                usa_invertido = True
 
                 # Añadir los parámetros f y l a la URL
                 chunk_url = f"{url}?s={key}&f={offset}&l={chunk_length}"
+                if usa_invertido:
+                    chunk_url += "&i=1"
+                    chunk = chunk[::-1]
                 # Preparar los datos para esta parte
                 chunk_data = data.copy()
                 chunk_data["file"] = (os.path.basename(file), chunk, get_mime_type(file))

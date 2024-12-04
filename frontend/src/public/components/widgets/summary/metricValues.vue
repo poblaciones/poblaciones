@@ -31,7 +31,7 @@
 								<div v-if="label.Symbol" class="categoryIcon" :style="'border-color: ' + label.FillColor + '; background-color: ' + label.FillColor">
 									<span v-html="resolveIcon(label.Symbol)"></span>
 								</div>
-								<i v-else :style="'border-color: ' + label.FillColor + '; color: ' + label.FillColor" class="fa drop fa-tint exp-category-bullets"></i>
+								<i v-else :style="'border-color: ' + label.FillColor + '; color: ' + label.FillColor + dropBorder(label.FillColor) " class="fa drop fa-tint exp-category-bullets"></i>
 							</td>
 							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
@@ -77,6 +77,7 @@ import Helper from '@/public/js/helper';
 import PinIcon from '@/public/assets/pin-outline.svg';
 import UnpinIcon from '@/public/assets/pin-off-outline.svg';
 import str from '@/common/framework/str';
+	import color from '@/common/framework/color';
 import iconManager from '@/common/js/iconManager';
 
 export default {
@@ -175,6 +176,15 @@ export default {
 	methods: {
 		displayLabel(label) {
 			return label.Values && ((this.variable.ShowEmptyCategories && !this.metric.Compare.Active) || label.Values.Count !== '');
+		},
+		dropBorder(dropColor) {
+			if (color.IsReallyLightColor(dropColor)) {
+				var strokeColor = color.ReduceColor(dropColor, .5);
+				return '; text-shadow: 0 0 1px ' + strokeColor + '; font-size: 13px';
+			}
+			else {
+				return '';
+			}
 		},
 		applySymbols(cad) {
 			return str.applySymbols(cad);
@@ -411,7 +421,7 @@ export default {
 		},
 		clickLabel(label) {
 			label.Visible = !label.Visible;
-			this.metric.UpdateMap();
+			this.metric.RefreshMap();
 		},
 	},
 }; //

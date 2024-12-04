@@ -270,7 +270,7 @@ Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 		if (name) {
 			document.title = name;
 		} else {
-			document.title = window.SegMap.DefaultTitle;
+			document.title = window.DefaultTitle;
 		}
 		if (fitRegion) {
 			if (moveCenter) {

@@ -24,9 +24,15 @@ App::$app->get('/services/frontend/metrics/GetSummary', function (Request $reque
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$frame = Frame::FromParams();
 
-	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, $isRestricted)) return $denied;
 
-	return App::JsonImmutable($controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition));
+	// Llama la regla de negocio
+	$result = $controller->GetSummary($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition);
+
+	if ($isRestricted)
+		return App::Json($result);
+	else
+		return App::JsonImmutable($result);
 });
 
 
@@ -47,9 +53,14 @@ App::$app->get('/services/frontend/metrics/GetRanking', function (Request $reque
 	$hiddenValueLabels = Params::GetIntArray('h');
 
 
-	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, $isRestricted)) return $denied;
 
-	return App::JsonImmutable($controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels));
+	$result = $controller->GetRanking($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $variableId, $hasTotals, $urbanity, $partition, $size, $direction, $hiddenValueLabels);
+
+	if ($isRestricted)
+		return App::Json($result);
+	else
+		return App::JsonImmutable($result);
 });
 
 App::$app->get('/services/metrics/GetMetricNavigationInfo', function (Request $request) {
@@ -82,7 +93,7 @@ App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $req
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
 
-	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, $isRestricted)) return $denied;
 
 	$frame = Frame::FromParams();
 	$levelId = Params::GetInt('a');
@@ -98,7 +109,8 @@ App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $req
 					$controller = new services\TileDataService();
 					return $controller->GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
 				},
-				($frame->ClippingCircle != null) // skipCache
+				($frame->ClippingCircle != null), // skipCache
+				$isRestricted // skipClientCache
 		);
 });
 
@@ -108,7 +120,7 @@ App::$app->get('/services/frontend/metrics/GetTileData', function (Request $requ
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
 
-	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)) return $denied;
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, $isRestricted)) return $denied;
 
 	$levelId = Params::GetInt('a');
 	$levelCompareId = Params::GetInt('p');
@@ -118,7 +130,13 @@ App::$app->get('/services/frontend/metrics/GetTileData', function (Request $requ
 	$x = Params::GetIntMandatory('x');
 	$y = Params::GetIntMandatory('y');
 	$z = Params::GetIntRangeMandatory('z', 0, 23);
-	return App::JsonImmutable($controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z));
+
+	$result = $controller->GetTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z);
+
+	if ($isRestricted)
+		return App::Json($result);
+	else
+		return App::JsonImmutable($result);
 });
 
 

@@ -59,7 +59,7 @@
 				} else {
 					this.metric.SetShowValuesToSelectedVariableSet("1");
 				}
-				this.metric.UpdateMap();
+				this.metric.RefreshMap();
 			},
 			changeUrbanity(mode) {
 				this.metric.properties.SelectedUrbanity = mode.key;

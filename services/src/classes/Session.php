@@ -124,11 +124,11 @@ class Session
 		return $ret;
 	}
 
-	public static function CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)
+	public static function CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, &$isRestricted = false)
 	{
 		Profiling::BeginTimer();
 		// Se fija los permisos
-		if (self::IsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId))
+		if (self::IsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, $isRestricted))
 			$ret = null;
 		else
 		{
@@ -249,24 +249,22 @@ class Session
 		return $ret;
 	}
 
-	public static function IsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId)
+	public static function IsWorkPublicOrAccessibleByMetricVersion($metricId, $metricVersionId, &$isRestricted = false)
 	{
 		Profiling::BeginTimer();
 		$selectedMetricService = new SelectedMetricService();
 		$metric = $selectedMetricService->GetSelectedMetric($metricId);
-		if ($metric === null) return true;
-		foreach($metric->Versions as $version)
-			if ($version->Version->Id === $metricVersionId)
-			{
-				$ret = self::IsWorkPublicOrAccessible($version->Version->WorkId);
+		if ($metric === null)
+			return true;
+		foreach ($metric->Versions as $version)
+			if ($version->Version->Id === $metricVersionId) {
+				$ret = self::IsWorkPublicOrAccessible($version->Version->WorkId, $isRestricted);
 				Profiling::EndTimer();
 				return $ret;
 			}
 		Profiling::EndTimer();
 		return true;
 	}
-
-
 
 	public static function IsWorkEditor($workId, $canEditIndexed = false)
 	{

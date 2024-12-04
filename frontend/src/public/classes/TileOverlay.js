@@ -10,10 +10,12 @@ function TileOverlay(activeSelectedMetric, disablePreview = false) {
 	var TILE_SIZE = 256;
 	this.idCounter = 0;
 	this.activeSelectedMetric = activeSelectedMetric;
+	this.activeSelectedMetric.overlay = this;
 	this.tileSize = TILE_SIZE;
 	this.composer = activeSelectedMetric.CreateComposer();
 	this.geographyService = activeSelectedMetric.GetCartographyService();
 	this.requestedTiles = [];
+	this.activeTiles = [];
 	this.disposed = false;
 	this.previewHandler = null;
 	if (this.composer.usePreview && !disablePreview) {
@@ -50,20 +52,27 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	if (preview && preview.IsFullCopy) {
 		// es copia completa... regenera etiquetas y markers
 		this.processLabels(preview.TileData, key, tileBounds, coord.x, coord.y, zoom);
-		// lo guarda si el original
+		// lo guarda si es el original
 		if (preview.SourceZoom === zoom) {
 			this.composer.SaveTileData(preview.Svg, preview.TileData, coord.x, coord.y, zoom);
 		}
 	} else {
-		// pide información
-		var dataRequest = new TileRequest(window.SegMap.Queue, window.SegMap.StaticQueue, this, coord, zoom, key, div);
-		dataRequest.GetTile();
-		this.requestedTiles[key] = dataRequest;
+		this.RequestTile(coord.x, coord.y, zoom, key, div);
 	}
 	//div.innerHTML = '<div style="padding: 4px; ">XXXXXXXXXXXX<a href="' + args + '">' + args + '</a></div>';
 	//div.innerHTML = '<div style="padding: 4px; "><a href="' + args + '">' + args + '</a></div>';
-
+	if (preview) {
+		// lo registra sin datos para reemplazo
+		this.activeTiles[key] = { mapResults: null, data: null, gradient: null, tileKey: key, div: div, x: coord.x, y: coord.y, z: zoom	};
+	}
 	return div;
+};
+
+TileOverlay.prototype.RequestTile = function (x, y, zoom, key, div) {
+	// pide información
+	var dataRequest = new TileRequest(window.SegMap.Queue, window.SegMap.StaticQueue, this, { x: x, y: y }, zoom, key, div);
+	dataRequest.GetTile();
+	this.requestedTiles[key] = dataRequest;
 };
 
 TileOverlay.prototype.resolvePreview = function (div, tileBounds, coord, zoom) {
@@ -83,12 +92,35 @@ TileOverlay.prototype.resolvePreview = function (div, tileBounds, coord, zoom) {
 	return preview;
 };
 
+TileOverlay.prototype.refresh = function () {
+	if (this.previewHandler) {
+		this.previewHandler.dispose();
+		this.previewHandler = new PreviewHandler(this);
+	}
+	for (var values of Object.values(this.activeTiles)) {
+		var tileKey = values.tileKey;
+		this.requestedTiles[tileKey] = true;
+		this.composer.labelsVisibility = [];
+		this.composer.removeTileFeatures(tileKey);
+
+		if (values.mapResults === null && values.data === null) {
+			this.RequestTile(values.x, values.y, values.z, values.tileKey, values.div);
+			h.removeAllChildren(values.div);
+		} else {
+			this.process(values.mapResults, values.data, values.gradient,
+										values.tileKey, values.div, values.x, values.y, values.z);
+		}
+	}
+};
 
 TileOverlay.prototype.process = function (mapResults, data, gradient, tileKey, div, x, y, z) {
 	if ((tileKey in this.requestedTiles) === false || this.disposed) {
 		return;
 	}
 	delete this.requestedTiles[tileKey];
+
+	this.activeTiles[tileKey] = { mapResults: mapResults, data: data, gradient: gradient, tileKey: tileKey, div: div, x:x, y:y, z:z };
+
 	var mercator = new Mercator();
 	var tileBounds = mercator.getTileBounds({ x: x, y: y, z: z });
 	var dataResults = data.Main;
@@ -133,6 +165,7 @@ TileOverlay.prototype.releaseTile = function (tile) {
 	var key = tile.getAttribute('key');
 	this.killIfRunning(key);
 	this.composer.removeTileFeatures(key);
+	delete this.activeTiles[key];
 };
 
 TileOverlay.prototype.killIfRunning = function(key) {

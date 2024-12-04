@@ -187,7 +187,7 @@
 									<img src="/static/img/tour/step7-b.png" /> &nbsp;Comentar
 								</h4>
 								<div style="margin-top: 10px">
-									Si tiene comentarios, pedidos o problemas, utilice la herramienta de asistencia que estará siempre a la izquierda en el mapa.
+									Si tiene comentarios, pedidos o problemas, utilice el link de contacto que estará siempre al pie derecho del mapa.
 								</div>
 							</div>
 						</div>
@@ -428,13 +428,16 @@ article {
 .articleContent {
   position: relative; padding-left: 18px; margin-right: 10px;
 }
-.articleTitle {
-  padding: 6px 0 6px 12px; font-size: 27px;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  margin: -10px -10px 30px -10px;
-  background-color: #00A0D2; color: #ffffff;
-}
+	.articleTitle {
+		padding: 6px 0 6px 12px;
+		font-size: 25px;
+		font-weight: 100;
+		border-top-left-radius: 3px;
+		border-top-right-radius: 3px;
+		margin: -10px -10px 30px -10px;
+		background-color: #00A0D2;
+		color: #ffffff;
+	}
 section p {
   font-size: 18px;
   padding-left: 0px;

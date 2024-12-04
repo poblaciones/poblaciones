@@ -192,15 +192,18 @@ class SelectedMetricService extends BaseService
 		{
 			foreach($version->Levels as $level)
 			{
-				$levelName = $level->ShortName;
-				if (!array_key_exists($levelName, $datasets))
+				if ($level->Partitions === null) // hasta que sea compatible es una restricción
 				{
-					$datasets[$levelName] = [];
-				}
-				$datasetId = $level->Dataset->Id;
-				if (!Arr::InArrayByNamedValue($datasets[$levelName], $datasetId, 'datasetId') && $level->Dataset->Type == "D")
-				{
-					$datasets[$levelName][] = ['datasetId' => $datasetId, 'level' => $level];
+					$levelName = $level->ShortName;
+					if (!array_key_exists($levelName, $datasets))
+					{
+						$datasets[$levelName] = [];
+					}
+					$datasetId = $level->Dataset->Id;
+					if (!Arr::InArrayByNamedValue($datasets[$levelName], $datasetId, 'datasetId') && $level->Dataset->Type == "D")
+					{
+						$datasets[$levelName][] = ['datasetId' => $datasetId, 'level' => $level];
+					}
 				}
 			}
 		}

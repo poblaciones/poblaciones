@@ -107,15 +107,10 @@ class ConfigurationService extends BaseService
 		$canAccessContent = true;
 		if ($workId)
 		{
-			if ($workId == 227201)
-			{
-				//$staticServers = [ Context::Settings()->Servers()->GetTransactionServer()->publicUrl];
-				//$useComparer = true;
-			}
 			Session::$AccessLink = $link;
 			$isRestricted = false;
 			$canAccessContent = Session::IsWorkPublicOrAccessible($workId, $isRestricted);
-			if ($isRestricted)
+			if (!$isRestricted)
 			{
 				$service = new MetadataModel();
 				$metadata = $service->GetMetadataByWorkId($workId);

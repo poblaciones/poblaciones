@@ -61,7 +61,8 @@
 		<script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
-		var defaultTitle = '{{ application_name | escape("js") }}';
+			var defaultTitle = '{{ application_name | escape("js") }}';
+			window.DefaultTitle = defaultTitle;
 		var addthis_config = {
 			ui_language: "es"
 		};

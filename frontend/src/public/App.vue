@@ -118,7 +118,7 @@
 					selectionMode: null, tutorialOpened: 0, showLabels: true,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false
 				},
-			  flyRightTimeoutId: null,
+				flyRightTimeoutId: null,
 				clipping: {
 					IsUpdating: false,
 					Region: {
@@ -167,15 +167,15 @@
 			var loc = this;
 			window.Popups.WaitMessage = this.$refs.showWaitMessage;
 			this.GetServer().then(
-				function(serverConfiguration) {
+				function (serverConfiguration) {
 					return loc.GetConfiguration(serverConfiguration.data);
 				}).then(function () {
-				if (loc.Embedded.HideLabels) {
-					loc.toolbarStates.showLabels = false;
-				}
-				var start = new StartMap(loc.work, loc, loc.SetupMap);
-				start.Start();
-			});
+					if (loc.Embedded.HideLabels) {
+						loc.toolbarStates.showLabels = false;
+					}
+					var start = new StartMap(loc.work, loc, loc.SetupMap);
+					start.Start();
+				});
 			window.Panels.Left = this.$refs.leftPanel;
 		},
 		computed: {
@@ -214,7 +214,7 @@
 					(event.srcElement && (
 						event.srcElement.className === 'vue-slider-dot-handle' ||
 						event.srcElement.className === 'vue-slider-process' ||
-						event.srcElement.className === 'vue-slider vue-slider-ltr' )) ||
+						event.srcElement.className === 'vue-slider vue-slider-ltr')) ||
 					window.getSelection().toLocaleString().length > 0) {
 					return;
 				}
@@ -228,7 +228,7 @@
 				var params = {};
 				if (window.self !== window.top && !this.IsPreview()) {
 					var topUrl = (window.location.ancestorOrigin && window.location.ancestorOrigin.length > 0 ?
-														window.location.ancestorOrigin[0] : document.referrer);
+						window.location.ancestorOrigin[0] : document.referrer);
 					if (!topUrl || document.location.href.startsWith(topUrl)) {
 						topUrl = '<unknown>';
 					}
@@ -260,8 +260,13 @@
 							authentication.redirectLogin();
 						} else {
 							// puede accederlo
-							document.title = res.data.ContentAttributes.Title;
-							document.querySelector('meta[name="description"]').setAttribute("content", res.data.ContentAttributes.Description);
+							if (res.data.ContentAttributes.Title) {
+								window.DefaultTitle = res.data.ContentAttributes.Title;
+								document.title = window.DefaultTitle;
+							}
+							if (res.data.ContentAttributes.Description) {
+								document.querySelector('meta[name="description"]').setAttribute("content", res.data.ContentAttributes.Description);
+							}
 						}
 					}
 				}).catch(function (error) {
@@ -286,7 +291,7 @@
 			},
 			LoadEmbeddedSettings() {
 				var ret = {
-				Compact: web.getParameterByName('co') != null,
+					Compact: web.getParameterByName('co') != null,
 					Active: web.getParameterByName('emb') != null || this.inIframe(),
 					OpenNewWindow: function () {
 						var url = window.location.href;
@@ -412,7 +417,7 @@
 					}
 				}, 100);
 				*/
-					},
+			},
 			RegisterErrorHandler() {
 				Vue.config.errorHandler = err.HandleError;
 				window.onerror = err.HandleError;
@@ -442,7 +447,7 @@
 							expandToMin: true,
 							gutterSize: 5,
 							onDrag: function () { window.SegMap.TriggerResize(); },
-							onDragEnd: function() { window.SegMap.TriggerResize(); }
+							onDragEnd: function () { window.SegMap.TriggerResize(); }
 						});
 					}
 				}
@@ -477,8 +482,8 @@
 	};
 
 </script>
-<style src="@/common/styles/popovers.css">
-</style>
+<style src="@/common/styles/popovers.css"></style>
+<style src="@/common/styles/transition.css"></style>
 
 <style>
 	html, body {
@@ -488,6 +493,7 @@
 		padding: 0;
 		cursor: default;
 	}
+
 	.leaflet-tooltip {
 		white-space: unset !important;
 		border: unset !important;
@@ -495,6 +501,7 @@
 		box-shadow: unset !important;
 		line-height: 1.15;
 	}
+
 	.leaflet-popup-content {
 		font-size: 13px !important;
 		margin: 8px 20px 5px 10px !important;
@@ -523,10 +530,12 @@
 		font-weight: 500;
 		float: left;
 	}
+
 	.leaflet-control-scale-line {
-		font-size: 9px!important;
+		font-size: 9px !important;
 		cursor: default;
 	}
+
 	.gm-ui-hover-effect {
 		top: 0px !important;
 		right: 0px !important;
@@ -535,8 +544,9 @@
 	.ls {
 		fill: none !important;
 	}
+
 	.mapsOvercontrols {
-		z-index: 900!important;
+		z-index: 900 !important;
 	}
 
 	.gm-fullscreen-control {
@@ -556,9 +566,9 @@
 		transform: translateX(-8px) scale(0.8);
 	}
 
-	.gm-style-mtc:last-of-type {
-		transform: translateX(4px) scale(0.8);
-	}
+		.gm-style-mtc:last-of-type {
+			transform: translateX(4px) scale(0.8);
+		}
 
 	.trigger {
 		width: 100%;
@@ -628,9 +638,11 @@
 		color: #DDDDDD;
 		border-color: #DDDDDD !important;
 	}
+
 	.center {
 		text-align: center;
 	}
+
 	.downloadButton {
 		border: 1.5px solid #68B3C8;
 		color: #68B3C8;
@@ -698,6 +710,7 @@
 			height: 1px;
 			content: '';
 		}
+
 	.leaflet-attribution-flag {
 		width: 0px !important;
 		margin-left: -3px;
@@ -718,21 +731,24 @@
 	.exp-rounded {
 		border-radius: 26px !important;
 	}
+
 	.panel-body {
 		border-radius: 0px !important;
 		box-shadow: 0 2px 2px rgb(0 0 0 / 18%) !important;
 	}
+
 	.moderateHr {
 		margin-top: 0.4rem;
 		margin-bottom: 1.1rem;
 		border-color: #ccc;
 	}
+
 	.gutter.gutter-horizontal {
 		background-color: #ffffff !important;
 		filter: contrast(0.675);
 	}
 	/* settings de split */
-		.split p, .split-flex p {
+	.split p, .split-flex p {
 		padding: 20px;
 	}
 
@@ -805,18 +821,22 @@
 	a:hover {
 		text-decoration: underline;
 	}
+
 	.optionsLabel {
-		padding-top: 10px!important;
+		padding-top: 10px !important;
 	}
+
 	.attachmentsDownloadPanel {
 		max-height: 120px;
 		overflow-y: auto;
 	}
+
 	.sl span {
 		opacity: .5;
 		color: #333;
 		text-shadow: 0.75px 0.75px 1px #fff, -0.75px -1px 1px #fff, -0.75px 0.75px 1px #fff, 0.75px -1px 1px #fff;
 	}
+
 	.innerBoxTooltip {
 		right: unset !important;
 		max-height: 200px !important;
@@ -845,8 +865,9 @@
 		fill: none;
 		vector-effect: non-scaling-stroke;
 	}
+
 	.sat.sl span {
-		opacity: .75!important;
+		opacity: .75 !important;
 	}
 
 	.sat span {
@@ -854,23 +875,23 @@
 		color: #fff !important;
 	}
 
-		.sat .ibLinkC {
-			color: #d4edff !important;
+	.sat .ibLinkC {
+		color: #d4edff !important;
+	}
+
+		.sat .ibLinkC:hover {
+			color: #5591ec !important;
+			text-decoration: none !important;
 		}
 
-			.sat .ibLinkC:hover {
-				color: #5591ec !important;
-				text-decoration: none !important;
-			}
+	.sat .ibLink {
+		color: #fff !important;
+	}
 
-		.sat .ibLink {
-			color: #fff !important;
+		.sat .ibLink:hover {
+			color: #5591ec !important;
+			text-decoration: none !important;
 		}
-
-			.sat .ibLink:hover {
-				color: #5591ec !important;
-				text-decoration: none !important;
-			}
 
 	.ibTooltipNoYOffset {
 		margin-top: -10px;
@@ -902,6 +923,7 @@
 		overflow: hidden;
 		box-shadow: 0 4px 10px rgba(60,64,67,.28);
 	}
+
 	.embeddedOpener {
 		position: absolute;
 		background-color: #ffffff;
@@ -940,6 +962,7 @@
 		height: 100%;
 		width: 100%;
 	}
+
 	.ibTooltipOffsetLeft {
 		margin-left: 9px;
 	}
@@ -954,6 +977,7 @@
 			color: #2e8cff;
 			text-decoration: none !important;
 		}
+
 	.ibLinkTooltip {
 		pointer-events: all;
 	}
@@ -1046,6 +1070,7 @@
 		font-size: 12px;
 		text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
 	}
+
 	.markerSelectedLabel {
 		text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
 		transform: translateX(calc(50% + 17px));
@@ -1117,9 +1142,11 @@
 		padding: 6px;
 		vertical-align: top;
 	}
+
 	.tdWrappable {
 		overflow-wrap: anywhere;
 	}
+
 	.text-softer {
 		color: #777;
 	}
@@ -1160,6 +1187,7 @@
 	.animatedFlyAway {
 		transition: transform .3s ease;
 	}
+
 	.animatedFlyLeft {
 		transform: translateX(-100%);
 		-webkit-transform: translateX(-100%);
@@ -1194,14 +1222,15 @@
 	}
 
 	.leaflet-control-zoom {
-		border: 0px solid black!important;
-		box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px!important;
+		border: 0px solid black !important;
+		box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px !important;
 	}
 
-	.leaflet-control-zoom-in  {
+	.leaflet-control-zoom-in {
 		border-bottom: 1px solid #f0f0f0 !important;
 		color: #666 !important;
 	}
+
 	.leaflet-control-zoom-out {
 		color: #666 !important
 	}
@@ -1233,7 +1262,7 @@
 	}
 
 	.noTopPadding {
-		padding-top: 0px!important;
+		padding-top: 0px !important;
 	}
 
 	.dropCapture {
@@ -1246,17 +1275,17 @@
 		color: #333 !important;
 	}
 
-.unselected:hover {
-	background-color: #333 !important;
-	color: #d4d4d4 !important;
-	border-color: #8c8c8c !important;
-}
+		.unselected:hover {
+			background-color: #333 !important;
+			color: #d4d4d4 !important;
+			border-color: #8c8c8c !important;
+		}
 
-.shareIt {
-min-width: 37px;
-margin-top: 8px;
-margin-left: -5px;
-}
+	.shareIt {
+		min-width: 37px;
+		margin-top: 8px;
+		margin-left: -5px;
+	}
 
 	.btn-default.active.focus, .btn-default.active:focus, .btn-default.active:hover, .btn-default:active.focus, .btn-default:active:focus, .btn-default:active:hover, .open > .dropdown-toggle.btn-default.focus, .open > .dropdown-toggle.btn-default:focus, .open > .dropdown-toggle.btn-default:hover {
 		border-color: #66615B;
@@ -1325,6 +1354,7 @@ margin-left: -5px;
 			text-decoration: none;
 			color: #000000;
 		}
+
 	.lihover {
 		background: #efefef;
 	}
@@ -1359,6 +1389,7 @@ margin-left: -5px;
 		height: unset !important;
 		box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 12px !important;
 	}
+
 	.gm-svpc {
 		left: -111px !important;
 		top: 113px !important;
@@ -1367,7 +1398,7 @@ margin-left: -5px;
 	.searchOffsetTop {
 		margin-top: 50px;
 		transform: translateX(-55px)
-}
+	}
 
 
 	.copyright {
@@ -1389,12 +1420,13 @@ margin-left: -5px;
 	}
 
 
-a[title="Abrir esta área en Google&nbsp;Maps (se abre en una ventana nueva)"] {
- display: none !important;
-}
+	a[title="Abrir esta área en Google&nbsp;Maps (se abre en una ventana nueva)"] {
+		display: none !important;
+	}
 
-a[title="Abrir esta área en Google Maps (se abre en una ventana nueva)"]
-{ display: none !important; }
+	a[title="Abrir esta área en Google Maps (se abre en una ventana nueva)"] {
+		display: none !important;
+	}
 
 	a[title="Informar a Google errores en las imágenes o el mapa de carreteras."] {
 		display: none !important;
@@ -1407,9 +1439,9 @@ a[title="Abrir esta área en Google Maps (se abre en una ventana nueva)"]
 		position: absolute;
 	}
 
-.leaflet-mouse-marker {
-		transition: none!important;
-}
+	.leaflet-mouse-marker {
+		transition: none !important;
+	}
 	/*
 	.leaflet-zoom-animated {
 		transition: none !important;

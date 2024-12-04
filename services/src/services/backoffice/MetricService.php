@@ -74,7 +74,7 @@ class MetricService extends BaseService
 		$symbology->setOpacity('M');
 		$symbology->setGradientOpacity('M');
 		$symbology->setRainbowReverse(false);
-		$symbology->setShowEmptyCategories(true);
+		$symbology->setShowEmptyCategories(false);
 		$symbology->setColorFrom('0ce800');
 		$symbology->setColorTo('fb0000');
 		$symbology->setRound(5);
@@ -635,10 +635,10 @@ class MetricService extends BaseService
 			if ($existingLevel->getDataset()->getMultilevelMatrix() !== $dataset->getMultilevelMatrix())
 			{
 				throw new PublicException("No es posible agregar a un nivel a la versión '" .
-						$existingVersion->getCaption() . "' debido a que ya tiene niveles en datasets que no están vinculados al dataset
-									actual. Para poder agregar niveles debe primero vincular los datasets desde la solapa 'Multinivel'.
-									\n\nSi lo que desea hacer es agregar una nueva versión, debe elegir nombre de versión
-												que no se encuentre ya en uso.");
+						$existingVersion->getCaption() . "' debido a que ya tiene niveles en datasets que no están vinculados al dataset " .
+									"actual. Para poder agregar niveles debe primero vincular los datasets desde la solapa 'Multinivel'." .
+									"\n\nSi lo que desea hacer es agregar una nueva versión, debe elegir nombre de versión " .
+												"que no se encuentre ya en uso.");
 			}
 		}
 	}
