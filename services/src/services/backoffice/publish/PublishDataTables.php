@@ -362,7 +362,7 @@ class PublishDataTables
 		$datasets = $workModel->GetDatasets($workIdShardified);
 		foreach($datasets as $dataset)
 		{
-			$this->DropTable($dataset['dat_table']);
+			RevokeSnapshots::DropTable($dataset['dat_table'], $dataset['dat_id']);
 		}
 		Profiling::EndTimer();
 	}
@@ -377,7 +377,7 @@ class PublishDataTables
 		if ($slice < sizeof($datasets))
 		{
 			$dataset = $datasets[$slice];
-			$this->CopyWorkDatasetTable($dataset['dat_table']);
+			$this->CopyWorkDatasetTable($dataset['dat_table'], $dataset['dat_id']);
 		}
 		Profiling::EndTimer();
 
@@ -445,19 +445,12 @@ class PublishDataTables
 			echo $log;
 	}
 
-	private function DropTable($table)
-	{
-		$table = Str::Replace($table, '_draft', '');
-		App::Db()->dropTable($table);
-		App::Db()->dropTableLikePattern($table . "_snapshot_matrix_%");
-	}
-
 	private function CopyFileChunks($workId)
 	{
 		$src_table = DbFile::GetChunksTableName(true, $workId);
 		$target_table = DbFile::GetChunksTableName(false, PublishDataTables::Shardified($workId));
 		// La crea
-		$this->DropTable($target_table);
+		App::Db()->dropTable($target_table);
 		$create = "CREATE TABLE " . $target_table . " (`chu_id` int(11) NOT NULL AUTO_INCREMENT, `chu_file_id` int(11) NOT NULL,`chu_content` longblob, PRIMARY KEY (`chu_id`), KEY `fk_file_chunk_file1_idx` (`chu_file_id`), CONSTRAINT `fk_file_" . $target_table . "` FOREIGN KEY (`chu_file_id`) REFERENCES `file` (`fil_id`) ON DELETE CASCADE ON UPDATE NO ACTION) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;" ;
 		App::Db()->execDDL($create);
 
@@ -468,14 +461,15 @@ class PublishDataTables
 		App::Db()->markTableUpdate($target_table);
 	}
 
-	private function CopyWorkDatasetTable($table)
+	private function CopyWorkDatasetTable($table, $datasetId)
 	{
 		Profiling::BeginTimer();
 
 		$target = Str::Replace($table, '_draft_', '_shard_' . App::Settings()->Shard()->CurrentShard . '_');
+		$datasetIdShardified = PublishDataTables::Shardified($datasetId);;
 
 		// Crea la tabla
-		$this->DropTable($target);
+		RevokeSnapshots::DropTable($target, $datasetIdShardified);
 		$create = "CREATE TABLE " . $target . " LIKE " . $table;
 		App::Db()->execDDL($create);
 		$alterTable = "ALTER TABLE " . $target . " CHANGE `geography_item_id` `geography_item_id` INT(11) NOT NULL";

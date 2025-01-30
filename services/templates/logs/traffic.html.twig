@@ -20,7 +20,6 @@
 			<th class='dTableCell2'><a href="#">País</a></th>
 			<th class='dTableCell4'><a href="#">User-Agent</a></th>
 			<th class='dTableCell4'><a href="#">Última Url</a></th>
-			<th class='dTableCell2'><a href="#">Dispositivo</a></th>
 		</tr>
 		</thead>
 		<tbody>
@@ -31,9 +30,8 @@
 			<td class='dTableCell2' style='text-align:center'>{{ t.country }}</td>
 			<td class='dTableCell4' style='text-align:center'>{{ t.agent }}</td>
 			<td class='dTableCell4' style='text-align:center'>
-				<a href='{{ t.url }}' target='_blank'>{{ publicURL }}{{ t.url }}</a>
+				<a href='{{ t.url }}' target='_blank'>{{ public_url }}{{ t.url }}</a>
 			</td>
-			<td class='dTableCell2' style='text-align:center'>{{ t.device }}</td>
 		</tr>
 		{% endfor %}
 		</tbody>
@@ -45,7 +43,6 @@
 				<td class='dTableCell2'></td>
 				<td class='dTableCell4'></td>
 				<td class='dTableCell4'></td>
-				<td class='dTableCell2'></td>
 			</tr>
 			{% endfor %}
 		</tfoot>
@@ -55,8 +52,6 @@
 		<div class='dText'>Tráfico total</div>
 	</div>
 	<div class='dText'>IPs únicas: {{ ips_count }}.
-	{%
-	for key, value in ips_by_device %}<br>&bull; {{ key }}: {{ value }}.{% endfor %}
 	</div>
 
 	<div class='dText'>Hits: {{ hits_count }} hits.</div>

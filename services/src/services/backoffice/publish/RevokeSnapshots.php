@@ -34,6 +34,17 @@ class RevokeSnapshots extends BaseService
 		$this->publicWork = $this->publicWorkModel->GetWork($this->shardifiedWorkId);
 	}
 
+	public static function DropTable($table, $datasetId)
+	{
+		App::Db()->dropTable($table);
+		$snapShotTable = SnapshotByDatasetModel::SnapshotTable($table);
+		App::Db()->dropTable($snapShotTable);
+		App::Db()->dropTableLikePattern($snapShotTable . "_matrix_%");
+		// Borra otras que hagan referencia a él
+		$pattern = 'work_dataset_shard_' . App::Settings()->Shard()->CurrentShard . '_%_snapshot_matrix_' . $datasetId;
+		App::Db()->dropTableLikePattern($pattern);
+	}
+
 	public function DeleteAllWorkDatasets()
 	{
 		$previousDatasets = PublishDataTables::UnshardifyList($this->publicWorkModel->GetDatasets($this->shardifiedWorkId), array('dat_id'));
@@ -48,6 +59,8 @@ class RevokeSnapshots extends BaseService
 			$this->work['wrk_dataset_data_changed'] = true;
 		return $this->DeleteDatasets($removedDatasets);
 	}
+
+
 	private function DeleteDatasets($datasetsToDelete)
 	{
 		Profiling::BeginTimer();
@@ -59,9 +72,7 @@ class RevokeSnapshots extends BaseService
 		$datasets = $this->workModel->GetDatasets($this->workId);
 		foreach($datasetsToDelete as $row)
 		{
-			$table = SnapshotByDatasetModel::SnapshotTable($row['dat_table']);
-			App::Db()->dropTable($table);
-			App::Db()->dropTableLikePattern($table . "_matrix_%");
+			self::DropTable($row['dat_table'], $row['dat_id']);
 		}
 		$totalLabelsRowDeleted = 0;
 		foreach($datasetsToDelete as $row)

@@ -209,6 +209,7 @@ class SelectedMetricService extends BaseService
 		}
 		$merger = new MergeSnapshotsByDatasetModel();
 		$listOfIds = [];
+		$foundComparable = false;
 		foreach($datasets as $levelName => $datasetIds)
 		{
 			foreach ($datasetIds as $dataset)
@@ -226,8 +227,10 @@ class SelectedMetricService extends BaseService
 						$variablePairs = $merger->GetComparableVariables($datasetId, $datasetCompareId, false);
 						if (sizeof($variablePairs) > 0)
 						{
-							$this->FlagAllVariablesAsComparable($level, $variablePairs);
-							$this->FlagAllVariablesAsComparable($levelCompare, $variablePairs);
+							if ($this->FlagAllVariablesAsComparable($level, $variablePairs))
+								$foundComparable = true;
+							if ($this->FlagAllVariablesAsComparable($levelCompare, $variablePairs))
+								$foundComparable = true;
 						}
 
 					}
@@ -237,17 +240,21 @@ class SelectedMetricService extends BaseService
 		// Con los datasets obtiene la metadata a devolver
 		$metadataInfo = $merger->GetTuplesMetadata($listOfIds);
 		$selectedMetric->ComparableMetadata = $metadataInfo;
-		$selectedMetric->Comparable = sizeof($metadataInfo['TupleGeography']) > 0;
+		$selectedMetric->Comparable = $foundComparable; // && sizeof($metadataInfo['TupleGeography']) > 0;
 	}
 
 	private function FlagAllVariablesAsComparable($level, $variablePairs)
 	{
+		$ret = false;
 		foreach ($level->Variables as $levelVariable) {
 			foreach ($variablePairs as $pair) {
-				if ($levelVariable->Id === $pair[0]->Id() || $levelVariable->Id === $pair[1]->Id())
+				if ($levelVariable->Id === $pair[0]->Id() || $levelVariable->Id === $pair[1]->Id()) {
 					$levelVariable->Comparable = true;
+					$ret = true;
+				}
 			}
 		}
+		return $ret;
 	}
 
 	private function GetWork($selectedVersionInfo)
