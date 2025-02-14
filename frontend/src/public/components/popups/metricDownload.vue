@@ -27,7 +27,7 @@
 					</tr>
 					<tr>
 						<td>Nivel:</td>
-						<td v-if="version.Levels.length > 1">
+						<td v-if="version.Levels.length > 1 && !metric.Compare.Active">
 							<select :disabled="!visibleUrl" v-model="downloadLevel">
 								<option v-for="(level, index) in version.Levels" :key="level.Id" :value="index">{{ level.Name }}</option>
 							</select>
@@ -333,7 +333,13 @@ export default {
 			}
 			var urbanity = (this.level.HasUrbanity ? this.downloadUrbanity : null);
 			var partition = (this.partitions ? this.downloadPartition : null);
-			return 't=' + type + h.urlParam('d', this.level.Dataset.Id) + h.urlParam('c', circle) + h.urlParam('r', clippingRegionId)
+			var compareDatasetId = '';
+			if (this.metric.Compare.Active)
+			{
+				compareDatasetId = this.metric.Compare.SelectedLevel().Dataset.Id;
+			}
+
+			return 't=' + type + h.urlParam('d', this.level.Dataset.Id) + h.urlParam('p', compareDatasetId) +  h.urlParam('c', circle) + h.urlParam('r', clippingRegionId)
 				+ h.urlParam('u', urbanity) + h.urlParam('g', partition) + h.urlParam('w', this.version.Work.Id);
 		}
 	},

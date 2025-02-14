@@ -24,11 +24,11 @@ class cTraffic extends cController
 		// Resuelve el combo de período
 		$period = cStatsSolver::AddDaylyInfo($this->templateValues);
 
-		$this->AddValue('traffic', Traffic::GetTraffic($period == 'Ayer', $totalIps, $totalHits));
-		$this->AddValue('ips_count', array_sum($totalIps));
-		$this->AddValue('ips_by_device', $totalIps);
-		$this->AddValue('hits_count', $totalHits);
-		$this->AddValue('publicURL', Context::Settings()->GetMainServerPublicUrl());
+		$traffic = Traffic::GetTraffic($period == 'Ayer');
+		$this->AddValue('traffic', $traffic['data']);
+		$this->AddValue('ips_count', $traffic['ips']);
+		$this->AddValue('hits_count', $traffic['hits']);
+		$this->AddValue('public_url', Context::Settings()->GetPublicUrl());
 		$this->AddValue('limit', Context::Settings()->Limits()->LogAgentThresholdDaylyHits);
 		$this->AddValue('now', date("Y-m-d H:i:s"));
 

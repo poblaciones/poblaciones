@@ -67,6 +67,28 @@ abstract class BaseDownloadModel extends BaseModel
 		}
 	}
 
+	public function AppendCompareColumns($cols, &$joins, $compareDataset)
+	{
+		$previousGeoId = $compareDataset['dat_geography_id'];
+		$joins .= ' JOIN geography_tuple_item ON gti_geography_item_id = geography_item_id  AND gti_geography_previous_id = ' . $previousGeoId;
+		$joins .= ' JOIN geography_item COMPARED_ITEM ON COMPARED_ITEM.gei_id = gti_geography_previous_item_id ';
+
+		$geo = new GeographyModel();
+		$compareInfo = $geo->GetGeographyInfo($previousGeoId);
+		$compareLabel = 'Códigos de ' . $compareInfo['geography'] . ' (' . $compareInfo['revision'] . ')';
+
+		$cols[] = self::GetCustomCol(
+			'COMPARED_ITEM.gei_code', 'codigo_comparacion',
+			$compareLabel,
+			Format::A,
+			9,
+			10,
+			0, Measurement::Nominal, Alignment::Left
+		);
+
+		return $cols;
+	}
+
 	public function AppendGeographyTree($cols, &$joins, $geography_id, $matchField, $includeGeographyOtherColumns = false)
 	{
 		// Árbol plano de Geographies

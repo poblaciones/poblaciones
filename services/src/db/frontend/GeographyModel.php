@@ -36,6 +36,7 @@ class GeographyModel extends BaseModel
 		$sql = "SELECT
 			geo_id id,
 			geo_caption geography,
+			geo_revision revision,
 			geo_field_code_name field_code,
 			geo_field_code_size field_size,
 			geo_field_caption_name field_caption,

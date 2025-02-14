@@ -78,6 +78,9 @@ export default {
 				this.$refs.nombre.$el.focus();
 			}, 250);
 
+			this.email = this.$route.query.email;
+			this.code = this.$route.query.code;
+
 			if (window.Context.ServerLoaded) {
 				this.validateCode();
 			} else {
@@ -87,12 +90,10 @@ export default {
 			}
 
 		// valida parámetros
-		this.email = this.$route.query.email;
 		if(str.IsEmail(this.email) == false) {
 			this.$refs.messagebox.show('Debe ingresar un correo electrónico válido');
 			return;
 		}
-		this.code = this.$route.query.code;
 		if(/^\d{6}$/.test(this.code) == false) {
 			this.$refs.messagebox.show('Debe indicar el código.');
 			return;

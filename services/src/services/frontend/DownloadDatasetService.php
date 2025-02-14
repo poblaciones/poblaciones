@@ -8,10 +8,10 @@ use helena\services\common\DatasetDownloadManager;
 
 class DownloadDatasetService extends BaseService
 {
-	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition)
+	public function CreateMultiRequestFile($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition)
 	{
 		$dm = new DatasetDownloadManager();
-		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, false, 'basic');
+		return $dm->CreateMultiRequestFile($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, false, 'basic');
 	}
 
 	public function StepMultiRequestFile($key)
@@ -20,10 +20,10 @@ class DownloadDatasetService extends BaseService
 		return $dm->StepMultiRequestFile($key);
 	}
 
-	public static function GetFileBytes($type, $workId, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition)
+	public static function GetFileBytes($type, $workId, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition)
 	{
 		Statistics::StoreDownloadDatasetHit($workId, $datasetId, $type);
-		return DatasetDownloadManager::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, false);
+		return DatasetDownloadManager::GetFileBytes($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, false);
 	}
 }
 

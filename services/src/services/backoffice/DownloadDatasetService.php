@@ -10,7 +10,7 @@ class DownloadDatasetService extends BaseService
 	public function CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition)
 	{
 		$dm = new DatasetDownloadManager();
-		return $dm->CreateMultiRequestFile($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, true, null);
+		return $dm->CreateMultiRequestFile($type, $datasetId, null, $clippingItemId, $clippingCircle, $urbanity, $partition, true, null);
 	}
 
 	public function StepMultiRequestFile($key)
@@ -21,7 +21,7 @@ class DownloadDatasetService extends BaseService
 
 	public static function GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition)
 	{
-		return DatasetDownloadManager::GetFileBytes($type, $datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, true);
+		return DatasetDownloadManager::GetFileBytes($type, $datasetId, null, $clippingItemId, $clippingCircle, $urbanity, $partition, true);
 	}
 }
 

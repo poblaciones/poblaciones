@@ -4,6 +4,8 @@ namespace helena\services\backoffice\import;
 
 use helena\classes\App;
 use helena\classes\spss\Variable;
+use helena\classes\spss\Format;
+use helena\classes\spss\Measurement;
 use minga\framework\Str;
 use helena\entities\backoffice\DraftDatasetColumn;
 use helena\entities\backoffice\DraftDataset;
@@ -16,13 +18,21 @@ class DatasetColumns
 	{
        $this->headers = $headers;
 	}
-
 	public static function FixCaption($column)
 	{
-			if (Str::IsNullOrEmpty($column->getLabel()))
-				$column->setCaption($column->getVariable());
-			else
-				$column->setCaption($column->getLabel());
+		if (Str::IsNullOrEmpty($column->getLabel()))
+			$column->setCaption($column->getVariable());
+		else
+			$column->setCaption($column->getLabel());
+	}
+	public static function FixMeasurement($column)
+	{
+		$format = $column->getFormat();
+		$measure = $column->getMeasure();
+		if ($format == Format::A && $measure == Measurement::Scale)
+		{
+			$column->setMeasure(Measurement::Nominal);
+		}
 	}
 
 	public static function FixName($column)
@@ -56,6 +66,7 @@ class DatasetColumns
 			$column->setDataset($dataset);
 
 			self::FixCaption($column);
+			self::FixMeasurement($column);
 
 			App::Orm()->save($column);
 

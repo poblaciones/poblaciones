@@ -1,3 +1,7 @@
+- Fix a comparación entre series basadas en una misma geografía.
+- Descarga incluye columna de códigos previos.
+- Corrige measurementeLevel inválidos en subida de archivos SPSS.
+
 v4.2 (2024-11-05)
 - Filtro libre por nombre en listas de cartografías (admin y usuario).
 - Validación de polígonos confirma auto-intersección para evitar falsos positivos.

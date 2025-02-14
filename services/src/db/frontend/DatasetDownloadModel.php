@@ -59,13 +59,19 @@ class DatasetDownloadModel extends BaseDownloadModel
 		return $ret;
 	}
 
-	public function PrepareFileQuery($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $getPolygon)
+	public function PrepareFileQuery($datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $getPolygon)
 	{
 		Profiling::BeginTimer();
 		$params = array();
 
 		$datasetModel = new DatasetModel();
 		$dataset = $datasetModel->GetDatasetById($datasetId, $this->fromDraft);
+
+		if ($compareDatasetId)
+			$compareDataset = $datasetModel->GetDatasetById($compareDatasetId, $this->fromDraft);
+		else
+			$compareDataset = null;
+
 		$requiresSna = false;
 		$where = '';
 		$joins = ' ';
@@ -122,6 +128,11 @@ class DatasetDownloadModel extends BaseDownloadModel
 			$geoColumns = array_merge($geoColumns, $endSegmentColumns);
 		}
 		$cols = array_merge($cols, $geoColumns);
+
+		// Agrega columnas de comparación
+		if ($compareDataset) {
+			$cols = $this->AppendCompareColumns($cols, $joins, $compareDataset);
+		}
 
 		if ($getPolygon)
 			$this->AppendPolygon($cols, $dataset, $getPolygon, $requiresSna);
