@@ -9,7 +9,7 @@ use helena\db\backoffice\annotations\ClientReadonly;
 /**
  * Metadata
  *
- * @ORM\Table(name="metadata", indexes={@ORM\Index(name="metadata_ibfk_1", columns={"met_contact_id"}), @ORM\Index(name="metadata_ibfk_2", columns={"met_institution_id"})})
+ * @ORM\Table(name="metadata", indexes={@ORM\Index(name="metadata_ibfk_1", columns={"met_contact_id"})})
  * @ORM\Entity
  */
 class Metadata
@@ -174,17 +174,6 @@ class Metadata
      * })
      */
     private $Contact;
-
-    /**
-     * @var \helena\entities\backoffice\Institution
-     *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Institution")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="met_institution_id", referencedColumnName="ins_id", nullable=true)
-     * })
-     */
-    private $Institution;
-
 
     /**
      * @var \DateTime
@@ -782,28 +771,5 @@ class Metadata
         return $this->Contact;
     }
 
-    /**
-     * Set institution
-     *
-     * @param \helena\entities\backoffice\Institution $institution
-     *
-     * @return Metadata
-     */
-    public function setInstitution(\helena\entities\backoffice\Institution $institution = null)
-    {
-        $this->Institution = $institution;
-
-        return $this;
-    }
-
-    /**
-     * Get institution
-     *
-     * @return \helena\entities\backoffice\Institution
-     */
-    public function getInstitution()
-    {
-        return $this->Institution;
-    }
 }
 

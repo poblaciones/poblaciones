@@ -57,6 +57,7 @@ class SourceService extends BaseService
 			}
 		}
 	}
+
 	public function Update($workId, $source)
 	{
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
@@ -129,6 +130,8 @@ class SourceService extends BaseService
 		// Obtiene el anterior
 		$previousSourceId = App::Db()->fetchScalarNullable("SELECT msc_id FROM draft_metadata_source WHERE msc_metadata_id = ? AND msc_order < ? ORDER BY msc_order DESC LIMIT 1",
 									 array($metadataSource->getMetadata()->getId(), $metadataSource->getOrder()));
+		if ($previousSourceId === null)
+			return self::OK;
 		$metadataSourceAlter = App::Orm()->find(entities\DraftMetadataSource::class, $previousSourceId);
 		if ($metadataSourceAlter === null)
 				return self::OK;
@@ -148,6 +151,8 @@ class SourceService extends BaseService
 		// Obtiene el siguiente
 		$nextSourceId = App::Db()->fetchScalarNullable("SELECT msc_id FROM draft_metadata_source WHERE msc_metadata_id = ? AND msc_order > ? ORDER BY msc_order ASC LIMIT 1",
 									array($metadataSource->getMetadata()->getId(), $metadataSource->getOrder()));
+		if ($nextSourceId === null)
+			return self::OK;
 		$metadataSourceAlter = App::Orm()->find(entities\DraftMetadataSource::class, $nextSourceId);
 		if ($metadataSourceAlter === null)
 				return self::OK;

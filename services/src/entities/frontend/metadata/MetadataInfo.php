@@ -11,7 +11,7 @@ class MetadataInfo extends BaseMapModel
 	public $Authors;
 	public $Date;
 	public $ReleaseDate;
-	public $Institution;
+	public $Institutions;
 	public $Abstract;
 	public $Coverage;
 	public $License;
@@ -41,12 +41,15 @@ class MetadataInfo extends BaseMapModel
 		$this->Files = $arr;
 	}
 
-	public function FillInstitution($row)
+	public function FillInstitutions($rows)
 	{
-		$this->Institution = new InstitutionInfo();
-		$this->Institution->Fill($row);
+		foreach($rows as $row)
+		{
+			$institution = new InstitutionInfo();
+			$institution->Fill($row);
+			$this->Institutions[] = $institution;
+		}
 	}
-
 }
 
 

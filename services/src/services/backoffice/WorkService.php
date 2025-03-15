@@ -175,13 +175,13 @@ class WorkService extends BaseService
 		$workInfo->Permissions = $permissions->GetPermissions($workId);
 		$workInfo->Datasets = $this->GetDatasets($workId);
 		$workInfo->Sources = $this->GetSources($workId);
+		$workInfo->Institutions = $this->GetInstitutions($workId);
 		$workInfo->Files = $this->GetFiles($workId);
 		$workInfo->Icons = $this->GetIcons($workId);
 		$workInfo->Onboarding = $onboarding->GetOnboarding($workId);
 		$workInfo->StatsMonths = Statistics::ResolveWorkMonths($workId);
 		$workInfo->StatsQuarters = Statistics::ResolveWorkQuarters($workId);
 		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
-		$this->CompleteInstitution($workInfo->Work->getMetadata()->getInstitution());
 		$workInfo->Startup = $this->GetStartupInfo($workId);
 		$workInfo->PendingReviewSince = $this->GetPendingReviewSince($workId);
 		$workInfo->ArkUrl = Links::GetWorkArkUrl($workId);
@@ -555,12 +555,32 @@ class WorkService extends BaseService
 	private function GetSources($workId)
 	{
 		Profiling::BeginTimer();
-		$ret = App::Orm()->findManyByQuery("SELECT src FROM e:DraftSource src WHERE src.Id IN (SELECT s.Id FROM e:DraftMetadataSource ms JOIN ms.Source s
-																				JOIN ms.Metadata m JOIN e:DraftWork w WITH w.Metadata = m WHERE w.Id = :p1)", array($workId));
+
+		$retRelations = App::Orm()->findManyByQuery("SELECT ms FROM e:DraftMetadataSource ms
+						JOIN ms.Metadata m JOIN e:DraftWork w WITH w.Metadata = m WHERE w.Id = :p1 ORDER BY ms.Order", array($workId));
+		$ret = [];
+		foreach ($retRelations as $relation)
+			$ret[] = $relation->getSource();
 
 		$services = new SourceService();
 		$services->fixSources($ret);
 		$this->CompleteSources($ret);
+		return $ret;
+	}
+
+	private function GetInstitutions($workId)
+	{
+		Profiling::BeginTimer();
+
+		$retRelations = App::Orm()->findManyByQuery("SELECT mi FROM e:DraftMetadataInstitution mi JOIN mi.Institution i
+											JOIN mi.Metadata m JOIN e:DraftWork w WITH w.Metadata = m WHERE w.Id = :p1 ORDER BY mi.Order", array($workId));
+		$ret = [];
+		foreach ($retRelations as $relation)
+			$ret[] = $relation->getInstitution();
+
+		foreach($ret as $institution)
+			$this->CompleteInstitution($institution);
+
 		return $ret;
 	}
 
@@ -583,16 +603,18 @@ class WorkService extends BaseService
 				// que es utilizado el institution
 				$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
 													JOIN draft_metadata ON wrk_metadata_id = met_id
+													JOIN draft_metadata_institution ON min_metadata_id = met_id
 												  LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
 												  LEFT JOIN draft_source ON msc_source_id = src_id
-													WHERE src_institution_id = ? OR met_institution_id = ?) AS used,
-												(SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
-													JOIN draft_metadata ON wrk_metadata_id = met_id
-												  LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
-													LEFT JOIN draft_source ON msc_source_id = src_id
-													JOIN draft_work_permission ON wkp_work_id = wrk_id
-													WHERE src_institution_id = ? OR met_institution_id = ?
-													AND wkp_user_id = ? AND wkp_permission IN ('E', 'A')) AS editor";
+													WHERE src_institution_id = ? OR min_institution_id = ?) AS used,
+							(SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
+								JOIN draft_metadata ON wrk_metadata_id = met_id
+								JOIN draft_metadata_institution ON min_metadata_id = met_id
+								LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
+								LEFT JOIN draft_source ON msc_source_id = src_id
+								JOIN draft_work_permission ON wkp_work_id = wrk_id
+								WHERE src_institution_id = ? OR min_institution_id = ?
+								AND wkp_user_id = ? AND wkp_permission IN ('E', 'A')) AS editor";
 				$institutionId = $institution->getId();
 				$params = array($institutionId, $institutionId, $institutionId, $institutionId, $userId);
 				$res = App::Db()->fetchAssoc($sql, $params);

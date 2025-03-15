@@ -81,6 +81,16 @@ App::GetOrPost('/services/backoffice/UpdateWorkSource', function (Request $reque
 	return App::OrmJson($controller->Update($workId, $source));
 });
 
+App::GetOrPost('/services/backoffice/UpdateWorkInstitution', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+
+	$controller = new services\InstitutionService();
+	$institution = App::ReconnectJsonParam(entities\DraftInstitution::class, 'i');
+	return App::OrmJson($controller->UpdateWork($workId, $institution));
+});
+
 App::GetOrPost('/services/backoffice/UpdateInstitution', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;

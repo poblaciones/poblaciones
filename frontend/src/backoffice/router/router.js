@@ -99,6 +99,7 @@ export const constantRouterMap = [
 				alias: [
 					'/cartographies/:workId/metadata/content',
 					'/cartographies/:workId/metadata/attribution',
+					'/cartographies/:workId/metadata/institutions',
 					'/cartographies/:workId/metadata/sources',
 					'/cartographies/:workId/metadata/attachments',
 					'/cartographies/:workId/metadata/abstract'
@@ -164,6 +165,24 @@ export const constantRouterMap = [
 			component: () => import('@/backoffice/views/Metadata/Attribution.vue'),
 		}
 	]
+	},
+
+
+	{
+		group: 'Publicación',
+		path: '/cartographies/:workId/institutions',
+		component: Layout,
+		redirect: '/cartographies/:workId/institutions',
+		icon: 'fas fa-quote-right',
+		name: 'Instituciones',
+		hidden: true,
+		children: [
+			{
+				path: '/cartographies/:workId/institutions',
+				name: 'Institutions',
+				component: () => import('@/backoffice/views/Metadata/Institutions.vue'),
+			}
+		]
 	},
 
 	{

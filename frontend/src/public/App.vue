@@ -22,7 +22,11 @@
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
 					<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
-					<WatermarkFloat v-if="work.Current && work.Current.Metadata && work.Current.Metadata.Institution && work.Current.Metadata.Institution.WatermarkId" :work="work" />
+					<template v-if="work.Current && work.Current.Metadata">
+						<template v-for="institution in work.Current.Metadata.Institutions">
+							<WatermarkFloat v-if="institution.WatermarkId" :key="institution.Id" :work="work" />
+						</template>
+					</template>
 					<WatermarkOwner v-if="ownerLogo && ownerLogo.Image"
 													:url="ownerLogo.Url"
 													:image="ownerLogo.Image"
@@ -189,8 +193,8 @@
 				return (this.clippingStarted ? 'overflow-y: auto;' : 'overflow-y: hidden');
 			},
 			workColor() {
-				if (this.work && this.work.Current && this.work.Current.Metadata && this.work.Current.Metadata.Institution && this.work.Current.Metadata.Institution.Color) {
-					return '#' + this.work.Current.Metadata.Institution.Color;
+				if (this.work && this.work.Current && this.work.Current.Metadata && this.work.Current.Metadata.Institutions.length > 0 && this.work.Current.Metadata.Institutions[0].Color) {
+					return '#' + this.work.Current.Metadata.Institutions[0].Color;
 				}
 				return '#00A0D2';
 			},

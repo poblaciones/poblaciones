@@ -156,7 +156,7 @@ class MetadataModel extends BaseModel
 				 FROM " . $this->draftPreffix . "dataset
 					JOIN geography ON dat_geography_id = geo_id AND dat_type = 'D'
 					JOIN metadata ON geo_metadata_id = met_id
-					LEFT JOIN contact ON con_id = null
+					LEFT JOIN contact ON con_id = met_contact_id
 					where dat_id IN (" . $datasetIds . ") ORDER BY src_version";
 		$ret = App::Db()->fetchAll($sql);
 		foreach($ret as &$item)

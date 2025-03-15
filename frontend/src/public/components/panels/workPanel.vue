@@ -22,8 +22,8 @@
 						</div>
 					</div>
 				</div>
-				<div v-if="work.Current.Metadata.Institution.Name" class="littleRow preTitleRow">
-					{{ work.Current.Metadata.Institution.Name }}
+				<div v-if="institutionsList" class="littleRow preTitleRow">
+					{{ institutionsList }}
 				</div>
 				<div class="h3 title titleRow">
 					{{ work.Current.Metadata.Name }}
@@ -67,6 +67,16 @@ export default {
 				return 'spaceNext';
 			}
 		},
+		institutionsList() {
+			var institutions = this.work.Current.Metadata.Institutions;
+			if (institutions.length == 0)
+				return null;
+			var ret = institutions[0].Name;
+			for (var n = 1; n < institutions.length; n++) {
+				ret += (n < institutions.length - 1 ? ', ' : ' y ') + institutions[n].Name;
+			}
+			return ret;
+		},
 		workHasMetrics() {
 			if (!this.work || !this.work.Current || this.work.Current.Metrics.length == 0) return false;
 			for (var metric of this.work.Current.Metrics) {
@@ -101,7 +111,7 @@ export default {
 			if (!this.work.Current) {
 				return 0;
 			}
-			var ret = (this.work.Current.Metadata.Name ? 1 : 0) + (this.work.Current.Metadata.Institution.Name ? 1 : 0)
+			var ret = (this.work.Current.Metadata.Name ? 1 : 0) + (this.work.Current.Metadata.Institutions.length > 0 && this.work.Current.Metadata.Institutions[0].Name ? 1 : 0)
 				+ (this.work.Current.Metadata.Authors ? 1 : 0);
 			return ret;
 		},

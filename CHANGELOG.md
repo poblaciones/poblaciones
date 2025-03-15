@@ -1,6 +1,9 @@
 - Fix a comparación entre series basadas en una misma geografía.
 - Descarga incluye columna de códigos previos.
 - Corrige measurementeLevel inválidos en subida de archivos SPSS.
+- Fix en formulario de activación (mostraba mensaje inválido al ingresar desde el link del email)
+- Fix a popups no scroleando en dispositivos móviles.
+- Admite múltiples instituciones para una cartografía.
 
 v4.2 (2024-11-05)
 - Filtro libre por nombre en listas de cartografías (admin y usuario).

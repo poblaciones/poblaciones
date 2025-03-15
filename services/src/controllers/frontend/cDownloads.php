@@ -39,13 +39,13 @@ class cDownloads extends cPublicController
 	{
 			$res = $this->GetPublicIndexedWorkList();
 		$sql = "SELECT mvw_work_id Id, mvw_work_caption Caption,
-			 mvw_work_authors Authors, mvw_work_institution Institution,
+			 mvw_work_authors Authors, mvw_work_institutions Institution,
          GROUP_CONCAT(mvw_metric_caption SEPARATOR ', ') Metrics
 			FROM snapshot_metric_version
 			where mvw_work_is_private = false
 			and mvw_work_is_indexed = true
 			group by mvw_work_id, mvw_work_caption,
-					 mvw_work_authors, mvw_work_institution
+					 mvw_work_authors, mvw_work_institutions
 			order by mvw_work_caption";
 
 		$res = App::Db()->fetchAll($sql);
@@ -57,13 +57,13 @@ class cDownloads extends cPublicController
 	{
 		$res = $this->GetPublicIndexedWorkList();
 		$sql = "SELECT mvw_work_id Id, mvw_work_caption Caption,
-			 mvw_work_authors Authors, mvw_work_institution Institution,
+			 mvw_work_authors Authors, mvw_work_institutions Institution,
          GROUP_CONCAT(mvw_metric_caption SEPARATOR ', ') Metrics
 			FROM snapshot_metric_version
 			where mvw_work_is_private = false
 			and mvw_work_is_indexed = true
 			group by mvw_work_id, mvw_work_caption,
-					 mvw_work_authors, mvw_work_institution
+					 mvw_work_authors, mvw_work_institutions
 			order by mvw_work_caption";
 
 		$res = App::Db()->fetchAll($sql);

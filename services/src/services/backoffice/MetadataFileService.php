@@ -90,6 +90,8 @@ class MetadataFileService extends BaseService
 		$metadataFile = $this->LoadAndValidate($workId, $metadataFileId);
 		// Obtiene el anterior
 		$previousFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order < ? ORDER BY mfi_order DESC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
+		if ($previousFileId === null)
+			return self::OK;
 		$metadataFileAlter = App::Orm()->find(entities\DraftMetadataFile::class, $previousFileId);
 		if ($metadataFileAlter === null)
 			return self::OK;
@@ -109,6 +111,8 @@ class MetadataFileService extends BaseService
 		$metadataFile = $this->LoadAndValidate($workId, $metadataFileId);
 		// Obtiene el siguiente
 		$nextFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order > ? ORDER BY mfi_order ASC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
+		if ($nextFileId === null)
+			return self::OK;
 		$metadataFileAlter = App::Orm()->find(entities\DraftMetadataFile::class, $nextFileId);
 		if ($metadataFileAlter === null)
 			return self::OK;

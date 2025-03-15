@@ -30,6 +30,7 @@
 													:md-template-data="{ help: step.Helper }">
 										<Content v-if="step.Id == 'content'" />
 										<Attribution v-if="step.Id == 'attribution'" />
+										<InstitutionsList v-if="step.Id == 'institutions'" />
 										<Abstract v-if="step.Id == 'abstract'" />
 										<SourcesList v-if="step.Id == 'sources'" />
 										<Attachments v-if="step.Id == 'attachments'" />
@@ -49,6 +50,7 @@
 <script>
 	import Content from './Content';
 	import Attribution from './Attribution';
+	import InstitutionsList from './Institutions';
 	import Abstract from './Abstract';
 	import Attachments from './Attachments';
 	import SourcesList from './Sources';
@@ -59,6 +61,7 @@ export default {
 		Content,
 		Attribution,
 		SourcesList,
+		InstitutionsList,
 		Abstract,
 		Attachments
 		},
@@ -75,13 +78,18 @@ export default {
 						</p>` },
 				{
 					Id: 'attribution', Label: 'Atribución', Helper: `<p>
-								La atribución permite indicar los autores individuales y opcionalmente la atribución institucional de los datos publicados.
+								La atribución permite indicar los autores individuales, la licencia utilizada y la información de contacto.
 							</p><p>
 									La información de contacto hace accesible a los usuarios de la información un canal de comunicación con los responsables de los datos para poder realizar consultas o realimentar el proceso de producción de la información.
 								</p><p>
 									La declaración de licencia permite que quienes descarguen la información tengan un marco explícito del alcance con el que pueden utilizar los datos obtenidos de la plataforma.
 								</p>` },
-									{
+					{
+						Id: 'institutions', Label: 'Instituciones', Helper: `<p>La sección de instituciones permite indicar qué
+								instituciones participaron o dieron apoyo a la producción de la información. </p>
+							<p>Para cada una de ellas puede especificarse la información de contacto y opcionalmente una imagen para incorporar al pie de la cartografía.
+							</p>` },
+								{
 					Id: 'abstract', Label: 'Resumen', Helper: `<p>El resumen permite explicitar información sobre la elaboración de
 								los datos publicados, sus motivaciones o hipótesis, así como detalles de su nivel de cobertura,
 							 su estructura o consideraciones para su interpretación o uso. </p>

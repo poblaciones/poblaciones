@@ -9,6 +9,7 @@ class WorkInfo
 	public $Files;
 	public $Permissions;
 	public $Sources;
+	public $Institutions;
 	public $Icons;
 	public $Onboarding;
 	public $ExtraMetrics;

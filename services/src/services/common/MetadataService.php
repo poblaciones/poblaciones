@@ -93,6 +93,7 @@ class MetadataService extends BaseService
 		$metadata['wrk_access_link'] = $model->GetAccessLink($workId);
 
 		$sources = $model->GetMetadataSources($metadataId);
+		$institutions = $model->GetMetadataInstitutions($metadataId);
 		if ($datasetId || $workId)
 			$model->AddGeographyMetadata($sources, $datasetId, $workId);
 		$dataset = $model->GetDatasetMetadata($datasetId);
@@ -100,9 +101,8 @@ class MetadataService extends BaseService
 		$metadata['met_online_since_formatted'] = $this->formatDate($metadata['met_online_since']);
 		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
 
-
 		$PdfCreator = new PdfCreator();
-		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $dataset);
+		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $institutions, $dataset);
 
 		if ($fromDraft === false)
 		{

@@ -14,12 +14,14 @@ class PdfCreator
 	private $pdf;
 	private $metadata;
 	private $sources;
+	private $institutions;
 	private $dataset;
 
-	public function CreateMetadataPdf($metadata, $sources, $dataset = null)
+	public function CreateMetadataPdf($metadata, $sources, $institutions, $dataset = null)
 	{
 		$this->metadata = $metadata;
 		$this->sources = $sources;
+		$this->institutions = $institutions;
 		$this->dataset = $dataset;
 
 		$this->pdf = new PdfFile();
@@ -71,7 +73,8 @@ class PdfCreator
 			$this->WriteValuePair("Detalle", 'met_abstract_long', false);
 		}
 		$this->WriteContact();
-		$this->WriteInstitution();
+
+		$this->WriteInstitutions();
 
 		$this->WriteSources();
 
@@ -174,7 +177,7 @@ class PdfCreator
 				$this->pdf->WriteDoubleIndentedPair('Teléfono', $source['con_phone']);
 			}
 			// Institución
-			if ($source['ins_caption'] != '')
+			if (array_key_exists('ins_caption', $source) && $source['ins_caption'] != '')
 			{
 				//$this->pdf->WriteIndentedSpace();
 				$this->pdf->WriteIndentedText('Institución');
@@ -208,25 +211,43 @@ class PdfCreator
 		$this->WriteIndentedValuePair('Teléfono', 'con_phone');
 
 	}
-	private function WriteInstitution()
+	private function WriteInstitutions()
 	{
-		if ($this->metadata['ins_caption'] == '')
+		$c = sizeof($this->institutions);
+		if ($c > 0)
+		{
+			if ($c == 1)
+				$this->pdf->WriteHeading4('Institución');
+			else
+				$this->pdf->WriteHeading4('Instituciones');
+		}
+		$isFirst = true;
+		foreach ($this->institutions as $institution)
+		{
+			if (!$isFirst)
+				$this->pdf->WriteIndentedSeparator();
+			$this->WriteInstitution($institution);
+			$isFirst = false;
+		}
+	}
+	private function WriteInstitution($institution)
+	{
+		if ($institution['ins_caption'] == '')
 			return;
-		$this->pdf->WriteHeading4('Institución');
-		if ($this->metadata['ins_watermark_id'] != ''){
+		if ($institution['ins_watermark_id'] != ''){
 			$controller = new InstitutionService();
-			$file = $controller->GetInstitutionWatermarkFile($this->metadata['ins_watermark_id'], false);
+			$file = $controller->GetInstitutionWatermarkFile($institution['ins_watermark_id'], false);
 			Image::ResizeToMaxSize($file, null, InstitutionService::MAX_WATERMARK_HEIGHT);
 			$this->pdf->AddImage('institution', file_get_contents($file));
 			$html = "<img src='var:institution' height='50' />";
 			$this->pdf->WriteDoubleIndentedText($html, false);
 		}
-		$this->WriteIndentedValuePair('Nombre', 'ins_caption');
-		$this->pdf->WriteIndentedPairLink('Página web', $this->metadata['ins_web']);
-		$this->pdf->WriteIndentedMail($this->metadata['ins_email']);
-		$this->WriteIndentedValuePair('Teléfono', 'ins_phone');
-		$this->WriteIndentedValuePair('Dirección', 'ins_address');
-		$this->WriteIndentedValuePair('País', 'ins_country');
+		$this->pdf->WriteIndentedPair('Nombre', $institution['ins_caption']);
+		$this->pdf->WriteIndentedPairLink('Página web', $institution['ins_web']);
+		$this->pdf->WriteIndentedMail($institution['ins_email']);
+		$this->pdf->WriteIndentedPair('Teléfono', $institution['ins_phone']);
+		$this->pdf->WriteIndentedPair('Dirección', $institution['ins_address']);
+		$this->pdf->WriteIndentedPair('País', $institution['ins_country']);
 	}
 
 	private function WriteDataset()

@@ -39,10 +39,12 @@ class WorkService extends BaseService
 	public function GetWorkOnly($workId)
 	{
 		$worksTable = new WorkModel();
+		$metadataTable = new MetadataModel();
 		$work = $worksTable->GetWork($workId);
 		if (!$work) {
 			throw new PublicException("La cartografía no ha sido encontrada.");
 		}
+		$institutions = $metadataTable->GetInstitutions($work['met_id']);
 		$ret = new WorkInfo();
 		$workIdUnShardified = PublishDataTables::Unshardify($workId);
 		$ret->CanEdit = Session::IsWorkEditor($workIdUnShardified);
@@ -54,7 +56,7 @@ class WorkService extends BaseService
 		$ret->Url = Links::GetFullyQualifiedUrl($ret->Url);
 		$ret->Metadata = new MetadataInfo();
 		$ret->Metadata->Fill($work);
-		$ret->Metadata->FillInstitution($work);
+		$ret->Metadata->FillInstitutions($institutions);
 		$ret->ArkUrl = Links::GetWorkArkUrl($workId);
 		return $ret;
 	}

@@ -11,9 +11,6 @@
 										@update="Update" :maxlength="250"
 									 v-model="metadata.Authors" />
 								</div>
-								<div class="md-layout-item md-size-85 md-small-size-100">
-									<institution-widget @onSelected="Update()" :container="metadata"></institution-widget>
-								</div>
 							</div>
 				</div>
 
@@ -50,7 +47,6 @@
 
 <script>
 	import Context from '@/backoffice/classes/Context';
-	import InstitutionWidget from '@/backoffice/views/Metadata/InstitutionWidget';
 	import ContactForm from '@/backoffice/views/Metadata/ContactForm';
 	import MpLicense from '@/backoffice/components/MpLicense';
 
@@ -77,7 +73,6 @@
 		},
 	},
 	components: {
-		InstitutionWidget,
 		ContactForm,
 		MpLicense
 	}

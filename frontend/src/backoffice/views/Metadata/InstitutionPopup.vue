@@ -148,7 +148,7 @@
 			).then(
 				function () {
 					loc.openEditableInstitution = false;
-					loc.$emit('onSelected', loc.container.Institution);
+					loc.$emit('onSelected', loc.container.Institution, loc.item);
 					if (loc.closeParentCallback !== null) {
 						loc.closeParentCallback();
 					}

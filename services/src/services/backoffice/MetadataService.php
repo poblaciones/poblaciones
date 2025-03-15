@@ -20,13 +20,20 @@ class MetadataService extends DbSession
 	{
 		$work = App::Orm()->find(entities\DraftWork::class, $workId);
 		$isGlobal = $work->getType() === 'P';
-		$ins = $metadata->getInstitution();
-		if ($ins !== null)
+		$metadataId = $work->getMetadata()->getId();
+
+		$institutionRelations = App::Orm()->findManyByProperty(entities\DraftMetadataInstitution::class, "Metadata.Id", $metadataId);
+
+		foreach($institutionRelations as $relation)
 		{
-			if ($isGlobal && $ins->getIsGlobal() == false)
+			$ins = $relation->getInstitution();
+			if ($ins !== null)
 			{
-				$ins->setIsGlobal(true);
-				App::Orm()->Save($ins);
+				if ($isGlobal && $ins->getIsGlobal() == false)
+				{
+					$ins->setIsGlobal(true);
+					App::Orm()->Save($ins);
+				}
 			}
 		}
 	}

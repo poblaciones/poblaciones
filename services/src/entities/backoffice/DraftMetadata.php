@@ -9,7 +9,7 @@ use helena\db\backoffice\annotations\ClientReadonly;
 /**
  * DraftMetadata
  *
- * @ORM\Table(name="draft_metadata", indexes={@ORM\Index(name="draft_metadata_ibfk_1", columns={"met_contact_id"}), @ORM\Index(name="draft_metadata_ibfk_2", columns={"met_institution_id"})})
+ * @ORM\Table(name="draft_metadata", indexes={@ORM\Index(name="draft_metadata_ibfk_1", columns={"met_contact_id"})})
  * @ORM\Entity
  */
 class DraftMetadata
@@ -174,17 +174,6 @@ class DraftMetadata
      * @ORM\Column(name="met_last_online_user_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
      */
     private $LastOnlineUserId;
-
-    /**
-     * @var \helena\entities\backoffice\DraftInstitution
-     *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftInstitution", cascade={"persist"}, fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="met_institution_id", referencedColumnName="ins_id", nullable=true)
-     * })
-     */
-    private $Institution;
-
 
     /**
      * @var \DateTime
@@ -784,30 +773,6 @@ class DraftMetadata
     public function getContact()
     {
         return $this->Contact;
-    }
-
-    /**
-     * Set institution
-     *
-     * @param \helena\entities\backoffice\DraftInstitution $institution
-     *
-     * @return DraftMetadata
-     */
-    public function setInstitution(\helena\entities\backoffice\DraftInstitution $institution = null)
-    {
-        $this->Institution = $institution;
-
-        return $this;
-    }
-
-    /**
-     * Get institution
-     *
-     * @return \helena\entities\backoffice\DraftInstitution
-     */
-    public function getInstitution()
-    {
-        return $this->Institution;
     }
 }
 

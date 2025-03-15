@@ -32,12 +32,17 @@ class SnapshotMetricVersionModel
 		}
 
 	 	$sql = "INSERT INTO snapshot_metric_version ( mvw_metric_version_id, mvw_metric_id, mvw_metric_revision, mvw_metric_caption, mvw_metric_group_id, mvw_metric_provider_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
-			mvw_work_id, mvw_work_caption, mvw_work_authors, mvw_work_institution, mvw_work_type, mvw_work_is_private, mvw_work_is_indexed, mvw_work_access_link, `mvw_variable_captions`, `mvw_variable_value_captions`) ";
+			mvw_work_id, mvw_work_caption, mvw_work_authors, mvw_work_institutions, mvw_work_type, mvw_work_is_private, mvw_work_is_indexed, mvw_work_access_link, `mvw_variable_captions`, `mvw_variable_value_captions`) ";
 
 		$sql .= "SELECT mvr_id, mvr_metric_id, mtr_revision, mtr_caption, mtr_metric_group_id, mtr_metric_provider_id, mvr_caption,
 						GROUP_CONCAT(DISTINCT IFNULL(mvl_partial_coverage, geo_partial_coverage) ORDER BY geo_id SEPARATOR ','),
 						GROUP_CONCAT(geo_caption ORDER BY geo_id SEPARATOR ','),
-						wrk_id, met_title, met_authors, ins_caption,
+						wrk_id, met_title, met_authors,
+						(SELECT LEFT(GROUP_CONCAT(ins_caption ORDER BY min_order SEPARATOR '\n'), " . self::SNAPSHOT_CAPTIONS_MAX_LENGTH . ")
+							FROM metadata_institution
+							JOIN institution i ON min_institution_id = i.ins_id
+							WHERE min_metadata_id = wrk_metadata_id
+									),
 						wrk_type, wrk_is_private,
 						wrk_is_indexed, wrk_access_link, ";
 						// Hace un subselect con los nombres de variables
@@ -63,11 +68,10 @@ class SnapshotMetricVersionModel
 						JOIN dataset ON mvl_dataset_id = dat_id
 						JOIN geography ON dat_geography_id = geo_id
 						JOIN work ON dat_work_id = wrk_id
-						JOIN metadata ON wrk_metadata_id = met_id
-						LEFT JOIN institution ON met_institution_id = ins_id " .
+						JOIN metadata ON wrk_metadata_id = met_id " .
 						($regenFullTable ? "" : " WHERE mvr_metric_id = ? ") .
 						" GROUP BY mvr_id, mvr_metric_id, mtr_revision, mtr_caption, mtr_metric_group_id, mtr_metric_provider_id, mvr_caption, wrk_id, met_title,
-										met_authors, ins_caption, wrk_type, wrk_is_private, wrk_is_indexed, wrk_access_link";
+										met_authors, wrk_type, wrk_is_private, wrk_is_indexed, wrk_access_link";
 
 		App::Db()->exec("SET group_concat_max_len = 102400");
 		$param = ($regenFullTable ? array() : array($metricIdShardified));

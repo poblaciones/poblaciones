@@ -112,16 +112,6 @@ App::$app->get('/services/backoffice/RemoveSourceFromWork', function (Request $r
 	return App::Json($ret);
 });
 
-App::$app->get('/services/backoffice/GetAllInstitutions', function (Request $request) {
-	$controller = new services\InstitutionService();
-	return App::OrmJson($controller->GetAllInstitutions());
-});
-
-App::$app->get('/services/backoffice/GetAllInstitutionsByCurrentUser', function (Request $request) {
-	$controller = new services\InstitutionService();
-	return App::OrmJson($controller->GetAllInstitutionsByCurrentUser());
-});
-
 App::$app->get('/services/backoffice/GetAllSources', function (Request $request) {
 	$controller = new services\SourceService();
 	return App::OrmJson($controller->GetAllSources());
@@ -135,4 +125,53 @@ App::$app->get('/services/backoffice/GetAllSourcesByCurrentUser', function (Requ
 App::$app->get('/services/backoffice/GetAllAttachments', function (Request $request) {
 	$controller = new services\AttachmentService();
 	return App::OrmJson($controller->GetAllAttachments());
+});
+
+App::$app->get('/services/backoffice/GetAllInstitutions', function (Request $request) {
+	$controller = new services\InstitutionService();
+	return App::OrmJson($controller->GetAllInstitutions());
+});
+
+App::$app->get('/services/backoffice/GetAllInstitutionsByCurrentUser', function (Request $request) {
+	$controller = new services\InstitutionService();
+	return App::OrmJson($controller->GetAllInstitutionsByCurrentUser());
+});
+
+App::Get('/services/backoffice/MoveInstitutionUp', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+	$controller = new services\InstitutionService();
+	$institutionId = Params::GetIntMandatory('i');
+	return App::Json($controller->MoveInstitutionUp($workId, $institutionId));
+});
+
+App::Get('/services/backoffice/MoveInstitutionDown', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+	$controller = new services\InstitutionService();
+	$institutionId = Params::GetIntMandatory('i');
+	return App::Json($controller->MoveInstitutionDown($workId, $institutionId));
+});
+
+
+App::$app->get('/services/backoffice/AddWorkInstitution', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+	$controller = new services\InstitutionService();
+	$institutionId = Params::GetIntMandatory('i');
+	$ret = $controller->AddInstitutionToWork($workId, $institutionId);
+	return App::OrmJson($ret);
+});
+
+App::$app->get('/services/backoffice/RemoveInstitutionFromWork', function (Request $request) {
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId))
+		return $denied;
+	$controller = new services\InstitutionService();
+	$institutionId = Params::GetInt('i');
+	$ret = $controller->RemoveInstitutionFromWork($workId, $institutionId);
+	return App::Json($ret);
 });

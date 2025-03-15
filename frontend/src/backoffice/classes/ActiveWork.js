@@ -13,6 +13,7 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.Bounded = false;
 	window.Context.BooleanKeys.WorkTopBarPublish = 0;
 	this.Sources = workInfo.Sources;
+	this.Institutions = workInfo.Institutions;
 	this.MetricVersions = new AsyncCatalog(window.host + '/services/backoffice/GetWorkMetricVersions?w=' + workInfo.Work.Id);
 	this.MetricVersions.Refresh();
 	this.Files = workInfo.Files;
@@ -536,6 +537,74 @@ ActiveWork.prototype.WorkChanged = function () {
 ActiveWork.prototype.WorkPublished = function () {
 	this.UpdateHasChanges(0);
 	this.properties.Metadata.LastOnline = Date.now();
+};
+
+
+
+ActiveWork.prototype.MoveInstitutionUp = function (item) {
+	var loc = this;
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/MoveInstitutionUp',
+		{ 'i': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación de la institución')
+		.then(function (data) {
+			arr.MoveUp(loc.Institutions, item);
+		});
+};
+
+ActiveWork.prototype.MoveInstitutionDown = function (item) {
+	var loc = this;
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/MoveInstitutionDown',
+		{ 'i': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación de la institución')
+		.then(function (data) {
+			arr.MoveDown(loc.Institutions, item);
+		});
+};
+
+
+ActiveWork.prototype.UpdateWorkInstitution = function (institution) {
+	var args = { 'w': this.properties.Id, 'i': institution };
+	var loc = this;
+	this.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateWorkInstitution', args,
+		'actualizar la institución').then(function (savedInstitution) {
+			// se fija si tiene que actualizar el institution
+			if (institution.Id === null || institution.Id === 0) {
+				// lo agrega en la lista
+				loc.Institutions.push(savedInstitution);
+				window.Context.Institutions.Refresh();
+			} else {
+				// actualiza en institutions
+				for (var n = 0; n < loc.Institutions.length; n++) {
+					if (loc.Institutions[n].Id === savedInstitution.Id) {
+						Vue.set(loc.Institutions, n, savedInstitution);
+						break;
+					}
+				}
+				// actualiza el padrón general
+				window.Context.Institutions.Refresh();
+			}
+			return savedInstitution;
+		});
+};
+
+ActiveWork.prototype.AddInstitution = function (institution) {
+	var loc = this;
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/AddWorkInstitution',
+		{ 'w': this.properties.Id, 'i': institution.Id }, 'agregar la institución')
+		.then(function (data) {
+			loc.Institutions.push(institution);
+		});
+};
+
+ActiveWork.prototype.RemoveInstitution = function (institution) {
+	var loc = this;
+	this.WorkChanged();
+	return axiosClient.getPromise(window.host + '/services/backoffice/RemoveInstitutionFromWork',
+		{ 'i': institution.Id, 'w': this.properties.Id }, 'quitar la institución').then(function (data) {
+			arr.Remove(loc.Institutions, institution);
+		});
 };
 
 ActiveWork.CalculateListItemStatus = function (item) {

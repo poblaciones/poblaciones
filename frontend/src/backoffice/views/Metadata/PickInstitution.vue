@@ -70,7 +70,7 @@ export default {
 				alert('No ha seleccionado ninguna institución.');
 				return;
 			}
-			this.$emit('onSelected', this.selected);
+			this.$emit('onSelected', this.selected, this.selected);
 			this.openInstitutions = false;
     },
     show() {

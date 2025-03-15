@@ -88,8 +88,8 @@ class WorkModel extends BaseModel
 		$params = array($workId, $workId);
 
 		$sql = "SELECT DISTINCT institution_id FROM (
-						SELECT met_institution_id AS institution_id FROM " . $this->resolveTableName('work') . ", " . $this->resolveTableName('metadata')
-							. " WHERE wrk_metadata_id = met_id AND wrk_id = ? AND met_institution_id IS NOT NULL
+						SELECT min_institution_id AS institution_id FROM " . $this->resolveTableName('work') . " JOIN " . $this->resolveTableName('metadata')
+							. " ON wrk_metadata_id = met_id JOIN " . $this->resolveTableName('metadata_institution') . " ON min_metadata_id = met_id WHERE wrk_id = ?
 							UNION
 						SELECT src_institution_id AS institution_id FROM " . $this->resolveTableName('work') .
 							" JOIN " . $this->resolveTableName('metadata') . " ON wrk_metadata_id = met_id
@@ -108,7 +108,7 @@ class WorkModel extends BaseModel
 		$params = array($institutionId, $institutionId);
 
 		$sql = "SELECT wrk_id, met_id FROM " . $this->resolveTableName('work') . ", " . $this->resolveTableName('metadata')
-							. " WHERE wrk_metadata_id = met_id AND met_institution_id = ?
+							. " JOIN " . $this->resolveTableName('metadata_institution') . " ON min_metadata_id = met_id WHERE wrk_metadata_id = met_id AND min_institution_id = ?
 							UNION
 						SELECT DISTINCT wrk_id, met_id FROM " . $this->resolveTableName('work') .
 							" JOIN " . $this->resolveTableName('metadata') . " ON wrk_metadata_id = met_id
