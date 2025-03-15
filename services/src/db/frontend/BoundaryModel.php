@@ -31,12 +31,11 @@ class BoundaryModel extends BaseModel
 	public function GetSelectedBoundary($id)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT boundary.*, metadata.*, ins_caption, ins_watermark_id, ins_color
+		$sql = "SELECT boundary.*, metadata.*
           FROM boundary
 					LEFT JOIN metadata ON met_id = IFNULL(bou_metadata_id,
     (select max(clr_metadata_id) FROM clipping_region JOIN
     boundary_clipping_region ON bcr_clipping_region_id = clr_id WHERE bcr_boundary_id = ?))
-					LEFT JOIN institution ON met_institution_id = ins_id
 					WHERE bou_id = ?";
 		$ret = App::Db()->fetchAssoc($sql, array($id, $id));
 

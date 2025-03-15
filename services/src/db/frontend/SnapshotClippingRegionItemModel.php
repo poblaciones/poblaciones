@@ -58,11 +58,10 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		{
 			$nameFields = ", cli_caption Name, met_id, met_title, met_abstract,
 							met_publication_date, met_license, met_online_since, met_coverage_caption,
-													met_authors, ins_caption, ins_watermark_id, ins_color ";
+													met_authors ";
 			 $nameJoins = " JOIN clipping_region_item ON cli_id = cgv_clipping_region_item_id
 											JOIN clipping_region ON clr_id = cli_clipping_region_id
-											LEFT JOIN metadata ON met_id = clr_metadata_id
-											LEFT JOIN institution ON ins_id = met_institution_id ";
+											LEFT JOIN metadata ON met_id = clr_metadata_id ";
 		}
 		$sql = "SELECT cgv_clipping_region_item_id as Id " . $nameFields .
 			" FROM snapshot_geography_item JOIN snapshot_clipping_region_item_geography_item ON cgv_geography_item_id = giw_geography_item_id "
@@ -114,10 +113,9 @@ class SnapshotClippingRegionItemModel extends BaseModel
 			ST_AsText(PolygonEnvelope(cli_geometry_r1)) Envelope, ".
 			"met_id, met_title, met_abstract, met_publication_date, met_license,
 			met_online_since, met_coverage_caption,
-			 met_authors, ins_caption, ins_watermark_id, ins_color " .
+			 met_authors " .
 			"FROM clipping_region JOIN clipping_region_item ON clr_id = cli_clipping_region_id " .
 			"LEFT JOIN metadata ON met_id = clr_metadata_id ".
-			"LEFT JOIN institution ON ins_id = met_institution_id ".
 			"WHERE cli_id IN (" . Str::JoinInts($clippingRegionIds) . ")";
 		$regions = App::Db()->fetchAll($sqlRegions);
 		$ret['Regions'] = $regions;
@@ -157,10 +155,9 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		if ($ret !== null)
 		{
 			$sqlMetadata = "SELECT null Id, null Name, null Type, met_id, met_title, met_abstract, met_publication_date,
-							met_license, met_online_since, met_coverage_caption, met_authors, ins_caption, ins_watermark_id, ins_color " .
+							met_license, met_online_since, met_coverage_caption, met_authors " .
 							"FROM geography ".
 							"LEFT JOIN metadata ON met_id = geo_metadata_id ".
-							"LEFT JOIN institution ON ins_id = met_institution_id ".
 							"WHERE geo_id = ?";
 			$retMetadata = App::Db()->fetchAll($sqlMetadata, $params);
 			$ret['Regions'] = $retMetadata;
@@ -175,11 +172,10 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		if ($trackingLevels)
 		{
 			$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
-          C1.geo_partial_coverage, metadata.*, ins_caption, ins_watermark_id, ins_color
+          C1.geo_partial_coverage, metadata.*
           FROM geography C1
 					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
 					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
-					LEFT JOIN institution ON met_institution_id = ins_id
 					WHERE " . $this->existsBlock($regionItemIds, "EXISTS (SELECT * FROM snapshot_clipping_region_item_geography_item WHERE C2.geo_id = cgv_geography_id
 																					AND cgv_clipping_region_item_id = ? AND C2.geo_is_tracking_level = 1) ") . "
 					AND C1.geo_use_for_clipping = 1
@@ -191,10 +187,9 @@ class SnapshotClippingRegionItemModel extends BaseModel
 			$sql = "SELECT geo_id, geo_parent_id, geo_max_zoom, geo_min_zoom, geo_caption, geo_revision, geo_partial_coverage,
 							met_id, met_title, met_abstract, met_publication_date, met_license,
 							met_online_since, met_coverage_caption,
-							met_authors, ins_caption, ins_watermark_id, ins_color
+							met_authors
 						FROM geography C1
 						LEFT JOIN metadata ON geo_metadata_id = met_id
-						LEFT JOIN institution ON met_institution_id = ins_id
 						WHERE " . $this->existsBlock($regionItemIds, "EXISTS (SELECT * FROM snapshot_clipping_region_item_geography_item WHERE C1.geo_id = cgv_geography_id
 																			AND cgv_clipping_region_item_id = ? AND cgv_level > 0) ") . "
 						AND C1.geo_use_for_clipping = 1
@@ -226,12 +221,11 @@ class SnapshotClippingRegionItemModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 		$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
-          C1.geo_partial_coverage, metadata.*, ins_caption, ins_watermark_id, ins_color
+          C1.geo_partial_coverage, metadata.*
           FROM geography C1
 					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
 					JOIN snapshot_geography_item ON C2.geo_id = giw_geography_id
 					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
-					LEFT JOIN institution ON met_institution_id = ins_id
 					WHERE ST_CONTAINS (giw_geometry_r3 , POINT(?, ?)) AND giw_geography_is_tracking_level = 1
 					AND C1.geo_use_for_clipping = 1
 					ORDER BY C1.geo_revision";
@@ -246,13 +240,12 @@ class SnapshotClippingRegionItemModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 		$sql = "SELECT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
-          C1.geo_partial_coverage, metadata.*, ins_caption, ins_watermark_id, ins_color
+          C1.geo_partial_coverage, metadata.*
           FROM (SELECT min(geo_id) geo_id FROM geography
 								WHERE ? >= geo_min_zoom AND ? <= geo_max_zoom
 								GROUP BY geo_revision) C0
 					JOIN geography C1 ON C0.geo_id = C1.geo_id
 					LEFT JOIN metadata ON geo_metadata_id = met_id
-					LEFT JOIN institution ON met_institution_id = ins_id
 					WHERE C1.geo_use_for_clipping = 1
 					ORDER BY C1.geo_revision";
 		$ret = App::Db()->fetchAll($sql, array($zoom, $zoom));

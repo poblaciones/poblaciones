@@ -36,8 +36,7 @@ class WorkModel extends BaseModel
 	}
 	private function MetadataJoins()
 	{
-		return " JOIN metadata ON wrk_metadata_id = met_id
-							LEFT JOIN institution ON ins_id = met_institution_id";
+		return " JOIN metadata ON wrk_metadata_id = met_id";
 	}
 	public function GetWorkFileByFileId($workId, $fileId)
 	{
@@ -58,8 +57,8 @@ class WorkModel extends BaseModel
 
 		$sql = "SELECT work.*, met_id, met_publication_date, met_title, met_authors, met_license, met_url, met_abstract,
 							met_coverage_caption, met_online_since, ST_AsText(PolygonEnvelope(met_extents)) met_extents,
-							ins_caption, wst_type, ST_X(wst_center) wst_center_lon, ST_Y(wst_center) wst_center_lat, wst_zoom,
-								wst_clipping_region_item_id, wst_clipping_region_item_selected, wst_active_metrics, ins_watermark_id, ins_web, ins_color FROM work " . $this->MetadataJoins() . " JOIN work_startup ON wrk_startup_id = wst_id "
+							wst_type, ST_X(wst_center) wst_center_lon, ST_Y(wst_center) wst_center_lat, wst_zoom,
+								wst_clipping_region_item_id, wst_clipping_region_item_selected, wst_active_metrics FROM work " . $this->MetadataJoins() . " JOIN work_startup ON wrk_startup_id = wst_id "
 							. " WHERE wrk_id = ? LIMIT 1";
 
 		$ret = App::Db()->fetchAssoc($sql, $params);

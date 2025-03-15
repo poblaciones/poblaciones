@@ -31,7 +31,18 @@ class MetadataModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+	public function GetInstitutions($metadataId)
+	{
+		Profiling::BeginTimer();
+		$params = array($metadataId);
 
+		$sql = "SELECT i.* FROM " . $this->draftPreffix . "metadata_institution mi JOIN " . $this->draftPreffix . "institution i ON i.ins_id = mi.min_institution_id WHERE min_metadata_id = ? LIMIT 1";
+
+		$ret = App::Db()->fetchAll($sql, $params);
+		Profiling::EndTimer();
+
+		return $ret;
+	}
 	public function GetMetadataByWorkId($workId)
 	{
 		Profiling::BeginTimer();
@@ -88,7 +99,6 @@ class MetadataModel extends BaseModel
 
 		$sql = "SELECT *, " . $extents . "(SELECT MIN(wrk_id) FROM " . $this->draftPreffix . "work WHERE wrk_metadata_id = met_id) AS wrk_id
 							FROM " . $this->draftPreffix . "metadata
-							LEFT JOIN " . $this->draftPreffix . "institution ON met_institution_id = ins_id
 							LEFT JOIN " . $this->draftPreffix . "contact ON met_contact_id = con_id
 								WHERE met_id = ? LIMIT 1";
 
@@ -101,12 +111,25 @@ class MetadataModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 		$params = array($metadataId);
-
 		$sql = "SELECT *, '' AS src_metadata_url FROM " . $this->draftPreffix . "metadata_source
 		          INNER JOIN " . $this->draftPreffix . "source ON msc_source_id = src_id
 							LEFT JOIN " . $this->draftPreffix . "institution ON src_institution_id = ins_id
 							LEFT JOIN " . $this->draftPreffix . "contact ON src_contact_id = con_id
 							WHERE msc_metadata_id = ? ORDER BY msc_order";
+
+		$ret = App::Db()->fetchAll($sql, $params);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	public function GetMetadataInstitutions($metadataId)
+	{
+		Profiling::BeginTimer();
+		$params = array($metadataId);
+
+		$sql = "SELECT i.* FROM " . $this->draftPreffix . "metadata_institution
+		          INNER JOIN " . $this->draftPreffix . "institution i ON min_institution_id = ins_id
+							WHERE min_metadata_id = ? ORDER BY min_order";
 
 		$ret = App::Db()->fetchAll($sql, $params);
 		Profiling::EndTimer();
@@ -129,12 +152,10 @@ class MetadataModel extends BaseModel
 					met_id AS met_id,
 					'' src_web,
 					'' src_wiki,
-					institution.*,
 					contact.*
 				 FROM " . $this->draftPreffix . "dataset
 					JOIN geography ON dat_geography_id = geo_id AND dat_type = 'D'
 					JOIN metadata ON geo_metadata_id = met_id
-					LEFT JOIN institution ON met_institution_id = ins_id
 					LEFT JOIN contact ON con_id = null
 					where dat_id IN (" . $datasetIds . ") ORDER BY src_version";
 		$ret = App::Db()->fetchAll($sql);
