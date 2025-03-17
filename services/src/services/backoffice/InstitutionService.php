@@ -39,7 +39,6 @@ class InstitutionService extends BaseService
 			$fileController->SaveBase64BytesToFile($watermarkImage, $file, null,
 										 null, self::MAX_WATERMARK_HEIGHT);
 		}
-
 		App::Orm()->Save($institution);
 		$institution->setIsEditableByCurrentUser(true);
 		return $institution;
@@ -107,7 +106,6 @@ class InstitutionService extends BaseService
 		$isGlobal = $work->getType() === 'P';
 		if ($isGlobal)
 			$institution->setIsGlobal(true);
-
 		// Verifica permisos
 		$wk = new WorkService();
 		$wk->CompleteInstitution($institution);

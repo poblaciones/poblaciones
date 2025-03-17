@@ -29,7 +29,6 @@ class WorkModel extends BaseModel
 							JOIN dataset ON dat_id = mvl_dataset_id
 							JOIN work ON dat_work_id =  wrk_id "
 						. $this->MetadataJoins() . " WHERE mvr_id = ? LIMIT 1";
-
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		Profiling::EndTimer();
 		return $ret;

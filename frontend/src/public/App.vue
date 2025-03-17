@@ -22,11 +22,11 @@
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
 					<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
-					<template v-if="work.Current && work.Current.Metadata">
+					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
-							<WatermarkFloat v-if="institution.WatermarkId" :key="institution.Id" :work="work" />
+							<WatermarkFloat v-if="institution.WatermarkId" :key="institution.Id" :institution="institution" :work="work" />
 						</template>
-					</template>
+					</div>
 					<WatermarkOwner v-if="ownerLogo && ownerLogo.Image"
 													:url="ownerLogo.Url"
 													:image="ownerLogo.Image"
@@ -1019,7 +1019,18 @@
 		-ms-user-select: none;
 		user-select: none;
 	}
-
+	.logosBox {
+		bottom: 24px;
+		right: 95px;
+		z-index: 1000;
+		position: absolute;
+		background-color: transparent;
+		display: flex;
+		height: 100%;
+		width: auto;
+		max-width: 70%;
+		max-height: 64px;
+	}
 	.bottomBox {
 		position: relative;
 		/* pointer-events: none; */

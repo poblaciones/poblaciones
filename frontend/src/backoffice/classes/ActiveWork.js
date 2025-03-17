@@ -295,6 +295,7 @@ ActiveWork.prototype.UpdateInstitution = function (institution, container, water
 			// se fija si tiene que actualizar el institution
 			container.Institution = savedInstitution;
 			window.Context.Institutions.Refresh();
+			return savedInstitution;
 		});
 };
 

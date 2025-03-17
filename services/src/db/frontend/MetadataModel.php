@@ -36,7 +36,7 @@ class MetadataModel extends BaseModel
 		Profiling::BeginTimer();
 		$params = array($metadataId);
 
-		$sql = "SELECT i.* FROM " . $this->draftPreffix . "metadata_institution mi JOIN " . $this->draftPreffix . "institution i ON i.ins_id = mi.min_institution_id WHERE min_metadata_id = ? LIMIT 1";
+		$sql = "SELECT i.* FROM " . $this->draftPreffix . "metadata_institution mi JOIN " . $this->draftPreffix . "institution i ON i.ins_id = mi.min_institution_id WHERE min_metadata_id = ?";
 
 		$ret = App::Db()->fetchAll($sql, $params);
 		Profiling::EndTimer();

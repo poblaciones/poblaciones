@@ -122,6 +122,9 @@ class WorkClone
 		// Copia metadata_sources
 		$static = array('msc_metadata_id' => $metadataId);
 		RowDuplicator::DuplicateRows(entities\DraftMetadataSource::class, $sourceMetadataId, $static, 'msc_metadata_id');
+		// Copia metadata_institutions
+		$static = array('min_metadata_id' => $metadataId);
+		RowDuplicator::DuplicateRows(entities\DraftMetadataInstitution::class, $sourceMetadataId, $static, 'min_metadata_id');
 		// Copia metadata_files
 		$this->CopyFiles($sourceMetadataId, $metadataId);
 	}

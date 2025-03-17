@@ -1,8 +1,8 @@
 <template>
   <div v-if="image" class="logoDiv" @click="institutionClicked"
-			 :style="(!work.Current.Metadata.Institution.Url ? 'pointer-events: none; ' : 'cursor: pointer; ') +
+			 :style="(!institution.Url ? 'pointer-events: none; ' : 'cursor: pointer; ') +
             (useStreetMap ? 'right: 145px' : '')">
-    <img class="logoIcon" :src="image" :title="work.Current.Metadata.Institution.Name" />
+    <img class="logoIcon" :src="image" :title="institution.Name" />
   </div>
 </template>
 
@@ -12,7 +12,8 @@ import err from "@/common/framework/err";
 
 export default {
   name: "watermarkFloat",
-  props: ["work"],
+    props: ["work",
+            "institution"  ],
   data() {
     return {
       image: null
@@ -29,7 +30,7 @@ export default {
   },
   methods: {
 		institutionClicked() {
-			window.open(this.work.Current.Metadata.Institution.Url);
+			window.open(this.institution.Url);
 		},
     getInstitutionWatermark() {
       const loc = this;
@@ -37,7 +38,7 @@ export default {
         .get(window.host + "/services/works/GetInstitutionWatermark", {
           params: {
             w: loc.work.Current.Id,
-            iwmid: loc.work.Current.Metadata.Institution.WatermarkId
+            iwmid: loc.institution.WatermarkId
           }
         })
         .then(function(res) {
@@ -55,22 +56,15 @@ export default {
 </script>
 
 <style scoped>
-.logoDiv {
-	bottom: 22px;
-	right: 95px;
-  z-index: 1000;
-	position: absolute;
-	background-color: transparent;
-	border-radius: 6px;
-	display: flex;
-	height: 100%;
-	width: auto;
-	max-width: 70%;
-	max-height: 64px;
-	overflow: hidden;
-	object-fit: scale-down;
-	justify-content: center;
-}
+	.logoDiv {
+		background-color: transparent;
+		display: flex;
+		width: auto;
+		object-fit: scale-down;
+		justify-content: center;
+		margin-left: 13px;
+		box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+	}
 
 .logoIcon {
   height: auto;
@@ -79,7 +73,8 @@ export default {
   max-height: 100%;
   margin: auto;
 	background-color: rgba(255, 255, 255, 0.75);
-  border: 4px solid rgba(255, 255, 255, 0);
+  border: 2px solid rgba(255, 255, 255, 0);
+  border-radius: 4px;
 }
 </style>
 

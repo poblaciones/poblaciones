@@ -51,10 +51,12 @@ ADD CONSTRAINT `metadata_institution_metadata`
 
 ALTER TABLE `draft_metadata`
 DROP FOREIGN KEY `draft_metadata_ibfk_2`;
+
 ALTER TABLE `draft_metadata`
 DROP COLUMN `met_institution_id`,
 DROP INDEX `draft_metadata_ibfk_2` ;
 ;
+
 
 ALTER TABLE `snapshot_metric_version`
 CHANGE COLUMN `mvw_work_institution` `mvw_work_institutions` VARCHAR(500) NULL DEFAULT NULL COMMENT 'Instituciones de la cartografía' ;

@@ -73,7 +73,7 @@ export default {
 				return null;
 			var ret = institutions[0].Name;
 			for (var n = 1; n < institutions.length; n++) {
-				ret += (n < institutions.length - 1 ? ', ' : ' y ') + institutions[n].Name;
+				ret += " – " + institutions[n].Name;
 			}
 			return ret;
 		},

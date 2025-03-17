@@ -146,8 +146,10 @@
 			this.$refs.invoker.doSave(
 				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageToSend
 			).then(
-				function () {
+				function (saved) {
 					loc.openEditableInstitution = false;
+					loc.item.Watermark = saved.Watermark;
+					loc.item.Id = saved.Id;
 					loc.$emit('onSelected', loc.container.Institution, loc.item);
 					if (loc.closeParentCallback !== null) {
 						loc.closeParentCallback();

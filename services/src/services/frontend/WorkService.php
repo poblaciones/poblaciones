@@ -45,6 +45,7 @@ class WorkService extends BaseService
 			throw new PublicException("La cartografía no ha sido encontrada.");
 		}
 		$institutions = $metadataTable->GetInstitutions($work['met_id']);
+
 		$ret = new WorkInfo();
 		$workIdUnShardified = PublishDataTables::Unshardify($workId);
 		$ret->CanEdit = Session::IsWorkEditor($workIdUnShardified);
