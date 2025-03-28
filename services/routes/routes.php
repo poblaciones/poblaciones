@@ -27,7 +27,8 @@ App::$app->before(function(Request $request) {
 	Profiling::BeginTimer("Request");
 
 	$add = minga\framework\Request::IP();
-	Traffic::RegisterIP($add);
+	if ($add != '')
+		Traffic::RegisterIP($add, minga\framework\Request::UserAgent(), minga\framework\Request::GetRequestURI(), Session::IsMegaUser());
 
 	Performance::Begin();
 

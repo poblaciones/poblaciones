@@ -99,22 +99,12 @@ class InstitutionService extends BaseService
 		return $wat;
 	}
 
-	public function UpdateWork($workId, $institution)
+	public function UpdateWorkInstitution($workId, $institution)
 	{
-		$work = App::Orm()->find(entities\DraftWork::class, $workId);
-		// Si el work es publicData, pone globales las fuentes e instituciones
-		$isGlobal = $work->getType() === 'P';
-		if ($isGlobal)
-			$institution->setIsGlobal(true);
-		// Verifica permisos
-		$wk = new WorkService();
-		$wk->CompleteInstitution($institution);
-		if (!$institution->getIsEditableByCurrentUser())
-			throw new PublicException('No tiene permisos para editar esta institución.');
-		App::Orm()->Save($institution);
 		// Si no está asociada, la agrega
 		$this->AddInstitutionToWork($workId, $institution->getId());
 		// Repone los flags de permisos
+		$wk = new WorkService();
 		$wk->CompleteInstitution($institution);
 		return $institution;
 	}

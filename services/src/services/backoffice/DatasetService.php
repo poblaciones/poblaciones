@@ -10,6 +10,7 @@ use minga\framework\WebConnection;
 use minga\framework\IO;
 
 use helena\classes\App;
+use helena\classes\ExportGrid;
 use helena\classes\CsvParser;
 use helena\caches\DatasetColumnCache;
 use helena\services\backoffice\cloning\DatasetClone;
@@ -315,23 +316,15 @@ class DatasetService extends DbSession
 
 	public function GetGridExport($filename, &$format, $content)
 	{
-		$wc = new WebConnection();
-		$wc->Initialize();
-
-		$uri = "http://jquerygrid.net/export_server/dataexport.php";
-		$ret = $wc->Post($uri, '', ['filename' => $filename, 'format' => $format, 'content' => $content]);
-		if ($ret->error)
-		{
-			throw new ErrorException("No se pudo realizar la exportación: " . $ret->error);
-		}
-		$wc->Finalize();
-		if ($format === "xls")
-		{
+		if ($format === "xls") {
 			$format = "xlsx";
-			return $this->ConvertXmlToXlsx($ret->file);
+			$file = IO::GetTempFilename();
+			IO::WriteAllText($file, $content);
+			return $this->ConvertXmlToXlsx($file);
+		} else {
+			$export = new ExportGrid($format, $content);
+			return $export->Export();
 		}
-		else
-			return $ret->file;
 	}
 
 	private function ConvertXmlToXlsx($file)

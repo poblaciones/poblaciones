@@ -34,8 +34,9 @@ class WorkClone
 		Profiling::BeginTimer();
 
 		$name = $this->state->Get('name');
-		$this->doCreateNewWork($name);
-		$this->CopyMetadata();
+		$newWork = $this->doCreateNewWork($name);
+		$this->CompleteMetadata($newWork->getMetadata());
+		$this->CopyOnBoarding();
 
 		$this->state->Set('targetWorkId', $this->targetWorkId);
 
@@ -98,26 +99,42 @@ class WorkClone
 			$newPreviewFileId = $this->DuplicateFile($previewFileId);
 			$cloned->setPreviewFileId($newPreviewFileId);
 		}
+		// Copia metadataos
+		$newMetadata = $this->CopyMetadata();
+		$cloned->setMetadata($newMetadata);
 		// Guarda y setea cambios
 		WorkFlags::Save($cloned);
+		return $cloned;
 	}
+
 	public function CopyMetadata()
 	{
 		$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
 		// Clona el contacto
 		$contactId = RowDuplicator::DuplicateRows(entities\DraftContact::class, $work->getMetadata()->getContact()->getId());
-		// Copia metadatos
+		// Copia metadata
 		$sourceMetadataId = $work->getMetadata()->getId();
 		$newName = $this->state->Get('name');
+		$static = array('met_title' => $newName, 'met_contact_id' => $contactId, 'met_online_since' => null, 'met_last_online' => null);
+		$metadataId = RowDuplicator::DuplicateRows(entities\DraftMetadata::class, $sourceMetadataId, $static);
+		$newMetadata = App::Orm()->find(entities\DraftMetadata::class, $metadataId);
+		return $newMetadata;
+	}
+
+	public function CompleteMetadata($newMetadata)
+	{
+		$metadataId = $newMetadata->getId();
+		$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
+		$sourceMetadataId = $work->getMetadata()->getId();
+		// Copia metadatos
 		$shardifiedWorkId = PublishDataTables::Shardified($this->targetWorkId);
 		$url = Links::GetWorkUrl($shardifiedWorkId);
-		$static = array('met_title' => $newName, 'met_contact_id' => $contactId, 'met_url' => $url, 'met_online_since' => null, 'met_last_online' => null);
-		$metadataId = RowDuplicator::DuplicateRows(entities\DraftMetadata::class, $sourceMetadataId, $static);
+		$newMetadata->setUrl($url);
 		// Corrige encabezado y accessLink
 		$link = $work->getAccessLink();
 		if ($link !== null) $link = Str::GenerateLink();
 		$update = "UPDATE draft_work SET wrk_metadata_id = ?, wrk_last_access_link = null, wrk_access_link = ? WHERE wrk_id = ?";
-		App::Db()->exec($update, array($metadataId, $link, $this->targetWorkId));
+		App::Db()->exec($update, array($newMetadata->getId(), $link, $this->targetWorkId));
 		App::Db()->markTableUpdate('draft_work');
 		// Copia metadata_sources
 		$static = array('msc_metadata_id' => $metadataId);
@@ -128,16 +145,42 @@ class WorkClone
 		// Copia metadata_files
 		$this->CopyFiles($sourceMetadataId, $metadataId);
 	}
+
+	private function CopyOnBoarding()
+	{
+		// Copia onboarding
+		$static = array('onb_work_id' => $this->targetWorkId);
+		RowDuplicator::DuplicateRows(entities\DraftOnboarding::class, $this->sourceWorkId, $static, 'onb_work_id');
+		// Trae al original y al nuevo
+		$sourceOnBoarding = App::Orm()->findByProperty(entities\DraftOnboarding::class, "Work.Id", $this->sourceWorkId);
+		$targetOnBoarding = App::Orm()->findByProperty(entities\DraftOnboarding::class, "Work.Id", $this->targetWorkId);
+		// Trae los pasos
+		$steps = App::Orm()->findManyByProperty(entities\DraftOnboardingStep::class, "Onboarding.Id", $sourceOnBoarding->getId());
+		// Duplica los pasos
+		foreach ($steps as $step) {
+			// Copia el adjunto
+			$image = $step->getImage();
+			if ($image !== null)
+				$newFileId = $this->DuplicateFile($image->getId());
+			else
+				$newFileId = null;
+			// Copia el metadataFile
+			$static = array('obs_onboarding_id' => $targetOnBoarding->getId(), 'obs_image_id' => $newFileId);
+			$sourceStepFileId = $step->getId();
+			RowDuplicator::DuplicateRows(entities\DraftOnboardingStep::class, $sourceStepFileId, $static, 'obs_id');
+		}
+	}
+
 	private function CopyFiles($sourceMetadataId, $metadataId)
 	{
-		$files = App::Orm()->findManyByProperty(entities\DraftMetadataFile::class, "Metadata.Id", $sourceMetadataId);
-		foreach($files as $file)
+		$metadataFiles = App::Orm()->findManyByProperty(entities\DraftMetadataFile::class, "Metadata.Id", $sourceMetadataId);
+		foreach($metadataFiles as $metadataFile)
 		{
 			// Copia el adjunto
-			$newFileId = $this->DuplicateFile($file->getFile()->getId());
+			$newFileId = $this->DuplicateFile($metadataFile->getFile()->getId());
 			// Copia el metadataFile
 			$static = array('mfi_metadata_id' => $metadataId, 'mfi_file_id' => $newFileId);
-			$sourceMetadataFileId = $file->getId();
+			$sourceMetadataFileId = $metadataFile->getId();
 			RowDuplicator::DuplicateRows(entities\DraftMetadataFile::class, $sourceMetadataFileId, $static, 'mfi_id');
 		}
 	}
@@ -161,9 +204,6 @@ class WorkClone
 
 	public function CopyIcons()
 	{
-		$src_table = DbFile::GetChunksTableName(true, $this->sourceWorkId);
-		$target_table = DbFile::GetChunksTableName(true, $this->targetWorkId);
-
 		$icons = App::Orm()->findManyByProperty(entities\DraftWorkIcon::class, "Work.Id", $this->sourceWorkId);
 		foreach($icons as $icon)
 		{

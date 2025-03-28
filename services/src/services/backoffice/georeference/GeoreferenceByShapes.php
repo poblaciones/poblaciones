@@ -6,12 +6,14 @@ use minga\framework\Profiling;
 
 class GeoreferenceByShapes extends GeoreferenceBase
 {
+	const MAX_SIZE_CUSTOM_VALIDATE = 10000;
+
 	public function Validate($from, $pageSize, $totalRows)
 	{
 		Profiling::BeginTimer();
 
 		$shapesField = $this->state->Get('shape');
-		$valid = "GeometryIsValid(ST_GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . ")))";
+		$valid = "(CASE WHEN LENGTH(" . $shapesField . ") > " . self::MAX_SIZE_CUSTOM_VALIDATE . " THEN 190 - 90 * ST_IsValid(ST_GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . "))) ELSE GeometryIsValid(ST_GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . "))) END)";
 
 		$condition1 = $this->IsNullOrEmptySql($shapesField);
 		$condition2 = "RIGHT(GeoJsonOrWktToWkt(" . $shapesField . "), 1) != CONVERT(')' USING utf8)";

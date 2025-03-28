@@ -187,6 +187,7 @@ export default {
 				function (data) {
 					loc.step.Image = data.Image;
 					loc.imageToSend = null;
+					loc.getStepImage();
 				});
 		}
 	}

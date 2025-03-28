@@ -36,7 +36,10 @@ class WorkDelete
 		$this->doDeleteRevisions();
 		$this->doDeleteWork();
 		$this->doDeletePreview($previewId);
+
+		//if ($metadata->getId() != 818 && $metadata->getId() != 2204 && $metadata->getId() != 1889)
 		$this->doDeleteMetadata($metadata);
+
 		$this->doDeleteChunks();
 
 		Profiling::EndTimer();
@@ -140,6 +143,12 @@ class WorkDelete
 		// Borra las relaciones con fuente
 		$delete = "DELETE FROM draft_metadata_source WHERE msc_metadata_id = ?";
 		App::Db()->exec($delete, array($metadata->getId()));
+
+		// Borra la relación con instituciones
+		$deleteMetadataInstitutions = "DELETE FROM draft_metadata_institution WHERE min_metadata_id = ?";
+		App::Db()->exec($deleteMetadataInstitutions, array($metadata->getId()));
+		App::Db()->markTableUpdate('draft_metadata_institution');
+
 		// Consulta archivos a borrar
 		$queryDeleteFiles = "SELECT fil_id FROM draft_file JOIN
 						draft_metadata_file ON mfi_file_id = fil_id WHERE
@@ -148,6 +157,7 @@ class WorkDelete
 		$files = array();
 		foreach($filesRes as $fileRow)
 			$files[] = $fileRow['fil_id'];
+
 		// Borra metada_files
 		$deleteMetadataFiles = "DELETE FROM draft_metadata_file WHERE mfi_metadata_id = ?";
 		App::Db()->exec($deleteMetadataFiles, array($metadata->getId()));

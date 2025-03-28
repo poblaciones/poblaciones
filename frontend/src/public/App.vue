@@ -21,6 +21,7 @@
 					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')" v-show="!Embedded.HideSearch" />
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
+					<MapTypeSelector v-if="false"></MapTypeSelector>
 					<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -65,6 +66,8 @@
 	import Search from '@/public/components/widgets/map/search';
 	import WatermarkFloat from '@/public/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/public/components/widgets/map/WatermarkOwner';
+	import MapTypeSelector from '@/public/components/controls/mapTypeSelector';
+
 	import CollapseButtonRight from '@/public/components/controls/collapseButtonRight';
 
 	import Split from 'split.js';
@@ -91,6 +94,7 @@
 			LeftPanel,
 			PopupsPanel,
 			WorkPanel,
+			MapTypeSelector,
 			WatermarkFloat,
 			WatermarkOwner,
 			CollapseButtonRight,
@@ -1026,7 +1030,6 @@
 		position: absolute;
 		background-color: transparent;
 		display: flex;
-		height: 100%;
 		width: auto;
 		max-width: 70%;
 		max-height: 64px;

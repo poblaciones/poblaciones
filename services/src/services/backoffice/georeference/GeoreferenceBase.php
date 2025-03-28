@@ -66,6 +66,9 @@ abstract class GeoreferenceBase
 	// El polígono múltiple no contiene polígonos.
 	const ERROR_MULTIPOLYGON_EMPTY = 120;
 
+	// El polígono múltiple no contiene polígonos.
+	const ERROR_NON_VALID_GEOMETRY = 199;
+
 	function __construct($state)
 	{
 		$this->state = $state;

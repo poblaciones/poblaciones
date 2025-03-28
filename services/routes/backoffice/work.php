@@ -88,7 +88,7 @@ App::GetOrPost('/services/backoffice/UpdateWorkInstitution', function (Request $
 
 	$controller = new services\InstitutionService();
 	$institution = App::ReconnectJsonParam(entities\DraftInstitution::class, 'i');
-	return App::OrmJson($controller->UpdateWork($workId, $institution));
+	return App::OrmJson($controller->UpdateWorkInstitution($workId, $institution));
 });
 
 App::GetOrPost('/services/backoffice/UpdateInstitution', function (Request $request) {
