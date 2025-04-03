@@ -464,7 +464,7 @@ GoogleMapsApi.prototype.SetMapTypeState = function (mapTypeState) {
 		mapType = 'roadLight';
 		break;
 	case 't':
-		mapType = 'roadLight';
+		mapType = 'streets';
 		break;
 	case 's':
 		mapType = 'satellite';
@@ -503,6 +503,8 @@ GoogleMapsApi.prototype.getOpacity = function () {
 		return 0.4;
 	} else if(this.gMap.getMapTypeId() === 'hybrid') {
 		return 0.4;
+	} else if (this.gMap.getMapTypeId() === 'streets') {
+		return 0.10;
 	} else if (this.gMap.getMapTypeId() === 'roadLight') {
 		return 0.10;
 	} else if (this.gMap.getMapTypeId() === 'blank') {

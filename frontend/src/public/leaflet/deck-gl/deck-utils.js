@@ -1,12 +1,10 @@
 import * as L from 'leaflet';
 import { Deck } from '@deck.gl/core';
 
-/** @typedef {import('@deck.gl/core/lib/deck').DeckProps} DeckProps */
-/** @typedef {import('@deck.gl/core/lib/deck').ViewStateProps} ViewStateProps */
-
 /**
- * @param {L.Map} map
- * @returns {ViewStateProps}
+ * Obtiene el estado de la vista basado en el mapa de Leaflet.
+ * @param {L.Map} map - El mapa de Leaflet.
+ * @returns {Object} - Propiedades del estado de vista.
  */
 function getViewState(map) {
 	return {
@@ -19,11 +17,12 @@ function getViewState(map) {
 }
 
 /**
- * @param {L.Map} map
- * @param {HTMLElement} container
- * @param {Deck} deck
- * @param {DeckProps} props
- * @returns {Deck}
+ * Crea una instancia de Deck.gl dentro de un contenedor en Leaflet.
+ * @param {L.Map} map - El mapa de Leaflet.
+ * @param {HTMLElement} container - Contenedor HTML para Deck.gl.
+ * @param {Deck} deck - Instancia existente de Deck.gl (opcional).
+ * @param {Object} props - Propiedades para la capa de Deck.gl.
+ * @returns {Deck} - Nueva instancia de Deck.gl.
  */
 export function createDeckInstance(map, container, deck, props) {
 	if (!deck) {
@@ -33,20 +32,19 @@ export function createDeckInstance(map, container, deck, props) {
 			parent: container,
 			controller: false,
 			style: { zIndex: 'auto' },
-			viewState,
+			viewState
 		});
 	}
 	return deck;
 }
 
 /**
- * @param {Deck} deck
- * @param {L.Map} map
+ * Actualiza la vista de Deck.gl en base al estado del mapa de Leaflet.
+ * @param {Deck} deck - Instancia de Deck.gl.
+ * @param {L.Map} map - Mapa de Leaflet.
  */
 export function updateDeckView(deck, map) {
 	const viewState = getViewState(map);
-	// console.log(viewState);
-
 	deck.setProps({ viewState });
 	deck.redraw(false);
 }

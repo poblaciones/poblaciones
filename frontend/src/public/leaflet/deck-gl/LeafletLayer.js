@@ -50,6 +50,7 @@ export default class LeafletLayer extends L.Layer {
 		}
 
 		this.on('click', function (event) {
+			alert(1);
 			var elements = document.elementsFromPoint(event.containerPoint.x, event.containerPoint.y);
 			this.handleClick(event);
 		}, this);
@@ -145,7 +146,7 @@ export default class LeafletLayer extends L.Layer {
 	 * @returns {void}
 	 */
 	_update() {
-		if (this._map._animatingZoom) {
+		if (this._map._animatingZoom || !this._container) {
 			return;
 		}
 

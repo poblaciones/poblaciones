@@ -1,5 +1,6 @@
 import TxtOverlay from './TxtOverlay';
 import LeafletTileOverlay from './LeafletTileOverlay';
+import LeafletNullOverlay from './LeafletNullOverlay';
 import color from '@/common/framework/color';
 import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
@@ -757,6 +758,34 @@ LeafletApi.prototype.getBounds = function() {
 LeafletApi.prototype.getZoom = function () {
 	return this.map.getZoom();
 };
+LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
+	// Lo crea
+	var overlayTiled = new LeafletTileOverlay(activeMetric);
+
+	const d = require('./deck-gl/LeafletLayer');
+	var iconLayer = new IconOverlay(activeMetric);
+	var deckIconLayer = iconLayer.CreateLayer(data, 1);
+
+	var wrapper = new d.default({
+		views: [
+			new MapView({
+				repeat: true
+			})
+		],
+		layers: [deckIconLayer]
+	});
+
+	var overlay = L.layerGroup([wrapper, overlayTiled]);
+	overlay.dispose = function () {
+		overlay.eachLayer(function (layer) {
+			layer.dispose();
+		});
+	};
+
+	this.RemoveOverlay(index);
+	this.doInsertOverlay(index, overlay);
+};
+
 
 LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index) {
 	var deckGlDisabled = (window.Use.UseDeckgl == false);
@@ -767,67 +796,51 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		}
 	}
 
-	// le aumenta el índice a los siguientes...
-	for (var layer of this.overlayMapTypesLayers) {
-		if (layer.index >= index) {
-			layer.index++;
-		}
-	}
 	var overlay;
 	if (activeMetric.useTiles() || deckGlDisabled) {
 
 		// Lo crea
 		overlay = new LeafletTileOverlay(activeMetric);
 		// Lo agrega
-		this.overlayMapTypesLayers.push(overlay);
-
+		this.doInsertOverlay(index, overlay);
 	} else {
 		// Lo crea
-		var overlayTiled = new LeafletTileOverlay(activeMetric);
-
-		const d = require('./deck-gl/LeafletLayer');
-		var wrapper = new d.default({
-			views: [
-				new MapView({
-					repeat: true
-				})
-			],
-			layers: []
-		});
-
-		var overlay = L.layerGroup([wrapper, overlayTiled]);
-		overlay.dispose = function () {
-			overlay.eachLayer(function (layer) {
-				layer.dispose();
-			});
-		};
-		this.overlayMapTypesLayers.push(overlay);
+		overlay = new LeafletNullOverlay();
+		// Lo agrega
+		this.doInsertOverlay(index, overlay);
 
 		var loc = this;
 		// Trae los datos
+
 		// -TODO falta:
 		// 1. que muestre que los está trayendo
 		// 2. que cancele si ya no tiene sentido
 		// 3. que lo espere si está exportando
 		activeMetric.GetLayerData().then(function (data) {
 			if (!overlay.disposed) {
-				var iconLayer = new IconOverlay(activeMetric);
-				var deckIconLayer = iconLayer.CreateLayer(data, 1);
-
-//				overlay.deckOverlay = overlay;
-				wrapper.AddLayer(deckIconLayer);
-//				overlay.ZoomSubscribed = iconLayer;
-	//			window.SegMap.ZoomChangedSubscribers.push(overlay.ZoomSubscribed);
+				loc.CreateDeckglLayer(activeMetric, data, index);
 			}
 		});
 	}
+};
 
+LeafletApi.prototype.doInsertOverlay = function (index, overlay) {
+
+	// le aumenta el índice a los siguientes...
+	for (var layer of this.overlayMapTypesLayers) {
+		if (layer.index >= index) {
+			layer.index++;
+		}
+	}
+	// Lo ponen en el listado interno
+	this.overlayMapTypesLayers.push(overlay);
+	// Se lo setea
 	if (index >= this.overlayMapTypesLayers.length) {
 		overlay.index = this.overlayMapTypesLayers.length - 1;
 	} else {
 		overlay.index = index;
 	}
-	// lo reinserta
+	// Lo agrega al mapa
 	this.overlayMapTypesGroup.addLayer(overlay);
 	// actualiza las posiciones
 	for (var layer of this.overlayMapTypesLayers) {

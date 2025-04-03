@@ -4,6 +4,11 @@
 - Fix en formulario de activación (mostraba mensaje inválido al ingresar desde el link del email)
 - Fix a popups no scroleando en dispositivos móviles.
 - Admite múltiples instituciones para una cartografía.
+- Fix a clonado de bienvenida al clonar cartografía.
+- Fix a selección de institución.
+- Exportación nativa a excel y csv desde las grillas.
+- Mejoras en la tolerancia a errores al subir una capa de polígonos y georreferenciarla.
+- Fix a deckGl en leaflet.
 
 v4.2 (2024-11-05)
 - Filtro libre por nombre en listas de cartografías (admin y usuario).
