@@ -9,7 +9,6 @@ use minga\framework\Context;
 
 class MapSettings
 {
-	//Datos DB
 	public $DefaultClippingRegion = '';
 
 	public $LabelsBlockSize = 6;
@@ -20,6 +19,7 @@ class MapSettings
 	public $UseLightMap = false;
 	public $UsePerimeter = false;
 	public $ContentServerWorks = [];
+	public $BasemapMetrics = [];
 
 	public $UseCalculated = true;
 

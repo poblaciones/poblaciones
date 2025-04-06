@@ -23,6 +23,7 @@ function MetricsList(selectedMetricCollection) {
 		this.ClippingSegment
 	];
 };
+
 MetricsList.prototype.AddStandardMetric = function (activeMetric) {
 	var locked = this.GetLockedMetricsCount();
 	this.InsertStandardMetric(activeMetric, locked);

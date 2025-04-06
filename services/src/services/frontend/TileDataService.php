@@ -126,7 +126,7 @@ class TileDataService extends BaseService
 		} else {
 			$table = new SnapshotByDatasetTileData(
 				$snapshotTable,
-				$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables,
+				$level->Dataset->Id, $level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables,
 				$urbanity,
 				$partition,
 				$hasSymbols,
@@ -168,10 +168,11 @@ class TileDataService extends BaseService
 
 		$hasDescriptions = $level->HasDescriptions;
 		$hasSymbols = $level->Dataset->Marker && $level->Dataset->Marker->Type !== 'N' &&  $level->Dataset->Marker->Source === 'V';
+		$requiresPolygons = ($level->Dataset->Type == 'S');
 
 		$table = new SnapshotByDatasetTileData($snapshotTable,
-											$level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables,
-													$urbanity, $partition, $hasSymbols, $hasDescriptions);
+											$level->Dataset->Id, $level->Dataset->Type, $level->Dataset->AreSegments, $level->Variables,
+													$urbanity, $partition, $hasSymbols, $hasDescriptions, $requiresPolygons);
 
 		$table->honorTileLimit = false;
 

@@ -44,19 +44,26 @@ module.exports = {
 		var caption = null;
 		var value = null;
 		if (feature.value) {
-			var varName = window.SegMap.GetVariableName(feature.parentInfo.MetricId, feature.parentInfo.VariableId);
-			value = (str.EscapeHtml(varName) + '').trim() + ': ' + feature.value;
+			var variable = window.SegMap.GetVariable(feature.parentInfo.MetricId, feature.parentInfo.VariableId);
+			if (variable) {
+				if (!variable.IsSimpleCount) {
+					var varName = variable.Name;
+					value = (str.EscapeHtml(varName) + '').trim() + ': ' + feature.value;
+				}
+			}
 		}
 		if (feature.description) {
 			caption = feature.description;
 		}
-		var divider = (value !== null ? 'tpValueTitle' : '');
 		var html = '';
 		if (caption) {
-			html = "<div class='" + divider + "'>" + str.EscapeHtml(caption) + '</div>';
+			html = "<div style='white-space: nowrap;'>" + str.Wrap(str.EscapeHtml(caption), 30) + '</div>';
+		}
+		if (caption && value) {
+			html += "<div class='tpValueLine'></div>";
 		}
 		if (value) {
-			html += '<div>' + value + '</div>';
+			html += "<div style='white-space: nowrap;'>" + str.Wrap(value, 30) + '</div>';
 		}
 		if (html === '') {
 			html = null;

@@ -124,7 +124,11 @@
 				featureNavigation: { Key: null, Values: [], GettingKey: null },
 				toolbarStates: {
 					selectionMode: null, tutorialOpened: 0, showLabels: true,
-					collapsed: false, repositionSearch: false, leftPanelVisible: false
+					collapsed: false, repositionSearch: false, leftPanelVisible: false,
+					basemapMetrics: []/*
+						{ Id: 281101, Caption: 'Vías de tren', Group: 'Transporte', Visible: false },
+						{ Id: 281001, Caption: 'Estaciones de tren', Group: 'Transporte', Visible: false }
+					]*/
 				},
 				flyRightTimeoutId: null,
 				clipping: {
@@ -197,7 +201,11 @@
 				return (this.clippingStarted ? 'overflow-y: auto;' : 'overflow-y: hidden');
 			},
 			workColor() {
-				if (this.work && this.work.Current && this.work.Current.Metadata && this.work.Current.Metadata.Institutions.length > 0 && this.work.Current.Metadata.Institutions[0].Color) {
+				if (this.work && this.work.Current &&
+					this.work.Current.Metadata &&
+					this.work.Current.Metadata.Institutions &&
+					this.work.Current.Metadata.Institutions.length > 0 &&
+					this.work.Current.Metadata.Institutions[0].Color) {
 					return '#' + this.work.Current.Metadata.Institutions[0].Color;
 				}
 				return '#00A0D2';
@@ -911,14 +919,12 @@
 		box-shadow: 0px 1px rgb(34 153 221 / 40%);
 	}
 
-	.tpValueTitle {
+	.tpValueLine {
 		border-bottom: 1px solid #666;
-		padding-bottom: 4px;
-		padding-right: 8px;
 		margin-left: -8px;
 		margin-right: -8px;
-		font-weight: 500;
-		margin-bottom: 5px;
+		margin-top: 4px;
+		margin-bottom: 4px;
 	}
 
 	.ibTooltip {
@@ -926,7 +932,7 @@
 		pointer-events: none;
 		cursor: pointer;
 		background-color: #ffffff;
-		padding: 8px;
+		padding: 8px 8px 6px 8px;
 		border-radius: 8px;
 		overflow: hidden;
 		box-shadow: 0 4px 10px rgba(60,64,67,.28);
@@ -973,6 +979,7 @@
 
 	.ibTooltipOffsetLeft {
 		margin-left: 9px;
+		max-width: unset !important;
 	}
 
 	.ibLinkC {

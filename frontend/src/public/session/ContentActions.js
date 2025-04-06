@@ -15,6 +15,11 @@ ContentActions.prototype.AddMetric = function (metricId) {
 	this.Summary.MetricAdded();
 };
 
+ContentActions.prototype.AddBaseMetric = function (metricId) {
+	this.RegisterAction('AddBaseMetric', metricId);
+	this.Summary.BaseMetricAdded();
+};
+
 ContentActions.prototype.AddBoundary = function (boundaryId) {
 	this.RegisterAction('AddBoundary', boundaryId);
 	this.Summary.BoundaryAdded();
@@ -34,6 +39,10 @@ ContentActions.prototype.SelectSerie = function (serie) {
 	}
 	this.RegisterActionChange('SelectSerie', serie.Version.Name);
 	this.Summary.SerieSelected(serie.Version.Name);
+};
+
+ContentActions.prototype.RemoveBaseMetric = function (metricId) {
+	this.RegisterAction('RemoveBaseMetric', metricId);
 };
 
 ContentActions.prototype.RemoveMetric = function (metricId) {

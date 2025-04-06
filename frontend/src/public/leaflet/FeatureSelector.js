@@ -104,6 +104,9 @@ FeatureSelector.prototype.getFeature = function (event) {
 			var obj = this.getDeckElement(event);
 			// tiene en OBJ lo que precisa...
 			if (obj) {
+				if (obj.properties) {
+					obj = obj.properties;
+				}
 				var activeSelectedMetric = window.SegMap.GetActiveMetricByVariableId(obj.VID);
 				var variable = activeSelectedMetric.GetVariableById(obj.VID);
 
@@ -261,7 +264,7 @@ FeatureSelector.prototype.showTooltip = function () {
 	var m = new Mercator();
 	var coord = loc.tooltipLocation.Coordinate;
 	var style = 'ibTooltip exp-hiddable-block';
-	var outStyle = "ibTooltipOffsetLeft  mapLabels";
+	var outStyle = "ibTooltipOffsetLeft mapLabels";
 	if (loc.tooltipMarker) {
 		outStyle += ' ibTooltipNoYOffset';
 	}

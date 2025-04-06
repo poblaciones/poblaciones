@@ -3,6 +3,7 @@
 namespace helena\db\frontend;
 
 use minga\framework\Arr;
+use minga\framework\Str;
 use minga\framework\Profiling;
 
 use minga\framework\QueryPart;
@@ -20,18 +21,21 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	private $hasSymbols;
 	private $hasDescriptions;
 	private $areSegments;
-	public	$honorTileLimit = true;
+	private $datasetId;
+	public $honorTileLimit = true;
+	public $requiresPolygons = false;
 
-	public function __construct($snapshotTable, $datasetType, $areSegments, $variables, $urbanity, $partition,
-		$hasSymbols, $hasDescriptions)
+	public function __construct($snapshotTable, $datasetId, $datasetType, $areSegments, $variables, $urbanity, $partition,
+		$hasSymbols, $hasDescriptions, $requiresPolygons = false)
 	{
 		$this->variables = $variables;
 		$this->urbanity = $urbanity;
 		$this->partition = $partition;
-
+		$this->datasetId = $datasetId;
 		$this->areSegments = $areSegments;
 		$this->hasSymbols = $hasSymbols;
 		$this->hasDescriptions = $hasDescriptions;
+		$this->requiresPolygons = $requiresPolygons;
 
 		parent::__construct($snapshotTable, "sna", $datasetType);
 	}
@@ -73,10 +77,16 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		if ($hasAnyNotNullTotal !== '')
 			$where .= ' AND (' . substr($hasAnyNotNullTotal, 4) . ')';
 
+		// PolygonsQuery
+		if ($this->requiresPolygons)
+		{
+			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "sdi_geometry as value");
+		}
+		else
+			$polygonsQuery = null;
 		// Ejecuta la consulta
 		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
-		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
-
+		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery, $polygonsQuery);
 		$ret = $multiQuery->fetchAll();
 
 		$extraFields = [];
@@ -110,6 +120,8 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	private function RotateResults($arr, $extraFields)
 	{
 		$ret = [];
+		$render = new GeoJson();
+
 		foreach($arr as $row)
 		{
 			foreach($this->variables as $variable)
@@ -132,6 +144,8 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 						$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
 					if ($this->hasSymbols)
 						$item['Symbol'] = $row['Symbol'];
+					if ($this->requiresPolygons)
+						$item['Data'] = $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
 
 					$ret[] = $item;
 				}

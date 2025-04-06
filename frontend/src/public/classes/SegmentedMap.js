@@ -1,4 +1,5 @@
 import ActiveSelectedMetric from '@/public/classes/ActiveSelectedMetric';
+import ActiveBaseMetric from '@/public/classes/ActiveBaseMetric';
 import ActiveLabels from '@/public/classes/ActiveLabels';
 import ActiveBoundary from '@/public/classes/ActiveBoundary';
 import MetricsList from '@/public/classes/MetricsList';
@@ -351,6 +352,31 @@ SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
 	this.UpdateLabelsVisibility();
 };
 
+SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
+	basemapMetric.Visible = !basemapMetric.Visible;
+	if (basemapMetric.Visible) {
+		// lo muestra
+		if (basemapMetric.layer == null) {
+			// lo inserta de la nada...
+			if (!basemapMetric.requested) {
+				basemapMetric.requested = true;
+				this.AddBaseMetricById(basemapMetric.Id).then(function (activeBaseMetric) {
+					basemapMetric.layer = activeBaseMetric;
+					basemapMetric.requested = false;
+				});
+			}
+		} else {
+			basemapMetric.layer.Show();
+			this.SaveRoute.UpdateRoute();
+		}
+	} else {
+		// lo quita
+		basemapMetric.layer.Hide();
+		this.SaveRoute.UpdateRoute();
+	}
+};
+
+
 SegmentedMap.prototype.ToggleShowLabels = function () {
 	// Si está en modo satélite, el toggle implica un cambio de mapa
 	var mapState = this.MapsApi.GetMapTypeState();
@@ -431,8 +457,27 @@ SegmentedMap.prototype.EndSelecting = function () {
 };
 
 SegmentedMap.prototype.GetActiveMetricByVariableId = function (variableId) {
-	return this.Metrics.GetMetricByVariableId(variableId);
+	var ret = this.Metrics.GetMetricByVariableId(variableId);
+	if (ret) {
+		return ret;
+	} else {
+		return this.GetActiveMetricByVariableFromBaseMetricsId(variableId);
+	}
 };
+
+SegmentedMap.prototype.GetActiveMetricByVariableFromBaseMetricsId = function (variableId) {
+	var baseMetrics = this.toolbarStates.basemapMetrics;
+	for (var i = 0; i < baseMetrics.length; i++) {
+		if (baseMetrics[i].layer) {
+			var variable = baseMetrics[i].layer.GetVariableById(variableId);
+			if (variable !== null) {
+				return baseMetrics[i].layer;
+			}
+		}
+	}
+	return null;
+};
+
 
 SegmentedMap.prototype.GetVariable = function (metricId, variableId) {
 	var metric = this.Metrics.GetMetricById(metricId);
@@ -486,8 +531,17 @@ SegmentedMap.prototype.AddMetricByFID = function (fid) {
 
 SegmentedMap.prototype.AddMetricById = function (id) {
 	var loc = this;
-	return this.doAddMetricById(id, null).then(function () {
+	return this.doAddMetricById(id, null).then(function (activeSelectedMetric) {
 		loc.Session.Content.AddMetric(id);
+		return activeSelectedMetric;
+	});
+};
+
+SegmentedMap.prototype.AddBaseMetricById = function (id) {
+	var loc = this;
+	return this.doAddMetricById(id, null, true).then(function (activeSelectedMetric) {
+		loc.Session.Content.AddBaseMetric(id);
+		return activeSelectedMetric;
 	});
 };
 
@@ -505,19 +559,25 @@ SegmentedMap.prototype.AddBoundaryById = function (id, caption) {
 
 };
 
-SegmentedMap.prototype.doAddMetricById = function (id, versionSelector) {
+SegmentedMap.prototype.doAddMetricById = function (id, versionSelector, isBaseMetric) {
 	const loc = this;
 	return this.Get(window.host + '/services/metrics/GetSelectedMetric', {
 		params: { l: id }
 	}).then(function (res) {
-		loc.AddMetricBySelectedMetricInfo(res.data, versionSelector);
+		var activeSelectedMetric = loc.AddMetricBySelectedMetricInfo(res.data, versionSelector, isBaseMetric);
+		return activeSelectedMetric;
 	}).catch(function (error) {
 		err.errDialog('GetSelectedMetric', 'obtener el indicador solicitado', error);
 	});
 };
 
-SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricInfo, versionSelector) {
-	var activeSelectedMetric = new ActiveSelectedMetric(selectedMetricInfo, false);
+SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricInfo, versionSelector, isBaseMetric) {
+	var activeSelectedMetric;
+	if (isBaseMetric) {
+		activeSelectedMetric = new ActiveBaseMetric(selectedMetricInfo, false);
+	} else {
+		activeSelectedMetric = new ActiveSelectedMetric(selectedMetricInfo, false);
+	}
 	if (versionSelector) {
 		var index = versionSelector(activeSelectedMetric);
 		if (index !== -1) {
@@ -525,7 +585,12 @@ SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricI
 		}
 	}
 	activeSelectedMetric.UpdateLevel();
-	this.Metrics.AddStandardMetric(activeSelectedMetric);
+	if (isBaseMetric) {
+		this.Metrics.AppendNonStandardMetric(activeSelectedMetric);
+	} else {
+		this.Metrics.AddStandardMetric(activeSelectedMetric);
+	}
+	return activeSelectedMetric;
 };
 
 SegmentedMap.prototype.ChangeMetricIndex = function (oldIndex, newIndex) {

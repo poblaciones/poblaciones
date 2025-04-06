@@ -27,6 +27,7 @@ function Summary(session) {
 		},
 		Content: {
 				Metrics: 0,
+				//BaseMetrics: 0,
 				Downloads: 0,
 				Metadata: 0,
 				Boundaries: 0,
@@ -52,6 +53,10 @@ Summary.prototype.UpdateEllapsed = function () {
 
 Summary.prototype.MetricAdded = function () {
 	this.Data.Content.Metrics++;
+};
+
+Summary.prototype.BaseMetricAdded = function () {
+	//this.Data.Content.BaseMetrics++;
 };
 
 Summary.prototype.BoundaryAdded = function () {

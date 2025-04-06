@@ -22,14 +22,6 @@ function IconOverlay(activeSelectedMetric) {
 };
 
 IconOverlay.prototype.CreateLayer = function (data, sc = 1) {
-		/*this.activeSelectedMetric.get[
-		{
-			name: 'Colma (COLM)',
-			address: '365 D Street, Colma CA 94014',
-			exits: 4214,
-			coordinates: [-59.846507, -36.783843]
-		},
-	];*/
 	var dataFiltered = this.Filter(data);
 	var loc = this;
 	var delegates = loc.markerFactory.createDelegates();

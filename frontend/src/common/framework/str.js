@@ -136,6 +136,63 @@ module.exports = {
 			return cad.charAt(0).toUpperCase() + cad.slice(1);
 		}
 	},
+	Wrap(text, size) {
+		if (!text || size <= 0) return text;
+
+		const result = [];
+		let currentLine = '';
+		let currentWord = '';
+
+		// Recorrer el texto caracter por caracter
+		for (let i = 0; i < text.length; i++) {
+			const char = text[i];
+
+			// Si es un espacio o símbolo, es posible punto de corte
+			if (/\s|[.,;:!?)\]}<>\/\\-]/.test(char)) {
+				// Si añadir esta palabra excede el tamaño
+				if ((currentLine + currentWord + char).length > size) {
+					// Guardar línea actual y empezar nueva
+					result.push(currentLine);
+					currentLine = currentWord + char;
+				} else {
+					// Añadir palabra y separador a la línea actual
+					currentLine += currentWord + char;
+				}
+				currentWord = '';
+			} else {
+				// Añadir caracter a la palabra actual
+				currentWord += char;
+
+				// Si la palabra actual es más grande que el tamaño permitido
+				if (currentWord.length >= size) {
+					// Si hay contenido en la línea actual, guardarla
+					if (currentLine.length > 0) {
+						result.push(currentLine);
+						currentLine = '';
+					}
+					// Cortar la palabra y guardarla
+					result.push(currentWord.substring(0, size));
+					currentWord = currentWord.substring(size);
+				}
+			}
+		}
+
+		// Procesar la última palabra y línea
+		if (currentWord.length > 0) {
+			if ((currentLine + currentWord).length > size) {
+				if (currentLine.length > 0) {
+					result.push(currentLine);
+				}
+				result.push(currentWord);
+			} else {
+				result.push(currentLine + currentWord);
+			}
+		} else if (currentLine.length > 0) {
+			result.push(currentLine);
+		}
+
+		return result.join('<br>');
+	},
 	EscapeHtml(unsafe) {
 		return ('' + unsafe)
 			.replaceAll(/&/g, "&amp;")

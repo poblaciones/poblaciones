@@ -11,8 +11,10 @@ import arr from '@/common/framework/arr';
 import Mercator from '@/public/js/Mercator';
 import MarkerFactory from './MarkerFactory';
 import IconOverlay from '@/public/overlays/IconOverlay';
+import PolygonOverlay from '@/public/overlays/PolygonOverlay';
 import { LeafletLayer } from './deck-gl/LeafletLayer';
 import { MapView } from '@deck.gl/core';
+import { PolygonLayer } from '../../../node_modules/@deck.gl/layers/dist/index';
 
 export default LeafletApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -763,16 +765,25 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 	var overlayTiled = new LeafletTileOverlay(activeMetric);
 
 	const d = require('./deck-gl/LeafletLayer');
-	var iconLayer = new IconOverlay(activeMetric);
-	var deckIconLayer = iconLayer.CreateLayer(data, 1);
 
+	var deckElementsLayer;
+	// Crea la capa
+	if (activeMetric.SelectedLevel().Dataset.Type == 'S') {
+		var polygonLayer = new PolygonOverlay(activeMetric);
+		deckElementsLayer = polygonLayer.CreateLayer(data);
+	} else {
+		var iconLayer = new IconOverlay(activeMetric);
+		deckElementsLayer = iconLayer.CreateLayer(data, 1);
+	}
+
+	// La agrega
 	var wrapper = new d.default({
 		views: [
 			new MapView({
 				repeat: true
 			})
 		],
-		layers: [deckIconLayer]
+		layers: [deckElementsLayer]
 	});
 
 	var overlay = L.layerGroup([wrapper, overlayTiled]);
@@ -795,10 +806,8 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 			deckGlDisabled = false;
 		}
 	}
-
 	var overlay;
 	if (activeMetric.useTiles() || deckGlDisabled) {
-
 		// Lo crea
 		overlay = new LeafletTileOverlay(activeMetric);
 		// Lo agrega

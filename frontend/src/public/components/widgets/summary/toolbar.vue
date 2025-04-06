@@ -19,6 +19,11 @@
 				<i class="fas fa-tags" />
 			</button>
 
+			<button type="button" v-for="basemapMetric in basemapMetrics" :key="basemapMetric.Id" class="btn btn-default btn-xs"
+							:title="(basemapMetric.Visible ? 'Ocultar ' : 'Mostrar ') + basemapMetric.Caption" @click="toggleBasemapMetric(basemapMetric)" :class="getBasemapMetricActive(basemapMetric)">
+				<i class="fas fa-tags" />
+			</button>
+
 			<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" @click="geolocate()">
 				<i class="far fa-dot-circle" />
@@ -178,6 +183,9 @@
 			toggleLabels() {
 				window.SegMap.ToggleShowLabels();
 			},
+			toggleBasemapMetric(basemapMetric) {
+				window.SegMap.ToggleBasemapMetric(basemapMetric);
+			},
 			geolocate() {
 				if (navigator.geolocation) {
 					navigator.geolocation.getCurrentPosition(function (position) {
@@ -198,6 +206,12 @@
 				}
 				return '';
 			},
+			getBasemapMetricActive(basemapMetricActive) {
+				if (basemapMetricActive.Visible) {
+					return ' active';
+				}
+				return ' unselected';
+			},
 			getLabelsActive(mode) {
 				if (this.toolbarStates.showLabels) {
 					return ' active';
@@ -211,6 +225,9 @@
 			},
 			Embedded() {
 				return window.Embedded;
+			},
+			basemapMetrics() {
+				return this.toolbarStates.basemapMetrics;
 			},
 			helpLinks() {
 				if (this.config) {

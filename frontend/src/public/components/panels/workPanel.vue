@@ -69,7 +69,7 @@ export default {
 		},
 		institutionsList() {
 			var institutions = this.work.Current.Metadata.Institutions;
-			if (institutions.length == 0)
+			if (!institutions || institutions.length == 0)
 				return null;
 			var ret = institutions[0].Name;
 			for (var n = 1; n < institutions.length; n++) {
@@ -111,7 +111,7 @@ export default {
 			if (!this.work.Current) {
 				return 0;
 			}
-			var ret = (this.work.Current.Metadata.Name ? 1 : 0) + (this.work.Current.Metadata.Institutions.length > 0 && this.work.Current.Metadata.Institutions[0].Name ? 1 : 0)
+			var ret = (this.work.Current.Metadata.Name ? 1 : 0) + (this.work.Current.Metadata.Institutions && this.work.Current.Metadata.Institutions.length > 0 && this.work.Current.Metadata.Institutions[0].Name ? 1 : 0)
 				+ (this.work.Current.Metadata.Authors ? 1 : 0);
 			return ret;
 		},
