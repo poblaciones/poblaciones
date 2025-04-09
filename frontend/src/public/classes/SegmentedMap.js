@@ -353,8 +353,7 @@ SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
 };
 
 SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
-	basemapMetric.Visible = !basemapMetric.Visible;
-	if (basemapMetric.Visible) {
+	if (!basemapMetric.Visible) {
 		// lo muestra
 		if (basemapMetric.layer == null) {
 			// lo inserta de la nada...
@@ -363,15 +362,20 @@ SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
 				this.AddBaseMetricById(basemapMetric.Id).then(function (activeBaseMetric) {
 					basemapMetric.layer = activeBaseMetric;
 					basemapMetric.requested = false;
+					basemapMetric.Visible = !basemapMetric.Visible;
 				});
 			}
 		} else {
+			basemapMetric.Visible = !basemapMetric.Visible;
 			basemapMetric.layer.Show();
 			this.SaveRoute.UpdateRoute();
 		}
 	} else {
 		// lo quita
-		basemapMetric.layer.Hide();
+		basemapMetric.Visible = !basemapMetric.Visible;
+		if (basemapMetric.layer) {
+			basemapMetric.layer.Hide();
+		}
 		this.SaveRoute.UpdateRoute();
 	}
 };

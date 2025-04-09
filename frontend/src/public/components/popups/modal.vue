@@ -2,7 +2,7 @@
 	<div v-if="showDialog" :transition="transition">
 		<div class="modal" @click.self="clickMask">
 			<div class="modal-dialog" :class="modalClass" @click.self="clickMask" ref="dialog">
-				<div class="modal-content card" :style="(maxWidth ? 'max-width: ' + maxWidth + 'px' : '')">
+				<div class="modal-content card" :style="(maxHeight ? 'height: ' + maxHeight + ';': '') + (maxWidth ? 'max-width: ' + maxWidth + 'px' : '')">
 					<!--Header-->
 					<div class="modal-header mpHeader unselectable" :style="'background-color: ' + backgroundColor">
 						<slot name="header">
@@ -17,7 +17,7 @@
 						</slot>
 					</div>
 					<!--Container-->
-					<div class="modal-body" v-if="hasBody">
+					<div class="modal-body" :class="bodyClass" v-if="hasBody">
 						<slot></slot>
 					</div>
 					<!--Footer-->
@@ -43,6 +43,14 @@
 		props: {
 			maxWidth: {
 				type: Number,
+			},
+			maxHeight: {
+				type: String,
+				default: ''
+			},
+			bodyClass: {
+				type: String,
+				default: ''
 			},
 		showCancel: {
 			type: Boolean,

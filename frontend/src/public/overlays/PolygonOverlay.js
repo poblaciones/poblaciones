@@ -38,9 +38,9 @@ PolygonOverlay.prototype.CreateLayer = function (data) {
 		//getPolygon: d => d.Data.geometry.coordinates,
 		//getElevation: d => 0,
 		getFillColor: d => color.ParseColorParts(loc.colorMap[d.properties.LID] + "80"),
-		getLineColor: d => color.ParseColorParts(loc.colorMap[d.properties.LID]),
-		getLineWidth: 5,
-		lineWidthMinPixels: 1,
+		getLineColor: d => color.ParseColorParts(loc.colorMap[d.properties.LID] + "B0"),
+		getLineWidth: 5, // en metros
+		lineWidthMinPixels: 2,
 		pickable: true,
 		onError: function (error) {
 			console.log(error.message);

@@ -32,7 +32,7 @@ class ImportService extends BaseService
 	const STEP_INSERTED = 3;
 	const STEP_END = 4;
 
-	const DEFAULT_NAME_CAPTIONS = ['nombre', 'nombre_place', 'name', 'descripción', 'descripcion'];
+	const DEFAULT_NAME_CAPTIONS = ['nombre', 'nombre_place', 'name', 'descripción', 'descripcion', 'fna'];
 	private $state;
 
 	public function CreateMultiImportFile($datasetId, $bucketId, $fileExtension, $keepLabels, $selectedSheetIndex)

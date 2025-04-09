@@ -21,15 +21,15 @@
 	</script>
 	<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>
 	<% if (htmlWebpackPlugin.options.metadata.maps_api == 'google' ||
-					htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
-		<% if (htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
-			{% if (maps_api == 'google') %}
-		<% } %>
-		<!-- Google maps -->
-		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v={{ google_maps_version}}&language=es-419&key=<%=htmlWebpackPlugin.options.metadata.google_maps_key%>&libraries=drawing"></script>
-		<% if (htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
-			{% endif %}
-		<% } %>
+	htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
+	<% if (htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
+	{% if (maps_api == 'google') %}
+	<% } %>
+	<!-- Google maps -->
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v={{ google_maps_version}}&language=es-419&key=<%=htmlWebpackPlugin.options.metadata.google_maps_key%>&libraries=drawing"></script>
+	<% if (htmlWebpackPlugin.options.metadata.maps_api == 'all') { %>
+	{% endif %}
+	<% } %>
 	<% } %>
 	<!-- Bootstrap Core CSS -->
 	<link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">

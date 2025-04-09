@@ -131,6 +131,11 @@ class Variable
 		throw new PublicException("Operador inválido: " . $operator);
 	}
 
+	public function IsValidFormula()
+	{
+		return !($this->attributes['mvv_data'] == 'O' && $this->attributes['mvv_data_column_id'] == null);
+	}
+
 	public static function ResolveFilterCondition($datasetId, $filter)
 	{
 		$filterParts = explode("\t", $filter);

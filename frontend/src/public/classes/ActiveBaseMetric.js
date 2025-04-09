@@ -42,7 +42,8 @@ ActiveBaseMetric.prototype.GetCartographyService = function () {
 
 ActiveBaseMetric.prototype.Show = function () {
 	this.properties.Visible = true;
-	window.SegMap.Metrics.UpdateMetric(this);
+	window.SegMap.Metrics.InsertNonStandardMetric(this, -1);
+//	window.SegMap.Metrics.UpdateMetric(this);
 };
 
 ActiveBaseMetric.prototype.Hide = function () {

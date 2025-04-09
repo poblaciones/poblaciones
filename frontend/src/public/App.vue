@@ -73,6 +73,7 @@
 	import Split from 'split.js';
 	import axios from 'axios';
 	import Vue from 'vue';
+	import arr from '@/common/framework/arr';
 	import err from '@/common/framework/err';
 	import web from '@/common/framework/web';
 
@@ -125,10 +126,9 @@
 				toolbarStates: {
 					selectionMode: null, tutorialOpened: 0, showLabels: true,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false,
-					basemapMetrics: []/*
-						{ Id: 281101, Caption: 'Vías de tren', Group: 'Transporte', Visible: false },
-						{ Id: 281001, Caption: 'Estaciones de tren', Group: 'Transporte', Visible: false }
-					]*/
+					basemapMetrics: [
+
+					]
 				},
 				flyRightTimeoutId: null,
 				clipping: {
@@ -265,6 +265,8 @@
 					loc.config = res.data;
 					loc.config.IsMobile = loc.$isMobile();
 					loc.user = res.data.User;
+					arr.AddRange(loc.toolbarStates.basemapMetrics, loc.config.BasemapMetrics);
+
 					if (web.getParameterByName('leaflet') != null) {
 						loc.config.MapsAPI = 'leaflet';
 					}
@@ -797,7 +799,9 @@
 		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
 		cursor: ew-resize;
 	}
-
+	.fixedBody {
+		position: absolute; top: 40px; bottom: 0px;
+	}
 	.split.split-horizontal, .gutter.gutter-horizontal {
 		height: 100%;
 		width: 100%;
@@ -1383,7 +1387,12 @@
 	.lihover {
 		background: #efefef;
 	}
-
+	.itemSearchCategoryL {
+		background-color: #fafafa;
+	}
+	.itemSearchCategoryB {
+		background-color: #f5f5f5;
+	}
 	.thinScroll::-webkit-scrollbar {
 		width: 6px;
 		border-top-right-radius: 2px;
@@ -1471,4 +1480,24 @@
 	.leaflet-zoom-animated {
 		transition: none !important;
 	}*/
+
+
+	/* Fixes Google Mutant Empty attribution */
+	.leaflet-bottom.leaflet-left,
+	.leaflet-bottom.leaflet-right {
+		margin-bottom: initial !important;
+	}
+
+	/* Make Google Logo/ToS/Feedback links clickable */
+	.leaflet-google-mutant a,
+	.leaflet-google-mutant button {
+		pointer-events: auto;
+	}
+
+	/* Move Google ToS/Feedback to the top */
+	.leaflet-google-mutant .gmnoprint,
+	.leaflet-google-mutant .gm-style-cc {
+		top: 0;
+		bottom: auto !important;
+	}
 </style>

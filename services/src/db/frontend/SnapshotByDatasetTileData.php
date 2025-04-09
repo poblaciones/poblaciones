@@ -81,6 +81,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		if ($this->requiresPolygons)
 		{
 			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "sdi_geometry as value");
+			//			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "ST_AsText(sdi_geometry) as value");
 		}
 		else
 			$polygonsQuery = null;
@@ -146,6 +147,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 						$item['Symbol'] = $row['Symbol'];
 					if ($this->requiresPolygons)
 						$item['Data'] = $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
+						//	$item['Data'] = $row['value'];// $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
 
 					$ret[] = $item;
 				}

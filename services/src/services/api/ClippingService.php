@@ -9,7 +9,7 @@ use helena\classes\GeoJson;
 use minga\framework\Arr;
 use minga\framework\MessageBox;
 
-use helena\services\frontend\LookupService;
+use helena\services\frontend\SearchService;
 use helena\services\common\BaseService;
 use helena\db\frontend\ClippingRegionItemModel;
 use helena\entities\frontend\geometries\Envelope;
@@ -56,7 +56,7 @@ class ClippingService extends BaseService
 	{
 		$this->CheckVersion($version);
 
-		$controller = new LookupService();
+		$controller = new SearchService();
 		$filter = 'r';
 		$data = $controller->Search($q, $filter, false);
 		$res = [];

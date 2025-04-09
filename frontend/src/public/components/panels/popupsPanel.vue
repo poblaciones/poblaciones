@@ -8,7 +8,7 @@
 		<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
 		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
 		<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
-		<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
+		<AddMetric2 ref="addMetric" :backgroundColor="backgroundColor" />
 	</div>
 </template>
 
@@ -18,7 +18,7 @@ import ClippingMetadata from '@/public/components/popups/clippingMetadata';
 import CompareMetadata from '@/public/components/popups/compareMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
 import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
-import AddMetric from '@/public/components/popups/addMetric';
+import AddMetric2 from '@/public/components/popups/addMetric2';
 import MetricDownload from '@/public/components/popups/metricDownload';
 import BoundaryDownload from '@/public/components/popups/boundaryDownload';
 import Embedding from '@/public/components/popups/embedding';
@@ -27,7 +27,7 @@ export default {
 	name: 'popupsPanel',
 	components: {
 		BoundaryDownload,
-		AddMetric,
+		AddMetric2,
 		WorkMetadata,
 		Embedding,
 		ClippingMetadata,

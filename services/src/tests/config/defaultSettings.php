@@ -57,7 +57,7 @@ return [
 		],
 	],
 
-	"helena\\tests\\frontend\\LookupServiceTest" => [
+	"helena\\tests\\frontend\\SearchServiceTest" => [
 		"testSearch" => "escuelas",
 	],
 	"helena\\tests\\frontend\\LabelServiceTest" => [

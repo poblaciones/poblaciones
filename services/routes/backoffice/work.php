@@ -31,7 +31,7 @@ App::$app->get('/services/backoffice/CreateWork', function (Request $request) {
 
 App::$app->get('/services/backoffice/Search', function (Request $request) {
 	$query = Params::Get('q');
-	$controller = new helena\services\frontend\LookupService();
+	$controller = new helena\services\frontend\SearchService();
 	$filter = Params::Get('f', '');
 	$getDraftMetrics = Params::GetBool('b');
 	$currentWorkId = Params::GetIntMandatory('k');

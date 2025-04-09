@@ -275,3 +275,39 @@ String.prototype.replaceRange = function(start, end, str) {
 	return this.slice(0, start) + str + this.slice(end);
 };
 
+String.prototype.Desofuscar = function(textoOfuscado, key) {
+	// Verificamos que la clave no esté vacía
+	if (!key || key.length === 0) {
+		return '';
+	}
+
+	// Convertimos la clave a un array de bytes
+	const keyBytes = [];
+	for (let i = 0; i < key.length; i++) {
+		keyBytes.push(key.charCodeAt(i));
+	}
+	const keyLength = keyBytes.length;
+
+	// Convertimos el texto ofuscado de hexadecimal a bytes
+	const bytes = [];
+	for (let i = 0; i < textoOfuscado.length; i += 2) {
+		const hex = textoOfuscado.substring(i, i + 2);
+		bytes.push(parseInt(hex, 16));
+	}
+
+	// Desofuscamos cada byte
+	const resultado = [];
+	for (let i = 0; i < bytes.length; i++) {
+		// Obtenemos el byte correspondiente de la clave
+		const keyIndex = i % keyLength;
+		const keyByte = keyBytes[keyIndex];
+
+		// XOR para desofuscar
+		const original = bytes[i] ^ keyByte;
+
+		// Añadimos el carácter desofuscado
+		resultado.push(String.fromCharCode(original));
+	}
+
+	return resultado.join('');
+};

@@ -28,7 +28,7 @@
 						<div style="height: 155px">
 							<div v-if="error" style="max-width: 450px">
 								<p>{{ error }}</p>
-								<p>{{ errorDetail }}</p>
+								<p v-html="errorDetail"></p>
 							</div>
 							<div v-else="">
 								<img style="width: 120px; margin-top: 16px" :src="imageSrc" alt="Listo">
@@ -153,6 +153,7 @@ export default {
 				var msgtext = error.response.data.trim();
 				if (msgtext.startsWith('[PE-E]:')) {
 					ret = msgtext.substr(7).trim();
+					ret = ret.replace("\n\n", "</p><p>");
 					ret = ret.replace("\n", "<br>");
 				}
 			}

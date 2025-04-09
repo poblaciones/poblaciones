@@ -27,8 +27,16 @@ class SnapshotByDatasetModel
 			throw new PublicException("Dataset no encontrado");
 
 		$columns = $this->BuildHeaders($dataset);
-
 		$levels = $this->GetDatasetLevels($dataset['dat_id']);
+
+		// Valida la integraidad para dar mejores errores
+		foreach($levels as $level)
+		{
+			foreach ($level['variables'] as $variable)
+				$this->ValidateVariableIntegrity($level, $dataset, $variable);
+		}
+			;
+		// Arma las columnas a insertar
 		$variables = $this->GetAllVariables($levels);
 		foreach ($variables as $variable)
 		{
@@ -50,6 +58,17 @@ class SnapshotByDatasetModel
 		Profiling::EndTimer();
 	}
 
+	private function ValidateVariableIntegrity($level, $dataset, $variable)
+	{
+		if (!$variable->IsValidFormula())
+		{
+            $text = '';
+            // Obtiene información y armar el error
+            $text = "El dataset '" . $dataset['dat_caption'] . "' contiene un indicador cuya fórmula no indica ninguna variable principal.\n\n";
+			$text .= "Verifique la fórmula para el indicador '" . $level['mtr_caption'] . " (" . $level['mvr_caption'] . ")' e intente publicar nuevamente.";
+			throw new PublicException($text);
+		}
+	}
 	public static function SnapshotTable($table)
 	{
 		return $table . "_snapshot";
@@ -151,7 +170,8 @@ class SnapshotByDatasetModel
 		catch(\Exception $ex)
         {
             $msg = $ex->getMessage();
-			if (Str::EndsWith($msg, "Cannot get geometry object from data you send to the GEOMETRY field"))
+			if (Str::EndsWith($msg, "Cannot get geometry object from data you send to the GEOMETRY field") ||
+				Str::Contains($msg, "Invalid GIS data provided to function polygon"))
             {
                 $text = '';
                 // Obtiene información y armar el error
@@ -172,7 +192,7 @@ class SnapshotByDatasetModel
 	{
 		Profiling::BeginTimer();
 
-		$sql = "SELECT metric_version.*, metric_version_level.*, dataset.*, geo_id,
+		$sql = "SELECT metric.mtr_caption, metric_version.*, metric_version_level.*, dataset.*, geo_id,
 							geo_caption, geo_field_caption_name,
 							caption.dco_field AS dat_caption_field,
 							longitude.dco_field AS dat_longitude_field,
@@ -180,9 +200,10 @@ class SnapshotByDatasetModel
 							longitudeSegment.dco_field AS dat_longitude_field_segment,
 							latitudeSegment.dco_field AS dat_latitude_field_segment
 
-							FROM metric_version
+							FROM metric
+							JOIN metric_version ON mtr_id = mvr_metric_id
 							JOIN metric_version_level ON mvl_metric_version_id = mvr_id
-						  JOIN dataset ON dat_id = mvl_dataset_id
+							JOIN dataset ON dat_id = mvl_dataset_id
 							JOIN geography ON geo_id = dat_geography_id
 
 							LEFT JOIN dataset_column latitude ON latitude.dco_id = dat_latitude_column_id
@@ -437,8 +458,10 @@ class SnapshotByDatasetModel
 		{
 			if ($metricVersionLevel['geo_field_caption_name'] == "" || $metricVersionLevel['dat_are_segments'])
 				return "null";
-			else
+			else if ($metricVersionLevel['dat_type'] == 'D')
 				return "IFNULL(gei_caption, gei_code)";
+			else
+				return "null";
 		}
 		else
 		{

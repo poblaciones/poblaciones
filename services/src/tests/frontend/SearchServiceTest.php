@@ -3,13 +3,13 @@
 namespace helena\tests\frontend;
 
 use helena\classes\TestCase;
-use helena\services\frontend\LookupService;
+use helena\services\frontend\SearchService;
 
-class LookupServiceTest extends TestCase
+class SearchServiceTest extends TestCase
 {
 	public function testSearch()
 	{
-		$search = new LookupService();
+		$search = new SearchService();
 		$ret = $search->Search($this->Get(), '', false);
 		$this->assertIsArray($ret);
 		$ret = $search->Search('asldkfhasldfkjasdlfkjaslfasjdflkasjflaksjflaskf', '', false);

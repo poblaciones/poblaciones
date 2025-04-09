@@ -15,7 +15,7 @@ use helena\services\frontend\WorkService;
 use helena\classes\Session;
 use helena\classes\Statistics;
 use helena\controllers\common\cPublicController;
-use helena\services\frontend\LookupService;
+use helena\services\frontend\SearchService;
 use helena\db\frontend\MetadataModel;
 use helena\classes\App;
 use helena\classes\Links;
@@ -113,7 +113,7 @@ class cMap extends cPublicController
 		if (!$search) return null;
 
 		// Prueba una búsqueda
-		$service = new LookupService();
+		$service = new SearchService();
 		$ret = $service->Search($search, 'h', false);
 		if (sizeof($ret) === 0)
 			return null;

@@ -15,7 +15,7 @@ use minga\framework\Context;
 use minga\framework\SearchLog;
 use minga\framework\Profiling;
 
-class LookupService extends BaseService
+class SearchService extends BaseService
 {
 	public function Search($query, $filter, $getDraftMetrics, $currentWork = null)
 	{
@@ -45,28 +45,28 @@ class LookupService extends BaseService
 			$resLay = [];
 
 		// Trae las regiones
-		if ($filter != 'm' && ($filter != 'h' ||  sizeof($resLay) === 0))
+		$resClippings = [];
+		if ($filter != 'm' && ($filter != 'h' || sizeof($resLay) === 0))
+		{
 			$resClippings = $regionsLookup->SearchClippingRegions($query);
-		else
-			$resClippings = [];
+		}
 
-		// Si hay de ambas, pone 5 de cada uno
+		// Si hay de ambas, pone 5 máximo de cada uno
+		// 1. primero los indicadores
+		$totalMetrics = 10 - sizeof($resClippings);
+		if ($totalMetrics < 5)
+			$totalMetrics = 5;
 		$ret = array();
-		$insertPos = 0;
-		for($n = 0; $n < 10; $n++)
+		for ($n = 0; $n < $totalMetrics; $n++)
 		{
 			if ($n < sizeof($resLay))
-				$ret = Arr::AddAt($ret, $n, $resLay[$n]);
-			if ($n < sizeof($resClippings) && sizeof($ret) !== 10)
-			{
-				if ($resClippings[$n]['Relevance'] > 1)
-				{
-					$ret = Arr::AddAt($ret, $insertPos, $resClippings[$n]);
-					$insertPos++;
-				}
-				else
-					$ret[] = $resClippings[$n];
-			}
+				$ret[] = $resLay[$n];
+		}
+		// 2. después las regiones
+		for($n = 0; $n < 10; $n++)
+		{
+			if ($n < sizeof($resClippings))
+				$ret[] = $resClippings[$n];
 			if (sizeof($ret) === 10) break;
 		}
 

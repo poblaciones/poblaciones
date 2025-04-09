@@ -723,7 +723,11 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 				window.SegMap.ZoomChangedSubscribers.push(overlay.ZoomSubscribed);
 				}
 			}
-		);
+		).catch(function (res) {
+			// TODO: revertir el toggle
+			loc.RemoveOverlay(index);
+			err.errDialog("GetLayerData", "acceder a la información solicitada.", res);
+		});
 	}
 };
 

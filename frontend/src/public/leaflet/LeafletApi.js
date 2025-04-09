@@ -3,6 +3,7 @@ import LeafletTileOverlay from './LeafletTileOverlay';
 import LeafletNullOverlay from './LeafletNullOverlay';
 import color from '@/common/framework/color';
 import FeatureSelector from './FeatureSelector';
+import err from '@/common/framework/err';
 import h from '@/public/js/helper';
 import { setTimeout } from 'core-js';
 import L from 'leaflet';
@@ -12,9 +13,10 @@ import Mercator from '@/public/js/Mercator';
 import MarkerFactory from './MarkerFactory';
 import IconOverlay from '@/public/overlays/IconOverlay';
 import PolygonOverlay from '@/public/overlays/PolygonOverlay';
-import { LeafletLayer } from './deck-gl/LeafletLayer';
 import { MapView } from '@deck.gl/core';
 import { PolygonLayer } from '../../../node_modules/@deck.gl/layers/dist/index';
+import './pegman/Pegman.css';
+
 
 export default LeafletApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -84,11 +86,29 @@ LeafletApi.prototype.Initialize = function () {
 
 	// Crea el mapa
 	this.map = new L.Map("map", options);
+	// le agrega el control de zoom
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
 
+	/*
+	// agrega streetview
+	const p = require('./pegman/Pegman');
+	var pegman = new p.default();
+	L.Control.Pegman = pegman.Create();
+	L.control.pegman = function (options) {
+		return new L.Control.Pegman(options);
+	};
+	var pegmanControl = new L.Control.Pegman({
+		position: 'bottomright', // position of control inside the map
+		theme: "leaflet-pegman-v3-default", // or "leaflet-pegman-v3-default"
+		apiKey: window.SegMap.Configuration.MapsAccess // CHANGE: with your google maps api key
+	});
+	pegmanControl.addTo(this.map);
+	//
 	if (!window.Embedded.Active || !window.Embedded.Compact) {
 		L.control.scale({ imperial: false }).addTo(this.map);
 	}
+	*/
+
 	this.CreateDrawingManager();
 
 	this.baseMapGroup = L.layerGroup();
@@ -829,7 +849,11 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 			if (!overlay.disposed) {
 				loc.CreateDeckglLayer(activeMetric, data, index);
 			}
-		});
+		}).catch(function (res) {
+			// TODO: revertir el toggle
+			loc.RemoveOverlay(index);
+			err.errDialog("GetLayerData", "acceder a la información solicitada.", res);
+		});;
 	}
 };
 

@@ -15,7 +15,7 @@ use minga\framework\PublicException;
 
 App::$app->get('/services/frontend/Search', function (Request $request) {
 	$query = Params::Get('q');
-	$controller = new services\LookupService();
+	$controller = new services\SearchService();
 	$filter = Params::Get('f', '');
 
 	return App::JsonImmutable($controller->Search($query, $filter, false));

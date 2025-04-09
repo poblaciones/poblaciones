@@ -123,6 +123,17 @@ class ConfigurationService extends BaseService
 
 		$mainServer = App::Settings()->Servers()->Main();
 
+		$mapAccess = '';
+		if (is_array(Context::Settings()->Keys()->GoogleMapsKey))
+		{
+			$mapAccess = implode(",", Context::Settings()->Keys()->GoogleMapsKey);
+		}
+		else
+		{
+			$mapAccess = Context::Settings()->Keys()->GoogleMapsKey;
+		}
+		//Context::Settings()->Keys()->Ofuscate();
+
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
 									'StaticServer' =>  $staticServers,
@@ -132,6 +143,7 @@ class ConfigurationService extends BaseService
 									'StaticWorks' =>  App::Settings()->Map()->ContentServerWorks,
 									'UseGradients' => App::Settings()->Map()->UseGradients,
 									'UseTextures' => App::Settings()->Map()->UseTextures,
+									'BasemapMetrics' => App::Settings()->Map()->BasemapMetrics,
 
 									'UsePerimeter' =>  App::Settings()->Map()->UsePerimeter,
 									'UseFavorites' => App::Settings()->Map()->UseFavorites,
@@ -144,6 +156,7 @@ class ConfigurationService extends BaseService
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 									'OwnerLogo' => App::Settings()->Map()->OwnerLogo,
 									'MapsAPI' => $this->GetCurrentMapProvider(),
+									'MapsAccess' => $mapAccess,
 									'NavigationId' => $navigation['id'],
 									'NavigationMonth' => $navigation['month'],
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,

@@ -20,7 +20,8 @@
 			</button>
 
 			<button type="button" v-for="basemapMetric in basemapMetrics" :key="basemapMetric.Id" class="btn btn-default btn-xs"
-							:title="(basemapMetric.Visible ? 'Ocultar ' : 'Mostrar ') + basemapMetric.Caption" @click="toggleBasemapMetric(basemapMetric)" :class="getBasemapMetricActive(basemapMetric)">
+							:title="(basemapMetric.Visible ? 'Ocultar ' : 'Mostrar ') + basemapMetric.Caption"
+							@click="toggleBasemapMetric(basemapMetric)" :class="getBasemapMetricActive(basemapMetric)">
 				<i class="fas fa-tags" />
 			</button>
 
@@ -209,8 +210,9 @@
 			getBasemapMetricActive(basemapMetricActive) {
 				if (basemapMetricActive.Visible) {
 					return ' active';
+				} else {
+					return ' unselected';
 				}
-				return ' unselected';
 			},
 			getLabelsActive(mode) {
 				if (this.toolbarStates.showLabels) {

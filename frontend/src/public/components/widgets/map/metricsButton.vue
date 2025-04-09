@@ -92,6 +92,7 @@ export default {
 			})).then(function (res) {
 				session.ReceiveSession(window.host, res);
 				loc.fabMetrics = res.data;
+				window.fabMetrics = res.data;
 			}).catch(function (error) {
 				err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
 			});
@@ -101,6 +102,9 @@ export default {
 				if (this.$refs.vuefab.toggle) {
 					this.$refs.vuefab.toggle = false;
 				}
+			}
+			if (e.key == "+" && e.shiftKey) {
+				window.Popups.AddMetric.show(this.action.Items, null, this.action.Name);
 			}
 		},
 		selectedPanel(item) {
