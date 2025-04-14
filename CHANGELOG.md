@@ -1,3 +1,10 @@
+v4.3 (2025-04-14)
+- Mejoras en manejo de error al publicar.
+- Avances en overlay de polígonos para capas base.
+- Fix a overlay de puntos en leaflet.
+- Popup de metricas alternativo.
+- Fix a función polygonenvelope en figuras unidimensionales.
+- Fix: tomaba como valor nulo a un cero en el filtro por partición de los datasets.
 - Fix a comparación entre series basadas en una misma geografía.
 - Descarga incluye columna de códigos previos.
 - Corrige measurementeLevel inválidos en subida de archivos SPSS.

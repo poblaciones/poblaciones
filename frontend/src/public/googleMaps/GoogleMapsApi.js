@@ -8,6 +8,7 @@ import MarkerFactory from './MarkerFactory';
 import { GoogleMapsOverlay } from "@deck.gl/google-maps";
 import IconOverlay from '@/public/overlays/IconOverlay';
 import GoogleNullOverlay from './GoogleNullOverlay';
+import GoogleMapsAnnotator from './GoogleMapsAnnotator';
 
 export default GoogleMapsApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -117,6 +118,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 
 	var loc = this;
 	this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
+		loc.Annotations = new GoogleMapsAnnotator();
 		window.SegMap.MapInitialized();
 	});
 };
@@ -1109,3 +1111,45 @@ GoogleMapsApi.prototype.CreateBlankMap = function () {
 		{ name: 'Blanco' });
 	return styledMapType;
 };
+/*
+
+
+GoogleMapsAnnotator.prototype._loadGoogleMapsAPI = function () {
+	return new Promise((resolve, reject) => {
+		// Skip if already loaded
+		if (window.google && window.google.maps) {
+			resolve();
+			return;
+		}
+
+		// Create callback function for the API
+		window.initGoogleMapsCallback = () => {
+			resolve();
+			delete window.initGoogleMapsCallback;
+		};
+
+		// Load API script
+		const script = document.createElement('script');
+		const apiKey = process.env.GOOGLE_MAPS_API_KEY || '';
+		script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing&callback=initGoogleMapsCallback`;
+		script.async = true;
+		script.defer = true;
+		script.onerror = reject;
+		document.head.appendChild(script);
+	});
+};
+
+GoogleMapsAnnotator.prototype._waitForGoogleMapsAPI = async function () {
+	// Wait for Google Maps API to be loaded
+	if (!window.google || !window.google.maps) {
+		await new Promise(resolve => {
+			const checkInterval = setInterval(() => {
+				if (window.google && window.google.maps) {
+					clearInterval(checkInterval);
+					resolve();
+				}
+			}, 100);
+		});
+	}
+}
+*/

@@ -16,6 +16,7 @@ import PolygonOverlay from '@/public/overlays/PolygonOverlay';
 import { MapView } from '@deck.gl/core';
 import { PolygonLayer } from '../../../node_modules/@deck.gl/layers/dist/index';
 import './pegman/Pegman.css';
+import LeafletAnnotator from './LeafletAnnotator';
 
 
 export default LeafletApi;
@@ -119,6 +120,7 @@ LeafletApi.prototype.Initialize = function () {
 
 	var loc = this;
 	this.map.on("load", function() {
+		loc.Annotations = new LeafletAnnotator();
 		window.SegMap.MapInitialized();
 
 		var t = document.createElement("div");

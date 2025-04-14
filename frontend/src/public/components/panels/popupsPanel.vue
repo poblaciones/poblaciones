@@ -8,7 +8,8 @@
 		<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
 		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
 		<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
-		<AddMetric2 ref="addMetric" :backgroundColor="backgroundColor" />
+		<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
+		<AddMetric2 ref="addMetric2" :backgroundColor="backgroundColor" />
 	</div>
 </template>
 
@@ -19,6 +20,7 @@ import CompareMetadata from '@/public/components/popups/compareMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
 import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
 import AddMetric2 from '@/public/components/popups/addMetric2';
+import AddMetric from '@/public/components/popups/addMetric';
 import MetricDownload from '@/public/components/popups/metricDownload';
 import BoundaryDownload from '@/public/components/popups/boundaryDownload';
 import Embedding from '@/public/components/popups/embedding';
@@ -27,6 +29,7 @@ export default {
 	name: 'popupsPanel',
 	components: {
 		BoundaryDownload,
+		AddMetric,
 		AddMetric2,
 		WorkMetadata,
 		Embedding,
@@ -49,6 +52,7 @@ export default {
 		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AddMetric = this.$refs.addMetric;
+		window.Popups.AddMetric2 = this.$refs.addMetric2;
 	},
 	methods: {
 

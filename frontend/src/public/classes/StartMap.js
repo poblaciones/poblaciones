@@ -5,6 +5,7 @@ import str from '@/common/framework/str';
 import err from '@/common/framework/err';
 import Tutorial from './Tutorial';
 import session from '@/common/framework/session';
+import ActiveAnnotations from '@/public/annotations/ActiveAnnotations';
 
 export default StartMap;
 
@@ -67,6 +68,7 @@ StartMap.prototype.RestoreWork = function (workId, link) {
 		loc.workReference.Current = res.data.work;
 		loc.workReference.Current.tutorialOpened = false;
 		loc.workReference.Current.Tutorial = new Tutorial(loc.workReference.Current, res.data.work.Id);
+		loc.workReference.Current.Annotations = new ActiveAnnotations(loc.workReference.Current);
 		loc.ReceiveWorkStartup(loc.workReference.Current.Startup, res.data.frame);
 	}).catch(function (error) {
 		err.errDialog('GetWork', 'obtener la información del servidor', error);

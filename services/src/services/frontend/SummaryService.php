@@ -59,7 +59,7 @@ class SummaryService extends BaseService
 		{
 			$partition = null;
 		}
-		else if (!$partition)
+		else if ($partition === null)
 		{
 			if ($level->Partitions->Mandatory)
 				throw new \ErrorException("Debe indicar una valor para '" . $level->Partitions->Name . "'");

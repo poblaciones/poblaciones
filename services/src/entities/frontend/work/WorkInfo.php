@@ -15,6 +15,7 @@ class WorkInfo extends BaseMapModel
 	public $Extents;
 	public $Url;
 	public $FileUrl;
+	public $Annotations;
 	public $Metrics;
 	public $Startup;
 	public $Onboarding;

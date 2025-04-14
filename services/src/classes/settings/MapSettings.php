@@ -22,6 +22,7 @@ class MapSettings
 	public $BasemapMetrics = [];
 
 	public $UseCalculated = true;
+	public $UseNewMetricPicker = false;
 
 	public $UseDeckgl = true;
 
@@ -35,6 +36,8 @@ class MapSettings
 	public $UseGradients = false;
 	public $UseTextures = false;
 	public $UseFavorites = false;
+
+	public $UseAnnotations = false;
 
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;

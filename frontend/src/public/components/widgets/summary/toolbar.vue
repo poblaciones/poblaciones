@@ -32,7 +32,7 @@
 		</div>
 
 		<div class="btn-group">
-			<button v-for="(mode, index) in selectionModes()" :key="mode.Name" type="button"
+			<button v-for="(mode, index) in selectionModes" :key="mode.Name" type="button"
 							@click="setMode(index)" @mouseup="setMode(index)"
 							class="btn btn-default btn-xs" :class="getActive(index)"
 							:title="mode.Name">
@@ -90,7 +90,7 @@
 </template>
 
 <script>
-	import dom from '@/common/framework/dom';
+	import arr from '@/common/framework/arr';
 	import tour from '@/public/components/popups/tour';
 
 	import MapExport from '@/public/classes/MapExport';
@@ -107,7 +107,7 @@
 			'frame',
 			'user',
 			'config',
-			'currentWork',
+			'work',
 			'toolbarStates',
 			'metrics'
 		],
@@ -115,15 +115,6 @@
 			tour,
 		},
 		methods: {
-			selectionModes() {
-				if (this.frame && this.frame.Zoom >= 10) {
-					return [
-						{ Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' },
-						{ Name: 'Seleccionar una zona arrastrando en el mapa.', Icon: 'fa fa-circle-notch' }];
-				} else {
-					return [];
-				}
-			},
 			switchMapProvider() {
 				window.SegMap.SwitchSessionProvider().then(function () {
 					location.reload();
@@ -136,11 +127,11 @@
 				window.Popups.Embedding.show();
 			},
 			captureMapImage(format) {
-				var mapExport = new MapExport(this.currentWork);
+				var mapExport = new MapExport(this.work.Current);
 				mapExport.ExportImage(format);
 			},
 			captureMapPdf(landscape) {
-				var mapExport = new MapExport(this.currentWork);
+				var mapExport = new MapExport(this.work.Current);
 				mapExport.ExportPdf(landscape);
 			},
 			shareSelected(item) {
@@ -300,6 +291,50 @@
 					ret += '\n';
 				}
 				ret += this.user.User;
+				return ret;
+			},
+			selectionModes() {
+				var ret = [];
+				if (this.frame && this.frame.Zoom >= 10) {
+					ret.push(
+						{ Name: 'Seleccionar una zona arrastrando en el mapa.', Icon: 'fa fa-circle-notch' });
+				}
+				// Agrega las herramientas para dibujar
+				// Para eso se basa en las listas existentes del work
+				if (this.work.Current && this.Use.UseAnnotations) {
+					// Se fija qué funciona permite las listas permitidas
+					// Las acciones pueden hacerse si es editor de la cartografía o si el permiso
+					// para invitados es A o E.
+					var annotationTypes = {
+						'M': { Name: 'Anotar punto', Icon: 'fas fa-map-marker-alt' },   // Punto
+						'L': { Name: 'Anotar línea', Icon: 'fas fa-slash' },            // Línea
+						'P': { Name: 'Anotar polígono', Icon: 'fas fa-draw-polygon' },  // Polígono
+						'C': { Name: 'Agregar comentario', Icon: 'fas fa-comment' },    // Comentario
+						'Q': { Name: 'Agregar pregunta', Icon: 'fas fa-question' } // Pregunta
+					};
+					if (this.work.Current.Annotations.Lists.length == 0) {
+						// ofrece todos los tipos
+						if (this.work.Current.CanEdit) {
+							for (const [key, value] of Object.entries(annotationTypes)) {
+								ret.push(value);
+							}
+						}
+					} else {
+						// ofrece solo las permitidas
+						for (var annotationList of this.work.Current.Annotations.Lists) {
+							for (const [key, value] of Object.entries(annotationTypes)) {
+								// Va sumando los types editables
+								if (this.work.Current.CanEdit || annotationList.AllowedTypes.includes(key)) {
+									ret.push(value);
+								}
+							}
+						}
+					}
+				}
+				if (ret.length > 0) {
+					// Agrega el neutro
+					arr.InsertAt(ret, 0, { Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' });
+				}
 				return ret;
 			}
 		},

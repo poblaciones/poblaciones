@@ -1,7 +1,7 @@
 <template>
 	<div style="width: 100%;">
 		<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
-						 :currentWork="currentWork" :config="config" :toolbarStates="toolbarStates" style="position: sticky; z-index: 10; top: 0px"
+						 :work="work" :config="config" :toolbarStates="toolbarStates" style="position: sticky; z-index: 10; top: 0px"
 						 class="exp-hiddable-block" />
 		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
 				 style="background-color: transparent; padding-bottom: 11px; margin-bottom: 0px; ">
@@ -41,7 +41,7 @@ export default {
 		'clipping',
 		'frame',
 		'config',
-		'currentWork',
+		'work',
 		'user',
 		'toolbarStates',
 		'metrics'

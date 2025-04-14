@@ -12,6 +12,7 @@ use helena\services\backoffice\publish\PublishDataTables;
 use helena\services\common\BaseService;
 use helena\classes\Links;
 use helena\db\frontend\MetadataModel;
+use helena\db\frontend\AnnotationsModel;
 use helena\db\frontend\WorkModel;
 use helena\db\frontend\OnboardingModel;
 use helena\db\frontend\FileModel;
@@ -33,6 +34,8 @@ class WorkService extends BaseService
 		$onboardingTable = new OnboardingModel();
 		$rows = $onboardingTable->GetOnboardingInfo($workId);
 		$ret->FillOnboarding($rows);
+		$annotationsModel = new AnnotationsModel();
+		$ret->Annotations = $annotationsModel->GetAnnotations($workId);
 		return $ret;
 	}
 

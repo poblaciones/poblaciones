@@ -14,7 +14,7 @@
 				<PopupsPanel :backgroundColor="workColor" />
 				<div id="panRight" class="animatedFlyAway floatRightPanel thinScroll" v-touch:swipe.right="panRightSwipeClose" :style="rightPanelOverflow">
 					<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
-												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :currentWork="work.Current"
+												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
@@ -42,6 +42,7 @@
 															 class="exp-hiddable-block"
 															 :style="collapseButtonOffset" />
 				</div>
+				<DynamicEditor v-if="false" class="DynamicEditor" style="position: absolute; left: 0; top: 0;" />
 				<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
 			</div>
 		</fs>
@@ -67,7 +68,7 @@
 	import WatermarkFloat from '@/public/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/public/components/widgets/map/WatermarkOwner';
 	import MapTypeSelector from '@/public/components/controls/mapTypeSelector';
-
+	import DynamicEditor from "@/public/components/editor/DynamicEditor";
 	import CollapseButtonRight from '@/public/components/controls/collapseButtonRight';
 
 	import Split from 'split.js';
@@ -96,6 +97,7 @@
 			PopupsPanel,
 			WorkPanel,
 			MapTypeSelector,
+			DynamicEditor,
 			WatermarkFloat,
 			WatermarkOwner,
 			CollapseButtonRight,

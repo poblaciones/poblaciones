@@ -2,7 +2,7 @@
 	<div :id="position + '-wrapper'" class="fab-wrapper" v-on-clickaway="away" :style="[ pos, {zIndex: zIndex}, {position: positionType} ]">
 		<div :id="position + '-action'" class="actions-container" :style="listPos">
 			<transition name="fab-actions-appear" :enter-active-class="transitionEnter" :leave-active-class="transitionLeave">
-			<ul v-show="toggle" class="fab-list">
+			<ul v-show="expanded" class="fab-list">
 				<template v-for="action in actions">
 					<transition :key="action.name"
 						enter-active-class="animated quick zoomIn"
@@ -10,7 +10,7 @@
 						@after-enter="afterActionsTransitionEnter"
 						@before-enter="beforeActionsTransitionEnter">
 						<template v-if="action.tooltip">
-							<li v-if="toggle" :style="{ 'background-color': action.color || bgColor }">
+							<li v-if="expanded" :style="{ 'background-color': action.color || bgColor }">
 								<div v-tooltip="{ content: action.tooltip, placement: tooltipPosition, classes: 'fab-tooltip', trigger: tooltipTrigger}"
 									@mouseenter="showPanel(action.name)" @click="toParent(action.name)" ref="actions" class="fab-list-div no-highlight pointer">
 									<i :class="[ actionIconSize, 'material-icons' ]">{{ action.icon }}</i>
@@ -23,7 +23,7 @@
 							</li>
 						</template>
 						<template v-else>
-							<li v-if="toggle" :style="{ 'background-color': action.color || bgColor }">
+							<li v-if="expanded" :style="{ 'background-color': action.color || bgColor }">
 								<div @mouseenter="showPanel(action.name)" @click="toParent(action.name)" class="fab-list-div pointer">
 									<i :class="[ actionIconSize, 'material-icons' ]">{{ action.icon }}</i>
 								</div>
@@ -138,7 +138,10 @@ export default {
 			default: true
 		},
 	},
-	computed: {
+		computed: {
+			expanded() {
+				return this.toggle && !window.Use.UseNewMenu;
+			},
 		tooltipPosition() {
 			if(this.usePanel && this.panelOpenMode == 'mouseenter') {
 				return 'top';
@@ -348,8 +351,12 @@ export default {
 			});
 		},
 		toggle() {
-			if(this.toggle == false) {
-				this.hidePanels();
+			if (window.Use.UseNewMenu) {
+				window.Popups.AddMetric2.show(this.actions, null);
+			} else {
+				if (this.toggle == false) {
+					this.hidePanels();
+				}
 			}
 		}
 	},

@@ -32,6 +32,7 @@ class WorkDelete
 		$this->doDeleteWorkVersions();
 		$this->doDeleteExtraMetrics();
 		$this->doDeleteIcons();
+		$this->doDeleteAnnotations();
 		$this->doDeleteOnBoarding();
 		$this->doDeleteRevisions();
 		$this->doDeleteWork();
@@ -101,6 +102,22 @@ class WorkDelete
 		App::Db()->markTableUpdate('draft_work_icon');
 	}
 
+
+	private function doDeleteAnnotations()
+	{
+		// Borra items
+		$delete = "DELETE draft_annotation_item FROM draft_annotation_item
+					INNER JOIN draft_annotation ON ann_id = ani_annotation_id
+					WHERE ann_work_id = ?";
+		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_annotation_item');
+
+		// Borra principal
+		$delete = "DELETE FROM draft_annotation WHERE ann_work_id = ?";
+		App::Db()->exec($delete, array($this->workId));
+		App::Db()->markTableUpdate('draft_annotation');
+	}
+
 	private function doDeleteOnBoarding()
 	{
 		// Borra pasos
@@ -114,7 +131,6 @@ class WorkDelete
 		$delete = "DELETE FROM draft_onboarding WHERE onb_work_id = ?";
 		App::Db()->exec($delete, array($this->workId));
 		App::Db()->markTableUpdate('draft_onboarding');
-
 	}
 
 	private function doDeleteRevisions()

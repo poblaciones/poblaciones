@@ -37,6 +37,7 @@ class WorkClone
 		$newWork = $this->doCreateNewWork($name);
 		$this->CompleteMetadata($newWork->getMetadata());
 		$this->CopyOnBoarding();
+		$this->CopyAnnotations();
 
 		$this->state->Set('targetWorkId', $this->targetWorkId);
 
@@ -144,6 +145,19 @@ class WorkClone
 		RowDuplicator::DuplicateRows(entities\DraftMetadataInstitution::class, $sourceMetadataId, $static, 'min_metadata_id');
 		// Copia metadata_files
 		$this->CopyFiles($sourceMetadataId, $metadataId);
+	}
+
+	private function CopyAnnotations()
+	{
+		// Copia variableValueLabel
+		$parentInfo = array(
+			entities\DraftAnnotation::class,
+			$this->sourceWorkId,
+			$this->targetWorkId,
+			'ann_work_id',
+			'ani_annotation_id'
+		);
+		RowDuplicator::DuplicateParentedRows($parentInfo, entities\DraftAnnotationItem::class);
 	}
 
 	private function CopyOnBoarding()
