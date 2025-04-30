@@ -514,6 +514,9 @@ module.exports = {
 		ret.e = null;
 		return ret;
 	},
+	getWorkAnnotationParams(annotation) {
+		return { w: annotation.WorkId, a: annotation.Id };
+	},
 	getLayerDataParams(metric, frame) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({

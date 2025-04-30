@@ -42,7 +42,6 @@
 															 class="exp-hiddable-block"
 															 :style="collapseButtonOffset" />
 				</div>
-				<DynamicEditor v-if="false" class="DynamicEditor" style="position: absolute; left: 0; top: 0;" />
 				<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
 			</div>
 		</fs>
@@ -68,7 +67,6 @@
 	import WatermarkFloat from '@/public/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/public/components/widgets/map/WatermarkOwner';
 	import MapTypeSelector from '@/public/components/controls/mapTypeSelector';
-	import DynamicEditor from "@/public/components/editor/DynamicEditor";
 	import CollapseButtonRight from '@/public/components/controls/collapseButtonRight';
 
 	import Split from 'split.js';
@@ -97,7 +95,6 @@
 			PopupsPanel,
 			WorkPanel,
 			MapTypeSelector,
-			DynamicEditor,
 			WatermarkFloat,
 			WatermarkOwner,
 			CollapseButtonRight,
@@ -126,7 +123,7 @@
 				splitPanels: null,
 				featureNavigation: { Key: null, Values: [], GettingKey: null },
 				toolbarStates: {
-					selectionMode: null, tutorialOpened: 0, showLabels: true,
+					selectionMode: 'PAN', tutorialOpened: 0, showLabels: true,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false,
 					basemapMetrics: [
 
@@ -417,7 +414,7 @@
 				}
 				segMap.SaveRoute.DisableOnce = true;
 				mapApi.Initialize();
-				segMap.SetSelectionMode(0);
+				segMap.SetSelectionMode("PAN");
 				if (window.Embedded.HideLabels) {
 					segMap.Labels.Hide();
 				}
@@ -1502,4 +1499,8 @@
 		top: 0;
 		bottom: auto !important;
 	}
+	.pointer-ready-css {
+				cursor: unset!important;
+	}
+
 </style>

@@ -25,6 +25,7 @@ function GoogleMapsApi(google) {
 	this.clippingCanvas = null;
 	this.li = null;
 	this.selectedCanvas = null;
+	this.Annotations = null;
 	this.selector = new FeatureSelector(this);
 	this.allwaysHiddenElements = ['landscape.natural', 'landscape.natural.landcover', 'landscape.natural.terrain',
 																	'poi.attraction', 'administrative.locality',
@@ -118,7 +119,7 @@ GoogleMapsApi.prototype.Initialize = function () {
 
 	var loc = this;
 	this.google.maps.event.addListenerOnce(this.gMap, 'idle', function () {
-		loc.Annotations = new GoogleMapsAnnotator();
+		loc.Annotations = new GoogleMapsAnnotator(this);
 		window.SegMap.MapInitialized();
 	});
 };
@@ -299,7 +300,7 @@ GoogleMapsApi.prototype.CircleCompleted = function (circle) {
 
 	//borra el círculo
 	circle.setMap(null);
-	window.SegMap.SetSelectionMode(0);
+	window.SegMap.SetSelectionMode("PAN");
 };
 
 GoogleMapsApi.prototype.CreateMarkerFactory = function (activeSelectedMetric, variable, customIcons) {
@@ -713,11 +714,16 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 		// 3. que lo espere si está exportando
 		activeMetric.GetLayerData().then(function (data) {
 			if (!overlay.disposed) {
-				var iconLayer = new IconOverlay(activeMetric);
-				var deckIconLayer = iconLayer.CreateLayer(data, 1);
+				var nativeLayer;
+				if (activeMetric.IsLocationType()) {
+					nativeLayer = new IconOverlay(activeMetric);
+				} else {
+					nativeLayer = new PolygonOverlay(activeMetric);
+				}
+				var deckLayer = nativeLayer.CreateLayer(data, 1);
 
 				const deckOverlay = new GoogleMapsOverlay({
-					layers: [deckIconLayer]
+					layers: [deckLayer]
 				});
 				deckOverlay.setMap(loc.gMap);
 				overlay.deckOverlay = deckOverlay;

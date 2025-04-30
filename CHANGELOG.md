@@ -1,3 +1,7 @@
+- Fix problema en menú de indicadores (se ocultan ítems en ciertas resoluciones)
+- Fix a performance de publicación (se demora al 88% en ciertas cartografías).
+
+
 v4.3 (2025-04-14)
 - Mejoras en manejo de error al publicar.
 - Avances en overlay de polígonos para capas base.

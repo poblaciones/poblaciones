@@ -71,7 +71,6 @@ PolygonOverlay.prototype.createGeoJsonElement = function (dataElement) {
 };
 
 PolygonOverlay.prototype.Filter = function (data) {
-	var variableId = this.variable.Id;
 	var dataFiltered = [];
 	var varId;
 	if (!this.activeSelectedMetric.IsFiltering()) {
@@ -81,6 +80,7 @@ PolygonOverlay.prototype.Filter = function (data) {
 		}
 		return dataFiltered;
 	}
+	var variableId = this.variable.Id;
 	for (var dataElement of data) {
 		varId = dataElement['VID'];
 		if (varId === variableId) {

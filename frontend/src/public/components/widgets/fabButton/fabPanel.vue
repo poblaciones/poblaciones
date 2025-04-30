@@ -270,11 +270,9 @@ export default {
 			if(items && items.length > 0) {
 				const el = this.$refs.panelScroll;
 				var height = 0;
-				var text = "";
 				for (var i = 0; i < items.length; i++) {
 					var delta = this.visiblePixelsItemTop(el.scrollTop, height, items[i].scrollHeight);
 					height += items[i].scrollHeight;
-					text = items[i].innerText.trim();
 					if(delta > 0 || el.scrollTop == 0 || el.scrollTop == height) {
 						if(delta > 0) {
 							delta = items[i].scrollHeight - delta;
@@ -302,13 +300,27 @@ export default {
 		},
 		scrollDown() {
 			const el = this.$refs.panelScroll;
-			if(el.scrollTop == el.scrollHeight - el.offsetHeight) {
+			const items = this.$refs.liItems;
+			if (!el || !items || items.length === 0) return;
+			let currentScroll = el.scrollTop;
+			let lastHidden = null;
+			for (let i = items.length - 1; i >= 0; i--) {
+				let item = items[i];
+				if (!item.classList.contains('fab-panel-item-header')) {
+					if (item.offsetTop - currentScroll > el.offsetHeight) {
+						lastHidden = item;
+					} else {
+						break;
+					}
+				}
+			}
+			if (lastHidden === null) {
 				return;
 			}
-			var maxScrolling = el.scrollHeight - el.offsetHeight - 1;
-			var targetScroll = el.scrollTop + this.nextItemHeight();
-
-			el.scrollTo(0, Math.min(maxScrolling, targetScroll));
+			let targetScroll = lastHidden.offsetTop - el.offsetHeight + lastHidden.offsetHeight - el.offsetTop;
+			let maxScroll = el.scrollHeight - el.offsetHeight;
+			el.scrollTo({ top: Math.min(targetScroll, maxScroll), behavior: 'smooth' });
+			return;
 		},
 		wheel(e) {
 			e.preventDefault();

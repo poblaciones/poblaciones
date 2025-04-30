@@ -10,7 +10,7 @@ export default IconOverlay;
 function IconOverlay(activeSelectedMetric) {
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
-	this.customIcons = this.activeSelectedMetric.SelectedVersion().Work.Icons;
+	this.customIcons = this.activeSelectedMetric.Icons();
 	this.labelsVisibility = [];
 	if (this.activeSelectedMetric.HasSelectedVariable()) {
 		this.variable = this.activeSelectedMetric.SelectedVariable();
@@ -26,7 +26,7 @@ IconOverlay.prototype.CreateLayer = function (data, sc = 1) {
 	var loc = this;
 	var delegates = loc.markerFactory.createDelegates();
 
-	var markerSettings = this.activeSelectedMetric.SelectedLevel().Dataset.Marker;
+	var markerSettings = this.activeSelectedMetric.SelectedMarker();
 	var isDone = {};
 
 	var now = new Date();
@@ -135,12 +135,12 @@ IconOverlay.prototype.LargeZoom = function () {
 };
 
 IconOverlay.prototype.Filter = function (data) {
-	var variableId = this.variable.Id;
-	var dataFiltered = [];
-	var varId;
 	if (!this.activeSelectedMetric.IsFiltering()) {
 		return data;
 	}
+	var variableId = this.variable.Id;
+	var dataFiltered = [];
+	var varId;
 	for (var dataElement of data) {
 		varId = dataElement['VID'];
 		if (varId === variableId) {

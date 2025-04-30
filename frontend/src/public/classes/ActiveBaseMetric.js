@@ -50,3 +50,23 @@ ActiveBaseMetric.prototype.Hide = function () {
 	this.properties.Visible = false;
 	window.SegMap.Metrics.Remove(this, true);
 };
+
+ActiveBaseMetric.prototype.ResolveSegment = function () {
+	if (this.properties == null) {
+		this.objs.Segment = window.SegMap.Metrics.ClippingSegment;
+	} else {
+		switch (this.SelectedLevel().Dataset.Type) {
+			case 'L':
+				this.objs.Segment = window.SegMap.Metrics.BaseLocationsSegment;
+				break;
+			case 'D':
+				this.objs.Segment = window.SegMap.Metrics.BaseGeoShapesSegment;
+				break;
+			case 'S':
+				this.objs.Segment = window.SegMap.Metrics.BaseGeoShapesSegment;
+				break;
+			default:
+				throw new Error('Unknown dataset metric type');
+		}
+	}
+};

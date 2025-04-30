@@ -65,19 +65,21 @@
 				</button>
 			</div>
 			<template v-if="!Embedded.Readonly && useComparer">
-				<div style="float: left; margin-left: 10px; margin-top: 6px;">
-					<switches style="transform: scale(0.8)" title="Comparar" v-model="compare" theme="bootstrap"
-										color="default" @changed="toggleCompare()"></switches>
-				</div>
-				<div v-if="compare" class="compareLabel">
-					{{ compareContent }}
-																<a href="#" @click="clickCompareFuente" v-if="hasCompareMetadata()"
-																	 title="Fuente de comparación" style="color: #a7a7a7">
-																	<link-icon />
-																</a>
-				</div>
-				<div v-else style="color: #ccc; cursor: pointer" class="compareLabel" @click="toggleCompare">
-					Comparar
+				<div style="float:left" class="exp-hiddable-block">
+					<div style="float: left; margin-left: 10px; margin-top: 6px;">
+						<switches style="transform: scale(0.8)" title="Comparar" v-model="compare" theme="bootstrap"
+											color="default" @changed="toggleCompare()"></switches>
+					</div>
+					<div v-if="compare" class="compareLabel">
+						{{ compareContent }}
+						<a href="#" @click="clickCompareFuente" v-if="hasCompareMetadata()"
+							 title="Fuente de comparación" style="color: #a7a7a7">
+							<link-icon />
+						</a>
+					</div>
+					<div v-else style="color: #ccc; cursor: pointer" class="compareLabel" @click="toggleCompare">
+						Comparar
+					</div>
 				</div>
 			</template>
 
@@ -389,7 +391,7 @@ export default {
 			if (this.compareVersions[0] == null || this.compareVersions[1] == null) {
 				return "Iniciando...";
 			} else {
-				return "Comparando " + this.compareVersions[0] + " con " + this.compareVersions[1];
+				return "Comparación " + this.compareVersions[0] + "-" + this.compareVersions[1];
 			}
 		},
 		useComparer() {

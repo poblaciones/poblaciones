@@ -142,7 +142,7 @@ class CacheManager
 		$publicWorkModel = new WorkModel(false);
 		$workIdShardified = PublishDataTables::Shardified($workId);
 		$metricVersions = PublishDataTables::UnshardifyList($publicWorkModel->GetMetricVersions($workIdShardified),
-																																				array('mvr_metric_id'));
+						array('mvr_metric_id'));
 		foreach($metricVersions as $row)
 		{
 			$this->ClearMetricMetadata($row['mvr_metric_id']);

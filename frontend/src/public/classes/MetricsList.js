@@ -7,19 +7,29 @@ function MetricsList(selectedMetricCollection) {
 
 	this.BaseGeoShapesSegment = [];
 	this.BaseLocationsSegment = [];
+
 	this.GeoShapesSegment = [];
 	this.PatternsSegment = [];
 	this.LocationsSegment = [];
+
+	this.AnnotationsShapesSegment = [];
+	this.AnnotationsLocationsSegment = [];
+
 	this.LabelsSegment = [];
 	this.ClippingSegment = [];
 
 	this.segments = [
 		this.LabelsSegment,
 		this.BaseGeoShapesSegment,
+		this.BaseLocationsSegment,
+
 		this.GeoShapesSegment,
 		this.PatternsSegment,
-		this.BaseLocationsSegment,
+
+		this.AnnotationsShapesSegment,
 		this.LocationsSegment,
+		this.AnnotationsLocationsSegment,
+
 		this.ClippingSegment
 	];
 };

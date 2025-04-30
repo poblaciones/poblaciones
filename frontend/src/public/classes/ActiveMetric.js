@@ -77,6 +77,22 @@ ActiveMetric.prototype.UpdateOpacity = function (zoom) {
 	}
 };
 
+ActiveMetric.prototype.SelectedShowInfo = function () {
+	return this.SelectedLevel().Dataset.ShowInfo;
+};
+
+ActiveMetric.prototype.SelectedMarker = function () {
+	return this.SelectedLevel().Dataset.Marker;
+};
+
+ActiveMetric.prototype.Icons = function () {
+	return this.SelectedVersion().Work.Icons;
+};
+
+
+ActiveMetric.prototype.IsLocationType = function () {
+	return this.SelectedLevel().Dataset.Type === 'L';
+};
 
 ActiveMetric.prototype.CheckTileIsOutOfClipping = function () {
 	return (window.SegMap.Clipping.clipping.IsUpdating !== '1');
@@ -341,7 +357,9 @@ ActiveMetric.prototype.RefreshMap = function () {
 		return this.UpdateMap();
 	}
 	this.UpdateLevel();
-	this.overlay.refresh();
+	if (this.overlay) {
+		this.overlay.refresh();
+	}
 	window.SegMap.InfoWindow.CheckUpdateNavigation();
 	window.SegMap.SaveRoute.UpdateRoute();
 };

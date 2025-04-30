@@ -1,15 +1,26 @@
-import MapAnnotator from '@/public/annotations/MapAnnotator';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-export default LeafletAnnotator;
-
-// Constructor
+/**
+ * LeafletAnnotator - A tool for annotating Leaflet maps with markers, polylines, and polygons
+ */
 function LeafletAnnotator(mapsAPI) {
-	MapAnnotator.call(this, mapsAPI);
+	this.mapsAPI = mapsAPI;
+	this.map = mapsAPI.map;
+	this.container = this.map.getContainer();
 
+	// Collections
 	this.elementLayers = new Map(); // Map element IDs to Leaflet layers
+	this.elements = new Map(); // Store element data
+	this.selectedElementIds = new Set(); // Currently selected elements
+
+	// Drawing state
 	this.tempLayer = null; // Layer for in-progress drawing
+	this.drawingCoordinates = []; // Coordinates being drawn
+	this.currentMode = 'select'; // Default mode: select, draw-marker, draw-polyline, draw-polygon
+	this.drawingInProgress = false;
+
+	// Styles
 	this.selectedStyle = {
 		color: '#2196F3',
 		weight: 4,
@@ -18,138 +29,294 @@ function LeafletAnnotator(mapsAPI) {
 		fillColor: '#2196F3'
 	};
 
-	// Event handlers for element updates
+	// Event handlers
+	this.elementClickHandler = null;
+	this.elementHoverHandler = null;
+	this.elementLeaveHandler = null;
 	this.elementDragEndHandler = null;
+	this.mapClickHandler = null;
+	this.onCompleteDrawHandler = null;
 
 	// Flag to control whether elements can be moved/edited
 	this.canEdit = false;
 
-	// Required Leaflet plugins
-	this.leafletEdit = window.L && window.L.edit;
-}
-
-// Herencia
-LeafletAnnotator.prototype = new MapAnnotator();
-
-// Método init
-LeafletAnnotator.prototype.init = function () {
-
-	// Set up map click event
+	// Set up event listeners
 	var self = this;
-	this.mapsAPI.map.on('click', function (event) {
-		if (self.mapClickHandler) {
-			self.mapClickHandler({
-				lat: event.latlng.lat,
-				lng: event.latlng.lng
-			});
-		}
+	this.map.on('click', function (event) {
+		self._handleMapClick(event);
+	});
+
+	this.map.on('mousemove', function (event) {
+		self._handleMapMouseMove(event);
 	});
 
 	// Initialize with select mode
-	this._updateInteractionMode();
+	this._updateCursor();
+}
+
+/**
+ * Set the current interaction mode
+ * @param {string} mode - The mode to set (select, draw-marker, draw-polyline, draw-polygon)
+ */
+LeafletAnnotator.prototype.setMode = function (mode) {
+	this.currentMode = mode;
+	this._updateCursor();
+
+	// Cancel any in-progress drawing when changing modes
+	if (this.drawingInProgress) {
+		this.cancelDrawing();
+	}
 };
 
-// Método addElement
-LeafletAnnotator.prototype.addElement = function (element) {
-	var layer;
-	var self = this;
 
-	// Create appropriate Leaflet layer based on element type
-	if (element.tipo === 'marker') {
-		var markerOptions = this._getMarkerOptions(element);
-		layer = L.marker(element.coordenadas[0], {
-			icon: markerOptions.icon,
-			title: markerOptions.title,
-			draggable: this.this.canEdit
-		});
+/**
+ * Handle map click events based on current mode
+ * @private
+ */
+LeafletAnnotator.prototype._handleMapClick = function (event) {
+	var latlng = event.latlng;
+	var position = { lat: latlng.lat, lng: latlng.lng };
 
-		// Add drag end event to markers
-		layer.on('dragend', function (event) {
-			var latlng = event.target.getLatLng();
-			var updatedElement = Object.assign({}, element, {
-				coordenadas: [{ lat: latlng.lat, lng: latlng.lng }]
-			});
-			// Trigger update event
-			if (self.elementDragEndHandler) {
-				self.elementDragEndHandler(updatedElement);
+	// Different behavior based on current mode
+	switch (this.currentMode) {
+		case 'select':
+			// Pass the event to the registered handler
+			if (this.mapClickHandler) {
+				this.mapClickHandler(position);
+			}
+			break;
+
+		case 'draw-marker':
+			// Create a marker immediately
+			var marker = {
+				Id: 'temp-' + Date.now(),
+				Type: 'M',
+				Description: 'Nuevo elemento',
+				Geometry: [position],
+				Color: '#2196F3',
+				Forma: 'pin'
+			};
+			this.addTempElement(marker);
+			// Complete drawing and open attributes popup
+			this._completeDrawing(marker);
+			break;
+
+		case 'draw-polyline':
+			this._handlePolyDraw(position, 'polyline');
+			break;
+
+		case 'draw-polygon':
+			this._handlePolyDraw(position, 'polygon');
+			break;
+
+		case 'draw-comment':
+			// Create a marker immediately
+			var marker = {
+				Id: 'temp-' + Date.now(),
+				Type: 'C',
+				Geometry: [position],
+				Color: '#2196F3',
+				Forma: 'pin'
+			};
+			this.addTempElement(marker);
+			// Complete drawing and open attributes popup
+			this._completeDrawing(marker);
+			break;
+
+		case 'draw-question':
+			// Create a marker immediately
+			var marker = {
+				Id: 'temp-' + Date.now(),
+				Type: 'Q',
+				Geometry: [position],
+				Color: '#2196F3',
+				Forma: 'pin'
+			};
+			this.addTempElement(marker);
+			// Complete drawing and open attributes popup
+			this._completeDrawing(marker);
+			break;
+	}
+};
+
+/**
+ * Handle drawing for polylines and polygons
+ * @private
+ */
+LeafletAnnotator.prototype._handlePolyDraw = function (position, type) {
+	// Start drawing if not already in progress
+	if (!this.drawingInProgress) {
+		this.drawingInProgress = true;
+		this.drawingCoordinates = [position];
+
+		// Create initial temporary visualization
+		var element = {
+			Id: 'temp-' + Date.now(),
+			Type: type,
+			Description: 'Nuevo elemento',
+			Geometry: this.drawingCoordinates,
+			Color: type === 'polyline' ? '#FF4081' : '#4CAF50'
+		};
+
+		this.addTempElement(element);
+
+		// Add double-click handler to complete the drawing
+		var self = this;
+		this.map.once('dblclick', function (e) {
+			L.DomEvent.stopPropagation(e);
+			L.DomEvent.preventDefault(e);
+
+			if (self.drawingCoordinates.length >= (type === 'polygon' ? 3 : 2)) {
+				self._completeDrawing(element);
+			} else {
+				// Not enough points to create a valid shape
+				self.cancelDrawing();
 			}
 		});
+		window.addEventListener('keydown', function (e) {
+			var loc = window.SegMap.MapsApi.Annotations;
+			if (e.key === "Enter") {
+				if (loc.currentMode == 'draw-polyline') {
+					loc.drawingInProgress = true;
+					loc._handlePolyDraw(position, 'polyline');
+				} else if (loc.currentMode == 'draw-polygon') {
+					loc.drawingInProgress = true;
+					loc._handlePolyDraw(position, 'polygon');
+				} else {
+					loc._completeDrawing(element);
+				}
+			}
 
-	} else if (element.tipo === 'polyline') {
-		layer = L.polyline(element.coordenadas, {
-			color: element.color || '#FF4081',
-			weight: 3,
-			opacity: 0.8
-		});
+			if (e.key === "Escape") {
+				if (loc.tempLayer) {
+					loc.removeTempElement();
+					loc.cancelDrawing();
+				} else {
+					window.SegMap.toolbarStates.selectionMode = "PAN";
+				}
+			}
+		}, { 'once' : true});
 
-		// Make polyline editable when editing is enabled
-		if (this.this.canEdit) {
-			this._makeLayerEditable(layer, element);
-		}
 
-	} else if (element.tipo === 'polygon') {
-		layer = L.polygon(element.coordenadas, {
-			color: element.color || '#4CAF50',
-			weight: 2,
-			opacity: 0.8,
-			fillOpacity: 0.3,
-			fillColor: element.color || '#4CAF50'
-		});
-
-		// Make polygon editable when editing is enabled
-		if (this.this.canEdit) {
-			this._makeLayerEditable(layer, element);
-		}
 	} else {
-		console.warn("Unknown element type: " + element.tipo);
+		// Continue adding points to existing drawing
+		this.drawingCoordinates.push(position);
+
+		// Update the temporary visualization
+		var element = {
+			Id: 'temp-' + Date.now(),
+			Type: this.currentMode === 'draw-polyline' ? 'L' : 'P',
+			Geometry: this.drawingCoordinates,
+			Color: this.currentMode === 'draw-polyline' ? '#FF4081' : '#4CAF50'
+		};
+
+		this.updateTempElement(element);
+	}
+};
+
+/**
+ * Handle map mouse move events (for drawing preview)
+ * @private
+ */
+LeafletAnnotator.prototype._handleMapMouseMove = function (event) {
+	// Only relevant when drawing is in progress
+	if (!this.drawingInProgress || this.currentMode === 'select' || this.currentMode === 'draw-marker') {
 		return;
 	}
 
-	// Add element to map
-	layer.addTo(this.map);
+	var latlng = event.latlng;
+	var position = { lat: latlng.lat, lng: latlng.lng };
 
-	// Store reference to the element
-	layer.elementId = element.id;
-	this.elementLayers.set(element.id, layer);
-	this.elements.set(element.id, element);
+	// Create a preview with existing points plus current mouse position
+	var previewCoords = [...this.drawingCoordinates, position];
 
-	// Set up events
-	this._setupLayerEvents(layer);
+	// Update the temporary visualization
+	var element = {
+		Id: 'temp-' + Date.now(),
+		Type: this.currentMode === 'draw-polyline' ? 'L' : 'P',
+		Description: 'Nuevo elemento',
+		Geometry: previewCoords,
+		Color: this.currentMode === 'draw-polyline' ? '#FF4081' : '#4CAF50'
+	};
 
-	// Show description on map if enabled
-	if (element.mostrarDescripcionEnMapa && element.descripcion) {
-		if (element.tipo === 'marker') {
-			layer.bindTooltip(element.descripcion, { permanent: true, direction: 'top' });
-		} else {
-			layer.bindTooltip(element.descripcion, { permanent: true, sticky: true });
-		}
-	}
-
-	return layer;
+	this.updateTempElement(element);
 };
 
-// Método updateElement
+/**
+ * Complete the drawing process and prompt for attributes
+ * @private
+ */
+LeafletAnnotator.prototype._completeDrawing = function (element) {
+//	this.removeTempElement();
+	this.drawingInProgress = false;
+
+	// Show the attribute popup
+	this._showAttributesPopup(element);
+};
+
+/**
+ * Show a popup to collect attributes for the new element
+ * @private
+ */
+LeafletAnnotator.prototype._showAttributesPopup = function (element) {
+	var loc = this;
+	loc.removeTempElement();
+	window.Popups.AnnotationItem.show(element).then(
+		function (element) {
+			// Notify handler about the new element
+			if (loc.onCompleteDrawHandler) {
+				loc.onCompleteDrawHandler(element);
+			}
+	});
+};
+
+/**
+ * Set a handler for when drawing is completed
+ * @param {Function} handler - Handler function that receives the new element
+ */
+LeafletAnnotator.prototype.onCompleteDrawing = function (handler) {
+	this.onCompleteDrawHandler = handler;
+};
+
+/**
+ * Cancel the current drawing
+ */
+LeafletAnnotator.prototype.cancelDrawing = function () {
+	this.removeTempElement();
+	this.drawingInProgress = false;
+	this.drawingCoordinates = [];
+};
+
+/**
+ * Update an existing element
+ * @param {Object} element - The element with updated properties
+ */
 LeafletAnnotator.prototype.updateElement = function (element) {
 	// Remove existing element
-	if (this.elementLayers.has(element.id)) {
-		this.removeElement(element.id);
+	if (this.elementLayers.has(element.Id)) {
+		this.removeElement(element.Id);
 	}
 	// Add updated element
 	return this.addElement(element);
 };
 
-// Método removeElement
+/**
+ * Remove an element from the map
+ * @param {string} elementId - The ID of the element to remove
+ */
 LeafletAnnotator.prototype.removeElement = function (elementId) {
 	var layer = this.elementLayers.get(elementId);
 	if (layer) {
-		this.mapsAPI.map.removeLayer(layer);
+		this.map.removeLayer(layer);
 		this.elementLayers.delete(elementId);
 		this.elements.delete(elementId);
 		this.selectedElementIds.delete(elementId);
 	}
 };
 
-// Método clearElements
+/**
+ * Clear all elements from the map
+ */
 LeafletAnnotator.prototype.clearElements = function () {
 	var self = this;
 	// Remove all elements from map
@@ -163,26 +330,30 @@ LeafletAnnotator.prototype.clearElements = function () {
 	this.selectedElementIds.clear();
 };
 
-// Método addTempElement
+/**
+ * Add a temporary element (for drawing preview)
+ * @param {Object} element - The element to add temporarily
+ */
 LeafletAnnotator.prototype.addTempElement = function (element) {
 	// Remove existing temp element if any
 	this.removeTempElement();
 
 	// Create temp layer based on element type
-	if (element.tipo === 'marker') {
-		this.tempLayer = L.marker(element.coordenadas[0], {
-			opacity: 0.7
+	if (element.Type === 'M') {
+		var markerOptions = this._getMarkerOptions(element);
+		this.tempLayer = L.marker(element.Geometry[0], {
+			opacity: 0.7, icon: markerOptions.icon
 		}).addTo(this.map);
-	} else if (element.tipo === 'polyline') {
-		this.tempLayer = L.polyline(element.coordenadas, {
-			color: element.color || '#FF4081',
+	} else if (element.Type === 'L') {
+		this.tempLayer = L.polyline(element.Geometry, {
+			color: element.Color || '#FF4081',
 			weight: 3,
 			opacity: 0.7,
 			dashArray: '5, 10'
 		}).addTo(this.map);
-	} else if (element.tipo === 'polygon') {
-		this.tempLayer = L.polygon(element.coordenadas, {
-			color: element.color || '#4CAF50',
+	} else if (element.Type === 'P') {
+		this.tempLayer = L.polygon(element.Geometry, {
+			color: element.Color || '#4CAF50',
 			weight: 2,
 			opacity: 0.7,
 			fillOpacity: 0.2,
@@ -191,14 +362,17 @@ LeafletAnnotator.prototype.addTempElement = function (element) {
 	}
 };
 
-// Método updateTempElement
+/**
+ * Update a temporary element (for drawing preview)
+ * @param {Object} element - The updated element
+ */
 LeafletAnnotator.prototype.updateTempElement = function (element) {
 	// Update existing temp element
 	if (this.tempLayer) {
-		if (element.tipo === 'marker') {
-			this.tempLayer.setLatLng(element.coordenadas[0]);
-		} else if (element.tipo === 'polyline' || element.tipo === 'polygon') {
-			this.tempLayer.setLatLngs(element.coordenadas);
+		if (element.Type === 'M' || element.Type === 'C' || element.Type === 'Q') {
+			this.tempLayer.setLatLng(element.Geometry[0]);
+		} else if (element.Type === 'L' || element.Type === 'P') {
+			this.tempLayer.setLatLngs(element.Geometry);
 		}
 	} else {
 		// Create if it doesn't exist
@@ -206,15 +380,20 @@ LeafletAnnotator.prototype.updateTempElement = function (element) {
 	}
 };
 
-// Método removeTempElement
+/**
+ * Remove the temporary element
+ */
 LeafletAnnotator.prototype.removeTempElement = function () {
 	if (this.tempLayer) {
-		this.mapsAPI.map.removeLayer(this.tempLayer);
+		this.map.removeLayer(this.tempLayer);
 		this.tempLayer = null;
 	}
 };
 
-// Método selectElement
+/**
+ * Select an element
+ * @param {string} elementId - The ID of the element to select
+ */
 LeafletAnnotator.prototype.selectElement = function (elementId) {
 	var layer = this.elementLayers.get(elementId);
 	if (layer) {
@@ -225,7 +404,9 @@ LeafletAnnotator.prototype.selectElement = function (elementId) {
 		if (layer instanceof L.Marker) {
 			// For markers, we could use a different icon or change opacity
 			layer.setOpacity(1.0);
-			layer._icon.classList.add('selected-marker');
+			if (layer._icon) {
+				layer._icon.classList.add('selected-marker');
+			}
 		} else {
 			// For lines and polygons, apply style
 			layer.setStyle(this.selectedStyle);
@@ -234,7 +415,10 @@ LeafletAnnotator.prototype.selectElement = function (elementId) {
 	}
 };
 
-// Método deselectElement
+/**
+ * Deselect an element
+ * @param {string} elementId - The ID of the element to deselect
+ */
 LeafletAnnotator.prototype.deselectElement = function (elementId) {
 	var layer = this.elementLayers.get(elementId);
 	var element = this.elements.get(elementId);
@@ -246,26 +430,30 @@ LeafletAnnotator.prototype.deselectElement = function (elementId) {
 		// Restore original style
 		if (layer instanceof L.Marker) {
 			layer.setOpacity(0.9);
-			layer._icon.classList.remove('selected-marker');
-		} else if (element.tipo === 'polyline') {
+			if (layer._icon) {
+				layer._icon.classList.remove('selected-marker');
+			}
+		} else if (element.Type === 'L') {
 			layer.setStyle({
-				color: element.color || '#FF4081',
+				color: element.Color || '#FF4081',
 				weight: 3,
 				opacity: 0.8
 			});
-		} else if (element.tipo === 'polygon') {
+		} else if (element.Type === 'P') {
 			layer.setStyle({
-				color: element.color || '#4CAF50',
+				color: element.Color || '#4CAF50',
 				weight: 2,
 				opacity: 0.8,
 				fillOpacity: 0.3,
-				fillColor: element.color || '#4CAF50'
+				fillColor: element.Color || '#4CAF50'
 			});
 		}
 	}
 };
 
-// Método clearSelection
+/**
+ * Clear all selected elements
+ */
 LeafletAnnotator.prototype.clearSelection = function () {
 	var self = this;
 	// Deselect all elements
@@ -275,54 +463,68 @@ LeafletAnnotator.prototype.clearSelection = function () {
 	this.selectedElementIds.clear();
 };
 
-// Método centerOnElement
+/**
+ * Center the map on an element
+ * @param {Object} element - The element to center on
+ */
 LeafletAnnotator.prototype.centerOnElement = function (element) {
-	if (!element || !element.coordenadas || element.coordenadas.length === 0) {
+	if (!element || !element.Geometry || element.Geometry.length === 0) {
 		return;
 	}
 
-	if (element.tipo === 'marker') {
+	if (element.Type === 'M') {
 		// Center on marker
-		this.mapsAPI.map.setView(element.coordenadas[0], 15);
+		this.map.setView(element.Geometry[0], 15);
 	} else {
 		// Create bounds around polyline or polygon
-		var bounds = L.latLngBounds(element.coordenadas);
-		this.mapsAPI.map.fitBounds(bounds, {
+		var bounds = L.latLngBounds(element.Geometry);
+		this.map.fitBounds(bounds, {
 			padding: [50, 50],
 			maxZoom: 15
 		});
 	}
 };
 
-// Método destroy
+/**
+ * Clean up resources when no longer needed
+ */
 LeafletAnnotator.prototype.destroy = function () {
+	// Remove temporary elements
+	this.removeTempElement();
 
+	// Clear all elements
+	this.clearElements();
+
+	// Remove event listeners (if needed)
 };
 
-// Método _updateInteractionMode (método privado)
-LeafletAnnotator.prototype._updateInteractionMode = function () {
-	// Set cursor and interaction behavior based on current mode
-	var mapContainer = this.container;
-
+/**
+ * Update the cursor style based on current mode
+ * @private
+ */
+LeafletAnnotator.prototype._updateCursor = function () {
+	// Set cursor based on current mode
 	switch (this.currentMode) {
 		case 'select':
-			mapContainer.style.cursor = 'default';
+			window.map.style.cursor = 'default';
 			break;
 		case 'draw-marker':
-			mapContainer.style.cursor = 'crosshair';
-			break;
 		case 'draw-polyline':
-			mapContainer.style.cursor = 'crosshair';
+		case 'draw-polygon':
+			window.map.style.cursor = 'crosshair';
 			break;
 		case 'delete':
-			mapContainer.style.cursor = 'not-allowed';
+			window.map.style.cursor = 'not-allowed';
 			break;
 		default:
-			mapContainer.style.cursor = 'default';
+			window.map.style.cursor = 'default';
 	}
 };
 
-// Método _setupLayerEvents (método privado)
+/**
+ * Set up event handlers for a layer
+ * @private
+ */
 LeafletAnnotator.prototype._setupLayerEvents = function (layer) {
 	var self = this;
 
@@ -346,7 +548,7 @@ LeafletAnnotator.prototype._setupLayerEvents = function (layer) {
 
 		// Apply hover style unless already selected
 		if (!self.selectedElementIds.has(layer.elementId)) {
-			if (layer instanceof L.Marker) {
+			if (layer instanceof L.Marker && layer._icon) {
 				layer._icon.classList.add('hover-marker');
 			} else {
 				layer.setStyle({
@@ -365,22 +567,22 @@ LeafletAnnotator.prototype._setupLayerEvents = function (layer) {
 		// Remove hover style if not selected
 		if (!self.selectedElementIds.has(layer.elementId)) {
 			var element = self.elements.get(layer.elementId);
-			if (layer instanceof L.Marker) {
+			if (layer instanceof L.Marker && layer._icon) {
 				layer._icon.classList.remove('hover-marker');
 			} else if (element) {
-				if (element.tipo === 'polyline') {
+				if (element.Type === 'L') {
 					layer.setStyle({
-						color: element.color || '#FF4081',
+						color: element.Color || '#FF4081',
 						weight: 3,
 						opacity: 0.8
 					});
-				} else if (element.tipo === 'polygon') {
+				} else if (element.Type === 'P') {
 					layer.setStyle({
-						color: element.color || '#4CAF50',
+						color: element.Color || '#4CAF50',
 						weight: 2,
 						opacity: 0.8,
 						fillOpacity: 0.3,
-						fillColor: element.color || '#4CAF50'
+						fillColor: element.Color || '#4CAF50'
 					});
 				}
 			}
@@ -388,24 +590,68 @@ LeafletAnnotator.prototype._setupLayerEvents = function (layer) {
 	});
 };
 
-// Método onElementDragEnd
+/**
+ * Set a handler for element drag end events
+ * @param {Function} handler - Handler function
+ */
 LeafletAnnotator.prototype.onElementDragEnd = function (handler) {
 	this.elementDragEndHandler = handler;
 };
 
-// Método setEditingEnabled
+/**
+ * Set a handler for element click events
+ * @param {Function} handler - Handler function
+ */
+LeafletAnnotator.prototype.onElementClick = function (handler) {
+	this.elementClickHandler = handler;
+};
+
+/**
+ * Set a handler for element hover events
+ * @param {Function} handler - Handler function
+ */
+LeafletAnnotator.prototype.onElementHover = function (handler) {
+	this.elementHoverHandler = handler;
+};
+
+/**
+ * Set a handler for element leave events
+ * @param {Function} handler - Handler function
+ */
+LeafletAnnotator.prototype.onElementLeave = function (handler) {
+	this.elementLeaveHandler = handler;
+};
+
+/**
+ * Set a handler for map click events
+ * @param {Function} handler - Handler function
+ */
+LeafletAnnotator.prototype.onMapClick = function (handler) {
+	this.mapClickHandler = handler;
+};
+
+/**
+ * Enable or disable editing for all elements
+ * @param {boolean} enabled - Whether editing should be enabled
+ */
 LeafletAnnotator.prototype.setEditingEnabled = function (enabled) {
 	var self = this;
 	// Update the editing flag
-	this.this.canEdit = enabled;
+	this.canEdit = enabled;
 
 	// Update marker draggable state
 	this.elementLayers.forEach(function (layer, elementId) {
 		var element = self.elements.get(elementId);
 		if (!element) return;
 
-		if (element.tipo === 'marker') {
-			layer.dragging.enabled(enabled);
+		if (element.Type === 'M') {
+			if (layer.dragging) {
+				if (enabled) {
+					layer.dragging.enable();
+				} else {
+					layer.dragging.disable();
+				}
+			}
 		} else {
 			if (enabled) {
 				self._makeLayerEditable(layer, element);
@@ -419,7 +665,10 @@ LeafletAnnotator.prototype.setEditingEnabled = function (enabled) {
 	});
 };
 
-// Método _makeLayerEditable (método privado)
+/**
+ * Make a layer editable
+ * @private
+ */
 LeafletAnnotator.prototype._makeLayerEditable = function (layer, element) {
 	var self = this;
 	// Check if Leaflet's editing capability is available
@@ -434,7 +683,7 @@ LeafletAnnotator.prototype._makeLayerEditable = function (layer, element) {
 		var layerLatLngs = layer.getLatLngs();
 
 		// Handle the different structures returned by polyline vs polygon
-		if (element.tipo === 'polyline') {
+		if (element.Type === 'L') {
 			// For polylines, it's a simple array of LatLng objects
 			layerLatLngs.forEach(function (latlng) {
 				updatedCoordinates.push({
@@ -442,7 +691,7 @@ LeafletAnnotator.prototype._makeLayerEditable = function (layer, element) {
 					lng: latlng.lng
 				});
 			});
-		} else if (element.tipo === 'polygon') {
+		} else if (element.Type === 'P') {
 			// For polygons, it might be nested arrays
 			var coords = Array.isArray(layerLatLngs[0]) ? layerLatLngs[0] : layerLatLngs;
 			coords.forEach(function (latlng) {
@@ -455,7 +704,7 @@ LeafletAnnotator.prototype._makeLayerEditable = function (layer, element) {
 
 		// Create updated element with new coordinates
 		var updatedElement = Object.assign({}, element, {
-			coordenadas: updatedCoordinates
+			Geometry: updatedCoordinates
 		});
 
 		// Trigger update event
@@ -470,14 +719,14 @@ LeafletAnnotator.prototype._makeLayerEditable = function (layer, element) {
 		var layerLatLngs = layer.getLatLngs();
 
 		// Process coordinates same as above
-		if (element.tipo === 'polyline') {
+		if (element.Type === 'L') {
 			layerLatLngs.forEach(function (latlng) {
 				updatedCoordinates.push({
 					lat: latlng.lat,
 					lng: latlng.lng
 				});
 			});
-		} else if (element.tipo === 'polygon') {
+		} else if (element.Type === 'Polygon') {
 			var coords = Array.isArray(layerLatLngs[0]) ? layerLatLngs[0] : layerLatLngs;
 			coords.forEach(function (latlng) {
 				updatedCoordinates.push({
@@ -488,7 +737,7 @@ LeafletAnnotator.prototype._makeLayerEditable = function (layer, element) {
 		}
 
 		var updatedElement = Object.assign({}, element, {
-			coordenadas: updatedCoordinates
+			Geometry: updatedCoordinates
 		});
 
 		if (self.elementDragEndHandler) {
@@ -497,22 +746,38 @@ LeafletAnnotator.prototype._makeLayerEditable = function (layer, element) {
 	});
 };
 
-// Método _getMarkerOptions (método privado)
+/**
+ * Get marker options based on element properties
+ * @private
+ */
 LeafletAnnotator.prototype._getMarkerOptions = function (element) {
 	var iconOptions = {};
 
 	// Check if it's a comment type (which has precedence over forma)
-	if (element.tipo === 'comment') {
-		// Create a comment icon (chat bubble)
+	if (element.Type === 'C') {
 		return {
 			icon: L.divIcon({
-				html: '<div style="width: 30px; height: 30px; background-color: ' + (element.color || '#FF9800') + '; border: 2px solid #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
+				html: '<div style="width: 30px; height: 30px; background-color: ' + (element.Color || '#FF9800') + '; border: 2px solid #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
 					'<span class="material-icons" style="font-size: 18px; color: white;">comment</span>' +
 					'</div>',
 				className: 'custom-div-icon',
 				iconSize: [30, 30],
 				iconAnchor: [15, 15]
-			})
+			}),
+			title: element.Description || ''
+		};
+	}
+	if (element.Type === 'Q') {
+		return {
+			icon: L.divIcon({
+				html: '<div style="width: 30px; height: 30px; background-color: ' + (element.Color || '#FF9800') + '; border: 2px solid #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
+					'<span class="material-icons" style="font-size: 18px; color: white;">help</span>' +
+					'</div>',
+				className: 'custom-div-icon',
+				iconSize: [30, 30],
+				iconAnchor: [15, 15]
+			}),
+			title: element.Description || ''
 		};
 	}
 
@@ -532,37 +797,27 @@ LeafletAnnotator.prototype._getMarkerOptions = function (element) {
 			// Create a square icon
 			return {
 				icon: L.divIcon({
-					html: '<div style="width: 20px; height: 20px; background-color: ' + element.color + '; border: 2px solid #FFF; display: flex; align-items: center; justify-content: center;">' +
+					html: '<div style="width: 20px; height: 20px; background-color: ' + (element.Color || '#2196F3') + '; border: 2px solid #FFF; display: flex; align-items: center; justify-content: center;">' +
 						'<span class="material-icons" style="font-size: 14px; color: white;">' + (element.icono || '') + '</span>' +
 						'</div>',
 					className: 'custom-div-icon',
 					iconSize: [20, 20],
 					iconAnchor: [10, 10]
-				})
+				}),
+				title: element.Description || ''
 			};
 		case 'círculo':
 			// Create a circle icon
 			return {
 				icon: L.divIcon({
-					html: '<div style="width: 20px; height: 20px; background-color: ' + element.color + '; border: 2px solid #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
+					html: '<div style="width: 20px; height: 20px; background-color: ' + (element.Color || '#2196F3') + '; border: 2px solid #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
 						'<span class="material-icons" style="font-size: 14px; color: white;">' + (element.icono || '') + '</span>' +
 						'</div>',
 					className: 'custom-div-icon',
 					iconSize: [20, 20],
 					iconAnchor: [10, 10]
-				})
-			};
-		case 'comment':
-			// Create a comment icon (chat bubble)
-			return {
-				icon: L.divIcon({
-					html: '<div style="width: 30px; height: 30px; background-color: ' + (element.color || '#FF9800') + '; border: 2px solid #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">' +
-						'<span class="material-icons" style="font-size: 18px; color: white;">comment</span>' +
-						'</div>',
-					className: 'custom-div-icon',
-					iconSize: [30, 30],
-					iconAnchor: [15, 15]
-				})
+				}),
+				title: element.Description || ''
 			};
 		default:
 			iconOptions = {
@@ -577,6 +832,9 @@ LeafletAnnotator.prototype._getMarkerOptions = function (element) {
 
 	return {
 		icon: L.icon(iconOptions),
-		title: element.descripcion || ''
+		title: element.Description || ''
 	};
 };
+
+// Export the constructor
+export default LeafletAnnotator;

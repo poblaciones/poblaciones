@@ -304,3 +304,22 @@ ActiveSelectedMetric.prototype.GetSubset = function (coord) {
 	}
 };
 
+ActiveSelectedMetric.prototype.ResolveSegment = function () {
+	if (this.properties == null) {
+		this.objs.Segment = window.SegMap.Metrics.ClippingSegment;
+	} else {
+		switch (this.SelectedLevel().Dataset.Type) {
+			case 'L':
+				this.objs.Segment = window.SegMap.Metrics.LocationsSegment;
+				break;
+			case 'D':
+				this.objs.Segment = window.SegMap.Metrics.GeoShapesSegment;
+				break;
+			case 'S':
+				this.objs.Segment = window.SegMap.Metrics.GeoShapesSegment;
+				break;
+			default:
+				throw new Error('Unknown dataset metric type');
+		}
+	}
+};

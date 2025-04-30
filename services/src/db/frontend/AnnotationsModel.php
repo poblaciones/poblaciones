@@ -4,10 +4,15 @@ namespace helena\db\frontend;
 
 use helena\classes\App;
 use helena\classes\Session;
+use helena\classes\GeoJson;
 
 use minga\framework\Date;
 use minga\framework\Profiling;
 use helena\entities\frontend\work\AnnotationsInfo;
+
+use helena\entities\frontend\geometries\Coordinate;
+use helena\entities\frontend\geometries\Frame;
+use helena\entities\frontend\geometries\Envelope;
 
 class AnnotationsModel extends BaseModel
 {
@@ -18,37 +23,46 @@ class AnnotationsModel extends BaseModel
 		$this->captionField = 'ann_caption';
 
 	}
+
 	public function GetAnnotations($workId)
 	{
 		Profiling::BeginTimer();
 		$params = array($workId);
 
-		$sql = "SELECT ann_id AS AnnotationId, ann_caption AS AnnotationCaption, ann_guest_access AS AnnotationGuestAccess,
-				  ann_allowed_types AS AnnotationAllowedTypes,
-				  ani_id AS Id,  ani_type AS Type, ani_centroid AS Centroid, ani_geometry AS Geometry, ani_order AS OrderNumber,
-				  ani_caption AS CaptionText, ani_description AS Description, ani_color AS Color, ani_length_m AS LengthMeters,
-				  ani_area_m2 AS AreaSquareMeters, ani_create AS Created, ani_user AS Created, ani_update AS Updated
-				FROM draft_annotation JOIN draft_annotation_item ON ann_id = ani_annotation_id WHERE ann_work_id = ?
-				ORDER BY ann_caption, ann_id, ani_order";
-
+		$sql = "SELECT ann_id AS Id, ann_work_id AS WorkId, ann_caption AS Caption, ann_guest_access AS GuestAccess,
+				  ann_allowed_types AS AllowedTypes
+				FROM draft_annotation WHERE ann_work_id = ?
+				ORDER BY ann_caption";
 		$ret = App::Db()->fetchAll($sql, $params);
-		$block = [];
-		$annotations = [];
-		$lastAnnotationId = null;
-		foreach($ret as $row)
-		{
-			if ($lastAnnotationId != $row["AnnotationId"])
-			{
-				$lastAnnotationId = $row["AnnotationId"];
-				$this->AppendAnnotation($annotations, $block);
-				$block = [];
-			}
-			$block[] = $row;
-		}
-		$this->AppendAnnotation($annotations, $block);
-
 		Profiling::EndTimer();
-		return $annotations;
+		return $ret;
+	}
+
+	public function GetAnnotationItems($workId, $annotationId)
+	{
+		Profiling::BeginTimer();
+		$params = array($workId, $annotationId);
+
+		$sql = "SELECT ani_id AS Id, ani_type AS Type, ST_Y(ani_centroid) AS Lat, ST_X(ani_centroid) AS Lon,
+					ani_geometry AS Geometry, ani_order AS OrderNumber,
+				  ani_caption AS Description, ani_description AS Content, ani_color AS Color,
+					ani_length_m AS LengthMeters,
+					'' AS LID,
+					'' AS Symbol,
+				  ani_area_m2 AS AreaSquareMeters, ani_create AS Created, ani_user AS Created, ani_update AS Updated
+				FROM draft_annotation JOIN draft_annotation_item ON ann_id = ani_annotation_id WHERE ann_work_id = ? AND ani_annotation_id = ?
+				ORDER BY ani_order";
+
+		$annotationItems = App::Db()->fetchAll($sql, $params);
+		$geo = new GeoJson();
+		//$envelope = Envelope::FromCircle($frame->ClippingCircle)->Trim();
+
+		foreach($annotationItems as &$item)
+		{
+			$item['Geometry'] = $geo->GenerateFromBinary(array(array('name' => '', 'value' => $item['Geometry'], 'FID' => $item['Id'])));
+		}
+		Profiling::EndTimer();
+		return $annotationItems;
 	}
 
 	private function AppendAnnotation(&$annotations, $block)

@@ -35,7 +35,8 @@ class WorkService extends BaseService
 		$rows = $onboardingTable->GetOnboardingInfo($workId);
 		$ret->FillOnboarding($rows);
 		$annotationsModel = new AnnotationsModel();
-		$ret->Annotations = $annotationsModel->GetAnnotations($workId);
+		$workIdUnShardified = PublishDataTables::Unshardify($workId);
+		$ret->Annotations = $annotationsModel->GetAnnotations($workIdUnShardified);
 		return $ret;
 	}
 

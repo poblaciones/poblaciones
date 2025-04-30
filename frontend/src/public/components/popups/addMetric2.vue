@@ -169,7 +169,7 @@ export default {
 				}
 			}
 		},
-		show(tree, workId, title) {
+		show(tree, workId) {
 			if (!tree) {
 				tree = [];
 			}

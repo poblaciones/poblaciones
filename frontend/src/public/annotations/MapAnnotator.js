@@ -15,11 +15,6 @@ function MapAnnotator(mapsAPI) {
 	this.elementDragEndHandler = null;
 }
 
-// Initialize the map
-MapAnnotator.prototype.init = function () {
-	throw new Error("Method 'init()' must be implemented");
-};
-
 // Set interaction mode
 MapAnnotator.prototype.setMode = function (mode) {
 	this.currentMode = mode;

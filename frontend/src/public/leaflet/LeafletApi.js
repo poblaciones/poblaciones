@@ -119,8 +119,55 @@ LeafletApi.prototype.Initialize = function () {
 	this.overlayMapTypesGroup.addTo(this.map);
 
 	var loc = this;
-	this.map.on("load", function() {
-		loc.Annotations = new LeafletAnnotator();
+	this.map.on("load", function () {
+		var annotator = new LeafletAnnotator(loc);
+		loc.Annotations = annotator;
+		loc.mapElements = [];
+
+		// Cuando se complete un dibujo, guardar el elemento
+		annotator.onCompleteDrawing(function (element) {
+			console.log('Nuevo elemento creado:', element);
+			loc.mapElements.push(element);
+			loc.Annotations.removeTempElement();
+			var activeAnnotation = window.SegMap.GetAnnotationById(element.AnnotationId);
+			if (activeAnnotation == null) {
+				window.SegMap.CreateAnnotationForType(element.Type).then(function (annotation) {
+					activeAnnotation = window.SegMap.CreateActiveAnnotation(annotation);
+					activeAnnotation.UpdateItem(element);
+				});
+			} else {
+				activeAnnotation.UpdateItem(element);
+			}
+		});
+
+		// Manejar la actualización de elementos cuando se editan
+		annotator.onElementDragEnd(function (updatedElement) {
+			// Encontrar y actualizar el elemento en nuestro array
+			const index = loc.mapElements.findIndex(el => el.id === updatedElement.id);
+			if (index !== -1) {
+				loc.mapElements[index] = updatedElement;
+
+				// Guardar los cambios
+				window.SegMap.Annotations.UpdateItem(updateElement);
+			}
+		});
+
+		// Manejar clics en elementos para seleccionarlos
+		annotator.onElementClick(function (elementId, event) {
+			// Puedes mostrar propiedades del elemento en un panel lateral
+			const element = loc.mapElements.find(el => el.id === elementId);
+			if (element) {
+				loc.showElementDetails(element);
+			}
+
+			// También seleccionar el elemento
+			annotator.clearSelection();
+			annotator.selectElement(elementId);
+		});
+
+		////////////////
+		////////////////
+		//////////////////
 		window.SegMap.MapInitialized();
 
 		var t = document.createElement("div");
@@ -153,6 +200,60 @@ LeafletApi.prototype.Initialize = function () {
 	});
 	this.map.setView(new L.LatLng(-37.1799565, -65.6866910), 6);
 	this.CheckBaseLayer();
+};
+
+// Mostrar detalles de un elemento en un panel lateral
+LeafletApi.prototype.showElementDetails = function (element) {
+	const detailsPanel = document.getElementById('element-details');
+	detailsPanel.innerHTML = `
+    <h3>${element.nombre || 'Sin nombre'}</h3>
+    <p>${element.descripcion || 'Sin descripción'}</p>
+    <div class="color-sample" style="background-color: ${element.color}"></div>
+    <p>Lista: ${element.lista || 'Ninguna'}</p>
+    <button id="btn-delete-element">Eliminar</button>
+    <button id="btn-edit-properties">Editar propiedades</button>
+  `;
+
+	// Configurar botones de acciones
+	document.getElementById('btn-delete-element').addEventListener('click', function () {
+		deleteElement(element.id);
+	});
+
+	document.getElementById('btn-edit-properties').addEventListener('click', function () {
+		showEditPropertiesPopup(element);
+	});
+};
+
+// Eliminar un elemento
+LeafletApi.prototype.deleteElement = function (elementId) {
+	// Eliminar del mapa
+	this.Annotations.removeElement(elementId);
+
+	// Eliminar de nuestra colección
+	this.mapElements = this.mapElements.filter(el => el.id !== elementId);
+	window.SegMap.Annotations.DeleteItem(elementId);
+
+	// Limpiar panel de detalles
+	document.getElementById('element-details').innerHTML = '';
+};
+
+// Mostrar popup para editar propiedades
+LeafletApi.prototype.showEditPropertiesPopup = function (element) {
+	// Crear un popup con un formulario similar al que usa el anotador internamente
+	// pero esta vez para editar un elemento existente
+	var loc = this;
+	window.Popups.AnnotationItem.show(element).then(
+		function (element) {
+
+			loc.Annotations.updateElement(element);
+			// Actualizar en nuestra colección
+			const index = loc.mapElements.findIndex(el => el.id === element.id);
+			if (index !== -1) {
+				loc.mapElements[index] = element;
+				window.SegMap.Annotations.UpdateItem(element);
+			}
+		});
+
 };
 
 LeafletApi.prototype.InteractiveChangeMapType = function (type) {
@@ -307,7 +408,7 @@ LeafletApi.prototype.BindEvents = function () {
 			}
 	});
 	this.map.on("draw:drawstop", function() {
-		window.SegMap.SetSelectionMode(0);
+		window.SegMap.SetSelectionMode("PAN");
 	});
 };
 
@@ -413,7 +514,7 @@ LeafletApi.prototype.CircleCompleted = function (circle) {
 
 	//borra el círculo
 	this.map.removeLayer(circle);
-	window.SegMap.SetSelectionMode(0);
+	window.SegMap.SetSelectionMode("PAN");
 };
 
 LeafletApi.prototype.CreateMarkerFactory = function (activeSelectedMetric, variable, customIcons) {
@@ -790,12 +891,12 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 
 	var deckElementsLayer;
 	// Crea la capa
-	if (activeMetric.SelectedLevel().Dataset.Type == 'S') {
-		var polygonLayer = new PolygonOverlay(activeMetric);
-		deckElementsLayer = polygonLayer.CreateLayer(data);
-	} else {
+	if (activeMetric.IsLocationType()) {
 		var iconLayer = new IconOverlay(activeMetric);
 		deckElementsLayer = iconLayer.CreateLayer(data, 1);
+	} else {
+		var polygonLayer = new PolygonOverlay(activeMetric);
+		deckElementsLayer = polygonLayer.CreateLayer(data);
 	}
 
 	// La agrega

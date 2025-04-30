@@ -32,9 +32,9 @@
 		</div>
 
 		<div class="btn-group">
-			<button v-for="(mode, index) in selectionModes" :key="mode.Name" type="button"
-							@click="setMode(index)" @mouseup="setMode(index)"
-							class="btn btn-default btn-xs" :class="getActive(index)"
+			<button v-for="mode in selectionModes" :key="mode.Name" type="button"
+							@click="setMode(mode.Action)" @mouseup="setMode(mode.Action)"
+							class="btn btn-default btn-xs" :class="getActive(mode.Action)"
 							:title="mode.Name">
 				<i :class="mode.Icon" />
 			</button>
@@ -297,7 +297,7 @@
 				var ret = [];
 				if (this.frame && this.frame.Zoom >= 10) {
 					ret.push(
-						{ Name: 'Seleccionar una zona arrastrando en el mapa.', Icon: 'fa fa-circle-notch' });
+						{ Action: 'BUFFER', Name: 'Seleccionar una zona arrastrando en el mapa.', Icon: 'fa fa-circle-notch' });
 				}
 				// Agrega las herramientas para dibujar
 				// Para eso se basa en las listas existentes del work
@@ -306,13 +306,13 @@
 					// Las acciones pueden hacerse si es editor de la cartografía o si el permiso
 					// para invitados es A o E.
 					var annotationTypes = {
-						'M': { Name: 'Anotar punto', Icon: 'fas fa-map-marker-alt' },   // Punto
-						'L': { Name: 'Anotar línea', Icon: 'fas fa-slash' },            // Línea
-						'P': { Name: 'Anotar polígono', Icon: 'fas fa-draw-polygon' },  // Polígono
-						'C': { Name: 'Agregar comentario', Icon: 'fas fa-comment' },    // Comentario
-						'Q': { Name: 'Agregar pregunta', Icon: 'fas fa-question' } // Pregunta
+						'M': { Action: 'MARKER', Name: 'Anotar punto', Icon: 'fas fa-map-marker-alt' },   // Punto
+						'L': { Action: 'LINE', Name: 'Anotar línea', Icon: 'fas fa-slash' },            // Línea
+						'P': { Action: 'POLYGON', Name: 'Anotar polígono', Icon: 'fas fa-draw-polygon' },  // Polígono
+						'C': { Action: 'COMMENT', Name: 'Agregar comentario', Icon: 'fas fa-comment' },    // Comentario
+						'Q': { Action: 'QUESTION', Name: 'Agregar pregunta', Icon: 'fas fa-question' } // Pregunta
 					};
-					if (this.work.Current.Annotations.Lists.length == 0) {
+					if (this.work.Current.Annotations.length == 0) {
 						// ofrece todos los tipos
 						if (this.work.Current.CanEdit) {
 							for (const [key, value] of Object.entries(annotationTypes)) {
@@ -321,7 +321,7 @@
 						}
 					} else {
 						// ofrece solo las permitidas
-						for (var annotationList of this.work.Current.Annotations.Lists) {
+						for (var annotationList of this.work.Current.Annotations) {
 							for (const [key, value] of Object.entries(annotationTypes)) {
 								// Va sumando los types editables
 								if (this.work.Current.CanEdit || annotationList.AllowedTypes.includes(key)) {
@@ -333,7 +333,7 @@
 				}
 				if (ret.length > 0) {
 					// Agrega el neutro
-					arr.InsertAt(ret, 0, { Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' });
+					arr.InsertAt(ret, 0, { Action: 'PAN', Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' });
 				}
 				return ret;
 			}
@@ -348,14 +348,34 @@
 				window.SegMap.StopDrawing();
 
 				switch (mode) {
-					case 0:
+					case 'PAN':
 						// go back to default mode
 						window.map.style.cursor = 'auto';
+						window.SegMap.MapsApi.Annotations.setMode('select');
 						window.SegMap.StartClickSelecting();
 						break;
-					case 1:
+					case 'BUFFER':
 						// startCircleMode
+						window.SegMap.MapsApi.Annotations.setMode('select');
 						window.SegMap.BeginDrawingCircle();
+						break;
+					case 'MARKER':
+						//window.SegMap.MapsAPI.Annotations.addElement('marker');
+						window.SegMap.MapsApi.Annotations.setMode('draw-marker');
+						break;
+					case 'LINE':
+						window.SegMap.MapsApi.Annotations.setMode('draw-polyline');
+			//			window.SegMap.MapsAPI.Annotations.addElement('polyline');
+						break;
+					case 'POLYGON':
+						window.SegMap.MapsApi.Annotations.setMode('draw-polygon');
+			//		window.SegMap.MapsAPI.Annotations.addElement('polygon');
+						break;
+					case 'COMMENT':
+						window.SegMap.MapsApi.Annotations.setMode('draw-comment');
+						break;
+					case 'QUESTION':
+						window.SegMap.MapsApi.Annotations.setMode('draw-question');
 						break;
 				}
 			}

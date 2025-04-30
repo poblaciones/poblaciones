@@ -161,7 +161,7 @@ class PublishDataTables
 		$cacheManager->CleanPdfMetadata($work->getMetadata()->getId());
 		$cacheManager->CleanWorkHandlesCache($workId);
 		$cacheManager->CleanWorkVisiblityCache($workId);
-		$cacheManager->ClearWorkSelectedMetricMetadata($workId);
+		$cacheManager->ClearWorkSelectedMetricMetadata($workId); // < aca se traba
 		$this->CleanWorkMetadataCaches($workId, $work->getMetadata()->getId());
 
 		// Limpia efectos de haber editado la institución y ahora republicarla

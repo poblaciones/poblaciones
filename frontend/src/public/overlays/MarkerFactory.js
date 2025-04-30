@@ -209,7 +209,7 @@ MarkerFactory.prototype.createDelegates = function () {
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	var loc = this;
 
-	if (this.activeSelectedMetric.SelectedLevel().Dataset.ShowInfo) {
+	if (this.activeSelectedMetric.SelectedShowInfo) {
 		delegates.click = function (feature, event) {
 			var parentInfo = loc.activeSelectedMetric.CreateParentInfo(variable, feature.object);
 			return maps.markerClicked(event.srcEvent, parentInfo, feature.object.FID);

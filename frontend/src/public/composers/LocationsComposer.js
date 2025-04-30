@@ -11,7 +11,7 @@ function LocationsComposer(mapsApi, activeSelectedMetric) {
 	this.activeSelectedMetric = activeSelectedMetric;
 	this.keysInTile = {};
 	this.labelsVisibility = [];
-	this.customIcons = this.activeSelectedMetric.SelectedVersion().Work.Icons;
+	this.customIcons = this.activeSelectedMetric.Icons();
 	if (this.activeSelectedMetric.HasSelectedVariable()) {
 		this.variable = this.activeSelectedMetric.SelectedVariable();
 	} else {
@@ -38,7 +38,7 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 		this.keysInTile[tileKey] = [];
 	}
 
-	var markerSettings = this.activeSelectedMetric.SelectedLevel().Dataset.Marker;
+	var markerSettings = this.activeSelectedMetric.SelectedMarker();
 	this.UpdateTextStyle(zoom, markerSettings);
 	var markers = [];
 

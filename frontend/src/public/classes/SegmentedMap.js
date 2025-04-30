@@ -33,6 +33,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.MapsApi = mapsApi;
 	this.Work = null;
 	this.Popups = {};
+	this.Annotations = [];
 	this.IsSmallDevice = null;
 	this.IsNotLarge = false;
 	this.textCanvas = {};
@@ -221,6 +222,22 @@ SegmentedMap.prototype.Post = function (url, args, noCredencials) {
 	}).catch(function (res) {
 		throw (res);
 	});
+};
+
+SegmentedMap.prototype.CreateActiveAnnotation = function (annotation) {
+	var activeAnnotation = new ActiveAnnotations(annotation);
+	this.Metrics.AppendNonStandardMetric(activeAnnotation);
+	this.Annotations.push(activeAnnotation);
+	return activeAnnotation;
+};
+
+SegmentedMap.prototype.GetAnnotationById = function (annotationId) {
+	for (var ann of window.SegMap.Annotations) {
+		if (ann.properties.Id === annotationId) {
+			return ann;
+		}
+	}
+	return null;
 };
 
 SegmentedMap.prototype.CreateAxios = function (withCredentials) {
@@ -521,6 +538,18 @@ SegmentedMap.prototype.AddMetricByIdAndVersion = function (id, versionId) {
 		return activeSelectedMetric.GetVersionIndex(metricVersionId);
 	});
 };
+
+SegmentedMap.prototype.CreateAnnotationForType = function (annotationType) {
+	const loc = this;
+	this.Get(window.host + '/services/works/CreateAnnotationForType', {
+		params: { w: this.Work.Id, t: annotationType }
+	}).then(function (res) {
+		loc.AddMetricBySelectedMetricInfo(res.data);
+	}).catch(function (error) {
+		err.errDialog('CreateAnnotationForType', 'crear una lista de elementos', error);
+	});
+};
+
 
 SegmentedMap.prototype.AddMetricByFID = function (fid) {
 	const loc = this;

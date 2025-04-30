@@ -4,6 +4,7 @@
 		<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
 		<CompareMetadata ref="showCompareMetadata" :backgroundColor="backgroundColor" />
 		<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
+		<AnnotationItem ref="showAnnotationItem" :backgroundColor="backgroundColor" />
 		<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
 		<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
 		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
@@ -18,6 +19,7 @@ import WorkMetadata from '@/public/components/popups/workMetadata';
 import ClippingMetadata from '@/public/components/popups/clippingMetadata';
 import CompareMetadata from '@/public/components/popups/compareMetadata';
 import MetricCustomize from '@/public/components/popups/metricCustomize';
+import AnnotationItem from '@/public/components/popups/annotationItem';
 import BoundaryCustomize from '@/public/components/popups/boundaryCustomize';
 import AddMetric2 from '@/public/components/popups/addMetric2';
 import AddMetric from '@/public/components/popups/addMetric';
@@ -31,6 +33,7 @@ export default {
 		BoundaryDownload,
 		AddMetric,
 		AddMetric2,
+		AnnotationItem,
 		WorkMetadata,
 		Embedding,
 		ClippingMetadata,
@@ -51,6 +54,7 @@ export default {
 		window.Popups.CompareMetadata = this.$refs.showCompareMetadata;
 		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
+		window.Popups.AnnotationItem = this.$refs.showAnnotationItem;
 		window.Popups.AddMetric = this.$refs.addMetric;
 		window.Popups.AddMetric2 = this.$refs.addMetric2;
 	},

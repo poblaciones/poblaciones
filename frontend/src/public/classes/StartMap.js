@@ -5,7 +5,7 @@ import str from '@/common/framework/str';
 import err from '@/common/framework/err';
 import Tutorial from './Tutorial';
 import session from '@/common/framework/session';
-import ActiveAnnotations from '@/public/annotations/ActiveAnnotations';
+import ActiveAnnotations from '@/public/classes/ActiveAnnotations';
 
 export default StartMap;
 
@@ -68,7 +68,6 @@ StartMap.prototype.RestoreWork = function (workId, link) {
 		loc.workReference.Current = res.data.work;
 		loc.workReference.Current.tutorialOpened = false;
 		loc.workReference.Current.Tutorial = new Tutorial(loc.workReference.Current, res.data.work.Id);
-		loc.workReference.Current.Annotations = new ActiveAnnotations(loc.workReference.Current);
 		loc.ReceiveWorkStartup(loc.workReference.Current.Startup, res.data.frame);
 	}).catch(function (error) {
 		err.errDialog('GetWork', 'obtener la información del servidor', error);
@@ -108,13 +107,23 @@ StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
 		// Type === 'D' || 'R' sin región
 		var loc = this;
 		this.StartByDefaultFrame(frame, function () {
+			loc.LoadAnnotations();
 			loc.LoadStartMetrics(startup);
 		});
 		return;
 	}
 	this.SetupMap(setMapPosition);
 	this.Finish();
+	this.LoadAnnotations();
 	this.LoadStartMetrics(startup);
+};
+
+StartMap.prototype.LoadAnnotations = function () {
+	if (this.workReference.Current) {
+		for (var annotation of this.workReference.Current.Annotations) {
+			window.SegMap.CreateActiveAnnotation(annotation);
+		}
+	}
 };
 
 StartMap.prototype.LoadStartMetrics = function (startup) {
@@ -151,7 +160,8 @@ StartMap.prototype.LoadStartMetrics = function (startup) {
 StartMap.prototype.StartByUrl = function () {
 	var route = this.hash;
 	var loc = this;
-	var afterLoaded = function() {
+	var afterLoaded = function () {
+		loc.LoadAnnotations();
 		window.SegMap.RestoreRoute.LoadRoute(route, true);
 		loc.Finish();
 	};

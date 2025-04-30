@@ -7,6 +7,7 @@ use helena\entities\frontend\geometries\Circle;
 use helena\services\frontend as services;
 use helena\services\common as commonServices;
 use helena\services\backoffice\InstitutionService;
+use helena\db\frontend\AnnotationsModel;
 
 use helena\classes\App;
 use helena\classes\Session;
@@ -82,11 +83,23 @@ App::$app->get('/services/works/GetWorkAndDefaultFrame', function (Request $requ
 // ej. http://mapas/services/works/GetWork?w=12
 App::$app->get('/services/works/GetWork', function (Request $request) {
 	$controller = new services\WorkService();
-	$workId = Params::GetInt('w');
+	$workId = Params::GetIntMandatory('w');
 
 	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId)) return $denied;
 
 	return App::Json($controller->GetWork($workId));
+});
+
+// ej. http://mapas/services/works/GetAnnotationItems?w=12&a=1
+App::$app->get('/services/works/GetAnnotationItems', function (Request $request) {
+	$controller = new AnnotationsModel();
+	$workId = Params::GetIntMandatory('w');
+	$annotationId = Params::GetIntMandatory('a');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessible($workId))
+		return $denied;
+	$res = $controller->GetAnnotationItems($workId, $annotationId);
+	return App::Json(array("Data" => $res));
 });
 
 
