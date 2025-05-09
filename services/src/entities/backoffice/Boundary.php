@@ -222,7 +222,7 @@ class Boundary
 	/**
 	 * Set icon
 	 *
-	 * @param boolean $icon
+	 * @param string $icon
 	 *
 	 * @return Boundary
 	 */
@@ -236,7 +236,7 @@ class Boundary
 	/**
 	 * Get icon
 	 *
-	 * @return boolean
+	 * @return string
 	 */
 	public function getIcon()
 	{
