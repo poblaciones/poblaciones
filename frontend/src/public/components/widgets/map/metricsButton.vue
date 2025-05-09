@@ -9,19 +9,8 @@
 					 :bg-color="backgroundColor"
 					 :actions="fabActions"
 					 :mainTooltip="mainTooltip"
-					 @selectedPanel="selectedPanel"
-					 @selected0="selected(0)"
-					 @selected1="selected(1)"
-					 @selected2="selected(2)"
-					 @selected3="selected(3)"
-					 @selected4="selected(4)"
-					 @selected5="selected(5)"
-					 @selected6="selected(6)"
-					 @selected7="selected(7)"
-					 @selected8="selected(8)"
-					 @selected9="selected(9)"
-					 @selected10="selected(10)"
-					 @selected11="selected(11)">
+					 @selectedItem="selectedItem"
+					 @selectedGroup="selectedGroup">
 			</fabButton>
 		</span>
 	</div>
@@ -63,7 +52,8 @@ export default {
 				var fabAction = {
 					name: 'selected' + n, tooltip: action.Name,
 					icon: action.Icon,
-					items: action.Items
+					items: action.Items,
+					metricAction: action
 				};
 				if (action.Intensity) {
 					fabAction.color = color.ReduceColor("#10AADB" /*this.backgroundColor*/, action.Intensity);
@@ -82,21 +72,6 @@ export default {
 		'backgroundColor'
 	],
 	methods: {
-		loadFabMetrics() {
-			const loc = this;
-			axios.get(window.host + '/services/metrics/GetFabMetrics', session.AddSession(window.host, {
-				params: {
-					w: window.SegMap.Signatures.FabMetrics,
-					h: window.SegMap.Signatures.Suffix
-				}
-			})).then(function (res) {
-				session.ReceiveSession(window.host, res);
-				loc.fabMetrics = res.data;
-				window.fabMetrics = res.data;
-			}).catch(function (error) {
-				err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
-			});
-		},
 		keyProcess(e) {
 			if (e.key === "Escape") {
 				if (this.$refs.vuefab.toggle) {
@@ -107,7 +82,7 @@ export default {
 				window.Popups.AddMetric.show(this.action.Items, null, this.action.Name);
 			}
 		},
-		selectedPanel(item) {
+		selectedItem(item) {
 			if (item.Type === 'B') {
 				window.SegMap.AddBoundaryById(item.Id, item.Name);
 			} else {
@@ -115,8 +90,8 @@ export default {
 			}
 			this.$refs.vuefab.toggle = false;
 		},
-		selected(n) {
-			this.action = this.fabMetrics[n];
+		selectedGroup(action) {
+			this.action = action.metricAction; // this.fabMetrics[n];
 			this.$refs.vuefab.toggle = false;
 			window.Popups.AddMetric.show(this.action.Items, null, this.action.Name);
 		}

@@ -27,10 +27,18 @@ class FabService extends BaseService
 		if (FabMetricsCache::Cache()->HasData($shard, $data))
 			return self::RemovePrivateBoundaries($data);
 
-		$data = $this->CalculateFabMetrics();
+		$data = $this->CalculateFab();
 
 		FabMetricsCache::Cache()->PutData($shard, $data);
 		return self::RemovePrivateBoundaries($data);
+	}
+
+	private function CalculateFab()
+	{
+		$metrics = $this->CalculateFabMetrics();
+		$boundaries = $this->CalculateFabRecommendedBoundaries();
+
+		return ['Metrics' => $metrics, 'Boundaries' => $boundaries];
 	}
 
 	private function CalculateFabMetrics()
@@ -52,6 +60,13 @@ class FabService extends BaseService
 			array_unshift($ret, $recommended);
 
 		return $ret;
+	}
+
+
+	private function CalculateFabRecommendedBoundaries()
+	{
+		$table = new BoundaryModel();
+		return $table->GetRecommendedBoundaries();
 	}
 	private function IntensityTarget()
 	{
@@ -96,8 +111,8 @@ class FabService extends BaseService
 	{
 		if (Session::IsSiteReader())
 			return $ret;
-
-		foreach($ret as &$group)
+		$boundaries = $ret->Boundaries;
+		foreach($boundaries as &$group)
 		{
 			$secondItem = (sizeof($group['Items']) > 1 ? $group['Items'][1] : null);
 			if ($secondItem)
@@ -109,7 +124,7 @@ class FabService extends BaseService
 					if ($this->doRemovePrivateBoundaries($group['Items']))
 						$this->fixEmptyGroups($group['Items']);
 					if (sizeof($group['Items']) == 0)
-						Arr::Remove($ret, $group);
+						Arr::Remove($boundaries, $group);
 					break;
 				}
 			}

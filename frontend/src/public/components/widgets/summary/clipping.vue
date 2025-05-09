@@ -69,7 +69,7 @@
 										enter-active-class="animated quick zoomIn"
 										leave-active-class="animated quick zoomOut">
 					<div v-if="ShowMultiselectInfo" class="infoBoxHolder">
-						<div class="infoBox">
+						<div class="infoBox exp-hiddable-unset">
 							<mp-close-button title="Cerrar mensaje" @click="closeMultiselectInfo"
 															 style="float: none; top: 0; margin-top: 0px;
 																		position: absolute; right: 5px; font-size: 1.1em;" class="exp-hiddable-block" />

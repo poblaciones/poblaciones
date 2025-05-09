@@ -40,7 +40,6 @@ CREATE TABLE `draft_annotation_item` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
-
 ALTER TABLE `draft_annotation_item`
 ADD UNIQUE INDEX `ani_order` (`ani_annotation_id` ASC, `ani_order` ASC);
 

@@ -1,13 +1,15 @@
 <template>
 	<div v-show="visible" :class="[ 'fab-panel', outerBorderRadiusClass ]"
-		:style="{ 'background-color': bgColor, 'max-width': width + 'px', 'width': getWidth }" ref="fabPanel">
-		<div class="fab-triangle" :style="{ 'border-right-color': bgColor }" ref="triangle"></div>
+			 :style="{ 'background-color': bgColor, 'max-width': width + 'px', 'width': getWidth }" ref="fabPanel">
+		<div v-show="orientation == 'right'" class="fab-triangle-left" :style="{ 'border-right-color': bgColor }" ref="triangle"></div>
+		<div v-show="orientation == 'bottom'"  class="fab-triangle-top" :style="{ 'border-bottom-color': bgColor }"></div>
+
 		<div v-if="showScrollButtons" ref="scrollUp" class="fab-scroll-button-disabled top-radius" :style="style"
-			@click="scrollUp" @mouseenter="scrollUpStart" @mouseleave="scrollUpStop">
+				 @click="scrollUp" @mouseenter="scrollUpStart" @mouseleave="scrollUpStop">
 			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_up</i>
 		</div>
 		<div :class="[ 'fab-panel-overflow', scrollBarClass, borderRadiusClass ]" ref="panelScroll"
-			:style="scrollStyle" @wheel="wheel($event)" @scroll="scrolled()">
+				 :style="scrollStyle" @wheel="wheel($event)" @scroll="scrolled()">
 			<ul class="fab-panel-list unselectable">
 				<li v-for="(item, index) in items" :key="item.Id" :class="[ 'fab-panel-item', ellipsisClass, 'unselectable',
 						(item.Header ? (index === 0 && !showScrollButtons ? 'fab-panel-item-header fab-panel-item-header-offset' : 'fab-panel-item-header') : '')]" :style="style" @click="select(item)"
@@ -18,7 +20,7 @@
 			</ul>
 		</div>
 		<div v-if="showScrollButtons" ref="scrollDown" class="fab-scroll-button bottom-radius"
-			:style="style" @click="scrollDown" @mouseenter="scrollDownStart" @mouseleave="scrollDownStop">
+				 :style="style" @click="scrollDown" @mouseenter="scrollDownStart" @mouseleave="scrollDownStop">
 			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_down</i>
 		</div>
 	</div>
@@ -34,7 +36,7 @@ export default {
 	},
 	data() {
 		return {
-			maxHeight: 400,
+			maxHeight: 1400,
 			adjust: 0,
 			visible: false,
 			scrollInterval: null,
@@ -51,6 +53,9 @@ export default {
 	props: {
 		items: {
 			default: [],
+		},
+		orientation: {
+			default: 'right',
 		},
 		scrollButtons: {
 			default: function() {
@@ -102,7 +107,6 @@ export default {
 		scrollBgColor: {
 			default:  '#06769a',
 		},
-
 		actionIconSize: {
 			default: 'md-38',
 		},
@@ -455,7 +459,19 @@ export default {
 	margin-top: 9px;
 }
 
-.fab-triangle {
+.fab-triangle-top {
+	height: 10px;
+	width: 10px;
+	position: absolute;
+	left: 20px;
+	top: -10px;
+	transform: translateX(-50%);
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-bottom: 10px solid;
+}
+
+.fab-triangle-left {
 	height: 10px;
 	width: 10px;
 	position: absolute;

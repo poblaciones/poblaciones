@@ -391,7 +391,8 @@ export default {
 			return false;
 		},
 		completeEditOnClick() {
-			this.CurrentVarValue = this.CurrentVarValue.trim();
+			var value = this.CurrentVarValue + '';
+			this.CurrentVarValue = value.trim();
 			if (this.doingAutoRecode === false && this.repeatedValue()) {
 				alert("Ya existe un elemento para el valor '" + this.CurrentVarValue + "'.");
 				return;

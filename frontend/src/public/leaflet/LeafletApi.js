@@ -619,10 +619,13 @@ LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offset
 		current.getWest() + offsetRad > min.lng ||
 		current.getNorth() < max.lat ||
 		current.getSouth() > min.lat) {
-		this.map.fitBounds(bounds);
+		this.map.flyToBounds(bounds, {
+			animate: true,
+			duration: 1.5 // Duración en segundos (puedes ajustarlo)
+		});
 		if (offsetX) {
 			var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
-			this.map.panTo(L.latLng(pos.lat, pos.lng - offsetRad));
+			this.map.flyTo(L.latLng(pos.lat, pos.lng - offsetRad));
 		}
 	}
 };
@@ -641,7 +644,10 @@ LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) 
 	var bounds = L.latLngBounds();
 	bounds.extend(min);
 	bounds.extend(max);
-	this.map.fitBounds(bounds);
+	this.map.flyToBounds(bounds, {
+		animate: true,
+		duration: 1.5 // Duración en segundos (puedes ajustarlo)
+	});
 
 	var offsetRad = 0;
 	if (offsetX) {
@@ -653,7 +659,7 @@ LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) 
 		bounds.extend(max);
 		offsetRad = this.calculateOffsetX(offsetX);
 		var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
-		this.map.panTo(L.latLng(pos.lat, pos.lng - offsetRad));
+		this.map.flyTo(L.latLng(pos.lat, pos.lng - offsetRad));
 	}
 };
 

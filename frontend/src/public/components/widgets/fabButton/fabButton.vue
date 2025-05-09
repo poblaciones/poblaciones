@@ -9,30 +9,9 @@
 						leave-active-class="animated quick zoomOut"
 						@after-enter="afterActionsTransitionEnter"
 						@before-enter="beforeActionsTransitionEnter">
-						<template v-if="action.tooltip">
-							<li v-if="expanded" :style="{ 'background-color': action.color || bgColor }">
-								<div v-tooltip="{ content: action.tooltip, placement: tooltipPosition, classes: 'fab-tooltip', trigger: tooltipTrigger}"
-									@mouseenter="showPanel(action.name)" @click="toParent(action.name)" ref="actions" class="fab-list-div no-highlight pointer">
-									<i :class="[ actionIconSize, 'material-icons' ]">{{ action.icon }}</i>
-								</div>
-
-								<fabPanel v-if="usePanel" ref="fabPanel" @selected="selectedParent"
-									 :items="action.items"
-									 :actionIconSize="actionIconSize"
-									 :bgColor="bgColor"></fabPanel>
-							</li>
-						</template>
-						<template v-else>
-							<li v-if="expanded" :style="{ 'background-color': action.color || bgColor }">
-								<div @mouseenter="showPanel(action.name)" @click="toParent(action.name)" class="fab-list-div pointer">
-									<i :class="[ actionIconSize, 'material-icons' ]">{{ action.icon }}</i>
-								</div>
-								<fabPanel v-if="usePanel" ref="fabPanel" @selected="selectedParent"
-									 :items="action.items"
-									 :actionIconSize="actionIconSize"
-									 :bgColor="bgColor"></fabPanel>
-							</li>
-						</template>
+						<fab-button-item v-if="expanded" :action="action" :isOpening="isOpening" @selectedItem="selectedItem" @selectedGroup="selectedGroup"
+														 :usePanel="usePanel"
+														 :iconSize="iconSize" :tooltipTrigger="tooltipTrigger" :bgColor="bgColor" @hidePanels="hidePanels"/>
 					</transition>
 				</template>
 			</ul>
@@ -61,13 +40,13 @@
 
 import {mixin as clickaway} from 'vue-clickaway';
 import {VTooltip} from 'v-tooltip';
-import fabPanel from '@/public/components/widgets/fabButton/fabPanel';
+import fabButtonItem from './fabButtonItem';
 
 export default {
 	name: 'fabButton',
 	mixins: [clickaway],
 	components: {
-		fabPanel,
+		fabButtonItem
 	},
 	directives: {
 		tooltip: VTooltip,
@@ -84,20 +63,6 @@ export default {
 		usePanel: {
 			default: true,
 		},
-		panelOpenMode: {
-			default: function() {
-				if(this.$isMobile()) {
-					return 'click';
-				} else {
-					return 'mouseenter';
-				}
-			},
-			validator: function(value) {
-				// valores válidos:
-				return ['mouseenter', 'click'].indexOf(value) !== -1;
-			},
-		},
-
 		bgColor: {
 			default: '#333333',
 		},
@@ -143,22 +108,7 @@ export default {
 				return this.toggle && !window.Use.UseNewMenu;
 			},
 		tooltipPosition() {
-			if(this.usePanel && this.panelOpenMode == 'mouseenter') {
-				return 'top';
-			}
-			return 'left';
-		},
-		actionIconSize() {
-			switch (this.iconSize) {
-				case 'small':
-					return 'md-18';
-				case 'medium':
-					return 'md-24';
-				case 'large':
-					return 'md-36';
-				default:
-					return 'md-24';
-			}
+			return 'top';
 		},
 		allowRotation() {
 			return this.enableRotation && this.actions && this.actions.length;
@@ -233,25 +183,11 @@ export default {
 		}
 	},
 	methods: {
-		showPanel(name) {
-			if(this.usePanel == false || this.panelOpenMode == 'click') {
-				return;
-			}
-			if (this.openHoverTimer) {
-				clearTimeout(this.openHoverTimer);
-				this.openHoverTimer = null;
-			}
-			if (!this.isOpening) {
-				this.togglePanel(name);
-			} else {
-				this.openHoverTimer = setTimeout(() => {
-					this.showPanel(name);
-				}, 50);
-			}
-		},
 		hidePanels() {
-			this.$refs.fabPanel.forEach(function(item) {
-				item.hide();
+			this.actions.forEach(function (action) {
+				if (action.hide) {
+					action.hide();
+				}
 			});
 		},
 		togglePanel(name) {
@@ -269,15 +205,11 @@ export default {
 				this.tooltipPosition = 'right';
 			}
 		},
-		selectedParent(item) {
-			this.$emit('selectedPanel', item);
+		selectedItem(item) {
+			this.$emit('selectedItem', item);
 		},
-		toParent(name) {
-			if(this.usePanel && this.panelOpenMode == 'click') {
-				this.togglePanel(name);
-				return;
-			}
-			this.$emit(name);
+		selectedGroup(action) {
+			this.$emit('selectedGroup', action);
 			this.toggle = false;
 		},
 		away() {
@@ -509,23 +441,6 @@ ul {
 	overflow: hidden;
 	z-index: 0;
 	position: relative;
-}
-
-/* Rules for sizing the icon. */
-.material-icons.md-18 {
-	font-size: 18px;
-}
-
-.material-icons.md-24 {
-	font-size: 24px;
-}
-
-.material-icons.md-36 {
-	font-size: 36px;
-}
-
-.material-icons.md-48 {
-	font-size: 48px;
 }
 
 /* Rules for using icons as black on a light background. */

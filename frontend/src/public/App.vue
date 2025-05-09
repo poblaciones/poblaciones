@@ -23,6 +23,8 @@
 					<MapPanel />
 					<MapTypeSelector v-if="false"></MapTypeSelector>
 					<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
+					<RecommendBoundaries style="position: absolute; left: 20px; top: 60px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor"/>
+
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
 							<WatermarkFloat v-if="institution.WatermarkId" :key="institution.Id" :institution="institution" :work="work" />
@@ -59,6 +61,7 @@
 	import MapExport from '@/public/classes/MapExport';
 	import MapPanel from '@/public/components/panels/mapPanel';
 	import MetricsButton from '@/public/components/widgets/map/metricsButton';
+	import RecommendBoundaries from '@/public/components/widgets/map/recommendBoundaries';
 	import LeftPanel from '@/public/components/panels/leftPanel';
 	import EditButton from '@/public/components/widgets/map/editButton';
 	import FullScreenButton from '@/public/components/widgets/map/fullScreenButton';
@@ -92,6 +95,7 @@
 			FullScreenButton,
 			MetricsButton,
 			LeftPanel,
+			RecommendBoundaries,
 			PopupsPanel,
 			WorkPanel,
 			MapTypeSelector,
@@ -410,7 +414,7 @@
 				segMap.afterCallback = afterLoaded;
 				window.SegMap = segMap;
 				if (!window.Embedded.Compact) {
-					this.$refs.fabPanel.loadFabMetrics();
+					this.loadFabMetrics();
 				}
 				segMap.SaveRoute.DisableOnce = true;
 				mapApi.Initialize();
@@ -442,6 +446,22 @@
 			doToggle() {
 				this.toolbarStates.collapsed = !this.toolbarStates.collapsed;
 				window.SegMap.Session.UI.ToggleRightPanel(!this.toolbarStates.collapsed);
+			},
+			loadFabMetrics() {
+				const loc = this;
+				axios.get(window.host + '/services/metrics/GetFabMetrics', session.AddSession(window.host, {
+					params: {
+						w: window.SegMap.Signatures.FabMetrics,
+						h: window.SegMap.Signatures.Suffix
+					}
+				})).then(function (res) {
+					session.ReceiveSession(window.host, res);
+					loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
+					loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
+					window.fabMetrics = res.data.Metrics;
+				}).catch(function (error) {
+					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
+				});
 			},
 			SplitPanelsRefresh() {
 				return;

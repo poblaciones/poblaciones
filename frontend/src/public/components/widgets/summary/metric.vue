@@ -77,7 +77,7 @@
 							<link-icon />
 						</a>
 					</div>
-					<div v-else style="color: #ccc; cursor: pointer" class="compareLabel" @click="toggleCompare">
+					<div v-else style="color: #A7A7A7; cursor: pointer" class="compareLabel" @click="toggleCompare">
 						Comparar
 					</div>
 				</div>

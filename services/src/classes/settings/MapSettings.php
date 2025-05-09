@@ -20,6 +20,7 @@ class MapSettings
 	public $UsePerimeter = false;
 	public $ContentServerWorks = [];
 	public $BasemapMetrics = [];
+	public $BoundaryRecommendationExclusions = [];
 
 	public $UseCalculated = true;
 	public $UseNewMetricPicker = false;

@@ -72,7 +72,7 @@ class DraftAnnotation
 	 *
 	 * @param integer $id
 	 *
-	 * @return DraftWorkIcon
+	 * @return DraftAnnotation
 	 */
 	public function setId($id)
 	{
@@ -87,7 +87,7 @@ class DraftAnnotation
 	 *
 	 * @param \helena\entities\backoffice\DraftWork $work
 	 *
-	 * @return DraftWorkIcon
+	 * @return DraftAnnotation
 	 */
 	public function setWork(\helena\entities\backoffice\DraftWork $work = null)
 	{
@@ -112,7 +112,7 @@ class DraftAnnotation
 	 *
 	 * @param string $caption
 	 *
-	 * @return DraftDataset
+	 * @return DraftAnnotation
 	 */
 	public function setCaption($caption)
 	{

@@ -257,7 +257,8 @@ export default {
 		background-position: 50% 50%;
 		height: 200px;
 		width: 100%;
-		background-size: cover;
+		background-size: contain;
+		background-repeat: no-repeat;
 	}
 	.iLabel {
 		font-weight: 600;

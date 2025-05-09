@@ -75,15 +75,30 @@ class Boundary
 		 *   @ORM\JoinColumn(name="bou_group_id", referencedColumnName="bgr_id", nullable=false)
 		 * })
 		 */
-    private $Group;
+	private $Group;
 
 
 
-		/**
-		 * Get id
-     *
-     * @return integer
-     */
+	/**
+	 * @var boolean
+	 *
+	 * @ORM\Column(name="bou_is_suggestion", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+	 */
+    private $IsSuggestion;
+
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="bou_icon", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+	 */
+	private $Icon;
+
+	/**
+	 * Get id
+	 *
+	 * @return integer
+	 */
     public function getId()
     {
         return $this->Id;
@@ -153,38 +168,89 @@ class Boundary
     }
 
 
-    /**
-     * Set isPrivate
-     *
-     * @param boolean $isPrivate
-     *
-     * @return Boundary
-     */
-    public function setIsPrivate($isPrivate)
+	/**
+	 * Set isPrivate
+	 *
+	 * @param boolean $isPrivate
+	 *
+	 * @return Boundary
+	 */
+	public function setIsPrivate($isPrivate)
+	{
+		$this->IsPrivate = $isPrivate;
+
+		return $this;
+	}
+
+	/**
+	 * Get isPrivate
+	 *
+	 * @return boolean
+	 */
+	public function getIsPrivate()
+	{
+		return $this->IsPrivate;
+	}
+
+
+
+	/**
+	 * Set isSuggestion
+	 *
+	 * @param boolean $isSuggestion
+	 *
+	 * @return Boundary
+	 */
+    public function setIsSuggestion($isSuggestion)
     {
-        $this->IsPrivate = $isPrivate;
+        $this->IsSuggestion = $isSuggestion;
 
         return $this;
     }
 
     /**
-     * Get isPrivate
+     * Get isSuggestion
      *
      * @return boolean
      */
-    public function getIsPrivate()
+    public function getIsSuggestion()
     {
-        return $this->IsPrivate;
+        return $this->IsSuggestion;
     }
 
 
-    /**
-		 * Set geography
-		 *
-		 * @param \helena\entities\backoffice\Geography $geography
-		 *
-		 * @return Boundary
-		 */
+	/**
+	 * Set icon
+	 *
+	 * @param boolean $icon
+	 *
+	 * @return Boundary
+	 */
+	public function setIcon($icon)
+	{
+		$this->Icon = $icon;
+
+		return $this;
+	}
+
+	/**
+	 * Get icon
+	 *
+	 * @return boolean
+	 */
+	public function getIcon()
+	{
+		return $this->Icon;
+	}
+
+
+	/**
+	 * Set geography
+	 *
+	 * @param \helena\entities\backoffice\Geography $geography
+	 *
+	 * @return Boundary
+	 */
     public function setGeography(\helena\entities\backoffice\Geography $geography = null)
     {
 			$this->Geography = $geography;
