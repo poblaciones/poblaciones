@@ -13,6 +13,7 @@
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Contenido">{{ item.ClippingRegions }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Geografía">{{ geographyCaption(item) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Público">{{ formatBool(!item.IsPrivate) }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Recomendado">{{ formatBool(item.IsSuggestion) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap" v-if="isAdmin">
 							<md-button class="md-icon-button" @click="openEdition(item)">
 								<md-icon>edit</md-icon>

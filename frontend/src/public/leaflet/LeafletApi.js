@@ -621,7 +621,7 @@ LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offset
 		current.getSouth() > min.lat) {
 		this.map.flyToBounds(bounds, {
 			animate: true,
-			duration: 1.5 // Duración en segundos (puedes ajustarlo)
+			duration: 1 // Duración en segundos (puedes ajustarlo)
 		});
 		if (offsetX) {
 			var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
@@ -646,7 +646,7 @@ LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) 
 	bounds.extend(max);
 	this.map.flyToBounds(bounds, {
 		animate: true,
-		duration: 1.5 // Duración en segundos (puedes ajustarlo)
+		duration: 1 // Duración en segundos (puedes ajustarlo)
 	});
 
 	var offsetRad = 0;

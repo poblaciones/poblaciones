@@ -28,6 +28,15 @@
 							Público (se encuentra visible a todos los usuarios)
 						</md-switch>
 					</div>
+					<div class="md-layout-item md-size-100">
+						<md-switch class="md-primary" v-model="boundary.IsSuggestion">
+							Recomendado
+						</md-switch>
+						<div class="md-layout-item md-size-80" style="margin-left: 52px">
+							<mp-simple-text label="Ícono para la recomendación (Material-Icon)" :canEdit="boundary.IsSuggestion"
+															v-model="boundary.Icon" @enter="save" />
+						</div>
+					</div>
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>

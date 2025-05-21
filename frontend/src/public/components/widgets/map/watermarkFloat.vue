@@ -69,8 +69,7 @@ export default {
 .logoIcon {
   height: auto;
   width: auto;
-  max-width: 64px;
-  max-height: 100%;
+  max-height: 60px;
   margin: auto;
 	background-color: rgba(255, 255, 255, 0.75);
   border: 2px solid rgba(255, 255, 255, 0);

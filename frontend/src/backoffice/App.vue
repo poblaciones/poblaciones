@@ -113,7 +113,9 @@
 	.md-field.md-focused label, .md-field.md-has-value label {
 		font-size: 14px !important;
 	}
-
+	.tooltip-inner a {
+		font-family: Roboto,Noto Sans,-apple-system,BlinkMacSystemFont,sans-serif;
+	}
 	.unselectable {
 		-webkit-touch-callout: none;
 		-webkit-user-select: none;

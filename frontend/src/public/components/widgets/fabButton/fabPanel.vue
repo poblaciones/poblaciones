@@ -5,7 +5,7 @@
 		<div v-show="orientation == 'bottom'"  class="fab-triangle-top" :style="{ 'border-bottom-color': bgColor }"></div>
 
 		<div v-if="showScrollButtons" ref="scrollUp" class="fab-scroll-button-disabled top-radius" :style="style"
-				 @click="scrollUp" @mouseenter="scrollUpStart" @mouseleave="scrollUpStop">
+				 @click="scrollUp(4)" @mouseenter="scrollUpStart" @mouseleave="scrollUpStop">
 			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_up</i>
 		</div>
 		<div :class="[ 'fab-panel-overflow', scrollBarClass, borderRadiusClass ]" ref="panelScroll"
@@ -20,7 +20,7 @@
 			</ul>
 		</div>
 		<div v-if="showScrollButtons" ref="scrollDown" class="fab-scroll-button bottom-radius"
-				 :style="style" @click="scrollDown" @mouseenter="scrollDownStart" @mouseleave="scrollDownStop">
+				 :style="style" @click="scrollDown(4)" @mouseenter="scrollDownStart" @mouseleave="scrollDownStop">
 			<i :class="[ actionIconSize, 'material-icons', 'no-highlight', 'fab-icon-offset' ]">arrow_drop_down</i>
 		</div>
 	</div>
@@ -250,69 +250,71 @@ export default {
 			}
 			return 0;
 		},
-		prevItemHeight() {
+		prevItemHeight(offset) {
 			const items = this.$refs.liItems;
 			if(items && items.length > 0) {
 				const el = this.$refs.panelScroll;
 				var height = 0;
 				for (var i = 0; i < items.length; i++) {
-					const delta = this.visiblePixelsItemTop(el.scrollTop, height, items[i].scrollHeight);
+					/*const delta = this.visiblePixelsItemTop(el.scrollTop, height, items[i].scrollHeight);
 					if(delta > 0) {
 						return delta;
-					}
+					}*/
 					height += items[i].scrollHeight;
-					if(el.scrollTop == height) {
-						return items[i].scrollHeight;
+					if(el.scrollTop >= height) {
+						return items[Math.max(0, i - offset)].scrollTop;
 					}
 				};
-				return items[0].scrollHeight;
+				return 0;
 			}
-			return 36;
+			return 0;
 		},
-		nextItemHeight() {
-			const items = this.$refs.liItems;
-			if(items && items.length > 0) {
-				const el = this.$refs.panelScroll;
-				var height = 0;
-				for (var i = 0; i < items.length; i++) {
-					var delta = this.visiblePixelsItemTop(el.scrollTop, height, items[i].scrollHeight);
-					height += items[i].scrollHeight;
-					if(delta > 0 || el.scrollTop == 0 || el.scrollTop == height) {
-						if(delta > 0) {
-							delta = items[i].scrollHeight - delta;
-						}
-						const next = Math.min(i + this.maxItems + 1 + this.adjust, items.length);
-						for (var j = i + 1; j < next; j++) {
-							delta += items[j].scrollHeight;
-						}
-						if(delta > el.offsetHeight) {
-							return delta - el.offsetHeight;
-						}
-						return items[next].scrollHeight;
-					}
-				};
-				return items[0].scrollHeight;
-			}
-			return 36;
-		},
-		scrollUp() {
+		scrollUp(step = 1) {
 			const el = this.$refs.panelScroll;
-			if(el.scrollTop == 0) {
+			const items = this.$refs.liItems;
+			if (!el || !items || items.length === 0) return;
+
+			let currentScroll = el.scrollTop;
+			let firstHidden = null;
+			let offset = step - 1;
+
+			// Buscamos el primer elemento oculto arriba del viewport
+			firstHidden = items[0];
+			for (let i = 0; i < items.length; i++) {
+				let item = items[i];
+				if (!item.classList.contains('fab-panel-item-header')) {
+					if (item.offsetTop < currentScroll) {
+						firstHidden = items[Math.max(0, i - offset)];
+					} else {
+						break;
+					}
+				}
+			}
+
+			if (firstHidden === null) {
 				return;
 			}
-			el.scroll(0, el.scrollTop - this.prevItemHeight());
+
+			// Calculamos la nueva posición de scroll
+			let targetScroll = firstHidden.offsetTop - el.offsetTop;
+			// Nos aseguramos de no ir más allá del inicio
+			el.scrollTo({
+				top: Math.max(0, targetScroll),
+				behavior: 'smooth'
+			});
 		},
-		scrollDown() {
+		scrollDown(step = 1) {
 			const el = this.$refs.panelScroll;
 			const items = this.$refs.liItems;
 			if (!el || !items || items.length === 0) return;
 			let currentScroll = el.scrollTop;
 			let lastHidden = null;
+			let offset = step - 1;
 			for (let i = items.length - 1; i >= 0; i--) {
 				let item = items[i];
 				if (!item.classList.contains('fab-panel-item-header')) {
 					if (item.offsetTop - currentScroll > el.offsetHeight) {
-						lastHidden = item;
+						lastHidden = items[Math.min(items.length - 1, i + offset)];
 					} else {
 						break;
 					}
@@ -329,9 +331,9 @@ export default {
 		wheel(e) {
 			e.preventDefault();
 			if(e.deltaY > 0) {
-				this.scrollDown();
+				this.scrollDown(4);
 			} else {
-				this.scrollUp();
+				this.scrollUp(4);
 			}
 		},
 		scrolled() {

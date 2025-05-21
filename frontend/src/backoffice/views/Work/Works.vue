@@ -48,6 +48,18 @@
 						<md-icon>add_circle_outline</md-icon>
 						{{ newLabel }}
 					</md-button>
+					<div v-if="learn.length > 0">
+						<p style="line-height: 1em;">
+							&nbsp;
+						</p>
+						<p style="margin-top: 25px; line-height: 2em;">
+							Para información de uso:
+						</p>
+						<md-button v-for="(item, index) in learn" :key="index" @click="openPdf(item.Url)" class="md-raised">
+							<i class="far fa-file-pdf" />
+							{{ item.Caption }}
+						</md-button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -126,6 +138,9 @@ export default {
 			showingWelcome() {
 				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 			},
+			learn() {
+				return window.Context.Configuration.Learn;
+			},
 			speechFormat() {
 				return speech;
 			},
@@ -191,6 +206,9 @@ export default {
 	methods: {
 		getWorkUri(element) {
 			return '/cartographies/' + element.Id + '/metadata/content';
+		},
+		openPdf(pdf) {
+				window.open(pdf, '_blank');
 		},
 		calculateList(archived, deleted, example = false) {
 			var ret = [];

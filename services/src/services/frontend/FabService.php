@@ -111,7 +111,7 @@ class FabService extends BaseService
 	{
 		if (Session::IsSiteReader())
 			return $ret;
-		$boundaries = $ret->Boundaries;
+		$boundaries = $ret['Boundaries'];
 		foreach($boundaries as &$group)
 		{
 			$secondItem = (sizeof($group['Items']) > 1 ? $group['Items'][1] : null);
