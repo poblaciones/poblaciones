@@ -1,5 +1,6 @@
 import GoogleTileOverlay from './GoogleTileOverlay';
 import arr from '@/common/framework/arr';
+import err from '@/common/framework/err';
 import color from '@/common/framework/color';
 import FeatureSelector from './FeatureSelector';
 import h from '@/public/js/helper';
@@ -727,7 +728,7 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 				});
 				deckOverlay.setMap(loc.gMap);
 				overlay.deckOverlay = deckOverlay;
-				overlay.ZoomSubscribed = iconLayer;
+				overlay.ZoomSubscribed = nativeLayer;
 				window.SegMap.ZoomChangedSubscribers.push(overlay.ZoomSubscribed);
 				}
 			}

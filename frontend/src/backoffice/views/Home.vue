@@ -15,7 +15,11 @@
 						</template>
 
 						<md-tab class="transparentTab" to="/works" md-label="Cartografías" :md-active="isPath('/works')"
-										:md-template-data="{ help: ayudaCartografias }">
+										:md-template-data="{ help: `<p>
+											Para publicar información en la plataforma es necesario organizarla en cartografías.
+										</p><p>
+											Cada cartografía está compuesta por un conjunto de datasets e indicadores que se representan en el visor del mapa.
+										</p>` + extraHelp('CatografiesSection') }">
 						<works filter="R"></works>
 						</md-tab>
 						<md-tab class="transparentTab" id="public-tab" v-if="showPublic" to="/public" :md-active="isPath('/public')" md-label="Datos públicos"
@@ -70,27 +74,18 @@ export default {
 		showPublic() {
 			return (window.Context.Cartographies && window.Context.CanViewPublicData());
 		},
-		ayudaCartografias() {
-			var ret = `<p>
-											Para publicar información en la plataforma es necesario organizarla en cartografías.
-										</p><p>
-											Cada cartografía está compuesta por un conjunto de datasets e indicadores que se representan en el visor del mapa.
-										</p>`;
-			if (window.Context.Configuration.Learn.length > 1) {
-				ret += `
-						<p>
-							Para más información:
-						</p>
-						<p><i class='far fa-file-pdf' />&nbsp;<a href='` + window.Context.Configuration.Learn[1].Url + `' target='_blank'>
-						 `	+ window.Context.Configuration.Learn[1].Caption + "</a></p>";
-			}
-			return ret;
-		}
 	},
 	methods: {
 		isPath(path) {
 			return this.$route.path === path;
 		},
+		extraHelp(section) {
+			if (window) {
+				return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);
+			} else {
+				return '';
+			}
+		}
 	}
 };
 </script>

@@ -2,7 +2,7 @@
 	<div>
 		<title-bar title="Visibilidad" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" :help="`<p>
 			La visiblidad establece quiénes pueden ver la información en el mapa y acceder a su descarga una vez publicada.
-			</p>`" />
+			</p>` + extraHelp('VisibilitySection')" />
 			<div class="app-container">
 			<invoker ref="invoker"></invoker>
 
@@ -191,6 +191,13 @@ export default {
 				this.visibilityMode = 2;
 			} else {
 				this.visibilityMode = 1;
+			}
+		},
+		extraHelp(section) {
+			if (window) {
+				return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);
+			} else {
+				return '';
 			}
 		},
 		RegenLink() {

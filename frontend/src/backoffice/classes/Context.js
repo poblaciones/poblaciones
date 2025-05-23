@@ -62,6 +62,24 @@ Context.prototype.CreateStore = function () {
 };
 
 
+Context.prototype.HelpLinkSection = function (helpItem) {
+	if (helpItem) {
+		var url = this.Configuration.Help.UploadGuideLink.Url;
+		var caption = this.Configuration.Help.UploadGuideLink.Caption;
+		url += "#nameddest=" + helpItem.Url;
+		caption += " - " + helpItem.Caption;
+
+		return `
+						<p>
+							Para más información:
+						</p>
+						<p><i class='far fa-file-pdf' />&nbsp;<a href='` + url + `' target='_blank'>
+						 `	+ caption + "</a></p>";
+	} else {
+		return '';
+	}
+};
+
 Context.prototype.IsAdmin = function () {
 	return (this.User.Privileges === 'A');
 };

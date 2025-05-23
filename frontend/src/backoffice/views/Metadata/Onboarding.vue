@@ -17,7 +17,7 @@
 
 							<div>
 								<md-tabs md-sync-route ref="tabs">
-									<md-tab v-for="step, index in stepDefinitions" :key="step.Id" style='flex: 1 0 100% !important;overflow-x: auto;'
+									<md-tab v-for="step, index in stepDefinitions" :key="step.Id" style='flex: 1 0 100% !important;'
 													:id="step.Id" :md-label="step.Label"
 													:to="makePath(step.Id)" :md-active="isPath(makePath(step.Id))">
 										<onboarding-step :stepDefinition="step"

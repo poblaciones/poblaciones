@@ -2,7 +2,7 @@
 	<div>
 		<permission-popup ref="editPopup">
 		</permission-popup>
-		<title-bar title="Permisos" help="
+		<title-bar title="Permisos" :help="`
 								<p>
 									Al asignar permisos, otras personas pueden ver o modificar sus contenidos
 									antes de ser publicados. Es posible asignar tres niveles de acceso:
@@ -18,7 +18,7 @@
 										Administrar: al igual que al editar, permite modificar los contenidos, pudiendo además
 										delegar permisos a otras personas y eliminar la cartografía por completo.
 									</li>
-								</ul>" />
+								</ul>` + extraHelp('PermissionsSection')" />
 			<div class="app-container">
 			<invoker ref="invoker"></invoker>
 
@@ -95,6 +95,13 @@ export default {
 					return 'Puede administrar';
 				default:
 					return 'Indeterminado';
+			}
+		},
+		extraHelp(section) {
+			if (window) {
+				return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);
+			} else {
+				return '';
 			}
 		},
 		onAdd() {

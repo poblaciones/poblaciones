@@ -48,16 +48,20 @@
 						<md-icon>add_circle_outline</md-icon>
 						{{ newLabel }}
 					</md-button>
-					<div v-if="learn.length > 0">
+					<div v-if="help.UploadGuideLink || help.ReadGuideLink">
 						<p style="line-height: 1em;">
 							&nbsp;
 						</p>
 						<p style="margin-top: 25px; line-height: 2em;">
 							Para información de uso:
 						</p>
-						<md-button v-for="(item, index) in learn" :key="index" @click="openPdf(item.Url)" class="md-raised">
+						<md-button @click="openPdf(help.ReadGuideLink.Url)" class="md-raised">
 							<i class="far fa-file-pdf" />
-							{{ item.Caption }}
+							{{ help.ReadGuideLink.Caption }}
+						</md-button>
+						<md-button @click="openPdf(help.UploadGuideLink.Url)" class="md-raised">
+							<i class="far fa-file-pdf" />
+							{{ help.UploadGuideLink.Caption }}
 						</md-button>
 					</div>
 				</div>
@@ -138,8 +142,8 @@ export default {
 			showingWelcome() {
 				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 			},
-			learn() {
-				return window.Context.Configuration.Learn;
+			help() {
+				return window.Context.Configuration.Help;
 			},
 			speechFormat() {
 				return speech;

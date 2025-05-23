@@ -198,6 +198,12 @@ LeafletApi.prototype.Initialize = function () {
 		});
 		loc.BoundsChanged();
 	});
+
+	// Agrega la escala
+	var scale = L.control.scale({ position: 'bottomright', maxWidth: 120, imperial: false });
+	scale.addTo(this.map);
+
+
 	this.map.setView(new L.LatLng(-37.1799565, -65.6866910), 6);
 	this.CheckBaseLayer();
 };
@@ -892,9 +898,7 @@ LeafletApi.prototype.getZoom = function () {
 LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 	// Lo crea
 	var overlayTiled = new LeafletTileOverlay(activeMetric);
-
 	const d = require('./deck-gl/LeafletLayer');
-
 	var deckElementsLayer;
 	// Crea la capa
 	if (activeMetric.IsLocationType()) {
@@ -904,7 +908,6 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 		var polygonLayer = new PolygonOverlay(activeMetric);
 		deckElementsLayer = polygonLayer.CreateLayer(data);
 	}
-
 	// La agrega
 	var wrapper = new d.default({
 		views: [
@@ -967,7 +970,6 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 };
 
 LeafletApi.prototype.doInsertOverlay = function (index, overlay) {
-
 	// le aumenta el índice a los siguientes...
 	for (var layer of this.overlayMapTypesLayers) {
 		if (layer.index >= index) {

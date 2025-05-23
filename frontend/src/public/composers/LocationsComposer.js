@@ -29,6 +29,9 @@ LocationsComposer.prototype.renderLabels = function (dataItems, tileKey, tileBou
 		return;
 	}
 	var variable = this.variable;
+	if (!variable) {
+		return;
+	}
 	var variableId = variable.Id;
 	var id;
 	var varId;

@@ -861,6 +861,10 @@
 		text-decoration: underline;
 	}
 
+	#deckgl-overlay {
+		width: 100% !important;
+		height: 100% !important;
+	}
 	.optionsLabel {
 		padding-top: 10px !important;
 	}
@@ -1521,6 +1525,50 @@
 	}
 	.pointer-ready-css {
 				cursor: unset!important;
+	}
+	/* Para la escala */
+	.leaflet-control-attribution {
+		margin-left: -6px !important;
+		padding-left: 5px !important;
+	}
+	.leaflet-control-scale {
+		order: 1;
+	}
+	.leaflet-control-scale-line {
+		padding-bottom: 1px !important;
+		padding-left: 8px !important;
+		padding-right: 4px !important;
+		text-shadow: rgb(255, 255, 255) -2px -2px 0px, white 2px -2px 0px, white -2px 2px 0px, white 2px 2px 0px;
+		color: rgb(102, 102, 102);
+		margin-bottom: -5px;
+		margin-right: -2px;
+		margin-left: -2px;
+		text-align: center;
+		font-size: 10px !important;
+		border: 0px solid !important;
+		z-index: 0;
+	}
+
+	.leaflet-control-zoom {
+		bottom: 14px;
+		position: absolute;
+	}
+
+	.leaflet-bottom.leaflet-right {
+		display: flex;
+		flex-direction: row-reverse;
+	}
+	.leaflet-control-scale-line::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		width: 100%;
+		height: 65%;
+		border-bottom: 2px solid #000;
+		border-left: 2px solid #000;
+		border-right: 2px solid #000;
+		transform: translateY(25%);
+		z-index: -1; /* la línea queda por detrás del texto */
 	}
 
 </style>

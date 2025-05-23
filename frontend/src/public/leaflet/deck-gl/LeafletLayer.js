@@ -50,7 +50,6 @@ export default class LeafletLayer extends L.Layer {
 		}
 
 		this.on('click', function (event) {
-			alert(1);
 			var elements = document.elementsFromPoint(event.containerPoint.x, event.containerPoint.y);
 			this.handleClick(event);
 		}, this);

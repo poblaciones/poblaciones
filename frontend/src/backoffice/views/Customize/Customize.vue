@@ -1,7 +1,9 @@
 <template>
 	<div v-if="Work">
-		<title-bar title="Personalizar" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" :help="`<p>En esta sección se indican opciones que modifican la vista personalizada que se genera para la cartografía.
-			</p>`" />
+		<title-bar title="Personalizar" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()"
+							 :help="`<p>En esta sección se indican opciones que modifican la vista personalizada
+							que se genera para la cartografía.
+			</p>`+ extraHelp('CustomizeSection')" />
 		<div class="app-container">
 
 			<startup />
@@ -32,7 +34,14 @@ export default {
 	},
 	mounted() {
 	},
-	methods: {
+		methods: {
+			extraHelp(section) {
+				if (window) {
+					return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);
+				} else {
+					return '';
+				}
+			},
 	}
 };
 

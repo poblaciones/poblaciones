@@ -148,19 +148,19 @@
 						this.showTutorial();
 						break;
 					case 'GUIA-USO':
-						window.open(this.helpLinks.ReadGuideLink, '_blank');
+						window.open(this.helpLinks.ReadGuideLink.Url, '_blank');
 						break;
 					case 'GUIA-CARGA':
-						window.open(this.helpLinks.UploadGuideLink, '_blank');
+						window.open(this.helpLinks.UploadGuideLink.Url, '_blank');
 						break;
 					case 'TUTORIALES':
-						window.open(this.helpLinks.TutorialsLink, '_blank');
+						window.open(this.helpLinks.TutorialsLink.Url, '_blank');
 						break;
 					case 'CONTACTO':
-						window.open(this.helpLinks.ContactLink, '_blank');
+						window.open(this.helpLinks.ContactLink.Url, '_blank');
 						break;
 					case 'ABOUT':
-						window.open(this.helpLinks.AboutLink, '_blank');
+						window.open(this.helpLinks.AboutLink.Url, '_blank');
 						break;
 					default:
 				}
@@ -253,22 +253,22 @@
 					ret.push({ separator: true });
 				}
 				if (this.helpLinks.ReadGuideLink) {
-					ret.push({ label: 'Guía para consulta de información', key: 'GUIA-USO', icon: 'fas fa-file-pdf' });
+					ret.push({ label: this.helpLinks.ReadGuideLink.Caption, key: 'GUIA-USO', icon: 'fas fa-file-pdf' });
 				}
 				if (this.helpLinks.UploadGuideLink) {
-					ret.push({ label: 'Guía para la creación de mapas', key: 'GUIA-CARGA', icon: 'fas fa-file-pdf' });
+					ret.push({ label: this.helpLinks.UploadGuideLink.Caption, key: 'GUIA-CARGA', icon: 'fas fa-file-pdf' });
 				}
 				if (this.helpLinks.TutorialsLink) {
 					ret.push({ separator: true });
-					ret.push({ label: 'Tutoriales', key: 'TUTORIALES', icon: 'fab fa-youtube' });
+					ret.push({ label: this.helpLinks.TutorialsLink.Caption, key: 'TUTORIALES', icon: 'fab fa-youtube' });
 				}
 				if (this.helpLinks.AboutLink) {
 					ret.push({ separator: true });
-					ret.push({ label: 'Acerca de Poblaciones', key: 'ABOUT' });
+					ret.push({ label: this.helpLinks.AboutLink.Caption, key: 'ABOUT' });
 				}
 				if (this.helpLinks.ContactLink) {
 					ret.push({ separator: true });
-					ret.push({ label: 'Contacto', key: 'CONTACTO' });
+					ret.push({ label: this.helpLinks.ContactLink.Caption, key: 'CONTACTO' });
 				}
 				return ret;
 			},

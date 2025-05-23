@@ -1,14 +1,14 @@
 <template>
 	<div>
 		<invoker ref="invoker"></invoker>
-		<title-bar title="Información" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" help="<p>
+		<title-bar title="Información" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" :help="`<p>
 						Los datos publicados en la plataforma deben poder ser referenciado por quienes hacen
 						uso de ellos.
 						</p><p>
 							Para ello, cada conjunto de datos posee un conjunto de metadatos que
 							describe su origen, autores y contenidos. Estos metadatos se organizan para su carga
 							en Contenido, Atribución, Resumen, Fuentes y Adjuntos.
-						</p>" />
+						</p>` + extraHelp('MetadataSection')" />
 
 		<div class="app-container">
 			<div class="md-layout md-gutter">
@@ -75,7 +75,7 @@ export default {
 							En la sección de Contenido
 							se indica el título del conjunto de datos, un breve resumen de su contenido e información
 							sobre su nivel de cobertura.
-						</p>` },
+						</p>` + this.extraHelp('MetadataContentSection') },
 				{
 					Id: 'attribution', Label: 'Atribución', Helper: `<p>
 								La atribución permite indicar los autores individuales, la licencia utilizada y la información de contacto.
@@ -83,19 +83,19 @@ export default {
 									La información de contacto hace accesible a los usuarios de la información un canal de comunicación con los responsables de los datos para poder realizar consultas o realimentar el proceso de producción de la información.
 								</p><p>
 									La declaración de licencia permite que quienes descarguen la información tengan un marco explícito del alcance con el que pueden utilizar los datos obtenidos de la plataforma.
-								</p>` },
+								</p>` + this.extraHelp('MetadataAttributionSection') },
 					{
 						Id: 'institutions', Label: 'Instituciones', Helper: `<p>La sección de instituciones permite indicar qué
 								instituciones participaron o dieron apoyo a la producción de la información. </p>
 							<p>Para cada una de ellas puede especificarse la información de contacto y opcionalmente una imagen para incorporar al pie de la cartografía.
-							</p>` },
+							</p>`  + this.extraHelp('MetadataInstitutionsSection') },
 								{
 					Id: 'abstract', Label: 'Resumen', Helper: `<p>El resumen permite explicitar información sobre la elaboración de
 								los datos publicados, sus motivaciones o hipótesis, así como detalles de su nivel de cobertura,
 							 su estructura o consideraciones para su interpretación o uso. </p>
 								<p>Esta información es ofrecida a los usuarios dentro del archivo en formato PDF que el
 								sitio genera automáticamente con los metadatos de cada conjunto de datos accedido.
-								</p>` },
+								</p>`  + this.extraHelp('MetadataAbstractSection') },
 				{ Id: 'sources', Label: 'Fuentes secundarias', Helper: `
 							 <p>
 								 La sección de fuentes` + this.SecondaryLabel + ` permite ofrecer la lista de datos o documentación en la que se apoyó
@@ -103,7 +103,7 @@ export default {
 							 </p><p>
 								 De esta forma, pueden consignarse como fuentes secundarias censos, encuestas o
 								 cartografías que hayan sido empleadas para el armado de los datos ofrecidos.
-							 </p>` },
+							 </p>`  + this.extraHelp('MetadataSourcesSection') },
 				{
 					Id: 'attachments', Label: 'Adjuntos', Helper: `<p>
 						La sección de adjuntos permite agregar archivos que complementen la comprensión o descripción
@@ -114,7 +114,7 @@ export default {
 						</p><p>No debe incluirse aquí un adjunto con los metadatos generales ni con las listas de variables
 						de los datasets ya que dicha información se brinda a los usuarios en forma automática.
 						</p><p>El tipo de archivo permitido es Acrobat/PDF.
-					</p>` }			]
+					</p>` + this.extraHelp('MetadataAttachmentsSection') }			]
 			};
 	},
 	computed: {
@@ -126,6 +126,13 @@ export default {
 		},
 	},
 		methods: {
+			extraHelp(section) {
+				if (window) {
+					return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);
+				} else {
+					return '';
+				}
+			},
 		isPath(path) {
 			if (this.$refs.tabs) {
 				for (var step of this.stepDefinitions) {

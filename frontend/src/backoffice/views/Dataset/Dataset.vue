@@ -59,13 +59,13 @@
 											</template>
 
 											<md-tab style='flex: 1 0 100% !important;overflow-x: auto;' id="metrics" md-label="Indicadores"
-														:to="makePath('metrics')" :md-active="isPath(makePath('metrics'))"
-													:md-template-data="{ badge: (Dataset && Dataset.MetricVersionLevels ? Dataset.MetricVersionLevels.length : ''), help: `
+															:to="makePath('metrics')" :md-active="isPath(makePath('metrics'))"
+															:md-template-data="{ badge: (Dataset && Dataset.MetricVersionLevels ? Dataset.MetricVersionLevels.length : ''), help: `
 														<p>
 															Los indicadores vuelven la información visible en el mapa.
 														</p><p>
 															Cada indicador muestra un aspecto de los datos (ej. Nivel educativo, Antiguedad de la escuela), pudiendo seleccionarse colores y criterios de segmentación para las variables utilizadas.
-														</p>`}" >
+														</p>`+ extraHelp('DatasetMetricsSection')}" >
 												<metrics-tab></metrics-tab>
 											</md-tab>
 											<md-tab style='flex: 1 0 100% !important;' id="georeference" md-label="Georreferenciar"
@@ -87,7 +87,7 @@
 													<li>
 														Polígonos: se identifica la localización de la fila por el reconocimiento de un polígono en alguna de las variables del dataset, en formato Well-known-text (WKT) o GeoJson.
 													</li>
-												</ul>` }">
+												</ul>` + extraHelp('DatasetGeoreferenceSection') }">
 												<georeference-tab @stepperClosed="stepperClosed"></georeference-tab>
 											</md-tab>
 											<md-tab style='flex: 1 0 100% !important;' id="data" md-label="Datos" @click="EnsureColumns"
@@ -101,28 +101,28 @@
 																Una vez incorporada la información,
 																es posible volver a importar los datos en caso de haberse agregado nuevas
 																filas o nuevas columnas a la información primaria.
-															</p>` }">
+															</p>` + extraHelp('DatasetImportSection') }">
 												<data-tab></data-tab>
 											</md-tab>
 											<md-tab style='flex: 1 0 100% !important;' id="variables" md-label="Variables" @click="EnsureColumns"
 															:to="makePath('variables')" :md-active="isPath(makePath('variables'))"
-																:md-template-data="{ help: `<p>
+															:md-template-data="{ help: `<p>
 															El listado de variables detalla qué variables (columnas) posee el dataset.
 														</p><p>
 															Permite modificar sus descripciones, etiquetas de valores, remover variables y
 															recodificarlas (convertir en códigos numéricos con etiquetas) variables
-															existentes.</p>` }">
+															existentes.</p>` + extraHelp('DatasetVariablesSection') }">
 													<columns-tab></columns-tab>
 												</md-tab>
-												<md-tab style='flex: 1 0 100% !important;' id="identity" md-label="Identificación"
+											<md-tab style='flex: 1 0 100% !important;' id="identity" md-label="Identificación"
 															:to="makePath('identity')" :md-active="isPath(makePath('identity'))"
-																:md-template-data="{ help: `
+															:md-template-data="{ help: `
 															<p>
 																La identificación permite indicar las variables para la ficha de resumen de cada elemento.
 															</p><p>
 																Pueden elegirse opcionalmente la variable que contenga la descripción de cada fila (ej. Nombre de escuela),
 																así como especificar un ícono para los elementos del dataset.
-															</p>`}" >
+															</p>` + extraHelp('DatasetIdentitySection') }" >
 													<identity-tab></identity-tab>
 												</md-tab>
 												<md-tab v-if="Work.Datasets.length > 1" id="multilevel" md-label="Multinivel"
@@ -194,6 +194,13 @@ export default {
 			if (this.Dataset) {
 				this.$refs.invoker.doMessage('Obteniendo información del dataset', this.Dataset,
 					this.Dataset.EnsureColumnsAndExec);
+			}
+		},
+		extraHelp(section) {
+			if (window) {
+				return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);
+			} else {
+				return '';
 			}
 		},
 		stepperClosed() {

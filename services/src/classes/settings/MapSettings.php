@@ -53,6 +53,7 @@ class MapSettings
 	public $GoogleGeocodingArea = '';
 	public $GoogleMapsApi = "quarterly";
 
+	// REMOVE
 	public $LearnResources = [];
 
 	public $SignatureSuffix = null;
