@@ -419,6 +419,9 @@
 				segMap.SaveRoute.DisableOnce = true;
 				mapApi.Initialize();
 				segMap.SetSelectionMode("PAN");
+				if (!window.Embedded.ReadOnly) {
+					segMap.StartClickSelecting();
+				}
 				if (window.Embedded.HideLabels) {
 					segMap.Labels.Hide();
 				}
@@ -1571,4 +1574,13 @@
 		z-index: -1; /* la línea queda por detrás del texto */
 	}
 
+	.leaflet-layer {
+		z-index: 1000 !important;
+		pointer-events: auto;
+	}
+
+	.leaflet-marker-pane {
+		pointer-events: none!important;
+				display: none;
+	}
 </style>

@@ -47,15 +47,15 @@ FeatureSelector.prototype.SetSelectorCanvas = function () {
 		polygon.addTo(this.MapsApi.map);
 	}
 	this.selectorCanvasEvents = [];
-	//this.selectorCanvasEvents.push(polygon.on('click', this.selectorClicked));
+//this.selectorCanvasEvents.push(polygon.on('click', this.selectorClicked));
 	this.subscribe('click', this.selectorClicked);
 
-//	this.selectorCanvasEvents.push(polygon.on('mouseout', this.resetTooltip));
+//this.selectorCanvasEvents.push(polygon.on('mouseout', this.resetTooltip));
 	this.subscribe('mouseout', this.resetTooltip);
 
 	this.subscribe('zoom_changed', this.resetTooltip);
 	this.subscribe('center_changed', this.resetTooltip);
-	//this.selectorCanvasEvents.push(polygon.on('mousemove', this.selectorMoved));
+//this.selectorCanvasEvents.push(polygon.on('mousemove', this.selectorMoved));
 	this.subscribe('mouseup', this.selectorUp);
 	this.subscribe('mousedown', this.selectorDown);
 	this.subscribe('mousemove', this.selectorMoved);

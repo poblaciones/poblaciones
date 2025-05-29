@@ -733,6 +733,18 @@ module.exports = {
 					}
 				}
 			}
+			if (location == null) {
+				return {
+					Coordinate: {
+						Lat: 33,
+						Lon: 0
+					},
+					Point: {
+						X: 0,
+						Y: 0,
+					}
+				};
+			}
 			return {
 				Coordinate: {
 					Lat: event.latLng.lat(),
