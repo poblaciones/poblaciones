@@ -156,7 +156,8 @@ class ConfigurationService extends BaseService
 
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 									'OwnerLogo' => App::Settings()->Map()->OwnerLogo,
-									'MapsAPI' => $this->GetCurrentMapProvider(),
+									'MapsAPI' => App::Settings()->Map()->MapsAPI,
+										/* $this->GetCurrentMapProvider(), */
 									'MapsAccess' => $mapAccess,
 									'NavigationId' => $navigation['id'],
 									'NavigationMonth' => $navigation['month'],

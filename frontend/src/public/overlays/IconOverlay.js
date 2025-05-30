@@ -63,9 +63,6 @@ IconOverlay.prototype.CreateLayer = function (data, sc = 1) {
 		largeZoom: window.SegMap.frame.Zoom > 10,
 		autoHighlight: true,
 		sizeUnits: units,
-		/*getCursor: ({ isHovering }) =>
-			isHovering ? 'pointer' : 'default',
-			*/
 		sizeMinPixels: min, // 20, 32, 50
 		sizeMaxPixels: 40 * sc, // 20, 32, 50
 		//filled: true,

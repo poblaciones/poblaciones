@@ -122,7 +122,7 @@ class SnapshotLookupModel
 		}
 		else if ($dataset["dat_type"] == 'L')
 		{
-			return "POINT(" . $dataset["LongitudeColumn"] . ", " .  $dataset["LatitudeColumn"] . ")";
+			return "POINT(DmsToDecimal(" . $dataset["LongitudeColumn"] . "), DmsToDecimal(" .  $dataset["LatitudeColumn"] . "))";
 		}
 		else
 			return "gei_centroid";

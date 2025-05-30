@@ -506,18 +506,18 @@ LeafletAnnotator.prototype._updateCursor = function () {
 	// Set cursor based on current mode
 	switch (this.currentMode) {
 		case 'select':
-			window.map.style.cursor = 'default';
+			window.SegMap.SetCursor('default');
 			break;
 		case 'draw-marker':
 		case 'draw-polyline':
 		case 'draw-polygon':
-			window.map.style.cursor = 'crosshair';
+			window.SegMap.SetCursor('crosshair');
 			break;
 		case 'delete':
-			window.map.style.cursor = 'not-allowed';
+			window.SegMap.SetCursor('not-allowed');
 			break;
 		default:
-			window.map.style.cursor = 'default';
+			window.SegMap.SetCursor('default');
 	}
 };
 

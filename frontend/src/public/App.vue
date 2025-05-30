@@ -1574,6 +1574,7 @@
 		z-index: -1; /* la línea queda por detrás del texto */
 	}
 
+		/* estilos para la captura de mouse */
 	.leaflet-layer {
 		z-index: 1000 !important;
 		pointer-events: auto;
@@ -1582,5 +1583,26 @@
 	.leaflet-marker-pane {
 		pointer-events: none!important;
 				display: none;
+	}
+
+		/* estilo para arreglar los punteros */
+	.leaflet-dragging {
+		cursor: move !important;
+	}
+
+	.leaflet-dragging .leaflet-grab {
+		cursor: move!important;
+	}
+
+	.leaflet-grab {
+		cursor: default;
+	}
+
+	.leaflet-zoom-animated {
+		cursor: unset !important;
+	}
+
+		.leaflet-layer {
+		cursor: unset!important;
 	}
 </style>

@@ -171,6 +171,13 @@ InfoWindow.prototype.FocusView = function (position, key, title) {
 
 InfoWindow.prototype.InfoRequestedInteractive = function (position, parent, fid) {
 	if (parent && parent.VariableId) {
+		// trata de validar si tiene activo el cliqueo
+		if (parent.MetricId) {
+			var metric = window.SegMap.Metrics.GetMetricById(parent.MetricId);
+			if (!metric.SelectedShowInfo()) {
+				return;
+			}
+		}
 		window.SegMap.Session.Content.SelectFeature(fid, parent.MetricId, parent.VariableId);
 	} else {
 		window.SegMap.Session.Content.SelectFeature(fid);

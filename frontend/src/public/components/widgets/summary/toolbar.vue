@@ -73,8 +73,10 @@
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
 						<li v-if="isAdminReader"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
-						<li v-if="isAdminReader" class="divider"></li>
-						<li v-if="isAdminReader"><a @click="switchMapProvider">Cambiar a {{ altProvider }}</a></li>
+						<!--
+						<li v-if="isAdminReader" class="divider"></!--li>
+					  <li v-if="isAdminReader"><a @click="switchMapProvider">Cambiar a {{ altProvider }}</a></li>
+							-->
 						<li v-if="false"><a href="/users#/account">Cuenta</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.redirectHome()" :href="authenticate.homeUrl()">Inicio</a></li>
@@ -350,7 +352,6 @@
 				switch (mode) {
 					case 'PAN':
 						// go back to default mode
-						window.map.style.cursor = 'auto';
 						window.SegMap.MapsApi.Annotations.setMode('select');
 						window.SegMap.StartClickSelecting();
 						break;
@@ -360,16 +361,14 @@
 						window.SegMap.BeginDrawingCircle();
 						break;
 					case 'MARKER':
-						//window.SegMap.MapsAPI.Annotations.addElement('marker');
+						// Annotations se ocupa del cursor
 						window.SegMap.MapsApi.Annotations.setMode('draw-marker');
 						break;
 					case 'LINE':
 						window.SegMap.MapsApi.Annotations.setMode('draw-polyline');
-			//			window.SegMap.MapsAPI.Annotations.addElement('polyline');
 						break;
 					case 'POLYGON':
 						window.SegMap.MapsApi.Annotations.setMode('draw-polygon');
-			//		window.SegMap.MapsAPI.Annotations.addElement('polygon');
 						break;
 					case 'COMMENT':
 						window.SegMap.MapsApi.Annotations.setMode('draw-comment');

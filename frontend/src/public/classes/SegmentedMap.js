@@ -463,6 +463,29 @@ SegmentedMap.prototype.BoundsChanged = function () {
 	this.SaveRoute.UpdateRoute();
 };
 
+SegmentedMap.prototype.SetCursor = function (cursor, previousRequiredCursor = null) {
+	var current = window.map.style.cursor;
+	if (previousRequiredCursor) {
+		if (current !== previousRequiredCursor) {
+			return;
+		}
+	}
+	if (current !== cursor) {
+		window.map.style.cursor = cursor;
+	}
+	/* código para detectar dónde está definiéndose el puntero
+	document.addEventListener('mousemove', (e) => {
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const cursor = getComputedStyle(el).cursor;
+  if (cursor !== 'auto' && cursor !== 'default') {
+    console.log('Hovering over element with cursor:', cursor, el);
+  }
+});*/
+};
+SegmentedMap.prototype.GetCursor = function () {
+	return window.map.style.cursor;
+};
+
 SegmentedMap.prototype.StartClickSelecting = function () {
 	this.MapsApi.selector.SetSelectorCanvas();
 };
@@ -737,6 +760,7 @@ SegmentedMap.prototype.StopDrawing = function () {
 };
 
 SegmentedMap.prototype.BeginDrawingCircle = function () {
+	window.SegMap.SetCursor('crosshair');
 	return this.MapsApi.BeginDrawingCircle();
 };
 

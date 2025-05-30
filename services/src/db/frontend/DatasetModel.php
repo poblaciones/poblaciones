@@ -144,7 +144,6 @@ class DatasetModel
 		}
 
 		$sql = "SELECT " . $cols . $from . $joins . $where . " LIMIT 1";
-
 		$row = App::Db()->fetchAssoc($sql, $params);
 
 		$info = new InfoWindowInfo();
@@ -157,7 +156,6 @@ class DatasetModel
         $items = $this->FormatItems($row, $columns, $captionColumn);
         $items = $this->FilterItems($dataset['dat_skip_empty_fields'], $items);
         $info->Items = $items;
-
 		$info->Centroid = Coordinate::FromDbLonLat($row['centroid'])->Trim();
 		if ($row['geometry'])
 			$info->Canvas = Geometry::FromDb($row['geometry']);

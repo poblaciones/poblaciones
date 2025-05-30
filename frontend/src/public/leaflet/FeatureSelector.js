@@ -175,8 +175,8 @@ FeatureSelector.prototype.createItemFromElement = function (element, position) {
 			MetricId: parentAttributes['metricId'].value,
 			MetricVersionId: parentAttributes['metricVersionId'].value,
 			LevelId: parentAttributes['levelId'].value,
-			VariableId: parentAttributes['variableId'].value,
-			ShowInfo: (parentAttributes['showInfo'].value === "1")
+			VariableId: parentAttributes['variableId'].value /*,
+			ShowInfo: (parentAttributes['showInfo'].value === "1") */
 		};
 	} else {
 		var boundaryId = parentAttributes['boundaryId'].value;
@@ -313,7 +313,6 @@ FeatureSelector.prototype.startTooltipCandidate = function (feature) {
 	var loc = window.SegMap.MapsApi.selector;
 	loc.tooltipEvent = null;
 	loc.tooltipCandidate = feature;
-	console.log('startTooltipCandidate');
 	if (loc.tooltipTimer !== null) {
 		clearTimeout(loc.tooltipTimer);
 	}
@@ -467,9 +466,9 @@ FeatureSelector.prototype.selectorClicked = function (event) {
 	if (feature.parentInfo.BoundaryId) {
 			window.SegMap.SelectId('C', feature.id, null, null, event.ctrlKey);
 		} else {
-			if (feature.parentInfo.ShowInfo) {
+			//if (feature.parentInfo.ShowInfo) {
 				window.SegMap.InfoWindow.InfoRequestedInteractive(feature.position, feature.parentInfo, feature.id);
-			}
+			//}
 	}
 	return true;
 };

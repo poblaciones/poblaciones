@@ -735,14 +735,8 @@ module.exports = {
 			}
 			if (location == null) {
 				return {
-					Coordinate: {
-						Lat: 33,
-						Lon: 0
-					},
-					Point: {
-						X: 0,
-						Y: 0,
-					}
+					Coordinate: null,
+					Point: null
 				};
 			}
 			return {

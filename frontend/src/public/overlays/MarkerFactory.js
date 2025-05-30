@@ -209,7 +209,7 @@ MarkerFactory.prototype.createDelegates = function () {
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	var loc = this;
 
-	if (this.activeSelectedMetric.SelectedShowInfo) {
+	if (this.activeSelectedMetric.SelectedShowInfo()) {
 		delegates.click = function (feature, event) {
 			var parentInfo = loc.activeSelectedMetric.CreateParentInfo(variable, feature.object);
 			return maps.markerClicked(event.srcEvent, parentInfo, feature.object.FID);
@@ -222,7 +222,11 @@ MarkerFactory.prototype.createDelegates = function () {
 	};
 	delegates.mouseover = function (feature, event) {
 			if (!feature.object) {
+				window.SegMap.SetCursor('default', 'pointer');
 				return delegates.mouseout(event.srcEvent);
+			}
+			if (loc.activeSelectedMetric.SelectedShowInfo()) {
+				window.SegMap.SetCursor('pointer', 'default');
 			}
 			var parentInfo = loc.activeSelectedMetric.CreateParentInfo(variable, feature.object);
 			return maps.selector.markerMouseOver(event.srcEvent, parentInfo, feature.object.FID,
