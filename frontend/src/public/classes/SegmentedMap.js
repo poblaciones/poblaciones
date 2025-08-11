@@ -359,9 +359,9 @@ SegmentedMap.prototype.SetTypeControlsDefault = function () {
 };
 
 SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
-	if (mapTypeState === 's' || mapTypeState === 'h') {
+	/*if (mapTypeState === 's' || mapTypeState === 'h') {
 		this.toolbarStates.showElevation = false;
-	}
+	}*/
 
 	if (mapTypeState === 's') {
 		this.toolbarStates.showLabels = false;

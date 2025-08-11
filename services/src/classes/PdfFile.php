@@ -77,7 +77,7 @@ class PdfFile
 	{
 		$height = $this->measureHeight("<h4>" . $h4 . "</h4>" . $html, false);
 		$a4Height = 297;
-		if ($this->mpdf->y + $height + $this->mpdf->orig_bMargin > $a4Height)
+		if ((int)($this->mpdf->y + $height + $this->mpdf->orig_bMargin) > $a4Height)
 			$this->mpdf->WriteHTML("<pagebreak />");
 	}
 
