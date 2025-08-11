@@ -41,17 +41,22 @@ class BoundaryService extends BaseService
 	private function AddContent(& $boundaries)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT bcr_boundary_id Id,
-								GROUP_CONCAT(clr_caption SEPARATOR ', ') AS clippingRegions
-								FROM boundary_clipping_region JOIN clipping_region ON clr_id = bcr_clipping_region_id
-								GROUP BY bcr_boundary_id";
+		$sql = "SELECT bvr_boundary_id AS Id,
+					 GROUP_CONCAT(clippingRegions SEPARATOR '\n') AS clippingRegions
+					 FROM (
+					SELECT bvr_boundary_id, bcr_boundary_version_id VersionId,
+													CONCAT(bvr_caption, ': ', GROUP_CONCAT(clr_caption SEPARATOR ', ')) AS clippingRegions
+													FROM boundary_version_clipping_region JOIN clipping_region ON clr_id = bcr_clipping_region_id
+													JOIN boundary_version ON bcr_boundary_version_id = bvr_id
+													GROUP BY bvr_boundary_id, bvr_caption, bcr_boundary_version_id) t
+					group by bvr_boundary_id";
 		$counts = App::Db()->fetchAll($sql);
 		foreach($boundaries as $boundary)
 		{
 			$id = $boundary->getId();
 			$n = Arr::IndexOfByNamedValue($counts, "Id", $id);
 			if ($n !== -1)
-				$boundary->ClippingRegions = $counts[$n]['clippingRegions'];
+				$boundary->VersionsSummary = $counts[$n]['clippingRegions'];
 		}
 		Profiling::EndTimer();
 		return $boundaries;
@@ -60,16 +65,6 @@ class BoundaryService extends BaseService
 	{
 		Profiling::BeginTimer();
 
-		$metadata = $boundary->getMetadata();
-		if ($metadata != null)
-		{
-			if (!$boundary->getId())
-			{
-				$metadata->setCreate(new \DateTime());
-			}
-			$metadata->setUpdate(new \DateTime());
-			App::Orm()->Save($metadata);
-		}
 		App::Orm()->Save($boundary);
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();

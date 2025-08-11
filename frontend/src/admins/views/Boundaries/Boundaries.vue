@@ -10,8 +10,7 @@
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre">{{ item.Caption }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Grupo">{{ item.Group.Caption }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Contenido">{{ item.ClippingRegions }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Geografía">{{ geographyCaption(item) }}</md-table-cell>
+						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Contenido" v-html="asHtml(item.VersionsSummary)"></md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Público">{{ formatBool(!item.IsPrivate) }}</md-table-cell>
 						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Recomendado">{{ formatBool(item.IsSuggestion) }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap" v-if="isAdmin">
@@ -39,7 +38,6 @@ import arr from '@/common/framework/arr';
 		return {
 			list: [],
 			groups: [],
-			geographies: [],
 			};
 	},
 	computed: {
@@ -57,10 +55,6 @@ import arr from '@/common/framework/arr';
 		window.Context.BoundaryGroups.GetAll(function (data) {
 			arr.AddRange(loc.groups, data);
 		});
-		var loc = this;
-		window.Context.Geographies.GetAll(function (data) {
-			arr.AddRange(loc.geographies, data);
-		});
 	},
 	methods: {
 		formatBool(v) {
@@ -72,15 +66,16 @@ import arr from '@/common/framework/arr';
 					loc.openEdition(data);
 			});
 		},
-		geographyCaption(item) {
-			if (item.Geography) {
-				return item.Geography.Caption;
+		asHtml(text) {
+			if (text) {
+				return text.replace('\n', '<br>');
 			} else {
-				return '-';
+				return '';
 			}
+
 		},
 		openEdition(item) {
-			this.$refs.editPopup.show(item, this.groups, this.geographies);
+			this.$refs.editPopup.show(item, this.groups);
 		},
 		popupSaved(item) {
 			arr.ReplaceByIdOrAdd(this.list, item);

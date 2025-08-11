@@ -25,15 +25,16 @@ App::$app->get('/services/boundaries/GetSelectedBoundary', function (Request $re
 App::$app->get('/services/frontend/boundaries/GetBoundary', function (Request $request) {
 	$controller = new services\BoundaryService();
 	$boundaryId = Params::GetIntMandatory('a');
+	$boundaryVersionId = Params::GetIntMandatory('v');
 
-	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
+	if ($denied = Session::CheckIsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId)) return $denied;
 
 	$frame = Frame::FromTileParams();
 
 	$frame->ClippingRegionIds = null;
 	$frame->ClippingCircle = null;
 
-	$ret = $controller->GetBoundary($frame, $boundaryId);
+	$ret = $controller->GetBoundary($frame, $boundaryVersionId);
 
 	return App::JsonImmutable($ret);
 });
@@ -43,8 +44,10 @@ App::$app->get('/services/frontend/boundaries/GetBoundarySummary', function (Req
 	$controller = new services\BoundaryService();
 	$boundaryId = Params::GetIntMandatory('b');
 	$frame = Frame::FromParams();
+	$boundaryVersionId = Params::GetIntMandatory('v');
 
-	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
+	if ($denied = Session::CheckIsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId))
+		return $denied;
 
 	return App::JsonImmutable($controller->GetSummary($frame, $boundaryId));
 });
@@ -55,10 +58,12 @@ App::$app->get('/services/download/GetBoundaryFile', function (Request $request)
 	$type = Params::Get('t');
 	$clippingItemId = Params::GetIntArray('r');
 	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
+	$boundaryVersionId = Params::GetIntMandatory('v');
 
-	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
+	if ($denied = Session::CheckIsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId))
+		return $denied;
 
-	return services\DownloadBoundaryService::GetFileBytes($type, $boundaryId, $clippingItemId, $clippingCircle);
+	return services\DownloadBoundaryService::GetFileBytes($type, $boundaryVersionId, $clippingItemId, $clippingCircle);
 });
 
 // http://mapas.aacademica.org/services/download/StartBoundaryDownload?t=ss&l=8&r=1692&a=X&k=
@@ -68,10 +73,12 @@ App::$app->get('/services/download/StartBoundaryDownload', function (Request $re
 	$type = Params::Get('t');
 	$clippingCircle = Circle::TextDeserialize(Params::Get('c'));
 	$clippingItemId = Params::GetIntArray('r');
+	$boundaryVersionId = Params::GetIntMandatory('v');
 
-	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
+	if ($denied = Session::CheckIsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId))
+		return $denied;
 
-	return App::Json($controller->CreateMultiRequestFile($type, $boundaryId, $clippingItemId, $clippingCircle));
+	return App::Json($controller->CreateMultiRequestFile($type, $boundaryVersionId, $clippingItemId, $clippingCircle));
 });
 
 App::$app->get('/services/download/StepBoundaryDownload', function (Request $request) {

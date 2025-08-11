@@ -19,6 +19,11 @@
 				<i class="fas fa-tags" />
 			</button>
 
+			<button type="button" class="btn btn-default btn-xs" v-if="useElevation"
+							:title="(toolbarStates.showElevation ? 'Ocultar relieve del mapa' : 'Mostrar relieve en el mapa')" @click="toggleElevation()" :class="getElevationActive()">
+				<i class="fas fa-hat-cowboy-side" />
+			</button>
+
 			<button type="button" v-for="basemapMetric in basemapMetrics" :key="basemapMetric.Id" class="btn btn-default btn-xs"
 							:title="(basemapMetric.Visible ? 'Ocultar ' : 'Mostrar ') + basemapMetric.Caption"
 							@click="toggleBasemapMetric(basemapMetric)" :class="getBasemapMetricActive(basemapMetric)">
@@ -177,6 +182,9 @@
 			toggleLabels() {
 				window.SegMap.ToggleShowLabels();
 			},
+			toggleElevation() {
+				window.SegMap.ToggleShowElevation();
+			},
 			toggleBasemapMetric(basemapMetric) {
 				window.SegMap.ToggleBasemapMetric(basemapMetric);
 			},
@@ -213,6 +221,12 @@
 				}
 				return ' unselected';
 			},
+			getElevationActive(mode) {
+				if (this.toolbarStates.showElevation) {
+					return ' active';
+				}
+				return ' unselected';
+			},
 		},
 		computed: {
 			Use() {
@@ -223,6 +237,9 @@
 			},
 			basemapMetrics() {
 				return this.toolbarStates.basemapMetrics;
+			},
+			useElevation() {
+				return this.toolbarStates.hasElevation;
 			},
 			helpLinks() {
 				if (this.config) {

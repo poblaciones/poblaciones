@@ -88,7 +88,7 @@ endmacro %}
 
 {% endmacro %}
 
-{% macro showTable(rows, headerRows = 1, colspan = 1, small = false, firstExtraColumns = 0) %}
+{% macro showTable(rows, headerRows = 1, colspan = 1, small = false) %}
 	<table class="dCssTable">
 		{% set n = 0 %}
 		{% for rowTitle, cells in rows %}
@@ -100,8 +100,10 @@ endmacro %}
 					{% set c = 0 %}
 					{% for cell in cells %}
 						{% set c = c + 1 %}
-						<td {{ (n == 1 ? "colspan=" ~ (colspan + (isFirst and c == 1 ? firstExtraColumns : 0)) : "") }} class='dTableCell0 {{ (isFirst ? 'tFontHeader4' : (small ? 'tFont3' : 'tFont4')) }}
-							{{ (colspan > 1 and (n == 1 or (c - firstExtraColumns) % colspan == 0) ? 'tRightBorder' : '') }}'>{{ cell | raw }}</td>
+						<td {{ (n == 1 ? "colspan=" ~ colspan : "") }} class='dTableCell0 {{ (isFirst ? 'tFontHeader4' : (small ? 'tFont3' : 'tFont4')) }}
+							{{ (colspan > 1 and (n == 1 or c % colspan == 0) ? 'tRightBorder' : '') }}'{%
+									if cell.width %} style='width: {{ cell.width }}px'{% endif %}>{%
+									if cell.name %}{{ cell.name | raw }}{% else %}{{ cell | raw }}{% endif %}</td>
 					{% endfor %}
 				</tr>
 			{% endif %}

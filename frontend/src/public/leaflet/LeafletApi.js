@@ -41,7 +41,9 @@ function LeafletApi() {
 	this.baseMapGroup = null;
 	this.showLabels = true;
 	this.MIN_ZOOM_LABELS = 15;
+	this.useElevation = null;
 	this.mapTypeState = 'r';
+	this.elevationState = false;
 	this.overlayMapTypesGroup = null;
 	this.overlayMapTypesLayers = [];
 	this.selector = new FeatureSelector(this);
@@ -173,7 +175,8 @@ LeafletApi.prototype.Initialize = function () {
 		var t = document.createElement("div");
 		t.innerHTML = '<div class="gmnoprint" role="menubar" style="margin: 10px -10px; z-index: 900; position: absolute; cursor: pointer; left: 0px; top: 0px;">' +
 			'<div class="gm-style-mtc" style="float: left; position: relative;">' +
-			'<button title="Mostrar mapa de calles" type="button" class="leafletMapButton" style="font-weight: bold" id="roadTypeButton">Mapa</button>' +
+			'<button title="Mostrar mapa gris" type="button" class="leafletMapButton" style="font-weight: bold" id="roadTypeButton">Mapa</button>' +
+			'<button title="Mostrar mapa de calles" type="button" class="leafletMapButton" style="font-weight: bold" id="coloredTypeButton">Calles</button>' +
 			'<button title="Mostrar imágenes satelitales" type="button" class="leafletMapButton" id="satelliteTypeButton">Satélite</button>' +
 			'<button title="Mapa vacío" type="button" class="leafletMapButton" id="blankTypeButton">Blanco</button>' +
 			'</div></div>';
@@ -183,6 +186,10 @@ LeafletApi.prototype.Initialize = function () {
 		loc.mapTypeButtons['r'] = document.getElementById('roadTypeButton');
 		loc.mapTypeButtons['r'].addEventListener("click", function () {
 			loc.InteractiveChangeMapType("r");
+		});
+		loc.mapTypeButtons['c'] = document.getElementById('coloredTypeButton');
+		loc.mapTypeButtons['c'].addEventListener("click", function () {
+			loc.InteractiveChangeMapType("c");
 		});
 		loc.mapTypeButtons['s'] = document.getElementById('satelliteTypeButton');
 		loc.mapTypeButtons['s'].addEventListener("click", function () {
@@ -284,11 +291,28 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	// satelite:
 	// https://github.com/roblabs/xyz-raster-sources
 
+	var bounds = L.latLngBounds(
+		[-58.0, -73.0], // esquina suroeste [lat, lng]
+		[-21.0, -53.0]  // esquina noreste [lat, lng]
+	);
 
 	// desde 16, que tenga dires
 	this.baseLayers['roadmap'] = new L.TileLayer("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png", { attribution: cp });
 	this.baseLayers['roadmap_no_labels'] = new L.TileLayer("https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png", { attribution: cp });
+	this.baseLayers['colored'] = new L.TileLayer("https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png", { attribution: cp });
+	this.baseLayers['colored_no_labels'] = new L.TileLayer("https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png", { attribution: cp });
 	this.baseLayers['roadmap_only_labels'] = new L.TileLayer("https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png", { attribution: cp });
+
+	this.useElevation = (window.SegMap.Configuration.ElevationUrl != null);
+	if (this.useElevation) {
+		this.baseLayers['elevation'] = new L.TileLayer(window.SegMap.Configuration.ElevationUrl,
+			{
+				attribution: cp,
+				maxNativeZoom: 12,
+				maxZoom: 16
+			});
+		this.baseLayers['elevation'].setOpacity(0.5);
+	}
 
 	var zeroItem = [[0, 90], [180, 90], [180, -90], [0, -90], [-180, -90], [-180, 0], [-180, 90], [0, 90]];
 	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] }};
@@ -335,6 +359,7 @@ LeafletApi.prototype.generateLabelsArray = function (visibility) {
 
 LeafletApi.prototype.CheckBaseLayer = function () {
 	var reqLayer;
+	var elevation = (this.elevationState && this.useElevation ? ',elevation' : '');
 	if (this.mapTypeState === 'b') {
 		reqLayer = 'blank';
 	} else if (this.mapTypeState === 's') {
@@ -345,14 +370,20 @@ LeafletApi.prototype.CheckBaseLayer = function () {
 		} else {
 			reqLayer = 'satellite'; // se podría agregar roadmap_only_labels
 		}
+	} else if (this.mapTypeState === 'c') {
+		if (this.map.getZoom() >= this.MIN_ZOOM_LABELS && this.showLabels) {
+			reqLayer = 'colored' + elevation;
+		} else {
+			reqLayer = 'colored_no_labels' + elevation;
+		}
 	} else if (this.mapTypeState === 'r') {
 		if (this.map.getZoom() >= this.MIN_ZOOM_LABELS && this.showLabels) {
-			reqLayer = 'roadmap';
+			reqLayer = 'roadmap' + elevation;
 		} else {
-			reqLayer = 'roadmap_no_labels';
+			reqLayer = 'roadmap_no_labels' + elevation;
 		}
 	} else {
-		reqLayer = 'roadmap_no_labels';
+		reqLayer = 'roadmap_no_labels' + elevation;
 	}
 	this.SetBaseMap(reqLayer);
 	// actualiza el negrita del botón
@@ -706,10 +737,17 @@ LeafletApi.prototype.SetMapTypeState = function (mapTypeState) {
 	this.CheckBaseLayer();
 };
 
+LeafletApi.prototype.SetElevationState = function (elevationState) {
+	this.elevationState = elevationState;
+	this.CheckBaseLayer();
+};
+
 LeafletApi.prototype.getOpacity = function () {
 	if (this.mapTypeState === 'b') {
 		return 1.5 * 0.4;
 	} else if (this.mapTypeState === 'r') {
+		return 1.5 * 0.15;
+	} else if (this.mapTypeState === 'c') {
 		return 1.5 * 0.15;
 	} else if (this.mapTypeState === 's' || this.mapTypeState === 'h') {
 		return 1.5 * 0.4;

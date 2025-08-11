@@ -359,6 +359,10 @@ SegmentedMap.prototype.SetTypeControlsDefault = function () {
 };
 
 SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
+	if (mapTypeState === 's' || mapTypeState === 'h') {
+		this.toolbarStates.showElevation = false;
+	}
+
 	if (mapTypeState === 's') {
 		this.toolbarStates.showLabels = false;
 	}
@@ -397,6 +401,18 @@ SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
 	}
 };
 
+SegmentedMap.prototype.SetShowElevation = function (value) {
+	this.toolbarStates.showElevation = value;
+	this.MapsApi.SetElevationState(value);
+};
+
+
+SegmentedMap.prototype.ToggleShowElevation = function () {
+	this.toolbarStates.showElevation = !this.toolbarStates.showElevation;
+	this.MapsApi.SetElevationState(this.toolbarStates.showElevation);
+	this.MapTypeChanged();
+	this.SaveRoute.UpdateRoute();
+};
 
 SegmentedMap.prototype.ToggleShowLabels = function () {
 	// Si está en modo satélite, el toggle implica un cambio de mapa

@@ -303,7 +303,12 @@ class cHandle extends cPublicController
 
 		$ret = "";
 		if ($clippingRegionItemName)
-			$ret .= $clippingRegionItemName . ', ';
+		{
+			$ret .= $clippingRegionItemName;
+			if ($grandParentCaption)
+				$ret .= ' (' . $clippingRegion . ')';
+			$ret .= ', ';
+		}
 		$ret .= $title;
 
 		if ($parentCaption)

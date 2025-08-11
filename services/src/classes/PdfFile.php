@@ -73,6 +73,14 @@ class PdfFile
 		return $mpdf;
 	}
 
+	public function EnsureSpaceForH4andHtml($h4, $html)
+	{
+		$height = $this->measureHeight("<h4>" . $h4 . "</h4>" . $html, false);
+		$a4Height = 297;
+		if ($this->mpdf->y + $height + $this->mpdf->orig_bMargin > $a4Height)
+			$this->mpdf->WriteHTML("<pagebreak />");
+	}
+
 	public function Save($filename = "")
 	{
 		Profiling::BeginTimer();
@@ -276,6 +284,9 @@ class PdfFile
 								.link {	color: #000066; font-style: normal; text-decoration: none;
 									font-weight: normal; }
 
+								h4 {
+									page-break-after: avoid;
+								}
 
 								.indentedText { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em;  text-align: justify; margin-left: " . $firstPadding. "pt;  }
 								.doubleIndentedText { padding-bottom: " . $bottomMargin . "pt; line-height: 1.6em;  text-align: justify; margin-left: " . ($firstPadding + $fieldWidth) . "pt;  }

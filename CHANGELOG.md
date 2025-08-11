@@ -1,11 +1,15 @@
+v4.4 (2025-08-11)
+- Las delimitaciones permiten cargarle versiones históricas.
 - Fix problema en menú de indicadores (se ocultan ítems en ciertas resoluciones)
-- Fix a performance de publicación (se demora al 88% en ciertas cartografías).
+- Fix a performance de publicación (demora al 88% en ciertas cartografías).
 - La tabla de boundaries permite indicar cuáles deben ser destacados en el visor en la parte superior izquierda.
 - Ofrece guías al no haber cartografías.
 - Fix a capas con deckgl.
 - Escala en mapas con leaflet.
+- Relieve.
 - Links a ayuda en PDF en las burbujas de ayuda.
-
+- Fix a generación de excel de etiquetas (diccionario). Omitía etiquetas cuando había más de una variable con etiquetas en el dataset.
+- Mejoras en generación de PDF de metadatos (no corte página en títulos de elemento)
 
 v4.3 (2025-04-14)
 - Mejoras en manejo de error al publicar.

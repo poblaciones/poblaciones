@@ -205,10 +205,9 @@ class MergeSnapshotsByDatasetModel
 		$ret = [];
 		foreach ($level['variables'] as $variable) {
 			$formula = Variable::FormulaToString($variable->attributes);
-
 			foreach ($levelCompare['variables'] as $variableCompare) {
 				$formulaCompare = Variable::FormulaToString($variableCompare->attributes);
-				if ($formula == $formulaCompare)
+				if ($formula == $formulaCompare && $variable->attributes['vsy_cut_mode'] !== 'V' && $variableCompare->attributes['vsy_cut_mode'] !== 'V')
 				{
 					$ret[] = [$variable, $variableCompare];
 				}

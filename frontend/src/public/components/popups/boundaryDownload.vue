@@ -5,16 +5,16 @@
 				<tbody>
 					<tr>
 						<td style="width: 250px">Título:</td>
-						<td style="width: 600px">{{ boundary.properties.Metadata.Name }}</td>
+						<td style="width: 600px">{{ version.Metadata.Name }}</td>
 					</tr>
-					<tr v-if="boundary.properties.Metadata.Authors">
+					<tr v-if="version.Metadata.Authors">
 						<td>Autores:</td>
-						<td>{{ boundary.properties.Metadata.Authors }}</td>
+						<td>{{ version.Metadata.Authors }}</td>
 					</tr>
 					<tr>
 						<td>Licencia:</td>
 						<td>
-							<creativeCommons :license="boundary.properties.Metadata.License" />
+							<creativeCommons :license="version.Metadata.License" />
 						</td>
 					</tr>
 					<tr v-if="useFilter">
@@ -46,11 +46,11 @@
 							</span>
 						</td>
 					</tr>
-					<tr v-if="boundary.properties.Metadata.Files && boundary.properties.Metadata.Files.length > 0">
+					<tr v-if="version.Metadata.Files && version.Metadata.Files.length > 0">
 						<td>Adjuntos:</td>
 						<td>
 							<div class="attachmentsDownloadPanel">
-								<span v-for="file in boundary.properties.Metadata.Files" :key="file.Id">
+								<span v-for="file in version.Metadata.Files" :key="file.Id">
 									<a target="_blank" :href="resolveFileUrl(file)">
 										<i class="far fa-file-pdf" /> {{ file.Caption }}
 									</a>
@@ -117,6 +117,7 @@ export default {
 	methods: {
 		show(boundary) {
 			this.boundary = boundary;
+			this.version = boundary.SelectedVersion();
 			this.regions = [];
 			if (this.clipping.FrameHasClippingCircle() || this.clipping.FrameHasClippingRegionId()) {
 				this.regions = this.regions.concat(this.clipping.clipping.Region.Summary.Regions);
@@ -136,13 +137,13 @@ export default {
 			if (file.Web) {
 				return file.Web;
 			} else if (file.FileId) {
-				return window.host + '/services/metadata/GetMetadataFile?m=' + this.boundary.properties.Metadata.Id + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
+				return window.host + '/services/metadata/GetMetadataFile?m=' + this.version.Metadata.Id + h.urlParam('f', file.FileId) + h.urlParam('l', window.accessLink);
 			} else {
 				return '#';
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetWorkMetadataPdf?m=' + this.version.Work.Metadata.Id + '&d=' + this.level.Dataset.Id + '&w=' + this.version.Work.Id + h.urlParam('l', window.accessLink);
+			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.version.Metadata.Id + h.urlParam('l', window.accessLink);
 		},
 		getSpatialFormats() {
 			var ret = [];
@@ -246,7 +247,7 @@ export default {
 					clippingRegionId = arr.GetIds(this.regions).join(',');
 				}
 			}
-			return 't=' + type + '&s=b' + h.urlParam('b', this.boundary.properties.Id) + h.urlParam('c', circle) + h.urlParam('r', clippingRegionId);
+			return 't=' + type + '&s=b' + h.urlParam('b', this.boundary.properties.Id) + h.urlParam('v', this.version.Id) + h.urlParam('c', circle) + h.urlParam('r', clippingRegionId);
 		}
 	},
 };

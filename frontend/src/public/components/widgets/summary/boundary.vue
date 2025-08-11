@@ -19,6 +19,15 @@
 		</div>
 
 		<div class="sourceRow" v-if="!Embedded.Readonly">
+			<div class="btn-group" style="float: left">
+				<button v-for="(ver, index) in boundary.properties.Versions" :key="ver.Id" type="button"
+								@click="changeSelectedVersionIndex(index)"
+								class="btn btn-default btn-xs exp-serie-item"
+								:class="getActive(index)">
+					{{ ver.Name }}
+				</button>
+			</div>
+
 			<Source style="float:right" :sourceTitle="boundary.properties.Name"
 							@clickDownload="clickDescargar" @clickSource="clickFuente" />
 
@@ -51,6 +60,17 @@ export default {
 			label.Visible = !label.Visible;
 			this.boundary.UpdateMap();
 		},
+		getActive(index) {
+			if (this.boundary.properties.Versions.length == 1) {
+				return ' frozen';
+			} else if (this.boundary.properties.SelectedVersionIndex === index) {
+				return ' active';
+			}
+			return '';
+		},
+		changeSelectedVersionIndex(index) {
+			this.boundary.SelectVersion(index);
+		},
 		changeVisibility() {
 			this.boundary.ChangeVisibility();
 		},
@@ -62,7 +82,7 @@ export default {
 			window.Popups.BoundaryDownload.show(this.boundary);
 		},
 		clickFuente() {
-			window.Popups.ClippingMetadata.show(this.boundary.properties.Metadata, this.boundary.properties.Name);
+			window.Popups.ClippingMetadata.show(this.boundary.SelectedVersion().Metadata, this.boundary.properties.Name);
 		},
 	},
 		computed: {

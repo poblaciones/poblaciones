@@ -51,9 +51,28 @@ ActiveBoundary.prototype.CurrentOpacity = function () {
 ActiveBoundary.prototype.UpdateRanking = function () {
 };
 
+ActiveBoundary.prototype.SelectVersion = function (index) {
+	if (this.properties.SelectedVersionIndex + '' === index + '') {
+		return;
+	}
+	this.properties.SelectedVersionIndex = index;
+	window.SegMap.Session.Content.SelectBoundarySerie(this.SelectedVersion());
+
+	this.UpdateSummary();
+	this.UpdateMap();
+};
+
+
+ActiveBoundary.prototype.SelectedVersion = function () {
+	if (this.properties === null) {
+		throw new Error('No properties has been set.');
+	}
+	return this.properties.Versions[this.properties.SelectedVersionIndex];
+};
+
 
 ActiveBoundary.prototype.UpdateSummary = function () {
-	var boundary = this.properties;
+	var boundary = this;
 	var loc = this;
 	var CancelToken = axios.CancelToken;
 	if (this.cancelUpdateSummary !== null) {

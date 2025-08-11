@@ -132,6 +132,44 @@ ActiveSelectedMetric.prototype.UpdateSummary = function () {
 	});
 };
 
+ActiveSelectedMetric.prototype.useComparer = function () {
+	return window.Use.UseCompareSeries && this.properties.Comparable && this.properties.Versions.length > 1;
+};
+
+ActiveSelectedMetric.prototype.hasComparableVariables = function () {
+	return this.SelectedLevelCanBeCompared() && (this.SelectedLevel().Variables.length > this.getNonComparableVariables().length);
+};
+
+ActiveSelectedMetric.prototype.hasNonComparableVariables = function () {
+	return this.getNonComparableVariables().length > 0;
+};
+
+ActiveSelectedMetric.prototype.getNonComparableVariables = function () {
+	var ret = [];
+	for (var variable of this.SelectedLevel().Variables) {
+		if (!this.matchesComparableFilter(variable)) {
+			ret.push(variable);
+		}
+	}
+	return ret;
+};
+
+ActiveSelectedMetric.prototype.matchesComparableFilter = function (variable) {
+	if (!this.useComparer()) {
+		return true;
+	}
+	return (!this.Compare.Active || variable.Comparable);
+};
+
+ActiveSelectedMetric.prototype.SelectedLevelCanBeCompared = function () {
+	if (!this.useComparer()) return false;
+	if (this.IsMultiLevel() && this.LastLevelDontMultilevel()) {
+		return this.SelectedLevel() !== this.BottomLevel();
+	}
+	return true;
+};
+
+
 ActiveSelectedMetric.prototype.useRankings = function () {
 	var variable = this.SelectedVariable();
 	if (variable) {

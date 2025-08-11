@@ -4,19 +4,19 @@ namespace helena\entities\frontend\clipping;
 
 use helena\entities\BaseMapModel;
 
-class BoundaryInfo extends BaseMapModel
+class BoundaryVersionInfo extends BaseMapModel
 {
 	public $Id;
 	public $Name;
-	public $IsBoundary = true;
-	public $Versions = [];
+	public $Metadata;
+	public $Count = null;
 	public $SelectedVersionIndex = 0;
 
 	public static function GetMap()
 	{
 		return array (
-			'bou_id' => 'Id',
-			'bou_caption' => 'Name');
+			'bvr_id' => 'Id',
+			'bvr_caption' => 'Name');
 	}
 
 }

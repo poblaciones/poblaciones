@@ -34,7 +34,7 @@ class BaseWriter
 
 	protected function GetValueLabels($col)
 	{
-		if($col['measure'] != Measurement::Scale && $col['id'] !== null)
+		if($col['id'] !== null)
 		{
 			$ids = array();
 			if(isset($col['label_ids']))

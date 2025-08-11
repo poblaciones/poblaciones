@@ -13,8 +13,9 @@ use \JMS\Serializer\Annotation\Exclude;
  */
 class Boundary
 {
-		// Propiedades no almacenada en la base de datos
-		public $ClippingRegions;
+	// Propiedades no almacenada en la base de datos
+	public $Versions;
+	public $VersionsSummary;
 
 		/**
      * @var integer
@@ -46,28 +47,7 @@ class Boundary
      */
     private $IsPrivate;
 
-    /**
-     * @var \helena\entities\backoffice\Metadata
-     * @Exclude
-     *
-     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Metadata")
-		 * @ORM\JoinColumns({
-		 *   @ORM\JoinColumn(name="bou_metadata_id", referencedColumnName="met_id", nullable=true)
-		 * })
-		 */
-    private $Metadata;
-
-    /**
-		 * @var \helena\entities\backoffice\Geography
-		 *
-		 * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Geography")
-		 * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="bou_geography_id", referencedColumnName="geo_id", nullable=true)
-     * })
-     */
-    private $Geography;
-
-		/**
+  	/**
 		 * @var \helena\entities\backoffice\BoundaryGroup
 		 *
 		 * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\BoundaryGroup")
@@ -243,31 +223,6 @@ class Boundary
 		return $this->Icon;
 	}
 
-
-	/**
-	 * Set geography
-	 *
-	 * @param \helena\entities\backoffice\Geography $geography
-	 *
-	 * @return Boundary
-	 */
-    public function setGeography(\helena\entities\backoffice\Geography $geography = null)
-    {
-			$this->Geography = $geography;
-
-			return $this;
-    }
-
-    /**
-		 * Get geography
-		 *
-		 * @return \helena\entities\backoffice\Geography
-		 */
-    public function getGeography()
-    {
-			return $this->Geography;
-    }
-
     /**
 		 * Set group
 		 *
@@ -290,30 +245,6 @@ class Boundary
     public function getGroup()
     {
 			return $this->Group;
-    }
-
-    /**
-     * Set metadata
-     *
-     * @param \helena\entities\backoffice\Metadata $metadata
-     *
-     * @return Boundary
-     */
-    public function setMetadata(\helena\entities\backoffice\Metadata $metadata = null)
-    {
-        $this->Metadata = $metadata;
-
-        return $this;
-    }
-
-    /**
-     * Get metadata
-     *
-     * @return \helena\entities\backoffice\Metadata
-     */
-    public function getMetadata()
-    {
-        return $this->Metadata;
     }
 }
 

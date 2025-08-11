@@ -109,6 +109,18 @@ class Session
 		return $ret;
 	}
 
+	public static function CheckIsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId)
+	{
+		Profiling::BeginTimer();
+		// Se fija los permisos
+		if (self::IsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId))
+			$ret = null;
+		else {
+			$ret = self::NotEnoughPermissions();
+		}
+		Profiling::EndTimer();
+		return $ret;
+	}
 
 	public static function CheckIsBoundaryPublicOrAccessible($boundaryId)
 	{
@@ -160,11 +172,32 @@ class Session
 		Profiling::BeginTimer();
 		$res = null;
 		$resText = "";
-		if (!BoundaryVisiblityCache::Cache()->HasData($boundaryId, $resText))
-		{
+		$key = BoundaryVisiblityCache::CreateKey($boundaryId, '');
+		if (!BoundaryVisiblityCache::Cache()->HasData($key, $resText)) {
 			$res = App::Db()->fetchScalarInt("SELECT bou_is_private = 0 FROM boundary WHERE bou_id = ? LIMIT 1", array($boundaryId));
 			$resText = $res . '';
-			BoundaryVisiblityCache::Cache()->PutData($boundaryId, $res . '');
+			BoundaryVisiblityCache::Cache()->PutData($key, $res . '');
+		}
+		$res = ($resText !== '0' ? true : 0);
+
+		if (!$res)
+			$res = self::IsSiteReader();
+
+		Profiling::EndTimer();
+		return $res;
+	}
+
+	public static function IsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId)
+	{
+		Profiling::BeginTimer();
+		$res = null;
+		$resText = "";
+		$key = BoundaryVisiblityCache::CreateKey($boundaryId, $boundaryVersionId);
+		if (!BoundaryVisiblityCache::Cache()->HasData($key, $resText))
+		{
+			$res = App::Db()->fetchScalarInt("SELECT bou_is_private = 0 FROM boundary INNER JOIN boundary_version ON bou_id = bvr_boundary_id WHERE bou_id = ? and bvr_id = ? LIMIT 1", array($boundaryId, $boundaryVersionId));
+			$resText = $res . '';
+			BoundaryVisiblityCache::Cache()->PutData($key, $res . '');
 		}
 		$res = ($resText !== '0' ? true: 0);
 

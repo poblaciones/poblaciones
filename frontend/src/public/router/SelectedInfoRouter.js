@@ -50,6 +50,7 @@ SelectedInfoRouter.prototype.SelectedBoundaryToRoute = function (activeBoundary)
 	var ret = [];
 	ret.push([activeBoundary.properties.Id]);
 	ret.push(['t', 'b']); // es boundary
+	ret.push(['a', activeBoundary.SelectedVersion().SelectedVersionIndex, 0]);
 	ret.push(['v', (activeBoundary.visible ? 1 : 0), 1]);
 	ret.push(['w', activeBoundary.borderWidth, 2]);
 	ret.push(['c', this.cleanSign(activeBoundary.color), this.cleanSign(ActiveBoundary.DEFAULT_COLOR)]);
@@ -318,11 +319,13 @@ SelectedInfoRouter.prototype.parseBoundary = function (values) {
 	var visible = h.getSafeValue(values, 'v', 1);
 	var descriptions = h.getSafeValue(values, 'd', 1);
 	var borderWidth = h.getSafeValueInt(values, 'w', 2);
+	var versionInfo = h.getSafeValue(values, 'a', 0);
 	var color = h.getSafeValue(values, 'c', this.cleanSign(ActiveBoundary.DEFAULT_COLOR));
 
 	return {
 		Id: parseInt(id),
 		IsBoundary: true,
+		VersionInfo: versionInfo,
 		BorderWidth: borderWidth,
 		Color: '#' + color,
 		Visible: (visible ? true : false),
@@ -397,10 +400,14 @@ SelectedInfoRouter.prototype.restoreInfoStates = function (states) {
 	}
 };
 
-
 SelectedInfoRouter.prototype.RestoreBoundaryState = function (boundary, state) {
 	var mapChanged = false;
-
+	var versionIndex = parseInt(state.VersionInfo);
+	if (versionIndex !== -1 && versionIndex !== boundary.SelectedVersionIndex &&
+		versionIndex < boundary.properties.Versions.length) {
+		boundary.properties.SelectedVersionIndex = versionIndex;
+		mapChanged = true;
+	}
 	if (state.Visible !== boundary.visible) {
 		boundary.visible = state.Visible;
 		mapChanged = true;

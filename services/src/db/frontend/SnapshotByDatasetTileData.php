@@ -125,32 +125,49 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 
 		foreach($arr as $row)
 		{
+			$item = [];
+			$anyValue = false;
+
+			// Pone lo general
+			$item['FID'] = $row['FID'];
+			if ($this->hasSymbols)
+				$item['Symbol'] = $row['Symbol'];
+			if ($this->requiresPolygons)
+				$item['Data'] = $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
+			//	$item['Data'] = $row['value'];// $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
+			foreach ($extraFields as $field)
+				$item[$field] = $row[$field];
+
+			$values = [];
 			foreach($this->variables as $variable)
 			{
-				$totalField = "sna_" . $variable->Id . "_total";
-				if ($row[$totalField] !== null)
+				$set = [];
+				$total = $row["sna_" . $variable->Id . "_total"];
+				if ($total !== null)
 				{
-					$item = [];
-					foreach($extraFields as $field)
-						$item[$field] = $row[$field];
-
-					$item['FID'] = $row['FID'];
-
-					// Pone lo específico de cada variable
-					$item['VID'] = $variable->Id;
-					$item['Value'] = $row["sna_" . $variable->Id . "_value"];
-					$item['Total'] = $row[$totalField];
-					$item['LID'] = $row["sna_" . $variable->Id . "_value_label_id"];
+					$anyValue = true;
+					//
+				/*	$set['VID'] = $variable->Id;
+					$set['Value'] = $row["sna_" . $variable->Id . "_value"];
+					$set['Total'] = $total;
+					$set['LID'] = $row["sna_" . $variable->Id . "_value_label_id"];
 					if ($variable->IsSequence)
 						$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
-					if ($this->hasSymbols)
-						$item['Symbol'] = $row['Symbol'];
-					if ($this->requiresPolygons)
-						$item['Data'] = $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
-						//	$item['Data'] = $row['value'];// $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
-
-					$ret[] = $item;
+				*/
+					// Pone lo específico de cada variable
+					$set[] = $variable->Id;
+					$set[] = $row["sna_" . $variable->Id . "_value"];
+					$set[] = $total;
+					$set[] = $row["sna_" . $variable->Id . "_value_label_id"];
+					if ($variable->IsSequence)
+						$item[] = $row["sna_" . $variable->Id . "_sequence_order"];
 				}
+				$values[] = $set;
+			}
+			if ($anyValue)
+			{
+				$item['Values'] = $values;
+				$ret[] = $item;
 			}
 		}
 		return $ret;

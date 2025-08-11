@@ -12,15 +12,15 @@ use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
 
-class SnapshotBoundaryItemModel extends BaseSpatialSnapshotModel
+class SnapshotBoundaryVersionItemModel extends BaseSpatialSnapshotModel
 {
-	private $boundaryId;
+	private $boundaryVersionId;
 	public $zoom = null;
 
-	public function __construct($boundaryId)
+	public function __construct($boundaryVersionId)
 	{
-		$this->boundaryId = $boundaryId;
-		parent::__construct('snapshot_boundary_item', 'biw', 'B');
+		$this->boundaryVersionId = $boundaryVersionId;
+		parent::__construct('snapshot_boundary_version_item', 'biw', 'B');
 	}
 
 	protected function ExecQuery($query = null, $extraQuery = null)
@@ -39,8 +39,8 @@ class SnapshotBoundaryItemModel extends BaseSpatialSnapshotModel
 		$from = $this->tableName;
 
 		// Pone filtros
-		$where = "biw_boundary_id = ?";
-		$params = array($this->boundaryId);
+		$where = "biw_boundary_version_id = ?";
+		$params = array($this->boundaryVersionId);
 
 		$baseQuery = new QueryPart($from, $where, $params, $select);
 

@@ -83,7 +83,6 @@ Summary.prototype.FeatureSelected = function () {
 	this.Data.Content.Elements++;
 };
 
-
 Summary.prototype.SerieSelected = function (serie) {
 	var year = parseInt(serie);
 	if (isNaN(year) || year < 1800 || year > 2100) {

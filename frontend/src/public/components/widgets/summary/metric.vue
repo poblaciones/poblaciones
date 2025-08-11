@@ -64,7 +64,7 @@
 					{{ pair.version.Version.Name }}
 				</button>
 			</div>
-			<template v-if="!Embedded.Readonly && useComparer">
+			<template v-if="!Embedded.Readonly && useComparer && hasComparableVariables">
 				<div style="float:left" class="exp-hiddable-block">
 					<div style="float: left; margin-left: 10px; margin-top: 6px;">
 						<switches style="transform: scale(0.8)" title="Comparar" v-model="compare" theme="bootstrap"
@@ -166,7 +166,8 @@ export default {
 				return ' active';
 			}
 			return '';
-		},
+			},
+
 		clickLabel(label) {
 			label.Visible = !label.Visible;
 			this.metric.RefreshMap();
@@ -273,6 +274,9 @@ export default {
 			this.metric.ChangeMetricVisibility();
 			},
 			variableChanged() {
+				if (this.metric.Compare.Active && !this.metric.hasComparableVariables()) {
+					this.toggleCompare();
+				}
 				this.updateCompareVersions();
 			},
 			updateCompareVersions() {
@@ -383,7 +387,10 @@ export default {
 	computed: {
 			Use() {
 				return window.Use;
-			},
+		},
+		hasComparableVariables() {
+			return this.metric.hasComparableVariables();
+		},
 			Embedded() {
 				return window.Embedded;
 		},

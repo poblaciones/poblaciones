@@ -21,9 +21,9 @@ class SnapshotBoundaryModel
 	{
 	 	Profiling::BeginTimer();
 
-		App::Db()->truncate("snapshot_boundary_item");;
+		App::Db()->truncate("snapshot_boundary_version_item");
 
-		App::Db()->truncate("snapshot_boundary");;
+		App::Db()->truncate("snapshot_boundary");
 
 		VersionUpdater::Increment('BOUNDARY_VIEW');
 
@@ -45,8 +45,9 @@ class SnapshotBoundaryModel
 		$ret = App::Db()->exec($sql);
 		App::Db()->markTableUpdate('snapshot_boundary');
 
-		$sql = "INSERT INTO snapshot_boundary_item
-									(`biw_boundary_id`,
+		$sql = "INSERT INTO snapshot_boundary_version_item
+								  	(`biw_boundary_version_id`,
+									`biw_boundary_id`,
 										`biw_clipping_region_item_id`,
 										`biw_caption`,
 										`biw_code`,
@@ -56,15 +57,15 @@ class SnapshotBoundaryModel
 										biw_geometry_r2,
 										biw_geometry_r3,
 										biw_envelope)
-										SELECT bcr_boundary_id, cli_id, cli_caption, cli_code, cli_centroid,
+										SELECT bcr_boundary_version_id, bvr_boundary_id, cli_id, cli_caption, cli_code, cli_centroid,
 											cli_area_m2, cli_geometry_r1, cli_geometry_r2, cli_geometry_r3,
 											PolygonEnvelope(cli_geometry)
-										FROM boundary_clipping_region
-									INNER JOIN  boundary ON bou_id = bcr_boundary_id
+										FROM boundary_version_clipping_region
+									INNER JOIN  boundary_version ON bvr_id = bcr_boundary_version_id
 									INNER JOIN  clipping_region_item ON cli_clipping_region_id = bcr_clipping_region_id";
 
 		$ret = App::Db()->exec($sql);
-		App::Db()->markTableUpdate('snapshot_boundary_item');
+		App::Db()->markTableUpdate('snapshot_boundary_version_item');
 
 		FabMetricsCache::Cache()->Clear();
 

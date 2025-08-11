@@ -33,12 +33,30 @@ ContentActions.prototype.SelectVariable = function (variableId) {
 	this.RegisterAction('SelectVariable', variableId);
 };
 
+
+ContentActions.prototype.SelectBoundarySerie = function (serie) {
+	if (!serie) {
+		return;
+	}
+	this.RegisterActionChange('SelectBoundarySerie', serie.Version.Name);
+	this.Summary.SerieSelected(serie.Version.Name);
+};
+
 ContentActions.prototype.SelectSerie = function (serie) {
 	if (!serie) {
 		return;
 	}
 	this.RegisterActionChange('SelectSerie', serie.Version.Name);
 	this.Summary.SerieSelected(serie.Version.Name);
+};
+
+
+ContentActions.prototype.SelectBoundarySerie = function (serie) {
+	if (!serie) {
+		return;
+	}
+	this.RegisterActionChange('SelectBoundarySerie', serie.Name);
+	this.Summary.SerieSelected(serie.Name);
 };
 
 ContentActions.prototype.RemoveBaseMetric = function (metricId) {

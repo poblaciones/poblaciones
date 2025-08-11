@@ -338,12 +338,15 @@ class PdfCreator
 		$ele->attributes = json_decode($this->metadata['met_license'], true);
 		$licenseUrl = CreativeCommons::ResolveUrl($ele);
 
-		$this->pdf->WriteHeading4('Licencia');
 		$licenseText = CreativeCommons::GetLegendByUrl($licenseUrl);
 		$imageFile = CreativeCommons::GetLicenseImageSvgByUrl($licenseUrl);
 		$this->pdf->AddImage('license', file_get_contents(Paths::GetResourcesPath() . $imageFile));
 		$html = "<p style='font-size: 10pt; line-height: 1.4em'><a href='" . $licenseUrl . "'><img src='var:license' style='float: left; margin-right: 5pt'/></a>" .
 									$licenseText . '</p>';
+		$this->pdf->EnsureSpaceForH4andHtml("Licencia", $html);
+
+		$this->pdf->WriteHeading4('Licencia');
+
 		$this->pdf->WriteIndentedText($html, false);
 	}
 }

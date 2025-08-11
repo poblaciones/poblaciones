@@ -18,7 +18,7 @@ class SnapshotBoundarySummary extends BaseSpatialSnapshotModel
 	public function __construct($boundaryId)
 	{
 		$this->boundaryId = $boundaryId;
-		parent::__construct('snapshot_boundary_item', 'biw', 'B');
+		parent::__construct('snapshot_boundary_version_item', 'biw', 'B');
 	}
 
 	protected function ExecQuery($query = null, $extraQuery = null)
@@ -30,7 +30,7 @@ class SnapshotBoundarySummary extends BaseSpatialSnapshotModel
 		$from = $this->tableName;
 
 		// Pone filtros
-		$where = "biw_boundary_id = ?";
+		$where = "biw_boundary_version_id = ?";
 		$params = array($this->boundaryId);
 
 		$baseQuery = new QueryPart($from, $where, $params, $select);

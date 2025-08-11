@@ -22,6 +22,9 @@ class MapSettings
 	public $BasemapMetrics = [];
 	public $BoundaryRecommendationExclusions = [];
 
+	public $ElevationUrl = null;
+	public $ShortUrlPattern = null;
+
 	public $UseCalculated = true;
 	public $UseNewMetricPicker = false;
 

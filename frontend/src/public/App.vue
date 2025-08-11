@@ -127,11 +127,12 @@
 				splitPanels: null,
 				featureNavigation: { Key: null, Values: [], GettingKey: null },
 				toolbarStates: {
-					selectionMode: 'PAN', tutorialOpened: 0, showLabels: true,
+					selectionMode: 'PAN', tutorialOpened: 0, showLabels: true, showElevation: false,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false,
 					basemapMetrics: [
 
-					]
+					],
+					hasElevation: false
 				},
 				flyRightTimeoutId: null,
 				clipping: {
@@ -268,6 +269,7 @@
 					loc.config = res.data;
 					loc.config.IsMobile = loc.$isMobile();
 					loc.user = res.data.User;
+					loc.toolbarStates.hasElevation = (loc.config.ElevationUrl != null);
 					arr.AddRange(loc.toolbarStates.basemapMetrics, loc.config.BasemapMetrics);
 
 					if (web.getParameterByName('leaflet') != null) {

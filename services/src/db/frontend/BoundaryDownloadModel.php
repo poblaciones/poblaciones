@@ -25,21 +25,21 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		$this->fullQuery = $fullQuery;
 		$this->countQuery = $countQuery;
 		$this->fullCols = $fullCols;
-  	$this->fullParams = $fullParams;
+  		$this->fullParams = $fullParams;
 		$this->extraColumns = $extraColumns;
 		$this->wktIndex = $wktIndex;
 		if($fullQuery !== '')
 			$this->prepared = true;
 	}
 
-	public function PrepareFileQuery($boundaryId, $getPolygon, $clippingItemId, $clippingCircle)
+	public function PrepareFileQuery($boundaryVersionId, $getPolygon, $clippingItemId, $clippingCircle)
 	{
 		Profiling::BeginTimer();
 		$params = array();
-		$params[] = $boundaryId;
+		$params[] = $boundaryVersionId;
 
 		$boundaryModel = new BoundaryModel();
-		$boundary = $boundaryModel->GetBoundaryById($boundaryId);
+		$boundary = $boundaryModel->GetBoundaryVersionById($boundaryVersionId);
 		$spatialConditions = new SpatialConditions('biw');
 
 		$where = '';
@@ -55,18 +55,18 @@ class BoundaryDownloadModel extends BaseDownloadModel
 			$where = $spatialConditions->CreateCircleQuery($clippingCircle, 'B')->Where;
 		}
 
-		$geographyId = $boundary['bou_geography_id'];
+		$geographyId = $boundary['bvr_geography_id'];
 
 		$cols = $this->GetBoundaryColumns();
 
 		$this->AppendExtraColumns($cols, $joins, $geographyId, $getPolygon);
 
 		$cols = $this->Deduplicate($cols);
-			$wherePart = 'WHERE biw_boundary_id = ?';
+			$wherePart = 'WHERE biw_boundary_version_id = ?';
 		if ($where !== '')
 			$wherePart .= ' AND ' . $where;
 
-		$query = ' FROM snapshot_boundary_item AS _data_table ' . $joins . $wherePart;
+		$query = ' FROM snapshot_boundary_version_item AS _data_table ' . $joins . $wherePart;
 
 		$fullSql = 'SELECT ' . $this->GetFields($cols) . $query;
 		$countSql = 'SELECT COUNT(*) ' . $query;

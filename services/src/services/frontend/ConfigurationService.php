@@ -154,6 +154,8 @@ class ConfigurationService extends BaseService
 									'UseDeckgl' => App::Settings()->Map()->UseDeckgl,
 									'UseCompareSeries' => $useComparer,
 
+									'ElevationUrl' => App::Settings()->Map()->ElevationUrl,
+
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 									'OwnerLogo' => App::Settings()->Map()->OwnerLogo,
 									'MapsAPI' => App::Settings()->Map()->MapsAPI,

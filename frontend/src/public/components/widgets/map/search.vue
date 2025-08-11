@@ -1,9 +1,9 @@
 <template>
 	<div v-hotkey="keymap" class="searchBar no-print mapsOvercontrols"
-			 style="box-shadow: rgba(50, 50, 50, 0.18) 0px 0px 12px !important; border-top-right-radius: 20px; border-bottom-right-radius: 20px; ">
-		<div class="input-group" style="margin-bottom: 0px;">
+			 style="box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px !important; border-radius: 20px; ">
+		<div class="input-group" style="margin-bottom: 0px; margin-right: 0px; border-radius: 20px;">
 			<input v-model='text' ref='sfield' id='sfield' autocomplete="off"
-						 @keyup='doSearch' class="form-control formBorder"
+						 @keyup='doSearch' class="form-control formBorder placeHolderStronger"
 						 :class="getLoading()" type="text" placeholder="Buscar indicadores y lugares en Poblaciones">
 			<span class="input-group-btn">
 				<button @click="doSearch" class="btn btn-default lupa-button" type="button"><i class="fa fa-search"></i>
@@ -215,6 +215,8 @@ export default {
 <style scoped>
 	.searchBar {
 		top: 11px;
+				/* transparency of search bar: */
+		background-color: #fcfcfccc;
 		z-index: 1;
 		left: calc(50%);
 		margin-left: -25%;
@@ -231,11 +233,25 @@ export default {
 			width: max(calc(100% - 300px), 200px);
 		}
 
-	.lupa-button{
-		width: 40px;
-		padding-left: 6px;
-	}
+		.lupa-button {
+			width: 40px;
+			padding-left: 6px;
+		}
 }
+
+	.searchBar:focus-within {
+		border-left: 1px solid #ddd;
+		border-bottom: 1px solid #ddd;
+		border-top: 1px solid #ddd;
+		background-color: white;
+		transform: translate(-1px, -1px);
+	}
+
+	.lupa-button {
+		border: 0px;
+		border-left: 0px;
+		background-color: transparent!important;
+	}
 
 .auto {
 	background: white;
@@ -269,20 +285,27 @@ li:last-child {
 background-color: white;
 }
 .btn:hover {
-background-color: #66615B;
+background-color: #66615B!important;
 }
 .loading {
 	background: #ffffff url("/static/img/spinner.gif") no-repeat right 5px center;
 }
-.formBorder {
-  border-left: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  border-top: 1px solid #ddd;
-}
+	.formBorder {
+		border-top-left-radius: 20px;
+		border-bottom-left-radius: 20px;
+		background-color: transparent;
+/*		border-left: 1px solid #ddd;
+		border-bottom: 1px solid #ddd;
+		border-top: 1px solid #ddd;
+*/	}
 .formBorder:focus {
-  border-left: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  border-top: 1px solid #ddd;
+
+
+}
+
+	.placeHolderStronger::placeholder {
+  color: #909090;
+  opacity: 1; /* Firefox */
 }
 </style>
 

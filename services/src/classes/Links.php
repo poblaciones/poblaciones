@@ -3,6 +3,7 @@
 namespace helena\classes;
 
 use minga\framework\Context;
+use minga\framework\Str;
 
 class Links
 {
@@ -14,6 +15,15 @@ class Links
 
 		return $mainUrl . $url;
 	}
+	public static function GetWorkStableUrl($url, $id)
+	{
+		$pattern = App::Settings()->Map()->ShortUrlPattern;
+		if ($pattern)
+			return Str::Replace($pattern, '{id}', $id);
+		else
+			return self::GetFullyQualifiedUrl($url);
+	}
+
 	public static function GetBackofficeUrl()
 	{
 		return self::GetFullyQualifiedUrl('/users/');

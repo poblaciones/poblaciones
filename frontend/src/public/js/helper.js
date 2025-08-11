@@ -484,6 +484,7 @@ module.exports = {
 	getBoundaryParams(boundary, frame, x, y, rev, suffix) {
 		var ret = this.mergeObject({
 			a: boundary.properties.Id,
+			v: boundary.SelectedVersion().Id,
 			x: x,
 			y: y,
 			w: rev,
@@ -494,7 +495,7 @@ module.exports = {
 	},
 	getTileParams(metric, frame, x, y, suffix) {
 		const ver = metric.properties.Versions[metric.properties.SelectedVersionIndex];
-		if (metric.Compare.Active) {
+		if (metric.Compare.Active && metric.SelectedLevelCanBeCompared()) {
 			compare = metric.Compare.SelectedLevel().Id;
 		} else {
 			compare = null;
@@ -533,8 +534,7 @@ module.exports = {
 		return ret;
 	},
 	getBlockTileParams(metric, frame, x, y, suffix, size) {
-
-		if (metric.Compare.Active) {
+		if (metric.Compare.Active && metric.SelectedLevelCanBeCompared()) {
 			compare = metric.Compare.SelectedLevel().Id;
 		} else {
 			compare = null;
@@ -589,7 +589,7 @@ module.exports = {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		const level = ver.Levels[ver.SelectedLevelIndex];
 		const variable = level.Variables[level.SelectedVariableIndex];
-		if (activeMetric.Compare.Active) {
+		if (activeMetric.Compare.Active && metric.SelectedLevelCanBeCompared()) {
 			compare = activeMetric.Compare.SelectedLevel().Id;
 		} else {
 			compare = null;
@@ -624,7 +624,7 @@ module.exports = {
 	},
 	getSummaryParams(metric, frame) {
 		const ver = metric.properties.Versions[metric.properties.SelectedVersionIndex];
-		if (metric.Compare.Active) {
+		if (metric.Compare.Active && metric.SelectedLevelCanBeCompared()) {
 			compare = metric.Compare.SelectedLevel().Id;
 		} else {
 			compare = null;
@@ -641,7 +641,8 @@ module.exports = {
 	},
 	getBoundarySummaryParams(boundary, frame, rev, suffix) {
 		return this.mergeObject({
-			b: boundary.Id,
+			b: boundary.properties.Id,
+			v: boundary.SelectedVersion().Id,
 			w: rev,
 			h: suffix
 		}, this.getFrameParams(frame));

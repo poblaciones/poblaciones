@@ -10,7 +10,7 @@ use helena\classes\GeoJson;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\BoundaryModel;
-use helena\db\frontend\SnapshotBoundaryItemModel;
+use helena\db\frontend\SnapshotBoundaryVersionItemModel;
 use helena\db\frontend\SnapshotBoundarySummary;
 use helena\entities\frontend\clipping\FeaturesInfo;
 use minga\framework\PublicException;
@@ -23,13 +23,14 @@ use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
 
 use helena\entities\frontend\clipping\BoundaryInfo;
+use helena\entities\frontend\clipping\BoundaryVersionInfo;
 use helena\entities\frontend\clipping\BoundarySummaryInfo;
 use helena\entities\frontend\metadata\MetadataInfo;
 
 
 class BoundaryService extends BaseService
 {
-	public function GetBoundary($frame, $boundaryId)
+	public function GetBoundary($frame, $boundaryVersionId)
 	{
 		$data = null;
 
@@ -37,21 +38,21 @@ class BoundaryService extends BaseService
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null && $frame->TileEnvelope == null)
 			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
 		$key = BoundaryCache::CreateKey($frame);
-		if (BoundaryCache::Cache()->HasData($boundaryId, $key, $data))
+		if (BoundaryCache::Cache()->HasData($boundaryVersionId, $key, $data))
 		{
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateBoundary($frame, $boundaryId);
+		$data = $this->CalculateBoundary($frame, $boundaryVersionId);
 
-		BoundaryCache::Cache()->PutData($boundaryId, $key, $data);
+		BoundaryCache::Cache()->PutData($boundaryVersionId, $key, $data);
 
 		return $data;
 	}
 
-	private function CalculateBoundary($frame, $boundaryId)
+	private function CalculateBoundary($frame, $boundaryVersionId)
 	{
-		$table = new SnapshotBoundaryItemModel($boundaryId);
+		$table = new SnapshotBoundaryVersionItemModel($boundaryVersionId);
 		$table->zoom = $frame->Zoom;
 
 		$rows = $table->GetRows($frame);
@@ -90,13 +91,25 @@ class BoundaryService extends BaseService
 
 		$item = new BoundaryInfo();
 		$item->Fill($row);
-		$item->Metadata = new MetadataInfo();
-		$item->Metadata->Fill($row);
 
-		$metadataTable = new MetadataModel();
-		$rows = $metadataTable->GetMetadataFiles($item->Metadata->Id);
-		$item->Metadata->FillFiles($rows);
+		$versions = $table->GetSelectedBoundaryVersions($boundaryId);
 
+		foreach($versions as $row)
+		{
+			$version = new BoundaryVersionInfo();
+			$version->Fill($row);
+			$version->Metadata = new MetadataInfo();
+			$version->Metadata->Fill($row);
+
+			$metadataTable = new MetadataModel();
+			$rows = $metadataTable->GetMetadataFiles($version->Metadata->Id);
+			$version->Metadata->FillFiles($rows);
+
+			$item->Versions[] = $version;
+			$version->SelectedVersionIndex = sizeof($item->Versions) - 1;
+		}
+
+		$item->SelectedVersionIndex = sizeof($item->Versions) - 1;
 
 		return $item;
 	}
@@ -130,9 +143,9 @@ class BoundaryService extends BaseService
 		return $data;
 	}
 
-	private function CalculateSummary($frame, $boundaryId)
+	private function CalculateSummary($frame, $boundaryVersionId)
 	{
-		$table = new SnapshotBoundarySummary($boundaryId);
+		$table = new SnapshotBoundarySummary($boundaryVersionId);
 
 		$rows = $table->GetRows($frame);
 
