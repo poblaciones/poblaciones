@@ -13,6 +13,7 @@ module.exports = {
 		indexBackoffice: path.resolve(__dirname, '../../services/templates/backoffice.html.twig'),
 		indexAdmin: path.resolve(__dirname, '../../services/templates/admins.html.twig'),
 		indexCredentials: path.resolve(__dirname, '../../services/templates/credentials.html.twig'),
+		indexTable: path.resolve(__dirname, '../../services/templates/table.html.twig'),
 		assetsRoot: path.resolve(__dirname, '../../services/web'),
 		assetsSubDirectory: 'static',
 		assetsPublicPath: '/',

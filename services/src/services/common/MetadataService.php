@@ -102,7 +102,7 @@ class MetadataService extends BaseService
 		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
 
 		$PdfCreator = new PdfCreator();
-		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $institutions, $dataset);
+		$filename = $PdfCreator->CreateMetadataPdf($metadata, $sources, $institutions, $dataset, $fromDraft);
 
 		if ($fromDraft === false)
 		{

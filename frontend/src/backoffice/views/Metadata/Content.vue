@@ -24,8 +24,8 @@
 											<label class="with-area">Dirección:</label>
 										</div>
 										<div class="md-layout-item md-size-60">
-											<a v-if="metadata.LastOnline" style="color: #989797;" :href="absoluteMap(appendAccessLink(metadata.Url))" target="_blank">{{ absoluteMap(appendAccessLink(metadata.Url)) }}</a>
-											<span v-else>{{ absoluteMap(appendAccessLink(metadata.Url)) }} (sin publicar)</span>
+											<a v-if="metadata.LastOnline" style="color: #989797;" :href="resolvePublicUrl()" target="_blank">{{ resolvePublicUrl() }}</a>
+											<span v-else>{{ resolvePublicUrl() }} (sin publicar)</span>
 										</div>
 									</div>
 									<div class="md-layout md-gutter gutterBottom" v-if="metadata.Url && Work.ArkUrl">
@@ -125,7 +125,10 @@ name: 'Contenido',
 			return window.Context.CurrentWork;
 		},
 	},
-	methods: {
+		methods: {
+			resolvePublicUrl() {
+				return str.PatternUrl(this.metadata.Url, window.Context.Configuration.ShortUrlPattern, this.Work.properties.AccessLink);
+			},
 		absoluteMap(url) {
 			return str.AbsoluteUrl(url);
 		},
@@ -133,11 +136,7 @@ name: 'Contenido',
 	    return window.host + '/services/backoffice/GetMetadataPdf?w=' + this.Work.properties.Id;
 		},
 		appendAccessLink(url) {
-			if (this.Work.properties.AccessLink) {
-				return url + '/' + this.Work.properties.AccessLink;
-			} else {
-				return url;
-			}
+			return str.AppendAccessLink(url, this.Work.properties.AccessLink);
 		},
 		formatDate(date) {
 				return f.formatDate(date);

@@ -25,9 +25,18 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	public $honorTileLimit = true;
 	public $requiresPolygons = false;
 
-	public function __construct($snapshotTable, $datasetId, $datasetType, $areSegments, $variables, $urbanity, $partition,
-		$hasSymbols, $hasDescriptions, $requiresPolygons = false)
-	{
+	public function __construct(
+		$snapshotTable,
+		$datasetId,
+		$datasetType,
+		$areSegments,
+		$variables,
+		$urbanity,
+		$partition,
+		$hasSymbols,
+		$hasDescriptions,
+		$requiresPolygons = false
+	) {
 		$this->variables = $variables;
 		$this->urbanity = $urbanity;
 		$this->partition = $partition;
@@ -47,8 +56,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$select = "sna_feature_id FID";
 		$hasAnyNotNullTotal = '';
 
-		foreach($this->variables as $variable)
-		{
+		foreach ($this->variables as $variable) {
 			$totalField = "sna_" . $variable->Id . "_total";
 			$select .= ", sna_" . $variable->Id . "_value, sna_" . $variable->Id . "_value_label_id,
 									" . $totalField;
@@ -65,7 +73,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 			$select .= ", sna_segment value";
 
 		// Si es un metric de puntos, trae la ubicación del punto
-		$select .= ", round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
+		$select .= ", round(ST_Y(sna_location), " . GeoJson::PRECISION . ") as Lat, round(ST_X(sna_location), " . GeoJson::PRECISION . ")  as Lon";
 
 		$from = $this->tableName;
 
@@ -78,12 +86,10 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 			$where .= ' AND (' . substr($hasAnyNotNullTotal, 4) . ')';
 
 		// PolygonsQuery
-		if ($this->requiresPolygons)
-		{
+		if ($this->requiresPolygons) {
 			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "sdi_geometry as value");
 			//			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "ST_AsText(sdi_geometry) as value");
-		}
-		else
+		} else
 			$polygonsQuery = null;
 		// Ejecuta la consulta
 		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
@@ -100,18 +106,14 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$extraFields[] = 'Lon';
 		$ret = self::RotateResults($ret, $extraFields);
 
-		if ($this->datasetType == 'L' && $this->honorTileLimit)
-		{
-			if ($this->areSegments)
-			 {
+		if ($this->datasetType == 'L' && $this->honorTileLimit) {
+			if ($this->areSegments) {
 				if (sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE_SEGMENTS)
 					$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE_SEGMENTS);
-			}
-			 else
-			 {
+			} else {
 				if (sizeof($ret) > self::LOCATIONS_LIMIT_PER_TILE)
 					$ret = Arr::SystematicSample($ret, self::LOCATIONS_LIMIT_PER_TILE);
-			 }
+			}
 		}
 		Profiling::EndTimer();
 
@@ -123,56 +125,34 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		$ret = [];
 		$render = new GeoJson();
 
-		foreach($arr as $row)
-		{
-			$item = [];
-			$anyValue = false;
+		foreach ($arr as $row) {
+			foreach ($this->variables as $variable) {
+				$totalField = "sna_" . $variable->Id . "_total";
+				if ($row[$totalField] !== null) {
+					$item = [];
+					foreach ($extraFields as $field)
+						$item[$field] = $row[$field];
 
-			// Pone lo general
-			$item['FID'] = $row['FID'];
-			if ($this->hasSymbols)
-				$item['Symbol'] = $row['Symbol'];
-			if ($this->requiresPolygons)
-				$item['Data'] = $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
-			//	$item['Data'] = $row['value'];// $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
-			foreach ($extraFields as $field)
-				$item[$field] = $row[$field];
+					$item['FID'] = $row['FID'];
 
-			$values = [];
-			foreach($this->variables as $variable)
-			{
-				$set = [];
-				$total = $row["sna_" . $variable->Id . "_total"];
-				if ($total !== null)
-				{
-					$anyValue = true;
-					//
-				/*	$set['VID'] = $variable->Id;
-					$set['Value'] = $row["sna_" . $variable->Id . "_value"];
-					$set['Total'] = $total;
-					$set['LID'] = $row["sna_" . $variable->Id . "_value_label_id"];
+					// Pone lo específico de cada variable
+					$item['VID'] = $variable->Id;
+					$item['Value'] = $row["sna_" . $variable->Id . "_value"];
+					$item['Total'] = $row[$totalField];
+					$item['LID'] = $row["sna_" . $variable->Id . "_value_label_id"];
 					if ($variable->IsSequence)
 						$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
-				*/
-					// Pone lo específico de cada variable
-					$set[] = $variable->Id;
-					$set[] = $row["sna_" . $variable->Id . "_value"];
-					$set[] = $total;
-					$set[] = $row["sna_" . $variable->Id . "_value_label_id"];
-					if ($variable->IsSequence)
-						$item[] = $row["sna_" . $variable->Id . "_sequence_order"];
+					if ($this->hasSymbols)
+						$item['Symbol'] = $row['Symbol'];
+					if ($this->requiresPolygons)
+						$item['Data'] = $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
+					//	$item['Data'] = $row['value'];// $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
+
+					$ret[] = $item;
 				}
-				$values[] = $set;
-			}
-			if ($anyValue)
-			{
-				$item['Values'] = $values;
-				$ret[] = $item;
 			}
 		}
 		return $ret;
 	}
 
 }
-
-

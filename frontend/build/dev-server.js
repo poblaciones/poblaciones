@@ -36,6 +36,9 @@ app.use(function(req, res, next) {
 	if (req.url === '/admins/' || req.url === '/admins') {
      req.url = '/admins.html';
 	}
+	if (req.url === '/table/' || req.url === '/table') {
+		req.url = '/table.html';
+	}
 	if (req.url === '/cr/' || req.url === '/cr') {
 		req.url = '/credentials.html';
 	}
@@ -98,7 +101,7 @@ var readyPromise = new Promise(resolve => {
 const appPORT = port;
 const phpPORT = port + 2;
 const vueJSPORT = port + 4;
-var vuejsPaths = ['/map/', '/cr', '/users/', '/admins', '/users', '/static/img', '/admins', '/__webpack_hmr'];
+var vuejsPaths = ['/map/', '/cr', '/users/', '/admins', '/table', '/users', '/static/img', '/admins', '/__webpack_hmr'];
 const singleApp = require('./single-app');
 ////////////////// LISTO PHP y el proxy unificador //////////////////
 var uri = 'https://localhost:' + appPORT;

@@ -18,6 +18,24 @@ module.exports = {
 			return null;
 		}
 	},
+	PatternUrl(url, pattern, accessLink) {
+		if (!accessLink) {
+			// trata de aplicar la forma acortada...
+			if (pattern && url && url.length > 0) {
+				var idParts = this.Split(url, '/');
+				var id = idParts[idParts.length - 1];
+				return this.Replace(pattern, '{id}', id);
+			}
+		}
+		return this.AbsoluteUrl(this.AppendAccessLink(url, accessLink));
+	},
+	AppendAccessLink(url, accessLink) {
+		if (accessLink) {
+			return url + '/' + accessLink;
+		} else {
+			return url;
+		}
+	},
 	FormatFloat(n, places) {
 		//TODO: CultureInfo
 		return ('' + parseFloat(n.toFixed(places))).replace(".", ",");

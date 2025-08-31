@@ -67,7 +67,7 @@ import InputPopup from "@/backoffice/components/InputPopup";
 import ListSelectionPopup from "@/backoffice/components/ListSelectionPopup";
 import vueDropzone from "vue2-dropzone";
 import "vue2-dropzone/dist/vue2Dropzone.min.css";
-import h from '@/public/js/helper';
+import h from '@/map/js/helper';
 
 export default {
   name: "General",

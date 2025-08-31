@@ -13,8 +13,9 @@ function resolve (dir) {
 
 module.exports = {
 	entry: {
-		app: './src/public/main.js',
+		app: './src/map/main.js',
 		appBackoffice: './src/backoffice/main.js',
+		appTable: './src/table/main.js',
 		appAdmin: './src/admins/main.js',
 		appCred: './src/credentials/main.js',
 	},

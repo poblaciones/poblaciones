@@ -58,9 +58,9 @@
 	</md-dialog>
 </template>
 <script>
-	import SegmentedMap from '@/public/classes/SegmentedMap';
-	import GoogleMapsApi from '@/public/googleMaps/GoogleMapsApi';
-	import h from '@/public/js/helper';
+	import SegmentedMap from '@/map/classes/SegmentedMap';
+	import GoogleMapsApi from '@/map/googleMaps/GoogleMapsApi';
+	import h from '@/map/js/helper';
 	import str from '@/common/framework/str';
 	import GeographyOverlay from '../classes/GeographyOverlay';
 

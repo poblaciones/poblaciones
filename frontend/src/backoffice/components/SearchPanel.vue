@@ -19,7 +19,7 @@
 		</div>
 </template>
 <script>
-	import Search from '@/public/classes/Search';
+	import Search from '@/map/classes/Search';
 
 	export default {
 		name: "SearchPanel",

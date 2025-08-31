@@ -4,7 +4,7 @@ import arr from '@/common/framework/arr';
 import str from '@/common/framework/str';
 import color from '@/common/framework/color';
 import f from '@/backoffice/classes/Formatter';
-import h from '@/public/js/helper';
+import h from '@/map/js/helper';
 import ScaleStates from './ScaleStates';
 
 export default ScaleGenerator;

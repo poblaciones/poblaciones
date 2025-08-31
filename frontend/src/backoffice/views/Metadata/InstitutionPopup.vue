@@ -65,7 +65,7 @@
 
 <script>
 	import Context from '@/backoffice/classes/Context';
-	import h from '@/public/js/helper';
+	import h from '@/map/js/helper';
 	import f from '@/backoffice/classes/Formatter';
 
 

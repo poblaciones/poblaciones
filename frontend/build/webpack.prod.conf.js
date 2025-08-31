@@ -121,6 +121,17 @@ var webpackConfig = merge(baseWebpackConfig, {
 				removeAttributeQuotes: true
 			}
 		}),
+		new HtmlWebpackPlugin({
+			filename: config.build.indexTable,
+			template: 'table.html',
+			chunks: ['manifest', 'vendor', 'appTable'],
+			inject: true,
+			minify: {
+				removeComments: true,
+				collapseWhitespace: true,
+				removeAttributeQuotes: true
+			}
+		}),
 		// copy custom static assets
 		new CopyWebpackPlugin({
 			patterns: [

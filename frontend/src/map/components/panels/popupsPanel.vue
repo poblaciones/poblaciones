@@ -1,0 +1,77 @@
+<template>
+	<div>
+		<WorkMetadata ref="showFuente" :backgroundColor="backgroundColor" />
+		<ClippingMetadata ref="showClippingMetadata" :backgroundColor="backgroundColor" />
+		<CompareMetadata ref="showCompareMetadata" :backgroundColor="backgroundColor" />
+		<MetricDownload ref="showMetricDownload" :backgroundColor="backgroundColor" />
+		<AnnotationItem ref="showAnnotationItem" :backgroundColor="backgroundColor" />
+		<BoundaryDownload ref="showBoundaryDownload" :backgroundColor="backgroundColor" />
+		<Embedding ref="showEmbedding" :backgroundColor="backgroundColor" />
+		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
+		<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
+		<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
+		<AddMetric2 ref="addMetric2" :backgroundColor="backgroundColor" />
+	</div>
+</template>
+
+<script>
+import WorkMetadata from '@/map/components/popups/workMetadata';
+import ClippingMetadata from '@/map/components/popups/clippingMetadata';
+import CompareMetadata from '@/map/components/popups/compareMetadata';
+import MetricCustomize from '@/map/components/popups/metricCustomize';
+import AnnotationItem from '@/map/components/popups/annotationItem';
+import BoundaryCustomize from '@/map/components/popups/boundaryCustomize';
+import AddMetric2 from '@/map/components/popups/addMetric2';
+import AddMetric from '@/map/components/popups/addMetric';
+import MetricDownload from '@/map/components/popups/metricDownload';
+import BoundaryDownload from '@/map/components/popups/boundaryDownload';
+import Embedding from '@/map/components/popups/embedding';
+
+export default {
+	name: 'popupsPanel',
+	components: {
+		BoundaryDownload,
+		AddMetric,
+		AddMetric2,
+		AnnotationItem,
+		WorkMetadata,
+		Embedding,
+		ClippingMetadata,
+		CompareMetadata,
+		BoundaryCustomize,
+		MetricCustomize,
+		MetricDownload,
+	},
+	props: [
+		'backgroundColor',
+	],
+	mounted() {
+		window.Popups.MetricDownload = this.$refs.showMetricDownload;
+		window.Popups.BoundaryDownload = this.$refs.showBoundaryDownload;
+		window.Popups.Embedding = this.$refs.showEmbedding;
+		window.Popups.WorkMetadata = this.$refs.showFuente;
+		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
+		window.Popups.CompareMetadata = this.$refs.showCompareMetadata;
+		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
+		window.Popups.MetricCustomize = this.$refs.showCustomize;
+		window.Popups.AnnotationItem = this.$refs.showAnnotationItem;
+		window.Popups.AddMetric = this.$refs.addMetric;
+		window.Popups.AddMetric2 = this.$refs.addMetric2;
+	},
+	methods: {
+
+	},
+};
+// https://vuejs.org/v2/guide/transitions.html
+</script>
+
+<style scoped>
+
+.fade-enter-active, .fade-leave-active {
+	transition: opacity .35s
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+	opacity: 0
+}
+
+</style>

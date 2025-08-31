@@ -36,7 +36,8 @@ class ConfigurationService extends BaseService
 								'DefaultRelocateLocation' => App::Settings()->Map()->DefaultRelocateLocation,
 								'Signatures' => $signatures,
 								'User' => $user,
-								'MainServer' => $mainServer->publicUrl);
+								'MainServer' => $mainServer->publicUrl,
+								'ShortUrlPattern' => App::Settings()->Map()->ShortUrlPattern);
 	}
 
 	public function SetUserSetting($key, $value)

@@ -1,3 +1,8 @@
+v4.5 (2025-08-31)
+- Fix a carga de imagen de instituciones en generación de PDF en backoffice.
+- Generación de ruta por ShortUrl.
+- /table en frontend (refactor interno de /public a /map).
+
 v4.4 (2025-08-11)
 - Las delimitaciones permiten cargarle versiones históricas.
 - Fix problema en menú de indicadores (se ocultan ítems en ciertas resoluciones)

@@ -153,7 +153,7 @@ export default {
 		},
 		stableUrlHref() {
 			if (this.Work.properties.Metadata.Url) {
-				var url = str.AbsoluteUrl(this.Work.properties.Metadata.Url);
+				var url = str.PatternUrl(this.Work.properties.Metadata.Url, window.Context.Configuration.ShortUrlPattern, null);
 				if (this.Work.properties.Metadata.LastOnline) {
 					return "(<a href='" + url + "' target='_blank'>" + url + "</a>)";
 				} else {

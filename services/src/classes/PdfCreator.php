@@ -17,7 +17,7 @@ class PdfCreator
 	private $institutions;
 	private $dataset;
 
-	public function CreateMetadataPdf($metadata, $sources, $institutions, $dataset = null)
+	public function CreateMetadataPdf($metadata, $sources, $institutions, $dataset = null, $fromDraft = false)
 	{
 		$this->metadata = $metadata;
 		$this->sources = $sources;
@@ -74,7 +74,7 @@ class PdfCreator
 		}
 		$this->WriteContact();
 
-		$this->WriteInstitutions();
+		$this->WriteInstitutions($fromDraft);
 
 		$this->WriteSources();
 
@@ -133,8 +133,17 @@ class PdfCreator
 		if ($value == null)
 			return;
 		$extra = $this->metadata['wrk_access_link'];
-		if ($extra) $value .= '/' . $extra;
-		$this->pdf->WritePair("Dirección", Links::GetFullyQualifiedUrl($value));
+		if ($extra)
+		{
+			$value = Links::GetFullyQualifiedUrl($value) . '/' . $extra;
+		}
+		else
+		{
+			$parts = explode("/", $value);
+			$id = $parts[sizeof($parts) - 1];
+			$value = Links::GetWorkStableUrl($value, $id);
+		}
+		$this->pdf->WritePair("Dirección", $value);
 	}
 
 	private function WriteArk()
@@ -211,7 +220,7 @@ class PdfCreator
 		$this->WriteIndentedValuePair('Teléfono', 'con_phone');
 
 	}
-	private function WriteInstitutions()
+	private function WriteInstitutions($fromDraft)
 	{
 		$c = sizeof($this->institutions);
 		if ($c > 0)
@@ -226,17 +235,17 @@ class PdfCreator
 		{
 			if (!$isFirst)
 				$this->pdf->WriteIndentedSeparator();
-			$this->WriteInstitution($institution);
+			$this->WriteInstitution($institution, $fromDraft);
 			$isFirst = false;
 		}
 	}
-	private function WriteInstitution($institution)
+	private function WriteInstitution($institution, $fromDraft)
 	{
 		if ($institution['ins_caption'] == '')
 			return;
 		if ($institution['ins_watermark_id'] != ''){
 			$controller = new InstitutionService();
-			$file = $controller->GetInstitutionWatermarkFile($institution['ins_watermark_id'], false);
+			$file = $controller->GetInstitutionWatermarkFile($institution['ins_watermark_id'], $fromDraft);
 			Image::ResizeToMaxSize($file, null, InstitutionService::MAX_WATERMARK_HEIGHT);
 			$this->pdf->AddImage('institution', file_get_contents($file));
 			$html = "<img src='var:institution' height='50' />";

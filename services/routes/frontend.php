@@ -15,9 +15,6 @@ App::$app->post('/', function (Request $request) {
 });
 
 // MAPA
-App::RegisterControllerGet('/map', controllers\cMap::class);
-App::RegisterControllerGet('/map/', controllers\cMap::class);
-App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
 App::RegisterControllerGet('/datasets', controllers\cDatasets::class);
 
 App::RegisterControllerGet('/services/content/downloads', controllers\cDownloads::class);
@@ -27,12 +24,19 @@ if (App::Settings()->Servers()->IsMainServerRequest()) {
 	if (!App::Settings()->Servers()->IsTransactionServerRequest())
 	{
 		require_once('frontend/remoteCrawler.php');
+		App::RegisterControllerGet('/map', controllers\cRemoteMap::class);
+		App::RegisterControllerGet('/map/', controllers\cRemoteMap::class);
+		App::RegisterControllerGet('/map/{any}', controllers\cRemoteMap::class)->assert("any", ".*");
 	}
 }
 
 require_once('frontend/metadata.php');
 
 if (App::Settings()->Servers()->IsTransactionServerRequest()) {
+	App::RegisterControllerGet('/map', controllers\cMap::class);
+	App::RegisterControllerGet('/map/', controllers\cMap::class);
+	App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
+
 	require_once('frontend/map.php');
 	require_once('frontend/boundary.php');
 	require_once('frontend/clipping.php');

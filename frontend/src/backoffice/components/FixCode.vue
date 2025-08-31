@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import h from '@/public/js/helper';
+import h from '@/map/js/helper';
 
 export default {
 	name: 'fixValue',

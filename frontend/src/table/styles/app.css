@@ -1,0 +1,460 @@
+@font-face {
+	font-family: "Averta-Regular";
+	src: url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.eot"); /* IE9*/
+	src: url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.woff2") format("woff2"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.woff") format("woff"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.ttf") format("truetype"), /* chrome firefox opera Safari, Android, iOS 4.2+*/
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.svg#Averta-Regular") format("svg"); /* iOS 4.1- */
+}
+
+@font-face {
+	font-family: "AvertaStd-Bold";
+	src: url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.eot"); /* IE9*/
+	src: url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.woff2") format("woff2"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.woff") format("woff"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.ttf") format("truetype"), /* chrome firefox opera Safari, Android, iOS 4.2+*/
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.svg#AvertaStd-Bold") format("svg"); /* iOS 4.1- */
+}
+
+@media (min-width:961px) {
+	.md-small-show {
+		display: none !important
+	}
+}
+
+@media (min-width:800px) {
+	.md-smally-show {
+		display: none !important
+	}
+}
+@media (max-width:799px) {
+	.md-smally-hide {
+		display: none !important
+	}
+}
+
+@keyframes fadeInRight2 {
+	from {
+		opacity: 0;
+		transform: translate3d(50%, 0, 0);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+.fadeInRight2 {
+	animation-name: fadeInRight2;
+}
+
+
+.underlined {
+	text-decoration: underline !important;
+}
+
+	.underlined:hover {
+		text-decoration: underline !important;
+	}
+
+html, body {
+	height: 100%;
+	overflow-y: hidden;
+	margin: 0;
+	padding: 0;
+	font-size: 18px !important;
+	font-family: Averta-Regular, sans-serif !important;
+	letter-spacing: .015em;
+	line-height: 1.55em!important;
+	color: #666;
+	background-color: #fff;
+}
+.label {
+	font-size: 0.83em;
+	font-weight: bold;
+	margin-top: 0.2em;
+	margin-bottom: 0.2em;
+}
+.md-field + .md-has-textarea:not(.md-autogrow) {
+	margin-top: 0px!important;
+}
+.md-field.md-has-textarea:not(.md-autogrow) .md-textarea {
+	padding: 6px 0px !important;
+	margin-top: 0px !important;
+}
+.md-field.md-has-textarea:not(.md-autogrow).md-focused label, .md-field.md-has-textarea:not(.md-autogrow).md-has-value label {
+	top: -1px!important;
+}
+.md-field.md-has-textarea:not(.md-autogrow) label {
+	left: 0px!important;
+}
+.md-menu-content-container .md-list {
+	font-family: unset!important;
+}
+.md-list-item-content {
+	min-height: 40px !important;
+	font-size: .97rem !important;
+}
+.md-menu-content {
+	max-height: 65vh !important;
+	box-shadow: 0px 1px 4px 4px rgb(0 0 0 / 12%) !important;
+}
+.md-list.md-theme-default .md-selected .md-list-item-content, .md-list.md-theme-default .router-link-active .md-list-item-content {
+	background-color: var(--md-theme-default-primary-on-background, #448aff);
+	color:white!important;
+}
+.minorText {
+	font-size: .95rem;
+	line-height: 1.35rem;
+}
+.underlined {
+	text-decoration: underline!important;
+}
+.underlined:hover {
+	text-decoration: underline !important;
+}
+.md-checkbox .md-checkbox-label {
+	padding-left: 9px !important;
+	font-size: .95rem !important;
+	position: static !important;
+	letter-spacing: 0px!important;
+}
+.md-field.md-theme-default.md-invalid label {
+	color: unset!important;
+}
+.floatRight {
+	float: right;
+}
+
+.app-singlepage {
+	overflow-y: auto;
+	height: 100%;
+}
+
+h3 {
+	color: #000;
+	line-height: 1.5em;
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+h1 {
+	color: #000;
+	line-height: 1.0em;
+	font-size: 3.3em !important;
+	font-family: AvertaStd-Bold, sans-serif !important;
+}
+h2 {
+	color: #000;
+	line-height: 1.1em;
+	font-size: 2.55rem !important;
+	font-family: AvertaStd-Bold, sans-serif !important;
+}
+h4 {
+	display: block;
+	color: #444;
+	font-size: 1.17em;
+	margin-block-start: 1em;
+	margin-block-end: 1em;
+	margin-inline-start: 0px;
+	margin-inline-end: 0px;
+	font-weight: bold;
+}
+h5 {
+	font-size: 18px !important;
+}
+.gm-fullscreen-control {
+	transform: scale(0.8);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity .3s ;
+
+}
+.logoTop {
+	margin-left: -16px;
+	margin-top: -15px;
+}
+.md-chip .md-button.md-input-action {
+	height: 18px !important;
+}
+.fade-enter, .fade-leave-active {
+	opacity: 0
+}
+
+.gm-bundled-control {
+	transform: scale(0.8);
+	margin: 0px 0px -24px 0px !important;
+}
+
+.gm-style-mtc {
+	transform: scale(0.8);
+}
+
+.formRow {
+	margin-top: 25px;
+	margin-bottom: 25px;
+}
+
+.formRowCompact {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.fullRowButton {
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+	width: 100%;
+}
+.userChip {
+	background-color: #aaa;
+	color: white;
+}
+
+.md-tab {
+	overflow-x: hidden;
+}
+
+.md-tabs.md-theme-default .md-tabs-navigation {
+	background-color: unset !important;
+	margin-bottom: 25px !important;
+}
+.md-tabs-navigation .md-button {
+	margin: 0px 6px!important;
+}
+.md-dialog-title {
+	padding: 12px 12px 10px !important;
+	background-color: #007194;
+	color: white;
+}
+
+.md-field.md-has-password .md-toggle-password {
+	right: 4px !important;
+	bottom: unset !important;
+	top: 4px !important;
+	height: 32px !important;
+}
+
+.md-title {
+	font-weight: normal !important;
+}
+
+.md-card {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.md-dialog {
+	min-width: 400px !important;
+	border-radius: 4px !important;
+}
+
+.md-menu-content {
+	max-width: 380px !important;
+}
+
+.md-dialog-actions {
+	border-top: 0.5px solid #cccccc;
+}
+
+.whiteLink {
+	color: white !important;
+}
+
+.whiteLink:hover {
+	text-decoration: none !important;
+}
+
+.blackLink {
+	color: #555 !important;
+}
+
+.blackLink:hover {
+	text-decoration: none !important;
+}
+
+.md-button {
+	font-weight: normal !important;
+	text-transform: none !important;
+}
+
+@media print {
+	.no-print, .no-print * {
+		display: none !important;
+	}
+
+	.always-print {
+		visible: visible;
+	}
+
+	.only-print {
+		display: block !important;
+	}
+}
+
+.only-print {
+	display: none;
+}
+
+.gridStatusBar {
+	font-size: 13px;
+	padding-top: 3px;
+	padding-left: 2px;
+	color: #777;
+	min-height: 1li;
+}
+
+.md-field.md-theme-default.md-disabled:after {
+	background-image: unset !important;
+}
+
+.md-field {
+	margin-bottom: 6px !important;
+}
+
+.mp-label {
+	padding-left: 0 !important;
+	left: 0 !important;
+	margin-bottom: 2px;
+	line-height: 1.1em;
+	color: #888 !important;
+	-webkit-text-fill-color: #888 !important;
+	font-size: 14px !important;
+}
+
+.mp-area {
+	left: 0 !important;
+	margin-bottom: 2px;
+	color: #448aff !important;
+	font-size: 14px !important;
+	border: 1px solid whitesmoke !important;
+	margin-top: 10px;
+	margin-bottom: 5px;
+	line-height: 1.3em;
+	padding-top: 6px;
+	padding-left: 6px !important;
+}
+
+.md-field.md-theme-default.md-invalid .md-error {
+	color: var(--md-theme-default-accent, #ff5252)!important;
+}
+.dParagrah {
+	padding-top: 0px;
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-bottom: 20px;
+}
+
+.gutterBottom {
+	margin-bottom: 18px;
+}
+
+.gutterTop {
+	margin-top: 18px;
+}
+
+.mpNoWrap {
+	white-space: nowrap;
+}
+
+.md-dialog-container {
+	max-width: 640px !important;
+}
+.hand {
+	cursor: pointer;
+}
+
+.md-icon-button {
+	cursor: pointer;
+}
+
+.md-icon-button {
+	margin: 0 0px;
+}
+
+.mp-right-toolbar {
+	position: absolute;
+	padding-top: 12px;
+	right: 9px;
+}
+
+.mp-bottom-toolbar {
+	bottom: 15px;
+}
+
+.md-helper-text {
+	bottom: -18px !important;
+	-webkit-text-fill-color: #888 !important;
+}
+
+.helper {
+	font-size: 11.5px;
+	line-height: 1.4em;
+	color: #a0a0a0 !important;
+}
+
+.selectable {
+	cursor: pointer;
+}
+
+.mpLabel {
+	position: absolute;
+	line-height: 0.3em;
+	font-size: 14px !important;
+	color: #888 !important;
+}
+
+
+.md-field.md-has-textarea:not(.md-autogrow) .md-count {
+	bottom: -22px !important;
+}
+
+.normalTextLink {
+	color: #444444 !important
+}
+
+a.normalTextLink:hover {
+	text-decoration: none !important;
+}
+
+
+.right {
+	text-align: right;
+}
+
+.justify {
+	text-align: justify;
+}
+
+.center {
+	text-align: center;
+}
+
+.md-tabs-navigation .md-button {
+	font-size: 16px!important;
+}
+
+.md-button:not(.md-icon-button) {
+	min-width: 100px !important;
+}
+.md-button {
+	height: 40px !important;
+	font-size: 16px !important;
+}
+
+.customField {
+	padding: 4px 10px !important;
+	border: 1px solid #a2a2a2 !important;
+	border-radius: 6px !important;
+	min-height: unset !important;
+	margin-top: 5px !important;
+} :root {
+	--md-theme-default-primary: #28608b !important;
+	--md-theme-default-primary-on-background: #28608b !important;
+	--md-theme-default-accent: #ca4a4a !important;
+	--md-theme-default-theme: light;
+}
+
