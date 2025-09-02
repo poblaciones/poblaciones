@@ -184,9 +184,8 @@ class WorkService extends BaseService
 		$workInfo->ExtraMetrics = $this->GetExtraMetrics($workId);
 		$workInfo->Startup = $this->GetStartupInfo($workId);
 		$workInfo->PendingReviewSince = $this->GetPendingReviewSince($workId);
-		$workInfo->ArkUrl = Links::GetWorkArkUrl($workId);
-
 		$workIdShardified = PublishDataTables::Shardified($workId);
+		$workInfo->ArkUrl = Links::GetWorkArkUrl($workIdShardified);
 		Statistics::StoreInternalHit($workIdShardified, 'backoffice');
 		Profiling::EndTimer();
 		return $workInfo;

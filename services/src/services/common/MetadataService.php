@@ -23,6 +23,7 @@ use helena\classes\Statistics;
 use helena\db\backoffice\WorkModel;
 use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
 use OpenSpout\Writer\Common\Creator\Style\StyleBuilder;
+use helena\services\backoffice\publish\PublishDataTables;
 use OpenSpout\Common\Entity\Style\Color;
 use OpenSpout\Common\Entity\Style\CellAlignment;
 use OpenSpout\Writer\XLSX\Entity\SheetView;
@@ -70,8 +71,6 @@ class MetadataService extends BaseService
 
 		if ($metadata === null || sizeof($metadata) < 2) throw new PublicException('Metadatos no encontrados.');
 		$friendlyName = $metadata['met_title'] . '.pdf';
-		if ($workId)
-			$metadata['met_ark'] = Links::GetWorkArkUrl($workId);
 
 		// se fija en el caché
 		$key = PdfMetadataCache::CreateKey($datasetId);
@@ -90,8 +89,17 @@ class MetadataService extends BaseService
 		{
 			Performance::CacheMissed();
 		}
-		$metadata['wrk_access_link'] = $model->GetAccessLink($workId);
 
+		// completa los metadatos para crearlo
+		$metadata['wrk_access_link'] = $model->GetAccessLink($workId);
+		if ($workId)
+		{
+			if ($fromDraft)
+				$ark = Links::GetWorkArkUrl(PublishDataTables::Shardified($workId));
+			else
+				$ark = Links::GetWorkArkUrl($workId);
+			$metadata['met_ark'] = $ark;
+		}
 		$sources = $model->GetMetadataSources($metadataId);
 		$institutions = $model->GetMetadataInstitutions($metadataId);
 		if ($datasetId || $workId)
