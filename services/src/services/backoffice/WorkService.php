@@ -143,11 +143,11 @@ class WorkService extends BaseService
 	}
 	public function PostWorkPreview($workId, $tmpFilename)
 	{
-		$fs = new FileService();
+		$fs = new FileService($this->isDraft);
 
 		$file = $fs->Create('Preview de ' . $workId, "image/png");
 
-		$fs->SaveFile($file, $tmpFilename, true, "image/png", $workId);
+		$fs->SaveFile($file, $tmpFilename, "image/png", $workId);
 		$work = App::Orm()->find(DraftWork::class, $workId);
 		// Si había alguno, retiene para borrar
 		$oldFileId = $work->GetPreviewFileId();
@@ -157,7 +157,7 @@ class WorkService extends BaseService
 		// Va
 		if ($oldFileId && $oldFileId !== $file->getId())
 		{
-			$fs = new FileService();
+			$fs = new FileService($this->isDraft);
 			$fs->DeleteFile($oldFileId, $workId);
 		}
 		return $file->getId();
@@ -174,9 +174,15 @@ class WorkService extends BaseService
 		$onboarding = new OnboardingService();
 		$workInfo->Permissions = $permissions->GetPermissions($workId);
 		$workInfo->Datasets = $this->GetDatasets($workId);
-		$workInfo->Sources = $this->GetSources($workId);
-		$workInfo->Institutions = $this->GetInstitutions($workId);
-		$workInfo->Files = $this->GetFiles($workId);
+
+		// Colecciones de metadatos
+		$metadataService = new MetadataService();
+		$metadataId = $workInfo->Work->getMetadata()->getId();
+		$workInfo->Sources = $metadataService->GetSources($metadataId);
+		$workInfo->Institutions = $metadataService->GetInstitutions($metadataId);
+		$workInfo->Files = $metadataService->GetFiles($metadataId);
+		// Listo metadatos
+
 		$workInfo->Icons = $this->GetIcons($workId);
 		$workInfo->Onboarding = $onboarding->GetOnboarding($workId);
 		$workInfo->StatsMonths = Statistics::ResolveWorkMonths($workId);
@@ -551,129 +557,6 @@ class WorkService extends BaseService
 		return $ret;
 	}
 
-	private function GetSources($workId)
-	{
-		Profiling::BeginTimer();
-
-		$retRelations = App::Orm()->findManyByQuery("SELECT ms FROM e:DraftMetadataSource ms
-						JOIN ms.Metadata m JOIN e:DraftWork w WITH w.Metadata = m WHERE w.Id = :p1 ORDER BY ms.Order", array($workId));
-		$ret = [];
-		foreach ($retRelations as $relation)
-			$ret[] = $relation->getSource();
-
-		$services = new SourceService();
-		$services->fixSources($ret);
-		$this->CompleteSources($ret);
-		return $ret;
-	}
-
-	private function GetInstitutions($workId)
-	{
-		Profiling::BeginTimer();
-
-		$retRelations = App::Orm()->findManyByQuery("SELECT mi FROM e:DraftMetadataInstitution mi JOIN mi.Institution i
-											JOIN mi.Metadata m JOIN e:DraftWork w WITH w.Metadata = m WHERE w.Id = :p1 ORDER BY mi.Order", array($workId));
-		$ret = [];
-		foreach ($retRelations as $relation)
-			$ret[] = $relation->getInstitution();
-
-		foreach($ret as $institution)
-			$this->CompleteInstitution($institution);
-
-		return $ret;
-	}
-
-	public function CompleteInstitution($institution)
-	{
-		if ($institution === null) return;
-		Profiling::BeginTimer();
-
-		$userId = Session::GetCurrentUser()->GetUserId();
-		if (Session::IsMegaUser())
-		{
-			$editable = true;
-		} else if ($institution->getIsGlobal())
-		{
-			$editable = Session::IsSiteEditor();
-		}
-		else
-		{
-				// Es editable si tiene control sobre todas las obras en las
-				// que es utilizado el institution
-				$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
-													JOIN draft_metadata ON wrk_metadata_id = met_id
-													JOIN draft_metadata_institution ON min_metadata_id = met_id
-												  LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
-												  LEFT JOIN draft_source ON msc_source_id = src_id
-													WHERE src_institution_id = ? OR min_institution_id = ?) AS used,
-							(SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
-								JOIN draft_metadata ON wrk_metadata_id = met_id
-								JOIN draft_metadata_institution ON min_metadata_id = met_id
-								LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
-								LEFT JOIN draft_source ON msc_source_id = src_id
-								JOIN draft_work_permission ON wkp_work_id = wrk_id
-								WHERE src_institution_id = ? OR min_institution_id = ?
-								AND wkp_user_id = ? AND wkp_permission IN ('E', 'A')) AS editor";
-				$institutionId = $institution->getId();
-				$params = array($institutionId, $institutionId, $institutionId, $institutionId, $userId);
-				$res = App::Db()->fetchAssoc($sql, $params);
-				$editable = ($res['used'] === $res['editor']);
-		}
-		$institution->setIsEditableByCurrentUser($editable);
-		Profiling::EndTimer();
-	}
-
-	private function CompleteSources($sources)
-	{
-		if ($sources === null) return;
-		Profiling::BeginTimer();
-
-		foreach($sources as $source)
-		{
-			$this->CompleteSource($source);
-		}
-		Profiling::EndTimer();
-	}
-
-	public function CompleteSource($source)
-	{
-		$userId = Session::GetCurrentUser()->GetUserId();
-		if (Session::IsMegaUser())
-		{
-			$editable = true;
-		} else if ($source->getIsGlobal())
-		{
-			$editable = Session::IsSiteEditor();
-		}
-		else
-		{
-			// Es editable si tiene control sobre todas las obras en las
-			// que es utilizado el source
-			$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
-												JOIN draft_metadata ON wrk_metadata_id = met_id
-												JOIN draft_metadata_source ON msc_metadata_id = met_id
-												WHERE msc_source_id = ?) AS used,
-											(SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
-												JOIN draft_metadata ON wrk_metadata_id = met_id
-												JOIN draft_metadata_source ON msc_metadata_id = met_id
-												JOIN draft_work_permission ON wkp_work_id = wrk_id
-												WHERE msc_source_id = ? AND wkp_user_id = ?
-												AND wkp_permission IN ('E', 'A')) AS editor";
-			$params = array($source->getId(), $source->getId(), $userId);
-			$res = App::Db()->fetchAssoc($sql, $params);
-			$editable = ($res['used'] === $res['editor']);
-		}
-		$source->setIsEditableByCurrentUser($editable);
-		$this->CompleteInstitution($source->getInstitution());
-	}
-	private function GetFiles($workId)
-	{
-		Profiling::BeginTimer();
-		$ret = App::Orm()->findManyByQuery("SELECT f FROM e:DraftMetadataFile f JOIN f.Metadata m JOIN e:DraftWork w WITH w.Metadata = m WHERE w.Id = :p1 ORDER BY f.Order", array($workId));
-		Profiling::EndTimer();
-		return $ret;
-	}
-
 	public function GetWorksByType($filter)
 	{
 		$condition = "wrk_type = '" . substr($filter, 0, 1) . "' ";
@@ -756,7 +639,7 @@ class WorkService extends BaseService
 		if (!$image)
 			throw new ErrorException("No se ha recibido la imagen");
 
-		$fileController = new FileService();
+		$fileController = new FileService($this->isDraft);
 		$fileController->SaveBase64BytesToFile($image, $file, $workId,
 										self::MAX_ICON_WIDTH, self::MAX_ICON_HEIGHT);
 
@@ -796,7 +679,7 @@ class WorkService extends BaseService
 		App::Db()->exec("DELETE FROM draft_work_icon WHERE wic_id = ?", array($iconId));
 		App::Db()->markTableUpdate('draft_work_icon');
 
-		$fileService = new FileService();
+		$fileService = new FileService($this->isDraft);
 		$fileService->DeleteFile($fileId, $workId);
 
 		WorkFlags::SetMetadataDataChanged($workId);

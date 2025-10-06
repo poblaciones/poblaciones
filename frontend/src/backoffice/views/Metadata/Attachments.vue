@@ -2,10 +2,10 @@
 	<div>
 		<invoker ref="invoker"></invoker>
 
-		<attachment-popup ref="editPopup">
+		<attachment-popup ref="editPopup" :canEdit="canEdit" :Metadata="Metadata">
 		</attachment-popup>
 
-		<div v-if="Work.CanEdit()" class="md-layout">
+		<div v-if="canEdit" class="md-layout">
 			<md-button @click="createNewAttachment()">
 				<md-icon>add_circle_outline</md-icon>
 				Agregar adjunto
@@ -20,7 +20,7 @@
 							<a v-if="item.File !== null" target="_blank" :href="getAttachUrl(item)">{{ formatFile('PDF', item.File.Size, item.File.Pages) }}</a>
 						</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<div v-if="Work.CanEdit()">
+							<div v-if="canEdit">
 								<md-button class="md-icon-button" @click="openEdition(item)">
 									<md-icon>edit</md-icon>
 									<md-tooltip md-direction="bottom">Modificar adjunto</md-tooltip>
@@ -57,18 +57,19 @@ import AttachmentPopup from './AttachmentPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 
 export default {
-	name: 'Adjuntos',
+		name: 'Adjuntos',
+		props: [
+			'canEdit',
+			'Metadata'
+		],
 	data() {
 		return {
 
 			};
 	},
 	computed: {
-		Work() {
-			return window.Context.CurrentWork;
-		},
 		list() {
-			return this.Work.Files;
+			return this.Metadata.Files;
 		}
 	},
 	methods: {
@@ -82,13 +83,13 @@ export default {
 			return f.formatFile(type, size, pages);
 		},
 		isFirst(item) {
-			return this.Work.Files[0] === item;
+			return this.Metadata.Files[0] === item;
 		},
 		isLast(item) {
-			return this.Work.Files[this.Work.Files.length - 1] === item;
+			return this.Metadata.Files[this.Metadata.Files.length - 1] === item;
 		},
 		getAttachUrl(item) {
-			return window.host + '/services/backoffice/GetMetadataFile?m=' + this.Work.properties.Metadata.Id + '&f=' + item.File.Id;
+			return window.host + '/services/' + (this.Metadata.WorkId() ? 'backoffice' : 'admin') + '/GetMetadataFile?m=' + this.Metadata.properties.Id + '&f=' + item.File.Id;
 		},
 		openEdition(item) {
 			this.$refs.editPopup.show(item);
@@ -96,13 +97,13 @@ export default {
 		onDelete(item) {
 			this.$refs.invoker.message = 'Eliminando...';
 			this.$refs.invoker.confirmDo('Eliminar archivo adjunto', 'El adjunto seleccionado será eliminado',
-					this.Work, this.Work.DeleteFile, item);
+				this.Metadata, this.Metadata.DeleteFile, item);
 		},
     up(item) {
-      this.$refs.invoker.doSave(this.Work, this.Work.MoveFileUp, item);
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.MoveFileUp, item);
     },
     down(item) {
-      this.$refs.invoker.doSave(this.Work, this.Work.MoveFileDown, item);
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.MoveFileDown, item);
     },
   },
   components: {

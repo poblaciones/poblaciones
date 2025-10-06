@@ -5,15 +5,19 @@
 			<md-dialog-content v-if="clippingRegion">
 				<invoker ref="invoker"></invoker>
 				<div class="md-layout md-gutter">
-					<div class="md-layout-item md-size-80">
+					<div class="md-layout-item md-size-50">
 						<mp-simple-text label="Nombre" ref="inputName"
 														v-model="clippingRegion.Caption" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-40">
+					<div class="md-layout-item md-size-50">
+						<mp-simple-text label="Version"
+														v-model="clippingRegion.Version" @enter="save" />
+					</div>
+					<div class="md-layout-item md-size-50">
 						<mp-simple-text label="Menor nivel de zoom"
 														v-model="clippingRegion.LabelsMinZoom" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-40">
+					<div class="md-layout-item md-size-50">
 						<mp-simple-text label="Mayor nivel de zoom"
 														v-model="clippingRegion.LabelsMaxZoom" @enter="save" />
 					</div>

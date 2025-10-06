@@ -19,20 +19,27 @@ class MetadataFileService extends BaseService
 
 	public function GetNewMetadataFile($metadata)
 	{
-		$new = new entities\DraftMetadataFile();
-		$new->setFile(new entities\DraftFile());
+		if ($this->isDraft)
+		{
+			$new = new entities\DraftMetadataFile();
+			$new->setFile(new entities\DraftFile());
+		}
+		else
+		{
+			$new = new entities\MetadataFile();
+			$new->setFile(new entities\File());
+		}
 		return $new;
 	}
 
-	public function UpdateMetadataFile($workId, $bucketId, $metadataFile)
+	public function UpdateMetadataFile($workId, $metadataId, $bucketId, $metadataFile)
 	{
-		$work = App::Orm()->find(entities\DraftWork::class, $workId);
-		$metadata = $work->getMetadata();
-
+		$ms = new MetadataService($this->isDraft);
+		$metadata =  $ms->ResolveMetadata($workId, $metadataId);
 		if ($metadataFile->getMetadata() !== null)
 		{
-		 if ($metadataFile->getMetadata() !== $metadata)
-			throw new PublicException('Los metadatos indicados no coinciden con el adjunto.');
+			if ($metadataFile->getMetadata() !== $metadata)
+				throw new PublicException('Los metadatos indicados no coinciden con el adjunto.');
 		}
 		else
 		{
@@ -41,7 +48,7 @@ class MetadataFileService extends BaseService
 		$order = $metadataFile->getOrder();
 		if ($order === null)
 		{
-			$newOrder = App::Db()->fetchScalarIntNullable("SELECT max(mfi_order) FROM draft_metadata_file WHERE mfi_metadata_id = ?", array($metadata->getId()));
+			$newOrder = App::Db()->fetchScalarIntNullable("SELECT max(mfi_order) FROM " . $this->makeTableName("metadata_file") . " WHERE mfi_metadata_id = ?", array($metadata->getId()));
 			if ($newOrder == null) $newOrder = 0;
 				$metadataFile->setOrder($newOrder + 1);
 		}
@@ -56,43 +63,46 @@ class MetadataFileService extends BaseService
 		if ($fileBucket != null)
 			$fileBucket->Delete();
 
-		WorkFlags::SetMetadataDataChanged($workId);
+		if ($workId)
+			WorkFlags::SetMetadataDataChanged($workId);
 		return $metadataFile;
 	}
-	private function LoadAndValidate($workId, $metadataFileId)
+	private function LoadAndValidate($workId, $metadataId, $metadataFileId)
 	{
-		$work = App::Orm()->find(entities\DraftWork::class, $workId);
-		$metadata = $work->getMetadata();
-		$metadataFile = App::Orm()->find(entities\DraftMetadataFile::class, $metadataFileId);
+		$ms = new MetadataService($this->isDraft);
+		$metadata = $ms->ResolveMetadata($workId, $metadataId);
+		$metadataFile = App::Orm()->find($this->ApplyDraft(entities\DraftMetadataFile::class), $metadataFileId);
 		if ($metadataFile->getMetadata() !== $metadata)
 			throw new PublicException('Los metadatos indicados no coinciden con el adjunto.');
 		return $metadataFile;
 	}
-	public function DeleteMetadataFile($workId, $metadataFileId)
+	public function DeleteMetadataFile($workId, $metadataId, $metadataFileId)
 	{
-		$metadataFile = $this->LoadAndValidate($workId, $metadataFileId);
+		$metadataFile = $this->LoadAndValidate($workId, $metadataId, $metadataFileId);
 		// Borra
 		$file = $metadataFile->getFile();
-		App::Db()->exec("DELETE FROM draft_metadata_file WHERE mfi_id = ?", array($metadataFileId));
-		App::Db()->markTableUpdate('draft_metadata_file');
+		App::Db()->exec("DELETE FROM " . $this->makeTableName("metadata_file") . " WHERE mfi_id = ?", array($metadataFileId));
+		App::Db()->markTableUpdate($this->makeTableName("metadata_file"));
 
 		if ($file !== null)
 		{
-			$fileService = new FileService();
+			$fileService = new FileService($this->isDraft);
 			$fileService->DeleteFile($file->getId());
 		}
-		WorkFlags::SetMetadataDataChanged($workId);
+		if ($workId)
+			WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
 	}
 
-	public function MoveMetadataFileUp($workId, $metadataFileId)
+	public function MoveMetadataFileUp($workId, $metadataId, $metadataFileId)
 	{
-		$metadataFile = $this->LoadAndValidate($workId, $metadataFileId);
+		$metadataFile = $this->LoadAndValidate($workId, $metadataId, $metadataFileId);
 		// Obtiene el anterior
-		$previousFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order < ? ORDER BY mfi_order DESC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
+		$previousFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM " . $this->makeTableName("metadata_file")
+				. " WHERE mfi_metadata_id = ? AND mfi_order < ? ORDER BY mfi_order DESC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
 		if ($previousFileId === null)
 			return self::OK;
-		$metadataFileAlter = App::Orm()->find(entities\DraftMetadataFile::class, $previousFileId);
+		$metadataFileAlter = App::Orm()->find($this->ApplyDraft(entities\DraftMetadataFile::class), $previousFileId);
 		if ($metadataFileAlter === null)
 			return self::OK;
 		// Actualiza
@@ -102,18 +112,20 @@ class MetadataFileService extends BaseService
 		$metadataFileAlter->setOrder($order2);
 		App::Orm()->save($metadataFile);
 		App::Orm()->save($metadataFileAlter);
-		WorkFlags::SetMetadataDataChanged($workId);
+		if ($workId)
+			WorkFlags::SetMetadataDataChanged($workId);
 		return self::OK;
 	}
 
-	public function MoveMetadataFileDown($workId, $metadataFileId)
+	public function MoveMetadataFileDown($workId, $metadataId, $metadataFileId)
 	{
-		$metadataFile = $this->LoadAndValidate($workId, $metadataFileId);
+		$metadataFile = $this->LoadAndValidate($workId, $metadataId, $metadataFileId);
 		// Obtiene el siguiente
-		$nextFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM draft_metadata_file WHERE mfi_metadata_id = ? AND mfi_order > ? ORDER BY mfi_order ASC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
+		$nextFileId = App::Db()->fetchScalarNullable("SELECT mfi_id FROM " . $this->makeTableName("metadata_file") .
+				" WHERE mfi_metadata_id = ? AND mfi_order > ? ORDER BY mfi_order ASC LIMIT 1", array($metadataFile->getMetadata()->getId(), $metadataFile->getOrder()));
 		if ($nextFileId === null)
 			return self::OK;
-		$metadataFileAlter = App::Orm()->find(entities\DraftMetadataFile::class, $nextFileId);
+		$metadataFileAlter = App::Orm()->find($this->ApplyDraft(entities\DraftMetadataFile::class), $nextFileId);
 		if ($metadataFileAlter === null)
 			return self::OK;
 		// Actualiza
@@ -128,7 +140,7 @@ class MetadataFileService extends BaseService
 	}
 	public function GetAllMetadataFiles()
 	{
-		$records = App::Orm()->findAll(entities\DraftMetadataFile::class);
+		$records = App::Orm()->findAll($this->ApplyDraft(entities\DraftMetadataFile::class));
 		return $records;
 	}
 
@@ -137,15 +149,13 @@ class MetadataFileService extends BaseService
 		// Trae de la base de datos lo actual. Lo hace por sql porque lo que
 		// vino desde el client está reconectado.
 		if ($metadataFile->getId() !== 0 && $metadataFile->getId() !== null)
-			$previuosFileId = App::Db()->fetchScalarIntNullable("SELECT mfi_file_id FROM draft_metadata_file WHERE mfi_id = ?", array($metadataFile->getId()));
+			$previuosFileId = App::Db()->fetchScalarIntNullable("SELECT mfi_file_id FROM " . $this->makeTableName("metadata_file") . " WHERE mfi_id = ?", array($metadataFile->getId()));
 		else
 			$previuosFileId = null;
 
 		// Guarda el archivo
-		$toDrafts = true;
-
-		$fs = new FileService();
-		$fs->SaveFile($metadataFile->getFile(), $tempFilename, $toDrafts, 'application/pdf', $workId);
+		$fs = new FileService($this->isDraft);
+		$fs->SaveFile($metadataFile->getFile(), $tempFilename, 'application/pdf', $workId);
 
 		// Guarda la metadata
 		App::Orm()->save($metadataFile);
@@ -155,19 +165,11 @@ class MetadataFileService extends BaseService
 		{
 			if ($metadataFile->getFile() === null || $metadataFile->getFile()->getId() !== $previuosFileId)
 			{
-				$fileService = new FileService();
+				$fileService = new FileService($this->isDraft);
 				$fileService->DeleteFile($previuosFileId, $workId);
 			}
 		}
 		return self::OK;
-	}
-
-	protected function makeTableName($table, $fromDraft)
-	{
-		if ($fromDraft)
-			return 'draft_' . $table;
-		else
-			return $table;
 	}
 
 	public function GetMetadataFile($metadataId, $fileId)
@@ -179,7 +181,7 @@ class MetadataFileService extends BaseService
 		if (Str::EndsWith($friendlyName, '.pdf') == false)
 				$friendlyName .= '.pdf';
 		$workId = $metadataFile['work_id'];
-		$fileModel = new FileModel(true, $workId);
+		$fileModel = new FileModel($this->isDraft, $workId);
 		return $fileModel->SendFile($fileId, $friendlyName);
 	}
 
@@ -187,7 +189,8 @@ class MetadataFileService extends BaseService
 	{
 		Profiling::BeginTimer();
 		$params = array($metadataId, $fileId);
-		$sql = "SELECT m.*, (SELECT wrk_id FROM draft_work WHERE wrk_metadata_id = mfi_metadata_id) AS work_id FROM draft_metadata_file m WHERE mfi_metadata_id = ? AND mfi_file_id = ? LIMIT 1";
+		$sql = "SELECT m.*, (SELECT wrk_id FROM " . $this->makeTableName("work") . " WHERE wrk_metadata_id = mfi_metadata_id) AS work_id
+								FROM " . $this->makeTableName("metadata_file") . " m WHERE mfi_metadata_id = ? AND mfi_file_id = ? LIMIT 1";
 		$ret = App::Db()->fetchAssoc($sql, $params);
 		Profiling::EndTimer();
 		return $ret;

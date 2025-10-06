@@ -6,7 +6,7 @@
 				<div class="md-layout-item md-size-80 md-small-size-100">
 							<div class="md-layout md-gutter">
 								<div class="md-layout-item md-size-100 md-small-size-100">
-									<mp-text :canEdit="Work.CanEdit()" label="Autores"
+									<mp-text :canEdit="canEdit" label="Autores"
 									 :helper="'Indique quiénes elaboraron la cartografía. Ej. Petraqui, María y Herández, José.'"
 										@update="Update" :maxlength="250"
 									 v-model="metadata.Authors" />
@@ -25,7 +25,7 @@
 								</div>
 						</md-card-header>
 						<md-card-content>
-							<mp-license :canEdit="Work.CanEdit()" v-model="metadata.License" @update="Update"></mp-license>
+							<mp-license :canEdit="canEdit" v-model="metadata.License" @update="Update"></mp-license>
 						</md-card-content>
 					</md-card>
 				</div>
@@ -36,7 +36,7 @@
 							<div class="md-title">Contacto</div>
 						</md-card-header>
 						<md-card-content>
-							<contact-form></contact-form>
+							<contact-form :canEdit="canEdit" :Metadata="Metadata"></contact-form>
 						</md-card-content>
 					</md-card>
 
@@ -51,24 +51,25 @@
 	import MpLicense from '@/backoffice/components/MpLicense';
 
 	export default {
-	name: 'Atribucion',
+		name: 'Atribucion',
+		props: [
+			'canEdit',
+			'Metadata'
+		],
 	data() {
 		return {
 
 		};
 	},
 	computed: {
-		Work() {
-			return window.Context.CurrentWork;
-		},
-		metadata () {
-			return window.Context.CurrentWork.properties.Metadata;
-		},
+		metadata() {
+			return this.Metadata.properties;
+		}
 	},
 	methods: {
 		Update() {
-			this.$refs.invoker.doBackground(this.Work,
-					this.Work.UpdateMetadata);
+			this.$refs.invoker.doBackground(this.Metadata,
+				this.Metadata.UpdateMetadata);
 			return true;
 		},
 	},

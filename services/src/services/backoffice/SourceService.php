@@ -7,6 +7,7 @@ use minga\framework\PublicException;
 use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
+use helena\services\admin as adminServices;
 use minga\framework\Arr;
 use helena\classes\Session;
 
@@ -14,16 +15,25 @@ class SourceService extends BaseService
 {
 	public function GetNewSource()
 	{
-		$entity = new entities\DraftSource();
+		if ($this->isDraft)
+		{
+			$entity = new entities\DraftSource();
+			$contact = new entities\DraftContact();
+		}
+		else
+		{
+			$entity = new entities\Source();
+			$contact = new entities\Contact();
+		}
 		$entity->setIsGlobal(false);
-		$contact = new entities\DraftContact();
 		$entity->setContact($contact);
+
 		return $entity;
 	}
 
-	public function GetAllSources()
+	public function GetAllPublicSources()
 	{
-		$records = App::Orm()->findAll(entities\DraftSource::class, array('Caption' => 'ASC', 'Version' => 'DESC'));
+		$records = App::Orm()->findManyByProperty($this->ApplyDraft(entities\DraftSource::class), 'IsGlobal', true, array('Caption' => 'ASC', 'Version' => 'DESC'));
 		$this->fixSources($records);
 		return $records;
 	}
@@ -38,7 +48,7 @@ class SourceService extends BaseService
 																					JOIN w2.Metadata m3 JOIN p2.User u2 WHERE m3.Id = m2.Id
 																						AND u2.Id = :p1) AND s.IsGlobal = 0", array($userId));
 		// Agrega las globales
-		$records = App::Orm()->findManyByProperty(entities\DraftSource::class, 'IsGlobal', true, array('Caption' => 'ASC', 'Version' => 'DESC'));
+		$records = App::Orm()->findManyByProperty($this->ApplyDraft(entities\DraftSource::class), 'IsGlobal', true, array('Caption' => 'ASC', 'Version' => 'DESC'));
 		$ret = Arr::AddRange($user, $records);
 		$this->fixSources($ret);
 		return $ret;
@@ -50,7 +60,11 @@ class SourceService extends BaseService
 		{
 			if ($record->getContact() === null)
 			{
-				$contact = new entities\DraftContact();
+				if ($this->isDraft)
+					$contact = new entities\DraftContact();
+				else
+					$contact = new entities\Contact();
+
 				$record->setContact($contact);
 				App::Orm()->save($contact);
 				App::Orm()->save($record);
@@ -58,11 +72,17 @@ class SourceService extends BaseService
 		}
 	}
 
-	public function Update($workId, $source)
+	public function Update($workId, $metadataId, $source)
 	{
-		$work = App::Orm()->find(entities\DraftWork::class, $workId);
-		// Si el work es publicData, pone globales las fuentes e instituciones
-		$isGlobal = $work->getType() === 'P';
+		if ($workId) {
+			$work = App::Orm()->find(entities\DraftWork::class, $workId);
+			// Si el work es publicData, pone globales las fuentes e instituciones
+			$isGlobal = $work->getType() === 'P';
+		}
+		else
+		{
+			$isGlobal = true;
+		}
 		// Guarda la fuente
 		$ins = $source->getInstitution();
 		if ($ins !== null)
@@ -72,40 +92,49 @@ class SourceService extends BaseService
 		}
 		if ($source->getContact() !== null)
 			App::Orm()->Save($source->getContact());
-
 		if ($isGlobal) $source->setIsGlobal(true);
+
 		// Verifica permisos
-		$wk = new WorkService();
-		$wk->CompleteSource($source);
+		$meta = new MetadataService();
+		$meta->CompleteSource($source);
 		if (!$source->getIsEditableByCurrentUser())
 			throw new PublicException('No tiene permisos para editar esta fuente.');
 		App::Orm()->Save($source);
 		// Si no está asociada, la agrega
-		$this->AddSourceToWork($workId, $source->getId());
+		$this->AddSourceToMetadata($workId, $metadataId, $source->getId());
 		// Repone los flags de permisos
-		$wk->CompleteSource($source);
+		$meta->CompleteSource($source);
 		return $source;
 	}
 
-	public function AddSourceToWork($workId, $sourceId)
+	public function AddSourceToMetadata($workId, $metadataId, $sourceId)
 	{
+		$ms = new MetadataService($this->isDraft);
+		$metadata = $ms->ResolveMetadata($workId, $metadataId);
+
 		// Save de MetadataSource que los vincula (setear order en metadataSource)
-		$work = App::Orm()->find(entities\DraftWork::class, $workId);
-		$source = App::Orm()->find(entities\DraftSource::class, $sourceId);
-		$metadata = $work->getMetadata();
+		$source = App::Orm()->find($this->ApplyDraft(entities\DraftSource::class), $sourceId);
 		// Se fija si ya está asociado
-		$existing = App::Db()->fetchScalarIntNullable("SELECT * FROM draft_metadata_source WHERE msc_metadata_id = ? AND msc_source_id = ?",
+		$existing = App::Db()->fetchScalarIntNullable("SELECT * FROM " . $this->makeTableName("metadata_source") . " WHERE msc_metadata_id = ? AND msc_source_id = ?",
 				array($metadata->getId(), $source->getId()));
 		if ($existing !== null && $existing > 0) return self::OK;
 
-		$sql = "SELECT MAX(msc_order) FROM draft_metadata_source WHERE msc_metadata_id = ?";
+		$sql = "SELECT MAX(msc_order) FROM " . $this->makeTableName("metadata_source") . " WHERE msc_metadata_id = ?";
 		$max = App::Db()->fetchScalarIntNullable($sql, array($metadata->getId()));
 		if ($max === null)
 			$max = 1;
 		else
 			$max++;
 
-		$newSourceMetadata = new entities\DraftMetadataSource();
+		if ($this->isDraft)
+			$newSourceMetadata = new entities\DraftMetadataSource();
+		else
+		{
+			$newSourceMetadata = new entities\MetadataSource();
+
+			$adminServices = new adminServices\MetadataService();
+			$adminServices->EnsureId(entities\MetadataSource::class, $newSourceMetadata);
+		}
 		$newSourceMetadata->setOrder($max);
 		$newSourceMetadata->setSource($source);
 		$newSourceMetadata->setMetadata($metadata);
@@ -115,24 +144,26 @@ class SourceService extends BaseService
 		return self::OK;
 	}
 
-	private function LoadAndValidate($workId, $sourceId)
+	private function LoadAndValidate($workId, $metadataId, $sourceId)
 	{
-		$work = App::Orm()->find(entities\DraftWork::class, $workId);
-		$metadataId = $work->getMetadata()->getId();
-		$metadataSource = App::Orm()->findByProperties(entities\DraftMetadataSource::class, array("Metadata.Id" => $metadataId, "Source.Id" => $sourceId));
+		$ms = new MetadataService($this->isDraft);
+		$metadata = $ms->ResolveMetadata($workId, $metadataId);
+		$metadataId = $metadata->getId();
+		$metadataSource = App::Orm()->findByProperties($this->ApplyDraft(entities\DraftMetadataSource::class),
+													array("Metadata.Id" => $metadataId, "Source.Id" => $sourceId));
 		if ($metadataSource === null)
 			throw new PublicException('Invalid relation.');
 		return $metadataSource;
 	}
-	public function MoveSourceUp($workId, $sourceId)
+	public function MoveSourceUp($workId, $metadataId, $sourceId)
 	{
-		$metadataSource = $this->LoadAndValidate($workId, $sourceId);
+		$metadataSource = $this->LoadAndValidate($workId, $metadataId, $sourceId);
 		// Obtiene el anterior
-		$previousSourceId = App::Db()->fetchScalarNullable("SELECT msc_id FROM draft_metadata_source WHERE msc_metadata_id = ? AND msc_order < ? ORDER BY msc_order DESC LIMIT 1",
+		$previousSourceId = App::Db()->fetchScalarNullable("SELECT msc_id FROM " . $this->makeTableName("metadata_source") . " WHERE msc_metadata_id = ? AND msc_order < ? ORDER BY msc_order DESC LIMIT 1",
 									 array($metadataSource->getMetadata()->getId(), $metadataSource->getOrder()));
 		if ($previousSourceId === null)
 			return self::OK;
-		$metadataSourceAlter = App::Orm()->find(entities\DraftMetadataSource::class, $previousSourceId);
+		$metadataSourceAlter = App::Orm()->find($this->ApplyDraft(entities\DraftMetadataSource::class), $previousSourceId);
 		if ($metadataSourceAlter === null)
 				return self::OK;
 		// Actualiza
@@ -145,15 +176,16 @@ class SourceService extends BaseService
 		return self::OK;
 	}
 
-	public function MoveSourceDown($workId, $sourceId)
+	public function MoveSourceDown($workId, $metadataId, $sourceId)
 	{
-		$metadataSource = $this->LoadAndValidate($workId, $sourceId);
+		$metadataSource = $this->LoadAndValidate($workId, $metadataId, $sourceId);
 		// Obtiene el siguiente
-		$nextSourceId = App::Db()->fetchScalarNullable("SELECT msc_id FROM draft_metadata_source WHERE msc_metadata_id = ? AND msc_order > ? ORDER BY msc_order ASC LIMIT 1",
+		$nextSourceId = App::Db()->fetchScalarNullable("SELECT msc_id FROM " . $this->makeTableName('metadata_source')
+											. " WHERE msc_metadata_id = ? AND msc_order > ? ORDER BY msc_order ASC LIMIT 1",
 									array($metadataSource->getMetadata()->getId(), $metadataSource->getOrder()));
 		if ($nextSourceId === null)
 			return self::OK;
-		$metadataSourceAlter = App::Orm()->find(entities\DraftMetadataSource::class, $nextSourceId);
+		$metadataSourceAlter = App::Orm()->find($this->ApplyDraft(entities\DraftMetadataSource::class), $nextSourceId);
 		if ($metadataSourceAlter === null)
 				return self::OK;
 			// Actualiza
@@ -165,14 +197,15 @@ class SourceService extends BaseService
 		App::Orm()->save($metadataSourceAlter);
 		return self::OK;
 	}
-	public function RemoveSourceFromWork($workId, $sourceId)
+	public function RemoveSourceFromWork($workId, $metadataId, $sourceId)
 	{
-		$work = App::Orm()->find(entities\DraftWork::class, $workId);
-		$metadataId = $work->getMetadata()->getId();
+		$ms = new MetadataService($this->isDraft);
+		$metadata = $ms->ResolveMetadata($workId, $metadataId);
+		$metadataId = $metadata->getId();
 		// Si hay algo idéntico, sale
-		$sql = "DELETE FROM draft_metadata_source WHERE msc_metadata_id = ? AND	msc_source_id = ?";
+		$sql = "DELETE FROM " . $this->makeTableName('metadata_source') . " WHERE msc_metadata_id = ? AND	msc_source_id = ?";
 		App::Db()->exec($sql, array($metadataId, $sourceId));
-		App::Db()->markTableUpdate('draft_metadata_source');
+		App::Db()->markTableUpdate($this->makeTableName('metadata_source'));
 
 		return self::OK;
 	}

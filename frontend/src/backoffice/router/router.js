@@ -215,7 +215,7 @@ export const constantRouterMap = [
 		{
 			path: '/cartographies/:workId/sources',
 			name: 'Sources Target',
-			component: () => import('@/backoffice/views/Metadata/Sources.vue'),
+			component: () => import('@/backoffice/views/Metadata/Sources.vue')
 			}
 		]
 	},

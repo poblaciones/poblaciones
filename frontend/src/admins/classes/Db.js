@@ -1,4 +1,5 @@
 import axiosClient from '@/common/js/axiosClient';
+import ActiveMetadata from '../../backoffice/classes/ActiveMetadata';
 
 export default Db;
 
@@ -137,5 +138,12 @@ Db.prototype.GetStepWorkRevokeUrl = function () {
 };
 
 
+Db.prototype.LoadMetadata = function (metadata) {
+	return axiosClient.getPromise(window.host + '/services/admin/GetMetadata',
+		{ m: metadata.Id }, 'obtener los metadatos').then(function (data) {
+			var ret = new ActiveMetadata(null, data.Metadata, data);
+			return ret;
+		});
+};
 
 

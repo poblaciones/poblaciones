@@ -3,6 +3,7 @@ import ActiveDataset from '@/backoffice/classes/ActiveDataset';
 import axiosClient from '@/common/js/axiosClient';
 import arr from '@/common/framework/arr';
 import AsyncCatalog from './AsyncCatalog';
+import ActiveMetadata from './ActiveMetadata';
 import Vue from 'vue';
 import f from '@/backoffice/classes/Formatter';
 export default ActiveWork;
@@ -12,11 +13,9 @@ function ActiveWork(workInfo, workListMetadata) {
 	this.Datasets = [];
 	this.Bounded = false;
 	window.Context.BooleanKeys.WorkTopBarPublish = 0;
-	this.Sources = workInfo.Sources;
-	this.Institutions = workInfo.Institutions;
 	this.MetricVersions = new AsyncCatalog(window.host + '/services/backoffice/GetWorkMetricVersions?w=' + workInfo.Work.Id);
 	this.MetricVersions.Refresh();
-	this.Files = workInfo.Files;
+	this.Metadata = new ActiveMetadata(this, this.properties.Metadata, workInfo);
 	this.Permissions = workInfo.Permissions;
 	this.StatsMonths = workInfo.StatsMonths;
 	this.StatsQuarters = workInfo.StatsQuarters;
@@ -49,15 +48,6 @@ ActiveWork.prototype.CreateNewDataset = function (caption) {
 			window.Db.LoadWorks();
 			return data;
 		});
-};
-
-ActiveWork.prototype.ContainsSource = function (source) {
-	for (var i = 0; i < this.Sources.length; i++) {
-		if (this.Sources[i].Id === source.Id) {
-			return true;
-		}
-	}
-	return false;
 };
 
 ActiveWork.prototype.IsPublicData = function () {
@@ -187,9 +177,6 @@ ActiveWork.prototype.GetUploadUrl = function () {
 	return window.host + '/services/backoffice/UploadFile';
 };
 
-ActiveWork.prototype.GetCreateFileUrl = function (bucketId) {
-	return window.host + '/services/backoffice/PostImportChunk?b=' + bucketId;
-};
 
 ActiveWork.prototype.GetDatasetFileImportUrl = function (keepLabels) {
 	return window.host + '/services/backoffice/Dataset/CreateMultiImportFile?k=' + (keepLabels ? '1' : 0);
@@ -286,47 +273,6 @@ ActiveWork.prototype.DeleteIcon = function (iconId) {
 			});
 };
 
-ActiveWork.prototype.UpdateInstitution = function (institution, container, watermarkImage) {
-	var args = { 'w': this.properties.Id, 'i': institution, 'iwm': watermarkImage };
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateInstitution', args,
-		'actualizar la institución').then(function (savedInstitution) {
-			// se fija si tiene que actualizar el institution
-			container.Institution = savedInstitution;
-			window.Context.Institutions.Refresh();
-			return savedInstitution;
-		});
-};
-
-ActiveWork.prototype.UpdateSource = function (source) {
-	var args = { 'w': this.properties.Id, 's': source };
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateWorkSource', args,
-		'actualizar la fuente').then(function (savedSource) {
-			// se fija si tiene que actualizar el institution
-			if (source.Id === null || source.Id === 0) {
-				// lo agrega en la lista
-				loc.Sources.push(savedSource);
-				window.Context.Sources.Refresh();
-			} else {
-				// actualiza en sources
-				for (var n = 0; n < loc.Sources.length; n++) {
-					if (loc.Sources[n].Id === savedSource.Id) {
-						Vue.set(loc.Sources, n, savedSource);
-						break;
-					}
-				}
-				// verifica institution
-				if (source.Institution !== null && (source.Institution.Id === 0 || source.Institution.Id === null)) {
-					source.Institution.Id = savedSource.Institution.Id;
-				}
-				// actualiza el padrón general
-				window.Context.Sources.Refresh();
-			}
-		});
-};
 
 ActiveWork.prototype.AppendExtraMetric = function (metric) {
 	var args = { 'w': this.properties.Id, 'm': metric.Id };
@@ -361,15 +307,6 @@ ActiveWork.prototype.UpdateStartup = function () {
 		'actualizar los atributos de inicio');
 };
 
-
-ActiveWork.prototype.UpdateMetadata = function () {
-	var args = { 'w': this.properties.Id, 'm': this.properties.Metadata };
-	this.WorkChanged();
-	// Guarda en el servidor lo que esté en this.properties.Metadata
-	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateMetadata', args,
-		'actualizar los atributos indicados');
-};
-
 ActiveWork.prototype.GetGeographyItems = function (geographyId) {
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetGeographyItems',
 		{ 'g': geographyId }, 'obtener los ítems de la geografía');
@@ -379,13 +316,6 @@ ActiveWork.prototype.GetStepImage = function (step) {
 	var args = { 'w': this.properties.Id, 's': step };
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetStepImage', args,
 		'obtener la imagen del paso');
-};
-
-
-ActiveWork.prototype.GetInstitutionWatermark = function (institution) {
-	var args = { 'w': this.properties.Id, 'iwmid': institution.Watermark.Id };
-	return axiosClient.getPromise(window.host + '/services/backoffice/GetInstitutionWatermark', args,
-		'obtener el logo de la institución');
 };
 
 ActiveWork.prototype.UpdateMultilevelMatrix = function () {
@@ -432,104 +362,6 @@ ActiveWork.prototype.DeletePermission = function (permission) {
 };
 
 
-ActiveWork.prototype.AddSource = function (source) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/AddWorkSource',
-		{ 'w': this.properties.Id, 's': source.Id }, 'agregar la fuente')
-		.then(function (data) {
-			loc.Sources.push(source);
-		});
-};
-
-ActiveWork.prototype.RemoveSource = function (source) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/RemoveSourceFromWork',
-		{ 's': source.Id, 'w': this.properties.Id }, 'quitar la fuente').then(function (data) {
-			arr.Remove(loc.Sources, source);
-		});
-};
-
-ActiveWork.prototype.UpdateFile = function (item, bucketId) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateMetadataFile',
-		{ 'f': item, 'w': this.properties.Id, 'b': bucketId }, 'actualizar el adjunto')
-		.then(function (data) {
-			// recibe el id y se lo pone
-			if (item.Id === 0 || item.Id === null) {
-				loc.Files.push(item);
-				item.Id = data.Id;
-				item.File = data.File;
-			} else {
-				var original = loc.GetAttachmentById(data.Id);
-				if (original !== null) {
-					original.File = data.File;
-					original.Caption = data.Caption;
-				}
-			}
-		});
-};
-
-ActiveWork.prototype.GetAttachmentById = function (id) {
-	for (var n = 0; n < this.Files.length; n++) {
-		if (this.Files[n].Id === id) {
-			return this.Files[n];
-		}
-	}
-	return null;
-};
-ActiveWork.prototype.DeleteFile = function (item) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/DeleteMetadataFile',
-		{ 'f': item.Id, 'w': this.properties.Id }, 'eliminar el adjunto')
-		.then(function (data) {
-			arr.Remove(loc.Files, item);
-		});
-};
-
-ActiveWork.prototype.MoveFileUp = function (item) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/MoveMetadataFileUp',
-		{ 'f': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación del adjunto')
-		.then(function (data) {
-			arr.MoveUp(loc.Files, item);
-		});
-};
-
-ActiveWork.prototype.MoveFileDown = function (item) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/MoveMetadataFileDown',
-		{ 'f': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación del adjunto')
-		.then(function (data) {
-			arr.MoveDown(loc.Files, item);
-		});
-};
-
-
-ActiveWork.prototype.MoveSourceUp = function (item) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/MoveSourceUp',
-		{ 's': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación de la fuente')
-		.then(function (data) {
-			arr.MoveUp(loc.Sources, item);
-		});
-};
-
-ActiveWork.prototype.MoveSourceDown = function (item) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/MoveSourceDown',
-		{ 's': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación de la fuente')
-		.then(function (data) {
-			arr.MoveDown(loc.Sources, item);
-		});
-};
 
 ActiveWork.prototype.WorkChanged = function () {
 	this.UpdateHasChanges(1);
@@ -538,74 +370,6 @@ ActiveWork.prototype.WorkChanged = function () {
 ActiveWork.prototype.WorkPublished = function () {
 	this.UpdateHasChanges(0);
 	this.properties.Metadata.LastOnline = Date.now();
-};
-
-
-
-ActiveWork.prototype.MoveInstitutionUp = function (item) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/MoveInstitutionUp',
-		{ 'i': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación de la institución')
-		.then(function (data) {
-			arr.MoveUp(loc.Institutions, item);
-		});
-};
-
-ActiveWork.prototype.MoveInstitutionDown = function (item) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/MoveInstitutionDown',
-		{ 'i': item.Id, 'w': this.properties.Id }, 'cambiar la ubicación de la institución')
-		.then(function (data) {
-			arr.MoveDown(loc.Institutions, item);
-		});
-};
-
-
-ActiveWork.prototype.UpdateWorkInstitution = function (institution) {
-	var args = { 'w': this.properties.Id, 'i': institution };
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateWorkInstitution', args,
-		'actualizar la institución').then(function (savedInstitution) {
-			// se fija si tiene que actualizar el institution
-			if (institution.Id === null || institution.Id === 0) {
-				// lo agrega en la lista
-				loc.Institutions.push(savedInstitution);
-				window.Context.Institutions.Refresh();
-			} else {
-				// actualiza en institutions
-				for (var n = 0; n < loc.Institutions.length; n++) {
-					if (loc.Institutions[n].Id === savedInstitution.Id) {
-						Vue.set(loc.Institutions, n, savedInstitution);
-						break;
-					}
-				}
-				// actualiza el padrón general
-				window.Context.Institutions.Refresh();
-			}
-			return savedInstitution;
-		});
-};
-
-ActiveWork.prototype.AddInstitution = function (institution) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/AddWorkInstitution',
-		{ 'w': this.properties.Id, 'i': institution.Id }, 'agregar la institución')
-		.then(function (data) {
-			loc.Institutions.push(institution);
-		});
-};
-
-ActiveWork.prototype.RemoveInstitution = function (institution) {
-	var loc = this;
-	this.WorkChanged();
-	return axiosClient.getPromise(window.host + '/services/backoffice/RemoveInstitutionFromWork',
-		{ 'i': institution.Id, 'w': this.properties.Id }, 'quitar la institución').then(function (data) {
-			arr.Remove(loc.Institutions, institution);
-		});
 };
 
 ActiveWork.CalculateListItemStatus = function (item) {

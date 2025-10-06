@@ -58,6 +58,15 @@ App::Get('/services/admin/UpdateWorkSpaceUsage', function (Request $request) {
 	return App::Json($ret);
 });
 
+App::Get('/services/admin/GetMetadata', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$controller = new services\MetadataService();
+	$metadataId = Params::GetIntMandatory('m');
+	$ret = $controller->GetMetadata($metadataId);
+	return App::OrmJson($ret);
+});
+
 
 App::Get('/services/admin/GetClippingRegions', function (Request $request) {
 	if ($app = Session::CheckIsSiteReader())

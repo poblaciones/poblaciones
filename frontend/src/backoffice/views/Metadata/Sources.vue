@@ -2,11 +2,11 @@
 	<div>
 		<invoker ref="invoker"></invoker>
 
-			<pick-source ref="PickSource"></pick-source>
+			<pick-source ref="PickSource" :canEdit="canEdit" :Metadata="Metadata"></pick-source>
 
-			<source-popup ref="SourcePopup" contact="source"></source-popup>
+			<source-popup ref="SourcePopup" :canEdit="canEdit" :Metadata="Metadata" contact="source"></source-popup>
 
-			<div v-if="Work.CanEdit()" class="md-layout">
+			<div v-if="canEdit" class="md-layout">
 				<md-button @click="addSource">
 					<md-icon>add_circle_outline</md-icon>
 					Agregar fuente
@@ -20,7 +20,7 @@
 							<md-table-cell md-label="Edición">{{ item.Version }}</md-table-cell>
 							<md-table-cell md-label="Institución">{{ getInstitutionCaption(item) }}</md-table-cell>
 							<md-table-cell md-label="Acciones" class="mpNoWrap">
-								<div v-if="Work.CanEdit()">
+								<div v-if="canEdit">
 									<md-button v-if="item.IsEditableByCurrentUser" class="md-icon-button" @click="openEditionWarning(item)">
 										<md-icon>edit</md-icon>
 										<md-tooltip md-direction="bottom">Modificar fuente</md-tooltip>
@@ -57,21 +57,22 @@ import SourcePopup from '@/backoffice/views/Metadata/SourcePopup';
 import PickSource from '@/backoffice/views/Metadata/PickSource';
 
 export default {
-  name: 'Fuentes',
+		name: 'Fuentes',
+		props: [
+			'canEdit',
+			'Metadata'
+		],
   data() {
     return {
 			sources: [],
     };
 	},
 	mounted() {
-		this.sources = this.Work.Sources;
+		this.sources = this.Metadata.Sources;
 	},
   computed: {
-    Work() {
-      return window.Context.CurrentWork;
-    },
-		SecondaryLabel() {
-			return (this.Work.IsPublicData() ? '' : ' secundarias');
+   SecondaryLabel() {
+			return (this.Metadata.Work && this.Metadata.Work.IsPublicData() ? '' : ' secundarias');
 		},
 		CanEditStaticLists() {
 			return window.Context.CanEditStaticLists();
@@ -86,24 +87,24 @@ export default {
 			}
 		},
 		isFirst(item) {
-			return this.Work.Sources[0] === item;
+			return this.Metadata.Sources[0] === item;
 		},
 		isLast(item) {
-			return this.Work.Sources[this.Work.Sources.length - 1] === item;
+			return this.Metadata.Sources[this.Metadata.Sources.length - 1] === item;
 		},
 		onDelete(item) {
 			this.$refs.invoker.message = 'Quitando fuente...';
 			this.$refs.invoker.confirmDo('Quitar fuente', 'La fuente será removida de la lista',
-					this.Work, this.Work.RemoveSource, item);
+				this.Metadata, this.Metadata.RemoveSource, item);
     },
 		addSource() {
 			this.$refs.PickSource.show();
 		},
 	  up(item) {
-      this.$refs.invoker.doSave(this.Work, this.Work.MoveSourceUp, item);
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.MoveSourceUp, item);
     },
     down(item) {
-      this.$refs.invoker.doSave(this.Work, this.Work.MoveSourceDown, item);
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.MoveSourceDown, item);
     },
     openEditionWarning(item) {
 			var loc = this;

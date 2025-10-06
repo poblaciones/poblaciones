@@ -6,6 +6,7 @@ use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\PdfReader;
+use helena\services\admin as adminServices;
 use minga\framework\Str;
 use minga\framework\FileBucket;
 use minga\framework\PublicException;
@@ -16,7 +17,7 @@ class FileService extends BaseService
 {
 	const PAGESIZE = 1024 * 1024;
 
-	public function SaveFile($fileObject, $tempFilename, $toDrafts, $fileType, $workId = null)
+	public function SaveFile($fileObject, $tempFilename, $fileType, $workId = null)
 	{
 		// Tiene que insertar en la base de datos
 		$fileId = $fileObject->getId();
@@ -26,7 +27,12 @@ class FileService extends BaseService
 			$fileObject->setSize(filesize($tempFilename));
 		}
 		$fileObject->setType($fileType);
-
+		// Se fija si tiene que generarle un id
+		if (!$this->isDraft)
+		{
+			$adminServices = new adminServices\MetadataService();
+			$adminServices->EnsureId(entities\File::class, $fileObject);
+		}
 		App::Orm()->save($fileObject);
 		$fileId = $fileObject->getId();
 		// Ya tiene el id de file, sube los chunks
@@ -41,7 +47,7 @@ class FileService extends BaseService
 			$fileObject->setPages($pages);
 			App::Orm()->save($fileObject);
 			// Graba
-			$this->saveChunks($fileId, $tempFilename, $toDrafts, $workId);
+			$this->saveChunks($fileId, $tempFilename, $workId);
 		}
 		return $fileObject;
 	}
@@ -70,21 +76,13 @@ class FileService extends BaseService
 			}
 			$fileType = Image::GetImageMimeType($file);
 		}
-		$this->SaveFile($fileObject, $file, true, $fileType, $workId);
+		$this->SaveFile($fileObject, $file, $fileType, $workId);
 		$bucket->Delete();
 	}
 
-	protected function makeTableName($table, $fromDraft)
+	private function saveChunks($fileId, $tempFilename, $workId = null)
 	{
-		if ($fromDraft)
-			return 'draft_' . $table;
-		else
-			return $table;
-	}
-
-	private function saveChunks($fileId, $tempFilename, $toDrafts, $workId = null)
-	{
-		$fileChunkTable = DbFile::GetChunksTableName($toDrafts, $workId);
+		$fileChunkTable = DbFile::GetChunksTableName($this->isDraft, $workId);
 		App::Db()->exec("DELETE FROM " . $fileChunkTable . " WHERE chu_file_id = ?", array($fileId));
 		App::Db()->markTableUpdate($fileChunkTable);
 		$unread = filesize($tempFilename);
@@ -92,11 +90,29 @@ class FileService extends BaseService
 			throw new PublicException('No se ha transferido correctamente el archivo al servidor.');
 		$handle = fopen($tempFilename, "rb");
 
+		if ($fileChunkTable == 'file_chunk')
+		{
+			$idArgs = ", chu_id";
+			$idParam = ", ?";
+			$adminServices = new adminServices\MetadataService();
+			$nextId = $adminServices->GetNextId(entities\FileChunk::class);
+		}
+		else {
+			$idArgs = "";
+			$idParam = "";
+			$nextId = -1;
+		}
+
 		while($unread > 0)
 		{
 			$contents = fread($handle, self::PAGESIZE);
-			$sql = "INSERT INTO " . $fileChunkTable . " (chu_file_id, chu_content) VALUES (?, ?)";
-			App::Db()->exec($sql, array($fileId, $contents));
+			$sql = "INSERT INTO " . $fileChunkTable . " (chu_file_id, chu_content" . $idArgs  . ") VALUES (?, ?" . $idParam . ")";
+			$args = array($fileId, $contents);
+			if ($idArgs != '')
+			{
+				$args[] = $nextId++;
+			}
+			App::Db()->exec($sql, $args);
 			App::Db()->markTableUpdate($fileChunkTable);
 			$unread -= strlen($contents);
 		}

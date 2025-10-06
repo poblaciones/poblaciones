@@ -17,7 +17,6 @@ class Institution
      *
      * @ORM\Column(name="ins_id", type="integer", precision=0, scale=0, nullable=false, unique=false)
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $Id;
 
@@ -28,11 +27,17 @@ class Institution
      */
     private $Caption;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="ins_web", type="string", length=255, precision=0, scale=0, nullable=true, unique=false)
-     */
+
+	/**
+	 * @var boolean
+	 */
+	private $IsEditableByCurrentUser = false;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="ins_web", type="string", length=255, precision=0, scale=0, nullable=true, unique=false)
+	 */
     private $Web;
 
     /**
@@ -125,11 +130,36 @@ class Institution
         return $this;
     }
 
-    /**
-     * Get caption
-     *
-     * @return string
-     */
+
+	/**
+	 * Set isEditableByCurrentUser
+	 *
+	 * @param boolean $isEditableByCurrentUser
+	 *
+	 * @return Institution
+	 */
+	public function setIsEditableByCurrentUser($isEditableByCurrentUser)
+	{
+		$this->IsEditableByCurrentUser = $isEditableByCurrentUser;
+
+		return $this;
+	}
+
+	/**
+	 * Get isEditableByCurrentUser
+	 *
+	 * @return boolean
+	 */
+	public function getIsEditableByCurrentUser()
+	{
+		return $this->IsEditableByCurrentUser;
+	}
+
+	/**
+	 * Get caption
+	 *
+	 * @return string
+	 */
     public function getCaption()
     {
         return $this->Caption;

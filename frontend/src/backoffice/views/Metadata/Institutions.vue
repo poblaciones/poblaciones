@@ -2,10 +2,10 @@
 	<div>
 		<invoker ref="invoker"></invoker>
 
-		<pick-institution @onSelected="selected" :container="container" ref="PickInstitution"></pick-institution>
-		<institution-popup ref="InstitutionPopup" @onSelected="selected" :container="container"></institution-popup>
+		<pick-institution @onSelected="selected" :container="container" ref="PickInstitution" :Metadata="Metadata" :canEdit="canEdit" ></pick-institution>
+		<institution-popup ref="InstitutionPopup" @onSelected="selected" :container="container" :canEdit="canEdit" :Metadata="Metadata" ></institution-popup>
 
-		<div v-if="Work.CanEdit()" class="md-layout">
+		<div v-if="canEdit" class="md-layout">
 			<md-button @click="addInstitution">
 				<md-icon>add_circle_outline</md-icon>
 				Agregar institución
@@ -17,7 +17,7 @@
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
 						<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<div v-if="Work.CanEdit()">
+							<div v-if="canEdit">
 								<md-button v-if="item.IsEditableByCurrentUser" class="md-icon-button" @click="openEditionWarning(item)">
 									<md-icon>edit</md-icon>
 									<md-tooltip md-direction="bottom">Modificar institución</md-tooltip>
@@ -54,7 +54,11 @@ import InstitutionPopup from '@/backoffice/views/Metadata/InstitutionPopup';
 import PickInstitution from '@/backoffice/views/Metadata/PickInstitution';
 
 export default {
-  name: 'Instituciones',
+		name: 'Instituciones',
+		props: [
+			'canEdit',
+			'Metadata'
+		],
   data() {
     return {
 			institutions: [],
@@ -62,13 +66,10 @@ export default {
     };
 	},
 	mounted() {
-		this.institutions = this.Work.Institutions;
+		this.institutions = this.Metadata.Institutions;
 	},
   computed: {
-    Work() {
-      return window.Context.CurrentWork;
-    },
-		CanEditStaticLists() {
+    CanEditStaticLists() {
 			return window.Context.CanEditStaticLists();
 		}
   },
@@ -76,35 +77,35 @@ export default {
 		selected(oldItem, item) {
 				this.container.Institution = item;
 				var loc = this;
-				this.$refs.invoker.doSave(this.Work, this.Work.UpdateWorkInstitution, item).then(function (savedInstitution) {
-					for (var n = 0; n < loc.Work.Institutions.length; n++) {
-						if (loc.Work.Institutions[n].Id === savedInstitution.Id) {
-							loc.Work.Institutions[n] = savedInstitution;
+				this.$refs.invoker.doSave(this.Metadata, this.Metadata.UpdateMetadataInstitution, item).then(function (savedInstitution) {
+					for (var n = 0; n < loc.Metadata.Institutions.length; n++) {
+						if (loc.Metadata.Institutions[n].Id === savedInstitution.Id) {
+							loc.Metadata.Institutions[n] = savedInstitution;
 							return;
 						}
 					}
-					loc.Work.Institutions.push(savedInstitution);
+					loc.Metadata.Institutions.push(savedInstitution);
 				});
 		},
 		isFirst(item) {
-			return this.Work.Institutions[0] === item;
+			return this.Metadata.Institutions[0] === item;
 		},
 		isLast(item) {
-			return this.Work.Institutions[this.Work.Institutions.length - 1] === item;
+			return this.Metadata.Institutions[this.Metadata.Institutions.length - 1] === item;
 		},
 		onDelete(item) {
 			this.$refs.invoker.message = 'Quitando institución...';
 			this.$refs.invoker.confirmDo('Quitar institución', 'La institución será removida de la lista',
-					this.Work, this.Work.RemoveInstitution, item);
+				this.Metadata, this.Metadata.RemoveInstitution, item);
     },
 		addInstitution() {
 			this.$refs.PickInstitution.show();
 		},
 	  up(item) {
-      this.$refs.invoker.doSave(this.Work, this.Work.MoveInstitutionUp, item);
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.MoveInstitutionUp, item);
     },
     down(item) {
-      this.$refs.invoker.doSave(this.Work, this.Work.MoveInstitutionDown, item);
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.MoveInstitutionDown, item);
     },
     openEditionWarning(item) {
 			var loc = this;

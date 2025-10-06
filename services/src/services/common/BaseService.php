@@ -4,6 +4,8 @@ namespace helena\services\common;
 
 use helena\classes\App;
 use minga\framework\Performance;
+use minga\framework\Str;
+use minga\framework\ErrorException;
 use helena\classes\GlobalTimer;
 use minga\framework\PublicException;
 
@@ -11,6 +13,44 @@ class BaseService
 {
 	public const OK = "OK";
 	public const ERROR = "ERROR";
+
+	public $isDraft = null;
+
+	public function __construct($isDraft = true)
+	{
+		$this->isDraft = $isDraft;
+	}
+
+	protected function makeTableName($table)
+	{
+		if ($this->isDraft === null) {
+			throw new ErrorException('Debe indicarse el modo de trabajo (borrador/publicado)');
+		}
+		if ($this->isDraft)
+			return 'draft_' . $table;
+		else
+			return $table;
+	}
+
+	protected function ApplyDraft($entityName)
+	{
+		if ($this->isDraft === null) {
+			throw new ErrorException('Debe indicarse el modo de trabajo (borrador/publicado)');
+		}
+
+		if (!$this->isDraft) {
+			$parts = explode("\\", $entityName);
+			$last = $parts[count($parts) - 1];
+
+			// quitar el prefijo solo si está al inicio
+			if (Str::StartsWith($last, "Draft")) {
+				$last = substr($last, strlen("Draft"));
+			}
+			$parts[count($parts) - 1] = $last;
+			return implode("\\", $parts);
+		}
+		return $entityName;
+	}
 
 	public function GetBaseUrl()
 	{

@@ -5,11 +5,13 @@
 			<md-dialog-title>
 				Seleccionar institución
 			</md-dialog-title>
+
 			<md-dialog-content>
 			<invoker ref="invoker"></invoker>
 
-			<institution-popup ref="InstitutionPopup" @onSelected="setSelected" :container="container"></institution-popup>
-			<div v-if="Work.CanEdit()" class="md-layout">
+			<institution-popup ref="InstitutionPopup" @onSelected="setSelected" :Metadata="Metadata" :canEdit="canEdit" :container="container"></institution-popup>
+
+				<div v-if="canEdit" class="md-layout">
 				<md-button @click="CreateNewInstitution()">
 					<md-icon>add_circle_outline</md-icon>
 					Crear nueva institución
@@ -39,7 +41,12 @@ import Context from '@/backoffice/classes/Context';
 import InstitutionPopup from '@/backoffice/views/Metadata/InstitutionPopup';
 
 export default {
-  name: 'Fuentes',
+		name: 'Fuentes',
+		props: {
+			container: Object,
+			canEdit: Boolean,
+			Metadata: Object
+		},
   data() {
     return {
       openInstitutions: false,
@@ -49,9 +56,7 @@ export default {
     };
   },
   computed: {
-    Work() {
-      return window.Context.CurrentWork;
-    },
+
   },
   methods: {
     CreateNewInstitution() {
@@ -87,9 +92,6 @@ export default {
 			this.openInstitutions = false;
 		}
   },
-	props: {
-    container: Object
-	},
   components: {
     InstitutionPopup
   }

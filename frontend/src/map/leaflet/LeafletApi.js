@@ -173,7 +173,7 @@ LeafletApi.prototype.Initialize = function () {
 		window.SegMap.MapInitialized();
 
 		var t = document.createElement("div");
-		t.innerHTML = '<div class="gmnoprint" role="menubar" style="margin: 10px -10px; z-index: 900; position: absolute; cursor: pointer; left: 0px; top: 0px;">' +
+		t.innerHTML = '<div class="gmnoprint" role="menubar" style="margin: 10px -10px; z-index: 800; position: absolute; cursor: pointer; left: 0px; top: 0px;">' +
 			'<div class="gm-style-mtc" style="float: left; position: relative;">' +
 			'<button title="Mostrar mapa gris" type="button" class="leafletMapButton" style="font-weight: bold" id="roadTypeButton">Mapa</button>' +
 			'<button title="Mostrar mapa de calles" type="button" class="leafletMapButton" style="font-weight: bold" id="coloredTypeButton">Calles</button>' +

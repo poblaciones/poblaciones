@@ -365,6 +365,12 @@ class Session
 	{
 		MessageBox::ThrowMessage("El elemento indicado no ha sido encontrado.");
 	}
+
+	public static function CheckIsWorkEditorOrSiteEditor($workId, $canEditIndexed = false)
+	{
+		return self::CheckIsWorkEditor($workId, $canEditIndexed);
+	}
+
 	public static function CheckIsWorkEditor($workId, $canEditIndexed = false)
 	{
 		Profiling::BeginTimer();

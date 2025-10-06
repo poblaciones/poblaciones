@@ -173,9 +173,15 @@ class Orm
 		return self::$entityManager;
 	}
 
-	public function MarkClassUpdate($className) {
+	public function GetTableName($className)
+	{
 		$metadata = $this->getClassMetadata($className);
 		$table = $metadata->GetTableName();
+		return $table;
+	}
+
+	public function MarkClassUpdate($className) {
+		$table = $this->GetTableName($className);
 		App::Db()->markTableUpdate($table);
 	}
 
@@ -222,10 +228,21 @@ class Orm
 		}
 		catch(\Doctrine\DBAL\Exception\NotNullConstraintViolationException $e) {
 			$message = $e->getMessage();
-			$start = strpos($message, "Column '") + 8;
-			$end = strpos($message, "'", $start);
-			$field = substr($message, $start, $end - $start);
-			throw new PublicException('Se ha omitido un valor requerido (' . $field . ')');
+			$start = strpos($message, "Column ");
+			if ($start <= 0) {
+				$start = strpos($message, "Field ");
+			}
+			if ($start)
+			{
+				$start = strpos($message, "'", $start) + 1;
+				$end = strpos($message, "'", $start);
+				$field = substr($message, $start, $end - $start);
+			}
+			else
+			{
+				$field = $message;
+			}
+			throw new PublicException('Se ha omitido un valor requerido (' . $field . ').');
 		}
 	}
 

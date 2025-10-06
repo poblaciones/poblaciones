@@ -36,6 +36,9 @@ import MpLargeButton from '@/backoffice/components/MpLargeButton';
 import MpSimpleText from '@/backoffice/components/MpSimpleText';
 import MpHelp from '@/backoffice/components/MpHelp';
 import MpSelect from '@/backoffice/components/MpSelect';
+import MpImageUpload from '@/backoffice/components/MpImageUpload';
+import MpFileUpload from '@/backoffice/components/MpFileUpload';
+
 
 Vue.component('title-bar', TitleBar);
 Vue.component('invoker', Invoker);
@@ -48,6 +51,8 @@ Vue.component('mp-large-button', MpLargeButton);
 Vue.component('mp-help', MpHelp);
 Vue.component('mp-color-picker', MpColorPicker);
 Vue.component('mp-simple-text', MpSimpleText);
+Vue.component('mp-image-upload', MpImageUpload);
+Vue.component('mp-file-upload', MpFileUpload);
 
 // Settings
 window.host = process.env.host;

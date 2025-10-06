@@ -252,10 +252,14 @@
 	}
 
 	.md-dialog-container {
-		max-width: 640px !important;
 		max-height: 95% !important;
+		max-width: 95% !important;
 	}
 
+	.md-dialog-content
+	{
+				max-width: 640px;
+	}
 	.hand {
 		cursor: pointer;
 	}

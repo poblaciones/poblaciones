@@ -5,10 +5,10 @@
 		</div>
 		<invoker ref="invoker"></invoker>
 
-		<institution-popup ref="InstitutionPopup" @onSelected="selected" :container="container"></institution-popup>
+		<institution-popup ref="InstitutionPopup" @onSelected="selected" :Metadata="Metadata" :canEdit="canEdit" :container="container"></institution-popup>
 
 		<div style="padding-top: 14px; padding-bottom: 4px; font-size: 18px; min-width: 260px; line-height: 1.3em">
-			<div v-if="Work.CanEdit()" :style="(getInstitutionCaption === '' ? '' : 'float: right; margin-top: -16px;')">
+			<div v-if="canEdit" :style="(getInstitutionCaption === '' ? '' : 'float: right; margin-top: -16px;')">
 				<md-button class="md-raised" @click="onOpenSelect()">
 					<md-icon>edit</md-icon>
 					Seleccionar
@@ -22,7 +22,7 @@
 			</div>
 			{{ getInstitutionCaption }}
 		</div>
-		<pick-institution @onSelected="selected" :container="container" ref="PickInstitution"></pick-institution>
+		<pick-institution @onSelected="selected" :container="container" ref="PickInstitution" :Metadata="Metadata" :canEdit="canEdit"></pick-institution>
 	</div>
 </template>
 
@@ -31,12 +31,15 @@ import PickInstitution from './PickInstitution';
 import InstitutionPopup from './InstitutionPopup';
 
 export default {
-  name: 'InstitutionWidget',
-  data() {
-    return {
-
-};
-  },
+		name: 'InstitutionWidget',
+		props: {
+			container: Object,
+			canEdit: Boolean,
+			Metadata: Object
+		},
+		data() {
+			return {};
+		},
   computed: {
    Work() {
       return window.Context.CurrentWork;
@@ -77,9 +80,6 @@ export default {
 		onOpenSelect() {
 			this.$refs.PickInstitution.show();
 		}
-	},
-	props: {
-    container: Object
 	},
   components: {
     PickInstitution,

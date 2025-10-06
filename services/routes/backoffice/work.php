@@ -71,38 +71,6 @@ App::GetOrPost('/services/backoffice/GetWorkMetricsList', function (Request $req
 	return App::OrmJson($controller->GetWorkMetricsList($workId));
 });
 
-
-App::GetOrPost('/services/backoffice/UpdateWorkSource', function (Request $request) {
-	$workId = Params::GetIntMandatory('w');
-	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
-
-	$controller = new services\SourceService();
-	$source = App::ReconnectJsonParam(entities\DraftSource::class, 's');
-	return App::OrmJson($controller->Update($workId, $source));
-});
-
-App::GetOrPost('/services/backoffice/UpdateWorkInstitution', function (Request $request) {
-	$workId = Params::GetIntMandatory('w');
-	if ($denied = Session::CheckIsWorkEditor($workId))
-		return $denied;
-
-	$controller = new services\InstitutionService();
-	$institution = App::ReconnectJsonParam(entities\DraftInstitution::class, 'i');
-	return App::OrmJson($controller->UpdateWorkInstitution($workId, $institution));
-});
-
-App::GetOrPost('/services/backoffice/UpdateInstitution', function (Request $request) {
-	$workId = Params::GetIntMandatory('w');
-	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
-
-	$controller = new services\InstitutionService();
-	$institution = App::ReconnectJsonParam(entities\DraftInstitution::class, 'i');
-	// Traigo el base64 de la nueva imagen
-	$watermarkImage = Params::Get('iwm');
-
-	return App::OrmJson($controller->Update($institution, $watermarkImage));
-});
-
 App::GetOrPost('/services/backoffice/CreateWorkIcon', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;

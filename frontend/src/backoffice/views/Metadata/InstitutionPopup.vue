@@ -8,38 +8,38 @@
 
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-100">
-					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+					<mp-simple-text :canEdit="canEdit" @enter="save"
 									label="Nombre de la institución" ref="datasetInput"
 									helper="Indique el nombre completo de la institución. Ej. Instituto de Estadística Nacional."
 									:maxlength="200" v-model="item.Caption" />
 				</div>
 				<div class="md-layout-item md-size-55 md-small-size-100">
-					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+					<mp-simple-text :canEdit="canEdit" @enter="save"
 									label="Correo electrónico" helper="Dirección de correo electrónico institucional."
 									:maxlength="50" v-model="item.Email" />
 				</div>
 				<div class="md-layout-item md-size-45 md-small-size-100">
-					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+					<mp-simple-text :canEdit="canEdit" @enter="save"
 									label="Teléfono" helper="Incluir códigos de área y prefijos."
 									:maxlength="50" v-model="item.Phone" />
 				</div>
 				<div class="md-layout-item md-size-55 md-small-size-100">
-					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+					<mp-simple-text :canEdit="canEdit" @enter="save"
 									label="Dirección postal" helper="Ej. Carreli 1720 (2321), Montevideo."
 									:maxlength="200" v-model="item.Address" />
 				</div>
 				<div class="md-layout-item md-size-45 md-small-size-100">
-					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+					<mp-simple-text :canEdit="canEdit" @enter="save"
 									label="País" helper="Ej. Uruguay."
 									:maxlength="50" v-model="item.Country" />
 				</div>
 				<div class="md-layout-item md-size-55 md-small-size-100">
-					<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+					<mp-simple-text :canEdit="canEdit" @enter="save"
 													label="Sitio web de la institución" helper="Ej. https://vedol.gov/."
 													:maxlength="255" v-model="item.Web" />
 					<div>
 						<div class="mp-label">Color primario</div>
-						<mp-color-picker :canEdit="Work.CanEdit()" :ommitHexaSign="true" v-model="currentColor" />
+						<mp-color-picker :canEdit="canEdit" :ommitHexaSign="true" v-model="currentColor" />
 						<div class="md-helper-text helper">Fondo a utilizar en los marcos superiores de las cartografías de la institución.</div>
 					</div>
 				</div>
@@ -52,7 +52,7 @@
 
 		</md-dialog-content>
 		<md-dialog-actions>
-			<div v-if="Work.CanEdit()">
+			<div v-if="canEdit">
 				<md-button @click="openEditableInstitution = false">Cancelar</md-button>
 				<md-button class="md-primary" @click="save()">Aceptar</md-button>
 			</div>
@@ -70,7 +70,12 @@
 
 
 	export default {
-	name: 'InstitutionPopup',
+		name: 'InstitutionPopup',
+		props: {
+			container: Object,
+			canEdit: Boolean,
+			Metadata: Object
+		},
 	data() {
 		return {
 			item: null,
@@ -84,8 +89,8 @@
 		};
 	},
 	computed: {
-		Work() {
-			return window.Context.CurrentWork;
+		metadata() {
+			return this.Metadata.properties;
 		},
 		institutionSelected() {
 			if (this.item && this.item.Institution) {
@@ -121,7 +126,7 @@
 		getInstitutionWatermark(){
 			var loc = this;
 			loc.$refs.invoker.doMessage('Obteniendo imagen',
-				this.Work, this.Work.GetInstitutionWatermark, this.item
+				this.Metadata, this.Metadata.GetInstitutionWatermark, this.item
 			).then(
 				function (dataUrl) {
 					loc.watermarkPreviewImage = dataUrl;
@@ -144,7 +149,7 @@
 				this.item.PrimaryColor = this.currentColor;
 			}
 			this.$refs.invoker.doSave(
-				this.Work, this.Work.UpdateInstitution, this.item, this.container, this.imageToSend
+				this.Metadata, this.Metadata.UpdateInstitution, this.item, this.container, this.imageToSend
 			).then(
 				function (saved) {
 					loc.openEditableInstitution = false;
@@ -160,9 +165,6 @@
 		clearImage() {
 			this.item.Watermark = null;
 		}
-	},
- 	props: {
-		container: Object
 	},
 	components: {
 	}

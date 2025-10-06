@@ -86,7 +86,7 @@ class OnboardingService extends BaseService
 			$file = $this->GetNewStepImage();
 			$step->setImage($file);
 
-			$fileController = new FileService();
+			$fileController = new FileService($this->isDraft);
 			$fileController->SaveBase64BytesToFile(
 				$image,
 				$file,

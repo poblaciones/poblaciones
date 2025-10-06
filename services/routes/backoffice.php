@@ -29,6 +29,7 @@ if (App::Settings()->Servers()->IsTransactionServerRequest())
 	require_once('backoffice/test.php');
 
 	require_once('admin/review.php');
+	require_once('admin/metadata.php');
 	require_once('admin/admin.php');
 }
 

@@ -20,6 +20,14 @@ Context.prototype.Initialize = function () {
 	this.CartographyMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetCartographyMetrics');
 	this.MetricGroups = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricGroups');
 	this.BoundaryGroups = new AsyncCatalog(window.host + '/services/admin/GetBoundaryGroups');
+
+	this.Sources = new AsyncCatalog(window.host + '/services/admin/GetAllPublicSources');
+	this.Institutions = new AsyncCatalog(window.host + '/services/admin/GetAllPublicInstitutions');
+
+};
+
+Context.prototype.GetCreateFileUrl = function (bucketId) {
+	return window.host + '/services/backoffice/PostImportChunk?b=' + bucketId;
 };
 
 Context.prototype.CreateStore = function () {
@@ -49,3 +57,4 @@ Context.prototype.CanCreatePublicData = function () {
 Context.prototype.CanAccessAdminSite = function () {
 	return (this.User.Privileges === 'A' || this.User.Privileges === 'E' || this.User.Privileges === 'L');
 };
+

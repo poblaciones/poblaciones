@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<invoker ref="invoker"></invoker>
-		<title-bar title="Información" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()" :help="`<p>
+		<title-bar :title="resolveTitle" :showReadonlyIndexedWarning="readOnlyCausedByIndexing()" :help="`<p>
 						Los datos publicados en la plataforma deben poder ser referenciado por quienes hacen
 						uso de ellos.
 						</p><p>
@@ -16,24 +16,24 @@
 					<md-card>
 						<md-card-content>
 
-							<div>
-								<md-tabs md-sync-route ref="tabs">
+							<div v-if="Metadata">
+								<md-tabs :md-sync-route="hasCurrentWork" ref="tabs">
 									<template slot="md-tab" slot-scope="{ tab }">
 										{{ tab.label }}
 										<i class="badge" v-if="tab.data.badge">{{ tab.data.badge }}</i>
 										<mp-help :text="tab.data.help" :large="true" />
 									</template>
-									<md-tab v-for="step in stepDefinitions" :key="step.Id"
+									<md-tab @click="setTab(step)" v-for="step in stepDefinitions" :key="step.Id"
 													style='flex: 1 0 100% !important; overflow-x: auto; padding-top: 0px;'
 													:id="step.Id" :md-label="step.Label"
-													:to="makePath(step.Id)" :md-active="isPath(makePath(step.Id))"
+													:to="makePath(step.Id)" :md-active="isPath(makePath(step.Id)) || currentTab == step.Id"
 													:md-template-data="{ help: step.Helper }">
-										<Content v-if="step.Id == 'content'" />
-										<Attribution v-if="step.Id == 'attribution'" />
-										<InstitutionsList v-if="step.Id == 'institutions'" />
-										<Abstract v-if="step.Id == 'abstract'" />
-										<SourcesList v-if="step.Id == 'sources'" />
-										<Attachments v-if="step.Id == 'attachments'" />
+										<Content v-if="step.Id == 'content'" :canEdit='canEdit' :Metadata="Metadata" />
+										<Attribution v-if="step.Id == 'attribution'" :canEdit='canEdit' :Metadata="Metadata" />
+										<InstitutionsList v-if="step.Id == 'institutions'" :canEdit='canEdit' :Metadata="Metadata" />
+										<Abstract v-if="step.Id == 'abstract'"  :canEdit='canEdit' :useComplexAbstract='false' :Metadata="Metadata" />
+										<SourcesList v-if="step.Id == 'sources'" :canEdit='canEdit' :Metadata="Metadata" />
+										<Attachments v-if="step.Id == 'attachments'" :canEdit='canEdit' :Metadata="Metadata" />
 									</md-tab>
 								</md-tabs>
 							</div>
@@ -56,19 +56,32 @@
 	import SourcesList from './Sources';
 
 export default {
-	name: 'onboarding',
-	components: {
-		Content,
-		Attribution,
-		SourcesList,
-		InstitutionsList,
-		Abstract,
-		Attachments
+		name: 'metadata',
+		components: {
+			Content,
+			Attribution,
+			SourcesList,
+			InstitutionsList,
+			Abstract,
+			Attachments
+		},
+		props: ['metadataProperty', 'canEditProperty' ],
+		created() {
+			if (Context.CurrentWork) {
+				this.Metadata = Context.CurrentWork.Metadata;
+				this.canEdit = Context.CurrentWork.Metadata.Work.CanEdit();
+			} else {
+				this.Metadata = this.metadataProperty;
+				this.canEdit = this.canEditProperty;
+			}
 		},
 		mounted() {
-	},
+		},
 	data() {
 		return {
+			canEdit: false,
+			Metadata: null,
+			currentTab: 'institutions',
 			stepDefinitions: [{
 				Id: 'content', Label: 'Contenido', Helper: `
 						<p>
@@ -118,20 +131,46 @@ export default {
 			};
 	},
 	computed: {
-		Work() {
-			return window.Context.CurrentWork;
-		},
 		SecondaryLabel() {
-			return (this.Work.IsPublicData() ? '' : ' secundarias');
+			return (this.useComplexAbstract ? '' : ' secundarias');
 		},
+		hasCurrentWork() {
+			return Context.CurrentWork != null;
+		},
+		resolveTitle() {
+			if (this.hasCurrentWork) {
+				return 'Información';
+			} else {
+				return this.Metadata.properties.Title + ". Id: " + this.Metadata.properties.Id;
+			}
+		}
 	},
 		methods: {
 			extraHelp(section) {
-				if (window) {
+				if (window && window.Context.HelpLinkSection) {
 					return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);
 				} else {
 					return '';
 				}
+			},
+
+			start(metadata, canEdit) {
+				this.canEdit = canEdit;
+				this.Metadata = metadata;
+			},
+			readOnlyCausedByIndexing() {
+				if (this.Metadata && this.Metadata.Work) {
+					return this.Metadata.Work.ReadOnlyCausedByIndexing();
+				} else {
+					return false;
+				}
+			},
+			setTab(step) {
+				if (this.hasCurrentWork) {
+					return;
+				}
+				this.currentTab = step.Id;
+				this.$refs.tabs.activeTab = step.Id;
 			},
 		isPath(path) {
 			if (this.$refs.tabs) {
@@ -145,15 +184,15 @@ export default {
 			return this.$route.path === path;
 		},
 		makePath(relativePath) {
-			if (!this.Work) {
+			if (! (this.Metadata && this.Metadata.Work)) {
 				return '';
 			} else {
-				return '/cartographies/' + this.Work.properties.Id + '/metadata'
+				return '/cartographies/' + this.Metadata.Work.properties.Id + '/metadata'
 					+ (relativePath === '' ? '' : '/') + relativePath;
 			}
 		},
 		Update() {
-      this.$refs.invoker.doSave(this.Work, this.Work.UpdateOnboarding);
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.UpdateMetadata);
 		}
 	}
 };

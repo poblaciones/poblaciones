@@ -19,7 +19,6 @@ class Metadata
      *
      * @ORM\Column(name="met_id", type="integer", precision=0, scale=0, nullable=false, unique=false)
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $Id;
 

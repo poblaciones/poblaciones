@@ -9,31 +9,31 @@
 				<md-tab md-label="General">
 					<div class="md-layout md-gutter">
 						<div class="md-layout-item md-size-70 md-small-size-100">
-							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+							<mp-simple-text :canEdit="canEdit" @enter="save"
 								label="Nombre completo de la fuente" ref="datasetInput" helper="Evite siglas o acrónimos. No incluya el año de producción de la información.
 					Ej. Censo Nacional Económico."
 									:maxlength="200" v-model="item.Caption" />
 						</div>
 						<div class="md-layout-item md-size-30 md-small-size-100">
-							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+							<mp-simple-text :canEdit="canEdit" @enter="save"
 							label="Edición" helper="Año de producción de la fuente o versión"
 								:maxlength="15" v-model="item.Version" />
 						</div>
 						<div class="md-layout-item md-size-55 md-small-size-100">
-							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+							<mp-simple-text :canEdit="canEdit" @enter="save"
 											label="Autores" helper="Autores personales si correspondiera (Ej. Juana Méndez)"
 											:maxlength="200" v-model="item.Authors" />
 						</div>
 
 						<div class="md-layout-item md-size-50 md-small-size-100">
-							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+							<mp-simple-text :canEdit="canEdit" @enter="save"
 											label="Página web" helper="Sitio web correspondiente a la fuente (Ej. https://mical.gov/datum/2010)"
 											:maxlength="255" v-model="item.Web" />
 						</div>
 						<div class="md-layout-item md-size-10 md-small-size-0">
 						</div>
 						<div class="md-layout-item md-size-40 md-small-size-100">
-							<mp-simple-text :canEdit="Work.CanEdit()" @enter="save"
+							<mp-simple-text :canEdit="canEdit" @enter="save"
 											label="Entrada en Wikipedia" helper="Ej. https://es.wikipedia.org/wiki/Cen2010"
 											:maxlength="200" v-model="item.Wiki" />
 						</div>
@@ -42,24 +42,24 @@
 				<md-tab md-label="Institución">
 					<div class="md-layout md-gutter">
 						<div class="md-layout-item md-size-90 md-small-size-100">
-							<institution-widget :container="item"></institution-widget>
+							<institution-widget :container="item" :Metadata="Metadata" :canEdit="canEdit" ></institution-widget>
 						</div>
 					</div>
 				</md-tab>
 				<md-tab md-label="Contacto">
 					<div v-if="item.Contact" class="md-layout md-gutter">
 							<div class="md-layout-item md-size-80">
-								<mp-simple-text label="Nombre" :canEdit="Work.CanEdit()" @enter="save"
+								<mp-simple-text label="Nombre" :canEdit="canEdit" @enter="save"
 									helper="Nombre completo de la persona a contactar por consultas. Ej. Catalina Gorriti."
 									v-model="item.Contact.Person" :maxlength="200" />
 							</div>
 							<div class="md-layout-item md-size-50 md-small-size-100">
-								<mp-simple-text label="Correo electrónico" :canEdit="Work.CanEdit()" @enter="save"
+								<mp-simple-text label="Correo electrónico" :canEdit="canEdit" @enter="save"
 									helper="Dirección de correo electrónico de contacto. Ej. catagorr@cecil.edu."
 									v-model="item.Contact.Email" :maxlength="50" />
 							</div>
 							<div class="md-layout-item md-size-50 md-small-size-100">
-								<mp-simple-text label="Teléfono" :canEdit="Work.CanEdit()" @enter="save"
+								<mp-simple-text label="Teléfono" :canEdit="canEdit" @enter="save"
 									helper="Teléfono de contacto, incluyendo códigos de área. Ej. +54 11 524-1124."
 									v-model="item.Contact.Phone" :maxlength="50" />
 							</div>
@@ -68,7 +68,7 @@
 			</md-tabs>
 		</md-dialog-content>
 		<md-dialog-actions>
-			<div v-if="Work.CanEdit()">
+			<div v-if="canEdit">
 				<md-button @click="openEditableSource = false">Cancelar</md-button>
 				<md-button class="md-primary" @click="save()">Aceptar</md-button>
 			</div>
@@ -83,7 +83,11 @@
 import InstitutionWidget from '@/backoffice/views/Metadata/InstitutionWidget';
 
 export default {
-  name: 'SourcePopup',
+		name: 'SourcePopup',
+		props: [
+			'canEdit',
+			'Metadata'
+		],
   data() {
     return {
   		item: null,
@@ -92,10 +96,7 @@ export default {
     };
   },
   computed: {
-   Work() {
-      return window.Context.CurrentWork;
-    },
-		institutionSelected()
+   institutionSelected()
 		{
 			if (this.item && this.item.Institution) {
 				return this.item.Institution.Id;
@@ -128,8 +129,8 @@ export default {
 				return;
 			}
 			var loc = this;
-		  this.$refs.invoker.doSave(this.Work,
-														this.Work.UpdateSource, this.item).then(
+			this.$refs.invoker.doSave(this.Metadata,
+				this.Metadata.UpdateSource, this.item).then(
 														function () {
 															loc.openEditableSource = false;
 															if (loc.closeParentCallback !== null) {

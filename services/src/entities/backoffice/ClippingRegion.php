@@ -30,7 +30,15 @@ class ClippingRegion
      *
      * @ORM\Column(name="clr_caption", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
      */
-    private $Caption;
+	private $Caption;
+
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="clr_version", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+	 */
+    private $Version;
 
     /**
      * @var string
@@ -166,13 +174,37 @@ class ClippingRegion
         return $this->Caption;
     }
 
-    /**
-     * Set symbol
-     *
-     * @param string $symbol
-     *
-     * @return ClippingRegion
-     */
+
+	/**
+	 * Set version
+	 *
+	 * @param string $version
+	 *
+	 * @return ClippingRegion
+	 */
+	public function setVersion($version)
+	{
+		$this->Version = $version;
+
+		return $this;
+	}
+
+	/**
+	 * Get version
+	 *
+	 * @return string
+	 */
+	public function getVersion()
+	{
+		return $this->Version;
+	}
+	/**
+	 * Set symbol
+	 *
+	 * @param string $symbol
+	 *
+	 * @return ClippingRegion
+	 */
     public function setSymbol($symbol)
     {
         $this->Symbol = $symbol;

@@ -15,7 +15,7 @@
 				<div v-if="!isNew && this.item !== null" class="md-layout md-gutter">
 						<div class="md-layout-item md-size-100">
 							<mp-simple-text label="Descripción" ref="inputName" :maxlength="200"
-															v-model="localCaption" @enter="save()" :canEdit="Work.CanEdit()" />
+															v-model="localCaption" @enter="save()" :canEdit="canEdit" />
 						</div>
 				</div>
 				<div class="md-layout md-gutter" v-if="!isNew">
@@ -26,7 +26,7 @@
 								<label>{{ formatFile('PDF', item.File.Size, item.File.Pages) }}</label>
 						</div>
 				</div>
-				<div v-if="Work.CanEdit()" class="md-layout md-gutter">
+				<div v-if="canEdit" class="md-layout md-gutter">
 						<div class="md-layout-item md-size-20" style="padding-top: 30px;">
 										<label>Archivo:</label>
 						</div>
@@ -48,14 +48,14 @@
 				<div v-if="isNew && this.item !== null" class="md-layout md-gutter">
 						<div class="md-layout-item md-size-100">
 							<mp-simple-text label="Descripción" :maxlength="200"
-															v-model="localCaption" @enter="save()" :canEdit="Work.CanEdit()" />
+															v-model="localCaption" @enter="save()" :canEdit="canEdit" />
 						</div>
 				</div>
 
 			</md-dialog-content>
 
 		<md-dialog-actions>
-			<div v-if="Work.CanEdit()">
+			<div v-if="canEdit">
 				<md-button @click="openEditableAttach = false">Cancelar</md-button>
 				<md-button class="md-primary" :disabled="sending" @click="save()">Aceptar</md-button>
 			</div>
@@ -75,7 +75,11 @@ import f from '@/backoffice/classes/Formatter';
 import str from '@/common/framework/str';
 
 export default {
-  name: 'Adjuntos',
+		name: 'Adjuntos',
+		props: [
+			'canEdit',
+			'Metadata'
+		],
   data() {
 		var loc = this;
     return {
@@ -106,16 +110,16 @@ export default {
     };
   },
   computed: {
-		Work() {
-			return window.Context.CurrentWork;
-		},
 		isNew() {
 			return this.item === null || this.item.File === null || this.item.File.Id === null;
 		},
+		metadata() {
+			return this.Metadata.properties;
+		}
 	},
 	methods: {
 		getCreateFileUrl() {
-      return this.Work.GetCreateFileUrl(this.getBucketId());
+      return window.Context.GetCreateFileUrl(this.getBucketId());
     },
     getBucketId() {
       return this.bucketId;
@@ -138,9 +142,9 @@ export default {
 			return f.formatFile(type, size);
 		},
 		IsNotUniqueName() {
-			for(var n = 0; n < this.Work.Files.length; n++) {
-				if (this.Work.Files[n].Caption === this.localCaption &&
-					this.Work.Files[n].Id !== this.item.Id) {
+			for(var n = 0; n < this.Metadata.Files.length; n++) {
+				if (this.Metadata.Files[n].Caption === this.localCaption &&
+					this.Metadata.Files[n].Id !== this.item.Id) {
 					return true;
 				}
 			}
@@ -163,7 +167,7 @@ export default {
 			var loc = this;
 			var itemToUpdate = f.clone(this.item);
 			itemToUpdate.Caption = this.localCaption;
-      this.$refs.invoker.doSave(this.Work, this.Work.UpdateFile, itemToUpdate, (this.hasFiles ? this.bucketId : null)).then(
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.UpdateFile, itemToUpdate, (this.hasFiles ? this.bucketId : null)).then(
 					function() {
 						loc.openEditableAttach = false;
 						loc.bucketId = '';

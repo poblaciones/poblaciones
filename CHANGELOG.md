@@ -1,3 +1,7 @@
+- Los arks no se estaban mostrando bien desde backoffice.
+- Edición de metadatos de regiones y delimitaciones desde web.
+- Versiones para las delimitaciones.
+
 v4.5 (2025-08-31)
 - Fix a carga de imagen de instituciones en generación de PDF en backoffice.
 - Generación de ruta por ShortUrl.

@@ -6,10 +6,11 @@
 				Agregar fuente
 			</md-dialog-title>
 			<md-dialog-content>
+
 			<invoker ref="invoker"></invoker>
 
-			<source-popup ref="SourcePopup"></source-popup>
-			<div v-if="Work.CanEdit()" class="md-layout">
+			<source-popup ref="SourcePopup" :Metadata="Metadata" :canEdit="canEdit" ></source-popup>
+			<div v-if="canEdit" class="md-layout">
 				<md-button @click="CreateNewSource()">
 					<md-icon>add_circle_outline</md-icon>
 					Crear nueva fuente
@@ -40,7 +41,11 @@ import Context from '@/backoffice/classes/Context';
 import SourcePopup from '@/backoffice/views/Metadata/SourcePopup';
 
 export default {
-  name: 'Fuentes',
+		name: 'Fuentes',
+		props: [
+			'canEdit',
+			'Metadata'
+		],
   data() {
     return {
       openSources: false,
@@ -50,19 +55,14 @@ export default {
     };
   },
   computed: {
-    Work() {
-      return window.Context.CurrentWork;
-    },
-		SecondaryLabel() {
-			return (this.Work.IsPublicData() ? '' : ' secundarias');
+    SecondaryLabel() {
+			return (this.Metadata.Work && this.Metadata.Work.IsPublicData() ? '' : ' secundarias');
 		}
   },
   methods: {
     CreateNewSource() {
 			var loc = this;
 			window.Context.Factory.GetCopy('Source', function(data) {
-					data.Work = loc.Work.properties;
-					data.Type = loc.Work.properties.Type;
 					data.IsEditableByCurrentUser = true;
 					loc.openEdition(data);
 			});
@@ -79,12 +79,12 @@ export default {
 				alert('No ha seleccionado ninguna fuente.');
 				return;
 			}
-			if (this.Work.ContainsSource(this.selected)) {
-				alert('La fuente seleccionada ya es parte de ' + this.Work.ThisWorkLabel() + '.');
+			if (this.Metadata.ContainsSource(this.selected)) {
+				alert('Se ha seleccionada una fuente que ya es parte de la lista.');
 				return;
 			}
 			var loc = this;
-			this.$refs.invoker.doSave(this.Work, this.Work.AddSource, this.selected).then(function() {
+			this.$refs.invoker.doSave(this.Metadata, this.Metadata.AddSource, this.selected).then(function() {
 				loc.openSources = false;
 				});
     },

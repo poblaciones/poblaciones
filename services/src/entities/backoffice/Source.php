@@ -17,15 +17,20 @@ class Source
      *
      * @ORM\Column(name="src_id", type="integer", precision=0, scale=0, nullable=false, unique=false)
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $Id;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="src_caption", type="string", length=200, precision=0, scale=0, nullable=false, unique=false)
-     */
+
+	/**
+	 * @var boolean
+	 */
+	private $IsEditableByCurrentUser = false;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="src_caption", type="string", length=200, precision=0, scale=0, nullable=false, unique=false)
+	 */
     private $Caption;
 
     /**
@@ -131,13 +136,38 @@ class Source
         return $this->Caption;
     }
 
-    /**
-     * Set authors
-     *
-     * @param string $authors
-     *
-     * @return Source
-     */
+
+	/**
+	 * Set isEditableByCurrentUser
+	 *
+	 * @param boolean $isEditableByCurrentUser
+	 *
+	 * @return Source
+	 */
+	public function setIsEditableByCurrentUser($isEditableByCurrentUser)
+	{
+		$this->IsEditableByCurrentUser = $isEditableByCurrentUser;
+
+		return $this;
+	}
+
+	/**
+	 * Get isEditableByCurrentUser
+	 *
+	 * @return boolean
+	 */
+	public function getIsEditableByCurrentUser()
+	{
+		return $this->IsEditableByCurrentUser;
+	}
+
+	/**
+	 * Set authors
+	 *
+	 * @param string $authors
+	 *
+	 * @return Source
+	 */
     public function setAuthors($authors)
     {
         $this->Authors = $authors;

@@ -42,6 +42,10 @@ Context.prototype.GetTrackingLevelGeography = function () {
 	throw new Error('No hay un tracking level definido.');
 };
 
+Context.prototype.GetCreateFileUrl = function (bucketId) {
+	return window.host + '/services/backoffice/PostImportChunk?b=' + bucketId;
+};
+
 Context.prototype.CreateStore = function () {
 
 	Vue.use(Vuex);
