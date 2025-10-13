@@ -116,7 +116,7 @@ export default {
   },
   methods: {
     getCreateFileUrl() {
-      return this.Work.GetCreateFileUrl(this.getBucketId());
+      return window.Context.GetCreateFileUrl(this.getBucketId());
     },
     getBucketId() {
       return this.bucketId;

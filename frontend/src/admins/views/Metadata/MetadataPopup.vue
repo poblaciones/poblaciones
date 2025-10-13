@@ -1,17 +1,10 @@
 <template>
   <div>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="false">
-			<md-dialog-content style="min-width: 1290px!important; min-height: 800px!important">
+		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+			<md-dialog-content style="min-width: 1290px!important; min-height: 800px!important; padding: 0px">
 				<invoker ref="invoker"></invoker>
-				<div class="md-layout md-gutter">
-					<div class="md-layout-item md-size-100">
 						<Metadata :metadataProperty="metadata" :canEditProperty="true"></Metadata>
-					</div>
-				</div>
 			</md-dialog-content>
-			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cerrar</md-button>
-			</md-dialog-actions>
 		</md-dialog>
 	</div>
 </template>

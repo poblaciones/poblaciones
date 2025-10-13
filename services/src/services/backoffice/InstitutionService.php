@@ -171,7 +171,7 @@ class InstitutionService extends BaseService
 		$metadataInstitution = $this->LoadAndValidate($workId, $metadataId, $institutionId);
 		// Obtiene el anterior
 		$previousInstitutionId = App::Db()->fetchScalarNullable(
-			"SELECT min_id FROM " . $this->makeTableName("draft_metadata_institution") . " WHERE min_metadata_id = ? AND min_order < ? ORDER BY min_order DESC LIMIT 1",
+			"SELECT min_id FROM " . $this->makeTableName("metadata_institution") . " WHERE min_metadata_id = ? AND min_order < ? ORDER BY min_order DESC LIMIT 1",
 			array($metadataInstitution->getMetadata()->getId(), $metadataInstitution->getOrder())
 		);
 		if ($previousInstitutionId === null)

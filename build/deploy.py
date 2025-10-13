@@ -51,7 +51,7 @@ def upload(url, file, key, verify_ssl=True):
     rnd = generate_random_hex()
     data = {}
 
-    chunk_size=256*1024
+    chunk_size=65*1024
     file_size = os.path.getsize(file)
 
     with open(file, 'rb') as f:
@@ -73,7 +73,8 @@ def upload(url, file, key, verify_ssl=True):
 
                 e = MultipartEncoder(fields=chunk_data)
 
-                headers = {"Content-Type": e.content_type, "User-Agent": USER_AGENT }
+                headers = {"Content-Type": e.content_type, "User-Agent": USER_AGENT,  "Connection": "keep-alive",
+    "Accept-Encoding": "gzip, deflate" }
                 response = requests.post(chunk_url, data=e, headers=headers, verify=verify_ssl)
 
                 # Verificar la respuesta del servidor

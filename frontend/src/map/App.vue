@@ -1021,6 +1021,14 @@
 		pointer-events: all
 	}
 
+	.fa {
+		translate: no;
+	}
+
+	.fas {
+		translate: no;
+	}
+
 		.ibLinkC:hover {
 			color: #2e8cff;
 			text-decoration: none !important;

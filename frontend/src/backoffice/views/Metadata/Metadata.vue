@@ -10,12 +10,11 @@
 							en Contenido, Atribución, Resumen, Fuentes y Adjuntos.
 						</p>` + extraHelp('MetadataSection')" />
 
-		<div class="app-container">
+		<div class="app-container" :class="(hasCurrentWork ? '' : 'popupFrame')">
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-100">
 					<md-card>
-						<md-card-content>
-
+						<md-card-content >
 							<div v-if="Metadata">
 								<md-tabs :md-sync-route="hasCurrentWork" ref="tabs">
 									<template slot="md-tab" slot-scope="{ tab }">
@@ -216,22 +215,28 @@ export default {
 	background-color: #f5f5f5;
 	}
 
-.badge {
-  padding: 2px 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: #b7b7b7;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 600;
-  letter-spacing: -.05em;
-  font-family: 'Roboto Mono', monospace;
-}
+	.popupFrame {
+		margin-top: -54px;
+		height: calc(100% - 53px)!important;
+				padding: 0px!important;
+	}
+
+		.badge {
+		padding: 2px 6px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: absolute;
+		top: 6px;
+		right: 6px;
+		background: #b7b7b7;
+		border-radius: 6px;
+		color: #fff;
+		font-size: 10px;
+		font-style: normal;
+		font-weight: 600;
+		letter-spacing: -.05em;
+		font-family: 'Roboto Mono', monospace;
+	}
 </style>
 
