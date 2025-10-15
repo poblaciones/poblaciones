@@ -4,6 +4,7 @@ namespace helena\db\frontend;
 
 use helena\classes\App;
 use helena\classes\Session;
+use helena\services\backoffice\publish\PublishDataTables;
 
 use minga\framework\Date;
 use minga\framework\Profiling;
@@ -68,24 +69,33 @@ class WorkModel extends BaseModel
 	public function GetWorkMetricsInfo($workId)
 	{
 		Profiling::BeginTimer();
-		$params = array($workId, $workId, $workId);
+		$userId = (Session::IsAuthenticated() ? Session::GetCurrentUser()->GetUserId() : null);
+		$currentShard = App::Settings()->Shard()->CurrentShard;
+		$params = array($workId, $workId, $workId, $currentShard, $userId);
 
 		$sql = "SELECT mtr_id Id, mtr_caption Name,
 								GROUP_CONCAT(DISTINCT mvr_caption ORDER BY mvr_caption ASC SEPARATOR '\t')
 								Versions,
-                GROUP_CONCAT(DISTINCT (CASE WHEN mvr_work_id = ? THEN mvr_caption ELSE '' END) ORDER BY mvr_caption DESC SEPARATOR '\t')
+								GROUP_CONCAT(DISTINCT (CASE WHEN mvr_work_id = ? THEN mvr_caption ELSE '' END) ORDER BY mvr_caption DESC SEPARATOR '\t')
 								LocalVersions
-								FROM
+				FROM
 								(SELECT wmt_metric_id metricId FROM work_extra_metric WHERE wmt_work_id = ?
 								UNION
 								SELECT DISTINCT mvr_metric_id metricId FROM dataset
 								JOIN metric_version_level ON mvl_dataset_id = dat_id
 								JOIN metric_version ON mvl_metric_version_id = mvr_id
 								WHERE dat_work_id = ?) wMetrics
-								JOIN metric_version ON mvr_metric_id = metricId
-								JOIN metric_version_level ON mvl_metric_version_id = mvr_id
-								JOIN metric ON mtr_id = metricId
-								GROUP BY mtr_id, mtr_caption ORDER BY mtr_caption";
+				JOIN metric_version
+								ON mvr_metric_id = metricId
+				JOIN metric_version_level
+								ON mvl_metric_version_id = mvr_id
+				JOIN dataset
+								ON mvl_dataset_id = dat_id
+				JOIN work		ON dat_work_id = wrk_id AND
+								(wrk_is_private = 0 OR EXISTS (SELECT * FROM draft_work_permission WHERE wkp_work_id * 100 + ? = wrk_id AND wkp_user_id = ?))
+				JOIN metric
+								ON mtr_id = metricId
+				GROUP BY mtr_id, mtr_caption ORDER BY mtr_caption";
 
 		$ret = App::Db()->fetchAll($sql, $params);
 		Profiling::EndTimer();

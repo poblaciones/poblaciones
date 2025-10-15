@@ -1,3 +1,5 @@
+v4.6 (2025-10-13)
+- Fix a íconos bajo traducción automática de Chrome.
 - Los arks no se estaban mostrando bien desde backoffice.
 - Edición de metadatos de regiones y delimitaciones desde web.
 - Versiones para las delimitaciones.
