@@ -7,10 +7,11 @@
 				{{ (variable.Name ? variable.Name : 'Conteo') }} {{ divider(variable) }}<span v-if="isActive(index)" style="padding-left: 1px;">{{ variable.Asterisk }}</span>
 				<span v-if="isActive(index)" @click.stop="toggleVariable()" class='hand exp-hiddable-inline'>
 					<chevron-down-icon v-if="version.LabelsCollapsed"
-															title="Mostrar categorías"/>
-					<chevron-up-icon v-else title="Ocultar categorías"/>
+														 title="Mostrar categorías" />
+					<chevron-up-icon v-else title="Ocultar categorías" />
 				</span>
 			</div>
+			<metricChart v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
 			<metricValues v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
 		</div>
 		<div v-if="hasComparableVariables && hasNonComparableVariables" class="coverageBox" style="padding: 12px 0px 0px 0px">
@@ -22,6 +23,7 @@
 <script>
 import h from '@/map/js/helper';
 import metricValues from './metricValues';
+import metricChart from './metricChart';
 import ChevronDownIcon from 'vue-material-design-icons/ChevronDown.vue';
 import ChevronUpIcon from 'vue-material-design-icons/ChevronUp.vue';
 // https://materialdesignicons.com/cdn/1.9.32/
@@ -31,6 +33,7 @@ export default {
 	props: [ 'metric', 'fixedLevel' ],
 	components: {
 		metricValues,
+		metricChart,
 		ChevronDownIcon,
 		ChevronUpIcon
 	},

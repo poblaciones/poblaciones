@@ -307,7 +307,7 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	if (this.useElevation) {
 		this.baseLayers['elevation'] = new L.TileLayer(window.SegMap.Configuration.ElevationUrl,
 			{
-				attribution: cp,
+//				tms: true,               // necesario para EPSG:4326
 				maxNativeZoom: 12,
 				maxZoom: 16
 			});

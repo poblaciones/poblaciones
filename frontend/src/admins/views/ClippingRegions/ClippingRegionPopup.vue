@@ -29,6 +29,10 @@
 						<mp-simple-text label="Símbolo"
 														v-model="clippingRegion.Symbol" @enter="save" />
 					</div>
+					<div class="md-layout-item md-size-40">
+						<mp-simple-text label="Prioridad"
+														v-model="clippingRegion.Priority" @enter="save" />
+					</div>
 
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" v-model="useInSearch">
