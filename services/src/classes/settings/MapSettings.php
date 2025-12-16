@@ -46,6 +46,8 @@ class MapSettings
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;
 
+	public $UseCharts = false;
+
 	public $NAAN = null;
 
 	public $MapsAPI = "google";

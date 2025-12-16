@@ -82,17 +82,17 @@ ActiveBoundary.prototype.UpdateSummary = function () {
 
 	var rev = window.SegMap.Signatures.Boundary;
 	var suffix = window.SegMap.Signatures.Suffix;
-
+	var versionId = boundary.SelectedVersion().Id;
 	window.SegMap.Get(window.host + '/services/frontend/boundaries/GetBoundarySummary', {
 		params: h.getBoundarySummaryParams(boundary, window.SegMap.frame, rev, suffix),
 		cancelToken: new CancelToken(function executor(c) { loc.cancelUpdateSummary = c; }),
 	}).then(function (res) {
 		loc.cancelUpdateSummary = null;
-		if (res.message === 'cancelled') {
+		if (res.message === 'cancelled' || res.data.BoundaryVersionId != versionId) {
 			return;
 		}
 		loc.IsUpdatingSummary = false;
-		loc.properties.Count = res.data.Count;
+		boundary.SelectedVersion().Count = res.data.Count;
 	}).catch(function (error) {
 		err.errDialog('GetBoundarySummary', 'obtener las estadísticas de resumen de delimitación', error);
 	});

@@ -147,6 +147,7 @@ class ConfigurationService extends BaseService
 
 									'UseAnnotations' =>  App::Settings()->Map()->UseAnnotations,
 									'UsePerimeter' =>  App::Settings()->Map()->UsePerimeter,
+									'UseCharts' =>  App::Settings()->Map()->UseCharts,
 									'UseFavorites' => App::Settings()->Map()->UseFavorites,
 									'UseEmbedding' => App::Settings()->Map()->UseEmbedding,
 									'UseUrbanity' => App::Settings()->Map()->UseUrbanity,

@@ -20,7 +20,7 @@
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
 						<span class="hand" :title="currentMetric.Title" @click="clickMetric(currentMetric.Next.Key)"
-									v-html="getValueHeader()">
+									v-html="metric.Summary.getValueHeader(variable)">
 						</span>
 					</td>
 				</tr>
@@ -35,10 +35,10 @@
 							</td>
 							<td class="dataBox" style="width: 100%">
 								{{ label.Name }}
-								<div class="bar" :style="getLength(getValue(label.Values, variableValueLabels), variable)"></div>
+								<div class="bar" :style="getLength(metric.Summary.getValue(variable, variableValueLabels, label.Values, variableValueLabels), variable)"></div>
 							</td>
 							<td class='textRight' :class="getMuted()"><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
-							<td style="width: 75px" class='textRight' :class="getMuted()">{{ getValueFormatted(getValue(label.Values, variableValueLabels), variable.Decimals) }}</td>
+							<td style="width: 75px" class='textRight' :class="getMuted()">{{ metric.Summary.getValueFormatted(metric.Summary.getValue(variable, variableValueLabels, label.Values, variableValueLabels), variable.Decimals) }}</td>
 						</template>
 						<template v-else class="labelRow">
 							<td class="dataBox action-muted center">
@@ -49,10 +49,10 @@
 							</td>
 							<td class="dataBox text-muted" style="width: 100%">
 								{{ applySymbols(label.Name) }}
-								<div class="bar-muted" :style="getLength( getValue(label.Values, variableValueLabels), variable)"></div>
+								<div class="bar-muted" :style="getLength( metric.Summary.getValue(variable, variableValueLabels, label.Values, variableValueLabels), variable)"></div>
 							</td>
 							<td class='text-muted textRight'><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
-							<td class='text-muted textRight'>{{ getValueFormatted(getValue(label.Values, variableValueLabels), variable.Decimals) }}</td>
+							<td class='text-muted textRight'>{{ metric.Summary.getValueFormatted(metric.Summary.getValue(variable, variableValueLabels, label.Values, variableValueLabels), variable.Decimals) }}</td>
 						</template>
 					</template>
 				</tr>
@@ -91,7 +91,7 @@ export default {
 		UnpinIcon
 	},
   mounted() {
-    var format = this.getFormat();
+		var format = this.metric.Summary.getFormat(this.variable);
 		var total = this.total.aniTotal;
 		Helper.animateNum(this, 'aniTotal', total, total, format, this.variable.Decimals);
 		var totalCount = this.totalCount;
@@ -107,11 +107,11 @@ export default {
 	},
 	watch: {
 		'total.aniTotal'(newValue, oldValue) {
-			var format = this.getFormat();
+			var format = this.metric.Summary.getFormat(this.variable);
 			Helper.animateNum(this, 'aniTotal', newValue, oldValue, format, this.variable.Decimals);
 		},
 		totalCount(newValue, oldValue) {
-			var format = this.getFormat();
+			var format = this.metric.Summary.getFormat(this.variable);
 			Helper.animateNum(this, 'aniTotalCount', newValue, oldValue, format, this.variable.Decimals);
 		},
 	},
@@ -124,7 +124,7 @@ export default {
 			return 'margin-right: ' + margin + 'px;';
 		},
 		total() {
-			return this.getTotal();
+			return this.metric.Summary.getTotal(this.variable, this.variableValueLabels);
 		},
 		totalCount() {
 			var ret = 0;
@@ -227,191 +227,6 @@ export default {
 		},
 		clickMetric(metric) {
       this.metric.properties.SummaryMetric = metric;
-		},
-		getFormat() {
-			var format = 'num';
-			switch(this.metric.properties.SummaryMetric) {
-			case 'D':
-			case 'N':
-				format = 'num';
-				break;
-			case 'K':
-			case 'H':
-				format = 'km';
-				break;
-			case 'P':
-			case 'A':
-				format = '%';
-				break;
-			case 'I':
-				switch(this.variable.NormalizationScale) {
-					case 100:
-						format = '%100';
-						break;
-					case 1:
-            format = '%1';
-            break;
-          case 1000:
-            format = '%1000';
-            break;
-          case 10000:
-            format = '%10000';
-            break;
-          case 100000:
-            format = '%100000';
-            break;
-        }
-			}
-			return format;
-		},
-		getValueHeader() {
-			var delta = (this.metric.Compare.Active ? 'Δ ' : '');
-			switch(this.metric.properties.SummaryMetric) {
-			case 'K':
-				return 'Km<sup>2</sup>';
-			case 'H':
-				return 'Ha';
-			case 'A':
-				return '% Km<sup>2</sup>';
-			case 'P':
-				return 'COL %';
-			case 'I':
-				switch(this.variable.NormalizationScale) {
-					case 100:
-						return delta + '%';
-          case 1:
-						return delta + '/1';
-          case 1000:
-						return delta + '/k';
-          case 10000:
-						return delta + '/10k';
-					case 100000:
-						return delta + '/100k';
-					case 1000000:
-						return delta + '/1M';
-        }
-					return 'N/A';
-			case 'D':
-				return 'N/Km<sup>2</sup>';
-			case 'N':
-				return 'N';
-			default:
-				return '?';
-			}
-		},
-		getValueFormatted(value, decimals) {
-			if(this.metric.properties.SummaryMetric === 'N') {
-				return Helper.formatNum(value, decimals);
-			} else if(this.metric.properties.SummaryMetric === 'I') {
-				return Helper.formatPercentNumber(value);
-			} else if(this.metric.properties.SummaryMetric === 'P') {
-				return Helper.formatPercentNumber(value);
-			} else if(this.metric.properties.SummaryMetric === 'K') {
-				return Helper.formatKm(value);
-			} else if(this.metric.properties.SummaryMetric === 'H') {
-				return Helper.formatKm(value);
-			} else if(this.metric.properties.SummaryMetric === 'A') {
-				return Helper.formatPercentNumber(value);
-			} else if(this.metric.properties.SummaryMetric === 'D') {
-				return Helper.formatKm(value);
-			} else {
-				return '';
-			}
-		},
-		getValue(values, labels) {
-			if (this.metric.Compare.Active && this.metric.properties.SummaryMetric === 'I') {
-				var tuple = this.getValueTuple(values, labels);
-				var compareTuple = { value: tuple.valueCompare, normalization: tuple.normalizationCompare };
-				var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
-				return Helper.calculateCompareValue(useProportionalDelta, tuple, compareTuple);
-			} else {
-				return Helper.calculateValue(this.getValueTuple(values, labels));
-			}
-		},
-		getTotal() {
-			// calcula el total para barras azules
-			var loc = this;
-			var percTotal = 0;
-			for (var label of this.variableValueLabels) {
-				percTotal += Number(Math.abs(loc.getValue(label.Values, this.variableValueLabels)));
-			};
-			// calcula el total general
-			var total = null, value = 0, totalCompare = null, valueCompare = null;
-			var labels = this.variableValueLabels;
-			labels.forEach(function (label) {
-				var tuple = loc.getValueTuple(label.Values, labels);
-				if (tuple.normalization !== undefined) {
-					total = (total == null ? 0 : total) + tuple.normalization;
-				}
-				if (tuple.normalizationCompare !== undefined) {
-					totalCompare = (total == null ? 0 : totalCompare) + tuple.normalizationCompare;
-				}
-				if (tuple.valueCompare !== undefined) {
-					valueCompare = (valueCompare == null ? 0 : valueCompare) + tuple.valueCompare;
-				}
-				value += Number(tuple.value);
-			});
-			var totalTuple = { value: value, normalization: total };
-			var aniTotal = 100;
-			if (this.metric.properties.SummaryMetric == 'I' && this.metric.Compare.Active) {
-				// calcula la diferencia en puntos porcentajes o %
-				var compareTuple = { value: valueCompare, normalization: totalCompare };
-				var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
-				aniTotal = Helper.calculateCompareValue(useProportionalDelta, totalTuple, compareTuple);
-			} else if (this.metric.properties.SummaryMetric !== 'P' && this.metric.properties.SummaryMetric !== 'A') {
-				aniTotal = Helper.calculateValue(totalTuple);
-			}
-			// devuelve el par
-			return { aniTotal: aniTotal,
-							 percTotal: percTotal };
-		},
-		getNumericValue(values) {
-			if (this.metric.Compare.Active) {
-				return values.Value; // - values.ValueCompare;
-			} else {
-				return values.Value;
-			}
-		},
-		getValueTuple(values, labels) {
-			var value = this.getNumericValue(values);
-			var area = Number(values.Km2);
-			if (this.metric.properties.SummaryMetric === 'N') {
-				return { value: value };
-			} else if (this.metric.properties.SummaryMetric === 'P') {
-				let tot = 0;
-				var loc = this;
-				labels.forEach(function (label) {
-					var tvalue = loc.getNumericValue(label.Values);
-					tot += Math.abs(Number(tvalue));
-				});
-				return { value: Math.abs(value), normalization: tot / 100 };
-			} else if (this.metric.properties.SummaryMetric === 'K') {
-				return { value: area };
-			} else if (this.metric.properties.SummaryMetric === 'I') {
-				if (this.metric.Compare.Active) {
-					return {
-						value: Number(values.Value),
-						valueCompare: Number(values.ValueCompare),
-						normalization: Number(values.Total) / this.variable.NormalizationScale,
-						normalizationCompare: Number(values.TotalCompare) / this.variable.NormalizationScale
-					};
-				} else {
-					var nTotal = Number(values.Total);
-					return { value: value, normalization: nTotal / this.variable.NormalizationScale };
-				}
-			} else if (this.metric.properties.SummaryMetric === 'H') {
-				return { value: area, normalization: 0.01 };
-			} else if (this.metric.properties.SummaryMetric === 'A') {
-				var tot2 = 0;
-				labels.forEach(function (label) {
-					tot2 += Number(label.Values.Km2);
-				});
-				return { value: area, normalization: tot2 / 100 };
-			} else if (this.metric.properties.SummaryMetric === 'D') {
-				return { value: value, normalization: area };
-			} else {
-				return { value: 0 };
-			}
 		},
 		getLength(value, variable) {
 			//return '';

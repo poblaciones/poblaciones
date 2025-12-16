@@ -1,107 +1,112 @@
 <template>
-    <div class="chart-panel"
-         :style="{ width: actualWidth + 'px', height: height + 'px' }"
-         @mousemove="updateTooltip"
-         @mouseleave="hideTooltip">
+  <div class="chart-panel"
+       :style="{ width: actualWidth + 'px', height: height + 'px' }"
+       @mousemove="updateTooltip"
+       @mouseleave="hideTooltip">
 
-        <svg :width="actualWidth" :height="height" class="chart-svg">
+    <div class="skeleton" v-if="isUpdating" :style="'left: ' + chartRect.x + 'px; top: ' + chartRect.y + 'px; width:' + chartRect.width + 'px; height:' + chartRect.height + 'px;'">
+    </div>
 
-            <rect v-if="!isDonut"
-                  class="chart-zone"
-                  :x="paddingLeft"
-                  :y="padding"
-                  :width="Math.max(0, actualWidth - paddingLeft - padding - computedBars.extraRightPadding)"
-                  :height="Math.max(0, height - 2 * padding)" />
+    <svg :width="actualWidth" :height="height" class="chart-svg">
 
-            <g v-if="!isDonut">
-                <line v-if="zeroPos >= padding && zeroPos <= (isHorizontal ? actualWidth : height) - padding"
-                      :x1="isHorizontal ? zeroPos : paddingLeft"
-                      :y1="isHorizontal ? padding : zeroPos"
-                      :x2="isHorizontal ? zeroPos : actualWidth - padding - computedBars.extraRightPadding"
-                      :y2="isHorizontal ? height - padding : zeroPos"
-                      stroke="#dedede" stroke-width="1" />
+      <rect v-if="!isDonut"
+            class="chart-zone"
+            :x="chartRect.x"
+            :y="chartRect.y"
+            :width="chartRect.width"
+            :height="chartRect.height" />
 
-                <text class="axis-label" :x="axisLabels.min.x" :y="axisLabels.min.y" :text-anchor="axisLabels.min.anchor">
-                    {{ axisLabels.min.text }}
-                </text>
-                <text class="axis-label" :x="(axisLabels.min.x + axisLabels.max.x) / 2 - (isHorizontal ? 0 : 6)" :y="(axisLabels.min.y + axisLabels.max.y) / 2" :text-anchor="isHorizontal ? 'middle' : 'end'"
-                      v-html="axisLabels.yLabel">
+      <g v-if="!isDonut">
+        <line v-if="zeroPos >= padding && zeroPos <= (isHorizontal ? actualWidth : height) - padding"
+              :x1="isHorizontal ? zeroPos : paddingLeft"
+              :y1="isHorizontal ? padding : zeroPos"
+              :x2="isHorizontal ? zeroPos : actualWidth - padding - computedBars.extraRightPadding"
+              :y2="isHorizontal ? height - padding : zeroPos"
+              stroke="#dedede" stroke-width="1" />
 
-                </text>
-                <text class="axis-label" :x="axisLabels.max.x" :y="axisLabels.max.y" :text-anchor="axisLabels.max.anchor">
-                    {{ axisLabels.max.text }}
-                </text>
-            </g>
+        <text class="axis-label" :x="axisLabels.min.x" :y="axisLabels.min.y" :text-anchor="axisLabels.min.anchor">
+          {{ axisLabels.min.text }}
+        </text>
+        <text class="axis-label" :x="(!isHorizontal ?  (axisLabels.min.x + axisLabels.max.x) / 4 : (axisLabels.min.x + axisLabels.max.x) / 2)"
+              :y="(axisLabels.min.y + axisLabels.max.y) / 2"
+              text-anchor="middle"
+              v-html="formatAxisLabel(axisLabels.yLabel)">
 
-            <g v-if="!isDonut">
-                <g v-for="(serie, sIndex) in computedBars" :key="'serie-' + sIndex">
-                    <rect v-for="(bar, vIndex) in serie.items"
-                          :key="'bar-' + sIndex + '-' + vIndex"
-                          :x="bar.x" :y="bar.y" :width="Math.max(0, bar.width)" :height="bar.height"
-                          :fill="bar.color"
-                          :stroke="isSelected(sIndex, vIndex) ? '#333' : darkenColor(bar.color, 20)"
-                          :stroke-width="isSelected(sIndex, vIndex) ? 1 : 0.5"
-                          class="chart-element" :class="(isSelectedSerie(sIndex) ? '' : 'chart-element-inactive')"
-                          @click.stop="selectElement(sIndex, vIndex)"
-                          @mouseenter="hoverElement($event, sIndex, vIndex, bar.data)" />
+        </text>
+        <text class="axis-label" :x="axisLabels.max.x" :y="axisLabels.max.y" :text-anchor="axisLabels.max.anchor">
+          {{ axisLabels.max.text }}
+        </text>
+      </g>
 
-                    <template v-if="!isHorizontal">
-                        <text class="axis-label" :x="centerOfBarsX(serie.items)" :y="axisLabels.min.y + 14"
-                              :class="(isSelectedManySerie(sIndex) ? 'axis-label-active' : '')"
-                              text-anchor="middle">
-                            {{ data.series[sIndex].text }}
-                        </text>
-                        <line :x1="centerOfBarsX(serie.items)"
-                              :y1="axisLabels.min.y"
-                              :x2="centerOfBarsX(serie.items)"
-                              :y2="axisLabels.min.y + 4"
-                              stroke="#c0c0c0" stroke-width="2" />
-                    </template>
-                    <template v-else>
-                        <text class="axis-label" :y="centerOfBarsY(serie.items) + 3" :x="axisLabels.min.x - 6"
-                              :class="(isSelectedManySerie(sIndex) ? 'axis-label-active' : '')"
-                              text-anchor="end">
-                            {{ data.series[sIndex].text }}
-                        </text>
-                        <line :y1="centerOfBarsY(serie.items)"
-                              :x1="axisLabels.min.x"
-                              :y2="centerOfBarsY(serie.items)"
-                              :x2="axisLabels.min.x - 3"
-                              stroke="#c0c0c0" stroke-width="2" />
-                    </template>
+      <g v-if="!isDonut">
+        <g v-for="(serie, sIndex) in computedBars" :key="'serie-' + sIndex">
+          <rect v-for="(bar, vIndex) in serie.items"
+                :key="'bar-' + sIndex + '-' + vIndex"
+                :x="bar.x" :y="bar.y" :width="Math.max(0, bar.width)" :height="bar.height"
+                :fill="bar.color"
+                :stroke="isSelected(sIndex, vIndex) ? '#333' : darkenColor(bar.color, 20)"
+                :stroke-width="isSelected(sIndex, vIndex) ? 1 : 0.5"
+                class="chart-element" :class="(isSelectedSerie(sIndex) ? '' : 'chart-element-inactive')"
+                @click.stop="selectElement(sIndex, vIndex)"
+                @mouseenter="hoverElement($event, sIndex, vIndex, bar.data)" />
 
-                </g>
-            </g>
+          <template v-if="!isHorizontal">
+            <text class="axis-label" :x="centerOfBarsX(serie.items)" :y="axisLabels.min.y + 14"
+                  :class="(isSelectedManySerie(sIndex) ? 'axis-label-active' : '')"
+                  text-anchor="middle">
+              {{ data.series[sIndex].text }}
+            </text>
+            <line :x1="centerOfBarsX(serie.items)"
+                  :y1="axisLabels.min.y"
+                  :x2="centerOfBarsX(serie.items)"
+                  :y2="axisLabels.min.y + 4"
+                  stroke="#c0c0c0" stroke-width="2" />
+          </template>
+          <template v-else>
+            <text class="axis-label" :y="centerOfBarsY(serie.items) + 3" :x="axisLabels.min.x - 6"
+                  :class="(isSelectedManySerie(sIndex) ? 'axis-label-active' : '')"
+                  text-anchor="end">
+              {{ data.series[sIndex].text }}
+            </text>
+            <line :y1="centerOfBarsY(serie.items)"
+                  :x1="axisLabels.min.x"
+                  :y2="centerOfBarsY(serie.items)"
+                  :x2="axisLabels.min.x - 3"
+                  stroke="#c0c0c0" stroke-width="2" />
+          </template>
 
-<g v-else :transform="`translate(${actualWidth/2}, ${height/2})`">
-    <g v-for="(ring, sIndex) in computedDonut" :key="'ring-' + sIndex">
-        <path v-for="(slice, vIndex) in ring.slices"
-              :key="'slice-' + sIndex + '-' + vIndex"
-              :d="slice.path"
-              :fill="slice.color"
-              :stroke="isSelected(sIndex, vIndex) ? '#333' : darkenColor(slice.color, 20)"
-              stroke-width="1"
-              class="chart-element" :class="(isSelectedManySerie(sIndex) ? '' : 'chart-element-donut-inactive')"
-              @click.stop="selectElement(sIndex, vIndex)"
-              @mouseenter="hoverElement($event, sIndex, vIndex, slice.data)" />
+        </g>
+      </g>
 
-    </g>
-    <text class="axis-label" :x="axisLabels.min.x" :y="axisLabels.min.y" :text-anchor="'end'">
-        {{ axisLabels.yLabel }}
-    </text>
-</g>
-        </svg>
+      <g v-else :transform="`translate(${actualWidth/2}, ${height/2})`">
+        <g v-for="(ring, sIndex) in computedDonut" :key="'ring-' + sIndex">
+          <path v-for="(slice, vIndex) in ring.slices"
+                :key="'slice-' + sIndex + '-' + vIndex"
+                :d="slice.path"
+                :fill="slice.color"
+                :stroke="isSelected(sIndex, vIndex) ? '#333' : darkenColor(slice.color, 20)"
+                stroke-width="1"
+                class="chart-element" :class="(isSelectedManySerie(sIndex) ? '' : 'chart-element-donut-inactive')"
+                @click.stop="selectElement(sIndex, vIndex)"
+                @mouseenter="hoverElement($event, sIndex, vIndex, slice.data)" />
 
-<div v-if="tooltip.visible"
-     class="chart-tooltip"
-     :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }">
-    <div class="tooltip-header">{{ tooltip.seriesName }}</div>
-    <div>
+        </g>
+        <text class="axis-label" :x="axisLabels.min.x" :y="axisLabels.min.y" :text-anchor="'end'">
+          {{ axisLabels.yLabel }}
+        </text>
+      </g>
+    </svg>
+
+    <div v-if="tooltip.visible"
+         class="chart-tooltip"
+         :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }">
+      <div class="tooltip-header">{{ tooltip.seriesName }}</div>
+      <div>
         <span class="dot" :style="{background: tooltip.color}"></span>
-        {{ tooltip.label }}: <strong>{{ tooltip.valueFormatted }}</strong>
+        {{ tooltip.label }}: <span style="color: '#d5d5d5'">{{ tooltip.valueFormatted }}</span>
+      </div>
     </div>
-</div>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -111,6 +116,7 @@
             data: Object,
             selected: Object,
             yLabel: String,
+					  isUpdating: { type: Boolean, default: false },
             height: { type: Number, default: 300 },
             width: { type: Number, default: 400 },  // Opcional: solo como fallback
             stackedNormalize: Boolean
@@ -158,6 +164,14 @@
                 if (!this.data || !this.data.series) return [];
                 this.data.series.forEach(s => s.values.forEach(i => v.push(i.value)));
                 return v;
+            },
+            chartRect() {
+              return {
+                  x: this.paddingLeft,
+                  y: this.padding,
+                  width: Math.max(0, this.actualWidth - this.paddingLeft - this.padding - this.computedBars.extraRightPadding),
+                  height: Math.max(0, this.height - 2 * this.padding)
+                    };
             },
             scaleLimits() {
                 if (this.isDonut) return null;
@@ -425,7 +439,19 @@
 					}
 				}
 				return (min + max) / 2;
-			},
+          },
+			    formatAxisLabel(text) {
+		        if (typeof text !== "string") return text;
+
+		        // Convierte a mayúsculas
+		        text = text.toUpperCase();
+
+		        // Reemplaza las etiquetas <sup> y </sup> directamente
+		        text = text.replaceAll("<SUP>", '<tspan font-size="9" dx="-0.5" dy="-4">');
+		        text = text.replaceAll("</SUP>", "</tspan>");
+
+		        return text;
+	        },
             roundNice(val) {
                 if (val === 0) return 0;
 
@@ -451,8 +477,8 @@
             },
             fmt(n) {
                 const abs = Math.abs(n);
-                if (abs >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-                if (abs >= 1000) return (n / 1000).toFixed(1) + 'k';
+                if (abs >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '').replace('.', ',') + 'M';
+                if (abs >= 1000) return (n / 1000).toFixed(1).replace('.0', '').replace('.', ',') + 'k';
                 return n;
             },
             darkenColor(color, percent) {
@@ -506,7 +532,7 @@
                 this.tooltip = {
                     visible: true,
                     label: d.label,
-                    valueFormatted: this.fmt(d.value),
+                    valueFormatted: (d.valueFormatted !== undefined ? d.valueFormatted : this.fmt(d.value)),
                     seriesName: this.data.series[s].text,
                     color: d.color,
                     x: e.clientX + 15,
@@ -634,4 +660,26 @@
         border-radius: 50%;
         margin-right: 5px;
     }
+
+	.skeleton {
+    position: absolute;
+		background: linear-gradient(90deg, #eeeeee 25%, #dddddd 50%, #eeeeee 75%);
+		/* border: 1px solid #cbcbcb; */
+		opacity: .3;
+    pointer-events: none;
+		background-size: 200% 100%;
+		/* border-radius: 4px; */
+		animation: shimmer 1.5s infinite;
+	}
+
+	@keyframes shimmer {
+		0% {
+			background-position: 200% 0;
+		}
+
+		100% {
+			background-position: -200% 0;
+		}
+	}
+
 </style>

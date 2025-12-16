@@ -115,7 +115,7 @@ class BoundaryService extends BaseService
 	}
 
 
-	public function GetSummary($frame, $boundaryId)
+	public function GetSummary($frame, $boundaryVersionId)
 	{
 		$data = null;
 
@@ -125,7 +125,7 @@ class BoundaryService extends BaseService
 
 		$key = BoundarySummaryCache::CreateKey($frame);
 
-		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && BoundarySummaryCache::Cache()->HasData($boundaryId, $key, $data))
+		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null && BoundarySummaryCache::Cache()->HasData($boundaryVersionId, $key, $data))
 		{
 			return $this->GotFromCache($data);
 		}
@@ -133,10 +133,10 @@ class BoundaryService extends BaseService
 		{
 			Performance::CacheMissed();
 		}
-		$data = $this->CalculateSummary($frame, $boundaryId);
+		$data = $this->CalculateSummary($frame, $boundaryVersionId);
 
 		if ($frame->HasClippingFactor() && $frame->ClippingCircle == null)
-			BoundarySummaryCache::Cache()->PutData($boundaryId, $key, $data);
+			BoundarySummaryCache::Cache()->PutData($boundaryVersionId, $key, $data);
 
 		$data->EllapsedMs = GlobalTimer::EllapsedMs();
 
@@ -151,7 +151,7 @@ class BoundaryService extends BaseService
 
 		$data = new BoundarySummaryInfo();
 		$data->Count = $rows[0]['itemCount'];
-
+		$data->BoundaryVersionId = $boundaryVersionId;
 		return $data;
 	}
 

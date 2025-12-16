@@ -1,9 +1,5 @@
-import LocationsComposer from '@/map/composers/LocationsComposer';
-import DataShapeComposer from '@/map/composers/DataShapeComposer';
-import SegmentsComposer from '@/map/composers/SegmentsComposer';
 import ActiveMetric from './ActiveMetric';
-import Compare from './Compare.js';
-import Vue from 'vue';
+import Summary from './Summary';
 
 import h from '@/map/js/helper';
 import err from '@/common/framework/err';
@@ -24,6 +20,7 @@ function ActiveSelectedMetric(selectedMetric) {
 	this.ShowRanking = false;
 	this.RankingSize = 10;
 	this.RankingDirection = 'D';
+	this.Summary = new Summary(this);
 	this.activeSequenceSteps = {};
 	this.overlay = null;
 	this.blockSize = window.SegMap.tileDataBlockSize;

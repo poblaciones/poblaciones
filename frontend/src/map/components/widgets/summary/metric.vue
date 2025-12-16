@@ -13,9 +13,9 @@
 			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor + dropBorder(singleLabel.FillColor)"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
-				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
-				{{ metric.properties.Metric.Name }} <span style="font-size: .95em" v-show="h.formatNum(singleLabel.Values.Count) !== '-'">
-					({{ h.formatNum(singleLabel.Values.Count) }})
+				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted"  style="border-color: inherit" />
+				{{ metric.properties.Metric.Name }} <span style="font-size: .95em" :class="getMuted()">
+					({{ (singleLabel.Values.Count === '' ? '0' : h.formatNum(singleLabel.Values.Count)) }})
 				</span>
 			</h4>
 			<mp-partition-badge :metric="metric" style="padding-bottom: 7px;" />
@@ -167,7 +167,13 @@ export default {
 			}
 			return '';
 			},
-
+		getMuted() {
+			if (this.metric.IsUpdatingSummary) {
+				return ' text-muted';
+			} else {
+				return '';
+			}
+		},
 		clickLabel(label) {
 			label.Visible = !label.Visible;
 			this.metric.RefreshMap();

@@ -49,7 +49,7 @@ App::$app->get('/services/frontend/boundaries/GetBoundarySummary', function (Req
 	if ($denied = Session::CheckIsBoundaryVersionPublicOrAccessible($boundaryId, $boundaryVersionId))
 		return $denied;
 
-	return App::JsonImmutable($controller->GetSummary($frame, $boundaryId));
+	return App::JsonImmutable($controller->GetSummary($frame, $boundaryVersionId));
 });
 
 // http://mapas.aacademica.org/services/download/GetBoundaryFile?t=ss&l=8&r=1692&a=X

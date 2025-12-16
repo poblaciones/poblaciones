@@ -12,8 +12,8 @@
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
-				{{ boundary.properties.Name }} <span style="font-size: .95em" v-if="boundary.properties.Count">
-					({{ h.formatNum(boundary.properties.Count) }})
+				{{ boundary.properties.Name }} <span style="font-size: .95em" v-if="boundaryCount || boundaryCount === 0" :class="getMuted()">
+					({{ h.formatNum(boundaryCount) }})
 				</span>
 			</h4>
 		</div>
@@ -68,6 +68,13 @@ export default {
 			}
 			return '';
 		},
+		getMuted() {
+			if (this.boundary.IsUpdatingSummary) {
+				return ' text-muted';
+			} else {
+				return '';
+			}
+		},
 		changeSelectedVersionIndex(index) {
 			this.boundary.SelectVersion(index);
 		},
@@ -94,6 +101,9 @@ export default {
 			},
 			h() {
 				return Helper;
+			},
+			boundaryCount() {
+				return this.boundary.SelectedVersion().Count;
 			},
 			singleLabel() {
 				return { FillColor: this.boundary.color, Visible: this.boundary.visible };
