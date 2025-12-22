@@ -1,3 +1,7 @@
+- Charts de indicadores.
+- Herramienta contextual de medir.
+- Menú contextual de abrir en StreetView.
+
 v4.6 (2025-10-13)
 - Fix a íconos bajo traducción automática de Chrome.
 - Los arks no se estaban mostrando bien desde backoffice.

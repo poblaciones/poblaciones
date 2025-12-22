@@ -17,7 +17,10 @@ import { MapView } from '@deck.gl/core';
 import { PolygonLayer } from '../../../node_modules/@deck.gl/layers/dist/index';
 import './pegman/Pegman.css';
 import LeafletAnnotator from './LeafletAnnotator';
+import ContextMenuTools from './ContextMenuTools.js';
 
+import 'leaflet-contextmenu';
+import 'leaflet-contextmenu/dist/leaflet.contextmenu.css';
 
 export default LeafletApi;
 // https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
@@ -82,15 +85,27 @@ LeafletApi.prototype.Initialize = function () {
 
 	this.CreateBaseLayers();
 
+	var addContextMenu = !window.Embedded.Active;
+
 	var options = {
 		zoomControl: false, zoomAnimation: false,
-		renderer: L.canvas(), /*zoomSnap: 0.5,*/ minZoom: 3, maxZoom: 17
+		renderer: L.canvas(), /*zoomSnap: 0.5,*/ minZoom: 3, maxZoom: 17,
+
+		contextmenu: addContextMenu,
+		contextmenuWidth: 200,
+
+		contextmenuItems: []
 	};
 
 	// Crea el mapa
 	this.map = new L.Map("map", options);
 	// le agrega el control de zoom
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
+
+	if (addContextMenu) {
+		// Le agrega el context menu
+		new ContextMenuTools(this.map);
+	}
 
 	/*
 	// agrega streetview
