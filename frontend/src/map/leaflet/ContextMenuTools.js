@@ -246,26 +246,11 @@ ContextMenuTools.prototype._attachEvents = function () {
 	});
 };
 
-
 // --- Acción: abrir Street View ---
 ContextMenuTools.prototype._openStreetView = function (e) {
 	var lat = e.latlng.lat;
 	var lng = e.latlng.lng;
-
-	// Obtener el zoom actual del mapa
-	var zoom = this.map.getZoom();
-
-	// Obtener el centro actual del mapa
-	var center = this.map.getCenter();
-
-	// Construir URL de StreetView con parámetros para volver al mapa
-	var url = 'https://www.google.com/maps/@' + lat + ',' + lng + ',' + zoom + 'z/data=!3m1!1e3!5m1!1e1?entry=ttu';
-
-	// Alternativa con más control sobre la vista de retorno:
-	// var url = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + lat + ',' + lng +
-	//           '&heading=0&pitch=0&fov=80' +
-	//           '&basemap=roadmap&center=' + center.lat + ',' + center.lng + '&zoom=' + zoom;
-
+	var url = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + lat + ',' + lng;
 	window.open(url, '_blank');
 };
 

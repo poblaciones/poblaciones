@@ -8,6 +8,7 @@ use minga\framework\settings\Settings;
 class LocalSettings extends Settings
 {
 	private static $map = NULL;
+	private static $cache = NULL;
 	private static $shard = NULL;
 	private static $limits = NULL;
 	private static $help = NULL;
@@ -19,6 +20,16 @@ class LocalSettings extends Settings
 
 		return self::$map;
 	}
+
+	public function ServiceCache()
+	{
+		if (self::$cache == NULL)
+			self::$cache = new ServiceCacheSettings();
+
+		return self::$cache;
+	}
+
+
 
 	public function Help()
 	{

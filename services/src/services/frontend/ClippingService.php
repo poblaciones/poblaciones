@@ -155,7 +155,6 @@ class ClippingService extends BaseService
 
 		$clipping->Levels = $this->CalculateLevels($frame, $forcetrackingLevels);
 		GlobalTimer::End();
-
 		if (sizeof($clipping->Levels) == 0)
 		{
 			$clipping->Summary = null;

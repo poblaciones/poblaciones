@@ -40,10 +40,10 @@
 		"doctrine/dbal": "^2.9.2",
 		"doctrine/orm": "^2.9.2",
 		"doctrine/annotations": "^1.4",
-		"jms/serializer": "^1.12",
+		"jms/serializer": "^3.0",
 		"symfony/serializer": "^3.4",
 		"symfony/property-info": "^3.4",
-		"jms/metadata": "^1.6",
+		"jms/metadata": "^2.6.0",
 		"yogarine/doctrine-annotation-autoload": "^0.3.0",
 		"lusitanian/oauth": "^0.8.11",
 		"gasparesganga/php-shapefile": "^3.1",
@@ -55,7 +55,8 @@
 		"simple-html-dom/simple-html-dom": "^1.5",
 		"symfony/cache": "^3.4",
 		"proj4php/proj4php": "^2.0",
-		"longitude-one/doctrine-spatial": "^3.0"
+		"longitude-one/doctrine-spatial": "^3.0",
+		"symfony/polyfill-php80": "^1.33"
 	},
 	"autoload": {
 		"psr-0": {

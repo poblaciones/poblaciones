@@ -2,13 +2,16 @@
 
 namespace helena\caches;
 
+use helena\classes\App;
+
 use minga\framework\caching\TwoLevelObjectCache;
 
 class TileDataCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new TwoLevelObjectCache("Metrics/TileData");
+		$limitMB = App::Settings()->ServiceCache()->TileDataCachePerFileLimitMB;
+		return new TwoLevelObjectCache("Metrics/TileData", false, $limitMB);
 	}
 	public static function CreateKey($frame, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y,$zoom)
 	{
