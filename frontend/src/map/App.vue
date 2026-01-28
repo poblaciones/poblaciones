@@ -18,14 +18,10 @@
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
-					<!--Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')" v-show="!Embedded.HideSearch" /-->
 					<LeftPanel ref='leftPanel' />
 					<MapPanel class="exp-hiddable-block" />
-					<SideToolbar ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" ></SideToolbar>
+					<SideToolbar ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
 					<MapType ref="mapSelector"></MapType>
-					<!--FabSelector v-show="!Embedded.HideAddMetrics" ref="fabSelector" @selectedItem="selectedItem" class="exp-hiddable-unset mapsOvercontrols" /-->
-					<!--MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" /-->
-					<!--RecommendBoundaries style="position: absolute; left: 20px; top: 60px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" /-->
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -63,19 +59,15 @@
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
 	import MapExport from '@/map/classes/MapExport';
 	import MapPanel from '@/map/components/panels/mapPanel';
-	import MetricsButton from '@/map/components/widgets/map/metricsButton';
-	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
 	import LeftPanel from '@/map/components/panels/leftPanel';
 	import EditButton from '@/map/components/widgets/map/editButton';
 	import FullScreenButton from '@/map/components/widgets/map/fullScreenButton';
 	import SummaryPanel from '@/map/components/panels/summaryPanel';
-	import Search from '@/map/components/widgets/map/search';
 	import WatermarkFloat from '@/map/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/map/components/widgets/map/WatermarkOwner';
 	import MapType from '@/map/components/widgets/map/mapType';
 	import SideToolbar from '@/map/components/widgets/sideToolbar/sideToolbar';
 	import CollapseButtonRight from '@/map/components/controls/collapseButtonRight';
-	import FabSelector from '@/map/components/widgets/fabSelector/fabSelector';
 
 	import Split from 'split.js';
 	import axios from 'axios';
@@ -93,15 +85,11 @@
 		name: 'app',
 		components: {
 			SummaryPanel,
-			//Search,
 			MapPanel,
 			WaitMessage,
 			EditButton,
 			FullScreenButton,
-			//MetricsButton,
 			LeftPanel,
-			//FabSelector,
-			//RecommendBoundaries,
 			PopupsPanel,
 			WorkPanel,
 			MapType,
@@ -568,30 +556,6 @@
 	.leaflet-popup-content {
 		font-size: 13px !important;
 		margin: 8px 20px 5px 10px !important;
-	}
-
-	.leafletMapButton {
-		background: none padding-box rgb(255, 255, 255);
-		display: table-cell;
-		border: 0px;
-		margin: 0px;
-		padding: 0px 17px;
-		position: relative;
-		cursor: pointer;
-		direction: ltr;
-		overflow: hidden;
-		text-align: center;
-		height: 40px;
-		vertical-align: middle;
-		color: rgb(0, 0, 0);
-		font-family: Roboto, Arial, sans-serif;
-		font-size: 18px;
-		border-bottom-left-radius: 2px;
-		border-top-left-radius: 2px;
-		box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-		min-width: 45px;
-		font-weight: 500;
-		float: left;
 	}
 
 	.leaflet-control-scale-line {

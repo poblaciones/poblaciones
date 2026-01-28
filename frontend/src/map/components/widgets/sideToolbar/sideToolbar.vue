@@ -2,7 +2,7 @@
   <div>
     <!-- Toolbar con los botones principales -->
     <MapToolbar
-      :active-panel="activePanel"
+      :active-panel="activePanel" :backgroundColor="backgroundColor"
       @panel-toggle="handlePanelToggle"
     />
 
@@ -51,6 +51,10 @@ export default {
     boundaries: {
       type: Array,
       default: () => []
+    },
+    backgroundColor: {
+      type: String,
+      default: ''
     },
   },
   data() {

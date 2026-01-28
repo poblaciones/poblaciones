@@ -5,8 +5,7 @@
       class="toolbar-button"
       :class="{ 'active': activePanel === 'indicators' }"
       @click="togglePanel('indicators')"
-      title="Explorar datos"
-    >
+      title="Explorar datos">
       <i class="fas fa-plus"></i>
     </button>
 
@@ -35,11 +34,15 @@
 <script>
 export default {
   name: 'MapToolbar',
-  props: {
-    activePanel: {
-      type: String,
-      default: null
-    }
+    props: {
+      activePanel: {
+        type: String,
+        default: null
+      },
+      backgroundColor: {
+        type: String,
+        default: ''
+      },
     },
  computed: {
  		Embedded() {

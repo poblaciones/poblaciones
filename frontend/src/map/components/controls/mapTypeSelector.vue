@@ -90,7 +90,7 @@
         mapStyles: [
           {
             id: 'default',
-            name: 'Suave',
+            name: 'Simple',
             class: 'preview-default',
             asset: defaultMapType
           },

@@ -187,38 +187,6 @@ LeafletApi.prototype.Initialize = function () {
 		//////////////////
 		window.SegMap.MapInitialized();
 
-		/*var t = document.createElement("div");
-		t.innerHTML = '<div class="gmnoprint" role="menubar" style="margin: 10px -10px; z-index: 800; position: absolute; cursor: pointer; left: 0px; top: 0px;">' +
-			'<div class="gm-style-mtc" style="float: left; position: relative;">' +
-			'<button title="Mostrar mapa gris" type="button" class="leafletMapButton" style="font-weight: bold" id="roadTypeButton">Mapa</button>' +
-			'<button title="Mostrar mapa de calles" type="button" class="leafletMapButton" style="font-weight: bold" id="coloredTypeButton">Calles</button>' +
-			'<button title="Mostrar imágenes satelitales" type="button" class="leafletMapButton" id="satelliteTypeButton">Satélite</button>' +
-			'<button title="Mapa vacío" type="button" class="leafletMapButton" id="blankTypeButton">Blanco</button>' +
-			'</div></div>';
-		var map = document.getElementById('map');
-		map.parentElement.appendChild(t);
-
-		loc.mapTypeButtons['r'] = document.getElementById('roadTypeButton');
-		loc.mapTypeButtons['r'].addEventListener("click", function () {
-			loc.InteractiveChangeMapType("r");
-		});
-		loc.mapTypeButtons['c'] = document.getElementById('coloredTypeButton');
-		loc.mapTypeButtons['c'].addEventListener("click", function () {
-			loc.InteractiveChangeMapType("c");
-		});
-		loc.mapTypeButtons['s'] = document.getElementById('satelliteTypeButton');
-		loc.mapTypeButtons['s'].addEventListener("click", function () {
-			if (loc.showLabels) {
-				loc.InteractiveChangeMapType("h");
-			} else {
-				loc.InteractiveChangeMapType("s");
-			}
-		});
-		loc.mapTypeButtons['b'] = document.getElementById('blankTypeButton');
-		loc.mapTypeButtons['b'].addEventListener("click", function () {
-			loc.InteractiveChangeMapType("b");
-		});
-		*/
 		loc.BoundsChanged();
 	});
 
