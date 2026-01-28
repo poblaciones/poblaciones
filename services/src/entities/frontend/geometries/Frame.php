@@ -19,7 +19,8 @@ class Frame
 		$ret = self::FromParams();
 		$x = Params::GetIntMandatory('x');
 		$y = Params::GetIntMandatory('y');
-		$z = Params::GetIntRangeMandatory('z', 0, 23);
+		$z = (int) Params::GetFloatMandatory('z');
+		Params::CheckRange($z, 0, 23);
 		$ret->TileEnvelope = Envelope::FromXYZ($x, $y, $z);
 		$ret->TileEnvelopeKey = "@x" . $x . "y" . $y . "z" . $z;
 		return $ret;
@@ -28,7 +29,7 @@ class Frame
 	public static function FromParams()
 	{
 		$ret = new Frame();
-		$ret->Zoom = Params::GetInt('z', null);
+		$ret->Zoom = (int) Params::GetFloat('z', null);
 		$ret->Envelope =  Envelope::TextDeserialize(Params::Get('e'));
 		$ret->ClippingRegionIds = Params::GetIntArray('r');
 		$ret->ClippingCircle = Circle::TextDeserialize(Params::Get('c'));

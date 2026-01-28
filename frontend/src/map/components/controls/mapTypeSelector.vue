@@ -1,324 +1,554 @@
 <template>
-	<div ref="layerSelector"
-			 class="layer-selector"
-			 :class="['state-' + expansionState]"
-			 @keydown.esc="minimizeLayer">
-		<!-- Estado Cerrado -->
-		<div v-if="expansionState === 0"
-				 class="layer-toggle"
-				 @click="expandLayer">
-			<svg width="24" height="24" viewBox="0 0 24 24" class="layer-icon">
-				<path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z" fill="#5F6368" />
-			</svg>
-			<span>Capas</span>
-		</div>
+  <div class="map-style-selector-wrapper exp-hiddable-block">
+    <!-- Botón compacto para mostrar tipo de mapa actual -->
+    <button
+      class="map-style-btn btn btn-default btn-xs"
+      :class="{ 'expanded': isExpanded }"
+      @click="handleClick"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
 
-		<!-- Estado Parcialmente Abierto -->
-		<div v-if="expansionState === 1"
-				 class="layer-partial-expanded">
-			<div class="layer-quick-options">
-				<div v-for="layer in quickLayers"
-						 :key="layer.id"
-						 class="quick-layer-item"
-						 @click="toggleLayer(layer.id)">
-					<svg width="24" height="24" :viewBox="`0 0 24 24`">
-						<use :xlink:href="`#icon-${layer.id}`" />
-					</svg>
-					<span>{{ layer.name }}</span>
-				</div>
-				<div class="more-options"
-						 @click="fullyExpandLayer">
-					Más
-				</div>
-			</div>
-		</div>
+            :title="currentMapStyle.name"
+    >
+      <div class="map-style-icon preview-default" :style="{ backgroundImage: 'url(' + currentMapStyle.asset + ')' }"></div>
+    </button>
 
-		<!-- Estado Completamente Expandido -->
-		<div v-if="expansionState === 2"
-				 class="layer-fully-expanded">
-			<div class="layer-details-header">
-				<h2>Detalles del mapa</h2>
-				<button class="close-button"
-								@click="minimizeLayer">
-					✕
-				</button>
-			</div>
+    <!-- Panel expandido con opciones -->
+    <transition name="fade">
+      <div
+        v-if="isExpanded"
+        class="map-options-panel panel card"
+        @mouseenter="keepPanelOpen = true"
+        @mouseleave="handlePanelLeave"
+      >
 
-			<div class="layer-sections">
-				<div class="layer-section">
-					<h3>Capas</h3>
-					<div class="layer-grid">
-						<div v-for="layer in detailedLayers"
-								 :key="layer.id"
-								 class="layer-item"
-								 @click="toggleLayer(layer.id)">
-							<svg width="24" height="24" :viewBox="`0 0 24 24`">
-								<use :xlink:href="`#icon-${layer.id}`" />
-							</svg>
-							<span>{{ layer.name }}</span>
-						</div>
-					</div>
-				</div>
 
-				<div class="layer-section">
-					<h3>Herramientas del mapa</h3>
-					<div class="layer-grid">
-						<div v-for="tool in mapTools"
-								 :key="tool.id"
-								 class="layer-item">
-							<svg width="24" height="24" :viewBox="`0 0 24 24`">
-								<use :xlink:href="`#icon-${tool.id}`" />
-							</svg>
-							<span>{{ tool.name }}</span>
-						</div>
-					</div>
-				</div>
+        <!-- Sección de capas adicionales -->
+        <div class="panel-section">
+          <div class="section-title" style="margin-bottom: 4px;">Detalles del mapa</div>
+          <div class="map-layers-list">
+            <div
+              v-for="layer in mapLayers"
+              :key="layer.Id"
+              class="layer-item hand"
+              @click="toggleLayer(layer)"
+            >
+              <div class="layer-info">
+                <i :class="layer.Icon" class="layer-icon"></i>
+                <span class="layer-name">{{ layer.Caption }}</span>
+              </div>
+              <div class="layer-toggle">
+                <div class="toggle-switch" :class="{ 'active': layer.Visible }">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-				<div class="layer-section">
-					<h3>Tipo de mapa</h3>
-					<div class="map-type-options">
-						<div v-for="type in mapTypes"
-								 :key="type.id"
-								 class="map-type-item"
-								 @click="selectMapType(type.id)">
-							<svg width="24" height="24" :viewBox="`0 0 24 24`">
-								<use :xlink:href="`#icon-${type.id}`" />
-							</svg>
-							<span>{{ type.name }}</span>
-						</div>
-						<label class="globe-view">
-							<input type="checkbox" /> Vista con el globo
-						</label>
-					</div>
-				</div>
-			</div>
-		</div>
+ <!-- Separador -->
+ <div class="panel-divider"></div>
+         <!-- Sección de tipos de mapa -->
+ <div class="panel-section">
+   <div class="section-title">Tipo de mapa</div>
+   <div class="map-types-grid">
+     <div
+       v-for="style in mapStyles"
+       :key="style.id"
+       class="map-type-card hand"
 
-		<!-- SVG Icons -->
-		<svg style="display:none">
-			<symbol id="icon-transporte-publico" viewBox="0 0 24 24">
-				<path d="M12 2c-4.42 0-8 .5-8 4v10.5A2.5 2.5 0 0 0 6.5 19L5 20.5v.5h2l2-2h2v-5H4V6h16v8h2v-8c0-3.5-3.58-4-8-4zM6.5 16a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm11 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM9 12V7h6v5H9z" fill="#5F6368" />
-			</symbol>
 
-			<symbol id="icon-trafico" viewBox="0 0 24 24">
-				<path d="M20 10h-6V7h6v3zm2-5H2v12h20V5zm-6 9h-6v-3h6v3z" fill="#5F6368" />
-				<circle cx="9" cy="13" r="1.5" fill="#5F6368" />
-				<circle cx="15" cy="13" r="1.5" fill="#5F6368" />
-			</symbol>
+     :class="{ 'active': currentMapStyle.id === style.id }"
+       @click="mapStyleSelected(style)"
+     >
+       <div class="map-type-preview preview-default" :style="{ backgroundImage: 'url(' + style.asset + ')' }"></div>
+       <div class="map-type-name">{{ style.name }}</div>
+     </div>
+   </div>
+ </div>
 
-			<symbol id="icon-bicicleta" viewBox="0 0 24 24">
-				<path d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.7.7c1.2 1.2 3 1.2 4.2 0 .4-.4.4-1 0-1.4L16.1 3c-.4-.4-1-.4-1.4 0-1.2 1.2-1.2 3 0 4.2l.7.7-4.6 4.6h-3v-2.3h2V9H2.5V5.5h2V7h6.3L4.5 14.5H1v-3H0v4h7.5V12l3.3-3.3zm7.7 7c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-relieve" viewBox="0 0 24 24">
-				<path d="M14 6l-3.8 5 3 4H5V6h9zm6 10h-9l3-4-3-5h9v9z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-street-view" viewBox="0 0 24 24">
-				<path d="M12 4a4 4 0 0 1 4 4c0 2.21-1.79 4-4 4s-4-1.79-4-4a4 4 0 0 1 4-4zm0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-incendios" viewBox="0 0 24 24">
-				<path d="M11.25 2.25a9 9 0 0 0-5.56 16.13l1.79-1.78A6.75 6.75 0 1 1 16.5 12h-3.06l-1.56 3.75A4.5 4.5 0 1 1 12 7.5h1.5L15 4.5A7.5 7.5 0 1 0 11.25 2.25z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-calidad-aire" viewBox="0 0 24 24">
-				<path d="M14.5 10.5A2.5 2.5 0 0 0 12 8h-1.5v4H12a2.5 2.5 0 0 0 2.5-2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14h-1.5v2H12v-2zm-3-2H7v-2h2v2zm6 0h-2v-2h2v2z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-mapa-predeterminado" viewBox="0 0 24 24">
-				<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-satelite" viewBox="0 0 24 24">
-				<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-7l-2 2h4l-2-2z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-duracion-viaje" viewBox="0 0 24 24">
-				<path d="M11.5 2.75a8.75 8.75 0 100 17.5 8.75 8.75 0 000-17.5zM9 16.5v-9l7 4.5-7 4.5z" fill="#5F6368" />
-			</symbol>
-
-			<symbol id="icon-medir" viewBox="0 0 24 24">
-				<path d="M21 6H3a1 1 0 00-1 1v10a1 1 0 001 1h18a1 1 0 001-1V7a1 1 0 00-1-1zm-1 10H4V8h16v8z" fill="#5F6368" />
-				<path d="M5 10h2v4H5zm3 0h2v4H8zm3 0h2v4h-2z" fill="#5F6368" />
-			</symbol>
-		</svg>
-	</div>
+      </div>
+    </transition>
+  </div>
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				expansionState: 0, // 0: cerrado, 1: parcial, 2: completo
-				quickLayers: [
-					{ id: 'relieve', name: 'Relieve' },
-					{ id: 'trafico', name: 'Tráfico' },
-					{ id: 'transporte-publico', name: 'Transporte público' },
-					{ id: 'bicicleta', name: 'En bicicleta' }
-				],
-				detailedLayers: [
-					{ id: 'relieve', name: 'Relieve' },
-					{ id: 'trafico', name: 'Tráfico' },
-					{ id: 'transporte-publico', name: 'Transporte público' },
-					{ id: 'bicicleta', name: 'En bicicleta' },
-					{ id: 'incendios', name: 'Incendios' },
-					{ id: 'calidad-aire', name: 'Calidad del aire' },
-					{ id: 'street-view', name: 'Street View' }
-				],
-				mapTools: [
-					{ id: 'duracion-viaje', name: 'Duración del viaje' },
-					{ id: 'medir', name: 'Medir' }
-				],
-				mapTypes: [
-					{ id: 'mapa-predeterminado', name: 'Predeterminado' },
-					{ id: 'satelite', name: 'Satélite' }
-				]
-			};
-		},
-		methods: {
-			expandLayer() {
-				this.expansionState = 1;
-				this.$nextTick(() => {
-					document.addEventListener('click', this.handleOutsideClick);
-				});
-			},
-			fullyExpandLayer() {
-				this.expansionState = 2;
-				this.$nextTick(() => {
-					document.addEventListener('click', this.handleOutsideClick);
-				});
-			},
-			minimizeLayer() {
-				this.expansionState = 0;
-				document.removeEventListener('click', this.handleOutsideClick);
-			},
-			handleOutsideClick(event) {
-				if (this.$refs.layerSelector &&
-					!this.$refs.layerSelector.contains(event.target)) {
-					this.minimizeLayer();
+
+  import defaultMapType from '@/common/assets/maps/default.png';
+  import streetsMapType from '@/common/assets/maps/streets.png';
+  import satelliteMapType from '@/common/assets/maps/satellite.png';
+
+  export default {
+    name: 'MapStyleSelector',
+    data() {
+      return {
+        isExpanded: false,
+        keepPanelOpen: false,
+        isTouchDevice: false,
+        hoverTimeout: null,
+        currentMapStyleId: 'default',
+        mapStyles: [
+          {
+            id: 'default',
+            name: 'Suave',
+            class: 'preview-default',
+            asset: defaultMapType
+          },
+          {
+            id: 'satellite',
+            name: 'Satélite',
+            class: 'preview-satellite',
+            asset: satelliteMapType
+          },
+          {
+            id: 'streets',
+            name: 'Calles',
+            class: 'preview-streets',
+            asset: streetsMapType
+          },
+          {
+            id: 'blank',
+            name: 'Blanco',
+            class: 'preview-blank',
+            asset: ''
+          }
+        ],
+        mapLayers: [
+          {
+            Id: 'labels',
+            Caption: 'Etiquetas',
+            Icon: 'fas fa-tag',
+            Visible: true
+          },
+          {
+            Id: 'relief',
+            Caption: 'Relieve',
+            Icon: 'fas fa-mountain',
+            Visible: false
+          }]/*
+                {
+                  id: 'roads',
+                  name: 'Rutas',
+                  icon: 'fas fa-road',
+                  Visible: true
+                },
+                {
+                  id: 'rivers',
+                  name: 'Cursos de agua',
+                  icon: 'fas fa-water',
+                  Visible: false
+                },
+                {
+                  id: 'trains',
+                  name: 'Trenes',
+                  icon: 'fas fa-train',
+                  Visible: false
+                }
+              ]*/
+      };
+    },
+    mounted() {
+      // Detectar si es dispositivo táctil
+      this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    },
+    beforeDestroy() {
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout);
+      }
+    },
+    computed: {
+      currentMapStyle() {
+        return this.mapStyles.find(s => s.id === this.currentMapStyleId);
+      }
+    },
+    methods: {
+      handleClick() {
+        if (this.isTouchDevice) {
+          // En dispositivos táctiles, toggle del panel
+          this.isExpanded = !this.isExpanded;
+        } else {
+          // En desktop, cambiar al siguiente tipo de mapa sin abrir panel
+          if (!this.isExpanded) {
+            const currentIndex = this.mapStyles.findIndex(s => s.id === this.currentMapStyleId);
+            const nextIndex = (currentIndex + 1) % this.mapStyles.length;
+            this.mapStyleSelected(this.mapStyles[nextIndex]);
+          }
+        }
+      },
+      handleMouseEnter() {
+        if (!this.isTouchDevice) {
+          // En desktop, expandir panel con hover
+          if (this.hoverTimeout) {
+            clearTimeout(this.hoverTimeout);
+          }
+          this.hoverTimeout = setTimeout(() => {
+            this.isExpanded = true;
+          }, 200);
+        }
+      },
+      handleMouseLeave() {
+        if (!this.isTouchDevice) {
+          if (this.hoverTimeout) {
+            clearTimeout(this.hoverTimeout);
+          }
+          this.hoverTimeout = setTimeout(() => {
+            if (!this.keepPanelOpen) {
+              this.isExpanded = false;
+            }
+          }, 300);
+        }
+      },
+      handlePanelLeave() {
+        this.keepPanelOpen = false;
+        if (!this.isTouchDevice) {
+          this.hoverTimeout = setTimeout(() => {
+            this.isExpanded = false;
+          }, 300);
+        }
+      },
+      selectMapStyleById(styleId) {
+        this.currentMapStyleId = styleId;
+      },
+      mapStyleSelected(style) {
+        this.currentMapStyleId = style.id;
+        this.$emit('styleChanged', style.id);
+        // En desktop, cerrar panel después de seleccionar
+        if (!this.isTouchDevice) {
+          setTimeout(() => {
+            this.isExpanded = false;
+            this.keepPanelOpen = false;
+          }, 150);
+        }
+      },
+      toggleLayer(layer) {
+        layer.Visible = !layer.Visible;
+        this.$emit('layerToggled', {
+          layerId: layer.Id,
+          Visible: layer.Visible
+        });
+      },
+
+
+      getBasemapMetricActive(basemapMetricActive) {
+				if (basemapMetricActive.Visible) {
+					return ' active';
+				} else {
+					return ' unselected';
 				}
 			},
-			toggleLayer(layerId) {
-				console.log(`Capa ${layerId} toggled`);
+			getLabelsActive(mode) {
+				if (this.toolbarStates.showLabels) {
+					return ' active';
+				}
+				return ' unselected';
 			},
-			selectMapType(typeId) {
-				console.log(`Tipo de mapa ${typeId} seleccionado`);
-			}
-		},
-		beforeUnmount() {
-			document.removeEventListener('click', this.handleOutsideClick);
-		}
-	};
+			getElevationActive(mode) {
+				if (this.toolbarStates.showElevation) {
+					return ' active';
+				}
+				return ' unselected';
+			},
+      toggleLabels() {
+				window.SegMap.ToggleShowLabels();
+			},
+			toggleElevation() {
+				window.SegMap.ToggleShowElevation();
+			},
+			toggleBasemapMetric(basemapMetric) {
+				window.SegMap.ToggleBasemapMetric(basemapMetric);
+			},
+
+    }
+};
 </script>
 
 <style scoped>
-	.layer-selector {
-		position: absolute;
-		top: 60px;
-		left: 10px;
-		z-index: 1000;
-		transition: all 0.3s ease;
-		font-family: Arial, sans-serif;
-	}
+/* Reset básico */
+* {
+  box-sizing: border-box;
+}
 
-	.state-0 .layer-toggle {
-		background: white;
-		padding: 8px 12px;
-		border-radius: 4px;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-		display: flex;
-		align-items: center;
-		gap: 8px;
+/* Botón principal - estilo Pampeana */
+	.map-style-btn {
+		position: fixed;
+		left: 20px;
+		bottom: 20px;
+		width: 64px;
+		height: 64px;
+		border-radius: 8px;
+		background: #ffffffc0;
+		border: 1px solid #ddd;
+		box-shadow: rgb(0 0 0 / 20%) 0px 1px 3px 2px;
+		color: #333;
 		cursor: pointer;
-	}
-
-	.state-1 .layer-partial-expanded {
-		background: white;
-		border-radius: 4px;
-		box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+		z-index: 1030;
+		transition: all 0.2s;
 		display: flex;
-		padding: 8px;
-	}
-
-	.state-2 .layer-fully-expanded {
-		background: white;
-		width: 300px;
-		border-radius: 4px;
-		box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-		padding: 16px;
-	}
-
-	.layer-quick-options {
-		display: flex;
-		gap: 8px;
 		align-items: center;
+		justify-content: center;
+		padding: 2px;
 	}
 
-	.quick-layer-item, .layer-item, .map-type-item {
+.map-style-btn:hover {
+  background: #f8f9fa;
+  border-color: #ccc;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 4px;
+}
+
+.map-style-btn.expanded {
+  background: #f8f9fa;
+  border-color: #999;
+}
+
+.map-style-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+	.map-style-icon {
+		width: 100%;
+		height: 100%;
+		border-radius: 6px;
+		border: 1px solid #ddd;
+		flex-shrink: 0;
+	}
+
+.map-style-label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expand-icon {
+  font-size: 12px;
+  color: #666;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.expand-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* Panel de opciones */
+.map-options-panel {
+  position: fixed;
+  bottom: -6px;
+  left: 100px; /* Al lado del botón */
+  width: 320px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: rgba(0, 0, 0, 0.18) 0px 1px 1px;
+  border: 1px solid #ddd;
+  z-index: 1040;
+  overflow: hidden;
+}
+
+/* Secciones del panel */
+.panel-section {
+  padding: 12px;
+}
+
+.panel-divider {
+  height: 1px;
+  background: #e9ecef;
+  margin: 0;
+}
+
+/* Grid de tipos de mapa */
+.map-types-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+	.map-type-card {
+		background: white;
+		/* border: 2px solid #ddd;*/
+		border-radius: 4px;
+		padding: 8px;
+		justify-items: center;
+    text-align: center;
+		transition: all 0.2s;
+	}
+
+.map-type-card:hover {
+  border-color: #999;
+  background: #f1f1f1;
+}
+
+.map-type-card.active {
+  border-color: #4a90e2;
+  background: #f0f7ff;
+}
+
+.map-type-preview {
+  width: 55px;
+  height: 55px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border: 1px solid #e9ecef;
+}
+
+/* Estilos de preview para cada tipo de mapa */
+	.preview-default {
+		background: white;
+		background-size: contain;
+		background-origin: border-box;
+    border: 1px solid #ddd !important;
+	}
+
+.map-type-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Lista de capas */
+	.map-layers-list {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		cursor: pointer;
-		padding: 4px;
-		border-radius: 4px;
+		gap: 2px;
+		margin-top: 2px;
 	}
 
-		.quick-layer-item:hover, .layer-item:hover, .map-type-item:hover {
-			background-color: #f0f0f0;
-		}
+.layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
 
-	.more-options {
-		cursor: pointer;
-		color: #1a73e8;
-		font-weight: bold;
-	}
+.layer-item:hover {
+  background-color: #f8f9fa;
+}
 
-	.layer-details-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 16px;
-	}
+.layer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
 
-	.close-button {
-		background: none;
-		border: none;
-		font-size: 20px;
-		cursor: pointer;
-	}
+.layer-icon {
+  width: 16px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
 
-	.layer-section {
-		margin-bottom: 16px;
-	}
+.layer-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
 
-		.layer-section h3 {
-			margin-bottom: 8px;
-			color: #5f6368;
-			font-size: 14px;
-		}
+/* Toggle switch */
+.layer-toggle {
+  flex-shrink: 0;
+}
 
-	.layer-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 8px;
-	}
+.toggle-switch {
+  width: 38px;
+  height: 20px;
+  background: #ccc;
+  border-radius: 10px;
+  position: relative;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
 
-	.map-type-options {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
+.toggle-switch.active {
+  background: #4a90e2;
+}
 
-	.globe-view {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		margin-top: 8px;
-	}
+.toggle-slider {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 3px;
+}
 
-	.layer-icon {
-		width: 24px;
-		height: 24px;
-	}
+.toggle-switch.active .toggle-slider {
+  transform: translateX(18px);
+}
+
+/* Animaciones */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+/* Utilidades */
+.hand {
+  cursor: pointer;
+}
+
+/* Media queries para responsive */
+@media (max-width: 768px) {
+  .map-style-btn {
+    left: auto;
+    right: 20px;
+    top: 20px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .map-options-panel {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 70vh;
+    border-radius: 16px 16px 0 0;
+    transform-origin: bottom;
+  }
+
+  .fade-enter, .fade-leave-to {
+    transform: translateY(100%);
+  }
+
+  .map-types-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .map-type-preview {
+    height: 50px;
+  }
+
+  .map-type-name {
+    font-size: 12px;
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .map-style-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .map-style-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
 </style>

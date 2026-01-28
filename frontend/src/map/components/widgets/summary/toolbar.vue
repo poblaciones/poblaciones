@@ -19,17 +19,6 @@
 				<i class="fas fa-tags" />
 			</button>
 
-			<button type="button" class="btn btn-default btn-xs" v-if="useElevation"
-							:title="(toolbarStates.showElevation ? 'Ocultar relieve del mapa' : 'Mostrar relieve en el mapa')" @click="toggleElevation()" :class="getElevationActive()">
-				<i class="fas fa-hat-cowboy-side" />
-			</button>
-
-			<button type="button" v-for="basemapMetric in basemapMetrics" :key="basemapMetric.Id" class="btn btn-default btn-xs"
-							:title="(basemapMetric.Visible ? 'Ocultar ' : 'Mostrar ') + basemapMetric.Caption"
-							@click="toggleBasemapMetric(basemapMetric)" :class="getBasemapMetricActive(basemapMetric)">
-				<i class="fas fa-tags" />
-			</button>
-
 			<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" @click="geolocate()">
 				<i class="far fa-dot-circle" />
@@ -182,11 +171,11 @@
 			toggleLabels() {
 				window.SegMap.ToggleShowLabels();
 			},
-			toggleElevation() {
-				window.SegMap.ToggleShowElevation();
-			},
-			toggleBasemapMetric(basemapMetric) {
-				window.SegMap.ToggleBasemapMetric(basemapMetric);
+			getLabelsActive(mode) {
+				if (this.toolbarStates.showLabels) {
+					return ' active';
+				}
+				return ' unselected';
 			},
 			geolocate() {
 				if (navigator.geolocation) {
@@ -207,25 +196,6 @@
 					return ' active';
 				}
 				return '';
-			},
-			getBasemapMetricActive(basemapMetricActive) {
-				if (basemapMetricActive.Visible) {
-					return ' active';
-				} else {
-					return ' unselected';
-				}
-			},
-			getLabelsActive(mode) {
-				if (this.toolbarStates.showLabels) {
-					return ' active';
-				}
-				return ' unselected';
-			},
-			getElevationActive(mode) {
-				if (this.toolbarStates.showElevation) {
-					return ' active';
-				}
-				return ' unselected';
 			},
 		},
 		computed: {

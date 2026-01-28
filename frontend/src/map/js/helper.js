@@ -650,7 +650,7 @@ module.exports = {
 	getFrameParams(frame) {
 		var ret = {
 			e: this.getEnvelopeParam(frame.Envelope),
-			z: frame.Zoom,
+			z: parseInt(frame.Zoom, 10),
 		};
 		if(frame.ClippingRegionIds) {
 			ret.r = (frame.ClippingRegionIds ? frame.ClippingRegionIds.join(',') : null);

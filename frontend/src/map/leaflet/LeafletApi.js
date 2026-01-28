@@ -187,7 +187,7 @@ LeafletApi.prototype.Initialize = function () {
 		//////////////////
 		window.SegMap.MapInitialized();
 
-		var t = document.createElement("div");
+		/*var t = document.createElement("div");
 		t.innerHTML = '<div class="gmnoprint" role="menubar" style="margin: 10px -10px; z-index: 800; position: absolute; cursor: pointer; left: 0px; top: 0px;">' +
 			'<div class="gm-style-mtc" style="float: left; position: relative;">' +
 			'<button title="Mostrar mapa gris" type="button" class="leafletMapButton" style="font-weight: bold" id="roadTypeButton">Mapa</button>' +
@@ -218,6 +218,7 @@ LeafletApi.prototype.Initialize = function () {
 		loc.mapTypeButtons['b'].addEventListener("click", function () {
 			loc.InteractiveChangeMapType("b");
 		});
+		*/
 		loc.BoundsChanged();
 	});
 

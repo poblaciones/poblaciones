@@ -18,12 +18,14 @@
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
-					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')" v-show="!Embedded.HideSearch" />
+					<!--Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')" v-show="!Embedded.HideSearch" /-->
 					<LeftPanel ref='leftPanel' />
-					<MapPanel />
-					<MapTypeSelector v-if="false"></MapTypeSelector>
-					<MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
-					<RecommendBoundaries style="position: absolute; left: 20px; top: 60px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" />
+					<MapPanel class="exp-hiddable-block" />
+					<SideToolbar ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" ></SideToolbar>
+					<MapType ref="mapSelector"></MapType>
+					<!--FabSelector v-show="!Embedded.HideAddMetrics" ref="fabSelector" @selectedItem="selectedItem" class="exp-hiddable-unset mapsOvercontrols" /-->
+					<!--MetricsButton v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" /-->
+					<!--RecommendBoundaries style="position: absolute; left: 20px; top: 60px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" /-->
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -70,8 +72,10 @@
 	import Search from '@/map/components/widgets/map/search';
 	import WatermarkFloat from '@/map/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/map/components/widgets/map/WatermarkOwner';
-	import MapTypeSelector from '@/map/components/controls/mapTypeSelector';
+	import MapType from '@/map/components/widgets/map/mapType';
+	import SideToolbar from '@/map/components/widgets/sideToolbar/sideToolbar';
 	import CollapseButtonRight from '@/map/components/controls/collapseButtonRight';
+	import FabSelector from '@/map/components/widgets/fabSelector/fabSelector';
 
 	import Split from 'split.js';
 	import axios from 'axios';
@@ -89,17 +93,19 @@
 		name: 'app',
 		components: {
 			SummaryPanel,
-			Search,
+			//Search,
 			MapPanel,
 			WaitMessage,
 			EditButton,
 			FullScreenButton,
-			MetricsButton,
+			//MetricsButton,
 			LeftPanel,
-			RecommendBoundaries,
+			//FabSelector,
+			//RecommendBoundaries,
 			PopupsPanel,
 			WorkPanel,
-			MapTypeSelector,
+			MapType,
+			SideToolbar,
 			WatermarkFloat,
 			WatermarkOwner,
 			CollapseButtonRight,
@@ -229,6 +235,16 @@
 			IsPreview() {
 				var path = window.location.href;
 				return path.indexOf('&pv=1#') > 0;
+			},
+			placeSelected(item) {
+				window.SegMap.Clipping.SetClippingRegion(item.Id, true, false, false);
+			},
+			selectedItem(item) {
+				if (item.Type === 'B') {
+					window.SegMap.AddBoundaryById(item.Id, item.Name);
+				} else {
+					window.SegMap.AddMetricById(item.Id);
+				}
 			},
 			panRightSwipeClose(direction, event) {
 				if (
@@ -444,6 +460,7 @@
 					}
 				}, 100);
 				*/
+				this.$refs.mapSelector.InitializeMapControl();
 			},
 			RegisterErrorHandler() {
 				Vue.config.errorHandler = err.HandleError;
@@ -462,8 +479,11 @@
 					}
 				})).then(function (res) {
 					session.ReceiveSession(window.host, res);
-					loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
-					loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
+					//loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
+					//loc.$refs.fabSelector.metrics = res.data.Metrics;
+					arr.AddRange(loc.$refs.sideToolbar.metrics, res.data.Metrics);
+					arr.AddRange(loc.$refs.sideToolbar.boundaries, res.data.Boundaries);
+					//loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
 					window.fabMetrics = res.data.Metrics;
 				}).catch(function (error) {
 					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
@@ -592,6 +612,12 @@
 		z-index: 900 !important;
 	}
 
+	.section-title {
+		font-size: 14px;
+		color: #333;
+		letter-spacing: 0.5px;
+	}
+
 	.gm-fullscreen-control {
 		transform: scale(0.8);
 	}
@@ -704,6 +730,10 @@
 
 	.exp-showable-block {
 		display: none;
+	}
+
+	.sidepanelOffset {
+		margin-left: 0px;
 	}
 
 	.exp-high-contrast {

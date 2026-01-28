@@ -80,7 +80,7 @@ class SnapshotSearchMetrics extends BaseModel
 	public static function calculateSpecialWordsCondition($originalQuery, $fields)
 	{
 		$specialWords = Context::Settings()->Db()->SpecialWords;
-		$matches = Str::TextContainsWordList($specialWords, Str::ReplaceGroup($originalQuery, "'\+-@()[],.;|/", " "));
+		$matches = Str::TextContainsWordList($specialWords, Str::ReplaceGroup($originalQuery, ["'", "\\", "+", "-", "@", "(", ")", "[", "]", ",", ".", ";", "|", "/"], " "));
 
 		if (sizeof($matches) > 0)
 		{

@@ -347,7 +347,7 @@ class App
 		$actual_link = self::AbsoluteUrl('', $locaLink);
 		$url = self::AbsoluteUrl('/authenticate/login', $locaLink);
 
-		$url = Str::AppendParam($url, 'ask', 1);
+		$url = Str::AppendParam($url, 'ask', "1");
 		$url = Str::AppendParam($url, 'to', $actual_link);
 		return $url;
 	}

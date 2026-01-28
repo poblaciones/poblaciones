@@ -355,18 +355,18 @@ class MergeSnapshotsByDatasetModel
 		$t2 = ($sameDataset ? 't1' : 't2');
 		// Pasa valores
 		$value1 = 'sna_' . $variable1->Id() . '_value';
-		if (Arr::IndexOfByNamedValue($columns, 0, $value1) == -1)
+		if (Arr::IndexOfByIndexValue($columns, 0, $value1) == -1)
 			$columns[] = [$value1, 'double NULL', 't1.' . $value1];
 		$value2 = 'sna_' . $variable2->Id() . '_value';
-		if (Arr::IndexOfByNamedValue($columns, 0, $value2) == -1)
+		if (Arr::IndexOfByIndexValue($columns, 0, $value2) == -1)
 			$columns[] = [$value2, 'double NULL', $t2 . '.' . $value2];
 
 		// Pasa totales
 		$value1 = 'sna_' . $variable1->Id() . '_total';
-		if (Arr::IndexOfByNamedValue($columns, 0, $value1) == -1)
+		if (Arr::IndexOfByIndexValue($columns, 0, $value1) == -1)
 			$columns[] = [$value1, 'double NULL', 't1.' . $value1];
 		$value2 = 'sna_' . $variable2->Id() . '_total';
-		if (Arr::IndexOfByNamedValue($columns, 0, $value2) == -1)
+		if (Arr::IndexOfByIndexValue($columns, 0, $value2) == -1)
 			$columns[] = [$value2, 'double NULL', $t2 . '.' . $value2];
 
 		// Calcula la categoría de matriz

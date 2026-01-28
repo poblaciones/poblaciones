@@ -241,6 +241,8 @@ export default {
 			var css1 = dom.getCssRule(document, '.gm-style-mtc:first-of-type');
 			var css2 = dom.getCssRule(document, '.gm-style-mtc');
 			var css3 = dom.getCssRule(document, '.gm-style-mtc:last-of-type');
+
+			var cssSidePanelOffset = dom.getCssRule(document, '.sidepanelOffset');
 			//var css4 = dom.getCssRule(document, '.leaflet-left .leaflet-control-scale');
 			if(css1 === null) {
 				css1 = { style: { transform: '' } };
@@ -255,6 +257,8 @@ export default {
 				css1.style.transform = 'translateX(9px) scale(0.8)';
 				css2.style.transform = 'translateX(-8px) scale(0.8)';
 				css3.style.transform = 'translateX(4px) scale(0.8)';
+				cssSidePanelOffset.style.marginLeft = '0px';
+
 				//css4.style.transform = '';
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
@@ -262,6 +266,7 @@ export default {
 				css1.style.transform = '';
 				css3.style.transform = '';
 				//css4.style.transform = 'translateX(' + (this.width + 7) + 'px)';
+				cssSidePanelOffset.style.marginLeft = '300px';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
