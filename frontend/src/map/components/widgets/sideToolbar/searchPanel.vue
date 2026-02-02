@@ -295,7 +295,7 @@ export default {
 
 /* Wrapper del panel */
 .search-panel-wrapper {
-  position: fixed;
+  position: absolute;
   left: 92px;
   top: 50%;
   transform: translateY(-50%);

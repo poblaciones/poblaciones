@@ -230,6 +230,33 @@ module.exports = {
 			return n.toLocaleString('es');
 		}
 	},
+	formatNumOverall(num) {
+		if (num === '' || num === '-') {
+			return '-';
+		} else if (num === 'n/d') {
+			return 'n/d';
+		} else {
+			var suffix = '';
+			var decimals = 0;
+			if (num < 2000) {
+
+			} else if (num < 1000000) {
+				num = num / 1000;
+				decimals = 0;
+				suffix = ' mil';
+			} else {
+				if (num < 1050000) {
+					suffix = ' millón';
+			} else {
+					suffix = ' millones';
+			}
+				num = num / 1000000;
+				decimals = 1;
+			}
+			var ret = this.formatNum(num, decimals);
+			return ret + suffix;
+		}
+	},
 	animateNum(vm, element, newValue, oldValue, formatMode, decimals) {
 		var fix = 0;
 		var format = null;

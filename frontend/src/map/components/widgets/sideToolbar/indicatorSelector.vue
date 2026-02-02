@@ -5,7 +5,7 @@
       <div class="overlay" @click="closePanel"></div>
 
       <!-- Panel flotante principal -->
-      <div class="floating-panel panel card">
+      <div class="work-offsetY floating-panel panel card">
         <!-- Encabezado del panel -->
         <div class="panel-header">
           <div class="panel-title">Explorar datos</div>
@@ -412,10 +412,11 @@ export default {
 
 /* Panel flotante */
 .floating-panel {
-  position: fixed;
+  position: absolute;
   left: 92px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0px;
+  bottom: 0px;
+  margin: auto 0;
   width: 420px;
   max-width: calc(100vw - 112px);
   max-height: 90vh;

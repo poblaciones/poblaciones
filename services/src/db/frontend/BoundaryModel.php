@@ -7,6 +7,7 @@ use minga\framework\Profiling;
 use minga\framework\Str;
 use minga\framework\Context;
 use helena\services\backoffice\publish\PublishDataTables;
+use helena\db\frontend\SnapshotClippingRegionItemModel;
 
 class BoundaryModel extends BaseModel
 {
@@ -96,6 +97,19 @@ class BoundaryModel extends BaseModel
 					     WHERE bcr_boundary_version_id = ? " . $exclusions . " ORDER BY " . $orderBy . " LIMIT 25";
 			}
 			$items = App::Db()->fetchAll($sql, array($boundary['VersionId']));
+
+
+			// Resuelve para los ítems las poblaciones
+			foreach ($items as &$item) {
+				$table = new SnapshotClippingRegionItemModel();
+				$levels = $table->CalculateLevelsFromRegionIds([$item['Id']], false);
+				$lastLevel = $levels[sizeof($levels) - 1];
+				// geo_caption y geo_revision (departamentos, 2022)
+				$info = $table->GetSelectionInfoById([$item['Id']], $lastLevel['geo_id'], null);
+				$item['Population'] = $info['Population'];
+				$item['Households'] = $info['Households'];
+				$item['AreaM2'] = $info['AreaM2'];
+			}
 			$boundary['Items'] = $items;
 		}
 		Profiling::EndTimer();

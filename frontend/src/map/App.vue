@@ -983,6 +983,9 @@
 		box-shadow: rgb(0, 0, 0, 0.3) 0px 1px 4px -1px;
 	}
 
+	.work-offsetY {
+		margin-top: 0px;
+	}
 
 	.embeddedNoOpener {
 		position: absolute;

@@ -132,8 +132,8 @@ class SpatialConditions
 		if ($urbanity === null) return '';
 		$sql = $field . " IN ('N'";
 		foreach(['U', 'D', 'R', 'L'] as $validFilter)
-		if (Str::Contains($urbanity, $validFilter))
-			$sql .= ",'" . $validFilter . "'";
+			if (Str::Contains($urbanity, $validFilter))
+				$sql .= ",'" . $validFilter . "'";
 
 		return ' AND ' . $sql . ') ';
 	}

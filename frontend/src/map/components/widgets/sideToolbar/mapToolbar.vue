@@ -100,7 +100,7 @@ export default {
 }
 
 .toolbar-button.active {
-  background: #2196F3;
+  background: #0fa7d8;
   color: white;
 }
 
@@ -110,16 +110,16 @@ export default {
 
 /* Primer botón con color azul por defecto */
 .toolbar-button:first-child {
-  background: #2196F3;
+  background: #0fa7d8;
   color: white;
 }
 
 .toolbar-button:first-child:hover {
-  background: #1976D2;
+  background: #0fa7d8;
 }
 
 .toolbar-button:first-child.active {
-  background: #1565C0;
+  background: #0fa7d8;
 }
 
 @media (max-width: 768px) {

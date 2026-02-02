@@ -40,7 +40,8 @@
 <script>
 import LinkIcon from 'vue-material-design-icons/Link.vue';
 import Onboarding from '../popups/onboarding';
-	import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
+import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
+import dom from '@/common/framework/dom';
 
 export default {
 	name: 'workPanel',
@@ -147,6 +148,9 @@ export default {
 					var holder = document.querySelector('#holder');
 					holder.style.height = `calc(100% - ${calculatedHeight})`;
 					holder.style.top = calculatedHeight;
+
+					var offsetCss = dom.getCssRule(document, '.work-offsetY');
+					offsetCss.style.maxHeight = '80vh;';
 					if (window.SegMap) {
 						window.SegMap.TriggerResize();
 					}
@@ -155,6 +159,10 @@ export default {
 					var holder = document.querySelector('#holder');
 					holder.style.height = '100%';
 					holder.style.top = '0px';
+
+					var offsetCss = dom.getCssRule(document, '.work-offsetY');
+					offsetCss.style.maxHeight = '90vh;';
+
 					this.work.Current = null;
 					if (window.SegMap) {
 						window.SegMap.SaveRoute.RemoveWork();

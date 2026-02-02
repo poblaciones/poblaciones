@@ -42,7 +42,7 @@
                   </div>
                   <div class="place-info">
                     <div class="place-name">{{ place.Name }}</div>
-                    <div class="place-type">{{ boundary.Name }}</div>
+                    <div class="place-type">Habitantes: {{ lh.formatNumOverall(place.Population) }} - Hogares: {{ lh.formatNumOverall(place.Households) }}.</div>
                   </div>
                 </div>
               </div>
@@ -56,6 +56,7 @@
 
 <script>
 import { mixin as clickaway } from 'vue-clickaway';
+import h from '@/map/js/helper';
 
 export default {
   name: 'QuickPlaces',
@@ -76,7 +77,12 @@ export default {
       // Inicializar con el primer boundary si existe
       activeTab: this.boundariesData.length > 0 ? this.boundariesData[0].Id : null,
     };
-  },
+    },
+    computed: {
+      lh() {
+        return h;
+      }
+    },
   watch: {
     isOpen(val) {
       if (!val) {
@@ -175,7 +181,7 @@ export default {
 
 /* Wrapper del panel */
 .quick-places-wrapper {
-  position: fixed;
+  position: absolute;
   left: 92px;
   top: 50%;
   transform: translateY(-50%);
@@ -186,7 +192,7 @@ export default {
   background: white;
   border-radius: 6px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  width: 350px;
+  width: 400px;
   max-height: 500px;
   display: flex;
   flex-direction: column;
@@ -278,7 +284,7 @@ export default {
 /* Tab Content */
 .tabs-content {
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .tab-panel {

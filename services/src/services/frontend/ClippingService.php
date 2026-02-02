@@ -265,7 +265,7 @@ class ClippingService extends BaseService
 
 	private function CalculateRegionFromIds($clippingRegionIds, $levelId, $urbanity)
 	{
-	$table = new SnapshotClippingRegionItemModel();
+		$table = new SnapshotClippingRegionItemModel();
 		$item = $table->GetSelectionInfoById($clippingRegionIds, $levelId, $urbanity);
 		if ($item != null)
 			return $this->CreateSelectionInfo($item);
