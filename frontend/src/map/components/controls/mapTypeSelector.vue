@@ -28,7 +28,7 @@
           <div class="section-title" style="margin-bottom: 4px;">Detalles del mapa</div>
           <div class="map-layers-list">
             <div
-              v-for="layer in mapLayers"
+              v-for="layer in activeLayers"
               :key="layer.Id"
               class="layer-item hand"
               @click="toggleLayer(layer)"
@@ -80,6 +80,7 @@
 
   export default {
     name: 'MapStyleSelector',
+    props: ['toolbarStates'],
     data() {
       return {
         isExpanded: false,
@@ -113,19 +114,18 @@
             asset: ''
           }
         ],
-        mapLayers: [
-          {
-            Id: 'labels',
-            Caption: 'Etiquetas',
-            Icon: 'fas fa-tag',
-            Visible: true
-          },
-          {
-            Id: 'relief',
-            Caption: 'Relieve',
-            Icon: 'fas fa-mountain',
-            Visible: false
-          }]/*
+        mapLayers:  [{
+           Id: 'labels',
+           Caption: 'Etiquetas',
+           Icon: 'fas fa-tag',
+           Visible: true
+            }, {
+            Id: 'elevation',
+              Caption: 'Relieve',
+                Icon: 'fas fa-mountain',
+                  Visible: false
+              }]
+      /*
                 {
                   id: 'roads',
                   name: 'Rutas',
@@ -157,8 +157,20 @@
       }
     },
     computed: {
+      useElevation() {
+        return this.toolbarStates.hasElevation;
+      },
       currentMapStyle() {
         return this.mapStyles.find(s => s.id === this.currentMapStyleId);
+      },
+      activeLayers() {
+        var ret = [];
+        for (var l of this.mapLayers) {
+          if (l.Id != 'elevation' || this.useElevation) {
+            ret.push(l);
+          }
+        }
+        return ret;
       }
     },
     methods: {
@@ -166,6 +178,9 @@
         if (this.isTouchDevice) {
           // En dispositivos táctiles, toggle del panel
           this.isExpanded = !this.isExpanded;
+          if (this.isExpanded) {
+            this.expandit();
+          }
         } else {
           // En desktop, cambiar al siguiente tipo de mapa sin abrir panel
           if (!this.isExpanded) {
@@ -183,7 +198,15 @@
           }
           this.hoverTimeout = setTimeout(() => {
             this.isExpanded = true;
+            this.expandit();
           }, 200);
+        }
+      },
+      expandit() {
+        for (var l of this.mapLayers) {
+          if (l.Id == 'elevation') {
+            l.Visible = this.toolbarStates.showElevation;
+          }
         }
       },
       handleMouseLeave() {
@@ -221,43 +244,20 @@
         }
       },
       toggleLayer(layer) {
-        layer.Visible = !layer.Visible;
+        if (layer.Id == 'labels') {
+          layer.Visible = !layer.Visible;
+          window.SegMap.ToggleShowLabels();
+        } else if (layer.Id == 'elevation') {
+          window.SegMap.ToggleShowElevation();
+          layer.Visible = this.toolbarStates.showElevation;
+        } else {
+          window.SegMap.ToggleBasemapMetric(layer);
+        }
         this.$emit('layerToggled', {
           layerId: layer.Id,
           Visible: layer.Visible
         });
-      },
-
-
-      getBasemapMetricActive(basemapMetricActive) {
-				if (basemapMetricActive.Visible) {
-					return ' active';
-				} else {
-					return ' unselected';
-				}
-			},
-			getLabelsActive(mode) {
-				if (this.toolbarStates.showLabels) {
-					return ' active';
-				}
-				return ' unselected';
-			},
-			getElevationActive(mode) {
-				if (this.toolbarStates.showElevation) {
-					return ' active';
-				}
-				return ' unselected';
-			},
-      toggleLabels() {
-				window.SegMap.ToggleShowLabels();
-			},
-			toggleElevation() {
-				window.SegMap.ToggleShowElevation();
-			},
-			toggleBasemapMetric(basemapMetric) {
-				window.SegMap.ToggleBasemapMetric(basemapMetric);
-			},
-
+      }
     }
 };
 </script>
@@ -382,10 +382,10 @@
   background: #f1f1f1;
 }
 
-.map-type-card.active {
-  border-color: #4a90e2;
-  background: #f0f7ff;
-}
+	.map-type-card.active {
+		border-color: #4a90e2;
+		background: #e9e9e9;
+	}
 
 .map-type-preview {
   width: 55px;

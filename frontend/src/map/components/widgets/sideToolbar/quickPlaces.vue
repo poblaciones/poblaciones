@@ -3,7 +3,7 @@
     <div class="quick-places-wrapper sidepanelOffset" v-if="isOpen">
       <div class="quick-places-panel" v-on-clickaway="close">
         <div class="panel-header">
-          <div class="panel-title">Ir a</div>
+          <div class="panel-title">Ir a ...</div>
           <button class="btn-close" @click="close">
             <span aria-hidden="true">×</span>
           </button>
@@ -37,8 +37,8 @@
                   class="place-item"
                   @click="goToPlace(boundary.Id, place)"
                 >
-                  <div class="place-icon" :class="getIconClass(boundary.Icon)">
-                    <i :class="getIcon(boundary.Icon)"></i>
+                  <div class="place-icon">
+                    {{ getIcon(boundary.Icon) }}
                   </div>
                   <div class="place-info">
                     <div class="place-name">{{ place.Name }}</div>
@@ -117,20 +117,20 @@ export default {
     getIcon(iconName) {
       // Mapear iconos del JSON a clases de FontAwesome
       const iconMap = {
-        'map': 'fas fa-map',
-        'public': 'fas fa-globe-americas',
-        'location_city': 'fas fa-city',
-        'dashboard': 'fas fa-layer-group', // Para delimitaciones
-        'star': 'fas fa-star', // Para los más consultados
-        'people': 'fas fa-users',
-        'school': 'fas fa-graduation-cap',
-        'favorite': 'fas fa-heartbeat',
-        'engineering': 'fas fa-briefcase',
-        'local_library': 'fas fa-landmark',
-        'opacity': 'fas fa-tint',
-        'how_to_vote': 'fas fa-vote-yea',
-        'account_balance': 'fas fa-balance-scale',
-        'home': 'fas fa-home'
+        map: "🗺️",
+        public: "🌎",
+        location_city: "🏙️",
+        dashboard: "🗂️", // Delimitaciones
+        star: "⭐", // Más consultados
+        people: "👥",
+        school: "🎓",
+        favorite: "❤️",
+        engineering: "💼",
+        local_library: "🏛️",
+        opacity: "💧",
+        how_to_vote: "🗳️",
+        account_balance: "⚖️",
+        home: "🏠"
       };
       return iconMap[iconName] || 'fas fa-map-marker-alt';
     },
@@ -315,7 +315,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 8px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -335,7 +335,7 @@ export default {
   justify-content: center;
   border-radius: 8px;
   color: white;
-  font-size: 16px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 

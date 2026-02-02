@@ -1,6 +1,6 @@
 <template>
 	<div>
-			<mapTypeSelector @styleChanged="styleChanged" ref="selector"/>
+			<mapTypeSelector @styleChanged="styleChanged" :toolbarStates="toolbarStates" ref="selector"/>
 	</div>
 </template>
 
@@ -26,7 +26,7 @@ export default {
 	computed: {
 	},
 	props: [
-
+		 'toolbarStates'
 	],
 	methods: {
 		styleChanged(styleId) {

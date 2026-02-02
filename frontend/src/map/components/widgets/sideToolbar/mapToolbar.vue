@@ -70,16 +70,16 @@ export default {
   z-index: 990;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   background: #ffffffc0;
-  padding: 12px;
+  padding: 8px;
   border-radius: 30px;
   box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 8px;
 }
 
 .toolbar-button {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
   background: white;

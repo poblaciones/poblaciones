@@ -21,7 +21,7 @@
 					<LeftPanel ref='leftPanel' />
 					<MapPanel class="exp-hiddable-block" />
 					<SideToolbar ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
-					<MapType ref="mapSelector"></MapType>
+					<MapType ref="mapSelector" :toolbarStates="toolbarStates"></MapType>
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
