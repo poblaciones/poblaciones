@@ -47,6 +47,16 @@ App::$app->get('/services/frontend/clipping/GetLabels', function (Request $reque
 	return App::JsonImmutable($controller->GetLabels($x, $y, $z));
 });
 
+
+// ej. http://mapas/services/shapes/GetShapesByEnvelope?d=62
+App::$app->get('/services/frontend/shapes/GetShapesByEnvelope', function (Request $request) {
+	$controller = new services\ShapesService();
+	$datasetId = Params::GetIntMandatory('d');
+	$e = Envelope::TextDeserialize(Params::Get('e'));
+	$ret = $controller->GetShapesByEnvelope($datasetId, $e);
+	return App::JsonImmutable($ret);
+});
+
 // ej. http://mapas/services/geographies/GetGeography?a=62&z=12&x=1380&y=2468
 App::$app->get('/services/frontend/geographies/GetGeography', function (Request $request) {
 	$controller = new services\GeographyService();

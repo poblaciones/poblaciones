@@ -133,8 +133,8 @@ class ConfigurationService extends BaseService
 			$mapAccess = Context::Settings()->Keys()->GoogleMapsKey;
 		}
 
-		$suggestions = array('minScore' => Context::Settings()->Suggestions()->getMinScoreToSuggest(),
-							'maxSuggestions' => Context::Settings()->Suggestions()->getMaxSuggestionsPerTrigger());
+		$suggestions = array('minScore' => App::Settings()->Suggestions()->getMinScoreToSuggest(),
+							 'maxSuggestions' => App::Settings()->Suggestions()->getMaxSuggestionsPerTrigger());
 
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,

@@ -39,7 +39,7 @@ class MonthlyAnalyzer {
         $this->log("=== Iniciando análisis para {$this->year}-{$this->month} ===");
 
 		ini_set('memory_limit', '2G'); // 2GB de RAM
-		ini_set('max_execution_time', 7200); // 2 horas
+		ini_set('max_execution_time', '7200'); // 2 horas
 		set_time_limit(7200);
 
         $startTime = date('Y-m-d H:i:s');
@@ -782,7 +782,7 @@ class MonthlyAnalyzer {
 		if ($currentTotal == null)
 			$currentTotal = 0;
 
-         $newTotal = ($currentTotal ?? 0) + $this->stats['sessions_analyzed'];
+         $newTotal = $currentTotal + $this->stats['sessions_analyzed'];
 
         App::Db()->exec($sql, ['total_sessions_analyzed', (string)$newTotal, $newTotal]);
     }

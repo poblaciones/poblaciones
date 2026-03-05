@@ -26,7 +26,7 @@ class ShapesService extends BaseService
 	// Los niveles de zoom se mapean con la calidad de imagen
 	// de modo que CALIDAD = Max(5, ((int)((zoom + 2) / 3))),
 	// es decir que z[1 a 3] = C1, z[4 a 6] = C2, z[7 a 9] = C3, z[10] = C4, z>10 = C5.
-public function GetDatasetShapes($datasetId, $x, $y, $z)
+	public function GetDatasetShapes($datasetId, $x, $y, $z)
 	{
 		$data = null;
 		$this->CheckNotNullNumeric($datasetId);
@@ -46,6 +46,12 @@ public function GetDatasetShapes($datasetId, $x, $y, $z)
 		DatasetShapesCache::Cache()->PutData($datasetId, $key, $data);
 
 		return $data;
+	}
+
+	public function GetShapesByEnvelope($datasetId, $envelope)
+	{
+		$table = new SnapshotShapesModel();
+		return $table->GetShapesByEnvelope($datasetId, $envelope);
 	}
 
 	private function CalculateDatasetShapes($datasetId, $x, $y, $z)
