@@ -585,7 +585,6 @@
     .chart-panel {
         position: relative;
         font-family: sans-serif;
-        background: #fff;
         border: 0px solid #eee;
         overflow: hidden;
         width: 100%; /* IMPORTANTE: Permitir que siga al padre */

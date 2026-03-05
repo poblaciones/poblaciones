@@ -76,7 +76,8 @@ App::$app->after(function(Request $request, Response $response) {
 
 App::$app->options("{anything}", function () {
 	$response = new \Symfony\Component\HttpFoundation\JsonResponse(null, 204);
-	$response->headers->set('Access-Control-Allow-Headers', 'Authorization,Cache-Control,X-Requested-With,Full-Url,Session-Id');
+	//$response->headers->set('Access-Control-Allow-Headers', 'Authorization,Cache-Control,X-Requested-With,Full-Url,Session-Id');
+	$response->headers->set('Access-Control-Allow-Headers',   'Authorization,Cache-Control,X-Requested-With,Full-Url,Session-Id,Access-Link,Origin,Content-Type,Accept');
 	return $response;
 })->assert("anything", ".*");
 
@@ -92,6 +93,7 @@ require_once('frontend.php');
 if (Context::Settings()->isAPIEnabled)
 {
 	require_once('api/mail.php');
+	require_once('api/wfs.php');
 	require_once('api/clipping.php');
 	require_once('api/backup.php');
 	require_once('api/deployment.php');

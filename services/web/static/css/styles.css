@@ -94,17 +94,14 @@ body, td.tda {
 .dText {
 }
 .btn {
-	padding: 0;
+	padding: 4px;
 	overflow: hidden;
 	border-width: 0;
-	width: 80px;
-	font-size: 13px;
+	font-size: 14px;
 	cursor: pointer;
 	height: 30px;
 	outline: none;
 	border-radius: 2px;
-	background-color: #4a89dc;
-	color: #ecf0f1;
 	transition: background-color .3s;
 }
 
@@ -114,7 +111,7 @@ input[type=text], input[type=password] {
 }
 
 .btn:hover, .btn:focus {
-		background-color: #3070c3;
+		/* background-color: #3070c3; */
 	}
 
 	.btn > * {

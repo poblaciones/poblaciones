@@ -92,6 +92,7 @@ SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMet
 		ret.push(['g', variable.GradientOpacity, 'M']);
 		ret.push(['d', this.Boolean(variable.ShowDescriptions), '0']);
 		ret.push(['s', this.Boolean(variable.ShowValues), '0']);
+		ret.push(['h', this.Boolean(activeSelectedMetric.ShowChart), '1']);
 		ret.push(['e', this.Boolean(variable.ShowPerimeter), '0']);
 
 		var activeStepsState = this.activeSequences(variable);
@@ -350,6 +351,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 	var showDescriptions = h.getSafeValue(values, 'd', '0');
 	var showPerimeter = h.getSafeValue(values, 'e', '0');
 	var showValues = h.getSafeValue(values, 's', '0');
+	var showChart = h.getSafeValue(values, 'h', '1');
 	var activeSequencesSteps = h.getSafeValue(values, 'a', null);
 	var ranking = h.getSafeValue(values, 'k', null);
 	var customPattern = h.getSafeValue(values, 'p', '');
@@ -371,6 +373,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 		ShowValues: showValues,
 		ShowPerimeter: showPerimeter,
 		ShowRanking: this.ParseRanking(ranking)['Show'],
+		ShowChart: showChart,
 		RankingSize: this.ParseRanking(ranking)['Size'],
 		RankingDirection: this.ParseRanking(ranking)['Direction'],
 		Opacity: opacity,
@@ -476,6 +479,10 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 
 	if (state.ShowRanking !== activeSelectedMetric.ShowRanking) {
 		activeSelectedMetric.ShowRanking = state.ShowRanking;
+	}
+	if (state.ShowChart !== activeSelectedMetric.ShowChart) {
+		activeSelectedMetric.ShowChart = state.ShowChart;
+		alert(state.ShowChart);
 	}
 	if (state.RankingDirection !== activeSelectedMetric.RankingDirection) {
 		activeSelectedMetric.RankingDirection = state.RankingDirection;

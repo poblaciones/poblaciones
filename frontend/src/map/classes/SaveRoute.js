@@ -6,6 +6,7 @@ import ClippingRouter from '@/map/router/ClippingRouter';
 import SelectedInfoRouter from '@/map/router/SelectedInfoRouter';
 import LeftPanelRouter from '@/map/router/LeftPanelRouter';
 import FeatureInfoRouter from '@/map/router/FeatureInfoRouter';
+import BasemapRouter from '../router/BasemapRouter';
 
 
 export default SaveRoute;
@@ -27,6 +28,7 @@ function SaveRoute() {
 	this.lastState = null;
 
 	this.subscribers = [	new FrameRouter(),
+												new BasemapRouter(),
 												new ClippingRouter(),
 												new SelectedInfoRouter(),
 												new LeftPanelRouter(),

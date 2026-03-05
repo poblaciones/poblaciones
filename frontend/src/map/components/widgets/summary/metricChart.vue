@@ -59,8 +59,14 @@ import QuickChart from '@/map/components/controls/quickChart';
 				return this.variableValueLabels.length == 0;
 			},
 			chartData() {
+				var serieName;
+				if (this.metric.Compare.Active) {
+					serieName = this.metric.Compare.SelectedVersion().Version.Name + '-' + this.version.Version.Name;
+				} else {
+					serieName = this.version.Version.Name;
+				}
 				var serie = {
-					text: this.version.Version.Name,
+					text: serieName,
 					values: []
 				};
 

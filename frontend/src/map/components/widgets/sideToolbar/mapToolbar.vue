@@ -1,5 +1,5 @@
 <template>
-  <div class="map-toolbar exp-hiddable-block sidepanelOffset">
+  <div class="map-toolbar exp-hiddable-block sidepanelOffset" v-if="!Embedded.HideAddMetrics || !Embedded.HideSearch">
     <!-- Botón para Indicadores -->
     <button v-show="!Embedded.HideAddMetrics"
       class="toolbar-button"

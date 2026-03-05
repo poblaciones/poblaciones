@@ -16,6 +16,7 @@ use helena\caches\SelectedBoundaryCache;
 use helena\caches\BoundaryVisiblityCache;
 use helena\caches\BoundaryDownloadCache;
 use helena\caches\BoundarySummaryCache;
+use helena\caches\SuggestionLabelsCache;
 use helena\caches\ClippingCache;
 use helena\caches\RankingCache;
 use helena\caches\BackofficeDownloadCache;
@@ -101,11 +102,15 @@ class CacheManager
 		BoundaryCache::Cache()->Clear();
 		BoundaryDownloadCache::Cache()->Clear();
 		BoundarySummaryCache::Cache()->Clear();
+
+		SuggestionLabelsCache::Cache()->Clear();
 	}
 	public function CleanBoundariesMetadataCache()
 	{
 		SelectedBoundaryCache::Cache()->Clear();
 		BoundaryVisiblityCache::Cache()->Clear();
+
+		SuggestionLabelsCache::Cache()->Clear();
 	}
 	public function CleanSelectedMetricCache()
 	{
@@ -113,6 +118,8 @@ class CacheManager
 		SelectedMetricsMetadataCache::Cache()->Clear();
 		self::CleanMetricGroupsMetadataCache();
 		self::CleanMetricProvidersMetadataCache();
+
+		SuggestionLabelsCache::Cache()->Clear();
 	}
 	public function CleanAllMetricCaches()
 	{
@@ -126,6 +133,7 @@ class CacheManager
 		DownloadCache::Cache()->Clear();
 		FabMetricsCache::Cache()->Clear();
 		SelectedMetricsMetadataCache::Cache()->Clear();
+		SuggestionLabelsCache::Cache()->Clear();
 	}
 	public function CleanMetricGroupsMetadataCache()
 	{
@@ -152,6 +160,7 @@ class CacheManager
 	{
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 		SelectedMetricsMetadataCache::Cache()->Clear($metricIdShardified);
+		SuggestionLabelsCache::Cache()->Clear();
 	}
 	public function ClearMetricMetadata($metricId)
 	{
@@ -161,5 +170,6 @@ class CacheManager
 		LayerDataCache::Cache()->Clear($metricIdShardified);
 		RankingCache::Cache()->Clear($metricIdShardified);
 		SelectedMetricsMetadataCache::Cache()->Clear($metricIdShardified);
+		SuggestionLabelsCache::Cache()->Clear();
 	}
 }

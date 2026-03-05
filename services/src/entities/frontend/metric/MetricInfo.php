@@ -13,6 +13,7 @@ class MetricInfo extends BaseMapModel
 	public $MetricProviderId;
 	public $Provider;
 	public $Signature;
+	public $Tag;
 	public $Coverage;
 	public $Type;
 
@@ -22,6 +23,7 @@ class MetricInfo extends BaseMapModel
 		return array (
 			'mtr_id' => 'Id',
 			'mtr_caption' => 'Name',
+			'mtr_tag' => 'Tag',
 			'mtr_metric_group_id' => 'MetricGroupId',
 			'mtr_metric_provider_id' => 'MetricProviderId',
 			'cli_caption' => 'Coverage',

@@ -1,0 +1,408 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'SUGGESTIONS_PROCESSING' %}
+
+{% block content %}
+
+{{ macros.Title('Procesamiento de aprendizaje') }}
+
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="processing-manager">
+    <div class="dSeparatorNewLine">
+		<div class='dText'>Aprendizaje para sugerencias</div>
+	</div>
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3>Estado del Modelo</h3>
+        </div>
+        <div class="dBlockNewLineS1">
+            Reglas:
+        </div>
+        <div class="dBlockSize3">
+            {{ model_metadata.total_rules|number_format }}
+        </div>
+        <div class="dBlockNewLineS1">
+            Meses procesados:
+        </div>
+        <div class="dBlockSize3">
+            {{ processing_status.total_processed }} / {{ processing_status.total_available }}
+        </div>
+        <div class="dBlockNewLineS1">
+            Último procesamiento:
+        </div>
+        <div class="dBlockSize3">
+            {{ model_metadata.metadata.last_training_month.text|default('N/A') }}
+        </div>
+    </div>
+    <div class="" style="clear:both; padding-top: 20px; margin-bottom: 30px" >
+
+        <form method="post" >
+        <input type="hidden" name="clearAll" value="1" />
+        <button  id="btnClearAll" class="btn btn-red" type="submit">
+            <i class="fa fa-play"></i> Reiniciar conocimiento (borrar en MySQL)
+        </button>
+        </form>
+    </div>
+
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3>Procesamiento por mes</h3>
+            <div class="pull-right">
+                <form method="post" >
+
+                <button id="btnProcessPending" class="dSmallerButton" style="margin-top: -22px" type="submit">
+                    <i class="fa fa-play"></i> Procesar 10 próximos pendientes
+                </button>
+                </form>
+            </div>
+
+
+        </div>
+        <div class="panel-body">
+            <table class="table table-striped" id="monthsTable">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Estado</th>
+                        <th>Sesiones</th>
+                        <th>Reglas creadas</th>
+                        <th>Reglas actualizadas</th>
+                        <th>Reglas eliminadas</th>
+                        <th>Procesado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month in processing_status.months %}
+                    <tr class="month-row" data-year="{{ month.year }}" data-month="{{ month.month }}">
+                        <td><strong>{{ month.label }}</strong></td>
+                        <td>
+                            {% if month.status == 'completed' %}
+                                <span class="badge badge-success">Completado</span>
+                            {% elseif month.status == 'failed' %}
+                                <span class="badge badge-danger">Error</span>
+                            {% elseif month.status == 'running' %}
+                                <span class="badge badge-warning">Procesando...</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ month.sessions_analyzed|number_format|default('-') }}</td>
+                        <td class="text-success">{{ month.rules_created|number_format|default('-') }}</td>
+                        <td class="text-info">{{ month.rules_updated|number_format|default('-') }}</td>
+                        <td class="text-danger">{{ month.rules_deleted|number_format|default('-') }}</td>
+                        <td class="text-muted small">
+                            {% if month.completed_at %}
+                                {{ month.completed_at|date('d/m/Y H:i') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="post">
+                            <input type="hidden" name="y" value="{{ month.year }}" />
+                            <input type="hidden" name="m" value="{{ month.month }}" />
+                            <button type="submit"
+                                class="dSmallerButton btn-process" data-year="{{ month.year }}" data-month="{{ month.month }}"
+                                {% if month.status == 'running' %}disabled{% endif %}>
+                                <i class="fa fa-play"></i>
+                                {% if month.is_processed and month.status != 'failed' %}Re-procesar{% else %}Procesar{% endif %}
+                            </button>
+                            </form>
+                            {% if month.error_message %}
+                            <button class="btn btn-sm btn-danger btn-show-error"
+                                    data-error="{{ month.error_message }}">
+                                <i class="fa fa-exclamation-triangle"></i> Ver Error
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3>Configuración del Sistema</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Parámetros actuales</h4>
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Mínimo Support:</strong></td>
+                            <td>3 apariciones</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mínima Confianza:</strong></td>
+                            <td>15%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Factor de Decaimiento:</strong></td>
+                            <td>{{ model_metadata.metadata.decay_factor.text|default('0.95') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tasa Mínima Aceptación:</strong></td>
+                            <td>5%</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h4>Desglose de reglas</h4>
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Co-ocurrencias Métricas:</td>
+                            <td><strong>{{ model_metadata.rule_counts.metric_cooccurrences|number_format }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Secuencias:</td>
+                            <td><strong>{{ model_metadata.rule_counts.sequences|number_format }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Patrones por Zoom:</td>
+                            <td><strong>{{ model_metadata.rule_counts.zoom_patterns|number_format }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Patrones por Provincia:</td>
+                            <td><strong>{{ model_metadata.rule_counts.province_patterns|number_format }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Progreso -->
+<div class="modal fade" id="processingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Procesando...</h4>
+            </div>
+            <div class="modal-body">
+                <p id="processingMessage">Procesando mes...</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Error -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Error de procesamiento</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="errorMessage"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const processingModal = document.getElementById('processingModal');
+    const processingMessage = document.getElementById('processingMessage');
+    const errorModal = document.getElementById('errorModal');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // --- Funciones auxiliares para mostrar/ocultar modales ---
+    function showModal(modal) {
+        modal.style.display = 'block';
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop';
+        document.body.appendChild(backdrop);
+        document.body.classList.add('modal-open');
+    }
+
+    function hideModal(modal) {
+        modal.style.display = 'none';
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        document.body.classList.remove('modal-open');
+    }
+
+    // --- Procesar un mes ---
+    document.querySelectorAll('.btn-process').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row = btn.closest('.month-row');
+            const year = row.getAttribute('data-year');
+            const month = row.getAttribute('data-month');
+            processingMessage.textContent = `Procesando ${year}-${String(month).padStart(2, '0')}...`;
+            showModal(processingModal);
+        });
+    });
+
+    // --- Procesar todos los pendientes ---
+    const btnProcessPending = document.getElementById('btnProcessPending');
+    if (btnProcessPending) {
+        btnProcessPending.addEventListener('click', (e) => {
+            const confirmed = confirm('¿Procesar todos los meses pendientes? Esto puede tardar varios minutos.');
+            if (!confirmed) {
+                e.preventDefault();
+                return;
+            }
+            processingMessage.textContent = 'Procesando meses pendientes...';
+            showModal(processingModal);
+        });
+    }
+
+
+    // --- Procesar todos los pendientes ---
+    const btnClearAll = document.getElementById('btnClearAll');
+    if (btnClearAll) {
+        btnClearAll.addEventListener('click', (e) => {
+            const confirmed = confirm('¿Desea eliminar todo lo aprendido en la base de datos? Esto dejará los archivos navigation intactos, pero sin procesar.');
+            if (!confirmed) {
+                e.preventDefault();
+                return;
+            }
+            processingMessage.textContent = 'Eliminando conocimientos...';
+            showModal(processingModal);
+        });
+    }
+
+    // --- Mostrar error individual ---
+    document.querySelectorAll('.btn-show-error').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const error = btn.getAttribute('data-error');
+            errorMessage.textContent = error || 'Sin detalles del error.';
+            showModal(errorModal);
+        });
+    });
+
+    // --- Botones de cierre en los modales ---
+    document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            hideModal(modal);
+        });
+    });
+
+    // Cerrar modales haciendo clic fuera del contenido solo para errorModal
+    errorModal.addEventListener('click', (e) => {
+        if (e.target === errorModal) hideModal(errorModal);
+    });
+
+});
+</script>
+<style>
+/* --- Comportamiento de los modales --- */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    z-index: 1050;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.table-striped {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+th, td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+}
+.modal-dialog {
+    position: relative;
+    margin: 10% auto;
+    max-width: 500px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-content {
+    border: none;
+    border-radius: 6px;
+}
+
+.modal-header, .modal-footer {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+
+.modal-footer {
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+	.btn-red {
+        background-color: indianred;
+	}
+.modal-body {
+    padding: 15px;
+}
+
+.modal-title {
+    margin: 0;
+}
+
+.modal-open {
+    overflow: hidden;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+}
+
+/* --- Visual de los paneles y cajas --- */
+.stat-box {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+.stat-box h4 {
+    font-size: 2em;
+    margin: 0;
+    color: #007bff;
+}
+.panel {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+.panel-heading {
+    padding: 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+.panel-body {
+    padding: 15px;
+}
+.pull-right {
+    float: right;
+}
+</style>
+
+{% endblock %}

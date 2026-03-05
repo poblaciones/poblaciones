@@ -12,6 +12,7 @@ ContentActions.prototype = Object.create(ActionManagerBase.prototype);
 
 ContentActions.prototype.AddMetric = function (metricId) {
 	this.RegisterAction('AddMetric', metricId);
+	window.SegMap.Suggestions.RegisterAction('Content', 'AddMetric', metricId);
 	this.Summary.MetricAdded();
 };
 
@@ -22,6 +23,7 @@ ContentActions.prototype.AddBaseMetric = function (metricId) {
 
 ContentActions.prototype.AddBoundary = function (boundaryId) {
 	this.RegisterAction('AddBoundary', boundaryId);
+	window.SegMap.Suggestions.RegisterAction('Content', 'AddBoundary', boundaryId);
 	this.Summary.BoundaryAdded();
 };
 
@@ -30,6 +32,7 @@ ContentActions.prototype.RemoveBoundary = function (boundaryId) {
 };
 
 ContentActions.prototype.SelectVariable = function (variableId) {
+	window.SegMap.Suggestions.RegisterAction('Content', 'SelectVariable', variableId);
 	this.RegisterAction('SelectVariable', variableId);
 };
 
@@ -74,6 +77,7 @@ ContentActions.prototype.SelectFeature = function (fid, metricId = null, variabl
 
 ContentActions.prototype.SelectRegion = function (regionIds) {
 	this.RegisterAction('SelectRegions', regionIds);
+	window.SegMap.Suggestions.RegisterAction('Content', 'SelectRegions', regionIds);
 	this.Summary.RegionSelected();
 };
 

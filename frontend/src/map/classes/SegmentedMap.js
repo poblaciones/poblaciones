@@ -1,6 +1,9 @@
 import ActiveSelectedMetric from '@/map/classes/ActiveSelectedMetric';
 import ActiveBaseMetric from '@/map/classes/ActiveBaseMetric';
 import ActiveLabels from '@/map/classes/ActiveLabels';
+import ActiveSuggestions from '@/map/classes/ActiveSuggestions';
+import ActiveCatalog from "./ActiveCatalog";
+import ActiveBaseBoundary from '@/map/classes/ActiveBaseBoundary';
 import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import MetricsList from '@/map/classes/MetricsList';
 import SaveRoute from '@/map/classes/SaveRoute';
@@ -29,11 +32,13 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 	this.InfoWindow = new InfoWindow();
 	this.Clipping = new Clipping(frame, clipping);
 	this.Signatures = config.Signatures;
+	this.Catalog = new ActiveCatalog();
 	this.User = config.User;
 	this.MapsApi = mapsApi;
 	this.Work = null;
 	this.Popups = {};
 	this.Annotations = [];
+	this.Suggestions = new ActiveSuggestions(config.Suggestions, config.NavigationId);
 	this.IsSmallDevice = null;
 	this.IsNotLarge = false;
 	this.textCanvas = {};
@@ -57,7 +62,13 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 		this.tileDataBlockSize = null;
 	}
 	this.Configuration = config;
-	window.Use = config;
+	// Pone propiedades de configuración
+	for (var n in config) {
+		if (config.hasOwnProperty(n)) {
+			window.Use[n] = config[n];
+		}
+	}
+
 	this.Queue = new Queue(config.MaxQueueRequests);
 	if (Array.isArray(config.StaticServer) || window.host !== config.StaticServer) {
 		this.StaticQueue = new Queue(config.MaxStaticQueueRequests);
@@ -305,7 +316,7 @@ SegmentedMap.prototype.CheckSmallDevice = function () {
 			this.toolbarStates.repositionSearch = true;
 		} else {
 			this.toolbarStates.repositionSearch = false;
-			if (!window.Embedded.HideSidePanel) {
+			if (!window.Embedded.HideSummaryPanel) {
 				this.toolbarStates.collapsed = false;
 			}
 		}
@@ -376,26 +387,43 @@ SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
 SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
 	if (!basemapMetric.Visible) {
 		// lo muestra
-		if (basemapMetric.layer == null) {
+		if (!basemapMetric.layers) {
+			basemapMetric.layers = [];
 			// lo inserta de la nada...
 			if (!basemapMetric.requested) {
-				basemapMetric.requested = true;
-				this.AddBaseMetricById(basemapMetric.Id).then(function (activeBaseMetric) {
-					basemapMetric.layer = activeBaseMetric;
-					basemapMetric.requested = false;
-					basemapMetric.Visible = !basemapMetric.Visible;
-				});
+				basemapMetric.requested = 0;
+				basemapMetric.Visible = !basemapMetric.Visible;
+				if (basemapMetric.MetricIds) {
+					for (var id of basemapMetric.MetricIds) {
+						basemapMetric.requested++;
+						this.AddBaseMetricById(id).then(function (activeBaseMetric) {
+							basemapMetric.layers.push(activeBaseMetric);
+							basemapMetric.requested--;
+						});
+					}
+				}
+				if (basemapMetric.BoundaryIds) {
+					for (var id of basemapMetric.BoundaryIds) {
+						basemapMetric.requested++;
+						this.AddBaseBoundaryById(id).then(function (activeBaseMetric) {
+							basemapMetric.layers.push(activeBaseMetric);
+							basemapMetric.requested--;
+						});
+					}
+				}
 			}
 		} else {
 			basemapMetric.Visible = !basemapMetric.Visible;
-			basemapMetric.layer.Show();
+			for (var layer of basemapMetric.layers) {
+				layer.Show();
+			}
 			this.SaveRoute.UpdateRoute();
 		}
 	} else {
 		// lo quita
 		basemapMetric.Visible = !basemapMetric.Visible;
-		if (basemapMetric.layer) {
-			basemapMetric.layer.Hide();
+		for (var layer of basemapMetric.layers) {
+			layer.Hide();
 		}
 		this.SaveRoute.UpdateRoute();
 	}
@@ -528,10 +556,14 @@ SegmentedMap.prototype.GetActiveMetricByVariableId = function (variableId) {
 SegmentedMap.prototype.GetActiveMetricByVariableFromBaseMetricsId = function (variableId) {
 	var baseMetrics = this.toolbarStates.basemapMetrics;
 	for (var i = 0; i < baseMetrics.length; i++) {
-		if (baseMetrics[i].layer) {
-			var variable = baseMetrics[i].layer.GetVariableById(variableId);
-			if (variable !== null) {
-				return baseMetrics[i].layer;
+		if (baseMetrics[i].layers) {
+			for (var layer of baseMetrics[i].layers) {
+				if (!layer.isBoundary) {
+					var variable = layer.GetVariableById(variableId);
+					if (variable !== null) {
+						return layer;
+					}
+				}
 			}
 		}
 	}
@@ -609,6 +641,14 @@ SegmentedMap.prototype.AddMetricById = function (id) {
 	});
 };
 
+SegmentedMap.prototype.AddBaseBoundaryById = function (id) {
+	var loc = this;
+	return this.AddBoundaryById(id, true).then(function (activeSelectedMetric) {
+		loc.Session.Content.AddBaseMetric(id);
+		return activeSelectedMetric;
+	});
+};
+
 SegmentedMap.prototype.AddBaseMetricById = function (id) {
 	var loc = this;
 	return this.doAddMetricById(id, null, true).then(function (activeSelectedMetric) {
@@ -617,14 +657,21 @@ SegmentedMap.prototype.AddBaseMetricById = function (id) {
 	});
 };
 
-SegmentedMap.prototype.AddBoundaryById = function (id, caption) {
+SegmentedMap.prototype.AddBoundaryById = function (id, isBaseMetric = false) {
 	const loc = this;
-	this.Get(window.host + '/services/boundaries/GetSelectedBoundary', {
+	return this.Get(window.host + '/services/boundaries/GetSelectedBoundary', {
 		params: { a: id }
 	}).then(function (res) {
-		var activeBoundary = new ActiveBoundary(res.data);
-		loc.Metrics.AddStandardMetric(activeBoundary);
+		var activeBoundary;
+		if (isBaseMetric) {
+			activeBoundary = new ActiveBaseBoundary(res.data);
+			loc.Metrics.AppendNonStandardMetric(activeBoundary);
+		} else {
+			activeBoundary = new ActiveBoundary(res.data);
+			loc.Metrics.AddStandardMetric(activeBoundary);
+		}
 		loc.Session.Content.AddBoundary(id);
+		return activeBoundary;
 	}).catch(function (error) {
 		err.errDialog('GetSelectedBoundary', 'obtener las delimitaciones solicitadas', error);
 	});

@@ -20,8 +20,12 @@
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
 					<LeftPanel ref='leftPanel' />
 					<MapPanel class="exp-hiddable-block" />
-					<SideToolbar ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
-					<MapType ref="mapSelector" :toolbarStates="toolbarStates"></MapType>
+					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
+					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
+					<MapType ref="mapSelector" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
+
+					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
+					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" />
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -34,7 +38,7 @@
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 					<FullScreenButton v-if="!Embedded.Readonly" class="exp-hiddable-unset" :fullscreen="fullscreen" />
-					<CollapseButtonRight v-show="!Embedded.HideSidePanel && !Embedded.Readonly"
+					<CollapseButtonRight v-show="!Embedded.HideSummaryPanel && !Embedded.Readonly"
 															 :collapsed='toolbarStates.collapsed'
 															 v-if="clippingStarted"
 															 @click="doToggle"
@@ -59,6 +63,8 @@
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
 	import MapExport from '@/map/classes/MapExport';
 	import MapPanel from '@/map/components/panels/mapPanel';
+	import MetricsButton from '@/map/components/widgets/map/metricsButton';
+	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
 	import LeftPanel from '@/map/components/panels/leftPanel';
 	import EditButton from '@/map/components/widgets/map/editButton';
 	import FullScreenButton from '@/map/components/widgets/map/fullScreenButton';
@@ -66,6 +72,7 @@
 	import WatermarkFloat from '@/map/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/map/components/widgets/map/WatermarkOwner';
 	import MapType from '@/map/components/widgets/map/mapType';
+	import SuggestionsPanel from '@/map/components/widgets/map/suggestionsPanel';
 	import SideToolbar from '@/map/components/widgets/sideToolbar/sideToolbar';
 	import CollapseButtonRight from '@/map/components/controls/collapseButtonRight';
 
@@ -90,6 +97,9 @@
 			EditButton,
 			FullScreenButton,
 			LeftPanel,
+			MetricsButton,
+			RecommendBoundaries,
+			SuggestionsPanel,
 			PopupsPanel,
 			WorkPanel,
 			MapType,
@@ -106,7 +116,7 @@
 					FeatureInfo: null, FeatureList: null, FeatureNavigation: this.featureNavigation
 				}
 			};
-			window.Use = {};
+			window.Use = { };
 			window.Embedded = this.LoadEmbeddedSettings();
 			window.ToggleFullscreen = this.toggleFullscreen;
 		},
@@ -115,6 +125,11 @@
 				fullscreen: false,
 				teleport: true,
 				pageOnly: false,
+
+				suggestionCheckInterval: null,
+				queryingSuggestions: false,
+
+				oldStyleIndent: '',
 
 				selfCheckTimer: null,
 				workStartupSetter: null,
@@ -170,6 +185,11 @@
 				work: { Current: null },
 				workToLoad: false
 			};
+		},
+		beforeDestroy() {
+			if (this.suggestionCheckInterval) {
+				clearInterval(this.suggestionCheckInterval);
+			}
 		},
 		mounted() {
 			this.toolbarStates.collapsed = true;
@@ -248,6 +268,22 @@
 			toggleFullscreen() {
 				this.fullscreen = !this.fullscreen;
 			},
+			checkForSuggestions() {
+				var loc = this;
+				if (loc.queryingSuggestions || loc.$refs.suggestionsPanel.visible) {
+					return;
+				}
+				loc.queryingSuggestions = true;
+				window.SegMap.Suggestions.requestSuggestions().then(function (result) {
+					if (result) {
+						// Mostrar panel de sugerencias
+						arr.Fill(loc.$refs.sideToolbar.suggestions, result.suggestions);
+						loc.$refs.suggestionsPanel.show(result.suggestions, result.reason);
+					}
+				}).finally(function () {
+						loc.queryingSuggestions = false;
+				});
+			},
 			GetConfiguration(serverConfiguration) {
 				const loc = this;
 				var params = {};
@@ -277,6 +313,12 @@
 					loc.toolbarStates.hasElevation = (loc.config.ElevationUrl != null);
 					arr.AddRange(loc.toolbarStates.basemapMetrics, loc.config.BasemapMetrics);
 
+					if (!Embedded.Active && (loc.config.Suggestions.useSuggestions && (
+						loc.config.Suggestions.selectedUsers.length == 0 || loc.config.Suggestions.selectedUsers.includes(loc.user.User)))) {
+						loc.suggestionCheckInterval = setInterval(() => {
+							loc.checkForSuggestions();
+						}, 15000); // Cada 15 segundos
+					}
 					if (web.getParameterByName('leaflet') != null) {
 						loc.config.MapsAPI = 'leaflet';
 					}
@@ -345,15 +387,15 @@
 				}
 				if (ret.Compact) {
 					ret.HideSearch = true;
-					ret.HideSidePanel = true;
+					ret.HideSummaryPanel = true;
 					ret.HideAddMetrics = true;
 					ret.HideWorkPanel = true;
 					ret.DisableClippingSelection = true;
 				} else {
 					ret.HideSearch = ret.Readonly || web.getParameterByName('ns') != null;
-					ret.HideSidePanel = web.getParameterByName('np') != null;
+					ret.HideSummaryPanel = web.getParameterByName('np') != null;
 					ret.HideAddMetrics = ret.Readonly || web.getParameterByName('na') != null;
-					ret.DisableClippingSelection = ret.HideSidePanel;
+					ret.DisableClippingSelection = ret.HideSummaryPanel;
 				}
 				if (ret.Readonly && web.getParameterByName('oc') != null) {
 					ret.OpenOnClick = true;
@@ -467,12 +509,17 @@
 					}
 				})).then(function (res) {
 					session.ReceiveSession(window.host, res);
-					//loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
-					//loc.$refs.fabSelector.metrics = res.data.Metrics;
-					arr.AddRange(loc.$refs.sideToolbar.metrics, res.data.Metrics);
-					arr.AddRange(loc.$refs.sideToolbar.boundaries, res.data.Boundaries);
-					//loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
-					window.fabMetrics = res.data.Metrics;
+					if (!loc.Use.UseNewFabButton) {
+						loc.oldStyleIndent = 'position: relative; left: 70px; top: -5px;';
+						loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
+						loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
+						window.fabMetrics = res.data.Metrics;
+					} else {
+						loc.oldStyleIndent = '';
+						arr.AddRange(loc.$refs.sideToolbar.metrics, res.data.Metrics);
+						arr.AddRange(loc.$refs.sideToolbar.boundaries, res.data.Boundaries);
+					}
+					window.SegMap.Catalog.Receive(res.data);
 				}).catch(function (error) {
 					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
 				});
@@ -1143,6 +1190,18 @@
 		max-width: 250px;
 		font-size: 16px;
 	}
+
+	.drawing-active,
+	.drawing-active * {
+		cursor: crosshair !important;
+	}
+	.drawing-active .ibLink:hover {
+		color: inherit !important;
+	}
+	.drawing-active .ibLinkC:hover {
+		color: inherit !important;
+	}
+
 
 	.ml0 {
 		width: 250px;

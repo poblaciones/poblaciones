@@ -53,6 +53,13 @@
 					this.$emit('RankingShown');
 				}
 			},
+			toggleChart() {
+				this.metric.ShowChart = (this.metric.ShowChart == 1 ? '0' : '1');
+				window.SegMap.SaveRoute.UpdateRoute();
+				if (this.metric.ShowChart == 1) {
+					this.$emit('ChartShown');
+				}
+			},
 			toggleShowValues() {
 				if (this.metric.SelectedVariable().ShowValues == 1) {
 					this.metric.SetShowValuesToSelectedVariableSet("0");
@@ -112,6 +119,9 @@
 					case 'RANKINGS':
 						this.toggleRankings();
 						break;
+					case 'CHART':
+						this.toggleChart();
+						break;
 					case 'SHOWVALUES':
 						this.toggleShowValues();
 						break;
@@ -151,6 +161,14 @@
 						ret.push({
 							label: (this.metric.SelectedVariable().ShowValues == '1' ? 'Ocultar valores' : 'Mostrar valores'),
 							key: 'SHOWVALUES',
+						});
+					}
+					// muestra chart
+					if (this.metric.useChart()) {
+						ret.push({
+							label: (this.metric.ShowChart == 1 ? 'Ocultar gráfico' : 'Mostrar gráfico'),
+							key: 'CHART',
+							/* icon: 'fa fa-signal' */
 						});
 					}
 					// muestra ránking

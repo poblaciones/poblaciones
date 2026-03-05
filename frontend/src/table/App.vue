@@ -9,12 +9,17 @@
 
 <script>
 	import Vue from 'vue';
+	import arr from '@/common/framework/arr';
 	import err from '@/common/framework/err';
 	import axiosClient from '@/common/js/axiosClient';
+	import session from '@/common/framework/session';
+	import axios from 'axios';
 
 	export default {
 		name: 'App',
 		// components: { },
+		created() {
+		},
 		data() {
 			return {
 				user: null,
@@ -35,7 +40,24 @@
 						window.host = serverConfiguration.Server;
 						window.Messages.$emit('serverLoaded');
 						window.Context.ServerLoaded = true;
+					}).then(function () {
+						return loc.loadFabMetrics();
 					});
+			},
+			loadFabMetrics() {
+				const loc = this;
+				return axios.get(window.host + '/services/metrics/GetFabMetrics', session.AddSession(window.host, {
+					params: {
+						w: -1 /* window.SegMap.Signatures.FabMetrics */,
+						h: '' /*window.SegMap.Signatures.Suffix*/
+					}
+				})).then(function (res) {
+					session.ReceiveSession(window.host, res);
+					arr.AddRange(window.Context.Metrics, res.data.Metrics);
+					arr.AddRange(window.Context.Boundaries, res.data.Boundaries);
+				}).catch(function (error) {
+					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
+				});
 			},
 			RegisterErrorHandler() {
 				Vue.config.errorHandler = err.HandleError;

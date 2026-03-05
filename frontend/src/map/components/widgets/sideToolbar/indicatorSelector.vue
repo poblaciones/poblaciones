@@ -55,7 +55,9 @@
               @click="selectItem(item)"
             >
               <div class="indicator-content">
-                <div class="indicator-icon">{{ getIconEmoji(item.catIcon) }}</div>
+                <div class="indicator-icon">
+                  <i :class="getIconClass(item.catIcon)"></i>
+                </div>
                 <div class="indicator-info">
                   <div class="indicator-name">{{ item.Name }}</div>
                   <div class="indicator-meta sourceInfo">{{ item.catName }}</div>
@@ -84,7 +86,9 @@
               :class="{ 'featured': cat.Icon === 'star' }"
               @click="selectCategory(cat)"
             >
-              <span class="category-icon">{{ getIconEmoji(cat.Icon) }}</span>
+              <span class="category-icon" :class="{ 'featured': cat.Icon === 'star' }">
+                <i :class="getIconClass(cat.Icon)"></i>
+              </span>
               <div class="category-name">{{ cat.Name }}</div>
               <div class="category-count sourceInfo">
                 {{ getLabel(cat) }}
@@ -100,7 +104,9 @@
               </div>
               <div v-else class="indicator-item hand" @click="selectItem(item)">
                 <div class="indicator-content">
-                  <div class="indicator-icon">{{ getIconEmoji(currentCategory.Icon) }}</div>
+                  <div class="indicator-icon">
+                    <i :class="getIconClass(currentCategory.Icon)"></i>
+                  </div>
                   <div class="indicator-info">
                     <div class="indicator-name">{{ item.Name }}</div>
                     <div class="indicator-meta sourceInfo">
@@ -125,7 +131,7 @@
         </div>
 
         <!-- Zona de sugerencias fija en el pie -->
-        <div class="suggestions-zone" :class="{ 'expanded': showAllSuggestions }">
+        <div class="suggestions-zone" :class="{ 'expanded': showAllSuggestions }" v-show="visibleSuggestions.length > 0">
           <div class="suggestion-header">
             <span class="section-title">Sugerencias</span>
             <span class="more-link hand" @click="toggleSuggestions">
@@ -140,9 +146,11 @@
               @click="selectSuggestion(item)"
             >
               <div class="indicator-content">
-                <div class="indicator-icon">{{ getIconEmoji(item.icon) }}</div>
+                <div class="indicator-icon">
+                  <i :class="getIconClass(item.Icon)"></i>
+                </div>
                 <div class="indicator-info">
-                  <div class="indicator-name">{{ item.Name }}</div>
+                  <div class="indicator-name">{{ item.Label }}</div>
                   <div class="indicator-meta sourceInfo">{{ item.Provider }}</div>
                 </div>
               </div>
@@ -165,7 +173,9 @@
           @mouseleave="hideTooltip"
         >
           <div class="preview-header">
-            <div class="preview-icon">{{ getTooltipIcon(tooltip.item) }}</div>
+            <div class="preview-icon">
+              <i :class="getTooltipIconClass(tooltip.item)"></i>
+            </div>
             <div class="preview-title">{{ tooltip.item.Name }}</div>
           </div>
           <div class="preview-section">
@@ -200,7 +210,11 @@ export default {
     metrics: {
       type: Array,
       default: () => []
-    }
+    },
+    suggestions: {
+      type: Array,
+      default: () => []
+    },
   },
   data() {
     return {
@@ -214,13 +228,6 @@ export default {
         left: 0,
         item: null
       },
-      suggestions: [
-        { Id: 101, Name: 'Evolución de Manchas Urbanas', Type: 'B', icon: 'dashboard', Provider: 'CIPPEC' },
-        { Id: 102, Name: 'Índice de Vulnerabilidad', Type: 'M', icon: 'warning', Provider: 'Observatorio Social' },
-        { Id: 103, Name: 'Acceso a Red Eléctrica', Type: 'M', icon: 'bolt', Provider: 'ENRE' },
-        { Id: 104, Name: 'Límites Departamentales', Type: 'B', icon: 'map', Provider: 'IGN' },
-        { Id: 105, Name: 'Nivel de Hacinamiento', Type: 'M', icon: 'groups', Provider: 'INDEC' }
-      ]
     };
   },
   computed: {
@@ -334,26 +341,26 @@ export default {
       if (!cat.Items) return 0;
       return cat.Items.filter(item => !item.Header).length;
     },
-    getIconEmoji(icon) {
+    getIconClass(icon) {
       const icons = {
-           'star': '⭐',
-           'people': '👥',
-           'school': '🏫',
-           'favorite': '🏥',
-           'engineering': '🏗️',
-           'local_library': '🎭',
-           'opacity': '💧',
-           'how_to_vote': '🗳️',
-           'account_balance': '⚖️',
-           'home': '🏠',
-           'dashboard': '📊',
-           'warning': '⚠️',
-           'bolt': '⚡',
-           'map': '🗺️',
-           'groups': '👨‍👩‍👧‍👦',
-           'auto_awesome': '✨'
+        'star': 'fas fa-star',
+        'people': 'fas fa-users',
+        'school': 'fas fa-graduation-cap',
+        'favorite': 'fas fa-heart',
+        'engineering': 'fas fa-hard-hat',
+        'local_library': 'fas fa-book',
+        'opacity': 'fas fa-tint',
+        'how_to_vote': 'fas fa-vote-yea',
+        'account_balance': 'fas fa-balance-scale',
+        'home': 'fas fa-home',
+        'dashboard': 'fas fa-th',
+        'warning': 'fas fa-exclamation-triangle',
+        'bolt': 'fas fa-bolt',
+        'map': 'fas fa-map',
+        'groups': 'fas fa-users',
+        'auto_awesome': 'fas fa-magic'
       };
-      return icons[icon] || '📌';
+      return icons[icon] || 'fas fa-map-pin';
     },
     getYearsString(item) {
       if (item.Versions && item.Versions.length > 0) {
@@ -361,8 +368,8 @@ export default {
       }
       return '';
     },
-    getTooltipIcon(item) {
-      return this.getIconEmoji(item.catIcon || item.icon);
+    getTooltipIconClass(item) {
+      return this.getIconClass(item.catIcon || item.icon);
     },
     getTooltipSource(item) {
       return item.Provider || item.catName || 'Sin especificar';
@@ -430,20 +437,20 @@ export default {
 }
 
 /* Encabezado del panel */
-	.panel-header {
-		padding: 12px 16px;
-		border-bottom: 1px solid #e9ecef;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		flex-shrink: 0;
-	}
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
 
-	.panel-title {
-		margin: 0;
-		font-size: 18px;
-		color: #333;
-	}
+.panel-title {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
 
 .btn-close {
   background: none;
@@ -501,12 +508,12 @@ export default {
 }
 
 /* Cuerpo del panel */
-	.panel-body {
-		flex: 1;
-		overflow-y: auto;
-		padding: 20px 24px;
-		min-height: 230px;
-	}
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  min-height: 230px;
+}
 
 .panel-body.thinScroll::-webkit-scrollbar {
   width: 6px;
@@ -579,7 +586,7 @@ export default {
 }
 
 .category-card.featured {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #c3c3c3 0%, #818181 100%);
   color: white;
   border: none;
 }
@@ -592,8 +599,15 @@ export default {
   color: rgba(255, 255, 255, 0.8);
 }
 
+	.category-icon.featured {
+		text-shadow: none;
+		color: #69bad5;
+	}
+
 .category-icon {
   font-size: 32px;
+  text-shadow: 2px 2px 4px rgb(223 216 220 / 50%);
+  color: #0fa7d8;
   display: block;
   margin-bottom: 12px;
 }
@@ -649,12 +663,14 @@ export default {
   min-width: 0;
 }
 
-.indicator-icon {
-  font-size: 20px;
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
+	.indicator-icon {
+		text-shadow: 2px 2px 1px rgb(223 216 220 / 50%);
+		color: #0fa7d8;
+		font-size: 20px;
+		width: 24px;
+		text-align: center;
+		flex-shrink: 0;
+	}
 
 .indicator-info {
   flex: 1;

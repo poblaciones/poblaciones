@@ -22,6 +22,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	private $hasDescriptions;
 	private $areSegments;
 	private $datasetId;
+	public $getGeometries = true;
 	public $honorTileLimit = true;
 	public $requiresPolygons = false;
 
@@ -65,15 +66,21 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 				$select .= ", sna_" . $variable->Id . "_sequence_order";
 		}
 
-		if ($this->hasDescriptions)
-			$select .= ", sna_description Description";
-		if ($this->hasSymbols)
-			$select .= ", sna_symbol Symbol";
-		if ($this->areSegments)
-			$select .= ", sna_segment value";
+		if ($this->getGeometries) {
+			if ($this->hasDescriptions)
+				$select .= ", sna_description Description";
+			if ($this->hasSymbols)
+				$select .= ", sna_symbol Symbol";
+			if ($this->areSegments)
+				$select .= ", sna_segment value";
 
-		// Si es un metric de puntos, trae la ubicación del punto
-		$select .= ", round(ST_Y(sna_location), " . GeoJson::PRECISION . ") as Lat, round(ST_X(sna_location), " . GeoJson::PRECISION . ")  as Lon";
+			// Si es un metric de puntos, trae la ubicación del punto
+			$select .= ", round(ST_Y(sna_location), " . GeoJson::PRECISION . ") as Lat, round(ST_X(sna_location), " . GeoJson::PRECISION . ")  as Lon";
+		}
+		else
+		{
+			$select .= ", sna_geography_item_id GeographyItemId";
+		}
 
 		$from = $this->tableName;
 
@@ -86,7 +93,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 			$where .= ' AND (' . substr($hasAnyNotNullTotal, 4) . ')';
 
 		// PolygonsQuery
-		if ($this->requiresPolygons) {
+		if ($this->requiresPolygons && $this->getGeometries) {
 			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "sdi_geometry as value");
 			//			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "ST_AsText(sdi_geometry) as value");
 		} else
@@ -102,8 +109,11 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		if ($this->areSegments)
 			$extraFields[] = 'value';
 		// Si es un metric de puntos, trae la ubicación del punto
-		$extraFields[] = 'Lat';
-		$extraFields[] = 'Lon';
+		if ($this->getGeometries)
+		{
+			$extraFields[] = 'Lat';
+			$extraFields[] = 'Lon';
+		}
 		$ret = self::RotateResults($ret, $extraFields);
 
 		if ($this->datasetType == 'L' && $this->honorTileLimit) {
@@ -132,8 +142,12 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 					$item = [];
 					foreach ($extraFields as $field)
 						$item[$field] = $row[$field];
-
-					$item['FID'] = $row['FID'];
+					if ($this->getGeometries)
+					{
+						$item['FID'] = $row['FID'];
+					}
+					else
+						$item['GeographyItemId'] = $row['GeographyItemId'];
 
 					// Pone lo específico de cada variable
 					$item['VID'] = $variable->Id;
@@ -142,6 +156,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 					$item['LID'] = $row["sna_" . $variable->Id . "_value_label_id"];
 					if ($variable->IsSequence)
 						$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];
+
 					if ($this->hasSymbols)
 						$item['Symbol'] = $row['Symbol'];
 					if ($this->requiresPolygons)

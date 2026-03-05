@@ -25,17 +25,6 @@ FrameRouter.prototype.ToRoute = function (coord) {
 	ret.push(h.trimNumberCoords(coord.Lat));
 	ret.push(h.trimNumberCoords(coord.Lon));
 	ret.push(segmentedMap.frame.Zoom + 'z');
-	var mapType = segmentedMap.GetMapTypeState();
-	// guarda mapType junto con la negación de etiquetas
-	if (mapType !== 's' && !segmentedMap.toolbarStates.showLabels) {
-		mapType += 'n';
-	}
-	if (segmentedMap.toolbarStates.showElevation) {
-		mapType += 'e';
-	}
-	if (mapType !== 'r') {
-		ret.push(mapType);
-	}
 	return ret;
 };
 
@@ -104,9 +93,11 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 			Lon: lon
 		},
 		Zoom: zoom,
+		/* Legacy */
 		MapType: mapType,
 		Elevation: elevation,
 		ShowLabels: showLabels,
+		/* Fin de legacy */
 		ClippingRegionIds: null,
 		ClippingCircle: null,
 		ClippingLevelName: null

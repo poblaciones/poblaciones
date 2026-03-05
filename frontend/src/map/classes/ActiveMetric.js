@@ -297,6 +297,16 @@ ActiveMetric.prototype.BottomLevel = function () {
 	return version.Levels[version.Levels.length - 1];
 };
 
+
+ActiveMetric.prototype.SelectedLevelParent = function () {
+	var version = this.SelectedVersion();
+	if (version.SelectedLevelIndex == 0) {
+		return null;
+	} else {
+		return version.Levels[version.SelectedLevelIndex - 1];
+	}
+};
+
 ActiveMetric.prototype.SelectedLevel = function () {
 	if (this.properties === null) {
 		throw new Error('No properties has been set.');

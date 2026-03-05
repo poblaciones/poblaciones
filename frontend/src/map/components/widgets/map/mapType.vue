@@ -1,6 +1,6 @@
 <template>
 	<div>
-			<mapTypeSelector @styleChanged="styleChanged" :toolbarStates="toolbarStates" ref="selector"/>
+			<mpBasemapButton @styleChanged="styleChanged" :toolbarStates="toolbarStates" :readonly="Embedded.Readonly" ref="selector"/>
 	</div>
 </template>
 
@@ -9,22 +9,26 @@ import axios from 'axios';
 import arr from '@/common/framework/arr';
 import err from '@/common/framework/err';
 import color from '@/common/framework/color';
-import mapTypeSelector from '@/map/components/controls/mapTypeSelector';
+import mpBasemapButton from '@/map/components/controls/mpBasemapButton';
 import session from '@/common/framework/session';
 
 export default {
 	name: 'mapType',
 	components: {
-		mapTypeSelector,
+		mpBasemapButton,
 	},
 	data() {
 		return {
 		};
 	},
 	mounted() {
-	},
-	computed: {
-	},
+		},
+
+ computed: {
+ 		Embedded() {
+				return window.Embedded;
+			}
+    },
 	props: [
 		 'toolbarStates'
 	],

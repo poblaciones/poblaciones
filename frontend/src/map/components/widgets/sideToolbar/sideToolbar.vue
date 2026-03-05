@@ -10,6 +10,7 @@
     <IndicatorSelector
       :is-open="activePanel === 'indicators'"
       :metrics="metrics"
+      :suggestions="suggestions"
       @close="closePanel"
       @selected-item="handleIndicatorSelected"
     />
@@ -56,6 +57,10 @@ export default {
       type: String,
       default: ''
     },
+    suggestions: {
+      type: Array,
+      default: () => []
+    },
   },
   data() {
     return {
@@ -72,7 +77,6 @@ export default {
     handleIndicatorSelected(item) {
       // Maneja la selección de un indicador
       this.$emit('selectedItem', item);
-      console.log('Indicator selected:', item);
     },
     handlePlaceSelected(item) {
       // Maneja la selección de un lugar frecuente

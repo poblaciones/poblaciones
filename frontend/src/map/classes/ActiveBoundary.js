@@ -14,6 +14,7 @@ function ActiveBoundary(data) {
 	this.objs.Segment = null;
 	this.index = -1;
 	this.isBoundary = true;
+	this.isBaseMetric = false;
 	this.visible = true;
 	this.IsLocked = false;
 	this.IsUpdatingSummary = false;
@@ -61,7 +62,6 @@ ActiveBoundary.prototype.SelectVersion = function (index) {
 	this.UpdateSummary();
 	this.UpdateMap();
 };
-
 
 ActiveBoundary.prototype.SelectedVersion = function () {
 	if (this.properties === null) {

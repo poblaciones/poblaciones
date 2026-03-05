@@ -31,7 +31,14 @@ class Boundary
      *
      * @ORM\Column(name="bou_caption", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
      */
-    private $Caption;
+	private $Caption;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="bou_tag", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+	 */
+    private $Tag;
 
     /**
 		 * @var integer
@@ -123,13 +130,38 @@ class Boundary
         return $this->Caption;
     }
 
-    /**
-		 * Set order
-		 *
-		 * @param integer $order
-		 *
-		 * @return Boundary
-		 */
+
+	/**
+	 * Set tag
+	 *
+	 * @param string $tag
+	 *
+	 * @return Boundary
+	 */
+	public function setTag($tag)
+	{
+		$this->Tag = $tag;
+
+		return $this;
+	}
+
+	/**
+	 * Get tag
+	 *
+	 * @return string
+	 */
+	public function getTag()
+	{
+		return $this->Tag;
+	}
+
+	/**
+	 * Set order
+	 *
+	 * @param integer $order
+	 *
+	 * @return Boundary
+	 */
     public function setOrder($order)
     {
 			$this->Order = $order;

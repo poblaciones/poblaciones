@@ -27,7 +27,14 @@ class Metric
      *
      * @ORM\Column(name="mtr_caption", type="string", length=150, precision=0, scale=0, nullable=false, unique=false)
      */
-    private $Caption;
+	private $Caption;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="mtr_tag", type="string", length=150, precision=0, scale=0, nullable=false, unique=false)
+	 */
+    private $Tag;
 
     /**
      * @var boolean
@@ -79,6 +86,7 @@ class Metric
 
         return $this;
     }
+
     /**
      * Set caption
      *
@@ -103,13 +111,37 @@ class Metric
         return $this->Caption;
     }
 
+	/**
+	 * Set tag
+	 *
+	 * @param string $tag
+	 *
+	 * @return Metric
+	 */
+	public function setTag($tag)
+	{
+		$this->Tag = $tag;
+
+		return $this;
+	}
+
+	/**
+	 * Get tag
+	 *
+	 * @return string
+	 */
+	public function getTag()
+	{
+		return $this->Tag;
+	}
+
     /**
-     * Set isBasicMetric
-     *
-     * @param boolean $IsBasicMetric
-     *
-     * @return Metric
-     */
+	 * Set isBasicMetric
+	 *
+	 * @param boolean $IsBasicMetric
+	 *
+	 * @return Metric
+	 */
     public function setIsBasicMetric($IsBasicMetric)
     {
         $this->IsBasicMetric = $IsBasicMetric;

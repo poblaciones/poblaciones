@@ -100,6 +100,8 @@ class MetricService extends BaseService
 		$metric = new MetricInfo();
 		$metric->Id = $item['myv_metric_id'];
 		$metric->Name = $item['myv_metric_caption'];
+		$metric->Tag = $item['myv_metric_tag'];
+		$metric->Signature = $item['myv_metric_revision'];
 		$metric->MetricGroupId = $item['myv_metric_group_id'];
 		$metric->MetricProviderId = $item['myv_metric_provider_id'];
 		$metric->Signature = $item['myv_metric_revision'];

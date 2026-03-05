@@ -96,7 +96,10 @@ App::$app->get('/services/GetConfiguration', function (Request $request) {
 
 App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {
 	$controller = new services\FabService();
-	return App::JsonImmutable($controller->GetFabMetrics());
+	if (Params::GetIntMandatory('w') != -1)
+		return App::JsonImmutable($controller->GetFabMetrics());
+	else
+		return App::Json($controller->GetFabMetrics());
 });
 
 App::$app->get('/services/metrics/GetSelectedInfos', function (Request $request) {

@@ -32,6 +32,7 @@ class Menu
 		$activityMenu[] = self::MenuItem('PERFORMANCE', '/logs/performance', 'Rendimiento');
 		if (Context::Settings()->Db()->NoDbConnection() == false)
 			$activityMenu[] = self::MenuItem('SEARCHLOG', '/logs/search', 'Búsquedas');
+		$activityMenu[] = self::MenuItem('SUGGESTIONS', '/logs/suggestions', 'Sugerencias');
 		$activityMenu[] = self::MenuItem('TRAFFIC', '/logs/traffic', 'Tráfico');
 		$activityMenu[] = self::MenuItem('ERRORS', '/logs/errors', 'Errores');
 
@@ -39,6 +40,7 @@ class Menu
 		$configurationMenu[] = self::MenuItem('PLATFORM', '/logs/platform', 'Plataforma');
 		$configurationMenu[] = self::MenuItem('PLUGINS', '/logs/plugins', 'Plugins');
 		$configurationMenu[] = self::MenuItem('CACHES', '/logs/caches', 'Cachés');
+		$configurationMenu[] = self::MenuItem('SUGGESTIONS_PROCESSING', '/logs/learn', 'Sugerencias');
 		$configurationMenu[] = self::MenuItem('TESTS', '/logs/tests', 'Tests');
 
 		if(Session::IsMegaUser())

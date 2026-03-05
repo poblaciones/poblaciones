@@ -27,6 +27,20 @@ class SpatialConditions
 		return new QueryPart($from, $where, $params);
 	}
 
+	public function CreateRegionToGeographyQuery($geographyId)
+	{
+		$from = "snapshot_clipping_region_item_geography_item ";
+
+		$select = "cgv_geography_item_id AS GID";
+
+		$where = "biw_clipping_region_item_id = cgv_clipping_region_item_id AND
+					cgv_geography_id = ? ";
+
+		$orderBy = "biw_clipping_region_item_id ASC, cgv_geography_item_id ASC ";
+		$params = array($geographyId);
+		return new QueryPart($from, $where, $params, $select, null, $orderBy);
+	}
+
 	public function CreateRegionToRegionQuery($clippingRegionIds)
 	{
 		$from = "";

@@ -423,6 +423,11 @@ class App
 		return self::Json($value, $expireDays, $alreadyEncoded, $gzipped);
 	}
 
+	public static function JsonClone($object)
+	{
+		return json_decode(json_encode($object), true);
+	}
+
 	public static function Json($value, $daysToExpire = -1, $alreadyEncoded = false, $gzipped = false)
 	{
 		$sessionStarted = PhpSession::GetSessionValue('started', null);

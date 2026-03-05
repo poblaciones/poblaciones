@@ -13,6 +13,7 @@ UIActions.prototype = Object.create(ActionManagerBase.prototype);
 
 UIActions.prototype.ZoomChanged = function (zoomValue) {
 	this.RegisterActionChange('Zoom', zoomValue);
+	window.SegMap.Suggestions.RegisterAction('UI', 'Zoom', zoomValue);
 	this.Summary.ZoomChanged(zoomValue);
 };
 

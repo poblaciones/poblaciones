@@ -12,6 +12,7 @@ class LocalSettings extends Settings
 	private static $shard = NULL;
 	private static $limits = NULL;
 	private static $help = NULL;
+	private static $suggestions = NULL;
 
 	public function Map()
 	{
@@ -21,6 +22,14 @@ class LocalSettings extends Settings
 		return self::$map;
 	}
 
+
+	public function Suggestions()
+	{
+		if (self::$suggestions == NULL)
+			self::$suggestions = new SuggestionsSettings();
+
+		return self::$suggestions;
+	}
 	public function ServiceCache()
 	{
 		if (self::$cache == NULL)

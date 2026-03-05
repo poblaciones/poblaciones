@@ -11,7 +11,7 @@
 					<chevron-up-icon v-else title="Ocultar categorías" />
 				</span>
 			</div>
-			<metricChart v-if="useCharts" v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
+			<metricChart v-if="useCharts && metric.ShowChart == 1 && metric.useChart()" v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
 			<metricValues v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
 		</div>
 		<div v-if="hasComparableVariables && hasNonComparableVariables" class="coverageBox" style="padding: 12px 0px 0px 0px">

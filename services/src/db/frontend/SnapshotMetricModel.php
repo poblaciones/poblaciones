@@ -26,7 +26,6 @@ class SnapshotMetricModel extends BaseModel
 		Profiling::EndTimer();
 		return $item;
 	}
-
 	private function GetMetricViewQuery($getAllPublicData = false)
 	{
 		if ($getAllPublicData)
@@ -41,7 +40,7 @@ class SnapshotMetricModel extends BaseModel
 			$having = "";
 			$orderBy = "";
 		}
-		$sql = "SELECT	mvw_metric_id myv_metric_id,
+		$sql = "SELECT	mvw_metric_id myv_metric_id, mvw_metric_revision myv_metric_revision, mvw_metric_tag myv_metric_tag,
 										MIN(mvw_metric_caption) myv_metric_caption,
 										MAX(mvw_metric_revision) myv_metric_revision,
 										MIN(mvw_metric_group_id) myv_metric_group_id,
@@ -55,7 +54,7 @@ class SnapshotMetricModel extends BaseModel
 										GROUP_CONCAT(IFNULL(mvw_partial_coverage, '') ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_partial_coverages
 									FROM snapshot_metric_version
 									" . $where . "
-									group by mvw_metric_id " .
+									group by mvw_metric_id, mvw_metric_revision, mvw_metric_tag " .
 									$having .
 									$orderBy;
 		return $sql;
@@ -67,7 +66,6 @@ class SnapshotMetricModel extends BaseModel
 
 		$sql = $this->GetMetricViewQuery(true);
 		$ret = App::Db()->fetchAll($sql);
-
 		Profiling::EndTimer();
 		return $ret;
 	}

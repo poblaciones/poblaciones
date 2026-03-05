@@ -103,12 +103,15 @@ class BoundaryModel extends BaseModel
 			foreach ($items as &$item) {
 				$table = new SnapshotClippingRegionItemModel();
 				$levels = $table->CalculateLevelsFromRegionIds([$item['Id']], false);
-				$lastLevel = $levels[sizeof($levels) - 1];
-				// geo_caption y geo_revision (departamentos, 2022)
-				$info = $table->GetSelectionInfoById([$item['Id']], $lastLevel['geo_id'], null);
-				$item['Population'] = $info['Population'];
-				$item['Households'] = $info['Households'];
-				$item['AreaM2'] = $info['AreaM2'];
+				if (sizeof($levels) > 0)
+				{
+					$lastLevel = $levels[sizeof($levels) - 1];
+					// geo_caption y geo_revision (departamentos, 2022)
+					$info = $table->GetSelectionInfoById([$item['Id']], $lastLevel['geo_id'], null);
+					$item['Population'] = $info['Population'];
+					$item['Households'] = $info['Households'];
+					$item['AreaM2'] = $info['AreaM2'];
+				}
 			}
 			$boundary['Items'] = $items;
 		}

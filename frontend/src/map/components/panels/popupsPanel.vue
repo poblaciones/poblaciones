@@ -10,6 +10,7 @@
 		<BoundaryCustomize ref="showBoundaryCustomize" :backgroundColor="backgroundColor" />
 		<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
 		<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
+
 		<AddMetric2 ref="addMetric2" :backgroundColor="backgroundColor" />
 	</div>
 </template>
@@ -56,7 +57,6 @@ export default {
 		window.Popups.MetricCustomize = this.$refs.showCustomize;
 		window.Popups.AnnotationItem = this.$refs.showAnnotationItem;
 		window.Popups.AddMetric = this.$refs.addMetric;
-		window.Popups.AddMetric2 = this.$refs.addMetric2;
 	},
 	methods: {
 

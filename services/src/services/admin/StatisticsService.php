@@ -84,8 +84,22 @@ class StatisticsService extends BaseService
 
 	public function GetTopMetrics($month, $limit)
 	{
+		$exclusions = "";
+		if (sizeof(App::Settings()->Map()->MetricsFavoritesExclusions) > 0) {
+			$exclusions = " AND mvw_metric_caption NOT IN (";
+			$text = "";
+			foreach (App::Settings()->Map()->MetricsFavoritesExclusions as $item) {
+				if ($text != "")
+					$text .= ",";
+				$text .= Str::CheapSqlEscape($item);
+			}
+			$exclusions .= $text . ") ";
+		}
+
 		$sqlMetrics = "SELECT mvw_metric_id myv_metric_id,
+													mvw_metric_revision myv_metric_revision,
 													mvw_metric_caption myv_metric_caption,
+													mvw_metric_tag myv_metric_tag,
 													mvw_metric_group_id myv_metric_group_id,
 													mvw_metric_provider_id myv_metric_provider_id,
 													mvw_metric_revision myv_metric_revision,
@@ -98,8 +112,8 @@ class StatisticsService extends BaseService
 													GROUP_CONCAT(IFNULL(mvw_partial_coverage, '') ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_partial_coverages,
 													MAX(sta_hits) Hits
 										 FROM statistic JOIN snapshot_metric_version ON sta_element_id = mvw_metric_id
-						WHERE sta_month = ? AND sta_type = 'M'
-						GROUP BY myv_metric_id, myv_metric_caption, myv_metric_group_id,
+						WHERE sta_month = ? AND sta_type = 'M' " . $exclusions . "
+						GROUP BY myv_metric_id, mvw_metric_revision, myv_metric_caption, mvw_metric_tag, myv_metric_group_id,
 											myv_metric_provider_id, myv_metric_revision
 						ORDER BY Hits DESC
 						LIMIT " . $limit;

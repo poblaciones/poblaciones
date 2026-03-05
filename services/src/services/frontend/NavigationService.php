@@ -11,7 +11,7 @@ use minga\framework\GeoIp;
 use minga\framework\Profiling;
 use minga\framework\ErrorException;
 
-class SessionService extends BaseService
+class NavigationService extends BaseService
 {
     private $db = null;
     private $path = null;
@@ -257,7 +257,7 @@ class SessionService extends BaseService
             $value = $action['Value'];
             if (is_array($value))
             {
-                $value = json_encode($value);
+                $value = json_encode(self::TrimFloatsRecursive($value));
             }
             $action_value = $value !== null ? $db->escapeString($value) : 'NULL';
             $time_ms = (int) $action['TimeMs'];
@@ -266,6 +266,20 @@ class SessionService extends BaseService
         }
     }
 
+	public static function TrimFloatsRecursive($value, $precision = 6)
+	{
+		if (is_array($value)) {
+			$result = [];
+			foreach ($value as $key => $v) {
+				$result[$key] = self::TrimFloatsRecursive($v, $precision);
+			}
+			return $result;
+		} elseif (is_float($value)) {
+			return round($value, $precision);
+		} else {
+			return $value;
+		}
+	}
     function insertOrUpdateSummary($db, $navigation_id, $summary)
     {
         $summary_data = $summary;

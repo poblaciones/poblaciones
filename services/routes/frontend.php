@@ -41,6 +41,8 @@ if (App::Settings()->Servers()->IsTransactionServerRequest()) {
 	require_once('frontend/boundary.php');
 	require_once('frontend/clipping.php');
 	require_once('frontend/session.php');
+	require_once('frontend/table.php');
+	require_once('frontend/suggestions.php');
 	require_once('frontend/crawler.php');
 	require_once('frontend/metric.php');
 	require_once('frontend/work.php');

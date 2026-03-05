@@ -428,6 +428,7 @@ LeafletApi.prototype.BindEvents = function () {
 				loc.CircleCompleted(circle);
 			}
 	});
+
 	this.map.on("draw:drawstop", function() {
 		window.SegMap.SetSelectionMode("PAN");
 	});
@@ -456,10 +457,50 @@ LeafletApi.prototype.GetCopyright = function () {
 };
 
 LeafletApi.prototype.StopDrawing = function () {
+	this.map.getContainer().classList.remove('drawing-active');
+
+	if (this._drawingClickCapture) {
+		this.map.getContainer().removeEventListener('click', this._drawingClickCapture, true);
+		this._drawingClickCapture = null;
+	}
+	if (this._drawingCancelCapture) {
+		document.removeEventListener('click', this._drawingCancelCapture, true);
+		this._drawingCancelCapture = null;
+	}
+	this._clearCircleGuide();
 	this.drawingManager.disable();
 };
 
 LeafletApi.prototype.BeginDrawingCircle = function () {
+	this.map.getContainer().classList.add('drawing-active');
+
+	// Captura todos los clics durante el dibujo antes que cualquier elemento HTML
+	var loc = this;
+	this._drawingClickCapture = function (e) {
+		if (e.target !== loc.map.getContainer()) {
+			// El clic cayó en un elemento hijo (overlay, etiqueta, etc.)
+			// Lo detenemos y re-disparamos en el mapa directamente
+			e.stopPropagation();
+			var newEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true,
+				clientX: e.clientX,
+				clientY: e.clientY
+			});
+			loc.map.getContainer().dispatchEvent(newEvent);
+		}
+	};
+	this.map.getContainer().addEventListener('click', this._drawingClickCapture, true);
+
+	// Cancela el dibujo si el clic es fuera del mapa
+	this._drawingCancelCapture = function (e) {
+		if (!loc.map.getContainer().contains(e.target)) {
+			loc.StopDrawing();
+			window.SegMap.SetSelectionMode("PAN");
+		}
+	};
+	document.addEventListener('click', this._drawingCancelCapture, true);
+
 	this.drawingManager.enable();
 };
 
@@ -490,8 +531,6 @@ LeafletApi.prototype.CreateMyLocationMarker = function (coord) {
 
 
 LeafletApi.prototype.CreateDrawingManager = function () {
-	// esto puede permitir hacerlo en dos clicks
-	// https://github.com/ThomasG77/leaflet.pm/tree/hook-circle-move
 	this.drawingManager = new L.Draw.Circle(this.map,
 		{
 			shapeOptions: {
@@ -502,6 +541,27 @@ LeafletApi.prototype.CreateDrawingManager = function () {
 			},
 			showRadius: false
 		});
+	var loc = this;
+	// Sobreescribir el comportamiento para usar dos clics en lugar de drag
+	this.drawingManager.addHooks = function () {
+		L.Draw.Feature.prototype.addHooks.call(this);
+		if (this._map) {
+			this._map.on('click', loc._onCircleClick, loc);
+			this._map.on('mousemove', loc._onCircleMouseMove, loc);
+		}
+	};
+
+	this.drawingManager.removeHooks = function () {
+		L.Draw.Feature.prototype.removeHooks.call(this);
+		if (this._map) {
+			this._map.off('click', loc._onCircleClick, loc);
+			this._map.off('mousemove', loc._onCircleMouseMove, loc);
+		}
+	};
+
+	this._circleCenter = null;
+	this._circleGuide = null;
+
 	if (this.drawingManager._initialLabelText) {
 		this.drawingManager._initialLabelText = '';
 	}
@@ -509,6 +569,71 @@ LeafletApi.prototype.CreateDrawingManager = function () {
 		this.drawingManager._endLabelText = '';
 	}
 };
+
+
+LeafletApi.prototype._onCircleClick = function (e) {
+	if (!this._circleCenter) {
+		// Primer clic: fijar el centro
+		this._circleCenter = e.latlng;
+
+		// Dibujar un pequeño marcador visual en el centro
+		this._circleCenterMarker = L.circleMarker(e.latlng, {
+			radius: 2,
+			color: '#666',
+			fillColor: '#aaa',
+			fillOpacity: 1,
+			weight: 1,
+			interactive: false
+		}).addTo(this.map);
+
+	} else {
+		// Segundo clic: calcular radio y disparar el evento CREATED
+		var radius = this._circleCenter.distanceTo(e.latlng);
+
+		var circle = new L.Circle(this._circleCenter, { radius: radius });
+
+		// Limpiar
+		this._clearCircleGuide();
+
+		// Disparar el mismo evento que usa Leaflet Draw
+		this.map.fire(L.Draw.Event.CREATED, { layer: circle, layerType: 'circle' });
+
+		this.drawingManager.disable();
+	}
+};
+
+LeafletApi.prototype._onCircleMouseMove = function (e) {
+	if (!this._circleCenter) return;
+
+	var radius = this._circleCenter.distanceTo(e.latlng);
+
+	// Actualizar o crear el círculo guía
+	if (this._circleGuide) {
+		this._circleGuide.setRadius(radius);
+	} else {
+		this._circleGuide = L.circle(this._circleCenter, {
+			radius: radius,
+			fillColor: "#aaa",
+			fillOpacity: this.getOpacity(),
+			weight: 1,
+			color: '#111',
+			interactive: false
+		}).addTo(this.map);
+	}
+};
+
+LeafletApi.prototype._clearCircleGuide = function () {
+	if (this._circleGuide) {
+		this.map.removeLayer(this._circleGuide);
+		this._circleGuide = null;
+	}
+	if (this._circleCenterMarker) {
+		this.map.removeLayer(this._circleCenterMarker);
+		this._circleCenterMarker = null;
+	}
+	this._circleCenter = null;
+};
+
 
 LeafletApi.prototype.CircleCompleted = function (circle) {
 	circle = circle.layer;

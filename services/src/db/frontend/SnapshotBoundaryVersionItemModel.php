@@ -16,6 +16,8 @@ class SnapshotBoundaryVersionItemModel extends BaseSpatialSnapshotModel
 {
 	private $boundaryVersionId;
 	public $zoom = null;
+	public $getGeometries = true;
+	public $getCaption = true;
 
 	public function __construct($boundaryVersionId)
 	{
@@ -26,15 +28,24 @@ class SnapshotBoundaryVersionItemModel extends BaseSpatialSnapshotModel
 	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
-		$centroids = ', ST_Y(biw_centroid) as Lat, ST_X(biw_centroid) as Lon';
+		$select = "";
+		$centroids = "";
 
-		if ($this->zoom === null)
-			throw new ErrorException("Zoom must be set before calling execQuery");
+		if ($this->getGeometries)
+		{
+			$centroids = ', ST_Y(biw_centroid) as Lat, ST_X(biw_centroid) as Lon';
 
-		$rZoom = SpatialConditions::ResolveRZoom3($this->zoom);
-		$field = "biw_geometry_r" . $rZoom;
+			if ($this->zoom === null)
+				throw new ErrorException("Zoom must be set before calling execQuery");
 
-		$select = $field . " as value, biw_caption Caption, biw_clipping_region_item_id as FID" . $centroids;
+			$rZoom = SpatialConditions::ResolveRZoom3($this->zoom);
+			$field = "biw_geometry_r" . $rZoom;
+
+			$select .= $field . " as value, ";
+		}
+		if ($this->getCaption)
+			$select .= "biw_caption Caption, ";
+		$select .= "biw_clipping_region_item_id as FID" . $centroids;
 
 		$from = $this->tableName;
 

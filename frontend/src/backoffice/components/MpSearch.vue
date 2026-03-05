@@ -1,6 +1,6 @@
 <template>
 
-	<div style="position: absolute; z-index: 10;left: 200px; background-color: white">
+	<div style="position: absolute; z-index: 10;left: 100px; background-color: white">
 		<md-button @click="focusSearch" style="float: right; margin-top: 11px; margin-left: -2px;" class="md-icon-button">
 			<md-icon>search</md-icon>
 			<md-tooltip md-direction="bottom">Buscar en la lista</md-tooltip>

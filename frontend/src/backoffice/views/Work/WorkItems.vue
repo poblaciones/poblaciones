@@ -7,7 +7,7 @@
 		</md-button>
 		<transition name="fade">
 			<div style="position: relative">
-				<mp-search @search="searchOnTable" v-model="search" v-show="(expanded || actions == 'I')" />
+				<mp-search @search="searchOnTable" v-model="search" v-show="(expanded || actions == 'I')" style="left: 200px;" />
 				<md-table style="max-width: 1000px;" v-show="(expanded || actions == 'I')" v-model="listFiltered"
 									:md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder" :md-sort-fn="customSort"
 									md-card>

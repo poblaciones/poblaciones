@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import axiosClient from '@/common/js/axiosClient';
+import RegionStore from '../processing/RegionStore';
+import MetricStore from '../processing/MetricStore';
 
 export default Context;
 
@@ -10,6 +12,13 @@ function Context() {
 	// 'L': Lector de datos públicos, 'P': Usuario estándar
 	this.User = null;
 	this.ErrorSignaled = { value: 0 };
+
+	this.Metrics = [];
+	this.Boundaries = [];
+
+	this.MetricStore = new MetricStore();
+	this.RegionStore = new RegionStore();
+
 };
 
 Context.prototype.CreateStore = function () {

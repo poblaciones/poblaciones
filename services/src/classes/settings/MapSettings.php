@@ -21,6 +21,7 @@ class MapSettings
 	public $ContentServerWorks = [];
 	public $BasemapMetrics = [];
 	public $BoundaryRecommendationExclusions = [];
+	public $MetricsFavoritesExclusions = [];
 
 	public $ElevationUrl = null;
 	public $ShortUrlPattern = null;
@@ -42,6 +43,8 @@ class MapSettings
 	public $UseFavorites = false;
 
 	public $UseAnnotations = false;
+
+	public $UseNewFabButton = false;
 
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;

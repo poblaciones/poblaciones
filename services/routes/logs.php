@@ -20,3 +20,21 @@ App::RegisterControllerGetPost('/logs/errors', controllers\cErrors::class);
 App::RegisterControllerGet('/logs', controllers\cActivity::class);
 App::RegisterControllerGet('/logs/', controllers\cActivity::class);
 
+App::RegisterControllerGet('/logs/suggestions', controllers\cSuggestions::class);
+App::RegisterControllerGetPost('/logs/learn', controllers\cLearn::class);
+
+
+/**
+ * Ver detalle de reglas de un tipo específico
+ * GET /admin/suggestions/rules/{type}
+ */
+/*App::$app->get('/services/admin/suggestions/rules/{type}', function (Request $request, $type) {
+	$service = new DashboardService();
+	$rules = $service->getRuleDetails($type);
+
+	return App::Render('suggestions_rules_detail.html', [
+		'rule_type' => $type,
+		'rules' => $rules
+	]);
+});
+*/

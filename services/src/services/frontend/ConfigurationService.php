@@ -85,7 +85,7 @@ class ConfigurationService extends BaseService
 
 	public function GetConfiguration($workId, $link)
 	{
-		$session = new SessionService();
+		$session = new NavigationService();
 		$model = new SignatureModel();
 		$signatures = $model->GetSignatures();
 
@@ -132,7 +132,9 @@ class ConfigurationService extends BaseService
 		{
 			$mapAccess = Context::Settings()->Keys()->GoogleMapsKey;
 		}
-		//Context::Settings()->Keys()->Ofuscate();
+
+		$suggestions = array('minScore' => Context::Settings()->Suggestions()->getMinScoreToSuggest(),
+							'maxSuggestions' => Context::Settings()->Suggestions()->getMaxSuggestionsPerTrigger());
 
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
@@ -145,6 +147,7 @@ class ConfigurationService extends BaseService
 									'UseTextures' => App::Settings()->Map()->UseTextures,
 									'BasemapMetrics' => App::Settings()->Map()->BasemapMetrics,
 
+									'UseNewFabButton' =>  App::Settings()->Map()->UseNewFabButton,
 									'UseAnnotations' =>  App::Settings()->Map()->UseAnnotations,
 									'UsePerimeter' =>  App::Settings()->Map()->UsePerimeter,
 									'UseCharts' =>  App::Settings()->Map()->UseCharts,
@@ -167,6 +170,7 @@ class ConfigurationService extends BaseService
 									'MaxQueueRequests' => App::Settings()->Map()->MaxQueueRequests,
 									'MaxStaticQueueRequests' => App::Settings()->Map()->MaxStaticQueueRequests,
 									'User' => $user,
+									'Suggestions' => $suggestions,
 									'CanAccessContent' => $canAccessContent,
 									'ContentAttributes' => $contentAttributes,
 									'MainServer' => $mainServer->publicUrl);

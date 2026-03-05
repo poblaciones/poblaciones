@@ -18,12 +18,13 @@ function ActiveSelectedMetric(selectedMetric) {
 	this.IsUpdatingRanking = false;
 	this.isBaseMetric = false;
 	this.ShowRanking = false;
+	this.ShowChart = true;
 	this.RankingSize = 10;
 	this.RankingDirection = 'D';
 	this.Summary = new Summary(this);
 	this.activeSequenceSteps = {};
 	this.overlay = null;
-	this.blockSize = window.SegMap.tileDataBlockSize;
+	this.blockSize = (window.SegMap ? window.SegMap.tileDataBlockSize : null);
 	this.fillEmptySummaries();
 };
 
@@ -166,6 +167,16 @@ ActiveSelectedMetric.prototype.SelectedLevelCanBeCompared = function () {
 	return true;
 };
 
+
+ActiveSelectedMetric.prototype.useChart = function () {
+	var variable = this.SelectedVariable();
+	if (variable) {
+		var values = this.getVariableValueLabels(variable);
+		return !variable.IsSimpleCount && values.length > 1;
+	} else {
+		return false;
+	}
+};
 
 ActiveSelectedMetric.prototype.useRankings = function () {
 	var variable = this.SelectedVariable();

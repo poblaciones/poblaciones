@@ -1,6 +1,6 @@
 <template>
   <div class="map-style-selector-wrapper exp-hiddable-block">
-    <!-- Botón compacto para mostrar tipo de mapa actual -->
+    <!-- Botón compacto para mostrar tipo de mapa al que se podría ir -->
     <button
       class="map-style-btn btn btn-default btn-xs"
       :class="{ 'expanded': isExpanded }"
@@ -8,9 +8,9 @@
       @mouseenter="handleMouseEnter"
       @mouseleave="handleMouseLeave"
 
-            :title="currentMapStyle.name"
+            :title="'Cambiar a ' + nextMapStyle.name.toLowerCase()"
     >
-      <div class="map-style-icon preview-default" :style="{ backgroundImage: 'url(' + currentMapStyle.asset + ')' }"></div>
+      <div class="map-style-icon preview-default" :style="{ backgroundImage: 'url(' + nextMapStyle.asset + ')' }"></div>
     </button>
 
     <!-- Panel expandido con opciones -->
@@ -28,9 +28,9 @@
           <div class="section-title" style="margin-bottom: 4px;">Detalles del mapa</div>
           <div class="map-layers-list">
             <div
-              v-for="layer in activeLayers"
-              :key="layer.Id"
-              class="layer-item hand"
+              v-for="layer, index in activeLayers"
+              :key="index"
+              class="layer-item hand" :class="(layer.Separator ? 'layer-separator' : '')"
               @click="toggleLayer(layer)"
             >
               <div class="layer-info">
@@ -79,8 +79,8 @@
   import satelliteMapType from '@/common/assets/maps/satellite.png';
 
   export default {
-    name: 'MapStyleSelector',
-    props: ['toolbarStates'],
+    name: 'mpBasemapButton',
+    props: ['toolbarStates', 'readonly'],
     data() {
       return {
         isExpanded: false,
@@ -163,6 +163,20 @@
       currentMapStyle() {
         return this.mapStyles.find(s => s.id === this.currentMapStyleId);
       },
+      nextMapStyle() {
+        var next = '';
+        switch (this.currentMapStyleId) {
+          case 'default':
+					case 'streets':
+            next = 'satellite';
+            break;
+          case 'satellite':
+					case 'blank':
+            next = 'default';
+            break;
+        }
+        return this.mapStyles.find(s => s.id === next);
+			},
       activeLayers() {
         var ret = [];
         for (var l of this.mapLayers) {
@@ -175,6 +189,9 @@
     },
     methods: {
       handleClick() {
+        if (this.readonly) {
+          return;
+        }
         if (this.isTouchDevice) {
           // En dispositivos táctiles, toggle del panel
           this.isExpanded = !this.isExpanded;
@@ -183,14 +200,15 @@
           }
         } else {
           // En desktop, cambiar al siguiente tipo de mapa sin abrir panel
-          if (!this.isExpanded) {
-            const currentIndex = this.mapStyles.findIndex(s => s.id === this.currentMapStyleId);
-            const nextIndex = (currentIndex + 1) % this.mapStyles.length;
-            this.mapStyleSelected(this.mapStyles[nextIndex]);
-          }
+          //if (!this.isExpanded) {
+						this.mapStyleSelected(this.nextMapStyle);
+          //}
         }
       },
       handleMouseEnter() {
+        if (this.readonly) {
+          return;
+        }
         if (!this.isTouchDevice) {
           // En desktop, expandir panel con hover
           if (this.hoverTimeout) {
@@ -210,6 +228,9 @@
         }
       },
       handleMouseLeave() {
+        if (this.readonly) {
+          return;
+        }
         if (!this.isTouchDevice) {
           if (this.hoverTimeout) {
             clearTimeout(this.hoverTimeout);
@@ -268,9 +289,8 @@
   box-sizing: border-box;
 }
 
-/* Botón principal - estilo Pampeana */
 	.map-style-btn {
-		position: fixed;
+		position: absolute;
 		left: 20px;
 		bottom: 20px;
 		width: 64px;
@@ -281,7 +301,7 @@
 		box-shadow: rgb(0 0 0 / 20%) 0px 1px 3px 2px;
 		color: #333;
 		cursor: pointer;
-		z-index: 1030;
+		z-index: 890;
 		transition: all 0.2s;
 		display: flex;
 		align-items: center;
@@ -337,7 +357,7 @@
 
 /* Panel de opciones */
 .map-options-panel {
-  position: fixed;
+  position: absolute;
   bottom: -6px;
   left: 100px; /* Al lado del botón */
   width: 320px;
@@ -376,6 +396,11 @@
     text-align: center;
 		transition: all 0.2s;
 	}
+
+.layer-separator {
+	border-bottom: 1px solid #cdcdcd;
+	border-radius: 0px;
+}
 
 .map-type-card:hover {
   border-color: #999;
@@ -511,7 +536,7 @@
   }
 
   .map-options-panel {
-    position: fixed;
+    position: absolute;
     top: auto;
     left: 0;
     right: 0;

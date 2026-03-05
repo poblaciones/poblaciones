@@ -1,0 +1,323 @@
+{% extends "adminLayout.html.twig" %}
+{% import "macros.html.twig" as macros %}
+
+{% set menu = 'SUGGESTIONS' %}
+
+{% block content %}
+
+{{ macros.Title('Sugerencias') }}
+
+{{ include('tabbedContentMenu.html.twig') }}
+<div class="suggestions-dashboard">
+    <div class="dSeparatorNewLine">
+		<div class='dText'>Sugerencias</div>
+	</div>
+    <!-- Metadatos del Modelo -->
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3>Estado del modelo</h3>
+        </div>
+         <div class="dBlockNewLineS1">
+            Reglas:
+        </div>
+        <div class="dBlockSize3">
+            {{ model_metadata.total_rules|number_format }}
+        </div>
+        <div class="dBlockNewLineS1">
+           Sesiones analizadas:
+        </div>
+        <div class="dBlockSize3">
+            {{ metadata.total_sessions_analyzed|number_format }}
+        </div>
+        <div class="dBlockNewLineS1">
+            Último entrenamiento:
+        </div>
+        <div class="dBlockSize3">
+            {{ metadata.last_training_month }}
+        </div>
+         <div class="dBlockNewLineS1">
+           Versión del modelo:
+        </div>
+        <div class="dBlockSize3">
+            {{ metadata.model_version }}
+        </div>
+    </div>
+
+    <!-- Evolución Mensual -->
+    <div class="panel panel-success" style="clear: both">
+        <div class="panel-heading">
+            <h3>Evolución mensual</h3>
+        </div>
+        <div class="panel-body">
+            <canvas id="evolutionChart" width="400" height="150"></canvas>
+
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Sesiones</th>
+                        <th>Reglas Creadas</th>
+                        <th>Reglas Actualizadas</th>
+                        <th>Tasa Aceptación</th>
+                        <th>Fecha Procesamiento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month in evolution %}
+                    <tr>
+                        <td><strong>{{ month.spl_year_month }}</strong></td>
+                        <td>{{ month.spl_sessions_analyzed|number_format }}</td>
+                        <td class="text-success">+{{ month.spl_rules_created|number_format }}</td>
+                        <td class="text-info">{{ month.spl_rules_updated|number_format }}</td>
+                        <td>
+                            {% if month.acceptance_rate %}
+                                <span class="badge {% if month.acceptance_rate > 0.15 %}badge-success{% elseif month.acceptance_rate > 0.10 %}badge-warning{% else %}badge-danger{% endif %}">
+                                    {{ (month.acceptance_rate * 100)|number_format(1) }}%
+                                </span>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ month.spl_completed_at|date('d/m/Y H:i') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top Reglas -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3>Top Co-ocurrencias de indicadores</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Metric A</th>
+                                <th>Metric B</th>
+                                <th>Lift</th>
+                                <th>Aceptación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rule in top_rules.metrics %}
+                            <tr>
+                                <td>{{ rule.smc_metric_a }}</td>
+                                <td>{{ rule.smc_metric_b }}</td>
+                                <td><span class="badge badge-primary">{{ rule.smc_lift|number_format(2) }}x</span></td>
+                                <td><span class="badge badge-success">{{ (rule.smc_acceptance_rate * 100)|number_format(1) }}%</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3>Top Secuencias</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Patrón</th>
+                                <th>Siguiente</th>
+                                <th>Prob</th>
+                                <th>Aceptación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for seq in top_rules.sequences %}
+                            <tr>
+                                <td class="text-muted small">{{ seq.ssq_pattern_json|slice(0, 30) }}...</td>
+                                <td>{{ seq.ssq_next_action_name }}</td>
+                                <td><span class="badge badge-primary">{{ (seq.ssq_probability * 100)|number_format(0) }}%</span></td>
+                                <td><span class="badge badge-success">{{ (seq.ssq_acceptance_rate * 100)|number_format(1) }}%</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Recientes -->
+    <div class="panel panel-warning">
+        <div class="panel-heading">
+            <h3>Estadísticas del mes actual ({{ recent_stats.year_month }})</h3>
+        </div>
+        <div class="panel-body">
+            {% if recent_stats.overall %}
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <h4>{{ recent_stats.overall.total_offered|number_format }}</h4>
+                        <p>Sugerencias ofrecidas</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <h4>{{ recent_stats.overall.total_accepted|number_format }}</h4>
+                        <p>Sugerencias aceptadas</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <h4>{{ recent_stats.overall.avg_decision_seconds|number_format(1) }}s</h4>
+                        <p>Tiempo promedio de decisión</p>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Por Tipo de Sugerencia</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th>Trigger</th>
+                        <th>Veces Ofrecida</th>
+                        <th>Tasa Aceptación</th>
+                        <th>Tiempo Decisión</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in recent_stats.by_type %}
+                    <tr>
+                        <td><span class="badge badge-secondary">{{ stat.sof_suggestion_type }}</span></td>
+                        <td>{{ stat.sof_suggestion_value }}</td>
+                        <td class="text-muted small">{{ stat.sof_trigger_reason }}</td>
+                        <td>{{ stat.times_offered }}</td>
+                        <td>
+                            <span class="badge {% if stat.acceptance_rate > 0.2 %}badge-success{% elseif stat.acceptance_rate > 0.1 %}badge-warning{% else %}badge-danger{% endif %}">
+                                {{ (stat.acceptance_rate * 100)|number_format(1) }}%
+                            </span>
+                        </td>
+                        <td>{{ (stat.avg_decision_time_ms / 1000)|number_format(1) }}s</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">No hay datos disponibles para el mes actual.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de evolución
+const evolutionData = {{ evolution|json_encode|raw }};
+
+const labels = evolutionData.map(m => m.spl_year_month);
+const acceptanceRates = evolutionData.map(m => m.acceptance_rate ? m.acceptance_rate * 100 : 0);
+const rulesCreated = evolutionData.map(m => m.spl_rules_created);
+
+const ctx = document.getElementById('evolutionChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels.reverse(),
+        datasets: [{
+            label: 'Tasa de Aceptación (%)',
+            data: acceptanceRates.reverse(),
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            yAxisID: 'y'
+        }, {
+            label: 'Reglas Creadas',
+            data: rulesCreated.reverse(),
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Aceptación (%)'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Reglas Creadas'
+                },
+                grid: {
+                    drawOnChartArea: false,
+                }
+            }
+        }
+    }
+});
+</script>
+
+<style>
+.stat-box {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.stat-box h4 {
+    font-size: 2em;
+    margin: 0;
+    color: #007bff;
+}
+.stat-box p {
+    margin: 5px 0 0 0;
+    color: #6c757d;
+}
+.panel {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+.panel-heading {
+    padding: 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+.panel-body {
+    padding: 15px;
+}
+
+
+.table-striped {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+th, td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+}
+</style>
+{% endblock %}

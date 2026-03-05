@@ -335,7 +335,7 @@ class Statistics
 	{
 		if (isset(self::$cache[$ip]))
 			return self::$cache[$ip];
-	Profiling::BeginTimer();
+		Profiling::BeginTimer();
 
 		$countryObj = GeoIp::GetCountry($ip);
 		if (!$countryObj || $countryObj->names === null) return 'Otros';

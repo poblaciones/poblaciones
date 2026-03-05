@@ -1,11 +1,11 @@
 module.exports = {
-	ReadyPromise() {
+	ReadyPromise(args = null) {
 		var _resolve;
 		var readyPromise = new Promise(resolve => {
 			_resolve = resolve;
 		});
 		setTimeout(() => {
-			_resolve();
+			_resolve(args);
 		}, 10);
 		return readyPromise;
 	},

@@ -35,6 +35,17 @@ module.exports = {
 		// Insertar el nuevo elemento en la posición encontrada
 		arr.splice(pos, 0, newElement);
 	},
+	Substract(arr, arrToSubstract) {
+		var ret = [];
+		this.AddRange(ret, arr);
+		for (var element of arrToSubstract) {
+			var pos = ret.indexOf(element);
+			if (pos !== -1) {
+				this.RemoveAt(ret, pos);
+			}
+		}
+		return ret;
+	},
 	Remove(arr, element) {
 		var index = arr.indexOf(element);
 		return this.RemoveAt(arr, index);

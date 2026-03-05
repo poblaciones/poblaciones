@@ -12,7 +12,7 @@ use helena\entities\frontend\geometries\Circle;
 
 // ej. http://mapas/boundaries/GetSelectedBoundary?a=62
 App::$app->post('/services/session/UpdateUsage', function (Request $request) {
-	$controller = new services\SessionService();
+	$controller = new services\NavigationService();
 	$navigationId = Params::GetIntMandatory('id');
     $startup = Params::GetJson('i', true);
     $actions = Params::GetJson('a', true);

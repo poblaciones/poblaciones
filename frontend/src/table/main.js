@@ -31,9 +31,11 @@ Vue.component('router-view', Vue.options.components.RouterView);
 // Globales propios
 import Invoker from '@/backoffice/components/Invoker';
 import MpWait from '@/common/components/MpWait';
+import MpConfirm from '@/backoffice/components/MpConfirm';
 
 Vue.component('invoker', Invoker);
 Vue.component('mp-wait', MpWait);
+Vue.component('mp-confirm', MpConfirm);
 
 // Settings
 window.host = process.env.host;

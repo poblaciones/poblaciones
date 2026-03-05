@@ -139,6 +139,14 @@ class GeoJson
 		Profiling::EndTimer();
 		return $geojson;
 	}
+
+	public static function LoadBinaryGeometry($data)
+	{
+		$undata = unpack("@4/a*", $data);
+		$geometry = \geoPHP::load($undata, 'wkb');
+		return $geometry;
+	}
+
 	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false, $hasCaption = false, $projectedEnvelope = null)
 	{
 		if (array_key_exists('valueClipped', $row))
