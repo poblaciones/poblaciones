@@ -482,7 +482,6 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 	}
 	if (state.ShowChart !== activeSelectedMetric.ShowChart) {
 		activeSelectedMetric.ShowChart = state.ShowChart;
-		alert(state.ShowChart);
 	}
 	if (state.RankingDirection !== activeSelectedMetric.RankingDirection) {
 		activeSelectedMetric.RankingDirection = state.RankingDirection;

@@ -373,13 +373,6 @@ SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
 	/*if (mapTypeState === 's' || mapTypeState === 'h') {
 		this.toolbarStates.showElevation = false;
 	}*/
-
-	if (mapTypeState === 's') {
-		this.toolbarStates.showLabels = false;
-	}
-	if (mapTypeState === 'h') {
-		this.toolbarStates.showLabels = true;
-	}
 	this.Session.UI.BasemapChanged(mapTypeState);
 	this.UpdateLabelsVisibility();
 };
@@ -434,7 +427,6 @@ SegmentedMap.prototype.SetShowElevation = function (value) {
 	this.MapsApi.SetElevationState(value);
 };
 
-
 SegmentedMap.prototype.ToggleShowElevation = function () {
 	this.toolbarStates.showElevation = !this.toolbarStates.showElevation;
 	this.MapsApi.SetElevationState(this.toolbarStates.showElevation);
@@ -443,16 +435,6 @@ SegmentedMap.prototype.ToggleShowElevation = function () {
 };
 
 SegmentedMap.prototype.ToggleShowLabels = function () {
-	// Si está en modo satélite, el toggle implica un cambio de mapa
-	var mapState = this.MapsApi.GetMapTypeState();
-	if (mapState === 'h') {
-		this.SetMapTypeState('s');
-		return;
-	}
-	if (mapState === 's') {
-		this.SetMapTypeState('h');
-		return;
-	}
 	this.toolbarStates.showLabels = !this.toolbarStates.showLabels;
 	this.UpdateLabelsVisibility();
 	this.SaveRoute.UpdateRoute();

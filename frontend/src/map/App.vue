@@ -18,6 +18,8 @@
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
+					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
+									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
 					<LeftPanel ref='leftPanel' />
 					<MapPanel class="exp-hiddable-block" />
 					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
@@ -62,6 +64,7 @@
 	import WorkPanel from '@/map/components/panels/workPanel';
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
 	import MapExport from '@/map/classes/MapExport';
+	import Search from '@/map/components/widgets/map/search';
 	import MapPanel from '@/map/components/panels/mapPanel';
 	import MetricsButton from '@/map/components/widgets/map/metricsButton';
 	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
@@ -92,6 +95,7 @@
 		name: 'app',
 		components: {
 			SummaryPanel,
+			Search,
 			MapPanel,
 			WaitMessage,
 			EditButton,

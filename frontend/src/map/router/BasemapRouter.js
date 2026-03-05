@@ -21,7 +21,7 @@ BasemapRouter.prototype.ToRoute = function (coord) {
 	var segmentedMap = window.SegMap;
 	var mapType = segmentedMap.GetMapTypeState();
 	// guarda mapType junto con la negación de etiquetas
-	if (mapType !== 's' && !segmentedMap.toolbarStates.showLabels) {
+	if (!segmentedMap.toolbarStates.showLabels) {
 		mapType += 'n';
 	}
 	if (segmentedMap.toolbarStates.showElevation) {
@@ -39,7 +39,7 @@ BasemapRouter.prototype.ToRoute = function (coord) {
 };
 
 BasemapRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
-	if (!args || args.length < 2) {
+	if (!args || args.length < 1) {
 		return;
 	}
 	var framing = this.frameFromRoute(args);
@@ -49,33 +49,36 @@ BasemapRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 		segmentedMap.toolbarStates.showLabels = framing.ShowLabels;
 		segmentedMap.SetShowElevation(framing.Elevation);
 		segmentedMap.SetMapTypeState(framing.MapType);
+		for (var layer of framing.VisibleBaseMetrics) {
+			layer.Visible = false;
+			segmentedMap.ToggleBasemapMetric(layer);
+		}
 	}
-
 	segmentedMap.SaveRoute.Disabled = false;
 };
 
 BasemapRouter.prototype.frameFromRoute = function (args) {
-	var mapType = 'r';
+	//var mapType = 'r';
 	var showLabels = true;
 	var elevation = false;
-	console.log(args);
-	if (args.length === 4 && args[3].length > 0) {
-		// Tiene algo indicado
-		if (args[3].endsWith('n') || args[3].endsWith('ne')) {
-			showLabels = false;
-		}
-		if (args[3].endsWith('e')) {
-			elevation = true;
-		}
-		if (args[3] !== 'n' && args[3] !== 'ne' && args[3] !== 'e') {
-			mapType = args[3][0];
-		}
+	var setting = args[0];
+	var segmentedMap = window.SegMap;
+
+	if (setting.length == 0) {
+		return;
+	}
+	var mapType = setting[0];
+	if (setting.includes('n')) {
+		showLabels = false;
+	}
+	if (setting.includes('e')) {
+		elevation = true;
 	}
 	var visibleBaseMetrics = [];
 	/*si contiene estas letras, lo agrega en...
 	ojo que no los cargó... solo les setea el visible en true */
 	for (var basemapMetric of segmentedMap.toolbarStates.basemapMetrics) {
-		if (args.includes(basemapMetric.RouteTag)) {
+		if (setting.includes(basemapMetric.RouteTag)) {
 			basemapMetric.Visible = true;
 			visibleBaseMetrics.push(basemapMetric);
 		}

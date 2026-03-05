@@ -89,7 +89,7 @@ LeafletApi.prototype.Initialize = function () {
 
 	var options = {
 		zoomControl: false, zoomAnimation: false,
-		renderer: L.canvas(), /*zoomSnap: 0.5,*/ minZoom: 3, maxZoom: 17,
+		renderer: L.canvas(), /*zoomSnap: 0.5,*/ minZoom: 3, maxZoom: 20,
 
 		contextmenu: addContextMenu,
 		contextmenuWidth: 200,
@@ -312,11 +312,16 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	// satélite
 	var mapLink =  '<a href="http://www.esri.com/">Esri</a>';
   var wholink =  'i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
-  var satellite = L.tileLayer(
+  /*var satellite = L.tileLayer(
             'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: cp,
             maxZoom: 18,
-		});
+	});*/
+	var satellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+		maxZoom: 20,
+		subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+		attribution: cp
+	});
 	this.baseLayers['satellite'] = satellite;
 
 	for (var layer in this.baseLayers) {
@@ -346,9 +351,8 @@ LeafletApi.prototype.CheckBaseLayer = function () {
 	var elevation = (this.elevationState && this.useElevation ? ',elevation' : '');
 	if (this.mapTypeState === 'b') {
 		reqLayer = 'blank';
-	} else if (this.mapTypeState === 's') {
-			reqLayer = 'satellite';
-	} else if (this.mapTypeState === 'h') {
+		// h lo soporta por compatibilidad para atrás... la referencia es showLabels para etiquetas
+	} else if (this.IsSatelliteType()) {
 		if (this.map.getZoom() >= this.MIN_ZOOM_LABELS && this.showLabels) {
 			reqLayer = 'satellite,roadmap_only_labels'; // se podría agregar roadmap_only_labels
 		} else {
@@ -370,17 +374,6 @@ LeafletApi.prototype.CheckBaseLayer = function () {
 		reqLayer = 'roadmap_no_labels' + elevation;
 	}
 	this.SetBaseMap(reqLayer);
-	// actualiza el negrita del botón
-	if (this.mapTypeButtons.r) {
-		for (var button in this.mapTypeButtons) {
-			this.setBold(this.mapTypeButtons[button], false);
-		}
-		this.setBold(this.mapTypeButtons[(this.mapTypeState == 'h' ? 's' : this.mapTypeState)], true);
-	}
-};
-
-LeafletApi.prototype.setBold = function (ele, state) {
-	ele.style.fontWeight = (state ? "bold" : '');
 };
 
 LeafletApi.prototype.SetBaseMap = function (basemapName) {
@@ -858,7 +851,7 @@ LeafletApi.prototype.getOpacity = function () {
 		return 1.5 * 0.15;
 	} else if (this.mapTypeState === 'c') {
 		return 1.5 * 0.15;
-	} else if (this.mapTypeState === 's' || this.mapTypeState === 'h') {
+	} else if (this.IsSatelliteType()) {
 		return 1.5 * 0.4;
 	} else { // Default
 		return 0.15;

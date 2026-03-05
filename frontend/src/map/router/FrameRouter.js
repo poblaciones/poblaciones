@@ -52,7 +52,7 @@ FrameRouter.prototype.FromRoute = function (args, updateRoute, skipRestore) {
 	} else if (newZoom) {
 		segmentedMap.SetZoom(newZoom);
 	}
-	if (framing.MapType) {
+	if (framing.MapType && framing.MapTypeLegacy) {
 		segmentedMap.toolbarStates.showLabels = framing.ShowLabels;
 		segmentedMap.SetShowElevation(framing.Elevation);
 		segmentedMap.SetMapTypeState(framing.MapType);
@@ -64,6 +64,7 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 	if (!args || args.length < 2) {
 		return null;
 	}
+	var legacy = false;
 	var lat = parseFloat(args[0]);
 	var lon = parseFloat(args[1]);
 	var zoom;
@@ -76,6 +77,7 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 	var showLabels = true;
 	var elevation = false;
 	if (args.length === 4 && args[3].length > 0) {
+		legacy = true;
 		// Tiene algo indicado
 		if (args[3].endsWith('n') || args[3].endsWith('ne')) {
 			showLabels = false;
@@ -85,6 +87,9 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 		}
 		if (args[3] !== 'n' && args[3] !== 'ne' && args[3] !== 'e') {
 			mapType = args[3][0];
+			if (mapType == 's') {
+				showLabels = false;
+			}
 		}
 	}
 	var frame = {
@@ -94,6 +99,7 @@ FrameRouter.prototype.frameFromRoute = function (args) {
 		},
 		Zoom: zoom,
 		/* Legacy */
+		MapTypeLegacy: legacy,
 		MapType: mapType,
 		Elevation: elevation,
 		ShowLabels: showLabels,

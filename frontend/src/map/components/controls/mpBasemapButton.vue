@@ -27,12 +27,10 @@
         <div class="panel-section">
           <div class="section-title" style="margin-bottom: 4px;">Detalles del mapa</div>
           <div class="map-layers-list">
-            <div
-              v-for="layer, index in activeLayers"
-              :key="index"
-              class="layer-item hand" :class="(layer.Separator ? 'layer-separator' : '')"
-              @click="toggleLayer(layer)"
-            >
+            <div v-for="layer, index in activeLayers"
+                 :key="index"
+                 class="layer-item hand" :class="(layer.Separator ? 'layer-separator' : '')"
+                 @click="toggleLayer(layer)">
               <div class="layer-info">
                 <i :class="layer.Icon" class="layer-icon"></i>
                 <span class="layer-name">{{ layer.Caption }}</span>
@@ -74,6 +72,7 @@
 
 <script>
 
+  import arr from '@/common/framework/arr';
   import defaultMapType from '@/common/assets/maps/default.png';
   import streetsMapType from '@/common/assets/maps/streets.png';
   import satelliteMapType from '@/common/assets/maps/satellite.png';
@@ -114,42 +113,46 @@
             asset: ''
           }
         ],
-        mapLayers:  [{
-           Id: 'labels',
-           Caption: 'Etiquetas',
-           Icon: 'fas fa-tag',
-           Visible: true
-            }, {
-            Id: 'elevation',
-              Caption: 'Relieve',
-                Icon: 'fas fa-mountain',
-                  Visible: false
-              }]
-      /*
-                {
-                  id: 'roads',
-                  name: 'Rutas',
-                  icon: 'fas fa-road',
-                  Visible: true
-                },
-                {
-                  id: 'rivers',
-                  name: 'Cursos de agua',
-                  icon: 'fas fa-water',
-                  Visible: false
-                },
-                {
-                  id: 'trains',
-                  name: 'Trenes',
-                  icon: 'fas fa-train',
-                  Visible: false
-                }
-              ]*/
+        mapLayers: [{
+          Id: 'labels',
+          Caption: 'Etiquetas',
+          Icon: 'fas fa-tag',
+          Visible: true
+        }, {
+          Id: 'elevation',
+          Caption: 'Relieve',
+          Icon: 'fas fa-mountain',
+          Visible: false
+        }]
+        /*
+                  {
+                    id: 'roads',
+                    name: 'Rutas',
+                    icon: 'fas fa-road',
+                    Visible: true
+                  },
+                  {
+                    id: 'rivers',
+                    name: 'Cursos de agua',
+                    icon: 'fas fa-water',
+                    Visible: false
+                  },
+                  {
+                    id: 'trains',
+                    name: 'Trenes',
+                    icon: 'fas fa-train',
+                    Visible: false
+                  }
+                ]*/
       };
     },
     mounted() {
       // Detectar si es dispositivo táctil
       this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      var labels = arr.GetByProperty(this.mapLayers, 'Id', 'labels');
+      if (labels) {
+				labels.Visible = this.toolbarStates.showLabels;
+      }
     },
     beforeDestroy() {
       if (this.hoverTimeout) {
@@ -278,6 +281,14 @@
           layerId: layer.Id,
           Visible: layer.Visible
         });
+      }
+    },
+    watch: {
+      'toolbarStates.showLabels'(val) {
+        var labels = arr.GetByProperty(this.mapLayers, 'Id', 'labels');
+        if (labels) {
+          labels.Visible = val;
+        }
       }
     }
 };

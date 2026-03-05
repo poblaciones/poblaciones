@@ -39,11 +39,7 @@ export default {
 					window.SegMap.MapsApi.InteractiveChangeMapType("r");
 					break;
 				case 'satellite':
-					if (window.SegMap.MapsApi.showLabels) {
-						window.SegMap.MapsApi.InteractiveChangeMapType("h");
-					} else {
-						window.SegMap.MapsApi.InteractiveChangeMapType("s");
-					}
+					window.SegMap.MapsApi.InteractiveChangeMapType("s");
 					break;
 				case 'streets':
 					window.SegMap.MapsApi.InteractiveChangeMapType("c");
