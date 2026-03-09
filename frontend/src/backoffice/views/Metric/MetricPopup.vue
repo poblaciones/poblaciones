@@ -36,6 +36,20 @@
 											 :list='MetricProviders'
 											 helper='Indique la fuente agrupada del indicador.' />
 					</div>
+					<div v-if="Work.IsPublicData()" class='md-layout-item md-size-65 md-small-size-100'>
+						<mp-simple-text :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
+														label="Tag OGC" @enter="save"
+														helper="Ej. acceso_agua"
+														:maxlength="150" v-model="newMetricVersionLevel.MetricVersion.Metric.Tag">
+						</mp-simple-text>
+					</div>
+					<div v-if="Work.IsPublicData()" class='md-layout-item md-size-35 md-small-size-100'>
+						<mp-simple-text :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
+														label="Ícono" @enter="save"
+														helper="Ej. fas fa-school"
+														:maxlength="50" v-model="newMetricVersionLevel.MetricVersion.Metric.Icon">
+						</mp-simple-text>
+					</div>
 					<div class="md-layout-item md-size-60 md-small-size-100">
 						<mp-simple-text label="Edición" @enter="save"
 														helper="Año de referencia de la edición o serie de datos. Ej. 2010"

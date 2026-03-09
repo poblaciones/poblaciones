@@ -1,9 +1,6 @@
 <template>
   <transition name="slide-fade">
     <div class="indicator-selector-wrapper sidepanelOffset" v-if="isOpen" v-on-clickaway="closePanel">
-      <!-- Overlay oscuro -->
-      <div class="overlay" @click="closePanel"></div>
-
       <!-- Panel flotante principal -->
       <div class="work-offsetY floating-panel panel card">
         <!-- Encabezado del panel -->
@@ -26,6 +23,7 @@
           <span v-else-if="currentCategory" class="breadcrumb-item active">
             {{ currentCategory.Name }}
           </span>
+          <button class="btn-breadcrumb-clear" @click.stop="goHome" title="Volver a categorías">×</button>
         </div>
 
         <!-- Cuerpo del panel con contenido scrolleable -->
@@ -56,7 +54,7 @@
             >
               <div class="indicator-content">
                 <div class="indicator-icon">
-                  <i :class="getIconClass(item.catIcon)"></i>
+                  <i :class="(item.Icon ? item.Icon : getIconClass(item.catIcon))"></i>
                 </div>
                 <div class="indicator-info">
                   <div class="indicator-name">{{ item.Name }}</div>
@@ -64,12 +62,12 @@
                 </div>
               </div>
               <div class="indicator-actions">
-                <button
+                <button v-if="!isMobile"
                   class="btn-preview btn btn-default btn-xs"
                   @mouseenter.prevent="showTooltip($event, item)"
                   @mouseleave.prevent="hideTooltip"
                   @click.stop="preventDefault"
-                  title="Información"
+
                 >
                   <i class="fas fa-info-circle"></i>
                 </button>
@@ -80,7 +78,7 @@
           <!-- Grid de categorías -->
           <div v-else-if="!currentCategory" class="categories-grid">
             <div
-              v-for="cat in metrics"
+              v-for="cat in excludeBoundaries(metrics)"
               :key="cat.Name"
               class="category-card hand"
               :class="{ 'featured': cat.Icon === 'star' }"
@@ -105,7 +103,7 @@
               <div v-else class="indicator-item hand" @click="selectItem(item)">
                 <div class="indicator-content">
                   <div class="indicator-icon">
-                    <i :class="getIconClass(currentCategory.Icon)"></i>
+                    <i :class="(item.Icon ? item.Icon : getIconClass(currentCategory.Icon))"></i>
                   </div>
                   <div class="indicator-info">
                     <div class="indicator-name">{{ item.Name }}</div>
@@ -115,12 +113,12 @@
                   </div>
                 </div>
                 <div class="indicator-actions">
-                  <button
+                  <button  v-if="!isMobile"
                     class="btn-preview btn btn-default btn-xs"
                     @mouseenter="showTooltip($event, item)"
                     @mouseleave="hideTooltip"
                     @click.stop="preventDefault"
-                    title="Información"
+
                   >
                     <i class="fas fa-info-circle"></i>
                   </button>
@@ -169,7 +167,7 @@
             position: 'fixed'
           }"
              @mouseenter="keepTooltip = true"
-             @mouseleave="hideTooltip">
+             @mouseleave="keepTooltip = false; hideTooltip()">
           <div class="preview-header">
             <div class="preview-icon">
               <i :class="getTooltipIconClass(tooltip.item)"></i>
@@ -177,29 +175,36 @@
             <div class="preview-title">{{ tooltip.item.Name }}</div>
           </div>
           <div class="preview-section">
-            <div class="preview-label">Variables</div>
+            <div class="preview-label">{{ plural('Variable', getTooltipVariables(tooltip.item)) }}</div>
             <div class="preview-value">
-              <ul style="padding-left: 20px">
-                <li v-for="variable, index in getTooltipVariables(tooltip.item)" :key="index" :value="variable" >
-                  {{ variable }}.
+              <ul :class="(getTooltipVariables(tooltip.item).length == 1 ? 'variablesSingle' : 'variables')">
+                <li v-for="variable, index in getTooltipVariables(tooltip.item)" :key="index" :value="variable">
+                  {{ addDot(variable) }}
                 </li>
-              </ul></div>
+              </ul>
+            </div>
           </div>
           <div class="preview-section">
-            <div class="preview-label">Niveles</div>
-            <div class="preview-value">{{ getTooltipLevels(tooltip.item) }}</div>
+            <div class="preview-label">
+              {{ plural('Nivel', getTooltipLevels(tooltip.item)) }}
+            </div>
+            <div class="preview-value">
+              {{
+ getTooltipLevels(tooltip.item).join(', ')
+              }}.
+            </div>
           </div>
           <div class="preview-section">
-            <div class="preview-label">Fuente</div>
-            <div class="preview-value">{{ getTooltipSource(tooltip.item) }}</div>
-          </div>
-          <div class="preview-section" v-if="tooltip.item.Versions">
-            <div class="preview-label">Versiones</div>
+            <div class="preview-label">{{ plural('Versión', tooltip.item.Versions) }}</div>
             <div class="year-tags">
-              <span v-for="v in tooltip.item.Versions" :key="v.Id" class="year-tag btn btn-default btn-xs">
+              <span v-for="v in tooltip.item.Versions" :key="v.Id" class="year-tag">
                 {{ v.Name }}
               </span>
             </div>
+          </div>
+          <div class="preview-section">
+            <div class="preview-label">Fuente</div>
+            <div class="preview-value">{{ getTooltipSource(tooltip.item) }}.</div>
           </div>
         </div>
       </transition>
@@ -209,6 +214,7 @@
 
 <script>
 import { mixin as clickaway } from 'vue-clickaway';
+import str from '@/common/framework/str';
 
 export default {
   name: 'IndicatorSelector',
@@ -233,6 +239,7 @@ export default {
       currentCategory: null,
       showAllSuggestions: false,
       keepTooltip: false,
+      tooltipHideTimer: null,
       tooltip: {
         visible: false,
         top: 0,
@@ -258,6 +265,9 @@ export default {
       });
 
       return results;
+    },
+    isMobile() {
+      return window.SegMap.Configuration.IsMobile;
     },
     visibleSuggestions() {
       return this.showAllSuggestions ? this.suggestions : this.suggestions.slice(0, 3);
@@ -286,6 +296,12 @@ export default {
     closePanel() {
       this.$emit('close');
     },
+    plural(term, collection) {
+      return str.Plural(term, collection.length);
+    },
+    addDot(term) {
+			return str.AddDot(term);
+    },
     selectItem(item) {
       this.$emit('selected-item', item);
       this.closePanel();
@@ -302,6 +318,15 @@ export default {
       const text = cat.Items[0].Type === 'B' ? 'delimitaciones' : 'indicadores';
       return `${count} ${text}`;
     },
+    excludeBoundaries(list) {
+      var ret = [];
+      for (var item of list) {
+        if (item.Name != 'Delimitaciones') {
+          ret.push(item);
+        }
+      }
+      return ret;
+    },
     goHome() {
       this.currentCategory = null;
       this.searchQuery = '';
@@ -313,30 +338,48 @@ export default {
         if (body) body.scrollTop = 0;
       });
     },
-    showTooltip(event, item) {
-      if (this.keepTooltip) return;
+		showTooltip(event, item) {
+			if (this.keepTooltip) return;
 
-      const rect = event.target.getBoundingClientRect();
-      const tooltipWidth = 280;
-      const viewportWidth = window.innerWidth;
+			// Cancelar cualquier hide pendiente
+			if (this._hideTimer) {
+				clearTimeout(this._hideTimer);
+				this._hideTimer = null;
+			}
 
-      let left = rect.right + 10;
-      if (left + tooltipWidth > viewportWidth) {
-        left = rect.left - tooltipWidth - 10;
-      }
+			const rect = event.target.getBoundingClientRect();
+			const tooltipWidth = 420;
+			const viewportWidth = window.innerWidth;
 
-      this.tooltip = {
-        visible: true,
-        top: rect.top,
-        left: left,
-        item: item
-      };
-    },
-    hideTooltip() {
-      if (!this.keepTooltip) {
-        this.tooltip.visible = false;
-      }
-    },
+			let left = rect.right + 10;
+			if (left + tooltipWidth > viewportWidth) {
+				left = rect.left - tooltipWidth - 10;
+			}
+
+			this.tooltip = { visible: true, top: rect.top, left, item };
+
+			this.$nextTick(() => {
+				const el = this.$el.querySelector('.preview-tooltip');
+				if (!el) return;
+				const actualHeight = el.offsetHeight;
+				const viewportHeight = window.innerHeight;
+				let top = rect.top;
+				if (top + actualHeight > viewportHeight - 12) {
+					top = viewportHeight - actualHeight - 12;
+				}
+				if (top < 8) top = 8;
+				this.tooltip = { ...this.tooltip, top };
+			});
+		},
+
+		hideTooltip() {
+			this._hideTimer = setTimeout(() => {
+				if (!this.keepTooltip) {
+					this.tooltip.visible = false;
+				}
+				this._hideTimer = null;
+			}, 120);
+		},
     toggleSuggestions() {
       this.showAllSuggestions = !this.showAllSuggestions;
     },
@@ -384,14 +427,23 @@ export default {
         for (var level of version.Levels) {
           for (var variable of level.Variables) {
             if (!ret.includes(variable.Name)) {
-              ret.push(variable.Name);
+              if (variable.Name) {
+                if (variable.Name == 'N') {
+									ret.push('Conteo');
+                } else {
+                  ret.push(variable.Name);
+                }
+              }
             }
           }
         }
       }
+      if (ret.length == 0) {
+        ret.push('Conteo');
+      }
 			return ret;
 		},
-		getTooltipLevels(item) {
+    getTooltipLevels(item) {
       var ret = [];
       for (var version of item.Versions) {
         for (var level of version.Levels) {
@@ -400,7 +452,7 @@ export default {
           }
         }
       }
-			return ret.join(', ');
+			return ret;
 		},
     getTooltipSource(item) {
       var provider = this.getItemProvider(item);
@@ -411,7 +463,7 @@ export default {
       }
     },
     getItemGroup(item) {
-      for (var metric in this.metrics) {
+      for (var metric of this.metrics) {
         if (item.MetricGroupId && item.MetricGroupId === metric.Id) {
           return metric;
         }
@@ -419,8 +471,8 @@ export default {
 			return null;
     },
 		getItemProvider(item) {
-			for (var metric in this.metrics) {
-        for (var provider in metric.Items) {
+			for (var metric of this.metrics) {
+				for (var provider of metric.Items) {
 					if (provider.Header) {
 						if (item.MetricProviderId && item.MetricProviderId === provider.Id) {
 							return provider;
@@ -530,13 +582,24 @@ export default {
   color: #666;
 }
 
+	.variablesSingle {
+		padding-left: 0px;
+		list-style: none;
+	}
+
+	.variables {
+		padding-left: 20px;
+	}
+
+
 /* Breadcrumb */
 .breadcrumb-nav {
-  padding: 12px 24px;
+  padding: 8px 24px;
   background: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
   font-size: 14px;
   flex-shrink: 0;
+  line-height: 2em;
 }
 
 .breadcrumb-item {
@@ -558,6 +621,22 @@ export default {
   font-weight: 500;
 }
 
+	.btn-breadcrumb-clear {
+		background: none;
+		border: none;
+		color: #999;
+    float: right;
+		font-size: 24px;
+		line-height: 1;
+		padding: 0 0 0 6px;
+		cursor: pointer;
+		vertical-align: middle;
+		transition: color 0.2s;
+	}
+
+		.btn-breadcrumb-clear:hover {
+			color: #333;
+		}
 .breadcrumb-sep {
   margin: 0 8px;
   color: #ccc;
@@ -708,7 +787,7 @@ export default {
 }
 
 .indicator-item:hover {
-  background-color: #f8f9fa;
+  background-color: #eee;
 }
 
 .indicator-content {
@@ -859,14 +938,14 @@ export default {
 /* Tooltip */
 	.preview-tooltip {
 		position: fixed;
-		background: #fff;
-		color: #5a626d;
+		background: #333;
+		color: white;
 		border-radius: 8px;
-		padding: 8px 8px 6px 8px;
-		width: 360px;
+		padding: 12px;
+		width: 420px;
 		z-index: 1060;
 		box-shadow: 0 4px 10px rgba(60,64,67,.28);
-		pointer-events: none;
+		pointer-events: auto;
 	}
 
 .preview-header {
@@ -879,13 +958,14 @@ export default {
 }
 
 .preview-icon {
+  display: none;
   font-size: 20px;
   flex-shrink: 0;
 }
 
 .preview-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
   line-height: 1.3;
 }
 
@@ -900,12 +980,14 @@ export default {
 .preview-label {
   font-size: 11px;
   text-transform: uppercase;
+  color: #aaa;
   margin-bottom: 4px;
   letter-spacing: 0.5px;
 }
 
 .preview-value {
   font-size: 14px;
+  color: #e9e9e9;
   line-height: 1.4;
 }
 
@@ -921,6 +1003,7 @@ export default {
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 12px;
+  color: #e9e9e9;
   border: none;
 }
 

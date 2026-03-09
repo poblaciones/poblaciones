@@ -632,11 +632,11 @@
 	.chart-tooltip {
 		box-shadow: 0 4px 10px rgba(60,64,67,.28);
 		position: fixed; /* Cambiado de absolute a fixed */
-		background: #fff;
-		color: #5a626d;
+		background: #333;
+		color: #e9e9e9;
 		padding: 8px 8px 6px 8px;
 		border-radius: 8px;
-		font-size: 12px;
+		font-size: 13px;
 		pointer-events: none;
 		z-index: 9999; /* Z-index alto */
 		white-space: nowrap;
@@ -652,13 +652,14 @@
         letter-spacing: 0.5px;
     }
 
-    .dot {
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        margin-right: 5px;
-    }
+	.dot {
+		display: inline-block;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		margin-right: 5px;
+		box-shadow: 0 0px 1px 1px rgb(171 171 171 / 80%);
+	}
 
 	.skeleton {
     position: absolute;

@@ -80,7 +80,6 @@
           </transition>
 
           <div v-if="searchText && !hasResults && !loading" class="no-results">
-            <i class="fas fa-search"></i>
             <p>No se encontraron resultados</p>
           </div>
         </div>

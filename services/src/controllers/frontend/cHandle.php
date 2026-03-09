@@ -247,15 +247,6 @@ class cHandle extends cPublicController
 		$this->AddValue("metadata_pdf", $m);
 	}
 
-
-	private function PreppendMap($title)
-	{
-		if (Str::StartsWith(Str::ToLower($title), "map") == false)
-			return "Mapa de " . $title;
-		else
-			return $title;
-	}
-
 	private function ShowWorkMetric($workId, $metricId, $regionId)
 	{
 		$workService = new WorkService();

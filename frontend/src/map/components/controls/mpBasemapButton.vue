@@ -206,11 +206,7 @@
           }
         } else {
           // En desktop, cambiar al siguiente tipo de mapa sin abrir panel
-          //if (!this.isExpanded) {
-//          alert(window.SegMap.Configuration.IsMobile);
-	//				alert(window.SegMap.Configuration);
 					this.mapStyleSelected(this.nextMapStyle);
-          //}
         }
       },
       handleMouseEnter() {

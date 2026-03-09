@@ -1,3 +1,10 @@
+- Refactor de botón de buscar.
+- Shortcut para subir archivo.
+- Capas base físicas (rutas, trenes)
+- Capas base administrativas (rutas, trenes)
+
+v4.7 (2026-03-05)
+- Tipo de mapa renovado.
 - Charts de indicadores.
 - Herramienta contextual de medir.
 - Menú contextual de abrir en StreetView.

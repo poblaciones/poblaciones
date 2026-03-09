@@ -24,12 +24,12 @@
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
+				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
 					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
 									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
 					<LeftPanel ref='leftPanel' />
 					<MapPanel class="exp-hiddable-block" />
-					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
 					<MapType ref="mapSelector" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
 

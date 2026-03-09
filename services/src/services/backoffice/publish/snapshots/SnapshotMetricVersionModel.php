@@ -8,7 +8,7 @@ use helena\classes\App;
 
 class SnapshotMetricVersionModel
 {
-	const SNAPSHOT_CAPTIONS_MAX_LENGTH = 500;
+	const SNAPSHOT_CAPTIONS_MAX_LENGTH = 5000;
 
 	public function RegenAllMetric()
 	{
@@ -31,13 +31,14 @@ class SnapshotMetricVersionModel
 			$metricIdShardified = PublishDataTables::Shardified($metricId);
 		}
 
-	 	$sql = "INSERT INTO snapshot_metric_version ( mvw_metric_version_id, mvw_metric_id, mvw_metric_tag, mvw_metric_revision, mvw_metric_caption, mvw_metric_group_id, mvw_metric_provider_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
+	 	$sql = "INSERT INTO snapshot_metric_version ( mvw_metric_version_id, mvw_metric_id, mvw_metric_tag, mvw_metric_icon, mvw_metric_revision, mvw_metric_caption, mvw_metric_group_id, mvw_metric_provider_id, `mvw_caption`, mvw_partial_coverage, mvw_level,
 			mvw_work_id, mvw_work_caption, mvw_work_authors, mvw_work_institutions, mvw_work_type, mvw_work_is_private, mvw_work_is_indexed, mvw_work_access_link, `mvw_variable_captions`, `mvw_variable_value_captions`) ";
 
-		$sql .= "SELECT mvr_id, mvr_metric_id, mvr_metric_tag, mtr_revision, mtr_caption, mtr_metric_group_id, mtr_metric_provider_id, mvr_caption,
+		$sql .= "SELECT mvr_id, mvr_metric_id, mtr_tag, mtr_icon, mtr_revision, mtr_caption, mtr_metric_group_id, mtr_metric_provider_id, mvr_caption,
 						GROUP_CONCAT(DISTINCT IFNULL(mvl_partial_coverage, geo_partial_coverage) ORDER BY geo_id SEPARATOR ','),
-						GROUP_CONCAT(geo_caption ORDER BY geo_id SEPARATOR ','),
-						wrk_id, met_title, met_authors,
+						GROUP_CONCAT(CONCAT(mvl_id, ';', (CASE WHEN dat_type != 'D' THEN 'Ubicaciones' ELSE geo_caption END)) ORDER BY geo_id SEPARATOR ','),
+						wrk_id, met_title,
+						met_authors,
 						(SELECT LEFT(GROUP_CONCAT(ins_caption ORDER BY min_order SEPARATOR '\n'), " . self::SNAPSHOT_CAPTIONS_MAX_LENGTH . ")
 							FROM metadata_institution
 							JOIN institution i ON min_institution_id = i.ins_id
@@ -46,7 +47,7 @@ class SnapshotMetricVersionModel
 						wrk_type, wrk_is_private,
 						wrk_is_indexed, wrk_access_link, ";
 						// Hace un subselect con los nombres de variables
-		$sql .= "(SELECT LEFT(GROUP_CONCAT(mvv_caption ORDER BY mvv_order SEPARATOR '\n'), " . self::SNAPSHOT_CAPTIONS_MAX_LENGTH . ")
+		$sql .= "(SELECT LEFT(GROUP_CONCAT(CONCAT(mvl_id, ';', mvv_caption) ORDER BY mvl_id, mvv_order SEPARATOR '\n'), " . self::SNAPSHOT_CAPTIONS_MAX_LENGTH . ")
 							FROM variable
 							JOIN metric_version_level ON mvv_metric_version_level_id = mvl_id
 							WHERE mvl_metric_version_id = mvr_id

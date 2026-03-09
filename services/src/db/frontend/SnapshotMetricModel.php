@@ -21,6 +21,8 @@ class SnapshotMetricModel extends BaseModel
 	public function GetMetric($metricId)
 	{
 		Profiling::BeginTimer();
+
+		App::Db()->PrepareGroupConcat();
 		$sql = $this->GetMetricViewQuery();
 		$item = App::Db()->fetchAssoc($sql, array($metricId));
 		Profiling::EndTimer();
@@ -40,12 +42,14 @@ class SnapshotMetricModel extends BaseModel
 			$having = "";
 			$orderBy = "";
 		}
-		$sql = "SELECT	mvw_metric_id myv_metric_id, mvw_metric_revision myv_metric_revision, mvw_metric_tag myv_metric_tag,
+		$sql = "SELECT	mvw_metric_id myv_metric_id, mvw_metric_revision myv_metric_revision, mvw_metric_tag myv_metric_tag, mvw_metric_icon myv_metric_icon,
 										MIN(mvw_metric_caption) myv_metric_caption,
 										MAX(mvw_metric_revision) myv_metric_revision,
 										MIN(mvw_metric_group_id) myv_metric_group_id,
 										MIN(mvw_metric_provider_id) myv_metric_provider_id,
 										GROUP_CONCAT(mvw_work_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_ids,
+										GROUP_CONCAT(mvw_level ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_level,
+										GROUP_CONCAT(mvw_variable_captions ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_variable_captions,
 										GROUP_CONCAT(mvw_work_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_captions,
 										GROUP_CONCAT(mvw_work_is_private ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_private,
 										GROUP_CONCAT(mvw_work_is_indexed ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_indexed,
@@ -54,7 +58,7 @@ class SnapshotMetricModel extends BaseModel
 										GROUP_CONCAT(IFNULL(mvw_partial_coverage, '') ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_partial_coverages
 									FROM snapshot_metric_version
 									" . $where . "
-									group by mvw_metric_id, mvw_metric_revision, mvw_metric_tag " .
+									group by mvw_metric_id, mvw_metric_revision, mvw_metric_tag, mvw_metric_icon " .
 									$having .
 									$orderBy;
 		return $sql;
@@ -64,6 +68,7 @@ class SnapshotMetricModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 
+		App::Db()->PrepareGroupConcat();
 		$sql = $this->GetMetricViewQuery(true);
 		$ret = App::Db()->fetchAll($sql);
 		Profiling::EndTimer();

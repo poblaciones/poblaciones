@@ -36,11 +36,18 @@ class Metric
 	 */
     private $Tag;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="mtr_is_basic_metric", type="boolean", precision=0, scale=0, nullable=false, unique=false)
-     */
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="mtr_icon", type="string", length=50, precision=0, scale=0, nullable=false, unique=false)
+	 */
+	private $Icon;
+
+	/**
+	 * @var boolean
+	 *
+	 * @ORM\Column(name="mtr_is_basic_metric", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+	 */
     private $IsBasicMetric;
 
     /**
@@ -135,6 +142,30 @@ class Metric
 		return $this->Tag;
 	}
 
+
+	/**
+	 * Set icon
+	 *
+	 * @param string $icon
+	 *
+	 * @return Metric
+	 */
+	public function setIcon($icon)
+	{
+		$this->Icon = $icon;
+
+		return $this;
+	}
+
+	/**
+	 * Get icon
+	 *
+	 * @return string
+	 */
+	public function getIcon()
+	{
+		return $this->Icon;
+	}
     /**
 	 * Set isBasicMetric
 	 *

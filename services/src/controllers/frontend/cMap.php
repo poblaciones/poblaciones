@@ -133,6 +133,16 @@ class cMap extends cPublicController
 
 		return App::Redirect(Links::GetWorkMetricUrl(null, $metricId, $regionId));
 	}
+
+
+	private function PreppendMap($title)
+	{
+		if (Str::StartsWith(Str::ToLower($title), "map") == false)
+			return "Mapa de " . $title;
+		else
+			return $title;
+	}
+
 	private function RegisterOpenGraphTags()
 	{
 		$this->AddValue('description', 'Plataforma abierta de datos espaciales de la Argentina');
@@ -142,7 +152,7 @@ class cMap extends cPublicController
 			$service = new MetadataModel();
 			$metadata = $service->GetMetadataByWorkId($this->workId);
 			if ($metadata !== null) {
-				$this->AddValue('application_name' , "Mapa de " . $metadata['met_title'] . " - Poblaciones");
+				$this->AddValue('application_name' , $this->PreppendMap($metadata['met_title']) . " - Poblaciones");
 				$this->AddValue('description', $metadata['met_abstract']);
 			}
 		}

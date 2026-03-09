@@ -11,6 +11,9 @@ use helena\caches\FabMetricsCache;
 use helena\services\common\BaseService;
 use minga\framework\PublicException;
 
+use helena\entities\frontend\metric\LevelNameInfo;
+use helena\entities\frontend\metric\VariableNameInfo;
+
 use helena\entities\frontend\metric\MetricVersionInfo;
 use helena\entities\frontend\metric\MetricInfo;
 use helena\entities\frontend\metric\MetricProviderInfo;
@@ -101,6 +104,7 @@ class MetricService extends BaseService
 		$metric->Id = $item['myv_metric_id'];
 		$metric->Name = $item['myv_metric_caption'];
 		$metric->Tag = $item['myv_metric_tag'];
+		$metric->Icon = $item['myv_metric_icon'];
 		$metric->Signature = $item['myv_metric_revision'];
 		$metric->MetricGroupId = $item['myv_metric_group_id'];
 		$metric->MetricProviderId = $item['myv_metric_provider_id'];
@@ -117,6 +121,13 @@ class MetricService extends BaseService
 		$coverages = explode("\t", $item['myv_version_partial_coverages']);
 		$workIds = explode("\t", $item['myv_work_ids']);
 		$works = explode("\t", $item['myv_work_captions']);
+		$levels = explode("\t", $item['myv_level']);
+		$variables = explode("\t", $item['myv_variable_captions']);
+		if (sizeof($ids) > sizeof($variables)) {
+			print_r($ids);
+			echo '<p>' . $item['myv_variable_captions'];
+			exit;
+		}
 		$isPrivate = explode("\t", $item['myv_work_is_private']);
 		for($n = 0; $n < sizeof($ids); $n++)
 		{
@@ -130,9 +141,43 @@ class MetricService extends BaseService
 			$version->WorkId = intval($workIds[$n]);
 			$version->WorkIsPrivate = intval($isPrivate[$n]);
 
+			$this->AddLevels($version, $levels[$n]);
+			$this->AddVariables($version, $variables[$n]);
+
 			$metric->Versions[] = $version;
 		}
 		Arr::SortByField($metric->Versions, 'Name');
+	}
+
+	private function AddLevels($version, $levelNames)
+	{
+		$levels = explode(",", $levelNames);
+		foreach($levels as $level)
+		{
+			$parts = explode(";", $level);
+			$levelNameInfo = new LevelNameInfo();
+			$levelNameInfo->Id = $parts[0];
+			$levelNameInfo->Name = $parts[1];
+			$version->Levels[] = $levelNameInfo;
+		}
+	}
+
+	private function AddVariables($version, $variablesNames)
+	{
+		$variables = explode("\n", $variablesNames);
+		foreach ($variables as $variable)
+		{
+			$parts = explode(";", $variable);
+			$levelId = $parts[0];
+			$name = $parts[1];
+			// Se fija en qué nivel agregarla
+			$level = Arr::GetItemByProperty($version->Levels, "Id", $levelId);
+			if ($level) {
+				$var = new VariableNameInfo();
+				$var->Name = $name;
+				$level->Variables[] = $var;
+			}
+		}
 	}
 }
 

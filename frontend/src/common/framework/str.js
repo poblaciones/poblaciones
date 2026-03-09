@@ -18,6 +18,29 @@ module.exports = {
 			return null;
 		}
 	},
+	Plural(term, count) {
+		if (count == 1) return term;
+
+		if (term.endsWith('ión')) {
+			return term.slice(0, -3) + 'iones';
+		}
+		if (term.endsWith('z')) {
+			return term.slice(0, -1) + 'ces';
+		}
+		if (/[áéó]$/.test(term)) {
+			return term + 's';
+		}
+		if (/[íú]$/.test(term)) {
+			return term + 'es';
+		}
+		if (/[sx]$/.test(term)) {
+			return term; // muchos casos son invariables
+		}
+		if (/[aeiou]$/.test(term)) {
+			return term + 's';
+		}
+		return term + 'es';
+	},
 	PatternUrl(url, pattern, accessLink) {
 		if (!accessLink) {
 			// trata de aplicar la forma acortada...

@@ -27,13 +27,28 @@ class DraftMetric
      *
      * @ORM\Column(name="mtr_caption", type="string", length=150, precision=0, scale=0, nullable=false, unique=false)
      */
-    private $Caption;
+	private $Caption;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="mtr_is_basic_metric", type="boolean", precision=0, scale=0, nullable=false, unique=false)
-     */
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="mtr_tag", type="string", length=150, precision=0, scale=0, nullable=false, unique=false)
+	 */
+    private $Tag;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="mtr_icon", type="string", length=50, precision=0, scale=0, nullable=false, unique=false)
+	 */
+	private $Icon;
+
+	/**
+	 * @var boolean
+	 *
+	 * @ORM\Column(name="mtr_is_basic_metric", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+	 */
     private $IsBasicMetric;
 
     /**
@@ -103,13 +118,63 @@ class DraftMetric
         return $this->Caption;
     }
 
-    /**
-     * Set isBasicMetric
-     *
-     * @param boolean $IsBasicMetric
-     *
-     * @return DraftMetric
-     */
+
+	/**
+	 * Set tag
+	 *
+	 * @param string $tag
+	 *
+	 * @return DraftMetric
+	 */
+	public function setTag($tag)
+	{
+		$this->Tag = $tag;
+
+		return $this;
+	}
+
+	/**
+	 * Get tag
+	 *
+	 * @return string
+	 */
+	public function getTag()
+	{
+		return $this->Tag;
+	}
+
+
+	/**
+	 * Set icon
+	 *
+	 * @param string $icon
+	 *
+	 * @return DraftMetric
+	 */
+	public function setIcon($icon)
+	{
+		$this->Icon = $icon;
+
+		return $this;
+	}
+
+	/**
+	 * Get icon
+	 *
+	 * @return string
+	 */
+	public function getIcon()
+	{
+		return $this->Icon;
+	}
+
+	/**
+	 * Set isBasicMetric
+	 *
+	 * @param boolean $IsBasicMetric
+	 *
+	 * @return DraftMetric
+	 */
     public function setIsBasicMetric($IsBasicMetric)
     {
         $this->IsBasicMetric = $IsBasicMetric;

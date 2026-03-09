@@ -183,7 +183,7 @@ class FabService extends BaseService
 		{
 			if ($metric->Provider && $metric->Provider->Name !== $last)
 			{
-					$separator = [ 'Id' => null, 'Name' =>
+					$separator = [ 'Id' => ($metric->Provider->Id ? $metric->Provider->Id : null), 'Name' =>
 										 ($metric->Provider->Name === null ? 'Otras fuentes' : $metric->Provider->Name),
 												'Header' => true ];
 					$ret[] = $separator;
