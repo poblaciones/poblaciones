@@ -5,7 +5,7 @@ namespace helena\controllers\frontend;
 use minga\framework\Context;
 use minga\framework\Params;
 use minga\framework\Request;
-use minga\framework\Response;
+use minga\framework\Str;
 use minga\framework\PublicException;
 use minga\framework\Performance;
 
