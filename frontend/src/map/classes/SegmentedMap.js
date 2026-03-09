@@ -10,6 +10,7 @@ import SaveRoute from '@/map/classes/SaveRoute';
 import Clipping from '@/map/classes/Clipping';
 import Tutorial from '@/map/classes/Tutorial';
 import RestoreRoute from '@/map/classes/RestoreRoute';
+import ChartCookie from '@/map/classes/ChartCookie';
 import Queue from './Queue';
 import Session from '@/map/session/Session';
 import OverlapRectangles from './OverlapRectangles';
@@ -678,6 +679,8 @@ SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricI
 		activeSelectedMetric = new ActiveBaseMetric(selectedMetricInfo, false);
 	} else {
 		activeSelectedMetric = new ActiveSelectedMetric(selectedMetricInfo, false);
+		var chartCookie = new ChartCookie();
+		activeSelectedMetric.ShowChart = chartCookie.Get();
 	}
 	if (versionSelector) {
 		var index = versionSelector(activeSelectedMetric);

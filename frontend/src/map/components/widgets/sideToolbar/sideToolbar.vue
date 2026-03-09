@@ -21,6 +21,11 @@
       @close="closePanel"
     />
 
+    <!-- Panel de Búsqueda -->
+    <SearchPanel
+      :is-open="activePanel === 'upload'"
+      @close="closePanel"
+    />
     <!-- Panel de Lugares Frecuentes -->
     <QuickPlaces
       :is-open="activePanel === 'places'" :boundariesData="boundaries"

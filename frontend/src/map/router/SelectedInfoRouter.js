@@ -253,6 +253,7 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 				var selectedInfo = res.data[n];
 				if (selectedInfo != null) {
 					if (selectedInfo.IsBoundary) {
+						// Es una delimitación
 						var activeBoundary = new ActiveBoundary(selectedInfo);
 						activeBoundary.IsLocked = locked;
 						if (!skipRestore) {
@@ -260,6 +261,7 @@ SelectedInfoRouter.prototype.LoadInfos= function (infos, updateRoute, skipRestor
 						}
 						segmentedMap.Metrics.AppendStandardMetric(activeBoundary);
 					} else {
+						// Es un indicador
 						var activeMetric = new ActiveSelectedMetric(selectedInfo, false);
 						activeMetric.IsLocked = locked;
 						if (!skipRestore) {

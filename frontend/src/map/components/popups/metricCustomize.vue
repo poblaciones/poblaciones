@@ -19,6 +19,17 @@
 						</div>
 					</td>
 				</tr>
+				<tr v-if="metric.SelectedLevel().HasDescriptions">
+					<td class="nowrapwords">Mostrar descripciones:</td>
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="descripciones" value="1" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
+						</label>
+						<label class="radio-inline">
+							<input type="radio" name="descripciones" value="0" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">No
+						</label>
+					</td>
+				</tr>
 				<tr v-if="anyHasArea() || !metric.SelectedVariable().IsSimpleCount">
 					<td colspan="2">
 						<div class="popupSubTitle">

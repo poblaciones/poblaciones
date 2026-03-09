@@ -8,7 +8,7 @@
       <div class="work-offsetY floating-panel panel card">
         <!-- Encabezado del panel -->
         <div class="panel-header">
-          <div class="panel-title">Explorar datos</div>
+          <div class="panel-title">Explorar indicadores</div>
           <button class="btn-close" @click="closePanel">
             <span aria-hidden="true">×</span>
           </button>
@@ -161,17 +161,15 @@
 
       <!-- Tooltip de información -->
       <transition name="fade">
-        <div
-          v-if="tooltip.visible"
-          class="preview-tooltip"
-          :style="{
+        <div v-if="tooltip.visible"
+             class="preview-tooltip"
+             :style="{
             top: tooltip.top + 'px',
             left: tooltip.left + 'px',
             position: 'fixed'
           }"
-          @mouseenter="keepTooltip = true"
-          @mouseleave="hideTooltip"
-        >
+             @mouseenter="keepTooltip = true"
+             @mouseleave="hideTooltip">
           <div class="preview-header">
             <div class="preview-icon">
               <i :class="getTooltipIconClass(tooltip.item)"></i>
@@ -179,11 +177,24 @@
             <div class="preview-title">{{ tooltip.item.Name }}</div>
           </div>
           <div class="preview-section">
-            <div class="preview-label">Fuente / Trabajo</div>
+            <div class="preview-label">Variables</div>
+            <div class="preview-value">
+              <ul style="padding-left: 20px">
+                <li v-for="variable, index in getTooltipVariables(tooltip.item)" :key="index" :value="variable" >
+                  {{ variable }}.
+                </li>
+              </ul></div>
+          </div>
+          <div class="preview-section">
+            <div class="preview-label">Niveles</div>
+            <div class="preview-value">{{ getTooltipLevels(tooltip.item) }}</div>
+          </div>
+          <div class="preview-section">
+            <div class="preview-label">Fuente</div>
             <div class="preview-value">{{ getTooltipSource(tooltip.item) }}</div>
           </div>
           <div class="preview-section" v-if="tooltip.item.Versions">
-            <div class="preview-label">Versiones Disponibles</div>
+            <div class="preview-label">Versiones</div>
             <div class="year-tags">
               <span v-for="v in tooltip.item.Versions" :key="v.Id" class="year-tag btn btn-default btn-xs">
                 {{ v.Name }}
@@ -240,11 +251,7 @@ export default {
         if (cat.Items && Array.isArray(cat.Items) && cat.Icon != 'star') {
           cat.Items.forEach(item => {
             if (!item.Header && item.Name.toLowerCase().includes(term)) {
-              results.push({
-                ...item,
-                catName: cat.Name,
-                catIcon: cat.Icon
-              });
+              results.push(item);
             }
           });
         }
@@ -371,9 +378,58 @@ export default {
     getTooltipIconClass(item) {
       return this.getIconClass(item.catIcon || item.icon);
     },
+		getTooltipVariables(item) {
+			var ret = [];
+      for (var version of item.Versions) {
+        for (var level of version.Levels) {
+          for (var variable of level.Variables) {
+            if (!ret.includes(variable.Name)) {
+              ret.push(variable.Name);
+            }
+          }
+        }
+      }
+			return ret;
+		},
+		getTooltipLevels(item) {
+      var ret = [];
+      for (var version of item.Versions) {
+        for (var level of version.Levels) {
+					if (!ret.includes(level.Name)) {
+            ret.push(level.Name);
+          }
+        }
+      }
+			return ret.join(', ');
+		},
     getTooltipSource(item) {
-      return item.Provider || item.catName || 'Sin especificar';
-    }
+      var provider = this.getItemProvider(item);
+      if (provider) {
+        return provider.Name;
+      } else {
+        return '';
+      }
+    },
+    getItemGroup(item) {
+      for (var metric in this.metrics) {
+        if (item.MetricGroupId && item.MetricGroupId === metric.Id) {
+          return metric;
+        }
+      }
+			return null;
+    },
+		getItemProvider(item) {
+			for (var metric in this.metrics) {
+        for (var provider in metric.Items) {
+					if (provider.Header) {
+						if (item.MetricProviderId && item.MetricProviderId === provider.Id) {
+							return provider;
+            }
+          }
+        }
+      }
+			return null;
+		},
   }
 };
 </script>
@@ -801,17 +857,17 @@ export default {
 }
 
 /* Tooltip */
-.preview-tooltip {
-  position: fixed;
-  background: #333;
-  color: white;
-  border-radius: 8px;
-  padding: 16px;
-  width: 280px;
-  z-index: 1060;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  pointer-events: auto;
-}
+	.preview-tooltip {
+		position: fixed;
+		background: #fff;
+		color: #5a626d;
+		border-radius: 8px;
+		padding: 8px 8px 6px 8px;
+		width: 360px;
+		z-index: 1060;
+		box-shadow: 0 4px 10px rgba(60,64,67,.28);
+		pointer-events: none;
+	}
 
 .preview-header {
   display: flex;
@@ -844,14 +900,12 @@ export default {
 .preview-label {
   font-size: 11px;
   text-transform: uppercase;
-  color: #aaa;
   margin-bottom: 4px;
   letter-spacing: 0.5px;
 }
 
 .preview-value {
   font-size: 14px;
-  color: #e9e9e9;
   line-height: 1.4;
 }
 
@@ -867,7 +921,6 @@ export default {
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 12px;
-  color: #e9e9e9;
   border: none;
 }
 

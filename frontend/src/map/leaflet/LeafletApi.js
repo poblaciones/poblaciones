@@ -281,6 +281,11 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	);
 
 	// desde 16, que tenga dires
+
+	/*
+	- https://cdn.jsdelivr.net/gh/freetiler/nasa-blackmarble/tiles/{z}/{x}/{y}.jpeg
+	- https://cdn.statically.io/gh/freetiler/nasa-blackmarble/main/tiles/{z}/{x}/{y}.jpeg
+	*/
 	this.baseLayers['roadmap'] = new L.TileLayer("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png", { attribution: cp });
 	this.baseLayers['roadmap_no_labels'] = new L.TileLayer("https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png", { attribution: cp });
 	this.baseLayers['colored'] = new L.TileLayer("https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png", { attribution: cp });

@@ -34,9 +34,9 @@
 					<span v-if="size===1">
 						<input type="checkbox" v-model="showSidePanel" /> Panel derecho
 					</span>
-					<span v-if="isStatic">
+					<div v-if="isStatic">
 						<input type="checkbox" v-model="openOnClick" /> Abrir mapa navegable al hacerse click
-					</span>
+					</div>
 				</div>
 			</div>
 			</div>

@@ -12,6 +12,13 @@
 					 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
 			<div id="holder" style="overflow-x: hidden">
 				<PopupsPanel :backgroundColor="workColor" />
+				<CollapseButtonRight id="panRightButton" v-show="!Embedded.HideSummaryPanel && !Embedded.Readonly"
+														 :collapsed='toolbarStates.collapsed'
+														 @click="doToggle"
+														 v-if="clippingStarted"
+														 tooltip="panel de estadísticas"
+														 class="rightButton exp-hiddable-block"
+														 :style="collapseButtonOffset" />
 				<div id="panRight" class="animatedFlyAway floatRightPanel thinScroll" v-touch:swipe.right="panRightSwipeClose" :style="rightPanelOverflow">
 					<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
@@ -24,7 +31,7 @@
 					<MapPanel class="exp-hiddable-block" />
 					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
-					<MapType ref="mapSelector" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
+					<MapType ref="mapSelector" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
 
 					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
 					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" />
@@ -40,13 +47,6 @@
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 					<FullScreenButton v-if="!Embedded.Readonly" class="exp-hiddable-unset" :fullscreen="fullscreen" />
-					<CollapseButtonRight v-show="!Embedded.HideSummaryPanel && !Embedded.Readonly"
-															 :collapsed='toolbarStates.collapsed'
-															 v-if="clippingStarted"
-															 @click="doToggle"
-															 tooltip="panel de estadísticas"
-															 class="exp-hiddable-block"
-															 :style="collapseButtonOffset" />
 				</div>
 				<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
 				<a id="downloadAnchor" style="display: none;" download></a>
@@ -85,6 +85,7 @@
 	import arr from '@/common/framework/arr';
 	import err from '@/common/framework/err';
 	import web from '@/common/framework/web';
+	import dom from '@/common/framework/dom';
 
 	import session from '@/common/framework/session';
 	import authentication from '@/common/js/authentication';
@@ -208,6 +209,10 @@
 					if (loc.Embedded.HideLabels) {
 						loc.toolbarStates.showLabels = false;
 					}
+					if (loc.Embedded.Readonly) {
+						var css1 = dom.getCssRule(document, '.leaflet-control-zoom');
+						css1.style.display = 'none';
+					}
 					var start = new StartMap(loc.work, loc, loc.SetupMap);
 					start.Start();
 				});
@@ -215,7 +220,9 @@
 		},
 		computed: {
 			collapseButtonOffset() {
-				return (this.toolbarStates.collapsed ? '' : 'right: max(275px, calc(30% - 3px)); z-index: 999!important;');
+				return this.toolbarStates.collapsed
+					? "right: 0px; "
+					: "right: max(275px, calc(30% - 3px)); z-index: 999!important;";
 			},
 			clippingStarted() {
 				return this.clipping.Region.Summary && !this.clipping.Region.Summary.Empty;
@@ -513,7 +520,7 @@
 					}
 				})).then(function (res) {
 					session.ReceiveSession(window.host, res);
-					if (!loc.Use.UseNewFabButton) {
+					if (!loc.Use.UseNewFabButton && !loc.Embedded.HideAddMetrics) {
 						loc.oldStyleIndent = 'position: relative; left: 70px; top: -5px;';
 						loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
 						loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
@@ -561,6 +568,7 @@
 		watch: {
 			'toolbarStates.collapsed'(value) {
 				var s = document.getElementById('panRight');
+
 				if (this.flyRightTimeoutId) {
 					clearTimeout(this.flyRightTimeoutId);
 					this.flyRightTimeoutId = null;
@@ -571,6 +579,7 @@
 					this.flyRightTimeoutId = setTimeout(() => {
 						s.classList.remove('animatedFlyRight');
 					}, 10);
+
 				} else {
 					// ocultar
 					s.classList.add('animatedFlyRight');
@@ -632,7 +641,11 @@
 		color: #333;
 		letter-spacing: 0.5px;
 	}
-
+	.rightButton {
+		transition: right 0.3s ease;
+		position: fixed;
+		right: 0px;
+	}
 	.gm-fullscreen-control {
 		transform: scale(0.8);
 	}
@@ -1293,12 +1306,24 @@
 		pointer-events: none;
 		border-color: #cecece;
 	}
-
+		.close {
+						font-size: 22px;
+		}
 	.lightButton {
-		font-size: 12px;
+		font-size: 14px;
 		padding: 4px 4px 4px 4px !important;
 		line-height: 1em;
+		margin-top: -2px;
+		margin-right: 2px;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		transition: background-color .2s ease;
 	}
+
+		.lightButton:hover {
+			background-color: rgba(0,0,0,0.12);
+		}
 
 		.lightButton[disabled]:hover {
 			opacity: .1 !important;

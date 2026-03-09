@@ -16,7 +16,7 @@
     <!-- Panel expandido con opciones -->
     <transition name="fade">
       <div
-        v-if="isExpanded"
+        v-if="isExpanded" v-on-clickaway="closePanel"
         class="map-options-panel panel card"
         @mouseenter="keepPanelOpen = true"
         @mouseleave="handlePanelLeave"
@@ -72,6 +72,8 @@
 
 <script>
 
+	import { mixin as clickaway } from 'vue-clickaway';
+
   import arr from '@/common/framework/arr';
   import defaultMapType from '@/common/assets/maps/default.png';
   import streetsMapType from '@/common/assets/maps/streets.png';
@@ -79,6 +81,7 @@
 
   export default {
     name: 'mpBasemapButton',
+		mixins: [clickaway],
     props: ['toolbarStates', 'readonly'],
     data() {
       return {
@@ -204,7 +207,9 @@
         } else {
           // En desktop, cambiar al siguiente tipo de mapa sin abrir panel
           //if (!this.isExpanded) {
-						this.mapStyleSelected(this.nextMapStyle);
+//          alert(window.SegMap.Configuration.IsMobile);
+	//				alert(window.SegMap.Configuration);
+					this.mapStyleSelected(this.nextMapStyle);
           //}
         }
       },
@@ -229,6 +234,9 @@
             l.Visible = this.toolbarStates.showElevation;
           }
         }
+      },
+      closePanel() {
+        this.isExpanded = false;
       },
       handleMouseLeave() {
         if (this.readonly) {
@@ -538,25 +546,31 @@
 
 /* Media queries para responsive */
 @media (max-width: 768px) {
-  .map-style-btn {
+ /* .map-style-btn {
     left: auto;
     right: 20px;
     top: 20px;
     width: 48px;
     height: 48px;
-  }
+  }*/
 
-  .map-options-panel {
-    position: absolute;
-    top: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-height: 70vh;
-    border-radius: 16px 16px 0 0;
-    transform-origin: bottom;
-  }
+	.map-style-btn {
+		width: 48px;
+		height: 48px;
+	}
+
+
+	.map-options-panel {
+		position: absolute;
+		top: auto;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: 100%;
+		max-height: 70vh;
+		border-radius: 16px 16px 0 0;
+		transform-origin: bottom;
+	}
 
   .fade-enter, .fade-leave-to {
     transform: translateY(100%);

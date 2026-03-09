@@ -172,7 +172,7 @@ ActiveSelectedMetric.prototype.useChart = function () {
 	var variable = this.SelectedVariable();
 	if (variable) {
 		var values = this.getVariableValueLabels(variable);
-		return !variable.IsSimpleCount && values.length > 1;
+		return values.length > 1;
 	} else {
 		return false;
 	}

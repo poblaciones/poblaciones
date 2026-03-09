@@ -100,7 +100,6 @@
     <div v-if="tooltip.visible"
          class="chart-tooltip"
          :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }">
-      <div class="tooltip-header">{{ tooltip.seriesName }}</div>
       <div>
         <span class="dot" :style="{background: tooltip.color}"></span>
         {{ tooltip.label }}: <span style="color: '#d5d5d5'">{{ tooltip.valueFormatted }}</span>
@@ -630,18 +629,19 @@
     }
 
     /* Tooltip Fixed: Se sale del layout y flota sobre todo */
-    .chart-tooltip {
-        position: fixed; /* Cambiado de absolute a fixed */
-        background: rgba(30, 30, 30, 0.9);
-        color: #fff;
-        padding: 6px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        pointer-events: none;
-        z-index: 9999; /* Z-index alto */
-        white-space: nowrap;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
+	.chart-tooltip {
+		box-shadow: 0 4px 10px rgba(60,64,67,.28);
+		position: fixed; /* Cambiado de absolute a fixed */
+		background: #fff;
+		color: #5a626d;
+		padding: 8px 8px 6px 8px;
+		border-radius: 8px;
+		font-size: 12px;
+		pointer-events: none;
+		z-index: 9999; /* Z-index alto */
+		white-space: nowrap;
+		/*		box-shadow: 0 4px 6px rgba(0,0,0,0.3);*/
+	}
 
     .tooltip-header {
         border-bottom: 1px solid #555;

@@ -2,31 +2,37 @@
   <div class="map-toolbar exp-hiddable-block sidepanelOffset" v-if="!Embedded.HideAddMetrics || !Embedded.HideSearch">
     <!-- Botón para Indicadores -->
     <button v-show="!Embedded.HideAddMetrics"
-      class="toolbar-button"
-      :class="{ 'active': activePanel === 'indicators' }"
-      @click="togglePanel('indicators')"
-      title="Explorar datos">
+            class="toolbar-button"
+            :class="{ 'active': activePanel === 'indicators' }"
+            @click="togglePanel('indicators')"
+            title="Explorar indicadores">
       <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Botón para filtrar -->
+    <button class="toolbar-button"
+            :class="{ 'active': activePanel === 'places' }"
+            @click="togglePanel('places')"
+            title="Filtrar">
+      <i class="fas fa-filter"></i>
     </button>
 
     <!-- Botón para Búsqueda -->
     <button v-show="!Embedded.HideSearch"
-      class="toolbar-button"
-      :class="{ 'active': activePanel === 'search' }"
-      @click="togglePanel('search')"
-      title="Buscar"
-    >
+            class="toolbar-button"
+            :class="{ 'active': activePanel === 'search' }"
+            @click="togglePanel('search')"
+            title="Buscar">
       <i class="fas fa-search"></i>
     </button>
 
-    <!-- Botón para Lugares Frecuentes -->
-    <button
-      class="toolbar-button"
-      :class="{ 'active': activePanel === 'places' }"
-      @click="togglePanel('places')"
-      title="Ir a lugares frecuentes"
-    >
-      <i class="fas fa-bolt"></i>
+    <!-- Botón para subir archivo -->
+    <button v-show="!Embedded.HideSearch"
+            class="toolbar-button"
+            :class="{ 'active': activePanel === 'upload' }"
+            @click="togglePanel('upload')"
+            title="Subir archivo georreferenciable">
+      <i class="fas fa-cloud-upload-alt"></i>
     </button>
   </div>
 </template>

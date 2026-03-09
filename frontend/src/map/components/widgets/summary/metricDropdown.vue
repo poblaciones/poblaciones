@@ -14,6 +14,7 @@
 
 <script>
 	import Mercator from '@/map/js/Mercator';
+	import ChartCookie from '@/map/classes/ChartCookie';
 
 	// https://materialdesignicons.com/cdn/1.9.32/
 
@@ -55,6 +56,8 @@
 			},
 			toggleChart() {
 				this.metric.ShowChart = (this.metric.ShowChart == 1 ? '0' : '1');
+				var chartCookie = new ChartCookie();
+				chartCookie.Set(this.metric.ShowChart == "1");
 				window.SegMap.SaveRoute.UpdateRoute();
 				if (this.metric.ShowChart == 1) {
 					this.$emit('ChartShown');
