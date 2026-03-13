@@ -184,7 +184,7 @@ ADD UNIQUE INDEX `ix_boundary_Tag` (`bou_tag` ASC);
 ;
 
 UPDATE boundary
-SET bou_tag = SanitizeTag(bou_caption, 0)
+SET bou_tag = SanitizeTag(bou_caption, 0, false)
 WHERE bou_tag IS NULL;
 
 DROP FUNCTION IF EXISTS SanitizeTag;

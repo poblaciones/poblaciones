@@ -459,7 +459,7 @@ export default {
       if (provider) {
         return provider.Name;
       } else {
-        return '';
+        return 'Otras fuentes';
       }
     },
     getItemGroup(item) {
