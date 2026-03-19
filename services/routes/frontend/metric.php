@@ -115,7 +115,7 @@ App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $req
 });
 
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470
-App::$app->get('/services/frontend/metrics/GetTileData', function (Request $request) {
+$getTileData = function (Request $request) {
 	$controller = new services\TileDataService();
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
@@ -137,11 +137,13 @@ App::$app->get('/services/frontend/metrics/GetTileData', function (Request $requ
 		return App::Json($result);
 	else
 		return App::JsonImmutable($result);
-});
+};
+App::$app->get('/services/frontend/metrics/GetTileData', $getTileData);
+App::$app->get('/services/frontend/metrics/GetBaseTileData', $getTileData);
 
 
 // ej. http://mapas/services/metrics/GetBlockTileData?l=8&s=4&v=12&a=62&z=12&x=1383&y=2470
-App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request $request) {
+$getBlockTileData = function (Request $request) {
 	$controller = new services\TileDataService();
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
@@ -162,7 +164,9 @@ App::$app->get('/services/frontend/metrics/GetBlockTileData', function (Request 
 			$s !== App::Settings()->Map()->TileDataBlockSize)
 		throw new PublicException('El tamaño de bloque de datos solicitado no coincide con la configuración del servidor. Cargue nuevamente el mapa para continuar trabajando.');
 	return App::JsonImmutable($controller->GetBlockTileData($frame, $metricId, $metricVersionId, $levelId, $levelCompareId, $urbanity, $partition, $x, $y, $z));
-});
+};
+App::$app->get('/services/frontend/metrics/GetBlockTileData', $getBlockTileData);
+App::$app->get('/services/frontend/metrics/GetBaseBlockTileData', $getBlockTileData);
 
 App::$app->get('/services/metrics/GetSelectedMetric', function (Request $request) {
 	$controller = new services\SelectedMetricService();

@@ -22,7 +22,7 @@ App::$app->get('/services/boundaries/GetSelectedBoundary', function (Request $re
 });
 
 // ej. http://mapas/services/boundaries/GetBoundary?a=62&z=12&x=1380&y=2468
-App::$app->get('/services/frontend/boundaries/GetBoundary', function (Request $request) {
+$getBoundary = function (Request $request) {
 	$controller = new services\BoundaryService();
 	$boundaryId = Params::GetIntMandatory('a');
 	$boundaryVersionId = Params::GetIntMandatory('v');
@@ -37,7 +37,9 @@ App::$app->get('/services/frontend/boundaries/GetBoundary', function (Request $r
 	$ret = $controller->GetBoundary($frame, $boundaryVersionId);
 
 	return App::JsonImmutable($ret);
-});
+};
+App::$app->get('/services/frontend/boundaries/GetBoundary', $getBoundary);
+App::$app->get('/services/frontend/boundaries/GetBaseBoundary', $getBoundary);
 
 // ej. http://mapas//services/frontend/boundaries/GetBoundarySummary?b=8&r=7160
 App::$app->get('/services/frontend/boundaries/GetBoundarySummary', function (Request $request) {

@@ -1,7 +1,6 @@
 <?php
 
 use Symfony\Component\Debug\Debug;
-use Silex\Provider\VarDumperServiceProvider;
 
 use helena\classes\App;
 use minga\framework\Str;
@@ -87,10 +86,9 @@ if(Context::Settings()->Debug()->debug)
 
 	Context::Settings()->Debug()->showErrors = true;
 
-	$app['twig.options'] = array('cache' => false);
+	//$app['twig.options'] = array('cache' => false);
 	require_once __DIR__.'/src/debug.php';
 
-	$app->register(new VarDumperServiceProvider());
 	Profiling::EndTimer();
 }
 
