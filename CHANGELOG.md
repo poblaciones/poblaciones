@@ -1,3 +1,6 @@
+
+
+v4.8 (2026-03-19)
 - Refactor de botón de buscar.
 - Shortcut para subir archivo.
 - Capas base físicas (rutas, trenes)

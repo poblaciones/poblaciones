@@ -11,7 +11,7 @@ use helena\classes\Session;
 use minga\framework\Params;
 use minga\framework\Performance;
 use minga\framework\PublicException;
-use helena\caches\LayerDataCache;
+use helena\caches\MetricDataCache;
 
 // ej. http://mapas/services/metrics/GetSummary?l=8&v=12&a=62&r=7160
 App::$app->get('/services/frontend/metrics/GetSummary', function (Request $request) {
@@ -89,7 +89,7 @@ App::$app->get('/services/metrics/GetMetricItemInfo', function (Request $request
 });
 
 
-App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $request) {
+$getMetricData = function (Request $request) {
 	$metricId = Params::GetInt('l');
 	$metricVersionId = Params::GetInt('v');
 
@@ -100,19 +100,22 @@ App::$app->get('/services/frontend/metrics/GetLayerData', function (Request $req
 	$urbanity = App::SanitizeUrbanity(Params::Get('u'));
 	$partition = Params::GetInt('g');
 
-	$key = LayerDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition);
+	$key = MetricDataCache::CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition);
 
 	return App::JsonCacheableImmutable(
-				LayerDataCache::Cache(),
+				MetricDataCache::Cache(),
 				[$metricId, $key],
 				function() use ($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition) {
-					$controller = new services\TileDataService();
-					return $controller->GetLayerData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
+					$controller = new services\MetricDataService();
+					return $controller->GetMetricData($frame, $metricId, $metricVersionId, $levelId, $urbanity, $partition);
 				},
 				($frame->ClippingCircle != null), // skipCache
 				$isRestricted // skipClientCache
 		);
-});
+};
+App::$app->get('/services/frontend/metrics/GetMetricData', $getMetricData);
+App::$app->get('/services/frontend/metrics/GetBaseMetricData', $getMetricData);
+
 
 // ej. http://mapas/services/metrics/GetTileData?l=8&v=12&a=62&z=12&x=1383&y=2470
 $getTileData = function (Request $request) {

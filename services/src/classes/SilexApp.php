@@ -48,11 +48,20 @@ class SilexApp implements \ArrayAccess
 		$this->values['db.options'] = [
 			'driver' => 'pdo_mysql',
 			'charset' => 'utf8',
+			'driverOptions' => [
+				\PDO::ATTR_STRINGIFY_FETCHES => false,
+				\PDO::ATTR_EMULATE_PREPARES  => false, // esto es clave para tipos nativos
+			],
 			'host' => null,
 			'dbname' => null,
 			'user' => null,
 			'password' => null,
 		];
+	}
+
+	public function redirect(string $url, int $status = 302): Response
+	{
+		return new \Symfony\Component\HttpFoundation\RedirectResponse($url, $status);
 	}
 
 	// -------------------------------------------------------------------------
@@ -193,6 +202,7 @@ class SilexApp implements \ArrayAccess
 		$this->values[$offset] = $value;
 	}
 
+	#[\ReturnTypeWillChange]
 	public function offsetGet($offset)
 	{
 		// Lazy: construye 'db' con 'db.options' la primera vez que se pide

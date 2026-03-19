@@ -27,7 +27,7 @@ use helena\caches\WorkVisiblityCache;
 
 use helena\caches\SummaryCache;
 use helena\caches\TileDataCache;
-use helena\caches\LayerDataCache;
+use helena\caches\MetricDataCache;
 use helena\caches\GeographyCache;
 use helena\caches\LabelsCache;
 
@@ -125,7 +125,7 @@ class CacheManager
 	{
 		SummaryCache::Cache()->Clear();
 		TileDataCache::Cache()->Clear();
-		LayerDataCache::Cache()->Clear();
+		MetricDataCache::Cache()->Clear();
 		RankingCache::Cache()->Clear();
 		DatasetColumnCache::Cache()->Clear();
 		BackofficeDownloadCache::Cache()->Clear();
@@ -167,7 +167,7 @@ class CacheManager
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 		SummaryCache::Cache()->Clear($metricIdShardified);
 		TileDataCache::Cache()->Clear($metricIdShardified);
-		LayerDataCache::Cache()->Clear($metricIdShardified);
+		MetricDataCache::Cache()->Clear($metricIdShardified);
 		RankingCache::Cache()->Clear($metricIdShardified);
 		SelectedMetricsMetadataCache::Cache()->Clear($metricIdShardified);
 		SuggestionLabelsCache::Cache()->Clear();

@@ -511,22 +511,34 @@ class App
 		if (!$skipCache)
 		{
 			if (sizeof($cacheArgs) === 1 && $cache->HasRawData($cacheArgs[0], $encodedZipData))
+			{
 				return App::JsonImmutable($encodedZipData, true, true);
+			}
 			if (sizeof($cacheArgs) === 2 && $cache->HasRawData($cacheArgs[0], $cacheArgs[1], $encodedZipData))
+			{
 				return App::JsonImmutable($encodedZipData, true, true);
+			}
 		}
-		$encodedZipData = self::EncodeAndzip($dataCalculator());
 
 		Performance::CacheMissed();
 		Performance::SetMethod("get");
 
+		$data = $dataCalculator();
+
 		if (!$skipCache)
 		{
+			$data->Cached = 1;
+			$encodedZipData = self::EncodeAndzip($data);
+
 			if (sizeof($cacheArgs) === 1)
 				$cache->PutRawData($cacheArgs[0], $encodedZipData);
 			else if (sizeof($cacheArgs) === 2)
 				$cache->PutRawData($cacheArgs[0], $cacheArgs[1], $encodedZipData);
+			$encodedZipData = null;
 		}
+		$data->Cached = 0;
+		$encodedZipData = self::EncodeAndzip($data);
+
 		if ($skipClientCache)
 			return App::Json($encodedZipData, -1, true, true);
 		else
@@ -547,18 +559,23 @@ class App
 	private static function serializeCompressed($data, $level='6')
 	{
 		$STEP = 25000;
+		// Extrae las filas y arma el template
 		$rows = $data->Data;
 		$data->Data = [];
 		$template = json_encode($data);
+		// Restituye atributos del objeto
+		$data->Data = $rows;
+
+		// Serializa y comprime las filas
 		$nPos = strpos($template, '"Data":[]');
 		$header = substr($template, 0, $nPos + 8);
 		$footer = substr($template, $nPos + 8);
 
 		$dest = IO::GetTempFilename();
 
-    $mode='wb'.$level;
-    if(! ($fp_out=gzopen($dest,$mode)))
-			throw new ErrorException("No pudo serializarse el resultado.");
+		$mode='wb'.$level;
+		if(! ($fp_out=gzopen($dest,$mode)))
+				throw new ErrorException("No pudo serializarse el resultado.");
 		gzwrite($fp_out, $header);
 		// Pone los chunks
 		$total = 0;

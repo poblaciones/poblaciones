@@ -688,8 +688,8 @@ ActiveMetric.prototype.GetStyleColorDictionary = function () {
 	return ret;
 };
 
-ActiveMetric.prototype.GetLayerData = function () {
-	var url = this.GetLayerDataService();
+ActiveMetric.prototype.GetMetricData = function () {
+	var url = this.GetMetricDataService();
 	var currentVariableId = this.SelectedVariable().Id;
 	var selectedLevel = this.SelectedLevel();
 
@@ -712,11 +712,12 @@ ActiveMetric.prototype.GetLayerData = function () {
 	});
 };
 
-ActiveMetric.prototype.GetLayerDataService = function (seed) {
+ActiveMetric.prototype.GetMetricDataService = function (seed) {
 	var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
 	var server = '';
 
-	var path = '/services/frontend/metrics/GetLayerData';
+	var service = (this.isBaseMetric ? 'Base' : '');
+	var path = '/services/frontend/metrics/Get' + service + 'MetricData';
 
 	if (useStaticQueue) {
 		server = h.selectMultiUrl(window.SegMap.Configuration.StaticServer, seed);
@@ -724,7 +725,7 @@ ActiveMetric.prototype.GetLayerDataService = function (seed) {
 		server = window.host;
 	}
 	this.properties.EffectivePartition = this.GetSelectedPartition();
-	var params = h.getLayerDataParams(this.properties, window.SegMap.frame);
+	var params = h.getMetricDataParams(this.properties, window.SegMap.frame);
 	return { server: server, path: path, useStaticQueue: useStaticQueue, params: params };
 };
 

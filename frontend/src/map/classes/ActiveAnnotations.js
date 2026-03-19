@@ -203,8 +203,8 @@ ActiveAnnotations.prototype.CheckTileIsOutOfClipping = function () {
 	return false;
 };
 
-ActiveAnnotations.prototype.GetLayerData = function () {
-	var url = this.GetLayerDataService();
+ActiveAnnotations.prototype.GetMetricData = function () {
+	var url = this.GetMetricDataService();
 
 	return window.SegMap.Get(url.server + url.path, {
 		params: url.params
@@ -214,7 +214,7 @@ ActiveAnnotations.prototype.GetLayerData = function () {
 	});
 };
 
-ActiveAnnotations.prototype.GetLayerDataService = function () {
+ActiveAnnotations.prototype.GetMetricDataService = function () {
 	var path = '/services/works/GetAnnotationItems';
 	var server = window.host;
 

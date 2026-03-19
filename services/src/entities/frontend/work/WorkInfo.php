@@ -13,6 +13,8 @@ class WorkInfo extends BaseMapModel
 	public $IsPrivate;
 	public $CanEdit;
 	public $Extents;
+	public $Icons;
+	public $Type;
 	public $Url;
 	public $FileUrl;
 	public $Annotations;

@@ -11,6 +11,7 @@ class WorkInfo
 	public $Sources;
 	public $Institutions;
 	public $Icons;
+	public $Type;
 	public $Onboarding;
 	public $ExtraMetrics;
 	public $Startup;

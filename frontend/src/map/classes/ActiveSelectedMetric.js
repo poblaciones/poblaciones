@@ -317,11 +317,12 @@ ActiveSelectedMetric.prototype.GetDataService = function (seed) {
 	var path = '';
 	var server = '';
 
+	var service = (this.isBaseMetric ? 'Base' : '');
 	if (this.UseBlockedRequests()) {
-		path = '/services/frontend/metrics/GetBlockTileData';
+		path = '/services/frontend/metrics/Get' + service + 'BlockTileData';
 		seed = seed / this.blockSize;
 	} else {
-		path = '/services/frontend/metrics/GetTileData';
+		path = '/services/frontend/metrics/Get' + service + 'TileData';
 	}
 
 	if (useStaticQueue) {

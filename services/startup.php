@@ -100,7 +100,7 @@ if (Str::StartsWith($uri, '/services/frontend/clipping/GetBlockLabels') ||
 	Str::StartsWith($uri, '/services/frontend/metrics/GetSummary') ||
 	Str::StartsWith($uri, '/services/frontend/geographies/GetGeography') ||
 	Str::StartsWith($uri, '/services/frontend/metrics/GetTileData') ||
-	Str::StartsWith($uri, '/services/frontend/metrics/GetLayerData') ||
+	Str::StartsWith($uri, '/services/frontend/metrics/GetMetricData') ||
 	Str::StartsWith($uri, '/services/frontend/clipping/GetLabels'))
 	Context::Settings()->allowPHPSessionCacheResults = true;
 

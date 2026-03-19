@@ -4,11 +4,11 @@ namespace helena\caches;
 
 use minga\framework\caching\TwoLevelObjectCache;
 
-class LayerDataCache extends BaseCache
+class MetricDataCache extends BaseCache
 {
 	public static function Cache()
 	{
-		return new TwoLevelObjectCache("Metrics/LayerData", true);
+		return new TwoLevelObjectCache("Metrics/MetricData", true);
 	}
 	public static function CreateKey($frame, $metricVersionId, $levelId, $urbanity, $partition)
 	{

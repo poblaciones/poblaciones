@@ -713,7 +713,7 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 		// 1. que muestre que los está trayendo
 		// 2. que cancele si ya no tiene sentido
 		// 3. que lo espere si está exportando
-		activeMetric.GetLayerData().then(function (data) {
+		activeMetric.GetMetricData().then(function (data) {
 			if (!overlay.disposed) {
 				var nativeLayer;
 				if (activeMetric.IsLocationType()) {
@@ -735,7 +735,7 @@ GoogleMapsApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, in
 		).catch(function (res) {
 			// TODO: revertir el toggle
 			loc.RemoveOverlay(index);
-			err.errDialog("GetLayerData", "acceder a la información solicitada.", res);
+			err.errDialog("GetMetricData", "acceder a la información solicitada.", res);
 		});
 	}
 };

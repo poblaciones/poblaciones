@@ -3,6 +3,12 @@
 use helena\classes\App;
 use helena\classes\GlobalTimer;
 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
+// cuando se pase a 8.1, se puede hacer:
+// composer require symfony/routing:^6.4
+// y deja de haber warnings de deprecated
+
 if (!array_key_exists('REQUEST_URI', $_SERVER))
 	$uri = '';
 else

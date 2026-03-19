@@ -6,6 +6,9 @@ use minga\framework\Arr;
 use minga\framework\Str;
 use minga\framework\Profiling;
 
+use helena\db\frontend\SpatialConditions;
+use helena\classes\SimplifyGeometry;
+
 use minga\framework\QueryPart;
 use minga\framework\MultiQuery;
 use helena\classes\GeoJson;
@@ -95,7 +98,6 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 		// PolygonsQuery
 		if ($this->requiresPolygons && $this->getGeometries) {
 			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "sdi_geometry as value");
-			//			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "ST_AsText(sdi_geometry) as value");
 		} else
 			$polygonsQuery = null;
 		// Ejecuta la consulta
@@ -159,8 +161,21 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 
 					if ($this->hasSymbols)
 						$item['Symbol'] = $row['Symbol'];
+
 					if ($this->requiresPolygons)
+					{
 						$item['Data'] = $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
+
+						$simplifier = new SimplifyGeometry();
+						$simplifier->discardOversimplified = false;
+						$zoom = 16;
+						$rZoom = SpatialConditions::ResolveRZoom6($zoom);
+						$simpler = $simplifier->Simplify($item['Data']['geometry'], $rZoom);
+						if ($simpler !== null)
+						{
+							$item['Data']['geometry'] = $simpler;
+						}
+					}
 					//	$item['Data'] = $row['value'];// $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
 
 					$ret[] = $item;
