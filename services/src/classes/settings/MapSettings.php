@@ -23,6 +23,7 @@ class MapSettings
 	public $BoundaryRecommendationExclusions = [];
 	public $MetricsFavoritesExclusions = [];
 
+	public $Rasters = [];
 	public $ElevationUrl = null;
 	public $ShortUrlPattern = null;
 

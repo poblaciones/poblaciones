@@ -40,6 +40,7 @@ if (App::Settings()->Servers()->IsTransactionServerRequest()) {
 	require_once('frontend/map.php');
 	require_once('frontend/boundary.php');
 	require_once('frontend/clipping.php');
+	require_once('frontend/raster.php');
 	require_once('frontend/session.php');
 	require_once('frontend/table.php');
 	require_once('frontend/suggestions.php');

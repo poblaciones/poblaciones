@@ -82,6 +82,11 @@ class Paths
 		return Context::Paths()->GetStorageRoot() . '/suggestions';
 	}
 
+	public static function GetRasterFolder()
+	{
+		return Context::Paths()->GetStorageRoot() . '/rasters';
+	}
+
 	public static function GetGradientsFolder()
 	{
 		return Context::Paths()->GetStorageRoot(). '/gradients';

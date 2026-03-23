@@ -318,9 +318,9 @@ class App
 	public static function AbsoluteUrl($url, $locaLink = false)
 	{
 		if ($locaLink)
-			$host = App::Settings()->Servers()->Current()->publicUrl;
+			$host = self::Settings()->Servers()->Current()->publicUrl;
 		else
-			$host = App::Settings()->Servers()->Main()->publicUrl;
+			$host = self::Settings()->Servers()->Main()->publicUrl;
 		$hasBar = substr($url, 0, 1) === '/';
 		if (!$hasBar)
 		{
@@ -413,6 +413,40 @@ class App
 		$serializer = self::GetSerializer();
 		return $serializer->deserialize($entity, $className, 'json');
 	}
+
+	public static function ImageImmutable(string $data, string $mimeType): Response
+	{
+		$response = new Response($data);
+		$response->headers->set('Content-Type', $mimeType);
+		$maxAge = 31536000;
+
+		if (PhpSession::SessionExists()) {
+			$sessionId = session_id();
+			session_write_close();
+			session_cache_limiter('public');
+			session_cache_expire($maxAge);
+			header("Pragma: public");
+			header("Content-Type: $mimeType");
+			session_id($sessionId);
+			session_start();
+			// habiendo sesión precisa cerrar el pedido para que
+			// no se arruinen los encabezados de caching
+			echo $data;
+			self::EndRequest();
+		}
+
+		$response->headers->set('Cache-Control', 'public, max-age=' . $maxAge . ', immutable');
+		$response->headers->set('Pragma', '');
+		return $response;
+	}
+
+	public static function Image(string $data, string $mimeType): Response
+	{
+		$response = new Response($data);
+		$response->headers->set('Content-Type', $mimeType);
+		return $response;
+	}
+
 	public static function JsonImmutable($value, $alreadyEncoded = false, $gzipped = false)
 	{
 		$w = Params::GetIntMandatory('w');
@@ -430,9 +464,6 @@ class App
 
 	public static function Json($value, $daysToExpire = -1, $alreadyEncoded = false, $gzipped = false)
 	{
-		$sessionStarted = PhpSession::GetSessionValue('started', null);
-		$sessionTime = gmdate('D, d M Y H:i:s', intval($sessionStarted)) . ' GMT';
-		//
 		self::$isJson = true;
 
 		if (version_compare(phpversion(), '7.1', '>=')) {
@@ -454,6 +485,8 @@ class App
 		$response = new Response($alreadyEncoded ? $value : json_encode($value));
 		if ($daysToExpire === -1 || self::Debug())
 		{
+			$sessionStarted = PhpSession::GetSessionValue('started', null);
+			$sessionTime = gmdate('D, d M Y H:i:s', intval($sessionStarted)) . ' GMT';
 			$response->headers->set('Cache-control', 'private');
 			$response->headers->set('Last-Modified', $sessionTime);
 		}
@@ -478,7 +511,7 @@ class App
 				// habiendo sesión precisa cerrar el pedido para que
 				// no se arruinen los encabezados de caching
 				echo ($alreadyEncoded ? $value : json_encode($value));
-				App::EndRequest();
+				self::EndRequest();
 			}
 			else
 			{
@@ -512,11 +545,11 @@ class App
 		{
 			if (sizeof($cacheArgs) === 1 && $cache->HasRawData($cacheArgs[0], $encodedZipData))
 			{
-				return App::JsonImmutable($encodedZipData, true, true);
+				return self::JsonImmutable($encodedZipData, true, true);
 			}
 			if (sizeof($cacheArgs) === 2 && $cache->HasRawData($cacheArgs[0], $cacheArgs[1], $encodedZipData))
 			{
-				return App::JsonImmutable($encodedZipData, true, true);
+				return self::JsonImmutable($encodedZipData, true, true);
 			}
 		}
 
@@ -540,9 +573,9 @@ class App
 		$encodedZipData = self::EncodeAndzip($data);
 
 		if ($skipClientCache)
-			return App::Json($encodedZipData, -1, true, true);
+			return self::Json($encodedZipData, -1, true, true);
 		else
-			return App::JsonImmutable($encodedZipData, true, true);
+			return self::JsonImmutable($encodedZipData, true, true);
 	}
 
 	public static function EncodeAndzip($data)
@@ -686,20 +719,20 @@ class App
 			if ($response->httpCode == 403)
 			{
 				// los privados van directos
-				return App::Redirect($url);
+				return self::Redirect($url);
 			}
 			if ($response->httpCode !== 200)
 			{
 				Log::HandleSilentException(new \Exception('Ha fallado la recuperación remota (Status: ' . $response->httpCode . '. Url: ' . $url . ').'));
-				return App::Response("Error: " . $response->httpCode, 'text/html', $response->httpCode);
+				return self::Response("Error: " . $response->httpCode, 'text/html', $response->httpCode);
 			}
 			// Se fija si recibió un redirect...
 			if ($response->IsRedirect())
 			{
-				return App::Redirect($response->GetLocationHeader(), $response->httpCode);
+				return self::Redirect($response->GetLocationHeader(), $response->httpCode);
 			}
 		}
-		$sending = App::SendFile($response->file, true);
+		$sending = self::SendFile($response->file, true);
 		if (array_key_exists("content-disposition", $response->headers))
 			$sending->headers->set('content-disposition', $response->headers['content-disposition']);
 
@@ -718,7 +751,7 @@ class App
 		$response = $conn->Post($url, '', $args);
 		$conn->Finalize();
 
-		$sending = App::SendFile($response->file, true);
+		$sending = self::SendFile($response->file, true);
 		if (array_key_exists("content-disposition", $response->headers))
 			$sending->headers->set('content-disposition', $response->headers['content-disposition']);
 		return $sending;
@@ -833,7 +866,7 @@ class App
 		$vals['maps_faq_url'] = "/faq";
 		$vals['maps_feedback_url'] =  Links::GetContactUrl();
 		$vals['maps_backoffice_url'] = Links::GetBackofficeUrl();
-		$mainUrl = App::Settings()->Servers()->Main()->publicUrl;
+		$mainUrl = self::Settings()->Servers()->Main()->publicUrl;
 		$vals['site_maps_url'] = Str::EnsureEndsWith($mainUrl, "/") . "map";
 		$vals['logos_url'] = "/static/img/logos";
 		if (array_key_exists('current_user', $vals) === false)

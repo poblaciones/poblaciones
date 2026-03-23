@@ -133,7 +133,18 @@ class SilexApp implements \ArrayAccess
 				fn($k) => !str_starts_with($k, '_'),
 				ARRAY_FILTER_USE_KEY
 			);
-			$result = $controller($request, ...$params);
+			$rf = new \ReflectionFunction(\Closure::fromCallable($controller));
+			$args = [$request];
+			foreach ($rf->getParameters() as $p) {
+				if ($p->getName() === 'request')
+					continue;
+				if (array_key_exists($p->getName(), $params)) {
+					$args[] = $params[$p->getName()];
+				} elseif ($p->isDefaultValueAvailable()) {
+					$args[] = $p->getDefaultValue();
+				}
+			}
+			$result = $controller(...$args);
 			if ($result instanceof Response) {
 				return $result;
 			}
