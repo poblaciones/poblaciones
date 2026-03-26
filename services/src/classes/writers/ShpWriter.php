@@ -7,6 +7,8 @@ use minga\framework\Str;
 use helena\classes\spss\Format;
 use helena\classes\App;
 use minga\framework\Zip;
+use minga\framework\ErrorException;
+
 
 use Shapefile\Shapefile;
 use Shapefile\ShapefileWriter;
@@ -85,7 +87,7 @@ class ShpWriter extends BaseWriter
 			{
 				// rearma el polígono
 				$polygon = $row[$wktIndex];
-				$geom = $this->createGeom($polygon);
+				$geom = self::createGeom($polygon);
 			}
 			else
 			{
@@ -189,36 +191,147 @@ class ShpWriter extends BaseWriter
 		return $friendlyNoExtension;
 	}
 
-	private function createGeom($wkt)
+	public static function createGeom($wkt)
 	{
-		if (Str::StartsWith($wkt, "POLYGON"))
-		{
-			$ret = new Polygon();
+		try {
+			$ret = self::instantiateGeom($wkt);
+			$ret->initFromWKT($wkt);
+		} catch (\Exception $e) {
+			if (str_contains($e->getMessage(), 'Ring area too small')) {
+				// Intentar sanitizar y reintentar
+				try {
+					$cleanWkt = self::sanitizeRings($wkt);
+					$ret = self::instantiateGeom($cleanWkt);
+					$ret->initFromWKT($cleanWkt);
+				} catch (\Exception $e2) {
+					$err = 'No pudo reconstruir la geometría incluso después de sanitizar. '
+						. "Antes: \n" . $wkt . "\n\nDespués: \n" . $cleanWkt . "\n\n Error antes: " . $e->getMessage()
+						. "\n Error después: " . $e2->getMessage();
+					throw new ErrorException(
+						$err);
+				}
+			} else {
+				throw new ErrorException(
+					'No pudo reconstruir la geometría obtenida desde la base de datos: '
+					. $wkt . '. Error: ' . $e->getMessage()
+				);
+			}
 		}
-		else if (Str::StartsWith($wkt, "MULTIPOLYGON"))
-		{
-			$ret = new MultiPolygon();
-		}
-		else if (Str::StartsWith($wkt, "LINESTRING"))
-		{
-			$ret = new Linestring();
-		}
-		else if (Str::StartsWith($wkt, "MULTILINESTRING"))
-		{
-			$ret = new MultiLinestring();
-		}
-		else if (Str::StartsWith($wkt, "POINT"))
-		{
-			$ret = new Point();
-		}
-		else if (Str::StartsWith($wkt, "MULTIPOINT"))
-		{
-			$ret = new MultiPoint();
-		} else {
-			throw new \Exception("Entidad no reconocida: " . ($wkt === null ? 'null' : $wkt));
-		}
-		$ret->initFromWKT($wkt);
 		return $ret;
+	}
+
+	private static function instantiateGeom($wkt)
+	{
+		if (Str::startsWith($wkt, 'MULTIPOLYGON'))
+			return new MultiPolygon();
+		if (Str::startsWith($wkt, 'POLYGON'))
+			return new Polygon();
+		if (Str::startsWith($wkt, 'MULTILINESTRING'))
+			return new MultiLinestring();
+		if (Str::startsWith($wkt, 'LINESTRING'))
+			return new Linestring();
+		if (Str::startsWith($wkt, 'MULTIPOINT'))
+			return new MultiPoint();
+		if (Str::startsWith($wkt, 'POINT'))
+			return new Point();
+		throw new \Exception('Entidad no reconocida: ' . ($wkt === null ? 'null' : $wkt));
+	}
+
+	private static function sanitizeRings(string $wkt, float $minRange = 1e-6): string
+	{
+		// Para MULTIPOLYGON: elimina sub-polígonos degenerados
+		if (Str::startsWith($wkt, 'MULTIPOLYGON')) {
+			return self::sanitizeMultiPolygon($wkt, $minRange);
+		}
+		// Para POLYGON: elimina anillos interiores (huecos) degenerados
+		if (Str::startsWith($wkt, 'POLYGON')) {
+			return self::sanitizePolygon($wkt, $minRange);
+		}
+		return $wkt;
+	}
+	private static function sanitizeMultiPolygon(string $wkt, float $minRange): string
+	{
+		// Extraer sub-polígonos contando paréntesis en lugar de usar regex
+		$innerStart = strpos($wkt, '(');
+		if ($innerStart === false)
+			return $wkt;
+
+		// El contenido entre el primer '(' y el último ')'
+		$inner = substr($wkt, $innerStart + 1, strlen($wkt) - $innerStart - 2);
+
+		$polygons = self::extractTopLevelParenGroups($inner);
+
+		$valid = array_filter($polygons, fn($poly) => self::ringIsValid($poly, $minRange));
+
+		if (empty($valid)) {
+			throw new \Exception('Todos los sub-polígonos del MULTIPOLYGON son degenerados');
+		}
+
+		return 'MULTIPOLYGON(' . implode(',', $valid) . ')';
+	}
+
+	/**
+	 * Extrae grupos de paréntesis de nivel superior de una cadena.
+	 * Ej: "((...)),((...))" → ["((...))","((...))" ]
+	 */
+	private static function extractTopLevelParenGroups(string $str): array
+	{
+		$groups = [];
+		$depth = 0;
+		$start = null;
+		$len = strlen($str);
+
+		for ($i = 0; $i < $len; $i++) {
+			$ch = $str[$i];
+			if ($ch === '(') {
+				if ($depth === 0) {
+					$start = $i;
+				}
+				$depth++;
+			} elseif ($ch === ')') {
+				$depth--;
+				if ($depth === 0 && $start !== null) {
+					$groups[] = substr($str, $start, $i - $start + 1);
+					$start = null;
+				}
+			}
+		}
+
+		return $groups;
+	}
+	private static function sanitizePolygon(string $wkt, float $minRange): string
+	{
+		// Extrae contenido dentro de POLYGON(...)
+		if (!preg_match('/^POLYGON\s*\((.+)\)$/s', $wkt, $outer)) {
+			return $wkt;
+		}
+
+		// Separa los anillos: el primero es el exterior, el resto son huecos
+		preg_match_all('/\(([^()]+)\)/', $outer[1], $rings);
+
+		$validRings = [];
+		foreach ($rings[0] as $index => $ring) {
+			// Siempre conservar el anillo exterior (índice 0)
+			if ($index === 0 || self::ringIsValid($ring, $minRange)) {
+				$validRings[] = $ring;
+			}
+		}
+
+		return 'POLYGON(' . implode(',', $validRings) . ')';
+	}
+
+	private static function ringIsValid(string $ringWkt, float $minRange): bool
+	{
+		preg_match_all('/-?\d+(?:\.\d+)?/', $ringWkt, $nums);
+		$xs = $ys = [];
+		for ($i = 0; $i + 1 < count($nums[0]); $i += 2) {
+			$xs[] = (float) $nums[0][$i];
+			$ys[] = (float) $nums[0][$i + 1];
+		}
+		if (empty($xs))
+			return false;
+		return (max($xs) - min($xs)) >= $minRange
+			|| (max($ys) - min($ys)) >= $minRange;
 	}
 
 	private function getColumnByVariable($variable)

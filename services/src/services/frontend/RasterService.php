@@ -18,21 +18,22 @@ class RasterService extends BaseService
 	public function GetGpkgTile(int $x, int $y, int $z, string $layer): array
 	{
 		$gpkgPath = $this->resolveGpkgPath($layer);
-
+		$tmsY = (1 << $z) - 1 - $y;
 		try {
 			$db = new \PDO('sqlite:' . $gpkgPath);
 			$db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-			$stmt = $db->prepare(
-				'SELECT tile_data FROM tiles
-				 WHERE zoom_level = :z AND tile_column = :x AND tile_row = :y'
-			);
+			$sql = 'SELECT tile_data FROM tiles
+				 WHERE zoom_level = :z AND tile_column = :x AND tile_row = :y';
+			$stmt = $db->prepare($sql);
 			$stmt->bindValue(':z', $z, \PDO::PARAM_INT);
 			$stmt->bindValue(':x', $x, \PDO::PARAM_INT);
-			$stmt->bindValue(':y', $y, \PDO::PARAM_INT);
+			$stmt->bindValue(':y', $tmsY, \PDO::PARAM_INT);
+
 			$stmt->execute();
 
 			$tile = $stmt->fetchColumn();
+//			print_r(['x' => $x, 'y' => $tmsY, 'z' => $z, 'sql' => $sql, 'tile' => $tile]);
+	//		exit;
 		} catch (\Exception $e) {
 			throw new ErrorException('Error al acceder al GPKG: ' . $e->getMessage() . '<p>' . $gpkgPath);
 		}

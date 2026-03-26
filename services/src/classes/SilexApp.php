@@ -2,6 +2,7 @@
 
 namespace helena\classes;
 
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -50,7 +51,7 @@ class SilexApp implements \ArrayAccess
 			'charset' => 'utf8',
 			'driverOptions' => [
 				\PDO::ATTR_STRINGIFY_FETCHES => false,
-				\PDO::ATTR_EMULATE_PREPARES  => false, // esto es clave para tipos nativos
+				\PDO::ATTR_EMULATE_PREPARES  => false, // esto es clave para tipos nativos al serializar
 			],
 			'host' => null,
 			'dbname' => null,
@@ -182,6 +183,31 @@ class SilexApp implements \ArrayAccess
 		$response = $this->handle($request);
 
 		$this->sendWithAfter($request, $response);
+	}
+
+	public function sendFile(
+		$file,
+		int $status = 200,
+		array $headers = [],
+		?string $contentDisposition = null
+	): BinaryFileResponse {
+		$response = new BinaryFileResponse($file, $status, $headers, true);
+
+		if ($contentDisposition !== null) {
+			$filename = $file instanceof \SplFileInfo
+				? $file->getFilename()
+				: basename($file);
+			$response->setContentDisposition($contentDisposition, $filename);
+		}
+
+		$path = $file instanceof \SplFileInfo ? $file->getPathname() : $file;
+		$finfo = new \finfo(FILEINFO_MIME_TYPE);
+		$mimeType = $finfo->file($path);
+		if ($mimeType) {
+			$response->headers->set('Content-Type', $mimeType);
+		}
+
+		return $response;
 	}
 
 	private function sendWithAfter(Request $request, Response $response): void

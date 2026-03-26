@@ -54,17 +54,10 @@ abstract class BaseDownloadModel extends BaseModel
 		$params = $this->fullParams;
 
 		$limit = ' LIMIT ' . intval($start) . ', ' . intval($count);
-		try
-		{
-			App::Db()->setFetchMode(PDO::FETCH_NUM);
-			$ret = App::Db()->fetchAll($this->fullQuery . $limit, $params);
-			Profiling::EndTimer();
-			return $ret;
-		}
-		finally
-		{
-			App::Db()->setFetchMode(PDO::FETCH_ASSOC);
-		}
+
+		$ret = App::Db()->fetchAllByPos($this->fullQuery . $limit, $params);
+		Profiling::EndTimer();
+		return $ret;
 	}
 
 	public function AppendCompareColumns($cols, &$joins, $compareDataset)

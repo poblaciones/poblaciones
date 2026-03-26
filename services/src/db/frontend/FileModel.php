@@ -95,7 +95,8 @@ class FileModel extends BaseModel
 		$outFile = IO::GetTempFilename();
 		$this->ReadFileToFile($fileId, $outFile);
 		return App::SendFile($outFile)
-			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
+			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName,
+					preg_replace('/[^\x20-\x7E]/', '_', $friendlyName))
 			->deleteFileAfterSend(true);
 	}
 }

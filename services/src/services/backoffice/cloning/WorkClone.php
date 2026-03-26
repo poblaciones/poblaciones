@@ -80,7 +80,9 @@ class WorkClone
 			}
 		}
 		$this->state->Set('name', $newName);
-		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0, 'wrk_is_example' => 0);
+
+		$startupId = $this->CopyCustomizeAndStartup();
+		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0, 'wrk_is_example' => 0, 'wrk_startup_id' => $startupId);
 		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId, $static);
 		$cloned = App::Orm()->find(entities\DraftWork::class, $this->targetWorkId);
 		// Crea la tabla de trabajo para chunks
@@ -235,8 +237,12 @@ class WorkClone
 		// Clona el startup
 		$work = App::Orm()->find(entities\DraftWork::class, $this->sourceWorkId);
 		$startupId = RowDuplicator::DuplicateRows(entities\DraftWorkStartup::class, $work->getStartup()->getId());
-		$update = "UPDATE draft_work SET wrk_startup_id = ? WHERE wrk_id = ?";
-		App::Db()->exec($update, array($startupId, $this->targetWorkId));
+		return $startupId;
+	}
+
+
+	public function CopyExtraMetrics()
+	{
 		// Copia los extra metric
 		$static = array('wmt_work_id' => $this->targetWorkId);
 		RowDuplicator::DuplicateRows(entities\DraftWorkExtraMetric::class, $this->sourceWorkId, $static, 'wmt_work_id');

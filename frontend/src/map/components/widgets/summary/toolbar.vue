@@ -14,10 +14,6 @@
 					<li><a @click="captureMapPdf(true)">Guardar como PDF (apaisado)</a></li>
 				</ul>
 			</button>
-			<button type="button" class="btn btn-default btn-xs"
-							:title="(toolbarStates.showLabels ? 'Ocultar etiquetas del mapa' : 'Mostrar etiquetas del mapa')" @click="toggleLabels()" :class="getLabelsActive()">
-				<i class="fas fa-tags" />
-			</button>
 
 			<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="btn btn-default btn-xs"
 							title="Ubicación actual" @click="geolocate()">

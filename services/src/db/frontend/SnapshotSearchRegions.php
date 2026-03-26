@@ -30,17 +30,17 @@ class SnapshotSearchRegions extends BaseModel
 			clc_full_ids ExtraIds,
 			clc_symbol Symbol,
 			Replace(clc_full_parent, '\t', ' > ') Extra,
-			MATCH(clc_caption) AGAINST (:query) Relevance
+			MATCH(clc_caption) AGAINST (:query1) Relevance
 			FROM snapshot_lookup_clipping_region_item
 			WHERE
-			(MATCH(clc_caption, clc_tooltip, clc_full_parent, clc_code) AGAINST (:query IN BOOLEAN MODE)
+			(MATCH(clc_caption, clc_tooltip, clc_full_parent, clc_code) AGAINST (:query2 IN BOOLEAN MODE)
 			" . $specialWordsCondition . ")
 			" . $explicitExclusions . " ORDER by
 			Relevance DESC,
 			clc_population DESC
 			LIMIT 0, 10";
 
-		$ret = App::Db()->fetchAll($sql, array('query' => $query));
+		$ret = App::Db()->fetchAll($sql, array('query1' => $query, 'query2' => $query));
 		Profiling::EndTimer();
 		return $ret;
 	}

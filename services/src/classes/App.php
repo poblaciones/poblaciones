@@ -466,10 +466,8 @@ class App
 	{
 		self::$isJson = true;
 
-		if (version_compare(phpversion(), '7.1', '>=')) {
-			ini_set('precision', '17');
-			ini_set('serialize_precision', '-1');
-		}
+		ini_set('precision', '17');
+		ini_set('serialize_precision', '-1');
 
 		// Procesa la compresión...
 		$acceptsGzip = strstr(Params::SafeServer('HTTP_ACCEPT_ENCODING'), "gzip");
@@ -481,7 +479,6 @@ class App
 				$value = gzdecode($value);
 			}
 		}
-
 		$response = new Response($alreadyEncoded ? $value : json_encode($value));
 		if ($daysToExpire === -1 || self::Debug())
 		{

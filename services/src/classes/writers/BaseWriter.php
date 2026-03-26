@@ -44,7 +44,7 @@ class BaseWriter
 		return array();
 	}
 
-	protected function PrepareGeometry($type, $value)
+	protected function PrepareGeometry($type, $value, &$outType = null)
 	{
 		if ($value == null)
 			return null;
@@ -52,6 +52,7 @@ class BaseWriter
 		{
 			$geoJson = new GeoJson();
 			$jsonArray = $geoJson->GenerateFeatureFromBinary(array('name'=>'', 'value' => $value));
+			$outType = $jsonArray['geometry']['type'];
 			$value = json_encode($jsonArray['geometry']);
 		}
 		return $this->RoundWktValue($value);
