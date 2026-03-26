@@ -84,7 +84,7 @@ export default {
 		},
 		selectedItem(item) {
 			if (item.Type === 'B') {
-				window.SegMap.AddBoundaryById(item.Id, item.Name);
+				window.SegMap.AddBoundaryById(item.Id);
 			} else {
 				window.SegMap.AddMetricById(item.Id);
 			}

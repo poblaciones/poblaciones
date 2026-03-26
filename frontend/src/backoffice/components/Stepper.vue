@@ -193,7 +193,17 @@ export default {
 					loc.key = res.data.key;
 
 					let newUrl = loc.stepUrl + '?k=' + loc.key;
-					loc.Navigate(newUrl, null);
+					if (loc.key) {
+						loc.Navigate(newUrl, null);
+					} else {
+						var error = {
+							message: 'Ha ocurrido un error.',
+							response: res
+						};
+						var errorText = loc.formatError(error);
+						loc.ShowError(errorText);
+						err.err('Stepper', error);
+					}
 				}
 			}).catch(function (error) {
 				var errorText = loc.formatError(error);

@@ -163,7 +163,7 @@ export default {
 				if (this.workId) {
 					window.SegMap.AddMetricByIdAndWork(item.Id, this.workId);
 				} else if (item.Type === 'B') {
-					window.SegMap.AddBoundaryById(item.Id, item.Name);
+					window.SegMap.AddBoundaryById(item.Id);
 				} else {
 					window.SegMap.AddMetricById(item.Id);
 				}

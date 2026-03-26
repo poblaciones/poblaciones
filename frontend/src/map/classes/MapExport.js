@@ -166,7 +166,10 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 
 	];
 	var collapseButtonRight = document.getElementById('collapseButtonRight');
-	var marginRightCopyright = window.innerWidth - collapseButtonRight.getBoundingClientRect().right;
+	var marginRightCopyright = window.innerWidth;
+	if (collapseButtonRight) {
+		marginRightCopyright -= collapseButtonRight.getBoundingClientRect().right;
+	}
 	var attributesByClass = [
 
 		{ attribute: 'display', set: 'none', restore: 'unset', class: 'leaflet-control-zoom' },
