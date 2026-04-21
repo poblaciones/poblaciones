@@ -152,6 +152,7 @@ export default {
 			ret.push({ caption: 'Excel con GeoJSON (.xlsx)', key: 'xg' });
 			ret.push({ caption: 'Excel con WKT (.xlsx)', key: 'xw' });
 			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
+			ret.push({ caption: 'GeoPackage (.gpkg)', key: 'gw' });
 			return ret;
 		},
 		showUrls: debounce(function() {
@@ -166,9 +167,10 @@ export default {
 			const a = document.getElementById('downloadAnchor');
 			a.href = url;
 			if (newTab) {
-				a.target = '_blank';
+				window.open(url, '_blank');
+			} else {
+				window.location.href = url;
 			}
-			a.click();
 		},
 		process(e, type) {
 			e.preventDefault();

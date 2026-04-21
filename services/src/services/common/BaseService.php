@@ -32,6 +32,18 @@ class BaseService
 			return $table;
 	}
 
+
+	protected function ProcessError(\Exception $e): array
+	{
+		Log::HandleSilentException($e);
+		http_response_code(500);
+		if (Context::Settings()->Debug()->debug) {
+			$text = $e->getTraceAsString();
+		} else
+			$text = "";
+
+		return ['Status' => self::ERROR, 'Message' => $e->getMessage(), 'Exception' => $text];
+	}
 	protected function ApplyDraft($entityName)
 	{
 		if ($this->isDraft === null) {

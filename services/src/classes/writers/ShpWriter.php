@@ -31,9 +31,9 @@ class ShpWriter extends BaseWriter
 
 		// Empieza a crear los archivos
 		$shapeFile = $this->resolveShapeFile();
-    $Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_EXISTING_FILES_MODE  => Shapefile::MODE_OVERWRITE]);
+		$Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_EXISTING_FILES_MODE  => Shapefile::MODE_OVERWRITE]);
 
-    // Setea el tipo
+		// Setea el tipo
 		$wktIndex = $this->model->wktIndex;
 		if ($this->state->AreSegments())
 		{
@@ -47,7 +47,7 @@ class ShpWriter extends BaseWriter
 		{
 		  $Shapefile->setShapeType(Shapefile::SHAPE_TYPE_POINT);
 		}
-    $Shapefile->setPRJ(self::PRJ);
+		$Shapefile->setPRJ(self::PRJ);
 		$Shapefile->setCharset(self::ENCODING);
 
 		$cols = $this->cols;
@@ -61,7 +61,7 @@ class ShpWriter extends BaseWriter
 		if(count($rows) === 0) return false;
 
 		$shapeFile = $this->resolveShapeFile();
-	  $Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_EXISTING_FILES_MODE  => Shapefile::MODE_APPEND,
+		$Shapefile = new ShapefileWriter($shapeFile, [Shapefile::OPTION_EXISTING_FILES_MODE  => Shapefile::MODE_APPEND,
 			Shapefile::OPTION_BUFFERED_RECORDS => 100,
 			Shapefile::OPTION_ENFORCE_GEOMETRY_DATA_STRUCTURE => false]);
 		$Shapefile->setCharset(self::ENCODING);
@@ -199,6 +199,7 @@ class ShpWriter extends BaseWriter
 		} catch (\Exception $e) {
 			if (str_contains($e->getMessage(), 'Ring area too small')) {
 				// Intentar sanitizar y reintentar
+				$cleanWkt = "";
 				try {
 					$cleanWkt = self::sanitizeRings($wkt);
 					$ret = self::instantiateGeom($cleanWkt);

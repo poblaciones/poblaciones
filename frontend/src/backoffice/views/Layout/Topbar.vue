@@ -71,8 +71,8 @@ export default {
 		},
 		UpdateTitle() {
 			var loc = this;
-			this.$refs.invoker.doSave(this.Work,
-				this.Work.UpdateMetadata).then(function () {
+			this.$refs.invoker.doSave(this.Work.Metadata,
+				this.Work.Metadata.UpdateMetadata).then(function () {
 					window.Db.RenameWork(loc.Work.properties.Id, loc.Work.properties.Metadata.Title);
 				});
 			return true;

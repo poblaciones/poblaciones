@@ -210,7 +210,9 @@ export default {
 			ret.push({ caption: 'R (.rdata)', key: 'r' });
 			if (!this.level.HasArea) {
 				ret.push({ caption: 'Shapefile (.shp)', key: 'h' });
+				ret.push({ caption: 'GeoPackage (.gpkg)', key: 'g' });
 			}
+
 			return ret;
 		},
 		resolveFileUrl(file) {
@@ -232,10 +234,8 @@ export default {
 			var ret = [];
 			ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
 			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
-			ret.push({ caption: 'Excel con GeoJSON (.xlsx)', key: 'xg' });
-			ret.push({ caption: 'Excel con WKT (.xlsx)', key: 'xw' });
-			ret.push({ caption: 'SPSS con WKT (.sav)', key: 'sw' });
 			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
+			ret.push({ caption: 'GeoPackage (.gpkg)', key: 'gw' });
 			return ret;
 		},
 		showUrls: debounce(function() {
@@ -250,9 +250,10 @@ export default {
 			const a = document.getElementById('downloadAnchor');
 			a.href = url;
 			if (newTab) {
-				a.target = '_blank';
+				window.open(url, '_blank');
+			} else {
+				window.location.href = url;
 			}
-			a.click();
 		},
 		process(e, type) {
 			e.preventDefault();

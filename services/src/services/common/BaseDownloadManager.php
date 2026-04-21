@@ -12,6 +12,7 @@ use helena\classes\writers\StataWriter;
 use helena\classes\writers\RWriter;
 use helena\classes\writers\XlsxWriter;
 use helena\classes\writers\ShpWriter;
+use helena\classes\writers\GpkgWriter;
 
 
 abstract class BaseDownloadManager
@@ -28,6 +29,7 @@ abstract class BaseDownloadManager
 	public const FILE_XLSX = 4;
 	public const FILE_STATA = 5;
 	public const FILE_R = 6;
+	public const FILE_GPKG = 7;
 
 	protected static $validFileTypes = ['s' => [ 'extension' => 'sav', 'Caption' => 'SPSS', 'type' => self::FILE_SPSS],
 																		'z' => [ 'extension' => 'zsav', 'Caption' => 'SPSS', 'type' => self::FILE_SPSS],
@@ -35,7 +37,8 @@ abstract class BaseDownloadManager
 																		'r' => [ 'extension' => 'rdata', 'Caption' => 'R', 'type' => self::FILE_R],
 																		'c' => [ 'extension' => 'csv', 'Caption' => 'CSV', 'type' => self::FILE_CSV],
 																		'x' => [ 'extension' => 'xlsx', 'Caption' => 'Excel', 'type' => self::FILE_XLSX],
-																		'h' => [ 'extension' => 'zip', 'Caption' => 'Shapefile', 'type' => self::FILE_SHP]];
+																		'h' => [ 'extension' => 'zip', 'Caption' => 'Shapefile', 'type' => self::FILE_SHP],
+																		'g' => [ 'extension' => 'gpkg', 'Caption' => 'GPKG', 'type' => self::FILE_GPKG]];
 
 	protected const OUTPUT_LATIN3_WINDOWS_ISO = false;
 
@@ -158,6 +161,8 @@ abstract class BaseDownloadManager
 			return new XlsxWriter($this->model, $this->state);
 		else if ($fileType === self::FILE_SHP)
 			return new ShpWriter($this->model, $this->state);
+		else if ($fileType === self::FILE_GPKG)
+			return new GpkgWriter($this->model, $this->state);
 		else
 			throw new PublicException('Tipo de archivo de descarga no reconocido');
 	}

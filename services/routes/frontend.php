@@ -19,13 +19,14 @@ App::RegisterControllerGet('/datasets', controllers\cDatasets::class);
 
 App::RegisterControllerGet('/services/content/downloads', controllers\cDownloads::class);
 
+App::RegisterControllerGet('/map', controllers\cMap::class);
+App::RegisterControllerGet('/map/', controllers\cMap::class);
+
 if (App::Settings()->Servers()->IsMainServerRequest()) {
 	require_once('frontend/mainServer.php');
 	if (!App::Settings()->Servers()->IsTransactionServerRequest())
 	{
 		require_once('frontend/remoteCrawler.php');
-		App::RegisterControllerGet('/map', controllers\cRemoteMap::class);
-		App::RegisterControllerGet('/map/', controllers\cRemoteMap::class);
 		App::RegisterControllerGet('/map/{any}', controllers\cRemoteMap::class)->assert("any", ".*");
 	}
 }
@@ -33,8 +34,6 @@ if (App::Settings()->Servers()->IsMainServerRequest()) {
 require_once('frontend/metadata.php');
 
 if (App::Settings()->Servers()->IsTransactionServerRequest()) {
-	App::RegisterControllerGet('/map', controllers\cMap::class);
-	App::RegisterControllerGet('/map/', controllers\cMap::class);
 	App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
 
 	require_once('frontend/map.php');

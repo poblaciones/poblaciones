@@ -333,7 +333,7 @@ class StatisticsService extends BaseService
 			{
 				$fileType = BaseDownloadManager::GetFileTypeFromLetter(substr($code, 0, 1));
 				$polygon = BaseDownloadManager::GetPolygon($code);
-				if ($polygon && $fileType !== BaseDownloadManager::FILE_SHP)
+				if ($polygon && $fileType !== BaseDownloadManager::FILE_SHP && $fileType !== BaseDownloadManager::FILE_GPKG)
 				{
 					$fileType += ($polygon == 'wkt' ? 100 : 200);
 				}

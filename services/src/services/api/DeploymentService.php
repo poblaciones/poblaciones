@@ -165,17 +165,5 @@ class DeploymentService extends BaseService
 	{
 		return IO::RemoveExtension($this->GetUpdateFile('dummy'));
 	}
-
-	private function ProcessError(\Exception $e) : array
-	{
-		Log::HandleSilentException($e);
-		http_response_code(500);
-		if (Context::Settings()->Debug()->debug) {
-			$text = $e->getTraceAsString();
-		} else
-			$text = "";
-
-		return ['Status' => self::ERROR, 'Message' => $e->getMessage(), 'Exception' => $text];
-	}
 }
 
