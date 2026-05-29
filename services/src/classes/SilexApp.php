@@ -149,7 +149,12 @@ class SilexApp implements \ArrayAccess
 			if ($result instanceof Response) {
 				return $result;
 			}
-			return new Response((string) $result);
+			if (is_array($result))
+			{
+				return new JsonResponse(json_encode($result));
+			}
+			else
+				return new Response((string) $result);
 
 		} catch (ResourceNotFoundException $e) {
 			$response = $this->handleError(new \RuntimeException('Not found', 404), $request, 404);

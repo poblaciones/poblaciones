@@ -96,6 +96,10 @@ if (Context::Settings()->isAPIEnabled)
 	require_once('api/wfs.php');
 	require_once('api/clipping.php');
 	require_once('api/backup.php');
+	require_once('api/automationWork.php');
+	require_once('api/automationDataset.php');
+	require_once('api/automationMetric.php');
+	require_once('api/automationMetadata.php');
 	require_once('api/deployment.php');
 }
 if (App::Settings()->Map()->isOWSEnabled)

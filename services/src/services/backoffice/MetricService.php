@@ -13,6 +13,7 @@ use helena\entities\backoffice as entities;
 use minga\framework\PublicException;
 use minga\framework\Serializator;
 use minga\framework\Date;
+use minga\framework\Str;
 use minga\framework\MessageException;
 use minga\framework\ErrorException;
 
@@ -275,6 +276,17 @@ class MetricService extends BaseService
 													FROM draft_metric_version
 													WHERE mvr_metric_id = mtr_id) Versions";
 	}
+	public function GetPublicMetricByCaption($caption)
+	{
+		$captionLower = trim(Str::ToLower($caption));
+		$publicMetrics = $this->GetPublicMetrics();
+		foreach($publicMetrics as $metric)
+		{
+			if ($captionLower === trim(Str::ToLower($metric['Caption'])))
+				return $metric['Id'];
+		}
+		return null;
+	}
 	private function GetAllMetricByType($type)
 	{
 		Profiling::BeginTimer();
@@ -383,7 +395,7 @@ class MetricService extends BaseService
 			App::Db()->markTableUpdate('draft_variable');
 		}
 		// Graba valores
-		$this->SaveValues($variable, $variableConnected);
+		$this->UpdateVariableValues($variable, $variableConnected);
 		// Marca work
 		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
 		WorkFlags::SetMetricDataChanged($dataset->getWork()->getId());
@@ -489,7 +501,7 @@ class MetricService extends BaseService
 			App::Db()->markTableUpdate('draft_variable_value_label');
 		}
 	}
-	private function SaveValues($variable, $variableConnected)
+	public function UpdateVariableValues($variable, $variableConnected)
 	{
 		Profiling::BeginTimer();
 		if (method_exists($variable, 'getId'))
@@ -516,7 +528,6 @@ class MetricService extends BaseService
 		}
 		$rebindVersion = $this->saveMetricVersion($dataset, $metricVersionLevel, $metric, $metricVersion);
 		if ($rebindVersion != null) {
-			echo 'seteó la rebind: ' . $rebindVersion->getId() . ".<p>";
 			$metricVersionLevel->setMetricVersion($rebindVersion);
 			App::Orm()->save($rebindVersion);
 		}

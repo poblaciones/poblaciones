@@ -170,6 +170,28 @@ class SnapshotByDatasetModel
 		catch(\Exception $ex)
         {
             $msg = $ex->getMessage();
+
+			if (Str::Contains($msg, "Integrity constraint violation:") && Str::Contains($msg, "_value_label_id' cannot be null"))
+			{
+				// Se ocupa de errores como: "An exception occurred while executing a query: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'sna_1331801_value_label_id' cannot be null"
+				$n = strpos($msg, "Column 'sna_");
+				if ($n) {
+					$part = substr($msg, $n + 12);
+					$end = strpos($part, "_");
+					$variableId = (int) substr($part, 0, $end);
+					$info = App::Db()->fetchAssoc("
+										select dat_caption, mvv_caption from variable
+										join metric_version_level on mvl_id = mvv_metric_version_level_id
+										join dataset on dat_id = mvl_dataset_id
+										where mvv_id = ?", array($variableId));
+					if ($info) {
+						$extraMessage = "Un valor de la variable '" . $info['mvv_caption'] . "' del dataset '" . $info['dat_caption'] . "' no pudo
+											ser clasificado. Revise las categorías definidas y los valores de la variable en los datos.";
+						throw new PublicException($extraMessage, new \Exception($sql));
+					}
+				}
+				throw new PublicException("No pudo completarse la clasificación de los valores del indicador.");
+			}
 			if (Str::EndsWith($msg, "Cannot get geometry object from data you send to the GEOMETRY field") ||
 				Str::Contains($msg, "Invalid GIS data provided to function polygon"))
             {

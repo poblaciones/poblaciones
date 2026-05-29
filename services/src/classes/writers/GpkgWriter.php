@@ -48,19 +48,22 @@ class GpkgWriter extends BaseWriter
 			throw new PublicException('Error al preparar INSERT en gpkg: ' . $db->lastErrorMsg());
 
 		foreach ($rows as $row) {
+			// Normalizar claves a índices 0-based para que $i coincida con $wktIndex
+			$rowValues = array_values($row);
+
 			// Geometría
 			if ($wktIndex !== -1) {
-				$wkt = $row[$wktIndex];
+				$wkt = $rowValues[$wktIndex];
 			} else {
-				$lon = $this->parseCoord($row[$iLon]);
-				$lat = $this->parseCoord($row[$iLat]);
+				$lon = $this->parseCoord($rowValues[$iLon]);
+				$lat = $this->parseCoord($rowValues[$iLat]);
 				$wkt = "POINT($lon $lat)";
 			}
 
 			$blob = $this->wktToGpkgBlob($wkt);
 			$stmt->bindValue(1, $blob, SQLITE3_BLOB);
 
-			// Atributos
+			// Atributos (la columna WKT se omite: la geometría ya quedó en el blob)
 			$paramIdx = 2;
 			$i = 0;
 			foreach ($cols as $col) {
@@ -69,7 +72,7 @@ class GpkgWriter extends BaseWriter
 					continue;
 				}
 
-				$value = $row[$i];
+				$value = $rowValues[$i];
 				if ($col['format'] == Format::F) {
 					$bound = ($value === '' || $value === null)
 						? null
@@ -238,9 +241,6 @@ class GpkgWriter extends BaseWriter
 			throw new PublicException('Ruta de archivo gpkg no definida en el estado');
 
 		$db = new \SQLite3($path);
-		if (!$db)
-			throw new PublicException('No se pudo abrir la base de datos gpkg');
-
 		$db->exec('PRAGMA journal_mode=WAL');
 		$db->exec('PRAGMA foreign_keys=ON');
 		return $db;

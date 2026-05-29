@@ -18,7 +18,32 @@ use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
 
 class DatasetModel
 {
+	public function GetDatasetsByWorkId($workId, $fromDraft = false)
+	{
+		$draftPreffix = ($fromDraft ? 'draft_' : '');
 
+		Profiling::BeginTimer();
+
+		// Precisa devolver latitud y longitud con dos alias diferentes por el uso en GetCentroidField, para
+		// ser compatible con GetDatasetInfo (revisar refactoring para eso)
+		$sql = 'SELECT
+			d1.dat_id id,
+			d1.dat_caption caption,
+			d1.dat_table `table`,
+			d1.dat_type `type`,
+			d1.dat_are_segments,
+			d1.dat_partition_column_id,
+			d1.dat_partition_mandatory,
+			d1.dat_geography_id,
+			d1.dat_geography_segment_id
+		FROM ' . $draftPreffix . 'dataset d1
+		WHERE d1.dat_work_id = ?';
+		$ret = App::Db()->fetchAll($sql, array((int)$workId));
+		if ($ret == null)
+			throw new PublicException("El dataset no ha sido encontrado.");
+		Profiling::EndTimer();
+		return $ret;
+	}
 	public function GetDatasetById($id, $fromDraft = false)
 	{
 		$draftPreffix = ($fromDraft ? 'draft_' : '');

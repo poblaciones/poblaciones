@@ -20,6 +20,23 @@ class InstitutionService extends BaseService
 	{
 		$new = new entities\DraftInstitution();
 		$new->setIsGlobal(false);
+		$new->setCountry("");
+		return $new;
+	}
+	public function FindOrCreateByCaption($caption)
+	{
+		$posibles = $this->GetAllInstitutionsByCurrentUser();
+		foreach($posibles as $institution)
+		{
+			if ($institution->getCaption() == $caption)
+			{
+				return $institution;
+			}
+		}
+		// No la encontró... la crea
+		$new = $this->GetNewInstitution();
+		$new->setCaption($caption);
+		$this->Update($new, null);
 		return $new;
 	}
 

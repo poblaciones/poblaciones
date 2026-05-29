@@ -17,6 +17,15 @@ class GeographyService extends DbSession
 		return $ret;
 	}
 
+	public function GetTrackingLevelId()
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT geo_id Id FROM geography WHERE geo_is_tracking_level = 1";
+		$ret = App::Db()->fetchScalarInt($sql);
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetAllGeographies()
 	{
 		Profiling::BeginTimer();

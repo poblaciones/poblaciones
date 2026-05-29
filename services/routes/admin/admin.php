@@ -206,3 +206,49 @@ App::Get('/services/admin/MarkTable', function (Request $request) {
 	$controller->MarkTables($tables);
 	return App::Json(["result" => "OK"]);
 });
+
+App::$app->get('/services/admin/GetUserKeys', function (Request $request) {
+	if ($denied = Session::CheckIsMegaUser()) return $denied;
+
+	$userId = Params::GetIntMandatory('u');
+
+	$controller = new services\UserService();
+
+	return App::Json($controller->GetUserKeys($userId));
+});
+
+App::$app->post('/services/admin/CreateUserKey', function (Request $request) {
+	if ($denied = Session::CheckIsMegaUser()) return $denied;
+
+	$userId      = Params::GetIntMandatory('u');
+	$description = Params::GetMandatory('description');
+
+	$controller = new services\UserService();
+	return App::Json($controller->CreateUserKey($userId, $description));
+});
+
+App::$app->post('/services/admin/UpdateUserKey', function (Request $request) {
+	if ($denied = Session::CheckIsMegaUser()) return $denied;
+
+	$keyId      = Params::GetIntMandatory('key_id');
+	$description = Params::Get('description');
+	$active      = Params::GetInt('active');
+	if ($description === null && $active === null) {
+		throw new PublicException('Debe indicar al menos un campo a actualizar: description o active.');
+	}
+	$controller = new services\UserService();
+	$controller->UpdateUserKey($keyId, $description, $active);
+
+	return App::Json(['result' => 'ok']);
+});
+
+App::$app->get('/services/admin/DeleteUserKey', function (Request $request) {
+	if ($denied = Session::CheckIsMegaUser()) return $denied;
+
+	$keyId = Params::GetIntMandatory('key_id');
+
+	$controller = new services\UserService();
+	$controller->DeleteUserKey($keyId);
+
+	return App::Json(['result' => 'ok']);
+});

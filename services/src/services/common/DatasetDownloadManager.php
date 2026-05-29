@@ -41,7 +41,7 @@ class DatasetDownloadManager extends BaseDownloadManager
 		return self::getCache($fromDraft)->HasData($datasetId, $cacheKey, $filename);
 	}
 
-	private static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $type, $fromDraft)
+	public static function GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $type, $fromDraft)
 	{
 		$validFileTypes = self::$validFileTypes;
 		if (array_key_exists($type[0], $validFileTypes))
@@ -58,12 +58,13 @@ class DatasetDownloadManager extends BaseDownloadManager
 		if($partition)
 		{
 			$partitionName = App::Db()->fetchScalar("SELECT dla_caption FROM " . ($fromDraft ? 'draft_' : '') . "dataset_column_value_label WHERE dla_dataset_column_id = (SELECT dat_partition_column_id FROM " . ($fromDraft ? 'draft_' : '') . "dataset WHERE dat_id = ?) AND dla_value = ?", array($datasetId, $partition));
+			if (!$partitionName)
+				$partitionName = 'Todo';
 			$name .= ' - ' . $partitionName;
 		}
-
 		$name .= self::RegionsAsText($clippingItemId);
-
-		return Str::SanitizeFilename($name) . '.' . $ext;
+		$ret = Str::SanitizeFilename($name) . '.' . $ext;
+		return $ret;
 	}
 
 	public static function RegionsAsText($clippingItemId)
@@ -123,8 +124,7 @@ class DatasetDownloadManager extends BaseDownloadManager
 			}
 		}
 	}
-
-	public static function GetFileBytes($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft = false)
+	public static function GetFile($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft = false)
 	{
 		self::ValidateType($type);
 
@@ -133,12 +133,28 @@ class DatasetDownloadManager extends BaseDownloadManager
 			self::ValidateClippingItem($clippingItemId);
 		}
 		$cacheKey = self::createKey($fromDraft, $type, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition);
-		$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $type, $fromDraft);
 		$cache = self::getCache($fromDraft);
 		// Lo devuelve desde el cache
 		$filename = null;
 		if ($cache->HasData($datasetId, $cacheKey, $filename, true))
+			return $filename;
+		else
+			return null;
+	}
+	public static function GetFileBytes($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft = false)
+	{
+		self::ValidateType($type);
+
+		if (!$fromDraft)
+		{
+			self::ValidateClippingItem($clippingItemId);
+		}
+		$filename = self::GetFile($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft);
+		if ($filename )
+		{
+			$friendlyName = self::GetFileName($datasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $type, $fromDraft);
 			return App::StreamFile($filename, $friendlyName);
+		}
 		else
 			throw new PublicException('No ha sido posible descargar el archivo.');
 	}

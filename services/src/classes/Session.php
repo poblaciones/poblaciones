@@ -56,6 +56,13 @@ class Session
 		$account = Account::Current();
 		return $account->IsSiteReader();
 	}
+
+	public static function ImpersonateUser($user)
+	{
+		$account = new Account();
+		$account->user = $user;
+		$account->Begin();
+	}
 	public static function CheckReadonlyForMaintenance()
 	{
 		if (Context::Settings()->readonlyForMaintenance)

@@ -296,6 +296,17 @@ class WorkService extends BaseService
 		$nm->NotifyRequestReview($workId);
 		return $this->GetPendingReviewSince($workId);
 	}
+
+	public function AppendExtraMetricByName($workId, $metricName)
+	{
+		$ms = new MetricService();
+		$publicMetricId = $ms->GetPublicMetricByCaption($metricName);
+		if (!$publicMetricId)
+			throw new PublicException("No se ha encontrado la métrica '" . $metricName . "'");
+		$this->AppendExtraMetric($workId, $publicMetricId);
+		return self::OK;
+	}
+
 	public function AppendExtraMetric($workId, $metricId)
 	{
 		// Evita duplicados
@@ -549,7 +560,7 @@ class WorkService extends BaseService
 		return $ret;
 	}
 
-	private function GetDatasets($workId)
+	public function GetDatasets($workId)
 	{
 		Profiling::BeginTimer();
 		$ret = App::Orm()->findManyByQuery("SELECT d FROM e:DraftDataset d JOIN d.Work w WHERE w.Id = :p1", array($workId));

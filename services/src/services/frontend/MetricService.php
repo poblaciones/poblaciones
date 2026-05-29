@@ -129,6 +129,7 @@ class MetricService extends BaseService
 			exit;
 		}
 		$isPrivate = explode("\t", $item['myv_work_is_private']);
+
 		for($n = 0; $n < sizeof($ids); $n++)
 		{
 			$version = new MetricVersionInfo();

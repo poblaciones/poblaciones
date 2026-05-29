@@ -26,7 +26,8 @@ class GeoreferenceService extends BaseService
 	const STEP_GEOREFERENCING = 3;
 	const STEP_UPDATING = 4;
 	const STEP_ATTRIBUTES = 5;
-	const STEP_END = 6;
+	const STEP_COMPLETED = 6;
+
 
 	const GEO_LAT_LON = 1;
 	const GEO_CODES = 2;
@@ -146,7 +147,7 @@ class GeoreferenceService extends BaseService
 		$this->UpdateGeoreferencingAttributesIfChanged($datasetId, $datasetType, $attributes);
 		$caption = $this->GetStepCaption($step);
 		$this->state = GeoreferenceStateBag::Create($datasetId, $type, $geographyId, $geographySegmentId, $fromErrors, $datasetType, $georefenceSegments);
-		$this->state->SetTotalSteps(self::STEP_END);
+		$this->state->SetTotalSteps(self::STEP_COMPLETED);
 		$this->state->SetStep($step, $caption);
 		$this->state->Save();
 	}
@@ -189,9 +190,6 @@ class GeoreferenceService extends BaseService
 				break;
 			case self::STEP_ATTRIBUTES:
 				$this->UpdateGeocodedAndType();
-				$done = false;
-				break;
-			case self::STEP_END:
 				$done = true;
 				break;
 			default:
@@ -283,7 +281,7 @@ class GeoreferenceService extends BaseService
 				return "Actualizando la información";
 			case self::STEP_ATTRIBUTES:
 				return "Actualizando atributos";
-			case self::STEP_END:
+			case self::STEP_COMPLETED:
 				return "Completado";
 			default:
 				return "Paso no reconocido.";
@@ -293,7 +291,7 @@ class GeoreferenceService extends BaseService
 	private function UpdateGeocodedAndType()
 	{
 		// Avanza el paso final
-		$step = self::STEP_END;
+		$step = self::STEP_COMPLETED;
 		$caption = $this->GetStepCaption($step);
 		$this->state->SetStep($step, $caption);
 

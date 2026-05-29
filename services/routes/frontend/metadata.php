@@ -48,7 +48,7 @@ App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) 
 	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
 });
 
-// ej. http://mapas/services/metadata/GetWorkMetadataPdf?w=12&f=4
+// ej. http://mapas/services/metadata/GetWorkMetadataPdf?w=12&m=4
 App::$app->get('/services/metadata/GetWorkMetadataPdf', function (Request $request) {
 	$metadataId = Params::GetInt('m');
 	$workId = Params::GetIntMandatory('w');

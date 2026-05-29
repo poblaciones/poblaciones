@@ -8,15 +8,14 @@ use helena\services\common\BaseService;
 use helena\db\frontend\DatasetModel;
 use helena\db\frontend\WorkModel;
 use minga\framework\Context;
+use helena\services\frontend as frontendServices;
 use minga\framework\ErrorException;
 use minga\framework\IO;
 use minga\framework\Params;
 use minga\framework\Str;
-use minga\framework\System;
+use helena\services\common\DatasetDownloadManager;
 use minga\framework\Zip;
 use minga\framework\FileBucket;
-use helena\services\frontend\WorkService;
-use helena\services\frontend\BoundaryService;
 use helena\services\common\MetadataService;
 
 class AutomationService extends BaseService
@@ -25,12 +24,9 @@ class AutomationService extends BaseService
 
 	public function DownloadWorkDatasets($workId)
 	{
-        $dynamicServer = App::Settings()->Servers()->GetTransactionServer();
-		$this->serverUrl = $dynamicServer->publicUrl;
-
         try
 		{
-    		$bucket = FileBucket::Create();
+			$bucket = FileBucket::Create();
 			$path = $bucket->GetBucketFolder();
 			$wm = new WorkModel();
 			$work = $wm->GetWork($workId);
@@ -38,15 +34,26 @@ class AutomationService extends BaseService
 			$ws = new DatasetModel();
 			$datasets = $ws->GetDatasetsByWorkId($workId);
 
-            $files = [];
+			$files = [];
+			$partitionValues = [null];
 			foreach($datasets as $dataset)
 		    {
-				$files[] = $this->downloadDataset($path, "s", $workId, $dataset['id']);
-				if ($dataset['type'] == 'S') {
-					$files[] = $this->downloadDataset($path, "cw", $workId, $dataset['id']);
+				if ($dataset['dat_partition_mandatory'] && $dataset['dat_partition_column_id'])
+				{
+					$columnId = $dataset['dat_partition_column_id'];
+					$sql = "SELECT dla_value FROM dataset_column_value_label
+											WHERE dla_dataset_column_id = ? ORDER BY dla_order, dla_id ";
+					$partitionValues = App::Db()->fetchAllColumn($sql, [$columnId]);
+				}
+				foreach ($partitionValues as $partition)
+				{
+					$files[] = $this->downloadDataset($path, "s", $workId, $dataset['id'], $partition);
+					if ($dataset['type'] == 'S') {
+						$files[] = $this->downloadDataset($path, "cw", $workId, $dataset['id'], $partition);
+					}
 				}
 			}
-            // Agrega los metadatos
+			// Agrega los metadatos
             $files[] = $this->downloadWorkMetadata($path, $workId, $metadataId);
 			$files[] = $this->getMetadataInfo($path, $workId, $metadataId);
             // Zipea los archivos
@@ -128,212 +135,53 @@ class AutomationService extends BaseService
         int $workId, int $metadataId): string
 	{
 		$destDir = $path;
-
-        $baseUrl = $this->serverUrl . '/services/metadata';
-		$referer = '';
-        $cookieJar = tempnam(sys_get_temp_dir(), 'pob_cookies_');
-
-        try {
-            // ── Paso 1: iniciar la generación ─────────────────────────────────────
-            $startUrl = $baseUrl . sprintf('/GetWorkMetadataPdf?w=%s&m=%s', $workId, $metadataId);
-
-            $fileHeaders = [
-                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'sec-ch-ua: "Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"',
-                'sec-ch-ua-mobile: ?0',
-                'sec-ch-ua-platform: "Windows"',
-                'Upgrade-Insecure-Requests: 1',
-            ];
-
-            $destPath = $this->downloadFile($startUrl, $referer, $fileHeaders, $cookieJar, $destDir);
-
-            return $destPath;
-
-        } finally {
-            if (file_exists($cookieJar)) {
-                unlink($cookieJar);
-            }
-        }
-    }
+		$friendlyName = "";
+		$controller = new MetadataService();
+		//Session::$AccessLink = $link;
+		$file = $controller->GetMetadataPdfFile($metadataId, null, false, $workId, $friendlyName);
+		IO::Copy($file, $path . "/metadatos.pdf");
+		return "metadatos.pdf";
+	}
 
     function downloadDataset(
         string $path,
         string $type,
         int $workId,
-        int $datasetId): string
+        int $datasetId,
+		?string $partition): string
 	{
-		$destDir = $path;
+        $destDir = $path;
 
-		$baseUrl = $this->serverUrl . '/services/download';
-		$referer = '';
-		$cookieJar = tempnam(sys_get_temp_dir(), 'pob_cookies_');
-
-        // Cabeceras comunes que envía el navegador
-        $commonHeaders = [
-            'Accept: application/json, text/plain, */*',
-            'sec-ch-ua: "Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"',
-            'sec-ch-ua-mobile: ?0',
-            'sec-ch-ua-platform: "Windows"',
-        ];
-
-        try {
-            // ── Paso 1: iniciar la generación ─────────────────────────────────────
-            $startUrl = $baseUrl . sprintf('/StartDatasetDownload?t=%s&d=%d&w=%d', $type, $datasetId, $workId);
-            $response = $this->curlGet($startUrl, $referer, $commonHeaders, $cookieJar);
-            $data = json_decode($response['body'], true);
-
-            // Si el primer response ya dice done=true, saltamos el polling
-            if (empty($data['done'])) {
-				if (!isset($data['key'])) {
-					throw new ErrorException("StartDatasetDownload no devolvió key. Body: " . $response['body']);
-				}
-				$key = $data['key'];
-				// ── Paso 2: ejecutar pasos hasta done=true ────────────────────────────────
-				$stepUrl = $baseUrl . sprintf('/StepDatasetDownload?k=%s', $key);
-
-				do {
-					$response = $this->curlGet($stepUrl, $referer, $commonHeaders, $cookieJar);
-					$data = json_decode($response['body'], true);
-
-					if ($data === null) {
-						throw new ErrorException("Respuesta no-JSON en StepDatasetDownload: " . $response['body']);
-					}
-
-					$step = $data['step'] ?? '?';
-					$totalSteps = $data['totalSteps'] ?? '?';
-
-					if ($step !== '?' && $totalSteps !== '?' && (int) $step > (int) $totalSteps + 2) {
-						// Guardia por si el server entra en un estado inesperado
-						throw new ErrorException("Número de paso ($step) excede totalSteps ($totalSteps) — abortando (key=$key)");
-					}
-
-				} while (empty($data['done']));
+		$controller = new frontendServices\DownloadDatasetService(false);
+		// ── Paso 1: iniciar la generación ─────────────────────────────────────
+	    $data = $controller->CreateMultiRequestFile($type, $datasetId, null, [], null, null, $partition);
+        // Si el primer response ya dice done=true, saltamos el polling
+        if (empty($data['done'])) {
+			if (!isset($data['key'])) {
+				throw new ErrorException("StartDatasetDownload no devolvió key. Body: " . $response['body']);
 			}
+			$key = $data['key'];
+			// ── Paso 2: ejecutar pasos hasta done=true ────────────────────────────────
+			do {
+				$data = $controller->StepMultiRequestFile($key);
+				$step = $data['step'];
+				$totalSteps = $data['totalSteps'];
 
-            // ── Paso 3: descargar el archivo ──────────────────────────────────────
-            if (!is_dir($destDir) && !mkdir($destDir, 0755, true)) {
-                throw new ErrorException("No se pudo crear el directorio destino: $destDir");
-            }
+				if ((int) $step > (int) $totalSteps + 2) {
+					throw new ErrorException("Número de paso ($step) excede totalSteps ($totalSteps) — abortando (key=$key)");
+				}
 
-            $fileUrl = $baseUrl . sprintf('/GetDatasetFile?t=%s&d=%d&w=%d', $type, $datasetId, $workId);
-
-            // Necesitamos las cookies de sesión y seguir la redirección si la hay
-            $fileHeaders = [
-                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'sec-ch-ua: "Google Chrome";v="147", "Not.A/Brand";v="8", "Chromium";v="147"',
-                'sec-ch-ua-mobile: ?0',
-                'sec-ch-ua-platform: "Windows"',
-                'Upgrade-Insecure-Requests: 1',
-            ];
-
-            $destPath = $this->downloadFile($fileUrl, $referer, $fileHeaders, $cookieJar, $destDir);
-
-            return $destPath;
-
-        } finally {
-            if (file_exists($cookieJar)) {
-                unlink($cookieJar);
-            }
-        }
-    }
-
-
-    // ── Helpers internos ──────────────────────────────────────────────────────────
-
-    function curlGet(string $url, string $referer, array $headers, string $cookieJar): array
-    {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTPHEADER     => $headers,
-            CURLOPT_REFERER        => $referer,
-            CURLOPT_COOKIEFILE     => $cookieJar,   // leer cookies
-            CURLOPT_COOKIEJAR      => $cookieJar,   // guardar cookies
-            CURLOPT_ENCODING       => '',            // acepta gzip automáticamente
-            CURLOPT_TIMEOUT        => 300,
-        ]);
-
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
-		$body     = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error    = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            throw new ErrorException("cURL error en $url: $error");
-        }
-        if ($httpCode >= 400) {
-            throw new ErrorException("HTTP $httpCode en $url");
+			} while (empty($data['done']));
+		}
+        // ── Paso 3: descargar el archivo ──────────────────────────────────────
+        if (!is_dir($destDir) && !mkdir($destDir, 0755, true)) {
+            throw new ErrorException("No se pudo crear el directorio destino: $destDir");
         }
 
-        return ['body' => $body, 'httpCode' => $httpCode];
-    }
-
-
-    function downloadFile(string $url, string $referer, array $headers, string $cookieJar, string $destDir): string
-    {
-        // Primera llamada solo para obtener el Content-Disposition y determinar el nombre
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTPHEADER     => $headers,
-            CURLOPT_REFERER        => $referer,
-            CURLOPT_COOKIEFILE     => $cookieJar,
-            CURLOPT_COOKIEJAR      => $cookieJar,
-            CURLOPT_ENCODING       => '',
-            CURLOPT_TIMEOUT        => 300,
-            CURLOPT_HEADER         => true,   // incluir cabeceras en la respuesta
-        ]);
-
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
-		$raw      = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $error    = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            throw new ErrorException("cURL error descargando archivo: $error");
-        }
-        if ($httpCode >= 400) {
-            throw new ErrorException("HTTP $httpCode al descargar archivo");
-        }
-
-        $rawHeaders = substr($raw, 0, $headerSize);
-        $body       = substr($raw, $headerSize);
-
-        // Extraer nombre del archivo desde Content-Disposition
-        $filename = $this->extractFilename($rawHeaders);
-        if (!$filename) {
-            $filename = 'dataset_' . time() . '.bin';
-        }
-
-        $destPath = rtrim($destDir, '/') . '/' . $filename;
-        if (file_put_contents($destPath, $body) === false) {
-            throw new ErrorException("No se pudo escribir el archivo en: $destPath");
-        }
-
-        return $destPath;
-    }
-
-
-    function extractFilename(string $headers): ?string
-    {
-        // Intenta primero el parámetro RFC 5987 (filename*=UTF-8''...)
-        if (preg_match("/filename\*=UTF-8''([^\r\n;]+)/i", $headers, $m)) {
-            return urldecode(trim($m[1]));
-        }
-        // Fallback al filename= clásico
-        if (preg_match('/filename="?([^"\r\n;]+)"?/i', $headers, $m)) {
-            return urldecode(trim($m[1], " \"'"));
-        }
-        return null;
+		$file = DatasetDownloadManager::GetFile($type, $datasetId, null, [], null, null, $partition, false);
+		$filename = DatasetDownloadManager::GetFileName($datasetId, [], null, null, $partition, $type, false);
+		IO::Copy($file, $destDir . "/" . $filename);
+		return $filename;
     }
 }
 

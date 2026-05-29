@@ -59,7 +59,44 @@ class MetadataService extends BaseService
 		}
 		return $this->GetMetadataPdf($metadataId, $datasetId, $fromDraft, $workId);
 	}
+	public function GetMetadataInfo($metadataId, $workId = null, $fromDraft = false)
+	{
+		$model = new MetadataModel($fromDraft);
+		$metadata = $model->GetMetadata($metadataId);
+		// Si no indica work, no pueden ser metadatos de un work
+		if (!$workId && $metadata['met_type'] !== 'C') {
+			throw new PublicException('Indicación de metadatos no válida.');
+		}
+		if ($metadata === null || sizeof($metadata) < 2)
+			throw new PublicException('Metadatos no encontrados.');
+		// completa los metadatos para crearlo
+		$metadata['wrk_access_link'] = $model->GetAccessLink($workId);
+		if ($workId) {
+			if ($fromDraft)
+				$ark = Links::GetWorkArkUrl(PublishDataTables::Shardified($workId));
+			else
+				$ark = Links::GetWorkArkUrl($workId);
+			$metadata['met_ark'] = $ark;
+		}
+		$metadata['sources'] = $model->GetMetadataSources($metadataId);
+		$metadata['institutions'] = $model->GetMetadataInstitutions($metadataId);
+		if ($workId)
+			$model->AddGeographyMetadata($sources, null, $workId);
+		$metadata['met_online_since_formatted'] = $this->formatDate($metadata['met_online_since']);
+		$metadata['met_last_online_formatted'] = $this->formatDate($metadata['met_last_online']);
+
+		return $metadata;
+	}
 	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
+	{
+		$friendlyName = "";
+		$filename = $this->GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, $friendlyName);
+
+		return App::SendFile($filename)
+			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
+			->deleteFileAfterSend(true);
+	}
+	public function GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, &$friendlyName )
 	{
 		$model = new MetadataModel($fromDraft);
 		$metadata = $model->GetMetadata($metadataId);
@@ -82,9 +119,7 @@ class MetadataService extends BaseService
 		if ($fromDraft === false && PdfMetadataCache::Cache()->HasData($metadataId, $key, $data))
 		{
 			$friendlyName = Str::SanitizeFilename($friendlyName);
-
-			return App::SendFile($data, true)
-				->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName);
+			return $data;
 		}
 		else
 		{
@@ -118,10 +153,7 @@ class MetadataService extends BaseService
 			PdfMetadataCache::Cache()->PutData($metadataId, $key, $filename);
 		}
 		$friendlyName = Str::SanitizeFilename($friendlyName);
-
-		return App::SendFile($filename)
-			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
-			->deleteFileAfterSend(true);
+		return $filename;
 	}
 
 	public function GetXlsDictionary($metadataId, $datasetId, $workId)

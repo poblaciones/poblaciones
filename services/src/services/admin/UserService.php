@@ -5,6 +5,7 @@ namespace helena\services\admin;
 use helena\caches\WorkPermissionsCache;
 use helena\classes\App;
 use helena\classes\Account;
+use helena\classes\AutomationAuth;
 use minga\framework\PublicException;
 
 use helena\services\common\BaseService;
@@ -124,6 +125,54 @@ class UserService extends BaseService
 
 		Profiling::EndTimer();
 		return self::OK;
+	}
+
+	public function CreateUserKey($userId, $description)
+	{
+		[$plainKey, $hash] = AutomationAuth::GenerateKey();
+
+		App::Db()->insert('user_key', [
+			'key_hash' => $hash,
+			'key_user_id' => $userId,
+			'key_description' => $description,
+			'key_active' => 1,
+			'key_created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
+		]);
+
+		$keyId = App::Db()->lastInsertId();
+
+		return [
+			'key_id' => (int) $keyId,
+			'plain_key' => $plainKey,
+			'description' => $description,
+		];
+	}
+
+	public function UpdateUserKey($keyId, $description, $active)
+	{
+		$fields = [];
+		if ($description !== null)
+			$fields['key_description'] = $description;
+		if ($active !== null)
+			$fields['key_active'] = $active;
+
+		App::Db()->update('user_key', $fields, ['key_id' => $keyId]);
+	}
+
+	public function DeleteUserKey($keyId)
+	{
+		App::Db()->delete('user_key', ['key_id' => $keyId]);
+	}
+
+	public function GetUserKeys($userId)
+	{
+		$rows = App::Db()->fetchAll(
+			'SELECT key_id, key_description, key_active, key_created_at, key_last_used
+		   FROM user_key WHERE key_user_id = ?
+		  ORDER BY key_created_at DESC',
+			[$userId]
+		);
+		return $rows;
 	}
 }
 

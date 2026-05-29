@@ -139,7 +139,7 @@ class SourceService extends BaseService
 		$newSourceMetadata->setSource($source);
 		$newSourceMetadata->setMetadata($metadata);
 
-		App::Orm()->save($newSourceMetadata) ;
+		App::Orm()->save($newSourceMetadata);
 
 		return self::OK;
 	}

@@ -30,12 +30,14 @@ class BaseReader
 			return new ShapefileReader($path, $fileExtension);
 		else if ($fileExtension == "xlsx" || $fileExtension == "xls")
 			return new XlsxReader($path, $fileExtension);
+		else if ($fileExtension == "gpkg")
+			return new GpkgReader($path, $fileExtension);
 		else if ($fileExtension == "sav")
 			return new SavReader($path, $fileExtension);
 		else if ($fileExtension == "kml" || $fileExtension == "kmz")
 			return new KmxReader($path, $fileExtension);
 		else
-			throw new PublicException('La extensión del archivo debe ser CSV, TXT, XLSX, XLS, SAV, ZIP (shapefiles), KML o KMZ. Extensión recibida: ' . $fileExtension);
+			throw new PublicException('La extensión del archivo debe ser CSV, TXT, XLSX, XLS, SAV, ZIP (shapefiles), GPKG, KML o KMZ. Extensión recibida: ' . $fileExtension);
 	}
 
 	public function Prepare($selectedSheetIndex)
