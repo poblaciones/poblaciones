@@ -32,7 +32,7 @@ class MapSettings
 
 	public $UseDeckgl = true;
 
-	public $UseCompareSeries = false;
+	public $UseCompareSeries = true;
 
 	public $isOWSEnabled = false;
 
@@ -50,11 +50,11 @@ class MapSettings
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;
 
-	public $UseCharts = false;
+	public $UseCharts = true;
 
 	public $NAAN = null;
 
-	public $MapsAPI = "google";
+	public $MapsAPI = "leaflet";
 
 	public $MaxQueueRequests = 5;
 	public $MaxStaticQueueRequests = 10;
