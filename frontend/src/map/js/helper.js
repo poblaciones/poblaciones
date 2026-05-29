@@ -545,7 +545,7 @@ module.exports = {
 	getWorkAnnotationParams(annotation) {
 		return { w: annotation.WorkId, a: annotation.Id };
 	},
-	getMetricDataParams(metric, frame) {
+	getMetricDataParams(metric) {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		var ret = this.mergeObject({
 			l: metric.Metric.Id,
@@ -554,10 +554,7 @@ module.exports = {
 			u: metric.SelectedUrbanity,
 			g: metric.EffectivePartition,
 			w: metric.Metric.Signature
-		}, this.getFrameParams(frame));
-		delete ret.e;
-		delete ret.z;
-		ret.e = null;
+		});
 		return ret;
 	},
 	getBlockTileParams(metric, frame, x, y, suffix, size) {
@@ -616,7 +613,7 @@ module.exports = {
 		const ver = metric.Versions[metric.SelectedVersionIndex];
 		const level = ver.Levels[ver.SelectedLevelIndex];
 		const variable = level.Variables[level.SelectedVariableIndex];
-		if (activeMetric.Compare.Active && metric.SelectedLevelCanBeCompared()) {
+		if (activeMetric.Compare.Active && activeMetric.SelectedLevelCanBeCompared()) {
 			compare = activeMetric.Compare.SelectedLevel().Id;
 		} else {
 			compare = null;

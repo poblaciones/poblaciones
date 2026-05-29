@@ -1038,19 +1038,20 @@ LeafletApi.prototype.getBounds = function() {
 };
 
 LeafletApi.prototype.getZoom = function () {
-	return this.map.getZoom();
+	return Math.round(this.map.getZoom());
 };
 LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 	// Lo crea
 	var overlayTiled = new LeafletTileOverlay(activeMetric);
 	const d = require('./deck-gl/LeafletLayer');
 	var deckElementsLayer;
+	var polygonLayer = null;
 	// Crea la capa
 	if (activeMetric.IsLocationType()) {
 		var iconLayer = new IconOverlay(activeMetric);
 		deckElementsLayer = iconLayer.CreateLayer(data, 1);
 	} else {
-		var polygonLayer = new PolygonOverlay(activeMetric);
+		polygonLayer = new PolygonOverlay(activeMetric);
 		deckElementsLayer = polygonLayer.CreateLayer(data);
 	}
 	// La agrega
@@ -1062,6 +1063,16 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 		],
 		layers: [deckElementsLayer]
 	});
+	if (polygonLayer != null) {
+		var map = this.map;
+		map.on('zoomend', function () {
+			var zoom = map.getZoom();
+			var updatedLayer = polygonLayer.UpdateZoom(zoom);
+			if (updatedLayer) {
+				wrapper.setProps({ layers: [updatedLayer] });
+			}
+		});
+	}
 
 	var overlay = L.layerGroup([wrapper, overlayTiled]);
 	overlay.dispose = function () {
@@ -1090,7 +1101,7 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		// Lo agrega
 		this.doInsertOverlay(index, overlay);
 	} else {
-		// Lo crea
+		// Lo crea sin tiles
 		overlay = new LeafletNullOverlay();
 		// Lo agrega
 		this.doInsertOverlay(index, overlay);

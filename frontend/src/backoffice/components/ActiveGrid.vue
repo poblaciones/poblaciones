@@ -111,6 +111,13 @@
 					<md-button @click="startDownload('r')">
 						<md-icon>file_download</md-icon> Descargar .RDATA
 					</md-button>
+					<md-button v-if="isShapesPolygon" @click="startDownload('gw')">
+						<md-icon>file_download</md-icon> Descargar .GPKG
+					</md-button>
+					<md-button v-if="isShapesPolygon" @click="startDownload('hw')">
+						<md-icon>file_download</md-icon> Descargar .SHP
+					</md-button>
+
 				</template>
 			</div>
 		</div>
@@ -166,6 +173,9 @@ export default {
     },
 		usePagedGrid() {
 			return true; //this.showingErrors;
+		},
+		isShapesPolygon() {
+			return this.Dataset.properties.Type == 'S';
 		}
   },
   methods: {

@@ -593,6 +593,8 @@ export default {
 				{ Id: '0', Caption: 'Ninguno' },
 				{ Id: '1', Caption: '#' },
 				{ Id: '0.1', Caption: '#,#' },
+				{ Id: '0.01', Caption: '#,##' },
+				{ Id: '0.001', Caption: '#,###' },
 				];
 		},
 		palettes() {

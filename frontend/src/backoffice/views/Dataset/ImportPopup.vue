@@ -10,6 +10,7 @@
 					<ul>
 						<li>Archivo geográfico estructurado (.kml/.kmz)</li>
 						<li>ESRI Shapefiles (.zip)</li>
+						<li>GeoPackage (.gpkg)</li>
 						<li>Texto separado por comas (.csv)</li>
 						<li>Excel (.xls, xlsx)</li>
 						<li>SPSS (.sav)</li>
@@ -94,7 +95,7 @@ export default {
         thumbnailWidth: 150,
         withCredentials: true,
         maxFiles: 1,
-        acceptedFiles: '.csv,.txt,.sav,.kml,.kmz,.xls,.xlsx,.zip',
+        acceptedFiles: '.csv,.txt,.sav,.gpkg,.kml,.kmz,.xls,.xlsx,.zip',
         dictDefaultMessage: "Arrastre su archivo aquí o haga click para examinar.",
         forceChunking: true,
         chunking: true,
@@ -205,8 +206,8 @@ export default {
       let extension = this.extension;
       if (extension !== 'sav' && extension !== 'csv' && extension !== 'txt'
           && extension !== 'xls' && extension !== 'xlsx'
-				&& extension !== 'kml' && extension !== 'kmz' && extension !== 'zip') {
-				alert('La extensión del archivo debe ser CSV, TXT, XLS, XLSX, SAV, KML, KMZ o ZIP.');
+				&& extension !== 'kml' && extension !== 'kmz' && extension !== 'gpkg' && extension !== 'zip') {
+				alert('La extensión del archivo debe ser CSV, TXT, XLS, XLSX, SAV, KML, KMZ, GPKG o ZIP.');
         return;
       }
       if (!this.Dataset && !this.createdDataset) {

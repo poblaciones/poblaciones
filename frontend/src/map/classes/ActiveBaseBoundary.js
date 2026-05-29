@@ -13,6 +13,9 @@ ActiveBaseBoundary.DEFAULT_COLOR = '#95a3c1';
 function ActiveBaseBoundary(data, color = null) {
 	ActiveBoundary.call(this, data);
 	this.isBaseMetric = true;
+	this.dynamicWidth = false;
+	this.dashedLine = false;
+	this.lineWidth = 2;
 	this.color = (color ? color : ActiveBaseBoundary.DEFAULT_COLOR);
 };
 

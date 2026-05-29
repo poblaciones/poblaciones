@@ -1,4 +1,4 @@
-
+- Exportación a GeoPackage (.gpkg)
 
 v4.8 (2026-03-19)
 - Refactor de botón de buscar.

@@ -589,7 +589,6 @@ ScaleGenerator.prototype.CreateByVariableCategories = function (variable, curren
 		};
 		newVals.push(value);
 	}
-	//arr.Fill(variable.Values, newVals);
 	variable.Values = newVals;
 };
 

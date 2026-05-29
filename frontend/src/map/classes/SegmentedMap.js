@@ -391,6 +391,9 @@ SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
 					for (var id of basemapMetric.MetricIds) {
 						basemapMetric.requested++;
 						this.AddBaseMetricById(id).then(function (activeBaseMetric) {
+							activeBaseMetric.dynamicWidth = basemapMetric.DynamicWidth;
+							activeBaseMetric.lineWidth = basemapMetric.LineWidth;
+							activeBaseMetric.dashedLine = basemapMetric.DashedLine;
 							basemapMetric.layers.push(activeBaseMetric);
 							basemapMetric.requested--;
 						});
@@ -400,6 +403,9 @@ SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
 					for (var id of basemapMetric.BoundaryIds) {
 						basemapMetric.requested++;
 						this.AddBaseBoundaryById(id).then(function (activeBaseMetric) {
+							activeBaseMetric.dynamicWidth = basemapMetric.DynamicWidth;
+							activeBaseMetric.lineWidth = basemapMetric.LineWidth;
+							activeBaseMetric.dashedLine = basemapMetric.DashedLine;
 							basemapMetric.layers.push(activeBaseMetric);
 							basemapMetric.requested--;
 						});

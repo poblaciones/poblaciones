@@ -65,6 +65,27 @@ Db.prototype.DeleteReview = function (review, callback) {
 		});
 };
 
+////////////////////////////////////////////////
+Db.prototype.GetUserKeys = function (userId) {
+	return axiosClient.getPromise(window.host + '/services/admin/GetUserKeys',
+		{ u: userId }, 'obtener la lista de keys');
+};
+
+Db.prototype.CreateUserKey = function (userId, description) {
+	return axiosClient.postPromise(window.host + '/services/admin/CreateUserKey',
+		{ u: userId, description }, 'crear los keys');
+};
+
+Db.prototype.DeleteUserKey = function (keyId) {
+	return axiosClient.getPromise(window.host + '/services/admin/DeleteUserKey',
+		{ key_id: keyId }, 'eliminar el key');
+};
+
+Db.prototype.UpdateUserKey = function (keyId, fields) {
+	return axiosClient.postPromise(window.host + '/services/admin/UpdateUserKey',
+		{ key_id: keyId, ...fields }, 'actualizar el key');
+};
+
 Db.prototype.UpdateReview = function (review) {
 	return axiosClient.postPromise(window.host + '/services/admin/UpdateReview',
 		{ r: review }, 'modificar la revisión');

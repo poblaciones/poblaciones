@@ -313,7 +313,15 @@ ActiveSelectedMetric.prototype.GetDataService = function (seed) {
 			return null;
 		}
 	}
+	// Define si usa servidores secundarios...
 	var useStaticQueue = window.SegMap.Configuration.StaticWorks.indexOf(this.SelectedVersion().Work.Id) !== -1;
+	// Tiene que estar las dos...
+	if (this.Compare.Active && this.SelectedLevelCanBeCompared()) {
+		if (window.SegMap.Configuration.StaticWorks.indexOf(this.Compare.SelectedVersion().Work.Id) === -1) {
+			useStaticQueue = false;
+		}
+	}
+	// Listo
 	var path = '';
 	var server = '';
 

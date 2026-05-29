@@ -14,6 +14,8 @@ function ActiveBaseMetric(selectedMetric) {
 	ActiveMetric.call(this, selectedMetric);
 	this.objs.Segment = null;
 	this.isBaseMetric = true;
+	this.dynamicWidth = false;
+	this.lineWidth = 2;
 	this.color = ActiveBaseMetric.DEFAULT_COLOR;
 };
 

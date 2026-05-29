@@ -19,6 +19,7 @@
 		"@ckeditor/ckeditor5-build-classic": "^38.0.1",
 		"@ckeditor/ckeditor5-vue2": "^3.0.1",
 		"@deck.gl/core": "^9.1.8",
+		"@deck.gl/extensions": "^9.3.1",
 		"@deck.gl/google-maps": "^9.1.8",
 		"@deck.gl/layers": "^9.1.8",
 		"@fortawesome/fontawesome-free": "^5.15.3",
