@@ -29,9 +29,9 @@
 					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
 									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
 					<LeftPanel ref='leftPanel' />
-					<MapPanel class="exp-hiddable-block" />
+					<MapPanel />
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
-					<MapType ref="mapSelector" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
+					<MapType ref="mapSelector" class="exp-hiddable-block" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
 
 					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
 					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" />
