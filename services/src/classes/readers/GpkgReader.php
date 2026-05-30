@@ -359,7 +359,6 @@ class GpkgReader extends BaseReader
 			return $useLatLong ? [null, null] : [null];
 
 		if ($useLatLong) {
-			/** @var Point $geom */
 			$x = $geom->x();
 			$y = $geom->y();
 			if ($needsProjection)

@@ -20,8 +20,6 @@ use helena\services\common\MetadataService;
 
 class AutomationService extends BaseService
 {
-	private string $serverUrl;
-
 	public function DownloadWorkDatasets($workId)
 	{
         try
@@ -158,7 +156,8 @@ class AutomationService extends BaseService
         // Si el primer response ya dice done=true, saltamos el polling
         if (empty($data['done'])) {
 			if (!isset($data['key'])) {
-				throw new ErrorException("StartDatasetDownload no devolvió key. Body: " . $response['body']);
+				$body = (isset($data['body']) ? $data['body'] : '');
+				throw new ErrorException("StartDatasetDownload no devolvió key. Body: " . $body);
 			}
 			$key = $data['key'];
 			// ── Paso 2: ejecutar pasos hasta done=true ────────────────────────────────
