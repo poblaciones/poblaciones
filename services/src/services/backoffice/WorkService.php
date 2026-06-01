@@ -619,7 +619,7 @@ class WorkService extends BaseService
 								, wrk_segmented_crawling SegmentedCrawling
 								, wrk_type Type
 								, wrk_unfinished Unfinished
-								, (SELECT MIN(wkp_permission) FROM draft_work_permission WHERE wkp_work_id = wrk_id AND wkp_user_id = ?) privileges
+								, (SELECT MIN(wkp_permission) FROM draft_work_permission WHERE wkp_work_id = wrk_id AND wkp_user_id = ?) Privileges
 								, (SELECT COUNT(*) FROM draft_dataset d1 WHERE d1.dat_work_id = wrk_id) DatasetCount
 								, (SELECT COUNT(*) FROM draft_dataset d2 WHERE d2.dat_work_id = wrk_id AND dat_geocoded = 1) GeorreferencedCount
 								, (SELECT COUNT(*) FROM draft_metric_version_level mvl

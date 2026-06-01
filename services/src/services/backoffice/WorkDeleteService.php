@@ -39,7 +39,7 @@ class WorkDeleteService extends BaseService
 		$revoke = new RevokeService($this->state);
 		if ($this->state->Step() < $revoke->TotalSteps())
 		{
-			return $revoke->StepRevoke($key, true);
+			return $revoke->StepRevoke($key, true, "Eliminando datasets");
 		}
 
 		switch($this->state->Step() - $revoke->TotalSteps())

@@ -9,6 +9,7 @@
  *   POST /api/automation/CreateWork
  *   GET  /api/automation/GetWork
  *   GET  /api/automation/GetWorks
+ *   GET  /api/automation/GetSiteWorks
  *   POST /api/automation/UpdateMetadata
  *   POST /api/automation/UpdateWorkVisibility
  *   GET  /api/automation/DownloadWorkDatasets
@@ -26,6 +27,7 @@ use helena\classes\App;
 use helena\classes\Session;
 use helena\classes\AutomationAuth;
 use helena\services\backoffice as services;
+use helena\services\admin as adminServices;
 use helena\services\api as apiServices;
 use helena\entities\backoffice as entities;
 use minga\framework\Params;
@@ -82,6 +84,23 @@ App::$app->get('/services/api/automation/GetWorks', function (Request $request) 
 
 	$controller = new services\WorkService();
 	return App::Json($controller->GetCurrentUserWorks());
+});
+
+/**
+ * Lista las cartografías de sitio para usuarios administradores.
+ *
+ * Respuesta: array de objetos Work (resumen, sin datasets ni indicadores).
+ */
+App::$app->get('/services/api/automation/GetSiteWorks', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$controller = new adminServices\WorkService();
+	$filter = Params::Get('f', null);
+	$ret = $controller->GetWorksByType($filter);
+	return App::Json($ret);
+
 });
 
 /**

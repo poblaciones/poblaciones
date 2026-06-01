@@ -505,7 +505,7 @@
 
 	:root {
 		--md-theme-default-primary: #00A0D2 !important;
-		--md-theme-default-accent: #ca4a4a !important;
+		--md-theme-default-accent: #00A0D2 !important;
 		--md-theme-default-theme: light;
 		--md-theme-default-icon-on-background: #767676;
 	}

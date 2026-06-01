@@ -36,7 +36,7 @@ class RevokeService extends BaseService
 	{
 		return self::STEP_COMPLETED;
 	}
-	public function StepRevoke($key, $isSubStepper = false)
+	public function StepRevoke($key, $isSubStepper = false, $subStepperEndLabel = null)
 	{
 		// Desde acá controla los pasos de publicación
 		$this->state = new WorkStateBag();
@@ -68,7 +68,10 @@ class RevokeService extends BaseService
 				$publisher->CleanWorkCaches($workId);
 				$publisher->RevokeOnlineDates($workId);
 				WorkFlags::SetAll($workId);
-				$this->state->NextStep('Listo');
+				if ($isSubStepper)
+					$this->state->NextStep($subStepperEndLabel);
+				else
+					$this->state->NextStep('Listo');
 				break;
 			default:
 				throw new PublicException('Paso inválido.');

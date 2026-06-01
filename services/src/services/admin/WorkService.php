@@ -133,7 +133,10 @@ class WorkService extends BaseService
 
 	public function GetWorksByType($filter, $timeFilterDays = 0)
 	{
-		$condition = "wrk_type = '" . substr($filter, 0, 1) . "' ";
+		if ($filter)
+			$condition = " wrk_type = '" . substr($filter, 0, 1) . "' ";
+		else
+			$condition = " 1=1 ";
 		if ($timeFilterDays > 0)
 			$condition .= ' AND met_create >= ( CURDATE() - INTERVAL ' . $timeFilterDays. ' DAY ) ';
 		// Trae las cartografías

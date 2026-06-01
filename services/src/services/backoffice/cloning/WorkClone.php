@@ -81,8 +81,11 @@ class WorkClone
 		}
 		$this->state->Set('name', $newName);
 
+		// Copia metadataos
+		$newMetadata = $this->CopyMetadata();
+
 		$startupId = $this->CopyCustomizeAndStartup();
-		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0, 'wrk_is_example' => 0, 'wrk_startup_id' => $startupId);
+		$static = array('wrk_unfinished' => true, 'wrk_is_indexed' => 0, 'wrk_is_example' => 0, 'wrk_startup_id' => $startupId, 'wrk_metadata_id' => $newMetadata->getId());
 		$this->targetWorkId = RowDuplicator::DuplicateRows(entities\DraftWork::class, $this->sourceWorkId, $static);
 		$cloned = App::Orm()->find(entities\DraftWork::class, $this->targetWorkId);
 		// Crea la tabla de trabajo para chunks
@@ -102,9 +105,6 @@ class WorkClone
 			$newPreviewFileId = $this->DuplicateFile($previewFileId);
 			$cloned->setPreviewFileId($newPreviewFileId);
 		}
-		// Copia metadataos
-		$newMetadata = $this->CopyMetadata();
-		$cloned->setMetadata($newMetadata);
 		// Guarda y setea cambios
 		WorkFlags::Save($cloned);
 		return $cloned;

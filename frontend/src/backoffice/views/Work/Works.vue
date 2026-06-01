@@ -15,8 +15,6 @@
 		<div class="md-layout-item md-size-100">
 			<stepper ref="DeleteStepper" @completed="onDeleteComplete">
 			</stepper>
-			<stepper ref="SaveAsStepper">
-			</stepper>
 			<stepper ref="stepper">
 			</stepper>
 			<invoker ref="invoker">
@@ -28,9 +26,40 @@
 				</md-button>
 			</div>
 		</div>
-		<work-items :list="list" :filter="filter" @action="actionSelected" actions="I" />
 
-		<work-items :list="listArchived" :filter="filter" icon="archive" @action="actionSelected" actions="A" label="Archivadas" />
+		<!--
+			Lista activa: soporta selección múltiple para archivar y eliminar.
+			El toggle y los botones de acción en lote viven dentro del toolbar
+			del md-table (WorkItems), dentro del max-width: 1000px de la tabla.
+		-->
+		<work-items
+			:list="list"
+			:filter="filter"
+			@action="actionSelected"
+			actions="I"
+			:multi-select-mode="multiSelectMode"
+			:selected-items="selectedItems"
+			@update:selected-items="selectedItems = $event"
+			@toggle-multi-select="toggleMultiSelect"
+			@bulk-action="onBulkAction"
+		/>
+
+		<!--
+			Lista archivada: soporta selección múltiple para desarchivar y eliminar.
+		-->
+		<work-items
+			:list="listArchived"
+			:filter="filter"
+			icon="archive"
+			@action="actionSelected"
+			actions="A"
+			label="Archivadas"
+			:multi-select-mode="multiSelectModeArchived"
+			:selected-items="selectedArchivedItems"
+			@update:selected-items="selectedArchivedItems = $event"
+			@toggle-multi-select="toggleMultiSelectArchived"
+			@bulk-action="onBulkActionArchived"
+		/>
 
 		<div class="md-layout-item md-size-100">
 			<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
@@ -67,6 +96,7 @@
 				</div>
 			</div>
 		</div>
+
 		<div class="md-layout" v-if="this.filter !== 'P' && listExamples.length > 0">
 			<md-button @click="toggle" v-if="list.length > 0" style="margin: 10px 0px 10px 0px">
 				<md-icon>{{ (examplesExpanded ? 'expand_less' : 'expand_more' ) }}</md-icon>
@@ -74,16 +104,15 @@
 				Ejemplos ({{ listExamples.length }})
 			</md-button>
 			<transition name="fade">
-
 				<div class="md-layout-item md-size-100" style="margin-bottom: 1px;" v-show="examplesExpanded">
 					<div style="position: relative; display: inline" v-for="item in listExamples" :key="item.Id">
 						<mp-large-data-item @click="select(item)" :item="item" :showEdited="false" />
 						<work-actions :item="item" actions="S" @action="actionSelected"></work-actions>
 					</div>
 				</div>
-
 			</transition>
 		</div>
+
 		<md-dialog-prompt :md-active.sync="activateSaveAs"
 						  :md-title="'Duplicar ' + entityName.single"
 						  v-model="newWorkName"
@@ -129,90 +158,274 @@ export default {
 			works: [],
 			examplesExpanded: true,
 			activateSaveAs: false,
+			// ── Selección múltiple: lista activa ─────────────────────────────────
+			multiSelectMode: false,
+			selectedItems: [],
+			// ── Selección múltiple: lista archivada ──────────────────────────────
+			multiSelectModeArchived: false,
+			selectedArchivedItems: [],
+			// ── Estado de borrado en lote (compartido por ambas listas) ──────────
+			isBulkDeleting: false,
+			bulkDeleteQueue: [],
+			bulkDeleteIndex: 0,
+			bulkDeleteTotal: 0,
 		};
 	},
 	props: {
 		filter: String,
 		createEnabled: { type: Boolean, default: true },
+	},
+	mounted() {
+		this.examplesExpanded = window.Db.GetUserSetting('examplesExpanded', '1') == '1';
+		document.addEventListener('keydown', this.handleKeyDown);
+	},
+	beforeDestroy() {
+		document.removeEventListener('keydown', this.handleKeyDown);
+	},
+	computed: {
+		showingWelcome() {
+			return window.Context.CartographiesStarted && this.list && this.list.length === 0;
 		},
-		mounted() {
-			this.examplesExpanded = window.Db.GetUserSetting('examplesExpanded', '1') == '1';
+		help() {
+			return window.Context.Configuration.Help;
 		},
-		computed: {
-			showingWelcome() {
-				return window.Context.CartographiesStarted && this.list && this.list.length === 0;
-			},
-			help() {
-				return window.Context.Configuration.Help;
-			},
-			speechFormat() {
-				return speech;
-			},
-			canCreate() {
-				return (this.filter !== 'P' || window.Context.CanCreatePublicData());
-			},
-			lastest() {
-				var listCopy = [];
-				var loc = this;
-				arr.AddRange(listCopy, this.list);
-				// Ordena descendiente por fecha
-				listCopy.sort((a, b) => {
-						return -1 * loc.ocompare(speech.GetValidaDate(a), speech.GetValidaDate(b));
-					});
-				return listCopy.slice(0, 4);
-			},
-			user() {
-				return window.Context.User;
-			},
-			entityName() {
-				if (this.filter === 'P') {
-					return { single: 'datos públicos', plural: 'datos públicos', one: '', article: 'los' };
-				} else if (this.filter === 'R') {
-					return { single: 'cartografía', plural: 'cartografías', one: 'una', article: 'la' };
-				} else {
-					throw '(entidad desconocida: ' + this.Filter + ')';
-				}
-			},
-			newLabel() {
-				if (this.filter === 'P') {
-					return 'Nuevos datos públicos';
-				} else if (this.filter === 'R') {
-					return 'Nueva cartografía';
-				} else {
-					return '(entidad desconocida)';
-				}
-			},
-			list: {
-				get() {
-					return this.calculateList(false, false);
-				},
-				set(value) {
-
-				}
-			},
-			listArchived: {
-				get() {
-					return this.calculateList(true, false);
-				},
-				set(value) {
-
-				}
-			},
-			listExamples: {
-				get() {
-					return this.calculateList(false, false, true);
-				},
-				set(value) {
-
-				}
-			},
+		speechFormat() {
+			return speech;
+		},
+		canCreate() {
+			return (this.filter !== 'P' || window.Context.CanCreatePublicData());
+		},
+		lastest() {
+			var listCopy = [];
+			var loc = this;
+			arr.AddRange(listCopy, this.list);
+			listCopy.sort((a, b) => {
+				return -1 * loc.ocompare(speech.GetValidaDate(a), speech.GetValidaDate(b));
+			});
+			return listCopy.slice(0, 4);
+		},
+		user() {
+			return window.Context.User;
+		},
+		entityName() {
+			if (this.filter === 'P') {
+				return { single: 'datos públicos', plural: 'datos públicos', one: '', article: 'los' };
+			} else if (this.filter === 'R') {
+				return { single: 'cartografía', plural: 'cartografías', one: 'una', article: 'la' };
+			} else {
+				throw '(entidad desconocida: ' + this.Filter + ')';
+			}
+		},
+		newLabel() {
+			if (this.filter === 'P') {
+				return 'Nuevos datos públicos';
+			} else if (this.filter === 'R') {
+				return 'Nueva cartografía';
+			} else {
+				return '(entidad desconocida)';
+			}
+		},
+		list: {
+			get() { return this.calculateList(false, false); },
+			set(value) {}
+		},
+		listArchived: {
+			get() { return this.calculateList(true, false); },
+			set(value) {}
+		},
+		listExamples: {
+			get() { return this.calculateList(false, false, true); },
+			set(value) {}
+		},
 	},
 	methods: {
+
+		// ── Tecla Escape: cancela cualquier modo de selección múltiple activo ───────
+
+		handleKeyDown(e) {
+			if (e.key === 'Escape') {
+				if (this.multiSelectMode) {
+					this.multiSelectMode = false;
+					this.selectedItems = [];
+				}
+				if (this.multiSelectModeArchived) {
+					this.multiSelectModeArchived = false;
+					this.selectedArchivedItems = [];
+				}
+			}
+		},
+
+		// ── Toggles de selección múltiple ─────────────────────────────────────────
+
+		toggleMultiSelect() {
+			this.multiSelectMode = !this.multiSelectMode;
+			if (!this.multiSelectMode) {
+				this.selectedItems = [];
+			}
+		},
+
+		toggleMultiSelectArchived() {
+			this.multiSelectModeArchived = !this.multiSelectModeArchived;
+			if (!this.multiSelectModeArchived) {
+				this.selectedArchivedItems = [];
+			}
+		},
+
+		// ── Enrutadores de acciones en lote ───────────────────────────────────────
+
+		// Recibe el evento bulk-action de la lista activa (actions="I").
+		onBulkAction(payload) {
+			const { type, items } = payload;
+			const loc = this;
+			switch (type) {
+				case 'DELETE':
+					this.startBulkDelete(items, function () {
+						loc.multiSelectMode = false;
+						loc.selectedItems = [];
+					});
+					break;
+				case 'ARCHIVE':
+					this.startBulkArchive(items, function () {
+						loc.multiSelectMode = false;
+						loc.selectedItems = [];
+					});
+					break;
+			}
+		},
+
+		// Recibe el evento bulk-action de la lista archivada (actions="A").
+		onBulkActionArchived(payload) {
+			const { type, items } = payload;
+			const loc = this;
+			switch (type) {
+				case 'DELETE':
+					this.startBulkDelete(items, function () {
+						loc.multiSelectModeArchived = false;
+						loc.selectedArchivedItems = [];
+					});
+					break;
+				case 'UNARCHIVE':
+					this.startBulkUnarchive(items, function () {
+						loc.multiSelectModeArchived = false;
+						loc.selectedArchivedItems = [];
+					});
+					break;
+			}
+		},
+
+		// ── Borrado en lote ───────────────────────────────────────────────────────
+
+		// onConfirmed: callback que se ejecuta justo antes de iniciar la cola,
+		// usado para resetear el modo de selección de la lista de origen.
+		startBulkDelete(items, onConfirmed) {
+			const count = items.length;
+			const loc = this;
+			this.$refs.invoker.confirm(
+				`Eliminar ${count} ${this.entityName.plural}`,
+				`Los datasets, indicadores y metadatos de las ${count} ${this.entityName.plural} seleccionadas serán eliminados permanentemente. Esta operación no puede deshacerse.`,
+				function () {
+					if (onConfirmed) onConfirmed();
+					loc.bulkDeleteQueue = [...items];
+					loc.bulkDeleteIndex = 0;
+					loc.bulkDeleteTotal = count;
+					loc.isBulkDeleting = true;
+					loc.runNextBulkDelete();
+				}
+			);
+		},
+
+		runNextBulkDelete() {
+			const item = this.bulkDeleteQueue[this.bulkDeleteIndex];
+			const n = this.bulkDeleteIndex + 1;
+			const t = this.bulkDeleteTotal;
+			this.source = item;
+			this.$refs.DeleteStepper.startUrl = window.Db.GetStartWorkDeleteUrl(item.Id);
+			this.$refs.DeleteStepper.stepUrl = window.Db.GetStepWorkDeleteUrl();
+			this.$refs.DeleteStepper.setTitle(`Eliminando cartografías (${n}/${t})`);
+			this.$refs.DeleteStepper.useClose = false;
+			this.$refs.DeleteStepper.Start();
+		},
+
+		onDeleteComplete() {
+			arr.Remove(window.Context.Cartographies, this.source);
+			if (this.isBulkDeleting) {
+				this.bulkDeleteIndex++;
+				if (this.bulkDeleteIndex < this.bulkDeleteTotal) {
+					// Cierra el stepper actual, pausa breve para ver el estado completado,
+					// y abre el siguiente.
+					setTimeout(() => {
+						this.$refs.DeleteStepper.Close();
+						this.$nextTick(() => this.runNextBulkDelete());
+					}, 1);
+				} else {
+					// Último ítem: el stepper queda en su estado completado para cierre manual.
+					this.$refs.DeleteStepper.useClose = true;
+					this.isBulkDeleting = false;
+				}
+			}
+		},
+
+		// ── Archivo en lote ───────────────────────────────────────────────────────
+
+		startBulkArchive(items, onConfirmed) {
+			const count = items.length;
+			const loc = this;
+			this.$refs.invoker.confirm(
+				`Archivar ${count} ${this.entityName.plural}`,
+				`Las ${count} ${this.entityName.plural} seleccionadas serán archivadas.`,
+				function () {
+					if (onConfirmed) onConfirmed();
+					loc.runBulkArchive([...items]);
+				}
+			);
+		},
+
+		async runBulkArchive(items) {
+			const total = items.length;
+			for (let i = 0; i < items.length; i++) {
+				const item = items[i];
+				await this.$refs.invoker.doMessage(
+					`Archivando cartografías (${i + 1}/${total})`,
+					window.Db, window.Db.ArchiveWork, item.Id
+				);
+				item.IsArchived = true;
+			}
+		},
+
+		// ── Desarchivo en lote ────────────────────────────────────────────────────
+
+		startBulkUnarchive(items, onConfirmed) {
+			const count = items.length;
+			const loc = this;
+			this.$refs.invoker.confirm(
+				`Reactivar ${count} ${this.entityName.plural}`,
+				`Las ${count} ${this.entityName.plural} archivadas serán reactivadas.`,
+				function () {
+					if (onConfirmed) onConfirmed();
+					loc.runBulkUnarchive([...items]);
+				}
+			);
+		},
+
+		async runBulkUnarchive(items) {
+			const total = items.length;
+			for (let i = 0; i < items.length; i++) {
+				const item = items[i];
+				await this.$refs.invoker.doMessage(
+					`Reactivando cartografías (${i + 1}/${total})`,
+					window.Db, window.Db.UnarchiveWork, item.Id
+				);
+				item.IsArchived = false;
+			}
+		},
+
+		// ── Métodos existentes ────────────────────────────────────────────────────
+
 		getWorkUri(element) {
 			return '/cartographies/' + element.Id + '/metadata/content';
 		},
 		openPdf(pdf) {
-				window.open(pdf, '_blank');
+			window.open(pdf, '_blank');
 		},
 		calculateList(archived, deleted, example = false) {
 			var ret = [];
@@ -234,10 +447,8 @@ export default {
 					}
 				}
 			}
-			//this.customSort(ret);
 			return ret;
 		},
-
 		onLogicalDelete(item) {
 			this.$refs.invoker.doMessage('Enviando a la papelera', window.Db, window.Db.DeleteWork, item.Id).then(() => {
 				item.Deleted = true;
@@ -317,27 +528,18 @@ export default {
 				case 'RESTORE':
 					this.onRestore(item);
 					break;
-
 			}
 		},
 		ocompare(o1, o2) {
-			if (o1 === o2) {
-				return 0;
-			}
-			if (o1 === null) {
-				return -1;
-			}
-			if (o2 === null) {
-				return 1;
-			}
+			if (o1 === o2) { return 0; }
+			if (o1 === null) { return -1; }
+			if (o2 === null) { return 1; }
 			if (typeof o1 === 'string' && typeof o2 === 'string') {
 				return o1.localeCompare(o2, undefined, { sensitivity: 'accent' });
 			} else {
-				return o1 < o2 ? -1 :
-					o1 > o2 ? 1 : 0;
+				return o1 < o2 ? -1 : o1 > o2 ? 1 : 0;
 			}
 		},
-
 		select(element) {
 			this.$router.push({ path: this.getWorkUri(element) }).catch();
 		},
@@ -372,7 +574,6 @@ export default {
 					arr.Remove(window.Context.Cartographies, item);
 					arr.Remove(loc.listExamples, item);
 				});
-
 		},
 		onDemotePublic(item) {
 			var loc = this;
@@ -384,22 +585,19 @@ export default {
 					item.Type = 'R';
 					arr.Remove(loc.list, item);
 				});
-
 		},
 		onDelete(item) {
 			var loc = this;
 			this.source = item;
+			this.$refs.DeleteStepper.useClose = true;
 			this.$refs.invoker.confirm('Eliminar ' + this.entityName.single,
 				'Los datasets, indicadores y metadatos correspondientes a \'' + item.Caption + '\' serán eliminados',
-					function() {
-						loc.$refs.DeleteStepper.startUrl = window.Db.GetStartWorkDeleteUrl(item.Id);
-						loc.$refs.DeleteStepper.stepUrl = window.Db.GetStepWorkDeleteUrl();
-						loc.$refs.DeleteStepper.setTitle('Eliminando ' + loc.entityName.single);
-						loc.$refs.DeleteStepper.Start();
-			});
-		},
-		onDeleteComplete() {
-			arr.Remove(window.Context.Cartographies, this.source);
+				function () {
+					loc.$refs.DeleteStepper.startUrl = window.Db.GetStartWorkDeleteUrl(item.Id);
+					loc.$refs.DeleteStepper.stepUrl = window.Db.GetStepWorkDeleteUrl();
+					loc.$refs.DeleteStepper.setTitle('Eliminando ' + loc.entityName.single);
+					loc.$refs.DeleteStepper.Start();
+				});
 		},
 		onDuplicate(item, isExample) {
 			this.source = item;
@@ -420,14 +618,14 @@ export default {
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkPublishUrl();
 			this.$refs.stepper.setTitle('Publicando ' + this.entityName.single);
 			this.$refs.stepper.Start().then(function () {
-						item.HasChanges = 0;
-						item.Updated = date.FormateDateTime(new Date());
-						item.UpdateUser = f.formatFullName(window.Context.User);
-						item.MetadataLastOnline = date.FormateDateTime(new Date());
-						item.PreviewId = null;
-						item.LastOnlineUser = f.formatFullName(window.Context.User);
-						window.Db.ReleaseWork(item.Id);
-						});
+				item.HasChanges = 0;
+				item.Updated = date.FormateDateTime(new Date());
+				item.UpdateUser = f.formatFullName(window.Context.User);
+				item.MetadataLastOnline = date.FormateDateTime(new Date());
+				item.PreviewId = null;
+				item.LastOnlineUser = f.formatFullName(window.Context.User);
+				window.Db.ReleaseWork(item.Id);
+			});
 		},
 		onNewWork() {
 			this.newWorkName = '';
@@ -437,9 +635,7 @@ export default {
 			var loc = this;
 			if (this.newWorkName.trim().length === 0) {
 				alert('Debe indicar un nombre.');
-				this.$nextTick(() => {
-					loc.activateNewWork = true;
-				});
+				this.$nextTick(() => { loc.activateNewWork = true; });
 				return;
 			}
 			this.$refs.invoker.doMessage('Creando cartografía', window.Db,
@@ -453,32 +649,31 @@ export default {
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkRevokeUrl();
 			this.$refs.stepper.setTitle('Revocando publicación');
 			this.$refs.stepper.Start().then(function () {
-						item.MetadataLastOnline = null;
-						item.PreviewId = null;
-						window.Db.ReleaseWork(item.Id);
-					});
+				item.MetadataLastOnline = null;
+				item.PreviewId = null;
+				window.Db.ReleaseWork(item.Id);
+			});
 		},
 		onDuplicateStart() {
 			var loc = this;
 			if (this.newWorkName !== null && this.newWorkName.trim().length === 0) {
 				alert('Debe indicar un nombre.');
-				this.$nextTick(() => {
-					loc.activateSaveAs = true;
-				});
+				this.$nextTick(() => { loc.activateSaveAs = true; });
 				return;
 			}
 			this.$refs.stepper.startUrl = window.Db.GetStartWorkCloneUrl(this.source.Id, this.newWorkName);
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkCloneUrl();
 			this.$refs.stepper.setTitle('Duplicando ' + this.entityName.single);
-			this.$refs.stepper.Start().then(function() {
-						window.Db.LoadWorks(); });
+			this.$refs.stepper.Start().then(function () {
+				window.Db.LoadWorks();
+			});
 		},
+	},
+	watch: {
+		'examplesExpanded'() {
+			window.Db.SetUserSetting('examplesExpanded', (this.examplesExpanded ? '1' : '0'));
 		},
-		watch: {
-			'examplesExpanded'() {
-				window.Db.SetUserSetting('examplesExpanded', (this.examplesExpanded ? '1' : '0'));
-			},
-		}
+	}
 };
 </script>
 
@@ -502,18 +697,16 @@ export default {
   border-radius: 10px;
   overflow: hidden;
   height: 13px;
-
 }
-	.tinyIcon {
-		font-size: 10px;
-		margin: 3px 2px 0px 2px;
-	}
-
-	.extraIcon {
-		background-color: white;
-		font-size: 15px !important;
-		color: #868686;
-		margin-left: -5px;
-		margin-top: -6px;
-	}
+.tinyIcon {
+	font-size: 10px;
+	margin: 3px 2px 0px 2px;
+}
+.extraIcon {
+	background-color: white;
+	font-size: 15px !important;
+	color: #868686;
+	margin-left: -5px;
+	margin-top: -6px;
+}
 </style>

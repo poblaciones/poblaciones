@@ -69,13 +69,13 @@
 				if (window.Context.User.Privileges === 'A') {
 					return true;
 				}
-				return this.item.privileges !== 'V';
+				return this.item.Privileges !== 'V';
 			},
 			canAdmin() {
 				if (window.Context.User.Privileges === 'A') {
 					return true;
 				}
-				return this.item.privileges === 'A';
+				return this.item.Privileges === 'A';
 			},
 		},
 		methods: {

@@ -395,7 +395,7 @@ App::$app->get('/services/backoffice/StepTestWork', function (Request $request) 
 // ej. http://mapas/services/backoffice/StartDeleteWork?w=5
 App::$app->get('/services/backoffice/StartDeleteWork', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
-	//if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
 
 	$controller = new services\WorkDeleteService();
 	return App::Json($controller->StartDeleteWork($workId));
