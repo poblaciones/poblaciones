@@ -9,26 +9,25 @@ Esta guía detalla los pasos necesarios para inicializar una instalación de des
 
 3. Instalar PHP 7.4 o posterior. No hace falta configurar Apache o IIS porque el servidor de VueJS se ocupará de resolver localmente en desarrollo los pedidos PHP (por medio del componente https://github.com/sindresorhus/php-server) que en producción resuelve el webserver remoto.
 
-4. Instalar Python 3.4 o superior (requerido para conversiones de archivos) (https://www.python.org/downloads/release/python-3811/)
+4. Instalar Python 3.8 o superior. (requerido para conversiones de archivos) (https://www.python.org/downloads)
 
 5. Instalar las dependencias de Python: 
 
+### bcup
+./pip install pymysql tqdm
 ### spss
 ./pip install savReaderWriter ijson numpy
-
 ### kmz
 ./pip install bs4 lxml unicodecsv
-
 ### sta
 ./pip install pandas pyreadstat
-
 ### r
 ./pip install pyreadr
 
 ### Todos juntos
-./pip install savReaderWriter ijson numpy bs4 lxml unicodecsv pandas pyreadstat pyreadr
+./pip install savReaderWriter ijson numpy bs4 lxml unicodecsv pandas pyreadstat pyreadr pymysql tqdm
 
-6. Instalar MySql 5.7 o superior (https://dev.mysql.com/downloads/mysql/).
+6. Instalar MySql 5.7 (https://dev.mysql.com/downloads/mysql/).
 
 ## 2. Descargar los fuentes del repositorio
 
