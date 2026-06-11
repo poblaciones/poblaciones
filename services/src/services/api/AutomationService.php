@@ -51,8 +51,7 @@ class AutomationService extends BaseService
 					}
 				}
 			}
-			// Agrega los metadatos
-            $files[] = $this->downloadWorkMetadata($path, $workId, $metadataId);
+			// Agrega los metadatos en JSON (el PDF se descarga por separado vía GetWorkMetadataPdf)
 			$files[] = $this->getMetadataInfo($path, $workId, $metadataId);
             // Zipea los archivos
 			$filenameZip = IO::GetTempFilename() . ".zip";
@@ -127,6 +126,17 @@ class AutomationService extends BaseService
         }
         return $resultado;
     }
+
+    public function StreamWorkMetadataPdf(int $workId)
+	{
+		$wm = new WorkModel();
+		$work = $wm->GetWork($workId);
+		$metadataId = $work['met_id'];
+		$friendlyName = '';
+		$controller = new MetadataService();
+		$file = $controller->GetMetadataPdfFile($metadataId, null, false, $workId, $friendlyName);
+		return App::StreamFile($file, 'metadatos-' . $workId . '.pdf');
+	}
 
     function downloadWorkMetadata(
         string $path,

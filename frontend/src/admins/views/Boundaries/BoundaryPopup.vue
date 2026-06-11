@@ -69,7 +69,7 @@ export default {
 			var loc = this;
 			setTimeout(() => {
 				loc.$refs.inputName.focus();
-			}, 1000);
+			}, 100);
 		},
 		save() {
 			var loc = this;

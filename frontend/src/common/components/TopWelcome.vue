@@ -1,37 +1,38 @@
 <template>
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar" :style="(backColor ? 'background-color: ' + backColor : '')">
-			<user-info></user-info>
-			<admin-links v-if="showAdminButton"></admin-links>
-			<div style="padding-top: 4px; font-size: 1.5em; ">
-					{{ welcomeMessage }}
+			<div class="topRight">
+				<admin-links v-if="showAdminButton"></admin-links>
+				<profile-menu></profile-menu>
+			</div>
+			<div style="padding-top: 4px; font-size: 1.5em;">
+				{{ welcomeMessage }}
 			</div>
 		</div>
-
 	</div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import ActiveWork from '@/backoffice/classes/ActiveWork.js';
-import UserInfo from './UserInfo';
 import AdminLinks from './AdminLinks';
+import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
 
 export default {
 	name: 'topBar',
 	components: {
-		UserInfo,
-		AdminLinks
+		AdminLinks,
+		ProfileMenu
 	},
 	data() {
 		return {
 			newName: ''
-			};
+		};
 	},
 	computed: {
 		...mapGetters([
-		'sidebar',
-		'avatar'
+			'sidebar',
+			'avatar'
 		]),
 		user() {
 			return window.Context.User;
@@ -62,13 +63,22 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-	.barIco
-	{
+.barIco {
 	margin-top: -10px;
-	}
-	.barIco .md-button-content > i
-	{
-		color: #FFF;
-	}
+}
+.barIco .md-button-content > i {
+	color: #FFF;
+}
+/* La zona derecha es absoluta igual que en Topbar.vue,
+   para no desplazar el mensaje de bienvenida. */
+.topRight {
+	position: absolute;
+	top: -2px;
+	right: 10px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 55px;
+	z-index: 1;
+}
 </style>
-

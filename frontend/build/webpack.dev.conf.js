@@ -33,7 +33,6 @@ module.exports = merge(baseWebpackConfig, {
 			filename: 'backoffice.html',
 			template: 'backoffice.html',
 			metadata: {
-				google_maps_key: config.dev.env.google_maps_key.replace(/"/g, ''),
 				maps_api: config.dev.env.maps_api.replace(/"/g, '')
 			},
 			chunks: ['appBackoffice'],
@@ -43,7 +42,6 @@ module.exports = merge(baseWebpackConfig, {
 			filename: 'admins.html',
 			template: 'admins.html',
 			metadata: {
-				google_maps_key: config.dev.env.google_maps_key.replace(/"/g, ''),
 				maps_api: config.dev.env.maps_api.replace(/"/g, '')
 			},
 			chunks: ['appAdmin'],
@@ -71,7 +69,6 @@ module.exports = merge(baseWebpackConfig, {
 			filename: 'index.html',
 			template: 'index.html',
 			metadata: {
-				google_maps_key: config.dev.env.google_maps_key.replace(/"/g, ''),
 				maps_api: config.dev.env.maps_api.replace(/"/g, ''),
 				google_analytics_key: config.dev.env.google_analytics_key.replace(/"/g, ''),
 				add_this_key: config.dev.env.add_this_key.replace(/"/g, ''),

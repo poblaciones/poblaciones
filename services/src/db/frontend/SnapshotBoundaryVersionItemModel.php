@@ -18,6 +18,7 @@ class SnapshotBoundaryVersionItemModel extends BaseSpatialSnapshotModel
 	public $zoom = null;
 	public $getGeometries = true;
 	public $getCaption = true;
+	public $getCode = false;
 
 	public function __construct($boundaryVersionId)
 	{
@@ -46,7 +47,6 @@ class SnapshotBoundaryVersionItemModel extends BaseSpatialSnapshotModel
 		if ($this->getCaption)
 			$select .= "biw_caption Caption, ";
 		$select .= "biw_clipping_region_item_id as FID" . $centroids;
-
 		$from = $this->tableName;
 
 		// Pone filtros

@@ -83,6 +83,8 @@ class BoundaryDownloadModel extends BaseDownloadModel
 	private function GetBoundaryColumns()
 	{
 		$cols = [];
+		$cols[] = self::GetCustomCol('_data_table.biw_clipping_region_item_id', 'fid', 'FID',
+			Format::F, 9, 10, 0, Measurement::Scale, Alignment::Right);
 		$cols[] = self::GetCustomCol('_data_table.biw_code', 'codigo', 'Código',
 			Format::A, 0, 20, 0, Measurement::Nominal, Alignment::Left);
 		$cols[] = self::GetCustomCol('_data_table.biw_caption', 'nombre', 'Nombre',
@@ -104,7 +106,8 @@ class BoundaryDownloadModel extends BaseDownloadModel
 		if ($getPolygonType != null)
 		{
 			$polygonField = 'biw_geometry_r3';
-
+//			$field = "(select dsa ad cli_geometry from clipping_region_item where cli_id = biw_clipping_region_item_id)"; //biw_geometry_r3  . $rZoom; biw_clipping_region_item_id
+			$polygonField = "(select cli_geometry from clipping_region_item where cli_id = biw_clipping_region_item_id)";
 			$cols = $this->AppendPolygonColumn($cols, $polygonField, $getPolygonType);
 			$this->wktIndex = count($cols) - 1;
 		}

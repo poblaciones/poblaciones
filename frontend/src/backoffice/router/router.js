@@ -67,7 +67,7 @@ export const constantRouterMap = [
 				{
 					hidden: true,
 					path: 'datasets/:datasetId',
-					redirect: 'datasets/:datasetId/metrics', // default child path
+					redirect: 'datasets/:datasetId/data', // default child path
 			 },
 			{
 				hidden: true,
@@ -84,13 +84,13 @@ export const constantRouterMap = [
 	},
 
 	{
-		group: 'Publicación',
+		group: 'Publicar',
 		path: '/cartographies/:workId/metadata',
 		alias: '/cartographies/:workId',
 		component: Layout,
 		redirect: '/cartographies/:workId/metadata/content',
 		icon: 'fa fa-tag',
-		name: 'Información',
+		name: 'Agregar información complementaria',
 		hidden: false,
 		children: [
 			{
@@ -110,7 +110,7 @@ export const constantRouterMap = [
 	},
 
 {
-	group: 'Publicación',
+	group: 'Publicar',
 	path: '/cartographies/:workId/content',
 	alias: '/cartographies/:workId',
 	component: Layout,
@@ -128,7 +128,7 @@ export const constantRouterMap = [
 	},
 
 	{
-		group: 'Publicación',
+		group: 'Publicar',
 		path: '/cartographies/:workId/onboarding',
 		component: Layout,
 		redirect: '/cartographies/:workId/onboarding/step1',
@@ -151,7 +151,7 @@ export const constantRouterMap = [
 	},
 
 {
-	group: 'Publicación',
+	group: 'Publicar',
 	path: '/cartographies/:workId/attribution',
 	component: Layout,
 	redirect: '/cartographies/:workId/attribution',
@@ -169,7 +169,7 @@ export const constantRouterMap = [
 
 
 	{
-		group: 'Publicación',
+		group: 'Publicar',
 		path: '/cartographies/:workId/institutions',
 		component: Layout,
 		redirect: '/cartographies/:workId/institutions',
@@ -186,7 +186,7 @@ export const constantRouterMap = [
 	},
 
 	{
-		group: 'Publicación',
+		group: 'Publicar',
 		path: '/cartographies/:workId/abstract',
 		component: Layout,
 		redirect: '/cartographies/:workId/abstract',
@@ -204,7 +204,7 @@ export const constantRouterMap = [
 	},
 
 {
-	group: 'Publicación',
+	group: 'Publicar',
 	path: '/cartographies/:workId/sources',
 	component: Layout,
 	redirect: '/cartographies/:workId/sources',
@@ -222,7 +222,7 @@ export const constantRouterMap = [
 
 
 {
-	group: 'Publicación',
+	group: 'Publicar',
 	path: '/cartographies/:workId/attachments',
 	component: Layout,
 	redirect: '/cartographies/:workId/attachments',
@@ -239,71 +239,6 @@ export const constantRouterMap = [
 	]
 },
 
-	{
-		group: 'Publicación',
-		path: '/cartographies/:workId/customize',
-		component: Layout,
-		redirect: '/cartographies/:workId/customize',
-		icon: 'fas fa-sliders-h',
-		name: 'Personalizar',
-		children: [
-			{
-				path: '/cartographies/:workId/customize',
-				name: 'CustomizeTarget',
-				component: () => import('@/backoffice/views/Customize/Customize.vue'),
-			}
-		]
-	},
-
-	{
-		group: 'Administración',
-		path: '/cartographies/:workId/visibility',
-		component: Layout,
-		redirect: '/cartographies/:workId/visibility',
-		icon: 'far fa-eye',
-		name: 'Visibilidad',
-		children: [
-			{
-				path: '/cartographies/:workId/visibility',
-				name: 'VisibilidadTarget',
-				component: () => import('@/backoffice/views/Visibility/Visibility.vue'),
-			}
-		]
-	},
-
-	{
-		group: 'Administración',
-		path: '/cartographies/:workId/stats',
-		component: Layout,
-		redirect: '/cartographies/:workId/stats',
-		icon: 'far fa-chart-bar',
-		name: 'Estadísticas',
-		children: [
-			{
-				path: '/cartographies/:workId/stats',
-				name: 'StatsTarget',
-				component: () => import('@/backoffice/views/Statistics/Statistics.vue'),
-			}
-		]
-	},
-
-	{
-		group: 'Administración',
-		path: '/cartographies/:workId/permissions',
-		component: Layout,
-		redirect: '/cartographies/:workId/permissions',
-		icon: 'fa fa-user',
-		name: 'Permisos',
-		children: [
-			{
-				path: '/cartographies/:workId/permissions',
-				name: 'PermisosTarget',
-				component: () => import('@/backoffice/views/Permissions/Permissions.vue'),
-			}
-		]
-	},
-
-
 	{ path: '*', redirect: '/404', hidden: true }
 ];
 
@@ -312,4 +247,3 @@ export default new Router({
 	scrollBehavior: () => ({ y: 0 }),
 	routes: constantRouterMap
 });
-

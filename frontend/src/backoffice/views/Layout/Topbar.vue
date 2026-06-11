@@ -1,8 +1,11 @@
 <template>
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar">
-			<user-info></user-info>
-			<backoffice-links></backoffice-links>
+			<div class="topRight">
+				<!--backoffice-links><backoffice-links-->
+				<topbar-work-actions></topbar-work-actions>
+				<profile-menu></profile-menu>
+			</div>
 			<div style="float: left">
 				<router-link :to="getBackRoute">
 					<BackIcon class="icon" style="font-size: 28px; color: #fff" />
@@ -31,15 +34,15 @@
 import { mapGetters } from 'vuex';
 import Context from '@/backoffice/classes/Context';
 import BackIcon from '@/common/assets/back.svg';
-import UserInfo from '@/common/components/UserInfo';
-import BackofficeLinks from '@/backoffice/components/BackofficeLinks.vue';
+import TopbarWorkActions from '@/backoffice/components/TopbarWorkActions.vue';
+import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
 
 export default {
 	name: 'topBar',
 	components: {
 		BackIcon,
-		BackofficeLinks,
-		UserInfo
+		TopbarWorkActions,
+		ProfileMenu
 	},
 	computed: {
 		Work() { return window.Context.CurrentWork; },
@@ -108,12 +111,31 @@ export default {
 
 .titleLine {
 	margin-left: 38px;
+	/* Reserva espacio para la zona derecha:
+	   BackofficeLinks (~280px) + TopbarWorkActions (~130px) + ProfileMenu (~55px) + margen (~15px) */
+	margin-right: 490px;
 	color: white;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	font-size: 24px;
 	line-height: 1.2em;
 	overflow: hidden;
+}
+
+.topRight {
+	position: absolute;
+	top: -2px;
+	right: 10px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 55px;
+	z-index: 1;
+}
+
+.topRight > * {
+	display: flex;
+	align-items: center;
 }
 
 #topBarContainer {
@@ -124,4 +146,3 @@ export default {
   z-index: 1002;
 }
 </style>
-

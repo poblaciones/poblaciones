@@ -3,10 +3,8 @@ module.exports ={
 	NODE_ENV: '"development"',
 	UPLOAD_ENV: '""',
 	ApplicationName: '"Poblaciones"',
-	google_maps_key: '"AIzaSyCrjhSOGOq31QnvJ5VB6g5tQB1_dcP7Gy4"', // Para desarrollo. Las de prod se toman de settings
-	maps_api: 'google',
+	maps_api: '"leaflet"',
 
-	google_maps_version: '"quarterly"', // Para desarrollo. Las de prod se toman de config.php / mapsSettings.php
 	add_this_key: '"ra-5adea5cc40743803"', // Para desarrollo. Las de prod se toman de settings
 	google_analytics_key: '""', // Para desarrollo. Las de prod se toman de settings
 

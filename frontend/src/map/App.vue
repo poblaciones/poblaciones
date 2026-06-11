@@ -59,7 +59,6 @@
 	import WaitMessage from '@/map/components/popups/waitMessage';
 	import SegmentedMap from '@/map/classes/SegmentedMap';
 	import StartMap from '@/map/classes/StartMap';
-	import GoogleMapsApi from '@/map/googleMaps/GoogleMapsApi';
 	import LeafletApi from '@/map/leaflet/LeafletApi';
 	import WorkPanel from '@/map/components/panels/workPanel';
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
@@ -461,14 +460,7 @@
 					}
 					return;
 				}
-				var mapApi;
-				if (this.config.MapsAPI === 'google') {
-					mapApi = new GoogleMapsApi(window.google);
-				} else if (this.config.MapsAPI === 'leaflet') {
-					mapApi = new LeafletApi();
-				} else {
-					throw new Error("Api no soportada");
-				}
+				var mapApi = new LeafletApi();
 				var segMap = new SegmentedMap(mapApi, this.frame, this.clipping, this.toolbarStates, this.metrics, this.config);
 				segMap.Work = this.work;
 				segMap.afterCallback = afterLoaded;

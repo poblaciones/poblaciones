@@ -1,46 +1,57 @@
-export default GeographyOverlay;
-
+import L from 'leaflet';
 import axiosClient from '@/common/js/axiosClient';
 
-function GeographyOverlay(map, geographyId) {
-	this.map = map;
-	this.geographyId = geographyId;
-  this.tileSize = new google.maps.Size(256, 256);
-}
+var GeographyOverlay = L.GridLayer.extend({
 
-GeographyOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
-	var div = ownerDocument.createElement('div');
-	var tileUrl = window.host + '/services/frontend/geographies/GetGeography';
-	var args = {
-		x: coord.x,
-		y: coord.y,
-		z: zoom,
-		a: this.geographyId,
-		w: window.Context.Configuration.Signatures.Geography,
-		h: window.Context.Configuration.Signatures.Suffix
-	};
+	initialize: function (geographyId, options) {
+		this.geographyId = geographyId;
+		L.GridLayer.prototype.initialize.call(this, L.extend({ tileSize: 256 }, options));
 
-  //div.innerHTML = coord;
-  div.style.width = this.tileSize.width + 'px';
-  div.style.height = this.tileSize.height + 'px';
-
-	div.dataLayer = new google.maps.Data();
-	div.dataLayer.setStyle({
-		fillOpacity: 0,
-		strokeColor: '#984ee6',
-		strokeWeight: 1
-			});
-	var loc = this;
-	axiosClient.getPromise(tileUrl, args,
-		'obtener la cartografía').then(function (response) {
-			div.dataLayer.addGeoJson(response.Data);
+		this.on('tileunload', function (e) {
+			if (e.tile._geoJsonLayer && this._map) {
+				this._map.removeLayer(e.tile._geoJsonLayer);
+				e.tile._geoJsonLayer = null;
+			}
 		});
-  div.dataLayer.setMap(loc.map);
-	return div;
-};
+	},
 
-GeographyOverlay.prototype.releaseTile = function (tile) {
-	if (tile.dataLayer) {
-			tile.dataLayer.setMap(null);
-    }
-};
+	createTile: function (coords) {
+		var tile = document.createElement('div');
+		var size = this.getTileSize();
+		tile.style.width  = size.x + 'px';
+		tile.style.height = size.y + 'px';
+
+		var tileUrl = window.host + '/services/frontend/geographies/GetGeography';
+		var args = {
+			x: coords.x,
+			y: coords.y,
+			z: coords.z,
+			a: this.geographyId,
+			w: window.Context.Configuration.Signatures.Geography,
+			h: window.Context.Configuration.Signatures.Suffix
+		};
+
+		var gridLayer = this;
+		var geoJsonLayer = L.geoJSON(null, {
+			style: {
+				fillOpacity: 0,
+				color: '#984ee6',
+				weight: 1
+			},
+			interactive: false
+		});
+
+		tile._geoJsonLayer = geoJsonLayer;
+
+		axiosClient.getPromise(tileUrl, args, 'obtener la cartografía').then(function (response) {
+			if (gridLayer._map) {
+				geoJsonLayer.addData(response.Data);
+				geoJsonLayer.addTo(gridLayer._map);
+			}
+		});
+
+		return tile;
+	}
+});
+
+export default GeographyOverlay;

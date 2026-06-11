@@ -34,8 +34,7 @@ TileOverlay.prototype.getTile = function (coord, zoom, ownerDocument) {
 	div.style.fontSize = '10';
 
 	var args = h.getFrameKey(coord.x, coord.y, zoom);
-  // si no se agrega idCounter, google maps hace coexistir
-  // tiles con key duplicado
+
 	var key = args + '&s=' + (this.idCounter++);
 	div.setAttribute('key', key);
 

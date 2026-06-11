@@ -24,7 +24,7 @@
 	import arr from '@/common/framework/arr';
 
 	export default {
-		name: 'WorkActions',
+		name: 'WorkItemActions',
 		components: {
 
 		},

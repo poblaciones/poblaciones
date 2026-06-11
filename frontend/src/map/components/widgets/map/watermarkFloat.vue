@@ -1,7 +1,6 @@
 <template>
   <div v-if="image" class="logoDiv" @click="institutionClicked"
-			 :style="(!institution.Url ? 'pointer-events: none; ' : 'cursor: pointer; ') +
-            (useStreetMap ? 'right: 145px' : '')">
+			 :style="(!institution.Url ? 'pointer-events: none; ' : 'cursor: pointer; ')">
     <img class="logoIcon" :src="image" :title="institution.Name" />
   </div>
 </template>
@@ -24,9 +23,7 @@ export default {
     this.getInstitutionWatermark();
   },
   computed: {
-    useStreetMap() {
-      return window.SegMap.Configuration.MapsAPI === 'google';
-    },
+
   },
   methods: {
 		institutionClicked() {

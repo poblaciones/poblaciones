@@ -195,7 +195,8 @@ App::$app->post('/services/api/automation/AppendExtraMetric', function (Request 
 
 /**
  * Descarga todos los datasets de una cartografía como archivo ZIP.
- * Integra el endpoint legacy /services/api/downloadWorkDatasets.
+ * El ZIP incluye los datasets y un archivo metadata.json, pero no el PDF
+ * de metadatos (descargable por separado vía GetWorkMetadataPdf).
  *
  * Parámetros GET:
  *   w (int, obligatorio) – work ID
@@ -210,6 +211,24 @@ App::$app->get('/services/api/automation/DownloadWorkDatasets', function (Reques
 
 	$controller = new apiServices\AutomationService();
 	return $controller->DownloadWorkDatasets($workId);
+});
+
+/**
+ * Descarga el PDF de metadatos de una cartografía.
+ *
+ * Parámetros GET:
+ *   w (int, obligatorio) – work ID
+ *
+ * Respuesta: archivo PDF (stream).
+ */
+App::$app->get('/services/api/automation/GetWorkMetadataPdf', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;
+
+	$controller = new apiServices\AutomationService();
+	return $controller->StreamWorkMetadataPdf($workId);
 });
 
 // ******* Publicación (multi-paso) ********************************************

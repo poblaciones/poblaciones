@@ -1,22 +1,21 @@
 <template>
 	<div>
-		<div class="md-layout md-gutter">
-			<invoker ref="invoker"></invoker>
-			<search-popup ref="addMetricPopup" @selected="metricSelected" :currentWork="Work.properties.Id" searchType="m" />
+		<invoker ref="invoker"></invoker>
+		<search-popup ref="addMetricPopup" @selected="metricSelected" :currentWork="Work.properties.Id" searchType="m" />
 
-			<div class="md-layout-item md-size-80 md-small-size-100">
+		<!-- Bloque 1: Indicadores predeterminados -->
+		<div v-if="!section || section === 'default'" class="md-layout md-gutter">
+			<div class="md-layout-item md-size-100">
 				<md-card>
 					<md-card-header>
-						<div class="md-title">
-							Indicadores predeterminados
-						</div>
+						<div class="md-title">Indicadores predeterminados</div>
 					</md-card-header>
 					<md-card-content>
 						<div class="md-layout md-gutter">
-							<div class="md-layout-item md-size-100 md-small-size-100">
+							<div class="md-layout-item md-size-100">
 								Establezca qué indicadores deben estar activos (visibles en el mapa) al ingresar a la cartografía.
 							</div>
-							<div class="md-layout-item md-size-80 md-small-size-100">
+							<div class="md-layout-item md-size-95 md-small-size-100">
 								<md-table v-model="metricList" md-sort="Caption" md-sort-order="asc" md-card="">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
@@ -32,17 +31,17 @@
 				</md-card>
 			</div>
 		</div>
-		<div class="md-layout md-gutter">
-			<div class="md-layout-item md-size-80 md-small-size-100">
+
+		<!-- Bloque 2: Indicadores adicionales -->
+		<div v-if="!section || section === 'extra'" class="md-layout md-gutter">
+			<div class="md-layout-item md-size-100">
 				<md-card>
 					<md-card-header>
-						<div class="md-title">
-							Indicadores adicionales
-						</div>
+						<div class="md-title">Indicadores adicionales</div>
 					</md-card-header>
 					<md-card-content>
 						<div class="md-layout md-gutter">
-							<div class="md-layout-item md-size-100 md-small-size-100">
+							<div class="md-layout-item md-size-100">
 								En forma complementaria, pueden ofrecerse en el panel superior indicadores con información disponible en el sitio tales como variables demográficas generales o indicadores de infraestructura.
 							</div>
 							<div v-if="Work.CanEdit()" class="md-layout-item md-size-40 md-small-size-50">
@@ -55,7 +54,7 @@
 								<img style="float: right" src="/static/img/parts/metrics.png" />
 								<div class="highlightBox" style="right: 14px; width: 90px; height: 32px; top: 8px;"></div>
 							</div>
-							<div class="md-layout-item md-size-80 md-small-size-100">
+							<div class="md-layout-item md-size-95 md-small-size-100">
 								<md-table v-model="Work.ExtraMetrics" md-sort="Caption" md-sort-order="asc" md-card="">
 									<md-table-row slot="md-table-row" slot-scope="{ item }">
 										<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
@@ -81,6 +80,7 @@
 		</div>
 	</div>
 </template>
+
 <script>
 import Context from '@/backoffice/classes/Context';
 import f from '@/backoffice/classes/Formatter';
@@ -92,6 +92,12 @@ export default {
 	name: 'Metrics',
 	components: {
 		SearchPopup
+	},
+	props: {
+		// 'default': muestra solo Indicadores predeterminados.
+		// 'extra':   muestra solo Indicadores adicionales.
+		// null:      muestra ambos (comportamiento original).
+		section: { type: String, default: null }
 	},
 	data() {
 		return {
@@ -137,7 +143,6 @@ export default {
 			this.Update();
 		},
 		handleToggle(value, metric) {
-			var loc = this;
 			this.$refs.invoker.doSave(this.Work,
 				this.Work.UpdateExtraMetricStart, metric);
 		},
@@ -175,11 +180,7 @@ export default {
 		}
 	}
 };
-
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
-
-
 </style>

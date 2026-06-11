@@ -23,7 +23,6 @@ import 'leaflet-contextmenu';
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css';
 
 export default LeafletApi;
-// https://www.endpointdev.com/blog/2019/03/switching-google-maps-leaflet/
 
 //
 
@@ -336,7 +335,6 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 
 LeafletApi.prototype.generateLabelsArray = function (visibility) {
 	var ret = [];
-	// https://mapstyle.withgoogle.com/
 	for (var ele in this.mapabelElements) {
 		var item = this.mapabelElements[ele];
 		var feature = { featureType: item, elementType: 'labels', stylers: [{ visibility: (visibility ? 'on' : 'off') }] };
@@ -704,13 +702,9 @@ LeafletApi.prototype.screenPoint2LatLng = function (point, map, zoom = null) {
 };
 
 LeafletApi.prototype.SetTypeControlsDropDown = function () {
-	// TODO leaflet
-//	this.SetTypeControls(this.google.maps.MapTypeControlStyle.DROPDOWN_MENU);
 };
 
 LeafletApi.prototype.SetTypeControlsDefault = function () {
-	// TODO leaflet
-	//this.SetTypeControls(this.google.maps.MapTypeControlStyle.HORIZONTAL_BAR);
 };
 
 LeafletApi.prototype.DrawPerimeter = function (center, radius, fillColor) {
@@ -724,18 +718,20 @@ LeafletApi.prototype.DrawPerimeter = function (center, radius, fillColor) {
 	} else if (color.IsAlmostLightColor(fillColor)) {
 		strokeOpacity = 0.5;
 	}
-	return new google.maps.Circle({
-            center: center,
-            map: this.map,
-            strokeColor: strokeColor,
-            strokeWeight: 1,
-            strokeOpacity: strokeOpacity,
-            fillColor: fillColor,
-						fillOpacity: 0.1,
-						clickable: false,
-						editable: false,
-            radius: radius * 1000
-	});
+	var circle = L.circle(
+		L.latLng(center.Lat, center.Lon),
+		{
+			radius: radius * 1000,
+			color: strokeColor,
+			weight: 1,
+			opacity: strokeOpacity,
+			fillColor: fillColor,
+			fillOpacity: 0.1,
+			interactive: false
+		}
+	);
+	circle.addTo(this.map);
+	return circle;
 };
 
 LeafletApi.prototype.SetZoom = function (zoom) {

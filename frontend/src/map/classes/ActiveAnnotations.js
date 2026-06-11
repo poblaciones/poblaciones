@@ -107,7 +107,7 @@ ActiveAnnotations.prototype.CreateParentInfo = function (variable, feature) {
 
 ActiveAnnotations.prototype.ResolveStyle = function (variable, labelId) {
 
-			return /** @type {google.maps.Data.StyleOptions} */({
+			return ({
 				fillColor: this.color,
 				fillOpacity: this.opacity,
 				strokeWeight: 1,

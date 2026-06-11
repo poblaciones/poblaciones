@@ -43,28 +43,29 @@ class TableService extends BaseService
 		return $ret;
 	}
 
-	public function GetRegionGeographyRelations($boundaryVersionId, $includedGeographyRelations)
+	public function GetRegionGeographyRelations($boundaryVersionId, $includedGeographyRelations, $includeCodes = false)
 	{
 		$ret = [];
 		foreach ($includedGeographyRelations as $geographyId)
 		{
-			$relations = $this->CalculateGeographyRelations($boundaryVersionId, $geographyId);
+			$relations = $this->CalculateGeographyRelations($boundaryVersionId, $geographyId, $includeCodes);
 			$ret[$geographyId] = $relations;
 		}
 		return $ret;
 	}
 
-	private function CalculateGeographyRelations($boundaryVersionId, $geographyId)
+	private function CalculateGeographyRelations($boundaryVersionId, $geographyId, $includeCodes)
 	{
 		$table = new SnapshotBoundaryVersionItemModel($boundaryVersionId);
 		$table->getGeometries = false;
 		$table->getCaption = false;
+		$table->getCodes = $includeCodes;
 
 		if (!$this->GeographyIsChildOfBoundaryVersion($boundaryVersionId, $geographyId)) {
 			return [];
 		}
 
-		$rows = $table->GetAllRowsJoinWithGeography($geographyId);
+		$rows = $table->GetAllRowsJoinWithGeography($geographyId, $includeCodes === false);
 
 		return Arr::FromSortedToKeyedArrays($rows, 'FID', 'GID');
 	}

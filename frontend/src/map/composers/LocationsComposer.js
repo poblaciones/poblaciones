@@ -2,7 +2,6 @@ import AbstractTextComposer from '@/map/composers/AbstractTextComposer';
 import h from '@/map/js/helper';
 import arr from '@/common/framework/arr';
 import SequenceHandler from './SequenceHandler';
-import MarkerClusterer from '@googlemaps/markerclustererplus';
 
 export default LocationsComposer;
 

@@ -9,7 +9,7 @@
 					Indique la ubicación:
 				</p>
 				<div style="position: relative; width: 600px; height: 320px;">
-				<div id="map" style="width: 600px; height: 320px;">
+				<div id="relocate-map" style="width: 600px; height: 320px;">
 				</div>
 				</div>
 				<div style="margin-top: 20px; margin-bottom: -10px">
@@ -58,11 +58,14 @@
 	</md-dialog>
 </template>
 <script>
-	import SegmentedMap from '@/map/classes/SegmentedMap';
-	import GoogleMapsApi from '@/map/googleMaps/GoogleMapsApi';
+	import L from 'leaflet';
+	import 'leaflet/dist/leaflet.css';
 	import h from '@/map/js/helper';
 	import str from '@/common/framework/str';
 	import GeographyOverlay from '../classes/GeographyOverlay';
+
+	const BASEMAP_URL = 'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
+	const BASEMAP_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>';
 
 	export default {
 		name: 'relocatePopup',
@@ -79,8 +82,8 @@
 		},
 		methods: {
 			updateMarkerPosition(latLng) {
-				var la = latLng.lat();
-				var lo = latLng.lng();
+				var la = latLng.lat;
+				var lo = latLng.lng;
 				if (la) la = parseFloat(la.toFixed(6));
 				if (lo) lo = parseFloat(lo.toFixed(6));
 				this.newLat = la;
@@ -93,74 +96,85 @@
 				this.goto();
 			},
 			goto() {
-				var latLng = new google.maps.LatLng(this.newLat, this.newLon);
+				var latLng = L.latLng(this.newLat, this.newLon);
 				if (this.marker) {
-					this.marker.setPosition(latLng);
+					this.marker.setLatLng(latLng);
+					this.map.panTo(latLng);
 				} else {
-					this.map.setZoom(parseFloat(this.newZoom));
+					this.map.setView(latLng, parseFloat(this.newZoom));
 				}
-				this.map.setCenter(latLng);
 			},
-
 			revert() {
 				this.newLat = this.lat;
 				this.newLon = this.lon;
-				var latLng = new google.maps.LatLng(this.lat, this.lon);
-
+				var latLng = L.latLng(this.lat, this.lon);
 				this.updateMarkerPosition(latLng);
 				if (this.marker) {
-					this.marker.setPosition(latLng);
+					this.marker.setLatLng(latLng);
 				}
-				this.map.setCenter(latLng);
+				this.map.panTo(latLng);
 			},
 			round(value, decimals) {
 				return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
 			},
 			initialize() {
 				var loc = this;
-				var latLng = new google.maps.LatLng(this.lat, this.lon);
-				var map = new google.maps.Map(document.getElementById('map'), {
-					zoom: this.zoom,
+
+				// Destruye el mapa anterior si existe
+				if (this.map) {
+					this.map.remove();
+					this.map = null;
+					this.marker = null;
+				}
+
+				var latLng = L.latLng(this.lat, this.lon);
+
+				var map = L.map('relocate-map', {
 					center: latLng,
-					mapTypeId: google.maps.MapTypeId.ROADMAP
+					zoom: this.zoom,
+					zoomControl: true,
+					attributionControl: true
 				});
+
+				L.tileLayer(BASEMAP_URL, {
+					attribution: BASEMAP_ATTRIBUTION,
+					maxZoom: 20
+				}).addTo(map);
+
 				if (this.useMarker) {
-					var marker = new google.maps.Marker({
-						position: latLng,
-						title: 'Relocalizar',
-						map: map,
-						draggable: true
-					});
+					var marker = L.marker(latLng, { draggable: true });
+					marker.addTo(map);
 					this.marker = marker;
 				} else {
 					this.marker = null;
 				}
+
+				if (this.useOverlay) {
+					new GeographyOverlay(window.Context.GetTrackingLevelGeography().Id).addTo(map);
+				}
+
 				this.map = map;
-				/*if (this.useOverlay) {
-					map.overlayMapTypes.insertAt(0, new GeographyOverlay(map,
-						window.Context.GetTrackingLevelGeography().Id));
-				}*/
 				loc.updateMarkerPosition(latLng);
 
 				if (this.useMarker) {
-					google.maps.event.addListener(marker, 'drag', function () {
-						loc.updateMarkerPosition(marker.getPosition());
+					marker.on('drag', function () {
+						loc.updateMarkerPosition(marker.getLatLng());
 					});
 				} else {
-					google.maps.event.addListener(map, 'bounds_changed', function (e) {
+					map.on('move', function () {
 						var c = map.getCenter();
-						loc.newLat = parseFloat(c.lat().toFixed(6));
-						loc.newLon = parseFloat(c.lng().toFixed(6));
+						loc.newLat = parseFloat(c.lat.toFixed(6));
+						loc.newLon = parseFloat(c.lng.toFixed(6));
 					});
-					google.maps.event.addListener(map, 'zoom_changed', function (e) {
+					map.on('zoomend', function () {
 						loc.newZoom = map.getZoom();
 					});
 				}
 
-				google.maps.event.addListener(map, 'click', function (e) {
-					loc.updateMarkerPosition(e.latLng);
+				map.on('click', function (e) {
+					loc.updateMarkerPosition(e.latlng);
 					if (loc.marker) {
-						marker.setPosition(e.latLng);
+						loc.marker.setLatLng(e.latlng);
 					}
 				});
 			},
@@ -196,7 +210,7 @@
 		},
 		props: {
 			// Esta propiedad establece si funciona como un popup de captación de posición
-			// por marker o si apartir de la posición actual del mapa revuelve un lat, lon y zoom.
+			// por marker o si a partir de la posición actual del mapa devuelve un lat, lon y zoom.
 			useMarker: {
 				type: Boolean, default: true
 			},

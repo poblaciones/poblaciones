@@ -67,6 +67,12 @@
 		padding: 0;
 	}
 
+	.md-list-item-content > .md-icon:first-child {
+		margin-right: 12px!important;
+	}
+	.md-tabs-navigation .md-button-content {
+		font-size: 14px!important;
+	}
 
 	.separator {
 		font-size: 12px;
@@ -461,21 +467,8 @@
 		height: 30px !important;
 	}
 
-	.floatRadio {
-		float: left;
-		padding-top: 3px !important;
-	}
-
-	.largeOption {
-		padding: 18px 0px 6px 12px;
-	}
-
 	.largeText {
 		font-size: 18px;
-	}
-
-	.largeOption {
-		padding: 18px 0px 6px 12px;
 	}
 
 	.superSmallButton {

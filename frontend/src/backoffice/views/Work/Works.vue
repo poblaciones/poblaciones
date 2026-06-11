@@ -7,7 +7,7 @@
 			<div class="md-layout-item md-size-100" style="margin-bottom: 1px;">
 				<div style="position: relative; display: inline" v-for="item in lastest" :key="item.Id">
 					<mp-large-data-item @click="select(item)" :item="item" />
-					<work-actions :item="item" actions="I" @action="actionSelected" />
+					<work-item-actions :item="item" actions="I" @action="actionSelected" />
 				</div>
 			</div>
 		</div>
@@ -140,14 +140,14 @@ import str from '@/common/framework/str';
 import f from '@/backoffice/classes/Formatter';
 import date from '@/common/framework/date';
 import speech from '@/common/js/speech';
-import WorkActions from './WorkActions';
+import WorkItemActions from './WorkItemActions';
 import WorkItems from './WorkItems';
 
 
 export default {
 	name: 'works',
 	components: {
-		WorkActions,
+		WorkItemActions,
 		WorkItems
 	},
 	data() {

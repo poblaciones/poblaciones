@@ -265,6 +265,8 @@ export default {
 				case STEP_UPDATING:
 					stepper.error = 'Falló en actualización de datos.';
 					break;
+				case STEP_ATTRIBUTES:
+					break;
 				case STEP_END:
 					this.Dataset.properties.Geocoded = true;
 					if (this.activeTab === 'location') {

@@ -37,10 +37,11 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-.adminButton {
-	float: right;
-	font-size: 12px;
-	margin-top: -12px;
-}
+	.adminButton {
+		float: right;
+		font-size: 12px;
+		padding-top: 12px;
+		margin-top: -12px;
+	}
 </style>
 

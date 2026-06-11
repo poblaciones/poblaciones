@@ -246,19 +246,24 @@ class Account
 			return $this->isActive != 0;
 	}
 
-	public function Login($password)
+	public function ValidatePassword($password)
 	{
 		Session::CheckReadonlyForMaintenance();
 
 		if ($this->EnsureDbInfo(false) == false)
 			return false;
 		else
+			return password_verify($password, $this->password);
+	}
+
+	public function Login($password)
+	{
+		$ret = $this->ValidatePassword($password);
+		if ($ret)
 		{
-			$ret = password_verify($password, $this->password);
-			if ($ret)
-				$this->Begin();
-			return $ret;
+			$this->Begin();
 		}
+		return $ret;
 	}
 
 	public function BeginActivation(string $to) : array

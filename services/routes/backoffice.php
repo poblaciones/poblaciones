@@ -22,6 +22,7 @@ if (App::Settings()->Servers()->IsTransactionServerRequest())
 	require_once('backoffice/work.php');
 	require_once('backoffice/metric.php');
 	require_once('backoffice/dataset.php');
+	require_once('backoffice/user.php');
 	require_once('backoffice/datasetColumns.php');
 	require_once('backoffice/metadata.php');
 	require_once('backoffice/georeference.php');

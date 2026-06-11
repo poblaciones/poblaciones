@@ -75,7 +75,6 @@ MarkerFactory.prototype.CreateMarker = function (tileKey, feature, markerSetting
 		}
 		var labelInfo = this.createLabel(sequenceMarker.Type, '' + feature.Sequence);
 		params.icon = this.createFrame(sequenceMarker.Frame, style, seqScale, labelInfo);
-		//params.icon.anchor = new this.Maps.google.maps.Point(0, 0);
 		element = new L.marker(params.position, params.icon, { zIndexOffset: params.zIndexOffset } );
 		element.addTo(this.Maps.map);
 	}

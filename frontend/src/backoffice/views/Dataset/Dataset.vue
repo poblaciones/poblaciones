@@ -53,24 +53,39 @@
 										</md-card>
 								</div>
 								<md-tabs v-else md-sync-route ref="tabs">
-											<template slot="md-tab" slot-scope="{ tab }">
-												{{ tab.label }}  <i class="badge" v-if="tab.data.badge">{{ tab.data.badge }}</i>
-													<mp-help :text="tab.data.help" :large="true" />
-											</template>
+									<template slot="md-tab" slot-scope="{ tab }">
+										{{ tab.label }}
+										<i class="badge" v-if="tab.data.badge">{{ tab.data.badge }}</i>
+										<mp-help :text="tab.data.help" :large="true" />
+									</template>
 
-											<md-tab style='flex: 1 0 100% !important;overflow-x: auto;' id="metrics" md-label="Indicadores"
-															:to="makePath('metrics')" :md-active="isPath(makePath('metrics'))"
-															:md-template-data="{ badge: (Dataset && Dataset.MetricVersionLevels ? Dataset.MetricVersionLevels.length : ''), help: `
-														<p>
-															Los indicadores vuelven la información visible en el mapa.
-														</p><p>
-															Cada indicador muestra un aspecto de los datos (ej. Nivel educativo, Antiguedad de la escuela), pudiendo seleccionarse colores y criterios de segmentación para las variables utilizadas.
-														</p>`+ extraHelp('DatasetMetricsSection')}" >
-												<metrics-tab></metrics-tab>
-											</md-tab>
-											<md-tab style='flex: 1 0 100% !important;' id="georeference" md-label="Georreferenciar"
-															:to="makePath('georeference')" :md-active="isPath(makePath('georeference'))"
-															:md-template-data="{ help: `<p>
+									<md-tab style='flex: 1 0 100% !important;' id="data" md-label="Datos" @click="EnsureColumns"
+													:to="makePath('data')" :md-active="isPath(makePath('data'))"
+													:md-template-data="{ help: `
+															<p>
+																	La información de un dataset debe ser incorporada mediante la importación
+																	de sus datos a partir de un archivo de texto separados por comas (.CSV) o
+																	archivos de formato SPSS (.SAV).
+															</p><p>
+																	Una vez incorporada la información,
+																	es posible volver a importar los datos en caso de haberse agregado nuevas
+																	filas o nuevas columnas a la información primaria.
+															</p>` + extraHelp('DatasetImportSection') }">
+											<data-tab></data-tab>
+									</md-tab>
+									<md-tab style='flex: 1 0 100% !important;' id="variables" md-label="Variables" @click="EnsureColumns"
+													:to="makePath('variables')" :md-active="isPath(makePath('variables'))"
+													:md-template-data="{ help: `<p>
+													El listado de variables detalla qué variables (columnas) posee el dataset.
+													</p><p>
+															Permite modificar sus descripciones, etiquetas de valores, remover variables y
+															recodificarlas (convertir en códigos numéricos con etiquetas) variables
+															existentes.</p>` + extraHelp('DatasetVariablesSection') }">
+											<columns-tab></columns-tab>
+									</md-tab>
+									<md-tab style='flex: 1 0 100% !important;' id="georeference" md-label="Georreferenciar"
+													:to="makePath('georeference')" :md-active="isPath(makePath('georeference'))"
+													:md-template-data="{ help: `<p>
 													La georreferenciación es el proceso que vincula los datos con una ubicación espacial en el mapa. Para poder publicar los datos es necesario previamente georreferenciarlos.
 												</p>
 												<p>
@@ -90,33 +105,10 @@
 												</ul>` + extraHelp('DatasetGeoreferenceSection') }">
 												<georeference-tab @stepperClosed="stepperClosed"></georeference-tab>
 											</md-tab>
-											<md-tab style='flex: 1 0 100% !important;' id="data" md-label="Datos" @click="EnsureColumns"
-															:to="makePath('data')" :md-active="isPath(makePath('data'))"
-															:md-template-data="{ help: `
-															<p>
-																La información de un dataset debe ser incorporada mediante la importación
-																de sus datos a partir de un archivo de texto separados por comas (.CSV) o
-																archivos de formato SPSS (.SAV).
-															</p><p>
-																Una vez incorporada la información,
-																es posible volver a importar los datos en caso de haberse agregado nuevas
-																filas o nuevas columnas a la información primaria.
-															</p>` + extraHelp('DatasetImportSection') }">
-												<data-tab></data-tab>
-											</md-tab>
-											<md-tab style='flex: 1 0 100% !important;' id="variables" md-label="Variables" @click="EnsureColumns"
-															:to="makePath('variables')" :md-active="isPath(makePath('variables'))"
-															:md-template-data="{ help: `<p>
-															El listado de variables detalla qué variables (columnas) posee el dataset.
-														</p><p>
-															Permite modificar sus descripciones, etiquetas de valores, remover variables y
-															recodificarlas (convertir en códigos numéricos con etiquetas) variables
-															existentes.</p>` + extraHelp('DatasetVariablesSection') }">
-													<columns-tab></columns-tab>
-												</md-tab>
-											<md-tab style='flex: 1 0 100% !important;' id="identity" md-label="Identificación"
-															:to="makePath('identity')" :md-active="isPath(makePath('identity'))"
-															:md-template-data="{ help: `
+
+									<md-tab style='flex: 1 0 100% !important;' id="identity" md-label="Identificación"
+													:to="makePath('identity')" :md-active="isPath(makePath('identity'))"
+													:md-template-data="{ help: `
 															<p>
 																La identificación permite indicar las variables para la ficha de resumen de cada elemento.
 															</p><p>
@@ -125,12 +117,24 @@
 															</p>` + extraHelp('DatasetIdentitySection') }" >
 													<identity-tab></identity-tab>
 												</md-tab>
-												<md-tab v-if="Work.Datasets.length > 1" id="multilevel" md-label="Multinivel"
-														:to="makePath('multilevel')" :md-active="isPath(makePath('multilevel'))"
-															>
-													<multilevel-tab></multilevel-tab>
-												</md-tab>
-											</md-tabs>
+
+									<md-tab v-if="Work.Datasets.length > 1" id="multilevel" md-label="Multinivel"
+													:to="makePath('multilevel')" :md-active="isPath(makePath('multilevel'))">
+										<multilevel-tab></multilevel-tab>
+									</md-tab>
+
+									<md-tab style='flex: 1 0 100% !important;overflow-x: auto;' id="metrics" md-label="Indicadores"
+													:to="makePath('metrics')" :md-active="isPath(makePath('metrics'))"
+													:md-template-data="{ badge: (Dataset && Dataset.MetricVersionLevels ? Dataset.MetricVersionLevels.length : ''), help: `
+												<p>
+														Los indicadores vuelven la información visible en el mapa.
+												</p><p>
+														Cada indicador muestra un aspecto de los datos (ej. Nivel educativo, Antiguedad de la escuela), pudiendo seleccionarse colores y criterios de segmentación para las variables utilizadas.
+												</p>`+ extraHelp('DatasetMetricsSection')}" >
+											<metrics-tab></metrics-tab>
+									</md-tab>
+
+								</md-tabs>
 								</div>
 						</md-card-content>
 					</md-card>

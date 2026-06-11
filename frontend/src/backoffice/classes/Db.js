@@ -288,3 +288,36 @@ Db.prototype.RenameWork = function (workId, newName) {
 	}
 };
 
+// ---------------------------------------------------------------------
+// Cuenta del usuario autenticado.
+// ---------------------------------------------------------------------
+
+Db.prototype.GetCurrentUserAccount = function () {
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetCurrentUserAccount',
+		{}, 'obtener los datos de la cuenta');
+};
+
+Db.prototype.GetCurrentUserDiskUsage = function () {
+	return axiosClient.getPromise(window.host + '/services/backoffice/GetCurrentUserDiskUsage',
+		{}, 'obtener el espacio en disco');
+};
+
+Db.prototype.UpdateUserName = function (firstname, lastname) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateCurrentUserName',
+		{ f: firstname, l: lastname }, 'actualizar el nombre').then(function () {
+			if (window.Context.User) {
+				window.Context.User.Firstname = firstname;
+				window.Context.User.Lastname = lastname;
+			}
+		});
+};
+
+Db.prototype.ChangePassword = function (current, newPassword, verification) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/ChangeCurrentUserPassword',
+		{ c: current, n: newPassword, v: verification }, 'cambiar la contraseña');
+};
+
+Db.prototype.DeleteAccount = function () {
+	return axiosClient.postPromise(window.host + '/services/backoffice/DeleteCurrentUserAccount',
+		{}, 'eliminar la cuenta');
+};

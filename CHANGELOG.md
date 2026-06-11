@@ -1,4 +1,7 @@
-- Exportación a GeoPackage (.gpkg)
+v4.9 (2026-06-03)
+- Exportación e importación desde GeoPackage (.gpkg)
+- Múltiple selección para eliminación y archivo de cartografías.
+- v1 API para automatización.
 
 v4.8 (2026-03-19)
 - Refactor de botón de buscar.

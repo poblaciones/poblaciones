@@ -25,14 +25,6 @@ class UserService extends BaseService
 		return $entity;
 	}
 
-	public function GetCurrentUser()
-	{
-		$userId = Account::Current()->GetUserId();
-		$user = App::Orm()->find(entities\User::class, $userId);
-		if ($user === null) throw new PublicException("Usuario no encontrado.");
-		return $user;
-	}
-
 	public function LoginAs($userId)
 	{
 		$user = App::Orm()->find(entities\User::class, $userId);
@@ -113,6 +105,9 @@ class UserService extends BaseService
 		// Borra los links
 		$delete = "DELETE FROM user_link WHERE lnk_user_id = ?";
 		App::Db()->exec($delete, array($userId));
+		// Borra los keys
+		$delete = "DELETE FROM user_key WHERE key_user_id = ?";
+		App::Db()->exec($delete, array($userId));
 		// Borra al usuario
 		$delete = "DELETE FROM user WHERE usr_id = ?";
 		App::Db()->exec($delete, array($userId));
@@ -175,4 +170,3 @@ class UserService extends BaseService
 		return $rows;
 	}
 }
-

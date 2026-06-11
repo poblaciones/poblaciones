@@ -1,17 +1,12 @@
 <template>
-	<div class="sidebarRoot">
-		<sidebar-menu class="topMenu" :menu="topMenuItems" theme="white-theme" style="height: unset!important"
-									:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
-		<sidebar-menu v-if="bottomMenuItems.length > 0" class="bottomMenu" :menu="bottomMenuItems" theme="white-theme"  style="height: unset!important"
+	<div>
+		<sidebar-menu :menu="menuItems" theme="white-theme" style="padding-bottom: 9px;"
 									:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
 		<import-popup ref="importPopup"></import-popup>
-		<div style="display: flex; padding: 4px; background-color: #efefef;">
-			<backoffice-links></backoffice-links>
-
-		</div>
-
 		<stepper ref="stepper"></stepper>
 	</div>
+
+
 </template>
 
 <script>
@@ -19,8 +14,6 @@ import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import { SidebarMenu } from 'vue-sidebar-menu';
 import { mapGetters } from 'vuex';
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css';
-import BackofficeLinks from '@/backoffice/components/BackofficeLinks.vue';
-
 import str from '@/common/framework/str';
 import arr from '@/common/framework/arr';
 
@@ -30,8 +23,7 @@ import arr from '@/common/framework/arr';
 export default {
   components: {
 		ImportPopup,
-		SidebarMenu,
-		BackofficeLinks
+    SidebarMenu,
   },
   methods: {
     replaceParams(text) {
@@ -199,14 +191,12 @@ export default {
     Work () {
 			return window.Context.CurrentWork;
 		},
-		// Arma dos listas: la principal (top) y la del grupo 'Publicación' (bottom),
-		// que se renderiza anclada al fondo del panel. El encabezado de grupo se
-		// difiere y se inserta junto al primer item visible del grupo, para no dejar
-		// encabezados huérfanos cuando todas sus opciones están ocultas.
-    menus() {
-			var top = [];
-			var bottom = [];
+    menuItems() {
+			var ret = [];
 			var lastGroup = '';
+			// El encabezado de grupo se difiere y se inserta recién junto al primer
+			// item visible del grupo, para no dejar encabezados huérfanos cuando todas
+			// sus opciones están ocultas (p. ej. Administración tras el refactor).
 			var pendingHeader = null;
 			for(var n = 0; n < this.$router.options.routes.length; n++) {
 				var route = this.$router.options.routes[n];
@@ -218,29 +208,22 @@ export default {
 				if (route.name == 'Bienvenida') {
 					route.hidden = !this.Work.IsPublicData();
 				}
-				var target = (route.group === 'Publicar') ? bottom : top;
 				if (!route.hidden && ! this.removePermissionsOnExamples(route)) {
 					if (pendingHeader !== null) {
-						target.push(pendingHeader);
+						ret.push(pendingHeader);
 						pendingHeader = null;
 					}
-					target.push(men);
+					ret.push(men);
 				}
 				if (route.name === 'Nuevo dataset') {
 					men.badge = this.createBadgeUpload();
-					this.addDatasets(top);
+					this.addDatasets(ret);
 				}
 				if (route.name === 'Personalizar') {
 					men.badge = this.createBadgePublish();
 				}
 			}
-			return { top: top, bottom: bottom };
-    },
-    topMenuItems() {
-			return this.menus.top;
-    },
-    bottomMenuItems() {
-			return this.menus.bottom;
+			return ret;
     },
   }
 };
@@ -308,33 +291,10 @@ export default {
 	color: #888 !important;
 }
 
-/* Contenedor del sidebar como columna de alto completo:
-   el menú principal arriba (con scroll) y el grupo 'Publicación' anclado al fondo.
-   El offset del topbar (55px) se aplica acá como padding, no en cada menú. */
-.sidebarRoot {
-	height: 100%;
-	box-sizing: border-box;
-	padding-top: 55px;
-	display: flex;
-	flex-direction: column;
-}
-
-.sidebarRoot .topMenu {
-	flex: 1 1 auto;
-	overflow-y: auto;
-	overflow-x: hidden;
-}
-
-.sidebarRoot .bottomMenu {
-	flex: 0 0 auto;
-	border-top: 1px solid #e2e2e2;
-}
-
-/* Antes el margen superior lo ponía cada .v-sidebar-menu; ahora lo da .sidebarRoot. */
 .v-sidebar-menu
 {
 	position: relative;
-	margin-top: 0 !important;
+	margin-top: 55px !important;
 	width: unset !important;
 }
 
@@ -379,9 +339,6 @@ export default {
 	font-size: 14px;
 }
 
-.collapse-btn {
-		display: none!important;
-}
 .vsm-title
 {
 	white-space: nowrap;

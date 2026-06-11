@@ -50,9 +50,9 @@ abstract class BaseSpatialSnapshotModel extends BaseModel
 		return $this->ExecQuery();
 	}
 
-	public function GetAllRowsJoinWithGeography($geographyId)
+	public function GetAllRowsJoinWithGeography($geographyId, $identifyById = true)
 	{
-		$query = $this->spatialConditions->CreateRegionToGeographyQuery($geographyId);
+		$query = $this->spatialConditions->CreateRegionToGeographyQuery($geographyId, $identifyById);
 		return $this->ExecQuery($query);
 	}
 

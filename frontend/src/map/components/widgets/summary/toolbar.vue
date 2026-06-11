@@ -63,10 +63,6 @@
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
 						<li v-if="isAdminReader"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
-						<!--
-						<li v-if="isAdminReader" class="divider"></!--li>
-					  <li v-if="isAdminReader"><a @click="switchMapProvider">Cambiar a {{ altProvider }}</a></li>
-							-->
 						<li v-if="false"><a href="/users#/account">Cuenta</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.redirectHome()" :href="authenticate.homeUrl()">Inicio</a></li>
@@ -256,9 +252,6 @@
 					ret.push({ label: this.helpLinks.ContactLink.Caption, key: 'CONTACTO' });
 				}
 				return ret;
-			},
-			altProvider() {
-				return (this.config.MapsAPI == 'leaflet' ? 'Google Maps' : 'Leaflet');
 			},
 			authenticate() {
 				return a;
