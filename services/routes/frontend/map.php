@@ -112,6 +112,25 @@ App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {
 		return App::Json($controller->GetFabMetrics());
 });
 
+
+App::$app->get('/services/metrics/GetFabIndicators', function (Request $request) {
+	$controller = new services\FabService();
+	if (Params::GetIntMandatory('w') != -1)
+		return App::JsonImmutable($controller->GetFabIndicators());
+	else
+		return App::Json($controller->GetFabIndicators());
+});
+
+
+App::$app->get('/services/metrics/GetFabBoundaries', function (Request $request) {
+	$controller = new services\FabService();
+	if (Params::GetIntMandatory('w') != -1)
+		return App::JsonImmutable($controller->GetBoundariesWithItems());
+	else
+		return App::Json($controller->GetBoundariesWithItems());
+});
+
+
 App::$app->get('/services/metrics/GetSelectedInfos', function (Request $request) {
 	$controller = new services\SelectedMetricService();
 

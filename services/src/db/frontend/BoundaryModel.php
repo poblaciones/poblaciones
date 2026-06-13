@@ -5,6 +5,7 @@ namespace helena\db\frontend;
 use helena\classes\App;
 use minga\framework\Profiling;
 use minga\framework\Str;
+use minga\framework\Arr;
 use minga\framework\Context;
 use helena\services\backoffice\publish\PublishDataTables;
 use helena\db\frontend\SnapshotClippingRegionItemModel;
@@ -117,6 +118,71 @@ class BoundaryModel extends BaseModel
 		}
 		Profiling::EndTimer();
 		return $boundaries;
+	}
+
+	public function GetBoundariesWithItems()
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT bou_id Id, bou_caption Name, bou_icon Icon, bou_sort_by OrderBy, bou_is_suggestion Suggestion, bou_gropup_by_parent UseParent,
+					bgr_caption `Group`, bgr_icon GroupIcon,
+                   (SELECT MAX(bvr_id) FROM boundary_version WHERE bvr_boundary_id = bou_id) VersionId
+            FROM boundary INNER JOIN boundary_group ON bou_group_id = bgr_id ORDER BY bgr_order, bou_group_id, bou_order";
+		$boundaries = App::Db()->fetchAll($sql);
+		$exclusions = '';
+		$ret = [];
+		foreach ($boundaries as &$boundary) {
+			$useParent = $boundary['UseParent'];
+			$useParentSelect = '';
+			$orderBy = '';
+			if ($useParent)
+			{
+				$useParentSelect  = ' (SELECT parent.cli_caption FROM clipping_region_item parent WHERE parent.cli_id = cli.cli_parent_id) as Parent, ';
+				$orderBy = 'Parent ,';
+			}
+			if ($boundary['OrderBy'] == 'P') {
+				// por tamaño
+				$orderBy .= "clc_population DESC, cli_code";
+				$sql = "SELECT min(cli_id) Id, cli_caption `Name`, " . $useParentSelect . " clc_population Population
+                    FROM boundary_version_clipping_region c
+                    JOIN clipping_region_item cli ON cli_clipping_region_id = bcr_clipping_region_id
+                    JOIN snapshot_lookup_clipping_region_item ON cli_id = clc_clipping_region_item_id
+                    WHERE bcr_boundary_version_id = ? " . $exclusions . "
+                    GROUP BY cli_caption, cli_code, clc_population
+                    ORDER BY " . $orderBy;
+			} else {
+				// default por nombre
+				if ($boundary['OrderBy'] == 'C')
+					$orderBy .= 'cli_code';
+				else
+					$orderBy .= 'cli_caption, cli_code';
+
+				$sql = "SELECT cli_id Id, cli_caption `Name` , " . $useParentSelect . " IFNULL(clc_population, 0) Population
+                    FROM boundary_version_clipping_region c
+                    JOIN clipping_region_item cli ON cli_clipping_region_id = bcr_clipping_region_id
+                    LEFT JOIN snapshot_lookup_clipping_region_item ON cli_id = clc_clipping_region_item_id
+                    WHERE bcr_boundary_version_id = ? " . $exclusions . "
+                    ORDER BY " . $orderBy;
+			}
+			$items = App::Db()->fetchAll($sql, array($boundary['VersionId']));
+			if (sizeof($items) > 0)
+			{
+				if ($useParent)
+				{
+					$items = Arr::FromSortedToKeyed($items, 'Parent');
+				}
+				$boundary['Items'] = $items;
+				$ret[] = $boundary;
+			}
+		}
+		Profiling::EndTimer();
+		$grouped = Arr::FromSortedToKeyed($ret, 'Group');
+		$groups = [];
+		foreach (array_keys($grouped) as $key) {
+			$items = $grouped[$key];
+
+			$groups[] = ['Id' => null, 'Name' => $key, 'Items' => $items, 'Icon' => $items[0]['GroupIcon']];
+		}
+		return $groups;
 	}
 
 	public function GetFabBoundaries()

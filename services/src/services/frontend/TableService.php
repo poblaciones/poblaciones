@@ -59,7 +59,6 @@ class TableService extends BaseService
 		$table = new SnapshotBoundaryVersionItemModel($boundaryVersionId);
 		$table->getGeometries = false;
 		$table->getCaption = false;
-		$table->getCodes = $includeCodes;
 
 		if (!$this->GeographyIsChildOfBoundaryVersion($boundaryVersionId, $geographyId)) {
 			return [];

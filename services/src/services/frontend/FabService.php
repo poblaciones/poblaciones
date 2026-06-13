@@ -19,6 +19,28 @@ class FabService extends BaseService
 {
 	private $intensityTarget = null;
 
+	public function GetBoundariesWithItems()
+	{
+		// FALTA HACER REMOVE PRIVATE BOUNDARIES Y PONERLE UN CACHE
+		$table = new BoundaryModel();
+		return $table->GetBoundariesWithItems();
+	}
+
+	public function GetFabIndicators() // nombre provisorio
+	{
+		$metricsService = new MetricService();
+		$providers = $metricsService->GetMetricProviders();
+		// Arma los grupos con métricas (esto puede quedar cacheado en bloque)
+		$ret = $this->CalculateMetrics($providers, true);
+
+		// Si el usuario está autenticado, antepone un grupo con sus propios indicadores
+		$userGroup = $this->GetUserMetricsGroup($providers);
+		if ($userGroup)
+			array_unshift($ret, $userGroup);
+
+		return $ret;
+	}
+
 	public function GetFabMetrics()
 	{
 		$shard = App::Settings()->Shard()->CurrentShard;
@@ -50,7 +72,7 @@ class FabService extends BaseService
 		$ret = $this->CalculateMetrics($providers);
 
 		// Agrega boundaries
-		$boundaries = $this->GetFabBoundaries();
+		$boundaries = $this->doGetFabBoundaries();
 		if ($boundaries)
 			array_unshift($ret, $boundaries);
 
@@ -68,11 +90,12 @@ class FabService extends BaseService
 		$table = new BoundaryModel();
 		return $table->GetRecommendedBoundaries();
 	}
+
 	private function IntensityTarget()
 	{
 
 	}
-	private function CalculateMetrics($providers)
+	private function CalculateMetrics($providers, $useParent = false)
 	{
 		$ret = [];
 		// Agrega métricas
@@ -83,22 +106,27 @@ class FabService extends BaseService
 		$intensity = 1 - (sizeof($groups) * $step);
 		$this->intensityTarget = $intensity - $step;
 
-		foreach($groups as $group)
-		{
-			if (array_key_exists($group->Id, $sets))
-			{
+		foreach ($groups as $group) {
+			if (array_key_exists($group->Id, $sets)) {
 				$metrics = $this->createMetricInfos($sets[$group->Id], $providers);
 				// Los ordena por provider, dejando los nulos al final
 				usort($metrics, array($this, 'sortByOrderDescriptionNullAtEnd'));
 				// inserta los headers
-				$metrics = $this->addSubHeaders($metrics);
+				if (!$useParent)
+					$metrics = $this->addSubHeaders($metrics);
 				// saca los provider
-				foreach($metrics as $metric)
-				{
+				foreach ($metrics as $metric) {
+					if ($useParent)
+						$metric->Parent = $metric->Provider->Name;
 					unset($metric->Provider);
 				}
 				// Listo
-				$group->Items = $metrics;
+				if ($useParent) {
+					$metricsArr = json_decode(json_encode($metrics), true);
+					$group->Items = Arr::FromSortedToKeyed($metricsArr, "Parent");
+				} else
+					$group->Items = $metrics;
+
 				$group->Intensity = $intensity;
 				$intensity += $step;
 				$ret[] = $group;
@@ -106,20 +134,68 @@ class FabService extends BaseService
 		}
 		return $ret;
 	}
+	private function GetUserMetricsGroup($providers)
+	{
+		if (!Session::IsAuthenticated())
+			return null;
+
+		$workService = new WorkService();
+		$userMetrics = $workService->GetCurrentUserPublicMetrics();
+		if (sizeof($userMetrics) === 0)
+			return null;
+
+		// Indexa por id de métrica la info de la cartografía (título y privacidad)
+		$userMetricsById = [];
+		foreach ($userMetrics as $userMetric)
+			$userMetricsById[$userMetric['Id']] = $userMetric;
+
+		// Trae todas las métricas (sin el filtro de públicas) y se queda con las del usuario
+		$table = new SnapshotMetricModel();
+		$allRows = $table->GetFabMetricSnapshot();
+		$rows = []; foreach ($allRows as $row) {
+			if (array_key_exists($row['myv_metric_id'], $userMetricsById))
+				$rows[] = $row;
+		}
+
+		if (sizeof($rows) === 0)
+			return null;
+
+		$metrics = $this->createMetricInfos($rows, $providers);
+
+		// Agrupa por cartografía (Work), que pasa a actuar como "Provider"
+		foreach ($metrics as $metric) {
+			$userMetric = $userMetricsById[$metric->Id];
+			$metric->Parent = $userMetric['Caption'];
+			$metric->IsPrivate = (bool) $userMetric['IsPrivate'];
+			if ($metric->IsPrivate)
+				$metric->Icon = 'fas fa-lock';
+			unset($metric->Provider);
+		}
+
+		// Los ordena por cartografía y, dentro de cada una, por nombre
+		usort($metrics, array($this, 'sortByParentThenName'));
+
+		$metricsArr = json_decode(json_encode($metrics), true);
+		$items = Arr::FromSortedToKeyed($metricsArr, "Parent");
+
+		return (object) [
+			'Id' => null,
+			'Name' => 'Mis indicadores',
+			'Icon' => 'fas fa-layer-group',
+			'Items' => $items
+		];
+	}
 
 	private function RemovePrivateBoundaries(&$ret)
 	{
 		if (Session::IsSiteReader())
 			return $ret;
 		$boundaries = $ret['Boundaries'];
-		foreach($boundaries as &$group)
-		{
+		foreach ($boundaries as &$group) {
 			$secondItem = (sizeof($group['Items']) > 1 ? $group['Items'][1] : null);
-			if ($secondItem)
-			{
+			if ($secondItem) {
 				$type = (is_array($secondItem) ? Arr::SafeGet($secondItem, 'Type', 'M') : $secondItem->Type);
-				if ($type === 'B')
-				{
+				if ($type === 'B') {
 					// las filtra
 					if ($this->doRemovePrivateBoundaries($group['Items']))
 						$this->fixEmptyGroups($group['Items']);
@@ -134,24 +210,18 @@ class FabService extends BaseService
 	private function fixEmptyGroups(&$items)
 	{
 		$groupSize = 0;
-		for($n = 0; $n < sizeof($items); $n++)
-		{
-			if ($this->isHeader($items[$n]))
-			{
-				if ($groupSize == 0 && $n > 0)
-				{
+		for ($n = 0; $n < sizeof($items); $n++) {
+			if ($this->isHeader($items[$n])) {
+				if ($groupSize == 0 && $n > 0) {
 					Arr::RemoveAt($items, $n - 1);
 					$n--;
 				}
 				$groupSize = 0;
-			}
-			else
-			{
+			} else {
 				$groupSize++;
 			}
 		}
-		if ($groupSize == 0 && sizeof($items) > 0)
-		{
+		if ($groupSize == 0 && sizeof($items) > 0) {
 			Arr::RemoveAt($items, sizeof($items) - 1);
 		}
 	}
@@ -159,11 +229,11 @@ class FabService extends BaseService
 	private function doRemovePrivateBoundaries(&$items)
 	{
 		$removedItems = false;
-		for($n = sizeof($items) - 1; $n >= 0; $n--)
-		{
-			if (!$this->isHeader($items[$n]) &&
-				!Session::IsBoundaryPublicOrAccessible($items[$n]['Id']))
-			{
+		for ($n = sizeof($items) - 1; $n >= 0; $n--) {
+			if (
+				!$this->isHeader($items[$n]) &&
+				!Session::IsBoundaryPublicOrAccessible($items[$n]['Id'])
+			) {
 				Arr::RemoveAt($items, $n);
 				$removedItems = true;
 			}
@@ -179,15 +249,16 @@ class FabService extends BaseService
 	{
 		$last = null;
 		$ret = [];
-		foreach($list as $metric)
-		{
-			if ($metric->Provider && $metric->Provider->Name !== $last)
-			{
-					$separator = [ 'Id' => ($metric->Provider->Id ? $metric->Provider->Id : null), 'Name' =>
-										 ($metric->Provider->Name === null ? 'Otras fuentes' : $metric->Provider->Name),
-												'Header' => true ];
-					$ret[] = $separator;
-					$last = $metric->Provider->Name;
+		foreach ($list as $metric) {
+			if ($metric->Provider && $metric->Provider->Name !== $last) {
+				$separator = [
+					'Id' => ($metric->Provider->Id ? $metric->Provider->Id : null),
+					'Name' =>
+					($metric->Provider->Name === null ? 'Otras fuentes' : $metric->Provider->Name),
+					'Header' => true
+				];
+				$ret[] = $separator;
+				$last = $metric->Provider->Name;
 			}
 			$metric->Type = 'M';
 			$ret[] = $metric;
@@ -202,8 +273,7 @@ class FabService extends BaseService
 
 		$metricService = new MetricService();
 		// crea los metricInfo a partir del registro de la base de datos
-		foreach($rows as $metric)
-		{
+		foreach ($rows as $metric) {
 			$metricInfo = $metricService->CreateMetric($metric);
 			// La asigna un provider
 			if ($metricInfo->MetricProviderId)
@@ -217,26 +287,33 @@ class FabService extends BaseService
 	}
 	private static function sortByOrderDescriptionNullAtEnd($a, $b)
 	{
-	if (!is_object($a->Provider) || !is_object($b->Provider))
-		return 0;
+		if (!is_object($a->Provider) || !is_object($b->Provider))
+			return 0;
 
 		// Primero define el orden...
-		if ($a->Provider->Order !== $b->Provider->Order)
-		{
-			if ($a->Provider->Order === null) return 1;
-			if ($b->Provider->Order === null) return -1;
+		if ($a->Provider->Order !== $b->Provider->Order) {
+			if ($a->Provider->Order === null)
+				return 1;
+			if ($b->Provider->Order === null)
+				return -1;
 			return ($a->Provider->Order > $b->Provider->Order ? 1 : -1);
-		}
-		else
-		{
-			if ($a->Provider->Name === $b->Provider->Name)
-			{
+		} else {
+			if ($a->Provider->Name === $b->Provider->Name) {
 				return strcasecmp($a->Name, $b->Name);
 			}
-			if ($a->Provider->Name === null) return 1;
-			if ($b->Provider->Name === null) return -1;
+			if ($a->Provider->Name === null)
+				return 1;
+			if ($b->Provider->Name === null)
+				return -1;
 			return strcasecmp($a->Provider->Name, $b->Provider->Name);
 		}
+	}
+	private static function sortByParentThenName($a, $b)
+	{
+		$cmp = strcasecmp($a->Parent, $b->Parent);
+		if ($cmp !== 0)
+			return $cmp;
+		return strcasecmp($a->Name, $b->Name);
 	}
 	private function GetFabMetricsGrouped()
 	{
@@ -259,16 +336,20 @@ class FabService extends BaseService
 		// inserta los headers
 		$metrics = $this->addSubHeaders($metrics);
 		// saca los provider
-		foreach($metrics as $metric)
-		{
+		foreach ($metrics as $metric) {
 			unset($metric->Provider);
 		}
 		// Listo
-		return [ 'Id' => null, 'Name' => 'Los más consultados', 'Icon' => 'star',
-						'Items' => $metrics, 'Intensity' => 1.05];
+		return [
+			'Id' => null,
+			'Name' => 'Los más consultados',
+			'Icon' => 'star',
+			'Items' => $metrics,
+			'Intensity' => 1.05
+		];
 	}
 
-	private function GetFabBoundaries()
+	private function doGetFabBoundaries()
 	{
 		$table = new BoundaryModel();
 		$items = $table->GetFabBoundaries();
@@ -276,22 +357,28 @@ class FabService extends BaseService
 
 		if (sizeof($list) === 0)
 			return null;
-		return [ 'Id' => null, 'Name' => 'Delimitaciones', 'Icon' => 'dashboard',
-							'Items' => $list, 'Intensity' => $this->intensityTarget];
+		return [
+			'Id' => null,
+			'Name' => 'Delimitaciones',
+			'Icon' => 'dashboard',
+			'Items' => $list,
+			'Intensity' => $this->intensityTarget
+		];
 	}
 
 	private function addBoundariesSubHeaders($list)
 	{
 		$last = null;
 		$ret = [];
-		foreach($list as $boundary)
-		{
-			if ($boundary['Group'] !== $last)
-			{
-					$separator = [ 'Id' => null, 'Name' => $boundary['Group'],
-												'Header' => true ];
-					$ret[] = $separator;
-					$last = $boundary['Group'];
+		foreach ($list as $boundary) {
+			if ($boundary['Group'] !== $last) {
+				$separator = [
+					'Id' => null,
+					'Name' => $boundary['Group'],
+					'Header' => true
+				];
+				$ret[] = $separator;
+				$last = $boundary['Group'];
 			}
 			$boundary['Type'] = 'B';
 			$ret[] = $boundary;
@@ -299,4 +386,3 @@ class FabService extends BaseService
 		return $ret;
 	}
 }
-

@@ -2,20 +2,20 @@ includes:
 	- src/framework/phpstan.neon
 
 parameters:
-	reportUnmatchedIgnoredErrors:
-		false
+	reportUnmatchedIgnoredErrors: false
 	excludePaths:
-		- vendor
-		- routes
-		- compilation_cache
-		- doctrine_proxies
-		- src/classes/shapefile
-		- storage
-		- web/phpinfo2.php
-		- web/index.php
-		- web/b.php
-		- tests/routesTest.php
-		- src/classes/readers/ShapefileReader.php
+		analyseAndScan:
+			- vendor (?)
+			- routes (?)
+			- compilation_cache (?)
+			- doctrine_proxies (?)
+			- src/classes/shapefile (?)
+			- storage (?)
+			- web/phpinfo2.php (?)
+			- web/index.php (?)
+			- web/b.php (?)
+			- tests/routesTest.php (?)
+			- src/classes/readers/ShapefileReader.php (?)
 	ignoreErrors:
 		- '#Function vd not found.#'
 		- '#Function pr not found.#'

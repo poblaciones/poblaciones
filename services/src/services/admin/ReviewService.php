@@ -6,6 +6,7 @@ use helena\classes\App;
 use helena\services\common\BaseService;
 use minga\framework\Date;
 use helena\entities\backoffice as entities;
+use helena\services\backoffice as backofficeServices;
 
 class ReviewService extends BaseService
 {
@@ -24,7 +25,7 @@ class ReviewService extends BaseService
 			$review->setUserDecision(null);
 		} else if ($currentStatus !== $review->getDecision()) {
 			$review->setResolutionDate(new \DateTime());
-			$userService = new UserService();
+			$userService = new backofficeServices\UserService();
 			$user = $userService->GetCurrentUser();
 			$review->setUserDecision($user);
 		}

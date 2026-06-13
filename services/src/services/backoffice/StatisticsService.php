@@ -78,7 +78,8 @@ class StatisticsService extends BaseService
 	{
 		$attachments = $data['attachment'];
 		if (sizeof($attachments) == 0) return [];
-		$ids = Arr::RemoveByValue(array_keys($attachments), 'metadata');
+		$ids = array_keys($attachments);
+		$ids = Arr::RemoveByValue($ids, 'metadata');
 		if (sizeof($ids) != 0)
 		{
 			$sql = "SELECT mfi_id Id, mfi_caption Caption FROM metadata_file WHERE mfi_id IN (" . Str::JoinInts($ids) . ")";

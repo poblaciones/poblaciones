@@ -24,7 +24,7 @@
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
-				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
+				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
 					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
 									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
@@ -88,6 +88,10 @@
 
 	import session from '@/common/framework/session';
 	import authentication from '@/common/js/authentication';
+
+	// Helpers del selector (ajustá la ruta a donde ubiques estos archivos).
+	import { addIndicatorSubtitles, addBoundarySubtitles } from '@/map/components/widgets/sideToolbar/selectorSubtitles';
+	import { attachInfo, buildIndicatorInfo, buildBoundaryInfo } from '@/map/components/widgets/sideToolbar/selectorTooltips';
 
 	import { component } from 'vue-fullscreen';
 
@@ -259,10 +263,26 @@
 			},
 			selectedItem(item) {
 				if (item.Type === 'B') {
-					window.SegMap.AddBoundaryById(item.Id);
+					// Alta de una delimitación individual; en selección múltiple se acumula.
+					window.SegMap.Clipping.SetClippingRegion(item.Id, true, false, item.Append === true);
 				} else {
 					window.SegMap.AddMetricById(item.Id);
 				}
+			},
+			deselectedItem(item) {
+				if (item.Type === 'B') {
+					window.SegMap.Clipping.ResetClippingRegion(item.Id);
+				} else {
+					var metric = window.SegMap.Metrics.GetMetricById(item.Id);
+					if (metric) {
+						metric.Remove();
+					}
+				}
+			},
+			selectedGroup(group) {
+				// "Ver todas en el mapa": agrega la capa completa de la delimitación
+				// usando el Id del boundary (no de los boundaryItem).
+				window.SegMap.AddBoundaryById(group.Id);
 			},
 			panRightSwipeClose(direction, event) {
 				if (
@@ -504,6 +524,11 @@
 				window.SegMap.Session.UI.ToggleRightPanel(!this.toolbarStates.collapsed);
 			},
 			loadFabMetrics() {
+				// Modo nuevo (panel lateral): dos llamadas, una por panel.
+				if (this.Use.UseNewFabButton && !this.Embedded.HideAddMetrics) {
+					this.loadFabData();
+					return;
+				}
 				const loc = this;
 				axios.get(window.host + '/services/metrics/GetFabMetrics', session.AddSession(window.host, {
 					params: {
@@ -512,19 +537,46 @@
 					}
 				})).then(function (res) {
 					session.ReceiveSession(window.host, res);
-					if (!loc.Use.UseNewFabButton && !loc.Embedded.HideAddMetrics) {
-						loc.oldStyleIndent = 'position: relative; left: 70px; top: -5px;';
-						loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
-						loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
-						window.fabMetrics = res.data.Metrics;
-					} else {
-						loc.oldStyleIndent = '';
-						arr.AddRange(loc.$refs.sideToolbar.metrics, res.data.Metrics);
-						arr.AddRange(loc.$refs.sideToolbar.boundaries, res.data.Boundaries);
-					}
+					loc.oldStyleIndent = 'position: relative; left: 70px; top: -5px;';
+					loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
+					loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
+					window.fabMetrics = res.data.Metrics;
 					window.SegMap.Catalog.Receive(res.data);
 				}).catch(function (error) {
 					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
+				});
+			},
+			loadFabData() {
+				const loc = this;
+				loc.oldStyleIndent = '';
+				const params = session.AddSession(window.host, {
+					params: {
+						w: window.SegMap.Signatures.FabMetrics,
+						h: window.SegMap.Signatures.Suffix
+					}
+				});
+				// 1) Indicadores (árbol). Ajustá la URL si tu endpoint difiere.
+				axios.get(window.host + '/services/metrics/GetFabIndicators', params).then(function (res) {
+					session.ReceiveSession(window.host, res);
+					const data = res.data; // árbol: [{ Id, Name, Icon, Items }]
+					addIndicatorSubtitles(data);
+					attachInfo(data, buildIndicatorInfo);
+					arr.AddRange(loc.$refs.sideToolbar.indicators, data);
+					window.SegMap.Catalog.ReceiveMetrics(data);
+				}).catch(function (error) {
+					err.errDialog('LoadFabIndicators', 'obtener los indicadores', error);
+				});
+				// 2) Delimitaciones (árbol). Si seguís sirviéndolas desde GetFabMetrics,
+				//    cambiá la URL y tomá res.data.Boundaries en lugar de res.data.
+				axios.get(window.host + '/services/metrics/GetFabBoundaries', params).then(function (res) {
+					session.ReceiveSession(window.host, res);
+					const data = res.data; // árbol: [{ Id, Name, Items: [tipo...] }]
+					addBoundarySubtitles(data);
+					attachInfo(data, buildBoundaryInfo);
+					arr.AddRange(loc.$refs.sideToolbar.boundaries, data);
+					window.SegMap.Catalog.ReceiveBoundaries(data);
+				}).catch(function (error) {
+					err.errDialog('LoadFabBoundaries', 'obtener las delimitaciones', error);
 				});
 			},
 			SplitPanelsRefresh() {

@@ -87,7 +87,7 @@ class PatternAnalyzer {
 
             if ($action['action_type'] === 'Content' && $action['action_name'] !== 'SelectFeature') {
                 $asText = $action['action_value'] . '';
-                if ($asText !== NULL && strlen($asText) > 2 && Str::StartsWith($asText, "{") && Str::EndsWith($asText,"}"))
+                if ($asText !== '' && strlen($asText) > 2 && Str::StartsWith($asText, "{") && Str::EndsWith($asText,"}"))
 				{
                     $action['action_value'] = json_encode(NavigationService::TrimFloatsRecursive(json_decode($asText)));
 				}

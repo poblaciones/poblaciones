@@ -30,10 +30,8 @@ class WorkService extends BaseService
 			if ($value && $work->getAccessLink()) {
 				throw new PublicException("No se puede indexar una cartografía con visibilidad por enlace.");
 			}
-			if ($work !== null) {
-				$work->setIsIndexed($value);
-				App::Orm()->save($work);
-			}
+			$work->setIsIndexed($value);
+			App::Orm()->save($work);
 		}
 		// Actualiza cachés
 		$publisher = new PublishSnapshots();

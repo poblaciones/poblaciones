@@ -29,11 +29,18 @@ class BoundaryGroup
      */
     private $Caption;
 
-    /**
-		 * @var integer
-		 *
-		 * @ORM\Column(name="bgr_order", type="integer", precision=0, scale=0, nullable=false, unique=false)
-		 */
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="bgr_icon", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
+	 */
+	private $Icon;
+
+	/**
+	 * @var integer
+	 *
+	 * @ORM\Column(name="bgr_order", type="integer", precision=0, scale=0, nullable=false, unique=false)
+	 */
     private $Order;
 
 		/**
@@ -85,13 +92,38 @@ class BoundaryGroup
         return $this->Caption;
     }
 
-    /**
-		 * Set order
-		 *
-		 * @param integer $order
-		 *
-		 * @return BoundaryGroup
-		 */
+
+	/**
+	 * Set icon
+	 *
+	 * @param string $icon
+	 *
+	 * @return BoundaryGroup
+	 */
+	public function setIcon($icon)
+	{
+		$this->Icon = $icon;
+
+		return $this;
+	}
+
+	/**
+	 * Get icon
+	 *
+	 * @return string
+	 */
+	public function getIcon()
+	{
+		return $this->Icon;
+	}
+
+	/**
+	 * Set order
+	 *
+	 * @param integer $order
+	 *
+	 * @return BoundaryGroup
+	 */
     public function setOrder($order)
     {
 			$this->Order = $order;

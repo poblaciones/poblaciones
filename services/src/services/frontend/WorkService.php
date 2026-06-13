@@ -47,6 +47,26 @@ class WorkService extends BaseService
 		return $ret;
 	}
 
+	public function GetCurrentUserPublicMetrics()
+	{
+		$userId = Session::GetCurrentUser()->GetUserId();
+		// Trae los indicadores del usuario
+		$sql = "SELECT mtr_id `Id`, met_title Caption, MAX(wrk_is_private) IsPrivate FROM metric
+					JOIN metric_version ON mtr_id = mvr_metric_id
+					JOIN metric_version_level ON mvr_id = mvl_metric_version_id
+					JOIN dataset ON dat_id = mvl_dataset_id
+					JOIN `work` ON wrk_id = dat_work_id
+					JOIN metadata ON met_id = wrk_metadata_id
+					WHERE dat_work_id IN (
+					SELECT " . PublishDataTables::ShardifiedDb('wkp_work_id') . " FROM draft_work_permission WHERE wkp_user_id = " . $userId . ")
+					GROUP BY mtr_id, mtr_caption, met_title
+					ORDER BY MAX(met_publication_date) DESC,
+							met_title ASC,
+							mtr_caption ASC";
+		$ret = App::Db()->fetchAll($sql);
+		return $ret;
+	}
+
 	public function GetWorkOnly($workId)
 	{
 		$worksTable = new WorkModel();

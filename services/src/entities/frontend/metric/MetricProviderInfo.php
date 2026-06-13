@@ -11,6 +11,8 @@ class MetricProviderInfo extends BaseMapModel
 	public $Order;
 	public $Type;
 
+	public $Parent;
+
 	public static function GetMap()
 	{
 		return array (

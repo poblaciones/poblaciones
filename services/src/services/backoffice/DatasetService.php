@@ -414,12 +414,10 @@ class DatasetService extends DbSession
 						$filtervalue, $filtercondition, $filtervariable, $filteroperator, $filterdatafield);
 			}
 		}
-		$where .= ")";
-
-		if ($where === "()" || $where === ")")
-			$where = "";
-		else if ($where !== "")
+		if ($where != "" && $where != "(")
 			$where = "AND (" . $where . ")";
+		else
+			$where = "";
 
 		return $where;
 	}

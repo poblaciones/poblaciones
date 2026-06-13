@@ -39,7 +39,7 @@
 
 <script>
 export default {
-  name: 'MapToolbar',
+  name: 'sideButtons',
     props: {
       activePanel: {
         type: String,

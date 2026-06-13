@@ -68,8 +68,6 @@ abstract class cController
 	}
 	public function Render($template)
 	{
-		$this->RegisterBar();
-
 		$this->AddValue('html_title',  $this->title);
 		$this->AddValue('success',  $this->message);
 		$this->AddValue('isMegaUser',  Session::IsMegaUser());
@@ -79,8 +77,4 @@ abstract class cController
 		return App::Render($template, $this->templateValues);
 	}
 
-	private function RegisterBar()
-	{
-
-	}
 }

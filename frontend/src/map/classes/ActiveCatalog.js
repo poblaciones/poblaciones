@@ -13,7 +13,10 @@ function ActiveCatalog() {
 	this.Boundaries = [];
 };
 
-ActiveCatalog.prototype.Receive = function (info) {
-	arr.Fill(this.Metrics, info.Metrics);
-	arr.Fill(this.Boundaries, info.Boundaries);
+ActiveCatalog.prototype.ReceiveMetrics = function (metrics) {
+	arr.Fill(this.Metrics, metrics);
+};
+
+ActiveCatalog.prototype.ReceiveBoundaries = function (boundaries) {
+	arr.Fill(this.Boundaries, boundaries);
 };

@@ -16,6 +16,8 @@ use minga\framework\MessageBox;
 use minga\framework\PhpSession;
 use minga\framework\WebConnection;
 
+use minga\framework\caching\ObjectCache;
+
 use helena\classes\Paths;
 use helena\classes\settings\LocalSettings;
 
@@ -687,7 +689,7 @@ class App
 	}
 
 
-	public static function FlushRemoteFile($url, $args = null, $cache = null, $cacheKey = null)
+	public static function FlushRemoteFile($url, $args = null, ObjectCache $cache = null, $cacheKey = null)
 	{
 		$response = null;
 		if ($cache)

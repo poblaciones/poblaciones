@@ -1,3 +1,9 @@
+- refactor backoffice (barra superior de estadísticas, personalizar y compartir)
+- popup de cuenta.
+- remove de googlemaps.
+- fix a relocate al georreferenciar puntos.
+- apiclient para boundaries
+
 v4.9 (2026-06-03)
 - Exportación e importación desde GeoPackage (.gpkg)
 - Múltiple selección para eliminación y archivo de cartografías.
