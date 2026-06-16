@@ -324,7 +324,7 @@
 				return this.doSort(value, this.currentSort, this.currentSortOrder);
 			},
 			getWorkUri(element) {
-				return '/users/#/cartographies/' + element.Id + '/metadata/content';
+				return '/users/#/cartographies/' + element.Id;
 			},
 		},
 		watch: {

@@ -36,7 +36,7 @@ export default {
 		goEdit() {
 			var id = this.work.Current.Id + '';
 			id = id.substring(0, id.length - 2);
-			var url = this.absoluteMap('/users/#/cartographies/' + id + '/metadata/content');
+			var url = this.absoluteMap('/users/#/cartographies/' + id);
 			window.open(url, '_blank');
 		},
 	},

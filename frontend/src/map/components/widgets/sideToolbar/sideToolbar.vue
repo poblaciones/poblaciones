@@ -103,10 +103,20 @@ export default {
   computed: {
     // Chips de indicadores: métricas activas que no son boundary ni isBaseMetric.
     indicatorSelection() {
-      return this.metrics
-        .filter(m => !m.IsBaseMetric && !m.IsBoundary)
-        .map(m => toChip({ Id: m.properties.Metric.Id, Name: m.properties.Metric.Name }));
-    },
+			const result = [];
+
+			for (const m of this.metrics) {
+				if (!m.isBaseMetric && !m.isBoundary) {
+					result.push(
+						toChip({
+							Id: m.properties.Metric.Id,
+							Name: m.properties.Metric.Name
+						})
+					);
+				}
+			}
+			return result;
+		},
     // Chips de delimitaciones: métricas activas que son boundary y no IsBaseMetric,
     // más las regiones de recorte activas en clipping.Region.Summary.Regions.
     boundarySelection() {

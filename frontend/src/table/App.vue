@@ -15,6 +15,10 @@
 	import session from '@/common/framework/session';
 	import axios from 'axios';
 
+	// Helpers del selector (mismas rutas que usa el main del mapa).
+	import { addIndicatorSubtitles, addBoundarySubtitles } from '@/map/components/widgets/sideToolbar/selectorSubtitles';
+	import { attachInfo, buildIndicatorInfo, buildBoundaryInfo } from '@/map/components/widgets/sideToolbar/selectorTooltips';
+
 	export default {
 		name: 'App',
 		// components: { },
@@ -41,23 +45,44 @@
 						window.Messages.$emit('serverLoaded');
 						window.Context.ServerLoaded = true;
 					}).then(function () {
-						return loc.loadFabMetrics();
+						return loc.loadFabData();
 					});
 			},
-			loadFabMetrics() {
+			// Dos árboles independientes, igual que el main del mapa:
+			// Context.Metrics      <- GetFabIndicators (alimenta el panel de columnas)
+			// Context.Boundaries   <- GetFabBoundaries  (alimenta filas y filtros)
+			loadFabData() {
 				const loc = this;
-				return axios.get(window.host + '/services/metrics/GetFabMetrics', session.AddSession(window.host, {
+				const params = session.AddSession(window.host, {
 					params: {
 						w: -1 /* window.SegMap.Signatures.FabMetrics */,
-						h: '' /*window.SegMap.Signatures.Suffix*/
+						h: '' /* window.SegMap.Signatures.Suffix */
 					}
-				})).then(function (res) {
-					session.ReceiveSession(window.host, res);
-					arr.AddRange(window.Context.Metrics, res.data.Metrics);
-					arr.AddRange(window.Context.Boundaries, res.data.Boundaries);
-				}).catch(function (error) {
-					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
 				});
+
+				// 1) Indicadores (árbol).
+				const indicators = axios.get(window.host + '/services/metrics/GetFabIndicators', params).then(function (res) {
+					session.ReceiveSession(window.host, res);
+					const data = res.data; // árbol: [{ Id, Name, Icon, Items }]
+					addIndicatorSubtitles(data);
+					attachInfo(data, buildIndicatorInfo);
+					arr.AddRange(window.Context.Metrics, data);
+				}).catch(function (error) {
+					err.errDialog('LoadFabIndicators', 'obtener los indicadores', error);
+				});
+
+				// 2) Delimitaciones (árbol).
+				const boundaries = axios.get(window.host + '/services/metrics/GetFabBoundaries', params).then(function (res) {
+					session.ReceiveSession(window.host, res);
+					const data = res.data; // árbol: [{ Id, Name, Items: [tipo...] }]
+					addBoundarySubtitles(data);
+					attachInfo(data, buildBoundaryInfo);
+					arr.AddRange(window.Context.Boundaries, data);
+				}).catch(function (error) {
+					err.errDialog('LoadFabBoundaries', 'obtener las delimitaciones', error);
+				});
+
+				return Promise.all([indicators, boundaries]);
 			},
 			RegisterErrorHandler() {
 				Vue.config.errorHandler = err.HandleError;

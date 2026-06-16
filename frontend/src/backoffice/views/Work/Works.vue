@@ -422,7 +422,7 @@ export default {
 		// ── Métodos existentes ────────────────────────────────────────────────────
 
 		getWorkUri(element) {
-			return '/cartographies/' + element.Id + '/metadata/content';
+			return '/cartographies/' + element.Id;
 		},
 		openPdf(pdf) {
 			window.open(pdf, '_blank');

@@ -30,23 +30,52 @@ export default {
   },
   mounted() {
     var workId = this.$route.params.workId;
-		this.$refs.invoker.doMessage('Obteniendo cartografía', window.Db,
-													window.Db.BindWork,
-													workId);
-		Split(['#panMain', '#panRight'], {
-			sizes: [25, 75],
-			minSize: 150,
-			gutterSize: 4
-		});
+    var router = this.$router;
+    var currentRoute = this.$route;
+
+    var needsRedirect = !currentRoute.params.datasetId
+      && currentRoute.path === '/cartographies/' + workId;
+
+    var bindPromise = window.Db.BindWork(workId);
+
+    if (needsRedirect) {
+      bindPromise.then(function () {
+        var datasets = window.Context.CurrentWork.Datasets;
+        if (datasets && datasets.length > 0) {
+          var firstDataset = datasets[0];
+          router.replace('/cartographies/' + workId + '/datasets/' + firstDataset.properties.Id + '/data');
+        } else {
+          router.replace('/cartographies/' + workId + '/newDataset');
+        }
+      });
+    }
+
+    this.$refs.invoker.doMessage('Obteniendo cartografía', window.Db,
+      window.Db.BindWork,
+      workId);
+
+    Split(['#panMain', '#panRight'], {
+      sizes: [25, 75],
+      minSize: 150,
+      gutterSize: 4
+    });
   },
   watch: {
-  '$route.params.workId'(workId) {
-      window.Db.BindWork(workId);
+    '$route.params.workId'(workId) {
+      var router = this.$router;
+      window.Db.BindWork(workId).then(function () {
+        var datasets = window.Context.CurrentWork.Datasets;
+        if (datasets && datasets.length > 0) {
+          router.replace('/cartographies/' + workId + '/datasets/' + datasets[0].properties.Id + '/data');
+        } else {
+          router.replace('/cartographies/' + workId + '/newDataset');
+        }
+      });
     },
-  '$route.params.datasetId'(datasetId) {
+    '$route.params.datasetId'(datasetId) {
       window.Db.BindDataset(datasetId);
     }
-   },
+  },
 
 	data() {
 		return {

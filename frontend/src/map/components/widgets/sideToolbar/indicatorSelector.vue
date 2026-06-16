@@ -160,6 +160,15 @@
                 class="source-header hand"
                 @click="toggleCollapse(row.sectionKey)"
               >
+                <span
+                  v-if="selectableBranches && row.selectable && row.items && row.items.length"
+                  class="selcheck header-check"
+                  :class="{ 'checked': leavesSelectionState(row.items) === 'all', 'partial': leavesSelectionState(row.items) === 'some' }"
+                  @click.stop="toggleLeavesSelection(row.items, currentNode)"
+                >
+                  <i v-if="leavesSelectionState(row.items) === 'all'" class="fas fa-check"></i>
+                  <i v-else-if="leavesSelectionState(row.items) === 'some'" class="fas fa-minus"></i>
+                </span>
                 <span class="source-header-text">{{ row.name }}</span>
                 <span v-if="row.count != null" class="source-header-count">{{ row.count }}</span>
                 <i class="source-header-caret fas" :class="isCollapsed(row.sectionKey) ? 'fa-caret-right' : 'fa-caret-down'"></i>
@@ -189,7 +198,7 @@
                 :key="row.key"
                 class="indicator-item hand"
                 :class="{ 'is-selected': isSelected(row.item) }"
-                @click="onItemClick(row.item)"
+                @click="onItemClick(row.item, row.container)"
               >
                 <span v-if="isMulti" class="selcheck" :class="{ 'checked': isSelected(row.item) }">
                   <i v-if="isSelected(row.item)" class="fas fa-check"></i>
@@ -301,6 +310,16 @@ export default {
     allowMultiSelectToggle: { type: Boolean, default: true },
     showAddAll: { type: Boolean, default: false },
     addAllLabel: { type: String, default: 'Agregar todas' },
+    // Si está activo, los nodos contenedores (ramas) muestran un checkbox que
+    // selecciona o deselecciona todas sus hojas descendientes. Pensado para
+    // delimitaciones (p. ej. marcar una provincia pinta sus departamentos).
+    // No afecta la navegación: el checkbox no entra a la rama.
+    selectableBranches: { type: Boolean, default: false },
+    // Si está activo, los eventos select/deselect emiten como segundo argumento
+    // el nodo contenedor actual (el "tipo", p. ej. la delimitación Departamentos),
+    // necesario para resolver el boundary al que pertenecen las hojas.
+    // El consumidor del mapa ignora este segundo argumento, así que no lo afecta.
+    emitContainer: { type: Boolean, default: false },
     groupCategories: { type: Boolean, default: false },
     closeOnSelect: { type: Boolean, default: true },
   },
@@ -394,7 +413,7 @@ export default {
         for (const cat of this.categories) {
           const sKey = 'cat_' + this.containerKey(cat);
           const content = this.contentOf(cat);
-          rows.push({ type: 'header', key: 'h_' + sKey, sectionKey: sKey, name: cat.Name, count: this.branchLabel(cat) });
+          rows.push({ type: 'header', key: 'h_' + sKey, sectionKey: sKey, name: cat.Name, count: this.branchLabel(cat), selectable: false });
           if (this.isCollapsed(sKey)) continue;
           if (content.branches.length) {
             for (const br of content.branches) {
@@ -412,7 +431,7 @@ export default {
       }
       for (const section of this.currentSections) {
         if (section.Name) {
-          rows.push({ type: 'header', key: 'h_' + section.Key, sectionKey: section.Key, name: section.Name, count: null });
+          rows.push({ type: 'header', key: 'h_' + section.Key, sectionKey: section.Key, name: section.Name, count: null, selectable: true, items: section.Items });
           if (this.isCollapsed(section.Key)) continue;
         }
         for (const item of section.Items) {
@@ -543,18 +562,47 @@ export default {
     },
     // ── Selección ────────────────────────────────────────────────────────────
     isSelected(item) { return this.selectedIds.has(item.Id); },
-    onItemClick(item) {
-      if (this.isMulti) {
-        this.$emit(this.isSelected(item) ? 'deselect' : 'select', [item]);
+    // Estado del check de un corte de control sobre su conjunto de hojas.
+    leavesSelectionState(leaves) {
+      if (!leaves || !leaves.length) return 'none';
+      let selected = 0;
+      for (const leaf of leaves) if (this.selectedIds.has(leaf.Id)) selected++;
+      if (selected === 0) return 'none';
+      if (selected === leaves.length) return 'all';
+      return 'some';
+    },
+    // Pinta/despinta todas las hojas del corte de control.
+    toggleLeavesSelection(leaves, container) {
+      if (!leaves || !leaves.length) return;
+      if (this.leavesSelectionState(leaves) === 'all') {
+        this.emitDeselect(leaves, container);
       } else {
-        this.$emit('select', [item]);
+        const toAdd = leaves.filter(leaf => !this.selectedIds.has(leaf.Id));
+        this.emitSelect(toAdd.length ? toAdd : leaves, container);
+      }
+    },
+    // Emisión con o sin contenedor según emitContainer.
+    emitSelect(items, container) {
+      if (this.emitContainer) this.$emit('select', items, container);
+      else this.$emit('select', items);
+    },
+    emitDeselect(items, container) {
+      if (this.emitContainer) this.$emit('deselect', items, container);
+      else this.$emit('deselect', items);
+    },
+    onItemClick(item, container) {
+      if (this.isMulti) {
+        if (this.isSelected(item)) this.emitDeselect([item], container);
+        else this.emitSelect([item], container);
+      } else {
+        this.emitSelect([item], container);
         if (this.closeOnSelect) this.closePanel();
       }
     },
-    removeChip(chip) { this.$emit('deselect', [chip.Item || chip]); },
+    removeChip(chip) { this.emitDeselect([chip.Item || chip], chip.Container || null); },
     clearSelection() {
       if (!this.selection.length) return;
-      this.$emit('deselect', this.selection.map(c => c.Item || c));
+      this.emitDeselect(this.selection.map(c => c.Item || c), null);
     },
     clearSearch() {
       this.searchQuery = '';
@@ -847,6 +895,7 @@ export default {
   font-size: 10px; color: white; transition: all 0.15s; margin-right: 4px;
 }
 .selcheck.checked { background: #2196F3; border-color: #2196F3; }
+.selcheck.partial { background: #2196F3; border-color: #2196F3; }
 .indicator-item.is-selected .selcheck:not(.checked) { border-color: #2196F3; }
 
 
