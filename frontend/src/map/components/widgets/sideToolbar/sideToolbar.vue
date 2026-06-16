@@ -55,7 +55,6 @@
 import SideButtons from './sideButtons.vue';
 import IndicatorSelector from './indicatorSelector.vue';
 import SearchPanel from './searchPanel.vue';
-// Ajustá la ruta si ubicás los helpers en otra carpeta.
 import { toChip } from './selectorTooltips';
 
 export default {
@@ -70,22 +69,56 @@ export default {
       type: String,
       default: '',
     },
+    // Árbol de categorías de indicadores, alimentado desde App.vue.
+    indicators: {
+      type: Array,
+      default: () => [],
+    },
+    // Árbol de categorías de delimitaciones, alimentado desde App.vue.
+    boundaries: {
+      type: Array,
+      default: () => [],
+    },
+    // Referencia reactiva a window.SegMap.Metrics.metrics (this.metrics de App.vue).
+    // Es la fuente de verdad para los chips activos.
+    metrics: {
+      type: Array,
+      default: () => [],
+    },
+    // Objeto clipping de App.vue; se usa para incluir las regiones de recorte activas
+    // en el listado de chips de delimitaciones.
+    clipping: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   data() {
     return {
       activePanel: null, // 'indicators', 'places', 'search', 'upload', o null
-      // Árboles que alimenta App.vue por referencia (arr.AddRange).
-      indicators: [],
-      boundaries: [],
       suggestions: [],
-      // Selección controlada de cada panel: [{ Id, Caption, Description, Item }].
-      // Son las dos fuentes de verdad de lo insertado/quitado desde el panel.
-      indicatorSelection: [],
-      boundarySelection: [],
-      // Estado del modo de selección múltiple del panel de delimitaciones;
-      // mientras está activo, las altas en el mapa se acumulan (appendSelection).
+      // Estado del modo de selección múltiple del panel de delimitaciones.
       boundaryMulti: false,
     };
+  },
+  computed: {
+    // Chips de indicadores: métricas activas que no son boundary ni isBaseMetric.
+    indicatorSelection() {
+      return this.metrics
+        .filter(m => !m.IsBaseMetric && !m.IsBoundary)
+        .map(m => toChip({ Id: m.properties.Metric.Id, Name: m.properties.Metric.Name }));
+    },
+    // Chips de delimitaciones: métricas activas que son boundary y no IsBaseMetric,
+    // más las regiones de recorte activas en clipping.Region.Summary.Regions.
+    boundarySelection() {
+      if (!(this.clipping &&
+        this.clipping.Region &&
+        this.clipping.Region.Summary &&
+        this.clipping.Region.Summary.Regions != null)) return [];
+
+      return this.clipping.Region.Summary.Regions
+        .filter(r => r.Id && r.Name)
+        .map(r => toChip({ Id: r.Id, Name: r.Name }));
+    },
   },
   methods: {
     handlePanelToggle(panel) {
@@ -97,52 +130,23 @@ export default {
 
     // ── Indicadores ────────────────────────────────────────────────────────────
     onIndicatorSelect(items) {
-      this.addChips(this.indicatorSelection, items);
       items.forEach(it => this.$emit('selectedItem', { Id: it.Id, Type: 'M', Item: it }));
     },
     onIndicatorDeselect(items) {
-      this.removeChips(this.indicatorSelection, items);
       items.forEach(it => this.$emit('deselectedItem', { Id: it.Id, Type: 'M', Item: it }));
     },
 
     // ── Delimitaciones ───────────────────────────────────────────────────────────
     onBoundarySelect(items) {
-      this.addChips(this.boundarySelection, items);
       items.forEach(it => this.$emit('selectedItem', { Id: it.Id, Type: 'B', Item: it, Append: this.boundaryMulti }));
     },
     onBoundaryDeselect(items) {
-      this.removeChips(this.boundarySelection, items);
       items.forEach(it => this.$emit('deselectedItem', { Id: it.Id, Type: 'B', Item: it }));
     },
     // "Ver todas en el mapa": el nodo es el tipo de delimitación (boundary);
     // se emite su Id (de boundary, no de boundaryItem) como selección de grupo.
     onBoundaryGroup(node) {
       this.$emit('selectedGroup', { Id: node.Id, Type: 'B', Item: node });
-    },
-
-    // ── Mantenimiento de la selección (chips) ────────────────────────────────────
-    addChips(target, items) {
-      for (const item of items) {
-        if (!target.some(c => c.Id === item.Id)) target.unshift(toChip(item));
-      }
-    },
-    removeChips(target, items) {
-      for (const item of items) {
-        const i = target.findIndex(c => c.Id === item.Id);
-        if (i >= 0) target.splice(i, 1);
-      }
-    },
-
-    // ── API pública para sincronizar desde afuera ───────────────────────────────
-    // Cuando un indicador/delimitación se quita desde otro lugar (p. ej. la lista
-    // de capas activas del mapa), llamá a estos métodos para reflejarlo en los chips.
-    syncIndicatorRemoved(id) {
-      const i = this.indicatorSelection.findIndex(c => c.Id === id);
-      if (i >= 0) this.indicatorSelection.splice(i, 1);
-    },
-    syncBoundaryRemoved(id) {
-      const i = this.boundarySelection.findIndex(c => c.Id === id);
-      if (i >= 0) this.boundarySelection.splice(i, 1);
     },
   },
 };

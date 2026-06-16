@@ -141,8 +141,6 @@
                     const { width } = entry.contentRect;
                     requestAnimationFrame(() => {
                         this.actualWidth = width;
-
-                        console.log(this.actualWidth);;
                     });
                 }
             });

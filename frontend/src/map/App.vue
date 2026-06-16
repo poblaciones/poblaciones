@@ -24,7 +24,7 @@
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
-				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor"></SideToolbar>
+				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor" :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics" :clipping="clipping"></SideToolbar>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
 					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
 									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
@@ -189,6 +189,10 @@
 					ClippingCircle: null
 				},
 				metrics: [],
+				// Árboles de catálogo para el panel lateral.
+				// App.vue los puebla en loadFabData y los pasa como props a SideToolbar.
+				sideIndicators: [],
+				sideBoundaries: [],
 				config: {},
 				work: { Current: null },
 				workToLoad: false
@@ -561,7 +565,7 @@
 					const data = res.data; // árbol: [{ Id, Name, Icon, Items }]
 					addIndicatorSubtitles(data);
 					attachInfo(data, buildIndicatorInfo);
-					arr.AddRange(loc.$refs.sideToolbar.indicators, data);
+					arr.AddRange(loc.sideIndicators, data);
 					window.SegMap.Catalog.ReceiveMetrics(data);
 				}).catch(function (error) {
 					err.errDialog('LoadFabIndicators', 'obtener los indicadores', error);
@@ -573,7 +577,7 @@
 					const data = res.data; // árbol: [{ Id, Name, Items: [tipo...] }]
 					addBoundarySubtitles(data);
 					attachInfo(data, buildBoundaryInfo);
-					arr.AddRange(loc.$refs.sideToolbar.boundaries, data);
+					arr.AddRange(loc.sideBoundaries, data);
 					window.SegMap.Catalog.ReceiveBoundaries(data);
 				}).catch(function (error) {
 					err.errDialog('LoadFabBoundaries', 'obtener las delimitaciones', error);

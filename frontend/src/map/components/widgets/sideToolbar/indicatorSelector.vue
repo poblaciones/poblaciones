@@ -31,7 +31,7 @@
               @click="toggleViewMode"
               :title="listModeActive ? 'Ver como grilla' : 'Ver como listado'"
             >
-              <i :class="listModeActive ? 'fas fa-th-large' : 'fas fa-stream'"></i>
+              <i class="fas fa-stream"></i>
             </button>
             <button class="btn-close" @click="closePanel" title="Cerrar" aria-label="Cerrar">
               <span aria-hidden="true">×</span>
