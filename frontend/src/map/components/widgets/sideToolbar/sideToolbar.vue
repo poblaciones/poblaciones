@@ -103,31 +103,48 @@ export default {
   computed: {
     // Chips de indicadores: métricas activas que no son boundary ni isBaseMetric.
     indicatorSelection() {
-			const result = [];
-
-			for (const m of this.metrics) {
-				if (!m.isBaseMetric && !m.isBoundary) {
-					result.push(
-						toChip({
-							Id: m.properties.Metric.Id,
-							Name: m.properties.Metric.Name
-						})
-					);
-				}
-			}
-			return result;
-		},
-    // Chips de delimitaciones: métricas activas que son boundary y no IsBaseMetric,
-    // más las regiones de recorte activas en clipping.Region.Summary.Regions.
+      return this.metrics
+        .filter(m => !m.isBaseMetric && !m.isBoundary)
+        .map(m => toChip({ Id: m.properties.Metric.Id, Name: m.properties.Metric.Name }));
+    },
+    // Chips de delimitaciones: las capas de delimitación activas en el mapa
+    // (métricas de tipo boundary) más las regiones de recorte (clipping).
+    // Cada chip lleva en Item un Type que vuelve al removerlo:
+    //   'B' capa de delimitación (RemoveBoundaryById)
+    //   'C' región de recorte (ResetClippingRegion)
     boundarySelection() {
-      if (!(this.clipping &&
+      var chips = [];
+
+      // Capas de delimitación activas (boundaries, no base, no indicadores).
+      this.metrics
+        .filter(m => !m.isBaseMetric && m.isBoundary)
+        .forEach(m => {
+          chips.push({
+            Id: 'B:' + m.properties.Id,
+            Caption: m.properties.Name,
+            Description: m.properties.Name,
+            Item: { Type: 'B', Id: m.properties.Id }
+          });
+        });
+
+      // Regiones de recorte activas.
+      if (this.clipping &&
         this.clipping.Region &&
         this.clipping.Region.Summary &&
-        this.clipping.Region.Summary.Regions != null)) return [];
+        this.clipping.Region.Summary.Regions != null) {
+        this.clipping.Region.Summary.Regions
+          .filter(r => r.Id && r.Name)
+          .forEach(r => {
+            chips.push({
+              Id: 'C:' + r.Id,
+              Caption: r.Name,
+              Description: r.Name,
+              Item: { Type: 'C', Id: r.Id }
+            });
+          });
+      }
 
-      return this.clipping.Region.Summary.Regions
-        .filter(r => r.Id && r.Name)
-        .map(r => toChip({ Id: r.Id, Name: r.Name }));
+      return chips;
     },
   },
   methods: {
@@ -148,10 +165,18 @@ export default {
 
     // ── Delimitaciones ───────────────────────────────────────────────────────────
     onBoundarySelect(items) {
-      items.forEach(it => this.$emit('selectedItem', { Id: it.Id, Type: 'B', Item: it, Append: this.boundaryMulti }));
+      items.forEach(it => this.$emit('selectedItem', { Id: it.Id, Type: 'C', Item: it, Append: this.boundaryMulti }));
     },
     onBoundaryDeselect(items) {
-      items.forEach(it => this.$emit('deselectedItem', { Id: it.Id, Type: 'B', Item: it }));
+      items.forEach(it => {
+        // Desde un chip: it lleva Type ('B' capa, 'C' recorte) y su Id propio.
+        // Desde una hoja del árbol: es una región de recorte (comportamiento previo).
+        if (it && it.Type === 'B') {
+          this.$emit('deselectedItem', { Id: it.Id, Type: 'B', Item: it });
+        } else {
+          this.$emit('deselectedItem', { Id: it.Id, Type: 'C', Item: it });
+        }
+      });
     },
     // "Ver todas en el mapa": el nodo es el tipo de delimitación (boundary);
     // se emite su Id (de boundary, no de boundaryItem) como selección de grupo.

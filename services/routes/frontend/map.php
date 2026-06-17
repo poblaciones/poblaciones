@@ -113,12 +113,20 @@ App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {
 });
 
 
+App::$app->get('/services/metrics/GetUserFabIndicators', function (Request $request) {
+	if ($denied = Session::CheckSessionAlive())
+		return $denied;
+
+	$controller = new services\FabService();
+	return App::Json($controller->GetFabIndicators(true));
+});
+
 App::$app->get('/services/metrics/GetFabIndicators', function (Request $request) {
 	$controller = new services\FabService();
 	if (Params::GetIntMandatory('w') != -1)
-		return App::JsonImmutable($controller->GetFabIndicators());
+		return App::JsonImmutable($controller->GetFabIndicators(false));
 	else
-		return App::Json($controller->GetFabIndicators());
+		return App::Json($controller->GetFabIndicators(false));
 });
 
 

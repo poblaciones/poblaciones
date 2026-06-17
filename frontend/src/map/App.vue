@@ -266,8 +266,8 @@
 				window.SegMap.Clipping.SetClippingRegion(item.Id, true, false, false);
 			},
 			selectedItem(item) {
-				if (item.Type === 'B') {
-					// Alta de una delimitación individual; en selección múltiple se acumula.
+				if (item.Type === 'B' || item.Type === 'C') {
+					// Alta de una región de recorte; en selección múltiple se acumula.
 					window.SegMap.Clipping.SetClippingRegion(item.Id, true, false, item.Append === true);
 				} else {
 					window.SegMap.AddMetricById(item.Id);
@@ -275,6 +275,9 @@
 			},
 			deselectedItem(item) {
 				if (item.Type === 'B') {
+					// Capa de delimitación agregada con "Ver en el mapa".
+					window.SegMap.RemoveBoundaryById(item.Id);
+				} else if (item.Type === 'C') {
 					window.SegMap.Clipping.ResetClippingRegion(item.Id);
 				} else {
 					var metric = window.SegMap.Metrics.GetMetricById(item.Id);
@@ -559,8 +562,10 @@
 						h: window.SegMap.Signatures.Suffix
 					}
 				});
-				// 1) Indicadores (árbol). Ajustá la URL si tu endpoint difiere.
-				axios.get(window.host + '/services/metrics/GetFabIndicators', params).then(function (res) {
+				// 1) Indicadores (árbol). La ruta general se cachea local; la de usuario no,
+				//    por eso se usan endpoints distintos según si hay sesión iniciada.
+				var indicatorsEndpoint = (loc.user && loc.user.Logged) ? 'GetUserFabIndicators' : 'GetFabIndicators';
+				axios.get(window.host + '/services/metrics/' + indicatorsEndpoint, params).then(function (res) {
 					session.ReceiveSession(window.host, res);
 					const data = res.data; // árbol: [{ Id, Name, Icon, Items }]
 					addIndicatorSubtitles(data);

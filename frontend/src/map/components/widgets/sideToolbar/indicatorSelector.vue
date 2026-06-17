@@ -1,7 +1,7 @@
 <template>
   <transition name="slide-fade">
     <div class="indicator-selector-wrapper sidepanelOffset" v-if="isOpen" v-on-clickaway="closePanel">
-      <div class="work-offsetY floating-panel panel card">
+      <div ref="floatingPanel" class="work-offsetY floating-panel panel card" :style="panelStyle">
         <!-- Encabezado -->
         <div class="panel-header">
           <div class="panel-title">{{ title }}</div>
@@ -134,7 +134,7 @@
 
           <!-- Lista de hojas: misma fila para búsqueda y para navegación -->
           <div v-else class="indicators-list">
-            <div v-if="searchQuery && !filteredItems.length" class="no-results">
+            <div v-if="searchQuery && !filteredItems.length && !filteredBranches.length" class="no-results">
               No se encontraron resultados para "{{ searchQuery }}"
             </div>
 
@@ -161,7 +161,7 @@
                 @click="toggleCollapse(row.sectionKey)"
               >
                 <span
-                  v-if="selectableBranches && row.selectable && row.items && row.items.length"
+                  v-if="selectableBranches && isMulti && row.selectable && row.items && row.items.length"
                   class="selcheck header-check"
                   :class="{ 'checked': leavesSelectionState(row.items) === 'all', 'partial': leavesSelectionState(row.items) === 'some' }"
                   @click.stop="toggleLeavesSelection(row.items, currentNode)"
@@ -170,6 +170,12 @@
                   <i v-else-if="leavesSelectionState(row.items) === 'some'" class="fas fa-minus"></i>
                 </span>
                 <span class="source-header-text">{{ row.name }}</span>
+                <i
+                  v-if="selectableBranches && !isMulti && row.selectable && row.items && row.items.length"
+                  class="fas fa-layer-group source-header-addall"
+                  title="Agregar todos/as"
+                  @click.stop="addLeaves(row.items, currentNode)"
+                ></i>
                 <span v-if="row.count != null" class="source-header-count">{{ row.count }}</span>
                 <i class="source-header-caret fas" :class="isCollapsed(row.sectionKey) ? 'fa-caret-right' : 'fa-caret-down'"></i>
               </div>
@@ -286,6 +292,11 @@ export default {
   mixins: [clickaway],
   props: {
     isOpen: { type: Boolean, default: false },
+    // Punto de anclaje opcional { left, top } en coordenadas de viewport (p. ej.
+    // el borde derecho del botón que abre el panel). Cuando se provee y no es
+    // móvil, el panel se posiciona a la derecha de ese punto en vez de pegado al
+    // borde izquierdo. El visor del mapa no lo usa, así que su layout no cambia.
+    anchor: { type: Object, default: null },
     // Árbol nativo de GetFabIndicators / GetFabBoundaries. Cada nodo tiene
     // { Id, Name, Icon, Items }. La profundidad la determinan los datos:
     //   · Items diccionario { parent: hoja[] }        -> hojas agrupadas por separador
@@ -334,6 +345,7 @@ export default {
       viewMode: 'tree',   // 'tree' | 'list' (listado unificado de niveles 0 y 1)
       expanded: {},       // sectionKey -> true cuando el separador está expandido
                           // (por defecto, todo corte de control arranca colapsado)
+      panelStyle: null,   // posición calculada cuando se ancla a un invocador
     };
   },
   computed: {
@@ -390,6 +402,20 @@ export default {
       if (!term) return [];
       return this.searchScope.filter(e => this.normalize(e.item.Name || '').includes(term));
     },
+    // Todas las ramas (nodos contenedores navegables) bajo el ámbito actual, con
+    // su padre, para poder entrar en ellas desde la búsqueda.
+    branchScope() {
+      const out = [];
+      this.collectBranches(this.currentNode ? [this.currentNode] : this.categories, null, out);
+      return out;
+    },
+    // Ramas cuyo nombre coincide con la búsqueda (p. ej. "Departamentos" al
+    // buscar "departamento"): se ofrecen primero para entrar y ver sus hojas.
+    filteredBranches() {
+      const term = this.normalize(this.searchQuery.trim());
+      if (!term) return [];
+      return this.branchScope.filter(e => this.normalize(e.branch.Name || '').includes(term));
+    },
     listModeActive() {
       return this.viewMode === 'list' && !this.navStack.length;
     },
@@ -399,12 +425,20 @@ export default {
     },
     renderRows() {
       if (this.searchQuery) {
-        return this.filteredItems.map(e => ({
+        const branchRows = this.filteredBranches.map(e => ({
+          type: 'branch',
+          branch: e.branch,
+          parent: e.parent,
+          key: 'sb|' + this.containerKey(e.branch),
+        }));
+        const itemRows = this.filteredItems.map(e => ({
           type: 'item',
           item: e.item,
           container: e.container,
           key: this.containerKey(e.container) + '|' + e.item.Id,
         }));
+        // Las ramas coincidentes (contenedores) van primero, para entrar en ellas.
+        return branchRows.concat(itemRows);
       }
       const rows = [];
       if (this.listModeActive) {
@@ -467,8 +501,12 @@ export default {
   watch: {
     isOpen(val) {
       if (val) {
-        this.$nextTick(() => { if (this.$refs.searchInput) this.$refs.searchInput.focus(); });
+        this.$nextTick(() => {
+          if (this.$refs.searchInput) this.$refs.searchInput.focus();
+          this.positionPanel();
+        });
       } else {
+        this.panelStyle = null;
         this.hideTooltip();
         this.keepTooltip = false;
         setTimeout(() => {
@@ -490,6 +528,26 @@ export default {
     },
   },
   methods: {
+    // Posiciona el panel a la derecha del invocador y centrado verticalmente en
+    // él (mitad arriba, mitad abajo), sin pasar el borde superior ni inferior.
+    positionPanel() {
+      if (!this.anchor || this.isMobile) { this.panelStyle = null; return; }
+      var panel = this.$refs.floatingPanel;
+      if (!panel) return;
+      var rect = panel.getBoundingClientRect();
+      var width = rect.width || 420;
+      var height = rect.height || 0;
+      var gap = 8;
+      var margin = 8;
+      var left = this.anchor.left + gap;
+      if (left + width > window.innerWidth) {
+        left = Math.max(margin, window.innerWidth - width - margin);
+      }
+      var top = this.anchor.centerY - height / 2;
+      var maxTop = Math.max(margin, window.innerHeight - height - margin);
+      top = Math.min(Math.max(margin, top), maxTop);
+      this.panelStyle = { left: left + 'px', top: top + 'px', bottom: 'auto', margin: '0' };
+    },
     // Clasifica el contenido de un nodo en ramas u hojas.
     contentOf(node) {
       const items = node.Items;
@@ -517,6 +575,16 @@ export default {
           for (const section of content.sections) {
             for (const item of section.Items) out.push({ item, container: node });
           }
+        }
+      }
+    },
+    // Recolecta ramas (nodos navegables) con su padre, para la búsqueda.
+    collectBranches(nodes, parent, out) {
+      for (const node of nodes) {
+        const content = this.contentOf(node);
+        if (content.branches.length) {
+          out.push({ branch: node, parent: parent });
+          this.collectBranches(content.branches, node, out);
         }
       }
     },
@@ -581,6 +649,12 @@ export default {
         this.emitSelect(toAdd.length ? toAdd : leaves, container);
       }
     },
+    // Agrega todas las hojas de un corte de control a la tabla (sin alternar):
+    // usado por el ícono de capa cuando la multiselección está desactivada.
+    addLeaves(leaves, container) {
+      if (!leaves || !leaves.length) return;
+      this.emitSelect(leaves, container);
+    },
     // Emisión con o sin contenedor según emitContainer.
     emitSelect(items, container) {
       if (this.emitContainer) this.$emit('select', items, container);
@@ -642,7 +716,9 @@ export default {
     // Desde el listado unificado, entrar a un tipo apila ambos niveles
     // para que el breadcrumb refleje la ruta completa.
     enterListBranch(parent, branch) {
-      this.navStack = [parent, branch];
+      // Desde el listado, parent y branch forman la pila de dos niveles.
+      // Desde la búsqueda, parent puede ser null (rama en la raíz): solo la rama.
+      this.navStack = parent ? [parent, branch] : [branch];
       this.searchQuery = '';
       this.$nextTick(() => {
         const body = this.$el.querySelector('.panel-body');
@@ -865,6 +941,14 @@ export default {
 .source-header-text { flex: 1; }
 .source-header-count { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
 .source-header-caret { width: 14px; text-align: center; font-size: 13px; }
+.source-header-addall {
+  color: #1976d2;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.source-header-addall:hover { background: #e3f2fd; }
 
 /* Items */
 .indicator-item {

@@ -125,9 +125,19 @@ MetricsList.prototype.ClearUserMetrics = function () {
 };
 
 
+MetricsList.prototype.GetBoundaryById = function (boundaryId) {
+	for (var i = 0; i < this.metrics.length; i++) {
+		if (this.metrics[i].isBoundary
+			&& !this.metrics[i].isBaseMetric && this.metrics[i].properties.Id == boundaryId) {
+			return this.metrics[i];
+		}
+	}
+	return null;
+};
+
 MetricsList.prototype.GetMetricById = function (metricId) {
 	for (var i = 0; i < this.metrics.length; i++) {
-		if (!this.metrics[i].isBoundary
+		if (!this.metrics[i].isBoundary && !this.metrics[i].isBaseMetric
 			&& this.metrics[i].properties.Metric.Id == metricId) {
 			return this.metrics[i];
 		}

@@ -82,7 +82,7 @@
 	import tour from '@/map/components/popups/tour';
 
 	import MapExport from '@/map/classes/MapExport';
-	import a from '@/common/js/authentication';
+	import auth from '@/common/js/authentication';
 
 	export default {
 		name: 'toolbar',
@@ -254,7 +254,7 @@
 				return ret;
 			},
 			authenticate() {
-				return a;
+				return auth;
 			},
 			isAdminReader() {
 				return this.user.Privileges === 'A' || this.user.Privileges === 'E' || this.user.Privileges === 'L';

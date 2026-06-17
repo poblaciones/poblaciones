@@ -21,24 +21,60 @@ class FabService extends BaseService
 
 	public function GetBoundariesWithItems()
 	{
-		// FALTA HACER REMOVE PRIVATE BOUNDARIES Y PONERLE UN CACHE
+		$shard = App::Settings()->Shard()->CurrentShard;
+		$data = null;
+		$key = 'B' . $shard;
+
+		if (FabMetricsCache::Cache()->HasData($key, $data))
+			return self::RemovePrivateFabBoundaries($data);
+
 		$table = new BoundaryModel();
-		return $table->GetBoundariesWithItems();
+		$data = $table->GetBoundariesWithItems();
+
+		FabMetricsCache::Cache()->PutData($key, $data);
+		return self::RemovePrivateFabBoundaries($data);
 	}
 
-	public function GetFabIndicators() // nombre provisorio
+	public function GetFabIndicators($incluseUserInfo) // nombre provisorio
 	{
-		$metricsService = new MetricService();
-		$providers = $metricsService->GetMetricProviders();
-		// Arma los grupos con métricas (esto puede quedar cacheado en bloque)
-		$ret = $this->CalculateMetrics($providers, true);
+		$shard = App::Settings()->Shard()->CurrentShard;
+		$data = null;
+		$key = 'M' . $shard;
 
-		// Si el usuario está autenticado, antepone un grupo con sus propios indicadores
-		$userGroup = $this->GetUserMetricsGroup($providers);
-		if ($userGroup)
-			array_unshift($ret, $userGroup);
+		if (FabMetricsCache::Cache()->HasData($key, $data))
+			$ret = $data;
+		else
+		{
+			$metricsService = new MetricService();
+			$providers = $metricsService->GetMetricProviders();
+			// Arma los grupos con métricas
+			$ret = $this->CalculateMetrics($providers, true);
+		}
+		FabMetricsCache::Cache()->PutData($key, $ret);
 
+		if ($incluseUserInfo)
+		{
+			// Si el usuario está autenticado, antepone un grupo con sus propios indicadores
+			$userGroup = $this->GetUserMetricsGroup($providers);
+			if ($userGroup)
+				array_unshift($ret, $userGroup);
+		}
 		return $ret;
+	}
+
+	private function RemovePrivateFabBoundaries(&$data)
+	{
+		if (Session::IsSiteReader())
+			return $data;
+
+		foreach ($data as &$group) {
+			if ($this->doRemovePrivateBoundaries($group['Items']))
+				$this->fixEmptyGroups($group['Items']);
+			if (sizeof($group['Items']) == 0)
+				Arr::Remove($data, $group);
+		}
+		unset($group);
+		return $data;
 	}
 
 	public function GetFabMetrics()
@@ -134,6 +170,7 @@ class FabService extends BaseService
 		}
 		return $ret;
 	}
+
 	private function GetUserMetricsGroup($providers)
 	{
 		if (!Session::IsAuthenticated())
