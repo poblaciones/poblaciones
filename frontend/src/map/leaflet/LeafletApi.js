@@ -15,7 +15,7 @@ import IconOverlay from '@/map/overlays/IconOverlay';
 import PolygonOverlay from '@/map/overlays/PolygonOverlay';
 import { MapView } from '@deck.gl/core';
 import { PolygonLayer } from '../../../node_modules/@deck.gl/layers/dist/index';
-import './pegman/Pegman.css';
+//import './pegman/Pegman.css';
 import LeafletAnnotator from './LeafletAnnotator';
 import ContextMenuTools from './ContextMenuTools.js';
 

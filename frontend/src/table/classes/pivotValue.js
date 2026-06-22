@@ -15,10 +15,13 @@ import h from '@/map/js/helper';
 
 // Construye el tuple { value, normalization } a partir de la celda.
 // Mantiene el criterio de Summary.getValueTuple para los modos que dependen
-// solo de Value/Total; para el resto normaliza por Total/NormalizationScale.
+// solo de Value/Total; los modos de superficie (K, H, A, D) usan cell.Area
+// (en m²) sumado por la pivot a partir de AreaM2 del endpoint. El modo FIL
+// (% horizontal entre categorías del mismo indicador-versión) usa cell.RowGroupTotal.
 function valueTuple(summaryMetric, variable, cell) {
 	var value = Number(cell.Value);
 	var total = Number(cell.Total);
+	var area  = (cell.Area != null) ? Number(cell.Area) : null;
 	var scale = (variable && variable.NormalizationScale) ? variable.NormalizationScale : 1;
 	switch (summaryMetric) {
 		case 'N': // conteo
@@ -27,19 +30,33 @@ function valueTuple(summaryMetric, variable, cell) {
 			return { value: value, normalization: total / scale };
 		case 'P': // % de columna: value sobre el total vertical de la columna
 			return { value: value, normalization: (cell.ColumnTotal ? cell.ColumnTotal / 100 : undefined) };
-		// K (área), H (hectáreas), A (distribución de área) y D (densidad)
-		// dependen de la suma de Km2 por celda, que la pivot aún no recibe.
-		// Quedan deshabilitados en el ciclo de modos (ver MetricHeader) hasta
-		// que ResolveCell agregue el área. Por defecto se normaliza por Total.
+		case 'FIL': // % de fila: value sobre la suma de categorías del grupo en la fila
+			return { value: value, normalization: (cell.RowGroupTotal ? cell.RowGroupTotal / 100 : undefined) };
+		case 'K': // superficie en Km²
+			return { value: area != null ? area / 1e6 : null };
+		case 'H': // superficie en hectáreas
+			return { value: area != null ? area / 1e4 : null };
+		case 'A': // % del área de la columna que ocupa la fila
+			return { value: area, normalization: (cell.ColumnArea ? cell.ColumnArea / 100 : undefined) };
+		case 'D': // densidad: Value / Km²
+			return { value: value, normalization: (area != null && area > 0) ? area / 1e6 : undefined };
 		default:
 			return { value: value, normalization: total / scale };
 	}
 }
 
 // Valor numérico calculado de la celda (ya normalizado).
+// Los modos K/H/A no usan Value: para esos, el guard mira cell.Area.
 export function cellValue(metric, variable, cell) {
-	if (!cell || cell.Empty || cell.Value === null || cell.Value === undefined) return '-';
-	return h.calculateValue(valueTuple(metric.properties.SummaryMetric, variable, cell));
+	if (!cell || cell.Empty) return '-';
+	var sm = metric.properties.SummaryMetric;
+	var areaOnly = (sm === 'K' || sm === 'H' || sm === 'A');
+	if (areaOnly) {
+		if (cell.Area === null || cell.Area === undefined) return '-';
+	} else {
+		if (cell.Value === null || cell.Value === undefined) return '-';
+	}
+	return h.calculateValue(valueTuple(sm, variable, cell));
 }
 
 // Valor formateado según el modo y los decimales de la variable
@@ -53,6 +70,7 @@ export function formatValue(metric, variable, rawValue) {
 		case 'I':
 		case 'P':
 		case 'A':
+		case 'FIL':
 			return h.formatPercentNumber(rawValue);
 		case 'K':
 		case 'H':
@@ -71,11 +89,18 @@ export function displayCell(metric, variable, cell) {
 // Encabezado de la columna según el modo y la variable
 // (mismo criterio que Summary.getValueHeader).
 export function valueHeader(metric, variable) {
-	switch (metric.properties.SummaryMetric) {
+	return valueHeaderForKey(metric.properties.SummaryMetric, variable);
+}
+
+// Símbolo de un modo de resumen dado su Key, sin depender del estado actual del
+// metric. Útil para listar todos los modos disponibles (combo de tipo).
+export function valueHeaderForKey(key, variable) {
+	switch (key) {
 		case 'K': return 'Km<sup>2</sup>';
 		case 'H': return 'Ha';
 		case 'A': return '% Km<sup>2</sup>';
 		case 'P': return 'COL %';
+		case 'FIL': return 'FIL %';
 		case 'I':
 			switch (variable ? variable.NormalizationScale : null) {
 				case 100: return '%';
@@ -92,4 +117,4 @@ export function valueHeader(metric, variable) {
 	}
 }
 
-export default { cellValue, formatValue, displayCell, valueHeader };
+export default { cellValue, formatValue, displayCell, valueHeader, valueHeaderForKey };

@@ -276,7 +276,10 @@
 			deselectedItem(item) {
 				if (item.Type === 'B') {
 					// Capa de delimitación agregada con "Ver en el mapa".
-					window.SegMap.RemoveBoundaryById(item.Id);
+					var boundary = window.SegMap.Metrics.GetBoundaryById(item.Id);
+					if (boundary) {
+						boundary.Remove();
+					}
 				} else if (item.Type === 'C') {
 					window.SegMap.Clipping.ResetClippingRegion(item.Id);
 				} else {

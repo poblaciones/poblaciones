@@ -71,6 +71,25 @@ RegionStore.prototype.GetRegionOrRetrieve = function (boundaryVersionId, include
 		});
 };
 
+// Construye (o recupera de la caché) un RegionSet a partir de los items que ya
+// están en memoria (árbol de GetFabBoundaries), sin llamar a GetRegion. Las
+// relaciones geográficas se siguen pidiendo aparte vía GetRegionGeographyRelations,
+// que busca el RegionSet acá registrado por su Id (= boundaryVersionId).
+RegionStore.prototype.GetRegionFromItems = function (boundaryVersionId, caption, items) {
+	var ret = this.GetRegionById(boundaryVersionId);
+	if (ret !== null) {
+		return ret;
+	}
+	var regionSet = new RegionSet(this, {
+		Id: boundaryVersionId,
+		Caption: caption,
+		Items: items,
+		GeographyRelations: {}
+	});
+	this.Regions.push(regionSet);
+	return regionSet;
+};
+
 RegionStore.prototype.GetRegionGeographyRelations = function (boundaryVersionId, includedGeographyRelations) {
 	var args = { id: boundaryVersionId, includedGeographyRelations: includedGeographyRelations };
 	var loc = this;

@@ -4,7 +4,7 @@
 			<md-icon>public</md-icon> Publicar cambios
 		</md-button>
 		<md-button @click="goMap" v-if="lastOnline" class="md-raised">
-			<md-icon>map</md-icon> Visitar mapa {{ (Work.HasChanges() ? 'actual' : '') }}
+			<md-icon>map</md-icon> Ver en mapa
 		</md-button>
 	</div>
 </template>

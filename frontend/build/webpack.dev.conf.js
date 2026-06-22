@@ -33,7 +33,7 @@ module.exports = merge(baseWebpackConfig, {
 			filename: 'backoffice.html',
 			template: 'backoffice.html',
 			metadata: {
-				maps_api: config.dev.env.maps_api.replace(/"/g, '')
+				maps_api: ''
 			},
 			chunks: ['appBackoffice'],
 			inject: true
@@ -42,7 +42,7 @@ module.exports = merge(baseWebpackConfig, {
 			filename: 'admins.html',
 			template: 'admins.html',
 			metadata: {
-				maps_api: config.dev.env.maps_api.replace(/"/g, '')
+				maps_api: ''
 			},
 			chunks: ['appAdmin'],
 			inject: true
@@ -69,7 +69,7 @@ module.exports = merge(baseWebpackConfig, {
 			filename: 'index.html',
 			template: 'index.html',
 			metadata: {
-				maps_api: config.dev.env.maps_api.replace(/"/g, ''),
+				maps_api: '',
 				google_analytics_key: config.dev.env.google_analytics_key.replace(/"/g, ''),
 				add_this_key: config.dev.env.add_this_key.replace(/"/g, ''),
 			},

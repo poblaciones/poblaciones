@@ -644,6 +644,13 @@ ActiveMetric.prototype.getValidMetrics = function (variable) {
 
 	ret.push({ Key: 'P', Caption: 'Distribución' });
 
+	// %FIL (distribución horizontal entre categorías): solo si el indicador lo
+	// habilita (lo hace la pivot vía AllowRowPercent) y la variable tiene más
+	// de un ValueLabel; sin categorías el modo sería siempre 100.
+	if (this.properties.AllowRowPercent && variable && variable.ValueLabels && variable.ValueLabels.length > 1) {
+		ret.push({ Key: 'FIL', Caption: 'Distribución horizontal' });
+	}
+
 	if (this.SelectedLevel().HasArea && this.SelectedVariable() && !this.SelectedVariable().IsArea
 				&& !this.SelectedLevel().Dataset.AreSegments) {
 		ret.push({ Key: 'K', Caption: 'Área' });

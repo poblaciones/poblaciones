@@ -24,8 +24,10 @@ MetricStore.prototype.GetMetricInfoById = function (metricId) {
 };
 
 
-MetricStore.prototype.GetMetricData = function (metric) {
-	var args = { m: metric.properties.Metric.Id, v: metric.SelectedVersion().Version.Id, l: metric.SelectedLevel().Id };
+MetricStore.prototype.GetMetricData = function (metric, version, level) {
+	version = version || metric.SelectedVersion();
+	level = level || metric.SelectedLevel();
+	var args = { m: metric.properties.Metric.Id, v: version.Version.Id, l: level.Id };
 	return axiosClient.getPromise(window.host + '/services/frontend/processor/GetMetricData', args,
 		('traer las Metrices'));
 };
@@ -42,7 +44,9 @@ MetricStore.prototype.GetMetricOrRetrieve = function (metricId) {
 	var loc = this;
 	return axiosClient.getPromise(window.host + '/services/metrics/GetSelectedInfos', args,
 		('traer las Metrices')).then(function (data) {
-			data[0].SummaryMetric = '%';
+			// 'I' = índice/proporción (se muestra como %). El valor '%' anterior no
+			// es un Key válido de getValidMetrics y caía en el default '?'.
+			data[0].SummaryMetric = 'I';
 			var activeMetric = loc.CreateActiveMetric(data[0]);
 			loc.Metrics.push(data[0]);
 			return activeMetric;

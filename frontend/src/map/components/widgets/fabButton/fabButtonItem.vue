@@ -10,7 +10,9 @@
 				 @click="mouseClick"
 				 ref="actions"
 				 class="fab-list-div no-highlight pointer">
-			<i :class="[actionIconSize, 'material-icons']">{{ action.icon }}</i>
+			<div class="icon18">
+				<i :class="action.icon"></i>
+			</div>
 		</div>
 
 		<fabPanel v-if="usePanel"
@@ -236,7 +238,15 @@
 	.material-icons.md-48 {
 		font-size: 48px;
 	}
-
+	.icon18 {
+		width: 18px;
+		height: 18px;
+		color: white;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 14px;
+	}
 	.material-icons.md-light {
 		color: rgba(255, 255, 255, 1);
 	}

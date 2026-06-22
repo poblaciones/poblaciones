@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import axiosClient from '@/common/js/axiosClient';
-import RegionStore from '../processing/RegionStore';
-import MetricStore from '../processing/MetricStore';
+import RegionStore from './RegionStore';
+import MetricStore from './MetricStore';
 
 export default Context;
 
