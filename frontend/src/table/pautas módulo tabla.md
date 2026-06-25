@@ -137,6 +137,17 @@ Los widgets emiten eventos hacia arriba (`toggle-analysis`, `close`,
         pivot/PivotTable.vue     Render de la tabla (sticky, sort por header)
         pivot/ColumnDragController.js  Reordenamiento de columnas por arrastre (objeto, no mixin)
         charts/ScatterPlot.vue, ScatterMulti.vue, DualHistogram.vue
+        popups/AddMetricPopup.vue, WorkMetadataPopup.vue  Popups (modal propio) invocables vía window.Popups
+      widgets/widgetStyles.css   Estilos compartidos por los widgets (contenedor, encabezado,
+                                 jerarquía de títulos, etiquetas, recuadros, pie). Se importa con
+                                 @import en el <style scoped> de cada widget; evita redefinir lo común.
+      widgets/distributions/      Widget de distribución (gráficos por indicador)
+        DistributionWidget.vue   Orquesta: modo categorías/regiones, toggles por panel, barra global
+        classes/                 DistributionModel (agrupa por indicador×versión), DistributionPanel
+                                 (resuelve el caso: %/N, total, apilable), CategoryDistribution
+                                 (agrega por categoría, ponderado), RegionDistribution (barras por
+                                 región con contribución al total)
+        components/              CategoryChart (barras/líneas/apilado), RegionBars (horizontales)
       classes/                   Comportamiento y estado (orientado a objetos)
         ActivePivot.js           Agregado raíz; compone los colaboradores
         ActiveMetricTuples.js    Tuplas de métrica, orden, encabezados
@@ -149,7 +160,7 @@ Los widgets emiten eventos hacia arriba (`toggle-analysis`, `close`,
         Context.js               Contexto global (stores, usuario, autenticación)
         pivotValue.js            Formato y encabezados de valor
       js/                        Helpers puros (sin estado)
-        pivotStats.js            Estadística ponderada
+        pivotStats.js            Estadística ponderada (regresión lineal, logística binomial por IRLS, correlaciones)
         tableExport.js           Exportación DOM → CSV/XLSX
       writers/                   Exportadores (clases, no helpers)
         TabularWriter.js         Base: arma la grilla intermedia desde el pivot
@@ -251,3 +262,58 @@ Antes de dar por buena una edición:
   como vecinos. `RegionStore` vivía en una carpeta `processing/` que se eliminó;
   si falta, hay que ubicarlo junto a `MetricStore.js`.
 - Estilos: el módulo asume el `index.scss` global; los componentes usan `scoped`.
+- Arranque sin Vue Router: el componente raíz del módulo es `table/App.vue`
+  (montado por el `main.js` del proyecto), que monta el `Dashboard`
+  directamente (no hay `table/router/` ni `Layout.vue`). `App.vue` resuelve el
+  "work" inicial con `StartTable` (en `table/classes/`) y, sobre una ruta
+  "limpia", espera el
+  evento `pivot-ready` (emitido por el Dashboard vía `window.Messages`) para
+  aplicar `RestoreWork`. Puede mostrar un `WorkPanel` (zócalo informativo) si hay
+  un work por defecto. El estado de la pivot se serializa en el **hash**
+  (`#/view?c=...&r=...&dash=...`): el Dashboard lo lee con un parser propio y lo
+  escribe con `window.history.replaceState`, sin depender de `$route`/`$router`.
+  `pivot.Router` sigue componiendo el objeto de query (es agnóstico del
+  transporte); el Dashboard lo serializa al hash.
+- Popups globales: `App.vue` declara instancias de los popups con `ref` y las
+  publica en `window.Popups` (p. ej. `window.Popups.AddMetric`,
+  `window.Popups.WorkMetadata`), para que cualquier componente —como el
+  `workPanel` de la barra superior— los invoque con `.show(...)` sin depender del
+  z-order del control que los dispara. Los popups del módulo no reutilizan el
+  modal del visor (evitan arrastrar libs de estilo/controles del mapa): traen su
+  propio overlay. Para actuar sobre la pivot, `AddMetricPopup` **emite un evento**
+  (`add-metric`) que App.vue escucha y delega en el Dashboard (dueño de la pivot)
+  por ref — cadena explícita y rastreable, sin globales mágicos.
+
+## 10. Pendientes a verificar
+
+- **Ponderación en correlaciones (Pearson/Spearman).** La regresión lineal y la
+  logística se corrigieron para que los ponderadores (población) modulen la
+  influencia relativa de cada unidad pero NO inflen el n efectivo (se normalizan a
+  sumar n; sin esto, con pesos = población todo daba significativo). Falta
+  verificar si la correlación y su p-valor (weightedPearson/weightedSpearman +
+  correlationPValue, en pivotStats.js) tienen el mismo problema de escala: el p de
+  la correlación depende de n; revisar qué n usa y si con pesos grandes infla la
+  significación igual que pasaba en la regresión. En la práctica no se observaron
+  correlaciones exageradamente altas, pero la significación puede estar afectada
+  aunque el coeficiente r en sí no lo esté.
+
+- **Rendimiento del Camino 1 (distribución, solo-total en categorías).**
+  `ActivePivot.ResolveAllCategories` resuelve cada categoría con
+  `ResolveCategoryAggregate`, que recorre TODAS las regiones de la tabla por
+  categoría (el agregado sobre el universo lo requiere). Con muchas regiones ×
+  categorías puede acumular costo. El modo regiones NO tiene este problema: ya
+  recorta el render a `maxRegions` (25). Si aparece lentitud real (medir antes),
+  cachear el agregado por (metricId, versionId) mientras no cambie el dataset.
+
+- **Colapso de cortes de control de la pivot (CollapseState).**
+  `classes/CollapseState.js` encapsula el estado de colapso de los grupos
+  (cortes de control) de la tabla, indexado por la clave del grupo (nombre del
+  padre). Codifica a una cadena compacta para la URL: bits de a 6 en base64url,
+  con un carácter de polaridad que invierte el bitmap si la mayoría está
+  colapsada (así "casi todo colapsado" también queda corto). Cadena vacía = todo
+  expandido. Cadena de prueba cubierta en CollapseState.test.mjs.
+  Flujo de persistencia: PivotTable emite 'collapse-changed' (string compacto) →
+  PivotTableWidget lo reemite → Dashboard lo guarda como 5º segmento del 'dash'
+  ("...;<distribución>;<colapso-pivot>"). Al restaurar, el Dashboard pasa
+  :initial-collapse y PivotTable lo aplica una vez, cuando ya hay grupos
+  (watcher de groupKeys con bandera _collapseApplied).

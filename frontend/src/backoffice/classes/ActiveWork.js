@@ -121,6 +121,11 @@ ActiveWork.prototype.PublicUrl = function () {
 	return ret;
 };
 
+ActiveWork.prototype.PublicTableUrl = function () {
+	var ret = this.PublicUrl();
+	return ret.replace(/^\/map\//, "/table/");
+};
+
 ActiveWork.prototype.GetGridExportUrl = function () {
 	return window.host + '/services/backoffice/ExportGridService?w=' + this.properties.Id;
 };
@@ -295,8 +300,12 @@ ActiveWork.prototype.RemoveExtraMetric = function (metric) {
 		'remover el indicador adicional');
 };
 
-ActiveWork.prototype.PreviewTarget = function () {
+ActiveWork.prototype.PreviewMapTarget = function () {
 	return '_mapPbl' + this.properties.Id;
+};
+
+ActiveWork.prototype.PreviewTableTarget = function () {
+	return '_tablePbl' + this.properties.Id;
 };
 
 ActiveWork.prototype.UpdateStartup = function () {

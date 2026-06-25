@@ -32,6 +32,7 @@ class ConfigurationService extends BaseService
 								'UseTextures' => App::Settings()->Map()->UseTextures,
 								'UseGradients' => App::Settings()->Map()->UseGradients,
 								'UsePerimeter' => App::Settings()->Map()->UsePerimeter,
+								'UsePivot' => App::Settings()->Map()->UsePivot,
 								'Help' => App::Settings()->Help(),
 								'DefaultRelocateLocation' => App::Settings()->Map()->DefaultRelocateLocation,
 								'Signatures' => $signatures,

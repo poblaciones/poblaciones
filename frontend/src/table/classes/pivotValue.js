@@ -18,7 +18,7 @@ import h from '@/map/js/helper';
 // solo de Value/Total; los modos de superficie (K, H, A, D) usan cell.Area
 // (en m²) sumado por la pivot a partir de AreaM2 del endpoint. El modo FIL
 // (% horizontal entre categorías del mismo indicador-versión) usa cell.RowGroupTotal.
-function valueTuple(summaryMetric, variable, cell) {
+export function valueTuple(summaryMetric, variable, cell) {
 	var value = Number(cell.Value);
 	var total = Number(cell.Total);
 	var area  = (cell.Area != null) ? Number(cell.Area) : null;
@@ -26,6 +26,8 @@ function valueTuple(summaryMetric, variable, cell) {
 	switch (summaryMetric) {
 		case 'N': // conteo
 			return { value: value };
+		case 'T': // total
+			return { value: total };
 		case 'I': // índice / proporción normalizada
 			return { value: value, normalization: total / scale };
 		case 'P': // % de columna: value sobre el total vertical de la columna
@@ -113,6 +115,7 @@ export function valueHeaderForKey(key, variable) {
 			return 'N/A';
 		case 'D': return 'N/Km<sup>2</sup>';
 		case 'N': return 'N';
+		case 'T': return 'T';
 		default: return '?';
 	}
 }

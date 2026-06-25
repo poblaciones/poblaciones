@@ -327,11 +327,17 @@ export function weightedLinearRegression(y, X, weights) {
 	var rSquared = (ssTot === 0) ? null : (1 - ssRes / ssTot);
 	var adj = (ssTot === 0 || n - k <= 0) ? null : (1 - (1 - rSquared) * (n - 1) / (n - k));
 
-	// Errores estándar: sigma² = ssRes / (n - k); var(β) = sigma² · Ainv.
-	var sigma2 = ssRes / (n - k);
+	// Errores estándar. Los ponderadores modulan la influencia relativa de cada
+	// unidad (municipio), pero la inferencia es sobre las unidades observadas, no
+	// sobre la población que representan: se usan los pesos normalizados a sumar n
+	// (Σw' = n), de modo que el n efectivo sea el número de filas. Sin esto, con
+	// pesos = población el n efectivo sería de millones y todo daría significativo.
+	var sigma2 = (n - k > 0) ? (ssRes / sw) * n / (n - k) : 0;
 	var stdErrors = [], tValues = [], pValues = [];
 	for (var d = 0; d < k; d++) {
-		var se = Math.sqrt(Math.max(0, sigma2 * Ainv[d][d]));
+		// Ainv viene de A = Σ w·xx'; para usar pesos normalizados (w' = w·n/Σw) la
+		// matriz se reescala por n/Σw, así que var(β) = sigma² · Ainv · (Σw/n).
+		var se = Math.sqrt(Math.max(0, sigma2 * Ainv[d][d] * (sw / n)));
 		stdErrors.push(se);
 		var tv = se === 0 ? null : coef[d] / se;
 		tValues.push(tv);
@@ -353,6 +359,161 @@ export function weightedLinearRegression(y, X, weights) {
 			var acc = 0;
 			for (var i = 0; i < row.length; i++) acc += coef[i] * row[i];
 			return acc;
+		}
+	};
+}
+
+// p de dos colas para el estadístico de Wald (z), con la normal estándar.
+// p(|Z| > z) = 2 · (1 − Φ(z)) = erfc(z/√2).
+function normalTwoTailP(z) {
+	if (!isFinite(z)) return 0;
+	var p = erfc(Math.abs(z) / Math.SQRT2);
+	if (p < 0) p = 0;
+	if (p > 1) p = 1;
+	return p;
+}
+
+// Función error complementaria (aproximación de Abramowitz & Stegun 7.1.26),
+// error absoluto < 1,5e-7.
+function erfc(x) {
+	var sign = x < 0 ? -1 : 1;
+	var ax = Math.abs(x);
+	var t = 1 / (1 + 0.3275911 * ax);
+	var y = (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t;
+	var erf = 1 - y * Math.exp(-ax * ax);
+	erf *= sign;
+	return 1 - erf;
+}
+
+// Regresión logística binomial ponderada, ajustada por mínimos cuadrados
+// reponderados iterativamente (IRLS). Misma convención de ponderación que las
+// demás: los pesos son de frecuencia (cada observación cuenta wᵢ veces).
+//   y: array dependiente dicotómica (0/1)
+//   X: array de arrays de independientes (sin intercepto)
+//   weights: opcional
+// Devuelve { coefficients, stdErrors, zValues, waldValues, pValues, oddsRatios,
+//   n, k, logLik, llNull, mcFaddenR2, nagelkerkeR2, iterations, predict } o null.
+export function weightedLogisticRegression(y, X, weights) {
+	var rows = [];
+	for (var i = 0; i < y.length; i++) {
+		var yi = y[i];
+		var xi = X[i];
+		var wt = weights ? weights[i] : 1;
+		if (!isNum(yi)) continue;
+		if (yi !== 0 && yi !== 1) continue;
+		if (!xi || xi.some(function (v) { return !isNum(v); })) continue;
+		if (!isNum(wt) || wt < 0 || (weights && wt === 0)) continue;
+		rows.push({ y: yi, x: [1].concat(xi), w: weights ? wt : 1 });
+	}
+	var n = rows.length;
+	if (n === 0) return null;
+	var k = rows[0].x.length; // incluye intercepto
+
+	// Necesita ambas clases presentes y grados de libertad suficientes.
+	var ones = 0;
+	for (var c0 = 0; c0 < n; c0++) ones += rows[c0].y === 1 ? 1 : 0;
+	if (ones === 0 || ones === n) return null;
+	if (n <= k) return null;
+
+	// Igual que en la regresión lineal: los pesos modulan la influencia relativa,
+	// pero la inferencia es sobre las unidades observadas. Se normalizan a sumar n
+	// (Σw' = n); sin esto, con pesos = población los errores estándar se encogen y
+	// todo da significativo.
+	var sumW0 = 0;
+	for (var sw0 = 0; sw0 < n; sw0++) sumW0 += rows[sw0].w;
+	if (sumW0 > 0) {
+		var wScale = n / sumW0;
+		for (var ws = 0; ws < n; ws++) rows[ws].w *= wScale;
+	}
+
+	var beta = new Array(k).fill(0);
+	var lastAinv = null;
+	var iterations = 0;
+	var maxIter = 50;
+	var converged = false;
+
+	for (var it = 0; it < maxIter; it++) {
+		iterations++;
+		// Ecuaciones normales ponderadas del paso IRLS: A = XᵀW̃X, g = Xᵀ(w·(y−p)).
+		var A = [], grad = [];
+		for (var a0 = 0; a0 < k; a0++) { A.push(new Array(k).fill(0)); grad.push(0); }
+
+		for (var o = 0; o < n; o++) {
+			var xr = rows[o].x, yr = rows[o].y, wr = rows[o].w;
+			var eta = 0;
+			for (var e = 0; e < k; e++) eta += beta[e] * xr[e];
+			var mu = 1 / (1 + Math.exp(-eta));
+			var v = mu * (1 - mu);
+			var wv = wr * v;
+			for (var a = 0; a < k; a++) {
+				grad[a] += wr * xr[a] * (yr - mu);
+				for (var cc = 0; cc < k; cc++) A[a][cc] += wv * xr[a] * xr[cc];
+			}
+		}
+
+		var Ainv = invertMatrix(A);
+		if (!Ainv) return null; // separación perfecta o colinealidad
+		lastAinv = Ainv;
+		var delta = multiplyMatrixVector(Ainv, grad);
+		var maxStep = 0;
+		for (var d = 0; d < k; d++) { beta[d] += delta[d]; if (Math.abs(delta[d]) > maxStep) maxStep = Math.abs(delta[d]); }
+		if (maxStep < 1e-8) { converged = true; break; }
+	}
+
+	// Log-verosimilitud del modelo y del nulo (solo intercepto), ponderadas.
+	var sw = 0, swy = 0;
+	for (var s = 0; s < n; s++) { sw += rows[s].w; swy += rows[s].w * rows[s].y; }
+	var pNull = swy / sw;
+	var logLik = 0, llNull = 0;
+	for (var l = 0; l < n; l++) {
+		var et = 0;
+		for (var le = 0; le < k; le++) et += beta[le] * rows[l].x[le];
+		var p = 1 / (1 + Math.exp(-et));
+		var yy = rows[l].y, ww = rows[l].w;
+		logLik += ww * (yy * Math.log(Math.max(p, 1e-12)) + (1 - yy) * Math.log(Math.max(1 - p, 1e-12)));
+		llNull += ww * (yy * Math.log(Math.max(pNull, 1e-12)) + (1 - yy) * Math.log(Math.max(1 - pNull, 1e-12)));
+	}
+
+	var stdErrors = [], zValues = [], waldValues = [], pValues = [], oddsRatios = [];
+	for (var q = 0; q < k; q++) {
+		var se = lastAinv ? Math.sqrt(Math.max(0, lastAinv[q][q])) : null;
+		stdErrors.push(se);
+		var z = (se && se > 0) ? beta[q] / se : null;
+		zValues.push(z);
+		// Estadístico de Wald: z² (χ² con 1 gl). Su p de dos colas coincide con el
+		// de la normal sobre z, así que se reusa pValues.
+		waldValues.push(z === null ? null : z * z);
+		pValues.push(z === null ? null : normalTwoTailP(z));
+		oddsRatios.push(Math.exp(beta[q]));
+	}
+
+	var mcFadden = (llNull === 0) ? null : (1 - logLik / llNull);
+	// Nagelkerke (R² de Cox-Snell normalizado), con n efectivo = suma de pesos.
+	var coxSnell = 1 - Math.exp((2 / sw) * (llNull - logLik));
+	var nagelkerke = (1 - Math.exp((2 / sw) * llNull)) === 0
+		? null
+		: coxSnell / (1 - Math.exp((2 / sw) * llNull));
+
+	return {
+		coefficients: beta,
+		stdErrors: stdErrors,
+		zValues: zValues,
+		waldValues: waldValues,
+		pValues: pValues,
+		oddsRatios: oddsRatios,
+		n: n,
+		k: k - 1,
+		logLik: logLik,
+		llNull: llNull,
+		mcFaddenR2: mcFadden,
+		nagelkerkeR2: nagelkerke,
+		converged: converged,
+		iterations: iterations,
+		predict: function (xRow) {
+			var row = [1].concat(xRow);
+			var acc = 0;
+			for (var i = 0; i < row.length; i++) acc += beta[i] * row[i];
+			return 1 / (1 + Math.exp(-acc));
 		}
 	};
 }
@@ -656,5 +817,6 @@ export default {
 	weightedQuantile, weightedMedian, describe,
 	weightedCovariance, weightedPearson, weightedSpearman, correlationPValue,
 	weightedLinearRegression, weightedSimpleRegression, weightedMultilevelRegression,
+	weightedLogisticRegression,
 	correlationMatrix, correlations1xN
 };

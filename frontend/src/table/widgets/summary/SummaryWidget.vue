@@ -28,8 +28,9 @@
 		</div>
 
 		<footer v-if="availability === 'ready'" class="widget-foot">
-			<label class="weight-toggle">
+			<label class="sw-toggle">
 				<input type="checkbox" v-model="weighted" />
+				<span class="sw-track"><span class="sw-thumb"></span></span>
 				<span>Ponderar valores</span>
 			</label>
 		</footer>
@@ -98,74 +99,7 @@ export default {
 </script>
 
 <style scoped>
-	.widget {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		background: #fff;
-		border: 1px solid #e0e0e0;
-		border-radius: 6px;
-		overflow: hidden;
-	}
-	.widget-head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 8px 12px;
-		border-bottom: 1px solid #eee;
-		background: #fafafa;
-		cursor: move;
-	}
-	.widget-titles {
-		display: flex;
-		flex-direction: column;
-		min-width: 0;
-	}
-	.widget-kind {
-		font-size: 13px;
-		font-weight: 600;
-		color: #263238;
-	}
-	.widget-source {
-		font-size: 11px;
-		color: #78909c;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-	.widget-head-actions { display: flex; align-items: center; gap: 6px; }
-	.head-btn {
-		border: 1px solid #d0d7de;
-		background: #fff;
-		color: #455a64;
-		font-size: 12px;
-		padding: 3px 8px;
-		border-radius: 4px;
-		cursor: pointer;
-	}
-	.head-btn:hover:not(:disabled) { background: #f0f3f5; }
-	.head-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-	.widget-close {
-		border: none;
-		background: transparent;
-		font-size: 18px;
-		line-height: 1;
-		color: #90a4ae;
-		cursor: pointer;
-		padding: 0 4px;
-	}
-	.widget-close:hover { color: #455a64; }
-
-	.widget-empty {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		text-align: center;
-		padding: 24px;
-		color: #90a4ae;
-		font-size: 13px;
-	}
+	@import '@/table/widgets/widgetStyles.css';
 
 	.summary-body {
 		flex: 1;
@@ -181,20 +115,5 @@ export default {
 			width: 33vw;
 			min-width: 200px;
 		}
-	}
-
-	.widget-foot {
-		border-top: 1px solid #eee;
-		padding: 8px 12px;
-		background: #fafafa;
-	}
-	.weight-toggle {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		font-size: 12px;
-		color: #455a64;
-		cursor: pointer;
-		user-select: none;
 	}
 </style>

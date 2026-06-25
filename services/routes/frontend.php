@@ -22,6 +22,13 @@ App::RegisterControllerGet('/services/content/downloads', controllers\cDownloads
 App::RegisterControllerGet('/map', controllers\cMap::class);
 App::RegisterControllerGet('/map/', controllers\cMap::class);
 
+// TABLA
+if (App::Settings()->Map()->UsePivot)
+{
+	App::RegisterControllerGet('/table', controllers\cTable::class);
+	App::RegisterControllerGet('/table/', controllers\cTable::class);
+}
+
 if (App::Settings()->Servers()->IsMainServerRequest()) {
 	require_once('frontend/mainServer.php');
 	if (!App::Settings()->Servers()->IsTransactionServerRequest())
@@ -41,7 +48,8 @@ if (App::Settings()->Servers()->IsTransactionServerRequest()) {
 	require_once('frontend/clipping.php');
 	require_once('frontend/raster.php');
 	require_once('frontend/session.php');
-	require_once('frontend/table.php');
+	if (App::Settings()->Map()->UsePivot)
+		require_once('frontend/table.php');
 	require_once('frontend/suggestions.php');
 	require_once('frontend/crawler.php');
 	require_once('frontend/metric.php');

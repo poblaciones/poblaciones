@@ -121,6 +121,7 @@ class TableService extends BaseService
 			$hasSymbols,
 			$hasDescriptions
 		);
+		$table->getAreas = true;
 		$table->getGeometries = false;
 
 		$rows = $table->GetAllRows();

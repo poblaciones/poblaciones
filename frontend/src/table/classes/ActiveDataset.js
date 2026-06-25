@@ -72,9 +72,7 @@ function columnRecord(spec, columnIndex) {
 	var av = spec.variable;
 	var sm = spec.summary;
 
-	var unitHtml = '';
-	try { unitHtml = valueHeader(metric, av); } catch (e) { unitHtml = ''; }
-	var unit = stripHtml(unitHtml);
+	var unit = stripHtml(valueHeader(metric, av));
 
 	// Label largo: "Indicador — Variable (unidad) — Categoría [Edición]".
 	var labelParts = [spec.metricName];
@@ -90,6 +88,13 @@ function columnRecord(spec, columnIndex) {
 	if (spec.versionName) shortParts.push(spec.versionName);
 	if (unit) shortParts.push(unit);
 	var shortLabel = shortParts.join(' ');
+
+	// Color curado de la categoría (FillColor del ValueLabel), para los gráficos
+	// que pintan por categoría. null para la columna de total o si no hay color.
+	var fillColor = null;
+	if (!spec.isTotal && spec.labelId != null) {
+		fillColor = metric.GetStyleColorDictionary()[spec.labelId] || null;
+	}
 
 	return {
 		key: spec.key,
@@ -113,6 +118,7 @@ function columnRecord(spec, columnIndex) {
 			labelId: spec.labelId,
 			labelName: spec.labelName,
 			isTotal: !!spec.isTotal,
+			fillColor: fillColor,
 			isSimpleCount: !!(av && av.IsSimpleCount),
 			hasArea: !!(spec.level && spec.level.HasArea)
 		},

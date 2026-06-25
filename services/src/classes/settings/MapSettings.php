@@ -37,6 +37,11 @@ class MapSettings
 	public $isOWSEnabled = false;
 
 	public $UseMultiselect = true;
+	public $DefaultPivotBoundaryId = null;
+	public $DefaultPivotSubBoundaryId = null;
+	public $DefaultPivotSubSubBoundaryId = null;
+
+	public $UsePivot = false;
 	public $UseNewMenu = false;
 
 	public $UseGradients = false;
@@ -45,7 +50,7 @@ class MapSettings
 
 	public $UseAnnotations = false;
 
-	public $UseNewFabButton = false;
+	public $UseNewFabButton = true;
 
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;

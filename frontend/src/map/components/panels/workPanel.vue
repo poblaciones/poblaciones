@@ -150,7 +150,9 @@ export default {
 					holder.style.top = calculatedHeight;
 
 					var offsetCss = dom.getCssRule(document, '.work-offsetY');
-					offsetCss.style.maxHeight = '80vh;';
+					if (offsetCss) {
+						offsetCss.style.maxHeight = '80vh;';
+					}
 					if (window.SegMap) {
 						window.SegMap.TriggerResize();
 					}
@@ -161,8 +163,9 @@ export default {
 					holder.style.top = '0px';
 
 					var offsetCss = dom.getCssRule(document, '.work-offsetY');
-					offsetCss.style.maxHeight = '90vh;';
-
+					if (offsetCss) {
+						offsetCss.style.maxHeight = '90vh;';
+					}
 					this.work.Current = null;
 					if (window.SegMap) {
 						window.SegMap.SaveRoute.RemoveWork();

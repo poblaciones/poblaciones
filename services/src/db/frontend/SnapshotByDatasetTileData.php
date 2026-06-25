@@ -25,6 +25,8 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	private $hasDescriptions;
 	private $areSegments;
 	private $datasetId;
+
+	public $getAreas = false;
 	public $getGeometries = true;
 	public $honorTileLimit = true;
 	public $requiresPolygons = false;
@@ -56,8 +58,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	protected function ExecQuery($query = null, $extraQuery = null)
 	{
 		Profiling::BeginTimer();
-
-		$select = "sna_feature_id FID";
+		$select = "sna_feature_id FID, round(sna_area_m2) AreaM2";
 		$hasAnyNotNullTotal = '';
 
 		foreach ($this->variables as $variable) {
@@ -144,6 +145,8 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 					$item = [];
 					foreach ($extraFields as $field)
 						$item[$field] = $row[$field];
+					if ($this->getAreas)
+						$item['AreaM2'] = $row['AreaM2'];
 					if ($this->getGeometries)
 					{
 						$item['FID'] = $row['FID'];

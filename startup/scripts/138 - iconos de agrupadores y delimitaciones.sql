@@ -26,7 +26,8 @@ UPDATE boundary_group SET bgr_icon = 'fas fa-map-pin'        WHERE bgr_id = 6; -
 
 -- boundary: convertir íconos Material Design a clases FA (solo filas con valor)
 UPDATE boundary SET bou_icon = 'fas fa-map'    WHERE bou_icon = 'map';
-UPDATE boundary SET bou_icon = 'fas fa-globe'  WHERE bou_icon = 'public';
+UPDATE boundary SET bou_icon = 'fas fa-globe-americas'  WHERE bou_icon = 'public';
+UPDATE boundary SET bou_icon = 'fas fa-globe-americas'  WHERE bou_icon = 'fas fa-globe';
 UPDATE boundary SET bou_icon = 'fas fa-city'   WHERE bou_icon = 'location_city';
 
 -- ── boundary: asignar íconos FontAwesome 5.15 (free) a las filas sin valor ──

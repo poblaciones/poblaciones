@@ -75,8 +75,8 @@ export default {
 		},
 		// Agrupación por edición (multi).
 		byVersion() {
-			var idxs = this.metric.properties.SelectedVersionIndices || [];
-			var versions = this.metric.properties.Versions || [];
+			var idxs = this.metric.properties.SelectedVersionIndices;
+			var versions = this.metric.properties.Versions;
 			var out = [];
 			for (var i = 0; i < idxs.length; i++) {
 				var v = versions[idxs[i]];
@@ -88,7 +88,7 @@ export default {
 				out.push({
 					versionId: v.Version.Id,
 					versionName: v.Version.Name,
-					labels: (variable.ValueLabels || []).filter(function (l) { return l.Visible; })
+					labels: variable.ValueLabels.filter(function (l) { return l.Visible; })
 				});
 			}
 			return out;
@@ -96,7 +96,7 @@ export default {
 		// Resumen del botón: "Total" / "Ninguna" / "Elegir... (n/t)".
 		label() {
 			var n = 0, t = 0, totalSelected = false;
-			var selById = this.metric.properties.SelectedLabelIds || {};
+			var selById = this.metric.properties.SelectedLabelIds;
 			var groups = this.multi
 				? this.byVersion
 				: [{ versionId: this.currentVersionId, labels: this.currentLabels }];
@@ -118,25 +118,25 @@ export default {
 		rootClass() { return 'categories-selector'; },
 		panelWidth() { return 220; },
 		_currentVersion() {
-			var versions = this.metric.properties.Versions || [];
+			var versions = this.metric.properties.Versions;
 			if (!versions.length) return null;
 			var idx = this.metric.properties.SelectedVersionIndex;
 			if (idx == null || idx < 0 || idx >= versions.length) idx = 0;
 			return versions[idx] || null;
 		},
 		_findVersionById(versionId) {
-			var versions = this.metric.properties.Versions || [];
+			var versions = this.metric.properties.Versions;
 			for (var i = 0; i < versions.length; i++) {
 				if (versions[i].Version.Id === versionId) return versions[i];
 			}
 			return null;
 		},
 		isLabelSelected(versionId, labelId) {
-			var sel = (this.metric.properties.SelectedLabelIds || {})[versionId];
+			var sel = this.metric.properties.SelectedLabelIds[versionId];
 			return !!(sel && sel.labels && sel.labels.indexOf(labelId) !== -1);
 		},
 		isTotalSelected(versionId) {
-			var sel = (this.metric.properties.SelectedLabelIds || {})[versionId];
+			var sel = this.metric.properties.SelectedLabelIds[versionId];
 			return !!(sel && sel.includeTotal !== false);
 		},
 		isAllSelected(versionId) {
@@ -146,8 +146,8 @@ export default {
 			if (!level) return false;
 			var variable = level.Variables[level.SelectedVariableIndex];
 			if (!variable) return false;
-			var labels = (variable.ValueLabels || []).filter(function (l) { return l.Visible; });
-			var sel = (this.metric.properties.SelectedLabelIds || {})[versionId];
+			var labels = variable.ValueLabels.filter(function (l) { return l.Visible; });
+			var sel = this.metric.properties.SelectedLabelIds[versionId];
 			if (!sel || !sel.includeTotal) return false;
 			for (var i = 0; i < labels.length; i++) {
 				if (sel.labels.indexOf(labels[i].Id) === -1) return false;

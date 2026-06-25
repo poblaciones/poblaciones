@@ -41,7 +41,7 @@ TabularWriter.prototype.columnParts = function (tuple) {
 };
 
 TabularWriter.prototype._unit = function (metric, variable) {
-	try { return valueHeader(metric, variable); } catch (e) { return ''; }
+	return valueHeader(metric, variable);
 };
 
 TabularWriter.prototype._value = function (tuple, cell) {

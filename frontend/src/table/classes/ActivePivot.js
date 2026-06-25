@@ -1,7 +1,7 @@
 import arr from '@/common/framework/arr';
 import promises from '@/common/framework/promises';
 import RegionSelection from '@/table/classes/RegionSelection';
-import { cellValue } from '@/table/classes/pivotValue.js';
+import { cellValue, valueTuple } from '@/table/classes/pivotValue.js';
 import { resolveBoundary } from '@/table/classes/boundaryTree.js';
 import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import ActiveData from '@/table/classes/ActiveData.js';
@@ -440,18 +440,28 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 	// Sumariza. Cuando spec.labelId es null, suma todos los LID que matchean el VID
 	// (eso da el "Total" agregado por variable, o la única columna cuando la variable
 	// no tiene ValueLabels). Cuando spec.labelId es un Id concreto, filtra por él.
+	//
+	// Se usa el índice por VID y geografía (pivot.Data.indexFor): se recorre solo
+	// la intersección de geografías filtradas con las que tienen datos, en vez de
+	// barrer todo el array de items por cada celda.
 	var sum = 0, sumTotal = 0, sumArea = 0, count = 0;
-	var metricItems = this.Data.itemsFor(spec.versionId, spec.levelId) || level.Items || [];
 	var variableId = spec.variableId;
 	var labelId = spec.labelId;
-	for (var k = 0; k < metricItems.length; k++) {
-		var mi = metricItems[k];
-		if (mi.VID !== variableId) continue;
-		if (filteredGeographyIds.indexOf(mi.GeographyItemId) === -1) continue;
-		if (labelId != null && mi.LID !== labelId) continue;
-		if (mi.Value !== null && mi.Value !== undefined) { sum += parseFloat(mi.Value); count++; }
-		if (mi.Total !== null && mi.Total !== undefined) { sumTotal += parseFloat(mi.Total); count++; }
-		if (mi.AreaM2 !== null && mi.AreaM2 !== undefined) { sumArea += parseFloat(mi.AreaM2); }
+	var index = this.Data.indexFor(spec.versionId, spec.levelId);
+	var byVid = index ? index[variableId] : null;
+
+	if (byVid) {
+		for (var g = 0; g < filteredGeographyIds.length; g++) {
+			var bucket = byVid.byGeo.get(filteredGeographyIds[g]);
+			if (!bucket) continue;
+			for (var b = 0; b < bucket.length; b++) {
+				var mi = bucket[b];
+				if (labelId != null && mi.LID !== labelId) continue;
+				if (mi.Value !== null && mi.Value !== undefined) { sum += parseFloat(mi.Value); count++; }
+				if (mi.Total !== null && mi.Total !== undefined) { sumTotal += parseFloat(mi.Total); count++; }
+				if (mi.AreaM2 !== null && mi.AreaM2 !== undefined) { sumArea += parseFloat(mi.AreaM2); }
+			}
+		}
 	}
 
 	return {
@@ -459,6 +469,133 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 		'Total': count > 0 ? sumTotal : null,
 		'Area':  sumArea > 0 ? sumArea : null
 	};
+};
+
+// Valor agregado de una categoría sobre todo el universo de regiones de la tabla,
+// reutilizando ResolveCell (la sumarización por celda, con filtros, vive en un
+// solo lugar). Recorre todas las regiones/items, acumula Value y Total, y aplica
+// la misma interpretación por modo de medición que usa el dataset (pivotValue):
+// suma de conteos, o media ponderada en porcentaje. Lo usa el widget de
+// distribución para mostrar categorías que no están seleccionadas como columnas
+// (caso "solo total"). `spec` debe traer level, versionId, levelId, variableId y
+// labelId de la categoría.
+ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, variable, totalSpec) {
+	var sumValue = 0, sumTotal = 0, sumArea = 0, hasAny = false;
+	for (var bi = 0; bi < this.Regions.items.length; bi++) {
+		var version = this.Regions.items[bi].SelectedVersion();
+		var region = version.Selection;
+		for (var ii = 0; ii < region.Items.length; ii++) {
+			var item = region.Items[ii];
+			var cell = this.ResolveCell(spec, region.Region, item);
+			if (cell.Empty) continue;
+			if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
+			if (cell.Area != null)  { sumArea  += Number(cell.Area); }
+			// En modos normalizados (incidencia, etc.) el denominador es el total del
+			// universo, no el de la categoría: los ítems de categoría pueden no traer
+			// su propio Total. Por eso se resuelve con el spec de total (labelId null).
+			if (totalSpec) {
+				var tcell = this.ResolveCell(totalSpec, region.Region, item);
+				if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
+			} else if (cell.Total != null) {
+				sumTotal += Number(cell.Total);
+			}
+		}
+	}
+	if (!hasAny && sumTotal === 0) return null;
+
+	var tuple = valueTuple(summaryMetric, variable, { Value: sumValue, Total: sumTotal, Area: sumArea });
+	if (tuple.normalization != null && tuple.normalization !== 0) {
+		return tuple.value / tuple.normalization;
+	}
+	return tuple.value;
+};
+
+// Camino 1: para un (metricId, versionId) cuya selección es "solo total",
+// resuelve TODAS las categorías de la variable con su valor agregado y color,
+// como si estuvieran seleccionadas. Devuelve [{ labelId, name, color, value }] en
+// el orden de las ValueLabels, o [] si no se puede resolver. Lo usa el widget de
+// distribución para graficar las categorías sin que el usuario las elija.
+// Specs de todas las categorías de la variable de un (metricId, versionId), con
+// su color y el spec base (level, modo) para resolverlas. Devuelve null si no
+// hay una variable con ValueLabels.
+ActivePivot.prototype._categorySpecs = function (metricId, versionId) {
+	var base = null;
+	for (var t = 0; t < this.MetricTuples.metricTuples.length; t++) {
+		var sp = this.MetricTuples.metricTuples[t];
+		if (String(sp.metricId) === String(metricId) &&
+			String(sp.versionId) === String(versionId) &&
+			sp.variable && sp.variable.ValueLabels && sp.variable.ValueLabels.length) {
+			base = sp; break;
+		}
+	}
+	if (!base) return null;
+
+	var colors = base.metric.GetStyleColorDictionary();
+
+	var labels = base.variable.ValueLabels;
+	var specs = [];
+	for (var i = 0; i < labels.length; i++) {
+		specs.push({
+			labelId: labels[i].Id,
+			name: labels[i].Name,
+			color: colors[labels[i].Id] || null,
+			spec: {
+				level: base.level, levelId: base.levelId, versionId: base.versionId,
+				variableId: base.variableId, labelId: labels[i].Id, isTotal: false
+			}
+		});
+	}
+	// Spec del total (labelId null): denominador del universo para modos normalizados.
+	var totalSpec = {
+		level: base.level, levelId: base.levelId, versionId: base.versionId,
+		variableId: base.variableId, labelId: null, isTotal: true
+	};
+	return { base: base, specs: specs, totalSpec: totalSpec };
+};
+
+ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
+	var info = this._categorySpecs(metricId, versionId);
+	if (!info) return [];
+	var loc = this;
+	return info.specs.map(function (c) {
+		return {
+			labelId: c.labelId, name: c.name, color: c.color,
+			value: loc.ResolveCategoryAggregate(c.spec, info.base.summary, info.base.variable, info.totalSpec)
+		};
+	});
+};
+
+// Camino 1 en modo regiones: para un (metricId, versionId) con selección "solo
+// total", resuelve el valor de cada categoría POR REGIÓN. Devuelve una fila por
+// región { label, fid, parts: [{ labelId, name, color, value }] }, en el orden de
+// las regiones de la tabla. El widget arma con esto las barras horizontales.
+ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, versionId) {
+	var info = this._categorySpecs(metricId, versionId);
+	if (!info) return [];
+	var rows = [];
+	for (var bi = 0; bi < this.Regions.items.length; bi++) {
+		var version = this.Regions.items[bi].SelectedVersion();
+		var region = version.Selection;
+		for (var ii = 0; ii < region.Items.length; ii++) {
+			var item = region.Items[ii];
+			// Total del universo de la región (denominador para modos normalizados).
+			var totalCell = this.ResolveCell(info.totalSpec, region.Region, item);
+			var denomTotal = (!totalCell.Empty && totalCell.Total != null) ? Number(totalCell.Total) : null;
+			var parts = [];
+			for (var ci = 0; ci < info.specs.length; ci++) {
+				var c = info.specs[ci];
+				var cell = this.ResolveCell(c.spec, region.Region, item);
+				// Para la normalización se usa el Total del universo, no el de la
+				// categoría (que en incidencia puede venir vacío).
+				var merged = { Value: cell.Value, Total: denomTotal != null ? denomTotal : cell.Total, Area: cell.Area };
+				var tuple = valueTuple(info.base.summary, info.base.variable, merged);
+				var val = (tuple.normalization != null && tuple.normalization !== 0) ? tuple.value / tuple.normalization : tuple.value;
+				parts.push({ labelId: c.labelId, name: c.name, color: c.color, value: (val == null || isNaN(val)) ? 0 : val });
+			}
+			rows.push({ label: item.Caption, fid: item.FID, parts: parts });
+		}
+	}
+	return rows;
 };
 
 ActivePivot.prototype.NeedAutoDrillDown = function () {

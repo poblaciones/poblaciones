@@ -73,7 +73,7 @@
               aria-label="Remover toda la selección"
             >×</button>
             <div class="chips-scroll thinScroll">
-              <div v-for="chip in selection" :key="chip.Id" class="chip" :title="chip.Description">
+              <div v-for="chip in selection" :key="chip.Key || chip.Id" class="chip" :title="chip.Description">
                 <span class="chip-label">{{ chip.Caption }}</span>
                 <button class="chip-remove" @click="removeChip(chip)" :aria-label="'Quitar ' + chip.Caption">×</button>
               </div>
@@ -198,9 +198,9 @@
                 </div>
               </div>
 
-              <!-- Fila de hoja (única en todo el template) -->
+              <!-- Fila de hoja -->
               <div
-                v-else
+                v-else-if="row.type === 'item'"
                 :key="row.key"
                 class="indicator-item hand"
                 :class="{ 'is-selected': isSelected(row.item) }"
@@ -230,8 +230,27 @@
                   </button>
                 </div>
               </div>
+              <div
+                v-else-if="row.type === 'more'"
+                :key="row.key"
+                class="search-more hand"
+                @click="liftSearchLimit"
+              >
+                Ver {{ row.remaining }} resultado{{ row.remaining === 1 ? '' : 's' }} más
+              </div>
             </template>
           </div>
+        </div>
+
+        <!-- Regiones: controla si clic en una delimitación entra a sus elementos
+             (activo) o los agrega todos (inactivo, default). Visible al ver
+             delimitaciones, también en resultados de búsqueda. -->
+        <div v-if="showDrillToggle" class="add-all-bar">
+          <label class="sw-toggle">
+            <input type="checkbox" v-model="drillIntoElements" />
+            <span class="sw-track"><span class="sw-thumb"></span></span>
+            <span class="sw-label">Ver cada elemento de las delimitaciones al seleccionar</span>
+          </label>
         </div>
 
         <!-- Sugerencias -->
@@ -343,12 +362,30 @@ export default {
       internalMulti: this.multiSelect,
       tooltip: { visible: false, top: 0, left: 0, item: null },
       viewMode: 'tree',   // 'tree' | 'list' (listado unificado de niveles 0 y 1)
+      drillIntoElements: false,   // regiones: si está activo, clic en delimitación
+                                  // entra a sus elementos; si no (default), agrega todos
       expanded: {},       // sectionKey -> true cuando el separador está expandido
-                          // (por defecto, todo corte de control arranca colapsado)
+                          // (en listado, por defecto expandido; en árbol, según expandLeaves)
       panelStyle: null,   // posición calculada cuando se ancla a un invocador
+      searchRenderLimit: 50,    // máximo de filas de búsqueda a renderizar de entrada
+      searchLimitLifted: false, // "Ver más": renderizar todas las coincidencias
     };
   },
   computed: {
+    // El switch "Ver cada elemento de las delimitaciones al seleccionar" se ofrece
+    // cuando hay delimitaciones a la vista: navegando boundaries reales (ramas que
+    // llevan directo a hojas) o en resultados de búsqueda que incluyan alguna
+    // delimitación. No aparece en la raíz (tipos de boundary) ni en hojas puras.
+    showDrillToggle() {
+      if (!this.selectableBranches) return false;
+      if (this.searchQuery) {
+        return this.filteredBranches.some(this.isDelimitation);
+      }
+      if (!this.navStack.length) return false;
+      var branches = this.currentBranches;
+      if (!branches.length) return false;
+      return branches.every(this.isDelimitation);
+    },
     isMobile() {
       return window.SegMap && window.SegMap.Configuration && window.SegMap.Configuration.IsMobile;
     },
@@ -455,7 +492,16 @@ export default {
           key: this.containerKey(e.container) + '|' + e.item.Id,
         }));
         // Las ramas coincidentes (contenedores) van primero, para entrar en ellas.
-        return branchRows.concat(itemRows);
+        const all = branchRows.concat(itemRows);
+        // Con búsquedas de pocos caracteres el match puede ser de miles de filas;
+        // el filtrado es barato pero renderizarlas todas no. Se muestran las
+        // primeras y se ofrece "Ver más" para renderizar el resto a pedido.
+        if (!this.searchLimitLifted && all.length > this.searchRenderLimit) {
+          const shown = all.slice(0, this.searchRenderLimit);
+          shown.push({ type: 'more', key: '__more__', remaining: all.length - this.searchRenderLimit });
+          return shown;
+        }
+        return all;
       }
       const rows = [];
       if (this.listModeActive) {
@@ -523,26 +569,18 @@ export default {
           this.positionPanel();
         });
       } else {
+        // Al cerrarse, el panel se oculta pero conserva su estado de navegación
+        // (rama, listado, búsqueda), para reabrir donde estaba. La navegación se
+        // reinicia con las acciones explícitas (inicio/breadcrumb), no al cerrar.
         this.panelStyle = null;
         this.hideTooltip();
         this.keepTooltip = false;
-        setTimeout(() => {
-          this.navStack = [];
-          this.searchQuery = '';
-          this.showAllSuggestions = false;
-          this.expanded = {};
-        }, 300);
       }
     },
     multiSelect(val) { this.internalMulti = val; },
-    // Si el contexto deja de tener hojas chequeables (p. ej. volver del listado
-    // al árbol en la raíz), el modo múltiple se apaga y su botón se oculta.
-    hasSelectableRows(val) {
-      if (!val && this.internalMulti) {
-        this.internalMulti = false;
-        this.$emit('update:multiSelect', false);
-      }
-    },
+    // Cada cambio de texto vuelve a acotar el render de resultados (el "Ver más"
+    // se reinicia): así escribir un carácter más no arrastra miles de filas.
+    searchQuery() { this.searchLimitLifted = false; },
   },
   methods: {
     // Posiciona el panel a la derecha del invocador y centrado verticalmente en
@@ -601,7 +639,7 @@ export default {
       for (const node of nodes) {
         const content = this.contentOf(node);
         const hasBranches = content.branches.length > 0;
-        const hasLeaves = (content.sections || []).some(s => s.Items && s.Items.length);
+        const hasLeaves = content.sections.some(s => s.Items && s.Items.length);
         // Un nodo es navegable si contiene algo: sub-ramas u hojas. Incluye tanto
         // los agrupadores mayores (p. ej. "Límites políticos", que agrupa
         // delimitaciones) como los contenedores de hojas (p. ej. "Departamentos").
@@ -640,12 +678,40 @@ export default {
       this.internalMulti = !this.internalMulti;
       this.$emit('update:multiSelect', this.internalMulti);
     },
-    goHome() { this.navStack = []; this.searchQuery = ''; },
+    goHome() {
+      this.navStack = [];
+      this.searchQuery = '';
+      // En la raíz, si no hay hojas chequeables, el modo múltiple no aplica.
+      // (Antes esto lo hacía un watcher reactivo, que se disparaba con cualquier
+      // transición —incluido limpiar la búsqueda— y apagaba el multi sin querer.)
+      if (this.internalMulti && !this.hasSelectableRows) {
+        this.internalMulti = false;
+        this.$emit('update:multiSelect', false);
+      }
+    },
     goToDepth(depth) {
       this.navStack = this.navStack.slice(0, depth + 1);
       this.searchQuery = '';
     },
+    // Una delimitación es una rama cuyos hijos son elementos (hojas), no más
+    // sub-ramas. Distingue boundaries reales (Provincias, Municipios) de los
+    // agrupadores de tipo (Límites políticos) y de las hojas sueltas.
+    isDelimitation(node) {
+      var content = this.contentOf(node);
+      return content.branches.length === 0 && content.sections.some(function (s) {
+        return s.Items && s.Items.length;
+      });
+    },
     enterBranch(node) {
+      // Regiones: si "ver cada elemento" está inactivo (default), clic en una
+      // delimitación agrega todos sus elementos en vez de entrar a navegarla.
+      // Si está activo, se navega. Solo aplica a delimitaciones (no a grupos de
+      // tipo ni a hojas).
+      if (this.selectableBranches && !this.drillIntoElements && this.isDelimitation(node)) {
+        this.$emit('select-group', node);
+        if (!this.isMulti && this.closeOnSelect) this.closePanel();
+        return;
+      }
       this.navStack = this.navStack.concat(node);
       this.searchQuery = '';
       this.$nextTick(() => {
@@ -708,6 +774,7 @@ export default {
       this.searchQuery = '';
       this.$nextTick(() => { if (this.$refs.searchInput) this.$refs.searchInput.focus(); });
     },
+    liftSearchLimit() { this.searchLimitLifted = true; },
     // "Ver todas en el mapa": agrega el nivel actual como entidad (capa). No marca
     // hojas; emite el nodo contenedor para que el consumidor use su Id.
     onSelectGroup() {
@@ -721,7 +788,7 @@ export default {
     // según expandLeaves.
     isCollapsed(key) {
       if (key in this.expanded) return !this.expanded[key];
-      if (this.listModeActive) return true;
+      if (this.listModeActive) return false;
       return !this.expandLeaves;
     },
     toggleCollapse(key) { this.$set(this.expanded, key, this.isCollapsed(key)); },
@@ -735,13 +802,24 @@ export default {
         this.navStack = [];
         this.searchQuery = '';
         this.viewMode = 'list';
+        this.expanded = {};
         return;
       }
       this.viewMode = this.viewMode === 'tree' ? 'list' : 'tree';
+      // Al entrar a listado, todos los tipos arrancan expandidos (se descartan
+      // los colapsos manuales de una visita anterior).
+      if (this.viewMode === 'list') this.expanded = {};
     },
     // Desde el listado unificado, entrar a un tipo apila ambos niveles
     // para que el breadcrumb refleje la ruta completa.
     enterListBranch(parent, branch) {
+      // Misma lógica invertida que enterBranch: inactivo (default) agrega todos
+      // los elementos de la delimitación; activo, entra a navegarla.
+      if (this.selectableBranches && !this.drillIntoElements && this.isDelimitation(branch)) {
+        this.$emit('select-group', branch);
+        if (!this.isMulti && this.closeOnSelect) this.closePanel();
+        return;
+      }
       // Desde el listado, parent y branch forman la pila de dos niveles.
       // Desde la búsqueda, parent puede ser null (rama en la raíz): solo la rama.
       this.navStack = parent ? [parent, branch] : [branch];
@@ -952,7 +1030,15 @@ export default {
 .category-icon { font-size: 32px; text-shadow: 2px 2px 4px rgb(223 216 220 / 50%); color: #0fa7d8; display: block; margin-bottom: 12px; }
 .category-icon.featured { text-shadow: none; color: #69bad5; }
 .category-name { font-size: 15px; color: #333; margin-bottom: 4px; line-height: 1.3; font-weight: 500; }
-.category-count { font-size: 13px; color: #999; }
+.category-count { font-size: 13px; color: #999; padding-top: 2px; line-height: 1.3; }
+
+.add-all-bar { padding: 8px 14px; border-top: 1px solid #eee; background: #fafafa; flex: 0 0 auto; }
+.add-all-bar .sw-toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #455a64; cursor: pointer; user-select: none; }
+.add-all-bar .sw-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.add-all-bar .sw-track { position: relative; width: 32px; height: 17px; background: #cfd8dc; border-radius: 9px; transition: background 0.15s; flex: 0 0 auto; }
+.add-all-bar .sw-thumb { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; background: #fff; border-radius: 50%; transition: transform 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+.add-all-bar .sw-toggle input:checked + .sw-track { background: #1976d2; }
+.add-all-bar .sw-toggle input:checked + .sw-track .sw-thumb { transform: translateX(15px); }
 
 /* Separadores / encabezados de sección (colapsables) */
 .source-header {
@@ -1018,6 +1104,8 @@ export default {
 .btn-preview:hover { background: #e9ecef; color: #666; }
 
 .no-results { text-align: center; color: #999; padding: 40px 16px; font-style: italic; font-size: 15px; }
+.search-more { text-align: center; color: #1976d2; padding: 12px 16px; font-size: 13px; cursor: pointer; border-top: 1px solid #eee; }
+.search-more:hover { background: #f5f9ff; }
 
 /* Sugerencias */
 .suggestions-zone {

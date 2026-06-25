@@ -4,7 +4,7 @@
 			<div v-if="fixedLevel || metric.matchesComparableFilter(variable)" v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')
 					 && (!Embedded.Readonly || index === level.SelectedVariableIndex)" class="variableRow hand" @click="clickVariable(index)">
 				<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"></i>
-				{{ (variable.Name ? variable.Name : 'Conteo') }} {{ divider(variable) }}<span v-if="isActive(index)" style="padding-left: 1px;">{{ variable.Asterisk }}</span>
+				{{ variableName(variable) }} {{ divider(variable) }}<span v-if="isActive(index)" style="padding-left: 1px;">{{ variable.Asterisk }}</span>
 				<span v-if="isActive(index)" @click.stop="toggleVariable()" class='hand exp-hiddable-inline'>
 					<chevron-down-icon v-if="version.LabelsCollapsed"
 														 title="Mostrar categorías" />
@@ -22,6 +22,7 @@
 
 <script>
 import h from '@/map/js/helper';
+import str from '@/common/framework/str';
 import metricValues from './metricValues';
 import metricChart from './metricChart';
 import ChevronDownIcon from 'vue-material-design-icons/ChevronDown.vue';
@@ -86,6 +87,10 @@ export default {
 			} else {
 				return 'keyboard_arrow_down';
 			}
+		},
+		variableName(variable) {
+			var ret = variable.Name ? variable.Name : 'Conteo';
+			return str.RemoveDot(ret);
 		},
 		dropClass(index) {
 			if (this.isActive(index) && this.level.SelectedVariableIndex === index) {

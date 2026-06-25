@@ -157,6 +157,7 @@ class ConfigurationService extends BaseService
 									'UseMultiselect' => App::Settings()->Map()->UseMultiselect,
 									'UseDeckgl' => App::Settings()->Map()->UseDeckgl,
 									'UseCompareSeries' => $useComparer,
+									'UsePivot' => App::Settings()->Map()->UsePivot,
 
 									'ElevationUrl' => App::Settings()->Map()->ElevationUrl,
 

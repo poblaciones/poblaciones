@@ -115,6 +115,7 @@ cp ../services/web/static/css/styles.css $output/web/static/css/styles.css>>$out
 cp ../services/web/static/css/authenticate.css $output/web/static/css/authenticate.css>>$output-4_copy.log
 cp -r ../frontend/static/img $output/web/static/>>$output-4_copy.log
 cp $output/templates/index.html.twig $output/templates/frontend/>>$output-4_copy.log
+cp $output/templates/table.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/backoffice.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/credentials.html.twig $output/templates/frontend/>>$output-4_copy.log
 cp $output/templates/admins.html.twig $output/templates/frontend/>>$output-4_copy.log

@@ -18,8 +18,10 @@ var STUBS = {
 	'@/common/framework/arr': '_stubs/arr.mjs',
 	'@/common/framework/promises': '_stubs/promises.mjs',
 	'@/table/classes/RegionSelection': '_stubs/RegionSelection.mjs',
+	'@/table/classes/RegionSelection.js': '_stubs/RegionSelection.mjs',
 	'@/map/classes/ActiveBoundary': '_stubs/ActiveBoundary.mjs',
 	'@/table/classes/pivotValue.js': '_stubs/pivotValue.mjs',
+	'@/table/classes/boundaryTree': '_stubs/boundaryTree.mjs',
 	'@/table/classes/boundaryTree.js': '_stubs/boundaryTree.mjs'
 };
 

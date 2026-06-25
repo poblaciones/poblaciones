@@ -1,0 +1,147 @@
+/*
+ * widgetStyles.css — estilos compartidos por los widgets de análisis del tablero
+ * (Resumen, Distribución, Relaciones). Define la identidad visual común para que
+ * ningún widget tenga que redefinir qué es un contenedor, un encabezado, un
+ * título, una etiqueta, un recuadro o un pie: todos importan esta hoja y se
+ * limitan a su contenido propio.
+ *
+ * Uso en un componente:  @import '@/table/widgets/widgetStyles.css';
+ * (dentro de <style scoped>, antes de las reglas propias del widget.)
+ *
+ * Las clases no llevan scoping de componente porque se comparten; los nombres
+ * van prefijados con `w-` o `widget-` para no colisionar.
+ */
+
+/* ── Contenedor ──────────────────────────────────────────────────────────── */
+.widget {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+/* ── Encabezado del widget ───────────────────────────────────────────────── */
+.widget-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	border-bottom: 1px solid #eee;
+	background: #fafafa;
+	cursor: move;
+	flex: 0 0 auto;
+}
+.widget-titles { display: flex; flex-direction: column; min-width: 0; }
+.widget-kind { font-size: 13px; font-weight: 600; color: #263238; }
+.widget-source {
+	font-size: 11px;
+	color: #78909c;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.widget-head-actions { display: flex; align-items: center; gap: 6px; }
+.head-btn {
+	border: 1px solid #d0d7de;
+	background: #fff;
+	color: #455a64;
+	font-size: 12px;
+	padding: 3px 8px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+.head-btn:hover:not(:disabled) { background: #f0f3f5; }
+.head-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.widget-close {
+	border: none;
+	background: transparent;
+	font-size: 18px;
+	line-height: 1;
+	color: #90a4ae;
+	cursor: pointer;
+	padding: 0 4px;
+}
+.widget-close:hover { color: #455a64; }
+
+/* ── Cuerpo y estado vacío ───────────────────────────────────────────────── */
+.widget-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 10px 12px; }
+.widget-empty {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 24px;
+	color: #90a4ae;
+	font-size: 13px;
+}
+
+/* ── Jerarquía de títulos de un bloque (indicador / variable / año) ──────────
+ * Misma escala tipográfica en todos los widgets, para que un indicador se vea
+ * igual en Resumen que en Distribución.
+ */
+.w-indicator { font-size: 13px; font-weight: 600; color: #263238; white-space: nowrap; }
+.w-variable  { font-size: 11px; color: #78909c; white-space: nowrap; }
+.w-version   { font-size: 11px; font-weight: 700; color: #455a64; }
+
+/* ── Recuadro de bloque ──────────────────────────────────────────────────── */
+.w-block {
+	border: 1px solid #eceff1;
+	border-radius: 6px;
+	background: #fff;
+}
+.w-block-head {
+	padding: 8px 12px;
+	background: #f5f7f9;
+	border-bottom: 1px solid #eceff1;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+/* ── Etiquetas y leyendas ────────────────────────────────────────────────── */
+.w-legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: #546e7a; }
+.w-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.w-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: 0 0 auto; }
+.w-legend-line { width: 14px; border-top: 1.5px dashed #607d8b; display: inline-block; }
+.w-note { font-size: 10.5px; color: #90a4ae; font-style: italic; }
+
+/* ── Pie del widget (barra de opciones) ──────────────────────────────────── */
+.widget-foot {
+	border-top: 1px solid #eee;
+	padding: 8px 12px;
+	background: #fafafa;
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	flex-wrap: wrap;
+}
+.weight-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: #455a64;
+	cursor: pointer;
+	user-select: none;
+}
+
+/* Switch on/off compartido por los widgets (reemplaza checkboxes). */
+.sw-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font-size: 12px;
+	color: #455a64;
+	cursor: pointer;
+	user-select: none;
+}
+.sw-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.sw-track { position: relative; width: 30px; height: 16px; background: #cfd8dc; border-radius: 9px; transition: background 0.15s; flex: 0 0 auto; }
+.sw-thumb { position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: #fff; border-radius: 50%; transition: transform 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+.sw-toggle input:checked + .sw-track { background: #1976d2; }
+.sw-toggle input:checked + .sw-track .sw-thumb { transform: translateX(14px); }

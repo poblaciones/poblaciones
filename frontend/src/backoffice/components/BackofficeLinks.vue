@@ -6,6 +6,9 @@
 		<md-button @click="goMap" v-if="lastOnline" class="md-raised">
 			<md-icon>map</md-icon> Ver en mapa
 		</md-button>
+		<md-button @click="goTable" v-if="lastOnline && usePivot" class="md-raised">
+			<md-icon>map</md-icon> Ver en tablero
+		</md-button>
 	</div>
 </template>
 
@@ -24,12 +27,20 @@ export default {
 		Work() { return window.Context.CurrentWork; },
 		Keys() {
 			return window.Context.Keys;
+		},
+		usePivot() {
+			return window.Context.Configuration.UsePivot;
 		}
 	},
 	methods: {
 		goMap() {
 			var url = this.Work.PublicUrl();
-			var target = this.Work.PreviewTarget();
+			var target = this.Work.PreviewTableTarget();
+			window.open(url, target);
+		},
+		goTable() {
+			var url = this.Work.PublicTableUrl();
+			var target = this.Work.PreviewTableTarget();
 			window.open(url, target);
 		},
 		onPublish() {

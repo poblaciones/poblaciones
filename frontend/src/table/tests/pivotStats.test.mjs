@@ -102,6 +102,46 @@ describe('weightedQuantile', function () {
 	});
 });
 
+describe('weightedLogisticRegression', function () {
+	// Relación creciente pero con solapamiento (sin separación perfecta, que haría
+	// diverger el ajuste): valores altos tienden a y=1, pero no de forma tajante.
+	var x = [1, 2, 3, 4, 5, 6, 7, 8, 3, 6];
+	var y = [0, 0, 1, 0, 1, 0, 1, 1, 0, 1];
+	var X = x.map(function (v) { return [v]; });
+
+	it('coeficiente positivo de la variable separadora', function () {
+		var reg = stats.weightedLogisticRegression(y, X, null);
+		expect(reg !== null).toBeTruthy();
+		expect(reg.coefficients[1] > 0).toBeTruthy();
+	});
+	it('la probabilidad predicha crece con la variable separadora', function () {
+		var reg = stats.weightedLogisticRegression(y, X, null);
+		expect(reg.predict([8]) > reg.predict([1])).toBeTruthy();
+	});
+	it('McFadden entre 0 y 1', function () {
+		var reg = stats.weightedLogisticRegression(y, X, null);
+		expect(reg.mcFaddenR2 > 0 && reg.mcFaddenR2 <= 1).toBeTruthy();
+	});
+	it('devuelve null si solo hay una clase', function () {
+		expect(stats.weightedLogisticRegression([0, 0, 0, 0], [[1], [2], [3], [4]], null)).toBeNull();
+	});
+	it('odds ratio = exp(coef)', function () {
+		var reg = stats.weightedLogisticRegression(y, X, null);
+		expect(reg.oddsRatios[1]).toBeCloseTo(Math.exp(reg.coefficients[1]), 1e-9);
+	});
+	it('Wald = z²', function () {
+		var reg = stats.weightedLogisticRegression(y, X, null);
+		expect(reg.waldValues[1]).toBeCloseTo(reg.zValues[1] * reg.zValues[1], 1e-9);
+	});
+	it('el ponderador de frecuencia influye en la estimación', function () {
+		var w1 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+		var w2 = [5, 5, 5, 5, 1, 1, 1, 1, 3, 2];
+		var a = stats.weightedLogisticRegression(y, X, w1);
+		var b = stats.weightedLogisticRegression(y, X, w2);
+		expect(Math.abs(a.coefficients[0] - b.coefficients[0]) > 1e-6).toBeTruthy();
+	});
+});
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }

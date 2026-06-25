@@ -1,12 +1,7 @@
 <template>
 	<div class="dashboard">
-		<div class="dashboard-bar">
-			<h1 class="dashboard-title">POBLACIONES</h1>
-		</div>
-
 		<div v-if="booting" class="dash-booting">
 			<div class="boot-spinner"></div>
-			<div class="boot-text">Cargando datos…</div>
 		</div>
 
 		<div class="dash-area" ref="area" v-show="!booting">
@@ -17,8 +12,10 @@
 						ref="table"
 						:pivot="pivot"
 						:active-analyses="activeAnalyses"
+						:initial-collapse="rowCollapse"
 						@toggle-analysis="onToggleAnalysis"
 						@data-refreshed="onDataRefreshed"
+						@collapse-changed="onCollapseChanged"
 						@error="onWidgetError" />
 				</div>
 
@@ -28,9 +25,11 @@
 						 title="Arrastrar para redimensionar"></div>
 
 				<div v-if="showDistribution" class="dash-pane" :style="leftBottomStyle">
-					<dataset-inspector-widget
+					<distribution-widget
 						ref="distribution"
 						:dataset="dataset"
+						:pivot="pivot"
+						:excluded-groups="collapsedGroups"
 						:config="configFor('distribution')"
 						@config-changed="onConfigChanged('distribution', $event)"
 						@close="hideAnalysis('distribution')"
@@ -76,12 +75,28 @@
 </template>
 <script>
 import PivotTableWidget from '@/table/widgets/pivot/PivotTableWidget.vue';
-import DatasetInspectorWidget from '@/table/widgets/DatasetInspectorWidget.vue';
+import DistributionWidget from '@/table/widgets/distributions/DistributionWidget.vue';
 import SummaryWidget from '@/table/widgets/summary/SummaryWidget.vue';
 import RelationsWidget from '@/table/widgets/relations/RelationsWidget.vue';
 
 import ActivePivot from '@/table/classes/ActivePivot.js';
 import ActiveRoute from '@/table/classes/ActiveRoute.js';
+
+// Extrae los parámetros de la query del hash (#/view?c=...&r=...) como objeto
+// plano, equivalente a lo que proveía this.$route.query con Vue Router.
+function _parseHashQuery(hash) {
+	if (!hash) return null;
+	var qi = hash.indexOf('?');
+	if (qi < 0) return null;
+	var out = {};
+	var pairs = hash.slice(qi + 1).split('&');
+	for (var i = 0; i < pairs.length; i++) {
+		var eq = pairs[i].indexOf('=');
+		if (eq < 0) continue;
+		out[pairs[i].slice(0, eq)] = decodeURIComponent(pairs[i].slice(eq + 1));
+	}
+	return out;
+}
 
 var MIN = 0.15;   // proporción mínima de cualquier panel
 var MAX = 0.85;
@@ -92,7 +107,10 @@ var ANALYSES = ['summary', 'distribution', 'relations'];
 
 export default {
 	name: 'Dashboard',
-	components: { PivotTableWidget, DatasetInspectorWidget, SummaryWidget, RelationsWidget },
+	components: { PivotTableWidget, DistributionWidget, SummaryWidget, RelationsWidget },
+	props: {
+		work: { type: Object, default: null }
+	},
 	data() {
 		return {
 			pivot: new ActivePivot(),   // dueño único de la pivot del tablero
@@ -101,6 +119,8 @@ export default {
 			showDistribution: false,
 			showRelations: false,
 			analysisConfig: { summary: {}, distribution: {}, relations: {} },
+			rowCollapse: '',   // estado compacto de colapso de cortes de control (pivot)
+			collapsedGroups: [],   // nombres de grupos colapsados (para excluir en distribución)
 			colSplit: 0.5,
 			leftSplit: 0.5,
 			rightSplit: 0.5,
@@ -182,6 +202,22 @@ export default {
 		onDataRefreshed() {
 			this.syncRoute();
 		},
+		onCollapseChanged(payload) {
+			this.rowCollapse = (payload && payload.encoded) || '';
+			this.collapsedGroups = (payload && payload.keys) || [];
+			this.syncRoute();
+		},
+		// Agrega un indicador a la pivot del tablero. Lo invoca App.vue cuando el
+		// popup de la barra superior emite su intención; la mutación vive acá
+		// porque el Dashboard es el dueño de la pivot.
+		addMetric(metricId) {
+			var loc = this;
+			return Promise.resolve(this.pivot.AddMetricById(metricId)).then(function () {
+				return loc.pivot.RefreshData();
+			}).then(function () {
+				loc.syncRoute();
+			});
+		},
 		onWidgetError(err) {
 			console.error('Widget error:', err);
 		},
@@ -245,7 +281,7 @@ export default {
 
 		bootstrap() {
 			var loc = this;
-			var query = this.$route ? this.$route.query : null;
+			var query = _parseHashQuery(window.location.hash);
 			var sections = ActiveRoute.parseQuery(query);
 			var hasContent = (sections.columns && sections.columns.length) ||
 							 (sections.rows && sections.rows.length) ||
@@ -259,15 +295,18 @@ export default {
 			}).then(function () {
 				loc.restoreDashState(query);
 				loc.booting = false;
+				// Evento de arranque: avisa que la pivot quedó construida.
+				if (window.Messages) window.Messages.$emit('pivot-ready', loc.pivot);
 			}).catch(function (err) {
 				console.error('Error al construir el tablero:', err);
 				loc.booting = false;
 			});
 		},
 
-		// Restaura splitters, análisis visibles y config de relaciones desde el
-		// parámetro 'dash' de la ruta. Formato:
-		//   "col,left,right;kind1,kind2;relTab~relMethod~dep~x~y~size"
+		// Restaura splitters, análisis visibles, config de relaciones y de
+		// distribución y colapso de cortes de la pivot, desde el parámetro 'dash'.
+		// Formato (5 segmentos separados por ';'):
+		//   "col,left,right;kind1,kind2;<relaciones>;<distribución>;<colapso-pivot>"
 		restoreDashState(query) {
 			if (!query || !query.dash) return;
 			try {
@@ -275,6 +314,8 @@ export default {
 				this.restoreSplits(parts[0]);
 				this.restoreVisible(parts[1]);
 				this.restoreRelationsConfig(parts[2]);
+				this.restoreDistributionConfig(parts[3]);
+				if (parts[4] != null) this.rowCollapse = parts[4];
 			} catch (e) { /* estado inválido: se ignora */ }
 		},
 		restoreSplits(segment) {
@@ -300,7 +341,29 @@ export default {
 			if (rp[3]) cfg.xKey = rp[3];
 			if (rp[4]) cfg.yKey = rp[4];
 			if (rp[5] != null && rp[5] !== '') cfg.sizeByWeight = (rp[5] === '1');
+			if (rp[6]) cfg.regType = rp[6];
+			if (rp[7] != null && rp[7] !== '') cfg.logitThreshold = parseFloat(rp[7]);
+			if (rp[8]) cfg.logitDirection = rp[8];
 			this.analysisConfig.relations = cfg;
+		},
+
+		// Segmento de distribución: "weighted~axisMode~chartMode~stacked~collapsed",
+		// donde collapsed es una lista de metricIds separados por coma.
+		restoreDistributionConfig(segment) {
+			if (!segment) return;
+			var dp = segment.split('~');
+			var cfg = {};
+			if (dp[0] != null && dp[0] !== '') cfg.weighted = (dp[0] === '1');
+			if (dp[1]) cfg.axisMode = dp[1];
+			if (dp[2]) cfg.chartMode = dp[2];
+			if (dp[3] != null && dp[3] !== '') cfg.stacked = (dp[3] === '1');
+			if (dp[4]) {
+				cfg.collapsed = dp[4].split(',').map(function (s) {
+					var n = Number(s);
+					return isNaN(n) ? s : n;
+				});
+			}
+			this.analysisConfig.distribution = cfg;
 		},
 
 		// Serializa el estado del tablero (splitters + análisis visibles + config
@@ -319,19 +382,37 @@ export default {
 
 			var c = this.analysisConfig.relations || {};
 			var relPart = [c.tab || '', c.method || '', c.depKey || '', c.xKey || '', c.yKey || '',
-				(c.sizeByWeight === false ? '0' : '1')].join('~');
+				(c.sizeByWeight === false ? '0' : '1'),
+				c.regType || '',
+				(c.logitThreshold != null ? c.logitThreshold : ''),
+				c.logitDirection || ''].join('~');
 
-			return splits + ';' + visible.join(',') + ';' + relPart;
+			var d = this.analysisConfig.distribution || {};
+			var collapsed = (d.collapsed && d.collapsed.length) ? d.collapsed.join(',') : '';
+			var distPart = [
+				(d.weighted === false ? '0' : '1'),
+				d.axisMode || '',
+				d.chartMode || '',
+				(d.stacked ? '1' : '0'),
+				collapsed
+			].join('~');
+
+			return splits + ';' + visible.join(',') + ';' + relPart + ';' + distPart + ';' + (this.rowCollapse || '');
 		},
 
 		syncRoute() {
-			if (!this.$router) return;
 			var query = this.pivot
 				? this.pivot.Router.query()
-				: Object.assign({}, this.$route.query);
+				: (_parseHashQuery(window.location.hash) || {});
 			query.dash = this.composeDashState();
-			if (JSON.stringify(this.$route.query) !== JSON.stringify(query)) {
-				this.$router.replace({ query: query }).catch(function () {});
+			var parts = [];
+			var keys = Object.keys(query);
+			for (var i = 0; i < keys.length; i++) {
+				parts.push(keys[i] + '=' + encodeURIComponent(query[keys[i]]));
+			}
+			var newHash = '#/view' + (parts.length ? ('?' + parts.join('&')) : '');
+			if (window.location.hash !== newHash) {
+				window.history.replaceState(null, '', newHash);
 			}
 		}
 	}
@@ -339,26 +420,12 @@ export default {
 </script>
 <style scoped>
 	.dashboard {
-		height: 100vh;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
 		background: #eceff1;
 		padding: 16px 20px;
 		box-sizing: border-box;
-	}
-	.dashboard-bar {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 12px;
-		flex: 0 0 auto;
-	}
-	.dashboard-title {
-		margin: 0;
-		margin-bottom: 8px;
-		font-weight: 100 !important;
-		color: #1b79ce;
-		font-size: 2.85em !important;
 	}
 
 	.dash-area {
@@ -384,7 +451,6 @@ export default {
 		border-radius: 50%;
 		animation: boot-spin 0.9s linear infinite;
 	}
-	.boot-text { font-size: 14px; color: #607d8b; }
 	@keyframes boot-spin { to { transform: rotate(360deg); } }
 	.dash-col {
 		min-width: 0;

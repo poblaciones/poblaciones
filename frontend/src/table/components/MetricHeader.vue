@@ -24,9 +24,6 @@
 
 				<div class="footer-right">
 
-					<!-- Nivel (solo lectura) -->
-					<span class="level-display">Nivel: {{ currentLevelName }}</span>
-
 					<!-- Selector de versión (sub-control: single/multi) -->
 					<version-selector
 						:metric="metric"
@@ -119,10 +116,6 @@
 			// Estado multi-versión.
 			isMultiVersion() {
 				return !!this.metric.properties.MultiVersion;
-			},
-			currentLevelName() {
-				var l = this.getCurrentLevel();
-				return l ? l.Name : '—';
 			},
 		},
 
@@ -240,7 +233,7 @@
 			toggleVersionMulti(index) {
 				var props = this.metric.properties;
 				if (!props.MultiVersion) return;
-				var idxs = (props.SelectedVersionIndices || []).slice();
+				var idxs = props.SelectedVersionIndices.slice();
 				var pos = idxs.indexOf(index);
 				if (pos >= 0) {
 					idxs.splice(pos, 1);   // se permite quedar sin ninguna activa
@@ -285,7 +278,7 @@
 				var mainVersionId = mainVersion.Version.Id;
 				var mainLevel = mainVersion.Levels[mainVersion.SelectedLevelIndex];
 				var mainVariable = mainLevel ? mainLevel.Variables[mainLevel.SelectedVariableIndex] : null;
-				var idxs = props.SelectedVersionIndices || [];
+				var idxs = props.SelectedVersionIndices;
 				for (var i = 0; i < idxs.length; i++) {
 					var v = props.Versions[idxs[i]];
 					if (!v) continue;
@@ -322,8 +315,8 @@
 				if (!level) return false;
 				var variable = level.Variables[level.SelectedVariableIndex];
 				if (!variable) return false;
-				var labels = (variable.ValueLabels || []).filter(function (l) { return l.Visible; });
-				var sel = (this.metric.properties.SelectedLabelIds || {})[versionId];
+				var labels = variable.ValueLabels.filter(function (l) { return l.Visible; });
+				var sel = this.metric.properties.SelectedLabelIds[versionId];
 				if (!sel) return false;
 				if (!sel.includeTotal) return false;
 				for (var i = 0; i < labels.length; i++) {
@@ -339,7 +332,7 @@
 					props.SelectedLabelIds[versionId] = { labels: [], includeTotal: true };
 				}
 				var sel = props.SelectedLabelIds[versionId];
-				var labels = (sel.labels || []).slice();
+				var labels = sel.labels.slice();
 				var pos = labels.indexOf(labelId);
 				if (pos >= 0) labels.splice(pos, 1);
 				else labels.push(labelId);
@@ -356,7 +349,7 @@
 					props.SelectedLabelIds[versionId] = { labels: [], includeTotal: true };
 				}
 				var sel = props.SelectedLabelIds[versionId];
-				this.$set(props.SelectedLabelIds, versionId, { labels: sel.labels || [], includeTotal: !(sel.includeTotal !== false) });
+				this.$set(props.SelectedLabelIds, versionId, { labels: sel.labels, includeTotal: !(sel.includeTotal !== false) });
 				this.emitSelectionChanged('Categories');
 			},
 
@@ -369,7 +362,7 @@
 				if (!level) return;
 				var variable = level.Variables[level.SelectedVariableIndex];
 				if (!variable) return;
-				var labels = (variable.ValueLabels || []).filter(function (l) { return l.Visible; });
+				var labels = variable.ValueLabels.filter(function (l) { return l.Visible; });
 				var allSelected = this.isVersionAllSelected(versionId);
 				props.SelectedLabelIds = props.SelectedLabelIds || {};
 				if (allSelected) {
@@ -384,7 +377,7 @@
 			},
 
 			_findVersionById(versionId) {
-				var versions = this.metric.properties.Versions || [];
+				var versions = this.metric.properties.Versions;
 				for (var i = 0; i < versions.length; i++) {
 					if (versions[i].Version.Id === versionId) return versions[i];
 				}
@@ -417,7 +410,7 @@
 				if (this.isMultiVersion) {
 					var name = currentLevel.Variables[index].Name;
 					var props = this.metric.properties;
-					var idxs = props.SelectedVersionIndices || [];
+					var idxs = props.SelectedVersionIndices;
 					for (var i = 0; i < idxs.length; i++) {
 						var v = props.Versions[idxs[i]];
 						if (!v || v === this.getCurrentVersion()) continue;
@@ -431,7 +424,7 @@
 			},
 
 			getCurrentVersion() {
-				var versions = this.metric.properties.Versions || [];
+				var versions = this.metric.properties.Versions;
 				if (!versions.length) return null;
 				var idx = this.metric.properties.SelectedVersionIndex;
 				if (idx == null || idx < 0 || idx >= versions.length) {
@@ -594,12 +587,6 @@
 		align-items: center;
 		gap: 10px;
 		font-size: 12px;
-	}
-
-	.level-display {
-		font-size: 12px;
-		color: #757575;
-		white-space: nowrap;
 	}
 
 	.metric-title-sortable {

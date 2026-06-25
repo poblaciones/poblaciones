@@ -241,6 +241,44 @@ AnalysisColumns.prototype.regression = function (depKey) {
 	return reg ? { regression: reg, others: others } : null;
 };
 
+// Rango [min, max] de los valores válidos de la dependiente, para el control de
+// punto de corte de la regresión logística. null si no hay valores.
+AnalysisColumns.prototype.dependentRange = function (depKey) {
+	var dep = this.byKey(depKey) || this._columns[0];
+	if (!dep) return null;
+	var min = null, max = null;
+	for (var i = 0; i < dep.values.length; i++) {
+		var v = dep.values[i];
+		if (v == null || !isFinite(v)) continue;
+		if (min === null || v < min) min = v;
+		if (max === null || v > max) max = v;
+	}
+	return min === null ? null : { min: min, max: max };
+};
+
+// Regresión logística binomial: dicotomiza la dependiente por un punto de corte
+// (1 si cumple el criterio respecto del umbral, 0 si no) y la explica con las
+// mismas independientes que la lineal. direction 'greater' → 1 si valor >
+// umbral; 'less' → 1 si valor < umbral. Devuelve { regression, others } o null.
+AnalysisColumns.prototype.logisticRegression = function (depKey, threshold, direction) {
+	var dep = this.byKey(depKey) || this._columns[0];
+	if (!dep || threshold == null || !isFinite(threshold)) return null;
+	var others = this.regressionSet().filter(function (c) { return c.key !== dep.key; });
+	if (others.length < 1) return null;
+
+	var greater = direction !== 'less';
+	var binary = [];
+	var X = [];
+	for (var r = 0; r < dep.values.length; r++) {
+		var v = dep.values[r];
+		if (v == null || !isFinite(v)) { binary.push(null); }
+		else binary.push((greater ? v > threshold : v < threshold) ? 1 : 0);
+		X.push(others.map(function (c) { return c.values[r]; }));
+	}
+	var reg = this._stats.weightedLogisticRegression(binary, X, dep.weights);
+	return reg ? { regression: reg, others: others } : null;
+};
+
 // Correlación de un par (ambos métodos, dirección Y←X usando peso de Y).
 AnalysisColumns.prototype.pairCorrelation = function (xKey, yKey) {
 	var x = this.byKey(xKey), y = this.byKey(yKey);

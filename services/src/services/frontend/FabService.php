@@ -380,7 +380,7 @@ class FabService extends BaseService
 		return [
 			'Id' => null,
 			'Name' => 'Los más consultados',
-			'Icon' => 'star',
+			'Icon' => 'fas fa-star',
 			'Items' => $metrics,
 			'Intensity' => 1.05
 		];
@@ -397,7 +397,7 @@ class FabService extends BaseService
 		return [
 			'Id' => null,
 			'Name' => 'Delimitaciones',
-			'Icon' => 'dashboard',
+			'Icon' => 'fas fa-th-large',
 			'Items' => $list,
 			'Intensity' => $this->intensityTarget
 		];

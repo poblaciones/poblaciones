@@ -12,6 +12,7 @@
 function ActiveData(pivot) {
 	this.pivot = pivot;
 	this._byVersionLevel = {};
+	this._indexByVersionLevel = {};
 }
 
 ActiveData.prototype._key = function (versionId, levelId) {
@@ -20,6 +21,30 @@ ActiveData.prototype._key = function (versionId, levelId) {
 
 ActiveData.prototype.itemsFor = function (versionId, levelId) {
 	return this._byVersionLevel[this._key(versionId, levelId)] || null;
+};
+
+// Índice de los items de un (versión, nivel) agrupados por VID y, dentro, por
+// GeographyItemId. Permite que ResolveCell baje directo a las filas de su
+// variable y busque por geografía en O(1), en vez de recorrer todo el array por
+// cada celda. Se construye perezosamente y se cachea hasta el próximo clear.
+//   índice[VID] = { byGeo: Map(geoId → [items]) }
+ActiveData.prototype.indexFor = function (versionId, levelId) {
+	var key = this._key(versionId, levelId);
+	var cached = this._indexByVersionLevel[key];
+	if (cached) return cached;
+	var items = this._byVersionLevel[key];
+	if (!items) return null;
+	var index = {};
+	for (var i = 0; i < items.length; i++) {
+		var mi = items[i];
+		var byVid = index[mi.VID];
+		if (!byVid) { byVid = { byGeo: new Map() }; index[mi.VID] = byVid; }
+		var bucket = byVid.byGeo.get(mi.GeographyItemId);
+		if (!bucket) { bucket = []; byVid.byGeo.set(mi.GeographyItemId, bucket); }
+		bucket.push(mi);
+	}
+	this._indexByVersionLevel[key] = index;
+	return index;
 };
 
 // Carga los datos de cada (versionId, levelId) único que requieren las columnas
@@ -41,6 +66,7 @@ ActiveData.prototype.load = function () {
 				(function (k, lvl, mtc, ver) {
 					toRetrieve.push(mtc.Store.GetMetricData(mtc, ver, lvl).then(function (list) {
 						store[k] = list;
+						delete loc._indexByVersionLevel[k]; // se reconstruye al primer uso
 						return list;
 					}));
 				})(key, spec.level, spec.metric, spec.version);
@@ -52,14 +78,16 @@ ActiveData.prototype.load = function () {
 
 ActiveData.prototype.clear = function () {
 	this._byVersionLevel = {};
+	this._indexByVersionLevel = {};
 };
 
 // Fuerza la recarga de una versión descartando todas sus claves del caché.
 ActiveData.prototype.invalidateVersion = function (versionId) {
 	var prefix = versionId + ':';
 	var store = this._byVersionLevel;
+	var index = this._indexByVersionLevel;
 	Object.keys(store).forEach(function (k) {
-		if (k.indexOf(prefix) === 0) delete store[k];
+		if (k.indexOf(prefix) === 0) { delete store[k]; delete index[k]; }
 	});
 };
 

@@ -47,15 +47,18 @@
 
 			</div>
 
-			<!-- Tabla pivot -->
-			<div class="pivot-table-scroll" :class="{ 'panels-open': openPanels > 0 }">
+			<!-- Tabla pivot. El overlay de espera va en este contenedor relativo
+			     (no scrolleable), no dentro del scroll, para que cubra el área visible
+			     completa y no se desplace con el scroll horizontal. -->
+			<div class="pivot-scroll-area">
 				<div v-if="busy" class="pivot-busy-overlay">
 					<div class="pivot-spinner"></div>
 				</div>
-				<table class="pivot-table">
+				<div class="pivot-table-scroll" :class="{ 'panels-open': openPanels > 0 }">
+					<table class="pivot-table">
 					<thead>
 						<tr>
-							<th class="pivot-header-corner" :rowspan="3">
+							<th class="pivot-header-corner" :rowspan="showLevelRow ? 4 : 3">
 								<span class="region-sort hand" @click="sortByLabel" title="Ordenar alfabéticamente">
 									Regiones
 									<span v-if="labelSortState === 'asc'" class="sort-arrow">▲</span>
@@ -68,7 +71,7 @@
 								</button>
 							</th>
 							<th v-for="(group, gi) in headerGroups"
-									:key="'mgroup-' + group.metric.properties.Metric.Id"
+									:key="'mgroup-' + group.metric.InstanceId"
 									:colspan="group.colSpan"
 									class="pivot-header-metric"
 									:class="{ 'drag-over': dragState.overIndex === gi, 'dragging': dragState.index === gi }"
@@ -95,7 +98,7 @@
 															 @panel-open="onPanelOpen" />
 							</th>
 							<th class="pivot-header-metric pivot-header-add"
-									:rowspan="3">
+									:rowspan="showLevelRow ? 4 : 3">
 								<span class="add-label">Indicadores</span>
 								<button class="toolbar-button"
 												@click="addMetrics($event)"
@@ -109,7 +112,7 @@
 						<tr class="pivot-version-row">
 							<template v-for="group in headerGroups">
 								<th v-for="(vg, vgIdx) in group.versionGroups"
-										:key="'vg-' + group.metric.properties.Metric.Id + '-' + vgIdx"
+										:key="'vg-' + group.metric.InstanceId + '-' + vgIdx"
 										:colspan="vg.colSpan"
 										class="pivot-version-header">
 									{{ vg.versionName || '—' }}
@@ -117,27 +120,62 @@
 							</template>
 						</tr>
 
-						<!-- Fila de categorías: siempre presente -->
+						<!-- Fila de nivel: solo si alguna columna es de datos por unidad
+						     geográfica (tipo D) con categorías. Las columnas que necesitan
+						     nivel muestran acá el nombre del nivel (con sus categorías
+						     debajo); las demás muestran acá su propia etiqueta con rowspan 2
+						     (ocupan nivel + categoría). -->
+						<tr v-if="showLevelRow" class="pivot-level-row">
+							<template v-for="(spec, sIdx) in pivot.MetricTuples.metricTuples">
+								<th v-if="levelRowCells[sIdx]"
+										:key="'lv-' + sIdx"
+										:colspan="levelRowCells[sIdx].colspan"
+										:rowspan="levelRowCells[sIdx].rowspan"
+										:class="levelRowCells[sIdx].kind === 'level' ? 'pivot-level-header' : 'pivot-subheader hand'"
+										:title="levelRowCells[sIdx].kind === 'cat' ? subHeaderTooltip(spec) : null"
+										@click="levelRowCells[sIdx].kind === 'cat' ? onSubHeaderSort(spec) : null">
+									<template v-if="levelRowCells[sIdx].kind === 'level'">{{ levelRowCells[sIdx].name }}</template>
+									<template v-else>
+										<span class="subheader-label" :class="{ 'subheader-total': spec.isTotal }">{{ subHeaderText(spec) }}</span>
+										<span v-if="pivot.MetricTuples.sortStateOf(spec.key) === 'desc'" class="sort-arrow">▼</span>
+										<span v-else-if="pivot.MetricTuples.sortStateOf(spec.key) === 'asc'" class="sort-arrow">▲</span>
+									</template>
+								</th>
+							</template>
+						</tr>
+
+						<!-- Fila de categorías. Con fila de nivel presente, solo trae las
+						     columnas que la necesitan (las demás ya hicieron rowspan 2). -->
 						<tr class="pivot-subheader-row">
-							<th v-for="(spec, sIdx) in pivot.MetricTuples.metricTuples"
-									:key="'sub-' + sIdx"
-									class="pivot-subheader hand"
-									:title="subHeaderTooltip(spec)"
-									@click="onSubHeaderSort(spec)">
-								<span class="subheader-label" :class="{ 'subheader-total': spec.isTotal }">{{ subHeaderText(spec) }}</span>
-								<span v-if="pivot.MetricTuples.sortStateOf(spec.key) === 'desc'" class="sort-arrow">▼</span>
-								<span v-else-if="pivot.MetricTuples.sortStateOf(spec.key) === 'asc'" class="sort-arrow">▲</span>
-							</th>
+							<template v-for="(spec, sIdx) in pivot.MetricTuples.metricTuples">
+								<th v-if="!showLevelRow || tupleNeedsLevel(spec)"
+										:key="'sub-' + sIdx"
+										class="pivot-subheader hand"
+										:title="subHeaderTooltip(spec)"
+										@click="onSubHeaderSort(spec)">
+									<span class="subheader-label" :class="{ 'subheader-total': spec.isTotal }">{{ subHeaderText(spec) }}</span>
+									<span v-if="pivot.MetricTuples.sortStateOf(spec.key) === 'desc'" class="sort-arrow">▼</span>
+									<span v-else-if="pivot.MetricTuples.sortStateOf(spec.key) === 'asc'" class="sort-arrow">▲</span>
+								</th>
+							</template>
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(row, rowIndex) in pivot.Rows"
+						<tr v-for="(row, rowIndex) in visibleRows"
 								:key="'row-' + rowIndex"
 								:class="getRowClass(row)">
 							<td v-for="(cell, cellIndex) in row"
 									:key="'cell-' + rowIndex + '-' + cellIndex"
 									:class="getCellClass(cell)">
 								<span v-if="cell.isHeader" class="cell-label">
+									<button v-if="cell.isRegionHeader && groupKeys.length"
+													class="group-toggle group-toggle-all"
+													@click="toggleAllGroups"
+													:title="allGroupsCollapsed ? 'Expandir todos' : 'Colapsar todos'">{{ allGroupsCollapsed ? '▸' : '▾' }}</button>
+									<button v-if="cell.isGroupHeader"
+													class="group-toggle"
+													@click="toggleGroup(cell.Label)"
+													:title="collapse.isCollapsed(cell.Label) ? 'Expandir' : 'Colapsar'">{{ collapse.isCollapsed(cell.Label) ? '▸' : '▾' }}</button>
 									{{ cell.Label }}
 									<button v-if="cell.isRegionHeader && cell.boundaryId != null"
 													class="region-remove-btn"
@@ -151,6 +189,7 @@
 						</tr>
 					</tbody>
 				</table>
+			</div>
 			</div>
 
 			<!-- Resumen -->
@@ -215,6 +254,7 @@
 	import CsvWriter from '@/table/writers/CsvWriter.js';
 	import XlsxWriter from '@/table/writers/XlsxWriter.js';
 	import ColumnDragController, { initialDragState } from '@/table/components/pivot/ColumnDragController.js';
+	import CollapseState from '@/table/components/pivot/CollapseState.js';
 
 	export default {
 		name: 'PivotTable',
@@ -234,6 +274,10 @@
 			decimals: {
 				type: Number,
 				default: 2
+			},
+			initialCollapse: {
+				type: String,
+				default: ''
 			}
 		},
 
@@ -254,7 +298,12 @@
 				panelAnchor: null,
 				// Estado del reordenamiento de columnas por arrastre (lo opera el
 				// ColumnDragController; lo lee el template para las clases y :draggable).
-				dragState: initialDragState()
+				dragState: initialDragState(),
+				// Colapso de cortes de control (grupos). La clave es el nombre del grupo.
+				collapse: new CollapseState(),
+				collapseVersion: 0,  // fuerza recomputar al mutar collapse (no es reactivo)
+				dataTick: 0          // fuerza recomputar lo que depende de metricTuples
+				                     // (array de clase, que Vue no observa) tras refrescar
 			};
 		},
 
@@ -272,14 +321,93 @@
 		},
 
 		computed: {
+			// Claves de los cortes de control (grupos), en orden de aparición. Sirven
+			// para el colapso y para codificar el estado de forma posicional.
+			groupKeys() {
+				this.collapseVersion;
+				var keys = [];
+				if (!this.pivot || !this.pivot.Rows) return keys;
+				this.pivot.Rows.forEach(function (row) {
+					if (row.length && row[0].isGroupHeader) keys.push(row[0].Label);
+				});
+				return keys;
+			},
+			// Filas a mostrar: oculta las filas hijas de los grupos colapsados. La fila
+			// de grupo siempre se ve; sus hijos (item-header bajo ese padre) se ocultan.
+			visibleRows() {
+				this.collapseVersion;
+				if (!this.pivot || !this.pivot.Rows) return [];
+				var loc = this;
+				var hiddenParent = null;
+				var out = [];
+				this.pivot.Rows.forEach(function (row) {
+					var head = row[0];
+					if (head && head.isGroupHeader) {
+						hiddenParent = loc.collapse.isCollapsed(head.Label) ? head.Label : null;
+						out.push(row);
+						return;
+					}
+					if (head && head.isRegionHeader) { hiddenParent = null; out.push(row); return; }
+					// Fila de item: se oculta si pertenece al grupo colapsado en curso.
+					if (hiddenParent != null && head && head.Parent === hiddenParent) return;
+					out.push(row);
+				});
+				return out;
+			},
+			allGroupsCollapsed() {
+				this.collapseVersion;
+				return this.collapse.allCollapsed(this.groupKeys);
+			},
 			// Estado del orden alfabético por label ('asc' | 'desc' | null).
 			labelSortState() {
 				return this.pivot ? this.pivot.MetricTuples.sortStateOf(ActivePivot.LABEL_SORT_KEY) : null;
+			},
+			// Celdas de la fila de nivel, alineadas por índice con metricTuples.
+			// Cada entrada es null (columna absorbida por el colspan de un nivel a su
+			// izquierda) o { kind, colspan, rowspan, name }:
+			//   kind 'level' → nombre del nivel, colspan = nº de categorías del tramo
+			//   kind 'cat'   → etiqueta de la propia columna (total o tipo L/S), con
+			//                  rowspan 2 para ocupar también la fila de categorías.
+			levelRowCells() {
+				this.dataTick;
+				var specs = this.pivot ? this.pivot.MetricTuples.metricTuples : [];
+				var cells = new Array(specs.length).fill(null);
+				var i = 0;
+				while (i < specs.length) {
+					var sp = specs[i];
+					if (this.tupleNeedsLevel(sp)) {
+						var span = 1;
+						var j = i + 1;
+						while (j < specs.length && this.tupleNeedsLevel(specs[j])
+								&& specs[j].metric === sp.metric && specs[j].versionId === sp.versionId && specs[j].levelId === sp.levelId) {
+							span++; j++;
+						}
+						cells[i] = { kind: 'level', colspan: span, rowspan: 1, name: sp.levelName };
+						i = j;
+					} else {
+						cells[i] = { kind: 'cat', colspan: 1, rowspan: 2, name: null };
+						i++;
+					}
+				}
+				return cells;
+			},
+			// Una tupla aporta la fila de nivel cuando es de un dataset tipo "D"
+			// (datos por unidad geográfica) y representa una categoría (no el total).
+			// Los tipos "L" (puntos) y "S" (shape), y los totales, no la necesitan.
+			showLevelRow() {
+				this.dataTick;
+				var specs = this.pivot ? this.pivot.MetricTuples.metricTuples : null;
+				if (!specs) return false;
+				for (var i = 0; i < specs.length; i++) {
+					if (this.tupleNeedsLevel(specs[i])) return true;
+				}
+				return false;
 			},
 			// Agrupa las ColumnSpecs por indicador (consecutivas con mismo metricId).
 			// Devuelve [{ metric, specs: [...], colSpan }]. El metric viene del primer
 			// spec del grupo (todas las del mismo grupo comparten metric).
 			headerGroups() {
+				this.dataTick;
 				if (!this.pivot || !this.pivot.MetricTuples.metricTuples) return [];
 				var specs = this.pivot.MetricTuples.metricTuples;
 				var groups = [];
@@ -341,6 +469,35 @@
 			}
 		},
 		methods: {
+			// Colapsa o expande un corte de control (grupo) por su clave.
+			toggleGroup(key) {
+				this.collapse.toggle(key);
+				this.collapseVersion++;
+				this.emitCollapse();
+			},
+			// Alterna entre colapsar todos los grupos y expandir todos.
+			toggleAllGroups() {
+				this.collapse.setAll(this.groupKeys, !this.allGroupsCollapsed);
+				this.collapseVersion++;
+				this.emitCollapse();
+			},
+			// Notifica el estado compacto para que el contenedor lo persista en la URL.
+			emitCollapse() {
+				this.$emit('collapse-changed', {
+					encoded: this.collapse.encode(this.groupKeys),
+					keys: this.collapse.collapsedKeys()
+				});
+			},
+			// Aplica un estado de colapso recibido (p. ej. restaurado desde la URL).
+			applyCollapse(encoded) {
+				this.collapse.decode(encoded || '', this.groupKeys);
+				this.collapseVersion++;
+				// Tras restaurar, notifica los nombres para que distribución los excluya.
+				this.$emit('collapse-changed', {
+					encoded: this.collapse.encode(this.groupKeys),
+					keys: this.collapse.collapsedKeys()
+				});
+			},
 			// Un header abrió o cerró un dropdown. Mantiene la cuenta para liberar
 			// el overflow del scroll mientras al menos uno esté abierto.
 			onPanelOpen(open) {
@@ -394,6 +551,7 @@
 			metricToChip(metric) {
 				return {
 					Id: metric.properties.Metric.Id,
+					Key: 'm:' + metric.InstanceId,
 					Caption: metric.properties.Metric.Name,
 					Description: metric.properties.Metric.Name,
 					Item: metric
@@ -461,14 +619,22 @@
 			onMetricDeselect(items) {
 				var loc = this;
 				items.forEach(function (it) {
+					// Desde un chip llega la instancia concreta: se quita esa.
+					if (it && loc.pivot.Metrics.indexOf(it) !== -1) {
+						arr.Remove(loc.pivot.Metrics, it);
+						return;
+					}
+					// Desde el árbol llega el indicador (por Metric.Id): se quitan
+					// todas sus instancias, porque el nodo representa al indicador.
 					var id = (it && it.Id != null) ? it.Id
 						: (it && it.properties && it.properties.Metric ? it.properties.Metric.Id : null);
-					var metric = loc.pivot.Metrics.find(function (m) {
+					var toRemove = loc.pivot.Metrics.filter(function (m) {
 						return m.properties.Metric.Id === id;
 					});
-					if (metric) arr.Remove(loc.pivot.Metrics, metric);
+					for (var i = 0; i < toRemove.length; i++) arr.Remove(loc.pivot.Metrics, toRemove[i]);
 				});
 				this.pivot.RefreshData();
+				this.dataTick++;
 				this.$emit('data-refreshed', this.pivot);
 			},
 
@@ -531,9 +697,13 @@
 						setTimeout(function () {
 							Promise.resolve(fn()).then(function (r) {
 								loc.busy = false;
+								// metricTuples/Rows ya se rearmaron: invalida los computeds
+								// que los leen (no son observables por Vue).
+								loc.dataTick++;
 								resolve(r);
 							}).catch(function (e) {
 								loc.busy = false;
+								loc.dataTick++;
 								resolve(e);
 							});
 						}, 0);
@@ -572,6 +742,9 @@
 				});
 			},
 			// Texto del sub-header: categoría/Total, o nombre de variable cuando no hay categorías.
+			tupleNeedsLevel(spec) {
+				return !!spec && !spec.isEmpty && !spec.isTotal && spec.datasetType === 'D' && spec.labelId != null;
+			},
 			subHeaderText(spec) {
 				if (spec.isEmpty) return '—';
 				if (spec.isTotal) return 'Total';
@@ -623,7 +796,11 @@
 				if (row.length > 0 && row[0].isGroupHeader) {
 					return 'pivot-row-group-header';
 				}
-				return 'pivot-row-item-header';
+				// Indentado doble solo cuando hay cortes de control (jerarquía de
+				// árbol); sin ellos, indentado simple.
+				return this.groupKeys.length
+					? 'pivot-row-item-header pivot-row-item-nested'
+					: 'pivot-row-item-header';
 			},
 
 			getCellClass(cell) {
@@ -655,6 +832,13 @@
 					}
 				},
 				deep: false
+			},
+			// Aplica el colapso restaurado de la URL una sola vez, cuando ya hay
+			// grupos sobre los que mapearlo (tras el primer render con datos).
+			groupKeys(keys) {
+				if (this._collapseApplied || !keys.length) return;
+				this._collapseApplied = true;
+				if (this.initialCollapse) this.applyCollapse(this.initialCollapse);
 			}
 		}
 	};
@@ -774,8 +958,15 @@
 		flex: 0 0 auto;
 	}
 
-	.pivot-table-scroll {
+	.pivot-scroll-area {
 		position: relative;
+		flex: 1 1 auto;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.pivot-table-scroll {
 		flex: 1 1 auto;
 		min-height: 0;
 		overflow: auto;
@@ -824,7 +1015,12 @@
 	.pivot-table {
 		width: auto;
 		table-layout: fixed;
-		border-collapse: collapse;
+		/* separate (no collapse) para sticky headers: en modo collapse los bordes
+		   pertenecen a la tabla y no se mueven con la celda sticky al scrollear,
+		   dejando colar el fondo blanco entre el header y los datos. Con separate
+		   cada celda lleva su propio borde y viaja con ella. */
+		border-collapse: separate;
+		border-spacing: 0;
 		font-size: 14px;
 	}
 
@@ -911,7 +1107,22 @@
 		color: #fff;
 		background-color: #1976d2;
 		text-align: center;
-		padding: 5px 8px;
+		padding: 0 8px;
+		border: none;
+		border-left: 1px solid #3b8eea;
+		border-bottom: 1px solid #3b8eea;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.pivot-table th.pivot-level-header {
+		font-size: 11px;
+		font-weight: 600;
+		color: #fff;
+		background-color: #2289d6;
+		text-align: center;
+		padding: 0 8px;
 		border: none;
 		border-left: 1px solid #3b8eea;
 		border-bottom: 1px solid #3b8eea;
@@ -931,7 +1142,7 @@
 		color: #fff;
 		background-color: #1976d2;
 		text-align: center;
-		padding: 6px 8px;
+		padding: 0 8px;
 		border: none;
 		border-left: 1px solid #3b8eea;
 		border-bottom: 2px solid #1565c0;
@@ -970,8 +1181,13 @@
 	}
 
 	.pivot-table tbody tr {
-		border-bottom: 1px solid #e0e0e0;
+		background-color: inherit;
 	}
+		/* En border-collapse: separate los bordes de <tr> se ignoran; la línea
+		   horizontal entre filas se pone en las celdas. */
+		.pivot-table tbody td {
+			border-bottom: 1px solid #e0e0e0;
+		}
 
 		.pivot-table tbody tr:hover {
 			background-color: #f5f5f5;
@@ -998,6 +1214,13 @@
 		.pivot-row-item-header .pivot-cell-header {
 			background-color: #fafafa;
 		}
+		/* Indentado simple por defecto; doble cuando hay cortes de control. */
+		.pivot-row-item-header .cell-label {
+			padding-left: 6px;
+		}
+		.pivot-row-item-nested .cell-label {
+			padding-left: 13px;
+		}
 
 	.pivot-row-group-header {
 		background-color: #f0f4f8;
@@ -1007,14 +1230,33 @@
 		.pivot-row-group-header .pivot-cell-header {
 			background-color: #f0f4f8;
 		}
+		/* El corte de control se indenta levemente; su fondo ya lo distingue, sin
+		   necesidad de un borde izquierdo (que rompía la jerarquía del árbol). */
 		.pivot-row-group-header .cell-label {
 			padding-left: 6px;
-			border-left: 3px solid #90a4ae;
 		}
 
 	.pivot-row-data {
 		background-color: #fff;
 	}
+
+	/* Triángulo de colapso de grupos: flota a la derecha de la celda de etiqueta,
+	   igual que en el selector de indicadores. */
+	.pivot-cell-header { position: relative; }
+	.group-toggle {
+		position: absolute;
+		right: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+		border: none;
+		background: transparent;
+		color: #607d8b;
+		cursor: pointer;
+		font-size: 14px;
+		line-height: 1;
+		padding: 2px 4px;
+	}
+	.group-toggle:hover { color: #263238; }
 
 	.pivot-table td {
 		padding: 2px 8px;

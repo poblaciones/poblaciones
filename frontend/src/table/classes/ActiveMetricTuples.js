@@ -26,11 +26,8 @@ ActiveMetricTuples.prototype.rebuild = function () {
 	this.metricTuples.length = 0;
 	var metrics = this.pivot.Metrics;
 	for (var i = 0; i < metrics.length; i++) {
-		var metric = metrics[i];
-		if (typeof metric.GetTuples === 'function') {
-			var tuples = metric.GetTuples();
-			for (var s = 0; s < tuples.length; s++) this.metricTuples.push(tuples[s]);
-		}
+		var tuples = metrics[i].GetTuples();
+		for (var s = 0; s < tuples.length; s++) this.metricTuples.push(tuples[s]);
 	}
 	return this.metricTuples;
 };

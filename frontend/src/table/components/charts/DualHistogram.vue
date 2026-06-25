@@ -21,7 +21,7 @@
 
 			<!-- eje X inferior (A) -->
 			<g v-for="(t, i) in aTicks" :key="'ax-' + i">
-				<text :x="sxA(t)" :y="H - pad.b + 13" class="tick-label" :style="{ fill: aColor }" text-anchor="middle">{{ fmtTick(t) }}</text>
+				<text :x="sxA(t)" :y="H - pad.b + 13" class="tick-label" :style="{ fill: aTickColor }" text-anchor="middle">{{ fmtTick(t) }}</text>
 			</g>
 			<!-- eje X superior (B) -->
 			<g v-for="(t, i) in bTicks" :key="'bx-' + i">
@@ -36,7 +36,7 @@
 		</svg>
 		<div class="legend">
 			<span class="legend-item"><span class="swatch" :style="{ background: aColor }"></span>{{ aLabel }} (eje inferior)</span>
-			<span class="legend-item"><span class="swatch outline" :style="{ borderColor: bColor }"></span>{{ bLabel }} (eje superior)</span>
+			<span class="legend-item"><span class="swatch" :style="{ background: bColor }"></span>{{ bLabel }} (eje superior)</span>
 		</div>
 	</div>
 </template>
@@ -54,7 +54,12 @@ export default {
 		height: { type: Number, default: 240 }
 	},
 	data() {
-		return { pad: { l: 38, r: 38, t: 26, b: 32 }, aColor: '#81d4fa', bColor: '#0d47a1' };
+		return {
+			pad: { l: 38, r: 38, t: 26, b: 32 },
+			aColor: '#81d4fa',
+			aTickColor: '#3585bf',
+			bColor: 'rgb(108, 165, 217)'
+		};
 	},
 	computed: {
 		W() { return this.width; },
@@ -151,16 +156,15 @@ export default {
 
 <style scoped>
 	.dual-hist { width: 100%; }
-	.dh-svg { width: 100%; max-width: 480px; height: auto; display: block; margin: 0 auto; }
+	.dh-svg { width: 100%; max-width: 525px; height: auto; display: block; margin: 0 auto; }
 	.frame { fill: none; stroke: #cfd8dc; stroke-width: 1; }
 	.tick { stroke: #cfd8dc; stroke-width: 1; }
 	.tick-label { font-size: 9px; }
 	.tick-label.freq { fill: #90a4ae; }
 	.axis-label { font-size: 10px; font-weight: 600; }
 	.bar-a { opacity: 0.85; }
-	.bar-b { fill: none; stroke-width: 1.8; }
+	.bar-b { fill: none; stroke-width: 1.25; }
 	.legend { display: flex; flex-wrap: wrap; font-size: 13px; color: #546e7a; width: 100%; }
 	.legend-item { display: inline-flex; align-items: baseline; line-height: 1.75em; padding-right: 10px; }
 	.swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; }
-	.swatch.outline { background: transparent !important; border: 2px solid; }
 </style>

@@ -24,7 +24,9 @@
 				:pivot="pivot"
 				:auto-refresh="false"
 				:decimals="2"
+				:initial-collapse="initialCollapse"
 				@data-refreshed="onDataRefreshed"
+				@collapse-changed="onCollapseChanged"
 				@error="onError"
 				ref="pivotTable" />
 		</div>
@@ -49,7 +51,8 @@ export default {
 	components: { PivotTable },
 	props: {
 		pivot: { type: Object, required: true },
-		activeAnalyses: { type: Object, default: function () { return {}; } }
+		activeAnalyses: { type: Object, default: function () { return {}; } },
+		initialCollapse: { type: String, default: '' }
 	},
 	data() {
 		return {
@@ -77,6 +80,9 @@ export default {
 		},
 		onDataRefreshed() {
 			this.$emit('data-refreshed');
+		},
+		onCollapseChanged(payload) {
+			this.$emit('collapse-changed', payload);
 		},
 		onError(error) {
 			this.$emit('error', error);

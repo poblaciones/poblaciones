@@ -21,12 +21,16 @@ console.log('\n=== ActiveDataset ===');
 await import('./ActiveDataset.test.mjs');
 console.log('\n=== ActivePivot ===');
 await import('./ActivePivot.test.mjs');
+
+await import('./CollapseState.test.mjs');
 console.log('\n=== ColumnDragController ===');
 await import('./ColumnDragController.test.mjs');
 console.log('\n=== CsvWriter ===');
 await import('./CsvWriter.test.mjs');
 console.log('\n=== ActiveBoundarySet ===');
 await import('./ActiveBoundarySet.test.mjs');
+console.log('\n=== Distribution ===');
+await import('./Distribution.test.mjs');
 
 await report();
 process.exit(exitCode());

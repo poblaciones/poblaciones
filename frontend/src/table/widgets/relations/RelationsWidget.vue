@@ -62,7 +62,7 @@
 								:regression="pairRegression(selected.i, selected.j)" :size-by-weight="sizeByWeight"
 								:height="150" :y-max100="isPct(columns[selected.i])" :x-max100="isPct(columns[selected.j])" />
 						</div>
-						<label class="weight-toggle"><input type="checkbox" v-model="sizeByWeight" /><span>Tamaño de puntos según ponderador</span></label>
+						<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
 					</div>
 
 					<div class="corr-method">
@@ -107,11 +107,35 @@
 						</tbody>
 					</table>
 
-					<h4 class="section-title"><span class="sec-ico ico-calc">∑</span> Regresión lineal
-						<span class="r2" v-if="regression">R²aj. {{ fmt2(regression.adjRSquared) }} · n {{ regression.n }}</span>
+					<h4 class="section-title"><span class="sec-ico ico-calc">∑</span> Regresión
+						<span class="r2" v-if="regType === 'linear' && regression">R²aj. {{ fmt2(regression.adjRSquared) }} · n {{ regression.n }}</span>
+						<span class="r2" v-else-if="regType === 'logistic' && logitReg">R² McF. {{ fmt2(logitReg.mcFaddenR2) }} · n {{ logitReg.n }}</span>
 					</h4>
-					<div class="subject-line" v-if="regression">Variable dependiente: {{ depColumn ? fullName(depColumn) : '' }}</div>
-					<table class="data-table rel-table" v-if="regression">
+					<div class="subject-line">Variable dependiente: {{ depColumn ? fullName(depColumn) : '' }}</div>
+
+					<div class="reg-type">Tipo:
+						<label><input type="radio" value="linear" v-model="regType" /> lineal</label>
+						<label><input type="radio" value="logistic" v-model="regType" /> binomial logística</label>
+					</div>
+
+					<div v-if="regType === 'logistic'" class="logit-controls">
+						<div class="cut-row" v-if="depRange">
+							<label>Punto de corte:</label>
+							<input type="range" class="cut-slider" :min="depRange.min" :max="depRange.max" :step="cutStep" v-model.number="logitThreshold" />
+							<input type="number" class="cut-input" :min="depRange.min" :max="depRange.max" :step="cutStep" v-model.number="logitThreshold" />
+						</div>
+						<div class="reg-type">Criterio de inclusión:
+							<label><input type="radio" value="greater" v-model="logitDirection" /> mayores</label>
+							<label><input type="radio" value="less" v-model="logitDirection" /> menores</label>
+						</div>
+						<p class="matrix-note">
+							Se tomará como variable dicotómica independiente = 1 a los casos con valores
+							{{ thresholdSign }} a {{ fmt2(logitThreshold) }}.
+						</p>
+					</div>
+
+					<!-- Resultado lineal -->
+					<table v-if="regType === 'linear' && regression" class="data-table rel-table">
 						<thead>
 							<tr><th class="left">Variable</th><th>Coef.</th><th>EE</th><th>t</th><th>Sig.</th></tr>
 						</thead>
@@ -131,7 +155,41 @@
 							</template>
 						</tbody>
 					</table>
-					<p v-else class="matrix-note">No hay datos suficientes para estimar la regresión.</p>
+					<p v-else-if="regType === 'linear'" class="matrix-note">No hay datos suficientes para estimar la regresión.</p>
+
+					<!-- Resultado logístico -->
+					<table v-if="regType === 'logistic' && logitReg" class="data-table rel-table">
+						<thead>
+							<tr><th class="left">Variable</th><th>Coef. (B)</th><th>EE</th><th>Wald</th><th>z</th><th>Sig.</th><th title="Exp(B) = e^B: razón de chances (odds ratio). Factor por el que se multiplican las chances de que la dependiente sea 1 al aumentar la variable en una unidad.">Exp(B)</th></tr>
+						</thead>
+						<tbody>
+							<tr class="intercept">
+								<td>(Intercepto)</td>
+								<td>{{ fmt2(logitReg.coefficients[0]) }}</td><td>{{ fmt2(logitReg.stdErrors[0]) }}</td>
+								<td>{{ fmt2(logitReg.waldValues[0]) }}</td>
+								<td>{{ fmt2(logitReg.zValues[0]) }}</td><td>{{ fmtP(logitReg.pValues[0]) }}<sup class="sig-star">{{ stars(logitReg.pValues[0]) }}</sup></td>
+								<td>{{ fmt2(logitReg.oddsRatios[0]) }}</td>
+							</tr>
+							<template v-for="row in logitRows">
+								<tr v-if="row.type === 'group'" :key="'lg-' + row.gid" :class="'grp grp-' + row.level"><td :colspan="7">{{ row.label }}</td></tr>
+								<tr v-else :key="'lreg-' + row.col.key">
+									<td class="rel-cat indent">{{ catName(row.col) }}</td>
+									<td>{{ fmt2(row.coef) }}</td><td>{{ fmt2(row.se) }}</td>
+									<td>{{ fmt2(row.wald) }}</td>
+									<td>{{ fmt2(row.z) }}</td><td>{{ fmtP(row.p) }}<sup class="sig-star">{{ stars(row.p) }}</sup></td>
+									<td>{{ fmt2(row.or) }}</td>
+								</tr>
+							</template>
+						</tbody>
+					</table>
+					<div v-if="regType === 'logistic' && logitReg" class="pair-stats">
+						<div>Pseudo-R² de McFadden: <b>{{ fmt2(logitReg.mcFaddenR2) }}</b> · R² de Nagelkerke: <b>{{ fmt2(logitReg.nagelkerkeR2) }}</b></div>
+						<div>Log-verosimilitud: {{ fmt2(logitReg.logLik) }} · n: {{ logitReg.n }}</div>
+					</div>
+					<p v-if="regType === 'logistic' && logitReg" class="matrix-note">
+						Las chances (OR) indican por qué factor se multiplican las chances de que la dependiente sea 1 al aumentar cada variable en una unidad: mayor que 1 las aumenta, menor que 1 las reduce.
+					</p>
+					<p v-else-if="regType === 'logistic'" class="matrix-note">No hay datos suficientes para estimar la regresión logística (se requieren ambas clases presentes según el punto de corte).</p>
 
 					<p class="footnote">*p &lt; 0,05; **p &lt; 0,01; ***p &lt; 0,001. A menor p, mayor nivel de confianza estadística.</p>
 
@@ -141,7 +199,7 @@
 						<scatter-multi :series="multiSeries" :y-label="depColumn ? axisMetric(depColumn) : ''"
 							:size-by-weight="sizeByWeight" :height="150" :y-max100="depColumn ? isPct(depColumn) : false" />
 					</div>
-					<label class="weight-toggle"><input type="checkbox" v-model="sizeByWeight" /><span>Tamaño de puntos según ponderador</span></label>
+					<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
 				</div>
 
 				<!-- ───────── 1x1 ───────── -->
@@ -167,13 +225,13 @@
 
 					<div class="chart-block" v-if="xKey !== yKey">
 						<h4 class="section-title"><span class="sec-ico ico-chart">▥</span> Gráfico de dispersión</h4>
-						<div class="chart-subject">{{ colByKey[yKey] ? fullName(colByKey[yKey]) : '' }}</div>
-						<scatter-plot :points="pairPointsByKey(xKey, yKey)" :x-label="axisFullKey(xKey)" :y-label="axisMetricKey(yKey)"
+						<div class="chart-subject">{{ colByKey[xKey] ? fullName(colByKey[xKey]) : '' }}</div>
+						<scatter-plot :points="pairPointsByKey(xKey, yKey)" :x-label="axisFullKey(yKey)" :y-label="axisMetricKey(xKey)"
 							:regression="pairReg" :size-by-weight="sizeByWeight" :height="150"
-							:y-max100="isPctKey(yKey)" :x-max100="isPctKey(xKey)" />
+							:y-max100="isPctKey(xKey)" :x-max100="isPctKey(yKey)" />
 					</div>
 					<p v-else class="matrix-note">Deben elegirse dos variables distintas.</p>
-					<label class="weight-toggle"><input type="checkbox" v-model="sizeByWeight" /><span>Tamaño de puntos según ponderador</span></label>
+					<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
 
 					<div class="chart-block" v-if="xKey !== yKey">
 						<h4 class="section-title"><span class="sec-ico ico-chart">▥</span> Histogramas</h4>
@@ -209,6 +267,9 @@ export default {
 			depKey: cfg.depKey || null,
 			xKey: cfg.xKey || null,
 			yKey: cfg.yKey || null,
+			regType: cfg.regType || 'linear',
+			logitThreshold: cfg.logitThreshold != null ? cfg.logitThreshold : null,
+			logitDirection: cfg.logitDirection || 'greater',
 			selected: null,
 			tabs: [
 				{ key: 'nxn', label: 'N×N', tip: 'Analizar relaciones entre todas las variables' },
@@ -256,6 +317,27 @@ export default {
 			});
 			return this.withControlBreaks(rowsRaw);
 		},
+		depRange() { return this.cols && this.depColumn ? this.cols.dependentRange(this.depColumn.key) : null; },
+		thresholdSign() { return this.logitDirection === 'greater' ? '>' : '<'; },
+		cutStep() {
+			var r = this.depRange;
+			if (!r || r.max === r.min) return 1;
+			// Enteros en general; un decimal solo si el rango es chico (≤ 10 unidades).
+			return (r.max - r.min) <= 10 ? 0.1 : 1;
+		},
+		logitResult() {
+			if (this.regType !== 'logistic' || !this.cols || !this.depColumn) return null;
+			return this.cols.logisticRegression(this.depColumn.key, this.logitThreshold, this.logitDirection);
+		},
+		logitReg() { return this.logitResult ? this.logitResult.regression : null; },
+		logitRows() {
+			if (!this.logitResult) return [];
+			var reg = this.logitResult.regression, others = this.logitResult.others;
+			var rowsRaw = others.map(function (c, i) {
+				return { col: c, coef: reg.coefficients[i + 1], se: reg.stdErrors[i + 1], wald: reg.waldValues[i + 1], z: reg.zValues[i + 1], p: reg.pValues[i + 1], or: reg.oddsRatios[i + 1] };
+			});
+			return this.withControlBreaks(rowsRaw);
+		},
 		multiSeries() {
 			var dep = this.depColumn;
 			if (!dep || !this.cols) return [];
@@ -276,19 +358,21 @@ export default {
 			});
 		},
 		yOptions() { var xk = this.xKey; return this.columns.filter(function (c) { return c.key !== xk; }); },
-		pairStats() { return this.cols ? this.cols.pairCorrelation(this.xKey, this.yKey) : null; },
-		pairReg() { return this.cols ? this.cols.pairRegression(this.xKey, this.yKey) : null; }
+		// El ponderador lo aporta la fila elegida (primer combo, xKey): se pasa como
+		// segundo argumento, que es el que define el ponderador en estas funciones.
+		pairStats() { return this.cols ? this.cols.pairCorrelation(this.yKey, this.xKey) : null; },
+		pairReg() { return this.cols ? this.cols.pairRegression(this.yKey, this.xKey) : null; }
 	},
 	watch: {
 		columns() {
-			// Si al cambiar las columnas (p. ej. se quitó un indicador) algún combo
-			// apunta a una columna que ya no existe, se reasigna automáticamente.
 			var keys = {};
 			this.columns.forEach(function (c) { keys[c.key] = true; });
+
 			if (this.columns.length) {
-				if (!keys[this.depKey]) this.depKey = this.columns[0].key;
-				if (!keys[this.xKey]) this.xKey = this.columns[0].key;
-				if (!keys[this.yKey]) {
+				// Reasigna o llena combos vacíos o que apunten a columnas que ya no existen.
+				if (!this.depKey || !keys[this.depKey]) this.depKey = this.columns[0].key;
+				if (!this.xKey || !keys[this.xKey]) this.xKey = this.columns[0].key;
+				if (!this.yKey || !keys[this.yKey]) {
 					var xk = this.xKey;
 					var alt = this.columns.find(function (c) { return c.key !== xk; });
 					this.yKey = alt ? alt.key : this.columns[0].key;
@@ -297,16 +381,41 @@ export default {
 					this.selected = this.columns.length >= 2 ? { i: 0, j: 1 } : null;
 				}
 			}
+
+			// Al quedar en exactamente dos columnas (viniendo de otra cantidad), el
+			// único análisis con sentido es el 1×1: se salta a ese tab con ambas
+			// columnas seleccionadas. Vale tanto al agregar (1→2) como al quitar (3+→2).
+			if (this.columns.length === 2 && this._prevColumnCount !== 2) {
+				this.xKey = this.columns[0].key;
+				this.yKey = this.columns[1].key;
+				this.activeTab = '1x1';
+				this.persist({ tab: '1x1', xKey: this.xKey, yKey: this.yKey });
+			}
+			this._prevColumnCount = this.columns.length;
 		},
 		activeTab(v) { this.persist({ tab: v }); },
 		method(v) { this.persist({ method: v }); },
 		sizeByWeight(v) { this.persist({ sizeByWeight: v }); },
-		depKey(v) { this.persist({ depKey: v }); },
+		depKey(v) {
+			this.persist({ depKey: v });
+			// La dependiente cambió: el umbral previo ya no aplica, se recentra.
+			if (this.regType === 'logistic') this.resetThresholdToMid();
+		},
 		xKey(v) {
 			this.persist({ xKey: v });
 			if (this.yKey === v) { var alt = this.columns.find(function (c) { return c.key !== v; }); if (alt) this.yKey = alt.key; }
 		},
-		yKey(v) { this.persist({ yKey: v }); }
+		yKey(v) { this.persist({ yKey: v }); },
+		regType(v) {
+			this.persist({ regType: v });
+			if (v === 'logistic' && this.logitThreshold == null) this.resetThresholdToMid();
+		},
+		logitThreshold(v) {
+			var r = this.roundToCut(v);
+			if (r !== v) { this.logitThreshold = r; return; }
+			this.persist({ logitThreshold: v });
+		},
+		logitDirection(v) { this.persist({ logitDirection: v }); }
 	},
 	created() {
 		if (!this.depKey && this.columns.length) this.depKey = this.columns[0].key;
@@ -315,9 +424,21 @@ export default {
 		// Preselecciona la primera celda fuera de la diagonal para que el gráfico
 		// del tab NxN ya esté visible.
 		if (this.columns.length >= 2) this.selected = { i: 0, j: 1 };
+		this._prevColumnCount = this.columns.length;
 	},
 	methods: {
 		persist(patch) { this.updateConfig(patch); },
+		// Redondea un valor al paso del corte (entero, o 1 decimal en rangos chicos).
+		roundToCut(v) {
+			if (v == null || !isFinite(v)) return v;
+			return this.cutStep < 1 ? Math.round(v * 10) / 10 : Math.round(v);
+		},
+		// Punto de corte al centro del rango de la dependiente (al activar la
+		// logística o al cambiar de dependiente).
+		resetThresholdToMid() {
+			var r = this.depRange;
+			this.logitThreshold = r ? this.roundToCut((r.min + r.max) / 2) : null;
+		},
 		// Delegan en la columna (AnalysisColumn): el template los usa como métodos.
 		catName(c) { return c.categoryName(); },
 		matrixRowName(c) { return c.matrixRowName(); },
@@ -385,7 +506,7 @@ export default {
 		},
 		selectCell(i, j) { if (i !== j) this.selected = { i: i, j: j }; },
 		pairPoints(i, j) { return this.pairPointsCols(this.columns[i], this.columns[j]); },
-		pairPointsByKey(xk, yk) { return this.pairPointsCols(this.colByKey[yk], this.colByKey[xk]); },
+		pairPointsByKey(xk, yk) { return this.pairPointsCols(this.colByKey[xk], this.colByKey[yk]); },
 		pairPointsCols(rowCol, colCol) {
 			if (!rowCol || !colCol) return [];
 			var labels = this.rowLabels;
@@ -405,19 +526,18 @@ export default {
 			return reg ? { slope: reg.slope, intercept: reg.intercept } : null;
 		},
 		pairColumn(key) { return this.colByKey[key]; },
-		goTo1x1(i, j) { this.xKey = this.columns[j].key; this.yKey = this.columns[i].key; this.activeTab = '1x1'; },
+		goTo1x1(i, j) { this.xKey = this.columns[i].key; this.yKey = this.columns[j].key; this.activeTab = '1x1'; },
 		goTo1xN(c) { this.depKey = c.key; this.activeTab = '1xn'; }
 	}
 };
 </script>
 
 <style scoped>
-	.widget { display: flex; flex-direction: column; height: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; font-size: 14px; }
-	.widget-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #eee; background: #fafafa; cursor: move; }
-	.widget-kind { font-size: 14px; font-weight: 600; color: #263238; }
-	.widget-close { border: none; background: transparent; font-size: 18px; line-height: 1; color: #90a4ae; cursor: pointer; padding: 0 4px; }
-	.widget-close:hover { color: #455a64; }
-	.widget-empty { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #90a4ae; font-size: 14px; }
+	@import '@/table/widgets/widgetStyles.css';
+
+	.widget { font-size: 14px; }
+	.widget-kind { font-size: 14px; }
+	.widget-empty { font-size: 14px; }
 
 	.tabs { display: flex; gap: 2px; padding: 6px 10px 0; background: #fafafa; border-bottom: 1px solid #eee; }
 	.tab { border: 1px solid transparent; border-bottom: none; background: #eceff1; color: #607d8b; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 5px 5px 0 0; cursor: pointer; }
@@ -446,8 +566,8 @@ export default {
 	.cm-cell.self { background: #f5f5f5; color: #b0bec5; }
 	.cm-cell.selectedcell { outline: 2px solid #1976d2; outline-offset: -2px; }
 
-	.matrix-note { font-size: 12px; color: #90a4ae; margin: 6px 0 12px; line-height: 1.4; }
-	.footnote { font-size: 12px; color: #78909c; margin: 8px 0 4px; line-height: 1.4; }
+	.matrix-note { font-size: 13px; color: #90a4ae; margin: 6px 0 12px; line-height: 1.4; }
+	.footnote { font-size: 13px; color: #78909c; margin: 8px 0 4px; line-height: 1.4; }
 
 	.combo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
 	.combo-row label { font-size: 14px; color: #546e7a; }
@@ -479,6 +599,12 @@ export default {
 	.corr-method { margin-top: 14px; padding-top: 10px; border-top: 1px solid #eceff1; font-size: 13px; color: #546e7a; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 	.corr-method label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 
-	.weight-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #607d8b; cursor: pointer; margin-top: 6px; user-select: none; }
+	.weight-toggle { color: #607d8b; margin-top: 6px; }
 	.hand { cursor: pointer; }
+	.reg-type { font-size: 14px; color: #455a64; margin: 6px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+	.reg-type label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+	.logit-controls { margin: 4px 0 10px; }
+	.cut-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; color: #455a64; }
+	.cut-slider { flex: 0 1 auto; width: 45%; min-width: 80px; }
+	.cut-input { width: 90px; padding: 2px 6px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; }
 </style>

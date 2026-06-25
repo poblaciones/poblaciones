@@ -12,6 +12,7 @@ export default MetricStore;
 function MetricStore() {
 
 	this.Metrics = [];
+	this._nextInstanceId = 1;
 };
 
 MetricStore.prototype.GetMetricInfoById = function (metricId) {
@@ -53,9 +54,17 @@ MetricStore.prototype.GetMetricOrRetrieve = function (metricId) {
 		});
 };
 
+// Cada ActiveSelectedMetric recibe una copia propia del metricInfo. El info que
+// guarda el store es un catálogo compartido (puede pedirse el mismo indicador
+// varias veces); sin la copia, dos columnas del mismo indicador compartirían la
+// selección (versión, variable, categorías) y no podrían configurarse aparte.
 MetricStore.prototype.CreateActiveMetric = function (metricInfo) {
-	var activeMetric = new ActiveSelectedMetric(metricInfo);
+	var ownInfo = JSON.parse(JSON.stringify(metricInfo));
+	var activeMetric = new ActiveSelectedMetric(ownInfo);
 	activeMetric.Store = this;
+	// Identidad de instancia: distingue dos columnas del mismo indicador (misma
+	// Metric.Id) en las keys de Vue y ante reordenamientos.
+	activeMetric.InstanceId = this._nextInstanceId++;
 	return activeMetric;
 };
 

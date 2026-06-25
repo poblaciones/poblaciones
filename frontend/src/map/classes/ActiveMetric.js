@@ -640,6 +640,7 @@ ActiveMetric.prototype.getValidMetrics = function (variable) {
 
 	if (variable && variable.HasTotals) {
 		ret.push({ Key: 'I', Caption: delta + 'Incidencia' });
+		ret.push({ Key: 'T', Caption: delta + 'Total' });
 	}
 
 	ret.push({ Key: 'P', Caption: 'Distribución' });

@@ -73,7 +73,7 @@
               aria-label="Remover toda la selección"
             >×</button>
             <div class="chips-scroll thinScroll">
-              <div v-for="chip in selection" :key="chip.Id" class="chip" :title="chip.Description">
+              <div v-for="chip in selection" :key="chip.Key || chip.Id" class="chip" :title="chip.Description">
                 <span class="chip-label">{{ chip.Caption }}</span>
                 <button class="chip-remove" @click="removeChip(chip)" :aria-label="'Quitar ' + chip.Caption">×</button>
               </div>
@@ -198,9 +198,9 @@
                 </div>
               </div>
 
-              <!-- Fila de hoja (única en todo el template) -->
+              <!-- Fila de hoja -->
               <div
-                v-else
+                v-else-if="row.type === 'item'"
                 :key="row.key"
                 class="indicator-item hand"
                 :class="{ 'is-selected': isSelected(row.item) }"
@@ -230,8 +230,26 @@
                   </button>
                 </div>
               </div>
+              <div
+                v-else-if="row.type === 'more'"
+                :key="row.key"
+                class="search-more hand"
+                @click="liftSearchLimit"
+              >
+                Ver {{ row.remaining }} resultado{{ row.remaining === 1 ? '' : 's' }} más
+              </div>
             </template>
           </div>
+        </div>
+
+        <!-- "Agregar todos/as": con regiones, clic en una rama agrega todos sus
+             hijos en vez de entrar a navegarla. Fijo debajo del listado. -->
+        <div v-if="showAddAll" class="add-all-bar">
+          <label class="sw-toggle">
+            <input type="checkbox" v-model="addAllMode" />
+            <span class="sw-track"><span class="sw-thumb"></span></span>
+            <span class="sw-label">{{ addAllLabel }}</span>
+          </label>
         </div>
 
         <!-- Sugerencias -->
@@ -343,12 +361,33 @@ export default {
       internalMulti: this.multiSelect,
       tooltip: { visible: false, top: 0, left: 0, item: null },
       viewMode: 'tree',   // 'tree' | 'list' (listado unificado de niveles 0 y 1)
+      addAllMode: true,   // con regiones: clic en rama agrega todos sus hijos (no entra)
       expanded: {},       // sectionKey -> true cuando el separador está expandido
-                          // (por defecto, todo corte de control arranca colapsado)
+                          // (en listado, por defecto expandido; en árbol, según expandLeaves)
       panelStyle: null,   // posición calculada cuando se ancla a un invocador
+      searchRenderLimit: 50,    // máximo de filas de búsqueda a renderizar de entrada
+      searchLimitLifted: false, // "Ver más": renderizar todas las coincidencias
     };
   },
   computed: {
+    // "Agregar todos/as" se ofrece solo cuando se están viendo boundaries reales
+    // (ramas seleccionables cuyos hijos son regiones), no en la raíz —que muestra
+    // tipos de boundary (nivel 0)— ni cuando se ven las hojas. Requiere haber
+    // entrado al menos un nivel y que las ramas actuales lleven directamente a
+    // hojas (no a más sub-ramas).
+    showAddAll() {
+      if (!this.selectableBranches || this.searchQuery) return false;
+      if (!this.navStack.length) return false;            // raíz: tipos de boundary
+      var branches = this.currentBranches;
+      if (!branches.length) return false;                 // viendo hojas, no ramas
+      var loc = this;
+      return branches.every(function (br) {
+        var content = loc.contentOf(br);
+        return content.branches.length === 0 && content.sections.some(function (s) {
+          return s.Items && s.Items.length;
+        });
+      });
+    },
     isMobile() {
       return window.SegMap && window.SegMap.Configuration && window.SegMap.Configuration.IsMobile;
     },
@@ -455,7 +494,16 @@ export default {
           key: this.containerKey(e.container) + '|' + e.item.Id,
         }));
         // Las ramas coincidentes (contenedores) van primero, para entrar en ellas.
-        return branchRows.concat(itemRows);
+        const all = branchRows.concat(itemRows);
+        // Con búsquedas de pocos caracteres el match puede ser de miles de filas;
+        // el filtrado es barato pero renderizarlas todas no. Se muestran las
+        // primeras y se ofrece "Ver más" para renderizar el resto a pedido.
+        if (!this.searchLimitLifted && all.length > this.searchRenderLimit) {
+          const shown = all.slice(0, this.searchRenderLimit);
+          shown.push({ type: 'more', key: '__more__', remaining: all.length - this.searchRenderLimit });
+          return shown;
+        }
+        return all;
       }
       const rows = [];
       if (this.listModeActive) {
@@ -523,26 +571,18 @@ export default {
           this.positionPanel();
         });
       } else {
+        // Al cerrarse, el panel se oculta pero conserva su estado de navegación
+        // (rama, listado, búsqueda), para reabrir donde estaba. La navegación se
+        // reinicia con las acciones explícitas (inicio/breadcrumb), no al cerrar.
         this.panelStyle = null;
         this.hideTooltip();
         this.keepTooltip = false;
-        setTimeout(() => {
-          this.navStack = [];
-          this.searchQuery = '';
-          this.showAllSuggestions = false;
-          this.expanded = {};
-        }, 300);
       }
     },
     multiSelect(val) { this.internalMulti = val; },
-    // Si el contexto deja de tener hojas chequeables (p. ej. volver del listado
-    // al árbol en la raíz), el modo múltiple se apaga y su botón se oculta.
-    hasSelectableRows(val) {
-      if (!val && this.internalMulti) {
-        this.internalMulti = false;
-        this.$emit('update:multiSelect', false);
-      }
-    },
+    // Cada cambio de texto vuelve a acotar el render de resultados (el "Ver más"
+    // se reinicia): así escribir un carácter más no arrastra miles de filas.
+    searchQuery() { this.searchLimitLifted = false; },
   },
   methods: {
     // Posiciona el panel a la derecha del invocador y centrado verticalmente en
@@ -601,7 +641,7 @@ export default {
       for (const node of nodes) {
         const content = this.contentOf(node);
         const hasBranches = content.branches.length > 0;
-        const hasLeaves = (content.sections || []).some(s => s.Items && s.Items.length);
+        const hasLeaves = content.sections.some(s => s.Items && s.Items.length);
         // Un nodo es navegable si contiene algo: sub-ramas u hojas. Incluye tanto
         // los agrupadores mayores (p. ej. "Límites políticos", que agrupa
         // delimitaciones) como los contenedores de hojas (p. ej. "Departamentos").
@@ -640,12 +680,29 @@ export default {
       this.internalMulti = !this.internalMulti;
       this.$emit('update:multiSelect', this.internalMulti);
     },
-    goHome() { this.navStack = []; this.searchQuery = ''; },
+    goHome() {
+      this.navStack = [];
+      this.searchQuery = '';
+      // En la raíz, si no hay hojas chequeables, el modo múltiple no aplica.
+      // (Antes esto lo hacía un watcher reactivo, que se disparaba con cualquier
+      // transición —incluido limpiar la búsqueda— y apagaba el multi sin querer.)
+      if (this.internalMulti && !this.hasSelectableRows) {
+        this.internalMulti = false;
+        this.$emit('update:multiSelect', false);
+      }
+    },
     goToDepth(depth) {
       this.navStack = this.navStack.slice(0, depth + 1);
       this.searchQuery = '';
     },
     enterBranch(node) {
+      // Con regiones y "Agregar todos/as" activo, clickear una rama agrega todos
+      // sus hijos (como el botón de adentro) en vez de entrar a navegarla.
+      if (this.addAllMode && this.selectableBranches) {
+        this.$emit('select-group', node);
+        if (!this.isMulti && this.closeOnSelect) this.closePanel();
+        return;
+      }
       this.navStack = this.navStack.concat(node);
       this.searchQuery = '';
       this.$nextTick(() => {
@@ -708,6 +765,7 @@ export default {
       this.searchQuery = '';
       this.$nextTick(() => { if (this.$refs.searchInput) this.$refs.searchInput.focus(); });
     },
+    liftSearchLimit() { this.searchLimitLifted = true; },
     // "Ver todas en el mapa": agrega el nivel actual como entidad (capa). No marca
     // hojas; emite el nodo contenedor para que el consumidor use su Id.
     onSelectGroup() {
@@ -721,7 +779,7 @@ export default {
     // según expandLeaves.
     isCollapsed(key) {
       if (key in this.expanded) return !this.expanded[key];
-      if (this.listModeActive) return true;
+      if (this.listModeActive) return false;
       return !this.expandLeaves;
     },
     toggleCollapse(key) { this.$set(this.expanded, key, this.isCollapsed(key)); },
@@ -735,13 +793,23 @@ export default {
         this.navStack = [];
         this.searchQuery = '';
         this.viewMode = 'list';
+        this.expanded = {};
         return;
       }
       this.viewMode = this.viewMode === 'tree' ? 'list' : 'tree';
+      // Al entrar a listado, todos los tipos arrancan expandidos (se descartan
+      // los colapsos manuales de una visita anterior).
+      if (this.viewMode === 'list') this.expanded = {};
     },
     // Desde el listado unificado, entrar a un tipo apila ambos niveles
     // para que el breadcrumb refleje la ruta completa.
     enterListBranch(parent, branch) {
+      // Mismo comportamiento que enterBranch desde el listado.
+      if (this.addAllMode && this.selectableBranches) {
+        this.$emit('select-group', branch);
+        if (!this.isMulti && this.closeOnSelect) this.closePanel();
+        return;
+      }
       // Desde el listado, parent y branch forman la pila de dos niveles.
       // Desde la búsqueda, parent puede ser null (rama en la raíz): solo la rama.
       this.navStack = parent ? [parent, branch] : [branch];
@@ -952,7 +1020,15 @@ export default {
 .category-icon { font-size: 32px; text-shadow: 2px 2px 4px rgb(223 216 220 / 50%); color: #0fa7d8; display: block; margin-bottom: 12px; }
 .category-icon.featured { text-shadow: none; color: #69bad5; }
 .category-name { font-size: 15px; color: #333; margin-bottom: 4px; line-height: 1.3; font-weight: 500; }
-.category-count { font-size: 13px; color: #999; }
+.category-count { font-size: 13px; color: #999; padding-top: 2px; line-height: 1.3; }
+
+.add-all-bar { padding: 8px 14px; border-top: 1px solid #eee; background: #fafafa; flex: 0 0 auto; }
+.add-all-bar .sw-toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #455a64; cursor: pointer; user-select: none; }
+.add-all-bar .sw-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.add-all-bar .sw-track { position: relative; width: 32px; height: 17px; background: #cfd8dc; border-radius: 9px; transition: background 0.15s; flex: 0 0 auto; }
+.add-all-bar .sw-thumb { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; background: #fff; border-radius: 50%; transition: transform 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+.add-all-bar .sw-toggle input:checked + .sw-track { background: #1976d2; }
+.add-all-bar .sw-toggle input:checked + .sw-track .sw-thumb { transform: translateX(15px); }
 
 /* Separadores / encabezados de sección (colapsables) */
 .source-header {
@@ -1018,6 +1094,8 @@ export default {
 .btn-preview:hover { background: #e9ecef; color: #666; }
 
 .no-results { text-align: center; color: #999; padding: 40px 16px; font-style: italic; font-size: 15px; }
+.search-more { text-align: center; color: #1976d2; padding: 12px 16px; font-size: 13px; cursor: pointer; border-top: 1px solid #eee; }
+.search-more:hover { background: #f5f9ff; }
 
 /* Sugerencias */
 .suggestions-zone {

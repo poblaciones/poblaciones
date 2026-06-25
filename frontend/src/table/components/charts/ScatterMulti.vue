@@ -118,7 +118,7 @@ export default {
 
 <style scoped>
 	.scatter-multi { width: 100%; }
-	.sm-svg { width: 100%; max-width: 480px; height: auto; display: block; margin: 0 auto; }
+	.sm-svg { width: 100%; max-width: 525px; height: auto; display: block; margin: 0 auto; }
 	.axis { stroke: #b0bec5; stroke-width: 1; }
 	.tick { stroke: #cfd8dc; stroke-width: 1; }
 	.tick-label { font-size: 9px; fill: #78909c; }

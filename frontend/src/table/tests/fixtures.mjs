@@ -47,11 +47,11 @@ export var corrColumns = [
 // + su Total). Una sola edición (2010). 4 regiones (provincias).
 export function makeDataset() {
 	var columns = [
-		col('pob_total', 'N', { metricId: 1, metricName: 'Población', variableName: 'Conteo', labelName: null, isTotal: true, isSimpleCount: true, versionName: '2010', versionId: 11 }),
-		col('edu_a', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelName: '0 a 5%', isTotal: false, isSimpleCount: false, versionName: '2010', versionId: 11 }),
-		col('edu_b', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelName: '5 a 10%', isTotal: false, isSimpleCount: false, versionName: '2010', versionId: 11 }),
-		col('edu_c', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelName: '10 a 15%', isTotal: false, isSimpleCount: false, versionName: '2010', versionId: 11 }),
-		col('edu_total', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelName: 'Total', isTotal: true, isSimpleCount: false, versionName: '2010', versionId: 11 })
+		col('pob_total', 'N', { metricId: 1, metricName: 'Población', variableName: 'Conteo', labelId: null, labelName: null, fillColor: null, isTotal: true, isSimpleCount: true, versionName: '2010', versionId: 11 }),
+		col('edu_a', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelId: 101, labelName: '0 a 5%', fillColor: '#9FE1CB', isTotal: false, isSimpleCount: false, versionName: '2010', versionId: 11 }),
+		col('edu_b', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelId: 102, labelName: '5 a 10%', fillColor: '#FAC775', isTotal: false, isSimpleCount: false, versionName: '2010', versionId: 11 }),
+		col('edu_c', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelId: 103, labelName: '10 a 15%', fillColor: '#E24B4A', isTotal: false, isSimpleCount: false, versionName: '2010', versionId: 11 }),
+		col('edu_total', '%', { metricId: 2, metricName: 'Educación', variableName: 'Nivel educativo', labelId: null, labelName: 'Total', fillColor: null, isTotal: true, isSimpleCount: false, versionName: '2010', versionId: 11 })
 	];
 
 	// values[] alineado por orden de columnas (0-based denso).
@@ -84,12 +84,18 @@ export function makeDataset() {
 }
 
 function col(key, unit, meta) {
+	// Modo de ponderación según la unidad, como lo deriva el dataset real:
+	// porcentaje → media ponderada por denominador; conteo → suma (self).
+	var weighting = unit === '%'
+		? { kind: 'denominator', label: 'Total', available: true }
+		: { kind: 'self', label: meta.variableName || 'Valor', available: true };
 	return {
 		key: key,
 		label: meta.metricName + (meta.labelName ? ' — ' + meta.labelName : ''),
 		shortLabel: meta.labelName || meta.variableName,
 		unit: unit,
 		role: 'measure',
+		weighting: weighting,
 		formatter: function (v) { return (Math.round(v * 100) / 100).toString(); },
 		meta: meta
 	};
@@ -99,4 +105,26 @@ function dataRow(label, parentLabel, values, weights) {
 	return { type: 'data', label: label, parentLabel: parentLabel, values: values, weights: weights };
 }
 
-export default { seriesUniform, seriesWeighted, pairs, corrColumns, makeDataset };
+// Variante: un indicador "NBI" con DOS versiones (2008 y 2022), ambas con solo
+// Total seleccionado (sin categorías como columnas). Sirve para probar el Camino 1
+// con varias versiones del mismo indicador.
+export function makeDatasetTwoVersions() {
+	var columns = [
+		col('nbi_t_2008', '%', { metricId: 5, metricName: 'NBI', variableName: 'Hogares con NBI', labelId: null, labelName: 'Total', fillColor: null, isTotal: true, isSimpleCount: false, versionName: '2008', versionId: 51 }),
+		col('nbi_t_2022', '%', { metricId: 5, metricName: 'NBI', variableName: 'Hogares con NBI', labelId: null, labelName: 'Total', fillColor: null, isTotal: true, isSimpleCount: false, versionName: '2022', versionId: 52 })
+	];
+	var rows = [
+		{ type: 'region-header', label: 'Provincias', parentLabel: null, values: [], weights: [] },
+		dataRow('Buenos Aires', null, [18, 14], [1000, 1000]),
+		dataRow('Córdoba', null, [15, 11], [800, 800])
+	];
+	var dataset = {
+		version: 1, title: 'Dos versiones', regionTypes: ['Provincias'],
+		columns: columns, rows: rows
+	};
+	dataset.dataRows = function () { return rows.filter(function (r) { return r.type === 'data'; }); };
+	dataset.column = function (key) { return columns.find(function (c) { return c.key === key; }) || null; };
+	return dataset;
+}
+
+export default { seriesUniform, seriesWeighted, pairs, corrColumns, makeDataset, makeDatasetTwoVersions };

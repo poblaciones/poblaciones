@@ -21,6 +21,8 @@ function Summary(selectedMetric) {
 Summary.prototype.getValueFormatted = function (value, decimals) {
 		if (this.metric.properties.SummaryMetric === 'N') {
 			return h.formatNum(value, decimals);
+		} else if (this.metric.properties.SummaryMetric === 'T') {
+			return h.formatPercentNumber(value);
 		} else if (this.metric.properties.SummaryMetric === 'I') {
 			return h.formatPercentNumber(value);
 		} else if (this.metric.properties.SummaryMetric === 'P') {
@@ -43,6 +45,7 @@ Summary.prototype.getFormat = function (variable) {
 	switch (this.metric.properties.SummaryMetric) {
 		case 'D':
 		case 'N':
+		case 'T':
 			format = 'num';
 			break;
 		case 'K':
@@ -168,6 +171,8 @@ Summary.prototype.getValueTuple = function (variable, variableValueLabels, value
 	var area = Number(values.Km2);
 	if (this.metric.properties.SummaryMetric === 'N') {
 		return { value: value };
+	} else if (this.metric.properties.SummaryMetric === 'T') {
+		return { value: values.Total };
 	} else if (this.metric.properties.SummaryMetric === 'P') {
 		let tot = 0;
 		var loc = this;

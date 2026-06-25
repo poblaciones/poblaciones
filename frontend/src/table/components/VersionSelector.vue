@@ -46,11 +46,11 @@ export default {
 		metric: { type: Object, required: true }
 	},
 	computed: {
-		versions() { return this.metric.properties.Versions || []; },
+		versions() { return this.metric.properties.Versions; },
 		hasMultiple() { return this.versions.length > 1; },
 		multi() { return !!this.metric.properties.MultiVersion; },
 		selectedIndex() { return this.metric.properties.SelectedVersionIndex; },
-		activeIndices() { return this.metric.properties.SelectedVersionIndices || []; },
+		activeIndices() { return this.metric.properties.SelectedVersionIndices; },
 		// Edición actual en single (nombre seguro).
 		singleName() {
 			var v = this.versions[this.selectedIndex];
