@@ -212,7 +212,7 @@ export default {
 				const term2 = this.formulaTermToSegments(variable, 'GapData', 'GapNormalization');
 				const hasNormalization = variable.Normalization !== null;
 
-				if (hasNormalization && variable.NormalizationScale === 100) {
+				if (hasNormalization && variable.NormalizationScale == 100) {
 					segments = segments.concat(term2);
 					segments.push({ label: ' - ', tooltip: null });
 					segments = segments.concat(term1);

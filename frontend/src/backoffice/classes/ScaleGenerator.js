@@ -709,7 +709,7 @@ ScaleGenerator.prototype.ResolveRangeCaption = function (variable, isFirst, isLa
 	}
 	ret = str.Replace(ret, '.', ',');
 	if (variable.IsGap) {
-		ret += (variable.NormalizationScale === 100 ? ' pp.' : ' %');
+		ret += (variable.NormalizationScale == 100 ? ' pp.' : ' %');
 	} else {
 		ret += h.ResolveNormalizationCaption(variable);
 	}

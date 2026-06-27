@@ -55,7 +55,7 @@ app.use((req, res, next) => {
 // ── Proxy a PHP ─────────────────────────────────────────────────────────────
 const phpProxyOptions = {
 	target:       'http://127.0.0.1:' + phpPORT,
-	logLevel:     'warn',
+	logLevel:     'debug',
 	timeout:       30000,
 	proxyTimeout:  30000,
 	onError(err, req, res) {

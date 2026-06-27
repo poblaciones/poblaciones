@@ -69,7 +69,7 @@ class RankingService extends BaseService
 		$hasDescriptions = $level->HasDescriptions;
 
 		$isGap = $variable->IsGap;
-		$isPercentage = ($variable->Normalization !== SpecialColumnEnum::NullValue && $variable->NormalizationScale === 100);
+		$isPercentage = ($variable->Normalization !== SpecialColumnEnum::NullValue && $variable->NormalizationScale == 100);
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		if ($levelCompareId)

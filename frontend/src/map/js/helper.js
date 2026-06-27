@@ -735,7 +735,7 @@ module.exports = {
 				tuple.normalizationGap = Number(rawValues.TotalGap ?? 0) / variable.NormalizationScale;
 			}
 			tuple.isGap = true;
-			tuple.isPercentage = (variable.NormalizationScale === 100);
+			tuple.isPercentage = (variable.NormalizationScale == 100);
 		}
 		return tuple;
 	},
@@ -785,7 +785,7 @@ module.exports = {
 	getColumnHeader(variable, compareActive) {
 		var delta = compareActive ? 'Δ ' : '';
 		if (variable.IsGap) {
-			return delta + (variable.NormalizationScale === 100 ? 'Δ %' : 'Δ %');
+			return delta + (variable.NormalizationScale == 100 ? 'Δ %' : 'Δ %');
 		}
 		if (!variable.HasTotals) {
 			return 'N';

@@ -342,13 +342,16 @@ class MergeSnapshotsByDatasetModel
 	{
 		foreach($variablePairs as $pair)
 		{
+			//echo '<p>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<p>';
 			$this->AddColumnsByVariablePair($columns, $pair[0], $pair[1], $sameDataset);
 		}
+		//exit;
+
 	}
 	private function UseProportionalDelta($variable)
 	{
 		$isPercent = $variable->attributes['mvv_normalization'] !== SpecialColumnEnum::NullValue
-						&& $variable->attributes['mvv_normalization_scale'] === 100;
+						&& $variable->attributes['mvv_normalization_scale'] == 100;
 		if ($variable->IsGap())
 			return $isPercent;
 		else
@@ -389,7 +392,8 @@ class MergeSnapshotsByDatasetModel
 		$category2 = 'sna_' . $variable2->Id() . '_value_label_id';
 		$columns[] = ['sna_' . $variable1->Id() . '_' . $variable2->Id() . '_value_matrix_id', 'varchar(50) NOT NULL',
 								'CONCAT(t1.' . $category1 . ",'_'," . $t2 . "." . $category2 . ')'];
-
+		//print_r($variable1);
+		//echo '<p>'. '<p>' .$variable1->IsGap() . '<p>'. '<p>';
 		// Calcula la categoría de diferencia porcentual
 		$value1ForSegmentation = $this->CalculateNormalizedFinalValueField($variable1, 't1.');
 		$value2ForSegmentation = $this->CalculateNormalizedFinalValueField($variable2, $t2 . '.');
@@ -401,7 +405,7 @@ class MergeSnapshotsByDatasetModel
 		}
 		else
 		{
-			$value = '(' . $value1ForSegmentation . ' - ' . $value2ForSegmentation . ')';
+			$value = '(' . $value2ForSegmentation . ' - ' . $value1ForSegmentation . ')';
 		}
 		;// Crea una variable para armar el case
 		$v = new Variable([], []);
@@ -419,8 +423,10 @@ class MergeSnapshotsByDatasetModel
 		$v->attributes['values'][] = ['vvl_id' => 10, 'vvl_value' => 20];
 		$v->attributes['values'][] = ['vvl_id' => 11, 'vvl_value' => 50];
 		$v->attributes['values'][] = ['vvl_id' => 12, 'vvl_value' => 10000000];
-
+		//echo $value;
+		//echo '<p>-----------------------------: ' . $value . '<p>';
 		$valueSelector = $v->CalculateVersionValueLabelId($value);
+		//echo ($valueSelector);
 		$columns[] = ['sna_' . $variable1->Id() . '_' . $variable2->Id() . '_value_label_id', 'int(11) NOT NULL', $valueSelector];
 
 
@@ -436,7 +442,7 @@ class MergeSnapshotsByDatasetModel
 		$value = $this->calculateNormalizedValueField($variable, $tablePreffix);
 		if (!$variable->IsGap())
 			return $value;
-		$isPercentage = ($variable->attributes['mvv_normalization'] !== SpecialColumnEnum::NullValue && $variable->attributes['mvv_normalization_scale'] === 100);
+		$isPercentage = ($variable->attributes['mvv_normalization'] !== SpecialColumnEnum::NullValue && $variable->attributes['mvv_normalization_scale'] == 100);
 		$valueGap = $this->calculateNormalizedValueField($variable, $tablePreffix, "_gap");
 		if ($isPercentage)
 			return "(" . $valueGap . " - " . $value . ")";

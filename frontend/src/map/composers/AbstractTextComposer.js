@@ -20,8 +20,13 @@ AbstractTextComposer.prototype.ResolveValueLabel = function (variable, effective
 	var number = null;
 	if (variable.ShowValues == 1 && !variable.IsSimpleCount) {
 		if (this.activeSelectedMetric.Compare.Active && variable.Comparable) {
+			var compareData = { Value: dataElement.ValueCompare, Total: dataElement.TotalCompare };
+			if (variable.IsGap) {
+				compareData.ValueGap = dataElement.ValueCompareGap;
+				compareData.TotalGap = dataElement.TotalCompareGap;
+			}
 			var delta = this.activeSelectedMetric.Compare.CalculateDelta(variable,
-				dataElement, { Value: dataElement.ValueCompare, Total: dataElement.TotalCompare });
+				dataElement, compareData);
 			dataElement.DeltaValue = delta;
 		}
 		number = this.FormatValue(variable, dataElement);
