@@ -188,8 +188,10 @@ class DatasetColumnService extends DbSession
 	{
 		// 2. Pone en null las referencias a columnas en variable
 		$queryCols = "UPDATE draft_variable JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
-								 SET " . 	$this->conditionalResetter('mvv_normalization_column_id', $colsId) . "," .
-													$this->conditionalResetter('mvv_data_column_id', $colsId) . "
+								 SET " . 	$this->conditionalResetter('mvv_data_column_id', $colsId) . "," .
+													$this->conditionalResetter('mvv_normalization_column_id', $colsId) . "," .
+													$this->conditionalResetter('mvv_gap_data_column_id', $colsId) . "," .
+													$this->conditionalResetter('mvv_gap_normalization_column_id', $colsId) . "
 									WHERE mvl_dataset_id = ?";
 		App::Db()->exec($queryCols, array($datasetId));
 

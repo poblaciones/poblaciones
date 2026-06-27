@@ -7,25 +7,70 @@
 
 			<div v-if="Variable">
 				<div class='md-layout md-gutter'>
-					<div class='md-layout-item md-size-75 md-small-size-100'>
-						<mp-select label='Variable' :canEdit='canEdit'
-											 v-model='newVariable'
-											 list-key='Id'
-											 :list='Dataset.GetNumericTextAndRichColumns()'
-											 :render='formatColumn'
-											 @selected="updateValues"
-											 helper='Variable de categorías o valor numérico para el cálculo del indicador.' />
-					</div>
+					<template v-if="!isGap">
+						<!-- MODO NORMAL -->
+						<div class='md-layout-item md-size-75 md-small-size-100'>
+							<mp-select label='Variable' :canEdit='canEdit'
+												 v-model='newVariable'
+												 list-key='Id'
+												 :list='Dataset.GetNumericTextAndRichColumns()'
+												 :render='formatColumn'
+												 @selected="updateValues"
+												 helper='Variable de categorías o valor numérico para el cálculo del indicador.' />
+						</div>
+						<div class='md-layout-item md-size-10 md-small-size-0' v-if="isGap"></div>
+						<div class='md-layout-item md-size-75 md-small-size-100' v-show="!DataColumnIsCategorical()">
+							<mp-select label='Normalización' :canEdit='canEdit'
+												 v-model='newNormalization'
+												 list-key='Id'
+												 :list='Dataset.GetNumericAndRichColumns(true)'
+												 :render='formatColumn'
+												 @selected="updateValues"
+												 helper='Total para realizar porcentajes o tasas con el indicador.' />
+						</div>
+					</template>
+					<!-- MODO GAP -->
+					<template v-else>
+						<div class='md-layout-item md-size-45'>
+							<mp-select label='Variable 1' :canEdit='canEdit'
+												 v-model='newVariable'
+												 list-key='Id'
+												 :list='Dataset.GetNumericTextAndRichColumns()'
+												 :render='formatColumn'
+												 @selected="updateValues"
+												 helper='Variable de valor numérico para el cálculo del indicador.' />
+						</div>
+						<div class='md-layout-item md-size-10'></div>
+						<div class='md-layout-item md-size-45'>
+							<mp-select label='Variable 2' :canEdit='canEdit'
+												 v-model='newGapVariable'
+												 list-key='Id'
+												 :list='Dataset.GetNumericTextAndRichColumns()'
+												 :render='formatColumn'
+												 @selected="updateValues"
+												 helper='Variable de valor numérico para el cálculo del indicador.' />
+						</div>
+						<div class='md-layout-item md-size-45'>
+							<mp-select label='Normalización 1' :canEdit='canEdit'
+												 v-model='newNormalization'
+												 list-key='Id'
+												 :list='Dataset.GetNumericAndRichColumns(true)'
+												 :render='formatColumn'
+												 @selected="updateValues"
+												 helper='Total para realizar porcentajes o tasas con el indicador.' />
+						</div>
+						<div class='md-layout-item md-size-10'></div>
+						<div class='md-layout-item md-size-45'>
+							<mp-select label='Normalización 2' :canEdit='canEdit'
+												 v-model='newGapNormalization'
+												 list-key='Id'
+												 :list='Dataset.GetNumericAndRichColumns(true)'
+												 :render='formatColumn'
+												 @selected="updateValues"
+												 helper='Total para realizar porcentajes o tasas con el indicador.' />
+						</div>
+					</template>
 
-					<div class='md-layout-item md-size-75 md-small-size-100' v-show="!DataColumnIsCategorical()">
-						<mp-select label='Normalización' :canEdit='canEdit'
-											 v-model='newNormalization'
-											 list-key='Id'
-											 :list='Dataset.GetNumericAndRichColumns(true)'
-											 :render='formatColumn'
-											 @selected="updateValues"
-											 helper='Total para realizar porcentajes o tasas con el indicador.' />
-					</div>
 					<div v-show='!(newNormalization && newNormalization.Code === null)' class='md-layout-item md-size-70 md-small-size-100'>
 						<mp-select label='Porcentaje / tasa' :canEdit='canEdit'
 											 v-model='Variable.NormalizationScale'
@@ -35,22 +80,26 @@
 											 :list='Dataset.GetNormalizationScales()'
 											 helper='Indica el modo de normalización. Ej. Porcentaje, 1 cada 10 mil.' />
 					</div>
-					<div class='md-layout-item md-size-100 md-small-size-100'>
-						<md-switch class="md-primary" :disabled="!Work.CanEdit()" v-model="useFilter">Aplicar un filtro de filas.</md-switch>
+					<div class='md-layout-item md-size-50'>
+						<md-switch class="md-primary" :disabled="!Work.CanEdit()" v-model="useFilter">Aplicar un filtro de filas</md-switch>
 
 					</div>
-					<div class='md-layout-item md-size-0 md-small-size-0' v-show="useFilter">
-
+					<div class='md-layout-item md-size-50'>
+						<md-switch class="md-primary" :disabled="!Work.CanEdit()" v-model="isGap">Calcular como brecha</md-switch>
+					</div>
+					<div class='md-layout-item md-size-100 md-helper-text helper'>
+							Indique las variables para expresar una brecha del grupo de la <i>Variable 1</i> respecto del grupo de la <i>Variable 2</i>.
+							Los valores responderán a las pregunta ¿cuánto debería aumentar el nivel del indicador del Grupo 1 para igualar al indicador del Grupo 2?
 					</div>
 					<div class='md-layout-item md-size-40 md-small-size-40' v-show="useFilter">
 						<div class="helper" style="position: absolute; bottom: 26px;">
 							Importante: el filtro del indicador no se aplicará en la descarga del dataset.
 						</div>
 						<mp-select label='Variable de filtro' :canEdit='canEdit'
-															v-model='filterVariable'
-															list-key='Id'
-															:list='Dataset.Columns'
-															:render='formatColumn' />
+											 v-model='filterVariable'
+											 list-key='Id'
+											 :list='Dataset.Columns'
+											 :render='formatColumn' />
 					</div>
 					<div class='md-layout-item md-size-30 md-small-size-20' v-show="useFilter">
 						<md-field>
@@ -105,6 +154,22 @@ export default {
 	name: 'metricVariables',
 	components: {
 	},
+	data() {
+		return {
+			Level: null,
+			useFilter: false,
+			Variable: null,
+			isGap: false,
+			filterOperator: null,
+			filterValue: null,
+			filterVariable: null,
+			originalFilterValue: null,
+			showDialog: false,
+			newVariable: null,
+			newNormalization: null,
+			columnsForFilter: [],
+		};
+	},
 	methods: {
 		formatColumn(column) {
 			return f.formatColumn(column);
@@ -152,6 +217,16 @@ export default {
 			}
 			var loc = this;
 			this.updateValues();
+			if (this.Variable.IsGap) {
+				if (this.Variable.GapData === null) {
+					alert("Debe indicar una variable para el valor de la segunda variable para la fórmula.");
+					return;
+				}
+				if ((this.Variable.Normalization === null) != (this.Variable.GapNormalization === null)) {
+					alert("La normalización debe operar igual en ambas variable (con normalización o sin normalización).");
+					return;
+				}
+			}
 			if (this.originalFilterValue !== this.Variable.FilterValue) {
 				// El filtro impacta en las escalas... regenera
 				this.$refs.invoker.doSave(this.Dataset.ScaleGenerator,
@@ -191,8 +266,11 @@ export default {
 			return true;
 		},
 		receiveValue() {
+			this.isGap = this.Variable.IsGap;
 			this.newVariable = this.Dataset.fromTwoColumnVariable(this.Variable.Data, this.Variable.DataColumn);
 			this.newNormalization = this.Dataset.fromTwoColumnVariable(this.Variable.Normalization, this.Variable.NormalizationColumn);
+			this.newGapVariable = this.Dataset.fromTwoColumnVariable(this.Variable.GapData, this.Variable.GapDataColumn);
+			this.newGapNormalization = this.Dataset.fromTwoColumnVariable(this.Variable.GapNormalization, this.Variable.GapNormalizationColumn);
 			this.receiveFilter();
 		},
 		receiveFilter() {
@@ -226,8 +304,8 @@ export default {
 			this.Variable.Data = data.Info;
 			this.Variable.DataColumn = data.Column;
 			this.Variable.DataColumnIsCategorical = this.DataColumnIsCategorical();
-
-			if (this.Variable.DataColumnIsCategorical) {
+			this.Variable.IsGap = this.isGap;
+			if (this.Variable.DataColumnIsCategorical && !this.Variable.IsGap) {
 				// La pone como variable de corte
 				this.Variable.Symbology.CutMode = 'V';
 				this.Variable.Symbology.CutColumn = this.Variable.DataColumn;
@@ -243,6 +321,24 @@ export default {
 					this.Variable.Symbology.CutMode = 'S';
 					this.Variable.Symbology.CutColumn = null;
 				}
+			}
+			if (this.Variable.IsGap) {
+				var gapData = this.Dataset.toTwoColumnVariable(this.newGapVariable);
+				this.Variable.DataColumnIsCategorical = false;
+				this.Variable.GapData = gapData.Info;
+				this.Variable.GapDataColumn = gapData.Column;
+				// Resuelve normalización
+				var gapNormalization = this.Dataset.toTwoColumnVariable(this.newGapNormalization);
+				this.Variable.GapNormalization = gapNormalization.Info;
+				this.Variable.GapNormalizationColumn = gapNormalization.Column;
+				this.Variable.HasGapSameTotal = (this.Variable.GapNormalization != null && this.Variable.GapNormalization === this.Variable.Normalization &&
+																						this.Variable.GapNormalizationColumn === this.Variable.NormalizationColumn);
+			} else {
+				this.Variable.GapData = null;
+				this.Variable.GapDataColumn = null;
+				this.Variable.GapNormalization = null;
+				this.Variable.GapNormalizationColumn = null;
+				this.Variable.HasGapSameTotal = false;
 			}
 		},
 	},
@@ -267,21 +363,6 @@ export default {
 				return '';
 			}
 		}
-	},
-	data() {
-		return {
-			Level: null,
-			useFilter: false,
-			Variable: null,
-			filterOperator: null,
-			filterValue: null,
-			filterVariable: null,
-			originalFilterValue: null,
-			showDialog: false,
-			newVariable: null,
-			newNormalization: null,
-			columnsForFilter: [],
-		};
 	},
 };
 </script>

@@ -1,131 +1,122 @@
 require('./check-versions')();
 
-var config = require('../config');
+// Suprimir DEP0060 (util._extend en http-proxy): es inocuo y no tiene fix
+// disponible sin actualizar la dependencia
+const _emit = process.emit.bind(process);
+process.emit = function(event, ...args) {
+	if (event === 'warning' && args[0] && args[0].code === 'DEP0060') return false;
+	return _emit(event, ...args);
+};
+
+const config = require('../config');
 if (!process.env.NODE_ENV) {
 	process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV);
 }
 
-var opn = require('opn');
-var path = require('path');
-var express = require('express');
-var webpack = require('webpack');
-var proxyMiddleware = require('http-proxy-middleware');
-var webpackConfig = require('./webpack.dev.conf');
+const path          = require('path');
+const fs            = require('fs');
+const https         = require('https');
+const express       = require('express');
+const webpack       = require('webpack');
+const proxyMW       = require('http-proxy-middleware');
+const history       = require('connect-history-api-fallback');
+const devMiddleware = require('webpack-dev-middleware');
+const hotMiddleware = require('webpack-hot-middleware');
+const phpServer     = require('php-server');
+const opn           = require('opn');
+const webpackConfig = require('./webpack.dev.conf');
 
-// default port where dev server listens for incoming traffic
-var port = process.env.PORT || config.dev.port;
-// automatically open browser, if not set will be false
-var autoOpenBrowser = !!config.dev.autoOpenBrowser;
-// Define HTTP proxies to your custom API backend
-// https://github.com/chimurai/http-proxy-middleware
-var proxyTable = config.dev.proxyTable;
-var phpPort = port + 2;
-var php = 'http://localhost:' + phpPort;
-proxyTable = {
-	'/services': php, '/sitemap': php, '/handle': php, '/logs': php, '/oauthGoogle': php, '/oauthFacebook': php,
-	'/static/css': php, '/ark:/': php, '/static/js': php, '/static/vendor': php, '/authenticate': php
+const appPORT         = parseInt(process.env.PORT) || config.dev.port;
+const phpPORT         = appPORT + 2;
+const autoOpenBrowser = !!config.dev.autoOpenBrowser;
+
+// Rutas que van al backend PHP
+const phpPaths = [
+	'/services', '/sitemap', '/handle', '/logs',
+	'/oauthGoogle', '/oauthFacebook', '/authenticate',
+	'/static/css', '/static/js', '/static/vendor',
+	'/ark:/'
+];
+
+const app      = express();
+const compiler = webpack(webpackConfig);
+
+// ── URL rewrites ────────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+	const url = req.url;
+	if      (url === '/users'  || url === '/users/')              req.url = '/backoffice.html';
+	else if (url === '/admins' || url === '/admins/')             req.url = '/admins.html';
+	else if (url === '/table'  || url.startsWith('/table/'))      req.url = '/table.html';
+	else if (url === '/cr'     || url === '/cr/')                 req.url = '/credentials.html';
+	else if (url === '/map'    || url.startsWith('/map/'))        req.url = '/index.html';
+	next();
+});
+
+// ── Proxy a PHP ─────────────────────────────────────────────────────────────
+const phpProxyOptions = {
+	target:       'http://127.0.0.1:' + phpPORT,
+	logLevel:     'warn',
+	timeout:       30000,
+	proxyTimeout:  30000,
+	onError(err, req, res) {
+		console.error('[PHP proxy error]', req.url, err.message);
+		if (!res.headersSent) {
+			res.writeHead(502, { 'Content-Type': 'text/plain' });
+			res.end('PHP proxy error: ' + err.message);
+		}
+	}
 };
+phpPaths.forEach(context => app.use(context, proxyMW(context, phpProxyOptions)));
 
-var app = express();
-var compiler = webpack(webpackConfig);
-
-app.use(function(req, res, next) {
-   if (req.url === '/users/' || req.url === '/users') {
-     req.url = '/backoffice.html';
-	 }
-	if (req.url === '/admins/' || req.url === '/admins') {
-     req.url = '/admins.html';
-	}
-	if (req.url === '/table' || (req.url && req.url.startsWith('/table/'))) {
-		req.url = '/table.html';
-	}
-	if (req.url === '/cr/' || req.url === '/cr') {
-		req.url = '/credentials.html';
-	}
-	if (req.url === '/map' || (req.url && req.url.startsWith('/map/'))) {
-     req.url = '/index.html';
-   }
-   next();
-});
-
-var devMiddleware = require('webpack-dev-middleware')(compiler, {
+// ── Webpack ──────────────────────────────────────────────────────────────────
+const dev = devMiddleware(compiler, {
 	publicPath: webpackConfig.output.publicPath,
-	quiet: true
+	quiet:      true
 });
-
-var hotMiddleware = require('webpack-hot-middleware')(compiler, {
-	log: false,
+const hot = hotMiddleware(compiler, {
+	log:       false,
 	heartbeat: 2000
 });
-// force page reload when html-webpack-plugin template changes
-/*compiler.plugin('compilation', function (compilation) {
-	compilation.plugin('html-webpack-plugin-after-emit', function (data, cb) {
-		hotMiddleware.publish({ action: 'reload' });
-		cb();
-	});
-});*/
 compiler.hooks.compilation.tap('html-webpack-plugin-after-emit', () => {
-        hotMiddleware.publish({
-              action: 'reload'
-        });
-     });
-
-// proxy api requests
-Object.keys(proxyTable).forEach(function (context) {
-	var options = proxyTable[context];
-	if (typeof options === 'string') {
-		options = { target: options,  logLevel: "debug"  };
-	}
-	app.use(proxyMiddleware(options.filter || context, options));
+	hot.publish({ action: 'reload' });
 });
-// handle fallback for HTML5 history API
-app.use(require('connect-history-api-fallback')());
 
-// serve webpack bundle output
-app.use(devMiddleware);
+app.use(history());
+app.use(dev);
+app.use(hot);
 
-// enable hot-reload and state-preserving
-// compilation error display
-app.use(hotMiddleware);
-
-// serve pure static assets
-var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory);
+// ── Assets estáticos ─────────────────────────────────────────────────────────
+const staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory);
 app.use(staticPath, express.static('./static'));
 
-var _resolve;
-var readyPromise = new Promise(resolve => {
-	_resolve = resolve;
+// ── PHP server ───────────────────────────────────────────────────────────────
+phpServer({ port: phpPORT, base: '../services/web', router: '../services/web/resolve-dev.php' })
+	.then(() => console.log('> PHP server running at port ' + phpPORT))
+	.catch(() => {});
+
+// ── HTTPS server directo sobre Express (sin proxy intermedio) ────────────────
+const server = https.createServer({
+	key:  fs.readFileSync('certs/valid-ssl-key.pem',  'utf8'),
+	cert: fs.readFileSync('certs/valid-ssl-cert.pem', 'utf8')
+}, app);
+
+// Timeout de keep-alive por encima del del cliente (60 s)
+// para evitar acumulación de sockets colgados
+server.keepAliveTimeout = 65000;
+server.headersTimeout   = 66000;
+
+// ── Arranque ─────────────────────────────────────────────────────────────────
+dev.waitUntilValid(() => {
+	server.listen(appPORT, () => {
+		const uri = 'https://127.0.0.1:' + appPORT;
+		console.log('> ============================================');
+		console.log('> Dev server:  ' + uri);
+		console.log('> PHP backend: port ' + phpPORT);
+		console.log('> ============================================');
+		if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
+			opn(uri);
+		}
+	});
 });
 
-/////////////////// INICIA PHP y el proxy unificador //////////////////
-const appPORT = port;
-const phpPORT = port + 2;
-const vueJSPORT = port + 4;
-var vuejsPaths = ['/map/', '/cr', '/users/', '/admins', '/table/', '/users', '/static/img', '/admins', '/__webpack_hmr'];
-const singleApp = require('./single-app');
-////////////////// LISTO PHP y el proxy unificador //////////////////
-var uri = 'https://localhost:' + appPORT;
-
-console.log('> Starting dev server...');
-devMiddleware.waitUntilValid(() => {
-	console.log('> ==============================================');
-	console.log('> Internal VUEJS port listening at ' + vueJSPORT);
-	console.log('> Internal PHP port listening at ' + phpPORT);
-	console.log('> Local DESA running at ' + uri);
-	console.log('> ==============================================');
-
-	singleApp.start(appPORT, phpPORT, vueJSPORT, vuejsPaths);
-  // when env is testing, don't need open it
-	if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
-		opn(uri);
-	}
-	_resolve();
-});
-var server = app.listen(vueJSPORT);
-
-module.exports = {
-	ready: readyPromise,
-	close: () => {
-		server.close();
-	}
-};
+module.exports = { close: () => server.close() };

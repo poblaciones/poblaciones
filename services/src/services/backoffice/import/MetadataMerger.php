@@ -152,6 +152,12 @@ class MetadataMerger
 		// normalizationcolumn
 		$message = "La variable de normalización para el indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
 		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_normalization_column_id', $message);
+		// gatdatacolumn
+		$message = "La variable del indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
+		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_gap_data_column_id', $message);
+		// gatnormalizationcolumn
+		$message = "La variable de normalización para el indicador 'ENTITY_CAPTION' ha quedado vacía debido a que el nuevo dataset no contiene una variable llamada 'VARIABLE_CAPTION'.";
+		$turnedToNull .= $this->MigrateColumnFormatted($datasetInfo, 'mvv_gap_normalization_column_id', $message);
 
 		$this->DeleteOrphanVariables();
 

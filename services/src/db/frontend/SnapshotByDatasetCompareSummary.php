@@ -47,8 +47,15 @@ class SnapshotByDatasetCompareSummary extends BaseSpatialSnapshotModel
 				$select .= ", SUM(IFNULL(" . $varId . "_value, 0)) Value,
 											SUM(" . $varId . "_total) Total,
 											SUM(IFNULL(" . $varIdCompare . "_value, 0)) ValueCompare,
-												SUM(" . $varIdCompare . "_total) TotalCompare," .
-											$varId . "_" . $variableCompare->attributes['mvv_id'] . "_value_label_id ValueId";
+												SUM(" . $varIdCompare . "_total) TotalCompare,";
+
+				if ($variable->IsGap())
+					$select .= "SUM(IFNULL(" . $varId . "_value_gap, 0)) ValueGap,
+								SUM(" . $varId . "_total_gap) TotalGap,
+								SUM(IFNULL(" . $varIdCompare . "_value_gap, 0)) ValueCompareGap,
+									SUM(" . $varIdCompare . "_total_gap) TotalCompareGap,";
+
+				$select .= $varId . "_" . $variableCompare->attributes['mvv_id'] . "_value_label_id ValueId";
 
 				$groupBy = $varId . "_" . $variableCompare->attributes['mvv_id'] . "_value_label_id";
 

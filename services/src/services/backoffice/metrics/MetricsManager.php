@@ -5,6 +5,7 @@ namespace helena\services\backoffice\metrics;
 use minga\framework\Str;
 use minga\framework\Arr;
 use minga\framework\Profiling;
+use helena\classes\SpecialColumnEnum;
 
 use helena\classes\App;
 use helena\entities\backoffice as entities;
@@ -13,10 +14,13 @@ use helena\services\backoffice\publish\snapshots\Variable;
 
 class MetricsManager
 {
-	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter)
+	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,
+												$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,
+												$normalizationScale, $from, $to, $filter)
 	{
 		$ret = array();
-		$data = $this->GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $filter);
+		$data = $this->GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,
+										$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId, $normalizationScale, $filter);
 		// Indica nulos
 		$hasNulls = $this->resolveNulls($data);
 		// Calcula total
@@ -56,11 +60,14 @@ class MetricsManager
 			return false;
 	}
 
-	private function GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $filter)
+	private function GetSortedDataForColumn($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,
+														$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,
+															$normalizationScale, $filter)
 	{
 		Profiling::BeginTimer();
 		// Arma el listado agrupado de [VALOR,PESO]
-		$field = $this->resolveFieldValues($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale);
+		$field = $this->resolveFieldValues($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,
+												$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,$normalizationScale);
 		$dataTableSql = "SELECT dat_table FROM draft_dataset WHERE dat_id = ?";
 		$table = App::Db()->fetchScalar($dataTableSql, array($datasetId));
 		// Se fija si tiene que hacer el join a la geografía
@@ -84,14 +91,22 @@ class MetricsManager
 		Profiling::EndTimer();
 		return $ret;
 	}
-	private function resolveFieldValues($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale)
+	private function resolveFieldValues($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,
+											$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId, $normalizationScale)
 	{
 		$sql = "SELECT (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_data_field,
-									 (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_normalization_field,
-									 (SELECT dat_type FROM draft_dataset WHERE dat_id = ?) as dat_type";
-		$values = App::Db()->fetchAssoc($sql, array($dataColumnId, $datasetId, $normalizationId, $datasetId, $datasetId));
+					   (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_normalization_field,
+					   (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_gap_data_field,
+					   (SELECT dco_field FROM draft_dataset_column WHERE dco_id = ? AND dco_dataset_id = ?) AS mvv_gap_normalization_field,
+					   (SELECT dat_type FROM draft_dataset WHERE dat_id = ?) as dat_type";
+		$values = App::Db()->fetchAssoc($sql, array($dataColumnId, $datasetId, $normalizationId, $datasetId,
+													$gapDataColumnId, $datasetId, $gapNormalizationId, $datasetId,
+													$datasetId));
 		$values['mvv_data'] = $dataColumn;
 		$values['mvv_normalization'] = $normalization;
+		$values['mvv_is_gap'] = $gapDataColumn !== null && $gapDataColumn !== SpecialColumnEnum::NullValue && $gapDataColumnId;
+		$values['mvv_gap_data'] = $gapDataColumn;
+		$values['mvv_gap_normalization'] = $gapNormalization;
 		$values['mvv_normalization_scale'] = $normalizationScale;
 		$var = new Variable($values, $values);
 		$fix = -1;
@@ -102,7 +117,7 @@ class MetricsManager
 			else
 				$fix = 1;
 		}
-		return $var->CalculateNormalizedValueField($fix);
+		return $var->CalculateNormalizedFinalValueField($fix);
 	}
 
 	public function GetWorkMetricVersions($workId)

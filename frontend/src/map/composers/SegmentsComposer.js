@@ -57,6 +57,16 @@ SegmentsComposer.prototype.processFeature = function (tileUniqueId, dataElement)
 	}
 	var variable = this.activeSelectedMetric.SelectedVariable();
 	if (!variable.IsSimpleCount) {
+		if (this.activeSelectedMetric.Compare.Active && variable.Comparable) {
+			var compareData = { Value: dataElement.ValueCompare, Total: dataElement.TotalCompare };
+			if (variable.IsGap) {
+				compareData.ValueGap = dataElement.ValueCompareGap;
+				compareData.TotalGap = dataElement.TotalCompareGap;
+			}
+			var delta = this.activeSelectedMetric.Compare.CalculateDelta(variable,
+									  dataElement, compareData);
+			dataElement.DeltaValue = delta;
+		}
 		mapItem.properties.value = this.FormatValue(variable, dataElement);
 	}
 	return mapItem;

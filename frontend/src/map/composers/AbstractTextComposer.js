@@ -86,16 +86,16 @@ AbstractTextComposer.prototype.AddPerimeter = function(variable, val, dataElemen
 
 AbstractTextComposer.prototype.FormatValue = function (variable, dataElement) {
 	if (dataElement.DeltaValue !== undefined) {
-		var number = h.getValueFormatted(dataElement.DeltaValue, false, 1);
+		var number = h.formatNum(dataElement.DeltaValue, 1);
 		var ret = (dataElement.DeltaValue >= 0 ? '+' : '') + number;
 		if (number !== '-' && number !== 'n/d') {
 			ret += variable.ComparableUnit.replace(' ', '&nbsp;');
 		}
 		return ret;
 	} else {
-		var ret = h.renderMetricValue(dataElement.Value, dataElement.Total,
-			variable.HasTotals, variable.NormalizationScale, variable.Decimals) + h.ResolveNormalizationCaption(variable);
-		return ret.trimRight();
+		var tuple = h.buildValueTuple(variable, dataElement);
+		var calculated = h.calculateValue(tuple);
+		return (h.formatVariableValue(variable, calculated) + h.ResolveNormalizationCaption(variable)).trimRight();
 	}
 };
 

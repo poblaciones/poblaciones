@@ -10,13 +10,13 @@
 				<md-option v-if="allowNull" :value="-1111111">{{ nullLabel }}</md-option>
 				<template v-if="listGrouping">
 					<md-optgroup v-for="(groupItem, index) in classifyGroups(list)" :key="index" :label="groupItem.caption">
-						<md-option v-for="item in groupItem.list" :key="item[listKey]" :value="item[listKey]">
+						<md-option v-for="(item, index) in groupItem.list" :key="!item.Separator ? item[listKey] : '__separator_' + index" :value="item[listKey]">
 							{{ format(item) }}
 						</md-option>
 					</md-optgroup>
 				</template>
 				<template v-else>
-					<md-option v-for="item in list" :key="item[listKey]" :value="item[listKey]" :class="(item.Separator ? 'mpSeparator' : '')">
+					<md-option v-for="(item, index) in list" :key="!item.Separator ? item[listKey] : '__separator_' + index" :value="item[listKey]" :class="(item.Separator ? 'mpSeparator' : '')">
 						{{ format(item) }}
 					</md-option>
 				</template>

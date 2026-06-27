@@ -640,7 +640,6 @@ ActiveMetric.prototype.getValidMetrics = function (variable) {
 
 	if (variable && variable.HasTotals) {
 		ret.push({ Key: 'I', Caption: delta + 'Incidencia' });
-		ret.push({ Key: 'T', Caption: delta + 'Total' });
 	}
 
 	ret.push({ Key: 'P', Caption: 'Distribución' });
@@ -658,7 +657,10 @@ ActiveMetric.prototype.getValidMetrics = function (variable) {
 		ret.push({ Key: 'A', Caption: 'Distr. de áreas' });
 		ret.push({ Key: 'D', Caption: 'Densidad' });
 	}
-
+	if (variable && variable.HasTotals) {
+		ret.push({ Key: 'T', Caption: delta + 'Total' });
+	}
+	// Pone relaciones con las siguientes
 	for (var n = 0; n < ret.length; n++) {
 		var next = n + 1;
 		if (next === ret.length) {

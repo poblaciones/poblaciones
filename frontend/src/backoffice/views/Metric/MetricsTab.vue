@@ -68,43 +68,12 @@
 						</md-table-cell>
 						<md-table-cell v-if="Work.properties.Type === 'P'" class="selectable" md-label="Categoría">{{ formatGroup(item.MetricVersion.Metric.MetricGroup) }}</md-table-cell>
 						<md-table-cell class="selectable"
-													 style="vertical-align: top" md-label="Fórmula">
+													 style="vertical-align: top; max-width: 400px" md-label="Fórmula">
 							<md-list class="innerList">
 								<md-list-item v-for="variable in item.Variables" style="display: -webkit-box"
 															:key='variable.Id' :value='variable.Id'>
-									<span :style="'font-size: 13px; white-space: normal;' + (variable.IsDefault && item.Variables.length > 1 ? 'font-weight: bold': '')">
-										<span v-if="variable.DataColumnIsCategorical">
-											Conteo
-										</span>
-										<span v-else>
-											{{ Dataset.formatTwoColumnVariable(variable.Data, variable.DataColumn, true) }}
-											<md-tooltip md-direction="bottom" v-if="Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn)">
-												{{ Dataset.formatTwoColumnVariableTooltip(variable.Data, variable.DataColumn) }}
-											</md-tooltip>
-										</span>
-										<template v-if="variable.Normalization !== null">
-											/
-											<span>
-												{{
- Dataset.formatTwoColumnVariable(variable.Normalization, variable.NormalizationColumn, true)
-												}}
-												<md-tooltip md-direction="bottom" v-if="Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn)">
-													{{ Dataset.formatTwoColumnVariableTooltip(variable.Normalization, variable.NormalizationColumn) }}
-												</md-tooltip>
-											</span>
-											{{
- formatScaleFormula(variable)
-											}}
-										</template>
-										<template v-if="variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null">
-											por
-											<span>
-												{{ f.formatColumn(variable.Symbology.CutColumn, true) }}
-												<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(variable.Symbology.CutColumn)">
-													{{ f.formatColumnTooltip(variable.Symbology.CutColumn) }}
-												</md-tooltip>
-											</span>
-										</template>
+									<span :style="'font-size: 13px; white-space: normal; line-height: 2.5em;' + (variable.IsDefault && item.Variables.length > 1 ? 'font-weight: bold': '')">
+										<span v-for="(seg, i) in formulaToSegments(variable)" :key="i">{{ seg.label }}<md-tooltip md-direction="bottom" v-if="seg.tooltip">{{ seg.tooltip }}</md-tooltip></span>
 										<template v-if="variable.FilterValue !== null">
 											(<span>{{ f.formatColumn(getFilterColumn(variable), true) }}
 												<md-tooltip md-direction="bottom" v-if="f.formatColumnTooltip(getFilterColumn(variable))">
@@ -235,26 +204,73 @@ export default {
 		createNewLevel() {
 			this.$refs.pickMetricVersion.show();
 		},
-		formatScaleFormula(variable) {
-			if (variable.Normalization === null) {
-				return '';
+		formulaToSegments(variable) {
+			let segments = [];
+
+			if (variable.IsGap) {
+				const term1 = this.formulaTermToSegments(variable, 'Data', 'Normalization');
+				const term2 = this.formulaTermToSegments(variable, 'GapData', 'GapNormalization');
+				const hasNormalization = variable.Normalization !== null;
+
+				if (hasNormalization && variable.NormalizationScale === 100) {
+					segments = segments.concat(term2);
+					segments.push({ label: ' - ', tooltip: null });
+					segments = segments.concat(term1);
+				} else {
+					segments.push({ label: '(', tooltip: null });
+					segments = segments.concat(term2);
+					segments.push({ label: ' - ', tooltip: null });
+					segments = segments.concat(term1);
+					segments.push({ label: ') / ', tooltip: null });
+					segments = segments.concat(term2);
+					segments.push({ label: ' * 100', tooltip: null });
+				}
+			} else {
+				segments = this.formulaTermToSegments(variable, 'Data', 'Normalization');
 			}
-			switch(variable.NormalizationScale) {
-				case 1:
-					return '';
-				case 100:
-					return ' * 100';
-				case 1000:
-					return ' * 1000';
-				case 10000:
-					return ' * 10.000';
-				case 100000:
-					return ' * 100.000';
-				case 1000000:
-					return ' * 1.000.000';
-				default:
-					return '';
+
+			if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null) {
+				segments.push({ label: 'por', tooltip: null });
+				segments.push({
+					label: f.formatColumn(variable.Symbology.CutColumn, true),
+					tooltip: f.formatColumnTooltip(variable.Symbology.CutColumn) || null
+				});
 			}
+
+			return segments;
+		},
+
+		formulaTermToSegments(variable, dataField, normalizationField) {
+			const segments = [];
+
+			if (variable.DataColumnIsCategorical) {
+				segments.push({ label: 'Conteo', tooltip: null });
+			} else {
+				segments.push({
+					label: this.Dataset.formatTwoColumnVariable(variable[dataField], variable[dataField + 'Column'], true),
+					tooltip: this.Dataset.formatTwoColumnVariableTooltip(variable[dataField], variable[dataField + 'Column']) || null
+				});
+			}
+
+			const normValue = variable[normalizationField];
+			if (normValue !== null) {
+				segments.push({ label: ' / ', tooltip: null });
+				segments.push({
+					label: this.Dataset.formatTwoColumnVariable(normValue, variable[normalizationField + 'Column'], true),
+					tooltip: this.Dataset.formatTwoColumnVariableTooltip(normValue, variable[normalizationField + 'Column']) || null
+				});
+
+				const scale = variable.NormalizationScale;
+				switch (scale) {
+					case 100: segments.push({ label: ' * 100', tooltip: null }); break;
+					case 1000: segments.push({ label: ' / 1.000', tooltip: null }); break;
+					case 10000: segments.push({ label: ' / 10.000', tooltip: null }); break;
+					case 100000: segments.push({ label: ' / 100.000', tooltip: null }); break;
+					case 1000000: segments.push({ label: ' / 1.000.000', tooltip: null }); break;
+				}
+			}
+
+			return segments;
 		},
 		formatGroup(item) {
 			if (item === null || item === undefined) {

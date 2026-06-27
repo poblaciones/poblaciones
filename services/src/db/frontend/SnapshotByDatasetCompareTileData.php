@@ -62,6 +62,13 @@ class SnapshotByDatasetCompareTileData extends BaseSpatialSnapshotModel
 			$select .= ", " . $varIdCompare . "_value,
 					  	  " . $totalFieldCompare;
 
+			if ($variable->IsGap())
+			{
+				$select .= ", " . $varId . "_value_gap,
+						  " . $totalField . "_gap";
+				$select .= ", " . $varIdCompare . "_value_gap,
+					  	  " . $totalFieldCompare . "_gap";
+			}
 			$select .= ", "  . $varId . "_" . $variableCompare->attributes['mvv_id']. "_value_label_id";
 		}
 
@@ -145,6 +152,12 @@ class SnapshotByDatasetCompareTileData extends BaseSpatialSnapshotModel
 					$item['ValueCompare'] = $row[$varIdCompare . "_value"];
 					$item['Total'] = $row[$totalField];
 					$item['TotalCompare'] = $row[$totalFieldCompare];
+					if ($variable->IsGap()) {
+						$item['ValueGap'] = $row[$varId . "_value_gap"];
+						$item['ValueCompareGap'] = $row[$varIdCompare . "_value_gap"];
+						$item['TotalGap'] = $row[$totalField . "_gap"];
+						$item['TotalCompareGap'] = $row[$totalFieldCompare . "_gap"];
+					}
 
 					$item['LID'] = $row[$varId . "_" . $variableCompare->attributes['mvv_id']. "_value_label_id"];
 

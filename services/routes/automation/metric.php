@@ -138,7 +138,10 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 	$legend = Params::Get('legend');
 	$dataColumnId = Params::GetInt('data_column_id');
 	$normColId = Params::GetInt('normalization_column_id');
+	$gapDataColumnId = Params::GetInt('gap_data_column_id');
+	$gapNormColId = Params::GetInt('gap_normalization_column_id');
 	$normScale = Params::GetInt('normalization_scale', 100);
+	$isGap = Params::Get('is_gap', false);
 	$cutMode = Params::Get('cut_mode', 'J');
 	$cutColumnId = Params::Get('cut_column_id');
 	$categories = Params::GetInt('categories', 4);
@@ -164,7 +167,6 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 	// Determinar si el dato es columna (O) o conteo (N)
 	$dataType = ($dataColumnId !== null) ? 'O' : 'N';
 
-
 	// Construir DataColumn (si aplica)
 	$dataColumnObj = null;
 	if ($dataColumnId !== null) {
@@ -179,7 +181,21 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 		$normColObj = App::Orm()->find(entities\DraftDatasetColumn::class, $normColId);
 	}
 
-	// Construir DataColumn (si aplica)
+	// Construir GapDataColumn (si aplica)
+	$gapDataType = ($gapDataColumnId !== null) ? 'O' : 'N';
+	$gapDataColumnObj = null;
+	if ($gapDataColumnId !== null) {
+		$gapDataColumnObj = App::Orm()->find(entities\DraftDatasetColumn::class, $gapDataColumnId);
+	}
+	// Construir GapNormalizationColumn (si aplica)
+	$gapNormType = null;
+	$gapNormColObj = null;
+	if ($gapNormColId !== null) {
+		$gapNormType = 'O';
+		$gapNormColObj = App::Orm()->find(entities\DraftDatasetColumn::class, $gapNormColId);
+	}
+
+	// Construir CutColumn (si aplica)
 	$cutColumnObj = null;
 	if ($cutColumnId !== null) {
 		$cutColumnObj = App::Orm()->find(entities\DraftDatasetColumn::class, $cutColumnId);
@@ -195,6 +211,12 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 	$variable->setNormalization($normType);
 	$variable->setNormalizationScale($normScale);
 	$variable->setNormalizationColumn($normColObj);
+
+	$variable->setIsGap($isGap);
+	$variable->setGapData($gapDataType);
+	$variable->setGapDataColumn($gapDataColumnObj);
+	$variable->setGapNormalization($gapNormType);
+	$variable->setGapNormalizationColumn($gapNormColObj);
 
 	$symbology = $variable->getSymbology();
 	$symbology->setColorFrom($colorFrom);
@@ -303,6 +325,10 @@ App::$app->get('/services/api/automation/GetColumnDistributions', function (Requ
 	$dataColumnId = Params::GetInt('ci');
 	$normalizationColumn = Params::Get('o');
 	$normalizationColumnId = Params::GetInt('oi');
+	$gapDataColumn = Params::Get('gc');
+	$gapDataColumnId = Params::GetInt('gci');
+	$gapNormalizationColumn = Params::Get('go');
+	$gapNormalizationColumnId = Params::GetInt('goi');
 	$normalizationScale = Params::Get('s');
 	$filter = Params::Get('f');
 
@@ -313,6 +339,10 @@ App::$app->get('/services/api/automation/GetColumnDistributions', function (Requ
 		$dataColumnId,
 		$normalizationColumn,
 		$normalizationColumnId,
+		$gapDataColumn,
+		$gapDataColumnId,
+		$gapNormalizationColumn,
+		$gapNormalizationColumnId,
 		$normalizationScale,
 		$filter
 	)

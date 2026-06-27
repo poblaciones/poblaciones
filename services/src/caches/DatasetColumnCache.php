@@ -10,7 +10,9 @@ class DatasetColumnCache extends BaseCache
 	{
 		return new TwoLevelObjectCache("Datasets/ColumnDistributions");
 	}
-	public static function CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter)
+	public static function CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId,
+										$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,
+										$normalizationScale, $from, $to, $filter)
 	{
 		$key = "c" . $dataColumn;
 		if ($dataColumnId !== null)
@@ -18,6 +20,19 @@ class DatasetColumnCache extends BaseCache
 		$key .= "n" . $normalization;
 		if ($normalizationId !== null)
 			$key .= "i" . $normalizationId;
+
+		if ($gapDataColumn !== null)
+		{
+			$key = "gc" . $gapDataColumn;
+			if ($gapDataColumnId !== null)
+				$key .= "gi" . $gapDataColumnId;
+		}
+		if ($gapNormalization !== null)
+		{
+			$key .= "gn" . $gapNormalization;
+			if ($gapNormalizationId !== null)
+				$key .= "gi" . $gapNormalizationId;
+		}
 		$key .= "e" . $normalizationScale;
 		$key .= "f" . $from . "t" . $to;
 		if ($filter !== null)

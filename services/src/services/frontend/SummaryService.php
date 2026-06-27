@@ -101,12 +101,23 @@ class SummaryService extends BaseService
 			$item->Count = $row['Areas'] ;
 			if (array_key_exists('Total', $row) && $row['Total'] !== null)
 				$item->Total = $row['Total'];
+			// Gap
+			if (array_key_exists('ValueGap', $row) && $row['ValueGap'] !== null)
+				$item->ValueGap = $row['ValueGap'];
+			if (array_key_exists('TotalGap', $row) && $row['TotalGap'] !== null)
+				$item->TotalGap = $row['TotalGap'];
 
 			// Agrega información comparativa
 			if (array_key_exists('ValueCompare', $row) && $row['ValueCompare'] !== null)
 				$item->ValueCompare = $row['ValueCompare'];
 			if (array_key_exists('TotalCompare', $row) && $row['TotalCompare'] !== null)
 				$item->TotalCompare = $row['TotalCompare'];
+
+			// Comparación con gap
+			if (array_key_exists('ValueCompareGap', $row) && $row['ValueCompareGap'] !== null)
+				$item->ValueCompareGap = $row['ValueCompareGap'];
+			if (array_key_exists('TotalCompareGap', $row) && $row['TotalCompareGap'] !== null)
+				$item->TotalCompareGap = $row['TotalCompareGap'];
 
 			$item->Km2 = $row['Km2'] ;
 			$item->VariableId = $row['VariableId'];

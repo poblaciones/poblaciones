@@ -367,15 +367,21 @@ class SelectedMetricService extends BaseService
 			if ($variableInfo->Legend !== null && $variableInfo->Legend !== "")
 			{
 				$variableInfo->Asterisk = $asterisk;
-				//$asterisk .= '*';
 			}
 			if ($variableInfo->Perimeter)
 			{
 				$variableInfo->ShowPerimeter = 1;
 			}
 			$variableInfo->IsCategorical = $variable['vsy_cut_mode'] === 'V';
-			$variableInfo->IsSimpleCount = $variable['mvv_normalization'] === null &&
-																				($variable['mvv_data'] === SpecialColumnEnum::Count || $variable['mvv_data_column_is_categorical']);
+			if ($variableInfo->IsGap === false)
+			{
+				$variableInfo->IsSimpleCount = $variable['mvv_normalization'] === null &&
+												($variable['mvv_data'] === SpecialColumnEnum::Count || $variable['mvv_data_column_is_categorical']);
+			}
+			else
+			{
+				$variableInfo->IsSimpleCount = false;
+			}
 			if ($variableInfo->IsSimpleCount)
 				$variableInfo->ShowValues = false;
 			if ($variable['mvv_data'] === SpecialColumnEnum::AreaKm2)

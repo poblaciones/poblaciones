@@ -41,8 +41,13 @@ class SnapshotByDatasetSummary extends BaseSpatialSnapshotModel
 				$varId = "sna_" . $variable->Id;
 
 				$select .= ", SUM(IFNULL(" . $varId . "_value, 0)) Value,
-											SUM(" . $varId . "_total) Total," .
-											$varId . "_value_label_id ValueId";
+							  SUM(" . $varId . "_total) Total,";
+
+				if ($variable->IsGap)
+					$select .= "SUM(IFNULL(" . $varId . "_value_gap, 0)) ValueGap,
+							    SUM(" . $varId . "_total_gap) TotalGap,";
+
+				$select .=  $varId . "_value_label_id ValueId";
 
 				$groupBy = $varId . "_value_label_id";
 

@@ -92,43 +92,23 @@ export default {
 			}
 		},
 		getValueHeader() {
-			var ret = h.ResolveNormalizationCaption(this.variable, true);
-			if (this.metric.Compare.Active) {
-				switch (ret) {
-					case '%':
-						return 'Δ %';
-					default:
-						return ret;
-				}
-			} else {
-				return ret;
-			}
+			return h.getColumnHeader(this.variable, this.metric.Compare.Active);
 		},
 		getFormattedValue(item) {
+			var tuple = h.buildValueTuple(this.variable, item);
 			if (this.metric.Compare.Active) {
+				var compareTuple = h.buildValueTuple(this.variable, {
+					Value: item.ValueCompare,
+					Total: item.TotalCompare,
+					ValueGap: item.ValueCompareGap,
+					TotalGap: item.TotalCompareGap
+				});
 				var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
-				var totalTuple = { value: item.Value, normalization: item.Total };
-				var compareTuple = { value: item.ValueCompare, normalization: item.TotalCompare };
-				if (this.variable.HasTotals) {
-					totalTuple.normalization /= this.variable.NormalizationScale;
-					compareTuple.normalization /= this.variable.NormalizationScale;
-				}
-				var ret = h.formatNum(h.calculateCompareValue(useProportionalDelta, totalTuple, compareTuple), 1);
-				if (ret == 'NaN') {
-					ret = '-';
-				} else if (ret.length > 0) {
-					var num = parseFloat(ret);
-					if (num <= -1 || num >= 1) {
-						if (ret[0] == '-') {
-							ret = '↘ ' + ret.substring(1);
-						} else {
-							ret = '↗ ' + ret;
-						}
-					}
-				}
-				return ret;
+				var delta = h.calculateCompareValue(useProportionalDelta, tuple, compareTuple);
+				return h.formatDeltaValue(delta, true);
 			} else {
-				return h.renderMetricValue(item.Value, item.Total, this.variable.HasTotals, this.variable.NormalizationScale, this.variable.Decimals);
+				var calculated = h.calculateValue(tuple);
+				return h.formatVariableValue(this.variable, calculated);
 			}
 		},
 		getColor(item) {

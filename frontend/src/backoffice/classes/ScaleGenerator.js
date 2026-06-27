@@ -220,6 +220,10 @@ ScaleGenerator.prototype.GetColumnDistributions = function (variable) {
 			'ci': (variable.DataColumn ? variable.DataColumn.Id : 0),
 			'o': variable.Normalization,
 			'oi': (variable.NormalizationColumn ? variable.NormalizationColumn.Id : 0),
+			'gc': variable.GapData,
+			'gci': (variable.GapDataColumn ? variable.GapDataColumn.Id : 0),
+			'go': variable.GapNormalization,
+			'goi': (variable.GapNormalizationColumn ? variable.GapNormalizationColumn.Id : 0),
 			's': variable.NormalizationScale,
 			'f': variable.FilterValue
 		};
@@ -666,7 +670,7 @@ ScaleGenerator.prototype.CreateRangeCategories = function (variable, data, set) 
 				roundedValue += parseFloat(variable.Symbology.Round);
 			}
 			// Si quedó repetido, lo incrementa
-			if (roundedValue <= lastRoundedValue) {
+			if (roundedValue <= lastRoundedValue && lastRoundedValue !== null) {
 				if (variable.Symbology.Round && variable.Symbology.Round !== "0") {
 					roundedValue = lastRoundedValue + parseFloat(variable.Symbology.Round);
 				} else {
@@ -704,7 +708,11 @@ ScaleGenerator.prototype.ResolveRangeCaption = function (variable, isFirst, isLa
 		ret = lastRoundedValue + ' a ' + roundedValue;
 	}
 	ret = str.Replace(ret, '.', ',');
-	ret += h.ResolveNormalizationCaption(variable);
+	if (variable.IsGap) {
+		ret += (variable.NormalizationScale === 100 ? ' pp.' : ' %');
+	} else {
+		ret += h.ResolveNormalizationCaption(variable);
+	}
 	return ret.trimRight();
 };
 

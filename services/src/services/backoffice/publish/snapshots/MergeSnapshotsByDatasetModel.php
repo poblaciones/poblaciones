@@ -347,27 +347,42 @@ class MergeSnapshotsByDatasetModel
 	}
 	private function UseProportionalDelta($variable)
 	{
-		return $variable->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue
-			|| $variable->attributes['mvv_normalization_scale'] != 100;
+		$isPercent = $variable->attributes['mvv_normalization'] !== SpecialColumnEnum::NullValue
+						&& $variable->attributes['mvv_normalization_scale'] === 100;
+		if ($variable->IsGap())
+			return $isPercent;
+		else
+			return !$isPercent;
 	}
-	private function AddColumnsByVariablePair(&$columns, $variable1, $variable2, $sameDataset)
+
+	private function AddColumnsValueNormalization(&$columns, $variable1, $variable2, $t2, $suffix = "")
 	{
-		$t2 = ($sameDataset ? 't1' : 't2');
 		// Pasa valores
-		$value1 = 'sna_' . $variable1->Id() . '_value';
+		$value1 = 'sna_' . $variable1->Id() . '_value' . $suffix;
 		if (Arr::IndexOfByIndexValue($columns, 0, $value1) == -1)
 			$columns[] = [$value1, 'double NULL', 't1.' . $value1];
-		$value2 = 'sna_' . $variable2->Id() . '_value';
+		$value2 = 'sna_' . $variable2->Id() . '_value' . $suffix;
 		if (Arr::IndexOfByIndexValue($columns, 0, $value2) == -1)
 			$columns[] = [$value2, 'double NULL', $t2 . '.' . $value2];
 
 		// Pasa totales
-		$value1 = 'sna_' . $variable1->Id() . '_total';
+		$value1 = 'sna_' . $variable1->Id() . '_total' . $suffix;
 		if (Arr::IndexOfByIndexValue($columns, 0, $value1) == -1)
 			$columns[] = [$value1, 'double NULL', 't1.' . $value1];
-		$value2 = 'sna_' . $variable2->Id() . '_total';
+		$value2 = 'sna_' . $variable2->Id() . '_total' . $suffix;
 		if (Arr::IndexOfByIndexValue($columns, 0, $value2) == -1)
 			$columns[] = [$value2, 'double NULL', $t2 . '.' . $value2];
+	}
+
+	private function AddColumnsByVariablePair(&$columns, $variable1, $variable2, $sameDataset)
+	{
+		$t2 = ($sameDataset ? 't1' : 't2');
+
+		$this->AddColumnsValueNormalization($columns, $variable1, $variable2, $t2);
+
+		// Para gaps
+		if ($variable1->IsGap())
+			$this->AddColumnsValueNormalization($columns, $variable1, $variable2, $t2, "_gap");
 
 		// Calcula la categoría de matriz
 		$category1 = 'sna_' . $variable1->Id() . '_value_label_id';
@@ -376,8 +391,8 @@ class MergeSnapshotsByDatasetModel
 								'CONCAT(t1.' . $category1 . ",'_'," . $t2 . "." . $category2 . ')'];
 
 		// Calcula la categoría de diferencia porcentual
-		$value1ForSegmentation = $this->CalculateNormalizedValueField($variable1, 't1.');
-		$value2ForSegmentation = $this->CalculateNormalizedValueField($variable2, $t2 . '.');
+		$value1ForSegmentation = $this->CalculateNormalizedFinalValueField($variable1, 't1.');
+		$value2ForSegmentation = $this->CalculateNormalizedFinalValueField($variable2, $t2 . '.');
 
 		if ($this->UseProportionalDelta($variable1))
 		{
@@ -416,14 +431,25 @@ class MergeSnapshotsByDatasetModel
 			$columns[] = ['sna_' . $variable1->Id() . '_sequence_order', "int NOT NULL DEFAULT '0'", 't1.' . 'sna_' . $variable1->Id() . '_sequence_order'];
 		}
 	}
-
-	private function CalculateNormalizedValueField($variable, $tablePreffix = '')
+	private function CalculateNormalizedFinalValueField($variable, $tablePreffix = '')
 	{
-		$field = $tablePreffix . 'sna_' . $variable->Id() . '_value';
+		$value = $this->calculateNormalizedValueField($variable, $tablePreffix);
+		if (!$variable->IsGap())
+			return $value;
+		$isPercentage = ($variable->attributes['mvv_normalization'] !== SpecialColumnEnum::NullValue && $variable->attributes['mvv_normalization_scale'] === 100);
+		$valueGap = $this->calculateNormalizedValueField($variable, $tablePreffix, "_gap");
+		if ($isPercentage)
+			return "(" . $valueGap . " - " . $value . ")";
+		else
+			return "(" . $valueGap  . " / " . $value . " - 1) * 100";
+	}
+	private function calculateNormalizedValueField($variable, $tablePreffix, $suffix = '')
+	{
+		$field = $tablePreffix . 'sna_' . $variable->Id() . '_value' . $suffix;
 		if ($variable->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
 			return $field;
 
-		$normalizationField = $tablePreffix . 'sna_' . $variable->Id() . '_total';
+		$normalizationField = $tablePreffix . 'sna_' . $variable->Id() . '_total' . $suffix;
 		return "(CASE WHEN " . $normalizationField . " IS NULL THEN NULL "
 					. "WHEN " . $normalizationField . " = 0 THEN 0 "
 					. "ELSE " . $field . " * " . $variable->attributes['mvv_normalization_scale'] . " / " . $normalizationField . " END " . ") ";

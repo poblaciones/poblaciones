@@ -20,9 +20,11 @@ class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 	private $hasDescriptions;
 	private $size;
 	private $direction;
+	private $isGap;
+	private $isPercentage;
 
 	public function __construct($snapshotTable, $datasetType,
-		$variableId, $variableCompareId, $hasTotals, $urbanity, $partition,
+		$variableId, $variableCompareId, $isGap, $isPercentage, $hasTotals, $urbanity, $partition,
 		$hasDescriptions, $size, $direction, $hiddenValueLabels)
 	{
 		$this->variableId = $variableId;
@@ -30,6 +32,8 @@ class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 		$this->urbanity = $urbanity;
 		$this->partition = $partition;
 		$this->hiddenValueLabels = $hiddenValueLabels;
+		$this->isGap = $isGap;
+		$this->isPercentage = $isPercentage;
 
 		$this->hasTotals = $hasTotals;
 		$this->hasDescriptions = $hasDescriptions;
@@ -52,6 +56,14 @@ class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 					. "	sna_feature_id FeatureId, "
 					. " sna_" . $this->variableId . "_" . $this->variableCompareId . "_value_label_id ValueId, "
 					. "ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
+
+		if ($this->isGap)
+		{
+			$select .= ",IFNULL(sna_" . $this->variableId . "_value_gap, 0) ValueGap, "
+				. $totalField . "_gap TotalGap, "
+				. "IFNULL(sna_" . $this->variableCompareId . "_value_gap, 0) ValueCompareGap,"
+				. " sna_" . $this->variableCompareId . "_total_gap TotalCompareGap";
+		}
 		if ($this->hasDescriptions)
 		{
 			$select .= ", sna_description Name ";
@@ -85,10 +97,8 @@ class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 		$where = $this->AddNotNullCondition($where, $totalField);
 
 		// Setea el orden
-		if ($this->hasTotals)
-			$orderBy = "CASE WHEN Total = 0 OR TotalCompare = 0 THEN 0 ELSE (Value / Total) - (ValueCompare / TotalCompare) END";
-		else
-			$orderBy = "ValueCompare - Value";
+		$orderBy = self::CalculateValueSql($this->isGap, $this->isPercentage, $this->hasTotals);
+
 		// Setea la dirección
 		$orderBy .= ($this->direction === 'D' ? ' DESC' : ' ASC');
 
@@ -101,6 +111,20 @@ class SnapshotByDatasetCompareRanking extends BaseSpatialSnapshotModel
 
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	public static function CalculateValueSql($isGap, $isPercentage, $hasTotals)
+	{
+		$part1 = SnapshotByDatasetRanking::CalculateValueSql($isGap, $isPercentage, $hasTotals);
+		$part2 = SnapshotByDatasetRanking::CalculateValueSql($isGap, $isPercentage, $hasTotals, "Compare");
+		$useProportional = !$isPercentage;
+		if ($isGap)
+			$useProportional = !$useProportional;
+
+		if ($useProportional)
+			return "((" . $part2 . " / " . $part1 . " - 1) * 100)";
+		else
+			return "(" . $part2 . " - " . $part1 . ")";
 	}
 
 	private function hiddenValuesCondition()

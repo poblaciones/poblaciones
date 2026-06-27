@@ -108,6 +108,9 @@ export default {
 		},
 		divider(variable) {
 			var normalization = h.ResolveNormalizationCaption(variable);
+			if (variable.IsGap) {
+				return "";
+			}
 			if (normalization != '%') {
 				return normalization;
 			} else {

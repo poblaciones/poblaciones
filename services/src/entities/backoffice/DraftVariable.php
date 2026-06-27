@@ -59,13 +59,27 @@ class DraftVariable
      *
      * @ORM\Column(name="mvv_is_default", type="boolean", precision=0, scale=0, nullable=false, unique=false)
      */
-    private $IsDefault;
+	private $IsDefault;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="mvv_default_measure", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
-     */
+	/**
+	 * @var boolean
+	 *
+	 * @ORM\Column(name="mvv_is_gap", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+	 */
+    private $IsGap;
+
+	/**
+	 * @var boolean
+	 *
+	 * @ORM\Column(name="mvv_has_gap_same_total", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+	 */
+	private $HasGapSameTotal;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="mvv_default_measure", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
+	 */
     private $DefaultMeasure;
 
     /**
@@ -119,6 +133,42 @@ class DraftVariable
 		 * })
 		 */
     private $NormalizationColumn;
+
+    /**
+     * @var \helena\entities\backoffice\DraftDatasetColumn
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="mvv_gap_data_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $GapDataColumn;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="mvv_gap_data", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $GapData;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="mvv_gap_normalization", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $GapNormalization;
+
+    /**
+     * @var \helena\entities\backoffice\DraftDatasetColumn
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\DraftDatasetColumn", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="mvv_gap_normalization_column_id", referencedColumnName="dco_id", nullable=true)
+     * })
+     */
+    private $GapNormalizationColumn;
+
 
 		/**
 		 * @var string
@@ -241,14 +291,63 @@ class DraftVariable
         return $this->Order;
     }
 
+	/**
+	 * Set HasGapSameTotal
+	 *
+	 * @param boolean $HasGapSameTotal
+	 *
+	 * @return DraftVariable
+	 */
+	public function setHasGapSameTotal($HasGapSameTotal)
+	{
+		$this->HasGapSameTotal = $HasGapSameTotal;
 
-    /**
-     * Set isDefault
-     *
-     * @param boolean $isDefault
-     *
-     * @return DraftVariable
-     */
+		return $this;
+	}
+
+	/**
+	 * Get HasGapSameTotal
+	 *
+	 * @return boolean
+	 */
+	public function getHasGapSameTotal()
+	{
+		return $this->HasGapSameTotal;
+	}
+
+
+
+	/**
+	 * Set isGap
+	 *
+	 * @param boolean $isGap
+	 *
+	 * @return DraftVariable
+	 */
+	public function setIsGap($isGap)
+	{
+		$this->IsGap = $isGap;
+
+		return $this;
+	}
+
+	/**
+	 * Get isGap
+	 *
+	 * @return boolean
+	 */
+	public function getIsGap()
+	{
+		return $this->IsGap;
+	}
+
+	/**
+	 * Set isDefault
+	 *
+	 * @param boolean $isDefault
+	 *
+	 * @return DraftVariable
+	 */
     public function setIsDefault($isDefault)
     {
         $this->IsDefault = $isDefault;
@@ -531,5 +630,97 @@ class DraftVariable
     {
         return $this->MetricVersionLevel;
     }
-}
 
+    /**
+     * Set gapDataColumn
+     *
+     * @param \helena\entities\backoffice\DraftDatasetColumn $gapDataColumn
+     *
+     * @return DraftVariable
+     */
+    public function setGapDataColumn(\helena\entities\backoffice\DraftDatasetColumn $gapDataColumn = null)
+    {
+        $this->GapDataColumn = $gapDataColumn;
+        return $this;
+    }
+
+    /**
+     * Get gapDataColumn
+     *
+     * @return \helena\entities\backoffice\DraftDatasetColumn
+     */
+    public function getGapDataColumn()
+    {
+        return $this->GapDataColumn;
+    }
+
+    /**
+     * Set gapNormalization
+     *
+     * @param string $gapNormalization
+     *
+     * @return DraftVariable
+     */
+    public function setGapNormalization($gapNormalization)
+    {
+        $this->GapNormalization = $gapNormalization;
+        return $this;
+    }
+
+    /**
+     * Get gapNormalization
+     *
+     * @return string
+     */
+    public function getGapNormalization()
+    {
+        return $this->GapNormalization;
+    }
+
+    /**
+     * Set gapNormalizationColumn
+     *
+     * @param \helena\entities\backoffice\DraftDatasetColumn $gapNormalizationColumn
+     *
+     * @return DraftVariable
+     */
+    public function setGapNormalizationColumn(\helena\entities\backoffice\DraftDatasetColumn $gapNormalizationColumn = null)
+    {
+        $this->GapNormalizationColumn = $gapNormalizationColumn;
+        return $this;
+    }
+
+    /**
+     * Get gapNormalizationColumn
+     *
+     * @return \helena\entities\backoffice\DraftDatasetColumn
+     */
+    public function getGapNormalizationColumn()
+    {
+        return $this->GapNormalizationColumn;
+    }
+
+    /**
+     * Set gapData
+     *
+     * @param string $gapData
+     *
+     * @return DraftVariable
+     */
+    public function setGapData($gapData)
+    {
+        $this->GapData = $gapData;
+        return $this;
+    }
+
+    /**
+     * Get gapData
+     *
+     * @return string
+     */
+    public function getGapData()
+    {
+        return $this->GapData;
+    }
+
+}

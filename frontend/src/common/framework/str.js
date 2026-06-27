@@ -186,59 +186,62 @@ module.exports = {
 	Wrap(text, size) {
 		if (!text || size <= 0) return text;
 
-		const result = [];
-		let currentLine = '';
-		let currentWord = '';
+		// -------------------------------------------------
+		// 1. Proteger abreviaturas con espacio: "10 pp.", "5 p.m."
+		//    Reemplazamos ese espacio por un marcador temporal.
+		// -------------------------------------------------
+		const MARK = '§§S§§';
+		const abbrs = ['pp', 'km', '%', '/'];
+		let t = text;
 
-		// Recorrer el texto caracter por caracter
-		for (let i = 0; i < text.length; i++) {
-			const char = text[i];
-
-			// Si es un espacio o símbolo, es posible punto de corte
-			if (/\s|[.,;:!?)\]}<>\/\\-]/.test(char)) {
-				// Si añadir esta palabra excede el tamaño
-				if ((currentLine + currentWord + char).length > size) {
-					// Guardar línea actual y empezar nueva
-					result.push(currentLine);
-					currentLine = currentWord + char;
-				} else {
-					// Añadir palabra y separador a la línea actual
-					currentLine += currentWord + char;
+		for (const a of abbrs) {
+			let p = t.indexOf(' ' + a);
+			while (p !== -1) {
+				// Solo si antes del espacio hay un dígito
+				if (p > 0 && t[p - 1] >= '0' && t[p - 1] <= '9') {
+					t = t.slice(0, p) + MARK + t.slice(p + 1);
 				}
-				currentWord = '';
-			} else {
-				// Añadir caracter a la palabra actual
-				currentWord += char;
+				p = t.indexOf(' ' + a, p + 1);
+			}
+		}
+		// -------------------------------------------------
+		// 2. Dividir por espacios y armar líneas
+		// -------------------------------------------------
+		const words = t.split(' ');
+		const out = [];
+		let line = '';
 
-				// Si la palabra actual es más grande que el tamaño permitido
-				if (currentWord.length >= size) {
-					// Si hay contenido en la línea actual, guardarla
-					if (currentLine.length > 0) {
-						result.push(currentLine);
-						currentLine = '';
+		for (let i = 0; i < words.length; i++) {
+			// Restaurar el espacio original en las abreviaturas
+			const w = words[i].split(MARK).join(' ');
+			const sep = line.length > 0 ? ' ' : '';
+			const cand = line + sep + w;
+
+			if (cand.length <= size) {
+				// Cabe en la línea actual
+				line = cand;
+			} else {
+				// No cabe: guardar línea actual
+				if (line.length > 0) {
+					out.push(line);
+				}
+
+				// Si la palabra sola es más ancha que el límite, la partimos
+				if (w.length > size) {
+					for (let k = 0; k < w.length; k += size) {
+						out.push(w.slice(k, k + size));
 					}
-					// Cortar la palabra y guardarla
-					result.push(currentWord.substring(0, size));
-					currentWord = currentWord.substring(size);
+					line = '';
+				} else {
+					// Empieza una línea nueva con esta palabra
+					line = w;
 				}
 			}
 		}
-
-		// Procesar la última palabra y línea
-		if (currentWord.length > 0) {
-			if ((currentLine + currentWord).length > size) {
-				if (currentLine.length > 0) {
-					result.push(currentLine);
-				}
-				result.push(currentWord);
-			} else {
-				result.push(currentLine + currentWord);
-			}
-		} else if (currentLine.length > 0) {
-			result.push(currentLine);
+		if (line.length > 0) {
+			out.push(line);
 		}
-
-		return result.join('<br>');
+		return out.join('<br>');
 	},
 	EscapeHtml(unsafe) {
 		return ('' + unsafe)

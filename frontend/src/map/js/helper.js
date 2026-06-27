@@ -84,33 +84,24 @@ module.exports = {
 		}
 	},
 	calculateValue(tuple) {
-		if (tuple.normalization == 0) {
+		if (tuple.isGap) {
+			var value1 = this.calculateTerm(tuple.value, tuple.normalization);
+			var value2 = this.calculateTerm(tuple.valueGap, tuple.normalizationGap);
+			if (tuple.isPercentage)
+				return value2 - value1;
+			else
+				return (value2 / value1 - 1) * 100;
+		} else {
+			return this.calculateTerm(tuple.value, tuple.normalization);
+		}
+	},
+	calculateTerm(value, normalization) {
+		if (normalization == 0) {
 			return 0;
-		} else if (tuple.normalization === undefined || tuple.normalization === null) {
-			return tuple.value;
+		} else if (normalization === undefined || normalization === null) {
+			return value;
 		} else {
-			return tuple.value / tuple.normalization;
-		}
-	},
-	renderMetricValue(value, total, hasTotals, normalizationScale, decimals) {
-		if (value === '-') {
-			return '-';
-		}
-		var calculatedValue;
-		if (hasTotals) {
-			calculatedValue = (total > 0 ? value * normalizationScale / total : 0);
-		} else {
-			calculatedValue = value;
-		}
-		return this.getValueFormatted(calculatedValue, hasTotals, decimals);
-	},
-	getValueFormatted(value, hasTotals, decimals) {
-		if (value === '-') {
-			return '-';
-		} else if (hasTotals) {
-			return this.formatPercentNumber(value);
-		} else {
-			return this.formatNum(value, decimals);
+			return value / normalization;
 		}
 	},
 	formatPercentNumber(num) {
@@ -731,6 +722,85 @@ module.exports = {
 		for (let attr in obj2) { ret[attr] = obj2[attr]; }
 		return ret;
 	},
+	// Construye el tuple desde datos crudos de una fila (ranking, summary, mapa).
+	// rawValues debe tener: Value, Total, y opcionalmente ValueGap, TotalGap.
+	buildValueTuple(variable, rawValues) {
+		var tuple = { value: Number(rawValues.Value) };
+		if (variable.HasTotals) {
+			tuple.normalization = Number(rawValues.Total) / variable.NormalizationScale;
+		}
+		if (variable.IsGap) {
+			tuple.valueGap = Number(rawValues.ValueGap ?? 0);
+			if (variable.HasTotals) {
+				tuple.normalizationGap = Number(rawValues.TotalGap ?? 0) / variable.NormalizationScale;
+			}
+			tuple.isGap = true;
+			tuple.isPercentage = (variable.NormalizationScale === 100);
+		}
+		return tuple;
+	},
+
+	// Formatea un valor ya calculado (resultado de calculateValue).
+	// Cubre: sin normalización, con normalización (%), con escala de tasas, y brechas.
+	formatVariableValue(variable, calculatedValue) {
+		if (calculatedValue === '' || calculatedValue === '-') {
+			return '-';
+		}
+		if (typeof calculatedValue === 'number' && isNaN(calculatedValue)) {
+			return '-';
+		}
+		if (variable.IsGap) {
+			return this.formatNum(calculatedValue, 1);
+		}
+		if (variable.HasTotals) {
+			return this.formatPercentNumber(calculatedValue);
+		}
+		return this.formatNum(calculatedValue, variable.Decimals ?? 0);
+	},
+
+	// Formatea un delta de comparación (resultado de calculateCompareValue).
+	// withArrows: true en ranking, false en mapa/summary.
+	formatDeltaValue(deltaValue, withArrows) {
+		if (deltaValue === '' || (typeof deltaValue === 'number' && isNaN(deltaValue))) {
+			return '-';
+		}
+		var ret = this.formatNum(deltaValue, 1);
+		if (ret === '-' || ret === 'n/d') {
+			return ret;
+		}
+		if (withArrows) {
+			var num = parseFloat(ret.replace(',', '.'));
+			if (num <= -1 || num >= 1) {
+				if (deltaValue < 0) {
+					ret = '↘ ' + this.formatNum(Math.abs(deltaValue), 1);
+				} else {
+					ret = '↗ ' + ret;
+				}
+			}
+		}
+		return ret;
+	},
+
+	// Header de columna para los modos I y N (los demás modos quedan en Summary.getValueHeader).
+	getColumnHeader(variable, compareActive) {
+		var delta = compareActive ? 'Δ ' : '';
+		if (variable.IsGap) {
+			return delta + (variable.NormalizationScale === 100 ? 'Δ %' : 'Δ %');
+		}
+		if (!variable.HasTotals) {
+			return 'N';
+		}
+		switch (variable.NormalizationScale) {
+			case 100:     return delta + '%';
+			case 1:       return delta + '/1';
+			case 1000:    return delta + '/k';
+			case 10000:   return delta + '/10k';
+			case 100000:  return delta + '/100k';
+			case 1000000: return delta + '/1M';
+			default:      return delta + 'N';
+		}
+	},
+
 	getScaleFactor(zoom) {
 		return Math.pow(2, (zoom / 3));
 	},

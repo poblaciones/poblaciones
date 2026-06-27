@@ -44,13 +44,19 @@ class Variable
 										(CASE WHEN vsy_is_sequence THEN sequencecolumn.dco_field ELSE NULL END) AS vsy_sequence_field,
 										data.dco_field AS mvv_data_field,
 										data.dco_variable AS mvv_data_column_variable,
-										cutcolumn.dco_format AS mvv_cut_field_format,
 										normalization.dco_field AS mvv_normalization_field,
-										normalization.dco_variable AS mvv_normalization_column_variable
+										normalization.dco_variable AS mvv_normalization_column_variable,
+										gap_data.dco_field AS mvv_gap_data_field,
+										gap_data.dco_variable AS mvv_gap_data_column_variable,
+										gap_normalization.dco_field AS mvv_gap_normalization_field,
+										gap_normalization.dco_variable AS mvv_gap_normalization_column_variable,
+										cutcolumn.dco_format AS mvv_cut_field_format
 						FROM variable
 						JOIN symbology ON mvv_symbology_id = vsy_id
 						LEFT JOIN dataset_column data ON data.dco_id = mvv_data_column_id
 						LEFT JOIN dataset_column normalization ON normalization.dco_id = mvv_normalization_column_id
+						LEFT JOIN dataset_column gap_data ON gap_data.dco_id = mvv_gap_data_column_id
+						LEFT JOIN dataset_column gap_normalization ON gap_normalization.dco_id = mvv_gap_normalization_column_id
 						LEFT JOIN dataset_column sequencecolumn ON sequencecolumn.dco_id = vsy_sequence_column_id
 						LEFT JOIN dataset_column cutcolumn ON cutcolumn.dco_id = vsy_cut_column_id
 						WHERE mvv_metric_version_level_id = ? ORDER BY mvv_order";
@@ -78,17 +84,22 @@ class Variable
 			$variable['values'] = $values;
 		}
 	}
-	public function CalculateValueField()
+
+	public function IsGap()
+	{
+		return $this->attributes['mvv_is_gap'];
+	}
+	public function CalculateValueField($preffix = "")
 	{
 		if ($this->attributes['mvv_data_column_is_categorical'])
 			return 1;
 
-		$field = self::GetRichColumn($this->attributes, "mvv_data", $this->metricVersionLevel['dat_type']);
+		$field = self::GetRichColumn($this->attributes, "mvv" . $preffix . "_data", $this->metricVersionLevel['dat_type']);
 
-		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
+		if ($this->attributes["mvv" . $preffix . "_normalization"] == SpecialColumnEnum::NullValue)
 			return $field;
 
-		$normalizationField = self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
+		$normalizationField = self::GetRichColumn($this->attributes, "mvv" . $preffix . "_normalization", $this->metricVersionLevel['dat_type']);
 		if ($normalizationField == 'null')
 			return $field;
 		else
@@ -97,12 +108,13 @@ class Variable
 								. " THEN NULL "
 								. "ELSE " . $field . " END) ";
 	}
-	public function CalculateNormalizationField()
+
+	public function CalculateNormalizationField($preffix = "")
 	{
-		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
+		if ($this->attributes['mvv' . $preffix . '_normalization'] == SpecialColumnEnum::NullValue)
 			return 0;
 		else
-			return self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
+			return self::GetRichColumn($this->attributes, "mvv" . $preffix . "_normalization", $this->metricVersionLevel['dat_type']);
 	}
 
 	private function RaiseError($problem)
@@ -230,7 +242,7 @@ class Variable
 			return $this->GetFieldFromId($cutColumnId);
 		}
 		else
-			return $this->CalculateNormalizedValueField();
+			return $this->CalculateNormalizedFinalValueField();
 	}
 
 	private function GetFieldFromId($columnId)
@@ -242,30 +254,45 @@ class Variable
 		return $ret;
 	}
 
-	public function CalculateNormalizedValueField($fixDecimales = -1)
-	{
-		$field = self::GetRichColumn($this->attributes, "mvv_data", $this->metricVersionLevel['dat_type']);
-		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
-			return $field;
 
-		$normalizationField = self::GetRichColumn($this->attributes, "mvv_normalization", $this->metricVersionLevel['dat_type']);
-		if ($fixDecimales !== -1)
+	public function CalculateNormalizedFinalValueField($fixDecimales = -1)
+	{
+		$value1 = $this->CalculateNormalizedValueField();
+		if ($this->IsGap())
 		{
-			$pre = "ROUND(";
-			$post = "," . $fixDecimales . ")";
+			$value2 = $this->CalculateNormalizedValueField("_gap");
+			$isPercentage = ($this->attributes['mvv_normalization'] !== SpecialColumnEnum::NullValue && $this->attributes['mvv_normalization_scale'] == 100);
+			if ($isPercentage)
+				$valueSql = "(" . $value2 . " - " . $value1 . ")";
+			else
+				$valueSql = "((" . $value2 . " / " . $value1 . " - 1) * 100)";
 		}
 		else
 		{
-			$pre = "";
-			$post = "";
+			$valueSql = $value1;
 		}
+
+		if ($fixDecimales !== -1) {
+			return "ROUND(" . $valueSql . "," . $fixDecimales . ")";
+		} else {
+			return $valueSql;
+		}
+	}
+
+	public function CalculateNormalizedValueField($suffix = "")
+	{
+		$field = self::GetRichColumn($this->attributes, "mvv" . $suffix . "_data", $this->metricVersionLevel['dat_type']);
+		if ($this->attributes['mvv_normalization'] == SpecialColumnEnum::NullValue)
+			return $field;
+
+		$normalizationField = self::GetRichColumn($this->attributes, "mvv" . $suffix . "_normalization", $this->metricVersionLevel['dat_type']);
 		if ($normalizationField == 'null')
 			return $field;
 		else
 			return "(CASE "
 								. "WHEN " . $normalizationField . " IS NULL"
 								. " THEN NULL "
-								. "ELSE " . $pre . $field . " * " . $this->attributes['mvv_normalization_scale'] . " / " . $normalizationField . $post . " END " . ") ";
+								. "ELSE " . $field . " * " . $this->attributes['mvv_normalization_scale'] . " / " . $normalizationField . " END " . ") ";
 	}
 
 	public function CalculateVersionValueLabelId($valueField)
@@ -364,7 +391,7 @@ class Variable
 			return '';
 		else if ($specialColumnEnum == SpecialColumnEnum::Other)
 		{
-      return $fieldVariable;
+	      return $fieldVariable;
 		}
 		else
 			return "[" . self::SpecialColumnToLabel($specialColumnEnum) . "]";
@@ -416,35 +443,83 @@ class Variable
 	}
 	public static function FormulaToString($variable)
 	{
+		$unit = "";
+		$hasNormalization = ($variable['mvv_normalization'] !== SpecialColumnEnum::NullValue);
+		if ($hasNormalization) {
+			switch ($variable['mvv_normalization_scale']) {
+				case 1:
+					$unit = "n cada unidad";
+					break;
+				case 100:
+					$unit = "porcentaje";
+					break;
+				case 1000:
+					$unit = "n cada mil";
+					break;
+				case 10000:
+					$unit = "n cada 10 mil";
+					break;
+				case 100000:
+					$unit = "n cada 100 mil";
+					break;
+				case 1000000:
+					$unit = "n cada 1 millón";
+					break;
+			}
+		}
+		if ($variable['mvv_is_gap'])
+		{
+			$hasNormalization = ($variable['mvv_normalization'] !== SpecialColumnEnum::NullValue);
+			$term1 = self::formulaTermToString($variable, 'mvv_data', 'mvv_normalization');
+			$term2 = self::formulaTermToString($variable, 'mvv_gap_data', 'mvv_gap_normalization');
+			if ($hasNormalization && $variable['mvv_normalization_scale'] == 100)
+			{
+				return "(" . $term2 . ") - (" . $term1 . ") (brecha de " . $unit . " en pp.)";
+			}
+			else
+			{
+				if ($unit != '')
+					$unit = " de " . $unit;
+				return "((" . $term2 . ") / (" . $term1 . ") - 1) * 100 (brecha porcentual" . $unit . ")";
+			}
+		}
+		else
+		{
+			if ($unit != "")
+				$unit = " (" . $unit . ")";
+			return self::formulaTermToString($variable, 'mvv_data', 'mvv_normalization') . $unit;
+		}
+	}
+	private static function formulaTermToString($variable, $data_field, $normalization_field)
+	{
 		if ($variable['mvv_data_column_is_categorical'])
 			$dataVariable = '[' . self::SpecialColumnToLabel(SpecialColumnEnum::Count) . ']';
 		else
-			$dataVariable = self::GetRichColumnVariable($variable['mvv_data'], $variable['mvv_data_column_variable']);
+			$dataVariable = self::GetRichColumnVariable($variable[$data_field], $variable[$data_field . '_column_variable']);
 
-		$normalizationVariable = self::GetRichColumnVariable($variable['mvv_normalization'], $variable['mvv_normalization_column_variable']);
-
+		$normalizationVariable = self::GetRichColumnVariable($variable[$normalization_field], $variable[$normalization_field . '_column_variable']);
 		$ret = $dataVariable;
 		if ($normalizationVariable)
 		{
 			switch($variable['mvv_normalization_scale'])
 			{
 				case 1:
-					$ret .= " / " . $normalizationVariable . " (n cada unidad)";
+					$ret .= " / " . $normalizationVariable;
 					break;
 				case 100:
-					$ret .= " / " . $normalizationVariable . " * 100 (Porcentaje)";
+					$ret .= " / " . $normalizationVariable . " * 100";
 					break;
 				case 1000:
-					$ret .= " / " . $normalizationVariable . " / 1000 (n cada mil)";
+					$ret .= " / " . $normalizationVariable . " / 1000";
 					break;
 				case 10000:
-					$ret .= " / " . $normalizationVariable . " / 10.000 (n cada 10 mil)";
+					$ret .= " / " . $normalizationVariable . " / 10.000";
 					break;
 				case 100000:
-					$ret .= " / " . $normalizationVariable . " / 100.000 (n cada 100 mil)";
+					$ret .= " / " . $normalizationVariable . " / 100.000";
 					break;
 				case 1000000:
-					$ret .= " / " . $normalizationVariable . " / 1.000.000 (n cada 1 millón)";
+					$ret .= " / " . $normalizationVariable . " / 1.000.000";
 					break;
 			}
 		}

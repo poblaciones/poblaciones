@@ -18,9 +18,12 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 	private $hasDescriptions;
 	private $size;
 	private $direction;
+	private $isGap;
+	private $isPercentage;
 
 	public function __construct($snapshotTable, $datasetType,
-		$variableId, $hasTotals, $urbanity, $partition, $hasDescriptions,
+		$variableId, $isGap, $isPercentage,
+		$hasTotals, $urbanity, $partition, $hasDescriptions,
 		$size, $direction, $hiddenValueLabels)
 	{
 		$this->variableId = $variableId;
@@ -33,6 +36,9 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 		$this->size = $size;
 		$this->direction = $direction;
 
+		$this->isGap = $isGap;
+		$this->isPercentage = $isPercentage;
+
 		parent::__construct($snapshotTable, 'sna', $datasetType);
 	}
 
@@ -44,6 +50,10 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 
 		$select = "IFNULL(sna_" . $this->variableId . "_value, 0) Value, " . $totalField . " Total, sna_feature_id FeatureId,
 								sna_" . $this->variableId . "_value_label_id ValueId, ST_AsText(sna_envelope) Envelope, round(ST_Y(sna_location), ". GeoJson::PRECISION .") as Lat, round(ST_X(sna_location), ". GeoJson::PRECISION .")  as Lon";
+		if ($this->isGap)
+		{
+			$select .= ",IFNULL(sna_" . $this->variableId . "_value_gap, 0) ValueGap, " . $totalField . "_gap TotalGap";
+		}
 		if ($this->hasDescriptions)
 		{
 			$select .= ", sna_description Name ";
@@ -76,11 +86,7 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 		// Excluye las filas filtradas
 		$where = $this->AddNotNullCondition($where, $totalField);
 
-		// Setea el orden
-		if ($this->hasTotals)
-			$orderBy = "CASE WHEN Total = 0 THEN 0 ELSE Value / Total END";
-		else
-			$orderBy = "Value";
+		$orderBy = self::CalculateValueSql($this->isGap, $this->isPercentage, $this->hasTotals);
 		// Setea la dirección
 		$orderBy .= ($this->direction === 'D' ? ' DESC' : ' ASC');
 
@@ -93,6 +99,29 @@ class SnapshotByDatasetRanking extends BaseSpatialSnapshotModel
 
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	public static function CalculateValueSql($isGap, $isPercentage, $hasTotals, $suffix = "")
+	{
+		if (!$isGap)
+		{
+			if ($hasTotals)
+				return "(CASE WHEN Total" . $suffix . " = 0 THEN 0 ELSE Value" . $suffix . " / Total" . $suffix . " END)";
+			else
+				return "Value" . $suffix;
+		}
+		else
+		{
+			if ($hasTotals)
+			{
+				if ($isPercentage)
+					return "(Value" . $suffix . "Gap / Total" . $suffix . "Gap) - (Value" . $suffix . " / Total" . $suffix . ")";
+				else
+					return "((Value" . $suffix . "Gap / Total" . $suffix . "Gap) / (Value" . $suffix . " / Total" . $suffix . ") - 1) * 100";
+			}
+			else
+				return "(Value" . $suffix . "Gap / Value" . $suffix . " - 1) * 100";
+		}
 	}
 
 	private function hiddenValuesCondition()

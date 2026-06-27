@@ -486,8 +486,10 @@ class WorkService extends BaseService
 		$errors .= $this->CheckOffdatasetColumns($columnRefs);
 		// 2. Trae las referencias en variables
 		$queryCols = "SELECT dat_id,
+										mvv_data_column_id, GetDatasetOf(mvv_data_column_id),
 										mvv_normalization_column_id, GetDatasetOf(mvv_normalization_column_id),
-										mvv_data_column_id, GetDatasetOf(mvv_data_column_id)
+										mvv_gap_data_column_id, GetDatasetOf(mvv_gap_data_column_id),
+										mvv_gap_normalization_column_id, GetDatasetOf(mvv_gap_normalization_column_id)
 										FROM draft_variable
 										JOIN draft_metric_version_level ON mvv_metric_version_level_id = mvl_id
 										JOIN draft_dataset ON dat_id = mvl_dataset_id

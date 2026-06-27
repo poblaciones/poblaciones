@@ -90,23 +90,11 @@ Summary.prototype.getValueHeader = function (variable) {
 		case 'P':
 			return 'COL %';
 		case 'I':
-			switch (variable.NormalizationScale) {
-				case 100:
-					return delta + '%';
-				case 1:
-					return delta + '/1';
-				case 1000:
-					return delta + '/k';
-				case 10000:
-					return delta + '/10k';
-				case 100000:
-					return delta + '/100k';
-				case 1000000:
-					return delta + '/1M';
-			}
-			return 'N/A';
+			return h.getColumnHeader(variable, this.metric.Compare.Active);
 		case 'D':
 			return 'N/Km<sup>2</sup>';
+		case 'T':
+			return 'T';
 		case 'N':
 			return 'N';
 		default:
@@ -116,12 +104,17 @@ Summary.prototype.getValueHeader = function (variable) {
 
 Summary.prototype.getValue = function (variable, variableValueLabels, values, labels) {
 	if (this.metric.Compare.Active && this.metric.properties.SummaryMetric === 'I') {
-		var tuple = this.getValueTuple(variable, variableValueLabels, values, labels);
-		var compareTuple = { value: tuple.valueCompare, normalization: tuple.normalizationCompare };
+		var tuple = this.getValueTuple(variable, values, labels);
+		var compareTuple = h.buildValueTuple(variable, {
+			Value:    values.ValueCompare,
+			Total:    values.TotalCompare,
+			ValueGap: values.ValueCompareGap,
+			TotalGap: values.TotalCompareGap
+		});
 		var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
 		return h.calculateCompareValue(useProportionalDelta, tuple, compareTuple);
 	} else {
-		return h.calculateValue(this.getValueTuple(variable, variableValueLabels, values, labels));
+		return h.calculateValue(this.getValueTuple(variable, values, labels));
 	}
 };
 
@@ -136,7 +129,7 @@ Summary.prototype.getTotal = function (variable, variableValueLabels) {
 	var total = null, value = 0, totalCompare = null, valueCompare = null;
 	var labels = variableValueLabels;
 	labels.forEach(function (label) {
-		var tuple = loc.getValueTuple(variable, variableValueLabels, label.Values, labels);
+		var tuple = loc.getValueTuple(variable, label.Values, labels);
 		if (tuple.normalization !== undefined) {
 			total = (total == null ? 0 : total) + tuple.normalization;
 		}
@@ -166,35 +159,46 @@ Summary.prototype.getTotal = function (variable, variableValueLabels) {
 };
 
 /* privada */
-Summary.prototype.getValueTuple = function (variable, variableValueLabels, values, labels) {
-	var value = values.Value;
+Summary.prototype.getValueTuple = function (variable, values, labels) {
 	var area = Number(values.Km2);
+	var N = values.Value;
+	if (variable.IsGap)
+		N += (values.ValueGap ?? 0);
 	if (this.metric.properties.SummaryMetric === 'N') {
-		return { value: value };
+		return { value: N };
 	} else if (this.metric.properties.SummaryMetric === 'T') {
-		return { value: values.Total };
+		if (!variable.IsGap || (variable.IsGap && variable.HasGapSameTotal))
+			return { value: values.Total };
+		else
+			return { value: values.Total + values.TotalGap };
 	} else if (this.metric.properties.SummaryMetric === 'P') {
 		let tot = 0;
-		var loc = this;
 		labels.forEach(function (label) {
 			var tvalue = label.Values.Value;
+			if (variable.IsGap)
+				tvalue += (label.Values.ValueGap ?? 0);
 			tot += Math.abs(Number(tvalue));
 		});
-		return { value: Math.abs(value), normalization: tot / 100 };
+		return { value: Math.abs(N), normalization: tot / 100 };
 	} else if (this.metric.properties.SummaryMetric === 'K') {
 		return { value: area };
 	} else if (this.metric.properties.SummaryMetric === 'I') {
+		var tuple = h.buildValueTuple(variable, values);
 		if (this.metric.Compare.Active) {
-			return {
-				value: Number(values.Value),
-				valueCompare: Number(values.ValueCompare),
-				normalization: Number(values.Total) / variable.NormalizationScale,
-				normalizationCompare: Number(values.TotalCompare) / variable.NormalizationScale
-			};
-		} else {
-			var nTotal = Number(values.Total);
-			return { value: value, normalization: nTotal / variable.NormalizationScale };
+			var compareTuple = h.buildValueTuple(variable, {
+				Value: values.ValueCompare,
+				Total: values.TotalCompare,
+				ValueGap: values.ValueCompareGap,
+				TotalGap: values.TotalCompareGap
+			});
+			tuple.valueCompare          = compareTuple.value;
+			tuple.normalizationCompare  = compareTuple.normalization;
+			if (variable.IsGap) {
+				tuple.valueCompareGap         = compareTuple.valueGap;
+				tuple.normalizationCompareGap = compareTuple.normalizationGap;
+			}
 		}
+		return tuple;
 	} else if (this.metric.properties.SummaryMetric === 'H') {
 		return { value: area, normalization: 0.01 };
 	} else if (this.metric.properties.SummaryMetric === 'A') {
@@ -204,7 +208,7 @@ Summary.prototype.getValueTuple = function (variable, variableValueLabels, value
 		});
 		return { value: area, normalization: tot2 / 100 };
 	} else if (this.metric.properties.SummaryMetric === 'D') {
-		return { value: value, normalization: area };
+		return { value: N, normalization: area };
 	} else {
 		return { value: 0 };
 	}

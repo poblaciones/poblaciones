@@ -507,11 +507,13 @@ class PublishDataTables
 
 		// 2. Pone en null las referencias en variables
 		$queryCols = "UPDATE " . $drafting . "variable
-									SET mvv_normalization_column_id = NULL, mvv_data_column_id = NULL
+									SET mvv_normalization_column_id = NULL, mvv_data_column_id = NULL,
+									mvv_gap_normalization_column_id = NULL, mvv_gap_data_column_id = NULL
 									WHERE EXISTS (SELECT * from " . $drafting . "dataset_column
 									JOIN " . $drafting . "dataset ON dat_id = dco_dataset_id
 									WHERE (dco_id = mvv_data_column_id
-									OR dco_id = mvv_normalization_column_id) AND dat_work_id = ? " . $datasetCondition . ")";
+									OR dco_id = mvv_normalization_column_id  OR dco_id = mvv_gap_data_column_id
+									OR dco_id = mvv_gap_normalization_column_id) AND dat_work_id = ? " . $datasetCondition . ")";
 		App::Db()->exec($queryCols, array($workId));
 		App::Db()->markTableUpdate($drafting . "variable");
 

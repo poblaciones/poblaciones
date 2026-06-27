@@ -63,8 +63,12 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 
 		foreach ($this->variables as $variable) {
 			$totalField = "sna_" . $variable->Id . "_total";
-			$select .= ", sna_" . $variable->Id . "_value, sna_" . $variable->Id . "_value_label_id,
-									" . $totalField;
+
+			$select .= ", sna_" . $variable->Id . "_value, sna_" . $variable->Id . "_value_label_id, " . $totalField;
+			if ($variable->IsGap)
+			{
+				$select .= ", sna_" . $variable->Id . "_value_gap, " . $totalField . "_gap";
+			}
 			$hasAnyNotNullTotal .= ' OR ' . $totalField . ' IS NOT NULL';
 			if ($variable->IsSequence)
 				$select .= ", sna_" . $variable->Id . "_sequence_order";
@@ -158,6 +162,11 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 					$item['VID'] = $variable->Id;
 					$item['Value'] = $row["sna_" . $variable->Id . "_value"];
 					$item['Total'] = $row[$totalField];
+					if ($variable->IsGap)
+					{
+						$item['ValueGap'] = $row["sna_" . $variable->Id . "_value_gap"];
+						$item['TotalGap'] = $row[$totalField . "_gap"];
+					}
 					$item['LID'] = $row["sna_" . $variable->Id . "_value_label_id"];
 					if ($variable->IsSequence)
 						$item['Sequence'] = $row["sna_" . $variable->Id . "_sequence_order"];

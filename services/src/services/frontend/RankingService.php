@@ -6,6 +6,7 @@ use minga\framework\Performance;
 use minga\framework\PublicException;
 use minga\framework\Log;
 
+use helena\classes\SpecialColumnEnum;
 use helena\classes\GlobalTimer;
 use helena\db\frontend\SnapshotByDatasetRanking;
 use helena\caches\RankingCache;
@@ -63,9 +64,12 @@ class RankingService extends BaseService
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
-		$version = $metric->GetVersion($metricVersionId);
-		$level = $version->GetLevel($levelId);
+		$variable = null;
+		$level = $metric->GetLevelAndVariableByVariableId($variableId, $variable);
 		$hasDescriptions = $level->HasDescriptions;
+
+		$isGap = $variable->IsGap;
+		$isPercentage = ($variable->Normalization !== SpecialColumnEnum::NullValue && $variable->NormalizationScale === 100);
 
 		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($level->Dataset->Table);
 		if ($levelCompareId)
@@ -78,6 +82,8 @@ class RankingService extends BaseService
 				$mergeTable, $level->Dataset->Type,
 				$variableId,
 				$variableCompareId,
+				$isGap,
+				$isPercentage,
 				$hasTotals,
 				$urbanity,
 				$partition,
@@ -91,7 +97,7 @@ class RankingService extends BaseService
 		else
 		{
 			$table = new SnapshotByDatasetRanking($snapshotTable, $level->Dataset->Type,
-				$variableId, $hasTotals, $urbanity, $partition, $hasDescriptions, $size, $direction, $hiddenValueLabels);
+				$variableId, $isGap, $isPercentage, $hasTotals, $urbanity, $partition, $hasDescriptions, $size, $direction, $hiddenValueLabels);
 		}
 
 		$rows = $table->GetRows($frame);
@@ -109,11 +115,22 @@ class RankingService extends BaseService
 			$item->Value = $row['Value'] ;
 			$item->Total = $row['Total'] ;
 			$item->ValueId = $row['ValueId'];
+
+			// Gap
+			if (array_key_exists('ValueGap', $row) && $row['ValueGap'] !== null)
+				$item->ValueGap = $row['ValueGap'];
+			if (array_key_exists('TotalGap', $row) && $row['TotalGap'] !== null)
+				$item->TotalGap = $row['TotalGap'];
+
 			// Agrega información comparativa
 			if (array_key_exists('ValueCompare', $row) && $row['ValueCompare'] !== null)
 				$item->ValueCompare = $row['ValueCompare'];
 			if (array_key_exists('TotalCompare', $row) && $row['TotalCompare'] !== null)
 				$item->TotalCompare = $row['TotalCompare'];
+			if (array_key_exists('ValueCompareGap', $row) && $row['ValueCompareGap'] !== null)
+				$item->ValueCompareGap = $row['ValueCompareGap'];
+			if (array_key_exists('TotalCompareGap', $row) && $row['TotalCompareGap'] !== null)
+				$item->TotalCompareGap = $row['TotalCompareGap'];
 
 			$item->FID = $row['FeatureId'] ;
 			$item->Name = $row['Name'];

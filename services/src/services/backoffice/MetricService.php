@@ -216,18 +216,24 @@ class MetricService extends BaseService
 		return $ret;
 	}
 
-	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $filter)
+	public function GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,
+											$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,
+											$normalizationScale, $filter)
 	{
 		Profiling::BeginTimer();
 		$data = null;
 		$from = 1;
 		$to = 10;
-		$key = DatasetColumnCache::CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter);
+		$key = DatasetColumnCache::CreateKey($dataColumn, $dataColumnId, $normalization, $normalizationId,
+												$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,
+												$normalizationScale, $from, $to, $filter);
 
 		if (DatasetColumnCache::Cache()->HasData($datasetId, $data) === false)
 		{
 			$metricsManager = new MetricsManager();
-			$data = $metricsManager->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId, $normalizationScale, $from, $to, $filter);
+			$data = $metricsManager->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,
+																$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,
+																$normalizationScale, $from, $to, $filter);
 			if ($data == null)
 				return null;
 			DatasetColumnCache::Cache()->PutData($datasetId, $key, $data);

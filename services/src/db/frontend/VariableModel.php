@@ -27,7 +27,12 @@ class VariableModel extends BaseModel
 										data.dco_field AS mvv_data_field,
 										data.dco_variable AS mvv_data_column_variable,
 										normalization.dco_field AS mvv_normalization_field,
-										normalization.dco_variable AS mvv_normalization_column_variable
+										normalization.dco_variable AS mvv_normalization_column_variable,
+
+										gap_data.dco_field AS mvv_gap_data_field,
+										gap_data.dco_variable AS mvv_gap_data_column_variable,
+										gap_normalization.dco_field AS mvv_gap_normalization_field,
+										gap_normalization.dco_variable AS mvv_gap_normalization_column_variable
 
 
 								FROM variable
@@ -37,6 +42,8 @@ class VariableModel extends BaseModel
 
 								LEFT JOIN dataset_column data ON data.dco_id = mvv_data_column_id
 								LEFT JOIN dataset_column normalization ON normalization.dco_id = mvv_normalization_column_id
+								LEFT JOIN dataset_column gap_data ON gap_data.dco_id = mvv_gap_data_column_id
+								LEFT JOIN dataset_column gap_normalization ON gap_normalization.dco_id = mvv_gap_normalization_column_id
 								LEFT JOIN dataset_column sequencecolumn ON sequencecolumn.dco_id = vsy_sequence_column_id
 
 								WHERE `mvv_metric_version_level_id` = ?

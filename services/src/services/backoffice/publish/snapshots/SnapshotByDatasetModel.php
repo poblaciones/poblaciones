@@ -423,27 +423,38 @@ class SnapshotByDatasetModel
 
 	}
 
+	private function AddValueAndTotal($variable, &$columns, $value, $totalValue, $suffix = "")
+	{
+		// filtros
+		if ($variable->HasFilters()) {
+			$valueSql = "(CASE WHEN " . $variable->CalculateFilterCondition($datasetId) . " THEN " . $value . " ELSE NULL END)";
+			$totalSql = "(CASE WHEN " . $variable->CalculateFilterCondition($datasetId) . " THEN " . $totalValue . " ELSE NULL END)";
+		} else {
+			$valueSql = $value;
+			$totalSql = $totalValue;
+		}
+		// Valor y total
+		$columns[] = ['sna_' . $variable->Id() . '_value' . $suffix, 'double NULL', $valueSql];
+		$columns[] = ['sna_' . $variable->Id() . '_total' . $suffix, "double NULL DEFAULT '0'", $totalSql];
+	}
+
 	private function BuildVariableColumns($datasetId, $variable, &$columns)
 	{
-		// Calcula el valor
-		$columns[] = ['sna_' . $variable->Id() . '_value', 'double NULL', $variable->CalculateValueField()];
-
+		// Calcula valor y total
+		$value = $variable->CalculateValueField();
+		$totalValue = $variable->CalculateNormalizationField();
+		$this->AddValueAndTotal($variable, $columns, $value, $totalValue);
+		// Agrega las columnas de gap
+		if ($variable->IsGap())
+		{
+			$valueGap = $variable->CalculateValueField("_gap");
+			$totalValueGap = $variable->CalculateNormalizationField("_gap");
+			$this->AddValueAndTotal($variable, $columns, $valueGap, $totalValueGap, "_gap");
+		}
 		// Calcula la categoría
 		$valueForSegmentation = $variable->CalculateSegmentationValueField();
 		$valueLabel = $variable->CalculateVersionValueLabelId($valueForSegmentation);
 		$columns[] = ['sna_' . $variable->Id() . '_value_label_id', 'int(11) NOT NULL', $valueLabel];
-
-		// total de normalización
-		$totalValue = $variable->CalculateNormalizationField();
-		if ($variable->HasFilters())
-		{
-			$totalSql = "(CASE WHEN " . $variable->CalculateFilterCondition($datasetId) . " THEN " . $totalValue . " ELSE NULL END)";
-		}
-		else
-		{
-			$totalSql = $totalValue;
-		}
-		$columns[] = ['sna_' . $variable->Id() . '_total', "double NULL DEFAULT '0'", $totalSql];
 
 		// Se fija si precisa traer el valor de una secuencia
 		if ($variable->IsSequence())

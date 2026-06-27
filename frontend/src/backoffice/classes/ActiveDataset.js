@@ -214,20 +214,35 @@ ActiveDataset.prototype.DeleteVariable = function (level, variable) {
 			arr.RemoveById(level.Variables, variable.Id);
 		});
 };
-
-ActiveDataset.prototype.UpdateVariable = function (level, variable) {
-	var loc = this;
-	var levelNoVariables = f.clone(level);
-	levelNoVariables.Variables = null;
-	// Establece caption
+ActiveDataset.prototype.ResolveVariableCaption = function (variable) {
 	var column = this.fromTwoColumnVariable(variable.Data, variable.DataColumn);
 	var columnText = '';
-	if (variable.DataColumnIsCategorical) {
-		columnText = 'Conteo';
-	} else if (variable.Data !== 'N') {
-		columnText = f.formatColumnText(column);
-	} else {
-		columnText = 'Conteo';
+	if (variable.IsGap)
+	{
+		var gapColumn = this.fromTwoColumnVariable(variable.GapData, variable.GapDataColumn);
+		columnText = "Brecha de '";
+		if (variable.Data !== 'N') {
+			columnText += f.formatColumnText(column);
+		} else {
+			columnText += 'Conteo';
+		}
+		columnText += "' con respecto a '";
+		if (variable.GapData !== 'N') {
+			columnText += f.formatColumnText(gapColumn);
+		} else {
+			columnText += 'Conteo';
+		}
+		columnText += "'";
+	}
+	else
+	{
+		if (variable.DataColumnIsCategorical) {
+			columnText = 'Conteo';
+		} else if (variable.Data !== 'N') {
+			columnText = f.formatColumnText(column);
+		} else {
+			columnText = 'Conteo';
+		}
 	}
 	// Agrega criterio de corte tal como se va a ver en el frontend público
 	if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null) {
@@ -241,7 +256,14 @@ ActiveDataset.prototype.UpdateVariable = function (level, variable) {
 	if (variable.FilterValue !== null) {
 		columnText += ' (' + this.formatFilter(variable) + ')';
 	}
-	variable.Caption = columnText;
+	return columnText;
+};
+
+ActiveDataset.prototype.UpdateVariable = function (level, variable) {
+	var levelNoVariables = f.clone(level);
+	levelNoVariables.Variables = null;
+	// Establece caption
+	variable.Caption = this.ResolveVariableCaption(variable);
 	// graba
 	this.Work.WorkChanged();
 	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateVariable',
@@ -718,7 +740,7 @@ ActiveDataset.prototype.GetNullColumn = function () {
 	return [{ Id: 0, Caption: '[Ninguna]', Code: null }];
 };
 
-ActiveDataset.prototype.GetSeparator = function (label = 'Variables de cartografía', id = -100) {
+ActiveDataset.prototype.GetSeparator = function (label, id = -100) {
 	return [{ Id: id, Caption: label, Code: 'O', Separator: true }];
 };
 ActiveDataset.prototype.GetRichColumns = function () {

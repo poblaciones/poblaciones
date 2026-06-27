@@ -119,7 +119,11 @@ Compare.prototype.SelectedVersion = function () {
 };
 
 Compare.prototype.UseProportionalDelta = function (variable) {
-	return !variable.HasTotals || variable.NormalizationScale !== 100;
+	var ret = !variable.HasTotals || variable.NormalizationScale !== 100;
+	if (variable.IsGap)
+		return !ret;
+	else
+		return ret;
 };
 
 Compare.prototype.CalculateCategory = function (variable, delta) {
@@ -146,6 +150,9 @@ Compare.prototype.CalculateDelta = function (variable, item, compareItem) {
 };
 
 Compare.prototype.CalculateValue = function (variable, item) {
+	if (variable.IsGap) {
+		return h.calculateValue(h.buildValueTuple(variable, item));
+	}
 	if (variable.HasTotals) {
 		return (item.Total > 0 ? item.Value * variable.NormalizationScale / item.Total : 0);
 	} else {

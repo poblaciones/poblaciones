@@ -112,8 +112,23 @@ App::Get('/services/backoffice/GetColumnDistributions', function (Request $reque
 	else
 		$normalizationScale = Params::Get('s');
 
+	$gapDataColumn = Params::Get('gc');
+	if ($gapDataColumn === 'O') {
+		$gapDataColumnId = Params::GetIntMandatory('gci');
+	} else {
+		$gapDataColumnId = null;
+	}
+	$gapNormalizationColumn = Params::Get('go');
+	if ($gapNormalizationColumn === 'O') {
+		$gapNormalizationColumnId = Params::GetIntMandatory('goi');
+	} else {
+		$gapNormalizationColumnId = null;
+	}
+
+
 	$filter = Params::Get('f');
-	return App::Json($controller->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalizationColumn, $normalizationColumnId, $normalizationScale, $filter));
+	return App::Json($controller->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalizationColumn, $normalizationColumnId,
+									$gapDataColumn,	$gapDataColumnId, $gapNormalizationColumn, $gapNormalizationColumnId, $normalizationScale, $filter));
 });
 
 App::Get('/services/backoffice/GetColumnStringDistributions', function (Request $request) {

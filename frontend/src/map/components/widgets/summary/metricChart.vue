@@ -71,9 +71,17 @@ import QuickChart from '@/map/components/controls/quickChart';
 				};
 
 				for (var label of this.variableValueLabels) {
+					if (!label.Values) {
+						continue;
+					}
+					if (!this.variable.ShowEmptyCategories && label.Values.Count === '') {
+						continue;
+					}
+					var calculated = this.metric.Summary.getValue(this.variable, this.variableValueLabels, label.Values, this.variableValueLabels);
 					var value = {
-						label: label.Name, value: this.metric.Summary.getValue(this.variable, this.variableValueLabels, label.Values, this.variableValueLabels),
-						valueFormatted: this.metric.Summary.getValueFormatted(this.metric.Summary.getValue(this.variable, this.variableValueLabels, label.Values, this.variableValueLabels), this.variable.Decimals),
+						label: label.Name,
+						value: calculated,
+						valueFormatted: this.metric.Summary.getValueFormatted(calculated, this.variable.Decimals),
 						color: label.FillColor, enabled: label.Visible, labelObject: label
 					};
 					if (value.value !== '') {

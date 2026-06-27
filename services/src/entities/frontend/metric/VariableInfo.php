@@ -29,6 +29,8 @@ class VariableInfo extends BaseMapModel
 	public $GradientOpacity = 'M';
 	public $HasTotals = 0;
 	public $IsArea = false;
+	public $IsGap = false;
+	public $HasGapSameTotal = false;
 	public $IsSimpleCount = false;
 	public $RankingItems = null;
 	public $DefaultMeasure = 'N';
@@ -50,6 +52,8 @@ class VariableInfo extends BaseMapModel
 			'mvv_legend' => 'Legend',
 			'mvv_perimeter' => 'Perimeter',
 			'mvv_is_default' => 'IsDefault',
+			'mvv_is_gap' => 'IsGap',
+			'mvv_has_gap_same_total' => 'HasGapSameTotal',
 			'mvv_default_measure' => 'DefaultMeasure',
 			'dco_decimals' => 'Decimals',
 			'dco_variable' => 'ShortName',

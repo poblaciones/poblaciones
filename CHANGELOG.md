@@ -1,8 +1,10 @@
+- brechas para la definición de indicadores.
+- fixes en chart de panel estadístico.
 - refactor backoffice (barra superior de estadísticas, personalizar y compartir)
 - popup de cuenta.
 - remove de googlemaps.
 - fix a relocate al georreferenciar puntos.
-- apiclient para boundaries
+- API cliente para boundaries
 
 v4.9 (2026-06-03)
 - Exportación e importación desde GeoPackage (.gpkg)
