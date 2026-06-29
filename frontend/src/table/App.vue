@@ -233,6 +233,10 @@
 
 	#holder {
 		width: 100%;
+		/* Alto por defecto para cuando el JS de carga del work aún no recalculó la
+		   altura (si no, el holder crece de más y tapa el widget inferior). El
+		   recálculo por resize fija un alto en px inline que pisa este 100%. */
+		height: 100%;
 	}
 	.card {
 		margin-bottom: 20px;

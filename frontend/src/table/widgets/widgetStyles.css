@@ -35,7 +35,7 @@
 	flex: 0 0 auto;
 }
 .widget-titles { display: flex; flex-direction: column; min-width: 0; }
-.widget-kind { font-size: 13px; font-weight: 600; color: #263238; }
+.widget-kind { font-size: 15px; font-weight: normal; color: #263238; line-height: 1.2em; margin-bottom: -4px; }
 .widget-source {
 	font-size: 11px;
 	color: #78909c;
@@ -103,7 +103,7 @@
 }
 
 /* ── Etiquetas y leyendas ────────────────────────────────────────────────── */
-.w-legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: #546e7a; }
+.w-legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: #546e7a; }
 .w-legend-item { display: inline-flex; align-items: center; gap: 5px; }
 .w-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: 0 0 auto; }
 .w-legend-line { width: 14px; border-top: 1.5px dashed #607d8b; display: inline-block; }

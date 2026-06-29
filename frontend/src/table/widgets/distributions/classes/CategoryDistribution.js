@@ -109,6 +109,19 @@ CategoryDistribution.prototype.bars = function () {
 	return this._bars;
 };
 
+// ¿Las barras representan varias categorías (con labelId)? Es lo que hace que
+// apilar tenga sentido, ya sea por categorías elegidas como columnas o por las
+// resueltas vía Camino 1 cuando la selección es solo total.
+CategoryDistribution.prototype.isComposed = function () {
+	if (!this._bars) return false;
+	var n = 0;
+	for (var i = 0; i < this._bars.length; i++) {
+		if (this._bars[i].labelId != null) n++;
+		if (n > 1) return true;
+	}
+	return false;
+};
+
 // Valor agregado del total (para la línea de referencia), o null.
 CategoryDistribution.prototype.totalValue = function () {
 	return this._total;

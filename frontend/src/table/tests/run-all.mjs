@@ -23,6 +23,14 @@ console.log('\n=== ActivePivot ===');
 await import('./ActivePivot.test.mjs');
 
 await import('./CollapseState.test.mjs');
+
+await import('./ActiveMultiselectedMetric.test.mjs');
+
+await import('./ActivePivotMultiVersion.test.mjs');
+
+await import('./Gap.test.mjs');
+
+await import('./ChartExporter.test.mjs');
 console.log('\n=== ColumnDragController ===');
 await import('./ColumnDragController.test.mjs');
 console.log('\n=== CsvWriter ===');

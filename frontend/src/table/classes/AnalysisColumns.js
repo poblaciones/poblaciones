@@ -256,6 +256,23 @@ AnalysisColumns.prototype.dependentRange = function (depKey) {
 	return min === null ? null : { min: min, max: max };
 };
 
+// Media ponderada de la dependiente (por los pesos de su columna). Es el punto de
+// corte por defecto razonable para la logística: dicotomiza alrededor del valor
+// esperado, no del centro geométrico del rango (que puede caer lejos de los datos).
+AnalysisColumns.prototype.dependentMean = function (depKey) {
+	var dep = this.byKey(depKey) || this._columns[0];
+	if (!dep) return null;
+	var sum = 0, wsum = 0;
+	for (var i = 0; i < dep.values.length; i++) {
+		var v = dep.values[i];
+		if (v == null || !isFinite(v)) continue;
+		var w = (dep.weights && dep.weights[i] != null && isFinite(dep.weights[i])) ? dep.weights[i] : 1;
+		sum += v * w;
+		wsum += w;
+	}
+	return wsum > 0 ? sum / wsum : null;
+};
+
 // Regresión logística binomial: dicotomiza la dependiente por un punto de corte
 // (1 si cumple el criterio respecto del umbral, 0 si no) y la explica con las
 // mismas independientes que la lineal. direction 'greater' → 1 si valor >

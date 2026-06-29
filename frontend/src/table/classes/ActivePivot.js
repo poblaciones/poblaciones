@@ -1,7 +1,7 @@
 import arr from '@/common/framework/arr';
 import promises from '@/common/framework/promises';
 import RegionSelection from '@/table/classes/RegionSelection';
-import { cellValue, valueTuple } from '@/table/classes/pivotValue.js';
+import { cellValue } from '@/table/classes/pivotValue.js';
 import { resolveBoundary } from '@/table/classes/boundaryTree.js';
 import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import ActiveData from '@/table/classes/ActiveData.js';
@@ -86,29 +86,41 @@ ActivePivot.prototype.RefreshData = function () {
 			var region = version.Selection;
 			for (var item of region.Items) {
 				var row = [];
-				row.push({ 'Label': item.Caption, FID: item.FID, isHeader: true, Parent: (item.Parent != null ? item.Parent : null) });
+				row.push({ 'Label': item.Caption, FID: item.FID, Code: (item.Code != null ? item.Code : null), isHeader: true, Parent: (item.Parent != null ? item.Parent : null) });
 				for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
 					var spec = loc.MetricTuples.metricTuples[ci];
 					var value = loc.ResolveCell(spec, region.Region, item);
 					row.push(value);
 					if (totals.length < row.length - 1) {
-						totals.push({ Value: value.Value, Total: value.Total, Area: value.Area });
+						totals.push({
+							Value: value.Value, Total: value.Total, Area: value.Area,
+							ValueGap: value.ValueGap, TotalGap: value.TotalGap
+						});
 					} else {
 						var i = row.length - 2;
 						totals[i]['Value'] = (totals[i]['Value'] ?? 0) + (value['Value'] ?? 0);
 						totals[i]['Total'] = (totals[i]['Total'] ?? 0) + (value['Total'] ?? 0);
 						totals[i]['Area']  = (totals[i]['Area']  ?? 0) + (value['Area']  ?? 0);
+						// Brecha: se agregan los dos universos para que el delta del
+						// encabezado del boundary se calcule sobre las sumas.
+						if (value['ValueGap'] != null) totals[i]['ValueGap'] = (totals[i]['ValueGap'] ?? 0) + value['ValueGap'];
+						if (value['TotalGap'] != null) totals[i]['TotalGap'] = (totals[i]['TotalGap'] ?? 0) + value['TotalGap'];
 					}
 				}
 				boundaryRows.push(row);
 			}
 			// Solo filas con al menos un valor (no muestra filas totalmente vacías).
-			boundaryRows = boundaryRows.filter(function (r) {
-				for (var c = 1; c < r.length; c++) {
-					if (r[c] && r[c].Value !== null && r[c].Value !== undefined) return true;
-				}
-				return false;
-			});
+			// Sin indicadores no hay valores en ninguna fila: en ese caso se muestran
+			// todas las regiones igual (no se filtra), para que la selección de
+			// delimitaciones siga visible al quitar el último indicador.
+			if (loc.MetricTuples.metricTuples.length > 0) {
+				boundaryRows = boundaryRows.filter(function (r) {
+					for (var c = 1; c < r.length; c++) {
+						if (r[c] && r[c].Value !== null && r[c].Value !== undefined) return true;
+					}
+					return false;
+				});
+			}
 
 			// Totales verticales por columna (Value y Area) dentro de esta delimitación.
 			var columnTotals = [];
@@ -283,17 +295,25 @@ ActivePivot.prototype.GroupRowsByParent = function (boundaryRows) {
 		var subtotal = [{ Label: parent, isHeader: true, isGroupHeader: true }];
 		for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
 			var sv = 0, st = 0, sa = 0, hasVal = false, hasArea = false;
+			var svg = 0, stg = 0, hasGap = false;
 			rows.forEach(function (r) {
 				var cell = r[ci + 1];
 				if (cell && cell.Value !== null && cell.Value !== undefined) { sv += Number(cell.Value); hasVal = true; }
 				if (cell && cell.Total !== null && cell.Total !== undefined) { st += Number(cell.Total); }
 				if (cell && cell.Area  !== null && cell.Area  !== undefined) { sa += Number(cell.Area);  hasArea = true; }
+				// Brecha: el subtotal agrega los dos universos de los hijos, para que
+				// el delta del corte de control se calcule sobre las sumas (no quede
+				// vacío como pasaba al no propagar el gap).
+				if (cell && cell.ValueGap !== null && cell.ValueGap !== undefined) { svg += Number(cell.ValueGap); hasGap = true; }
+				if (cell && cell.TotalGap !== null && cell.TotalGap !== undefined) { stg += Number(cell.TotalGap); hasGap = true; }
 			});
 			var first = rows[0] && rows[0][ci + 1] ? rows[0][ci + 1] : null;
 			var cellTotal = {
 				Value: hasVal ? sv : null,
 				Total: st,
 				Area:  hasArea ? sa : null,
+				ValueGap: hasGap ? svg : null,
+				TotalGap: hasGap ? stg : null,
 				ColumnTotal: first ? first.ColumnTotal : undefined,
 				ColumnArea:  first ? first.ColumnArea  : undefined
 			};
@@ -445,6 +465,7 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 	// la intersección de geografías filtradas con las que tienen datos, en vez de
 	// barrer todo el array de items por cada celda.
 	var sum = 0, sumTotal = 0, sumArea = 0, count = 0;
+	var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
 	var variableId = spec.variableId;
 	var labelId = spec.labelId;
 	var index = this.Data.indexFor(spec.versionId, spec.levelId);
@@ -460,6 +481,10 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 				if (mi.Value !== null && mi.Value !== undefined) { sum += parseFloat(mi.Value); count++; }
 				if (mi.Total !== null && mi.Total !== undefined) { sumTotal += parseFloat(mi.Total); count++; }
 				if (mi.AreaM2 !== null && mi.AreaM2 !== undefined) { sumArea += parseFloat(mi.AreaM2); }
+				// Variables de brecha (gap): traen un segundo par de valores que se
+				// suma en paralelo. El cálculo del delta lo hace pivotValue.
+				if (mi.ValueGap !== null && mi.ValueGap !== undefined) { sumValueGap += parseFloat(mi.ValueGap); hasGap = true; }
+				if (mi.TotalGap !== null && mi.TotalGap !== undefined) { sumTotalGap += parseFloat(mi.TotalGap); hasGap = true; }
 			}
 		}
 	}
@@ -467,7 +492,9 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 	return {
 		'Value': count > 0 ? sum : null,
 		'Total': count > 0 ? sumTotal : null,
-		'Area':  sumArea > 0 ? sumArea : null
+		'Area':  sumArea > 0 ? sumArea : null,
+		'ValueGap': hasGap ? sumValueGap : null,
+		'TotalGap': hasGap ? sumTotalGap : null
 	};
 };
 
@@ -481,6 +508,7 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 // labelId de la categoría.
 ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, variable, totalSpec) {
 	var sumValue = 0, sumTotal = 0, sumArea = 0, hasAny = false;
+	var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
 	for (var bi = 0; bi < this.Regions.items.length; bi++) {
 		var version = this.Regions.items[bi].SelectedVersion();
 		var region = version.Selection;
@@ -490,12 +518,15 @@ ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, 
 			if (cell.Empty) continue;
 			if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
 			if (cell.Area != null)  { sumArea  += Number(cell.Area); }
+			if (cell.ValueGap != null) { sumValueGap += Number(cell.ValueGap); hasGap = true; }
+			if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
 			// En modos normalizados (incidencia, etc.) el denominador es el total del
 			// universo, no el de la categoría: los ítems de categoría pueden no traer
 			// su propio Total. Por eso se resuelve con el spec de total (labelId null).
 			if (totalSpec) {
 				var tcell = this.ResolveCell(totalSpec, region.Region, item);
 				if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
+				if (!tcell.Empty && tcell.TotalGap != null) { sumTotalGap += Number(tcell.TotalGap); hasGap = true; }
 			} else if (cell.Total != null) {
 				sumTotal += Number(cell.Total);
 			}
@@ -503,11 +534,14 @@ ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, 
 	}
 	if (!hasAny && sumTotal === 0) return null;
 
-	var tuple = valueTuple(summaryMetric, variable, { Value: sumValue, Total: sumTotal, Area: sumArea });
-	if (tuple.normalization != null && tuple.normalization !== 0) {
-		return tuple.value / tuple.normalization;
-	}
-	return tuple.value;
+	// Delega en cellValue para aplicar el mismo cálculo que la pivot (incluido el
+	// delta de brecha cuando la variable es de gap).
+	var aggCell = {
+		Value: sumValue, Total: sumTotal, Area: sumArea,
+		ValueGap: hasGap ? sumValueGap : null, TotalGap: hasGap ? sumTotalGap : null
+	};
+	var cv = cellValue({ properties: { SummaryMetric: summaryMetric } }, variable, aggCell);
+	return (cv === '-' || cv == null) ? null : Number(cv);
 };
 
 // Camino 1: para un (metricId, versionId) cuya selección es "solo total",
@@ -587,9 +621,15 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 				var cell = this.ResolveCell(c.spec, region.Region, item);
 				// Para la normalización se usa el Total del universo, no el de la
 				// categoría (que en incidencia puede venir vacío).
-				var merged = { Value: cell.Value, Total: denomTotal != null ? denomTotal : cell.Total, Area: cell.Area };
-				var tuple = valueTuple(info.base.summary, info.base.variable, merged);
-				var val = (tuple.normalization != null && tuple.normalization !== 0) ? tuple.value / tuple.normalization : tuple.value;
+				var merged = {
+					Value: cell.Value,
+					Total: denomTotal != null ? denomTotal : cell.Total,
+					Area: cell.Area,
+					ValueGap: cell.ValueGap,
+					TotalGap: cell.TotalGap
+				};
+				var cv = cellValue({ properties: { SummaryMetric: info.base.summary } }, info.base.variable, merged);
+				var val = (cv === '-' || cv == null) ? null : Number(cv);
 				parts.push({ labelId: c.labelId, name: c.name, color: c.color, value: (val == null || isNaN(val)) ? 0 : val });
 			}
 			rows.push({ label: item.Caption, fid: item.FID, parts: parts });
@@ -598,26 +638,21 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 	return rows;
 };
 
+// Auto-drill hacia abajo: si alguna región no tiene relación geográfica con el
+// nivel de alguna Selection (de algún censo), esa Selection baja un nivel. Cada
+// censo se evalúa contra SU propio GeographyId, porque sus geografías difieren.
 ActivePivot.prototype.NeedAutoDrillDown = function () {
-	var ret = false;
-	// Si alguna región no tiene valores asociados,
-	// hace drilldown del level y sale con true
 	var allBoundaries = this.AllBoundaries();
-	// Lo detecta cruzando indicadores con items de region (si hay alguno, lo da por bueno)
-	for (var activeBoundary of allBoundaries) {
-		for (var metric of this.Metrics) {
-			// Métrica sin versiones activas (multi-versión vacío): no participa.
-			if (metric.properties && metric.properties.MultiVersion &&
-				Array.isArray(metric.properties.SelectedVersionIndices) &&
-				metric.properties.SelectedVersionIndices.length === 0) {
-				continue;
-			}
-			var region = activeBoundary.SelectedVersion().Selection;
-			var rel = region.Region.GeographyRelations[metric.SelectedLevel().GeographyId];
-			if (!rel) continue;   // relación aún no cargada: no fuerza drilldown
-			if (rel.length == 0) {
-				if (this.TakeOneLevelDown(metric)) {
-					return true;
+	for (var bi = 0; bi < allBoundaries.length; bi++) {
+		var region = allBoundaries[bi].SelectedVersion().Selection;
+		for (var mi = 0; mi < this.Metrics.length; mi++) {
+			var selections = this.Metrics[mi].Selections;
+			for (var si = 0; si < selections.length; si++) {
+				var sel = selections[si];
+				var rel = region.Region.GeographyRelations[sel.geographyId()];
+				if (!rel) continue;              // relación aún no cargada
+				if (rel.length === 0) {
+					if (this._selectionLevelDown(sel)) return true;
 				}
 			}
 		}
@@ -625,57 +660,48 @@ ActivePivot.prototype.NeedAutoDrillDown = function () {
 	return false;
 };
 
+// Auto-drill hacia arriba: si TODAS las regiones tienen relación con el nivel
+// padre de una Selection, esa Selection sube un nivel. Por Selection y por su
+// propia geografía.
 ActivePivot.prototype.CanAutoDrillUp = function () {
-	// Si alguna región no tiene valores asociados,
-	// hace drilldown del level y sale con true
 	var allBoundaries = this.AllBoundaries();
 	var drilledUp = false;
-	// Lo detecta cruzando indicadores con items de region (si hay alguno, lo da por bueno)
-	for (var metric of this.Metrics) {
-		// Métrica sin versiones activas (multi-versión vacío): no participa.
-		if (metric.properties && metric.properties.MultiVersion &&
-			Array.isArray(metric.properties.SelectedVersionIndices) &&
-			metric.properties.SelectedVersionIndices.length === 0) {
-			continue;
-		}
-		var parent = metric.SelectedLevelParent();
-		if (parent) {
-			var geographyId = parent.GeographyId;
-			var canAutoDrillUp = true;
-			for (var activeBoundary of allBoundaries) {
-				var selection = activeBoundary.SelectedVersion().Selection;
-				var rel = selection.Region.GeographyRelations[geographyId];
-				if (!rel || rel.length == 0) {
-					canAutoDrillUp = false;
-					break;
-				}
+	for (var mi = 0; mi < this.Metrics.length; mi++) {
+		var selections = this.Metrics[mi].Selections;
+		for (var si = 0; si < selections.length; si++) {
+			var sel = selections[si];
+			var parent = this._selectionLevelParent(sel);
+			if (!parent) continue;
+			var canUp = true;
+			for (var bi = 0; bi < allBoundaries.length; bi++) {
+				var region = allBoundaries[bi].SelectedVersion().Selection;
+				var rel = region.Region.GeographyRelations[parent.GeographyId];
+				if (!rel || rel.length === 0) { canUp = false; break; }
 			}
-			if (canAutoDrillUp) {
-				if (this.TakeOneLevelUp(metric)) {
-					drilledUp = true;
-				}
-			}
+			if (canUp && this._selectionLevelUp(sel)) drilledUp = true;
 		}
 	}
 	return drilledUp;
 };
 
-ActivePivot.prototype.TakeOneLevelUp = function (metric) {
-	if (metric.SelectedVersion().SelectedLevelIndex > 0) {
-		metric.SelectedVersion().SelectedLevelIndex--;
-		return true;
-	} else {
-		return false;
-	}
+// Nivel padre (uno más agregado) de una Selection dentro de su propio censo.
+ActivePivot.prototype._selectionLevelParent = function (sel) {
+	var idx = sel.levelIndex();
+	return idx > 0 ? sel.version.Levels[idx - 1] : null;
 };
 
-ActivePivot.prototype.TakeOneLevelDown = function (metric) {
-	if (metric.SelectedVersion().SelectedLevelIndex < metric.SelectedVersion().Levels.length - 1) {
-		metric.SelectedVersion().SelectedLevelIndex++;
-		return true;
-	} else {
-		return false;
-	}
+// Mueve una Selection un nivel hacia arriba/abajo en SU propia jerarquía. Devuelve
+// true si cambió. Reengancha la variable por nombre (lo hace Selection).
+ActivePivot.prototype._selectionLevelUp = function (sel) {
+	var idx = sel.levelIndex();
+	if (idx <= 0) return false;
+	return sel.moveToLevelNamed(sel.version.Levels[idx - 1].Name);
+};
+
+ActivePivot.prototype._selectionLevelDown = function (sel) {
+	var idx = sel.levelIndex();
+	if (idx >= sel.version.Levels.length - 1) return false;
+	return sel.moveToLevelNamed(sel.version.Levels[idx + 1].Name);
 };
 
 ActivePivot.prototype.AllBoundaries = function () {
@@ -865,90 +891,44 @@ ActivePivot.prototype.RestoreFromSections = function (sections) {
 ActivePivot.prototype.applyColumnState = function (metric, col) {
 	if (!metric || !metric.properties) return;
 	var props = metric.properties;
-
 	if (col.summary) props.SummaryMetric = col.summary;
 
-	var versions = props.Versions || [];
-	var versionIds = (col.versionIds && col.versionIds.length) ? col.versionIds : (col.versionId != null ? [col.versionId] : []);
+	// La variable guardada (por Id) define la variable lógica (por Name). Es el
+	// gobernador: SelectByCaption rearma las Selections para los censos guardados,
+	// garantizando que cada una quede con esa variable. Lo que ya no exista se
+	// descarta.
+	var variable = metric.GetVariableById(col.variableId);
+	var variableName = variable ? variable.Name : metric.variableName();
+	if (variableName == null) return;
 
-	// Resuelve índices de las versiones activas.
-	var indices = [];
-	for (var vi = 0; vi < versionIds.length; vi++) {
-		for (var v = 0; v < versions.length; v++) {
-			if (versions[v].Version && versions[v].Version.Id === versionIds[vi]) {
-				indices.push(v);
-				break;
-			}
-		}
-	}
-	if (indices.length === 0) return;
-
-	props.SelectedVersionIndex = indices[0];
-	props.SelectedVersionIndices = indices.slice();
-	props.MultiVersion = indices.length > 1;
-
-	// Nivel y variable de la versión principal por Id; el resto por Name.
-	var mainVersion = versions[indices[0]];
-	if (mainVersion && col.levelId != null) {
-		for (var l = 0; l < mainVersion.Levels.length; l++) {
-			if (mainVersion.Levels[l].Id === col.levelId) {
-				mainVersion.SelectedLevelIndex = l;
-				break;
-			}
-		}
-	}
-	var mainLevel = mainVersion ? mainVersion.Levels[mainVersion.SelectedLevelIndex] : null;
-	if (mainLevel && col.variableId != null && mainLevel.Variables) {
-		for (var a = 0; a < mainLevel.Variables.length; a++) {
-			if (mainLevel.Variables[a].Id === col.variableId) {
-				mainLevel.SelectedVariableIndex = a;
-				break;
-			}
-		}
-	}
-	// Para las demás versiones activas, busca level y variable por Name.
-	var mainLevelName = mainLevel ? mainLevel.Name : null;
-	var mainVariableName = (mainLevel && mainLevel.Variables[mainLevel.SelectedVariableIndex])
-		? mainLevel.Variables[mainLevel.SelectedVariableIndex].Name : null;
-	for (var oi = 1; oi < indices.length; oi++) {
-		var otherVersion = versions[indices[oi]];
-		if (!otherVersion) continue;
-		if (mainLevelName != null) {
-			for (var ol = 0; ol < otherVersion.Levels.length; ol++) {
-				if (otherVersion.Levels[ol].Name === mainLevelName) {
-					otherVersion.SelectedLevelIndex = ol;
-					break;
-				}
-			}
-		}
-		var otherLevel = otherVersion.Levels[otherVersion.SelectedLevelIndex];
-		if (otherLevel && mainVariableName != null && otherLevel.Variables) {
-			for (var oa = 0; oa < otherLevel.Variables.length; oa++) {
-				if (otherLevel.Variables[oa].Name === mainVariableName) {
-					otherLevel.SelectedVariableIndex = oa;
-					break;
-				}
-			}
+	// Nombre del nivel guardado (por Id), para preferirlo al resolver cada censo.
+	var levelName = null;
+	var versions = props.Versions;
+	for (var v = 0; v < versions.length && levelName == null; v++) {
+		for (var l = 0; l < versions[v].Levels.length; l++) {
+			if (versions[v].Levels[l].Id === col.levelId) { levelName = versions[v].Levels[l].Name; break; }
 		}
 	}
 
-	// Selección de categorías por versión activa.
-	props.SelectedLabelIds = props.SelectedLabelIds || {};
-	if (col.selection) {
-		Object.keys(col.selection).forEach(function (vId) {
-			var sel = col.selection[vId];
-			props.SelectedLabelIds[vId] = {
-				labels: (sel.labels || []).slice(),
-				includeTotal: sel.includeTotal !== false
-			};
-		});
-	} else {
-		// Sin selección serializada: default (solo Total) por cada versión activa.
-		for (var di = 0; di < indices.length; di++) {
-			var vId = versions[indices[di]].Version.Id;
-			if (!props.SelectedLabelIds[vId]) {
-				props.SelectedLabelIds[vId] = { labels: [], includeTotal: true };
-			}
+	// Ids de censo guardados (los que el usuario tenía activos).
+	var versionIds = (col.versionIds && col.versionIds.length)
+		? col.versionIds
+		: (col.versionId != null ? [col.versionId] : null);
+
+	metric.SelectByCaption(variableName, versionIds, levelName);
+
+	// Reaplica nivel (por nombre, ya preferido) y la selección de categorías por
+	// censo. Lo que no exista en un censo se ignora; la correspondencia lógica la
+	// mantiene SelectByCaption.
+	for (var s = 0; s < metric.Selections.length; s++) {
+		var sel = metric.Selections[s];
+		if (levelName != null) sel.moveToLevelNamed(levelName);
+		var saved = col.selection ? col.selection[sel.versionId()] : null;
+		if (saved) {
+			sel.includeTotal = saved.includeTotal !== false;
+			var valid = {};
+			sel.variable.ValueLabels.forEach(function (lab) { valid[lab.Id] = true; });
+			sel.labels = (saved.labels || []).filter(function (id) { return valid[id]; });
 		}
 	}
 };

@@ -8,12 +8,12 @@
 
 		<div v-if="open" class="variables-panel">
 			<div class="variables-panel-content">
-				<div v-for="(variable, index) in variables"
+				<div v-for="(name, index) in variableNames"
 						 :key="'variable-' + index"
 						 class="variable-option"
-						 :class="{ 'active': index === selectedIndex }"
-						 @click="choose(index)">
-					{{ variable.Name }}
+						 :class="{ 'active': name === currentName }"
+						 @click="choose(name)">
+					{{ name }}
 				</div>
 			</div>
 		</div>
@@ -22,35 +22,26 @@
 
 <script>
 /*
- * VariableSelector — combo de la variable de un nivel. Conoce el objeto de
- * negocio (un Level con sus Variables y el índice seleccionado): sabe mostrar la
- * variable activa y listar las disponibles. No muta el activo: emite
- * 'select' (índice elegido). La propagación a otras versiones la decide el padre.
+ * VariableSelector — combo de la variable lógica del indicador. Ofrece la unión
+ * de variables (por nombre) de todos los censos y emite 'select' con el nombre
+ * elegido; el modelo (SelectByCaption) rearma las selecciones.
  */
 export default {
 	name: 'VariableSelector',
 	props: {
-		// Level del objeto de negocio (tiene Variables y SelectedVariableIndex).
-		level: { type: Object, default: null },
-		// Sufijo de normalización ya resuelto por el padre (depende de la métrica).
+		metric: { type: Object, required: true },
 		normalizationCaption: { type: String, default: '' }
 	},
 	data() {
 		return { open: false };
 	},
 	watch: {
-		open(v) { this.$emit('open-change', v); },
-		// Si cambia el nivel/variable desde afuera, se cierra el panel.
-		level() { this.open = false; }
+		open(v) { this.$emit('open-change', v); }
 	},
 	computed: {
-		variables() { return this.level && this.level.Variables ? this.level.Variables : []; },
-		selectedIndex() { return this.level ? this.level.SelectedVariableIndex : -1; },
-		hasMultiple() { return this.variables.length > 1; },
-		currentName() {
-			var v = this.variables[this.selectedIndex];
-			return v ? v.Name : '';
-		}
+		variableNames() { return this.metric.AvailableVariables(); },
+		hasMultiple() { return this.variableNames.length > 1; },
+		currentName() { return this.metric.variableName() || ''; }
 	},
 	mounted() {
 		var loc = this;
@@ -71,9 +62,9 @@ export default {
 	},
 	methods: {
 		toggle() { this.open = !this.open; },
-		choose(index) {
+		choose(name) {
 			this.open = false;
-			this.$emit('select', index);
+			this.$emit('select', name);
 		},
 		close() { this.open = false; }
 	}
@@ -131,6 +122,8 @@ export default {
 		left: 0;
 		right: 0;
 		margin-top: 3px;
+		min-width: 220px;
+		max-width: 360px;
 		background-color: #fff;
 		border: 1px solid #e0e0e0;
 		border-radius: 4px;

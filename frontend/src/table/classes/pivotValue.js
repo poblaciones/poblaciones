@@ -23,6 +23,26 @@ export function valueTuple(summaryMetric, variable, cell) {
 	var total = Number(cell.Total);
 	var area  = (cell.Area != null) ? Number(cell.Area) : null;
 	var scale = (variable && variable.NormalizationScale) ? variable.NormalizationScale : 1;
+
+	// Variables de brecha (gap): el modo de incidencia 'I' pasa a ser un delta
+	// entre dos términos normalizados (el segundo respecto del primero). El helper
+	// calculateValue recibe los términos ya divididos por su normalización, así que
+	// se arma normalization = total/scale y normalizationGap = totalGap/scale.
+	// isPercentage marca cuando la variable ya es un porcentaje (scale 100): ahí el
+	// delta es una resta de puntos; si no, es la variación relativa en %.
+	if (variable && variable.IsGap && summaryMetric === 'I') {
+		var valueGap = Number(cell.ValueGap);
+		var totalGap = Number(cell.TotalGap);
+		return {
+			isGap: true,
+			isPercentage: scale === 100,
+			value: value,
+			normalization: total / scale,
+			valueGap: valueGap,
+			normalizationGap: totalGap / scale
+		};
+	}
+
 	switch (summaryMetric) {
 		case 'N': // conteo
 			return { value: value };
@@ -58,7 +78,11 @@ export function cellValue(metric, variable, cell) {
 	} else {
 		if (cell.Value === null || cell.Value === undefined) return '-';
 	}
-	return h.calculateValue(valueTuple(sm, variable, cell));
+	var computed = h.calculateValue(valueTuple(sm, variable, cell));
+	// Un resultado no finito no es un valor mostrable: ocurre, por ejemplo, en el
+	// delta de brecha cuando el término base es 0 (variación relativa indefinida).
+	if (typeof computed === 'number' && !isFinite(computed)) return '-';
+	return computed;
 }
 
 // Valor formateado según el modo y los decimales de la variable
@@ -104,6 +128,8 @@ export function valueHeaderForKey(key, variable) {
 		case 'P': return 'COL %';
 		case 'FIL': return 'FIL %';
 		case 'I':
+			// Brecha: el valor mostrado es un delta de porcentaje, no una incidencia.
+			if (variable && variable.IsGap) return 'Δ %';
 			switch (variable ? variable.NormalizationScale : null) {
 				case 100: return '%';
 				case 1: return '/1';

@@ -168,9 +168,13 @@ export default {
 	},
 	mounted() {
 		this.whenCatalogReady(this.bootstrap);
+		// "Atrás"/"adelante" del navegador: recargar el estado desde la URL.
+		this._onPopState = this.reloadFromUrl.bind(this);
+		window.addEventListener('popstate', this._onPopState);
 	},
 	beforeDestroy() {
 		this.endDrag();
+		if (this._onPopState) window.removeEventListener('popstate', this._onPopState);
 	},
 	methods: {
 		configFor(kind) {
@@ -199,8 +203,8 @@ export default {
 			this.analysisConfig[kind] = Object.assign({}, this.analysisConfig[kind], config);
 			this.syncRoute();
 		},
-		onDataRefreshed() {
-			this.syncRoute();
+		onDataRefreshed(pivot, structural) {
+			this.syncRoute(!!structural);
 		},
 		onCollapseChanged(payload) {
 			this.rowCollapse = (payload && payload.encoded) || '';
@@ -215,7 +219,7 @@ export default {
 			return Promise.resolve(this.pivot.AddMetricById(metricId)).then(function () {
 				return loc.pivot.RefreshData();
 			}).then(function () {
-				loc.syncRoute();
+				loc.syncRoute(true);
 			});
 		},
 		onWidgetError(err) {
@@ -277,6 +281,25 @@ export default {
 			var timer = setInterval(function () {
 				if (ready() || tries++ > 200) { clearInterval(timer); cb(); }
 			}, 50);
+		},
+
+		// Reconstruye el estado desde el hash actual (lo dispara el botón
+		// atrás/adelante). Limpia la pivot y restaura, sin tocar el historial.
+		reloadFromUrl() {
+			var loc = this;
+			var query = _parseHashQuery(window.location.hash);
+			var sections = ActiveRoute.parseQuery(query);
+			this.pivot.Clear();
+			var hasContent = (sections.columns && sections.columns.length) ||
+							 (sections.rows && sections.rows.length) ||
+							 (sections.filters && sections.filters.length);
+			var start = hasContent ? this.pivot.Router.restore(sections) : Promise.resolve();
+			Promise.resolve(start).then(function () {
+				return loc.pivot.Render();
+			}).then(function () {
+				loc.restoreDashState(query);
+				loc.$emit('data-refreshed', loc.pivot);
+			});
 		},
 
 		bootstrap() {
@@ -400,7 +423,7 @@ export default {
 			return splits + ';' + visible.join(',') + ';' + relPart + ';' + distPart + ';' + (this.rowCollapse || '');
 		},
 
-		syncRoute() {
+		syncRoute(pushHistory) {
 			var query = this.pivot
 				? this.pivot.Router.query()
 				: (_parseHashQuery(window.location.hash) || {});
@@ -412,7 +435,11 @@ export default {
 			}
 			var newHash = '#/view' + (parts.length ? ('?' + parts.join('&')) : '');
 			if (window.location.hash !== newHash) {
-				window.history.replaceState(null, '', newHash);
+				// Los cambios estructurales (agregar/quitar indicador, región o filtro)
+				// dejan una entrada en el historial para que "atrás" los deshaga; el
+				// resto (paneles, splits, configuraciones) reemplaza sin ensuciarlo.
+				if (pushHistory) window.history.pushState(null, '', newHash);
+				else window.history.replaceState(null, '', newHash);
 			}
 		}
 	}

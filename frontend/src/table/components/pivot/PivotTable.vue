@@ -108,14 +108,22 @@
 							</th>
 						</tr>
 
-						<!-- Fila de años: siempre presente; anida las categorías -->
+						<!-- Fila de años: un th por año, y al final de cada indicador un
+						     control desplegable para elegir qué años se muestran. -->
 						<tr class="pivot-version-row">
 							<template v-for="group in headerGroups">
 								<th v-for="(vg, vgIdx) in group.versionGroups"
 										:key="'vg-' + group.metric.InstanceId + '-' + vgIdx"
 										:colspan="vg.colSpan"
 										class="pivot-version-header">
-									{{ vg.versionName || '—' }}
+									<span class="version-header-text">{{ vg.versionName || '—' }}</span>
+									<span v-if="vg.versionId && !group.metric.selectionResolvesData(vg.versionId)"
+											class="version-no-data"
+											title="Este censo no tiene datos de la variable al nivel de desagregación mostrado.">*</span>
+									<button v-if="vgIdx === group.versionGroups.length - 1 && versionsOfferedFor(group.metric)"
+											class="inline-trigger"
+											:ref="'vtrig-' + group.metric.InstanceId"
+											@click.stop="openVersionPanel(group.metric, $event)">▾</button>
 								</th>
 							</template>
 						</tr>
@@ -131,31 +139,52 @@
 										:key="'lv-' + sIdx"
 										:colspan="levelRowCells[sIdx].colspan"
 										:rowspan="levelRowCells[sIdx].rowspan"
-										:class="levelRowCells[sIdx].kind === 'level' ? 'pivot-level-header' : 'pivot-subheader hand'"
+										:class="levelRowCells[sIdx].kind === 'level' ? 'pivot-level-header' : (levelRowCells[sIdx].kind === 'placeholder' ? 'pivot-subheader pivot-subheader-empty' : 'pivot-subheader hand')"
 										:title="levelRowCells[sIdx].kind === 'cat' ? subHeaderTooltip(spec) : null"
 										@click="levelRowCells[sIdx].kind === 'cat' ? onSubHeaderSort(spec) : null">
 									<template v-if="levelRowCells[sIdx].kind === 'level'">{{ levelRowCells[sIdx].name }}</template>
+									<template v-else-if="levelRowCells[sIdx].kind === 'placeholder'">
+										<span class="subheader-label subheader-empty">[Ninguna]</span>
+										<button class="inline-trigger"
+												:ref="'ctrig-' + levelRowCells[sIdx].metric.InstanceId"
+												@click.stop="openCategoryPanel(levelRowCells[sIdx].metric, $event)">▾</button>
+									</template>
 									<template v-else>
 										<span class="subheader-label" :class="{ 'subheader-total': spec.isTotal }">{{ subHeaderText(spec) }}</span>
-										<span v-if="pivot.MetricTuples.sortStateOf(spec.key) === 'desc'" class="sort-arrow">▼</span>
-										<span v-else-if="pivot.MetricTuples.sortStateOf(spec.key) === 'asc'" class="sort-arrow">▲</span>
+										<span v-if="pivot.MetricTuples.sortStateOf(spec.key) === 'desc'" class="sort-glyph sort-desc">⌄</span>
+										<span v-else-if="pivot.MetricTuples.sortStateOf(spec.key) === 'asc'" class="sort-glyph sort-asc">⌃</span>
+										<button v-if="levelRowCells[sIdx].lastOfMetric && metricTriggerInLevelRow(levelRowCells[sIdx].metric)"
+												class="inline-trigger"
+												:ref="'ctrig-' + levelRowCells[sIdx].metric.InstanceId"
+												@click.stop="openCategoryPanel(levelRowCells[sIdx].metric, $event)">▾</button>
 									</template>
 								</th>
 							</template>
 						</tr>
 
-						<!-- Fila de categorías. Con fila de nivel presente, solo trae las
-						     columnas que la necesitan (las demás ya hicieron rowspan 2). -->
+						<!-- Fila de categorías. Recorre los indicadores: cada uno muestra
+						     sus celdas de categoría/total (las que no hicieron rowspan en la
+						     fila de nivel) y, si no tiene ninguna columna visible, una celda
+						     placeholder "[Ninguna]". El control de categorías cuelga de la
+						     última celda de cada indicador. -->
 						<tr class="pivot-subheader-row">
-							<template v-for="(spec, sIdx) in pivot.MetricTuples.metricTuples">
-								<th v-if="!showLevelRow || tupleNeedsLevel(spec)"
-										:key="'sub-' + sIdx"
-										class="pivot-subheader hand"
-										:title="subHeaderTooltip(spec)"
-										@click="onSubHeaderSort(spec)">
-									<span class="subheader-label" :class="{ 'subheader-total': spec.isTotal }">{{ subHeaderText(spec) }}</span>
-									<span v-if="pivot.MetricTuples.sortStateOf(spec.key) === 'desc'" class="sort-arrow">▼</span>
-									<span v-else-if="pivot.MetricTuples.sortStateOf(spec.key) === 'asc'" class="sort-arrow">▲</span>
+							<template v-for="entry in categoryRow">
+								<th v-for="(cell, ci) in entry.cells"
+										:key="'sub-' + entry.metric.InstanceId + '-' + ci"
+										class="pivot-subheader"
+										:class="{ hand: !cell.spec.isPlaceholder, 'pivot-subheader-empty': cell.spec.isPlaceholder }"
+										:title="cell.spec.isPlaceholder ? null : subHeaderTooltip(cell.spec)"
+										@click="cell.spec.isPlaceholder ? null : onSubHeaderSort(cell.spec)">
+									<span v-if="cell.spec.isPlaceholder" class="subheader-label subheader-empty">[Ninguna]</span>
+									<template v-else>
+										<span class="subheader-label" :class="{ 'subheader-total': cell.spec.isTotal }">{{ subHeaderText(cell.spec) }}</span>
+										<span v-if="pivot.MetricTuples.sortStateOf(cell.spec.key) === 'desc'" class="sort-glyph sort-desc">⌄</span>
+										<span v-else-if="pivot.MetricTuples.sortStateOf(cell.spec.key) === 'asc'" class="sort-glyph sort-asc">⌃</span>
+									</template>
+									<button v-if="ci === entry.cells.length - 1 && !metricTriggerInLevelRow(entry.metric)"
+											class="inline-trigger"
+											:ref="'ctrig-' + entry.metric.InstanceId"
+											@click.stop="openCategoryPanel(entry.metric, $event)">▾</button>
 								</th>
 							</template>
 						</tr>
@@ -241,6 +270,43 @@
 											 @select-group="onRowGroup"
 											 @close="closePanel" />
 
+		<!-- Panel flotante único de versión/categorías. Vive en la raíz del
+		     componente (fuera del thead y su contexto de apilamiento sticky), y se
+		     posiciona por JS respecto del triángulo que lo abrió. Es multiselect: el
+		     usuario marca varias opciones y el panel permanece abierto; se cierra al
+		     hacer clic afuera o en el triángulo de nuevo. -->
+		<div v-if="floatPanel.open" ref="floatPanel" class="inline-float-panel" :style="floatPanel.style" @click.stop>
+			<template v-if="floatPanel.kind === 'version'">
+				<div v-for="v in floatVersions" :key="'fv-' + v.id"
+						class="ifp-option" :class="{ 'ifp-locked': v.locked, 'ifp-selected': !versionMulti && v.active }"
+						@click.stop="onFloatVersionToggle(v.id)">
+					<input v-if="versionMulti" type="checkbox" tabindex="-1" :checked="v.active" :disabled="v.locked" @click.prevent />
+					<span>{{ v.name }}</span>
+				</div>
+				<div class="ifp-multi-toggle ifp-multi-foot" @click.stop="versionMulti = !versionMulti">
+					<input type="checkbox" tabindex="-1" :checked="versionMulti" @click.prevent />
+					<span>Selección múltiple</span>
+				</div>
+			</template>
+			<template v-else-if="floatPanel.kind === 'category'">
+				<div v-for="grp in floatGroups" :key="'fg-' + grp.versionId" class="ifp-group">
+					<div class="ifp-group-header" @click.stop="onFloatToggleAll(grp.versionId)">
+						<input type="checkbox" tabindex="-1" :checked="grp.allSelected" @click.prevent />
+						<span class="ifp-group-title">{{ grp.versionName }}</span>
+					</div>
+					<div v-for="lbl in grp.labels" :key="'fl-' + grp.versionId + '-' + lbl.Id"
+							class="ifp-option" @click.stop="onFloatToggleLabel(grp.versionId, lbl.Id)">
+						<input type="checkbox" tabindex="-1" :checked="grp.selectedLabels.indexOf(lbl.Id) !== -1" @click.prevent />
+						<span>{{ lbl.Name }}</span>
+					</div>
+					<div class="ifp-option ifp-total" @click.stop="onFloatToggleTotal(grp.versionId)">
+						<input type="checkbox" tabindex="-1" :checked="grp.includeTotal" @click.prevent />
+						<span>Total</span>
+					</div>
+				</div>
+			</template>
+		</div>
+
 	</div>
 </template>
 
@@ -287,6 +353,13 @@
 				exloading: false,
 				error: null,
 				activePanel: '',
+				// Panel flotante único de versión/categorías (un solo lugar de estado,
+				// fuera del thead). metric: el indicador en edición; kind: 'version' o
+				// 'category'; style: posición calculada respecto del triángulo.
+				floatPanel: { open: false, kind: null, metric: null, style: {} },
+				// Modo del combo de años: por defecto single-select (elegir un año lo
+				// reemplaza y cierra el panel); el check lo vuelve multiselect.
+				versionMulti: false,
 				// Filas y filtros: multiselección desactivada por defecto.
 				rowMulti: false,
 				filterMulti: false,
@@ -318,6 +391,23 @@
 			if (this.autoRefresh && this.pivot) {
 				this.pivot.Render();
 			}
+			// Cierra el panel flotante de versión/categorías al hacer clic afuera.
+			// El panel y los triángulos detienen la propagación (@click.stop), así que
+			// cualquier clic que llegue acá es "afuera".
+			var loc = this;
+			this._floatAway = function () { if (loc.floatPanel.open) loc.closeFloatPanel(); };
+			document.addEventListener('click', this._floatAway);
+			this._floatScroll = function (e) {
+				if (!loc.floatPanel.open) return;
+				var p = loc.$refs.floatPanel;
+				if (p && (p === e.target || p.contains(e.target))) return; // scroll interno
+				loc.closeFloatPanel();
+			};
+			window.addEventListener('scroll', this._floatScroll, true);
+		},
+		beforeDestroy() {
+			if (this._floatAway) document.removeEventListener('click', this._floatAway);
+			if (this._floatScroll) window.removeEventListener('scroll', this._floatScroll, true);
 		},
 
 		computed: {
@@ -375,19 +465,32 @@
 				var i = 0;
 				while (i < specs.length) {
 					var sp = specs[i];
-					if (this.tupleNeedsLevel(sp)) {
+					if (sp && sp.isPlaceholder) {
+						cells[i] = { kind: 'placeholder', colspan: 1, rowspan: 2, name: null, metric: sp.metric };
+						i++;
+					} else if (this.tupleNeedsLevel(sp)) {
 						var span = 1;
 						var j = i + 1;
 						while (j < specs.length && this.tupleNeedsLevel(specs[j])
 								&& specs[j].metric === sp.metric && specs[j].versionId === sp.versionId && specs[j].levelId === sp.levelId) {
 							span++; j++;
 						}
-						cells[i] = { kind: 'level', colspan: span, rowspan: 1, name: sp.levelName };
+						cells[i] = { kind: 'level', colspan: span, rowspan: 1, name: sp.levelName, metric: sp.metric };
 						i = j;
 					} else {
-						cells[i] = { kind: 'cat', colspan: 1, rowspan: 2, name: null };
+						cells[i] = { kind: 'cat', colspan: 1, rowspan: 2, name: null, metric: sp.metric };
 						i++;
 					}
+				}
+				// Marca la última celda de cada indicador, para colgar ahí el control
+				// de categorías inline (una vez por indicador).
+				for (var k = 0; k < cells.length; k++) {
+					if (!cells[k]) continue;
+					var nextWithCell = null;
+					for (var n = k + 1; n < cells.length; n++) {
+						if (cells[n]) { nextWithCell = cells[n]; break; }
+					}
+					cells[k].lastOfMetric = !nextWithCell || nextWithCell.metric !== cells[k].metric;
 				}
 				return cells;
 			},
@@ -443,6 +546,71 @@
 					g.versionGroups = vgs;
 				});
 				return groups;
+			},
+			// Contenido del panel flotante de versión: los censos donde existe la
+			// variable, con su estado activo y el bloqueo del último.
+			floatVersions() {
+				var m = this.floatPanel.metric;
+				if (!m || this.floatPanel.kind !== 'version') return [];
+				var active = m.Selections.map(function (s) { return s.versionId(); });
+				var multi = this.versionMulti;
+				var list = m.VersionsForVariable(m.variableName());
+				return list.map(function (v) {
+					var id = v.Version.Id;
+					var isActive = active.indexOf(id) !== -1;
+					// El bloqueo del último censo solo aplica en multiselect; en single,
+					// elegir otro año siempre está permitido (lo reemplaza).
+					return { id: id, name: v.Version.Name, active: isActive, locked: multi && isActive && active.length === 1 };
+				});
+			},
+			// Contenido del panel flotante de categorías: un grupo por censo activo,
+			// con sus labels visibles y el estado de selección.
+			floatGroups() {
+				var m = this.floatPanel.metric;
+				if (!m || this.floatPanel.kind !== 'category') return [];
+				return m.Selections.map(function (sel) {
+					var labels = sel.variable.ValueLabels.filter(function (l) { return l.Visible; });
+					var allSelected = sel.includeTotal && labels.length > 0 &&
+						labels.every(function (l) { return sel.labels.indexOf(l.Id) !== -1; });
+					return {
+						versionId: sel.versionId(),
+						versionName: sel.versionName(),
+						labels: labels,
+						selectedLabels: sel.labels,
+						includeTotal: sel.includeTotal,
+						allSelected: allSelected
+					};
+				});
+			},
+			// Estructura de la fila de categorías por indicador: las celdas que esta
+			// fila renderiza (las que no hicieron rowspan en la fila de nivel). El
+			// control de categorías cuelga de la última celda de cada indicador. Una
+			// tupla placeholder (indicador sin columnas visibles) muestra "[Ninguna]".
+			categoryRow() {
+				this.dataTick;
+				if (!this.pivot) return [];
+				var specs = this.pivot.MetricTuples.metricTuples;
+				var showLevel = this.showLevelRow;
+				var byMetric = [];
+				var indexByMetric = {};
+				for (var i = 0; i < specs.length; i++) {
+					var sp = specs[i];
+					if (!sp || !sp.metric) continue;
+					// Con fila de nivel, el placeholder ya ocupa ambas filas (rowspan 2)
+					// allí; sin fila de nivel, va acá. Las celdas que hicieron rowspan en
+					// la fila de nivel no se repiten.
+					if (showLevel) {
+						if (sp.isPlaceholder) continue;
+						if (!this.tupleNeedsLevel(sp)) continue;
+					}
+					var id = sp.metric.InstanceId;
+					if (indexByMetric[id] == null) {
+						indexByMetric[id] = byMetric.length;
+						byMetric.push({ metric: sp.metric, cells: [] });
+					}
+					byMetric[indexByMetric[id]].cells.push({ spec: sp });
+				}
+				return byMetric;
 			},
 			// Árboles de catálogo (poblados por App.vue desde GetFabIndicators / GetFabBoundaries).
 			indicatorCategories() {
@@ -642,7 +810,7 @@
 			// "Agregar todos/as": la delimitación entera (un solo chip).
 			onRowGroup(node) {
 				var loc = this;
-				loc.pivot.AddRegionById(node.Id, node.Name).then(function () { loc.applyAndNotify(); });
+				loc.pivot.AddRegionById(node.Id, node.Name).then(function () { loc.applyAndNotify(true); });
 			},
 			// Selección por items (hojas individuales o check de corte de control).
 			// container es la delimitación a la que pertenecen las hojas.
@@ -650,7 +818,7 @@
 				if (!container) return;
 				var loc = this;
 				var itemIds = items.map(function (it) { return it.Id; });
-				loc.pivot.AddRegionItemsById(container.Id, itemIds).then(function () { loc.applyAndNotify(); });
+				loc.pivot.AddRegionItemsById(container.Id, itemIds).then(function () { loc.applyAndNotify(true); });
 			},
 			onRowDeselect(items, container) {
 				var loc = this;
@@ -661,7 +829,7 @@
 				Object.keys(removals.byBoundary).forEach(function (boundaryId) {
 					loc.pivot.RemoveRegionItemsById(boundaryId, removals.byBoundary[boundaryId]);
 				});
-				this.applyAndNotify();
+				this.applyAndNotify(true);
 			},
 
 			// ── Filtros (delimitaciones) ─────────────────────────────────────────────
@@ -669,7 +837,7 @@
 				if (!container) return;
 				var loc = this;
 				var itemIds = items.map(function (it) { return it.Id; });
-				loc.pivot.AddFilterItemsById(container.Id, itemIds).then(function () { loc.applyAndNotify(); });
+				loc.pivot.AddFilterItemsById(container.Id, itemIds).then(function () { loc.applyAndNotify(true); });
 			},
 			onFilterDeselect(items, container) {
 				var loc = this;
@@ -712,11 +880,13 @@
 			},
 
 			// Re-renderiza (trae datos) y avisa al contenedor para sincronizar la ruta.
-			applyAndNotify() {
+			// `structural` marca add/remove de región o filtro, para que el contenedor
+			// deje una entrada en el historial.
+			applyAndNotify(structural) {
 				var loc = this;
 				return this.runBusy(function () {
 					return loc.pivot.Render().then(function () {
-						loc.$emit('data-refreshed', loc.pivot);
+						loc.$emit('data-refreshed', loc.pivot, !!structural);
 					});
 				});
 			},
@@ -732,6 +902,102 @@
 					loc.$emit('data-refreshed', loc.pivot);
 				});
 			},
+
+			// ── Controles inline del encabezado (años y categorías por indicador) ──
+			// Operan directamente sobre el modelo del indicador y refrescan. La lógica
+			// vive en el modelo (toggleVersion, Selections); acá solo se dispara.
+			// ── Panel flotante de versión/categorías ──────────────────────────────
+			// ¿Conviene ofrecer el combo de años para este indicador? (más de un censo
+			// donde existe la variable). Si hay uno solo, el triángulo no se muestra.
+			versionsOfferedFor(metric) {
+				return metric.VersionsForVariable(metric.variableName()).length > 1;
+			},
+			openVersionPanel(metric, ev) {
+				if (this.floatPanel.open && this.floatPanel.kind === 'version' && this.floatPanel.metric === metric) {
+					this.closeFloatPanel();
+					return;
+				}
+				// Si ya hay más de un censo activo, el panel arranca en modo múltiple.
+				this.versionMulti = metric.Selections.length > 1;
+				this.floatPanel = { open: true, kind: 'version', metric: metric, style: {} };
+				this._positionFloatPanel(ev.currentTarget);
+			},
+			openCategoryPanel(metric, ev) {
+				if (this.floatPanel.open && this.floatPanel.kind === 'category' && this.floatPanel.metric === metric) {
+					this.closeFloatPanel();
+					return;
+				}
+				this.floatPanel = { open: true, kind: 'category', metric: metric, style: {} };
+				this._positionFloatPanel(ev.currentTarget);
+			},
+			closeFloatPanel() {
+				this.floatPanel = { open: false, kind: null, metric: null, style: {} };
+			},
+			// Posiciona el panel (position:fixed) debajo del triángulo, ajustando si se
+			// sale del viewport. Se recalcula en el nextTick (cuando el panel ya tiene
+			// tamaño) para poder corregir hacia arriba/izquierda.
+			_positionFloatPanel(triggerEl) {
+				if (!triggerEl || !triggerEl.getBoundingClientRect) return;
+				var r = triggerEl.getBoundingClientRect();
+				var loc = this;
+				this.floatPanel.style = { position: 'fixed', top: (r.bottom + 4) + 'px', left: r.left + 'px', zIndex: 3000 };
+				this.$nextTick(function () {
+					var panel = loc.$refs.floatPanel;
+					if (!panel) return;
+					var pr = panel.getBoundingClientRect();
+					var vw = window.innerWidth, vh = window.innerHeight;
+					var left = r.left, top = r.bottom + 4;
+					if (left + pr.width > vw - 8) left = Math.max(8, vw - pr.width - 8);
+					if (top + pr.height > vh - 8) top = Math.max(8, r.top - pr.height - 4);
+					loc.floatPanel.style = { position: 'fixed', top: top + 'px', left: left + 'px', zIndex: 3000,
+						maxHeight: (vh - top - 12) + 'px', overflowY: 'auto' };
+				});
+			},
+			// Contenido del panel (computado desde floatPanel.metric en los getters).
+			_floatSelectionFor(versionId) {
+				var m = this.floatPanel.metric;
+				if (!m) return null;
+				return m.Selections.filter(function (s) { return s.versionId() === versionId; })[0] || null;
+			},
+			onFloatVersionToggle(versionId) {
+				var m = this.floatPanel.metric;
+				if (!m) return;
+				if (!this.versionMulti) {
+					// Single-select: ese censo pasa a ser el único, y el panel se cierra.
+					m.SelectVersions([versionId]);
+					this.closeFloatPanel();
+					this.handleChange({ metric: m, changeType: 'Version' });
+					return;
+				}
+				// Multiselect: alterna sin cerrar; no permite destildar el último.
+				var active = m.Selections.map(function (s) { return s.versionId(); });
+				if (active.length === 1 && active[0] === versionId) return;
+				m.toggleVersion(versionId);
+				this.handleChange({ metric: m, changeType: 'Version' });
+			},
+			onFloatToggleLabel(versionId, labelId) {
+				var sel = this._floatSelectionFor(versionId);
+				if (!sel) return;
+				if (sel.labels.indexOf(labelId) >= 0) sel.labels = sel.labels.filter(function (id) { return id !== labelId; });
+				else sel.labels = sel.labels.concat(labelId);
+				this.handleChange({ metric: this.floatPanel.metric, changeType: 'Categories' });
+			},
+			onFloatToggleTotal(versionId) {
+				var sel = this._floatSelectionFor(versionId);
+				if (!sel) return;
+				sel.includeTotal = !sel.includeTotal;
+				this.handleChange({ metric: this.floatPanel.metric, changeType: 'Categories' });
+			},
+			onFloatToggleAll(versionId) {
+				var sel = this._floatSelectionFor(versionId);
+				if (!sel) return;
+				var labels = sel.variable.ValueLabels.filter(function (l) { return l.Visible; });
+				var allSelected = sel.includeTotal && labels.length > 0 &&
+					labels.every(function (l) { return sel.labels.indexOf(l.Id) !== -1; });
+				sel.labels = allSelected ? [] : labels.map(function (l) { return l.Id; });
+				sel.includeTotal = true;
+				this.handleChange({ metric: this.floatPanel.metric, changeType: 'Categories' });
+			},
 			// Sort por una columna concreta (sub-header). Recibe la ColumnSpec.
 			onSubHeaderSort(spec) {
 				if (!spec || !spec.key || spec.isEmpty) return;
@@ -744,6 +1010,30 @@
 			// Texto del sub-header: categoría/Total, o nombre de variable cuando no hay categorías.
 			tupleNeedsLevel(spec) {
 				return !!spec && !spec.isEmpty && !spec.isTotal && spec.datasetType === 'D' && spec.labelId != null;
+			},
+			// ¿El indicador tiene celdas en la fila de categorías? Si no (todas sus
+			// columnas hicieron rowspan en la fila de nivel), el control de categorías
+			// debe colgar de su celda con rowspan en la fila de nivel.
+			metricHasCategoryRowCells(metric) {
+				var row = this.categoryRow;
+				for (var i = 0; i < row.length; i++) {
+					if (row[i].metric.InstanceId === metric.InstanceId) return row[i].cells.length > 0;
+				}
+				return false;
+			},
+			// ¿La última celda del indicador está en la fila de nivel (una celda 'cat'
+			// con rowspan: el Total, o una columna tipo L/S)? En ese caso el triángulo
+			// de categorías cuelga de esa celda —típicamente el Total cuando está
+			// visible—, no de la última categoría de la fila de abajo.
+			metricTriggerInLevelRow(metric) {
+				var cells = this.levelRowCells;
+				for (var i = 0; i < cells.length; i++) {
+					var c = cells[i];
+					if (c && c.metric === metric && c.lastOfMetric) {
+						return c.kind === 'cat' || c.kind === 'placeholder';
+					}
+				}
+				return false;
 			},
 			subHeaderText(spec) {
 				if (spec.isEmpty) return '—';
@@ -778,7 +1068,7 @@
 					}
 				}
 				this.runBusy(function () { loc.pivot.RefreshData(); }).then(function () {
-					loc.$emit('data-refreshed', loc.pivot);
+					loc.$emit('data-refreshed', loc.pivot, true);
 				});
 			},
 			removeRowBoundary(boundaryId) {
@@ -1109,11 +1399,17 @@
 		text-align: center;
 		padding: 0 8px;
 		border: none;
+		border-top: 1px solid #3b8eea;
 		border-left: 1px solid #3b8eea;
 		border-bottom: 1px solid #3b8eea;
 		white-space: nowrap;
-		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	/* En border-collapse: separate cada celda dibuja sus bordes; la primera fila no
+	   tenía borde superior ni la última columna borde derecho. Se completan acá. */
+	.pivot-table thead th:last-child {
+		border-right: 1px solid #3b8eea;
 	}
 
 	.pivot-table th.pivot-level-header {
@@ -1127,9 +1423,102 @@
 		border-left: 1px solid #3b8eea;
 		border-bottom: 1px solid #3b8eea;
 		white-space: nowrap;
-		overflow: hidden;
 		text-overflow: ellipsis;
 	}
+
+	/* Las celdas con control inline lo posicionan a la derecha; el panel flota con
+	   position:fixed, así que overflow:hidden de la celda no lo recorta. */
+	.pivot-table th.pivot-version-header,
+	.pivot-table th.pivot-level-header {
+		position: relative;
+	}
+	.inline-header-control {
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+	.version-header-text, .level-header-text { vertical-align: middle; }
+	.version-no-data {
+		color: #ffd54f;
+		font-weight: 700;
+		margin-left: 2px;
+		cursor: help;
+		vertical-align: middle;
+	}
+	/* Glifo de ordenamiento: circunflejo arriba/abajo, distinto del desplegable. */
+	.sort-glyph { margin-left: 3px; font-weight: 700; }
+	.subheader-empty { font-style: italic; opacity: 0.7; }
+	.pivot-subheader-empty { cursor: default; }
+
+	/* Triángulo que abre el panel flotante de versión/categorías. */
+	.inline-trigger {
+		position: absolute;
+		right: 4px;
+		top: 50%;
+		transform: translateY(-50%);
+		background: none;
+		border: none;
+		color: #ffffff;
+		font-size: 16px;
+		line-height: 1;
+		cursor: pointer;
+		padding: 2px 4px;
+		border-radius: 3px;
+	}
+	.inline-trigger:hover { background-color: rgba(255,255,255,0.2); }
+
+	/* Panel flotante único (versión/categorías), anclado por JS. */
+	.inline-float-panel {
+		background: #fff;
+		border: 1px solid #cfd8dc;
+		border-radius: 4px;
+		box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+		min-width: 180px;
+		padding: 4px 0;
+		font-size: 13px;
+		color: #37474f;
+	}
+	.inline-float-panel .ifp-option,
+	.inline-float-panel .ifp-group-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 12px;
+		cursor: pointer;
+		white-space: nowrap;
+		text-align: left;
+	}
+	.inline-float-panel .ifp-option:hover,
+	.inline-float-panel .ifp-group-header:hover { background-color: #e3f2fd; }
+	.inline-float-panel .ifp-group-header { font-weight: 600; border-top: 1px solid #eceff1; }
+	.inline-float-panel .ifp-group:first-child .ifp-group-header { border-top: none; }
+	/* Las categorías cuelgan de su grupo de versión: se indentan para reflejarlo. */
+	.inline-float-panel .ifp-group .ifp-option { padding-left: 28px; }
+	.inline-float-panel .ifp-total { font-style: italic; color: #607d8b; }
+	.inline-float-panel .ifp-locked { opacity: 0.5; cursor: default; }
+	/* En selección simple no hay checkbox: el activo se marca con fondo. */
+	.inline-float-panel .ifp-selected { background-color: #e3f2fd; font-weight: 600; }
+	.inline-float-panel .ifp-multi-toggle {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 12px;
+		cursor: pointer;
+		white-space: nowrap;
+		color: #607d8b;
+		border-bottom: 1px solid #eceff1;
+		margin-bottom: 2px;
+	}
+	/* Variante al pie del panel: el separador va arriba. */
+	.inline-float-panel .ifp-multi-foot {
+		border-bottom: none;
+		border-top: 1px solid #eceff1;
+		margin-bottom: 0;
+		margin-top: 2px;
+	}
+	.inline-float-panel .ifp-multi-toggle:hover { background-color: #eceff1; }
+	.inline-float-panel input[type="checkbox"] { pointer-events: none; }
 
 	/* Sub-headers de columna (etiqueta de categoría/Total + sort) */
 	.pivot-subheader-row {
@@ -1151,6 +1540,13 @@
 		max-width: 75px;
 		white-space: normal;
 		overflow-wrap: break-word;
+		position: relative;
+	}
+	/* El espacio extra a la derecha solo en celdas que tienen el triángulo. */
+	.pivot-table th.pivot-subheader:has(.inline-trigger),
+	.pivot-table th.pivot-version-header:has(.inline-trigger),
+	.pivot-table th.pivot-level-header:has(.inline-trigger) {
+		padding-right: 18px;
 	}
 
 		.pivot-table th.pivot-version-header:first-child,

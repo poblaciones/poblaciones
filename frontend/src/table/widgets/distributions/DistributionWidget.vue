@@ -18,20 +18,29 @@
 				<!-- Indicador colapsado: franja angosta para reexpandir -->
 				<div v-if="isCollapsed(ind.metricId)" :key="'c-' + ind.metricId"
 						class="w-block dist-collapsed" :title="ind.name" @click="toggleCollapse(ind.metricId)">
-					<button class="dist-collapse-btn" :aria-label="'Expandir ' + ind.name">›</button>
+					<button class="dist-collapse-btn" :aria-label="'Expandir ' + ind.name">▸</button>
 					<span class="dist-collapsed-name">{{ ind.name }}</span>
 				</div>
 
 				<div v-else :key="ind.metricId" class="w-block dist-indicator">
-					<button class="dist-collapse-btn dist-minimize" @click="toggleCollapse(ind.metricId)" title="Colapsar" aria-label="Colapsar">◂</button>
+					<button class="dist-collapse-btn dist-minimize" @click="toggleCollapse(ind.metricId)" title="Colapsar" aria-label="Colapsar">▾</button>
 					<div class="w-block-head">
 						<div class="dist-head-titles">
 							<div class="w-indicator">{{ ind.name }}</div>
 							<div class="w-variable">{{ ind.variableName }}</div>
 						</div>
+						<div class="dist-export">
+							<button class="dist-export-btn" @click.stop="toggleExportMenu(ind.metricId)" title="Exportar gráfico" aria-label="Exportar gráfico">
+								<i class="fas fa-download"></i>
+							</button>
+							<div v-if="exportMenuFor === ind.metricId" class="dist-export-menu" @click.stop>
+								<div class="dist-export-opt" @click="exportChart(ind, 'svg')">SVG (vectorial)</div>
+								<div class="dist-export-opt" @click="exportChart(ind, 'png')">PNG (imagen)</div>
+							</div>
+						</div>
 					</div>
 
-					<div class="dist-indicator-body">
+					<div class="dist-indicator-body" :ref="'body-' + ind.metricId">
 					<!-- Categorías, apilado multi-año: un solo chart, cada año una barra -->
 					<template v-if="axisMode === 'categories' && stacked && ind.panels.length">
 						<div class="dist-panel">
@@ -50,14 +59,17 @@
 						<div class="dist-panels">
 							<div v-for="panel in ind.panels" :key="panel.key()" class="dist-panel">
 								<div class="w-version dist-panel-title">{{ panel.versionName() }}</div>
-								<category-chart
+								<category-chart v-if="categoryHasData(panel)"
 									:bars="barsFor(panel)"
 									:mode="chartMode"
 									:stacked="false"
 									:is-percent="panel.isPercent()"
+									:is-gap="panel.isGap()"
+									:value-unit="panel.valueUnit()"
 									:show-total-line="panel.showsTotalLine()"
 									:total-value="totalFor(panel)"
 									:height="chartHeight" />
+								<div v-else class="dist-no-data">Sin información</div>
 							</div>
 						</div>
 					</template>
@@ -67,18 +79,17 @@
 						<div class="dist-panels">
 							<div v-for="panel in ind.panels" :key="panel.key()" class="dist-panel">
 								<div class="w-version dist-panel-title">{{ panel.versionName() }}</div>
-								<region-bars
+								<region-bars v-if="regionHasData(panel)"
 									:rows="regionRowsFor(panel)"
 									:scale-max="regionScaleFor(panel)"
 									:stacked="stacked"
 									:is-percent="panel.isPercent()"
 									:min-height="chartHeight" />
-								<div v-if="hiddenFor(panel) > 0" class="w-note dist-cut-note">
-									mostrando {{ shownFor(panel) }} de {{ shownFor(panel) + hiddenFor(panel) }} regiones
-								</div>
+								<div v-else class="dist-no-data">Sin información</div>
 							</div>
 						</div>
 					</template>
+				</div>
 
 					<div class="w-legend dist-legend" v-if="legendFor(ind).length">
 						<span v-for="c in legendFor(ind)" :key="c.labelId == null ? c.name : c.labelId" class="w-legend-item">
@@ -89,7 +100,6 @@
 						</span>
 					</div>
 				</div>
-			</div>
 			</template>
 		</div>
 
@@ -120,6 +130,7 @@ import RegionBars from '@/table/widgets/distributions/components/RegionBars.vue'
 import DistributionModel from '@/table/widgets/distributions/classes/DistributionModel.js';
 import CategoryDistribution from '@/table/widgets/distributions/classes/CategoryDistribution.js';
 import RegionDistribution from '@/table/widgets/distributions/classes/RegionDistribution.js';
+import ChartExporter from '@/table/writers/ChartExporter.js';
 
 export default {
 	name: 'DistributionWidget',
@@ -137,7 +148,8 @@ export default {
 			chartMode: cfg.chartMode || 'bars',        // 'bars' | 'lines' (global)
 			stacked: !!cfg.stacked,                    // apilar (global)
 			collapsed: cfg.collapsed ? cfg.collapsed.slice() : [],  // metricIds colapsados
-			chartHeight: 180
+			chartHeight: 180,
+			exportMenuFor: null   // metricId con el menú de exportar abierto, o null
 		};
 	},
 	computed: {
@@ -148,7 +160,17 @@ export default {
 			return this.model ? this.model.indicators() : [];
 		},
 		anyStackable() {
-			return this.indicators.some(function (ind) { return ind.panels[0].canStack(); });
+			// En categorías: algún panel con varias categorías, ya sea como columnas
+			// elegidas (canStack) o resueltas por Camino 1 (isComposed). En regiones:
+			// paneles cuya barra se compone de varias categorías.
+			var byColumns = this.indicators.some(function (ind) {
+				return ind.panels.some(function (p) { return p.canStack(); });
+			});
+			if (byColumns) return true;
+			if (this.axisMode === 'regions') {
+				return this._anyComposed(this.regionByPanel);
+			}
+			return this._anyComposed(this.categoryByPanel);
 		},
 		categoryByPanel() {
 			var out = {};
@@ -191,12 +213,34 @@ export default {
 		});
 		if (this.$refs.body) this._ro.observe(this.$refs.body);
 		this.$nextTick(this.measureHeight);
+		// Cierra el menú de exportar al hacer clic afuera (el botón y el menú
+		// detienen la propagación con @click.stop).
+		this._exportAway = function () { if (loc.exportMenuFor != null) loc.exportMenuFor = null; };
+		document.addEventListener('click', this._exportAway);
 	},
 	beforeDestroy() {
 		if (this._ro) this._ro.disconnect();
+		if (this._exportAway) document.removeEventListener('click', this._exportAway);
 	},
 	methods: {
 		persist(patch) { this.updateConfig(patch); },
+		toggleExportMenu(metricId) {
+			this.exportMenuFor = (this.exportMenuFor === metricId) ? null : metricId;
+		},
+		// Exporta todos los gráficos del indicador (puede haber un panel por año) a un
+		// único archivo, vectorial (SVG) o raster (PNG). El contenedor es el cuerpo
+		// del bloque; el título combina indicador y variable.
+		exportChart(ind, format) {
+			this.exportMenuFor = null;
+			var refs = this.$refs['body-' + ind.metricId];
+			var body = Array.isArray(refs) ? refs[0] : refs;
+			if (!body) return;
+			var title = ind.name + (ind.variableName ? ' — ' + ind.variableName : '');
+			var exporter = new ChartExporter(body, title);
+			if (!exporter.hasCharts()) return;
+			if (format === 'png') exporter.downloadPng();
+			else exporter.downloadSvg();
+		},
 		isCollapsed(metricId) { return this.collapsed.indexOf(metricId) !== -1; },
 		toggleCollapse(metricId) {
 			var i = this.collapsed.indexOf(metricId);
@@ -208,13 +252,29 @@ export default {
 		measureHeight() {
 			if (!this.$refs.body) return;
 			var h = this.$refs.body.clientHeight;
+			// clientHeight puede ser 0 o no numérico durante el montaje; en ese caso
+			// se mantiene un alto por defecto en vez de propagar un valor inválido
+			// (que un SVG rechazaría por negativo/NaN).
+			if (!h || isNaN(h)) { this.chartHeight = 180; return; }
 			// Se descuenta el espacio de cabecera del bloque, título de versión y
 			// leyenda para que el gráfico no provoque scroll por sobrarse de alto.
-			this.chartHeight = Math.max(125, Math.min(720, h - 160));
+			this.chartHeight = Math.max(125, Math.min(720, h - 175));
 		},
 		barsFor(panel) {
 			var cd = this.categoryByPanel[panel.key()];
 			return cd ? cd.bars() : [];
+		},
+		// ¿Algún panel del mapa de distribuciones tiene barras compuestas por varias
+		// categorías? Habilita apilar incluso sin categorías elegidas como columnas.
+		_anyComposed(byPanel) {
+			for (var k in byPanel) {
+				if (byPanel.hasOwnProperty(k) && byPanel[k] && byPanel[k].isComposed && byPanel[k].isComposed()) return true;
+			}
+			return false;
+		},
+		categoryHasData(panel) {
+			var bars = this.barsFor(panel);
+			return bars.some(function (b) { return b.value != null; });
 		},
 		// Leyenda del indicador: las categorías del panel, o las resueltas por el
 		// Camino 1 cuando la selección es solo total (que vienen en los bars).
@@ -246,6 +306,10 @@ export default {
 			var rd = this.regionByPanel[panel.key()];
 			return rd ? rd.rows() : [];
 		},
+		regionHasData(panel) {
+			var rd = this.regionByPanel[panel.key()];
+			return rd ? rd.hasData() : false;
+		},
 		regionScaleFor(panel) {
 			var rd = this.regionByPanel[panel.key()];
 			if (!rd) return 100;
@@ -258,14 +322,6 @@ export default {
 			if (m <= 0) return panel.isPercent() ? 100 : 1;
 			var p = Math.pow(10, Math.floor(Math.log10(m)));
 			return Math.ceil(m / p) * p;
-		},
-		hiddenFor(panel) {
-			var rd = this.regionByPanel[panel.key()];
-			return rd ? rd.hiddenCount() : 0;
-		},
-		shownFor(panel) {
-			var rd = this.regionByPanel[panel.key()];
-			return rd ? rd.rows().length : 0;
 		}
 	}
 };
@@ -277,10 +333,32 @@ export default {
 	.dist-scroll { display: flex; gap: 16px; align-items: stretch; }
 
 	.dist-indicator { flex: 0 0 auto; display: flex; flex-direction: column; position: relative; }
-	.dist-indicator-body { padding: 10px 12px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: auto; }
+	.dist-indicator-body { padding: 10px 12px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 
 	.w-block-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding-right: 24px; }
-	.dist-head-titles { min-width: 0; }
+	.dist-export { position: relative; flex: 0 0 auto; }
+	.dist-export-btn {
+		border: none; background: transparent; color: #90a4ae; cursor: pointer;
+		font-size: 13px; line-height: 1; padding: 4px 6px; border-radius: 4px;
+	}
+	.dist-export-btn:hover { color: #1976d2; background: #e3f2fd; }
+	.dist-export-menu {
+		position: absolute; top: 100%; right: 0; margin-top: 2px; z-index: 5;
+		background: #fff; border: 1px solid #cfd8dc; border-radius: 4px;
+		box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; padding: 4px 0;
+	}
+	.dist-export-opt {
+		padding: 7px 14px; font-size: 13px; color: #37474f; cursor: pointer; white-space: nowrap;
+	}
+	.dist-export-opt:hover { background: #e3f2fd; }
+	.dist-head-titles { min-width: 0; max-width: 320px; }
+	.dist-head-titles .w-indicator,
+	.dist-head-titles .w-variable {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 320px;
+	}
 	.dist-collapse-btn {
 		border: none; background: transparent; color: #90a4ae; cursor: pointer;
 		font-size: 16px; line-height: 1; padding: 2px 4px; flex: 0 0 auto;
@@ -303,15 +381,35 @@ export default {
 		overflow: hidden; text-overflow: ellipsis; max-height: 220px;
 	}
 
-	.dist-panels { display: flex; gap: 4px; align-items: flex-start; flex: 1 1 auto; min-height: 0; }
+	.dist-panels { display: flex; gap: 4px; align-items: flex-start; flex: 1 1 auto; min-height: 0; overflow-x: auto; }
 	.dist-panel { flex: 0 0 auto; display: flex; flex-direction: column; height: 100%; }
 	.dist-panel-title { text-align: center; margin-bottom: 6px; }
 
-	.dist-legend { margin-top: 10px; max-width: 360px; }
+	.dist-legend {
+		margin: 0;
+		max-width: none;
+		flex: 0 0 auto;
+		padding: 8px 12px;
+		border-top: 1px solid #eceff1;
+		background: #fff;
+	}
 	.dist-cut-note { margin-top: 6px; }
+	.dist-no-data {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 80px;
+		padding: 20px;
+		color: #90a4ae;
+		font-size: 13px;
+		font-style: italic;
+	}
 
 	.sw-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: #546e7a; cursor: pointer; user-select: none; }
-	.sw-toggle.disabled { opacity: 0.4; cursor: not-allowed; }
+	.sw-toggle.disabled { opacity: 0.35; cursor: not-allowed; }
+	.sw-toggle.disabled .sw-track { background: #cfd8dc; }
+	/* Habilitado pero en off: track con un gris más vivo que invita a togglear. */
+	.sw-toggle:not(.disabled) .sw-track { background: #b0bec5; }
 	.sw-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
 	.sw-track { position: relative; width: 30px; height: 16px; background: #cfd8dc; border-radius: 9px; transition: background 0.15s; flex: 0 0 auto; }
 	.sw-thumb { position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: #fff; border-radius: 50%; transition: transform 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }

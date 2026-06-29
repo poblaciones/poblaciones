@@ -25,12 +25,13 @@ function fakeSelection(region) {
 	};
 }
 
-// Delimitación falsa: una versión con su Selection.
+// Delimitación falsa: una versión con su Selection y el nombre en properties.
 function fakeBuild(boundaryId) {
 	var version = { Id: 1, Name: 'b' + boundaryId, Selection: null };
 	var ab = {
 		Versions: [version],
 		SelectedVersionIndex: 0,
+		properties: { Name: 'Delim' + boundaryId },
 		SelectedVersion: function () { return this.Versions[this.SelectedVersionIndex]; }
 	};
 	return { activeBoundary: ab, region: { id: boundaryId } };
@@ -54,6 +55,17 @@ describe('ActiveBoundarySet — agregar y buscar', function () {
 		expect(b.__whole).toBeTruthy();
 		expect(b.__boundaryId).toBe(7);
 		expect(b.__caption).toBe('Prov');
+	});
+	it('addWholeById sin caption explícito lo deriva del nombre de la delimitación', function () {
+		var set = makeSet({ prepend: true });
+		var b = set.addWholeById(7);
+		expect(b.__caption).toBe('Delim7');
+	});
+	it('addItemsById con whole (restauración) deriva el caption del nombre', function () {
+		var set = makeSet({ prepend: true });
+		var b = set.addItemsById(9, ['a', 'b'], true);
+		expect(b.__whole).toBeTruthy();
+		expect(b.__caption).toBe('Delim9');
 	});
 	it('addWholeById sobre una existente la promociona sin duplicar', function () {
 		var set = makeSet();

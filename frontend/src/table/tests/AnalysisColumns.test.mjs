@@ -116,6 +116,14 @@ describe('AnalysisColumns — estadística de conjunto', function () {
 		expect(reg).toBeTruthy();
 		expect(typeof reg.slope).toBe('number');
 	});
+	it('dependentMean da la media ponderada de la dependiente', function () {
+		var c = cols();
+		var m = c.dependentMean('edu_a');
+		// La media cae dentro del rango de la variable.
+		var r = c.dependentRange('edu_a');
+		expect(m >= r.min && m <= r.max).toBeTruthy();
+		expect(typeof m).toBe('number');
+	});
 });
 
 if (import.meta.url === 'file://' + process.argv[1]) {

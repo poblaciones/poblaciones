@@ -58,9 +58,18 @@ ActiveBoundarySet.prototype.addWholeById = function (boundaryId, caption) {
 	version.Selection = regionSelection;
 	built.activeBoundary.__boundaryId = boundaryId;
 	built.activeBoundary.__whole = true;
-	built.activeBoundary.__caption = caption || null;
+	built.activeBoundary.__caption = caption || this._captionOf(built.activeBoundary);
 	this._insert(built.activeBoundary);
 	return this._ready(built.activeBoundary);
+};
+
+// Nombre visible de una delimitación, para el chip. Si no se pasó un caption
+// explícito (p. ej. al restaurar desde la URL), se toma del propio boundary.
+ActiveBoundarySet.prototype._captionOf = function (activeBoundary) {
+	if (activeBoundary && activeBoundary.properties && activeBoundary.properties.Name) {
+		return activeBoundary.properties.Name;
+	}
+	return null;
 };
 
 // Si la delimitación ya está, fusiona los items sin duplicar; si no, la crea.
@@ -81,6 +90,9 @@ ActiveBoundarySet.prototype.addItemsById = function (boundaryId, itemIds, whole)
 	version.Selection = regionSelection;
 	built.activeBoundary.__boundaryId = boundaryId;
 	if (whole !== undefined) built.activeBoundary.__whole = !!whole;
+	// Al restaurar desde la URL no llega caption; se deriva del nombre de la
+	// delimitación para que el chip no muestre el placeholder genérico.
+	built.activeBoundary.__caption = this._captionOf(built.activeBoundary);
 	this._insert(built.activeBoundary);
 	return this._ready(built.activeBoundary);
 };

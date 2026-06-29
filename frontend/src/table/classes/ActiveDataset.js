@@ -53,13 +53,23 @@ function weightingFor(mode, variable) {
 	return { kind: 'none', label: null, available: false };
 }
 
-function weightFromCell(mode, cell) {
+function weightFromCell(column, cell) {
 	if (!cell || cell.Empty) return null;
+	var mode = column.mode;
 	if (SELF_WEIGHTED[mode]) {
 		return (cell.Value != null) ? Number(cell.Value) : null;
 	}
 	if (TOTAL_WEIGHTED[mode]) {
-		return (cell.Total != null) ? Number(cell.Total) : null;
+		if (cell.Total == null) return null;
+		var total = Number(cell.Total);
+		// Variables de brecha: el ponderador suma ambos universos (Total + TotalGap).
+		// Si HasGapSameTotal, ambos totales son la misma magnitud (p. ej. hogares),
+		// así que se cuenta una sola vez para no sobreponderar.
+		if (column.meta && column.meta.isGap && cell.TotalGap != null) {
+			var totalGap = Number(cell.TotalGap);
+			return column.meta.hasGapSameTotal ? total : (total + totalGap);
+		}
+		return total;
 	}
 	if (AREA_WEIGHTED[mode]) {
 		return (cell.Area != null) ? Number(cell.Area) : null;
@@ -120,6 +130,8 @@ function columnRecord(spec, columnIndex) {
 			isTotal: !!spec.isTotal,
 			fillColor: fillColor,
 			isSimpleCount: !!(av && av.IsSimpleCount),
+			isGap: !!(av && av.IsGap),
+			hasGapSameTotal: !!(av && av.HasGapSameTotal),
 			hasArea: !!(spec.level && spec.level.HasArea)
 		},
 		_columnIndex: columnIndex
@@ -139,7 +151,7 @@ function extractWeights(pivotRow, workColumns) {
 	var out = [];
 	for (var i = 0; i < workColumns.length; i++) {
 		var cell = pivotRow[workColumns[i]._columnIndex];
-		out.push(weightFromCell(workColumns[i].mode, cell));
+		out.push(weightFromCell(workColumns[i], cell));
 	}
 	return out;
 }

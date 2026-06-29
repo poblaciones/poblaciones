@@ -135,7 +135,12 @@
           <!-- Lista de hojas: misma fila para búsqueda y para navegación -->
           <div v-else class="indicators-list">
             <div v-if="searchQuery && !filteredItems.length && !filteredBranches.length" class="no-results">
-              No se encontraron resultados para "{{ searchQuery }}"
+              <div>No se encontraron resultados para "{{ searchQuery }}"</div>
+              <div v-if="navStack.length" class="no-results-broaden">
+                <a class="no-results-link" @click.stop="searchFromRoot">
+                  Buscar sin el filtro de "{{ navStack[0].Name }}"
+                </a>
+              </div>
             </div>
 
             <!-- Acción de grupo: agrega el nivel actual como capa (no marca hojas) -->
@@ -242,13 +247,14 @@
           </div>
         </div>
 
-        <!-- "Agregar todos/as": con regiones, clic en una rama agrega todos sus
-             hijos en vez de entrar a navegarla. Fijo debajo del listado. -->
-        <div v-if="showAddAll" class="add-all-bar">
+        <!-- Regiones: controla si clic en una delimitación entra a sus elementos
+             (activo) o los agrega todos (inactivo, default). Visible al ver
+             delimitaciones, también en resultados de búsqueda. -->
+        <div v-if="showDrillToggle" class="add-all-bar">
           <label class="sw-toggle">
-            <input type="checkbox" v-model="addAllMode" />
+            <input type="checkbox" v-model="drillIntoElements" />
             <span class="sw-track"><span class="sw-thumb"></span></span>
-            <span class="sw-label">{{ addAllLabel }}</span>
+            <span class="sw-label">Ver cada elemento de las delimitaciones al seleccionar</span>
           </label>
         </div>
 
@@ -361,7 +367,8 @@ export default {
       internalMulti: this.multiSelect,
       tooltip: { visible: false, top: 0, left: 0, item: null },
       viewMode: 'tree',   // 'tree' | 'list' (listado unificado de niveles 0 y 1)
-      addAllMode: true,   // con regiones: clic en rama agrega todos sus hijos (no entra)
+      drillIntoElements: false,   // regiones: si está activo, clic en delimitación
+                                  // entra a sus elementos; si no (default), agrega todos
       expanded: {},       // sectionKey -> true cuando el separador está expandido
                           // (en listado, por defecto expandido; en árbol, según expandLeaves)
       panelStyle: null,   // posición calculada cuando se ancla a un invocador
@@ -370,23 +377,19 @@ export default {
     };
   },
   computed: {
-    // "Agregar todos/as" se ofrece solo cuando se están viendo boundaries reales
-    // (ramas seleccionables cuyos hijos son regiones), no en la raíz —que muestra
-    // tipos de boundary (nivel 0)— ni cuando se ven las hojas. Requiere haber
-    // entrado al menos un nivel y que las ramas actuales lleven directamente a
-    // hojas (no a más sub-ramas).
-    showAddAll() {
-      if (!this.selectableBranches || this.searchQuery) return false;
-      if (!this.navStack.length) return false;            // raíz: tipos de boundary
+    // El switch "Ver cada elemento de las delimitaciones al seleccionar" se ofrece
+    // cuando hay delimitaciones a la vista: navegando boundaries reales (ramas que
+    // llevan directo a hojas) o en resultados de búsqueda que incluyan alguna
+    // delimitación. No aparece en la raíz (tipos de boundary) ni en hojas puras.
+    showDrillToggle() {
+      if (!this.selectableBranches) return false;
+      if (this.searchQuery) {
+        return this.filteredBranches.some(this.isDelimitation);
+      }
+      if (!this.navStack.length) return false;
       var branches = this.currentBranches;
-      if (!branches.length) return false;                 // viendo hojas, no ramas
-      var loc = this;
-      return branches.every(function (br) {
-        var content = loc.contentOf(br);
-        return content.branches.length === 0 && content.sections.some(function (s) {
-          return s.Items && s.Items.length;
-        });
-      });
+      if (!branches.length) return false;
+      return branches.every(this.isDelimitation);
     },
     isMobile() {
       return window.SegMap && window.SegMap.Configuration && window.SegMap.Configuration.IsMobile;
@@ -437,9 +440,18 @@ export default {
       return out;
     },
     filteredItems() {
-      const term = this.normalize(this.searchQuery.trim());
+      const raw = this.searchQuery.trim();
+      const term = this.normalize(raw);
       if (!term) return [];
-      const matches = this.searchScope.filter(e => this.normalize(e.item.Name || '').includes(term));
+      // Coincide por nombre (parcial) o por código (exacto): si el término escrito
+      // es idéntico al Code del ítem, también se incluye. El match de código es
+      // completo, no parcial, para no traer ruido al teclear dígitos.
+      const matches = this.searchScope.filter(e => {
+        const byName = this.normalize(e.item.Name || '').includes(term);
+        const code = e.item.Code != null ? String(e.item.Code) : '';
+        const byCode = code !== '' && code === raw;
+        return byName || byCode;
+      });
       // Un mismo indicador puede figurar en varias categorías (p. ej. "más usados"
       // y los propios del usuario), por lo que el ámbito de búsqueda lo trae
       // repetido. Se deduplica por Id conservando la primera aparición.
@@ -695,10 +707,27 @@ export default {
       this.navStack = this.navStack.slice(0, depth + 1);
       this.searchQuery = '';
     },
+    // Repite la búsqueda actual desde la raíz, descartando la subruta. Útil cuando
+    // el usuario buscó dentro de una rama (p. ej. "Regiones físicas") sin darse
+    // cuenta y no hubo resultados: el término se conserva y el ámbito se amplía.
+    searchFromRoot() {
+      this.navStack = [];
+    },
+    // Una delimitación es una rama cuyos hijos son elementos (hojas), no más
+    // sub-ramas. Distingue boundaries reales (Provincias, Municipios) de los
+    // agrupadores de tipo (Límites políticos) y de las hojas sueltas.
+    isDelimitation(node) {
+      var content = this.contentOf(node);
+      return content.branches.length === 0 && content.sections.some(function (s) {
+        return s.Items && s.Items.length;
+      });
+    },
     enterBranch(node) {
-      // Con regiones y "Agregar todos/as" activo, clickear una rama agrega todos
-      // sus hijos (como el botón de adentro) en vez de entrar a navegarla.
-      if (this.addAllMode && this.selectableBranches) {
+      // Regiones: si "ver cada elemento" está inactivo (default), clic en una
+      // delimitación agrega todos sus elementos en vez de entrar a navegarla.
+      // Si está activo, se navega. Solo aplica a delimitaciones (no a grupos de
+      // tipo ni a hojas).
+      if (this.selectableBranches && !this.drillIntoElements && this.isDelimitation(node)) {
         this.$emit('select-group', node);
         if (!this.isMulti && this.closeOnSelect) this.closePanel();
         return;
@@ -804,8 +833,9 @@ export default {
     // Desde el listado unificado, entrar a un tipo apila ambos niveles
     // para que el breadcrumb refleje la ruta completa.
     enterListBranch(parent, branch) {
-      // Mismo comportamiento que enterBranch desde el listado.
-      if (this.addAllMode && this.selectableBranches) {
+      // Misma lógica invertida que enterBranch: inactivo (default) agrega todos
+      // los elementos de la delimitación; activo, entra a navegarla.
+      if (this.selectableBranches && !this.drillIntoElements && this.isDelimitation(branch)) {
         this.$emit('select-group', branch);
         if (!this.isMulti && this.closeOnSelect) this.closePanel();
         return;
@@ -1094,6 +1124,9 @@ export default {
 .btn-preview:hover { background: #e9ecef; color: #666; }
 
 .no-results { text-align: center; color: #999; padding: 40px 16px; font-style: italic; font-size: 15px; }
+.no-results-broaden { margin-top: 12px; font-style: normal; }
+.no-results-link { color: #2196F3; font-size: 14px; cursor: pointer; text-decoration: underline; }
+.no-results-link:hover { color: #1976D2; }
 .search-more { text-align: center; color: #1976d2; padding: 12px 16px; font-size: 13px; cursor: pointer; border-top: 1px solid #eee; }
 .search-more:hover { background: #f5f9ff; }
 

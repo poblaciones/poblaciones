@@ -69,10 +69,25 @@ DistributionPanel.prototype.unit = function () {
 	return this.columns.length ? (this.columns[0].unit || '') : '';
 };
 
+// Variable de brecha: el valor es un delta (diferencia de puntos porcentuales o
+// variación relativa), no una incidencia 0-100. Lo marca el meta de la columna.
+DistributionPanel.prototype.isGap = function () {
+	return !!(this.columns.length && this.columns[0].meta && this.columns[0].meta.isGap);
+};
+
+// Unidad para el eje del gráfico. En brecha el delta se expresa en puntos
+// porcentuales ('pp.'); si no, la unidad propia de la variable.
+DistributionPanel.prototype.valueUnit = function () {
+	return this.isGap() ? 'pp.' : this.unit();
+};
+
 // Conteo de medida (cada fila/región representa una unidad) vs porcentaje/tasa.
 // El modo de medición (mode) y la unidad lo determinan: si la unidad es '%', es
 // porcentaje. Conservador: ante la duda, no lo trata como porcentaje.
+// Las variables de brecha NO son porcentaje fijo 0-100: su delta puede ser
+// negativo, así que se excluyen para que la escala se ajuste a los datos.
 DistributionPanel.prototype.isPercent = function () {
+	if (this.isGap()) return false;
 	var u = this.unit();
 	return u.indexOf('%') !== -1;
 };
@@ -83,12 +98,11 @@ DistributionPanel.prototype.showsTotalLine = function () {
 	return this.isPercent() && this._totalColumn != null;
 };
 
-// Las categorías particionan el total cuando, sumadas, lo reconstruyen: es el
-// caso de conteos por subgrupo o de rangos cuya contribución suma el total.
-// Habilita apilar / pedir composición. Se ofrece cuando hay total y categorías;
-// el dato de si la suma cuadra lo valida quien arme las regiones.
+// Apilar requiere al menos dos categorías que compongan una barra. El total, si
+// está, habilita además la composición al 100% (porcentaje); no es requisito para
+// apilar conteos.
 DistributionPanel.prototype.canStack = function () {
-	return this._categoryColumns.length > 1 && this._totalColumn != null;
+	return this._categoryColumns.length > 1;
 };
 
 DistributionPanel.prototype.categoryColumns = function () {

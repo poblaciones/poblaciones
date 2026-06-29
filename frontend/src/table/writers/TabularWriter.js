@@ -33,6 +33,7 @@ TabularWriter.prototype.columnParts = function (tuple) {
 	if (tuple.isTotal) category = 'Total';
 	else if (tuple.labelName) category = tuple.labelName;
 	return {
+		metricId: (tuple.metricId != null ? tuple.metricId : null),
 		indicator: tuple.metricName,
 		variable: variableLabel,
 		category: category,
@@ -71,7 +72,9 @@ TabularWriter.prototype.dataRows = function () {
 			if (cell.isHeader) cells.push(cell.Label);
 			else cells.push(loc._value(headers[j - 1], cell));
 		}
-		out.push({ cells: cells, indent: indent, bold: bold });
+		// El Code solo lo traen los items hoja; agrupadores y encabezados de
+		// delimitación van con código vacío.
+		out.push({ cells: cells, indent: indent, bold: bold, code: (head.Code != null ? head.Code : '') });
 	});
 	return out;
 };
@@ -85,10 +88,15 @@ TabularWriter.prototype.grid = function () {
 	this.pivot.MetricTuples.headers.forEach(function (tuple) {
 		columns.push(loc.columnParts(tuple));
 	});
+	var rows = this.dataRows();
+	// La columna de código solo se incluye si alguna fila trae un valor.
+	var hasCode = rows.some(function (r) { return r.code !== '' && r.code != null; });
 	return {
+		codeHeader: 'Código',
+		hasCode: hasCode,
 		labelHeader: 'Regiones',
 		columns: columns,
-		rows: this.dataRows()
+		rows: rows
 	};
 };
 

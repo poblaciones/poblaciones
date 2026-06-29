@@ -56,7 +56,9 @@ export var WIDGET_KINDS = {
 };
 
 // Lista de los kinds de análisis (los que la pivot ofrece crear), en orden.
-export var ANALYSIS_KINDS = ['summary', 'distribution', 'relations', 'clusters']
+// 'clusters' (Agrupamientos) queda oculto por ahora; su definición sigue en
+// WIDGET_KINDS para reactivarlo agregándolo de nuevo a esta lista.
+export var ANALYSIS_KINDS = ['summary', 'distribution', 'relations']
 	.map(function (k) { return WIDGET_KINDS[k]; });
 
 export function kindInfo(kind) {

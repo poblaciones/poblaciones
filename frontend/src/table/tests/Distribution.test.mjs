@@ -88,11 +88,55 @@ describe('RegionDistribution', function () {
 	it('maxTotal es el mayor de los totales mostrados', function () {
 		expect(rd.maxTotal()).toBeCloseTo(100, 1e-9);
 	});
-	it('recorta al máximo de regiones y reporta las ocultas', function () {
-		var rd2 = new RegionDistribution(edu, dataset, { maxRegions: 2 });
-		expect(rd2.rows()).toHaveLength(2);
-		expect(rd2.hiddenCount()).toBe(2);
-		expect(rd2.totalCount()).toBe(4);
+	it('isComposed es verdadero con varias categorías por barra', function () {
+		expect(rd.isComposed()).toBeTruthy();
+	});
+	it('panel solo-total compone por categoría vía Camino 1 (ResolveAllCategoriesByRegion)', function () {
+		var pob = model.panels()[0];
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				return [
+					{ label: 'Buenos Aires', fid: 1, parts: [
+						{ labelId: 1, name: 'Bajo', color: '#aaa', value: 30 },
+						{ labelId: 2, name: 'Alto', color: '#bbb', value: 70 }
+					] }
+				];
+			}
+		};
+		var rdPob = new RegionDistribution(pob, dataset, { pivot: fakePivot });
+		expect(rdPob.rows()).toHaveLength(1);
+		expect(rdPob.rows()[0].parts).toHaveLength(2);
+		expect(rdPob.rows()[0].total).toBeCloseTo(100, 1e-9);
+		expect(rdPob.isComposed()).toBeTruthy();
+	});
+	it('no recorta: muestra todas las filas visibles', function () {
+		// Sin límite de regiones; el chart refleja todas las filas de la pivot.
+		expect(rd.rows()).toHaveLength(4);
+		expect(rd.totalCount()).toBe(4);
+	});
+
+	it('incluye agrupadores (isGroup) y excluye hijos de grupos colapsados', function () {
+		// Dataset con un agrupador (group-header) y dos hijos.
+		var cols = edu.categoryColumns();
+		var hierDataset = {
+			columns: dataset.columns,
+			dataRows: function () {
+				return [
+					{ type: 'group-header', label: 'Buenos Aires', parentLabel: null, fid: null, values: dataset.dataRows()[0].values },
+					{ type: 'data', label: 'La Plata', parentLabel: 'Buenos Aires', fid: 1, values: dataset.dataRows()[0].values },
+					{ type: 'data', label: 'Mar del Plata', parentLabel: 'Buenos Aires', fid: 2, values: dataset.dataRows()[1].values }
+				];
+			}
+		};
+		// Sin colapso: agrupador + 2 hijos = 3 filas; el agrupador marcado isGroup.
+		var full = new RegionDistribution(edu, hierDataset, {});
+		expect(full.rows()).toHaveLength(3);
+		expect(full.rows()[0].isGroup).toBe(true);
+		expect(full.rows()[1].isGroup).toBe(false);
+		// Con el grupo colapsado: queda solo el agrupador (sus hijos se excluyen).
+		var collapsed = new RegionDistribution(edu, hierDataset, { excludedGroups: ['Buenos Aires'] });
+		expect(collapsed.rows()).toHaveLength(1);
+		expect(collapsed.rows()[0].isGroup).toBe(true);
 	});
 });
 
@@ -126,6 +170,24 @@ describe('CategoryDistribution', function () {
 		expect(cd.bars()).toHaveLength(2);
 		expect(cd.bars()[1].name).toBe('Alto');
 		expect(cd.bars()[1].value).toBe(60);
+	});
+	it('isComposed es verdadero con varias categorías', function () {
+		expect(cdEdu.isComposed()).toBeTruthy();
+	});
+	it('isComposed es falso para un panel solo-total sin pivot', function () {
+		expect(cdPob.isComposed()).toBeFalsy();
+	});
+	it('isComposed es verdadero para solo-total resuelto por Camino 1', function () {
+		var fakePivot = {
+			ResolveAllCategories: function () {
+				return [
+					{ labelId: 1, name: 'Bajo', color: '#aaa', value: 40 },
+					{ labelId: 2, name: 'Alto', color: '#bbb', value: 60 }
+				];
+			}
+		};
+		var cd = new CategoryDistribution(pob, dataset, fakePivot);
+		expect(cd.isComposed()).toBeTruthy();
 	});
 });
 

@@ -29,11 +29,16 @@ CsvWriter.prototype.build = function () {
 	var loc = this;
 	var grid = this.grid();
 
-	var header = [grid.labelHeader];
+	var header = [];
+	if (grid.hasCode) header.push(grid.codeHeader);
+	header.push(grid.labelHeader);
 	grid.columns.forEach(function (col) { header.push(loc._headerLine(col)); });
 
 	var matrix = [header];
-	grid.rows.forEach(function (r) { matrix.push(r.cells); });
+	grid.rows.forEach(function (r) {
+		var cells = grid.hasCode ? [r.code].concat(r.cells) : r.cells;
+		matrix.push(cells);
+	});
 
 	return matrix.map(function (row) {
 		return row.map(function (v) { return loc._escape(v); }).join(',');

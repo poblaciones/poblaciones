@@ -1,20 +1,21 @@
 <template>
-	<svg :viewBox="'0 0 ' + W + ' ' + H" class="region-bars" :style="{ height: H + 'px' }" preserveAspectRatio="xMinYMin meet" role="img" :aria-label="ariaLabel">
+	<svg :viewBox="'0 0 ' + W + ' ' + H" class="region-bars" :style="{ width: W + 'px', height: H + 'px' }" preserveAspectRatio="xMinYMin meet" role="img" :aria-label="ariaLabel">
 		<g v-for="(t, i) in xTicks" :key="'xt-' + i">
 			<line :x1="sx(t)" :y1="pad.t" :x2="sx(t)" :y2="H - pad.b" class="grid-line" />
 			<text :x="sx(t)" :y="pad.t - 3" class="tick-label" text-anchor="middle">{{ fmtTick(t) }}</text>
 		</g>
+		<line v-if="hasNegative" :x1="zeroX" :y1="pad.t" :x2="zeroX" :y2="H - pad.b" class="zero-line" />
 
 		<g v-for="(row, ri) in layout" :key="'r-' + ri">
-			<text :x="pad.l - 6" :y="row.labelY" class="region-label" text-anchor="end">
-				<tspan v-for="(ln, li) in row.lines" :key="'ln-' + li" :x="pad.l - 6" :dy="li === 0 ? 0 : 14">{{ ln }}</tspan>
+			<text :x="pad.l - 6" :y="row.labelY" class="region-label" :class="{ 'region-label-group': row.isGroup }" text-anchor="end">
+				<tspan v-for="(ln, li) in row.lines" :key="'ln-' + li" :x="pad.l - 6" :dy="li === 0 ? 0 : lineH">{{ ln }}</tspan>
 			</text>
 			<rect v-for="(seg, si) in row.segments" :key="'s-' + ri + '-' + si"
 					:x="seg.x" :y="row.y" :width="seg.w" :height="barH"
 					:style="{ fill: seg.color }" class="seg">
 				<title>{{ seg.title }}</title>
 			</rect>
-			<text v-if="!stacked" :x="row.totalX + 4" :y="row.cy + 3" class="region-total">{{ fmtVal(row.total) }}</text>
+			<text v-if="!stacked" :x="row.totalX + 4" :y="row.cy + 3" class="region-total" :class="{ 'region-total-group': row.isGroup }">{{ fmtVal(row.total) }}</text>
 		</g>
 	</svg>
 </template>
@@ -30,7 +31,7 @@
 			minHeight: { type: Number, default: 0 }
 		},
 		data: function () {
-			return { W: 440, baseBarH: 16, baseRowGap: 7, pad: { l: 176, r: 44, t: 16, b: 6 }, labelCharsPerLine: 22, labelMaxLines: 2, lineH: 14 };
+			return { W: 350, baseBarH: 16, baseRowGap: 7, pad: { l: 150, r: 40, t: 16, b: 6 }, labelCharsPerLine: 22, labelMaxLines: 2, lineH: 14 };
 		},
 		computed: {
 			ariaLabel: function () {
@@ -59,16 +60,52 @@
 				return Math.max(total, this.pad.t + this.pad.b + 20);
 			},
 			trackW: function () { return this.W - this.pad.l - this.pad.r; },
+			// Rango de valores de las barras. Con deltas de brecha puede haber
+			// negativos: el eje incluye ambos lados y las barras divergen desde el cero.
+			valueRange: function () {
+				var min = 0, max = 0;
+				var loc = this;
+				this.rows.forEach(function (r) {
+					var v = loc.stacked ? 0 : (r.total || 0);
+					if (!loc.stacked) {
+						for (var k = 0; k < r.parts.length; k++) {
+							var pv = r.parts[k].value || 0;
+							if (pv < min) min = pv;
+							if (pv > max) max = pv;
+						}
+					}
+					if (v < min) min = v;
+					if (v > max) max = v;
+				});
+				if (min === 0 && max === 0) max = 1;
+				return { min: min, max: max };
+			},
+			hasNegative: function () { return this.valueRange.min < 0; },
 			axisMax: function () { return this.stacked ? 100 : (this.scaleMax > 0 ? this.scaleMax : 1); },
 			xTicks: function () {
-				var m = this.axisMax;
 				var ticks = [];
-				for (var i = 0; i <= 4; i++) ticks.push(Math.round((m / 4) * i * 100) / 100);
+				if (this.hasNegative) {
+					var range = this.valueRange;
+					for (var i = 0; i <= 4; i++) {
+						ticks.push(Math.round((range.min + (range.max - range.min) / 4 * i) * 100) / 100);
+					}
+					return ticks;
+				}
+				var m = this.axisMax;
+				for (var j = 0; j <= 4; j++) ticks.push(Math.round((m / 4) * j * 100) / 100);
 				return ticks;
 			},
 			layout: function () {
 				var loc = this;
 				var y = this.pad.t;
+				var neg = this.hasNegative;
+				var range = this.valueRange;
+				// Con negativos, el dominio va de min a max y el cero cae en su lugar;
+				// las barras parten del cero. Sin negativos, comportamiento clásico
+				// (desde el borde izquierdo, escala 0..axisMax).
+				var span = neg ? (range.max - range.min) : this.axisMax;
+				if (span <= 0) span = 1;
+				var zeroX = neg ? (this.pad.l + ((0 - range.min) / span) * this.trackW) : this.pad.l;
 				return this.rows.map(function (r) {
 					var lines = loc._wrap(r.label);
 					var rowH = Math.max(lines.length * loc.lineH, loc.barH);
@@ -78,24 +115,48 @@
 					var acc = 0;
 					var segments = r.parts.map(function (p) {
 						var v = p.value || 0;
-						var val = loc.stacked ? (sum > 0 ? v / sum * 100 : 0) : v;
-						var w = (val / loc.axisMax) * loc.trackW;
-						var x = loc.pad.l + (acc / loc.axisMax) * loc.trackW;
-						acc += val;
-						return { x: x, w: w, color: p.color || '#888780',
+						var seg;
+						if (neg) {
+							// Barra desde el cero hacia el lado del signo. El ancho es la
+							// magnitud; nunca negativo (eso rompía el atributo width).
+							var x0 = loc.pad.l + ((0 - range.min) / span) * loc.trackW;
+							var x1 = loc.pad.l + ((v - range.min) / span) * loc.trackW;
+							seg = { x: Math.min(x0, x1), w: Math.abs(x1 - x0) };
+						} else {
+							var val = loc.stacked ? (sum > 0 ? v / sum * 100 : 0) : v;
+							var w = (val / loc.axisMax) * loc.trackW;
+							var x = loc.pad.l + (acc / loc.axisMax) * loc.trackW;
+							acc += val;
+							seg = { x: x, w: Math.max(0, w) };
+						}
+						return { x: seg.x, w: seg.w, color: p.color || '#888780',
 							title: r.label + ' · ' + loc.fmtVal(v) + (loc.stacked && sum > 0 ? ' (' + Math.round(v / sum * 100) + '%)' : '') };
 					});
-					var totalX = loc.pad.l + ((loc.stacked ? 100 : Math.min(sum, loc.axisMax)) / loc.axisMax) * loc.trackW;
+					var totalX = neg
+						? loc.pad.l + ((Math.max(range.min, Math.min(sum, range.max)) - range.min) / span) * loc.trackW
+						: loc.pad.l + ((loc.stacked ? 100 : Math.min(sum, loc.axisMax)) / loc.axisMax) * loc.trackW;
 					var cy = barTop + loc.barH / 2;
 					var labelY = cy - (lines.length - 1) * loc.lineH / 2 + 3;
-					var item = { lines: lines, labelY: labelY, y: barTop, cy: cy, segments: segments, total: r.total, totalX: totalX };
+					var item = { lines: lines, labelY: labelY, y: barTop, cy: cy, segments: segments, total: r.total, totalX: totalX, isGroup: !!r.isGroup };
 					y += rowH + loc.rowGap;
 					return item;
 				});
+			},
+			zeroX: function () {
+				var range = this.valueRange;
+				var span = (range.max - range.min) || 1;
+				return this.hasNegative ? (this.pad.l + ((0 - range.min) / span) * this.trackW) : this.pad.l;
 			}
 		},
 		methods: {
-			sx: function (v) { return this.pad.l + (v / this.axisMax) * this.trackW; },
+			sx: function (v) {
+				if (this.hasNegative) {
+					var range = this.valueRange;
+					var span = (range.max - range.min) || 1;
+					return this.pad.l + ((v - range.min) / span) * this.trackW;
+				}
+				return this.pad.l + (v / this.axisMax) * this.trackW;
+			},
 			_wrap: function (label) {
 				var s = String(label == null ? '' : label);
 				var max = this.labelCharsPerLine;
@@ -140,10 +201,13 @@
 </script>
 
 <style scoped>
-	.region-bars { width: 100%; min-width: 300px; max-width: 580px; display: block; }
+	.region-bars { max-width: 580px; display: block; flex: none; align-self: flex-start; }
 	.grid-line { stroke: #eceff1; stroke-width: 0.5; }
-	.tick-label { font-size: 9px; fill: #90a4ae; }
+	.zero-line { stroke: #90a4ae; stroke-width: 1; }
+	.tick-label { font-size: 10px; fill: #90a4ae; }
 	.region-label { font-size: 15px; fill: #546e7a; }
+	.region-label-group { font-weight: 700; fill: #37474f; }
 	.region-total { font-size: 11px; fill: #78909c; }
+	.region-total-group { font-weight: 700; fill: #546e7a; }
 	.seg { stroke: #fff; stroke-width: 0.5; }
 </style>

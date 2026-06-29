@@ -156,7 +156,7 @@ class BoundaryModel extends BaseModel
 				else
 					$orderBy .= 'cli_caption, cli_code';
 
-				$sql = "SELECT cli_id Id, cli_caption `Name` , " . $useParentSelect . " IFNULL(clc_population, 0) Population
+				$sql = "SELECT cli_id Id, cli_caption `Name` , cli_code Code," . $useParentSelect . " IFNULL(clc_population, 0) Population
                     FROM boundary_version_clipping_region c
                     JOIN clipping_region_item cli ON cli_clipping_region_id = bcr_clipping_region_id
                     LEFT JOIN snapshot_lookup_clipping_region_item ON cli_id = clc_clipping_region_item_id

@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import axiosClient from '@/common/js/axiosClient';
 import promises from '@/common/framework/promises';
 
-import ActiveSelectedMetric from '@/map/classes/ActiveSelectedMetric';
+import ActiveMultiselectedMetric from '@/table/classes/ActiveMultiselectedMetric.js';
 
 
 export default MetricStore;
@@ -26,8 +26,11 @@ MetricStore.prototype.GetMetricInfoById = function (metricId) {
 
 
 MetricStore.prototype.GetMetricData = function (metric, version, level) {
-	version = version || metric.SelectedVersion();
-	level = level || metric.SelectedLevel();
+	// La pivot siempre pasa version y level (desde la tupla). El fallback usa la
+	// selección de referencia del modelo multi-censo.
+	var ref = (!version || !level) ? metric.referenceSelection() : null;
+	version = version || (ref ? ref.version : null);
+	level = level || (ref ? ref.level : null);
 	var args = { m: metric.properties.Metric.Id, v: version.Version.Id, l: level.Id };
 	return axiosClient.getPromise(window.host + '/services/frontend/processor/GetMetricData', args,
 		('traer las Metrices'));
@@ -54,13 +57,13 @@ MetricStore.prototype.GetMetricOrRetrieve = function (metricId) {
 		});
 };
 
-// Cada ActiveSelectedMetric recibe una copia propia del metricInfo. El info que
+// Cada ActiveMultiselectedMetric recibe una copia propia del metricInfo. El info que
 // guarda el store es un catálogo compartido (puede pedirse el mismo indicador
 // varias veces); sin la copia, dos columnas del mismo indicador compartirían la
 // selección (versión, variable, categorías) y no podrían configurarse aparte.
 MetricStore.prototype.CreateActiveMetric = function (metricInfo) {
 	var ownInfo = JSON.parse(JSON.stringify(metricInfo));
-	var activeMetric = new ActiveSelectedMetric(ownInfo);
+	var activeMetric = new ActiveMultiselectedMetric(ownInfo);
 	activeMetric.Store = this;
 	// Identidad de instancia: distingue dos columnas del mismo indicador (misma
 	// Metric.Id) en las keys de Vue y ante reordenamientos.

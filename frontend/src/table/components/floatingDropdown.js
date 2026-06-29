@@ -37,15 +37,30 @@ export default {
 		var loc = this;
 		this.clickOutsideHandler = function (event) {
 			if (!loc.open) return;
-			var inside = false;
 			var rootClass = loc.rootClass ? loc.rootClass() : null;
-			var target = event.target;
-			while (target) {
-				if (target.classList && (
-					target.classList.contains('floating') ||
-					(rootClass && target.classList.contains(rootClass))
-				)) { inside = true; break; }
-				target = target.parentElement;
+			// composedPath captura el camino del evento en el momento del click; es
+			// estable aunque el re-render (al togglear un checkbox) reemplace el nodo
+			// clickeado y lo deje huérfano. Recorrer desde event.target tras ese
+			// reemplazo subía por un árbol desconectado y cerraba el panel por error.
+			var path = (typeof event.composedPath === 'function') ? event.composedPath() : null;
+			var inside = false;
+			if (path) {
+				for (var i = 0; i < path.length; i++) {
+					var el = path[i];
+					if (el && el.classList && (
+						el.classList.contains('floating') ||
+						(rootClass && el.classList.contains(rootClass))
+					)) { inside = true; break; }
+				}
+			} else {
+				var target = event.target;
+				while (target) {
+					if (target.classList && (
+						target.classList.contains('floating') ||
+						(rootClass && target.classList.contains(rootClass))
+					)) { inside = true; break; }
+					target = target.parentElement;
+				}
 			}
 			if (!inside) loc.closePanel();
 		};
@@ -68,6 +83,12 @@ export default {
 		if (this.clickOutsideHandler) document.removeEventListener('click', this.clickOutsideHandler);
 		if (this.scrollHandler) window.removeEventListener('scroll', this.scrollHandler, true);
 		if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
+		// Si el panel quedó portado al body, removerlo para no dejar nodos huérfanos.
+		if (this._portalPanel && this._portalPanel.parentNode === document.body) {
+			document.body.removeChild(this._portalPanel);
+		}
+		this._portalPanel = null;
+		this._portalHome = null;
 		if (this.open) this.$emit('open-change', false);
 	},
 
@@ -78,9 +99,32 @@ export default {
 		},
 		openPanel: function (anchorEl) {
 			this.open = true;
-			this._positionFrom(anchorEl);
+			var loc = this;
+			// El panel flota con position:fixed pero queda anidado en un th sticky
+			// (que crea contexto de apilamiento), por lo que su z-index no escapa y
+			// aparece por detrás de las celdas vecinas. Se reubica en el body y se
+			// posiciona DESPUÉS de moverlo (el anchor permanece en su lugar original,
+			// y position:fixed se mide contra el viewport).
+			this.$nextTick(function () {
+				var panel = loc.$el && loc.$el.querySelector ? loc.$el.querySelector('.floating') : null;
+				if (panel && panel.parentNode !== document.body) {
+					loc._portalPanel = panel;
+					loc._portalHome = panel.parentNode;
+					document.body.appendChild(panel);
+				}
+				loc._positionFrom(anchorEl);
+			});
 		},
 		closePanel: function () {
+			// Devuelve el panel a su lugar original antes de ocultarlo (si Vue aún no
+			// lo destruyó), para que el v-if lo gestione normalmente.
+			if (this._portalPanel && this._portalHome) {
+				if (this._portalPanel.parentNode === document.body) {
+					this._portalHome.appendChild(this._portalPanel);
+				}
+				this._portalPanel = null;
+				this._portalHome = null;
+			}
 			this.open = false;
 		},
 

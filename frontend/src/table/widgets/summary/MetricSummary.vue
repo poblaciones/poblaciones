@@ -187,13 +187,15 @@ export default {
 		gap: 2px;
 	}
 	.ms-indicator {
-		font-size: 13px;
-		font-weight: 600;
+		font-size: 18px;
+		font-weight: normal;
 		color: #263238;
+		line-height: 1.45em;
 	}
 	.ms-variable {
-		font-size: 11px;
+		font-size: 13px;
 		color: #78909c;
+		line-height: 1.4em;
 	}
 	.ms-version {
 		padding: 0;

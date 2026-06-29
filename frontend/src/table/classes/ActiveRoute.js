@@ -168,34 +168,31 @@ ActiveRoute.prototype.sections = function () {
 	return sections;
 };
 
-// level y variable se serializan solo para la versión principal; al restaurar,
-// el resto de las versiones se rematchea por nombre.
+// Serializa la columna desde las Selections del indicador. Cada Selection es un
+// censo con su nivel y variable; el formato de URL conserva versionIds + un
+// level/variable de referencia (la primera Selection) + la selección por censo.
 ActiveRoute.prototype._columnSection = function (metric) {
 	var props = metric.properties;
-	var versionIndices = (props.MultiVersion && Array.isArray(props.SelectedVersionIndices) && props.SelectedVersionIndices.length > 0)
-		? props.SelectedVersionIndices.slice()
-		: [props.SelectedVersionIndex];
+	var selections = metric.Selections || [];
 
 	var versionIds = [];
 	var selection = {};
-	for (var vi = 0; vi < versionIndices.length; vi++) {
-		var v = props.Versions[versionIndices[vi]];
-		if (v) {
-			versionIds.push(v.Version.Id);
-			var sel = (props.SelectedLabelIds && props.SelectedLabelIds[v.Version.Id]) || { labels: [], includeTotal: true };
-			selection[v.Version.Id] = { labels: (sel.labels || []).slice(), includeTotal: sel.includeTotal !== false };
-		}
+	for (var i = 0; i < selections.length; i++) {
+		var sel = selections[i];
+		var vId = sel.versionId();
+		versionIds.push(vId);
+		selection[vId] = {
+			labels: (sel.labels || []).slice(),
+			includeTotal: sel.includeTotal !== false
+		};
 	}
 
-	var mainVersion = props.Versions[versionIndices[0]];
-	var mainLevel = mainVersion ? mainVersion.Levels[mainVersion.SelectedLevelIndex] : null;
-	var mainVariable = mainLevel ? mainLevel.Variables[mainLevel.SelectedVariableIndex] : null;
-
+	var first = selections[0] || null;
 	return {
 		id: props.Metric.Id,
 		versionIds: versionIds,
-		levelId: mainLevel ? mainLevel.Id : null,
-		variableId: mainVariable ? mainVariable.Id : null,
+		levelId: first ? first.level.Id : null,
+		variableId: first ? first.variable.Id : null,
 		summary: props.SummaryMetric || null,
 		selection: selection
 	};

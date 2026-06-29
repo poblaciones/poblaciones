@@ -194,6 +194,33 @@ describe('manager Columns (API por objeto)', function () {
 	});
 });
 
+describe('GroupRowsByParent — subtotal con brecha (gap)', function () {
+	it('el subtotal del corte de control suma el gap de los hijos y calcula el delta', function () {
+		var p = new ActivePivot();
+		var variable = { IsGap: true, NormalizationScale: 1 };
+		// Una columna en modo incidencia con variable de brecha.
+		p.MetricTuples.metricTuples = [{
+			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
+			metric: { properties: { SummaryMetric: 'I' } }, variable: variable
+		}];
+		// Dos filas hijas del mismo padre, con datos de brecha.
+		var rows = [
+			[{ Label: 'A', FID: 1, Parent: 'P' }, { Value: 7090, Total: 17379, ValueGap: 6193, TotalGap: 18536 }],
+			[{ Label: 'B', FID: 2, Parent: 'P' }, { Value: 3200, Total: 9000, ValueGap: 2800, TotalGap: 9500 }]
+		];
+		var grouped = p.GroupRowsByParent(rows);
+		// La primera fila del resultado es el subtotal del grupo (isGroupHeader).
+		var subtotal = grouped[0];
+		expect(subtotal[0].isGroupHeader).toBe(true);
+		var subCell = subtotal[1];
+		// Sumó los dos universos de los hijos.
+		expect(subCell.ValueGap).toBe(8993);
+		expect(subCell.TotalGap).toBe(28036);
+		// Y calculó el delta (no quedó en null/'-').
+		expect(subCell.ComputedValue).toBeCloseTo(-17.7698, 3);
+	});
+});
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }

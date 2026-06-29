@@ -135,7 +135,12 @@
           <!-- Lista de hojas: misma fila para búsqueda y para navegación -->
           <div v-else class="indicators-list">
             <div v-if="searchQuery && !filteredItems.length && !filteredBranches.length" class="no-results">
-              No se encontraron resultados para "{{ searchQuery }}"
+              <div>No se encontraron resultados para "{{ searchQuery }}"</div>
+              <div v-if="navStack.length" class="no-results-broaden">
+                <a class="no-results-link" @click.stop="searchFromRoot">
+                  Buscar sin el filtro de "{{ navStack[0].Name }}"
+                </a>
+              </div>
             </div>
 
             <!-- Acción de grupo: agrega el nivel actual como capa (no marca hojas) -->
@@ -435,9 +440,18 @@ export default {
       return out;
     },
     filteredItems() {
-      const term = this.normalize(this.searchQuery.trim());
+      const raw = this.searchQuery.trim();
+      const term = this.normalize(raw);
       if (!term) return [];
-      const matches = this.searchScope.filter(e => this.normalize(e.item.Name || '').includes(term));
+      // Coincide por nombre (parcial) o por código (exacto): si el término escrito
+      // es idéntico al Code del ítem, también se incluye. El match de código es
+      // completo, no parcial, para no traer ruido al teclear dígitos.
+      const matches = this.searchScope.filter(e => {
+        const byName = this.normalize(e.item.Name || '').includes(term);
+        const code = e.item.Code != null ? String(e.item.Code) : '';
+        const byCode = code !== '' && code === raw;
+        return byName || byCode;
+      });
       // Un mismo indicador puede figurar en varias categorías (p. ej. "más usados"
       // y los propios del usuario), por lo que el ámbito de búsqueda lo trae
       // repetido. Se deduplica por Id conservando la primera aparición.
@@ -692,6 +706,12 @@ export default {
     goToDepth(depth) {
       this.navStack = this.navStack.slice(0, depth + 1);
       this.searchQuery = '';
+    },
+    // Repite la búsqueda actual desde la raíz, descartando la subruta. Útil cuando
+    // el usuario buscó dentro de una rama (p. ej. "Regiones físicas") sin darse
+    // cuenta y no hubo resultados: el término se conserva y el ámbito se amplía.
+    searchFromRoot() {
+      this.navStack = [];
     },
     // Una delimitación es una rama cuyos hijos son elementos (hojas), no más
     // sub-ramas. Distingue boundaries reales (Provincias, Municipios) de los
@@ -1104,6 +1124,9 @@ export default {
 .btn-preview:hover { background: #e9ecef; color: #666; }
 
 .no-results { text-align: center; color: #999; padding: 40px 16px; font-style: italic; font-size: 15px; }
+.no-results-broaden { margin-top: 12px; font-style: normal; }
+.no-results-link { color: #2196F3; font-size: 14px; cursor: pointer; text-decoration: underline; }
+.no-results-link:hover { color: #1976D2; }
 .search-more { text-align: center; color: #1976d2; padding: 12px 16px; font-size: 13px; cursor: pointer; border-top: 1px solid #eee; }
 .search-more:hover { background: #f5f9ff; }
 

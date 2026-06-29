@@ -436,6 +436,14 @@ export default {
 		// Punto de corte al centro del rango de la dependiente (al activar la
 		// logística o al cambiar de dependiente).
 		resetThresholdToMid() {
+			// Punto de corte por defecto: la media ponderada de la dependiente (cae
+			// dentro de los datos), con respaldo al centro del rango si no se puede
+			// calcular.
+			var mean = (this.cols && this.depColumn) ? this.cols.dependentMean(this.depColumn.key) : null;
+			if (mean != null && isFinite(mean)) {
+				this.logitThreshold = this.roundToCut(mean);
+				return;
+			}
 			var r = this.depRange;
 			this.logitThreshold = r ? this.roundToCut((r.min + r.max) / 2) : null;
 		},
@@ -536,7 +544,7 @@ export default {
 	@import '@/table/widgets/widgetStyles.css';
 
 	.widget { font-size: 14px; }
-	.widget-kind { font-size: 14px; }
+
 	.widget-empty { font-size: 14px; }
 
 	.tabs { display: flex; gap: 2px; padding: 6px 10px 0; background: #fafafa; border-bottom: 1px solid #eee; }
@@ -605,6 +613,6 @@ export default {
 	.reg-type label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 	.logit-controls { margin: 4px 0 10px; }
 	.cut-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; color: #455a64; }
-	.cut-slider { flex: 0 1 auto; width: 45%; min-width: 80px; }
-	.cut-input { width: 90px; padding: 2px 6px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; }
+	.cut-slider { flex: 0 1 auto; width: 22%; min-width: 60px; }
+	.cut-input { width: 59px; padding: 2px 6px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; }
 </style>

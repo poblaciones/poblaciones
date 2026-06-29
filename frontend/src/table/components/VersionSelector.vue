@@ -1,27 +1,20 @@
 <template>
 	<div class="version-selector" v-if="hasMultiple">
 		<div class="version-label-wrapper" ref="anchor" @click.stop="togglePanel($refs.anchor)">
-			<span class="version-text">{{ label }}</span>
 			<span class="version-arrow">▾</span>
 		</div>
 
 		<div v-if="open" class="version-dropdown floating" :style="floatStyle">
-			<div v-for="(version, index) in versions"
-					 :key="'version-' + index"
+			<div v-for="version in versions"
+					 :key="'version-' + version.Version.Id"
 					 class="version-option"
-					 :class="{ 'active': !multi && index === selectedIndex }"
-					 @click="onOptionClick(index)">
-				<input v-if="multi" type="checkbox" class="version-checkbox"
-							 :checked="isActive(index)"
-							 @click.stop="$emit('toggle-multi', index)" />
+					 :class="{ 'version-option-locked': isLast(version.Version.Id) }"
+					 @click.stop="onToggle(version.Version.Id)">
+				<input type="checkbox" class="version-checkbox" tabindex="-1"
+							 :checked="isActive(version.Version.Id)"
+							 :disabled="isLast(version.Version.Id)"
+							 @click.prevent />
 				<span>{{ version.Version.Name }}</span>
-			</div>
-
-			<div class="version-multi-switch">
-				<label class="switch-label">
-					<input type="checkbox" :checked="multi" @change="$emit('toggle-mode')" />
-					<span>Elegir varios</span>
-				</label>
 			</div>
 		</div>
 	</div>
@@ -32,12 +25,9 @@
 import floatingDropdown from '@/table/components/floatingDropdown.js';
 
 /*
- * VersionSelector — combo de edición (versión) de un indicador. Conoce el
- * objeto de negocio (la métrica con sus Versions, el índice activo y el estado
- * multi-versión): sabe mostrar la edición o ediciones elegidas y el switch
- * "Elegir varios". No muta la métrica: emite 'select' (índice en single),
- * 'toggle-multi' (índice en multi) y 'toggle-mode' (cambiar single/multi). El
- * rematch de niveles/categorías y la invalidación de datos los hace el padre.
+ * VersionSelector — combo de años (censos) del indicador. Ofrece solo los
+ * censos donde existe la variable lógica vigente (VersionsForVariable) y emite
+ * 'toggle-version' con el id; el modelo agrega o quita esa selección.
  */
 export default {
 	name: 'VersionSelector',
@@ -46,38 +36,29 @@ export default {
 		metric: { type: Object, required: true }
 	},
 	computed: {
-		versions() { return this.metric.properties.Versions; },
+		// Censos ofrecibles: donde existe la variable vigente.
+		versions() { return this.metric.VersionsForVariable(this.metric.variableName()); },
 		hasMultiple() { return this.versions.length > 1; },
-		multi() { return !!this.metric.properties.MultiVersion; },
-		selectedIndex() { return this.metric.properties.SelectedVersionIndex; },
-		activeIndices() { return this.metric.properties.SelectedVersionIndices; },
-		// Edición actual en single (nombre seguro).
+		activeIds() { return this.metric.Selections.map(function (s) { return s.versionId(); }); },
 		singleName() {
-			var v = this.versions[this.selectedIndex];
+			var v = this.versions[0];
 			return v && v.Version ? v.Version.Name : '—';
 		},
-		// Etiqueta del control: en single la edición; en multi, la lista elegida.
+		// Etiqueta: lista de años activos.
 		label() {
-			if (!this.multi) return this.singleName;
-			var idxs = this.activeIndices;
-			if (!idxs.length) return 'Ninguno';
-			var versions = this.versions;
-			return idxs
-				.map(function (i) { var v = versions[i]; return v ? v.Version.Name : null; })
-				.filter(Boolean)
-				.join(', ');
+			var active = this.metric.Selections.map(function (s) { return s.versionName(); });
+			return active.length ? active.join(', ') : 'Ninguno';
 		}
 	},
 	methods: {
 		rootClass() { return 'version-selector'; },
 		panelWidth() { return 200; },
-		isActive(index) { return this.activeIndices.indexOf(index) !== -1; },
-		// Click en una opción: en single cambia la edición (y cierra); en multi el
-		// checkbox es el que togglea, así que el click en la fila no hace nada.
-		onOptionClick(index) {
-			if (this.multi) return;
-			this.closePanel();
-			this.$emit('select', index);
+		isActive(versionId) { return this.activeIds.indexOf(versionId) !== -1; },
+		// El último censo activo no puede destildarse: siempre debe quedar uno.
+		isLast(versionId) { return this.activeIds.length === 1 && this.activeIds[0] === versionId; },
+		onToggle(versionId) {
+			if (this.isLast(versionId)) return;
+			this.$emit('toggle-version', versionId);
 		}
 	}
 };
@@ -85,35 +66,30 @@ export default {
 
 <style scoped>
 	.version-selector {
-		position: relative;
+		display: inline-flex;
 	}
 	.version-label-wrapper {
 		display: flex;
 		align-items: center;
 		gap: 4px;
-		padding: 4px 8px;
-		background-color: #f5f5f5;
-		border: 1px solid #e0e0e0;
+		padding: 0;
+		background: none;
+		border: none;
 		border-radius: 4px;
 		cursor: pointer;
-		transition: all 0.2s ease;
+		transition: background-color 0.15s ease;
 	}
 	.version-label-wrapper:hover {
-		background-color: #eeeeee;
-		border-color: #bdbdbd;
-	}
-	.version-text {
-		font-size: 12px;
-		color: #424242;
-		white-space: nowrap;
+		background-color: #2499ef;
 	}
 	.version-text-single {
 		font-size: 12px;
 		color: #424242;
 	}
 	.version-arrow {
-		color: #757575;
-		font-size: 10px;
+		color: #ffffff;
+		font-size: 18px;
+		line-height: 1;
 	}
 	.version-dropdown {
 		background-color: #fff;
@@ -137,20 +113,23 @@ export default {
 		overflow-y: auto;
 	}
 	.version-option {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 		padding: 8px 12px;
 		cursor: pointer;
 		font-size: 12px;
 		color: #424242;
+		text-align: left;
 		transition: background-color 0.15s ease;
 		white-space: nowrap;
 	}
 	.version-option:hover {
 		background-color: #f5f5f5;
 	}
-	.version-option.active {
-		background-color: #e3f2fd;
-		color: #1976d2;
-		font-weight: 500;
+	.version-option-locked {
+		opacity: 0.55;
+		cursor: default;
 	}
 	.version-option .version-checkbox {
 		margin-right: 6px;

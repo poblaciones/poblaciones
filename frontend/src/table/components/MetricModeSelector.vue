@@ -34,12 +34,13 @@ export default {
 	mixins: [floatingDropdown],
 	props: {
 		metric: { type: Object, required: true },
-		variable: { type: Object, default: null }
+		variable: { type: Object, default: null },
+		level: { type: Object, default: null }
 	},
 	computed: {
-		// Modos de resumen válidos para esta métrica/variable.
+		// Modos de resumen válidos para esta métrica/variable/nivel.
 		validModes() {
-			return this.metric.getValidMetrics ? this.metric.getValidMetrics(this.variable) : [];
+			return this.metric.getValidMetrics ? this.metric.getValidMetrics(this.variable, this.level) : [];
 		},
 		currentKey() {
 			return this.metric.properties.SummaryMetric;

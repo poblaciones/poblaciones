@@ -1,6 +1,7 @@
 <template>
 	<svg :viewBox="'0 0 ' + W + ' ' + H" class="cat-chart" :style="{ height: H + 'px', width: pxWidth + 'px' }"
 			preserveAspectRatio="xMidYMid meet" role="img" :aria-label="ariaLabel">
+		<template v-if="hasData">
 		<!-- Marco del área de datos -->
 		<rect :x="pad.l" :y="pad.t" :width="plotW" :height="plotH" class="plot-frame" />
 
@@ -20,7 +21,6 @@
 						<title>{{ seg.title }}</title>
 					</rect>
 				</template>
-				<text :x="yr.cx" :y="H - pad.b + 12" class="x-label" text-anchor="middle">{{ yr.name }}</text>
 			</g>
 			<!-- Áreas apiladas entre años (modo líneas) -->
 			<template v-if="mode === 'lines'">
@@ -48,6 +48,14 @@
 			</template>
 			<line v-if="showTotalLine && totalValue != null" :x1="pad.l" :y1="sy(totalValue)" :x2="W - pad.r" :y2="sy(totalValue)" class="total-line" />
 		</template>
+
+		<!-- Etiquetas de categoría/año bajo cada columna, envueltas en dos líneas -->
+		<g v-for="(lab, li) in xLabels" :key="'xl-' + li">
+			<text :x="lab.cx" :y="H - pad.b + labelLineH + 2" class="x-label" text-anchor="middle">
+				<tspan v-for="(ln, k) in lab.lines" :key="'xln-' + k" :x="lab.cx" :dy="k === 0 ? 0 : labelLineH">{{ ln }}</tspan>
+			</text>
+		</g>
+		</template>
 	</svg>
 </template>
 
@@ -60,29 +68,60 @@
 			mode: { type: String, default: 'bars' },                        // 'bars' | 'lines'
 			stacked: { type: Boolean, default: false },
 			isPercent: { type: Boolean, default: false },
+			isGap: { type: Boolean, default: false },
+			valueUnit: { type: String, default: '' },
 			showTotalLine: { type: Boolean, default: false },
 			totalValue: { type: Number, default: null },
 			height: { type: Number, default: 180 }
 		},
 		data: function () {
-			return { pad: { l: 40, r: 12, t: 12, b: 22 } };
+			return {
+				// Espacio inferior (pad.b) reservado para las etiquetas de categoría en
+				// hasta dos líneas; el resto del padding enmarca el área de datos.
+				pad: { l: 44, r: 14, t: 14, b: 40 },
+				colWidth: 46,        // ancho fijo por columna (rectangular, no cuadrado)
+				barMaxWidth: 26,     // ancho máximo de la barra dentro de su columna
+				labelLineH: 11,      // interlineado de las etiquetas de categoría
+				labelMaxLines: 2,    // hasta dos líneas por etiqueta
+				labelCharsPerLine: 9 // corte aproximado para envolver la etiqueta
+			};
 		},
 		computed: {
-			// Alto efectivo del área de dibujo, con piso para no miniaturizarse: por
-			// debajo de 125px no sigue achicándose (el contenedor scrollea).
-			H: function () { return Math.max(125, this.height); },
-			// Ancho en píxeles. Mientras hay alto (≥275) el gráfico es cuadrado; al
-			// achicarse por debajo de 275 conserva el ancho de ese punto (deja de ser
-			// cuadrado en vez de angostarse), y nunca baja del piso de 125.
-			pxWidth: function () {
-				var squareSide = Math.max(125, Math.min(this.H, 275));
-				return Math.round(this.W / this.H * squareSide);
+			// ¿Hay algún valor para dibujar? Sin datos no se dibuja marco ni ejes.
+			hasData: function () {
+				if (this.stacked) {
+					for (var y = 0; y < this.years.length; y++) {
+						for (var b = 0; b < this.years[y].bars.length; b++) {
+							if (this.years[y].bars[b].value != null) return true;
+						}
+					}
+					return false;
+				}
+				return this.bars.some(function (b) { return b.value != null; });
 			},
+			// Alto efectivo del área de dibujo, con piso para no miniaturizarse.
+			H: function () { var h = Number(this.height); return Math.max(125, (isNaN(h) ? 180 : h)); },
+			// Ancho fijo: cada columna ocupa colWidth, así el gráfico es rectangular y
+			// mantiene su ancho aunque cambie el alto (deja de achicarse/cuadrarse).
+			W: function () {
+				var cols = Math.max(1, this.columnCount);
+				return this.pad.l + this.pad.r + cols * this.colWidth;
+			},
+			pxWidth: function () { return this.W; },
 			ariaLabel: function () {
 				return 'Distribución por categorías' + (this.isPercent ? ' (porcentaje)' : '');
 			},
 			values: function () {
 				return this.bars.map(function (b) { return (b.value == null ? 0 : b.value); });
+			},
+			// Mínimo del eje. Normalmente 0; con brecha puede haber valores negativos
+			// (deltas), y el eje baja hasta el menor para que las barras se vean.
+			scaleMin: function () {
+				if (!this.isGap || this.stacked) return 0;
+				var mn = 0;
+				for (var i = 0; i < this.values.length; i++) if (this.values[i] < mn) mn = this.values[i];
+				if (mn === 0) return 0;
+				return -this._niceMax(-mn);
 			},
 			scaleMax: function () {
 				// Apilado en porcentaje: composición al 100%. Apilado en conteo (N, T,
@@ -104,40 +143,56 @@
 				var m = 0;
 				for (var i = 0; i < this.values.length; i++) if (this.values[i] > m) m = this.values[i];
 				if (this.showTotalLine && this.totalValue != null && this.totalValue > m) m = this.totalValue;
+				if (this.isGap && m === 0 && this.scaleMin === 0) return 1;
 				return this._niceMax(m);
+			},
+			scaleSpan: function () {
+				var span = this.scaleMax - this.scaleMin;
+				return span > 0 ? span : 1;
 			},
 			plotW: function () { return this.W - this.pad.l - this.pad.r; },
 			plotH: function () { return this.H - this.pad.t - this.pad.b; },
 			columnCount: function () {
 				return this.stacked && this.years.length ? this.years.length : this.bars.length;
 			},
-			// Hasta 8 columnas el área de ploteo es cuadrada (proporción agradable y
-			// compacta); con más, crece en ancho para no amontonar.
-			W: function () {
-				var cols = Math.max(1, this.columnCount);
-				if (cols <= 8) return this.pad.l + this.pad.r + this.plotH;
-				return this.pad.l + this.pad.r + cols * 30;
-			},
 			// Cinco divisiones para tener gridlines intermedios (0/20/.../100 en %).
 			yTicks: function () {
-				// Cuartos del eje: marca 0/25/50/75/100% (y los equivalentes en N),
-				// con líneas en los números de escala y en sus mitades.
-				var max = this.scaleMax;
 				var ticks = [];
-				for (var i = 0; i <= 4; i++) ticks.push(Math.round((max / 4) * i * 100) / 100);
+				for (var i = 0; i <= 4; i++) {
+					ticks.push(Math.round((this.scaleMin + this.scaleSpan / 4 * i) * 100) / 100);
+				}
 				return ticks;
 			},
 			bandWidth: function () {
-				return this.plotW / Math.max(1, this.bars.length);
+				// Ancho fijo por columna (no se reparte el ancho disponible).
+				return this.colWidth;
 			},
 			barRects: function () {
 				var loc = this;
+				var yZero = this.sy(0);
 				return this.bars.map(function (b, i) {
 					var v = (b.value == null ? 0 : b.value);
-					var h = (v / loc.scaleMax) * loc.plotH;
-					var bw = Math.min(loc.bandWidth * 0.45, 22);
-					var x = loc.pad.l + i * loc.bandWidth + (loc.bandWidth - bw) / 2;
-					return { x: x, y: loc.H - loc.pad.b - h, w: bw, h: h, color: b.color || '#888780', title: b.name + ': ' + loc.fmtVal(v) };
+					var yVal = loc.sy(v);
+					var bw = Math.min(loc.colWidth * 0.6, loc.barMaxWidth);
+					var x = loc.pad.l + i * loc.colWidth + (loc.colWidth - bw) / 2;
+					// La barra va del cero al valor; el alto es la distancia (nunca
+					// negativa) y la y, el extremo superior.
+					return { x: x, y: Math.min(yZero, yVal), w: bw, h: Math.abs(yVal - yZero), color: b.color || '#888780', title: b.name + ': ' + loc.fmtVal(v) };
+				});
+			},
+			// Etiquetas de categoría bajo cada columna, envueltas en hasta dos líneas
+			// y centradas, con su espacio reservado en pad.b (no se superponen con el
+			// área de datos).
+			xLabels: function () {
+				var loc = this;
+				var src = (this.stacked && this.years.length)
+					? this.years.map(function (y) { return y.name; })
+					: this.bars.map(function (b) { return b.name; });
+				return src.map(function (name, i) {
+					return {
+						cx: loc.pad.l + i * loc.colWidth + loc.colWidth / 2,
+						lines: loc._wrapLabel(name)
+					};
 				});
 			},
 			linePts: function () {
@@ -156,17 +211,15 @@
 			// normalizan a 100% (composición); en conteo se apilan en su escala real.
 			stackLayout: function () {
 				var loc = this;
-				var n = this.years.length;
-				var band = this.plotW / Math.max(1, n);
+				var band = this.colWidth;
 				return this.years.map(function (yr, yi) {
 					var vals = yr.bars.map(function (b) { return (b.value == null ? 0 : b.value); });
 					var sum = 0; for (var s = 0; s < vals.length; s++) sum += vals[s];
-					var bw = Math.min(band * 0.45, 22);
+					var bw = Math.min(band * 0.6, loc.barMaxWidth);
 					var x = loc.pad.l + yi * band + (band - bw) / 2;
 					var acc = 0;
 					var segments = yr.bars.map(function (b) {
 						var v = (b.value == null ? 0 : b.value);
-						// Altura del segmento: fracción del total en %, valor/escala en N.
 						var unit = loc.isPercent ? (sum > 0 ? v / sum : 0) : (v / loc.scaleMax);
 						var h = unit * loc.plotH;
 						var y = loc.pad.t + (loc.plotH - (acc + unit) * loc.plotH);
@@ -183,7 +236,7 @@
 				var n = this.years.length;
 				if (n < 1) return [];
 				var cats = this.years[0].bars.length;
-				var band = this.plotW / Math.max(1, n);
+				var band = this.colWidth;
 				var cx = function (yi) { return loc.pad.l + yi * band + band / 2; };
 				// Acumulado por año (fracciones).
 				var cum = this.years.map(function () { return 0; });
@@ -212,13 +265,40 @@
 			}
 		},
 		methods: {
+			// Envuelve una etiqueta en hasta labelMaxLines líneas, cortando por
+			// palabras; si la última línea desborda, la trunca con elipsis.
+			_wrapLabel: function (text) {
+				var s = String(text == null ? '' : text);
+				var max = this.labelCharsPerLine;
+				var words = s.split(/\s+/);
+				var lines = [];
+				var cur = '';
+				for (var i = 0; i < words.length; i++) {
+					var test = cur ? (cur + ' ' + words[i]) : words[i];
+					if (test.length > max && cur) {
+						lines.push(cur);
+						cur = words[i];
+						if (lines.length === this.labelMaxLines - 1) break;
+					} else {
+						cur = test;
+					}
+				}
+				var rest = cur;
+				for (var j = i + 1; j < words.length; j++) rest += ' ' + words[j];
+				if (rest) lines.push(rest);
+				if (lines.length > this.labelMaxLines) lines = lines.slice(0, this.labelMaxLines);
+				var last = lines[lines.length - 1];
+				if (last && last.length > max) lines[lines.length - 1] = last.slice(0, max - 1) + '…';
+				return lines;
+			},
 			_niceMax: function (m) {
 				if (m <= 0) return 1;
 				var p = Math.pow(10, Math.floor(Math.log10(m)));
 				return Math.ceil(m / p) * p;
 			},
-			sy: function (v) { return this.H - this.pad.b - (v / this.scaleMax) * this.plotH; },
+			sy: function (v) { return this.H - this.pad.b - ((v - this.scaleMin) / this.scaleSpan) * this.plotH; },
 			fmtTick: function (v) {
+				if (this.isGap) return this._coma(v) + ' pp';
 				if (this.isPercent) return v + '%';
 				return this._fmtMagnitude(v);
 			},
@@ -237,6 +317,7 @@
 			},
 			fmtVal: function (v) {
 				var r = Math.round(v * 10) / 10;
+				if (this.isGap) return this._coma(r) + ' pp';
 				return this.isPercent ? r + '%' : r.toLocaleString('es-AR');
 			}
 		}
@@ -244,10 +325,10 @@
 </script>
 
 <style scoped>
-	.cat-chart { display: block; }
+	.cat-chart { display: block; flex: none; align-self: flex-start; }
 	.plot-frame { fill: none; stroke: #b0bec5; stroke-width: 1; vector-effect: non-scaling-stroke; }
 	.grid-line { stroke: #dde3e7; stroke-width: 1; vector-effect: non-scaling-stroke; }
-	.tick-label, .x-label { font-size: 9px; fill: #90a4ae; }
+	.tick-label, .x-label { font-size: 10px; fill: #90a4ae; }
 	.bar, .seg { stroke: none; }
 	.area-band { opacity: 0.9; }
 	.series-line { fill: none; stroke: #888780; stroke-width: 1.5; vector-effect: non-scaling-stroke; }

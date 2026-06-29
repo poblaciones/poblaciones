@@ -72,6 +72,36 @@ describe('CsvWriter — serialización', function () {
 	});
 });
 
+describe('CsvWriter — columna de código', function () {
+	function pivotWithCodes() {
+		var headers = [tuple({ metricName: 'Población', isTotal: true })];
+		return {
+			MetricTuples: { headers: headers },
+			Rows: [
+				[{ isHeader: true, isRegionHeader: true, Label: 'Provincias' }, headerCell('Provincias')],
+				[{ isHeader: true, Label: 'Buenos Aires', Code: '06' }, valueCell(100)],
+				[{ isHeader: true, Label: 'Córdoba', Code: '14' }, valueCell(50)]
+			]
+		};
+	}
+	it('expone el código de cada fila en dataRows', function () {
+		var rows = new CsvWriter(pivotWithCodes()).dataRows();
+		expect(rows[0].code).toBe('');   // encabezado de delimitación, sin código
+		expect(rows[1].code).toBe('06');
+		expect(rows[2].code).toBe('14');
+	});
+	it('agrega la columna Código primero cuando hay códigos', function () {
+		var csv = new CsvWriter(pivotWithCodes()).build();
+		var lines = csv.split('\n');
+		expect(lines[0]).toBe('Código,Regiones,Población - Total - 2010');
+		expect(lines[2]).toBe('06,Buenos Aires,100');
+	});
+	it('no agrega columna Código si ninguna fila lo trae', function () {
+		var csv = new CsvWriter(fakePivot()).build();
+		expect(csv.split('\n')[0].indexOf('Código') === -1).toBeTruthy();
+	});
+});
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }
