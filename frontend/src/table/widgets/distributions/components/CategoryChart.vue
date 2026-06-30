@@ -5,11 +5,20 @@
 		<!-- Marco del área de datos -->
 		<rect :x="pad.l" :y="pad.t" :width="plotW" :height="plotH" class="plot-frame" />
 
+		<!-- Gridlines intermedias (entre cada par de ticks), más suaves -->
+		<line v-for="(t, i) in yMidTicks" :key="'ym-' + i"
+				:x1="pad.l" :y1="sy(t)" :x2="W - pad.r" :y2="sy(t)" class="grid-line-soft" />
+
 		<!-- Gridlines de escala (en los cuartos para %) y sus rótulos -->
 		<g v-for="(t, i) in yTicks" :key="'yt-' + i">
 			<line :x1="pad.l" :y1="sy(t)" :x2="W - pad.r" :y2="sy(t)" class="grid-line" />
 			<text :x="pad.l - 5" :y="sy(t) + 3" class="tick-label" text-anchor="end">{{ fmtTick(t) }}</text>
 		</g>
+		<!-- Unidad del eje, una sola vez (las de % van pegadas a cada número). -->
+		<text v-if="axisUnit" :x="pad.l - 5" :y="pad.t - 4" class="axis-unit" text-anchor="end">{{ axisUnit }}</text>
+
+		<!-- Línea del cero: siempre marcada (más oscura), como referencia -->
+		<line v-if="zeroInRange" :x1="pad.l" :y1="sy(0)" :x2="W - pad.r" :y2="sy(0)" class="zero-line" />
 
 		<!-- Apilado multi-año: una columna apilada por año (100%) -->
 		<template v-if="stacked && years.length">
@@ -50,10 +59,12 @@
 		</template>
 
 		<!-- Etiquetas de categoría/año bajo cada columna, envueltas en dos líneas -->
-		<g v-for="(lab, li) in xLabels" :key="'xl-' + li">
-			<text :x="lab.cx" :y="H - pad.b + labelLineH + 2" class="x-label" text-anchor="middle">
-				<tspan v-for="(ln, k) in lab.lines" :key="'xln-' + k" :x="lab.cx" :dy="k === 0 ? 0 : labelLineH">{{ ln }}</tspan>
-			</text>
+		<g v-if="!hideXLabels">
+			<g v-for="(lab, li) in xLabels" :key="'xl-' + li">
+				<text :x="lab.cx" :y="H - pad.b + labelLineH + 2" class="x-label" text-anchor="middle">
+					<tspan v-for="(ln, k) in lab.lines" :key="'xln-' + k" :x="lab.cx" :dy="k === 0 ? 0 : labelLineH">{{ ln }}</tspan>
+				</text>
+			</g>
 		</g>
 		</template>
 	</svg>
@@ -69,16 +80,19 @@
 			stacked: { type: Boolean, default: false },
 			isPercent: { type: Boolean, default: false },
 			isGap: { type: Boolean, default: false },
+			gapInPoints: { type: Boolean, default: true },
 			valueUnit: { type: String, default: '' },
+			hideXLabels: { type: Boolean, default: false },
 			showTotalLine: { type: Boolean, default: false },
 			totalValue: { type: Number, default: null },
 			height: { type: Number, default: 180 }
 		},
 		data: function () {
 			return {
-				// Espacio inferior (pad.b) reservado para las etiquetas de categoría en
-				// hasta dos líneas; el resto del padding enmarca el área de datos.
-				pad: { l: 44, r: 14, t: 14, b: 40 },
+				// Espacio inferior (basePad.b) reservado para las etiquetas de categoría
+				// en hasta dos líneas; el resto del padding enmarca el área de datos. El
+				// `pad` efectivo (computed) achica ese inferior cuando no hay etiquetas.
+				basePad: { l: 44, r: 14, t: 14, b: 40 },
 				colWidth: 46,        // ancho fijo por columna (rectangular, no cuadrado)
 				barMaxWidth: 26,     // ancho máximo de la barra dentro de su columna
 				labelLineH: 11,      // interlineado de las etiquetas de categoría
@@ -87,6 +101,19 @@
 			};
 		},
 		computed: {
+			// Unidad mostrada una sola vez en el eje (las de % van pegadas a cada
+			// número, así que acá no se repiten).
+			axisUnit: function () {
+				if (this._isPointUnit()) return '';
+				return this.valueUnit || '';
+			},
+			// Padding efectivo: si no se dibujan etiquetas de categoría (hideXLabels),
+			// el espacio inferior reservado para ellas se reduce al mínimo para que el
+			// gráfico no deje un hueco vacío abajo.
+			pad: function () {
+				var b = this.hideXLabels ? 8 : this.basePad.b;
+				return { l: this.basePad.l, r: this.basePad.r, t: this.basePad.t, b: b };
+			},
 			// ¿Hay algún valor para dibujar? Sin datos no se dibuja marco ni ejes.
 			hasData: function () {
 				if (this.stacked) {
@@ -143,12 +170,23 @@
 				var m = 0;
 				for (var i = 0; i < this.values.length; i++) if (this.values[i] > m) m = this.values[i];
 				if (this.showTotalLine && this.totalValue != null && this.totalValue > m) m = this.totalValue;
+				// Brecha con valores negativos: si el máximo real es 0 (todo baja del
+				// cero), se deja un margen positivo (~25% del alcance negativo) para que
+				// se entienda la referencia de positivo/negativo en torno al cero.
+				if (this.isGap && m <= 0 && this.scaleMin < 0) {
+					return this._niceMax(-this.scaleMin * 0.25);
+				}
 				if (this.isGap && m === 0 && this.scaleMin === 0) return 1;
 				return this._niceMax(m);
 			},
 			scaleSpan: function () {
 				var span = this.scaleMax - this.scaleMin;
 				return span > 0 ? span : 1;
+			},
+			// El cero cae dentro de la escala (siempre en variables normales que
+			// arrancan en 0; en gap, cuando hay negativos y positivos o margen).
+			zeroInRange: function () {
+				return this.scaleMin <= 0 && this.scaleMax >= 0;
 			},
 			plotW: function () { return this.W - this.pad.l - this.pad.r; },
 			plotH: function () { return this.H - this.pad.t - this.pad.b; },
@@ -162,6 +200,14 @@
 					ticks.push(Math.round((this.scaleMin + this.scaleSpan / 4 * i) * 100) / 100);
 				}
 				return ticks;
+			},
+			// Puntos medios entre ticks consecutivos: una guía más suave entre cada par.
+			yMidTicks: function () {
+				var mids = [];
+				for (var i = 0; i < 4; i++) {
+					mids.push(this.scaleMin + this.scaleSpan / 4 * (i + 0.5));
+				}
+				return mids;
 			},
 			bandWidth: function () {
 				// Ancho fijo por columna (no se reparte el ancho disponible).
@@ -297,18 +343,23 @@
 				return Math.ceil(m / p) * p;
 			},
 			sy: function (v) { return this.H - this.pad.b - ((v - this.scaleMin) / this.scaleSpan) * this.plotH; },
+			// ¿La unidad va pegada a cada número? Solo en porcentaje (y brecha de puntos
+			// porcentuales). Las demás unidades van una vez en el título del eje.
+			_isPointUnit: function () {
+				if (this.isGap) return this.gapInPoints !== false;
+				return this.isPercent;
+			},
+			_pointSuffix: function () { return this.isGap ? ' pp' : '%'; },
 			fmtTick: function (v) {
-				if (this.isGap) return this._coma(v) + ' pp';
-				if (this.isPercent) return v + '%';
+				if (this._isPointUnit()) return this._fmtMagnitude(v) + this._pointSuffix();
 				return this._fmtMagnitude(v);
 			},
-			// Formato de magnitudes para ejes: millones con "M" y miles con "mil",
-			// usando coma decimal (es-AR). Ej: 5600000 → "5,6 M"; 1200 → "1,2 mil".
+			// Magnitud: ≥1M → "1,1 M"; ≥2000 → "123 mil"; resto con coma decimal.
 			_fmtMagnitude: function (v) {
 				if (v === 0) return '0';
 				var abs = Math.abs(v);
 				if (abs >= 1e6) return this._coma(v / 1e6) + ' M';
-				if (abs >= 1000) return this._coma(v / 1000) + ' mil';
+				if (abs >= 2000) return Math.round(v / 1000) + ' mil';
 				return this._coma(v);
 			},
 			_coma: function (n) {
@@ -316,9 +367,8 @@
 				return (Number.isInteger(r) ? String(r) : r.toFixed(1)).replace('.', ',');
 			},
 			fmtVal: function (v) {
-				var r = Math.round(v * 10) / 10;
-				if (this.isGap) return this._coma(r) + ' pp';
-				return this.isPercent ? r + '%' : r.toLocaleString('es-AR');
+				if (this._isPointUnit()) return this._fmtMagnitude(v) + this._pointSuffix();
+				return this._fmtMagnitude(v);
 			}
 		}
 	};
@@ -327,9 +377,12 @@
 <style scoped>
 	.cat-chart { display: block; flex: none; align-self: flex-start; }
 	.plot-frame { fill: none; stroke: #b0bec5; stroke-width: 1; vector-effect: non-scaling-stroke; }
-	.grid-line { stroke: #dde3e7; stroke-width: 1; vector-effect: non-scaling-stroke; }
+	.grid-line { stroke: #898989; stroke-width: 1; vector-effect: non-scaling-stroke; }
+	.grid-line-soft { stroke: #c7c7c7; stroke-width: 0.5; vector-effect: non-scaling-stroke; }
+	.zero-line { stroke: #5e5e5e; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
 	.tick-label, .x-label { font-size: 10px; fill: #90a4ae; }
-	.bar, .seg { stroke: none; }
+	.axis-unit { font-size: 10px; fill: #78909c; }
+	.bar, .seg { stroke: #5e5e5e; stroke-width: 0.1; vector-effect: non-scaling-stroke; }
 	.area-band { opacity: 0.9; }
 	.series-line { fill: none; stroke: #888780; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 	.total-line { stroke: #607d8b; stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }

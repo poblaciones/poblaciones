@@ -10,6 +10,14 @@ import ActiveBoundarySet from '@/table/classes/ActiveBoundarySet.js';
 import ActiveDataset from '@/table/classes/ActiveDataset.js';
 import ActiveRoute from '@/table/classes/ActiveRoute.js';
 
+// Suma que conserva null: si ambos operandos son null, el resultado es null; si
+// alguno tiene valor, suma tratando el null como 0. Permite distinguir "no se midió"
+// (todos '-') de "se midió y dio 0".
+function _addKeepNull(acc, val) {
+	if (val == null) return acc;
+	return (acc == null ? 0 : acc) + Number(val);
+}
+
 // Construye el ActiveBoundary y su RegionSet desde el árbol ya cargado
 // (GetFabBoundaries), sin la llamada GetRegion. Devuelve { activeBoundary, region }
 // o null si el boundaryId no está en el árbol.
@@ -86,7 +94,14 @@ ActivePivot.prototype.RefreshData = function () {
 			var region = version.Selection;
 			for (var item of region.Items) {
 				var row = [];
-				row.push({ 'Label': item.Caption, FID: item.FID, Code: (item.Code != null ? item.Code : null), isHeader: true, Parent: (item.Parent != null ? item.Parent : null) });
+				row.push({
+					'Label': item.Caption, FID: item.FID,
+					Code: (item.Code != null ? item.Code : null),
+					isHeader: true,
+					Parent: (item.Parent != null ? item.Parent : null),
+					ParentId: (item.ParentId != null ? item.ParentId : null),
+					ParentCode: (item.ParentCode != null ? item.ParentCode : null)
+				});
 				for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
 					var spec = loc.MetricTuples.metricTuples[ci];
 					var value = loc.ResolveCell(spec, region.Region, item);
@@ -98,13 +113,16 @@ ActivePivot.prototype.RefreshData = function () {
 						});
 					} else {
 						var i = row.length - 2;
-						totals[i]['Value'] = (totals[i]['Value'] ?? 0) + (value['Value'] ?? 0);
-						totals[i]['Total'] = (totals[i]['Total'] ?? 0) + (value['Total'] ?? 0);
-						totals[i]['Area']  = (totals[i]['Area']  ?? 0) + (value['Area']  ?? 0);
+						// Se suma solo lo no nulo y se conserva null cuando ningún aporte
+						// tuvo valor: la suma de puros '-' debe quedar '-', no 0 (un 0 daría
+						// a entender que se midió y el resultado fue cero).
+						totals[i].Value = _addKeepNull(totals[i].Value, value.Value);
+						totals[i].Total = _addKeepNull(totals[i].Total, value.Total);
+						totals[i].Area  = _addKeepNull(totals[i].Area,  value.Area);
 						// Brecha: se agregan los dos universos para que el delta del
 						// encabezado del boundary se calcule sobre las sumas.
-						if (value['ValueGap'] != null) totals[i]['ValueGap'] = (totals[i]['ValueGap'] ?? 0) + value['ValueGap'];
-						if (value['TotalGap'] != null) totals[i]['TotalGap'] = (totals[i]['TotalGap'] ?? 0) + value['TotalGap'];
+						if (value.ValueGap != null) totals[i].ValueGap = (totals[i].ValueGap ?? 0) + value.ValueGap;
+						if (value.TotalGap != null) totals[i].TotalGap = (totals[i].TotalGap ?? 0) + value.TotalGap;
 					}
 				}
 				boundaryRows.push(row);
@@ -228,6 +246,13 @@ ActivePivot.prototype.RefreshData = function () {
 			if (version.Name && version.Name !== activeBoundary.properties.Name) {
 				boundaryLabel += ' [' + version.Name + ']';
 			}
+			// Conteo "n/total" de elementos: cuántos están seleccionados respecto del
+			// universo de la delimitación. Solo se muestra si no están todos elegidos.
+			var selectedCount = region.Items ? region.Items.length : 0;
+			var availableCount = (region.Region && region.Region.Items) ? region.Region.Items.length : selectedCount;
+			if (availableCount > 0 && selectedCount < availableCount) {
+				boundaryLabel += ' (' + selectedCount + '/' + availableCount + ')';
+			}
 			headerRow.push({ 'Label': boundaryLabel, isHeader: true, isRegionHeader: true, boundaryId: activeBoundary.__boundaryId });
 			for (var ti = 0; ti < totals.length; ti++) {
 				totals[ti].ColumnTotal = columnTotals[ti];
@@ -290,9 +315,15 @@ ActivePivot.prototype.GroupRowsByParent = function (boundaryRows) {
 	var out = [];
 	order.forEach(function (parent) {
 		var rows = groups[parent];
+		// El Id y el Code del agrupador (formato actual de GetFabBoundaries) los
+		// comparten todas sus hojas; se toman de la primera para que la fila
+		// agrupadora se pueda referenciar por Id y exportar con su código.
+		var head0 = rows[0] && rows[0][0] ? rows[0][0] : null;
+		var groupId = head0 && head0.ParentId != null ? head0.ParentId : null;
+		var groupCode = head0 && head0.ParentCode != null ? head0.ParentCode : null;
 		// Subtotal del grupo por columna (suma de Value/Total/Area; ColumnTotal,
 		// ColumnArea y RowGroupTotal heredados de la primera fila del grupo).
-		var subtotal = [{ Label: parent, isHeader: true, isGroupHeader: true }];
+		var subtotal = [{ Label: parent, isHeader: true, isGroupHeader: true, GroupId: groupId, Code: groupCode }];
 		for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
 			var sv = 0, st = 0, sa = 0, hasVal = false, hasArea = false;
 			var svg = 0, stg = 0, hasGap = false;
@@ -475,24 +506,42 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 		for (var g = 0; g < filteredGeographyIds.length; g++) {
 			var bucket = byVid.byGeo.get(filteredGeographyIds[g]);
 			if (!bucket) continue;
+			// El área (AreaM2) es geográfica: la comparten todos los registros de la
+			// misma geografía (uno por categoría). Por eso se suma UNA sola vez por
+			// geografía, no por registro; sumarla por registro la inflaba tantas veces
+			// como categorías tuviera la variable (rompía densidad y km² del total).
+			var geoArea = 0, geoAreaSeen = false;
 			for (var b = 0; b < bucket.length; b++) {
 				var mi = bucket[b];
 				if (labelId != null && mi.LID !== labelId) continue;
-				if (mi.Value !== null && mi.Value !== undefined) { sum += parseFloat(mi.Value); count++; }
-				if (mi.Total !== null && mi.Total !== undefined) { sumTotal += parseFloat(mi.Total); count++; }
-				if (mi.AreaM2 !== null && mi.AreaM2 !== undefined) { sumArea += parseFloat(mi.AreaM2); }
+				// Cada registro que aporta trae el paquete completo (Value, Total y, si
+				// corresponde, Area): se cuenta como UN aporte y se suman sus campos
+				// juntos. No se cuenta por campo: hacerlo fabricaba celdas incoherentes
+				// (p. ej. Total presente con Value en cero), que luego rompían los
+				// cálculos derivados (incidencia, densidad) en otros lados.
+				count++;
+				if (mi.Value !== null && mi.Value !== undefined) sum += parseFloat(mi.Value);
+				if (mi.Total !== null && mi.Total !== undefined) sumTotal += parseFloat(mi.Total);
+				if (mi.AreaM2 !== null && mi.AreaM2 !== undefined) { geoArea = parseFloat(mi.AreaM2); geoAreaSeen = true; }
 				// Variables de brecha (gap): traen un segundo par de valores que se
 				// suma en paralelo. El cálculo del delta lo hace pivotValue.
 				if (mi.ValueGap !== null && mi.ValueGap !== undefined) { sumValueGap += parseFloat(mi.ValueGap); hasGap = true; }
 				if (mi.TotalGap !== null && mi.TotalGap !== undefined) { sumTotalGap += parseFloat(mi.TotalGap); hasGap = true; }
 			}
+			if (geoAreaSeen) sumArea += geoArea;
 		}
 	}
 
+	// Celda coherente: si ninguna geografía aportó un registro, está vacía (todos los
+	// campos null); si alguna aportó, todos los campos son sumas válidas. El área se
+	// devuelve también cuando es 0 legítimo (no se la confunde con "sin dato").
+	if (count === 0) {
+		return { 'Value': null, 'Total': null, 'Area': null, 'Empty': true };
+	}
 	return {
-		'Value': count > 0 ? sum : null,
-		'Total': count > 0 ? sumTotal : null,
-		'Area':  sumArea > 0 ? sumArea : null,
+		'Value': sum,
+		'Total': sumTotal,
+		'Area':  sumArea,
 		'ValueGap': hasGap ? sumValueGap : null,
 		'TotalGap': hasGap ? sumTotalGap : null
 	};
@@ -590,12 +639,67 @@ ActivePivot.prototype._categorySpecs = function (metricId, versionId) {
 ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
 	var info = this._categorySpecs(metricId, versionId);
 	if (!info) return [];
+	var sm = info.base.summary;
+
+	// Primera pasada: agrega cada categoría sobre todas las regiones (suma de Value,
+	// Area y del Total del universo), guardando los crudos por categoría.
+	var aggs = [];
+	var totalValueSum = 0, totalAreaSum = 0;
+	for (var ci = 0; ci < info.specs.length; ci++) {
+		var c = info.specs[ci];
+		var sumValue = 0, sumTotal = 0, sumArea = 0, hasAny = false;
+		var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
+		for (var bi = 0; bi < this.Regions.items.length; bi++) {
+			var region = this.Regions.items[bi].SelectedVersion().Selection;
+			for (var ii = 0; ii < region.Items.length; ii++) {
+				var item = region.Items[ii];
+				var cell = this.ResolveCell(c.spec, region.Region, item);
+				if (cell.Empty) continue;
+				// En incidencia, una celda sin valor (numerador) debe saltearse por
+				// completo: si se sumara solo su Total al denominador, la incidencia
+				// agregada quedaría hundida (p. ej. una región sin dato en la categoría
+				// arrastraba el promedio a casi cero). Con conteo no aplica: ahí el
+				// aporte es el propio Value, que si falta simplemente no suma.
+				var isIncidence = (sm === 'I' || sm === 'P' || sm === 'FIL');
+				if (isIncidence && cell.Value == null) continue;
+				if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
+				if (cell.Area != null) sumArea += Number(cell.Area);
+				if (cell.ValueGap != null) { sumValueGap += Number(cell.ValueGap); hasGap = true; }
+				// Denominador de incidencia: el Total propio de la categoría (como en la
+				// pivot). Solo si la celda no lo trae se cae al total del universo.
+				if (cell.Total != null) {
+					sumTotal += Number(cell.Total);
+				} else {
+					var tcell = this.ResolveCell(info.totalSpec, region.Region, item);
+					if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
+				}
+				if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
+			}
+		}
+		aggs.push({ labelId: c.labelId, name: c.name, color: c.color,
+			sumValue: sumValue, sumTotal: sumTotal, sumArea: sumArea,
+			sumValueGap: sumValueGap, sumTotalGap: sumTotalGap, hasGap: hasGap, hasAny: hasAny });
+		totalValueSum += sumValue;
+		totalAreaSum += sumArea;
+	}
+
+	// Segunda pasada: valor mostrado de cada categoría con el mismo cellValue de la
+	// pivot. En col% (P) y fil% (FIL) el denominador es la suma de Value de todas las
+	// categorías (el universo); en col-área (A), la suma de Area. Sin ese
+	// denominador, esos modos devolverían el valor crudo (incidencias gigantes).
 	var loc = this;
-	return info.specs.map(function (c) {
-		return {
-			labelId: c.labelId, name: c.name, color: c.color,
-			value: loc.ResolveCategoryAggregate(c.spec, info.base.summary, info.base.variable, info.totalSpec)
+	return aggs.map(function (a) {
+		if (!a.hasAny && a.sumTotal === 0) return { labelId: a.labelId, name: a.name, color: a.color, value: null };
+		var aggCell = {
+			Value: a.sumValue, Total: a.sumTotal, Area: a.sumArea,
+			ValueGap: a.hasGap ? a.sumValueGap : null, TotalGap: a.hasGap ? a.sumTotalGap : null,
+			ColumnTotal: (sm === 'P') ? totalValueSum : undefined,
+			ColumnArea: (sm === 'A') ? totalAreaSum : undefined,
+			RowGroupTotal: (sm === 'FIL') ? totalValueSum : undefined
 		};
+		var cv = cellValue({ properties: { SummaryMetric: sm } }, info.base.variable, aggCell);
+		var val = (cv === '-' || cv == null) ? null : Number(cv);
+		return { labelId: a.labelId, name: a.name, color: a.color, value: val };
 	});
 };
 
@@ -606,34 +710,126 @@ ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
 ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, versionId) {
 	var info = this._categorySpecs(metricId, versionId);
 	if (!info) return [];
-	var rows = [];
+	var isGap = !!(info.base.variable && info.base.variable.IsGap);
+	var sm = info.base.summary;
+
+	// Primera pasada: se resuelven todas las celdas (región × categoría) y la celda
+	// total de cada región, guardando los crudos. Con ellos se calculan los
+	// denominadores de los modos normalizados que la pivot deriva por columna o por
+	// fila y que ResolveCell no trae en una resolución suelta:
+	//   - col% (P): ColumnTotal = suma de Value de la categoría sobre las regiones.
+	//   - fil% (FIL): RowGroupTotal = suma de Value de las categorías en la región.
+	//   - col-área (A): ColumnArea = suma de Area de la categoría sobre las regiones.
+	var grid = [];                 // por región: { item, totalCell, cells: [por categoría] }
+	var colValueSum = [];          // por categoría: suma de Value (denominador col%)
+	var colAreaSum = [];           // por categoría: suma de Area  (denominador col-área)
+	for (var ci0 = 0; ci0 < info.specs.length; ci0++) { colValueSum[ci0] = 0; colAreaSum[ci0] = 0; }
+
 	for (var bi = 0; bi < this.Regions.items.length; bi++) {
 		var version = this.Regions.items[bi].SelectedVersion();
 		var region = version.Selection;
 		for (var ii = 0; ii < region.Items.length; ii++) {
 			var item = region.Items[ii];
-			// Total del universo de la región (denominador para modos normalizados).
 			var totalCell = this.ResolveCell(info.totalSpec, region.Region, item);
-			var denomTotal = (!totalCell.Empty && totalCell.Total != null) ? Number(totalCell.Total) : null;
-			var parts = [];
+			var cells = [];
 			for (var ci = 0; ci < info.specs.length; ci++) {
-				var c = info.specs[ci];
-				var cell = this.ResolveCell(c.spec, region.Region, item);
-				// Para la normalización se usa el Total del universo, no el de la
-				// categoría (que en incidencia puede venir vacío).
-				var merged = {
-					Value: cell.Value,
-					Total: denomTotal != null ? denomTotal : cell.Total,
-					Area: cell.Area,
-					ValueGap: cell.ValueGap,
-					TotalGap: cell.TotalGap
-				};
-				var cv = cellValue({ properties: { SummaryMetric: info.base.summary } }, info.base.variable, merged);
-				var val = (cv === '-' || cv == null) ? null : Number(cv);
-				parts.push({ labelId: c.labelId, name: c.name, color: c.color, value: (val == null || isNaN(val)) ? 0 : val });
+				var cell = this.ResolveCell(info.specs[ci].spec, region.Region, item);
+				cells.push(cell);
+				if (!cell.Empty) {
+					if (cell.Value != null) colValueSum[ci] += Number(cell.Value);
+					if (cell.Area != null) colAreaSum[ci] += Number(cell.Area);
+				}
 			}
-			rows.push({ label: item.Caption, fid: item.FID, parts: parts });
+			grid.push({ item: item, totalCell: totalCell, cells: cells });
 		}
+	}
+
+	// Gran total de Value (todas las categorías y regiones): es el denominador común
+	// que hace que el col% componga bien por región. Si cada segmento se midiera
+	// contra el total de SU columna (colValueSum por categoría), las participaciones
+	// de una región no compartirían denominador y la barra podía superar el 100%.
+	var grandValueSum = 0;
+	for (var gv = 0; gv < colValueSum.length; gv++) grandValueSum += colValueSum[gv];
+
+	// Segunda pasada: se calcula el valor mostrado de cada celda con el mismo
+	// cellValue que la pivot, inyectando los denominadores correctos según el modo.
+	var rows = [];
+	for (var gi = 0; gi < grid.length; gi++) {
+		var g = grid[gi];
+		var totalCell2 = g.totalCell;
+		var denomTotal = (!totalCell2.Empty && totalCell2.Total != null) ? Number(totalCell2.Total) : null;
+
+		// RowGroupTotal (fil%): suma de Value de las categorías en esta región.
+		var rowGroupSum = 0;
+		for (var rc = 0; rc < g.cells.length; rc++) {
+			if (!g.cells[rc].Empty && g.cells[rc].Value != null) rowGroupSum += Number(g.cells[rc].Value);
+		}
+
+		var parts = [];
+		for (var ci2 = 0; ci2 < info.specs.length; ci2++) {
+			var c = info.specs[ci2];
+			var cell2 = g.cells[ci2];
+			var merged = {
+				Value: cell2.Value,
+				// El Total propio de la categoría (su denominador de incidencia), como en
+				// la pivot: la incidencia de "15% y más" es su Value sobre SU total, no
+				// sobre el universo. Solo si la celda no trae Total se cae al del universo.
+				Total: cell2.Total != null ? cell2.Total : denomTotal,
+				Area: cell2.Area,
+				ValueGap: cell2.ValueGap,
+				TotalGap: cell2.TotalGap,
+				// Denominadores derivados, para que col%/fil%/col-área normalicen igual
+				// que en la tabla en vez de devolver el valor crudo.
+				ColumnTotal: (sm === 'P') ? colValueSum[ci2] : cell2.ColumnTotal,
+				ColumnArea: (sm === 'A') ? colAreaSum[ci2] : cell2.ColumnArea,
+				RowGroupTotal: (sm === 'FIL') ? rowGroupSum : cell2.RowGroupTotal
+			};
+			var cv = cellValue({ properties: { SummaryMetric: sm } }, info.base.variable, merged);
+			var val = (cv === '-' || cv == null) ? null : Number(cv);
+			// Valor expresado sobre el universo de la región (no sobre el total propio
+			// de la categoría): en incidencia, la categoría sobre el TOTAL de la región.
+			// A diferencia del valor sobre el total propio, estos sí son aditivos entre
+			// categorías (comparten denominador), así que sumarlos da la incidencia del
+			// conjunto. Para conteos/áreas coincide con el valor normal.
+			var mergedU = {
+				Value: cell2.Value,
+				Total: denomTotal != null ? denomTotal : cell2.Total,
+				Area: cell2.Area, ValueGap: cell2.ValueGap, TotalGap: cell2.TotalGap,
+				// Para componer la barra de una región, col% se mide contra el gran total
+				// (denominador común) en vez del total de cada columna; así los segmentos
+				// suman la participación de la región y el conjunto de barras llega a 100%.
+				ColumnTotal: (sm === 'P') ? grandValueSum : cell2.ColumnTotal,
+				ColumnArea: (sm === 'A') ? colAreaSum[ci2] : cell2.ColumnArea,
+				RowGroupTotal: (sm === 'FIL') ? rowGroupSum : cell2.RowGroupTotal
+			};
+			var cvU = cellValue({ properties: { SummaryMetric: sm } }, info.base.variable, mergedU);
+			var valU = (cvU === '-' || cvU == null) ? null : Number(cvU);
+			// Peso de composición para repartir los colores: magnitud combinada de
+			// los dos universos (base + comparado). Es siempre positiva y aditiva,
+			// a diferencia del delta (value), que puede ser negativo. En variables
+			// no-brecha el peso es simplemente el Value.
+			var weight = (Number(cell2.Value) || 0) + (isGap ? (Number(cell2.ValueGap) || 0) : 0);
+			parts.push({
+				labelId: c.labelId, name: c.name, color: c.color,
+				value: (val == null || isNaN(val)) ? 0 : val,
+				valueOnUniverse: (valU == null || isNaN(valU)) ? 0 : valU,
+				weight: weight
+			});
+		}
+		// Delta/valor del total de la región: en brecha es la longitud (con signo) de
+		// la barra; en lo demás es el valor de total que la pivot muestra.
+		var totalCv = cellValue({ properties: { SummaryMetric: sm } }, info.base.variable, {
+			Value: totalCell2.Value, Total: totalCell2.Total, Area: totalCell2.Area,
+			ValueGap: totalCell2.ValueGap, TotalGap: totalCell2.TotalGap,
+			ColumnTotal: totalCell2.ColumnTotal, ColumnArea: totalCell2.ColumnArea,
+			RowGroupTotal: totalCell2.RowGroupTotal
+		});
+		var totalVal = (totalCv === '-' || totalCv == null) ? null : Number(totalCv);
+		rows.push({
+			label: g.item.Caption, fid: g.item.FID, parts: parts,
+			delta: (totalVal == null || isNaN(totalVal)) ? null : totalVal,
+			isGap: isGap
+		});
 	}
 	return rows;
 };
@@ -695,13 +891,13 @@ ActivePivot.prototype._selectionLevelParent = function (sel) {
 ActivePivot.prototype._selectionLevelUp = function (sel) {
 	var idx = sel.levelIndex();
 	if (idx <= 0) return false;
-	return sel.moveToLevelNamed(sel.version.Levels[idx - 1].Name);
+	return sel.moveToLevel(sel.version.Levels[idx - 1]);
 };
 
 ActivePivot.prototype._selectionLevelDown = function (sel) {
 	var idx = sel.levelIndex();
 	if (idx >= sel.version.Levels.length - 1) return false;
-	return sel.moveToLevelNamed(sel.version.Levels[idx + 1].Name);
+	return sel.moveToLevel(sel.version.Levels[idx + 1]);
 };
 
 ActivePivot.prototype.AllBoundaries = function () {

@@ -100,6 +100,20 @@ describe('CsvWriter — columna de código', function () {
 		var csv = new CsvWriter(fakePivot()).build();
 		expect(csv.split('\n')[0].indexOf('Código') === -1).toBeTruthy();
 	});
+	it('el agrupador (isGroupHeader) exporta su propio Code', function () {
+		var headers = [tuple({ metricName: 'Población', isTotal: true })];
+		var pivot = {
+			MetricTuples: { headers: headers },
+			Rows: [
+				[{ isHeader: true, isRegionHeader: true, Label: 'Departamentos' }, headerCell('Departamentos')],
+				[{ isHeader: true, isGroupHeader: true, Label: 'Buenos Aires', Code: '02' }, valueCell(150)],
+				[{ isHeader: true, Label: 'La Plata', Code: '02-001', Parent: 'Buenos Aires' }, valueCell(100)]
+			]
+		};
+		var rows = new CsvWriter(pivot).dataRows();
+		expect(rows[1].code).toBe('02');       // agrupador con su código
+		expect(rows[2].code).toBe('02-001');   // hoja
+	});
 });
 
 if (import.meta.url === 'file://' + process.argv[1]) {

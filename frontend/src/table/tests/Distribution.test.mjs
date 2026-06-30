@@ -107,12 +107,83 @@ describe('RegionDistribution', function () {
 		expect(rdPob.rows()).toHaveLength(1);
 		expect(rdPob.rows()[0].parts).toHaveLength(2);
 		expect(rdPob.rows()[0].total).toBeCloseTo(100, 1e-9);
-		expect(rdPob.isComposed()).toBeTruthy();
+		// El Camino 1 arma las partes, pero un conteo no se apila (apilar solo en %).
+		expect(rdPob.isComposed()).toBeFalsy();
+	});
+	it('el Camino 1 reordena las barras según el orden de la pivot (sort)', function () {
+		var pob = model.panels()[0];
+		// dataRows del dataset define el orden (sort) de la pivot; las regiones que
+		// resuelve ResolveAllCategoriesByRegion llegan en otro orden y deben alinearse.
+		var pivotOrder = dataset.dataRows()
+			.filter(function (r) { return r.fid != null; })
+			.map(function (r) { return r.fid; });
+		// Se devuelven en orden inverso al de la pivot, para verificar el reordenamiento.
+		var reversed = pivotOrder.slice().reverse();
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				return reversed.map(function (fid) {
+					return { label: 'r' + fid, fid: fid, parts: [
+						{ labelId: 1, name: 'A', color: '#a', value: 10 },
+						{ labelId: 2, name: 'B', color: '#b', value: 20 }
+					] };
+				});
+			}
+		};
+		var rdPob = new RegionDistribution(pob, dataset, { pivot: fakePivot });
+		var resultFids = rdPob.rows().map(function (r) { return r.fid; });
+		// Tras el reordenamiento, el chart sigue el orden de la pivot, no el de origen.
+		expect(resultFids).toEqual(pivotOrder);
 	});
 	it('no recorta: muestra todas las filas visibles', function () {
 		// Sin límite de regiones; el chart refleja todas las filas de la pivot.
 		expect(rd.rows()).toHaveLength(4);
 		expect(rd.totalCount()).toBe(4);
+	});
+	it('incidencia solo-total: agrega sobre el universo igual que con las categorías elegidas', function () {
+		// Sin categorías elegidas (solo total), una incidencia debe componer la barra
+		// con la MISMA suma sobre el universo que cuando se eligen todas. Antes este
+		// camino sumaba las incidencias propias de cada categoría (62+67=129).
+		var fakePanel = {
+			categoryColumns: function () { return []; },
+			totalColumn: function () { return { meta: {} }; },
+			isGap: function () { return false; },
+			isPercent: function () { return true; },
+			metricId: function () { return 7; },
+			versionId: function () { return 11; }
+		};
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				return [{ label: 'X', fid: 1, delta: null, parts: [
+					{ labelId: 101, name: 'A', color: '#a', value: 62, valueOnUniverse: 30 },
+					{ labelId: 102, name: 'B', color: '#b', value: 67, valueOnUniverse: 47 }
+				] }];
+			}
+		};
+		var rd = new RegionDistribution(fakePanel, dataset, { pivot: fakePivot });
+		var row = rd.rows()[0];
+		expect(row.total).toBeCloseTo(77, 1e-9);   // 30 + 47, no 62 + 67
+		expect(row.parts).toHaveLength(2);
+	});
+
+	it('incidencia con categorías: la barra suma los valores sobre el universo, no las incidencias propias', function () {
+		// edu es porcentaje con categorías elegidas. Cada categoría trae su incidencia
+		// sobre su propio total (value, p. ej. 62 y 67, que NO deben sumarse) y su
+		// incidencia sobre el universo (valueOnUniverse, aditivas). La barra debe medir
+		// la suma de estas últimas (la incidencia del conjunto), no 62+67=129.
+		var edu = model.panels()[1];
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				return [{ label: 'X', fid: 1, parts: [
+					{ labelId: 101, name: 'A', color: '#a', value: 62, valueOnUniverse: 30 },
+					{ labelId: 102, name: 'B', color: '#b', value: 67, valueOnUniverse: 47 }
+				] }];
+			}
+		};
+		var rdEdu = new RegionDistribution(edu, dataset, { pivot: fakePivot });
+		var row = rdEdu.rows()[0];
+		expect(row.total).toBeCloseTo(77, 1e-9);          // 30 + 47, no 62 + 67
+		expect(row.parts[0].value).toBe(30);              // segmentos en magnitud aditiva
+		expect(row.parts[1].value).toBe(47);
 	});
 
 	it('incluye agrupadores (isGroup) y excluye hijos de grupos colapsados', function () {
@@ -177,7 +248,14 @@ describe('CategoryDistribution', function () {
 	it('isComposed es falso para un panel solo-total sin pivot', function () {
 		expect(cdPob.isComposed()).toBeFalsy();
 	});
-	it('isComposed es verdadero para solo-total resuelto por Camino 1', function () {
+	it('un panel de porcentaje con varias categorías sí es apilable (isComposed)', function () {
+		var edu = model.panels()[1];   // Educación: porcentaje, 3 categorías
+		var cd = new CategoryDistribution(edu, dataset);
+		expect(cd.isComposed()).toBeTruthy();
+	});
+	it('un conteo solo-total NO es apilable aunque el Camino 1 resuelva categorías', function () {
+		// Apilar/componer solo aplica a porcentaje; un conteo (como Población) no se
+		// apila aunque el Camino 1 pueda resolver sus categorías.
 		var fakePivot = {
 			ResolveAllCategories: function () {
 				return [
@@ -187,7 +265,51 @@ describe('CategoryDistribution', function () {
 			}
 		};
 		var cd = new CategoryDistribution(pob, dataset, fakePivot);
-		expect(cd.isComposed()).toBeTruthy();
+		expect(cd.isComposed()).toBeFalsy();
+	});
+});
+
+describe('Brecha (gap) no apilable', function () {
+	// Columna mínima con la forma que esperan las clases (meta + role measure).
+	function gapCol(key, labelId, labelName) {
+		return {
+			key: key, label: labelName, shortLabel: labelName, unit: 'pp.', role: 'measure',
+			weighting: { kind: 'self', label: 'Valor', available: true },
+			meta: { metricId: 9, metricName: 'Brecha', variableName: 'Δ', labelId: labelId,
+				labelName: labelName, fillColor: '#888', isTotal: labelId == null, isGap: true,
+				versionName: '2010', versionId: 11 }
+		};
+	}
+	it('un panel de brecha con varias categorías no apila (canStack falso)', function () {
+		var panel = new DistributionPanel([gapCol('g_a', 1, 'A'), gapCol('g_b', 2, 'B')]);
+		expect(panel.isGap()).toBeTruthy();
+		expect(panel.canStack()).toBeFalsy();
+	});
+	it('isPercent es falso para una brecha (escala no se fija 0-100)', function () {
+		var panel = new DistributionPanel([gapCol('g_a', 1, 'A'), gapCol('g_b', 2, 'B')]);
+		expect(panel.isPercent()).toBeFalsy();
+		expect(panel.valueUnit()).toBe('pp.');
+	});
+	it('Camino 1 de regiones para brecha: longitud = delta, partes con peso', function () {
+		var dataset = makeDataset();
+		var model = new DistributionModel(dataset);
+		var pob = model.panels()[0];
+		// El panel real no es gap; se fuerza isGap para ejercitar la rama.
+		pob.isGap = function () { return true; };
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				return [{ label: 'X', fid: 1, delta: -20, isGap: true, parts: [
+					{ labelId: 1, name: 'A', color: '#a', value: -8, weight: 5000 },
+					{ labelId: 2, name: 'B', color: '#b', value: -12, weight: 5000 }
+				] }];
+			}
+		};
+		var rd = new RegionDistribution(pob, dataset, { pivot: fakePivot });
+		var rows = rd.rows();
+		expect(rows).toHaveLength(1);
+		// La longitud de la barra es el delta del total (no la suma de las partes).
+		expect(rows[0].total).toBe(-20);
+		expect(rows[0].parts[0].weight).toBe(5000);
 	});
 });
 

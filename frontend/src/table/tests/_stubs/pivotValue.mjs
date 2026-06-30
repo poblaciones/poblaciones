@@ -13,6 +13,20 @@ export function cellValue(metric, variable, cell) {
 		return isFinite(d) ? d : '-';
 	}
 	if (sm === 'T') return cell.Total;
+	// Incidencia (I): value sobre el Total propio de la celda, por la escala. Es lo
+	// que permite testear que el Camino 1 use el total propio de la categoría (su
+	// incidencia real) y no el del universo.
+	if (sm === 'I') {
+		if (cell.Total == null || Number(cell.Total) === 0) return cell.Value;
+		var scaleI = (variable && variable.NormalizationScale) || 100;
+		return cell.Value / (Number(cell.Total) / scaleI);
+	}
+	// Modos normalizados por denominador derivado, para poder testear que el Camino 1
+	// los provea (col%, fil%, col-área). Reflejan value/denominador * 100.
+	if (sm === 'P') return cell.ColumnTotal ? (cell.Value / cell.ColumnTotal * 100) : cell.Value;
+	if (sm === 'FIL') return cell.RowGroupTotal ? (cell.Value / cell.RowGroupTotal * 100) : cell.Value;
+	if (sm === 'A') return cell.ColumnArea ? (cell.Area / cell.ColumnArea * 100) : cell.Area;
+	if (sm === 'K') return cell.Area != null ? cell.Area / 1e6 : null;
 	return cell.Value;
 }
 export function valueTuple(summaryMetric, variable, cell) {

@@ -102,7 +102,10 @@ function col(key, unit, meta) {
 }
 
 function dataRow(label, parentLabel, values, weights) {
-	return { type: 'data', label: label, parentLabel: parentLabel, values: values, weights: weights };
+	// fid estable derivado del nombre, para tests que verifican orden/alineación.
+	var fid = 0;
+	for (var i = 0; i < label.length; i++) fid = (fid * 31 + label.charCodeAt(i)) % 100000;
+	return { type: 'data', label: label, fid: fid, parentLabel: parentLabel, values: values, weights: weights };
 }
 
 // Variante: un indicador "NBI" con DOS versiones (2008 y 2022), ambas con solo

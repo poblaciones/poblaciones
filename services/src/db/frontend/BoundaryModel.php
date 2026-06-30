@@ -133,33 +133,37 @@ class BoundaryModel extends BaseModel
 		foreach ($boundaries as &$boundary) {
 			$useParent = $boundary['UseParent'];
 			$useParentSelect = '';
+			$useParentFrom = '';
 			$orderBy = '';
 			if ($useParent)
 			{
-				$useParentSelect  = ' (SELECT parent.cli_caption FROM clipping_region_item parent WHERE parent.cli_id = cli.cli_parent_id) as Parent, ';
-				$orderBy = 'Parent ,';
+				$useParentSelect  = ' parent.cli_caption ParentCaption, parent.cli_code ParentCode, cli.cli_parent_id ParentId, ';
+				$useParentFrom = ' LEFT JOIN clipping_region_item parent ON parent.cli_id = cli.cli_parent_id ';
+				$orderBy = 'ParentCaption, ParentId,';
 			}
 			if ($boundary['OrderBy'] == 'P') {
 				// por tamaño
-				$orderBy .= "clc_population DESC, cli_code";
-				$sql = "SELECT min(cli_id) Id, cli_caption `Name`, " . $useParentSelect . " clc_population Population
+				$orderBy .= "clc_population DESC, cli.cli_code";
+				$sql = "SELECT min(cli.cli_id) Id, cli.cli_caption `Name`, " . $useParentSelect . " clc_population Population
                     FROM boundary_version_clipping_region c
-                    JOIN clipping_region_item cli ON cli_clipping_region_id = bcr_clipping_region_id
-                    JOIN snapshot_lookup_clipping_region_item ON cli_id = clc_clipping_region_item_id
+                    JOIN clipping_region_item cli ON cli.cli_clipping_region_id = bcr_clipping_region_id
+                    JOIN snapshot_lookup_clipping_region_item ON cli.cli_id = clc_clipping_region_item_id
+					" . $useParentFrom . "
                     WHERE bcr_boundary_version_id = ? " . $exclusions . "
-                    GROUP BY cli_caption, cli_code, clc_population
+                    GROUP BY cli.cli_caption, cli.cli_code, clc_population
                     ORDER BY " . $orderBy;
 			} else {
 				// default por nombre
 				if ($boundary['OrderBy'] == 'C')
-					$orderBy .= 'cli_code';
+					$orderBy .= 'cli.cli_code';
 				else
-					$orderBy .= 'cli_caption, cli_code';
+					$orderBy .= 'cli.cli_caption, cli.cli_code';
 
-				$sql = "SELECT cli_id Id, cli_caption `Name` , cli_code Code," . $useParentSelect . " IFNULL(clc_population, 0) Population
+				$sql = "SELECT cli.cli_id Id, cli.cli_caption `Name` , cli.cli_code Code," . $useParentSelect . " IFNULL(clc_population, 0) Population
                     FROM boundary_version_clipping_region c
-                    JOIN clipping_region_item cli ON cli_clipping_region_id = bcr_clipping_region_id
-                    LEFT JOIN snapshot_lookup_clipping_region_item ON cli_id = clc_clipping_region_item_id
+                    JOIN clipping_region_item cli ON cli.cli_clipping_region_id = bcr_clipping_region_id
+                    LEFT JOIN snapshot_lookup_clipping_region_item ON cli.cli_id = clc_clipping_region_item_id
+                    " . $useParentFrom . "
                     WHERE bcr_boundary_version_id = ? " . $exclusions . "
                     ORDER BY " . $orderBy;
 			}
@@ -168,7 +172,14 @@ class BoundaryModel extends BaseModel
 			{
 				if ($useParent)
 				{
-					$items = Arr::FromSortedToKeyed($items, 'Parent');
+					$items = Arr::FromSortedToKeyed($items, 'ParentId');
+					$families = [];
+					foreach (array_keys($items) as $key) {
+						$children = $items[$key];
+						$families[] = ['Id' => $key, 'Name' => $children[0]['ParentCaption'],
+							'Items' => Arr::UnsetKeysArray($children, ['ParentId', 'ParentCaption', 'ParentCode']), 'Code' => $children[0]['ParentCode']];
+					}
+					$items = $families;
 				}
 				$boundary['Items'] = $items;
 				$ret[] = $boundary;

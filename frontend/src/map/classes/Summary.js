@@ -168,9 +168,9 @@ Summary.prototype.getValueTuple = function (variable, values, labels) {
 		return { value: N };
 	} else if (this.metric.properties.SummaryMetric === 'T') {
 		if (!variable.IsGap || (variable.IsGap && variable.HasGapSameTotal))
-			return { value: values.Total };
+			return { value: values.Total / variable.NormalizationScale };
 		else
-			return { value: values.Total + values.TotalGap };
+			return { value: (values.Total + values.TotalGap) / variable.NormalizationScale };
 	} else if (this.metric.properties.SummaryMetric === 'P') {
 		let tot = 0;
 		labels.forEach(function (label) {

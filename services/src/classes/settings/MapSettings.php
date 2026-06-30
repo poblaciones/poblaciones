@@ -28,7 +28,6 @@ class MapSettings
 	public $ShortUrlPattern = null;
 
 	public $UseCalculated = true;
-	public $UseNewMetricPicker = false;
 
 	public $UseDeckgl = true;
 

@@ -31,6 +31,8 @@ await import('./ActivePivotMultiVersion.test.mjs');
 await import('./Gap.test.mjs');
 
 await import('./ChartExporter.test.mjs');
+
+await import('./boundaryTree.test.mjs');
 console.log('\n=== ColumnDragController ===');
 await import('./ColumnDragController.test.mjs');
 console.log('\n=== CsvWriter ===');
@@ -39,6 +41,8 @@ console.log('\n=== ActiveBoundarySet ===');
 await import('./ActiveBoundarySet.test.mjs');
 console.log('\n=== Distribution ===');
 await import('./Distribution.test.mjs');
+console.log('\n=== MapUrlBuilder ===');
+await import('./MapUrlBuilder.test.mjs');
 
 await report();
 process.exit(exitCode());

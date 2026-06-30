@@ -22,27 +22,27 @@ function fakeContainer(svgCount) {
 
 describe('ChartExporter — detección de gráficos', function () {
 	it('hasCharts es falso sin SVGs', function () {
-		expect(new ChartExporter(fakeContainer(0), 'X').hasCharts()).toBeFalsy();
+		expect(new ChartExporter(fakeContainer(0), { indicator: 'X' }).hasCharts()).toBeFalsy();
 	});
 	it('hasCharts es verdadero con al menos un SVG', function () {
-		expect(new ChartExporter(fakeContainer(2), 'X').hasCharts()).toBeTruthy();
+		expect(new ChartExporter(fakeContainer(2), { indicator: 'X' }).hasCharts()).toBeTruthy();
 	});
 	it('hasCharts es falso sin contenedor', function () {
-		expect(new ChartExporter(null, 'X').hasCharts()).toBeFalsy();
+		expect(new ChartExporter(null, { indicator: 'X' }).hasCharts()).toBeFalsy();
 	});
 });
 
 describe('ChartExporter — nombre de archivo', function () {
-	it('deriva el nombre del título, saneando caracteres', function () {
-		var ex = new ChartExporter(fakeContainer(1), 'Población — NBI (%)');
+	it('combina indicador y variable, saneando caracteres', function () {
+		var ex = new ChartExporter(fakeContainer(1), { indicator: 'Población', variable: 'NBI (%)' });
 		expect(ex._filename('svg')).toBe('Poblaci_n_NBI.svg');
 	});
 	it('usa un nombre por defecto si el título queda vacío', function () {
-		var ex = new ChartExporter(fakeContainer(1), '###');
+		var ex = new ChartExporter(fakeContainer(1), { indicator: '###' });
 		expect(ex._filename('png')).toBe('grafico.png');
 	});
 	it('respeta guiones y alfanuméricos', function () {
-		var ex = new ChartExporter(fakeContainer(1), 'tasa-2010');
+		var ex = new ChartExporter(fakeContainer(1), { indicator: 'tasa-2010' });
 		expect(ex._filename('svg')).toBe('tasa-2010.svg');
 	});
 });

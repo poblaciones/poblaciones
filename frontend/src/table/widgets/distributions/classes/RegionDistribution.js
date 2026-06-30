@@ -46,25 +46,66 @@ RegionDistribution.prototype._indexOf = function (column) {
 RegionDistribution.prototype._build = function () {
 	var catCols = this.panel.categoryColumns();
 	var totalOnly = catCols.length === 0;
+	var isGap = !!(this.panel.isGap && this.panel.isGap());
+	var isPercent = !!(this.panel.isPercent && this.panel.isPercent());
 
-	// Camino 1: sin categorías explícitas pero con pivot, se resuelven las
-	// categorías por región para componer cada barra con color (en vez de una
-	// barra monocroma de total). Es lo que permite ver y apilar la composición
-	// aunque el usuario no haya elegido categorías como columnas.
-	if (totalOnly && this.pivot && typeof this.pivot.ResolveAllCategoriesByRegion === 'function') {
+	// Camino 1: resuelve las categorías por región para componer cada barra. Se usa:
+	//  - sin categorías elegidas (para mostrar la composición igual);
+	//  - SIEMPRE en brechas (el delta no se compone por suma de columnas: la barra
+	//    mide el delta del total y los colores la subdividen por peso);
+	//  - en incidencias/porcentajes con categorías elegidas, porque sumar las
+	//    incidencias de cada categoría sobre su propio total no tiene sentido (daría
+	//    >100%): la barra debe medir la incidencia del CONJUNTO. Para eso se usa el
+	//    valor de cada categoría sobre el universo de la región (valueOnUniverse),
+	//    que sí es aditivo, y se suman.
+	// Componer la barra sumando los valores aditivos sobre el universo aplica a toda
+	// incidencia/porcentaje no-brecha, haya o no categorías elegidas: sumar las
+	// incidencias de cada categoría sobre su propio total daría >100%. Con o sin
+	// selección, la barra mide la incidencia del CONJUNTO (suma de valueOnUniverse).
+	var usePercentAgg = isPercent && !isGap;
+	if ((totalOnly || isGap || usePercentAgg) && this.pivot && typeof this.pivot.ResolveAllCategoriesByRegion === 'function') {
 		var resolved = this.pivot.ResolveAllCategoriesByRegion(this.panel.metricId(), this.panel.versionId());
 		if (resolved && resolved.length) {
+			// Filtro de categorías elegidas (cuando hay selección explícita). Sin
+			// selección (solo total) se conservan todas las categorías resueltas.
+			var keep = null;
+			if (!totalOnly) {
+				keep = {};
+				for (var ki = 0; ki < catCols.length; ki++) {
+					if (catCols[ki].meta.labelId != null) keep[catCols[ki].meta.labelId] = true;
+				}
+			}
 			var rr = [];
 			for (var ri = 0; ri < resolved.length; ri++) {
 				var src = resolved[ri];
-				var s = 0;
-				for (var pi = 0; pi < src.parts.length; pi++) s += (src.parts[pi].value || 0);
-				rr.push({ label: src.label, fid: src.fid, total: s, parts: src.parts, isGroup: false });
+				var parts = src.parts;
+				if (keep) parts = parts.filter(function (p) { return keep[p.labelId]; });
+				if (isGap) {
+					rr.push({
+						label: src.label, fid: src.fid,
+						total: (src.delta != null ? src.delta : 0),
+						parts: parts, isGroup: false, isGap: true
+					});
+				} else if (usePercentAgg) {
+					// Incidencia del conjunto: suma de los valores sobre el universo
+					// (aditivos). Cada segmento usa ese mismo valor sobre el universo,
+					// para que la composición sea proporcional al agregado.
+					var aggParts = parts.map(function (p) {
+						return { labelId: p.labelId, name: p.name, color: p.color, value: (p.valueOnUniverse || 0) };
+					});
+					var su = 0;
+					for (var ui = 0; ui < aggParts.length; ui++) su += aggParts[ui].value;
+					rr.push({ label: src.label, fid: src.fid, total: su, parts: aggParts, isGroup: false });
+				} else {
+					var s = 0;
+					for (var pi = 0; pi < parts.length; pi++) s += (parts[pi].value || 0);
+					rr.push({ label: src.label, fid: src.fid, total: s, parts: parts, isGroup: false });
+				}
 			}
-			this._rows = rr;
-			this._totalCount = rr.length;
-			this._totalOnly = false;   // tiene composición real, no es monocromo
-			this._composed = true;     // marca que las barras ya traen categorías
+			this._rows = this._orderByPivot(rr);
+			this._totalCount = this._rows.length;
+			this._totalOnly = false;
+			this._composed = true;
 			return;
 		}
 	}
@@ -116,18 +157,40 @@ RegionDistribution.prototype._build = function () {
 	this._composed = !totalOnly;
 };
 
-// ¿Las barras se componen de varias categorías (con color)? Determina si tiene
-// sentido ofrecer apilar en este panel de regiones, incluso sin que el usuario
-// haya elegido categorías como columnas (Camino 1).
+// ¿Las barras se componen de varias categorías (con color) apilables? Apilar solo
+// tiene sentido en porcentaje (las categorías reparten un 100). En conteo, tasa o
+// área no se ofrece. Una brecha tampoco apila: su delta no compone una suma.
 RegionDistribution.prototype.isComposed = function () {
+	if (this.panel && this.panel.isGap && this.panel.isGap()) return false;
+	if (this.panel && this.panel.isPercent && !this.panel.isPercent()) return false;
 	if (this._composed) {
-		// Con composición real: apilar aporta si hay más de una categoría en alguna
-		// barra.
 		for (var i = 0; i < this._rows.length; i++) {
 			if (this._rows[i].parts && this._rows[i].parts.length > 1) return true;
 		}
 	}
 	return false;
+};
+
+// Reordena las filas del Camino 1 (que llegan en el orden original de las
+// regiones) para que imiten el orden de la pivot, que refleja el sort activo. Se
+// alinea por FID contra dataRows(); las filas sin correspondencia van al final en
+// su orden original.
+RegionDistribution.prototype._orderByPivot = function (rows) {
+	var dataRows = (this.dataset && typeof this.dataset.dataRows === 'function')
+		? this.dataset.dataRows() : [];
+	if (!dataRows.length) return rows;
+	var rank = {};
+	var next = 0;
+	for (var i = 0; i < dataRows.length; i++) {
+		var dr = dataRows[i];
+		if (dr.fid != null && rank[dr.fid] === undefined) rank[dr.fid] = next++;
+	}
+	var withRank = rows.map(function (row, idx) {
+		var r = (row.fid != null && rank[row.fid] !== undefined) ? rank[row.fid] : (next + idx);
+		return { row: row, r: r };
+	});
+	withRank.sort(function (a, b) { return a.r - b.r; });
+	return withRank.map(function (x) { return x.row; });
 };
 
 RegionDistribution.prototype.rows = function () {

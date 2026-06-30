@@ -23,7 +23,7 @@
 				</div>
 
 				<div v-else :key="ind.metricId" class="w-block dist-indicator">
-					<button class="dist-collapse-btn dist-minimize" @click="toggleCollapse(ind.metricId)" title="Colapsar" aria-label="Colapsar">▾</button>
+					<button class="dist-collapse-btn dist-minimize" @click="toggleCollapse(ind.metricId)" title="Colapsar" aria-label="Colapsar">🗕</button>
 					<div class="w-block-head">
 						<div class="dist-head-titles">
 							<div class="w-indicator">{{ ind.name }}</div>
@@ -41,10 +41,16 @@
 					</div>
 
 					<div class="dist-indicator-body" :ref="'body-' + ind.metricId">
-					<!-- Categorías, apilado multi-año: un solo chart, cada año una barra -->
-					<template v-if="axisMode === 'categories' && stacked && ind.panels.length">
+					<!-- Categorías, apilado multi-año: un solo chart, cada año una barra.
+					     Las brechas se excluyen: su delta no compone una suma apilable. -->
+					<template v-if="axisMode === 'categories' && stacked && !indicatorIsGap(ind) && ind.panels.length">
 						<div class="dist-panel">
-							<div class="w-version dist-panel-title">{{ yearSpan(ind) }}</div>
+							<div class="w-version dist-panel-title">
+								<span class="dist-version-name">{{ yearSpan(ind) }}</span>
+								<button v-if="canPickCategories(ind)"
+										class="dist-cat-trigger" @click.stop="openCategoryPicker(ind, null, $event)"
+										title="Elegir categorías" aria-label="Elegir categorías">▾</button>
+							</div>
 							<category-chart
 								:years="yearSeriesFor(ind)"
 								:mode="chartMode"
@@ -58,14 +64,21 @@
 					<template v-else-if="axisMode === 'categories'">
 						<div class="dist-panels">
 							<div v-for="panel in ind.panels" :key="panel.key()" class="dist-panel">
-								<div class="w-version dist-panel-title">{{ panel.versionName() }}</div>
+								<div class="w-version dist-panel-title">
+									<span class="dist-version-name">{{ panel.versionName() }}</span>
+									<button v-if="canPickCategories(ind)"
+											class="dist-cat-trigger" @click.stop="openCategoryPicker(ind, panel.versionId(), $event)"
+											title="Elegir categorías" aria-label="Elegir categorías">▾</button>
+								</div>
 								<category-chart v-if="categoryHasData(panel)"
 									:bars="barsFor(panel)"
 									:mode="chartMode"
 									:stacked="false"
 									:is-percent="panel.isPercent()"
 									:is-gap="panel.isGap()"
+									:gap-in-points="panel.gapIsPoints()"
 									:value-unit="panel.valueUnit()"
+									:hide-x-labels="true"
 									:show-total-line="panel.showsTotalLine()"
 									:total-value="totalFor(panel)"
 									:height="chartHeight" />
@@ -78,12 +91,20 @@
 					<template v-else>
 						<div class="dist-panels">
 							<div v-for="panel in ind.panels" :key="panel.key()" class="dist-panel">
-								<div class="w-version dist-panel-title">{{ panel.versionName() }}</div>
+								<div class="w-version dist-panel-title">
+									<span class="dist-version-name">{{ panel.versionName() }}</span>
+									<button v-if="canPickCategories(ind)"
+											class="dist-cat-trigger" @click.stop="openCategoryPicker(ind, panel.versionId(), $event)"
+											title="Elegir categorías" aria-label="Elegir categorías">▾</button>
+								</div>
 								<region-bars v-if="regionHasData(panel)"
 									:rows="regionRowsFor(panel)"
 									:scale-max="regionScaleFor(panel)"
-									:stacked="stacked"
+									:stacked="stacked && !panel.isGap()"
 									:is-percent="panel.isPercent()"
+									:is-gap="panel.isGap()"
+									:gap-in-points="panel.gapIsPoints()"
+									:value-unit="panel.valueUnit()"
 									:min-height="chartHeight" />
 								<div v-else class="dist-no-data">Sin información</div>
 							</div>
@@ -91,7 +112,8 @@
 					</template>
 				</div>
 
-					<div class="w-legend dist-legend" v-if="legendFor(ind).length">
+					<div class="w-legend dist-legend" v-if="legendFor(ind).length"
+							:style="legendStyleFor(ind)">
 						<span v-for="c in legendFor(ind)" :key="c.labelId == null ? c.name : c.labelId" class="w-legend-item">
 							<span class="w-swatch" :style="{ background: c.color }"></span>{{ c.name }}
 						</span>
@@ -106,8 +128,8 @@
 		<footer v-if="availability === 'ready'" class="widget-foot">
 			<span class="axis-switch">
 				<span class="axis-label">Graficar:</span>
-				<label><input type="radio" value="categories" v-model="axisMode" /> categorías</label>
-				<label><input type="radio" value="regions" v-model="axisMode" /> regiones</label>
+				<label><input type="radio" value="categories" v-model="axisMode" /> Categorías</label>
+				<label><input type="radio" value="regions" v-model="axisMode" /> Regiones</label>
 			</span>
 			<label class="sw-toggle" :class="{ disabled: !anyStackable }">
 				<input type="checkbox" v-model="stacked" :disabled="!anyStackable" />
@@ -120,6 +142,14 @@
 				<span class="sw-label">Ponderar los valores de las unidades geográficas según sus totales</span>
 			</label>
 		</footer>
+
+		<!-- Panel flotante de selección de categorías. Reutiliza el mismo control que
+		     la pivot (CategoryPicker): opera sobre las Selections del metric y, al
+		     cambiar, se re-renderiza la pivot para reflejarlo en la tabla y los charts. -->
+		<div v-if="catPicker.open" ref="catPicker" class="dist-cat-panel" :style="catPicker.style" @click.stop>
+			<category-picker :metric="catPicker.metric" :version-id="catPicker.versionId" :tick="datasetVersion"
+				@change="_refreshAfterCategoryChange" />
+		</div>
 	</div>
 </template>
 
@@ -130,11 +160,12 @@ import RegionBars from '@/table/widgets/distributions/components/RegionBars.vue'
 import DistributionModel from '@/table/widgets/distributions/classes/DistributionModel.js';
 import CategoryDistribution from '@/table/widgets/distributions/classes/CategoryDistribution.js';
 import RegionDistribution from '@/table/widgets/distributions/classes/RegionDistribution.js';
+import CategoryPicker from '@/table/components/CategoryPicker.vue';
 import ChartExporter from '@/table/writers/ChartExporter.js';
 
 export default {
 	name: 'DistributionWidget',
-	components: { CategoryChart, RegionBars },
+	components: { CategoryChart, RegionBars, CategoryPicker },
 	mixins: [widgetMixin],
 	props: {
 		pivot: { type: Object, default: null },
@@ -149,11 +180,18 @@ export default {
 			stacked: !!cfg.stacked,                    // apilar (global)
 			collapsed: cfg.collapsed ? cfg.collapsed.slice() : [],  // metricIds colapsados
 			chartHeight: 180,
-			exportMenuFor: null   // metricId con el menú de exportar abierto, o null
+			exportMenuFor: null,   // metricId con el menú de exportar abierto, o null
+			legendWidths: {},      // metricId → ancho (px) de los charts, tope de la leyenda
+			// Panel flotante de selección de categorías (propio del widget).
+			catPicker: { open: false, metric: null, versionId: null, style: {} }
 		};
 	},
 	computed: {
 		model() {
+			// datasetVersion cambia con cada RefreshData (incluido un sort): se lee
+			// para que el modelo y los charts se recalculen aunque el dataset mute en
+			// el lugar sin cambiar de referencia.
+			this.datasetVersion;
 			return this.availability === 'ready' ? new DistributionModel(this.dataset) : null;
 		},
 		indicators() {
@@ -196,6 +234,9 @@ export default {
 		axisMode(v) { this.persist({ axisMode: v }); },
 		chartMode(v) { this.persist({ chartMode: v }); },
 		stacked(v) { this.persist({ stacked: v }); },
+		// Cuando deja de corresponder apilar, el switch se deshabilita; si quedara en
+		// ON producía estados raros (se apilaba sin poder desapilar). Se apaga primero.
+		anyStackable(v) { if (!v && this.stacked) this.stacked = false; },
 		collapsed: { deep: true, handler(v) { this.persist({ collapsed: v }); } }
 	},
 	mounted() {
@@ -213,16 +254,65 @@ export default {
 		});
 		if (this.$refs.body) this._ro.observe(this.$refs.body);
 		this.$nextTick(this.measureHeight);
+		this.$nextTick(this._measureLegends);
+		// Estado inicial: si viene apilado pero no corresponde, se apaga (el switch
+		// arranca deshabilitado y no debe quedar en ON).
+		if (this.stacked && !this.anyStackable) this.stacked = false;
 		// Cierra el menú de exportar al hacer clic afuera (el botón y el menú
 		// detienen la propagación con @click.stop).
 		this._exportAway = function () { if (loc.exportMenuFor != null) loc.exportMenuFor = null; };
 		document.addEventListener('click', this._exportAway);
+		// Cierra el panel de categorías al hacer clic afuera (el triángulo y el panel
+		// detienen la propagación con @click.stop).
+		this._catAway = function () { if (loc.catPicker.open) loc.closeCategoryPicker(); };
+		document.addEventListener('click', this._catAway);
 	},
 	beforeDestroy() {
 		if (this._ro) this._ro.disconnect();
 		if (this._exportAway) document.removeEventListener('click', this._exportAway);
+		if (this._catAway) document.removeEventListener('click', this._catAway);
+	},
+	updated() {
+		this.$nextTick(this._measureLegends);
 	},
 	methods: {
+		// Tope de ancho de la leyenda: la SUMA de los anchos de los charts del
+		// indicador (cada .dist-panel), más los gaps entre ellos. Se suma por hijo y
+		// no se mide el contenedor: el contenedor puede estirarse por la propia leyenda
+		// de un render anterior, lo que retroalimentaría la medición y la haría crecer.
+		// Aplica igual a categorías y regiones (ambas usan .dist-panel).
+		_measureLegends() {
+			var changed = false;
+			var next = {};
+			var keys = Object.keys(this.$refs);
+			for (var k = 0; k < keys.length; k++) {
+				if (keys[k].indexOf('body-') !== 0) continue;
+				var refVal = this.$refs[keys[k]];
+				var el = Array.isArray(refVal) ? refVal[0] : refVal;
+				if (!el) continue;
+				var metricId = keys[k].slice(5);
+				var panels = el.querySelectorAll('.dist-panel');
+				if (!panels.length) continue;
+				var sum = 0;
+				for (var p = 0; p < panels.length; p++) {
+					sum += panels[p].getBoundingClientRect().width;
+				}
+				// Gap horizontal entre paneles (.dist-panels usa gap de 16px).
+				if (panels.length > 1) sum += (panels.length - 1) * 16;
+				var w = Math.round(sum);
+				if (w > 0) {
+					next[metricId] = w;
+					if (this.legendWidths[metricId] !== w) changed = true;
+				}
+			}
+			if (changed || Object.keys(next).length !== Object.keys(this.legendWidths).length) {
+				this.legendWidths = next;
+				// El nuevo ancho cambia cuántas líneas ocupa la leyenda y, por lo tanto,
+				// el alto disponible para el chart: se recalcula tras aplicar el ancho.
+				var loc = this;
+				this.$nextTick(function () { loc.measureHeight(); });
+			}
+		},
 		persist(patch) { this.updateConfig(patch); },
 		toggleExportMenu(metricId) {
 			this.exportMenuFor = (this.exportMenuFor === metricId) ? null : metricId;
@@ -235,8 +325,19 @@ export default {
 			var refs = this.$refs['body-' + ind.metricId];
 			var body = Array.isArray(refs) ? refs[0] : refs;
 			if (!body) return;
-			var title = ind.name + (ind.variableName ? ' — ' + ind.variableName : '');
-			var exporter = new ChartExporter(body, title);
+			// Subtítulos por gráfico: en apilado de categorías hay un solo chart (su
+			// caption es el rango de años); en el resto, un chart por versión (su año).
+			var captions;
+			if (this.axisMode === 'categories' && this.stacked && !this.indicatorIsGap(ind)) {
+				captions = [this.yearSpan(ind)];
+			} else {
+				captions = ind.panels.map(function (p) { return p.versionName(); });
+			}
+			var exporter = new ChartExporter(body, {
+				indicator: ind.name,
+				variable: ind.variableName || '',
+				captions: captions
+			});
 			if (!exporter.hasCharts()) return;
 			if (format === 'png') exporter.downloadPng();
 			else exporter.downloadSvg();
@@ -250,19 +351,103 @@ export default {
 		// Alto disponible para los charts: sigue al alto del cuerpo (que cambia con
 		// el splitter), descontando títulos y leyenda.
 		measureHeight() {
-			if (!this.$refs.body) return;
-			var h = this.$refs.body.clientHeight;
-			// clientHeight puede ser 0 o no numérico durante el montaje; en ese caso
-			// se mantiene un alto por defecto en vez de propagar un valor inválido
-			// (que un SVG rechazaría por negativo/NaN).
-			if (!h || isNaN(h)) { this.chartHeight = 180; return; }
-			// Se descuenta el espacio de cabecera del bloque, título de versión y
-			// leyenda para que el gráfico no provoque scroll por sobrarse de alto.
-			this.chartHeight = Math.max(125, Math.min(720, h - 175));
+			// Se mide el cuerpo de un indicador (dist-indicator-body), que ya excluye la
+			// cabecera del bloque: su alto es el espacio real para chart + título de
+			// versión + leyenda. Al chart le queda ese alto menos lo que ocupan el
+			// título de versión y la leyenda (medidos, no estimados). Medir el cuerpo
+			// del indicador —y no el scroll que apila varios— evita el desajuste que
+			// dejaba un scroll vertical residual.
+			var keys = Object.keys(this.$refs);
+			var bodyEl = null;
+			for (var k = 0; k < keys.length && !bodyEl; k++) {
+				if (keys[k].indexOf('body-') !== 0) continue;
+				var refVal = this.$refs[keys[k]];
+				bodyEl = Array.isArray(refVal) ? refVal[0] : refVal;
+			}
+			if (!bodyEl) { if (!this.chartHeight) this.chartHeight = 180; return; }
+			var avail = bodyEl.clientHeight;
+			if (!avail || isNaN(avail)) { this.chartHeight = 180; return; }
+			var legend = bodyEl.querySelector('.dist-legend');
+			var title = bodyEl.querySelector('.dist-panel-title');
+			var legendH = legend ? Math.ceil(legend.getBoundingClientRect().height) : 0;
+			var titleH = title ? Math.ceil(title.getBoundingClientRect().height) : 0;
+			// El cuerpo tiene padding vertical (10px arriba y abajo) que clientHeight
+			// incluye pero no es área de dibujo, más un pequeño margen de seguridad.
+			var chrome = 24;
+			this.chartHeight = Math.max(125, Math.min(720, avail - legendH - titleH - chrome));
 		},
 		barsFor(panel) {
 			var cd = this.categoryByPanel[panel.key()];
 			return cd ? cd.bars() : [];
+		},
+		// Metric del modelo de la pivot correspondiente a un indicador del widget.
+		// El widget conoce el metricId (Metric.Id del catálogo); se busca la primera
+		// instancia que coincida en pivot.Metrics.
+		_pivotMetricFor(ind) {
+			if (!this.pivot || !this.pivot.Metrics) return null;
+			for (var i = 0; i < this.pivot.Metrics.length; i++) {
+				var m = this.pivot.Metrics[i];
+				var mid = m.properties && m.properties.Metric ? m.properties.Metric.Id : null;
+				if (mid === ind.metricId) return m;
+			}
+			return null;
+		},
+		// ¿Tiene sentido ofrecer el selector de categorías para este indicador? Solo
+		// si su variable tiene etiquetas (categorías) elegibles.
+		canPickCategories(ind) {
+			var m = this._pivotMetricFor(ind);
+			if (!m || !m.Selections || !m.Selections.length) return false;
+			return m.Selections.some(function (sel) {
+				return sel.variable && sel.variable.ValueLabels &&
+					sel.variable.ValueLabels.some(function (l) { return l.Visible; });
+			});
+		},
+		openCategoryPicker(ind, versionId, ev) {
+			var m = this._pivotMetricFor(ind);
+			if (!m) return;
+			if (this.catPicker.open && this.catPicker.metric === m && this.catPicker.versionId === versionId) {
+				this.closeCategoryPicker();
+				return;
+			}
+			this.catPicker = { open: true, metric: m, versionId: (versionId == null ? null : versionId), style: {} };
+			this._positionCatPicker(ev.currentTarget);
+		},
+		closeCategoryPicker() {
+			this.catPicker = { open: false, metric: null, versionId: null, style: {} };
+		},
+		_positionCatPicker(triggerEl) {
+			if (!triggerEl || !triggerEl.getBoundingClientRect) return;
+			var r = triggerEl.getBoundingClientRect();
+			var loc = this;
+			this.catPicker.style = { position: 'fixed', top: (r.bottom + 4) + 'px', left: r.left + 'px', zIndex: 3000 };
+			this.$nextTick(function () {
+				var panel = loc.$refs.catPicker;
+				if (!panel) return;
+				var pr = panel.getBoundingClientRect();
+				var vw = window.innerWidth, vh = window.innerHeight;
+				var left = r.left, top = r.bottom + 4;
+				if (left + pr.width > vw - 8) left = Math.max(8, vw - pr.width - 8);
+				if (top + pr.height > vh - 8) top = Math.max(8, r.top - pr.height - 4);
+				loc.catPicker.style = { position: 'fixed', top: top + 'px', left: left + 'px', zIndex: 3000,
+					maxHeight: (vh - top - 12) + 'px', overflowY: 'auto' };
+			});
+		},
+		// Tras cambiar las categorías (el CategoryPicker ya mutó las Selections), se
+		// vuelve a renderizar la pivot y se avisa al contenedor (mismo evento
+		// 'data-refreshed' que emite la pivot) para propagar el nuevo dataset a la
+		// tabla y a los demás widgets.
+		_refreshAfterCategoryChange() {
+			var loc = this;
+			if (!this.pivot || typeof this.pivot.Render !== 'function') return;
+			var done = this.pivot.Render();
+			var emit = function () { loc.$emit('data-refreshed', loc.pivot); };
+			if (done && typeof done.then === 'function') done.then(emit);
+			else emit();
+		},
+		// ¿El indicador es de brecha? (alguno de sus paneles lo es). Las brechas no
+		// se apilan: su delta no compone una suma.
+		indicatorIsGap(ind) {
+			return ind.panels.some(function (p) { return p.isGap && p.isGap(); });
 		},
 		// ¿Algún panel del mapa de distribuciones tiene barras compuestas por varias
 		// categorías? Habilita apilar incluso sin categorías elegidas como columnas.
@@ -278,11 +463,32 @@ export default {
 		},
 		// Leyenda del indicador: las categorías del panel, o las resueltas por el
 		// Camino 1 cuando la selección es solo total (que vienen en los bars).
+		legendStyleFor(ind) {
+			// El ancho de los charts no es fijo: crece con la cantidad de barras. La
+			// leyenda no debe pasar el ancho de los charts visibles del indicador; ese
+			// ancho se mide tras el render (_measureLegends) y se aplica como tope.
+			var w = this.legendWidths[ind.metricId];
+			return w ? { maxWidth: w + 'px' } : {};
+		},
 		legendFor(ind) {
+			// La leyenda refleja solo lo que se grafica: las barras ya excluyen las
+			// categorías sin valor, así que se filtra la leyenda declarada a esas. Así,
+			// elegir categorías a mano y expandir el total dan la misma leyenda (antes,
+			// a mano aparecían también las vacías). No se tocan dropdown ni otros lados.
+			// Se considera con datos a la categoría que aparezca en cualquier versión.
+			var withData = {};
+			var anyLabeled = false;
+			for (var pi = 0; pi < ind.panels.length; pi++) {
+				var bars = this.barsFor(ind.panels[pi]);
+				for (var i = 0; i < bars.length; i++) {
+					if (bars[i].labelId != null) { withData[bars[i].labelId] = true; anyLabeled = true; }
+				}
+			}
+			if (!anyLabeled) return [];
 			var leg = ind.panels[0].legend();
-			if (leg.length) return leg;
-			var bars = this.barsFor(ind.panels[0]);
-			return bars.filter(function (b) { return b.labelId != null; })
+			if (leg.length) return leg.filter(function (c) { return withData[c.labelId]; });
+			var first = this.barsFor(ind.panels[0]);
+			return first.filter(function (b) { return b.labelId != null; })
 				.map(function (b) { return { labelId: b.labelId, name: b.name, color: b.color }; });
 		},
 		totalFor(panel) {
@@ -320,6 +526,10 @@ export default {
 			// largo. El máximo real evita ambos.
 			var m = rd.maxTotal();
 			if (m <= 0) return panel.isPercent() ? 100 : 1;
+			// En porcentaje, cuando las barras componen ~100% (fil%: cada región
+			// reparte su propio 100), el máximo real puede excederlo apenas por
+			// redondeo. Sin este tope, el "nice ceil" saltaba de 100 a 200. Se fija 100.
+			if (panel.isPercent() && m <= 100.5) return 100;
 			var p = Math.pow(10, Math.floor(Math.log10(m)));
 			return Math.ceil(m / p) * p;
 		}
@@ -336,7 +546,7 @@ export default {
 	.dist-indicator-body { padding: 10px 12px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 
 	.w-block-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding-right: 24px; }
-	.dist-export { position: relative; flex: 0 0 auto; }
+	.dist-export { position: absolute; right: 30px; flex: 0 0 auto; }
 	.dist-export-btn {
 		border: none; background: transparent; color: #90a4ae; cursor: pointer;
 		font-size: 13px; line-height: 1; padding: 4px 6px; border-radius: 4px;
@@ -366,7 +576,7 @@ export default {
 	.dist-collapse-btn:hover { color: #455a64; }
 	.dist-minimize {
 		position: absolute; top: 4px; right: 4px; z-index: 1;
-		font-size: 18px; font-weight: 700; padding: 0 6px;
+		font-size: 8px; font-weight: 700; padding: 0 6px;
 	}
 
 	.dist-collapsed {
@@ -381,13 +591,24 @@ export default {
 		overflow: hidden; text-overflow: ellipsis; max-height: 220px;
 	}
 
-	.dist-panels { display: flex; gap: 4px; align-items: flex-start; flex: 1 1 auto; min-height: 0; overflow-x: auto; }
+	.dist-panels { display: flex; gap: 4px; align-items: flex-start; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 	.dist-panel { flex: 0 0 auto; display: flex; flex-direction: column; height: 100%; }
-	.dist-panel-title { text-align: center; margin-bottom: 6px; }
+	.dist-panel-title { position: relative; text-align: center; }
+	.dist-version-name { display: inline-block; }
+	.dist-cat-trigger {
+		position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+		border: none; background: transparent; cursor: pointer; padding: 0 4px;
+		font-size: 18px; color: #607d8b; line-height: 1;
+	}
+	.dist-cat-trigger:hover { color: #1565c0; }
+	.dist-cat-panel {
+		background: #fff; border: 1px solid #cfd8dc; border-radius: 4px;
+		box-shadow: 0 4px 14px rgba(0,0,0,.16); padding: 6px 0; min-width: 200px;
+	}
 
 	.dist-legend {
 		margin: 0;
-		max-width: none;
+		gap: 0px 10px;
 		flex: 0 0 auto;
 		padding: 8px 12px;
 		border-top: 1px solid #eceff1;

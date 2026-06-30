@@ -1,7 +1,7 @@
 <template>
   <transition name="slide-fade">
     <div class="indicator-selector-wrapper sidepanelOffset" v-if="isOpen" v-on-clickaway="closePanel">
-      <div ref="floatingPanel" class="work-offsetY floating-panel panel card" :style="panelStyle">
+      <div ref="floatingPanel" class="work-offsetY floating-panel panel card" :style="[panelStyle, heightStyle]">
         <!-- Encabezado -->
         <div class="panel-header">
           <div class="panel-title">{{ title }}</div>
@@ -145,7 +145,7 @@
 
             <!-- Acción de grupo: agrega el nivel actual como capa (no marca hojas) -->
             <div
-              v-if="!searchQuery && showAddAll && currentLeafItems.length"
+              v-if="!searchQuery && showAddAll && !filterMode && currentLeafItems.length"
               class="indicator-item add-all hand"
               @click="onSelectGroup"
             >
@@ -166,7 +166,7 @@
                 @click="toggleCollapse(row.sectionKey)"
               >
                 <span
-                  v-if="selectableBranches && isMulti && row.selectable && row.items && row.items.length"
+                  v-if="selectableBranches && !filterMode && isMulti && row.selectable && row.items && row.items.length"
                   class="selcheck header-check"
                   :class="{ 'checked': leavesSelectionState(row.items) === 'all', 'partial': leavesSelectionState(row.items) === 'some' }"
                   @click.stop="toggleLeavesSelection(row.items, currentNode)"
@@ -176,7 +176,7 @@
                 </span>
                 <span class="source-header-text">{{ row.name }}</span>
                 <i
-                  v-if="selectableBranches && !isMulti && row.selectable && row.items && row.items.length"
+                  v-if="selectableBranches && !filterMode && !isMulti && row.selectable && row.items && row.items.length"
                   class="fas fa-layer-group source-header-addall"
                   title="Agregar todos/as"
                   @click.stop="addLeaves(row.items, currentNode)"
@@ -254,7 +254,7 @@
           <label class="sw-toggle">
             <input type="checkbox" v-model="drillIntoElements" />
             <span class="sw-track"><span class="sw-thumb"></span></span>
-            <span class="sw-label">Ver cada elemento de las delimitaciones al seleccionar</span>
+            <span class="sw-label">Explorar las delimitaciones al seleccionar</span>
           </label>
         </div>
 
@@ -350,6 +350,12 @@ export default {
     // delimitaciones (p. ej. marcar una provincia pinta sus departamentos).
     // No afecta la navegación: el checkbox no entra a la rama.
     selectableBranches: { type: Boolean, default: false },
+    // Modo filtro: filtrar siempre es por una o varias delimitaciones concretas,
+    // nunca "todas" (eso no filtra). Por eso no se muestran los controles de
+    // "agregar todas" (ni en filas ni en separadores) y explorar las delimitaciones
+    // es el comportamiento obligatorio (no un toggle). El panel además se dimensiona
+    // con un alto mínimo/máximo cómodo para elegir.
+    filterMode: { type: Boolean, default: false },
     // Si está activo, los eventos select/deselect emiten como segundo argumento
     // el nodo contenedor actual (el "tipo", p. ej. la delimitación Departamentos),
     // necesario para resolver el boundary al que pertenecen las hojas.
@@ -366,9 +372,12 @@ export default {
       keepTooltip: false,
       internalMulti: this.multiSelect,
       tooltip: { visible: false, top: 0, left: 0, item: null },
-      viewMode: 'tree',   // 'tree' | 'list' (listado unificado de niveles 0 y 1)
-      drillIntoElements: false,   // regiones: si está activo, clic en delimitación
-                                  // entra a sus elementos; si no (default), agrega todos
+      // Para delimitaciones (regiones/filtro) el listado es más claro que la grilla
+      // de tarjetas; para indicadores se mantiene la grilla por defecto.
+      viewMode: this.selectableBranches ? 'list' : 'tree',   // 'tree' | 'list'
+      drillIntoElements: this.filterMode ? true : false,   // regiones: si está activo,
+                                  // clic en delimitación entra a sus elementos; si no
+                                  // (default), agrega todos. En filtro: siempre activo.
       expanded: {},       // sectionKey -> true cuando el separador está expandido
                           // (en listado, por defecto expandido; en árbol, según expandLeaves)
       panelStyle: null,   // posición calculada cuando se ancla a un invocador
@@ -377,14 +386,36 @@ export default {
     };
   },
   computed: {
-    // El switch "Ver cada elemento de las delimitaciones al seleccionar" se ofrece
-    // cuando hay delimitaciones a la vista: navegando boundaries reales (ramas que
-    // llevan directo a hojas) o en resultados de búsqueda que incluyan alguna
-    // delimitación. No aparece en la raíz (tipos de boundary) ni en hojas puras.
+    // El panel se dimensiona con un alto cómodo en todos sus usos: mínimo 600px y
+    // máximo 750px, ambos acotados al alto de la pantalla (menos un margen) para no
+    // excederla en monitores chicos.
+    heightStyle() {
+      var avail = (typeof window !== 'undefined' ? window.innerHeight : 800) - 16;
+      var max = Math.min(750, avail);
+      var min = Math.min(600, avail);
+      if (min > max) min = max;
+      return { minHeight: min + 'px', maxHeight: max + 'px' };
+    },
+    // El switch "Explorar las delimitaciones al seleccionar" se ofrece cuando hay
+    // delimitaciones a la vista, donde el clic es ambiguo (¿se agregan a la pivot o
+    // se entra a explorarlas?): en resultados de búsqueda con delimitaciones, en el
+    // listado de la raíz (que ya muestra delimitaciones como "Provincias"), o
+    // navegando dentro de boundaries. No aparece en la grilla de tipos ni en hojas.
     showDrillToggle() {
       if (!this.selectableBranches) return false;
+      // En filtro, explorar es obligatorio (no un toggle): no se ofrece.
+      if (this.filterMode) return false;
       if (this.searchQuery) {
-        return this.filteredBranches.some(this.isDelimitation);
+        return this.filteredBranches.some(e => this.isDelimitation(e.branch));
+      }
+      // Listado en la raíz: hay delimitaciones si alguna rama de las categorías lo es.
+      if (this.listModeActive) {
+        var loc = this;
+        return this.categories.some(function (cat) {
+          var content = loc.contentOf(cat);
+          return content.branches.some(loc.isDelimitation) ||
+            (content.branches.length === 0 && content.sections.some(function (s) { return s.Items && s.Items.length; }) && loc.isDelimitation(cat));
+        });
       }
       if (!this.navStack.length) return false;
       var branches = this.currentBranches;
@@ -542,7 +573,10 @@ export default {
       }
       for (const section of this.currentSections) {
         if (section.Name) {
-          rows.push({ type: 'header', key: 'h_' + section.Key, sectionKey: section.Key, name: section.Name, count: null, selectable: true, items: section.Items });
+          rows.push({ type: 'header', key: 'h_' + section.Key, sectionKey: section.Key,
+            name: section.Name, count: null, selectable: true, items: section.Items,
+            groupId: (section.GroupId != null ? section.GroupId : null),
+            code: (section.Code != null ? section.Code : null) });
           if (this.isCollapsed(section.Key)) continue;
         }
         for (const item of section.Items) {
@@ -620,6 +654,24 @@ export default {
     // Clasifica el contenido de un nodo en ramas u hojas.
     contentOf(node) {
       const items = node.Items;
+      // Un nodo con VersionId es un tipo de delimitación seleccionable: sus Items
+      // son sus hojas, ya sea planas o agrupadas (formato actual: cada agrupador
+      // trae { Id, Name, Code, Items }). En ese caso NO son ramas navegables, sino
+      // las secciones (grupos) de la delimitación.
+      if (node.VersionId != null) {
+        if (Array.isArray(items) && items.length && items[0] && items[0].Items !== undefined) {
+          // Agrupadores: una sección por agrupador, con su nombre como cabecera.
+          const sections = items.map(g => ({
+            Key: (g.Id != null ? String(g.Id) : g.Name), Name: g.Name, Parent: g.Name,
+            GroupId: (g.Id != null ? g.Id : null), Code: (g.Code != null ? g.Code : null),
+            Items: Array.isArray(g.Items) ? g.Items : [],
+          }));
+          return { branches: [], sections };
+        }
+        if (Array.isArray(items)) {
+          return { branches: [], sections: [{ Key: '_all', Name: '', Parent: null, Items: items }] };
+        }
+      }
       if (Array.isArray(items)) {
         if (items.length && items[0] && items[0].Items !== undefined) {
           return { branches: items, sections: [] }; // sub-categorías navegables
@@ -627,6 +679,7 @@ export default {
         return { branches: [], sections: [{ Key: '_all', Name: '', Parent: null, Items: items }] };
       }
       if (items && typeof items === 'object') {
+        // Formato anterior: diccionario { nombreGrupo: [hojas] }.
         const sections = Object.keys(items).map(parent => ({
           Key: parent, Name: parent, Parent: parent, Items: items[parent],
         }));
@@ -782,6 +835,9 @@ export default {
         else this.emitSelect([item], container);
       } else {
         this.emitSelect([item], container);
+        // En selección simple, tras elegir se limpia el texto de búsqueda (en
+        // multiselección se conserva para seguir agregando sobre el mismo filtro).
+        this.searchQuery = '';
         if (this.closeOnSelect) this.closePanel();
       }
     },

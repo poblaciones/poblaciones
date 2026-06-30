@@ -6,6 +6,7 @@ import ClippingRouter from '@/map/router/ClippingRouter';
 import SelectedInfoRouter from '@/map/router/SelectedInfoRouter';
 import LeftPanelRouter from '@/map/router/LeftPanelRouter';
 import FeatureInfoRouter from '@/map/router/FeatureInfoRouter';
+import ZoomFeatureRouter from '@/map/router/ZoomFeatureRouter';
 import BasemapRouter from '../router/BasemapRouter';
 
 
@@ -32,7 +33,8 @@ function SaveRoute() {
 												new ClippingRouter(),
 												new SelectedInfoRouter(),
 												new LeftPanelRouter(),
-												new FeatureInfoRouter()	];
+												new FeatureInfoRouter(),
+												new ZoomFeatureRouter()];
 };
 
 SaveRoute.prototype.UpdateRoute = function (coord) {

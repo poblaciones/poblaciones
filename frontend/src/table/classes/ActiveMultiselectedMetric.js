@@ -375,7 +375,7 @@ ActiveMultiselectedMetric.prototype.restore = function (str) {
 		var saved = perVersion[sel.versionId()];
 		if (!saved) continue;
 		if (!isNaN(saved.lvlIdx) && saved.lvlIdx >= 0 && saved.lvlIdx < sel.version.Levels.length) {
-			sel.moveToLevelNamed(sel.version.Levels[saved.lvlIdx].Name);
+			sel.moveToLevel(sel.version.Levels[saved.lvlIdx]);
 		}
 		sel.includeTotal = saved.total === 't';
 		if (saved.labels) {

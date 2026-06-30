@@ -167,6 +167,11 @@ export default {
 		}
 	},
 	mounted() {
+		// Banderas de control del historial (no reactivas): _pendingStructural marca
+		// que la próxima sincronización deja entrada en el back; _restoring evita
+		// escribir el historial mientras se restaura desde el botón atrás.
+		this._pendingStructural = false;
+		this._restoring = false;
 		this.whenCatalogReady(this.bootstrap);
 		// "Atrás"/"adelante" del navegador: recargar el estado desde la URL.
 		this._onPopState = this.reloadFromUrl.bind(this);
@@ -204,7 +209,14 @@ export default {
 			this.syncRoute();
 		},
 		onDataRefreshed(pivot, structural) {
-			this.syncRoute(!!structural);
+			// Una acción estructural (agregar/quitar indicador, región o filtro) debe
+			// dejar una entrada en el historial. El refresco de datos puede emitir este
+			// evento sin el flag, así que se respeta también una marca pendiente puesta
+			// por la acción que lo originó, para que el pushState no quede pisado por un
+			// replaceState posterior.
+			var isStructural = !!structural || this._pendingStructural;
+			this._pendingStructural = false;
+			this.syncRoute(isStructural);
 		},
 		onCollapseChanged(payload) {
 			this.rowCollapse = (payload && payload.encoded) || '';
@@ -216,10 +228,14 @@ export default {
 		// porque el Dashboard es el dueño de la pivot.
 		addMetric(metricId) {
 			var loc = this;
+			// Se marca la acción como estructural antes del refresco: el data-refreshed
+			// que emita la pivot dejará la entrada en el historial. La marca se limpia
+			// al consumirse; si por timing el evento no llegó, el syncRoute final la usa.
+			this._pendingStructural = true;
 			return Promise.resolve(this.pivot.AddMetricById(metricId)).then(function () {
 				return loc.pivot.RefreshData();
 			}).then(function () {
-				loc.syncRoute(true);
+				if (loc._pendingStructural) { loc._pendingStructural = false; loc.syncRoute(true); }
 			});
 		},
 		onWidgetError(err) {
@@ -287,6 +303,9 @@ export default {
 		// atrás/adelante). Limpia la pivot y restaura, sin tocar el historial.
 		reloadFromUrl() {
 			var loc = this;
+			// Marca de restauración: evita que el data-refreshed resultante reescriba el
+			// historial (ver syncRoute). Se limpia al terminar de reconstruir.
+			this._restoring = true;
 			var query = _parseHashQuery(window.location.hash);
 			var sections = ActiveRoute.parseQuery(query);
 			this.pivot.Clear();
@@ -299,7 +318,8 @@ export default {
 			}).then(function () {
 				loc.restoreDashState(query);
 				loc.$emit('data-refreshed', loc.pivot);
-			});
+				loc._restoring = false;
+			}).catch(function () { loc._restoring = false; });
 		},
 
 		bootstrap() {
@@ -424,6 +444,10 @@ export default {
 		},
 
 		syncRoute(pushHistory) {
+			// Durante el arranque o una restauración por el botón atrás no se escribe el
+			// historial: el estado ya proviene de la URL y volver a empujarlo pisaría la
+			// entrada a la que el navegador acaba de regresar.
+			if (this.booting || this._restoring) return;
 			var query = this.pivot
 				? this.pivot.Router.query()
 				: (_parseHashQuery(window.location.hash) || {});

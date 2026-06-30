@@ -72,27 +72,62 @@ CategoryDistribution.prototype._aggregate = function (column, rows) {
 };
 
 CategoryDistribution.prototype._build = function () {
+	this._buildBars();
+	// Se omiten las categorías sin valor (null, 0 o NaN): no aportan a la lectura y
+	// ensucian el eje. El total se conserva como referencia aunque alguna categoría
+	// quede fuera.
+	if (this._bars && this._bars.length) {
+		this._bars = this._bars.filter(function (b) {
+			return b.value != null && !isNaN(b.value) && b.value !== 0;
+		});
+	}
+};
+
+CategoryDistribution.prototype._buildBars = function () {
 	var rows = this._rows();
 	var cats = this.panel.categoryColumns();
+	var totalOnly = cats.length === 0;
+	var isPercent = !!(this.panel.isPercent && this.panel.isPercent());
 	var loc = this;
-	if (cats.length === 0 && this.panel.totalColumn()) {
-		// Solo total seleccionado. Camino 1: si hay pivot, se resuelven todas las
-		// categorías de la variable (con su valor agregado y color), como si
-		// estuvieran elegidas. El total agregado pasa a ser la línea de referencia.
-		if (this.pivot && typeof this.pivot.ResolveAllCategories === 'function') {
-			var resolved = this.pivot.ResolveAllCategories(this.panel.metricId(), this.panel.versionId());
-			if (resolved && resolved.length) {
+
+	// Para incidencia/porcentaje, el valor de cada categoría se toma SIEMPRE de la
+	// resolución de la pivot (ResolveAllCategories), con o sin selección explícita.
+	// Así el chart coincide con la tabla y una categoría vale lo mismo esté elegida
+	// o resuelta a partir del total (antes diferían: el camino con selección agregaba
+	// desde el dataset con otro denominador, y el de solo-total usaba la pivot).
+	if (isPercent && this.pivot && typeof this.pivot.ResolveAllCategories === 'function') {
+		var resolved = this.pivot.ResolveAllCategories(this.panel.metricId(), this.panel.versionId());
+		if (resolved && resolved.length) {
+			if (totalOnly) {
 				this._bars = resolved;
+			} else {
+				var keep = {};
+				for (var ci = 0; ci < cats.length; ci++) {
+					if (cats[ci].meta.labelId != null) keep[cats[ci].meta.labelId] = true;
+				}
+				this._bars = resolved.filter(function (b) { return keep[b.labelId]; });
+			}
+			this._total = this._aggregate(this.panel.totalColumn(), rows);
+			return;
+		}
+	}
+
+	if (totalOnly && this.panel.totalColumn()) {
+		// Solo total (conteo o brecha): Camino 1 vía la pivot si se puede resolver.
+		if (this.pivot && typeof this.pivot.ResolveAllCategories === 'function') {
+			var resolvedT = this.pivot.ResolveAllCategories(this.panel.metricId(), this.panel.versionId());
+			if (resolvedT && resolvedT.length) {
+				this._bars = resolvedT;
 				this._total = this._aggregate(this.panel.totalColumn(), rows);
 				return;
 			}
 		}
-		// Sin pivot o sin categorías resolubles: el total como barra única neutra.
 		var totalCol = this.panel.totalColumn();
 		this._bars = [{ labelId: null, name: totalCol.meta.labelName || 'Total', color: '#90a4ae', value: loc._aggregate(totalCol, rows) }];
 		this._total = null;
 		return;
 	}
+
 	this._bars = cats.map(function (col) {
 		return {
 			labelId: col.meta.labelId,
@@ -109,11 +144,13 @@ CategoryDistribution.prototype.bars = function () {
 	return this._bars;
 };
 
-// ¿Las barras representan varias categorías (con labelId)? Es lo que hace que
-// apilar tenga sentido, ya sea por categorías elegidas como columnas o por las
-// resueltas vía Camino 1 cuando la selección es solo total.
+// ¿Las barras representan varias categorías (con labelId) apilables? Apilar solo
+// tiene sentido en porcentaje (las categorías reparten un 100). En conteo, tasa o
+// área no se ofrece. Una brecha tampoco: su delta no compone una suma.
 CategoryDistribution.prototype.isComposed = function () {
 	if (!this._bars) return false;
+	if (this.panel && this.panel.isGap && this.panel.isGap()) return false;
+	if (this.panel && this.panel.isPercent && !this.panel.isPercent()) return false;
 	var n = 0;
 	for (var i = 0; i < this._bars.length; i++) {
 		if (this._bars[i].labelId != null) n++;

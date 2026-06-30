@@ -221,6 +221,63 @@ describe('GroupRowsByParent — subtotal con brecha (gap)', function () {
 	});
 });
 
+describe('ResolveAllCategories — incidencia sobre el total propio', function () {
+	it('calcula la incidencia de la categoría sobre SU total, no sobre el universo', function () {
+		// "65% y más": Value 6880 sobre su Total propio 10000 = 68.8%. El total del
+		// universo es 96900: si se usara como denominador, daría 7.1% (el bug).
+		var p = Object.create(ActivePivot.prototype);
+		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
+			Region: {}, Items: [ { Caption: 'Depto X', FID: 1 } ]
+		} }; } } ] };
+		p._categorySpecs = function () {
+			return {
+				base: { summary: 'I', variable: { NormalizationScale: 100 }, level: 0, levelId: 0, versionId: 11, variableId: 1 },
+				specs: [ { spec: { labelId: 103 }, labelId: 103, name: '65% y más', color: '#a' } ],
+				totalSpec: { labelId: null, isTotal: true }
+			};
+		};
+		p.ResolveCell = function (spec) {
+			if (spec.isTotal) return { Empty: false, Value: 6880, Total: 96900 };
+			return { Empty: false, Value: 6880, Total: 10000 };
+		};
+		var res = p.ResolveAllCategories(2, 11);
+		expect(res).toHaveLength(1);
+		expect(res[0].value).toBeCloseTo(68.8, 1);
+	});
+});
+
+
+describe('ResolveAllCategories — incidencia con celdas sin valor', function () {
+	it('saltea las celdas sin valor en vez de hundir el promedio', function () {
+		// Dos regiones; la categoría tiene dato en una (Value 84 sobre Total 100 →
+		// 84%) y '-' en la otra (Value null, pero con Total). Antes, el Total de la
+		// celda vacía entraba al denominador y la incidencia caía a ~42%/casi 0. Debe
+		// dar 84%.
+		var p = Object.create(ActivePivot.prototype);
+		var items = [{ Caption: 'Santiago', FID: 1 }, { Caption: 'Catamarca', FID: 2 }];
+		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
+			Region: {}, Items: items
+		} }; } } ] };
+		p._categorySpecs = function () {
+			return {
+				base: { summary: 'I', variable: { NormalizationScale: 100 }, level: 0, levelId: 0, versionId: 11, variableId: 1 },
+				specs: [ { spec: { labelId: 201 }, labelId: 201, name: 'Menor que 85%', color: '#a' } ],
+				totalSpec: { labelId: null, isTotal: true }
+			};
+		};
+		p.ResolveCell = function (spec, region, item) {
+			if (spec.isTotal) return { Empty: false, Value: 100, Total: 100 };
+			// La categoría: Santiago tiene 84/100; Catamarca no tiene dato (Value null).
+			if (item && item.FID === 1) return { Empty: false, Value: 84, Total: 100 };
+			return { Empty: false, Value: null, Total: 100 };
+		};
+		var res = p.ResolveAllCategories(2, 11);
+		expect(res).toHaveLength(1);
+		expect(res[0].value).toBeCloseTo(84, 1);
+	});
+});
+
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }

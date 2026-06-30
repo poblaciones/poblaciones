@@ -31,9 +31,23 @@ Selection.prototype.versionName = function () { return this.version.Version.Name
 Selection.prototype.levelName = function () { return this.level.Name; };
 Selection.prototype.geographyId = function () { return this.level.GeographyId; };
 
+// Mueve esta selección a un nivel concreto (por referencia) dentro de su censo.
+// Es la vía preferida cuando ya se tiene el objeto nivel: evita el round-trip de
+// convertirlo a nombre y re-buscarlo, que ante datos con niveles homónimos podía
+// reenganchar al nivel equivocado. Devuelve true si cambió.
+Selection.prototype.moveToLevel = function (level) {
+	if (!level || this.level === level) return false;
+	if (this.version.Levels.indexOf(level) === -1) return false;
+	this.level = level;
+	this._reconcileVariable();
+	return true;
+};
+
 // Mueve esta selección al nivel de nombre dado, dentro de SU propio censo. Si ese
 // censo no tiene un nivel con ese nombre, no cambia (su columna no aplica a ese
 // nivel de desagregación; el render lo marcará). Devuelve true si cambió.
+// Resuelve por nombre: úsese solo cuando el origen es un nombre (p. ej. la URL);
+// si se tiene la referencia del nivel, preferir moveToLevel.
 Selection.prototype.moveToLevelNamed = function (levelName) {
 	var levels = this.version.Levels;
 	for (var i = 0; i < levels.length; i++) {

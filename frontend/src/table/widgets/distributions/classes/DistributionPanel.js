@@ -75,10 +75,22 @@ DistributionPanel.prototype.isGap = function () {
 	return !!(this.columns.length && this.columns[0].meta && this.columns[0].meta.isGap);
 };
 
-// Unidad para el eje del gráfico. En brecha el delta se expresa en puntos
-// porcentuales ('pp.'); si no, la unidad propia de la variable.
+// Unidad para el eje del gráfico. En una brecha sobre una variable que es
+// porcentaje, el delta se expresa en puntos porcentuales ('pp.'); en una brecha
+// sobre otra unidad (p. ej. km²), el delta conserva esa unidad. Sin brecha, la
+// unidad propia de la variable.
 DistributionPanel.prototype.valueUnit = function () {
-	return this.isGap() ? 'pp.' : this.unit();
+	if (this.isGap()) {
+		var u = this.unit();
+		return (u && u.indexOf('%') !== -1) ? 'pp.' : (u || '');
+	}
+	return this.unit();
+};
+
+// ¿El delta de la brecha está en puntos porcentuales? (brecha sobre variable %).
+DistributionPanel.prototype.gapIsPoints = function () {
+	var u = this.unit();
+	return this.isGap() && !!u && u.indexOf('%') !== -1;
 };
 
 // Conteo de medida (cada fila/región representa una unidad) vs porcentaje/tasa.
@@ -98,10 +110,14 @@ DistributionPanel.prototype.showsTotalLine = function () {
 	return this.isPercent() && this._totalColumn != null;
 };
 
-// Apilar requiere al menos dos categorías que compongan una barra. El total, si
-// está, habilita además la composición al 100% (porcentaje); no es requisito para
-// apilar conteos.
+// Apilar (componer la barra al 100% por categorías) solo tiene sentido cuando la
+// medición es un porcentaje: ahí las categorías reparten un total de 100. En
+// conteos, tasas (p. ej. 1/10000), áreas (km²) o cualquier otra normalización, la
+// suma de categorías no compone un 100, así que no se ofrece. Una brecha tampoco
+// apila: su delta no compone una suma.
 DistributionPanel.prototype.canStack = function () {
+	if (this.isGap()) return false;
+	if (!this.isPercent()) return false;
 	return this._categoryColumns.length > 1;
 };
 
