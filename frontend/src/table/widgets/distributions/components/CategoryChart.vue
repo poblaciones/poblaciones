@@ -1,5 +1,5 @@
 <template>
-	<svg :viewBox="'0 0 ' + W + ' ' + H" class="cat-chart" :style="{ height: H + 'px', width: pxWidth + 'px' }"
+	<svg :viewBox="'0 0 ' + W + ' ' + H" class="cat-chart" :style="{ width: pxWidth + 'px' }"
 			preserveAspectRatio="xMidYMid meet" role="img" :aria-label="ariaLabel">
 		<template v-if="hasData">
 		<!-- Marco del área de datos -->
@@ -93,7 +93,7 @@
 				// en hasta dos líneas; el resto del padding enmarca el área de datos. El
 				// `pad` efectivo (computed) achica ese inferior cuando no hay etiquetas.
 				basePad: { l: 44, r: 14, t: 14, b: 40 },
-				colWidth: 46,        // ancho fijo por columna (rectangular, no cuadrado)
+				colWidth: 46,        // ancho nominal por columna (el efectivo es colW)
 				barMaxWidth: 26,     // ancho máximo de la barra dentro de su columna
 				labelLineH: 11,      // interlineado de las etiquetas de categoría
 				labelMaxLines: 2,    // hasta dos líneas por etiqueta
@@ -127,13 +127,32 @@
 				return this.bars.some(function (b) { return b.value != null; });
 			},
 			// Alto efectivo del área de dibujo, con piso para no miniaturizarse.
-			H: function () { var h = Number(this.height); return Math.max(125, (isNaN(h) ? 180 : h)); },
-			// Ancho fijo: cada columna ocupa colWidth, así el gráfico es rectangular y
-			// mantiene su ancho aunque cambie el alto (deja de achicarse/cuadrarse).
+			// Alto del sistema de coordenadas (viewBox). Referencia FIJA: se renderiza
+			// 1:1 (el <svg> toma width=W px y height:auto), así que este valor es el
+			// alto real en píxeles. 175 da un panel más bajo que el cuadrado estricto,
+			// compensado por el piso de ancho de abajo (H * 1.25) para que el eje no
+			// se vea desproporcionado.
+			H: function () { return 175; },
+			// Ancho del sistema de coordenadas: por contenido (colWidth por columna),
+			// pero nunca más angosto que H * 1.25. Con pocas columnas el ancho natural
+			// quedaría menor y el chart saldría vertical ("edificio"); el piso lo deja
+			// apaisado como mínimo (no cuadrado 1:1, para que el eje no se vea raro) y
+			// las columnas se reparten en ese ancho (ver colW).
 			W: function () {
 				var cols = Math.max(1, this.columnCount);
-				return this.pad.l + this.pad.r + cols * this.colWidth;
+				var natural = this.pad.l + this.pad.r + cols * this.colWidth;
+				return Math.max(natural, this.H * 1.25);
 			},
+			// Ancho efectivo por columna: reparte el ancho del área de datos. Con
+			// muchas columnas equivale a colWidth; cuando W subió al piso, las
+			// columnas se espacian para ocupar todo (sin hueco muerto a la derecha).
+			colW: function () {
+				var cols = Math.max(1, this.columnCount);
+				return (this.W - this.pad.l - this.pad.r) / cols;
+			},
+			// Render 1:1 con el viewBox (width = W px, height auto → H px exactos):
+			// el alto queda siempre en H (300px, nunca diminuto) y el ancho crece
+			// solo con las columnas. Sin franjas ni reescalados.
 			pxWidth: function () { return this.W; },
 			ariaLabel: function () {
 				return 'Distribución por categorías' + (this.isPercent ? ' (porcentaje)' : '');
@@ -210,8 +229,7 @@
 				return mids;
 			},
 			bandWidth: function () {
-				// Ancho fijo por columna (no se reparte el ancho disponible).
-				return this.colWidth;
+				return this.colW;
 			},
 			barRects: function () {
 				var loc = this;
@@ -219,8 +237,8 @@
 				return this.bars.map(function (b, i) {
 					var v = (b.value == null ? 0 : b.value);
 					var yVal = loc.sy(v);
-					var bw = Math.min(loc.colWidth * 0.6, loc.barMaxWidth);
-					var x = loc.pad.l + i * loc.colWidth + (loc.colWidth - bw) / 2;
+					var bw = Math.min(loc.colW * 0.6, loc.barMaxWidth);
+					var x = loc.pad.l + i * loc.colW + (loc.colW - bw) / 2;
 					// La barra va del cero al valor; el alto es la distancia (nunca
 					// negativa) y la y, el extremo superior.
 					return { x: x, y: Math.min(yZero, yVal), w: bw, h: Math.abs(yVal - yZero), color: b.color || '#888780', title: b.name + ': ' + loc.fmtVal(v) };
@@ -236,7 +254,7 @@
 					: this.bars.map(function (b) { return b.name; });
 				return src.map(function (name, i) {
 					return {
-						cx: loc.pad.l + i * loc.colWidth + loc.colWidth / 2,
+						cx: loc.pad.l + i * loc.colW + loc.colW / 2,
 						lines: loc._wrapLabel(name)
 					};
 				});
@@ -257,7 +275,7 @@
 			// normalizan a 100% (composición); en conteo se apilan en su escala real.
 			stackLayout: function () {
 				var loc = this;
-				var band = this.colWidth;
+				var band = this.colW;
 				return this.years.map(function (yr, yi) {
 					var vals = yr.bars.map(function (b) { return (b.value == null ? 0 : b.value); });
 					var sum = 0; for (var s = 0; s < vals.length; s++) sum += vals[s];
@@ -282,7 +300,7 @@
 				var n = this.years.length;
 				if (n < 1) return [];
 				var cats = this.years[0].bars.length;
-				var band = this.colWidth;
+				var band = this.colW;
 				var cx = function (yi) { return loc.pad.l + yi * band + band / 2; };
 				// Acumulado por año (fracciones).
 				var cum = this.years.map(function () { return 0; });
@@ -375,7 +393,16 @@
 </script>
 
 <style scoped>
-	.cat-chart { display: block; flex: none; align-self: flex-start; }
+	/* Render 1:1 con el viewBox: el width inline es W en px y height:auto deriva el
+	   alto por el aspecto (H = 300px exactos, nunca diminuto). El piso "nunca más
+	   angosto que alto" vive en el propio viewBox (computed W), así que acá no hacen
+	   falta ni alto fijo ni min-width, que peleaban con el flex y deformaban. */
+	.cat-chart {
+		display: block;
+		flex: 0 0 auto;
+		align-self: flex-start;
+		height: auto;
+	}
 	.plot-frame { fill: none; stroke: #b0bec5; stroke-width: 1; vector-effect: non-scaling-stroke; }
 	.grid-line { stroke: #898989; stroke-width: 1; vector-effect: non-scaling-stroke; }
 	.grid-line-soft { stroke: #c7c7c7; stroke-width: 0.5; vector-effect: non-scaling-stroke; }

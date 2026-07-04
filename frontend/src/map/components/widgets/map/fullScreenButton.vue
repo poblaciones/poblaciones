@@ -46,7 +46,7 @@ export default {
 		right: 55px;
 		line-height: .8em;
 		bottom: 24px;
-		font-size: 1.8em;
+		font-size: 1.7em;
 		cursor: pointer;
 		color: #5a5858;
 		background-color: #fbfbfb;

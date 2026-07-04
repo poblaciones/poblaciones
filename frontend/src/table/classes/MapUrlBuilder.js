@@ -75,21 +75,6 @@ MapUrlBuilder.prototype._versionIndex = function (metric, versionId) {
 	return 0;
 };
 
-// La selección (censo) más reciente del indicador: el visor admite una sola, así
-// que se elige la última de las activas (la de Id de versión más alto suele ser la
-// más nueva; si el modelo ya las ordena, se toma la última).
-MapUrlBuilder.prototype._latestSelection = function (metric) {
-	var sels = metric.Selections || [];
-	if (!sels.length) return null;
-	var best = sels[0];
-	var bestIdx = this._versionIndex(metric, best.versionId());
-	for (var i = 1; i < sels.length; i++) {
-		var idx = this._versionIndex(metric, sels[i].versionId());
-		if (idx > bestIdx) { best = sels[i]; bestIdx = idx; }
-	}
-	return best;
-};
-
 MapUrlBuilder.prototype._levelIndex = function (version, level) {
 	var levels = (version && version.Levels) || [];
 	for (var i = 0; i < levels.length; i++) {
@@ -108,23 +93,31 @@ MapUrlBuilder.prototype._variableIndex = function (level, variable) {
 
 // ── Bloque de indicadores (SelectedInfo, signature 'l=') ────────────────────
 
-// Grupo de un indicador: id + versión + nivel + variable + estado de variables.
-// Toma la selección más reciente (el visor no admite multi-censo).
-MapUrlBuilder.prototype._metricGroup = function (metric) {
-	var sel = this._latestSelection(metric);
-	if (!sel) return null;
-	var versionIdx = this._versionIndex(metric, sel.versionId());
-	var level = sel.level;
-	var levelIdx = this._levelIndex(sel.version, level);
-	var variableIdx = this._variableIndex(level, sel.variable);
+// Grupos de un indicador: uno por cada versión (censo) seleccionada. El visor no
+// tiene multi-censo en una sola capa, así que cada versión seleccionada se refleja
+// como una aparición del metric con su propia versión, nivel y variable. Así los dos
+// años quedan ambos en el mapa (antes se descartaba todo menos el más reciente).
+MapUrlBuilder.prototype._metricGroups = function (metric) {
+	var sels = metric.Selections || [];
+	if (!sels.length) return [];
+	var out = [];
+	for (var s = 0; s < sels.length; s++) {
+		var sel = sels[s];
+		var versionIdx = this._versionIndex(metric, sel.versionId());
+		if (versionIdx < 0) continue;
+		var level = sel.level;
+		var levelIdx = this._levelIndex(sel.version, level);
+		var variableIdx = this._variableIndex(level, sel.variable);
 
-	var items = [];
-	items.push([metric.properties.Metric.Id]);          // id (sin letra)
-	items.push(['v', versionIdx, -1]);                   // índice de versión
-	items.push(['a', levelIdx, 0]);                      // índice de nivel
-	items.push(['i', variableIdx, 0]);                   // índice de variable
-	items.push(['m', metric.properties.SummaryMetric, 'N']);
-	return this._joinItems(items, '!');
+		var items = [];
+		items.push([metric.properties.Metric.Id]);          // id (sin letra)
+		items.push(['v', versionIdx, -1]);                   // índice de versión
+		items.push(['a', levelIdx, 0]);                      // índice de nivel
+		items.push(['i', variableIdx, 0]);                   // índice de variable
+		items.push(['m', metric.properties.SummaryMetric, 'N']);
+		out.push(this._joinItems(items, '!'));
+	}
+	return out;
 };
 
 // Grupo de una delimitación (boundary) como capa del mapa.
@@ -142,8 +135,8 @@ MapUrlBuilder.prototype._selectedInfoBlock = function (extraGroups) {
 	var groups = [];
 	var metrics = (this.pivot && this.pivot.Metrics) || [];
 	for (var i = 0; i < metrics.length; i++) {
-		var g = this._metricGroup(metrics[i]);
-		if (g) groups.push(g);
+		var gs = this._metricGroups(metrics[i]);
+		for (var j = 0; j < gs.length; j++) groups.push(gs[j]);
 	}
 	if (extraGroups) {
 		for (var e = 0; e < extraGroups.length; e++) {
@@ -202,6 +195,18 @@ MapUrlBuilder.prototype._hasFilters = function () {
 //   { kind: 'boundaryType', boundaryId, versionIndex }   ← fila de un tipo (Provincias)
 //   { kind: 'item', regionId }                            ← un elemento concreto
 //   { kind: 'group', regionId }                           ← un corte de control (= item)
+// Construye la URL para abrir el mapa según lo clickeado.
+// target describe el origen del clic:
+//   { kind: 'boundaryType', boundaryId, versionIndex }  ← fila de un tipo (Provincias)
+//   { kind: 'item', regionId }                           ← un elemento de las filas
+//   { kind: 'group', regionId }                          ← un corte de control (= item)
+//   { kind: 'filter' }                                   ← el mundo de un chip de filtro
+//
+// Criterio: lo que se clickeó manda. Si se clickeó un elemento de las filas
+// (item/group), el mapa recorta en ESE elemento aunque haya filtros activos —el
+// filtro no pisa la elección explícita del usuario. Los filtros se usan como
+// recorte solo cuando el clic proviene del propio filtro (kind 'filter'), o como
+// contexto de una capa de delimitación (boundaryType).
 MapUrlBuilder.prototype.build = function (target) {
 	target = target || {};
 	var segments = [];
@@ -214,18 +219,17 @@ MapUrlBuilder.prototype.build = function (target) {
 	var zoomId = null;
 
 	if (target.kind === 'boundaryType' && target.boundaryId != null) {
-		// Clic en un tipo de delimitación: se agrega como capa de boundary.
+		// Clic en un tipo de delimitación: se agrega como capa de boundary; los
+		// filtros, si los hay, dan el recorte de contexto.
 		extraBoundaryGroups = [this._boundaryGroup(target.boundaryId, target.versionIndex)];
 		if (hasFilters) clippingIds = filterIds;
 	} else if (target.kind === 'item' || target.kind === 'group') {
-		// Clic en un elemento o corte de control: con filtros, zoom; sin filtros,
-		// recorte en ese elemento.
-		if (hasFilters) {
-			clippingIds = filterIds;
-			zoomId = target.regionId;
-		} else {
-			clippingIds = (target.regionId != null) ? [target.regionId] : null;
-		}
+		// Clic en un elemento de las filas: recorta en ese elemento, ignorando los
+		// filtros. La elección explícita manda sobre el filtro vigente.
+		clippingIds = (target.regionId != null) ? [target.regionId] : null;
+	} else if (target.kind === 'filter') {
+		// Clic en el mundo de un chip de filtro: se abre con los filtros como recorte.
+		if (hasFilters) clippingIds = filterIds;
 	} else {
 		// Sin target específico: solo el estado actual (filtros como recorte).
 		if (hasFilters) clippingIds = filterIds;

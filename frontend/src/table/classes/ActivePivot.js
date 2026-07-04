@@ -9,6 +9,7 @@ import ActiveMetricTuples, { LABEL_SORT_KEY } from '@/table/classes/ActiveMetric
 import ActiveBoundarySet from '@/table/classes/ActiveBoundarySet.js';
 import ActiveDataset from '@/table/classes/ActiveDataset.js';
 import ActiveRoute from '@/table/classes/ActiveRoute.js';
+import logicalVariableName from '@/table/classes/logicalVariableName.js';
 
 // Suma que conserva null: si ambos operandos son null, el resultado es null; si
 // alguno tiene valor, suma tratando el null como 0. Permite distinguir "no se midió"
@@ -248,9 +249,12 @@ ActivePivot.prototype.RefreshData = function () {
 			}
 			// Conteo "n/total" de elementos: cuántos están seleccionados respecto del
 			// universo de la delimitación. Solo se muestra si no están todos elegidos.
+			// Conteo "n/total": cuántas delimitaciones se eligieron sobre el universo.
+			// Se muestra siempre que haya universo, incluso cuando están todas (t/t):
+			// una delimitación completa informa así que incluye la totalidad.
 			var selectedCount = region.Items ? region.Items.length : 0;
 			var availableCount = (region.Region && region.Region.Items) ? region.Region.Items.length : selectedCount;
-			if (availableCount > 0 && selectedCount < availableCount) {
+			if (availableCount > 0) {
 				boundaryLabel += ' (' + selectedCount + '/' + availableCount + ')';
 			}
 			headerRow.push({ 'Label': boundaryLabel, isHeader: true, isRegionHeader: true, boundaryId: activeBoundary.__boundaryId });
@@ -312,7 +316,11 @@ ActivePivot.prototype.GroupRowsByParent = function (boundaryRows) {
 		groups[parent].push(r);
 	});
 
-	var out = [];
+	// Se acumulan los grupos (con su subtotal ya calculado) y luego se ordenan por el
+	// MISMO criterio activo, para que los grupos entre sí queden en el orden pedido
+	// (no solo las filas dentro de cada grupo). Sin esto, los grupos quedaban en orden
+	// de aparición del primer hijo, que no reflejaba el criterio.
+	var built = [];
 	order.forEach(function (parent) {
 		var rows = groups[parent];
 		// El Id y el Code del agrupador (formato actual de GetFabBoundaries) los
@@ -387,8 +395,46 @@ ActivePivot.prototype.GroupRowsByParent = function (boundaryRows) {
 			var cv = cellValue(sp2.metric, sp2.variable, cellT);
 			cellT.ComputedValue = (cv === '-' || cv === null || cv === undefined) ? null : Number(cv);
 		}
-		out.push(subtotal);
-		arr.AddRange(out, rows);
+		built.push({ parent: parent, subtotal: subtotal, rows: rows });
+	});
+
+	// Ordena los grupos entre sí según el criterio activo. Con orden por label, es
+	// alfabético por el nombre del grupo; con orden por columna, por el ComputedValue
+	// del subtotal en esa columna (nulos al final). Sin criterio activo, se conserva
+	// el orden de aparición.
+	var sortKey = this.MetricTuples.sortKey;
+	var dir = this.MetricTuples.sortDirection;
+	if (sortKey != null && dir !== 0) {
+		if (sortKey === ActivePivot.LABEL_SORT_KEY) {
+			built.sort(function (a, b) {
+				var cmp = String(a.parent).localeCompare(String(b.parent), 'es', { sensitivity: 'base' });
+				return dir === 1 ? cmp : -cmp;
+			});
+		} else {
+			var colIndex = -1;
+			for (var k = 0; k < this.MetricTuples.metricTuples.length; k++) {
+				if (this.MetricTuples.metricTuples[k].key === sortKey) { colIndex = k; break; }
+			}
+			if (colIndex !== -1) {
+				var col = colIndex + 1;
+				built.sort(function (a, b) {
+					var av = a.subtotal[col] ? a.subtotal[col].ComputedValue : null;
+					var bv = b.subtotal[col] ? b.subtotal[col].ComputedValue : null;
+					var aNull = (av === null || av === undefined);
+					var bNull = (bv === null || bv === undefined);
+					if (aNull && bNull) return 0;
+					if (aNull) return 1;
+					if (bNull) return -1;
+					return dir === 1 ? (av - bv) : (bv - av);
+				});
+			}
+		}
+	}
+
+	var out = [];
+	built.forEach(function (g) {
+		out.push(g.subtotal);
+		arr.AddRange(out, g.rows);
 	});
 	return out;
 };
@@ -1077,49 +1123,82 @@ ActivePivot.prototype.RestoreFromSections = function (sections) {
 		loc.MetricTuples.sortDirection = sections.order.dir;
 	}
 
-	return Promise.all(tasks);
+	// Las altas de arriba corren en paralelo (Promise.all) y cada una inserta al
+	// frente (Regions usa prepend), así que el orden final dependería de cuál
+	// promesa resuelve primero. Para que la tabla restaurada respete el orden
+	// serializado —el mismo en que se ven las filas al agregarlas— se reordenan
+	// las colecciones según el orden de las secciones, una vez cargadas.
+	return Promise.all(tasks).then(function (result) {
+		loc._reorderBySections(loc.Regions, sections.rows);
+		loc._reorderBySections(loc.FilterSet, sections.filters);
+		return result;
+	});
 };
 
-// Selecciona versión(es)/nivel/variable/summary/categorías de un indicador
-// según lo serializado. Cuando hay varias versionIds, activa multi-versión y
-// configura selección por versión; para versiones distintas a la principal,
-// busca level y variable por NAME (consistente con el rematch del header).
+// Reordena los items de un ActiveBoundarySet para que sigan el orden de `sections`
+// (por boundaryId). Los que no aparezcan en sections quedan al final, en su orden
+// actual. No altera qué items hay, solo su orden.
+ActivePivot.prototype._reorderBySections = function (boundarySet, sections) {
+	if (!boundarySet || !sections || !sections.length) return;
+	// Posición de un boundaryId en el orden serializado; -1 (→ al final) si no está.
+	// Comparación laxa: los ids del parseo pueden venir como string y el interno
+	// como number.
+	function orderIndex(id) {
+		for (var i = 0; i < sections.length; i++) {
+			/* eslint-disable-next-line eqeqeq */
+			if (sections[i].id == id) return i;
+		}
+		return sections.length;
+	}
+	boundarySet.items.sort(function (a, b) {
+		return orderIndex(a.__boundaryId) - orderIndex(b.__boundaryId);
+	});
+};
+
+// Selecciona versión(es)/nivel/variable/summary/categorías de un indicador según
+// lo serializado. Todo lo interno viene por ÍNDICE (posición), como el visor: las
+// versiones por su posición en properties.Versions, el nivel por su posición en la
+// versión, la variable por su posición en el nivel. El metric llega por Id (ya
+// resuelto en `metric`). La variable se traduce a su nombre lógico, que es el
+// gobernador con que SelectByCaption rearma todas las Selections.
 ActivePivot.prototype.applyColumnState = function (metric, col) {
 	if (!metric || !metric.properties) return;
 	var props = metric.properties;
 	if (col.summary) props.SummaryMetric = col.summary;
 
-	// La variable guardada (por Id) define la variable lógica (por Name). Es el
-	// gobernador: SelectByCaption rearma las Selections para los censos guardados,
-	// garantizando que cada una quede con esa variable. Lo que ya no exista se
-	// descarta.
-	var variable = metric.GetVariableById(col.variableId);
-	var variableName = variable ? variable.Name : metric.variableName();
-	if (variableName == null) return;
-
-	// Nombre del nivel guardado (por Id), para preferirlo al resolver cada censo.
-	var levelName = null;
-	var versions = props.Versions;
-	for (var v = 0; v < versions.length && levelName == null; v++) {
-		for (var l = 0; l < versions[v].Levels.length; l++) {
-			if (versions[v].Levels[l].Id === col.levelId) { levelName = versions[v].Levels[l].Name; break; }
-		}
+	var allVersions = props.Versions || [];
+	// Censos guardados, resueltos por índice. Si no hay lista, no se toca la selección.
+	var versionIndexes = (col.versionIndexes && col.versionIndexes.length) ? col.versionIndexes : null;
+	if (!versionIndexes) return;
+	var versionIds = [];
+	for (var vi = 0; vi < versionIndexes.length; vi++) {
+		var ver = allVersions[versionIndexes[vi]];
+		if (ver) versionIds.push(ver.Version.Id);
 	}
+	if (!versionIds.length) return;
 
-	// Ids de censo guardados (los que el usuario tenía activos).
-	var versionIds = (col.versionIds && col.versionIds.length)
-		? col.versionIds
-		: (col.versionId != null ? [col.versionId] : null);
+	// Versión principal (la primera guardada): de ella se leen los índices de nivel
+	// y variable, y de ahí el nombre lógico de la variable (el que gobierna el resto).
+	var mainVersion = allVersions[versionIndexes[0]];
+	var levelIndex = (col.levelIndex != null) ? col.levelIndex : 0;
+	var mainLevel = mainVersion && mainVersion.Levels ? mainVersion.Levels[levelIndex] : null;
+	if (!mainLevel) return;
+	var levelName = mainLevel.Name;
+	var variableIndex = (col.variableIndex != null) ? col.variableIndex : 0;
+	var mainVariable = mainLevel.Variables[variableIndex];
+	if (!mainVariable) return;
+	var variableName = logicalVariableName(mainLevel, mainVariable);
 
 	metric.SelectByCaption(variableName, versionIds, levelName);
 
-	// Reaplica nivel (por nombre, ya preferido) y la selección de categorías por
-	// censo. Lo que no exista en un censo se ignora; la correspondencia lógica la
-	// mantiene SelectByCaption.
+	// Reaplica nivel y la selección de categorías por censo. La selección viene
+	// indexada por ÍNDICE de versión; se traduce al censo de cada Selection.
 	for (var s = 0; s < metric.Selections.length; s++) {
 		var sel = metric.Selections[s];
 		if (levelName != null) sel.moveToLevelNamed(levelName);
-		var saved = col.selection ? col.selection[sel.versionId()] : null;
+		// Índice de este censo en properties.Versions, para leer su selección guardada.
+		var selVersionIndex = allVersions.indexOf(sel.version);
+		var saved = (col.selection && selVersionIndex >= 0) ? col.selection[selVersionIndex] : null;
 		if (saved) {
 			sel.includeTotal = saved.includeTotal !== false;
 			var valid = {};

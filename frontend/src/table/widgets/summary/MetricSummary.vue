@@ -186,17 +186,6 @@ export default {
 		flex-direction: column;
 		gap: 2px;
 	}
-	.ms-indicator {
-		font-size: 18px;
-		font-weight: normal;
-		color: #263238;
-		line-height: 1.45em;
-	}
-	.ms-variable {
-		font-size: 13px;
-		color: #78909c;
-		line-height: 1.4em;
-	}
 	.ms-version {
 		padding: 0;
 	}
@@ -242,7 +231,7 @@ export default {
 		box-shadow: 0px 0px 1px 0px rgb(0 0 0 / 70%);
 	}
 	.ms-table thead th {
-		font-weight: 600;
+		font-weight: normal;
 		color: #607d8b;
 		text-align: center;
 		padding: 3px 6px;
@@ -276,7 +265,7 @@ export default {
 	}
 	.ms-row-total {
 		background: #f7f9fb;
-		font-weight: 600;
+		font-weight: normal;
 	}
 	.ms-row-total .ms-cat {
 		font-style: italic;

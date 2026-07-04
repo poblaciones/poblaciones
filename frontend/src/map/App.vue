@@ -33,8 +33,8 @@
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
 					<MapType ref="mapSelector" class="exp-hiddable-block" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
 
-					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
-					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" />
+					<!--MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" /-->
+					<!--RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" /-->
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -47,6 +47,10 @@
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 					<FullScreenButton v-if="!Embedded.Readonly" class="exp-hiddable-unset" :fullscreen="fullscreen" />
+					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset"
+										 :metrics="metrics" :toolbarStates="toolbarStates" />
+					<ClippingLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset"
+													:clipping="clipping" :toolbarStates="toolbarStates" />
 				</div>
 				<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
 				<a id="downloadAnchor" style="display: none;" download></a>
@@ -65,11 +69,13 @@
 	import MapExport from '@/map/classes/MapExport';
 	import Search from '@/map/components/widgets/map/search';
 	import MapPanel from '@/map/components/panels/mapPanel';
-	import MetricsButton from '@/map/components/widgets/map/metricsButton';
+/*	import MetricsButton from '@/map/components/widgets/map/metricsButton';
 	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
-	import LeftPanel from '@/map/components/panels/leftPanel';
+	*/ import LeftPanel from '@/map/components/panels/leftPanel';
 	import EditButton from '@/map/components/widgets/map/editButton';
 	import FullScreenButton from '@/map/components/widgets/map/fullScreenButton';
+import MapLegend from '@/map/components/widgets/map/mapLegend';
+import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 	import SummaryPanel from '@/map/components/panels/summaryPanel';
 	import WatermarkFloat from '@/map/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/map/components/widgets/map/WatermarkOwner';
@@ -104,10 +110,12 @@
 			WaitMessage,
 			EditButton,
 			FullScreenButton,
+			MapLegend,
+			ClippingLegend,
 			LeftPanel,
-			MetricsButton,
+			/*MetricsButton,
 			RecommendBoundaries,
-			SuggestionsPanel,
+			*/SuggestionsPanel,
 			PopupsPanel,
 			WorkPanel,
 			MapType,
@@ -147,6 +155,7 @@
 				toolbarStates: {
 					selectionMode: 'PAN', tutorialOpened: 0, showLabels: true, showElevation: false,
 					collapsed: false, repositionSearch: false, leftPanelVisible: false,
+					legendMinimized: false,
 					basemapMetrics: [
 
 					],
@@ -635,7 +644,12 @@
 					this.flyRightTimeoutId = setTimeout(() => {
 						s.classList.remove('animatedFlyRight');
 					}, 10);
-
+					// Mientras el panel de estadísticas estuvo colapsado y la leyenda
+					// minimizada, RefreshSummaries no se ejecutó (ver SegmentedMap.js);
+					// al mostrar el panel, se trae lo que haya quedado pendiente.
+					if (window.SegMap) {
+						window.SegMap.RefreshSummaries();
+					}
 				} else {
 					// ocultar
 					s.classList.add('animatedFlyRight');
@@ -644,7 +658,14 @@
 					}, 300);
 				}
 				this.SplitPanelsRefresh();
-			}
+			},
+			'toolbarStates.legendMinimized'(value) {
+				// Misma razón que arriba: si se expande la leyenda estando el panel
+				// de estadísticas colapsado, se trae lo que haya quedado pendiente.
+				if (!value && this.toolbarStates.collapsed && window.SegMap) {
+					window.SegMap.RefreshSummaries();
+				}
+			},
 		}
 	};
 

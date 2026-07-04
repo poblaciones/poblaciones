@@ -52,11 +52,13 @@ function isDefaultSelection(selectionByVersion) {
 }
 
 function composeColumn(col) {
+	// metric por Id; versión (lista de índices), nivel y variable por índice. Se
+	// omiten los defaults (nivel/variable en 0) para acortar, igual que el visor.
 	var parts = [String(col.id)];
-	if (col.versionIds && col.versionIds.length) parts.push('v' + col.versionIds.join(','));
-	if (col.levelId != null) parts.push('l' + col.levelId);
-	if (col.variableId != null) parts.push('a' + col.variableId);
-	if (col.summary) parts.push('s' + col.summary);
+	if (col.versionIndexes && col.versionIndexes.length) parts.push('v' + col.versionIndexes.join(','));
+	if (col.levelIndex != null && col.levelIndex !== 0) parts.push('l' + col.levelIndex);
+	if (col.variableIndex != null && col.variableIndex !== 0) parts.push('a' + col.variableIndex);
+	if (col.summary && col.summary !== 'N') parts.push('s' + col.summary);
 	if (col.selection && !isDefaultSelection(col.selection)) {
 		parts.push('c' + composeSelection(col.selection));
 	}
@@ -108,14 +110,14 @@ function parseSelection(raw) {
 
 function parseColumn(token) {
 	var parts = token.split('!');
-	var col = { id: toIntOrRaw(parts[0]), versionIds: [], selection: null };
+	var col = { id: toIntOrRaw(parts[0]), versionIndexes: [], levelIndex: 0, variableIndex: 0, selection: null };
 	for (var i = 1; i < parts.length; i++) {
 		var p = parts[i];
 		if (p) {
 			var tail = p.slice(1);
-			if (p[0] === 'v') col.versionIds = tail.split(',').filter(Boolean).map(toIntOrRaw);
-			else if (p[0] === 'l') col.levelId = toIntOrRaw(tail);
-			else if (p[0] === 'a') col.variableId = toIntOrRaw(tail);
+			if (p[0] === 'v') col.versionIndexes = tail.split(',').filter(Boolean).map(toIntOrRaw);
+			else if (p[0] === 'l') col.levelIndex = toIntOrRaw(tail);
+			else if (p[0] === 'a') col.variableIndex = toIntOrRaw(tail);
 			else if (p[0] === 's') col.summary = tail;
 			else if (p[0] === 'c') col.selection = parseSelection(tail);
 		}
@@ -174,25 +176,41 @@ ActiveRoute.prototype.sections = function () {
 ActiveRoute.prototype._columnSection = function (metric) {
 	var props = metric.properties;
 	var selections = metric.Selections || [];
+	var allVersions = props.Versions || [];
 
-	var versionIds = [];
+	// Índice de un censo dentro de properties.Versions (su posición, como el visor).
+	function versionIndexOf(version) { return allVersions.indexOf(version); }
+
+	// Versiones seleccionadas por ÍNDICE (posición), y la selección de categorías
+	// indexada por ese mismo índice. Todo posicional, igual que el visor; el metric
+	// es lo único por Id. Como los datos publicados no cambian, los índices son
+	// estables y la ruta queda más corta.
+	var versionIndexes = [];
 	var selection = {};
 	for (var i = 0; i < selections.length; i++) {
 		var sel = selections[i];
-		var vId = sel.versionId();
-		versionIds.push(vId);
-		selection[vId] = {
+		var vIdx = versionIndexOf(sel.version);
+		if (vIdx < 0) continue;
+		versionIndexes.push(vIdx);
+		selection[vIdx] = {
 			labels: (sel.labels || []).slice(),
 			includeTotal: sel.includeTotal !== false
 		};
 	}
 
 	var first = selections[0] || null;
+	var levelIndex = null, variableIndex = null;
+	if (first) {
+		var li = first.version.Levels.indexOf(first.level);
+		levelIndex = (li >= 0) ? li : null;
+		var ai = first.level.Variables.indexOf(first.variable);
+		variableIndex = (ai >= 0) ? ai : null;
+	}
 	return {
 		id: props.Metric.Id,
-		versionIds: versionIds,
-		levelId: first ? first.level.Id : null,
-		variableId: first ? first.variable.Id : null,
+		versionIndexes: versionIndexes,
+		levelIndex: levelIndex,
+		variableIndex: variableIndex,
 		summary: props.SummaryMetric || null,
 		selection: selection
 	};

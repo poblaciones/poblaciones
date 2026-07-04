@@ -803,6 +803,13 @@ SegmentedMap.prototype.InvalidateSummaries = function () {
 };
 
 SegmentedMap.prototype.RefreshSummaries = function () {
+	// No se encontró en el código un guard previo sobre toolbarStates.collapsed
+	// para este método; se agrega acá según lo pedido: solo se salta la
+	// actualización cuando el panel de estadísticas está colapsado Y la
+	// leyenda flotante minimizada (nada que mostrar el resultado).
+	if (this.toolbarStates.collapsed && this.toolbarStates.legendMinimized) {
+		return;
+	}
 	for (var i = 0; i < this.Metrics.metrics.length; i++) {
 		this.Metrics.metrics[i].UpdateSummary();
 		this.Metrics.metrics[i].UpdateRanking();

@@ -278,6 +278,35 @@ describe('ResolveAllCategories — incidencia con celdas sin valor', function ()
 });
 
 
+describe('_reorderBySections — orden de filas simétrico a la URL', function () {
+	it('reordena los items para seguir el orden de las secciones (por boundaryId)', function () {
+		// Tras cargar en paralelo con prepend, items puede quedar en cualquier orden;
+		// el reorden lo fija según lo serializado.
+		var p = Object.create(ActivePivot.prototype);
+		var set = { items: [ { __boundaryId: 20 }, { __boundaryId: 10 }, { __boundaryId: 30 } ] };
+		// La URL guardó provincias(10) primero, luego regiones(30), luego 20.
+		p._reorderBySections(set, [ { id: 10 }, { id: 30 }, { id: 20 } ]);
+		expect(set.items.map(function (x) { return x.__boundaryId; })).toEqual([10, 30, 20]);
+	});
+
+	it('compara ids de forma laxa (string vs number) y deja los ausentes al final', function () {
+		var p = Object.create(ActivePivot.prototype);
+		var set = { items: [ { __boundaryId: 30 }, { __boundaryId: 10 }, { __boundaryId: 99 } ] };
+		// ids del parseo como string; 99 no está en la URL → va al final.
+		p._reorderBySections(set, [ { id: '10' }, { id: '30' } ]);
+		expect(set.items.map(function (x) { return x.__boundaryId; })).toEqual([10, 30, 99]);
+	});
+
+	it('no falla si no hay secciones', function () {
+		var p = Object.create(ActivePivot.prototype);
+		var set = { items: [ { __boundaryId: 1 } ] };
+		p._reorderBySections(set, null);
+		p._reorderBySections(set, []);
+		expect(set.items).toHaveLength(1);
+	});
+});
+
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }

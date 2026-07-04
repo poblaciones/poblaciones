@@ -19,8 +19,8 @@
 			<div class="tab-body">
 				<!-- ───────── NxN ───────── -->
 				<div v-if="activeTab === 'nxn'" class="pane">
-					<h4 class="section-title"><span class="sec-ico ico-table">▦</span> Matriz de correlaciones</h4>
-					<table class="data-table corr-matrix">
+					<h4 class="section-title">Matriz de correlaciones</h4>
+					<table class="data-table rel-table corr-matrix">
 						<thead>
 							<tr>
 								<th class="corner"></th>
@@ -40,7 +40,7 @@
 									<td v-for="(cell, j) in matrix.matrix[ci]" :key="'c-' + ci + '-' + j"
 											class="cm-cell" :class="cellClass(cell, ci, j)" :style="cellStyle(cell)"
 											:title="cellTitle(ci, j, cell)" @click="selectCell(ci, j)" @dblclick="goTo1x1(ci, j)">
-										{{ cell.self ? '—' : fmtR(cell.r) }}
+										{{ cell.self ? '—' : fmtR(cell.r) }}<sup v-if="!cell.self" class="sig-star">{{ stars(cell.p) }}</sup>
 									</td>
 								</tr>
 							</template>
@@ -49,13 +49,14 @@
 
 					<p class="matrix-note">
 						Cada celda muestra la correlación {{ methodName }} ponderada de la fila con la columna. La matriz es
-						asimétrica: cada fila usa el ponderador de su propia variable. En tono atenuado, los pares sin
-						significación estadística (p ≥ 0,05). Un clic sobre una celda muestra el gráfico; un doble clic lo abre en 1×1.
+						asimétrica: cada fila usa el ponderador de su propia variable. Un clic sobre una celda muestra el
+						gráfico; un doble clic lo abre en 1×1.
 					</p>
+					<p class="footnote">*p &lt; 0,05; **p &lt; 0,01; ***p &lt; 0,001. Sin asterisco: sin significación estadística.</p>
 
 					<div v-if="selected" class="inline-scatter">
 						<div class="chart-block">
-							<h4 class="section-title"><span class="sec-ico ico-chart">▥</span> Gráfico de dispersión</h4>
+							<h4 class="section-title">Gráfico de dispersión</h4>
 							<div class="chart-subject">{{ fullName(columns[selected.i]) }}</div>
 							<scatter-plot :points="pairPoints(selected.i, selected.j)"
 								:x-label="axisFull(columns[selected.j])" :y-label="axisMetric(columns[selected.i])"
@@ -81,7 +82,7 @@
 						</select>
 					</div>
 
-					<h4 class="section-title"><span class="sec-ico ico-table">▦</span> Correlaciones</h4>
+					<h4 class="section-title">Correlaciones</h4>
 					<div class="subject-line">{{ depColumn ? fullName(depColumn) : '' }}</div>
 					<table class="data-table rel-table">
 						<thead>
@@ -107,7 +108,7 @@
 						</tbody>
 					</table>
 
-					<h4 class="section-title"><span class="sec-ico ico-calc">∑</span> Regresión
+					<h4 class="section-title">Regresión
 						<span class="r2" v-if="regType === 'linear' && regression">R²aj. {{ fmt2(regression.adjRSquared) }} · n {{ regression.n }}</span>
 						<span class="r2" v-else-if="regType === 'logistic' && logitReg">R² McF. {{ fmt2(logitReg.mcFaddenR2) }} · n {{ logitReg.n }}</span>
 					</h4>
@@ -194,7 +195,7 @@
 					<p class="footnote">*p &lt; 0,05; **p &lt; 0,01; ***p &lt; 0,001. A menor p, mayor nivel de confianza estadística.</p>
 
 					<div class="chart-block">
-						<h4 class="section-title"><span class="sec-ico ico-chart">▥</span> Gráfico de dispersión</h4>
+						<h4 class="section-title">Gráfico de dispersión</h4>
 						<div class="chart-subject">{{ (depColumn ? fullName(depColumn) : '') }} según indicadores seleccionados</div>
 						<scatter-multi :series="multiSeries" :y-label="depColumn ? axisMetric(depColumn) : ''"
 							:size-by-weight="sizeByWeight" :height="150" :y-max100="depColumn ? isPct(depColumn) : false" />
@@ -224,7 +225,7 @@
 					</div>
 
 					<div class="chart-block" v-if="xKey !== yKey">
-						<h4 class="section-title"><span class="sec-ico ico-chart">▥</span> Gráfico de dispersión</h4>
+						<h4 class="section-title">Gráfico de dispersión</h4>
 						<div class="chart-subject">{{ colByKey[xKey] ? fullName(colByKey[xKey]) : '' }}</div>
 						<scatter-plot :points="pairPointsByKey(xKey, yKey)" :x-label="axisFullKey(yKey)" :y-label="axisMetricKey(xKey)"
 							:regression="pairReg" :size-by-weight="sizeByWeight" :height="150"
@@ -234,7 +235,7 @@
 					<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
 
 					<div class="chart-block" v-if="xKey !== yKey">
-						<h4 class="section-title"><span class="sec-ico ico-chart">▥</span> Histogramas</h4>
+						<h4 class="section-title">Histogramas</h4>
 						<div class="chart-subject">{{ histSubjectKeys(xKey, yKey) }}</div>
 						<dual-histogram :a="pairColumn(xKey)" :b="pairColumn(yKey)"
 							:a-label="colByKey[xKey] ? fullName(colByKey[xKey]) : ''"
@@ -502,11 +503,9 @@ export default {
 		},
 		cellStyle(cell) {
 			if (cell.self || cell.r == null) return {};
-			var insig = cell.p == null || cell.p >= ALPHA;
 			var a = Math.min(1, Math.abs(cell.r));
 			var rgb = cell.r >= 0 ? '25,118,210' : '229,57,53';
-			var bg = 'rgba(' + rgb + ',' + (0.08 + a * 0.5) + ')';
-			return insig ? { backgroundColor: bg, opacity: 0.5 } : { backgroundColor: bg };
+			return { backgroundColor: 'rgba(' + rgb + ',' + (0.08 + a * 0.5) + ')' };
 		},
 		cellTitle(i, j, cell) {
 			if (cell.self) return '';
@@ -554,12 +553,11 @@ export default {
 	.tab-body { flex: 1; overflow: auto; padding: 12px; min-height: 0; }
 	.pane { min-width: 0; }
 
-	.section-title { font-size: 14px; font-weight: 700; color: #37474f; margin: 16px 0 6px; display: flex; align-items: baseline; gap: 6px; }
-	.section-title:first-child { margin-top: 0; }
-	.sec-ico { font-size: 12px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: #dddddd; color: #919191; }
+	.section-title { font-size: 18px; font-weight: normal; color: #263238; line-height: 1.45em; margin-top: 14px !important; margin-bottom: 7px; }
+	.section-title:first-child { margin-top: 0 !important; }
 	.r2 { font-size: 12px; font-weight: 400; color: #78909c; }
 
-	.subject-line { font-size: 14px; font-weight: 600; color: #37474f; margin: 0 0 6px; }
+	.subject-line { font-size: 14px; font-weight: normal; color: #37474f; margin: 0 0 6px; }
 
 	/* Tablas de datos: sombra tenue */
 	.data-table { border-collapse: collapse; box-shadow: 0px 0px 1px 0px rgb(0 0 0 / 70%); background: #fff; }
@@ -585,15 +583,15 @@ export default {
 	.combo { font-size: 14px; border: 1px solid #d0d7de; border-radius: 4px; padding: 4px 16px 4px 6px; color: #37474f; max-width: 100%; }
 	.combo.wide { flex: 1; min-width: 0; margin-right: 30px; }
 
-	.rel-table { width: 100%; font-size: 14px; }
-	.rel-table thead th { font-size: 14px; font-weight: 600; color: #455a64; text-align: right; padding: 4px 8px; border-bottom: 2px solid #cfd8dc; background: #f7f9fb; }
+	.rel-table { min-width: calc(min(480px, 100%)); font-size: 14px; }
+	.rel-table thead th { font-size: 14px; font-weight: normal; color: #455a64; text-align: right; padding: 4px 8px; border-bottom: 2px solid #cfd8dc; background: #f7f9fb; }
 	.rel-table thead th.left { text-align: left; }
 	.rel-table td { text-align: right; padding: 2px 8px; border-bottom: 1px solid #f5f5f5; color: #455a64; }
 	.rel-table td.rel-cat { text-align: left; color: #37474f; padding-left: 14px; }
 	.rel-table td.rel-cat.indent { padding-left: 22px; }
 	.rel-table tr.intercept td { font-style: italic; color: #90a4ae; }
 	/* Corte de control: versión/año bien a la izquierda, poco padding, jerarquía menor que los encabezados de columna */
-	.rel-table tr.grp td { font-weight: 600; background: #eef2f5; color: #546e7a; text-align: left; padding: 1px 8px; font-size: 14px; }
+	.rel-table tr.grp td { font-weight: normal; background: #eef2f5; color: #546e7a; text-align: left; padding: 1px 8px; font-size: 14px; }
 	.rel-table tr.grp-2 td { background-color: #ffffff; color: #78909c; padding-left: 8px; }
 	.sig-star { color: #1976d2; font-weight: 700; }
 
@@ -601,7 +599,7 @@ export default {
 
 	/* Bloques de gráfico: título en dos líneas, centrado al ancho del gráfico */
 	.inline-scatter { border-top: 1px solid #eceff1; padding-top: 8px; margin-top: 10px; }
-	.chart-block { margin: 6px 0 4px; }
+	.chart-block { margin: 6px 0 8px; }
 	.chart-subject { font-size: 14px; text-align: center; color: #607d8b; line-height: 1.5; font-weight: 600; margin-bottom: 4px; }
 
 	.corr-method { margin-top: 14px; padding-top: 10px; border-top: 1px solid #eceff1; font-size: 13px; color: #546e7a; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }

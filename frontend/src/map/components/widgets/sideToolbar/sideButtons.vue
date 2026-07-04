@@ -27,7 +27,7 @@
     </button>
 
     <!-- Botón para subir archivo -->
-    <button v-show="!Embedded.HideSearch"
+    <button v-show="!Embedded.HideSearch" v-if="useUpload"
             class="toolbar-button"
             :class="{ 'active': activePanel === 'upload' }"
             @click="togglePanel('upload')"
@@ -53,7 +53,10 @@ export default {
  computed: {
  		Embedded() {
 				return window.Embedded;
-			}
+			},
+  		useUpload() {
+	  		return window.Use.UseUploadFromMap;
+		  }
     },
   methods: {
     togglePanel(panel) {

@@ -133,7 +133,7 @@ export default {
 		cursor: pointer;
 	}
 	.head-btn:hover:not(:disabled) { background: #f0f3f5; }
-	.head-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+	.head-btn:disabled { opacity: 0.45; cursor: default; }
 	.widget-close {
 		border: none; background: transparent;
 		font-size: 18px; line-height: 1; color: #90a4ae;
@@ -184,7 +184,7 @@ export default {
 		border-color: #1565c0;
 		color: #fff;
 	}
-	.analysis-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+	.analysis-btn:disabled { opacity: 0.45; cursor: default; }
 	.analysis-btn i { font-size: 12px; }
 
 	.pivot-widget-body {

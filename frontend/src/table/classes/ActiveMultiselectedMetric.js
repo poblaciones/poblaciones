@@ -20,6 +20,7 @@
  */
 
 import Selection from './Selection.js';
+import logicalVariableName from './logicalVariableName.js';
 
 export default ActiveMultiselectedMetric;
 
@@ -49,6 +50,22 @@ ActiveMultiselectedMetric.prototype.GetVariableById = function (variableId) {
 			var vars = versions[v].Levels[l].Variables;
 			for (var i = 0; i < vars.length; i++) {
 				if (vars[i].Id == variableId) return vars[i];
+			}
+		}
+	}
+	return null;
+};
+
+// Nombre lógico (con desambiguación #2/#3) de la variable de Id dado. Lo necesita
+// la restauración por URL: la ruta guarda el variableId físico exacto, pero la
+// variable lógica con que se rearma la selección se identifica por nombre lógico.
+ActiveMultiselectedMetric.prototype.LogicalNameOfVariableId = function (variableId) {
+	var versions = this.properties.Versions;
+	for (var v = 0; v < versions.length; v++) {
+		for (var l = 0; l < versions[v].Levels.length; l++) {
+			var level = versions[v].Levels[l];
+			for (var i = 0; i < level.Variables.length; i++) {
+				if (level.Variables[i].Id == variableId) return logicalVariableName(level, level.Variables[i]);
 			}
 		}
 	}
@@ -109,8 +126,18 @@ ActiveMultiselectedMetric.prototype.getValidMetrics = function (variable, level)
 
 // ── Oferta de variables y censos ──────────────────────────────────────────────
 
-// Unión de las variables lógicas (por Name) presentes en cualquier nivel de
+// Unión de las variables lógicas (por nombre) presentes en cualquier nivel de
 // cualquier censo. Es lo que ofrece el combo de variable.
+//
+// El orden importa para el usuario: recorrer censo por censo y hacer append de lo
+// nuevo al final deja las variables agregadas en un censo posterior (p. ej. una
+// franja etaria nueva en 2022) descolgadas al fondo, aunque en su propia
+// publicación aparezcan en un lugar significativo. Para respetar ese lugar, cada
+// variable nueva NO se agrega al final sino junto a sus vecinas de su censo de
+// origen: se busca un ancla ya presente en la lista —primero hacia atrás (y la
+// nueva va después de ella), luego hacia adelante (y va antes)— ampliando la
+// búsqueda a vecinas más lejanas de la misma secuencia hasta hallarla. Solo si
+// ninguna vecina de su censo está aún en la lista, va al final.
 ActiveMultiselectedMetric.prototype.AvailableVariables = function () {
 	var seen = {};
 	var out = [];
@@ -119,13 +146,34 @@ ActiveMultiselectedMetric.prototype.AvailableVariables = function () {
 		var levels = versions[v].Levels;
 		for (var l = 0; l < levels.length; l++) {
 			var vars = levels[l].Variables;
-			for (var a = 0; a < vars.length; a++) {
-				var name = vars[a].Name;
-				if (!seen[name]) { seen[name] = true; out.push(name); }
+			// Secuencia de nombres lógicos de este nivel, en su orden de publicación.
+			var seq = [];
+			for (var a = 0; a < vars.length; a++) seq.push(logicalVariableName(levels[l], vars[a]));
+			for (var i = 0; i < seq.length; i++) {
+				var name = seq[i];
+				if (seen[name]) continue;
+				seen[name] = true;
+				this._insertByNeighbours(out, seq, i, name);
 			}
 		}
 	}
 	return out;
+};
+
+// Inserta `name` en `out` respetando su vecindad en la secuencia `seq` (el orden de
+// su censo de origen), donde ocupa la posición `i`. Ancla hacia atrás primero
+// (inserta después de la vecina hallada), luego hacia adelante (inserta antes); si
+// ninguna vecina de la secuencia está ya en `out`, agrega al final.
+ActiveMultiselectedMetric.prototype._insertByNeighbours = function (out, seq, i, name) {
+	for (var b = i - 1; b >= 0; b--) {
+		var at = out.indexOf(seq[b]);
+		if (at !== -1) { out.splice(at + 1, 0, name); return; }
+	}
+	for (var f = i + 1; f < seq.length; f++) {
+		var af = out.indexOf(seq[f]);
+		if (af !== -1) { out.splice(af, 0, name); return; }
+	}
+	out.push(name);
 };
 
 // Censos (Version) en los que existe la variable lógica dada (en algún nivel).
@@ -147,7 +195,7 @@ ActiveMultiselectedMetric.prototype._findVariableInVersion = function (version, 
 	for (var l = 0; l < levels.length; l++) {
 		var vars = levels[l].Variables;
 		for (var a = 0; a < vars.length; a++) {
-			if (vars[a].Name === variableName) {
+			if (logicalVariableName(levels[l], vars[a]) === variableName) {
 				var hit = { level: levels[l], variable: vars[a] };
 				if (preferLevelName != null && levels[l].Name === preferLevelName) return hit;
 				if (!fallback) fallback = hit;
@@ -231,7 +279,7 @@ ActiveMultiselectedMetric.prototype.selectionResolvesData = function (versionId)
 	var sel = this.Selections.filter(function (s) { return s.versionId() === versionId; })[0];
 	if (!sel) return true;
 	var wanted = this._variableName;
-	return sel.level.Variables.some(function (v) { return v.Name === wanted; });
+	return sel.level.Variables.some(function (v) { return logicalVariableName(sel.level, v) === wanted; });
 };
 
 // Alterna un censo dentro de la variable vigente (lo agrega o lo quita), siempre
@@ -267,7 +315,7 @@ ActiveMultiselectedMetric.prototype._makeTuple = function (sel, labelId, labelNa
 		levelName: level.Name,
 		variable: variable,
 		variableId: variable.Id,
-		variableName: variable.Name,
+		variableName: logicalVariableName(level, variable),
 		summary: this.properties.SummaryMetric,
 		labelId: labelId,
 		labelName: labelName,

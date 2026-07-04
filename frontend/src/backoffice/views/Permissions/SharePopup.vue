@@ -120,7 +120,7 @@ export default {
 				} else if (this.Work.properties.LastAccessLink) {
 					return str.AbsoluteUrl(this.Work.properties.Metadata.Url) + '/' + this.Work.properties.LastAccessLink;
 				}
-				return '(no utilizado)';
+				return 'Seleccione para tener una dirección de acceso privada.';
 			}
 			return '(disponible al publicarse)';
 		},

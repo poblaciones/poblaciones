@@ -70,7 +70,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 			filename: config.build.index,
 			template: 'index.html',
 			metadata: {
-				maps_api: env.maps_api.replace(/"/g, ''),
+				maps_api: '',
 				google_analytics_key: env.google_analytics_key.replace(/"/g, ''),
 				add_this_key: env.add_this_key.replace(/"/g, ''),
 			},
@@ -86,7 +86,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 			filename: config.build.indexBackoffice,
 			template: 'backoffice.html',
 			metadata: {
-				maps_api: env.maps_api.replace(/"/g, ''),
+				maps_api: '',
 			},
 			chunks: ['manifest', 'vendor', 'appBackoffice'],
 			inject: true,
@@ -111,6 +111,9 @@ var webpackConfig = merge(baseWebpackConfig, {
 		new HtmlWebpackPlugin({
 			filename: config.build.indexCredentials,
 			template: 'credentials.html',
+			metadata: {
+				maps_api: '',
+			},
 			chunks: ['manifest', 'vendor', 'appCred'],
 			inject: true,
 			minify: {

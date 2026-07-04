@@ -14,37 +14,48 @@ function roundTrip(sections) {
 }
 
 describe('round-trip de columnas', function () {
-	it('preserva el id y las versiones múltiples', function () {
+	it('preserva el id (metric) y las versiones múltiples por índice', function () {
 		var sections = {
-			columns: [{ id: 42, versionIds: [2010, 2022], levelId: 5, variableId: 7, summary: 'I', selection: {} }],
+			columns: [{ id: 42, versionIndexes: [0, 1], levelIndex: 2, variableIndex: 3, summary: 'I', selection: {} }],
 			rows: [], filters: []
 		};
 		var back = roundTrip(sections);
 		expect(back.columns).toHaveLength(1);
 		expect(back.columns[0].id).toBe(42);
-		expect(back.columns[0].versionIds).toEqual([2010, 2022]);
+		expect(back.columns[0].versionIndexes).toEqual([0, 1]);
+		expect(back.columns[0].levelIndex).toBe(2);
+		expect(back.columns[0].variableIndex).toBe(3);
 	});
 	it('una sola versión también sobrevive', function () {
-		var sections = { columns: [{ id: 1, versionIds: [2010], levelId: 2, variableId: 3, selection: {} }], rows: [], filters: [] };
+		var sections = { columns: [{ id: 1, versionIndexes: [0], levelIndex: 1, variableIndex: 2, selection: {} }], rows: [], filters: [] };
 		var back = roundTrip(sections);
-		expect(back.columns[0].versionIds).toEqual([2010]);
+		expect(back.columns[0].versionIndexes).toEqual([0]);
+	});
+	it('los defaults (nivel 0, variable 0, summary N) se omiten y vuelven como default', function () {
+		var sections = { columns: [{ id: 7, versionIndexes: [0], levelIndex: 0, variableIndex: 0, summary: 'N', selection: {} }], rows: [], filters: [] };
+		var q = ActiveRoute.composeQuery(sections);
+		// El token de la columna no debe contener l, a ni s (van por defecto).
+		expect(/[!]l|[!]a|[!]s/.test(q.c || '')).toBeFalsy();
+		var back = ActiveRoute.parseQuery(q);
+		expect(back.columns[0].levelIndex).toBe(0);
+		expect(back.columns[0].variableIndex).toBe(0);
 	});
 });
 
 describe('round-trip de selección de categorías', function () {
-	it('preserva labels e includeTotal por versión', function () {
+	it('preserva labels e includeTotal por índice de versión', function () {
 		var sections = {
 			columns: [{
-				id: 9, versionIds: [2010], levelId: 1, variableId: 1,
-				selection: { 2010: { labels: [101, 102], includeTotal: true } }
+				id: 9, versionIndexes: [0], levelIndex: 0, variableIndex: 0,
+				selection: { 0: { labels: [101, 102], includeTotal: true } }
 			}],
 			rows: [], filters: []
 		};
 		var back = roundTrip(sections);
 		var sel = back.columns[0].selection;
 		expect(sel).toBeTruthy();
-		expect(sel[2010].labels).toEqual([101, 102]);
-		expect(sel[2010].includeTotal).toBeTruthy();
+		expect(sel[0].labels).toEqual([101, 102]);
+		expect(sel[0].includeTotal).toBeTruthy();
 	});
 });
 

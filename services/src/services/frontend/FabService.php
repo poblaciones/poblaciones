@@ -40,13 +40,13 @@ class FabService extends BaseService
 		$shard = App::Settings()->Shard()->CurrentShard;
 		$data = null;
 		$key = 'M' . $shard;
+		$metricsService = new MetricService();
+		$providers = $metricsService->GetMetricProviders();
 
 		if (FabMetricsCache::Cache()->HasData($key, $data))
 			$ret = $data;
 		else
 		{
-			$metricsService = new MetricService();
-			$providers = $metricsService->GetMetricProviders();
 			// Arma los grupos con métricas
 			$ret = $this->CalculateMetrics($providers, true);
 		}

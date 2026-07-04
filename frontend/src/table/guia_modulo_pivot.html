@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía del módulo pivot · Poblaciones</title>
+<style>
+	/* ─── Diseño. Separado del contenido: el contenido vive en MODULES (abajo). ─── */
+	:root {
+		--bg: #f7f6f2;
+		--panel: #ffffff;
+		--panel-2: #fbfaf6;
+		--ink: #2b2f2a;
+		--ink-soft: #6a6f63;
+		--ink-faint: #9a9e90;
+		--line: #e7e5db;
+		--line-soft: #f0eee7;
+		--c-datos: #7fa06a;
+		--c-modelo: #4fa39a;
+		--c-pivot: #d0a03f;
+		--c-ui: #7d8cc4;
+		--c-url: #c58a5f;
+		--focus: #d0a03f;
+		--radius: 8px;
+		--font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+		--mono: "SF Mono", "JetBrains Mono", "Cascadia Code", ui-monospace, Menlo, Consolas, monospace;
+	}
+	* { box-sizing: border-box; }
+	html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); }
+	body { line-height: 1.55; -webkit-font-smoothing: antialiased; padding: 0 20px 80px; }
+	.wrap { max-width: 940px; margin: 0 auto; }
+
+	header.top { padding: 48px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 34px; }
+	.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-pivot); margin: 0 0 12px; }
+	header.top h1 { font-size: 34px; font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; }
+	header.top p { margin: 0; color: var(--ink-soft); font-size: 16px; max-width: 660px; }
+
+	.flow-hint { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); text-align: center; margin: 0 0 14px; }
+	.layers { display: flex; flex-direction: column; gap: 0; }
+	.layer {
+		position: relative; text-align: left; width: 100%; cursor: pointer;
+		background: var(--panel); border: 1px solid var(--line);
+		border-left: 3px solid var(--accent, var(--line)); border-radius: var(--radius);
+		padding: 18px 22px; margin: 7px 0; color: inherit; font-family: inherit;
+		transition: background 0.16s, transform 0.16s, border-color 0.16s;
+	}
+	.layer:hover { background: var(--panel-2); transform: translateX(3px); border-color: var(--accent); }
+	.layer:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+	.layer .n { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
+	.layer .title { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+	.layer .sub { color: var(--ink-soft); font-size: 14px; margin: 0; }
+	.layer .peek { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+	.layer .arrow-hint { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--ink-faint); font-size: 20px; }
+	.connector { text-align: center; color: var(--line); font-size: 18px; line-height: 0.5; height: 8px; }
+	.cross { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 7px; }
+	@media (max-width: 620px) { .cross { grid-template-columns: 1fr; } }
+
+	.foot { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 13px; }
+	.foot code { font-family: var(--mono); color: var(--ink-soft); }
+
+	.scrim { position: fixed; inset: 0; background: rgba(43,47,42,0.32); display: none; align-items: flex-start; justify-content: center; padding: 40px 18px; overflow-y: auto; z-index: 10; }
+	.scrim.open { display: flex; }
+	.sheet {
+		background: var(--panel); border: 1px solid var(--line);
+		border-top: 3px solid var(--accent, var(--c-pivot)); border-radius: var(--radius);
+		max-width: 700px; width: 100%; margin: auto; padding: 30px 34px 34px;
+		box-shadow: 0 20px 50px rgba(43,47,42,0.16);
+	}
+	.sheet.depth-1 { max-width: 640px; }
+	.sheet.depth-2 { max-width: 600px; }
+	.sheet.depth-3 { max-width: 560px; }
+	.sheet .crumb { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--accent); margin: 0 0 10px; }
+	.sheet h2 { font-size: 23px; font-weight: 600; margin: 0 0 6px; }
+	.sheet .files { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); margin: 0 0 18px; }
+	.sheet .body { color: var(--ink-soft); font-size: 15px; }
+	.sheet .body p { margin: 0 0 14px; }
+	.sheet .body strong { color: var(--ink); font-weight: 600; }
+	.sheet .body code { font-family: var(--mono); font-size: 13px; color: #9a7420; background: var(--line-soft); padding: 1px 5px; border-radius: 3px; }
+	.sheet .body ul { margin: 0 0 14px; padding-left: 18px; }
+	.sheet .body li { margin: 0 0 7px; }
+
+	.sheet .drill-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin: 22px 0 10px; }
+	.chips { display: flex; flex-direction: column; gap: 8px; }
+	.chip { text-align: left; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 12px 15px; color: inherit; font-family: inherit; cursor: pointer; transition: background 0.14s, border-color 0.14s; }
+	.chip:hover { background: #f2f0e8; border-color: var(--accent); }
+	.chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+	.chip .ct { font-size: 15px; font-weight: 600; color: var(--ink); }
+	.chip .cs { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+	.chip .cf { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-top: 5px; }
+	.chip .cmore { font-family: var(--mono); font-size: 10.5px; color: var(--accent); margin-top: 5px; letter-spacing: 0.04em; }
+
+	.sheet .close { float: right; background: none; border: 1px solid var(--line); color: var(--ink-soft); width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 17px; line-height: 1; margin: -6px -8px 0 0; }
+	.sheet .close:hover { border-color: var(--accent); color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+	<header class="top">
+		<p class="eyebrow">Poblaciones · guía interna</p>
+		<h1>El módulo pivot, en profundidad</h1>
+		<p>Un mapa para saber dónde intervenir, ahora navegable hasta las fichas finas.
+		El dato baja de arriba hacia abajo: del servidor al modelo, a
+		<code style="font-family:var(--mono);font-size:14px">ActivePivot</code> —la
+		bisagra—, y de ahí a la UI. Tocá una capa y seguí bajando: los recuadros con
+		“▸ seguir” abren otra ficha.</p>
+	</header>
+
+	<p class="flow-hint">↓ el dato fluye hacia abajo ↓</p>
+	<main id="map" class="layers"></main>
+
+	<div class="foot">
+		<p>Para mantener esta guía: toda la información vive en el array <code>MODULES</code>
+		dentro de este mismo archivo, separada del diseño. Cada nodo puede tener
+		<code>children</code>, y esos a su vez <code>children</code>, sin límite de
+		profundidad. Agregar o extender una ficha es editar ese array; no se toca el
+		render ni el CSS. Abre offline con doble clic.</p>
+	</div>
+</div>
+
+<div class="scrim" id="scrim" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+	<div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   CONTENIDO — separado del diseño y del render.
+   Cada módulo: { id, n?, accent?, layout?, title, sub, files?, peek?, body, children? }
+   children puede anidarse sin límite; el render arma la migaja y la pila de popups.
+   Para mantener: editá/agregá objetos acá. Nada más.
+   ════════════════════════════════════════════════════════════════════════ */
+const MODULES = [
+	/* ─────────────────────────── CAPA 1 · DATOS ─────────────────────────── */
+	{
+		id: "datos", n: "Capa 1", accent: "var(--c-datos)", layout: "full",
+		title: "Datos del servidor",
+		sub: "Los registros crudos entran y se indexan en memoria.",
+		files: "classes/MetricStore.js · classes/ActiveData.js",
+		peek: ["MetricStore", "ActiveData", "indexFor()"],
+		body: `<p>El servidor entrega registros crudos por indicador: cada uno trae
+			<code>Value</code>, <code>Total</code>, <code>AreaM2</code>, <code>VID</code>
+			(id de variable), <code>GeographyItemId</code> y <code>LID</code> (categoría).
+			Value y Total <strong>siempre vienen juntos</strong>: si un dato falta, no viene
+			la fila. Esa garantía del servidor es la base de la "celda coherente".</p>
+			<p><strong>MetricStore</strong> es la puerta a los endpoints. <strong>ActiveData</strong>
+			guarda lo recibido indexado por <code>(versión, nivel)</code> y, dentro, por
+			geografía, para que resolver una celda sea una búsqueda directa.</p>`,
+		children: [
+			{
+				id: "activedata", title: "ActiveData — el índice",
+				sub: "Cómo se busca un dato sin recorrer todo.",
+				files: "classes/ActiveData.js",
+				body: `<p><code>indexFor(versionId, levelId)</code> devuelve, para ese par, un
+					índice <code>VID → { byGeo: Map(geoId → registros) }</code>. Así
+					<code>ResolveCell</code> pide "los registros de esta variable para esta
+					geografía" en O(1), sin filtrar la lista entera cada vez.</p>
+					<p>Si el índice no tiene datos para un <code>(versión, nivel, variable)</code>,
+					la celda sale vacía. Fue la raíz del bug de densidad: el dato existía pero
+					bajo otro nivel (dato duplicado en la base), y el índice pedido no lo tenía.</p>`
+			},
+			{
+				id: "metricstore", title: "MetricStore",
+				sub: "La puerta a los endpoints de medición.",
+				files: "classes/MetricStore.js",
+				body: `<p>Recupera y cachea los indicadores. Los <em>datos de medición</em>
+					(los valores de cada celda) se piden con <code>metric.Store.GetMetricData(…)</code>
+					y se cachean en <code>pivot.Data</code> (ActiveData). El catálogo de
+					indicadores disponibles, en cambio, lo mantiene el contexto global
+					(<code>window.Context</code>), no la pivot: la pivot consulta, no es dueña.</p>`
+			}
+		]
+	},
+	/* ─────────────────────────── CAPA 2 · MODELO ─────────────────────────── */
+	{
+		id: "modelo", n: "Capa 2", accent: "var(--c-modelo)", layout: "full",
+		title: "Modelo — qué se está mirando",
+		sub: "La selección del usuario, como objetos con comportamiento.",
+		files: "ActiveMultiselectedMetric.js · Selection.js · RegionSelection.js",
+		peek: ["ActiveMultiselectedMetric", "Selection", "RegionSelection", "variable lógica"],
+		body: `<p>Esta capa representa <strong>qué eligió mirar el usuario</strong>, con
+			independencia de cómo se dibuja. Un indicador puede cruzar varios censos (años)
+			a la vez, y cada censo tiene su propia versión, nivel y variable.</p>
+			<p>El concepto que más conviene tener claro es la <strong>variable lógica</strong>:
+			el usuario elige variables por nombre, pero dos físicas distintas pueden tener el
+			mismo nombre en un nivel. Se desambiguan con <code>#2</code>, <code>#3</code> y el
+			cruce entre años se hace por ese nombre lógico.</p>`,
+		children: [
+			{
+				id: "ams", title: "ActiveMultiselectedMetric",
+				sub: "Un indicador con sus censos y su variable.",
+				files: "classes/ActiveMultiselectedMetric.js",
+				body: `<p>Es el indicador en el modelo. Mantiene una lista de
+					<code>Selections</code> (una por censo activo) y la variable lógica común.</p>
+					<ul>
+					<li><code>SelectByCaption(nombre)</code> rearma todas las selecciones para
+					que queden en esa variable lógica.</li>
+					<li><code>AvailableVariables()</code> arma la lista del combo agrupando por
+					nombre lógico. Inserta las variables nuevas de un censo <em>junto a sus
+					vecinas</em> de origen (no al final), para respetar el orden con que se
+					publicaron.</li>
+					<li><code>GetTuples()</code> produce las columnas que la pivot va a resolver.</li>
+					</ul>`,
+				children: [
+					{
+						id: "logicalname", title: "logicalVariableName()",
+						sub: "La desambiguación #2/#3, en un módulo aparte.",
+						files: "classes/logicalVariableName.js",
+						body: `<p>Dado un nivel y una variable, devuelve su nombre lógico: el
+							<code>Name</code> tal cual si es única, o <code>Name #2</code>,
+							<code>#3</code> según su orden entre las homónimas del nivel. Vive en
+							su propio módulo para que lo compartan <code>ActiveMultiselectedMetric</code>
+							y <code>Selection</code> sin ciclo de imports.</p>`
+					},
+					{
+						id: "avail-order", title: "El orden del combo de variables",
+						sub: "Por qué lo nuevo no va al final.",
+						files: "classes/ActiveMultiselectedMetric.js · AvailableVariables",
+						body: `<p>La lista se arma censo por censo. Si se hiciera <em>append</em>
+							de cada variable nueva, una franja etaria agregada en 2022 quedaría al
+							fondo aunque en su publicación aparezca primera. En su lugar, cada
+							variable nueva busca un <strong>ancla</strong> ya presente en la lista:
+							primero su vecina anterior en el censo (y va después de ella), si no la
+							siguiente (y va antes), ampliando la búsqueda hasta hallarla. Solo si
+							ninguna vecina está aún, va al final.</p>`
+					}
+				]
+			},
+			{
+				id: "selection", title: "Selection",
+				sub: "Versión + nivel + variable de un censo.",
+				files: "classes/Selection.js",
+				body: `<p>Cada <code>Selection</code> fija, para un censo, qué versión, nivel y
+					variable se usan. <code>moveToLevel(level)</code> cambia de nivel <strong>por
+					referencia</strong> (lo preferido: no re-busca por nombre) y reengancha la
+					variable por nombre lógico. <code>moveToLevelNamed(nombre)</code> existe solo
+					para la restauración desde la URL, donde el origen es un string.</p>`
+			},
+			{
+				id: "regionsel", title: "RegionSelection / ActiveBoundarySet",
+				sub: "Qué va en las filas y en los filtros.",
+				files: "classes/RegionSelection.js · classes/ActiveBoundarySet.js",
+				body: `<p><code>pivot.Regions</code> son las delimitaciones de las filas
+					(semántica OR); <code>pivot.FilterSet</code> son las de filtro (semántica
+					AND). Misma clase (<code>ActiveBoundarySet</code>), distinta instancia. Cada
+					delimitación conoce sus items seleccionados y su universo, de donde sale el
+					conteo n/total que se ve en la fila de la delimitación.</p>`
+			}
+		]
+	},
+	/* ─────────────────────────── CAPA 3 · PIVOT ─────────────────────────── */
+	{
+		id: "pivot", n: "Capa 3 · el corazón", accent: "var(--c-pivot)", layout: "full",
+		title: "ActivePivot — la bisagra",
+		sub: "~1200 líneas. Casi todo lo importante pasa por acá.",
+		files: "classes/ActivePivot.js · classes/pivotValue.js",
+		peek: ["Render()", "ResolveCell()", "ResolveAllCategories()", "Dataset"],
+		body: `<p>Si un <strong>número</strong> sale mal (cómo se calcula o se agrega), el
+			lugar es casi siempre este. <code>Render()</code> recorre las regiones de las filas
+			y, por cada cruce con una columna, llama a <code>ResolveCell()</code>. El resultado
+			es una grilla de filas que la UI solo dibuja.</p>
+			<p>Regla mental: número mal → <code>ActivePivot</code>; se ve mal → un
+			<code>.vue</code>; URL mal → <code>ActiveRoute</code> o <code>MapUrlBuilder</code>.</p>`,
+		children: [
+			{
+				id: "resolvecell", title: "ResolveCell() — celda coherente",
+				sub: "Calcula una celda: completa o vacía, nunca a medias.",
+				files: "classes/ActivePivot.js",
+				body: `<p>Junta los registros de una geografía para una columna y arma la celda.
+					El principio: si <strong>ninguna</strong> geografía aportó, la celda está
+					vacía (todo <code>null</code>); si <strong>alguna</strong> aportó, todos los
+					campos son sumas coherentes. No existe una celda "a medias" (Total sin Value),
+					porque cada geografía aporta su paquete completo. El área se suma una vez por
+					geografía, no por registro.</p>
+					<p>Ese diseño resolvió una familia de bugs: antes el conteo se hacía por campo
+					por separado y fabricaba celdas incoherentes que rompían incidencia y densidad
+					aguas abajo.</p>`
+			},
+			{
+				id: "resolvecats", title: "ResolveAllCategories()",
+				sub: "El agregado que consumen los charts.",
+				files: "classes/ActivePivot.js",
+				body: `<p>Agrega las categorías de una variable a lo largo de las regiones, para
+					los gráficos de Distribución. En incidencia (modos I/P/FIL), una celda
+					<strong>sin valor se saltea por completo</strong>: si se sumara solo su Total
+					al denominador, el promedio se hundiría. Su variante por región
+					(<code>ResolveAllCategoriesByRegion</code>) usa el gran total como denominador
+					para que las columnas de porcentaje sumen bien.</p>`
+			},
+			{
+				id: "grouprows", title: "GroupRowsByParent()",
+				sub: "El corte de control (agrupadores).",
+				files: "classes/ActivePivot.js",
+				body: `<p>Cuando las filas tienen un padre (departamentos dentro de provincia),
+					agrupa las filas ya ordenadas bajo un subtotal por grupo. Los grupos entre sí
+					se ordenan por el <strong>mismo criterio activo</strong>: alfabético por nombre
+					si el orden es por etiqueta, o por el subtotal del grupo en la columna ordenada.</p>`
+			},
+			{
+				id: "pivotvalue", title: "pivotValue.js — los modos",
+				sub: "Cómo se convierte una celda en el número mostrado.",
+				files: "classes/pivotValue.js",
+				body: `<p>Decide qué representa una celda según el modo de medida:
+					<code>N</code> conteo, <code>T</code> total, <code>I</code> incidencia,
+					<code>P</code> col%, <code>FIL</code> fil%, <code>K</code> km²,
+					<code>A</code> área, <code>D</code> densidad (Value ÷ área). Es donde se
+					aplica la normalización y el formato. Si un valor se ve con la unidad o la
+					escala equivocada, el lugar es este.</p>`
+			},
+			{
+				id: "dataset", title: "ActiveDataset — la vista plana",
+				sub: "Lo que la pivot EXPONE a los widgets.",
+				files: "classes/ActiveDataset.js",
+				body: `<p>Este es el puente entre la pivot y los widgets. <code>pivot.Dataset</code>
+					proyecta el estado de la pivot a una estructura tabular estable que los widgets
+					consumen sin tocar la pivot. Lo reconstruye la propia pivot al terminar cada
+					refresco (<code>RebuildDataset</code>), incrementando <code>version</code> —lo
+					que dispara la reactividad de Vue y hace recomputar a los widgets.</p>
+					<p>Expone: <code>rows</code>, <code>columns</code>, <code>regionTypes</code>,
+					<code>filters</code>, y <code>Columns</code> (la vista de análisis). Nunca es
+					null: siempre hay un objeto válido, aunque esté vacío.</p>`,
+				children: [
+					{
+						id: "dataset-shape", title: "La forma de las filas y columnas",
+						sub: "rows[], columns[], values[], weights[].",
+						files: "classes/ActiveDataset.js",
+						body: `<p>Cada fila (<code>rows</code>) tiene un <code>type</code>:
+							<code>'data'</code> (un elemento), <code>'group-header'</code> (subtotal de
+							un corte de control) o <code>'region-header'</code> (encabezado de una
+							delimitación). Los accesores filtran por tipo:</p>
+							<ul>
+							<li><code>dataRows()</code> → solo las filas de datos.</li>
+							<li><code>groupRows()</code> → los subtotales de grupo.</li>
+							<li><code>regionHeaders()</code> → los encabezados de delimitación.</li>
+							</ul>
+							<p>Cada fila trae <code>values[]</code> y <code>weights[]</code>
+							<strong>alineados a <code>columns[]</code></strong> por posición: el valor
+							de la columna <em>i</em> es <code>row.values[i]</code>, y su peso (para
+							ponderar) <code>row.weights[i]</code>. La columna lleva su etiqueta
+							compuesta (indicador — variable — categoría [censo]) y su denominador.</p>`,
+						children: [
+							{
+								id: "dataset-weights", title: "Por qué values Y weights",
+								sub: "El peso por celda habilita la ponderación.",
+								files: "classes/ActiveDataset.js · js/pivotStats.js",
+								body: `<p>Los análisis (correlación, regresión, resumen) se ponderan por
+									población: un departamento con más gente pesa más. Por eso cada celda
+									viaja con su valor <em>y</em> su peso. Un detalle fino que costó un bug:
+									los pesos <strong>modulan la influencia relativa</strong> de cada unidad
+									pero no deben inflar el <em>n</em> efectivo; se normalizan a sumar
+									<em>n</em>. Sin eso, con pesos = población todo daba significativo. La
+									estadística ponderada vive en <code>pivotStats.js</code>.</p>`
+							}
+						]
+					},
+					{
+						id: "analysiscolumns", title: "dataset.Columns — AnalysisColumns",
+						sub: "La API de análisis que usan los widgets.",
+						files: "classes/AnalysisColumns.js",
+						body: `<p>Sobre el dataset se monta <code>pivot.Dataset.Columns</code>, una
+							instancia de <code>AnalysisColumns</code>. Es lo que los widgets llaman para
+							pedir cálculos, sin instanciar nada ni tocar la estadística directamente:</p>
+							<ul>
+							<li><code>all()</code>, <code>byKey()</code>, <code>length</code> — las
+							columnas numéricas disponibles.</li>
+							<li><code>pairCorrelation()</code>, <code>correlationMatrix()</code> —
+							correlaciones ponderadas entre columnas.</li>
+							<li><code>pairRegression()</code>, <code>regression()</code>,
+							<code>logisticRegression()</code> — regresiones.</li>
+							<li><code>shareScale()</code>, <code>oneToN()</code> — escalas y utilidades
+							para los charts.</li>
+							</ul>
+							<p>Los widgets usan <code>this.dataset.Columns.<em>x</em>()</code>; toda la
+							matemática queda de este lado, no en el componente.</p>`,
+						children: [
+							{
+								id: "stats", title: "pivotStats.js — el motor estadístico",
+								sub: "Regresión y correlación ponderadas.",
+								files: "js/pivotStats.js",
+								body: `<p>Helpers puros (sin estado) que hacen la cuenta:
+									<code>weightedLinearRegression</code>, <code>weightedLogisticRegression</code>
+									(binomial por IRLS), <code>weightedPearson</code>,
+									<code>weightedSpearman</code>, <code>correlationPValue</code>, y utilidades
+									(<code>weightedMean</code>, <code>weightedQuantile</code>,
+									<code>invertMatrix</code>…).</p>
+									<p><strong>Pendiente conocido:</strong> la regresión ya normaliza los pesos
+									para no inflar el <em>n</em> efectivo; falta verificar si el p-valor de la
+									correlación (<code>correlationPValue</code>) tiene el mismo problema de
+									escala con pesos grandes. El coeficiente <em>r</em> no se ve afectado, pero
+									la significación podría estarlo.</p>`
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	/* ─────────────────────────── CAPA 4 · UI ─────────────────────────── */
+	{
+		id: "ui", n: "Capa 4", accent: "var(--c-ui)", layout: "full",
+		title: "UI — cómo se ve y se opera",
+		sub: "Dibuja la grilla y los charts. No calcula números.",
+		files: "components/pivot/PivotTable.vue · widgets/… · views/Dashboard.vue",
+		peek: ["Dashboard.vue", "PivotTable.vue", "widgetMixin", "los widgets"],
+		body: `<p><strong>Dashboard.vue</strong> es el dueño de la pivot: la instancia, la
+			reparte por props y orquesta paneles, splitters y la URL. <strong>PivotTable.vue</strong>
+			dibuja la grilla que le pasó <code>Render()</code>. Los widgets reciben
+			<code>pivot.Dataset</code> y grafican.</p>
+			<p>Si algo se <strong>ve</strong> mal —un estilo, un ícono superpuesto, un alto que
+			no ajusta— el lugar es un <code>.vue</code>, no el modelo.</p>`,
+		children: [
+			{
+				id: "dashboard", title: "Dashboard.vue — el dueño",
+				sub: "Instancia la pivot y orquesta todo.",
+				files: "views/Dashboard.vue",
+				body: `<p>Instancia el <code>ActivePivot</code> y reparte por props: el
+					<code>pivot</code> a la tabla (que lo edita) y <code>pivot.Dataset</code> a cada
+					widget. La visibilidad de cada análisis es un booleano, y las instancias son
+					<strong>fijas y explícitas</strong> en el template (no hay lista dinámica de
+					widgets). Los widgets emiten eventos hacia arriba; el Dashboard, dueño del
+					estado, decide.</p>
+					<p>También es dueño de su URL/historial: lee el hash con un parser propio y lo
+					escribe con <code>history</code>, distinguiendo qué cambios son estructurales
+					(permiten volver atrás) con banderas para no escribir historial durante el
+					arranque o la restauración.</p>`
+			},
+			{
+				id: "widgetmixin", title: "widgetMixin — el contrato",
+				sub: "Qué recibe y expone todo widget.",
+				files: "widgets/widgetMixin.js",
+				body: `<p>El contrato común de los widgets: reciben la prop <code>dataset</code> y
+					una <code>config</code>, exponen un estado de <code>availability</code>
+					(si hay datos suficientes para el análisis) y un atajo <code>dataRows()</code>.
+					Con esto, cada widget se concentra en su gráfico y no en cómo obtener los datos:
+					todo llega por el dataset.</p>`,
+				children: [
+					{
+						id: "widget-relations", title: "RelationsWidget",
+						sub: "Correlación, regresión, dispersión.",
+						files: "widgets/relations/RelationsWidget.vue",
+						body: `<p>Pide a <code>dataset.Columns</code> las correlaciones y regresiones
+							ponderadas y las grafica (dispersión, matriz). No hace la cuenta: delega en
+							<code>AnalysisColumns</code> → <code>pivotStats</code>. Es el ejemplo más
+							claro del camino widget → dataset.Columns → stats.</p>`
+					},
+					{
+						id: "widget-distribution", title: "DistributionWidget",
+						sub: "Barras por categoría o por región.",
+						files: "widgets/distributions/…",
+						body: `<p>Agrupa el dataset por indicador × versión
+							(<code>DistributionModel</code>) y decide, por panel, si es %/N, si hay total
+							y si es apilable (<code>DistributionPanel</code>). Dibuja
+							<code>CategoryChart</code> (vertical) o <code>RegionBars</code> (horizontal).
+							El <strong>alto lo resuelve el CSS</strong> (el chart es flex-item); lo único
+							medido en JS es el ancho de la zona de leyenda, que depende del ancho de los
+							charts y la leyenda no puede conocer sola.</p>`
+					},
+					{
+						id: "widget-summary", title: "MetricSummary / SummaryWidget",
+						sub: "El resumen estadístico.",
+						files: "widgets/summary/…",
+						body: `<p>Muestra el resumen por indicador (media, mediana, dispersión
+							ponderadas, tomadas de <code>dataset.Columns</code>). Comparte con
+							Distribución los estilos de título <code>ms-indicator</code>/<code>ms-variable</code>,
+							que viven en <code>widgetStyles.css</code> como transversales.</p>`
+					}
+				]
+			},
+			{
+				id: "pivottable", title: "PivotTable.vue",
+				sub: "El componente más grande. Dibuja la grilla.",
+				files: "components/pivot/PivotTable.vue",
+				body: `<p>Consume las filas de <code>Render()</code> y las dibuja: encabezados,
+					agrupadores con corte de control, filas de delimitación con su conteo n/total,
+					el ícono "Abrir mapa" por fila (que arma la URL con <code>MapUrlBuilder</code>),
+					y el panel flotante de categorías. Los filtros viven en la celda esquina, cada
+					chip con su propio "Abrir mapa".</p>`
+			}
+		]
+	},
+	/* ─────────────────────────── TRANSVERSALES ─────────────────────────── */
+	{
+		id: "url", n: "Transversal", accent: "var(--c-url)", layout: "half",
+		title: "URL ↔ estado",
+		sub: "Serializa la tabla y arma la URL del visor.",
+		files: "classes/ActiveRoute.js · classes/MapUrlBuilder.js",
+		peek: ["ActiveRoute", "MapUrlBuilder"],
+		body: `<p><strong>ActiveRoute</strong> serializa el estado de la tabla al hash y lo
+			restaura, con el criterio del visor: el indicador por Id; versión (lista de
+			índices), nivel y variable por <strong>índice</strong>, con omisión de defaults.
+			<strong>MapUrlBuilder</strong> arma la URL del visor desde una fila.</p>`,
+		children: [
+			{
+				id: "activeroute", title: "ActiveRoute",
+				sub: "El formato de #/view?c=…",
+				files: "classes/ActiveRoute.js",
+				body: `<p>Una columna se serializa como <code>metricId!v0,1!l1!a2!sI!c…</code>:
+					id del indicador, versiones por índice, nivel por índice, variable por índice,
+					summary, y la selección de categorías. Los defaults (nivel 0, variable 0,
+					summary N) se omiten. El estado del tablero va en <code>dash</code>, también
+					con defaults omitidos y visibilidad por letra (s/d/r).</p>`
+			},
+			{
+				id: "mapurl", title: "MapUrlBuilder",
+				sub: "De una fila de la pivot a la URL del visor.",
+				files: "classes/MapUrlBuilder.js",
+				body: `<p>Emite el indicador una vez por cada versión seleccionada. Criterio de
+					recorte: <strong>lo clickeado manda</strong>. Un elemento de las filas recorta
+					en sí mismo aunque haya filtros; el mundo de un chip de filtro abre con los
+					filtros como recorte; un tipo de delimitación se agrega como capa.</p>`
+			}
+		]
+	},
+	{
+		id: "selectores", n: "Transversal", accent: "var(--c-ui)", layout: "half",
+		title: "Selectores (UI)",
+		sub: "Cómo el usuario elige qué mirar.",
+		files: "components/indicatorSelector.vue · VariableSelector.vue · CategoryPicker.vue",
+		peek: ["indicatorSelector", "VariableSelector", "CategoryPicker"],
+		body: `<p><strong>indicatorSelector</strong> es el árbol para elegir indicadores (se
+			comparte con el visor). <strong>VariableSelector</strong> es el combo de variables,
+			que muestra los nombres lógicos en el orden por vecindad. <strong>CategoryPicker</strong>
+			elige categorías, por versión. Operan sobre el modelo (capa 2), no sobre la pivot
+			directamente: levantan eventos y el dueño aplica las mutaciones.</p>`
+	}
+];
+
+/* ════════════════════════════════════════════════════════════════════════
+   RENDER — genérico. No conoce el contenido; solo la forma de MODULES.
+   Soporta anidamiento sin límite: cada ficha con children muestra recuadros
+   "▸ seguir" y el popup se apila; la migaja y el botón cerrar navegan hacia atrás.
+   ════════════════════════════════════════════════════════════════════════ */
+(function () {
+	const map = document.getElementById("map");
+	const scrim = document.getElementById("scrim");
+	const sheet = document.getElementById("sheet");
+	const byId = {};
+	index(MODULES, null);
+	function index(list, parent) {
+		list.forEach(m => { m._parent = parent; byId[m.id] = m; if (m.children) index(m.children, m); });
+	}
+
+	let i = 0;
+	while (i < MODULES.length) {
+		const m = MODULES[i];
+		if (m.layout === "half") {
+			const row = document.createElement("div");
+			row.className = "cross";
+			while (i < MODULES.length && MODULES[i].layout === "half") { row.appendChild(layerButton(MODULES[i])); i++; }
+			map.appendChild(row);
+		} else {
+			map.appendChild(layerButton(m));
+			if (i < MODULES.length - 1 && MODULES[i + 1].layout !== "half") {
+				const c = document.createElement("div"); c.className = "connector"; c.textContent = "│"; map.appendChild(c);
+			}
+			i++;
+		}
+	}
+
+	function layerButton(m) {
+		const b = document.createElement("button");
+		b.className = "layer"; b.style.setProperty("--accent", m.accent);
+		b.innerHTML =
+			(m.n ? `<span class="n">${esc(m.n)}</span>` : "") +
+			`<p class="title">${esc(m.title)}</p>` +
+			`<p class="sub">${esc(m.sub)}</p>` +
+			(m.peek ? `<p class="peek">${m.peek.map(p => `<span>${esc(p)}</span>`).join("")}</p>` : "") +
+			`<span class="arrow-hint" aria-hidden="true">›</span>`;
+		b.addEventListener("click", () => openSheet(m.id));
+		return b;
+	}
+
+	let stack = [];
+	function openSheet(id, isChild) {
+		const m = byId[id];
+		if (!m) return;
+		if (!isChild) stack = [];
+		stack.push(m);
+		paint(m);
+		scrim.classList.add("open");
+		document.body.style.overflow = "hidden";
+		sheet.querySelector(".close").focus();
+	}
+
+	function paint(m) {
+		const depth = stack.length - 1;
+		sheet.className = "sheet depth-" + Math.min(depth, 3);
+		sheet.style.setProperty("--accent", accentOf(m));
+		const crumb = stack.map(x => esc(x.title)).join("  ›  ");
+		let html =
+			`<button class="close" aria-label="Volver">×</button>` +
+			`<p class="crumb">${crumb}</p>` +
+			`<h2 id="sheet-title">${esc(m.title)}</h2>` +
+			(m.files ? `<p class="files">${esc(m.files)}</p>` : "") +
+			`<div class="body">${m.body || ""}</div>`;
+		if (m.children && m.children.length) {
+			html += `<p class="drill-label">Entrar en detalle</p><div class="chips"></div>`;
+		}
+		sheet.innerHTML = html;
+		sheet.querySelector(".close").addEventListener("click", closeSheet);
+		if (m.children && m.children.length) {
+			const chips = sheet.querySelector(".chips");
+			m.children.forEach(c => {
+				const btn = document.createElement("button");
+				btn.className = "chip";
+				const hasMore = c.children && c.children.length;
+				btn.innerHTML =
+					`<div class="ct">${esc(c.title)}</div>` +
+					(c.sub ? `<div class="cs">${esc(c.sub)}</div>` : "") +
+					(c.files ? `<div class="cf">${esc(c.files)}</div>` : "") +
+					(hasMore ? `<div class="cmore">▸ seguir (${c.children.length})</div>` : "");
+				btn.addEventListener("click", () => openSheet(c.id, true));
+				chips.appendChild(btn);
+			});
+		}
+		sheet.scrollTop = 0;
+	}
+
+	function accentOf(m) { let x = m; while (x._parent) x = x._parent; return x.accent; }
+
+	function closeSheet() {
+		if (stack.length > 1) { stack.pop(); paint(stack[stack.length - 1]); sheet.querySelector(".close").focus(); return; }
+		scrim.classList.remove("open"); document.body.style.overflow = ""; stack = [];
+	}
+
+	scrim.addEventListener("click", e => { if (e.target === scrim) { scrim.classList.remove("open"); document.body.style.overflow=""; stack=[]; } });
+	document.addEventListener("keydown", e => { if (e.key === "Escape" && scrim.classList.contains("open")) closeSheet(); });
+
+	function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c])); }
+})();
+</script>
+</body>
+</html>

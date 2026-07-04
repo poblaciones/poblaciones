@@ -230,6 +230,50 @@ describe('ActiveMultiselectedMetric — placeholder sin columnas', function () {
 	});
 });
 
+describe('AvailableVariables — orden por vecindad', function () {
+	// Arma un metric con censos cuyas variables se pasan como listas de nombres.
+	// Cada censo es una versión con un solo nivel cuyas Variables tienen ese Name.
+	function metricConCensos(censos) {
+		var versions = censos.map(function (nombres, vi) {
+			return {
+				Version: { Id: 'v' + vi, Name: 'censo' + vi },
+				Levels: [ { Id: 'L' + vi, Name: 'Nivel', GeographyId: 1,
+					Variables: nombres.map(function (n, k) { return { Id: vi * 100 + k, Name: n }; }) } ]
+			};
+		});
+		return new ActiveMultiselectedMetric({ Metric: { Id: 1, Name: 'Asistencia' }, Versions: versions });
+	}
+
+	it('inserta una variable nueva del segundo censo en el lugar que ocupa en su set', function () {
+		// 2010: cuatro franjas. 2022: agrega "0 a 3" al INICIO de su propia lista.
+		var m = metricConCensos([
+			['4 y 5', '6 a 12', '13 a 17', '18 a 29'],
+			['0 a 3', '4 y 5', '6 a 12', '13 a 17', '18 a 29']
+		]);
+		// "0 a 3" no tiene anterior en 2022; su siguiente ("4 y 5") ya está en la
+		// lista en posición 0 → se inserta antes, quedando al inicio.
+		expect(m.AvailableVariables()).toEqual(['0 a 3', '4 y 5', '6 a 12', '13 a 17', '18 a 29']);
+	});
+
+	it('inserta usando la vecina anterior cuando existe (va después de ella)', function () {
+		// El segundo censo agrega "intermedia" entre 'b' y 'c'.
+		var m = metricConCensos([
+			['a', 'b', 'c'],
+			['b', 'intermedia', 'c']
+		]);
+		// "intermedia": su anterior ('b') ya está → va justo después de 'b'.
+		expect(m.AvailableVariables()).toEqual(['a', 'b', 'intermedia', 'c']);
+	});
+
+	it('cae al final solo si ninguna vecina de su censo está aún en la lista', function () {
+		var m = metricConCensos([
+			['a', 'b'],
+			['x', 'y']   // censo totalmente disjunto
+		]);
+		expect(m.AvailableVariables()).toEqual(['a', 'b', 'x', 'y']);
+	});
+});
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }

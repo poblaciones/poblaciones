@@ -14,6 +14,8 @@
 
 export default Selection;
 
+import logicalVariableName from './logicalVariableName.js';
+
 function Selection(version, level, variable) {
 	this.version = version;
 	this.level = level;
@@ -38,8 +40,9 @@ Selection.prototype.geographyId = function () { return this.level.GeographyId; }
 Selection.prototype.moveToLevel = function (level) {
 	if (!level || this.level === level) return false;
 	if (this.version.Levels.indexOf(level) === -1) return false;
+	var wantedLogical = logicalVariableName(this.level, this.variable);
 	this.level = level;
-	this._reconcileVariable();
+	this._reconcileVariable(wantedLogical);
 	return true;
 };
 
@@ -53,8 +56,9 @@ Selection.prototype.moveToLevelNamed = function (levelName) {
 	for (var i = 0; i < levels.length; i++) {
 		if (levels[i].Name === levelName) {
 			if (this.level === levels[i]) return false;
+			var wantedLogical = logicalVariableName(this.level, this.variable);
 			this.level = levels[i];
-			this._reconcileVariable();
+			this._reconcileVariable(wantedLogical);
 			return true;
 		}
 	}
@@ -69,15 +73,15 @@ Selection.prototype.hasLevelNamed = function (levelName) {
 	return false;
 };
 
-// Tras cambiar de nivel, reengancha la variable a una del mismo Name en el nuevo
-// nivel (la instancia física cambia entre niveles). Si el nuevo nivel no tiene esa
-// variable lógica, conserva la referencia anterior; la disponibilidad real de
-// datos la evalúa la pivot a partir de las regiones.
-Selection.prototype._reconcileVariable = function () {
-	var wanted = this.variable.Name;
+// Tras cambiar de nivel, reengancha la variable a una del mismo nombre LÓGICO en el
+// nuevo nivel (la instancia física cambia entre niveles; el nombre lógico desambigua
+// homónimas con #2/#3). Si el nuevo nivel no tiene esa variable lógica, conserva la
+// referencia anterior; la disponibilidad real de datos la evalúa la pivot.
+Selection.prototype._reconcileVariable = function (wantedLogical) {
+	var wanted = (wantedLogical != null) ? wantedLogical : logicalVariableName(this.level, this.variable);
 	var vars = this.level.Variables;
 	for (var i = 0; i < vars.length; i++) {
-		if (vars[i].Name === wanted) { this.variable = vars[i]; return; }
+		if (logicalVariableName(this.level, vars[i]) === wanted) { this.variable = vars[i]; return; }
 	}
 };
 

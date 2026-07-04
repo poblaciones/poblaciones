@@ -101,7 +101,8 @@ describe('Serialización de columna (round-trip)', function () {
 		var route = new ActiveRoute(p);
 		var col = route._columnSection(m);
 
-		expect(col.versionIds).toEqual(['2010', '2022']);
+		// Versiones por índice (2010→0, 2022→1).
+		expect(col.versionIndexes).toEqual([0, 1]);
 
 		// Destino: aplica el estado serializado a un metric nuevo.
 		var m2 = makeMetric();
@@ -115,11 +116,12 @@ describe('Serialización de columna (round-trip)', function () {
 	it('aplicar un censo que ya no existe lo descarta, sin romper', function () {
 		var m = makeMetric();
 		var p = new ActivePivot();
-		// Discapacidad solo existe en 2010; pedir 2022 no debe agregarlo.
+		// Discapacidad solo existe en 2010-Departamentos: nivel índice 1, variable
+		// índice 1 (tras NBI). Pedir 2022 (índice 1) no debe agregarlo.
 		p.applyColumnState(m, {
-			id: 7, versionIds: ['2010', '2022'],
-			levelId: 'L10D',
-			variableId: 1030,   // Discapacidad en 2010-Departamentos
+			id: 7, versionIndexes: [0, 1],
+			levelIndex: 1,
+			variableIndex: 1,   // Discapacidad en 2010-Departamentos
 			summary: 'P', selection: null
 		});
 		expect(m.Selections.length).toBe(1);

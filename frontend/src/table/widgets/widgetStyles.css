@@ -54,7 +54,7 @@
 	cursor: pointer;
 }
 .head-btn:hover:not(:disabled) { background: #f0f3f5; }
-.head-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.head-btn:disabled { opacity: 0.45; cursor: default; }
 .widget-close {
 	border: none;
 	background: transparent;
@@ -85,6 +85,11 @@
  */
 .w-indicator { font-size: 13px; font-weight: 600; color: #263238; white-space: nowrap; }
 .w-variable  { font-size: 11px; color: #78909c; white-space: nowrap; }
+
+/* Título del indicador y su variable, compartidos entre widgets (Resumen y
+   Distribución) para que se vean igual. Se estilan una sola vez acá, no por widget. */
+.ms-indicator { font-size: 18px; font-weight: normal; color: #263238; line-height: 1.45em; }
+.ms-variable  { font-size: 13px; color: #78909c; line-height: 1.4em; }
 .w-version   { font-size: 11px; font-weight: 700; color: #455a64; }
 
 /* ── Recuadro de bloque ──────────────────────────────────────────────────── */

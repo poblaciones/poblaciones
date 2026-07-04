@@ -160,6 +160,7 @@ class ConfigurationService extends BaseService
 									'UsePivot' => App::Settings()->Map()->UsePivot,
 
 									'ElevationUrl' => App::Settings()->Map()->ElevationUrl,
+									'UseUploadFromMap' => App::Settings()->Map()->UseUploadFromMap,
 
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 									'OwnerLogo' => App::Settings()->Map()->OwnerLogo,

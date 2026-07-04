@@ -1,6 +1,5 @@
 <template>
-	<svg :viewBox="'0 0 ' + W + ' ' + H" class="region-bars" :style="{ width: renderW + 'px', height: (H * renderW / W) + 'px' }" preserveAspectRatio="xMinYMin meet" role="img" :aria-label="ariaLabel">
-		<!-- Marco del área de datos -->
+	<svg :viewBox="'0 0 ' + W + ' ' + H" class="region-bars" :style="{ width: renderW + 'px', height: (H * renderW / W) + 'px' }" preserveAspectRatio="xMinYMin meet" role="img" :aria-label="ariaLabel">		<!-- Marco del área de datos -->
 		<rect :x="pad.l" :y="pad.t" :width="trackW" :height="H - pad.t - pad.b" class="plot-frame" />
 		<!-- Guías intermedias (entre cada par de ticks), más suaves -->
 		<line v-for="(t, i) in xMidTicks" :key="'xm-' + i"

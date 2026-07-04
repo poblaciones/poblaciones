@@ -67,7 +67,7 @@ html, body {
 	padding: 0;
 	font-size: 18px !important;
 	font-family: Averta-Regular, sans-serif !important;
-	letter-spacing: .015em;
+	letter-spacing: -.015em!important;
 	line-height: 1.55em!important;
 	color: #666;
 	background-color: #fff;

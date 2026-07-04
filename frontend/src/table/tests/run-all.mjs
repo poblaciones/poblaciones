@@ -43,6 +43,8 @@ console.log('\n=== Distribution ===');
 await import('./Distribution.test.mjs');
 console.log('\n=== MapUrlBuilder ===');
 await import('./MapUrlBuilder.test.mjs');
+console.log('\n=== logicalVariableName ===');
+await import('./logicalVariableName.test.mjs');
 
 await report();
 process.exit(exitCode());

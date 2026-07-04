@@ -26,8 +26,8 @@
 					<button class="dist-collapse-btn dist-minimize" @click="toggleCollapse(ind.metricId)" title="Colapsar" aria-label="Colapsar">🗕</button>
 					<div class="w-block-head">
 						<div class="dist-head-titles">
-							<div class="w-indicator">{{ ind.name }}</div>
-							<div class="w-variable">{{ ind.variableName }}</div>
+							<div class="ms-indicator">{{ ind.name }}</div>
+							<div class="ms-variable">{{ ind.variableName }}</div>
 						</div>
 						<div class="dist-export">
 							<button class="dist-export-btn" @click.stop="toggleExportMenu(ind.metricId)" title="Exportar gráfico" aria-label="Exportar gráfico">
@@ -56,7 +56,7 @@
 								:mode="chartMode"
 								:stacked="true"
 								:is-percent="ind.panels[0].isPercent()"
-								:height="chartHeight" />
+/>
 						</div>
 					</template>
 
@@ -81,7 +81,7 @@
 									:hide-x-labels="true"
 									:show-total-line="panel.showsTotalLine()"
 									:total-value="totalFor(panel)"
-									:height="chartHeight" />
+/>
 								<div v-else class="dist-no-data">Sin información</div>
 							</div>
 						</div>
@@ -105,8 +105,12 @@
 									:is-gap="panel.isGap()"
 									:gap-in-points="panel.gapIsPoints()"
 									:value-unit="panel.valueUnit()"
-									:min-height="chartHeight" />
-								<div v-else class="dist-no-data">Sin información</div>
+/>
+								<button v-if="regionHiddenCount(panel) > 0"
+										class="dist-show-more" @click.stop="expandRegions(panel)">
+									Mostrar {{ regionHiddenCount(panel) }} más
+								</button>
+								<div v-else-if="!regionHasData(panel)" class="dist-no-data">Sin información</div>
 							</div>
 						</div>
 					</template>
@@ -163,6 +167,11 @@ import RegionDistribution from '@/table/widgets/distributions/classes/RegionDist
 import CategoryPicker from '@/table/components/CategoryPicker.vue';
 import ChartExporter from '@/table/writers/ChartExporter.js';
 
+// Tope de filas por chart de regiones antes de ofrecer "mostrar más". Con muchas
+// delimitaciones (p. ej. todos los radios) renderizar todo es costoso; se muestran
+// las primeras y una fila para expandir bajo demanda.
+var REGION_ROW_LIMIT = 40;
+
 export default {
 	name: 'DistributionWidget',
 	components: { CategoryChart, RegionBars, CategoryPicker },
@@ -179,9 +188,9 @@ export default {
 			chartMode: cfg.chartMode || 'bars',        // 'bars' | 'lines' (global)
 			stacked: !!cfg.stacked,                    // apilar (global)
 			collapsed: cfg.collapsed ? cfg.collapsed.slice() : [],  // metricIds colapsados
-			chartHeight: 180,
 			exportMenuFor: null,   // metricId con el menú de exportar abierto, o null
-			legendWidths: {},      // metricId → ancho (px) de los charts, tope de la leyenda
+			legendWidths: {},      // metricId → ancho (px) tope de la leyenda (medido en JS)
+			expandedRegions: {},   // panel.key() → true si mostró todas las filas (más de 40)
 			// Panel flotante de selección de categorías (propio del widget).
 			catPicker: { open: false, metric: null, versionId: null, style: {} }
 		};
@@ -231,33 +240,23 @@ export default {
 	},
 	watch: {
 		weighted(v) { this.persist({ weighted: v }); },
-		axisMode(v) { this.persist({ axisMode: v }); },
+		axisMode(v) { this.persist({ axisMode: v }); this.$nextTick(this._fixLegendWidth); },
 		chartMode(v) { this.persist({ chartMode: v }); },
 		stacked(v) { this.persist({ stacked: v }); },
 		// Cuando deja de corresponder apilar, el switch se deshabilita; si quedara en
 		// ON producía estados raros (se apilaba sin poder desapilar). Se apaga primero.
 		anyStackable(v) { if (!v && this.stacked) this.stacked = false; },
-		collapsed: { deep: true, handler(v) { this.persist({ collapsed: v }); } }
+		collapsed: { deep: true, handler(v) { this.persist({ collapsed: v }); } },
+		// El ancho de los charts (y por ende el tope de la leyenda) solo cambia con el
+		// contenido; se re-fija cuando cambian los indicadores. No depende del splitter.
+		indicators() { this.$nextTick(this._fixLegendWidth); }
 	},
 	mounted() {
-		// El callback se difiere con requestAnimationFrame: medir y luego ajustar el
-		// alto puede reentrar al observer en el mismo ciclo, lo que dispara el aviso
-		// "ResizeObserver loop completed with undelivered notifications".
 		var loc = this;
-		this._ro = new ResizeObserver(function () {
-			if (loc._roPending) return;
-			loc._roPending = true;
-			window.requestAnimationFrame(function () {
-				loc._roPending = false;
-				loc.measureHeight();
-			});
-		});
-		if (this.$refs.body) this._ro.observe(this.$refs.body);
-		this.$nextTick(this.measureHeight);
-		this.$nextTick(this._measureLegends);
 		// Estado inicial: si viene apilado pero no corresponde, se apaga (el switch
 		// arranca deshabilitado y no debe quedar en ON).
 		if (this.stacked && !this.anyStackable) this.stacked = false;
+		this.$nextTick(this._fixLegendWidth);
 		// Cierra el menú de exportar al hacer clic afuera (el botón y el menú
 		// detienen la propagación con @click.stop).
 		this._exportAway = function () { if (loc.exportMenuFor != null) loc.exportMenuFor = null; };
@@ -268,21 +267,15 @@ export default {
 		document.addEventListener('click', this._catAway);
 	},
 	beforeDestroy() {
-		if (this._ro) this._ro.disconnect();
 		if (this._exportAway) document.removeEventListener('click', this._exportAway);
 		if (this._catAway) document.removeEventListener('click', this._catAway);
 	},
-	updated() {
-		this.$nextTick(this._measureLegends);
-	},
 	methods: {
-		// Tope de ancho de la leyenda: la SUMA de los anchos de los charts del
-		// indicador (cada .dist-panel), más los gaps entre ellos. Se suma por hijo y
-		// no se mide el contenedor: el contenedor puede estirarse por la propia leyenda
-		// de un render anterior, lo que retroalimentaría la medición y la haría crecer.
-		// Aplica igual a categorías y regiones (ambas usan .dist-panel).
-		_measureLegends() {
-			var changed = false;
+		// Fija el ancho de la zona de leyenda al de los charts del indicador. Es lo
+		// único que el CSS no puede resolver solo: la leyenda no conoce el ancho de sus
+		// charts hermanos (que es por contenido, no por el contenedor). El resto del
+		// dimensionado —alto del chart, scroll— es CSS. No se ata a resize.
+		_fixLegendWidth() {
 			var next = {};
 			var keys = Object.keys(this.$refs);
 			for (var k = 0; k < keys.length; k++) {
@@ -290,28 +283,20 @@ export default {
 				var refVal = this.$refs[keys[k]];
 				var el = Array.isArray(refVal) ? refVal[0] : refVal;
 				if (!el) continue;
-				var metricId = keys[k].slice(5);
 				var panels = el.querySelectorAll('.dist-panel');
 				if (!panels.length) continue;
 				var sum = 0;
-				for (var p = 0; p < panels.length; p++) {
-					sum += panels[p].getBoundingClientRect().width;
-				}
-				// Gap horizontal entre paneles (.dist-panels usa gap de 16px).
-				if (panels.length > 1) sum += (panels.length - 1) * 16;
+				for (var p = 0; p < panels.length; p++) sum += panels[p].getBoundingClientRect().width;
+				if (panels.length > 1) sum += (panels.length - 1) * 16;   // gap de .dist-panels
 				var w = Math.round(sum);
-				if (w > 0) {
-					next[metricId] = w;
-					if (this.legendWidths[metricId] !== w) changed = true;
-				}
+				if (w > 0) next[keys[k].slice(5)] = w;
 			}
-			if (changed || Object.keys(next).length !== Object.keys(this.legendWidths).length) {
-				this.legendWidths = next;
-				// El nuevo ancho cambia cuántas líneas ocupa la leyenda y, por lo tanto,
-				// el alto disponible para el chart: se recalcula tras aplicar el ancho.
-				var loc = this;
-				this.$nextTick(function () { loc.measureHeight(); });
-			}
+			this.legendWidths = next;
+		},
+		// Tope de ancho de la leyenda del indicador.
+		legendStyleFor(ind) {
+			var w = this.legendWidths[ind.metricId];
+			return w ? { maxWidth: w + 'px' } : {};
 		},
 		persist(patch) { this.updateConfig(patch); },
 		toggleExportMenu(metricId) {
@@ -347,34 +332,6 @@ export default {
 			var i = this.collapsed.indexOf(metricId);
 			if (i === -1) this.collapsed.push(metricId);
 			else this.collapsed.splice(i, 1);
-		},
-		// Alto disponible para los charts: sigue al alto del cuerpo (que cambia con
-		// el splitter), descontando títulos y leyenda.
-		measureHeight() {
-			// Se mide el cuerpo de un indicador (dist-indicator-body), que ya excluye la
-			// cabecera del bloque: su alto es el espacio real para chart + título de
-			// versión + leyenda. Al chart le queda ese alto menos lo que ocupan el
-			// título de versión y la leyenda (medidos, no estimados). Medir el cuerpo
-			// del indicador —y no el scroll que apila varios— evita el desajuste que
-			// dejaba un scroll vertical residual.
-			var keys = Object.keys(this.$refs);
-			var bodyEl = null;
-			for (var k = 0; k < keys.length && !bodyEl; k++) {
-				if (keys[k].indexOf('body-') !== 0) continue;
-				var refVal = this.$refs[keys[k]];
-				bodyEl = Array.isArray(refVal) ? refVal[0] : refVal;
-			}
-			if (!bodyEl) { if (!this.chartHeight) this.chartHeight = 180; return; }
-			var avail = bodyEl.clientHeight;
-			if (!avail || isNaN(avail)) { this.chartHeight = 180; return; }
-			var legend = bodyEl.querySelector('.dist-legend');
-			var title = bodyEl.querySelector('.dist-panel-title');
-			var legendH = legend ? Math.ceil(legend.getBoundingClientRect().height) : 0;
-			var titleH = title ? Math.ceil(title.getBoundingClientRect().height) : 0;
-			// El cuerpo tiene padding vertical (10px arriba y abajo) que clientHeight
-			// incluye pero no es área de dibujo, más un pequeño margen de seguridad.
-			var chrome = 24;
-			this.chartHeight = Math.max(125, Math.min(720, avail - legendH - titleH - chrome));
 		},
 		barsFor(panel) {
 			var cd = this.categoryByPanel[panel.key()];
@@ -463,13 +420,6 @@ export default {
 		},
 		// Leyenda del indicador: las categorías del panel, o las resueltas por el
 		// Camino 1 cuando la selección es solo total (que vienen en los bars).
-		legendStyleFor(ind) {
-			// El ancho de los charts no es fijo: crece con la cantidad de barras. La
-			// leyenda no debe pasar el ancho de los charts visibles del indicador; ese
-			// ancho se mide tras el render (_measureLegends) y se aplica como tope.
-			var w = this.legendWidths[ind.metricId];
-			return w ? { maxWidth: w + 'px' } : {};
-		},
 		legendFor(ind) {
 			// La leyenda refleja solo lo que se grafica: las barras ya excluyen las
 			// categorías sin valor, así que se filtra la leyenda declarada a esas. Así,
@@ -510,7 +460,23 @@ export default {
 		},
 		regionRowsFor(panel) {
 			var rd = this.regionByPanel[panel.key()];
-			return rd ? rd.rows() : [];
+			if (!rd) return [];
+			var all = rd.rows();
+			// Se limita a las primeras REGION_ROW_LIMIT salvo que el panel esté
+			// expandido; el resto se muestra con "mostrar más" (ver regionHiddenCount).
+			if (this.expandedRegions[panel.key()]) return all;
+			return all.length > REGION_ROW_LIMIT ? all.slice(0, REGION_ROW_LIMIT) : all;
+		},
+		// Cuántas filas quedan ocultas en este panel (0 si entran todas o ya se expandió).
+		regionHiddenCount(panel) {
+			var rd = this.regionByPanel[panel.key()];
+			if (!rd || this.expandedRegions[panel.key()]) return 0;
+			var total = rd.rows().length;
+			return total > REGION_ROW_LIMIT ? total - REGION_ROW_LIMIT : 0;
+		},
+		expandRegions(panel) {
+			// Vue 2: asignación reactiva de una clave nueva en un objeto.
+			this.$set(this.expandedRegions, panel.key(), true);
 		},
 		regionHasData(panel) {
 			var rd = this.regionByPanel[panel.key()];
@@ -542,8 +508,11 @@ export default {
 
 	.dist-scroll { display: flex; gap: 16px; align-items: stretch; }
 
-	.dist-indicator { flex: 0 0 auto; display: flex; flex-direction: column; position: relative; }
-	.dist-indicator-body { padding: 10px 12px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+	.dist-indicator { flex: 0 0 auto; display: flex; flex-direction: column; position: relative; min-height: 0; }
+	/* El cuerpo reparte el alto: charts (flex:1) absorben el sobrante; título y
+	   leyenda toman lo suyo. Sin overflow vertical: el chart se ajusta al espacio,
+	   así no aparece scrollbar ni queda hueco (lo resuelve el navegador, no el JS). */
+	.dist-indicator-body { padding: 10px 12px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 
 	.w-block-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding-right: 24px; }
 	.dist-export { position: absolute; right: 30px; flex: 0 0 auto; }
@@ -562,8 +531,8 @@ export default {
 	}
 	.dist-export-opt:hover { background: #e3f2fd; }
 	.dist-head-titles { min-width: 0; max-width: 320px; }
-	.dist-head-titles .w-indicator,
-	.dist-head-titles .w-variable {
+	.dist-head-titles .ms-indicator,
+	.dist-head-titles .ms-variable {
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -591,9 +560,21 @@ export default {
 		overflow: hidden; text-overflow: ellipsis; max-height: 220px;
 	}
 
-	.dist-panels { display: flex; gap: 4px; align-items: flex-start; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
-	.dist-panel { flex: 0 0 auto; display: flex; flex-direction: column; height: 100%; }
-	.dist-panel-title { position: relative; text-align: center; }
+	/* Caso apilado: un único panel cuelga directo del cuerpo (sin .dist-panels);
+	   debe absorber el alto igual que la fila de paneles. */
+	.dist-indicator-body > .dist-panel { flex: 1 1 auto; min-height: 0; }
+	/* Fila de charts (uno por año). Absorbe el alto del cuerpo y reparte el ancho por
+	   contenido; el scroll, si hace falta, es horizontal. */
+	.dist-panels { display: flex; gap: 16px; align-items: flex-start; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+	/* Cada panel: columna con título (fijo) y chart (absorbe el resto). */
+	.dist-panel { flex: 0 0 auto; display: flex; flex-direction: column; min-height: 0; }
+	.dist-panel-title { position: relative; text-align: center; flex: 0 0 auto; }
+	/* El "sin datos" llena el panel. Los charts NO absorben el alto: el de categorías
+	   lo deriva del aspecto de su viewBox (nunca vertical) y el de regiones usa su
+	   alto natural por filas. */
+	.dist-panel > .dist-no-data { flex: 1 1 auto; min-height: 0; }
+	.dist-panel > .cat-chart,
+	.dist-panel > .region-bars { flex: 0 0 auto; }
 	.dist-version-name { display: inline-block; }
 	.dist-cat-trigger {
 		position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
@@ -610,11 +591,27 @@ export default {
 		margin: 0;
 		gap: 0px 10px;
 		flex: 0 0 auto;
+		align-self: stretch;
+		max-width: 100%;
 		padding: 8px 12px;
 		border-top: 1px solid #eceff1;
 		background: #fff;
+		box-sizing: border-box;
 	}
 	.dist-cut-note { margin-top: 6px; }
+	.dist-show-more {
+		align-self: flex-start;
+		margin: 2px 0 4px 176px;
+		border: 1px solid #e0e0e0;
+		background: #fff;
+		color: #1565c0;
+		font-size: 12px;
+		padding: 3px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+	}
+	.dist-show-more:hover { background: #f0f5fb; border-color: #90b4dd; }
+
 	.dist-no-data {
 		display: flex;
 		align-items: center;
@@ -627,7 +624,7 @@ export default {
 	}
 
 	.sw-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: #546e7a; cursor: pointer; user-select: none; }
-	.sw-toggle.disabled { opacity: 0.35; cursor: not-allowed; }
+	.sw-toggle.disabled { opacity: 0.35; cursor: default; }
 	.sw-toggle.disabled .sw-track { background: #cfd8dc; }
 	/* Habilitado pero en off: track con un gris más vivo que invita a togglear. */
 	.sw-toggle:not(.disabled) .sw-track { background: #b0bec5; }

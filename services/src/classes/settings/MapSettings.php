@@ -32,6 +32,7 @@ class MapSettings
 	public $UseDeckgl = true;
 
 	public $UseCompareSeries = true;
+	public $UseUploadFromMap = false;
 
 	public $isOWSEnabled = false;
 

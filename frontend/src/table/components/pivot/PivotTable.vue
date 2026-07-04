@@ -31,6 +31,10 @@
 									<div class="filter-chips">
 										<span v-for="chip in filterSelection" :key="'fchip-' + chip.Id" class="filter-chip">
 											{{ chip.Caption }}
+											<button class="filter-chip-map" @click="openMapForFilter"
+													title="Abrir mapa con este filtro" aria-label="Abrir mapa con este filtro">
+												<i class="fas fa-globe-americas" aria-hidden="true"></i>
+											</button>
 											<button class="filter-chip-x" @click="removeFilterChip(chip)" title="Quitar filtro">×</button>
 										</span>
 									</div>
@@ -194,20 +198,22 @@
 								:class="getRowClass(row)">
 							<td v-for="(cell, cellIndex) in row"
 									:key="'cell-' + rowIndex + '-' + cellIndex"
-									:class="getCellClass(cell)">
-								<span v-if="cell.isHeader" class="cell-label">
+									:class="getCellClass(cell)"
+									@click="cell.isGroupHeader ? toggleGroup(cell.Label) : null">
+								<span v-if="cell.isHeader" class="cell-label"
+											:class="{ 'has-toggle': cell.isGroupHeader || (cell.isRegionHeader && groupKeys.length) }">
 									<button v-if="cell.isRegionHeader && groupKeys.length"
 													class="group-toggle group-toggle-all"
-													@click="toggleAllGroups"
+													@click.stop="toggleAllGroups"
 													:title="allGroupsCollapsed ? 'Expandir todos' : 'Colapsar todos'">{{ allGroupsCollapsed ? '▸' : '▾' }}</button>
 									<button v-if="cell.isGroupHeader"
 													class="group-toggle"
-													@click="toggleGroup(cell.Label)"
+													@click.stop="toggleGroup(cell.Label)"
 													:title="collapse.isCollapsed(cell.Label) ? 'Expandir' : 'Colapsar'">{{ collapse.isCollapsed(cell.Label) ? '▸' : '▾' }}</button>
 									{{ cell.Label }}
 									<button v-if="cell.isRegionHeader && cell.boundaryId != null"
 													class="region-remove-btn"
-													@click="removeRowBoundary(cell.boundaryId)"
+													@click.stop="removeRowBoundary(cell.boundaryId)"
 													title="Quitar de las filas">×</button>
 									<button class="row-open-map" @click.stop="openMapForRow(cell)"
 													title="Abrir mapa" aria-label="Abrir mapa">
@@ -911,6 +917,13 @@
 				var url = new MapUrlBuilder(this.pivot).build(target);
 				window.open(url, '_blank');
 			},
+			openMapForFilter() {
+				// El mundo del chip de filtro abre el mapa usando los filtros vigentes
+				// como recorte (a diferencia del mundo de una fila, que recorta en su
+				// propio elemento e ignora los filtros).
+				var url = new MapUrlBuilder(this.pivot).build({ kind: 'filter' });
+				window.open(url, '_blank');
+			},
 			handleChange(data) {
 				var loc = this;
 				this.runBusy(function () {
@@ -1265,6 +1278,17 @@
 		cursor: pointer;
 		font-size: 13px;
 	}
+	.filter-chip-map {
+		border: none;
+		background: transparent;
+		color: #607d8b;
+		cursor: pointer;
+		padding: 0 2px;
+		font-size: 11px;
+		display: inline-flex;
+		align-items: center;
+	}
+		.filter-chip-map:hover { color: #1565c0; }
 		.filter-chip-x:hover { background: rgba(0,0,0,0.18); }
 
 	.pivot-table-wrapper {
@@ -1672,6 +1696,14 @@
 			opacity: 0;
 			transition: opacity 0.1s;
 		}
+		/* Cuando la fila tiene control de expandir/colapsar (grupo o boundary con
+		   grupos), ese control va pegado a la derecha (position:absolute right:6px). El
+		   mundo se posiciona a SU izquierda para no superponerse. */
+		.cell-label.has-toggle .row-open-map {
+			position: absolute;
+			right: 26px;
+			margin-left: 0;
+		}
 		tr:hover .cell-label .row-open-map { opacity: 1; }
 		.cell-label .row-open-map:hover { color: #1565c0; }
 
@@ -1688,6 +1720,9 @@
 		.pivot-row-group-header .cell-label {
 			padding-left: 6px;
 		}
+		/* El agrupador entero es clickeable para expandir/colapsar. */
+		.pivot-row-group-header { cursor: pointer; }
+		.pivot-row-group-header:hover { background-color: #e8eef4; }
 
 	.pivot-row-data {
 		background-color: #fff;

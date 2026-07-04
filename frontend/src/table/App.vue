@@ -256,4 +256,11 @@
 	.wp {
 		line-height: .85em !important;
 	}
+
+	/* Un estilo global de fuera del módulo aplica letter-spacing: 0.01em a
+	   .md-body-1, .md-body-2 y body, que separa de más el texto de la tabla. Se
+	   revierte al valor apretado que corresponde al módulo. */
+	.md-body-1, .md-body-2, body {
+		letter-spacing: -0.01em !important;
+	}
 </style>

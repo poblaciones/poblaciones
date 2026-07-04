@@ -105,6 +105,15 @@ var MAX = 0.85;
 // resumen y relaciones, en la columna derecha).
 var ANALYSES = ['summary', 'distribution', 'relations'];
 
+// Une los campos de una sección con '~' y recorta los vacíos finales: así los
+// defaults omitidos no dejan separadores colgando (ruta más corta). Los vacíos
+// intermedios se conservan, porque la posición es la que identifica cada campo.
+function _trimFields(fields) {
+	var f = fields.slice();
+	while (f.length > 0 && (f[f.length - 1] === '' || f[f.length - 1] == null)) f.pop();
+	return f.join('~');
+}
+
 export default {
 	name: 'Dashboard',
 	components: { PivotTableWidget, DistributionWidget, SummaryWidget, RelationsWidget },
@@ -369,9 +378,12 @@ export default {
 			if (isFinite(r)) this.rightSplit = this.clampSplit(r / 100);
 		},
 		restoreVisible(segment) {
-			var kinds = (segment || '').split(',').filter(Boolean);
-			for (var i = 0; i < kinds.length; i++) {
-				this.setVisible(kinds[i], true);
+			// Cada análisis visible se serializa con una letra (s/d/r). Se acepta
+			// también el nombre completo por compatibilidad con rutas previas.
+			var LETTER_TO_KIND = { s: 'summary', d: 'distribution', r: 'relations' };
+			var toks = (segment || '').split(',').filter(Boolean);
+			for (var i = 0; i < toks.length; i++) {
+				this.setVisible(LETTER_TO_KIND[toks[i]] || toks[i], true);
 			}
 		},
 		restoreRelationsConfig(segment) {
@@ -409,38 +421,47 @@ export default {
 			this.analysisConfig.distribution = cfg;
 		},
 
-		// Serializa el estado del tablero (splitters + análisis visibles + config
-		// de relaciones) al string del parámetro 'dash'.
+		// Serializa el estado del tablero. Para acortar la ruta: los campos en su valor
+		// por defecto se omiten (quedan vacíos) y se recortan los separadores '~'
+		// sobrantes al final de cada sección; los análisis visibles van por letra.
 		composeDashState() {
-			var splits = [
-				Math.round(this.colSplit * 100),
-				Math.round(this.leftSplit * 100),
-				Math.round(this.rightSplit * 100)
-			].join(',');
+			var sc = Math.round(this.colSplit * 100);
+			var sl = Math.round(this.leftSplit * 100);
+			var sr = Math.round(this.rightSplit * 100);
+			// Si los tres están en su default (50), el segmento se omite.
+			var splits = (sc === 50 && sl === 50 && sr === 50) ? '' : [sc, sl, sr].join(',');
 
+			var KIND_TO_LETTER = { summary: 's', distribution: 'd', relations: 'r' };
 			var visible = [];
 			for (var i = 0; i < ANALYSES.length; i++) {
-				if (this.isVisible(ANALYSES[i])) visible.push(ANALYSES[i]);
+				if (this.isVisible(ANALYSES[i])) visible.push(KIND_TO_LETTER[ANALYSES[i]] || ANALYSES[i]);
 			}
 
 			var c = this.analysisConfig.relations || {};
-			var relPart = [c.tab || '', c.method || '', c.depKey || '', c.xKey || '', c.yKey || '',
-				(c.sizeByWeight === false ? '0' : '1'),
+			var relPart = _trimFields([
+				c.tab || '', c.method || '', c.depKey || '', c.xKey || '', c.yKey || '',
+				// sizeByWeight: default true → se omite; solo se escribe '0' al desactivarlo.
+				(c.sizeByWeight === false ? '0' : ''),
 				c.regType || '',
 				(c.logitThreshold != null ? c.logitThreshold : ''),
-				c.logitDirection || ''].join('~');
+				c.logitDirection || '']);
 
 			var d = this.analysisConfig.distribution || {};
 			var collapsed = (d.collapsed && d.collapsed.length) ? d.collapsed.join(',') : '';
-			var distPart = [
-				(d.weighted === false ? '0' : '1'),
+			var distPart = _trimFields([
+				// weighted: default true → se omite; solo '0' al desactivarlo.
+				(d.weighted === false ? '0' : ''),
 				d.axisMode || '',
 				d.chartMode || '',
-				(d.stacked ? '1' : '0'),
-				collapsed
-			].join('~');
+				// stacked: default false → se omite; solo '1' al activarlo.
+				(d.stacked ? '1' : ''),
+				collapsed]);
 
-			return splits + ';' + visible.join(',') + ';' + relPart + ';' + distPart + ';' + (this.rowCollapse || '');
+			// Recorta segmentos finales vacíos: una tabla en su estado base queda con
+			// el dash mínimo en lugar de arrastrar separadores y defaults.
+			var segments = [splits, visible.join(','), relPart, distPart, (this.rowCollapse || '')];
+			while (segments.length > 1 && segments[segments.length - 1] === '') segments.pop();
+			return segments.join(';');
 		},
 
 		syncRoute(pushHistory) {
@@ -452,6 +473,7 @@ export default {
 				? this.pivot.Router.query()
 				: (_parseHashQuery(window.location.hash) || {});
 			query.dash = this.composeDashState();
+			if (!query.dash) delete query.dash;
 			var parts = [];
 			var keys = Object.keys(query);
 			for (var i = 0; i < keys.length; i++) {
