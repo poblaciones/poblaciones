@@ -24,8 +24,8 @@
     </div>
 	<div class='dBlockNewLineS2  dNoPaddingTop'>Regiones por geografías:</div>
 	<div class='dBlockSize3'>
-        <input class='dSmallerButton' name="regenClippingGeography" type="submit" value="Actualizar" id='updateClippingGeography' onclick="disableButton('updateClippingGeography');">
-        {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_CARTOGRAPHY_REGION') }}
+        <input class='dSmallerButton' name="regenClippingGeography" type="button" value="Actualizar" id='updateClippingGeography'>
+        {{ macros.ShowUpdateStatus(updateStatus, 'SNAPSHOT_CARTOGRAPHY_REGION') }} <span id='regenClippingGeographyProgress'></span>
         <div class="dExplanation">Procesar cuando se agrega una relación entre geografía y cartografía. Incluye cachés.</div>
     </div>
 	<div class='dBlockNewLineS2  dNoPaddingTop'>Delimitaciones y regiones:</div>
@@ -102,4 +102,74 @@
 </form>
 </div>
 
+<script language="javascript">
+
+	document.getElementById('updateClippingGeography').addEventListener('click', function(e) {
+		e.preventDefault();
+		disableButton('updateClippingGeography');
+		post({ regenClippingGeographyStart: 1 }, function(state) {
+			updateProgress(state);
+			continueRegen(state);
+		});
+	});
+
+	function continueRegen(state) {
+		var params = {
+			regenClippingGeographyStep: 1,
+			phase: state.phase,
+			level: state.level,
+			revisionIndex: state.revisionIndex,
+			rowsAffected: state.rowsAffected,
+			levelRowsAffected: state.levelRowsAffected
+		};
+
+		post(params, function(next) {
+			updateProgress(next);
+			if (next.done)
+				enableButton('updateClippingGeography');
+			else
+			{
+				next.revisions = state.revisions; // se mantiene fijo entre pasos
+				continueRegen(next);
+			}
+		}, state.revisions);
+	}
+
+	function post(params, callback, revisions) {
+		var body = new URLSearchParams();
+		Object.keys(params).forEach(function(k) { body.append(k, params[k]); });
+		if (revisions)
+			revisions.forEach(function(r) { body.append('revisions[]', r); });
+
+		fetch(window.location.href, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: body
+		})
+		.then(function(response) {
+			if (!response.ok)
+				throw new Error('Error en el proceso de regeneración.');
+			return response.json();
+		})
+		.then(callback)
+		.catch(function(err) {
+			alert(err.message);
+			enableButton('updateClippingGeography');
+		});
+	}
+
+	function updateProgress(state) {
+		var el = document.getElementById('regenClippingGeographyProgress');
+		if (!el)
+			return;
+
+		if (state.done)
+			el.textContent = '¡Listo! Filas insertadas: ' + state.rowsAffected;
+		else
+			el.textContent = 'Fase: ' + state.phase + ' — Nivel: ' + state.level +
+				' — Revisión: ' + (state.revisionIndex + 1) + '/' + state.revisions.length +
+				' — Filas: ' + state.rowsAffected;
+	}
+
+</script>
 {% endblock %}

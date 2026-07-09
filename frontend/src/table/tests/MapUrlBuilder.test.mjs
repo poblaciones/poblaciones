@@ -14,8 +14,10 @@ function makePivot() {
 	var versions = [mkVer(1, [lvl]), mkVer(2, [lvl]), mkVer(3, [lvl]), mkVer(4, [lvl])];
 	var metric = {
 		properties: { Metric: { Id: 6301 }, Versions: versions, SummaryMetric: 'N' },
-		// Dos versiones seleccionadas: el builder emite el metric una vez por cada una
-		// (índice 0 para v1, índice 3 para v4), reflejando ambos censos en el mapa.
+		// Dos versiones seleccionadas: el builder refleja solo la MÁS RECIENTE
+		// (mayor índice, v4→índice 3), ignorando el resto del multiselect. Reflejar
+		// cada versión como una aparición repetida del indicador resultaba confuso
+		// en el visor.
 		Selections: [
 			{ versionId: () => 1, version: versions[0], level: lvl, variable: lvl.Variables[0], labels: [] },
 			{ versionId: () => 4, version: versions[3], level: lvl, variable: lvl.Variables[0], labels: [] }
@@ -27,15 +29,15 @@ function makePivot() {
 var opts = { origin: 'https://x.org', basePath: '/map/' };
 
 describe('MapUrlBuilder', function () {
-	it('emite el metric una vez por versión seleccionada y omite los defaults (a0, i0, mN)', function () {
+	it('emite una sola aparición del metric, con la versión seleccionada más reciente', function () {
 		var url = new MapUrlBuilder(makePivot(), opts).build({ kind: 'item', regionId: 79537 });
-		// item sin filtros → recorte en el elemento + el indicador en ambos censos (v0 y v3).
-		expect(url).toBe('https://x.org/map/#/&r79537/l=6301!v0;6301!v3');
+		// item sin filtros → recorte en el elemento + el indicador en v3 (la más reciente).
+		expect(url).toBe('https://x.org/map/#/&r79537/l=6301!v3');
 	});
 
 	it('clic en un tipo de delimitación lo agrega como capa boundary', function () {
 		var url = new MapUrlBuilder(makePivot(), opts).build({ kind: 'boundaryType', boundaryId: 5550 });
-		expect(url).toBe('https://x.org/map/#/l=6301!v0;6301!v3;5550!tb');
+		expect(url).toBe('https://x.org/map/#/l=6301!v3;5550!tb');
 	});
 
 	it('un elemento de fila recorta en sí mismo aunque haya filtros (la elección manda)', function () {
@@ -43,19 +45,19 @@ describe('MapUrlBuilder', function () {
 		// Un filtro activo (FID 100): NO debe pisar el elemento clickeado.
 		pivot.FilterSet = { items: [ { SelectedVersion: function () { return { Selection: { Items: [ { FID: 100 } ] } }; } } ] };
 		var url = new MapUrlBuilder(pivot, opts).build({ kind: 'item', regionId: 79537 });
-		expect(url).toBe('https://x.org/map/#/&r79537/l=6301!v0;6301!v3');
+		expect(url).toBe('https://x.org/map/#/&r79537/l=6301!v3');
 	});
 
 	it('el mundo de un chip de filtro abre con los filtros como recorte', function () {
 		var pivot = makePivot();
 		pivot.FilterSet = { items: [ { SelectedVersion: function () { return { Selection: { Items: [ { FID: 100 } ] } }; } } ] };
 		var url = new MapUrlBuilder(pivot, opts).build({ kind: 'filter' });
-		expect(url).toBe('https://x.org/map/#/&r100/l=6301!v0;6301!v3');
+		expect(url).toBe('https://x.org/map/#/&r100/l=6301!v3');
 	});
 
 	it('un corte de control se trata igual que un elemento', function () {
 		var url = new MapUrlBuilder(makePivot(), opts).build({ kind: 'group', regionId: 42 });
-		expect(url).toBe('https://x.org/map/#/&r42/l=6301!v0;6301!v3');
+		expect(url).toBe('https://x.org/map/#/&r42/l=6301!v3');
 	});
 });
 

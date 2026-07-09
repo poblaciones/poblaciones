@@ -72,9 +72,9 @@ it('se muestra cuando hay más de una variable o la variable tiene nombre', () =
 	expect(legend.showVariableName(metric)).toBeTruthy();
 });
 
-describe('mapLegend: categorías (se muestran todas, con su estado de visibilidad)');
+describe('mapLegend: categorías (visibles u ocultas por el usuario, pero solo si tienen datos)');
 
-it('replica getVariableValueLabels sin filtrar: todas las categorías, visibles u ocultas', () => {
+it('lista tanto las categorías visibles como las ocultas por el usuario, si tienen datos', () => {
 	const properties = makeMetricProperties({
 		Versions: [makeVersion({
 			Levels: [makeLevel({
@@ -90,6 +90,79 @@ it('replica getVariableValueLabels sin filtrar: todas las categorías, visibles 
 	const labels = legend.allLabels(metric);
 	expect(labels).toHaveLength(2);
 	expect(labels[1].Name).toBe('Baja');
+});
+
+it('con ShowEmptyCategories en false, recorta las categorías sin datos en el encuadre actual (igual que metricValues.vue)', () => {
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({
+			Levels: [makeLevel({
+				Variables: [makeVariable({
+					ShowEmptyCategories: false,
+					ValueLabels: [
+						makeValueLabel({ Name: 'Alto NBI', Values: { Count: '' } }),
+						makeValueLabel({ Name: 'Bajo NBI', Values: { Count: '3' } }),
+					],
+				})],
+			})],
+		})],
+	});
+	setupWindow();
+	const metric = new ActiveMetric(properties);
+	const legend = mountLegend([metric], true);
+	const labels = legend.allLabels(metric);
+	expect(labels).toHaveLength(1);
+	expect(labels[0].Name).toBe('Bajo NBI');
+});
+
+it('con ShowEmptyCategories en true, mantiene las categorías sin datos', () => {
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({
+			Levels: [makeLevel({
+				Variables: [makeVariable({
+					ShowEmptyCategories: true,
+					ValueLabels: [makeValueLabel({ Name: 'Alto NBI', Values: { Count: '' } })],
+				})],
+			})],
+		})],
+	});
+	setupWindow();
+	const metric = new ActiveMetric(properties);
+	const legend = mountLegend([metric], true);
+	expect(legend.allLabels(metric)).toHaveLength(1);
+});
+
+it('con comparación activa, ShowEmptyCategories deja de aplicar (igual que metricValues.vue)', () => {
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({
+			Levels: [makeLevel({
+				Variables: [makeVariable({
+					ShowEmptyCategories: true,
+					ValueLabels: [makeValueLabel({ Name: 'Alto NBI', Values: { Count: '' } })],
+				})],
+			})],
+		})],
+	});
+	setupWindow();
+	const metric = new ActiveMetric(properties);
+	metric.Compare.Active = true;
+	const legend = mountLegend([metric], true);
+	expect(legend.allLabels(metric)).toHaveLength(0);
+});
+
+it('sin Values (summary aún no llegó), no se lista', () => {
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({
+			Levels: [makeLevel({
+				Variables: [makeVariable({
+					ValueLabels: [makeValueLabel({ Name: 'Alta', Values: null })],
+				})],
+			})],
+		})],
+	});
+	setupWindow();
+	const metric = new ActiveMetric(properties);
+	const legend = mountLegend([metric], true);
+	expect(legend.allLabels(metric)).toHaveLength(0);
 });
 
 it('en comparación activa, sigue el mismo criterio que el panel de estadísticas (ComparableValueLabels)', () => {
@@ -201,4 +274,29 @@ it('actualiza el offset al medir #holder (updateHolderTopOffset) y suma 40px ext
 	legend.updateHolderTopOffset();
 	expect(legend.holderTopOffset).toBe(64);
 	expect(legend.bodyMaxHeight).toBe('calc(100vh - 280px - 104px)');
+});
+
+describe('mapLegend: versión del indicador (mismo dato que el sourceRow de metric.vue)');
+
+it('sin comparación, muestra el año de la versión seleccionada', () => {
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({ Version: { Id: 1, Name: '2010' } }), makeVersion({ Version: { Id: 2, Name: '2022' } })],
+	});
+	setupWindow();
+	const metric = new ActiveMetric(properties);
+	metric.properties.SelectedVersionIndex = 1;
+	const legend = mountLegend([metric], true);
+	expect(legend.versionLabel(metric)).toBe('2022');
+});
+
+it('con comparación activa, muestra la versión de comparación primero y la principal después', () => {
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({ Version: { Id: 1, Name: '2010' } }), makeVersion({ Version: { Id: 2, Name: '2022' } })],
+	});
+	setupWindow();
+	const metric = new ActiveMetric(properties);
+	metric.Compare.Active = true;
+	metric.Compare.SelectedVersionIndex = 1;
+	const legend = mountLegend([metric], true);
+	expect(legend.versionLabel(metric)).toBe('2022-2010');
 });

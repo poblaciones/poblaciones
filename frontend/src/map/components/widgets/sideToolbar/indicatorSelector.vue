@@ -145,7 +145,7 @@
 
             <!-- Acción de grupo: agrega el nivel actual como capa (no marca hojas) -->
             <div
-              v-if="!searchQuery && showAddAll && !filterMode && currentLeafItems.length"
+              v-if="!searchQuery && (showAddAll || !filterMode) && currentLeafItems.length"
               class="indicator-item add-all hand"
               @click="onSelectGroup"
             >
@@ -478,7 +478,7 @@ export default {
       // es idéntico al Code del ítem, también se incluye. El match de código es
       // completo, no parcial, para no traer ruido al teclear dígitos.
       const matches = this.searchScope.filter(e => {
-        const byName = this.normalize(e.item.Name || '').includes(term);
+        const byName = this.matchesWordStart(this.normalize(e.item.Name || ''), term);
         const code = e.item.Code != null ? String(e.item.Code) : '';
         const byCode = code !== '' && code === raw;
         return byName || byCode;
@@ -510,7 +510,7 @@ export default {
     filteredBranches() {
       const term = this.normalize(this.searchQuery.trim());
       if (!term) return [];
-      const matches = this.branchScope.filter(e => this.normalize(e.branch.Name || '').includes(term));
+      const matches = this.branchScope.filter(e => this.matchesWordStart(this.normalize(e.branch.Name || ''), term));
       // Los agrupadores de mayor jerarquía (menor profundidad) aparecen primero,
       // para poder entrar al contenedor amplio antes que a sus sub-ramas.
       return matches.slice().sort((a, b) => (a.depth || 0) - (b.depth || 0));
@@ -908,6 +908,14 @@ export default {
     // Comparación de búsqueda insensible a mayúsculas y tildes.
     normalize(s) {
       return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    },
+    // Coincide si `term` es el inicio de alguna palabra de `name` (ambos ya
+    // normalizados). "tan" matchea "Tandil" pero no "Catamarca": evita el ruido de
+    // encontrar la búsqueda en cualquier posición dentro de una palabra.
+    matchesWordStart(name, term) {
+      if (!term) return false;
+      const words = name.split(/[^a-z0-9]+/).filter(Boolean);
+      return words.some(w => w.indexOf(term) === 0);
     },
     // ── Display ────────────────────────────────────────────────────────────────
     itemIcon(item, container) {

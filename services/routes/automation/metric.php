@@ -420,6 +420,8 @@ App::$app->post('/services/api/automation/UpdateVariableCategories', function (R
 	$variable = new entities\DraftVariable();
 	$variable->Values = $newValues;
 	$variable->setId($variableId);
+	$variable->setIsGap(false);
+	$variable->setHasGapSameTotal(false);
 
 	$controller = new services\MetricService();
 	$controller->UpdateVariableValues($variable, $variableConnected);

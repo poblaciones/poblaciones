@@ -227,7 +227,8 @@ class DatasetDownloadModel extends BaseDownloadModel
 										lng.dco_variable as lon,
 										latSegment.dco_variable as latSegment,
 										lngSegment.dco_variable as lonSegment,
-										dat_are_segments as areSegments
+										dat_are_segments as areSegments,
+										dat_segment_type as segmentType
 			FROM ' . $this->draftPreffix() . 'dataset
 			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column lat ON lat.dco_id = dat_latitude_column_id
 			LEFT JOIN ' . $this->draftPreffix() . 'dataset_column lng ON lng.dco_id = dat_longitude_column_id

@@ -93,31 +93,41 @@ MapUrlBuilder.prototype._variableIndex = function (level, variable) {
 
 // ── Bloque de indicadores (SelectedInfo, signature 'l=') ────────────────────
 
-// Grupos de un indicador: uno por cada versión (censo) seleccionada. El visor no
-// tiene multi-censo en una sola capa, así que cada versión seleccionada se refleja
-// como una aparición del metric con su propia versión, nivel y variable. Así los dos
-// años quedan ambos en el mapa (antes se descartaba todo menos el más reciente).
-MapUrlBuilder.prototype._metricGroups = function (metric) {
+// La selección (censo) más reciente del indicador: el visor admite una sola capa
+// por indicador, así que se refleja la de mayor índice de versión entre las
+// seleccionadas (ignora el resto del multiselect de versiones). Reflejar todas
+// las versiones seleccionadas como apariciones repetidas del mismo indicador
+// resultó confuso al usarlo (no se entendía el resultado en el visor), así que
+// se volvió a este criterio.
+MapUrlBuilder.prototype._latestSelection = function (metric) {
 	var sels = metric.Selections || [];
-	if (!sels.length) return [];
-	var out = [];
+	if (!sels.length) return null;
+	var best = null, bestIdx = -1;
 	for (var s = 0; s < sels.length; s++) {
-		var sel = sels[s];
-		var versionIdx = this._versionIndex(metric, sel.versionId());
-		if (versionIdx < 0) continue;
-		var level = sel.level;
-		var levelIdx = this._levelIndex(sel.version, level);
-		var variableIdx = this._variableIndex(level, sel.variable);
-
-		var items = [];
-		items.push([metric.properties.Metric.Id]);          // id (sin letra)
-		items.push(['v', versionIdx, -1]);                   // índice de versión
-		items.push(['a', levelIdx, 0]);                      // índice de nivel
-		items.push(['i', variableIdx, 0]);                   // índice de variable
-		items.push(['m', metric.properties.SummaryMetric, 'N']);
-		out.push(this._joinItems(items, '!'));
+		var idx = this._versionIndex(metric, sels[s].versionId());
+		if (idx > bestIdx) { bestIdx = idx; best = sels[s]; }
 	}
-	return out;
+	return best;
+};
+
+// Grupo de un indicador: una sola aparición, con la versión más reciente
+// seleccionada (ver _latestSelection).
+MapUrlBuilder.prototype._metricGroup = function (metric) {
+	var sel = this._latestSelection(metric);
+	if (!sel) return null;
+	var versionIdx = this._versionIndex(metric, sel.versionId());
+	if (versionIdx < 0) return null;
+	var level = sel.level;
+	var levelIdx = this._levelIndex(sel.version, level);
+	var variableIdx = this._variableIndex(level, sel.variable);
+
+	var items = [];
+	items.push([metric.properties.Metric.Id]);          // id (sin letra)
+	items.push(['v', versionIdx, -1]);                   // índice de versión
+	items.push(['a', levelIdx, 0]);                      // índice de nivel
+	items.push(['i', variableIdx, 0]);                   // índice de variable
+	items.push(['m', metric.properties.SummaryMetric, 'N']);
+	return this._joinItems(items, '!');
 };
 
 // Grupo de una delimitación (boundary) como capa del mapa.
@@ -135,8 +145,8 @@ MapUrlBuilder.prototype._selectedInfoBlock = function (extraGroups) {
 	var groups = [];
 	var metrics = (this.pivot && this.pivot.Metrics) || [];
 	for (var i = 0; i < metrics.length; i++) {
-		var gs = this._metricGroups(metrics[i]);
-		for (var j = 0; j < gs.length; j++) groups.push(gs[j]);
+		var g = this._metricGroup(metrics[i]);
+		if (g) groups.push(g);
 	}
 	if (extraGroups) {
 		for (var e = 0; e < extraGroups.length; e++) {

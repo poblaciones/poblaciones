@@ -208,7 +208,7 @@ export default {
 			}
 		},
 		stepperClosed() {
-			this.$router.push({ path: this.makePath('metrics') });
+			//this.$router.push({ path: this.makePath('metrics') });
 		},
 		isPath(path) {
 			if (this.$refs.tabs) {

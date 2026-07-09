@@ -6,6 +6,7 @@ use minga\framework\PublicException;
 use minga\framework\IO;
 use minga\framework\Zip;
 use helena\classes\App;
+use helena\classes\SanitizeGeometry;
 use minga\framework\Log;
 
 use helena\classes\Projections;
@@ -34,6 +35,9 @@ class ShapefileReader extends BaseReader
 	const MAX_LENGTH = 32;
 	const MIN_LENGTH = 5;
 	const MAX_ROWS = 5000;
+
+	/** Tolerancia de simplificación Douglas-Peucker, en metros. */
+	const SIMPLIFY_TOLERANCE_M = 0.5;
 
 	public function WriteJson($selectedSheetIndex)
 	{
@@ -139,42 +143,60 @@ class ShapefileReader extends BaseReader
 
 		$crsFrom = $projection;
 		$crsTo = "epsg:4326";
-		$needsProjection = !Str::Contains($crsFrom, "GCS_WGS_1984");
-
-		try
-		{
-			$projector = new Projections($crsFrom, $crsTo);
-		}
-		catch(\Exception $e)
-		{
-			$log = "La proyección indicada no fue reconocida: " . $crsFrom;
-			Log::HandleSilentException(new PublicException($log));
-			throw new PublicException("La proyección indicada no fue reconocida. Procure convertir la información a GCS_WGS_1984 antes de importarla.");
-		}
 
 		if (!$crsFrom)
 			throw new PublicException("No pudo identificarse la proyección del archivo.");
 
+		$needsProjection = !Str::Contains($crsFrom, "GCS_WGS_1984");
+
+		// El proyector solo hace falta si la fuente no está ya en WGS84;
+		// construirlo incondicionalmente hacía fallar archivos WGS84 cuyo
+		// PRJ no fuera reconocido por proj4php.
+		$projector = null;
+		if ($needsProjection)
+		{
+			try
+			{
+				$projector = new Projections($crsFrom, $crsTo);
+			}
+			catch(\Exception $e)
+			{
+				$log = "La proyección indicada no fue reconocida: " . $crsFrom;
+				Log::HandleSilentException(new PublicException($log));
+				throw new PublicException("La proyección indicada no fue reconocida. Procure convertir la información a GCS_WGS_1984 antes de importarla.");
+			}
+		}
+
 		while ($geometry = $shapefile->fetchRecord()) {
-      if (!$geometry->isDeleted()) {
+			if (!$geometry->isDeleted()) {
 				$data = $geometry->getDataArray();
 				$values = array_values($data);
 
-				// proyecta la geometría
-				if ($needsProjection)
-					$projected = $projector->ProjectGeometry($geometry);
-				else
-					$projected = $geometry;
-
 				if ($useLatLong)
 				{
-					$point = $projected->getArray();
-					$values[] = $point['y'];
-					$values[] = $point['x'];
+					$point = $geometry->getArray();
+					if ($point !== null && $needsProjection)
+						$point = $projector->ProjectXYPoint($point);
+					$values[] = ($point !== null ? $point['y'] : null);
+					$values[] = ($point !== null ? $point['x'] : null);
 				}
 				else
 				{
-					$values[] = $projected->getWKT();
+					// SanitizeShape resuelve en una sola pasada la conversión
+					// desde el objeto Shapefile, la reproyección a WGS84 (si
+					// corresponde), la simplificación y la corrección de
+					// orientación de los anillos. Una geometría defectuosa no
+					// debe abortar la importación completa.
+					try {
+						$wkt = SanitizeGeometry::SanitizeShape(
+							$geometry,
+							self::SIMPLIFY_TOLERANCE_M,
+							$needsProjection ? $projector : null
+						);
+					} catch (\Exception $e) {
+						$wkt = null;
+					}
+					$values[] = $wkt;
 				}
 				$rows[] = $values;
 				$rowsAdded++;

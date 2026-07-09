@@ -56,8 +56,8 @@ app.use((req, res, next) => {
 const phpProxyOptions = {
 	target:       'http://127.0.0.1:' + phpPORT,
 	logLevel:     'debug',
-	timeout:       30000,
-	proxyTimeout:  30000,
+	timeout:       60000,
+	proxyTimeout:  60000,
 	onError(err, req, res) {
 		console.error('[PHP proxy error]', req.url, err.message);
 		if (!res.headersSent) {

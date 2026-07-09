@@ -91,6 +91,15 @@ class Dataset
      */
     private $AreSegments;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dat_segment_type", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $SegmentType;
+
+
     /**
      * @var boolean
 		 *
@@ -344,6 +353,31 @@ class Dataset
     public function getPartitionAllLabel()
     {
         return $this->PartitionAllLabel;
+    }
+
+
+    /**
+     * Set segmentType
+     *
+     * @param string $segmentType
+     *
+     * @return Dataset
+     */
+    public function setSegmentType($segmentType)
+    {
+        $this->SegmentType  = $segmentType;
+
+        return $this;
+    }
+
+    /**
+     * Get segmentType
+     *
+     * @return string
+     */
+    public function getSegmentType()
+    {
+        return $this->SegmentType;
     }
 
     /**

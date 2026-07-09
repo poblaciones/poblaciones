@@ -10,6 +10,7 @@ class DatasetInfo extends BaseMapModel
 	public $Name;
 	public $Type;
 	public $AreSegments;
+	public $SegmentType;
 	public $Symbol;
 	public $ScaleSymbol;
 	public $ShowInfo;
@@ -25,6 +26,7 @@ class DatasetInfo extends BaseMapModel
 			'dat_id' => 'Id',
 			'dat_type' => 'Type',
 			'dat_are_segments' => 'AreSegments',
+			'dat_segment_type' => 'SegmentType',
 			'dat_caption' => 'Name',
 			'dat_table' => 'Table',
 			'dat_texture_id' => 'TextureId',

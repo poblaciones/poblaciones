@@ -64,7 +64,7 @@ export function makeValueLabel(overrides) {
 		Visible: true,
 		FillColor: '#ff0000',
 		Symbol: null,
-		Values: null,
+		Values: { Count: '1' },
 	}, overrides);
 }
 

@@ -5,81 +5,198 @@ namespace helena\services\backoffice\publish\snapshots;
 use minga\framework\Profiling;
 use helena\caches\ClippingCache;
 use helena\classes\App;
-
 use helena\classes\VersionUpdater;
 
 class SnapshotGeographiesByRegionModel
 {
+	private static $validPhases = array('init', 'down', 'up');
+
 	public function Clean()
 	{
-	 	Profiling::BeginTimer();
+		Profiling::BeginTimer();
 
 		App::Db()->truncate("snapshot_clipping_region_item_geography_item");
 		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
 
 		ClippingCache::Cache()->Clear();
 
-	 	Profiling::EndTimer();
+		Profiling::EndTimer();
 	}
 
-	public function Regen()
+	public function RegenStart()
 	{
-		$ver = new VersionUpdater("SNAPSHOT_CARTOGRAPHY_REGION");
-
-	 	Profiling::BeginTimer();
 		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
 
-		$rowsAffected = 0;
-		$l = 1;
+		$revisions = App::Db()->fetchAllColumn(
+			"SELECT DISTINCT geo_revision FROM geography ORDER BY geo_revision"
+		);
+		$revisions = array_map('intval', $revisions);
+
+		return array(
+			'phase' => 'init',
+			'level' => 1,
+			'revisionIndex' => 0,
+			'revisions' => $revisions,
+			'rowsAffected' => 0,
+			'levelRowsAffected' => 0,
+			'done' => count($revisions) == 0,
+		);
+	}
+
+	// Ejecuta un único INSERT (fase, nivel, revision) y devuelve el estado siguiente.
+	// phase, level, revisionIndex, revisions vienen del cliente: se validan antes de usarse en SQL.
+	public function RegenStep($phase, $level, $revisionIndex, array $revisions, $rowsAffected, $levelRowsAffected)
+	{
+		if (!in_array($phase, self::$validPhases, true))
+			throw new \Exception("Fase de regeneración inválida: " . $phase);
+
+		$level = (int)$level;
+		$revisionIndex = (int)$revisionIndex;
+		$rowsAffected = (int)$rowsAffected;
+		$levelRowsAffected = (int)$levelRowsAffected;
+		$revisions = array_map('intval', $revisions);
+
+		if ($phase == 'up')
+		{
+			if ($level < -100 || $level > 1)
+				throw new \Exception("Nivel de regeneración fuera de rango: " . $level);
+		}
+		else
+		{
+			if ($level < 1 || $level > 100)
+				throw new \Exception("Nivel de regeneración fuera de rango: " . $level);
+		}
+		if ($revisionIndex < 0 || $revisionIndex >= count($revisions))
+			throw new \Exception("Índice de revisión fuera de rango: " . $revisionIndex);
+
+		$revision = $revisions[$revisionIndex];
+
+		Profiling::BeginTimer();
+
 		$sqlInsert = "INSERT INTO snapshot_clipping_region_item_geography_item (cgv_clipping_region_id, "
-			.  "cgv_clipping_region_item_id, cgv_clipping_region_priority, cgv_geography_item_id, cgv_urbanity, cgv_area_m2, cgv_population, cgv_households, "
+			. "cgv_clipping_region_item_id, cgv_clipping_region_priority, cgv_geography_item_id, cgv_urbanity, cgv_area_m2, cgv_population, cgv_households, "
 			. "cgv_children, cgv_geography_id, cgv_level) ";
 
-		$sql = $sqlInsert . "SELECT cli_clipping_region_id, cli_id, clr_priority, gei_id, gei_urbanity, gei_area_m2, " .
-			"gei_population, gei_households, gei_children, gei_geography_id, "
-				. $l . " FROM clipping_region_item, " .
+		if ($phase == 'init')
+		{
+			$sql = $sqlInsert . "SELECT cli_clipping_region_id, cli_id, clr_priority, gei_id, gei_urbanity, gei_area_m2, " .
+				"gei_population, gei_households, gei_children, gei_geography_id, " .
+				"1 FROM clipping_region_item, " .
 						"clipping_region_item_geography_item, " .
 						"clipping_region, " .
-						"geography_item  " .
+						"geography_item, " .
+						"geography " .
 						"WHERE gei_id = cgi_geography_item_id ".
 						"AND clr_id = cli_clipping_region_id " .
-						"AND cli_id = cgi_clipping_region_item_id";
-		$r = App::Db()->exec($sql);
-		App::Db()->markTableUpdate('snapshot_clipping_region_item_geography_item');
-
-		$rowsAffected += $r;
-		while ($r != 0)
-		{ // Inserta niveles inferiores
-			$l++;
-			$sqlRecursive = $sqlInsert . "SELECT cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, gei_id, gei_urbanity, gei_area_m2, " .
-				"gei_population, gei_households, gei_children, gei_geography_id, " . $l
-				." FROM snapshot_clipping_region_item_geography_item ," .
-							"geography_item,  " .
-							"clipping_region " .
-							"WHERE clr_id = cgv_clipping_region_id AND gei_parent_id = cgv_geography_item_id and cgv_level = " . ($l - 1);
-			$r = App::Db()->exec($sqlRecursive);
+						"AND cli_id = cgi_clipping_region_item_id " .
+						"AND geo_id = gei_geography_id " .
+						"AND geo_revision = " . $revision;
+			$r = App::Db()->exec($sql);
+			App::Db()->markTableUpdate('snapshot_clipping_region_item_geography_item');
 			$rowsAffected += $r;
+			$levelRowsAffected += $r;
 		}
-
-		$r = 1; $l = 1;
-		while ($r != 0)
-		{ // Inserta niveles superiores
-			$l--;
-			$sqlRecursive = $sqlInsert . "SELECT DISTINCT cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, cai1.gei_id, cai1.gei_urbanity, cai1.gei_area_m2, " .
-				"cai1.gei_population, cai1.gei_households, cai1.gei_children, cai1.gei_geography_id, " . $l
+		else if ($phase == 'down')
+		{
+			$sql = $sqlInsert . "SELECT cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, gei_id, gei_urbanity, gei_area_m2, " .
+				"gei_population, gei_households, gei_children, gei_geography_id, " . $level
+				. " FROM snapshot_clipping_region_item_geography_item, " .
+							"geography_item, " .
+							"clipping_region, " .
+							"geography " .
+							"WHERE clr_id = cgv_clipping_region_id AND gei_parent_id = cgv_geography_item_id and cgv_level = " . ($level - 1)
+							. " AND geo_id = gei_geography_id AND geo_revision = " . $revision;
+			$r = App::Db()->exec($sql);
+			$rowsAffected += $r;
+			$levelRowsAffected += $r;
+		}
+		else // 'up'
+		{
+			$sql = $sqlInsert . "SELECT DISTINCT cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, cai1.gei_id, cai1.gei_urbanity, cai1.gei_area_m2, " .
+				"cai1.gei_population, cai1.gei_households, cai1.gei_children, cai1.gei_geography_id, " . $level
 				. " FROM snapshot_clipping_region_item_geography_item " .
 							"JOIN geography_item gei_children ON gei_children.gei_id = cgv_geography_item_id " .
 							"JOIN geography_item cai1 ON cai1.gei_id = gei_children.gei_parent_id " .
 							"JOIN clipping_region ON clr_id = cgv_clipping_region_id " .
-							"WHERE gei_children.gei_parent_id IS NOT NULL AND cgv_level = " . ($l + 1);
-			$r = App::Db()->exec($sqlRecursive);
+							"JOIN geography ON geo_id = cai1.gei_geography_id " .
+							"WHERE gei_children.gei_parent_id IS NOT NULL AND cgv_level = " . ($level + 1)
+							. " AND geo_revision = " . $revision;
+			$r = App::Db()->exec($sql);
 			$rowsAffected += $r;
+			$levelRowsAffected += $r;
 		}
 
-		VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
-		$ver->SetUpdated();
+		$revisionIndex++;
+
+		if ($revisionIndex < count($revisions))
+		{
+			// Quedan revisions por procesar en este mismo nivel/fase.
+			Profiling::EndTimer();
+			return array(
+				'phase' => $phase,
+				'level' => $level,
+				'revisionIndex' => $revisionIndex,
+				'revisions' => $revisions,
+				'rowsAffected' => $rowsAffected,
+				'levelRowsAffected' => $levelRowsAffected,
+				'done' => false,
+			);
+		}
+
+		// Nivel/fase completo: decidir transición según levelRowsAffected acumulado.
+		$revisionIndex = 0;
+
+		if ($phase == 'init')
+		{
+			if ($levelRowsAffected != 0)
+			{
+				$phase = 'down';
+				$level = 2;
+			}
+			else
+			{
+				$phase = 'up';
+				$level = 1;
+			}
+		}
+		else if ($phase == 'down')
+		{
+			if ($levelRowsAffected != 0)
+				$level++;
+			else
+			{
+				$phase = 'up';
+				$level = 1;
+			}
+		}
+		else // 'up'
+		{
+			if ($levelRowsAffected == 0)
+				$phase = 'done';
+			else
+				$level--;
+		}
+
+		$levelRowsAffected = 0;
+		$done = ($phase == 'done');
+
+		if ($done)
+		{
+			VersionUpdater::Increment('CARTOGRAPHY_REGION_VIEW');
+			$ver = new VersionUpdater("SNAPSHOT_CARTOGRAPHY_REGION");
+			$ver->SetUpdated();
+		}
 
 		Profiling::EndTimer();
-		return $rowsAffected;
+
+		return array(
+			'phase' => $phase,
+			'level' => $level,
+			'revisionIndex' => $revisionIndex,
+			'revisions' => $revisions,
+			'rowsAffected' => $rowsAffected,
+			'levelRowsAffected' => $levelRowsAffected,
+			'done' => $done,
+		);
 	}
 }

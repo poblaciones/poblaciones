@@ -3,9 +3,10 @@
  *
  * Encapsula el comportamiento de UI compartido por los selectores (versión,
  * variable, categorías, tipo de métrica): abrir/cerrar el panel, posicionarlo
- * con position:fixed respecto del ancla (corrigiendo ancestros transformados),
- * y cerrarlo al hacer click afuera, al scrollear fuera del panel o al
- * redimensionar.
+ * con position:fixed respecto del viewport (el panel se porta a document.body,
+ * así que su contexto de posicionamiento es siempre el viewport, sin necesidad
+ * de compensar ancestros del ancla), y cerrarlo al hacer click afuera, al
+ * scrollear fuera del panel o al redimensionar.
  *
  * No contiene lógica de negocio: sólo el "cómo flota" un panel. Cada control que
  * lo use aporta su propio markup y su objeto de negocio.
@@ -146,48 +147,27 @@ export default {
 
 				var r = anchorEl.getBoundingClientRect();
 
-				// position:fixed se mide respecto del viewport salvo que un ancestro
-				// tenga transform (vue-grid-layout puede aplicarlo); en ese caso el
-				// origen es ese ancestro y hay que restar su offset.
-				var ox = 0, oy = 0;
-				var tc = loc._transformedAncestor(anchorEl);
-				if (tc) {
-					var cr = tc.getBoundingClientRect();
-					ox = cr.left; oy = cr.top;
-				}
-
+				// El panel siempre se porta a document.body antes de llegar acá (ver
+				// openPanel), así que su contexto de posicionamiento fixed es siempre
+				// el viewport: no hace falta compensar ancestros transformados DEL
+				// ANCLA, porque el panel ya no cuelga de ese árbol. Restar ese offset
+				// (como se hacía antes) desplazaba el panel a un lugar equivocado.
 				var left = r.left;
 				if (left + width > vw - 8) left = vw - width - 8;
 				if (left < 8) left = 8;
-				style.left = (left - ox) + 'px';
+				style.left = left + 'px';
 
 				var spaceBelow = vh - r.bottom - 8;
 				var spaceAbove = r.top - 8;
 				if (spaceBelow >= 160 || spaceBelow >= spaceAbove) {
-					style.top = (r.bottom + 4 - oy) + 'px';
+					style.top = (r.bottom + 4) + 'px';
 					style.maxHeight = Math.max(160, spaceBelow) + 'px';
 				} else {
-					style.bottom = (vh - r.top + 4 + oy) + 'px';
+					style.bottom = (vh - r.top + 4) + 'px';
 					style.maxHeight = Math.max(160, spaceAbove) + 'px';
 				}
 				loc.floatStyle = style;
 			});
-		},
-
-		// Ancestro más cercano con transform/perspective/will-change (crea contexto
-		// de contención para position:fixed).
-		_transformedAncestor: function (el) {
-			var node = el ? el.parentElement : null;
-			while (node && node !== document.body) {
-				var st = window.getComputedStyle(node);
-				if ((st.transform && st.transform !== 'none') ||
-					(st.perspective && st.perspective !== 'none') ||
-					st.willChange === 'transform') {
-					return node;
-				}
-				node = node.parentElement;
-			}
-			return null;
 		}
 	}
 };

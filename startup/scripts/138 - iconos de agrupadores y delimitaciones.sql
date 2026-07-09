@@ -54,6 +54,19 @@ UPDATE boundary SET bou_icon = 'fas fa-university'        WHERE bou_id = 19; -- 
 UPDATE boundary SET bou_icon = 'fas fa-balance-scale'     WHERE bou_id = 20; -- Regiones judiciales
 UPDATE boundary SET bou_icon = 'fas fa-gavel'             WHERE bou_id = 21; -- Circunscripciones judiciales
 
+
+update draft_metric set mtr_icon = 'fas fa-house-user' where mtr_icon = 'fas fa-broom';
+update metric set mtr_icon = 'fas fa-house-user' where mtr_icon = 'fas fa-broom';
+
+update draft_metric set mtr_icon = 'fas fa-home' where mtr_icon = 'fas fa-feather-alt' and mtr_caption = 'Comunidades indígenas (INAI)';
+update metric set mtr_icon = 'fas fa-home' where mtr_icon = 'fas fa-feather-alt' and mtr_caption = 'Comunidades indígenas (INAI)';
+update draft_metric set mtr_icon = 'fas fa-comment' where mtr_icon = 'fas fa-feather-alt' and mtr_caption = 'Se reconoce indígena y habla o entiende la lengua de ese pueblo (censo)';
+update metric set mtr_icon = 'fas fa-comment' where mtr_icon = 'fas fa-feather-alt' and mtr_caption = 'Se reconoce indígena y habla o entiende la lengua de ese pueblo (censo)';
+
+
+update draft_metric set mtr_icon = 'fas fa-home' where mtr_icon = 'fas fa-feather-alt' and mtr_caption = 'Población pueblos originarios (censo)';
+update metric set mtr_icon = 'fas fa-home' where mtr_icon = 'fas fa-feather-alt' and mtr_caption = 'Población pueblos originarios (censo)';
+
 ALTER TABLE boundary
   MODIFY COLUMN bou_icon VARCHAR(40) DEFAULT NULL COMMENT 'Clase FontAwesome (ej. fas fa-map)';
 

@@ -247,15 +247,15 @@ ActivePivot.prototype.RefreshData = function () {
 			if (version.Name && version.Name !== activeBoundary.properties.Name) {
 				boundaryLabel += ' [' + version.Name + ']';
 			}
-			// Conteo "n/total" de elementos: cuántos están seleccionados respecto del
-			// universo de la delimitación. Solo se muestra si no están todos elegidos.
-			// Conteo "n/total": cuántas delimitaciones se eligieron sobre el universo.
-			// Se muestra siempre que haya universo, incluso cuando están todas (t/t):
-			// una delimitación completa informa así que incluye la totalidad.
-			var selectedCount = region.Items ? region.Items.length : 0;
-			var availableCount = (region.Region && region.Region.Items) ? region.Region.Items.length : selectedCount;
-			if (availableCount > 0) {
-				boundaryLabel += ' (' + selectedCount + '/' + availableCount + ')';
+			// Conteo entre paréntesis: cuántas filas quedan LISTADAS debajo de este
+			// encabezado tras el filtro por datos (boundaryRows, ya filtrado arriba).
+			// No es "seleccionadas/universo": un indicador sin datos en la mayoría de
+			// los hijos de la delimitación oculta esas filas (ver el filtro de arriba),
+			// y el número debe reflejar lo que efectivamente se lista, no el universo
+			// de la delimitación. Sin indicadores (nada que pueda faltar), no se
+			// muestra número: todas las filas están, no hay nada que contar de más.
+			if (loc.MetricTuples.metricTuples.length > 0) {
+				boundaryLabel += ' (' + boundaryRows.length + ')';
 			}
 			headerRow.push({ 'Label': boundaryLabel, isHeader: true, isRegionHeader: true, boundaryId: activeBoundary.__boundaryId });
 			for (var ti = 0; ti < totals.length; ti++) {
@@ -329,9 +329,13 @@ ActivePivot.prototype.GroupRowsByParent = function (boundaryRows) {
 		var head0 = rows[0] && rows[0][0] ? rows[0][0] : null;
 		var groupId = head0 && head0.ParentId != null ? head0.ParentId : null;
 		var groupCode = head0 && head0.ParentCode != null ? head0.ParentCode : null;
+		// El label del grupo lleva entre paréntesis cuántos hijos quedan listados
+		// debajo (rows ya viene filtrado por datos desde RefreshData): el mismo
+		// criterio que el encabezado de la delimitación, a nivel de este grupo.
+		var groupLabel = parent + ' (' + rows.length + ')';
 		// Subtotal del grupo por columna (suma de Value/Total/Area; ColumnTotal,
 		// ColumnArea y RowGroupTotal heredados de la primera fila del grupo).
-		var subtotal = [{ Label: parent, isHeader: true, isGroupHeader: true, GroupId: groupId, Code: groupCode }];
+		var subtotal = [{ Label: groupLabel, isHeader: true, isGroupHeader: true, GroupId: groupId, Code: groupCode }];
 		for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
 			var sv = 0, st = 0, sa = 0, hasVal = false, hasArea = false;
 			var svg = 0, stg = 0, hasGap = false;

@@ -268,7 +268,6 @@ export default {
 				case STEP_ATTRIBUTES:
 				case STEP_END:
 					this.Dataset.properties.Geocoded = true;
-					alert(1);
 					if (this.activeTab === 'location') {
 						this.Dataset.properties.Type = 'L';
 						this.Dataset.properties.AreSegments = this.mapSegmentsLatLon;

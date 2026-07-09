@@ -221,6 +221,26 @@ describe('GroupRowsByParent — subtotal con brecha (gap)', function () {
 	});
 });
 
+describe('GroupRowsByParent — conteo de hijos listados en el label', function () {
+	it('el label del subtotal lleva entre paréntesis la cantidad de hijos que llegan (ya filtrados por datos)', function () {
+		var p = new ActivePivot();
+		p.MetricTuples.metricTuples = [{
+			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
+			metric: { properties: { SummaryMetric: 'N' } }, variable: {}
+		}];
+		// Tres hijos del mismo padre. RefreshData ya habría descartado, antes de
+		// llegar acá, los hijos sin datos en ningún indicador: GroupRowsByParent
+		// solo ve los que sobrevivieron, y por eso cuenta 3, no el universo del padre.
+		var rows = [
+			[{ Label: 'A', FID: 1, Parent: 'Catamarca' }, { Value: 10, Total: 20 }],
+			[{ Label: 'B', FID: 2, Parent: 'Catamarca' }, { Value: 5,  Total: 15 }],
+			[{ Label: 'C', FID: 3, Parent: 'Catamarca' }, { Value: 8,  Total: 12 }]
+		];
+		var grouped = p.GroupRowsByParent(rows);
+		expect(grouped[0][0].Label).toBe('Catamarca (3)');
+	});
+});
+
 describe('ResolveAllCategories — incidencia sobre el total propio', function () {
 	it('calcula la incidencia de la categoría sobre SU total, no sobre el universo', function () {
 		// "65% y más": Value 6880 sobre su Total propio 10000 = 68.8%. El total del

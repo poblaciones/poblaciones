@@ -77,6 +77,7 @@ class DatasetService extends DbSession
 		$dataset->setMarker($datasetMarker);
 		$dataset->setWork($work);
         $dataset->setType('L');
+		$dataset->setSegmentType('N');
 		$dataset->setShowInfo(true);
 		$dataset->setSkipEmptyFields(false);
 		$dataset->setExportable(true);

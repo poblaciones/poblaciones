@@ -9,7 +9,7 @@
 															 @click.stop="removeRegion(region)"></i>{{ separatorFor(index) }}
 				</span>
 			</div>
-			<div class="clippingLegendName" v-else>Población</div>
+			<div class="clippingLegendName" v-else>Población <span class="clippingLegendVersion" v-if="clippingVersion">({{ clippingVersion }})</span></div>
 			<div class="clippingLegendRow">
 				<span>Habitantes</span>
 				<span class="clippingLegendValue"><AnimatedNumber :value="population" /></span>
@@ -89,6 +89,13 @@ export default {
 		},
 		regionType() {
 			return this.regions.length > 0 ? this.regions[0].TypeName : null;
+		},
+		// Año de la revisión censal seleccionada, mismo dato que el sourceRow
+		// de widgets/summary/clipping.vue (la botonera sobre clipping.Region.Levels).
+		clippingVersion() {
+			var levels = this.clipping.Region.Levels;
+			var level = levels ? levels[this.clipping.Region.SelectedLevelIndex] : null;
+			return level ? level.Revision : null;
 		},
 		population() {
 			return this.hasSummary ? this.clipping.Region.Summary.Population : 0;
@@ -176,6 +183,10 @@ export default {
 	color: #333333;
 	margin-bottom: 4px;
 	text-shadow: .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px .75px 1px #ffffffa0, .75px -1px 1px #ffffffa0, .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px 1px 1px #ffffffa0, .75px -.75px 1px #ffffffa0;
+}
+
+.clippingLegendVersion {
+	font-size: .92em;
 }
 
 .clippingLegendRemoveRegion {

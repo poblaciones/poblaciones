@@ -104,6 +104,15 @@ class DraftDataset
      */
     private $AreSegments;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dat_segment_type", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $SegmentType;
+
+
     /**
      * @var \helena\entities\backoffice\DraftDatasetColumn
  		 *
@@ -353,6 +362,31 @@ class DraftDataset
     public function getType()
     {
         return $this->Type;
+    }
+
+
+    /**
+     * Set segmentType
+     *
+     * @param string $segmentType
+     *
+     * @return DraftDataset
+     */
+    public function setSegmentType($segmentType)
+    {
+        $this->SegmentType  = $segmentType;
+
+        return $this;
+    }
+
+    /**
+     * Get segmentType
+     *
+     * @return string
+     */
+    public function getSegmentType()
+    {
+        return $this->SegmentType;
     }
 
 

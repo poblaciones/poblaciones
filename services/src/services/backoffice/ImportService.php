@@ -51,7 +51,6 @@ class ImportService extends BaseService
 		// Ejecuta los dos pasos de un reader
 		$reader->Prepare($selectedSheetIndex);
 		$reader->WriteJson($selectedSheetIndex);
-
 		// Listo
 		$this->state->SetStep(self::STEP_CONVERTED, 'Creando tablas');
 		return $this->state->ReturnState(false);

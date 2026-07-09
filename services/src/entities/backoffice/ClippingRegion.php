@@ -57,6 +57,13 @@ class ClippingRegion
     /**
      * @var string
      *
+     * @ORM\Column(name="clr_color", type="string", length=6, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Color;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="clr_field_code_name", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
      */
     private $FieldCodeName;
@@ -244,6 +251,30 @@ class ClippingRegion
     public function getPriority()
     {
         return $this->Priority;
+    }
+
+    /**
+     * Set color
+     *
+     * @param string $color
+     *
+     * @return ClippingRegion
+     */
+    public function setColor($color)
+    {
+        $this->Color = $color;
+
+        return $this;
+    }
+
+    /**
+     * Get color
+     *
+     * @return string
+     */
+    public function getColor()
+    {
+        return $this->Color;
     }
 
     /**

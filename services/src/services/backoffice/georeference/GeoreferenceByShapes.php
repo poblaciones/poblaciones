@@ -3,15 +3,31 @@
 namespace helena\services\backoffice\georeference;
 
 use minga\framework\Profiling;
+use helena\classes\App;
 
 class GeoreferenceByShapes extends GeoreferenceBase
 {
 	const MAX_SIZE_CUSTOM_VALIDATE = 10000;
 
+	public function SanitizeShapes($from, $pageSize)
+	{
+		Profiling::BeginTimer();
+
+		$shapesField = $this->state->Get('shape');
+		$table = $this->state->Table();
+		$sql = "UPDATE " . $table . " SET " . $shapesField . " = IFNULL(SanitizeGeometry(" . $shapesField . "), " . $shapesField . ") "
+			. "WHERE id IN (SELECT id FROM (SELECT id FROM " . $table . " LIMIT " . $from . ', ' . $pageSize . ") AS tmp)";
+		App::Db()->exec($sql);
+		Profiling::EndTimer();
+	}
+
 	public function Validate($from, $pageSize, $totalRows)
 	{
 		Profiling::BeginTimer();
 
+		//$this->SanitizeShapes($from, $pageSize);
+
+		// Valida...
 		$shapesField = $this->state->Get('shape');
 		$valid = "(CASE WHEN LENGTH(" . $shapesField . ") > " . self::MAX_SIZE_CUSTOM_VALIDATE . " THEN 190 - 90 * ST_IsValid(ST_GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . "))) ELSE GeometryIsValid(ST_GeomFromText(GeoJsonOrWktToWkt(" . $shapesField . "))) END)";
 

@@ -1,3 +1,4 @@
+- mejoras en tratamiento de shapes para importación y exportación (consistencia de geometrías)
 - brechas para la definición de indicadores.
 - fixes en chart de panel estadístico.
 - refactor backoffice (barra superior de estadísticas, personalizar y compartir)

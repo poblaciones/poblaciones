@@ -105,6 +105,8 @@ class BoundaryService extends BaseService
 			$rows = $metadataTable->GetMetadataFiles($version->Metadata->Id);
 			$version->Metadata->FillFiles($rows);
 
+			AddVersionValues($version);
+
 			$item->Versions[] = $version;
 			$version->SelectedVersionIndex = sizeof($item->Versions) - 1;
 		}
@@ -114,7 +116,21 @@ class BoundaryService extends BaseService
 		return $item;
 	}
 
+	private function AddVersionValues($version)
+	{
+		$tableValues = new BoundaryModel();
+		$values = $tableValues->GetValuesByBoundaryVersionId($version->Id);
 
+		foreach($values as $value)
+		{
+			$valueInfo = new ValueLabelInfo();
+			$valueInfo->Fill($value);
+			$valueInfo->FixColors();
+			$valueInfo->FixVisible();
+
+			$variableInfo->ValueLabels[] = $valueInfo;
+		}
+	}
 	public function GetSummary($frame, $boundaryVersionId)
 	{
 		$data = null;

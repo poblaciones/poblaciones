@@ -10,7 +10,8 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend.vue';
 function makeClipping(overrides) {
 	return Object.assign({
 		Region: {
-			Levels: [{ Id: 1, Revision: 'Municipios' }, { Id: 2, Revision: 'Departamentos' }],
+			SelectedLevelIndex: 0,
+			Levels: [{ Id: 1, Revision: '2010' }, { Id: 2, Revision: '2022' }],
 			Summary: {
 				Population: 27136,
 				Households: 10230,
@@ -158,4 +159,24 @@ it('lee y escribe sobre toolbarStates.legendMinimized (compartido con mapLegend)
 	expect(legend.minimized).toBeFalsy();
 	legend.minimized = true;
 	expect(toolbarStates.legendMinimized).toBeTruthy();
+});
+
+describe('clippingLegend: versión (año de la revisión censal seleccionada)');
+
+it('toma el Revision del nivel seleccionado, mismo dato que el sourceRow de clipping.vue', () => {
+	const legend = mountClippingLegend(makeClipping(), true, false);
+	expect(legend.clippingVersion).toBe('2010');
+});
+
+it('sigue SelectedLevelIndex al cambiar de revisión', () => {
+	const clipping = makeClipping();
+	clipping.Region.SelectedLevelIndex = 1;
+	const legend = mountClippingLegend(clipping, true, false);
+	expect(legend.clippingVersion).toBe('2022');
+});
+
+it('sin niveles, clippingVersion es null', () => {
+	const clipping = makeClipping({ Region: { SelectedLevelIndex: 0, Levels: [], Summary: makeClipping().Region.Summary } });
+	const legend = mountClippingLegend(clipping, true, false);
+	expect(legend.clippingVersion).toBeNull();
 });

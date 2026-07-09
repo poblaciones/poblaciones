@@ -55,6 +55,25 @@ class BoundaryModel extends BaseModel
 		return $ret;
 	}
 
+	public function GetValuesByBoundaryVersionId($id)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT  clr_id AS vvl_id,
+						clr_caption AS vvl_caption,
+						null AS vvl_value,
+						clr_color AS vvl_line_color,
+						clr_color AS vvl_fill_color,
+						null AS vvl_symbol,
+						1 vvl_visible
+					 FROM boundary_version_clipping_region
+					 JOIN clipping_region ON bcr_clipping_region_id = clr_id
+					WHERE bcr_boundary_version_id = ?";
+		$ret = App::Db()->fetchAll($sql, array($id));
+
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetRecommendedBoundaries()
 	{
 

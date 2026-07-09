@@ -10,7 +10,7 @@
 					<template v-for="metric in visibleMetrics">
 						<div class="mapLegendGroup" :key="metric.index">
 							<div class="mapLegendTitle">
-								<span class="mapLegendTitleText">{{ metric.properties.Metric.Name }}</span>
+								<span class="mapLegendTitleText">{{ metric.properties.Metric.Name }} <span class="mapLegendVersion">({{ versionLabel(metric) }})</span></span>
 								<i class="fas fa-times mapLegendRemove" title="Quitar del mapa" @click.stop="removeMetric(metric)"></i>
 							</div>
 							<div class="mapLegendSubtitle" v-if="showVariableName(metric)">{{ selectedVariable(metric).Name }}</div>
@@ -34,8 +34,10 @@
 
 <script>
 // Leyenda flotante de mapa: muestra, por cada indicador visible, su nombre,
-// la variable seleccionada y todas las categorías (ValueLabels) con su
-// color. Es una ayuda visual con dos interacciones propias, replicando el
+// la variable seleccionada y las categorías (ValueLabels) con su color. Con
+// ShowEmptyCategories en false, la lista se recorta a las categorías con
+// datos en el encuadre actual, igual que metricValues.vue:displayLabel.
+// Es una ayuda visual con dos interacciones propias, replicando el
 // mismo mecanismo que usa el panel de estadísticas:
 // - Clic en un cuadrado/círculo: alterna label.Visible y llama
 //   metric.RefreshMap(), igual que metricValues.vue/metric.vue.
@@ -148,6 +150,17 @@ export default {
 		selectedVariable(metric) {
 			return metric.SelectedVariable();
 		},
+		// Año(s) de la versión seleccionada, mismo dato que el sourceRow de
+		// metric.vue (botonera de metric.properties.Versions). En comparación
+		// activa, se muestran ambas versiones separadas por guión, en orden
+		// comparación-principal.
+		versionLabel(metric) {
+			if (metric.Compare.Active) {
+				var compareVersion = metric.Compare.SelectedVersion();
+				return (compareVersion ? compareVersion.Version.Name : '') + '-' + metric.SelectedVersion().Version.Name;
+			}
+			return metric.SelectedVersion().Version.Name;
+		},
 		// Réplica de la condición usada en metricVariables.vue: con una única
 		// variable de nombre vacío (indicadores de conteo simple), el nombre de
 		// variable no aporta nada y no se muestra.
@@ -160,7 +173,17 @@ export default {
 			if (!variable) {
 				return [];
 			}
-			return metric.getVariableValueLabels(variable);
+			var loc = this;
+			return metric.getVariableValueLabels(variable).filter(function (label) {
+				return loc.displayLabel(metric, variable, label);
+			});
+		},
+		// Réplica de metricValues.vue:displayLabel. Con ShowEmptyCategories en
+		// false, la lista de categorías es dinámica según los datos del
+		// encuadre actual: una categoría sin zonas que la representen
+		// (label.Values.Count === '') no se ofrece.
+		displayLabel(metric, variable, label) {
+			return label.Values && ((variable.ShowEmptyCategories && !metric.Compare.Active) || label.Values.Count !== '');
 		},
 		swatchStyle(label) {
 			if (label.Visible) {
@@ -273,6 +296,10 @@ export default {
 	font-weight: 700;
 	color: #333333;
 	text-shadow: .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px .75px 1px #ffffffa0, .75px -1px 1px #ffffffa0, .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px 1px 1px #ffffffa0, .75px -.75px 1px #ffffffa0;
+}
+
+.mapLegendVersion {
+	font-size: .92em;
 }
 
 .mapLegendRemove {

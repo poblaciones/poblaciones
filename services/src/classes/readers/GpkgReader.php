@@ -5,6 +5,7 @@ namespace helena\classes\readers;
 use minga\framework\PublicException;
 use minga\framework\Str;
 use minga\framework\Log;
+use helena\classes\SanitizeGeometry;
 use helena\classes\Projections;
 use helena\classes\spss\Variable;
 
@@ -36,6 +37,9 @@ class GpkgReader extends BaseReader
 	const MAX_LENGTH = 32;
 	const MIN_LENGTH = 5;
 	const MAX_ROWS   = 5000;
+
+	/** Tolerancia de simplificación Douglas-Peucker, en metros. */
+	const SIMPLIFY_TOLERANCE_M = 0.5;
 
 	// -------------------------------------------------------------------------
 	// Interfaz pública (BaseReader)
@@ -87,7 +91,7 @@ class GpkgReader extends BaseReader
 				  ORDER BY table_name"
 			);
 			if ($result === false)
-				throw new PublicException("No se pudo consultar gpkg_contents. ¿Es un GeoPackage válido?");
+				throw new PublicException("No se pudo consultar gpkg_contents. Verfique que se trata de un GeoPackage válido.");
 
 			$layers = [];
 			while ($row = $result->fetchArray(SQLITE3_ASSOC))
@@ -155,16 +159,19 @@ class GpkgReader extends BaseReader
 				&& !Str::Contains($crsFrom, "GCS_WGS_1984")
 				&& !Str::ContainsI($crsFrom, "epsg:4326");
 
-			try {
-				$projector = new Projections($crsFrom, $crsTo);
-			} catch (\Exception $e) {
-				Log::HandleSilentException(
-					new PublicException("La proyección indicada no fue reconocida: " . $crsFrom)
-				);
-				throw new PublicException(
-					"La proyección indicada no fue reconocida. " .
-					"Procure convertir la información a GCS_WGS_1984 antes de importarla."
-				);
+			// El proyector solo hace falta si la fuente no está ya en WGS84;
+			// construirlo incondicionalmente hacía fallar archivos WGS84 cuya
+			// definición de CRS no fuera reconocida por proj4php.
+			$projector = null;
+			if ($needsProjection) {
+				try {
+					$projector = new Projections($crsFrom, $crsTo);
+				} catch (\Exception $e) {
+					throw new PublicException(
+						"La proyección indicada no fue reconocida. " .
+						"Procure convertir la información a GCS_WGS_1984 antes de importarla."
+					);
+				}
 			}
 
 			// --- 4. Columnas de atributos (excluye la columna de geometría) --
@@ -184,7 +191,6 @@ class GpkgReader extends BaseReader
 			$rowsAdded       = 0;
 			$maxWktLength    = 0;   // largo máximo observado del WKT
 			$observedLengths = [];  // largo máximo observado por columna de atributo
-
 			while ($row = $result->fetchArray(SQLITE3_NUM)) {
 				$geomBlob = array_pop($row);   // último campo = blob de geometría
 				$values   = array_values($row);
@@ -349,27 +355,32 @@ class GpkgReader extends BaseReader
 		if ($wkb === null)
 			return $useLatLong ? [null, null] : [null];
 
-		try {
-			$geom = \geoPHP::load($wkb, 'wkb');
-		} catch (\Exception $e) {
-			return $useLatLong ? [null, null] : [null];
-		}
-
-		if ($geom === false || $geom === null)
-			return $useLatLong ? [null, null] : [null];
-
 		if ($useLatLong) {
-			$x = $geom->x();
-			$y = $geom->y();
+			$point = SanitizeGeometry::ReadWkbPoint($wkb);
+			if ($point === null)
+				return [null, null];
+
 			if ($needsProjection)
-				[$x, $y] = $projector->ProjectXY($x, $y);
-			return [$y, $x]; // latitud (y), longitud (x)
-		} else {
-			$wkt = $geom->out('wkt');
-			if ($needsProjection)
-				$wkt = $projector->ProjectWkt($wkt);
-			return [$wkt];
+				$point = $projector->ProjectXYPoint($point);
+
+			return [$point['y'], $point['x']]; // latitud (y), longitud (x)
 		}
+
+		// Polígonos / líneas: SanitizeWkb resuelve en una sola pasada el
+		// parseo del WKB, la reproyección a WGS84 (si corresponde), la
+		// simplificación y la corrección de orientación de los anillos.
+		// Una geometría corrupta no debe abortar la importación completa.
+		try {
+			$wkt = SanitizeGeometry::SanitizeWkb(
+				$wkb,
+				self::SIMPLIFY_TOLERANCE_M,
+				$needsProjection ? $projector : null
+			);
+		} catch (\Exception $e) {
+			$wkt = null;
+		}
+
+		return [$wkt];
 	}
 
 	// =========================================================================

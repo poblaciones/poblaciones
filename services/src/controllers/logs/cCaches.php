@@ -108,12 +108,29 @@ class cCaches extends cController
 			$model = new PublishDataTables();
 			$n = $model->CleanMatrixTables();
 			$this->message = 'Liberadas ' . $n . ' tablas de matrices.';
-		} else if (array_key_exists('regenClippingGeography', $_POST)) {
+		} else if (array_key_exists('regenClippingGeographyStart', $_POST)) {
 			$model = new SnapshotGeographiesByRegionModel();
 			$model->Clean();
-			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';
-			$cm = new CacheManager();
-			$cm->CleanClippingCache();
+			$state = $model->RegenStart();
+			echo json_encode($state);
+			App::EndRequest();
+		} else if (array_key_exists('regenClippingGeographyStep', $_POST)) {
+			$model = new SnapshotGeographiesByRegionModel();
+			$state = $model->RegenStep(
+				$_POST['phase'],
+				$_POST['level'],
+				$_POST['revisionIndex'],
+				$_POST['revisions'],
+				$_POST['rowsAffected'],
+				$_POST['levelRowsAffected']
+			);
+			if ($state['done'])
+			{
+				$cm = new CacheManager();
+				$cm->CleanClippingCache();
+			}
+			echo json_encode($state);
+			App::EndRequest();
 		}
 		return $this->Show();
 	}

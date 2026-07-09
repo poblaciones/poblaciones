@@ -241,6 +241,7 @@
 											 :selection="metricSelection"
 											 :suggestions="[]"
 											 :expand-leaves="true"
+											 :filterMode="true"
 											 title="Agregar indicadores"
 											 root-label="Categorías"
 											 search-placeholder="Buscar indicador..."

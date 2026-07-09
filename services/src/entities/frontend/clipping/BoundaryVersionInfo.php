@@ -11,6 +11,7 @@ class BoundaryVersionInfo extends BaseMapModel
 	public $Metadata;
 	public $Count = null;
 	public $SelectedVersionIndex = 0;
+	public $ValueLabels = [];
 
 	public static function GetMap()
 	{

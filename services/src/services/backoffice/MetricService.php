@@ -63,6 +63,8 @@ class MetricService extends BaseService
 		$variable->Values = array();
 		$variable->setNormalizationScale(100);
 		$variable->setIsDefault(false);
+		$variable->setIsGap(false);
+		$variable->setHasGapSameTotal(false);
 		$variable->setDefaultMeasure('N');
 		$variable->setDataColumnIsCategorical(false);
 

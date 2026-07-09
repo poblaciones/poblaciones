@@ -122,12 +122,13 @@
 					<div v-if="regType === 'logistic'" class="logit-controls">
 						<div class="cut-row" v-if="depRange">
 							<label>Punto de corte:</label>
-							<input type="range" class="cut-slider" :min="depRange.min" :max="depRange.max" :step="cutStep" v-model.number="logitThreshold" />
+							<input type="range" class="cut-slider" :min="depRange.min" :max="depRange.max" :step="cutStep"
+								v-model.number="logitThreshold" :style="cutSliderStyle" />
 							<input type="number" class="cut-input" :min="depRange.min" :max="depRange.max" :step="cutStep" v-model.number="logitThreshold" />
 						</div>
 						<div class="reg-type">Criterio de inclusión:
-							<label><input type="radio" value="greater" v-model="logitDirection" /> mayores</label>
 							<label><input type="radio" value="less" v-model="logitDirection" /> menores</label>
+							<label><input type="radio" value="greater" v-model="logitDirection" /> mayores</label>
 						</div>
 						<p class="matrix-note">
 							Se tomará como variable dicotómica independiente = 1 a los casos con valores
@@ -149,7 +150,7 @@
 							<template v-for="row in regressionRows">
 								<tr v-if="row.type === 'group'" :key="'rg-' + row.gid" :class="'grp grp-' + row.level"><td :colspan="5">{{ row.label }}</td></tr>
 								<tr v-else :key="'reg-' + row.col.key">
-									<td class="rel-cat indent">{{ catName(row.col) }}</td>
+									<td class="rel-cat indent" :title="fullName(row.col)">{{ fullName(row.col) }}</td>
 									<td>{{ fmt2(row.coef) }}</td><td>{{ fmt2(row.se) }}</td>
 									<td>{{ fmt2(row.t) }}</td><td>{{ fmtP(row.p) }}<sup class="sig-star">{{ stars(row.p) }}</sup></td>
 								</tr>
@@ -174,7 +175,7 @@
 							<template v-for="row in logitRows">
 								<tr v-if="row.type === 'group'" :key="'lg-' + row.gid" :class="'grp grp-' + row.level"><td :colspan="7">{{ row.label }}</td></tr>
 								<tr v-else :key="'lreg-' + row.col.key">
-									<td class="rel-cat indent">{{ catName(row.col) }}</td>
+									<td class="rel-cat indent" :title="fullName(row.col)">{{ fullName(row.col) }}</td>
 									<td>{{ fmt2(row.coef) }}</td><td>{{ fmt2(row.se) }}</td>
 									<td>{{ fmt2(row.wald) }}</td>
 									<td>{{ fmt2(row.z) }}</td><td>{{ fmtP(row.p) }}<sup class="sig-star">{{ stars(row.p) }}</sup></td>
@@ -320,6 +321,22 @@ export default {
 		},
 		depRange() { return this.cols && this.depColumn ? this.cols.dependentRange(this.depColumn.key) : null; },
 		thresholdSign() { return this.logitDirection === 'greater' ? '>' : '<'; },
+		// Gradiente del slider: pinta en azul el tramo que la dirección elegida acepta
+		// (a la izquierda del punto con "menores", a la derecha con "mayores"), para
+		// que el color a cada lado del círculo anticipe el rango incluido.
+		cutSliderStyle() {
+			var r = this.depRange;
+			if (!r || r.max === r.min) return {};
+			var pct = ((this.logitThreshold - r.min) / (r.max - r.min)) * 100;
+			pct = Math.max(0, Math.min(100, pct));
+			var accepted = '#90caf9';    // azul: tramo incluido
+			var rest = '#dde3e8';        // gris: tramo excluido
+			// linear-gradient con dos tramos: antes y después del punto de corte.
+			var gradient = (this.logitDirection === 'greater')
+				? 'linear-gradient(to right, ' + rest + ' 0%, ' + rest + ' ' + pct + '%, ' + accepted + ' ' + pct + '%, ' + accepted + ' 100%)'
+				: 'linear-gradient(to right, ' + accepted + ' 0%, ' + accepted + ' ' + pct + '%, ' + rest + ' ' + pct + '%, ' + rest + ' 100%)';
+			return { background: gradient };
+		},
 		cutStep() {
 			var r = this.depRange;
 			if (!r || r.max === r.min) return 1;
@@ -611,6 +628,36 @@ export default {
 	.reg-type label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 	.logit-controls { margin: 4px 0 10px; }
 	.cut-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; color: #455a64; }
-	.cut-slider { flex: 0 1 auto; width: 22%; min-width: 60px; }
+	.cut-slider {
+		flex: 0 1 auto;
+		width: 22%;
+		min-width: 60px;
+		/* El fondo (gradiente inline) marca el rango aceptado por el corte; se
+		   resetea la apariencia nativa del track en cada motor para que se vea. */
+		-webkit-appearance: none;
+		appearance: none;
+		height: 4px;
+		border-radius: 2px;
+		outline: none;
+	}
+	.cut-slider::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: transparent; }
+	.cut-slider::-moz-range-track { height: 4px; border-radius: 2px; background: transparent; border: none; }
+	.cut-slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: #1565c0;
+		margin-top: -5px;
+		cursor: pointer;
+	}
+	.cut-slider::-moz-range-thumb {
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: #1565c0;
+		border: none;
+		cursor: pointer;
+	}
 	.cut-input { width: 59px; padding: 2px 6px; border: 1px solid #cfd8dc; border-radius: 4px; font-size: 13px; }
 </style>
