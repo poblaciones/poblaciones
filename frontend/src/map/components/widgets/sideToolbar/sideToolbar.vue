@@ -116,6 +116,11 @@ export default {
     // Cada chip lleva en Item un Type que vuelve al removerlo:
     //   'B' capa de delimitación (RemoveBoundaryById)
     //   'C' región de recorte (ResetClippingRegion)
+    // Id de cada chip es el Id real (el mismo que el nodo del árbol
+    // `boundaries`, para que indicatorSelector.vue marque bien el checkbox
+    // en selección múltiple); Key lleva el prefijo, solo para distinguir
+    // en el :key del v-for un boundary completo de una región de recorte
+    // que compartan Id numérico.
     boundarySelection() {
       var chips = [];
 
@@ -123,12 +128,7 @@ export default {
       this.metrics
         .filter(m => !m.isBaseMetric && m.isBoundary)
         .forEach(m => {
-          chips.push({
-            Id: 'B:' + m.properties.Id,
-            Caption: m.properties.Name,
-            Description: m.properties.Name,
-            Item: { Type: 'B', Id: m.properties.Id }
-          });
+          chips.push(toChip({ Id: m.properties.Id, Name: m.properties.Name, Type: 'B' }, 'B:' + m.properties.Id));
         });
 
       // Regiones de recorte activas.
@@ -139,12 +139,7 @@ export default {
         this.clipping.Region.Summary.Regions
           .filter(r => r.Id && r.Name)
           .forEach(r => {
-            chips.push({
-              Id: 'C:' + r.Id,
-              Caption: r.Name,
-              Description: r.Name,
-              Item: { Type: 'C', Id: r.Id }
-            });
+            chips.push(toChip({ Id: r.Id, Name: r.Name, Type: 'C' }, 'C:' + r.Id));
           });
       }
 

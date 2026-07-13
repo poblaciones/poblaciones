@@ -20,6 +20,7 @@
 
 import { valueHeader, formatValue } from '@/table/classes/pivotValue.js';
 import AnalysisColumns from '@/table/classes/AnalysisColumns.js';
+import h from '@/map/js/helper';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
 
@@ -106,6 +107,17 @@ function columnRecord(spec, columnIndex) {
 		fillColor = metric.GetStyleColorDictionary()[spec.labelId] || null;
 	}
 
+	// Variable normalizadora (p. ej. "/ km²"), el mismo criterio que el combo de
+	// tipo de la pivot (MetricHeader): solo aplica en incidencia y se omite si es
+	// un simple "%" (ya lo dice la unidad). Se resuelve acá, no en el chart, para
+	// que quede disponible donde el chart la necesite sin depender de la selección
+	// viva del metric (el dataset es una foto).
+	var normCaption = '';
+	if (sm === 'I') {
+		var cap = h.ResolveNormalizationCaption(av, false);
+		normCaption = (cap && cap !== '%') ? cap : '';
+	}
+
 	return {
 		key: spec.key,
 		label: label,
@@ -132,7 +144,8 @@ function columnRecord(spec, columnIndex) {
 			isSimpleCount: !!(av && av.IsSimpleCount),
 			isGap: !!(av && av.IsGap),
 			hasGapSameTotal: !!(av && av.HasGapSameTotal),
-			hasArea: !!(spec.level && spec.level.HasArea)
+			hasArea: !!(spec.level && spec.level.HasArea),
+			normCaption: normCaption
 		},
 		_columnIndex: columnIndex
 	};

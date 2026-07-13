@@ -28,6 +28,7 @@ use helena\entities\frontend\geometries\Envelope;
 
 class TableService extends BaseService
 {
+	// No se usa
 	public function GetRegion($boundaryVersionId, $includedGeographyRelations)
 	{
 		$ret = $this->CalculateRegion($boundaryVersionId);
@@ -36,7 +37,9 @@ class TableService extends BaseService
 		{
 			foreach($includedGeographyRelations as $geographyId)
 			{
-				$ret['GeographyRelations'][$geographyId] = $this->GetRegionGeographyRelations($boundaryVersionId, $geographyId);
+				$res = $this->GetRegionGeographyRelations($boundaryVersionId, $geographyId);
+				$ret['GeographyRelations'][$geographyId] = $res['GeographyRelations'];
+				$ret['UpperGeographyRelations'][$geographyId] = $res['UpperGeographyRelations'];
 			}
 
 		}
@@ -45,13 +48,20 @@ class TableService extends BaseService
 
 	public function GetRegionGeographyRelations($boundaryVersionId, $includedGeographyRelations, $includeCodes = false)
 	{
-		$ret = [];
+		$geographyRelations = [];
+		$upperGeographyRelations = [];
 		foreach ($includedGeographyRelations as $geographyId)
 		{
 			$relations = $this->CalculateGeographyRelations($boundaryVersionId, $geographyId, $includeCodes);
-			$ret[$geographyId] = $relations;
+			if ($this->GeographyIsChildOfBoundaryVersion($boundaryVersionId, $geographyId)) {
+				$geographyRelations[$geographyId] = $relations;
+			}
+			else
+			{
+				$upperGeographyRelations[$geographyId] = $relations;
+			}
 		}
-		return $ret;
+		return ['GeographyRelations' => $geographyRelations, 'UpperGeographyRelations' => $upperGeographyRelations];
 	}
 
 	private function CalculateGeographyRelations($boundaryVersionId, $geographyId, $includeCodes)
@@ -60,14 +70,11 @@ class TableService extends BaseService
 		$table->getGeometries = false;
 		$table->getCaption = false;
 
-		if (!$this->GeographyIsChildOfBoundaryVersion($boundaryVersionId, $geographyId)) {
-			return [];
-		}
-
 		$rows = $table->GetAllRowsJoinWithGeography($geographyId, $includeCodes === false);
 
 		return Arr::FromSortedToKeyedArrays($rows, 'FID', 'GID');
 	}
+
 	private function GeographyIsChildOfBoundaryVersion($boundaryVersionId, $geographyId) {
 		$matches = App::Db()->fetchScalarInt("
 			SELECT COUNT(*) FROM boundary_version_clipping_region
@@ -89,7 +96,7 @@ class TableService extends BaseService
 		$table->getGeometries = false;
 		$rows = $table->GetAllRows();
 
-		$ret = ['Items' => $rows, 'Id' => (int) $boundaryVersionId, 'GeographyRelations' => []];
+		$ret = ['Items' => $rows, 'Id' => (int) $boundaryVersionId, 'GeographyRelations' => [], 'UpperGeographyRelations' => []];
 		return $ret;
 	}
 

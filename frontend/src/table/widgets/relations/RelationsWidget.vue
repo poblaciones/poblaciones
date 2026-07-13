@@ -108,7 +108,15 @@
 						</tbody>
 					</table>
 
-					<h4 class="section-title">Regresión
+					<div class="chart-block">
+						<h4 class="section-title">Gráfico de dispersión</h4>
+						<div class="chart-subject">{{ (depColumn ? fullName(depColumn) : '') }} según indicadores seleccionados</div>
+						<scatter-multi :series="multiSeries" :y-label="depColumn ? axisMetric(depColumn) : ''"
+							:size-by-weight="sizeByWeight" :height="150" :y-max100="depColumn ? isPct(depColumn) : false" />
+					</div>
+					<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
+
+					<h4 class="section-title">Regresión{{ regressionTitleSuffix }}
 						<span class="r2" v-if="regType === 'linear' && regression">R²aj. {{ fmt2(regression.adjRSquared) }} · n {{ regression.n }}</span>
 						<span class="r2" v-else-if="regType === 'logistic' && logitReg">R² McF. {{ fmt2(logitReg.mcFaddenR2) }} · n {{ logitReg.n }}</span>
 					</h4>
@@ -150,7 +158,7 @@
 							<template v-for="row in regressionRows">
 								<tr v-if="row.type === 'group'" :key="'rg-' + row.gid" :class="'grp grp-' + row.level"><td :colspan="5">{{ row.label }}</td></tr>
 								<tr v-else :key="'reg-' + row.col.key">
-									<td class="rel-cat indent" :title="fullName(row.col)">{{ fullName(row.col) }}</td>
+									<td class="rel-cat indent">{{ catName(row.col) }}</td>
 									<td>{{ fmt2(row.coef) }}</td><td>{{ fmt2(row.se) }}</td>
 									<td>{{ fmt2(row.t) }}</td><td>{{ fmtP(row.p) }}<sup class="sig-star">{{ stars(row.p) }}</sup></td>
 								</tr>
@@ -175,7 +183,7 @@
 							<template v-for="row in logitRows">
 								<tr v-if="row.type === 'group'" :key="'lg-' + row.gid" :class="'grp grp-' + row.level"><td :colspan="7">{{ row.label }}</td></tr>
 								<tr v-else :key="'lreg-' + row.col.key">
-									<td class="rel-cat indent" :title="fullName(row.col)">{{ fullName(row.col) }}</td>
+									<td class="rel-cat indent">{{ catName(row.col) }}</td>
 									<td>{{ fmt2(row.coef) }}</td><td>{{ fmt2(row.se) }}</td>
 									<td>{{ fmt2(row.wald) }}</td>
 									<td>{{ fmt2(row.z) }}</td><td>{{ fmtP(row.p) }}<sup class="sig-star">{{ stars(row.p) }}</sup></td>
@@ -194,14 +202,6 @@
 					<p v-else-if="regType === 'logistic'" class="matrix-note">No hay datos suficientes para estimar la regresión logística (se requieren ambas clases presentes según el punto de corte).</p>
 
 					<p class="footnote">*p &lt; 0,05; **p &lt; 0,01; ***p &lt; 0,001. A menor p, mayor nivel de confianza estadística.</p>
-
-					<div class="chart-block">
-						<h4 class="section-title">Gráfico de dispersión</h4>
-						<div class="chart-subject">{{ (depColumn ? fullName(depColumn) : '') }} según indicadores seleccionados</div>
-						<scatter-multi :series="multiSeries" :y-label="depColumn ? axisMetric(depColumn) : ''"
-							:size-by-weight="sizeByWeight" :height="150" :y-max100="depColumn ? isPct(depColumn) : false" />
-					</div>
-					<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
 				</div>
 
 				<!-- ───────── 1x1 ───────── -->
@@ -477,6 +477,10 @@ export default {
 		isPct(c) { return !!c && c.isPercent(); },
 		isPctKey(k) { var c = this.colByKey[k]; return this.isPct(c); },
 		regionPhrase() { var p = this.cols ? this.cols.regionTypesPhrase() : ''; return p ? ' en ' + p : ''; },
+		// "Regresión de provincias", "Regresión de provincias y departamentos": el
+		// tipo de delimitación de las filas, en minúscula, con el mismo criterio de
+		// unión (coma + "y" final) que regionPhrase.
+		regressionTitleSuffix() { var p = this.cols ? this.cols.regionTypesPhrase() : ''; return p ? ' de ' + p : ''; },
 		scatterSubject(rowCol, colCol) { return rowCol.fullName() + ' y ' + colCol.fullName() + this.regionPhrase(); },
 		scatterSubjectKeys(xk, yk) {
 			var x = this.colByKey[xk], y = this.colByKey[yk];
@@ -603,6 +607,9 @@ export default {
 	.rel-table { min-width: calc(min(480px, 100%)); font-size: 14px; }
 	.rel-table thead th { font-size: 14px; font-weight: normal; color: #455a64; text-align: right; padding: 4px 8px; border-bottom: 2px solid #cfd8dc; background: #f7f9fb; }
 	.rel-table thead th.left { text-align: left; }
+	/* Los encabezados de columna (letras) de la matriz van centrados en su celda,
+	   no a la derecha como el resto de rel-table (que son valores numéricos). */
+	.corr-matrix .cm-head { text-align: center; }
 	.rel-table td { text-align: right; padding: 2px 8px; border-bottom: 1px solid #f5f5f5; color: #455a64; }
 	.rel-table td.rel-cat { text-align: left; color: #37474f; padding-left: 14px; }
 	.rel-table td.rel-cat.indent { padding-left: 22px; }

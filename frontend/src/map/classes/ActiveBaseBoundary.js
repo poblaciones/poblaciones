@@ -8,15 +8,12 @@ import ActiveBoundary from './ActiveBoundary';
 
 export default ActiveBaseBoundary;
 
-ActiveBaseBoundary.DEFAULT_COLOR = '#95a3c1';
-
-function ActiveBaseBoundary(data, color = null) {
+function ActiveBaseBoundary(data) {
 	ActiveBoundary.call(this, data);
 	this.isBaseMetric = true;
 	this.dynamicWidth = false;
 	this.dashedLine = false;
 	this.lineWidth = 2;
-	this.color = (color ? color : ActiveBaseBoundary.DEFAULT_COLOR);
 };
 
 ActiveBaseBoundary.prototype = new ActiveBoundary();
@@ -30,4 +27,3 @@ ActiveBaseBoundary.prototype.Hide = function () {
 	this.properties.Visible = false;
 	window.SegMap.Metrics.Remove(this, true);
 };
-

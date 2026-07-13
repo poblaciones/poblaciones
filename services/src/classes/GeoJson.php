@@ -177,6 +177,10 @@ class GeoJson
 			{
 				$properties['Description'] = $row['Caption'];
 			}
+
+			if (isset($row['LID']))
+				$properties['LabelId'] = $row['LID'];
+
 		$ret['properties'] = $properties;
 		}
 		if ($project)

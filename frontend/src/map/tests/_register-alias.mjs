@@ -31,6 +31,8 @@ globalThis.__stubRequire = function (specifier) {
 			return { stringify: (o) => JSON.stringify(o) };
 		case 'form-data':
 			return function () { this.append = function () {}; };
+		case 'lodash.debounce':
+			return function debounce(fn) { return fn; };
 		default:
 			throw new Error('__stubRequire: paquete no contemplado: ' + specifier);
 	}

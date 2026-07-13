@@ -107,6 +107,8 @@
 	document.getElementById('updateClippingGeography').addEventListener('click', function(e) {
 		e.preventDefault();
 		disableButton('updateClippingGeography');
+		clearProgress();
+
 		post({ regenClippingGeographyStart: 1 }, function(state) {
 			updateProgress(state);
 			continueRegen(state);
@@ -156,6 +158,14 @@
 			alert(err.message);
 			enableButton('updateClippingGeography');
 		});
+	}
+
+	function clearProgress() {
+		var el = document.getElementById('regenClippingGeographyProgress');
+		if (!el)
+			return;
+
+		el.textContent = '';
 	}
 
 	function updateProgress(state) {

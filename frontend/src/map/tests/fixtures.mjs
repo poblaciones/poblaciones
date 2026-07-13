@@ -14,7 +14,7 @@
 
 export function setupWindow(overrides) {
 	const segMap = {
-		frame: { Zoom: 10, Envelope: { Min: { Lat: 0, Lon: 0 }, Max: { Lat: 0, Lon: 0 } }, Center: { Lat: 0, Lon: 0 } },
+		frame: { Zoom: 10, Envelope: { Min: { Lat: 0, Lon: 0 }, Max: { Lat: 0, Lon: 0 } }, Center: { Lat: 0, Lon: 0 }, ClippingCircle: null },
 		Clipping: {
 			HasClippingLevels() { return false; },
 			LevelMachLevels() { return true; },
@@ -23,6 +23,10 @@ export function setupWindow(overrides) {
 		SaveRoute: { UpdateRoute() {}, Disabled: false },
 		Session: { Content: makeCallRecorder(), UI: makeCallRecorder() },
 		Configuration: { UseGradients: false, UseTextures: false, IsMobile: false, StaticWorks: [], StaticServer: 'http://static' },
+		Signatures: { Boundary: 'rev', Suffix: 'suffix', Preffix: 'preffix' },
+		// Por defecto no resuelve nunca; los tests que ejercitan un request
+		// (UpdateSummary, etc.) sobreescriben segMap.Get con su propio mock.
+		Get() { return new Promise(function () {}); },
 		MapsApi: null,
 		InfoWindow: { CheckUpdateNavigation() {} },
 		Metrics: null,
@@ -32,6 +36,7 @@ export function setupWindow(overrides) {
 		SegMap: segMap,
 		Use: {},
 		Embedded: { Active: false },
+		host: 'http://host',
 		innerWidth: 1200,
 		innerHeight: 800,
 	}, overrides || {});
@@ -239,4 +244,53 @@ export function mountLite(component, options) {
 		}
 	}
 	return instance;
+}
+
+// Fixtures de boundary. A diferencia de metric, cada Version trae su
+// nombre/Id directo (sin anidar en Version.Name) y cada ValueLabel
+// representa un ClippingRegion de origen (Id/Name/LineColor/Visible ya
+// resueltos por el servidor, sin variable de por medio).
+export function makeBoundaryValueLabel(overrides) {
+	return Object.assign({
+		Id: nextId++,
+		Name: 'Barrios de Tandil',
+		LineColor: '#3388ff',
+		FillColor: '#a8c8ff',
+		Visible: true,
+		Values: null,
+	}, overrides);
+}
+
+export function makeBoundaryVersion(overrides) {
+	const base = {
+		Id: nextId++,
+		Name: '2022',
+		LabelsCollapsed: false,
+		IsSimpleCount: false,
+		Count: null,
+		ValueLabels: null,
+		Metadata: null,
+	};
+	const version = Object.assign(base, overrides);
+	if (version.ValueLabels === null) {
+		version.ValueLabels = [
+			makeBoundaryValueLabel({ Name: 'Barrios de Tandil' }),
+			makeBoundaryValueLabel({ Name: 'Barrios de CABA', LineColor: '#ff8833' }),
+		];
+	}
+	return version;
+}
+
+export function makeBoundaryProperties(overrides) {
+	const base = {
+		Id: nextId++,
+		Name: 'Barrios',
+		SelectedVersionIndex: 0,
+		Versions: null,
+	};
+	const properties = Object.assign(base, overrides);
+	if (properties.Versions === null) {
+		properties.Versions = [makeBoundaryVersion()];
+	}
+	return properties;
 }

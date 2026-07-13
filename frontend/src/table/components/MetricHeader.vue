@@ -149,7 +149,6 @@
 		background-color: #fff;
 		border: 1px solid #e0e0e0;
 		border-radius: 6px;
-		height: 100%;
 		width: 100%;
 		min-width: 300px;
 		position: relative;

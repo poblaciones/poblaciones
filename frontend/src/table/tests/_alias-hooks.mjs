@@ -22,7 +22,8 @@ var STUBS = {
 	'@/map/classes/ActiveBoundary': '_stubs/ActiveBoundary.mjs',
 	'@/table/classes/pivotValue.js': '_stubs/pivotValue.mjs',
 	'@/table/classes/boundaryTree': '_stubs/boundaryTree.mjs',
-	'@/table/classes/boundaryTree.js': '_stubs/boundaryTree.mjs'
+	'@/table/classes/boundaryTree.js': '_stubs/boundaryTree.mjs',
+	'@/map/js/helper': '_stubs/helper.mjs'
 };
 
 export async function resolve(specifier, context, nextResolve) {

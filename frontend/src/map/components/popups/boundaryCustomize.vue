@@ -21,25 +21,10 @@
 					</td>
 				</tr>
 				<tr>
-					<td class="optionsLabel">Ancho:</td>
+					<td class="optionsLabel">Trama:</td>
 					<td>
-						<div class="btn-group">
-							<button type="button" @click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
-								Fino
-							</button>
-							<button type="button" @click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
-								Intermedio
-							</button>
-							<button type="button" @click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
-								Grueso
-							</button>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td class="optionsLabel">Color:</td>
-					<td>
-						<mp-color-picker @selected="colorChanged" :top-padding="false" v-model="boundary.color" />
+						<PatternButtons :patterns="boundary.getValidPatterns()" :customPattern="boundary.customPattern"
+														:defaultPattern="boundary.pattern" @change="changePattern" />
 					</td>
 				</tr>
 			</table>
@@ -49,11 +34,13 @@
 
 <script>
 import Modal from '@/map/components/popups/modal';
+import PatternButtons from '@/map/components/controls/patternButtons';
 
 export default {
 	name: 'boundaryCustomize',
 	components: {
-		Modal
+		Modal,
+		PatternButtons
 	},
 	props: [
 		'backgroundColor'
@@ -64,45 +51,17 @@ export default {
 		};
 	},
 	methods: {
-		range(col, from, to) {
-			var ret = [];
-			for(var n = 0; n < col.length; n++) {
-				if (n >= from && n <= to) {
-					ret.push(col[n]);
-				}
-			}
-			return ret;
-		},
 		show(boundary) {
 			this.boundary = boundary;
 			this.$refs.dialog.show();
 		},
-		getActiveWidth(key) {
-			if (key === this.boundary.borderWidth) {
-				return ' active';
-			} else {
-				return '';
+		changePattern(key) {
+			var newPattern = key;
+			if (key === this.boundary.pattern) {
+				newPattern = '';
 			}
-		},
-		getActiveOpacity(key) {
-			if (key === this.boundary.opacity) {
-				return ' active';
-			} else {
-				return '';
-			}
-		},
-		changeOpacity(key) {
-			if (this.boundary.opacity !== key) {
-				this.boundary.opacity = key;
-				this.boundary.UpdateMap();
-			}
-		},
-		colorChanged() {
-			this.boundary.UpdateMap();
-		},
-		changeWidth(width) {
-			if (this.boundary.borderWidth !== width) {
-				this.boundary.borderWidth = width;
+			if (this.boundary.customPattern !== newPattern) {
+				this.boundary.customPattern = newPattern;
 				this.boundary.UpdateMap();
 			}
 		},

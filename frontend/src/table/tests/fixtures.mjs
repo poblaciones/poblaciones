@@ -89,11 +89,16 @@ function col(key, unit, meta) {
 	var weighting = unit === '%'
 		? { kind: 'denominator', label: 'Total', available: true }
 		: { kind: 'self', label: meta.variableName || 'Valor', available: true };
+	// Modo de resumen (mode): el fixture solo usa dos casos, '%' (incidencia, I) y
+	// conteo (N). Coincide con el campo real que arma ActiveDataset.js (columnRecord),
+	// necesario para needsUniverseAggregation() en RegionDistribution.
+	var mode = unit === '%' ? 'I' : 'N';
 	return {
 		key: key,
 		label: meta.metricName + (meta.labelName ? ' — ' + meta.labelName : ''),
 		shortLabel: meta.labelName || meta.variableName,
 		unit: unit,
+		mode: mode,
 		role: 'measure',
 		weighting: weighting,
 		formatter: function (v) { return (Math.round(v * 100) / 100).toString(); },

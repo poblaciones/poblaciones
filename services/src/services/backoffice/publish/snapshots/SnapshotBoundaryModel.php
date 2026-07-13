@@ -48,6 +48,7 @@ class SnapshotBoundaryModel
 		$sql = "INSERT INTO snapshot_boundary_version_item
 								  	(`biw_boundary_version_id`,
 									`biw_boundary_id`,
+										biw_clipping_region_id,
 										`biw_clipping_region_item_id`,
 										`biw_caption`,
 										`biw_code`,
@@ -57,7 +58,7 @@ class SnapshotBoundaryModel
 										biw_geometry_r2,
 										biw_geometry_r3,
 										biw_envelope)
-										SELECT bcr_boundary_version_id, bvr_boundary_id, cli_id, cli_caption, cli_code, cli_centroid,
+										SELECT bcr_boundary_version_id, bvr_boundary_id, cli_clipping_region_id, cli_id, cli_caption, cli_code, cli_centroid,
 											cli_area_m2, cli_geometry_r1, cli_geometry_r2, cli_geometry_r3,
 											PolygonEnvelope(cli_geometry)
 										FROM boundary_version_clipping_region

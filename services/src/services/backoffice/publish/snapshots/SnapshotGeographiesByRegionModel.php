@@ -112,18 +112,39 @@ class SnapshotGeographiesByRegionModel
 		}
 		else // 'up'
 		{
-			$sql = $sqlInsert . "SELECT DISTINCT cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, cai1.gei_id, cai1.gei_urbanity, cai1.gei_area_m2, " .
+			// Preciso una temporal para quedarme después solo con los parents mayoritarios
+			$dropTempSql = "DROP TEMPORARY TABLE IF EXISTS tmp_total_children;";
+			$createTempSql = "CREATE TEMPORARY TABLE tmp_total_children (
+									tmp_clipping_region_item_id INT PRIMARY KEY,
+									total_children INT
+								) ENGINE=MEMORY
+							SELECT cgv_clipping_region_item_id AS tmp_clipping_region_item_id, COUNT(*) AS total_children
+								FROM snapshot_clipping_region_item_geography_item s
+								JOIN geography_item gei_children ON gei_children.gei_id = s.cgv_geography_item_id
+								JOIN geography_item cai1 ON cai1.gei_id = gei_children.gei_parent_id
+								JOIN geography ON geo_id = cai1.gei_geography_id
+								WHERE gei_children.gei_parent_id IS NOT NULL
+									AND cgv_level = " . ($level + 1) . "
+									AND geo_revision = " . $revision . "
+								GROUP BY cgv_clipping_region_item_id;";
+			App::Db()->exec($dropTempSql);
+			App::Db()->exec($createTempSql);
+			$sql = $sqlInsert . "SELECT cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, cai1.gei_id, cai1.gei_urbanity, cai1.gei_area_m2, " .
 				"cai1.gei_population, cai1.gei_households, cai1.gei_children, cai1.gei_geography_id, " . $level
-				. " FROM snapshot_clipping_region_item_geography_item " .
+				. " FROM snapshot_clipping_region_item_geography_item s " .
 							"JOIN geography_item gei_children ON gei_children.gei_id = cgv_geography_item_id " .
 							"JOIN geography_item cai1 ON cai1.gei_id = gei_children.gei_parent_id " .
 							"JOIN clipping_region ON clr_id = cgv_clipping_region_id " .
 							"JOIN geography ON geo_id = cai1.gei_geography_id " .
 							"WHERE gei_children.gei_parent_id IS NOT NULL AND cgv_level = " . ($level + 1)
-							. " AND geo_revision = " . $revision;
+							. " AND geo_revision = " . $revision . "
+								 GROUP BY cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, cai1.gei_id, cai1.gei_urbanity, cai1.gei_area_m2,
+	cai1.gei_population, cai1.gei_households, cai1.gei_children, cai1.gei_geography_id
+								HAVING COUNT(*) >  (SELECT total_children / 2 FROM tmp_total_children WHERE tmp_clipping_region_item_id = cgv_clipping_region_item_id )";
 			$r = App::Db()->exec($sql);
 			$rowsAffected += $r;
 			$levelRowsAffected += $r;
+			App::Db()->exec($dropTempSql);
 		}
 
 		$revisionIndex++;

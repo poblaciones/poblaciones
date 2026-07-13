@@ -67,7 +67,7 @@ class BoundaryModel extends BaseModel
 						1 vvl_visible
 					 FROM boundary_version_clipping_region
 					 JOIN clipping_region ON bcr_clipping_region_id = clr_id
-					WHERE bcr_boundary_version_id = ?";
+					WHERE bcr_boundary_version_id = ? ORDER BY clr_caption";
 		$ret = App::Db()->fetchAll($sql, array($id));
 
 		Profiling::EndTimer();
@@ -76,7 +76,6 @@ class BoundaryModel extends BaseModel
 
 	public function GetRecommendedBoundaries()
 	{
-
 		Profiling::BeginTimer();
 		$sql = "SELECT bou_id Id, bou_caption Name, bou_icon Icon, bou_sort_by OrderBy,
 						(SELECT MAX(bvr_id) FROM boundary_version WHERE bvr_boundary_id = bou_id) VersionId

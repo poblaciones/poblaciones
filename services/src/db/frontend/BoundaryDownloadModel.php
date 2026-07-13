@@ -87,6 +87,8 @@ class BoundaryDownloadModel extends BaseDownloadModel
 			Format::A, 0, 20, 0, Measurement::Nominal, Alignment::Left);
 		$cols[] = self::GetCustomCol('_data_table.biw_caption', 'nombre', 'Nombre',
 			Format::A, 0, 100, 0, Measurement::Nominal, Alignment::Left);
+		$cols[] = self::GetCustomCol('(SELECT clr_caption FROM clipping_region WHERE clr_id = biw_clipping_region_id)', 'tipo', 'Tipo',
+			Format::A, 0, 50, 0, Measurement::Nominal, Alignment::Left);
 		return $cols;
 	}
 

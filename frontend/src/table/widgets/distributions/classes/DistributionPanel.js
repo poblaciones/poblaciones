@@ -69,6 +69,26 @@ DistributionPanel.prototype.unit = function () {
 	return this.columns.length ? (this.columns[0].unit || '') : '';
 };
 
+// El modo de resumen crudo (N, T, I, P, FIL, K, A, D, H), tal como lo trae la
+// columna. A diferencia de isPercent() (que mira si la UNIDAD se ve como
+// porcentaje, para decisiones visuales de formato), esto identifica el modo en
+// sí, para decisiones de CÁLCULO donde importa la fórmula, no el símbolo.
+DistributionPanel.prototype.summaryMode = function () {
+	return this.columns.length ? (this.columns[0].mode || '') : '';
+};
+
+// ¿Este modo necesita componerse "sobre el universo" al armar la barra de una
+// región con varias categorías? I/P/FIL/A son todos ratios cuyo denominador
+// puede diferir entre categorías (el total propio de cada una): sumar los
+// valores normales daría de más (no son aditivos entre sí). Se aplica por modo,
+// no por si la unidad "se ve" como porcentaje — una incidencia expresada como
+// tasa (p. ej. "/1M") tiene el mismo problema de no-aditividad que una expresada
+// como "%", aunque su unidad no lleve el símbolo.
+DistributionPanel.prototype.needsUniverseAggregation = function () {
+	var m = this.summaryMode();
+	return m === 'I' || m === 'P' || m === 'FIL' || m === 'A';
+};
+
 // Variable de brecha: el valor es un delta (diferencia de puntos porcentuales o
 // variación relativa), no una incidencia 0-100. Lo marca el meta de la columna.
 DistributionPanel.prototype.isGap = function () {
@@ -85,6 +105,13 @@ DistributionPanel.prototype.valueUnit = function () {
 		return (u && u.indexOf('%') !== -1) ? 'pp.' : (u || '');
 	}
 	return this.unit();
+};
+
+// Variable normalizadora (p. ej. "/ km²"): el mismo dato que ya muestra el combo
+// de tipo de la pivot para incidencia, resuelto en origen (ActiveDataset) porque
+// depende del helper del visor. Sin ella, esa información se perdía en el chart.
+DistributionPanel.prototype.normCaption = function () {
+	return this.columns.length ? (this.columns[0].meta.normCaption || '') : '';
 };
 
 // ¿El delta de la brecha está en puntos porcentuales? (brecha sobre variable %).

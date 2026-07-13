@@ -132,11 +132,11 @@ export function valueHeaderForKey(key, variable) {
 			if (variable && variable.IsGap) return 'Δ %';
 			switch (variable ? variable.NormalizationScale : null) {
 				case 100: return '%';
-				case 1: return '/1';
-				case 1000: return '/k';
-				case 10000: return '/10k';
-				case 100000: return '/100k';
-				case 1000000: return '/1M';
+				case 1: return 'N/1';
+				case 1000: return 'N/k';
+				case 10000: return 'N/10k';
+				case 100000: return 'N/100k';
+				case 1000000: return 'N/1M';
 			}
 			return 'N/A';
 		case 'D': return 'N/Km<sup>2</sup>';

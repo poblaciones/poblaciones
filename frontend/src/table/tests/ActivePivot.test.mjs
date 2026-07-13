@@ -239,6 +239,45 @@ describe('GroupRowsByParent — conteo de hijos listados en el label', function 
 		var grouped = p.GroupRowsByParent(rows);
 		expect(grouped[0][0].Label).toBe('Catamarca (3)');
 	});
+
+	it('el subtotal hereda el boundaryId de sus hojas y junta sus FID en ChildItemIds (para la \'x\' de quitar el grupo)', function () {
+		var p = new ActivePivot();
+		p.MetricTuples.metricTuples = [{
+			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
+			metric: { properties: { SummaryMetric: 'N' } }, variable: {}
+		}];
+		var rows = [
+			[{ Label: 'A', FID: 11, Parent: 'Catamarca', boundaryId: 900 }, { Value: 10, Total: 20 }],
+			[{ Label: 'B', FID: 22, Parent: 'Catamarca', boundaryId: 900 }, { Value: 5,  Total: 15 }]
+		];
+		var grouped = p.GroupRowsByParent(rows);
+		var subtotal = grouped[0][0];
+		expect(subtotal.boundaryId).toBe(900);
+		expect(subtotal.ChildItemIds).toEqual([11, 22]);
+	});
+
+	it('GroupKey es el nombre crudo (coincide con el Parent de las hojas), distinto del Label con el conteo', function () {
+		// Regresión real: la UI usaba Label para identificar el grupo (colapsar/
+		// expandir y decidir qué filas ocultar), comparándolo contra el Parent de
+		// las hojas. Al agregar el conteo "(N)" al Label, dejó de coincidir con
+		// Parent y las filas ya no se ocultaban (el ícono cambiaba, pero nada pasaba).
+		// GroupKey existe para eso: la clave de identidad, sin el conteo.
+		var p = new ActivePivot();
+		p.MetricTuples.metricTuples = [{
+			metricId: 1, key: 'k1', versionId: 10, levelId: 5, isEmpty: false,
+			metric: { properties: { SummaryMetric: 'N' } }, variable: {}
+		}];
+		var rows = [
+			[{ Label: 'A', FID: 1, Parent: 'Catamarca' }, { Value: 10, Total: 20 }],
+			[{ Label: 'B', FID: 2, Parent: 'Catamarca' }, { Value: 5,  Total: 15 }]
+		];
+		var grouped = p.GroupRowsByParent(rows);
+		var subtotal = grouped[0][0];
+		expect(subtotal.Label).toBe('Catamarca (2)');
+		expect(subtotal.GroupKey).toBe('Catamarca');
+		// La propiedad que importa: GroupKey coincide EXACTO con Parent de las hojas.
+		expect(subtotal.GroupKey).toBe(rows[0][0].Parent);
+	});
 });
 
 describe('ResolveAllCategories — incidencia sobre el total propio', function () {
@@ -249,11 +288,11 @@ describe('ResolveAllCategories — incidencia sobre el total propio', function (
 		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
 			Region: {}, Items: [ { Caption: 'Depto X', FID: 1 } ]
 		} }; } } ] };
-		p._categorySpecs = function () {
+		p._categoryTuples = function () {
 			return {
 				base: { summary: 'I', variable: { NormalizationScale: 100 }, level: 0, levelId: 0, versionId: 11, variableId: 1 },
-				specs: [ { spec: { labelId: 103 }, labelId: 103, name: '65% y más', color: '#a' } ],
-				totalSpec: { labelId: null, isTotal: true }
+				tuples: [ { tuple: { labelId: 103 }, labelId: 103, name: '65% y más', color: '#a' } ],
+				totalTuple: { labelId: null, isTotal: true }
 			};
 		};
 		p.ResolveCell = function (spec) {
@@ -278,11 +317,11 @@ describe('ResolveAllCategories — incidencia con celdas sin valor', function ()
 		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
 			Region: {}, Items: items
 		} }; } } ] };
-		p._categorySpecs = function () {
+		p._categoryTuples = function () {
 			return {
 				base: { summary: 'I', variable: { NormalizationScale: 100 }, level: 0, levelId: 0, versionId: 11, variableId: 1 },
-				specs: [ { spec: { labelId: 201 }, labelId: 201, name: 'Menor que 85%', color: '#a' } ],
-				totalSpec: { labelId: null, isTotal: true }
+				tuples: [ { tuple: { labelId: 201 }, labelId: 201, name: 'Menor que 85%', color: '#a' } ],
+				totalTuple: { labelId: null, isTotal: true }
 			};
 		};
 		p.ResolveCell = function (spec, region, item) {
@@ -294,6 +333,45 @@ describe('ResolveAllCategories — incidencia con celdas sin valor', function ()
 		var res = p.ResolveAllCategories(2, 11);
 		expect(res).toHaveLength(1);
 		expect(res[0].value).toBeCloseTo(84, 1);
+	});
+});
+
+
+describe('ResolveAllCategoriesByRegion — % de área (modo A) compone bien por región', function () {
+	it('usa un denominador común (grandAreaSum) entre categorías: la barra de una región no supera ~100%', function () {
+		// Bug observado: una barra en 202% porque cada categoría se medía contra SU
+		// PROPIA área total (colAreaSum por columna) en vez de un denominador común
+		// entre categorías, igual que ya hacía col% (P) con grandValueSum.
+		// Urbano: 30 (región 1) + 40 (región 2) = 70 de área total.
+		// Rural:  20 (región 1) + 10 (región 2) = 30 de área total.
+		// Gran total de área (todas las categorías, todas las regiones) = 100.
+		var p = Object.create(ActivePivot.prototype);
+		var items = [{ Caption: 'Región 1', FID: 1 }, { Caption: 'Región 2', FID: 2 }];
+		p.Regions = { items: [ { SelectedVersion: function () { return { Selection: {
+			Region: {}, Items: items
+		} }; } } ] };
+		p._categoryTuples = function () {
+			return {
+				base: { summary: 'A', variable: {}, level: 0, levelId: 0, versionId: 11, variableId: 1 },
+				tuples: [
+					{ tuple: { labelId: 101 }, labelId: 101, name: 'Urbano', color: '#a' },
+					{ tuple: { labelId: 102 }, labelId: 102, name: 'Rural', color: '#b' }
+				],
+				totalTuple: { labelId: null, isTotal: true }
+			};
+		};
+		p.ResolveCell = function (spec, region, item) {
+			if (spec.isTotal) return { Empty: false, Value: null, Total: null, Area: null };
+			var isUrbano = spec.labelId === 101;
+			if (item.FID === 1) return { Empty: false, Area: isUrbano ? 30 : 20 };
+			return { Empty: false, Area: isUrbano ? 40 : 10 };
+		};
+		var res = p.ResolveAllCategoriesByRegion(2, 11);
+		expect(res).toHaveLength(2);
+		var region1 = res[0].parts[0].valueOnUniverse + res[0].parts[1].valueOnUniverse;
+		var region2 = res[1].parts[0].valueOnUniverse + res[1].parts[1].valueOnUniverse;
+		expect(region1).toBeCloseTo(50, 1);   // (30+20)/100*100, no un valor inflado
+		expect(region2).toBeCloseTo(50, 1);   // (40+10)/100*100
 	});
 });
 

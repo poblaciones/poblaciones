@@ -1,10 +1,11 @@
 import { describe, it, expect } from './_harness.mjs';
-import { setupWindow, makeMetricProperties, makeVersion, makeLevel, makeVariable, makeValueLabel } from './fixtures.mjs';
+import { setupWindow, makeMetricProperties, makeVersion, makeLevel, makeVariable, makeValueLabel, makeBoundaryProperties, makeBoundaryVersion, makeBoundaryValueLabel } from './fixtures.mjs';
 import SelectedInfoRouter from '@/map/router/SelectedInfoRouter';
 import FrameRouter from '@/map/router/FrameRouter';
 import SaveRoute from '@/map/classes/SaveRoute';
 import RestoreRoute from '@/map/classes/RestoreRoute';
 import ActiveSelectedMetric from '@/map/classes/ActiveSelectedMetric';
+import ActiveBoundary from '@/map/classes/ActiveBoundary';
 
 describe('SelectedInfoRouter: compresión de visibilidades (deflate/inflate)');
 
@@ -170,4 +171,134 @@ it('appendValue omite el valor cuando coincide con su default', () => {
 	expect(saveRoute.appendValue(['a', 0, 0])).toBe('');
 	expect(saveRoute.appendValue(['t', 'b'])).toBe('tb');
 	expect(saveRoute.appendValue([123])).toBe('123');
+});
+
+describe('SelectedInfoRouter: boundary — serialización (color y ancho ya no se persisten)');
+
+function makeBoundary(overrides) {
+	setupWindow();
+	return new ActiveBoundary(makeBoundaryProperties(overrides));
+}
+
+it('con todo en default, omite LabelsCollapsed/customPattern/visibilidad de ValueLabels', () => {
+	const segMap = setupWindow();
+	const boundary = new ActiveBoundary(makeBoundaryProperties({ Id: 42 }));
+	segMap.Metrics = { metrics: [boundary] };
+	const router = new SelectedInfoRouter();
+	const saveRoute = new SaveRoute();
+	expect(saveRoute.callSubscriber(router)).toBe('42!tb');
+});
+
+it('con showDescriptions activado (desvío del nuevo default: no mostrarlas), sí lo serializa', () => {
+	const segMap = setupWindow();
+	const boundary = new ActiveBoundary(makeBoundaryProperties({ Id: 42 }));
+	boundary.showDescriptions = true;
+	segMap.Metrics = { metrics: [boundary] };
+	const router = new SelectedInfoRouter();
+	const saveRoute = new SaveRoute();
+	expect(saveRoute.callSubscriber(router)).toBe('42!tb!d1');
+});
+
+it('con LabelsCollapsed y customPattern activos, sí los serializa', () => {
+	const segMap = setupWindow();
+	const boundary = new ActiveBoundary(makeBoundaryProperties({ Id: 42 }));
+	boundary.SelectedVersion().LabelsCollapsed = true;
+	boundary.customPattern = 0;
+	segMap.Metrics = { metrics: [boundary] };
+	const router = new SelectedInfoRouter();
+	const saveRoute = new SaveRoute();
+	expect(saveRoute.callSubscriber(router)).toBe('42!tb!c1!p0');
+});
+
+it('con ShowChart apagado y summaryMetric distinto del default, los serializa (h y m)', () => {
+	const segMap = setupWindow();
+	const boundary = new ActiveBoundary(makeBoundaryProperties({ Id: 42 }));
+	boundary.ShowChart = false;
+	boundary.summaryMetric = 'K';
+	segMap.Metrics = { metrics: [boundary] };
+	const router = new SelectedInfoRouter();
+	const saveRoute = new SaveRoute();
+	expect(saveRoute.callSubscriber(router)).toBe('42!tb!h0!mK');
+});
+
+it('parseBoundary interpreta ShowChart y SummaryMetric', () => {
+	const router = new SelectedInfoRouter();
+	const parsed = router.parseBoundary({ '': '77', h: '0', m: 'K' });
+	expect(parsed.ShowChart).toBeFalsy();
+	expect(parsed.SummaryMetric).toBe('K');
+});
+
+it('RestoreBoundaryState aplica ShowChart y SummaryMetric sin marcar mapChanged (no dibujan el mapa)', () => {
+	const segMap = setupWindow();
+	const boundary = new ActiveBoundary(makeBoundaryProperties({
+		Versions: [makeBoundaryVersion({ ValueLabels: [makeBoundaryValueLabel({ Id: 501 })] })],
+	}));
+	const router = new SelectedInfoRouter();
+	const state = {
+		VersionInfo: '0', Visible: true, ShowDescriptions: false,
+		CustomPattern: '', LabelsCollapsed: false, ValueLabelStates: '',
+		ShowChart: false, SummaryMetric: 'K',
+	};
+	const changed = router.RestoreBoundaryState(boundary, state);
+	expect(boundary.ShowChart).toBeFalsy();
+	expect(boundary.summaryMetric).toBe('K');
+	expect(changed).toBeFalsy();
+});
+
+it('serializa el índice de versión real (properties.SelectedVersionIndex, no un campo de la Version)', () => {
+	const segMap = setupWindow();
+	const boundary = new ActiveBoundary(makeBoundaryProperties({
+		Id: 42,
+		SelectedVersionIndex: 1,
+		Versions: [makeBoundaryVersion(), makeBoundaryVersion()],
+	}));
+	segMap.Metrics = { metrics: [boundary] };
+	const router = new SelectedInfoRouter();
+	const saveRoute = new SaveRoute();
+	expect(saveRoute.callSubscriber(router)).toBe('42!tb!a1');
+});
+
+it('BoundaryValueLabelsToRoute comprime la visibilidad, mismo mecanismo que VariablesToRoute', () => {
+	const boundary = makeBoundary();
+	boundary.SelectedVersion().ValueLabels[1].Visible = false;
+	const router = new SelectedInfoRouter();
+	expect(router.BoundaryValueLabelsToRoute(boundary)).toBe(router.deflateString('10'));
+});
+
+it('con todas las categorías visibles, BoundaryValueLabelsToRoute devuelve vacío', () => {
+	const boundary = makeBoundary();
+	const router = new SelectedInfoRouter();
+	expect(router.BoundaryValueLabelsToRoute(boundary)).toBe('');
+});
+
+describe('SelectedInfoRouter: boundary — parseo y restauración');
+
+it('parseBoundary interpreta LabelsCollapsed, CustomPattern y ValueLabelStates', () => {
+	const router = new SelectedInfoRouter();
+	const parsed = router.parseBoundary({ '': '77', c: '1', p: '0', w: router.deflateString('10') });
+	expect(parsed.LabelsCollapsed).toBeTruthy();
+	expect(parsed.CustomPattern).toBe(0);
+	expect(parsed.ValueLabelStates).toBe('10');
+});
+
+it('parseBoundary ya no expone Color ni BorderWidth', () => {
+	const router = new SelectedInfoRouter();
+	const parsed = router.parseBoundary({ '': '77' });
+	expect('Color' in parsed).toBeFalsy();
+	expect('BorderWidth' in parsed).toBeFalsy();
+});
+
+it('RestoreBoundaryState aplica la visibilidad de cada ValueLabel según ValueLabelStates', () => {
+	const boundary = makeBoundary();
+	const router = new SelectedInfoRouter();
+	const state = {
+		VersionInfo: '0', Visible: true, ShowDescriptions: true,
+		CustomPattern: 0, LabelsCollapsed: true, ValueLabelStates: '10',
+	};
+	const changed = router.RestoreBoundaryState(boundary, state);
+	expect(changed).toBeTruthy();
+	expect(boundary.SelectedVersion().LabelsCollapsed).toBeTruthy();
+	expect(boundary.customPattern).toBe(0);
+	expect(boundary.SelectedVersion().ValueLabels[0].Visible).toBeTruthy();
+	expect(boundary.SelectedVersion().ValueLabels[1].Visible).toBeFalsy();
 });

@@ -27,7 +27,7 @@
 					<div class="w-block-head">
 						<div class="dist-head-titles">
 							<div class="ms-indicator">{{ ind.name }}</div>
-							<div class="ms-variable">{{ ind.variableName }}</div>
+							<div class="ms-variable">{{ ind.variableSubtitle }}</div>
 						</div>
 						<div class="dist-export">
 							<button class="dist-export-btn" @click.stop="toggleExportMenu(ind.metricId)" title="Exportar gráfico" aria-label="Exportar gráfico">
@@ -104,7 +104,6 @@
 									:is-percent="panel.isPercent()"
 									:is-gap="panel.isGap()"
 									:gap-in-points="panel.gapIsPoints()"
-									:value-unit="panel.valueUnit()"
 />
 								<button v-if="regionHiddenCount(panel) > 0"
 										class="dist-show-more" @click.stop="expandRegions(panel)">
@@ -242,7 +241,7 @@ export default {
 		weighted(v) { this.persist({ weighted: v }); },
 		axisMode(v) { this.persist({ axisMode: v }); this.$nextTick(this._fixLegendWidth); },
 		chartMode(v) { this.persist({ chartMode: v }); },
-		stacked(v) { this.persist({ stacked: v }); },
+		stacked(v) { this.persist({ stacked: v }); this.$nextTick(this._fixLegendWidth); },
 		// Cuando deja de corresponder apilar, el switch se deshabilita; si quedara en
 		// ON producía estados raros (se apilaba sin poder desapilar). Se apaga primero.
 		anyStackable(v) { if (!v && this.stacked) this.stacked = false; },
@@ -514,8 +513,16 @@ export default {
 	   así no aparece scrollbar ni queda hueco (lo resuelve el navegador, no el JS). */
 	.dist-indicator-body { padding: 10px 12px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 
-	.w-block-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding-right: 24px; }
-	.dist-export { position: absolute; right: 30px; flex: 0 0 auto; }
+	/* flex-direction:row explícito: widgetStyles.css define .w-block-head con
+	   column (título arriba, subtítulo abajo, para otros widgets); sin declararlo
+	   acá, esa propiedad no se pisa (un override de una propiedad no borra las que
+	   la regla compartida ya fijó y esta no menciona) y el título/export quedaban
+	   apilados en vez de en la misma fila. */
+	.w-block-head { display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 6px; }
+	/* Se posiciona en el flujo normal (no absolute): así el título "sabe" que debe
+	   dejarle lugar y se achica en vez de pasar por debajo. position:relative se
+	   mantiene como referencia para su propio menú desplegable. */
+	.dist-export { position: relative; flex: 0 0 auto; }
 	.dist-export-btn {
 		border: none; background: transparent; color: #90a4ae; cursor: pointer;
 		font-size: 13px; line-height: 1; padding: 4px 6px; border-radius: 4px;
@@ -530,13 +537,14 @@ export default {
 		padding: 7px 14px; font-size: 13px; color: #37474f; cursor: pointer; white-space: nowrap;
 	}
 	.dist-export-opt:hover { background: #e3f2fd; }
-	.dist-head-titles { min-width: 0; max-width: 320px; }
+	/* flex:1 (no un max-width fijo): se achica hasta el espacio real que deja el
+	   botón de exportar, en vez de asumir un ancho que puede no estar disponible. */
+	.dist-head-titles { flex: 1 1 auto; min-width: 0; }
 	.dist-head-titles .ms-indicator,
 	.dist-head-titles .ms-variable {
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: 320px;
 	}
 	.dist-collapse-btn {
 		border: none; background: transparent; color: #90a4ae; cursor: pointer;

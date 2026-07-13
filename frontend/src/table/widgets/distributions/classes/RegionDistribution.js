@@ -47,22 +47,20 @@ RegionDistribution.prototype._build = function () {
 	var catCols = this.panel.categoryColumns();
 	var totalOnly = catCols.length === 0;
 	var isGap = !!(this.panel.isGap && this.panel.isGap());
-	var isPercent = !!(this.panel.isPercent && this.panel.isPercent());
 
 	// Camino 1: resuelve las categorías por región para componer cada barra. Se usa:
 	//  - sin categorías elegidas (para mostrar la composición igual);
 	//  - SIEMPRE en brechas (el delta no se compone por suma de columnas: la barra
 	//    mide el delta del total y los colores la subdividen por peso);
-	//  - en incidencias/porcentajes con categorías elegidas, porque sumar las
-	//    incidencias de cada categoría sobre su propio total no tiene sentido (daría
-	//    >100%): la barra debe medir la incidencia del CONJUNTO. Para eso se usa el
+	//  - en cualquier modo ratio (I/P/FIL/A) con categorías elegidas, porque sumar
+	//    el valor de cada categoría sobre su PROPIO total no tiene sentido (daría
+	//    de más): la barra debe medir el agregado del CONJUNTO. Para eso se usa el
 	//    valor de cada categoría sobre el universo de la región (valueOnUniverse),
-	//    que sí es aditivo, y se suman.
-	// Componer la barra sumando los valores aditivos sobre el universo aplica a toda
-	// incidencia/porcentaje no-brecha, haya o no categorías elegidas: sumar las
-	// incidencias de cada categoría sobre su propio total daría >100%. Con o sin
-	// selección, la barra mide la incidencia del CONJUNTO (suma de valueOnUniverse).
-	var usePercentAgg = isPercent && !isGap;
+	//    que sí es aditivo, y se suman. El criterio es el modo en sí (I/P/FIL/A),
+	//    no si la unidad "se ve" como porcentaje: una incidencia expresada como
+	//    tasa (p. ej. "/1M") tiene el mismo problema de no-aditividad que una
+	//    expresada como "%", aunque su unidad no lleve el símbolo.
+	var usePercentAgg = !isGap && this.panel.needsUniverseAggregation();
 	if ((totalOnly || isGap || usePercentAgg) && this.pivot && typeof this.pivot.ResolveAllCategoriesByRegion === 'function') {
 		var resolved = this.pivot.ResolveAllCategoriesByRegion(this.panel.metricId(), this.panel.versionId());
 		if (resolved && resolved.length) {
@@ -102,7 +100,7 @@ RegionDistribution.prototype._build = function () {
 					rr.push({ label: src.label, fid: src.fid, total: s, parts: parts, isGroup: false });
 				}
 			}
-			this._rows = this._orderByPivot(rr);
+			this._rows = this._filterAndOrder(rr);
 			this._totalCount = this._rows.length;
 			this._totalOnly = false;
 			this._composed = true;
@@ -171,26 +169,42 @@ RegionDistribution.prototype.isComposed = function () {
 	return false;
 };
 
-// Reordena las filas del Camino 1 (que llegan en el orden original de las
-// regiones) para que imiten el orden de la pivot, que refleja el sort activo. Se
-// alinea por FID contra dataRows(); las filas sin correspondencia van al final en
-// su orden original.
-RegionDistribution.prototype._orderByPivot = function (rows) {
+// El Camino 1 resuelve directo desde el universo de la delimitación
+// (pivot.Regions.items, vía ResolveAllCategoriesByRegion), sin pasar por el
+// filtro de "sin datos en ningún indicador" que ya aplicó RefreshData al armar
+// pivot.Rows, ni por los grupos colapsados (excludedGroups, que es una
+// ocultación puramente de presentación). Sin este filtro, el Camino 1 graficaba
+// regiones sin dato y también los hijos de grupos colapsados, aunque la tabla no
+// los mostrara.
+//
+// dataset.dataRows() es la fuente de verdad de qué está VISIBLE con datos (ya
+// excluye lo sin dato); se cruza además con excludedGroups (que dataset.dataRows
+// no conoce, porque el colapso es un estado de la UI, no de la pivot) para
+// construir el orden y la visibilidad reales. Los fids que no aparecen en ese
+// conjunto se descartan; el resto se ordena igual que la tabla (el sort activo).
+RegionDistribution.prototype._visibleOrder = function () {
 	var dataRows = (this.dataset && typeof this.dataset.dataRows === 'function')
 		? this.dataset.dataRows() : [];
-	if (!dataRows.length) return rows;
+	var ex = this.excludedGroups;
 	var rank = {};
 	var next = 0;
 	for (var i = 0; i < dataRows.length; i++) {
 		var dr = dataRows[i];
+		if (dr.type === 'region-header') continue;
+		if (dr.type === 'data' && ex.length && ex.indexOf(dr.parentLabel) !== -1) continue;
 		if (dr.fid != null && rank[dr.fid] === undefined) rank[dr.fid] = next++;
 	}
-	var withRank = rows.map(function (row, idx) {
-		var r = (row.fid != null && rank[row.fid] !== undefined) ? rank[row.fid] : (next + idx);
-		return { row: row, r: r };
-	});
-	withRank.sort(function (a, b) { return a.r - b.r; });
-	return withRank.map(function (x) { return x.row; });
+	return rank;
+};
+
+// Filtra las filas del Camino 1 a las que están realmente visibles (con datos, no
+// en un grupo colapsado) y las ordena igual que la pivot.
+RegionDistribution.prototype._filterAndOrder = function (rows) {
+	var rank = this._visibleOrder();
+	if (!Object.keys(rank).length) return [];
+	var visible = rows.filter(function (row) { return row.fid != null && rank[row.fid] !== undefined; });
+	visible.sort(function (a, b) { return rank[a.fid] - rank[b.fid]; });
+	return visible;
 };
 
 RegionDistribution.prototype.rows = function () {

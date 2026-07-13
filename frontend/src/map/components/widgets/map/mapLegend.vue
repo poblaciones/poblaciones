@@ -14,10 +14,10 @@
 								<i class="fas fa-times mapLegendRemove" title="Quitar del mapa" @click.stop="removeMetric(metric)"></i>
 							</div>
 							<div class="mapLegendSubtitle" v-if="showVariableName(metric)">{{ selectedVariable(metric).Name }}</div>
-							<div class="mapLegendItem" v-for="label in allLabels(metric)" :key="label.Id" @click="toggleLabel(metric, label)">
-								<span class="mapLegendSwatch" :class="{ mapLegendSwatchDot: metric.IsLocationType() }"
+							<div class="mapLegendItem" v-for="label in allLabels(metric)" :key="label.Id" >
+								<span @click="toggleLabel(metric, label)" class="mapLegendSwatch" :class="{ mapLegendSwatchDot: metric.IsLocationType() }"
 											:style="swatchStyle(label)"></span>
-								<span class="mapLegendLabelName" :class="{ mapLegendLabelNameOff: !label.Visible }">{{ label.Name }}</span>
+								<span class="mapLegendLabelName" @click="toggleLabel(metric, label)" :class="{ mapLegendLabelNameOff: !label.Visible }">{{ label.Name }}</span>
 							</div>
 						</div>
 					</template>

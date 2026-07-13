@@ -21,7 +21,9 @@ BoundariesComposer.prototype.renderLabels = function (dataItems, tileKey, tileBo
 
 	for (var i = 0; i < dataItems.length; i++) {
 		var dataElement = dataItems[i];
-		this.AddFeatureText(dataElement, tileKey, tileBounds, zoom);
+		if (this.labelValueIsVisible(dataElement.properties.LabelId)) {
+			this.AddFeatureText(dataElement, tileKey, tileBounds, zoom);
+		}
 	}
 };
 
@@ -42,10 +44,20 @@ BoundariesComposer.prototype.AddFeatureText = function (dataElement, tileKey, ti
 	}
 };
 
+// Mismo patrón que DataShapeComposer.labelValueIsVisible: caché por tile de
+// la visibilidad resuelta contra el ValueLabel correspondiente.
+BoundariesComposer.prototype.labelValueIsVisible = function (val) {
+	var valKey = 'K' + val;
+	if (!(valKey in this.labelsVisibility)) {
+		this.labelsVisibility[valKey] = this.activeSelectedMetric.ResolveValueLabelVisibility(val);
+	}
+	return this.labelsVisibility[valKey];
+};
+
 BoundariesComposer.prototype.renderPolygons = function (mapResults, dataItems, gradient, div, x, y, z, tileBounds) {
 	var features = [];
 
-	const patternValue = 1;
+	var patternValue = this.activeSelectedMetric.GetPattern();
 
 	if (this.activeSelectedMetric.visible === false) {
 		return;
@@ -55,7 +67,9 @@ BoundariesComposer.prototype.renderPolygons = function (mapResults, dataItems, g
 	if (dataItems.length === 0) return;
 	for (var i = 0; i < dataItems.length; i++) {
 		var feature = this.processFeature(tileUniqueId, dataItems[i]);
-		features.push(feature);
+		if (feature !== null) {
+			features.push(feature);
+		}
 	}
 	var parentAttributes = {
 		boundaryId: this.activeSelectedMetric.properties.Id,
@@ -68,8 +82,11 @@ BoundariesComposer.prototype.GetTileCacheKey = function (x, y, z) {
 };
 
 BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElement) {
-	var val = 1;
-	// Lo agrega
+	// Se fija si por etiqueta (ClippingRegion de origen) está visible
+	var val = dataElement.properties.LabelId;
+	if (!this.labelValueIsVisible(val)) {
+		return null;
+	}
 	var isLineString = (dataElement.geometry.type === 'LineString' || dataElement.geometry.type === 'MultiLineString' ? ' ls' : '');
 	var mapItem = {
 		id: dataElement.id, type: dataElement.type, geometry: dataElement.geometry,
@@ -84,5 +101,3 @@ BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElemen
 BoundariesComposer.prototype.getCentroid = function (mapElement) {
 	return { Lat: mapElement.properties.centroid[0], Lon: mapElement.properties.centroid[1] };
 };
-
-

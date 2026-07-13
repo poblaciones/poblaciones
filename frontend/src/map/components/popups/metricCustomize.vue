@@ -105,16 +105,8 @@
 				<tr v-if="anyHasArea()">
 					<td class="optionsLabel">Trama:</td>
 					<td>
-						<div class="btn-group">
-							<button v-for="pattern in range(metric.getValidPatterns(), 0, 3)" :key="pattern.Key" type="button" @click="changePattern(pattern.Key)" class="btn btn-default btn-xs" :class="getActivePattern(pattern.Key)">
-								{{ pattern.Caption }}
-							</button>
-						</div>
-						<div class="btn-group" style="margin-top: 5px">
-							<button v-for="pattern in range(metric.getValidPatterns(), 4, 20)" :key="pattern.Key" type="button" @click="changePattern(pattern.Key)" class="btn btn-default btn-xs" :class="getActivePattern(pattern.Key)">
-								{{ pattern.Caption }}
-							</button>
-						</div>
+						<PatternButtons :patterns="metric.getValidPatterns()" :customPattern="metric.SelectedVariable().CustomPattern"
+																:defaultPattern="metric.SelectedVariable().Pattern" @change="changePattern" />
 					</td>
 				</tr>
 				<tr v-if="metric.SelectedLevel().Dataset.AreSegments">
@@ -140,11 +132,13 @@
 
 <script>
 import Modal from '@/map/components/popups/modal';
+import PatternButtons from '@/map/components/controls/patternButtons';
 
 export default {
 	name: 'customize',
 	components: {
-		Modal
+		Modal,
+		PatternButtons
 	},
 	props: [
 		'backgroundColor'
@@ -177,15 +171,6 @@ export default {
 			this.metric.SetShowValuesToSelectedVariableSet(value);
 			this.metric.RefreshMap();
 		},
-		range(col, from, to) {
-			var ret = [];
-			for(var n = 0; n < col.length; n++) {
-				if (n >= from && n <= to) {
-					ret.push(col[n]);
-				}
-			}
-			return ret;
-		},
 		show(metric) {
 			this.metric = metric;
 			this.$refs.dialog.show();
@@ -206,14 +191,6 @@ export default {
 		},
 		getActiveOpacity(key) {
 			if (key === this.metric.SelectedVariable().Opacity) {
-				return ' active';
-			} else {
-				return '';
-			}
-		},
-		getActivePattern(key) {
-			if(key === this.metric.SelectedVariable().CustomPattern ||
-				(this.metric.SelectedVariable().CustomPattern === '' && key === this.metric.SelectedVariable().Pattern)) {
 				return ' active';
 			} else {
 				return '';

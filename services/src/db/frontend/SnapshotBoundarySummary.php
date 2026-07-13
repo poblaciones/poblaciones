@@ -13,11 +13,11 @@ use helena\classes\GeoJson;
 
 class SnapshotBoundarySummary extends BaseSpatialSnapshotModel
 {
-	private $boundaryId;
+	private $boundaryVersonId;
 
-	public function __construct($boundaryId)
+	public function __construct($boundaryVersonId)
 	{
-		$this->boundaryId = $boundaryId;
+		$this->boundaryVersonId = $boundaryVersonId;
 		parent::__construct('snapshot_boundary_version_item', 'biw', 'B');
 	}
 
@@ -25,15 +25,17 @@ class SnapshotBoundarySummary extends BaseSpatialSnapshotModel
 	{
 		Profiling::BeginTimer();
 
-		$select = "count(*) AS itemCount";
+		$select = "COUNT(*) AS Value, biw_boundary_version_id AS BoundaryVersionId, biw_clipping_region_id AS ValueId, SUM(biw_area_m2) / 1000 / 1000 AS Km2";
 
 		$from = $this->tableName;
 
 		// Pone filtros
 		$where = "biw_boundary_version_id = ?";
-		$params = array($this->boundaryId);
+		$params = array($this->boundaryVersonId);
 
-		$baseQuery = new QueryPart($from, $where, $params, $select);
+		$groupBy = "biw_boundary_version_id, biw_clipping_region_id";
+
+		$baseQuery = new QueryPart($from, $where, $params, $select, $groupBy);
 
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery);
 		$ret = $multiQuery->fetchAll();

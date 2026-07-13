@@ -61,7 +61,7 @@ AbstractSvgComposer.prototype.CreateSVG = function (h, w, z, patternValue, tileU
 	svgElem.style.display = 'block';
 	svgElem.style.strokeWidth = this.strokeWidthScaling * this.resolveStrokeWidth(z, patternValue) * scale + "px";
 	if (patternValue > 6) {
-		svgElem.style.strokeOpacity = this.activeSelectedMetric.SelectedVariable().CurrentOpacity;
+		svgElem.style.strokeOpacity = this.activeSelectedMetric.CurrentOpacity();
 	}
 	return svgElem;
 };

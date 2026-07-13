@@ -50,16 +50,16 @@ ActiveData.prototype.indexFor = function (versionId, levelId) {
 // Carga los datos de cada (versionId, levelId) único que requieren las columnas
 // y que aún no estén cacheados. Devuelve una promesa de todas las cargas.
 ActiveData.prototype.load = function () {
-	var specs = this.pivot.MetricTuples.metricTuples;
+	var tuples = this.pivot.MetricTuples.metricTuples;
 	var store = this._byVersionLevel;
 	var seen = {};
 	var toRetrieve = [];
 	var loc = this;
-	for (var i = 0; i < specs.length; i++) {
-		var spec = specs[i];
-		var usable = !spec.isEmpty && spec.level;
+	for (var i = 0; i < tuples.length; i++) {
+		var tuple = tuples[i];
+		var usable = !tuple.isEmpty && tuple.level;
 		if (usable) {
-			var key = loc._key(spec.versionId, spec.levelId);
+			var key = loc._key(tuple.versionId, tuple.levelId);
 			var pending = !seen[key] && !store[key];
 			seen[key] = true;
 			if (pending) {
@@ -69,7 +69,7 @@ ActiveData.prototype.load = function () {
 						delete loc._indexByVersionLevel[k]; // se reconstruye al primer uso
 						return list;
 					}));
-				})(key, spec.level, spec.metric, spec.version);
+				})(key, tuple.level, tuple.metric, tuple.version);
 			}
 		}
 	}

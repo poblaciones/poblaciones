@@ -21,6 +21,7 @@ use helena\classes\ClipperRound;
 use helena\db\frontend\MetadataModel;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
+use helena\entities\frontend\metric\ValueLabelInfo;
 
 use helena\entities\frontend\clipping\BoundaryInfo;
 use helena\entities\frontend\clipping\BoundaryVersionInfo;
@@ -30,7 +31,7 @@ use helena\entities\frontend\metadata\MetadataInfo;
 
 class BoundaryService extends BaseService
 {
-	public function GetBoundary($frame, $boundaryVersionId)
+	public function GetBoundaryTile($frame, $boundaryVersionId)
 	{
 		$data = null;
 
@@ -43,14 +44,14 @@ class BoundaryService extends BaseService
 			return $this->GotFromCache($data);
 		}
 
-		$data = $this->CalculateBoundary($frame, $boundaryVersionId);
+		$data = $this->CalculateBoundaryTile($frame, $boundaryVersionId);
 
 		BoundaryCache::Cache()->PutData($boundaryVersionId, $key, $data);
 
 		return $data;
 	}
 
-	private function CalculateBoundary($frame, $boundaryVersionId)
+	private function CalculateBoundaryTile($frame, $boundaryVersionId)
 	{
 		$table = new SnapshotBoundaryVersionItemModel($boundaryVersionId);
 		$table->zoom = $frame->Zoom;
@@ -105,7 +106,8 @@ class BoundaryService extends BaseService
 			$rows = $metadataTable->GetMetadataFiles($version->Metadata->Id);
 			$version->Metadata->FillFiles($rows);
 
-			AddVersionValues($version);
+			$this->AddVersionValues($version);
+			$version->IsSimpleCount = (sizeof($version->ValueLabels) == 1);
 
 			$item->Versions[] = $version;
 			$version->SelectedVersionIndex = sizeof($item->Versions) - 1;
@@ -128,7 +130,7 @@ class BoundaryService extends BaseService
 			$valueInfo->FixColors();
 			$valueInfo->FixVisible();
 
-			$variableInfo->ValueLabels[] = $valueInfo;
+			$version->ValueLabels[] = $valueInfo;
 		}
 	}
 	public function GetSummary($frame, $boundaryVersionId)
@@ -166,8 +168,7 @@ class BoundaryService extends BaseService
 		$rows = $table->GetRows($frame);
 
 		$data = new BoundarySummaryInfo();
-		$data->Count = $rows[0]['itemCount'];
-		$data->BoundaryVersionId = $boundaryVersionId;
+		$data->Items = $rows;
 		return $data;
 	}
 

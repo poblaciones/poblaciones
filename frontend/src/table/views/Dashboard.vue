@@ -114,6 +114,28 @@ function _trimFields(fields) {
 	return f.join('~');
 }
 
+// La key de una columna de análisis (AnalysisColumns) tiene formato interno
+// 'm:{metricId}|v:{versionId}|l:{levelId}|a:{variableId}|s:{summary}|c:{categoría}',
+// pensado para matchear objetos en memoria, no para viajar en una URL: sus
+// separadores ':' y '|' no forman parte del conjunto de caracteres que
+// encodeURIComponent deja sin escapar, así que en la ruta se ven como %3A/%7C
+// (el "algo gigante" e ilegible que aparecía en dash). Estas dos funciones
+// SOLO traducen ese formato para persistirlo compacto: sacan los prefijos de
+// letra (redundantes, el orden ya los identifica) y cambian '|' por '!' (que
+// encodeURIComponent no toca). No tocan la key real que usa AnalysisColumns.
+function _compactColKey(key) {
+	if (!key) return '';
+	var m = /^m:([^|]*)\|v:([^|]*)\|l:([^|]*)\|a:([^|]*)\|s:([^|]*)\|c:(.*)$/.exec(key);
+	if (!m) return key;   // formato inesperado: se persiste tal cual, sin romper
+	return [m[1], m[2], m[3], m[4], m[5], m[6]].join('!');
+}
+function _expandColKey(compact) {
+	if (!compact) return '';
+	var p = compact.split('!');
+	if (p.length !== 6) return compact;   // no es el formato compacto esperado
+	return 'm:' + p[0] + '|v:' + p[1] + '|l:' + p[2] + '|a:' + p[3] + '|s:' + p[4] + '|c:' + p[5];
+}
+
 export default {
 	name: 'Dashboard',
 	components: { PivotTableWidget, DistributionWidget, SummaryWidget, RelationsWidget },
@@ -206,11 +228,29 @@ export default {
 			else if (kind === 'relations') this.showRelations = value;
 		},
 		onToggleAnalysis(kind) {
-			this.setVisible(kind, !this.isVisible(kind));
+			var wasVisible = this.isVisible(kind);
+			this.setVisible(kind, !wasVisible);
+			if (wasVisible) {
+				// Se está ocultando por este camino (no por el botón "cerrar"): mismo
+				// criterio que hideAnalysis, para que no quede desincronizado.
+				this.analysisConfig[kind] = {};
+			}
+			// Al habilitar Distribución, el panel de abajo arranca con 15px más de los
+			// que le tocan por el split 50/50 (se ve mejor con algo de aire extra para
+			// los charts). Solo se ajusta al recién activarla, y solo si el split sigue
+			// en su valor por defecto (si el usuario ya lo movió, no se lo pisa).
+			if (kind === 'distribution' && !wasVisible && this.leftSplit === 0.5 && this.$refs.area) {
+				var h = this.$refs.area.getBoundingClientRect().height;
+				if (h > 0) this.leftSplit = this.clampSplit(0.5 - 15 / h);
+			}
 			this.syncRoute();
 		},
 		hideAnalysis(kind) {
 			this.setVisible(kind, false);
+			// Al ocultar un panel, se descarta su configuración: si quedara en
+			// analysisConfig, composeDashState la seguiría escribiendo en la URL aunque
+			// el panel ya no esté visible (lo que hacía que "cerrar" no limpiara nada).
+			this.analysisConfig[kind] = {};
 			this.syncRoute();
 		},
 		onConfigChanged(kind, config) {
@@ -392,9 +432,9 @@ export default {
 			var cfg = {};
 			if (rp[0]) cfg.tab = rp[0];
 			if (rp[1]) cfg.method = rp[1];
-			if (rp[2]) cfg.depKey = rp[2];
-			if (rp[3]) cfg.xKey = rp[3];
-			if (rp[4]) cfg.yKey = rp[4];
+			if (rp[2]) cfg.depKey = _expandColKey(rp[2]);
+			if (rp[3]) cfg.xKey = _expandColKey(rp[3]);
+			if (rp[4]) cfg.yKey = _expandColKey(rp[4]);
 			if (rp[5] != null && rp[5] !== '') cfg.sizeByWeight = (rp[5] === '1');
 			if (rp[6]) cfg.regType = rp[6];
 			if (rp[7] != null && rp[7] !== '') cfg.logitThreshold = parseFloat(rp[7]);
@@ -439,7 +479,10 @@ export default {
 
 			var c = this.analysisConfig.relations || {};
 			var relPart = _trimFields([
-				c.tab || '', c.method || '', c.depKey || '', c.xKey || '', c.yKey || '',
+				c.tab || '', c.method || '',
+				(c.depKey ? _compactColKey(c.depKey) : ''),
+				(c.xKey ? _compactColKey(c.xKey) : ''),
+				(c.yKey ? _compactColKey(c.yKey) : ''),
 				// sizeByWeight: default true → se omite; solo se escribe '0' al desactivarlo.
 				(c.sizeByWeight === false ? '0' : ''),
 				c.regType || '',

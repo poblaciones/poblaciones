@@ -6,9 +6,7 @@ use helena\entities\BaseMapModel;
 
 class BoundarySummaryInfo extends BaseMapModel
 {
-	public $C;
-	public $Count = null;
-	public $BoundaryVersionId = null;
+	public $Items = [];
 }
 
 

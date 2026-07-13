@@ -7,9 +7,9 @@
 		</div>
 		<BoundaryTopButtons :boundary="boundary" :key="boundary.index"
 												class="exp-hiddable-block" v-if="!Embedded.Readonly" />
-		<div>
-			<h4 class="title" @click="changeVisibility()" style="margin-bottom: 6px;cursor: pointer">
-				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor"
+		<div v-if="boundary.SelectedVersion().IsSimpleCount">
+			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
+				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.LineColor + '; color: ' + singleLabel.LineColor"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted" style="border-color: inherit" />
 				{{ boundary.properties.Name }} <span style="font-size: .95em" v-if="boundaryCount || boundaryCount === 0" :class="getMuted()">
@@ -17,6 +17,21 @@
 				</span>
 			</h4>
 		</div>
+		<template v-else>
+			<h4 class="title" style="margin-bottom: 6px;">{{ boundary.properties.Name }}</h4>
+			<div class="variableRow hand" @click="toggleCollapse()">
+				<i :class="dropClass()" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"
+					 @click.stop="toggleVisible()"></i>
+				Cantidad de regiones
+				<span class="hand exp-hiddable-inline">
+					<chevron-down-icon v-if="boundary.SelectedVersion().LabelsCollapsed" title="Mostrar categorías" />
+					<chevron-up-icon v-else title="Ocultar categorías" />
+				</span>
+			</div>
+			<BoundaryChart v-if="useCharts && boundary.ShowChart == 1 && boundary.useChart()"
+										 v-show="!boundary.SelectedVersion().LabelsCollapsed" :boundary="boundary" />
+			<BoundaryValues :boundary="boundary" v-show="!boundary.SelectedVersion().LabelsCollapsed" />
+		</template>
 
 		<div class="sourceRow" v-if="!Embedded.Readonly">
 			<div class="btn-group" style="float: left">
@@ -40,7 +55,11 @@
 
 <script>
 import BoundaryTopButtons from './boundaryTopButtons';
+import BoundaryValues from './boundaryValues';
+import BoundaryChart from './boundaryChart';
 import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
+import ChevronDownIcon from 'vue-material-design-icons/ChevronDown.vue';
+import ChevronUpIcon from 'vue-material-design-icons/ChevronUp.vue';
 import Helper from '@/map/js/helper';
 import Source from './source';
 
@@ -48,7 +67,11 @@ export default {
 	name: 'boundary',
 	components: {
 		BoundaryTopButtons,
+		BoundaryValues,
+		BoundaryChart,
 		DragHorizontal,
+		ChevronDownIcon,
+		ChevronUpIcon,
 		Source,
 	},
 	props: [
@@ -59,6 +82,21 @@ export default {
 		clickLabel(label) {
 			label.Visible = !label.Visible;
 			this.boundary.UpdateMap();
+		},
+		// Control maestro de la línea "Cantidad de regiones": muestra u oculta
+		// TODO el boundary (a diferencia de clickLabel, que es por categoría).
+		// Reconecta boundary.visible/ChangeVisibility, que en el caso con más
+		// de una categoría ya no se dispara desde el título.
+		toggleVisible() {
+			this.boundary.ChangeVisibility();
+		},
+		dropClass() {
+			return this.boundary.visible ? 'dropMetric' : 'dropMetricMuted';
+		},
+		toggleCollapse() {
+			var version = this.boundary.SelectedVersion();
+			version.LabelsCollapsed = !version.LabelsCollapsed;
+			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		getActive(index) {
 			if (this.boundary.properties.Versions.length == 1) {
@@ -78,9 +116,6 @@ export default {
 		changeSelectedVersionIndex(index) {
 			this.boundary.SelectVersion(index);
 		},
-		changeVisibility() {
-			this.boundary.ChangeVisibility();
-		},
 		remove(e) {
 			e.preventDefault();
 			this.boundary.Remove();
@@ -99,6 +134,9 @@ export default {
 			Embedded() {
 				return window.Embedded;
 			},
+			useCharts() {
+				return window.Use.UseCharts;
+			},
 			h() {
 				return Helper;
 			},
@@ -106,7 +144,7 @@ export default {
 				return this.boundary.SelectedVersion().Count;
 			},
 			singleLabel() {
-				return { FillColor: this.boundary.color, Visible: this.boundary.visible };
+				return this.boundary.SelectedVersion().ValueLabels[0];
 			}
 		}
 };
@@ -123,4 +161,21 @@ export default {
 		font-size: 14px;
 		margin-top: 2px
 	}
+.variableRow
+{
+	padding: 0.6rem 0rem 0rem 0rem;
+}
+.fa-left
+{
+	text-align: left;
+	width: 12px;
+	vertical-align: baseline;
+}
+.fasVariable
+{
+	font-size: 12px;
+  vertical-align: top;
+  padding-top: 4px;
+  margin-right: 2px;
+}
 </style>

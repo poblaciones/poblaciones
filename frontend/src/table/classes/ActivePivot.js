@@ -45,6 +45,14 @@ function ActivePivot() {
 	this.Rows = [];
 	this.Metrics = [];
 
+	// Si es true (default), la fila de nivel (p. ej. "Departamentos") del
+	// encabezado de columnas se muestra siempre, aunque el indicador solo tenga
+	// el Total visible (sin categorías abiertas). En false, vuelve al criterio
+	// previo: solo aparece cuando hay una categoría específica seleccionada.
+	// Se prueba como propiedad porque todavía no está decidido si conviene
+	// dejarla fija en true.
+	this.AlwaysShowLevelRow = true;
+
 	this.MetricTuples = new ActiveMetricTuples(this);
 	this.Data = new ActiveData(this);
 
@@ -73,8 +81,8 @@ function ActivePivot() {
 ActivePivot.LABEL_SORT_KEY = LABEL_SORT_KEY;
 
 // Carga datos del endpoint por cada (versionId, levelId) único que las
-// columnSpecs requieren. Delega en el manager de datos (pivot.Data).
-ActivePivot.prototype._loadColumnSpecData = function () {
+// columnTuples requieren. Delega en el manager de datos (pivot.Data).
+ActivePivot.prototype._loadColumnTupleData = function () {
 	return this.Data.load();
 };
 
@@ -82,7 +90,7 @@ ActivePivot.prototype.RefreshData = function () {
 	this.MetricTuples.rebuild();
 	this.SanitizeSort();
 	var loc = this;
-	return this._loadColumnSpecData().then(function () {
+	return this._loadColumnTupleData().then(function () {
 		arr.Clear(loc.MetricTuples.headers);
 		for (var s = 0; s < loc.MetricTuples.metricTuples.length; s++) {
 			loc.MetricTuples.headers.push(loc.MetricTuples.metricTuples[s]);
@@ -99,13 +107,14 @@ ActivePivot.prototype.RefreshData = function () {
 					'Label': item.Caption, FID: item.FID,
 					Code: (item.Code != null ? item.Code : null),
 					isHeader: true,
+					boundaryId: activeBoundary.__boundaryId,
 					Parent: (item.Parent != null ? item.Parent : null),
 					ParentId: (item.ParentId != null ? item.ParentId : null),
 					ParentCode: (item.ParentCode != null ? item.ParentCode : null)
 				});
 				for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
-					var spec = loc.MetricTuples.metricTuples[ci];
-					var value = loc.ResolveCell(spec, region.Region, item);
+					var tuple = loc.MetricTuples.metricTuples[ci];
+					var value = loc.ResolveCell(tuple, region.Region, item);
 					row.push(value);
 					if (totals.length < row.length - 1) {
 						totals.push({
@@ -329,13 +338,23 @@ ActivePivot.prototype.GroupRowsByParent = function (boundaryRows) {
 		var head0 = rows[0] && rows[0][0] ? rows[0][0] : null;
 		var groupId = head0 && head0.ParentId != null ? head0.ParentId : null;
 		var groupCode = head0 && head0.ParentCode != null ? head0.ParentCode : null;
+		var groupBoundaryId = head0 ? head0.boundaryId : null;
+		// FIDs de las hojas del grupo: permite quitar "el grupo y sus hijos" de una
+		// sola vez (la 'x' del encabezado de grupo), sin tener que recorrer las filas
+		// desde la UI.
+		var groupItemIds = rows.map(function (r) { return r[0] ? r[0].FID : null; }).filter(function (id) { return id != null; });
 		// El label del grupo lleva entre paréntesis cuántos hijos quedan listados
 		// debajo (rows ya viene filtrado por datos desde RefreshData): el mismo
 		// criterio que el encabezado de la delimitación, a nivel de este grupo.
 		var groupLabel = parent + ' (' + rows.length + ')';
 		// Subtotal del grupo por columna (suma de Value/Total/Area; ColumnTotal,
 		// ColumnArea y RowGroupTotal heredados de la primera fila del grupo).
-		var subtotal = [{ Label: groupLabel, isHeader: true, isGroupHeader: true, GroupId: groupId, Code: groupCode }];
+		// GroupKey (el nombre crudo, sin el conteo) es la CLAVE de identidad para
+		// colapsar/expandir y para saber qué filas pertenecen al grupo: debe coincidir
+		// con `row.Parent` de las hojas, que no lleva el conteo. Label (con el
+		// conteo) es solo para mostrar; usarlo como clave rompía el colapso, porque
+		// dejaba de coincidir con Parent.
+		var subtotal = [{ Label: groupLabel, GroupKey: parent, isHeader: true, isGroupHeader: true, GroupId: groupId, Code: groupCode, boundaryId: groupBoundaryId, ChildItemIds: groupItemIds }];
 		for (var ci = 0; ci < loc.MetricTuples.metricTuples.length; ci++) {
 			var sv = 0, st = 0, sa = 0, hasVal = false, hasArea = false;
 			var svg = 0, stg = 0, hasGap = false;
@@ -457,7 +476,7 @@ ActivePivot.prototype.SanitizeSort = function () {
 
 // Ordena las filas de una delimitación según el criterio activo, sin mezclar
 // entre delimitaciones distintas. El criterio puede ser una columna concreta
-// (SortColumnKey = spec.key) o el label de la fila (SortColumnKey === LABEL_SORT_KEY).
+// (SortColumnKey = tuple.key) o el label de la fila (SortColumnKey === LABEL_SORT_KEY).
 // Los valores nulos quedan al final en ambas direcciones.
 ActivePivot.prototype.SortBoundaryRows = function (boundaryRows) {
 	if (this.MetricTuples.sortKey == null || this.MetricTuples.sortDirection === 0) return;
@@ -496,16 +515,16 @@ ActivePivot.prototype.SortBoundaryRows = function (boundaryRows) {
 	});
 };
 
-ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
-	// Resuelve la celda para un ColumnSpec (combinación metric × versión × labelId|total).
+ActivePivot.prototype.ResolveCell = function (tuple, region, regionItem) {
+	// Resuelve la celda para un ColumnTuple (combinación metric × versión × labelId|total).
 	// Suma Value, Total y AreaM2 filtrando por VID, geografía y, si corresponde, por LID.
 
-	// Spec placeholder (indicador sin versiones activas): celda vacía.
-	if (spec.isEmpty || !spec.level) {
+	// Tuple placeholder (indicador sin versiones activas): celda vacía.
+	if (tuple.isEmpty || !tuple.level) {
 		return { 'Value': null, 'Total': null, 'Area': null, 'Empty': true };
 	}
 
-	var level = spec.level;
+	var level = tuple.level;
 	var metricGeographyId = level.GeographyId;
 	var geographyIds = region.GetGeographyIdsForItem(regionItem.FID, metricGeographyId);
 
@@ -538,18 +557,18 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 		return { 'Value': null, 'Total': null, 'Area': null, 'Empty': true };
 	}
 
-	// Sumariza. Cuando spec.labelId es null, suma todos los LID que matchean el VID
+	// Sumariza. Cuando tuple.labelId es null, suma todos los LID que matchean el VID
 	// (eso da el "Total" agregado por variable, o la única columna cuando la variable
-	// no tiene ValueLabels). Cuando spec.labelId es un Id concreto, filtra por él.
+	// no tiene ValueLabels). Cuando tuple.labelId es un Id concreto, filtra por él.
 	//
 	// Se usa el índice por VID y geografía (pivot.Data.indexFor): se recorre solo
 	// la intersección de geografías filtradas con las que tienen datos, en vez de
 	// barrer todo el array de items por cada celda.
 	var sum = 0, sumTotal = 0, sumArea = 0, count = 0;
 	var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
-	var variableId = spec.variableId;
-	var labelId = spec.labelId;
-	var index = this.Data.indexFor(spec.versionId, spec.levelId);
+	var variableId = tuple.variableId;
+	var labelId = tuple.labelId;
+	var index = this.Data.indexFor(tuple.versionId, tuple.levelId);
 	var byVid = index ? index[variableId] : null;
 
 	if (byVid) {
@@ -603,9 +622,9 @@ ActivePivot.prototype.ResolveCell = function (spec, region, regionItem) {
 // la misma interpretación por modo de medición que usa el dataset (pivotValue):
 // suma de conteos, o media ponderada en porcentaje. Lo usa el widget de
 // distribución para mostrar categorías que no están seleccionadas como columnas
-// (caso "solo total"). `spec` debe traer level, versionId, levelId, variableId y
+// (caso "solo total"). `tuple` debe traer level, versionId, levelId, variableId y
 // labelId de la categoría.
-ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, variable, totalSpec) {
+ActivePivot.prototype.ResolveCategoryAggregate = function (tuple, summaryMetric, variable, totalTuple) {
 	var sumValue = 0, sumTotal = 0, sumArea = 0, hasAny = false;
 	var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
 	for (var bi = 0; bi < this.Regions.items.length; bi++) {
@@ -613,7 +632,7 @@ ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, 
 		var region = version.Selection;
 		for (var ii = 0; ii < region.Items.length; ii++) {
 			var item = region.Items[ii];
-			var cell = this.ResolveCell(spec, region.Region, item);
+			var cell = this.ResolveCell(tuple, region.Region, item);
 			if (cell.Empty) continue;
 			if (cell.Value != null) { sumValue += Number(cell.Value); hasAny = true; }
 			if (cell.Area != null)  { sumArea  += Number(cell.Area); }
@@ -621,9 +640,9 @@ ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, 
 			if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
 			// En modos normalizados (incidencia, etc.) el denominador es el total del
 			// universo, no el de la categoría: los ítems de categoría pueden no traer
-			// su propio Total. Por eso se resuelve con el spec de total (labelId null).
-			if (totalSpec) {
-				var tcell = this.ResolveCell(totalSpec, region.Region, item);
+			// su propio Total. Por eso se resuelve con el tuple de total (labelId null).
+			if (totalTuple) {
+				var tcell = this.ResolveCell(totalTuple, region.Region, item);
 				if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
 				if (!tcell.Empty && tcell.TotalGap != null) { sumTotalGap += Number(tcell.TotalGap); hasGap = true; }
 			} else if (cell.Total != null) {
@@ -648,10 +667,10 @@ ActivePivot.prototype.ResolveCategoryAggregate = function (spec, summaryMetric, 
 // como si estuvieran seleccionadas. Devuelve [{ labelId, name, color, value }] en
 // el orden de las ValueLabels, o [] si no se puede resolver. Lo usa el widget de
 // distribución para graficar las categorías sin que el usuario las elija.
-// Specs de todas las categorías de la variable de un (metricId, versionId), con
-// su color y el spec base (level, modo) para resolverlas. Devuelve null si no
+// Tuples de todas las categorías de la variable de un (metricId, versionId), con
+// su color y el tuple base (level, modo) para resolverlas. Devuelve null si no
 // hay una variable con ValueLabels.
-ActivePivot.prototype._categorySpecs = function (metricId, versionId) {
+ActivePivot.prototype._categoryTuples = function (metricId, versionId) {
 	var base = null;
 	for (var t = 0; t < this.MetricTuples.metricTuples.length; t++) {
 		var sp = this.MetricTuples.metricTuples[t];
@@ -666,28 +685,28 @@ ActivePivot.prototype._categorySpecs = function (metricId, versionId) {
 	var colors = base.metric.GetStyleColorDictionary();
 
 	var labels = base.variable.ValueLabels;
-	var specs = [];
+	var tuples = [];
 	for (var i = 0; i < labels.length; i++) {
-		specs.push({
+		tuples.push({
 			labelId: labels[i].Id,
 			name: labels[i].Name,
 			color: colors[labels[i].Id] || null,
-			spec: {
+			tuple: {
 				level: base.level, levelId: base.levelId, versionId: base.versionId,
 				variableId: base.variableId, labelId: labels[i].Id, isTotal: false
 			}
 		});
 	}
-	// Spec del total (labelId null): denominador del universo para modos normalizados.
-	var totalSpec = {
+	// Tuple del total (labelId null): denominador del universo para modos normalizados.
+	var totalTuple = {
 		level: base.level, levelId: base.levelId, versionId: base.versionId,
 		variableId: base.variableId, labelId: null, isTotal: true
 	};
-	return { base: base, specs: specs, totalSpec: totalSpec };
+	return { base: base, tuples: tuples, totalTuple: totalTuple };
 };
 
 ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
-	var info = this._categorySpecs(metricId, versionId);
+	var info = this._categoryTuples(metricId, versionId);
 	if (!info) return [];
 	var sm = info.base.summary;
 
@@ -695,15 +714,15 @@ ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
 	// Area y del Total del universo), guardando los crudos por categoría.
 	var aggs = [];
 	var totalValueSum = 0, totalAreaSum = 0;
-	for (var ci = 0; ci < info.specs.length; ci++) {
-		var c = info.specs[ci];
+	for (var ci = 0; ci < info.tuples.length; ci++) {
+		var c = info.tuples[ci];
 		var sumValue = 0, sumTotal = 0, sumArea = 0, hasAny = false;
 		var sumValueGap = 0, sumTotalGap = 0, hasGap = false;
 		for (var bi = 0; bi < this.Regions.items.length; bi++) {
 			var region = this.Regions.items[bi].SelectedVersion().Selection;
 			for (var ii = 0; ii < region.Items.length; ii++) {
 				var item = region.Items[ii];
-				var cell = this.ResolveCell(c.spec, region.Region, item);
+				var cell = this.ResolveCell(c.tuple, region.Region, item);
 				if (cell.Empty) continue;
 				// En incidencia, una celda sin valor (numerador) debe saltearse por
 				// completo: si se sumara solo su Total al denominador, la incidencia
@@ -720,7 +739,7 @@ ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
 				if (cell.Total != null) {
 					sumTotal += Number(cell.Total);
 				} else {
-					var tcell = this.ResolveCell(info.totalSpec, region.Region, item);
+					var tcell = this.ResolveCell(info.totalTuple, region.Region, item);
 					if (!tcell.Empty && tcell.Total != null) sumTotal += Number(tcell.Total);
 				}
 				if (cell.TotalGap != null) { sumTotalGap += Number(cell.TotalGap); hasGap = true; }
@@ -758,7 +777,7 @@ ActivePivot.prototype.ResolveAllCategories = function (metricId, versionId) {
 // región { label, fid, parts: [{ labelId, name, color, value }] }, en el orden de
 // las regiones de la tabla. El widget arma con esto las barras horizontales.
 ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, versionId) {
-	var info = this._categorySpecs(metricId, versionId);
+	var info = this._categoryTuples(metricId, versionId);
 	if (!info) return [];
 	var isGap = !!(info.base.variable && info.base.variable.IsGap);
 	var sm = info.base.summary;
@@ -773,17 +792,17 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 	var grid = [];                 // por región: { item, totalCell, cells: [por categoría] }
 	var colValueSum = [];          // por categoría: suma de Value (denominador col%)
 	var colAreaSum = [];           // por categoría: suma de Area  (denominador col-área)
-	for (var ci0 = 0; ci0 < info.specs.length; ci0++) { colValueSum[ci0] = 0; colAreaSum[ci0] = 0; }
+	for (var ci0 = 0; ci0 < info.tuples.length; ci0++) { colValueSum[ci0] = 0; colAreaSum[ci0] = 0; }
 
 	for (var bi = 0; bi < this.Regions.items.length; bi++) {
 		var version = this.Regions.items[bi].SelectedVersion();
 		var region = version.Selection;
 		for (var ii = 0; ii < region.Items.length; ii++) {
 			var item = region.Items[ii];
-			var totalCell = this.ResolveCell(info.totalSpec, region.Region, item);
+			var totalCell = this.ResolveCell(info.totalTuple, region.Region, item);
 			var cells = [];
-			for (var ci = 0; ci < info.specs.length; ci++) {
-				var cell = this.ResolveCell(info.specs[ci].spec, region.Region, item);
+			for (var ci = 0; ci < info.tuples.length; ci++) {
+				var cell = this.ResolveCell(info.tuples[ci].tuple, region.Region, item);
 				cells.push(cell);
 				if (!cell.Empty) {
 					if (cell.Value != null) colValueSum[ci] += Number(cell.Value);
@@ -800,6 +819,11 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 	// de una región no compartirían denominador y la barra podía superar el 100%.
 	var grandValueSum = 0;
 	for (var gv = 0; gv < colValueSum.length; gv++) grandValueSum += colValueSum[gv];
+	// Mismo razonamiento para % de área (modo A): sin un denominador común entre
+	// categorías, la barra de una región podía superar el 100% (bug observado: una
+	// barra en 202%). Se suma el área de TODAS las categorías, no solo la propia.
+	var grandAreaSum = 0;
+	for (var ga = 0; ga < colAreaSum.length; ga++) grandAreaSum += colAreaSum[ga];
 
 	// Segunda pasada: se calcula el valor mostrado de cada celda con el mismo
 	// cellValue que la pivot, inyectando los denominadores correctos según el modo.
@@ -816,8 +840,8 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 		}
 
 		var parts = [];
-		for (var ci2 = 0; ci2 < info.specs.length; ci2++) {
-			var c = info.specs[ci2];
+		for (var ci2 = 0; ci2 < info.tuples.length; ci2++) {
+			var c = info.tuples[ci2];
 			var cell2 = g.cells[ci2];
 			var merged = {
 				Value: cell2.Value,
@@ -848,8 +872,9 @@ ActivePivot.prototype.ResolveAllCategoriesByRegion = function (metricId, version
 				// Para componer la barra de una región, col% se mide contra el gran total
 				// (denominador común) en vez del total de cada columna; así los segmentos
 				// suman la participación de la región y el conjunto de barras llega a 100%.
+				// % de área (A) usa el mismo criterio con el área de todas las categorías.
 				ColumnTotal: (sm === 'P') ? grandValueSum : cell2.ColumnTotal,
-				ColumnArea: (sm === 'A') ? colAreaSum[ci2] : cell2.ColumnArea,
+				ColumnArea: (sm === 'A') ? grandAreaSum : cell2.ColumnArea,
 				RowGroupTotal: (sm === 'FIL') ? rowGroupSum : cell2.RowGroupTotal
 			};
 			var cvU = cellValue({ properties: { SummaryMetric: sm } }, info.base.variable, mergedU);
@@ -896,8 +921,7 @@ ActivePivot.prototype.NeedAutoDrillDown = function () {
 			for (var si = 0; si < selections.length; si++) {
 				var sel = selections[si];
 				var rel = region.Region.GeographyRelations[sel.geographyId()];
-				if (!rel) continue;              // relación aún no cargada
-				if (rel.length === 0) {
+				if (!rel || rel.length === 0) {
 					if (this._selectionLevelDown(sel)) return true;
 				}
 			}
@@ -959,7 +983,7 @@ ActivePivot.prototype.AllBoundaries = function () {
 
 ActivePivot.prototype.RefreshRelations = function () {
 	// Verifica que la información de relaciones entre regiones/filtros y métricas
-	// esté completa. Itera por geographyIds únicos derivados de las ColumnSpecs
+	// esté completa. Itera por geographyIds únicos derivados de las ColumnTuples
 	// (cubre multi-versión, donde cada versión activa puede usar un GeographyId distinto).
 	this.MetricTuples.rebuild();
 	var toRetrieve = [];
@@ -967,14 +991,14 @@ ActivePivot.prototype.RefreshRelations = function () {
 	var allBoundaries = this.AllBoundaries();
 
 	for (var s = 0; s < this.MetricTuples.metricTuples.length; s++) {
-		var spec = this.MetricTuples.metricTuples[s];
-		// Spec placeholder (indicador sin versiones activas): no tiene geografía.
-		if (spec.isEmpty || !spec.level || !spec.version) continue;
-		var geographyId = spec.level.GeographyId;
+		var tuple = this.MetricTuples.metricTuples[s];
+		// Tuple placeholder (indicador sin versiones activas): no tiene geografía.
+		if (tuple.isEmpty || !tuple.level || !tuple.version) continue;
+		var geographyId = tuple.level.GeographyId;
 		// Parent del nivel: solo si la versión activa tiene un nivel previo.
 		var parentGeoId = null;
-		var levelIdx = spec.version.Levels.indexOf(spec.level);
-		if (levelIdx > 0) parentGeoId = spec.version.Levels[levelIdx - 1].GeographyId;
+		var levelIdx = tuple.version.Levels.indexOf(tuple.level);
+		if (levelIdx > 0) parentGeoId = tuple.version.Levels[levelIdx - 1].GeographyId;
 
 		if (!seenGeoIds[geographyId]) {
 			seenGeoIds[geographyId] = true;

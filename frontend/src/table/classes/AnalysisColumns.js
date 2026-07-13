@@ -65,7 +65,7 @@ AnalysisColumn.prototype.categoryName = function () {
 	return this.variablePart();
 };
 
-// Nombre completo estilo columnSpec: "<variable o indicador>: <categoría> (<edición>)".
+// Nombre completo estilo columnTuple: "<variable o indicador>: <categoría> (<edición>)".
 AnalysisColumn.prototype.fullName = function () {
 	var base = this.variablePart();
 	var cat = this.meta.isTotal ? 'Total' : (this.meta.labelName || '');

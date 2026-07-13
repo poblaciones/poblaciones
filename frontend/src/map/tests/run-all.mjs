@@ -10,5 +10,14 @@ await import('./helperQueue.test.mjs');
 await import('./mapLegend.test.mjs');
 await import('./clippingLegend.test.mjs');
 await import('./segmentedMap.test.mjs');
+await import('./activeBoundary.test.mjs');
+await import('./boundariesComposer.test.mjs');
+await import('./boundaryValues.test.mjs');
+await import('./boundaryChart.test.mjs');
+await import('./boundaryTopButtons.test.mjs');
+await import('./abstractSvgComposer.test.mjs');
+await import('./sideToolbar.test.mjs');
+await import('./patternButtons.test.mjs');
+await import('./boundary.test.mjs');
 
 await report();

@@ -46,7 +46,8 @@ class SnapshotBoundaryVersionItemModel extends BaseSpatialSnapshotModel
 		}
 		if ($this->getCaption)
 			$select .= "biw_caption Caption, ";
-		$select .= "biw_clipping_region_item_id as FID" . $centroids;
+
+		$select .= "biw_clipping_region_id as LID" . $centroids . ", biw_clipping_region_item_id as FID";
 		$from = $this->tableName;
 
 		// Pone filtros

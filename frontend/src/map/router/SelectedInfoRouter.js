@@ -2,7 +2,6 @@ import h from '@/map/js/helper';
 import ActiveSelectedMetric from '@/map/classes/ActiveSelectedMetric';
 import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import err from '@/common/framework/err';
-import str from '@/common/framework/str';
 
 export default SelectedInfoRouter;
 
@@ -50,16 +49,36 @@ SelectedInfoRouter.prototype.SelectedBoundaryToRoute = function (activeBoundary)
 	var ret = [];
 	ret.push([activeBoundary.properties.Id]);
 	ret.push(['t', 'b']); // es boundary
-	ret.push(['a', activeBoundary.SelectedVersion().SelectedVersionIndex, 0]);
+	ret.push(['a', activeBoundary.properties.SelectedVersionIndex, 0]);
 	ret.push(['v', (activeBoundary.visible ? 1 : 0), 1]);
-	ret.push(['w', activeBoundary.borderWidth, 2]);
-	ret.push(['c', this.cleanSign(activeBoundary.color), this.cleanSign(ActiveBoundary.DEFAULT_COLOR)]);
-	ret.push(['d', (activeBoundary.showDescriptions ? 1 : 0), 1]);
+	ret.push(['c', this.Boolean(activeBoundary.SelectedVersion().LabelsCollapsed), '0']);
+	ret.push(['d', (activeBoundary.showDescriptions ? 1 : 0), 0]);
+	ret.push(['p', activeBoundary.customPattern, '']);
+	ret.push(['w', this.BoundaryValueLabelsToRoute(activeBoundary), '']);
+	ret.push(['h', this.Boolean(activeBoundary.ShowChart), '1']);
+	ret.push(['m', activeBoundary.summaryMetric, 'N']);
 	return ret;
 };
 
-SelectedInfoRouter.prototype.cleanSign = function (color) {
-	return str.Replace(color, '#', '');
+// Mismo mecanismo que VariablesToRoute (visibilidad de ValueLabels de
+// variable), pero sobre un único array plano de ValueLabels, sin variable de
+// por medio.
+SelectedInfoRouter.prototype.BoundaryValueLabelsToRoute = function (activeBoundary) {
+	var valueLabels = activeBoundary.SelectedVersion().ValueLabels;
+	var vals = '';
+	var allVisible = true;
+	for (var i = 0; i < valueLabels.length; i++) {
+		if (valueLabels[i].Visible) {
+			vals += '1';
+		} else {
+			vals += '0';
+			allVisible = false;
+		}
+	}
+	if (allVisible) {
+		return '';
+	}
+	return this.deflateString(vals);
 };
 
 SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMetric) {
@@ -320,19 +339,25 @@ SelectedInfoRouter.prototype.parseInfo = function (values) {
 SelectedInfoRouter.prototype.parseBoundary = function (values) {
 	var id = h.getSafeValue(values, '');
 	var visible = h.getSafeValue(values, 'v', 1);
-	var descriptions = h.getSafeValue(values, 'd', 1);
-	var borderWidth = h.getSafeValueInt(values, 'w', 2);
+	var descriptions = h.getSafeValue(values, 'd', 0);
 	var versionInfo = h.getSafeValue(values, 'a', 0);
-	var color = h.getSafeValue(values, 'c', this.cleanSign(ActiveBoundary.DEFAULT_COLOR));
+	var labelsCollapsed = h.getSafeValue(values, 'c', '0');
+	var customPattern = h.getSafeValue(values, 'p', '');
+	var valueLabelStates = h.getSafeValue(values, 'w', null);
+	var showChart = h.getSafeValue(values, 'h', '1');
+	var summaryMetric = h.getSafeValue(values, 'm', 'N');
 
 	return {
 		Id: parseInt(id),
 		IsBoundary: true,
 		VersionInfo: versionInfo,
-		BorderWidth: borderWidth,
-		Color: '#' + color,
 		Visible: (visible ? true : false),
 		ShowDescriptions: (descriptions ? true : false),
+		LabelsCollapsed: (labelsCollapsed === '1'),
+		CustomPattern: (customPattern === '' ? '' : parseInt(customPattern)),
+		ValueLabelStates: (valueLabelStates ? this.inflateString(valueLabelStates) : ''),
+		ShowChart: (showChart === '1'),
+		SummaryMetric: summaryMetric,
 	};
 };
 
@@ -408,7 +433,7 @@ SelectedInfoRouter.prototype.restoreInfoStates = function (states) {
 SelectedInfoRouter.prototype.RestoreBoundaryState = function (boundary, state) {
 	var mapChanged = false;
 	var versionIndex = parseInt(state.VersionInfo);
-	if (versionIndex !== -1 && versionIndex !== boundary.SelectedVersionIndex &&
+	if (versionIndex !== -1 && versionIndex !== boundary.properties.SelectedVersionIndex &&
 		versionIndex < boundary.properties.Versions.length) {
 		boundary.properties.SelectedVersionIndex = versionIndex;
 		mapChanged = true;
@@ -417,17 +442,33 @@ SelectedInfoRouter.prototype.RestoreBoundaryState = function (boundary, state) {
 		boundary.visible = state.Visible;
 		mapChanged = true;
 	}
-	if (state.BorderWidth !== boundary.borderWidth) {
-		boundary.borderWidth = state.BorderWidth;
-		mapChanged = true;
-	}
-	if (state.Color !== boundary.color) {
-		boundary.color = state.Color;
-		mapChanged = true;
-	}
 	if (state.ShowDescriptions !== boundary.showDescriptions) {
 		boundary.showDescriptions = state.ShowDescriptions;
 		mapChanged = true;
+	}
+	if (state.CustomPattern !== boundary.customPattern) {
+		boundary.customPattern = state.CustomPattern;
+		mapChanged = true;
+	}
+	if (state.ShowChart !== boundary.ShowChart) {
+		boundary.ShowChart = state.ShowChart;
+	}
+	if (state.SummaryMetric !== boundary.summaryMetric) {
+		boundary.summaryMetric = state.SummaryMetric;
+	}
+	var version = boundary.SelectedVersion();
+	if (state.LabelsCollapsed !== version.LabelsCollapsed) {
+		version.LabelsCollapsed = state.LabelsCollapsed;
+	}
+	var valueLabels = version.ValueLabels;
+	if (state.ValueLabelStates.length === valueLabels.length) {
+		for (var i = 0; i < valueLabels.length; i++) {
+			var val = (state.ValueLabelStates.substr(i, 1) === '1');
+			if (valueLabels[i].Visible !== val) {
+				valueLabels[i].Visible = val;
+				mapChanged = true;
+			}
+		}
 	}
 	return mapChanged;
 };

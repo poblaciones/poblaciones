@@ -106,7 +106,11 @@ it('deduplica por Id un ítem presente en varias categorías', () => {
 	const panel = mountSelector();
 	// El mismo indicador aparece también en otra categoría (p. ej. "más usados").
 	panel.categories.push({ Id: 4, Name: 'Más usados', Items: [{ Id: 111, Name: 'Población total', Code: 'P01' }] });
-	panel.searchQuery = 'población total';
+	// matchesWordStart compara contra el inicio de cada palabra por separado:
+	// una frase con espacio no matchea ninguna palabra individual. 'total' es
+	// específico de este ítem (a diferencia de 'poblacion', que también
+	// matchea 'Población migrante' del catálogo base).
+	panel.searchQuery = 'total';
 	expect(panel.filteredItems).toHaveLength(1);
 });
 
@@ -145,7 +149,8 @@ it('limita el render de búsqueda y agrega la fila "Ver más"', () => {
 		many.push({ Id: 9000 + n, Name: 'Hoja repetida ' + n });
 	}
 	panel.categories.push({ Id: 5, Name: 'Masivos', Items: many });
-	panel.searchQuery = 'hoja repetida';
+	// matchesWordStart compara contra el inicio de cada palabra por separado.
+	panel.searchQuery = 'hoja';
 	let rows = panel.renderRows;
 	expect(rows).toHaveLength(51); // 50 + la fila "more"
 	expect(rows[50].type).toBe('more');
@@ -177,7 +182,8 @@ describe('indicatorSelector: selección y emisiones');
 
 it('onItemClick en selección simple emite select, limpia la búsqueda y cierra', () => {
 	const panel = mountSelector();
-	panel.searchQuery = 'población total';
+	// matchesWordStart compara contra el inicio de cada palabra por separado.
+	panel.searchQuery = 'total';
 	const item = panel.filteredItems[0].item;
 	panel.onItemClick(item, null);
 	expect(panel.$emitted[0].event).toBe('select');

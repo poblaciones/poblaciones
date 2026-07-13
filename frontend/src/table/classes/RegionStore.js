@@ -46,7 +46,7 @@ RegionStore.prototype.GetBoundaryOrRetrieve = function (boundaryId) {
 			return activeBoundary;
 		});
 };
-
+/*
 RegionStore.prototype.GetRegionOrRetrieve = function (boundaryVersionId, includedGeographyRelations = []) {
 	var ret = this.GetRegionById(boundaryVersionId);
 	if (ret !== null) {
@@ -70,6 +70,7 @@ RegionStore.prototype.GetRegionOrRetrieve = function (boundaryVersionId, include
 			return regionSet;
 		});
 };
+*/
 
 // Construye (o recupera de la caché) un RegionSet a partir de los items que ya
 // están en memoria (árbol de GetFabBoundaries), sin llamar a GetRegion. Las
@@ -83,8 +84,7 @@ RegionStore.prototype.GetRegionFromItems = function (boundaryVersionId, caption,
 	var regionSet = new RegionSet(this, {
 		Id: boundaryVersionId,
 		Caption: caption,
-		Items: items,
-		GeographyRelations: {}
+		Items: items
 	});
 	this.Regions.push(regionSet);
 	return regionSet;
@@ -96,12 +96,15 @@ RegionStore.prototype.GetRegionGeographyRelations = function (boundaryVersionId,
 	return axiosClient.getPromise(window.host + '/services/frontend/processor/GetRegionGeographyRelations', args,
 		('traer las regiones')).then(function (data) {
 			var region = loc.GetRegionById(boundaryVersionId);
-			Object.entries(data).forEach(([key, value]) => {
+			Object.entries(data.GeographyRelations).forEach(([key, value]) => {
 				region.GeographyRelations[key] = value;
+			});
+			Object.entries(data.UpperGeographyRelations).forEach(([key, value]) => {
+				region.UpperGeographyRelations[key] = value;
 			});
 		});
 };
-
+/*
 RegionStore.prototype.GetMultipleRegions = function (boundaryIds, includedGeographyRelations = []) {
 	var loc = this;
 	var promises = [];
@@ -112,3 +115,4 @@ RegionStore.prototype.GetMultipleRegions = function (boundaryIds, includedGeogra
 };
 
 
+*/

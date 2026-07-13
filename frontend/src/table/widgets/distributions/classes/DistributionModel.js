@@ -53,6 +53,22 @@ DistributionModel.prototype._build = function () {
 		var ind = byMetric[id];
 		if (!ind) {
 			ind = { metricId: id, name: panel.indicatorName(), variableName: panel.variableName(), panels: [] };
+			// Subtítulo para el chart (la unidad ya no va en el eje, donde se
+			// superponía con los números). Formato: "{variable} {normalizadora}
+			// ({escala})", p. ej. "Población total (en hogares familiares) / km²
+			// (N/1M)" — la normalizadora pegada al nombre (es parte de qué mide la
+			// variable) y la escala entre paréntesis al final (es una unidad de
+			// magnitud, no de qué se mide). Se excluyen % y pp. de la escala: esas
+			// van pegadas a cada número del chart y repetirlas sería redundante. Se
+			// toma del primer panel: la unidad es propia de la variable, no cambia
+			// entre censos del mismo indicador.
+			var isPointUnit = panel.isGap() ? panel.gapIsPoints() : panel.isPercent();
+			var scale = (!isPointUnit && panel.valueUnit()) ? panel.valueUnit() : '';
+			var norm = panel.normCaption();
+			var subtitle = panel.variableName();
+			if (norm) subtitle += ' ' + norm;
+			if (scale) subtitle += ' (' + scale + ')';
+			ind.variableSubtitle = subtitle;
 			byMetric[id] = ind;
 			indicators.push(ind);
 		}

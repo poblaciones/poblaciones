@@ -114,10 +114,15 @@ export function attachInfo(categories, build) {
 }
 
 // ── Chip para la prop `selection` ─────────────────────────────────────────────
-
-export function toChip(item) {
+// Id siempre es el Id real (debe coincidir con el Id de la hoja/rama del
+// árbol: indicatorSelector.vue lo usa así para marcar los checkboxes de
+// selección múltiple). Cuando dos tipos de entidad pueden compartir el mismo
+// Id numérico (p. ej. un boundary completo y una región de recorte), key
+// permite darle al chip una clave de renderizado propia sin tocar Id.
+export function toChip(item, key) {
   return {
     Id: item.Id,
+    Key: key,
     Caption: item.Name,
     Description: (item.Info && item.Info.Title) || item.Name,
     Item: item,

@@ -78,7 +78,9 @@ function composeBoundary(entry) {
 function joinSection(list, composer) {
 	var out = [];
 	for (var i = 0; i < list.length; i++) out.push(composer(list[i]));
-	return out.join(';');
+	// '*' no requiere codificación en la URL (a diferencia de ';', que el navegador
+	// escapa a %3B); con varias columnas o delimitaciones, ahorra ruido visible.
+	return out.join('*');
 }
 
 // ── Parseo ───────────────────────────────────────────────────────────────────
@@ -138,7 +140,7 @@ function parseBoundary(token) {
 
 function parseList(raw, parser) {
 	var out = [];
-	var tokens = String(raw).split(';').filter(Boolean);
+	var tokens = String(raw).split('*').filter(Boolean);
 	for (var i = 0; i < tokens.length; i++) out.push(parser(tokens[i]));
 	return out;
 }

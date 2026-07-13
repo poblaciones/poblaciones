@@ -8,17 +8,18 @@ function RegionSet(rs, data) {
 	this.Caption = data.Caption;
 	this.Items = data.Items;
 	this.Id = data.Id;
-	this.GeographyRelations = data.GeographyRelations;
+	this.GeographyRelations = {};
+	this.UpperGeographyRelations = {};
 
 	this.Store = rs;
 
 	// un GeographyRelation es:
-	//	{ [geographyId] = [ clipping_region_item_id = [geographyItemId, geographyItemId, geographyItemId ]];
+	//	{ [geographyId] = { clipping_region_item_id = [geographyItemId, geographyItemId, geographyItemId ]};
 	//	}
 };
 
 RegionSet.prototype.EnsureContainsGeographyRelations = function (geographyId) {
-	if (geographyId in this.GeographyRelations) {
+	if ((geographyId in this.GeographyRelations) || (geographyId in this.UpperGeographyRelations)) {
 		return promises.ReadyPromise();
 	} else {
 		return this.Store.GetRegionGeographyRelations(this.Id, [geographyId]);
@@ -26,13 +27,24 @@ RegionSet.prototype.EnsureContainsGeographyRelations = function (geographyId) {
 };
 
 RegionSet.prototype.GetGeographyIdsForItem = function (regionItemId, geographyId) {
-	if (!regionItemId in this.GeographyRelations[geographyId]) {
+	// Si hay datos para ese geographyId, devuelve para ese elemento
+	if (this.GeographyRelations[geographyId]) {
+		if (regionItemId in this.GeographyRelations[geographyId]) {
+			return this.GeographyRelations[geographyId][regionItemId];
+		} else {
+			return [];
+		}
+	}
+	// Si no, va con las upper
+	if (!this.UpperGeographyRelations[geographyId]) {
+		return [];
+	}
+	if (!regionItemId in this.UpperGeographyRelations[geographyId]) {
 		return [];
 	} else {
-		return this.GeographyRelations[geographyId][regionItemId];
+		return this.UpperGeographyRelations[geographyId][regionItemId];
 	}
 };
-
 
 RegionSet.prototype.GetItemById = function (itemId) {
 	for (var i = 0; i < this.Items.length; i++) {
@@ -42,7 +54,7 @@ RegionSet.prototype.GetItemById = function (itemId) {
 	}
 	return null;
 };
-
+/*
 RegionSet.prototype.GetGeographyIdsForItem = function (itemId, geographyId) {
 	if (!this.GeographyRelations[geographyId]) {
 		return [];
@@ -54,7 +66,7 @@ RegionSet.prototype.GetGeographyIdsForItem = function (itemId, geographyId) {
 	}
 
 	return [];
-};
+};*/
 
 RegionSet.prototype.LoadItems = function () {
 	// Si ya tiene items, no hace nada

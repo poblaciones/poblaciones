@@ -10,6 +10,8 @@ class BoundaryVersionInfo extends BaseMapModel
 	public $Name;
 	public $Metadata;
 	public $Count = null;
+	public $IsSimpleCount = false;
+
 	public $SelectedVersionIndex = 0;
 	public $ValueLabels = [];
 

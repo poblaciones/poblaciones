@@ -96,7 +96,7 @@ describe('RegionDistribution', function () {
 		var fakePivot = {
 			ResolveAllCategoriesByRegion: function () {
 				return [
-					{ label: 'Buenos Aires', fid: 1, parts: [
+					{ label: 'Buenos Aires', fid: 11032, parts: [
 						{ labelId: 1, name: 'Bajo', color: '#aaa', value: 30 },
 						{ labelId: 2, name: 'Alto', color: '#bbb', value: 70 }
 					] }
@@ -148,12 +148,13 @@ describe('RegionDistribution', function () {
 			totalColumn: function () { return { meta: {} }; },
 			isGap: function () { return false; },
 			isPercent: function () { return true; },
+			needsUniverseAggregation: function () { return true; },
 			metricId: function () { return 7; },
 			versionId: function () { return 11; }
 		};
 		var fakePivot = {
 			ResolveAllCategoriesByRegion: function () {
-				return [{ label: 'X', fid: 1, delta: null, parts: [
+				return [{ label: 'X', fid: 11032, delta: null, parts: [
 					{ labelId: 101, name: 'A', color: '#a', value: 62, valueOnUniverse: 30 },
 					{ labelId: 102, name: 'B', color: '#b', value: 67, valueOnUniverse: 47 }
 				] }];
@@ -173,7 +174,7 @@ describe('RegionDistribution', function () {
 		var edu = model.panels()[1];
 		var fakePivot = {
 			ResolveAllCategoriesByRegion: function () {
-				return [{ label: 'X', fid: 1, parts: [
+				return [{ label: 'X', fid: 11032, parts: [
 					{ labelId: 101, name: 'A', color: '#a', value: 62, valueOnUniverse: 30 },
 					{ labelId: 102, name: 'B', color: '#b', value: 67, valueOnUniverse: 47 }
 				] }];
@@ -184,6 +185,31 @@ describe('RegionDistribution', function () {
 		expect(row.total).toBeCloseTo(77, 1e-9);          // 30 + 47, no 62 + 67
 		expect(row.parts[0].value).toBe(30);              // segmentos en magnitud aditiva
 		expect(row.parts[1].value).toBe(47);
+	});
+
+	it('una incidencia expresada como tasa (sin %, p. ej. "/1M") también rutea por el Camino 1', function () {
+		// El bug: el ruteo miraba si la unidad "contenía %" para decidir componer
+		// sobre el universo. Una tasa por millón no tiene "%" en su unidad, pero
+		// tiene el mismo problema de no-aditividad entre categorías (cada una con su
+		// propio total). Debe rutear igual que el caso "%", por el MODO (I), no por
+		// el símbolo. Antes caía al camino ingenuo y sumaba de más (42mil en vez de
+		// 15mil en el caso real que reportó el uso).
+		var edu = model.panels()[1];
+		// Mismas columnas que edu pero con unidad de tasa (sin "%"), para probar el
+		// ruteo por modo real, no por el string de la unidad.
+		var rateColumns = edu.columns.map(function (c) { return Object.assign({}, c, { unit: '/1M' }); });
+		var ratePanel = new DistributionPanel(rateColumns);
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				return [{ label: 'X', fid: 11032, parts: [
+					{ labelId: 101, name: 'A', color: '#a', value: 900000, valueOnUniverse: 8000 },
+					{ labelId: 102, name: 'B', color: '#b', value: 950000, valueOnUniverse: 7000 }
+				] }];
+			}
+		};
+		var rd = new RegionDistribution(ratePanel, dataset, { pivot: fakePivot });
+		var row = rd.rows()[0];
+		expect(row.total).toBeCloseTo(15000, 1e-9);   // 8000 + 7000, no la suma cruda (~42mil ballpark)
 	});
 
 	it('incluye agrupadores (isGroup) y excluye hijos de grupos colapsados', function () {
@@ -208,6 +234,63 @@ describe('RegionDistribution', function () {
 		var collapsed = new RegionDistribution(edu, hierDataset, { excludedGroups: ['Buenos Aires'] });
 		expect(collapsed.rows()).toHaveLength(1);
 		expect(collapsed.rows()[0].isGroup).toBe(true);
+	});
+
+	it('Camino 1 también excluye las regiones sin dato en ningún indicador (no solo el Camino 2)', function () {
+		// El universo que resuelve ResolveAllCategoriesByRegion puede incluir una
+		// región que RefreshData ya descartó de pivot.Rows por no tener dato en
+		// ningún indicador (fid 300): antes, el Camino 1 la graficaba igual, porque
+		// resuelve directo desde el universo de la delimitación, sin pasar por ese
+		// filtro. Debe respetarlo, igual que hace la tabla.
+		var hierDataset = {
+			columns: dataset.columns,
+			dataRows: function () {
+				// Solo dos regiones "sobrevivieron" al filtro de sin-dato.
+				return [
+					{ type: 'data', label: 'Región A', parentLabel: null, fid: 100, values: dataset.dataRows()[0].values },
+					{ type: 'data', label: 'Región B', parentLabel: null, fid: 200, values: dataset.dataRows()[1].values }
+				];
+			}
+		};
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				// El universo completo, INCLUYE una tercera región (300) sin dato.
+				return [
+					{ label: 'Región A', fid: 100, parts: [{ labelId: 101, name: 'A', color: '#a', value: 10, valueOnUniverse: 10 }] },
+					{ label: 'Región B', fid: 200, parts: [{ labelId: 101, name: 'A', color: '#a', value: 20, valueOnUniverse: 20 }] },
+					{ label: 'Región C (sin dato)', fid: 300, parts: [{ labelId: 101, name: 'A', color: '#a', value: 0, valueOnUniverse: 0 }] }
+				];
+			}
+		};
+		var rd = new RegionDistribution(edu, hierDataset, { pivot: fakePivot });
+		var fids = rd.rows().map(function (r) { return r.fid; });
+		expect(fids).toEqual([100, 200]);   // sin la 300
+	});
+
+	it('Camino 1 también excluye los hijos de grupos colapsados (no solo el Camino 2)', function () {
+		var hierDataset = {
+			columns: dataset.columns,
+			dataRows: function () {
+				return [
+					{ type: 'group-header', label: 'Buenos Aires', parentLabel: null, fid: null, values: dataset.dataRows()[0].values },
+					{ type: 'data', label: 'La Plata', parentLabel: 'Buenos Aires', fid: 1, values: dataset.dataRows()[0].values },
+					{ type: 'data', label: 'Mar del Plata', parentLabel: 'Buenos Aires', fid: 2, values: dataset.dataRows()[1].values }
+				];
+			}
+		};
+		var fakePivot = {
+			ResolveAllCategoriesByRegion: function () {
+				// El universo resuelto no sabe de colapso: trae los dos hijos igual.
+				return [
+					{ label: 'La Plata', fid: 1, parts: [{ labelId: 101, name: 'A', color: '#a', value: 10, valueOnUniverse: 10 }] },
+					{ label: 'Mar del Plata', fid: 2, parts: [{ labelId: 101, name: 'A', color: '#a', value: 20, valueOnUniverse: 20 }] }
+				];
+			}
+		};
+		var full = new RegionDistribution(edu, hierDataset, { pivot: fakePivot });
+		expect(full.rows()).toHaveLength(2);
+		var collapsed = new RegionDistribution(edu, hierDataset, { pivot: fakePivot, excludedGroups: ['Buenos Aires'] });
+		expect(collapsed.rows()).toHaveLength(0);   // Camino 1 no genera fila propia del agrupador
 	});
 });
 
@@ -298,7 +381,7 @@ describe('Brecha (gap) no apilable', function () {
 		pob.isGap = function () { return true; };
 		var fakePivot = {
 			ResolveAllCategoriesByRegion: function () {
-				return [{ label: 'X', fid: 1, delta: -20, isGap: true, parts: [
+				return [{ label: 'X', fid: 11032, delta: -20, isGap: true, parts: [
 					{ labelId: 1, name: 'A', color: '#a', value: -8, weight: 5000 },
 					{ labelId: 2, name: 'B', color: '#b', value: -12, weight: 5000 }
 				] }];

@@ -199,26 +199,27 @@
 							<td v-for="(cell, cellIndex) in row"
 									:key="'cell-' + rowIndex + '-' + cellIndex"
 									:class="getCellClass(cell)"
-									@click="cell.isGroupHeader ? toggleGroup(cell.Label) : null">
-								<span v-if="cell.isHeader" class="cell-label"
-											:class="{ 'has-toggle': cell.isGroupHeader || (cell.isRegionHeader && groupKeys.length) }">
-									<button v-if="cell.isRegionHeader && groupKeys.length"
-													class="group-toggle group-toggle-all"
-													@click.stop="toggleAllGroups"
-													:title="allGroupsCollapsed ? 'Expandir todos' : 'Colapsar todos'">{{ allGroupsCollapsed ? '▸' : '▾' }}</button>
-									<button v-if="cell.isGroupHeader"
-													class="group-toggle"
-													@click.stop="toggleGroup(cell.Label)"
-													:title="collapse.isCollapsed(cell.Label) ? 'Expandir' : 'Colapsar'">{{ collapse.isCollapsed(cell.Label) ? '▸' : '▾' }}</button>
-									{{ cell.Label }}
-									<button v-if="cell.isRegionHeader && cell.boundaryId != null"
-													class="region-remove-btn"
-													@click.stop="removeRowBoundary(cell.boundaryId)"
-													title="Quitar de las filas">×</button>
-									<button class="row-open-map" @click.stop="openMapForRow(cell)"
-													title="Abrir mapa" aria-label="Abrir mapa">
-										<i class="fas fa-globe-americas" aria-hidden="true"></i>
-									</button>
+									@click="cell.isGroupHeader ? toggleGroup(cell.GroupKey) : null">
+								<span v-if="cell.isHeader" class="cell-label">
+									<span class="cell-label-text">{{ cell.Label }}</span>
+									<span class="cell-label-actions">
+										<button v-if="rowRemoveTarget(cell)"
+														class="region-remove-btn"
+														@click.stop="removeRow(cell)"
+														:title="rowRemoveTitle(cell)">×</button>
+										<button class="row-open-map" @click.stop="openMapForRow(cell)"
+														title="Abrir mapa" aria-label="Abrir mapa">
+											<i class="fas fa-globe-americas" aria-hidden="true"></i>
+										</button>
+										<button v-if="cell.isRegionHeader && groupKeys.length"
+														class="group-toggle group-toggle-all"
+														@click.stop="toggleAllGroups"
+														:title="allGroupsCollapsed ? 'Expandir todos' : 'Colapsar todos'">{{ allGroupsCollapsed ? '▸' : '▾' }}</button>
+										<button v-if="cell.isGroupHeader"
+														class="group-toggle"
+														@click.stop="toggleGroup(cell.GroupKey)"
+														:title="collapse.isCollapsed(cell.GroupKey) ? 'Expandir' : 'Colapsar'">{{ collapse.isCollapsed(cell.GroupKey) ? '▸' : '▾' }}</button>
+									</span>
 								</span>
 								<span v-else class="cell-value">
 									{{ resolveValue(pivot.MetricTuples.headers[cellIndex - 1], cell) }}
@@ -241,7 +242,7 @@
 											 :selection="metricSelection"
 											 :suggestions="[]"
 											 :expand-leaves="true"
-											 :filterMode="true"
+											 :filter-mode="true"
 											 title="Agregar indicadores"
 											 root-label="Categorías"
 											 search-placeholder="Buscar indicador..."
@@ -430,7 +431,7 @@
 				var keys = [];
 				if (!this.pivot || !this.pivot.Rows) return keys;
 				this.pivot.Rows.forEach(function (row) {
-					if (row.length && row[0].isGroupHeader) keys.push(row[0].Label);
+					if (row.length && row[0].isGroupHeader) keys.push(row[0].GroupKey);
 				});
 				return keys;
 			},
@@ -445,7 +446,7 @@
 				this.pivot.Rows.forEach(function (row) {
 					var head = row[0];
 					if (head && head.isGroupHeader) {
-						hiddenParent = loc.collapse.isCollapsed(head.Label) ? head.Label : null;
+						hiddenParent = loc.collapse.isCollapsed(head.GroupKey) ? head.GroupKey : null;
 						out.push(row);
 						return;
 					}
@@ -480,10 +481,10 @@
 					if (sp && sp.isPlaceholder) {
 						cells[i] = { kind: 'placeholder', colspan: 1, rowspan: 2, name: null, metric: sp.metric, versionId: sp.versionId };
 						i++;
-					} else if (this.tupleNeedsLevel(sp)) {
+					} else if (this.tupleHasLevelCell(sp)) {
 						var span = 1;
 						var j = i + 1;
-						while (j < specs.length && this.tupleNeedsLevel(specs[j])
+						while (j < specs.length && this.tupleHasLevelCell(specs[j])
 								&& specs[j].metric === sp.metric && specs[j].versionId === sp.versionId && specs[j].levelId === sp.levelId) {
 							span++; j++;
 						}
@@ -511,12 +512,15 @@
 			// Una tupla aporta la fila de nivel cuando es de un dataset tipo "D"
 			// (datos por unidad geográfica) y representa una categoría (no el total).
 			// Los tipos "L" (puntos) y "S" (shape), y los totales, no la necesitan.
+			// Con pivot.AlwaysShowLevelRow (default true) se muestra siempre que haya
+			// al menos un indicador de tipo "D", aunque ninguno tenga categoría abierta
+			// (ver tupleHasLevelCell, el criterio único).
 			showLevelRow() {
 				this.dataTick;
 				var specs = this.pivot ? this.pivot.MetricTuples.metricTuples : null;
 				if (!specs) return false;
 				for (var i = 0; i < specs.length; i++) {
-					if (this.tupleNeedsLevel(specs[i])) return true;
+					if (this.tupleHasLevelCell(specs[i])) return true;
 				}
 				return false;
 			},
@@ -596,7 +600,7 @@
 					// la fila de nivel no se repiten.
 					if (showLevel) {
 						if (sp.isPlaceholder) continue;
-						if (!this.tupleNeedsLevel(sp)) continue;
+						if (!this.tupleHasLevelCell(sp)) continue;
 					}
 					var id = sp.metric.InstanceId;
 					if (indexByMetric[id] == null) {
@@ -1045,6 +1049,18 @@
 			tupleNeedsLevel(spec) {
 				return !!spec && !spec.isEmpty && !spec.isTotal && spec.datasetType === 'D' && spec.labelId != null;
 			},
+			// Criterio único: ¿esta tupla ocupa la fila de nivel (kind:'level', rowspan
+			// 1, con el nombre del nivel) en vez de fusionar la fila de categoría
+			// (kind:'cat', rowspan 2, sin fila de nivel propia)? Con
+			// pivot.AlwaysShowLevelRow (default true), cualquier tupla de dataset "D"
+			// la ocupa, Total incluido; si no, solo cuando representa una categoría
+			// concreta (tupleNeedsLevel, el criterio previo). Usado también por
+			// levelRowCells/categoryRow para que ambas filas queden en sincronía.
+			tupleHasLevelCell(spec) {
+				if (!spec || spec.isEmpty) return false;
+				if (this.pivot && this.pivot.AlwaysShowLevelRow) return spec.datasetType === 'D';
+				return this.tupleNeedsLevel(spec);
+			},
 			// ¿El indicador tiene celdas en la fila de categorías? Si no (todas sus
 			// columnas hicieron rowspan en la fila de nivel), el control de categorías
 			// debe colgar de su celda con rowspan en la fila de nivel.
@@ -1118,9 +1134,33 @@
 					loc.$emit('data-refreshed', loc.pivot, true);
 				});
 			},
-			removeRowBoundary(boundaryId) {
-				this.pivot.RemoveBoundaryById(boundaryId);
-				this.applyAndNotify();
+			// La 'x' del encabezado de fila quita, según el tipo de celda: toda la
+			// delimitación (boundary), un grupo completo con sus hijos, o un elemento
+			// suelto. Un único punto de entrada para el template.
+			rowRemoveTarget(cell) {
+				if (cell.isRegionHeader) return cell.boundaryId != null ? 'boundary' : null;
+				if (cell.isGroupHeader) return (cell.boundaryId != null && cell.ChildItemIds && cell.ChildItemIds.length) ? 'group' : null;
+				return (cell.boundaryId != null && cell.FID != null) ? 'item' : null;
+			},
+			rowRemoveTitle(cell) {
+				var t = this.rowRemoveTarget(cell);
+				if (t === 'boundary') return 'Quitar de las filas';
+				if (t === 'group') return 'Quitar este grupo de las filas';
+				return 'Quitar de las filas';
+			},
+			removeRow(cell) {
+				var target = this.rowRemoveTarget(cell);
+				if (target === 'boundary') {
+					this.pivot.RemoveBoundaryById(cell.boundaryId);
+					this.applyAndNotify();
+				} else if (target === 'group') {
+					// El grupo y todos sus hijos: mismo circuito que un chip (convierte un
+					// boundary agregado entero en "todos menos los quitados" si hiciera falta).
+					var items = cell.ChildItemIds.map(function (id) { return { Id: id, BoundaryId: cell.boundaryId }; });
+					this.onRowDeselect(items, null);
+				} else if (target === 'item') {
+					this.onRowDeselect([{ Id: cell.FID, BoundaryId: cell.boundaryId }], null);
+				}
 			},
 			resolveValue(spec, cell) {
 				if (!spec || !spec.metric || cell === null || cell === undefined) return '';
@@ -1389,7 +1429,6 @@
 		.pivot-table th {
 			padding: 12px 15px;
 			text-align: left;
-			height: 1px;
 			font-weight: 100;
 		}
 
@@ -1416,6 +1455,7 @@
 	.pivot-header-metric {
 		text-align: right;
 		position: relative;
+		padding-bottom: 0px !important;
 	}
 
 	.metric-drag-handle {
@@ -1481,7 +1521,7 @@
 		font-size: 11px;
 		font-weight: 600;
 		color: #fff;
-		background-color: #2289d6;
+		background-color: #1976d2;
 		text-align: center;
 		padding: 0 8px;
 		border: none;
@@ -1683,10 +1723,13 @@
 			padding-left: 13px;
 		}
 
-		/* Ícono "Abrir mapa" en el encabezado de fila: alineado a la derecha y oculto
-		   hasta que el mouse pasa sobre la fila, para no recargar la columna. */
-		.cell-label .row-open-map {
-			margin-left: auto;
+		/* Ícono "Abrir mapa" en el encabezado de fila. En dispositivos con hover real
+		   (mouse), queda oculto hasta pasar por la fila, para no recargar la columna.
+		   En touch, donde no hay manera de "pasar el mouse", queda siempre visible
+		   (el @media no aplica y prevalece la regla de abajo). Vive en
+		   .cell-label-actions junto con el resto de los controles, no necesita
+		   posición propia. */
+		.row-open-map {
 			border: none;
 			background: transparent;
 			color: #607d8b;
@@ -1694,19 +1737,13 @@
 			padding: 0 4px;
 			display: inline-flex;
 			align-items: center;
-			opacity: 0;
-			transition: opacity 0.1s;
 		}
-		/* Cuando la fila tiene control de expandir/colapsar (grupo o boundary con
-		   grupos), ese control va pegado a la derecha (position:absolute right:6px). El
-		   mundo se posiciona a SU izquierda para no superponerse. */
-		.cell-label.has-toggle .row-open-map {
-			position: absolute;
-			right: 26px;
-			margin-left: 0;
+		.row-open-map:hover { color: #1565c0; }
+
+		@media (hover: hover) and (pointer: fine) {
+			.row-open-map { opacity: 0; transition: opacity 0.1s; }
+			tr:hover .row-open-map { opacity: 1; }
 		}
-		tr:hover .cell-label .row-open-map { opacity: 1; }
-		.cell-label .row-open-map:hover { color: #1565c0; }
 
 	.pivot-row-group-header {
 		background-color: #f0f4f8;
@@ -1729,14 +1766,10 @@
 		background-color: #fff;
 	}
 
-	/* Triángulo de colapso de grupos: flota a la derecha de la celda de etiqueta,
-	   igual que en el selector de indicadores. */
 	.pivot-cell-header { position: relative; }
+	/* Triángulo de colapso de grupos: un control más dentro de .cell-label-actions,
+	   sin posición propia (ver ahí). */
 	.group-toggle {
-		position: absolute;
-		right: 6px;
-		top: 50%;
-		transform: translateY(-50%);
 		border: none;
 		background: transparent;
 		color: #607d8b;
@@ -1757,9 +1790,6 @@
 		text-align: left;
 		width: 300px;
 		max-width: 300px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 		padding-left: 15px;
 		position: sticky;
 		left: 0;
@@ -1783,10 +1813,32 @@
 		font-style: italic;
 	}
 
+	/* El texto trunca solo (min-width:0 es lo que permite que un flex-item se
+	   angoste por debajo de su ancho natural, en vez de desbordar y tapar los
+	   controles). Los controles viven aparte, en .cell-label-actions, con un único
+	   margin-left:auto que los empuja como bloque al borde derecho — con DOS
+	   elementos usando margin-left:auto por separado, el espacio libre se reparte
+	   entre ambos y el primero queda "centrado" en vez de pegado al segundo; de ahí
+	   que las acciones vayan agrupadas en un solo contenedor con un solo auto. */
 	.cell-label {
 		display: flex;
 		align-items: center;
+		min-width: 0;
+		overflow: hidden;
+	}
+	.cell-label-text {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.cell-label-actions {
+		display: flex;
+		align-items: center;
 		gap: 2px;
+		flex-shrink: 0;
+		margin-left: auto;
 	}
 
 	.region-remove-btn {
@@ -1796,12 +1848,19 @@
 		cursor: pointer;
 		font-size: 16px;
 		line-height: 1;
-		margin-left: 8px;
 		opacity: 0.6;
 		padding: 0 4px;
 	}
 		.region-remove-btn:hover {
 			opacity: 1;
+		}
+		/* Igual que el mundo: oculto hasta pasar por la fila, solo en dispositivos con
+		   hover real. En touch prevalece la regla de arriba (siempre visible, opacity
+		   0.6), porque no hay manera de "pasar el mouse" para revelarlo. */
+		@media (hover: hover) and (pointer: fine) {
+			.region-remove-btn { opacity: 0; transition: opacity 0.1s; }
+			tr:hover .region-remove-btn { opacity: 0.6; }
+			tr:hover .region-remove-btn:hover { opacity: 1; }
 		}
 
 	.cell-value {

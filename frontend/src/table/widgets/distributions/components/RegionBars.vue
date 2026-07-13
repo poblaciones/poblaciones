@@ -8,8 +8,9 @@
 			<line :x1="sx(t)" :y1="pad.t" :x2="sx(t)" :y2="H - pad.b" class="grid-line" />
 			<text :x="sx(t)" :y="pad.t - 3" class="tick-label" text-anchor="middle">{{ fmtTick(t) }}</text>
 		</g>
-		<!-- Unidad del eje, una sola vez (las unidades de % van pegadas a cada número). -->
-		<text v-if="axisUnit" :x="pad.l + trackW" :y="pad.t - 3" class="axis-unit" text-anchor="end">{{ axisUnit }}</text>
+		<!-- La unidad ya no se muestra acá (se superponía con el número del tick más a
+		     la derecha); vive en el subtítulo del indicador, junto al nombre de la
+		     variable. Ver DistributionModel.ind.variableSubtitle. -->
 		<line :x1="zeroX" :y1="pad.t" :x2="zeroX" :y2="H - pad.b" class="zero-line" />
 
 		<g v-for="(row, ri) in layout" :key="'r-' + ri">
@@ -36,21 +37,12 @@
 			isPercent: { type: Boolean, default: false },
 			isGap: { type: Boolean, default: false },
 			gapInPoints: { type: Boolean, default: true },
-			valueUnit: { type: String, default: '' },
 			minHeight: { type: Number, default: 0 }
 		},
 		data: function () {
 			return { W: 440, renderW: 350, baseBarH: 16, baseRowGap: 7, pad: { l: 176, r: 44, t: 16, b: 6 }, labelCharsPerLine: 22, labelMaxLines: 2, lineH: 19 };
 		},
 		computed: {
-			// Unidad mostrada una vez en el eje. Para porcentaje (y brecha de puntos)
-			// la unidad va pegada a cada número, así que acá no se repite. Para el resto
-			// (km², habitantes, etc.) se muestra la unidad propia, o "miles"/"millones"
-			// queda implícito en cada número.
-			axisUnit: function () {
-				if (this._isPointUnit()) return '';
-				return this.valueUnit || '';
-			},
 			// ¿Todas las barras valen ~100%? (fil%: cada región reparte su propio 100).
 			// En ese caso, mostrar "100%" en cada fila no aporta y se omite.
 			allHundred: function () {
@@ -290,7 +282,6 @@
 <style scoped>
 	.region-bars { max-width: 580px; display: block; flex: none; align-self: flex-start; }
 	.plot-frame { fill: none; stroke: #b0bec5; stroke-width: 1; vector-effect: non-scaling-stroke; }
-	.axis-unit { font-size: 10px; fill: #78909c; }
 	.grid-line { stroke: #898989; stroke-width: 0.5; }
 	.grid-line-soft { stroke: #c7c7c7; stroke-width: 0.25; }
 	.zero-line { stroke: #5e5e5e; stroke-width: 1.2; }
