@@ -6,6 +6,7 @@ import SaveRoute from '@/map/classes/SaveRoute';
 import RestoreRoute from '@/map/classes/RestoreRoute';
 import ActiveSelectedMetric from '@/map/classes/ActiveSelectedMetric';
 import ActiveBoundary from '@/map/classes/ActiveBoundary';
+import VueStub from './_stubs/vue.mjs';
 
 describe('SelectedInfoRouter: compresión de visibilidades (deflate/inflate)');
 
@@ -301,4 +302,17 @@ it('RestoreBoundaryState aplica la visibilidad de cada ValueLabel según ValueLa
 	expect(boundary.customPattern).toBe(0);
 	expect(boundary.SelectedVersion().ValueLabels[0].Visible).toBeTruthy();
 	expect(boundary.SelectedVersion().ValueLabels[1].Visible).toBeFalsy();
+});
+
+it('RestoreBoundaryState usa Vue.set para LabelsCollapsed (no viene preexistente en el payload)', () => {
+	const boundary = makeBoundary();
+	const router = new SelectedInfoRouter();
+	const state = {
+		VersionInfo: '0', Visible: true, ShowDescriptions: true,
+		CustomPattern: '', LabelsCollapsed: true, ValueLabelStates: '',
+	};
+	const callsBefore = VueStub.calls.length;
+	router.RestoreBoundaryState(boundary, state);
+	expect(VueStub.calls.length).toBe(callsBefore + 1);
+	expect(VueStub.calls[VueStub.calls.length - 1].key).toBe('LabelsCollapsed');
 });

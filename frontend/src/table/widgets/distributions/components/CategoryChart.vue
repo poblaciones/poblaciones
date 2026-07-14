@@ -71,6 +71,7 @@
 </template>
 
 <script>
+	import percentScaleMax from '@/table/js/percentScale.js';
 	export default {
 		name: 'CategoryChart',
 		props: {
@@ -170,8 +171,10 @@
 				return -this._niceMax(-mn);
 			},
 			scaleMax: function () {
-				// Apilado en porcentaje: composición al 100%. Apilado en conteo (N, T,
-				// Km²…): suma de valores absolutos, escala real al mayor total por año.
+				// Apilado en porcentaje: composición al 100% (es la naturaleza matemática
+				// del apilado —las categorías suman el total—, no una elección de escala:
+				// no aplica la escala escalonada de abajo). Apilado en conteo (N, T, Km²…):
+				// suma de valores absolutos, escala real al mayor total por año.
 				if (this.stacked) {
 					if (this.isPercent) return 100;
 					var sm = 0;
@@ -185,10 +188,15 @@
 					}
 					return this._niceMax(sm);
 				}
-				if (this.isPercent) return 100;
 				var m = 0;
 				for (var i = 0; i < this.values.length; i++) if (this.values[i] > m) m = this.values[i];
 				if (this.showTotalLine && this.totalValue != null && this.totalValue > m) m = this.totalValue;
+				// Porcentaje sin apilar: el techo por defecto es 100% (compara bien entre
+				// charts), pero fijarlo siempre deja el chart vacío si todos los valores
+				// son chicos (p. ej. 1 a 3%). Se agranda en tramos previsibles en vez de
+				// autoescalar libre, para no perder la referencia de "esto está sobre 100"
+				// cuando corresponde.
+				if (this.isPercent) return percentScaleMax(m);
 				// Brecha con valores negativos: si el máximo real es 0 (todo baja del
 				// cero), se deja un margen positivo (~25% del alcance negativo) para que
 				// se entienda la referencia de positivo/negativo en torno al cero.

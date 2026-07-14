@@ -10,8 +10,8 @@
 import { describe, it, expect, report } from './_harness.mjs';
 import ActiveDataset from '@/table/classes/ActiveDataset.js';
 
-// Spec de columna con la forma mínima que consume ActiveDataset.
-function spec(over) {
+// Tuple de columna con la forma mínima que consume ActiveDataset.
+function tuple(over) {
 	return Object.assign({
 		key: 'k', metricId: 1, metricName: 'Pob', variableName: '', labelName: '',
 		versionName: '2010', versionId: 2010, levelId: 5, levelName: 'Prov',
@@ -29,15 +29,15 @@ function cell(value, total) {
 // Pivot mínimo: dos columnas (un total de población, una categoría educativa) y
 // dos filas de datos bajo un region-header.
 function fakePivot() {
-	var specs = [
-		spec({ key: 'pob', metricName: 'Población', summary: 'N', isTotal: true }),
-		spec({ key: 'edu', metricName: 'Nivel educativo', variableName: 'Nivel', labelName: '0 a 5%', summary: 'P' })
+	var tuples = [
+		tuple({ key: 'pob', metricName: 'Población', summary: 'N', isTotal: true }),
+		tuple({ key: 'edu', metricName: 'Nivel educativo', variableName: 'Nivel', labelName: '0 a 5%', summary: 'P' })
 	];
 	var header = [{ Label: 'Provincias', isHeader: true, isRegionHeader: true, boundaryId: 7 }, cell(100), cell(40)];
 	var rowA = [{ Label: 'Buenos Aires', FID: 1, isHeader: true }, cell(60), cell(25)];
 	var rowB = [{ Label: 'Córdoba', FID: 2, isHeader: true }, cell(40), cell(15)];
 	return {
-		MetricTuples: { metricTuples: specs },
+		MetricTuples: { metricTuples: tuples },
 		Rows: [header, rowA, rowB],
 		FilterSet: { items: [] }
 	};

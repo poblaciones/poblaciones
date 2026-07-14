@@ -201,7 +201,8 @@ export function mountLite(component, options) {
 	const instance = {
 		$emit(event, ...args) { instance.$emitted.push({ event, args }); },
 		$emitted: [],
-		$set(obj, key, value) { obj[key] = value; },
+		$setCalls: [],
+		$set(obj, key, value) { instance.$setCalls.push({ obj, key, value }); obj[key] = value; },
 		$nextTick(cb) { if (cb) cb(); },
 		$refs: {},
 		$el: { querySelector() { return null; } },

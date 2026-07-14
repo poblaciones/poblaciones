@@ -15,16 +15,20 @@
 	<div class="cat-picker">
 		<div v-for="grp in groups" :key="'cg-' + grp.versionId" class="ifp-group">
 			<div class="ifp-group-header" @click.stop="toggleAll(grp.versionId)">
-				<input type="checkbox" tabindex="-1" :checked="grp.allSelected" @click.prevent />
+				<input type="checkbox" tabindex="-1" :key="'chk-all-' + grp.versionId + '-' + grp.allSelected"
+						:checked.prop="grp.allSelected" @click.prevent />
 				<span class="ifp-group-title">{{ grp.versionName }}</span>
 			</div>
 			<div v-for="lbl in grp.labels" :key="'cl-' + grp.versionId + '-' + lbl.Id"
 					class="ifp-option" @click.stop="toggleLabel(grp.versionId, lbl.Id)">
-				<input type="checkbox" tabindex="-1" :checked="grp.selectedLabels.indexOf(lbl.Id) !== -1" @click.prevent />
+				<input type="checkbox" tabindex="-1"
+						:key="'chk-' + grp.versionId + '-' + lbl.Id + '-' + (grp.selectedLabels.indexOf(lbl.Id) !== -1)"
+						:checked.prop="grp.selectedLabels.indexOf(lbl.Id) !== -1" @click.prevent />
 				<span>{{ lbl.Name }}</span>
 			</div>
 			<div class="ifp-option ifp-total" @click.stop="toggleTotal(grp.versionId)">
-				<input type="checkbox" tabindex="-1" :checked="grp.includeTotal" @click.prevent />
+				<input type="checkbox" tabindex="-1" :key="'chk-total-' + grp.versionId + '-' + grp.includeTotal"
+						:checked.prop="grp.includeTotal" @click.prevent />
 				<span>Total</span>
 			</div>
 		</div>
@@ -135,5 +139,5 @@ export default {
 	/* Las categorías cuelgan de su grupo de versión: se indentan para reflejarlo. */
 	.ifp-group .ifp-option { padding-left: 28px; }
 	.ifp-total { font-style: italic; color: #607d8b; }
-	.ifp-option input, .ifp-group-header input { margin: 0; }
+	.ifp-option input, .ifp-group-header input { margin: 0; cursor: pointer; }
 </style>

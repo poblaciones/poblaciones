@@ -4,6 +4,7 @@ import h from '@/map/js/helper';
 import err from '@/common/framework/err';
 import arr from '@/common/framework/arr';
 import axios from 'axios';
+import Vue from 'vue';
 
 export default ActiveBoundary;
 
@@ -284,7 +285,13 @@ ActiveBoundary.prototype.UpdateSummary = function () {
 			totalCount += Number(item.Value);
 			var label = h.getValueLabel(valueLabels, item.ValueId);
 			if (label !== null) {
-				label.Values = item;
+				// Vue.set, no asignación directa: el payload de GetSelectedBoundary
+				// no trae hoy un campo 'Values' (plural) preexistente en cada
+				// ValueLabel (sí trae 'Value', singular, sin uso). Sin Vue.set, esto
+				// agrega una propiedad nueva a un objeto ya reactivo, y Vue 2 no
+				// detecta esa mutación: los datos quedan en memoria pero la vista
+				// nunca se entera (sin error, sin re-render).
+				Vue.set(label, 'Values', item);
 			}
 		});
 		if (!matched) {

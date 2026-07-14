@@ -142,7 +142,7 @@ class BoundaryModel extends BaseModel
 	{
 		Profiling::BeginTimer();
 		$sql = "SELECT bou_id Id, bou_caption Name, bou_icon Icon, bou_sort_by OrderBy, bou_is_suggestion Suggestion, bou_gropup_by_parent UseParent,
-					bgr_caption `Group`, bgr_icon GroupIcon,
+					bgr_caption `Group`, bgr_icon GroupIcon, (SELECT MAX(geo_revision) FROM geography where geo_is_tracking_level = 1) AS PopulationVersion,
                    (SELECT MAX(bvr_id) FROM boundary_version WHERE bvr_boundary_id = bou_id) VersionId
             FROM boundary INNER JOIN boundary_group ON bou_group_id = bgr_id ORDER BY bgr_order, bou_group_id, bou_order";
 		$boundaries = App::Db()->fetchAll($sql);

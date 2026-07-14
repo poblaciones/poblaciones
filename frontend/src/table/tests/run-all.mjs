@@ -45,6 +45,8 @@ console.log('\n=== MapUrlBuilder ===');
 await import('./MapUrlBuilder.test.mjs');
 console.log('\n=== logicalVariableName ===');
 await import('./logicalVariableName.test.mjs');
+console.log('\n=== percentScale ===');
+await import('./percentScale.test.mjs');
 
 await report();
 process.exit(exitCode());

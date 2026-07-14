@@ -50,6 +50,9 @@ it('toggleCollapse invierte LabelsCollapsed y persiste la ruta', () => {
 	expect(boundary.SelectedVersion().LabelsCollapsed).toBeFalsy();
 	panel.toggleCollapse();
 	expect(boundary.SelectedVersion().LabelsCollapsed).toBeTruthy();
+	// LabelsCollapsed no viene en el payload real de GetSelectedBoundary; sin
+	// this.$set no seria reactivo en un Vue real (ver ActiveBoundary.UpdateSummary).
+	expect(panel.$setCalls.some(c => c.obj === boundary.SelectedVersion() && c.key === 'LabelsCollapsed')).toBeTruthy();
 	expect(routeUpdated).toBeTruthy();
 });
 

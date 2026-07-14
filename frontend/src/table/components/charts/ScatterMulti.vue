@@ -43,7 +43,9 @@ export default {
 		series: { type: Array, required: true },
 		yLabel: { type: String, default: 'Y' },
 		sizeByWeight: { type: Boolean, default: true },
-		yMax100: { type: Boolean, default: false },
+		// Techo del eje Y cuando es porcentaje (0 = autoescala). Ver ScatterPlot.vue
+		// para el porqué de no fijarlo siempre en 100.
+		yMax: { type: Number, default: 0 },
 		width: { type: Number, default: 460 },
 		height: { type: Number, default: 320 }
 	},
@@ -61,7 +63,7 @@ export default {
 		anyNormalized() { return this.series.some(function (s) { return s.normalized; }); },
 		xAxisLabel() { return this.anyNormalized ? 'Normalizado a 100' : ''; },
 		xExtent() { return this.extent(this.allPoints.map(function (p) { return p.x; })); },
-		yExtent() { return this.yMax100 ? [0, 100] : this.extent(this.allPoints.map(function (p) { return p.y; })); },
+		yExtent() { return this.yMax > 0 ? [0, this.yMax] : this.extent(this.allPoints.map(function (p) { return p.y; })); },
 		wExtent() { return this.extent(this.allPoints.map(function (p) { return p.w || 1; })); },
 		xTicks() { return this.ticks(this.xExtent); },
 		yTicks() { return this.ticks(this.yExtent); }

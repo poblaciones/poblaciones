@@ -45,8 +45,12 @@ export default {
 		regression: { type: Object, default: null },
 		// Si true, el radio del punto escala con el peso.
 		sizeByWeight: { type: Boolean, default: true },
-		xMax100: { type: Boolean, default: false },
-		yMax100: { type: Boolean, default: false },
+		// Techo del eje cuando es porcentaje (0 = autoescala al rango real de los
+		// datos). No es un booleano fijo a 100: valores todos chicos (p. ej. 1 a 3%)
+		// quedarían amontonados en una esquina; el llamador calcula el techo por
+		// tramos (ver js/percentScale.js) y lo pasa acá.
+		xMax: { type: Number, default: 0 },
+		yMax: { type: Number, default: 0 },
 		width: { type: Number, default: 440 },
 		height: { type: Number, default: 300 }
 	},
@@ -61,8 +65,8 @@ export default {
 				return p && isFinite(p.x) && isFinite(p.y);
 			});
 		},
-		xExtent() { return this.xMax100 ? [0, 100] : this.extent(this.valid.map(function (p) { return p.x; })); },
-		yExtent() { return this.yMax100 ? [0, 100] : this.extent(this.valid.map(function (p) { return p.y; })); },
+		xExtent() { return this.xMax > 0 ? [0, this.xMax] : this.extent(this.valid.map(function (p) { return p.x; })); },
+		yExtent() { return this.yMax > 0 ? [0, this.yMax] : this.extent(this.valid.map(function (p) { return p.y; })); },
 		wExtent() { return this.extent(this.valid.map(function (p) { return p.w || 1; })); },
 		xTicks() { return this.ticks(this.xExtent); },
 		yTicks() { return this.ticks(this.yExtent); },

@@ -137,14 +137,14 @@
 						     debajo); las demás muestran acá su propia etiqueta con rowspan 2
 						     (ocupan nivel + categoría). -->
 						<tr v-if="showLevelRow" class="pivot-level-row">
-							<template v-for="(spec, sIdx) in pivot.MetricTuples.metricTuples">
+							<template v-for="(tuple, sIdx) in pivot.MetricTuples.metricTuples">
 								<th v-if="levelRowCells[sIdx]"
 										:key="'lv-' + sIdx"
 										:colspan="levelRowCells[sIdx].colspan"
 										:rowspan="levelRowCells[sIdx].rowspan"
 										:class="levelRowCells[sIdx].kind === 'level' ? 'pivot-level-header' : (levelRowCells[sIdx].kind === 'placeholder' ? 'pivot-subheader pivot-subheader-empty' : 'pivot-subheader hand')"
-										:title="levelRowCells[sIdx].kind === 'cat' ? subHeaderTooltip(spec) : null"
-										@click="levelRowCells[sIdx].kind === 'cat' ? onSubHeaderSort(spec) : null">
+										:title="levelRowCells[sIdx].kind === 'cat' ? subHeaderTooltip(tuple) : null"
+										@click="levelRowCells[sIdx].kind === 'cat' ? onSubHeaderSort(tuple) : null">
 									<template v-if="levelRowCells[sIdx].kind === 'level'">{{ levelRowCells[sIdx].name }}</template>
 									<template v-else-if="levelRowCells[sIdx].kind === 'placeholder'">
 										<span class="subheader-label subheader-empty">[Ninguna]</span>
@@ -153,9 +153,9 @@
 												@click.stop="openCategoryPanel(levelRowCells[sIdx].metric, levelRowCells[sIdx].versionId, $event)">▾</button>
 									</template>
 									<template v-else>
-										<span class="subheader-label" :class="{ 'subheader-total': spec.isTotal }">{{ subHeaderText(spec) }}</span>
-										<span v-if="pivot.MetricTuples.sortStateOf(spec.key) === 'desc'" class="sort-glyph sort-desc">⌄</span>
-										<span v-else-if="pivot.MetricTuples.sortStateOf(spec.key) === 'asc'" class="sort-glyph sort-asc">⌃</span>
+										<span class="subheader-label" :class="{ 'subheader-total': tuple.isTotal }">{{ subHeaderText(tuple) }}</span>
+										<span v-if="pivot.MetricTuples.sortStateOf(tuple.key) === 'desc'" class="sort-glyph sort-desc">⌄</span>
+										<span v-else-if="pivot.MetricTuples.sortStateOf(tuple.key) === 'asc'" class="sort-glyph sort-asc">⌃</span>
 										<button v-if="levelRowCells[sIdx].lastOfVersion && metricTriggerInLevelRow(levelRowCells[sIdx].metric)"
 												class="inline-trigger"
 												:ref="'ctrig-' + levelRowCells[sIdx].metric.InstanceId + '-' + levelRowCells[sIdx].versionId"
@@ -175,19 +175,19 @@
 								<th v-for="(cell, ci) in entry.cells"
 										:key="'sub-' + entry.metric.InstanceId + '-' + ci"
 										class="pivot-subheader"
-										:class="{ hand: !cell.spec.isPlaceholder, 'pivot-subheader-empty': cell.spec.isPlaceholder }"
-										:title="cell.spec.isPlaceholder ? null : subHeaderTooltip(cell.spec)"
-										@click="cell.spec.isPlaceholder ? null : onSubHeaderSort(cell.spec)">
-									<span v-if="cell.spec.isPlaceholder" class="subheader-label subheader-empty">[Ninguna]</span>
+										:class="{ hand: !cell.tuple.isPlaceholder, 'pivot-subheader-empty': cell.tuple.isPlaceholder }"
+										:title="cell.tuple.isPlaceholder ? null : subHeaderTooltip(cell.tuple)"
+										@click="cell.tuple.isPlaceholder ? null : onSubHeaderSort(cell.tuple)">
+									<span v-if="cell.tuple.isPlaceholder" class="subheader-label subheader-empty">[Ninguna]</span>
 									<template v-else>
-										<span class="subheader-label" :class="{ 'subheader-total': cell.spec.isTotal }">{{ subHeaderText(cell.spec) }}</span>
-										<span v-if="pivot.MetricTuples.sortStateOf(cell.spec.key) === 'desc'" class="sort-glyph sort-desc">⌄</span>
-										<span v-else-if="pivot.MetricTuples.sortStateOf(cell.spec.key) === 'asc'" class="sort-glyph sort-asc">⌃</span>
+										<span class="subheader-label" :class="{ 'subheader-total': cell.tuple.isTotal }">{{ subHeaderText(cell.tuple) }}</span>
+										<span v-if="pivot.MetricTuples.sortStateOf(cell.tuple.key) === 'desc'" class="sort-glyph sort-desc">⌄</span>
+										<span v-else-if="pivot.MetricTuples.sortStateOf(cell.tuple.key) === 'asc'" class="sort-glyph sort-asc">⌃</span>
 									</template>
 									<button v-if="isLastCellOfVersion(entry, ci) && !metricTriggerInLevelRow(entry.metric)"
 											class="inline-trigger"
-											:ref="'ctrig-' + entry.metric.InstanceId + '-' + cell.spec.versionId"
-											@click.stop="openCategoryPanel(entry.metric, cell.spec.versionId, $event)">▾</button>
+											:ref="'ctrig-' + entry.metric.InstanceId + '-' + cell.tuple.versionId"
+											@click.stop="openCategoryPanel(entry.metric, cell.tuple.versionId, $event)">▾</button>
 								</th>
 							</template>
 						</tr>
@@ -473,19 +473,19 @@
 			//                  rowspan 2 para ocupar también la fila de categorías.
 			levelRowCells() {
 				this.dataTick;
-				var specs = this.pivot ? this.pivot.MetricTuples.metricTuples : [];
-				var cells = new Array(specs.length).fill(null);
+				var tuples = this.pivot ? this.pivot.MetricTuples.metricTuples : [];
+				var cells = new Array(tuples.length).fill(null);
 				var i = 0;
-				while (i < specs.length) {
-					var sp = specs[i];
+				while (i < tuples.length) {
+					var sp = tuples[i];
 					if (sp && sp.isPlaceholder) {
 						cells[i] = { kind: 'placeholder', colspan: 1, rowspan: 2, name: null, metric: sp.metric, versionId: sp.versionId };
 						i++;
 					} else if (this.tupleHasLevelCell(sp)) {
 						var span = 1;
 						var j = i + 1;
-						while (j < specs.length && this.tupleHasLevelCell(specs[j])
-								&& specs[j].metric === sp.metric && specs[j].versionId === sp.versionId && specs[j].levelId === sp.levelId) {
+						while (j < tuples.length && this.tupleHasLevelCell(tuples[j])
+								&& tuples[j].metric === sp.metric && tuples[j].versionId === sp.versionId && tuples[j].levelId === sp.levelId) {
 							span++; j++;
 						}
 						cells[i] = { kind: 'level', colspan: span, rowspan: 1, name: sp.levelName, metric: sp.metric, versionId: sp.versionId };
@@ -517,47 +517,47 @@
 			// (ver tupleHasLevelCell, el criterio único).
 			showLevelRow() {
 				this.dataTick;
-				var specs = this.pivot ? this.pivot.MetricTuples.metricTuples : null;
-				if (!specs) return false;
-				for (var i = 0; i < specs.length; i++) {
-					if (this.tupleHasLevelCell(specs[i])) return true;
+				var tuples = this.pivot ? this.pivot.MetricTuples.metricTuples : null;
+				if (!tuples) return false;
+				for (var i = 0; i < tuples.length; i++) {
+					if (this.tupleHasLevelCell(tuples[i])) return true;
 				}
 				return false;
 			},
-			// Agrupa las ColumnSpecs por indicador (consecutivas con mismo metricId).
-			// Devuelve [{ metric, specs: [...], colSpan }]. El metric viene del primer
-			// spec del grupo (todas las del mismo grupo comparten metric).
+			// Agrupa las ColumnTuples por indicador (consecutivas con mismo metricId).
+			// Devuelve [{ metric, tuples: [...], colSpan }]. El metric viene del primer
+			// tuple del grupo (todas las del mismo grupo comparten metric).
 			headerGroups() {
 				this.dataTick;
 				if (!this.pivot || !this.pivot.MetricTuples.metricTuples) return [];
-				var specs = this.pivot.MetricTuples.metricTuples;
+				var tuples = this.pivot.MetricTuples.metricTuples;
 				var groups = [];
 				var current = null;
-				for (var i = 0; i < specs.length; i++) {
-					var sp = specs[i];
-					// Defensa ante estados transitorios: ignora specs sin metric resuelto.
+				for (var i = 0; i < tuples.length; i++) {
+					var sp = tuples[i];
+					// Defensa ante estados transitorios: ignora tuples sin metric resuelto.
 					if (!sp || !sp.metric || !sp.metric.properties || !sp.metric.properties.Metric) continue;
 					if (!current || current.metric !== sp.metric) {
-						current = { metric: sp.metric, specs: [sp], colSpan: 1, versionGroups: null };
+						current = { metric: sp.metric, tuples: [sp], colSpan: 1, versionGroups: null };
 						groups.push(current);
 					} else {
-						current.specs.push(sp);
+						current.tuples.push(sp);
 						current.colSpan++;
 					}
 				}
 				// Subdivide cada grupo de indicador por versión (para la fila de años
-				// con colspan). Specs consecutivas con el mismo versionId forman un
+				// con colspan). Tuples consecutivas con el mismo versionId forman un
 				// sub-grupo.
 				groups.forEach(function (g) {
 					var vgs = [];
 					var cur = null;
-					for (var k = 0; k < g.specs.length; k++) {
-						var s = g.specs[k];
+					for (var k = 0; k < g.tuples.length; k++) {
+						var s = g.tuples[k];
 						if (!cur || cur.versionId !== s.versionId) {
-							cur = { versionId: s.versionId, versionName: s.versionName, specs: [s], colSpan: 1 };
+							cur = { versionId: s.versionId, versionName: s.versionName, tuples: [s], colSpan: 1 };
 							vgs.push(cur);
 						} else {
-							cur.specs.push(s);
+							cur.tuples.push(s);
 							cur.colSpan++;
 						}
 					}
@@ -588,12 +588,12 @@
 			categoryRow() {
 				this.dataTick;
 				if (!this.pivot) return [];
-				var specs = this.pivot.MetricTuples.metricTuples;
+				var tuples = this.pivot.MetricTuples.metricTuples;
 				var showLevel = this.showLevelRow;
 				var byMetric = [];
 				var indexByMetric = {};
-				for (var i = 0; i < specs.length; i++) {
-					var sp = specs[i];
+				for (var i = 0; i < tuples.length; i++) {
+					var sp = tuples[i];
 					if (!sp || !sp.metric) continue;
 					// Con fila de nivel, el placeholder ya ocupa ambas filas (rowspan 2)
 					// allí; sin fila de nivel, va acá. Las celdas que hicieron rowspan en
@@ -607,7 +607,7 @@
 						indexByMetric[id] = byMetric.length;
 						byMetric.push({ metric: sp.metric, cells: [] });
 					}
-					byMetric[indexByMetric[id]].cells.push({ spec: sp });
+					byMetric[indexByMetric[id]].cells.push({ tuple: sp });
 				}
 				return byMetric;
 			},
@@ -1036,18 +1036,18 @@
 				if (done && typeof done.then === 'function') done.then(emit);
 				else emit();
 			},
-			// Sort por una columna concreta (sub-header). Recibe la ColumnSpec.
-			onSubHeaderSort(spec) {
-				if (!spec || !spec.key || spec.isEmpty) return;
+			// Sort por una columna concreta (sub-header). Recibe la ColumnTuple.
+			onSubHeaderSort(tuple) {
+				if (!tuple || !tuple.key || tuple.isEmpty) return;
 				var loc = this;
-				this.pivot.MetricTuples.toggleSort(spec.key);
+				this.pivot.MetricTuples.toggleSort(tuple.key);
 				this.runBusy(function () { loc.pivot.RefreshData(); }).then(function () {
 					loc.$emit('data-refreshed', loc.pivot);
 				});
 			},
 			// Texto del sub-header: categoría/Total, o nombre de variable cuando no hay categorías.
-			tupleNeedsLevel(spec) {
-				return !!spec && !spec.isEmpty && !spec.isTotal && spec.datasetType === 'D' && spec.labelId != null;
+			tupleNeedsLevel(tuple) {
+				return !!tuple && !tuple.isEmpty && !tuple.isTotal && tuple.datasetType === 'D' && tuple.labelId != null;
 			},
 			// Criterio único: ¿esta tupla ocupa la fila de nivel (kind:'level', rowspan
 			// 1, con el nombre del nivel) en vez de fusionar la fila de categoría
@@ -1056,10 +1056,10 @@
 			// la ocupa, Total incluido; si no, solo cuando representa una categoría
 			// concreta (tupleNeedsLevel, el criterio previo). Usado también por
 			// levelRowCells/categoryRow para que ambas filas queden en sincronía.
-			tupleHasLevelCell(spec) {
-				if (!spec || spec.isEmpty) return false;
-				if (this.pivot && this.pivot.AlwaysShowLevelRow) return spec.datasetType === 'D';
-				return this.tupleNeedsLevel(spec);
+			tupleHasLevelCell(tuple) {
+				if (!tuple || tuple.isEmpty) return false;
+				if (this.pivot && this.pivot.AlwaysShowLevelRow) return tuple.datasetType === 'D';
+				return this.tupleNeedsLevel(tuple);
 			},
 			// ¿El indicador tiene celdas en la fila de categorías? Si no (todas sus
 			// columnas hicieron rowspan en la fila de nivel), el control de categorías
@@ -1085,7 +1085,7 @@
 				var cells = entry.cells;
 				if (ci >= cells.length) return false;
 				if (ci === cells.length - 1) return true;
-				return cells[ci].spec.versionId !== cells[ci + 1].spec.versionId;
+				return cells[ci].tuple.versionId !== cells[ci + 1].tuple.versionId;
 			},
 			metricTriggerInLevelRow(metric) {
 				if (!this.showLevelRow) return false;
@@ -1098,17 +1098,17 @@
 				}
 				return false;
 			},
-			subHeaderText(spec) {
-				if (spec.isEmpty) return '—';
-				if (spec.isTotal) return 'Total';
-				if (spec.labelName) return spec.labelName;
-				return spec.variableName || '';
+			subHeaderText(tuple) {
+				if (tuple.isEmpty) return '—';
+				if (tuple.isTotal) return 'Total';
+				if (tuple.labelName) return tuple.labelName;
+				return tuple.variableName || '';
 			},
-			subHeaderTooltip(spec) {
-				var parts = [spec.metricName];
-				if (spec.variableName) parts.push(spec.variableName);
-				if (spec.labelName) parts.push(spec.labelName);
-				if (spec.versionName) parts.push('Edición ' + spec.versionName);
+			subHeaderTooltip(tuple) {
+				var parts = [tuple.metricName];
+				if (tuple.variableName) parts.push(tuple.variableName);
+				if (tuple.labelName) parts.push(tuple.labelName);
+				if (tuple.versionName) parts.push('Edición ' + tuple.versionName);
 				return parts.join(' — ') + ' · clic para ordenar';
 			},
 			// Ordena alfabéticamente por el label de la fila (clic en "Región").
@@ -1162,9 +1162,9 @@
 					this.onRowDeselect([{ Id: cell.FID, BoundaryId: cell.boundaryId }], null);
 				}
 			},
-			resolveValue(spec, cell) {
-				if (!spec || !spec.metric || cell === null || cell === undefined) return '';
-				return displayCell(spec.metric, spec.variable, cell);
+			resolveValue(tuple, cell) {
+				if (!tuple || !tuple.metric || cell === null || cell === undefined) return '';
+				return displayCell(tuple.metric, tuple.variable, cell);
 			},
 			getRowClass(row) {
 				if (row.length > 0 && row[0].isRegionHeader) {

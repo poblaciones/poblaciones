@@ -183,6 +183,24 @@ variables por nombre: el combo de variables, la resolución en un censo, el
 reenganche al cambiar de nivel y la restauración por URL. En el caso sano (sin
 homónimas) el nombre lógico es el `Name` tal cual y nada cambia.
 
+### Relación geográfica de nivel superior
+
+Un indicador puede publicarse a un nivel más agregado que el de las filas
+activas (p. ej. Mortalidad infantil solo existe a nivel provincia, pero las
+filas están a nivel localidad). `RegionSet` guarda dos diccionarios por item:
+`GeographyRelations` (la relación directa con un `geographyId`) y
+`UpperGeographyRelations` (la relación con el `geographyId` del nivel padre).
+`GetGeographyIdsForItem(itemId, geographyId)` prueba primero la relación
+directa y, si falta, cae a la de nivel superior — así una fila de localidad
+puede resolver la celda de un indicador que solo existe a nivel provincia,
+usando la relación con SU provincia.
+
+Por esto `RefreshData` (antes de resolver celdas) pide
+`EnsureContainsGeographyRelations` dos veces por cada `geographyId` de indicador
+activo: una para el `geographyId` propio del nivel de la tupla, y otra para el
+`geographyId` de su nivel padre (`tuple.version.Levels[levelIdx - 1]`). Si falta
+la segunda, el fallback de `GetGeographyIdsForItem` no tiene nada que usar.
+
 ### Datos que violan una regla de negocio: arreglar en la base, no tolerar en el cliente
 
 Si un síntoma sugiere datos inconsistentes que violan una regla de negocio (por
@@ -263,6 +281,10 @@ no escribir historial durante el arranque o la restauración.
         AnalysisColumns.js       Columnas de análisis del dataset (correlación, regresión…)
         MetricStore.js           Caché/recuperación de métricas
         Context.js               Contexto global (stores, usuario, autenticación)
+        RegionStore.js           Store de delimitaciones (Boundaries/Regions); dueño de los RegionSet
+        RegionSet.js             Un boundary con sus items y sus relaciones geográficas
+                                 (GeographyRelations directas, UpperGeographyRelations con el nivel
+                                 padre — ver "relación geográfica de nivel superior" en la sección 3)
         pivotValue.js            Formato y valor de celda según el modo (N/T/I/P/FIL/K/A/D)
         logicalVariableName.js   Nombre lógico de una variable (desambiguación #2/#3; ver sección 3)
         boundaryTree.js          Resolución de delimitaciones desde el árbol

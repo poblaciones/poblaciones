@@ -909,13 +909,18 @@ export default {
     normalize(s) {
       return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     },
-    // Coincide si `term` es el inicio de alguna palabra de `name` (ambos ya
-    // normalizados). "tan" matchea "Tandil" pero no "Catamarca": evita el ruido de
-    // encontrar la búsqueda en cualquier posición dentro de una palabra.
+    // Coincide si cada palabra de `term` es el inicio de alguna palabra de
+    // `name` (ambos ya normalizados), tratando el término como un AND entre
+    // sus palabras: "niv edu" matchea "Nivel educativo" porque "niv" matchea
+    // el inicio de "nivel" y "edu" el de "educativo", en cualquier orden.
+    // "tan" matchea "Tandil" pero no "Catamarca": evita el ruido de encontrar
+    // la búsqueda en cualquier posición dentro de una palabra.
     matchesWordStart(name, term) {
       if (!term) return false;
-      const words = name.split(/[^a-z0-9]+/).filter(Boolean);
-      return words.some(w => w.indexOf(term) === 0);
+      const nameWords = name.split(/[^a-z0-9]+/).filter(Boolean);
+      const termWords = term.split(/[^a-z0-9]+/).filter(Boolean);
+      if (!termWords.length) return false;
+      return termWords.every(termWord => nameWords.some(w => w.indexOf(termWord) === 0));
     },
     // ── Display ────────────────────────────────────────────────────────────────
     itemIcon(item, container) {

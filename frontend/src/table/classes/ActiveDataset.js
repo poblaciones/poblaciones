@@ -78,33 +78,33 @@ function weightFromCell(column, cell) {
 	return null;
 }
 
-function columnRecord(spec, columnIndex) {
-	var metric = spec.metric;
-	var av = spec.variable;
-	var sm = spec.summary;
+function columnRecord(tuple, columnIndex) {
+	var metric = tuple.metric;
+	var av = tuple.variable;
+	var sm = tuple.summary;
 
 	var unit = stripHtml(valueHeader(metric, av));
 
 	// Label largo: "Indicador — Variable (unidad) — Categoría [Edición]".
-	var labelParts = [spec.metricName];
-	if (spec.variableName) labelParts.push('— ' + spec.variableName + (unit ? ' (' + unit + ')' : ''));
-	if (spec.labelName)    labelParts.push('— ' + spec.labelName);
-	if (spec.versionName)  labelParts.push('[' + spec.versionName + ']');
+	var labelParts = [tuple.metricName];
+	if (tuple.variableName) labelParts.push('— ' + tuple.variableName + (unit ? ' (' + unit + ')' : ''));
+	if (tuple.labelName)    labelParts.push('— ' + tuple.labelName);
+	if (tuple.versionName)  labelParts.push('[' + tuple.versionName + ']');
 	var label = labelParts.join(' ');
 
 	// Short label: la dimensión más diferenciadora primero.
 	var shortParts = [];
-	if (spec.labelName)         shortParts.push(spec.labelName);
-	else if (spec.variableName) shortParts.push(spec.variableName);
-	if (spec.versionName) shortParts.push(spec.versionName);
+	if (tuple.labelName)         shortParts.push(tuple.labelName);
+	else if (tuple.variableName) shortParts.push(tuple.variableName);
+	if (tuple.versionName) shortParts.push(tuple.versionName);
 	if (unit) shortParts.push(unit);
 	var shortLabel = shortParts.join(' ');
 
 	// Color curado de la categoría (FillColor del ValueLabel), para los gráficos
 	// que pintan por categoría. null para la columna de total o si no hay color.
 	var fillColor = null;
-	if (!spec.isTotal && spec.labelId != null) {
-		fillColor = metric.GetStyleColorDictionary()[spec.labelId] || null;
+	if (!tuple.isTotal && tuple.labelId != null) {
+		fillColor = metric.GetStyleColorDictionary()[tuple.labelId] || null;
 	}
 
 	// Variable normalizadora (p. ej. "/ km²"), el mismo criterio que el combo de
@@ -119,7 +119,7 @@ function columnRecord(spec, columnIndex) {
 	}
 
 	return {
-		key: spec.key,
+		key: tuple.key,
 		label: label,
 		shortLabel: shortLabel,
 		unit: unit,
@@ -129,22 +129,22 @@ function columnRecord(spec, columnIndex) {
 		formatter: function (v) { return formatValue(metric, av, v); },
 		weighting: weightingFor(sm, av),
 		meta: {
-			metricId: spec.metricId,
-			metricName: spec.metricName,
-			versionId: spec.versionId,
-			versionName: spec.versionName,
-			levelId: spec.levelId,
-			levelName: spec.levelName,
-			variableId: spec.variableId,
-			variableName: spec.variableName,
-			labelId: spec.labelId,
-			labelName: spec.labelName,
-			isTotal: !!spec.isTotal,
+			metricId: tuple.metricId,
+			metricName: tuple.metricName,
+			versionId: tuple.versionId,
+			versionName: tuple.versionName,
+			levelId: tuple.levelId,
+			levelName: tuple.levelName,
+			variableId: tuple.variableId,
+			variableName: tuple.variableName,
+			labelId: tuple.labelId,
+			labelName: tuple.labelName,
+			isTotal: !!tuple.isTotal,
 			fillColor: fillColor,
 			isSimpleCount: !!(av && av.IsSimpleCount),
 			isGap: !!(av && av.IsGap),
 			hasGapSameTotal: !!(av && av.HasGapSameTotal),
-			hasArea: !!(spec.level && spec.level.HasArea),
+			hasArea: !!(tuple.level && tuple.level.HasArea),
 			normCaption: normCaption
 		},
 		_columnIndex: columnIndex
@@ -300,14 +300,14 @@ function ActiveDataset(pivot, options) {
 	this.title = options.title || 'Tabla';
 
 	// Columnas de trabajo (con índice interno hacia pivot.Rows) y públicas. Las
-	// specs placeholder (indicador sin versiones activas) no son columnas de
+	// tuples placeholder (indicador sin versiones activas) no son columnas de
 	// datos, pero su posición real se respeta en el índice para no desalinear la
 	// lectura de celdas en pivot.Rows.
-	var specs = pivot.MetricTuples.metricTuples || [];
+	var tuples = pivot.MetricTuples.metricTuples || [];
 	var workColumns = [];
-	for (var i = 0; i < specs.length; i++) {
-		if (!specs[i].isEmpty) {
-			workColumns.push(columnRecord(specs[i], i + 1));
+	for (var i = 0; i < tuples.length; i++) {
+		if (!tuples[i].isEmpty) {
+			workColumns.push(columnRecord(tuples[i], i + 1));
 		}
 	}
 

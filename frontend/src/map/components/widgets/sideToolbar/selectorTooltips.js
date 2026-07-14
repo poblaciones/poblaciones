@@ -78,7 +78,8 @@ export function buildBoundaryInfo(item, container, parentName) {
   if (parent) {
     sections.push({ Label: 'Pertenece a', Text: parent });
   }
-  sections.push({ Label: 'Población', Text: formatPopulation(item.Population) });
+  const populationLabel = 'Población' + (container && container.PopulationVersion ? ' (' + container.PopulationVersion + ')' : '');
+  sections.push({ Label: populationLabel, Text: formatPopulation(item.Population) });
   return { Title: item.Name, Sections: sections };
 }
 

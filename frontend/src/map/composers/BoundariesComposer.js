@@ -66,7 +66,7 @@ BoundariesComposer.prototype.renderPolygons = function (mapResults, dataItems, g
 
 	if (dataItems.length === 0) return;
 	for (var i = 0; i < dataItems.length; i++) {
-		var feature = this.processFeature(tileUniqueId, dataItems[i]);
+		var feature = this.processFeature(tileUniqueId, dataItems[i], patternValue);
 		if (feature !== null) {
 			features.push(feature);
 		}
@@ -81,7 +81,7 @@ BoundariesComposer.prototype.GetTileCacheKey = function (x, y, z) {
 	return h.getFrameKey(x, y, z);
 };
 
-BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElement) {
+BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElement, patternValue) {
 	// Se fija si por etiqueta (ClippingRegion de origen) está visible
 	var val = dataElement.properties.LabelId;
 	if (!this.labelValueIsVisible(val)) {
@@ -94,6 +94,14 @@ BoundariesComposer.prototype.processFeature = function (tileUniqueId, dataElemen
 	};
 	if (dataElement.properties.Description) {
 		mapItem.properties.description = dataElement.properties.Description.replaceAll('"', '&#x22;');
+	}
+	// Mismo patrón que DataShapeComposer.processFeature: sin esto, el fill de
+	// las tramas de textura (Diagonal, Puntos) queda referenciando un pattern
+	// SVG inexistente (fill: url(#..._undefined)), y el navegador cae al fill
+	// por defecto de la clase CSS, que para patternValue!=0 es "sin relleno"
+	// (el mismo aspecto que Contorno).
+	if (this.patternUseFillStyles(patternValue)) {
+		mapItem.properties.patternClass = 'cs' + val;
 	}
 	return mapItem;
 };

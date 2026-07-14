@@ -1,6 +1,6 @@
 /*
  * ActivePivot.test.mjs — pruebas del modelo del pivot (sort, orden de métricas,
- * specs y caché de datos por versión-nivel).
+ * tuples y caché de datos por versión-nivel).
  *
  * Usa el alias y stubs del proyecto:
  *     node --import ./tests/_register-alias.mjs tests/ActivePivot.test.mjs
@@ -12,22 +12,22 @@
 import { describe, it, expect, report } from './_harness.mjs';
 import ActivePivot from '@/table/classes/ActivePivot.js';
 
-// Métrica simulada: id + specs declaradas.
-function fakeMetric(metricId, specs) {
+// Métrica simulada: id + tuples declaradas.
+function fakeMetric(metricId, tuples) {
 	return {
 		properties: { Metric: { Id: metricId, Name: 'M' + metricId } },
-		GetTuples: function () { return specs; }
+		GetTuples: function () { return tuples; }
 	};
 }
 
-function spec(metricId, key, versionId, levelId) {
+function tuple(metricId, key, versionId, levelId) {
 	return { metricId: metricId, key: key, versionId: versionId, levelId: levelId, isEmpty: false, level: { Id: levelId } };
 }
 
 describe('ToggleSort / SortStateOf', function () {
 	it('cicla sin orden → desc → asc → sin orden', function () {
 		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [spec(1, 'k1', 10, 5)];
+		p.MetricTuples.metricTuples = [tuple(1, 'k1', 10, 5)];
 		expect(p.MetricTuples.sortStateOf('k1')).toBeNull();
 		p.MetricTuples.toggleSort('k1');
 		expect(p.MetricTuples.sortStateOf('k1')).toBe('desc');
@@ -38,16 +38,16 @@ describe('ToggleSort / SortStateOf', function () {
 	});
 	it('al ordenar otra columna, la anterior queda sin orden', function () {
 		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [spec(1, 'k1', 10, 5), spec(2, 'k2', 10, 5)];
+		p.MetricTuples.metricTuples = [tuple(1, 'k1', 10, 5), tuple(2, 'k2', 10, 5)];
 		p.MetricTuples.toggleSort('k1');
 		expect(p.MetricTuples.sortStateOf('k1')).toBe('desc');
 		p.MetricTuples.toggleSort('k2');
 		expect(p.MetricTuples.sortStateOf('k1')).toBeNull();
 		expect(p.MetricTuples.sortStateOf('k2')).toBe('desc');
 	});
-	it('resuelve metricId a la key de su spec', function () {
+	it('resuelve metricId a la key de su tuple', function () {
 		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [spec(7, 'k7|c:total', 10, 5)];
+		p.MetricTuples.metricTuples = [tuple(7, 'k7|c:total', 10, 5)];
 		p.MetricTuples.toggleSort(7);  // por metricId
 		expect(p.MetricTuples.sortStateOf('k7|c:total')).toBe('desc');
 	});
@@ -76,12 +76,12 @@ describe('MoveMetric', function () {
 	});
 });
 
-describe('RebuildColumnSpecs', function () {
-	it('arma las specs concatenando las de cada métrica', function () {
+describe('RebuildColumnTuples', function () {
+	it('arma las tuples concatenando las de cada métrica', function () {
 		var p = new ActivePivot();
 		p.Metrics = [
-			fakeMetric(1, [spec(1, 'k1', 10, 5)]),
-			fakeMetric(2, [spec(2, 'k2a', 10, 5), spec(2, 'k2b', 10, 5)])
+			fakeMetric(1, [tuple(1, 'k1', 10, 5)]),
+			fakeMetric(2, [tuple(2, 'k2a', 10, 5), tuple(2, 'k2b', 10, 5)])
 		];
 		p.MetricTuples.rebuild();
 		expect(p.MetricTuples.metricTuples).toHaveLength(3);
@@ -124,14 +124,14 @@ describe('caché de datos (manager Data)', function () {
 			{ isEmpty: false, level: lvl5, versionId: 2022, levelId: 5, metric: { Store: store }, version: 2022 }
 		];
 		await p.Data.load();
-		// Dos claves únicas pese a tres specs (una es duplicada).
+		// Dos claves únicas pese a tres tuples (una es duplicada).
 		expect(p.Data.itemsFor(2010, 5)[0].tag).toBe('2010:5');
 		expect(p.Data.itemsFor(2022, 5)[0].tag).toBe('2022:5');
 	});
 });
 
 describe('Clear', function () {
-	it('vacía specs, filas, filtros, regiones y métricas', function () {
+	it('vacía tuples, filas, filtros, regiones y métricas', function () {
 		var p = new ActivePivot();
 		p.MetricTuples.headers = [1]; p.Rows = [1]; p.FilterSet.items = [1]; p.Regions.items = [1]; p.Metrics = [1];
 		p.Clear();
@@ -144,30 +144,30 @@ describe('Clear', function () {
 });
 
 describe('manager Columns (API por objeto)', function () {
-	it('GetById devuelve la primera spec de un indicador', function () {
+	it('GetById devuelve la primera tuple de un indicador', function () {
 		var p = new ActivePivot();
-		p.Metrics = [fakeMetric(1, [spec(1, 'k1', 10, 5)]), fakeMetric(2, [spec(2, 'k2', 10, 5)])];
+		p.Metrics = [fakeMetric(1, [tuple(1, 'k1', 10, 5)]), fakeMetric(2, [tuple(2, 'k2', 10, 5)])];
 		p.MetricTuples.rebuild();
 		expect(p.MetricTuples.GetById(2).key).toBe('k2');
 		expect(p.MetricTuples.GetById(99)).toBeNull();
 	});
 	it('byKey ubica por clave exacta', function () {
 		var p = new ActivePivot();
-		p.Metrics = [fakeMetric(1, [spec(1, 'k1a', 10, 5), spec(1, 'k1b', 10, 5)])];
+		p.Metrics = [fakeMetric(1, [tuple(1, 'k1a', 10, 5), tuple(1, 'k1b', 10, 5)])];
 		p.MetricTuples.rebuild();
 		expect(p.MetricTuples.byKey('k1b').key).toBe('k1b');
 		expect(p.MetricTuples.byKey('nope')).toBeNull();
 	});
-	it('allById devuelve todas las specs de un indicador', function () {
+	it('allById devuelve todas las tuples de un indicador', function () {
 		var p = new ActivePivot();
-		p.Metrics = [fakeMetric(1, [spec(1, 'k1a', 10, 5), spec(1, 'k1b', 10, 5)]), fakeMetric(2, [spec(2, 'k2', 10, 5)])];
+		p.Metrics = [fakeMetric(1, [tuple(1, 'k1a', 10, 5), tuple(1, 'k1b', 10, 5)]), fakeMetric(2, [tuple(2, 'k2', 10, 5)])];
 		p.MetricTuples.rebuild();
 		expect(p.MetricTuples.allById(1)).toHaveLength(2);
 		expect(p.MetricTuples.allById(2)).toHaveLength(1);
 	});
-	it('rebuild puebla specs desde las métricas', function () {
+	it('rebuild puebla tuples desde las métricas', function () {
 		var p = new ActivePivot();
-		p.Metrics = [fakeMetric(1, [spec(1, 'k1', 10, 5)])];
+		p.Metrics = [fakeMetric(1, [tuple(1, 'k1', 10, 5)])];
 		p.MetricTuples.rebuild();
 		expect(p.MetricTuples.metricTuples).toHaveLength(1);
 		expect(p.MetricTuples.metricTuples[0].key).toBe('k1');
@@ -179,7 +179,7 @@ describe('manager Columns (API por objeto)', function () {
 	});
 	it('clearSort quita el orden activo', function () {
 		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [spec(1, 'k1', 10, 5)];
+		p.MetricTuples.metricTuples = [tuple(1, 'k1', 10, 5)];
 		p.MetricTuples.toggleSort('k1');
 		expect(p.MetricTuples.isSortedBy('k1')).toBeTruthy();
 		p.MetricTuples.clearSort();
@@ -188,7 +188,7 @@ describe('manager Columns (API por objeto)', function () {
 	});
 	it('isSortedBy resuelve metricId además de key', function () {
 		var p = new ActivePivot();
-		p.MetricTuples.metricTuples = [spec(7, 'k7', 10, 5)];
+		p.MetricTuples.metricTuples = [tuple(7, 'k7', 10, 5)];
 		p.MetricTuples.toggleSort('k7');
 		expect(p.MetricTuples.isSortedBy(7)).toBeTruthy(); // por metricId
 	});
@@ -295,8 +295,8 @@ describe('ResolveAllCategories — incidencia sobre el total propio', function (
 				totalTuple: { labelId: null, isTotal: true }
 			};
 		};
-		p.ResolveCell = function (spec) {
-			if (spec.isTotal) return { Empty: false, Value: 6880, Total: 96900 };
+		p.ResolveCell = function (tuple) {
+			if (tuple.isTotal) return { Empty: false, Value: 6880, Total: 96900 };
 			return { Empty: false, Value: 6880, Total: 10000 };
 		};
 		var res = p.ResolveAllCategories(2, 11);
@@ -324,8 +324,8 @@ describe('ResolveAllCategories — incidencia con celdas sin valor', function ()
 				totalTuple: { labelId: null, isTotal: true }
 			};
 		};
-		p.ResolveCell = function (spec, region, item) {
-			if (spec.isTotal) return { Empty: false, Value: 100, Total: 100 };
+		p.ResolveCell = function (tuple, region, item) {
+			if (tuple.isTotal) return { Empty: false, Value: 100, Total: 100 };
 			// La categoría: Santiago tiene 84/100; Catamarca no tiene dato (Value null).
 			if (item && item.FID === 1) return { Empty: false, Value: 84, Total: 100 };
 			return { Empty: false, Value: null, Total: 100 };
@@ -360,9 +360,9 @@ describe('ResolveAllCategoriesByRegion — % de área (modo A) compone bien por 
 				totalTuple: { labelId: null, isTotal: true }
 			};
 		};
-		p.ResolveCell = function (spec, region, item) {
-			if (spec.isTotal) return { Empty: false, Value: null, Total: null, Area: null };
-			var isUrbano = spec.labelId === 101;
+		p.ResolveCell = function (tuple, region, item) {
+			if (tuple.isTotal) return { Empty: false, Value: null, Total: null, Area: null };
+			var isUrbano = tuple.labelId === 101;
 			if (item.FID === 1) return { Empty: false, Area: isUrbano ? 30 : 20 };
 			return { Empty: false, Area: isUrbano ? 40 : 10 };
 		};

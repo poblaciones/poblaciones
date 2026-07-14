@@ -61,7 +61,7 @@
 							<scatter-plot :points="pairPoints(selected.i, selected.j)"
 								:x-label="axisFull(columns[selected.j])" :y-label="axisMetric(columns[selected.i])"
 								:regression="pairRegression(selected.i, selected.j)" :size-by-weight="sizeByWeight"
-								:height="150" :y-max100="isPct(columns[selected.i])" :x-max100="isPct(columns[selected.j])" />
+								:height="150" :y-max="pctMax(columns[selected.i])" :x-max="pctMax(columns[selected.j])" />
 						</div>
 						<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
 					</div>
@@ -112,11 +112,11 @@
 						<h4 class="section-title">Gráfico de dispersión</h4>
 						<div class="chart-subject">{{ (depColumn ? fullName(depColumn) : '') }} según indicadores seleccionados</div>
 						<scatter-multi :series="multiSeries" :y-label="depColumn ? axisMetric(depColumn) : ''"
-							:size-by-weight="sizeByWeight" :height="150" :y-max100="depColumn ? isPct(depColumn) : false" />
+							:size-by-weight="sizeByWeight" :height="150" :y-max="depColumn ? pctMax(depColumn) : 0" />
 					</div>
 					<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
 
-					<h4 class="section-title">Regresión{{ regressionTitleSuffix }}
+					<h4 class="section-title">Regresión{{ regressionTitleSuffix() }}
 						<span class="r2" v-if="regType === 'linear' && regression">R²aj. {{ fmt2(regression.adjRSquared) }} · n {{ regression.n }}</span>
 						<span class="r2" v-else-if="regType === 'logistic' && logitReg">R² McF. {{ fmt2(logitReg.mcFaddenR2) }} · n {{ logitReg.n }}</span>
 					</h4>
@@ -230,7 +230,7 @@
 						<div class="chart-subject">{{ colByKey[xKey] ? fullName(colByKey[xKey]) : '' }}</div>
 						<scatter-plot :points="pairPointsByKey(xKey, yKey)" :x-label="axisFullKey(yKey)" :y-label="axisMetricKey(xKey)"
 							:regression="pairReg" :size-by-weight="sizeByWeight" :height="150"
-							:y-max100="isPctKey(xKey)" :x-max100="isPctKey(yKey)" />
+							:y-max="pctMaxKey(xKey)" :x-max="pctMaxKey(yKey)" />
 					</div>
 					<p v-else class="matrix-note">Deben elegirse dos variables distintas.</p>
 					<label class="sw-toggle"><input type="checkbox" v-model="sizeByWeight" /><span class="sw-track"><span class="sw-thumb"></span></span><span>Tamaño de puntos según ponderador</span></label>
@@ -253,6 +253,7 @@ import widgetMixin from '@/table/widgets/widgetMixin.js';
 import ScatterPlot from '@/table/components/charts/ScatterPlot.vue';
 import ScatterMulti from '@/table/components/charts/ScatterMulti.vue';
 import DualHistogram from '@/table/components/charts/DualHistogram.vue';
+import percentScaleMax from '@/table/js/percentScale.js';
 
 var ALPHA = 0.05;
 
@@ -474,8 +475,20 @@ export default {
 		axisMetricKey(k) { var c = this.colByKey[k]; return c ? (c.unit || '') : ''; },
 		axisFull(c) { return c.axisFull(); },
 		axisFullKey(k) { var c = this.colByKey[k]; return c ? c.axisFull() : ''; },
-		isPct(c) { return !!c && c.isPercent(); },
-		isPctKey(k) { var c = this.colByKey[k]; return this.isPct(c); },
+		// Techo del eje para una columna porcentual: 0 si no es porcentaje (autoescala
+		// libre), o el tramo correspondiente al máximo real de sus valores. Fijar
+		// siempre 100 dejaba el chart amontonado en una esquina cuando los valores
+		// reales eran chicos (p. ej. 1 a 3%).
+		pctMax(c) {
+			if (!c || !c.isPercent()) return 0;
+			var m = 0;
+			for (var i = 0; i < c.values.length; i++) {
+				var v = c.values[i];
+				if (v != null && isFinite(v) && v > m) m = v;
+			}
+			return percentScaleMax(m);
+		},
+		pctMaxKey(k) { var c = this.colByKey[k]; return this.pctMax(c); },
 		regionPhrase() { var p = this.cols ? this.cols.regionTypesPhrase() : ''; return p ? ' en ' + p : ''; },
 		// "Regresión de provincias", "Regresión de provincias y departamentos": el
 		// tipo de delimitación de las filas, en minúscula, con el mismo criterio de

@@ -95,7 +95,11 @@ export default {
 		},
 		toggleCollapse() {
 			var version = this.boundary.SelectedVersion();
-			version.LabelsCollapsed = !version.LabelsCollapsed;
+			// $set, no asignación directa: LabelsCollapsed no viene en el payload
+			// de GetSelectedBoundary (mismo motivo que Values en ActiveBoundary.
+			// UpdateSummary: una propiedad nueva en un objeto ya reactivo no es
+			// detectada por Vue 2 sin $set/Vue.set).
+			this.$set(version, 'LabelsCollapsed', !version.LabelsCollapsed);
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
 		getActive(index) {

@@ -2,6 +2,7 @@ import h from '@/map/js/helper';
 import ActiveSelectedMetric from '@/map/classes/ActiveSelectedMetric';
 import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import err from '@/common/framework/err';
+import Vue from 'vue';
 
 export default SelectedInfoRouter;
 
@@ -458,7 +459,9 @@ SelectedInfoRouter.prototype.RestoreBoundaryState = function (boundary, state) {
 	}
 	var version = boundary.SelectedVersion();
 	if (state.LabelsCollapsed !== version.LabelsCollapsed) {
-		version.LabelsCollapsed = state.LabelsCollapsed;
+		// Vue.set, no asignación directa: mismo motivo que en
+		// ActiveBoundary.UpdateSummary (Values) y boundary.vue (toggleCollapse).
+		Vue.set(version, 'LabelsCollapsed', state.LabelsCollapsed);
 	}
 	var valueLabels = version.ValueLabels;
 	if (state.ValueLabelStates.length === valueLabels.length) {

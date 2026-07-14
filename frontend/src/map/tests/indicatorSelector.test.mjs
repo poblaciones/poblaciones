@@ -85,11 +85,45 @@ it('normalize ignora mayúsculas y tildes', () => {
 	expect(panel.normalize('Proyección')).toBe('proyeccion');
 });
 
+describe('indicatorSelector: matchesWordStart con varias palabras (AND, no frase exacta)');
+
+it('con una palabra, sigue comportándose igual que antes', () => {
+	const panel = mountSelector();
+	expect(panel.matchesWordStart('nivel educativo', 'niv')).toBeTruthy();
+	expect(panel.matchesWordStart('nivel educativo', 'edu')).toBeTruthy();
+});
+
+it('con dos palabras parciales, matchea si cada una es inicio de alguna palabra del nombre', () => {
+	const panel = mountSelector();
+	expect(panel.matchesWordStart('nivel educativo', 'niv edu')).toBeTruthy();
+	// El orden no importa: es AND entre palabras, no coincidencia de frase.
+	expect(panel.matchesWordStart('nivel educativo', 'edu niv')).toBeTruthy();
+});
+
+it('si alguna palabra del término no matchea ninguna palabra del nombre, no matchea', () => {
+	const panel = mountSelector();
+	expect(panel.matchesWordStart('nivel educativo', 'niv xyz')).toBeFalsy();
+});
+
+it('"pesan" no matchea con "san" (sigue evitando el ruido de mitad de palabra)', () => {
+	const panel = mountSelector();
+	expect(panel.matchesWordStart('pesan', 'san')).toBeFalsy();
+	expect(panel.matchesWordStart('sanar', 'san')).toBeTruthy();
+});
+
 it('filteredItems matchea por nombre parcial insensible a tildes', () => {
 	const panel = mountSelector();
 	panel.searchQuery = 'proyeccion';
 	expect(panel.filteredItems).toHaveLength(1);
 	expect(panel.filteredItems[0].item.Name).toBe('Proyección 2030');
+});
+
+it('filteredItems con dos palabras parciales encuentra el ítem (caso reportado: "niv edu" -> Nivel educativo)', () => {
+	const panel = mountSelector();
+	panel.categories.push({ Id: 5, Name: 'Educación', Items: [{ Id: 501, Name: 'Nivel educativo', Code: 'E01' }] });
+	panel.searchQuery = 'niv edu';
+	expect(panel.filteredItems).toHaveLength(1);
+	expect(panel.filteredItems[0].item.Name).toBe('Nivel educativo');
 });
 
 it('el match por código es exacto, no parcial', () => {

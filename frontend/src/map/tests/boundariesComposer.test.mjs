@@ -47,6 +47,23 @@ it('arma la clase CSS con el LabelId de la feature', () => {
 	expect(feature.geometry).toEqual(makeFeature().geometry);
 });
 
+it('sin patternValue de textura (Contorno=1, Pleno=0), no setea patternClass', () => {
+	const boundary = makeBoundary();
+	const composer = makeComposer(boundary);
+	expect(composer.processFeature(1, makeFeature(), 1).properties.patternClass).toBeFalsy();
+	expect(composer.processFeature(1, makeFeature(), 0).properties.patternClass).toBeFalsy();
+});
+
+it('con patternValue de textura (Diagonal=7, Puntos=11), setea patternClass = "cs"+LabelId', () => {
+	// Bug corregido: sin esto, appendStyles arma fill: url(#..._undefined),
+	// una referencia inválida al <pattern> real (creado con "cs"+Id en
+	// appendPatterns), y el navegador caía al mismo aspecto que Contorno.
+	const boundary = makeBoundary();
+	const composer = makeComposer(boundary);
+	expect(composer.processFeature(1, makeFeature(), 7).properties.patternClass).toBe('cs501');
+	expect(composer.processFeature(1, makeFeature(), 11).properties.patternClass).toBe('cs501');
+});
+
 it('devuelve null si el ClippingRegion de origen está oculto', () => {
 	const boundary = makeBoundary();
 	boundary.SelectedVersion().ValueLabels[0].Visible = false;
@@ -91,6 +108,19 @@ it('usa el patrón dinámico del boundary (GetPattern), no un valor fijo', () =>
 	const result = composer.renderPolygons(null, [makeFeature()], null, 'div', 0, 0, 10, null);
 	expect(result).toBe('svg');
 	expect(capturedPattern).toBe(0);
+});
+
+it('con trama Diagonal, las features que llegan a CreateSVGOverlay ya traen patternClass', () => {
+	const boundary = makeBoundary();
+	boundary.customPattern = 7;
+	const composer = makeComposer(boundary);
+	let capturedFeatures = null;
+	composer.CreateSVGOverlay = function (tileUniqueId, div, parentAttributes, features) {
+		capturedFeatures = features;
+		return 'svg';
+	};
+	composer.renderPolygons(null, [makeFeature()], null, 'div', 0, 0, 10, null);
+	expect(capturedFeatures[0].properties.patternClass).toBe('cs501');
 });
 
 it('filtra las features ocultas antes de pasarlas al overlay', () => {

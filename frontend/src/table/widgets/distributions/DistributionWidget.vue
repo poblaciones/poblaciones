@@ -165,6 +165,7 @@ import CategoryDistribution from '@/table/widgets/distributions/classes/Category
 import RegionDistribution from '@/table/widgets/distributions/classes/RegionDistribution.js';
 import CategoryPicker from '@/table/components/CategoryPicker.vue';
 import ChartExporter from '@/table/writers/ChartExporter.js';
+import percentScaleMax from '@/table/js/percentScale.js';
 
 // Tope de filas por chart de regiones antes de ofrecer "mostrar más". Con muchas
 // delimitaciones (p. ej. todos los radios) renderizar todo es costoso; se muestran
@@ -491,10 +492,12 @@ export default {
 			// largo. El máximo real evita ambos.
 			var m = rd.maxTotal();
 			if (m <= 0) return panel.isPercent() ? 100 : 1;
-			// En porcentaje, cuando las barras componen ~100% (fil%: cada región
-			// reparte su propio 100), el máximo real puede excederlo apenas por
-			// redondeo. Sin este tope, el "nice ceil" saltaba de 100 a 200. Se fija 100.
-			if (panel.isPercent() && m <= 100.5) return 100;
+			// En porcentaje, la escala se agranda en tramos (percentScaleMax) en vez de
+			// fijar siempre 100: deja el chart vacío cuando todos los valores son
+			// chicos (p. ej. col%/incidencia con máximos de 1 a 3%). Cuando las barras
+			// componen ~100% (fil%: cada región reparte su propio 100) o el máximo real
+			// excede 25 por cualquier otro motivo, percentScaleMax ya devuelve 100.
+			if (panel.isPercent()) return percentScaleMax(m);
 			var p = Math.pow(10, Math.floor(Math.log10(m)));
 			return Math.ceil(m / p) * p;
 		}

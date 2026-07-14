@@ -1,11 +1,18 @@
-- mejoras en tratamiento de shapes para importación y exportación (consistencia de geometrías)
-- brechas para la definición de indicadores.
-- fixes en chart de panel estadístico.
-- refactor backoffice (barra superior de estadísticas, personalizar y compartir)
-- popup de cuenta.
-- remove de googlemaps.
-- fix a relocate al georreferenciar puntos.
-- API cliente para boundaries
+v5.0 (2026-07-14)
+- Delimitaciones tienen sus propios colores según región de recorte.
+- Delimitaciones se muestran abiertas y con gráficos en el panel de estadísticas.
+- Delimitaciones incorporan menú desplegable en el panel de estadísticas.
+- Delimitaciones permiten visualizarse con polígonos plenos diagonales y punteados.
+- Delimitaciones ya no permiten elegir el color.
+- Delimitaciones en la descarga ofrecen una columna de tipo que indica su tipo de región de recorte.
+- Mejoras en tratamiento de shapes para importación y exportación (consistencia de geometrías)
+- Brechas para la definición de indicadores.
+- Fixes en chart de panel estadístico.
+- Refactor backoffice (barra superior de estadísticas, personalizar y compartir)
+- Popup de cuenta.
+- Remove de googlemaps.
+- Fix a relocate al georreferenciar puntos.
+- API cliente para boundaries.
 
 v4.9 (2026-06-03)
 - Exportación e importación desde GeoPackage (.gpkg)

@@ -29,12 +29,17 @@ if (App::Settings()->Map()->UsePivot)
 	App::RegisterControllerGet('/table/', controllers\cTable::class);
 }
 
+
 if (App::Settings()->Servers()->IsMainServerRequest()) {
 	require_once('frontend/mainServer.php');
 	if (!App::Settings()->Servers()->IsTransactionServerRequest())
 	{
 		require_once('frontend/remoteCrawler.php');
 		App::RegisterControllerGet('/map/{any}', controllers\cRemoteMap::class)->assert("any", ".*");
+		if (App::Settings()->Map()->UsePivot)
+		{
+			App::RegisterControllerGet('/table/{any}', controllers\cRemoteTable::class)->assert("any", ".*");
+		}
 	}
 }
 
@@ -42,14 +47,16 @@ require_once('frontend/metadata.php');
 
 if (App::Settings()->Servers()->IsTransactionServerRequest()) {
 	App::RegisterControllerGet('/map/{any}', controllers\cMap::class)->assert("any", ".*");
-
+	if (App::Settings()->Map()->UsePivot)
+	{
+		App::RegisterControllerGet('/table/{any}', controllers\cTable::class)->assert("any", ".*");
+		require_once('frontend/table.php');
+	}
 	require_once('frontend/map.php');
 	require_once('frontend/boundary.php');
 	require_once('frontend/clipping.php');
 	require_once('frontend/raster.php');
 	require_once('frontend/session.php');
-	if (App::Settings()->Map()->UsePivot)
-		require_once('frontend/table.php');
 	require_once('frontend/suggestions.php');
 	require_once('frontend/crawler.php');
 	require_once('frontend/metric.php');

@@ -2,6 +2,7 @@ import { describe, it, expect } from './_harness.mjs';
 import { setupWindow, makeBoundaryProperties, makeBoundaryVersion, makeBoundaryValueLabel } from './fixtures.mjs';
 import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import ActiveBaseBoundary from '@/map/classes/ActiveBaseBoundary';
+import VueStub from './_stubs/vue.mjs';
 
 describe('ActiveBoundary: servicio de tiles (nombre real del endpoint en el servidor)');
 
@@ -219,6 +220,27 @@ it('ShowChart arranca en true, igual que ActiveSelectedMetric', () => {
 });
 
 describe('ActiveBoundary: UpdateSummary (sin BoundaryVersionId/Count a nivel raíz: se rige por Items)');
+
+it('usa Vue.set para asignar Values (el payload real no trae esa propiedad preexistente, solo "Value" singular sin uso)', async () => {
+	const segMap = setupWindow();
+	const properties = makeBoundaryProperties({
+		Versions: [makeBoundaryVersion({ ValueLabels: [makeBoundaryValueLabel({ Id: 501 })] })],
+	});
+	const boundary = new ActiveBoundary(properties);
+	const versionId = boundary.SelectedVersion().Id;
+	const label = boundary.SelectedVersion().ValueLabels[0];
+	const item = { ValueId: 501, BoundaryVersionId: versionId, Value: 300, Km2: 120 };
+	segMap.Get = function () {
+		return Promise.resolve({ data: { Items: [item] } });
+	};
+	const callsBefore = VueStub.calls.length;
+	boundary.UpdateSummary();
+	await Promise.resolve();
+	expect(VueStub.calls.length).toBe(callsBefore + 1);
+	expect(VueStub.calls[VueStub.calls.length - 1].obj).toBe(label);
+	expect(VueStub.calls[VueStub.calls.length - 1].key).toBe('Values');
+	expect(label.Values).toBe(item);
+});
 
 it('ignora la respuesta si ningún Item matchea la versión mostrada (carrera de requests)', async () => {
 	const segMap = setupWindow();
