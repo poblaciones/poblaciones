@@ -5,6 +5,7 @@ namespace helena\classes\writers;
 use minga\framework\Str;
 use minga\framework\PublicException;
 use helena\classes\spss\Format;
+use helena\classes\writers\metrics\MetricsMetadataExporter;
 
 class GpkgWriter extends BaseWriter
 {
@@ -100,6 +101,20 @@ class GpkgWriter extends BaseWriter
 	public function Flush()
 	{
 		// GPKG es un único archivo — se escribe directamente en outFile, nada que zipar.
+		$db = $this->openDb();
+		MetricsMetadataExporter::Export($db, (int)$this->state->Get('datasetId'), $this->state->FromDraft(),
+			$this->state->Cols(), $this->resolveGeometryKind());
+		$db->close();
+	}
+
+	private function resolveGeometryKind(): string
+	{
+		if ($this->state->AreSegments())
+			return 'line';
+		else if ($this->model->wktIndex !== -1)
+			return 'fill';
+		else
+			return 'marker';
 	}
 
 	// ── Inicialización del GeoPackage ─────────────────────────────────────────
