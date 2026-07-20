@@ -5,7 +5,7 @@ namespace helena\services\admin;
 use minga\framework\Arr;
 use minga\framework\Str;
 use minga\framework\Date;
-use minga\framework\Performance;
+use minga\framework\PerformanceTable;
 use minga\framework\Profiling;
 use minga\framework\IO;
 

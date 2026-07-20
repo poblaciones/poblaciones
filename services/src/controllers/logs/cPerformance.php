@@ -3,7 +3,7 @@
 namespace helena\controllers\logs;
 
 use helena\controllers\common\cController;
-use minga\framework\Performance;
+use minga\framework\PerformanceTable;
 
 use helena\classes\Session;
 use helena\classes\Menu;
