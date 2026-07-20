@@ -160,31 +160,6 @@ class SanitizeGeometry
 		return self::sanitizeArraysToWkt($parsed['type'], $parsed['coordinates'], $dpThresholdM, $projector);
 	}
 
-	/**
-	 * Variante sobre objetos geoPHP, por compatibilidad. Devuelve un objeto
-	 * geoPHP reconstruido desde el WKT normalizado.
-	 *
-	 * @return \Geometry|null
-	 */
-	public static function Sanitize(\Geometry $ele, float $dpThresholdM = 0.0): ?\Geometry
-	{
-		$type = $ele->geometryType();
-		if (!in_array($type, ['Polygon', 'MultiPolygon', 'LineString', 'MultiLineString'], true))
-			return null;
-
-		$wkt = self::sanitizeArraysToWkt($type, $ele->asArray(), $dpThresholdM, null);
-		if ($wkt === null)
-			return null;
-
-		try {
-			$geom = \geoPhp::load($wkt, 'wkt');
-		} catch (\Exception $e) {
-			return null;
-		}
-
-		return ($geom instanceof \Geometry) ? $geom : null;
-	}
-
 	// ------------------------------------------------------------------
 	// Núcleo del pipeline (sobre arrays de coordenadas)
 	// ------------------------------------------------------------------
@@ -198,19 +173,9 @@ class SanitizeGeometry
 	 */
 	private static function parseToArrays(string $data, string $format): ?array
 	{
-		// geoPHP puede emitir warnings ante datos anómalos sin lanzar
-		// excepción; se silencian durante el parseo y el fallo se determina
-		// por el resultado (tipo y estructura), no por la señal de error.
-		set_error_handler(function () { return true; });
-		try {
-			$geom = \geoPhp::load($data, $format);
-		} catch (\Throwable $e) {
-			return null;
-		} finally {
-			restore_error_handler();
-		}
+		$geom = \geoPHP::load($data, $format);
 
-		if (!($geom instanceof \Geometry))
+		if ($geom === null)
 			return null;
 
 		$type = $geom->geometryType();

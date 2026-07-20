@@ -13,13 +13,14 @@ use minga\framework\Performance;
 use minga\framework\PublicException;
 use helena\caches\MetricDataCache;
 
-App::$app->get('/services/frontend/processor/GetMetricData', function (Request $request) {
+App::$app->get('/services/frontend/processor/GetTableMetricData', function (Request $request) {
 	$controller = new services\TableService();
 	$metricId = Params::GetIntMandatory('m');
 	$levelId = Params::GetIntMandatory('l');
 	$versionId = Params::GetIntMandatory('v');
+	$partition = Params::GetInt('p');
 
-	$result = $controller->GetMetricData($metricId, $versionId, $levelId);
+	$result = $controller->GetTableMetricData($metricId, $versionId, $levelId, $partition);
 
 	return App::Json($result);
 });

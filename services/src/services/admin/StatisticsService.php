@@ -43,7 +43,7 @@ class StatisticsService extends BaseService
 		$summarized = $this->IsSummarized($month);
 
 		// Arma el block de resumen mensual
-		$dailyTable = Performance::GetDaylyTable($month);
+		$dailyTable = PerformanceTable::GetDaylyTable($month);
 		$totals = $this->CreateTotalHits($month, $dailyTable, $works, $metrics);
 		$resources = $this->CreateTotalsResources($month, $dailyTable);
 

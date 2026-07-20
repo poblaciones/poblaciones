@@ -10,6 +10,7 @@ use helena\classes\SpecialColumnEnum;
 use helena\classes\GlobalTimer;
 use helena\db\frontend\SnapshotByDatasetRanking;
 use helena\caches\RankingCache;
+use helena\entities\frontend\metric\VariableInfo;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\metric\RankingInfo;
 use helena\entities\frontend\metric\RankingItemInfo;
@@ -64,7 +65,7 @@ class RankingService extends BaseService
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
-		$variable = null;
+		$variable = new VariableInfo(); // <-- se llena por ref en la línea siguiente
 		$level = $metric->GetLevelAndVariableByVariableId($variableId, $variable);
 		$hasDescriptions = $level->HasDescriptions;
 

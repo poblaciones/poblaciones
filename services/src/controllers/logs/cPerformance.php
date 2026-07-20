@@ -47,23 +47,23 @@ class cPerformance extends cController
 		if ($month !== 'history')
 		{
 			// Diario
-			$this->AddValue('dayly_table', Performance::GetDaylyTable($monthNoYesterday, true));
+			$this->AddValue('dayly_table', PerformanceTable::GetDaylyTable($monthNoYesterday, true));
 
 			// Controller
-			$this->AddValue('controller_table', Performance::GetControllerTable($month, false, false, $fixedMethods));
+			$this->AddValue('controller_table', PerformanceTable::GetControllerTable($month, false, false, $fixedMethods));
 
-			$this->AddValue('controller_table_admin', Performance::GetControllerTable($month, true, false, $fixedMethods));
+			$this->AddValue('controller_table_admin', PerformanceTable::GetControllerTable($month, true, false, $fixedMethods));
 			// Por usuario
-			$this->AddValue('user_table', Performance::GetControllerTable($month, false, true, $fixedZones));
+			$this->AddValue('user_table', PerformanceTable::GetControllerTable($month, false, true, $fixedZones));
 			// Locks
-			$this->AddValue('locks_table', Performance::GetLocksTable($month));
+			$this->AddValue('locks_table', PerformanceTable::GetLocksTable($month));
 
 			return $this->Render('performance.html.twig');
 		}
 		else
 		{
 			// Diario
-			$this->AddValue('history_table', Performance::GetHistoryTable($this->templateValues['months']));
+			$this->AddValue('history_table', PerformanceTable::GetHistoryTable($this->templateValues['months']));
 
 			return $this->Render('performanceHistory.html.twig');
 		}

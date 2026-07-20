@@ -11,6 +11,7 @@ use helena\caches\MetricProvidersMetadataCache;
 use helena\caches\DatasetColumnCache;
 use helena\caches\WorkHandlesCache;
 use helena\caches\BoundaryCache;
+use helena\caches\TableMetricDataCache;
 use helena\caches\WorkPermissionsCache;
 use helena\caches\SelectedBoundaryCache;
 use helena\caches\BoundaryVisiblityCache;
@@ -125,6 +126,7 @@ class CacheManager
 	{
 		SummaryCache::Cache()->Clear();
 		TileDataCache::Cache()->Clear();
+		TableMetricDataCache::Cache()->Clear();
 		MetricDataCache::Cache()->Clear();
 		RankingCache::Cache()->Clear();
 		DatasetColumnCache::Cache()->Clear();
@@ -167,6 +169,7 @@ class CacheManager
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 		SummaryCache::Cache()->Clear($metricIdShardified);
 		TileDataCache::Cache()->Clear($metricIdShardified);
+		TableMetricDataCache::Cache()->Clear($metricIdShardified);
 		MetricDataCache::Cache()->Clear($metricIdShardified);
 		RankingCache::Cache()->Clear($metricIdShardified);
 		SelectedMetricsMetadataCache::Cache()->Clear($metricIdShardified);

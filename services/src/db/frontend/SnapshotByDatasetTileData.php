@@ -30,6 +30,7 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 	public $getGeometries = true;
 	public $honorTileLimit = true;
 	public $requiresPolygons = false;
+	public $groupByGeographyItemId = false;
 
 	public function __construct(
 		$snapshotTable,
@@ -105,8 +106,9 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 			$polygonsQuery = new QueryPart("snapshot_shape_dataset_item", "sdi_dataset_id = ? AND sdi_dataset_item_id = sna_id", array($this->datasetId), "sdi_geometry as value");
 		} else
 			$polygonsQuery = null;
+
 		// Ejecuta la consulta
-		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_feature_id");
+		$baseQuery = new QueryPart($from, $where, null, $select, null, "sna_geography_item_id, sna_feature_id");
 		$multiQuery = new MultiQuery($baseQuery, $query, $extraQuery, $polygonsQuery);
 		$ret = $multiQuery->fetchAll();
 
@@ -121,7 +123,10 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 			$extraFields[] = 'Lat';
 			$extraFields[] = 'Lon';
 		}
-		$ret = self::RotateResults($ret, $extraFields);
+		if ($this->groupByGeographyItemId)
+			$ret = self::RotateResultsGrouped($ret);
+		else
+			$ret = self::RotateResults($ret, $extraFields);
 
 		if ($this->datasetType == 'L' && $this->honorTileLimit) {
 			if ($this->areSegments) {
@@ -133,6 +138,61 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 			}
 		}
 		Profiling::EndTimer();
+
+		return $ret;
+	}
+
+	private function RotateResultsGrouped($arr)
+	{
+		$ret = [];
+		$currentGeoId = null;
+		$variableLabelValues = [];
+
+		foreach ($arr as $row) {
+			if ($currentGeoId !== null && $row['GeographyItemId'] !== $currentGeoId) {
+				foreach ($variableLabelValues as $item)
+					$ret[] = $item;
+				$variableLabelValues = [];
+			}
+			$currentGeoId = $row['GeographyItemId'];
+
+			foreach ($this->variables as $variable) {
+				$totalField = "sna_" . $variable->Id . "_total";
+				if ($row[$totalField] !== null) {
+					$vid = $variable->Id;
+					$lid = $row["sna_" . $vid . "_value_label_id"];
+					$key = $lid . '|' . $vid;
+
+					if (!isset($variableLabelValues[$key])) {
+						$item = [];
+						if ($this->getAreas)
+							$item['AreaM2'] = $row['AreaM2'];
+						$item['GeographyItemId'] = $currentGeoId;
+						$item['VID'] = $vid;
+						$item['Value'] = 0;
+						$item['Total'] = 0;
+						if ($variable->IsGap)
+						{
+							$item['ValueGap'] = 0;
+							$item['TotalGap'] = 0;
+						}
+						$item['LID'] = $lid;
+						$variableLabelValues[$key] = $item;
+					}
+
+					$variableLabelValues[$key]['Value'] += $row["sna_" . $vid . "_value"];
+					$variableLabelValues[$key]['Total'] += $row[$totalField];
+					if ($variable->IsGap)
+					{
+						$variableLabelValues[$key]['ValueGap'] += $row["sna_" . $vid . "_value_gap"];
+						$variableLabelValues[$key]['TotalGap'] += $row[$totalField . "_gap"];
+					}
+				}
+			}
+		}
+
+		foreach ($variableLabelValues as $item)
+			$ret[] = $item;
 
 		return $ret;
 	}
@@ -188,8 +248,6 @@ class SnapshotByDatasetTileData extends BaseSpatialSnapshotModel
 							$item['Data']['geometry'] = $simpler;
 						}
 					}
-					//	$item['Data'] = $row['value'];// $render->GenerateFeatureFromBinary($row, false, false, false, false, null);
-
 					$ret[] = $item;
 				}
 			}

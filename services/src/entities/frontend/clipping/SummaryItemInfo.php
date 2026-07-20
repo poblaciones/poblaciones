@@ -10,6 +10,10 @@ class SummaryItemInfo extends BaseMapModel
 	public $ValueCompare;
 	public $Total;
 	public $TotalCompare;
+	public $ValueGap;
+	public $ValueCompareGap;
+	public $TotalGap;
+	public $TotalCompareGap;
 	public $Count;
 	public $Km2;
 

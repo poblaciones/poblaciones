@@ -10,6 +10,10 @@ class RankingItemInfo extends BaseMapModel
 	public $ValueCompare;
 	public $Total;
 	public $TotalCompare;
+	public $ValueGap;
+	public $ValueCompareGap;
+	public $TotalGap;
+	public $TotalCompareGap;
 	public $Name;
 	public $ValueId;
 	public $FID;

@@ -12,8 +12,7 @@ use helena\classes\GlobalTimer;
 
 use helena\services\frontend\SelectedMetricService;
 
-use helena\caches\TileDataCache;
-use helena\caches\MetricDataCache;
+use helena\caches\TableMetricDataCache;
 use helena\services\common\BaseService;
 use helena\db\frontend\SnapshotBoundaryVersionItemModel;
 
@@ -100,12 +99,31 @@ class TableService extends BaseService
 		return $ret;
 	}
 
-	public function GetMetricData($metricId, $metricVersionId, $levelId)
+	public function GetTableMetricData($metricId, $metricVersionId, $levelId, $partition)
 	{
-		return $this->CalculateMetricData($metricId, $metricVersionId, $levelId);
+		Profiling::BeginTimer();
+
+		$data = null;
+		$key = TableMetricDataCache::CreateKey($metricId, $metricVersionId, $levelId, $partition);
+
+		if (TableMetricDataCache::Cache()->HasData($metricId, $key, $data))
+		{
+			Profiling::EndTimer();
+			return $this->GotFromCache($data);
+		}
+
+		$data = $this->CalculateMetricData($metricId, $metricVersionId, $levelId, $partition);
+
+		Performance::CacheMissed();
+		Performance::SetMethod("get");
+
+		TableMetricDataCache::Cache()->PutData($metricId, $key, $data);
+
+		Profiling::EndTimer();
+		return $data;
 	}
 
-	private function CalculateMetricData($metricId, $metricVersionId, $levelId)
+	private function CalculateMetricData($metricId, $metricVersionId, $levelId, $partition)
 	{
 		$selectedService = new SelectedMetricService();
 		$metric = $selectedService->GetSelectedMetric($metricId);
@@ -118,7 +136,6 @@ class TableService extends BaseService
 		$hasSymbols = false;
 
 		$urbanity = null;
-		$partition = null;
 
 		$table = new SnapshotByDatasetTileData(
 			$snapshotTable,
@@ -130,6 +147,8 @@ class TableService extends BaseService
 		);
 		$table->getAreas = true;
 		$table->getGeometries = false;
+		$table->honorTileLimit = false;
+		$table->groupByGeographyItemId = true;
 
 		$rows = $table->GetAllRows();
 

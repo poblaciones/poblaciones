@@ -104,7 +104,7 @@ class MetricsManager
 													$datasetId));
 		$values['mvv_data'] = $dataColumn;
 		$values['mvv_normalization'] = $normalization;
-		$values['mvv_is_gap'] = $gapDataColumn !== null && $gapDataColumn !== SpecialColumnEnum::NullValue && $gapDataColumnId;
+		$values['mvv_is_gap'] = $gapDataColumn != null && $gapDataColumn !=  SpecialColumnEnum::NullValue && $gapDataColumnId;
 		$values['mvv_gap_data'] = $gapDataColumn;
 		$values['mvv_gap_normalization'] = $gapNormalization;
 		$values['mvv_normalization_scale'] = $normalizationScale;

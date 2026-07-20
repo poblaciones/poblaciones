@@ -423,7 +423,7 @@ class SnapshotByDatasetModel
 
 	}
 
-	private function AddValueAndTotal($variable, &$columns, $value, $totalValue, $suffix = "")
+	private function AddValueAndTotal($datasetId, $variable, &$columns, $value, $totalValue, $suffix = "")
 	{
 		// filtros
 		if ($variable->HasFilters()) {
@@ -443,13 +443,13 @@ class SnapshotByDatasetModel
 		// Calcula valor y total
 		$value = $variable->CalculateValueField();
 		$totalValue = $variable->CalculateNormalizationField();
-		$this->AddValueAndTotal($variable, $columns, $value, $totalValue);
+		$this->AddValueAndTotal($datasetId, $variable, $columns, $value, $totalValue);
 		// Agrega las columnas de gap
 		if ($variable->IsGap())
 		{
 			$valueGap = $variable->CalculateValueField("_gap");
 			$totalValueGap = $variable->CalculateNormalizationField("_gap");
-			$this->AddValueAndTotal($variable, $columns, $valueGap, $totalValueGap, "_gap");
+			$this->AddValueAndTotal($datasetId, $variable, $columns, $valueGap, $totalValueGap, "_gap");
 		}
 		// Calcula la categoría
 		$valueForSegmentation = $variable->CalculateSegmentationValueField();
