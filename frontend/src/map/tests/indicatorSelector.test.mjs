@@ -284,3 +284,25 @@ it('el placeholder de búsqueda se contextualiza al nodo actual', () => {
 	panel.navStack = [panel.categories[0]];
 	expect(panel.dynamicPlaceholder).toBe('Buscar en población...');
 });
+
+describe('indicatorSelector: positionStyle (panel ajustado a un borde según sidebarPosition)');
+
+it('con sidebarPosition "middle" (default), no fuerza posición: el panel queda centrado por CSS', () => {
+	const panel = mountSelector();
+	expect(panel.positionStyle).toBeNull();
+});
+
+it('con "top", ancla el panel al borde superior en vez de centrarlo', () => {
+	const panel = mountSelector({ props: { sidebarPosition: 'top' } });
+	expect(panel.positionStyle).toEqual({ top: '20px', bottom: 'auto', margin: '0' });
+});
+
+it('con "bottom", ancla el panel al borde inferior', () => {
+	const panel = mountSelector({ props: { sidebarPosition: 'bottom' } });
+	expect(panel.positionStyle).toEqual({ bottom: '20px', top: 'auto', margin: '0' });
+});
+
+it('con anchor (panel anclado a un invocador puntual), sidebarPosition no tiene efecto', () => {
+	const panel = mountSelector({ props: { sidebarPosition: 'top', anchor: { left: 10, top: 10 } } });
+	expect(panel.positionStyle).toBeNull();
+});

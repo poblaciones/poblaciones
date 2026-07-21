@@ -8,26 +8,11 @@
 			<metadata-popup ref="editMetadataPopup">
 			</metadata-popup>
 			<div class="md-layout-item md-size-100">
-				<md-table style="max-width: 1100px;" v-model="list" md-card="">
-					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre">{{ item.Caption }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Grupo">{{ item.Group.Caption }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Contenido" v-html="asHtml(item.VersionsSummary)"></md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Público">{{ formatBool(!item.IsPrivate) }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Recomendado">{{ formatBool(item.IsSuggestion) }}</md-table-cell>
-						<md-table-cell md-label="Acciones" class="mpNoWrap" v-if="isAdmin">
-							<md-button class="md-icon-button" @click="openEdition(item)">
-								<md-icon>edit</md-icon>
-								<md-tooltip md-direction="bottom">Modificar</md-tooltip>
-							</md-button>
-							<md-button v-if="item.Metadata" class="md-icon-button" @click="openMetadata(item.Metadata)">
-								<div class="metadataLabel">{{ item.Metadata.Id }}</div>
-								<md-icon :style="'color: #' + resolveColor(item)">label</md-icon>
-								<md-tooltip md-direction="bottom">Metadatos</md-tooltip>
-							</md-button>
-						</md-table-cell>
-					</md-table-row>
-				</md-table>
+				<mp-grid
+					:items="list"
+					:columns="gridColumns"
+					:actions="gridActions"
+					:rowClick="onRowClick" />
 			</div>
 		</div>
 		</div>
@@ -57,6 +42,43 @@ import c from '@/common/framework/color';
 	computed: {
 		isAdmin() {
 			return window.Context.IsAdmin();
+		},
+		gridColumns() {
+			var loc = this;
+			return [
+				{ property: 'Caption', caption: 'Nombre' },
+				{ property: 'Group.Caption', caption: 'Grupo' },
+				{
+					property: 'VersionsSummary', caption: 'Contenido', html: true, sortable: false, align: 'left', size: 4,
+					value: function (item) { return loc.asHtml(item.VersionsSummary); },
+				},
+				{
+					property: 'IsPrivate', caption: 'Público', sortType: 'boolean',
+					value: function (item) { return loc.formatBool(!item.IsPrivate); },
+					sortValue: function (item) { return !item.IsPrivate; },
+				},
+				{
+					property: 'IsSuggestion', caption: 'Recomendado',
+					value: function (item) { return loc.formatBool(item.IsSuggestion); },
+				},
+			];
+		},
+		gridActions() {
+			var loc = this;
+			if (!this.isAdmin) {
+				return [];
+			}
+			return [
+				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openEdition(item); } },
+				{
+					icon: 'label',
+					caption: 'Metadatos',
+					iconStyle: function (item) { return 'color: #' + loc.resolveColor(item); },
+					badge: function (item) { return item.Metadata.Id; },
+					isEnabled: function (item) { return !!item.Metadata; },
+					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
+				},
+			];
 		},
 	},
 	mounted() {
@@ -97,6 +119,9 @@ import c from '@/common/framework/color';
 		openEdition(item) {
 			this.$refs.editPopup.show(item, this.groups);
 		},
+		onRowClick(grid, item) {
+			this.openEdition(item);
+		},
 		openMetadata(item) {
 			this.$refs.editMetadataPopup.show(item);
 		},
@@ -117,17 +142,6 @@ import c from '@/common/framework/color';
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
-	.metadataLabel {
-		position: absolute;
-		top: 6px;
-		font-size: 11px;
-		color: #ffffff;
-		z-index: 1;
-		left: -2px;
-		text-shadow: 0 0 4px #9E9E9E;
-	}
-
 .md-dialog-actions {
   padding: 8px 20px 8px 24px !important;
 }

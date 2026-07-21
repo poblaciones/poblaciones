@@ -3,7 +3,9 @@
     <!-- Toolbar con los botones principales -->
     <SideButtons
       :active-panel="activePanel" :backgroundColor="backgroundColor"
+      :sidebar-position="sidebarPosition"
       @panel-toggle="handlePanelToggle"
+      @update:sidebarPosition="onSidebarPositionChange"
     />
 
     <!-- Panel de Indicadores -->
@@ -11,6 +13,7 @@
       :is-open="activePanel === 'indicators'"
       :categories="indicators"
       :selection="indicatorSelection"
+      :sidebar-position="sidebarPosition"
       :expand-leaves="true"
       :suggestions="suggestions"
       title="Explorar indicadores"
@@ -29,6 +32,7 @@
       :is-open="activePanel === 'places'"
       :categories="boundaries"
       :selection="boundarySelection"
+      :sidebar-position="sidebarPosition"
       :selectable-branches="true"
       :filter-mode="true"
        :showAddAll="true"
@@ -48,10 +52,10 @@
     />
 
     <!-- Panel de Búsqueda -->
-    <SearchPanel :is-open="activePanel === 'search'" @close="closePanel" />
+    <SearchPanel :is-open="activePanel === 'search'" :sidebar-position="sidebarPosition" @close="closePanel" />
 
     <!-- Panel de Subida -->
-    <SearchPanel :is-open="activePanel === 'upload'" @close="closePanel" />
+    <SearchPanel :is-open="activePanel === 'upload'" :sidebar-position="sidebarPosition" @close="closePanel" />
   </div>
 </template>
 
@@ -94,6 +98,13 @@ export default {
     clipping: {
       type: Object,
       default: () => ({}),
+    },
+    // 'top' | 'middle' (default) | 'bottom'. Estado del panel lateral,
+    // controlado por App.vue (persistido en cookie ahí). Se reemite hacia
+    // arriba desde SideButtons vía update:sidebarPosition.
+    sidebarPosition: {
+      type: String,
+      default: 'middle',
     },
   },
   data() {
@@ -149,6 +160,9 @@ export default {
   methods: {
     handlePanelToggle(panel) {
       this.activePanel = panel;
+    },
+    onSidebarPositionChange(position) {
+      this.$emit('update:sidebarPosition', position);
     },
     closePanel() {
       this.activePanel = null;

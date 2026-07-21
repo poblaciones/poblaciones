@@ -6,6 +6,9 @@ use minga\framework\Str;
 use minga\framework\PublicException;
 use helena\classes\spss\Format;
 use helena\classes\writers\metrics\MetricsMetadataExporter;
+use helena\classes\writers\metrics\VariableStyleCollector;
+use helena\classes\writers\metrics\BoundaryStyleCollector;
+use helena\db\frontend\BoundaryDownloadModel;
 
 class GpkgWriter extends BaseWriter
 {
@@ -102,9 +105,22 @@ class GpkgWriter extends BaseWriter
 	{
 		// GPKG es un único archivo — se escribe directamente en outFile, nada que zipar.
 		$db = $this->openDb();
-		MetricsMetadataExporter::Export($db, (int)$this->state->Get('datasetId'), $this->state->FromDraft(),
-			$this->state->Cols(), $this->resolveGeometryKind());
+		MetricsMetadataExporter::Export($db, $this->collectStyles());
 		$db->close();
+	}
+
+	/**
+	 * Resuelve, según el tipo de descarga, qué collector arma los estilos a embeber: los límites
+	 * (boundaries) se colorean por tipo de ClippingRegion, sin relleno; los datasets, por sus
+	 * indicadores asociados.
+	 */
+	private function collectStyles(): array
+	{
+		if ($this->model instanceof BoundaryDownloadModel)
+			return BoundaryStyleCollector::Collect((int)$this->state->Get('boundaryVersionId'), $this->state->Cols())['styles'];
+
+		return VariableStyleCollector::Collect((int)$this->state->Get('datasetId'), $this->state->FromDraft(),
+			$this->state->Cols(), $this->resolveGeometryKind())['styles'];
 	}
 
 	private function resolveGeometryKind(): string

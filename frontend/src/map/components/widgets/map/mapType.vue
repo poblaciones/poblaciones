@@ -1,6 +1,7 @@
 <template>
 	<div>
-			<mpBasemapButton @styleChanged="styleChanged" :toolbarStates="toolbarStates" :readonly="Embedded.Readonly" ref="selector"/>
+			<mpBasemapButton @styleChanged="styleChanged" :toolbarStates="toolbarStates" :readonly="Embedded.Readonly"
+											 :sidebarPosition="sidebarPosition" ref="selector"/>
 	</div>
 </template>
 
@@ -30,7 +31,11 @@ export default {
 			}
     },
 	props: [
-		 'toolbarStates'
+		 'toolbarStates',
+		 // 'top' | 'middle' | 'bottom': cuando el panel lateral está abajo a la
+		 // izquierda, mpBasemapButton se corre para no superponerse (ambos
+		 // ocupan esa misma esquina por defecto).
+		 'sidebarPosition'
 	],
 	methods: {
 		styleChanged(styleId) {

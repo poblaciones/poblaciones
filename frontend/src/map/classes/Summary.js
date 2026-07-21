@@ -111,7 +111,7 @@ Summary.prototype.getValue = function (variable, variableValueLabels, values, la
 			ValueGap: values.ValueCompareGap,
 			TotalGap: values.TotalCompareGap
 		});
-		var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
+		var useProportionalDelta = this.metric.Compare.UseProportionalDelta(variable);
 		return h.calculateCompareValue(useProportionalDelta, tuple, compareTuple);
 	} else {
 		return h.calculateValue(this.getValueTuple(variable, values, labels));
@@ -146,7 +146,7 @@ Summary.prototype.getTotal = function (variable, variableValueLabels) {
 	if (this.metric.properties.SummaryMetric == 'I' && this.metric.Compare.Active) {
 		// calcula la diferencia en puntos porcentajes o %
 		var compareTuple = { value: valueCompare, normalization: totalCompare };
-		var useProportionalDelta = this.metric.Compare.UseProportionalDelta(this.metric.SelectedVariable());
+		var useProportionalDelta = this.metric.Compare.UseProportionalDelta(variable);
 		aniTotal = h.calculateCompareValue(useProportionalDelta, totalTuple, compareTuple);
 	} else if (this.metric.properties.SummaryMetric !== 'P' && this.metric.properties.SummaryMetric !== 'A') {
 		aniTotal = h.calculateValue(totalTuple);

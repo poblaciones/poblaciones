@@ -19,10 +19,16 @@ App::$app->get('/services/frontend/processor/GetTableMetricData', function (Requ
 	$levelId = Params::GetIntMandatory('l');
 	$versionId = Params::GetIntMandatory('v');
 	$partition = Params::GetInt('p');
+	$signature = Params::GetIntMandatory('w');
+
+	if ($denied = Session::CheckIsWorkPublicOrAccessibleByMetricVersion($metricId, $versionId, $isRestricted)) return $denied;
 
 	$result = $controller->GetTableMetricData($metricId, $versionId, $levelId, $partition);
 
-	return App::Json($result);
+	if ($isRestricted)
+		return App::Json($result);
+	else
+		return App::JsonImmutable($result);
 });
 
 App::$app->get('/services/frontend/processor/GetRegion', function (Request $request) {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from './_harness.mjs';
-import { setupWindow, makeMetricProperties, makeVersion, makeLevel, makeVariable, makeValueLabel, mountLite } from './fixtures.mjs';
+import { setupWindow, makeMetricProperties, makeVersion, makeLevel, makeVariable, makeValueLabel, makeBoundaryProperties, makeBoundaryVersion, makeBoundaryValueLabel, mountLite } from './fixtures.mjs';
 import ActiveMetric from '@/map/classes/ActiveMetric';
+import ActiveBoundary from '@/map/classes/ActiveBoundary';
 import MapLegend from '@/map/components/widgets/map/mapLegend.vue';
 
 // Caracterización de la lógica de mapLegend (sin template ni DOM): qué
@@ -29,7 +30,7 @@ it('incluye un indicador estándar visible', () => {
 	expect(legend.visibleMetrics).toEqual([metric]);
 });
 
-it('excluye boundaries, capas base y métricas apagadas', () => {
+it('incluye boundaries (ahora con soporte de leyenda propio); excluye capas base y métricas apagadas', () => {
 	const metric = makeVisibleMetric();
 	const boundary = makeVisibleMetric();
 	boundary.isBoundary = true;
@@ -38,7 +39,7 @@ it('excluye boundaries, capas base y métricas apagadas', () => {
 	const off = makeVisibleMetric();
 	off.properties.Visible = false;
 	const legend = mountLegend([metric, boundary, base, off], true);
-	expect(legend.visibleMetrics).toEqual([metric]);
+	expect(legend.visibleMetrics).toEqual([metric, boundary]);
 });
 
 describe('mapLegend: visibilidad general del panel');
@@ -183,12 +184,21 @@ it('en comparación activa, sigue el mismo criterio que el panel de estadística
 	expect(legend.allLabels(metric)[0].Name).toBe('Comparable');
 });
 
-it('swatchStyle deja el relleno solo si la categoría está visible', () => {
+it('swatchStyle (metric): usa FillColor, deja el relleno solo si la categoría está visible', () => {
 	const legend = mountLegend([], true);
+	const metric = makeVisibleMetric();
 	const on = makeValueLabel({ FillColor: '#ff0000', Visible: true });
 	const off = makeValueLabel({ FillColor: '#00ff00', Visible: false });
-	expect(legend.swatchStyle(on)).toBe('background-color: #ff0000; border-color: #ff0000');
-	expect(legend.swatchStyle(off)).toBe('background-color: transparent; border-color: #00ff00');
+	expect(legend.swatchStyle(metric, on)).toBe('background-color: #ff0000; border-color: #ff0000');
+	expect(legend.swatchStyle(metric, off)).toBe('background-color: transparent; border-color: #00ff00');
+});
+
+it('swatchStyle (boundary): usa LineColor, no FillColor (mismo criterio que boundaryValues.vue)', () => {
+	const legend = mountLegend([], true);
+	const boundary = makeVisibleMetric();
+	boundary.isBoundary = true;
+	const on = makeValueLabel({ LineColor: '#3388ff', FillColor: '#a8c8ff', Visible: true });
+	expect(legend.swatchStyle(boundary, on)).toBe('background-color: #3388ff; border-color: #3388ff');
 });
 
 it('toggleLabel invierte Visible y refresca el mapa, igual que el panel de estadísticas', () => {
@@ -299,4 +309,105 @@ it('con comparación activa, muestra la versión de comparación primero y la pr
 	metric.Compare.SelectedVersionIndex = 1;
 	const legend = mountLegend([metric], true);
 	expect(legend.versionLabel(metric)).toBe('2022-2010');
+});
+
+describe('mapLegend: soporte de boundaries (delimitaciones), no solo indicadores');
+
+function makeVisibleBoundary(valueLabels) {
+	setupWindow();
+	const properties = makeBoundaryProperties({
+		Name: 'Gobiernos locales',
+		Versions: [makeBoundaryVersion({
+			Name: '2022',
+			ValueLabels: valueLabels || [
+				makeBoundaryValueLabel({ Id: 501, Name: 'Comunas', LineColor: '#3388ff', Values: { ValueId: 501, Value: 300, Km2: 120 } }),
+				makeBoundaryValueLabel({ Id: 502, Name: 'Municipios', LineColor: '#ff8833', Values: { ValueId: 502, Value: 150, Km2: 80 } }),
+			],
+		})],
+	});
+	const boundary = new ActiveBoundary(properties);
+	boundary.index = 1;
+	return boundary;
+}
+
+it('un boundary visible entra a la leyenda igual que un indicador', () => {
+	const boundary = makeVisibleBoundary();
+	const legend = mountLegend([boundary], true);
+	expect(legend.visibleMetrics).toEqual([boundary]);
+});
+
+it('displayName usa properties.Name (boundary), no properties.Metric.Name', () => {
+	const boundary = makeVisibleBoundary();
+	const legend = mountLegend([boundary], true);
+	expect(legend.displayName(boundary)).toBe('Gobiernos locales');
+});
+
+it('versionLabel toma Version.Name directo (sin variable ni Compare)', () => {
+	const boundary = makeVisibleBoundary();
+	const legend = mountLegend([boundary], true);
+	expect(legend.versionLabel(boundary)).toBe('2022');
+});
+
+it('showVariableName es siempre false para boundary (no hay variable, no hay subtítulo)', () => {
+	const boundary = makeVisibleBoundary();
+	const legend = mountLegend([boundary], true);
+	expect(legend.showVariableName(boundary)).toBeFalsy();
+});
+
+it('allLabels usa ActiveBoundary.HasData: solo las categorías con datos', () => {
+	const boundary = makeVisibleBoundary([
+		makeBoundaryValueLabel({ Id: 501, Name: 'Con datos', Values: { ValueId: 501, Value: 300, Km2: 120 } }),
+		makeBoundaryValueLabel({ Id: 502, Name: 'Sin datos', Values: { ValueId: 502, Value: '', Km2: '' } }),
+	]);
+	const legend = mountLegend([boundary], true);
+	const labels = legend.allLabels(boundary);
+	expect(labels).toHaveLength(1);
+	expect(labels[0].Name).toBe('Con datos');
+});
+
+it('isDot es siempre false para boundary (polígonos, nunca círculos)', () => {
+	const boundary = makeVisibleBoundary();
+	const legend = mountLegend([boundary], true);
+	expect(legend.isDot(boundary)).toBeFalsy();
+});
+
+it('swatchStyle usa LineColor (no FillColor), mismo criterio que boundaryValues.vue', () => {
+	const boundary = makeVisibleBoundary();
+	const legend = mountLegend([boundary], true);
+	const label = boundary.SelectedVersion().ValueLabels[0];
+	expect(legend.swatchStyle(boundary, label)).toBe('background-color: #3388ff; border-color: #3388ff');
+});
+
+it('toggleLabel llama boundary.UpdateMap() (no RefreshMap, que boundary no tiene)', () => {
+	const boundary = makeVisibleBoundary();
+	let updated = false;
+	boundary.UpdateMap = function () { updated = true; };
+	const legend = mountLegend([boundary], true);
+	const label = boundary.SelectedVersion().ValueLabels[0];
+	legend.toggleLabel(boundary, label);
+	expect(label.Visible).toBeFalsy();
+	expect(updated).toBeTruthy();
+});
+
+it('removeMetric funciona igual: boundary.Remove()', () => {
+	const boundary = makeVisibleBoundary();
+	let removed = false;
+	boundary.Remove = function () { removed = true; };
+	const legend = mountLegend([boundary], true);
+	legend.removeMetric(boundary);
+	expect(removed).toBeTruthy();
+});
+
+describe('mapLegend: ícono minimizado, siempre visible con el panel de estadísticas colapsado');
+
+it('no depende de visibleMetrics: sin indicadores ni boundaries, sigue habiendo algo para mostrar (población general en clippingLegend.vue)', () => {
+	// El ícono es el control maestro que expande tanto mapLegend.vue como
+	// clippingLegend.vue (toolbarStates.legendMinimized compartido). Antes
+	// dependía de visibleMetrics.length > 0 (solo indicadores/boundaries),
+	// lo que lo dejaba oculto cuando no había ninguno agregado, aun cuando
+	// clippingLegend.vue sí tenía algo para mostrar (el resumen de
+	// población, siempre presente si hay un work con datos).
+	const legend = mountLegend([], true);
+	expect(legend.visibleMetrics).toHaveLength(0);
+	expect(legend.toolbarStates.collapsed).toBeTruthy();
 });

@@ -1,5 +1,5 @@
 <template>
-  <div class="map-style-selector-wrapper exp-hiddable-block">
+  <div class="map-style-selector-wrapper exp-hiddable-block" :class="{ 'shifted-right': sidebarPosition === 'bottom' }">
     <!-- Botón compacto para mostrar tipo de mapa al que se podría ir -->
     <button
       class="map-style-btn btn btn-default btn-xs"
@@ -82,7 +82,10 @@
   export default {
     name: 'mpBasemapButton',
 		mixins: [clickaway],
-    props: ['toolbarStates', 'readonly'],
+    // 'top' | 'middle' | 'bottom'. En 'bottom', el botón y su panel se corren
+    // a la derecha (ver .shifted-right): el panel lateral (sideToolbar.vue)
+    // usa esa misma esquina por defecto.
+    props: ['toolbarStates', 'readonly', 'sidebarPosition'],
     data() {
       return {
         isExpanded: false,
@@ -382,6 +385,17 @@
   border: 1px solid #ddd;
   z-index: 1040;
   overflow: hidden;
+}
+
+/* Con el panel lateral (sideToolbar.vue) abajo a la izquierda, este botón y
+   su panel se corren a la derecha para no superponerse: ambos ocupan esa
+   misma esquina por defecto. */
+.map-style-selector-wrapper.shifted-right .map-style-btn {
+  left: 95px;
+}
+
+.map-style-selector-wrapper.shifted-right .map-options-panel {
+  left: 175px;
 }
 
 /* Secciones del panel */

@@ -10,87 +10,26 @@
 			<invoker ref="invoker">
 			</invoker>
 		</div>
-		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="0">Todas</md-radio>
-		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="7">Últimos 7 días</md-radio>
-		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="30">Últimos 30 días</md-radio>
-		<md-radio v-model="timeFilter" class="md-primary" @change="refreshWorks" :value="90">Últimos 90 días</md-radio>
+		<md-radio v-model="timeFilter" class="md-primary" @change="onTimeFilterChanged" :value="0">Todas</md-radio>
+		<md-radio v-model="timeFilter" class="md-primary" @change="onTimeFilterChanged" :value="7">Últimos 7 días</md-radio>
+		<md-radio v-model="timeFilter" class="md-primary" @change="onTimeFilterChanged" :value="30">Últimos 30 días</md-radio>
+		<md-radio v-model="timeFilter" class="md-primary" @change="onTimeFilterChanged" :value="90">Últimos 90 días</md-radio>
 		<md-button @click="calculateUsage" style="margin-left: 60px">
 			<md-icon>data_usage</md-icon> Recalcular tamaños
 		</md-button>
 
 		<div class="md-layout-item md-size-100" style="position: relative">
-			<mp-search @search="applyFilters" v-model="search" style="margin-top: 8px" />
-
-			<md-table style="max-width: 1200px;" v-if="works.length > 0" v-model="worksFiltered" md-sort="Caption" md-sort-order="asc" md-card>
-				<md-table-row slot="md-table-row" slot-scope="{ item }">
-					<md-table-cell @click.native="select(item)" class="selectable" md-label="Título" md-sort-by="Caption">
-						<a :href="getWorkUri(item, true)" class="normalTextLink">{{ item.Caption }}</a>
-					</md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable" md-label="Tamaño" md-sort-by="TotalSizeBytes">
-						{{ totalSizeMB(item) }}
-						<md-tooltip md-direction="bottom">{{ formatSizes(item) }}</md-tooltip>
-					</md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable" style="width:50px" md-label="Datasets" md-sort-by="DatasetCount">
-						{{ item.DatasetCount }}
-						<md-tooltip md-direction="bottom">{{ item.DatasetNames }}</md-tooltip>
-					</md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable" md-label="Indicadores" md-sort-by="MetricCount">{{ item.MetricCount }}</md-table-cell>
-					<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Indexado" md-sort-by="IsIndexed">
-						<md-switch class="md-primary" v-model="item.IsIndexed"
-											 @change="onIndexedChanged(item)" />
-					</md-table-cell>
-					<md-table-cell v-if="showIndexingColumn" @click.native="select(item)" class="selectable" md-label="Segmentado" md-sort-by="SegmentedCrawling">
-						<md-switch class="md-primary" v-model="item.SegmentedCrawling"
-											 @change="onSegmentedCrawlingChanged(item)" :disabled="!item.IsIndexed" />
-					</md-table-cell>
-					<md-table-cell @click.native="select(item)" class="selectable" md-label="Estado">
-						<md-icon :style="'color: ' + status(item).color">
-							{{ status(item).icon }}
-							<md-tooltip md-direction="bottom">{{ status(item).label }}</md-tooltip>
-						</md-icon>
-						<div class="extraIconContainer">
-							<md-icon v-if="item.IsPrivate" class="extraIcon">
-								lock
-								<md-tooltip md-direction="bottom">Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.</md-tooltip>
-							</md-icon>
-							<md-icon v-if="!showIndexingColumn && !item.IsPrivate && !item.IsIndexed && status(item).tag !== 'unpublished'"
-											 class="extraIcon">
-								error_outline
-								<md-tooltip md-direction="bottom">
-									No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus resultados.
-									Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.
-								</md-tooltip>
-							</md-icon>
-						</div>
-					</md-table-cell>
-					<md-table-cell md-label="Acciones">
-						<md-button v-if="!canEdit(item)" class="md-icon-button" @click="select(item)">
-							<md-icon>remove_red_eye</md-icon>
-							<md-tooltip md-direction="bottom">Consultar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item) && !publishDisabled(item)" class="md-icon-button" @click="onPublish(item)">
-							<md-icon>public</md-icon>
-							<md-tooltip md-direction="bottom">Publicar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item) && !revokeDisabled(item)" class="md-icon-button" @click="onRevoke(item)">
-							<md-icon>pause_circle_filled</md-icon>
-							<md-tooltip md-direction="bottom">Revocar publicación</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" @click="select(item)">
-							<md-icon>edit</md-icon>
-							<md-tooltip md-direction="bottom">Modificar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" @click="onDuplicate(item)" class="md-icon-button">
-							<md-icon>file_copy</md-icon>
-							<md-tooltip md-direction="bottom">Duplicar</md-tooltip>
-						</md-button>
-						<md-button v-if="canEdit(item)" class="md-icon-button" @click="onDelete(item)">
-							<md-icon>delete</md-icon>
-							<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
-						</md-button>
-					</md-table-cell>
-				</md-table-row>
-			</md-table>
+			<mp-grid
+				:items="works"
+				:columns="gridColumns"
+				:actions="gridActions"
+				:rowClick="onRowClick"
+				:emptyMessage="emptyMessage"
+				canDelete
+				:isItemDeleteEnabled="canEdit"
+				:entityName="entityName.single"
+				:deleteConfirmMessage="deleteConfirmMessage"
+				@itemDelete="onItemDelete" />
 		</div>
 		<div class="md-layout-item md-size-100">
 			<div v-if="showingWelcome" style="margin-top: 20px; margin-left: 40px">
@@ -116,6 +55,7 @@
 <script>
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/framework/arr';
+import WorkPermissions from '@/backoffice/classes/WorkPermissions';
 
 export default {
 	name: 'works',
@@ -128,8 +68,6 @@ export default {
 			newWorkName: '',
 			timeFilter: 0,
 			works: [],
-			search: '',
-			worksFiltered: [],
 			activateSaveAs: false,
 		};
 	},
@@ -166,6 +104,66 @@ export default {
 			} else {
 				return '(entidad desconocida)';
 			}
+		},
+		emptyMessage() {
+			var ret = 'No hay ' + this.entityName.plural;
+			return ret + (this.timeFilter ? ' para este período.' : '.');
+		},
+		gridColumns() {
+			var loc = this;
+			var columns = [
+				{ property: 'Caption', caption: 'Título', href: function (item) { return loc.getWorkUri(item, true); } },
+				{
+					property: 'TotalSizeBytes', caption: 'Tamaño', sortType: 'number',
+					value: function (item) { return loc.totalSizeMB(item); },
+					tooltip: function (item) { return loc.formatSizes(item); },
+				},
+				{ property: 'DatasetCount', caption: 'Datasets', size: 1, sortType: 'number', tooltip: function (item) { return item.DatasetNames; } },
+				{ property: 'MetricCount', caption: 'Indicadores', sortType: 'number' },
+			];
+			if (this.showIndexingColumn) {
+				columns.push({ property: 'IsIndexed', caption: 'Indexado', type: 'switch', onChange: function (item) { loc.onIndexedChanged(item); } });
+				columns.push({
+					property: 'SegmentedCrawling', caption: 'Segmentado', type: 'switch',
+					onChange: function (item) { loc.onSegmentedCrawlingChanged(item); },
+					disabled: function (item) { return !item.IsIndexed; },
+				});
+			}
+			columns.push({
+				property: 'Estado',
+				caption: 'Estado',
+				type: 'status',
+				sortable: false,
+				icon: function (item) { return loc.status(item).icon; },
+				color: function (item) { return loc.status(item).color; },
+				tooltip: function (item) { return loc.status(item).label; },
+				icons: [
+					{
+						icon: 'lock',
+						show: function (item) { return item.IsPrivate; },
+						tooltip: 'Visiblidad: Privado. Para cambiar la visiblidad, acceda a Editar > Visiblidad.',
+					},
+					{
+						icon: 'error_outline',
+						show: function (item) { return !loc.showIndexingColumn && !item.IsPrivate && !item.IsIndexed && loc.status(item).tag !== 'unpublished'; },
+						tooltip: 'No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus '
+							+ 'resultados. Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.',
+					},
+				],
+			});
+			return columns;
+		},
+		gridActions() {
+			var loc = this;
+			return [
+				{ icon: 'remove_red_eye', caption: 'Consultar', onClick: function (grid, item) { loc.select(item); }, isEnabled: function (item) { return !loc.canEdit(item); } },
+				{ icon: 'public', caption: 'Publicar', onClick: function (grid, item) { loc.onPublish(item); }, isEnabled: function (item) { return loc.canEdit(item) && !loc.publishDisabled(item); } },
+				{ icon: 'pause_circle_filled', caption: 'Revocar publicación', onClick: function (grid, item) { loc.onRevoke(item); }, isEnabled: function (item) { return loc.canEdit(item) && !loc.revokeDisabled(item); } },
+				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.select(item); }, isEnabled: function (item) { return loc.canEdit(item); } },
+				{ icon: 'file_copy', caption: 'Duplicar', onClick: function (grid, item) { loc.onDuplicate(item); }, isEnabled: function (item) { return loc.canEdit(item); } },
+				{ icon: 'playlist_add', caption: 'Promover a Dato público', onClick: function (grid, item) { loc.onPromotePublic(item); }, isEnabled: function (item) { return WorkPermissions.CanPromotePublic(item); } },
+				{ icon: 'playlist_remove', caption: 'Convertir en Cartografía', onClick: function (grid, item) { loc.onDemotePublic(item); }, isEnabled: function (item) { return WorkPermissions.CanDemotePublic(item); } },
+			];
 		},
 	},
 		mounted() {
@@ -207,21 +205,27 @@ export default {
 		select(element) {
 			window.open(this.getWorkUri(element, true), '_blank');
 		},
+		onRowClick(grid, item) {
+			this.select(item);
+		},
 		loadData() {
 			if (this.works.length == 0) {
 				this.refreshWorks();
 			}
+		},
+		// El valor llega por el evento: no se lee de timeFilter porque
+		// v-model y este handler escuchan el mismo evento, y el orden entre
+		// ambos no está garantizado.
+		onTimeFilterChanged(value) {
+			this.timeFilter = value;
+			this.refreshWorks();
 		},
 		refreshWorks() {
 			var loc = this;
 			this.$refs.invoker.doMessage('Obteniendo cartografías', window.Db,
 					window.Db.GetWorks, this.filter, this.timeFilter).then(function(data) {
 						arr.Fill(loc.works, data);
-						loc.applyFilters();
 						});
-		},
-		applyFilters() {
-			this.worksFiltered = arr.SearchByCaption(this.works, this.search);
 		},
 		calculateUsage() {
 			var loc = this;
@@ -245,17 +249,18 @@ export default {
 			}
 			return (window.Context.User.Privileges === 'E');
 		},
-		onDelete(item) {
-			var loc = this;
+		deleteConfirmMessage(item) {
+			return 'Los datasets, indicadores y metadatos correspondientes a \'' + item.Caption + '\' serán eliminados';
+		},
+		onItemDelete(item) {
+			this.runDelete(item);
+		},
+		runDelete(item) {
 			this.source = item;
-			this.$refs.invoker.confirm('Eliminar ' + this.entityName.single,
-				'Los datasets, indicadores y metadatos correspondientes a \'' + item.Caption + '\' serán eliminados',
-					function() {
-						loc.$refs.DeleteStepper.startUrl = window.Db.GetStartWorkDeleteUrl(item.Id);
-						loc.$refs.DeleteStepper.stepUrl = window.Db.GetStepWorkDeleteUrl();
-						loc.$refs.DeleteStepper.setTitle('Eliminando ' + loc.entityName.single);
-						loc.$refs.DeleteStepper.Start();
-			});
+			this.$refs.DeleteStepper.startUrl = window.Db.GetStartWorkDeleteUrl(item.Id);
+			this.$refs.DeleteStepper.stepUrl = window.Db.GetStepWorkDeleteUrl();
+			this.$refs.DeleteStepper.setTitle('Eliminando ' + this.entityName.single);
+			this.$refs.DeleteStepper.Start();
 		},
 		onDeleteComplete() {
 			arr.Remove(this.works, this.source);
@@ -311,13 +316,29 @@ export default {
 			this.$refs.stepper.Start().then(function() {
 						loc.refreshWorks(); });
 		},
+		onPromotePublic(item) {
+			var loc = this;
+			this.source = item;
+			this.$refs.invoker.confirmDo('Promover ' + this.entityName.single,
+				'La cartografía será convertida a dato público. Los cambios no surtirán efecto hasta que la publique nuevamente teniendo este status.',
+				window.Db, window.Db.PromoteWork, item.Id,
+				function () {
+					item.Type = 'P';
+					arr.Remove(loc.works, item);
+				});
+		},
+		onDemotePublic(item) {
+			var loc = this;
+			this.source = item;
+			this.$refs.invoker.confirmDo('Revocar promoción de ' + this.entityName.single,
+				'El dato público será convertido a cartografía. Los cambios no surtirán efecto hasta que la publique nuevamente teniendo este status.',
+				window.Db, window.Db.DemoteWork, item.Id,
+				function () {
+					item.Type = 'R';
+					arr.Remove(loc.works, item);
+				});
+		},
 	},
-		watch: {
-			'works'() {
-				this.search = '';
-				this.applyFilters();
-			},
-		}
 };
 </script>
 
@@ -331,23 +352,5 @@ export default {
 		font-size: 20px;
 		line-height: 30px;
 	}
-}
-
-.extraIconContainer {
-  position: absolute;
-  right: calc(28%);
-  bottom: 16px;
-  width: 13px;
-  border-radius: 10px;
-  overflow: hidden;
-  height: 13px;
-
-}
-.extraIcon {
-	 background-color: white;
-  font-size: 15px !important;
-  color: #868686;
-  margin-left: -5px;
-  margin-top: -6px;
 }
 </style>

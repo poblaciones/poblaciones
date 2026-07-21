@@ -8,6 +8,10 @@ use helena\classes\spss\Format;
 use helena\classes\App;
 use minga\framework\Zip;
 use minga\framework\ErrorException;
+use helena\classes\writers\metrics\VariableStyleCollector;
+use helena\classes\writers\metrics\BoundaryStyleCollector;
+use helena\classes\writers\metrics\QgzProjectBuilder;
+use helena\db\frontend\BoundaryDownloadModel;
 
 
 use Shapefile\Shapefile;
@@ -170,8 +174,64 @@ class ShpWriter extends BaseWriter
 		if (file_exists($friendlyNoExtension . '.dbt'))
 			$files[] =  $friendlyNoExtension . '.dbt';
 
+		$qgzFile = $this->writeQgzProject($friendlyNoExtension);
+		if ($qgzFile !== null)
+			$files[] = $qgzFile;
+
 		$dir = $this->resolveDirectory();
 		$zip->AddToZip($dir, $files);
+	}
+
+	/**
+	 * Arma, junto al .shp, un proyecto QGIS (.qgz) con una capa por indicador del dataset, cada
+	 * una con su estilo ya aplicado. Ver QgzProjectBuilder para el porqué de este mecanismo
+	 * (un shapefile no admite, como el GeoPackage, múltiples estilos conmutables en una capa).
+	 * Un error acá no debe impedir la descarga del shapefile: se omite el .qgz y sigue el resto.
+	 */
+	private function writeQgzProject(string $baseNameNoExtension): ?string
+	{
+		try
+		{
+			$result = $this->collectStyles();
+			if (count($result['styles']) === 0)
+				return null;
+
+			$shpFileName = basename($baseNameNoExtension) . '.shp';
+			$qgzBytes = QgzProjectBuilder::Build($result['styles'], $shpFileName, $this->resolveGeometryKind(), $result['bbox']);
+			if ($qgzBytes === null)
+				return null;
+
+			$qgzPath = $baseNameNoExtension . '.qgz';
+			file_put_contents($qgzPath, $qgzBytes);
+			return $qgzPath;
+		}
+		catch (\Exception $e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * Resuelve, según el tipo de descarga, qué collector arma los estilos a embeber. Ver
+	 * GpkgWriter::collectStyles (misma lógica, para el .qgz en vez de la tabla layer_styles).
+	 */
+	private function collectStyles(): array
+	{
+		if ($this->model instanceof BoundaryDownloadModel)
+			return BoundaryStyleCollector::Collect((int)$this->state->Get('boundaryVersionId'), $this->state->Cols());
+
+		return VariableStyleCollector::Collect((int)$this->state->Get('datasetId'), $this->state->FromDraft(),
+			$this->state->Cols(), $this->resolveGeometryKind());
+	}
+
+	private function resolveGeometryKind(): string
+	{
+		if ($this->state->AreSegments())
+			return 'line';
+		else if ($this->model->wktIndex !== -1)
+			return 'fill';
+		else
+			return 'marker';
 	}
 
 	private function resolveShapeFile()

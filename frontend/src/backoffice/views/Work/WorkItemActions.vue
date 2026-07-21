@@ -21,7 +21,7 @@
 </template>
 <script>
 
-	import arr from '@/common/framework/arr';
+	import WorkPermissions from '@/backoffice/classes/WorkPermissions';
 
 	export default {
 		name: 'WorkItemActions',
@@ -36,7 +36,8 @@
 		},
 		props: {
 			item: Object,
-			actions: { type: String, default: null }
+			actions: { type: String, default: null },
+			filter: { type: String, default: null },
 			// Los tipos de acción son los correspondientes a los estados:
 			// - I: inbox (activo)
 			// - A: archivado
@@ -45,49 +46,31 @@
 		},
 		computed: {
 			canModify() {
-				return this.canEdit && this.actions !== 'D' && this.actions !== 'S';
+				return WorkPermissions.CanModify(this.item, this.filter, this.actions);
 			},
 			canDelete() {
-				return ((this.canAdmin && this.actions !== 'D') || this.actions == 'S') && !this.isExamplesManager;
+				return WorkPermissions.CanDelete(this.item, this.actions);
 			},
 			canDuplicateExample() {
-				return this.actions === 'S';
+				return WorkPermissions.CanDuplicateExample(this.actions);
 			},
 			canDuplicate() {
-				return (this.canEdit && this.actions !== 'D' && this.actions !== 'S');
+				return WorkPermissions.CanDuplicate(this.item, this.filter, this.actions);
 			},
 			canRestore() {
-				return this.canAdmin && this.actions === 'D';
+				return WorkPermissions.CanRestore(this.item, this.actions);
 			},
 			canPurge() {
-				return this.canAdmin && this.actions === 'D';
+				return WorkPermissions.CanPurge(this.item, this.actions);
 			},
 			canArchive() {
-				return this.actions !== 'D' && this.actions !== 'S' && this.actions !== 'A';
+				return WorkPermissions.CanArchive(this.actions);
 			},
 			canDemoteExample() {
-				return this.isExamplesManager;
-			},
-			isExamplesManager() {
-				return this.actions === 'S' && window.Context.IsAdmin();
+				return WorkPermissions.CanDemoteExample(this.actions);
 			},
 			canUnarchive() {
-				return this.actions === 'A';
-			},
-			canDownload() {
-				return this.actions !== 'D';
-			},
-			canEdit() {
-				if (window.Context.User.Privileges === 'A') {
-					return true;
-				}
-				return this.item.privileges !== 'V';
-			},
-			canAdmin() {
-				if (window.Context.User.Privileges === 'A') {
-					return true;
-				}
-				return this.item.privileges === 'A';
+				return WorkPermissions.CanUnarchive(this.actions);
 			},
 		},
 		methods: {

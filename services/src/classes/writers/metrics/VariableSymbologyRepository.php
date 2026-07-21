@@ -24,7 +24,7 @@ class VariableSymbologyRepository
 	 */
 	public function GetMetricVersionLevels(int $datasetId): array
 	{
-		$sql = "SELECT mvl_id, mtr_id, mtr_caption
+		$sql = "SELECT mvl_id, mtr_id, mtr_caption, ST_AsText(mvl_extents) AS mvl_extents_wkt
 						FROM {$this->prefix}metric_version_level
 						JOIN {$this->prefix}metric_version ON mvl_metric_version_id = mvr_id
 						JOIN {$this->prefix}metric ON mvr_metric_id = mtr_id

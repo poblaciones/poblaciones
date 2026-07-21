@@ -66,3 +66,11 @@ it('un nodo del árbol con el mismo Id que la capa activa aparece marcado', () =
 	expect(selector.isSelected({ Id: 501, Name: 'Barrios de Tandil' })).toBeTruthy();
 	expect(selector.isSelected({ Id: 999, Name: 'Otro' })).toBeFalsy();
 });
+
+describe('sideToolbar: re-emite el cambio de posición desde SideButtons hacia App.vue');
+
+it('onSidebarPositionChange reemite update:sidebarPosition con el nuevo valor', () => {
+	const panel = mountSideToolbar([]);
+	panel.onSidebarPositionChange('bottom');
+	expect(panel.$emitted[0]).toEqual({ event: 'update:sidebarPosition', args: ['bottom'] });
+});

@@ -17,6 +17,9 @@ await import('./boundaryChart.test.mjs');
 await import('./boundaryTopButtons.test.mjs');
 await import('./abstractSvgComposer.test.mjs');
 await import('./sideToolbar.test.mjs');
+await import('./selectorTooltips.test.mjs');
+await import('./sidebarPositionCookie.test.mjs');
+await import('./sideButtons.test.mjs');
 await import('./patternButtons.test.mjs');
 await import('./boundary.test.mjs');
 

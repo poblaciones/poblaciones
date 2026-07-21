@@ -24,14 +24,14 @@
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 												:toolbarStates="toolbarStates"></SummaryPanel>
 				</div>
-				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor" :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics" :clipping="clipping"></SideToolbar>
+				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor" :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics" :clipping="clipping" :sidebarPosition="sidebarPosition" @update:sidebarPosition="changeSidebarPosition"></SideToolbar>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
 					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
 									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
-					<MapType ref="mapSelector" class="exp-hiddable-block" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :style="oldStyleIndent"></MapType>
+					<MapType ref="mapSelector" class="exp-hiddable-block" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :sidebarPosition="sidebarPosition" :style="oldStyleIndent"></MapType>
 
 					<!--MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" /-->
 					<!--RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" /-->
@@ -63,6 +63,7 @@
 	import WaitMessage from '@/map/components/popups/waitMessage';
 	import SegmentedMap from '@/map/classes/SegmentedMap';
 	import StartMap from '@/map/classes/StartMap';
+	import SidebarPositionCookie from '@/map/classes/SidebarPositionCookie';
 	import LeafletApi from '@/map/leaflet/LeafletApi';
 	import WorkPanel from '@/map/components/panels/workPanel';
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
@@ -146,6 +147,9 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 				queryingSuggestions: false,
 
 				oldStyleIndent: '',
+				// 'top' | 'middle' | 'bottom'. Posición del panel lateral (sideToolbar),
+				// persistida en cookie (ver SidebarPositionCookie).
+				sidebarPosition: new SidebarPositionCookie().Get(),
 
 				selfCheckTimer: null,
 				workStartupSetter: null,
@@ -541,6 +545,10 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			doToggle() {
 				this.toolbarStates.collapsed = !this.toolbarStates.collapsed;
 				window.SegMap.Session.UI.ToggleRightPanel(!this.toolbarStates.collapsed);
+			},
+			changeSidebarPosition(position) {
+				this.sidebarPosition = position;
+				new SidebarPositionCookie().Set(position);
 			},
 			loadFabMetrics() {
 				// Modo nuevo (panel lateral): dos llamadas, una por panel.

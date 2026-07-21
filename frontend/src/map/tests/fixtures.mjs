@@ -39,6 +39,12 @@ export function setupWindow(overrides) {
 		host: 'http://host',
 		innerWidth: 1200,
 		innerHeight: 800,
+		// Stub mínimo: alcanza para componentes que agregan/quitan listeners
+		// globales (p. ej. sideButtons.vue durante un arrastre) sin verificar
+		// que efectivamente se disparen (eso se prueba llamando al handler
+		// directo, no simulando el evento del navegador).
+		addEventListener() {},
+		removeEventListener() {},
 	}, overrides || {});
 	// Stub mínimo de document: alcanza para los componentes que miden #holder
 	// (mapLegend.vue) sin necesidad de jsdom. Por defecto no encuentra nada,

@@ -1,7 +1,7 @@
 <template>
   <transition name="slide-right">
-    <div class="search-panel-wrapper sidepanelOffset" v-if="isOpen" >
-      <div class="search-panel" v-on-clickaway="close">
+    <div class="search-panel-wrapper sidepanelOffset" v-if="isOpen" :style="positionStyle">
+      <div class="search-panel" v-on-clickaway="close" :style="heightStyle">
         <div class="search-header">
           <div class="panel-title">Buscar</div>
           <button class="btn-close" @click="close">
@@ -102,6 +102,14 @@ export default {
     isOpen: {
       type: Boolean,
       default: false
+    },
+    // 'top' | 'middle' (default) | 'bottom'. Igual criterio que
+    // indicatorSelector.vue: en top/bottom el panel se acerca al botón de
+    // Buscar del sideToolbar en vez de quedar centrado, sin salirse de la
+    // pantalla (ver positionStyle/heightStyle).
+    sidebarPosition: {
+      type: String,
+      default: 'middle'
     }
   },
   data() {
@@ -140,6 +148,27 @@ export default {
         tab: this.handleArrowDown,
         'shift+tab': this.handleArrowUp
       };
+    },
+    // Con sidebarPosition 'top'/'bottom', el panel se acerca al botón de
+    // Buscar (que en esos casos está arriba o abajo, no en el medio de la
+    // pantalla) en vez de quedar centrado; 60px, no pegado al borde extremo
+    // como el resto de los controles del toolbar, para que se note más
+    // cerca del botón que de la esquina de la pantalla.
+    positionStyle() {
+      if (this.sidebarPosition === 'top') {
+        return { top: '60px', bottom: 'auto', transform: 'none' };
+      }
+      if (this.sidebarPosition === 'bottom') {
+        return { bottom: '60px', top: 'auto', transform: 'none' };
+      }
+      return null;
+    },
+    // max-height dinámico según el viewport: sin esto, el valor fijo de
+    // 600px podría hacer que el panel se salga de la pantalla al anclarlo
+    // arriba o abajo en vez de centrarlo.
+    heightStyle() {
+      var avail = (typeof window !== 'undefined' ? window.innerHeight : 800) - 80;
+      return { maxHeight: Math.min(600, avail) + 'px' };
     }
   },
   watch: {

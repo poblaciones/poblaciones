@@ -203,6 +203,7 @@ Compare.prototype.GetVersionsWithComparableVariables = function () {
 
 Compare.prototype.hasComparableVariable = function (version) {
 	var selected = this.metric.SelectedVariable();
+	if (selected === null) return false;
 	for (var level of version.Levels) {
 		for (var variable of level.Variables) {
 			if (selected.Formula == variable.Formula) {

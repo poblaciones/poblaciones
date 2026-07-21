@@ -42,6 +42,24 @@ Db.prototype.GetWorks = function (filter, timeFilter) {
 			{ f: filter, t: timeFilter }, 'obtener la lista de cartografías');
 };
 
+Db.prototype.PromoteWork = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/PromoteWork',
+		{ w: workId }, 'promover la cartografía').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
+Db.prototype.DemoteWork = function (workId, callback = null) {
+	return axiosClient.postPromise(window.host + '/services/backoffice/DemoteWork',
+		{ w: workId }, 'revoca la promoción de la cartografía').then(function () {
+			if (callback) {
+				callback();
+			}
+		});
+};
+
 Db.prototype.GetStatistics = function (month) {
 	return axiosClient.getPromise(window.host + '/services/admin/GetStatistics',
 			{ m: month }, 'obtener estadísticas mensuales');

@@ -23,13 +23,14 @@ class QmlRendererBuilder
 	 * @param bool        $isTextComparison  para 'V': comparar por texto (Caption) en vez de por número (Value)
 	 * @param array       $valueLabels       filas de VariableSymbologyRepository::GetValueLabels, ordenadas
 	 * @param string      $geometryKind      'fill' | 'marker' | 'line'
+	 * @param bool        $outlineOnly       para 'fill': sin relleno, solo el contorno (ver BuildSymbol)
 	 * @return string|null XML del <renderer-v2>, o null si no se pudo construir una clasificación válida
 	 */
 	public static function Build(string $variableCaption, string $cutMode, ?string $classificationExpr,
-		bool $isTextComparison, array $valueLabels, string $geometryKind): ?string
+		bool $isTextComparison, array $valueLabels, string $geometryKind, bool $outlineOnly = false): ?string
 	{
 		if ($cutMode === 'S')
-			return self::BuildSingleSymbol($valueLabels, $geometryKind);
+			return self::BuildSingleSymbol($valueLabels, $geometryKind, $outlineOnly);
 
 		if ($classificationExpr === null || count($valueLabels) === 0)
 			return null;
@@ -44,7 +45,7 @@ class QmlRendererBuilder
 		if (count($rules) === 0)
 			return null;
 
-		return self::BuildRuleBasedRenderer($variableCaption, $rules, $geometryKind);
+		return self::BuildRuleBasedRenderer($variableCaption, $rules, $geometryKind, $outlineOnly);
 	}
 
 	public static function WrapQml(string $rendererXml): string
@@ -114,7 +115,7 @@ class QmlRendererBuilder
 
 	// ── Ensamblado XML ────────────────────────────────────────────────────────
 
-	private static function BuildRuleBasedRenderer(string $variableCaption, array $rules, string $geometryKind): string
+	private static function BuildRuleBasedRenderer(string $variableCaption, array $rules, string $geometryKind, bool $outlineOnly = false): string
 	{
 		$rulesXml = '';
 		$symbolsXml = '';
@@ -126,7 +127,7 @@ class QmlRendererBuilder
 			$filter = self::EscapeAttr($rule['filter']);
 			$key = self::GenerateKey($i);
 			$rulesXml .= '<rule key="' . $key . '" filter="' . $filter . '" label="' . $label . '" symbol="' . $name . '"/>';
-			$symbolsXml .= self::BuildSymbol($name, $geometryKind, $rule['label']['vvl_fill_color'], $rule['label']['vvl_line_color']);
+			$symbolsXml .= self::BuildSymbol($name, $geometryKind, $rule['label']['vvl_fill_color'], $rule['label']['vvl_line_color'], $outlineOnly);
 			$i++;
 		}
 		return '<renderer-v2 type="RuleRenderer" symbollevels="0" forceraster="0" enableorderby="0" referencescale="-1">'
@@ -135,15 +136,22 @@ class QmlRendererBuilder
 			. '</renderer-v2>';
 	}
 
-	private static function BuildSingleSymbol(array $valueLabels, string $geometryKind): string
+	private static function BuildSingleSymbol(array $valueLabels, string $geometryKind, bool $outlineOnly = false): string
 	{
 		$fill = $valueLabels[0]['vvl_fill_color'] ?? null;
 		$line = $valueLabels[0]['vvl_line_color'] ?? null;
-		$symbolXml = self::BuildSymbol('0', $geometryKind, $fill, $line);
+		$symbolXml = self::BuildSymbol('0', $geometryKind, $fill, $line, $outlineOnly);
 		return '<renderer-v2 type="singleSymbol"><symbols>' . $symbolXml . '</symbols></renderer-v2>';
 	}
 
-	private static function BuildSymbol(string $name, string $geometryKind, ?string $fillHex, ?string $lineHex): string
+	/**
+	 * @param bool $outlineOnly sólo aplica a $geometryKind === 'fill': arma un polígono sin
+	 *                          relleno (color transparente + style="no"), mostrando únicamente
+	 *                          el contorno con $lineHex. Se usa para límites (boundaries), que se
+	 *                          exportan como polígono (misma geometría que en la base) pero se ven
+	 *                          en el visor sin relleno.
+	 */
+	private static function BuildSymbol(string $name, string $geometryKind, ?string $fillHex, ?string $lineHex, bool $outlineOnly = false): string
 	{
 		$fill = self::HexToRgba($fillHex, self::DEFAULT_FILL);
 		$outline = self::HexToRgba($lineHex, self::DEFAULT_OUTLINE);
@@ -180,6 +188,24 @@ class QmlRendererBuilder
 				. '<Option type="QString" name="outline_width_unit" value="MM"/>'
 				. '<Option type="QString" name="size" value="3"/>'
 				. '<Option type="QString" name="size_unit" value="MM"/>'
+				. '</Option>'
+				. '</layer>'
+				. '</symbol>';
+		}
+		else if ($outlineOnly) // fill sin relleno: sólo el contorno, con el color de línea
+		{
+			$strokeHex = $lineHex ?? $fillHex;
+			$stroke = self::HexToRgba($strokeHex, self::DEFAULT_OUTLINE);
+			return '<symbol type="fill" name="' . $name . '" alpha="1" clip_to_extent="1" force_rhr="0">'
+				. '<layer class="SimpleFill" enabled="1" locked="0" pass="0">'
+				. '<Option type="Map">'
+				. '<Option type="QString" name="color" value="0,0,0,0"/>'
+				. '<Option type="QString" name="style" value="no"/>'
+				. '<Option type="QString" name="outline_color" value="' . $stroke . '"/>'
+				. '<Option type="QString" name="outline_style" value="solid"/>'
+				. '<Option type="QString" name="outline_width" value="0.6"/>'
+				. '<Option type="QString" name="outline_width_unit" value="MM"/>'
+				. '<Option type="QString" name="joinstyle" value="bevel"/>'
 				. '</Option>'
 				. '</layer>'
 				. '</symbol>';

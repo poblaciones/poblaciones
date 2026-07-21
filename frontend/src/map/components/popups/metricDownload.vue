@@ -232,7 +232,7 @@ export default {
 		},
 		getSpatialFormats() {
 			var ret = [];
-			ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
+			//ret.push({ caption: 'Texto con GeoJSON (.csv)', key: 'cg' });
 			ret.push({ caption: 'Texto con WKT (.csv)', key: 'cw' });
 			ret.push({ caption: 'Shapefile (.shp)', key: 'hw' });
 			ret.push({ caption: 'GeoPackage (.gpkg)', key: 'gw' });

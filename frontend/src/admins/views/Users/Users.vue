@@ -14,34 +14,15 @@
 			<user-popup ref="editPopup" @completed="popupSaved">
 			</user-popup>
 			<div class="md-layout-item md-size-100">
-				<md-table style="max-width: 1100px;" v-model="list" md-sort="FullName" md-sort-order="asc" md-card="">
-					<md-table-row slot="md-table-row" slot-scope="{ item }">
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Nombre" md-sort-by="FullName">{{ item.FullName }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Email" md-sort-by="Email">{{ item.Email }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Rol" md-sort-by="FormattedRole">{{ item.FormattedRole }}</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Cartografías" md-sort-by="Cartographies">
-							{{ item.Cartographies + item.PublicData }}
-							<md-tooltip md-direction="bottom"> {{ item.CartographiesNames }}</md-tooltip>
-						</md-table-cell>
-						<md-table-cell @click.native="openEdition(item)" class="selectable" md-label="Último ingreso" md-sort-by="LastAccess">{{ formatDate(item.LastAccess)
-								}}
-</md-table-cell>
-						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<md-button class="md-icon-button" @click="openEdition(item)">
-								<md-icon>edit</md-icon>
-								<md-tooltip md-direction="bottom">Modificar</md-tooltip>
-							</md-button>
-							<md-button class="md-icon-button" @click="onLoginAs(item)">
-								<md-icon>flight_takeoff</md-icon>
-								<md-tooltip md-direction="bottom">Ingresar como {{ formatName(item) }}</md-tooltip>
-							</md-button>
-							<md-button class="md-icon-button" @click="onDelete(item)">
-								<md-icon>delete</md-icon>
-								<md-tooltip md-direction="bottom">Eliminar</md-tooltip>
-							</md-button>
-						</md-table-cell>
-					</md-table-row>
-				</md-table>
+				<mp-grid
+					:items="list"
+					:columns="gridColumns"
+					:actions="gridActions"
+					:rowClick="onRowClick"
+					canDelete
+					entityName="usuario"
+					:deleteConfirmMessage="deleteConfirmMessage"
+					@itemDelete="onItemDelete" />
 			</div>
 		</div>
 		</div>
@@ -61,7 +42,34 @@ import arr from '@/common/framework/arr';
 			};
 	},
 	computed: {
-
+		gridColumns() {
+			var loc = this;
+			return [
+				{ property: 'FullName', caption: 'Nombre' },
+				{ property: 'Email', caption: 'Email' },
+				{ property: 'FormattedRole', caption: 'Rol' },
+				{
+					property: 'Cartographies',
+					caption: 'Cartografías',
+					sortType: 'number',
+					value: function (item) { return item.Cartographies + item.PublicData; },
+					tooltip: function (item) { return item.CartographiesNames; },
+				},
+				{
+					property: 'LastAccess',
+					caption: 'Último ingreso',
+					sortType: 'date',
+					value: function (item) { return loc.formatDate(item.LastAccess); },
+				},
+			];
+		},
+		gridActions() {
+			var loc = this;
+			return [
+				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openEdition(item); } },
+				{ icon: 'flight_takeoff', caption: function (item) { return 'Ingresar como ' + loc.formatName(item); }, onClick: function (grid, item) { loc.onLoginAs(item); } },
+			];
+		},
 	},
 	mounted() {
 
@@ -120,6 +128,9 @@ import arr from '@/common/framework/arr';
 		openEdition(item) {
 			this.$refs.editPopup.show(item);
 		},
+		onRowClick(grid, item) {
+			this.openEdition(item);
+		},
 		popupSaved(item) {
 			arr.ReplaceByIdOrAdd(this.list, item);
 		},
@@ -128,13 +139,14 @@ import arr from '@/common/framework/arr';
 				window.open('/users', '_blank');
 			});
 		},
-		onDelete(item) {
+		deleteConfirmMessage() {
+			return 'El usuario seleccionado será eliminado';
+		},
+		onItemDelete(item) {
 			var loc = this;
-			this.$refs.invoker.message = 'Eliminando...';
-			this.$refs.invoker.confirmDo('Eliminar usuario', 'El usuario seleccionado será eliminado',
-					window.Db, window.Db.DeleteUser, item, function() {
-						arr.Remove(loc.list, item);
-					});
+			this.$refs.invoker.doMessage('Eliminando', window.Db, window.Db.DeleteUser, item).then(function () {
+				arr.Remove(loc.list, item);
+			});
 		},
   },
   components: {

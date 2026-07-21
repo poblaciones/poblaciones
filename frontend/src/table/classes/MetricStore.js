@@ -31,8 +31,10 @@ MetricStore.prototype.GetMetricData = function (metric, version, level) {
 	var ref = (!version || !level) ? metric.referenceSelection() : null;
 	version = version || (ref ? ref.version : null);
 	level = level || (ref ? ref.level : null);
-	var args = { m: metric.properties.Metric.Id, v: version.Version.Id, l: level.Id };
-	return axiosClient.getPromise(window.host + '/services/frontend/processor/GetMetricData', args,
+	var args = {
+		m: metric.properties.Metric.Id, v: version.Version.Id, l: level.Id,
+		w: metric.properties.Metric.Signature	};
+	return axiosClient.getPromise(window.host + '/services/frontend/processor/GetTableMetricData', args,
 		('traer las Metrices'));
 };
 

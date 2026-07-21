@@ -45,9 +45,6 @@
 			</template>
 		</div>
 		<div class="sourceRow">
-			<div v-if="false && metric.Compare.Active" style="margin-left: 2px; margin-top: -8px; margin-bottom: 8px;">
-
-			</div>
 			<div class="btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"
@@ -286,7 +283,7 @@ export default {
 				this.updateCompareVersions();
 			},
 			updateCompareVersions() {
-				if (!this.metric.Compare.Active) {
+				if (!this.metric.Compare.Active || !this.metric.SelectedVariable()) {
 					return;
 				}
 				if (this.metric.Compare.SelectedVersion() &&
@@ -395,14 +392,16 @@ export default {
 				return window.Use;
 		},
 		hasComparableVariables() {
-			return this.metric.hasComparableVariables();
+			return this.metric.hasComparableVariables() && this.metric.SelectedVariable();
 		},
 			Embedded() {
 				return window.Embedded;
 		},
 		compareContent() {
-			if (this.compareVersions[0] == null || this.compareVersions[1] == null) {
-				return "Iniciando...";
+			if (!this.metric.SelectedVariable()) {
+				return '';
+			} else if (this.compareVersions[0] == null || this.compareVersions[1] == null) {
+				return "";
 			} else {
 				return "Comparación " + this.compareVersions[0] + "-" + this.compareVersions[1];
 			}

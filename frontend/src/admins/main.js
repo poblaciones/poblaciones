@@ -38,12 +38,14 @@ import MpHelp from '@/backoffice/components/MpHelp';
 import MpSelect from '@/backoffice/components/MpSelect';
 import MpImageUpload from '@/backoffice/components/MpImageUpload';
 import MpFileUpload from '@/backoffice/components/MpFileUpload';
+import MpGrid from '@/backoffice/components/MpGrid';
 
 
 Vue.component('title-bar', TitleBar);
 Vue.component('invoker', Invoker);
 Vue.component('stepper', Stepper);
 Vue.component('mp-select', MpSelect);
+Vue.component('mp-grid', MpGrid);
 Vue.component('mp-confirm', MpConfirm);
 Vue.component('mp-search', MpSearch);
 Vue.component('mp-text', MpText);

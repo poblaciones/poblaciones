@@ -35,6 +35,7 @@ import MpLargeButton from '@/backoffice/components/MpLargeButton';
 import MpLargeDataItem from '@/backoffice/components/MpLargeDataItem';
 
 import MpSelect from '@/backoffice/components/MpSelect';
+import MpGrid from '@/backoffice/components/MpGrid';
 import MpHelp from '@/backoffice/components/MpHelp';
 import Clipboard from 'v-clipboard';
 
@@ -42,6 +43,7 @@ Vue.component('title-bar', TitleBar);
 Vue.component('invoker', Invoker);
 Vue.component('stepper', Stepper);
 Vue.component('mp-select', MpSelect);
+Vue.component('mp-grid', MpGrid);
 Vue.component('mp-confirm', MpConfirm);
 Vue.component('mp-large-button', MpLargeButton);
 Vue.component('mp-large-data-item', MpLargeDataItem);

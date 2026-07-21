@@ -10,14 +10,14 @@
 					<template v-for="metric in visibleMetrics">
 						<div class="mapLegendGroup" :key="metric.index">
 							<div class="mapLegendTitle">
-								<span class="mapLegendTitleText">{{ metric.properties.Metric.Name }} <span class="mapLegendVersion">({{ versionLabel(metric) }})</span></span>
+								<span class="mapLegendTitleText">{{ displayName(metric) }} <span class="mapLegendVersion">({{ versionLabel(metric) }})</span></span>
 								<i class="fas fa-times mapLegendRemove" title="Quitar del mapa" @click.stop="removeMetric(metric)"></i>
 							</div>
 							<div class="mapLegendSubtitle" v-if="showVariableName(metric)">{{ selectedVariable(metric).Name }}</div>
-							<div class="mapLegendItem" v-for="label in allLabels(metric)" :key="label.Id" >
-								<span @click="toggleLabel(metric, label)" class="mapLegendSwatch" :class="{ mapLegendSwatchDot: metric.IsLocationType() }"
-											:style="swatchStyle(label)"></span>
-								<span class="mapLegendLabelName" @click="toggleLabel(metric, label)" :class="{ mapLegendLabelNameOff: !label.Visible }">{{ label.Name }}</span>
+							<div class="mapLegendItem" v-for="label in allLabels(metric)" :key="label.Id" @click="toggleLabel(metric, label)">
+								<span class="mapLegendSwatch" :class="{ mapLegendSwatchDot: isDot(metric) }"
+											:style="swatchStyle(metric, label)"></span>
+								<span class="mapLegendLabelName" :class="{ mapLegendLabelNameOff: !label.Visible }">{{ label.Name }}</span>
 							</div>
 						</div>
 					</template>
@@ -25,7 +25,7 @@
 				<i v-show="canScrollDown" class="fas fa-caret-down mapLegendArrow" title="Bajar" @click="scrollBy(1)"></i>
 			</div>
 		</transition>
-		<div v-show="toolbarStates.collapsed && visibleMetrics.length > 0" class="mapLegendMinimized"
+		<div v-show="toolbarStates.collapsed" class="mapLegendMinimized"
 				 :class="{ mapLegendMinimizedOff: minimized }" title="Leyenda" @click="minimized = !minimized">
 			<i class="fas fa-list-ul"></i>
 		</div>
@@ -33,16 +33,18 @@
 </template>
 
 <script>
-// Leyenda flotante de mapa: muestra, por cada indicador visible, su nombre,
-// la variable seleccionada y las categorías (ValueLabels) con su color. Con
-// ShowEmptyCategories en false, la lista se recorta a las categorías con
-// datos en el encuadre actual, igual que metricValues.vue:displayLabel.
-// Es una ayuda visual con dos interacciones propias, replicando el
-// mismo mecanismo que usa el panel de estadísticas:
+// Leyenda flotante de mapa: muestra, por cada indicador o delimitación
+// (boundary) visible, su nombre y las categorías (ValueLabels) con su
+// color. Con ShowEmptyCategories en false (indicadores) o sin datos en el
+// encuadre actual (boundaries, vía ActiveBoundary.HasData), la lista se
+// recorta a las categorías con datos, igual que metricValues.vue/
+// boundaryValues.vue. Es una ayuda visual con dos interacciones propias,
+// replicando el mismo mecanismo que usa el panel de estadísticas:
 // - Clic en un cuadrado/círculo: alterna label.Visible y llama
-//   metric.RefreshMap(), igual que metricValues.vue/metric.vue.
-// - Clic en la cruz que aparece al pasar el mouse sobre el nombre del
-//   indicador: metric.Remove(), igual que metricDropdown.vue.
+//   metric.RefreshMap()/boundary.UpdateMap(), igual que metricValues.vue/
+//   boundaryValues.vue.
+// - Clic en la cruz que aparece al pasar el mouse sobre el nombre: Remove(),
+//   igual que metricDropdown.vue/boundaryTopButtons.vue.
 //
 // Coordinación con el panel de estadísticas: el panel expandido de la
 // leyenda solo se muestra con toolbarStates.collapsed en true (panel de
@@ -106,7 +108,7 @@ export default {
 		},
 		visibleMetrics() {
 			return this.metrics.filter(function (metric) {
-				return !metric.isBoundary && !metric.isBaseMetric && metric.Visible();
+				return !metric.isBaseMetric && metric.Visible();
 			});
 		},
 		// 280px sin panel de work. Con panel de work, se descuenta además su
@@ -150,11 +152,18 @@ export default {
 		selectedVariable(metric) {
 			return metric.SelectedVariable();
 		},
-		// Año(s) de la versión seleccionada, mismo dato que el sourceRow de
-		// metric.vue (botonera de metric.properties.Versions). En comparación
-		// activa, se muestran ambas versiones separadas por guión, en orden
-		// comparación-principal.
+		displayName(metric) {
+			return metric.isBoundary ? metric.properties.Name : metric.properties.Metric.Name;
+		},
+		// Año(s) de la versión seleccionada. En boundary, Version.Name es el
+		// año directo (sin variable/Compare de por medio). En metric, mismo
+		// dato que el sourceRow de metric.vue (botonera de
+		// metric.properties.Versions); en comparación activa, se muestran
+		// ambas versiones separadas por guión, en orden comparación-principal.
 		versionLabel(metric) {
+			if (metric.isBoundary) {
+				return metric.SelectedVersion().Name;
+			}
 			if (metric.Compare.Active) {
 				var compareVersion = metric.Compare.SelectedVersion();
 				return (compareVersion ? compareVersion.Version.Name : '') + '-' + metric.SelectedVersion().Version.Name;
@@ -163,12 +172,26 @@ export default {
 		},
 		// Réplica de la condición usada en metricVariables.vue: con una única
 		// variable de nombre vacío (indicadores de conteo simple), el nombre de
-		// variable no aporta nada y no se muestra.
+		// variable no aporta nada y no se muestra. Boundary no tiene variable:
+		// nunca hay subtítulo.
 		showVariableName(metric) {
+			if (metric.isBoundary) {
+				return false;
+			}
 			var variables = metric.SelectedLevel().Variables;
 			return !(variables.length === 1 && variables[0].Name === '');
 		},
+		// En boundary, las categorías son los ValueLabels de la versión
+		// seleccionada (uno por ClippingRegion de origen), filtradas con el
+		// mismo criterio que boundaryValues.vue/boundaryChart.vue (HasData).
+		// En metric, las ValueLabels de la variable seleccionada, filtradas
+		// con el mismo criterio que metricValues.vue (displayLabel).
 		allLabels(metric) {
+			if (metric.isBoundary) {
+				return metric.SelectedVersion().ValueLabels.filter(function (label) {
+					return metric.HasData(label);
+				});
+			}
 			var variable = this.selectedVariable(metric);
 			if (!variable) {
 				return [];
@@ -185,15 +208,29 @@ export default {
 		displayLabel(metric, variable, label) {
 			return label.Values && ((variable.ShowEmptyCategories && !metric.Compare.Active) || label.Values.Count !== '');
 		},
-		swatchStyle(label) {
+		// Un boundary siempre se representa como cuadrado (son polígonos/áreas,
+		// nunca ubicaciones puntuales); un indicador de puntos (IsLocationType)
+		// se representa como círculo, igual que antes.
+		isDot(metric) {
+			return !metric.isBoundary && metric.IsLocationType();
+		},
+		// El color "de identidad" de la categoría: en boundary, siempre
+		// LineColor (mismo criterio que boundaryValues.vue, sin importar el
+		// patrón de relleno activo en el mapa); en metric, FillColor.
+		swatchStyle(metric, label) {
+			var color = metric.isBoundary ? label.LineColor : label.FillColor;
 			if (label.Visible) {
-				return 'background-color: ' + label.FillColor + '; border-color: ' + label.FillColor;
+				return 'background-color: ' + color + '; border-color: ' + color;
 			}
-			return 'background-color: transparent; border-color: ' + label.FillColor;
+			return 'background-color: transparent; border-color: ' + color;
 		},
 		toggleLabel(metric, label) {
 			label.Visible = !label.Visible;
-			metric.RefreshMap();
+			if (metric.isBoundary) {
+				metric.UpdateMap();
+			} else {
+				metric.RefreshMap();
+			}
 		},
 		removeMetric(metric) {
 			metric.Remove();

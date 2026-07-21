@@ -1,7 +1,9 @@
 <template>
   <transition name="slide-fade">
     <div class="indicator-selector-wrapper sidepanelOffset" v-if="isOpen" v-on-clickaway="closePanel">
-      <div ref="floatingPanel" class="work-offsetY floating-panel panel card" :style="[panelStyle, heightStyle]">
+      <div ref="floatingPanel" class="work-offsetY floating-panel panel card"
+           :class="{ 'pos-anchored': !anchor && !isMobile && sidebarPosition !== 'middle' }"
+           :style="[panelStyle, positionStyle, heightStyle]">
         <!-- Encabezado -->
         <div class="panel-header">
           <div class="panel-title">{{ title }}</div>
@@ -363,6 +365,10 @@ export default {
     emitContainer: { type: Boolean, default: false },
     groupCategories: { type: Boolean, default: false },
     closeOnSelect: { type: Boolean, default: true },
+    // 'top' | 'middle' (default) | 'bottom'. Posición del panel lateral fijo
+    // (sideToolbar.vue), controlada por App.vue. No afecta el caso con
+    // anchor (el visor de la tabla no la usa).
+    sidebarPosition: { type: String, default: 'middle' },
   },
   data() {
     return {
@@ -395,6 +401,20 @@ export default {
       var min = Math.min(600, avail);
       if (min > max) min = max;
       return { minHeight: min + 'px', maxHeight: max + 'px' };
+    },
+    // Con sidebarPosition 'top'/'bottom' el panel se ajusta a ese borde en
+    // vez de quedar centrado verticalmente (el default de .floating-panel).
+    // No aplica con anchor (otro mecanismo de posicionamiento, ver panelStyle)
+    // ni en mobile (el panel ahí se desliza desde abajo siempre).
+    positionStyle() {
+      if (this.anchor || this.isMobile) return null;
+      if (this.sidebarPosition === 'top') {
+        return { top: '20px', bottom: 'auto', margin: '0' };
+      }
+      if (this.sidebarPosition === 'bottom') {
+        return { bottom: '20px', top: 'auto', margin: '0' };
+      }
+      return null;
     },
     // El switch "Explorar las delimitaciones al seleccionar" se ofrece cuando hay
     // delimitaciones a la vista, donde el clic es ambiguo (¿se agregan a la pivot o
@@ -974,8 +994,10 @@ export default {
 .slide-fade-enter-active { transition: all 0.3s ease; }
 .slide-fade-leave-active { transition: all 0.25s ease; }
 .slide-fade-enter, .slide-fade-leave-to { opacity: 0; }
-.slide-fade-enter .floating-panel,
-.slide-fade-leave-to .floating-panel { transform: translateX(-100%) translateY(-50%); }
+.slide-fade-enter .floating-panel:not(.pos-anchored),
+.slide-fade-leave-to .floating-panel:not(.pos-anchored) { transform: translateX(-100%) translateY(-50%); }
+.slide-fade-enter .floating-panel.pos-anchored,
+.slide-fade-leave-to .floating-panel.pos-anchored { transform: translateX(-100%); }
 
 /* Panel flotante */
 .floating-panel {
