@@ -109,6 +109,18 @@ var webpackConfig = merge(baseWebpackConfig, {
 			}
 		}),
 		new HtmlWebpackPlugin({
+			filename: config.build.indexPacks,
+			template: 'packs.html',
+			metadata: {},
+			chunks: ['manifest', 'vendor', 'appPacks'],
+			inject: true,
+			minify: {
+				removeComments: true,
+				collapseWhitespace: true,
+				removeAttributeQuotes: true
+			}
+		}),
+		new HtmlWebpackPlugin({
 			filename: config.build.indexCredentials,
 			template: 'credentials.html',
 			metadata: {

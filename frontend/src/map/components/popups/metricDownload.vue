@@ -86,7 +86,7 @@
 								</button>
 							</span>
 							<span v-else="">
-								<img src="/static/img/spinner.gif"> Generando archivo. El proceso puede demorar varios minutos... {{ (progress ? '(' + progress + '%)' : '') }}
+								<img src="/static/img/spinner.gif"> Generando el archivo. El proceso puede demorar varios minutos... {{ (progress ? '(' + progress + '%)' : '') }}
 							</span>
 						</td>
 					</tr>

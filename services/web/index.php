@@ -45,7 +45,7 @@ function isLocalPHP($uri)
 
 function isPublicPath($uri)
 {
-	return !startsWith($uri, '/users') && !startsWith($uri, '/table') && !startsWith($uri, '/basics') && !startsWith($uri, '/logs') && !startsWith($uri, '/services/backoffice/') && !startsWith($uri, '/services/admin/') && !startsWith($uri, '/admins');
+	return !startsWith($uri, '/users') && !startsWith($uri, '/table') && !startsWith($uri, '/basics') && !startsWith($uri, '/logs') && !startsWith($uri, '/services/backoffice/') && !startsWith($uri, '/services/admin/') && !startsWith($uri, '/services/packs/') && !startsWith($uri, '/admins') && !startsWith($uri, '/packs');
 }
 function startsWith($text, $word)
 {

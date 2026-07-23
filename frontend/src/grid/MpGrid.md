@@ -288,15 +288,19 @@ contenido HTML), se le declara un `size`.
 ## Paginación
 
 La grilla pagina de a 10 filas por defecto (`pageSize`); con `pageSize="null"` se
-desactiva. La barra de paginación muestra, en este orden: el rango visible
-("1 a 10 de 151"), los botones para moverse (primera, anterior, números de
-página, siguiente, última) y un selector "Mostrar:" para cambiar el tamaño de
-página. Las opciones del selector se configuran con `pageSizeOptions` (por
-defecto `[10, 50, 100]`), y el valor de `pageSize` se incluye entre ellas aunque
-no figure en la lista.
+desactiva. La barra de paginación tiene tres zonas: el rango visible ("1 a 10 de
+151") centrado entre los botones "← Anterior" y "Siguiente →" (esa zona central
+ocupa el 50% del ancho de la grilla y siempre está centrada, aunque los botones
+se oculten por no haber más de una página), y a la derecha un selector
+"Mostrar:" para cambiar el tamaño de página. Las opciones se configuran con
+`pageSizeOptions` (por defecto `[10, 50, 100]`; el valor de `pageSize` se
+incluye aunque no figure en la lista), más una opción fija "Todo" que muestra
+la lista completa sin paginar.
 
-La barra entera se oculta cuando no tiene sentido paginar, es decir, cuando ni
-siquiera el menor tamaño de página ofrecido llega a partir la lista.
+La barra entera se oculta si el propio `pageSize` es `null` (la grilla no pagina
+en absoluto), o si ni siquiera el menor tamaño ofrecido llega a partir la lista.
+Si en cambio el usuario eligió "Todo" desde el selector, la barra se mantiene
+visible, para poder volver a paginar.
 
 En jerarquías, la paginación es por nodos raíz: cada página trae esa cantidad de
 ítems de primer nivel con todos sus descendientes.

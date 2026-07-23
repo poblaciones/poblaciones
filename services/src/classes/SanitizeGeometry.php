@@ -53,18 +53,22 @@ class SanitizeGeometry
 	 * a WGS84, simplificación, corrección de orientación de anillos y
 	 * serialización a WKT (siempre 2D).
 	 *
-	 * @param string           $wkb          WKB binario (sin header GeoPackage)
-	 * @param float            $dpThresholdM Tolerancia de simplificación en metros; 0 la desactiva
-	 * @param Projections|null $projector    Proyector hacia WGS84, o null si la fuente ya está en lon/lat
+	 * @param string           $wkb                     WKB binario (sin header GeoPackage)
+	 * @param float            $dpThresholdM            Tolerancia de simplificación en metros; 0 la desactiva
+	 * @param Projections|null $projector               Proyector hacia WGS84, o null si la fuente ya está en lon/lat
+	 * @param bool             $enforceMinPointDistance Si es false, omite la re-simplificación forzada a
+	 *                                                   MIN_POINT_DISTANCE_M cuando quedan puntos muy próximos
+	 *                                                   (útil para calibrar la tolerancia de simplificación de
+	 *                                                   forma aislada, sin este piso adicional). Por defecto true.
 	 * @return string|null                   WKT normalizado, o null si el WKB no pudo procesarse
 	 */
-	public static function SanitizeWkb(string $wkb, float $dpThresholdM = 0.0, ?Projections $projector = null): ?string
+	public static function SanitizeWkb(string $wkb, float $dpThresholdM = 0.0, ?Projections $projector = null, bool $enforceMinPointDistance = true): ?string
 	{
 		$parsed = self::parseWkb($wkb);
 		if ($parsed === null || !self::hasValidStructure($parsed['type'], $parsed['coordinates']))
 			return null;
 
-		return self::sanitizeArraysToWkt($parsed['type'], $parsed['coordinates'], $dpThresholdM, $projector);
+		return self::sanitizeArraysToWkt($parsed['type'], $parsed['coordinates'], $dpThresholdM, $projector, $enforceMinPointDistance);
 	}
 
 	/**
@@ -87,12 +91,13 @@ class SanitizeGeometry
 	 * proyector, simplifica, corrige orientación y serializa a WKT (2D;
 	 * las coordenadas Z/M se descartan).
 	 *
-	 * @param object           $shapeGeometry Geometría con getArray() y constante GEOJSON_BASETYPE
-	 * @param float            $dpThresholdM  Tolerancia de simplificación en metros; 0 la desactiva
-	 * @param Projections|null $projector     Proyector hacia WGS84, o null si la fuente ya está en lon/lat
+	 * @param object           $shapeGeometry           Geometría con getArray() y constante GEOJSON_BASETYPE
+	 * @param float            $dpThresholdM            Tolerancia de simplificación en metros; 0 la desactiva
+	 * @param Projections|null $projector               Proyector hacia WGS84, o null si la fuente ya está en lon/lat
+	 * @param bool             $enforceMinPointDistance Ver SanitizeWkb. Por defecto true.
 	 * @return string|null                    WKT normalizado, o null si la geometría no pudo procesarse
 	 */
-	public static function SanitizeShape($shapeGeometry, float $dpThresholdM = 0.0, ?Projections $projector = null): ?string
+	public static function SanitizeShape($shapeGeometry, float $dpThresholdM = 0.0, ?Projections $projector = null, bool $enforceMinPointDistance = true): ?string
 	{
 		$type = $shapeGeometry::GEOJSON_BASETYPE;
 		$arr = $shapeGeometry->getArray();
@@ -123,7 +128,7 @@ class SanitizeGeometry
 		if (!self::hasValidStructure($type, $coordinates))
 			return null;
 
-		return self::sanitizeArraysToWkt($type, $coordinates, $dpThresholdM, $projector);
+		return self::sanitizeArraysToWkt($type, $coordinates, $dpThresholdM, $projector, $enforceMinPointDistance);
 	}
 
 	/**
@@ -150,14 +155,16 @@ class SanitizeGeometry
 
 	/**
 	 * Igual que SanitizeWkb, pero recibiendo y devolviendo WKT.
+	 *
+	 * @param bool $enforceMinPointDistance Ver SanitizeWkb. Por defecto true.
 	 */
-	public static function SanitizeString(string $wkt, float $dpThresholdM = 0.0, ?Projections $projector = null): ?string
+	public static function SanitizeString(string $wkt, float $dpThresholdM = 0.0, ?Projections $projector = null, bool $enforceMinPointDistance = true): ?string
 	{
 		$parsed = self::parseToArrays($wkt, 'wkt');
 		if ($parsed === null)
 			return null;
 
-		return self::sanitizeArraysToWkt($parsed['type'], $parsed['coordinates'], $dpThresholdM, $projector);
+		return self::sanitizeArraysToWkt($parsed['type'], $parsed['coordinates'], $dpThresholdM, $projector, $enforceMinPointDistance);
 	}
 
 	// ------------------------------------------------------------------
@@ -240,8 +247,11 @@ class SanitizeGeometry
 	 * aportan información geométrica y degeneran la matemática esférica de
 	 * SimplifyGeometry cuando quedan en los extremos de un rango (el círculo
 	 * máximo por dos puntos idénticos es indefinido).
+	 *
+	 * @param bool $enforceMinPointDistance Si es false, omite el paso de re-simplificación forzada a
+	 *                                       MIN_POINT_DISTANCE_M. Ver SanitizeWkb.
 	 */
-	private static function sanitizeArraysToWkt(string $type, array $coordinates, float $dpThresholdM, ?Projections $projector): ?string
+	private static function sanitizeArraysToWkt(string $type, array $coordinates, float $dpThresholdM, ?Projections $projector, bool $enforceMinPointDistance = true): ?string
 	{
 		$coordinates = self::deduplicate($type, $coordinates);
 		if ($coordinates === null || !self::hasValidStructure($type, $coordinates))
@@ -267,7 +277,7 @@ class SanitizeGeometry
 		// Si quedaron puntos consecutivos más próximos que el mínimo, una
 		// única re-simplificación con esa tolerancia. Sin reintentos
 		// adicionales: el resultado se devuelve de cualquier manera.
-		if (($type === 'Polygon' || $type === 'MultiPolygon') && self::hasTooClosePoints($type, $coordinates)) {
+		if ($enforceMinPointDistance && ($type === 'Polygon' || $type === 'MultiPolygon') && self::hasTooClosePoints($type, $coordinates)) {
 			$resimplified = self::simplify($type, $coordinates, self::MIN_POINT_DISTANCE_M);
 			if ($resimplified !== null) {
 				$coordinates = $resimplified;

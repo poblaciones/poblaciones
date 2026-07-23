@@ -17,16 +17,6 @@ Db.prototype.UpdateWorkSegmentedCrawling = function (item) {
 		{ w: item.Id, v: (item.SegmentedCrawling ? '1' : '0') }, 'cambiar el tipo indexación de la obra');
 };
 
-Db.prototype.GetClippingRegions = function () {
-	return axiosClient.getPromise(window.host + '/services/admin/GetClippingRegions',
-		{}, 'obtener la lista de regiones');
-};
-
-Db.prototype.GetBoundaries = function () {
-	return axiosClient.getPromise(window.host + '/services/admin/GetBoundaries',
-		{}, 'obtener la lista de delimitaciones');
-};
-
 Db.prototype.GetUsers = function () {
 	return axiosClient.getPromise(window.host + '/services/admin/GetUsers',
 			{ }, 'obtener la lista de usuarios');
@@ -117,19 +107,6 @@ Db.prototype.DeleteUser = function (user, callback) {
 		});
 };
 
-Db.prototype.UpdateBoundary = function (boundary) {
-	return axiosClient.postPromise(window.host + '/services/admin/UpdateBoundary',
-		{ b: boundary }, 'actualizar la delimitación').then(function () {
-
-		});
-};
-
-Db.prototype.UpdateClippingRegion = function (region) {
-	return axiosClient.postPromise(window.host + '/services/admin/UpdateClippingRegion',
-		{ r: region }, 'actualizar la región').then(function () {
-
-		});
-};
 
 Db.prototype.UpdateUser = function (user, password, verification) {
 	return axiosClient.postPromise(window.host + '/services/admin/UpdateUser',
@@ -175,14 +152,4 @@ Db.prototype.GetStartWorkRevokeUrl = function (workId) {
 Db.prototype.GetStepWorkRevokeUrl = function () {
 	return window.host + '/services/backoffice/StepRevokeWork';
 };
-
-
-Db.prototype.LoadMetadata = function (metadata) {
-	return axiosClient.getPromise(window.host + '/services/admin/GetMetadata',
-		{ m: metadata.Id }, 'obtener los metadatos').then(function (data) {
-			var ret = new ActiveMetadata(null, data.Metadata, data);
-			return ret;
-		});
-};
-
 

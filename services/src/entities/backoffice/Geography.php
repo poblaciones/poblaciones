@@ -4,6 +4,8 @@ namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
 use \JMS\Serializer\Annotation\Exclude;
+use \JMS\Serializer\Annotation\VirtualProperty;
+use \JMS\Serializer\Annotation\SerializedName;
 
 /**
  * Geography
@@ -13,6 +15,10 @@ use \JMS\Serializer\Annotation\Exclude;
  */
 class Geography
 {
+    // Propiedades no almacenadas en la base de datos
+    public $Level;
+    public $ChildCount = 0;
+
     /**
      * @var integer
      *
@@ -29,11 +35,17 @@ class Geography
      */
     private $Caption;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="geo_caption_short", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $CaptionShort;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="geo_root_caption", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+     * @ORM\Column(name="geo_root_caption", type="string", length=100, precision=0, scale=0, nullable=true, unique=false)
      */
     private $RootCaption;
 
@@ -129,11 +141,14 @@ class Geography
     private $PartialCoverage;
 
     /**
-		 * @var integer
-		 *
-		 * @ORM\Column(name="geo_parent_id", type="integer", precision=0, scale=0, nullable=false, unique=false)
+     * @var \helena\entities\backoffice\Geography
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Geography")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="geo_parent_id", referencedColumnName="geo_id", nullable=true)
+     * })
      */
-    private $ParentId;
+    private $Parent;
 
     /**
      * @var \helena\entities\backoffice\ClippingRegionItem
@@ -141,17 +156,20 @@ class Geography
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\ClippingRegionItem")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="geo_country_id", referencedColumnName="cli_id", nullable=true)
+     *   @ORM\JoinColumn(name="geo_country_id", referencedColumnName="cli_id", nullable=false)
      * })
      */
     private $Country;
 
     /**
-     * @var integer
-		 *
-		 * @ORM\Column(name="geo_gradient_id", type="integer", precision=0, scale=0, nullable=true, unique=false)
+     * @var \helena\entities\backoffice\Gradient
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Gradient")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="geo_gradient_id", referencedColumnName="grd_id", nullable=true)
+     * })
      */
-    private $GradientId;
+    private $Gradient;
 
     /**
      * @var \helena\entities\backoffice\Metadata
@@ -212,6 +230,30 @@ class Geography
     public function getCaption()
     {
         return $this->Caption;
+    }
+
+    /**
+     * Set captionShort
+     *
+     * @param string $captionShort
+     *
+     * @return Geography
+     */
+    public function setCaptionShort($captionShort)
+    {
+        $this->CaptionShort = $captionShort;
+
+        return $this;
+    }
+
+    /**
+     * Get captionShort
+     *
+     * @return string
+     */
+    public function getCaptionShort()
+    {
+        return $this->CaptionShort;
     }
 
     /**
@@ -552,52 +594,79 @@ class Geography
     }
 
     /**
-     * Set parentId
+     * Set parent
      *
-     * @param integer $parentId
+     * @param \helena\entities\backoffice\Geography $parent
      *
      * @return Geography
      */
-    public function setParent($parentId)
+    public function setParent(\helena\entities\backoffice\Geography $parent = null)
     {
-        $this->ParentId = $parentId;
+        $this->Parent = $parent;
 
         return $this;
     }
 
     /**
-     * Get parentId
+     * Get parent
      *
-     * @return integer
+     * @return \helena\entities\backoffice\Geography
      */
-    public function getParentId()
+    public function getParent()
     {
-        return $this->ParentId;
+        return $this->Parent;
     }
 
 
     /**
-     * Set gradientId
+     * Set gradient
      *
-     * @param integer $gradientId
+     * @param \helena\entities\backoffice\Gradient $gradient
      *
      * @return Geography
      */
-    public function setGradient($gradientId)
+    public function setGradient(\helena\entities\backoffice\Gradient $gradient = null)
     {
-        $this->GradientId = $gradientId;
+        $this->Gradient = $gradient;
 
         return $this;
     }
 
     /**
-     * Get gradientId
+     * Get gradient
      *
-     * @return integer
+     * @return \helena\entities\backoffice\Gradient
      */
-    public function getGradientId()
+    public function getGradient()
     {
-        return $this->GradientId;
+        return $this->Gradient;
+    }
+
+    // Propiedades calculadas, solo para la serialización (no hay setters:
+    // Parent/Gradient son las relaciones reales, ver más arriba). Otros
+    // puntos del sistema por fuera de 'packs' (CodesSelection.vue en
+    // backoffice, VariableOptionsPopup.vue) todavía esperan ParentId y
+    // GradientId como enteros sueltos, tal como estaban antes de
+    // corregir esta entidad para que Parent/Gradient sean relaciones
+    // reales (ver la nota de discrepancias del ORM): esto evita romper
+    // esos consumidores sin tener que acordarse de poblarlos a mano en
+    // cada servicio que toque una Geography.
+    /**
+     * @VirtualProperty
+     * @SerializedName("ParentId")
+     */
+    public function getParentIdForCompatibility()
+    {
+        return ($this->Parent !== null ? $this->Parent->getId() : null);
+    }
+
+    /**
+     * @VirtualProperty
+     * @SerializedName("GradientId")
+     */
+    public function getGradientIdForCompatibility()
+    {
+        return ($this->Gradient !== null ? $this->Gradient->getId() : null);
     }
 
     /**

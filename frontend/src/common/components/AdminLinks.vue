@@ -3,6 +3,9 @@
 		<md-button @click="goAdmin" class="md-raised">
 			Administración
 		</md-button>
+		<md-button @click="goPacks" class="md-raised">
+			Paquetes
+		</md-button>
 		<md-button @click="goLogs" class="md-raised" v-if="isAdmin">
 			Logs
 		</md-button>
@@ -27,6 +30,10 @@ export default {
 		goAdmin() {
 				var url = '/admins';
 				window.open(url, '_blank');
+		},
+		goPacks() {
+			var url = '/packs';
+			window.open(url, '_blank');
 		},
 		goLogs() {
 				var url = window.host + '/logs';

@@ -23,6 +23,7 @@ use helena\db\frontend\SnapshotByDatasetTileData;
 use helena\db\frontend\SnapshotByDatasetCompareTileData;
 use helena\entities\frontend\clipping\TileDataInfo;
 use helena\entities\frontend\geometries\Envelope;
+use helena\entities\frontend\metric\MetricDataInfo;
 
 
 class TableService extends BaseService
@@ -119,6 +120,8 @@ class TableService extends BaseService
 
 		TableMetricDataCache::Cache()->PutData($metricId, $key, $data);
 
+		$data->EllapsedMs = GlobalTimer::EllapsedMs();
+
 		Profiling::EndTimer();
 		return $data;
 	}
@@ -152,7 +155,9 @@ class TableService extends BaseService
 
 		$rows = $table->GetAllRows();
 
-		return $rows;
+		$ret = new MetricDataInfo();
+		$ret->Items = $rows;
+		return $ret;
 	}
 
 

@@ -4,6 +4,7 @@ namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
 use \JMS\Serializer\Annotation\Exclude;
+use \JMS\Serializer\Annotation\Type;
 
 /**
  * Geography
@@ -13,8 +14,22 @@ use \JMS\Serializer\Annotation\Exclude;
  */
 class BoundaryVersion
 {
-		// Propiedades no almacenada en la base de datos
-		public $ClippingRegions;
+		// Propiedades no almacenada en la base de datos. @Type explícito:
+		// sin él, el serializer puede no inferir bien el tipo de una
+		// propiedad pública sin anotación cuando el valor es un array de
+		// arrays (a diferencia de un string simple, como VersionsSummary en
+		// Boundary, que sí se ve). El default explícito (en vez de dejarla
+		// sin inicializar) es una segunda red de seguridad para lo mismo.
+		// ClippingRegionsSummary es puramente para diagnóstico: si el
+		// listado la muestra bien pero ClippingRegions le sigue sin
+		// llegar al popup, confirma que el problema es específico de
+		// serializar el array, no de la consulta en sí.
+		/**
+		 * @Type("array")
+		 */
+		public $ClippingRegions = array();
+		public $ClippingRegionsSummary = '';
+		public $Level;
 
 		/**
      * @var integer

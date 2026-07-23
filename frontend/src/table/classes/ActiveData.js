@@ -64,7 +64,8 @@ ActiveData.prototype.load = function () {
 			seen[key] = true;
 			if (pending) {
 				(function (k, lvl, mtc, ver) {
-					toRetrieve.push(mtc.Store.GetMetricData(mtc, ver, lvl).then(function (list) {
+					toRetrieve.push(mtc.Store.GetMetricData(mtc, ver, lvl).then(function (data) {
+						var list = data.Items;
 						store[k] = list;
 						delete loc._indexByVersionLevel[k]; // se reconstruye al primer uso
 						return list;

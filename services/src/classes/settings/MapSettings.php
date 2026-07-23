@@ -14,6 +14,8 @@ class MapSettings
 	public $LabelsBlockSize = 6;
 	public $TileDataBlockSize = 4;
 
+	public $CurrentCountryId = 7314;
+
 	public $UseDataTileBlocks = false;
 	public $UseLabelTileBlocks = true;
 	public $UseLightMap = false;

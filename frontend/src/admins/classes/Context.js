@@ -15,11 +15,8 @@ function Context() {
 
 Context.prototype.Initialize = function () {
 	this.Factory = new AsyncCatalog(window.host + '/services/backoffice/GetFactories');
-	this.Geographies = new AsyncCatalog(window.host + '/services/backoffice/GetAllGeographies');
 	this.PublicMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetPublicMetrics');
 	this.CartographyMetrics = new AsyncCatalog(window.host + '/services/backoffice/GetCartographyMetrics');
-	this.MetricGroups = new AsyncCatalog(window.host + '/services/backoffice/GetAllMetricGroups');
-	this.BoundaryGroups = new AsyncCatalog(window.host + '/services/admin/GetBoundaryGroups');
 
 	this.Sources = new AsyncCatalog(window.host + '/services/admin/GetAllPublicSources');
 	this.Institutions = new AsyncCatalog(window.host + '/services/admin/GetAllPublicInstitutions');

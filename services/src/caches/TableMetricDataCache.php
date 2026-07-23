@@ -11,7 +11,7 @@ class TableMetricDataCache extends BaseCache
 	public static function Cache()
 	{
 		$limitMB = App::Settings()->ServiceCache()->TileDataCachePerFileLimitMB;
-		return new TwoLevelObjectCache("Metrics/TableMetricData", false, $limitMB);
+		return new TwoLevelObjectCache("Metrics/TableData", false, $limitMB);
 	}
 	public static function CreateKey($metricId, $metricVersionId, $levelId, $partition)
 	{

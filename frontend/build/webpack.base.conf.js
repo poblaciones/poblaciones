@@ -17,6 +17,7 @@ module.exports = {
 		appBackoffice: './src/backoffice/main.js',
 		appTable: './src/table/main.js',
 		appAdmin: './src/admins/main.js',
+		appPacks: './src/packs/main.js',
 		appCred: './src/credentials/main.js',
 	},
 	output: {

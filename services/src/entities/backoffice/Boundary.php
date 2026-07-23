@@ -16,6 +16,7 @@ class Boundary
 	// Propiedades no almacenada en la base de datos
 	public $Versions;
 	public $VersionsSummary;
+	public $Level;
 
 		/**
      * @var integer
@@ -43,7 +44,7 @@ class Boundary
     /**
 		 * @var integer
 		 *
-		 * @ORM\Column(name="bou_order", type="integer", precision=0, scale=0, nullable=false, unique=false)
+		 * @ORM\Column(name="bou_order", type="integer", precision=0, scale=0, nullable=true, unique=false)
 		 */
     private $Order;
 

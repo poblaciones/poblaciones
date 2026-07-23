@@ -30,15 +30,6 @@ App::GetOrPost('/services/admin/UpdateUser', function (Request $request) {
 	return App::Json($ret);
 });
 
-App::GetOrPost('/services/admin/UpdateClippingRegion', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
-		return $app;
-	$region = App::ReconnectJsonParamMandatory(entities\ClippingRegion::class, 'r');
-
-	$controller = new services\ClippingRegionService();
-	$ret = $controller->UpdateClippingRegion($region);
-	return App::Json($ret);
-});
 
 App::Get('/services/admin/GetWorks', function (Request $request) {
 	if ($app = Session::CheckIsSiteReader())
@@ -55,61 +46,6 @@ App::Get('/services/admin/UpdateWorkSpaceUsage', function (Request $request) {
 		return $app;
 	$controller = new services\WorkService();
 	$ret = $controller->UpdateWorkSpaceUsage();
-	return App::Json($ret);
-});
-
-App::Get('/services/admin/GetMetadata', function (Request $request) {
-	if ($app = Session::CheckIsSiteReader())
-		return $app;
-	$controller = new services\MetadataService();
-	$metadataId = Params::GetIntMandatory('m');
-	$ret = $controller->GetMetadata($metadataId);
-	return App::OrmJson($ret);
-});
-
-
-App::Get('/services/admin/GetClippingRegions', function (Request $request) {
-	if ($app = Session::CheckIsSiteReader())
-		return $app;
-	$controller = new services\ClippingRegionService();
-	$ret = $controller->GetClippingRegions();
-	return App::OrmJson($ret);
-});
-
-
-App::GetOrPost('/services/admin/UpdateClippingRegion', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
-		return $app;
-	$region = App::ReconnectJsonParamMandatory(entities\ClippingRegion::class, 'r');
-
-	$controller = new services\ClippingRegionService();
-	$ret = $controller->UpdateClippingRegion($region);
-	return App::Json($ret);
-});
-
-App::Get('/services/admin/GetBoundaries', function (Request $request) {
-	if ($app = Session::CheckIsSiteReader())
-		return $app;
-	$controller = new services\BoundaryService();
-	$ret = $controller->GetBoundaries();
-	return App::OrmJson($ret);
-});
-
-App::Get('/services/admin/GetBoundaryGroups', function (Request $request) {
-	if ($app = Session::CheckIsSiteReader())
-		return $app;
-	$controller = new services\BoundaryService();
-	$ret = $controller->GetBoundaryGroups();
-	return App::OrmJson($ret);
-});
-
-App::GetOrPost('/services/admin/UpdateBoundary', function (Request $request) {
-	if ($app = Session::CheckIsMegaUser())
-		return $app;
-	$boundary = App::ReconnectJsonParamMandatory(entities\Boundary::class, 'b');
-
-	$controller = new services\BoundaryService();
-	$ret = $controller->UpdateBoundary($boundary);
 	return App::Json($ret);
 });
 
@@ -188,14 +124,6 @@ App::$app->get('/services/admin/GetStatistics', function (Request $request) {
 	return App::OrmJson($ret);
 });
 
-App::Get('/services/admin/ClearMetadataPdfCache', function (Request $request) {
-	if ($app = Session::CheckIsSiteReader())
-		return $app;
-	$controller = new CacheManager();
-	$metadataId = Params::GetMandatory('m');
-	$ret = $controller->CleanPdfMetadata($metadataId);
-	return App::Json(["result" => "OK"]);
-});
 
 App::Get('/services/admin/MarkTable', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())

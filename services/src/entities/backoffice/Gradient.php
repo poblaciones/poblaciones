@@ -52,7 +52,7 @@ class Gradient
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\ClippingRegionItem")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="grd_country_id", referencedColumnName="cli_id", nullable=true)
+     *   @ORM\JoinColumn(name="grd_country_id", referencedColumnName="cli_id", nullable=false)
      * })
      */
     private $Country;

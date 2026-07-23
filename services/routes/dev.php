@@ -136,6 +136,14 @@ App::$app->get('/map', function (Request $request) {
 App::$app->get('/appBackoffice.js', function (Request $request) {
 	return resolver($request);
 });
+
+App::$app->get('/appPacks.js', function (Request $request) {
+	return resolver($request);
+});
+
+App::$app->get('/appTable.js', function (Request $request) {
+	return resolver($request);
+});
 App::$app->get('/appAdmin.js', function (Request $request) {
 	return resolver($request);
 });

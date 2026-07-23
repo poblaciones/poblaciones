@@ -59,7 +59,7 @@
 					:style="columnStyle(captionColumn)"
 					:class="'align-' + captionColumn.align"
 					@click.native="onCellClick(row.item)">
-					<span class="mp-grid-indent" :style="{ paddingLeft: (row.level * 20) + 'px' }">
+					<span class="mp-grid-indent" :class="row.hasChildren ? 'mp-grid-indent-parent' : 'mp-grid-indent-leaf'" :style="{ paddingLeft: (row.level * 32) + 'px' }">
 						<md-button v-if="row.hasChildren" class="md-icon-button md-dense mp-grid-expand-btn" @click.stop="toggleRow(row)">
 							<md-icon>{{ row.expanded ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</md-icon>
 						</md-button>
@@ -150,45 +150,41 @@
 		</div>
 
 		<div class="mp-grid-pagination-bar" v-if="showPaginationBar">
-			<span class="mp-grid-pagination-range">{{ pageRangeLabel }}</span>
+			<div class="mp-grid-pagination-spacer"></div>
 
-			<div class="mp-grid-pagination" v-if="totalPages > 1">
-				<md-button class="md-icon-button md-dense" :disabled="currentPage === 0" title="Primera página" @click="goToPage(0)">
-					<md-icon>first_page</md-icon>
+			<div class="mp-grid-pagination-center">
+				<md-button class="md-dense mp-grid-nav-btn mp-grid-nav-prev"
+									 :class="{ 'mp-grid-nav-hidden': totalPages <= 1 }"
+									 :disabled="currentPage === 0"
+									 @click="goToPage(currentPage - 1)">
+					<span style="padding-right: 6px;
+												font-size: 14px;
+												font-family: monospace;
+										">&lt;</span>
+					Anterior
 				</md-button>
-				<md-button class="md-icon-button md-dense" :disabled="currentPage === 0" title="Página anterior" @click="goToPage(currentPage - 1)">
-					<md-icon>chevron_left</md-icon>
-				</md-button>
-				<template v-for="(page, pi) in pageNumbers">
-					<span v-if="page === null" :key="pi" class="mp-grid-pagination-gap">…</span>
-					<md-button
-						v-else
-						:key="pi"
-						class="md-icon-button md-dense mp-grid-pagination-page"
-						:class="{ 'md-primary': page === currentPage }"
-						:title="'Página ' + (page + 1)"
-						@click="goToPage(page)">
-						{{ page + 1 }}
-					</md-button>
-				</template>
-				<md-button class="md-icon-button md-dense" :disabled="currentPage >= totalPages - 1" title="Página siguiente" @click="goToPage(currentPage + 1)">
-					<md-icon>chevron_right</md-icon>
-				</md-button>
-				<md-button class="md-icon-button md-dense" :disabled="currentPage >= totalPages - 1" title="Última página" @click="goToPage(totalPages - 1)">
-					<md-icon>last_page</md-icon>
+				<span class="mp-grid-pagination-range">{{ pageRangeLabel }}</span>
+				<md-button class="md-dense mp-grid-nav-btn mp-grid-nav-next"
+									 :class="{ 'mp-grid-nav-hidden': totalPages <= 1 }"
+									 :disabled="currentPage >= totalPages - 1"
+									 @click="goToPage(currentPage + 1)">
+					Siguiente
+										<span style="padding-left: 6px;
+												font-size: 14px;
+												font-family: monospace;
+										">&gt;</span>
 				</md-button>
 			</div>
 
 			<div class="mp-grid-pagesize">
 				<span class="mp-grid-pagesize-label">Mostrar:</span>
-				<md-button
-					v-for="opt in resolvedPageSizeOptions"
-					:key="opt"
-					class="md-dense mp-grid-pagesize-option"
-					:class="{ 'md-primary': opt === currentPageSize }"
-					@click="changePageSize(opt)">
-					{{ opt }}
-				</md-button>
+				<select
+					class="mp-grid-pagesize-select"
+					:value="currentPageSize === null ? '' : currentPageSize"
+					@change="onPageSizeChange">
+					<option v-for="opt in resolvedPageSizeOptions" :key="opt" :value="opt">{{ opt }}</option>
+					<option value="">Todo</option>
+				</select>
 			</div>
 		</div>
 
@@ -321,6 +317,11 @@ export default {
 			this.currentPageSize = size;
 			this.currentPage = 0;
 			this.refreshRows();
+		},
+		// El <option value=""> de "Todo" llega como string vacío.
+		onPageSizeChange(event) {
+			var value = event.target.value;
+			this.changePageSize(value === '' ? null : Number(value));
 		},
 		rowActions(item) {
 			var result = [];
@@ -583,21 +584,29 @@ export default {
 			}
 			return Math.max(1, Math.ceil(this.rootCount / this.currentPageSize));
 		},
-		// La barra se muestra solo si tiene sentido paginar: si ni siquiera
-		// el menor tamaño de página ofrecido llega a partir la lista, no
-		// aporta nada (no hay páginas ni opción de tamaño útil), así que se
-		// oculta por completo.
+		// La barra se oculta si el padre configuró la grilla para no paginar
+		// (pageSize null), o si ni siquiera el menor tamaño ofrecido llega a
+		// partir la lista (no aportaría nada). Si en cambio lo que pasó es
+		// que el usuario eligió "Todo" (currentPageSize null pero pageSize
+		// sí definido), la barra se mantiene, para poder volver a paginar.
 		showPaginationBar() {
-			if (!this.currentPageSize) {
+			if (!this.pageSize) {
 				return false;
+			}
+			if (!this.currentPageSize) {
+				return true;
 			}
 			var smallest = this.resolvedPageSizeOptions.length > 0 ? this.resolvedPageSizeOptions[0] : this.currentPageSize;
 			return this.rootCount > smallest;
 		},
 		// Rango de ítems raíz visible en la página actual: "1 a 10 de 151".
+		// Con "Todo" elegido (currentPageSize null) se muestran todos.
 		pageRangeLabel() {
 			if (this.rootCount === 0) {
 				return '0 de 0';
+			}
+			if (!this.currentPageSize) {
+				return '1 a ' + this.rootCount + ' de ' + this.rootCount;
 			}
 			var from = this.currentPage * this.currentPageSize + 1;
 			var to = Math.min(this.rootCount, from + this.currentPageSize - 1);
@@ -620,35 +629,6 @@ export default {
 				}
 			}
 			return result;
-		},
-		// Números de página a ofrecer: la primera y la última siempre, más
-		// una ventana alrededor de la actual. Un null representa un salto,
-		// que se muestra como elipsis.
-		pageNumbers() {
-			var total = this.totalPages;
-			var current = this.currentPage;
-			var pages = [];
-			var i;
-			if (total <= 7) {
-				for (i = 0; i < total; i++) {
-					pages.push(i);
-				}
-				return pages;
-			}
-			var from = Math.max(1, current - 1);
-			var to = Math.min(total - 2, current + 1);
-			pages.push(0);
-			if (from > 1) {
-				pages.push(null);
-			}
-			for (i = from; i <= to; i++) {
-				pages.push(i);
-			}
-			if (to < total - 2) {
-				pages.push(null);
-			}
-			pages.push(total - 1);
-			return pages;
 		},
 		// Ancho de la columna de acciones, según la cantidad máxima de íconos
 		// que puede mostrar (resolvedActions; rowActions filtra por fila
@@ -990,6 +970,18 @@ export default {
 	align-items: center;
 }
 
+// El botón redondo de expandir agrega su propio ancho a la izquierda del
+// texto; sin él, el texto queda pegado al padding-left calculado por
+// nivel. Estos ajustes compensan esa diferencia para que filas con y sin
+// hijos, de un mismo nivel, queden alineadas entre sí.
+.mp-grid-indent-parent {
+	margin-left: -14px;
+}
+
+.mp-grid-indent-leaf {
+	margin-left: 16px;
+}
+
 .mp-grid-expand-btn {
 	margin-right: 2px;
 }
@@ -1088,51 +1080,73 @@ export default {
 }
 
 .mp-grid-pagination-bar {
-	display: flex;
+	display: grid;
+	// La columna central mide el 50% del ancho de la grilla y siempre está
+	// centrada; las columnas laterales (spacer y Mostrar) se reparten el
+	// resto en partes iguales, así "Mostrar" queda a la derecha sin correr
+	// el centrado del medio.
+	grid-template-columns: 1fr 400px 1fr;
 	align-items: center;
-	justify-content: space-between;
-	flex-wrap: wrap;
 	gap: 12px;
 	margin-top: 4px;
+}
+
+.mp-grid-pagination-center {
+	display: grid;
+	// Anterior y Siguiente ocupan columnas del mismo ancho (1fr cada una),
+	// aunque su texto tenga largos distintos: así el rango, en la columna
+	// del medio (auto), queda centrado en la zona central.
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	gap: 8px;
+}
+
+.mp-grid-nav-btn {
+	font-size: 13px;
+	white-space: nowrap;
+}
+
+.mp-grid-nav-prev {
+	justify-self: start;
+}
+
+.mp-grid-nav-next {
+	justify-self: end;
+}
+
+// Cuando no hay más de una página, Anterior/Siguiente no tienen a dónde ir:
+// se ocultan sin sacarlas del layout (visibility, no display), para que el
+// rango se mantenga centrado en la misma posición haya o no navegación.
+.mp-grid-nav-hidden {
+	visibility: hidden;
 }
 
 .mp-grid-pagination-range {
 	font-size: 13px;
 	color: #666;
+	padding-top: 1px;
+	white-space: nowrap;
+	text-align: center;
 }
 
 .mp-grid-pagesize {
 	display: flex;
 	align-items: center;
-	gap: 2px;
+	justify-content: flex-end;
+	gap: 4px;
 }
 
 .mp-grid-pagesize-label {
 	font-size: 13px;
+		padding-top: 2px;
 	color: #666;
-	margin-right: 4px;
 }
 
-.mp-grid-pagesize-option {
-	min-width: 36px;
+.mp-grid-pagesize-select {
 	font-size: 13px;
-}
-
-.mp-grid-pagination {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 2px;
-	margin-top: 4px;
-}
-
-.mp-grid-pagination-page {
-	font-size: 13px;
-}
-
-.mp-grid-pagination-gap {
-	font-size: 13px;
-	color: #666;
-	padding: 0px 4px;
+	color: inherit;
+	border: none;
+	background: transparent;
+	cursor: pointer;
 }
 </style>

@@ -1,0 +1,56 @@
+import Vue from 'vue';
+import Vuex from 'vuex';
+import AsyncCatalog from '@/backoffice/classes/AsyncCatalog.js';
+export default Context;
+
+function Context() {
+	// 	(window.Context.User.Privileges puede ser:
+	// 'A': Administrador, 'E': Editor de datos públicos,
+	// 'L': Lector de datos públicos, 'P': Usuario estándar
+	this.User = null;
+	this.Cartographies = [];
+	this.CartographiesStarted = false;
+	this.ErrorSignaled = { value: 0 };
+}
+
+Context.prototype.Initialize = function () {
+	this.Factory = new AsyncCatalog(window.host + '/services/backoffice/GetFactories');
+	this.Geographies = new AsyncCatalog(window.host + '/services/backoffice/GetAllGeographies');
+	this.ClippingRegions = new AsyncCatalog(window.host + '/services/packs/GetClippingRegions');
+	this.BoundaryGroups = new AsyncCatalog(window.host + '/services/packs/GetBoundaryGroups');
+	this.Sources = new AsyncCatalog(window.host + '/services/admin/GetAllPublicSources');
+	this.Institutions = new AsyncCatalog(window.host + '/services/admin/GetAllPublicInstitutions');
+};
+
+Context.prototype.GetCreateFileUrl = function (bucketId) {
+	return window.host + '/services/backoffice/PostImportChunk?b=' + bucketId;
+};
+
+Context.prototype.CreateStore = function () {
+	Vue.use(Vuex);
+	const store = new Vuex.Store({
+		modules: { },
+	});
+	return store;
+};
+
+Context.prototype.IsAdmin = function () {
+	return (this.User.Privileges === 'A');
+};
+
+Context.prototype.IsAdminReader = function () {
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E' || this.User.Privileges === 'L');
+};
+
+Context.prototype.IsDataAdmin = function () {
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
+};
+
+Context.prototype.CanCreatePublicData = function () {
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E');
+};
+
+Context.prototype.CanAccessAdminSite = function () {
+	return (this.User.Privileges === 'A' || this.User.Privileges === 'E' || this.User.Privileges === 'L');
+};
+

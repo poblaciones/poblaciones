@@ -24,10 +24,14 @@ class QmlRendererBuilder
 	 * @param array       $valueLabels       filas de VariableSymbologyRepository::GetValueLabels, ordenadas
 	 * @param string      $geometryKind      'fill' | 'marker' | 'line'
 	 * @param bool        $outlineOnly       para 'fill': sin relleno, solo el contorno (ver BuildSymbol)
+	 * @param bool        $prefixLabels      antepone "$variableCaption - " a la etiqueta de cada regla;
+	 *                                       en 'V' con una sola variable a mostrar (p. ej. tipos de límite)
+	 *                                       conviene desactivarlo para no repetir el nombre en cada ítem
 	 * @return string|null XML del <renderer-v2>, o null si no se pudo construir una clasificación válida
 	 */
 	public static function Build(string $variableCaption, string $cutMode, ?string $classificationExpr,
-		bool $isTextComparison, array $valueLabels, string $geometryKind, bool $outlineOnly = false): ?string
+		bool $isTextComparison, array $valueLabels, string $geometryKind, bool $outlineOnly = false,
+		bool $prefixLabels = true): ?string
 	{
 		if ($cutMode === 'S')
 			return self::BuildSingleSymbol($valueLabels, $geometryKind, $outlineOnly);
@@ -45,7 +49,7 @@ class QmlRendererBuilder
 		if (count($rules) === 0)
 			return null;
 
-		return self::BuildRuleBasedRenderer($variableCaption, $rules, $geometryKind, $outlineOnly);
+		return self::BuildRuleBasedRenderer($variableCaption, $rules, $geometryKind, $outlineOnly, $prefixLabels);
 	}
 
 	public static function WrapQml(string $rendererXml): string
@@ -115,7 +119,8 @@ class QmlRendererBuilder
 
 	// ── Ensamblado XML ────────────────────────────────────────────────────────
 
-	private static function BuildRuleBasedRenderer(string $variableCaption, array $rules, string $geometryKind, bool $outlineOnly = false): string
+	private static function BuildRuleBasedRenderer(string $variableCaption, array $rules, string $geometryKind,
+		bool $outlineOnly = false, bool $prefixLabels = true): string
 	{
 		$rulesXml = '';
 		$symbolsXml = '';
@@ -123,7 +128,10 @@ class QmlRendererBuilder
 		foreach ($rules as $rule)
 		{
 			$name = (string)$i;
-			$label = self::EscapeAttr($variableCaption . ' - ' . $rule['label']['vvl_caption']);
+			$labelText = $prefixLabels
+				? $variableCaption . ' - ' . $rule['label']['vvl_caption']
+				: $rule['label']['vvl_caption'];
+			$label = self::EscapeAttr($labelText);
 			$filter = self::EscapeAttr($rule['filter']);
 			$key = self::GenerateKey($i);
 			$rulesXml .= '<rule key="' . $key . '" filter="' . $filter . '" label="' . $label . '" symbol="' . $name . '"/>';

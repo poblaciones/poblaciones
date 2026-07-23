@@ -48,6 +48,15 @@ module.exports = merge(baseWebpackConfig, {
 			inject: true
 		}),
 		new HtmlWebpackPlugin({
+			filename: 'packs.html',
+			template: 'packs.html',
+			metadata: {
+				maps_api: ''
+			},
+			chunks: ['appPacks'],
+			inject: true
+		}),
+		new HtmlWebpackPlugin({
 			filename: 'table.html',
 			template: 'table.html',
 			metadata: {

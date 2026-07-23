@@ -6,6 +6,7 @@ use helena\classes\App;
 use helena\classes\Session;
 use helena\services\backoffice as services;
 use helena\services\admin as adminServices;
+use helena\services\packs as packsServices;
 use helena\entities\backoffice as entities;
 use minga\framework\Params;
 use minga\framework\PublicException;
@@ -58,6 +59,28 @@ App::$app->get('/services/backoffice/GetFactories', function (Request $request) 
 
 	$datasetColumnService = new services\DatasetColumnService();
 	$ret['Column'] = $datasetColumnService->GetNewColumn();
+
+	$boundaryService = new packsServices\BoundaryService();
+	$ret['Boundary'] = $boundaryService->GetNewBoundary();
+	$ret['BoundaryVersion'] = $boundaryService->GetNewBoundaryVersion();
+
+	$clippingRegionService = new packsServices\ClippingRegionService();
+	$ret['ClippingRegion'] = $clippingRegionService->GetNewClippingRegion();
+
+	$geographyService = new packsServices\GeographyService();
+	$ret['Geography'] = $geographyService->GetNewGeography();
+
+	$gradientService = new packsServices\GradientService();
+	$ret['Gradient'] = $gradientService->GetNewGradient();
+
+	$metricGroupService = new packsServices\MetricGroupService();
+	$ret['MetricGroup'] = $metricGroupService->GetNewMetricGroup();
+
+	$metricProviderService = new packsServices\MetricProviderService();
+	$ret['MetricProvider'] = $metricProviderService->GetNewMetricProvider();
+
+	$geographyTupleService = new packsServices\GeographyTupleService();
+	$ret['GeographyTuple'] = $geographyTupleService->GetNewGeographyTuple();
 
 	return App::OrmJson($ret);
 });

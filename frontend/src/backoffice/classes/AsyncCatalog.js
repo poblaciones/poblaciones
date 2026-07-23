@@ -32,6 +32,14 @@ AsyncCatalog.prototype.Refresh = function () {
 	});
 };
 
+// Expira el caché sin pedir nada todavía: la próxima llamada a Get/GetAll/
+// GetCopy dispara un Refresh real. Pensado para usar tras un alta, baja o
+// modificación de las entidades del catálogo, para no quedar sirviendo
+// datos desactualizados.
+AsyncCatalog.prototype.Invalidate = function () {
+	this.hasData = false;
+};
+
 AsyncCatalog.prototype.resolve = function (callback, clone, type) {
 	if (type === undefined) {
 		if (clone) {

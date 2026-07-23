@@ -1,6 +1,6 @@
 <?php
 
-namespace helena\services\admin;
+namespace helena\services\packs;
 
 use helena\classes\App;
 use helena\services\common\BaseService;

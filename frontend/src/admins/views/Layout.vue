@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<TopWelcome welcomeMessage="Administración de Poblaciones" backColor='#5a8ae2' />
+		<TopWelcome welcomeMessage="Administración de Poblaciones" :offerAdminLink="true" backColor='#5a8ae2' />
 		<invoker ref="invoker">
 		</invoker>
 
@@ -27,15 +27,6 @@
 							<users ref="usersList"></users>
 						</md-tab>
 
-
-						<md-tab class="transparentTab" id="boundaries-tab" v-if="isAdminReader" to="/boundaries" :md-active="isPath('/boundaries')" md-label="Delimitaciones">
-							<boundaries></boundaries>
-						</md-tab>
-
-						<md-tab class="transparentTab" id="clipping-regions-tab" v-if="isAdminReader" to="/regions" :md-active="isPath('/regions')" md-label="Regiones">
-							<clipping-regions></clipping-regions>
-						</md-tab>
-
 						<md-tab class="transparentTab" id="reviews-tab" v-if="isAdminReader" to="/reviews" :md-active="isPath('/reviews')" md-label="Revisiones"
 										:md-template-data="{ badge: (pendingReviews ? pendingReviews : '') }">
 							<reviews @pendingUpdated="pendingUpdated"></reviews>
@@ -58,16 +49,12 @@ import Works from './Works/Works';
 import Users from './Users/Users';
 import Statistics from './Statistics/Statistics';
 import Reviews from './Reviews/Reviews';
-import ClippingRegions from './ClippingRegions/ClippingRegions';
-import Boundaries from './Boundaries/Boundaries';
 
 export default {
 	name: 'Layout',
 	components: {
 		TopWelcome,
 		Works,
-		Boundaries,
-		ClippingRegions,
 		Statistics,
 		Reviews,
 		Users

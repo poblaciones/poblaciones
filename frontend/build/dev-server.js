@@ -46,6 +46,7 @@ app.use((req, res, next) => {
 	const url = req.url;
 	if      (url === '/users'  || url === '/users/')              req.url = '/backoffice.html';
 	else if (url === '/admins' || url === '/admins/')             req.url = '/admins.html';
+	else if (url === '/packs' || url === '/packs/')								req.url = '/packs.html';
 	else if (url === '/table'  || url.startsWith('/table/'))      req.url = '/table.html';
 	else if (url === '/cr'     || url === '/cr/')                 req.url = '/credentials.html';
 	else if (url === '/map'    || url.startsWith('/map/'))        req.url = '/index.html';
