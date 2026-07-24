@@ -20,14 +20,11 @@ class GeographyService extends BaseService
 	public function GetNewGeography()
 	{
 		$entity = new entities\Geography();
-		// Columnas NOT NULL sin campo editable en el popup de alta: valor
-		// por defecto para que el alta no falle por restricción de la
-		// base. Country se completa recién al importar (igual que en
-		// ClippingRegion), con el país vigente en ese momento. AreaAvgM2 y
-		// FieldCodeSize se recalculan con su valor real al terminar el
-		// import (ver FinishGeographyImport): sin este default, el primer
-		// guardado (antes de tener ítems) fallaba por violar la
-		// restricción NOT NULL de la base.
+		// AreaAvgM2 y FieldCodeSize son NOT NULL en la base pero no tienen
+		// campo editable en el popup de alta (se recalculan con su valor
+		// real al terminar el import, ver FinishGeographyImport): sin este
+		// default, el primer guardado -antes de tener ítems- fallaría por
+		// esa restricción.
 		$entity->setMaxZoom(18);
 		$entity->setUseForClipping(true);
 		$entity->setIsTrackingLevel(false);
@@ -36,11 +33,6 @@ class GeographyService extends BaseService
 		return $entity;
 	}
 
-	// Listado plano con Level, mismo contrato que ClippingRegion. A
-	// diferencia de ClippingRegion, Geography.Parent no es (todavía) una
-	// relación gestionada por el mecanismo genérico de Reconnect en las
-	// rutas existentes de este sistema: acá sí lo es (ver la corrección en
-	// Geography.php), así que Parent llega resuelto directo desde Doctrine.
 	public function GetGeographies()
 	{
 		Profiling::BeginTimer();
@@ -54,8 +46,7 @@ class GeographyService extends BaseService
 				$roots[] = $geography;
 			}
 		}
-		// Los de nivel 0 (relevamientos) se muestran en orden descendente
-		// por su descripción (el más reciente primero, típicamente).
+		// Los relevamientos (nivel 0) se muestran con el más reciente primero.
 		usort($roots, function ($a, $b) { return strcmp($b->getCaption(), $a->getCaption()); });
 		foreach ($roots as $root)
 		{
@@ -79,9 +70,10 @@ class GeographyService extends BaseService
 		}
 	}
 
-	// Igual criterio que ControlsToValues() del WinForms: el propio nivel
-	// recalcula su MinZoom en base al padre, y sus hijos directos
-	// recalculan el suyo en base al MaxZoom que se acaba de guardar.
+	// Cambiar el MaxZoom de un nivel obliga a recalcular el MinZoom propio
+	// (en base al padre) y el de los hijos directos (en base al MaxZoom
+	// que se acaba de guardar), para que la cadena de zooms quede
+	// consistente de punta a punta.
 	public function UpdateGeography($geography)
 	{
 		Profiling::BeginTimer();
@@ -100,7 +92,14 @@ class GeographyService extends BaseService
 	private function ApplyMinZoom($geography)
 	{
 		$parent = $geography->getParent();
-		$geography->setMinZoom($parent !== null ? $parent->getMaxZoom() + 1 : 0);
+		if ($parent !== null)
+		{
+			$geography->setMinZoom($parent->getMaxZoom() + 1);
+		}
+		else
+		{
+			$geography->setMinZoom(0);
+		}
 	}
 
 	private function UpdateChildrenMinZoom($geography)
@@ -126,6 +125,9 @@ class GeographyService extends BaseService
 		return self::OK;
 	}
 
+	// Primero los descendientes (en profundidad), recién después el nodo:
+	// evita dejar ítems huérfanos con gei_parent_id apuntando a un padre
+	// ya borrado.
 	private function DeleteGeographyRecursive($geography)
 	{
 		$children = App::Orm()->findManyByProperty(entities\Geography::class, 'Parent.Id', $geography->getId());
@@ -161,9 +163,8 @@ class GeographyService extends BaseService
 		$geography->setCountry($country);
 		$this->ApplyMinZoom($geography);
 
-		// FieldCodeName/FieldCaptionName/FieldUrbanityName quedan con el
-		// nombre de columna tal como lo eligió el usuario: es lo que se
-		// muestra de solo lectura en la edición posterior.
+		// Quedan con el nombre de columna tal como lo eligió el usuario:
+		// es lo que se muestra de solo lectura en la edición posterior.
 		$geography->setFieldCodeName($mapping['code']);
 		$geography->setFieldCaptionName($mapping['caption']);
 		$geography->setFieldUrbanityName($mapping['urbanity']);
@@ -188,9 +189,9 @@ class GeographyService extends BaseService
 		return $state->ReturnState(false);
 	}
 
-	// El mapeo que llega del cliente usa el nombre de columna original
-	// (lo que el usuario vio y eligió); acá se resuelve a la clave interna
-	// (varName) que trae cada fila de data_NNNNN.json.
+	// El mapeo que llega del cliente identifica cada columna por su
+	// nombre original (lo que el usuario vio y eligió); acá se resuelve a
+	// la clave interna (varName) que trae cada fila de data_NNNNN.json.
 	private function ResolveMapping($headerFilename, $mapping)
 	{
 		$columns = GeoPackageItemsImporter::ReadColumns($headerFilename);
@@ -214,7 +215,9 @@ class GeographyService extends BaseService
 		foreach ($columns as $column)
 		{
 			if ($column['Label'] === $label)
+			{
 				return $column['VarName'];
+			}
 		}
 		throw new PublicException('No se encontró la columna \'' . $label . '\' (' . $field . ') en el archivo.');
 	}
@@ -237,8 +240,9 @@ class GeographyService extends BaseService
 	// Se corre antes de insertar nada: si algún código de padre del
 	// archivo no existe entre los ítems ya cargados de la geografía
 	// padre, aborta todo el alta (borra la entidad recién creada, sin
-	// ítems todavía) e informa cuáles códigos fallaron. Mismo criterio
-	// que ClippingRegionService::ValidateParentCodes.
+	// ítems todavía) e informa cuáles códigos fallaron. Quien sube el
+	// archivo no conoce de memoria los códigos ya cargados, así que dejar
+	// ítems huérfanos en silencio es un problema real de calidad de datos.
 	private function ValidateParentCodes($state)
 	{
 		Profiling::BeginTimer();
@@ -347,12 +351,12 @@ class GeographyService extends BaseService
 	{
 		$mapping = $state->GetMapping();
 		$codeIndex = array_search($mapping['code'], $varNames);
-		$captionIndex = ($mapping['caption'] !== null ? array_search($mapping['caption'], $varNames) : null);
-		$parentCodeIndex = ($mapping['parentCode'] !== null ? array_search($mapping['parentCode'], $varNames) : null);
+		$captionIndex = $this->FindOptionalIndex($mapping['caption'], $varNames);
+		$parentCodeIndex = $this->FindOptionalIndex($mapping['parentCode'], $varNames);
+		$urbanityIndex = $this->FindOptionalIndex($mapping['urbanity'], $varNames);
 		$populationIndex = array_search($mapping['population'], $varNames);
 		$householdsIndex = array_search($mapping['households'], $varNames);
 		$childrenIndex = array_search($mapping['children'], $varNames);
-		$urbanityIndex = ($mapping['urbanity'] !== null ? array_search($mapping['urbanity'], $varNames) : null);
 		$wktIndex = array_search('wkt', $varNames);
 		$geographyId = $state->GetTargetId();
 		$parentGeographyId = $state->GetParentId();
@@ -362,10 +366,7 @@ class GeographyService extends BaseService
 			$wkt = $row[$wktIndex];
 			// Geometry = original (sin simplificar, más allá de los 0.5m
 			// que ya aplica GpkgReader); R1..R6 son 6 simplificaciones
-			// progresivas (mismo criterio que Simplifications.FillSimplifiedGeometries
-			// del WinForms: R1 más simplificado, R6 casi sin simplificar).
-			// Ver la nota sobre calibración en
-			// GeoPackageItemsImporter::QUALITY_TOLERANCES_M.
+			// progresivas, de la más agresiva a la más fina.
 			$levels = GeoPackageItemsImporter::SimplifyToTolerances($wkt, GeoPackageItemsImporter::QUALITY_TOLERANCES_M);
 			if ($levels === null)
 			{
@@ -374,11 +375,20 @@ class GeographyService extends BaseService
 			else
 			{
 				$code = $row[$codeIndex];
-				$caption = ($captionIndex !== null ? $row[$captionIndex] : $code);
+				$caption = $code;
+				if ($captionIndex !== null)
+				{
+					$caption = $row[$captionIndex];
+				}
 				$population = intval($row[$populationIndex]);
 				$households = intval($row[$householdsIndex]);
 				$children = intval($row[$childrenIndex]);
-				$urbanity = $this->ResolveUrbanity($urbanityIndex !== null ? $row[$urbanityIndex] : null);
+				$urbanityRawValue = null;
+				if ($urbanityIndex !== null)
+				{
+					$urbanityRawValue = $row[$urbanityIndex];
+				}
+				$urbanity = $this->ResolveUrbanity($urbanityRawValue);
 
 				if ($parentCodeIndex !== null && $parentGeographyId !== null)
 				{
@@ -394,20 +404,36 @@ class GeographyService extends BaseService
 		}
 	}
 
-	// Mapeo confirmado contra la entidad concreta del WinForms
-	// (GeographyItem.cs): 0 Rural, 1 Rural disperso, 2 Urbano,
-	// 3 Urbano disperso; sin columna mapeada, 'N' (ninguno).
+	private function FindOptionalIndex($mappedLabel, $varNames)
+	{
+		if ($mappedLabel === null)
+		{
+			return null;
+		}
+		return array_search($mappedLabel, $varNames);
+	}
+
+	// 0 Rural, 1 Rural disperso, 2 Urbano, 3 Urbano disperso; sin columna
+	// mapeada, 'N' (ninguno). No es un mapeo evidente, viene confirmado
+	// contra el sistema de origen de los datos.
 	private function ResolveUrbanity($rawValue)
 	{
 		if ($rawValue === null || $rawValue === '')
+		{
 			return 'N';
+		}
 		switch (intval($rawValue))
 		{
-			case 0: return 'R';
-			case 1: return 'L';
-			case 2: return 'U';
-			case 3: return 'D';
-			default: return 'N';
+			case 0:
+				return 'R';
+			case 1:
+				return 'L';
+			case 2:
+				return 'U';
+			case 3:
+				return 'D';
+			default:
+				return 'N';
 		}
 	}
 
@@ -430,8 +456,8 @@ class GeographyService extends BaseService
 	}
 
 	// El padre se resuelve por código dentro de la geografía padre, ya
-	// existente (no es una auto-referencia entre los ítems que se están
-	// insertando ahora): mismo criterio que GeographySave.cs.
+	// existente: no es una auto-referencia entre los ítems que se están
+	// insertando ahora.
 	private function InsertItemWithParent($geographyId, $parentGeographyId, $code, $caption, $wkt, $levels,
 		$population, $households, $children, $urbanity, $parentCode)
 	{

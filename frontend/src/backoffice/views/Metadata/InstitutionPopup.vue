@@ -173,9 +173,6 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.md-field {
-  margin: 12px 0 30px !important;
-}
 
 .label-primary-color{
 	font-size: 16px;

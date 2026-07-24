@@ -1,6 +1,6 @@
 <template>
-	<div class="mp-grid">
-		<mp-search v-model="search" @search="onSearchChanged" class="mp-grid-search" />
+	<div class="mp-grid" :class="{ 'mp-grid-compact': compact }">
+		<mp-search v-model="search" @search="onSearchChanged" v-if="items && items.length > 0" class="mp-grid-search" />
 		<div class="mp-grid-multiselect-overlay" v-if="multiSelectEnabled || hasChildren">
 			<transition name="bulk-actions-fade">
 				<span v-if="isMultiSelectActive && selectedItems.length > 0" class="bulk-actions-group">
@@ -299,8 +299,27 @@ export default {
 			this.refreshRows();
 		},
 		toggleExpandAll() {
-			this.expandedIds = this.allExpanded ? {} : MpGridHelper.CollectExpandableIds(this.items, 'Items');
+			if (this.allExpanded) {
+				this.expandedIds = this.CollapseAllKeepingSingleRoot();
+			} else {
+				this.expandedIds = MpGridHelper.CollectExpandableIds(this.items, 'Items');
+			}
 			this.refreshRows();
+		},
+		// Si la raíz tiene un único elemento con hijos, colapsar 'todo'
+		// dejándolo también colapsado deja la lista con una sola fila
+		// visible, algo inútil para el usuario: en ese caso se mantiene
+		// expandida esa única raíz, y se colapsan sus hijos en cambio.
+		CollapseAllKeepingSingleRoot() {
+			if (this.items.length === 1) {
+				var onlyRoot = this.items[0];
+				if (Array.isArray(onlyRoot.Items) && onlyRoot.Items.length > 0) {
+					var ret = {};
+					ret[onlyRoot.Id] = true;
+					return ret;
+				}
+			}
+			return {};
 		},
 		toggleMultiSelect() {
 			this.multiSelectToggled = !this.multiSelectToggled;
@@ -732,7 +751,7 @@ export default {
 		deleteConfirmMessage: { type: Function, default: null },
 		// Texto a mostrar cuando no hay elementos. Si la lista está vacía
 		// por la búsqueda, se usa un mensaje propio que lo aclara.
-		emptyMessage: { type: String, default: 'No hay elementos para mostrar.' },
+		emptyMessage: { type: String, default: '' },
 		// Ancho de la columna descriptiva, cuando no declara un size propio.
 		captionWidth: { type: String, default: '400px' },
 		// Cantidad de filas por página (también el tamaño inicial del
@@ -761,6 +780,9 @@ export default {
 		// Si se define, persiste la columna y el sentido de orden elegidos
 		// entre sesiones (window.Db.GetUserSetting), bajo esta clave.
 		settingsKey: { type: String, default: null },
+		// Filas más bajas (menos padding vertical en celdas y acciones):
+		// para listados densos donde no hace falta tanto aire entre filas.
+		compact: { type: Boolean, default: false },
 	},
 	watch: {
 		items() {
@@ -979,11 +1001,30 @@ export default {
 }
 
 .mp-grid-indent-leaf {
-	margin-left: 16px;
+	margin-left: -1px;
 }
 
 .mp-grid-expand-btn {
 	margin-right: 2px;
+}
+
+// Filas más bajas: menos aire vertical en cada celda. md-table-cell trae
+// su propio padding vertical (se anula acá) y el padding real queda en
+// md-table-cell-container (más chico, no en cero, para no pegar el texto
+// entre filas); la celda de acciones queda sin padding vertical propio.
+.mp-grid-compact ::v-deep .md-table-cell {
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+.mp-grid-compact ::v-deep .md-table-cell-container {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.mp-grid-compact ::v-deep .mp-grid-actions-cell .md-table-cell-container {
+	padding-top: 0px;
+	padding-bottom: 0px;
 }
 
 .mp-grid-status-badges {

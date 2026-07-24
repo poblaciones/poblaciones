@@ -146,22 +146,6 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-/*.form-wrapper {
-  margin: 20px;
-}
 
-.md-card .md-title {
-  margin-top: 0;
-  font-size: 18px;
-  letter-spacing: 0;
-  line-height: 18px;
-}
 
-.md-card-header {
-  padding: 10px;
-}*/
-
-.md-field {
-    margin: 12px 0 30px !important;
-}
 </style>

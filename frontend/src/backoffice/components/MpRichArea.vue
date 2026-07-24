@@ -75,7 +75,7 @@ export default {
 			}
 		},
 		minHeightRows() {
-			return { 'min-height': (32 + 10 * this.rows) + 'px' };
+			return { 'max-height: 500px!important; min-height': (32 + 10 * this.rows) + 'px' };
 		},
 		isDisabled() {
 			return !this.canEdit || this.$attrs.disabled;
@@ -167,6 +167,9 @@ export default {
 
 	.ck.ck-icon {
 		font-size: 9px !important;
+	}
+	.ck-content {
+				max-height: 500px!important;
 	}
 
 	.ck-content p {

@@ -1,7 +1,7 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
 			<md-dialog-title>Equivalencia entre geografías</md-dialog-title>
 			<md-dialog-content v-if="geographyTuple">
 				<div class="md-layout md-gutter">
@@ -82,7 +82,10 @@ export default {
 			if (!geography) {
 				return '[Sin elegir]';
 			}
-			return geography.Caption + (geography.Revision ? ' (' + geography.Revision + ')' : '');
+			if (geography.Revision) {
+				return geography.Caption + ' (' + geography.Revision + ')';
+			}
+			return geography.Caption;
 		},
 		save() {
 			if (!this.geographyTuple.Geography || !this.geographyTuple.PreviousGeography) {

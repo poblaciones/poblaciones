@@ -1,7 +1,7 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
 			<md-dialog-title>Origen de indicador</md-dialog-title>
 			<md-dialog-content v-if="metricProvider">
 				<div class="md-layout md-gutter">
@@ -10,7 +10,7 @@
 														v-model="metricProvider.Caption" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-30">
-						<mp-simple-text label="Orden" type="number"
+						<mp-simple-text label="Orden" type="number" helper="Orden en que se muestran los orígenes"
 														v-model="metricProvider.Order" @enter="save" />
 					</div>
 				</div>

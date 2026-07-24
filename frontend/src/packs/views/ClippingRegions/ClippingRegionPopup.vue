@@ -2,23 +2,35 @@
   <div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="parentPicker" @selected="onParentSelected"></tree-picker-popup>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="false">
-			<md-dialog-title>Región</md-dialog-title>
+		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+			<md-dialog-title>
+				Región {{ (clippingRegion.Parent ? ' en ' + clippingRegion.Parent.Caption : '') }}
+			</md-dialog-title>
 			<md-dialog-content v-if="clippingRegion">
 				<div class="md-layout md-gutter">
-					<div class="md-layout-item md-size-50">
+					<div class="md-layout-item md-size-100">
+						<div class="separator">Descripción</div>
+					</div>
+					<div class="md-layout-item md-size-40">
 						<mp-simple-text label="Nombre" ref="inputName"
+														helper="Nombre de la entidad mapeada, ej. Provincias, Departamentos"
 														v-model="clippingRegion.Caption" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-50">
-						<mp-simple-text label="Version"
+					<div class="md-layout-item md-size-30">
+						<mp-simple-text label="Versión"
+														helper="Para distinguir ediciones de una misma región, ej. 2010, 2022"
 														v-model="clippingRegion.Version" @enter="save" />
 					</div>
-
 					<div class="md-layout-item md-size-100" v-if="isNew">
 						<div class="mp-label">Categoría padre (opcional)</div>
-						<div>
-							{{ parentCaption }}
+						<div class="helper">
+							Ej. la categoría padre de Departamentos sería Provincias. Si no elige ninguna, la
+							región queda en el nivel raíz del país.
+						</div>
+						<div class="mp-readonly-value">
+							{{
+ parentCaption
+							}}
 							<md-button class="md-icon-button" @click="pickParent">
 								<md-icon>edit</md-icon>
 								<md-tooltip md-direction="bottom">Elegir</md-tooltip>
@@ -29,65 +41,75 @@
 							</md-button>
 						</div>
 					</div>
-					<div class="md-layout-item md-size-100" v-else-if="clippingRegion.Parent">
-						<div class="mp-label">Categoría padre</div>
-						<div>{{ clippingRegion.Parent.Caption }}</div>
+
+					<div class="md-layout-item md-size-40" v-if="false">
+						<mp-simple-text label="Campo de código"
+														helper="Columna del archivo usada como código de sus ítems al importar"
+														v-model="clippingRegion.FieldCodeName" />
 					</div>
 
 					<div class="md-layout-item md-size-100" v-if="isNew">
 						<div class="mp-label">Archivo geográfico (GeoPackage)</div>
 						<geo-package-upload ref="geoPackage" :fields="importFields" />
 					</div>
-					<div class="md-layout-item md-size-40" v-else>
-						<mp-simple-text label="Nombre del campo de código" :canEdit="false"
-														v-model="clippingRegion.FieldCodeName" />
-					</div>
 
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Menor nivel de zoom"
-														v-model="clippingRegion.LabelsMinZoom" @enter="save" />
+					<div class="md-layout-item md-size-100">
+						<div class="separator">Presentación en el mapa</div>
 					</div>
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Mayor nivel de zoom"
-														v-model="clippingRegion.LabelsMaxZoom" @enter="save" />
+					<div class="md-layout-item md-size-20">
+						<mp-simple-text label="Ícono" v-model="clippingRegion.Symbol"
+														helper="Icono de FontAwesome o de MapIcons para etiquetas en el mapa"
+														@enter="save" />
 					</div>
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Símbolo"
-														v-model="clippingRegion.Symbol" @enter="save" />
-					</div>
-					<div class="md-layout-item md-size-40">
+					<div class="md-layout-item md-size-20">
 						<mp-simple-text label="Color (hexadecimal)" helper="Ej. FF7043"
 														v-model="clippingRegion.Color" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Prioridad"
-														v-model="clippingRegion.Priority" @enter="save" />
+					<div class="md-layout-item md-size-20">
+						<mp-simple-text label="Zoom mínimo" type="number"
+														helper="Mínimo para mostrar el nombre de sus ítems como etiqueta"
+														v-model="clippingRegion.LabelsMinZoom" @enter="save" />
+					</div>
+					<div class="md-layout-item md-size-20">
+						<mp-simple-text label="Zoom máximo" type="number"
+														helper="Hasta qué nivel de zoom se muestra esa etiqueta"
+														v-model="clippingRegion.LabelsMaxZoom" @enter="save" />
 					</div>
 
+					<div class="md-layout-item md-size-20">
+						<mp-simple-text label="Prioridad" type="number"
+														helper="A mayor prioridad, más precedencia al resolver superposiciones"
+														v-model="clippingRegion.Priority" @enter="save" />
+					</div>
+					<div class="md-layout-item md-size-100">
+						<div class="separator">Indexación</div>
+					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" v-model="useInSearch">
-							Incluirlo en las etiquetas y en el buscador del mapa*
+							Buscador: ofrecer este nivel al autocompletar el ingreso de regiones y en el buscador del mapa*
 						</md-switch>
 					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" v-model="clippingRegion.IndexCode">
-							Indexar los códigos de sus ítems para búsqueda*
+							Códigos: indexar los códigos (además de las descripciones) de los ítems para búsquedas*
 						</md-switch>
 					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" v-model="clippingRegion.IsCrawlerIndexer">
-							Utilizarlo al segmentar para crawlers*
+							Usarlo como criterio de segmentación hacia crawlers*
 						</md-switch>
 					</div>
-					* Si modifica estos valores debe actualizar el caché de regiones utilizando  la opción
-					Configuración &gt; Cachés &gt; Regiones y delimitaciones&gt; Actualizar en el módulo
-					de 'Logs y Mantenimiento' (sitio/logs).
+					<div class="md-layout-item md-size-100 helper">
+						* Si modifica estos valores debe actualizar el caché de regiones utilizando la opción
+						Configuración &gt; Cachés &gt; Regiones y delimitaciones &gt; Actualizar en el módulo
+						de 'Logs y Mantenimiento' (sitio/logs).
+					</div>
 				</div>
 			</md-dialog-content>
 			<stepper ref="stepper" title="Creando región" @completed="importCompleted" @closed="stepperClosed"></stepper>
 			<md-dialog-actions>
 				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">{{ isNew ? 'Crear' : 'Guardar' }}</md-button>
+				<md-button class="md-primary" @click="save">{{ saveButtonLabel }}</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -114,8 +136,17 @@ export default {
 		isNew() {
 			return !this.clippingRegion.Id;
 		},
+		saveButtonLabel() {
+			if (this.isNew) {
+				return 'Crear';
+			}
+			return 'Guardar';
+		},
 		parentCaption() {
-			return (this.clippingRegion.Parent ? this.clippingRegion.Parent.Caption : '[Ninguna, es de nivel raíz]');
+			if (this.clippingRegion.Parent) {
+				return this.clippingRegion.Parent.Caption;
+			}
+			return '[Ninguna, es de nivel raíz]';
 		},
 		// El código del padre solo hace falta mapearlo cuando la región va a
 		// tener una categoría padre: sin eso, cada ítem del archivo no tendría
@@ -144,7 +175,10 @@ export default {
 		pickParent() {
 			var loc = this;
 			window.Context.ClippingRegions.GetAll(function (data) {
-				var excludeIds = (loc.clippingRegion.Id ? [loc.clippingRegion.Id] : []);
+				var excludeIds = [];
+				if (loc.clippingRegion.Id) {
+					excludeIds = [loc.clippingRegion.Id];
+				}
 				loc.$refs.parentPicker.show('Elegir categoría padre', data, excludeIds);
 			});
 		},

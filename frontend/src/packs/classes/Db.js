@@ -1,11 +1,15 @@
 import axiosClient from '@/common/js/axiosClient';
 import ActiveMetadata from '../../backoffice/classes/ActiveMetadata';
+import DbAdminBase from '@/common/classes/DbAdminBase';
 
 export default Db;
 
 function Db() {
-
+	DbAdminBase.call(this);
 };
+
+Db.prototype = Object.create(DbAdminBase.prototype);
+Db.prototype.constructor = Db;
 
 Db.prototype.GetClippingRegions = function () {
 	return axiosClient.getPromise(window.host + '/services/packs/GetClippingRegions',
@@ -270,5 +274,3 @@ Db.prototype.LoadMetadata = function (metadata) {
 			return ret;
 		});
 };
-
-

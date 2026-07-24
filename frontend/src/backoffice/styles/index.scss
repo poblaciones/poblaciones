@@ -1,5 +1,6 @@
 //@import './variables.scss';
 //@import './mixin.scss';
+//@import './transition.scss';
 
 body {
 	min-height: unset !important;
@@ -65,24 +66,12 @@ a:hover {
   min-height: 100%
 }
 
-.app-container-no-toolbar {
-	padding: 12px 20px 12px 20px;
-	position: absolute;
-	left: 0px;
-	right: 0px;
-	overflow: auto;
-	border: 0px;
-	top: 55px;
-	height: calc(100% - 55px);
-}
-
 .app-container {
 	padding: 12px 20px 12px 20px;
 	position: absolute;
 	left: 0px;
 	right: 0px;
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: auto;
 	border: 0px;
 	top: 107px;
 	height: calc(100% - 107px);
@@ -105,64 +94,59 @@ a:hover {
   flex: unset !important;
 }
 
-.md-list-item-content {
-	font-size: .9rem !important;
-	min-height: 36px !important;
-}
-.md-list {
-		padding: 4px 0px!important;
+.md-input.md-size-lg{
+  width: 90vh;
 }
 
-.md-menu-content {
-	background-color: #fff;
-	border-radius: 6px !important;
-	padding-bottom: 2px;
-	padding-top: 2px;
+.md-table-cell-container {
+  display: flex !important;
+}
+
+.md-full-layout-item {
+  flex: 1 1 !important;
+}
+
+.md-field.md-has-textarea:not(.md-autogrow):after,
+.md-field.md-has-textarea:not(.md-autogrow):before{
+  border: 0px solid transparent !important;
+}
+
+.hidden{
+  display: none;
 }
 
 .md-icon {
 	translate: no;
 }
 
-.md-input.md-size-lg{
-  width: 90vh;
+.md-overlay{
+  z-index: 2000 !important;
 }
 
-.md-tab {
-	padding-left: -16px !important;
-	padding-right: -16px !important;
+.md-dialog{
+  z-index: 2001 !important;
 }
 
-	.md-table-cell-container {
-		display: flex !important;
-	}
+.md-remove-margins{
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
 
-	.md-full-layout-item {
-		flex: 1 1 !important;
-	}
+.md-menu-content.md-select-menu {
+  z-index: 2002 !important;
+}
 
-	.md-field.md-has-textarea:not(.md-autogrow):after,
-	.md-field.md-has-textarea:not(.md-autogrow):before {
-		border: 0px solid transparent !important;
-	}
+// Diálogos que necesitan más espacio que el ancho por defecto (listas o
+// árboles de selección, formularios con varias secciones).
+.wide-dialog.md-dialog {
+/*  width: 90vw !important;
+  max-width: 720px !important;
+*/
 
-	.hidden {
-		display: none;
-	}
+}
 
-	.md-overlay {
-		z-index: 2000 !important;
-	}
-
-	.md-dialog {
-		z-index: 2001 !important;
-	}
-
-	.md-remove-margins {
-		margin-left: 0px !important;
-		margin-right: 0px !important;
-	}
-
-	.md-menu-content.md-select-menu {
-		z-index: 2002 !important;
-	}
+// Valor de solo lectura mostrado debajo de un mp-label (ej. la categoría
+// padre elegida), para que no quede más chico que el resto de los campos.
+.mp-readonly-value {
+  font-size: 19px;
+}

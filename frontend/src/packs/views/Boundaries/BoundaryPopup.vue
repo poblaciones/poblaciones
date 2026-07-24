@@ -1,26 +1,48 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
 			<md-dialog-title>Delimitación</md-dialog-title>
 			<md-dialog-content v-if="boundary">
 				<div class="md-layout md-gutter">
-					<div class="md-layout-item md-size-80">
+					<div class="md-layout-item md-size-40">
 						<mp-simple-text label="Nombre" ref="inputName"
+														helper="Nombre a mostrar del límite"
 														v-model="boundary.Caption" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-80">
+					<div class="md-layout-item md-size-40">
 						<mp-select :list="groups"
 											 :model-key="false" label="Grupo"
+											 helper="Grupo de límites al que pertenece"
 											 v-model="boundary.Group" />
 					</div>
 					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Orden"
+						<mp-simple-text label="Orden" type="number"
+														helper="Orden en que se muestran las delimitaciones"
 														v-model="boundary.Order" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-80">
-						<mp-simple-text label="Tag" helper="Identificador para exponerlo vía WFS (todavía no implementado). Se autocompleta a partir del nombre (minúsculas, sin acentos, espacios como guion bajo), pero se puede ajustar a mano."
+					<div class="md-layout-item md-size-40">
+						<mp-simple-text label="Tag" helper="Identificador para WFS (minúsculas, sin acentos, espacios como guion bajo)"
 														v-model="boundary.Tag" @enter="save" />
+					</div>
+
+					<div class="md-layout-item md-size-100">
+						<div class="separator">Selección de ítems</div>
+					</div>
+					<div class="md-layout-item md-size-40">
+						<div class="mp-label">Ordenar ítems por</div>
+						<md-radio v-model="boundary.SortBy" class="md-primary" value="N">Nombre</md-radio>
+						<md-radio v-model="boundary.SortBy" class="md-primary" value="P">Población</md-radio>
+						<md-radio v-model="boundary.SortBy" class="md-primary" value="C">Código</md-radio>
+					</div>
+					<div class="md-layout-item md-size-40">
+						<md-switch class="md-primary" v-model="boundary.GroupByParent" style="padding-top: 18px">
+							Agrupar items al listar para selección (ej. Departamentos se agrupan por Provincia)
+						</md-switch>
+					</div>
+
+					<div class="md-layout-item md-size-100">
+						<div class="separator">Visibilidad</div>
 					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" v-model="isPublic">
@@ -29,10 +51,10 @@
 					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" v-model="boundary.IsSuggestion">
-							Recomendado
+							Recomendado (para delimitaciones sugeridas [obsoleto])
 						</md-switch>
-						<div class="md-layout-item md-size-80" style="margin-left: 52px">
-							<mp-simple-text label="Ícono para la recomendación (Material-Icon)" :canEdit="boundary.IsSuggestion"
+						<div class="md-layout-item md-size-80" style="margin-left: 52px" v-if="boundary.IsSuggestion">
+							<mp-simple-text label="Ícono para la recomendación (Material Icon)"
 															v-model="boundary.Icon" @enter="save" />
 						</div>
 					</div>

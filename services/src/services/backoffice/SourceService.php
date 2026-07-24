@@ -63,8 +63,10 @@ class SourceService extends BaseService
 				if ($this->isDraft)
 					$contact = new entities\DraftContact();
 				else
+				{
 					$contact = new entities\Contact();
-
+					// Le tiene que resolver el ID
+				}
 				$record->setContact($contact);
 				App::Orm()->save($contact);
 				App::Orm()->save($record);

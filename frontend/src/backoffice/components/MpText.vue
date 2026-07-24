@@ -2,7 +2,7 @@
 	<div :class="this.classSize" class="defaultColor" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
 		<div style="position: relative">
 			<div style="padding-right: 85px" @dblclick="StartEdit">
-				<md-field style="margin-bottom: 0px">
+				<md-field style="margin-bottom: 0px" class="mp-editable-text">
 					<label class="mp-label unselectable" :style="(this.multiline ? 'top: 6px !important' : '')">
 						{{ this.label }}
 					</label>
@@ -16,20 +16,19 @@
 											 :readonly="isDisabled || !editMode" @mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 
 					<mp-rich-area style="width: 100%; margin-top: 10px;" @mousedown="mouseDown" @mouseup="mouseUp" :maxlength="maxlength" :rows="rows" v-if="this.multiline && this.formatted" :canEdit="!isDisabled && editMode"
-												 v-model="localValue" :ref="inputId" />
+												v-model="localValue" :ref="inputId" />
 
 					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>
-				<div :style="'line-height: 1em;' + (!isDisabled && maxlength > 0 ? ' padding-right: 34px' : '')">
-					<span class="md-helper-text helper" style="bottom: -18px;"
-								:ref="helperId" v-html="ProcessTip(helper)"></span>
-					<span class="md-helper-text error" style="color: red; bottom: -18px;">{{ errorMessage }}</span>
-				</div>
+			</div>
+			<div :style="'line-height: 1em; margin-top: -5px; ' + helperPaddingRight ">
+				<span class="md-helper-text helper" style="bottom: -18px;"
+							:ref="helperId" v-html="ProcessTip(helper)"></span>
+				<span class="md-helper-text error" style="color: red; bottom: -18px;">{{ errorMessage }}</span>
 			</div>
 			<div v-if="!isDisabled" style="position: absolute; top: 0px; right: 80px;">
 				<button-panel ref="buttonPanel" style="position: absolute"
-					@onCancel="cancel" @onUpdate="Update" @onEditModeChange="ChangeEditableMode" @onFocus="focus"
-						></button-panel>
+											@onCancel="cancel" @onUpdate="Update" @onEditModeChange="ChangeEditableMode" @onFocus="focus"></button-panel>
 			</div>
 		</div>
 
@@ -192,6 +191,18 @@ export default {
 		classSize() {
 			return 'md-layout-item md-size-' + (this.size ? this.size : 100);
 		},
+		helperPaddingRight() {
+			if (this.isDisabled || this.maxlength === 0) {
+				return '';
+			}
+			if (this.maxlength > 999) {
+				return 'padding-right: 115px';
+			} else if (this.maxlength > 99) {
+				return 'padding-right: 105px';
+			} else {
+				return 'padding-right: 88px';
+			}
+		},
 		isDisabled() {
 			return !this.canEdit || this.$attrs.disabled;
 		},
@@ -309,4 +320,5 @@ export default {
 .md-layout-item .md-size-25 {
   padding: 0 !important;
 }
+
 </style>

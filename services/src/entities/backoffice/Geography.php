@@ -173,7 +173,6 @@ class Geography
 
     /**
      * @var \helena\entities\backoffice\Metadata
-     * @Exclude
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Metadata")
      * @ORM\JoinColumns({
@@ -644,20 +643,21 @@ class Geography
 
     // Propiedades calculadas, solo para la serialización (no hay setters:
     // Parent/Gradient son las relaciones reales, ver más arriba). Otros
-    // puntos del sistema por fuera de 'packs' (CodesSelection.vue en
-    // backoffice, VariableOptionsPopup.vue) todavía esperan ParentId y
-    // GradientId como enteros sueltos, tal como estaban antes de
-    // corregir esta entidad para que Parent/Gradient sean relaciones
-    // reales (ver la nota de discrepancias del ORM): esto evita romper
-    // esos consumidores sin tener que acordarse de poblarlos a mano en
-    // cada servicio que toque una Geography.
+    // puntos del sistema por fuera de 'packs' todavía esperan ParentId y
+    // GradientId como enteros sueltos: esto evita romper esos consumidores
+    // sin tener que acordarse de poblarlos a mano en cada servicio que
+    // toque una Geography.
     /**
      * @VirtualProperty
      * @SerializedName("ParentId")
      */
     public function getParentIdForCompatibility()
     {
-        return ($this->Parent !== null ? $this->Parent->getId() : null);
+        if ($this->Parent !== null)
+        {
+            return $this->Parent->getId();
+        }
+        return null;
     }
 
     /**
@@ -666,7 +666,11 @@ class Geography
      */
     public function getGradientIdForCompatibility()
     {
-        return ($this->Gradient !== null ? $this->Gradient->getId() : null);
+        if ($this->Gradient !== null)
+        {
+            return $this->Gradient->getId();
+        }
+        return null;
     }
 
     /**

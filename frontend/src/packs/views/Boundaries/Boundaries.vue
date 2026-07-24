@@ -17,11 +17,13 @@
 			</div>
 			<div class="md-layout-item md-size-100">
 				<mp-grid
+					compact
 					:items="treeList"
 					:columns="gridColumns"
 					:actions="gridActions"
 					:rowClick="onRowClick"
 					:canDelete="isAdmin"
+					:isItemDeleteEnabled="isItemDeleteEnabled"
 					entityName="delimitación"
 					:deleteConfirmMessage="deleteConfirmMessage"
 					@itemDelete="onItemDelete"
@@ -40,6 +42,12 @@ import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
 import c from '@/common/framework/color';
 import MpGridHelper from '@/backoffice/components/MpGrid.helper';
+
+// Nivel artificial que agrupa las delimitaciones por Group: no viene del
+// servidor (que sigue devolviendo Level 0 delimitación / 1 versión), se
+// arma acá nada más que para la vista jerárquica. -1 lo mantiene fuera de
+// cualquier condición existente basada en Level (===0, ===1).
+const GROUP_LEVEL = -1;
 
 	export default {
 		name: 'Boundaries',
@@ -63,29 +71,48 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		// profundidad de cada ítem (Level: 0 delimitación, 1 versión), igual
 		// que en regiones (ver ClippingRegions.vue). Cada delimitación debe
 		// venir seguida inmediatamente de sus versiones, sin intercalar otra
-		// delimitación en el medio: BuildTreeFromLevels arma la jerarquía por
-		// posición, no por una referencia explícita al padre.
+		// delimitación en el medio: BuildTreeFromLevels arma esa parte de la
+		// jerarquía por posición, no por una referencia explícita al padre.
+		// El nivel de Group, más arriba, se arma acá agrupando por
+		// Group.Id: si se edita una delimitación y cambia de grupo, el
+		// árbol se recalcula solo (es un computed sobre this.list).
 		treeList() {
-			return MpGridHelper.BuildTreeFromLevels(this.list, 'Level', 'Items');
+			var boundaryTree = MpGridHelper.BuildTreeFromLevels(this.list, 'Level', 'Items');
+			return this.groupByBoundaryGroup(boundaryTree);
 		},
 		gridColumns() {
 			var loc = this;
 			return [
 				{ property: 'Caption', caption: 'Nombre' },
-				{ property: 'Group.Caption', caption: 'Grupo' },
 				{ property: 'Geography.Caption', caption: 'Geografía' },
 				{
-					property: 'ClippingRegionsSummary', caption: 'Contenido', sortable: false, align: 'left', size: 3,
-					value: function (item) { return (item.Level === 1 ? item.ClippingRegionsSummary : ''); },
+					property: 'ClippingRegionsSummary', caption: 'Contenido',
+					sortable: false, align: 'left', size: 5,
+					value: function (item) {
+						if (item.Level === 1) {
+							return item.ClippingRegionsSummary;
+						}
+						return '';
+					},
 				},
 				{
 					property: 'IsPrivate', caption: 'Público', sortType: 'boolean',
-					value: function (item) { return (item.Level === 0 ? loc.formatBool(!item.IsPrivate) : ''); },
+					value: function (item) {
+						if (item.Level === 0) {
+							return loc.formatBool(!item.IsPrivate);
+						}
+						return '';
+					},
 					sortValue: function (item) { return !item.IsPrivate; },
 				},
 				{
 					property: 'IsSuggestion', caption: 'Recomendado',
-					value: function (item) { return (item.Level === 0 ? loc.formatBool(item.IsSuggestion) : ''); },
+					value: function (item) {
+						if (item.Level === 0) {
+							return loc.formatBool(item.IsSuggestion);
+						}
+						return '';
+					},
 				},
 			];
 		},
@@ -95,7 +122,18 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 				return [];
 			}
 			return [
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openEdition(item); } },
+				{
+					icon: 'edit',
+					caption: 'Modificar delimitación',
+					isEnabled: function (item) { return item.Level === 0; },
+					onClick: function (grid, item) { loc.openEdition(item); },
+				},
+				{
+					icon: 'edit_calendar',
+					caption: 'Modificar versión',
+					isEnabled: function (item) { return item.Level === 1; },
+					onClick: function (grid, item) { loc.openEdition(item); },
+				},
 				{
 					icon: 'add_circle_outline',
 					caption: 'Nueva versión',
@@ -131,8 +169,34 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		});
 	},
 	methods: {
+		groupByBoundaryGroup(boundaryTree) {
+			var groupNodes = [];
+			var nodesByGroupId = {};
+			for (var i = 0; i < boundaryTree.length; i++) {
+				var boundary = boundaryTree[i];
+				var groupId = boundary.Group.Id;
+				if (!nodesByGroupId[groupId]) {
+					var groupNode = {
+						Id: 'group-' + groupId,
+						Caption: boundary.Group.Caption,
+						Level: GROUP_LEVEL,
+						Items: [],
+					};
+					nodesByGroupId[groupId] = groupNode;
+					groupNodes.push(groupNode);
+				}
+				nodesByGroupId[groupId].Items.push(boundary);
+			}
+			return groupNodes;
+		},
 		formatBool(v) {
-			return (v ? 'Sí' : '-');
+			if (v) {
+				return 'Sí';
+			}
+			return '-';
+		},
+		isItemDeleteEnabled(item) {
+			return item.Level !== GROUP_LEVEL;
 		},
 		createNewBoundary() {
 			var loc = this;
@@ -162,6 +226,9 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 			});
 		},
 		onRowClick(grid, item) {
+			if (item.Level === GROUP_LEVEL) {
+				return;
+			}
 			this.openEdition(item);
 		},
 		openMetadata(item) {

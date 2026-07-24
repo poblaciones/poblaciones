@@ -5,10 +5,10 @@ namespace helena\services\packs;
 use helena\classes\StateBag;
 
 // Estado compartido por los procesos de alta con GeoPackage (ClippingRegion
-// y, en la próxima tanda, Geography): comparten el mismo pipeline (parsear
-// el .gpkg ya subido, generar niveles de simplificación, insertar los
-// ítems, resolver el padre por código). Reutiliza el 'folder' del bucket
-// ya creado por GeoPackageUpload (mismo criterio que ImportStateBag).
+// y Geography): comparten el mismo pipeline (parsear el .gpkg ya subido,
+// generar niveles de simplificación, insertar los ítems, resolver el
+// padre por código). Reutiliza el 'folder' del bucket ya creado por
+// GeoPackageUpload (mismo criterio que ImportStateBag).
 class GeoPackageStateBag extends StateBag
 {
 	public static function Create($bucketId)

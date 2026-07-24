@@ -31,8 +31,12 @@
 							<gradients></gradients>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="metric-catalogs-tab" v-if="isAdminReader" to="/metric-catalogs" :md-active="isPath('/metric-catalogs')" md-label="Indicadores">
-							<metric-catalogs></metric-catalogs>
+						<md-tab class="transparentTab" id="metric-groups-tab" v-if="isAdminReader" to="/groups" :md-active="isPath('/groups')" md-label="Categorías">
+							<metric-groups></metric-groups>
+						</md-tab>
+
+						<md-tab class="transparentTab" id="metric-providers-tab" v-if="isAdminReader" to="/providers" :md-active="isPath('/providers')" md-label="Orígenes">
+							<metric-providers></metric-providers>
 						</md-tab>
 
 						<md-tab class="transparentTab" id="geography-tuples-tab" v-if="isAdminReader" to="/geography-tuples" :md-active="isPath('/geography-tuples')" md-label="Equivalencias">
@@ -53,7 +57,8 @@ import ClippingRegions from './ClippingRegions/ClippingRegions';
 import Boundaries from './Boundaries/Boundaries';
 import Geographies from './Geographies/Geographies';
 import Gradients from './Gradients/Gradients';
-import MetricCatalogs from './MetricCatalogs/MetricCatalogs';
+import MetricGroups from './MetricGroups/MetricGroups';
+import MetricProviders from './MetricProviders/MetricProviders';
 import GeographyTuples from './GeographyTuples/GeographyTuples';
 
 export default {
@@ -64,7 +69,8 @@ export default {
 		ClippingRegions,
 		Geographies,
 		Gradients,
-		MetricCatalogs,
+		MetricGroups,
+		MetricProviders,
 		GeographyTuples,
 	},
 	mounted() {

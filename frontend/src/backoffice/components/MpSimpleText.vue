@@ -1,21 +1,21 @@
 <template>
-	<div :style="(helper.length > 0 ? 'padding-bottom: 30px;' : 'padding-bottom: 8px;')">
+	<div style="padding-bottom: 8px; padding-top: 7px">
 		<md-field>
 			<label class="mp-label" :style="(this.multiline ? 'top: 6px !important' : '')">
-				{{ this.label }}</label>
+				{{ this.label }}
+			</label>
 			<md-input :class="(isDisabled ? 'mpDisabled' : '')" md-toggle-password v-if="!this.multiline" :placeholder="(placeholder ? placeholder : '')" :type="type" :disabled="isDisabled"
 								style="font-size: 19px; width: 100%" autocomplete="off" v-model="localValue" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" :id="inputId" />
 			<md-textarea v-if="this.multiline" :disabled="isDisabled" autocomplete="off"
 									 class="mp-area" :class="(isDisabled ? 'mpDisabled' : '')" :style="minHeightRows" v-model="localValue"
 									 :maxlength="(canEdit ? maxlength : 0)" :ref="inputId" :id="inputId" />
 			<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
-			<div v-if="helper" style="line-height: 1em; position: absolute;
-					 left: 0px; width: 100%; bottom: -2px;">
-				<span class="md-helper-text helper" :style="helperPaddingRight + '; bottom: -18px;'">
-					{{ helper }}
-				</span>
-			</div>
 		</md-field>
+		<div v-if="helper" :style="'line-height: 1em; margin-top: -5px; left: 0px; width: 100%; bottom: -2px; ' + helperPaddingRight">
+			<span class="md-helper-text helper">
+				{{ helper }}
+			</span>
+		</div>
 	</div>
 </template>
 
@@ -76,7 +76,7 @@ export default {
 			} else if (this.maxlength > 99) {
 				return 'padding-right: 55px';
 			} else {
-				return 'padding-right: 34px';
+				return 'padding-right: 38px';
 			}
 		},
 		minHeightRows() {
@@ -152,5 +152,6 @@ export default {
     -webkit-text-fill-color: #999!important;
 		color: red !important;
 }
+
 
 </style>

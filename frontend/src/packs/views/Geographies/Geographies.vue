@@ -64,7 +64,12 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 			return [
 				{
 					property: 'Caption', caption: 'Nombre',
-					value: function (item) { return item.Caption + (item.Revision ? ' (' + item.Revision + ')' : ''); },
+					value: function (item) {
+						if (item.Revision) {
+							return item.Caption + ' (' + item.Revision + ')';
+						}
+						return item.Caption;
+					},
 				},
 				{ property: 'RootCaption', caption: 'Relevamiento' },
 				{ property: 'Gradient.Caption', caption: 'Gradiente' },
@@ -112,7 +117,10 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 	},
 	methods: {
 		formatBool(v) {
-			return (v ? 'Sí' : '-');
+			if (v) {
+				return 'Sí';
+			}
+			return '-';
 		},
 		createNewGeography() {
 			var loc = this;
@@ -144,7 +152,11 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		},
 		popupSaved(item) {
 			if (item.Level === undefined || item.Level === null) {
-				item.Level = (item.Parent ? item.Parent.Level + 1 : 0);
+				if (item.Parent) {
+					item.Level = item.Parent.Level + 1;
+				} else {
+					item.Level = 0;
+				}
 			}
 			arr.ReplaceByIdOrAdd(this.list, item);
 		},

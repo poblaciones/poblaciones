@@ -37,7 +37,7 @@ class Boundary
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="bou_tag", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+	 * @ORM\Column(name="bou_tag", type="string", length=100, precision=0, scale=0, nullable=true, unique=true)
 	 */
     private $Tag;
 
@@ -78,9 +78,29 @@ class Boundary
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="bou_icon", type="string", length=100, precision=0, scale=0, nullable=false, unique=false)
+	 * @ORM\Column(name="bou_icon", type="string", length=10000, precision=0, scale=0, nullable=true, unique=false)
 	 */
 	private $Icon;
+
+	/**
+	 * Criterio de orden de los ítems al mostrarlos para selección: 'N'
+	 * Nombre, 'P' Población, 'C' Código.
+	 *
+	 * @var string
+	 *
+	 * @ORM\Column(name="bou_sort_by", type="string", length=1, precision=0, scale=0, nullable=false, unique=false)
+	 */
+	private $SortBy;
+
+	/**
+	 * Si al mostrar los ítems para selección deben filtrarse por el nivel
+	 * padre de la jerarquía de clipping_region.
+	 *
+	 * @var boolean
+	 *
+	 * @ORM\Column(name="bou_gropup_by_parent", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+	 */
+	private $GroupByParent;
 
 	/**
 	 * Get id
@@ -280,5 +300,53 @@ class Boundary
     {
 			return $this->Group;
     }
+
+	/**
+	 * Set sortBy
+	 *
+	 * @param string $sortBy
+	 *
+	 * @return Boundary
+	 */
+	public function setSortBy($sortBy)
+	{
+		$this->SortBy = $sortBy;
+
+		return $this;
+	}
+
+	/**
+	 * Get sortBy
+	 *
+	 * @return string
+	 */
+	public function getSortBy()
+	{
+		return $this->SortBy;
+	}
+
+	/**
+	 * Set groupByParent
+	 *
+	 * @param boolean $groupByParent
+	 *
+	 * @return Boundary
+	 */
+	public function setGroupByParent($groupByParent)
+	{
+		$this->GroupByParent = $groupByParent;
+
+		return $this;
+	}
+
+	/**
+	 * Get groupByParent
+	 *
+	 * @return boolean
+	 */
+	public function getGroupByParent()
+	{
+		return $this->GroupByParent;
+	}
 }
 

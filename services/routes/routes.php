@@ -106,8 +106,6 @@ if (Context::Settings()->isAPIEnabled)
 	require_once('api/backup.php');
 	require_once('api/deployment.php');
 }
-if (App::Settings()->Map()->isOWSEnabled)
-	require_once('ows/wfs.php');
 
 require_once('common.php');
 

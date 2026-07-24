@@ -1,7 +1,7 @@
 <template>
   <div>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true">
-			<md-dialog-content style="min-width: 1290px!important; min-height: 800px!important; padding: 0px">
+		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true"  class="wide-dialog">
+			<md-dialog-content style="min-height: 800px !important; min-width: 920px; max-width: unset; padding: 20px">
 				<invoker ref="invoker"></invoker>
 						<Metadata :metadataProperty="metadata" :canEditProperty="true"></Metadata>
 			</md-dialog-content>

@@ -42,17 +42,55 @@ class GeographyTupleService extends BaseService
 		{
 			$id = $tuple->getId();
 			$n = Arr::IndexOfByNamedValue($counts, 'Id', $id);
-			$tuple->ChildCount = ($n !== -1 ? $counts[$n]['Count'] : 0);
+			if ($n !== -1)
+			{
+				$tuple->ChildCount = $counts[$n]['Count'];
+			}
+			else
+			{
+				$tuple->ChildCount = 0;
+			}
 		}
 		Profiling::EndTimer();
 	}
 
+	// gtu_metadata_id es NOT NULL en la base: a diferencia de Boundary,
+	// ClippingRegion y Geography (donde el metadata es opcional y se
+	// agrega después con su propia acción de grilla), acá hace falta
+	// desde el alta. Se crea automáticamente con datos mínimos, editables
+	// después con la misma acción de 'Metadatos' que el resto del ABM.
 	public function UpdateGeographyTuple($tuple)
 	{
 		Profiling::BeginTimer();
+		if ($tuple->getMetadata() === null)
+		{
+			$title = $tuple->getGeography()->getCaption() . ' - equivalencia con revisión anterior';
+			$tuple->setMetadata($this->CreateMetadata($title));
+		}
 		App::Orm()->Save($tuple);
 		Profiling::EndTimer();
 		return self::OK;
+	}
+
+	// Mismos valores iniciales que WorkService::CreateMetadata, con
+	// met_type = 'C' (metadata sin un Work asociado, confirmado contra
+	// MetadataService::GetMetadataInfo) y sin Contact (nullable acá, a
+	// diferencia de DraftMetadata).
+	private function CreateMetadata($title)
+	{
+		$metadata = new entities\Metadata();
+		$metadata->setTitle($title);
+		$metadata->setAbstract('');
+		$metadata->setStatus('B');
+		$metadata->setAuthors('');
+		$metadata->setCoverageCaption('');
+		$metadata->setLicense('{"licenseType":1,"licenseOpen":"always","licenseCommercial":1,"licenseVersion":"4.0/deed.es"}');
+		$metadata->setType('C');
+		$metadata->setLanguage('es; Español');
+		$metadata->setCreate(new \DateTime());
+		$metadata->setUpdate(new \DateTime());
+		App::Orm()->Save($metadata);
+		return $metadata;
 	}
 
 	public function DeleteGeographyTuple($tuple)
@@ -65,7 +103,7 @@ class GeographyTupleService extends BaseService
 	}
 
 	// ---------------------------------------------------------------
-	// Cálculo de equivalencias (dos pasadas, ver GeographyTupleCalculate.cs)
+	// Cálculo de equivalencias (dos pasadas)
 	// ---------------------------------------------------------------
 
 	// Se puede correr las veces que haga falta sobre la misma tupla (no
@@ -139,17 +177,19 @@ class GeographyTupleService extends BaseService
 
 	// Para cada ítem de la geografía actual, busca en la geografía
 	// anterior equivalente el que cubre más del 50% de su área. Como
-	// PreviousGeography es una partición sin superposición, a lo sumo un
-	// ítem puede cumplir esa condición: no hace falta 'tomar el primero'
-	// como sí hacía el C# original (que iteraba con corte apenas
-	// encontraba uno). is_partial se calcula solo si hay un nivel de
-	// respaldo definido (PreviousLowerGeography): sin respaldo, un match
-	// parcial es el resultado final igual, así que no tiene sentido
-	// marcarlo distinto (mismo criterio que 'if (PreviousLowerGeography ==
-	// null) partial = false;' del WinForms).
+	// PreviousGeography es una partición sin superposición, matemáticamente
+	// a lo sumo un ítem puede cumplir esa condición: no hace falta elegir
+	// "el primero" entre varios candidatos. is_partial se calcula solo si
+	// hay un nivel de respaldo definido (PreviousLowerGeography): sin
+	// respaldo, un match parcial es el resultado final igual, así que no
+	// tiene sentido marcarlo distinto.
 	private function CalculateFirstPass($tuple, $hasLower)
 	{
-		$partialExpression = $hasLower ? '(t.percent_of_current < 95 OR t.percent_of_previous < 95)' : '0';
+		$partialExpression = '0';
+		if ($hasLower)
+		{
+			$partialExpression = '(t.percent_of_current < 95 OR t.percent_of_previous < 95)';
+		}
 		$sql = "INSERT INTO geography_tuple_item
 				(gti_geography_tuple_id, gti_geography_item_id, gti_geography_previous_id, gti_geography_previous_item_id, gti_is_partial)
 				SELECT ?, t.cur_id, ?, t.prev_id, $partialExpression
@@ -178,7 +218,7 @@ class GeographyTupleService extends BaseService
 	// el nivel de respaldo, más detallado, cualquier ítem que cubra más
 	// del 50% de SU PROPIA área (no de la del ítem actual: acá sí puede
 	// haber varios matches por ítem, a diferencia de la primera pasada,
-	// por eso no hay 'break' equivalente, se insertan todos).
+	// así que se insertan todos los que cumplan).
 	private function CalculateSecondPass($tuple)
 	{
 		$sql = "INSERT INTO geography_tuple_item

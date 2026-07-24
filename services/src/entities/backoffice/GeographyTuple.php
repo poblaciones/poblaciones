@@ -58,6 +58,16 @@ class GeographyTuple
     private $PreviousLowerGeography;
 
     /**
+     * @var \helena\entities\backoffice\Metadata
+     *
+     * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Metadata")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="gtu_metadata_id", referencedColumnName="met_id", nullable=false)
+     * })
+     */
+    private $Metadata;
+
+    /**
      * Get id
      *
      * @return integer
@@ -151,5 +161,29 @@ class GeographyTuple
     public function getPreviousLowerGeography()
     {
         return $this->PreviousLowerGeography;
+    }
+
+    /**
+     * Set metadata
+     *
+     * @param \helena\entities\backoffice\Metadata $metadata
+     *
+     * @return GeographyTuple
+     */
+    public function setMetadata(\helena\entities\backoffice\Metadata $metadata = null)
+    {
+        $this->Metadata = $metadata;
+
+        return $this;
+    }
+
+    /**
+     * Get metadata
+     *
+     * @return \helena\entities\backoffice\Metadata
+     */
+    public function getMetadata()
+    {
+        return $this->Metadata;
     }
 }

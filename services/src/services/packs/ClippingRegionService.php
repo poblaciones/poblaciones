@@ -31,12 +31,9 @@ class ClippingRegionService extends BaseService
 	public function GetNewClippingRegion()
 	{
 		$entity = new entities\ClippingRegion();
-		// Priority e IndexCode sí se editan en el popup (igual que en el
-		// WinForms): quedan acá con el mismo valor inicial que tendría un
-		// ClippingRegion recién instanciado allá (0 y false). El resto son
-		// columnas NOT NULL sin campo editable en el popup de alta, así que
-		// necesitan un valor por defecto para que el alta no falle por una
-		// restricción de la base. Country se completa recién al importar
+		// Columnas NOT NULL sin campo editable en el popup de alta: valor
+		// por defecto para que el alta no falle por restricción de la
+		// base. Country se completa recién al importar
 		// (StartImportClippingRegion), con el país vigente en ese momento.
 		$entity->setPriority(0);
 		$entity->setIndexCode(false);
@@ -58,14 +55,14 @@ class ClippingRegionService extends BaseService
 		return $ret;
 	}
 
-	private function AddChildCount(& $regions)
+	private function AddChildCount(&$regions)
 	{
 		Profiling::BeginTimer();
 		$sql = "SELECT clr_id Id,
 								(SELECT COUNT(*) FROM clipping_region_item WHERE cli_clipping_region_id = clr_id) AS Count
 								FROM clipping_region";
 		$counts = App::Db()->fetchAll($sql);
-		foreach($regions as $region)
+		foreach ($regions as $region)
 		{
 			$id = $region->getId();
 			$n = Arr::IndexOfByNamedValue($counts, "Id", $id);
@@ -74,9 +71,10 @@ class ClippingRegionService extends BaseService
 		Profiling::EndTimer();
 		return $regions;
 	}
+
 	private function InsertChildrenOf($regions, &$ret, $level, $parentId)
 	{
-		foreach($regions as $region)
+		foreach ($regions as $region)
 		{
 			$parentObj = $region->getParent();
 			if (($parentObj === null && $parentId === null) || ($parentObj !== null && $parentObj->getId() === $parentId))
@@ -87,6 +85,7 @@ class ClippingRegionService extends BaseService
 			}
 		}
 	}
+
 	public function UpdateClippingRegion($clippingRegion)
 	{
 		Profiling::BeginTimer();
@@ -139,11 +138,8 @@ class ClippingRegionService extends BaseService
 	// Alta con GeoPackage
 	// ---------------------------------------------------------------
 
-	// Valida que el archivo ya subido (ver GeoPackageUpload) tenga una
-	// única capa vectorial y, si es así, deja convertido el archivo
-	// (header.json + data_NNNNN.json) y devuelve sus columnas para el
-	// mapeo. El resto del pipeline (StartImportClippingRegion) reutiliza
-	// esa conversión, no vuelve a leer el .gpkg.
+	// Si el archivo no tiene exactamente una capa vectorial, no hay nada
+	// para mapear todavía: se informa el problema en vez de dejar elegir.
 	public function VerifyGeoPackage($bucketId)
 	{
 		Profiling::BeginTimer();
@@ -193,17 +189,16 @@ class ClippingRegionService extends BaseService
 			}
 		}
 
-		// FieldCodeName queda con el nombre de columna tal como lo eligió
-		// el usuario (no el nombre interno generado): es lo que se muestra
-		// de solo lectura en la edición posterior.
+		// Queda con el nombre de columna tal como lo eligió el usuario
+		// (no el nombre interno generado): es lo que se muestra de solo
+		// lectura en la edición posterior.
 		$clippingRegion->setFieldCodeName($mapping['code']);
 		App::Orm()->Save($clippingRegion);
 
 		$parentRegion = $clippingRegion->getParent();
-		// Cuando la categoría padre es la raíz ('Países'), no se usa
-		// código de fila para vincular ítems: todos cuelgan directo del
-		// mismo ítem país (mismo criterio que ClippingRegionSave.cs:
-		// SelectedParentIsCountries() descarta iParent).
+		// Cuando la categoría padre es la raíz ('Países'), no tiene
+		// sentido pedir un código de fila para vincular ítems: todos
+		// cuelgan directo del mismo ítem país.
 		$usesFixedParent = ($parentRegion !== null && $parentRegion->getParent() === null);
 
 		$state = GeoPackageStateBag::Create($bucketId);
@@ -230,12 +225,16 @@ class ClippingRegionService extends BaseService
 	private function GetRootClippingRegion()
 	{
 		$roots = App::Orm()->findManyByProperty(entities\ClippingRegion::class, 'Parent', null);
-		return (count($roots) > 0 ? $roots[0] : null);
+		if (count($roots) > 0)
+		{
+			return $roots[0];
+		}
+		return null;
 	}
 
-	// El mapeo que llega del cliente usa el nombre de columna original
-	// (lo que el usuario vio y eligió); acá se resuelve a la clave interna
-	// (varName) que trae cada fila de data_NNNNN.json.
+	// El mapeo que llega del cliente identifica cada columna por su
+	// nombre original (lo que el usuario vio y eligió); acá se resuelve a
+	// la clave interna (varName) que trae cada fila de data_NNNNN.json.
 	private function ResolveMapping($headerFilename, $mapping)
 	{
 		$columns = GeoPackageItemsImporter::ReadColumns($headerFilename);
@@ -259,7 +258,9 @@ class ClippingRegionService extends BaseService
 		foreach ($columns as $column)
 		{
 			if ($column['Label'] === $label)
+			{
 				return $column['VarName'];
+			}
 		}
 		throw new PublicException('No se encontró la columna \'' . $label . '\' (' . $field . ') en el archivo.');
 	}
@@ -284,17 +285,13 @@ class ClippingRegionService extends BaseService
 	// padre, aborta todo el alta (borra la entidad recién creada, sin
 	// ítems todavía) e informa cuáles códigos fallaron. Quien sube el
 	// archivo no conoce de memoria los códigos ya cargados, así que dejar
-	// ítems huérfanos en silencio (como hacía antes, resolviendo el
-	// padre a NULL sin avisar) es un problema real de calidad de datos.
+	// ítems huérfanos en silencio es un problema real de calidad de datos.
 	private function ValidateParentCodes($state)
 	{
 		Profiling::BeginTimer();
 		$mapping = $state->GetMapping();
 		$parentRegionId = $state->GetParentId();
 
-		// Sin columna de padre mapeada, o con padre fijo (categoría =
-		// 'Países', ver StartImportClippingRegion), no hay código de fila
-		// que validar: todos los ítems se vinculan igual.
 		if ($mapping['parentCode'] === null || $state->GetFixedParentItemId() !== null || $parentRegionId === null)
 		{
 			$state->SetStep(self::STEP_INSERTING, 'Insertando ítems');
@@ -334,9 +331,6 @@ class ClippingRegionService extends BaseService
 		return $state->ReturnState(false);
 	}
 
-	// Todos los valores distintos que trae la columna de código de padre,
-	// recorriendo el archivo completo (es una lectura liviana: solo una
-	// columna, sin cálculo de geometría).
 	private function CollectDistinctCodes($state, $columnIndex)
 	{
 		$ret = array();
@@ -400,8 +394,8 @@ class ClippingRegionService extends BaseService
 	{
 		$mapping = $state->GetMapping();
 		$codeIndex = array_search($mapping['code'], $varNames);
-		$captionIndex = ($mapping['caption'] !== null ? array_search($mapping['caption'], $varNames) : null);
-		$parentCodeIndex = ($mapping['parentCode'] !== null ? array_search($mapping['parentCode'], $varNames) : null);
+		$captionIndex = $this->FindOptionalIndex($mapping['caption'], $varNames);
+		$parentCodeIndex = $this->FindOptionalIndex($mapping['parentCode'], $varNames);
 		$wktIndex = array_search('wkt', $varNames);
 		$clippingRegionId = $state->GetTargetId();
 		$fixedParentItemId = $state->GetFixedParentItemId();
@@ -412,11 +406,9 @@ class ClippingRegionService extends BaseService
 			$wkt = $row[$wktIndex];
 			// Geometry = original (sin simplificar, más allá de los 0.5m
 			// que ya aplica GpkgReader al leer el .gpkg); R1/R2 son
-			// simplificaciones progresivas; R3 = original otra vez (mismo
-			// criterio que ClippingRegionSave.cs: GeometryR3 = geometría
-			// completa). 'High'/'VeryHigh' son los nombres de nivel del
-			// WinForms original: ver la nota sobre calibración en
-			// GeoPackageItemsImporter::QUALITY_TOLERANCES_M.
+			// simplificaciones progresivas; R3 = la geometría original de
+			// nuevo (dos niveles de simplificación alcanzan para
+			// ClippingRegion, a diferencia de los 6 de Geography).
 			$levels = GeoPackageItemsImporter::SimplifyToTolerances($wkt, array(
 				GeoPackageItemsImporter::QUALITY_TOLERANCES_M[3],
 				GeoPackageItemsImporter::QUALITY_TOLERANCES_M[4],
@@ -428,7 +420,11 @@ class ClippingRegionService extends BaseService
 			else
 			{
 				$code = $row[$codeIndex];
-				$caption = ($captionIndex !== null ? $row[$captionIndex] : $code);
+				$caption = $code;
+				if ($captionIndex !== null)
+				{
+					$caption = $row[$captionIndex];
+				}
 				if ($fixedParentItemId !== null)
 				{
 					$this->InsertItemWithFixedParent($clippingRegionId, $fixedParentItemId, $code, $caption, $wkt, $levels);
@@ -443,6 +439,15 @@ class ClippingRegionService extends BaseService
 				}
 			}
 		}
+	}
+
+	private function FindOptionalIndex($mappedLabel, $varNames)
+	{
+		if ($mappedLabel === null)
+		{
+			return null;
+		}
+		return array_search($mappedLabel, $varNames);
 	}
 
 	private function InsertItem($clippingRegionId, $code, $caption, $wkt, $levels)
@@ -464,8 +469,8 @@ class ClippingRegionService extends BaseService
 	}
 
 	// El padre se resuelve por código dentro de la región padre, ya
-	// existente (no es una auto-referencia entre los ítems que se están
-	// insertando ahora): mismo criterio que ClippingRegionSave.cs.
+	// existente: no es una auto-referencia entre los ítems que se están
+	// insertando ahora.
 	private function InsertItemWithParent($clippingRegionId, $parentRegionId, $code, $caption, $wkt, $levels, $parentCode)
 	{
 		$sql = "INSERT INTO clipping_region_item
@@ -610,19 +615,12 @@ class ClippingRegionService extends BaseService
 		return App::Db()->lastInsertId();
 	}
 
-	// Filtro rápido por rectángulo envolvente (MBRIntersects) antes de la
-	// intersección exacta, mismo criterio que el resto del sistema para
-	// consultas espaciales. El área se calcula con GeometryAreaSphere
-	// (esférica, ya validada y en uso en GeoreferenceBase para area_m2),
-	// no con ST_Area nativo de MySQL: en MySQL 5.7 las funciones ST_*
-	// estándar operan sobre las coordenadas como un plano cartesiano, sin
-	// tratamiento geodésico, así que ST_Area(grados) no da metros
-	// cuadrados reales. ST_Intersection/ST_Intersects sí quedan tal
-	// cual (no hay una función esférica equivalente en el sistema para
-	// el recorte de geometrías en sí, solo para área): valdría la pena
-	// confirmar contra un caso real que MySQL 5.7 esté calculando la
-	// intersección exacta y no una aproximación por bounding-box antes de
-	// confiar en este resultado en producción.
+	// GeometryAreaSphere en vez de ST_Area nativo: en MySQL 5.7 las
+	// funciones ST_* estándar operan sobre las coordenadas como un plano
+	// cartesiano, sin tratamiento geodésico (confirmado con una prueba
+	// aparte, ver tools/test-intersect-functions.sql, que también
+	// confirmó que ST_Intersects/ST_Intersection sí calculan la
+	// geometría real y no una aproximación por bounding box).
 	private function CalculateIntersections($crgId, $clippingRegionId, $geographyId)
 	{
 		$sql = "INSERT INTO clipping_region_item_geography_item
@@ -639,4 +637,3 @@ class ClippingRegionService extends BaseService
 		App::Db()->execute($sql, array($crgId, $clippingRegionId, $geographyId));
 	}
 }
-

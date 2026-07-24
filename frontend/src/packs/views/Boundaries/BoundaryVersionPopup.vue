@@ -3,17 +3,17 @@
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="regionPicker" @selected="onRegionSelected"></tree-picker-popup>
 		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
-			<md-dialog-title>{{ boundaryVersion ? 'Versión de ' + boundaryVersion.Boundary.Caption : 'Versión de delimitación' }}</md-dialog-title>
+			<md-dialog-title>{{ dialogTitle }}</md-dialog-title>
 			<md-dialog-content v-if="boundaryVersion">
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-80">
-						<mp-simple-text label="Nombre" ref="inputName"
+						<mp-simple-text label="Nombre" ref="inputName" helper="Hasta 20 caracteres"
 														v-model="boundaryVersion.Caption" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-80">
 						<mp-select :list="geographies" listGrouping="RootCaption"
 											 :model-key="false" label="Geografía"
-											 helper="Nivel geográfico del que se toman los polígonos de esta versión"
+											 helper="Nivel geográfico que se anexa como contexto al descargar (ej. el departamento en que se encuentra cada ítem), no de donde se toman los polígonos"
 											 :render="formatGeography"
 											 v-model="boundaryVersion.Geography" />
 					</div>
@@ -26,7 +26,7 @@
 						<div v-if="boundaryVersion.ClippingRegions.length === 0" class="helper">
 							No hay regiones asociadas.
 						</div>
-						<md-table v-else md-card>
+						<md-table v-else v-model="boundaryVersion.ClippingRegions" md-card>
 							<md-table-row slot="md-table-row" slot-scope="{ item }">
 								<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
 								<md-table-cell md-label="Acciones" class="mpNoWrap">
@@ -65,7 +65,12 @@ export default {
     };
   },
   computed: {
-
+		dialogTitle() {
+			if (this.boundaryVersion) {
+				return 'Versión de ' + this.boundaryVersion.Boundary.Caption;
+			}
+			return 'Versión de delimitación';
+		},
   },
 	created() {
 		// Se carga una sola vez, al montar el componente (mucho antes de
@@ -96,14 +101,17 @@ export default {
 				loc.allClippingRegions = data;
 			});
 			setTimeout(() => {
-				loc.$refs.inputName.focus();
+				//loc.$refs.inputName.focus();
 			}, 100);
 		},
 		formatGeography(geography) {
 			if (!geography) {
 				return '';
 			}
-			return geography.Caption + (geography.Revision ? ' (' + geography.Revision + ')' : '');
+			if (geography.Revision) {
+				return geography.Caption + ' (' + geography.Revision + ')';
+			}
+			return geography.Caption;
 		},
 		addRegion() {
 			var associatedIds = [];
@@ -124,6 +132,10 @@ export default {
 		save() {
 			if (this.boundaryVersion.Caption.trim() === '') {
 				alert('Debe indicar un valor para \'Nombre\'.');
+				return;
+			}
+			if (this.boundaryVersion.Caption.length > 20) {
+				alert('\'Nombre\' admite hasta 20 caracteres.');
 				return;
 			}
 			var loc = this;

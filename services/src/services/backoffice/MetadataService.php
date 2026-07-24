@@ -71,7 +71,7 @@ class MetadataService extends BaseService
 		foreach ($retRelations as $relation)
 			$ret[] = $relation->getSource();
 
-		$services = new SourceService();
+		$services = new SourceService($this->isDraft);
 		$services->fixSources($ret);
 		$this->CompleteSources($ret);
 		return $ret;

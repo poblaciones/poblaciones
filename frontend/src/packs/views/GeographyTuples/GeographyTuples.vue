@@ -5,6 +5,8 @@
 
 			<geography-tuple-popup ref="editPopup" @completed="popupSaved">
 			</geography-tuple-popup>
+			<metadata-popup ref="editMetadataPopup">
+			</metadata-popup>
 
 			<div class="md-layout-item md-size-100 helper">
 				Vincula los ítems de una geografía con su equivalente en una revisión anterior (por
@@ -36,6 +38,7 @@
 <script>
 import Context from '@/backoffice/classes/Context';
 import GeographyTuplePopup from './GeographyTuplePopup.vue';
+import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
 
@@ -43,6 +46,7 @@ import f from '@/backoffice/classes/Formatter';
 		name: 'GeographyTuples',
 		components: {
 			GeographyTuplePopup,
+			MetadataPopup,
 		},
 	data() {
 		return {
@@ -67,7 +71,12 @@ import f from '@/backoffice/classes/Formatter';
 				},
 				{
 					property: 'PreviousLowerGeography.Caption', caption: 'Respaldo (nivel detallado)',
-					value: function (item) { return (item.PreviousLowerGeography ? loc.formatGeography(item.PreviousLowerGeography) : '-'); },
+					value: function (item) {
+						if (item.PreviousLowerGeography) {
+							return loc.formatGeography(item.PreviousLowerGeography);
+						}
+						return '-';
+					},
 				},
 				{ property: 'ChildCount', caption: 'Ítems calculados', sortType: 'number' },
 			];
@@ -84,6 +93,12 @@ import f from '@/backoffice/classes/Formatter';
 					caption: 'Calcular',
 					onClick: function (grid, item) { loc.calculate(item); },
 				},
+				{
+					icon: 'label',
+					caption: 'Metadatos',
+					isEnabled: function (item) { return !!item.Metadata; },
+					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
+				},
 			];
 		},
 	},
@@ -99,7 +114,10 @@ import f from '@/backoffice/classes/Formatter';
 			if (!geography) {
 				return '';
 			}
-			return geography.Caption + (geography.Revision ? ' (' + geography.Revision + ')' : '');
+			if (geography.Revision) {
+				return geography.Caption + ' (' + geography.Revision + ')';
+			}
+			return geography.Caption;
 		},
 		createNewTuple() {
 			var loc = this;
@@ -109,6 +127,9 @@ import f from '@/backoffice/classes/Formatter';
 		},
 		openEdition(item) {
 			this.$refs.editPopup.show(item);
+		},
+		openMetadata(item) {
+			this.$refs.editMetadataPopup.show(item);
 		},
 		onRowClick(grid, item) {
 			this.openEdition(item);

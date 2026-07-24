@@ -56,10 +56,10 @@ class GradientService extends BaseService
 
 	// A diferencia de ClippingRegion/Geography (capas vectoriales, leídas
 	// con GpkgReader), acá el .gpkg es una grilla de teselas: se lee
-	// directo como base SQLite (mismo criterio que GradientSave.cs del
-	// WinForms), sin pasar por el pipeline de conversión a JSON. No hay
-	// mapeo de columnas de negocio: el archivo ya tiene la estructura fija
-	// tile_column/tile_row/zoom_level/tile_data del estándar GeoPackage.
+	// directo como base SQLite, sin pasar por el pipeline de conversión a
+	// JSON. No hay mapeo de columnas de negocio: el archivo ya tiene la
+	// estructura fija tile_column/tile_row/zoom_level/tile_data del
+	// estándar GeoPackage.
 	public function VerifyGradientPackage($bucketId)
 	{
 		Profiling::BeginTimer();
@@ -114,7 +114,12 @@ class GradientService extends BaseService
 		$state->Set('table', $table);
 		$state->Set('offset', 0);
 		$state->SetTotalSteps(2);
-		$state->SetTotalSlices($totalTiles > 0 ? (int)ceil($totalTiles / self::TILES_PER_SLICE) : 0);
+		$totalSlices = 0;
+		if ($totalTiles > 0)
+		{
+			$totalSlices = (int)ceil($totalTiles / self::TILES_PER_SLICE);
+		}
+		$state->SetTotalSlices($totalSlices);
 		$state->SetStep(self::STEP_INSERTING, 'Insertando teselas');
 
 		Profiling::EndTimer();
@@ -214,13 +219,21 @@ class GradientService extends BaseService
 	{
 		$safeTable = str_replace('"', '""', $table);
 		$row = $db->query("SELECT MAX(zoom_level) AS MaxZoom FROM \"" . $safeTable . "\"")->fetchArray(SQLITE3_ASSOC);
-		return ($row !== false && $row['MaxZoom'] !== null ? intval($row['MaxZoom']) : 0);
+		if ($row === false || $row['MaxZoom'] === null)
+		{
+			return 0;
+		}
+		return intval($row['MaxZoom']);
 	}
 
 	private function CountTiles($db, $table)
 	{
 		$safeTable = str_replace('"', '""', $table);
 		$row = $db->query("SELECT COUNT(*) AS Total FROM \"" . $safeTable . "\"")->fetchArray(SQLITE3_ASSOC);
-		return ($row !== false ? intval($row['Total']) : 0);
+		if ($row === false)
+		{
+			return 0;
+		}
+		return intval($row['Total']);
 	}
 }

@@ -50,7 +50,12 @@ import arr from '@/common/framework/arr';
 				{ property: 'Caption', caption: 'Nombre' },
 				{
 					property: 'ImageType', caption: 'Tipo de imagen',
-					value: function (item) { return (item.ImageType === 'image/jpeg' ? 'JPG' : 'PNG'); },
+					value: function (item) {
+						if (item.ImageType === 'image/jpeg') {
+							return 'JPG';
+						}
+						return 'PNG';
+					},
 				},
 				{ property: 'MaxZoomLevel', caption: 'Zoom máximo', sortType: 'number' },
 			];

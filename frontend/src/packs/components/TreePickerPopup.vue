@@ -47,7 +47,12 @@ export default {
 			return [
 				{
 					property: 'Caption', caption: 'Nombre',
-					value: function (item) { return item.Caption + (loc.isExcluded(item) ? ' (ya agregada)' : ''); },
+					value: function (item) {
+						if (loc.isExcluded(item)) {
+							return item.Caption + ' (ya agregada)';
+						}
+						return item.Caption;
+					},
 				},
 			];
 		},

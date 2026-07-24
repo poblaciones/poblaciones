@@ -1,7 +1,7 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
 			<md-dialog-title>Gradiente</md-dialog-title>
 			<md-dialog-content v-if="gradient">
 				<div class="md-layout md-gutter">
@@ -28,7 +28,7 @@
 			<stepper ref="stepper" title="Creando gradiente" @completed="importCompleted" @closed="stepperClosed"></stepper>
 			<md-dialog-actions>
 				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">{{ isNew ? 'Crear' : 'Guardar' }}</md-button>
+				<md-button class="md-primary" @click="save">{{ saveButtonLabel }}</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -51,6 +51,12 @@ export default {
   computed: {
 		isNew() {
 			return !this.gradient.Id;
+		},
+		saveButtonLabel() {
+			if (this.isNew) {
+				return 'Crear';
+			}
+			return 'Guardar';
 		},
 		verifyMethod() {
 			return function (bucketId) { return window.Db.VerifyGradientPackage(bucketId); };

@@ -10,7 +10,7 @@
 							en Contenido, Atribución, Resumen, Fuentes y Adjuntos.
 						</p>` + extraHelp('MetadataSection')" />
 
-		<div class="app-container" :class="(hasCurrentWork ? '' : 'popupFrame')">
+		<div :class="(hasCurrentWork ? 'app-container' : 'popupFrame')">
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-100">
 					<md-card>
@@ -216,7 +216,7 @@ export default {
 	}
 
 	.popupFrame {
-		margin-top: -54px;
+		margin-top: -14px;
 		height: calc(100% - 53px)!important;
 				padding: 0px!important;
 	}

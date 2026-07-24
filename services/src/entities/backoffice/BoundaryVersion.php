@@ -49,7 +49,6 @@ class BoundaryVersion
 
     /**
      * @var \helena\entities\backoffice\Metadata
-     * @Exclude
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Metadata")
 		 * @ORM\JoinColumns({

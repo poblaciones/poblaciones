@@ -19,19 +19,13 @@ class BoundaryService extends BaseService
 	public function GetNewBoundary()
 	{
 		$entity = new entities\Boundary();
-		// Icon es NOT NULL en la base pero solo se completa si se marca
-		// 'Recomendado' (queda deshabilitado en el popup si no): sin este
-		// default, el alta de cualquier delimitación no recomendada
-		// fallaría por restricción de la base.
-		$entity->setIcon('');
-		// Tag también es NOT NULL. No until ningún lugar (ni el formulario
-		// del WinForms, ni su constructor C#) que lo complete: es posible
-		// que la base tenga un DEFAULT propio que el ORM no refleja, o que
-		// el campo ya no se use activamente. Con un valor vacío el alta no
-		// falla, pero si Tag tiene un propósito real (p. ej. algún tipo de
-		// identificador estable, como el mismo campo en Metric/DraftMetric),
-		// convendría confirmarlo y ajustar esto.
-		$entity->setTag('');
+		// SortBy y GroupByParent son NOT NULL en la base (con default allá,
+		// pero se fija acá también para no depender de eso). Tag e Icon son
+		// nullable: no necesitan un valor inicial. Tag además tiene índice
+		// único (identificador para WFS, ver el auto-completado en
+		// BoundaryPopup.vue, que lo genera a partir del Nombre).
+		$entity->setSortBy('N');
+		$entity->setGroupByParent(false);
 		return $entity;
 	}
 

@@ -5,14 +5,19 @@ import arr from '@/common/framework/arr';
 import date from '@/common/framework/date';
 import f from '@/backoffice/classes/Formatter';
 import Vue from 'vue';
+import DbAdminBase from '@/common/classes/DbAdminBase';
 
 export default Db;
 
 function Db() {
+	DbAdminBase.call(this);
 	this.Works = [];
 	this.WorksCache = {};
 	this.SelectedWorkIndex = -1;
 };
+
+Db.prototype = Object.create(DbAdminBase.prototype);
+Db.prototype.constructor = Db;
 
 Db.prototype.BindDataset = function (datasetId) {
 	var dataset = window.Context.CurrentWork.GetActiveDatasetById(parseInt(datasetId));
@@ -240,26 +245,6 @@ Db.prototype.LoadWorks = function () {
 	});
 };
 
-Db.prototype.SetUserSetting = function (key, value) {
-	var prevValue = window.Context.User.Settings[key];
-	if (window.Context.User.Settings[key] !== value) {
-		window.Context.User.Settings[key] = value;
-		return axiosClient.postPromise(window.host + '/services/backoffice/SetUserSetting',
-			{ k: key, v: JSON.stringify(value) }, 'guardar la preferencia de usuario').catch(error => {
-				window.Context.User.Settings[key] = prevValue;
-				throw error;
-			});
-	}
-};
-
-Db.prototype.GetUserSetting = function (key, defaultValue) {
-	var val = window.Context.User.Settings[key];
-	if (val !== undefined) {
-		return val;
-	}
-	return defaultValue;
-};
-
 Db.prototype.CreateWork = function (newWorkName, type) {
 	// Guarda en el servidor lo que esté en this.properties.Metadata
 	return axiosClient.getPromise(window.host + '/services/backoffice/CreateWork', {
@@ -286,38 +271,4 @@ Db.prototype.RenameWork = function (workId, newName) {
 			break;
 		}
 	}
-};
-
-// ---------------------------------------------------------------------
-// Cuenta del usuario autenticado.
-// ---------------------------------------------------------------------
-
-Db.prototype.GetCurrentUserAccount = function () {
-	return axiosClient.getPromise(window.host + '/services/backoffice/GetCurrentUserAccount',
-		{}, 'obtener los datos de la cuenta');
-};
-
-Db.prototype.GetCurrentUserDiskUsage = function () {
-	return axiosClient.getPromise(window.host + '/services/backoffice/GetCurrentUserDiskUsage',
-		{}, 'obtener el espacio en disco');
-};
-
-Db.prototype.UpdateUserName = function (firstname, lastname) {
-	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateCurrentUserName',
-		{ f: firstname, l: lastname }, 'actualizar el nombre').then(function () {
-			if (window.Context.User) {
-				window.Context.User.Firstname = firstname;
-				window.Context.User.Lastname = lastname;
-			}
-		});
-};
-
-Db.prototype.ChangePassword = function (current, newPassword, verification) {
-	return axiosClient.postPromise(window.host + '/services/backoffice/ChangeCurrentUserPassword',
-		{ c: current, n: newPassword, v: verification }, 'cambiar la contraseña');
-};
-
-Db.prototype.DeleteAccount = function () {
-	return axiosClient.postPromise(window.host + '/services/backoffice/DeleteCurrentUserAccount',
-		{}, 'eliminar la cuenta');
 };

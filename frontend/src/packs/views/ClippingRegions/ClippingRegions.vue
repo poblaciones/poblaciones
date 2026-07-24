@@ -136,10 +136,16 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 	},
 	methods: {
 		formatBool(v) {
-			return (v ? 'Sí' : '-');
+			if (v) {
+				return 'Sí';
+			}
+			return '-';
 		},
 		formatColor(color) {
-			var hex = (color ? '#' + color.replace('#', '') : '#e0e0e0');
+			var hex = '#e0e0e0';
+			if (color) {
+				hex = '#' + color.replace('#', '');
+			}
 			return '<span style="display:inline-block;width:16px;height:16px;border-radius:50%;'
 				+ 'background-color:' + hex + ';border:1px solid rgba(0,0,0,0.2);"></span>';
 		},
@@ -176,7 +182,11 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		},
 		popupSaved(item) {
 			if (item.Level === undefined || item.Level === null) {
-				item.Level = (item.Parent ? item.Parent.Level + 1 : 0);
+				if (item.Parent) {
+					item.Level = item.Parent.Level + 1;
+				} else {
+					item.Level = 0;
+				}
 			}
 			arr.ReplaceByIdOrAdd(this.list, item);
 			window.Context.ClippingRegions.Invalidate();
