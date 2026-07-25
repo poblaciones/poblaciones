@@ -1,5 +1,6 @@
 - Fix al restituir ruta cuando no hay variables seleccionadas y está activa la comparación (se cortaba la carga del panel de estadísticas).
-
+- Fix a coloreo de tiles que tienen información parcial de gradiente poblacional.
+-
 v5.0 (2026-07-14)
 - Delimitaciones tienen sus propios colores según región de recorte.
 - Delimitaciones se muestran abiertas y con gráficos en el panel de estadísticas.

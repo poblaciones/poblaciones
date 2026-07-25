@@ -126,8 +126,10 @@
 		margin-bottom: 8px;
 	}
 
+
 	.md-dialog {
 		min-width: 400px !important;
+		top: 52px!important;
 		border-radius: 4px !important;
 	}
 

@@ -116,6 +116,36 @@ describe('CsvWriter — columna de código', function () {
 	});
 });
 
+describe('CsvWriter — fuentes al pie', function () {
+	function pivotWithSources() {
+		var headers = [tuple({ metricName: 'Población', isTotal: true })];
+		var work1 = { Id: 1, Url: 'https://poblaciones.org/@1', Metadata: { Authors: 'INDEC', Date: '1980', ReleaseDate: null, Name: 'Censo 1980' } };
+		var sel = { Version: function () { return { Work: work1 }; } };
+		return {
+			MetricTuples: { headers: headers },
+			Metrics: [{ Selections: [sel] }],
+			Rows: [
+				[{ isHeader: true, isRegionHeader: true, Label: 'Provincias' }, headerCell('Provincias')],
+				[{ isHeader: true, Label: 'Buenos Aires' }, valueCell(100)]
+			]
+		};
+	}
+	it('agrega dos filas en blanco y una cita por Work distinto, tras los datos', function () {
+		var csv = new CsvWriter(pivotWithSources()).build();
+		var lines = csv.split('\n');
+		// encabezado + 2 filas de datos + 2 en blanco + 1 cita = 6 líneas
+		expect(lines).toHaveLength(6);
+		expect(lines[3]).toBe('');
+		expect(lines[4]).toBe('');
+		expect(lines[5]).toBe('"INDEC (1980). Censo 1980, Poblaciones. https://poblaciones.org/@1"');
+	});
+	it('sin Metrics (u otro pivot sin fuentes), no agrega nada de más', function () {
+		var csv = new CsvWriter(fakePivot()).build();
+		var lines = csv.split('\n');
+		expect(lines).toHaveLength(4);
+	});
+});
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }

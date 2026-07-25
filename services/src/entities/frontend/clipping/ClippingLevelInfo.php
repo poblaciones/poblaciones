@@ -12,7 +12,6 @@ class ClippingLevelInfo extends BaseMapModel
 	public $Metadata;
 	public $MinZoom;
 	public $MaxZoom;
-	public $PartialCoverage;
 
 	public static function GetMap()
 	{
@@ -21,8 +20,7 @@ class ClippingLevelInfo extends BaseMapModel
 			'geo_caption' => 'Name',
 			'geo_revision' => 'Revision',
 			'geo_min_zoom' => 'MinZoom',
-			'geo_max_zoom' => 'MaxZoom',
-			'geo_partial_coverage' => 'PartialCoverage');
+			'geo_max_zoom' => 'MaxZoom');
 	}
 
 }

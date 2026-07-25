@@ -48,6 +48,13 @@ class FileModel extends BaseModel
 
 	public function ReadWorkIcons($workId)
 	{
+		$ret = [];
+		// En servidores secundarios no levanta íconos para las cartografías (solo)
+		// se consulta datos, por lo que los metadatos se rearman para preparar consultas
+		if (App::Settings()->Servers()->Current()->type == 'cdns')
+		{
+			return $ret;
+		}
 		Profiling::BeginTimer();
 		$params = array($workId);
 
@@ -57,7 +64,6 @@ class FileModel extends BaseModel
 						JOIN ". $this->chunkTableName . " chunk ON file.fil_id = chu_file_id
 						WHERE wic_work_id = ? ORDER BY wic_id, fil_id, chu_id";
 		$parts = App::Db()->fetchAll($sql, $params);
-		$ret = [];
 		$lastWicId = null;
 		$item = null;
 		foreach($parts as $part)

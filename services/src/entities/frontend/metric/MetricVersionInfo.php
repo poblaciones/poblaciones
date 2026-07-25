@@ -9,7 +9,6 @@ class MetricVersionInfo extends BaseMapModel
 	public $Id;
 	public $Name;
 
-	public $PartialCoverage;
 	public $Work;
 	public $WorkId;
 	public $Levels = [];
@@ -20,7 +19,6 @@ class MetricVersionInfo extends BaseMapModel
 		return array (
 			'mvr_id' => 'Id',
 			'mvr_caption' => 'Name',
-			'mvr_partial_coverage' => 'PartialCoverage',
 			'met_title' => 'Work',
 			'wrk_id' => 'WorkId');
 	}

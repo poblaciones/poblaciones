@@ -7,7 +7,7 @@ use minga\framework\PublicException;
 use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
-use helena\services\admin as adminServices;
+use helena\services\packs as packServices;
 use minga\framework\Arr;
 use helena\classes\Session;
 
@@ -65,8 +65,10 @@ class SourceService extends BaseService
 				else
 				{
 					$contact = new entities\Contact();
-					// Le tiene que resolver el ID
+					$packServices = new packServices\MetadataService();
+					$packServices->EnsureId(entities\Contact::class, $contact);
 				}
+
 				$record->setContact($contact);
 				App::Orm()->save($contact);
 				App::Orm()->save($record);
@@ -90,10 +92,22 @@ class SourceService extends BaseService
 		if ($ins !== null)
 		{
 			if ($isGlobal) $ins->setIsGlobal(true);
+			if (!$this->isDraft)
+			{
+				$packServices = new packServices\MetadataService();
+				$packServices->EnsureId(entities\Institution::class, $ins);
+			}
 			App::Orm()->Save($ins);
 		}
 		if ($source->getContact() !== null)
+		{
+			if (!$this->isDraft)
+			{
+				$packServices = new packServices\MetadataService();
+				$packServices->EnsureId(entities\Contact::class, $source->getContact());
+			}
 			App::Orm()->Save($source->getContact());
+		}
 		if ($isGlobal) $source->setIsGlobal(true);
 
 		// Verifica permisos
@@ -101,6 +115,11 @@ class SourceService extends BaseService
 		$meta->CompleteSource($source);
 		if (!$source->getIsEditableByCurrentUser())
 			throw new PublicException('No tiene permisos para editar esta fuente.');
+		if (!$this->isDraft)
+		{
+			$packServices = new packServices\MetadataService();
+			$packServices->EnsureId(entities\Source::class, $source);
+		}
 		App::Orm()->Save($source);
 		// Si no está asociada, la agrega
 		$this->AddSourceToMetadata($workId, $metadataId, $source->getId());
@@ -134,8 +153,8 @@ class SourceService extends BaseService
 		{
 			$newSourceMetadata = new entities\MetadataSource();
 
-			$adminServices = new adminServices\MetadataService();
-			$adminServices->EnsureId(entities\MetadataSource::class, $newSourceMetadata);
+			$packServices = new packServices\MetadataService();
+			$packServices->EnsureId(entities\MetadataSource::class, $newSourceMetadata);
 		}
 		$newSourceMetadata->setOrder($max);
 		$newSourceMetadata->setSource($source);

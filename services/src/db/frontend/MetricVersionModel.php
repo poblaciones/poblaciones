@@ -35,7 +35,6 @@ class MetricVersionModel extends BaseModel
 		$params = array($versionId);
 
 		$sql = 'SELECT	mvl_id,
-										mvl_partial_coverage,
 										ST_AsText(mvl_extents) mvl_extents,
 										geography.*,
 										dataset_marker.*,

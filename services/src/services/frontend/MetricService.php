@@ -118,7 +118,6 @@ class MetricService extends BaseService
 
 		$ids = explode("\t", $item['myv_version_ids']);
 		$captions = explode("\t", $item['myv_version_captions']);
-		$coverages = explode("\t", $item['myv_version_partial_coverages']);
 		$workIds = explode("\t", $item['myv_work_ids']);
 		$works = explode("\t", $item['myv_work_captions']);
 		$levels = explode("\t", $item['myv_level']);
@@ -135,9 +134,6 @@ class MetricService extends BaseService
 			$version = new MetricVersionInfo();
 			$version->Id = intval($ids[$n]);
 			$version->Name = $captions[$n];
-			$version->PartialCoverage = $coverages[$n];
-			if ($version->PartialCoverage == '')
-				$version->PartialCoverage = null;
 			$version->Work = $works[$n];
 			$version->WorkId = intval($workIds[$n]);
 			$version->WorkIsPrivate = intval($isPrivate[$n]);

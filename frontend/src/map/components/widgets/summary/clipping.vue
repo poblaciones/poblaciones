@@ -80,9 +80,6 @@
 				</transition>
 				<ClippingSource :metadata="selectedLevel().Metadata" v-if="!Embedded.Readonly" />
 			</div>
-			<div class="coverageBox" v-if="selectedLevel().PartialCoverage">
-				Cobertura: {{ selectedLevel().PartialCoverage }}.
-			</div>
 		</div>
 	</div>
 </template>

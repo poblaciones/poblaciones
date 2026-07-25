@@ -27,7 +27,7 @@
 					<div class="w-block-head">
 						<div class="dist-head-titles">
 							<div class="ms-indicator">{{ ind.name }}</div>
-							<div class="ms-variable">{{ ind.variableSubtitle }}</div>
+							<div class="ms-variable">{{ ind.variableName }}</div>
 						</div>
 						<div class="dist-export">
 							<button class="dist-export-btn" @click.stop="toggleExportMenu(ind.metricId)" title="Exportar gráfico" aria-label="Exportar gráfico">
@@ -104,12 +104,9 @@
 									:is-percent="panel.isPercent()"
 									:is-gap="panel.isGap()"
 									:gap-in-points="panel.gapIsPoints()"
+									:value-unit="panel.valueUnit()"
 />
-								<button v-if="regionHiddenCount(panel) > 0"
-										class="dist-show-more" @click.stop="expandRegions(panel)">
-									Mostrar {{ regionHiddenCount(panel) }} más
-								</button>
-								<div v-else-if="!regionHasData(panel)" class="dist-no-data">Sin información</div>
+								<div v-else class="dist-no-data">Sin información</div>
 							</div>
 						</div>
 					</template>
@@ -165,12 +162,7 @@ import CategoryDistribution from '@/table/widgets/distributions/classes/Category
 import RegionDistribution from '@/table/widgets/distributions/classes/RegionDistribution.js';
 import CategoryPicker from '@/table/components/CategoryPicker.vue';
 import ChartExporter from '@/table/writers/ChartExporter.js';
-import percentScaleMax from '@/table/js/percentScale.js';
-
-// Tope de filas por chart de regiones antes de ofrecer "mostrar más". Con muchas
-// delimitaciones (p. ej. todos los radios) renderizar todo es costoso; se muestran
-// las primeras y una fila para expandir bajo demanda.
-var REGION_ROW_LIMIT = 40;
+import { formatCitation, uniqueWorksFromSelections } from '@/table/js/citation.js';
 
 export default {
 	name: 'DistributionWidget',
@@ -190,7 +182,6 @@ export default {
 			collapsed: cfg.collapsed ? cfg.collapsed.slice() : [],  // metricIds colapsados
 			exportMenuFor: null,   // metricId con el menú de exportar abierto, o null
 			legendWidths: {},      // metricId → ancho (px) tope de la leyenda (medido en JS)
-			expandedRegions: {},   // panel.key() → true si mostró todas las filas (más de 40)
 			// Panel flotante de selección de categorías (propio del widget).
 			catPicker: { open: false, metric: null, versionId: null, style: {} }
 		};
@@ -242,7 +233,7 @@ export default {
 		weighted(v) { this.persist({ weighted: v }); },
 		axisMode(v) { this.persist({ axisMode: v }); this.$nextTick(this._fixLegendWidth); },
 		chartMode(v) { this.persist({ chartMode: v }); },
-		stacked(v) { this.persist({ stacked: v }); this.$nextTick(this._fixLegendWidth); },
+		stacked(v) { this.persist({ stacked: v }); },
 		// Cuando deja de corresponder apilar, el switch se deshabilita; si quedara en
 		// ON producía estados raros (se apilaba sin poder desapilar). Se apaga primero.
 		anyStackable(v) { if (!v && this.stacked) this.stacked = false; },
@@ -318,10 +309,14 @@ export default {
 			} else {
 				captions = ind.panels.map(function (p) { return p.versionName(); });
 			}
+			var metric = this._pivotMetricFor(ind);
+			var works = metric ? uniqueWorksFromSelections(metric.Selections) : [];
 			var exporter = new ChartExporter(body, {
 				indicator: ind.name,
 				variable: ind.variableName || '',
-				captions: captions
+				captions: captions,
+				legend: this._exportLegendFor(ind),
+				sources: works.map(function (w) { return formatCitation(w); })
 			});
 			if (!exporter.hasCharts()) return;
 			if (format === 'png') exporter.downloadPng();
@@ -441,6 +436,15 @@ export default {
 			return first.filter(function (b) { return b.labelId != null; })
 				.map(function (b) { return { labelId: b.labelId, name: b.name, color: b.color }; });
 		},
+		// Leyenda para exportar: la misma que legendFor(), más el ítem de la línea
+		// de Total cuando corresponde (mismo criterio que el v-if del template).
+		_exportLegendFor(ind) {
+			var leg = this.legendFor(ind).slice();
+			if (this.axisMode === 'categories' && !this.stacked && ind.panels[0].showsTotalLine()) {
+				leg.push({ name: 'Total', isLine: true, color: '#607d8b' });
+			}
+			return leg;
+		},
 		totalFor(panel) {
 			var cd = this.categoryByPanel[panel.key()];
 			return cd ? cd.totalValue() : null;
@@ -460,23 +464,7 @@ export default {
 		},
 		regionRowsFor(panel) {
 			var rd = this.regionByPanel[panel.key()];
-			if (!rd) return [];
-			var all = rd.rows();
-			// Se limita a las primeras REGION_ROW_LIMIT salvo que el panel esté
-			// expandido; el resto se muestra con "mostrar más" (ver regionHiddenCount).
-			if (this.expandedRegions[panel.key()]) return all;
-			return all.length > REGION_ROW_LIMIT ? all.slice(0, REGION_ROW_LIMIT) : all;
-		},
-		// Cuántas filas quedan ocultas en este panel (0 si entran todas o ya se expandió).
-		regionHiddenCount(panel) {
-			var rd = this.regionByPanel[panel.key()];
-			if (!rd || this.expandedRegions[panel.key()]) return 0;
-			var total = rd.rows().length;
-			return total > REGION_ROW_LIMIT ? total - REGION_ROW_LIMIT : 0;
-		},
-		expandRegions(panel) {
-			// Vue 2: asignación reactiva de una clave nueva en un objeto.
-			this.$set(this.expandedRegions, panel.key(), true);
+			return rd ? rd.rows() : [];
 		},
 		regionHasData(panel) {
 			var rd = this.regionByPanel[panel.key()];
@@ -492,12 +480,10 @@ export default {
 			// largo. El máximo real evita ambos.
 			var m = rd.maxTotal();
 			if (m <= 0) return panel.isPercent() ? 100 : 1;
-			// En porcentaje, la escala se agranda en tramos (percentScaleMax) en vez de
-			// fijar siempre 100: deja el chart vacío cuando todos los valores son
-			// chicos (p. ej. col%/incidencia con máximos de 1 a 3%). Cuando las barras
-			// componen ~100% (fil%: cada región reparte su propio 100) o el máximo real
-			// excede 25 por cualquier otro motivo, percentScaleMax ya devuelve 100.
-			if (panel.isPercent()) return percentScaleMax(m);
+			// En porcentaje, cuando las barras componen ~100% (fil%: cada región
+			// reparte su propio 100), el máximo real puede excederlo apenas por
+			// redondeo. Sin este tope, el "nice ceil" saltaba de 100 a 200. Se fija 100.
+			if (panel.isPercent() && m <= 100.5) return 100;
 			var p = Math.pow(10, Math.floor(Math.log10(m)));
 			return Math.ceil(m / p) * p;
 		}
@@ -516,16 +502,8 @@ export default {
 	   así no aparece scrollbar ni queda hueco (lo resuelve el navegador, no el JS). */
 	.dist-indicator-body { padding: 10px 12px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 
-	/* flex-direction:row explícito: widgetStyles.css define .w-block-head con
-	   column (título arriba, subtítulo abajo, para otros widgets); sin declararlo
-	   acá, esa propiedad no se pisa (un override de una propiedad no borra las que
-	   la regla compartida ya fijó y esta no menciona) y el título/export quedaban
-	   apilados en vez de en la misma fila. */
-	.w-block-head { display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 6px; }
-	/* Se posiciona en el flujo normal (no absolute): así el título "sabe" que debe
-	   dejarle lugar y se achica en vez de pasar por debajo. position:relative se
-	   mantiene como referencia para su propio menú desplegable. */
-	.dist-export { position: relative; flex: 0 0 auto; }
+	.w-block-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding-right: 24px; }
+	.dist-export { position: absolute; right: 30px; flex: 0 0 auto; }
 	.dist-export-btn {
 		border: none; background: transparent; color: #90a4ae; cursor: pointer;
 		font-size: 13px; line-height: 1; padding: 4px 6px; border-radius: 4px;
@@ -540,14 +518,13 @@ export default {
 		padding: 7px 14px; font-size: 13px; color: #37474f; cursor: pointer; white-space: nowrap;
 	}
 	.dist-export-opt:hover { background: #e3f2fd; }
-	/* flex:1 (no un max-width fijo): se achica hasta el espacio real que deja el
-	   botón de exportar, en vez de asumir un ancho que puede no estar disponible. */
-	.dist-head-titles { flex: 1 1 auto; min-width: 0; }
+	.dist-head-titles { min-width: 0; max-width: 320px; }
 	.dist-head-titles .ms-indicator,
 	.dist-head-titles .ms-variable {
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		max-width: 320px;
 	}
 	.dist-collapse-btn {
 		border: none; background: transparent; color: #90a4ae; cursor: pointer;
@@ -576,15 +553,14 @@ export default {
 	.dist-indicator-body > .dist-panel { flex: 1 1 auto; min-height: 0; }
 	/* Fila de charts (uno por año). Absorbe el alto del cuerpo y reparte el ancho por
 	   contenido; el scroll, si hace falta, es horizontal. */
-	.dist-panels { display: flex; gap: 16px; align-items: flex-start; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+	.dist-panels { display: flex; gap: 16px; align-items: stretch; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 	/* Cada panel: columna con título (fijo) y chart (absorbe el resto). */
 	.dist-panel { flex: 0 0 auto; display: flex; flex-direction: column; min-height: 0; }
 	.dist-panel-title { position: relative; text-align: center; flex: 0 0 auto; }
-	/* El "sin datos" llena el panel. Los charts NO absorben el alto: el de categorías
-	   lo deriva del aspecto de su viewBox (nunca vertical) y el de regiones usa su
-	   alto natural por filas. */
-	.dist-panel > .dist-no-data { flex: 1 1 auto; min-height: 0; }
+	/* El chart de categorías (vertical) toma el alto sobrante; el de regiones
+	   (horizontal) usa su alto natural por cantidad de filas. El "sin datos" llena. */
 	.dist-panel > .cat-chart,
+	.dist-panel > .dist-no-data { flex: 1 1 auto; min-height: 0; }
 	.dist-panel > .region-bars { flex: 0 0 auto; }
 	.dist-version-name { display: inline-block; }
 	.dist-cat-trigger {
@@ -610,19 +586,6 @@ export default {
 		box-sizing: border-box;
 	}
 	.dist-cut-note { margin-top: 6px; }
-	.dist-show-more {
-		align-self: flex-start;
-		margin: 2px 0 4px 176px;
-		border: 1px solid #e0e0e0;
-		background: #fff;
-		color: #1565c0;
-		font-size: 12px;
-		padding: 3px 10px;
-		border-radius: 4px;
-		cursor: pointer;
-	}
-	.dist-show-more:hover { background: #f0f5fb; border-color: #90b4dd; }
-
 	.dist-no-data {
 		display: flex;
 		align-items: center;

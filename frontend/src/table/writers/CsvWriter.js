@@ -40,6 +40,14 @@ CsvWriter.prototype.build = function () {
 		matrix.push(cells);
 	});
 
+	// Fuentes: dos filas en blanco tras el final de los datos y, debajo, una
+	// cita por cada Work distinto entre los indicadores agregados.
+	var sources = this.sources();
+	if (sources.length) {
+		matrix.push([], []);
+		sources.forEach(function (line) { matrix.push([line]); });
+	}
+
 	return matrix.map(function (row) {
 		return row.map(function (v) { return loc._escape(v); }).join(',');
 	}).join('\n');

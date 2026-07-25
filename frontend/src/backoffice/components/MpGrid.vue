@@ -1047,6 +1047,7 @@ export default {
 	top: 6px;
 	font-size: 11px;
 	color: #ffffff;
+		right: 0px;
 	z-index: 1;
 	left: -2px;
 	text-shadow: 0 0 4px #9E9E9E;

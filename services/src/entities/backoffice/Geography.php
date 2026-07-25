@@ -94,13 +94,6 @@ class Geography
     /**
      * @var string
      *
-     * @ORM\Column(name="geo_field_code_type", type="string", length=1, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $FieldCodeType;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="geo_field_caption_name", type="string", length=50, precision=0, scale=0, nullable=true, unique=false)
      */
     private $FieldCaptionName;
@@ -132,13 +125,6 @@ class Geography
      * @ORM\Column(name="geo_gradient_luminance", type="float", precision=0, scale=0, nullable=true, unique=false)
      */
     private $GradientLuminance;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="geo_partial_coverage", type="string", length=500, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $PartialCoverage;
 
     /**
      * @var \helena\entities\backoffice\Geography
@@ -423,29 +409,6 @@ class Geography
 			return $this->FieldCodeSize;
     }
 
-    /**
-     * Set fieldCodeType
-     *
-     * @param string $fieldCodeType
-     *
-     * @return Geography
-     */
-    public function setFieldCodeType($fieldCodeType)
-    {
-        $this->FieldCodeType = $fieldCodeType;
-
-        return $this;
-    }
-
-    /**
-     * Get fieldCodeType
-     *
-     * @return string
-     */
-    public function getFieldCodeType()
-    {
-        return $this->FieldCodeType;
-    }
 
     /**
      * Set fieldCaptionName
@@ -568,29 +531,6 @@ class Geography
         return $this->GradientLuminance;
     }
 
-    /**
-     * Set partialCoverage
-     *
-     * @param string $partialCoverage
-     *
-     * @return Geography
-     */
-    public function setPartialCoverage($partialCoverage)
-    {
-        $this->PartialCoverage = $partialCoverage;
-
-        return $this;
-    }
-
-    /**
-     * Get partialCoverage
-     *
-     * @return string
-     */
-    public function getPartialCoverage()
-    {
-        return $this->PartialCoverage;
-    }
 
     /**
      * Set parent

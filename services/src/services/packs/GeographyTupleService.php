@@ -75,7 +75,11 @@ class GeographyTupleService extends BaseService
 	// Mismos valores iniciales que WorkService::CreateMetadata, con
 	// met_type = 'C' (metadata sin un Work asociado, confirmado contra
 	// MetadataService::GetMetadataInfo) y sin Contact (nullable acá, a
-	// diferencia de DraftMetadata).
+	// diferencia de DraftMetadata). met_id no es autonumérico (a
+	// diferencia de las tablas draft_*): hay que resolverlo a mano antes
+	// de guardar, con el mismo mecanismo que ya usa el resto del sistema
+	// para esta tabla (MetadataService::EnsureId, que busca el máximo
+	// múltiplo de 100 y usa el siguiente).
 	private function CreateMetadata($title)
 	{
 		$metadata = new entities\Metadata();
@@ -89,6 +93,8 @@ class GeographyTupleService extends BaseService
 		$metadata->setLanguage('es; Español');
 		$metadata->setCreate(new \DateTime());
 		$metadata->setUpdate(new \DateTime());
+		$metadataService = new MetadataService();
+		$metadataService->EnsureId(entities\Metadata::class, $metadata);
 		App::Orm()->Save($metadata);
 		return $metadata;
 	}
@@ -112,9 +118,7 @@ class GeographyTupleService extends BaseService
 	public function StartCalculateGeographyTuple($tupleId)
 	{
 		Profiling::BeginTimer();
-		$state = new StateBag();
-		$state->Initialize();
-		$state->Set('tupleId', $tupleId);
+		$state = CalculationStateBag::Create();
 		$state->SetTotalSteps(2);
 		App::Db()->delete('geography_tuple_item', array('gti_geography_tuple_id' => $tupleId));
 		$state->SetStep(self::STEP_FIRST_PASS, 'Calculando equivalencias');

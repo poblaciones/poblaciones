@@ -71,6 +71,26 @@ App::GetOrPost('/services/packs/UpdateBoundaryVersion', function (Request $reque
 	return App::Json($ret);
 });
 
+App::GetOrPost('/services/packs/MoveBoundaryUp', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$boundaryId = Params::GetIntMandatory('b');
+
+	$controller = new services\BoundaryService();
+	$ret = $controller->MoveBoundaryUp($boundaryId);
+	return App::Json($ret);
+});
+
+App::GetOrPost('/services/packs/MoveBoundaryDown', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$boundaryId = Params::GetIntMandatory('b');
+
+	$controller = new services\BoundaryService();
+	$ret = $controller->MoveBoundaryDown($boundaryId);
+	return App::Json($ret);
+});
+
 App::GetOrPost('/services/packs/DeleteBoundaryVersion', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())
 		return $app;

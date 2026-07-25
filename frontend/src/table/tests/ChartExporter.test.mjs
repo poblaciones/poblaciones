@@ -47,6 +47,47 @@ describe('ChartExporter — nombre de archivo', function () {
 	});
 });
 
+describe('ChartExporter — leyenda (helpers puros, sin DOM)', function () {
+	it('_layoutLegend: todos los ítems entran en una fila si el ancho alcanza', function () {
+		var legend = [{ name: 'A', color: '#a' }, { name: 'B', color: '#b' }];
+		var ex = new ChartExporter(fakeContainer(1), { legend: legend });
+		var rows = ex._layoutLegend(1000);
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toHaveLength(2);
+	});
+	it('_layoutLegend: pasa a una segunda fila si no entran en el ancho', function () {
+		var legend = [
+			{ name: 'Categoría bastante larga uno', color: '#a' },
+			{ name: 'Categoría bastante larga dos', color: '#b' },
+			{ name: 'Categoría bastante larga tres', color: '#c' }
+		];
+		var ex = new ChartExporter(fakeContainer(1), { legend: legend });
+		var rows = ex._layoutLegend(200);
+		expect(rows.length > 1).toBeTruthy();
+	});
+	it('_layoutLegend: sin ítems, no hay filas', function () {
+		var ex = new ChartExporter(fakeContainer(1), { legend: [] });
+		expect(ex._layoutLegend(500)).toHaveLength(0);
+	});
+	it('_estimateTextWidth: crece con la longitud del texto y el tamaño de fuente', function () {
+		var ex = new ChartExporter(fakeContainer(1), {});
+		expect(ex._estimateTextWidth('abcdefgh', 11) > ex._estimateTextWidth('abcd', 11)).toBeTruthy();
+		expect(ex._estimateTextWidth('abcd', 16) > ex._estimateTextWidth('abcd', 11)).toBeTruthy();
+	});
+});
+
+describe('ChartExporter — opciones por defecto', function () {
+	it('legend y sources quedan como arrays vacíos si no se pasan', function () {
+		var ex = new ChartExporter(fakeContainer(1), { indicator: 'X' });
+		expect(ex.legend).toHaveLength(0);
+		expect(ex.sources).toHaveLength(0);
+	});
+	it('sources descarta entradas vacías/falsy', function () {
+		var ex = new ChartExporter(fakeContainer(1), { sources: ['a', '', null, 'b'] });
+		expect(ex.sources).toHaveLength(2);
+	});
+});
+
 if (import.meta.url === 'file://' + process.argv[1]) {
 	process.exit(await report() ? 0 : 1);
 }

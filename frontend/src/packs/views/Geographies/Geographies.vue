@@ -14,7 +14,7 @@
 				</md-button>
 			</div>
 			<div class="md-layout-item md-size-100">
-				<mp-grid
+				<mp-grid compact
 					:items="treeList" :pageSize="50"
 					:columns="gridColumns"
 					:actions="gridActions"
@@ -35,7 +35,6 @@ import GeographyPopup from './GeographyPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
-import c from '@/common/framework/color';
 import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 
 	export default {
@@ -47,7 +46,6 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 	data() {
 		return {
 			list: [],
-			uniqueMetadatas: []
 			};
 	},
 	computed: {
@@ -94,10 +92,8 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 				{
 					icon: 'label',
 					caption: 'Metadatos',
-					iconStyle: function (item) { return 'color: #' + loc.resolveColor(item); },
-					badge: function (item) { return item.Metadata.Id; },
 					isEnabled: function (item) { return !!item.Metadata; },
-					onClick: function (grid, item) { loc.openMetadata(item); },
+					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
 				},
 			];
 		},
@@ -107,12 +103,6 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		this.$refs.invoker.doMessage('Obteniendo geografías', window.Db,
 				window.Db.GetGeographies).then(function(data) {
 					arr.AddRange(loc.list, data);
-					loc.list.forEach(item => {
-						const id = item?.Metadata?.Id;
-						if (id && !loc.uniqueMetadatas.includes(id)) {
-							loc.uniqueMetadatas.push(id);
-						}
-					});
 			});
 	},
 	methods: {
@@ -134,21 +124,11 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		onRowClick(grid, item) {
 			this.openEdition(item);
 		},
-		openMetadata(item) {
+		openMetadata(metadata) {
 			var loc = this;
-			this.$refs.invoker.do(window.Db, window.Db.LoadMetadata,
-				item.Metadata).then(function (activeMetadata) {
-					loc.$refs.editMetadataPopup.show(activeMetadata);
-				});
-		},
-		resolveColor(item) {
-			if (!item.Metadata) {
-				return '';
-			}
-			var palete = c.GetColorPalete();
-			var position = this.uniqueMetadatas.indexOf(item.Metadata.Id);
-			var positionTrimed = position % palete.length;
-			return palete[positionTrimed];
+			window.Db.LoadMetadata(metadata).then(function (activeMetadata) {
+				loc.$refs.editMetadataPopup.show(activeMetadata);
+			});
 		},
 		popupSaved(item) {
 			if (item.Level === undefined || item.Level === null) {

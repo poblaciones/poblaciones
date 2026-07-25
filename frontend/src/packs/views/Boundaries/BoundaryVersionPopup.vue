@@ -101,7 +101,7 @@ export default {
 				loc.allClippingRegions = data;
 			});
 			setTimeout(() => {
-				//loc.$refs.inputName.focus();
+				loc.$refs.inputName.focus();
 			}, 100);
 		},
 		formatGeography(geography) {
@@ -141,6 +141,7 @@ export default {
 			var loc = this;
 			this.$refs.invoker.doSave(window.Db, window.Db.UpdateBoundaryVersion,
 							this.boundaryVersion).then(function(data) {
+								loc.boundaryVersion.ClippingRegionsSummary = data.ClippingRegionsSummary;
 								loc.activateEdit = false;
 								loc.$emit('completed', loc.boundaryVersion);
 			});

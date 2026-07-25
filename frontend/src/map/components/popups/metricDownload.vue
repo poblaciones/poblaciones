@@ -15,10 +15,6 @@
 						<td>Dataset:</td>
 						<td>{{ level.Dataset.Name }}</td>
 					</tr>
-					<tr v-if="version.Version.PartialCoverage">
-						<td>Cobertura:</td>
-						<td>{{ version.Version.PartialCoverage }}</td>
-					</tr>
 					<tr>
 						<td>Licencia:</td>
 						<td>

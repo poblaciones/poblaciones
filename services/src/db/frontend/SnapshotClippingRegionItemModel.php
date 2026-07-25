@@ -171,8 +171,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		Profiling::BeginTimer();
 		if ($trackingLevels)
 		{
-			$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
-          C1.geo_partial_coverage, metadata.*
+			$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision, metadata.*
           FROM geography C1
 					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
 					LEFT JOIN metadata ON C1.geo_metadata_id = met_id
@@ -184,7 +183,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 		}
 		else
 		{
-			$sql = "SELECT geo_id, geo_parent_id, geo_max_zoom, geo_min_zoom, geo_caption, geo_revision, geo_partial_coverage,
+			$sql = "SELECT geo_id, geo_parent_id, geo_max_zoom, geo_min_zoom, geo_caption, geo_revision,
 							met_id, met_title, met_abstract, met_publication_date, met_license,
 							met_online_since, met_coverage_caption,
 							met_authors
@@ -220,8 +219,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 	public function CalculateLevelsFromPoint($coordinate)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
-          C1.geo_partial_coverage, metadata.*
+		$sql = "SELECT DISTINCT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision, metadata.*
           FROM geography C1
 					JOIN geography C2 ON C1.geo_caption = C2.geo_caption AND C1.geo_country_id = C2.geo_country_id
 					JOIN snapshot_geography_item ON C2.geo_id = giw_geography_id
@@ -239,8 +237,7 @@ class SnapshotClippingRegionItemModel extends BaseModel
 	public function CalculateLevelsFromEnvelope($envelope, $zoom)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision,
-          C1.geo_partial_coverage, metadata.*
+		$sql = "SELECT C1.geo_id, C1.geo_max_zoom, C1.geo_min_zoom, C1.geo_caption, C1.geo_revision, metadata.*
           FROM (SELECT min(geo_id) geo_id FROM geography
 								WHERE ? >= geo_min_zoom AND ? <= geo_max_zoom
 								GROUP BY geo_revision) C0

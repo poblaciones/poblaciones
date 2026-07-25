@@ -32,7 +32,7 @@ class BoundaryService extends BaseService
 	public function GetBoundaries()
 	{
 		Profiling::BeginTimer();
-		$boundaries = App::Orm()->findAll(entities\Boundary::class, array('Caption' => 'ASC'));
+		$boundaries = App::Orm()->findAll(entities\Boundary::class, array('Order' => 'ASC'));
 		$this->AddContent($boundaries);
 		$ret = $this->AddVersions($boundaries);
 		Profiling::EndTimer();
@@ -73,11 +73,77 @@ class BoundaryService extends BaseService
 	{
 		Profiling::BeginTimer();
 
+		if ($boundary->getId() === null && $boundary->getOrder() === null)
+		{
+			$boundary->setOrder($this->GetNextBoundaryOrder($boundary->getGroup()->getId()));
+		}
 		App::Orm()->Save($boundary);
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();
 		VersionUpdater::Increment('FAB_METRICS');
 		$cacheManager->CleanFabMetricsCache();
+
+		Profiling::EndTimer();
+		return self::OK;
+	}
+
+	private function GetNextBoundaryOrder($groupId)
+	{
+		$max = App::Db()->fetchScalarIntNullable(
+			"SELECT MAX(bou_order) FROM boundary WHERE bou_group_id = ?", array($groupId));
+		if ($max === null)
+		{
+			return 1;
+		}
+		return $max + 1;
+	}
+
+	// El usuario reordena las delimitaciones de un mismo grupo con estas
+	// dos acciones (mismo patrón que MetricsTab.vue para variables:
+	// intercambiar el Order con el vecino, no editarlo a mano), en vez de
+	// permitir ordenar la grilla por nombre.
+	public function MoveBoundaryUp($boundaryId)
+	{
+		return $this->SwapBoundaryOrder($boundaryId, true);
+	}
+
+	public function MoveBoundaryDown($boundaryId)
+	{
+		return $this->SwapBoundaryOrder($boundaryId, false);
+	}
+
+	private function SwapBoundaryOrder($boundaryId, $up)
+	{
+		Profiling::BeginTimer();
+		$boundary = App::Orm()->find(entities\Boundary::class, $boundaryId);
+
+		$comparison = '>';
+		$direction = 'ASC';
+		if ($up)
+		{
+			$comparison = '<';
+			$direction = 'DESC';
+		}
+		$sql = "SELECT bou_id FROM boundary WHERE bou_group_id = ? AND bou_order $comparison ?
+					ORDER BY bou_order $direction LIMIT 1";
+		$adjacentId = App::Db()->fetchScalarIntNullable($sql,
+			array($boundary->getGroup()->getId(), $boundary->getOrder()));
+		if ($adjacentId === null)
+		{
+			// Ya está en el extremo del grupo: no hay nada para intercambiar.
+			Profiling::EndTimer();
+			return self::OK;
+		}
+
+		$adjacent = App::Orm()->find(entities\Boundary::class, $adjacentId);
+		$currentOrder = $boundary->getOrder();
+		$boundary->setOrder($adjacent->getOrder());
+		$adjacent->setOrder($currentOrder);
+		App::Orm()->Save($boundary);
+		App::Orm()->Save($adjacent);
+
+		$cacheManager = new CacheManager();
+		$cacheManager->CleanBoundariesCache();
 
 		Profiling::EndTimer();
 		return self::OK;
@@ -127,8 +193,13 @@ class BoundaryService extends BaseService
 		VersionUpdater::Increment('FAB_METRICS');
 		$cacheManager->CleanFabMetricsCache();
 
+		$summary = App::Db()->fetchScalarNullable(
+			"SELECT GROUP_CONCAT(clr_caption SEPARATOR ', ') FROM boundary_version_clipping_region
+			 JOIN clipping_region ON clr_id = bcr_clipping_region_id
+			 WHERE bcr_boundary_version_id = ?", array($boundaryVersion->getId()));
+
 		Profiling::EndTimer();
-		return self::OK;
+		return array('ClippingRegionsSummary' => $summary);
 	}
 
 	private function SyncClippingRegions($boundaryVersionId, $clippingRegionIds)

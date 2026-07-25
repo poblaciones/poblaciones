@@ -22,13 +22,6 @@ class MetricVersionLevel
     private $Id;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="mvl_partial_coverage", type="string", length=500, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $PartialCoverage;
-
-    /**
      * @var \helena\entities\backoffice\Dataset
      *
      * @ORM\ManyToOne(targetEntity="helena\entities\backoffice\Dataset")
@@ -71,31 +64,6 @@ class MetricVersionLevel
 
         return $this;
     }
-
-    /**
-     * Set partialCoverage
-     *
-     * @param string $partialCoverage
-     *
-     * @return MetricVersionLevel
-     */
-    public function setPartialCoverage($partialCoverage)
-    {
-        $this->PartialCoverage = $partialCoverage;
-
-        return $this;
-    }
-
-    /**
-     * Get partialCoverage
-     *
-     * @return string
-     */
-    public function getPartialCoverage()
-    {
-        return $this->PartialCoverage;
-    }
-
 
     /**
      * Set dataset

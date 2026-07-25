@@ -75,7 +75,7 @@ class GeographyService extends BaseService
 		}
 
 		$gradientId = $carto['gradient_id'];
-		if (App::Settings()->Map()->UseGradients && $gradientId && !$this->AllAreDense($rows))
+		if (App::Settings()->Map()->UseGradients && $gradientId)
 		{
 			$controller = new GradientService();
 			$gradientLimit = $carto['max_zoom_level'];
@@ -83,21 +83,6 @@ class GeographyService extends BaseService
 			$data->Gradient = $controller->GetGradientTile($gradientId, $gradientLimit, $gradientType, $x, $y, $z);
 		}
 		return $data;
-	}
-
-	private function AllAreDense($rows)
-	{
-		// Considera "todos densos" a bloques con más
-		// de 750 components o menos de un 10% de
-		// bloques no densos. Para ellos, omite el gradiente.
-		if (sizeof($rows) > 750)
-			return true;
-		foreach($rows as $row)
-		{
-			if (!isset($row['dense']) || !$row['dense'])
-				return false;
-		}
-		return true;
 	}
 }
 

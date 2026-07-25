@@ -40,9 +40,7 @@ Db.prototype.DeleteBoundary = function (boundary) {
 // confirma con 'Guardar'.
 Db.prototype.UpdateBoundaryVersion = function (boundaryVersion) {
 	return axiosClient.postPromise(window.host + '/services/packs/UpdateBoundaryVersion',
-		{ v: boundaryVersion }, 'actualizar la versión').then(function () {
-
-		});
+		{ v: boundaryVersion }, 'actualizar la versión');
 };
 
 Db.prototype.DeleteBoundaryVersion = function (boundaryVersion) {
@@ -50,6 +48,19 @@ Db.prototype.DeleteBoundaryVersion = function (boundaryVersion) {
 		{ v: boundaryVersion.Id }, 'eliminar la versión').then(function () {
 
 		});
+};
+
+// Reordenar delimitaciones dentro de un mismo grupo (intercambia el Order
+// con la vecina): mismo criterio que MetricsTab.vue para variables, en vez
+// de dejar que el usuario reordene la grilla por nombre.
+Db.prototype.MoveBoundaryUp = function (boundary) {
+	return axiosClient.postPromise(window.host + '/services/packs/MoveBoundaryUp',
+		{ b: boundary.Id }, 'mover la delimitación');
+};
+
+Db.prototype.MoveBoundaryDown = function (boundary) {
+	return axiosClient.postPromise(window.host + '/services/packs/MoveBoundaryDown',
+		{ b: boundary.Id }, 'mover la delimitación');
 };
 
 Db.prototype.UpdateClippingRegion = function (region) {

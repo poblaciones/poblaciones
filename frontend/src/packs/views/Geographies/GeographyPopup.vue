@@ -72,21 +72,16 @@
 					<div class="md-layout-item md-size-100">
 						<div class="separator">Presentación en el mapa</div>
 					</div>
-					<div class="md-layout-item md-size-33">
+					<div class="md-layout-item md-size-50">
 						<mp-simple-text label="Zoom máximo" type="number" :minimum="1" :maximum="22"
 														helper="Zoom sugerido cuando haya niveles de menor desagregación disponibles"
 														v-model="geography.MaxZoom" @enter="save" />
 					</div>
-					<div class="md-layout-item md-size-33">
+					<div class="md-layout-item md-size-50">
 						<mp-select :key="'gradient-' + gradients.length" :list="gradients" :model-key="false" label="Gradiente"
 											 helper="Gradiente de color con el que suavizar la información"
 											 :allow-null="true" nullLabel="[Ninguno]"
 											 v-model="geography.Gradient" />
-					</div>
-					<div class="md-layout-item md-size-33">
-						<mp-simple-text label="Luminancia del gradiente" type="number"
-														helper="Intensidad predeterminada del gradiente"
-														v-model="geography.GradientLuminance" @enter="save" />
 					</div>
 
 					<div class="md-layout-item md-size-100">
@@ -216,6 +211,11 @@ export default {
 			if (!this.geography.Parent && (!this.geography.RootCaption || this.geography.RootCaption.trim() === '')) {
 				alert('Debe indicar un valor para \'Nombre del relevamiento\' cuando no hay categoría padre.');
 				return;
+			}
+			if (this.geography.Gradient) {
+				this.geography.GradientLuminance = 1;
+			} else {
+				this.geography.GradientLuminance = null;
 			}
 			if (this.isNew) {
 				this.saveNew();

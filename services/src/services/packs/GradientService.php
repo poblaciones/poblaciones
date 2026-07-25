@@ -108,8 +108,7 @@ class GradientService extends BaseService
 
 		App::Orm()->Save($gradient);
 
-		$state = new StateBag();
-		$state->Initialize($bucketId);
+		$state = CalculationStateBag::Create($bucketId);
 		$state->Set('gradientId', $gradient->getId());
 		$state->Set('table', $table);
 		$state->Set('offset', 0);

@@ -84,9 +84,6 @@
 							@clickDownload="clickDescargar" @clickSource="clickFuente" :small="compare" />
 			<div style="clear: both; height: 0px"></div>
 		</div>
-			<div class="coverageBox" v-if="metric.SelectedVersion().Version.PartialCoverage">
-				Cobertura: {{ metric.SelectedVersion().Version.PartialCoverage }}.
-			</div>
 			<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
 				<Ranking :metric="metric" :clipping="clipping" />
 			</div>

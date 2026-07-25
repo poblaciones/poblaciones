@@ -1,10 +1,13 @@
 <template>
   <div>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true"  class="wide-dialog">
-			<md-dialog-content style="min-height: 800px !important; min-width: 920px; max-width: unset; padding: 20px">
+		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true" class="wide-dialog">
+			<md-dialog-content class="extraWideDialog">
 				<invoker ref="invoker"></invoker>
-						<Metadata :metadataProperty="metadata" :canEditProperty="true"></Metadata>
+				<Metadata :metadataProperty="metadata" :canEditProperty="true"></Metadata>
 			</md-dialog-content>
+			<md-dialog-actions>
+				<md-button @click="activateEdit = false">Cerrar</md-button>
+			</md-dialog-actions>
 		</md-dialog>
 	</div>
 </template>
@@ -43,5 +46,13 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
+	.extraWideDialog {
+		min-height: 800px !important;
+		min-width: 920px;
+		max-width: unset;
+		padding: 00px;
+		margin-right: -20px;
+		padding-right: 20px;
+		margin-bottom: -32px;
+	}
 </style>

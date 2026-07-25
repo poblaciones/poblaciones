@@ -556,9 +556,7 @@ class ClippingRegionService extends BaseService
 	public function StartCalculateClippingRegionGeography($clippingRegionId, $geographyIds)
 	{
 		Profiling::BeginTimer();
-		$state = new StateBag();
-		$state->Initialize();
-		$state->Set('clippingRegionId', $clippingRegionId);
+		$state = CalculationStateBag::Create();
 		$state->Set('geographyIds', $geographyIds);
 		$state->SetTotalSteps(1);
 		$state->SetTotalSlices(count($geographyIds));

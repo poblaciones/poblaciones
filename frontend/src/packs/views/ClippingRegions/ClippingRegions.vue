@@ -16,7 +16,7 @@
 				</md-button>
 			</div>
 			<div class="md-layout-item md-size-100">
-				<mp-grid
+				<mp-grid compact
 					:items="treeList" :pageSize="50"
 					:columns="gridColumns"
 					:actions="gridActions"
@@ -38,7 +38,6 @@ import ClippingRegionGeographyPopup from './ClippingRegionGeographyPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
-import c from '@/common/framework/color';
 import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 
 
@@ -52,7 +51,6 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 	data() {
 		return {
 			list: [],
-			uniqueMetadatas: []
 			};
 	},
 	computed: {
@@ -83,8 +81,10 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 					property: 'Color', caption: 'Color', html: true, sortable: false, size: 1,
 					value: function (item) { return loc.formatColor(item.Color); },
 				},
-				{ property: 'FieldCodeName', caption: 'Código' },
-				{ property: 'Symbol', caption: 'Ícono' },
+				{
+					property: 'Symbol', caption: 'Ícono', type: 'status', sortable: false,
+					icon: function (item) { return loc.formatIcon(item.Symbol); },
+				},
 				{ property: 'ChildCount', caption: 'Ítems', sortType: 'number' },
 				{ property: 'Priority', caption: 'Prioridad', sortType: 'number' },
 				{
@@ -96,6 +96,11 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 					property: 'IsCrawlerIndexer', caption: 'Segmenta',
 					value: function (item) { return loc.formatBool(item.IsCrawlerIndexer); },
 				},
+				{
+					property: 'IndexCode', caption: 'Indexa', sortType: 'boolean',
+					value: function (item) { return loc.formatBool(item.IndexCode); },
+				},
+				{ property: 'FieldCodeName', caption: 'Códigos' },
 			];
 		},
 		gridActions() {
@@ -113,10 +118,8 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 				{
 					icon: 'label',
 					caption: 'Metadatos',
-					iconStyle: function (item) { return 'transform: scaleX(2); color: #' + loc.resolveColor(item); },
-					badge: function (item) { return item.Metadata.Id; },
 					isEnabled: function (item) { return !!item.Metadata; },
-					onClick: function (grid, item) { loc.openMetadata(item); },
+					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
 				},
 			];
 		},
@@ -126,12 +129,6 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		this.$refs.invoker.doMessage('Obteniendo regiones', window.Db,
 				window.Db.GetClippingRegions).then(function(data) {
 					arr.AddRange(loc.list, data);
-					loc.list.forEach(item => {
-						const id = item?.Metadata?.Id;
-						if (id && !loc.uniqueMetadatas.includes(id)) {
-							loc.uniqueMetadatas.push(id);
-						}
-					});
 			});
 	},
 	methods: {
@@ -149,6 +146,18 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 			return '<span style="display:inline-block;width:16px;height:16px;border-radius:50%;'
 				+ 'background-color:' + hex + ';border:1px solid rgba(0,0,0,0.2);"></span>';
 		},
+		// El símbolo se guarda como clase FontAwesome sin el prefijo (ej.
+		// 'fa-chart-bar'), pero MpGrid solo lo reconoce como ícono si
+		// empieza con 'fas ' o 'fa ' (ver MpGridHelper.IsFontAwesome).
+		formatIcon(symbol) {
+			if (!symbol) {
+				return null;
+			}
+			if (symbol.indexOf('fas ') === 0 || symbol.indexOf('fa ') === 0) {
+				return symbol;
+			}
+			return 'fas ' + symbol;
+		},
 		createNewClippingRegion() {
 			var loc = this;
 			window.Context.Factory.GetCopy('ClippingRegion', function(data) {
@@ -164,21 +173,11 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		onRowClick(grid, item) {
 			this.openEdition(item);
 		},
-		openMetadata(item) {
+		openMetadata(metadata) {
 			var loc = this;
-			this.$refs.invoker.do(window.Db, window.Db.LoadMetadata,
-				item.Metadata).then(function (activeMetadata) {
-					loc.$refs.editMetadataPopup.show(activeMetadata);
-				});
-		},
-		resolveColor(item) {
-			if (!item.Metadata) {
-				return '';
-			}
-			var palete = c.GetColorPalete();
-			var position = this.uniqueMetadatas.indexOf(item.Metadata.Id);
-			var positionTrimed = position % palete.length;
-			return palete[positionTrimed];
+			window.Db.LoadMetadata(metadata).then(function (activeMetadata) {
+				loc.$refs.editMetadataPopup.show(activeMetadata);
+			});
 		},
 		popupSaved(item) {
 			if (item.Level === undefined || item.Level === null) {

@@ -1,4 +1,5 @@
 import { displayCell, valueHeader } from '@/table/classes/pivotValue.js';
+import { formatCitation, uniqueWorksFromSelections } from '@/table/js/citation.js';
 
 /**
  * TabularWriter — base de los exportadores de la tabla.
@@ -21,6 +22,25 @@ function TabularWriter(pivot) {
 
 TabularWriter.prototype.hasContent = function () {
 	return !!(this.pivot && this.pivot.Rows && this.pivot.Rows.length);
+};
+
+// Cita de cada fuente (Work) distinta entre TODOS los indicadores activos en
+// la pivot (no solo uno): tanto si la exportación sale de la grilla principal
+// como si el interés está puesto en un análisis de Relaciones, ambos trabajan
+// sobre los mismos indicadores agregados, así que las fuentes a listar son
+// las mismas en cualquier caso.
+TabularWriter.prototype.sources = function () {
+	var metrics = (this.pivot && this.pivot.Metrics) ? this.pivot.Metrics : [];
+	var seen = {};
+	var works = [];
+	metrics.forEach(function (m) {
+		uniqueWorksFromSelections(m.Selections || []).forEach(function (w) {
+			if (seen[w.Id]) return;
+			seen[w.Id] = true;
+			works.push(w);
+		});
+	});
+	return works.map(function (w) { return formatCitation(w); }).filter(Boolean);
 };
 
 // Encabezado de una tupla descompuesto en sus partes. 'variable' incluye el modo

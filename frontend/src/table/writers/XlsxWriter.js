@@ -56,7 +56,8 @@ XlsxWriter.prototype.download = function (filename) {
 	for (var c = firstValueCol; c <= ncols; c++) ws.getColumn(c).width = VALUE_COL_WIDTH;
 
 	this._writeHeader(ws, grid, ncols, leadCols);
-	this._writeRows(ws, grid, leadCols);
+	var lastRow = this._writeRows(ws, grid, leadCols);
+	this._writeSources(ws, lastRow);
 
 	ws.views = [{ state: 'frozen', xSplit: leadCols, ySplit: 4 }];
 
@@ -115,9 +116,11 @@ XlsxWriter.prototype._writeHeader = function (ws, grid, ncols, leadCols) {
 // Filas de datos: código (si hay) y label a la izquierda; valores centrados.
 XlsxWriter.prototype._writeRows = function (ws, grid, leadCols) {
 	var ncols = grid.columns.length + leadCols;
+	var lastRow = ws.rowCount;
 	grid.rows.forEach(function (meta) {
 		var rowCells = grid.hasCode ? [meta.code].concat(meta.cells) : meta.cells;
 		var added = ws.addRow(rowCells);
+		lastRow = added.number;
 		if (grid.hasCode) {
 			var codeCell = added.getCell(1);
 			codeCell.font = { size: 11, bold: meta.bold };
@@ -131,6 +134,34 @@ XlsxWriter.prototype._writeRows = function (ws, grid, leadCols) {
 			vc.font = { size: 11, bold: meta.bold };
 			vc.alignment = { horizontal: 'center' };
 		}
+	});
+	return lastRow;
+};
+
+// Fuentes: dos filas en blanco tras el final de los datos y, debajo, una cita
+// por cada Work distinto entre los indicadores agregados (misma fuente que
+// usan CsvWriter y la exportación de gráficos: TabularWriter.sources()).
+XlsxWriter.prototype._writeSources = function (ws, lastRow) {
+	var sources = this.sources();
+	if (!sources.length) return;
+	var row = lastRow + 3;   // 2 filas en blanco (lastRow+1, lastRow+2) antes de la primera cita
+	var isFirst = false;
+	if (sources.length > 1) {
+		var cell = ws.getCell(row, 1);
+		cell.value = "Fuentes:";
+		cell.font = { size: 9, italic: true, color: { argb: 'FF78909C' } };
+		row++;
+	}
+	var fistLine = true;
+	sources.forEach(function (line) {
+		var cell = ws.getCell(row, 1);
+		cell.value = line;
+		if (sources.length == 1 && firstLine) {
+			cell.value = "Fuente: " + cell.value;
+			fistLine = false;
+		}
+		cell.font = { size: 9, italic: true, color: { argb: 'FF78909C' } };
+		row++;
 	});
 };
 

@@ -23,13 +23,6 @@ class DraftMetricVersionLevel
     private $Id;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="mvl_partial_coverage", type="string", length=500, precision=0, scale=0, nullable=true, unique=false)
-     */
-    private $PartialCoverage;
-
-    /**
      * @var \helena\entities\backoffice\DraftDataset
      *
      * @Exclude
@@ -72,30 +65,6 @@ class DraftMetricVersionLevel
         $this->Id = $id;
 
         return $this;
-    }
-
-    /**
-     * Set partialCoverage
-     *
-     * @param string $partialCoverage
-     *
-     * @return DraftMetricVersionLevel
-     */
-    public function setPartialCoverage($partialCoverage)
-    {
-        $this->PartialCoverage = $partialCoverage;
-
-        return $this;
-    }
-
-    /**
-     * Get partialCoverage
-     *
-     * @return string
-     */
-    public function getPartialCoverage()
-    {
-        return $this->PartialCoverage;
     }
 
     /**

@@ -83,7 +83,11 @@ const GROUP_LEVEL = -1;
 		gridColumns() {
 			var loc = this;
 			return [
-				{ property: 'Caption', caption: 'Nombre' },
+				// No ordenable: las delimitaciones ya vienen en su Order real
+				// (se reordenan con las acciones Subir/Bajar, no clickeando el
+				// encabezado) y las versiones en su Caption (2010, 2022, ...);
+				// permitir el sort por nombre acá rompería ese orden.
+				{ property: 'Caption', caption: 'Nombre', sortable: false },
 				{ property: 'Geography.Caption', caption: 'Geografía' },
 				{
 					property: 'ClippingRegionsSummary', caption: 'Contenido',
@@ -141,6 +145,18 @@ const GROUP_LEVEL = -1;
 					onClick: function (grid, item) { loc.openNewVersion(item); },
 				},
 				{
+					icon: 'arrow_upward',
+					caption: 'Subir',
+					isEnabled: function (item) { return item.Level === 0; },
+					onClick: function (grid, item) { loc.moveBoundary(item, true); },
+				},
+				{
+					icon: 'arrow_downward',
+					caption: 'Bajar',
+					isEnabled: function (item) { return item.Level === 0; },
+					onClick: function (grid, item) { loc.moveBoundary(item, false); },
+				},
+				{
 					icon: 'label',
 					caption: 'Metadatos',
 					iconStyle: function (item) { return 'color: #' + loc.resolveColor(item); },
@@ -152,23 +168,28 @@ const GROUP_LEVEL = -1;
 		},
 	},
 	mounted() {
-		var loc = this;
-		this.$refs.invoker.doMessage('Obteniendo delimitaciones', window.Db,
-				window.Db.GetBoundaries).then(function(data) {
-					arr.AddRange(loc.list, data);
-					loc.list.forEach(item => {
-						const id = item?.Metadata?.Id;
-						if (id && !this.uniqueMetadatas.includes(id)) {
-							loc.uniqueMetadatas.push(id);
-						}
-					});
-			});
+		this.reloadList();
 		var loc = this;
 		window.Context.BoundaryGroups.GetAll(function (data) {
 			arr.AddRange(loc.groups, data);
 		});
 	},
 	methods: {
+		reloadList() {
+			var loc = this;
+			this.$refs.invoker.doMessage('Obteniendo delimitaciones', window.Db,
+					window.Db.GetBoundaries).then(function(data) {
+						loc.list = [];
+						arr.AddRange(loc.list, data);
+						loc.uniqueMetadatas = [];
+						loc.list.forEach(function (item) {
+							var id = item.Metadata ? item.Metadata.Id : null;
+							if (id && !loc.uniqueMetadatas.includes(id)) {
+								loc.uniqueMetadatas.push(id);
+							}
+						});
+			});
+		},
 		groupByBoundaryGroup(boundaryTree) {
 			var groupNodes = [];
 			var nodesByGroupId = {};
@@ -201,7 +222,7 @@ const GROUP_LEVEL = -1;
 		createNewBoundary() {
 			var loc = this;
 			window.Context.Factory.GetCopy('Boundary', function(data) {
-					loc.openEdition(data);
+					loc.$refs.editPopup.show(data, loc.groups);
 			});
 		},
 		asHtml(text) {
@@ -221,8 +242,25 @@ const GROUP_LEVEL = -1;
 		},
 		openNewVersion(boundary) {
 			var loc = this;
+			// Referencia liviana, sin Items: si se le pasara boundary tal
+			// cual (la fila real de this.list, con sus versiones ya anidadas
+			// por treeList), la versión nueva terminaría con Boundary
+			// apuntando a un objeto que la contiene a ella misma entre sus
+			// Items, un ciclo que después rompe el clonado por JSON al abrir
+			// 'Modificar versión' sobre esa misma fila.
+			var lightBoundary = { Id: boundary.Id, Caption: boundary.Caption };
 			window.Context.Factory.GetCopy('BoundaryVersion', function (data) {
-				loc.$refs.editVersionPopup.show(data, boundary);
+				loc.$refs.editVersionPopup.show(data, lightBoundary);
+			});
+		},
+		moveBoundary(item, up) {
+			var method = window.Db.MoveBoundaryDown;
+			if (up) {
+				method = window.Db.MoveBoundaryUp;
+			}
+			var loc = this;
+			this.$refs.invoker.doSave(window.Db, method, item).then(function () {
+				loc.reloadList();
 			});
 		},
 		onRowClick(grid, item) {
@@ -231,8 +269,11 @@ const GROUP_LEVEL = -1;
 			}
 			this.openEdition(item);
 		},
-		openMetadata(item) {
-			this.$refs.editMetadataPopup.show(item);
+		openMetadata(metadata) {
+			var loc = this;
+			window.Db.LoadMetadata(metadata).then(function (activeMetadata) {
+				loc.$refs.editMetadataPopup.show(activeMetadata);
+			});
 		},
 		resolveColor(item) {
 			if (!item.Metadata) {

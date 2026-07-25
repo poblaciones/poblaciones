@@ -14,6 +14,8 @@
 var SVG_NS = 'http://www.w3.org/2000/svg';
 var GAP = 16;            // separación vertical entre gráficos combinados
 var PNG_SCALE = 2;       // factor de rasterizado (nitidez en PNG)
+var LEGEND_FS = 11, LEGEND_LH = 20;   // leyenda de categorías, debajo de los gráficos
+var SOURCE_FS = 10, SOURCE_LH = 14;   // cita de fuente(s), al pie
 
 function ChartExporter(containerEl, opts) {
 	this.container = containerEl;
@@ -24,6 +26,13 @@ function ChartExporter(containerEl, opts) {
 	this.indicator = opts.indicator || '';
 	this.variable = opts.variable || '';
 	this.captions = Array.isArray(opts.captions) ? opts.captions : [];
+	// Leyenda del indicador (misma forma que arma legendFor() en el widget:
+	// [{ name, color }, ...]), y un ítem opcional { name: 'Total', isLine: true }
+	// para la línea de referencia. Se dibuja debajo de los gráficos.
+	this.legend = Array.isArray(opts.legend) ? opts.legend : [];
+	// Cita de la(s) fuente(s) del indicador, ya formateada por línea (una por
+	// Work distinto entre los censos exportados). Va al pie, en itálica.
+	this.sources = Array.isArray(opts.sources) ? opts.sources.filter(Boolean) : [];
 }
 
 // SVGs presentes en el contenedor, en orden de aparición.
@@ -54,6 +63,31 @@ ChartExporter.prototype._wrapTitle = function (title, width) {
 	return lines;
 };
 
+// Ancho estimado de un texto a un tamaño de fuente dado (mismo criterio que
+// _wrapTitle: ~6px por carácter en cuerpo 11, o sea ~0.545 × tamaño).
+ChartExporter.prototype._estimateTextWidth = function (text, fontSize) {
+	return String(text).length * fontSize * 0.545;
+};
+
+// Distribuye los ítems de la leyenda en filas que entren en el ancho dado
+// (cada ítem es una muestra de color + texto), igual que un texto que hace
+// salto de línea por palabra. Devuelve [[item, item, ...], [item, ...], ...].
+ChartExporter.prototype._layoutLegend = function (width) {
+	var loc = this;
+	var SWATCH = 14, SWATCH_GAP = 5, ITEM_GAP = 18;
+	var rows = [[]];
+	var curW = 0;
+	this.legend.forEach(function (item) {
+		var iw = SWATCH + SWATCH_GAP + loc._estimateTextWidth(item.name, LEGEND_FS);
+		if (curW > 0 && curW + ITEM_GAP + iw > width) { rows.push([]); curW = 0; }
+		if (curW > 0) curW += ITEM_GAP;
+		rows[rows.length - 1].push({ item: item, w: iw });
+		curW += iw;
+	});
+	if (!rows[rows.length - 1].length) rows.pop();
+	return rows;
+};
+
 ChartExporter.prototype._sizeOf = function (svg) {
 	var vb = svg.viewBox && svg.viewBox.baseVal;
 	if (vb && vb.width && vb.height) return { w: vb.width, h: vb.height };
@@ -67,6 +101,13 @@ ChartExporter.prototype._composeSvg = function () {
 	var svgs = this._collectSvgs();
 	var loc = this;
 	var sizes = svgs.map(function (s) { return loc._sizeOf(s); });
+	// agrega 'fuente'
+	if (this.sources.length == 1) {
+		sources[0] = "Fuente: " + sources[0];
+	} else if (this.sources.length > 1) {
+		sources.unshift("Fuentes:");
+	}
+
 
 	var width = 0;
 	for (var i = 0; i < sizes.length; i++) if (sizes[i].w > width) width = sizes[i].w;
@@ -75,7 +116,7 @@ ChartExporter.prototype._composeSvg = function () {
 	// Título en dos bloques: el indicador (negrita) y, debajo, la variable (sin
 	// negrita), cada uno envuelto a las líneas que entren en el ancho. Se evita el
 	// guión largo de unirlos en una sola línea.
-	var TITLE_FS = 12, TITLE_LH = 15, VAR_FS = 11, VAR_LH = 14;
+	var TITLE_FS = 16, TITLE_LH = 20, VAR_FS = 15, VAR_LH = 19;
 	var indLines = this.indicator ? this._wrapTitle(this.indicator, width) : [];
 	var varLines = this.variable ? this._wrapTitle(this.variable, width) : [];
 	var CAP_FS = 11, CAP_LH = 15;
@@ -89,6 +130,18 @@ ChartExporter.prototype._composeSvg = function () {
 
 	var height = titleH;
 	for (var j = 0; j < sizes.length; j++) height += sizes[j].h + capH + (j > 0 ? GAP : 0);
+
+	// Leyenda: se arma la distribución en filas ACÁ (antes de fijar el alto
+	// total) y se reutiliza el mismo resultado al dibujarla más abajo, para no
+	// recalcularla con datos potencialmente distintos.
+	var legendRows = this.legend.length ? this._layoutLegend(width) : [];
+	var legendH = legendRows.length ? (16 + legendRows.length * LEGEND_LH) : 0;
+	height += legendH;
+
+	// Cita de fuente(s), al pie: una línea por Work distinto.
+	var sourcesH = this.sources.length ? (14 + this.sources.length * SOURCE_LH) : 0;
+	height += sourcesH;
+
 	height = Math.max(1, Math.ceil(height));
 
 	var root = document.createElementNS(SVG_NS, 'svg');
@@ -148,6 +201,61 @@ ChartExporter.prototype._composeSvg = function () {
 		g.appendChild(clone);
 		root.appendChild(g);
 		y += sizes[k].h;
+	}
+
+	// Leyenda de categorías, debajo de todos los gráficos.
+	if (legendRows.length) {
+		y += 16;
+		legendRows.forEach(function (row) {
+			var totalW = row.reduce(function (acc, r) { return acc + r.w; }, 0) + (row.length - 1) * 18;
+			var x = (width - totalW) / 2;
+			row.forEach(function (r) {
+				var it = r.item;
+				if (it.isLine) {
+					var line = document.createElementNS(SVG_NS, 'line');
+					line.setAttribute('x1', String(x)); line.setAttribute('x2', String(x + 14));
+					line.setAttribute('y1', String(y - 4)); line.setAttribute('y2', String(y - 4));
+					line.setAttribute('stroke', it.color || '#607d8b');
+					line.setAttribute('stroke-width', '2');
+					root.appendChild(line);
+				} else {
+					var rect = document.createElementNS(SVG_NS, 'rect');
+					rect.setAttribute('x', String(x)); rect.setAttribute('y', String(y - 10));
+					rect.setAttribute('width', '10'); rect.setAttribute('height', '10');
+					rect.setAttribute('fill', it.color || '#90a4ae');
+					root.appendChild(rect);
+				}
+				var tx = x + 14 + 5;
+				var t = document.createElementNS(SVG_NS, 'text');
+				t.setAttribute('x', String(tx));
+				t.setAttribute('y', String(y));
+				t.setAttribute('font-family', 'sans-serif');
+				t.setAttribute('font-size', String(LEGEND_FS));
+				t.setAttribute('fill', '#455a64');
+				t.textContent = it.name;
+				root.appendChild(t);
+				x += r.w + 18;
+			});
+			y += LEGEND_LH;
+		});
+	}
+
+	// Cita de fuente(s), al pie, alineada a la izquierda (estilo referencia
+	// bibliográfica, no centrada como el resto del bloque).
+	if (this.sources.length) {
+		y += 14;
+		for (var si = 0; si < this.sources.length; si++) {
+			var st = document.createElementNS(SVG_NS, 'text');
+			st.setAttribute('x', '8');
+			st.setAttribute('y', String(y));
+			st.setAttribute('font-family', 'sans-serif');
+			st.setAttribute('font-size', String(SOURCE_FS));
+			st.setAttribute('font-style', 'italic');
+			st.setAttribute('fill', '#78909c');
+			st.textContent = this.sources[si];
+			root.appendChild(st);
+			y += SOURCE_LH;
+		}
 	}
 
 	this._inlineComputedStyles(root, svgs);

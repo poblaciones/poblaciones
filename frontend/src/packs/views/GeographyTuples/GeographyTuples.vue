@@ -128,8 +128,11 @@ import f from '@/backoffice/classes/Formatter';
 		openEdition(item) {
 			this.$refs.editPopup.show(item);
 		},
-		openMetadata(item) {
-			this.$refs.editMetadataPopup.show(item);
+		openMetadata(metadata) {
+			var loc = this;
+			window.Db.LoadMetadata(metadata).then(function (activeMetadata) {
+				loc.$refs.editMetadataPopup.show(activeMetadata);
+			});
 		},
 		onRowClick(grid, item) {
 			this.openEdition(item);

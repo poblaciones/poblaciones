@@ -15,7 +15,6 @@ class MetricInfo extends BaseMapModel
 	public $Signature;
 	public $Icon;
 	public $Tag;
-	public $Coverage;
 	public $Type;
 
 	public $Versions = array();
@@ -28,7 +27,6 @@ class MetricInfo extends BaseMapModel
 			'mtr_icon' => 'Icon',
 			'mtr_metric_group_id' => 'MetricGroupId',
 			'mtr_metric_provider_id' => 'MetricProviderId',
-			'cli_caption' => 'Coverage',
 			'mvr_type' => 'Type');
 	}
 }
