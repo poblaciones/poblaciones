@@ -11,6 +11,7 @@ use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 // -------------------------------------------------------------------------
 // Proxy retornado por get/post/match/options para soportar ->assert()
@@ -157,18 +158,12 @@ class SilexApp implements \ArrayAccess
 				return new Response((string) $result);
 
 		} catch (ResourceNotFoundException $e) {
-			$response = $this->handleError(new \RuntimeException('Not found', 404), $request, 404);
-			if ($response !== null) {
-				return $response;
-			}
-			throw $e;
+			return new Response('Not Found', 404);
+		} catch (MethodNotAllowedException $e) {
+			return new Response('Method Not Allowed', 405);
 		} catch (\Exception $e) {
 			$code = $e->getCode() ?: 500;
-			$response = $this->handleError($e, $request, $code);
-			if ($response !== null) {
-				return $response;
-			}
-			throw $e;
+			return $this->handleError($e, $request, $code);
 		}
 	}
 
@@ -224,7 +219,7 @@ class SilexApp implements \ArrayAccess
 		$response->send();
 	}
 
-	private function handleError(\Exception $e, Request $request, int $code): ?Response
+	private function handleError(\Exception $e, Request $request, int $code): Response
 	{
 		foreach ($this->errorHandlers as $handler) {
 			$result = $handler($e, $request, $code);
@@ -232,7 +227,8 @@ class SilexApp implements \ArrayAccess
 				return $result;
 			}
 		}
-		return null;
+		// Fallback: nunca relanzar la excepción cruda ni exponer stacktrace
+		return new Response($code === 404 ? 'Not Found' : 'Error', $code);
 	}
 
 	// -------------------------------------------------------------------------

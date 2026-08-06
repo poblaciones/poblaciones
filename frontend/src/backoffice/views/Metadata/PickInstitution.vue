@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openInstitutions" style="width: 750px">
+		<md-dialog :md-active.sync="openInstitutions">
 
 			<md-dialog-title>
 				Seleccionar institución
@@ -19,12 +19,12 @@
 			</div>
 			<div class="md-layout">
 				<div class="md-layout-item">
-					<md-table v-model="institutions" md-sort="caption" md-sort-order="asc" md-card="">
-						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell @click.native="setSelected(item); " class="selectable" md-label="Nombre" :md-sort-by="item.Caption">{{ item.Caption }}</md-table-cell>
-							<md-table-cell @click.native="setSelected(item)" md-label="País" class="selectable" :md-sort-by="item.Country">{{ item.Country }}</md-table-cell>
-						</md-table-row>
-					</md-table>
+					<mp-grid
+						compact
+						:pageSize="10"
+						:items="institutions"
+						:columns="gridColumns"
+						:rowClick="onRowClick" />
 				</div>
 			</div>
 		</md-dialog-content>
@@ -56,7 +56,12 @@ export default {
     };
   },
   computed: {
-
+    gridColumns() {
+			return [
+				{ property: 'Caption', size: 7, caption: 'Nombre' },
+				{ property: 'Country', size: 3, caption: 'País' },
+			];
+		}
   },
   methods: {
     CreateNewInstitution() {
@@ -66,6 +71,9 @@ export default {
 					loc.openEdition(data);
 			});
     },
+		onRowClick(grid, item) {
+			this.setSelected(item);
+		},
 		setSelected(item) {
 			this.selected = item;
 			this.save();

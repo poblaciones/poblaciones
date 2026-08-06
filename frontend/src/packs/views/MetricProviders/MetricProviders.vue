@@ -7,7 +7,7 @@
 			</metric-provider-popup>
 
 			<div class="md-layout-item md-size-100" style="margin-top: 20px">
-				<div v-if="isAdmin">
+				<div v-if="canEdit">
 					<md-button @click="createNewProvider">
 						<md-icon>add_circle_outline</md-icon>
 						Nuevo origen
@@ -18,7 +18,7 @@
 					:columns="providerColumns"
 					:actions="providerActions"
 					:rowClick="onProviderRowClick"
-					:canDelete="isAdmin"
+					:canDelete="canEdit"
 					entityName="origen"
 					:deleteConfirmMessage="providerDeleteConfirmMessage"
 					@itemDelete="onProviderDelete" />
@@ -43,7 +43,7 @@ import arr from '@/common/framework/arr';
 			};
 	},
 	computed: {
-		isAdmin() {
+		canEdit() {
 			return window.Context.IsAdmin();
 		},
 		providerColumns() {
@@ -54,11 +54,14 @@ import arr from '@/common/framework/arr';
 		},
 		providerActions() {
 			var loc = this;
-			if (!this.isAdmin) {
-				return [];
+			var editIcon = 'edit';
+			var editCaption = 'Modificar';
+			if (!this.canEdit) {
+				editIcon = 'visibility';
+				editCaption = 'Ver';
 			}
 			return [
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openProviderEdition(item); } },
+				{ icon: editIcon, caption: editCaption, onClick: function (grid, item) { loc.openProviderEdition(item); } },
 			];
 		},
 	},

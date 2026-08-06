@@ -2,55 +2,53 @@
   <div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="parentPicker" @selected="onParentSelected"></tree-picker-popup>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
-			<md-dialog-title>
-				Geografía {{
-				(geography.Parent ? ' en ' + geography.Parent.Caption : '')
-				 }}
-			</md-dialog-title>
-			<md-dialog-content v-if="geography">
+		<md-dialog v-if="geography" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+			<md-dialog-title>Geografía</md-dialog-title>
+			<md-dialog-content>
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-33">
-						<mp-simple-text label="Nombre" ref="inputName"
+						<mp-simple-text label="Nombre" ref="inputName" :canEdit="canEdit"
 														helper="Nombre de la entidad mapeada, ej. Provincias, Departamentos"
 														v-model="geography.Caption" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-33">
-						<mp-simple-text label="Nombre corto" helper="Usado donde no entra el nombre completo"
+						<mp-simple-text label="Nombre corto" :canEdit="canEdit" helper="Usado donde no entra el nombre completo"
 														v-model="geography.CaptionShort" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-33">
-						<mp-simple-text label="Revisión"
+						<mp-simple-text label="Revisión" :canEdit="canEdit"
 														helper="Distingue revisiones de una unidad geográfica (ej. 2010, 2022)"
 														v-model="geography.Revision" @enter="save" />
 					</div>
 
 					<div class="md-layout-item md-size-100" v-if="isNew">
-						<div class="mp-label">Categoría padre (opcional)</div>
+						<div class="mp-label">Geografía padre (opcional)</div>
 						<div class="helper">
-							Ej. la categoría padre de Departamentos sería Provincias. Si no elige ninguna, la
+							Ej. la geografía padre de Departamentos sería Provincias. Si no elige ninguna, la
 							geografía queda en el nivel raíz de un relevamiento propio.
 						</div>
 						<div class="mp-readonly-value">
-							{{ parentCaption }}
-							<md-button class="md-icon-button" @click="pickParent">
-								<md-icon>edit</md-icon>
-								<md-tooltip md-direction="bottom">Elegir</md-tooltip>
-							</md-button>
-							<md-button v-if="geography.Parent" class="md-icon-button" @click="geography.Parent = null">
-								<md-icon>clear</md-icon>
-								<md-tooltip md-direction="bottom">Quitar</md-tooltip>
-							</md-button>
+							<div class="mp-readonly-text">
+								{{ parentCaption }}
+								</div>
+								<md-button v-if="canEdit" class="md-icon-button" @click="pickParent">
+									<md-icon>edit</md-icon>
+									<md-tooltip md-direction="bottom">Elegir</md-tooltip>
+								</md-button>
+								<md-button v-if="canEdit && geography.Parent" class="md-icon-button" @click="geography.Parent = null">
+									<md-icon>clear</md-icon>
+									<md-tooltip md-direction="bottom">Quitar</md-tooltip>
+								</md-button>
+							</div>
 						</div>
-					</div>
 
 					<div class="md-layout-item md-size-60" v-if="!geography.Parent">
-						<mp-simple-text label="Nombre del relevamiento"
+						<mp-simple-text label="Nombre del relevamiento" :canEdit="canEdit"
 														helper="Sirve para agrupar las geografías en los listados para georreferenciar por código. Ej. Censo 2010"
 														v-model="geography.RootCaption" @enter="save" />
 					</div>
 
-					<div class="md-layout-item md-size-100" v-if="isNew">
+					<div class="md-layout-item md-size-100" v-if="isNew && canEdit">
 						<div class="mp-label">Archivo geográfico (GeoPackage)</div>
 						<geo-package-upload ref="geoPackage" :fields="importFields" />
 					</div>
@@ -73,12 +71,12 @@
 						<div class="separator">Presentación en el mapa</div>
 					</div>
 					<div class="md-layout-item md-size-50">
-						<mp-simple-text label="Zoom máximo" type="number" :minimum="1" :maximum="22"
+						<mp-simple-text label="Zoom máximo" :canEdit="canEdit" type="number" :minimum="1" :maximum="22"
 														helper="Zoom sugerido cuando haya niveles de menor desagregación disponibles"
 														v-model="geography.MaxZoom" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-50">
-						<mp-select :key="'gradient-' + gradients.length" :list="gradients" :model-key="false" label="Gradiente"
+						<mp-select :key="'gradient-' + gradients.length" :list="gradients" :model-key="false" label="Gradiente" :canEdit="canEdit"
 											 helper="Gradiente de color con el que suavizar la información"
 											 :allow-null="true" nullLabel="[Ninguno]"
 											 v-model="geography.Gradient" />
@@ -88,12 +86,12 @@
 						<div class="separator">Comportamiento</div>
 					</div>
 					<div class="md-layout-item md-size-100">
-						<md-switch class="md-primary" v-model="geography.UseForClipping">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="geography.UseForClipping">
 							Considerarla para calcular el total población del panel de resúmen
 						</md-switch>
 					</div>
 					<div class="md-layout-item md-size-100">
-						<md-switch class="md-primary" v-model="geography.IsTrackingLevel">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="geography.IsTrackingLevel">
 							Es el nivel de seguimiento (geografía por la que se georreferencian las capas de puntos)
 						</md-switch>
 					</div>
@@ -101,8 +99,8 @@
 			</md-dialog-content>
 			<stepper ref="stepper" title="Creando geografía" @completed="importCompleted" @closed="stepperClosed"></stepper>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">{{ saveButtonLabel }}</md-button>
+				<md-button @click="activateEdit = false">{{ cancelCaption }}</md-button>
+				<md-button v-if="canEdit" class="md-primary" @click="save">Guardar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -111,7 +109,7 @@
 <script>
 
 import f from '@/backoffice/classes/Formatter';
-import TreePickerPopup from '@/packs/components/TreePickerPopup';
+import TreePickerPopup from '@/packs/components/popups/TreePickerPopup';
 import GeoPackageUpload from '@/packs/components/GeoPackageUpload';
 
 export default {
@@ -125,20 +123,23 @@ export default {
     };
   },
   computed: {
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
+		cancelCaption() {
+			if (this.canEdit) {
+				return 'Cancelar';
+			}
+			return 'Cerrar';
+		},
 		isNew() {
 			return !this.geography.Id;
-		},
-		saveButtonLabel() {
-			if (this.isNew) {
-				return 'Crear';
-			}
-			return 'Guardar';
 		},
 		parentCaption() {
 			if (this.geography.Parent) {
 				return this.geography.Parent.Caption;
 			}
-			return '[Ninguna, es de nivel raíz]';
+			return 'Ninguna';
 		},
 		// El código del padre solo hace falta mapearlo cuando la geografía va
 		// a tener una categoría padre: sin eso, cada ítem del archivo no
@@ -192,7 +193,12 @@ export default {
 			});
 		},
 		onParentSelected(item) {
-			this.geography.Parent = item;
+			// El item que llega del picker es el nodo completo del árbol
+			// (con sus descendientes y el Metadata de cada uno anidados):
+			// guardarlo tal cual haría que el alta viaje con el árbol
+			// entero adentro. Solo hace falta el Id para guardar y el
+			// Caption/Revision para mostrarlo.
+			this.geography.Parent = { Id: item.Id, Caption: item.Caption, Revision: item.Revision };
 			this.geography.RootCaption = null;
 		},
 		save() {

@@ -28,14 +28,17 @@ class PdfCreator
 
 		if ($dataset != null)
 		{
-			$this->pdf->WriteMainTitle($dataset['dat_caption']);
+			$title = $dataset['dat_caption'];
+			$this->pdf->WriteMainTitle($title);
 			$this->WriteValuePair("Cartografía", 'met_title');
 		}
 		else
 		{
-			$this->pdf->WriteMainTitle($metadata['met_title']);
+			$title = $metadata['met_title'];
+			$this->pdf->WriteMainTitle($title);
 			$this->WriteValuePair("Título", 'met_title');
 		}
+		$this->pdf->SetDocumentTitle($title);
 		if ($this->metadata['met_online_since_formatted'] !== '-')
 			$this->WriteValuePair("Fecha de publicación", 'met_online_since_formatted');
 
@@ -49,6 +52,7 @@ class PdfCreator
 		$this->WriteArk();
 
 		$this->WriteValuePair("Autores", 'met_authors');
+		$this->pdf->SetDocumentAuthor($this->ResolveValue('met_authors'));
 
 		$this->WriteValuePair("Período", 'met_period_caption');
 		$this->WriteValuePair("Frecuencia de actualización", 'met_frequency');
@@ -216,7 +220,7 @@ class PdfCreator
 
 		$this->pdf->WriteHeading4('Contacto');
 		$this->WriteIndentedValuePair('Nombre', 'con_person');
-		$this->pdf->WriteIndentedMail($this->metadata['con_email']);
+		$this->pdf->WriteIndentedMail($this->ResolveValue('con_email'));
 		$this->WriteIndentedValuePair('Teléfono', 'con_phone');
 
 	}

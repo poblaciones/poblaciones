@@ -16,7 +16,7 @@
 				<div class="md-layout-item">
 					<md-table v-model="sources" md-sort="caption" md-sort-order="asc" md-card="">
 						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell md-label="Nombre">{{ item.Caption }}</md-table-cell>
+							<md-table-cell md-label="Nombre" style="width: 320px">{{ item.Caption }}</md-table-cell>
 							<md-table-cell md-label="Edición">{{ item.Version }}</md-table-cell>
 							<md-table-cell md-label="Institución">{{ getInstitutionCaption(item) }}</md-table-cell>
 							<md-table-cell md-label="Acciones" class="mpNoWrap">

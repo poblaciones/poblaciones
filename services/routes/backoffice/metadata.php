@@ -174,7 +174,7 @@ App::GetOrPost('/services/backoffice/UpdateWorkSource', function (Request $reque
 	return App::OrmJson($controller->Update($workId, $metadataId, $source));
 });
 
-App::GetOrPost('/services/backoffice/UpdateWorkInstitution', function (Request $request) {
+App::GetOrPost('/services/backoffice/UpdateMetadataInstitution', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkEditor($workId))
 		return $denied;
@@ -183,7 +183,7 @@ App::GetOrPost('/services/backoffice/UpdateWorkInstitution', function (Request $
 	$metadataId = Params::GetIntMandatory('m');
 
 	$institution = App::ReconnectJsonParam(entities\DraftInstitution::class, 'i');
-	return App::OrmJson($controller->UpdateWorkInstitution($workId, $metadataId, $institution));
+	return App::OrmJson($controller->UpdateMetadataInstitution($workId, $metadataId, $institution));
 });
 
 App::GetOrPost('/services/backoffice/UpdateInstitution', function (Request $request) {

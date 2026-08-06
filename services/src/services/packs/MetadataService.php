@@ -38,6 +38,48 @@ class MetadataService extends BaseService
 		}
 	}
 
+	// Se llama al dar de alta una región o geografía sin metadata propia
+	// todavía: crea un registro mínimo (y su contacto asociado, obligatorio
+	// por clave foránea) para que la entidad tenga algo que editar, en vez
+	// de quedar sin metadata hasta que alguien lo cree a mano. met_id,
+	// con_id no son autonuméricos (EnsureId antes de guardar). Los campos
+	// NOT NULL sin default de metadata que no tienen un valor razonable
+	// todavía se completan con un espacio, salvo met_title (con
+	// "Caption, Version" o solo "Caption" si no hay versión) y
+	// met_period_caption (con la versión, si existe): son los dos casos
+	// donde silenciar el campo con un espacio dejaría el registro más
+	// confuso de lo necesario para quien lo complete después.
+	public function CreateMinimalMetadata($caption, $version)
+	{
+		$contact = new entities\Contact();
+		$this->EnsureId(entities\Contact::class, $contact);
+		App::Orm()->Save($contact);
+
+		$title = $caption;
+		if ($version)
+		{
+			$title .= ', ' . $version;
+		}
+
+		$now = new \DateTime();
+		$metadata = new entities\Metadata();
+		$this->EnsureId(entities\Metadata::class, $metadata);
+		$metadata->setTitle($title);
+		$metadata->setAbstract(' ');
+		$metadata->setStatus('B');
+		$metadata->setAuthors(' ');
+		$metadata->setCoverageCaption(' ');
+		$metadata->setPeriodCaption($version);
+		$metadata->setLicense(' ');
+		$metadata->setType('C');
+		$metadata->setCreate($now);
+		$metadata->setUpdate($now);
+		$metadata->setContact($contact);
+		App::Orm()->Save($metadata);
+
+		return $metadata;
+	}
+
 	public function GetMetadata($metadataId)
 	{
 		$ret = new MetadataInfo();

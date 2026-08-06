@@ -5,7 +5,7 @@ namespace helena\services\backoffice;
 use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
-use helena\services\admin as adminServices;
+use helena\services\packs as packsServices;
 use minga\framework\Arr;
 use minga\framework\IO;
 use minga\framework\PublicException;
@@ -117,15 +117,15 @@ class InstitutionService extends BaseService
 		{
 			$wat = new entities\File();
 
-			$adminServices = new adminServices\MetadataService();
-			$adminServices->EnsureId(entities\File::class, $wat);
+			$packsServices = new packsServices\MetadataService();
+			$packsServices->EnsureId(entities\File::class, $wat);
 		}
 		$wat->setName('watermark_' . uniqid());
 		$wat->setType('image/*');
 		return $wat;
 	}
 
-	public function UpdateWorkInstitution($workId, $metadataId, $institution)
+	public function UpdateMetadataInstitution($workId, $metadataId, $institution)
 	{
 		// Si no está asociada, la agrega
 		$this->AddInstitutionToMetadata($workId, $metadataId, $institution->getId());
@@ -162,8 +162,8 @@ class InstitutionService extends BaseService
 		{
 			$newInstitutionMetadata = new entities\MetadataInstitution();
 
-			$adminServices = new adminServices\MetadataService();
-			$adminServices->EnsureId(entities\MetadataInstitution::class, $newInstitutionMetadata);
+			$packsServices = new packsServices\MetadataService();
+			$packsServices->EnsureId(entities\MetadataInstitution::class, $newInstitutionMetadata);
 		}
 		$newInstitutionMetadata->setOrder($max);
 		$newInstitutionMetadata->setInstitution($institution);

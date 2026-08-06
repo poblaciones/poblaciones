@@ -9,7 +9,7 @@
 			</boundary-version-popup>
 			<metadata-popup ref="editMetadataPopup">
 			</metadata-popup>
-			<div v-if="isAdmin" class="md-layout-item md-size-100">
+			<div v-if="canEdit" class="md-layout-item md-size-100">
 				<md-button @click="createNewBoundary">
 					<md-icon>add_circle_outline</md-icon>
 					Nueva delimitación
@@ -22,11 +22,12 @@
 					:columns="gridColumns"
 					:actions="gridActions"
 					:rowClick="onRowClick"
-					:canDelete="isAdmin"
+					:canDelete="canEdit"
 					:isItemDeleteEnabled="isItemDeleteEnabled"
 					entityName="delimitación"
 					:deleteConfirmMessage="deleteConfirmMessage"
 					@itemDelete="onItemDelete"
+					defaultSortBy="Order"
 					hasChildren />
 			</div>
 		</div>
@@ -64,7 +65,7 @@ const GROUP_LEVEL = -1;
 			};
 	},
 	computed: {
-		isAdmin() {
+		canEdit() {
 			return window.Context.IsAdmin();
 		},
 		// El servidor entrega el listado plano, en orden, con el nivel de
@@ -87,8 +88,23 @@ const GROUP_LEVEL = -1;
 				// (se reordenan con las acciones Subir/Bajar, no clickeando el
 				// encabezado) y las versiones en su Caption (2010, 2022, ...);
 				// permitir el sort por nombre acá rompería ese orden.
-				{ property: 'Caption', caption: 'Nombre', sortable: false },
-				{ property: 'Geography.Caption', caption: 'Geografía' },
+				{
+					property: 'Caption', caption: 'Nombre', sortable: false, size: 5,
+					tooltip: function (item) { return item.Metadata ? item.Metadata.Title : null; },
+				},
+				{
+					property: 'Order', caption: 'Orden', sortable: false, sortType: 'number',
+					value: function (item) {
+						if (item.Level === 0) {
+							return item.Order;
+						}
+						return '';
+					},
+				},
+				{
+					property: 'Geography.Caption', caption: 'Geografía',sortable: false,
+					value: function (item) { return loc.formatGeography(item.Geography); },
+				},
 				{
 					property: 'ClippingRegionsSummary', caption: 'Contenido',
 					sortable: false, align: 'left', size: 5,
@@ -100,7 +116,7 @@ const GROUP_LEVEL = -1;
 					},
 				},
 				{
-					property: 'IsPrivate', caption: 'Público', sortType: 'boolean',
+					property: 'IsPrivate', caption: 'Público', sortType: 'boolean', sortable: false,
 					value: function (item) {
 						if (item.Level === 0) {
 							return loc.formatBool(!item.IsPrivate);
@@ -110,7 +126,7 @@ const GROUP_LEVEL = -1;
 					sortValue: function (item) { return !item.IsPrivate; },
 				},
 				{
-					property: 'IsSuggestion', caption: 'Recomendado',
+					property: 'IsSuggestion', caption: 'Recomendado', sortable: false,
 					value: function (item) {
 						if (item.Level === 0) {
 							return loc.formatBool(item.IsSuggestion);
@@ -120,49 +136,65 @@ const GROUP_LEVEL = -1;
 				},
 			];
 		},
+		// 'Modificar' se degrada a 'Ver' cuando no se puede editar, en vez de
+		// ocultarse (siguen siendo consultables). 'Nueva versión', 'Subir' y
+		// 'Bajar' sí son acciones de edición real: se ocultan directamente
+		// sin permisos. 'Metadatos' es consulta pura: siempre visible.
 		gridActions() {
 			var loc = this;
-			if (!this.isAdmin) {
-				return [];
+			var editBoundaryIcon = 'edit';
+			var editBoundaryCaption = 'Modificar delimitación';
+			var editVersionIcon = 'edit_calendar';
+			var editVersionCaption = 'Modificar versión';
+			if (!this.canEdit) {
+				editBoundaryIcon = 'visibility';
+				editBoundaryCaption = 'Ver delimitación';
+				editVersionIcon = 'visibility';
+				editVersionCaption = 'Ver versión';
 			}
 			return [
 				{
-					icon: 'edit',
-					caption: 'Modificar delimitación',
+					icon: editBoundaryIcon,
+					caption: editBoundaryCaption,
 					isEnabled: function (item) { return item.Level === 0; },
 					onClick: function (grid, item) { loc.openEdition(item); },
 				},
 				{
-					icon: 'edit_calendar',
-					caption: 'Modificar versión',
+					icon: editVersionIcon,
+					caption: editVersionCaption,
 					isEnabled: function (item) { return item.Level === 1; },
 					onClick: function (grid, item) { loc.openEdition(item); },
 				},
 				{
 					icon: 'add_circle_outline',
 					caption: 'Nueva versión',
-					isEnabled: function (item) { return item.Level === 0; },
+					isEnabled: function (item) { return item.Level === 0 && loc.canEdit; },
 					onClick: function (grid, item) { loc.openNewVersion(item); },
 				},
 				{
 					icon: 'arrow_upward',
 					caption: 'Subir',
-					isEnabled: function (item) { return item.Level === 0; },
+					isEnabled: function (item) { return item.Level === 0 && loc.canEdit && !loc.isFirstInGroup(item); },
 					onClick: function (grid, item) { loc.moveBoundary(item, true); },
 				},
 				{
 					icon: 'arrow_downward',
 					caption: 'Bajar',
-					isEnabled: function (item) { return item.Level === 0; },
+					isEnabled: function (item) { return item.Level === 0 && loc.canEdit && !loc.isLastInGroup(item); },
 					onClick: function (grid, item) { loc.moveBoundary(item, false); },
 				},
 				{
 					icon: 'label',
 					caption: 'Metadatos',
 					iconStyle: function (item) { return 'color: #' + loc.resolveColor(item); },
-					badge: function (item) { return item.Metadata.Id; },
-					isEnabled: function (item) { return !!item.Metadata; },
-					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
+					badge: function (item) {
+						if (item.MetadataId) {
+							return null;
+						}
+						return loc.resolveVersionMetadataId(item);
+					},
+					isEnabled: function (item) { return item.Level === 1 && !!loc.resolveVersionMetadataId(item); },
+					onClick: function (grid, item) { loc.openMetadata({ Id: loc.resolveVersionMetadataId(item) }); },
 				},
 			];
 		},
@@ -175,6 +207,15 @@ const GROUP_LEVEL = -1;
 		});
 	},
 	methods: {
+		formatGeography(geography) {
+			if (!geography) {
+				return '';
+			}
+			if (geography.Revision) {
+				return geography.Caption + ' (' + geography.Revision + ')';
+			}
+			return geography.Caption;
+		},
 		reloadList() {
 			var loc = this;
 			this.$refs.invoker.doMessage('Obteniendo delimitaciones', window.Db,
@@ -183,7 +224,7 @@ const GROUP_LEVEL = -1;
 						arr.AddRange(loc.list, data);
 						loc.uniqueMetadatas = [];
 						loc.list.forEach(function (item) {
-							var id = item.Metadata ? item.Metadata.Id : null;
+							var id = loc.resolveVersionMetadataId(item);
 							if (id && !loc.uniqueMetadatas.includes(id)) {
 								loc.uniqueMetadatas.push(id);
 							}
@@ -263,6 +304,26 @@ const GROUP_LEVEL = -1;
 				loc.reloadList();
 			});
 		},
+		// this.list ya viene ordenada por Order (ver GetBoundaries en el
+		// backend): el primer/último hermano en ese orden es el primero/
+		// último dentro de su grupo, y no tiene a dónde subir/bajar.
+		getSiblings(item) {
+			var ret = [];
+			for (var n = 0; n < this.list.length; n++) {
+				if (this.list[n].Level === 0 && this.list[n].Group.Id === item.Group.Id) {
+					ret.push(this.list[n]);
+				}
+			}
+			return ret;
+		},
+		isFirstInGroup(item) {
+			var siblings = this.getSiblings(item);
+			return siblings.length > 0 && siblings[0].Id === item.Id;
+		},
+		isLastInGroup(item) {
+			var siblings = this.getSiblings(item);
+			return siblings.length > 0 && siblings[siblings.length - 1].Id === item.Id;
+		},
 		onRowClick(grid, item) {
 			if (item.Level === GROUP_LEVEL) {
 				return;
@@ -275,12 +336,31 @@ const GROUP_LEVEL = -1;
 				loc.$refs.editMetadataPopup.show(activeMetadata);
 			});
 		},
+		// Solo las versiones (Level 1) pueden tener metadatos propios
+		// (bvr_metadata_id): Boundary no tiene ese campo en la base. Si
+		// una versión no usa metadatos propios (switch "Usa metadatos
+		// propios" desactivado en su popup), se edita en su lugar el
+		// metadata de la primera región asociada, que el usuario ya
+		// entiende como "lo que se está mostrando en el mapa".
+		resolveVersionMetadataId(item) {
+			if (item.MetadataId) {
+				return item.MetadataId;
+			}
+			if (item.ClippingRegions && item.ClippingRegions.length > 0 && item.ClippingRegions[0].MetadataId) {
+				return item.ClippingRegions[0].MetadataId;
+			}
+			return null;
+		},
 		resolveColor(item) {
-			if (!item.Metadata) {
+			if (item.MetadataId) {
+				return '9e9e9e';
+			}
+			var metadataId = this.resolveVersionMetadataId(item);
+			if (!metadataId) {
 				return '';
 			}
 			var palete = c.GetColorPalete();
-			var position = this.uniqueMetadatas.indexOf(item.Metadata.Id);
+			var position = this.uniqueMetadatas.indexOf(metadataId);
 			var positionTrimed = position % palete.length;
 			return palete[positionTrimed];
 		},

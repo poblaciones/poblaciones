@@ -17,6 +17,7 @@ class DbFile
 	{
 		if ($workId)
 		{
+			$workId = intval($workId);
 			if ($fromDraft)
 			{
 				return "work_file_chunk_draft_" . str_pad('' . $workId, 6, '0', STR_PAD_LEFT);

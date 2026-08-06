@@ -4,6 +4,8 @@ namespace helena\entities\backoffice;
 
 use Doctrine\ORM\Mapping as ORM;
 use \JMS\Serializer\Annotation\Exclude;
+use \JMS\Serializer\Annotation\VirtualProperty;
+use \JMS\Serializer\Annotation\SerializedName;
 
 /**
  * ClippingRegion
@@ -444,6 +446,19 @@ class ClippingRegion
     public function getMetadata()
     {
         return $this->Metadata;
+    }
+
+    /**
+     * @VirtualProperty
+     * @SerializedName("MetadataId")
+     */
+    public function getMetadataIdForDisplay()
+    {
+        if ($this->Metadata !== null)
+        {
+            return $this->Metadata->getId();
+        }
+        return null;
     }
 
     /**

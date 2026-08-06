@@ -1,11 +1,14 @@
 <template>
 	<div>
-		<div class="md-layout">
-			<div class="md-layout-item md-size-25">
+		<div class="md-layout" style="width: 500px">
+			<div class="md-layout-item md-size-50">
 				<md-button @click="createNewUser">
 					<md-icon>add_circle_outline</md-icon>
 					Agregar usuario
 				</md-button>
+			</div>
+			<div class="md-layout-item md-size-50" style="margin-top: -2px;">
+				<md-switch class="md-primary" v-model="showInactive">Incluir usuarios inactivos</md-switch>
 			</div>
 		</div>
 		<div class="md-layout">
@@ -15,7 +18,7 @@
 			</user-popup>
 			<div class="md-layout-item md-size-100">
 				<mp-grid
-					:items="list"
+					:items="filteredList"
 					:columns="gridColumns"
 					:actions="gridActions"
 					:rowClick="onRowClick"
@@ -38,16 +41,23 @@ import arr from '@/common/framework/arr';
 	name: 'Usuarios',
 	data() {
 		return {
-			list: []
+			list: [],
+			showInactive: false,
 			};
 	},
 	computed: {
+		filteredList() {
+			if (this.showInactive) {
+				return this.list;
+			}
+			return this.list.filter(function (item) { return item.IsActive; });
+		},
 		gridColumns() {
 			var loc = this;
 			return [
-				{ property: 'FullName', caption: 'Nombre' },
-				{ property: 'Email', caption: 'Email' },
-				{ property: 'FormattedRole', caption: 'Rol' },
+				{ property: 'FullName', caption: 'Nombre', size: 5 },
+				{ property: 'Email', caption: 'Email', size: 4 },
+				{ property: 'FormattedRole', caption: 'Rol', size: 4 },
 				{
 					property: 'Cartographies',
 					caption: 'Cartografías',
@@ -77,16 +87,23 @@ import arr from '@/common/framework/arr';
 	methods: {
 		loadData() {
 			if (this.list.length == 0) {
-				var loc = this;
-				this.$refs.invoker.doMessage('Obteniendo usuarios', window.Db,
-					window.Db.GetUsers).then(function (data) {
-						for (var n = 0; n < data.length; n++) {
-							data[n].FormattedRole = loc.formatRole(data[n]);
-							data[n].FullName = loc.formatName(data[n]);
-						}
-						arr.AddRange(loc.list, data);
-					});
+				this.reloadData();
 			}
+		},
+		// Se llama tras un borrado: en vez de quitar el ítem del array local
+		// (que había quedado fallando en algún caso sin causa clara todavía),
+		// se vuelve a pedir la lista completa al servidor, que es la fuente
+		// de verdad y ya refleja el borrado correctamente.
+		reloadData() {
+			var loc = this;
+			this.$refs.invoker.doMessage('Obteniendo usuarios', window.Db,
+				window.Db.GetUsers).then(function (data) {
+					for (var n = 0; n < data.length; n++) {
+						data[n].FormattedRole = loc.formatRole(data[n]);
+						data[n].FullName = loc.formatName(data[n]);
+					}
+					arr.Fill(loc.list, data);
+				});
 		},
 		formatRole(v) {
 			var ret = '';
@@ -144,8 +161,8 @@ import arr from '@/common/framework/arr';
 		},
 		onItemDelete(item) {
 			var loc = this;
-			this.$refs.invoker.doMessage('Eliminando', window.Db, window.Db.DeleteUser, item).then(function () {
-				arr.Remove(loc.list, item);
+			this.$refs.invoker.do(window.Db, window.Db.DeleteUser, item, function () {
+				loc.reloadData();
 			});
 		},
   },

@@ -5,21 +5,23 @@
 
 			<geography-popup ref="editPopup" @completed="popupSaved">
 			</geography-popup>
+			<geography-clipping-regions-popup ref="editClippingRegionsPopup">
+			</geography-clipping-regions-popup>
 			<metadata-popup ref="editMetadataPopup">
 			</metadata-popup>
-			<div v-if="isAdmin" class="md-layout-item md-size-100">
+			<div v-if="canEdit" class="md-layout-item md-size-100">
 				<md-button @click="createNewGeography">
 					<md-icon>add_circle_outline</md-icon>
 					Nueva geografía
 				</md-button>
 			</div>
 			<div class="md-layout-item md-size-100">
-				<mp-grid compact
+				<mp-grid
 					:items="treeList" :pageSize="50"
 					:columns="gridColumns"
 					:actions="gridActions"
 					:rowClick="onRowClick"
-					:canDelete="isAdmin"
+					:canDelete="canEdit"
 					entityName="geografía"
 					:deleteConfirmMessage="deleteConfirmMessage"
 					@itemDelete="onItemDelete"
@@ -32,6 +34,7 @@
 <script>
 import Context from '@/backoffice/classes/Context';
 import GeographyPopup from './GeographyPopup.vue';
+import GeographyClippingRegionsPopup from './GeographyClippingRegionsPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
@@ -41,6 +44,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		name: 'Geographies',
 		components: {
 			GeographyPopup,
+			GeographyClippingRegionsPopup,
 			MetadataPopup
 		},
 	data() {
@@ -49,7 +53,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 			};
 	},
 	computed: {
-		isAdmin() {
+		canEdit() {
 			return window.Context.IsAdmin();
 		},
 		// El servidor entrega el listado plano, en orden, con el nivel de
@@ -68,6 +72,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 						}
 						return item.Caption;
 					},
+					tooltip: function (item) { return item.Metadata ? item.Metadata.Title : null; },
 				},
 				{ property: 'RootCaption', caption: 'Relevamiento' },
 				{ property: 'Gradient.Caption', caption: 'Gradiente' },
@@ -82,18 +87,32 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 				},
 			];
 		},
+		// 'Regiones asociadas' y 'Metadatos' son acciones de consulta: se
+		// abren igual sin importar el nivel de permisos (los popups que
+		// abren ya manejan su propia edición con :canEdit). Solo
+		// 'Modificar' cambia de ícono/etiqueta a 'Ver' cuando no se puede
+		// editar, en vez de ocultarse: sin esto no había forma de ver el
+		// detalle de una geografía sin permisos de edición.
 		gridActions() {
 			var loc = this;
-			if (!this.isAdmin) {
-				return [];
+			var editIcon = 'edit';
+			var editCaption = 'Modificar';
+			if (!this.canEdit) {
+				editIcon = 'visibility';
+				editCaption = 'Ver';
 			}
 			return [
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openEdition(item); } },
+				{ icon: editIcon, caption: editCaption, onClick: function (grid, item) { loc.openEdition(item); } },
+				{
+					icon: 'map',
+					caption: 'Regiones asociadas',
+					onClick: function (grid, item) { loc.openClippingRegions(item); },
+				},
 				{
 					icon: 'label',
 					caption: 'Metadatos',
-					isEnabled: function (item) { return !!item.Metadata; },
-					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
+					isEnabled: function (item) { return !!item.MetadataId; },
+					onClick: function (grid, item) { loc.openMetadata({ Id: item.MetadataId }); },
 				},
 			];
 		},
@@ -120,6 +139,9 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		},
 		openEdition(item) {
 			this.$refs.editPopup.show(item);
+		},
+		openClippingRegions(item) {
+			this.$refs.editClippingRegionsPopup.show(item);
 		},
 		onRowClick(grid, item) {
 			this.openEdition(item);

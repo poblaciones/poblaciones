@@ -1,32 +1,21 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog v-if="geographyTuple" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Equivalencia entre geografías</md-dialog-title>
-			<md-dialog-content v-if="geographyTuple">
+			<md-dialog-content>
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-100">
-						<mp-select :list="geographies" listGrouping="RootCaption"
+						<mp-select :list="geographies" listGrouping="RootCaption" :canEdit="canEdit"
 											 :model-key="false" label="Geografía"
 											 :render="formatGeography"
 											 v-model="geographyTuple.Geography" />
 					</div>
 					<div class="md-layout-item md-size-100">
-						<mp-select :list="geographies" listGrouping="RootCaption"
+						<mp-select :list="geographies" listGrouping="RootCaption" :canEdit="canEdit"
 											 :model-key="false" label="Geografía anterior equivalente"
 											 :render="formatGeography"
 											 v-model="geographyTuple.PreviousGeography" />
-					</div>
-					<div class="md-layout-item md-size-100">
-						<mp-select :list="geographies" listGrouping="RootCaption"
-											 :model-key="false" label="Geografía anterior de respaldo (opcional, nivel más detallado)"
-											 :allow-null="true" nullLabel="[Ninguna]"
-											 :render="formatGeography"
-											 v-model="geographyTuple.PreviousLowerGeography" />
-						<div class="helper">
-							Se usa para los ítems que no tengan una correspondencia clara contra la geografía
-							anterior equivalente, bajando a un nivel más detallado de esa misma revisión.
-						</div>
 					</div>
 					<div class="md-layout-item md-size-100" v-if="!isNew">
 						<div class="helper">
@@ -37,8 +26,8 @@
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">Guardar</md-button>
+				<md-button @click="activateEdit = false">{{ cancelCaption }}</md-button>
+				<md-button v-if="canEdit" class="md-primary" @click="save">Guardar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -59,6 +48,15 @@ export default {
     };
   },
   computed: {
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
+		cancelCaption() {
+			if (this.canEdit) {
+				return 'Cancelar';
+			}
+			return 'Cerrar';
+		},
 		isNew() {
 			return !this.geographyTuple.Id;
 		},

@@ -5,15 +5,16 @@
 
 			<geography-tuple-popup ref="editPopup" @completed="popupSaved">
 			</geography-tuple-popup>
+			<items-list-popup ref="itemsPopup">
+			</items-list-popup>
 			<metadata-popup ref="editMetadataPopup">
 			</metadata-popup>
 
 			<div class="md-layout-item md-size-100 helper">
-				Vincula los ítems de una geografía con su equivalente en una revisión anterior (por
-				ejemplo, cuando cambia el nombre o el esquema de una división geográfica entre censos),
+				Vincula los ítems de una geografía con su equivalente en una revisión anterior
 				para poder comparar series entre ediciones.
 			</div>
-			<div v-if="isAdmin" class="md-layout-item md-size-100">
+			<div v-if="canEdit" class="md-layout-item md-size-100">
 				<md-button @click="createNewTuple">
 					<md-icon>add_circle_outline</md-icon>
 					Nueva equivalencia
@@ -21,14 +22,16 @@
 			</div>
 			<div class="md-layout-item md-size-100">
 				<mp-grid
-					:items="list"
+					compact
+					:items="treeList"
 					:columns="gridColumns"
 					:actions="gridActions"
-					:rowClick="onRowClick"
-					:canDelete="isAdmin"
+					:canDelete="canEdit"
+					:isItemDeleteEnabled="isItemDeleteEnabled"
 					entityName="equivalencia"
 					:deleteConfirmMessage="deleteConfirmMessage"
-					@itemDelete="onItemDelete" />
+					@itemDelete="onItemDelete"
+					hasChildren />
 			</div>
 		</div>
 		<stepper ref="stepper" title="Calculando equivalencias" @completed="calculationCompleted"></stepper>
@@ -38,66 +41,117 @@
 <script>
 import Context from '@/backoffice/classes/Context';
 import GeographyTuplePopup from './GeographyTuplePopup.vue';
+import ItemsListPopup from '@/packs/components/popups/ItemsListPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import arr from '@/common/framework/arr';
+import c from '@/common/framework/color';
 import f from '@/backoffice/classes/Formatter';
+
+// Nivel artificial: agrupa las equivalencias por Geography (no viene del
+// servidor, que entrega una lista plana). Con muchas revisiones cruzadas,
+// una fila por tupla ("Departamentos 2022 - Departamentos 2010") es
+// difícil de leer; agrupada por la geografía actual, cada una de sus
+// equivalencias anteriores queda como hija.
+const PARENT_LEVEL = -1;
 
 	export default {
 		name: 'GeographyTuples',
 		components: {
 			GeographyTuplePopup,
+			ItemsListPopup,
 			MetadataPopup,
 		},
 	data() {
 		return {
 			list: [],
 			calculatingItem: null,
+			uniqueMetadatas: [],
 			};
 	},
 	computed: {
-		isAdmin() {
+		canEdit() {
 			return window.Context.IsAdmin();
+		},
+		treeList() {
+			var groupsByGeographyId = {};
+			var order = [];
+			for (var i = 0; i < this.list.length; i++) {
+				var tuple = this.list[i];
+				var geoId = tuple.Geography.Id;
+				if (!groupsByGeographyId[geoId]) {
+					var groupNode = {
+						Id: 'geo-' + geoId,
+						Level: PARENT_LEVEL,
+						Geography: tuple.Geography,
+						Items: [],
+					};
+					groupsByGeographyId[geoId] = groupNode;
+					order.push(groupNode);
+				}
+				groupsByGeographyId[geoId].Items.push(tuple);
+			}
+			return order;
 		},
 		gridColumns() {
 			var loc = this;
 			return [
 				{
 					property: 'Geography.Caption', caption: 'Geografía',
-					value: function (item) { return loc.formatGeography(item.Geography); },
-				},
-				{
-					property: 'PreviousGeography.Caption', caption: 'Geografía anterior equivalente',
-					value: function (item) { return loc.formatGeography(item.PreviousGeography); },
-				},
-				{
-					property: 'PreviousLowerGeography.Caption', caption: 'Respaldo (nivel detallado)',
 					value: function (item) {
-						if (item.PreviousLowerGeography) {
-							return loc.formatGeography(item.PreviousLowerGeography);
+						if (item.Level === PARENT_LEVEL) {
+							return loc.formatGeography(item.Geography);
 						}
-						return '-';
+						return loc.formatGeography(item.PreviousGeography);
+					},
+					tooltip: function (item) {
+						if (item.Level === PARENT_LEVEL) {
+							return null;
+						}
+						return item.Metadata ? item.Metadata.Title : null;
 					},
 				},
-				{ property: 'ChildCount', caption: 'Ítems calculados', sortType: 'number' },
+				{
+					property: 'ChildCount', caption: 'Ítems calculados', sortType: 'number',
+					value: function (item) {
+						if (item.Level === PARENT_LEVEL) {
+							return '';
+						}
+						return item.ChildCount;
+					},
+				},
 			];
 		},
+		// 'Nueva equivalencia' (creación) y 'Calcular' (modifica datos) solo
+		// con permiso de edición. 'Ver ítems' y 'Metadatos' son consulta
+		// pura: siempre visibles.
 		gridActions() {
 			var loc = this;
-			if (!this.isAdmin) {
-				return [];
-			}
 			return [
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openEdition(item); } },
+				{
+					icon: 'add_circle_outline',
+					caption: 'Nueva equivalencia',
+					isEnabled: function (item) { return item.Level === PARENT_LEVEL && loc.canEdit; },
+					onClick: function (grid, item) { loc.createNewTupleFor(item.Geography); },
+				},
 				{
 					icon: 'sync',
 					caption: 'Calcular',
+					isEnabled: function (item) { return item.Level !== PARENT_LEVEL && loc.canEdit; },
 					onClick: function (grid, item) { loc.calculate(item); },
+				},
+				{
+					icon: 'search',
+					caption: 'Ver ítems',
+					isEnabled: function (item) { return item.Level !== PARENT_LEVEL; },
+					onClick: function (grid, item) { loc.openItems(item); },
 				},
 				{
 					icon: 'label',
 					caption: 'Metadatos',
-					isEnabled: function (item) { return !!item.Metadata; },
-					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
+					iconStyle: function (item) { return 'color: #' + loc.resolveColor(item); },
+					badge: function (item) { return item.MetadataId; },
+					isEnabled: function (item) { return item.Level !== PARENT_LEVEL && !!item.MetadataId; },
+					onClick: function (grid, item) { loc.openMetadata({ Id: item.MetadataId }); },
 				},
 			];
 		},
@@ -107,6 +161,12 @@ import f from '@/backoffice/classes/Formatter';
 		this.$refs.invoker.doMessage('Obteniendo equivalencias', window.Db,
 				window.Db.GetGeographyTuples).then(function(data) {
 					arr.AddRange(loc.list, data);
+					loc.list.forEach(function (item) {
+						var id = item.MetadataId;
+						if (id && !loc.uniqueMetadatas.includes(id)) {
+							loc.uniqueMetadatas.push(id);
+						}
+					});
 			});
 	},
 	methods: {
@@ -122,11 +182,18 @@ import f from '@/backoffice/classes/Formatter';
 		createNewTuple() {
 			var loc = this;
 			window.Context.Factory.GetCopy('GeographyTuple', function(data) {
-					loc.openEdition(data);
+					loc.$refs.editPopup.show(data);
 			});
 		},
-		openEdition(item) {
-			this.$refs.editPopup.show(item);
+		// Desde el '+' de un grupo ya existente: la geografía actual llega
+		// preseleccionada, el usuario solo tiene que elegir la equivalente
+		// anterior.
+		createNewTupleFor(geography) {
+			var loc = this;
+			window.Context.Factory.GetCopy('GeographyTuple', function(data) {
+					data.Geography = geography;
+					loc.$refs.editPopup.show(data);
+			});
 		},
 		openMetadata(metadata) {
 			var loc = this;
@@ -134,8 +201,17 @@ import f from '@/backoffice/classes/Formatter';
 				loc.$refs.editMetadataPopup.show(activeMetadata);
 			});
 		},
-		onRowClick(grid, item) {
-			this.openEdition(item);
+		resolveColor(item) {
+			if (!item.MetadataId) {
+				return '';
+			}
+			var palete = c.GetColorPalete();
+			var position = this.uniqueMetadatas.indexOf(item.MetadataId);
+			var positionTrimed = position % palete.length;
+			return palete[positionTrimed];
+		},
+		isItemDeleteEnabled(item) {
+			return item.Level !== PARENT_LEVEL;
 		},
 		popupSaved(item) {
 			arr.ReplaceByIdOrAdd(this.list, item);
@@ -147,6 +223,22 @@ import f from '@/backoffice/classes/Formatter';
 			stepper.stepUrl = window.Db.GetStepGeographyTupleCalculateUrl();
 			stepper.args = { t: item.Id };
 			stepper.Start();
+		},
+		openItems(item) {
+			this.$refs.itemsPopup.show(
+				'Ítems de ' + this.formatGeography(item.PreviousGeography),
+				[
+					{ property: 'Caption', caption: 'Nombre actual' },
+					{ property: 'Code', caption: 'Código actual' },
+					{ property: 'PreviousCaption', caption: 'Nombre anterior' },
+					{ property: 'PreviousCode', caption: 'Código anterior' },
+					{ property: 'IsPartial', caption: 'Parcial' },
+					{ property: 'Id', caption: 'Id' },
+				],
+				function (offset, pageSize) {
+					return window.Db.GetGeographyTupleCalculatedItems(item.Id, offset, pageSize);
+				}
+			);
 		},
 		calculationCompleted() {
 			var stepper = this.$refs.stepper;

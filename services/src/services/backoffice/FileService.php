@@ -6,7 +6,7 @@ use helena\classes\App;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\PdfReader;
-use helena\services\admin as adminServices;
+use helena\services\packs as packsServices;
 use minga\framework\Str;
 use minga\framework\FileBucket;
 use minga\framework\PublicException;
@@ -30,8 +30,8 @@ class FileService extends BaseService
 		// Se fija si tiene que generarle un id
 		if (!$this->isDraft)
 		{
-			$adminServices = new adminServices\MetadataService();
-			$adminServices->EnsureId(entities\File::class, $fileObject);
+			$packsServices = new packsServices\MetadataService();
+			$packsServices->EnsureId(entities\File::class, $fileObject);
 		}
 		App::Orm()->save($fileObject);
 		$fileId = $fileObject->getId();
@@ -94,8 +94,8 @@ class FileService extends BaseService
 		{
 			$idArgs = ", chu_id";
 			$idParam = ", ?";
-			$adminServices = new adminServices\MetadataService();
-			$nextId = $adminServices->GetNextId(entities\FileChunk::class);
+			$packsServices = new packsServices\MetadataService();
+			$nextId = $packsServices->GetNextId(entities\FileChunk::class);
 		}
 		else {
 			$idArgs = "";

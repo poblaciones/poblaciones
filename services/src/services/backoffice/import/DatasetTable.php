@@ -210,7 +210,7 @@ class DatasetTable
 			$measureLevels = Measurement::GetCode($header["measureLevels"][$varName]);
 			$alignment = Alignment::GetCode($header["alignments"][$varName]);
 
-			// PARSEA format F1.0, A20 -> type, width, decimals
+			// PARSEA format F1.0, N3, A20 -> type, width, decimals
 			$first = '';
 			$last = '';
 			$format = $header["varFormats"][$varName];
@@ -227,7 +227,9 @@ class DatasetTable
 			$sqlType = self::SpssToMySqlDataType($spssType, $fieldWidth);
 			$fieldName = "dt_col" . (sizeof($array) + 1);
 
-			$fileTableHeader = new FileTableHeader($varName, $fieldName, $sqlType, $spssType, $fieldWidth, $columnWidth, $label, $measureLevels, $alignment, $decimals);
+			// El N con padding queda como texto
+			$spssTypeSimplified = ($spssType === Format::N ? Format::A : $spssType);
+			$fileTableHeader = new FileTableHeader($varName, $fieldName, $sqlType, $spssTypeSimplified, $fieldWidth, $columnWidth, $label, $measureLevels, $alignment, $decimals);
 
 			if (array_key_exists($varName, $header["varLabels"]))
 			{
@@ -256,7 +258,7 @@ class DatasetTable
 		else if ($varType == Format::Geometry)
 			return "GEOMETRY";
 
-		// TEXTO
+		// TEXTO o Format::N (número con leadings)
 		if ($fieldWidth > 255)
 			return "MEDIUMTEXT";
 		else

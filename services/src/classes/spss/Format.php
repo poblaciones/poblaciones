@@ -59,10 +59,12 @@ class Format
 		{
 			case self::A:
 				return 'A';
+			case self::N:
+				return 'N';
 			case self::F:
 				return 'F';
 			default:
-				throw new PublicException('Format de columna no soportado');
+				self::ThrowUnsupportedFormat($value);
 		}
 	}
 	public static function ThrowUnsupportedFormat($format)
@@ -106,7 +108,7 @@ class Format
 		}
 		if ($extra != '') $extra = ': ' . $extra;
 
-		throw new PublicException('Format de columna no soportado' . $extra);
+		throw new PublicException('Format de columna no soportado (' . $extra . ')');
 	}
 
 	public static function GetCode($value)
@@ -117,9 +119,10 @@ class Format
 				return self::A;
 			case 'F':
 				return self::F;
+			case 'N':
+				return self::N;
 			default:
-				self::ThrowUnsupportedFormat($value);
-				return null;
+				throw new PublicException('Format de columna no soportado: ' . $value);
 		}
 	}
 }

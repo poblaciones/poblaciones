@@ -328,7 +328,6 @@
 }
 
 .md-dialog-container {
-	max-width: calc(min(780px, 100%)) !important;
 	max-height: 95% !important;
 }
 .md-tab {

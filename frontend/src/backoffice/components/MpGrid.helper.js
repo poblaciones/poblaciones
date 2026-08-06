@@ -132,7 +132,9 @@ module.exports = {
 		} else if (type === 'boolean') {
 			return valueA === valueB ? 0 : (valueA ? 1 : -1);
 		} else {
-			return str.humanCompare('' + valueA, '' + valueB);
+			valueA = (valueA === null || valueA === undefined ? '' : '' + valueA);
+			valueB = (valueB === null || valueB === undefined ? '' : '' + valueB);
+			return str.humanCompare(valueA.trim(), valueB.trim());
 		}
 	},
 

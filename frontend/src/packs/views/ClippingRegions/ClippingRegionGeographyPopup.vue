@@ -2,14 +2,16 @@
 	<div>
 		<invoker ref="invoker"></invoker>
 		<geography-selection-popup ref="selectionPopup" @selected="onGeographiesSelected"></geography-selection-popup>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<items-list-popup ref="itemsPopup">
+		</items-list-popup>
+		<md-dialog v-if="clippingRegion" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>{{ dialogTitle }}</md-dialog-title>
-			<md-dialog-content v-if="clippingRegion">
+			<md-dialog-content>
 				<div class="helper">
 					Al asociar una geografía se calculan las intersecciones entre los ítems de la región y
 					los de esa geografía. El cálculo puede demorar.
 				</div>
-				<md-button @click="openSelection">
+				<md-button v-if="canEdit" @click="openSelection">
 					<md-icon>add_circle_outline</md-icon>
 					Agregar geografías
 				</md-button>
@@ -19,8 +21,13 @@
 				<md-table v-else v-model="associated" md-card>
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
 						<md-table-cell md-label="Geografía">{{ formatGeography(item.Geography) }}</md-table-cell>
+						<md-table-cell md-label="Ítems">{{ item.ItemCount }}</md-table-cell>
 						<md-table-cell md-label="Acciones" class="mpNoWrap">
-							<md-button class="md-icon-button" @click="confirmRemoveAssociation(item)">
+							<md-button class="md-icon-button" @click="openItems(item)">
+								<md-icon>search</md-icon>
+								<md-tooltip md-direction="bottom">Ver ítems</md-tooltip>
+							</md-button>
+							<md-button v-if="canEdit" class="md-icon-button" @click="confirmRemoveAssociation(item)">
 								<md-icon>delete</md-icon>
 								<md-tooltip md-direction="bottom">Quitar</md-tooltip>
 							</md-button>
@@ -38,12 +45,14 @@
 
 <script>
 
-import GeographySelectionPopup from './GeographySelectionPopup.vue';
+import GeographySelectionPopup from '@/packs/components/popups/GeographySelectionPopup.vue';
+import ItemsListPopup from '@/packs/components/popups/ItemsListPopup.vue';
 
 export default {
 	name: 'ClippingRegionGeographyPopup',
 	components: {
 		GeographySelectionPopup,
+		ItemsListPopup,
 	},
 	data() {
 		return {
@@ -54,9 +63,16 @@ export default {
 		};
 	},
 	computed: {
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
 		dialogTitle() {
 			if (this.clippingRegion) {
-				return 'Geografías asociadas a ' + this.clippingRegion.Caption;
+				var caption = this.clippingRegion.Caption;
+				if (this.clippingRegion.Version) {
+					caption += ', ' + this.clippingRegion.Version;
+				}
+				return 'Geografías asociadas a ' + caption;
 			}
 			return 'Geografías asociadas';
 		},
@@ -95,6 +111,20 @@ export default {
 				associatedIds.push(this.associated[n].Geography.Id);
 			}
 			this.$refs.selectionPopup.show(this.allGeographies, associatedIds);
+		},
+		openItems(item) {
+			this.$refs.itemsPopup.show(
+				'Ítems de ' + this.formatGeography(item.Geography),
+				[
+					{ property: 'Caption', caption: 'Nombre' },
+					{ property: 'Code', caption: 'Código' },
+					{ property: 'IntersectionPercent', caption: '% intersección' },
+					{ property: 'Id', caption: 'Id' },
+				],
+				function (offset, pageSize) {
+					return window.Db.GetClippingRegionGeographyIntersectionItems(item.Id, offset, pageSize);
+				}
+			);
 		},
 		onGeographiesSelected(geographyIds) {
 			if (geographyIds.length === 0) {

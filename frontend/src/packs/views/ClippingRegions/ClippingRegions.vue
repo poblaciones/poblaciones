@@ -7,21 +7,23 @@
 			</clippingRegion-popup>
 			<clipping-region-geography-popup ref="editGeographyPopup">
 			</clipping-region-geography-popup>
+			<items-list-popup ref="itemsPopup">
+			</items-list-popup>
 			<metadata-popup ref="editMetadataPopup">
 			</metadata-popup>
-			<div v-if="isAdmin" class="md-layout-item md-size-100">
+			<div v-if="canEdit" class="md-layout-item md-size-100">
 				<md-button @click="createNewClippingRegion">
 					<md-icon>add_circle_outline</md-icon>
 					Nueva región
 				</md-button>
 			</div>
 			<div class="md-layout-item md-size-100">
-				<mp-grid compact
+				<mp-grid
 					:items="treeList" :pageSize="50"
 					:columns="gridColumns"
 					:actions="gridActions"
 					:rowClick="onRowClick"
-					:canDelete="isAdmin"
+					:canDelete="canEdit"
 					entityName="región"
 					:deleteConfirmMessage="deleteConfirmMessage"
 					@itemDelete="onItemDelete"
@@ -35,6 +37,7 @@
 import Context from '@/backoffice/classes/Context';
 import ClippingRegionPopup from './ClippingRegionPopup.vue';
 import ClippingRegionGeographyPopup from './ClippingRegionGeographyPopup.vue';
+import ItemsListPopup from '@/packs/components/popups/ItemsListPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
@@ -46,6 +49,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		components: {
 			ClippingRegionPopup,
 			ClippingRegionGeographyPopup,
+			ItemsListPopup,
 			MetadataPopup
 		},
 	data() {
@@ -54,7 +58,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 			};
 	},
 	computed: {
-		isAdmin() {
+		canEdit() {
 			return window.Context.IsAdmin();
 		},
 		// El servidor entrega el listado plano, en orden, con el nivel de
@@ -76,6 +80,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 						ret += ' (' + item.LabelsMinZoom + '-' + item.LabelsMaxZoom + ')';
 						return ret;
 					},
+					tooltip: function (item) { return item.Metadata ? item.Metadata.Title : null; },
 				},
 				{
 					property: 'Color', caption: 'Color', html: true, sortable: false, size: 1,
@@ -103,23 +108,35 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 				{ property: 'FieldCodeName', caption: 'Códigos' },
 			];
 		},
+		// 'Geografías asociadas', 'Ver ítems' y 'Metadatos' son acciones de
+		// consulta: se muestran sin importar el nivel de permisos. Solo
+		// 'Modificar' se degrada a 'Ver' cuando no se puede editar, en vez
+		// de ocultarse.
 		gridActions() {
 			var loc = this;
-			if (!this.isAdmin) {
-				return [];
+			var editIcon = 'edit';
+			var editCaption = 'Modificar';
+			if (!this.canEdit) {
+				editIcon = 'visibility';
+				editCaption = 'Ver';
 			}
 			return [
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openEdition(item); } },
+				{ icon: editIcon, caption: editCaption, onClick: function (grid, item) { loc.openEdition(item); } },
 				{
 					icon: 'public',
 					caption: 'Geografías asociadas',
 					onClick: function (grid, item) { loc.openGeographies(item); },
 				},
 				{
+					icon: 'search',
+					caption: 'Ver ítems',
+					onClick: function (grid, item) { loc.openItems(item); },
+				},
+				{
 					icon: 'label',
 					caption: 'Metadatos',
-					isEnabled: function (item) { return !!item.Metadata; },
-					onClick: function (grid, item) { loc.openMetadata(item.Metadata); },
+					isEnabled: function (item) { return !!item.MetadataId; },
+					onClick: function (grid, item) { loc.openMetadata({ Id: item.MetadataId }); },
 				},
 			];
 		},
@@ -169,6 +186,19 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		},
 		openGeographies(item) {
 			this.$refs.editGeographyPopup.show(item);
+		},
+		openItems(item) {
+			this.$refs.itemsPopup.show(
+				'Ítems de ' + item.Caption,
+				[
+					{ property: 'Caption', caption: 'Nombre' },
+					{ property: 'Code', caption: 'Código' },
+					{ property: 'Id', caption: 'Id' },
+				],
+				function (offset, pageSize) {
+					return window.Db.GetClippingRegionItems(item.Id, offset, pageSize);
+				}
+			);
 		},
 		onRowClick(grid, item) {
 			this.openEdition(item);

@@ -5,7 +5,7 @@
 
 			<gradient-popup ref="editPopup" @completed="popupSaved">
 			</gradient-popup>
-			<div v-if="isAdmin" class="md-layout-item md-size-100">
+			<div v-if="canEdit" class="md-layout-item md-size-100">
 				<md-button @click="createNewGradient">
 					<md-icon>add_circle_outline</md-icon>
 					Nuevo gradiente
@@ -17,7 +17,7 @@
 					:columns="gridColumns"
 					:actions="gridActions"
 					:rowClick="onRowClick"
-					:canDelete="isAdmin"
+					:canDelete="canEdit"
 					entityName="gradiente"
 					:deleteConfirmMessage="deleteConfirmMessage"
 					@itemDelete="onItemDelete" />
@@ -42,7 +42,7 @@ import arr from '@/common/framework/arr';
 			};
 	},
 	computed: {
-		isAdmin() {
+		canEdit() {
 			return window.Context.IsAdmin();
 		},
 		gridColumns() {
@@ -62,11 +62,14 @@ import arr from '@/common/framework/arr';
 		},
 		gridActions() {
 			var loc = this;
-			if (!this.isAdmin) {
-				return [];
+			var editIcon = 'edit';
+			var editCaption = 'Modificar';
+			if (!this.canEdit) {
+				editIcon = 'visibility';
+				editCaption = 'Ver';
 			}
 			return [
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openEdition(item); } },
+				{ icon: editIcon, caption: editCaption, onClick: function (grid, item) { loc.openEdition(item); } },
 			];
 		},
 	},

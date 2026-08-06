@@ -32,11 +32,54 @@ class BoundaryService extends BaseService
 	public function GetBoundaries()
 	{
 		Profiling::BeginTimer();
+		$this->EnsureAllOrdersAssigned();
 		$boundaries = App::Orm()->findAll(entities\Boundary::class, array('Order' => 'ASC'));
 		$this->AddContent($boundaries);
 		$ret = $this->AddVersions($boundaries);
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	// bou_order puede haber quedado en NULL para delimitaciones creadas
+	// antes de que el alta empezara a asignarlo automáticamente (ver
+	// UpdateBoundary). Mientras conviven, en un mismo grupo, algunas con
+	// Order asignado y otras en NULL, subir/bajar se vuelve errático: en
+	// SQL, cualquier comparación contra NULL da NULL (nunca verdadero),
+	// así que SwapBoundaryOrder salta por encima de las que están en
+	// NULL al buscar el vecino, intercambiando con una que no es la
+	// visualmente adyacente. Se normaliza acá, antes de listar, en vez
+	// de dejar que la inconsistencia se acumule: si CUALQUIER
+	// delimitación del sistema está en NULL, se asigna Order a TODAS las
+	// de su grupo de una sola vez (no solo a la que se estaba por
+	// mover), así no queda una mezcla de "algunas con valor, otras sin".
+	private function EnsureAllOrdersAssigned()
+	{
+		$groupIds = App::Db()->fetchAll(
+			"SELECT DISTINCT bou_group_id FROM boundary WHERE bou_order IS NULL");
+		foreach ($groupIds as $row)
+		{
+			$this->NormalizeGroupOrder($row['bou_group_id']);
+		}
+	}
+
+	// Los que estaban en NULL se ubican primero, ordenados por nombre
+	// (mismo criterio con el que MpGridHelper.CompareByColumn ya los
+	// trataba visualmente: un valor null se compara como menor que
+	// cualquier otro, así que aparecían primero incluso antes de
+	// normalizar); los que ya tenían Order asignado mantienen su orden
+	// relativo entre sí, a continuación.
+	private function NormalizeGroupOrder($groupId)
+	{
+		$rows = App::Db()->fetchAll(
+			"SELECT bou_id FROM boundary WHERE bou_group_id = ?
+			 ORDER BY (bou_order IS NULL) DESC, bou_order ASC, bou_caption ASC",
+			array($groupId));
+		$order = 1;
+		foreach ($rows as $row)
+		{
+			App::Db()->execute("UPDATE boundary SET bou_order = ? WHERE bou_id = ?", array($order, $row['bou_id']));
+			$order++;
+		}
 	}
 
 	public function GetBoundaryGroups()
@@ -73,7 +116,7 @@ class BoundaryService extends BaseService
 	{
 		Profiling::BeginTimer();
 
-		if ($boundary->getId() === null && $boundary->getOrder() === null)
+		if ($boundary->getId() === null)
 		{
 			$boundary->setOrder($this->GetNextBoundaryOrder($boundary->getGroup()->getId()));
 		}
@@ -115,6 +158,13 @@ class BoundaryService extends BaseService
 	private function SwapBoundaryOrder($boundaryId, $up)
 	{
 		Profiling::BeginTimer();
+		$boundary = App::Orm()->find(entities\Boundary::class, $boundaryId);
+		// Salvaguarda: normaliza el grupo también acá, no solo al listar,
+		// por si este método se llegara a invocar sin haber pasado antes
+		// por GetBoundaries(). NormalizeGroupOrder escribe con SQL
+		// directo, así que se vuelve a pedir el boundary para no operar
+		// sobre un Order desactualizado que quedó en memoria.
+		$this->NormalizeGroupOrder($boundary->getGroup()->getId());
 		$boundary = App::Orm()->find(entities\Boundary::class, $boundaryId);
 
 		$comparison = '>';
@@ -181,9 +231,19 @@ class BoundaryService extends BaseService
 	// ids de las regiones asociadas (ClippingRegions no es una asociación
 	// Doctrine, es una propiedad simple: la tabla intermedia se sincroniza
 	// a mano).
-	public function UpdateBoundaryVersion($boundaryVersion, $clippingRegionIds)
+	// El switch de "usa metadatos propios" del formulario no es un campo
+	// de la base: se infiere de si bvr_metadata_id es NULL o no. Antes
+	// de guardar, se sincroniza ese estado con lo que decidió el
+	// usuario, creando un metadata mínimo si se acaba de activar, o
+	// liberando (borrando) el que tenía si se acaba de desactivar. Si el
+	// estado no cambió, no se toca nada acá: si ya tenía metadata propia
+	// y sigue activada, el objeto que llega del formulario ya trae esa
+	// referencia intacta.
+	public function UpdateBoundaryVersion($boundaryVersion, $clippingRegionIds, $hasOwnMetadata)
 	{
 		Profiling::BeginTimer();
+
+		$this->SyncVersionMetadata($boundaryVersion, $hasOwnMetadata);
 
 		App::Orm()->Save($boundaryVersion);
 		$this->SyncClippingRegions($boundaryVersion->getId(), $clippingRegionIds);
@@ -194,12 +254,59 @@ class BoundaryService extends BaseService
 		$cacheManager->CleanFabMetricsCache();
 
 		$summary = App::Db()->fetchScalarNullable(
-			"SELECT GROUP_CONCAT(clr_caption SEPARATOR ', ') FROM boundary_version_clipping_region
+			"SELECT GROUP_CONCAT(
+				CASE WHEN clr_version IS NOT NULL AND clr_version != '' THEN CONCAT(clr_caption, ', ', clr_version) ELSE clr_caption END
+				SEPARATOR '; ') FROM boundary_version_clipping_region
 			 JOIN clipping_region ON clr_id = bcr_clipping_region_id
 			 WHERE bcr_boundary_version_id = ?", array($boundaryVersion->getId()));
 
 		Profiling::EndTimer();
-		return array('ClippingRegionsSummary' => $summary);
+		return array('ClippingRegionsSummary' => $summary, 'MetadataId' => $this->GetMetadataId($boundaryVersion));
+	}
+
+	private function GetMetadataId($boundaryVersion)
+	{
+		if ($boundaryVersion->getMetadata() === null)
+		{
+			return null;
+		}
+		return $boundaryVersion->getMetadata()->getId();
+	}
+
+	private function SyncVersionMetadata($boundaryVersion, $hasOwnMetadata)
+	{
+		$existingMetadataId = null;
+		if ($boundaryVersion->getId() !== null)
+		{
+			$existingMetadataId = App::Db()->fetchScalarIntNullable(
+				"SELECT bvr_metadata_id FROM boundary_version WHERE bvr_id = ?", array($boundaryVersion->getId()));
+		}
+
+		if ($hasOwnMetadata && $existingMetadataId === null)
+		{
+			$metadataService = new MetadataService();
+			$metadata = $metadataService->CreateMinimalMetadata($boundaryVersion->getCaption(), null);
+			$boundaryVersion->setMetadata($metadata);
+		}
+		else if (!$hasOwnMetadata && $existingMetadataId !== null)
+		{
+			$this->DeleteMetadataAndContact($existingMetadataId);
+			$boundaryVersion->setMetadata(null);
+		}
+	}
+
+	// metadata_ibfk_1 (met_contact_id -> contact.con_id) tiene ON DELETE
+	// CASCADE: borrar el contacto borra el metadata solo, y con él, en
+	// cascada también, sus relaciones con instituciones o fuentes si las
+	// tuviera. No hace falta borrar el metadata explícitamente.
+	private function DeleteMetadataAndContact($metadataId)
+	{
+		$contactId = App::Db()->fetchScalarIntNullable(
+			"SELECT met_contact_id FROM metadata WHERE met_id = ?", array($metadataId));
+		if ($contactId !== null)
+		{
+			App::Db()->delete('contact', array('con_id' => $contactId));
+		}
 	}
 
 	private function SyncClippingRegions($boundaryVersionId, $clippingRegionIds)
@@ -267,7 +374,8 @@ class BoundaryService extends BaseService
 	private function AddClippingRegions(&$versions)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT bcr_boundary_version_id AS VersionId, clr_id AS Id, clr_caption AS Caption
+		$sql = "SELECT bcr_boundary_version_id AS VersionId, clr_id AS Id, clr_caption AS Caption, clr_version AS Version,
+						clr_metadata_id AS MetadataId
 					FROM boundary_version_clipping_region
 					JOIN clipping_region ON clr_id = bcr_clipping_region_id
 					ORDER BY clr_caption";
@@ -280,12 +388,17 @@ class BoundaryService extends BaseService
 			{
 				if ($row['VersionId'] == $version->getId())
 				{
-					$regions[] = array('Id' => $row['Id'], 'Caption' => $row['Caption']);
-					$captions[] = $row['Caption'];
+					$regions[] = array('Id' => $row['Id'], 'Caption' => $row['Caption'], 'Version' => $row['Version'], 'MetadataId' => $row['MetadataId']);
+					$caption = $row['Caption'];
+					if ($row['Version'])
+					{
+						$caption .= ', ' . $row['Version'];
+					}
+					$captions[] = $caption;
 				}
 			}
 			$version->ClippingRegions = $regions;
-			$version->ClippingRegionsSummary = implode(', ', $captions);
+			$version->ClippingRegionsSummary = implode('; ', $captions);
 		}
 		Profiling::EndTimer();
 	}

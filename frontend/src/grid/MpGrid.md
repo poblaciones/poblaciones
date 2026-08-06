@@ -101,7 +101,7 @@ Cada columna es un objeto. Propiedades comunes a todos los tipos:
 |---|---|
 | `property` | Propiedad del ítem. Admite notación de punto: `'Group.Caption'`. |
 | `caption` | Título de la columna. Si se omite, se usa `property`. |
-| `size` | `1` a `5` (80/130/180/240/400px). Sin `size`, el ancho se ajusta al título y a la cantidad de íconos. |
+| `size` | `1` a `7` (80/130/180/240/320/400/500px). Sin `size`, el ancho se ajusta al título y a la cantidad de íconos. |
 | `width` | Ancho en píxeles (número). Pisa a `size` si ambos están. |
 | `align` | Alineación del **contenido**: `'left'`, `'center'`, `'right'`. Default: izquierda en la descriptiva, centro en las demás. |
 | `sortable` | `false` para que no se pueda ordenar por ella. |

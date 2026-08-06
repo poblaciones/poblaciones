@@ -15,6 +15,7 @@ else
 	$uri = $_SERVER['REQUEST_URI'];
 
 $isPublic = isPublicPath($uri);
+/*
 $isLocal = isLocalPHP($uri);
 
 if ($isLocal) {
@@ -22,7 +23,7 @@ if ($isLocal) {
 	require_once __DIR__ . $uri;
 	exit();
 }
-
+*/
 $startTotalTime = microtime(true);
 
 require_once __DIR__ . '/../startup.php';
@@ -37,11 +38,11 @@ time_elapsed('fin run');
 
 //outwrite();
 
-function isLocalPHP($uri)
+/*function isLocalPHP($uri)
 {
 	$parts = explode('/', $uri);
 	return (sizeof($parts) == 2 && file_exists(__DIR__ . $uri)) && endsWithString($uri, '.php');
-}
+}*/
 
 function isPublicPath($uri)
 {

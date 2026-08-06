@@ -1,28 +1,23 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog v-if="boundary" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Delimitación</md-dialog-title>
-			<md-dialog-content v-if="boundary">
+			<md-dialog-content>
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Nombre" ref="inputName"
+						<mp-simple-text label="Nombre" ref="inputName" :canEdit="canEdit"
 														helper="Nombre a mostrar del límite"
 														v-model="boundary.Caption" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-40">
-						<mp-select :list="groups"
+						<mp-select :list="groups" :canEdit="canEdit"
 											 :model-key="false" label="Grupo"
 											 helper="Grupo de límites al que pertenece"
 											 v-model="boundary.Group" />
 					</div>
 					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Orden" type="number"
-														helper="Orden en que se muestran las delimitaciones"
-														v-model="boundary.Order" @enter="save" />
-					</div>
-					<div class="md-layout-item md-size-40">
-						<mp-simple-text label="Tag" helper="Identificador para WFS (minúsculas, sin acentos, espacios como guion bajo)"
+						<mp-simple-text label="Tag" :canEdit="canEdit" helper="Identificador para WFS (minúsculas, sin acentos, espacios como guion bajo)"
 														v-model="boundary.Tag" @enter="save" />
 					</div>
 
@@ -31,12 +26,12 @@
 					</div>
 					<div class="md-layout-item md-size-40">
 						<div class="mp-label">Ordenar ítems por</div>
-						<md-radio v-model="boundary.SortBy" class="md-primary" value="N">Nombre</md-radio>
-						<md-radio v-model="boundary.SortBy" class="md-primary" value="P">Población</md-radio>
-						<md-radio v-model="boundary.SortBy" class="md-primary" value="C">Código</md-radio>
+						<md-radio v-model="boundary.SortBy" class="md-primary" value="N" :disabled="!canEdit">Nombre</md-radio>
+						<md-radio v-model="boundary.SortBy" class="md-primary" value="P" :disabled="!canEdit">Población</md-radio>
+						<md-radio v-model="boundary.SortBy" class="md-primary" value="C" :disabled="!canEdit">Código</md-radio>
 					</div>
 					<div class="md-layout-item md-size-40">
-						<md-switch class="md-primary" v-model="boundary.GroupByParent" style="padding-top: 18px">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="boundary.GroupByParent" style="padding-top: 18px">
 							Agrupar items al listar para selección (ej. Departamentos se agrupan por Provincia)
 						</md-switch>
 					</div>
@@ -45,24 +40,24 @@
 						<div class="separator">Visibilidad</div>
 					</div>
 					<div class="md-layout-item md-size-100">
-						<md-switch class="md-primary" v-model="isPublic">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="isPublic">
 							Público (se encuentra visible a todos los usuarios)
 						</md-switch>
 					</div>
 					<div class="md-layout-item md-size-100">
-						<md-switch class="md-primary" v-model="boundary.IsSuggestion">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="boundary.IsSuggestion">
 							Recomendado (para delimitaciones sugeridas [obsoleto])
 						</md-switch>
 						<div class="md-layout-item md-size-80" style="margin-left: 52px" v-if="boundary.IsSuggestion">
-							<mp-simple-text label="Ícono para la recomendación (Material Icon)"
+							<mp-simple-text label="Ícono para la recomendación (Material Icon)" :canEdit="canEdit"
 															v-model="boundary.Icon" @enter="save" />
 						</div>
 					</div>
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">Guardar</md-button>
+				<md-button @click="activateEdit = false">{{ cancelCaption }}</md-button>
+				<md-button v-if="canEdit" class="md-primary" @click="save">Guardar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -85,7 +80,15 @@ export default {
     };
   },
   computed: {
-
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
+		cancelCaption() {
+			if (this.canEdit) {
+				return 'Cancelar';
+			}
+			return 'Cerrar';
+		},
   },
 	watch: {
 		'boundary.Caption'(newValue) {

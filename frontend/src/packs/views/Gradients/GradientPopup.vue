@@ -1,21 +1,21 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog v-if="gradient" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Gradiente</md-dialog-title>
-			<md-dialog-content v-if="gradient">
+			<md-dialog-content>
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-70">
-						<mp-simple-text label="Nombre" ref="inputName"
+						<mp-simple-text label="Nombre" ref="inputName" :canEdit="canEdit"
 														v-model="gradient.Caption" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-30">
 						<div class="mp-label">Tipo de imagen</div>
-						<md-radio v-model="gradient.ImageType" class="md-primary" value="image/jpeg">JPG</md-radio>
-						<md-radio v-model="gradient.ImageType" class="md-primary" value="image/png">PNG</md-radio>
+						<md-radio v-model="gradient.ImageType" class="md-primary" value="image/jpeg" :disabled="!canEdit">JPG</md-radio>
+						<md-radio v-model="gradient.ImageType" class="md-primary" value="image/png" :disabled="!canEdit">PNG</md-radio>
 					</div>
 
-					<div class="md-layout-item md-size-100" v-if="isNew">
+					<div class="md-layout-item md-size-100" v-if="isNew && canEdit">
 						<div class="mp-label">Archivo de teselas (GeoPackage)</div>
 						<geo-package-upload ref="geoPackage" :verify-method="verifyMethod" />
 					</div>
@@ -27,8 +27,8 @@
 			</md-dialog-content>
 			<stepper ref="stepper" title="Creando gradiente" @completed="importCompleted" @closed="stepperClosed"></stepper>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">{{ saveButtonLabel }}</md-button>
+				<md-button @click="activateEdit = false">{{ cancelCaption }}</md-button>
+				<md-button v-if="canEdit" class="md-primary" @click="save">Guardar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -49,14 +49,17 @@ export default {
     };
   },
   computed: {
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
+		cancelCaption() {
+			if (this.canEdit) {
+				return 'Cancelar';
+			}
+			return 'Cerrar';
+		},
 		isNew() {
 			return !this.gradient.Id;
-		},
-		saveButtonLabel() {
-			if (this.isNew) {
-				return 'Crear';
-			}
-			return 'Guardar';
 		},
 		verifyMethod() {
 			return function (bucketId) { return window.Db.VerifyGradientPackage(bucketId); };

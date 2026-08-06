@@ -139,7 +139,7 @@ ActiveMetadata.prototype.UpdateMetadataInstitution = function (institution) {
 	var args = { 'w': this.WorkId(), 'm': this.properties.Id, 'i': institution };
 	var loc = this;
 	this.WorkChanged();
-	return axiosClient.postPromise(window.host + '/services/' + this.Path() + '/UpdateWorkInstitution', args,
+	return axiosClient.postPromise(window.host + '/services/' + this.Path() + '/UpdateMetadataInstitution', args,
 		'actualizar la institución').then(function (savedInstitution) {
 			// se fija si tiene que actualizar el institution
 			if (institution.Id === null || institution.Id === 0) {

@@ -72,7 +72,9 @@ Db.prototype.GetReviews = function () {
 Db.prototype.DeleteReview = function (review, callback) {
 	return axiosClient.postPromise(window.host + '/services/admin/DeleteReview',
 		{ r: review }, 'eliminar la revisión').then(function () {
-			callback();
+			if (callback) {
+				callback();
+			}
 		});
 };
 
@@ -106,7 +108,9 @@ Db.prototype.UpdateReview = function (review) {
 Db.prototype.DeleteUser = function (user, callback) {
 	return axiosClient.getPromise(window.host + '/services/admin/DeleteUser',
 		{ u: user.Id }, 'eliminar al usuario').then(function () {
-			callback();
+			if (callback) {
+				callback();
+			}
 		});
 };
 

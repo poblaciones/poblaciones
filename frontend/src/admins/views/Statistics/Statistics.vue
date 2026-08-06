@@ -10,7 +10,7 @@
 					</md-option>
 				</md-select>
 			</md-field>
-			<md-button v-if="!isSummarized" @click="calculateStats" style="margin-left: 60px; margin-top: 15px;">
+			<md-button v-if="!isSummarized && canEdit" @click="calculateStats" style="margin-left: 60px; margin-top: 15px;">
 				<md-icon>data_usage</md-icon> Recalcular mes
 			</md-button>
 		</div>
@@ -138,7 +138,9 @@ export default {
 			};
 	},
 	computed: {
-
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
 	},
 	mounted() {
 		this.mounted = true;

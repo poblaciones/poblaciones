@@ -15,6 +15,7 @@ class cWinLogin extends cController
 {
 	public function Show()
 	{
+		/*
 		$this->CheckIsLocalCall();
 		$user = Params::GetMandatory('u');
 		$login = cLoginAjax::ProcessLogin($user);
@@ -42,6 +43,7 @@ class cWinLogin extends cController
 
 		$ret['extra'] = json_encode($extra);
 		return App::Json($ret);
+		*/
 	}
 
 	public function Post()

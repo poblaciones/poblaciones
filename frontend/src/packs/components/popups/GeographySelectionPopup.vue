@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Agregar geografías</md-dialog-title>
 			<md-dialog-content>
 				<div class="helper">
@@ -111,6 +111,10 @@ export default {
 	border-radius: 4px;
 	padding: 8px 16px;
 	margin-bottom: 12px;
+}
+
+.geographyCheckList ::v-deep .md-checkbox {
+	display: flex;
 }
 
 .geographyGroupHeader {

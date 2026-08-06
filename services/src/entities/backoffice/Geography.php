@@ -409,7 +409,6 @@ class Geography
 			return $this->FieldCodeSize;
     }
 
-
     /**
      * Set fieldCaptionName
      *
@@ -530,7 +529,6 @@ class Geography
     {
         return $this->GradientLuminance;
     }
-
 
     /**
      * Set parent
@@ -659,6 +657,19 @@ class Geography
     public function getMetadata()
     {
         return $this->Metadata;
+    }
+
+    /**
+     * @VirtualProperty
+     * @SerializedName("MetadataId")
+     */
+    public function getMetadataIdForDisplay()
+    {
+        if ($this->Metadata !== null)
+        {
+            return $this->Metadata->getId();
+        }
+        return null;
     }
 }
 

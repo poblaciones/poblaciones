@@ -137,16 +137,44 @@ a:hover {
 }
 
 // Diálogos que necesitan más espacio que el ancho por defecto (listas o
-// árboles de selección, formularios con varias secciones).
-.wide-dialog.md-dialog {
-/*  width: 90vw !important;
+// árboles de selección, formularios con varias secciones). Se controla
+// desde el contenido (md-dialog-content), no desde el contenedor del
+// diálogo (md-dialog): Vue Material centra el diálogo calculando su
+// posición en base al tamaño real del contenido, así que forzar el
+// ancho en md-dialog mismo descuadra ese cálculo y el diálogo aparece
+// pegado contra el margen izquierdo en vez de centrado.
+.wide-dialog .md-dialog-content {
+  width: 90vw !important;
   max-width: 720px !important;
-*/
+}
 
+// El popup de ítems (debug) necesita más lugar todavía: varias columnas
+// con el buscador de MpGrid arriba.
+.itemsDialog .md-dialog-content {
+  width: 90vw !important;
+  max-width: 1100px !important;
 }
 
 // Valor de solo lectura mostrado debajo de un mp-label (ej. la categoría
 // padre elegida), para que no quede más chico que el resto de los campos.
 .mp-readonly-value {
   font-size: 19px;
+}
+.mp-readonly-text {
+	padding-top: 12px;
+	display: inline-block;
+}
+// Título de sección dentro de un popup (ej. "Presentación en el mapa",
+// "Comportamiento"), para separar visualmente grupos de campos.
+.separator {
+	font-size: 12px;
+	text-transform: uppercase;
+	color: #949494;
+	background-color: #f7f7f7;
+	margin-bottom: 5px;
+	margin-top: 5px;
+	border: 1px solid #e7e7e7;
+	padding-left: 25px;
+	margin-left: -25px;
+	margin-right: -24px;
 }

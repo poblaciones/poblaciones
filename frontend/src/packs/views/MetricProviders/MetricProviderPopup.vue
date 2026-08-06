@@ -1,23 +1,23 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog v-if="metricProvider" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Origen de indicador</md-dialog-title>
-			<md-dialog-content v-if="metricProvider">
+			<md-dialog-content>
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-70">
-						<mp-simple-text label="Nombre" ref="inputName"
+						<mp-simple-text label="Nombre" ref="inputName" :canEdit="canEdit"
 														v-model="metricProvider.Caption" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-30">
-						<mp-simple-text label="Orden" type="number" helper="Orden en que se muestran los orígenes"
+						<mp-simple-text label="Orden" type="number" :canEdit="canEdit" helper="Orden en que se muestran los orígenes"
 														v-model="metricProvider.Order" @enter="save" />
 					</div>
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cancelar</md-button>
-				<md-button class="md-primary" @click="save">Guardar</md-button>
+				<md-button @click="activateEdit = false">{{ cancelCaption }}</md-button>
+				<md-button v-if="canEdit" class="md-primary" @click="save">Guardar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -34,6 +34,17 @@ export default {
 			activateEdit: false,
 			metricProvider: null,
     };
+  },
+  computed: {
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
+		cancelCaption() {
+			if (this.canEdit) {
+				return 'Cancelar';
+			}
+			return 'Cerrar';
+		},
   },
   methods: {
 		show(metricProvider) {

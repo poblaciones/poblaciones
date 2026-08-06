@@ -28,6 +28,18 @@ class PdfFile
 						</table></div>');
 		Profiling::EndTimer();
 	}
+	public function SetDocumentTitle($title)
+	{
+		Profiling::BeginTimer();
+		$this->mpdf->SetTitle(trim(strip_tags((string)$title)));
+		Profiling::EndTimer();
+	}
+	public function SetDocumentAuthor($author)
+	{
+		Profiling::BeginTimer();
+		$this->mpdf->SetAuthor(trim(strip_tags((string)$author)));
+		Profiling::EndTimer();
+	}
 	public function WriteMainTitle($title)
 	{
 		Profiling::BeginTimer();

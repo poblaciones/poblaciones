@@ -19,7 +19,7 @@
 							<works filter="P"></works>
 						</md-tab>
 
-						<md-tab class="transparentTab" id="works-tab" v-if="isDataAdmin" to="/works" md-label="Cartografías" :md-active="isPath('/works')">
+						<md-tab class="transparentTab" id="works-tab" v-if="isAdminReader" to="/works" md-label="Cartografías" :md-active="isPath('/works')">
 							<works filter="R" ref="worksList"></works>
 						</md-tab>
 

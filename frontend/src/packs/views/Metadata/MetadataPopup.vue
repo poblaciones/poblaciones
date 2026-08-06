@@ -3,7 +3,7 @@
 		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true" class="wide-dialog">
 			<md-dialog-content class="extraWideDialog">
 				<invoker ref="invoker"></invoker>
-				<Metadata :metadataProperty="metadata" :canEditProperty="true"></Metadata>
+				<Metadata :metadataProperty="metadata" :canEditProperty="canEdit"></Metadata>
 			</md-dialog-content>
 			<md-dialog-actions>
 				<md-button @click="activateEdit = false">Cerrar</md-button>
@@ -33,7 +33,9 @@ export default {
     };
   },
   computed: {
-
+		canEdit() {
+			return window.Context.IsAdmin();
+		},
   },
   methods: {
 		show(activeMetadata) {

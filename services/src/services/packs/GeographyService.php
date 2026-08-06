@@ -9,13 +9,14 @@ use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use minga\framework\Profiling;
 use helena\services\backoffice\publish\CacheManager;
+use helena\services\backoffice\publish\snapshots\SnapshotGeographiesModel;
 
 class GeographyService extends BaseService
 {
 	// Pasos del alta con GeoPackage.
-	const STEP_VALIDATING = 1;
-	const STEP_INSERTING = 2;
-	const STEP_END = 3;
+	const STEP_VALIDATING = 0;
+	const STEP_INSERTING = 1;
+	const STEP_END = 2;
 
 	public function GetNewGeography()
 	{
@@ -170,6 +171,14 @@ class GeographyService extends BaseService
 		$geography->setFieldUrbanityName($mapping['urbanity']);
 		App::Orm()->Save($geography);
 
+		if ($geography->getMetadata() === null)
+		{
+			$metadataService = new MetadataService();
+			$metadata = $metadataService->CreateMinimalMetadata($geography->getCaption(), $geography->getRevision());
+			$geography->setMetadata($metadata);
+			App::Orm()->Save($geography);
+		}
+
 		$parent = $geography->getParent();
 
 		$state = GeoPackageStateBag::Create($bucketId);
@@ -181,7 +190,7 @@ class GeographyService extends BaseService
 		$state->SetMapping($this->ResolveMapping($state->GetHeaderFilename(), $mapping));
 
 		$totalFiles = GeoPackageItemsImporter::CountDataFiles($state->GetFileFolder());
-		$state->SetTotalSteps(3);
+		$state->SetTotalSteps(2);
 		$state->SetTotalSlices($totalFiles);
 		$state->SetStep(self::STEP_VALIDATING, 'Validando datos');
 
@@ -488,6 +497,9 @@ class GeographyService extends BaseService
 		App::Db()->execute(
 			"UPDATE geography SET geo_field_code_size = (SELECT MAX(CHAR_LENGTH(gei_code)) FROM geography_item WHERE gei_geography_id = ?)
 			 WHERE geo_id = ?", array($geographyId, $geographyId));
+
+		$snapshotModel = new SnapshotGeographiesModel();
+		$snapshotModel->RegenForGeography($geographyId);
 
 		$geography = App::Orm()->find(entities\Geography::class, $geographyId);
 		$geography->Level = $this->CalculateLevel($geography);

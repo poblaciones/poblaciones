@@ -7,7 +7,7 @@
 			</metric-group-popup>
 
 			<div class="md-layout-item md-size-100">
-				<div v-if="isAdmin">
+				<div v-if="canEdit">
 					<md-button @click="createNewGroup">
 						<md-icon>add_circle_outline</md-icon>
 						Nueva categoría
@@ -18,7 +18,7 @@
 					:columns="groupColumns"
 					:actions="groupActions"
 					:rowClick="onGroupRowClick"
-					:canDelete="isAdmin"
+					:canDelete="canEdit"
 					entityName="categoría"
 					:deleteConfirmMessage="groupDeleteConfirmMessage"
 					@itemDelete="onGroupDelete" />
@@ -44,23 +44,30 @@ import arr from '@/common/framework/arr';
 			};
 	},
 	computed: {
-		isAdmin() {
+		canEdit() {
 			return window.Context.IsAdmin();
 		},
 		groupColumns() {
+			var loc = this;
 			return [
 				{ property: 'Caption', caption: 'Nombre' },
-				{ property: 'Icon', caption: 'Ícono' },
+				{
+					property: 'Icon', caption: 'Ícono', type: 'status', sortable: false,
+					icon: function (item) { return loc.formatIcon(item.Icon); },
+				},
 				{ property: 'Order', caption: 'Orden', sortType: 'number' },
 			];
 		},
 		groupActions() {
 			var loc = this;
-			if (!this.isAdmin) {
-				return [];
+			var editIcon = 'edit';
+			var editCaption = 'Modificar';
+			if (!this.canEdit) {
+				editIcon = 'visibility';
+				editCaption = 'Ver';
 			}
 			return [
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.openGroupEdition(item); } },
+				{ icon: editIcon, caption: editCaption, onClick: function (grid, item) { loc.openGroupEdition(item); } },
 			];
 		},
 	},
@@ -72,6 +79,18 @@ import arr from '@/common/framework/arr';
 			});
 	},
 	methods: {
+		// El ícono se guarda como clase FontAwesome sin el prefijo (ej.
+		// 'fa-users'), pero MpGrid solo lo reconoce como ícono si empieza
+		// con 'fas ' o 'fa ' (ver MpGridHelper.IsFontAwesome).
+		formatIcon(icon) {
+			if (!icon) {
+				return null;
+			}
+			if (icon.indexOf('fas ') === 0 || icon.indexOf('fa ') === 0) {
+				return icon;
+			}
+			return 'fas ' + icon;
+		},
 		createNewGroup() {
 			var loc = this;
 			window.Context.Factory.GetCopy('MetricGroup', function(data) {

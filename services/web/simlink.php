@@ -20,40 +20,62 @@ function endsWith($string, $endString)
 
 function serveStaticFiles($target)
 {
-	// Define la ruta base para los archivos estáticos
-	$realDir = $target;
-
-	// Obtén la URI del archivo solicitado
-	$requestUri = $_SERVER['REQUEST_URI'];
-
-	// Verifica si la solicitud comienza con "/static"
-	if ((strpos($requestUri, '/static') === 0 || strpos($requestUri, '/favicon') === 0) && strpos($requestUri, '..') === false) {
-		// Construye la ruta completa del archivo
-		$file = $realDir . parse_url($requestUri, PHP_URL_PATH);
-
-		// Verifica si el archivo existe
-		if (file_exists($file) && is_readable($file)) {
-			// Obtén el tipo de contenido del archivo
-			$mimeType = mime_content_type($file);
-
-			// Envía las cabeceras HTTP adecuadas
-			if (endsWith($file, ".css"))
-				$mimeType = 'text/css';
-
-			header('Content-Type: ' . $mimeType);
-			header('Content-Length: ' . filesize($file));
-
-			// Envía el contenido del archivo
-			readfile($file);
-			return true;
-		} else {
-			// Archivo no encontrado, envía una respuesta 404
-			header("HTTP/1.0 404 Not Found");
-			echo $file;
-			echo "404 Not Found";
-			return true;
-		}
+	// Define la ruta base para los archivos estáticos, resuelta de forma canónica
+	$realDir = realpath($target);
+	if ($realDir === false) {
+		return false;
 	}
+
+	// Obtén la URI del archivo solicitado, sin query string
+	$requestUri = $_SERVER['REQUEST_URI'];
+	$path = parse_url($requestUri, PHP_URL_PATH);
+	if ($path === null || $path === false) {
+		return false;
+	}
+
+	// Decodifica antes de evaluar, para no dejar pasar secuencias percent-encoded
+	$path = rawurldecode($path);
+
+	// Verifica si la solicitud corresponde a los prefijos servidos estáticamente
+	if (strpos($path, '/static') !== 0 && strpos($path, '/favicon') !== 0) {
+		return false;
+	}
+
+	// Rechaza cualquier indicio de traversal antes de tocar el filesystem
+	if (strpos($path, "\0") !== false || strpos($path, '..') !== false) {
+		header("HTTP/1.0 400 Bad Request");
+		return true;
+	}
+
+	$file = $realDir . $path;
+	$realFile = realpath($file);
+
+	// Verifica que el archivo exista, sea legible, y que su ruta resuelta
+	// quede efectivamente dentro de $realDir (bloquea symlinks hacia afuera)
+	if (
+		$realFile === false ||
+		!is_file($realFile) ||
+		!is_readable($realFile) ||
+		strpos($realFile, $realDir . DIRECTORY_SEPARATOR) !== 0
+	) {
+		header("HTTP/1.0 404 Not Found");
+		echo "404 Not Found";
+		return true;
+	}
+
+	// Obtén el tipo de contenido del archivo
+	$mimeType = mime_content_type($realFile);
+
+	// Envía las cabeceras HTTP adecuadas
+	if (endsWith($realFile, ".css"))
+		$mimeType = 'text/css';
+
+	header('Content-Type: ' . $mimeType);
+	header('Content-Length: ' . filesize($realFile));
+
+	// Envía el contenido del archivo
+	readfile($realFile);
+	return true;
 }
 
 // Llama a la función para servir archivos estáticos

@@ -59,3 +59,15 @@ App::Get('/services/packs/StepCalculateGeographyTuple', function (Request $reque
 	$ret = $controller->StepCalculateGeographyTuple($key);
 	return App::Json($ret);
 });
+
+App::Get('/services/packs/GetGeographyTupleCalculatedItems', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$tupleId = Params::GetIntMandatory('t');
+	$offset = Params::GetIntMandatory('o');
+	$limit = Params::GetIntMandatory('l');
+
+	$controller = new services\GeographyTupleService();
+	$ret = $controller->GetGeographyTupleCalculatedItems($tupleId, $offset, $limit);
+	return App::Json($ret);
+});

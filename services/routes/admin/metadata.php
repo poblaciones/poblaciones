@@ -5,7 +5,7 @@ use Symfony\Component\HttpFoundation\Request;
 use helena\classes\App;
 use helena\classes\Session;
 use helena\services\backoffice as services;
-use helena\services\admin as adminServices;
+use helena\services\packs as packsServices;
 use helena\services\common as commonServices;
 use helena\entities\backoffice as entities;
 use minga\framework\Params;
@@ -31,11 +31,11 @@ App::GetOrPost('/services/admin/UpdateMetadataFile', function (Request $request)
 	$controller = new services\MetadataFileService(false);
 	$metadataFile = App::ReconnectJsonParam(entities\MetadataFile::class, 'f');
 
-	$adminServices = new adminServices\MetadataService();
-	$adminServices->EnsureId(entities\MetadataFile::class, $metadataFile);
+	$packsServices = new packsServices\MetadataService();
+	$packsServices->EnsureId(entities\MetadataFile::class, $metadataFile);
 	$file = $metadataFile->getFile();
 	if ($file)
-		$adminServices->EnsureId(entities\File::class, $file);
+		$packsServices->EnsureId(entities\File::class, $file);
 
 	return App::OrmJson($controller->UpdateMetadataFile(null, $metadataId, $bucketId, $metadataFile));
 });
@@ -169,18 +169,18 @@ App::GetOrPost('/services/admin/UpdateWorkSource', function (Request $request) {
 	$source = App::ReconnectJsonParam(entities\Source::class, 's');
 
 	// Le asigna Ids antes de grabar
-	$adminServices = new adminServices\MetadataService();
-	$adminServices->EnsureId(entities\Source::class, $source);
-	$adminServices->EnsureId(entities\Contact::class, $source->getContact());
+	$packsServices = new packsServices\MetadataService();
+	$packsServices->EnsureId(entities\Source::class, $source);
+	$packsServices->EnsureId(entities\Contact::class, $source->getContact());
 	$institution = $source->getInstitution();
 	if ($institution)
-		$adminServices->EnsureId(entities\Institution::class, $institution);
+		$packsServices->EnsureId(entities\Institution::class, $institution);
 
 	// Graba
 	return App::OrmJson($controller->Update(null, $metadataId, $source));
 });
 
-App::GetOrPost('/services/admin/UpdateWorkInstitution', function (Request $request) {
+App::GetOrPost('/services/admin/UpdateMetadataInstitution', function (Request $request) {
 	if ($denied = Session::CheckIsSiteEditor())
 		return $denied;
 
@@ -188,7 +188,7 @@ App::GetOrPost('/services/admin/UpdateWorkInstitution', function (Request $reque
 	$metadataId = Params::GetIntMandatory('m');
 
 	$institution = App::ReconnectJsonParam(entities\Institution::class, 'i');
-	return App::OrmJson($controller->UpdateWorkInstitution(null, $metadataId, $institution));
+	return App::OrmJson($controller->UpdateMetadataInstitution(null, $metadataId, $institution));
 });
 
 App::GetOrPost('/services/admin/UpdateInstitution', function (Request $request) {
@@ -201,8 +201,8 @@ App::GetOrPost('/services/admin/UpdateInstitution', function (Request $request) 
 	$watermarkImage = Params::Get('iwm');
 
 	// Le asigna Ids antes de grabar
-	$adminServices = new adminServices\MetadataService();
-	$adminServices->EnsureId(entities\Institution::class, $institution);
+	$packsServices = new packsServices\MetadataService();
+	$packsServices->EnsureId(entities\Institution::class, $institution);
 
 	return App::OrmJson($controller->Update($institution, $watermarkImage));
 });

@@ -1,3 +1,9 @@
+- Se agrega módulo 'packs'
+- Mejoras de seguridad en argumentos con shellargs.
+- Mejorada la selección de fuente.
+- Mejorada la selección de institución.
+- Pdf: tiene título y autor en los atributos.
+- Importación: acepta el tipo numerico con ceros en archivos spss.
 - Fix al restituir ruta cuando no hay variables seleccionadas y está activa la comparación (se cortaba la carga del panel de estadísticas).
 - Fix a coloreo de tiles que tienen información parcial de gradiente poblacional.
 -

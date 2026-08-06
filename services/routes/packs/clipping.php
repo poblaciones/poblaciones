@@ -86,6 +86,37 @@ App::Get('/services/packs/GetClippingRegionGeographies', function (Request $requ
 	return App::Json($ret);
 });
 
+App::Get('/services/packs/GetGeographyClippingRegions', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$geographyId = Params::GetIntMandatory('g');
+
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->GetGeographyClippingRegions($geographyId);
+	return App::Json($ret);
+});
+
+App::GetOrPost('/services/packs/StartCalculateGeographyClippingRegions', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$geographyId = Params::GetIntMandatory('g');
+	$clippingRegionIds = Params::GetIntArray('r');
+
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->StartCalculateGeographyClippingRegions($geographyId, $clippingRegionIds);
+	return App::Json($ret);
+});
+
+App::Get('/services/packs/StepCalculateGeographyClippingRegions', function (Request $request) {
+	if ($app = Session::CheckIsMegaUser())
+		return $app;
+	$key = Params::GetMandatory('k');
+
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->StepCalculateGeographyClippingRegions($key);
+	return App::Json($ret);
+});
+
 App::GetOrPost('/services/packs/DeleteClippingRegionGeography', function (Request $request) {
 	if ($app = Session::CheckIsMegaUser())
 		return $app;
@@ -114,5 +145,29 @@ App::Get('/services/packs/StepCalculateClippingRegionGeography', function (Reque
 
 	$controller = new services\ClippingRegionService();
 	$ret = $controller->StepCalculateClippingRegionGeography($key);
+	return App::Json($ret);
+});
+
+App::Get('/services/packs/GetClippingRegionItems', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$regionId = Params::GetIntMandatory('r');
+	$offset = Params::GetIntMandatory('o');
+	$limit = Params::GetIntMandatory('l');
+
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->GetClippingRegionItems($regionId, $offset, $limit);
+	return App::Json($ret);
+});
+
+App::Get('/services/packs/GetClippingRegionGeographyIntersectionItems', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$crgId = Params::GetIntMandatory('c');
+	$offset = Params::GetIntMandatory('o');
+	$limit = Params::GetIntMandatory('l');
+
+	$controller = new services\ClippingRegionService();
+	$ret = $controller->GetClippingRegionGeographyIntersectionItems($crgId, $offset, $limit);
 	return App::Json($ret);
 });

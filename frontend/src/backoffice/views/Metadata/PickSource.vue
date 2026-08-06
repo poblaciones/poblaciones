@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openSources" style="width: 750px">
+		<md-dialog :md-active.sync="openSources">
 
 			<md-dialog-title>
 				Agregar fuente
@@ -18,13 +18,12 @@
 			</div>
 			<div class="md-layout">
 				<div class="md-layout-item">
-					<md-table v-model="sources" md-sort="caption" md-sort-order="asc" md-card="">
-						<md-table-row slot="md-table-row" slot-scope="{ item }">
-							<md-table-cell @click.native="selected = item; save(); " class="selectable" md-label="Nombre" :md-sort-by="item.Caption">{{ item.Caption }}</md-table-cell>
-							<md-table-cell @click.native="selected = item; save(); " md-label="Edición" class="selectable" :md-sort-by="item.Version">{{ item.Version }}</md-table-cell>
-							<md-table-cell @click.native="selected = item; save(); " md-label="Institución" class="selectable" :md-sort-by="getInstitutionCaption(item)">{{ getInstitutionCaption(item) }}</md-table-cell>
-						</md-table-row>
-					</md-table>
+					<mp-grid
+						compact
+						:pageSize="10"
+						:items="sources"
+						:columns="gridColumns"
+						:rowClick="onRowClick" />
 				</div>
 			</div>
 		</md-dialog-content>
@@ -57,6 +56,17 @@ export default {
   computed: {
     SecondaryLabel() {
 			return (this.Metadata.Work && this.Metadata.Work.IsPublicData() ? '' : ' secundarias');
+		},
+		gridColumns() {
+			var loc = this;
+			return [
+				{ property: 'Caption', size: 7, caption: 'Nombre' },
+				{ property: 'Version', caption: 'Edición' },
+				{
+					property: 'Institution.Caption', caption: 'Institución', size: 5,
+					value: function (item) { return loc.getInstitutionCaption(item); },
+				},
+			];
 		}
   },
   methods: {
@@ -73,6 +83,10 @@ export default {
 			} else {
 				return item.Institution.Caption;
 			}
+		},
+		onRowClick(grid, item) {
+			this.selected = item;
+			this.save();
 		},
     save() {
 			if (this.selected === null) {

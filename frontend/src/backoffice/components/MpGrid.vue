@@ -1,6 +1,6 @@
 <template>
 	<div class="mp-grid" :class="{ 'mp-grid-compact': compact }">
-		<mp-search v-model="search" @search="onSearchChanged" v-if="items && items.length > 0" class="mp-grid-search" />
+		<mp-search v-model="search" @search="onSearchChanged" v-if="items && items.length > 0" class="mp-grid-search" :class="(captionColumn.widthPixels <= 320 ? 'offsetSearch' : '')" />
 		<div class="mp-grid-multiselect-overlay" v-if="multiSelectEnabled || hasChildren">
 			<transition name="bulk-actions-fade">
 				<span v-if="isMultiSelectActive && selectedItems.length > 0" class="bulk-actions-group">
@@ -424,7 +424,7 @@ export default {
 		// de íconos, la cantidad que puede llegar a mostrar), para que las
 		// de contenido simple —conteos, códigos, booleanos— queden angostas.
 		sizeToWidth(size, caption, iconCount) {
-			var widths = { 1: '80px', 2: '130px', 3: '180px', 4: '240px', 5: '400px' };
+			var widths = { 1: '80px', 2: '130px', 3: '180px', 4: '240px', 5: '320px', 6: '400px', 7: '500px' };
 			if (size && widths[size]) {
 				return widths[size];
 			}
@@ -460,6 +460,10 @@ export default {
 			} else {
 				width = this.captionWidth;
 			}
+			var widthPixels = 0;
+			if (width) {
+				widthPixels = widthPixels = parseInt(width, 10);
+			}
 			return {
 				property: this.captionProperty,
 				caption: (def && def.caption) || this.captionProperty,
@@ -467,6 +471,7 @@ export default {
 				sortable: !def || def.sortable !== false,
 				sortValue: (def && def.sortValue) || null,
 				width: width,
+				widthPixels: widthPixels,
 				sortType: 'text',
 				type: 'text',
 				href: (def && def.href) || null,
@@ -785,8 +790,15 @@ export default {
 		compact: { type: Boolean, default: false },
 	},
 	watch: {
-		items() {
-			this.expandedIds = this.hasChildren ? MpGridHelper.CollectExpandableIds(this.items, 'Items') : {};
+		items(newItems, oldItems) {
+			if (!oldItems || oldItems.length === 0) {
+				// Primera carga real de datos: arranca con todo expandido.
+				this.expandedIds = this.hasChildren ? MpGridHelper.CollectExpandableIds(this.items, 'Items') : {};
+			}
+			// En cargas posteriores (recargar tras guardar, mover, etc.) se
+			// preserva expandedIds tal cual estaba: perder qué tenía
+			// abierto o cerrado el usuario solo porque los datos se
+			// refrescaron sería molesto, sobre todo con jerarquías largas.
 			this.currentPage = 0;
 			this.refreshRows();
 		},
@@ -937,7 +949,7 @@ export default {
 	max-width: 220px;
 	// MpSearch ya viene posicionado con left: 100px; en vez de pisarlo, se
 	// complementa con este desplazamiento para llegar a 200px.
-	transform: translateX(100px);
+	transform: translateX(90px);
 	background-color: unset !important;
 }
 
@@ -1045,9 +1057,9 @@ export default {
 .mp-grid-action-badge {
 	position: absolute;
 	top: 6px;
+	right: 0px;
 	font-size: 11px;
 	color: #ffffff;
-		right: 0px;
 	z-index: 1;
 	left: -2px;
 	text-shadow: 0 0 4px #9E9E9E;
@@ -1057,7 +1069,11 @@ export default {
 	white-space: nowrap;
 }
 
-.mp-grid-fa-icon,
+.mp-grid-fa-icon {
+	font-size: 15px;
+	margin: 3px 2px 0px 2px;
+}
+
 .mp-grid-badge-icon {
 	font-size: 10px;
 	margin: 3px 2px 0px 2px;
@@ -1121,17 +1137,18 @@ export default {
 	min-height: 160px;
 }
 
-.mp-grid-pagination-bar {
-	display: grid;
-	// La columna central mide el 50% del ancho de la grilla y siempre está
-	// centrada; las columnas laterales (spacer y Mostrar) se reparten el
-	// resto en partes iguales, así "Mostrar" queda a la derecha sin correr
-	// el centrado del medio.
-	grid-template-columns: 1fr 400px 1fr;
-	align-items: center;
-	gap: 12px;
-	margin-top: 4px;
-}
+	.mp-grid-pagination-bar {
+		display: grid;
+		// La columna central mide el 50% del ancho de la grilla y siempre está
+		// centrada; las columnas laterales (spacer y Mostrar) se reparten el
+		// resto en partes iguales, así "Mostrar" queda a la derecha sin correr
+		// el centrado del medio.
+		grid-template-columns: 20% 60% 20%;
+		padding-right: 30px;
+		align-items: center;
+		gap: 12px;
+		margin-top: 4px;
+	}
 
 .mp-grid-pagination-center {
 	display: grid;
@@ -1180,15 +1197,19 @@ export default {
 
 .mp-grid-pagesize-label {
 	font-size: 13px;
-		padding-top: 2px;
+	padding-top: 1px;
 	color: #666;
 }
 
+.offsetSearch {
+	transform: translateX(40px)!important;
+}
+
 .mp-grid-pagesize-select {
-	font-size: 13px;
-	color: inherit;
-	border: none;
-	background: transparent;
-	cursor: pointer;
+		font-size: 13px;
+		color: inherit;
+		border: none;
+		background: transparent;
+		cursor: pointer;
 }
 </style>

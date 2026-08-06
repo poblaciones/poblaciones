@@ -13,8 +13,8 @@ use minga\framework\Profiling;
 
 class GradientService extends BaseService
 {
-	const STEP_INSERTING = 1;
-	const STEP_END = 2;
+	const STEP_INSERTING = 0;
+	const STEP_END = 1;
 	const TILES_PER_SLICE = 500;
 
 	public function GetNewGradient()
@@ -112,7 +112,7 @@ class GradientService extends BaseService
 		$state->Set('gradientId', $gradient->getId());
 		$state->Set('table', $table);
 		$state->Set('offset', 0);
-		$state->SetTotalSteps(2);
+		$state->SetTotalSteps(1);
 		$totalSlices = 0;
 		if ($totalTiles > 0)
 		{

@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div class="md-elevation-1 titleBar">
-			<span>
+			<span :title="(title && title.length > 70 ? title : '')">
 				{{ title }}
 				<mp-help :text="help"></mp-help>
 			</span>
@@ -43,19 +43,22 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.titleBar {
-	position: fixed;
-  padding-top: 15px;
-  font-size: 23px;
-  line-height: 1.25;
-  color: #676767;
-  padding-left: 13px;
-  padding-bottom: 10px;
-  width: 100%;
-  margin-top: -3px;
-  z-index: 10;
-  background-color: #fdfdfd;
-}
+	.titleBar {
+		position: fixed;
+		padding-top: 15px;
+		font-size: 23px;
+		line-height: 1.25;
+		white-space: nowrap;
+		color: #676767;
+		overflow-y: hidden;
+		overflow-x: hidden;
+		padding-left: 13px;
+		padding-bottom: 10px;
+		width: 100%;
+		margin-top: -3px;
+		z-index: 10;
+		background-color: #fdfdfd;
+	}
 
 </style>
 

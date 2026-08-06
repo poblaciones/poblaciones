@@ -122,6 +122,34 @@ Db.prototype.GetStepClippingRegionGeographyCalculateUrl = function () {
 	return window.host + '/services/packs/StepCalculateClippingRegionGeography';
 };
 
+Db.prototype.GetGeographyClippingRegions = function (geographyId) {
+	return axiosClient.getPromise(window.host + '/services/packs/GetGeographyClippingRegions',
+		{ g: geographyId }, 'obtener las regiones asociadas');
+};
+
+Db.prototype.GetClippingRegionItems = function (clippingRegionId, offset, pageSize) {
+	return axiosClient.getPromise(window.host + '/services/packs/GetClippingRegionItems',
+		{ r: clippingRegionId, o: offset, l: pageSize }, 'obtener los ítems');
+};
+
+Db.prototype.GetClippingRegionGeographyIntersectionItems = function (crgId, offset, pageSize) {
+	return axiosClient.getPromise(window.host + '/services/packs/GetClippingRegionGeographyIntersectionItems',
+		{ c: crgId, o: offset, l: pageSize }, 'obtener los ítems');
+};
+
+Db.prototype.GetGeographyTupleCalculatedItems = function (tupleId, offset, pageSize) {
+	return axiosClient.getPromise(window.host + '/services/packs/GetGeographyTupleCalculatedItems',
+		{ t: tupleId, o: offset, l: pageSize }, 'obtener los ítems');
+};
+
+Db.prototype.GetStartGeographyClippingRegionsCalculateUrl = function () {
+	return window.host + '/services/packs/StartCalculateGeographyClippingRegions';
+};
+
+Db.prototype.GetStepGeographyClippingRegionsCalculateUrl = function () {
+	return window.host + '/services/packs/StepCalculateGeographyClippingRegions';
+};
+
 // Listado propio de 'packs' (con Level, igual que ClippingRegion): se usa
 // tanto para la grilla administrativa como para el picker de 'padre' al
 // dar de alta una nueva geografía.
