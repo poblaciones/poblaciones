@@ -48,7 +48,7 @@
 <script>
 	import Context from '@/backoffice/classes/Context';
 	import ContactForm from '@/backoffice/views/Metadata/ContactForm';
-	import MpLicense from '@/backoffice/components/MpLicense';
+	import MpLicense from '@/common/components/MpLicense';
 
 	export default {
 		name: 'Atribucion',

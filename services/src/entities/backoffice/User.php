@@ -84,6 +84,13 @@ class User
      */
     private $Deleted;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="usr_picture", type="string", length=255, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $Picture;
+
 
     /**
      * Get id
@@ -301,5 +308,28 @@ class User
     {
         return $this->Deleted;
     }
-}
 
+    /**
+     * Set picture
+     *
+     * @param string $picture
+     *
+     * @return User
+     */
+    public function setPicture($picture)
+    {
+        $this->Picture = $picture;
+
+        return $this;
+    }
+
+    /**
+     * Get picture
+     *
+     * @return string
+     */
+    public function getPicture()
+    {
+        return $this->Picture;
+    }
+}

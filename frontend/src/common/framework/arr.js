@@ -128,6 +128,29 @@ module.exports = {
 		}
 		return ret;
 	},
+	ListToTreeFromIndentedItems(items, levelProperty, childrenProperty) {
+			for (var i = 0; i < items.length; i++) {
+				delete items[i][childrenProperty];
+			}
+			var root = [];
+			var stack = [];
+			for (var j = 0; j < items.length; j++) {
+				var item = items[j];
+				var level = item[levelProperty] || 0;
+				stack.length = level;
+				if (stack.length === 0) {
+					root.push(item);
+				} else {
+					var parent = stack[stack.length - 1];
+					if (!parent[childrenProperty]) {
+						parent[childrenProperty] = [];
+					}
+					parent[childrenProperty].push(item);
+				}
+				stack.push(item);
+			}
+			return root;
+	},
 	DictionaryIdToDictionaryProperty(collection, dictionary, property, def = {}) {
 		return this.DictionaryIdToCollectionProperty(collection, dictionary, property, def);
 	},

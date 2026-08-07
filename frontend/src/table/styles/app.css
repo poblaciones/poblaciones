@@ -98,10 +98,7 @@ html, body {
 	min-height: 40px !important;
 	font-size: .97rem !important;
 }
-.md-menu-content {
-	max-height: 65vh !important;
-	box-shadow: 0px 1px 4px 4px rgb(0 0 0 / 12%) !important;
-}
+
 .md-list.md-theme-default .md-selected .md-list-item-content, .md-list.md-theme-default .router-link-active .md-list-item-content {
 	background-color: var(--md-theme-default-primary-on-background, #448aff);
 	color:white!important;
@@ -250,10 +247,6 @@ h5 {
 .md-dialog {
 	min-width: 400px !important;
 	border-radius: 4px !important;
-}
-
-.md-menu-content {
-	max-width: 380px !important;
 }
 
 .md-dialog-actions {

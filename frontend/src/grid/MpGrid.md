@@ -241,26 +241,6 @@ Buscar y ordenar respetan la jerarquía: los hijos nunca pierden su relación co
 el padre. Si un hijo coincide con la búsqueda, se muestran también todos sus
 ancestros; y el ordenamiento se aplica dentro de cada nivel.
 
-### Listados planos
-
-Si el servidor entrega el listado plano con un nivel de profundidad por ítem, se
-reconstruye la jerarquía con el helper:
-
-```js
-import MpGridHelper from '@/backoffice/components/MpGrid.helper';
-
-computed: {
-    treeList() {
-        return MpGridHelper.BuildTreeFromLevels(this.list, 'Level', 'Items');
-    },
-},
-```
-
-`BuildTreeFromLevels(items, levelProperty, childrenProperty)` espera el listado
-en orden (cada padre antes que sus hijos) y con la profundidad de cada ítem
-(0 = raíz). No clona los ítems, y puede volver a llamarse tras recargar datos
-sin duplicar hijos.
-
 ## Selección múltiple
 
 `multiSelect` tiene tres estados: `'no'`, `'yes'` (siempre activa) y

@@ -11,8 +11,12 @@ class HelpSettings
 {
 	public $ContactLink = ['Caption' => 'Contacto', 'Url' => 'https://poblaciones.org/contacto/'];
 	public $TutorialsLink = ['Caption' => 'Tutoriales', 'Url' => 'https://www.youtube.com/@poblaciones/playlists'];
-	public $ReadGuideLink = ['Caption' => 'Guía para la consulta de información', 'Url' => 'https://poblaciones.org/guias/guia-para-la-consulta-de-informacion.pdf'];
+	public $ReadGuideLink = ['Caption' => 'Guía para la consulta de mapas', 'Url' => 'https://poblaciones.org/guias/guia-para-la-consulta-de-informacion.pdf'];
+	public $TableGuideLink = ['Caption' => 'Guía para la consulta de tableros', 'Url' => 'https://poblaciones.org/guias/guia-para-la-consulta-de-tableros.pdf'];
 	public $UploadGuideLink = ['Caption' => 'Guía para la creación de mapas', 'Url' => 'https://poblaciones.org/guias/guia-para-la-creacion-de-mapas.pdf'];
+	public $AdminGuideLink = ['Caption' => 'Guía para la administración de usuarios', 'Url' => 'https://poblaciones.org/guias/guia-para-la-administracion-de-usuarios.pdf'];
+	public $AdminPacksGuideLink = ['Caption' => 'Guía para la administración geográfica', 'Url' => 'https://poblaciones.org/guias/guia-para-la-administracion-geografica.pdf'];
+	public $AdminLogsGuideLink = ['Caption' => 'Guía para la administración de registros', 'Url' => 'https://poblaciones.org/guias/guia-para-la-administracion-de-registros.pdf'];
 	public $AboutLink = ['Caption' => 'Acerca de Poblaciones', 'Url' => 'https://poblaciones.org/institucional'];
 
 	// Secciones de ayuda

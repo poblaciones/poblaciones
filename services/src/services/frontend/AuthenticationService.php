@@ -17,7 +17,7 @@ class AuthenticationService extends BaseService
 {
 	public function AccountExists(string $user, bool $shouldBeActive) : array
 	{
-		$info = $this->LoadAndValidateAccount($user, $shouldBeActive);
+		$info = Account::LoadAndValidateAccount($user, $shouldBeActive);
 		$isLogged = false;
 		if ($info['status'] == self::OK)
 		{
@@ -32,7 +32,7 @@ class AuthenticationService extends BaseService
 
 	public function BeginResetPassword(string $user, string $to) : array
 	{
-		$res = $this->LoadAndValidateAccount($user, true);
+		$res = Account::LoadAndValidateAccount($user, true);
 		if ($res['status'] == self::ERROR)
 			return $res;
 
@@ -43,7 +43,7 @@ class AuthenticationService extends BaseService
 
 	public function ResetPassword(string $user, string $password, int $code) : array
 	{
-		$res = $this->LoadAndValidateAccount($user);
+		$res = Account::LoadAndValidateAccount($user);
 		if ($res['status'] == self::ERROR)
 			return $res;
 		$model = new UserModel();
@@ -68,7 +68,7 @@ class AuthenticationService extends BaseService
 
 	public function ValidateCode(string $user, int $code) : array
 	{
-		$res = $this->LoadAndValidateAccount($user);
+		$res = Account::LoadAndValidateAccount($user);
 		if ($res['status'] == self::ERROR)
 			return $res;
 
@@ -82,7 +82,7 @@ class AuthenticationService extends BaseService
 
 	public function Login(string $user, string $password) : array
 	{
-		$res = self::LoadAndValidateAccount($user, true);
+		$res = Account::LoadAndValidateAccount($user, true);
 		if ($res['status'] == self::ERROR)
 			return $res;
 
@@ -149,24 +149,5 @@ class AuthenticationService extends BaseService
 		$model->DeleteUserLink($user, $code);
 
 		return ['status' => self::OK, 'target' => $link['to']];
-	}
-
-	private function LoadAndValidateAccount(string $user, bool $shouldBeActive = false) : array
-	{
-		$user = Str::ToLower(trim($user));
-		if ($user == "")
-			return ['status' => self::ERROR, 'message' => 'Debe indicarse una cuenta para ingresar.'];
-		if (Str::IsEmail($user) == false)
-			return ['status' => self::ERROR, 'message' => 'La dirección de correo electrónico no fue indicada correctamente.'];
-
-		$account = new Account();
-		$account->user = $user;
-		if ($account->Exists() == false)
-			return ['status' => self::ERROR, 'message' => 'Cuenta inexistente (' . $user . ').'];
-
-		if($shouldBeActive && $account->IsActive() == false)
-			return ['status' => self::ERROR, 'message' => 'La cuenta debe ser activada antes de poder ser utilizada. Verifique en su casilla de correo por el mensaje de activación.'];
-
-		return ['status' => self::OK, 'account' => $account];
 	}
 }

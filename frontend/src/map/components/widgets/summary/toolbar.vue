@@ -35,7 +35,7 @@
 												icon="fas fa-share-alt" :styleRounded="true" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
 
 			<mp-dropdown-menu :items="helpItems" @itemClick="helpSelected" :floatRight="false"
-												icon="fas fa-question-circle" :styleRounded="true" tooltip="Ayuda"  />
+												icon="fas fa-home" :styleRounded="true" tooltip="Inicio"  />
 
 			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
 				<i class="far fa-heart" />
@@ -49,8 +49,6 @@
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a :href="authenticate.loginUrl()" title="Ingresar" @click="authenticate.redirectLogin">Ingresar</a></li>
 						<li><a :href="authenticate.registerUrl()" title="Registrarse" @click="authenticate.redirectRegister">Registrarse</a></li>
-						<li class="divider"></li>
-						<li><a @click="authenticate.redirectHome()" :href="authenticate.homeUrl()">Inicio</a></li>
 					</ul>
 				</button>
 			</span>
@@ -59,13 +57,13 @@
 				<button type="button"
 								id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
 								data-toggle="dropdown">
-					<i class="fas fa-user" :title="userTooltip" />
+					<i v-if="!userPicture" class="fas fa-user" :title="userTooltip" />
+					<img v-else data-v-7ba6b492="" :src="userPicture" :title="userTooltip" :alt="userTooltip" class="avatar" />
+
 					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 						<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
 						<li v-if="isAdminReader"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
 						<li v-if="false"><a href="/users#/account">Cuenta</a></li>
-						<li class="divider"></li>
-						<li><a @click="authenticate.redirectHome()" :href="authenticate.homeUrl()">Inicio</a></li>
 						<li class="divider"></li>
 						<li><a @click="authenticate.logoff">Cerrar sesión</a></li>
 					</ul>
@@ -132,14 +130,29 @@
 			},
 			helpSelected(item) {
 				switch (item.key) {
+					case 'INICIO':
+						window.open(authenticate.homeUrl, '_blank');
+						break;
 					case 'BIENVENIDA':
 						this.showTutorial();
 						break;
 					case 'GUIA-USO':
 						window.open(this.helpLinks.ReadGuideLink.Url, '_blank');
 						break;
+					case 'GUIA-TABLA':
+						window.open(this.helpLinks.TableGuideLink.Url, '_blank');
+						break;
 					case 'GUIA-CARGA':
 						window.open(this.helpLinks.UploadGuideLink.Url, '_blank');
+						break;
+					case 'GUIA-USUARIOS':
+						window.open(this.helpLinks.AdminGuideLink.Url, '_blank');
+						break;
+					case 'GUIA-PAQUETES':
+						window.open(this.helpLinks.AdminPacksGuideLink.Url, '_blank');
+						break;
+					case 'GUIA-REGISTROS':
+						window.open(this.helpLinks.AdminLogsGuideLink.Url, '_blank');
 						break;
 					case 'TUTORIALES':
 						window.open(this.helpLinks.TutorialsLink.Url, '_blank');
@@ -226,19 +239,39 @@
 			helpItems() {
 				var ret = [];
 				// opciones
+				ret.push({ label: 'Inicio', key: 'INICIO' });
 				ret.push({ label: 'Bienvenida', key: 'BIENVENIDA' });
 				if (!this.helpLinks) {
 					return ret;
 				}
+
 				if (this.helpLinks.ReadGuideLink || this.helpLinks.UploadGuideLink) {
 					ret.push({ separator: true });
 				}
 				if (this.helpLinks.ReadGuideLink) {
 					ret.push({ label: this.helpLinks.ReadGuideLink.Caption, key: 'GUIA-USO', icon: 'fas fa-file-pdf' });
 				}
+				if (this.helpLinks.TableGuideLink && this.Use.UsePivot) {
+					ret.push({ label: this.helpLinks.TableGuideLink.Caption, key: 'GUIA-TABLA', icon: 'fas fa-file-pdf' });
+				}
 				if (this.helpLinks.UploadGuideLink) {
 					ret.push({ label: this.helpLinks.UploadGuideLink.Caption, key: 'GUIA-CARGA', icon: 'fas fa-file-pdf' });
 				}
+
+				if ((this.isAdminReader && (this.helpLinks.AdminGuideLink || this.helpLinks.AdminPacksGuideLink || this.helpLinks.AdminLogsGuideLink))
+					|| (this.isAdminMaster && this.helpLinks.AdminLogsGuideLink)) {
+					ret.push({ separator: true });
+					if (this.isAdminReader && this.helpLinks.AdminGuideLink) {
+						ret.push({ label: this.helpLinks.AdminGuideLink.Caption, key: 'GUIA-USUARIOS', icon: 'fas fa-file-pdf' });
+					}
+					if (this.isAdminReader && this.helpLinks.AdminPacksGuideLink) {
+						ret.push({ label: this.helpLinks.AdminPacksGuideLink.Caption, key: 'GUIA-PAQUETES', icon: 'fas fa-file-pdf' });
+					}
+					if (this.isAdminMaster && this.helpLinks.AdminLogsGuideLink) {
+						ret.push({ label: this.helpLinks.AdminLogsGuideLink.Caption, key: 'GUIA-REGISTROS', icon: 'fas fa-file-pdf' });
+					}
+				}
+
 				if (this.helpLinks.TutorialsLink) {
 					ret.push({ separator: true });
 					ret.push({ label: this.helpLinks.TutorialsLink.Caption, key: 'TUTORIALES', icon: 'fab fa-youtube' });
@@ -259,6 +292,9 @@
 			isAdminReader() {
 				return this.user.Privileges === 'A' || this.user.Privileges === 'E' || this.user.Privileges === 'L';
 			},
+			isAdminMaster() {
+				return this.user.Privileges === 'A';
+			},
 			userTooltip() {
 				if (!this.user.Logged) {
 					return '';
@@ -270,6 +306,12 @@
 				}
 				ret += this.user.User;
 				return ret;
+			},
+			userPicture() {
+				if (!this.user.Logged) {
+					return '';
+				}
+				return this.user.Picture;
 			},
 			selectionModes() {
 				var ret = [];
@@ -377,6 +419,13 @@
 		top: 12px;
 		color: rgb(170, 170, 170);
 		font-size: 12px;
+	}
+	.avatar {
+		height: 22px;
+		width: 22px;
+		border-radius: 10px;
+		margin-top: -6px !important;
+		margin: -5px;
 	}
 	.embedButton {
 		font-size: 13px;

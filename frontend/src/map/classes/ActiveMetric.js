@@ -735,7 +735,7 @@ ActiveMetric.prototype.GetMetricDataService = function (seed) {
 		server = window.host;
 	}
 	this.properties.EffectivePartition = this.GetSelectedPartition();
-	var params = h.getMetricDataParams(this.properties, window.SegMap.frame);
+	var params = h.getLayerDataParams(this.properties, window.SegMap.frame);
 	return { server: server, path: path, useStaticQueue: useStaticQueue, params: params };
 };
 

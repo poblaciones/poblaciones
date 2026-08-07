@@ -548,6 +548,21 @@ module.exports = {
 		});
 		return ret;
 	},
+	getLayerDataParams(metric, frame) {
+		const ver = metric.Versions[metric.SelectedVersionIndex];
+		var ret = this.mergeObject({
+			l: metric.Metric.Id,
+			v: ver.Version.Id,
+			a: ver.Levels[ver.SelectedLevelIndex].Id,
+			u: metric.SelectedUrbanity,
+			g: metric.EffectivePartition,
+			w: metric.Metric.Signature
+		}, this.getFrameParams(frame));
+		delete ret.e;
+		delete ret.z;
+		ret.e = null;
+		return ret;
+	},
 	getBlockTileParams(metric, frame, x, y, suffix, size) {
 		if (metric.Compare.Active && metric.SelectedLevelCanBeCompared()) {
 			compare = metric.Compare.SelectedLevel().Id;

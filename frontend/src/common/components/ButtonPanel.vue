@@ -72,6 +72,7 @@ export default {
 
 .flex{
   display: flex;
+  position: fixed!important;
 }
 
 .md-icon-button{

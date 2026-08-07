@@ -194,7 +194,7 @@
 
 <script>
 
-import MpGridHelper from '@/backoffice/components/MpGrid.helper';
+import MpGridHelper from './MpGrid.helper';
 import str from '@/common/framework/str';
 
 export default {

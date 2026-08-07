@@ -1,18 +1,19 @@
 <template>
-	<div style="height: 100%">
-		<div style="height: 100%">
-			<div id="panMain" class="split split-horizontal" style="overflow-y: hidden;">
-				<sidebar v-if="this.Work" @collapse="onCollapse" class="" ></sidebar>
-			</div>
-			<div id="panRight" class="split split-horizontal" style="overflow-y: hidden; position: relative">
-				<div class="mainPanel"  style="margin-top: 55px;">
-					<app-main v-if="this.Work"></app-main>
-				</div>
-			</div>
-		</div>
-		<Topbar v-if="this.Work" style="padding-left: 0px !important;"/>
-		<invoker ref="invoker"></invoker>
-	</div>
+  <div style="height: 100%">
+    <div style="height: 100%">
+      <div id="panMain" class="split split-horizontal" style="overflow-y: hidden;">
+        <sidebar v-if="this.Work" @collapse="onCollapse" class=""></sidebar>
+      </div>
+      <div id="panRight" class="split split-horizontal" style="overflow-y: hidden; position: relative">
+        <div class="mainPanel" style="margin-top: 55px;">
+          <app-main v-if="this.Work"></app-main>
+        </div>
+      </div>
+    </div>
+    <Topbar v-if="this.Work" style="padding-left: 0px !important;" />
+    <notice-changes-v5 ></notice-changes-v5>
+    <invoker ref="invoker"></invoker>
+  </div>
 </template>
 
 <script>
@@ -20,13 +21,15 @@ import AppMain from './AppMain';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import Split from 'split.js';
+import NoticeChangesV5 from './NoticeChangesV5';
 
 export default {
   name: 'layout',
   components: {
     Sidebar,
     Topbar,
-    AppMain
+    AppMain,
+		NoticeChangesV5
   },
   mounted() {
     var workId = this.$route.params.workId;

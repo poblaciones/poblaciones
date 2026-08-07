@@ -148,6 +148,8 @@ class App
 	}
 	public static function EndRequest($ommitExit = false)
 	{
+		// Llamarlo implica que se terminó antes un pedido, por lo que se
+		// realiza un rollback sobre la base de datos.
 		Performance::End();
 		if (!$ommitExit)
 			exit();

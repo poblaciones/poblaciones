@@ -39,7 +39,7 @@
 
 <script>
 import LinkIcon from 'vue-material-design-icons/Link.vue';
-import Onboarding from '../popups/onboarding';
+import Onboarding from '@/map/components/popups/onboarding';
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 import dom from '@/common/framework/dom';
 

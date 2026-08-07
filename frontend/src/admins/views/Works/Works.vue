@@ -78,11 +78,11 @@ export default {
 		showingWelcome() {
 			return window.Context.CartographiesStarted && this.works && this.works.length === 0;
 		},
-		showIndexingColumn() {
-			return this.user.Privileges === 'A';
-		},
 		isDataAdmin() {
 			return window.Context.IsDataAdmin();
+		},
+		canEditIndexingColumn() {
+			return this.user.Privileges === 'A';
 		},
 		user() {
 			return window.Context.User;
@@ -121,7 +121,8 @@ export default {
 				{ property: 'DatasetCount', caption: 'Datasets', size: 1, sortType: 'number', tooltip: function (item) { return item.DatasetNames; } },
 				{ property: 'MetricCount', caption: 'Indicadores', sortType: 'number' },
 			];
-			if (this.showIndexingColumn) {
+			if (this.canEditIndexingColumn)
+			{
 				columns.push({ property: 'IsIndexed', caption: 'Indexado', type: 'switch', onChange: function (item) { loc.onIndexedChanged(item); } });
 				columns.push({
 					property: 'SegmentedCrawling', caption: 'Segmentado', type: 'switch',
@@ -129,6 +130,22 @@ export default {
 					disabled: function (item) { return !item.IsIndexed; },
 				});
 			}
+			else
+			{
+				columns.push({ property: 'IsIndexed', caption: 'Indexado', type: 'boolean' });
+				columns.push({ property: 'SegmentedCrawling', caption: 'Segmentado', type: 'boolean',
+							value: function (item) {
+									if (item.IsIndexed) {
+										if (item.SegmentedCrawling) {
+											return "Sí";
+										} else {
+											return "No";
+										}
+									} else { return "-"; }
+							}
+				});
+			}
+
 			columns.push({
 				property: 'Estado',
 				caption: 'Estado',
@@ -145,7 +162,7 @@ export default {
 					},
 					{
 						icon: 'error_outline',
-						show: function (item) { return !loc.showIndexingColumn && !item.IsPrivate && !item.IsIndexed && loc.status(item).tag !== 'unpublished'; },
+						show: function (item) { return !item.IsPrivate && !item.IsIndexed && loc.status(item).tag !== 'unpublished'; },
 						tooltip: 'No indexada. El buscador de Poblaciones no publica los indicadores de esta cartografía en sus '
 							+ 'resultados. Para que sean incluidos, debe solictar una revisión desde Modificar > Visiblidad > Solicitar revisión.',
 					},

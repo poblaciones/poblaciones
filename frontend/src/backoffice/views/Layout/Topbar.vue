@@ -1,9 +1,10 @@
 <template>
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar">
-			<div class="topRight">
+			<div class="topRight" style="background-color: #00A0D2">
 				<!--backoffice-links><backoffice-links-->
 				<topbar-work-actions></topbar-work-actions>
+				<home-menu></home-menu>
 				<profile-menu></profile-menu>
 			</div>
 			<div style="float: left">
@@ -11,18 +12,21 @@
 					<BackIcon class="icon" style="font-size: 28px; color: #fff" />
 				</router-link>
 			</div>
-			<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
-				Ejemplos >
-				</div>
-				<div class="titleLine">
-					<div class="md-layout md-gutter" style="margin-top: -21px">
-						<div class="md-layout-item md-size-100">
-							<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :largeFont="true" :maxlength="150" class="fieldWhite"
-											 :required="true" @update="UpdateTitle"
-											 v-model="Work.properties.Metadata.Title" />
+				<div style="width: calc(max(1100px,100%)) ">
+					<div class="titleLine">
+						<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
+							Ejemplos >
+						</div>
+						<div class="md-layout md-gutter" style="margin-top: -21px">
+							<div class="md-layout-item md-size-100">
+								<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :largeFont="true"
+												 :maxlength="150" class="fieldWhite"
+												 :required="true" @update="UpdateTitle"
+												 v-model="Work.properties.Metadata.Title" />
+							</div>
 						</div>
 					</div>
-				</div>
+					</div>
 			</div>
 			<invoker ref="invoker"></invoker>
 			<stepper ref="TestStepper" title="Asistente de prueba">
@@ -36,13 +40,15 @@ import Context from '@/backoffice/classes/Context';
 import BackIcon from '@/common/assets/back.svg';
 import TopbarWorkActions from '@/backoffice/components/TopbarWorkActions.vue';
 import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
+import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
 
 export default {
 	name: 'topBar',
 	components: {
 		BackIcon,
 		TopbarWorkActions,
-		ProfileMenu
+		ProfileMenu,
+		HomeMenu
 	},
 	computed: {
 		Work() { return window.Context.CurrentWork; },
@@ -122,16 +128,18 @@ export default {
 	overflow: hidden;
 }
 
-.topRight {
-	position: absolute;
-	top: -2px;
-	right: 10px;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	height: 55px;
-	z-index: 1;
-}
+	.topRight {
+		position: absolute;
+		top: -2px;
+		right: 0px;
+		padding-right: 10px;
+		padding-left: 6px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		height: 55px;
+		z-index: 1;
+	}
 
 .topRight > * {
 	display: flex;

@@ -33,8 +33,8 @@
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
 					<MapType ref="mapSelector" class="exp-hiddable-block" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :sidebarPosition="sidebarPosition" :style="oldStyleIndent"></MapType>
 
-					<!--MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" /-->
-					<!--RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" /-->
+					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols"/>
+					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor"/>
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -47,9 +47,10 @@
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 					<FullScreenButton v-if="!Embedded.Readonly" class="exp-hiddable-unset" :fullscreen="fullscreen" />
-					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset"
+
+					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
 										 :metrics="metrics" :toolbarStates="toolbarStates" />
-					<ClippingLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset"
+					<ClippingLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset" :style="(!Use.UseNewFabButton ? 'visibility: hidden' : '')"
 													:clipping="clipping" :toolbarStates="toolbarStates" />
 				</div>
 				<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
@@ -70,9 +71,9 @@
 	import MapExport from '@/map/classes/MapExport';
 	import Search from '@/map/components/widgets/map/search';
 	import MapPanel from '@/map/components/panels/mapPanel';
-/*	import MetricsButton from '@/map/components/widgets/map/metricsButton';
+	import MetricsButton from '@/map/components/widgets/map/metricsButton';
 	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
-	*/ import LeftPanel from '@/map/components/panels/leftPanel';
+	import LeftPanel from '@/map/components/panels/leftPanel';
 	import EditButton from '@/map/components/widgets/map/editButton';
 	import FullScreenButton from '@/map/components/widgets/map/fullScreenButton';
 import MapLegend from '@/map/components/widgets/map/mapLegend';
@@ -114,9 +115,9 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			MapLegend,
 			ClippingLegend,
 			LeftPanel,
-			/*MetricsButton,
+			MetricsButton,
 			RecommendBoundaries,
-			*/SuggestionsPanel,
+			SuggestionsPanel,
 			PopupsPanel,
 			WorkPanel,
 			MapType,

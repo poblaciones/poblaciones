@@ -38,7 +38,6 @@ import GeographyClippingRegionsPopup from './GeographyClippingRegionsPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
-import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 
 	export default {
 		name: 'Geographies',
@@ -59,7 +58,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		// El servidor entrega el listado plano, en orden, con el nivel de
 		// profundidad de cada ítem (Level); mismo patrón que ClippingRegions.
 		treeList() {
-			return MpGridHelper.BuildTreeFromLevels(this.list, 'Level', 'Items');
+			return arr.ListToTreeFromIndentedItems(this.list, 'Level', 'Items');
 		},
 		gridColumns() {
 			var loc = this;

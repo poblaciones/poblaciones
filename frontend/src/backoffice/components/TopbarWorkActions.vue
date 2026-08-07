@@ -45,7 +45,7 @@ export default {
 .cartographyActions {
 	display: flex;
 	align-items: center;
-	margin-right: 6px;
+	margin-right: 0px;
 }
 .actionIcon { margin: 0 2px; }
 .actionIcon .md-icon { color: #fff !important; }

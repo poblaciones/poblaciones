@@ -76,24 +76,6 @@ class cLogin extends cController
 		return self::JumpToLoginUrl($returnUrl);
 	}
 
-
-	public static function LoadAndValidateAccount(string $user, bool $shouldBeActive = false): array
-	{
-		$user = Str::ToLower(trim($user));
-		if ($user == "")
-			return ['status' => BaseService::ERROR, 'message' => 'Debe indicarse una cuenta para ingresar.'];
-
-		$account = new Account();
-		$account->user = $user;
-		if ($account->Exists() == false)
-			return ['status' => BaseService::ERROR, 'message' => 'Cuenta inexistente (' . $user . ').'];
-
-		if ($shouldBeActive && $account->IsActive() == false)
-			return ['status' => BaseService::ERROR, 'message' => 'La cuenta debe ser activada antes de poder ser utilizada. Verifique en su casilla de correo por el mensaje de activación.'];
-
-		return ['status' => BaseService::OK, 'account' => $account];
-	}
-
 	public static function JumpToLoginUrl($returnUrl)
 	{
 		if(Str::StartsWith($returnUrl, '/') == false && Str::StartsWith($returnUrl, 'http') == false)

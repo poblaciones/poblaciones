@@ -3,6 +3,7 @@
 		<div id="topBar" class="topbar" :style="(backColor ? 'background-color: ' + backColor : '')">
 			<div class="topRight">
 				<admin-links v-if="showAdminButton"></admin-links>
+				<home-menu></home-menu>
 				<profile-menu></profile-menu>
 			</div>
 			<div style="padding-top: 4px; font-size: 1.5em;">
@@ -17,12 +18,14 @@ import { mapGetters } from 'vuex';
 import ActiveWork from '@/backoffice/classes/ActiveWork.js';
 import AdminLinks from './AdminLinks';
 import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
+import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
 
 export default {
 	name: 'topBar',
 	components: {
 		AdminLinks,
-		ProfileMenu
+		ProfileMenu,
+		HomeMenu
 	},
 	data() {
 		return {

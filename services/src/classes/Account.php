@@ -23,9 +23,11 @@ class Account
 	public $userId = '';
 	public $firstName = '';
 	public $lastName = '';
+	public $createTime = '';
 	public $privileges = '';
 	public $facebookOauthId = '';
 	public $googleOauthId = '';
+	public $picture = '';
 
 	public $isActive = false;
 	protected $geographies = NULL;
@@ -124,6 +126,12 @@ class Account
 		return $this->userId;
 	}
 
+	public function GetUserCreateTime()
+	{
+		$this->EnsureDbInfo();
+		return $this->createTime;
+	}
+
 	public function GetUserIdOrNull()
 	{
 		if ($this->IsEmpty())
@@ -134,6 +142,12 @@ class Account
 		{
 			return $this->GetUserId();
 		}
+	}
+
+	public function GetPicture()
+	{
+		$this->EnsureDbInfo();
+		return $this->picture;
 	}
 
 	public function GetSettings() : array
@@ -199,6 +213,7 @@ class Account
 			$this->lastName = $userInfo['Lastname'];
 			$this->facebookOauthId = '';
 			$this->googleOauthId = '';
+			$this->picture = $userInfo['Picture'];
 			$this->isActive = true;
 			$this->password = null;
 		}
@@ -217,10 +232,12 @@ class Account
 		}
 		$this->userId = $attrs['usr_id'];
 		$this->privileges = $attrs['usr_privileges'];
+		$this->createTime = $attrs['usr_create_time'];
 		$this->firstName = $attrs['usr_firstname'];
 		$this->lastName = $attrs['usr_lastname'];
 		$this->facebookOauthId = $attrs['usr_facebook_oauth_id'];
 		$this->googleOauthId = $attrs['usr_google_oauth_id'];
+		$this->picture = $attrs['usr_picture'];
 		$this->isActive = $attrs['usr_is_active'];
 		$this->password = $attrs['usr_password'];
 	}
@@ -459,11 +476,15 @@ class Account
 			$this->lastName = $data->lastname;
 		}
 		$this->SetOauthId($data->provider, $data->id);
+		$this->picture = $data->picture;
 		$this->isActive = true;
 		$sql = "UPDATE user SET usr_firstname = ?, usr_lastname = ?, usr_facebook_oauth_id = ?,
-												usr_google_oauth_id = ?, usr_is_active = 1 WHERE usr_id = ?";
-		App::Db()->exec($sql, array($this->firstName, $this->lastName, $this->facebookOauthId, $this->googleOauthId, $this->userId));
+												usr_google_oauth_id = ?, usr_picture = ?, usr_is_active = 1 WHERE usr_id = ?";
+		$args = array($this->firstName, $this->lastName, $this->facebookOauthId, $this->googleOauthId,
+											$this->picture, $this->userId);
+		App::Db()->exec($sql, $args);
 		App::Db()->markTableUpdate("user");
+		App::AutoCommit();
 	}
 	public function LostPasswordActivate($id)
 	{
@@ -514,6 +535,27 @@ class Account
 			PhpSession::SetSessionValue('masteruser', '');
 		PhpSession::SetSessionValue('user', $this->user);
 	}
+
+	public static function LoadAndValidateAccount(string $user, bool $shouldBeActive = false, $oauthData = null): array
+	{
+		$user = Str::ToLower(trim($user));
+		if ($user == "")
+			return ['status' => BaseService::ERROR, 'message' => 'Debe indicarse una cuenta para ingresar.'];
+		if (Str::IsEmail($user) == false)
+			return ['status' => self::ERROR, 'message' => 'La dirección de correo electrónico no fue indicada correctamente.'];
+
+		$account = new Account();
+		$account->user = $user;
+		if ($account->Exists() == false)
+			return ['status' => BaseService::ERROR, 'message' => 'Cuenta inexistente (' . $user . ').'];
+
+		if ($shouldBeActive && $account->IsActive() == false)
+			return ['status' => BaseService::ERROR, 'message' => 'La cuenta debe ser activada antes de poder ser utilizada. Verifique en su casilla de correo por el mensaje de activación.'];
+
+		if($oauthData != null && $oauthData->provider != null && $oauthData->id != null) {
+			$account->SetOauthId($oauthData->provider, $oauthData->id);
+			$account->SaveOauthActivation($oauthData, false);
+		}
+		return ['status' => BaseService::OK, 'account' => $account];
+	}
 }
-
-

@@ -19,7 +19,7 @@
 
 <script>
 
-import MpGridHelper from '@/backoffice/components/MpGrid.helper';
+import arr from '@/common/framework/arr';
 
 // Popup de selección única en árbol. Se usa para elegir un ítem existente
 // (una región, una geografía, un padre) a partir de un listado jerárquico
@@ -40,7 +40,7 @@ export default {
 	},
 	computed: {
 		treeList() {
-			return MpGridHelper.BuildTreeFromLevels(this.flatItems, 'Level', 'Items');
+			return arr.ListToTreeFromIndentedItems(this.flatItems, 'Level', 'Items');
 		},
 		gridColumns() {
 			var loc = this;

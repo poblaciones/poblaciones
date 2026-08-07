@@ -41,7 +41,6 @@ import ItemsListPopup from '@/packs/components/popups/ItemsListPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
-import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 
 
 	export default {
@@ -65,7 +64,7 @@ import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 		// profundidad de cada ítem (Level); acá se reconstruye la jerarquía
 		// que espera la grilla.
 		treeList() {
-			return MpGridHelper.BuildTreeFromLevels(this.list, 'Level', 'Items');
+			return arr.ListToTreeFromIndentedItems(this.list, 'Level', 'Items');
 		},
 		gridColumns() {
 			var loc = this;

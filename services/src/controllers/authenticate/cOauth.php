@@ -3,6 +3,7 @@
 namespace helena\controllers\authenticate;
 
 use helena\classes\App;
+use helena\classes\Account;
 use helena\controllers\common\cController;
 use minga\framework\oauth\OauthData;
 use helena\classes\Remember;
@@ -53,11 +54,12 @@ class cOauth extends cController
 				throw new MessageException('No pudo completarse la registración');
 		} else {
 			// Login
-			$res = cLogin::LoadAndValidateAccount($data->email, true);
+			$res = Account::LoadAndValidateAccount($data->email, true, $data);
 			if ($res['status'] == BaseService::ERROR)
 				throw new MessageException($res['message']);
 			$account = $res['account'];
 			$account->Begin();
+
 			Remember::SetRemember($account);
 		}
 	}

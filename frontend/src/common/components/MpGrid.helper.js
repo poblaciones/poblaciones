@@ -300,34 +300,4 @@ module.exports = {
 		}
 	},
 
-	// Reconstruye la jerarquía a partir de un listado plano en orden
-	// pre-order (padre antes que sus hijos), donde cada ítem trae su
-	// profundidad en levelProperty (0 = raíz). Agrega childrenProperty a
-	// los ítems que tienen hijos, con sus hijos directos; los ítems no se
-	// clonan. Puede llamarse repetidas veces sobre el mismo listado (p.
-	// ej. tras recargar datos) sin acumular hijos de corridas anteriores.
-	// Devuelve solo los de nivel raíz.
-	BuildTreeFromLevels(items, levelProperty, childrenProperty) {
-		for (var i = 0; i < items.length; i++) {
-			delete items[i][childrenProperty];
-		}
-		var root = [];
-		var stack = [];
-		for (var j = 0; j < items.length; j++) {
-			var item = items[j];
-			var level = item[levelProperty] || 0;
-			stack.length = level;
-			if (stack.length === 0) {
-				root.push(item);
-			} else {
-				var parent = stack[stack.length - 1];
-				if (!parent[childrenProperty]) {
-					parent[childrenProperty] = [];
-				}
-				parent[childrenProperty].push(item);
-			}
-			stack.push(item);
-		}
-		return root;
-	},
 };

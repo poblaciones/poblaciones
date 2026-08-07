@@ -40,7 +40,7 @@
 import ButtonPanel from './ButtonPanel';
 import { mixin as clickaway } from 'vue-clickaway';
 import str from '@/common/framework/str';
-import MpRichArea from '@/backoffice/components/MpRichArea';
+import MpRichArea from './MpRichArea';
 
 export default {
   name: 'MpText',

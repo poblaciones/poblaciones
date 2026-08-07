@@ -165,7 +165,6 @@ class ConfigurationService extends BaseService
 									'UseNewMenu' => App::Settings()->Map()->UseNewMenu,
 									'OwnerLogo' => App::Settings()->Map()->OwnerLogo,
 									'MapsAPI' => App::Settings()->Map()->MapsAPI,
-										/* $this->GetCurrentMapProvider(), */
 									'MapsAccess' => $mapAccess,
 									'NavigationId' => $navigation['id'],
 									'NavigationMonth' => $navigation['month'],
@@ -177,9 +176,22 @@ class ConfigurationService extends BaseService
 									'ContentAttributes' => $contentAttributes,
 									'MainServer' => $mainServer->publicUrl);
 
+		$this->FilterUserSettings($ret['User']['Settings']);
 		Callbacks::$MapsOpened++;
 
 		return $ret;
+	}
+
+	public static function FilterUserSettings(&$arr)
+	{
+		if (is_array($arr))
+		{
+			foreach ($arr as $key => $value)
+			{
+				if (strpos($key, 'work_archived_') === 0)
+					unset($arr[$key]);
+			}
+		}
 	}
 
 	private static function CheckMapLimits($mapsOpened)

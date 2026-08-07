@@ -42,7 +42,6 @@ import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
 import c from '@/common/framework/color';
-import MpGridHelper from '@/backoffice/components/MpGrid.helper';
 
 // Nivel artificial que agrupa las delimitaciones por Group: no viene del
 // servidor (que sigue devolviendo Level 0 delimitación / 1 versión), se
@@ -72,13 +71,13 @@ const GROUP_LEVEL = -1;
 		// profundidad de cada ítem (Level: 0 delimitación, 1 versión), igual
 		// que en regiones (ver ClippingRegions.vue). Cada delimitación debe
 		// venir seguida inmediatamente de sus versiones, sin intercalar otra
-		// delimitación en el medio: BuildTreeFromLevels arma esa parte de la
+		// delimitación en el medio: BuildTreeFromIndentedItems arma esa parte de la
 		// jerarquía por posición, no por una referencia explícita al padre.
 		// El nivel de Group, más arriba, se arma acá agrupando por
 		// Group.Id: si se edita una delimitación y cambia de grupo, el
 		// árbol se recalcula solo (es un computed sobre this.list).
 		treeList() {
-			var boundaryTree = MpGridHelper.BuildTreeFromLevels(this.list, 'Level', 'Items');
+			var boundaryTree = arr.ListToTreeFromIndentedItems(this.list, 'Level', 'Items');
 			return this.groupByBoundaryGroup(boundaryTree);
 		},
 		gridColumns() {
@@ -382,7 +381,7 @@ const GROUP_LEVEL = -1;
 			for (var n = 0; n < this.list.length; n++) {
 				if (this.list[n].Level === 0 && this.list[n].Id === item.Boundary.Id) {
 					// La inserta a continuación del bloque de versiones ya
-					// existentes de esa delimitación (BuildTreeFromLevels arma la
+					// existentes de esa delimitación (BuildTreeFromIndentedItems arma la
 					// jerarquía por posición, no por referencia al padre).
 					var insertAt = n + 1;
 					while (insertAt < this.list.length && this.list[insertAt].Level === 1 &&

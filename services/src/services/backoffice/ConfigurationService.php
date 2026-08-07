@@ -7,6 +7,7 @@ use helena\services\common\AuthenticationService;
 use helena\db\frontend\SignatureModel;
 use helena\classes\Account;
 use helena\classes\App;
+use helena\services\frontend as frontendServices;
 
 class ConfigurationService extends BaseService
 {
@@ -21,14 +22,19 @@ class ConfigurationService extends BaseService
 		$userService = new AuthenticationService();
 		$user = $userService->GetStatus();
 
+		frontendServices\ConfigurationService::FilterUserSettings($user['Settings']);
+
 		$model = new SignatureModel();
 		$signatures = $model->GetSignatures();
 
 		$mainServer = App::Settings()->Servers()->Main();
 		if (!$user['Logged'])
-			return array('User' => $user, 'MainServer' => $mainServer->publicUrl);
+			return array('User' => $user,
+								'HomePage' =>  App::Settings()->Servers()->Home()->publicUrl,
+								'MainServer' => $mainServer->publicUrl);
 		else
-			return array('UseCalculated' => App::Settings()->Map()->UseCalculated,
+			return array('HomePage' =>  App::Settings()->Servers()->Home()->publicUrl,
+						 'UseCalculated' => App::Settings()->Map()->UseCalculated,
 								'UseTextures' => App::Settings()->Map()->UseTextures,
 								'UseGradients' => App::Settings()->Map()->UseGradients,
 								'UsePerimeter' => App::Settings()->Map()->UsePerimeter,
