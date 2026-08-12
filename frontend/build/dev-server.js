@@ -34,12 +34,18 @@ const autoOpenBrowser = !!config.dev.autoOpenBrowser;
 const phpPaths = [
 	'/services', '/sitemap', '/handle', '/logs',
 	'/oauthGoogle', '/oauthFacebook', '/authenticate',
-	'/static/css', '/static/js', '/static/vendor',
+	'/static/css', '/static/js',
 	'/ark:/'
 ];
 
 const app      = express();
 const compiler = webpack(webpackConfig);
+
+// ── Log de todo el tráfico entrante (incluye lo que no pasa por HPM) ────────
+app.use((req, res, next) => {
+	console.log('[REQ] ' + new Date().toISOString() + '  ' + req.method + ' ' + req.url);
+	next();
+});
 
 // ── URL rewrites ────────────────────────────────────────────────────────────
 app.use((req, res, next) => {
@@ -53,21 +59,113 @@ app.use((req, res, next) => {
 	next();
 });
 
+// ── Vendor: estático directo, no pasa más por PHP ────────────────────────────
+// Relativo a frontend/build/dev-server.js -> frontend/static/vendor
+app.use('/static/vendor', express.static('../static/vendor'));
+
+// ── Mutex + cola FIFO delante del proxy a PHP ────────────────────────────────
+// El server embebido de PHP procesa una request a la vez. En vez de dejar que
+// varias conexiones entren en simultáneo al backlog TCP (donde no se puede
+// distinguir cuál ejecuta y cuáles esperan), se serializa explícitamente acá.
+let phpReqCounter = 0;
+let phpBusy       = false;
+const phpQueue    = [];         // items en espera de mutex
+const phpInFlight = new Map();  // id -> { url, method, queuedAt, startedAt, state }
+const phpHistory  = [];         // últimas N, con tiempos de espera y ejecución
+const PHP_HISTORY_MAX = 30;
+
+function phpQueueGate(req, res, next) {
+	const id = ++phpReqCounter;
+	req._phpReqId = id;
+	const queuedAt = Date.now();
+	phpInFlight.set(id, {
+		url: req.url, method: req.method,
+		queuedAt, startedAt: null, state: 'queued'
+	});
+	const item = { id, next };
+	phpQueue.push(item);
+
+	req.on('close', () => {
+		const entry = phpInFlight.get(id);
+		if (!entry || entry.state !== 'queued') return; // ya ejecutando o ya finalizado
+		const idx = phpQueue.indexOf(item);
+		if (idx !== -1) phpQueue.splice(idx, 1);
+		phpInFlight.delete(id);
+		phpHistory.unshift({
+			url: entry.url, method: entry.method,
+			status: 'CLOSED_BY_CLIENT',
+			waitMs: Date.now() - entry.queuedAt,
+			execMs: 0
+		});
+		if (phpHistory.length > PHP_HISTORY_MAX) phpHistory.pop();
+	});
+
+	tryDequeue();
+}
+
+function tryDequeue() {
+	if (phpBusy || phpQueue.length === 0) return;
+	const { id, next } = phpQueue.shift();
+	phpBusy = true;
+	const entry = phpInFlight.get(id);
+	entry.startedAt = Date.now();
+	entry.state      = 'running';
+	next();
+}
+
+function recordPhpEnd(id, status) {
+	const entry = phpInFlight.get(id);
+	if (entry) {
+		phpInFlight.delete(id);
+		const now = Date.now();
+		phpHistory.unshift({
+			url:        entry.url,
+			method:     entry.method,
+			status,
+			waitMs:     entry.startedAt - entry.queuedAt,
+			execMs:     now - entry.startedAt
+		});
+		if (phpHistory.length > PHP_HISTORY_MAX) phpHistory.pop();
+	}
+	phpBusy = false;
+	tryDequeue();
+}
+
+// ── Ruta fija de diagnóstico: la resuelve Express directamente, nunca PHP ───
+app.get('/php_status', (req, res) => {
+	const now = Date.now();
+	res.json({
+		inFlight: Array.from(phpInFlight.values()).map(e => ({
+			...e,
+			waitedMs: (e.startedAt || now) - e.queuedAt,
+			runningMs: e.startedAt ? now - e.startedAt : 0
+		})),
+		previous: phpHistory
+	});
+});
+
 // ── Proxy a PHP ─────────────────────────────────────────────────────────────
 const phpProxyOptions = {
 	target:       'http://127.0.0.1:' + phpPORT,
 	logLevel:     'debug',
 	timeout:       60000,
 	proxyTimeout:  60000,
+	onProxyRes(proxyRes, req) {
+		recordPhpEnd(req._phpReqId, proxyRes.statusCode);
+	},
 	onError(err, req, res) {
 		console.error('[PHP proxy error]', req.url, err.message);
+		recordPhpEnd(req._phpReqId, 'ERROR: ' + err.message);
 		if (!res.headersSent) {
 			res.writeHead(502, { 'Content-Type': 'text/plain' });
 			res.end('PHP proxy error: ' + err.message);
 		}
 	}
 };
-phpPaths.forEach(context => app.use(context, proxyMW(context, phpProxyOptions)));
+phpPaths.forEach(context => {
+	app.use(context, phpQueueGate);
+	app.use(context, proxyMW(context, phpProxyOptions));
+});
 
 // ── Webpack ──────────────────────────────────────────────────────────────────
 const dev = devMiddleware(compiler, {
