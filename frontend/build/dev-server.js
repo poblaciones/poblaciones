@@ -63,14 +63,19 @@ app.use((req, res, next) => {
 // Relativo a frontend/build/dev-server.js -> frontend/static/vendor
 app.use('/static/vendor', express.static('../static/vendor'));
 
-// ── Mutex + cola FIFO delante del proxy a PHP ────────────────────────────────
-// El server embebido de PHP procesa una request a la vez. En vez de dejar que
-// varias conexiones entren en simultáneo al backlog TCP (donde no se puede
-// distinguir cuál ejecuta y cuáles esperan), se serializa explícitamente acá.
+// ── Pool de servidores PHP + cola FIFO ───────────────────────────────────────
+// El server embebido de PHP procesa una request a la vez por proceso. En vez
+// de dejar que varias conexiones entren en simultáneo al backlog TCP de una
+// sola instancia (donde no se puede distinguir cuál ejecuta y cuáles esperan),
+// se levantan N instancias y se asigna cada request a un slot libre. Si las N
+// están ocupadas, la request queda en cola hasta que se libere alguna.
+const PHP_POOL_SIZE = 10;
+const phpBasePort   = phpPORT;
+const phpPoolBusy   = new Array(PHP_POOL_SIZE).fill(false);
+
 let phpReqCounter = 0;
-let phpBusy       = false;
-const phpQueue    = [];         // items en espera de mutex
-const phpInFlight = new Map();  // id -> { url, method, queuedAt, startedAt, state }
+const phpQueue    = [];         // items en espera de slot libre
+const phpInFlight = new Map();  // id -> { url, method, queuedAt, startedAt, state, poolIdx }
 const phpHistory  = [];         // últimas N, con tiempos de espera y ejecución
 const PHP_HISTORY_MAX = 30;
 
@@ -80,7 +85,7 @@ function phpQueueGate(req, res, next) {
 	const queuedAt = Date.now();
 	phpInFlight.set(id, {
 		url: req.url, method: req.method,
-		queuedAt, startedAt: null, state: 'queued'
+		queuedAt, startedAt: null, state: 'queued', poolIdx: null
 	});
 	const item = { id, next };
 	phpQueue.push(item);
@@ -95,7 +100,8 @@ function phpQueueGate(req, res, next) {
 			url: entry.url, method: entry.method,
 			status: 'CLOSED_BY_CLIENT',
 			waitMs: Date.now() - entry.queuedAt,
-			execMs: 0
+			execMs: 0,
+			poolIdx: null
 		});
 		if (phpHistory.length > PHP_HISTORY_MAX) phpHistory.pop();
 	});
@@ -104,13 +110,17 @@ function phpQueueGate(req, res, next) {
 }
 
 function tryDequeue() {
-	if (phpBusy || phpQueue.length === 0) return;
-	const { id, next } = phpQueue.shift();
-	phpBusy = true;
-	const entry = phpInFlight.get(id);
-	entry.startedAt = Date.now();
-	entry.state      = 'running';
-	next();
+	while (phpQueue.length > 0) {
+		const freeIdx = phpPoolBusy.findIndex(busy => !busy);
+		if (freeIdx === -1) return; // todos los slots ocupados
+		const { id, next } = phpQueue.shift();
+		phpPoolBusy[freeIdx] = true;
+		const entry = phpInFlight.get(id);
+		entry.startedAt = Date.now();
+		entry.state      = 'running';
+		entry.poolIdx    = freeIdx;
+		next();
+	}
 }
 
 function recordPhpEnd(id, status) {
@@ -123,11 +133,12 @@ function recordPhpEnd(id, status) {
 			method:     entry.method,
 			status,
 			waitMs:     entry.startedAt - entry.queuedAt,
-			execMs:     now - entry.startedAt
+			execMs:     now - entry.startedAt,
+			poolIdx:    entry.poolIdx
 		});
 		if (phpHistory.length > PHP_HISTORY_MAX) phpHistory.pop();
+		phpPoolBusy[entry.poolIdx] = false;
 	}
-	phpBusy = false;
 	tryDequeue();
 }
 
@@ -135,18 +146,26 @@ function recordPhpEnd(id, status) {
 app.get('/php_status', (req, res) => {
 	const now = Date.now();
 	res.json({
-		inFlight: Array.from(phpInFlight.values()).map(e => ({
+		active: Array.from(phpInFlight.values()).map(e => ({
 			...e,
 			waitedMs: (e.startedAt || now) - e.queuedAt,
 			runningMs: e.startedAt ? now - e.startedAt : 0
 		})),
-		previous: phpHistory
+		history:  phpHistory,
+		poolBusy: phpPoolBusy,
+		poolSize: PHP_POOL_SIZE
 	});
 });
 
 // ── Proxy a PHP ─────────────────────────────────────────────────────────────
 const phpProxyOptions = {
-	target:       'http://127.0.0.1:' + phpPORT,
+	// "target" es obligatorio para esta versión de http-proxy-middleware aunque
+	// se use "router" para la resolución real por request; nunca se usa en la
+	// práctica porque el gate siempre asigna poolIdx antes de llegar acá.
+	target: 'http://127.0.0.1:' + phpBasePort,
+	router(req) {
+		return 'http://127.0.0.1:' + (phpBasePort + phpInFlight.get(req._phpReqId).poolIdx);
+	},
 	logLevel:     'debug',
 	timeout:       60000,
 	proxyTimeout:  60000,
@@ -188,10 +207,13 @@ app.use(hot);
 const staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory);
 app.use(staticPath, express.static('./static'));
 
-// ── PHP server ───────────────────────────────────────────────────────────────
-phpServer({ port: phpPORT, base: '../services/web', router: '../services/web/resolve-dev.php' })
-	.then(() => console.log('> PHP server running at port ' + phpPORT))
-	.catch(() => {});
+// ── PHP server (pool) ─────────────────────────────────────────────────────────
+for (let i = 0; i < PHP_POOL_SIZE; i++) {
+	const port = phpBasePort + i;
+	phpServer({ port, base: '../services/web', router: '../services/web/resolve-dev.php' })
+		.then(() => console.log('> PHP server #' + i + ' running at port ' + port))
+		.catch(() => {});
+}
 
 // ── HTTPS server directo sobre Express (sin proxy intermedio) ────────────────
 const server = https.createServer({
@@ -210,7 +232,7 @@ dev.waitUntilValid(() => {
 		const uri = 'https://127.0.0.1:' + appPORT;
 		console.log('> ============================================');
 		console.log('> Dev server:  ' + uri);
-		console.log('> PHP backend: port ' + phpPORT);
+		console.log('> PHP backend: ports ' + phpBasePort + '-' + (phpBasePort + PHP_POOL_SIZE - 1));
 		console.log('> ============================================');
 		if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
 			opn(uri);

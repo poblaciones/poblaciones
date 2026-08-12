@@ -3,6 +3,8 @@ import color from '@/common/framework/color';
 import h from '@/map/js/helper';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { PathStyleExtension } from '@deck.gl/extensions';
+import LabeledGeoJsonLayer from './LabeledGeoJsonLayer';
+
 
 export default PolygonOverlay;
 
@@ -12,15 +14,17 @@ function PolygonOverlay(activeSelectedMetric) {
 	this.labelsVisibility = [];
 	this.dynamicWidth = activeSelectedMetric.dynamicWidth;
 	this.lineWidth = activeSelectedMetric.lineWidth;
+	this.aliases = activeSelectedMetric.aliases;
 	this.dashedLine = activeSelectedMetric.dashedLine;
-	this.currentZoom = 8; // ← inicializar siempre
+	this.showInMapLabels = activeSelectedMetric.showInMapLabels;
+	this.lightInMapLabels = activeSelectedMetric.lightInMapLabels;
+	this.currentZoom = 8;
 	if (this.activeSelectedMetric.HasSelectedVariable()) {
 		this.variable = this.activeSelectedMetric.SelectedVariable();
 	} else {
 		this.variable = null;
 	}
 	this.layer = null;
-	this.colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
 };
 // Los stops expresan: "con base width=2, ¿cuántos píxeles quiero?"
 // El scale = targetPixels / baseWidth = targetPixels / 2
@@ -30,9 +34,7 @@ PolygonOverlay.prototype.GetLineScaleForZoom = function (zoom) {
 		[5, 1],
 		[8, 2],
 		[14, 5],
-		[16, 10],
-		[18, 20],
-		[21, 160]
+		[16, 10]
 	];
 
 	if (zoom <= stops[0][0]) return stops[0][1] / 2;
@@ -49,6 +51,29 @@ PolygonOverlay.prototype.GetLineScaleForZoom = function (zoom) {
 	}
 	return 1;
 };
+
+PolygonOverlay.prototype.formatDescription = function (properties) {
+	if (!properties.Description) {
+		return '';
+	}
+	var desc = '' + properties.Description;
+	if (this.aliases) {
+		Object.keys(this.aliases).forEach(function (key) {
+			desc = desc.split(key).join(this.aliases[key]);
+		}, this);
+	}
+	return desc.toUpperCase();
+};
+
+PolygonOverlay.prototype.getDynamicLabelSize = function () {
+	var zoom = this.currentZoom;
+	if (zoom >= 16) {
+		return zoom - 1;
+	} else {
+		return Math.min(12, zoom * 2 - 10);
+	}
+};
+
 PolygonOverlay.prototype.CreateLayer = function (data) {
 	var zoom = window.SegMap.frame.Zoom;
 	if (zoom !== undefined) this.currentZoom = zoom;
@@ -56,53 +81,79 @@ PolygonOverlay.prototype.CreateLayer = function (data) {
 	var loc = this;
 	var ticks = new Date().getTime();
 	this._lastData = data;
-
 	var geojson = {
 		type: "FeatureCollection",
 		features: dataFiltered
 	};
 
 	const lineScale = this.GetLineScaleForZoom(this.currentZoom);
-	/*getLineWidth: 5, // en metros
-lineWidthMinPixels: 2,
-*/
-
+	var extraId = '' + (this.activeSelectedMetric && this.activeSelectedMetric.properties && this.activeSelectedMetric.properties.Metric ?
+												this.activeSelectedMetric.properties.Metric.Id : '');
 	var options = {
-		id: 'polygon-layer' + ticks,
+		id: 'polygon-layer-' + extraId + '-' + ticks,
 		data: geojson,
+
 		filled: true,
 		getFillColor: d => color.ParseColorParts(loc.colorMap[d.properties.LID] + "80"),
 		getLineColor: d => color.ParseColorParts(loc.colorMap[d.properties.LID] + "B0"),
-
-		getLineWidth: this.lineWidth,           // base en metros, igual que antes
-		lineWidthMinPixels: 1,     // que no desaparezca en zoom lejano
-		lineWidthMaxPixels: 200,   // tope para zoom muy cercano
+		getLineWidth: this.lineWidth,
+		lineWidthMinPixels: 1,
+		lineWidthMaxPixels: 200,
 		lineWidthScale: lineScale,
 		pickable: true,
 		onError: function (error) { console.log(error.message); },
 	};
+	if (this.showInMapLabels) {
+		// Etiquetas
+		options.getLabel = d => loc.formatDescription(d.properties);
+		options.getLabelPriority = 1;
+		// Ojo: es el zoom de deck, que deck-utils calcula como map.getZoom() - 1
+		// (Leaflet usa teselas de 256 px y deck.gl de 512). Para restringir las
+		// etiquetas a zoom alto hay que restar 1 al valor del mapa.
+		options.getLabelZoomRange = [8, 20];
+		options.labelFontWeight = 500;
+		options.labelMaxCount = 40;
+		options.labelMinPixelDistance = 70;
+		options.labelBackgroundPadding= [3, 1];
+		//if (this.dynamicWidth) {
+		options.getLabelSize = d => loc.getDynamicLabelSize();
+		//	} else {
+		//	options.getLabelSize = 12;
+		//}
+		if (this.lightInMapLabels) {
+			options.getLabelColor = [120, 120, 120];
+			options.labelBackground = d => [255, 255, 255, 70];
+		} else {
+			options.getLabelColor = [255, 255, 255, 255];
+			options.labelBackground = d => [d.itemColor[0], d.itemColor[1], d.itemColor[2], 200];
+		}
+	}
 	if (this.dashedLine) {
 		options.filled = false;
 		options.extensions = [new PathStyleExtension({ dash: true })];
-		// Punteado
-		options.getDashArray = [10, 5];         // [largo del trazo, largo del hueco]
+		options.getDashArray = [10, 5];
 		options.dashJustified = true;
 	}
-	const layer = new GeoJsonLayer(options);
+	if (this.showInMapLabels && window.SegMap.Labels.visible) {
+		this.layer = new LabeledGeoJsonLayer(options);
+	} else {
+		this.layer = new GeoJsonLayer(options);
+	}
 
-	this.layer = layer;
-	return layer;
+	return this.layer;
 };
 PolygonOverlay.prototype.UpdateZoom = function (zoom) {
-	if (!this.dynamicWidth) {
-		return this.layer;
-	}
+	// Sin ancho dinámico no hay nada que reemplazar: devolver la instancia ya
+	// montada haría que deck.gl reciba en setProps una capa en uso.
 	this.currentZoom = zoom;
+	if (!this.dynamicWidth) {
+		return null;
+	}
 	if (this.layer) {
-		const lineScale = this.GetLineScaleForZoom(zoom);
+		// lineWidthScale no es un accessor: el cambio de prop basta para
+		// redibujar y no requiere updateTriggers.
 		this.layer = this.layer.clone({
-			lineWidthScale: lineScale,
-			updateTriggers: { lineWidthScale: lineScale }
+			lineWidthScale: this.GetLineScaleForZoom(zoom)
 		});
 		return this.layer;
 	}
@@ -153,4 +204,3 @@ PolygonOverlay.prototype.Filter = function (data) {
 	}
 	return dataFiltered;
 };
-

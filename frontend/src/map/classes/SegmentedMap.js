@@ -388,16 +388,22 @@ SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
 				basemapMetric.requested = 0;
 				basemapMetric.Visible = !basemapMetric.Visible;
 				if (basemapMetric.MetricIds) {
-					for (var id of basemapMetric.MetricIds) {
-						basemapMetric.requested++;
-						this.AddBaseMetricById(id).then(function (activeBaseMetric) {
+					(async function () {
+						for (var id of basemapMetric.MetricIds) {
+							basemapMetric.requested++;
+							var activeBaseMetric = await this.AddBaseMetricById(id);
+
 							activeBaseMetric.dynamicWidth = basemapMetric.DynamicWidth;
+							activeBaseMetric.aliases = basemapMetric.Aliases;
 							activeBaseMetric.lineWidth = basemapMetric.LineWidth;
 							activeBaseMetric.dashedLine = basemapMetric.DashedLine;
+							activeBaseMetric.showInMapLabels = (basemapMetric.Labels == 'LightColor' || basemapMetric.Labels == 'SameColor');
+							activeBaseMetric.lightInMapLabels = (basemapMetric.Labels == 'LightColor');
+
 							basemapMetric.layers.push(activeBaseMetric);
 							basemapMetric.requested--;
-						});
-					}
+						}
+					}.bind(this))();
 				}
 				if (basemapMetric.BoundaryIds) {
 					for (var id of basemapMetric.BoundaryIds) {
@@ -414,16 +420,20 @@ SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
 			}
 		} else {
 			basemapMetric.Visible = !basemapMetric.Visible;
-			for (var layer of basemapMetric.layers) {
-				layer.Show();
+			if (basemapMetric.layers) {
+				for (var layer of basemapMetric.layers) {
+					layer.Show();
+				}
 			}
 			this.SaveRoute.UpdateRoute();
 		}
 	} else {
 		// lo quita
 		basemapMetric.Visible = !basemapMetric.Visible;
-		for (var layer of basemapMetric.layers) {
-			layer.Hide();
+		if (basemapMetric.layers) {
+			for (var layer of basemapMetric.layers) {
+				layer.Hide();
+			}
 		}
 		this.SaveRoute.UpdateRoute();
 	}
@@ -452,16 +462,29 @@ SegmentedMap.prototype.UpdateLabelsVisibility = function () {
 		if (!this.Labels.Visible()) {
 			// Lo empieza a mostrar
 			this.Labels.Show();
+			this.BasemapsUpdateLabelsVisiblity(true);
 			this.MapsApi.UpdateLabelsVisibility(true);
 		}
 	} else {
 		if (this.Labels.Visible()) {
 			// Las oculta
 			this.Labels.Hide();
+			this.BasemapsUpdateLabelsVisiblity(false);
 			this.MapsApi.UpdateLabelsVisibility(false);
 		}
 	}
 	this.Session.UI.LabelsChanged(this.toolbarStates.showLabels);
+};
+
+SegmentedMap.prototype.BasemapsUpdateLabelsVisiblity = function (value) {
+	var baseMetrics = this.toolbarStates.basemapMetrics;
+	for (var i = 0; i < baseMetrics.length; i++) {
+		var layer = baseMetrics[i];
+		if ((layer.Labels == 'SameColor' || layer.Labels == 'LightColor') && layer.Visible) {
+			this.ToggleBasemapMetric(layer);
+			this.ToggleBasemapMetric(layer);
+		}
+	}
 };
 
 SegmentedMap.prototype.ZoomChanged = function (zoom) {

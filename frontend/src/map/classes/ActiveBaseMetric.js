@@ -15,6 +15,9 @@ function ActiveBaseMetric(selectedMetric) {
 	this.objs.Segment = null;
 	this.isBaseMetric = true;
 	this.dynamicWidth = false;
+	this.aliases = [];
+	this.showInMapLabels = false;
+	this.lightInMapLabels = false;
 	this.lineWidth = 2;
 	this.color = ActiveBaseMetric.DEFAULT_COLOR;
 };
