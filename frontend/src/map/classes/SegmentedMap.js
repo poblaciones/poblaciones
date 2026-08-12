@@ -379,63 +379,67 @@ SegmentedMap.prototype.MapTypeChanged = function (mapTypeState) {
 };
 
 SegmentedMap.prototype.ToggleBasemapMetric = function (basemapMetric) {
-	if (!basemapMetric.Visible) {
-		// lo muestra
-		if (!basemapMetric.layers) {
-			basemapMetric.layers = [];
-			// lo inserta de la nada...
-			if (!basemapMetric.requested) {
-				basemapMetric.requested = 0;
-				basemapMetric.Visible = !basemapMetric.Visible;
-				if (basemapMetric.MetricIds) {
-					(async function () {
-						for (var id of basemapMetric.MetricIds) {
-							basemapMetric.requested++;
-							var activeBaseMetric = await this.AddBaseMetricById(id);
-
-							activeBaseMetric.dynamicWidth = basemapMetric.DynamicWidth;
-							activeBaseMetric.aliases = basemapMetric.Aliases;
-							activeBaseMetric.lineWidth = basemapMetric.LineWidth;
-							activeBaseMetric.dashedLine = basemapMetric.DashedLine;
-							activeBaseMetric.showInMapLabels = (basemapMetric.Labels == 'LightColor' || basemapMetric.Labels == 'SameColor');
-							activeBaseMetric.lightInMapLabels = (basemapMetric.Labels == 'LightColor');
-
-							basemapMetric.layers.push(activeBaseMetric);
-							basemapMetric.requested--;
-						}
-					}.bind(this))();
-				}
-				if (basemapMetric.BoundaryIds) {
-					for (var id of basemapMetric.BoundaryIds) {
-						basemapMetric.requested++;
-						this.AddBaseBoundaryById(id).then(function (activeBaseMetric) {
-							activeBaseMetric.dynamicWidth = basemapMetric.DynamicWidth;
-							activeBaseMetric.lineWidth = basemapMetric.LineWidth;
-							activeBaseMetric.dashedLine = basemapMetric.DashedLine;
-							basemapMetric.layers.push(activeBaseMetric);
-							basemapMetric.requested--;
-						});
-					}
-				}
-			}
-		} else {
-			basemapMetric.Visible = !basemapMetric.Visible;
-			if (basemapMetric.layers) {
-				for (var layer of basemapMetric.layers) {
-					layer.Show();
-				}
-			}
-			this.SaveRoute.UpdateRoute();
-		}
+	basemapMetric.Visible = !basemapMetric.Visible;
+	if (basemapMetric.layers) {
+		// Ya se pidieron las capas alguna vez: solo hay que aplicar el estado.
+		// Las que sigan en vuelo se van a reconciliar solas al llegar.
+		this.ApplyBasemapMetricVisibility(basemapMetric);
 	} else {
-		// lo quita
-		basemapMetric.Visible = !basemapMetric.Visible;
-		if (basemapMetric.layers) {
-			for (var layer of basemapMetric.layers) {
-				layer.Hide();
-			}
+		basemapMetric.layers = [];
+		this.LoadBasemapMetricLayers(basemapMetric);
+	}
+	this.SaveRoute.UpdateRoute();
+};
+
+SegmentedMap.prototype.ApplyBasemapMetricVisibility = function (basemapMetric) {
+	for (var layer of basemapMetric.layers) {
+		if (basemapMetric.Visible) {
+			layer.Show();
+		} else {
+			layer.Hide();
 		}
-		this.SaveRoute.UpdateRoute();
+	}
+};
+
+// Pide las capas de un mapa base. Cada una queda insertada en el mapa apenas
+// llega (lo hacen AddBaseMetricById / AddBaseBoundaryById), así que al
+// recibirla se aplica el estado de visibilidad VIGENTE, no el que había al
+// disparar el pedido: el usuario puede haber apagado el mapa base mientras
+// tanto. Sin esa reconciliación quedaba una capa dibujada con Visible en
+// false, y el siguiente encendido la insertaba una segunda vez, desfasando
+// las posiciones de todos los overlays.
+SegmentedMap.prototype.LoadBasemapMetricLayers = function (basemapMetric) {
+	var loc = this;
+	var receive = function (activeBaseMetric) {
+		if (!activeBaseMetric) {
+			// El pedido falló; doAddMetricById ya avisó del error.
+			return;
+		}
+		activeBaseMetric.dynamicWidth = basemapMetric.DynamicWidth;
+		activeBaseMetric.lineWidth = basemapMetric.LineWidth;
+		activeBaseMetric.dashedLine = basemapMetric.DashedLine;
+		basemapMetric.layers.push(activeBaseMetric);
+		if (!basemapMetric.Visible) {
+			activeBaseMetric.Hide();
+		}
+	};
+	if (basemapMetric.MetricIds) {
+		(async function () {
+			for (var id of basemapMetric.MetricIds) {
+				var activeBaseMetric = await loc.AddBaseMetricById(id);
+				if (activeBaseMetric) {
+					activeBaseMetric.aliases = basemapMetric.Aliases;
+					activeBaseMetric.showInMapLabels = (basemapMetric.Labels == 'LightColor' || basemapMetric.Labels == 'SameColor');
+					activeBaseMetric.lightInMapLabels = (basemapMetric.Labels == 'LightColor');
+				}
+				receive(activeBaseMetric);
+			}
+		})();
+	}
+	if (basemapMetric.BoundaryIds) {
+		for (var boundaryId of basemapMetric.BoundaryIds) {
+			this.AddBaseBoundaryById(boundaryId).then(receive);
+		}
 	}
 };
 

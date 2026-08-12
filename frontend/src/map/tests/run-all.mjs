@@ -8,6 +8,7 @@ await import('./routes.test.mjs');
 await import('./indicatorSelector.test.mjs');
 await import('./helperQueue.test.mjs');
 await import('./mapLegend.test.mjs');
+await import('./baseMetricOverlays.test.mjs');
 await import('./clippingLegend.test.mjs');
 await import('./segmentedMap.test.mjs');
 await import('./activeBoundary.test.mjs');

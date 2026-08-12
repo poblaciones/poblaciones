@@ -1111,11 +1111,19 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		// 3. que lo espere si está exportando
 		activeMetric.GetMetricData().then(function (data) {
 			if (!overlay.disposed) {
-				loc.CreateDeckglLayer(activeMetric, data, index);
+				// overlay.index, no el index capturado al pedir los datos: entre
+				// el pedido y la respuesta pueden haberse insertado o quitado
+				// otras capas, y doInsertOverlay/RemoveOverlay ya reacomodaron
+				// los índices de todos los overlays vivos. Con el índice viejo
+				// se termina removiendo del mapa el overlay de OTRA capa (los
+				// overlays se identifican solo por posición, nunca por identidad).
+				loc.CreateDeckglLayer(activeMetric, data, overlay.index);
 			}
 		}).catch(function (res) {
 			// TODO: revertir el toggle
-			loc.RemoveOverlay(index);
+			if (!overlay.disposed) {
+				loc.RemoveOverlay(overlay.index);
+			}
 			err.errDialog("GetMetricData", "acceder a la información solicitada.", res);
 		});;
 	}
@@ -1155,9 +1163,9 @@ LeafletApi.prototype.RemoveOverlay = function (index) {
 			// libera
 			layer.dispose();
 			// le reduce el índice a los siguientes...
-			for (var layer of this.overlayMapTypesLayers) {
-				if (layer.index > index) {
-					layer.index--;
+			for (var next of this.overlayMapTypesLayers) {
+				if (next.index > index) {
+					next.index--;
 				}
 			}
 			// listo

@@ -73,7 +73,13 @@ MetricsList.prototype.doInsert = function (activeMetric, i, insertInMetrics) {
 	if (i === -1) {
 		i = segment.length;
 	}
-	if (activeMetric.Visible()) {
+	// Los overlays del mapa se identifican solo por su posición, así que el
+	// invariante "un activeMetric ocupa a lo sumo un lugar en su segmento" es
+	// crítico: si se inserta dos veces, todas las posiciones siguientes quedan
+	// desfasadas y al quitar una capa se termina removiendo del mapa la de
+	// otra. Los caminos que reinsertan (Move, UpdateMetric) siempre remueven
+	// antes, así que este guard solo ataja altas repetidas indebidas.
+	if (activeMetric.Visible() && segment.indexOf(activeMetric) === -1) {
 		var segmentPos = this.CalculateSegmentPosition(segment, i);
 		arr.InsertAt(segment, segmentPos, activeMetric);
 		if (window.SegMap.MapsApi !== null) {
@@ -93,13 +99,23 @@ MetricsList.prototype.doInsert = function (activeMetric, i, insertInMetrics) {
 	}
 };
 
+// Devuelve la posición del segmento en la que va una capa cuyo orden en
+// this.metrics será `index`. El segmento se mantiene ordenado de forma
+// DESCENDENTE por ese orden: la métrica más nueva (índice 0, primera en el
+// panel) queda última en el segmento, y por lo tanto con el mapPos más alto,
+// que es el z-index más alto: se dibuja arriba de todo.
+//
+// Las capas que hoy tienen índice >= `index` van a correrse una posición al
+// insertarse la nueva, así que quedan por delante de ella; las de índice
+// menor, por detrás. Se busca de atrás hacia adelante la última con índice
+// mayor o igual y se inserta justo después.
 MetricsList.prototype.CalculateSegmentPosition = function (segment, index) {
 	for (let i = segment.length - 1; i >= 0; i--) {
-		if (segment[i].index < index) {
-			return i;
+		if (segment[i].index >= index) {
+			return i + 1;
 		}
 	}
-	return segment.length;
+	return 0;
 };
 
 MetricsList.prototype.CalculateMapPosition = function (segment, segmentPos) {
