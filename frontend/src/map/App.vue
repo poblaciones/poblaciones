@@ -1409,7 +1409,6 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 
 		.lightButton:hover {
 			background-color: rgba(0,0,0,0.12);
-			border-radius: 5px;
 		}
 
 		.lightButton[disabled]:hover {

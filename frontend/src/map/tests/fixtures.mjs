@@ -211,6 +211,8 @@ export function mountLite(component, options) {
 		$set(obj, key, value) { instance.$setCalls.push({ obj, key, value }); obj[key] = value; },
 		$nextTick(cb) { if (cb) cb(); },
 		$refs: {},
+		// Vue siempre lo define, aunque no haya slots.
+		$slots: {},
 		$el: { querySelector() { return null; } },
 		// Plugin vue-mobile-detection (main.js): disponible en cualquier
 		// componente vía this.$isMobile(). Por defecto false; se sobreescribe

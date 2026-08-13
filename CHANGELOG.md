@@ -1,3 +1,7 @@
+- Fix a manejo de capas base (se cruzaban contenidos en recarga simultánea).
+- Listas desplegables para fijar nivel y elegir tipo de métrica.
+- Fix a inicialización de filtro (partición).
+
 v5.1 (2026-08-08)
 - Menú home con guías en backoffice.
 - Se agrega módulo 'packs'

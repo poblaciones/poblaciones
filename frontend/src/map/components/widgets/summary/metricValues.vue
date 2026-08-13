@@ -23,9 +23,9 @@
 						</div>
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
-						<div style="margin-right: -16px">
+						<div style="margin-right: -12px">
 						<mp-dropdown-menu :items="metricItems" icon="fas fa-caret-down"
-															triggerStyle="min-width: 40px; text-align: right"
+															triggerStyle="min-width: 50px;"
 															:tooltip="currentMetric.Caption" @itemClick="metricSelected">
 							<span slot="trigger" v-html="metric.Summary.getValueHeader(variable)"></span>
 						</mp-dropdown-menu>
@@ -316,7 +316,6 @@ export default {
 .pinMark {
 	display: inline-block;
 	vertical-align: middle;
-	margin-right: 2px;
 	opacity: .55;
 }
 .pinMark:hover {

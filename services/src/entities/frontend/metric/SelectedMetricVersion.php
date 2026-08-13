@@ -17,7 +17,7 @@ class SelectedMetricVersion
 	public $Work;
 
 	public $SelectedLevelIndex;
-	public $SelectedMultiLevelIndex;
+	public $SelectedAutomaticLevelIndex;
 
 	public $ExcludedValues = array();
 

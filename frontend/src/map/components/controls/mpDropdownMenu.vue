@@ -69,16 +69,6 @@
 		components: {
 			XIcon
 		},
-		computed: {
-			// Los disparadores con texto suman labelButton, que ajusta lo que
-			// lightButton resuelve suponiendo que solo lleva un ícono.
-			triggerClass() {
-				if (this.styleRounded) {
-					return 'btn btn-default btn-xs';
-				}
-				return 'lightButton close' + ((this.label || this.$slots.trigger) ? ' labelButton' : '');
-			},
-		},
 		data() {
 			return {
 				showDropDown: false,
@@ -104,6 +94,14 @@
 			computed: {
 				Use() {
 					return window.Use;
+				},
+				// Los disparadores con texto suman labelButton, que ajusta lo que
+				// lightButton resuelve suponiendo que solo lleva un ícono.
+				triggerClass() {
+					if (this.styleRounded) {
+						return 'btn btn-default btn-xs';
+					}
+					return 'lightButton close' + ((this.label || this.$slots.trigger) ? ' labelButton' : '');
 				},
 				currentItem() {
 					return { label: this.label, level: this.level, key: this.key, separator: this.separator };
@@ -136,6 +134,8 @@
 	.triggerIcon {
 		font-size: 12px;
 		padding-top: 2px;
+		padding-left: 2px;
+		height: 17px;
 	}
 
 	/* Ajustes sobre lightButton para un disparador que lleva texto: ese fija
@@ -146,12 +146,12 @@
 	.labelButton {
 		width: auto !important;
 		height: auto !important;
-		border-radius: 5px;
+		border-radius: 11px;
 		font-size: 13px;
 		font-weight: normal;
-		padding: 6px 4px 2px 4px !important;
-		margin-top: 2px;
-		margin-bottom: -2px;
+		padding: 6px 8px 2px 8px !important;
+		margin-top: 4px;
+		margin-bottom: -6px;
 		white-space: nowrap;
 		opacity: 1;
 		color: #a9a9a9;

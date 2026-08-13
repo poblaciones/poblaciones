@@ -163,7 +163,7 @@ class SelectedMetricService extends BaseService
 
 			$version->SymbolStackedPosition = -1;
 			$version->SelectedLevelIndex = 0;
-			$version->SelectedMultiLevelIndex = 0;
+			$version->SelectedAutomaticLevelIndex = 0;
 			if (sizeof($version->Levels) > 1 &&
 				$version->Levels[sizeof($version->Levels) - 1]->Dataset->Type != 'D')
 			{	// Es multinivel y el nivel más bajo no es tipo 'datos'

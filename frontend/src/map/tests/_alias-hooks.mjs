@@ -56,6 +56,10 @@ function resolveWithExtension(basePath) {
 }
 
 export function resolve(specifier, context, nextResolve) {
+	// Los .svg de @/common no existen como módulo fuera de webpack.
+	if (specifier.startsWith('@/common/') && specifier.endsWith('.svg')) {
+		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
+	}
 	if (specifier.startsWith('vue-material-design-icons/')) {
 		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
 	}

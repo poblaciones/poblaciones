@@ -17,6 +17,13 @@ if ($isStatic)
 }
 else
 {
+	// DIAGNÓSTICO TEMPORAL — descomentar para descartar bloqueo en index.php.
+	// Si con esto activo el endpoint sigue colgado, el problema está en el
+	// cableado (Node/proxy/pool) o en el propio server embebido de PHP, no en
+	// la aplicación. Si responde, el bloqueo está dentro de index.php o algo
+	// que este incluye (bootstrap, DB, sesión, etc.). Recordar revertir.
+	// echo 1; exit;
+
 	require_once __DIR__.'/index.php';
 }
 
