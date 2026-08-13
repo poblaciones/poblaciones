@@ -10,7 +10,7 @@
 
 			<a v-if="!currentItem.separator" :style="' width: 100%; display: inline-block; padding-right: 28px; padding-left: '+ (15 + (currentItem.level ? currentItem.level : 0) * 14) +'px' ">
 				{{ currentItem.label }}
-				<i style="position: absolute; right: 10px; top: 12px;" :class="icon" />
+				<i style="position: absolute; right: 10px; top: 14px; font-size: 12px" :class="icon" />
 			</a>
 		</li>
 		<button v-else type="button" id="filterDropId" :title="tooltip"
@@ -29,7 +29,7 @@
 
 
 							<i v-if="item.icon && item.icon != 'X'"
-								 style="position: absolute; right: 10px; top: 9px; color: #aaa; font-size: 15px;"
+								 style="position: absolute; right: 10px; top: 9px; color: #aaa; padding-top: 3px; font-size: 12px;"
 								 :class="item.icon" />
 
 							<X-Icon v-if="item.icon == 'X'" class="item.icon" style="position: absolute; right: 6px; top: 6px; width: 25px; height: 25px; color: #aaa; font-size: 12px;" />

@@ -10,7 +10,7 @@
 								<template slot="trigger">
 									{{ level.Name }}
 									<span class="hand pinMark"
-												:title="(level.Pinned ? 'Nivel fijado: liberar' : 'Fijar este nivel')" @click.stop="togglePin">
+												:title="(level.Pinned ? 'Liberar nivel fijado' : 'Fijar este nivel')" @click.stop="togglePin">
 										<PinIcon v-if="!level.Pinned" class="icon" />
 										<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
 										-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />

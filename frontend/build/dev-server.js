@@ -69,7 +69,7 @@ app.use('/static/vendor', express.static('../static/vendor'));
 // sola instancia (donde no se puede distinguir cuál ejecuta y cuáles esperan),
 // se levantan N instancias y se asigna cada request a un slot libre. Si las N
 // están ocupadas, la request queda en cola hasta que se libere alguna.
-const PHP_POOL_SIZE = 10;
+const PHP_POOL_SIZE = 1;
 const phpBasePort   = phpPORT;
 const phpPoolBusy   = new Array(PHP_POOL_SIZE).fill(false);
 
