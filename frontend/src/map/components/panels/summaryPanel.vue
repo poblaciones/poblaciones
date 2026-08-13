@@ -7,14 +7,14 @@
 				 style="background-color: transparent; padding-bottom: 11px; margin-bottom: 0px; ">
 			<Clipping :clipping="clipping" :frame="frame" v-show="showPopulationTotals" />
 
-			<template v-for="(value, index) in metrics">
+			<template v-for="value in metrics">
 				<MetricItem :metric="value" :metrics="metrics" :clipping="clipping"
-										:key="index" v-if="value.IsLocked" />
+										:key="value.uid" v-if="value.IsLocked" />
 			</template>
 			<draggable v-model="propMetrics" @end="itemMoved" handle=".dragHandle">
 				<transition-group name="fade">
-					<template v-for="(value, index) in metrics">
-						<MetricItem :metric="value" :clipping="clipping" :metrics="metrics" :key="index" v-if="!value.IsLocked" />
+					<template v-for="value in metrics">
+						<MetricItem :metric="value" :clipping="clipping" :metrics="metrics" :key="value.uid" v-if="!value.IsLocked" />
 					</template>
 				</transition-group>
 			</draggable>

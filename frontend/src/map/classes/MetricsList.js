@@ -73,12 +73,10 @@ MetricsList.prototype.doInsert = function (activeMetric, i, insertInMetrics) {
 	if (i === -1) {
 		i = segment.length;
 	}
-	// Los overlays del mapa se identifican solo por su posición, así que el
-	// invariante "un activeMetric ocupa a lo sumo un lugar en su segmento" es
-	// crítico: si se inserta dos veces, todas las posiciones siguientes quedan
-	// desfasadas y al quitar una capa se termina removiendo del mapa la de
-	// otra. Los caminos que reinsertan (Move, UpdateMetric) siempre remueven
-	// antes, así que este guard solo ataja altas repetidas indebidas.
+	// Los overlays se identifican solo por posición, así que una capa no puede
+	// ocupar dos lugares del segmento: duplicarla desfasa las posiciones de
+	// todas las siguientes. Move y UpdateMetric remueven antes de reinsertar,
+	// así que este guard solo ataja altas repetidas.
 	if (activeMetric.Visible() && segment.indexOf(activeMetric) === -1) {
 		var segmentPos = this.CalculateSegmentPosition(segment, i);
 		arr.InsertAt(segment, segmentPos, activeMetric);

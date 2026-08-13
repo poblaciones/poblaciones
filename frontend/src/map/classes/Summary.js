@@ -79,8 +79,19 @@ Summary.prototype.getFormat = function (variable) {
 };
 
 Summary.prototype.getValueHeader = function (variable) {
-	var delta = (this.metric.Compare.Active ? 'Δ ' : '');
-	switch (this.metric.properties.SummaryMetric) {
+	return this.getValueHeaderOf(this.metric.properties.SummaryMetric, variable);
+};
+
+// Misma etiqueta pero sin marcado, para donde no se puede interpretar HTML
+// (por ejemplo los ítems de un menú).
+Summary.prototype.getValueHeaderText = function (metricKey, variable) {
+	return this.getValueHeaderOf(metricKey, variable).replace(/<[^>]+>/g, '');
+};
+
+// Encabezado de la columna de valores para una métrica cualquiera, no
+// necesariamente la activa.
+Summary.prototype.getValueHeaderOf = function (metricKey, variable) {
+	switch (metricKey) {
 		case 'K':
 			return 'Km<sup>2</sup>';
 		case 'H':

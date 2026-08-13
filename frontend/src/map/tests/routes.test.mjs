@@ -99,7 +99,7 @@ it('los desvíos del default sí se serializan (nivel, variable, métrica de res
 	});
 	const metric = new ActiveSelectedMetric(properties);
 	metric.properties.Versions[0].SelectedLevelIndex = 1;
-	metric.properties.Versions[0].SelectedMultiLevelIndex = 1;
+	metric.properties.Versions[0].AutomaticLevelIndex = 1;
 	metric.properties.Versions[0].Levels[1].SelectedVariableIndex = 1;
 	segMap.Metrics = { metrics: [metric] };
 	const route = new SaveRoute().callSubscriber(new SelectedInfoRouter());

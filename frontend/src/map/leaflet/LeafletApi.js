@@ -1084,12 +1084,6 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 
 LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index) {
 	var deckGlDisabled = (window.Use.UseDeckgl == false);
-	if (deckGlDisabled) {
-		if (activeMetric.SelectedVersion && activeMetric.SelectedVersion() &&
-			activeMetric.SelectedVersion().Work.Id == 130201) {
-			deckGlDisabled = false;
-		}
-	}
 	var overlay;
 	if (activeMetric.useTiles() || deckGlDisabled) {
 		// Lo crea
@@ -1111,12 +1105,10 @@ LeafletApi.prototype.InsertSelectedMetricOverlay = function (activeMetric, index
 		// 3. que lo espere si está exportando
 		activeMetric.GetMetricData().then(function (data) {
 			if (!overlay.disposed) {
-				// overlay.index, no el index capturado al pedir los datos: entre
-				// el pedido y la respuesta pueden haberse insertado o quitado
-				// otras capas, y doInsertOverlay/RemoveOverlay ya reacomodaron
-				// los índices de todos los overlays vivos. Con el índice viejo
-				// se termina removiendo del mapa el overlay de OTRA capa (los
-				// overlays se identifican solo por posición, nunca por identidad).
+				// El índice vigente lo mantiene el propio overlay: entre el
+				// pedido y la respuesta pudieron insertarse o quitarse otras
+				// capas, y el `index` recibido ya apuntaría a otra. Los
+				// overlays se identifican solo por posición.
 				loc.CreateDeckglLayer(activeMetric, data, overlay.index);
 			}
 		}).catch(function (res) {

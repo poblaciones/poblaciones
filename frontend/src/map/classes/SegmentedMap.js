@@ -402,12 +402,11 @@ SegmentedMap.prototype.ApplyBasemapMetricVisibility = function (basemapMetric) {
 };
 
 // Pide las capas de un mapa base. Cada una queda insertada en el mapa apenas
-// llega (lo hacen AddBaseMetricById / AddBaseBoundaryById), así que al
-// recibirla se aplica el estado de visibilidad VIGENTE, no el que había al
-// disparar el pedido: el usuario puede haber apagado el mapa base mientras
-// tanto. Sin esa reconciliación quedaba una capa dibujada con Visible en
-// false, y el siguiente encendido la insertaba una segunda vez, desfasando
-// las posiciones de todos los overlays.
+// llega (lo hacen AddBaseMetricById / AddBaseBoundaryById), y el pedido es
+// asincrónico: para cuando responde, el usuario pudo haber apagado el mapa
+// base. Por eso al recibirla se consulta el estado vigente y no el que había
+// al pedirla; si no, la capa queda dibujada con Visible en false y el
+// siguiente encendido la inserta una segunda vez.
 SegmentedMap.prototype.LoadBasemapMetricLayers = function (basemapMetric) {
 	var loc = this;
 	var receive = function (activeBaseMetric) {
@@ -480,13 +479,20 @@ SegmentedMap.prototype.UpdateLabelsVisibility = function () {
 	this.Session.UI.LabelsChanged(this.toolbarStates.showLabels);
 };
 
+// Vuelve a dibujar las capas base cuyas etiquetas dependen del estado de
+// visibilidad de etiquetas del mapa. El composer lee showInMapLabels al
+// construir el overlay, así que no alcanza con refrescarlo: hay que quitar
+// la capa y reponerla para que se reconstruya.
 SegmentedMap.prototype.BasemapsUpdateLabelsVisiblity = function (value) {
 	var baseMetrics = this.toolbarStates.basemapMetrics;
 	for (var i = 0; i < baseMetrics.length; i++) {
-		var layer = baseMetrics[i];
-		if ((layer.Labels == 'SameColor' || layer.Labels == 'LightColor') && layer.Visible) {
-			this.ToggleBasemapMetric(layer);
-			this.ToggleBasemapMetric(layer);
+		var basemapMetric = baseMetrics[i];
+		if ((basemapMetric.Labels == 'SameColor' || basemapMetric.Labels == 'LightColor')
+			&& basemapMetric.Visible && basemapMetric.layers) {
+			for (var layer of basemapMetric.layers) {
+				layer.Hide();
+				layer.Show();
+			}
 		}
 	}
 };

@@ -137,7 +137,7 @@ export function makeVersion(overrides) {
 		Work: { Id: nextId++, Icons: [] },
 		Levels: null,
 		SelectedLevelIndex: 0,
-		SelectedMultiLevelIndex: 0,
+		AutomaticLevelIndex: 0,
 		LabelsCollapsed: false,
 	};
 	const version = Object.assign(base, overrides);

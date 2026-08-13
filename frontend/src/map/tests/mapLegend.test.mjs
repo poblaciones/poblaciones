@@ -37,7 +37,7 @@ it('incluye boundaries (ahora con soporte de leyenda propio); excluye capas base
 	const base = makeVisibleMetric();
 	base.isBaseMetric = true;
 	const off = makeVisibleMetric();
-	off.properties.Visible = false;
+	off.visible = false;
 	const legend = mountLegend([metric, boundary, base, off], true);
 	expect(legend.visibleMetrics).toEqual([metric, boundary]);
 });

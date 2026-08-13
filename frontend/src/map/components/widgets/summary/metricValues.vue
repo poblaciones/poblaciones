@@ -5,23 +5,31 @@
 				<tr>
 					<td colspan="3" class="statsHeader">
 						<div v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="levelLabelMargin">
-							<button type="button" style="padding-left: 2px!important;"
-											class="lightButton close exp-hiddable-visiblity"
-											v-if='version.Levels.length > 1' :title="(level.Pinned ? 'Liberar' : 'Fijar')"
-											@click="togglePin">
-								<PinIcon v-if="!level.Pinned" class="icon" />
-								<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
-								-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />
-							</button>
-							<span style="line-height: 2.3rem">
+							<mp-dropdown-menu v-if="version.Levels.length > 1" :floatRight="false" :items="levelItems"
+																icon="fas fa-caret-down" tooltip="Nivel de agregación" @itemClick="levelSelected">
+								<template slot="trigger">
+									{{ level.Name }}
+									<span class="hand pinMark"
+												:title="(level.Pinned ? 'Nivel fijado: liberar' : 'Fijar este nivel')" @click.stop="togglePin">
+										<PinIcon v-if="!level.Pinned" class="icon" />
+										<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
+										-ms-transform: rotate(90deg); -o-transform: rotate(90deg);transform: rotate(90deg);" />
+									</span>
+								</template>
+							</mp-dropdown-menu>
+							<span v-else style="line-height: 2.3rem">
 								{{ level.Name }}
 							</span>
 						</div>
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
-						<span class="hand" :title="currentMetric.Title" @click="clickMetric(currentMetric.Next.Key)"
-									v-html="metric.Summary.getValueHeader(variable)">
-						</span>
+						<div style="margin-right: -16px">
+						<mp-dropdown-menu :items="metricItems" icon="fas fa-caret-down"
+															triggerStyle="min-width: 40px; text-align: right"
+															:tooltip="currentMetric.Caption" @itemClick="metricSelected">
+							<span slot="trigger" v-html="metric.Summary.getValueHeader(variable)"></span>
+						</mp-dropdown-menu>
+						</div>
 					</td>
 				</tr>
 				<tr @click="clickLabel(label)" v-for="label in variableValueLabels" class="hand" :key="label.Id">
@@ -172,8 +180,71 @@ export default {
 			}
 			return ret[0];
 		},
+		// Un ítem por nivel, luego un separador y "Automático". El tilde marca
+		// el nivel fijado, o el modo automático si no hay ninguno.
+		levelItems() {
+			var ret = [];
+			var levels = this.version.Levels;
+			for (var n = 0; n < levels.length; n++) {
+				ret.push({
+					label: levels[n].Name,
+					key: n,
+					icon: (levels[n].Pinned ? 'fas fa-check' : ''),
+				});
+			}
+			// El separador es un ítem propio: puesto como flag sobre un ítem
+			// existente, mpDropdownMenu lo dibuja EN LUGAR de ese ítem.
+			ret.push({ 'separator': true });
+			ret.push({
+				label: 'Automático',
+				key: 'AUTO',
+				icon: (this.isAutomaticLevel ? 'fas fa-check' : ''),
+			});
+			return ret;
+		},
+		isAutomaticLevel() {
+			var levels = this.version.Levels;
+			for (var n = 0; n < levels.length; n++) {
+				if (levels[n].Pinned) {
+					return false;
+				}
+			}
+			return true;
+		},
+		// La etiqueta corta es la que se ve como encabezado de la columna
+		// (puede traer HTML, así que acá se usa su versión en texto plano).
+		metricItems() {
+			var ret = [];
+			var metrics = this.metric.getValidMetrics(this.variable);
+			for (var n = 0; n < metrics.length; n++) {
+				ret.push({
+					label: this.metric.Summary.getValueHeaderText(metrics[n].Key, this.variable) + ' - ' + metrics[n].Caption,
+					key: metrics[n].Key,
+					icon: (metrics[n].Key === this.metric.properties.SummaryMetric ? 'fas fa-check' : ''),
+				});
+				// Los grupos los define getValidMetrics: acá solo se traducen.
+				if (metrics[n].GroupEnd && n < metrics.length - 1) {
+					ret.push({ 'separator': true });
+				}
+			}
+			return ret;
+		},
 	},
 	methods: {
+		levelSelected(item) {
+			if (item.key === 'AUTO') {
+				if (this.metric.ReleaseLevel()) {
+					this.metric.UpdateMap();
+				}
+			} else {
+				this.metric.PinLevelIndex(item.key);
+				this.metric.UpdateMap();
+			}
+			window.SegMap.SaveRoute.UpdateRoute();
+		},
+		metricSelected(item) {
+			this.clickMetric(item.key);
+		},
 		displayLabel(label) {
 			return label.Values && ((this.variable.ShowEmptyCategories && !this.metric.Compare.Active) || label.Values.Count !== '');
 		},
@@ -191,12 +262,11 @@ export default {
 		},
 		togglePin() {
 			if (this.level.Pinned) {
-				this.level.Pinned = false;
-				if (this.metric.UpdateLevel()) {
+				if (this.metric.ReleaseLevel()) {
 					this.metric.UpdateMap();
 				}
 			} else {
-				this.level.Pinned = true;
+				this.metric.PinLevelByName(this.level.Name);
 			}
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
@@ -243,6 +313,15 @@ export default {
 </script>
 
 <style scoped>
+.pinMark {
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 2px;
+	opacity: .55;
+}
+.pinMark:hover {
+	opacity: 1;
+}
 .bar {
 	border: 1px solid #2575fb;
 	position: absolute;
@@ -262,7 +341,7 @@ export default {
 	text-align: right;
 	color: #a9a9a9;
 	font-weight: 300;
-	font-size: 11px;
+	font-size: 12px;
 	height: 16px;
 	padding: 0px;
 	text-transform: uppercase;

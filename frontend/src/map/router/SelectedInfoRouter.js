@@ -87,7 +87,7 @@ SelectedInfoRouter.prototype.SelectedMetricToRoute = function (activeSelectedMet
 	ret.push([activeSelectedMetric.properties.Metric.Id]);
 	ret.push(['v', this.GetVersions(activeSelectedMetric), -1]);
 	ret.push(['a', activeSelectedMetric.SelectedVersion().SelectedLevelIndex, 0]);
-	ret.push(['q', activeSelectedMetric.SelectedVersion().SelectedMultiLevelIndex,
+	ret.push(['q', activeSelectedMetric.SelectedVersion().AutomaticLevelIndex,
 								 activeSelectedMetric.SelectedVersion().SelectedLevelIndex]);
 	ret.push(['i', activeSelectedMetric.SelectedLevel().SelectedVariableIndex, 0]);
 	ret.push(['k', this.GetRanking(activeSelectedMetric), '']);
@@ -366,9 +366,9 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 	var id = h.getSafeValue(values, '');
 	var versionInfo = h.getSafeValue(values, 'v', -1);
 	var levelIndex = h.getSafeValue(values, 'a', 0);
-	var multiLevelIndex = h.getSafeValue(values, 'q', null);
-	if (multiLevelIndex === null) {
-		multiLevelIndex = levelIndex;
+	var automaticLevelIndex = h.getSafeValue(values, 'q', null);
+	if (automaticLevelIndex === null) {
+		automaticLevelIndex = levelIndex;
 	}
 	var variableIndex = h.getSafeValue(values, 'i', 0);
 	var labelsCollapsed = h.getSafeValue(values, 'c', false);
@@ -391,7 +391,7 @@ SelectedInfoRouter.prototype.parseMetric = function (values) {
 		Id: parseInt(id),
 		VersionInfo: versionInfo,
 		LevelIndex: levelIndex,
-		MultiLevelIndex: multiLevelIndex,
+		AutomaticLevelIndex: automaticLevelIndex,
 		VariableIndex: variableIndex,
 		LabelsCollapsed: labelsCollapsed,
 		SummaryMetric: summaryMetric,
@@ -503,12 +503,12 @@ SelectedInfoRouter.prototype.RestoreMetricState = function (activeSelectedMetric
 		version.SelectedLevelIndex = levelIndex;
 		mapChanged = true;
 	}
-	var multiLevelIndex = parseInt(state.MultiLevelIndex);
-	if (multiLevelIndex !== version.SelectedMultiLevelIndex &&
-		multiLevelIndex < version.Levels.length) {
-		version.SelectedMultiLevelIndex = multiLevelIndex;
+	var automaticLevelIndex = parseInt(state.AutomaticLevelIndex);
+	if (automaticLevelIndex !== version.AutomaticLevelIndex &&
+		automaticLevelIndex < version.Levels.length) {
+		version.AutomaticLevelIndex = automaticLevelIndex;
 		if (state.PinnedLevel === '1') {
-			activeSelectedMetric.SelectedMultiLevel().Pinned = true;
+			activeSelectedMetric.AutomaticLevel().Pinned = true;
 		}
 		mapChanged = true;
 	}

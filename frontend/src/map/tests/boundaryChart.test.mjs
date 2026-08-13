@@ -61,7 +61,7 @@ it('sin Values todavía (summary no llegó), esa categoría no entra a la serie'
 	expect(chart.chartData.series[0].values).toHaveLength(1);
 });
 
-it('con Values pero Value/Km2 vacíos, tampoco entra (antes se colaba como valor 0 fantasma)', () => {
+it('con Values pero Value/Km2 vacíos, tampoco entra: Number(\'\') daría una barra fantasma en 0', () => {
 	setupWindow();
 	const boundary = new ActiveBoundary(makeBoundaryProperties({
 		Versions: [makeBoundaryVersion({

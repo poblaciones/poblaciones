@@ -49,7 +49,7 @@ export default {
 			if (this.fixedLevel) {
 				return this.fixedLevel;
 			} else {
-				return this.metric.SelectedMultiLevel();
+				return this.metric.AutomaticLevel();
 			}
 		},
 		Embedded() {

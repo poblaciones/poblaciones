@@ -2,6 +2,7 @@ import LocationsComposer from '@/map/composers/LocationsComposer';
 import DataShapeComposer from '@/map/composers/DataShapeComposer';
 import SegmentsComposer from '@/map/composers/SegmentsComposer';
 import Compare from './Compare.js';
+import nextLayerUid from './LayerUid';
 import Vue from 'vue';
 
 import h from '@/map/js/helper';
@@ -19,7 +20,24 @@ function ActiveMetric(selectedMetric) {
 	this.objs = {};
 	this.objs.Segment = null;
 	this.objs.composer = null;
+	// Identifica a ESTA capa, no al indicador: el mismo puede estar agregado
+	// dos veces mirando versiones distintas. Es la key del v-for del panel de
+	// estadísticas, así que cada componente sigue a su capa aunque la lista
+	// se reordene.
+	this.uid = nextLayerUid();
 	this.properties = selectedMetric;
+	// Visibilidad de la capa, tal como la lee Visible(). Se llama igual en
+	// todas las clases Active* (ActiveBoundary, ActiveLabels,
+	// ActiveAnnotations), y es estado de sesión del cliente: se siembra desde
+	// el payload pero después la mueve el usuario, no el servidor.
+	this.visible = !!selectedMetric.Visible;
+	// La partición seleccionada tiene que existir ya al construir la capa:
+	// Vue observa properties recién al insertarla en la lista de métricas, y
+	// no detecta propiedades agregadas después, así que elegir un valor no
+	// refrescaría la UI si el servidor no la mandó en el payload.
+	if (this.properties.SelectedPartition === undefined) {
+		this.properties.SelectedPartition = null;
+	}
 	this.index = -1;
 	this.IsLocked = false;
 	this.KillDuplicateds = true;
@@ -131,19 +149,22 @@ ActiveMetric.prototype.SetValueToSelectedVariableSet = function (attribute, valu
 };
 
 ActiveMetric.prototype.ChangeMetricVisibility = function () {
-	this.properties.Visible = !this.properties.Visible;
+	this.visible = !this.visible;
 	this.RefreshMap();
 };
 
-ActiveMetric.prototype.ChangeSelectedMultiLevelIndex = function (index) {
-	var isUsingMultilevel = (this.SelectedVersion().SelectedMultiLevelIndex
+// Mueve el nivel que resuelve el modo automático. Solo arrastra al nivel
+// mostrado si venían acoplados: si el usuario eligió uno a mano, el zoom deja
+// de cambiar lo que se ve.
+ActiveMetric.prototype.ChangeAutomaticLevelIndex = function (index) {
+	var isUsingMultilevel = (this.SelectedVersion().AutomaticLevelIndex
 															== this.SelectedVersion().SelectedLevelIndex);
 
 	// Cambia el level, intentando mantener la variable seleccionado.
 	// La mantiene si el caption coincide.
 	var variable = this.SelectedVariable();
 	var name = (variable !== null ? variable.Name : null);
-	this.SelectedVersion().SelectedMultiLevelIndex = index;
+	this.SelectedVersion().AutomaticLevelIndex = index;
 	if (isUsingMultilevel) {
 		this.SelectedVersion().SelectedLevelIndex = index;
 	}
@@ -180,7 +201,7 @@ ActiveMetric.prototype.GetSelectedPartition = function () {
 
 
 ActiveMetric.prototype.Visible = function () {
-	return this.properties.Visible && this.SelectedLevel().SelectedVariableIndex !== -1;
+	return this.visible && this.SelectedLevel().SelectedVariableIndex !== -1;
 };
 
 ActiveMetric.prototype.getHiddenValueLabels = function (variable) {
@@ -273,12 +294,16 @@ ActiveMetric.prototype.SelectedVersion = function () {
 	return this.properties.Versions[this.properties.SelectedVersionIndex];
 };
 
-ActiveMetric.prototype.SelectedMultiLevelIndex = function () {
+// Índice del nivel que el modo automático resuelve para el zoom actual. El
+// nivel que efectivamente se dibuja es SelectedLevelIndex, que lo copia
+// mientras el usuario no haya elegido uno a mano ni fijado ninguno. Los dos
+// campos se llaman así en el payload del servidor.
+ActiveMetric.prototype.AutomaticLevelIndex = function () {
 	if (this.properties === null) {
 		throw new Error('No properties has been set.');
 	}
 	var version = this.SelectedVersion();
-	return version.SelectedMultiLevelIndex;
+	return version.AutomaticLevelIndex;
 };
 
 ActiveMetric.prototype.SelectedLevelIndex = function () {
@@ -315,12 +340,14 @@ ActiveMetric.prototype.SelectedLevel = function () {
 	return version.Levels[version.SelectedLevelIndex];
 };
 
-ActiveMetric.prototype.SelectedMultiLevel = function () {
+// Nivel que el modo automático resuelve para el zoom actual (ver
+// AutomaticLevelIndex). No es necesariamente el que se está dibujando.
+ActiveMetric.prototype.AutomaticLevel = function () {
 	if (this.properties === null) {
 		throw new Error('No properties has been set.');
 	}
 	var version = this.SelectedVersion();
-	return version.Levels[version.SelectedMultiLevelIndex];
+	return version.Levels[version.AutomaticLevelIndex];
 };
 
 ActiveMetric.prototype.HasSelectedVersion = function () {
@@ -506,6 +533,7 @@ ActiveMetric.prototype.GetPattern = function (variable) {
 		return variable.CustomPattern;
 	}
 };
+// Libera el nivel fijado en todas las versiones.
 ActiveMetric.prototype.ReleasePins = function () {
 	for (var v = 0; v < this.properties.Versions.length; v++) {
 		for (var l = 0; l < this.properties.Versions[v].Levels.length; l++) {
@@ -515,6 +543,38 @@ ActiveMetric.prototype.ReleasePins = function () {
 			}
 		}
 	}
+};
+
+// Fija el nivel de nombre dado en todas las versiones que tengan uno igual, y
+// libera cualquier otro. Así el nivel fijado sobrevive al cambio de serie,
+// igual que la variable seleccionada, que también se sigue por nombre.
+ActiveMetric.prototype.PinLevelByName = function (name) {
+	for (var v = 0; v < this.properties.Versions.length; v++) {
+		var levels = this.properties.Versions[v].Levels;
+		for (var l = 0; l < levels.length; l++) {
+			levels[l].Pinned = (levels[l].Name === name);
+		}
+	}
+};
+
+// Fija un nivel concreto: deja de seguir al zoom y pasa a mostrarlo. Vuelve a
+// acoplar los dos índices, porque elegir un nivel a mano es justamente decidir
+// cuál se dibuja.
+ActiveMetric.prototype.PinLevelIndex = function (index) {
+	var variable = this.SelectedVariable();
+	var name = (variable !== null ? variable.Name : null);
+	var version = this.SelectedVersion();
+	version.AutomaticLevelIndex = index;
+	version.SelectedLevelIndex = index;
+	this.SetSelectedVariableByName(name);
+	this.PinLevelByName(version.Levels[index].Name);
+	this.CheckValidMetric();
+};
+
+// Vuelve al modo automático: el nivel pasa a resolverse por el zoom.
+ActiveMetric.prototype.ReleaseLevel = function () {
+	this.ReleasePins();
+	return this.UpdateLevel();
 };
 ActiveMetric.prototype.SetLevel = function (level) {
 	for (var l = 0; l < this.SelectedVersion().Levels.length; l++) {
@@ -527,12 +587,12 @@ ActiveMetric.prototype.SetLevel = function (level) {
 };
 
 ActiveMetric.prototype.UpdateLevel = function () {
-	if (this.SelectedMultiLevel().Pinned) {
+	if (this.AutomaticLevel().Pinned) {
 		return false;
 	}
 	var l = this.CalculateProperLevel();
-	if (l !== this.SelectedMultiLevelIndex()) {
-		this.ChangeSelectedMultiLevelIndex(l);
+	if (l !== this.AutomaticLevelIndex()) {
+		this.ChangeAutomaticLevelIndex(l);
 		this.CheckValidMetric();
 		return true;
 	} else {
@@ -660,6 +720,12 @@ ActiveMetric.prototype.getValidMetrics = function (variable) {
 	if (variable && variable.HasTotals) {
 		ret.push({ Key: 'T', Caption: delta + 'Total' });
 	}
+	// Cierra los grupos temáticos: cantidad | proporciones | área | total.
+	// Quien las liste puede usarlo para separarlas visualmente sin conocer
+	// las claves, que dependen de la variable y del indicador.
+	this.markMetricGroupEnd(ret, ['N']);
+	this.markMetricGroupEnd(ret, ['I', 'P', 'FIL']);
+	this.markMetricGroupEnd(ret, ['K', 'A', 'D']);
 	// Pone relaciones con las siguientes
 	for (var n = 0; n < ret.length; n++) {
 		var next = n + 1;
@@ -670,6 +736,18 @@ ActiveMetric.prototype.getValidMetrics = function (variable) {
 		ret[n].Title = 'Métrica: ' + ret[n].Caption + ' (click para cambiar por ' + ret[next].Caption + ')';
 	}
 	return ret;
+};
+
+// Marca la última métrica presente del grupo como cierre. Si no hay ninguna
+// (p. ej. sin área), no marca nada y el grupo desaparece sin dejar un
+// separador suelto.
+ActiveMetric.prototype.markMetricGroupEnd = function (metrics, keys) {
+	for (var n = metrics.length - 1; n >= 0; n--) {
+		if (keys.indexOf(metrics[n].Key) !== -1) {
+			metrics[n].GroupEnd = true;
+			return;
+		}
+	}
 };
 
 ActiveMetric.prototype.GetStyleColorList = function() {

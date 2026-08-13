@@ -111,6 +111,11 @@ export function load(url, context, nextLoad) {
 	if (!filePath.startsWith(moduleRoot) || filePath.startsWith(testsDir)) {
 		return nextLoad(url, context);
 	}
+	if (filePath.endsWith('.svg')) {
+		// webpack los resuelve como componentes Vue (vue-svg-loader). Acá
+		// alcanza con un componente vacío: no se prueba el render.
+		return { format: 'module', source: 'export default { name: "svg-stub", render: () => null };', shortCircuit: true };
+	}
 	if (filePath.endsWith('.vue')) {
 		const script = extractVueScript(fs.readFileSync(filePath, 'utf8'));
 		return { format: 'module', source: rewriteInlineRequires(script), shortCircuit: true };

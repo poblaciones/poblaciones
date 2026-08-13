@@ -109,7 +109,7 @@ Todo lo que se dibuja en el mapa es una "capa activa" con un contrato común
 - `ActiveMetric` — base con comportamiento real: selección de versión / nivel /
   variable (`SelectedVersion()`, `SelectedLevel()`, `SelectedVariable()`),
   cálculo del nivel según zoom (`CalculateProperLevel`, `UpdateLevel`,
-  `SelectedMultiLevelIndex`, `Pinned`), patrones y estilos (`GetPattern`,
+  `SelectedAutomaticLevelIndex`, `Pinned`), patrones y estilos (`GetPattern`,
   `ResolveStyle`, `GetStyleColorDictionary`), métricas de resumen válidas
   (`getValidMetrics`: N/I/P/FIL/K/A/D/T), opacidades por zoom.
 - `ActiveSelectedMetric` — el indicador estándar del usuario: agrega Summary y
@@ -435,7 +435,7 @@ Estado real del módulo y regla para lo nuevo:
   `StaticQueue` con deduplicación. Un pedido nuevo del mismo recurso cancela el
   anterior.
 - **Dueñez clara**: la mutación de una capa vive en la capa (`SelectVersion`,
-  `ChangeSelectedMultiLevelIndex`); los routers solo serializan/restauran; los
+  `ChangeAutomaticMultiLevelIndex`); los routers solo serializan/restauran; los
   sub-controles visuales levantan eventos y el dueño aplica.
 - **Nada "genérico por las dudas"** y **sin concesiones por compatibilidad**,
   con una excepción real: los routers de la URL sí mantienen soporte de rutas

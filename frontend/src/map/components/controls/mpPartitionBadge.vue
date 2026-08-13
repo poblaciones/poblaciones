@@ -26,18 +26,10 @@ export default {
 	components: {
 
 	},
-	data() {
-		return {
-			selected: ''
-		};
-	},
-	mounted() {
-		this.updateSelected();
-	},
 	computed: {
 		LevelHasPartitions() {
 			var level = this.metric.SelectedLevel();
-			return level && level.Partitions !== null;
+			return !!(level && level.Partitions);
 		},
 		List() {
 			if (!this.LevelHasPartitions) {
@@ -49,35 +41,32 @@ export default {
 			}
 			return ret;
 		},
+		// Etiqueta del valor vigente. Es derivada, no un dato propio: el nivel
+		// seleccionado cambia con el zoom, y summaryPanel usa el índice del
+		// array como key del v-for, así que Vue reusa esta instancia entre
+		// métricas distintas. Calcularla una sola vez la dejaría desfasada.
+		selected() {
+			var vals = this.List;
+			if (!vals || vals.length === 0) {
+				return '-';
+			}
+			var sel = this.metric.GetSelectedPartition();
+			for (var n of vals) {
+				if (n.key === sel) {
+					return n.label;
+				}
+			}
+			// Siempre hay un valor vigente: si el guardado no está entre los
+			// posibles rige el primero, igual que en GetSelectedPartition.
+			return vals[0].label;
+		},
 	},
 	methods: {
 		changeValue(mode) {
 			this.metric.properties.SelectedPartition = mode;
-			this.updateSelected();
 			window.SegMap.SaveRoute.UpdateRoute();
 			window.SegMap.UpdateMap();
 		},
-		updateSelected() {
-			if (this.List === null) {
-				this.selected = '-';
-				return;
-			}
-			var vals = this.List;
-			if (!vals || vals.length === 0) {
-				this.selected = '-';
-				return;
-			}
-			var sel = this.metric.GetSelectedPartition();
-			if (sel ===  null) {
-				sel = vals[0].key;
-			}
-			for (var n of vals) {
-				if (n.key === sel) {
-					this.selected = n.label;
-					break;
-				}
-			}
-		}
 	},
 };
 </script>

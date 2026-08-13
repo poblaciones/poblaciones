@@ -5,12 +5,16 @@ import err from '@/common/framework/err';
 import arr from '@/common/framework/arr';
 import axios from 'axios';
 import Vue from 'vue';
+import nextLayerUid from './LayerUid';
 
 export default ActiveBoundary;
 
 function ActiveBoundary(data) {
 	this.objs = {};
 	this.objs.Segment = null;
+	// Ver ActiveMetric: identifica a esta capa dentro de la lista de métricas,
+	// que comparte con los indicadores.
+	this.uid = nextLayerUid();
 	this.index = -1;
 	this.isBoundary = true;
 	this.isBaseMetric = false;

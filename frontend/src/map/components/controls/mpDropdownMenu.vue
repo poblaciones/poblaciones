@@ -14,9 +14,9 @@
 			</a>
 		</li>
 		<button v-else type="button" id="filterDropId" :title="tooltip"
-						:class="(styleRounded ? 'btn btn-default btn-xs' : 'lightButton close')">
-			{{ label }}
-			<i :style="(label ? 'float: right' : '')" :class="icon" />
+						:class="triggerClass" :style="triggerStyle">
+			<slot name="trigger">{{ label }}</slot>
+			<i :class="icon" class="triggerIcon" />
 		</button>
 
 		<div slot="popover">
@@ -62,9 +62,22 @@
 			separator: { type: Boolean, default: false },
 			label: { type: String, default: '' },
 			child: { type: Boolean, default: false },
+			// Estilo inline del disparador. Va por prop y no por clase porque
+			// el CSS scoped del padre no alcanza a los hijos de este componente.
+			triggerStyle: { type: String, default: '' },
 		},
 		components: {
 			XIcon
+		},
+		computed: {
+			// Los disparadores con texto suman labelButton, que ajusta lo que
+			// lightButton resuelve suponiendo que solo lleva un ícono.
+			triggerClass() {
+				if (this.styleRounded) {
+					return 'btn btn-default btn-xs';
+				}
+				return 'lightButton close' + ((this.label || this.$slots.trigger) ? ' labelButton' : '');
+			},
 		},
 		data() {
 			return {
@@ -118,6 +131,38 @@
 	.dropFilter {
 		margin-top: 0px;
 		cursor: pointer;
+	}
+
+	.triggerIcon {
+		font-size: 12px;
+		padding-top: 2px;
+	}
+
+	/* Ajustes sobre lightButton para un disparador que lleva texto: ese fija
+	   un alto y ancho de 24px y un borde circular, pensados para los que solo
+	   llevan ícono. La clase `close` que lo acompaña le saca decoraciones de
+	   botón, pero de paso impone una opacidad, un color y un peso de fuente
+	   que acá se reponen. */
+	.labelButton {
+		width: auto !important;
+		height: auto !important;
+		border-radius: 5px;
+		font-size: 13px;
+		font-weight: normal;
+		padding: 6px 4px 2px 4px !important;
+		margin-top: 2px;
+		margin-bottom: -2px;
+		white-space: nowrap;
+		opacity: 1;
+		color: #a9a9a9;
+		/* normalize.css hace `button { text-transform: none }`, que corta la
+		   herencia: restaurarla deja que mande el contenedor. */
+		text-transform: inherit;
+	}
+
+	.labelButton:hover {
+		color: #a9a9a9;
+		opacity: 1;
 	}
 
 

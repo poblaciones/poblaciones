@@ -17,13 +17,3 @@ function ActiveBaseBoundary(data) {
 };
 
 ActiveBaseBoundary.prototype = new ActiveBoundary();
-
-ActiveBaseBoundary.prototype.Show = function () {
-	this.properties.Visible = true;
-	window.SegMap.Metrics.InsertNonStandardMetric(this, -1);
-};
-
-ActiveBaseBoundary.prototype.Hide = function () {
-	this.properties.Visible = false;
-	window.SegMap.Metrics.Remove(this, true);
-};
