@@ -235,9 +235,33 @@ ActiveMetric.prototype.SelectVersion = function (index) {
 	}
 	this.properties.SelectedVersionIndex = index;
 	window.SegMap.Session.Content.SelectSerie(this.SelectedVersion());
+	// Cada serie trae sus propios índices de nivel, así que hay que llevarla
+	// al nivel fijado: sin esto la bandera está puesta pero se muestra otro.
+	this.ApplyPinnedLevel();
 
 	this.UpdateSummary();
 	this.UpdateMap();
+};
+
+// Lleva la serie activa al nivel que está fijado, si hay alguno. Devuelve si
+// hubo cambio.
+ActiveMetric.prototype.ApplyPinnedLevel = function () {
+	var version = this.SelectedVersion();
+	for (var l = 0; l < version.Levels.length; l++) {
+		if (version.Levels[l].Pinned) {
+			if (version.SelectedLevelIndex === l && version.AutomaticLevelIndex === l) {
+				return false;
+			}
+			var variable = this.SelectedVariable();
+			var name = (variable !== null ? variable.Name : null);
+			version.SelectedLevelIndex = l;
+			version.AutomaticLevelIndex = l;
+			this.SetSelectedVariableByName(name);
+			this.CheckValidMetric();
+			return true;
+		}
+	}
+	return false;
 };
 
 
@@ -557,18 +581,12 @@ ActiveMetric.prototype.PinLevelByName = function (name) {
 	}
 };
 
-// Fija un nivel concreto: deja de seguir al zoom y pasa a mostrarlo. Vuelve a
-// acoplar los dos índices, porque elegir un nivel a mano es justamente decidir
-// cuál se dibuja.
+// Fija un nivel concreto de la serie activa: deja de seguir al zoom y pasa a
+// mostrarlo. El pin queda marcado en todas las series con un nivel de igual
+// nombre, y ApplyPinnedLevel se encarga de mover los índices.
 ActiveMetric.prototype.PinLevelIndex = function (index) {
-	var variable = this.SelectedVariable();
-	var name = (variable !== null ? variable.Name : null);
-	var version = this.SelectedVersion();
-	version.AutomaticLevelIndex = index;
-	version.SelectedLevelIndex = index;
-	this.SetSelectedVariableByName(name);
-	this.PinLevelByName(version.Levels[index].Name);
-	this.CheckValidMetric();
+	this.PinLevelByName(this.SelectedVersion().Levels[index].Name);
+	this.ApplyPinnedLevel();
 };
 
 // Vuelve al modo automático: el nivel pasa a resolverse por el zoom.

@@ -1,6 +1,7 @@
-ALTER TABLE `clipping_region_item_geography_item`
-ADD UNIQUE INDEX `fw_unique_clipping_region_geography_items` (`cgi_clipping_region_geography_id` ASC, `cgi_geography_item_id` ASC);
-;
+-- ALTER TABLE `clipping_region_item_geography_item`
+-- ADD UNIQUE INDEX `fw_unique_clipping_region_geography_items`
+--  (`cgi_clipping_region_geography_id` ASC, `cgi_geography_item_id` ASC);
+-- ;
 
 ALTER TABLE `clipping_region_item_geography_item`
 ADD CONSTRAINT `fk_cgi_clipping_region_item`

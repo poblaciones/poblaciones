@@ -45,6 +45,7 @@ class MapSettings
 
 	public $UsePivot = false;
 	public $UseNewMenu = false;
+	public $UseGap = false;
 
 	public $UseGradients = false;
 	public $UseTextures = false;

@@ -17,9 +17,9 @@
 									</span>
 								</template>
 							</mp-dropdown-menu>
-							<span v-else style="line-height: 2.3rem">
+							<div v-else style="line-height: 2.3rem; padding-top: 6px; margin-bottom: -2px;">
 								{{ level.Name }}
-							</span>
+							</div>
 						</div>
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
@@ -85,7 +85,7 @@ import Helper from '@/map/js/helper';
 import PinIcon from '@/map/assets/pin-outline.svg';
 import UnpinIcon from '@/map/assets/pin-off-outline.svg';
 import str from '@/common/framework/str';
-	import color from '@/common/framework/color';
+import color from '@/common/framework/color';
 import iconManager from '@/common/js/iconManager';
 
 export default {
@@ -340,7 +340,7 @@ export default {
 	text-align: right;
 	color: #a9a9a9;
 	font-weight: 300;
-	font-size: 12px;
+	font-size: 13px;
 	height: 16px;
 	padding: 0px;
 	text-transform: uppercase;

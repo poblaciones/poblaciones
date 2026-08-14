@@ -5,9 +5,13 @@
 				<tr>
 					<td colspan="2" class="statsHeader"></td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
-						<span class="hand" :title="currentMetric.Title" @click="clickMetric(currentMetric.Next.Key)"
-									v-html="boundary.valueHeader()">
-						</span>
+						<div style="margin-right: -12px">
+							<mp-dropdown-menu :items="metricItems" icon="fas fa-caret-down"
+																triggerStyle="min-width: 50px;"
+																:tooltip="currentMetric.Title" @itemClick="metricSelected">
+								<span slot="trigger" v-html="boundary.valueHeader()"></span>
+							</mp-dropdown-menu>
+						</div>
 					</td>
 				</tr>
 				<tr @click="clickLabel(label)" v-for="label in visibleLabels" class="hand" :key="label.Id">
@@ -60,6 +64,24 @@ export default {
 				return boundary.HasData(label);
 			});
 		},
+		// La etiqueta corta es la que se ve como encabezado de la columna
+		// (puede traer HTML, así que acá se usa su versión en texto plano).
+		metricItems() {
+			var ret = [];
+			var metrics = this.boundary.getValidMetrics();
+			for (var n = 0; n < metrics.length; n++) {
+				ret.push({
+					label: this.boundary.getValueHeaderText(metrics[n].Key) + ' - ' + metrics[n].Caption,
+					key: metrics[n].Key,
+					icon: (metrics[n].Key === this.currentMetric.Key ? 'fas fa-check' : ''),
+				});
+				// Los grupos los define getValidMetrics: acá solo se traducen.
+				if (metrics[n].GroupEnd && n < metrics.length - 1) {
+					ret.push({ 'separator': true });
+				}
+			}
+			return ret;
+		},
 		currentMetric() {
 			var ret = this.boundary.getValidMetrics();
 			for (var n = 0; n < ret.length; n++) {
@@ -89,6 +111,9 @@ export default {
 				return '';
 			}
 		},
+		metricSelected(item) {
+			this.clickMetric(item.key);
+		},
 		clickMetric(key) {
 			this.boundary.summaryMetric = key;
 			window.SegMap.SaveRoute.UpdateRoute();
@@ -109,7 +134,7 @@ export default {
 	text-align: right;
 	color: #a9a9a9;
 	font-weight: 300;
-	font-size: 11px;
+	font-size: 13px;
 	height: 16px;
 	padding: 0px;
 	text-transform: uppercase;

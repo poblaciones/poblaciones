@@ -141,7 +141,7 @@ App::$app->post('/services/api/automation/AddVariable', function (Request $reque
 	$gapDataColumnId = Params::GetInt('gap_data_column_id');
 	$gapNormColId = Params::GetInt('gap_normalization_column_id');
 	$normScale = Params::GetInt('normalization_scale', 100);
-	$isGap = Params::Get('is_gap', false);
+	$isGap = Params::GetInt('is_gap', 0) === 1;
 	$cutMode = Params::Get('cut_mode', 'J');
 	$cutColumnId = Params::Get('cut_column_id');
 	$categories = Params::GetInt('categories', 4);

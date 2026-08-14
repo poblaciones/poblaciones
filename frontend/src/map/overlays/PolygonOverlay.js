@@ -13,7 +13,10 @@ function PolygonOverlay(activeSelectedMetric) {
 	this.colorMap = this.activeSelectedMetric.GetStyleColorDictionary();
 	this.labelsVisibility = [];
 	this.dynamicWidth = activeSelectedMetric.dynamicWidth;
-	this.lineWidth = activeSelectedMetric.lineWidth;
+	// Se normaliza a número: sin etiquetas GeoJsonLayer tolera undefined, pero
+	// dentro del composite el valor llega al PathLayer de contorno como
+	// getWidth y su validación lo rechaza.
+	this.lineWidth = Number(activeSelectedMetric.lineWidth) || 1;
 	this.aliases = activeSelectedMetric.aliases;
 	this.dashedLine = activeSelectedMetric.dashedLine;
 	this.showInMapLabels = activeSelectedMetric.showInMapLabels;

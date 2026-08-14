@@ -1,7 +1,7 @@
 <template>
 	<div class="filterElement"
 			 :title="tooltip">
-		{{ title }}
+		<div style="display: inline-block; padding-top: 3px;">{{ title }}</div>
 		<mp-close-button @click="onClose()" title="Quitar"
 										 class="exp-hiddable-block filterElement-close" />
 	</div>

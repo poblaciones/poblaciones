@@ -37,6 +37,7 @@ class ConfigurationService extends BaseService
 						 'UseCalculated' => App::Settings()->Map()->UseCalculated,
 								'UseTextures' => App::Settings()->Map()->UseTextures,
 								'UseGradients' => App::Settings()->Map()->UseGradients,
+								'UseGap' => App::Settings()->Map()->UseGap,
 								'UsePerimeter' => App::Settings()->Map()->UsePerimeter,
 								'UsePivot' => App::Settings()->Map()->UsePivot,
 								'Help' => App::Settings()->Help(),

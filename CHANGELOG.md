@@ -1,6 +1,8 @@
+v5.2 (2026-08-14)
 - Fix a manejo de capas base (se cruzaban contenidos en recarga simultánea).
 - Listas desplegables para fijar nivel y elegir tipo de métrica.
 - Fix a inicialización de filtro (partición).
+- Las capas base vectoriales muestran su descripciones en el mapa.
 
 v5.1 (2026-08-08)
 - Menú home con guías en backoffice.
@@ -11,6 +13,7 @@ v5.1 (2026-08-08)
 - Mejorada la selección de institución.
 - Pdf: tiene título y autor en los atributos.
 - Importación: acepta el tipo numerico con ceros en archivos spss.
+- Al colapsarse las estadísticas se muestran leyendas en el mapa.
 - Fix al restituir ruta cuando no hay variables seleccionadas y está activa la comparación (se cortaba la carga del panel de estadísticas).
 - Fix a coloreo de tiles que tienen información parcial de gradiente poblacional.
 
@@ -38,8 +41,9 @@ v4.9 (2026-06-03)
 v4.8 (2026-03-19)
 - Refactor de botón de buscar.
 - Shortcut para subir archivo.
-- Capas base físicas (rutas, trenes)
-- Capas base administrativas (rutas, trenes)
+- Capas base físicas (cuerpos de agua)
+- Capas base circulación (rutas, trenes)
+- Capas base administrativas (provincias, departamentos)
 
 v4.7 (2026-03-05)
 - Tipo de mapa renovado.
@@ -113,7 +117,7 @@ v4.0 (2024-06-27)
 - Caching para crawler.
 - Opción de depuración por sesión.
 - Estadística de errores.
-- Getway para instalación en carpeta secundaria (simlinks)
+- Gateway para instalación en carpeta secundaria (simlinks)
 
 v3.13 (2023-11-27)
 - Plugins administrativos.

@@ -211,10 +211,15 @@ class LabeledGeoJsonLayer extends CompositeLayer {
 
 		// Descarte por proximidad sobre una grilla en píxeles de pantalla.
 		const occupied = new Set();
+		const addedText = new Set();
 		const visible = [];
-		const addedText = [];
+
 		for (const label of candidates) {
 			if (visible.length >= labelMaxCount) break;
+
+			// El descarte por texto repetido va antes de reservar la grilla:
+			// si no, una etiqueta duplicada bloquea celdas sin ocuparlas.
+			if (addedText.has(label.text)) continue;
 
 			const pixel = viewport.project(label.position);
 			const cx = Math.round(pixel[0] / labelMinPixelDistance);
@@ -228,10 +233,8 @@ class LabeledGeoJsonLayer extends CompositeLayer {
 					occupied.add((cx + dx) + ':' + (cy + dy));
 				}
 			}
-			if (!addedText.includes(label.text)) {
-				visible.push(label);
-				addedText.push(label.text);
-			}
+			visible.push(label);
+			addedText.add(label.text);
 		}
 		return visible;
 	}

@@ -157,7 +157,7 @@ ActiveBoundary.prototype.GetPattern = function () {
 ActiveBoundary.prototype.getValidMetrics = function () {
 	var ret = [];
 	ret.push({ Key: 'N', Caption: 'Cantidad' });
-	ret.push({ Key: 'P', Caption: 'Distribución' });
+	ret.push({ Key: 'P', Caption: 'Distribución', GroupEnd: true });
 	ret.push({ Key: 'K', Caption: 'Área' });
 	ret.push({ Key: 'A', Caption: 'Distr. de áreas' });
 	for (var n = 0; n < ret.length; n++) {
@@ -171,8 +171,8 @@ ActiveBoundary.prototype.getValidMetrics = function () {
 	return ret;
 };
 
-ActiveBoundary.prototype.valueHeader = function () {
-	switch (this.summaryMetric) {
+ActiveBoundary.prototype.getValueHeaderOf = function (key) {
+	switch (key) {
 		case 'N':
 			return 'N';
 		case 'P':
@@ -184,6 +184,13 @@ ActiveBoundary.prototype.valueHeader = function () {
 		default:
 			return '';
 	}
+};
+
+ActiveBoundary.prototype.getValueHeaderText = function (key) {
+	return this.getValueHeaderOf(key).replace(/<[^>]+>/g, '');
+};
+ActiveBoundary.prototype.valueHeader = function () {
+	return this.getValueHeaderOf(this.summaryMetric);
 };
 
 ActiveBoundary.prototype.sumValueLabels = function (pick) {

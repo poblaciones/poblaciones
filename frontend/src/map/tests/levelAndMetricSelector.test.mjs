@@ -1,6 +1,7 @@
 import { describe, it, expect } from './_harness.mjs';
 import { setupWindow, makeMetricProperties, makeVersion, makeLevel, makeVariable, mountLite } from './fixtures.mjs';
 import ActiveSelectedMetric from '@/map/classes/ActiveSelectedMetric';
+import MetricsList from '@/map/classes/MetricsList';
 import MetricValues from '@/map/components/widgets/summary/metricValues.vue';
 
 function conNiveles(nombres, versiones) {
@@ -224,3 +225,62 @@ it('un grupo sin métricas presentes no deja un separador suelto', () => {
 	// Dos separadores: tras N y tras el grupo de proporciones.
 	expect(values.metricItems.filter(i => i.separator)).toHaveLength(2);
 });
+
+describe('El nivel fijado sobrevive al cambio de serie');
+
+function conDosSeries() {
+	const segMap = setupWindow();
+	segMap.Metrics = new MetricsList([]);
+	segMap.MapsApi = null;
+	const armar = function () {
+		return makeVersion({
+			Levels: [
+				makeLevel({ Name: 'Provincias', MinZoom: 0, MaxZoom: 7 }),
+				makeLevel({ Name: 'Departamentos', MinZoom: 8, MaxZoom: 20 }),
+			],
+		});
+	};
+	const metric = new ActiveSelectedMetric(makeMetricProperties({ Versions: [armar(), armar()] }));
+	metric.properties.Versions[0].Version = { Id: 1, Name: '2022' };
+	metric.properties.Versions[1].Version = { Id: 2, Name: '2010' };
+	metric.UpdateSummary = function () {};
+	segMap.frame.Zoom = 2; // por zoom correspondería Provincias
+	return metric;
+}
+
+it('al cambiar de serie se sigue mostrando el nivel fijado, no el índice propio de esa serie', () => {
+	// La bandera Pinned se propaga por nombre, pero cada serie trae sus
+	// propios índices de nivel: sin moverlos, la serie nueva muestra otro.
+	const metric = conDosSeries();
+	metric.PinLevelIndex(1);
+	expect(metric.SelectedLevel().Name).toBe('Departamentos');
+	metric.SelectVersion(1);
+	expect(metric.SelectedVersion().Version.Name).toBe('2010');
+	expect(metric.SelectedLevel().Name).toBe('Departamentos');
+	expect(metric.SelectedLevel().Pinned).toBeTruthy();
+});
+
+it('vuelve al mismo nivel al regresar a la serie original', () => {
+	const metric = conDosSeries();
+	metric.PinLevelIndex(1);
+	metric.SelectVersion(1);
+	metric.SelectVersion(0);
+	expect(metric.SelectedLevel().Name).toBe('Departamentos');
+});
+
+it('sin pin, al cambiar de serie manda el zoom', () => {
+	const metric = conDosSeries();
+	metric.PinLevelIndex(1);
+	metric.SelectVersion(1);
+	metric.ReleaseLevel();
+	expect(metric.SelectedLevel().Name).toBe('Provincias');
+	metric.SelectVersion(0);
+	expect(metric.SelectedLevel().Name).toBe('Provincias');
+});
+
+it('ApplyPinnedLevel avisa si no hubo cambio, para no redibujar de más', () => {
+	const metric = conDosSeries();
+	metric.PinLevelIndex(1);
+	expect(metric.ApplyPinnedLevel()).toBeFalsy();
+});
+

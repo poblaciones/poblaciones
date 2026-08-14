@@ -173,7 +173,7 @@ class DraftVariable
 		/**
 		 * @var string
 		 *
-		 * @ORM\Column(name="mvv_legend", type="string", length=2000, precision=0, scale=0, nullable=true, unique=false)
+		 * @ORM\Column(name="mvv_legend", type="string", length=1000, precision=0, scale=0, nullable=true, unique=false)
 		 */
     private $Legend;
 

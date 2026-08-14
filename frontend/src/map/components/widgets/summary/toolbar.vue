@@ -131,7 +131,7 @@
 			helpSelected(item) {
 				switch (item.key) {
 					case 'INICIO':
-						window.open(authenticate.homeUrl, '_blank');
+						window.open(this.authenticate.homeUrl(), '_blank');
 						break;
 					case 'BIENVENIDA':
 						this.showTutorial();

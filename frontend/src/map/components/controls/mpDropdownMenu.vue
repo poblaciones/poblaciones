@@ -151,7 +151,7 @@
 		font-weight: normal;
 		padding: 6px 8px 2px 8px !important;
 		margin-top: 4px;
-		margin-bottom: -6px;
+		margin-bottom: -8px;
 		white-space: nowrap;
 		opacity: 1;
 		color: #a9a9a9;

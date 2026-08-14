@@ -84,10 +84,10 @@
 						<md-switch class="md-primary" :disabled="!Work.CanEdit()" v-model="useFilter">Aplicar un filtro de filas</md-switch>
 
 					</div>
-					<div class='md-layout-item md-size-50'>
+					<div class='md-layout-item md-size-50' v-if='useGap'>
 						<md-switch class="md-primary" :disabled="!Work.CanEdit()" v-model="isGap">Calcular como brecha</md-switch>
 					</div>
-					<div class='md-layout-item md-size-100 md-helper-text helper'>
+					<div class='md-layout-item md-size-100 md-helper-text helper' v-if="useGap">
 							Indique las variables para expresar una brecha del grupo de la <i>Variable 1</i> respecto del grupo de la <i>Variable 2</i>.
 							Los valores responderán a las pregunta ¿cuánto debería aumentar el nivel del indicador del Grupo 1 para igualar al indicador del Grupo 2?
 					</div>
@@ -348,6 +348,9 @@ export default {
 		},
 		Work() {
 			return window.Context.CurrentWork;
+		},
+		useGap() {
+			return window.Context.Configuration.UseGap;
 		},
 		canEdit() {
 			if (this.Work) {
