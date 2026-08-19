@@ -2,12 +2,12 @@
   <div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="parentPicker" @selected="onParentSelected"></tree-picker-popup>
-		<md-dialog v-if="clippingRegion" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="clippingRegion" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Región</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Descripción</div>
+						<div class="full-row-separator">Descripción</div>
 					</div>
 					<div class="md-layout-item md-size-40">
 						<mp-simple-text label="Nombre" ref="inputName" :canEdit="canEdit"
@@ -54,7 +54,7 @@
 					</div>
 
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Presentación en el mapa</div>
+						<div class="full-row-separator">Presentación en el mapa</div>
 					</div>
 					<div class="md-layout-item md-size-20">
 						<mp-simple-text label="Ícono" v-model="clippingRegion.Symbol" :canEdit="canEdit"
@@ -82,7 +82,7 @@
 														v-model="clippingRegion.Priority" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Indexación</div>
+						<div class="full-row-separator">Indexación</div>
 					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" :disabled="!canEdit" v-model="useInSearch">

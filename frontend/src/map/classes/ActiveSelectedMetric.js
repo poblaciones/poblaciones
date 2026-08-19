@@ -138,6 +138,21 @@ ActiveSelectedMetric.prototype.hasComparableVariables = function () {
 	return this.SelectedLevelCanBeCompared() && (this.SelectedLevel().Variables.length > this.getNonComparableVariables().length);
 };
 
+// Si la comparación puede ofrecerse con lo que hay seleccionado. Al activarla,
+// la lista se reduce a las variables comparables: con una activa que no lo es,
+// desaparecería de la lista y quedaría sin nada seleccionado.
+ActiveSelectedMetric.prototype.canCompareSelectedVariable = function () {
+	if (!this.hasComparableVariables()) {
+		return false;
+	}
+	if (this.Compare.Active) {
+		// Ya activa: tiene que poder apagarse.
+		return true;
+	}
+	var variable = this.SelectedVariable();
+	return !!(variable && variable.Comparable);
+};
+
 ActiveSelectedMetric.prototype.hasNonComparableVariables = function () {
 	return this.getNonComparableVariables().length > 0;
 };

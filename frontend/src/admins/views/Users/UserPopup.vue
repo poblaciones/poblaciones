@@ -232,17 +232,6 @@
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-	.separator {
-		font-size: 0.85em;
-		font-weight: 600;
-		color: #757575;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin-top: 20px;
-		margin-bottom: 8px;
-		border-bottom: 1px solid #e0e0e0;
-		padding-bottom: 4px;
-	}
 
 	.api-keys-section {
 		margin-top: 8px;

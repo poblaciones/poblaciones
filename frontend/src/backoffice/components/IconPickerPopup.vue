@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openPopup" @md-closed="onClosed">
+		<md-dialog :md-active.sync="openPopup" @md-closed="onClosed" class="medium-dialog">
 			<invoker ref="invoker"></invoker>
 			<md-dialog-title>
 				Seleccione un ícono

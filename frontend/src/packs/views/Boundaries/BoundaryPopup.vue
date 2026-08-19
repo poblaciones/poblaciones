@@ -1,7 +1,7 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog v-if="boundary" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="boundary" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Delimitación</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">
@@ -22,7 +22,7 @@
 					</div>
 
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Selección de ítems</div>
+						<div class="full-row-separator">Selección de ítems</div>
 					</div>
 					<div class="md-layout-item md-size-40">
 						<div class="mp-label">Ordenar ítems por</div>
@@ -37,7 +37,7 @@
 					</div>
 
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Visibilidad</div>
+						<div class="full-row-separator">Visibilidad</div>
 					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" :disabled="!canEdit" v-model="isPublic">

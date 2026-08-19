@@ -2,7 +2,7 @@
   <div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="regionPicker" @selected="onRegionSelected"></tree-picker-popup>
-		<md-dialog v-if="boundaryVersion" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="boundaryVersion" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>{{ dialogTitle }}</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">
@@ -25,7 +25,7 @@
 						</div>
 					</div>
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Regiones asociadas</div>
+						<div class="full-row-separator">Regiones asociadas</div>
 						<md-button v-if="canEdit" @click="addRegion">
 							<md-icon>add_circle_outline</md-icon>
 							Agregar región

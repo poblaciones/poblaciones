@@ -4,7 +4,7 @@
 		<geography-selection-popup ref="selectionPopup" @selected="onGeographiesSelected"></geography-selection-popup>
 		<items-list-popup ref="itemsPopup">
 		</items-list-popup>
-		<md-dialog v-if="clippingRegion" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="clippingRegion" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>{{ dialogTitle }}</md-dialog-title>
 			<md-dialog-content>
 				<div class="helper">

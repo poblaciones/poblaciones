@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog class="wide-dialog" :md-active.sync="activateDialog" :md-click-outside-to-close="true">
+		<md-dialog class="medium-dialog" :md-active.sync="activateDialog" :md-click-outside-to-close="true">
 			<md-dialog-title>{{ title }}</md-dialog-title>
 			<md-dialog-content>
 				<mp-grid

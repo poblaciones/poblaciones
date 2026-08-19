@@ -716,7 +716,7 @@ export default {
 }
 
 .itemSmall {
-height: 42px;
+height: 36px;
 }
 	.iconStyleInList {
 		padding-top: 3px;
@@ -750,9 +750,12 @@ height: 42px;
 .paletteDropdown md-select-menu md-menu-content-bottom-start md-menu-content-small md-menu-content {
 		width: 100px!important;
 	}
+	.md-list-item-text {
+				font-size: 15px
 
-.md-dialog-container {
-	max-width: 680px !important;
-}
+	}
+
+		.md-dialog-container {
+	}
 </style>
 

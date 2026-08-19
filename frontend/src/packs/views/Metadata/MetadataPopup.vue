@@ -1,6 +1,6 @@
 <template>
   <div>
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true" class="wide-dialog">
+		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="true" class="medium-dialog">
 			<md-dialog-content class="extraWideDialog">
 				<invoker ref="invoker"></invoker>
 				<Metadata :metadataProperty="metadata" :canEditProperty="canEdit"></Metadata>

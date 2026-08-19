@@ -1,63 +1,58 @@
 <template>
 	<div>
-		<invoker ref="invoker"></invoker>
-		<ValuesPopup v-if="valuesPopupReset" ref="valuesPopup"></ValuesPopup>
-		<ColumnPopup ref="edit" @completed="completeEditOnClick"></ColumnPopup>
-
-		<div class="md-layout md-gutter">
-			<div style="position: relative">
-				<div v-if="Work.CanEdit()" style="position: absolute; left: 850px">
-					<md-button @click="upOnClick()" class="md-icon-button" :disabled="upDisabled">
-						<md-icon>arrow_upward</md-icon>
-					</md-button>
-					<br />
-					<md-button @click="downOnClick()" class="md-icon-button" :disabled="downDisabled">
-						<md-icon>arrow_downward</md-icon>
-					</md-button>
+		<md-dialog :md-active.sync="open" class="dictionaryPopup">
+			<md-dialog-title>Diccionario de '{{ Dataset.properties.Caption }}'</md-dialog-title>
+			<invoker ref="invoker"></invoker>
+			<ValuesPopup v-if="valuesPopupReset" ref="valuesPopup"></ValuesPopup>
+			<ColumnPopup ref="edit" @completed="completeEditOnClick"></ColumnPopup>
+			<mp-confirm ref="confirmDialog"
+									title="Eliminar columnas"
+									text="Las columnas seleccionadas junto con sus datos serán eliminadas. Si deseara luego recuperar estos valores deberá volver a importar los datos al dataset."
+									confirm-text="Eliminar"
+									@confirm="deleteOnClick" />
+			<md-dialog-content>
+				<div style="position: relative">
+					<div v-if="Work.CanEdit()" style="position: absolute; left: 1000px">
+						<md-button @click="upOnClick()" class="md-icon-button" :disabled="upDisabled">
+							<md-icon>arrow_upward</md-icon>
+							<md-tooltip md-direction="left">Subir</md-tooltip>
+						</md-button>
+						<br />
+						<md-button @click="downOnClick()" class="md-icon-button" :disabled="downDisabled">
+							<md-icon>arrow_downward</md-icon>
+							<md-tooltip md-direction="left">Bajar</md-tooltip>
+						</md-button>
+					</div>
+					<JqxGrid ref="columnsGrid" :width="1000" :source="dataAdapter" :columns="columns" :columnsresize="true"
+									 :columnsreorder="true" @rowselect="selectionChanged" @rowunselect="selectionChanged"
+									 @celldoubleclick="dblClickModify" :handlekeyboardnavigation="handlekeyboardnavigation"
+									 selectionmode='multiplerowsextended' :localization="localization">
+					</JqxGrid>
+					<div class="gridStatusBar">{{ statusBarText }}</div>
+					<div>
+						<md-button v-if="canEdit" @click="showModify()" :disabled="modifyDisabled">
+							<md-icon>edit</md-icon>
+							Modificar
+						</md-button>
+						<md-button @click="valuesOnClick()" :disabled="valuesDisabled">
+							<md-icon>ballot</md-icon>
+							Categorías
+						</md-button>
+						<md-button v-if="canEdit" @click="confirmDelete" :disabled="deleteDisabled">
+							<md-icon>delete</md-icon>
+							Eliminar
+						</md-button>
+						<mp-dropdown-button label="Descargar" icon="cloud_download">
+							<md-menu-item @click="excelBtnOnClick()">Excel (.XLS)</md-menu-item>
+							<md-menu-item @click="csvBtnOnClick()">CSV (.CSV)</md-menu-item>
+						</mp-dropdown-button>
+					</div>
 				</div>
-				<mp-confirm ref="confirmDialog"
-										title="Eliminar variables"
-										text="Las variables seleccionadas junto con sus datos serán eliminados. Si deseara luego recuperar estos valores deberá volver a importar los datos al dataset."
-										confirm-text="Eliminar"
-										@confirm="deleteOnClick" />
-				<JqxGrid ref="columnsGrid" :width="850" :source="dataAdapter" :columns="columns" :columnsresize="true"
-								 :columnsreorder="true" @rowselect="selectionChanged" @rowunselect="selectionChanged"
-								 @celldoubleclick="dblClickModify" :handlekeyboardnavigation="handlekeyboardnavigation"
-								 selectionmode='multiplerowsextended' :localization="localization">
-				</JqxGrid>
-				<div class="gridStatusBar">{{ statusBarText }}</div>
-				<div>
-					<md-button v-if="canEdit" @click="showNew()">
-						<md-icon>add_circle_outline</md-icon>
-						Nueva
-					</md-button>
-					<md-button v-if="canEdit" @click="showModify()" :disabled="modifyDisabled">
-						<md-icon>edit</md-icon>
-						Modificar
-					</md-button>
-					<md-button v-if="canEdit" @click="startAutoRecode" :disabled="autoRecodeDisabled">
-						<md-icon>toc</md-icon>
-						Auto-recodificar
-					</md-button>
-					<md-button v-if="canEdit" @click="confirmDelete" :disabled="deleteDisabled">
-						<md-icon>delete</md-icon>
-						Eliminar
-					</md-button>
-					<md-button @click="valuesOnClick()" :disabled="valuesDisabled">
-						<md-icon>ballot</md-icon>
-						Categorías
-					</md-button>
-					<md-button @click="excelBtnOnClick()">
-						<md-icon>import_export</md-icon>
-						Exportar a Excel
-					</md-button>
-					<md-button @click="csvBtnOnClick()">
-						<md-icon>import_export</md-icon>
-						Exportar a CSV
-					</md-button>
-				</div>
-			</div>
-		</div>
+			</md-dialog-content>
+			<md-dialog-actions>
+				<md-button @click="open = false">Cerrar</md-button>
+			</md-dialog-actions>
+		</md-dialog>
 	</div>
 </template>
 
@@ -68,16 +63,18 @@ import arr from '@/common/framework/arr';
 import ColumnPopup from './ColumnPopup.vue';
 import Localization from '@/backoffice/classes/Localization';
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue';
+import MpDropdownButton from '@/backoffice/components/MpDropdownButton.vue';
 import JqxTooltip from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue';
 // https://www.jqwidgets.com/vue/vue-grid/
 var columnFormatEnum = require("@/common/enums/columnFormatEnum");
 
 export default {
-	name: 'columnsGrid',
+	name: 'DictionaryPopup',
 	components: {
 		JqxGrid,
 		ValuesPopup,
-		ColumnPopup
+		ColumnPopup,
+		MpDropdownButton
 	},
 	computed: {
 		Dataset() {
@@ -96,9 +93,6 @@ export default {
 				return false;
 			}
 		},
-	},
-	mounted() {
-		this.loadData();
 	},
 	beforeCreate() {
 		this.source = {
@@ -174,6 +168,9 @@ export default {
 			return data;
 		},
 		selectionChanged() {
+			if (!this.Grid) {
+				return;
+			}
 			let grid = this.Grid;
 			let rowIndexes = this.selectedIndexes();
 			this.modifyDisabled = (rowIndexes.length !== 1);
@@ -182,7 +179,6 @@ export default {
 			this.upDisabled = (rowIndexes.length === 0 || rowIndexes[0] === 0);
       let rowCount = (this.source ? this.source.totalrecords : 0);
 			this.downDisabled = (rowIndexes.length === 0 || rowIndexes[rowIndexes.length - 1] === rowCount - 1);
-			this.autoRecodeDisabled = (rowIndexes.length !== 1 || !this.allSelectedAreString());
 			this.updateCount();
 		},
 		allSelectedAreString() {
@@ -197,6 +193,9 @@ export default {
 			return true;
 		},
 		selectedIds() {
+			if (!this.Grid) {
+				return [];
+			}
 			let selectedRows = this.Grid.getselectedrowindexes();
 			let ret = [];
 			for(let i = 0; i < selectedRows.length; i++) {
@@ -207,6 +206,9 @@ export default {
 			return ret;
 		},
 		selectedIndexes() {
+			if (!this.Grid) {
+				return [];
+			}
 			let selectedRows = this.Grid.getselectedrowindexes();
 			let ret = [];
 			for(let i = 0; i < selectedRows.length; i++) {
@@ -231,6 +233,9 @@ export default {
 			}
 		},
 		updateCount(rowCount) {
+			if (!this.Grid) {
+				return;
+			}
 			if (!rowCount) {
 				rowCount = this.Grid.getdatainformation().rowscount;
 			}
@@ -395,21 +400,6 @@ export default {
 		destroyCallback() {
 			this.valuesPopupReset = false;
 		},
-		startAutoRecode() {
-			var loc = this;
-			var col = loc.selectedColumn();
-			// Obtiene los valores
-      this.$refs.invoker.call(function(closeInvoke) {
-						loc.Dataset.GetDistinctColumnValues(col.Id)
-							.then(function(res) {
-									loc.valuesPopupReset = true;
-									loc.$nextTick(() => {
-										loc.$refs.valuesPopup.showAutoRecode(col, res, loc.destroyCallback);
-										closeInvoke();
-									});
-								});
-							});
-		},
 		completeEditOnClick() {
 			this.showWait();
 			this.loadData();
@@ -418,11 +408,33 @@ export default {
 			this.hideWait();
 			alert('No se ha podido realizar la operación. ' + text);
 		},
-		showNew() {
+		show() {
+			// El source se llena antes de abrir para que el widget jqx se cree ya
+			// enlazado a los datos, igual que hace ValuesPopup con bindData.
+			this.source.localdata = this.getData();
+			this.source.totalrecords = this.source.localdata.length;
+			this.open = true;
+			this.waitForGrid(this.loadData, 60);
+		},
+		gridIsReady() {
+			// Alcanza con que exista el componente y exponga su API. No debe
+			// usarse getdatainformation() como prueba: falla mientras el grid no
+			// tiene datos, con lo que la carga quedaría esperando para siempre y
+			// la grilla se mostraría vacía.
+			return !!(this.Grid && typeof this.Grid.updatebounddata === 'function');
+		},
+		waitForGrid(callback, attempts) {
 			var loc = this;
-			window.Context.Factory.GetCopy('Column', function (data) {
-				loc.$refs.edit.show(data);
-			});
+			if (this.gridIsReady()) {
+				callback();
+				return;
+			}
+			if (attempts <= 0) {
+				return;
+			}
+			setTimeout(function () {
+				loc.waitForGrid(callback, attempts - 1);
+			}, 25);
 		},
 		dblClickModify(e) {
 			if (!this.Work.CanEdit()) {
@@ -452,17 +464,29 @@ export default {
 				this.Dataset.ReloadColumns);
 		},
 		loadData() {
+			if (!this.gridIsReady()) {
+				return;
+			}
 			this.source.localdata = this.getData();
 			this.source.totalrecords = this.source.localdata.length;
 			this.Grid.updatebounddata();
+			// El grid se inicializa mientras el diálogo todavía está oculto, así
+			// que puede haber quedado sin dibujar: se fuerza el refresco.
+			if (typeof this.Grid.refresh === 'function') {
+				this.Grid.refresh();
+			}
 			this.hideWait();
 			this.updateCount();
 		},
 		showWait() {
-			this.Grid.showloadelement();
+			if (this.Grid) {
+				this.Grid.showloadelement();
+			}
 		},
 		hideWait() {
-			this.Grid.hideloadelement();
+			if (this.Grid) {
+				this.Grid.hideloadelement();
+			}
 		},
 		numberrenderer(row, column, value) {
 				return '<div style="text-align: center; margin-top: 9px;">' + (1 + value) + '</div>';
@@ -473,6 +497,7 @@ export default {
 	},
 	data() {
 		return {
+				open: false,
 				orderChangedList: {},
 				orderSelectedIndexes: [],
 				orderRestoreColumns: [],
@@ -488,7 +513,6 @@ export default {
 				CurrentVarName: '',
 				CurrentVarLabel: '',
 				CurrentUseInSummary: false,
-				autoRecodeDisabled: true,
 				modifyDisabled: true,
 				deleteDisabled: true,
 				valuesDisabled: true,
@@ -519,14 +543,30 @@ export default {
 	},
 	watch: {
 		Dataset () {
-			this.loadData();
+			if (this.open) {
+				this.loadData();
+			}
 		},
 		'Dataset.Columns' (columns) {
-			this.loadData();
+			if (this.open) {
+				this.loadData();
+			}
 		}
 	}
 };
 </script>
 
 <style rel='stylesheet/scss' lang='scss' scoped>
+</style>
+
+<style rel='stylesheet/scss' lang='scss'>
+.dictionaryPopup .md-dialog-container {
+	max-width: 1120px;
+	width: 1120px;
+}
+.dictionaryPopup .md-dialog-content {
+	min-height: 420px;
+	max-height: 75vh;
+	overflow-y: auto;
+}
 </style>

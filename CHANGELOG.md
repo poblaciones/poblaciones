@@ -1,3 +1,6 @@
+- Remoción de tab de variables.
+- Fix a anchos y altos de dialogs inapropiados.
+
 v5.2 (2026-08-14)
 - Fix a manejo de capas base (se cruzaban contenidos en recarga simultánea).
 - Listas desplegables para fijar nivel y elegir tipo de métrica.

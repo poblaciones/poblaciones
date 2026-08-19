@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Agregar a delimitaciones</md-dialog-title>
 			<md-dialog-content>
 				<div class="helper">

@@ -1,5 +1,5 @@
 <template>
-	<md-dialog :md-active.sync="openEditableSource" style="height: 520px">
+	<md-dialog :md-active.sync="openEditableSource" class="medium-dialog">
 		<md-dialog-title>
 			Fuente
 		</md-dialog-title>

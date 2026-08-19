@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openSources">
+		<md-dialog :md-active.sync="openSources" class="content-sized-dialog">
 
 			<md-dialog-title>
 				Agregar fuente

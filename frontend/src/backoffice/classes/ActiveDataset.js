@@ -883,7 +883,9 @@ ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors, validate
 			newColumn.cellsformat = 'd' + datasetColumn.Decimals;
 		}
 		newColumn.cellsalign = this.spssAlignmentToGridAligment(datasetColumn.Alignment);
-		newColumn.width = (datasetColumn.ColumnWidth < 30 ? datasetColumn.ColumnWidth * 10 : 200);
+		newColumn.align = 'center';
+		var size = (datasetColumn.ColumnWidth < 30 ? datasetColumn.ColumnWidth * 10 : 200);
+		newColumn.width = (size < 100 ? 100 : size) + 'px';
 		newColumn.cellsrenderer = this.cellsRenderer;
 		if (validate) {
 			newColumn.editable = true;
@@ -897,8 +899,17 @@ ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors, validate
 };
 
 ActiveDataset.prototype.setRenderer = function(col) {
+	var loc = this;
 	col.rendered = function (ele, alignment, height) {
-		ele.html('<span style="cursor: default;" title="' + col.text.replace('"', "&quot;") + '">' + str.EscapeHtml(col.text) + '</span>');
+		var tooltip = loc.GetLabelFromVariable(col.text);
+		if (tooltip == null || tooltip.trim() == '') {
+			tooltip = col.text;
+		} else {
+			if (tooltip != col.text) {
+				tooltip = col.text + " - " + tooltip;
+			}
+		}
+		ele.html('<span style="cursor: default;" title="' + str.EscapeHtml(tooltip) + '">' + str.EscapeHtml(col.text) + '</span>');
 	};
 };
 

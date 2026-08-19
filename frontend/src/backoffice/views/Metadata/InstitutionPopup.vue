@@ -1,5 +1,5 @@
 <template>
-	<md-dialog :md-active.sync="openEditableInstitution" style="min-height: 520px">
+	<md-dialog :md-active.sync="openEditableInstitution" class="medium-dialog">
 		<md-dialog-title>
 			Institución
 		</md-dialog-title>

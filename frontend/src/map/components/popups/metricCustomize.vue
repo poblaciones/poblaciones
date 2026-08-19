@@ -221,6 +221,7 @@ export default {
 				for (var n = 0; n < variables.length; n++) {
 					variables[n].Opacity = key;
 				}
+				this.metric.UpdateOpacity(window.SegMap.frame.Zoom);
 				this.metric.RefreshMap();
 			}
 		},
@@ -234,6 +235,7 @@ export default {
 				}
 			}
 			if (changed) {
+				this.metric.UpdateOpacity(window.SegMap.frame.Zoom);
 				this.metric.RefreshMap();
 			}
 		},

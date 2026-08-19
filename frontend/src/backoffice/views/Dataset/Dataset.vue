@@ -73,16 +73,6 @@
 															</p>` + extraHelp('DatasetImportSection') }">
 											<data-tab></data-tab>
 									</md-tab>
-									<md-tab style='flex: 1 0 100% !important;' id="variables" md-label="Variables" @click="EnsureColumns"
-													:to="makePath('variables')" :md-active="isPath(makePath('variables'))"
-													:md-template-data="{ help: `<p>
-													El listado de variables detalla qué variables (columnas) posee el dataset.
-													</p><p>
-															Permite modificar sus descripciones, etiquetas de valores, remover variables y
-															recodificarlas (convertir en códigos numéricos con etiquetas) variables
-															existentes.</p>` + extraHelp('DatasetVariablesSection') }">
-											<columns-tab></columns-tab>
-									</md-tab>
 									<md-tab style='flex: 1 0 100% !important;' id="georeference" md-label="Georreferenciar"
 													:to="makePath('georeference')" :md-active="isPath(makePath('georeference'))"
 													:md-template-data="{ help: `<p>
@@ -157,7 +147,6 @@
 
 <script>
 import DataTab from './DataTab.vue';
-import ColumnsTab from './ColumnsTab.vue';
 import IdentityTab from './IdentityTab.vue';
 import MetricsTab from './../Metric/MetricsTab.vue';
 import MultilevelTab from './MultilevelTab.vue';
@@ -168,7 +157,6 @@ export default {
 	name: 'datasets',
 	components: {
 		DataTab,
-		ColumnsTab,
 		IdentityTab,
 		ImportPopup,
 		MultilevelTab,
@@ -213,7 +201,9 @@ export default {
 		isPath(path) {
 			if (this.$refs.tabs) {
 				if (this.$route.path.endsWith('/variables')) {
-					this.$refs.tabs.activeTab = 'variables';
+					// La solapa Variables fue absorbida por Datos (menú de columna + Diccionario).
+					// Las URLs anteriores se redirigen a Datos.
+					this.$refs.tabs.activeTab = 'data';
 				} else if (this.$route.path.endsWith('/georeference')) {
 					this.$refs.tabs.activeTab = 'georeference';
 				} else if (this.$route.path.endsWith('/multilevel')) {

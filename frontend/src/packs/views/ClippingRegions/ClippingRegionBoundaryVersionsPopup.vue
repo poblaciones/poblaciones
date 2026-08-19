@@ -2,7 +2,7 @@
 	<div>
 		<invoker ref="invoker"></invoker>
 		<boundary-version-selection-popup ref="selectionPopup" @selected="onVersionsSelected"></boundary-version-selection-popup>
-		<md-dialog class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>{{ dialogTitle }}</md-dialog-title>
 			<md-dialog-content v-if="clippingRegion">
 				<div class="helper">

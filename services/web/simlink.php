@@ -69,6 +69,8 @@ function serveStaticFiles($target)
 	// Envía las cabeceras HTTP adecuadas
 	if (endsWith($realFile, ".css"))
 		$mimeType = 'text/css';
+	else if (endsWith($realFile, ".js"))
+		$mimeType = 'text/javascript';
 
 	header('Content-Type: ' . $mimeType);
 	header('Content-Length: ' . filesize($realFile));

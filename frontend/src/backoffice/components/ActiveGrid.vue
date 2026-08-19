@@ -7,11 +7,34 @@
 			<fix-code v-if="showingErrors" @fixed="fixedCode" ref="FixCode"></fix-code>
 			<fix-polygon v-if="showingErrors" @fixed="fixedPolygon" ref="FixPolygon"></fix-polygon>
 			<import-popup ref="importPopup"></import-popup>
+			<dictionary-popup v-if="!showingErrors" ref="dictionaryPopup"></dictionary-popup>
+			<column-popup v-if="!showingErrors" ref="columnEdit" @completed="columnEdited"></column-popup>
+			<values-popup v-if="!showingErrors && valuesPopupReset" ref="valuesPopup"></values-popup>
+			<column-header-menu v-if="!showingErrors" ref="columnMenu"
+													@sortAsc="menuSortAsc" @sortDesc="menuSortDesc" @sortNone="menuSortNone"
+													@autoRecode="menuAutoRecode" @modify="menuModify"
+													@categories="menuCategories" @delete="menuDelete" />
+			<mp-confirm title="Eliminar columna"
+									:text="deleteColumnText"
+									confirm-text="Eliminar"
+									ref="confirmColumnDialog"
+									@confirm="deleteColumnConfirmed" />
 			<mp-confirm title="Eliminar filas"
 									text="Se removerán las filas seleccionadas. Si deseara luego recuperar estas filas deberá volver a importar los datos al dataset."
 									confirm-text="Eliminar"
 									ref="confirmDialog"
 									@confirm="deleteOnClick" />
+			<div v-if="!showingErrors" class="topGridToolbar">
+				<md-button v-if="Work.CanEdit()" @click="newRow">
+					<md-icon>add_circle_outline</md-icon> Nueva fila
+				</md-button>
+				<md-button v-if="Work.CanEdit()" @click="newColumn">
+					<md-icon>add_circle_outline</md-icon> Nueva columna
+				</md-button>
+				<md-button v-if="Work.CanEdit()" @click="upload()">
+					<md-icon>cloud_upload</md-icon> Importar
+				</md-button>
+			</div>
 			<JqxGrid ref="activeGrid"
 							 :width="gridwidth"
 							 :height="(showingErrors ? 300 : 350)"
@@ -24,12 +47,16 @@
 							 :rendergridrows="rendergridrows"
 							 @rowselect="selectionChanged"
 							 @rowunselect="selectionChanged"
+							 @columnresized="attachHeaderMenus"
+							 @columnreordered="attachHeaderMenus"
 							 editmode="dblclick"
 							 :editable="Work.CanEdit()"
 							 :showfilterrow="true"
 							 :rowsheight="22"
 							 :filterable="true"
 							 :columnsresize="true"
+							 :showsortmenuitems="false"
+							 :columnsmenu="false"
 							 :sortable="true"
 							 theme="metro"
 							 selectionmode="multiplerowsextended"
@@ -37,23 +64,17 @@
 							 :handlekeyboardnavigation="handlekeyboardnavigation" />
 			<div class="gridStatusBar">{{ statusBarText }}</div>
 			<div class="gridStatusBar">{{ problemText }}</div>
-			<div :style="(showingErrors ? 'margin-bottom: -20px' : 'margin-top: 20px')">
-				<md-button v-if="Work.CanEdit() && !showingErrors" @click="upload()">
-					<md-icon>cloud_upload</md-icon> Importar
-				</md-button>
+			<div :style="(showingErrors ? 'margin-bottom: -20px' : '')">
 				<md-button v-if="showingErrors" @click="skipAllOnClick" :disabled="skipAllDisabled">
 					<md-icon>fast_forward</md-icon> Omitir todas
 				</md-button>
 				<md-button v-if="showingErrors" @click="skipOnClick" :disabled="skipDisabled">
 					<md-icon>skip_next</md-icon> Omitir fila(s)
 				</md-button>
-				<md-button v-if="!showingErrors && Work.CanEdit()" @click="newRow">
-					<md-icon>add_circle_outline</md-icon> Nueva fila
-				</md-button>
-				<md-button v-if="Work.CanEdit()" @click="confirmDelete" :disabled="deleteDisabled">
-					<md-icon>delete</md-icon> Borrar
-				</md-button>
 				<template v-if="showingErrors">
+					<md-button v-if="Work.CanEdit()" @click="confirmDelete" :disabled="deleteDisabled">
+						<md-icon>delete</md-icon> Borrar
+					</md-button>
 					<template v-if="georeferenceParameters.type == 'location'">
 						<template v-if="georeferenceParameters.end.latitude">
 							<md-button @click="relocate(georeferenceParameters.start)" :disabled="relocateDisabled">
@@ -66,7 +87,7 @@
 						<md-button v-else @click="relocate(georeferenceParameters.start)" :disabled="relocateDisabled">
 							<md-icon>edit_location</md-icon> Relocalizar
 						</md-button>
-					</template>"
+					</template>
 					<template v-if="georeferenceParameters.type == 'code'">
 						<template v-if="georeferenceParameters.end.codes">
 							<md-button @click="fixCode(georeferenceParameters.start)" :disabled="fixDisabled">
@@ -93,31 +114,24 @@
 					</md-button>
 				</template>
 				<template v-else>
+					<md-button v-if="Work.CanEdit()" @click="confirmDelete" :disabled="deleteDisabled">
+						<md-icon>delete</md-icon> Borrar filas
+					</md-button>
+					<md-button @click="openDictionary">
+						<md-icon>label</md-icon> Diccionario
+					</md-button>
 					<md-button @click="createGrid()">
 						<md-icon>refresh</md-icon> Actualizar
 					</md-button>
-					<md-button @click="startDownload('c')">
-						<md-icon>file_download</md-icon> Descargar .CSV
-					</md-button>
-					<md-button @click="startDownload('x')">
-						<md-icon>file_download</md-icon> Descargar .XLSX
-					</md-button>
-					<md-button @click="startDownload('s')">
-						<md-icon>file_download</md-icon> Descargar .SAV
-					</md-button>
-					<md-button @click="startDownload('t')">
-						<md-icon>file_download</md-icon> Descargar .DTA
-					</md-button>
-					<md-button @click="startDownload('r')">
-						<md-icon>file_download</md-icon> Descargar .RDATA
-					</md-button>
-					<md-button v-if="isShapesPolygon" @click="startDownload('gw')">
-						<md-icon>file_download</md-icon> Descargar .GPKG
-					</md-button>
-					<md-button v-if="isShapesPolygon" @click="startDownload('hw')">
-						<md-icon>file_download</md-icon> Descargar .SHP
-					</md-button>
-
+					<mp-dropdown-button label="Descargar" icon="cloud_download">
+						<md-menu-item @click="startDownload('c')">CSV (.CSV)</md-menu-item>
+						<md-menu-item @click="startDownload('x')">Excel (.XLSX)</md-menu-item>
+						<md-menu-item @click="startDownload('s')">SPSS (.SAV)</md-menu-item>
+						<md-menu-item @click="startDownload('t')">Stata (.DTA)</md-menu-item>
+						<md-menu-item @click="startDownload('r')">R (.RDATA)</md-menu-item>
+						<md-menu-item v-if="isShapesPolygon" @click="startDownload('gw')">GeoPackage (.GPKG)</md-menu-item>
+						<md-menu-item v-if="isShapesPolygon" @click="startDownload('hw')">Shapefile (.SHP)</md-menu-item>
+					</mp-dropdown-button>
 				</template>
 			</div>
 		</div>
@@ -130,6 +144,11 @@ import FixPolygon from './FixPolygon.vue';
 import FixCode from './FixCode.vue';
 import DataPager from "@/backoffice/classes/DataPager";
 import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
+import DictionaryPopup from "@/backoffice/views/Dataset/DictionaryPopup.vue";
+import ColumnPopup from "@/backoffice/views/Dataset/ColumnPopup.vue";
+import ValuesPopup from "@/backoffice/views/Dataset/ValuesPopup.vue";
+import ColumnHeaderMenu from "./ColumnHeaderMenu.vue";
+import MpDropdownButton from "./MpDropdownButton.vue";
 import str from '@/common/framework/str';
 import err from '@/common/framework/err';
 import Localization from "@/backoffice/classes/Localization";
@@ -146,6 +165,11 @@ export default {
 		FixCode,
 		FixPolygon,
 		ImportPopup,
+		DictionaryPopup,
+		ColumnPopup,
+		ValuesPopup,
+		ColumnHeaderMenu,
+		MpDropdownButton,
 		Relocate
   },
 	props: {
@@ -195,6 +219,9 @@ export default {
     bindingcomplete() {
 			this.isBinding = false;
 			this.updateCount();
+			if (!this.showingErrors) {
+				this.attachHeaderMenus();
+			}
       if (this.requiresBinding) {
         this.requiresBinding = false;
         this.createGrid();
@@ -411,6 +438,180 @@ export default {
     upload() {
       this.$refs.importPopup.show();
     },
+		openDictionary() {
+			this.$refs.dictionaryPopup.show();
+		},
+		newColumn() {
+			var loc = this;
+			window.Context.Factory.GetCopy('Column', function (data) {
+				loc.$refs.columnEdit.show(data);
+			});
+		},
+		columnEdited() {
+			this.reloadColumns();
+		},
+		reloadColumns() {
+			this.$refs.invoker.doMessage('Obteniendo información del dataset', this.Dataset,
+				this.Dataset.ReloadColumns);
+		},
+		// Instala en cada encabezado de columna un botón que abre el menú propio.
+		// El menú nativo de jqxGrid queda desactivado (columnsmenu=false) y se
+		// reemplaza por éste, que suma las acciones de columna a las de orden.
+		attachHeaderMenus() {
+			var loc = this;
+			this.$nextTick(function () {
+				var host = loc.$refs.activeGrid;
+				if (!host || !host.$el) {
+					return;
+				}
+				var headers = host.$el.querySelectorAll('.jqx-grid-column-header');
+				for (var i = 0; i < headers.length; i++) {
+					loc.attachOneHeaderMenu(headers[i]);
+				}
+			});
+		},
+		attachOneHeaderMenu(header) {
+			if (header.getAttribute('data-mp-menu') === '1') {
+				return;
+			}
+			if (!header.querySelector('span')) {
+				return;
+			}
+			// jqx posiciona cada encabezado con position:absolute y left explícito;
+			// no debe modificarse su position, que ya sirve de bloque contenedor.
+			// El botón se agrega dentro del contenedor interno del encabezado.
+			var inner = header.firstElementChild || header;
+			header.setAttribute('data-mp-menu', '1');
+			var loc = this;
+			var btn = document.createElement('div');
+			btn.className = 'mpColumnMenuButton';
+			btn.title = 'Acciones de la columna';
+			btn.addEventListener('mousedown', function (e) {
+				e.stopPropagation();
+				e.preventDefault();
+			});
+			btn.addEventListener('click', function (e) {
+				e.stopPropagation();
+				e.preventDefault();
+				loc.openColumnMenu(btn);
+			});
+			inner.appendChild(btn);
+		},
+		openColumnMenu(btn) {
+			// El encabezado se busca en el momento del clic: jqx vuelve a renderizar
+			// su contenido al ordenar o reordenar columnas, de modo que una
+			// referencia guardada al instalar el botón puede quedar obsoleta.
+			var header = btn.parentNode;
+			while (header && !(header.classList &&
+					header.classList.contains('jqx-grid-column-header'))) {
+				header = header.parentNode;
+			}
+			var span = (header ? header.querySelector('span') : null);
+			if (!span) {
+				return;
+			}
+			// El nombre de variable se toma del texto del span, que setRenderer
+			// escribe como str.EscapeHtml(col.text), es decir la variable exacta.
+			// No se usa el atributo title: allí setRenderer arma el tooltip, que
+			// cuando la columna tiene etiqueta es 'Variable - Etiqueta'.
+			// Tampoco se recorta, porque el nombre puede contener espacios
+			// significativos y dejaría de corresponder con la columna.
+			var variable = (span.textContent !== undefined ? span.textContent : span.innerText);
+			var column = this.Dataset.GetColumnFromVariable(variable);
+			this.$refs.columnMenu.show(column, btn.getBoundingClientRect(),
+					this.currentSortDirection(column));
+		},
+		// El orden vigente se consulta a la grilla, para que la tilde del menú
+		// sea correcta también después de recargar o de ordenar por otra vía.
+		currentSortDirection(column) {
+			try {
+				var info = this.Grid.getsortinformation();
+				if (info && info.sortcolumn === column.Variable && info.sortdirection) {
+					if (info.sortdirection.ascending) {
+						return 'asc';
+					}
+					if (info.sortdirection.descending) {
+						return 'desc';
+					}
+				}
+				return null;
+			} catch (e) {
+				return this.sortState[column.Variable] || null;
+			}
+		},
+		menuSortAsc(column) {
+			this.sortState = Object.assign({}, this.sortState);
+			this.sortState[column.Variable] = 'asc';
+			this.Grid.sortby(column.Variable, 'asc');
+		},
+		menuSortDesc(column) {
+			this.sortState = Object.assign({}, this.sortState);
+			this.sortState[column.Variable] = 'desc';
+			this.Grid.sortby(column.Variable, 'desc');
+		},
+		menuSortNone(column) {
+			this.sortState = Object.assign({}, this.sortState);
+			delete this.sortState[column.Variable];
+			this.Grid.removesort();
+		},
+		menuModify(column) {
+			this.$refs.columnEdit.show(column);
+		},
+		menuCategories(column) {
+			var loc = this;
+			var values = this.Dataset.Labels[column.Id];
+			if (values === undefined) {
+				values = [];
+			}
+			this.valuesPopupReset = true;
+			this.$nextTick(function () {
+				loc.$refs.valuesPopup.show(column, values, loc.Work.CanEdit(),
+					function () {
+						loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByLabelChange(column);
+						loc.valuesPopupReset = false;
+						loc.reloadColumns();
+					}, loc.destroyValuesCallback);
+			});
+		},
+		destroyValuesCallback() {
+			this.valuesPopupReset = false;
+		},
+		menuAutoRecode(column) {
+			var loc = this;
+			this.$refs.invoker.call(function (closeInvoke) {
+				loc.Dataset.GetDistinctColumnValues(column.Id).then(function (res) {
+					loc.valuesPopupReset = true;
+					loc.$nextTick(function () {
+						loc.$refs.valuesPopup.showAutoRecode(column, res, loc.destroyValuesCallback);
+						closeInvoke();
+					});
+				});
+			});
+		},
+		menuDelete(column) {
+			this.pendingDeleteColumn = column;
+			this.deleteColumnText = 'La columna \u00ab' + column.Variable + '\u00bb junto con sus datos ser\u00e1 eliminada. ' +
+				'Si deseara luego recuperar estos valores deber\u00e1 volver a importar los datos al dataset.';
+			var loc = this;
+			this.$nextTick(function () {
+				loc.$refs.confirmColumnDialog.show();
+			});
+		},
+		deleteColumnConfirmed() {
+			var loc = this;
+			var ids = [this.pendingDeleteColumn.Id];
+			loc.showWait();
+			this.Dataset.DeleteColumns(ids).then(function () {
+				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedDataColumnIds(ids);
+				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedCutColumnsIds(ids);
+				loc.Dataset.ScaleGenerator.RegenAndSaveVariablesAffectedByDeletedSequenceIds(ids);
+				loc.pendingDeleteColumn = null;
+				loc.hideWait();
+				loc.reloadColumns();
+			}).catch(function () {
+				loc.hideWait();
+			});
+		},
     createGrid() {
       if (this.isBinding) {
         this.requiresBinding = true;
@@ -503,27 +704,84 @@ export default {
 			this.selectionChanged();
 			this.updateCount();
 		},
+		clearSelection() {
+			if (this.Grid) {
+				this.Grid.clearselection();
+				this.selectionChanged();
+			}
+		},
 		newRow() {
 			var loc = this;
 			loc.showWait();
 			this.Dataset.CreateRow().then(function (rowId) {
 				loc.refreshOnClick();
-				return;
-
-				/*var cols = loc.source.datafields.length;
-				var rowData = new Array(cols).fill('');
-				rowData[cols - 1] = rowId;
-				var named = loc.DataPager.PosFromNames(loc.source, [rowData]);
-				rowData = named[0];
-				loc.Grid.addrow(rowId, rowData);
-				var count = loc.Grid.getdatainformation().rowscount;
-				loc.updateCount(count);
-				loc.selectRowByPos(count - 1);
-				loc.hideWait();*/
+				// El refresh dispara una carga asíncrona (isBinding pasa a true y
+				// vuelve a false en bindingcomplete). Se espera a que termine para
+				// recién ahí calcular la última página y saltar a ella.
+				loc.waitBinding(function () {
+					loc.jumpToLastPageAndSelect(rowId);
+				});
 			}).catch (function (error) {
 				loc.hideWait();
 				err.err('AddRow', error);
 			});
+		},
+		// Espera a que termine el binding en curso (createGrid o gotopage
+		// disparan una carga asíncrona que se resuelve en bindingcomplete,
+		// donde isBinding vuelve a false).
+		waitBinding(callback, attempts) {
+			attempts = (attempts === undefined ? 40 : attempts);
+			var loc = this;
+			if (!this.isBinding) {
+				callback();
+				return;
+			}
+			if (attempts <= 0) {
+				this.hideWait();
+				return;
+			}
+			setTimeout(function () {
+				loc.waitBinding(callback, attempts - 1);
+			}, 50);
+		},
+		jumpToLastPageAndSelect(rowId) {
+			var loc = this;
+			var pagesize = (this.Grid && this.Grid.pagesize) || 50;
+			var total = (this.source && this.source.totalrecords) || 0;
+			var lastPage = Math.max(0, Math.ceil(total / pagesize) - 1);
+			// Si la nueva fila ya cae en la página que se está mostrando (la
+			// única, o la que quedó tras el refresh), no hace falta paginar.
+			if (lastPage === 0) {
+				var index = loc.findRowIndexById(rowId);
+				if (index !== -1) {
+					loc.selectRowByPos(index);
+				}
+				loc.hideWait();
+				return;
+			}
+			this.isBinding = true;
+			this.Grid.gotopage(lastPage);
+			this.waitBinding(function () {
+				var index2 = loc.findRowIndexById(rowId);
+				if (index2 !== -1) {
+					loc.selectRowByPos(index2);
+				}
+				loc.hideWait();
+			});
+		},
+		findRowIndexById(rowId) {
+			try {
+				var rows = this.Grid.getrows();
+				for (var i = 0; i < rows.length; i++) {
+					if ('' + rows[i]['internal__Id'] === '' + rowId) {
+						return (rows[i].boundindex !== undefined ? rows[i].boundindex : i);
+					}
+				}
+			} catch (e) {
+				// noop: si la API de la grilla no responde como se espera, se
+				// deja de intentar en lugar de romper la creación de la fila.
+			}
+			return -1;
 		},
 		selectRowByPos(i) {
 			this.Grid.clearselection();
@@ -659,6 +917,10 @@ export default {
       requiresBinding: false,
       statusBarText: "",
 			problemText: "",
+			valuesPopupReset: false,
+			pendingDeleteColumn: null,
+			deleteColumnText: "",
+			sortState: {},
 			currentGeorreferenceEdit: {},
       DataPager: new DataPager()
     };
@@ -674,10 +936,58 @@ export default {
 </script>
 
 <style rel='stylesheet/scss' lang='scss' scoped>
+.topGridToolbar {
+	margin-bottom: 8px;
+}
+
 </style>
 
 <style>
 .jqx-popup {
     z-index: 5001!important;
+}
+/* Botón de menú propio en el encabezado. Se apoya en que jqx ya declara
+   position:absolute en .jqx-grid-column-header. El triángulo se dibuja con
+   borders para no depender de imágenes del tema. */
+.mpColumnMenuButton {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 18px !important;
+	height: 100%;
+	cursor: pointer;
+	z-index: 5;
+}
+.mpColumnMenuButton:after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-left: -4px;
+	margin-top: -2px;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 5px solid #555;
+}
+.mpColumnMenuButton:hover {
+	background-color: rgba(0, 0, 0, 0.08);
+}
+/* El indicador de orden se muestra como tilde dentro del menú propio, así que
+   se ocultan los íconos que jqx agrega en el encabezado (evita el segundo
+   triángulo y que desplace al botón de menú). */
+.jqx-grid-column-header[data-mp-menu='1'] .iconscontainer {
+	display: none !important;
+}
+
+/* jqx achica el título con calc(100% - 20px) cuando la columna tiene orden o
+   filtro, para dejar lugar a esos íconos; como están ocultos, se restituye el
+   ancho y se reserva solo el espacio del botón de menú. */
+.jqx-grid-column-header[data-mp-menu='1'] > div > div:first-child,
+.jqx-grid-column-header[data-mp-menu='1'][sort] > div > div:first-child,
+.jqx-grid-column-header[data-mp-menu='1'][filter] > div > div:first-child,
+.jqx-grid-column-header[data-mp-menu='1'][filter][sort] > div > div:first-child {
+	width: 100% !important;
+	padding-right: 18px;
+	box-sizing: border-box;
 }
 </style>

@@ -2,7 +2,7 @@
   <div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="parentPicker" @selected="onParentSelected"></tree-picker-popup>
-		<md-dialog v-if="geography" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="geography" class="large-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Geografía</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">
@@ -68,7 +68,7 @@
 					</template>
 
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Presentación en el mapa</div>
+						<div class="full-row-separator">Presentación en el mapa</div>
 					</div>
 					<div class="md-layout-item md-size-50">
 						<mp-simple-text label="Zoom máximo" :canEdit="canEdit" type="number" :minimum="1" :maximum="22"
@@ -83,7 +83,7 @@
 					</div>
 
 					<div class="md-layout-item md-size-100">
-						<div class="separator">Comportamiento</div>
+						<div class="full-row-separator">Comportamiento</div>
 					</div>
 					<div class="md-layout-item md-size-100">
 						<md-switch class="md-primary" :disabled="!canEdit" v-model="geography.UseForClipping">

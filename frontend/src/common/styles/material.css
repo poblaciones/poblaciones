@@ -12,19 +12,30 @@
 		font-size: 14px!important;
 	}
 
+.full-row-separator {
+	font-size: 12px;
+	text-transform: uppercase;
+	color: #949494;
+	background-color: #f7f7f7;
+	margin-bottom: 5px;
+	margin-top: 5px;
+	border: 1px solid #e7e7e7;
+	padding-left: 25px;
+	margin-left: -25px;
+	margin-right: -24px;
+}
+
 .separator {
 	font-size: 12px;
 	text-transform: uppercase;
 	font-weight: 500;
 	color: #949494;
-	margin-bottom: 7px;
-	border-bottom: 1px solid #e7e7e7;
 }
 
 	.lineSeparator {
 		font-size: 12px;
 		text-transform: uppercase;
-		font-weight: 500;
+		font-weight: 600;
 		color: #949494;
 		margin-top: 8px;
 		margin-bottom: 2px;
@@ -341,12 +352,40 @@
 	position: unset !important;
 	height: unset !important;
 }
-.wide-dialog > .md-dialog-container {
-	max-width: calc(min(1070px, 100%)) !important;
+
+.itemsDialog .md-dialog-content {
+	width: 90vw !important;
+	max-width: 1100px !important;
+}
+
+.medium-dialog > .md-dialog-container {
+	max-width: calc(min(720px, 95%)) !important;
+}
+
+.medium-extra-dialog > .md-dialog-container {
+	max-width: calc(min(900px, 95%)) !important;
+}
+
+.large-dialog > .md-dialog-container {
+	max-width: calc(min(1100px, 95%)) !important;
+}
+
+
+.content-sized-dialog > .md-dialog-container {
+	max-width: unset!important;
+}
+
+.md-dialog-container > .md-dialog-container {
+	transform: translate(30px, 30px);
+}
+
+.md-button {
+		margin-left: 0px!important;
 }
 
 .md-dialog-container {
 	max-height: 95% !important;
+	max-width: calc(min(700px, 90%)) !important;
 }
 .md-tab {
 		overflow-x: hidden!important;

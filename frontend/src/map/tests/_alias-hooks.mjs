@@ -31,6 +31,8 @@ const packageStubs = {
 	'js-cookie': 'js-cookie.mjs',
 };
 
+const uiComponentStubs = ['vue-switches', 'vue-slider-component'];
+
 const commonStubs = {
 	'@/common/framework/str': 'str.mjs',
 	'@/common/framework/arr': 'arr.mjs',
@@ -61,6 +63,14 @@ export function resolve(specifier, context, nextResolve) {
 		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
 	}
 	if (specifier.startsWith('vue-material-design-icons/')) {
+		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
+	}
+	// Los .css los resuelve webpack; fuera de él no son módulos.
+	if (specifier.endsWith('.css')) {
+		return { url: stubUrl('empty.mjs'), shortCircuit: true };
+	}
+	// Componentes de UI de terceros sin lógica que los tests necesiten.
+	if (uiComponentStubs.indexOf(specifier) !== -1) {
 		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
 	}
 	if (packageStubs[specifier]) {

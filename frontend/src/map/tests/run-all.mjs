@@ -13,6 +13,8 @@ await import('./partitionBadge.test.mjs');
 await import('./layerUid.test.mjs');
 await import('./levelAndMetricSelector.test.mjs');
 await import('./dropdownTrigger.test.mjs');
+await import('./tileOverlayRefresh.test.mjs');
+await import('./compareSwitch.test.mjs');
 await import('./clippingLegend.test.mjs');
 await import('./segmentedMap.test.mjs');
 await import('./activeBoundary.test.mjs');

@@ -1,7 +1,7 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog v-if="metricGroup" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="metricGroup" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Categoría de indicador</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">

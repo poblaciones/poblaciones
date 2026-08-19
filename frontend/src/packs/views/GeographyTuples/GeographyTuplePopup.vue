@@ -1,7 +1,7 @@
 <template>
   <div>
 		<invoker ref="invoker"></invoker>
-		<md-dialog v-if="geographyTuple" class="wide-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="geographyTuple" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Equivalencia entre geografías</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">

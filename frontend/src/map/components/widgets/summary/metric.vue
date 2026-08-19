@@ -200,6 +200,7 @@ export default {
 				loc.metric.Compare.Active = true;
 				this.compare = true;
 				loc.updateCompareVersions();
+				loc.metric.SelectComparisonMetric();
 			} else {
 				loc.metric.Compare.Active = false;
 				this.compare = false;
@@ -389,7 +390,7 @@ export default {
 				return window.Use;
 		},
 		hasComparableVariables() {
-			return this.metric.hasComparableVariables() && this.metric.SelectedVariable();
+			return this.metric.canCompareSelectedVariable();
 		},
 			Embedded() {
 				return window.Embedded;

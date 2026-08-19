@@ -1,12 +1,12 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openPopup" @md-closed="onClosed">
+		<md-dialog :md-active.sync="openPopup" class="medium-extra-dialog" @md-closed="onClosed">
 			<invoker ref="invoker"></invoker>
 			<md-dialog-title>
 				Categorías
 			</md-dialog-title>
 
-			<md-dialog-content>
+			<md-dialog-content style="padding-bottom: 0px">
 				<div v-html="message"></div>
 
 				<div v-if="doingAutoRecode" class="md-layout md-size-100">
@@ -23,23 +23,21 @@
 				</div>
 
 				<div class="md-layout md-gutter">
-					<div style="position: relative; padding-left: 10px;">
-						<div v-if="canEdit && Work.CanEdit()" style="position: absolute; right: -10px">
+					<div style="position: relative; padding-left: 20px;">
+						<JqxGrid ref="valuesGrid" :width="490" :height="250" :source="dataAdapter" :columns="columns" :columnsresize="true"
+										 :columnsreorder="true" @rowselect="selectionChanged" @rowunselect="selectionChanged" style="display: inline-block; "
+										 @rowdoubleclick="showModify" :handlekeyboardnavigation="handlekeyboardnavigation"
+										 selectionmode='multiplerowsextended' :localization="localization">
+						</JqxGrid>
+						<div v-if="canEdit && Work.CanEdit()" style="display: inline-block; vertical-align: top">
 							<md-button @click="upOnClick()" class="md-icon-button" :disabled="upDisabled">
 								<md-icon>arrow_upward</md-icon>
 							</md-button>
-							<br/>
+							<br />
 							<md-button @click="downOnClick()" class="md-icon-button" :disabled="downDisabled">
 								<md-icon>arrow_downward</md-icon>
 							</md-button>
 						</div>
-
-						<JqxGrid ref="valuesGrid" :width="490" :height="250" :source="dataAdapter" :columns="columns" :columnsresize="true"
-										:columnsreorder="true" @rowselect="selectionChanged" @rowunselect="selectionChanged"
-										@rowdoubleclick="showModify" :handlekeyboardnavigation="handlekeyboardnavigation"
-									selectionmode='multiplerowsextended' :localization="localization">
-						</JqxGrid>
-
 						<div class="gridStatusBar">{{ statusBarText }}</div>
 						<div>
 							<md-button v-if="canEdit && doingAutoRecode === false" @click="create()">
@@ -55,17 +53,22 @@
 								Eliminar
 							</md-button>
 
-							<md-button @click="excelExportBtnOnClick">
-								<md-icon>download</md-icon>
-								Exportar a Excel
-							</md-button>
-							<md-button @click="csvExportBtnOnClick">
-								<md-icon>download</md-icon>
-								Exportar a CSV
-							</md-button>
+							<mp-dropdown-button v-if="canEdit && !doingAutoRecode" label="Importar" icon="cloud_upload">
+								<md-menu-item @click="triggerImport('csv')">Desde CSV</md-menu-item>
+								<md-menu-item @click="triggerImport('excel')">Desde Excel</md-menu-item>
+							</mp-dropdown-button>
 
-							<mp-file-upload v-if="canEdit && !doingAutoRecode" label="Importar desde Excel" @changed="excelImportBtn"  accept=".xlsx" />
-							<mp-file-upload v-if="canEdit && !doingAutoRecode" label="Importar desde CSV" @changed="csvImportBtn" accept=".csv" />
+							<mp-dropdown-button label="Exportar" icon="cloud_download">
+								<md-menu-item @click="csvExportBtnOnClick">A CSV</md-menu-item>
+								<md-menu-item @click="excelExportBtnOnClick">A Excel</md-menu-item>
+							</mp-dropdown-button>
+
+							<!-- Los selectores de archivo se conservan porque resuelven la lectura
+				 del archivo, pero quedan ocultos: los dispara el menú Importar. -->
+							<div class="hiddenUploaders">
+								<mp-file-upload v-if="canEdit && !doingAutoRecode" ref="excelUpload" label="Importar desde Excel" @changed="excelImportBtn" accept=".xlsx" />
+								<mp-file-upload v-if="canEdit && !doingAutoRecode" ref="csvUpload" label="Importar desde CSV" @changed="csvImportBtn" accept=".csv" />
+							</div>
 
 						</div>
 					</div>
@@ -114,6 +117,7 @@ import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
 import str from '@/common/framework/str';
 import Localization from '@/backoffice/classes/Localization';
+import MpDropdownButton from '@/backoffice/components/MpDropdownButton.vue';
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxgrid.vue';
 import JqxTooltip from 'jqwidgets-scripts/jqwidgets-vue/vue_jqxtooltip.vue';
 // https://www.jqwidgets.com/vue/vue-grid/
@@ -122,6 +126,7 @@ var columnFormatEnum = require("@/common/enums/columnFormatEnum");
 export default {
 	name: 'valuesPopup',
 	components: {
+		MpDropdownButton,
 		JqxGrid,
 	},
 	computed: {
@@ -239,6 +244,21 @@ export default {
 				this.statusBarText = sel + formatted + ' etiquetas.';
 			}
     },
+		// Abre el selector de archivos del mp-file-upload correspondiente.
+		// Se busca el input dentro del componente; si cambiara su estructura
+		// interna, se recurre a un click sobre su elemento raíz.
+		triggerImport(kind) {
+			var target = (kind === 'csv' ? this.$refs.csvUpload : this.$refs.excelUpload);
+			if (!target || !target.$el) {
+				return;
+			}
+			var input = target.$el.querySelector('input[type=file]');
+			if (input) {
+				input.click();
+			} else {
+				target.$el.click();
+			}
+		},
 		excelExportBtnOnClick() {
 			this.Grid.exportdata('xls', 'etiquetas', true, null, false, this.Work.GetGridExportUrl());
 		},
@@ -603,4 +623,7 @@ export default {
 </script>
 
 <style rel='stylesheet/scss' lang='scss' scoped>
+.hiddenUploaders {
+	display: none;
+}
 </style>

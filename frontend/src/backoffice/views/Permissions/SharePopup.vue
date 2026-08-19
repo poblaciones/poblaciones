@@ -353,7 +353,5 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss">
 .sharePopup .md-dialog-container {
-	max-width: 640px;
-	width: 640px;
-}
+	}
 </style>
