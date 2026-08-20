@@ -3,7 +3,7 @@
 		<md-menu md-size="medium" md-align-trigger md-direction="bottom-end">
 			<md-button class="md-icon-button actionIcon" md-menu-trigger>
 				<md-icon>home</md-icon>
-				<md-tooltip md-direction="bottom">Inicio</md-tooltip>
+				<md-tooltip md-direction="bottom">Ayuda</md-tooltip>
 			</md-button>
 			<md-menu-content>
 				<md-menu-item class="smallerMenu" @click="openLink({ Url: homepage })">

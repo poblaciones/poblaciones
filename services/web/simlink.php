@@ -63,7 +63,7 @@ function serveStaticFiles($target)
 		return true;
 	}
 
-	// Obtén el tipo de contenido del archivo
+	// Obtener el tipo de contenido del archivo
 	$mimeType = mime_content_type($realFile);
 
 	// Envía las cabeceras HTTP adecuadas

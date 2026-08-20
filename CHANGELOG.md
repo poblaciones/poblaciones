@@ -1,5 +1,9 @@
 - Remoción de tab de variables.
 - Fix a anchos y altos de dialogs inapropiados.
+- Fix a vista previa de la selección de transparencia y ajuste poblacional.
+- fix a permisos de fuentes de usuarios estándar.
+- mpgrid busca en todas las columnas
+- fix a error en auto-filtro de datos (backoffice)
 
 v5.2 (2026-08-14)
 - Fix a manejo de capas base (se cruzaban contenidos en recarga simultánea).

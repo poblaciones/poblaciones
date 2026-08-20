@@ -12,6 +12,7 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use minga\framework\Log;
 
 // -------------------------------------------------------------------------
 // Proxy retornado por get/post/match/options para soportar ->assert()
@@ -162,7 +163,8 @@ class SilexApp implements \ArrayAccess
 		} catch (MethodNotAllowedException $e) {
 			return new Response('Method Not Allowed', 405);
 		} catch (\Exception $e) {
-			$code = $e->getCode() ?: 500;
+			$code =  500;
+			Log::HandleSilentException($e);
 			return $this->handleError($e, $request, $code);
 		}
 	}

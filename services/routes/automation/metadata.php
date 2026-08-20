@@ -95,7 +95,9 @@ App::$app->post('/services/api/automation/CreateOrReuseAndAddSource', function (
 	// Construir la entidad Source
 	$source = new entities\DraftSource();
 	$source->setCaption($name);
-	$source->setIsGlobal(true);
+	// El valor final de IsGlobal lo determina Update() según el tipo de
+	// obra (igual que en el flujo de la UI vía GetNewSource), no acá.
+	$source->setIsGlobal(false);
 	if ($edition  !== null) $source->setVersion($edition);
 	if ($authors  !== null) $source->setAuthors($authors);
 	if ($web      !== null) $source->setWeb($web);

@@ -71,7 +71,7 @@ class MetadataService extends BaseService
 		foreach ($retRelations as $relation)
 			$ret[] = $relation->getSource();
 
-		$services = new SourceService($this->isDraft);
+		$services = new SourceService();
 		$services->fixSources($ret);
 		$this->CompleteSources($ret);
 		return $ret;
@@ -101,11 +101,23 @@ class MetadataService extends BaseService
 		if (Session::IsMegaUser()) {
 			$editable = true;
 		} else if ($institution->getIsGlobal()) {
-			$editable = Session::IsSiteEditor();
+			// Un SiteEditor puede editar cualquier institución global;
+			// además, quien tiene control total sobre todas las obras
+			// donde se usa (p. ej. quien la creó) también puede, aunque
+			// no tenga ese rol de sitio.
+			$editable = Session::IsSiteEditor() || $this->HasFullControlOverInstitutionWorks($institution, $userId);
 		} else {
 			// Es editable si tiene control sobre todas las obras en las
 			// que es utilizado el institution
-			$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
+			$editable = $this->HasFullControlOverInstitutionWorks($institution, $userId);
+		}
+		$institution->setIsEditableByCurrentUser($editable);
+		Profiling::EndTimer();
+	}
+
+	private function HasFullControlOverInstitutionWorks($institution, $userId)
+	{
+		$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
 													JOIN draft_metadata ON wrk_metadata_id = met_id
 													JOIN draft_metadata_institution ON min_metadata_id = met_id
 												  LEFT JOIN draft_metadata_source ON msc_metadata_id = met_id
@@ -119,13 +131,10 @@ class MetadataService extends BaseService
 								JOIN draft_work_permission ON wkp_work_id = wrk_id
 								WHERE src_institution_id = ? OR min_institution_id = ?
 								AND wkp_user_id = ? AND wkp_permission IN ('E', 'A')) AS editor";
-			$institutionId = $institution->getId();
-			$params = array($institutionId, $institutionId, $institutionId, $institutionId, $userId);
-			$res = App::Db()->fetchAssoc($sql, $params);
-			$editable = ($res['used'] === $res['editor']);
-		}
-		$institution->setIsEditableByCurrentUser($editable);
-		Profiling::EndTimer();
+		$institutionId = $institution->getId();
+		$params = array($institutionId, $institutionId, $institutionId, $institutionId, $userId);
+		$res = App::Db()->fetchAssoc($sql, $params);
+		return ((int)$res['used'] === (int)$res['editor']);
 	}
 
 	private function CompleteSources($sources)
@@ -146,11 +155,26 @@ class MetadataService extends BaseService
 		if (Session::IsMegaUser()) {
 			$editable = true;
 		} else if ($source->getIsGlobal()) {
-			$editable = Session::IsSiteEditor();
+			// Un SiteEditor puede editar cualquier fuente global; además,
+			// quien tiene control total sobre todas las obras donde se
+			// usa (p. ej. quien la creó) también puede, aunque no tenga
+			// ese rol de sitio. Sin este OR, cualquier fuente que quede
+			// marcada global (p. ej. al crearla desde la API de
+			// automatización, que la marca global siempre) deja de ser
+			// editable para su propio creador si no es SiteEditor.
+			$editable = Session::IsSiteEditor() || $this->HasFullControlOverSourceWorks($source, $userId);
 		} else {
 			// Es editable si tiene control sobre todas las obras en las
 			// que es utilizado el source
-			$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
+			$editable = $this->HasFullControlOverSourceWorks($source, $userId);
+		}
+		$source->setIsEditableByCurrentUser($editable);
+		$this->CompleteInstitution($source->getInstitution());
+	}
+
+	private function HasFullControlOverSourceWorks($source, $userId)
+	{
+		$sql = "SELECT (SELECT COUNT(DISTINCT(wrk_id)) FROM draft_work
 												JOIN draft_metadata ON wrk_metadata_id = met_id
 												JOIN draft_metadata_source ON msc_metadata_id = met_id
 												WHERE msc_source_id = ?) AS used,
@@ -160,12 +184,9 @@ class MetadataService extends BaseService
 												JOIN draft_work_permission ON wkp_work_id = wrk_id
 												WHERE msc_source_id = ? AND wkp_user_id = ?
 												AND wkp_permission IN ('E', 'A')) AS editor";
-			$params = array($source->getId(), $source->getId(), $userId);
-			$res = App::Db()->fetchAssoc($sql, $params);
-			$editable = ($res['used'] === $res['editor']);
-		}
-		$source->setIsEditableByCurrentUser($editable);
-		$this->CompleteInstitution($source->getInstitution());
+		$params = array($source->getId(), $source->getId(), $userId);
+		$res = App::Db()->fetchAssoc($sql, $params);
+		return ((int)$res['used'] === (int)$res['editor']);
 	}
 
 	public function GetFiles($metadataId)

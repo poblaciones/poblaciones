@@ -194,7 +194,7 @@
 
 <script>
 
-import MpGridHelper from './MpGrid.helper';
+import MpGridHelper from './MpGridHelper';
 import str from '@/common/framework/str';
 
 export default {
@@ -271,6 +271,8 @@ export default {
 				comparator: this.comparator,
 				search: this.search ? str.AnyToLower(this.search) : '',
 				captionProperty: this.captionProperty,
+				onlySearchDescriptions: this.onlySearchDescriptions,
+				searchColumns: this.allColumns,
 				childrenProperty: childrenProperty,
 				expandedIds: this.expandedIds,
 			};
@@ -699,6 +701,11 @@ export default {
 		// descriptiva: se muestra primero y es la que filtra el buscador.
 		// Si se omite, se toma la de la primera columna declarada.
 		caption: { type: String, default: null },
+		// Por defecto el buscador filtra por todos los campos que la
+		// grilla muestra (el texto tal como se ve en cada columna, según
+		// su type), no solo por la descriptiva. En true, restringe la
+		// búsqueda a esta última.
+		onlySearchDescriptions: { type: Boolean, default: false },
 		// Definición de columnas (más allá de la descriptiva, que puede o no
 		// estar incluida acá: si está, la grilla la saltea al recorrer las
 		// demás; y si no declara su propio caption, se usa su property).

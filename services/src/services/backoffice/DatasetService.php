@@ -416,7 +416,7 @@ class DatasetService extends DbSession
 			}
 		}
 		if ($where != "" && $where != "(")
-			$where = "AND (" . $where . ")";
+			$where = "AND " . $where . ")";
 		else
 			$where = "";
 

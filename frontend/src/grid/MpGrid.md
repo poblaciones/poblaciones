@@ -63,7 +63,8 @@ computed: {
 |---|---|---|---|
 | `items` | Array | (requerida) | Los objetos a listar. |
 | `columns` | Array | `[]` | Definición de columnas (ver abajo). |
-| `caption` | String | primera columna | Propiedad que actúa como columna descriptiva: va primera y es la que filtra el buscador. |
+| `caption` | String | primera columna | Propiedad que actúa como columna descriptiva: va primera y, si `onlySearchDescriptions` está activo, es la única que filtra el buscador. |
+| `onlySearchDescriptions` | Boolean | `false` | Restringe el buscador a la columna descriptiva. Por defecto busca en todas las columnas mostradas. |
 | `actions` | Array | `[]` | Acciones por fila (ver abajo). |
 | `canEdit` | Boolean | `false` | Agrega la acción de editar, que emite `itemEdit`. |
 | `canDelete` | Boolean | `false` | Agrega la acción de eliminar, que **siempre confirma** y luego emite `itemDelete`. |
@@ -290,11 +291,30 @@ así que encuentra cualquier elemento aunque no esté a la vista.
 
 ## Búsqueda
 
-El buscador filtra por la columna descriptiva (`caption`), ignorando acentos y
-mayúsculas. Cada palabra que se escribe debe ser **prefijo de alguna palabra**
-del valor: `edu` encuentra "Nivel educativo" pero no "Medusa". Con varias
-palabras, cada una se evalúa por separado (`edu niv` encuentra "Nivel
-educativo"), no como un bloque.
+Por defecto el buscador filtra por **todas las columnas declaradas**, no solo
+por la descriptiva (`caption`): concatena el texto que cada columna muestra
+para ese ítem y busca ahí. Con `onlySearchDescriptions`, se restringe a la
+columna descriptiva.
+
+Al concatenarse todos los campos en un solo texto, una búsqueda de varias
+palabras las encuentra repartidas entre columnas distintas: `juan gmail`
+encuentra un ítem con `Caption: 'Juan Pérez'` y `Email:
+'juan.perez@gmail.com'`, aunque ninguna de las dos palabras esté sola en una
+misma columna.
+
+Qué texto aporta cada columna depende de su `type`:
+
+| `type` | Texto usado |
+|---|---|
+| `'text'` (default) | El de `value(item)` si está declarada, o el valor crudo de `property`. |
+| `'switch'` | `'Sí'` o `'No'`, según el valor de `property`. |
+| `'icons'` | El `text` de cada ícono visible (los `show` en `false` se excluyen); los íconos sin `text` no aportan nada buscable. |
+| `'status'` | El `tooltip` del ícono principal. Los íconos satélite no se consideran. |
+
+La comparación ignora acentos y mayúsculas. Cada palabra que se escribe debe
+ser **prefijo de alguna palabra** del texto: `edu` encuentra "Nivel educativo"
+pero no "Medusa". Con varias palabras, cada una se evalúa por separado (`edu
+niv` encuentra "Nivel educativo"), no como un bloque.
 
 Cualquier símbolo (`>`, `-`, `/`, paréntesis, etc.) separa palabras igual que un
 espacio, sin descartar letras: `>Rosario` o `San Martín (Cba.)` matchean por

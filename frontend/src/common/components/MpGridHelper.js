@@ -233,6 +233,56 @@ module.exports = {
 		return result;
 	},
 
+	// Texto de una columna tal como se ve en la grilla, para la búsqueda
+	// que abarca todos los campos mostrados (ver GetRowSearchText). Por
+	// tipo: 'switch' da 'Sí'/'No'; 'icons' concatena el text de cada
+	// ícono visible (los que no llevan text, p. ej. uno de solo estado,
+	// no aportan nada buscable); 'status' usa el tooltip principal;
+	// 'text' (default) usa value(item) si está declarada, o el valor
+	// crudo de property.
+	GetColumnSearchText(column, item) {
+		if (column.type === 'switch') {
+			return this.GetNestedValue(item, column.property) ? 'Sí' : 'No';
+		}
+		if (column.type === 'icons') {
+			var badges = this.ResolveInlineIcons(column.icons, item);
+			var parts = [];
+			for (var i = 0; i < badges.length; i++) {
+				if (badges[i].text !== null && badges[i].text !== undefined) {
+					parts.push('' + badges[i].text);
+				}
+			}
+			return parts.join(' ');
+		}
+		if (column.type === 'status') {
+			return column.tooltip ? ('' + this.ResolveValue(column.tooltip, item)) : '';
+		}
+		var value = column.value ? this.ResolveValue(column.value, item) : this.GetNestedValue(item, column.property);
+		if (value === null || value === undefined) {
+			return '';
+		}
+		if (typeof value === 'boolean') {
+			return value ? 'Sí' : 'No';
+		}
+		return '' + value;
+	},
+
+	// Texto buscable de un ítem: la concatenación del texto de cada
+	// columna declarada. Al unirlas todas en un solo string, una búsqueda
+	// de varias palabras las encuentra repartidas entre columnas
+	// distintas (p. ej. el nombre en una y el dominio del email en otra),
+	// no solo dentro de una misma columna.
+	GetRowSearchText(columns, item) {
+		var parts = [];
+		for (var i = 0; i < columns.length; i++) {
+			var text = this.GetColumnSearchText(columns[i], item);
+			if (text) {
+				parts.push(text);
+			}
+		}
+		return parts.join(' ');
+	},
+
 	// Recorre un nivel de ítems: ordena a los hermanos entre sí y, bajo
 	// búsqueda, descarta los que ni matchean ni tienen descendientes que
 	// matcheen. No aplana: cada nodo conserva su lista de hijos ya filtrados
@@ -246,7 +296,10 @@ module.exports = {
 			var children = opts.childrenProperty ? item[opts.childrenProperty] : null;
 			var hasChildrenData = Array.isArray(children) && children.length > 0;
 			var matchingChildren = hasChildrenData ? this.FilterAndSortLevel(children, opts) : [];
-			var selfMatch = !opts.search || this.MatchesCaption(this.GetNestedValue(item, opts.captionProperty), opts.search);
+			var searchText = opts.onlySearchDescriptions
+				? this.GetNestedValue(item, opts.captionProperty)
+				: this.GetRowSearchText(opts.searchColumns, item);
+			var selfMatch = !opts.search || this.MatchesCaption(searchText, opts.search);
 			var descendantMatch = matchingChildren.length > 0;
 			if (!opts.search || selfMatch || descendantMatch) {
 				result.push({

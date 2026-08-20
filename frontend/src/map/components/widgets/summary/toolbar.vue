@@ -35,7 +35,7 @@
 												icon="fas fa-share-alt" :styleRounded="true" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
 
 			<mp-dropdown-menu :items="helpItems" @itemClick="helpSelected" :floatRight="false"
-												icon="fas fa-home" :styleRounded="true" tooltip="Inicio"  />
+												icon="fas fa-home" :styleRounded="true" tooltip="Ayuda"  />
 
 			<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
 				<i class="far fa-heart" />
