@@ -653,31 +653,185 @@ ScaleGenerator.prototype.RoundByVariable = function (variable, n) {
 	}
 };
 
-ScaleGenerator.prototype.CreateRangeCategories = function (variable, data, set) {
-//	var total = variable.Symbology.Categories;
-	var roundedValue = 0;
-	var groups = data.Groups;
-	var currentGroup = groups[variable.Symbology.Categories];
-	var total = currentGroup[set].length + 1;
+// Pasos de redondeo candidatos, de mayor a menor. Coinciden con los valores que ofrece
+// el desplegable de redondeo y con los que acepta el atributo Round de una variable.
+ScaleGenerator.ROUND_CANDIDATES = [1000, 100, 10, 5, 2.5, 1, 0.1, 0.01, 0.001];
+
+// Distorsión relativa máxima admitida en el ancho de cualquier intervalo cerrado al
+// elegir el paso de redondeo automáticamente. Es una constante de calibración.
+ScaleGenerator.DISTORTION_TOLERANCE = 0.15;
+
+ScaleGenerator.prototype.FloorNumber = function (number, criteria) {
+	number = parseFloat(number);
+	criteria = parseFloat(criteria);
+
+	if (!isFinite(number) || !isFinite(criteria) || criteria === 0) {
+		return number;
+	}
+
+	// Obtenemos el número de decimales de cada valor
+	var numDecimals = (number.toString().split('.')[1] || '').length;
+	var critDecimals = (criteria.toString().split('.')[1] || '').length;
+	var decimalPlaces = Math.max(numDecimals, critDecimals);
+	var factor = Math.pow(10, decimalPlaces);
+
+	// Escalamos a enteros (redondeamos por posibles imprecisiones al multiplicar)
+	var scaledNumber = Math.round(number * factor);
+	var scaledCriteria = Math.round(criteria * factor);
+
+	if (scaledCriteria === 0) {
+		return number;
+	}
+
+	// Realizamos la operación suelo en el dominio de los enteros
+	var scaledResult = Math.floor(scaledNumber / scaledCriteria) * scaledCriteria;
+
+	// Desescalamos y recortamos decimales para evitar restos extraños
+	return Number((scaledResult / factor).toFixed(decimalPlaces));
+};
+
+// Aplica un paso de redondeo a la secuencia completa de puntos de corte y devuelve los
+// valores finales. Los puntos se redondean hacia abajo, por coherencia con la semántica
+// de las clases ('de este valor o más'), y se preserva el orden estricto corriendo hacia
+// arriba los que alcanzan al anterior.
+//
+// El primer punto es la única excepción a la corrección por mínimo: se lo deja siempre en
+// su valor redondeado hacia abajo, aunque quede por debajo del mínimo observado, para no
+// correr hacia arriba el límite inferior de la escala y dejar casos fuera del rango
+// representado.
+ScaleGenerator.prototype.ApplyRounding = function (cutPoints, roundValue, minValue) {
+	var ret = [];
 	var lastRoundedValue = null;
-	for (var n = 0; n < total; n++) {
-		if (n === total - 1) {
-			roundedValue = MAX_VALUE;
-		} else {
-			roundedValue = this.RoundByVariable(variable, currentGroup[set][n]);
-			if (roundedValue < data.MinValue) {
-				// Evita que genere punto de corte en 0
-				roundedValue += parseFloat(variable.Symbology.Round);
+	for (var n = 0; n < cutPoints.length; n++) {
+		var raw = parseFloat(cutPoints[n]);
+		var roundedValue = (roundValue ? this.FloorNumber(raw, roundValue) : raw);
+
+		if (n > 0) {
+			if (roundedValue < minValue) {
+				// Evita que genere punto de corte por debajo de los datos
+				roundedValue += (roundValue ? parseFloat(roundValue) : 0);
 			}
 			// Si quedó repetido, lo incrementa
-			if (roundedValue <= lastRoundedValue && lastRoundedValue !== null) {
-				if (variable.Symbology.Round && variable.Symbology.Round !== "0") {
-					roundedValue = lastRoundedValue + parseFloat(variable.Symbology.Round);
-				} else {
-					roundedValue = lastRoundedValue + 10;
+			if (lastRoundedValue !== null && roundedValue <= lastRoundedValue) {
+				roundedValue = lastRoundedValue + (roundValue ? parseFloat(roundValue) : 10);
+			}
+		}
+
+		ret.push(roundedValue);
+		lastRoundedValue = roundedValue;
+	}
+	return ret;
+};
+
+// Anchos de los intervalos cerrados de la escala. Con k puntos de corte hay k+1
+// categorías: la primera ('Menor que') y la última ('y más') son abiertas y su ancho no
+// tiene significado interpretativo, de modo que quedan fuera.
+ScaleGenerator.prototype.ClosedIntervalWidths = function (cutPoints) {
+	var ret = [];
+	for (var n = 1; n < cutPoints.length; n++) {
+		ret.push(cutPoints[n] - cutPoints[n - 1]);
+	}
+	return ret;
+};
+
+// Elige el mayor paso de redondeo que no distorsione la escala más allá de la tolerancia.
+//
+// Un paso grande vuelve la leyenda mucho más legible (1.000 a 2.400 en lugar de 1.071 a
+// 2.444), pero corre los puntos de corte y con ello altera los anchos de los intervalos.
+// Cuando los cortes provienen de cuantiles o de cortes naturales esos anchos codifican la
+// estructura de la distribución, así que comprimir uno desproporcionadamente aleja la
+// escala de la partición que se quiso representar, aunque ningún corte llegue a colisionar.
+//
+// El criterio es entonces de distorsión relativa y no de colisión: para cada intervalo
+// cerrado se compara su ancho original con el resultante, y el paso se acepta solo si el
+// PEOR de esos desvíos queda dentro de la tolerancia. Se evalúa el máximo y no el promedio
+// porque un único paso se aplica a toda la escala. El corrimiento que evita la
+// superposición se manifiesta como un desvío alto en el intervalo afectado, de modo que el
+// test de colisión queda absorbido por este criterio.
+//
+// Devuelve 0 (sin redondeo) si la escala no tiene intervalos cerrados evaluables o si
+// ningún paso respeta la tolerancia.
+ScaleGenerator.prototype.ChooseRoundStep = function (cutPoints, minValue, maxValue) {
+	if (!cutPoints || cutPoints.length < 2) {
+		return 0;
+	}
+	var cuts = [];
+	for (var i = 0; i < cutPoints.length; i++) {
+		cuts.push(parseFloat(cutPoints[i]));
+	}
+	var originalWidths = this.ClosedIntervalWidths(cuts);
+	var floor = (minValue === null || minValue === undefined ? 0 : parseFloat(minValue));
+
+	for (var c = 0; c < ScaleGenerator.ROUND_CANDIDATES.length; c++) {
+		var candidate = ScaleGenerator.ROUND_CANDIDATES[c];
+		var rounded = this.ApplyRounding(cuts, candidate, floor);
+
+		// El corrimiento puede empujar el último corte por encima de los datos, dejando la
+		// categoría superior sin ningún caso.
+		if (maxValue !== null && maxValue !== undefined &&
+				rounded[rounded.length - 1] >= parseFloat(maxValue)) {
+			continue;
+		}
+
+		var roundedWidths = this.ClosedIntervalWidths(rounded);
+		var worst = 0;
+		var evaluated = 0;
+		for (var n = 0; n < originalWidths.length; n++) {
+			if (originalWidths[n] > 0) {
+				evaluated++;
+				var distortion = Math.abs(roundedWidths[n] - originalWidths[n]) / originalWidths[n];
+				if (distortion > worst) {
+					worst = distortion;
 				}
 			}
 		}
+
+		if (evaluated > 0 && worst <= ScaleGenerator.DISTORTION_TOLERANCE) {
+			return candidate;
+		}
+	}
+	return 0;
+};
+
+// Recalcula el redondeo de la variable cuando está en modo automático. Se invoca antes de
+// construir las categorías, para que el valor que muestra el desplegable sea el mismo que
+// se aplica a la escala.
+ScaleGenerator.prototype.IsAutoRounding = function (variable) {
+	// El servidor puede enviar el booleano como 0/1, y la propiedad puede no venir en
+	// variables anteriores a su incorporación: en ese caso vale el default de la entidad,
+	// que es modo automático.
+	var value = variable.AutoRounding;
+	if (value === undefined || value === null) {
+		return true;
+	}
+	return value === true || value === 1 || value === '1';
+};
+
+ScaleGenerator.prototype.UpdateAutoRounding = function (variable, data, set) {
+	if (!this.IsAutoRounding(variable)) {
+		return;
+	}
+	var currentGroup = data.Groups[variable.Symbology.Categories];
+	if (!currentGroup || !currentGroup[set]) {
+		return;
+	}
+	var step = this.ChooseRoundStep(currentGroup[set], data.MinValue, data.MaxValue);
+	variable.Symbology.Round = String(step);
+};
+
+ScaleGenerator.prototype.CreateRangeCategories = function (variable, data, set) {
+	this.UpdateAutoRounding(variable, data, set);
+
+	var groups = data.Groups;
+	var currentGroup = groups[variable.Symbology.Categories];
+	var roundValue = (variable.Symbology.Round && variable.Symbology.Round !== "0"
+										? parseFloat(variable.Symbology.Round) : 0);
+	var roundedPoints = this.ApplyRounding(currentGroup[set], roundValue, data.MinValue);
+
+	var total = currentGroup[set].length + 1;
+	var lastRoundedValue = null;
+	for (var n = 0; n < total; n++) {
+		var roundedValue = (n === total - 1 ? MAX_VALUE : roundedPoints[n]);
 		var caption = this.ResolveRangeCaption(variable, n === 0, n === total - 1, roundedValue, lastRoundedValue);
 		var value = ScaleGenerator.CreateValue(caption, roundedValue, null, n + 1);
 		variable.Values.push(value);
@@ -686,16 +840,28 @@ ScaleGenerator.prototype.CreateRangeCategories = function (variable, data, set) 
 };
 
 ScaleGenerator.prototype.RoundNumber = function (number, criteria) {
-	criteria = parseFloat(criteria);
-	if (criteria === 0.1)
-		return Math.round(number * 10) / 10;
 	number = parseFloat(number);
-	var mod = number % criteria;
-	if (mod < criteria / 2) {
-		return number - mod;
-	} else {
-		return number + criteria - ((number + criteria) % criteria);
+	criteria = parseFloat(criteria);
+
+	if (!isFinite(number) || !isFinite(criteria) || criteria === 0) {
+		return number;
 	}
+
+	// Decimales del criterio para convertir a enteros
+	var decimalPlaces = (criteria.toString().split('.')[1] || '').length;
+	var factor = Math.pow(10, decimalPlaces);
+
+	var scaledNumber = Math.round(number * factor);
+	var scaledCriteria = Math.round(criteria * factor);
+
+	if (scaledCriteria === 0) {
+		return number;
+	}
+
+	var scaledResult = Math.round(scaledNumber / scaledCriteria) * scaledCriteria;
+
+	// toFixed final elimina el ruido binario
+	return Number((scaledResult / factor).toFixed(decimalPlaces));
 };
 
 ScaleGenerator.prototype.ResolveRangeCaption = function (variable, isFirst, isLast, roundedValue, lastRoundedValue) {

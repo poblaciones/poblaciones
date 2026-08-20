@@ -64,6 +64,7 @@ class MetricService extends BaseService
 		$variable->setNormalizationScale(100);
 		$variable->setIsDefault(false);
 		$variable->setIsGap(false);
+		$variable->setAutoRounding(true);
 		$variable->setHasGapSameTotal(false);
 		$variable->setDefaultMeasure('N');
 		$variable->setDataColumnIsCategorical(false);
@@ -230,7 +231,7 @@ class MetricService extends BaseService
 												$gapDataColumn, $gapDataColumnId, $gapNormalization, $gapNormalizationId,
 												$normalizationScale, $from, $to, $filter);
 
-		if (DatasetColumnCache::Cache()->HasData($datasetId, $data) === false)
+		if (DatasetColumnCache::Cache()->HasData($datasetId, $key, $data) === false)
 		{
 			$metricsManager = new MetricsManager();
 			$data = $metricsManager->GetColumnDistributions($datasetId, $dataColumn, $dataColumnId, $normalization, $normalizationId,

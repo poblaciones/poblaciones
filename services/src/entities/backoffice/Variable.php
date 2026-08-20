@@ -174,6 +174,18 @@ class Variable
     private $IsGap;
 
     /**
+     * Indica si el nivel de redondeo de la escala lo elige el sistema en función de la
+     * magnitud de los puntos de corte. Cuando está activo, el valor de Round se recalcula
+     * cada vez que cambian el método de corte o la cantidad de cortes; cuando no lo está,
+     * se respeta el que haya elegido el usuario.
+     *
+     * @var boolean
+     *
+     * @ORM\Column(name="mvv_auto_rounding", type="boolean", precision=0, scale=0, nullable=false, unique=false, options={"default": true})
+     */
+    private $AutoRounding = true;
+
+    /**
 		 * @var float
 		 *
 		 * @ORM\Column(name="mvv_perimeter", type="float", precision=6, scale=0, nullable=true, unique=false)
@@ -332,6 +344,30 @@ class Variable
 	public function getIsGap()
 	{
 		return $this->IsGap;
+	}
+
+	/**
+	 * Set autoRounding
+	 *
+	 * @param boolean $autoRounding
+	 *
+	 * @return Variable
+	 */
+	public function setAutoRounding($autoRounding)
+	{
+		$this->AutoRounding = $autoRounding;
+
+		return $this;
+	}
+
+	/**
+	 * Get autoRounding
+	 *
+	 * @return boolean
+	 */
+	public function getAutoRounding()
+	{
+		return $this->AutoRounding;
 	}
 
 	/**

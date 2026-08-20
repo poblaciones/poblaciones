@@ -13,6 +13,8 @@
  *   POST /api/automation/CreateAndAddInstitution    – crea institución nueva y la vincula
  *   POST /api/automation/SetWorkPermission         – asigna permiso a un usuario sobre la cartografía
  *   POST /api/automation/RemoveWorkPermission      – revoca permiso
+ *   POST /api/automation/AddAttachmentToWork       – sube un PDF y lo agrega como adjunto
+ *   POST /api/automation/RemoveAttachmentFromWork  – borra un adjunto por ID
  */
 
 use Symfony\Component\HttpFoundation\Request;
@@ -205,6 +207,73 @@ App::$app->post('/services/api/automation/CreateAndAddInstitution', function (Re
 	$controller->AddInstitutionToMetadata($workId, $metadataId, $institutionId);
 
 	return App::Json(['result' => 'ok', 'institution_id' => $institutionId]);
+});
+
+// ******* Adjuntos ("adjuntos" en la UI; MetadataFile en el servidor) *********
+
+/**
+ * Sube un archivo PDF y lo agrega como adjunto de la cartografía.
+ *
+ * El archivo debe subirse primero al bucket temporal con
+ * POST /api/automation/UploadFileChunk (mismo mecanismo que usa la subida
+ * de datasets), y pasar acá el ID de ese bucket.
+ *
+ * Parámetros POST:
+ *   w        (int, obligatorio)    – work ID
+ *   b        (string, obligatorio) – bucket ID del archivo ya subido
+ *   caption  (string, obligatorio) – nombre visible del adjunto
+ *
+ * Respuesta: { result: "ok", attachment_id, caption }
+ */
+App::$app->post('/services/api/automation/AddAttachmentToWork', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$bucketId = Params::GetMandatory('b');
+	$caption  = Params::GetMandatory('caption');
+
+	$work = App::Orm()->find(entities\DraftWork::class, $workId);
+	$metadataId = $work->getMetadata()->getId();
+
+	$controller = new services\MetadataFileService();
+	$metadataFile = $controller->GetNewMetadataFile(null);
+	$metadataFile->setCaption($caption);
+
+	$saved = $controller->UpdateMetadataFile($workId, $metadataId, $bucketId, $metadataFile);
+
+	return App::Json([
+		'result' => 'ok',
+		'attachment_id' => $saved->getId(),
+		'caption' => $saved->getCaption(),
+	]);
+});
+
+/**
+ * Borra un adjunto de la cartografía por su ID.
+ *
+ * Parámetros POST:
+ *   w              (int, obligatorio) – work ID
+ *   attachment_id  (int, obligatorio) – ID del adjunto (retornado por AddAttachmentToWork)
+ *
+ * Respuesta: { result: "ok" }
+ */
+App::$app->post('/services/api/automation/RemoveAttachmentFromWork', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$workId = Params::GetIntMandatory('w');
+	if ($denied = Session::CheckIsWorkEditor($workId)) return $denied;
+
+	$attachmentId = Params::GetIntMandatory('attachment_id');
+
+	$work = App::Orm()->find(entities\DraftWork::class, $workId);
+	$metadataId = $work->getMetadata()->getId();
+
+	$controller = new services\MetadataFileService();
+	$controller->DeleteMetadataFile($workId, $metadataId, $attachmentId);
+
+	return App::Json(['result' => 'ok']);
 });
 
 // ******* Permisos ************************************************************

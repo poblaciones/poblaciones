@@ -422,6 +422,7 @@ App::$app->post('/services/api/automation/UpdateVariableCategories', function (R
 	$variable->setId($variableId);
 	$variable->setIsGap(false);
 	$variable->setHasGapSameTotal(false);
+	$variable->setAutoRounding($variableConnected->getAutoRounding());
 
 	$controller = new services\MetricService();
 	$controller->UpdateVariableValues($variable, $variableConnected);

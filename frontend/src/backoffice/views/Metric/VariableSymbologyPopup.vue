@@ -76,9 +76,11 @@
 										&nbsp;
 									</div>
 									<div class="md-layout-item md-size-35" v-if="CutMode !== 'M'">
-										<mp-select :canEdit="canEdit" :list="roundValues"
-													:model-key="true" label="Redondeo"
+										<mp-select-auto :canEdit="canEdit" :list="roundValues"
+													label="Redondeo"
 													v-model="Variable.Symbology.Round"
+													:auto-value="Variable.AutoRounding"
+													@auto-change="setAutoRounding"
 											/>
 									</div>
 								</div>
@@ -276,6 +278,7 @@ import axios from 'axios';
 import f from '@/backoffice/classes/Formatter';
 import IconPickerPopup from '@/backoffice/components/IconPickerPopup';
 import MpColorPickerChip from '@/common/components/MpColorPickerChip';
+import MpSelectAuto from '@/common/components/MpSelectAuto';
 import ValuePopup from './ValuePopup.vue';
 import Icon from '@/backoffice/components/Icon';
 import ScaleGenerator from '@/backoffice/classes/ScaleGenerator';
@@ -291,6 +294,20 @@ const colorbrewer = require('colorbrewer');
 export default {
   name: 'variableGroups',
   methods: {
+		// El interruptor de modo automático vive en la variable, no en la simbología: es una
+		// preferencia de edición y no un atributo del esquema de colores.
+		//
+		// Se asigna con $set y no por asignación directa porque la propiedad puede no venir
+		// en el objeto que envía el servidor: en ese caso Vue no la haría reactiva, el valor
+		// quedaría guardado pero la vista nunca se enteraría del cambio.
+		setAutoRounding(value) {
+			this.$set(this.Variable, 'AutoRounding', value);
+			if (value) {
+				// Al activarlo hay que regenerar para que el paso de redondeo se recalcule en
+				// el acto; al desactivarlo se conserva el que estaba aplicado.
+				this.RegenCategories();
+			}
+		},
 		swapColors() {
 			var t = this.Variable.Symbology.ColorFrom;
 			this.Variable.Symbology.ColorFrom = this.Variable.Symbology.ColorTo;
@@ -577,6 +594,16 @@ export default {
 		CutMode() {
 			return this.Variable.Symbology.CutMode;
 		},
+		// El servidor puede enviar el booleano como 0/1, y la propiedad puede no venir en
+		// variables anteriores a su incorporación: en ese caso vale el default de la
+		// entidad, que es modo automático.
+		IsAutoRounding() {
+			var value = this.Variable.AutoRounding;
+			if (value === undefined || value === null) {
+				return true;
+			}
+			return value === true || value === 1 || value === '1';
+		},
 		columnsForCutColumn() {
 			return this.Dataset.GetColumnsForCutColumn();
 		},
@@ -619,7 +646,8 @@ export default {
 		ValuePopup,
 		Icon,
 		IconPickerPopup,
-		MpColorPickerChip
+		MpColorPickerChip,
+		MpSelectAuto
 	},
 	data() {
 		return {
@@ -658,7 +686,11 @@ export default {
 			this.RegenCategories();
 		},
 		'Variable.Symbology.Round'() {
-			this.RegenCategories();
+			// En modo automático el paso lo fija el propio generador al construir la escala,
+			// de modo que regenerar acá volvería a disparar el mismo cambio.
+			if (!this.IsAutoRounding) {
+				this.RegenCategories();
+			}
 		},
 		'Variable.Symbology.ColorFrom'() {
 			if (this.Variable.Symbology.PaletteType === 'G') {
