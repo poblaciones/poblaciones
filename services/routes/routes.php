@@ -57,6 +57,7 @@ App::$app->error(function (\Exception $e, Request $request, $code) {
 	if ($e instanceof \minga\framework\MessageException || $e instanceof \minga\framework\PublicException)
 	{
 		$text = $e->getPublicMessage();
+		App::Rollback();
 		return new Response($text);
 	} else {
 		return new Response($code . '. Se ha producido un error en el servidor.');

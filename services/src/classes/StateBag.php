@@ -2,6 +2,7 @@
 
 namespace helena\classes;
 
+use helena\classes\App;
 use minga\framework\IO;
 use minga\framework\Log;
 use minga\framework\Str;
@@ -107,6 +108,7 @@ class StateBag
 	public function SetVisitUrl($url, $caption)
 	{
 		$this->state['visitUrl'] = $url;
+		$this->state['visitServer'] = App::Settings()->Servers()->Main()->publicUrl;
 		$this->state['visitCaption'] = $caption;
 	}
 	public function SetResult($result)

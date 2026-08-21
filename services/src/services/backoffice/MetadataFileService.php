@@ -17,7 +17,7 @@ class MetadataFileService extends BaseService
 {
 	const PAGESIZE = 1024 * 1024;
 
-	public function GetNewMetadataFile($metadata)
+	public function GetNewMetadataFile()
 	{
 		if ($this->isDraft)
 		{
@@ -35,7 +35,7 @@ class MetadataFileService extends BaseService
 	public function UpdateMetadataFile($workId, $metadataId, $bucketId, $metadataFile)
 	{
 		$ms = new MetadataService($this->isDraft);
-		$metadata =  $ms->ResolveMetadata($workId, $metadataId);
+		$metadata = $ms->ResolveMetadata($workId, $metadataId);
 		if ($metadataFile->getMetadata() !== null)
 		{
 			if ($metadataFile->getMetadata() !== $metadata)
@@ -76,6 +76,7 @@ class MetadataFileService extends BaseService
 			throw new PublicException('Los metadatos indicados no coinciden con el adjunto.');
 		return $metadataFile;
 	}
+
 	public function DeleteMetadataFile($workId, $metadataId, $metadataFileId)
 	{
 		$metadataFile = $this->LoadAndValidate($workId, $metadataId, $metadataFileId);

@@ -136,6 +136,16 @@ class App
 		return self::$app['db.options'];
 	}
 
+	public static function Rollback()
+	{
+		if (self::$orm !== null)
+		{
+			self::$orm = null;
+		}
+		if (self::$db !== null)
+			self::Db()->ensureRollback();
+	}
+
 	public static function AutoCommit()
 	{
 		if (self::$orm !== null)

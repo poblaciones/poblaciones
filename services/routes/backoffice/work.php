@@ -47,7 +47,7 @@ App::$app->get('/services/backoffice/GetFactories', function (Request $request) 
 	$institutionService = new services\InstitutionService();
 	$ret['Institution'] = $institutionService->GetNewInstitution();
 	$metadataFileService = new services\MetadataFileService();
-	$ret['MetadataFile'] = $metadataFileService->GetNewMetadataFile(null);
+	$ret['MetadataFile'] = $metadataFileService->GetNewMetadataFile();
 
 	$userService = new adminServices\UserService();
 	$ret['User'] = $userService->GetNewUser();

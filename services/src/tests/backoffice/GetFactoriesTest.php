@@ -29,7 +29,7 @@ class GetFactoriesTest extends TestCase
 		$this->assertInstanceOf(DraftInstitution::class, $ret);
 
 		$metadataFileService = new MetadataFileService();
-		$ret = $metadataFileService->GetNewMetadataFile(null);
+		$ret = $metadataFileService->GetNewMetadataFile();
 		$this->assertInstanceOf(DraftMetadataFile::class, $ret);
 
 		$userService = new UserService();

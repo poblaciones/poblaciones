@@ -238,8 +238,9 @@ App::$app->post('/services/api/automation/AddAttachmentToWork', function (Reques
 	$metadataId = $work->getMetadata()->getId();
 
 	$controller = new services\MetadataFileService();
-	$metadataFile = $controller->GetNewMetadataFile(null);
+	$metadataFile = $controller->GetNewMetadataFile();
 	$metadataFile->setCaption($caption);
+	$metadataFile->getFile()->setName($caption . ".pdf");
 
 	$saved = $controller->UpdateMetadataFile($workId, $metadataId, $bucketId, $metadataFile);
 
