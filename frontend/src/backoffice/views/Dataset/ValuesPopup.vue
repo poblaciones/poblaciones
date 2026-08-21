@@ -58,7 +58,7 @@
 								<md-menu-item @click="triggerImport('excel')">Desde Excel</md-menu-item>
 							</mp-dropdown-button>
 
-							<mp-dropdown-button label="Exportar" icon="cloud_download">
+							<mp-dropdown-button label="Exportar" icon="download">
 								<md-menu-item @click="csvExportBtnOnClick">A CSV</md-menu-item>
 								<md-menu-item @click="excelExportBtnOnClick">A Excel</md-menu-item>
 							</mp-dropdown-button>

@@ -1,3 +1,5 @@
+v5.3 (2026-08-21)
+- Soporte para adjuntos en la API.
 - Remoción de tab de variables.
 - Fix a anchos y altos de dialogs inapropiados.
 - Fix a vista previa de la selección de transparencia y ajuste poblacional.

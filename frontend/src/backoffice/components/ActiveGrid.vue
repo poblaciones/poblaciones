@@ -123,7 +123,7 @@
 					<md-button @click="createGrid()">
 						<md-icon>refresh</md-icon> Actualizar
 					</md-button>
-					<mp-dropdown-button label="Descargar" icon="cloud_download">
+					<mp-dropdown-button label="Descargar" icon="download">
 						<md-menu-item @click="startDownload('c')">CSV (.CSV)</md-menu-item>
 						<md-menu-item @click="startDownload('x')">Excel (.XLSX)</md-menu-item>
 						<md-menu-item @click="startDownload('s')">SPSS (.SAV)</md-menu-item>

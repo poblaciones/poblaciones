@@ -542,7 +542,7 @@ class Account
 		if ($user == "")
 			return ['status' => BaseService::ERROR, 'message' => 'Debe indicarse una cuenta para ingresar.'];
 		if (Str::IsEmail($user) == false)
-			return ['status' => self::ERROR, 'message' => 'La dirección de correo electrónico no fue indicada correctamente.'];
+			return ['status' => BaseService::ERROR, 'message' => 'La dirección de correo electrónico no fue indicada correctamente.'];
 
 		$account = new Account();
 		$account->user = $user;

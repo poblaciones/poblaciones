@@ -42,7 +42,7 @@
 							<md-icon>delete</md-icon>
 							Eliminar
 						</md-button>
-						<mp-dropdown-button label="Descargar" icon="cloud_download">
+						<mp-dropdown-button label="Descargar" icon="download">
 							<md-menu-item @click="excelBtnOnClick()">Excel (.XLS)</md-menu-item>
 							<md-menu-item @click="csvBtnOnClick()">CSV (.CSV)</md-menu-item>
 						</mp-dropdown-button>

@@ -35,7 +35,8 @@
 	}
 
 	.mpDropdownCaret {
-		margin-left: 2px;
+		min-width: 0px;
+		width: 16px;
 	}
 </style>
 

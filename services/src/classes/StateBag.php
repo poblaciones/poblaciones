@@ -108,7 +108,6 @@ class StateBag
 	public function SetVisitUrl($url, $caption)
 	{
 		$this->state['visitUrl'] = $url;
-		$this->state['visitServer'] = App::Settings()->Servers()->Main()->publicUrl;
 		$this->state['visitCaption'] = $caption;
 	}
 	public function SetResult($result)
@@ -144,6 +143,7 @@ class StateBag
 		{
 			$ret['visitUrl']  = $this->state['visitUrl'];
 			$ret['visitCaption']  = $this->state['visitCaption'];
+			$ret['visitServer'] = App::Settings()->Servers()->Main()->publicUrl;
 		}
 		if ($this->state['stepperResult'] != '')
 		{
