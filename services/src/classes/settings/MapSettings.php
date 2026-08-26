@@ -4,6 +4,7 @@ namespace helena\classes\settings;
 
 use helena\classes\App;
 use minga\framework\Arr;
+use minga\framework\Str;
 use minga\framework\Request;
 use minga\framework\Context;
 
@@ -54,6 +55,15 @@ class MapSettings
 	public $UseAnnotations = false;
 
 	public $UseNewFabButton = true;
+
+	public $BasemapUrls = [
+			'roadmap' => "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'roadmap_no_labels' => "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'colored' => "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'colored_no_labels' => "https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'roadmap_only_labels' => "https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'satellite' => "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+			];
 
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;
@@ -115,5 +125,11 @@ class MapSettings
 
 		// Servidor
 		Context::Settings()->Servers()->RegisterServers($server, $homeUrl);
+	}
+
+	public function SetBasemapUrlsKey($key)
+	{
+		foreach($this->BasemapUrls as $map => $value)
+			$this->BasemapUrls[$map] = Str::Replace($this->BasemapUrls[$map], "YOUR_KEY", $key);
 	}
 }

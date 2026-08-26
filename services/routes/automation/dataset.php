@@ -72,17 +72,26 @@ App::$app->post('/services/api/automation/CreateDataset', function (Request $req
  *
  * Parámetros GET:
  *   b (string, obligatorio) – bucket ID generado por el cliente
+ *   o (int, opcional)       – offset en bytes donde escribir este chunk.
+ *                              Si se omite, se appendea al final (comportamiento
+ *                              original, para compatibilidad con otros frontends
+ *                              que ya usan este endpoint). Si se especifica, el
+ *                              servidor escribe ahí en vez de appendear, y
+ *                              reintentar el mismo offset es seguro (pisa en vez
+ *                              de duplicar). Un offset mayor al tamaño actual del
+ *                              archivo devuelve un error.
  *
  * Cuerpo: multipart/form-data con el archivo en cualquier campo.
  *
- * Respuesta: { status: "OK", bucket, extension }
+ * Respuesta: { status: "OK", bucket, extension, size }
  */
 App::$app->post('/services/api/automation/UploadFileChunk', function (Request $request) {
 	AutomationAuth::Authenticate();
 
 	$bucketId = Params::GetMandatory('b');
+	$offset = Params::GetInt('o');
 	$controller = new services\ImportService();
-	return App::Json($controller->FileChunkImport($bucketId));
+	return App::Json($controller->FileChunkImport($bucketId, $offset));
 });
 
 /**

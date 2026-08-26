@@ -1,3 +1,5 @@
+- Soporte para basemap con keys.
+
 v5.3 (2026-08-21)
 - Soporte para adjuntos en la API.
 - Remoción de tab de variables.

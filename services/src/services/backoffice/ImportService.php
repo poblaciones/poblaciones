@@ -66,25 +66,62 @@ class ImportService extends BaseService
 		return ['Sheets' => $reader->ReadSheetNames(), 'CanGeoreference' => $selfImport];
 	}
 
-	public function FileChunkImport($bucketId) {
+	public function FileChunkImport($bucketId, $offset = null)
+	{
 		$bucket = FileBucket::Load($bucketId);
-		return $this->SaveTo($bucket);
+		return $this->SaveTo($bucket, $offset);
 	}
 
-	private function SaveTo($bucket)
+	private function SaveTo($bucket, $offset = null)
 	{
 		$uploadFolder = $bucket->path;
 		$extension = '';
+		$destFile = $uploadFolder . '/file.dat';
+		$size = is_file($destFile) ? filesize($destFile) : 0;
+
 		if (!empty($_FILES))
 		{
 			$tempFileName = $_FILES['file']['tmp_name'];
 			$actual = file_get_contents($tempFileName);
 			$extension = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-			$destFile =  $uploadFolder . '/file.dat';
-			file_put_contents($destFile, $actual, FILE_APPEND | LOCK_EX);
+
+			if ($offset === null)
+			{
+				// Compatibilidad con llamadores que no envían offset (otros
+				// frontends usan este mismo endpoint): comportamiento original,
+				// siempre appendea al final.
+				file_put_contents($destFile, $actual, FILE_APPEND | LOCK_EX);
+				$size = filesize($destFile);
+			}
+			else
+			{
+				// Escribe en la posición indicada en vez de appendear: reintentar
+				// el mismo offset pisa los mismos bytes en vez de duplicarlos, así
+				// que un reintento ante un corte de conexión es idempotente. Un
+				// offset mayor al tamaño actual indicaría un chunk salteado: se
+				// rechaza en vez de dejar un archivo con un hueco.
+				$handle = fopen($destFile, 'c+b');
+				if ($handle === false)
+					throw new PublicException('No se pudo abrir el archivo de destino para escritura.');
+
+				flock($handle, LOCK_EX);
+				$currentSize = fstat($handle)['size'];
+				if ($offset > $currentSize)
+				{
+					flock($handle, LOCK_UN);
+					fclose($handle);
+					throw new PublicException("Offset de upload inválido ($offset) mayor al tamaño actual del archivo ($currentSize).");
+				}
+
+				fseek($handle, $offset);
+				fwrite($handle, $actual);
+				$size = fstat($handle)['size'];
+				flock($handle, LOCK_UN);
+				fclose($handle);
+			}
 		}
 
-		return array('status' => 'OK', 'bucket' => $bucket->id, 'extension' => $extension);
+		return array('status' => 'OK', 'bucket' => $bucket->id, 'extension' => $extension, 'size' => $size);
 	}
 
 	public function SingleStepFileImport()

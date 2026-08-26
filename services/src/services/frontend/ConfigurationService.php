@@ -174,7 +174,8 @@ class ConfigurationService extends BaseService
 									'Suggestions' => $suggestions,
 									'CanAccessContent' => $canAccessContent,
 									'ContentAttributes' => $contentAttributes,
-									'MainServer' => $mainServer->publicUrl);
+									'MainServer' => $mainServer->publicUrl,
+									'BasemapUrls' => App::Settings()->Map()->BasemapUrls);
 
 		$this->FilterUserSettings($ret['User']['Settings']);
 		Callbacks::$MapsOpened++;

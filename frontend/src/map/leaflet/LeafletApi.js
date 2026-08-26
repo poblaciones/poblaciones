@@ -285,11 +285,14 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	- https://cdn.jsdelivr.net/gh/freetiler/nasa-blackmarble/tiles/{z}/{x}/{y}.jpeg
 	- https://cdn.statically.io/gh/freetiler/nasa-blackmarble/main/tiles/{z}/{x}/{y}.jpeg
 	*/
-	this.baseLayers['roadmap'] = new L.TileLayer("https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png", { attribution: cp });
-	this.baseLayers['roadmap_no_labels'] = new L.TileLayer("https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png", { attribution: cp });
-	this.baseLayers['colored'] = new L.TileLayer("https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png", { attribution: cp });
-	this.baseLayers['colored_no_labels'] = new L.TileLayer("https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png", { attribution: cp });
-	this.baseLayers['roadmap_only_labels'] = new L.TileLayer("https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png", { attribution: cp });
+
+	var basemapUrls = window.SegMap.Configuration.BasemapUrls;
+
+	this.baseLayers['roadmap'] = new L.TileLayer(basemapUrls.roadmap, { attribution: cp });
+	this.baseLayers['roadmap_no_labels'] = new L.TileLayer(basemapUrls.roadmap_no_labels, { attribution: cp });
+	this.baseLayers['colored'] = new L.TileLayer(basemapUrls.colored, { attribution: cp });
+	this.baseLayers['colored_no_labels'] = new L.TileLayer(basemapUrls.colored_no_labels, { attribution: cp });
+	this.baseLayers['roadmap_only_labels'] = new L.TileLayer(basemapUrls.roadmap_only_labels, { attribution: cp });
 
 	this.useElevation = (window.SegMap.Configuration.ElevationUrl != null);
 	if (this.useElevation) {
@@ -321,7 +324,7 @@ LeafletApi.prototype.CreateBaseLayers = function () {
             attribution: cp,
             maxZoom: 18,
 	});*/
-	var satellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+	var satellite = L.tileLayer(basemapUrls.satellite, {
 		maxZoom: 20,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
 		attribution: cp
