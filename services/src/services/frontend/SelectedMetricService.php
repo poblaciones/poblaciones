@@ -224,7 +224,7 @@ class SelectedMetricService extends BaseService
 					if ($datasetId != $datasetCompareId)
 					{
 						// Obtiene las variables comparables
-						$variablePairs = $merger->GetComparableVariables($datasetId, $datasetCompareId, false);
+						$variablePairs = $merger->GetComparableVariables($datasetId, $datasetCompareId, false, $selectedMetric->Metric->Id);
 						if (sizeof($variablePairs) > 0)
 						{
 							if ($this->FlagAllVariablesAsComparable($level, $variablePairs))
@@ -355,6 +355,7 @@ class SelectedMetricService extends BaseService
 
 	private function AddVariables(&$levelInfo)
 	{
+		Profiling::BeginTimer();
 		$table = new VariableModel();
 		$variables = $table->GetByVersionLevelId($levelInfo->Id);
 		$asterisk = '*';
@@ -396,10 +397,12 @@ class SelectedMetricService extends BaseService
 			$levelInfo->Variables[] = $variableInfo;
 
 		}
+		Profiling::EndTimer();
 	}
 
 	public function AddVariablesValues($variableInfo)
 	{
+		Profiling::BeginTimer();
 		$tableValues = new VariableValueLabelModel();
 		$values = $tableValues->GetByVariableId($variableInfo->Id);
 
@@ -412,6 +415,7 @@ class SelectedMetricService extends BaseService
 
 			$variableInfo->ValueLabels[] = $valueInfo;
 		}
+		Profiling::EndTimer();
 	}
 
 }

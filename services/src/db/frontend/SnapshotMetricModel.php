@@ -23,8 +23,10 @@ class SnapshotMetricModel extends BaseModel
 		Profiling::BeginTimer();
 
 		App::Db()->PrepareGroupConcat();
+
 		$sql = $this->GetMetricViewQuery();
 		$item = App::Db()->fetchAssoc($sql, array($metricId));
+
 		Profiling::EndTimer();
 		return $item;
 	}
@@ -70,6 +72,7 @@ class SnapshotMetricModel extends BaseModel
 		App::Db()->PrepareGroupConcat();
 		$sql = $this->GetMetricViewQuery(true);
 		$ret = App::Db()->fetchAll($sql);
+
 		Profiling::EndTimer();
 		return $ret;
 	}
@@ -78,12 +81,14 @@ class SnapshotMetricModel extends BaseModel
 	public function HasVisibleVersions($metricId)
 	{
 		Profiling::BeginTimer();
+
 		$metricIdShardified = PublishDataTables::Shardified($metricId);
 		$sql = "SELECT COUNT(*)
 							FROM snapshot_metric_version
 							WHERE IsAccessibleWork(?, mvw_work_id, mvw_work_is_indexed, mvw_work_is_private) AND mvw_metric_id = ?";
 		$userId = Account::Current()->GetUserIdOrNull();
 		$ret = App::Db()->fetchScalarInt($sql, array($userId, $metricIdShardified));
+
 		Profiling::EndTimer();
 		return $ret > 0;
 	}

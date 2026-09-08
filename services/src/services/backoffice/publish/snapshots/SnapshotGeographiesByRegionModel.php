@@ -120,10 +120,10 @@ class SnapshotGeographiesByRegionModel
 								) ENGINE=MEMORY
 							SELECT cgv_clipping_region_item_id AS tmp_clipping_region_item_id, COUNT(*) AS total_children
 								FROM snapshot_clipping_region_item_geography_item s
-								JOIN geography_item gei_children ON gei_children.gei_id = s.cgv_geography_item_id
-								JOIN geography_item cai1 ON cai1.gei_id = gei_children.gei_parent_id
+								JOIN geography_item geography_item_children ON geography_item_children.gei_id = s.cgv_geography_item_id
+								JOIN geography_item cai1 ON cai1.gei_id = geography_item_children.gei_parent_id
 								JOIN geography ON geo_id = cai1.gei_geography_id
-								WHERE gei_children.gei_parent_id IS NOT NULL
+								WHERE geography_item_children.gei_parent_id IS NOT NULL
 									AND cgv_level = " . ($level + 1) . "
 									AND geo_revision = " . $revision . "
 								GROUP BY cgv_clipping_region_item_id;";
@@ -132,11 +132,11 @@ class SnapshotGeographiesByRegionModel
 			$sql = $sqlInsert . "SELECT cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, cai1.gei_id, cai1.gei_urbanity, cai1.gei_area_m2, " .
 				"cai1.gei_population, cai1.gei_households, cai1.gei_children, cai1.gei_geography_id, " . $level
 				. " FROM snapshot_clipping_region_item_geography_item s " .
-							"JOIN geography_item gei_children ON gei_children.gei_id = cgv_geography_item_id " .
-							"JOIN geography_item cai1 ON cai1.gei_id = gei_children.gei_parent_id " .
+							"JOIN geography_item geography_item_children ON geography_item_children.gei_id = cgv_geography_item_id " .
+							"JOIN geography_item cai1 ON cai1.gei_id = geography_item_children.gei_parent_id " .
 							"JOIN clipping_region ON clr_id = cgv_clipping_region_id " .
 							"JOIN geography ON geo_id = cai1.gei_geography_id " .
-							"WHERE gei_children.gei_parent_id IS NOT NULL AND cgv_level = " . ($level + 1)
+							"WHERE geography_item_children.gei_parent_id IS NOT NULL AND cgv_level = " . ($level + 1)
 							. " AND geo_revision = " . $revision . "
 								 GROUP BY cgv_clipping_region_id, cgv_clipping_region_item_id, clr_priority, cai1.gei_id, cai1.gei_urbanity, cai1.gei_area_m2,
 	cai1.gei_population, cai1.gei_households, cai1.gei_children, cai1.gei_geography_id

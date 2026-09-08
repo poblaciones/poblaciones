@@ -41,7 +41,7 @@
 							<md-switch class="md-primary" v-model="keepLabels">
 								Mantener etiquetas de variables coincidentes
 
-						<div class="mp-label" style="margin-top: 4px; margin-bottom: 4px">
+						<div class="mp-label-multiline" style="margin-top: 4px; margin-bottom: 4px">
 							Cuando una variable sea de igual nombre que una existente, su etiqueta
 							y las etiquetas de sus valores se conservarán. Si desea en cambio actualizarlos, desmarque 'Mantener etiquetas'.
 						</div>

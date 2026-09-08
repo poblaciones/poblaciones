@@ -31,7 +31,7 @@ class Variable
 		return $this->attributes["mvv_id"];
 	}
 
-	public static function GetVariables($metricVersionLevel)
+	public static function GetVariables($metricVersionLevel, $getValueLabels = true)
 	{
 		Profiling::BeginTimer();
 
@@ -61,7 +61,10 @@ class Variable
 						LEFT JOIN dataset_column cutcolumn ON cutcolumn.dco_id = vsy_cut_column_id
 						WHERE mvv_metric_version_level_id = ? ORDER BY mvv_order";
 		$rows = App::Db()->fetchAll($sql, array($metricVersionLevelId));
-		self::AddLabels($rows, $metricVersionLevelId);
+
+		if ($getValueLabels)
+			self::AddLabels($rows, $metricVersionLevelId);
+
 		$ret = array();
 		foreach($rows as $row)
 			$ret[] = new Variable($metricVersionLevel, $row);

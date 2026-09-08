@@ -118,7 +118,8 @@ abstract class BaseDownloadManager
 		// r = R
 		$validFormats = self::$validFileTypes;
 		// h = shapefile
-		$validSpatialOnlyFormats = ['hw', 'h'];
+		// g = geopackage
+		$validSpatialOnlyFormats = ['hw', 'h', 'g'];
 
 		// La segunda letra (opcional) es:
 		// w = wkt
@@ -147,6 +148,8 @@ abstract class BaseDownloadManager
 		else
 			throw new PublicException('Tipo de descarga no reconocido');
 	}
+
+
 	protected function getWriter($fileType)
 	{
 		if ($fileType === self::FILE_SPSS)

@@ -210,6 +210,31 @@ class SnapshotByDatasetModel
 		Profiling::EndTimer();
 	}
 
+	public function GetDatasetLevelVariablesLight($datasetId, $metricId = null)
+	{
+		Profiling::BeginTimer();
+		$metricQuery = "";
+		$params = array($datasetId);
+		if ($metricId)
+		{
+			$metricQuery = " AND mvr_metric_id = ?";
+			$params[] = $metricId;
+		}
+		$sql = "SELECT mvl_id, metric_version.*
+							FROM metric_version
+							JOIN metric_version_level ON mvl_metric_version_id = mvr_id
+							WHERE mvl_dataset_id = ? " . $metricQuery . " ORDER BY mvl_id";
+
+		$ret = App::Db()->fetchAll($sql, $params);
+		foreach($ret as &$metricVersionLevel)
+		{
+			$variables = Variable::GetVariables($metricVersionLevel, false);
+			$metricVersionLevel['variables'] = $variables;
+		}
+		Profiling::EndTimer();
+		return $ret;
+	}
+
 	public function GetDatasetLevels($datasetId)
 	{
 		Profiling::BeginTimer();

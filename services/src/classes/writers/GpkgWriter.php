@@ -116,6 +116,9 @@ class GpkgWriter extends BaseWriter
 	 */
 	private function collectStyles(): array
 	{
+		if ($this->state->FromDraft())
+			return [];
+
 		if ($this->model instanceof BoundaryDownloadModel)
 			return BoundaryStyleCollector::Collect((int)$this->state->Get('boundaryVersionId'), $this->state->Cols())['styles'];
 
@@ -202,6 +205,11 @@ class GpkgWriter extends BaseWriter
 		else
 			$geomType = 'POINT';
 
+		// 'fid' es la PK autogenerada por este writer y 'geom' es la columna de geometría;
+		// ninguna columna de datos puede llamarse igual. Cualquier colisión con estos nombres,
+		// o entre columnas de datos entre sí tras sanitizar, se resuelve con sufijo _1, _2, ...
+		$usedNames = [mb_strtolower('fid') => true, mb_strtolower(self::GEOM_COLUMN) => true];
+
 		// Columnas de atributos
 		$colDefs = '';
 		$i = 0;
@@ -211,7 +219,8 @@ class GpkgWriter extends BaseWriter
 				continue;
 			}
 
-			$safeName = $this->safeColName($col['variable']);
+			$safeName = $this->uniqueColName($this->safeColName($col['variable']), $usedNames);
+			$usedNames[mb_strtolower($safeName)] = true;
 			$this->state->state['cols'][$i]['effectiveVariable'] = $safeName;
 
 			$sqlType = ($col['format'] == Format::F) ? 'REAL' : 'TEXT';
@@ -283,7 +292,7 @@ class GpkgWriter extends BaseWriter
 		$i = 0;
 		foreach ($cols as $col) {
 			if ($i !== $wktIndex)
-				$names[] = $this->safeColName($col['variable']);
+				$names[] = $col['effectiveVariable'] ?? $this->safeColName($col['variable']);
 			$i++;
 		}
 		return $names;
@@ -301,6 +310,23 @@ class GpkgWriter extends BaseWriter
 		if (preg_match('/^[0-9]/', $safe))
 			$safe = '_' . $safe;
 		return $safe;
+	}
+
+	/**
+	 * Devuelve $base si no colisiona (case-insensitive) con ningún nombre en $usedNames;
+	 * si colisiona, agrega el sufijo _1, _2, etc. hasta encontrar uno libre.
+	 */
+	private function uniqueColName(string $base, array $usedNames): string
+	{
+		$key = mb_strtolower($base);
+		if (!isset($usedNames[$key]))
+			return $base;
+
+		$suffix = 1;
+		while (isset($usedNames[mb_strtolower("{$base}_{$suffix}")]))
+			$suffix++;
+
+		return "{$base}_{$suffix}";
 	}
 
 	private function parseCoord($coord): float

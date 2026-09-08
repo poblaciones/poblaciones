@@ -274,12 +274,21 @@
 		max-height: 40vh !important;
 	}
 
+.mp-label-multiline {
+	padding-left: 0 !important;
+	left: 0 !important;
+	margin-bottom: 2px;
+	line-height: 1.35em;
+	color: #888 !important;
+	-webkit-text-fill-color: #888 !important;
+	font-size: 14px !important;
+}
 .mp-label {
 	padding-left: 0 !important;
 	left: 0 !important;
 	margin-bottom: 2px;
 	line-height: 1.1em;
-	white-space : nowrap;
+	white-space: nowrap;
 	color: #888 !important;
 	-webkit-text-fill-color: #888 !important;
 	font-size: 14px !important;

@@ -12,22 +12,11 @@
 				<tr>
 					<td class="col1 optionsLabel">Métrica:</td>
 					<td>
-						<div class="btn-group">
+						<div class="btn-group" style="display: flex">
 							<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
 								{{ metric.Caption }}
 							</button>
 						</div>
-					</td>
-				</tr>
-				<tr v-if="metric.SelectedLevel().HasDescriptions">
-					<td class="nowrapwords">Mostrar descripciones:</td>
-					<td>
-						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="1" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
-						</label>
-						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="0" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">No
-						</label>
 					</td>
 				</tr>
 				<tr v-if="anyHasArea() || !metric.SelectedVariable().IsSimpleCount">

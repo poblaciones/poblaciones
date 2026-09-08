@@ -7,6 +7,7 @@ use helena\services\backoffice\publish\PublishDataTables;
 use minga\framework\Profiling;
 use minga\framework\Arr;
 use minga\framework\Str;
+use minga\framework\Serializator;
 use helena\classes\SpecialColumnEnum;
 use helena\classes\App;
 use minga\framework\locking\CreateMergeLock;
@@ -19,18 +20,36 @@ use helena\entities\frontend\metadata\MetadataInfo;
 
 class MergeSnapshotsByDatasetModel
 {
-	public function GetComparableVariables($datasetId, $compareDatasetId, $sameDataset)
+	private $levelsCache = [];
+
+	private function GetDatasetLevelVariablesLight($datasetId, $metricId)
 	{
-		// Trae info de los levels
 		$snapshotModel = new SnapshotByDatasetModel();
-		$levels = $snapshotModel->GetDatasetLevels($datasetId);
-		$levelsCompare = ($sameDataset ? $levels : $snapshotModel->GetDatasetLevels($compareDatasetId));
+		// Usa un caché porque se repite el pedido para las combinaciones de variables
+		// comparables
+		$key = $datasetId . '-' . $metricId;
+		if (array_key_exists($key, $this->levelsCache))
+		{
+			return Serializator::CloneArray($this->levelsCache[$key]);
+		}
+		$ret = $snapshotModel->GetDatasetLevelVariablesLight($datasetId, $metricId);
+		$this->levelsCache[$key] = $ret;
+		return $ret;
+	}
+
+	public function GetComparableVariables($datasetId, $compareDatasetId, $sameDataset, $metricId = null)
+	{
+		Profiling::BeginTimer();
+		// Trae info de los levels
+		$levels = $this->GetDatasetLevelVariablesLight($datasetId, $metricId);
+		$levelsCompare = $this->GetDatasetLevelVariablesLight($compareDatasetId, $metricId);
 		if (sizeof($levelsCompare) == 0)
 			throw new PublicException("El dataset de comparación no contiene niveles definidos.");
 
 		// Construye la lista de variables que son
 		// comparables de ambos niveles
 		$variablePairs = $this->GetRequiredVariables($levels, $levelsCompare);
+		Profiling::EndTimer();
 		return $variablePairs;
 	}
 	public function MergeSnapshots($datasetId, $compareDatasetId)

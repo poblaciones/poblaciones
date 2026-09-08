@@ -190,6 +190,9 @@ class ShpWriter extends BaseWriter
 	 */
 	private function writeQgzProject(string $baseNameNoExtension): ?string
 	{
+		if ($this->state->FromDraft())
+			return null;
+
 		try
 		{
 			$result = $this->collectStyles();

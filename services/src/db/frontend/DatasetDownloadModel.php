@@ -13,6 +13,7 @@ use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
 class DatasetDownloadModel extends BaseDownloadModel
 {
 	public $fromDraft = false;
+	public $skipOmmited = false;
 
 
 	public function __construct($fullQuery = '', $countQuery = '', $fullCols = array(), $fullParams = array(), $wktIndex = -1, $extraColumns = null)
@@ -109,6 +110,10 @@ class DatasetDownloadModel extends BaseDownloadModel
 				$where .= 'AND ' . $dataset['partition_column_field'] . ' = ' . intval($partition);
 			}
 		}
+
+		// Excluye filas marcadas como omitidas en la georreferenciación
+		if ($this->skipOmmited)
+			$where .= ' AND _data_table.ommit = 0';
 
 		// Agrega columnas del dataset
 		$cols = $datasetModel->GetDatasetColumns($dataset['id'], false, $this->fromDraft);

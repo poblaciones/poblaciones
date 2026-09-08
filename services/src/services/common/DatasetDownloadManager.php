@@ -173,11 +173,20 @@ class DatasetDownloadManager extends BaseDownloadManager
 		$this->model->fromDraft = $this->state->FromDraft();
 	}
 
+	private function isSpatialFormat($type) {
+		return in_array($type[0], ['h', 'g']);
+	}
+
 	protected function PrepareNewModel($type, $datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, $fromDraft, $extraColumns)
 	{
 		$this->model = new DatasetDownloadModel();
 		$this->model->fromDraft = $fromDraft;
 		$this->model->extraColumns = $extraColumns;
+		// La omisión de filas con geometría inválida sólo hace falta en draft: en publicados
+		// esas filas ya no llegan a la tabla de datos. Qué formatos lo necesitan lo decide
+		// cada writer (ver BaseWriter::SkipOmittedRows).
+		$fileType = self::GetFileTypeFromLetter($type[0]);
+		$this->model->skipOmmited = $fromDraft && $this->isSpatialFormat($type);
 		$this->model->PrepareFileQuery($datasetId, $compareDatasetId, $clippingItemId, $clippingCircle, $urbanity, $partition, self::GetPolygon($type));
 	}
 
