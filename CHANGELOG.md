@@ -1,6 +1,8 @@
 - Soporte para basemap con keys.
 - Fix descarga de metadatos.
 - Mejoras a decimales en las apis.
+- Fixes a download de shaprefiles.
+- Mejoras en performance de carga de indicador.
 -
 v5.3 (2026-08-21)
 - Soporte para adjuntos en la API.

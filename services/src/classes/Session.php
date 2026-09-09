@@ -337,7 +337,7 @@ class Session
 	}
 	public static function CheckIsMegaUser()
 	{
-		if ($app = Session::CheckSessionAlive())
+		if ($app = self::CheckSessionAlive())
 		{
 			return $app;
 		}
@@ -351,7 +351,7 @@ class Session
 	{
 		$account = Account::Current();
 		$url = App::RedirectLoginUrl();
-		http_response_code(403);
+		// http_response_code(403);
 		MessageBox::ThrowMessage("Para acceder a esta opción debe ingresar con su cuenta de usuario.
 				<br><br>Seleccione continuar para identificarse.", $url);
 	}
@@ -383,7 +383,7 @@ class Session
 		Profiling::BeginTimer();
 		self::CheckReadonlyForMaintenanceService();
 
-		if ($app = Session::CheckSessionAlive())
+		if ($app = self::CheckSessionAlive())
 			$ret = $app;
 		// Se fija los permisos
 		else if (self::IsWorkEditor($workId, $canEditIndexed))
@@ -400,7 +400,7 @@ class Session
 		if ($readonly = self::CheckReadonlyForMaintenanceService())
 			return $readonly;
 
-		if ($app = Session::CheckSessionAlive())
+		if ($app = self::CheckSessionAlive())
 			$ret = $app;
 		else
 		{
@@ -427,7 +427,7 @@ class Session
 	public static function CheckIsDatasetReader($datasetId)
 	{
 		Profiling::BeginTimer();
-		if ($app = Session::CheckSessionAlive())
+		if ($app = self::CheckSessionAlive())
 			$ret = $app;
 		else {
 			$workId = self::GetDatasetWorkId($datasetId);
@@ -445,7 +445,7 @@ class Session
 	public static function CheckIsWorkReader($workId)
 	{
 		Profiling::BeginTimer();
-		if ($app = Session::CheckSessionAlive())
+		if ($app = self::CheckSessionAlive())
 			$ret = $app;
 		// Se fija los permisos
 		else if (self::IsWorkReader($workId))
@@ -458,7 +458,7 @@ class Session
 	public static function CheckIsSiteEditor()
 	{
 		Profiling::BeginTimer();
-		if ($app = Session::CheckSessionAlive())
+		if ($app = self::CheckSessionAlive())
 			$ret = $app;
 		// Se fija los permisos
 		else if (self::IsSiteEditor())
@@ -472,7 +472,7 @@ class Session
 	public static function CheckIsSiteReader()
 	{
 		Profiling::BeginTimer();
-		if ($app = Session::CheckSessionAlive())
+		if ($app = self::CheckSessionAlive())
 			$ret = $app;
 		// Se fija los permisos
 		else if (self::IsSiteReader())

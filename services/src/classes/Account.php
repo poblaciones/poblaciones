@@ -237,7 +237,10 @@ class Account
 		$this->lastName = $attrs['usr_lastname'];
 		$this->facebookOauthId = $attrs['usr_facebook_oauth_id'];
 		$this->googleOauthId = $attrs['usr_google_oauth_id'];
-		$this->picture = $attrs['usr_picture'];
+		if (array_key_exists('usr_picture', $attrs))
+			$this->picture = $attrs['usr_picture'];
+		else
+			$this->picture = '';
 		$this->isActive = $attrs['usr_is_active'];
 		$this->password = $attrs['usr_password'];
 	}
