@@ -258,7 +258,7 @@ class GeographyService extends BaseService
 		$mapping = $state->GetMapping();
 		$parentGeographyId = $state->GetParentId();
 
-		if ($mapping['parentCode'] === null || $parentGeographyId === null)
+		if (!array_key_exists('parentCode', $mapping) || $mapping['parentCode'] === null || $parentGeographyId === null)
 		{
 			$state->SetStep(self::STEP_INSERTING, 'Insertando ítems');
 			Profiling::EndTimer();
@@ -361,7 +361,10 @@ class GeographyService extends BaseService
 		$mapping = $state->GetMapping();
 		$codeIndex = array_search($mapping['code'], $varNames);
 		$captionIndex = $this->FindOptionalIndex($mapping['caption'], $varNames);
-		$parentCodeIndex = $this->FindOptionalIndex($mapping['parentCode'], $varNames);
+		if (!array_key_exists('parentCode', $mapping) || $mapping['parentCode'] === null)
+			$parentCodeIndex = null;
+		else
+			$parentCodeIndex = $this->FindOptionalIndex($mapping['parentCode'], $varNames);
 		$urbanityIndex = $this->FindOptionalIndex($mapping['urbanity'], $varNames);
 		$populationIndex = array_search($mapping['population'], $varNames);
 		$householdsIndex = array_search($mapping['households'], $varNames);
@@ -384,7 +387,8 @@ class GeographyService extends BaseService
 			else
 			{
 				$code = $row[$codeIndex];
-				$caption = $code;
+				$codeAsNumber = is_numeric($code) ? (float)$code : null;
+				$caption = null;
 				if ($captionIndex !== null)
 				{
 					$caption = $row[$captionIndex];
@@ -401,12 +405,12 @@ class GeographyService extends BaseService
 
 				if ($parentCodeIndex !== null && $parentGeographyId !== null)
 				{
-					$this->InsertItemWithParent($geographyId, $parentGeographyId, $code, $caption, $wkt, $levels,
+					$this->InsertItemWithParent($geographyId, $parentGeographyId, $code, $codeAsNumber, $caption, $wkt, $levels,
 						$population, $households, $children, $urbanity, $row[$parentCodeIndex]);
 				}
 				else
 				{
-					$this->InsertItem($geographyId, $code, $caption, $wkt, $levels,
+					$this->InsertItem($geographyId, $code, $codeAsNumber, $caption, $wkt, $levels,
 						$population, $households, $children, $urbanity);
 				}
 			}
@@ -446,19 +450,19 @@ class GeographyService extends BaseService
 		}
 	}
 
-	private function InsertItem($geographyId, $code, $caption, $wkt, $levels, $population, $households, $children, $urbanity)
+	private function InsertItem($geographyId, $code, $codeAsNumber, $caption, $wkt, $levels, $population, $households, $children, $urbanity)
 	{
 		$sql = "INSERT INTO geography_item
-			(gei_code, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
+			(gei_code, gei_code_as_number, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
 			 gei_population, gei_households, gei_children, gei_urbanity,
 			 gei_geometry_r1, gei_geometry_r2, gei_geometry_r3, gei_geometry_r4, gei_geometry_r5, gei_geometry_r6,
 			 gei_geography_id)
-			VALUES (?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
+			VALUES (?, ?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
 			 ?, ?, ?, ?,
 			 ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?),
 			 ?)";
 		App::Db()->execute($sql, array(
-			$code, $caption, $wkt, $wkt, $wkt,
+			$code, $codeAsNumber, $caption, $wkt, $wkt, $wkt,
 			$population, $households, $children, $urbanity,
 			$levels[0], $levels[1], $levels[2], $levels[3], $levels[4], $levels[5],
 			$geographyId));
@@ -467,20 +471,20 @@ class GeographyService extends BaseService
 	// El padre se resuelve por código dentro de la geografía padre, ya
 	// existente: no es una auto-referencia entre los ítems que se están
 	// insertando ahora.
-	private function InsertItemWithParent($geographyId, $parentGeographyId, $code, $caption, $wkt, $levels,
+	private function InsertItemWithParent($geographyId, $parentGeographyId, $code, $codeAsNumber, $caption, $wkt, $levels,
 		$population, $households, $children, $urbanity, $parentCode)
 	{
 		$sql = "INSERT INTO geography_item
-			(gei_code, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
+			(gei_code, gei_code_as_number, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
 			 gei_population, gei_households, gei_children, gei_urbanity,
 			 gei_geometry_r1, gei_geometry_r2, gei_geometry_r3, gei_geometry_r4, gei_geometry_r5, gei_geometry_r6,
 			 gei_geography_id, gei_parent_id)
-			SELECT ?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
+			SELECT ?, ?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
 			 ?, ?, ?, ?,
 			 ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?),
 			 ?, (SELECT gei_id FROM geography_item WHERE gei_code = ? AND gei_geography_id = ? LIMIT 1)";
 		App::Db()->execute($sql, array(
-			$code, $caption, $wkt, $wkt, $wkt,
+			$code, $codeAsNumber, $caption, $wkt, $wkt, $wkt,
 			$population, $households, $children, $urbanity,
 			$levels[0], $levels[1], $levels[2], $levels[3], $levels[4], $levels[5],
 			$geographyId, $parentCode, $parentGeographyId));

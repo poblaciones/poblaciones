@@ -70,7 +70,9 @@ class MetadataService extends BaseService
 		$metadata->setAuthors(' ');
 		$metadata->setCoverageCaption(' ');
 		$metadata->setPeriodCaption($version);
-		$metadata->setLicense(' ');
+		$licence = '{"licenseType":1,"licenseOpen":"always","licenseCommercial":1,"licenseVersion":"4.0\/deed.es"}';
+		$metadata->setLicense($licence);
+		$metadata->setLanguage('es; Español');
 		$metadata->setType('C');
 		$metadata->setCreate($now);
 		$metadata->setUpdate($now);

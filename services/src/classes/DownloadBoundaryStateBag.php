@@ -34,7 +34,10 @@ class DownloadBoundaryStateBag extends StateBag
 		));
 		return $ret;
 	}
-
+	public function FromDraft()
+	{
+		return false;
+	}
 	public function SetColWidth($keyCol, $value)
 	{
 		$this->state['cols'][$keyCol]['field_width'] = $value;
