@@ -52,7 +52,30 @@ export default {
 			return this.columns;
 		},
 	},
+	watch: {
+		// Este popup puede abrirse desde otro popup ya activo (md-dialog),
+		// además de desde una vista de nivel superior: ver el comentario en
+		// TreePickerPopup.vue sobre por qué el ESC, sin esto, termina cerrando
+		// ese otro popup en vez de este.
+		activateEdit(isActive) {
+			if (isActive) {
+				document.addEventListener('keydown', this.handleEscCapture, true);
+			} else {
+				document.removeEventListener('keydown', this.handleEscCapture, true);
+			}
+		},
+	},
+	beforeDestroy() {
+		document.removeEventListener('keydown', this.handleEscCapture, true);
+	},
 	methods: {
+		handleEscCapture(e) {
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				e.stopPropagation();
+				this.activateEdit = false;
+			}
+		},
 		// fetchPageFn(offset, pageSize) debe devolver una Promise que
 		// resuelva a { Items: [...], Total: N }. columns es un array de
 		// { property, caption }, en el orden en que se quiere ver: por

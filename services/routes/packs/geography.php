@@ -61,3 +61,15 @@ App::Get('/services/packs/StepImportGeography', function (Request $request) {
 	$ret = $controller->StepImportGeography($key);
 	return App::Json($ret);
 });
+
+App::Get('/services/packs/GetGeographyItems', function (Request $request) {
+	if ($app = Session::CheckIsSiteReader())
+		return $app;
+	$geographyId = Params::GetIntMandatory('g');
+	$offset = Params::GetIntMandatory('o');
+	$limit = Params::GetIntMandatory('l');
+
+	$controller = new services\GeographyService();
+	$ret = $controller->GetGeographyItems($geographyId, $offset, $limit);
+	return App::Json($ret);
+});

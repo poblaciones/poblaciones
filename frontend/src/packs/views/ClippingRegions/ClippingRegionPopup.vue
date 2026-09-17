@@ -2,10 +2,11 @@
   <div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="parentPicker" @selected="onParentSelected"></tree-picker-popup>
-		<md-dialog v-if="clippingRegion" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<tree-picker-popup ref="metadataSharePicker" @selected="onSharedMetadataRegionSelected"></tree-picker-popup>
+		<md-dialog v-if="clippingRegion" class="medium-extra-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Región</md-dialog-title>
 			<md-dialog-content>
-				<div class="md-layout md-gutter">
+				<div class="md-layout">
 					<div class="md-layout-item md-size-100">
 						<div class="full-row-separator">Descripción</div>
 					</div>
@@ -56,14 +57,14 @@
 					<div class="md-layout-item md-size-100">
 						<div class="full-row-separator">Presentación en el mapa</div>
 					</div>
-					<div class="md-layout-item md-size-20">
+					<div class="md-layout-item md-size-30">
 						<mp-simple-text label="Ícono" v-model="clippingRegion.Symbol" :canEdit="canEdit"
 														helper="Icono de FontAwesome o de MapIcons para etiquetas en el mapa"
 														@enter="save" />
 					</div>
-					<div class="md-layout-item md-size-20">
-						<mp-simple-text label="Color (hexadecimal)" :canEdit="canEdit" helper="Ej. FF7043"
-														v-model="clippingRegion.Color" @enter="save" />
+					<div class="md-layout-item md-size-10">
+						<div class="mp-label" style="padding-top: 14px;">Color</div>
+						<mp-color-picker :canEdit="canEdit" :ommitHexaSign="true" v-model="clippingRegion.Color" />
 					</div>
 					<div class="md-layout-item md-size-20">
 						<mp-simple-text label="Zoom mínimo" :canEdit="canEdit" type="number"
@@ -104,6 +105,29 @@
 						Configuración &gt; Cachés &gt; Regiones y delimitaciones &gt; Actualizar en el módulo
 						de 'Logs y Mantenimiento' (sitio/logs).
 					</div>
+
+					<div class="md-layout-item md-size-100" v-if="!isNew">
+						<div class="full-row-separator">Metadatos</div>
+					</div>
+					<div class="md-layout-item md-size-30" v-if="!isNew">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="hasOwnMetadata">
+							Usa metadatos propios
+						</md-switch>
+					</div>
+					<div class="md-layout-item md-size-70" v-if="!isNew && !hasOwnMetadata">
+						<div class="mp-label">Comparte metadatos con</div>
+						<div class="mp-readonly-value">
+							<div class="mp-readonly-text">
+								{{
+ sharedMetadataCaption
+								}}
+							</div>
+							<md-button v-if="canEdit" class="md-icon-button" @click="pickSharedMetadataRegion">
+								<md-icon>edit</md-icon>
+								<md-tooltip md-direction="bottom">Elegir</md-tooltip>
+							</md-button>
+						</div>
+					</div>
 				</div>
 			</md-dialog-content>
 			<stepper ref="stepper" title="Creando región" @completed="importCompleted" @closed="stepperClosed"></stepper>
@@ -119,6 +143,7 @@
 
 import arr from '@/common/framework/arr';
 import f from '@/backoffice/classes/Formatter';
+import color from '@/common/framework/color';
 import TreePickerPopup from '@/packs/components/popups/TreePickerPopup';
 import GeoPackageUpload from '@/packs/components/GeoPackageUpload';
 
@@ -130,6 +155,20 @@ export default {
 			clippingRegion: null,
 			useInSearch: 0,
 			importResult: null,
+			// Sección Metadatos (solo edición): la entidad no guarda si el
+			// metadata es propio o compartido como un campo aparte, así que se
+			// resuelve comparando MetadataId contra el resto del listado (ver
+			// resolveMetadataSharing). originalHasOwnMetadata guarda cómo
+			// arrancó, para saber si hay que crear un metadata en blanco al
+			// guardar (ver applyMetadataSharing). sharedWithRegion es el ancla
+			// usada para guardar (alcanza con una región para conocer el
+			// MetadataId a reutilizar); allRegionsFlat es la última consulta al
+			// listado completo, usada para mostrar en sharedMetadataCaption a
+			// TODAS las regiones que comparten ese metadato, no solo el ancla.
+			hasOwnMetadata: true,
+			originalHasOwnMetadata: true,
+			sharedWithRegion: null,
+			allRegionsFlat: [],
     };
   },
   computed: {
@@ -151,6 +190,25 @@ export default {
 			}
 			return 'Ninguna';
 		},
+		// Lista todas las regiones (con su versión) que comparten el mismo
+		// Metadata que 'sharedWithRegion', excluyendo esta misma región: no
+		// alcanza con mostrar el ancla, es útil ver con quiénes más se
+		// comparte. El fallback cubre el instante entre elegir en el picker y
+		// que allRegionsFlat se haya vuelto a resolver.
+		sharedMetadataCaption() {
+			if (!this.sharedWithRegion) {
+				return 'Ninguna';
+			}
+			var loc = this;
+			var metadataId = this.sharedWithRegion.MetadataId;
+			var matches = this.allRegionsFlat.filter(function (region) {
+				return region.MetadataId === metadataId && region.Id !== loc.clippingRegion.Id;
+			});
+			if (matches.length === 0) {
+				matches = [this.sharedWithRegion];
+			}
+			return matches.map(function (region) { return loc.formatRegionCaption(region); }).join(', ');
+		},
 		// El código del padre solo hace falta mapearlo cuando la región va a
 		// tener una categoría padre: sin eso, cada ítem del archivo no tendría
 		// con qué ítem padre vincularse.
@@ -168,12 +226,63 @@ export default {
   methods: {
 		show(clippingRegion) {
 			this.clippingRegion = f.clone(clippingRegion);
+			// El picker de color necesita siempre un valor con el que arrancar;
+			// sin esto, una región sin Color asignado todavía rompería el chip.
+			if (!this.clippingRegion.Color) {
+				this.clippingRegion.Color = color.GetRandomDefaultColor();
+			}
 			this.activateEdit = true;
 			this.useInSearch = !clippingRegion.NoAutocomplete;
+			this.resolveMetadataSharing();
 			var loc = this;
 			setTimeout(() => {
 				loc.$refs.inputName.focus();
 			}, 100);
+		},
+		// Determina, al abrir una región existente, si sus metadatos son
+		// propios o coinciden con los de otra región (compartidos): lo infiere
+		// comparando MetadataId contra el resto del listado, ya que no hay un
+		// campo aparte que lo indique. sharedWithRegion queda apuntando a la
+		// primera coincidencia (alcanza como ancla para guardar); para mostrar
+		// se usan todas (ver sharedMetadataCaption).
+		resolveMetadataSharing() {
+			this.hasOwnMetadata = true;
+			this.sharedWithRegion = null;
+			if (this.isNew || !this.clippingRegion.MetadataId) {
+				this.originalHasOwnMetadata = this.hasOwnMetadata;
+				return;
+			}
+			var loc = this;
+			window.Context.ClippingRegions.GetAll(function (data) {
+				loc.allRegionsFlat = data;
+				var match = data.find(function (region) {
+					return region.Id !== loc.clippingRegion.Id && region.MetadataId === loc.clippingRegion.MetadataId;
+				});
+				if (match) {
+					loc.hasOwnMetadata = false;
+					loc.sharedWithRegion = { Id: match.Id, Caption: match.Caption, Version: match.Version, MetadataId: match.MetadataId };
+				}
+				loc.originalHasOwnMetadata = loc.hasOwnMetadata;
+			});
+		},
+		pickSharedMetadataRegion() {
+			var loc = this;
+			window.Context.ClippingRegions.GetAll(function (data) {
+				loc.allRegionsFlat = data;
+				loc.$refs.metadataSharePicker.show(
+					'Elegir con qué región comparte los metadatos', data, [loc.clippingRegion.Id]);
+			});
+		},
+		onSharedMetadataRegionSelected(item) {
+			this.sharedWithRegion = { Id: item.Id, Caption: item.Caption, Version: item.Version, MetadataId: item.MetadataId };
+		},
+		// Mismo criterio que TreePickerPopup::formatCaption, para distinguir
+		// ediciones de una misma región (ej. varias "Provincias").
+		formatRegionCaption(region) {
+			if (region.Version) {
+				return region.Caption + ' (' + region.Version + ')';
+			}
+			return region.Caption;
 		},
 		pickParent() {
 			var loc = this;
@@ -198,6 +307,10 @@ export default {
 				alert('Debe indicar un valor para \'Nombre\'.');
 				return;
 			}
+			if (!this.isNew && !this.hasOwnMetadata && !this.sharedWithRegion) {
+				alert('Debe elegir con qué región comparte los metadatos.');
+				return;
+			}
 			if (this.isNew) {
 				this.saveNew();
 			} else {
@@ -207,12 +320,28 @@ export default {
 		saveEdit() {
 			var loc = this;
 			this.clippingRegion.NoAutocomplete = !this.useInSearch;
+			this.applyMetadataSharing();
 
 			this.$refs.invoker.doSave(window.Db, window.Db.UpdateClippingRegion,
 							this.clippingRegion).then(function(data) {
 								loc.activateEdit = false;
 								loc.$emit('completed', loc.clippingRegion);
 			});
+		},
+		// Traduce el switch/picker a lo que espera el servidor: la entidad no
+		// tiene un campo propio para 'usa metadatos propios', así que se
+		// resuelve mandando a qué Metadata debe apuntar. Si comparte, referencia
+		// el Metadata de la otra región (sin tocar sus datos: el servidor solo
+		// reconecta por Id). Si pasó de compartido a propio, se manda null para
+		// que el servidor genere uno en blanco al guardar, igual que en el alta
+		// (ver ClippingRegionService::UpdateClippingRegion). Si ya era propio y
+		// no cambió, no se toca: sigue siendo el Metadata completo que ya traía.
+		applyMetadataSharing() {
+			if (!this.hasOwnMetadata && this.sharedWithRegion) {
+				this.clippingRegion.Metadata = { Id: this.sharedWithRegion.MetadataId };
+			} else if (this.hasOwnMetadata && !this.originalHasOwnMetadata) {
+				this.clippingRegion.Metadata = null;
+			}
 		},
 		saveNew() {
 			if (!this.$refs.geoPackage.isReady()) {

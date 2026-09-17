@@ -97,7 +97,7 @@ class PublishSnapshots extends BaseService
 		if ($work['wrk_type'] === 'P')
 		{
 			VersionUpdater::Increment('FAB_METRICS');
-			$cacheManager->CleanFabMetricsCache();
+			$cacheManager->CleanFabListsCache();
 		}
 
 		Profiling::EndTimer();
@@ -134,7 +134,7 @@ class PublishSnapshots extends BaseService
 			$cache->ClearSelectedMetricMetadata($metric['mvr_metric_id']);
 		}
 		VersionUpdater::Increment('FAB_METRICS');
-		$cache->CleanFabMetricsCache();
+		$cache->CleanFabListsCache();
 		$cache->CleanWorkPermissionsCache($workId);
 		$cache->CleanWorkVisiblityCache($workId);
 	}

@@ -49,7 +49,13 @@ App::$app->before(function(Request $request) {
 }, 10000);
 
 App::$app->error(function (\Exception $e, Request $request, $code) {
+
+	Headers::SetErrorHeader('error' . $code);
+
 	Log::LogException($e);
+
+	App::Rollback();
+
 	if (App::Debug())
 		return;
 
@@ -57,7 +63,6 @@ App::$app->error(function (\Exception $e, Request $request, $code) {
 	if ($e instanceof \minga\framework\MessageException || $e instanceof \minga\framework\PublicException)
 	{
 		$text = $e->getPublicMessage();
-		App::Rollback();
 		return new Response($text);
 	} else {
 		return new Response($code . '. Se ha producido un error en el servidor.');

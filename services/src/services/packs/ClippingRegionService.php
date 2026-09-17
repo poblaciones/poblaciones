@@ -87,9 +87,21 @@ class ClippingRegionService extends BaseService
 		}
 	}
 
+	// Si el popup de edición pasó el switch de 'usa metadatos propios' de
+	// compartido a propio, llega con Metadata en null (ver
+	// ClippingRegionPopup.vue::applyMetadataSharing): se le crea uno en
+	// blanco para que quede algo editable, igual que en el alta con
+	// GeoPackage (ver StartImportClippingRegion). El metadata compartido
+	// anterior no se toca: otras regiones pueden seguir usándolo.
 	public function UpdateClippingRegion($clippingRegion)
 	{
 		Profiling::BeginTimer();
+		if ($clippingRegion->getMetadata() === null)
+		{
+			$metadataService = new MetadataService();
+			$metadata = $metadataService->CreateMinimalMetadata($clippingRegion->getCaption(), $clippingRegion->getVersion());
+			$clippingRegion->setMetadata($metadata);
+		}
 		App::Orm()->Save($clippingRegion);
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanClippingCache();

@@ -7,6 +7,8 @@
 			</geography-popup>
 			<geography-clipping-regions-popup ref="editClippingRegionsPopup">
 			</geography-clipping-regions-popup>
+			<items-list-popup ref="itemsPopup">
+			</items-list-popup>
 			<metadata-popup ref="editMetadataPopup">
 			</metadata-popup>
 			<div v-if="canEdit" class="md-layout-item md-size-100">
@@ -35,6 +37,7 @@
 import Context from '@/backoffice/classes/Context';
 import GeographyPopup from './GeographyPopup.vue';
 import GeographyClippingRegionsPopup from './GeographyClippingRegionsPopup.vue';
+import ItemsListPopup from '@/packs/components/popups/ItemsListPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
@@ -44,6 +47,7 @@ import arr from '@/common/framework/arr';
 		components: {
 			GeographyPopup,
 			GeographyClippingRegionsPopup,
+			ItemsListPopup,
 			MetadataPopup
 		},
 	data() {
@@ -74,6 +78,7 @@ import arr from '@/common/framework/arr';
 					tooltip: function (item) { return item.Metadata ? item.Metadata.Title : null; },
 				},
 				{ property: 'RootCaption', caption: 'Relevamiento' },
+				{ property: 'ChildCount', caption: 'Ítems', sortType: 'number' },
 				{ property: 'Gradient.Caption', caption: 'Gradiente' },
 				{ property: 'MaxZoom', caption: 'Zoom máx.', sortType: 'number' },
 				{
@@ -106,6 +111,11 @@ import arr from '@/common/framework/arr';
 					icon: 'map',
 					caption: 'Regiones asociadas',
 					onClick: function (grid, item) { loc.openClippingRegions(item); },
+				},
+				{
+					icon: 'search',
+					caption: 'Ver ítems',
+					onClick: function (grid, item) { loc.openItems(item); },
 				},
 				{
 					icon: 'label',
@@ -141,6 +151,19 @@ import arr from '@/common/framework/arr';
 		},
 		openClippingRegions(item) {
 			this.$refs.editClippingRegionsPopup.show(item);
+		},
+		openItems(item) {
+			this.$refs.itemsPopup.show(
+				'Ítems de ' + item.Caption,
+				[
+					{ property: 'Caption', caption: 'Nombre' },
+					{ property: 'Code', caption: 'Código' },
+					{ property: 'Id', caption: 'Id' },
+				],
+				function (offset, pageSize) {
+					return window.Db.GetGeographyItems(item.Id, offset, pageSize);
+				}
+			);
 		},
 		onRowClick(grid, item) {
 			this.openEdition(item);

@@ -24,14 +24,14 @@
 					<div class="md-layout-item md-size-100">
 						<div class="full-row-separator">Selección de ítems</div>
 					</div>
-					<div class="md-layout-item md-size-40">
-						<div class="mp-label">Ordenar ítems por</div>
+					<div class="md-layout-item md-size-100" style="display: inline-flex;">
+						<div class="mp-label" style="padding-top: 18px; padding-right: 18px;">Ordenar ítems por:</div>
 						<md-radio v-model="boundary.SortBy" class="md-primary" value="N" :disabled="!canEdit">Nombre</md-radio>
 						<md-radio v-model="boundary.SortBy" class="md-primary" value="P" :disabled="!canEdit">Población</md-radio>
 						<md-radio v-model="boundary.SortBy" class="md-primary" value="C" :disabled="!canEdit">Código</md-radio>
 					</div>
-					<div class="md-layout-item md-size-40">
-						<md-switch class="md-primary" :disabled="!canEdit" v-model="boundary.GroupByParent" style="padding-top: 18px">
+					<div class="md-layout-item md-size-100">
+						<md-switch class="md-primary" :disabled="!canEdit" v-model="boundary.GroupByParent" style="padding-bottom: 6px; margin-top: 8px;">
 							Agrupar items al listar para selección (ej. Departamentos se agrupan por Provincia)
 						</md-switch>
 					</div>

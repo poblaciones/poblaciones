@@ -4,6 +4,7 @@ namespace helena\services\packs;
 
 use helena\classes\App;
 use minga\framework\PublicException;
+use minga\framework\Arr;
 
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
@@ -53,8 +54,32 @@ class GeographyService extends BaseService
 		{
 			$this->InsertChildrenOf($geographies, $ret, 0, $root->getId(), $root);
 		}
+		$this->AddChildCount($ret);
 		Profiling::EndTimer();
 		return $ret;
+	}
+
+	private function AddChildCount(&$geographies)
+	{
+		Profiling::BeginTimer();
+		$sql = "SELECT gei_geography_id AS Id, COUNT(*) AS Count
+					FROM geography_item GROUP BY gei_geography_id";
+		$counts = App::Db()->fetchAll($sql);
+		foreach ($geographies as $geography)
+		{
+			$id = $geography->getId();
+			$n = Arr::IndexOfByNamedValue($counts, "Id", $id);
+			if ($n === -1)
+			{
+				$geography->ChildCount = 0;
+			}
+			else
+			{
+				$geography->ChildCount = $counts[$n]['Count'];
+			}
+		}
+		Profiling::EndTimer();
+		return $geographies;
 	}
 
 	private function InsertChildrenOf($geographies, &$ret, $level, $currentId, $current)
@@ -387,8 +412,7 @@ class GeographyService extends BaseService
 			else
 			{
 				$code = $row[$codeIndex];
-				$codeAsNumber = is_numeric($code) ? (float)$code : null;
-				$caption = null;
+				$caption = $code;
 				if ($captionIndex !== null)
 				{
 					$caption = $row[$captionIndex];
@@ -405,12 +429,12 @@ class GeographyService extends BaseService
 
 				if ($parentCodeIndex !== null && $parentGeographyId !== null)
 				{
-					$this->InsertItemWithParent($geographyId, $parentGeographyId, $code, $codeAsNumber, $caption, $wkt, $levels,
+					$this->InsertItemWithParent($geographyId, $parentGeographyId, $code, $caption, $wkt, $levels,
 						$population, $households, $children, $urbanity, $row[$parentCodeIndex]);
 				}
 				else
 				{
-					$this->InsertItem($geographyId, $code, $codeAsNumber, $caption, $wkt, $levels,
+					$this->InsertItem($geographyId, $code, $caption, $wkt, $levels,
 						$population, $households, $children, $urbanity);
 				}
 			}
@@ -450,19 +474,19 @@ class GeographyService extends BaseService
 		}
 	}
 
-	private function InsertItem($geographyId, $code, $codeAsNumber, $caption, $wkt, $levels, $population, $households, $children, $urbanity)
+	private function InsertItem($geographyId, $code, $caption, $wkt, $levels, $population, $households, $children, $urbanity)
 	{
 		$sql = "INSERT INTO geography_item
-			(gei_code, gei_code_as_number, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
+			(gei_code, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
 			 gei_population, gei_households, gei_children, gei_urbanity,
 			 gei_geometry_r1, gei_geometry_r2, gei_geometry_r3, gei_geometry_r4, gei_geometry_r5, gei_geometry_r6,
 			 gei_geography_id)
-			VALUES (?, ?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
+			VALUES (?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
 			 ?, ?, ?, ?,
 			 ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?),
 			 ?)";
 		App::Db()->execute($sql, array(
-			$code, $codeAsNumber, $caption, $wkt, $wkt, $wkt,
+			$code, $caption, $wkt, $wkt, $wkt,
 			$population, $households, $children, $urbanity,
 			$levels[0], $levels[1], $levels[2], $levels[3], $levels[4], $levels[5],
 			$geographyId));
@@ -471,20 +495,20 @@ class GeographyService extends BaseService
 	// El padre se resuelve por código dentro de la geografía padre, ya
 	// existente: no es una auto-referencia entre los ítems que se están
 	// insertando ahora.
-	private function InsertItemWithParent($geographyId, $parentGeographyId, $code, $codeAsNumber, $caption, $wkt, $levels,
+	private function InsertItemWithParent($geographyId, $parentGeographyId, $code, $caption, $wkt, $levels,
 		$population, $households, $children, $urbanity, $parentCode)
 	{
 		$sql = "INSERT INTO geography_item
-			(gei_code, gei_code_as_number, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
+			(gei_code, gei_caption, gei_geometry, gei_geometry_is_null, gei_centroid, gei_area_m2,
 			 gei_population, gei_households, gei_children, gei_urbanity,
 			 gei_geometry_r1, gei_geometry_r2, gei_geometry_r3, gei_geometry_r4, gei_geometry_r5, gei_geometry_r6,
 			 gei_geography_id, gei_parent_id)
-			SELECT ?, ?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
+			SELECT ?, ?, ST_GeomFromText(?), 0, GeometryCentroid(ST_GeomFromText(?)), GeometryAreaSphere(ST_GeomFromText(?)),
 			 ?, ?, ?, ?,
 			 ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?), ST_GeomFromText(?),
 			 ?, (SELECT gei_id FROM geography_item WHERE gei_code = ? AND gei_geography_id = ? LIMIT 1)";
 		App::Db()->execute($sql, array(
-			$code, $codeAsNumber, $caption, $wkt, $wkt, $wkt,
+			$code, $caption, $wkt, $wkt, $wkt,
 			$population, $households, $children, $urbanity,
 			$levels[0], $levels[1], $levels[2], $levels[3], $levels[4], $levels[5],
 			$geographyId, $parentCode, $parentGeographyId));
@@ -534,5 +558,21 @@ class GeographyService extends BaseService
 			$current = $current->getParent();
 		}
 		return $level;
+	}
+
+	// Para la acción 'Ver ítems' (debug) sobre la columna 'Ítems' del listado.
+	public function GetGeographyItems($geographyId, $offset, $limit)
+	{
+		Profiling::BeginTimer();
+		$total = App::Db()->fetchScalarInt(
+			"SELECT COUNT(*) FROM geography_item WHERE gei_geography_id = ?", array($geographyId));
+		$limitInt = (int)$limit;
+		$offsetInt = (int)$offset;
+		$rows = App::Db()->fetchAll(
+			"SELECT gei_id AS Id, gei_code AS Code, gei_caption AS Caption
+			 FROM geography_item WHERE gei_geography_id = ?
+			 ORDER BY gei_id LIMIT $limitInt OFFSET $offsetInt", array($geographyId));
+		Profiling::EndTimer();
+		return array('Items' => $rows, 'Total' => $total);
 	}
 }

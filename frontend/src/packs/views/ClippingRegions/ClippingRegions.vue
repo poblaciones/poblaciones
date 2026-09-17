@@ -41,6 +41,7 @@ import ItemsListPopup from '@/packs/components/popups/ItemsListPopup.vue';
 import MetadataPopup from '../Metadata/MetadataPopup.vue';
 import f from '@/backoffice/classes/Formatter';
 import arr from '@/common/framework/arr';
+import c from '@/common/framework/color';
 
 
 	export default {
@@ -54,6 +55,9 @@ import arr from '@/common/framework/arr';
 	data() {
 		return {
 			list: [],
+			// { metadataId: colorHex }, solo para los metadata_id que se repiten
+			// en más de una región (ver calculateSharedMetadataColors).
+			sharedMetadataColors: {},
 			};
 	},
 	computed: {
@@ -134,6 +138,8 @@ import arr from '@/common/framework/arr';
 				{
 					icon: 'label',
 					caption: 'Metadatos',
+					iconStyle: function (item) { return loc.resolveMetadataColor(item) ? 'color: #' + loc.resolveMetadataColor(item) : ''; },
+					badge: function (item) { return loc.resolveMetadataColor(item) ? item.MetadataId : null; },
 					isEnabled: function (item) { return !!item.MetadataId; },
 					onClick: function (grid, item) { loc.openMetadata({ Id: item.MetadataId }); },
 				},
@@ -141,13 +147,42 @@ import arr from '@/common/framework/arr';
 		},
 	},
 	mounted() {
-		var loc = this;
-		this.$refs.invoker.doMessage('Obteniendo regiones', window.Db,
-				window.Db.GetClippingRegions).then(function(data) {
-					arr.AddRange(loc.list, data);
-			});
+		this.reloadList();
 	},
 	methods: {
+		reloadList() {
+			var loc = this;
+			return this.$refs.invoker.doMessage('Obteniendo regiones', window.Db,
+					window.Db.GetClippingRegions).then(function(data) {
+						arr.ReplaceAll(loc.list, data);
+						loc.calculateSharedMetadataColors();
+				});
+		},
+		// Colorea (ver resolveMetadataColor) solo los metadata_id que aparecen
+		// en más de una región: es la señal de que están compartidos entre sí.
+		// Los que no se repiten quedan sin color, para no generar ruido visual
+		// ni volver a exponer el id crudo en la grilla.
+		calculateSharedMetadataColors() {
+			var counts = {};
+			this.list.forEach(function (item) {
+				if (item.MetadataId) {
+					counts[item.MetadataId] = (counts[item.MetadataId] || 0) + 1;
+				}
+			});
+			var sharedIds = Object.keys(counts).filter(function (id) { return counts[id] > 1; });
+			var palete = c.GetColorPalete();
+			var colors = {};
+			sharedIds.forEach(function (id, index) {
+				colors[id] = palete[index % palete.length];
+			});
+			this.sharedMetadataColors = colors;
+		},
+		resolveMetadataColor(item) {
+			if (!item.MetadataId) {
+				return '';
+			}
+			return this.sharedMetadataColors[item.MetadataId] || '';
+		},
 		formatBool(v) {
 			if (v) {
 				return 'Sí';
@@ -208,7 +243,18 @@ import arr from '@/common/framework/arr';
 				loc.$refs.editMetadataPopup.show(activeMetadata);
 			});
 		},
+		// En un alta, 'item' (el resultado del import) no necesariamente queda
+		// al final de la jerarquía a la que pertenece: agregarlo a mano al
+		// final de this.list rompe la reconstrucción del árbol
+		// (ListToTreeFromIndentedItems arma la jerarquía por posición en la
+		// lista, no por referencia al padre). Recargar desde el servidor, que
+		// sí entrega el orden correcto, evita el problema.
 		popupSaved(item) {
+			window.Context.ClippingRegions.Invalidate();
+			if (!arr.ContainsById(this.list, item.Id)) {
+				this.reloadList();
+				return;
+			}
 			if (item.Level === undefined || item.Level === null) {
 				if (item.Parent) {
 					item.Level = item.Parent.Level + 1;
@@ -217,7 +263,7 @@ import arr from '@/common/framework/arr';
 				}
 			}
 			arr.ReplaceByIdOrAdd(this.list, item);
-			window.Context.ClippingRegions.Invalidate();
+			this.calculateSharedMetadataColors();
 		},
 		deleteConfirmMessage(item) {
 			return 'Esta acción no puede deshacerse: se eliminará la región \'' + item.Caption

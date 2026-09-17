@@ -49,6 +49,11 @@ module.exports = {
 			params: args,
 			headers: h
 		})).then(function (res) {
+			if (res.headers['error-header'] && res.headers['error-header'].length > 0) {
+				const err = new Error('Request failed');
+				err.response = res;
+				throw err;
+			}
 			session.ReceiveSession(url, res);
 			return res;
 		});
@@ -75,6 +80,11 @@ module.exports = {
 			}
 		}
 		return axios.post(url, querystring.stringify(args), session.AddSession(url, config)).then(function (res) {
+			if (res.headers['error-header'] && res.headers['error-header'].length > 0) {
+				const err = new Error('Request failed');
+				err.response = res;
+				throw err;
+			}
 			session.ReceiveSession(url, res);
 			return res;
 		});

@@ -219,8 +219,7 @@ const GROUP_LEVEL = -1;
 			var loc = this;
 			this.$refs.invoker.doMessage('Obteniendo delimitaciones', window.Db,
 					window.Db.GetBoundaries).then(function(data) {
-						loc.list = [];
-						arr.AddRange(loc.list, data);
+						arr.ReplaceAll(loc.list, data);
 						loc.uniqueMetadatas = [];
 						loc.list.forEach(function (item) {
 							var id = loc.resolveVersionMetadataId(item);
@@ -363,7 +362,18 @@ const GROUP_LEVEL = -1;
 			var positionTrimed = position % palete.length;
 			return palete[positionTrimed];
 		},
+		// UpdateBoundary no devuelve la entidad guardada (ver Db.js), así que
+		// en un alta 'item' sigue siendo el clon local: sin Id ni Order
+		// reales. Mezclarlo a mano en this.list, además, rompe la
+		// reconstrucción del árbol (ListToTreeFromIndentedItems arma la
+		// jerarquía por posición en la lista, no por referencia al padre) si
+		// no queda exactamente al final. Recargar desde el servidor evita
+		// ambos problemas de una vez.
 		popupSaved(item) {
+			if (!arr.ContainsById(this.list, item.Id)) {
+				this.reloadList();
+				return;
+			}
 			item.Level = 0;
 			arr.ReplaceByIdOrAdd(this.list, item);
 		},

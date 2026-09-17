@@ -19,13 +19,14 @@ class BoundaryService extends BaseService
 	public function GetNewBoundary()
 	{
 		$entity = new entities\Boundary();
-		// SortBy y GroupByParent son NOT NULL en la base (con default allá,
-		// pero se fija acá también para no depender de eso). Tag e Icon son
-		// nullable: no necesitan un valor inicial. Tag además tiene índice
-		// único (identificador para WFS, ver el auto-completado en
+		// SortBy, GroupByParent e IsSuggestion son NOT NULL en la base (con
+		// default allá, pero se fija acá también para no depender de eso). Tag
+		// e Icon son nullable: no necesitan un valor inicial. Tag además tiene
+		// índice único (identificador para WFS, ver el auto-completado en
 		// BoundaryPopup.vue, que lo genera a partir del Nombre).
 		$entity->setSortBy('N');
 		$entity->setGroupByParent(false);
+		$entity->setIsSuggestion(false);
 		return $entity;
 	}
 
@@ -124,7 +125,7 @@ class BoundaryService extends BaseService
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();
 		VersionUpdater::Increment('FAB_METRICS');
-		$cacheManager->CleanFabMetricsCache();
+		$cacheManager->CleanFabListsCache();
 
 		Profiling::EndTimer();
 		return self::OK;
@@ -213,7 +214,7 @@ class BoundaryService extends BaseService
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();
 		VersionUpdater::Increment('FAB_METRICS');
-		$cacheManager->CleanFabMetricsCache();
+		$cacheManager->CleanFabListsCache();
 
 		Profiling::EndTimer();
 		return self::OK;
@@ -251,7 +252,7 @@ class BoundaryService extends BaseService
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();
 		VersionUpdater::Increment('FAB_METRICS');
-		$cacheManager->CleanFabMetricsCache();
+		$cacheManager->CleanFabListsCache();
 
 		$summary = App::Db()->fetchScalarNullable(
 			"SELECT GROUP_CONCAT(
@@ -332,7 +333,7 @@ class BoundaryService extends BaseService
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();
 		VersionUpdater::Increment('FAB_METRICS');
-		$cacheManager->CleanFabMetricsCache();
+		$cacheManager->CleanFabListsCache();
 
 		Profiling::EndTimer();
 		return self::OK;

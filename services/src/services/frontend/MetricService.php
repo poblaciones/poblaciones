@@ -7,7 +7,7 @@ use minga\framework\Arr;
 
 use helena\caches\MetricGroupsMetadataCache;
 use helena\caches\MetricProvidersMetadataCache;
-use helena\caches\FabMetricsCache;
+use helena\caches\FabListsCache;
 use helena\services\common\BaseService;
 use minga\framework\PublicException;
 

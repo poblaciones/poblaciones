@@ -73,6 +73,15 @@ module.exports = {
 					post += '.';
 				}
 			}
+			if (err.response && err.response.headers && err.response.headers['error-header']) {
+				const errorHeader = err.response.headers['error-header'];
+				if (errorHeader.startsWith('[PD-E]:')) {
+					post = ' [DEBUG] ' + errorHeader.substr(7).replace("\n", "<br>");
+					if (!post.endsWith('.')) {
+						post += '.';
+					}
+				}
+			}
 		}
 		// Pone el mensaje visual
 		alert(str.AddDot(pre + text) + post + '\n\nSi el problema persiste, póngase en contacto con soporte para que podamos solucionar el inconveniente.');

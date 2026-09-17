@@ -132,6 +132,11 @@ Db.prototype.GetClippingRegionItems = function (clippingRegionId, offset, pageSi
 		{ r: clippingRegionId, o: offset, l: pageSize }, 'obtener los ítems');
 };
 
+Db.prototype.GetGeographyItems = function (geographyId, offset, pageSize) {
+	return axiosClient.getPromise(window.host + '/services/packs/GetGeographyItems',
+		{ g: geographyId, o: offset, l: pageSize }, 'obtener los ítems');
+};
+
 Db.prototype.GetClippingRegionGeographyIntersectionItems = function (crgId, offset, pageSize) {
 	return axiosClient.getPromise(window.host + '/services/packs/GetClippingRegionGeographyIntersectionItems',
 		{ c: crgId, o: offset, l: pageSize }, 'obtener los ítems');

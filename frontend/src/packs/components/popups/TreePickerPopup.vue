@@ -11,7 +11,7 @@
 					hasChildren />
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="activateDialog = false">Cancelar</md-button>
+				<md-button @click="activateDialog = false">Cerrar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>
@@ -48,16 +48,47 @@ export default {
 				{
 					property: 'Caption', caption: 'Nombre',
 					value: function (item) {
+						var caption = loc.formatCaption(item);
 						if (loc.isExcluded(item)) {
-							return item.Caption + ' (ya agregada)';
+							return caption + ' (ya agregada)';
 						}
-						return item.Caption;
+						return caption;
 					},
 				},
 			];
 		},
 	},
+	watch: {
+		// Este picker siempre se abre desde otro popup ya activo (md-dialog):
+		// Vue Material monta cada md-dialog como hijo directo de <body> (ver
+		// MdPortal en el paquete vue-material), así que dos diálogos abiertos
+		// quedan como hermanos en el DOM, no uno anidado dentro del otro. El
+		// keydown.esc que cada md-dialog escucha en su propio contenedor solo
+		// se dispara si el foco quedó ahí adentro; si al abrir este picker el
+		// foco sigue en el popup de abajo (por ejemplo, en el botón que lo
+		// abrió), el ESC termina cerrando ese popup de abajo en vez de este,
+		// dejando a este picker huérfano. Se intercepta acá, en fase de
+		// captura (antes de que el evento llegue a burbujear por el popup de
+		// abajo), mientras este picker está activo.
+		activateDialog(isActive) {
+			if (isActive) {
+				document.addEventListener('keydown', this.handleEscCapture, true);
+			} else {
+				document.removeEventListener('keydown', this.handleEscCapture, true);
+			}
+		},
+	},
+	beforeDestroy() {
+		document.removeEventListener('keydown', this.handleEscCapture, true);
+	},
 	methods: {
+		handleEscCapture(e) {
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				e.stopPropagation();
+				this.activateDialog = false;
+			}
+		},
 		show(title, flatItems, excludeIds) {
 			this.title = title;
 			this.flatItems = flatItems;
@@ -66,6 +97,19 @@ export default {
 		},
 		isExcluded(item) {
 			return this.excludeIds.indexOf(item.Id) !== -1;
+		},
+		// Geografías y regiones pueden repetir el mismo nombre entre
+		// distintos censos o ediciones (ej. varias "Provincias"): sin la
+		// revisión/versión a la vista, no habría forma de distinguirlas
+		// en este selector.
+		formatCaption(item) {
+			if (item.Revision) {
+				return item.Caption + ' (' + item.Revision + ')';
+			}
+			if (item.Version) {
+				return item.Caption + ' (' + item.Version + ')';
+			}
+			return item.Caption;
 		},
 		onRowClick(grid, item) {
 			if (this.isExcluded(item)) {

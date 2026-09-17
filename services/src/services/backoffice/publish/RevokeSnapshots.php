@@ -112,7 +112,7 @@ class RevokeSnapshots extends BaseService
 		if ($this->work['wrk_type'] === 'P')
 		{
 			VersionUpdater::Increment('FAB_METRICS');
-			$this->cacheManager->CleanFabMetricsCache();
+			$this->cacheManager->CleanFabListsCache();
 		}
 		// Borra
 		$this->snapshotsManager->DeleteMetricVersionsByWork($this->workId);

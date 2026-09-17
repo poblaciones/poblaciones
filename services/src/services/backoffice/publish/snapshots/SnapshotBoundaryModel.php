@@ -4,7 +4,7 @@ namespace helena\services\backoffice\publish\snapshots;
 
 use helena\caches\BoundaryCache;
 use helena\caches\SelectedBoundaryCache;
-use helena\caches\FabMetricsCache;
+use helena\caches\FabListsCache;
 
 use helena\caches\BoundaryVisiblityCache;
 use helena\caches\BoundaryDownloadCache;
@@ -27,7 +27,7 @@ class SnapshotBoundaryModel
 
 		VersionUpdater::Increment('BOUNDARY_VIEW');
 
-		FabMetricsCache::Cache()->Clear();
+		FabListsCache::Cache()->Clear();
 
 		VersionUpdater::Increment('FAB_METRICS');
 		$cacheManager = new CacheManager();
@@ -68,7 +68,7 @@ class SnapshotBoundaryModel
 		$ret = App::Db()->exec($sql);
 		App::Db()->markTableUpdate('snapshot_boundary_version_item');
 
-		FabMetricsCache::Cache()->Clear();
+		FabListsCache::Cache()->Clear();
 
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanBoundariesCache();

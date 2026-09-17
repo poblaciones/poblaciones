@@ -22,6 +22,16 @@ module.exports = {
 	AddRange(arr, arrValues) {
 		arr.push.apply(arr, arrValues);
 	},
+	// Reemplaza todo el contenido en una sola mutación reactiva de Vue, a
+	// diferencia de Fill (Clear + AddRange), que lo hace en dos pasos y por
+	// lo tanto pasa por un estado intermedio de longitud 0. Ese paso
+	// intermedio le hace creer a MpGrid que se trata de una carga inicial
+	// (ver su watch de 'items'), reseteando a "todo expandido" el estado de
+	// expandido/colapsado que el usuario ya tenía en una grilla jerárquica.
+	// Usar acá en vez de Fill al recargar un listado ya mostrado.
+	ReplaceAll(arr, newValues) {
+		arr.splice.apply(arr, [0, arr.length].concat(newValues));
+	},
 	InsertAt(arr, index, value) {
 		arr.splice(index, 0, value);
 	},

@@ -7,7 +7,7 @@ use minga\framework\Arr;
 use helena\classes\Session;
 use helena\classes\App;
 
-use helena\caches\FabMetricsCache;
+use helena\caches\FabListsCache;
 use helena\services\common\BaseService;
 use helena\services\admin\StatisticsService;
 
@@ -25,13 +25,13 @@ class FabService extends BaseService
 		$data = null;
 		$key = 'B' . $shard;
 
-		if (FabMetricsCache::Cache()->HasData($key, $data))
+		if (FabListsCache::Cache()->HasData($key, $data))
 			return self::RemovePrivateFabBoundaries($data);
 
 		$table = new BoundaryModel();
 		$data = $table->GetBoundariesWithItems();
 
-		FabMetricsCache::Cache()->PutData($key, $data);
+		FabListsCache::Cache()->PutData($key, $data);
 		return self::RemovePrivateFabBoundaries($data);
 	}
 
@@ -43,14 +43,14 @@ class FabService extends BaseService
 		$metricsService = new MetricService();
 		$providers = $metricsService->GetMetricProviders();
 
-		if (FabMetricsCache::Cache()->HasData($key, $data))
+		if (FabListsCache::Cache()->HasData($key, $data))
 			$ret = $data;
 		else
 		{
 			// Arma los grupos con métricas
 			$ret = $this->CalculateMetrics($providers, true);
 		}
-		FabMetricsCache::Cache()->PutData($key, $ret);
+		FabListsCache::Cache()->PutData($key, $ret);
 
 		if ($incluseUserInfo)
 		{
@@ -82,12 +82,12 @@ class FabService extends BaseService
 		$shard = App::Settings()->Shard()->CurrentShard;
 		$data = null;
 
-		if (FabMetricsCache::Cache()->HasData($shard, $data))
+		if (FabListsCache::Cache()->HasData($shard, $data))
 			return self::RemovePrivateBoundaries($data);
 
 		$data = $this->CalculateFab();
 
-		FabMetricsCache::Cache()->PutData($shard, $data);
+		FabListsCache::Cache()->PutData($shard, $data);
 		return self::RemovePrivateBoundaries($data);
 	}
 

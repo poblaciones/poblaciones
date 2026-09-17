@@ -41,7 +41,29 @@ export default {
 			return this.getNewlyCheckedIds().length > 0;
 		},
 	},
+	watch: {
+		// Este popup se abre siempre desde otro popup ya activo (md-dialog):
+		// ver el comentario en TreePickerPopup.vue sobre por qué el ESC, sin
+		// esto, termina cerrando ese popup de abajo en vez de este.
+		activateEdit(isActive) {
+			if (isActive) {
+				document.addEventListener('keydown', this.handleEscCapture, true);
+			} else {
+				document.removeEventListener('keydown', this.handleEscCapture, true);
+			}
+		},
+	},
+	beforeDestroy() {
+		document.removeEventListener('keydown', this.handleEscCapture, true);
+	},
 	methods: {
+		handleEscCapture(e) {
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				e.stopPropagation();
+				this.activateEdit = false;
+			}
+		},
 		// allClippingRegions es la lista jerárquica de GetClippingRegions,
 		// ya con Level calculado: se muestra completa, indentada por
 		// nivel, sin agrupar (a diferencia de las geografías, acá la
