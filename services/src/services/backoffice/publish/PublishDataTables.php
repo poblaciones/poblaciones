@@ -548,9 +548,27 @@ class PublishDataTables
 		// 2. Libera referencias a columnas
 		$this->UnlockColumns($workId);
 		// 2. Borra work (tiene triggers y cascade para las demás tablas)
+		// Antes de borrar, guarda qué metrics tenían versiones publicadas
+		$affectedMetricsSql = "SELECT DISTINCT mvr_metric_id FROM metric_version WHERE mvr_work_id = ?";
+		$affectedMetricsShardified = App::Db()->fetchAllColumn($affectedMetricsSql, array($workId));
+
 		$query = "DELETE metric_version FROM metric_version WHERE mvr_work_id = ?";
 		App::Db()->exec($query, array($workId));
 		App::Db()->markTableUpdate("metric_version");
+
+		// Reindexa los metrics afectados. Los ids recién traídos son de
+		// la tabla pública (shardified);
+		if (sizeof($affectedMetricsShardified) > 0)
+		{
+			$cacheManager = new CacheManager();
+			$snapshotsManager = new SnapshotsManager();
+			foreach ($affectedMetricsShardified as $metricIdShardified)
+			{
+				$metricId = self::Unshardify($metricIdShardified);
+				$cacheManager->ClearMetricMetadata($metricId);
+				$snapshotsManager->UpdateMetricMetadata($metricId);
+			}
+		}
 		// Preserva metadata
 		$metSql = "SELECT wrk_metadata_id FROM work WHERE wrk_id = ?";
 		$metadataId = App::Db()->fetchScalarIntNullable($metSql, array($workId));

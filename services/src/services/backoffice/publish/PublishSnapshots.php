@@ -68,20 +68,11 @@ class PublishSnapshots extends BaseService
 		$workModel = new WorkModel();
 		$metricVersions = $workModel->GetMetricVersions($workId);
 
-		// Los datos cambian por metricVersion; los metadatos sólo por metric.
-		if (sizeof($metricVersions) === 0)
-		{
-			$snapshotsManager->DeleteMetricVersionsByWork($workId);
-			$this->ClearRemovedMetrics($workId, $metricVersions);
-			Profiling::EndTimer();
-			return;
-		}
 		// Actualiza los metric
-		if ($work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
+		if (sizeof($metricVersions) === 0 || $work['wrk_metric_data_changed'] || $work['wrk_dataset_data_changed'] || $work['wrk_metric_labels_changed'])
 		{
 			// Se asegura de dejar limpio
 			$snapshotsManager->DeleteMetricVersionsByWork($workId);
-			$this->ClearRemovedMetrics($workId, $metricVersions);
 		}
 		foreach($metricVersions as $metricVersion)
 		{
@@ -99,22 +90,7 @@ class PublishSnapshots extends BaseService
 			VersionUpdater::Increment('FAB_METRICS');
 			$cacheManager->CleanFabListsCache();
 		}
-
 		Profiling::EndTimer();
-	}
-
-	private function ClearRemovedMetrics($workId, $metricVersions)
-	{
-		$cacheManager = new CacheManager();
-		$workIdShardified = PublishDataTables::Shardified($workId);
-		$publicWorkModel = new WorkModel(false);
-		$previousMetricVersions = PublishDataTables::UnshardifyList($publicWorkModel->GetMetricVersions($workIdShardified),
-																																				array('mvr_id', 'mvr_metric_id'));
-		$removedMetricVersions = Arr::RemoveByField('mvr_id', $previousMetricVersions, $metricVersions);
-		foreach($removedMetricVersions as $row)
-		{
-			$cacheManager->ClearMetricMetadata($row['mvr_metric_id']);
-		}
 	}
 
 	public function UpdateWorkVisibility($workId)

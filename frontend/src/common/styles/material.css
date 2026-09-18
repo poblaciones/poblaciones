@@ -379,6 +379,10 @@
 	max-width: calc(min(1100px, 95%)) !important;
 }
 
+.ck.ck-balloon-panel.ck-balloon-panel_visible {
+	display: block;
+	z-index: 10000;
+}
 
 .content-sized-dialog > .md-dialog-container {
 	max-width: unset!important;

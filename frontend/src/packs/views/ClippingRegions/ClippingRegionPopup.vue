@@ -109,7 +109,7 @@
 					<div class="md-layout-item md-size-100" v-if="!isNew">
 						<div class="full-row-separator">Metadatos</div>
 					</div>
-					<div class="md-layout-item md-size-30" v-if="!isNew">
+					<div class="md-layout-item md-size-30" v-if="!isNew" style="padding-top: 10px;">
 						<md-switch class="md-primary" :disabled="!canEdit" v-model="hasOwnMetadata">
 							Usa metadatos propios
 						</md-switch>
