@@ -97,5 +97,56 @@ class MetadataService extends BaseService
 
 		return $ret;
 	}
+
+	// Borra un metadata si nadie más lo referencia todavía. $usageChecks
+	// es una lista de [sql, params], cada uno debe devolver cuántas OTRAS
+	// filas siguen usando ese mismo metadata; si cualquiera da más de
+	// cero, no se toca. Se deja vacío cuando el modelo de datos ya
+	// garantiza que nunca se comparte (BoundaryVersion, GeographyTuple:
+	// siempre exclusivo). ClippingRegion sí puede compartirse
+	// explícitamente entre varias regiones, así que pasa su propio check.
+	public function DeleteMetadataIfNotUsedElsewhere($metadataId, $usageChecks = array())
+	{
+		if ($metadataId === null)
+			return;
+		foreach ($usageChecks as $check)
+		{
+			$count = App::Db()->fetchScalarInt($check[0], $check[1]);
+			if ($count > 0)
+				return;
+		}
+		$this->DeleteMetadataAndContact($metadataId);
+	}
+
+	// metadata_ibfk_1 (met_contact_id -> contact.con_id) tiene ON DELETE
+	// CASCADE: borrar el contacto borra el metadata solo, y con él en
+	// cascada también sus relaciones con instituciones o fuentes si las
+	// tuviera (ver BoundaryService, de donde se trajo este mecanismo).
+	// met_contact_id es NOT NULL: todo metadata tiene contacto, siempre
+	// hay uno para borrar. Libera los adjuntos antes: metadata_file tiene
+	// cascade desde metadata, pero metadata_file->file no tiene cascade
+	// en esa dirección (solo file->metadata_file), así que sin este paso
+	// el registro de file (y lo que tenga de contenido asociado) queda
+	// huérfano.
+	public function DeleteMetadataAndContact($metadataId)
+	{
+		$this->DeleteMetadataFiles($metadataId);
+
+		$contactId = App::Db()->fetchScalarInt(
+			"SELECT met_contact_id FROM metadata WHERE met_id = ?", array($metadataId));
+		App::Db()->delete('contact', array('con_id' => $contactId));
+	}
+
+	private function DeleteMetadataFiles($metadataId)
+	{
+		$filesRes = App::Db()->fetchAll(
+			"SELECT fil_id FROM file JOIN metadata_file ON mfi_file_id = fil_id WHERE mfi_metadata_id = ?",
+			array($metadataId));
+		App::Db()->delete('metadata_file', array('mfi_metadata_id' => $metadataId));
+		foreach ($filesRes as $row)
+		{
+			App::Db()->delete('file', array('fil_id' => $row['fil_id']));
+		}
+	}
 }
 

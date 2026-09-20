@@ -66,45 +66,27 @@ class GeographyTupleService extends BaseService
 		if ($tuple->getMetadata() === null)
 		{
 			$title = $tuple->getGeography()->getCaption() . ' - equivalencia con revisión anterior';
-			$tuple->setMetadata($this->CreateMetadata($title));
+			$metadataService = new MetadataService();
+			$tuple->setMetadata($metadataService->CreateMinimalMetadata($title, null));
 		}
 		App::Orm()->Save($tuple);
 		Profiling::EndTimer();
 		return self::OK;
 	}
 
-	// Mismos valores iniciales que WorkService::CreateMetadata, con
-	// met_type = 'C' (metadata sin un Work asociado, confirmado contra
-	// MetadataService::GetMetadataInfo) y sin Contact (nullable acá, a
-	// diferencia de DraftMetadata). met_id no es autonumérico (a
-	// diferencia de las tablas draft_*): hay que resolverlo a mano antes
-	// de guardar, con el mismo mecanismo que ya usa el resto del sistema
-	// para esta tabla (MetadataService::EnsureId, que busca el máximo
-	// múltiplo de 100 y usa el siguiente).
-	private function CreateMetadata($title)
-	{
-		$metadata = new entities\Metadata();
-		$metadata->setTitle($title);
-		$metadata->setAbstract('');
-		$metadata->setStatus('B');
-		$metadata->setAuthors('');
-		$metadata->setCoverageCaption('');
-		$metadata->setLicense('{"licenseType":1,"licenseOpen":"always","licenseCommercial":1,"licenseVersion":"4.0/deed.es"}');
-		$metadata->setType('C');
-		$metadata->setLanguage('es; Español');
-		$metadata->setCreate(new \DateTime());
-		$metadata->setUpdate(new \DateTime());
-		$metadataService = new MetadataService();
-		$metadataService->EnsureId(entities\Metadata::class, $metadata);
-		App::Orm()->Save($metadata);
-		return $metadata;
-	}
-
 	public function DeleteGeographyTuple($tuple)
 	{
 		Profiling::BeginTimer();
 		App::Db()->delete('geography_tuple_item', array('gti_geography_tuple_id' => $tuple->getId()));
+		$metadata = $tuple->getMetadata();
 		App::Orm()->delete($tuple);
+		if ($metadata !== null)
+		{
+			// gtu_metadata_id es NOT NULL y nunca se comparte entre
+			// tuplas: no hace falta pasar checks.
+			$metadataService = new MetadataService();
+			$metadataService->DeleteMetadataIfNotUsedElsewhere($metadata->getId());
+		}
 		Profiling::EndTimer();
 		return self::OK;
 	}

@@ -549,6 +549,12 @@ class PublishDataTables
 		$this->UnlockColumns($workId);
 		// 2. Borra work (tiene triggers y cascade para las demás tablas)
 		// Antes de borrar, guarda qué metrics tenían versiones publicadas
+		// para reindexarlos después. Si un metric se queda sin ninguna
+		// versión (el work elimina todos sus niveles/versiones para ese
+		// indicador), ningún paso posterior vuelve a pedir su reindexado
+		// -ya no aparece entre las metric_versions activas del draft- y
+		// snapshot_metric_version queda con datos de versiones que ya no
+		// existen.
 		$affectedMetricsSql = "SELECT DISTINCT mvr_metric_id FROM metric_version WHERE mvr_work_id = ?";
 		$affectedMetricsShardified = App::Db()->fetchAllColumn($affectedMetricsSql, array($workId));
 
@@ -557,7 +563,8 @@ class PublishDataTables
 		App::Db()->markTableUpdate("metric_version");
 
 		// Reindexa los metrics afectados. Los ids recién traídos son de
-		// la tabla pública (shardified);
+		// la tabla pública (shardified); UpdateMetricMetadata/
+		// ClearMetricMetadata esperan el id en espacio draft.
 		if (sizeof($affectedMetricsShardified) > 0)
 		{
 			$cacheManager = new CacheManager();
@@ -582,6 +589,19 @@ class PublishDataTables
 		// Borra metadata
 		if ($metadataId !== null)
 		{
+			// metadata_file tiene cascade desde metadata (se borra solo
+			// al borrar metadata más abajo), pero metadata_file->file
+			// tiene el cascade en la dirección contraria (solo
+			// file->metadata_file): sin este paso, el file queda
+			// huérfano, sin ninguna fila de metadata_file que lo
+			// referencie.
+			$affectedFilesSql = "SELECT fil_id FROM file JOIN metadata_file ON mfi_file_id = fil_id WHERE mfi_metadata_id = ?";
+			$affectedFiles = App::Db()->fetchAllColumn($affectedFilesSql, array($metadataId));
+			foreach ($affectedFiles as $fileId)
+			{
+				App::Db()->delete('file', array('fil_id' => $fileId));
+			}
+
 			$query = "DELETE FROM metadata WHERE met_id = ?";
 			App::Db()->exec($query, array($metadataId));
 			App::Db()->markTableUpdate("metadata");

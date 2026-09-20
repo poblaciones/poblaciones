@@ -93,9 +93,19 @@ class ClippingRegionService extends BaseService
 	// blanco para que quede algo editable, igual que en el alta con
 	// GeoPackage (ver StartImportClippingRegion). El metadata compartido
 	// anterior no se toca: otras regiones pueden seguir usándolo.
+	// A la inversa (de propio a compartido), llega apuntando al Metadata
+	// de otra región: el que tenía esta antes queda sin ninguna
+	// referencia y se libera, salvo que alguna otra región ya lo
+	// estuviera usando también.
 	public function UpdateClippingRegion($clippingRegion)
 	{
 		Profiling::BeginTimer();
+		$previousMetadataId = null;
+		if ($clippingRegion->getId() !== null)
+		{
+			$previousMetadataId = App::Db()->fetchScalarIntNullable(
+				"SELECT clr_metadata_id FROM clipping_region WHERE clr_id = ?", array($clippingRegion->getId()));
+		}
 		if ($clippingRegion->getMetadata() === null)
 		{
 			$metadataService = new MetadataService();
@@ -103,6 +113,16 @@ class ClippingRegionService extends BaseService
 			$clippingRegion->setMetadata($metadata);
 		}
 		App::Orm()->Save($clippingRegion);
+
+		$newMetadataId = $clippingRegion->getMetadata()->getId();
+		if ($previousMetadataId !== null && $previousMetadataId !== $newMetadataId)
+		{
+			$metadataService = new MetadataService();
+			$metadataService->DeleteMetadataIfNotUsedElsewhere($previousMetadataId, array(
+				array("SELECT COUNT(*) FROM clipping_region WHERE clr_metadata_id = ?", array($previousMetadataId)),
+			));
+		}
+
 		$cacheManager = new CacheManager();
 		$cacheManager->CleanClippingCache();
 		Profiling::EndTimer();
@@ -144,7 +164,17 @@ class ClippingRegionService extends BaseService
 			 WHERE crg.crg_clipping_region_id = ?", array($id));
 		App::Db()->delete('clipping_region_geography', array('crg_clipping_region_id' => $id));
 		App::Db()->delete('clipping_region_item', array('cli_clipping_region_id' => $id));
+
+		$metadata = $clippingRegion->getMetadata();
 		App::Orm()->delete($clippingRegion);
+
+		if ($metadata !== null)
+		{
+			$metadataService = new MetadataService();
+			$metadataService->DeleteMetadataIfNotUsedElsewhere($metadata->getId(), array(
+				array("SELECT COUNT(*) FROM clipping_region WHERE clr_metadata_id = ?", array($metadata->getId())),
+			));
+		}
 	}
 
 	// ---------------------------------------------------------------

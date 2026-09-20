@@ -4,7 +4,9 @@
 			<i class="fas fa-map-marker" :class="getSize" v-if="marker.Frame == 'P'" />
 			<div class="frameCircle" :class="getSize" v-if="marker.Frame == 'C'" />
 			<div class="frameBox" :class="getSize" v-if="marker.Frame == 'B'" />
+			<div class="frameHexagon" :class="getSize" v-if="marker.Frame == 'H'" />
 		</div>
+
 		<div class="iconPosition" :style="iconOffset">
 			<div :style="iconSize" v-html="resolveIcon"></div>
 		</div>
@@ -64,6 +66,8 @@ export default {
 					return 'sizeMedium';
 				case 'L':
 					return 'sizeLarge';
+				case 'F':
+					return 'sizeLarge';
 			}
 			throw new Error('Tamaño no reconocido');
 		},
@@ -118,20 +122,25 @@ export default {
 		background-color: grey;
 		border-radius: 40px;
 	}
-
+	.frameHexagon {
+		width: 100px;
+		height: 115.47px; /* Proporción ideal para un hexágono regular */
+		background-color: grey;
+		clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+	}
 	.frameBox {
 		border: 1px solid grey;
 		background-color: grey;
 	}
 
-.iconPreview {
-	width: 90px;
-	margin-top: 10px;
-	height: 90px;
-	position: relative;
-	background-color: #eeeeee;
-	margin-bottom: -20px;
-}
+	.iconPreview {
+		width: 90px;
+		border-top: 10px white solid;
+		height: 90px;
+		position: relative;
+		background-color: #eeeeee;
+		margin-bottom: -20px;
+	}
 	.labelTop {
 		position: absolute;
 		left: 50%;

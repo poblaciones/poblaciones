@@ -99,17 +99,34 @@
 										<md-icon class="optLarge">room</md-icon>
 										<md-tooltip md-direction="bottom">Grande</md-tooltip>
 									</md-radio>
-									<div style="margin-top: -15px;">
+									<md-radio v-model="Dataset.properties.Marker.Size" :disabled="!canEdit" class="md-primary" @change="Update" value="F">
+										<md-icon class="optSmall ">numbers</md-icon>
+										<md-tooltip md-direction="bottom">Fijo</md-tooltip>
+									</md-radio>
+									<div style="margin-top: -15px;" v-if="Dataset.properties.Marker.Size !== 'F'">
 										<md-switch v-model="Dataset.properties.Marker.AutoScale" :disabled="!canEdit" class="md-primary" @change="Update">
 											Ajustar tamaño al cambiar el zoom
 										</md-switch>
+									</div>
+									<div v-else>
+										<mp-text :canEdit="canEdit"
+														 :label="'Tamaño fijo en metros ' + polygonFixedSizeMetric" :maxlength="10"
+														 @update="Update" class="smaller" style="width: 200px"
+														 v-model="Dataset.properties.Marker.FixedSize" />
+										<md-switch :disabled="!canEdit" v-model="setProjection" class="md-primary" @change="Update" v-if="Dataset.properties.Marker !== 'C'" >
+											Indicar proyección
+										</md-switch>
+										<mp-select :list="validProjections" :modelKey="true" :allowNull="false"  v-if="setProjection && Dataset.properties.Marker !== 'C'" @selected="Update"
+															 :label="'Proyección de los ' + polygonPluralName" listKey="Value" :canEdit="canEdit"
+															 v-model="Dataset.properties.Marker.SourceCentralMeridian" />
 									</div>
 								</div>
 								<div class='md-layout-item md-size-40 md-size-small-80'>
 									<div class="mp-label labelSeparator">Marco</div>
 									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="C">Círculo</md-radio>
-									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="P">Pin</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Frame" v-show="Dataset.properties.Marker.Size !='F'" :disabled="!canEdit" class="md-primary" @change="Update" value="P">Pin</md-radio>
 									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="B">Cuadrado</md-radio>
+									<md-radio v-model="Dataset.properties.Marker.Frame" :disabled="!canEdit" class="md-primary" @change="Update" value="H">Hexágono</md-radio>
 								</div>
 								<div class='md-layout-item md-size-15 md-size-small-100'>
 									<div class="mp-label labelSeparator">Vista previa</div>
@@ -188,6 +205,7 @@
 	import IconPickerPopup from '@/backoffice/components/IconPickerPopup';
 	import IconPreview from '@/backoffice/components/IconPreview';
 
+	const DEFAULT_SOURCE_CENTRAL_MERIDIAN = -63;
 
 	export default {
 		name: 'identityTab',
@@ -202,6 +220,54 @@
 			},
 			Work() {
 				return window.Context.CurrentWork;
+			},
+			polygonPluralName() {
+				switch (this.Dataset.properties.Marker.Frame) {
+					case 'B':
+						return 'cuadrados';
+					case 'C':
+						return 'círculos';
+					case 'H':
+						return 'hexágonos';
+				}
+				return '';
+			},
+			polygonFixedSizeMetric() {
+				switch (this.Dataset.properties.Marker.Frame) {
+					case 'B':
+						return '(lado)';
+					case 'C':
+						return '(diámetro)';
+					case 'H':
+						return '(altura)';
+				}
+				return '';
+			},
+			setProjection: {
+				get() {
+							return this.Dataset.properties.Marker.SourceCentralMeridian !== null;
+				},
+				// set se ejecuta cuando el usuario hace clic y cambia el checkbox
+				set(newValue) {
+					if (this.Dataset.properties.Marker.SourceCentralMeridian === null) {
+						this.Dataset.properties.Marker.SourceCentralMeridian = DEFAULT_SOURCE_CENTRAL_MERIDIAN;
+					} else {
+						this.Dataset.properties.Marker.SourceCentralMeridian = null;
+					}
+					this.Update();
+				}
+			},
+			validProjections() {
+				return [
+					{ Value: -72, Caption: 'POSGAR 2007 / Gauss-Krüger - Faja 1' },
+					{ Value: -69, Caption: 'POSGAR 2007 / Gauss-Krüger - Faja 2' },
+					{ Value: -66, Caption: 'POSGAR 2007 / Gauss-Krüger - Faja 3' },
+					{ Value: -63, Caption: 'POSGAR 2007 / Gauss-Krüger - Faja 4' },
+					{ Value: -60, Caption: 'POSGAR 2007 / Gauss-Krüger - Faja 5' },
+					{ Value: -57, Caption: 'POSGAR 2007 / Gauss-Krüger - Faja 6' },
+					{ Value: -54, Caption: 'POSGAR 2007 / Gauss-Krüger - Faja 7' },
+
+				];
 			},
 			publicLabelsStatus() {
 				return (this.Dataset.properties.PublicLabels ? 'Activado' : 'Desactivado');
@@ -234,7 +300,6 @@
 		},
 		data() {
 			return {
-
 			};
 		},
 		methods: {
@@ -258,6 +323,9 @@
 			Update() {
 				if (this.Dataset.properties.TextureId === 0) {
 					this.Dataset.properties.TextureId = null;
+				}
+				if (this.Dataset.properties.Marker.Size == 'F' && this.Dataset.properties.Marker.Frame == 'P') {
+					this.Dataset.properties.Marker.Frame = 'C';
 				}
 				this.$refs.invoker.doSave(this.Dataset, this.Dataset.Update);
 			},

@@ -291,22 +291,11 @@ class BoundaryService extends BaseService
 		}
 		else if (!$hasOwnMetadata && $existingMetadataId !== null)
 		{
-			$this->DeleteMetadataAndContact($existingMetadataId);
+			$metadataService = new MetadataService();
+			// bvr_metadata_id nunca se comparte entre versiones (a
+			// diferencia de clr_metadata_id): no hace falta pasar checks.
+			$metadataService->DeleteMetadataIfNotUsedElsewhere($existingMetadataId);
 			$boundaryVersion->setMetadata(null);
-		}
-	}
-
-	// metadata_ibfk_1 (met_contact_id -> contact.con_id) tiene ON DELETE
-	// CASCADE: borrar el contacto borra el metadata solo, y con él, en
-	// cascada también, sus relaciones con instituciones o fuentes si las
-	// tuviera. No hace falta borrar el metadata explícitamente.
-	private function DeleteMetadataAndContact($metadataId)
-	{
-		$contactId = App::Db()->fetchScalarIntNullable(
-			"SELECT met_contact_id FROM metadata WHERE met_id = ?", array($metadataId));
-		if ($contactId !== null)
-		{
-			App::Db()->delete('contact', array('con_id' => $contactId));
 		}
 	}
 
@@ -342,7 +331,13 @@ class BoundaryService extends BaseService
 	private function DeleteBoundaryVersionInternal($boundaryVersion)
 	{
 		App::Db()->delete('boundary_version_clipping_region', array('bcr_boundary_version_id' => $boundaryVersion->getId()));
+		$metadata = $boundaryVersion->getMetadata();
 		App::Orm()->delete($boundaryVersion);
+		if ($metadata !== null)
+		{
+			$metadataService = new MetadataService();
+			$metadataService->DeleteMetadataIfNotUsedElsewhere($metadata->getId());
+		}
 	}
 
 	// Listado plano con Level (0 delimitación, 1 versión), cada delimitación

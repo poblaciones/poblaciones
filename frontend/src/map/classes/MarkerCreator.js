@@ -1,6 +1,7 @@
 import h from '@/map/js/helper';
 import arr from '@/common/framework/arr';
 import iconManager from '@/common/js/iconManager';
+import Svg from '@/map/js/svg';
 
 export default MarkerCreator;
 
@@ -68,6 +69,16 @@ MarkerCreator.prototype.resolveContent = function (marker, variableSymbol, categ
 		}
 	}
 	return content;
+};
+
+MarkerCreator.prototype.resolveFramePath = function (frameType) {
+	if (frameType === 'P') {
+		return Svg.markerPincheNormal;
+	} else if (frameType === 'H') {
+		return Svg.markerHexagon;
+	} else {
+		return Svg.markerSquare;
+	}
 };
 
 MarkerCreator.prototype.formatText = function (content) {

@@ -57,6 +57,20 @@ class DatasetMarker
      */
     private $Frame;
 
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="dmk_fixed_size", type="float", precision=10, scale=0, nullable=false, unique=false)
+     */
+    private $FixedSize;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="dmk_source_central_meridian", type="float", precision=10, scale=0, nullable=true, unique=false)
+     */
+    private $SourceCentralMeridian;
+
 		/**
      * @var string
      *
@@ -216,6 +230,53 @@ class DatasetMarker
     public function setSource($source)
     {
         $this->Source = $source;
+
+        return $this;
+    }
+    /**
+     * Get fixedSize
+     *
+     * @return string
+     */
+    public function getFixedSize()
+    {
+        return $this->FixedSize;
+    }
+
+    /**
+     * Set fixedSize
+     *
+     * @param string $fixedSize
+     *
+     * @return DatasetMarker
+     */
+    public function setFixedSize($fixedSize)
+    {
+        $this->FixedSize = $fixedSize;
+
+        return $this;
+    }
+
+    /**
+     * Get sourceCentralMeridian
+     *
+     * @return float
+     */
+    public function getSourceCentralMeridian()
+    {
+        return $this->SourceCentralMeridian;
+    }
+
+    /**
+     * Set sourceCentralMeridian
+     *
+     * @param float $sourceCentralMeridian
+     *
+     * @return DatasetMarker
+     */
+    public function setSourceCentralMeridian($sourceCentralMeridian)
+    {
+        $this->SourceCentralMeridian = $sourceCentralMeridian;
 
         return $this;
     }

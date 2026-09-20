@@ -1,5 +1,4 @@
 import iconManager from '@/common/js/iconManager';
-import Svg from '@/map/js/svg';
 import MarkerCreator from '@/map/classes/MarkerCreator';
 
 export default MarkerFactory;
@@ -98,8 +97,8 @@ MarkerFactory.prototype.createFrame = function (frameType, style, scale, labelIn
 	if (frameType === 'C') {
 		circle = '<circle fill="{mapIconColor}" cx="12" cy="12" r="12" stroke="{strokeColor}" stroke-width="{strokeWeight}" />';
 	} else {
-		// Puede ser P:pin o B:box
-		iconSVGpath = (frameType === 'P' ? Svg.markerPincheNormal : Svg.markerSquare);
+		// Puede ser P:pin, B:box o H:hexágono
+		iconSVGpath = this.resolveFramePath(frameType);
 		path = '<path fill="{mapIconColor}" stroke="{strokeColor}" stroke-width="{strokeWeight}" d="{path}"/>';
 	}
 	if (frameType === 'P') {

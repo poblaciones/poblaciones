@@ -287,7 +287,10 @@ export default {
 		rows: Number,
 		placeholder: String,
 		maxlength: Number,
-    value: String,
+		value: {
+			type: [String, Number],
+			default: ''
+		},
 		helper: String,
 		required: Boolean
   },

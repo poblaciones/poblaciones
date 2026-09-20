@@ -1043,38 +1043,48 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 	// Lo crea
 	var overlayTiled = new LeafletTileOverlay(activeMetric);
 	const d = require('./deck-gl/LeafletLayer');
-	var deckElementsLayer;
-	var polygonLayer = null;
-	// Crea la capa
+	var deckLayers;
+	var updateLayersOnZoom;
+	// Crea las capas
 	if (activeMetric.IsLocationType()) {
-		var iconLayer = new IconOverlay(activeMetric);
-		deckElementsLayer = iconLayer.CreateLayer(data, 1);
+		var locationsOverlay = new IconOverlay(activeMetric);
+		deckLayers = locationsOverlay.CreateLayers(data);
+		updateLayersOnZoom = function (zoom, lat) {
+			return locationsOverlay.UpdateZoom(zoom, lat);
+		};
 	} else {
-		polygonLayer = new PolygonOverlay(activeMetric);
-		deckElementsLayer = polygonLayer.CreateLayer(data);
+		var polygonLayer = new PolygonOverlay(activeMetric);
+		deckLayers = [polygonLayer.CreateLayer(data)];
+		updateLayersOnZoom = function (zoom) {
+			var updatedLayer = polygonLayer.UpdateZoom(zoom);
+			if (updatedLayer) {
+				return [updatedLayer];
+			} else {
+				return null;
+			}
+		};
 	}
-	// La agrega
+	// Las agrega
 	var wrapper = new d.default({
 		views: [
 			new MapView({
 				repeat: true
 			})
 		],
-		layers: [deckElementsLayer]
+		layers: deckLayers
 	});
-	if (polygonLayer != null) {
-		var map = this.map;
-		map.on('zoomend', function () {
-			var zoom = map.getZoom();
-			var updatedLayer = polygonLayer.UpdateZoom(zoom);
-			if (updatedLayer) {
-				wrapper.setProps({ layers: [updatedLayer] });
-			}
-		});
-	}
+	var map = this.map;
+	var onZoomEnd = function () {
+		var updatedLayers = updateLayersOnZoom(map.getZoom(), map.getCenter().lat);
+		if (updatedLayers) {
+			wrapper.setProps({ layers: updatedLayers });
+		}
+	};
+	map.on('zoomend', onZoomEnd);
 
 	var overlay = L.layerGroup([wrapper, overlayTiled]);
 	overlay.dispose = function () {
+		map.off('zoomend', onZoomEnd);
 		overlay.eachLayer(function (layer) {
 			layer.dispose();
 		});

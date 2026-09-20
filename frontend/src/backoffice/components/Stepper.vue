@@ -157,6 +157,15 @@ export default {
 					ret = ret.replace("\n", "<br>");
 				}
 			}
+			if (error.response && error.response.headers && error.response.headers['error-header']) {
+				const errorHeader = decodeURIComponent(error.response.headers['error-header']);
+				if (errorHeader.startsWith('[PD-E]:')) {
+					ret = ' [DEBUG] ' + errorHeader.substr(7).replace("\n", "<br>");
+					if (!ret.endsWith('.')) {
+						ret += '.';
+					}
+				}
+			}
 			if (ret == 'Request failed with status code 500') {
 				ret = 'Si el problema persiste, escriba a contacto@poblaciones.org para recibir ayuda para resolver el incidente.';
 			}

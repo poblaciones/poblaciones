@@ -51,7 +51,12 @@ MarkerFactory.prototype.CreateMarker = function (feature, markerSettings) {
 	} else {
 		labelInfo = this.createLabel(effectiveType, content);
 	}
-	var icon = this.createFrame(markerSettings.Frame, style, labelInfo, srcImage);
+	var frameType = markerSettings.Frame;
+	if (markerSettings.Size === 'F') {
+		// El marco lo dibuja FixedSizeShapeOverlay en metros.
+		frameType = null;
+	}
+	var icon = this.createFrame(frameType, style, labelInfo, srcImage);
 	return icon;
 };
 
@@ -68,9 +73,9 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 	var iconSVGpath = "";
 	if (frameType === 'C') {
 		circle = '<circle fill="{mapIconColor}" cx="12" cy="12" r="11" stroke="{strokeColor}" stroke-width="{strokeWeight}" />';
-	} else {
-		// Puede ser P:pin o B:box
-		iconSVGpath = (frameType === 'P' ? Svg.markerPincheNormal : Svg.markerSquare);
+	} else if (frameType !== null) {
+		// Puede ser P:pin, B:box o H:hexágono
+		iconSVGpath = this.resolveFramePath(frameType);
 		path = '<path fill="{mapIconColor}" stroke="{strokeColor}" stroke-width="{strokeWeight}" d="{path}"/>';
 	}
 	const RESOLUTION_EXPANSOR = 3;
@@ -130,10 +135,19 @@ MarkerFactory.prototype.createFrame = function (frameType, style, labelInfo, src
 	}
 
 	var icon = {
-		svg: L.Util.template(svg, iconSettings),//.replace('#','%23'),
-		iconAnchor: [RESOLUTION_EXPANSOR * 12, RESOLUTION_EXPANSOR * (frameType === 'P' ? 32 : 24)],
-		iconSize: [RESOLUTION_EXPANSOR * 22, RESOLUTION_EXPANSOR * (frameType === 'P' ? 32 : 24)],
+		svg: L.Util.template(svg, iconSettings),
 	};
+	if (frameType === null) {
+		// Sin marco, el contenido se centra sobre el punto.
+		icon.iconAnchor = [RESOLUTION_EXPANSOR * 12, RESOLUTION_EXPANSOR * 12];
+		icon.iconSize = [RESOLUTION_EXPANSOR * 24, RESOLUTION_EXPANSOR * 24];
+	} else if (frameType === 'P') {
+		icon.iconAnchor = [RESOLUTION_EXPANSOR * 12, RESOLUTION_EXPANSOR * 32];
+		icon.iconSize = [RESOLUTION_EXPANSOR * 22, RESOLUTION_EXPANSOR * 32];
+	} else {
+		icon.iconAnchor = [RESOLUTION_EXPANSOR * 12, RESOLUTION_EXPANSOR * 24];
+		icon.iconSize = [RESOLUTION_EXPANSOR * 22, RESOLUTION_EXPANSOR * 24];
+	}
 	return icon;
 };
 

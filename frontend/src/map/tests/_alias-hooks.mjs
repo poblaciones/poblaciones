@@ -29,6 +29,7 @@ const packageStubs = {
 	'leaflet': 'leaflet.mjs',
 	'@tweenjs/tween.js': 'tween.mjs',
 	'js-cookie': 'js-cookie.mjs',
+	'@deck.gl/layers': 'deckgl-layers.mjs',
 };
 
 const uiComponentStubs = ['vue-switches', 'vue-slider-component'];

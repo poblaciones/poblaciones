@@ -74,7 +74,7 @@ module.exports = {
 				}
 			}
 			if (err.response && err.response.headers && err.response.headers['error-header']) {
-				const errorHeader = err.response.headers['error-header'];
+				const errorHeader = decodeURIComponent(err.response.headers['error-header']);
 				if (errorHeader.startsWith('[PD-E]:')) {
 					post = ' [DEBUG] ' + errorHeader.substr(7).replace("\n", "<br>");
 					if (!post.endsWith('.')) {

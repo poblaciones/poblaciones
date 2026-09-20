@@ -185,8 +185,8 @@ class SnapshotByDatasetModel
 										join dataset on dat_id = mvl_dataset_id
 										where mvv_id = ?", array($variableId));
 					if ($info) {
-						$extraMessage = "Un valor de la variable '" . $info['mvv_caption'] . "' del dataset '" . $info['dat_caption'] . "' no pudo
-											ser clasificado. Revise las categorías definidas y los valores de la variable en los datos.";
+						$extraMessage = "Un valor de la variable '" . $info['mvv_caption'] . "' del dataset '" . $info['dat_caption'] .
+								"' no pudo ser clasificado. Revise las categorías definidas y los valores de la variable en los datos.";
 						throw new PublicException($extraMessage, new \Exception($sql));
 					}
 				}

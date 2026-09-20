@@ -71,7 +71,7 @@
 																	es posible volver a importar los datos en caso de haberse agregado nuevas
 																	filas o nuevas columnas a la información primaria.
 															</p>` + extraHelp('DatasetImportSection') }">
-											<data-tab></data-tab>
+											<data-tab class="limitedSizeTab"></data-tab>
 									</md-tab>
 									<md-tab style='flex: 1 0 100% !important;' id="georeference" md-label="Georreferenciar"
 													:to="makePath('georeference')" :md-active="isPath(makePath('georeference'))"
@@ -93,7 +93,7 @@
 														Polígonos: se identifica la localización de la fila por el reconocimiento de un polígono en alguna de las variables del dataset, en formato Well-known-text (WKT) o GeoJson.
 													</li>
 												</ul>` + extraHelp('DatasetGeoreferenceSection') }">
-												<georeference-tab @stepperClosed="stepperClosed"></georeference-tab>
+												<georeference-tab @stepperClosed="stepperClosed" class="limitedSizeTab"></georeference-tab>
 											</md-tab>
 
 									<md-tab style='flex: 1 0 100% !important;' id="identity" md-label="Identificación"
@@ -105,12 +105,12 @@
 																Pueden elegirse opcionalmente la variable que contenga la descripción de cada fila (ej. Nombre de escuela),
 																así como especificar un ícono para los elementos del dataset.
 															</p>` + extraHelp('DatasetIdentitySection') }" >
-													<identity-tab></identity-tab>
+													<identity-tab class="limitedSizeTab"></identity-tab>
 												</md-tab>
 
 									<md-tab v-if="Work.Datasets.length > 1" id="multilevel" md-label="Multinivel"
 													:to="makePath('multilevel')" :md-active="isPath(makePath('multilevel'))">
-										<multilevel-tab></multilevel-tab>
+										<multilevel-tab class="limitedSizeTab"></multilevel-tab>
 									</md-tab>
 
 									<md-tab style='flex: 1 0 100% !important;overflow-x: auto;' id="metrics" md-label="Indicadores"
@@ -121,7 +121,7 @@
 												</p><p>
 														Cada indicador muestra un aspecto de los datos (ej. Nivel educativo, Antiguedad de la escuela), pudiendo seleccionarse colores y criterios de segmentación para las variables utilizadas.
 												</p>`+ extraHelp('DatasetMetricsSection')}" >
-											<metrics-tab></metrics-tab>
+											<metrics-tab class="limitedSizeTab"></metrics-tab>
 									</md-tab>
 
 								</md-tabs>
@@ -272,21 +272,23 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-.md-tab {
-	flex: 1 0 101% !important;
+	.md-tab {
+		flex: 1 0 101% !important;
 	}
-
-.topToolbar {
-	position: fixed;
-	padding-top: 4px;
-	padding-bottom: 1px;
-	line-height: 1.25;
-	font-size: 25px;
-	color: #676767;
-	width: 100%;
-	margin-top: -3px;
-	z-index: 10;
-	background-color: #f5f5f5;
+	.limitedSizeTab {
+		max-width: 900px;
+	}
+	.topToolbar {
+		position: fixed;
+		padding-top: 4px;
+		padding-bottom: 1px;
+		line-height: 1.25;
+		font-size: 25px;
+		color: #676767;
+		width: 100%;
+		margin-top: -3px;
+		z-index: 10;
+		background-color: #f5f5f5;
 	}
 
 .badge {

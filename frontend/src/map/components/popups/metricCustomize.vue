@@ -59,7 +59,7 @@
 						</label>
 					</td>
 				</tr>
-				<tr v-if="anyHasArea()">
+				<tr v-if="showOpacityOptions()">
 					<td class="optionsLabel">Transparencia:</td>
 					<td>
 						<div class="btn-group">
@@ -233,6 +233,12 @@ export default {
 				return;
 			}
 			return (this.metric.SelectedLevel().Dataset.HasGradient);
+		},
+		showOpacityOptions() {
+			if (this.anyHasArea()) {
+				return true;
+			}
+			return this.metric.IsLocationType() && this.metric.SelectedMarker().Size === 'F';
 		},
 		anyHasArea() {
 			var ret = false;
