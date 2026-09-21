@@ -1,13 +1,17 @@
 <template>
 	<div class="sidebarRoot">
-		<sidebar-menu class="topMenu" :menu="topMenuItems" theme="white-theme" style="height: unset!important"
-									:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
-		<sidebar-menu v-if="bottomMenuItems.length > 0" class="bottomMenu" :menu="bottomMenuItems" theme="white-theme"  style="height: unset!important"
-									:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
-		<import-popup ref="importPopup"></import-popup>
-		<div style="display: flex; padding: 4px; background-color: #efefef;">
-			<backoffice-links></backoffice-links>
+		<div class="md-card topMenu" style="margin: 15px; margin-bottom: 0px;">
+			<sidebar-menu :menu="topMenuItems" theme="white-theme" style="height: unset!important"
+										:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
+		</div>
+		<div class="md-card bottomMenu" style="margin: 15px">
+			<sidebar-menu v-if="bottomMenuItems.length > 0" :menu="bottomMenuItems" theme="white-theme" style="height: unset!important"
+										:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
+			<import-popup ref="importPopup"></import-popup>
+			<div style="display: flex; padding: 6px; padding-left: 12px; background-color: #efefef; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+				<backoffice-links></backoffice-links>
 
+			</div>
 		</div>
 
 		<stepper ref="stepper"></stepper>
@@ -324,11 +328,20 @@ export default {
 	overflow-y: auto;
 	overflow-x: hidden;
 }
+ .topMenu {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
 
 .sidebarRoot .bottomMenu {
 	flex: 0 0 auto;
 	border-top: 1px solid #e2e2e2;
 }
+	.bottomMenu {
+		flex: 0 0 auto;
+		border-top: 1px solid #e2e2e2;
+	}
 
 /* Antes el margen superior lo ponía cada .v-sidebar-menu; ahora lo da .sidebarRoot. */
 .v-sidebar-menu

@@ -186,3 +186,79 @@ it('sin localStorage disponible, arranca vacío y no rompe al registrar', () => 
 	recents.RegisterMetric(1, 'Efímero');
 	expect(recents.GetRecents()).toHaveLength(1);
 });
+
+// Un reciente sin descripción (p. ej. un polígono sin nombre) no sirve para
+// reconocerlo después en la lista: se descarta en vez de guardarse.
+describe('ActiveRecents: se descartan los recientes sin Caption');
+
+it('RegisterLocation con caption null no agrega nada', () => {
+	const recents = makeRecents();
+	recents.RegisterLocation({ Id: 1 }, null, -32.9, -60.6);
+	expect(recents.GetRecents()).toHaveLength(0);
+});
+
+it('RegisterBoundary con caption vacío o solo espacios no agrega nada', () => {
+	const recents = makeRecents();
+	recents.RegisterBoundary(1, '');
+	recents.RegisterBoundary(2, '   ');
+	expect(recents.GetRecents()).toHaveLength(0);
+});
+
+// Dos regiones distintas (distinto DedupeKey) pueden verse idénticas en la
+// lista si tienen el mismo nombre y, si tienen subtítulo, el mismo
+// subtítulo: en ese caso no tiene sentido ofrecer las dos.
+describe('ActiveRecents: no deja dos ítems que se vean igual (mismo Type + Caption + Subtitle)');
+
+it('mismo Caption y mismo Subtitle (ambos con subtítulo): la más nueva reemplaza a la vieja', () => {
+	const recents = makeRecents();
+	recents.RegisterClippingRegion([10], 'San Fabián', 'Localidad');
+	recents.RegisterClippingRegion([20], 'San Fabián', 'Localidad');
+	const items = recents.GetRecents();
+	expect(items).toHaveLength(1);
+	expect(items[0].Payload).toEqual({ RegionIds: [20] });
+});
+
+it('mismo Caption pero distinto Subtitle: se distinguen y quedan las dos', () => {
+	const recents = makeRecents();
+	recents.RegisterClippingRegion([10], 'San Fabián', 'Localidad');
+	recents.RegisterClippingRegion([20], 'San Fabián', 'Comuna');
+	const items = recents.GetRecents();
+	expect(items).toHaveLength(2);
+});
+
+it('mismo Caption y mismo Subtitle fijo (dos delimitaciones): también se consideran iguales', () => {
+	const recents = makeRecents();
+	recents.RegisterBoundary(1, 'Rosario');
+	recents.RegisterBoundary(2, 'Rosario');
+	const items = recents.GetRecents();
+	expect(items).toHaveLength(1);
+	expect(items[0].Payload).toEqual({ BoundaryId: 2 });
+});
+
+it('mismo Caption y ambos sin Subtitle (dos ubicaciones sin id estable): también se consideran iguales', () => {
+	const recents = makeRecents();
+	recents.RegisterLocation({}, 'Un punto', -32.9000, -60.6000);
+	recents.RegisterLocation({}, 'Un punto', -31.0000, -61.0000);
+	expect(recents.GetRecents()).toHaveLength(1);
+});
+
+it('mismo Caption pero distinto Type: no se consideran iguales', () => {
+	const recents = makeRecents();
+	recents.RegisterBoundary(1, 'Rosario');
+	recents.RegisterMetric(2, 'Rosario');
+	expect(recents.GetRecents()).toHaveLength(2);
+});
+
+describe('ActiveRecents: subtítulo fijo para indicadores y delimitaciones');
+
+it('RegisterMetric usa "Indicadores" como Subtitle', () => {
+	const recents = makeRecents();
+	recents.RegisterMetric(1, 'Población total');
+	expect(recents.GetRecents()[0].Subtitle).toBe('Indicadores');
+});
+
+it('RegisterBoundary usa "Delimitaciones" como Subtitle', () => {
+	const recents = makeRecents();
+	recents.RegisterBoundary(1, 'Rosario');
+	expect(recents.GetRecents()[0].Subtitle).toBe('Delimitaciones');
+});

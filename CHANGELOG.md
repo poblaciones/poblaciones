@@ -1,9 +1,15 @@
-- Soporte para basemap con keys.
+v5.4 (2026-09-21)
+- Soporte para basemap (proveedores de tiles) que usen api-key.
 - Fix descarga de metadatos.
 - Mejoras a decimales en las apis.
 - Fixes a download de shaprefiles.
 - Mejoras en performance de carga de indicador.
--
+- Panel de búsqueda ofrece recientes
+- Se agrega el marco de tipo hexágono.
+- Las capas de puntos se pueden representar como figura de tamaño fijo en metros.
+- Se reduce el parpadeo al agregar o quitar categorías de capas de puntos.
+- Fix al mapa de reubicación de puntos al georreferenciar.
+
 v5.3 (2026-08-21)
 - Soporte para adjuntos en la API.
 - Remoción de tab de variables.

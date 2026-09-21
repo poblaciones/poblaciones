@@ -177,7 +177,11 @@ TextOverlay.prototype.resolveOnClick = function () {
 		this.clickId = this.clickId[0];
 	}
 	var clickIdAsText = (this.clickId instanceof Object ? JSON.stringify(this.clickId).replaceAll('"', '@') : this.clickId);
-	return "onClick=\"event.stopPropagation(); window.SegMap.SelectId('" +
+	// Sin stopPropagation: el clic tiene que seguir subiendo hasta document
+	// para que v-on-clickaway (buscador, selector de indicadores, filtro
+	// por recorte) lo detecte como "afuera" y cierre el panel que esté
+	// abierto, igual que con cualquier otro clic sobre el mapa.
+	return "onClick=\"window.SegMap.SelectId('" +
 		this.type + "', '" + clickIdAsText + "', " + this.pos.Lat + ', '
 		+ this.pos.Lon + ", event.ctrlKey);\"";
 };

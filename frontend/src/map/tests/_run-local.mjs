@@ -31,5 +31,7 @@ await import('./boundary.test.mjs');
 await import('./fixedSizeShapes.test.mjs');
 await import('./activeRecents.test.mjs');
 await import('./searchPanel.test.mjs');
+await import('./textOverlay.test.mjs');
+await import('./clipping.test.mjs');
 
 await report();

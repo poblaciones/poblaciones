@@ -34,6 +34,10 @@
 							<md-icon>edit</md-icon>
 							Modificar
 						</md-button>
+						<md-button v-if="canEdit" @click="startAutoRecode" :disabled="autoRecodeDisabled">
+							<md-icon>toc</md-icon>
+							Auto-recodificar
+						</md-button>
 						<md-button @click="valuesOnClick()" :disabled="valuesDisabled">
 							<md-icon>ballot</md-icon>
 							Categorías
@@ -173,6 +177,8 @@ export default {
 			this.modifyDisabled = (rowIndexes.length !== 1);
 			this.valuesDisabled = (rowIndexes.length !== 1);
 			this.deleteDisabled = (rowIndexes.length === 0);
+			this.autoRecodeDisabled = (rowIndexes.length !== 1 || !this.allSelectedAreString());
+			// updown
 			this.upDisabled = (rowIndexes.length === 0 || rowIndexes[0] === 0);
       let rowCount = (this.source ? this.source.totalrecords : 0);
 			this.downDisabled = (rowIndexes.length === 0 || rowIndexes[rowIndexes.length - 1] === rowCount - 1);
@@ -388,6 +394,21 @@ export default {
 		destroyCallback() {
 			this.valuesPopupReset = false;
 		},
+		startAutoRecode() {
+			var loc = this;
+			var col = loc.selectedColumn();
+			// Obtiene los valores
+			this.$refs.invoker.call(function (closeInvoke) {
+				loc.Dataset.GetDistinctColumnValues(col.Id)
+					.then(function (res) {
+						loc.valuesPopupReset = true;
+						loc.$nextTick(() => {
+							loc.$refs.valuesPopup.showAutoRecode(col, res, loc.destroyCallback);
+							closeInvoke();
+						});
+					});
+			});
+		},
 		completeEditOnClick() {
 			this.showWait();
 			this.loadData();
@@ -497,6 +518,7 @@ export default {
 				CurrentVarName: '',
 				CurrentVarLabel: '',
 				CurrentUseInSummary: false,
+				autoRecodeDisabled: true,
 				modifyDisabled: true,
 				deleteDisabled: true,
 				valuesDisabled: true,

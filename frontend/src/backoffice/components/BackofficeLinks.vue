@@ -4,10 +4,10 @@
 			<md-icon>public</md-icon> Publicar cambios
 		</md-button>
 		<md-button @click="goMap" v-if="lastOnline" class="md-raised">
-			<md-icon>map</md-icon> Ver en mapa
+			<md-icon>map</md-icon> Ver mapa
 		</md-button>
 		<md-button @click="goTable" v-if="lastOnline && usePivot" class="md-raised">
-			<md-icon>map</md-icon> Ver en tablero
+			<md-icon>bar_chart</md-icon> Ver tablero
 		</md-button>
 	</div>
 </template>

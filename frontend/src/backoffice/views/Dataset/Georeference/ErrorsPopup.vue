@@ -10,7 +10,7 @@
 					Algunos elementos del dataset no han podido ser georreferenciados correctamente. Revise los problemas
 					identificados y seleccione la acción que corresponda para poder completar el proceso.
 				</p>
-				<div class="md-layout md-gutter">
+				<div class="md-layout md-gutter" style="margin-left: 0px; margin-right: 0px">
 					<ActiveGrid ref="grid" :showingErrors="true" :gridwidth="800" @submitGrid="save"
 											:georeferenceParameters="georeferenceParameters"></ActiveGrid>
 				</div>

@@ -260,6 +260,24 @@ Clipping.prototype.GetClippingName = function () {
 	}
 };
 
+// El nombre solo (GetClippingName) no alcanza para distinguir en "Visto
+// recientemente" dos regiones homónimas de distinto tipo (p. ej. la
+// Localidad San Fabián y la Comuna San Fabián): acompaña como subtítulo.
+Clipping.prototype.GetClippingTypeName = function () {
+	var regiones = this.clipping.Region.Summary.Regions;
+	if (!regiones || regiones.length === 0) {
+		return null;
+	}
+	if (regiones.length > 1) {
+		var ret = [];
+		for (var n = 0; n < regiones.length; n++)
+			ret.push(regiones[n].TypeName);
+		return ret.join(', ');
+	} else {
+		return regiones[0].TypeName;
+	}
+};
+
 Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 	this.cancelCreateClipping = null;
 	var canvas = data.Canvas;
@@ -269,7 +287,7 @@ Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 		var name = this.GetClippingName();
 		if (name) {
 			document.title = name;
-			window.SegMap.Recents.RegisterClippingRegion(this.frame.ClippingRegionIds, name);
+			window.SegMap.Recents.RegisterClippingRegion(this.frame.ClippingRegionIds, name, this.GetClippingTypeName());
 		} else {
 			document.title = window.DefaultTitle;
 		}

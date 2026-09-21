@@ -84,6 +84,7 @@
                       <div class="result-icon"><i class="fas fa-clock"></i></div>
                       <div class="result-info">
                         <div class="result-name">{{ item.Caption }}</div>
+                        <div v-if="item.Subtitle" class="result-extra">{{ item.Subtitle }}</div>
                       </div>
                       <button class="btn-remove-recent" @click.stop="removeRecent(item)" title="Eliminar de recientes">
                         <span aria-hidden="true">×</span>
@@ -99,6 +100,7 @@
                         <div class="result-icon"><i class="fas fa-clock"></i></div>
                         <div class="result-info">
                           <div class="result-name">{{ row.Item.Caption }}</div>
+                          <div v-if="row.Item.Subtitle" class="result-extra">{{ row.Item.Subtitle }}</div>
                         </div>
                         <button class="btn-remove-recent" @click.stop="removeRecent(row.Item)" title="Eliminar de recientes">
                           <span aria-hidden="true">×</span>
@@ -592,35 +594,38 @@ export default {
   gap: 2px;
 }
 
-/* Result Item */
+/* Result Item: mismo estilo que .indicator-item de indicatorSelector.vue,
+   para que este panel y el selector de indicadores/boundaries se vean como
+   un único sistema visual. */
 .result-item {
-  padding: 12px 12px;
+  display: flex;
+  align-items: center;
+  padding: 8px;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
-  border-left: 3px solid transparent;
+  transition: background-color 0.2s;
+  margin-bottom: 2px;
 }
 
 .result-item:hover,
 .result-item.result-hover {
-  background: #f5f7fa;
-  border-left-color: #2196F3;
+  background-color: #eee;
 }
 
 .result-content {
   display: flex;
+  align-items: center;
   gap: 12px;
-  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
 }
 
 .result-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-shadow: 2px 2px 1px rgb(223 216 220 / 50%);
   color: #0fa7d8;
-  font-size: 18px;
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
   flex-shrink: 0;
 }
 
@@ -633,14 +638,16 @@ export default {
   font-size: 14px;
   font-weight: 500;
   color: #333;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   line-height: 1.3;
 }
 
 .result-extra {
   font-size: 12px;
   color: #999;
-  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .result-coords {
@@ -684,10 +691,6 @@ export default {
   font-weight: 600;
   color: #999;
   padding: 12px 8px 4px;
-}
-
-.recents-container .result-content {
-  align-items: center;
 }
 
 .btn-remove-recent {

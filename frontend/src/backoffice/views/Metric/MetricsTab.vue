@@ -230,7 +230,7 @@ export default {
 			}
 
 			if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null) {
-				segments.push({ label: 'por', tooltip: null });
+				segments.push({ label: ' por ', tooltip: null });
 				segments.push({
 					label: f.formatColumn(variable.Symbology.CutColumn, true),
 					tooltip: f.formatColumnTooltip(variable.Symbology.CutColumn) || null

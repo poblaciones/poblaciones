@@ -134,7 +134,8 @@
 	.triggerIcon {
 		font-size: 12px;
 		padding-top: 2px;
-		padding-left: 2px;
+		padding-left: 1px;
+		padding-right: 1px;
 		height: 17px;
 	}
 

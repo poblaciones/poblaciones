@@ -2,7 +2,7 @@
 	<div class="homeMenu">
 		<md-menu md-size="medium" md-align-trigger md-direction="bottom-end">
 			<md-button class="md-icon-button actionIcon" md-menu-trigger>
-				<md-icon>home</md-icon>
+				<md-icon>help</md-icon>
 				<md-tooltip md-direction="bottom">Ayuda</md-tooltip>
 			</md-button>
 			<md-menu-content>

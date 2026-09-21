@@ -63,9 +63,16 @@
 	import h from '@/map/js/helper';
 	import str from '@/common/framework/str';
 	import GeographyOverlay from '../classes/GeographyOverlay';
+	import MapAttribution from '@/common/js/mapAttribution';
 
-	const BASEMAP_URL = 'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';
-	const BASEMAP_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>';
+	// 1. Elimina la configuración de íconos por defecto que viene rota
+	delete L.Icon.Default.prototype._getIconUrl;
+	// 2. Configura los nuevos íconos usando las imágenes importadas
+	L.Icon.Default.mergeOptions({
+		iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
+		iconUrl: require('leaflet/dist/images/marker-icon.png').default,
+		shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
+	});
 
 	export default {
 		name: 'relocatePopup',
@@ -135,6 +142,10 @@
 					zoomControl: true,
 					attributionControl: true
 				});
+
+				var basemapUrls = window.Context.Configuration.BasemapUrls;
+				var BASEMAP_URL = basemapUrls.roadmap;
+				var BASEMAP_ATTRIBUTION = MapAttribution.GetCopyright();
 
 				L.tileLayer(BASEMAP_URL, {
 					attribution: BASEMAP_ATTRIBUTION,

@@ -31,6 +31,7 @@ ActiveRecents.prototype.RegisterMetric = function (metricId, caption) {
 		Type: ActiveRecents.Types.Metric,
 		DedupeKey: 'metric:' + metricId,
 		Caption: caption,
+		Subtitle: 'Indicadores',
 		Lat: null,
 		Lon: null,
 		Payload: { MetricId: metricId },
@@ -42,6 +43,7 @@ ActiveRecents.prototype.RegisterBoundary = function (boundaryId, caption) {
 		Type: ActiveRecents.Types.Boundary,
 		DedupeKey: 'boundary:' + boundaryId,
 		Caption: caption,
+		Subtitle: 'Delimitaciones',
 		Lat: null,
 		Lon: null,
 		Payload: { BoundaryId: boundaryId },
@@ -49,7 +51,10 @@ ActiveRecents.prototype.RegisterBoundary = function (boundaryId, caption) {
 };
 
 // regionIds: un id de región o un array (recorte por selección múltiple).
-ActiveRecents.prototype.RegisterClippingRegion = function (regionIds, caption) {
+// subtitle: el/los TypeName de la región (p. ej. "Localidad", "Comuna"), que
+// distingue en la lista dos regiones de mismo nombre y distinto tipo
+// (Clipping.GetClippingTypeName).
+ActiveRecents.prototype.RegisterClippingRegion = function (regionIds, caption, subtitle) {
 	var idsArray;
 	if (Array.isArray(regionIds)) {
 		idsArray = regionIds;
@@ -60,6 +65,7 @@ ActiveRecents.prototype.RegisterClippingRegion = function (regionIds, caption) {
 		Type: ActiveRecents.Types.ClippingRegion,
 		DedupeKey: 'clippingRegion:' + idsArray.join(','),
 		Caption: caption,
+		Subtitle: (subtitle === undefined ? null : subtitle),
 		Lat: null,
 		Lon: null,
 		Payload: { RegionIds: idsArray },
@@ -75,6 +81,7 @@ ActiveRecents.prototype.RegisterLocation = function (key, caption, lat, lon) {
 		Type: ActiveRecents.Types.Location,
 		DedupeKey: this.resolveLocationDedupeKey(key, lat, lon),
 		Caption: caption,
+		Subtitle: null,
 		Lat: lat,
 		Lon: lon,
 		Payload: {
@@ -100,10 +107,31 @@ ActiveRecents.prototype.resolveLocationDedupeKey = function (key, lat, lon) {
 };
 
 // Da de alta una entrada, o la mueve a la posición más reciente si ya
-// estaba (por DedupeKey no queda más de una copia de un mismo elemento).
+// estaba. Dos filtros evitan que la lista termine con ítems inútiles:
+// - Sin Caption (p. ej. un polígono sin descripción) no se guarda: no hay
+//   forma de reconocerlo después en la lista.
+// - Por DedupeKey no queda más de una copia de un mismo elemento, pero
+//   además se descarta cualquier otra entrada del mismo Type que se vea
+//   igual (mismo Caption y mismo Subtitle, incluyendo cuando ambos son
+//   nulos), aunque su DedupeKey sea distinto: dos regiones de recorte
+//   llamadas "San Fabián" son elementos distintos, pero si no hay forma de
+//   distinguirlas en la lista (mismo nombre, mismo o ningún subtítulo) no
+//   tiene sentido ofrecer las dos.
 ActiveRecents.prototype.register = function (entry) {
+	var caption = normalizeText(entry.Caption);
+	if (caption === '') {
+		return;
+	}
+	entry.Caption = caption;
+	var subtitle = normalizeText(entry.Subtitle);
 	this.items = this.items.filter(function (existing) {
-		return existing.DedupeKey !== entry.DedupeKey;
+		if (existing.DedupeKey === entry.DedupeKey) {
+			return false;
+		}
+		if (existing.Type === entry.Type && normalizeText(existing.Caption) === caption && normalizeText(existing.Subtitle) === subtitle) {
+			return false;
+		}
+		return true;
 	});
 	entry.When = Date.now();
 	this.items.unshift(entry);
@@ -218,5 +246,15 @@ function resolveOrNull(obj, key) {
 		return obj[key];
 	} else {
 		return null;
+	}
+}
+
+// null/undefined y '' se tratan como "sin texto" por igual, tanto para
+// rechazar un Caption vacío como para comparar Subtitle entre ítems.
+function normalizeText(text) {
+	if (text === null || text === undefined) {
+		return '';
+	} else {
+		return String(text).trim();
 	}
 }

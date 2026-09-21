@@ -132,21 +132,31 @@
 		border-bottom: #eee solid 1px !important;
 	}
 
-	.md-dialog-title {
-		padding: 12px 12px 10px !important;
-		background-color: #00A0D2;
-		color: white;
-	}
+.md-dialog-title {
+	padding: 20px 22px 0px !important;
+}
 
-	.md-title {
-		font-weight: normal !important;
-	}
+.v-sidebar-menu.white-theme {
+	background-color: unset!important;
+}
+.md-title {
+	font-weight: 500 !important;
+	font-family: 'Roboto', sans-serif;
+	font-size: 22px!important;
+}
 
+.md-button {
+	border-radius: 7px!important;
+}
 	.md-card {
+				border-radius: 12px!important;
 		margin-top: 8px;
 		margin-bottom: 8px;
 	}
 
+.md-dialog-container.md-theme-default {
+	border-radius: .5rem;
+}
 
 	.md-dialog {
 		min-width: 400px !important;
@@ -174,10 +184,11 @@
 			text-decoration: none !important;
 		}
 
-	.md-button {
-		font-weight: normal !important;
-		text-transform: none !important;
-	}
+.md-button {
+	font-family: 'Roboto';
+	font-weight: normal !important;
+	text-transform: none !important;
+}
 
 	.md-table-sortable-icon {
 		right: 8px;

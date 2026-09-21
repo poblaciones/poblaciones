@@ -22,6 +22,8 @@ import ContextMenuTools from './ContextMenuTools.js';
 import 'leaflet-contextmenu';
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css';
 
+import MapAttribution from '@/common/js/mapAttribution';
+
 export default LeafletApi;
 
 //
@@ -260,7 +262,7 @@ LeafletApi.prototype.InteractiveChangeMapType = function (type) {
 };
 
 LeafletApi.prototype.CreateBaseLayers = function () {
-	var cp = this.GetCopyright();
+	var cp = MapAttribution.GetCopyright();
 	// Estandar:
 	// src1= https://tile.openstreetmap.org/{z}/{x}/{y}.png;
 	// Humanitarian
@@ -438,21 +440,6 @@ LeafletApi.prototype.BoundsChanged = function () {
 		window.SegMap.FrameMoved(this.getBounds());
 		window.SegMap.BoundsChanged();
 	}
-};
-
-LeafletApi.prototype.GetCopyright = function () {
-	var div = "<span class='copyright' style='padding: 0px'>";
-	var innerHTML = "<span class='copyrightText'>";
-	if (window.Embedded.Active) {
-		innerHTML += "<a class='copyrightText' href='https://poblaciones.org/' target='_blank'>";
-	}
-	innerHTML += "Poblaciones © 2019-" + (new Date().getFullYear()) + " CONICET / ODSA - UCA</a>. " +
-		"<a class='copyrightText exp-hiddable-unset' href='https://poblaciones.org/terminos/' target='_blank'>Términos y Condiciones</a>. ";
-	if (!window.Embedded.Active) {
-		innerHTML += "<a class='copyrightText exp-hiddable-unset' title='Comentarios y sugerencias a Poblaciones' href='https://poblaciones.org/contacto/' target='_blank'><i class='far fa-comments contacto'></i> Contacto</a>";
-	}
-	innerHTML += "</span>";
-	return div + innerHTML + "</span>";
 };
 
 LeafletApi.prototype.StopDrawing = function () {
