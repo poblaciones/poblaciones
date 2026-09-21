@@ -206,3 +206,114 @@ it('useTiles: segmentos siempre por tiles; locations no; shapes sí', () => {
 	metric.SelectedLevel().Dataset.Type = 'D';
 	expect(metric.useTiles()).toBeTruthy();
 });
+
+describe('ActiveMetric: caché de datos de capas de puntos (GetMetricData/GetLevelData)');
+
+// Las capas de puntos (deck.gl) traen todos los datos del nivel de una y
+// filtran/refrescan client-side (visibilidad de categorías, variable
+// seleccionada, zoom). Un refresh que no cambia nivel, versión, partición,
+// urbanidad ni recorte no debería volver a golpear al servidor.
+
+it('un segundo pedido con los mismos parámetros reutiliza la respuesta cacheada', async () => {
+	const segMap = setupWindow();
+	const calls = [];
+	segMap.Get = function (url, options) {
+		calls.push(options.params);
+		return Promise.resolve({ data: { Data: [{ VID: 1, LID: 1 }] } });
+	};
+	const metric = new ActiveMetric(makeMetricProperties());
+	await metric.GetMetricData();
+	await metric.GetMetricData();
+	expect(calls).toHaveLength(1);
+});
+
+it('cambiar la variable seleccionada dentro del mismo nivel no repite el pedido: filtra lo cacheado', async () => {
+	const segMap = setupWindow();
+	const calls = [];
+	segMap.Get = function (url, options) {
+		calls.push(options.params);
+		return Promise.resolve({ data: { Data: [{ VID: 10, LID: 1 }, { VID: 20, LID: 2 }] } });
+	};
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({ Levels: [makeLevel({ Variables: [makeVariable({ Id: 10 }), makeVariable({ Id: 20 })] })] })],
+	});
+	const metric = new ActiveMetric(properties);
+	const first = await metric.GetMetricData();
+	expect(first).toEqual([{ VID: 10, LID: 1 }]);
+	metric.SelectedLevel().SelectedVariableIndex = 1;
+	const second = await metric.GetMetricData();
+	expect(second).toEqual([{ VID: 20, LID: 2 }]);
+	expect(calls).toHaveLength(1);
+});
+
+it('cambiar el nivel seleccionado sí repite el pedido', async () => {
+	const segMap = setupWindow();
+	const calls = [];
+	segMap.Get = function (url, options) {
+		calls.push(options.params);
+		return Promise.resolve({ data: { Data: [] } });
+	};
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({ Levels: [makeLevel(), makeLevel()] })],
+	});
+	const metric = new ActiveMetric(properties);
+	await metric.GetMetricData();
+	metric.SelectedVersion().SelectedLevelIndex = 1;
+	await metric.GetMetricData();
+	expect(calls).toHaveLength(2);
+});
+
+it('cambiar la partición seleccionada sí repite el pedido', async () => {
+	const segMap = setupWindow();
+	const calls = [];
+	segMap.Get = function (url, options) {
+		calls.push(options.params);
+		return Promise.resolve({ data: { Data: [] } });
+	};
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({ Levels: [makeLevel({ Partitions: { Values: [{ Value: 'A' }, { Value: 'B' }] } })] })],
+		SelectedPartition: 'A',
+	});
+	const metric = new ActiveMetric(properties);
+	await metric.GetMetricData();
+	metric.properties.SelectedPartition = 'B';
+	await metric.GetMetricData();
+	expect(calls).toHaveLength(2);
+});
+
+it('mover el mapa (pan/zoom) no repite el pedido: el envelope no forma parte de la consulta', async () => {
+	const segMap = setupWindow();
+	const calls = [];
+	segMap.Get = function (url, options) {
+		calls.push(options.params);
+		return Promise.resolve({ data: { Data: [] } });
+	};
+	const metric = new ActiveMetric(makeMetricProperties());
+	await metric.GetMetricData();
+	segMap.frame.Zoom = 15;
+	segMap.frame.Envelope = { Min: { Lat: 1, Lon: 1 }, Max: { Lat: 2, Lon: 2 } };
+	await metric.GetMetricData();
+	expect(calls).toHaveLength(1);
+});
+
+it('un pedido fallido no queda cacheado: el siguiente intento reintenta', async () => {
+	const segMap = setupWindow();
+	let callCount = 0;
+	segMap.Get = function () {
+		callCount++;
+		if (callCount === 1) {
+			return Promise.reject(new Error('falló'));
+		}
+		return Promise.resolve({ data: { Data: [] } });
+	};
+	const metric = new ActiveMetric(makeMetricProperties());
+	let caught = false;
+	try {
+		await metric.GetMetricData();
+	} catch (e) {
+		caught = true;
+	}
+	expect(caught).toBeTruthy();
+	await metric.GetMetricData();
+	expect(callCount).toBe(2);
+});

@@ -11,6 +11,14 @@ const CIRCLE_SEGMENTS = 36;
 // de este diámetro, para que ningún elemento deje de verse.
 const MINIMUM_SIZE_IN_PIXELS = 4;
 
+// Por debajo de este zoom el punto mínimo garantizado se va achicando, hasta
+// llegar a SMALLEST_SIZE_IN_PIXELS en SMALL_ZOOM_FLOOR; de ahí para abajo no
+// se achica más. Sin esto, en un mapa muy alejado todos los puntos se ven
+// del mismo tamaño que a un zoom mucho más cercano.
+const SMALL_ZOOM_THRESHOLD = 7;
+const SMALL_ZOOM_FLOOR = 3;
+const SMALLEST_SIZE_IN_PIXELS = 2;
+
 // El rango de opacidad de esta capa va de 0,3 (baja) a 0,7 (alta); el nivel
 // medio es el promedio de ambos extremos.
 const OPACITY_LOW = 0.3;
@@ -33,10 +41,11 @@ function FixedSizeShapeOverlay(activeSelectedMetric, delegates) {
 	this.layer = null;
 };
 
-FixedSizeShapeOverlay.prototype.CreateLayer = function (data, zoom, lat) {
+FixedSizeShapeOverlay.prototype.CreateLayer = function (data, zoom) {
 	this.data = data;
+	this.zoom = zoom;
 	this.opacity = this.ResolveOpacity(zoom);
-	this.showsShapes = this.ShowsShapesAt(zoom, lat);
+	this.showsShapes = this.ShowsShapesAt(zoom);
 	if (this.showsShapes) {
 		this.layer = this.createShapesLayer();
 	} else {
@@ -45,13 +54,19 @@ FixedSizeShapeOverlay.prototype.CreateLayer = function (data, zoom, lat) {
 	return this.layer;
 };
 
-// Devuelve una capa nueva solo si cambió la forma de presentación o la
-// opacidad (que se atenúa en zooms altos); si no, null.
-FixedSizeShapeOverlay.prototype.UpdateZoom = function (zoom, lat) {
+// Devuelve una capa nueva solo si cambió la forma de presentación, la
+// opacidad (que se atenúa en zooms altos) o, estando en modo punto, el
+// tamaño del punto (que se achica por debajo de SMALL_ZOOM_THRESHOLD); si
+// no cambió nada de eso, null.
+FixedSizeShapeOverlay.prototype.UpdateZoom = function (zoom) {
 	var opacityChanged = this.ResolveOpacity(zoom) !== this.opacity;
-	var presentationChanged = this.ShowsShapesAt(zoom, lat) !== this.showsShapes;
-	if (opacityChanged || presentationChanged) {
-		return this.CreateLayer(this.data, zoom, lat);
+	var presentationChanged = this.ShowsShapesAt(zoom) !== this.showsShapes;
+	var dotSizeChanged = false;
+	if (!presentationChanged && !this.showsShapes) {
+		dotSizeChanged = this.ResolveDotDiameter(zoom) !== this.ResolveDotDiameter(this.zoom);
+	}
+	if (opacityChanged || presentationChanged || dotSizeChanged) {
+		return this.CreateLayer(this.data, zoom);
 	} else {
 		return null;
 	}
@@ -75,13 +90,35 @@ FixedSizeShapeOverlay.prototype.ResolveOpacity = function (zoom) {
 	}
 };
 
-FixedSizeShapeOverlay.prototype.ShowsShapesAt = function (zoom, lat) {
-	return this.SizeInPixels(zoom, lat) >= MINIMUM_SIZE_IN_PIXELS;
+FixedSizeShapeOverlay.prototype.ShowsShapesAt = function (zoom) {
+	return this.SizeInPixels(zoom) >= MINIMUM_SIZE_IN_PIXELS;
 };
 
-FixedSizeShapeOverlay.prototype.SizeInPixels = function (zoom, lat) {
-	var metersPerPixel = METERS_PER_PIXEL_AT_ZOOM_0 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom);
+// Metros por píxel calculados sin el factor cos(latitud) de la proyección
+// Mercator real, es decir con la escala del ecuador para cualquier punto.
+// Esto es deliberado: aquí solo importa determinar el zoom por debajo del
+// cual la figura deja de verse, no medir con precisión, y evita depender de
+// la latitud del encuadre para ese único fin. El error que introduce hace
+// que el punto mínimo garantizado se active en un zoom levemente más alto
+// que el estrictamente necesario, nunca más bajo, así que el invariante que
+// importa (nada deja de verse) se sigue cumpliendo.
+FixedSizeShapeOverlay.prototype.SizeInPixels = function (zoom) {
+	var metersPerPixel = METERS_PER_PIXEL_AT_ZOOM_0 / Math.pow(2, zoom);
 	return this.fixedSize / metersPerPixel;
+};
+
+// Diámetro del punto en modo mínimo garantizado. Entre SMALL_ZOOM_FLOOR y
+// SMALL_ZOOM_THRESHOLD interpola linealmente; fuera de ese rango queda en
+// uno de los dos extremos.
+FixedSizeShapeOverlay.prototype.ResolveDotDiameter = function (zoom) {
+	if (zoom >= SMALL_ZOOM_THRESHOLD) {
+		return MINIMUM_SIZE_IN_PIXELS;
+	} else if (zoom <= SMALL_ZOOM_FLOOR) {
+		return SMALLEST_SIZE_IN_PIXELS;
+	} else {
+		var fraction = (zoom - SMALL_ZOOM_FLOOR) / (SMALL_ZOOM_THRESHOLD - SMALL_ZOOM_FLOOR);
+		return SMALLEST_SIZE_IN_PIXELS + fraction * (MINIMUM_SIZE_IN_PIXELS - SMALLEST_SIZE_IN_PIXELS);
+	}
 };
 
 FixedSizeShapeOverlay.prototype.createShapesLayer = function () {
@@ -121,7 +158,7 @@ FixedSizeShapeOverlay.prototype.createDotsLayer = function () {
 		filled: true,
 		stroked: false,
 		radiusUnits: 'pixels',
-		getRadius: MINIMUM_SIZE_IN_PIXELS / 2,
+		getRadius: this.ResolveDotDiameter(this.zoom) / 2,
 		getPosition: function (dataElement) {
 			return [dataElement.Lon, dataElement.Lat];
 		},

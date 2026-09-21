@@ -20,20 +20,25 @@ export default class LeafletLayer extends L.Layer {
 
 		this._container = L.DomUtil.create('div');
 		this._container.className = 'leaflet-layer';
+		this._container.style.transition = 'none';
 		if (this._getZoomAnimated()) {
 			L.DomUtil.addClass(this._container, 'leaflet-zoom-animated');
 		}
 
+		const size = this._map.getSize();
+		this._container.style.width = `${size.x}px`;
+		this._container.style.height = `${size.y}px`;
+
+		const offset = this._map._getMapPanePos().multiplyBy(-1);
+		L.DomUtil.setPosition(this._container, offset);
+
 		pane.appendChild(this._container);
-		this._deck = createDeckInstance(this._map, this._container, this._deck, this.props);
+		this._deck = createDeckInstance(this._map, this._container, this._deck, this.props, size);
 		this._update();
 
-
 		this.on('click', function (event) {
-			var elements = document.elementsFromPoint(event.containerPoint.x, event.containerPoint.y);
 			this.handleClick(event);
 		}, this);
-
 
 		return this;
 	}
@@ -41,6 +46,9 @@ export default class LeafletLayer extends L.Layer {
 	onRemove(_map) {
 		if (!this._container || !this._deck) return this;
 
+		// Corta cualquier transición pendiente antes del removeChild, para
+		// que la desconexión del nodo sea instantánea.
+		this._container.style.transition = 'none';
 		L.DomUtil.remove(this._container);
 		this._container = undefined;
 

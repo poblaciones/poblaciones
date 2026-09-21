@@ -14,7 +14,7 @@ use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Geometry;
 
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
-use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
+use helena\services\backoffice\publish\snapshots\SnapshotSearchModel;
 
 class DatasetModel
 {
@@ -226,7 +226,7 @@ class DatasetModel
 
 	private function ResolveSpatialColumns($dataset, &$joins)
 	{
-		$snap = new SnapshotLookupModel();
+		$snap = new SnapshotSearchModel();
 		if (SnapshotByDatasetModel::UseGeographyItemPolygon($dataset))
 		{
 			$joins .= " LEFT JOIN geography_item ON gei_id = geography_item_id ";

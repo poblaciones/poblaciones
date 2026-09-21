@@ -10,7 +10,7 @@ use helena\services\common\BaseService;
 use helena\db\frontend\SnapshotSearchRegions;
 use helena\db\frontend\SnapshotSearchFeatures;
 
-use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
+use helena\services\backoffice\publish\snapshots\SnapshotSearchModel;
 use helena\entities\frontend\clipping\LabelsDataInfo;
 use helena\entities\frontend\geometries\Envelope;
 use helena\entities\frontend\geometries\Coordinate;
@@ -123,7 +123,7 @@ class LabelsService extends BaseService
 		$featuresLookup = new SnapshotSearchFeatures();
 
 		$res = $regionsLookup->GetClippingRegionsLabelsQuery($envelope, $z);
-		if ($z >= SnapshotLookupModel::SMALL_LABELS_FROM)
+		if ($z >= SnapshotSearchModel::SMALL_LABELS_FROM)
 		{
 			$features = $featuresLookup->GetFeatureLabelsQuery($envelope, $z);
 			$res = array_merge($res, $features);

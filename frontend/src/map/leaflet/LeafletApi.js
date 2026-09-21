@@ -1049,8 +1049,8 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 	if (activeMetric.IsLocationType()) {
 		var locationsOverlay = new IconOverlay(activeMetric);
 		deckLayers = locationsOverlay.CreateLayers(data);
-		updateLayersOnZoom = function (zoom, lat) {
-			return locationsOverlay.UpdateZoom(zoom, lat);
+		updateLayersOnZoom = function (zoom) {
+			return locationsOverlay.UpdateZoom(zoom);
 		};
 	} else {
 		var polygonLayer = new PolygonOverlay(activeMetric);
@@ -1075,7 +1075,7 @@ LeafletApi.prototype.CreateDeckglLayer = function (activeMetric, data, index) {
 	});
 	var map = this.map;
 	var onZoomEnd = function () {
-		var updatedLayers = updateLayersOnZoom(map.getZoom(), map.getCenter().lat);
+		var updatedLayers = updateLayersOnZoom(map.getZoom());
 		if (updatedLayers) {
 			wrapper.setProps({ layers: updatedLayers });
 		}

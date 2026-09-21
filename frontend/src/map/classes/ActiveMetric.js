@@ -42,6 +42,10 @@ function ActiveMetric(selectedMetric) {
 	this.IsLocked = false;
 	this.KillDuplicateds = true;
 	this.overlay = null;
+	// Última respuesta de GetLevelData, para no repetir el pedido al servidor
+	// cuando se refresca la capa sin que cambien los parámetros de la
+	// consulta (ver GetLevelData). null hasta el primer pedido.
+	this.levelDataCache = null;
 	this.Compare = new Compare(this);
 };
 
@@ -795,14 +799,10 @@ ActiveMetric.prototype.GetStyleColorDictionary = function () {
 };
 
 ActiveMetric.prototype.GetMetricData = function () {
-	var url = this.GetMetricDataService();
 	var currentVariableId = this.SelectedVariable().Id;
 	var selectedLevel = this.SelectedLevel();
 
-	return window.SegMap.Get(url.server + url.path, {
-		params: url.params
-	}, url.useStaticQueue).then(function (res) {
-		var list = res.data.Data;
+	return this.GetLevelData().then(function (list) {
 		if (selectedLevel.Variables.length > 1) {
 			// filtra antes de devolverlo...
 			var filtered = [];
@@ -816,6 +816,37 @@ ActiveMetric.prototype.GetMetricData = function () {
 			return list;
 		}
 	});
+};
+
+// Datos crudos del nivel seleccionado (todas sus variables, sin filtrar).
+// Se cachean por los parámetros de la consulta: nivel, versión, partición,
+// urbanidad y recorte activo, que son los únicos de los que depende esta
+// respuesta (el envelope y el zoom del encuadre no se envían: para las
+// capas de puntos el filtrado por lo que se ve en el mapa es enteramente
+// client-side). Así, refrescar la capa por un cambio que no toca esos
+// parámetros —tildar o destildar una categoría, cambiar la variable
+// seleccionada dentro del mismo nivel, etc.— no vuelve a pedirle nada al
+// servidor.
+ActiveMetric.prototype.GetLevelData = function () {
+	var url = this.GetMetricDataService();
+	var cacheKey = JSON.stringify(url.params);
+	if (this.levelDataCache !== null && this.levelDataCache.key === cacheKey) {
+		return this.levelDataCache.promise;
+	}
+	var loc = this;
+	var promise = window.SegMap.Get(url.server + url.path, {
+		params: url.params
+	}, url.useStaticQueue).then(function (res) {
+		return res.data.Data;
+	});
+	promise.catch(function () {
+		// Un pedido fallido no queda cacheado: el próximo refresh reintenta.
+		if (loc.levelDataCache !== null && loc.levelDataCache.key === cacheKey) {
+			loc.levelDataCache = null;
+		}
+	});
+	this.levelDataCache = { key: cacheKey, promise: promise };
+	return promise;
 };
 
 ActiveMetric.prototype.GetMetricDataService = function (seed) {

@@ -86,6 +86,10 @@ export default {
 	methods: {
 		show(clippingRegion) {
 			this.clippingRegion = clippingRegion;
+			// Se vacía antes de activar la visibilidad: si el popup se
+			// reutiliza para otra región, evita mostrar por un instante las
+			// asociadas de la consulta anterior mientras llega la nueva.
+			this.associated = [];
 			this.activateEdit = true;
 			this.reloadAssociated();
 		},

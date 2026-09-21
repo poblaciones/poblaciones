@@ -111,6 +111,10 @@ export default {
 	methods: {
 		show(geography) {
 			this.geography = geography;
+			// Se vacía antes de activar la visibilidad: si el popup se
+			// reutiliza para otra geografía, evita mostrar por un instante
+			// las asociadas de la consulta anterior mientras llega la nueva.
+			this.associated = [];
 			this.activateEdit = true;
 			this.reloadAssociated();
 		},

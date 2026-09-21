@@ -9,7 +9,7 @@ use minga\framework\MultiQuery;
 use minga\framework\Profiling;
 use helena\classes\GeoJson;
 use helena\classes\App;
-use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
+use helena\services\backoffice\publish\snapshots\SnapshotSearchModel;
 
 class SnapshotSearchRegions extends BaseModel
 {

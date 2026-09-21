@@ -33,8 +33,7 @@ IconOverlay.prototype.CreateLayers = function (data) {
 	}
 	var frame = window.SegMap.frame;
 	this.shapes = new FixedSizeShapeOverlay(this.activeSelectedMetric, delegates);
-	var referenceLat = this.CalculateEnvelopeCenterLatitude(frame.Envelope);
-	var shapesLayer = this.shapes.CreateLayer(dataFiltered, frame.Zoom, referenceLat);
+	var shapesLayer = this.shapes.CreateLayer(dataFiltered, frame.Zoom);
 	if (this.RequiresFramelessIcons(markerSettings)) {
 		this.framelessIconLayer = this.CreateFramelessIconLayer(dataFiltered, markerSettings);
 	}
@@ -42,11 +41,11 @@ IconOverlay.prototype.CreateLayers = function (data) {
 };
 
 // Devuelve las capas nuevas cuando el zoom cambia la presentación; si no, null.
-IconOverlay.prototype.UpdateZoom = function (zoom, lat) {
+IconOverlay.prototype.UpdateZoom = function (zoom) {
 	if (this.shapes === null) {
 		return null;
 	}
-	var shapesLayer = this.shapes.UpdateZoom(zoom, lat);
+	var shapesLayer = this.shapes.UpdateZoom(zoom);
 	if (shapesLayer === null) {
 		return null;
 	}
@@ -64,14 +63,6 @@ IconOverlay.prototype.composeFixedSizeLayers = function (shapesLayer) {
 		layers.push(this.framelessIconLayer);
 	}
 	return layers;
-};
-
-// frame.Center solo se completa al buscar una dirección o centrar el mapa
-// por código (SetCenter/PanTo); en la navegación normal queda indefinido.
-// frame.Envelope, en cambio, se actualiza en cada movimiento del mapa, así
-// que su centroide es la referencia de latitud confiable para esta capa.
-IconOverlay.prototype.CalculateEnvelopeCenterLatitude = function (envelope) {
-	return (envelope.Min.Lat + envelope.Max.Lat) / 2;
 };
 
 IconOverlay.prototype.CreateLayer = function (dataFiltered, markerSettings, delegates) {

@@ -4,7 +4,7 @@ namespace helena\controllers\logs;
 use helena\controllers\common\cController;
 
 use helena\services\backoffice\publish\snapshots\SnapshotGeographiesModel;
-use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
+use helena\services\backoffice\publish\snapshots\SnapshotSearchModel;
 use helena\services\backoffice\publish\snapshots\SnapshotBoundaryModel;
 use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionModel;
 use helena\services\backoffice\publish\snapshots\SnapshotGeographiesByRegionModel;
@@ -69,7 +69,7 @@ class cCaches extends cController
 			$cm->CleanGeographyCache();
 			$this->message = 'Regeneradas ' . $model->Regen() . ' filas.';
 	} else if (array_key_exists('regenClipping', $_POST)) {
-			$model = new SnapshotLookupModel();
+			$model = new SnapshotSearchModel();
 			$model->ClearClippingRegions();
 			$this->message = 'Regeneradas para lookup: ' . $model->RegenClippingRegions() . ' filas. ';
 

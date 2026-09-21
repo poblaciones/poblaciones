@@ -241,6 +241,10 @@ InfoWindow.prototype.ReceiveInfoWindowData = function (res, position, key, force
 	}
 	res.data.Key = key;
 	res.data.panelType = PanelType.InfoPanel;
+	if (res.data.position && res.data.position.Coordinate) {
+		window.SegMap.Recents.RegisterLocation(key, res.data.Title,
+			res.data.position.Coordinate.Lat, res.data.position.Coordinate.Lon);
+	}
 	// Lo marca en el mapa
 	window.SegMap.MapsApi.SetSelectedFeature(res.data.position, key, res.data.Title);
 	// Lo agrega al panel

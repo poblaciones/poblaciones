@@ -269,6 +269,7 @@ Clipping.prototype.ProcessClipping = function (data, fitRegion, moveCenter) {
 		var name = this.GetClippingName();
 		if (name) {
 			document.title = name;
+			window.SegMap.Recents.RegisterClippingRegion(this.frame.ClippingRegionIds, name);
 		} else {
 			document.title = window.DefaultTitle;
 		}

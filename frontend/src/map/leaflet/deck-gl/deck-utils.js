@@ -24,7 +24,7 @@ function getViewState(map) {
  * @param {Object} props - Propiedades para la capa de Deck.gl.
  * @returns {Deck} - Nueva instancia de Deck.gl.
  */
-export function createDeckInstance(map, container, deck, props) {
+export function createDeckInstance(map, container, deck, props, size) {
 	if (!deck) {
 		const viewState = getViewState(map);
 		deck = new Deck({
@@ -32,12 +32,13 @@ export function createDeckInstance(map, container, deck, props) {
 			parent: container,
 			controller: false,
 			style: { zIndex: 'auto' },
+			width: size.x,
+			height: size.y,
 			viewState
 		});
 	}
 	return deck;
 }
-
 /**
  * Actualiza la vista de Deck.gl en base al estado del mapa de Leaflet.
  * @param {Deck} deck - Instancia de Deck.gl.

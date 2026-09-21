@@ -15,6 +15,7 @@ import Queue from './Queue';
 import Session from '@/map/session/Session';
 import OverlapRectangles from './OverlapRectangles';
 import InfoWindow from './InfoWindow';
+import ActiveRecents from './ActiveRecents';
 import axios from 'axios';
 import promises from '@/common/framework/promises';
 import str from '@/common/framework/str';
@@ -77,6 +78,7 @@ function SegmentedMap(mapsApi, frame, clipping, toolbarStates, selectedMetricCol
 		this.StaticQueue = this.Queue;
 	}
 	this.Session = new Session(config);
+	this.Recents = new ActiveRecents();
 };
 
 SegmentedMap.prototype.WaitForFullLoading = function () {
@@ -693,6 +695,9 @@ SegmentedMap.prototype.AddBoundaryById = function (id, isBaseMetric = false) {
 			loc.Metrics.AddStandardMetric(activeBoundary);
 		}
 		loc.Session.Content.AddBoundary(id);
+		if (!isBaseMetric) {
+			loc.Recents.RegisterBoundary(id, res.data.Name);
+		}
 		return activeBoundary;
 	}).catch(function (error) {
 		err.errDialog('GetSelectedBoundary', 'obtener las delimitaciones solicitadas', error);
@@ -732,6 +737,7 @@ SegmentedMap.prototype.AddMetricBySelectedMetricInfo = function (selectedMetricI
 		this.Metrics.AppendNonStandardMetric(activeSelectedMetric);
 	} else {
 		this.Metrics.AddStandardMetric(activeSelectedMetric);
+		this.Recents.RegisterMetric(selectedMetricInfo.Metric.Id, selectedMetricInfo.Metric.Name);
 	}
 	return activeSelectedMetric;
 };

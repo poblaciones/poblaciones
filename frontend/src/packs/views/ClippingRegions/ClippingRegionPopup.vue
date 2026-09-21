@@ -109,7 +109,7 @@
 					<div class="md-layout-item md-size-100" v-if="!isNew">
 						<div class="full-row-separator">Metadatos</div>
 					</div>
-					<div class="md-layout-item md-size-30" v-if="!isNew" style="padding-top: 10px;">
+					<div class="md-layout-item md-size-30" v-if="!isNew">
 						<md-switch class="md-primary" :disabled="!canEdit" v-model="hasOwnMetadata">
 							Usa metadatos propios
 						</md-switch>
@@ -325,6 +325,13 @@ export default {
 			this.$refs.invoker.doSave(window.Db, window.Db.UpdateClippingRegion,
 							this.clippingRegion).then(function(data) {
 								loc.activateEdit = false;
+								// MetadataId es una propiedad calculada por el servidor
+								// (ver ClippingRegion::getMetadataIdForDisplay): el clon
+								// local no la recalcula al cambiar el switch de
+								// metadatos, así que se toma la que devuelve el guardado
+								// para que la grilla actualice el ícono sin recargarse
+								// entera (ver ClippingRegions.vue::popupSaved).
+								loc.clippingRegion.MetadataId = data.MetadataId;
 								loc.$emit('completed', loc.clippingRegion);
 			});
 		},

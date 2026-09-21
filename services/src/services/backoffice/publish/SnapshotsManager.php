@@ -11,7 +11,7 @@ use helena\classes\DatasetTypeEnum;
 use helena\services\backoffice\publish\snapshots\SnapshotMetricVersionModel;
 use helena\services\backoffice\publish\snapshots\SnapshotShapeDatasetItemModel;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
-use helena\services\backoffice\publish\snapshots\SnapshotLookupModel;
+use helena\services\backoffice\publish\snapshots\SnapshotSearchModel;
 
 class SnapshotsManager extends BaseService
 {
@@ -46,7 +46,7 @@ class SnapshotsManager extends BaseService
 		$mode = new SnapshotShapeDatasetItemModel();
 		$mode->Clear($datasetId);
 
-		$model = new SnapshotLookupModel();
+		$model = new SnapshotSearchModel();
 		$labelsRowDeleted = $model->ClearDataset($datasetId);
 
 		Profiling::EndTimer();
@@ -77,7 +77,7 @@ class SnapshotsManager extends BaseService
 			if (($row["dat_type"] == DatasetTypeEnum::Shapes || $row["dat_type"] == DatasetTypeEnum::Locations)
 				&& $row["dat_caption_column_id"] !== null)
 			{
-				$model = new SnapshotLookupModel();
+				$model = new SnapshotSearchModel();
 				$model->RegenDataset($row['dat_id']);
 			}
 		}

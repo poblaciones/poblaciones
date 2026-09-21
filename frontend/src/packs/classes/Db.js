@@ -63,11 +63,13 @@ Db.prototype.MoveBoundaryDown = function (boundary) {
 		{ b: boundary.Id }, 'mover la delimitación');
 };
 
+// Se propaga la respuesta del servidor (no se descarta con un .then vacío
+// como el resto de los métodos de este archivo): trae el MetadataId
+// resultante, necesario para refrescar el ícono de metadatos en la grilla
+// sin recargarla entera (ver ClippingRegionPopup.vue::saveEdit).
 Db.prototype.UpdateClippingRegion = function (region) {
 	return axiosClient.postPromise(window.host + '/services/packs/UpdateClippingRegion',
-		{ r: region }, 'actualizar la región').then(function () {
-
-		});
+		{ r: region }, 'actualizar la región');
 };
 
 Db.prototype.DeleteClippingRegion = function (region) {

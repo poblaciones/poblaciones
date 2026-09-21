@@ -32,7 +32,6 @@ function setupDom() {
 	const segMap = setupWindow();
 	segMap.MapsApi = {};
 	segMap.frame.Zoom = 16;
-	segMap.frame.Envelope = { Min: { Lat: -37.3, Lon: -59.1 }, Max: { Lat: -37.3, Lon: -59.1 } };
 	globalThis.document.createElement = function () { return {}; };
 	globalThis.L = { Util: { template(svg, values) { return svg.replace(/\{(\w+)\}/g, (match, key) => (key in values ? values[key] : match)); } } };
 	return segMap;
@@ -143,7 +142,7 @@ it('la capa de figuras es seleccionable y usa los mismos delegados que los ícon
 	setupDom();
 	const delegates = { mouseover() {}, click() {} };
 	const shapes = new FixedSizeShapeOverlay(makeLocationMetric({ Size: 'F', Frame: 'H', FixedSize: 100 }), delegates);
-	const layer = shapes.CreateLayer([{ LID: 1, Lat: -34, Lon: -58 }], 16, -34);
+	const layer = shapes.CreateLayer([{ LID: 1, Lat: -34, Lon: -58 }], 16);
 	expect(layer instanceof PolygonLayer).toBeTruthy();
 	expect(layer.props.pickable).toBe(true);
 	expect(layer.props.onClick).toBe(delegates.click);
@@ -153,40 +152,42 @@ it('la capa de figuras es seleccionable y usa los mismos delegados que los ícon
 it('alta es 0,7 (0,42 desde zoom 18)', () => {
 	setupDom();
 	const shapes = makeShapes('B', 500, 'H');
-	expect(shapes.CreateLayer([], 16, -37).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 179]);
-	expect(shapes.CreateLayer([], 18, -37).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 107]);
+	expect(shapes.CreateLayer([], 16).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 179]);
+	expect(shapes.CreateLayer([], 18).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 107]);
 });
 
 it('media es el promedio entre baja y alta (0,5)', () => {
 	setupDom();
-	expect(makeShapes('B', 500, 'M').CreateLayer([], 16, -37).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 128]);
+	expect(makeShapes('B', 500, 'M').CreateLayer([], 16).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 128]);
 });
 
 it('sin nivel elegido se comporta como media', () => {
 	setupDom();
-	expect(makeShapes('B', 500).CreateLayer([], 16, -37).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 128]);
+	expect(makeShapes('B', 500).CreateLayer([], 16).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 128]);
 });
 
 it('baja es 0,3', () => {
 	setupDom();
-	expect(makeShapes('B', 500, 'L').CreateLayer([], 16, -37).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 77]);
+	expect(makeShapes('B', 500, 'L').CreateLayer([], 16).props.getFillColor({ LID: 1 })).toEqual([255, 0, 0, 77]);
 });
 
 describe('FixedSizeShapeOverlay: tamaño mínimo en pantalla');
 
-it('calcula el tamaño en píxeles según zoom y latitud', () => {
+it('calcula el tamaño en píxeles según zoom, con la escala del ecuador', () => {
 	setupDom();
 	const shapes = makeShapes('H', 500);
-	// En Tandil, con zoom 9 un píxel cubre unos 243 m.
-	expect(shapes.SizeInPixels(9, -37.3)).toBeCloseTo(2.06, 2);
-	expect(shapes.SizeInPixels(10, -37.3)).toBeCloseTo(4.11, 2);
+	// Se calcula sin el factor cos(latitud) de Mercator: alcanza con saber en
+	// qué zoom la figura deja de verse, y usar la escala del ecuador para eso
+	// evita depender de la latitud del encuadre (ver comentario en el código).
+	expect(shapes.SizeInPixels(9)).toBeCloseTo(1.64, 2);
+	expect(shapes.SizeInPixels(10)).toBeCloseTo(3.27, 2);
 });
 
 it('por debajo de 4 píxeles reemplaza las figuras por puntos seleccionables', () => {
 	setupDom();
 	const delegates = { mouseover() {}, click() {} };
 	const shapes = new FixedSizeShapeOverlay(makeLocationMetric({ Size: 'F', Frame: 'H', FixedSize: 500 }), delegates);
-	const layer = shapes.CreateLayer([], 9, -37.3);
+	const layer = shapes.CreateLayer([], 9);
 	expect(layer instanceof ScatterplotLayer).toBeTruthy();
 	expect(layer.props.radiusUnits).toBe('pixels');
 	expect(layer.props.getRadius).toBe(2);
@@ -197,12 +198,40 @@ it('por debajo de 4 píxeles reemplaza las figuras por puntos seleccionables', (
 it('UpdateZoom devuelve una capa nueva solo al cambiar la presentación o la opacidad', () => {
 	setupDom();
 	const shapes = makeShapes('H', 500);
-	shapes.CreateLayer([], 12, -37.3);
-	expect(shapes.UpdateZoom(11, -37.3)).toBeNull();
-	expect(shapes.UpdateZoom(9, -37.3) instanceof ScatterplotLayer).toBeTruthy();
-	expect(shapes.UpdateZoom(8, -37.3)).toBeNull();
-	expect(shapes.UpdateZoom(13, -37.3) instanceof PolygonLayer).toBeTruthy();
-	expect(shapes.UpdateZoom(18, -37.3) instanceof PolygonLayer).toBeTruthy();
+	shapes.CreateLayer([], 12);
+	expect(shapes.UpdateZoom(11)).toBeNull();
+	expect(shapes.UpdateZoom(9) instanceof ScatterplotLayer).toBeTruthy();
+	expect(shapes.UpdateZoom(8)).toBeNull();
+	expect(shapes.UpdateZoom(13) instanceof PolygonLayer).toBeTruthy();
+	expect(shapes.UpdateZoom(18) instanceof PolygonLayer).toBeTruthy();
+});
+
+it('por debajo de zoom 7 el punto se achica gradualmente hasta zoom 3', () => {
+	setupDom();
+	const shapes = makeShapes('H', 500);
+	expect(shapes.ResolveDotDiameter(7)).toBe(4);
+	expect(shapes.ResolveDotDiameter(9)).toBe(4);
+	expect(shapes.ResolveDotDiameter(5)).toBe(3);
+	expect(shapes.ResolveDotDiameter(3)).toBe(2);
+	expect(shapes.ResolveDotDiameter(1)).toBe(2);
+});
+
+it('en modo punto, el radio de la capa sigue el achicamiento por zoom', () => {
+	setupDom();
+	const shapes = makeShapes('H', 500);
+	expect(shapes.CreateLayer([], 9).props.getRadius).toBe(2);
+	expect(shapes.CreateLayer([], 5).props.getRadius).toBe(1.5);
+	expect(shapes.CreateLayer([], 3).props.getRadius).toBe(1);
+});
+
+it('UpdateZoom también devuelve una capa nueva si cambia el tamaño del punto sin cambiar de presentación', () => {
+	setupDom();
+	const shapes = makeShapes('H', 500);
+	shapes.CreateLayer([], 9);
+	const updated = shapes.UpdateZoom(5);
+	expect(updated instanceof ScatterplotLayer).toBeTruthy();
+	expect(updated.props.getRadius).toBe(1.5);
+	expect(shapes.UpdateZoom(5)).toBeNull();
 });
 
 describe('IconOverlay: capas según el tamaño del marcador');
@@ -254,10 +283,10 @@ it('cuando las figuras pasan a puntos omite los íconos, y los repone al volver'
 	const marker = { Size: 'F', Frame: 'H', FixedSize: 500, Type: 'T', Source: 'V' };
 	const overlay = new IconOverlay(makeLocationMetric(marker));
 	expect(overlay.CreateLayers([])).toHaveLength(2);
-	const reduced = overlay.UpdateZoom(9, -37.3);
+	const reduced = overlay.UpdateZoom(9);
 	expect(reduced).toHaveLength(1);
 	expect(reduced[0] instanceof ScatterplotLayer).toBeTruthy();
-	const restored = overlay.UpdateZoom(14, -37.3);
+	const restored = overlay.UpdateZoom(14);
 	expect(restored).toHaveLength(2);
 	expect(restored[1] instanceof IconLayer).toBeTruthy();
 });
@@ -266,7 +295,7 @@ it('sin tamaño fijo UpdateZoom no reemplaza capas', () => {
 	setupDom();
 	const overlay = new IconOverlay(makeLocationMetric({ Size: 'M', Frame: 'C', Type: 'N', Source: 'F' }));
 	overlay.CreateLayers([]);
-	expect(overlay.UpdateZoom(5, -37.3)).toBeNull();
+	expect(overlay.UpdateZoom(5)).toBeNull();
 });
 
 describe('MarkerFactory (deck.gl): marcos');
