@@ -1,0 +1,35 @@
+import { report } from './_harness.mjs';
+
+await import('./mercator.test.mjs');
+await import('./metricsList.test.mjs');
+await import('./activeMetric.test.mjs');
+await import('./segmentsComposer.test.mjs');
+await import('./routes.test.mjs');
+await import('./indicatorSelector.test.mjs');
+await import('./helperQueue.test.mjs');
+await import('./mapLegend.test.mjs');
+await import('./baseMetricOverlays.test.mjs');
+await import('./partitionBadge.test.mjs');
+await import('./layerUid.test.mjs');
+await import('./levelAndMetricSelector.test.mjs');
+await import('./dropdownTrigger.test.mjs');
+await import('./compareSwitch.test.mjs');
+await import('./clippingLegend.test.mjs');
+await import('./segmentedMap.test.mjs');
+await import('./activeBoundary.test.mjs');
+await import('./boundariesComposer.test.mjs');
+await import('./boundaryValues.test.mjs');
+await import('./boundaryChart.test.mjs');
+await import('./boundaryTopButtons.test.mjs');
+await import('./abstractSvgComposer.test.mjs');
+await import('./sideToolbar.test.mjs');
+await import('./selectorTooltips.test.mjs');
+await import('./sidebarPositionCookie.test.mjs');
+await import('./sideButtons.test.mjs');
+await import('./patternButtons.test.mjs');
+await import('./boundary.test.mjs');
+await import('./fixedSizeShapes.test.mjs');
+await import('./activeRecents.test.mjs');
+await import('./searchPanel.test.mjs');
+
+await report();
