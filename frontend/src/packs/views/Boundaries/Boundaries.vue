@@ -370,14 +370,27 @@ const GROUP_LEVEL = -1;
 		// no queda exactamente al final. Recargar desde el servidor evita
 		// ambos problemas de una vez.
 		popupSaved(item) {
-			if (!arr.ContainsById(this.list, item.Id)) {
+			var index = this.indexOfBoundary(item.Id);
+			if (index === -1) {
 				this.reloadList();
 				return;
 			}
 			item.Level = 0;
-			arr.ReplaceByIdOrAdd(this.list, item);
+			this.list.splice(index, 1, item);
+		},
+		indexOfBoundary(id) {
+			for (var n = 0; n < this.list.length; n++) {
+				if (this.list[n].Level === 0 && this.list[n].Id === id) {
+					return n;
+				}
+			}
+			return -1;
 		},
 		versionSaved(item) {
+			if (!item.Id) {
+				this.reloadList();
+				return;
+			}
 			item.Level = 1;
 			for (var n = 0; n < this.list.length; n++) {
 				if (this.list[n].Level === 1 && this.list[n].Id === item.Id) {

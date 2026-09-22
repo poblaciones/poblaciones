@@ -1,5 +1,5 @@
 <template>
-  <div>
+	<div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="regionPicker" @selected="onRegionSelected"></tree-picker-popup>
 		<md-dialog v-if="boundaryVersion" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
@@ -57,131 +57,132 @@
 
 <script>
 
-import f from '@/backoffice/classes/Formatter';
-import TreePickerPopup from '@/packs/components/popups/TreePickerPopup';
-import GeographySelectHelper from '@/packs/classes/GeographySelectHelper';
+	import f from '@/backoffice/classes/Formatter';
+	import TreePickerPopup from '@/packs/components/popups/TreePickerPopup';
+	import GeographySelectHelper from '@/packs/classes/GeographySelectHelper';
 
-export default {
-  name: "BoundaryVersionPopup",
-  data() {
-    return {
-			activateEdit: false,
-			boundaryVersion: null,
-			geographies: [],
-			allClippingRegions: [],
-    };
-  },
-  computed: {
-		canEdit() {
-			return window.Context.IsAdmin();
+	export default {
+		name: "BoundaryVersionPopup",
+		data() {
+			return {
+				activateEdit: false,
+				boundaryVersion: null,
+				geographies: [],
+				allClippingRegions: [],
+			};
 		},
-		cancelCaption() {
-			if (this.canEdit) {
-				return 'Cancelar';
-			}
-			return 'Cerrar';
+		computed: {
+			canEdit() {
+				return window.Context.IsAdmin();
+			},
+			cancelCaption() {
+				if (this.canEdit) {
+					return 'Cancelar';
+				}
+				return 'Cerrar';
+			},
+			dialogTitle() {
+				if (this.boundaryVersion) {
+					return 'Versión de ' + this.boundaryVersion.Boundary.Caption;
+				}
+				return 'Versión de delimitación';
+			},
 		},
-		dialogTitle() {
-			if (this.boundaryVersion) {
-				return 'Versión de ' + this.boundaryVersion.Boundary.Caption;
-			}
-			return 'Versión de delimitación';
-		},
-  },
-	created() {
-		// Se carga una sola vez, al montar el componente (mucho antes de
-		// que se abra el popup por primera vez): igual criterio que el
-		// combo de Gradient en GeographyPopup. Si se cargara recién en
-		// show(), mp-select (con listGrouping) podría montarse con la
-		// lista todavía vacía y fallar al intentar ubicar el valor actual
-		// entre las opciones.
-		var loc = this;
-		window.Context.Geographies.GetAll(function (data) {
-			loc.geographies = GeographySelectHelper.ResolveRootCaptions(data);
-		});
-	},
-  methods: {
-		formatClippingRegion(region) {
-			if (region.Version) {
-				return region.Caption + ', ' + region.Version;
-			}
-			return region.Caption;
-		},
-		show(boundaryVersion, boundary) {
-			this.boundaryVersion = f.clone(boundaryVersion);
-			// Al crear una versión nueva desde la delimitación, el factory no
-			// conoce a qué delimitación pertenece: se completa acá.
-			if (!this.boundaryVersion.Boundary) {
-				this.boundaryVersion.Boundary = boundary;
-			}
-			if (!this.boundaryVersion.ClippingRegions) {
-				this.boundaryVersion.ClippingRegions = [];
-			}
-			this.boundaryVersion.HasOwnMetadata = !!this.boundaryVersion.MetadataId;
-			this.activateEdit = true;
+		created() {
+			// Se carga una sola vez, al montar el componente (mucho antes de
+			// que se abra el popup por primera vez): igual criterio que el
+			// combo de Gradient en GeographyPopup. Si se cargara recién en
+			// show(), mp-select (con listGrouping) podría montarse con la
+			// lista todavía vacía y fallar al intentar ubicar el valor actual
+			// entre las opciones.
 			var loc = this;
-			window.Context.ClippingRegions.GetAll(function (data) {
-				loc.allClippingRegions = data;
+			window.Context.Geographies.GetAll(function (data) {
+				loc.geographies = GeographySelectHelper.ResolveRootCaptions(data);
 			});
-			setTimeout(() => {
-				loc.$refs.inputName.focus();
-			}, 100);
 		},
-		formatGeography(geography) {
-			if (!geography) {
-				return '';
+		methods: {
+			formatClippingRegion(region) {
+				if (region.Version) {
+					return region.Caption + ', ' + region.Version;
+				}
+				return region.Caption;
+			},
+			show(boundaryVersion, boundary) {
+				this.boundaryVersion = f.clone(boundaryVersion);
+				// Al crear una versión nueva desde la delimitación, el factory no
+				// conoce a qué delimitación pertenece: se completa acá.
+				if (!this.boundaryVersion.Boundary) {
+					this.boundaryVersion.Boundary = boundary;
+				}
+				if (!this.boundaryVersion.ClippingRegions) {
+					this.boundaryVersion.ClippingRegions = [];
+				}
+				// $set es necesario porque HasOwnMetadata no viene en el objeto
+				// original: agregarla con asignación directa no la deja reactiva.
+				this.$set(this.boundaryVersion, 'HasOwnMetadata', !!this.boundaryVersion.MetadataId);
+				this.activateEdit = true;
+				var loc = this;
+				window.Context.ClippingRegions.GetAll(function (data) {
+					loc.allClippingRegions = data;
+				});
+				setTimeout(() => {
+					loc.$refs.inputName.focus();
+				}, 100);
+			},
+			formatGeography(geography) {
+				if (!geography) {
+					return '';
+				}
+				if (geography.Revision) {
+					return geography.Caption + ' (' + geography.Revision + ')';
+				}
+				return geography.Caption;
+			},
+			addRegion() {
+				var associatedIds = [];
+				for (var n = 0; n < this.boundaryVersion.ClippingRegions.length; n++) {
+					associatedIds.push(this.boundaryVersion.ClippingRegions[n].Id);
+				}
+				this.$refs.regionPicker.show('Agregar región', this.allClippingRegions, associatedIds);
+			},
+			onRegionSelected(region) {
+				// El region que llega del picker es el nodo completo del árbol
+				// (con sus descendientes y el Metadata de cada uno anidados):
+				// guardarlo tal cual haría que el alta viaje con el árbol
+				// entero adentro. Solo hace falta el Id para guardar y el
+				// Caption/Version para mostrarlo.
+				this.boundaryVersion.ClippingRegions.push({ Id: region.Id, Caption: region.Caption, Version: region.Version });
+			},
+			removeRegion(item) {
+				var index = this.boundaryVersion.ClippingRegions.indexOf(item);
+				if (index !== -1) {
+					this.boundaryVersion.ClippingRegions.splice(index, 1);
+				}
+			},
+			save() {
+				if (this.boundaryVersion.Caption.trim() === '') {
+					alert('Debe indicar un valor para \'Nombre\'.');
+					return;
+				}
+				if (this.boundaryVersion.Caption.length > 20) {
+					alert('\'Nombre\' admite hasta 20 caracteres.');
+					return;
+				}
+				var loc = this;
+				this.$refs.invoker.doSave(window.Db, window.Db.UpdateBoundaryVersion,
+					this.boundaryVersion).then(function (data) {
+						loc.boundaryVersion.ClippingRegionsSummary = data.ClippingRegionsSummary;
+						loc.boundaryVersion.MetadataId = data.MetadataId;
+						loc.activateEdit = false;
+						loc.$emit('completed', loc.boundaryVersion);
+					});
 			}
-			if (geography.Revision) {
-				return geography.Caption + ' (' + geography.Revision + ')';
-			}
-			return geography.Caption;
 		},
-		addRegion() {
-			var associatedIds = [];
-			for (var n = 0; n < this.boundaryVersion.ClippingRegions.length; n++) {
-				associatedIds.push(this.boundaryVersion.ClippingRegions[n].Id);
-			}
-			this.$refs.regionPicker.show('Agregar región', this.allClippingRegions, associatedIds);
-		},
-		onRegionSelected(region) {
-			// El region que llega del picker es el nodo completo del árbol
-			// (con sus descendientes y el Metadata de cada uno anidados):
-			// guardarlo tal cual haría que el alta viaje con el árbol
-			// entero adentro. Solo hace falta el Id para guardar y el
-			// Caption/Version para mostrarlo.
-			this.boundaryVersion.ClippingRegions.push({ Id: region.Id, Caption: region.Caption, Version: region.Version });
-		},
-		removeRegion(item) {
-			var index = this.boundaryVersion.ClippingRegions.indexOf(item);
-			if (index !== -1) {
-				this.boundaryVersion.ClippingRegions.splice(index, 1);
-			}
-		},
-		save() {
-			if (this.boundaryVersion.Caption.trim() === '') {
-				alert('Debe indicar un valor para \'Nombre\'.');
-				return;
-			}
-			if (this.boundaryVersion.Caption.length > 20) {
-				alert('\'Nombre\' admite hasta 20 caracteres.');
-				return;
-			}
-			var loc = this;
-			this.$refs.invoker.doSave(window.Db, window.Db.UpdateBoundaryVersion,
-							this.boundaryVersion).then(function(data) {
-								loc.boundaryVersion.ClippingRegionsSummary = data.ClippingRegionsSummary;
-								loc.boundaryVersion.MetadataId = data.MetadataId;
-								loc.activateEdit = false;
-								loc.$emit('completed', loc.boundaryVersion);
-			});
+		components: {
+			TreePickerPopup,
 		}
-  },
-  components: {
-		TreePickerPopup,
-  }
-};
+	};
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
 </style>

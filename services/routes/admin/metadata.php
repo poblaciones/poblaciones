@@ -19,6 +19,9 @@ App::GetOrPost('/services/admin/UpdateMetadata', function (Request $request) {
 
 	$controller = new services\MetadataService(false);
 	$metadata = App::ReconnectJsonParam(entities\Metadata::class, 'm');
+
+	packsServices\MetadataService::UpdateMetadataTimeStamps($metadata);
+
 	return App::Json($controller->UpdateMetadata(null, $metadata));
 });
 

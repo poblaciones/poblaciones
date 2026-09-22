@@ -3,6 +3,7 @@
 namespace helena\services\packs;
 
 use helena\classes\App;
+use helena\classes\Account;
 use helena\services\common\BaseService;
 use helena\entities\backoffice as entities;
 use helena\entities\admin\structs\MetadataInfo;
@@ -77,9 +78,24 @@ class MetadataService extends BaseService
 		$metadata->setCreate($now);
 		$metadata->setUpdate($now);
 		$metadata->setContact($contact);
+
+		$now = new \DateTime();
+		$metadata->setOnlineSince($now);
+
+		self::UpdateMetadataTimeStamps($metadata);
+
 		App::Orm()->Save($metadata);
 
 		return $metadata;
+	}
+
+	public static function UpdateMetadataTimeStamps($metadata)
+	{
+		$now = new \DateTime();
+		$userId = Account::Current()->GetUserId();
+		$metadata->setLastOnlineUserId($userId);
+		$metadata->setPublicationDate($now->format('Y'));
+		$metadata->setLastOnline($now);
 	}
 
 	public function GetMetadata($metadataId)
