@@ -7,6 +7,7 @@ use helena\caches\BoundarySummaryCache;
 use helena\caches\SelectedBoundaryCache;
 use helena\classes\Clipper;
 use helena\classes\GeoJson;
+use helena\classes\Links;
 
 use helena\services\common\BaseService;
 use helena\db\frontend\BoundaryModel;
@@ -37,7 +38,7 @@ class BoundaryService extends BaseService
 
 		if ($frame->ClippingRegionIds == NULL
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null && $frame->TileEnvelope == null)
-			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
+			throw new PublicException("Debe indicarse una delimitaciï¿½n espacial (zona, cï¿½rculo o regiï¿½n).");
 		$key = BoundaryCache::CreateKey($frame);
 		if (BoundaryCache::Cache()->HasData($boundaryVersionId, $key, $data))
 		{
@@ -99,8 +100,11 @@ class BoundaryService extends BaseService
 		{
 			$version = new BoundaryVersionInfo();
 			$version->Fill($row);
+			if ($row['bvr_extents'])
+				$version->Extents = Envelope::FromDb($row['bvr_extents'])->Trim();
 			$version->Metadata = new MetadataInfo();
 			$version->Metadata->Fill($row);
+			$version->Metadata->Ark = Links::GetBoundaryArkUrl($boundaryId);
 
 			$metadataTable = new MetadataModel();
 			$rows = $metadataTable->GetMetadataFiles($version->Metadata->Id);
@@ -139,7 +143,7 @@ class BoundaryService extends BaseService
 
 		if ($frame->ClippingRegionIds == NULL
 			&& $frame->ClippingCircle == NULL && $frame->Envelope == null)
-			throw new PublicException("Debe indicarse una delimitación espacial (zona, círculo o región).");
+			throw new PublicException("Debe indicarse una delimitaciï¿½n espacial (zona, cï¿½rculo o regiï¿½n).");
 
 		$key = BoundarySummaryCache::CreateKey($frame);
 

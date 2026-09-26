@@ -54,7 +54,7 @@ export default {
 	.adminButton {
 		float: right;
 		font-size: 12px;
-		padding-top: 12px;
+		padding-top: 15px;
 		margin-right: 6px;
 		margin-top: -12px;
 	}

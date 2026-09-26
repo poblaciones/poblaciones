@@ -68,6 +68,8 @@ class SnapshotBoundaryModel
 		$ret = App::Db()->exec($sql);
 		App::Db()->markTableUpdate('snapshot_boundary_version_item');
 
+		$this->RegenExtents();
+
 		FabListsCache::Cache()->Clear();
 
 		$cacheManager = new CacheManager();
@@ -78,5 +80,30 @@ class SnapshotBoundaryModel
 	 	Profiling::EndTimer();
 
 		return $ret;
+	}
+
+	private function RegenExtents()
+	{
+		Profiling::BeginTimer();
+
+		App::Db()->exec("UPDATE boundary_version SET bvr_extents = NULL");
+
+		$sql = "UPDATE boundary_version bv
+							INNER JOIN (
+								SELECT biw_boundary_version_id,
+									ST_AsText(PolygonEnvelope(LineString(
+										POINT(MIN(ST_X(ST_PointN(ST_ExteriorRing(biw_envelope), 1))),
+													MIN(ST_Y(ST_PointN(ST_ExteriorRing(biw_envelope), 1)))),
+										POINT(MAX(ST_X(ST_PointN(ST_ExteriorRing(biw_envelope), 3))),
+													MAX(ST_Y(ST_PointN(ST_ExteriorRing(biw_envelope), 3))))
+									))) extents
+								FROM snapshot_boundary_version_item
+								GROUP BY biw_boundary_version_id
+							) e ON e.biw_boundary_version_id = bv.bvr_id
+							SET bv.bvr_extents = ST_PolygonFromText(e.extents)";
+		App::Db()->exec($sql);
+		App::Db()->markTableUpdate('boundary_version');
+
+	 	Profiling::EndTimer();
 	}
 }

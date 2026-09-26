@@ -72,6 +72,31 @@ SaveRoute.prototype.RemoveWork = function () {
 	window.history.pushState({ 'route': args }, '', urlPath);
 };
 
+// Análoga a RemoveWork, para cuando se cierra el zócalo de una delimitación
+// (ruta /map/b<id>). Mismo criterio que StartMap.ParseBoundarySegment para
+// reconocer el segmento de la ruta.
+SaveRoute.prototype.RemoveBoundary = function () {
+	var args = this.calculateState();
+	var pathArray = window.location.pathname.split('/');
+	if (pathArray.length > 0 && pathArray[pathArray.length - 1] === '') {
+		pathArray.pop();
+	}
+	if (pathArray.length > 0 && this.isBoundarySegment(pathArray[pathArray.length - 1])) {
+		pathArray.pop();
+	}
+	var urlPath = pathArray.join('/');
+	urlPath += '/#' + args;
+
+	window.history.pushState({ 'route': args }, '', urlPath);
+};
+
+SaveRoute.prototype.isBoundarySegment = function (segment) {
+	if (!segment || segment.length < 2 || segment[0] !== 'b') {
+		return false;
+	}
+	return str.isNumeric(segment.substr(1));
+};
+
 SaveRoute.prototype.calculateState = function (coord) {
 	var blocks = {};
 	for (var n = 0; n < this.subscribers.length; n++) {

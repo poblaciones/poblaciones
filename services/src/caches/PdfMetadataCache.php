@@ -10,9 +10,11 @@ class PdfMetadataCache extends BaseCache
 	{
 		return new TwoLevelFileFileCache("Metadata/PdfMetadata");
 	}
-	public static function CreateKey($datasetId)
+	public static function CreateKey($datasetId, $boundaryId = null)
 	{
 		$key = ($datasetId ? $datasetId : 'default');
+		if ($boundaryId)
+			$key .= '_b' . $boundaryId;
 		return $key;
 	}
 	public static function Clear($metadataId)

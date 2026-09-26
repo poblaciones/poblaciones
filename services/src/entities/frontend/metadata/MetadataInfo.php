@@ -17,6 +17,10 @@ class MetadataInfo extends BaseMapModel
 	public $License;
 	public $Files;
 	public $Url;
+	// Ark de la delimitación cuyo metadata es este. No persiste en la tabla
+	// metadata (un mismo clipping_region puede ser compartido por varios
+	// boundaries): lo setea BoundaryService a partir del id del boundary.
+	public $Ark;
 
 	public static function GetMap()
 	{

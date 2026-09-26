@@ -2,23 +2,25 @@
 	<transition name="lefttrans">
 		<div v-touch:swipe.left="panLeftSwipeClose">
 			<div :class="(hasContent && !collapsed ? '': 'animatedFlyLeft')" class="animatedFlyAway floatLeftPanel thinScroll" :style="{ width: width + 'px' }">
-				<div v-if="isFullFront">
-					<transition name="fade" mode='out-in'>
-						<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose' />
-						<feature-info :featureInfo='Full' v-if='isFullInfo' :enabled="enabled" @clickClose='doClose' />
-					</transition>
-				</div>
-				<div id="panTop" class="split" v-if="!isFullFront">
-					<transition name="fade" mode='out-in'>
-						<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose' />
-						<feature-info :featureInfo='Top' v-if='isTopInfo' :enabled="enabled" @clickClose='doClose' />
-					</transition>
-				</div>
-				<div id="panBottom" class="split" v-if="!isFullFront">
-					<transition name="fade" mode='out-in'>
-						<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose' />
-						<feature-info :featureInfo='Bottom' v-if='isBottomInfo' :enabled="enabled" @clickClose='doClose' />
-					</transition>
+				<div class="floatLeftPanelContent">
+					<div v-if="isFullFront" style="display: flex; ">
+						<transition name="fade" mode='out-in'>
+							<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose' />
+							<feature-info :featureInfo='Full' v-if='isFullInfo' :enabled="enabled" @clickClose='doClose' />
+						</transition>
+					</div>
+					<div id="panTop" class="split" v-if="!isFullFront"  style="display: flex; ">
+						<transition name="fade" mode='out-in'>
+							<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose' />
+							<feature-info :featureInfo='Top' v-if='isTopInfo' :enabled="enabled" @clickClose='doClose' />
+						</transition>
+					</div>
+					<div id="panBottom" class="split" v-if="!isFullFront"  style="display: flex; ">
+						<transition name="fade" mode='out-in'>
+							<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose' />
+							<feature-info :featureInfo='Bottom' v-if='isBottomInfo' :enabled="enabled" @clickClose='doClose' />
+						</transition>
+					</div>
 				</div>
 			</div>
 			<collapse-button v-if='hasContent' :startLeft='width + leftMargin' tooltip="panel" class="exp-hiddable-block" :collapsed='collapsed' @click="doToggle" />
@@ -43,7 +45,7 @@ export default {
 	},
 	data() {
 		return {
-			width: 300,
+			width: 352,
 			leftMargin: -1,
 			hasContent: false,
 			collapsed: true,
@@ -237,36 +239,16 @@ export default {
 			window.SegMap.toolbarStates.leftPanelVisible = !this.collapsed;
 			window.SegMap.Session.UI.ToggleLeftPanel(!this.collapsed);
 		},
-		updateMapTypeControl() {
-			var css1 = dom.getCssRule(document, '.gm-style-mtc:first-of-type');
-			var css2 = dom.getCssRule(document, '.gm-style-mtc');
-			var css3 = dom.getCssRule(document, '.gm-style-mtc:last-of-type');
-
+		updateSidePanel() {
 			var cssSidePanelOffset = dom.getCssRule(document, '.sidepanelOffset');
-			//var css4 = dom.getCssRule(document, '.leaflet-left .leaflet-control-scale');
-			if(css1 === null) {
-				css1 = { style: { transform: '' } };
-				css2 = { style: { transform: '' } };
-				css3 = { style: { transform: '' } };
-			}
-			/*if (css4 === null) {
-				css4 = { style: { transform: '' } };
-			}*/
 			if (this.collapsed) {
 				window.SegMap.SetTypeControlsDefault();
-				css1.style.transform = 'translateX(9px) scale(0.8)';
-				css2.style.transform = 'translateX(-8px) scale(0.8)';
-				css3.style.transform = 'translateX(4px) scale(0.8)';
 				cssSidePanelOffset.style.marginLeft = '0px';
 
 				//css4.style.transform = '';
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				css2.style.transform = 'translateX(' + (this.width + 7) + 'px) scale(0.85)';
-				css1.style.transform = '';
-				css3.style.transform = '';
-				//css4.style.transform = 'translateX(' + (this.width + 7) + 'px)';
-				cssSidePanelOffset.style.marginLeft = '300px';
+				cssSidePanelOffset.style.marginLeft = '352px';
 			}
 		},
 		setCss(el, collapsed, onValue, offValue) {
@@ -305,22 +287,10 @@ export default {
 		},
 		collapsed() {
 			this.arrangePanels();
-			this.updateMapTypeControl();
-			/* this.updateSuroundings('fab-wrapper',
-				{ transform: 'translate('+ (this.width + this.leftMargin) + 'px)' },
-				{ transform: '' }
-			);*/
+			this.updateSidePanel();
 			this.updateSuroundings('edit-button',
 				{ transform: 'translate(' + (this.width + this.leftMargin) + 'px)' },
 				{ transform: '' }
-			);
-			/*this.updateSuroundings('searchBar',
-				{ left: (this.width + 200) + 'px', width: '300px' },
-				{ left: this.width + 'px', width: 'max(calc(100% - 500px), 400px)' }
-			);*/
-			this.updateSuroundings('searchBar',
-				{ marginLeft: '0px', left: (this.width + 120) + 'px', width: '300px' },
-				{ marginLeft: '-25%', left: 'calc(50%)', width: 'max(calc(100% - 500px), 300px)' }
 			);
 		},
 	},
@@ -350,14 +320,19 @@ export default {
 	.floatLeftPanel {
 		position: absolute;
 		max-height: calc(100% - 97px);
-		overflow-y: auto;
 		z-index: 900;
+		display: flex;
+		width: 340px;
+		box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 12px;
+	}
+
+	.floatLeftPanelContent {
+		overflow-y: auto;
+		display: flex;
 		background-color: #ffffff;
 		user-select: text;
-		width: 300px;
-		border-radius: 2px;
+		width: 340px;
 		border: 1px solid rgba(165, 164, 164, 0.75);
-		box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 12px;
 		user-select: text
 	}
 </style>

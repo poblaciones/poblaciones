@@ -3,7 +3,7 @@
     <div class="search-panel-wrapper sidepanelOffset" v-if="isOpen" :style="positionStyle">
       <div class="search-panel" v-on-clickaway="close" :style="heightStyle">
         <div class="search-header">
-          <div class="panel-title">Buscar</div>
+          <div class="titleDialog">Buscar</div>
           <button class="btn-close" @click="close">
             <span aria-hidden="true">×</span>
           </button>
@@ -444,31 +444,23 @@ export default {
   z-index: 999;
 }
 
-.search-panel {
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  width: 400px;
-  max-height: 600px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+	.search-panel {
+		background: white;
+		border-radius: 12px;
+		border: 1px solid rgb(165 164 164 / 50%);
+		width: 400px;
+		max-height: 600px;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
 
 /* Header */
-.search-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f8f9fa;
-}
-
-	.panel-title {
-		margin: 0;
-		font-size: 18px;
-		color: #333;
+	.search-header {
+		padding: 12px 16px 0px 16px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
 
 	.btn-close {
@@ -502,11 +494,10 @@ export default {
 }
 
 /* Search Input */
-.search-input-container {
-  position: relative;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-}
+	.search-input-container {
+		position: relative;
+		padding: 18px 20px 18px 20px;
+	}
 
 .search-icon {
   position: absolute;
@@ -549,22 +540,24 @@ export default {
 }
 
 /* Área de resultados/recientes */
-.results-area {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  /* Alto equivalente a 4 result-item vacíos, para que el panel no cambie
+	.results-area {
+		flex: 1;
+		overflow: hidden;
+		display: flex;
+		padding-left: 15px;
+		padding-right: 15px;
+		flex-direction: column;
+		/* Alto equivalente a 4 result-item vacíos, para que el panel no cambie
      de tamaño según haya resultados, recientes, ninguno de los dos, o un
      mensaje de "sin resultados". */
-  min-height: 232px;
-}
+		min-height: 232px;
+	}
 
 .results-container,
 .recents-container {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 0px;
 }
 
 .results-container::-webkit-scrollbar,
@@ -597,15 +590,16 @@ export default {
 /* Result Item: mismo estilo que .indicator-item de indicatorSelector.vue,
    para que este panel y el selector de indicadores/boundaries se vean como
    un único sistema visual. */
-.result-item {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-bottom: 2px;
-}
+	.result-item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 8px;
+		border-radius: 26px;
+		margin-bottom: 2px;
+    padding-right: 12px;
+		padding-left: 25px;
+	}
 
 .result-item:hover,
 .result-item.result-hover {
@@ -621,7 +615,6 @@ export default {
 }
 
 .result-icon {
-  text-shadow: 2px 2px 1px rgb(223 216 220 / 50%);
   color: #0fa7d8;
   font-size: 20px;
   width: 24px;
@@ -683,7 +676,7 @@ export default {
   color: #999;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  padding: 4px 8px 8px;
+  padding: 4px 8px 8px 18px;
 }
 
 .recents-group-label {

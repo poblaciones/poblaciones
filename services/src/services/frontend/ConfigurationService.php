@@ -134,7 +134,9 @@ class ConfigurationService extends BaseService
 		}
 
 		$suggestions = array('minScore' => App::Settings()->Suggestions()->getMinScoreToSuggest(),
-							 'maxSuggestions' => App::Settings()->Suggestions()->getMaxSuggestionsPerTrigger());
+							 'maxSuggestions' => App::Settings()->Suggestions()->getMaxSuggestionsPerTrigger(),
+							 'selectedUsers' => [],
+							 'useSuggestions' => App::Settings()->Suggestions()->useSuggestions);
 
 		$ret = array('Signatures' => $signatures,
 									'Blocks' => $blockStrategy,
@@ -175,6 +177,7 @@ class ConfigurationService extends BaseService
 									'CanAccessContent' => $canAccessContent,
 									'ContentAttributes' => $contentAttributes,
 									'MainServer' => $mainServer->publicUrl,
+									'ShortUrlPattern' => App::Settings()->Map()->ShortUrlPattern,
 									'BasemapUrls' => App::Settings()->Map()->BasemapUrls);
 
 		$this->FilterUserSettings($ret['User']['Settings']);

@@ -87,16 +87,16 @@ class MetadataService extends BaseService
 
 		return $metadata;
 	}
-	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null)
+	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null, $boundaryId = null)
 	{
 		$friendlyName = "";
-		$filename = $this->GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, $friendlyName);
+		$filename = $this->GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, $friendlyName, $boundaryId);
 
 		return App::SendFile($filename)
 			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
 			->deleteFileAfterSend(true);
 	}
-	public function GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, &$friendlyName )
+	public function GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, &$friendlyName, $boundaryId = null)
 	{
 		$model = new MetadataModel($fromDraft);
 		$metadata = $model->GetMetadata($metadataId);
@@ -111,7 +111,7 @@ class MetadataService extends BaseService
 		$friendlyName = $metadata['met_title'] . '.pdf';
 
 		// se fija en el caché
-		$key = PdfMetadataCache::CreateKey($datasetId);
+		$key = PdfMetadataCache::CreateKey($datasetId, $boundaryId);
 		$data = null;
 		if ($fromDraft === false && $workId !== null)
 			Statistics::StoreDownloadMetadataHit($workId);
@@ -128,7 +128,14 @@ class MetadataService extends BaseService
 
 		// completa los metadatos para crearlo
 		$metadata['wrk_access_link'] = $model->GetAccessLink($workId);
-		if ($workId)
+		if ($boundaryId)
+		{
+			// La delimitación no persiste ark ni ruta propia (los comparte con
+			// su/s clipping_region): se arman al vuelo a partir de su id.
+			$metadata['met_ark'] = Links::GetBoundaryArkUrl($boundaryId);
+			$metadata['met_boundary_stable_url'] = Links::GetBoundaryStableUrl($boundaryId);
+		}
+		else if ($workId)
 		{
 			if ($fromDraft)
 				$ark = Links::GetWorkArkUrl(PublishDataTables::Shardified($workId));

@@ -133,6 +133,17 @@ class PdfCreator
 	}
 	private function WriteStableUrl()
 	{
+		// La delimitación no persiste su ruta en met_url (un mismo
+		// clipping_region puede ser compartido por varios boundaries): se
+		// arma con GetBoundaryStableUrl, seteada aparte por MetadataService.
+		if (array_key_exists('met_boundary_stable_url', $this->metadata))
+		{
+			$value = $this->metadata['met_boundary_stable_url'];
+			if ($value == null)
+				return;
+			$this->pdf->WritePair("Dirección", $value);
+			return;
+		}
 		$value = $this->metadata['met_url'];
 		if ($value == null)
 			return;

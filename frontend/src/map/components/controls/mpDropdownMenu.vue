@@ -29,10 +29,10 @@
 
 
 							<i v-if="item.icon && item.icon != 'X'"
-								 style="position: absolute; right: 10px; top: 9px; color: #aaa; padding-top: 3px; font-size: 12px;"
-								 :class="item.icon" />
+								 style="position: absolute;"
+								 :class="item.icon" class="dropDownMenuIcon" />
 
-							<X-Icon v-if="item.icon == 'X'" class="item.icon" style="position: absolute; right: 6px; top: 6px; width: 25px; height: 25px; color: #aaa; font-size: 12px;" />
+							<X-Icon v-if="item.icon == 'X'" :class="item.icon" class="dropDownMenuIconX"  />
 						</a>
 
 					</li>
@@ -128,7 +128,9 @@
 
 	.dropFilter {
 		margin-top: 0px;
+		transform: translate(20px, 4px);
 		cursor: pointer;
+		overflow: hidden;
 	}
 
 	.triggerIcon {

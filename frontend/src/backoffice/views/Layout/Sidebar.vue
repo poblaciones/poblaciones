@@ -1,10 +1,10 @@
 <template>
 	<div class="sidebarRoot">
-		<div class="md-card topMenu" style="margin: 15px; margin-bottom: 0px;">
+		<div class="topMenu">
 			<sidebar-menu :menu="topMenuItems" theme="white-theme" style="height: unset!important"
 										:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
 		</div>
-		<div class="md-card bottomMenu" style="margin: 15px">
+		<div class="bottomMenu">
 			<sidebar-menu v-if="bottomMenuItems.length > 0" :menu="bottomMenuItems" theme="white-theme" style="height: unset!important"
 										:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
 			<import-popup ref="importPopup"></import-popup>

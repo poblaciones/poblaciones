@@ -43,7 +43,11 @@ class BoundaryModel extends BaseModel
 	public function GetSelectedBoundaryVersions($id)
 	{
 		Profiling::BeginTimer();
-		$sql = "SELECT boundary_version.*, metadata.*
+		// bvr_extents es geometry: boundary_version.* lo trae en binario (WKB),
+		// que Envelope::FromDb no puede parsear. ST_AsText lo pisa como texto
+		// (misma columna repetida al final del SELECT), igual que mvl_extents
+		// en MetricVersionModel.
+		$sql = "SELECT boundary_version.*, metadata.*, ST_AsText(bvr_extents) AS bvr_extents
           FROM boundary_version
 					LEFT JOIN metadata ON met_id = IFNULL(bvr_metadata_id,
 						(select max(clr_metadata_id) FROM clipping_region JOIN
@@ -118,7 +122,7 @@ class BoundaryModel extends BaseModel
 			$items = App::Db()->fetchAll($sql, array($boundary['VersionId']));
 
 
-			// Resuelve para los ítems las poblaciones
+			// Resuelve para los ï¿½tems las poblaciones
 			foreach ($items as &$item) {
 				$table = new SnapshotClippingRegionItemModel();
 				$levels = $table->CalculateLevelsFromRegionIds([$item['Id']], false);
@@ -160,7 +164,7 @@ class BoundaryModel extends BaseModel
 				$orderBy = 'ParentCaption, ParentId,';
 			}
 			if ($boundary['OrderBy'] == 'P') {
-				// por tamaño
+				// por tamaï¿½o
 				$orderBy .= "clc_population DESC, cli.cli_code";
 				$sql = "SELECT min(cli.cli_id) Id, cli.cli_caption `Name`, " . $useParentSelect . " clc_population Population
                     FROM boundary_version_clipping_region c

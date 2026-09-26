@@ -1,276 +1,52 @@
 <template>
-	<nav id="workPanel" class="workPanel">
-		<div>
-			<div v-if="work.Current !== null" ref="barBody" class="panel card workPanelBody" id="barBody"
-					 :style="'    text-shadow: rgb(118 118 118) 0px 0px 5px;rgba(76, 76, 76, 0.32) 0px 0px 6px 0px inset; background-color: ' + backgroundColor ">
-				<div class="floatBox pull-right exp-hiddable-block" style="margin-top: -1px">
-					<button type="button" class="btn smallButton" :class="spaceRight" @click="showMetrics">Agregar indicador</button>
-					<div style="position: absolute; top: 10px; right: 5px; zoom: 1.22;" v-if="hasOnboarding()">
-						<button type="button" class="btn btn-default btn-xs"
-										style="border-color: #FFF"
-										title="Bienvenida" @click="showOnboarding()">
-							<help-circle-icon style="color: #fff" title="Bienvenida" />
-						</button>
-					</div>
-					<div class="metadataInfo" style="position: relative; z-index: 10;" v-if="workHasMetrics" :style="(showButtonsInSingleRow() ? 'width: 1px' : '')">
-						<div class="sourceInfo exp-hiddable-block" :style="getMetadataStyle()">
-							<a href="#" :title="'Información de ' + work.Current.Metadata.Name"
-								 @click="clickFuente" style="color: #FFF">
-								<link-icon />
-								Información
-							</a>
-						</div>
-					</div>
-				</div>
-				<div v-if="institutionsList" class="littleRow preTitleRow">
-					{{ institutionsList }}
-				</div>
-				<div class="h3 title titleRow">
-					{{ work.Current.Metadata.Name }}
-				</div>
-				<div v-if="work.Current.Metadata.Authors" class="littleRow postTitleRow">
-					{{ work.Current.Metadata.Authors }}
-				</div>
-			</div>
-		</div>
-		<onboarding ref="Onboarding" :backgroundColor='backgroundColor' :work="work" v-if="work.Current && work.Current.Onboarding.Enabled"></onboarding>
-	</nav>
+	<TopPanel type="W"
+						:metadata="metadata"
+						:addToMapItems="addToMapItems"
+						:addToMapId="addToMapId"
+						:work="work"
+						:backgroundColor="backgroundColor"
+						ref="topPanel" />
 </template>
 
 <script>
-import LinkIcon from 'vue-material-design-icons/Link.vue';
-import Onboarding from '@/map/components/popups/onboarding';
-import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
-import dom from '@/common/framework/dom';
+import TopPanel from './topPanel';
 
+// Wrapper fino: arma las props genéricas de topPanel.vue (que resuelve el
+// 100% de la parte visual del zócalo) a partir del work activo. Ver
+// boundaryPanel.vue para el análogo de delimitaciones.
 export default {
 	name: 'workPanel',
+	components: {
+		TopPanel
+	},
 	props: [
 		'work',
 		'backgroundColor'
 	],
-	components: {
-		LinkIcon,
-		Onboarding,
-		HelpCircleIcon
-	},
-	data() {
-		return {
-			showZones: false,
-			showPresentation: false,
-		};
-	},
 	computed: {
-		spaceRight() {
-			if (this.hasOnboarding()) {
-				return 'spaceNextOb';
-			} else {
-				return 'spaceNext';
-			}
-		},
-		institutionsList() {
-			var institutions = this.work.Current.Metadata.Institutions;
-			if (!institutions || institutions.length == 0)
+		metadata() {
+			if (!this.work.Current) {
 				return null;
-			var ret = institutions[0].Name;
-			for (var n = 1; n < institutions.length; n++) {
-				ret += " – " + institutions[n].Name;
 			}
-			return ret;
+			return this.work.Current.Metadata;
 		},
-		workHasMetrics() {
-			if (!this.work || !this.work.Current || this.work.Current.Metrics.length == 0) return false;
-			for (var metric of this.work.Current.Metrics) {
-				if (metric.LocalVersions.length > 0 && metric.LocalVersions[0].Name != '') {
-					return true;
-				}
+		addToMapItems() {
+			if (!this.work.Current) {
+				return [];
 			}
-			return false;
+			return this.work.Current.Metrics;
+		},
+		addToMapId() {
+			if (!this.work.Current) {
+				return null;
+			}
+			return this.work.Current.Id;
 		}
 	},
 	methods: {
-		showMetrics() {
-			window.Popups.AddMetric.show(this.work.Current.Metrics, this.work.Current.Id);
-		},
 		onResize() {
-			var visible = (this.work.Current !== null);
-			if (visible) {
-				this.updateWork();
-			}
-		},
-		clickFuente(e) {
-			e.preventDefault();
-			window.Popups.WorkMetadata.show(this.work.Current);
-		},
-		showButtonsInSingleRow() {
-			return this.titleRowsCount() === 1;
-		},
-		showButtonsInDoubleRow() {
-			return this.titleRowsCount() === 2;
-		},
-		titleRowsCount() {
-			if (!this.work.Current) {
-				return 0;
-			}
-			var ret = (this.work.Current.Metadata.Name ? 1 : 0) + (this.work.Current.Metadata.Institutions && this.work.Current.Metadata.Institutions.length > 0 && this.work.Current.Metadata.Institutions[0].Name ? 1 : 0)
-				+ (this.work.Current.Metadata.Authors ? 1 : 0);
-			return ret;
-		},
-		hasOnboarding() {
-			return this.work.Current.Onboarding.Enabled;
-		},
-		showOnboarding() {
-			this.$refs.Onboarding.toggleModal();
-		},
-		getMetadataStyle() {
-			if (this.showButtonsInSingleRow()) {
-				return 'margin-top: -24px; margin-left: -90px;';
-			} else if (this.showButtonsInDoubleRow()) {
-				return 'margin-top: 3px';
-			} else {
-				return 'margin-top: 8px';
-			}
-		},
-		updateWork() {
-			var visible = (this.work.Current !== null);
-			var bar = document.getElementById('workPanel');
-			var currentVisible = bar.style.display === 'block';
-			var workPanelBody = document.getElementById('barBody');
-			var calculatedHeight = '0px';
-			if (workPanelBody) {
-				calculatedHeight = workPanelBody.offsetHeight + 'px';
-			}
-			var currentHeight = bar.style.height;
-			if (visible !== currentVisible || (visible && currentHeight !== calculatedHeight)) {
-				if (visible) {
-					bar.style.height = calculatedHeight;
-					bar.style.display = 'block';
-					var holder = document.querySelector('#holder');
-					holder.style.height = `calc(100% - ${calculatedHeight})`;
-					holder.style.top = calculatedHeight;
-
-					var offsetCss = dom.getCssRule(document, '.work-offsetY');
-					if (offsetCss) {
-						offsetCss.style.maxHeight = '80vh;';
-					}
-					if (window.SegMap) {
-						window.SegMap.TriggerResize();
-					}
-				} else {
-					bar.style.display = 'none';
-					var holder = document.querySelector('#holder');
-					holder.style.height = '100%';
-					holder.style.top = '0px';
-
-					var offsetCss = dom.getCssRule(document, '.work-offsetY');
-					if (offsetCss) {
-						offsetCss.style.maxHeight = '90vh;';
-					}
-					this.work.Current = null;
-					if (window.SegMap) {
-						window.SegMap.SaveRoute.RemoveWork();
-						window.SegMap.TriggerResize();
-					}
-				}
-			}
-		},
-	},
-	watch: {
-		'work.Current'() {
-			var loc = this;
-			setTimeout(function () {
-				loc.updateWork();
-				// hack por problemas en chrome y firefox con navbar-fixed-top en la inicialización
-				var height = (loc.work.Current && loc.$refs.barBody ? loc.$refs.barBody.offsetHeight : 0);
-				var holder = document.querySelector('#holder');
-				holder.style.height = `calc(100% - ${height}px)`;
-				holder.style.offsetHeight = `calc(100% - ${height}px)`;
-				holder.style.top = height + 'px';
-			}, 50);
+			this.$refs.topPanel.onResize();
 		}
 	}
 };
 </script>
-
-<style scoped>
-
-.workPanel {
-	display: none;
-	background-color: white;
-	z-index: 1;
-	position: initial;
-	width: 100%;
-}
-.littleRow {
-	width: 100%;
-	text-overflow: ellipsis;
-	color: white;
-	margin-left: 1px;
-	font-size: 1.1rem;
-}
-.sourceInfo
-{
-	margin-left: 30px;
-	font-size: 1.30rem;
-	margin-top: 8px;
-}
-.preTitleRow {
-	text-transform: uppercase;
-	margin-bottom: 3px;
-	margin-top: -4px;
-}
-.postTitleRow {
-	margin-bottom: -2px;
-	margin-top: 5px;
-}
-@media screen and (max-width: 600px) {
-	.titleRow {
-		font-size: 1.75rem!important;
-	}
-	.floatBox {
-		float: none !important;
-		margin-bottom: 6px;
-	}
-	.preTitleRow {
-		display: none;
-	}
-	.postTitleRow {
-		display: none;
-	}
-	.metadataInfo {
-		display: inline-block;
-	}
-}
-.titleRow {
-	line-height: 1.1em;
-	margin-top: 0px;
-	width: 100%;
-	text-overflow: ellipsis;
-	color: white;
-	font-size: 2.7rem;
-}
-.infoRow {
-	padding: 7px 0px 0px 0px;
-	position: relative;
-}
-.smallButton {
-	color: white;
-	padding: 4px 14px;
-	border-color: white;
-}
-.spaceNext {
-	margin-right: 8px;
-	margin-left: 8px
-}
-	.spaceNextOb {
-		margin-right: 41px;
-	}
-	.workPanelBody {
-		background-color: #00A0D2;
-		color: #fff !important;
-		border-radius: 1px;
-		min-height: 70px;
-		padding: 12px 2px 6px 12px;
-		box-shadow: 0 1px 4px 0 rgba(90,90,90,.32);
-	}
-</style>

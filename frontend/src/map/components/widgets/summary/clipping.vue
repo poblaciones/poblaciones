@@ -268,7 +268,7 @@ export default {
 		bottom: 2px;
 		text-align: center;
 		right: 0;
-		z-index: 10;
+		z-index: 100;
 		border-radius: 6px;
 		padding: 0px;
 	}

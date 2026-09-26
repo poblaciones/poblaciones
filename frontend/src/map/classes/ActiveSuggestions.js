@@ -17,6 +17,7 @@ function ActiveSuggestions(config, navigationId) {
 	this.contentActionsCount = 0;
 	this.recentActions = [];
 	this.lastActionTime = Date.now();
+	this.config = config;
 }
 
 ActiveSuggestions.prototype.generateFingerprint = function () {
@@ -73,7 +74,6 @@ ActiveSuggestions.prototype.prepareParams = function () {
 		current_clipping_regions: regionIds,
 		current_boundaries: boundaryIds,
 		current_zoom: window.SegMap.frame.Zoom,
-
 		recent_actions: this.recentActions,
 		content_actions_count: this.contentActionsCount,
 		time_since_last_action_ms: Date.now() - this.lastActionTime,
@@ -131,11 +131,9 @@ ActiveSuggestions.prototype.requestSuggestions = function () {
 		throw new Error('Sugerencias no habilitadas');
 	}
 
-	var context = this.prepareParams();
+	var params = this.prepareParams();
 	var loc = this;
-	return window.SegMap.Post(window.host + '/services/suggestions/GetSuggestions', {
-		context,
-	}).then(function (res) {
+	return window.SegMap.Post(window.host + '/services/suggestions/GetSuggestions', params).then(function (res) {
 
 		var data = res.data;
 		if (data.should_suggest && data.suggestions.length > 0) {
@@ -158,9 +156,9 @@ ActiveSuggestions.prototype.requestSuggestions = function () {
 };
 
 ActiveSuggestions.prototype.Enabled = function () {
-	if (!this.config || !this.config.useSuggestions) {
+	if (!this.config.useSuggestions) {
 		return false;
-	} else if (loc.config.Suggestions.selectedUsers.length == 0) {
+	} else if (this.config.selectedUsers.length == 0) {
 		return true;
 	} else {
 		return this.config.selectedUsers.includes(window.Context.User.User);
@@ -191,9 +189,7 @@ ActiveSuggestions.prototype.SendFeedbackMany = function (suggestionIds, accepted
 		accepted: accepted,
 		time_to_decision_ms: timeToDecisionMs || null
 	};
-	return window.SegMap.Post(window.host + '/services/suggestions/RegisterFeedbackMany', {
-		params: args,
-	}).then(function (res) {
+	return window.SegMap.Post(window.host + '/services/suggestions/RegisterFeedbackMany', args).then(function (res) {
 		return;
 	}).catch(function (error) {
 		err.errDialog('RegisterFeedback', 'registrar el uso de sugerencias', error);

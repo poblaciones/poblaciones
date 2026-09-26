@@ -48,11 +48,7 @@
 				this.metric.Remove();
 			},
 			toggleRankings() {
-				this.metric.ShowRanking = !this.metric.ShowRanking;
-				window.SegMap.SaveRoute.UpdateRoute();
-				if (this.metric.ShowRanking) {
-					this.$emit('RankingShown');
-				}
+				this.$emit('RankingShown');
 			},
 			toggleChart() {
 				this.metric.ShowChart = (this.metric.ShowChart == 1 ? '0' : '1');

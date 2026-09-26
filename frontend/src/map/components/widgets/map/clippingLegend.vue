@@ -137,7 +137,7 @@ export default {
 
 .clippingLegend {
 	position: absolute;
-	top: 12px;
+	top: 75px;
 	right: 33px;
 	z-index: 900;
 	width: 257px;

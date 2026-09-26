@@ -139,6 +139,8 @@
 .v-sidebar-menu.white-theme {
 	background-color: unset!important;
 }
+/******************* nuevo *******************/
+
 .md-title {
 	font-weight: 500 !important;
 	font-family: 'Roboto', sans-serif;
@@ -146,13 +148,53 @@
 }
 
 .md-button {
-	border-radius: 7px!important;
+	border-radius: 20px !important;
+	font-size: 13.5px !important;
+	padding-right: 10px !important;
+	padding-left: 10px !important;
 }
+.md-button.md-icon-button.avatarButton {
+		padding: 0px!important;
+}
+.md-button .md-icon-button {
+	margin-left: 0px !important;
+	padding: 0px !important;
+}
+		.md-button-content {
+	min-height: 24px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.md-tabs.md-theme-default .md-tabs-navigation .md-button {
+	border-radius: 0px !important;
+}
+	/* panel de menú izquierdo */
+	.v-sidebar-menu .vsm-badge {
+	right: 18px!important;
+}
+		/* active  */
+.v-sidebar-menu .vsm-item.active-item > .vsm-link, .v-sidebar-menu .vsm-item.parent-active-item > .vsm-link {
+	background-color: #e9f2fe!important;
+}
+.adminButton .md-button {
+		vertical-align: text-bottom;
+}
+.v-sidebar-menu .vsm-link {
+	border-top-right-radius: 30px !important;
+	border-bottom-right-radius: 30px !important;
+	margin-right: 10px !important;
+	margin-left: 0px !important;
+	padding-right: 12px !important;
+	padding-left: 12px !important;
+	box-shadow: none !important;
+}
+/***************** final nuevo *****************/
 	.md-card {
-				border-radius: 12px!important;
-		margin-top: 8px;
-		margin-bottom: 8px;
-	}
+	border-radius: 12px !important;
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
 
 .md-dialog-container.md-theme-default {
 	border-radius: .5rem;

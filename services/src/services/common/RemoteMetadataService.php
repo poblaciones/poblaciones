@@ -48,11 +48,11 @@ class RemoteMetadataService extends BaseService
 		return App::FlushRemoteFile($url, $args);
 	}
 
-	public function GetMetadataPdf($metadataId, $workId)
+	public function GetMetadataPdf($metadataId, $workId, $boundaryId = null)
 	{
 		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
 		$url = $dynamicServer->publicUrl . '/services/metadata/GetMetadataPdf';
-		$args = ['m' => $metadataId, 'w' => $workId];
+		$args = ['m' => $metadataId, 'w' => $workId, 'b' => $boundaryId];
 
 		return App::FlushRemoteFile($url, $args);
 	}

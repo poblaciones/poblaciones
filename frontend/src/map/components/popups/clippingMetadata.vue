@@ -24,6 +24,16 @@
 							<td>Resumen:</td>
 							<td class='tdWrappable'>{{ metadata.Abstract }} </td>
 						</tr>
+						<tr v-if="boundaryId !== null">
+							<td style="width: 120px;">Dirección:</td>
+							<td class='tdWrappable'>
+								<a target="_blank" :href="resolvePublicUrl()">{{ resolvePublicUrl() }}</a>
+							</td>
+						</tr>
+						<tr v-if="metadata.Ark">
+							<td>Ark:</td>
+							<td class='tdWrappable'>{{ metadata.Ark }}</td>
+						</tr>
 						<tr>
 							<td>Cita (APA):</td>
 							<td class="quotation tdWrappable">
@@ -89,7 +99,14 @@ export default {
 	data() {
 		return {
 			metadata: null,
-			title: 'Fuente'
+			title: 'Fuente',
+			// Id de la delimitación cuyo metadata se muestra. A diferencia del
+			// work, un boundary no persiste su propia ruta estable ni su Ark en
+			// los metadatos (sus metadatos son los del/los clipping_region que
+			// agrupa esa versión, y varios boundaries pueden compartir uno): se
+			// arman al vuelo a partir de este id. null: metadata de un work, sin
+			// ruta estable propia que mostrar acá.
+			boundaryId: null
 		};
 	},
   methods: {
@@ -102,9 +119,14 @@ export default {
 				return '#';
 			}
 		},
-		show(metadata, title) {
+		show(metadata, title, boundaryId) {
 			this.metadata = metadata;
 			this.title = title;
+			if (boundaryId === undefined) {
+				this.boundaryId = null;
+			} else {
+				this.boundaryId = boundaryId;
+			}
 			this.$refs.showFuente.show();
 		},
 		citationAPA(metadata) {
@@ -120,16 +142,16 @@ export default {
 				document.createTextNode(html)).parentNode.innerHTML;
 		},
 		resolveMetadataUrl() {
-			return window.mainHost + '/services/metadata/GetMetadataPdf?m=' + this.metadata.Id + h.urlParam('l', window.accessLink);
+			var url = window.mainHost + '/services/metadata/GetMetadataPdf?m=' + this.metadata.Id + h.urlParam('l', window.accessLink);
+			if (this.boundaryId !== null) {
+				url += h.urlParam('b', this.boundaryId);
+			}
+			return url;
 		},
-		calculateHref(workId) {
-		var pathArray = window.location.pathname.split('/');
-		if (pathArray.length > 0 && str.isNumeric(pathArray[pathArray.length - 1])) {
-					pathArray.pop();
-				}
-				var path = pathArray.join('/');
-				path = h.ensureFinalBar(path);
-				return h.qualifyURL(path + workId);
+		// Ruta estable de la delimitación (/map/b<id>), resuelta contra el
+		// ShortUrlPattern configurado en el servidor.
+		resolvePublicUrl() {
+			return str.PatternUrl('/map/b' + this.boundaryId, window.SegMap.Configuration.ShortUrlPattern);
 		}
 	},
 	computed: {

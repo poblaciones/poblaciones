@@ -128,7 +128,7 @@ export default {
 			window.Popups.BoundaryDownload.show(this.boundary);
 		},
 		clickFuente() {
-			window.Popups.ClippingMetadata.show(this.boundary.SelectedVersion().Metadata, this.boundary.properties.Name);
+			window.Popups.ClippingMetadata.show(this.boundary.SelectedVersion().Metadata, this.boundary.properties.Name, this.boundary.properties.Id);
 		},
 	},
 		computed: {

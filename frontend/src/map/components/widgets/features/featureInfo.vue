@@ -1,49 +1,51 @@
 <template>
-	<div>
-		<div ref="topImage" v-if="featureInfo.Image && isImageUrl(featureInfo.Image)"
-				 :style="'background-image:url('
+	<div style="display: flex">
+		<div class="" style="background-color: transparent!important; display: flex; flex-direction: column; ">
+			<div ref="topImage" v-if="featureInfo.Image && isImageUrl(featureInfo.Image)"
+					 :style="'background-image:url('
 										+ preProcess(featureInfo.Image) + ');'"
-				 class="topImage">
-		</div>
-		<div class='panel card panel-body' style="margin-bottom: 0px; background-color: transparent" :class="(enabled ? '' : 'text-muted')">
-			<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
-			<mp-close-button v-else @click="doClose" class="exp-hiddable-block" />
-			<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" :clickeable="!!featureInfo.position" @click='focus()' /></h5>
-			<div class='stats' style="padding-top: 8px; padding-bottom: 8px;">
-				<a href="#" title="Agregar como indicador"
-					 @click="addMetricFromKey" style="color: #a7a7a7">
-					{{ featureInfo.Type }}
-				</a>
-				<div style="float: right" class="exp-hiddable-block" v-if="featureInfo.Key && featureInfo.Key.MetricId">
-					<button type="button" :disabled="isLast"
-									class="close lightButton smallerButton" :title="(isLast ? '' : 'Siguiente' + positionalData)" @click="next()">
-						<i class="fas fa-chevron-right" />
-					</button>
-					<button type="button" :disabled="isFirst" style="margin-right: -2px"
-									class="close lightButton smallerButton" :title="(isFirst ? '' : 'Anterior' + positionalData)" @click="previous()">
-						<i class="fas fa-chevron-left" />
-					</button>
+					 class="topImage">
+			</div>
+			<div class='panel card panel-body' style="box-shadow: none !important; margin-bottom: 0px; padding-bottom: 6px; background-color: transparent !important " :class="(enabled ? '' : 'text-muted')">
+				<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
+				<mp-close-button v-else @click="doClose" class="exp-hiddable-block" />
+				<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" :clickeable="!!featureInfo.position" @click='focus()' /></h5>
+				<div class='stats' style="padding-top: 8px; padding-bottom: 8px;">
+					<a href="#" title="Agregar como indicador"
+						 @click="addMetricFromKey" style="color: #a7a7a7">
+						{{ featureInfo.Type }}
+					</a>
+					<div style="float: right" class="exp-hiddable-block" v-if="featureInfo.Key && featureInfo.Key.MetricId">
+						<button type="button" :disabled="isLast"
+										class="close lightButton smallerButton" :title="(isLast ? '' : 'Siguiente' + positionalData)" @click="next()">
+							<i class="fas fa-chevron-right" />
+						</button>
+						<button type="button" :disabled="isFirst" style="margin-right: -2px"
+										class="close lightButton smallerButton" :title="(isFirst ? '' : 'Anterior' + positionalData)" @click="previous()">
+							<i class="fas fa-chevron-left" />
+						</button>
+					</div>
 				</div>
 			</div>
-			<hr class="moderateHr exp-hiddable-visiblity">
-			<div>
-				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
-					<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
-									title="Seleccionar el perímetro" @click="selectPerimeter">
-						<i class="fas fa-circle-notch" />
 
-					</button>
+				<div style="overflow-y: auto; padding:15px " class="thinScroll">
+					<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
+						<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
+										title="Seleccionar el perímetro" @click="selectPerimeter">
+							<i class="fas fa-circle-notch" />
+
+						</button>
+					</div>
+					<div class='item' v-if="featureInfo.Code && featureInfo.Title">
+						<div class="iLabel">Código</div>
+						{{ val }}
+					</div>
+					<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
+						<div class="iLabel">{{ capitalize(item.Name) }}</div>
+						<mp-label :text="getValue(item)" />
+					</div>
+					<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
 				</div>
-				<div class='item' v-if="featureInfo.Code && featureInfo.Title">
-					<div class="iLabel">Código</div>
-					{{ val }}
-				</div>
-				<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
-					<div class="iLabel">{{ capitalize(item.Name) }}</div>
-					<mp-label :text="getValue(item)" />
-				</div>
-				<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
-			</div>
 		</div>
 	</div>
 </template>

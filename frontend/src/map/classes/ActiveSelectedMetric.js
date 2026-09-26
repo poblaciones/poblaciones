@@ -182,6 +182,24 @@ ActiveSelectedMetric.prototype.SelectedLevelCanBeCompared = function () {
 	return true;
 };
 
+// Al activar la comparación, la lista de variables ofrecidas se reduce a
+// las comparables (matchesComparableFilter): si la variable seleccionada
+// no lo es, desaparece de la lista sin dejar ninguna seleccionada. La
+// reemplaza por la primera variable comparable del nivel actual.
+ActiveSelectedMetric.prototype.SelectComparisonMetric = function () {
+	var variable = this.SelectedVariable();
+	if (variable && this.matchesComparableFilter(variable)) {
+		return;
+	}
+	var level = this.SelectedLevel();
+	for (var v = 0; v < level.Variables.length; v++) {
+		if (level.Variables[v].Comparable) {
+			level.SelectedVariableIndex = v;
+			return;
+		}
+	}
+};
+
 
 ActiveSelectedMetric.prototype.useChart = function () {
 	var variable = this.SelectedVariable();

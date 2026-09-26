@@ -313,18 +313,17 @@
 		bottom: 20px;
 		width: 64px;
 		height: 64px;
-		border-radius: 8px;
+		border-radius: 8px !important;
 		background: #ffffffc0;
-		border: 1px solid #ddd;
-		box-shadow: rgb(0 0 0 / 20%) 0px 1px 3px 2px;
-		color: #333;
+		border: 1px solid rgb(165 164 164 / 50%);
+    color: #333;
 		cursor: pointer;
 		z-index: 890;
 		transition: all 0.2s;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 2px;
+		padding: 2px !important;
 	}
 
 .map-style-btn:hover {
@@ -374,18 +373,18 @@
 }
 
 /* Panel de opciones */
-.map-options-panel {
-  position: absolute;
-  bottom: -6px;
-  left: 100px; /* Al lado del botón */
-  width: 320px;
-  background: white;
-  border-radius: 6px;
-  box-shadow: rgba(0, 0, 0, 0.18) 0px 1px 1px;
-  border: 1px solid #ddd;
-  z-index: 1040;
-  overflow: hidden;
-}
+	.map-options-panel {
+		position: absolute;
+		bottom: -6px;
+		left: 100px; /* Al lado del botón */
+		width: 320px;
+		box-shadow:none;
+    background: white;
+		border-radius: 12px;
+		border: 1px solid rgb(165 164 164 / 50%);
+		z-index: 1040;
+		overflow: hidden;
+	}
 
 /* Con el panel lateral (sideToolbar.vue) abajo a la izquierda, este botón y
    su panel se corren a la derecha para no superponerse: ambos ocupan esa

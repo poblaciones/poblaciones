@@ -2,6 +2,8 @@
 	<div>
 		<fs v-model="fullscreen" :teleport="teleport" :page-only="pageOnly">
 			<WorkPanel v-if="!Embedded.HideWorkPanel" :work="work" ref="workPanel" :backgroundColor="workColor" />
+			<BoundaryPanel v-if="!Embedded.HideWorkPanel" :boundary="boundary" ref="boundaryPanel" :backgroundColor="workColor" />
+
 			<WaitMessage ref="showWaitMessage" :backgroundColor="workColor" />
 			<div class="embeddedNoOpener"></div>
 			<div style="height:0px;width:0px;overflow:hidden">
@@ -12,6 +14,11 @@
 					 :title="(Embedded.OpenOnClick ? 'Abrir en Poblaciones (nueva ventana)' : '')"></div>
 			<div id="holder" style="overflow-x: hidden">
 				<PopupsPanel :backgroundColor="workColor" />
+
+				<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
+								 :work="work" :config="config" :toolbarStates="toolbarStates"
+								 class="exp-hiddable-block" />
+
 				<CollapseButtonRight id="panRightButton" v-show="!Embedded.HideSummaryPanel && !Embedded.Readonly"
 														 :collapsed='toolbarStates.collapsed'
 														 @click="doToggle"
@@ -19,7 +26,8 @@
 														 tooltip="panel de estadísticas"
 														 class="rightButton exp-hiddable-block"
 														 :style="collapseButtonOffset" />
-				<div id="panRight" class="animatedFlyAway floatRightPanel thinScroll" v-touch:swipe.right="panRightSwipeClose" :style="rightPanelOverflow">
+				<div id="panRight" class="animatedFlyAway floatRightPanel" v-touch:swipe.right="panRightSwipeClose"
+						 :style="rightPanelOverflow">
 					<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
 												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 												:toolbarStates="toolbarStates"></SummaryPanel>
@@ -33,8 +41,8 @@
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
 					<MapType ref="mapSelector" class="exp-hiddable-block" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :sidebarPosition="sidebarPosition" :style="oldStyleIndent"></MapType>
 
-					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols"/>
-					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor"/>
+					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
+					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" />
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -67,12 +75,15 @@
 	import SidebarPositionCookie from '@/map/classes/SidebarPositionCookie';
 	import LeafletApi from '@/map/leaflet/LeafletApi';
 	import WorkPanel from '@/map/components/panels/workPanel';
+	import BoundaryPanel from '@/map/components/panels/boundaryPanel';
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
 	import MapExport from '@/map/classes/MapExport';
 	import Search from '@/map/components/widgets/map/search';
 	import MapPanel from '@/map/components/panels/mapPanel';
 	import MetricsButton from '@/map/components/widgets/map/metricsButton';
 	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
+	import Toolbar from '@/map/components/widgets/summary/toolbar';
+
 	import LeftPanel from '@/map/components/panels/leftPanel';
 	import EditButton from '@/map/components/widgets/map/editButton';
 	import FullScreenButton from '@/map/components/widgets/map/fullScreenButton';
@@ -113,6 +124,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			EditButton,
 			FullScreenButton,
 			MapLegend,
+			Toolbar,
 			ClippingLegend,
 			LeftPanel,
 			MetricsButton,
@@ -120,6 +132,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			SuggestionsPanel,
 			PopupsPanel,
 			WorkPanel,
+			BoundaryPanel,
 			MapType,
 			SideToolbar,
 			WatermarkFloat,
@@ -137,6 +150,17 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			window.Use = { };
 			window.Embedded = this.LoadEmbeddedSettings();
 			window.ToggleFullscreen = this.toggleFullscreen;
+			var esModoEspecial = true;
+			if (esModoEspecial) {
+				// Importación dinámica basada en Promesas
+				import('@/common/styles/visor-material3.css')
+					.then(() => {
+						console.log('XCSS condicional cargado con éxito');
+					})
+					.catch(err => {
+						console.error('Error al cargar el archivo XCSS:', err);
+					});
+			}
 		},
 		data() {
 			return {
@@ -209,6 +233,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 				sideBoundaries: [],
 				config: {},
 				work: { Current: null },
+				boundary: { Current: null },
 				workToLoad: false
 			};
 		},
@@ -234,7 +259,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 						var css1 = dom.getCssRule(document, '.leaflet-control-zoom');
 						css1.style.display = 'none';
 					}
-					var start = new StartMap(loc.work, loc, loc.SetupMap);
+					var start = new StartMap(loc.work, loc.boundary, loc, loc.SetupMap);
 					start.Start();
 				});
 			window.Panels.Left = this.$refs.leftPanel;
@@ -243,13 +268,13 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			collapseButtonOffset() {
 				return this.toolbarStates.collapsed
 					? "right: 0px; "
-					: "right: max(275px, calc(30% - 3px)); z-index: 999!important;";
+					: "right: max(303px, calc(30% + 9px)); z-index: 999!important;";
 			},
 			clippingStarted() {
 				return this.clipping.Region.Summary && !this.clipping.Region.Summary.Empty;
 			},
 			rightPanelOverflow() {
-				return (this.clippingStarted ? 'overflow-y: auto;' : 'overflow-y: hidden');
+				return (this.clippingStarted ? 'overflow-y: hidden;' : 'overflow-y: hidden; border: 0px');
 			},
 			workColor() {
 				if (this.work && this.work.Current &&
@@ -468,7 +493,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 				this.RegisterErrorHandler();
 				window.onpopstate = function (event) {
 					if (event.state !== null) {
-						var start = new StartMap(loc.work, loc, loc.SetupMap);
+						var start = new StartMap(loc.work, loc.boundary, loc, loc.SetupMap);
 						start.Start();
 						//loc.UpdateMapsControls();
 					}
@@ -476,6 +501,9 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 				window.onresize = function (event) {
 					if (loc.$refs.workPanel) {
 						loc.$refs.workPanel.onResize();
+					}
+					if (loc.$refs.boundaryPanel) {
+						loc.$refs.boundaryPanel.onResize();
 					}
 					if (window.SegMap) {
 						window.SegMap.CheckSmallDevice();
@@ -492,6 +520,9 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 				window.onload = function (event) {
 					if (loc.$refs.workPanel) {
 						loc.$refs.workPanel.onResize();
+					}
+					if (loc.$refs.boundaryPanel) {
+						loc.$refs.boundaryPanel.onResize();
 					}
 				};
 			},
@@ -649,7 +680,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 				}
 				if (!value) {
 					// mostrar
-					s.style.display = 'block';
+					s.style.display = 'flex';
 					this.flyRightTimeoutId = setTimeout(() => {
 						s.classList.remove('animatedFlyRight');
 					}, 10);
@@ -1624,7 +1655,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 		position: absolute;
 		right: 0px;
 		z-index: 1000;
-		border: 1px solid rgb(165 164 164 / 75%);
+		border: 1px solid rgb(165 164 164 / 50%);
 		border-radius: 2px;
 		max-height: calc(100% - 95px);
 		background-color: #ffffff;

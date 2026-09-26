@@ -61,27 +61,9 @@
 					{{ pair.version.Version.Name }}
 				</button>
 			</div>
-			<template v-if="!Embedded.Readonly && useComparer && hasComparableVariables">
-				<div style="float:left" class="exp-hiddable-block">
-					<div style="float: left; margin-left: 10px; margin-top: 6px;">
-						<switches style="transform: scale(0.8)" title="Comparar" v-model="compare" theme="bootstrap"
-											color="default" @changed="toggleCompare()"></switches>
-					</div>
-					<div v-if="compare" class="compareLabel">
-						{{ compareContent }}
-						<a href="#" @click="clickCompareFuente" v-if="hasCompareMetadata()"
-							 title="Fuente de comparación" style="color: #a7a7a7">
-							<link-icon />
-						</a>
-					</div>
-					<div v-else style="color: #A7A7A7; cursor: pointer" class="compareLabel" @click="toggleCompare">
-						Comparar
-					</div>
-				</div>
-			</template>
-
-			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly" style="float: right"
-							@clickDownload="clickDescargar" @clickSource="clickFuente" :small="compare" />
+			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly" :useCompare="!Embedded.Readonly && useComparer && hasComparableVariables"
+														:valueCompare="compare" :compareTitle="compareContent" style="float: right" :useRanking="metric.useRankings()" :valueRanking="metric.ShowRanking"
+							@clickRanking="rankingShown" @clickDownload="clickDescargar" @clickSource="clickFuente" @clickCompare="toggleCompare"  />
 			<div style="clear: both; height: 0px"></div>
 		</div>
 			<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
@@ -92,7 +74,6 @@
 <script>
 
 import MetricVariables from './metricVariables';
-import Switches from 'vue-switches';
 //https://github.com/drewjbartlett/vue-switches
 import MetricDropdown from './metricDropdown';
 	import Source from './source';
@@ -100,7 +81,6 @@ import MetricDropdown from './metricDropdown';
 	import color from '@/common/framework/color';
 
 	import Ranking from './ranking';
-	import LinkIcon from 'vue-material-design-icons/Link.vue';
 import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
 import Helper from '@/map/js/helper';
 import 'vue-slider-component/theme/default.css';
@@ -111,11 +91,9 @@ export default {
 	components: {
 		MetricDropdown,
 		Source,
-		Switches,
 		DragHorizontal,
 		MetricVariables,
-		Ranking,
-		LinkIcon
+		Ranking
 	},
 	props: [
 		'metric',
@@ -365,12 +343,16 @@ export default {
 				}
 				return false;
 			},
-		rankingShown() {
-			var vScrollTo = require('vue-scrollto');
-			var loc = this;
-			setTimeout(function () {
-				vScrollTo.scrollTo(loc.$refs.rankings, 500, { container: '#panRight', force: false });
-			}, 100);
+			rankingShown() {
+				this.metric.ShowRanking = !this.metric.ShowRanking;
+				window.SegMap.SaveRoute.UpdateRoute();
+				if (this.metric.ShowRanking) {
+					var vScrollTo = require('vue-scrollto');
+					var loc = this;
+					setTimeout(function () {
+						vScrollTo.scrollTo(loc.$refs.rankings, 500, { container: '#panRight', force: false });
+					}, 100);
+				}
 		},
 		inVersionsArray(versionsArray, version) {
 				for (var arrVersion of versionsArray) {

@@ -9,11 +9,12 @@ import ActiveAnnotations from '@/map/classes/ActiveAnnotations';
 
 export default StartMap;
 
-function StartMap(workReference, frameReference, setupMap) {
+function StartMap(workReference, boundaryReference, frameReference, setupMap) {
 	this.hash = '';
 	this.SetupMap = setupMap;
 	this.frameReference = frameReference;
 	this.workReference = workReference;
+	this.boundaryReference = boundaryReference;
 };
 
 StartMap.prototype.Start = function () {
@@ -21,13 +22,18 @@ StartMap.prototype.Start = function () {
 	window.accessLink = null;
 	window.accessWorkId = null;
 	this.workReference.Current = null;
+	this.boundaryReference.Current = null;
 
 	var args = StartMap.ResolveWorkIdFromUrl();
 	if (args.workId) {
 		// Si tiene un work, va a ese paso
 		this.RestoreWork(args.workId, args.link);
+	} else if (args.boundaryId) {
+		// Si tiene una delimitación (ruta /map/b<id>), la restaura como
+		// delimitación activa.
+		this.RestoreBoundary(args.boundaryId);
 	} else {
-		// Si no vino indicado un work,
+		// Si no vino indicado un work ni una delimitación,
 		// inicia por ruta o por definición default de servidor.
 		if (new RestoreRoute(null).RouteHasLocation(this.hash)) {
 			this.StartByUrl();
@@ -35,6 +41,15 @@ StartMap.prototype.Start = function () {
 			this.GetAndStartByDefaultFrame();
 		}
 	}
+};
+
+// Un segmento de ruta identifica una delimitación cuando es 'b' seguido de
+// solo dígitos (p. ej. 'b45'); en cualquier otro caso no es una delimitación.
+StartMap.ParseBoundarySegment = function (segment) {
+	if (!segment || segment.length < 2 || segment[0] !== 'b' || !str.isNumeric(segment.substr(1))) {
+		return null;
+	}
+	return parseInt(segment.substr(1));
 };
 
 StartMap.ResolveWorkIdFromUrl = function () {
@@ -49,10 +64,18 @@ StartMap.ResolveWorkIdFromUrl = function () {
 	if (pathArray.length > 0 && pathArray[pathArray.length - 1].length === 18) {
 		link = pathArray.pop();
 	}
-	if (pathArray.length === 0 || !str.isNumeric(pathArray[pathArray.length - 1])) {
-		return { workId: null, link: null };
+	if (pathArray.length === 0) {
+		return { workId: null, boundaryId: null, link: null };
+	}
+	var lastSegment = pathArray[pathArray.length - 1];
+	var boundaryId = StartMap.ParseBoundarySegment(lastSegment);
+	if (boundaryId !== null) {
+		return { workId: null, boundaryId: boundaryId, link: link };
+	}
+	if (!str.isNumeric(lastSegment)) {
+		return { workId: null, boundaryId: null, link: null };
 	} else {
-		return { workId: parseInt(pathArray[pathArray.length - 1]), link: link };
+		return { workId: parseInt(lastSegment), boundaryId: null, link: link };
 	}
 };
 
@@ -73,6 +96,25 @@ StartMap.prototype.RestoreWork = function (workId, link) {
 		err.errDialog('GetWork', 'obtener la información del servidor', error);
 	});
 	return true;
+};
+
+
+
+StartMap.prototype.RestoreBoundary = function (boundaryId) {
+	var loc = this;
+	this.GetAndStartByDefaultFrame(function () {
+		window.SegMap.AddBoundaryById(boundaryId).then(function (activeBoundary) {
+			if (!activeBoundary) {
+				return;
+			}
+			loc.boundaryReference.Current = activeBoundary.properties;
+			var extents = activeBoundary.SelectedVersion().Extents;
+			if (extents) {
+				loc.frameReference.frame.Envelope = extents;
+				window.SegMap.FitCurrentEnvelope();
+			}
+		});
+	});
 };
 
 StartMap.prototype.ReceiveWorkStartup = function (startup, frame) {
@@ -168,13 +210,13 @@ StartMap.prototype.StartByUrl = function () {
 	this.SetupMap(afterLoaded);
 };
 
-StartMap.prototype.GetAndStartByDefaultFrame = function () {
+StartMap.prototype.GetAndStartByDefaultFrame = function (extrafunc) {
 	const loc = this;
 	axios.get(window.host + '/services/clipping/GetDefaultFrame', session.AddSession(window.host, {
 		params: {}
 	})).then(function (res) {
 		session.ReceiveSession(window.host, res);
-		loc.StartByDefaultFrame(res.data);
+		loc.StartByDefaultFrame(res.data, extrafunc);
 	}).catch(function(error) {
 		err.errDialog('GetDefaultFrame', 'conectarse con el servidor', error);
 	});

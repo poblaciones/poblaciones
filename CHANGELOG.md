@@ -1,3 +1,6 @@
+- Material 3.
+- Delimitaciones tienen url estable y ark.
+
 v5.4 (2026-09-21)
 - Soporte para basemap (proveedores de tiles) que usen api-key.
 - Fix descarga de metadatos.

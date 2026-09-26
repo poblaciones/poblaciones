@@ -6,7 +6,7 @@
            :style="[panelStyle, positionStyle, heightStyle]">
         <!-- Encabezado -->
         <div class="panel-header">
-          <div class="panel-title">{{ title }}</div>
+          <div class="titleDialog">{{ title }}</div>
           <div class="panel-header-actions">
             <button
               v-if="allowMultiSelectToggle && hasSelectableRows"
@@ -66,7 +66,7 @@
         </div>
 
         <!-- Zona fija: chips y buscador (no scrollean con la lista) -->
-        <div class="panel-fixed">
+        <div>
           <div v-if="selection.length" class="chips-zone">
             <button
               class="chips-clear"
@@ -1000,29 +1000,32 @@ export default {
 .slide-fade-leave-to .floating-panel.pos-anchored { transform: translateX(-100%); }
 
 /* Panel flotante */
-.floating-panel {
-  position: absolute;
-  left: 92px; top: 0; bottom: 0;
-  margin: auto 0;
-  width: 420px;
-  max-width: calc(100vw - 112px);
-  max-height: 90vh;
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  z-index: 1050;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+	.floating-panel {
+		position: absolute;
+		left: 92px;
+		top: 0;
+		bottom: 0;
+		margin: auto 0;
+		width: 420px;
+		max-width: calc(100vw - 112px);
+		max-height: 90vh;
+		background: white;
+		border-radius: 12px;
+		border: 1px solid rgb(165 164 164 / 50%);
+		z-index: 1050;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
 
 /* Encabezado */
-.panel-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e9ecef;
-  display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
-}
-.panel-title { margin: 0; font-size: 18px; color: #333; }
+	.panel-header {
+		padding: 12px 16px 8px 16px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-shrink: 0;
+	}
 .panel-header-actions { display: flex; align-items: center; gap: 4px; }
 
 .btn-tool {
@@ -1045,11 +1048,12 @@ export default {
 .btn-close:hover { background: #f0f0f0; color: #666; }
 
 /* Breadcrumb */
-.breadcrumb-nav {
-  padding: 8px 24px; background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-  font-size: 14px; flex-shrink: 0; line-height: 2em;
-}
+	.breadcrumb-nav {
+		padding: 6px 24px 4px 24px;
+		font-size: 14px;
+		flex-shrink: 0;
+		line-height: 2em;
+	}
 .breadcrumb-item { color: #666; transition: color 0.2s; }
 .breadcrumb-item:not(.active) { cursor: pointer; }
 .breadcrumb-item:not(.active):hover { color: #333; text-decoration: underline; }
@@ -1062,29 +1066,43 @@ export default {
 }
 .btn-breadcrumb-clear:hover { color: #333; }
 
-/* Zona fija (chips + buscador), no scrollea */
-.panel-fixed { flex-shrink: 0; padding: 20px 24px 0 24px; }
-
 /* Cuerpo */
-.panel-body { flex: 1; overflow-y: auto; padding: 4px 24px 20px 24px; min-height: 150px; }
+	.panel-body {
+		flex: 1;
+		overflow-y: auto;
+		padding:  4px 15px 20px 15px;
+		min-height: 150px;
+	}
 .panel-body.thinScroll::-webkit-scrollbar { width: 6px; }
 .panel-body.thinScroll::-webkit-scrollbar-track { background: #f1f1f1; }
 .panel-body.thinScroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 .panel-body.thinScroll::-webkit-scrollbar-thumb:hover { background: #999; }
 
 /* Chips */
-.chips-zone {
-  position: relative;
-  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed #e0e0e0;
-}
-.chips-clear {
-  position: absolute; top: 1px; right: 0;
-  background: none; border: none; color: #999; cursor: pointer;
-  width: 24px; height: 24px; border-radius: 50%;
-  font-size: 18px; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; z-index: 1;
-}
+	.chips-zone {
+		position: relative;
+		padding: 12px;
+		padding-bottom: 10px;
+		padding-left: 20px;
+	}
+	.chips-clear {
+		margin-right: 8px;
+		float: right;
+    background: none;
+		border: none;
+		color: #999;
+		cursor: pointer;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		font-size: 18px;
+		line-height: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s;
+		z-index: 1;
+	}
 .chips-clear:hover { background: #f0f0f0; color: #666; }
 .chips-scroll {
   display: flex; flex-wrap: wrap; gap: 6px;
@@ -1108,23 +1126,51 @@ export default {
 .chip-remove:hover { background: rgba(21, 101, 192, 0.28); }
 
 /* Búsqueda */
-.search-container { position: relative; margin-bottom: 20px; }
-.search-icon {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  color: #999; font-size: 16px; pointer-events: none;
-}
-.search-input {
-  width: 100%; padding: 12px 38px 12px 42px;
-  border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; outline: none; transition: all 0.2s;
-}
-.search-input:focus { border-color: #2196F3; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1); }
-.search-clear {
-  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; color: #999; cursor: pointer;
-  width: 24px; height: 24px; border-radius: 50%; font-size: 20px; line-height: 1;
-  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-}
-.search-clear:hover { background: #f0f0f0; color: #666; }
+	/* Search Input */
+	.search-container {
+		position: relative;
+		padding: 12px 20px 16px 20px;
+	}
+
+	.search-icon {
+		position: absolute;
+		left: 32px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #999;
+		font-size: 14px;
+		pointer-events: none;
+	}
+
+	.search-input {
+		width: 100%;
+		padding: 10px 40px 10px 32px;
+		border: 1px solid #e0e0e0;
+		border-radius: 20px;
+		font-size: 14px;
+		outline: none;
+		transition: all 0.2s;
+		background: #f8f9fa;
+	}
+
+		.search-input:focus {
+			border-color: #2196F3;
+			background: white;
+			box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+		}
+
+		.search-input::placeholder {
+			color: #999;
+		}
+
+	.search-spinner {
+		position: absolute;
+		right: 32px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #2196F3;
+		font-size: 14px;
+	}
 
 /* Grid de categorías */
 .categories-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 8px; }
@@ -1152,12 +1198,21 @@ export default {
 .add-all-bar .sw-toggle input:checked + .sw-track .sw-thumb { transform: translateX(15px); }
 
 /* Separadores / encabezados de sección (colapsables) */
-.source-header {
-  font-size: 13px; font-weight: 700; color: #999;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  margin: 12px 0 8px 0; padding: 4px; border-bottom: 1px solid #e9ecef;
-  display: flex; align-items: center; gap: 8px;
-  border-radius: 4px 4px 0 0; transition: background 0.15s;
+	.source-header {
+		font-size: 13px;
+		font-weight: 700;
+		color: #999;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: background 0.15s;
+		padding-left: 20px;
+		padding-right: 15px;
+		border-radius: 20px;
+		padding-top: 12px;
+		padding-bottom: 12px;
 }
 .source-header:first-child { margin-top: 0; }
 .source-header.hand:hover { background: #f5f5f5; color: #777; }
@@ -1174,10 +1229,15 @@ export default {
 .source-header-addall:hover { background: #e3f2fd; }
 
 /* Items */
-.indicator-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px; border-radius: 6px; transition: background-color 0.2s; margin-bottom: 2px;
-}
+	.indicator-item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 8px;
+		border-radius: 26px;
+		margin-bottom: 2px;
+		padding-left: 25px;
+	}
 .indicator-item:hover { background-color: #eee; }
 .indicator-item.is-selected { background-color: #e3f2fd; }
 .indicator-item.is-selected:hover { background-color: #d6ebfc; }
@@ -1186,7 +1246,6 @@ export default {
 
 .indicator-content { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 .indicator-icon {
-  text-shadow: 2px 2px 1px rgb(223 216 220 / 50%);
   color: #0fa7d8; font-size: 20px; width: 24px; text-align: center; flex-shrink: 0;
 }
 .indicator-info { flex: 1; min-width: 0; }

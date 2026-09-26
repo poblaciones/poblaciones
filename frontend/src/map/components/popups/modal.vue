@@ -4,11 +4,11 @@
 			<div class="modal-dialog" :class="modalClass" @click.self="clickMask" ref="dialog">
 				<div class="modal-content card" :style="(maxHeight ? 'height: ' + maxHeight + ';': '') + (maxWidth ? 'max-width: ' + maxWidth + 'px' : '')">
 					<!--Header-->
-					<div class="modal-header mpHeader unselectable" :style="'background-color: ' + backgroundColor">
+					<div class="modal-header mpHeader unselectable">
 						<slot name="header">
-						<a v-if="showClose" type="button" class="close white" style="padding: 3px; margin-right: 2px;
+						<a v-if="showClose" type="button" class="close" style="margin-right: 6px;
 														    opacity: .75;font-size: 20px; font-weight: 200;" @click="cancel">x</a>
-						<h5 class="title white">
+						<h5 class="titleDialog">
 							<slot name="title">
 								<img src="/static/img/spinner.gif" class="waitImg" v-if="!hasBody" />
 								{{ title }}
@@ -216,15 +216,18 @@
 	opacity: 0;
 }
 
-.mpHeader {
-	padding: 8px!important;
-  padding-left: 12px!important;
-}
+	.mpHeader {
+		padding-top: 14px !important;
+		padding-right: 8px !important;
+		padding-bottom: 8px !important;
+		padding-left: 12px !important;
+		border-bottom: 0px;
+	}
 .white {
 	color: white;
 }
 .mpHeaderClose {
-	margin-top: 0px;
+	margin-top: -6px;
 	padding: 3px;
   margin-right: 2px;
 }

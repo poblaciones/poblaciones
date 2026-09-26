@@ -64,6 +64,29 @@ class Links
 	{
 		return self::GetMapUrl() . '/' .  $workId;
 	}
+	public static function GetBoundaryArkUrl($boundaryId)
+	{
+		$naan = self::GetArkUrl();
+		if (!$naan)
+			return null;
+		else
+			return $naan . '/b' . $boundaryId;
+	}
+	public static function GetBoundaryUrl($boundaryId)
+	{
+		return self::GetMapUrl() . '/b' .  $boundaryId;
+	}
+	// Ruta estable de una delimitación. Un boundary no persiste una columna
+	// propia con su URL (a diferencia de met_url en work): se calcula siempre
+	// a partir de su id, con el mismo mecanismo que GetWorkStableUrl.
+	public static function GetBoundaryStableUrl($boundaryId)
+	{
+		$pattern = App::Settings()->Map()->ShortUrlPattern;
+		if ($pattern)
+			return Str::Replace($pattern, '{id}', 'b' . $boundaryId);
+		else
+			return self::GetFullyQualifiedUrl(self::GetBoundaryUrl($boundaryId));
+	}
 	public static function GetWorkMetadataUrl($workId)
 	{
 		return '/services/metadata/GetWorkMetadataPdf?w=' . $workId;

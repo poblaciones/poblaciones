@@ -1,23 +1,23 @@
 <template>
 	<div style="width: 100%;">
-		<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
-						 :work="work" :config="config" :toolbarStates="toolbarStates" style="position: sticky; z-index: 10; top: 0px"
-						 class="exp-hiddable-block" />
-		<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
-				 style="background-color: transparent; padding-bottom: 11px; margin-bottom: 0px; ">
-			<Clipping :clipping="clipping" :frame="frame" v-show="showPopulationTotals" />
 
-			<template v-for="value in metrics">
-				<MetricItem :metric="value" :metrics="metrics" :clipping="clipping"
-										:key="value.uid" v-if="value.IsLocked" />
-			</template>
-			<draggable v-model="propMetrics" @end="itemMoved" handle=".dragHandle">
-				<transition-group name="fade">
-					<template v-for="value in metrics">
-						<MetricItem :metric="value" :clipping="clipping" :metrics="metrics" :key="value.uid" v-if="!value.IsLocked" />
-					</template>
-				</transition-group>
-			</draggable>
+		<div class="thinScroll" style="overflow-y: auto">
+			<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
+					 style="background-color: transparent; padding-bottom: 11px; margin-bottom: 0px; ">
+				<Clipping :clipping="clipping" :frame="frame" v-show="showPopulationTotals" />
+
+				<template v-for="value in metrics">
+					<MetricItem :metric="value" :metrics="metrics" :clipping="clipping"
+											:key="value.uid" v-if="value.IsLocked" />
+				</template>
+				<draggable v-model="propMetrics" @end="itemMoved" handle=".dragHandle">
+					<transition-group name="fade">
+						<template v-for="value in metrics">
+							<MetricItem :metric="value" :clipping="clipping" :metrics="metrics" :key="value.uid" v-if="!value.IsLocked" />
+						</template>
+					</transition-group>
+				</draggable>
+			</div>
 		</div>
 	</div>
 </template>
@@ -25,7 +25,6 @@
 <script>
 import MetricItem from './metricItem';
 import Clipping from '@/map/components/widgets/summary/clipping';
-import Toolbar from '@/map/components/widgets/summary/toolbar';
 import draggable from 'vuedraggable';
 import arr from '@/common/framework/arr';
 
@@ -34,7 +33,6 @@ export default {
 	components: {
 		MetricItem,
 		Clipping,
-		Toolbar,
 		draggable
 	},
 	props: [
