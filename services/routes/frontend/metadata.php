@@ -34,18 +34,19 @@ App::$app->get('/services/metadata/GetMetadataFile', function (Request $request)
 // ej. http://mapas/services/metadata/GetMetadataPdf?m=12&f=4
 App::$app->get('/services/metadata/GetMetadataPdf', function (Request $request) {
 	$workId = Params::GetInt('w');
+	$boundaryId = Params::GetInt('b');
 	$metadataId = Params::GetIntMandatory('m');
 	if (!App::Settings()->Servers()->IsTransactionServerRequest())
 	{
 		$controller = new commonServices\RemoteMetadataService();
-		return $controller->GetMetadataPdf($metadataId, $workId);
+		return $controller->GetMetadataPdf($metadataId, $workId, $boundaryId);
 	}
 	$controller = new commonServices\MetadataService();
 	// x compatibilidad a links viejos
 	if ($workId !== null && $denied = Session::CheckIsWorkPublicOrAccessible($workId))
 		return $denied;
 
-	return $controller->GetMetadataPdf($metadataId, null, false, $workId);
+	return $controller->GetMetadataPdf($metadataId, null, false, $workId, $boundaryId);
 });
 
 // ej. http://mapas/services/metadata/GetWorkMetadataPdf?w=12&m=4

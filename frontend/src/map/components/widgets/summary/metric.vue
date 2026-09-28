@@ -62,7 +62,7 @@
 				</button>
 			</div>
 			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly" :useCompare="!Embedded.Readonly && useComparer && hasComparableVariables"
-														:valueCompare="compare" :compareTitle="compareContent" style="float: right" :useRanking="metric.useRankings()" :valueRanking="metric.ShowRanking"
+														:valueCompare="compare" :compareTitle="compareContent" :useRanking="metric.useRankings()" :valueRanking="metric.ShowRanking"
 							@clickRanking="rankingShown" @clickDownload="clickDescargar" @clickSource="clickFuente" @clickCompare="toggleCompare"  />
 			<div style="clear: both; height: 0px"></div>
 		</div>

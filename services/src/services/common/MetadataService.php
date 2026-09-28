@@ -90,13 +90,13 @@ class MetadataService extends BaseService
 	public function GetMetadataPdf($metadataId, $datasetId = null, $fromDraft = false, $workId = null, $boundaryId = null)
 	{
 		$friendlyName = "";
-		$filename = $this->GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, $friendlyName, $boundaryId);
+		$filename = $this->GetMetadataPdfFile($metadataId, $datasetId, $fromDraft, $workId, $boundaryId, $friendlyName);
 
 		return App::SendFile($filename)
 			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
 			->deleteFileAfterSend(true);
 	}
-	public function GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, &$friendlyName, $boundaryId = null)
+	public function GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, $boundaryId, &$friendlyName)
 	{
 		$model = new MetadataModel($fromDraft);
 		$metadata = $model->GetMetadata($metadataId);

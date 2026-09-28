@@ -681,11 +681,24 @@ SegmentedMap.prototype.AddBaseMetricById = function (id) {
 	});
 };
 
-SegmentedMap.prototype.AddBoundaryById = function (id, isBaseMetric = false) {
-	const loc = this;
+// Solo trae los datos de la delimitación, sin agregarla como capa al mapa.
+// Lo usa AddBoundaryById (que sí la agrega) y StartMap cuando la ruta ya
+// declara sus propias capas (ahí solo hacen falta los datos, para el
+// zócalo, sin duplicar el agregado).
+SegmentedMap.prototype.GetBoundaryInfo = function (id) {
 	return this.Get(window.host + '/services/boundaries/GetSelectedBoundary', {
 		params: { a: id }
-	}).then(function (res) {
+	}).catch(function (error) {
+		err.errDialog('GetSelectedBoundary', 'obtener las delimitaciones solicitadas', error);
+	});
+};
+
+SegmentedMap.prototype.AddBoundaryById = function (id, isBaseMetric = false) {
+	const loc = this;
+	return this.GetBoundaryInfo(id).then(function (res) {
+		if (!res) {
+			return null;
+		}
 		var activeBoundary;
 		if (isBaseMetric) {
 			activeBoundary = new ActiveBaseBoundary(res.data);
@@ -699,8 +712,6 @@ SegmentedMap.prototype.AddBoundaryById = function (id, isBaseMetric = false) {
 			loc.Recents.RegisterBoundary(id, res.data.Name);
 		}
 		return activeBoundary;
-	}).catch(function (error) {
-		err.errDialog('GetSelectedBoundary', 'obtener las delimitaciones solicitadas', error);
 	});
 
 };

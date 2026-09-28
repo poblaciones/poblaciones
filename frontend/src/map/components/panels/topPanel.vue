@@ -13,7 +13,7 @@
 						</button>
 					</div>
 					<div class="metadataInfo" style="position: relative; z-index: 10;" v-if="type === 'W' && hasMetrics" :style="metadataInfoWidthStyle">
-						<div class="sourceInfo exp-hiddable-block" :style="getMetadataStyle()">
+						<div class="sourceInfo2 exp-hiddable-block" :style="getMetadataStyle()">
 							<a href="#" :title="'Información de ' + metadata.Name"
 								 @click="clickFuente" style="color: #FFF">
 								<link-icon />
@@ -268,11 +268,11 @@ export default {
 	margin-left: 1px;
 	font-size: 1.1rem;
 }
-.sourceInfo
+.sourceInfo2
 {
 	margin-left: 30px;
 	font-size: 1.30rem;
-	margin-top: 8px;
+	margin-top: 10px;
 }
 .preTitleRow {
 	text-transform: uppercase;

@@ -1,11 +1,11 @@
 <template>
-	<button :title="title" type="button" class="close buttonMargin" @click="onClose">
-		<close-icon title="Quitar" />
+	<button :title="title" class="btn-close" @click="onClose" style="float: right">
+		<span aria-hidden="true" style="margin-top: -3px">×</span>
 	</button>
+
 </template>
 
 <script>
-import CloseIcon from 'vue-material-design-icons/Close.vue';
 
 
 export default {
@@ -17,7 +17,7 @@ export default {
 		},
 	},
 	components: {
-		CloseIcon
+
 	},
 	data() {
 		return {

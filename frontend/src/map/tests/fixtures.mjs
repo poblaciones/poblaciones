@@ -45,6 +45,10 @@ export function setupWindow(overrides) {
 		// directo, no simulando el evento del navegador).
 		addEventListener() {},
 		removeEventListener() {},
+		// Idem para componentes que abren/cierran con EscapeCloseHandler
+		// (agrega una entrada de historial al abrirse, y la consume al
+		// cerrarse fuera del propio botón atrás).
+		history: { pushState() {}, back() {} },
 	}, overrides || {});
 	// Stub mínimo de document: alcanza para los componentes que miden #holder
 	// (mapLegend.vue) sin necesidad de jsdom. Por defecto no encuentra nada,

@@ -25,6 +25,7 @@
 
         <!-- Sección de capas adicionales -->
         <div class="panel-section">
+          <mp-close-button @click="closePanel" title="Cerrar" class="rightButton" />
           <div class="section-title" style="margin-bottom: 4px;">Detalles del mapa</div>
           <div class="map-layers-list">
             <div v-for="layer, index in activeLayers"
@@ -78,6 +79,7 @@
   import defaultMapType from '@/common/assets/maps/default.png';
   import streetsMapType from '@/common/assets/maps/streets.png';
   import satelliteMapType from '@/common/assets/maps/satellite.png';
+  import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
 
   export default {
     name: 'mpBasemapButton',
@@ -159,11 +161,16 @@
       if (labels) {
 				labels.Visible = this.toolbarStates.showLabels;
       }
+      this.escapeHandler = new EscapeCloseHandler(this.closePanel, { useHistory: this.isTouchDevice });
+      if (this.isExpanded) {
+        this.escapeHandler.Open();
+      }
     },
     beforeDestroy() {
       if (this.hoverTimeout) {
         clearTimeout(this.hoverTimeout);
       }
+      this.escapeHandler.Close();
     },
     computed: {
       useElevation() {
@@ -296,6 +303,13 @@
         if (labels) {
           labels.Visible = val;
         }
+      },
+      isExpanded(value) {
+        if (value) {
+          this.escapeHandler.Open();
+        } else {
+          this.escapeHandler.Close();
+        }
       }
     }
 };
@@ -359,6 +373,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.rightButton {
+	position: absolute;
+	right: 10px;
+	top: 6px;
 }
 
 .expand-icon {
@@ -576,7 +596,6 @@
 		right: 0;
 		bottom: 0;
 		width: 100%;
-		max-height: 70vh;
 		border-radius: 16px 16px 0 0;
 		transform-origin: bottom;
 	}

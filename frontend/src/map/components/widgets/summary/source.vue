@@ -7,7 +7,7 @@
 		</button>
 		<button v-if="useRanking" type="button" title="Ránkings" @click="clickRanking" class="btn btn-default btn-xs" :class="(valueRanking ? 'active' : '')"><i class="fas fa-list-ol"></i></button>
 		<button type="button" title="Descargar" @click="clickDescargar" class="btn btn-default btn-xs"><i class="fas fa-download"></i></button>
-		<button type="button" :title="'Fuente de ' + sourceTitle" @click="clickFuente" class="btn btn-default btn-xs"><i class="fas fa-link"></i></button>
+		<button type="button" :title="'Fuente de \'' + sourceTitle + '\''" @click="clickFuente" class="btn btn-default btn-xs"><i class="fas fa-link"></i></button>
 
 	</div>
 </template>
@@ -53,15 +53,6 @@ export default {
 </script>
 
 <style scoped>
-	.sourceInfo .btn {
-		color: #747373;
-		font-size: 12.5px !important;
-		margin-right: 0px;
-	}
 
-	.sourceInfo {
-		padding-top: 1px;
-		font-size: 12px;
-	}
 
 </style>

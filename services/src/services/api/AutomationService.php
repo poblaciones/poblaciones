@@ -134,7 +134,7 @@ class AutomationService extends BaseService
 		$metadataId = $work['met_id'];
 		$friendlyName = '';
 		$controller = new MetadataService();
-		$file = $controller->GetMetadataPdfFile($metadataId, null, false, $workId, $friendlyName);
+		$file = $controller->GetMetadataPdfFile($metadataId, null, false, $workId, null, $friendlyName);
 		return App::StreamFile($file, 'metadatos-' . $workId . '.pdf');
 	}
 
@@ -146,7 +146,7 @@ class AutomationService extends BaseService
 		$friendlyName = "";
 		$controller = new MetadataService();
 		//Session::$AccessLink = $link;
-		$file = $controller->GetMetadataPdfFile($metadataId, null, false, $workId, $friendlyName);
+		$file = $controller->GetMetadataPdfFile($metadataId, null, false, $workId, null, $friendlyName);
 		IO::Copy($file, $path . "/metadatos.pdf");
 		return "metadatos.pdf";
 	}

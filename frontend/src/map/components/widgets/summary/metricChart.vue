@@ -167,15 +167,7 @@ import QuickChart from '@/map/components/controls/quickChart';
 .textRight {
 	text-align: right;
 }
-.statsHeader {
-	text-align: right;
-	color: #a9a9a9;
-	font-weight: 300;
-	font-size: 11px;
-	height: 16px;
-	padding: 0px;
-	text-transform: uppercase;
-}
+
 
 .categoryMuted {
 	color: #000!important;

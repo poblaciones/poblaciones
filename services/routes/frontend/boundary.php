@@ -2,6 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use helena\services\frontend as services;
+use helena\services\backoffice\InstitutionService;
 
 use helena\classes\App;
 use helena\classes\Session;
@@ -19,6 +20,14 @@ App::$app->get('/services/boundaries/GetSelectedBoundary', function (Request $re
 	$ret = $controller->GetSelectedBoundary($boundaryId);
 
 	return App::Json($ret);
+});
+
+App::$app->get('/services/boundaries/GetInstitutionWatermark', function (Request $request) {
+	$boundaryId = Params::GetIntMandatory('b');
+	if ($denied = Session::CheckIsBoundaryPublicOrAccessible($boundaryId)) return $denied;
+	$watermarkId = Params::GetIntMandatory('iwmid');
+	$controller = new InstitutionService();
+	return $controller->GetInstitutionWatermark($watermarkId, false);
 });
 
 // ej. http://mapas/services/boundaries/GetBoundaryTile?a=62&z=12&x=1380&y=2468

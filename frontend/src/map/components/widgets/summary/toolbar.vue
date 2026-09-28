@@ -363,10 +363,11 @@
 						}
 					}
 				}
+				/*
 				if (ret.length > 0) {
 					// Agrega el neutro
 					arr.InsertAt(ret, 0, { Action: 'PAN', Name: 'Navegar el mapa', Icon: 'far fa-hand-paper' });
-				}
+				}*/
 				return ret;
 			}
 		},
@@ -437,7 +438,7 @@
 		padding: 8px;
 		position: absolute;
 		top: 12px;
-		z-index: 10000;
+		z-index: 1000;
 		right: 12px;
 		border: 0px solid transparent;
 	}

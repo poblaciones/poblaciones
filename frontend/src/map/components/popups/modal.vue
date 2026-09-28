@@ -6,14 +6,16 @@
 					<!--Header-->
 					<div class="modal-header mpHeader unselectable">
 						<slot name="header">
-						<a v-if="showClose" type="button" class="close" style="margin-right: 6px;
-														    opacity: .75;font-size: 20px; font-weight: 200;" @click="cancel">x</a>
-						<h5 class="titleDialog">
-							<slot name="title">
-								<img src="/static/img/spinner.gif" class="waitImg" v-if="!hasBody" />
-								{{ title }}
-							</slot>
-						</h5>
+
+							<mp-close-button @click="cancel" title="Cerrar"
+															 v-if="showClose" class="exp-hiddable-block" />
+
+							<h5 class="titleDialog">
+								<slot name="title">
+									<img src="/static/img/spinner.gif" class="waitImg" v-if="!hasBody" />
+									{{ title }}
+								</slot>
+							</h5>
 						</slot>
 					</div>
 					<!--Container-->
@@ -39,6 +41,8 @@
  * Bootstrap Style Modal Component for Vue
  * Depend on Bootstrap.css
  */
+	import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
+
 	export default {
 		props: {
 			maxWidth: {
@@ -130,20 +134,27 @@
 		}
 	},
 	created () {
+		this.escapeHandler = new EscapeCloseHandler(() => {
+			if (this.showDialog) {
+				this.showDialog = false;
+			}
+		}, { useHistory: true });
 		if (this.showDialog) {
 			document.body.className += ' modal-open';
+			this.escapeHandler.Open();
 		}
-		window.addEventListener('keydown', this.keyProcess);
 	},
 	beforeDestroy () {
-		window.removeEventListener('keydown', this.keyProcess);
+		this.escapeHandler.Close();
 		document.body.className = document.body.className.replace(/\s?modal-open/, '');
 	},
 	watch: {
 		showDialog (value) {
 			if (value) {
+				this.escapeHandler.Open();
 				document.body.className += ' modal-open';
 			} else {
+				this.escapeHandler.Close();
 				if (!this.duration) {
 					this.duration = window.getComputedStyle(this.$refs.dialog)['transition-duration'].replace('s', '') * 1000;
 				}
@@ -159,13 +170,6 @@
 			this.$emit('ok');
 			if (this.closeWhenOK) {
 				// this.showDialog = false;
-			}
-		},
-		keyProcess(e) {
-			if (this.showDialog) {
-				if (e.key === "Escape") {
-					this.showDialog = false;
-				}
 			}
 		},
 		cancel () {

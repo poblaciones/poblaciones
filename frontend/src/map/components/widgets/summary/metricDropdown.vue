@@ -5,7 +5,7 @@
 				<mp-close-button @click="clickQuitar" title="Quitar indicador"
 												 v-if="!metric.IsLocked" class="exp-hiddable-block" />
 
-				<mp-dropdown-menu :items="menuItems" @itemClick="dropdownSelected"
+				<mp-dropdown-menu :items="menuItems" :styleRounded="true" @itemClick="dropdownSelected"
 											 icon="fas fa-ellipsis-v" />
 			</h5>
 		</div>

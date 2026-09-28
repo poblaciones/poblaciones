@@ -393,23 +393,24 @@ export default {
 	opacity: .55;
 }
 
-.mapLegendMinimized {
-	position: absolute;
-	z-index: 900;
-	right: 55px;
-	bottom: 58px;
-	line-height: .8em;
-	font-size: 1em;
-	cursor: pointer;
-	color: #5a5858;
-	background-color: #fbfbfb;
-	box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-	background-clip: padding-box;
-	border-radius: 2px;
-	padding: 6px 6px;
-	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
-	transition: background-color .15s ease, color .15s ease;
-}
+	.mapLegendMinimized {
+		position: absolute;
+		z-index: 900;
+		right: 55px;
+		bottom: 60px;
+		line-height: .8em;
+		font-size: 1em;
+		cursor: pointer;
+		color: #5a5858;
+		border: 1px solid rgb(165 164 164 / 50%) !important;
+		background-color: #fbfbfb;
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		padding: 7px 7px;
+		-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+		transition: background-color .15s ease, color .15s ease;
+	}
 
 .mapLegendMinimized:hover {
 	background-color: #f4f4f4;

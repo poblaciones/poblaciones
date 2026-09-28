@@ -32,8 +32,12 @@
 						</tr>
 						<tr v-if="metadata.Ark">
 							<td>Ark:</td>
-							<td class='tdWrappable'>{{ metadata.Ark }}</td>
-						</tr>
+							<td class='tdWrappable'>
+								<a target="_blank" :href="metadata.Ark">{{ metadata.Ark }}</a>
+								<a href="#" v-clipboard="() => metadata.Ark" class="superSmallButton">
+									Copiar
+								</a>
+							</td></tr>
 						<tr>
 							<td>Cita (APA):</td>
 							<td class="quotation tdWrappable">
@@ -131,11 +135,11 @@ export default {
 		},
 		citationAPA(metadata) {
 			return apa.onlineMapCitation(this.htmlEncode(metadata.Authors), this.htmlEncode(metadata.Date),
-					this.htmlEncode(metadata.Name));
+				this.htmlEncode(metadata.Name), this.availablePublicUrl);
 		},
 		citationAPAText(metadata) {
 			return apa.onlineMapCitation(metadata.Authors, metadata.Date,
-				metadata.Name, null, true);
+				metadata.Name, this.availablePublicUrl, true);
 		},
 		htmlEncode(html) {
 			return document.createElement('a').appendChild(
@@ -155,7 +159,9 @@ export default {
 		}
 	},
 	computed: {
-
+		availablePublicUrl() {
+			return (this.metadata.Ark ? this.metadata.Ark : this.resolvePublicUrl());
+		}
 	}
 };
 </script>

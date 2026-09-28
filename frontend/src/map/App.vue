@@ -15,27 +15,27 @@
 			<div id="holder" style="overflow-x: hidden">
 				<PopupsPanel :backgroundColor="workColor" />
 
-				<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
-								 :work="work" :config="config" :toolbarStates="toolbarStates"
-								 class="exp-hiddable-block" />
-
-				<CollapseButtonRight id="panRightButton" v-show="!Embedded.HideSummaryPanel && !Embedded.Readonly"
-														 :collapsed='toolbarStates.collapsed'
-														 @click="doToggle"
-														 v-if="clippingStarted"
-														 tooltip="panel de estadísticas"
-														 class="rightButton exp-hiddable-block"
-														 :style="collapseButtonOffset" />
-				<div id="panRight" class="animatedFlyAway floatRightPanel" v-touch:swipe.right="panRightSwipeClose"
-						 :style="rightPanelOverflow">
-					<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
-												:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
-												:toolbarStates="toolbarStates"></SummaryPanel>
-				</div>
-				<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor" :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics" :clipping="clipping" :sidebarPosition="sidebarPosition" @update:sidebarPosition="changeSidebarPosition"></SideToolbar>
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
 					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
 									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
+					<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
+									 :work="work" :config="config" :toolbarStates="toolbarStates"
+									 class="exp-hiddable-block" />
+
+					<CollapseButtonRight id="panRightButton" v-show="!Embedded.HideSummaryPanel && !Embedded.Readonly"
+															 :collapsed='toolbarStates.collapsed'
+															 @click="doToggle"
+															 v-if="clippingStarted"
+															 tooltip="panel de estadísticas"
+															 class="rightButton exp-hiddable-block"
+															 :style="collapseButtonOffset" />
+					<div id="panRight" class="animatedFlyAway floatRightPanel" v-touch:swipe.right="panRightSwipeClose"
+							 :style="rightPanelOverflow">
+						<SummaryPanel :metrics="metrics" id="panSummary" :config="config"
+													:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
+													:toolbarStates="toolbarStates"></SummaryPanel>
+					</div>
+					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor" :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics" :clipping="clipping" :sidebarPosition="sidebarPosition" @update:sidebarPosition="changeSidebarPosition"></SideToolbar>
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
@@ -47,6 +47,11 @@
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
 							<WatermarkFloat v-if="institution.WatermarkId" :key="institution.Id" :institution="institution" :work="work" />
+						</template>
+					</div>
+					<div v-if="boundaryMetadata" class="logosBox">
+						<template v-for="institution in boundaryMetadata.Institutions">
+							<WatermarkFloat v-if="institution.WatermarkId" :key="institution.Id" :institution="institution" :boundary="boundary" />
 						</template>
 					</div>
 					<WatermarkOwner v-if="ownerLogo && ownerLogo.Image"
@@ -268,7 +273,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			collapseButtonOffset() {
 				return this.toolbarStates.collapsed
 					? "right: 0px; "
-					: "right: max(303px, calc(30% + 9px)); z-index: 999!important;";
+					: "right: max(303px, calc(30% + 9px)); z-index: 1020!important;";
 			},
 			clippingStarted() {
 				return this.clipping.Region.Summary && !this.clipping.Region.Summary.Empty;
@@ -288,6 +293,13 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 			},
 			ownerLogo() {
 				return this.config.OwnerLogo;
+			},
+			boundaryMetadata() {
+				if (!this.boundary.Current) {
+					return null;
+				}
+				var current = this.boundary.Current;
+				return current.Versions[current.SelectedVersionIndex].Metadata;
 			},
 			Embedded() {
 				return window.Embedded;
@@ -956,7 +968,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 	}
 
 	.moderateHr {
-		margin-top: 0.4rem;
+		margin-top: 0.9rem;
 		margin-bottom: 1.1rem;
 		border-color: #ccc;
 	}
@@ -1651,10 +1663,10 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 
 	.floatRightPanel {
 		width: calc(30% - 2.5px);
-		min-width: 275px;
+		min-width: 292px;
 		position: absolute;
 		right: 0px;
-		z-index: 1000;
+		z-index: 1020;
 		border: 1px solid rgb(165 164 164 / 50%);
 		border-radius: 2px;
 		max-height: calc(100% - 95px);

@@ -12,6 +12,7 @@ import err from "@/common/framework/err";
 export default {
   name: "watermarkFloat",
     props: ["work",
+            "boundary",
             "institution"  ],
   data() {
     return {
@@ -31,13 +32,20 @@ export default {
 		},
     getInstitutionWatermark() {
       const loc = this;
+      // El control de acceso del logo depende de si la institución es la
+      // de la cartografía activa o la de la delimitación activa: cada una
+      // resuelve contra su propio permiso en el servidor.
+      var url = window.host;
+      var params = { iwmid: loc.institution.WatermarkId };
+      if (loc.boundary) {
+        url += "/services/boundaries/GetInstitutionWatermark";
+        params.b = loc.boundary.Current.Id;
+      } else {
+        url += "/services/works/GetInstitutionWatermark";
+        params.w = loc.work.Current.Id;
+      }
       return axios
-        .get(window.host + "/services/works/GetInstitutionWatermark", {
-          params: {
-            w: loc.work.Current.Id,
-            iwmid: loc.institution.WatermarkId
-          }
-        })
+        .get(url, { params: params })
         .then(function(res) {
           loc.image = res.data;
         })

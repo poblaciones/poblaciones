@@ -143,7 +143,8 @@ export default {
 			}
 		},
 		resolveMetadataUrl() {
-			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.version.Metadata.Id + h.urlParam('l', window.accessLink);
+			return window.host + '/services/metadata/GetMetadataPdf?m=' + this.version.Metadata.Id
+				+ h.urlParam('l', window.accessLink) + h.urlParam('b', this.boundary.properties.Id);
 		},
 		getSpatialFormats() {
 			var ret = [];

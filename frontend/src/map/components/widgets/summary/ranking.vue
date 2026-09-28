@@ -4,10 +4,10 @@
 			<table class="localTableCompact">
 				<tbody>
 					<tr>
-						<td class="statsHeader" style="text-align: left" colspan="2">
+						<td class="statsHeaderSmaller" style="text-align: left" colspan="2">
 							Ranking de {{ level.Name }}
 						</td>
-						<td class="statsHeader textRight" style="min-width: 75px">
+						<td class="statsHeaderSmaller textRight" style="min-width: 75px">
 							{{ getValueHeader() }}
 						</td>
 					</tr>
@@ -173,7 +173,9 @@ export default {
 .textRight {
 	text-align: right;
 }
-.statsHeader {
+
+
+.statsHeaderSmaller {
 	text-align: right;
 	color: #a9a9a9;
 	font-weight: 300;

@@ -12,15 +12,15 @@
         <div class="search-body">
           <div class="search-input-container">
             <i class="fas fa-search search-icon"></i>
-            <input
-              v-model="searchText"
-              ref="searchField"
-              type="text"
-              class="search-input"
-              placeholder="Buscar indicadores y lugares en Poblaciones"
-              @keyup="handleSearch"
-              autocomplete="off"
-            />
+            <input v-model="searchText"
+                   ref="searchInput"
+                   type="text"
+                   class="search-input"
+                   placeholder="Buscar indicadores y lugares en Poblaciones"
+                   @keyup="handleSearch"
+                   autocomplete="off" />
+            <button v-if="searchText" class="search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
+
             <div v-if="loading" class="search-spinner">
               <i class="fas fa-spinner fa-spin"></i>
             </div>
@@ -257,8 +257,8 @@ export default {
         // cambiado lo guardado desde la última vez que se mostraron.
         this.refreshRecents();
         this.$nextTick(() => {
-          if (this.$refs.searchField) {
-            this.$refs.searchField.focus();
+					if (this.$refs.searchInput) {
+						this.$refs.searchInput.focus();
           }
         });
       } else {
@@ -279,6 +279,10 @@ export default {
     close() {
       this.$emit('close');
     },
+		clearSearch() {
+			this.searchText = '';
+			this.$nextTick(() => { if (this.$refs.searchInput) this.$refs.searchInput.focus(); });
+		},
     handleSearch(e) {
       if (e.keyCode === 13) {
         this.doSearchDebounced.flush();
@@ -363,8 +367,8 @@ export default {
     },
     handleEnter(e) {
       if (!this.hasResults) {
-        if (this.$refs.searchField) {
-          this.$refs.searchField.focus();
+				if (this.$refs.searchInput) {
+					this.$refs.searchInput.focus();
         }
       } else {
         const selected = this.autolist.find(el => el.Class !== '');
@@ -377,8 +381,8 @@ export default {
       if (!this.hasResults) return;
       e.preventDefault();
 
-      if (this.$refs.searchField) {
-        this.$refs.searchField.blur();
+			if (this.$refs.searchInput) {
+				this.$refs.searchInput.blur();
       }
 
       if (this.selindex >= 0 && this.selindex < this.autolist.length - 1) {
@@ -396,8 +400,8 @@ export default {
       if (!this.hasResults) return;
       e.preventDefault();
 
-      if (this.$refs.searchField) {
-        this.$refs.searchField.blur();
+			if (this.$refs.searchInput) {
+				this.$refs.searchInput.blur();
       }
 
       if (this.selindex > 0) {
@@ -436,13 +440,13 @@ export default {
 }
 
 /* Wrapper del panel */
-.search-panel-wrapper {
-  position: absolute;
-  left: 92px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 999;
-}
+	.search-panel-wrapper {
+		position: absolute;
+		left: 92px;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 1050;
+	}
 
 	.search-panel {
 		background: white;
@@ -463,27 +467,6 @@ export default {
 		align-items: center;
 	}
 
-	.btn-close {
-		background: none;
-		border: none;
-		font-size: 28px;
-		line-height: 1;
-		color: #999;
-		cursor: pointer;
-		padding: 0;
-		width: 32px;
-		height: 32px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 4px;
-		transition: all 0.2s;
-	}
-
-		.btn-close:hover {
-			background: #f0f0f0;
-			color: #666;
-		}
 
 /* Body */
 .search-body {
@@ -499,45 +482,6 @@ export default {
 		padding: 18px 20px 18px 20px;
 	}
 
-.search-icon {
-  position: absolute;
-  left: 32px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  font-size: 14px;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 10px 40px 10px 32px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  font-size: 14px;
-  outline: none;
-  transition: all 0.2s;
-  background: #f8f9fa;
-}
-
-.search-input:focus {
-  border-color: #2196F3;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.search-input::placeholder {
-  color: #999;
-}
-
-.search-spinner {
-  position: absolute;
-  right: 32px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #2196F3;
-  font-size: 14px;
-}
 
 /* Área de resultados/recientes */
 	.results-area {
@@ -670,21 +614,19 @@ export default {
 }
 
 /* Recientes */
-.recents-section-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 4px 8px 8px 18px;
-}
+	.recents-section-title {
+		font-size: 13.5px;
+		color: #707070;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		padding: 4px 8px 8px 18px;
+	}
 
-.recents-group-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #999;
-  padding: 12px 8px 4px;
-}
+	.recents-group-label {
+		font-size: 14px;
+		color: #707070;
+		padding: 10px 22px 4px;
+	}
 
 .btn-remove-recent {
   background: none;
@@ -748,13 +690,19 @@ export default {
 }
 
 /* Media queries */
-@media (max-width: 768px) {
-  .search-panel-wrapper {
-    left: 10px;
-    right: 10px;
-    top: 80px;
-    transform: none;
-  }
+	@media (max-width: 768px) {
+		.search-panel-wrapper {
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		margin: unset;
+		width: 100%;
+		max-width: 100%;
+		max-height: 100% !important;
+		border-radius: 0;
+		transform: none;
+	}
 
   .search-panel {
     width: 100%;

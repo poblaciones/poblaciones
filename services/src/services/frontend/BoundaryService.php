@@ -109,6 +109,8 @@ class BoundaryService extends BaseService
 			$metadataTable = new MetadataModel();
 			$rows = $metadataTable->GetMetadataFiles($version->Metadata->Id);
 			$version->Metadata->FillFiles($rows);
+			$institutions = $metadataTable->GetInstitutions($version->Metadata->Id);
+			$version->Metadata->FillInstitutions($institutions);
 
 			$this->AddVersionValues($version);
 			$version->IsSimpleCount = (sizeof($version->ValueLabels) == 1);

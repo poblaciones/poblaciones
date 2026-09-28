@@ -130,15 +130,7 @@ export default {
 .textRight {
 	text-align: right;
 }
-.statsHeader {
-	text-align: right;
-	color: #a9a9a9;
-	font-weight: 300;
-	font-size: 13px;
-	height: 16px;
-	padding: 0px;
-	text-transform: uppercase;
-}
+
 .dataBox {
 	padding-left: 2px!important;
 	padding-right: 2px!important;

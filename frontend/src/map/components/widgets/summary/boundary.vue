@@ -43,7 +43,7 @@
 				</button>
 			</div>
 
-			<Source style="float:right" :sourceTitle="boundary.properties.Name"
+			<Source :sourceTitle="boundary.properties.Name"
 							@clickDownload="clickDescargar" @clickSource="clickFuente" />
 
 			<div style="clear: both; height: 0px">

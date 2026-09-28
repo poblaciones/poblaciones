@@ -57,7 +57,7 @@
 				</div>
 			</h3>
 
-			<div class="sourceRow" style="padding-bottom: 0.6rem;">
+			<div class="sourceRow" style="padding-bottom: 0.2rem;">
 				<div class="btn-group" style=" z-index: 100; background-color: white;">
 					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index"
 									class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)" @mouseup="changeClipping(index)"

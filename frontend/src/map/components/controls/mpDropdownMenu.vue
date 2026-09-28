@@ -99,7 +99,7 @@
 				// lightButton resuelve suponiendo que solo lleva un ícono.
 				triggerClass() {
 					if (this.styleRounded) {
-						return 'btn btn-default btn-xs';
+						return 'btn btn-default btn-xs btn-small-toolbar';
 					}
 					return 'lightButton close' + ((this.label || this.$slots.trigger) ? ' labelButton' : '');
 				},
@@ -134,11 +134,7 @@
 	}
 
 	.triggerIcon {
-		font-size: 12px;
-		padding-top: 2px;
-		padding-left: 1px;
-		padding-right: 1px;
-		height: 17px;
+		font-size: 14px;
 	}
 
 	/* Ajustes sobre lightButton para un disparador que lleva texto: ese fija
@@ -148,18 +144,14 @@
 	   que acá se reponen. */
 	.labelButton {
 		width: auto !important;
-		height: auto !important;
 		border-radius: 11px;
 		font-size: 13px;
 		font-weight: normal;
 		padding: 6px 8px 2px 8px !important;
 		margin-top: 4px;
-		margin-bottom: -8px;
 		white-space: nowrap;
 		opacity: 1;
 		color: #a9a9a9;
-		/* normalize.css hace `button { text-transform: none }`, que corta la
-		   herencia: restaurarla deja que mande el contenedor. */
 		text-transform: inherit;
 	}
 

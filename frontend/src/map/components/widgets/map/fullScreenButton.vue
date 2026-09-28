@@ -1,22 +1,21 @@
 <template>
 	<div class="fsButton" id="fsButton" title="Pantalla completa" @click="goFullScreen">
-		<fullscreen-icon class="bt"  title="Pantalla completa" v-if="!fullscreen" />
-		<fullscreen-exit-icon class="bt" v-else title="Salir del modo de pantalla completa" />
-
+		<arrow-expand-icon class="bt" title="Pantalla completa" v-if="!fullscreen" />
+		<arrow-collapse-icon class="bt" v-else title="Salir del modo de pantalla completa" />
 	</div>
 </template>
 
 <script>
 import f from '@/backoffice/classes/Formatter';
 import str from '@/common/framework/str';
-	import FullscreenIcon from 'vue-material-design-icons/Fullscreen.vue';
-	import FullscreenExitIcon from 'vue-material-design-icons/FullscreenExit.vue';
+	import ArrowExpandIcon from 'vue-material-design-icons/ArrowExpand.vue';
+	import ArrowCollapseIcon from 'vue-material-design-icons/ArrowCollapse.vue';
 
 export default {
 	name: 'fsButton',
 	components: {
-		FullscreenIcon,
-		FullscreenExitIcon
+		ArrowExpandIcon,
+		ArrowCollapseIcon
 	},
 	data() {
     return {
@@ -44,15 +43,16 @@ export default {
 		z-index: 900;
 		position: absolute;
 		right: 55px;
-		line-height: .8em;
+		border: 1px solid rgb(165 164 164 / 50%) !important;
 		bottom: 24px;
-		font-size: 1.7em;
+		font-size: 16px;
+		padding: 6px 0px 0px 5px;
+		width: 30px;
+		height: 30px;
 		cursor: pointer;
 		color: #5a5858;
 		background-color: #fbfbfb;
-		box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-		background-clip: padding-box;
-		border-radius: 2px;
+		border-radius: 50%;
 		-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
 	}
 		.fsButton:hover, fsButton:focus {

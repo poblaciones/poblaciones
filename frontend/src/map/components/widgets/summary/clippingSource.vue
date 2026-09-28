@@ -1,23 +1,15 @@
 <template>
-  <div v-if="metadata">
-    <div class="sourceInfo exp-hiddable-block">
-			<a href="#" @click="clickFuente"
-				 :title="sourceTitle" style="color: #a7a7a7">
-				<link-icon />
-				Fuente
-			</a>
-    </div>
-  </div>
+	<div v-if="metadata" class="sourceInfo exp-hiddable-block btn-group">
+		<button type="button" :title="sourceTitle" @click="clickFuente" class="btn btn-default btn-xs"><i class="fas fa-link"></i></button>
+	</div>
 </template>
 
 <script>
-import LinkIcon from 'vue-material-design-icons/Link.vue';
 
 export default {
 	name: 'clippingSourceInfo',
 	components: {
-   LinkIcon,
-	},
+ },
 	props: [
     'metadata'
 	],
@@ -37,12 +29,6 @@ export default {
 </script>
 
 <style scoped>
-.sourceInfo
-{
-  position: absolute;
-  top: 12px;
-  right: 0px;
-  font-size: 12px;
-}
+
 
 </style>

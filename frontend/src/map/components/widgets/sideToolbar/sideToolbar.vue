@@ -64,6 +64,7 @@ import SideButtons from './sideButtons.vue';
 import IndicatorSelector from './indicatorSelector.vue';
 import SearchPanel from './searchPanel.vue';
 import { toChip } from './selectorTooltips';
+import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
 
 export default {
   name: 'SideToolbar',
@@ -114,6 +115,17 @@ export default {
       // Estado del modo de selección múltiple del panel de delimitaciones.
       boundaryMulti: false,
     };
+  },
+  created() {
+    // Un único handler para los cuatro paneles: todos comparten el mismo
+    // estado (activePanel) y el mismo cierre (closePanel). Se abren
+    // únicamente por click en SideButtons, nunca por hover, así que el
+    // botón atrás también puede cerrarlos sin interferir con la navegación
+    // real de la app.
+    this.escapeHandler = new EscapeCloseHandler(this.closePanel, { useHistory: true });
+  },
+  beforeDestroy() {
+    this.escapeHandler.Close();
   },
   computed: {
     // Chips de indicadores: métricas activas que no son boundary ni isBaseMetric.
@@ -195,6 +207,15 @@ export default {
     // se emite su Id (de boundary, no de boundaryItem) como selección de grupo.
     onBoundaryGroup(node) {
       this.$emit('selectedGroup', { Id: node.Id, Type: 'B', Item: node });
+    },
+  },
+  watch: {
+    activePanel(value) {
+      if (value) {
+        this.escapeHandler.Open();
+      } else {
+        this.escapeHandler.Close();
+      }
     },
   },
 };

@@ -59,7 +59,7 @@
           <span v-if="searchQuery" class="breadcrumb-item active">Resultados de búsqueda</span>
           <button
             v-if="navStack.length || searchQuery"
-            class="btn-breadcrumb-clear"
+            class="chips-clear"
             @click.stop="goHome"
             title="Volver al inicio"
           >×</button>
@@ -112,7 +112,7 @@
                   >
                     <span class="category-icon"><i :class="getIconClass(br.Icon)"></i></span>
                     <div class="category-name">{{ br.Name }}</div>
-                    <div class="category-count sourceInfo">{{ branchLabel(br) }}</div>
+                    <div class="category-count">{{ branchLabel(br) }}</div>
                   </div>
                 </div>
               </div>
@@ -129,7 +129,7 @@
                   <i :class="getIconClass(br.Icon)"></i>
                 </span>
                 <div class="category-name">{{ br.Name }}</div>
-                <div class="category-count sourceInfo">{{ branchLabel(br) }}</div>
+                <div class="category-count">{{ branchLabel(br) }}</div>
               </div>
             </div>
           </div>
@@ -200,7 +200,7 @@
                   </div>
                   <div class="indicator-info">
                     <div class="indicator-name">{{ row.branch.Name }}</div>
-                    <div class="indicator-meta sourceInfo">{{ branchLabel(row.branch) }}</div>
+                    <div class="indicator-meta">{{ branchLabel(row.branch) }}</div>
                   </div>
                 </div>
               </div>
@@ -222,7 +222,7 @@
                   </div>
                   <div class="indicator-info">
                     <div class="indicator-name">{{ row.item.Name }}</div>
-                    <div class="indicator-meta sourceInfo">{{ itemSubtitle(row.item, row.container) }}</div>
+                    <div class="indicator-meta">{{ itemSubtitle(row.item, row.container) }}</div>
                   </div>
                 </div>
                 <div class="indicator-actions">
@@ -274,7 +274,7 @@
                 <div class="indicator-icon"><i :class="getIconClass(item.Icon)"></i></div>
                 <div class="indicator-info">
                   <div class="indicator-name">{{ item.Label || item.Name }}</div>
-                  <div class="indicator-meta sourceInfo">{{ item.Provider || itemSubtitle(item, null) }}</div>
+                  <div class="indicator-meta">{{ item.Provider || itemSubtitle(item, null) }}</div>
                 </div>
               </div>
             </div>
@@ -400,7 +400,7 @@ export default {
       var max = Math.min(750, avail);
       var min = Math.min(600, avail);
       if (min > max) min = max;
-      return { minHeight: min + 'px', maxHeight: max + 'px' };
+      return { minHeight: 'min(90vh, ' + min + 'px)', maxHeight: 'max(90vh, ' + max + 'px)' };
     },
     // Con sidebarPosition 'top'/'bottom' el panel se ajusta a ese borde en
     // vez de quedar centrado verticalmente (el default de .floating-panel).
@@ -1038,21 +1038,12 @@ export default {
 .btn-tool.active { background: #e3f2fd; color: #2196F3; }
 .btn-tool:disabled { color: #d5d5d5; cursor: default; }
 
-.btn-close {
-  background: none; border: none; font-size: 28px; line-height: 1;
-  color: #999; cursor: pointer; padding: 0;
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 4px; transition: all 0.2s;
-}
-.btn-close:hover { background: #f0f0f0; color: #666; }
-
 /* Breadcrumb */
 	.breadcrumb-nav {
-		padding: 6px 24px 4px 24px;
-		font-size: 14px;
+		padding: 6px 12px 4px 24px;
+		font-size: 16px;
 		flex-shrink: 0;
-		line-height: 2em;
+		line-height: 1.2em;
 	}
 .breadcrumb-item { color: #666; transition: color 0.2s; }
 .breadcrumb-item:not(.active) { cursor: pointer; }
@@ -1129,49 +1120,9 @@ export default {
 	/* Search Input */
 	.search-container {
 		position: relative;
-		padding: 12px 20px 16px 20px;
+		padding: 12px 20px 12px 20px;
+		margin-bottom: 2px;
 	}
-
-	.search-icon {
-		position: absolute;
-		left: 32px;
-		top: 50%;
-		transform: translateY(-50%);
-		color: #999;
-		font-size: 14px;
-		pointer-events: none;
-	}
-
-	.search-input {
-		width: 100%;
-		padding: 10px 40px 10px 32px;
-		border: 1px solid #e0e0e0;
-		border-radius: 20px;
-		font-size: 14px;
-		outline: none;
-		transition: all 0.2s;
-		background: #f8f9fa;
-	}
-
-		.search-input:focus {
-			border-color: #2196F3;
-			background: white;
-			box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-		}
-
-		.search-input::placeholder {
-			color: #999;
-		}
-
-	.search-spinner {
-		position: absolute;
-		right: 32px;
-		top: 50%;
-		transform: translateY(-50%);
-		color: #2196F3;
-		font-size: 14px;
-	}
-
 /* Grid de categorías */
 .categories-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 8px; }
 .category-card {
@@ -1199,9 +1150,8 @@ export default {
 
 /* Separadores / encabezados de sección (colapsables) */
 	.source-header {
-		font-size: 13px;
-		font-weight: 700;
-		color: #999;
+		font-size: 13.5px;
+		color: #707070;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		display: flex;
@@ -1213,7 +1163,7 @@ export default {
 		border-radius: 20px;
 		padding-top: 12px;
 		padding-bottom: 12px;
-}
+	}
 .source-header:first-child { margin-top: 0; }
 .source-header.hand:hover { background: #f5f5f5; color: #777; }
 .source-header-text { flex: 1; }
@@ -1338,8 +1288,8 @@ export default {
 
 @media (max-width: 768px) {
   .floating-panel {
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100%; max-width: 100%; max-height: 100%; border-radius: 0; transform: none;
+    top: 0; left: 0; right: 0; bottom: 0; margin: unset;
+    width: 100%; max-width: 100%; max-height: 100%!important; border-radius: 0; transform: none;
   }
   .slide-fade-enter .floating-panel,
   .slide-fade-leave-to .floating-panel { transform: translateY(100%); }

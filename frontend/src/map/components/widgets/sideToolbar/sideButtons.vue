@@ -203,8 +203,8 @@ export default {
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: white;
   color: #666;
+  background-color: unset;
   font-size: 18px;
   display: flex;
   align-items: center;
@@ -214,20 +214,13 @@ export default {
   outline: none;
 }
 
-.toolbar-button:hover {
-  background: #f0f0f0;
-  color: #333;
-  transform: scale(1.05);
-}
-
-.toolbar-button.active {
-  background: #0fa7d8;
-  color: white;
-}
-
-.toolbar-button:active {
-  transform: scale(0.95);
-}
+	.toolbar-button:hover {
+		background: #e7e7e7;
+		color: #333;
+	}
+	.toolbar-button.active {
+		background: #dddddd;
+	}
 
 /* Botón de indicadores, con color azul por defecto */
 .toolbar-button-primary {
@@ -235,13 +228,15 @@ export default {
   color: white;
 }
 
-.toolbar-button-primary:hover {
-  background: #0fa7d8;
-}
+	.toolbar-button-primary:hover {
+		background: #0fa7d8;
+		color: #efefef!important;
+	}
 
-.toolbar-button-primary.active {
-  background: #0fa7d8;
-}
+	.toolbar-button-primary.active {
+		background: #0fa7d8;
+		color: #efefef !important;
+	}
 
 /* Con el panel abajo a la izquierda, el botón de indicadores pasa al final
    (el drag-handle y los demás botones no tienen order, quedan en su

@@ -320,7 +320,7 @@ export default {
 	.floatLeftPanel {
 		position: absolute;
 		max-height: calc(100% - 97px);
-		z-index: 900;
+		z-index: 1010;
 		display: flex;
 		width: 340px;
 		box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 12px;

@@ -5,7 +5,7 @@
 				<tr>
 					<td colspan="3" class="statsHeader">
 						<div v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="levelLabelMargin">
-							<mp-dropdown-menu v-if="version.Levels.length > 1" :floatRight="false" :items="levelItems"
+							<mp-dropdown-menu v-if="version.Levels.length > 1" :items="levelItems"
 																icon="fas fa-caret-down" tooltip="Nivel de agregación" @itemClick="levelSelected">
 								<template slot="trigger">
 									{{ level.Name }}
@@ -336,16 +336,6 @@ export default {
 .textRight {
 	text-align: right;
 }
-.statsHeader {
-	text-align: right;
-	color: #a9a9a9;
-	font-weight: 300;
-	font-size: 13px;
-	height: 16px;
-	padding: 0px;
-	text-transform: uppercase;
-}
-
 .categoryMuted {
 	color: #000!important;
 	background-color: #DDDDDD;

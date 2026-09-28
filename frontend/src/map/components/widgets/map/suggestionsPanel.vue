@@ -122,27 +122,6 @@ import arr from '@/common/framework/arr';
   background: #f5f5f5;
 }
 
-.btn-close {
-	background: none;
-	border: none;
-	font-size: 20px;
-	line-height: 1;
-	color: #999;
-	cursor: pointer;
-	padding: 0;
-	width: 20px;
-	height: 20px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 3px;
-	transition: all 0.2s;
-}
-
-	.btn-close:hover {
-		background: #f0f0f0;
-		color: #666;
-	}
 
 .badge {
   background: #4CAF50;

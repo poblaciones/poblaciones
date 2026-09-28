@@ -98,11 +98,28 @@ StartMap.prototype.RestoreWork = function (workId, link) {
 	return true;
 };
 
-
-
+// Análogo a RestoreWork, pero para una delimitación (ruta /map/b<id>): no
+// hay startup propio de la delimitación, así que arranca por el frame
+// default del servidor y, una vez montado el mapa, agrega la delimitación.
+// Igual que en ReceiveWorkStartup, si la ruta ya trae sus propios parámetros
+// (zoom y centro, una región de clipping, o la lista de capas activas vía
+// l=...), esos parámetros mandan: no se encuadra en los Extents de la
+// delimitación, y tampoco se la agrega como capa (StartByDefaultFrame ya
+// restaura las capas declaradas en la ruta a través de LoadRoute, y si la
+// delimitación estaba entre ellas, agregarla de nuevo acá la duplicaría).
+// Con ruta, solo se piden sus datos para poblar el zócalo (boundary activo).
 StartMap.prototype.RestoreBoundary = function (boundaryId) {
 	var loc = this;
+	var hasRoute = new RestoreRoute(null).RouteHasLocation(this.hash);
 	this.GetAndStartByDefaultFrame(function () {
+		if (hasRoute) {
+			window.SegMap.GetBoundaryInfo(boundaryId).then(function (res) {
+				if (res) {
+					loc.boundaryReference.Current = res.data;
+				}
+			});
+			return;
+		}
 		window.SegMap.AddBoundaryById(boundaryId).then(function (activeBoundary) {
 			if (!activeBoundary) {
 				return;
