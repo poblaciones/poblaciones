@@ -155,7 +155,11 @@ export default {
 		// Ruta estable de la delimitación (/map/b<id>), resuelta contra el
 		// ShortUrlPattern configurado en el servidor.
 		resolvePublicUrl() {
-			return str.PatternUrl('/map/b' + this.boundaryId, window.SegMap.Configuration.ShortUrlPattern);
+			var location = '';
+			if (this.boundaryId) {
+				location = '/map/b' + this.boundaryId;
+			}
+			return str.PatternUrl(location, window.SegMap.Configuration.ShortUrlPattern);
 		}
 	},
 	computed: {

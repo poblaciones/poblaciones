@@ -104,6 +104,7 @@ export default {
 		width: 220px;
 		height: 202px;
 		white-space: normal;
+		border-radius: 9px !important;
 		margin-left: 0px;
 		margin-right: 15px;
 	}

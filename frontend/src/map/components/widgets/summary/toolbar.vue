@@ -20,42 +20,22 @@
 		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="Use.UseEmbedding"
 											icon="fas fa-share-alt" :styleRounded="true" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
 
-		<mp-dropdown-menu :items="helpItems" @itemClick="helpSelected" :floatRight="false"
+		<mp-dropdown-menu :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
 											icon="fas fa-question" :styleRounded="true" tooltip="Ayuda" />
 
 		<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
 			<i class="far fa-heart" />
 		</button>
 
-		<span v-if='!user.Logged' class="dropdown">
-			<button type="button"
-							id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
-							data-toggle="dropdown" title="Ingresar/Registrarse">
-				<i class="fas fa-sign-in-alt" />
-
-				<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-					<li><a :href="authenticate.loginUrl()" title="Ingresar" @click="authenticate.redirectLogin">Ingresar</a></li>
-					<li><a :href="authenticate.registerUrl()" title="Registrarse" @click="authenticate.redirectRegister">Registrarse</a></li>
-				</ul>
-			</button>
-		</span>
-		<span v-else="" class="dropdown">
-
-			<button type="button"
-							id="dropdownMenuButton" class="btn btn-default btn-xs dropdown-toggle"
-							data-toggle="dropdown">
-				<i v-if="!userPicture" class="fas fa-user" :title="userTooltip" />
-				<img v-else data-v-7ba6b492="" :src="userPicture" :title="userTooltip" :alt="userTooltip" class="avatar" />
-
-				<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-					<li><a @click="authenticate.redirectBackoffice" href="/users">Mis cartografías</a></li>
-					<li v-if="isAdminReader"><a href="/admins" @click="authenticate.redirectAdmin">Administración</a></li>
-					<li v-if="false"><a href="/users#/account">Cuenta</a></li>
-					<li class="divider"></li>
-					<li><a @click="authenticate.logoff">Cerrar sesión</a></li>
-				</ul>
-			</button>
-		</span>
+		<mp-dropdown-menu v-if='!user.Logged' :items="getLoginItems()" @itemClick="loginSelected" :floatRight="false"
+											icon="fas fa-sign-in-alt" :styleRounded="true" tooltip="Ingresar/Registrarse" />
+		<mp-dropdown-menu v-else :items="userItems" @itemClick="userSelected" :floatRight="false"
+											:styleRounded="true" :tooltip="userTooltip">
+			<template slot="trigger">
+				<i v-if="!userPicture" class="fas fa-user" />
+				<img v-else :src="userPicture" :alt="userTooltip" class="avatar" />
+			</template>
+		</mp-dropdown-menu>
 		<div style="clear: both"></div>
 		<tour ref="Tour"></tour>
 	</div>
@@ -131,40 +111,92 @@
 					default:
 				}
 			},
+			// No es computed: homeUrl() lee estado global no reactivo y un valor cacheado queda desactualizado
+			getHelpItems() {
+				var ret = [];
+				ret.push({ label: 'Inicio', key: 'INICIO', href: this.authenticate.homeUrl(), target: '_blank' });
+				ret.push({ label: 'Bienvenida', key: 'BIENVENIDA' });
+				if (!this.helpLinks) {
+					return ret;
+				}
+
+				if (this.helpLinks.ReadGuideLink || this.helpLinks.UploadGuideLink) {
+					ret.push({ separator: true });
+				}
+				if (this.helpLinks.ReadGuideLink) {
+					ret.push(this.buildHelpLinkItem(this.helpLinks.ReadGuideLink, 'GUIA-USO', 'fas fa-file-pdf'));
+				}
+				if (this.helpLinks.TableGuideLink && this.Use.UsePivot) {
+					ret.push(this.buildHelpLinkItem(this.helpLinks.TableGuideLink, 'GUIA-TABLA', 'fas fa-file-pdf'));
+				}
+				if (this.helpLinks.UploadGuideLink) {
+					ret.push(this.buildHelpLinkItem(this.helpLinks.UploadGuideLink, 'GUIA-CARGA', 'fas fa-file-pdf'));
+				}
+
+				if ((this.isAdminReader && (this.helpLinks.AdminGuideLink || this.helpLinks.AdminPacksGuideLink || this.helpLinks.AdminLogsGuideLink))
+					|| (this.isAdminMaster && this.helpLinks.AdminLogsGuideLink)) {
+					ret.push({ separator: true });
+					if (this.isAdminReader && this.helpLinks.AdminGuideLink) {
+						ret.push(this.buildHelpLinkItem(this.helpLinks.AdminGuideLink, 'GUIA-USUARIOS', 'fas fa-file-pdf'));
+					}
+					if (this.isAdminReader && this.helpLinks.AdminPacksGuideLink) {
+						ret.push(this.buildHelpLinkItem(this.helpLinks.AdminPacksGuideLink, 'GUIA-PAQUETES', 'fas fa-file-pdf'));
+					}
+					if (this.isAdminMaster && this.helpLinks.AdminLogsGuideLink) {
+						ret.push(this.buildHelpLinkItem(this.helpLinks.AdminLogsGuideLink, 'GUIA-REGISTROS', 'fas fa-file-pdf'));
+					}
+				}
+
+				if (this.helpLinks.TutorialsLink) {
+					ret.push({ separator: true });
+					ret.push(this.buildHelpLinkItem(this.helpLinks.TutorialsLink, 'TUTORIALES', 'fab fa-youtube'));
+				}
+				if (this.helpLinks.AboutLink) {
+					ret.push({ separator: true });
+					ret.push(this.buildHelpLinkItem(this.helpLinks.AboutLink, 'ABOUT'));
+				}
+				if (this.helpLinks.ContactLink) {
+					ret.push({ separator: true });
+					ret.push(this.buildHelpLinkItem(this.helpLinks.ContactLink, 'CONTACTO'));
+				}
+				return ret;
+			},
+			buildHelpLinkItem(link, key, icon) {
+				return { label: link.Caption, key: key, icon: icon, href: link.Url, target: '_blank' };
+			},
 			helpSelected(item) {
+				if (item.key === 'BIENVENIDA') {
+					this.showTutorial();
+				}
+			},
+			// No es computed: loginUrl() lee estado global no reactivo y un valor cacheado queda desactualizado
+			getLoginItems() {
+				var ret = [];
+				ret.push({ label: 'Ingresar', key: 'LOGIN', href: this.authenticate.loginUrl() });
+				ret.push({ label: 'Registrarse', key: 'REGISTER', href: this.authenticate.registerUrl() });
+				return ret;
+			},
+			loginSelected(item) {
 				switch (item.key) {
-					case 'INICIO':
-						window.open(this.authenticate.homeUrl(), '_blank');
+					case 'LOGIN':
+						this.authenticate.redirectLogin();
 						break;
-					case 'BIENVENIDA':
-						this.showTutorial();
+					case 'REGISTER':
+						this.authenticate.redirectRegister();
 						break;
-					case 'GUIA-USO':
-						window.open(this.helpLinks.ReadGuideLink.Url, '_blank');
+					default:
+				}
+			},
+			userSelected(item) {
+				switch (item.key) {
+					case 'BACKOFFICE':
+						this.authenticate.redirectBackoffice();
 						break;
-					case 'GUIA-TABLA':
-						window.open(this.helpLinks.TableGuideLink.Url, '_blank');
+					case 'ADMIN':
+						this.authenticate.redirectAdmin();
 						break;
-					case 'GUIA-CARGA':
-						window.open(this.helpLinks.UploadGuideLink.Url, '_blank');
-						break;
-					case 'GUIA-USUARIOS':
-						window.open(this.helpLinks.AdminGuideLink.Url, '_blank');
-						break;
-					case 'GUIA-PAQUETES':
-						window.open(this.helpLinks.AdminPacksGuideLink.Url, '_blank');
-						break;
-					case 'GUIA-REGISTROS':
-						window.open(this.helpLinks.AdminLogsGuideLink.Url, '_blank');
-						break;
-					case 'TUTORIALES':
-						window.open(this.helpLinks.TutorialsLink.Url, '_blank');
-						break;
-					case 'CONTACTO':
-						window.open(this.helpLinks.ContactLink.Url, '_blank');
-						break;
-					case 'ABOUT':
-						window.open(this.helpLinks.AboutLink.Url, '_blank');
+					case 'LOGOFF':
+						this.authenticate.logoff();
 						break;
 					default:
 				}
@@ -248,56 +280,6 @@
 
 					return ret;
 			},
-			helpItems() {
-				var ret = [];
-				// opciones
-				ret.push({ label: 'Inicio', key: 'INICIO' });
-				ret.push({ label: 'Bienvenida', key: 'BIENVENIDA' });
-				if (!this.helpLinks) {
-					return ret;
-				}
-
-				if (this.helpLinks.ReadGuideLink || this.helpLinks.UploadGuideLink) {
-					ret.push({ separator: true });
-				}
-				if (this.helpLinks.ReadGuideLink) {
-					ret.push({ label: this.helpLinks.ReadGuideLink.Caption, key: 'GUIA-USO', icon: 'fas fa-file-pdf' });
-				}
-				if (this.helpLinks.TableGuideLink && this.Use.UsePivot) {
-					ret.push({ label: this.helpLinks.TableGuideLink.Caption, key: 'GUIA-TABLA', icon: 'fas fa-file-pdf' });
-				}
-				if (this.helpLinks.UploadGuideLink) {
-					ret.push({ label: this.helpLinks.UploadGuideLink.Caption, key: 'GUIA-CARGA', icon: 'fas fa-file-pdf' });
-				}
-
-				if ((this.isAdminReader && (this.helpLinks.AdminGuideLink || this.helpLinks.AdminPacksGuideLink || this.helpLinks.AdminLogsGuideLink))
-					|| (this.isAdminMaster && this.helpLinks.AdminLogsGuideLink)) {
-					ret.push({ separator: true });
-					if (this.isAdminReader && this.helpLinks.AdminGuideLink) {
-						ret.push({ label: this.helpLinks.AdminGuideLink.Caption, key: 'GUIA-USUARIOS', icon: 'fas fa-file-pdf' });
-					}
-					if (this.isAdminReader && this.helpLinks.AdminPacksGuideLink) {
-						ret.push({ label: this.helpLinks.AdminPacksGuideLink.Caption, key: 'GUIA-PAQUETES', icon: 'fas fa-file-pdf' });
-					}
-					if (this.isAdminMaster && this.helpLinks.AdminLogsGuideLink) {
-						ret.push({ label: this.helpLinks.AdminLogsGuideLink.Caption, key: 'GUIA-REGISTROS', icon: 'fas fa-file-pdf' });
-					}
-				}
-
-				if (this.helpLinks.TutorialsLink) {
-					ret.push({ separator: true });
-					ret.push({ label: this.helpLinks.TutorialsLink.Caption, key: 'TUTORIALES', icon: 'fab fa-youtube' });
-				}
-				if (this.helpLinks.AboutLink) {
-					ret.push({ separator: true });
-					ret.push({ label: this.helpLinks.AboutLink.Caption, key: 'ABOUT' });
-				}
-				if (this.helpLinks.ContactLink) {
-					ret.push({ separator: true });
-					ret.push({ label: this.helpLinks.ContactLink.Caption, key: 'CONTACTO' });
-				}
-				return ret;
-			},
 			authenticate() {
 				return auth;
 			},
@@ -306,6 +288,16 @@
 			},
 			isAdminMaster() {
 				return this.user.Privileges === 'A';
+			},
+			userItems() {
+				var ret = [];
+				ret.push({ label: 'Mis cartografías', key: 'BACKOFFICE', href: '/users' });
+				if (this.isAdminReader) {
+					ret.push({ label: 'Administración', key: 'ADMIN', href: '/admins' });
+				}
+				ret.push({ separator: true });
+				ret.push({ label: 'Cerrar sesión', key: 'LOGOFF' });
+				return ret;
 			},
 			userTooltip() {
 				if (!this.user.Logged) {

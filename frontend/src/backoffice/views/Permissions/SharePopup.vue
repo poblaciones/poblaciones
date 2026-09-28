@@ -54,9 +54,9 @@
 				<!-- Acceso general -->
 				<div class="sectionTitle">Acceso general</div>
 
-				<div class="accessRow" @click="Work.CanEdit() && setMode(1)">
+				<div class="accessRow" @click="Work.CanEdit() && setModeInteractive(1)">
 					<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()"
-										class="md-primary" @change="UpdateClearLink" :value="1" />
+										class="md-primary" @change="UpdateLink(false)" :value="1" />
 					<div class="accessText">
 						<div class="accessTitle">Público</div>
 						<div class="accessSub" v-html="stableUrlHref"></div>
@@ -64,9 +64,9 @@
 				</div>
 
 				<div v-if="!Work.properties.IsIndexed" class="accessRow"
-						 @click="Work.CanEdit() && setMode(2)">
+						 @click="Work.CanEdit() && setModeInteractive(2)">
 					<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()"
-										class="md-primary" @change="UpdateSetLink" :value="2" />
+										class="md-primary" @change="UpdateLink(true)" :value="2" />
 					<div class="accessText">
 						<div class="accessTitle">Enlace</div>
 						<div class="accessSub">
@@ -79,9 +79,9 @@
 					</div>
 				</div>
 
-				<div class="accessRow" @click="Work.CanEdit() && setMode(3)">
+				<div class="accessRow" @click="Work.CanEdit() && setModeInteractive(3)">
 					<md-radio v-model="visibilityMode" :disabled="!Work.CanEdit()"
-										class="md-primary" @change="UpdateClearLink" :value="3" />
+										class="md-primary" @change="UpdateLink(false)" :value="3" />
 					<div class="accessText">
 						<div class="accessTitle">Privado</div>
 						<div class="accessSub">Solo visible para quienes tengan permisos asignados.</div>
@@ -168,8 +168,9 @@ export default {
 				loc.$refs.usuario.$el.focus();
 			}, 100);
 		},
-		setMode(mode) {
+		setModeInteractive(mode) {
 			this.visibilityMode = mode;
+			this.UpdateLink(mode == 2);
 		},
 		initials(user) {
 			var a = (user.Firstname || user.Email || '?').trim();
@@ -213,15 +214,11 @@ export default {
 			this.Work.properties.AccessLink = '?';
 			this.doUpdate();
 		},
-		UpdateClearLink() {
-			if (this.Work.properties.AccessLink !== null) {
+		UpdateLink(useLink) {
+			if (!useLink) {
 				this.Work.properties.LastAccessLink = this.Work.properties.AccessLink;
 				this.Work.properties.AccessLink = null;
-			}
-			this.doUpdate();
-		},
-		UpdateSetLink() {
-			if (!this.Work.properties.AccessLink) {
+			} else {
 				this.Work.properties.AccessLink = this.Work.properties.LastAccessLink || '?';
 				this.Work.properties.LastAccessLink = null;
 			}

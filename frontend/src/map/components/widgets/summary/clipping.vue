@@ -10,7 +10,7 @@
 						<span style="font-size: 2em;">{{ region.Name }}</span>
 					</div>
 					<div class="exp-hiddable-block" style="top: 40px;right: 15px; position: absolute; font-size: 1.75em;">
-						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id"
+						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id && !hasClippingCircle"
 																		 :useIcon="true" :region="region" :metadata="region.Metadata" />
 					</div>
 				</div>
@@ -113,6 +113,9 @@ export default {
 		hasSummaryName() {
 			return this.hasSummary && this.clipping.Region.Summary.Regions &&
 				this.clipping.Region.Summary.Regions.length > 0 && this.clipping.Region.Summary.Regions[0].Name;
+		},
+		hasClippingCircle() {
+			return window.SegMap.Clipping.FrameHasClippingCircle();
 		},
 		population() {
 			if(this.hasSummary) {

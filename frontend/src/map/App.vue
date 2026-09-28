@@ -1530,7 +1530,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 	}
 
 	.dropdown-menu {
-		border-radius: 4px;
+		border-radius: 12px;
 	}
 
 	.dToolboxBox {

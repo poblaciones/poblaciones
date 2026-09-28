@@ -42,7 +42,7 @@ export default {
 	.fsButton {
 		z-index: 900;
 		position: absolute;
-		right: 55px;
+		right: 53px;
 		border: 1px solid rgb(165 164 164 / 50%) !important;
 		bottom: 24px;
 		font-size: 16px;

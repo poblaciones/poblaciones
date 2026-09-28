@@ -284,33 +284,31 @@ export default {
 	pointer-events: auto;
 }
 
-.mapLegendCollapseButton {
-	opacity: 0;
-	cursor: pointer;
-	padding: 2px;
-	color: #5a5858;
-	font-size: 1em;
-	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
-	transition: opacity .15s ease;
-}
+	.mapLegendCollapseButton {
+		opacity: 0;
+		cursor: pointer;
+		padding: 2px;
+		color: var(--color-texto-leyenda);
+		font-size: 1em;
+		transition: opacity .15s ease;
+	}
 
 .mapLegend:hover .mapLegendCollapseButton {
 	opacity: 1;
 }
 
-.mapLegendArrow {
-	pointer-events: auto;
-	cursor: pointer;
-	font-size: 1.4em;
-	color: #5a5858;
-	text-shadow: 0px 0px 3px #ffffff, 0px 0px 3px #ffffff;
-}
+	.mapLegendArrow {
+		pointer-events: auto;
+		cursor: pointer;
+		font-size: 1.4em;
+		color: var(--color-texto-leyenda);
+	}
 
 .mapLegendBody {
 	pointer-events: auto;
 	overflow-y: auto;
 	width: 100%;
-	background-color: #cdcdcd50;
+	background-color: var(--color-fondo-leyenda);
 	padding-left: 13px;
 	padding-top: 11px;
 	padding-bottom: 2px;
@@ -328,25 +326,22 @@ export default {
 	align-items: center;
 }
 
-.mapLegendTitleText {
-	font-size: 1em;
-	font-weight: 700;
-	color: #333333;
-	text-shadow: .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px .75px 1px #ffffffa0, .75px -1px 1px #ffffffa0, .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px 1px 1px #ffffffa0, .75px -.75px 1px #ffffffa0;
-}
+	.mapLegendTitleText {
+		font-size: 1em;
+		color: var(--color-texto-leyenda);
+	}
 
 .mapLegendVersion {
 	font-size: .92em;
 }
 
-.mapLegendRemove {
-	opacity: 0;
-	cursor: pointer;
-	font-size: .75em;
-	color: #333333;
-	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
-	transition: opacity .15s ease;
-}
+	.mapLegendRemove {
+		opacity: 0;
+		cursor: pointer;
+		font-size: .75em;
+		color: var(--color-texto-leyenda);
+		transition: opacity .15s ease;
+	}
 
 .mapLegend:hover .mapLegendRemove {
 	opacity: 1;
@@ -356,13 +351,11 @@ export default {
 	opacity: 1;
 }
 
-.mapLegendSubtitle {
-	font-size: .82em;
-	font-weight: 400;
-	color: #000;
-	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
-	margin-bottom: 3px;
-}
+	.mapLegendSubtitle {
+		font-size: .82em;
+		color: var(--color-texto-leyenda);
+		margin-bottom: 3px;
+	}
 
 .mapLegendItem {
 	display: flex;
@@ -383,11 +376,10 @@ export default {
 	border-radius: 50%;
 }
 
-.mapLegendLabelName {
-	font-size: .82em;
-	color: #000;
-	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
-}
+	.mapLegendLabelName {
+		font-size: .82em;
+		color: var(--color-texto-leyenda);
+	}
 
 .mapLegendLabelNameOff {
 	opacity: .55;
@@ -396,7 +388,7 @@ export default {
 	.mapLegendMinimized {
 		position: absolute;
 		z-index: 900;
-		right: 55px;
+		right: 54px;
 		bottom: 60px;
 		line-height: .8em;
 		font-size: 1em;

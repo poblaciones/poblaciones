@@ -17,12 +17,20 @@ class SnapshotShapesModel extends BaseModel
 	public function GetShapesByEnvelope($datasetId, $envelope)
 	{
 		Profiling::BeginTimer();
-
+		/*
 		$sql = "SELECT sdi_geometry as value, sdi_feature_id as FID " .
 			" FROM snapshot_shape_dataset_item WHERE " .
 			" ST_IsValid(sdi_geometry) AND ST_Intersects(sdi_geometry, ST_PolygonFromText('" . $envelope->ToWKT() . "'))" .
 			" AND sdi_dataset_id = ?
 			 ORDER BY sdi_dataset_item_id";
+			 */
+		$sql = "SELECT sdi_geometry AS value, sdi_feature_id AS FID
+			FROM snapshot_shape_dataset_item FORCE INDEX (uniquenormal)
+			WHERE sdi_dataset_id = ?
+			AND MBRIntersects(sdi_geometry, ST_PolygonFromText('" . $envelope->ToWKT() . "'))
+			AND ST_Intersects(sdi_geometry, ST_PolygonFromText('" . $envelope->ToWKT() . "'))
+			AND ST_IsValid(sdi_geometry)
+			ORDER BY sdi_dataset_item_id";
 
 	//	$params = array();
 		$params = array($datasetId);

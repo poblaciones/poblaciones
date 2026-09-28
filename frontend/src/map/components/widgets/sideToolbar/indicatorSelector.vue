@@ -43,6 +43,12 @@
 
         <!-- Breadcrumb (acumulativo, profundidad variable) -->
         <div class="breadcrumb-nav">
+        <button
+            v-if="navStack.length || searchQuery"
+            class="chips-clear"
+            @click.stop="goHome"
+            title="Volver al inicio"
+          >×</button>
           <span class="breadcrumb-item" :class="{ 'active': !navStack.length && !searchQuery }" @click="goHome">
             {{ rootLabel }}
           </span>
@@ -55,14 +61,7 @@
               @click="goToDepth(depth)"
             >{{ node.Name }}</span>
           </template>
-          <span v-if="searchQuery" class="breadcrumb-sep">/</span>
-          <span v-if="searchQuery" class="breadcrumb-item active">Resultados de búsqueda</span>
-          <button
-            v-if="navStack.length || searchQuery"
-            class="chips-clear"
-            @click.stop="goHome"
-            title="Volver al inicio"
-          >×</button>
+
         </div>
 
         <!-- Zona fija: chips y buscador (no scrollean con la lista) -->
@@ -140,7 +139,7 @@
               <div>No se encontraron resultados para "{{ searchQuery }}"</div>
               <div v-if="navStack.length" class="no-results-broaden">
                 <a class="no-results-link" @click.stop="searchFromRoot">
-                  Buscar sin el filtro de "{{ navStack[0].Name }}"
+                  Buscar sin el filtro de "{{ currentNode.Name }}"
                 </a>
               </div>
             </div>
@@ -1040,10 +1039,10 @@ export default {
 
 /* Breadcrumb */
 	.breadcrumb-nav {
-		padding: 6px 12px 4px 24px;
+		padding: 0px 12px 2px 24px;
 		font-size: 16px;
 		flex-shrink: 0;
-		line-height: 1.2em;
+		line-height: 1.75em;
 	}
 .breadcrumb-item { color: #666; transition: color 0.2s; }
 .breadcrumb-item:not(.active) { cursor: pointer; }

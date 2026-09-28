@@ -104,10 +104,10 @@
 	color: #252422!important;
 	font-size: 14px;
 }
-	.dropdown-menu > li > a {
-		color: #252422;
-		font-size: 15px;
-	}
+.dropdown-menu > li > a {
+	background-color: inherit !important;
+	color: inherit!important;
+}
 
 	.floatRightPanel {
 	margin-right: 12px !important;
@@ -157,7 +157,22 @@
 	text-decoration: none !important;
 }
 
-/* chequeadas */
+.dropdown-menu > li > a:hover {
+	background-color: #eee!important;
+	color: unset!important;
+}
+
+.sourceInfo .btn {
+	width: 32px;
+	height: 32px;
+}
+
+	/* chequeadas */
+
+:root {
+	--color-texto-leyenda: #333;
+	--color-fondo-leyenda: #ffffff9e;
+}
 
 .search-clear {
 	position: absolute;

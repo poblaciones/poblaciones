@@ -9,7 +9,6 @@
 															 @click.stop="removeRegion(region)"></i>{{ separatorFor(index) }}
 				</span>
 			</div>
-			<div class="clippingLegendName" v-else>Población <span class="clippingLegendVersion" v-if="clippingVersion">({{ clippingVersion }})</span></div>
 			<div class="clippingLegendRow">
 				<span>Habitantes</span>
 				<span class="clippingLegendValue"><AnimatedNumber :value="population" /></span>
@@ -127,6 +126,7 @@ export default {
 </script>
 
 <style scoped>
+
 .legendSlideDown-enter-active, .legendSlideDown-leave-active {
 	transition: transform .3s ease, opacity .3s ease;
 }
@@ -145,7 +145,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	pointer-events: auto;
-	background-color: #cdcdcd50;
+	background-color: var(--color-fondo-leyenda);
 	padding-left: 13px;
 	padding-top: 9px;
 	padding-bottom: 9px;
@@ -156,13 +156,12 @@ export default {
 .clippingLegendCollapseButton {
 	position: absolute;
 	top: 6px;
-	right: 6px;
+	right: -21px;
 	opacity: 0;
 	cursor: pointer;
 	padding: 2px;
-	color: #5a5858;
+	color: var(--color-texto-leyenda);
 	font-size: 1em;
-	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
 	transition: opacity .15s ease;
 }
 
@@ -172,17 +171,13 @@ export default {
 
 .clippingLegendType {
 	font-size: .8em;
-	font-weight: 400;
-	color: #000;
-	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
+	color: var(--color-texto-leyenda);
 }
 
 .clippingLegendName {
 	font-size: 1.2em;
-	font-weight: 700;
-	color: #333333;
+	color: var(--color-texto-leyenda);
 	margin-bottom: 4px;
-	text-shadow: .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px .75px 1px #ffffffa0, .75px -1px 1px #ffffffa0, .75px .75px 1px #ffffffa0, -.75px -1px 1px #ffffffa0, -.75px 1px 1px #ffffffa0, .75px -.75px 1px #ffffffa0;
 }
 
 .clippingLegendVersion {
@@ -204,14 +199,12 @@ export default {
 
 .clippingLegendRow {
 	font-size: .85em;
-	color: #000;
-	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
+	color: var(--color-texto-leyenda);
 	display: flex;
 	justify-content: space-between;
 }
 
 .clippingLegendValue {
-	font-weight: 600;
 	text-align: right;
 }
 </style>

@@ -77,8 +77,8 @@ export default {
   max-height: 60px;
   margin: auto;
 	background-color: rgba(255, 255, 255, 0.75);
-  border: 2px solid rgba(255, 255, 255, 0);
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0);
+  border-radius: 9px;
 }
 </style>
 

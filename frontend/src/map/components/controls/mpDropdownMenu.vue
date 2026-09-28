@@ -23,7 +23,7 @@
 			<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
 				<template v-for="(item, index) in items">
 					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'liDividerNext' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
-						<a v-if="!item.items && !item.separator" :href="item.href" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
+						<a v-if="!item.items && !item.separator" :href="item.href" :target="item.target" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
 							 @click="itemClicked(item, $event)" :class="(item.aClass ? item.aClass : '')">
 							{{ item.label }}
 

@@ -7,7 +7,7 @@
 					<div class="modal-header mpHeader unselectable">
 						<slot name="header">
 
-							<mp-close-button @click="cancel" title="Cerrar"
+							<mp-close-button @click="cancel" title="Cerrar" style="margin-top: -2px"
 															 v-if="showClose" class="exp-hiddable-block" />
 
 							<h5 class="titleDialog">

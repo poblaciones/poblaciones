@@ -825,8 +825,22 @@ LeafletApi.prototype.IsSatelliteType = function () {
 	return this.mapTypeState === 's' || this.mapTypeState === 'h';
 };
 
+LeafletApi.prototype.ChangeLegendColor = function (color) {
+	document.documentElement.style.setProperty('--color-texto-leyenda', color);
+};
+LeafletApi.prototype.ChangeLegendBackgroundColor = function (color) {
+	document.documentElement.style.setProperty('--color-fondo-leyenda', color);
+};
+
 LeafletApi.prototype.SetMapTypeState = function (mapTypeState) {
 	this.mapTypeState = mapTypeState;
+	if (this.IsSatelliteType()) {
+		this.ChangeLegendColor('#ddd');
+		this.ChangeLegendBackgroundColor('#00000057');
+	} else {
+		this.ChangeLegendColor('#333');
+		this.ChangeLegendBackgroundColor('#ffffff9e');
+	}
 	this.CheckBaseLayer();
 };
 
