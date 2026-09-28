@@ -23,8 +23,8 @@
 			<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
 				<template v-for="(item, index) in items">
 					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'liDividerNext' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
-						<a v-if="!item.items && !item.separator" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
-							 @click="itemClicked(item)" :class="(item.aClass ? item.aClass : '')">
+						<a v-if="!item.items && !item.separator" :href="item.href" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
+							 @click="itemClicked(item, $event)" :class="(item.aClass ? item.aClass : '')">
 							{{ item.label }}
 
 
@@ -85,10 +85,17 @@
 				this.showDropDown = false;
 				this.isDropDownOpen = false;
 			},
-			itemClicked(item) {
+			itemClicked(item, event) {
 				this.dropDownClosed();
+				// Con href, ctrl/cmd/shift + clic los resuelve el navegador (pestaña o ventana nueva)
+				if (item.href && this.isModifiedClick(event)) {
+					return;
+				}
 				// pasa el click
-				this.$emit('itemClick', item);
+				this.$emit('itemClick', item, event);
+			},
+			isModifiedClick(event) {
+				return event.ctrlKey || event.metaKey || event.shiftKey;
 			}
 		},
 			computed: {
