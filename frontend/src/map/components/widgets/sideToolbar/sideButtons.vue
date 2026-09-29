@@ -148,6 +148,7 @@ export default {
 
 <style scoped>
 .map-toolbar {
+	border: 1px solid rgb(165 164 164 / 50%);
   position: absolute;
   left: 20px;
   z-index: 990;
@@ -157,7 +158,6 @@ export default {
   background: #ffffffc0;
   padding: 8px;
   border-radius: 30px;
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 8px;
 }
 
 .map-toolbar.pos-middle {

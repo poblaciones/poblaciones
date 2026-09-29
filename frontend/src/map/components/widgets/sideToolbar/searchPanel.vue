@@ -43,7 +43,7 @@
                     @mouseout="unhoverResult(item, index)"
                   >
                     <div class="result-content">
-                      <div class="result-icon">
+                      <div class="list-icon">
                         <i :class="getResultIcon(item)"></i>
                       </div>
                       <div class="result-info">
@@ -81,7 +81,7 @@
                     @click="selectRecent(item)"
                   >
                     <div class="result-content">
-                      <div class="result-icon"><i class="fas fa-clock"></i></div>
+                      <div class="list-icon"><i class="fas fa-clock"></i></div>
                       <div class="result-info">
                         <div class="result-name">{{ item.Caption }}</div>
                         <div v-if="item.Subtitle" class="result-extra">{{ item.Subtitle }}</div>
@@ -97,7 +97,7 @@
                     <div v-if="row.IsLabel" class="recents-group-label">{{ row.Label }}</div>
                     <div v-else class="result-item" @click="selectRecent(row.Item)">
                       <div class="result-content">
-                        <div class="result-icon"><i class="fas fa-clock"></i></div>
+                        <div class="list-icon"><i class="fas fa-clock"></i></div>
                         <div class="result-info">
                           <div class="result-name">{{ row.Item.Caption }}</div>
                           <div v-if="row.Item.Subtitle" class="result-extra">{{ row.Item.Subtitle }}</div>
@@ -556,14 +556,6 @@ export default {
   gap: 12px;
   flex: 1;
   min-width: 0;
-}
-
-.result-icon {
-  color: #0fa7d8;
-  font-size: 20px;
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
 }
 
 .result-info {

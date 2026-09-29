@@ -151,7 +151,7 @@
               @click="onSelectGroup"
             >
               <div class="indicator-content">
-                <div class="indicator-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="list-icon"><i class="fas fa-layer-group"></i></div>
                 <div class="indicator-info">
                   <div class="indicator-name">{{ addAllLabel }}</div>
                 </div>
@@ -194,7 +194,7 @@
                 @click="enterListBranch(row.parent, row.branch)"
               >
                 <div class="indicator-content">
-                  <div class="indicator-icon">
+                  <div class="list-icon">
                     <i :class="getIconClass(row.branch.Icon || (row.parent && row.parent.Icon))"></i>
                   </div>
                   <div class="indicator-info">
@@ -216,7 +216,7 @@
                   <i v-if="isSelected(row.item)" class="fas fa-check"></i>
                 </span>
                 <div class="indicator-content">
-                  <div class="indicator-icon">
+                  <div class="list-icon">
                     <i :class="itemIcon(row.item, row.container)"></i>
                   </div>
                   <div class="indicator-info">
@@ -270,7 +270,7 @@
           <div class="suggestions-content thinScroll" :class="{ 'expanded': showAllSuggestions }">
             <div v-for="item in visibleSuggestions" :key="item.Id" class="suggestion-item hand" @click="onItemClick(item)">
               <div class="indicator-content">
-                <div class="indicator-icon"><i :class="getIconClass(item.Icon)"></i></div>
+                <div class="list-icon"><i :class="getIconClass(item.Icon)"></i></div>
                 <div class="indicator-info">
                   <div class="indicator-name">{{ item.Label || item.Name }}</div>
                   <div class="indicator-meta">{{ item.Provider || itemSubtitle(item, null) }}</div>
@@ -1034,7 +1034,11 @@ export default {
   color: #999; font-size: 15px; transition: all 0.2s;
 }
 .btn-tool:hover:not(:disabled) { background: #f0f0f0; color: #666; }
-.btn-tool.active { background: #e3f2fd; color: #2196F3; }
+
+	.btn-tool.active {
+		background: #e9f2fd;
+		color: #485167;
+	}
 .btn-tool:disabled { color: #d5d5d5; cursor: default; }
 
 /* Breadcrumb */
@@ -1102,11 +1106,18 @@ export default {
 .chips-scroll::-webkit-scrollbar { width: 6px; }
 .chips-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
 .chips-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: #e3f2fd; color: #1565c0;
-  border-radius: 14px; padding: 4px 6px 4px 12px; font-size: 13px; max-width: 100%;
-}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		background: #e9f2fd;
+		color: #1565c0;
+		border: 1px solid rgb(165 164 164 / 16%) !important;
+    border-radius: 14px;
+		padding: 4px 6px 4px 12px;
+		font-size: 13px;
+		max-width: 100%;
+	}
 .chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
 .chip-remove {
   background: rgba(21, 101, 192, 0.12); border: none; color: #1565c0; cursor: pointer;
@@ -1134,7 +1145,12 @@ export default {
 .category-card.featured { background: linear-gradient(135deg, #c3c3c3 0%, #818181 100%); color: white; border: none; }
 .category-card.featured .category-name { color: white; }
 .category-card.featured .category-count { color: rgba(255, 255, 255, 0.8); }
-.category-icon { font-size: 32px; text-shadow: 2px 2px 4px rgb(223 216 220 / 50%); color: #0fa7d8; display: block; margin-bottom: 12px; }
+	.category-icon {
+		font-size: 32px;
+		color: #888;
+		display: block;
+		margin-bottom: 12px;
+	}
 .category-icon.featured { text-shadow: none; color: #69bad5; }
 .category-name { font-size: 15px; color: #333; margin-bottom: 4px; line-height: 1.3; font-weight: 500; }
 .category-count { font-size: 13px; color: #999; padding-top: 2px; line-height: 1.3; }
@@ -1175,7 +1191,7 @@ export default {
   padding: 2px 4px;
   border-radius: 4px;
 }
-.source-header-addall:hover { background: #e3f2fd; }
+.source-header-addall:hover { background: #e9f2fd; }
 
 /* Items */
 	.indicator-item {
@@ -1188,15 +1204,13 @@ export default {
 		padding-left: 25px;
 	}
 .indicator-item:hover { background-color: #eee; }
-.indicator-item.is-selected { background-color: #e3f2fd; }
+.indicator-item.is-selected { background-color: #e9f2fd; }
 .indicator-item.is-selected:hover { background-color: #d6ebfc; }
 .indicator-item.add-all { background-color: #f1f1f1; }
 .indicator-item.add-all:hover { background-color: #e8e8e8; }
 
 .indicator-content { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-.indicator-icon {
-  color: #0fa7d8; font-size: 20px; width: 24px; text-align: center; flex-shrink: 0;
-}
+
 .indicator-info { flex: 1; min-width: 0; }
 .indicator-name { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 2px; line-height: 1.3; }
 .indicator-meta { font-size: 12px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
