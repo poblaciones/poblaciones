@@ -6,10 +6,10 @@
 					<td colspan="3" class="statsHeader">
 						<div v-if="!variable.IsSimpleCount || version.Levels.length > 1" :style="levelLabelMargin">
 							<mp-dropdown-menu v-if="version.Levels.length > 1" :items="levelItems"
-																icon="fas fa-caret-down" tooltip="Nivel de agregación" @itemClick="levelSelected">
+																icon="fas exp-hiddable-inline fa-caret-down" tooltip="Nivel de agregación" @itemClick="levelSelected">
 								<template slot="trigger">
 									{{ level.Name }}
-									<span class="hand pinMark"
+									<span class="hand exp-hiddable-inline pinMark"
 												:title="(level.Pinned ? 'Liberar nivel fijado' : 'Fijar este nivel')" @click.stop="togglePin">
 										<PinIcon v-if="!level.Pinned" class="icon" />
 										<UnpinIcon v-else class="icon" style="-webkit-transform: rotate(90deg); -moz-transform: rotate(90deg);
@@ -24,7 +24,7 @@
 					</td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
 						<div style="margin-right: -12px">
-						<mp-dropdown-menu :items="metricItems" icon="fas fa-caret-down"
+						<mp-dropdown-menu :items="metricItems" icon="fas exp-hiddable-inline fa-caret-down"
 															triggerStyle="min-width: 50px;"
 															:tooltip="currentMetric.Caption" @itemClick="metricSelected">
 							<span slot="trigger" v-html="metric.Summary.getValueHeader(variable)"></span>

@@ -107,6 +107,7 @@
                     v-for="br in grp.Branches"
                     :key="br.Id != null ? br.Id : br.Name"
                     class="category-card hand"
+                    data-kbd-item="card"
                     @click="enterBranch(br)"
                   >
                     <span class="category-icon"><i :class="getIconClass(br.Icon)"></i></span>
@@ -121,6 +122,7 @@
                 v-for="br in currentBranches"
                 :key="br.Id != null ? br.Id : br.Name"
                 class="category-card hand"
+                data-kbd-item="card"
                 :class="{ 'featured': br.Icon === 'star' }"
                 @click="enterBranch(br)"
               >
@@ -148,6 +150,7 @@
             <div
               v-if="!searchQuery && (showAddAll || !filterMode) && currentLeafItems.length"
               class="indicator-item add-all hand"
+              data-kbd-item="group"
               @click="onSelectGroup"
             >
               <div class="indicator-content">
@@ -191,11 +194,12 @@
                 v-else-if="row.type === 'branch'"
                 :key="row.key"
                 class="indicator-item hand"
+                data-kbd-item="branch"
                 @click="enterListBranch(row.parent, row.branch)"
               >
                 <div class="indicator-content">
                   <div class="list-icon">
-                    <i :class="getIconClass(row.branch.Icon || (row.parent && row.parent.Icon))"></i>
+                    <i :class="branchIcon(row)"></i>
                   </div>
                   <div class="indicator-info">
                     <div class="indicator-name">{{ row.branch.Name }}</div>
@@ -209,6 +213,7 @@
                 v-else-if="row.type === 'item'"
                 :key="row.key"
                 class="indicator-item hand"
+                data-kbd-item="item"
                 :class="{ 'is-selected': isSelected(row.item) }"
                 @click="onItemClick(row.item, row.container)"
               >
@@ -240,6 +245,7 @@
                 v-else-if="row.type === 'more'"
                 :key="row.key"
                 class="search-more hand"
+                data-kbd-item="more"
                 @click="liftSearchLimit"
               >
                 Ver {{ row.remaining }} resultado{{ row.remaining === 1 ? '' : 's' }} más
@@ -311,6 +317,7 @@
 
 <script>
 import { mixin as clickaway } from 'vue-clickaway';
+import KeyboardAwareList from '@/map/classes/KeyboardAwareList';
 
 export default {
   name: 'IndicatorSelector',
@@ -389,6 +396,23 @@ export default {
       searchRenderLimit: 50,    // máximo de filas de búsqueda a renderizar de entrada
       searchLimitLifted: false, // "Ver más": renderizar todas las coincidencias
     };
+  },
+  created() {
+    // Navegación por teclado de la lista (no reactivo a propósito).
+    this.kbd = new KeyboardAwareList({
+      getInput: () => this.$refs.searchInput,
+      getContainer: () => this.$el,
+      onEnter: this.kbdOnEnter,
+      onSpace: this.kbdOnSpace,
+      onEscape: () => this.onEscape(),
+      onCtrlBackspace: this.kbdGoUp,
+    });
+  },
+  mounted() {
+    if (this.isOpen) this.kbd.attach();
+  },
+  beforeDestroy() {
+    this.kbd.detach();
   },
   computed: {
     // El panel se dimensiona con un alto cómodo en todos sus usos: mínimo 600px y
@@ -627,15 +651,24 @@ export default {
         ? ('Buscar en ' + this.currentNode.Name.toLowerCase() + '...')
         : this.searchPlaceholder;
     },
+    // Cualquier cambio del contenido visible de la lista (búsqueda, nivel,
+    // colapsos, modo de vista) devuelve el elemento activo por teclado a -1.
+    // Se devuelve un arreglo nuevo en cada recálculo para que el watcher dispare.
+    kbdContentKey() {
+      return [this.renderRows, this.currentBranches, this.groupedBranches,
+        this.navStack, this.searchQuery, this.listModeActive];
+    },
   },
   watch: {
     isOpen(val) {
       if (val) {
+        this.kbd.attach();
         this.$nextTick(() => {
           if (this.$refs.searchInput) this.$refs.searchInput.focus();
           this.positionPanel();
         });
       } else {
+        this.kbd.detach();
         // Al cerrarse, el panel se oculta pero conserva su estado de navegación
         // (rama, listado, búsqueda), para reabrir donde estaba. La navegación se
         // reinicia con las acciones explícitas (inicio/breadcrumb), no al cerrar.
@@ -648,6 +681,7 @@ export default {
     // Cada cambio de texto vuelve a acotar el render de resultados (el "Ver más"
     // se reinicia): así escribir un carácter más no arrastra miles de filas.
     searchQuery() { this.searchLimitLifted = false; },
+    kbdContentKey() { this.kbd.reset(); },
   },
   methods: {
     // Posiciona el panel a la derecha del invocador y centrado verticalmente en
@@ -760,6 +794,41 @@ export default {
     },
     closePanel() { this.$emit('close'); },
     onEscape() { if (this.isMulti) this.toggleMultiSelect(); else this.closePanel(); },
+    // ── Teclado (ver KeyboardAwareList) ─────────────────────────────────────────
+    // Enter sobre una hoja en selección múltiple la marca (si no lo estaba) y
+    // cierra el panel; en cualquier otro caso equivale a un clic sobre el
+    // elemento activo.
+    kbdOnEnter(kind, el) {
+      if (kind === 'item' && this.isMulti) {
+        if (!el.classList.contains('is-selected')) el.click();
+        this.closePanel();
+        return true;
+      }
+      return false;
+    },
+    // Espacio sobre una hoja: activa la selección múltiple si hacía falta y
+    // alterna su casilla.
+    kbdOnSpace(kind, el) {
+      if (kind !== 'item') return;
+      if (!this.isMulti) {
+        if (!this.allowMultiSelectToggle) return;
+        this.toggleMultiSelect();
+      }
+      el.click();
+    },
+    // Ctrl+Backspace con el buscador vacío: sube un nivel del breadcrumb.
+    kbdGoUp() {
+      if (!this.navStack.length) return false;
+      if (this.navStack.length === 1) this.goHome();
+      else this.goToDepth(this.navStack.length - 2);
+      return true;
+    },
+    // Los agrupadores de nivel 0 (tipos de indicador, tipos de límites) se
+    // muestran con el ícono de capas en vez del propio.
+    branchIcon(row) {
+      if (this.categories.indexOf(row.branch) !== -1) return 'fas fa-layer-group';
+      return this.getIconClass(row.branch.Icon || (row.parent && row.parent.Icon));
+    },
     toggleMultiSelect() {
       this.internalMulti = !this.internalMulti;
       this.$emit('update:multiSelect', this.internalMulti);
@@ -1208,6 +1277,13 @@ export default {
 .indicator-item.is-selected:hover { background-color: #d6ebfc; }
 .indicator-item.add-all { background-color: #f1f1f1; }
 .indicator-item.add-all:hover { background-color: #e8e8e8; }
+/* Elemento activo por teclado (KeyboardAwareList) */
+.indicator-item[data-kbd-active] { background-color: #e3e3e3; box-shadow: inset 0 0 0 2px #90caf9; }
+.indicator-item.is-selected[data-kbd-active] { background-color: #d6ebfc; }
+.category-card[data-kbd-active] {
+  border-color: #2196F3; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+}
+.search-more[data-kbd-active] { background: #e9f2fd; }
 
 .indicator-content { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 

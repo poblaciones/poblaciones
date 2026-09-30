@@ -42,12 +42,16 @@ MapExport.prototype.generatePngInternal = function (canvas, scale) {
 	img.style.width = (100 / scale) + '%';
 	img.style.height = (100 / scale) + '%';
 	img.style.float = 'right';
-	img.style.border = "2px solid #c0c0c0";
+	img.style.border = "1px solid #c0c0c0";
+	img.style.borderRadius = "12px";
+
 	div.appendChild(img);
+	div.setAttribute("id", "imgPanel");
 	div.style.position = "absolute";
 	div.style.padding = '0px';
-	div.style.top = '0';
-	div.style.right = '0';
+	div.style.marginBottom = '12px';
+	div.style.top = '12px';
+	div.style.right = '12px';
 	div.style.zIndex = 1000;
 	var container = document.getElementById('holder');
 	container.appendChild(div);
@@ -221,7 +225,6 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 
 	panHolder.style.height = (Math.max(newHeight, panRightHeight + 1) + 2) + "px";
 	panMain.style.height = newHeight + "px";
-
 	// se asegura de tener los datos
 	window.SegMap.SetTimeout(50).then(function () {
 		//return window.SegMap.MapsApi.WaitForFullLoading().then(function () {
@@ -230,10 +233,16 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 				if (!previewExport) {
 					window.Popups.WaitMessage.show('Preparando visualización ...');
 				}
+
 				// saca scrollbar de panel de resumen
-				var hideSecond = [{ attribute: 'overflow-y', set: 'hidden', restore: 'auto', class: '#panRight' },
-				// oculta el spliter
-				{ attribute: 'display', set: 'none', restore: 'block', class: 'gutter gutter-horizontal' }];
+				var hideSecond = [{ attribute: 'overflow-y', set: 'hidden', restore: 'auto', class: '#panSummary' },
+					// oculta el spliter
+					{ attribute: 'display', set: 'none', restore: 'block', class: 'gutter gutter-horizontal' },
+					{ attribute: 'max-height', set: 'unset', restore: 'calc(100% - 95px - 80px)', class: '#panRight' }];
+
+				// oculta el panel de resumen
+				var hideSecond3 = [{ attribute: 'display', set: 'none', restore: 'flex', class: '#panRight' }];
+
 				if (!previewExport) {
 					// bordes
 					hideSecond.push({ attribute: 'border', set: '1px solid #ddd', restore: 'unset', class: '#holder' });
@@ -248,10 +257,13 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 				dom.setStyleAttributesByList(hideSecond);
 				attributesByClass = attributesByClass.concat(hideSecond);
 
-
 				/////
-				html2canvas(panRight, { useCORS: true, scale: scale, ignoreElements: loc.ignoreFilter }).then(function (canvasPanRight) {
+				html2canvas(panSummary, { useCORS: true, scale: scale, ignoreElements: loc.ignoreFilter }).then(function (canvasPanRight) {
 					var divPanel = null;
+
+					dom.setStyleAttributesByList(hideSecond3);
+					attributesByClass = attributesByClass.concat(hideSecond3);
+
 					if (!previewExport) {
 						divPanel = loc.generatePngInternal(canvasPanRight, scale);
 					}

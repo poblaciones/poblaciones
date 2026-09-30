@@ -6,7 +6,7 @@
 					<td colspan="2" class="statsHeader"></td>
 					<td class="statsHeader textRight" style="min-width: 75px; padding-left: 15px; line-height: 2.3rem">
 						<div style="margin-right: -12px">
-							<mp-dropdown-menu :items="metricItems" icon="fas fa-caret-down"
+							<mp-dropdown-menu :items="metricItems" icon="fas exp-hiddable-inline fa-caret-down"
 																triggerStyle="min-width: 50px;"
 																:tooltip="currentMetric.Title" @itemClick="metricSelected">
 								<span slot="trigger" v-html="boundary.valueHeader()"></span>

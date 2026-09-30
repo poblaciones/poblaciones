@@ -3,19 +3,19 @@
 		<div v-touch:swipe.left="panLeftSwipeClose">
 			<div :class="(hasContent && !collapsed ? '': 'animatedFlyLeft')" class="animatedFlyAway floatLeftPanel thinScroll" :style="{ width: width + 'px' }">
 				<div class="floatLeftPanelContent">
-					<div v-if="isFullFront" style="display: flex; ">
+					<div v-if="isFullFront" style="display: flex; height: 100%;">
 						<transition name="fade" mode='out-in'>
 							<feature-list :featureInfo='Full' v-if='isFullList' :enabled="enabled" @clickClose='doClose' />
 							<feature-info :featureInfo='Full' v-if='isFullInfo' :enabled="enabled" @clickClose='doClose' />
 						</transition>
 					</div>
-					<div id="panTop" class="split" v-if="!isFullFront"  style="display: flex; ">
+					<div id="panTop" class="split" v-if="!isFullFront"  style="display: flex; height: 100%;">
 						<transition name="fade" mode='out-in'>
 							<feature-list :featureInfo='Top' v-if='isTopList' :enabled="enabled" @clickClose='doClose' />
 							<feature-info :featureInfo='Top' v-if='isTopInfo' :enabled="enabled" @clickClose='doClose' />
 						</transition>
 					</div>
-					<div id="panBottom" class="split" v-if="!isFullFront"  style="display: flex; ">
+					<div id="panBottom" class="split" v-if="!isFullFront"  style="display: flex; height: 100%;">
 						<transition name="fade" mode='out-in'>
 							<feature-list :featureInfo='Bottom' v-if='isBottomList' :enabled="enabled" @clickClose='doClose' />
 							<feature-info :featureInfo='Bottom' v-if='isBottomInfo' :enabled="enabled" @clickClose='doClose' />
@@ -318,20 +318,21 @@ export default {
 
 
 	.floatLeftPanel {
+		max-height: calc(100% - 109px);
+		padding-left: 12px;
+		padding-top: 12px;
 		position: absolute;
-		max-height: calc(100% - 97px);
 		z-index: 1010;
 		display: flex;
 		width: 340px;
-		box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 12px;
 	}
 
 	.floatLeftPanelContent {
-		overflow-y: auto;
-		display: flex;
+		border-radius: 12px;
+		width: 100%;
 		background-color: #ffffff;
 		user-select: text;
-		width: 340px;
+		max-width: 340px;
 		border: 1px solid rgba(165, 164, 164, 0.75);
 		user-select: text
 	}

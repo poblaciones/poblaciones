@@ -133,7 +133,7 @@ export default {
 		text-align: left;
 	}
 	.ifp-option:hover,
-	.ifp-group-header:hover { background-color: #e3f2fd; }
+	.ifp-group-header:hover { background-color: #e9f2fd; }
 	.ifp-group-header { font-weight: 600; border-top: 1px solid #eceff1; }
 	.ifp-group:first-child .ifp-group-header { border-top: none; }
 	/* Las categorías cuelgan de su grupo de versión: se indentan para reflejarlo. */

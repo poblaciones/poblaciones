@@ -426,6 +426,8 @@
 		font-size: 12px;
 	}
 	.summaryToolbar {
+		background-color: transparent;
+		font-size: 24px;
 		display: block;
 		padding: 8px;
 		position: absolute;
@@ -435,9 +437,9 @@
 		border: 0px solid transparent;
 	}
 	.avatar {
-		height: 22px;
-		width: 22px;
-		border-radius: 10px;
+		height: 40px;
+		width: 40px;
+		border-radius: 20px;
 		margin-top: -6px !important;
 		margin: -5px;
 	}

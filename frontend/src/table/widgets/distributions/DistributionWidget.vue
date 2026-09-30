@@ -508,7 +508,7 @@ export default {
 		border: none; background: transparent; color: #90a4ae; cursor: pointer;
 		font-size: 13px; line-height: 1; padding: 4px 6px; border-radius: 4px;
 	}
-	.dist-export-btn:hover { color: #1976d2; background: #e3f2fd; }
+	.dist-export-btn:hover { color: #1976d2; background: #e9f2fd; }
 	.dist-export-menu {
 		position: absolute; top: 100%; right: 0; margin-top: 2px; z-index: 5;
 		background: #fff; border: 1px solid #cfd8dc; border-radius: 4px;
@@ -517,7 +517,7 @@ export default {
 	.dist-export-opt {
 		padding: 7px 14px; font-size: 13px; color: #37474f; cursor: pointer; white-space: nowrap;
 	}
-	.dist-export-opt:hover { background: #e3f2fd; }
+	.dist-export-opt:hover { background: #e9f2fd; }
 	.dist-head-titles { min-width: 0; max-width: 320px; }
 	.dist-head-titles .ms-indicator,
 	.dist-head-titles .ms-variable {

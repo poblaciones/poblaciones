@@ -34,13 +34,11 @@
               <div class="results-container" v-if="hasResults">
                 <div class="results-list">
                   <div
-                    v-for="(item, index) in autolist"
+                    v-for="item in autolist"
                     :key="item.Id"
                     class="result-item"
-                    :class="{ 'result-hover': item.Class === 'lihover' }"
+                    data-kbd-item="result"
                     @click="selectResult($event, item)"
-                    @mouseover="hoverResult(item, index)"
-                    @mouseout="unhoverResult(item, index)"
                   >
                     <div class="result-content">
                       <div class="list-icon">
@@ -78,6 +76,7 @@
                     v-for="item in recentsPreview"
                     :key="item.DedupeKey"
                     class="result-item"
+                    data-kbd-item="recent"
                     @click="selectRecent(item)"
                   >
                     <div class="result-content">
@@ -95,7 +94,7 @@
                 <template v-else>
                   <div v-for="row in recentsExpandedRows" :key="row.Key">
                     <div v-if="row.IsLabel" class="recents-group-label">{{ row.Label }}</div>
-                    <div v-else class="result-item" @click="selectRecent(row.Item)">
+                    <div v-else class="result-item" data-kbd-item="recent" @click="selectRecent(row.Item)">
                       <div class="result-content">
                         <div class="list-icon"><i class="fas fa-clock"></i></div>
                         <div class="result-info">
@@ -110,7 +109,7 @@
                   </div>
                 </template>
               </div>
-              <div v-if="!showAllRecents && hasMoreRecents" class="show-more-recents hand" @click="showAllRecents = true">
+              <div v-if="!showAllRecents && hasMoreRecents" class="show-more-recents hand" data-kbd-item="more" @click="showAllRecents = true">
                 Más vistos recientemente
               </div>
             </div>
@@ -130,6 +129,7 @@ import { mixin as clickaway } from 'vue-clickaway';
 import h from '@/map/js/helper';
 import Search from '@/map/classes/Search';
 import ActiveRecents from '@/map/classes/ActiveRecents';
+import KeyboardAwareList from '@/map/classes/KeyboardAwareList';
 
 const debounce = require('lodash.debounce');
 
@@ -156,7 +156,6 @@ export default {
       loading: false,
       autolist: [],
       searched: '',
-      selindex: -1,
       retCancel: null,
       // Si se está mostrando la lista completa de recientes (agrupada por
       // fecha) en lugar de la vista previa de hasta 4 ítems.
@@ -181,6 +180,20 @@ export default {
         s.StartSearch(t);
       }, 1000)
     };
+  },
+  created() {
+    // Navegación por teclado de resultados y recientes (no reactivo a propósito).
+    this.kbd = new KeyboardAwareList({
+      getInput: () => this.$refs.searchInput,
+      getContainer: () => this.$el,
+      onDelete: this.kbdOnDelete
+    });
+  },
+  mounted() {
+    if (this.isOpen) this.kbd.attach();
+  },
+  beforeDestroy() {
+    this.kbd.detach();
   },
   computed: {
     hasResults() {
@@ -216,16 +229,11 @@ export default {
       }
       return rows;
     },
-    keymap() {
-      return {
-        'ctrl+s': this.handleEnter,
-        enter: this.handleEnter,
-        down: this.handleArrowDown,
-        up: this.handleArrowUp,
-        esc: this.handleEscape,
-        tab: this.handleArrowDown,
-        'shift+tab': this.handleArrowUp
-      };
+    // Cualquier cambio del contenido visible (resultados, recientes, vista
+    // expandida) devuelve el elemento activo por teclado a -1. Se devuelve un
+    // arreglo nuevo en cada recálculo para que el watcher dispare.
+    kbdContentKey() {
+      return [this.autolist, this.recentsList, this.showAllRecents, this.showRecents];
     },
     // Con sidebarPosition 'top'/'bottom', el panel se acerca al botón de
     // Buscar (que en esos casos está arriba o abajo, no en el medio de la
@@ -252,6 +260,7 @@ export default {
   watch: {
     isOpen(val) {
       if (val) {
+        this.kbd.attach();
         // window.SegMap.Recents no es reactivo para Vue: se piden los
         // recientes recién al abrir el panel, que es cuando puede haber
         // cambiado lo guardado desde la última vez que se mostraron.
@@ -262,10 +271,10 @@ export default {
           }
         });
       } else {
+        this.kbd.detach();
         this.searchText = '';
         this.autolist = [];
         this.searched = '';
-        this.selindex = -1;
         this.showAllRecents = false;
       }
     },
@@ -273,6 +282,9 @@ export default {
       if (val === '') {
         this.handleEscape();
       }
+    },
+    kbdContentKey() {
+      this.kbd.reset();
     }
   },
   methods: {
@@ -299,20 +311,6 @@ export default {
       this.searchText = '';
       this.autolist = [];
       this.close();
-    },
-    hoverResult(item, index) {
-      this.clearHover();
-      item.Class = 'lihover';
-      this.selindex = index;
-    },
-    unhoverResult(item, index) {
-      this.clearHover();
-      this.selindex = -1;
-    },
-    clearHover() {
-      this.autolist.forEach(el => {
-        el.Class = '';
-      });
     },
     formatCoord(item) {
       return h.trimNumberCoords(item.Lat) + ',' + h.trimNumberCoords(item.Lon);
@@ -365,55 +363,17 @@ export default {
       this.recentsList = window.SegMap.Recents.GetRecents();
       this.recentsGroups = window.SegMap.Recents.GetGroupedRecents();
     },
-    handleEnter(e) {
-      if (!this.hasResults) {
-				if (this.$refs.searchInput) {
-					this.$refs.searchInput.focus();
-        }
-      } else {
-        const selected = this.autolist.find(el => el.Class !== '');
-        if (selected) {
-          this.selectResult(e, selected);
-        }
-      }
-    },
-    handleArrowDown(e) {
-      if (!this.hasResults) return;
-      e.preventDefault();
-
-			if (this.$refs.searchInput) {
-				this.$refs.searchInput.blur();
-      }
-
-      if (this.selindex >= 0 && this.selindex < this.autolist.length - 1) {
-        this.autolist[this.selindex].Class = '';
-        this.selindex++;
-      } else {
-        if (this.selindex >= 0) {
-          this.autolist[this.autolist.length - 1].Class = '';
-        }
-        this.selindex = 0;
-      }
-      this.autolist[this.selindex].Class = 'lihover';
-    },
-    handleArrowUp(e) {
-      if (!this.hasResults) return;
-      e.preventDefault();
-
-			if (this.$refs.searchInput) {
-				this.$refs.searchInput.blur();
-      }
-
-      if (this.selindex > 0) {
-        this.autolist[this.selindex].Class = '';
-        this.selindex--;
-      } else {
-        if (this.selindex === 0) {
-          this.autolist[0].Class = '';
-        }
-        this.selindex = this.autolist.length - 1;
-      }
-      this.autolist[this.selindex].Class = 'lihover';
+    // Supr sobre un reciente lo elimina (equivale a su botón ×) y deja activo
+    // al siguiente; si era el último, al anterior.
+    kbdOnDelete(kind, el) {
+      const btn = kind === 'recent' ? el.querySelector('.btn-remove-recent') : null;
+      if (!btn) return false;
+      const idx = this.kbd.index;
+      btn.click();
+      // Se registra después de que la eliminación encoló el reset del índice,
+      // así corre tras el render, con la lista ya actualizada.
+      this.$nextTick(() => this.kbd.select(idx));
+      return true;
     },
     handleEscape() {
       if (this.hasResults) {
@@ -545,9 +505,14 @@ export default {
 		padding-left: 25px;
 	}
 
-.result-item:hover,
-.result-item.result-hover {
+.result-item:hover {
   background-color: #eee;
+}
+
+/* Elemento activo por teclado (KeyboardAwareList) */
+.result-item[data-kbd-active] {
+  background-color: #e3e3e3;
+  box-shadow: inset 0 0 0 2px #90caf9;
 }
 
 .result-content {
@@ -646,7 +611,8 @@ export default {
   cursor: pointer;
 }
 
-.show-more-recents:hover {
+.show-more-recents:hover,
+.show-more-recents[data-kbd-active] {
   text-decoration: underline;
 }
 

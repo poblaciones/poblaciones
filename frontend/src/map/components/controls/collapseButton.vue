@@ -57,6 +57,10 @@ export default {
 
 <style scoped>
 .left-arrow {
+	border-top-right-radius: 9px;
+	border-bottom-right-radius: 9px;
+	border: 1px solid rgb(165 164 164 / 50%);
+
 	position:absolute;
 	height: 48px;
 	width: 23px;
@@ -67,7 +71,6 @@ export default {
   padding-right: 2px;
   color: #666;
 	background: rgba(255,255,255,0.9);
-  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
 	z-index: 800;
 }
 .border-left {

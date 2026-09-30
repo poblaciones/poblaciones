@@ -1,6 +1,6 @@
 <template>
-	<div style="display: flex">
-		<div class="" style="background-color: transparent!important; display: flex; flex-direction: column; ">
+	<div style="width: 100%;">
+		<div class="" style="background-color: transparent !important; display: flex; flex-direction: column; height: 100%; ">
 			<div ref="topImage" v-if="featureInfo.Image && isImageUrl(featureInfo.Image)"
 					 :style="'background-image:url('
 										+ preProcess(featureInfo.Image) + ');'"
@@ -8,8 +8,11 @@
 			</div>
 			<div class='panel card panel-body' style="box-shadow: none !important; margin-bottom: 0px; padding-bottom: 6px; background-color: transparent !important " :class="(enabled ? '' : 'text-muted')">
 				<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
-				<mp-close-button v-else @click="doClose" class="exp-hiddable-block" />
-				<h5 v-if="hasTitle" class="title"><mp-label :text="'' + title" :clickeable="!!featureInfo.position" @click='focus()' /></h5>
+				<h5 v-if="hasTitle" class="titleDialog">
+					<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
+					<mp-close-button v-else @click="doClose" class="exp-hiddable-block" />
+					<mp-label :text="'' + title" :clickeable="!!featureInfo.position" @click='focus()' />
+				</h5>
 				<div class='stats' style="padding-top: 8px; padding-bottom: 8px;">
 					<a href="#" title="Agregar como indicador"
 						 @click="addMetricFromKey" style="color: #a7a7a7">
@@ -28,24 +31,24 @@
 				</div>
 			</div>
 
-				<div style="overflow-y: auto; padding:15px " class="thinScroll">
-					<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
-						<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
-										title="Seleccionar el perímetro" @click="selectPerimeter">
-							<i class="fas fa-circle-notch" />
+			<div style="overflow-y: auto; padding:15px " class="thinScroll">
+				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
+					<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
+									title="Seleccionar el perímetro" @click="selectPerimeter">
+						<i class="fas fa-circle-notch" />
 
-						</button>
-					</div>
-					<div class='item' v-if="featureInfo.Code && featureInfo.Title">
-						<div class="iLabel">Código</div>
-						{{ val }}
-					</div>
-					<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
-						<div class="iLabel">{{ capitalize(item.Name) }}</div>
-						<mp-label :text="getValue(item)" />
-					</div>
-					<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
+					</button>
 				</div>
+				<div class='item' v-if="featureInfo.Code && featureInfo.Title">
+					<div class="iLabel">Código</div>
+					{{ val }}
+				</div>
+				<div v-for="(item, index) in featureInfo.Items" class='item' :key="index">
+					<div class="iLabel">{{ capitalize(item.Name) }}</div>
+					<mp-label :text="getValue(item)" />
+				</div>
+				<div v-if="lat != 0 && lon != 0" class='pos'>Posición: {{ lat }},{{ lon }}.</div>
+			</div>
 		</div>
 	</div>
 </template>

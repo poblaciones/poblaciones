@@ -171,7 +171,7 @@ export default {
 	}
 	.analysis-btn:hover:not(:disabled) {
 		border-color: #1976d2;
-		background: #e3f2fd;
+		background: #e9f2fd;
 		color: #1565c0;
 	}
 	.analysis-btn.is-active {

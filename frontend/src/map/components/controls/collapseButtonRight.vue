@@ -38,6 +38,10 @@ export default {
 
 <style scoped>
 .right-arrow {
+	border-top-left-radius: 9px;
+	border-bottom-left-radius: 9px;
+	border: 1px solid rgb(165 164 164 / 50%);
+	box-shadow: none !important;
 	position: absolute;
 	height: 48px;
 	width: 23px;
@@ -47,7 +51,6 @@ export default {
 	padding-left: 5px;
 	color: #666;
 	background: rgba(255, 255, 255, 0.9);
-	box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
 }
 .border-left {
 	position: absolute;

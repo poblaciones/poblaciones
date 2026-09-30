@@ -148,7 +148,7 @@ export default {
 		background-color: #f5f5f5;
 	}
 	.variable-option.active {
-		background-color: #e3f2fd;
+		background-color: #e9f2fd;
 		color: #1976d2;
 		font-weight: 500;
 	}

@@ -1,6 +1,3 @@
-
-
-
 .btn {
 	color: #5e5e5e;
 	border-radius: 20px!important;
@@ -9,19 +6,6 @@
 	border: 0px;
 	margin-right: 4px;
 	margin-left: 4px!important;
-}
-
-.avatar {
-	height: 40px!important;
-	width: 40px!important;
-	border-radius: 20px!important;
-}
-	.titleDialog {
-	font-size: 1.5em;
-	line-height: 1.4em;
-	font-weight: 500;
-	margin-top: 0px;
-	margin-bottom: 0px;
 }
 .summaryToolbar .btn {
 	font-size: 18px !important;
@@ -34,21 +18,11 @@
 .summaryToolbar .triggerIcon {
 	font-size: 18px !important;
 }
-
-.right-arrow {
-	border-top-left-radius: 9px;
-	border-bottom-left-radius: 9px;
-}
-
-.left-arrow {
-	border-top-right-radius: 9px;
-	border-bottom-right-radius: 9px;
-}
 .btn.active {
 	background-color: #e9f2fe !important;
 	color: unset;
 	color: #66615b;
-	border: 1px solid rgb(165 164 164 / 50%)!important;
+	border: 1px solid rgb(165 164 164 / 37%) !important;
 }
 .btn.active:hover {
 	border: 1px solid rgb(165 164 164 / 50%)!important;
@@ -59,22 +33,30 @@
 	color: #333;
 }
 
+.trigger > li > a:hover, .trigger > li > a:focus {
+	background-color: #eee !important;
+	color: unset !important;
+}
 /* hover */
 .btn.active, .btn:active, .btn:focus, .btn:hover, .navbar .navbar-nav > li > a.btn.active, .navbar .navbar-nav > li > a.btn:active, .navbar .navbar-nav > li > a.btn:focus, .navbar .navbar-nav > li > a.btn:hover, .open > .btn.dropdown-toggle, .open > .navbar .navbar-nav > li > a.btn.dropdown-toggle {
 	background-color: #e7e7e7;
 	color: #66615b;
 }
 
-	.btn.active:not(:hover) + .btn.active:not(:hover)::before {
-		background-color: white !important;
-				width: 0px!important;
-	}
-	.btn-group {
-			margin-right: 2px!important;
-	}
-
-		.panel.card.panel-body {
+.btn.active:not(:hover) + .btn.active:not(:hover)::before {
+	background-color: white !important;
+	width: 0px!important;
+}
+.btn-group {
+	margin-right: 2px!important;
+}
+.panel.card.panel-body {
 	background-color: white!important;
+}
+.modal-content .card {
+	border-radius: 12px;
+	border: 1px solid rgb(165 164 164 / 50%);
+	box-shadow: unset !important;
 }
 
 #panSummary {
@@ -82,67 +64,6 @@
 	display: flex;
 	flex-direction: column;
 }
-
-.summaryToolbar {
-	background-color: transparent!important;
-	font-size: 24px!important;
-}
-.dropDownMenuIcon {
-	right: 10px;
-	top: 9px;
-	color: #252422;
-	position: absolute;
-	padding-top: 3px;
-	font-size: 14px;
-}
-.dropDownMenuIconX {
-	position: absolute;
-	right: 6px;
-	top: 6px;
-	width: 25px;
-	height: 25px;
-	color: #252422!important;
-	font-size: 14px;
-}
-.dropdown-menu > li > a {
-	background-color: inherit !important;
-	color: inherit!important;
-}
-
-	.floatRightPanel {
-	margin-right: 12px !important;
-	margin-top: 12px !important;
-	border-radius: 12px !important;
-	max-height: calc(100% - 95px - 72px) !important;
-	background-color: unset !important;
-	display: flex;
-	top: 60px;
-	box-shadow: none!important;
-}
-
-.floatLeftPanel {
-	max-height: calc(100% - 109px) !important;
-	padding-left: 12px;
-	padding-top: 12px;
-	box-shadow: none !important;
-}
-
-.map-toolbar {
-	border: 1px solid rgb(165 164 164 / 50%);
-	box-shadow: none!important;
-}
-.left-arrow {
-	border: 1px solid rgb(165 164 164 / 50%);
-	box-shadow: none !important;
-}
-.right-arrow {
-	border: 1px solid rgb(165 164 164 / 50%);
-	box-shadow: none !important;
-}
-.floatLeftPanelContent {
-	border-radius: 12px !important;
-}
-
 .leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out {
 	border: 1px solid rgb(165 164 164 / 50%) !important;
 	margin-top: 6px;
@@ -168,10 +89,37 @@
 }
 
 	/* chequeadas */
+.dropDownMenuIcon {
+	right: 10px;
+	top: 9px;
+	color: #252422;
+	position: absolute;
+	padding-top: 3px;
+	font-size: 14px;
+}
+
+.dropDownMenuIconX {
+	position: absolute;
+	right: 6px;
+	top: 6px;
+	width: 25px;
+	height: 25px;
+	color: #252422 !important;
+	font-size: 14px;
+}
 
 :root {
 	--color-texto-leyenda: #333;
 	--color-fondo-leyenda: #ffffff9e;
+}
+
+
+.titleDialog {
+	font-size: 1.5em;
+	line-height: 1.4em;
+	font-weight: 500;
+	margin-top: 0px;
+	margin-bottom: 0px;
 }
 
 .search-clear {
@@ -260,6 +208,11 @@
 		background: #f0f0f0;
 		color: #666;
 	}
+
+.titleDialog .btn-close {
+	 margin-top: -2px;
+}
+
 .btn-close {
 	background: none;
 	border: none;
@@ -290,4 +243,13 @@
 	height: 16px;
 	padding: 0px;
 	text-transform: uppercase;
+}
+
+
+.list-icon {
+	color: #888;
+	font-size: 20px;
+	width: 24px;
+	text-align: center;
+	flex-shrink: 0;
 }

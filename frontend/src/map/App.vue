@@ -16,8 +16,6 @@
 				<PopupsPanel :backgroundColor="workColor" />
 
 				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
-					<Search class="exp-hiddable-block" :class="(toolbarStates.repositionSearch || toolbarStates.leftPanelVisible ? 'searchOffsetTop': '')"
-									v-show="!Embedded.HideSearch && !Use.UseNewFabButton" />
 					<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
 									 :work="work" :config="config" :toolbarStates="toolbarStates"
 									 class="exp-hiddable-block" />
@@ -83,7 +81,6 @@
 	import BoundaryPanel from '@/map/components/panels/boundaryPanel';
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
 	import MapExport from '@/map/classes/MapExport';
-	import Search from '@/map/components/widgets/map/search';
 	import MapPanel from '@/map/components/panels/mapPanel';
 	import MetricsButton from '@/map/components/widgets/map/metricsButton';
 	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
@@ -92,8 +89,8 @@
 	import LeftPanel from '@/map/components/panels/leftPanel';
 	import EditButton from '@/map/components/widgets/map/editButton';
 	import FullScreenButton from '@/map/components/widgets/map/fullScreenButton';
-import MapLegend from '@/map/components/widgets/map/mapLegend';
-import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
+	import MapLegend from '@/map/components/widgets/map/mapLegend';
+	import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 	import SummaryPanel from '@/map/components/panels/summaryPanel';
 	import WatermarkFloat from '@/map/components/widgets/map/watermarkFloat';
 	import WatermarkOwner from '@/map/components/widgets/map/WatermarkOwner';
@@ -123,7 +120,6 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 		name: 'app',
 		components: {
 			SummaryPanel,
-			Search,
 			MapPanel,
 			WaitMessage,
 			EditButton,
@@ -769,6 +765,7 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 		font-size: 14px;
 		color: #333;
 		letter-spacing: 0.5px;
+		margin-bottom: 8px;
 	}
 	.rightButton {
 		transition: right 0.3s ease;
@@ -902,10 +899,14 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 		pointer-events: all !important;
 	}
 
-	.exp-high-button {
-		color: #ffffff !important;
+	.btn .exp-high-button {
+		color: unset !important;
+		background-color: #ffffff !important;
 	}
-
+	.btn .exp-high-button .active {
+		color: unset !important;
+		background-color: #ffffff !important;
+	}
 	.exp-circles {
 		margin-top: 5px !important;
 		color: white !important;
@@ -960,11 +961,6 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 
 	.exp-rounded {
 		border-radius: 26px !important;
-	}
-
-	.panel-body {
-		border-radius: 0px !important;
-		box-shadow: 0 2px 2px rgb(0 0 0 / 18%) !important;
 	}
 
 	.moderateHr {
@@ -1490,6 +1486,8 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 
 	.dropdown-menu > li > a {
 		padding: 8px 15px;
+		background-color: inherit !important;
+		color: inherit !important;
 	}
 
 	.dropdown-menu, .dropdown.open .dropdown-menu {
@@ -1662,17 +1660,20 @@ import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 	}
 
 	.floatRightPanel {
+		margin-right: 12px;
+		margin-top: 12px;
+		border-radius: 12px;
+		max-height: calc(100% - 95px - 80px);
+		display: flex;
+		top: 60px;
+
 		width: calc(30% - 2.5px);
 		min-width: 292px;
 		position: absolute;
 		right: 0px;
 		z-index: 1020;
 		border: 1px solid rgb(165 164 164 / 50%);
-		border-radius: 2px;
-		max-height: calc(100% - 95px);
-		background-color: #ffffff;
 		height: unset !important;
-		box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 12px !important;
 	}
 
 	.gm-svpc {

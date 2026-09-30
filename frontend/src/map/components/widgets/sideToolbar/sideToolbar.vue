@@ -66,6 +66,10 @@ import SearchPanel from './searchPanel.vue';
 import { toChip } from './selectorTooltips';
 import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
 
+// Atajos Ctrl+letra → panel. Reemplazan los atajos del navegador (buscar en
+// la página, marcadores, etc.) mientras la barra lateral está disponible.
+const PANEL_SHORTCUTS = { i: 'indicators', f: 'places', b: 'search' };
+
 export default {
   name: 'SideToolbar',
   components: {
@@ -124,7 +128,14 @@ export default {
     // real de la app.
     this.escapeHandler = new EscapeCloseHandler(this.closePanel, { useHistory: true });
   },
+  mounted() {
+    // Fase de captura en window: corre antes que los handlers del mapa
+    // (Leaflet, que usa + para el zoom) y de las listas (KeyboardAwareList),
+    // lo que permite reemplazar su comportamiento con estas teclas.
+    window.addEventListener('keydown', this.onGlobalKeydown, true);
+  },
   beforeDestroy() {
+    window.removeEventListener('keydown', this.onGlobalKeydown, true);
     this.escapeHandler.Close();
   },
   computed: {
@@ -178,6 +189,95 @@ export default {
     },
     closePanel() {
       this.activePanel = null;
+    },
+
+    // ── Teclado ────────────────────────────────────────────────────────────────
+    // Botones visibles, en el mismo orden visual que SideButtons. Con el panel
+    // abajo a la izquierda, indicadores pasa al final (clase toolbar-button-last).
+    getPanelOrder() {
+      const embedded = window.Embedded || {};
+      const use = window.Use || {};
+      const order = [];
+      if (!embedded.HideAddMetrics) {
+        order.push('indicators');
+      }
+      order.push('places');
+      if (!embedded.HideSearch) {
+        order.push('search');
+        if (use.UseUploadFromMap) {
+          order.push('upload');
+        }
+      }
+      if (this.sidebarPosition === 'bottom' && order[0] === 'indicators') {
+        order.push(order.shift());
+      }
+      return order;
+    },
+    isToolbarAvailable() {
+      const embedded = window.Embedded || {};
+      const use = window.Use || {};
+      return !!use.UseNewFabButton && (!embedded.HideAddMetrics || !embedded.HideSearch);
+    },
+    isTypingTarget(el) {
+      if (!el || !el.tagName) {
+        return false;
+      }
+      const tag = el.tagName.toUpperCase();
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable === true;
+    },
+    swallowKey(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    },
+    onGlobalKeydown(e) {
+      if (!this.isToolbarAvailable()) {
+        return;
+      }
+      // "+" abre el panel de indicadores en lugar de acercar el mapa.
+      if (e.key === '+' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        // Si se mantiene apretada, las repeticiones no deben acercar el mapa
+        // ni escribirse en el buscador que acaba de recibir el foco.
+        if (e.repeat && this.plusHandled) {
+          this.swallowKey(e);
+          return;
+        }
+        this.plusHandled = false;
+        const embedded = window.Embedded || {};
+        if (embedded.HideAddMetrics || this.isTypingTarget(e.target) || this.activePanel === 'indicators') {
+          return;
+        }
+        this.plusHandled = true;
+        this.swallowKey(e);
+        this.activePanel = 'indicators';
+        return;
+      }
+      // Atajos directos: Ctrl+I indicadores, Ctrl+F filtrar, Ctrl+B buscar.
+      if (e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && typeof e.key === 'string') {
+        const target = PANEL_SHORTCUTS[e.key.toLowerCase()];
+        if (target && this.getPanelOrder().indexOf(target) >= 0) {
+          this.swallowKey(e);
+          if (!e.repeat) {
+            this.activePanel = target;
+          }
+          return;
+        }
+      }
+      // Ctrl+↓ / Ctrl+↑ recorren los paneles de forma circular.
+      if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') &&
+        e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && this.activePanel) {
+        const order = this.getPanelOrder();
+        const index = order.indexOf(this.activePanel);
+        if (index < 0) {
+          return;
+        }
+        this.swallowKey(e);
+        if (e.repeat) {
+          return;
+        }
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        this.activePanel = order[(index + step + order.length) % order.length];
+      }
     },
 
     // ── Indicadores ────────────────────────────────────────────────────────────

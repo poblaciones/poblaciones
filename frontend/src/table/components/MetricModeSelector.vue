@@ -142,7 +142,7 @@ export default {
 		background-color: #f5f5f5;
 	}
 	.summary-option.active {
-		background-color: #e3f2fd;
+		background-color: #e9f2fd;
 	}
 	.summary-option-symbol {
 		display: inline-block;

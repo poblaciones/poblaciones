@@ -266,7 +266,7 @@ export default {
 .mapLegend {
 	position: absolute;
 	right: 10px;
-	bottom: 95px;
+	bottom: 103px;
 	z-index: 900;
 	max-width: 280px;
 	/* Garantiza 200px libres arriba, donde se ubica clippingLegend, aunque la

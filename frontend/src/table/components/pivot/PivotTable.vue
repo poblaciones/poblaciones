@@ -1302,7 +1302,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		background: #e3f2fd;
+		background: #e9f2fd;
 		color: #1565c0;
 		border-radius: 14px;
 		padding: 3px 6px 3px 12px;
@@ -1595,7 +1595,7 @@
 		text-align: left;
 	}
 	.inline-float-panel .ifp-option:hover,
-	.inline-float-panel .ifp-group-header:hover { background-color: #e3f2fd; }
+	.inline-float-panel .ifp-group-header:hover { background-color: #e9f2fd; }
 	.inline-float-panel .ifp-group-header { font-weight: 600; border-top: 1px solid #eceff1; }
 	.inline-float-panel .ifp-group:first-child .ifp-group-header { border-top: none; }
 	/* Las categorías cuelgan de su grupo de versión: se indentan para reflejarlo. */
@@ -1603,7 +1603,7 @@
 	.inline-float-panel .ifp-total { font-style: italic; color: #607d8b; }
 	.inline-float-panel .ifp-locked { opacity: 0.5; cursor: default; }
 	/* En selección simple no hay checkbox: el activo se marca con fondo. */
-	.inline-float-panel .ifp-selected { background-color: #e3f2fd; font-weight: 600; }
+	.inline-float-panel .ifp-selected { background-color: #e9f2fd; font-weight: 600; }
 	.inline-float-panel .ifp-multi-toggle {
 		display: flex;
 		align-items: center;
@@ -1695,11 +1695,11 @@
 		}
 
 	.pivot-row-region-header {
-		background-color: #e3f2fd;
+		background-color: #e9f2fd;
 		font-weight: 600;
 	}
 		.pivot-row-region-header .pivot-cell-header {
-			background-color: #e3f2fd;
+			background-color: #e9f2fd;
 		}
 
 		.pivot-row-region-header:hover {

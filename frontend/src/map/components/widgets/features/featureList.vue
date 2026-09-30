@@ -1,12 +1,13 @@
 <template>
 	<div v-if="dt">
 		<feature-info :dt='detail' v-if='showDetail' @clickBack='doCloseInfo' />
-		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')"  v-else>
-			<mp-close-button @click="doClose" class="exp-hiddable-block" />
+		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')" v-else>
 
 			<div class='stats' style="padding-top: 8px">{{ dt.Type }}</div>
-			<div class='title'>{{ title }}</div>
-			<hr class="moderateHr exp-hiddable-visiblity">
+			<div class='titleDialog'>
+				<mp-close-button @click="doClose" class="exp-hiddable-block" />
+				<mp-label :text="'' + title" />
+			</div>
 			<div v-for="(item, index) in dt.Items" :key="item.Name">
 				<div @click="doCloseItem(index)" class='fa fa-times hand' style='float:right;margin:5px'></div>
 				<div class='item hand' @click='openDetail(item)'>

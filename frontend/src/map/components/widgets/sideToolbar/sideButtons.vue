@@ -17,7 +17,7 @@
               class="toolbar-button toolbar-button-primary"
               :class="{ 'active': activePanel === 'indicators', 'toolbar-button-last': sidebarPosition === 'bottom' }"
               @click="togglePanel('indicators')"
-              title="Explorar indicadores">
+              title="Explorar indicadores (Ctrl+I)">
         <i class="fas fa-plus"></i>
       </button>
 
@@ -25,7 +25,7 @@
       <button class="toolbar-button"
               :class="{ 'active': activePanel === 'places' }"
               @click="togglePanel('places')"
-              title="Filtrar">
+              title="Filtrar (Ctrl+F)">
         <i class="fas fa-filter"></i>
       </button>
 
@@ -34,7 +34,7 @@
               class="toolbar-button"
               :class="{ 'active': activePanel === 'search' }"
               @click="togglePanel('search')"
-              title="Buscar">
+              title="Buscar (Ctrl+B)">
         <i class="fas fa-search"></i>
       </button>
 
