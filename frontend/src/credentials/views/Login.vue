@@ -68,7 +68,7 @@
 										Ingresar con Google
 									</md-button>
 								</div>
-								<div class="md-layout-item md-size-50">
+								<div class="md-layout-item md-size-50" v-if="useFacebook">
 									<md-button class="md-primary md-raised fullRowButton floatRight" @click="facebookLogin">
 										Ingresar con Facebook
 									</md-button>
@@ -124,7 +124,10 @@ export default {
 			required
 		},
 	},
-	computed: {
+		computed: {
+			useFacebook() {
+				return false;
+			}
 	},
 	methods: {
 		messageClass(value = false) {

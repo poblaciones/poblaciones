@@ -1,3 +1,5 @@
+- Soporte para mapa base vectorial.
+- Soporte para teclado en panel de insertar indicador, buscar y filtrar.
 - Material 3.
 - Delimitaciones tienen url estable y ark.
 

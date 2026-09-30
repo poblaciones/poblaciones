@@ -157,6 +157,28 @@ class MapSettings
 		];
 	}
 
+
+	public function SetCartoVectorBasemaps()
+	{
+		$this->BasemapUrls = [
+			'roadmap' => "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json?key=YOUR_KEY",
+			'roadmap_no_labels' => "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json?key=YOUR_KEY",
+			'colored' => "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json?key=YOUR_KEY",
+			'colored_no_labels' => "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json?key=YOUR_KEY",
+			'roadmap_only_labels' => "https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'satellite' => "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+			];
+
+		$this->BasemapAttributions = [
+			'roadmap' => self::CARTO_ATTRIBUTION,
+			'roadmap_no_labels' => self::CARTO_ATTRIBUTION,
+			'roadmap_only_labels' => self::CARTO_ATTRIBUTION,
+			'colored' => self::CARTO_ATTRIBUTION,
+			'colored_no_labels' => self::CARTO_ATTRIBUTION,
+			'satellite' => ''
+		];
+	}
+
 	public function SetOpenTilesBasemaps()
 	{
 		$this->BasemapUrls = [

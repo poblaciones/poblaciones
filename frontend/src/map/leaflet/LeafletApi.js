@@ -55,11 +55,11 @@ function LeafletApi() {
 	this.overlayMapTypesLayers = [];
 	this.selector = new FeatureSelector(this);
 	this.allwaysHiddenElements = ['landscape.natural', 'landscape.natural.landcover', 'landscape.natural.terrain',
-																	'poi.attraction', 'administrative.locality',
-																	'administrative.country', 'administrative.province'];
+		'poi.attraction', 'administrative.locality',
+		'administrative.country', 'administrative.province'];
 	this.mapabelElements = ['administrative.land_parcel', 'administrative.neighborhood', 'landscape.man_made',
-													'poi.business', 'poi.government', 'poi.medical', 'poi.park', 'poi.place_of_worship',
-													'poi.school', 'poi.sports_complex', 'transit', 'water' ];
+		'poi.business', 'poi.government', 'poi.medical', 'poi.park', 'poi.place_of_worship',
+		'poi.school', 'poi.sports_complex', 'transit', 'water'];
 	this.allwaysVisibleElements = ['road'];
 	this.setColorElements = ['poi.medical', 'poi.business'];
 	this.mapTypeButtons = {};
@@ -71,8 +71,8 @@ LeafletApi.prototype.UpdateLabelsVisibility = function (showLabels) {
 };
 
 
-LeafletApi.prototype.Write = function(text, location, zIndex, style, innerStyle, ignoreMapMode, type, hidden) {
-	if(!style) {
+LeafletApi.prototype.Write = function (text, location, zIndex, style, innerStyle, ignoreMapMode, type, hidden) {
+	if (!style) {
 		style = 'mapLabels';
 	}
 	if (!ignoreMapMode && this.IsSatelliteType()) {
@@ -83,7 +83,7 @@ LeafletApi.prototype.Write = function(text, location, zIndex, style, innerStyle,
 };
 
 LeafletApi.prototype.Initialize = function () {
-	if(window.SegMap === null) {
+	if (window.SegMap === null) {
 		throw new Error('segmentedMap is null. Call SetSegmentedMap.');
 	}
 
@@ -103,7 +103,7 @@ LeafletApi.prototype.Initialize = function () {
 
 	// Crea el mapa
 	this.map = new L.Map("map", options);
-	// Los mapas base vectoriales aportan solo su propio crédito: el de Poblaciones se declara acá.
+	// Las capas base aportan solo el crédito de su proveedor: el de Poblaciones se declara acá.
 	this.map.attributionControl.addAttribution(MapAttribution.GetCopyright());
 	// le agrega el control de zoom
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
@@ -267,11 +267,14 @@ LeafletApi.prototype.InteractiveChangeMapType = function (type) {
 };
 
 // Una URL con {z} es una plantilla de teselas raster; cualquier otra es el estilo JSON de un mapa vectorial.
-LeafletApi.prototype.CreateBasemapLayer = function (url, vectorVariant) {
+LeafletApi.prototype.CreateBasemapLayer = function (name, vectorVariant) {
+	var configuration = window.SegMap.Configuration;
+	var url = configuration.BasemapUrls[name];
+	var attribution = configuration.BasemapAttributions[name];
 	if (url.indexOf('{z}') >= 0) {
-		return new L.TileLayer(url, { attribution: MapAttribution.GetCopyright() });
+		return new L.TileLayer(url, { attribution: attribution });
 	}
-	return createVectorBasemapLayer(url, vectorVariant, MapAttribution.GetBasemapCopyright());
+	return createVectorBasemapLayer(url, vectorVariant, attribution);
 };
 
 LeafletApi.prototype.CreateBaseLayers = function () {
@@ -302,12 +305,13 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	*/
 
 	var basemapUrls = window.SegMap.Configuration.BasemapUrls;
+	var basemapAttributions = window.SegMap.Configuration.BasemapAttributions;
 
-	this.baseLayers['roadmap'] = this.CreateBasemapLayer(basemapUrls.roadmap, VARIANT_WITH_LABELS);
-	this.baseLayers['roadmap_no_labels'] = this.CreateBasemapLayer(basemapUrls.roadmap_no_labels, VARIANT_WITHOUT_LABELS);
-	this.baseLayers['colored'] = this.CreateBasemapLayer(basemapUrls.colored, VARIANT_WITH_LABELS);
-	this.baseLayers['colored_no_labels'] = this.CreateBasemapLayer(basemapUrls.colored_no_labels, VARIANT_WITHOUT_LABELS);
-	this.baseLayers['roadmap_only_labels'] = this.CreateBasemapLayer(basemapUrls.roadmap_only_labels, VARIANT_ONLY_LABELS);
+	this.baseLayers['roadmap'] = this.CreateBasemapLayer('roadmap', VARIANT_WITH_LABELS);
+	this.baseLayers['roadmap_no_labels'] = this.CreateBasemapLayer('roadmap_no_labels', VARIANT_WITHOUT_LABELS);
+	this.baseLayers['colored'] = this.CreateBasemapLayer('colored', VARIANT_WITH_LABELS);
+	this.baseLayers['colored_no_labels'] = this.CreateBasemapLayer('colored_no_labels', VARIANT_WITHOUT_LABELS);
+	this.baseLayers['roadmap_only_labels'] = this.CreateBasemapLayer('roadmap_only_labels', VARIANT_ONLY_LABELS);
 
 	this.useElevation = (window.SegMap.Configuration.ElevationUrl != null);
 	if (this.useElevation) {
@@ -321,28 +325,28 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	}
 
 	var zeroItem = [[0, 90], [180, 90], [180, -90], [0, -90], [-180, -90], [-180, 0], [-180, 90], [0, 90]];
-	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] }};
+	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] } };
 	featureMask.geometry.coordinates.push(zeroItem);
 	var mask = { type: 'FeatureCollection', features: [featureMask] };
-	var blank = L.geoJson(mask, { attribution: cp, interactive: false } );
+	var blank = L.geoJson(mask, { attribution: cp, interactive: false });
 	blank.setStyle({
-        "color": "#e5e3df",
-				"weight": 1,
-        "fillOpacity": this.getOpacity()
-    });
+		"color": "#e5e3df",
+		"weight": 1,
+		"fillOpacity": this.getOpacity()
+	});
 	this.baseLayers['blank'] = blank;
 	// satélite
-	var mapLink =  '<a href="http://www.esri.com/">Esri</a>';
-  var wholink =  'i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
-  /*var satellite = L.tileLayer(
-            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: cp,
-            maxZoom: 18,
+	var mapLink = '<a href="http://www.esri.com/">Esri</a>';
+	var wholink = 'i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
+	/*var satellite = L.tileLayer(
+						'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+						attribution: cp,
+						maxZoom: 18,
 	});*/
 	var satellite = L.tileLayer(basemapUrls.satellite, {
 		maxZoom: 20,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-		attribution: cp
+		attribution: basemapAttributions.satellite
 	});
 	this.baseLayers['satellite'] = satellite;
 
@@ -415,35 +419,35 @@ LeafletApi.prototype.SetBaseMap = function (basemapName) {
 LeafletApi.prototype.BindEvents = function () {
 	var loc = this;
 
-	this.map.on("zoomend", function() {
+	this.map.on("zoomend", function () {
 		window.SegMap.ZoomChanged(loc.map.getZoom());
 		loc.CheckBaseLayer();
 		loc.BoundsChanged();
 	});
 
-	this.map.on("movestart", function() {
+	this.map.on("movestart", function () {
 		loc.dragging = true;
 		loc.draggingDelayed = true;
 	});
 
-	this.map.on("moveend", function() {
+	this.map.on("moveend", function () {
 		loc.dragging = false;
 		window.SegMap.BoundsChanged();
 		setTimeout(() => {
 			loc.draggingDelayed = false;
 		}, 250);
-//		event.stopPropagation();
+		//		event.stopPropagation();
 		loc.BoundsChanged();
 	});
 
 	this.map.on(L.Draw.Event.CREATED, function (circle) {
 		var type = circle.layerType;
-			if (type === 'circle') {
-				loc.CircleCompleted(circle);
-			}
+		if (type === 'circle') {
+			loc.CircleCompleted(circle);
+		}
 	});
 
-	this.map.on("draw:drawstop", function() {
+	this.map.on("draw:drawstop", function () {
 		window.SegMap.SetSelectionMode("PAN");
 	});
 };
@@ -675,8 +679,19 @@ LeafletApi.prototype.SetCenter = function (coord, zoom) {
 	this.map.setView(c, (zoom ? zoom : undefined));
 };
 
-LeafletApi.prototype.PanTo = function (coord, zoom) {
-	var c = L.latLng(coord.Lat, coord.Lon);
+LeafletApi.prototype.calculateOffsetX = function (offsetXpixels, zoom = null) {
+	var offsetRad = 0;
+	if (offsetXpixels) {
+		var ret = this.screenPoint2LatLng({ x: offsetXpixels, y: 0 }, this.map, zoom);
+		var ret2 = this.screenPoint2LatLng({ x: 0, y: 0 }, this.map, zoom);
+		offsetRad = (ret.Lon - ret2.Lon) / 2;
+	}
+	return offsetRad;
+};
+
+LeafletApi.prototype.PanTo = function (coord, offsetXpixels, zoom) {
+	var offsetRad = this.calculateOffsetX(offsetXpixels, zoom);
+	var c = L.latLng(coord.Lat, coord.Lon - offsetRad);
 	this.map.flyTo(c, (zoom ? zoom : undefined));
 };
 
@@ -734,9 +749,13 @@ LeafletApi.prototype.SetZoom = function (zoom) {
 
 LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offsetX) {
 	var envelope;
-//	envelope = envelopeOrig;
+	//	envelope = envelopeOrig;
 	envelope = h.scaleEnvelope(envelopeOrig, 1.25);
 
+	var offsetRad = 0;
+	if (offsetX) {
+		offsetRad = this.calculateOffsetX(offsetX);
+	}
 	var min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
 	var max = L.latLng(envelope.Max.Lat, envelope.Max.Lon);
 	var bounds = L.latLngBounds();
@@ -744,7 +763,7 @@ LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offset
 	bounds.extend(max);
 	var current = this.map.getBounds();
 	if (current.getEast() < max.lng ||
-		current.getWest() > min.lng ||
+		current.getWest() + offsetRad > min.lng ||
 		current.getNorth() < max.lat ||
 		current.getSouth() > min.lat) {
 		this.map.flyToBounds(bounds, {
@@ -753,7 +772,7 @@ LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offset
 		});
 		if (offsetX) {
 			var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
-			this.map.flyTo(L.latLng(pos.lat, pos.lng));
+			this.map.flyTo(L.latLng(pos.lat, pos.lng - offsetRad));
 		}
 	}
 };
@@ -776,6 +795,19 @@ LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) 
 		animate: true,
 		duration: 1 // Duración en segundos (puedes ajustarlo)
 	});
+
+	var offsetRad = 0;
+	if (offsetX) {
+		offsetRad = this.calculateOffsetX(offsetX);
+		min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
+		max = L.latLng(envelope.Max.Lat, envelope.Max.Lon + offsetRad);
+		var bounds = L.latLngBounds();
+		bounds.extend(min);
+		bounds.extend(max);
+		offsetRad = this.calculateOffsetX(offsetX);
+		var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
+		this.map.flyTo(L.latLng(pos.lat, pos.lng - offsetRad));
+	}
 };
 
 LeafletApi.prototype.ClearClippingCanvas = function () {
@@ -851,9 +883,9 @@ LeafletApi.prototype.getOpacity = function () {
 LeafletApi.prototype.UpdateClippingStyle = function () {
 	if (this.clippingCanvas) {
 		this.clippingCanvas.setStyle({
-        "color": "#444",
-				"weight": 0.5,
-        "fillOpacity": this.getOpacity()
+			"color": "#444",
+			"weight": 0.5,
+			"fillOpacity": this.getOpacity()
 		});
 	}
 };
@@ -871,7 +903,7 @@ LeafletApi.prototype.SetClippingCanvas = function (canvasList) {
 		[-180, 90],
 		[0, 90]
 	];
-	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] }};
+	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] } };
 	featureMask.geometry.coordinates.push(zeroItem);
 
 	for (var c = 0; c < canvasList.length; c++) {
@@ -886,12 +918,12 @@ LeafletApi.prototype.SetClippingCanvas = function (canvasList) {
 		} else {
 			// polygon
 			featureMask.geometry.coordinates = featureMask.geometry.coordinates.concat(
-													canvas.features[0].geometry.coordinates);
+				canvas.features[0].geometry.coordinates);
 		}
 	}
 	var mask = { type: 'FeatureCollection', features: [featureMask] };
 
-	this.clippingCanvas = L.geoJson(mask, { interactive: false } );
+	this.clippingCanvas = L.geoJson(mask, { interactive: false });
 	this.UpdateClippingStyle();
 	this.clippingCanvas.addTo(this.map);
 };
@@ -924,6 +956,14 @@ LeafletApi.prototype.SetSelectedFeature = function (feature, key, title) {
 			if (title) {
 				label = { text: title, className: 'markerSelectedLabel' };
 			}
+			/*
+			var icon = this.defaultMarkerIcon();
+
+			var marker = new L.marker(pos, { icon: icon });
+			marker.addTo(this.map);
+
+			// label: label
+			this.selectedCanvas.push(marker); */
 		}
 		this.CreateSelectedCircle(feature.Coordinate);
 	}
@@ -945,7 +985,7 @@ LeafletApi.prototype.CreateSelectedPolygon = function (polygon) {
 	for (var ring of polygon) {
 		var res = [];
 		for (var point of ring) {
-			res.push([ point[1], point[0] ]);
+			res.push([point[1], point[0]]);
 		}
 		rings.push(res);
 	}
@@ -978,14 +1018,14 @@ LeafletApi.prototype.CreateSelectedPolygon = function (polygon) {
 LeafletApi.prototype.CreateSelectedCircle = function (center) {
 	var radius = 15;
 
-	var item = new L.circle([ center.Lat, center.Lon ],radius,
+	var item = new L.circle([center.Lat, center.Lon], radius,
 		{
-		color: "#FFFFFF",
-		weight: 1,
-		opacity: .8,
-		fillColor: "#999",
-		fillOpacity: 0.45,
-		interactive: false
+			color: "#FFFFFF",
+			weight: 1,
+			opacity: .8,
+			fillColor: "#999",
+			fillOpacity: 0.45,
+			interactive: false
 		});
 	item.addTo(this.map);
 	this.selectedCanvas.push(item);
@@ -998,7 +1038,7 @@ LeafletApi.prototype.markerClicked = function (event, metricVersion, fid) {
 	window.SegMap.InfoWindow.InfoRequestedInteractive(h.getPosition(event), metricVersion, fid);
 };
 
-LeafletApi.prototype.getBounds = function() {
+LeafletApi.prototype.getBounds = function () {
 	var ne = this.map.getBounds().getNorthEast();
 	var sw = this.map.getBounds().getSouthWest();
 	return {
@@ -1264,9 +1304,9 @@ LeafletApi.prototype.CreateLightMap = function () {
 			]
 		},
 		{
-    "featureType": "road.highway",
-    "elementType": "geometry.stroke",
-    "stylers": [
+			"featureType": "road.highway",
+			"elementType": "geometry.stroke",
+			"stylers": [
 				{
 					"weight": 0.5
 				}

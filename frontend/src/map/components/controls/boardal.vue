@@ -68,16 +68,14 @@ export default {
 		&__wrapper {
 			position: relative;
 			width: 65vw;
-			width: 60em;
 			max-width: 100%;
 			max-height: 85vh;
-			height: 30em;
 			background: #fff;
 			color: #333;
 			display: flex;
+			border: 1px solid rgb(165 164 164 / 50%);
 			flex-direction: var(--cross, column);
-			border-radius: .2em;
-			box-shadow: 0 0 0 1px rgba(0,0,0,.2), 0 1em 2em -1em;
+			border-radius: 12px;
 		}
 
 		&__x {
