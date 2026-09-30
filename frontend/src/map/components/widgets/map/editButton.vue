@@ -54,7 +54,6 @@ export default {
 		color: white;
 		position: relative;
 		overflow: hidden;
-		box-shadow: 0 6px 6px rgba(0, 0, 0, 0.10), 0 4px 4px rgba(0, 0, 0, 0.15);
 		justify-content: center;
 	}
 

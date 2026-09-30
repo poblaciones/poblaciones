@@ -16,25 +16,38 @@ function StartMap(workReference, boundaryReference, frameReference, setupMap) {
 	this.workReference = workReference;
 	this.boundaryReference = boundaryReference;
 };
-
 StartMap.prototype.Start = function () {
 	this.hash = window.location.hash;
 	window.accessLink = null;
 	window.accessWorkId = null;
-	this.workReference.Current = null;
-	this.boundaryReference.Current = null;
 
 	var args = StartMap.ResolveWorkIdFromUrl();
+
+	// Solo limpiar workReference.Current / boundaryReference.Current si la
+	// URL apunta a un id distinto del actualmente cargado (o a ninguno).
+	// Limpiarlos incondicionalmente —como hacía el código original— dispara
+	// watchers que llaman a SaveRoute.RemoveWork / RemoveBoundary cuando
+	// work/boundary se vacían, perdiendo el segmento /map/<id>/ de la ruta
+	// aun cuando la URL sigue apuntando al mismo work/boundary (caso típico:
+	// cerrar un popup, donde EscapeCloseHandler.Close() llama a back() y
+	// aterriza en una entrada con state={route:...} que dispara Start()).
+	var currentWorkId = (this.workReference.Current && this.workReference.Current.Id !== undefined)
+		? this.workReference.Current.Id : null;
+	var currentBoundaryId = (this.boundaryReference.Current && this.boundaryReference.Current.Id !== undefined)
+		? this.boundaryReference.Current.Id : null;
+
+	if (args.workId !== currentWorkId) {
+		this.workReference.Current = null;
+	}
+	if (args.boundaryId !== currentBoundaryId) {
+		this.boundaryReference.Current = null;
+	}
+
 	if (args.workId) {
-		// Si tiene un work, va a ese paso
 		this.RestoreWork(args.workId, args.link);
 	} else if (args.boundaryId) {
-		// Si tiene una delimitación (ruta /map/b<id>), la restaura como
-		// delimitación activa.
 		this.RestoreBoundary(args.boundaryId);
 	} else {
-		// Si no vino indicado un work ni una delimitación,
-		// inicia por ruta o por definición default de servidor.
 		if (new RestoreRoute(null).RouteHasLocation(this.hash)) {
 			this.StartByUrl();
 		} else {

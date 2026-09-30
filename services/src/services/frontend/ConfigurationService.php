@@ -178,7 +178,8 @@ class ConfigurationService extends BaseService
 									'ContentAttributes' => $contentAttributes,
 									'MainServer' => $mainServer->publicUrl,
 									'ShortUrlPattern' => App::Settings()->Map()->ShortUrlPattern,
-									'BasemapUrls' => App::Settings()->Map()->BasemapUrls);
+									'BasemapUrls' => App::Settings()->Map()->BasemapUrls,
+									'BasemapAttributions' => App::Settings()->Map()->BasemapAttributions);
 
 		$this->FilterUserSettings($ret['User']['Settings']);
 		Callbacks::$MapsOpened++;

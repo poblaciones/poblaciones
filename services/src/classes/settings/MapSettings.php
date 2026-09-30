@@ -10,6 +10,15 @@ use minga\framework\Context;
 
 class MapSettings
 {
+	const OPENFREEMAP_ATTRIBUTION =
+		"<a class='copyrightText exp-hiddable-unset' target='_blank' href='https://openfreemap.org'>© OpenFreeMap</a> " .
+		"<a class='copyrightText exp-hiddable-unset' target='_blank' href='https://www.openmaptiles.org/'>© OpenMapTiles</a> " .
+		"<a class='copyrightText exp-hiddable-unset' target='_blank' href='https://www.openstreetmap.org/copyright'>© OpenStreetMap</a>";
+
+	const CARTO_ATTRIBUTION =
+		"<a class='copyrightText exp-hiddable-unset' target='_blank' href='https://www.openstreetmap.org/copyright'>© OpenStreetMap</a> " .
+		"<a class='copyrightText exp-hiddable-unset' target='_blank' href='https://carto.com/attributions'>© CARTO</a>";
+
 	public $DefaultClippingRegion = '';
 
 	public $LabelsBlockSize = 6;
@@ -56,14 +65,8 @@ class MapSettings
 
 	public $UseNewFabButton = true;
 
-	public $BasemapUrls = [
-			'roadmap' => "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
-			'roadmap_no_labels' => "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
-			'colored' => "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
-			'colored_no_labels' => "https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
-			'roadmap_only_labels' => "https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
-			'satellite' => "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
-			];
+	public $BasemapUrls = [];
+	public $BasemapAttributions = [];
 
 	public $UseEmbedding = true;
 	public $UseUrbanity = true;
@@ -113,6 +116,13 @@ class MapSettings
 
 	public $DefaultRelocateLocation = ['Lat' => -34.511498, 'Lon' => -63.903948];
 
+
+
+	public function __construct()
+	{
+		$this->SetCartoBasemaps();
+	}
+
 	public function RegisterMultiServer($validServers, $homeUrl = null)
 	{
 		$current = Arr::IndexOf($validServers, "https://" . Request::Host());
@@ -125,6 +135,47 @@ class MapSettings
 
 		// Servidor
 		Context::Settings()->Servers()->RegisterServers($server, $homeUrl);
+	}
+	public function SetCartoBasemaps()
+	{
+		$this->BasemapUrls = [
+			'roadmap' => "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'roadmap_no_labels' => "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'colored' => "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'colored_no_labels' => "https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'roadmap_only_labels' => "https://a.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}@2x.png?key=YOUR_KEY",
+			'satellite' => "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+			];
+
+		$this->BasemapAttributions = [
+			'roadmap' => self::CARTO_ATTRIBUTION,
+			'roadmap_no_labels' => self::CARTO_ATTRIBUTION,
+			'roadmap_only_labels' => self::CARTO_ATTRIBUTION,
+			'colored' => self::CARTO_ATTRIBUTION,
+			'colored_no_labels' => self::CARTO_ATTRIBUTION,
+			'satellite' => ''
+		];
+	}
+
+	public function SetOpenTilesBasemaps()
+	{
+		$this->BasemapUrls = [
+			'roadmap' => 'https://tiles.openfreemap.org/styles/positron',
+			'roadmap_no_labels' => 'https://tiles.openfreemap.org/styles/positron',
+			'roadmap_only_labels' => 'https://tiles.openfreemap.org/styles/positron',
+			'colored' => 'https://tiles.openfreemap.org/styles/bright',
+			'colored_no_labels' => 'https://tiles.openfreemap.org/styles/bright',
+			'satellite' => "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+		];
+
+		$this->BasemapAttributions = [
+			'roadmap' => self::OPENFREEMAP_ATTRIBUTION,
+			'roadmap_no_labels' => self::OPENFREEMAP_ATTRIBUTION,
+			'roadmap_only_labels' => self::OPENFREEMAP_ATTRIBUTION,
+			'colored' => self::OPENFREEMAP_ATTRIBUTION,
+			'colored_no_labels' => self::OPENFREEMAP_ATTRIBUTION,
+			'satellite' => ''
+		];
 	}
 
 	public function SetBasemapUrlsKey($key)

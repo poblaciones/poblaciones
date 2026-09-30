@@ -145,7 +145,7 @@
 
 				var basemapUrls = window.Context.Configuration.BasemapUrls;
 				var BASEMAP_URL = basemapUrls.roadmap;
-				var BASEMAP_ATTRIBUTION = MapAttribution.GetCopyright();
+				var BASEMAP_ATTRIBUTION = window.Context.Configuration.BasemapAttributions.roadmap;
 
 				L.tileLayer(BASEMAP_URL, {
 					attribution: BASEMAP_ATTRIBUTION,

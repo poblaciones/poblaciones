@@ -21,8 +21,11 @@ import ContextMenuTools from './ContextMenuTools.js';
 
 import 'leaflet-contextmenu';
 import 'leaflet-contextmenu/dist/leaflet.contextmenu.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 import MapAttribution from '@/common/js/mapAttribution';
+import createVectorBasemapLayer from './VectorBasemapLayer';
+import { VARIANT_WITH_LABELS, VARIANT_WITHOUT_LABELS, VARIANT_ONLY_LABELS } from './BasemapStyle';
 
 export default LeafletApi;
 
@@ -100,6 +103,8 @@ LeafletApi.prototype.Initialize = function () {
 
 	// Crea el mapa
 	this.map = new L.Map("map", options);
+	// Los mapas base vectoriales aportan solo su propio crédito: el de Poblaciones se declara acá.
+	this.map.attributionControl.addAttribution(MapAttribution.GetCopyright());
 	// le agrega el control de zoom
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
 
@@ -261,6 +266,14 @@ LeafletApi.prototype.InteractiveChangeMapType = function (type) {
 	this.UpdateClippingStyle();
 };
 
+// Una URL con {z} es una plantilla de teselas raster; cualquier otra es el estilo JSON de un mapa vectorial.
+LeafletApi.prototype.CreateBasemapLayer = function (url, vectorVariant) {
+	if (url.indexOf('{z}') >= 0) {
+		return new L.TileLayer(url, { attribution: MapAttribution.GetCopyright() });
+	}
+	return createVectorBasemapLayer(url, vectorVariant, MapAttribution.GetBasemapCopyright());
+};
+
 LeafletApi.prototype.CreateBaseLayers = function () {
 	var cp = MapAttribution.GetCopyright();
 	// Estandar:
@@ -290,11 +303,11 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 
 	var basemapUrls = window.SegMap.Configuration.BasemapUrls;
 
-	this.baseLayers['roadmap'] = new L.TileLayer(basemapUrls.roadmap, { attribution: cp });
-	this.baseLayers['roadmap_no_labels'] = new L.TileLayer(basemapUrls.roadmap_no_labels, { attribution: cp });
-	this.baseLayers['colored'] = new L.TileLayer(basemapUrls.colored, { attribution: cp });
-	this.baseLayers['colored_no_labels'] = new L.TileLayer(basemapUrls.colored_no_labels, { attribution: cp });
-	this.baseLayers['roadmap_only_labels'] = new L.TileLayer(basemapUrls.roadmap_only_labels, { attribution: cp });
+	this.baseLayers['roadmap'] = this.CreateBasemapLayer(basemapUrls.roadmap, VARIANT_WITH_LABELS);
+	this.baseLayers['roadmap_no_labels'] = this.CreateBasemapLayer(basemapUrls.roadmap_no_labels, VARIANT_WITHOUT_LABELS);
+	this.baseLayers['colored'] = this.CreateBasemapLayer(basemapUrls.colored, VARIANT_WITH_LABELS);
+	this.baseLayers['colored_no_labels'] = this.CreateBasemapLayer(basemapUrls.colored_no_labels, VARIANT_WITHOUT_LABELS);
+	this.baseLayers['roadmap_only_labels'] = this.CreateBasemapLayer(basemapUrls.roadmap_only_labels, VARIANT_ONLY_LABELS);
 
 	this.useElevation = (window.SegMap.Configuration.ElevationUrl != null);
 	if (this.useElevation) {
@@ -662,19 +675,8 @@ LeafletApi.prototype.SetCenter = function (coord, zoom) {
 	this.map.setView(c, (zoom ? zoom : undefined));
 };
 
-LeafletApi.prototype.calculateOffsetX = function (offsetXpixels, zoom = null) {
-	var offsetRad = 0;
-	if (offsetXpixels) {
-		var ret = this.screenPoint2LatLng({ x: offsetXpixels, y: 0 }, this.map, zoom);
-		var ret2 = this.screenPoint2LatLng({ x: 0, y: 0 }, this.map, zoom);
-		offsetRad = (ret.Lon - ret2.Lon) / 2;
-	}
-	return offsetRad;
-};
-
-LeafletApi.prototype.PanTo = function (coord, offsetXpixels, zoom) {
-	var offsetRad = this.calculateOffsetX(offsetXpixels, zoom);
-	var c = L.latLng(coord.Lat, coord.Lon - offsetRad);
+LeafletApi.prototype.PanTo = function (coord, zoom) {
+	var c = L.latLng(coord.Lat, coord.Lon);
 	this.map.flyTo(c, (zoom ? zoom : undefined));
 };
 
@@ -735,10 +737,6 @@ LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offset
 //	envelope = envelopeOrig;
 	envelope = h.scaleEnvelope(envelopeOrig, 1.25);
 
-	var offsetRad = 0;
-	if (offsetX) {
-		offsetRad = this.calculateOffsetX(offsetX);
-	}
 	var min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
 	var max = L.latLng(envelope.Max.Lat, envelope.Max.Lon);
 	var bounds = L.latLngBounds();
@@ -746,7 +744,7 @@ LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offset
 	bounds.extend(max);
 	var current = this.map.getBounds();
 	if (current.getEast() < max.lng ||
-		current.getWest() + offsetRad > min.lng ||
+		current.getWest() > min.lng ||
 		current.getNorth() < max.lat ||
 		current.getSouth() > min.lat) {
 		this.map.flyToBounds(bounds, {
@@ -755,7 +753,7 @@ LeafletApi.prototype.EnsureEnvelope = function (envelopeOrig, exactMatch, offset
 		});
 		if (offsetX) {
 			var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
-			this.map.flyTo(L.latLng(pos.lat, pos.lng - offsetRad));
+			this.map.flyTo(L.latLng(pos.lat, pos.lng));
 		}
 	}
 };
@@ -778,19 +776,6 @@ LeafletApi.prototype.FitEnvelope = function (envelopeOrig, exactMatch, offsetX) 
 		animate: true,
 		duration: 1 // Duración en segundos (puedes ajustarlo)
 	});
-
-	var offsetRad = 0;
-	if (offsetX) {
-		offsetRad = this.calculateOffsetX(offsetX);
-		min = L.latLng(envelope.Min.Lat, envelope.Min.Lon);
-		max = L.latLng(envelope.Max.Lat, envelope.Max.Lon + offsetRad);
-		var bounds = L.latLngBounds();
-		bounds.extend(min);
-		bounds.extend(max);
-		offsetRad = this.calculateOffsetX(offsetX);
-		var pos = L.latLng((envelope.Min.Lat + envelope.Max.Lat) / 2, (envelope.Min.Lon + envelope.Max.Lon) / 2);
-		this.map.flyTo(L.latLng(pos.lat, pos.lng - offsetRad));
-	}
 };
 
 LeafletApi.prototype.ClearClippingCanvas = function () {
@@ -939,14 +924,6 @@ LeafletApi.prototype.SetSelectedFeature = function (feature, key, title) {
 			if (title) {
 				label = { text: title, className: 'markerSelectedLabel' };
 			}
-			/*
-			var icon = this.defaultMarkerIcon();
-
-			var marker = new L.marker(pos, { icon: icon });
-			marker.addTo(this.map);
-
-			// label: label
-			this.selectedCanvas.push(marker); */
 		}
 		this.CreateSelectedCircle(feature.Coordinate);
 	}

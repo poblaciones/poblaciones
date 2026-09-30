@@ -139,7 +139,7 @@ InfoWindow.prototype.EnsureVisibleView = function (position, key, title) {
 	if (position) {
 		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
 			|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
-			window.SegMap.MapsApi.EnsureEnvelope(position.Envelope, true, window.Panels.Left.width);
+			window.SegMap.MapsApi.EnsureEnvelope(position.Envelope, true, 0);
 			setTimeout(() => {
 				window.SegMap.MapsApi.selector.tooltipCandidate = { id: key.Id };
 				window.SegMap.MapsApi.selector.setTooltipOverlays();
@@ -155,7 +155,7 @@ InfoWindow.prototype.FocusView = function (position, key, title) {
 	if (position) {
 		if (position.Envelope && (position.Envelope.Min.Lat !== position.Envelope.Max.Lat
 			|| position.Envelope.Min.Lon !== position.Envelope.Max.Lon)) {
-			window.SegMap.MapsApi.FitEnvelope(position.Envelope, true, window.Panels.Left.width);
+			window.SegMap.MapsApi.FitEnvelope(position.Envelope, true, 0);
 			setTimeout(() => {
 				window.SegMap.MapsApi.selector.tooltipCandidate = { id: key.Id };
 				window.SegMap.MapsApi.selector.setTooltipOverlays();
@@ -163,7 +163,7 @@ InfoWindow.prototype.FocusView = function (position, key, title) {
 		} else if (!position.Point || position.Point.X < 350) {
 			const MIN_PAN_ZOOM = 15;
 			var setZoom = (window.SegMap.frame.Zoom < MIN_PAN_ZOOM ? MIN_PAN_ZOOM : null);
-			window.SegMap.PanTo(position.Coordinate, window.Panels.Left.width, setZoom);
+			window.SegMap.PanTo(position.Coordinate, setZoom);
 		}
 		window.SegMap.MapsApi.SetSelectedFeature(position, key, title);
 	}

@@ -262,9 +262,8 @@ ScaleGenerator.prototype.RegenVariableCategories = function (level, variable) {
 		});
 		return ret;
 	}
-	if (data || (variable.Symbology.CutMode === 'V' &&
-		variable.Symbology.CutColumn && variable.Symbology.CutColumn.Format === columnFormatEnum.NUMBER)) {
-		// procede a crearlas si ya tiene los datos, o si usa CutColumn y es numérica
+	if (data) {
+		// procede a crearlas si ya tiene los datos
 		let ret = new Promise((resolve, reject) => {
 			loc.CreateVariableCategories(level, variable, data);
 			resolve();
@@ -492,9 +491,12 @@ ScaleGenerator.prototype.CreateVariableCategories = function (level, variable, d
 		var col = variable.Symbology.CutColumn;
 		if (col !== null) {
 			var currentLabels = [];
-			if (variable.Symbology.CutColumn.Format === columnFormatEnum.NUMBER) {
-				if (this.Dataset.Labels !== null) {
+			if (col.Format === columnFormatEnum.NUMBER) {
+				if (this.Dataset.Labels !== null && this.Dataset.Labels[col.Id]) {
 					currentLabels = this.Dataset.Labels[col.Id];
+				}
+				if (this.DistributionHasNulls(data)) {
+					currentLabels = [{ Caption: null, Value: null }].concat(currentLabels);
 				}
 			} else {
 				currentLabels = data;
@@ -573,25 +575,39 @@ ScaleGenerator.prototype.CreateSingleCategory = function (variable) {
 	variable.Values.push(value);
 };
 
+ScaleGenerator.prototype.DistributionHasNulls = function (data) {
+	if (!data) {
+		return false;
+	}
+	for (var n = 0; n < data.length; n++) {
+		if (data[n].Value === null) {
+			return true;
+		}
+	}
+	return false;
+};
+
 ScaleGenerator.prototype.CreateByVariableCategories = function (variable, currentLabels) {
 	if (!currentLabels) {
 		return;
 	}
-	var total = currentLabels.length;
 	var newVals = [];
-	for (var n = 0; n < total; n++) {
+	var nullValue = null;
+	var order = 1;
+	for (var n = 0; n < currentLabels.length; n++) {
 		var label = currentLabels[n];
-		var value = {
-			Id: null,
-			Caption: label.Caption,
-			Visible: true,
-			Value: label.Value,
-			FillColor: null,
-			Symbol: null,
-			LineColor: null,
-			Order: n + 1
-		};
-		newVals.push(value);
+		if (label.Value === null || label.Value === undefined) {
+			// Categoría de nulos: se normaliza y se ubica primera
+			if (nullValue === null) {
+				nullValue = ScaleGenerator.CreateValue(label.Caption ? label.Caption : 'Sin valores',
+					null, this.CalculateColor(variable, null, null, null), 0);
+			}
+			continue;
+		}
+		newVals.push(ScaleGenerator.CreateValue(label.Caption, label.Value, null, order++));
+	}
+	if (nullValue !== null) {
+		newVals.unshift(nullValue);
 	}
 	variable.Values = newVals;
 };

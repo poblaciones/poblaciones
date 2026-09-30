@@ -14,5 +14,14 @@ module.exports = {
 		}
 		innerHTML += "</span>";
 		return div + innerHTML + "</span>";
+	},
+
+	GetBasemapCopyright() {
+		var link = "<a class='copyrightText' target='_blank' href='";
+		return "<span class='copyright' style='padding: 0px'><span class='copyrightText'>" +
+			link + "https://openfreemap.org'>OpenFreeMap</a> " +
+			link + "https://www.openmaptiles.org/'>© OpenMapTiles</a> " +
+			"Datos de " + link + "https://www.openstreetmap.org/copyright'>OpenStreetMap</a>" +
+			"</span></span>";
 	}
 };

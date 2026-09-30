@@ -46,7 +46,8 @@ class ConfigurationService extends BaseService
 								'User' => $user,
 								'MainServer' => $mainServer->publicUrl,
 								'ShortUrlPattern' => App::Settings()->Map()->ShortUrlPattern,
-								'BasemapUrls' => App::Settings()->Map()->BasemapUrls);
+								'BasemapUrls' => App::Settings()->Map()->BasemapUrls,
+								'BasemapAttributions' => App::Settings()->Map()->BasemapAttributions);
 	}
 
 	public function SetUserSetting($key, $value)

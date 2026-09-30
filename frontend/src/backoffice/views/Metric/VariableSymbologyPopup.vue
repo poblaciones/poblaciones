@@ -442,12 +442,13 @@ export default {
 		},
 		reverseCustom() {
 			if (this.Variable.Symbology.PaletteType === 'P' && this.Variable.Symbology.Rainbow === 100) {
-				// Invierte los colores
-				for(var n = 0; n < this.Variable.Values.length / 2; n++) {
-					var target = (this.Variable.Values.length - 1) - n;
-					var tmp = this.Variable.Values[n].FillColor;
-					this.Variable.Values[n].FillColor = this.Variable.Values[target].FillColor;
-					this.Variable.Values[target].FillColor = tmp;
+				// Invierte los colores, excluyendo la categoría de nulos
+				var items = this.Variable.Values.filter(function (v) { return v.Value !== null; });
+				for(var n = 0; n < items.length / 2; n++) {
+					var target = (items.length - 1) - n;
+					var tmp = items[n].FillColor;
+					items[n].FillColor = items[target].FillColor;
+					items[target].FillColor = tmp;
 				}
 				this.colorSelected();
 			}

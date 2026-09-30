@@ -284,7 +284,7 @@ SegmentedMap.prototype.SetMyLocation = function (coord) {
 	this.Clipping.ResetClippingRegion();
 	this.SaveRoute.Disabled = false;
 	this.MapsApi.CreateMyLocationMarker(coord);
-	this.PanTo(coord, null, 13);
+	this.PanTo(coord, 13);
 	this.SaveRoute.UpdateRoute(coord);
 };
 
@@ -347,14 +347,14 @@ SegmentedMap.prototype.SetCenter = function (coord, zoom = null) {
 	this.MapsApi.SetCenter(coord, zoom);
 };
 
-SegmentedMap.prototype.PanTo = function (coord, offsetXpixels, zoom) {
+SegmentedMap.prototype.PanTo = function (coord, zoom) {
 	this.frame.Envelope.Min = coord;
 	this.frame.Envelope.Max = coord;
 	this.frame.Center = coord;
 	if (zoom) {
 		this.frame.Zoom = zoom;
 	}
-	this.MapsApi.PanTo(coord, offsetXpixels, zoom);
+	this.MapsApi.PanTo(coord, zoom);
 };
 
 SegmentedMap.prototype.SetZoom = function (zoom) {
@@ -824,10 +824,6 @@ SegmentedMap.prototype.SelectId = function (type, item, lat, lon, appendSelectio
 	} else {
 		throw new Error('Tipo de respuesta no reconocida.');
 	}
-/*	if (lat && lon) {
-		this.PanTo({ Lat: lat, Lon: lon });
-		this.SetZoom(15);
-	}*/
 };
 
 

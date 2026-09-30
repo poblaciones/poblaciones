@@ -1288,10 +1288,13 @@
 	}
 
 	.filterElement-close {
-		font-size: 16px;
-		margin-left: 1px !important;
+		font-size: 16px !important;
+		margin-left: 2px !important;
 		margin-right: -4px !important;
-		margin-top: -1px !important;
+		margin-top: -2px !important;
+		height: 28px !important;
+		width: 16px !important;
+		margin-bottom: -5px;
 	}
 
 	.filterElement {
