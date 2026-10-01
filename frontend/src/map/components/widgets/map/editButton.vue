@@ -54,6 +54,7 @@ export default {
 		color: white;
 		position: relative;
 		overflow: hidden;
+		border: 1px solid rgb(165 164 164 / 50%);
 		justify-content: center;
 	}
 

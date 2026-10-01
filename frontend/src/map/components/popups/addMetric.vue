@@ -27,6 +27,7 @@
 import h from '@/map/js/helper';
 import arr from '@/common/framework/arr';
 import Modal from '@/map/components/popups/modal';
+import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
 
 export default {
 	name: 'addMetricPopup',
@@ -54,13 +55,19 @@ export default {
 			this.selected = item;
 			if (item !== null) {
 				this.hide();
-				if (this.workId) {
-					window.SegMap.AddMetricByIdAndWork(item.Id, this.workId);
-				} else if (item.Type === 'B') {
-					window.SegMap.AddBoundaryById(item.Id);
-				} else {
-					window.SegMap.AddMetricById(item.Id);
-				}
+				var workId = this.workId;
+				// Se espera a que termine el history.back() del cierre del popup:
+				// si el alta se resuelve antes, su pushState de ruta queda
+				// intercalado con ese retroceso y la ruta vieja pisa al indicador.
+				EscapeCloseHandler.WhenIdle().then(function () {
+					if (workId) {
+						window.SegMap.AddMetricByIdAndWork(item.Id, workId);
+					} else if (item.Type === 'B') {
+						window.SegMap.AddBoundaryById(item.Id);
+					} else {
+						window.SegMap.AddMetricById(item.Id);
+					}
+				});
 			}
 		},
 		show(list, workId, title) {

@@ -57,6 +57,30 @@ SaveRoute.prototype.UpdateRoute = function (coord) {
 	window.history.pushState({ 'route': args }, '', urlPath);
 };
 
+// Reconcilia la URL con el estado actual del mapa después de que
+// EscapeCloseHandler consumió su entrada fantasma con history.back(). Si en el
+// medio se agregó algo a la ruta (pushState sobre la entrada fantasma), el
+// retroceso deja una URL desactualizada. Si la entrada actual es la fantasma
+// se la reemplaza, para no dejar una entrada muerta en el historial.
+SaveRoute.prototype.ResyncRoute = function () {
+	if (this.Disabled) {
+		return;
+	}
+	var args = this.calculateState();
+	if (window.location.hash === '#' + args) {
+		this.lastState = args;
+		return;
+	}
+	if (window.history.state && window.history.state.escapeCloseHandler) {
+		var urlPath = h.ensureFinalBar(document.location.pathname) + '#' + args;
+		this.lastState = args;
+		window.history.replaceState({ 'route': args }, '', urlPath);
+	} else {
+		this.lastState = null;
+		this.UpdateRoute();
+	}
+};
+
 SaveRoute.prototype.RemoveWork = function () {
 	var args = this.calculateState();
 	var pathArray = window.location.pathname.split('/');

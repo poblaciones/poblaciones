@@ -102,7 +102,7 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
 	.largeitem {
 		width: 220px;
-		height: 205px;
+		height: 220px;
 		white-space: normal;
 		padding: 0px!important;
 		border-radius: 9px !important;
@@ -111,7 +111,7 @@ export default {
 	}
 	.largeIco {
 		font-size: 50px !important;
-		margin-top: 47px;
+		margin-top: 55px;
 		color: #a2a2a2;
 	}
 	.text {
@@ -137,9 +137,9 @@ export default {
 	}
 	.iconContainer {
 		width: 220px;
-		margin-top: -8px;
+		margin-top: -6px;
 		background-color: #d0cdcd40;
-		height: 115px;
+		height: 130px;
 		overflow: hidden;
 		border-radius: 4px 4px 0px 0px;
 	}

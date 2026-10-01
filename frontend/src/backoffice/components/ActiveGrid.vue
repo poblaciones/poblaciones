@@ -115,7 +115,7 @@
 				</template>
 				<template v-else>
 					<md-button v-if="Work.CanEdit()" @click="confirmDelete" :disabled="deleteDisabled">
-						<md-icon>delete</md-icon> Borrar filas
+						<md-icon>delete</md-icon> Borrar {{ (selectedRowsCount > 1 ? selectedRowsCount : '') }} fila{{ (selectedRowsCount > 1 ? 's' : '') }}
 					</md-button>
 					<md-button @click="openDictionary">
 						<md-icon>label</md-icon> Diccionario
@@ -172,6 +172,28 @@ export default {
 		MpDropdownButton,
 		Relocate
   },
+		data() {
+			return {
+				localization: new Localization().Get(),
+				counter: 0,
+				selectedRowsCount: 0,
+				relocateDisabled: true,
+				deleteDisabled: true,
+				skipDisabled: true,
+				skipAllDisabled: true,
+				fixDisabled: true,
+				isBinding: false,
+				requiresBinding: false,
+				statusBarText: "",
+				problemText: "",
+				valuesPopupReset: false,
+				pendingDeleteColumn: null,
+				deleteColumnText: "",
+				sortState: {},
+				currentGeorreferenceEdit: {},
+				DataPager: new DataPager()
+			};
+		},
 	props: {
 		georeferenceParameters: { type: Object },
 		showingErrors: false,
@@ -410,15 +432,19 @@ export default {
     },
     updateCount(rowCount) {
       if (rowCount === undefined) {
-        rowCount = this.Grid.getdatainformation().rowscount;
+				rowCount = this.Grid.getdatainformation().rowscount;
+				if (this.Grid.getrows().length == 0) {
+					// captura el caso de los filtros sin resultados
+					rowCount = 0;
+				}
       }
       let selectedRows = 0;
 			this.skipAllDisabled = (rowCount === 0);
 			try {
         selectedRows = this.Grid.getselectedrowindexes().length;
       } catch (err) {}
-
-      let sel = selectedRows < 2 ? "" : selectedRows + " de ";
+			this.selectedRowsCount = selectedRows;
+      let selectedRowsPart = selectedRows < 2 ? "" : selectedRows + " de ";
 			if (this.showingErrors) {
 				if (selectedRows === 1) {
 					var row = this.getSelectedRowData();
@@ -432,7 +458,7 @@ export default {
         this.statusBarText = "1 fila.";
 			} else {
 			  let formatted = rowCount.toLocaleString("es");
-        this.statusBarText = sel + formatted + " filas.";
+				this.statusBarText = selectedRowsPart + formatted + " filas.";
       }
     },
     upload() {
@@ -903,27 +929,6 @@ export default {
 			var rows = obj.data;
 			return rows;
     }
-  },
-  data() {
-    return {
-      localization: new Localization().Get(),
-      counter: 0,
-			relocateDisabled: true,
-      deleteDisabled: true,
-			skipDisabled: true,
-			skipAllDisabled: true,
-      fixDisabled: true,
-      isBinding: false,
-      requiresBinding: false,
-      statusBarText: "",
-			problemText: "",
-			valuesPopupReset: false,
-			pendingDeleteColumn: null,
-			deleteColumnText: "",
-			sortState: {},
-			currentGeorreferenceEdit: {},
-      DataPager: new DataPager()
-    };
   },
   watch: {
     "Dataset.Columns"() {

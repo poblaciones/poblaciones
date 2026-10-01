@@ -29,7 +29,7 @@ class SnapshotByDatasetModel
 		$columns = $this->BuildHeaders($dataset);
 		$levels = $this->GetDatasetLevels($dataset['dat_id']);
 
-		// Valida la integraidad para dar mejores errores
+		// Valida la integridad para dar mejores errores
 		foreach($levels as $level)
 		{
 			foreach ($level['variables'] as $variable)

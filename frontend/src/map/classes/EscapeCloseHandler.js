@@ -67,8 +67,59 @@ EscapeCloseHandler.prototype.Close = function () {
 		// El cierre no vino del botón atrás (fue la X, un click afuera o ESC):
 		// hay que consumir la entrada fantasma para que el próximo atrás del
 		// usuario no quede atascado en una entrada sin efecto visible.
+		EscapeCloseHandler.pendingBacks++;
+		setTimeout(EscapeCloseHandler.expirePendingBack, 1000);
 		window.history.back();
 	}
+};
+
+// Cantidad de history.back() propios cuyo popstate todavía no se procesó.
+// El popstate de ese retroceso solo consume la entrada fantasma: no es una
+// navegación de ruta, y quien escuche popstate para restaurar el estado
+// (App.onpopstate) debe ignorarlo con ConsumePendingBack().
+EscapeCloseHandler.pendingBacks = 0;
+EscapeCloseHandler.idleWaiters = [];
+
+EscapeCloseHandler.ConsumePendingBack = function () {
+	if (EscapeCloseHandler.pendingBacks === 0) {
+		return false;
+	}
+	EscapeCloseHandler.pendingBacks--;
+	EscapeCloseHandler.flushIdleWaiters();
+	return true;
+};
+
+// Respaldo por si el popstate nunca llega: evita que el contador quede
+// desfasado y se ignore una navegación real.
+EscapeCloseHandler.expirePendingBack = function () {
+	if (EscapeCloseHandler.pendingBacks > 0) {
+		EscapeCloseHandler.pendingBacks--;
+		EscapeCloseHandler.flushIdleWaiters();
+	}
+};
+
+EscapeCloseHandler.flushIdleWaiters = function () {
+	if (EscapeCloseHandler.pendingBacks > 0) {
+		return;
+	}
+	var waiters = EscapeCloseHandler.idleWaiters;
+	EscapeCloseHandler.idleWaiters = [];
+	waiters.forEach(function (resolve) { resolve(); });
+};
+
+// Promesa que se resuelve cuando no queda ningún history.back() propio
+// pendiente. Se difiere un tick porque Close() corre desde un watcher de Vue,
+// es decir, después de que el componente llamó a hide().
+EscapeCloseHandler.WhenIdle = function () {
+	return new Promise(function (resolve) {
+		setTimeout(function () {
+			if (EscapeCloseHandler.pendingBacks === 0) {
+				resolve();
+			} else {
+				EscapeCloseHandler.idleWaiters.push(resolve);
+			}
+		}, 0);
+	});
 };
 
 EscapeCloseHandler.prototype.onKeyDown = function (e) {

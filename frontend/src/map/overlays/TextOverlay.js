@@ -181,7 +181,7 @@ TextOverlay.prototype.resolveOnClick = function () {
 	// para que v-on-clickaway (buscador, selector de indicadores, filtro
 	// por recorte) lo detecte como "afuera" y cierre el panel que esté
 	// abierto, igual que con cualquier otro clic sobre el mapa.
-	return "onClick=\"window.SegMap.SelectId('" +
+	return "onClick=\"event.isSelf = true; window.SegMap.SelectId('" +
 		this.type + "', '" + clickIdAsText + "', " + this.pos.Lat + ', '
 		+ this.pos.Lon + ", event.ctrlKey);\"";
 };

@@ -77,6 +77,7 @@
 	import WaitMessage from '@/map/components/popups/waitMessage';
 	import SegmentedMap from '@/map/classes/SegmentedMap';
 	import StartMap from '@/map/classes/StartMap';
+	import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
 	import SidebarPositionCookie from '@/map/classes/SidebarPositionCookie';
 	import LeafletApi from '@/map/leaflet/LeafletApi';
 	import WorkPanel from '@/map/components/panels/workPanel';
@@ -150,20 +151,9 @@
 					FeatureInfo: null, FeatureList: null, FeatureNavigation: this.featureNavigation
 				}
 			};
-			window.Use = { };
+			window.Use = {};
 			window.Embedded = this.LoadEmbeddedSettings();
 			window.ToggleFullscreen = this.toggleFullscreen;
-			var esModoEspecial = true;
-			if (esModoEspecial) {
-				// Importación dinámica basada en Promesas
-				import('@/common/styles/visor-material3.css')
-					.then(() => {
-						console.log('XCSS condicional cargado con éxito');
-					})
-					.catch(err => {
-						console.error('Error al cargar el archivo XCSS:', err);
-					});
-			}
 		},
 		data() {
 			return {
@@ -371,7 +361,7 @@
 						loc.$refs.suggestionsPanel.show(result.suggestions, result.reason);
 					}
 				}).finally(function () {
-						loc.queryingSuggestions = false;
+					loc.queryingSuggestions = false;
 				});
 			},
 			GetConfiguration(serverConfiguration) {
@@ -503,6 +493,12 @@
 				var loc = this;
 				this.RegisterErrorHandler();
 				window.onpopstate = function (event) {
+					if (EscapeCloseHandler.ConsumePendingBack()) {
+						if (window.SegMap) {
+							window.SegMap.SaveRoute.ResyncRoute();
+						}
+						return;
+					}
 					if (event.state !== null) {
 						var start = new StartMap(loc.work, loc.boundary, loc, loc.SetupMap);
 						start.Start();
@@ -714,6 +710,8 @@
 </script>
 <style src="@/common/styles/popovers.css"></style>
 <style src="@/common/styles/transition.css"></style>
+<style src="@/common/styles/visor-material3.css"></style>
+
 
 <style>
 	html, body {
@@ -761,11 +759,13 @@
 		letter-spacing: 0.5px;
 		margin-bottom: 8px;
 	}
+
 	.rightButton {
 		transition: right 0.3s ease;
 		position: fixed;
 		right: 0px;
 	}
+
 	.gm-fullscreen-control {
 		transform: scale(0.8);
 	}
@@ -897,10 +897,12 @@
 		color: unset !important;
 		background-color: #ffffff !important;
 	}
-	.btn .exp-high-button .active {
-		color: unset !important;
-		background-color: #ffffff !important;
-	}
+
+		.btn .exp-high-button .active {
+			color: unset !important;
+			background-color: #ffffff !important;
+		}
+
 	.exp-circles {
 		margin-top: 5px !important;
 		color: white !important;
@@ -939,6 +941,11 @@
 	.leaflet-attribution-flag {
 		width: 0px !important;
 		margin-left: -3px;
+	}
+
+	.leaflet-control-attribution {
+		font-size: 11px;
+		margin-bottom: -1px !important;
 	}
 
 	.exp-logodiv-right {
@@ -1001,9 +1008,13 @@
 		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
 		cursor: ew-resize;
 	}
+
 	.fixedBody {
-		position: absolute; top: 40px; bottom: 0px;
+		position: absolute;
+		top: 40px;
+		bottom: 0px;
 	}
+
 	.split.split-horizontal, .gutter.gutter-horizontal {
 		height: 100%;
 		width: 100%;
@@ -1048,6 +1059,7 @@
 		width: 100% !important;
 		height: 100% !important;
 	}
+
 	.optionsLabel {
 		padding-top: 10px !important;
 	}
@@ -1209,10 +1221,10 @@
 		translate: no;
 	}
 
-		.ibLinkC:hover {
-			color: #2e8cff;
-			text-decoration: none !important;
-		}
+	.ibLinkC:hover {
+		color: #2e8cff;
+		text-decoration: none !important;
+	}
 
 	.ibLinkTooltip {
 		pointer-events: all;
@@ -1251,6 +1263,7 @@
 		-ms-user-select: none;
 		user-select: none;
 	}
+
 	.logosBox {
 		bottom: 24px;
 		right: 95px;
@@ -1262,6 +1275,7 @@
 		max-width: 70%;
 		max-height: 64px;
 	}
+
 	.bottomBox {
 		position: relative;
 		/* pointer-events: none; */
@@ -1334,12 +1348,14 @@
 	.drawing-active * {
 		cursor: crosshair !important;
 	}
-	.drawing-active .ibLink:hover {
-		color: inherit !important;
-	}
-	.drawing-active .ibLinkC:hover {
-		color: inherit !important;
-	}
+
+		.drawing-active .ibLink:hover {
+			color: inherit !important;
+		}
+
+		.drawing-active .ibLinkC:hover {
+			color: inherit !important;
+		}
 
 
 	.ml0 {
@@ -1428,9 +1444,11 @@
 		pointer-events: none;
 		border-color: #cecece;
 	}
-		.close {
-						font-size: 22px;
-		}
+
+	.close {
+		font-size: 22px;
+	}
+
 	.lightButton {
 		font-size: 14px;
 		padding: 4px 4px 4px 4px !important;
@@ -1633,16 +1651,18 @@
 	.lihover {
 		background: #efefef;
 	}
+
 	.itemSearchCategoryL {
 		background-color: #fafafa;
 	}
+
 	.itemSearchCategoryB {
 		background-color: #f5f5f5;
 	}
 
-		.thinScroll::-webkit-scrollbar-thumb:hover {
-			background: #999;
-		}
+	.thinScroll::-webkit-scrollbar-thumb:hover {
+		background: #999;
+	}
 
 	.thinScroll::-webkit-scrollbar {
 		width: 6px;
@@ -1665,7 +1685,6 @@
 		max-height: calc(100% - 95px - 80px);
 		display: flex;
 		top: 60px;
-
 		width: calc(30% - 2.5px);
 		min-width: 292px;
 		position: absolute;
@@ -1687,7 +1706,7 @@
 
 
 	.copyright {
-		padding: 0px 5px;
+		padding: 0px 0px 0px 1px;
 		user-select: none;
 		height: 14px;
 		line-height: 14px;
@@ -1695,7 +1714,7 @@
 		opacity: 0.9;
 		border-top-left-radius: 6px;
 		font-family: Roboto, Arial, sans-serif;
-		font-size: 10px;
+		font-size: 11px;
 		white-space: nowrap;
 		vertical-align: middle;
 	}
@@ -1751,17 +1770,20 @@
 		top: 0;
 		bottom: auto !important;
 	}
+
 	.pointer-ready-css {
-				cursor: unset!important;
+		cursor: unset !important;
 	}
 	/* Para la escala */
 	.leaflet-control-attribution {
 		margin-left: -6px !important;
 		padding-left: 5px !important;
 	}
+
 	.leaflet-control-scale {
 		order: 1;
 	}
+
 	.leaflet-control-scale-line {
 		padding-bottom: 1px !important;
 		padding-left: 8px !important;
@@ -1786,6 +1808,7 @@
 		display: flex;
 		flex-direction: row-reverse;
 	}
+
 	.leaflet-control-scale-line::before {
 		content: '';
 		position: absolute;
@@ -1799,25 +1822,25 @@
 		z-index: -1; /* la línea queda por detrás del texto */
 	}
 
-		/* estilos para la captura de mouse */
+	/* estilos para la captura de mouse */
 	/*z-index: 1000 !important;*/
-.leaflet-layer {
-
+	.leaflet-layer {
 		pointer-events: auto;
 	}
+
 	.leaflet-marker-pane {
-		pointer-events: none!important;
-				display: none;
+		pointer-events: none !important;
+		display: none;
 	}
 
-		/* estilo para arreglar los punteros */
+	/* estilo para arreglar los punteros */
 	.leaflet-dragging {
 		cursor: move !important;
 	}
 
-	.leaflet-dragging .leaflet-grab {
-		cursor: move!important;
-	}
+		.leaflet-dragging .leaflet-grab {
+			cursor: move !important;
+		}
 
 	.leaflet-grab {
 		cursor: default;
@@ -1827,7 +1850,7 @@
 		cursor: unset !important;
 	}
 
-		.leaflet-layer {
-		cursor: unset!important;
+	.leaflet-layer {
+		cursor: unset !important;
 	}
 </style>

@@ -360,6 +360,26 @@ FeatureSelector.prototype.markerMouseOut = function (event) {
 	}
 };
 
+// El canvas de deck.gl no recibe los eventos del mouse, por lo que onHover no se dispara:
+// el cursor se resuelve acá, a partir del movimiento del mapa.
+FeatureSelector.prototype.updateCursor = function (event) {
+	if (event.originalEvent.buttons !== 0) {
+		return;
+	}
+	var obj = this.getDeckElement(event);
+	if (obj) {
+		if (obj.properties) {
+			obj = obj.properties;
+		}
+		var metric = window.SegMap.GetActiveMetricByVariableId(obj.VID);
+		if (metric.SelectedShowInfo()) {
+			window.SegMap.SetCursor('pointer', 'default');
+			return;
+		}
+	}
+	window.SegMap.SetCursor('default', 'pointer');
+};
+
 FeatureSelector.prototype.selectorMoved = function (event) {
 	var loc = window.SegMap.MapsApi.selector;
 	if (loc.disabled) {
@@ -376,6 +396,7 @@ FeatureSelector.prototype.selectorMoved = function (event) {
 	// o porque ya fue procesado ese lugar;
 	//return;
 
+	loc.updateCursor(event);
 	loc.tooltipLocation = h.getPosition(event);
 	loc.tooltipEvent = event;
 

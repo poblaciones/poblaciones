@@ -533,6 +533,10 @@ SegmentedMap.prototype.BoundsChanged = function () {
 
 SegmentedMap.prototype.SetCursor = function (cursor, previousRequiredCursor = null) {
 	var current = window.map.style.cursor;
+	// Sin cursor inline, el mapa muestra el predeterminado.
+	if (current === '') {
+		current = 'default';
+	}
 	if (previousRequiredCursor) {
 		if (current !== previousRequiredCursor) {
 			return;
@@ -541,15 +545,8 @@ SegmentedMap.prototype.SetCursor = function (cursor, previousRequiredCursor = nu
 	if (current !== cursor) {
 		window.map.style.cursor = cursor;
 	}
-	/* código para detectar dónde está definiéndose el puntero
-	document.addEventListener('mousemove', (e) => {
-  const el = document.elementFromPoint(e.clientX, e.clientY);
-  const cursor = getComputedStyle(el).cursor;
-  if (cursor !== 'auto' && cursor !== 'default') {
-    console.log('Hovering over element with cursor:', cursor, el);
-  }
-});*/
 };
+
 SegmentedMap.prototype.GetCursor = function () {
 	return window.map.style.cursor;
 };
