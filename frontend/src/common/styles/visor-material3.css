@@ -25,7 +25,7 @@
 .mpHeader {
 	padding-top: 14px !important;
 	padding-right: 8px !important;
-	padding-bottom: 8px !important;
+	padding-bottom: 0px !important;
 	padding-left: 12px !important;
 	border-bottom: 0px;
 }
@@ -116,7 +116,7 @@
 .dropDownMenuIcon {
 	right: 10px;
 	top: 9px;
-	color: #252422;
+	color: #666;
 	position: absolute;
 	padding-top: 3px;
 	font-size: 14px;
@@ -128,7 +128,7 @@
 	top: 6px;
 	width: 25px;
 	height: 25px;
-	color: #252422 !important;
+	color: #666 !important;
 	font-size: 14px;
 }
 

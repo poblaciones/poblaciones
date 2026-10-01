@@ -1,7 +1,13 @@
+v5.5 (2026-09-30)
 - Soporte para mapa base vectorial.
 - Soporte para teclado en panel de insertar indicador, buscar y filtrar.
 - Material 3.
 - Delimitaciones tienen url estable y ark.
+- Fix a botón de información y botón de bienvenida en el zócala de cartografía.
+- Reorganización de metadatos y botones de publicar.
+- Fix a descripción del usuario de última modificación.
+- Fix a inicio de sesión en ventana de incógnito.
+- Fix a matener usuario entre sesiones.
 
 v5.4 (2026-09-21)
 - Soporte para basemap (proveedores de tiles) que usen api-key.

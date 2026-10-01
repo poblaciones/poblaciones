@@ -12,7 +12,7 @@
 					<button type="button" class="btn btn-default btn-accent smallButton" @click="showAddToMap">{{ addToMapLabel }}</button>
 					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="type === 'W' && hasMetrics"
 									style="color: #FFF"
-									title="'Información de ' + metadata.Name" @click="clickFuente">
+									:title="'Información de ' + metadata.Name" @click="clickFuente">
 						<i class="fas fa-link"></i>
 					</button>
 

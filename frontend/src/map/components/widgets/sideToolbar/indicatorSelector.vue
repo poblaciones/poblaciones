@@ -1136,10 +1136,6 @@ export default {
 		padding:  4px 15px 20px 15px;
 		min-height: 150px;
 	}
-.panel-body.thinScroll::-webkit-scrollbar { width: 6px; }
-.panel-body.thinScroll::-webkit-scrollbar-track { background: #f1f1f1; }
-.panel-body.thinScroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-.panel-body.thinScroll::-webkit-scrollbar-thumb:hover { background: #999; }
 
 /* Chips */
 	.chips-zone {

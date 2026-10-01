@@ -111,8 +111,8 @@
 			// No es computed: homeUrl() lee estado global no reactivo y un valor cacheado queda desactualizado
 			getHelpItems() {
 				var ret = [];
-				ret.push({ label: 'Inicio', key: 'INICIO', href: this.authenticate.homeUrl(), target: '_blank' });
-				ret.push({ label: 'Bienvenida', key: 'BIENVENIDA' });
+				ret.push({ label: 'Inicio', key: 'INICIO', href: this.authenticate.homeUrl(), icon: 'fas fa-home', target: '_blank' });
+				ret.push({ label: 'Bienvenida', key: 'BIENVENIDA', icon: 'fas fa-comment-alt' });
 				if (!this.helpLinks) {
 					return ret;
 				}
@@ -150,11 +150,11 @@
 				}
 				if (this.helpLinks.AboutLink) {
 					ret.push({ separator: true });
-					ret.push(this.buildHelpLinkItem(this.helpLinks.AboutLink, 'ABOUT'));
+					ret.push(this.buildHelpLinkItem(this.helpLinks.AboutLink, 'ABOUT', 'fas fa-question-circle'));
 				}
 				if (this.helpLinks.ContactLink) {
 					ret.push({ separator: true });
-					ret.push(this.buildHelpLinkItem(this.helpLinks.ContactLink, 'CONTACTO'));
+					ret.push(this.buildHelpLinkItem(this.helpLinks.ContactLink, 'CONTACTO', 'fas fa-comments'));
 				}
 				return ret;
 			},

@@ -2,7 +2,7 @@
 	<Modal :title="title" ref="showPopup" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="list">
 			<div class="listContainer">
-				<div style="max-height: 50vh; min-height: 240px; overflow: auto;
+				<div class="thinScroll" style="max-height: 50vh; min-height: 240px; overflow: auto;
 					 border: 1px solid #e2e2e2;">
 					<table class="localTable">
 						<tbody>
@@ -115,8 +115,7 @@ export default {
 	padding: 15px;
 }
 
-.selectedRow {
-	background-color: #66615b;
-	color: hsla(0,0%,100%,.7);
-}
+	.selectedRow {
+		background: #f0f0f0;
+	}
 </style>

@@ -244,8 +244,7 @@ export default {
 	}
 
 	.selectedRow {
-		background-color: #66615b;
-		color: hsla(0,0%,100%,.7);
+		background: #f0f0f0;
 	}
 	.itemHeader {
 		text-align: center;

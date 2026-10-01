@@ -33,7 +33,9 @@
 													:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 													:toolbarStates="toolbarStates"></SummaryPanel>
 					</div>
-					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor" :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics" :clipping="clipping" :sidebarPosition="sidebarPosition" @update:sidebarPosition="changeSidebarPosition"></SideToolbar>
+					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor"
+											 :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics"
+											 :clipping="clipping" :sidebarPosition="sidebarPosition" @update:sidebarPosition="changeSidebarPosition"></SideToolbar>
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
@@ -57,7 +59,7 @@
 													:image="ownerLogo.Image"
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-					<FullScreenButton v-if="!Embedded.Readonly" class="exp-hiddable-unset" :fullscreen="fullscreen" />
+					<FullScreenButton v-if="!Embedded.Readonly && mapLoaded" class="exp-hiddable-unset" :fullscreen="fullscreen" />
 
 					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
 										 :metrics="metrics" :toolbarStates="toolbarStates" />
@@ -168,6 +170,7 @@
 				fullscreen: false,
 				teleport: true,
 				pageOnly: false,
+				mapLoaded: false,
 
 				suggestionCheckInterval: null,
 				queryingSuggestions: false,
@@ -566,17 +569,8 @@
 				} else {
 					window.SegMap.CheckSmallDevice();
 				}
-				/*
-				var loc = this;
-				this.selfCheckTimer = setInterval(function () {
-					if (window.SegMap.MapsApi.__ob__ || window.SegMap.__ob__) {
-						alert('got observed');
-						debugger;
-						clearInterval(loc.selfCheckTimer);
-					}
-				}, 100);
-				*/
 				this.$refs.mapSelector.InitializeMapControl();
+				this.mapLoaded = true;
 			},
 			RegisterErrorHandler() {
 				Vue.config.errorHandler = err.HandleError;
@@ -1645,21 +1639,23 @@
 	.itemSearchCategoryB {
 		background-color: #f5f5f5;
 	}
+
+		.thinScroll::-webkit-scrollbar-thumb:hover {
+			background: #999;
+		}
+
 	.thinScroll::-webkit-scrollbar {
 		width: 6px;
 		border-top-right-radius: 2px;
 	}
 
 	.thinScroll::-webkit-scrollbar-thumb {
-		background: #777;
-		border-top-right-radius: 2px;
-		border-bottom-right-radius: 2px;
+		background: #ccc;
+		border-radius: 3px;
 	}
 
 	.thinScroll::-webkit-scrollbar-track {
-		background: #ddd;
-		border-top-right-radius: 2px;
-		border-bottom-right-radius: 2px;
+		background: #f1f1f1;
 	}
 
 	.floatRightPanel {
