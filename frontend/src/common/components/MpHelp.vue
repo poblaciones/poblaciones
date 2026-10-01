@@ -24,7 +24,7 @@ export default {
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
 	.underline {
-		margin-top: 0.65rem;
+		margin-top: 0.3rem;
 		margin-left: -0.05rem;
 		color: #b1b1b1;
 		position: absolute;

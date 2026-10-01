@@ -7,13 +7,18 @@
 </template>
 
 <script>
+import session from '@/common/framework/session';
 
 export default {
 	name: 'OpenAuth',
 	components: {
 	},
 	mounted() {
-		},
+		window.addEventListener('message', this.receiveMessage);
+	},
+	beforeDestroy() {
+		window.removeEventListener('message', this.receiveMessage);
+	},
 	props: {
 		terms: ''
 	},
@@ -32,6 +37,22 @@ export default {
 		}
 	},
 	methods: {
+		receiveMessage(event) {
+			if (event.source !== this.keepWindow) {
+				return;
+			}
+			if (event.origin !== new URL(window.host).origin) {
+				return;
+			}
+			if (!event.data || event.data.type !== 'oauthLogin' || !event.data.sessionId) {
+				return;
+			}
+			session.SetSessionForUrl(window.host, event.data.sessionId);
+			if (event.data.rememberToken) {
+				session.SetRememberForUrl(window.host, event.data.rememberToken);
+			}
+			document.location = this.target;
+		},
 		show(url, checkTerms) {
 			if (checkTerms && !this.terms) {
 				alert("Debe aceptar los 'Términos y condiciones' para poder continuar.");

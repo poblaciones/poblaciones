@@ -4,6 +4,10 @@
 			<md-icon>tune</md-icon>
 			<md-tooltip md-direction="bottom">Personalizar</md-tooltip>
 		</md-button>
+		<md-button class="md-icon-button actionIcon" @click="openMetadata">
+			<md-icon>label</md-icon>
+			<md-tooltip md-direction="bottom">Metadatos</md-tooltip>
+		</md-button>
 		<md-button class="md-icon-button actionIcon" @click="openStats">
 			<md-icon>bar_chart</md-icon>
 			<md-tooltip md-direction="bottom">Estadísticas</md-tooltip>
@@ -36,7 +40,10 @@ export default {
 	methods: {
 		openCustomize() { this.$refs.customizePopup.show(); },
 		openStats() { this.$refs.statisticsPopup.show(); },
-		openShare() { this.$refs.sharePopup.show(); }
+		openShare() { this.$refs.sharePopup.show(); },
+		openMetadata() {
+			this.$router.push({ path: '/cartographies/' + window.Context.CurrentWork.properties.Id + '/metadata' });
+		},
 	}
 };
 </script>

@@ -57,7 +57,7 @@ export default {
 		justify-content: center;
 
 		&__mask {
-			background: rgba(#000,.05);
+			background: rgba(#000,.50);
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -68,9 +68,10 @@ export default {
 		&__wrapper {
 			position: relative;
 			width: 65vw;
-			max-width: 100%;
+			max-width: min(850px, 100%);
 			max-height: 85vh;
 			background: #fff;
+			overflow: hidden;
 			color: #333;
 			display: flex;
 			border: 1px solid rgb(165 164 164 / 50%);

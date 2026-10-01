@@ -10,6 +10,7 @@ use minga\framework\Date;
 use minga\framework\Str;
 use minga\framework\Log;
 use minga\framework\Request;
+use minga\framework\Params;
 
 
 class Remember
@@ -19,21 +20,33 @@ class Remember
 	const CookieName = 'remember';
 	const SectionName = 'Remember';
 
+	private static $issuedValue = '';
+
 	public static function SetRemember($account)
 	{
 		if (!Context::Settings()->allowPHPsession)
-			return;
+			return '';
 
 		self::CleanExpiredSections($account);
 
 		$token = random_bytes(32);
 		self::SetAccount($account, $token);
-		self::SetCookie($account->user, $token);
+		$value = self::BuildValue($account->user, $token);
+		Cookies::SetCookie(self::CookieName, $value, self::ValidRenew);
+		self::$issuedValue = $value;
+		return $value;
+	}
+
+	public static function TakeIssuedValue()
+	{
+		$value = self::$issuedValue;
+		self::$issuedValue = '';
+		return $value;
 	}
 
 	public static function Remove($account)
 	{
-		$token = self::GetTokenFromCookie($account);
+		$token = self::GetTokenFromClient($account);
 		if($token == '')
 			return self::RemoveAndFail();
 
@@ -46,7 +59,7 @@ class Remember
 		if (!Context::Settings()->allowPHPsession)
 			return true;
 
-		$cookie = Cookies::GetCookie(self::CookieName);
+		$cookie = self::GetClientValue();
 		//Si no hay cookie...
 		if($cookie == '')
 			return false;
@@ -118,9 +131,9 @@ class Remember
 	}
 
 
-	private static function GetTokenFromCookie($account)
+	private static function GetTokenFromClient($account)
 	{
-		$cookie = Cookies::GetCookie(self::CookieName);
+		$cookie = self::GetClientValue();
 		if($cookie == '')
 			return '';
 
@@ -163,13 +176,22 @@ class Remember
 		return $ret;
 	}
 
-	private static function SetCookie($user, $token)
+	private static function BuildValue($user, $token)
 	{
 		$key = Key::loadFromAsciiSafeString(Context::Settings()->Keys()->GetRememberKey());
 		$enc = Crypto::encrypt($user, $key, true);
 
-		$value = base64_encode($enc) . '|' . base64_encode($token);
-		Cookies::SetCookie(self::CookieName, $value, self::ValidRenew);
+		return base64_encode($enc) . '|' . base64_encode($token);
+	}
+
+	// Sin cookies de terceros (incógnito, Safari) el valor llega por cabecera desde el almacenamiento de la aplicación.
+	private static function GetClientValue()
+	{
+		$cookie = Cookies::GetCookie(self::CookieName);
+		if ($cookie != '')
+			return $cookie;
+
+		return (string)Params::SafeServer('HTTP_REMEMBER_TOKEN', '');
 	}
 
 

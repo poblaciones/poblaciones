@@ -2,12 +2,11 @@
 	<div>
 		<invoker ref="invoker"></invoker>
 		<title-bar :title="resolveTitle" :showReadonlyIndexedWarning="readOnlyCausedByIndexing()" :help="`<p>
-						Los datos publicados en la plataforma deben poder ser referenciado por quienes hacen
+						Los metadatos permite que los datos publicados puedan ser referenciado por quienes hacen
 						uso de ellos.
 						</p><p>
-							Para ello, cada conjunto de datos posee un conjunto de metadatos que
-							describe su origen, autores y contenidos. Estos metadatos se organizan para su carga
-							en Contenido, Atribución, Resumen, Fuentes y Adjuntos.
+							Para ello, el conjunto de metadadatos describe el origen, autores y contenidos de la cartografía. Estos
+							metadatos se organizan para su carga en Contenido, Atribución, Instituciones, Resumen, Fuentes y Adjuntos.
 						</p>` + extraHelp('MetadataSection')" />
 
 		<div :class="(hasCurrentWork ? 'app-container' : 'popupFrame')">
@@ -138,7 +137,7 @@ export default {
 		},
 		resolveTitle() {
 			if (this.hasCurrentWork) {
-				return 'Información';
+				return 'Metadatos';
 			} else {
 				return this.Metadata.properties.Title + ". Id: " + this.Metadata.properties.Id;
 			}

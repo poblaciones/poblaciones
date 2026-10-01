@@ -4,7 +4,7 @@
     <boardal v-if="modal.isOpen" ref="dal" :has-mask="modal.hasMask" :can-click-mask="modal.canClickMask" :has-x="modal.hasX" @toggle="toggleModal">
 			<article v-cloak>
 				<section>
-					<div class="articleTitle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
@@ -34,7 +34,7 @@
 					</div>
 				</section>
 				<section>
-					<div class="articleTitle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
@@ -56,7 +56,7 @@
 					</div>
 				</section>
 				<section style="padding-bottom: 0px">
-					<div class="articleTitle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
@@ -73,7 +73,7 @@
 					</div>
 				</section>
 				<section style="padding-bottom: 0px">
-					<div class="articleTitle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
@@ -103,7 +103,7 @@
 					</div>
 				</section>
 				<section>
-					<div class="articleTitle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
@@ -132,7 +132,7 @@
 					</div>
 				</section>
 				<section style="padding-bottom: 0px">
-					<div class="articleTitle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
@@ -162,7 +162,7 @@
 					</div>
 				</section>
 				<section style="padding-bottom: 0px">
-					<div class="articleTitle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="toggleModal">
 							<close-icon title="Cerrar" />
 						</div>
@@ -294,6 +294,9 @@ export default {
     // xray: 'setCssVars'
   },
     methods: {
+      show() {
+        this.toggleModal();
+      },
 			nextOrToggle() {
 				if (!this.modal.isOpen) {
 					return;
@@ -428,12 +431,15 @@ article {
 .articleContent {
   position: relative; padding-left: 18px; margin-right: 10px;
 }
+	.article {
+		border-radius: 12px!important;
+	}
 	.articleTitle {
 		padding: 6px 0 6px 12px;
 		font-size: 25px;
 		font-weight: 100;
-		border-top-left-radius: 3px;
-		border-top-right-radius: 3px;
+		border-top-left-radius: 12px;
+		border-top-right-radius: 12px;
 		margin: -10px -10px 30px -10px;
 		background-color: #00A0D2;
 		color: #ffffff;
@@ -447,7 +453,7 @@ section {
   width: 100%;
   visibility: hidden;
   flex: 0 0 100%;
-  font-size: 18px;
+  font-size: 16px;
   padding: 10px;
   overflow: auto;
   will-change: transform;

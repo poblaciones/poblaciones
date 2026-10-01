@@ -3,24 +3,19 @@
 		<div>
 			<div v-if="metadata !== null" ref="barBody" class="panel card workPanelBody"
 					 :style="'    text-shadow: rgb(118 118 118) 0px 0px 5px;rgba(76, 76, 76, 0.32) 0px 0px 6px 0px inset; background-color: ' + backgroundColor ">
-				<div class="floatBox pull-right exp-hiddable-block" style="margin-top: -1px">
-					<button type="button" class="btn smallButton" :class="spaceRight" @click="showAddToMap">{{ addToMapLabel }}</button>
-					<div style="position: absolute; top: 10px; right: 5px; zoom: 1.22;" v-if="hasOnboarding()">
-						<button type="button" class="btn btn-default btn-xs"
-										style="border-color: #FFF"
-										title="Bienvenida" @click="showOnboarding()">
-							<help-circle-icon style="color: #fff" title="Bienvenida" />
-						</button>
-					</div>
-					<div class="metadataInfo" style="position: relative; z-index: 10;" v-if="type === 'W' && hasMetrics" :style="metadataInfoWidthStyle">
-						<div class="sourceInfo2 exp-hiddable-block" :style="getMetadataStyle()">
-							<a href="#" :title="'Información de ' + metadata.Name"
-								 @click="clickFuente" style="color: #FFF">
-								<link-icon />
-								Información
-							</a>
-						</div>
-					</div>
+				<div class="floatBox pull-right btn-group exp-hiddable-block" style="margin-top: -1px">
+					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="hasOnboarding()"
+									style="color: #FFF"
+									title="Bienvenida" @click="showOnboarding">
+						<help-circle-icon style="color: #fff" title="Bienvenida" />
+					</button>
+					<button type="button" class="btn btn-default btn-accent smallButton" @click="showAddToMap">{{ addToMapLabel }}</button>
+					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="type === 'W' && hasMetrics"
+									style="color: #FFF"
+									title="'Información de ' + metadata.Name" @click="clickFuente">
+						<i class="fas fa-link"></i>
+					</button>
+
 				</div>
 				<div v-if="institutionsList" class="littleRow preTitleRow">
 					{{ institutionsList }}
@@ -38,7 +33,6 @@
 </template>
 
 <script>
-import LinkIcon from 'vue-material-design-icons/Link.vue';
 import Onboarding from '@/map/components/popups/onboarding';
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircle.vue';
 import dom from '@/common/framework/dom';
@@ -69,18 +63,10 @@ export default {
 		'backgroundColor'
 	],
 	components: {
-		LinkIcon,
 		Onboarding,
 		HelpCircleIcon
 	},
 	computed: {
-		spaceRight() {
-			if (this.hasOnboarding()) {
-				return 'spaceNextOb';
-			} else {
-				return 'spaceNext';
-			}
-		},
 		addToMapLabel() {
 			if (this.type === 'B') {
 				return 'Delimitaciones';
@@ -171,16 +157,7 @@ export default {
 			return this.work.Current.Onboarding.Enabled;
 		},
 		showOnboarding() {
-			this.$refs.Onboarding.toggleModal();
-		},
-		getMetadataStyle() {
-			if (this.showButtonsInSingleRow()) {
-				return 'margin-top: -24px; margin-left: -90px;';
-			} else if (this.showButtonsInDoubleRow()) {
-				return 'margin-top: 3px';
-			} else {
-				return 'margin-top: 8px';
-			}
+			this.$refs.Onboarding.show();
 		},
 		removeFromRoute() {
 			if (this.type === 'W') {

@@ -7,6 +7,13 @@ module.exports = {
 			}
 			params.headers['session-id'] = s;
 		}
+		var r = this.GetRememberForUrl(url);
+		if (r) {
+			if (!params.headers) {
+				params.headers = {};
+			}
+			params.headers['remember-token'] = r;
+		}
 		return params;
 	},
 	ReceiveSession(url, res) {
@@ -20,6 +27,19 @@ module.exports = {
 		const parser = new URL(url);
 		var key = parser.host;
 		return localStorage.getItem("sessionId_" + key);
+	},
+	GetRememberForUrl(url) {
+		return localStorage.getItem(this.RememberKey(url));
+	},
+	SetRememberForUrl(url, token) {
+		localStorage.setItem(this.RememberKey(url), token);
+	},
+	ClearRememberForUrl(url) {
+		localStorage.removeItem(this.RememberKey(url));
+	},
+	RememberKey(url) {
+		const parser = new URL(url);
+		return "rememberToken_" + parser.host;
 	},
 	SetSessionForUrl(url, sessionId) {
 		const parser = new URL(url);

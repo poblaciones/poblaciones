@@ -12,6 +12,11 @@
 		font-size: 14px!important;
 	}
 
+.largeitem .md-button-content {
+	flex-direction: column !important;
+	gap: 0px !important;
+}
+
 .full-row-separator {
 	font-size: 12px;
 	text-transform: uppercase;
@@ -133,7 +138,7 @@
 	}
 
 .md-dialog-title {
-	padding: 20px 22px 0px !important;
+	padding: 20px 15px 0px !important;
 }
 
 .v-sidebar-menu.white-theme {

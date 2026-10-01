@@ -102,20 +102,21 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
 	.largeitem {
 		width: 220px;
-		height: 202px;
+		height: 205px;
 		white-space: normal;
+		padding: 0px!important;
 		border-radius: 9px !important;
 		margin-left: 0px;
 		margin-right: 15px;
 	}
 	.largeIco {
 		font-size: 50px !important;
-		margin-top: 38px;
+		margin-top: 47px;
 		color: #a2a2a2;
 	}
 	.text {
 		text-align: left;
-		line-height: 1.15rem;
+		line-height: 1.1rem;
 		font-size: 13px;
 		height: 34px;
 		overflow: hidden;
@@ -126,7 +127,7 @@ export default {
 	}
 	.edited {
 		font-size: 12px;
-		line-height: 1.15rem;
+		line-height: 1.1rem;
 		margin-top: 8px;
 		color: #aaa;
 		text-align: left;
@@ -136,20 +137,18 @@ export default {
 	}
 	.iconContainer {
 		width: 220px;
+		margin-top: -8px;
 		background-color: #d0cdcd40;
-		margin-top: -98px;
-		height: 105px;
+		height: 115px;
 		overflow: hidden;
 		border-radius: 4px 4px 0px 0px;
 	}
 	.textbox {
-		position: absolute;
 		padding: 10px 15px ;
 	}
 	.largeitem:hover {
 		box-shadow: 0 3px 3px -2px rgba(0, 0, 0, .20), 0 3px 4px 0 rgba(0, 0, 0, .14), 0 1px 8px 0 rgba(0, 0, 0, .12);
 	}
-
 	.largeitem.md-button:not([disabled]).md-focused:before, .md-button:not([disabled]):active:before, .md-button:not([disabled]):hover:before {
 		background-color: #d0d0d0;
 		opacity: .15;
@@ -159,6 +158,6 @@ export default {
 		height: 260px;
 		width: 380px;
 		pointer-events: none;
-		margin-top: -70px;
+		margin-top: -50px;
 	}
 </style>

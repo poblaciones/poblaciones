@@ -48,12 +48,12 @@
 									</div>
 									<div class="md-layout-item md-size-100">
 										<div class="md-layout formRowCompact">
-											<div class="md-layout-item md-size-50">
+											<div class="md-layout-item md-size-100">
 												<md-button class="md-accent md-raised fullRowButton" @click="googleSignup" style="width: 96%!important;">
 													Registrarse con Google
 												</md-button>
 											</div>
-											<div class="md-layout-item md-size-50">
+											<div class="md-layout-item md-size-50" v-if="useFacebook">
 												<md-button class="md-primary md-raised fullRowButton floatRight" @click="facebookSignup">
 													Registrarse con Facebook
 												</md-button>
@@ -114,6 +114,9 @@ export default {
 		}
 	},
 	computed: {
+		useFacebook() {
+			return false;
+		}
 	},
 	methods: {
 		messageClass(value = false) {

@@ -1,5 +1,6 @@
 const axiosClient = require('./axiosClient');
 const login = require('./redirectLogin');
+const session = require('@/common/framework/session');
 
 module.exports = {
 	loadHeaderBar(setter) {
@@ -11,6 +12,7 @@ module.exports = {
 				axiosClient.getPromise(serverConfiguration.Server + '/services/backoffice/GetConfiguration', {},
 					'acceder a la sesión activa').then(function (res) {
 						if (res.User.Logged === false) {
+							session.ClearRememberForUrl(serverConfiguration.Server);
 							login.redirectLogin();
 						} else {
 							res.DynamicServer = serverConfiguration.Server;
@@ -47,6 +49,9 @@ module.exports = {
 	},
 	logoff() {
 		var url = window.host + '/authenticate/logoff';
-		document.location = url;
+		axiosClient.postPromise(url, {}, 'cerrar la sesión').then(function (homeUrl) {
+			session.ClearRememberForUrl(url);
+			document.location = homeUrl;
+		});
 	}
 };

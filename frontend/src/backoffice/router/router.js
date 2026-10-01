@@ -90,7 +90,7 @@ export const constantRouterMap = [
 		redirect: '/cartographies/:workId/metadata/content',
 		icon: 'fa fa-tag',
 		name: 'Agregar información complementaria',
-		hidden: false,
+		hidden: true,
 		children: [
 			{
 				path: '/cartographies/:workId/metadata/content',

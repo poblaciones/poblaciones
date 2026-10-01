@@ -1,17 +1,17 @@
 <template>
 	<div class="sidebarRoot">
-		<div class="topMenu">
-			<sidebar-menu :menu="topMenuItems" theme="white-theme" style="height: unset!important"
-										:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
-		</div>
 		<div class="bottomMenu">
 			<sidebar-menu v-if="bottomMenuItems.length > 0" :menu="bottomMenuItems" theme="white-theme" style="height: unset!important"
 										:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
 			<import-popup ref="importPopup"></import-popup>
-			<div style="display: flex; padding: 6px; padding-left: 12px; background-color: #efefef; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+			<div class="toolbar">
 				<backoffice-links></backoffice-links>
 
 			</div>
+		</div>
+		<div class="topMenu">
+			<sidebar-menu :menu="topMenuItems" theme="white-theme" style="height: unset!important"
+										:collapsed="false" @collapse="onCollapse" @itemClick="onItemClick" :showChild="true" />
 		</div>
 
 		<stepper ref="stepper"></stepper>
@@ -402,4 +402,9 @@ export default {
 	text-overflow: ellipsis;
 }
 
+	.toolbar {
+		display: flex;
+		padding: 10px 6px 0px 12px;
+		margin-bottom: -4px;
+	}
 </style>

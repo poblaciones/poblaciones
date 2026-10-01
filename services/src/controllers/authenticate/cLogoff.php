@@ -22,5 +22,8 @@ class cLogoff extends cController
 
 	public function Post()
 	{
+		Session::Logoff();
+
+		return Links::GetHomeUrl();
 	}
 }

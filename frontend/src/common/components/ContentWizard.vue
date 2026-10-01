@@ -8,7 +8,7 @@
 				</template>
 
 				<section v-for="currentStep in steps" :key="currentStep.Id" style="overflow: hidden">
-					<div class="articleTitle" :style="titleStyle">
+					<div class="titleDialog step-header">
 						<div class="closeButton" @click="hide">
 							<close-icon title="Cerrar" />
 						</div>
@@ -165,9 +165,6 @@ export default {
 		currentTitle() {
 			var current = this.steps[this.step - 1];
 			return current ? current.Name : '';
-		},
-		titleStyle() {
-			return 'background-color: ' + this.backgroundColor;
 		},
 		keymap() {
 			return {
@@ -380,11 +377,15 @@ article {
 	font-size: 18px;
 	margin-bottom: 1.2em;
 }
+	.article {
+		border-radius: 12px !important;
+	}
+
 .articleTitle {
 	padding: 6px 0 6px 12px;
 	font-size: 25px;
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
+	border-top-left-radius: 12px;
+	border-top-right-radius: 12px;
 	font-weight: 100;
 	margin: -10px -10px 29px -10px;
 	color: #ffffff;
@@ -397,7 +398,7 @@ section {
 	width: 100%;
 	visibility: hidden;
 	flex: 0 0 100%;
-	font-size: 18px;
+	font-size: 16px;
 	padding: 10px;
 	overflow: auto;
 	will-change: transform;

@@ -63,8 +63,8 @@
 						</div>
 						<div class="md-layout-item md-size-100">
 							<div class="md-layout formRowCompact">
-								<div class="md-layout-item md-size-50">
-									<md-button class="md-accent md-raised fullRowButton" @click="googleLogin" style="width: 96%!important;">
+								<div class="md-layout-item md-size-100">
+									<md-button class="md-accent md-raised fullRowButton" @click="googleLogin">
 										Ingresar con Google
 									</md-button>
 								</div>

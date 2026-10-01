@@ -40,7 +40,7 @@ class cOauth extends cController
 					$this->oauth->RedirectErrorNoEmail();
 
 				$this->LoginOrRegister($data);
-				$this->oauth->RedirectSuccess($data, $state);
+				$this->oauth->RedirectSuccess($data, $state, Remember::TakeIssuedValue());
 			}
 		}
 		$this->oauth->RedirectError();

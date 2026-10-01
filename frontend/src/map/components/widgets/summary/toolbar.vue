@@ -37,13 +37,11 @@
 			</template>
 		</mp-dropdown-menu>
 		<div style="clear: both"></div>
-		<tour ref="Tour"></tour>
 	</div>
 </template>
 
 <script>
 	import arr from '@/common/framework/arr';
-	import tour from '@/map/components/popups/tour';
 
 	import MapExport from '@/map/classes/MapExport';
 	import auth from '@/common/js/authentication';
@@ -64,7 +62,6 @@
 			'metrics'
 		],
 		components: {
-			tour,
 		},
 		methods: {
 			switchMapProvider() {
@@ -73,7 +70,7 @@
 				});
 			},
 			showTutorial() {
-				this.$refs.Tour.toggleModal();
+				window.Popups.Tour.show();
 			},
 			showEmbeddedMapPopUp() {
 				window.Popups.Embedding.show();

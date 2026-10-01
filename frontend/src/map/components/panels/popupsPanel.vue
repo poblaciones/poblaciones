@@ -11,6 +11,8 @@
 		<MetricCustomize ref="showCustomize" :backgroundColor="backgroundColor" />
 		<AddMetric ref="addMetric" :backgroundColor="backgroundColor" />
 
+		<Tour ref="showTour"></Tour>
+
 		<AddMetric2 ref="addMetric2" :backgroundColor="backgroundColor" />
 	</div>
 </template>
@@ -27,6 +29,7 @@ import AddMetric from '@/map/components/popups/addMetric';
 import MetricDownload from '@/map/components/popups/metricDownload';
 import BoundaryDownload from '@/map/components/popups/boundaryDownload';
 import Embedding from '@/map/components/popups/embedding';
+import Tour from '@/map/components/popups/tour';
 
 export default {
 	name: 'popupsPanel',
@@ -36,6 +39,7 @@ export default {
 		AddMetric2,
 		AnnotationItem,
 		WorkMetadata,
+		Tour,
 		Embedding,
 		ClippingMetadata,
 		CompareMetadata,
@@ -52,6 +56,7 @@ export default {
 		window.Popups.Embedding = this.$refs.showEmbedding;
 		window.Popups.WorkMetadata = this.$refs.showFuente;
 		window.Popups.ClippingMetadata = this.$refs.showClippingMetadata;
+		window.Popups.Tour = this.$refs.showTour;
 		window.Popups.CompareMetadata = this.$refs.showCompareMetadata;
 		window.Popups.BoundaryCustomize = this.$refs.showBoundaryCustomize;
 		window.Popups.MetricCustomize = this.$refs.showCustomize;

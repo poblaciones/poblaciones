@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import axiosClient from '@/common/js/axiosClient';
+import session from '@/common/framework/session';
 
 export default Context;
 
@@ -49,14 +50,20 @@ Context.prototype.ValidateCode = function (user, code) {
 Context.prototype.Login = function (user, password) {
 	// Trae sus variables
 	var args = { u: user, p: password };
-	return axiosClient.postPromise(window.host + '/services/authentication/Login', args,
-		('iniciar sesión'));
+	var url = window.host + '/services/authentication/Login';
+	return axiosClient.postPromise(url, args, ('iniciar sesión')).then(function (data) {
+		storeRemember(url, data);
+		return data;
+	});
 };
 
 Context.prototype.Register = function (email) {
 	var args = { u: email, t: window.mainHost + '/users/' };
-	return axiosClient.postPromise(window.host + '/services/authentication/BeginActivation', args,
-		('crear la cuenta'));
+	var url = window.host + '/services/authentication/BeginActivation';
+	return axiosClient.postPromise(url, args, ('crear la cuenta')).then(function (data) {
+		storeRemember(url, data);
+		return data;
+	});
 };
 
 Context.prototype.Activate = function (email, password, firstname, lastname, code, type) {
@@ -65,3 +72,9 @@ Context.prototype.Activate = function (email, password, firstname, lastname, cod
 	return axiosClient.postPromise(window.host + '/services/authentication/Activate', args,
 		('activar la cuenta'));
 };
+
+function storeRemember(url, data) {
+	if (data.remember) {
+		session.SetRememberForUrl(url, data.remember);
+	}
+}

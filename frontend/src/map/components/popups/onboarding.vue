@@ -49,6 +49,9 @@ export default {
 				}
 			);
 		},
+		show() {
+			this.$refs.wizard.show();
+		},
 		checkOpenTutorial() {
 			if (this.totalImagesRequested === 0) {
 				if (this.work.Current.Tutorial.CheckOpenTutorial()) {

@@ -91,9 +91,9 @@ class AuthenticationService extends BaseService
 		if ($account->Login($password) == false)
 			return ['status' => self::ERROR, 'message' => ('Contraseña incorrecta.')];
 
-		Remember::SetRemember($account);
+		$remember = Remember::SetRemember($account);
 
-		return ['status' => self::OK];
+		return ['status' => self::OK, 'remember' => $remember];
 	}
 
 	public function BeginActivation(string $user, string $to) : array
@@ -105,7 +105,7 @@ class AuthenticationService extends BaseService
 				return ['status' => self::ERROR, 'message' => ('Información incompleta.')];
 
 			$returnUrl = PhpSession::GetSessionValue($data->provider . 'OauthReturnUrl');
-			return ['status' => self::OK, 'returnUrl' => $returnUrl];
+			return ['status' => self::OK, 'returnUrl' => $returnUrl, 'remember' => Remember::TakeIssuedValue()];
 		}
 
 		$account = new Account();

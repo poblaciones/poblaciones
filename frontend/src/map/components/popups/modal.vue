@@ -219,13 +219,7 @@
 	opacity: 0;
 }
 
-	.mpHeader {
-		padding-top: 14px !important;
-		padding-right: 8px !important;
-		padding-bottom: 8px !important;
-		padding-left: 12px !important;
-		border-bottom: 0px;
-	}
+
 .white {
 	color: white;
 }

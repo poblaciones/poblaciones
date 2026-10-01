@@ -1,7 +1,7 @@
 <template>
 	<div class="adminButton">
 		<md-button @click="onPublish" v-if="Work.CanEdit() && Work.HasChanges()" class="md-raised">
-			<md-icon>public</md-icon> Publicar cambios
+			<md-icon>public</md-icon> Publicar
 		</md-button>
 		<md-button @click="goMap" v-if="lastOnline" class="md-raised">
 			<md-icon>map</md-icon> Ver mapa
