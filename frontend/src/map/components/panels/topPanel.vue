@@ -9,7 +9,7 @@
 									title="Bienvenida" @click="showOnboarding">
 						<help-circle-icon style="color: #fff" title="Bienvenida" />
 					</button>
-					<button type="button" class="btn btn-default btn-accent smallButton" @click="showAddToMap">
+					<button type="button" class="btn btn-default btn-accent" style="color: #FFF" @click="showAddToMap">
 						<i v-if="isMobile" class="fas fa-plus"></i>
 						<template v-else>
 							{{ addToMapLabel }}
@@ -271,7 +271,8 @@ export default {
 }
 @media screen and (max-width: 768px) {
 	.titleRow {
-		font-size: 1.75rem!important;
+		font-size: 1.75rem !important;
+		line-height: 1.25em!important;
 	}
 	.preTitleRow {
 		display: none;

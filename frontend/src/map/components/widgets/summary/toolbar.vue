@@ -17,8 +17,15 @@
 			<i :class="mode.Icon" />
 		</button>
 
-		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="Use.UseEmbedding"
+		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="Use.UseEmbedding || !hasNativeShare()"
 											icon="fas fa-share-alt" :styleRounded="true" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
+
+		<button type="button" v-else-if="Use.UseEmbedding && hasNativeShare()"
+						@click="nativeShare"
+						class="btn btn-default btn-xs"
+						title="Compartir">
+			<i class="fas fa-share-alt" />
+		</button>
 
 		<mp-dropdown-menu v-if="!$isMobile" :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
 											icon="fas fa-question" :styleRounded="true" tooltip="Ayuda" />
@@ -82,6 +89,16 @@
 			captureMapPdf(landscape) {
 				var mapExport = new MapExport(this.work.Current);
 				mapExport.ExportPdf(landscape);
+			},
+			nativeShare() {
+				navigator.share({
+					title: document.title,
+					//text: 'Mira este contenido interesante',
+					url: document.location
+				});
+			},
+			hasNativeShare() {
+				return (navigator.share !== undefined);
 			},
 			captureSelected(item) {
 				switch (item.key) {

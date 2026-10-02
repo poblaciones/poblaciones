@@ -93,7 +93,6 @@
       return {
         isExpanded: false,
         keepPanelOpen: false,
-        isTouchDevice: false,
         hoverTimeout: null,
         currentMapStyleId: 'default',
         mapStyles: [
@@ -157,12 +156,12 @@
     },
     mounted() {
       // Detectar si es dispositivo táctil
-      this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      //this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       var labels = arr.GetByProperty(this.mapLayers, 'Id', 'labels');
       if (labels) {
 				labels.Visible = this.toolbarStates.showLabels;
       }
-      this.escapeHandler = new EscapeCloseHandler(this.closePanel, { useHistory: this.isTouchDevice });
+			this.escapeHandler = new EscapeCloseHandler(this.closePanel, { useHistory: this.$isMobile() });
       if (this.isExpanded) {
         this.escapeHandler.Open();
       }
@@ -209,7 +208,7 @@
         if (this.readonly) {
           return;
         }
-        if (this.isTouchDevice) {
+				if (this.$isMobile()) {
           // En dispositivos táctiles, toggle del panel
           this.isExpanded = !this.isExpanded;
           if (this.isExpanded) {
@@ -224,7 +223,7 @@
         if (this.readonly) {
           return;
         }
-        if (!this.isTouchDevice) {
+				if (!this.$isMobile()) {
           // En desktop, expandir panel con hover
           if (this.hoverTimeout) {
             clearTimeout(this.hoverTimeout);
@@ -249,7 +248,7 @@
         if (this.readonly) {
           return;
         }
-        if (!this.isTouchDevice) {
+				if (!this.$isMobile()) {
           if (this.hoverTimeout) {
             clearTimeout(this.hoverTimeout);
           }
@@ -262,7 +261,7 @@
       },
       handlePanelLeave() {
         this.keepPanelOpen = false;
-        if (!this.isTouchDevice) {
+				if (!this.$isMobile()) {
           this.hoverTimeout = setTimeout(() => {
             this.isExpanded = false;
           }, 300);
@@ -274,13 +273,10 @@
       mapStyleSelected(style) {
         this.currentMapStyleId = style.id;
         this.$emit('styleChanged', style.id);
-        // En desktop, cerrar panel después de seleccionar
-        if (!this.isTouchDevice) {
-          setTimeout(() => {
-            this.isExpanded = false;
-            this.keepPanelOpen = false;
-          }, 150);
-        }
+			  setTimeout(() => {
+          this.isExpanded = false;
+          this.keepPanelOpen = false;
+        }, 150);
       },
       toggleLayer(layer) {
         if (layer.Id == 'labels') {

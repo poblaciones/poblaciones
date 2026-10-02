@@ -10,7 +10,7 @@
 						<span style="font-size: 2em;">{{ region.Name }}</span>
 					</div>
 					<div class="exp-hiddable-block" style="top: 40px;right: 15px; position: absolute; font-size: 1.75em;">
-						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id && !hasClippingCircle"
+						<ClippingSelectionSource style="padding-top: 8px" v-if="region.Metadata && region.Metadata.Id && !hasClippingCircle"
 																		 :useIcon="true" :region="region" :metadata="region.Metadata" />
 					</div>
 				</div>
@@ -25,13 +25,16 @@
 				</button>
 
 				<div v-for="region in clipping.Region.Summary.Regions" :key="region.Id" :class="getColorMuted()" class="clippingElement">
-					<div style="position: relative; padding-right: 15px; ">
+					<div style="position: relative; ">
 						<div @click="fitRegion(region)" v-if="clipping.Region.Summary.Regions.length < 8" class="clippingBlockHeader hand">{{ region.TypeName }}</div>
-						<div @click="fitRegion(region)" class="hand">{{ region.Name }}</div>
-						<mp-close-button @click="removeRegion(region)" title="Quitar zona seleccionada"
-														 style="float: none; top: 0; margin-top: -2px; position: absolute; right: -2px; font-size: .75em" class="exp-hiddable-block" />
-						<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id && !Embedded.Readonly" style="position: absolute;
-										    bottom: -.4em; right: -1px" :region="region" :metadata="region.Metadata" />
+						<div @click="fitRegion(region)" class="hand">
+							{{ region.Name }}
+							<div style="display: inline-flex;">
+								<ClippingSelectionSource v-if="region.Metadata && region.Metadata.Id && !Embedded.Readonly"
+																				 style="display: inline-block; margin-left: -6px; margin-right: -6px; transform: scale(.8) " :region="region" :metadata="region.Metadata" />
+								<mp-close-button @click="removeRegion(region)" title="Quitar zona seleccionada" class="exp-hiddable-block btn-inline" />
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -233,7 +236,6 @@ export default {
 		display: inline-block;
 		margin-right: .32em;
 		margin-bottom: .32em;
-		border: 1px solid #bbbbbb;
 		box-shadow: 0 0 2px 0 #cbcbcb;
 		min-width: 5em;
 		line-height: 1.4em;
@@ -274,6 +276,15 @@ export default {
 		z-index: 100;
 		border-radius: 6px;
 		padding: 0px;
+	}
+
+	.btn-inline {
+		display: inline-block;
+		transform: scale(.8);
+		margin-left: -6px;
+		vertical-align: top;
+		padding: 0px;
+		float: unset !important;
 	}
 </style>
 

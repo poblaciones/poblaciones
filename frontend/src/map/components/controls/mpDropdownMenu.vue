@@ -2,7 +2,7 @@
 	<v-popover popoverClass="tooltipInPopup tooltipNoBorder colorTooltip"
 						 style=" display: inline-block;" :style="(child ? 'width: 100%;': (floatRight ? ' float: right;' : ''))"
 						 popoverArrowClass="noArrow" :open="showDropDown"
-						 :disabled="false" @hide="dropDownClosed" @show="dropDownOpened"
+						 :disabled="false" @hide="dropDownClosed" @show="dropDownOpened" @apply-show="adjustMenuToViewport"
 						 popoverInnerClass="tooltipNoBorder">
 
 		<li v-if="child" style="position: relative"
@@ -20,7 +20,7 @@
 		</button>
 
 		<div slot="popover">
-			<ul class="dropdown-menu dropdown-menu-right dropFilter" aria-labelledby="filterDropId">
+			<ul ref="menu" class="dropdown-menu dropdown-menu-right dropFilter" :style="menuStyle" aria-labelledby="filterDropId">
 				<template v-for="(item, index) in items">
 					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'liDividerNext' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
 						<a v-if="!item.items && !item.separator" :href="item.href" :target="item.target" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
@@ -50,6 +50,8 @@
 	import XIcon from '@/common/assets/xicon.svg';
 
 
+	const VIEWPORT_MARGIN_PX = 8;
+
 	export default {
 		name: 'dropdown',
 		props: {
@@ -73,6 +75,7 @@
 			return {
 				showDropDown: false,
 				isDropDownOpen: false,
+				menuShiftX: 0,
 			};
 		},
 		methods: {
@@ -96,6 +99,22 @@
 			},
 			isModifiedClick(event) {
 				return event.ctrlKey || event.metaKey || event.shiftKey;
+			},
+			adjustMenuToViewport() {
+				this.menuShiftX = 0;
+				// Popper posiciona el popover en el primer frame; recién en el segundo la medición es válida.
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
+						this.shiftMenuInsideViewport();
+					});
+				});
+			},
+			// Popper no ve el menú (es absolute dentro del popover), por eso no lo acota al viewport.
+			shiftMenuInsideViewport() {
+				var menuLeft = this.$refs.menu.getBoundingClientRect().left;
+				if (menuLeft < VIEWPORT_MARGIN_PX) {
+					this.menuShiftX = VIEWPORT_MARGIN_PX - menuLeft;
+				}
 			}
 		},
 			computed: {
@@ -112,6 +131,9 @@
 				},
 				currentItem() {
 					return { label: this.label, level: this.level, key: this.key, separator: this.separator };
+				},
+				menuStyle() {
+					return { '--menu-shift-x': this.menuShiftX + 'px' };
 				}
 		},
 	};
@@ -135,7 +157,7 @@
 
 	.dropFilter {
 		margin-top: 0px;
-		transform: translate(20px, 4px);
+		transform: translate(calc(20px + var(--menu-shift-x, 0px)), 4px);
 		cursor: pointer;
 		overflow: hidden;
 	}

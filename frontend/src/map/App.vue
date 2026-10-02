@@ -1451,7 +1451,7 @@
 		font-size: 14px;
 		padding: 4px 4px 4px 4px !important;
 		line-height: 1em;
-		margin-top: -2px;
+		margin-top: 5px;
 		margin-right: 2px;
 		width: 24px;
 		height: 24px;
@@ -1460,7 +1460,7 @@
 	}
 
 		.lightButton:hover {
-			background-color: rgba(0,0,0,0.12);
+			background-color: #f0f0f0!important;
 		}
 
 		.lightButton[disabled]:hover {

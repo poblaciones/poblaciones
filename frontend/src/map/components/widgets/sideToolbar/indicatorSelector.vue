@@ -1,7 +1,7 @@
 <template>
   <transition name="slide-right">
-    <div ref="floatingPanel" class="indicator-selector-wrapper work-offsetY" v-if="isOpen"
-         :style="[panelStyle, positionStyle, heightStyle]" v-on-clickaway="closePanel" v-touch:swipe.left="panLeftSwipeClose">
+    <div ref="floatingPanel" class="indicator-selector-wrapper sidepanelOffset work-offsetY" v-if="isOpen"
+         :style="[panelStyle, positionStyle]" v-on-clickaway="closePanel" v-touch:swipe.left="panLeftSwipeClose">
       <div class="floating-panel panel card">
         <!-- Encabezado -->
         <div class="panel-header">
@@ -382,16 +382,6 @@ export default {
     this.kbd.detach();
   },
   computed: {
-    // El panel se dimensiona con un alto cómodo en todos sus usos: mínimo 600px y
-    // máximo 750px, ambos acotados al alto de la pantalla (menos un margen) para no
-    // excederla en monitores chicos.
-    heightStyle() {
-      var avail = (typeof window !== 'undefined' ? window.innerHeight : 800) - 16;
-      var max = Math.min(750, avail);
-      var min = Math.min(600, avail);
-      if (min > max) min = max;
-      return { minHeight: 'min(90vh, ' + min + 'px)', maxHeight: 'max(90vh, ' + max + 'px)' };
-    },
     // Con sidebarPosition 'top'/'bottom' el panel se ajusta a ese borde en
     // vez de quedar centrado verticalmente (el default de .indicator-selector-wrapper).
     // No aplica con anchor (otro mecanismo de posicionamiento, ver panelStyle)
@@ -1043,7 +1033,8 @@ export default {
 		margin: auto 0;
 		width: 420px;
 		max-width: calc(100vw - 112px);
-		max-height: 90vh;
+		min-height: min(50vh, 400px);
+		max-height: min(80vh, 750px);
 		border-radius: 12px;
 		z-index: 1050;
 		display: flex;

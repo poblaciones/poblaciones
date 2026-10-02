@@ -2,7 +2,6 @@
 	color: #5e5e5e;
 	border-radius: 20px !important;
 	font-size: 13.5px !important;
-	height: 32px;
 	min-width: 32px;
 	padding: 6px 8px !important;
 	border: 1px;
@@ -10,7 +9,9 @@
 	margin-left: 1px !important;
 }
 .btn-accent {
-		border: 1px solid;
+	border: 1px solid;
+	min-width: 33px;
+	height: 33px;
 }
 .step-header {
 	padding-bottom: 20px;
@@ -320,6 +321,7 @@
 @media (max-width: 768px) {
 	.floatRightPanel {
 		margin-right: 0px;
+		border-right: 0px;
 		border-bottom-right-radius: 0px !important;
 		border-top-right-radius: 0px !important;
 	}
