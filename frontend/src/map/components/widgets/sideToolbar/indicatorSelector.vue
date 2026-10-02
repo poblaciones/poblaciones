@@ -1,6 +1,6 @@
 <template>
-  <transition name="slide-fade">
-    <div class="indicator-selector-wrapper sidepanelOffset" v-if="isOpen" v-on-clickaway="closePanel">
+  <transition name="lefttrans">
+    <div class="indicator-selector-wrapper sidepanelOffset" v-if="isOpen" v-on-clickaway="closePanel" v-touch:swipe.left="panLeftSwipeClose">
       <div ref="floatingPanel" class="work-offsetY floating-panel panel card"
            :class="{ 'pos-anchored': !anchor && !isMobile && sidebarPosition !== 'middle' }"
            :style="[panelStyle, positionStyle, heightStyle]">
@@ -8,31 +8,25 @@
         <div class="panel-header">
           <div class="titleDialog">{{ title }}</div>
           <div class="panel-header-actions">
-            <button
-              v-if="allowMultiSelectToggle && hasSelectableRows"
-              class="btn-tool"
-              :class="{ 'active': isMulti }"
-              @click="toggleMultiSelect"
-              :title="isMulti ? 'Salir de selección múltiple' : 'Selección múltiple'"
-              :aria-pressed="isMulti ? 'true' : 'false'"
-            >
+            <button v-if="allowMultiSelectToggle && hasSelectableRows"
+                    class="btn-tool"
+                    :class="{ 'active': isMulti }"
+                    @click="toggleMultiSelect"
+                    :title="isMulti ? 'Salir de selección múltiple' : 'Selección múltiple'"
+                    :aria-pressed="isMulti ? 'true' : 'false'">
               <i class="fas fa-tasks"></i>
             </button>
-            <button
-              v-if="hasHeaders"
-              class="btn-tool"
-              @click="toggleCollapseAll"
-              :title="allCollapsed ? 'Expandir todos' : 'Colapsar todos'"
-            >
+            <button v-if="hasHeaders"
+                    class="btn-tool"
+                    @click="toggleCollapseAll"
+                    :title="allCollapsed ? 'Expandir todos' : 'Colapsar todos'">
               <i :class="allCollapsed ? 'fas fa-caret-right' : 'fas fa-caret-down'"></i>
             </button>
-            <button
-              class="btn-tool"
-              :class="{ 'active': listModeActive }"
-              :disabled="!showingCards && !listModeActive"
-              @click="toggleViewMode"
-              :title="listModeActive ? 'Ver como grilla' : 'Ver como listado'"
-            >
+            <button class="btn-tool"
+                    :class="{ 'active': listModeActive }"
+                    :disabled="!showingCards && !listModeActive"
+                    @click="toggleViewMode"
+                    :title="listModeActive ? 'Ver como grilla' : 'Ver como listado'">
               <i class="fas fa-stream"></i>
             </button>
             <button class="btn-close" @click="closePanel" title="Cerrar" aria-label="Cerrar">
@@ -43,23 +37,21 @@
 
         <!-- Breadcrumb (acumulativo, profundidad variable) -->
         <div class="breadcrumb-nav">
-        <button
-            v-if="navStack.length || searchQuery"
-            class="chips-clear"
-            @click.stop="goHome"
-            title="Volver al inicio"
-          >×</button>
+          <button v-if="navStack.length || searchQuery"
+                  class="chips-clear"
+                  @click.stop="goHome"
+                  title="Volver al inicio">
+            ×
+          </button>
           <span class="breadcrumb-item" :class="{ 'active': !navStack.length && !searchQuery }" @click="goHome">
             {{ rootLabel }}
           </span>
           <template v-for="(node, depth) in navStack">
             <span :key="'sep' + depth" class="breadcrumb-sep">/</span>
-            <span
-              :key="'crumb' + depth"
-              class="breadcrumb-item"
-              :class="{ 'active': depth === navStack.length - 1 && !searchQuery }"
-              @click="goToDepth(depth)"
-            >{{ node.Name }}</span>
+            <span :key="'crumb' + depth"
+                  class="breadcrumb-item"
+                  :class="{ 'active': depth === navStack.length - 1 && !searchQuery }"
+                  @click="goToDepth(depth)">{{ node.Name }}</span>
           </template>
 
         </div>
@@ -67,12 +59,12 @@
         <!-- Zona fija: chips y buscador (no scrollean con la lista) -->
         <div>
           <div v-if="selection.length" class="chips-zone">
-            <button
-              class="chips-clear"
-              @click="clearSelection"
-              :title="selection.length === 1 ? 'Remover' : ('Remover todo (' + selection.length + ')')"
-              aria-label="Remover toda la selección"
-            >×</button>
+            <button class="chips-clear"
+                    @click="clearSelection"
+                    :title="selection.length === 1 ? 'Remover' : ('Remover todo (' + selection.length + ')')"
+                    aria-label="Remover toda la selección">
+              ×
+            </button>
             <div class="chips-scroll thinScroll">
               <div v-for="chip in selection" :key="chip.Key || chip.Id" class="chip" :title="chip.Description">
                 <span class="chip-label">{{ chip.Caption }}</span>
@@ -83,14 +75,12 @@
 
           <div class="search-container">
             <i class="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              class="search-input"
-              v-model="searchQuery"
-              :placeholder="dynamicPlaceholder"
-              ref="searchInput"
-              @keyup.esc="onEscape"
-            />
+            <input type="text"
+                   class="search-input"
+                   v-model="searchQuery"
+                   :placeholder="dynamicPlaceholder"
+                   ref="searchInput"
+                   @keyup.esc="onEscape" />
             <button v-if="searchQuery" class="search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
           </div>
         </div>
@@ -103,13 +93,11 @@
               <div v-for="grp in groupedBranches" :key="grp.Name || '_'">
                 <div v-if="grp.Name" class="source-header">{{ grp.Name }}</div>
                 <div class="categories-grid">
-                  <div
-                    v-for="br in grp.Branches"
-                    :key="br.Id != null ? br.Id : br.Name"
-                    class="category-card hand"
-                    data-kbd-item="card"
-                    @click="enterBranch(br)"
-                  >
+                  <div v-for="br in grp.Branches"
+                       :key="br.Id != null ? br.Id : br.Name"
+                       class="category-card hand"
+                       data-kbd-item="card"
+                       @click="enterBranch(br)">
                     <span class="category-icon"><i :class="getIconClass(br.Icon)"></i></span>
                     <div class="category-name">{{ br.Name }}</div>
                     <div class="category-count">{{ branchLabel(br) }}</div>
@@ -118,14 +106,12 @@
               </div>
             </template>
             <div v-else class="categories-grid">
-              <div
-                v-for="br in currentBranches"
-                :key="br.Id != null ? br.Id : br.Name"
-                class="category-card hand"
-                data-kbd-item="card"
-                :class="{ 'featured': br.Icon === 'star' }"
-                @click="enterBranch(br)"
-              >
+              <div v-for="br in currentBranches"
+                   :key="br.Id != null ? br.Id : br.Name"
+                   class="category-card hand"
+                   data-kbd-item="card"
+                   :class="{ 'featured': br.Icon === 'star' }"
+                   @click="enterBranch(br)">
                 <span class="category-icon" :class="{ 'featured': br.Icon === 'star' }">
                   <i :class="getIconClass(br.Icon)"></i>
                 </span>
@@ -147,12 +133,10 @@
             </div>
 
             <!-- Acción de grupo: agrega el nivel actual como capa (no marca hojas) -->
-            <div
-              v-if="!searchQuery && (showAddAll || !filterMode) && currentLeafItems.length"
-              class="indicator-item add-all hand"
-              data-kbd-item="group"
-              @click="onSelectGroup"
-            >
+            <div v-if="!searchQuery && (showAddAll || !filterMode) && currentLeafItems.length"
+                 class="indicator-item add-all hand"
+                 data-kbd-item="group"
+                 @click="onSelectGroup">
               <div class="indicator-content">
                 <div class="list-icon"><i class="fas fa-layer-group"></i></div>
                 <div class="indicator-info">
@@ -163,40 +147,32 @@
 
             <template v-for="row in renderRows">
               <!-- Separador colapsable (corte de control) -->
-              <div
-                v-if="row.type === 'header'"
-                :key="row.key"
-                class="source-header hand"
-                @click="toggleCollapse(row.sectionKey)"
-              >
-                <span
-                  v-if="selectableBranches && !filterMode && isMulti && row.selectable && row.items && row.items.length"
-                  class="selcheck header-check"
-                  :class="{ 'checked': leavesSelectionState(row.items) === 'all', 'partial': leavesSelectionState(row.items) === 'some' }"
-                  @click.stop="toggleLeavesSelection(row.items, currentNode)"
-                >
+              <div v-if="row.type === 'header'"
+                   :key="row.key"
+                   class="source-header hand"
+                   @click="toggleCollapse(row.sectionKey)">
+                <span v-if="selectableBranches && !filterMode && isMulti && row.selectable && row.items && row.items.length"
+                      class="selcheck header-check"
+                      :class="{ 'checked': leavesSelectionState(row.items) === 'all', 'partial': leavesSelectionState(row.items) === 'some' }"
+                      @click.stop="toggleLeavesSelection(row.items, currentNode)">
                   <i v-if="leavesSelectionState(row.items) === 'all'" class="fas fa-check"></i>
                   <i v-else-if="leavesSelectionState(row.items) === 'some'" class="fas fa-minus"></i>
                 </span>
                 <span class="source-header-text">{{ row.name }}</span>
-                <i
-                  v-if="selectableBranches && !filterMode && !isMulti && row.selectable && row.items && row.items.length"
-                  class="fas fa-layer-group source-header-addall"
-                  title="Agregar todos/as"
-                  @click.stop="addLeaves(row.items, currentNode)"
-                ></i>
+                <i v-if="selectableBranches && !filterMode && !isMulti && row.selectable && row.items && row.items.length"
+                   class="fas fa-layer-group source-header-addall"
+                   title="Agregar todos/as"
+                   @click.stop="addLeaves(row.items, currentNode)"></i>
                 <span v-if="row.count != null" class="source-header-count">{{ row.count }}</span>
                 <i class="source-header-caret fas" :class="isCollapsed(row.sectionKey) ? 'fa-caret-right' : 'fa-caret-down'"></i>
               </div>
 
               <!-- Rama navegable (modo listado: nivel 1 de delimitaciones) -->
-              <div
-                v-else-if="row.type === 'branch'"
-                :key="row.key"
-                class="indicator-item hand"
-                data-kbd-item="branch"
-                @click="enterListBranch(row.parent, row.branch)"
-              >
+              <div v-else-if="row.type === 'branch'"
+                   :key="row.key"
+                   class="indicator-item hand"
+                   data-kbd-item="branch"
+                   @click="enterListBranch(row.parent, row.branch)">
                 <div class="indicator-content">
                   <div class="list-icon">
                     <i :class="branchIcon(row)"></i>
@@ -209,14 +185,12 @@
               </div>
 
               <!-- Fila de hoja -->
-              <div
-                v-else-if="row.type === 'item'"
-                :key="row.key"
-                class="indicator-item hand"
-                data-kbd-item="item"
-                :class="{ 'is-selected': isSelected(row.item) }"
-                @click="onItemClick(row.item, row.container)"
-              >
+              <div v-else-if="row.type === 'item'"
+                   :key="row.key"
+                   class="indicator-item hand"
+                   data-kbd-item="item"
+                   :class="{ 'is-selected': isSelected(row.item) }"
+                   @click="onItemClick(row.item, row.container)">
                 <span v-if="isMulti" class="selcheck" :class="{ 'checked': isSelected(row.item) }">
                   <i v-if="isSelected(row.item)" class="fas fa-check"></i>
                 </span>
@@ -230,24 +204,20 @@
                   </div>
                 </div>
                 <div class="indicator-actions">
-                  <button
-                    v-if="!isMobile && hasInfo(row.item)"
-                    class="btn-preview btn btn-default btn-xs"
-                    @mouseenter="showTooltip($event, row.item)"
-                    @mouseleave="hideTooltip"
-                    @click.stop="preventDefault"
-                  >
+                  <button v-if="!isMobile && hasInfo(row.item)"
+                          class="btn-preview btn btn-default btn-xs"
+                          @mouseenter="showTooltip($event, row.item)"
+                          @mouseleave="hideTooltip"
+                          @click.stop="preventDefault">
                     <i class="fas fa-info-circle"></i>
                   </button>
                 </div>
               </div>
-              <div
-                v-else-if="row.type === 'more'"
-                :key="row.key"
-                class="search-more hand"
-                data-kbd-item="more"
-                @click="liftSearchLimit"
-              >
+              <div v-else-if="row.type === 'more'"
+                   :key="row.key"
+                   class="search-more hand"
+                   data-kbd-item="more"
+                   @click="liftSearchLimit">
                 Ver {{ row.remaining }} resultado{{ row.remaining === 1 ? '' : 's' }} más
               </div>
             </template>
@@ -255,8 +225,8 @@
         </div>
 
         <!-- Regiones: controla si clic en una delimitación entra a sus elementos
-             (activo) o los agrega todos (inactivo, default). Visible al ver
-             delimitaciones, también en resultados de búsqueda. -->
+           (activo) o los agrega todos (inactivo, default). Visible al ver
+           delimitaciones, también en resultados de búsqueda. -->
         <div v-if="showDrillToggle" class="add-all-bar">
           <label class="sw-toggle">
             <input type="checkbox" v-model="drillIntoElements" />
@@ -289,13 +259,11 @@
 
       <!-- Tooltip data-driven -->
       <transition name="fade">
-        <div
-          v-if="tooltip.visible && tooltip.item && tooltip.item.Info"
-          class="preview-tooltip"
-          :style="{ top: tooltip.top + 'px', left: tooltip.left + 'px', position: 'fixed' }"
-          @mouseenter="keepTooltip = true"
-          @mouseleave="keepTooltip = false; hideTooltip()"
-        >
+        <div v-if="tooltip.visible && tooltip.item && tooltip.item.Info"
+             class="preview-tooltip"
+             :style="{ top: tooltip.top + 'px', left: tooltip.left + 'px', position: 'fixed' }"
+             @mouseenter="keepTooltip = true"
+             @mouseleave="keepTooltip = false; hideTooltip()">
           <div class="preview-header">
             <div class="preview-title">{{ tooltip.item.Info.Title || tooltip.item.Name }}</div>
           </div>
@@ -664,7 +632,9 @@ export default {
       if (val) {
         this.kbd.attach();
         this.$nextTick(() => {
-          if (this.$refs.searchInput) this.$refs.searchInput.focus();
+          if (!this.$isMobile) {
+            if (this.$refs.searchInput) this.$refs.searchInput.focus();
+          }
           this.positionPanel();
         });
       } else {
@@ -832,6 +802,13 @@ export default {
     toggleMultiSelect() {
       this.internalMulti = !this.internalMulti;
       this.$emit('update:multiSelect', this.internalMulti);
+    },
+    panLeftSwipeClose() {
+			if (event.srcElement.className === 'excluded' ||
+				window.getSelection().toLocaleString().length > 0) {
+				return;
+			}
+			this.closePanel();
     },
     goHome() {
       this.navStack = [];
@@ -1371,14 +1348,21 @@ export default {
   .category-card:hover { transform: none; }
 }
 
-@media (max-width: 768px) {
-  .floating-panel {
-    top: 0; left: 0; right: 0; bottom: 0; margin: unset;
-    width: 100%; max-width: 100%; max-height: 100%!important; border-radius: 0; transform: none;
-  }
+	@media (max-width: 768px) {
+		.floating-panel {
+			left: 0;
+			width: 90%;
+			max-width: 100%;
+			max-height: 80% !important;
+			border-top-right-radius: 12px;
+			border-bottom-right-radius: 12px;
+			border-bottom-left-radius: 0px;
+			border-top-left-radius: 0px;
+			border-left: 0px;
+		}
   .slide-fade-enter .floating-panel,
-  .slide-fade-leave-to .floating-panel { transform: translateY(100%); }
-  .categories-grid { grid-template-columns: 1fr; }
+  .slide-fade-leave-to .floating-panel { transform: translateX(-100%); }
+
   .preview-tooltip {
     left: 50% !important; top: 50% !important; transform: translate(-50%, -50%);
     width: calc(100% - 40px); max-width: 320px;

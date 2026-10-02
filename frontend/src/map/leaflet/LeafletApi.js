@@ -24,8 +24,7 @@ import 'leaflet-contextmenu/dist/leaflet.contextmenu.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import MapAttribution from '@/common/js/mapAttribution';
-import createVectorBasemapLayer from './VectorBasemapLayer';
-import { VARIANT_WITH_LABELS, VARIANT_WITHOUT_LABELS, VARIANT_ONLY_LABELS } from './BasemapStyle';
+import BasemapLayers from './BasemapLayers';
 
 export default LeafletApi;
 
@@ -104,7 +103,7 @@ LeafletApi.prototype.Initialize = function () {
 	// Crea el mapa
 	this.map = new L.Map("map", options);
 	// Las capas base aportan solo el crédito de su proveedor: el de Poblaciones se declara acá.
-	this.map.attributionControl.addAttribution(MapAttribution.GetCopyright());
+	this.map.attributionControl.addAttribution(MapAttribution.GetCopyright(window.SegMap.Configuration.IsMobile));
 	// le agrega el control de zoom
 	new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
 
@@ -266,17 +265,6 @@ LeafletApi.prototype.InteractiveChangeMapType = function (type) {
 	this.UpdateClippingStyle();
 };
 
-// Una URL con {z} es una plantilla de teselas raster; cualquier otra es el estilo JSON de un mapa vectorial.
-LeafletApi.prototype.CreateBasemapLayer = function (name, vectorVariant) {
-	var configuration = window.SegMap.Configuration;
-	var url = configuration.BasemapUrls[name];
-	var attribution = configuration.BasemapAttributions[name];
-	if (url.indexOf('{z}') >= 0) {
-		return new L.TileLayer(url, { attribution: attribution });
-	}
-	return createVectorBasemapLayer(url, vectorVariant, attribution);
-};
-
 LeafletApi.prototype.CreateBaseLayers = function () {
 	var cp = MapAttribution.GetCopyright();
 	// Estandar:
@@ -306,12 +294,13 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 
 	var basemapUrls = window.SegMap.Configuration.BasemapUrls;
 	var basemapAttributions = window.SegMap.Configuration.BasemapAttributions;
+	var basemaps = new BasemapLayers(basemapUrls, basemapAttributions);
 
-	this.baseLayers['roadmap'] = this.CreateBasemapLayer('roadmap', VARIANT_WITH_LABELS);
-	this.baseLayers['roadmap_no_labels'] = this.CreateBasemapLayer('roadmap_no_labels', VARIANT_WITHOUT_LABELS);
-	this.baseLayers['colored'] = this.CreateBasemapLayer('colored', VARIANT_WITH_LABELS);
-	this.baseLayers['colored_no_labels'] = this.CreateBasemapLayer('colored_no_labels', VARIANT_WITHOUT_LABELS);
-	this.baseLayers['roadmap_only_labels'] = this.CreateBasemapLayer('roadmap_only_labels', VARIANT_ONLY_LABELS);
+	this.baseLayers['roadmap'] = basemaps.CreateLayer('roadmap', BasemapLayers.VARIANT_WITH_LABELS);
+	this.baseLayers['roadmap_no_labels'] = basemaps.CreateLayer('roadmap_no_labels', BasemapLayers.VARIANT_WITHOUT_LABELS);
+	this.baseLayers['colored'] = basemaps.CreateLayer('colored', BasemapLayers.VARIANT_WITH_LABELS);
+	this.baseLayers['colored_no_labels'] = basemaps.CreateLayer('colored_no_labels', BasemapLayers.VARIANT_WITHOUT_LABELS);
+	this.baseLayers['roadmap_only_labels'] = basemaps.CreateLayer('roadmap_only_labels', BasemapLayers.VARIANT_ONLY_LABELS);
 
 	this.useElevation = (window.SegMap.Configuration.ElevationUrl != null);
 	if (this.useElevation) {
@@ -328,7 +317,7 @@ LeafletApi.prototype.CreateBaseLayers = function () {
 	var featureMask = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [] } };
 	featureMask.geometry.coordinates.push(zeroItem);
 	var mask = { type: 'FeatureCollection', features: [featureMask] };
-	var blank = L.geoJson(mask, { attribution: cp, interactive: false });
+	var blank = L.geoJson(mask, { interactive: false });
 	blank.setStyle({
 		"color": "#e5e3df",
 		"weight": 1,

@@ -299,16 +299,6 @@ export default {
 
 <style scoped>
 
-	.lefttrans-enter-active, .lefttrans-leave-active {
-		transition: opacity .35s;
-	}
-
-	.lefttrans-enter, .lefttrans-leave-to {
-		opacity: 0;
-		transition: 10s;
-		left: -100px;
-	}
-
 .fade-enter-active, .fade-leave-active {
 	transition: opacity .35s;
 }

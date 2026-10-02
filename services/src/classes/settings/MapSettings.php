@@ -13,10 +13,10 @@ class MapSettings
 	const OPENFREEMAP_ATTRIBUTION =
 		"<a class='copyrightText copyright exp-hiddable-unset' target='_blank' href='https://openfreemap.org'>© OpenFreeMap</a> " .
 		"<a class='copyrightText copyright exp-hiddable-unset' target='_blank' href='https://www.openmaptiles.org/'>© OpenMapTiles</a> " .
-		"<a class='copyrightText copyright exp-hiddable-unset' target='_blank' href='https://www.openstreetmap.org/copyright'>© OpenStreetMap</a>";
+		"<a class='copyrightText copyright exp-hiddable-unset' target='_blank' href='https://www.openstreetmap.org/copyright'>© OSM</a>";
 
 	const CARTO_ATTRIBUTION =
-		"<a class='copyrightText copyright exp-hiddable-unset' target='_blank' href='https://www.openstreetmap.org/copyright'>© OpenStreetMap</a> " .
+		"<a class='copyrightText copyright exp-hiddable-unset' target='_blank' href='https://www.openstreetmap.org/copyright'>© OSM</a> " .
 		"<a class='copyrightText copyright exp-hiddable-unset' target='_blank' href='https://carto.com/attributions'>© CARTO</a>";
 
 	public $DefaultClippingRegion = '';

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="display: flex">
     <!-- Toolbar con los botones principales -->
     <SideButtons
       :active-panel="activePanel" :backgroundColor="backgroundColor"

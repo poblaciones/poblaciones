@@ -20,7 +20,7 @@
 		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="Use.UseEmbedding"
 											icon="fas fa-share-alt" :styleRounded="true" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
 
-		<mp-dropdown-menu :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
+		<mp-dropdown-menu v-if="!$isMobile" :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
 											icon="fas fa-question" :styleRounded="true" tooltip="Ayuda" />
 
 		<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
@@ -108,7 +108,6 @@
 					default:
 				}
 			},
-			// No es computed: homeUrl() lee estado global no reactivo y un valor cacheado queda desactualizado
 			getHelpItems() {
 				var ret = [];
 				ret.push({ label: 'Inicio', key: 'INICIO', href: this.authenticate.homeUrl(), icon: 'fas fa-home', target: '_blank' });

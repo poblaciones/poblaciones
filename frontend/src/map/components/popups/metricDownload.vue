@@ -70,14 +70,14 @@
 					<tr>
 						<td>Descarga:</td>
 						<td>
-							<span v-if="visibleUrl">
-								<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="downloadButton">
+							<span v-if="visibleUrl" class="btn-set">
+								<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="btn btn-solid">
 									<download-icon title="Descargar" /> {{ format.caption }}
 								</button>
-								<button @click="sendFile(resolveMetadataUrl(), true)" class="downloadButton">
+								<button @click="sendFile(resolveMetadataUrl(), true)" class="btn btn-solid">
 									<i class="far fa-file-pdf" /> Metadatos
 								</button>
-								<button @click="sendFile(resolveMetadataDictionaryUrl(), true)" class="downloadButton">
+								<button @click="sendFile(resolveMetadataDictionaryUrl(), true)" class="btn btn-solid">
 									<i class="far fa-file-excel" /> Diccionario de datos
 								</button>
 							</span>
@@ -100,8 +100,8 @@
 					</tr>
 					<tr v-if="level.HasArea || level.Dataset.AreSegments">
 						<td>Descarga con polígonos:</td>
-						<td>
-							<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="downloadButton">
+						<td class="btn-set">
+							<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="btn btn-solid">
 								<download-icon title="Descargar" /> {{ format.caption }}
 							</button>
 						</td>

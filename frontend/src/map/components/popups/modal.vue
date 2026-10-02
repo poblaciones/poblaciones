@@ -8,12 +8,12 @@
 						<slot name="header">
 
 							<h5 class="titleDialog">
+								<mp-close-button @click="cancel" title="Cerrar"
+																 v-if="showClose" class="exp-hiddable-block" />
 								<slot name="title">
 									<img src="/static/img/spinner.gif" class="waitImg" v-if="!hasBody" />
 									{{ title }}
 								</slot>
-								<mp-close-button @click="cancel" title="Cerrar"
-																 v-if="showClose" class="exp-hiddable-block" />
 							</h5>
 						</slot>
 					</div>
@@ -194,19 +194,18 @@
 </script>
 
 <style scoped>
-.modal {
-	display: table;
-  height: 100%;
-	width: 100%;
-	position: absolute;
-}
+	.modal {
+		display: flex;
+		height: 100%;
+		width: 100%;
+		position: absolute;
+	}
 
 .modal-dialog {
-	display: table-cell;
-	vertical-align: middle;
-  max-width: 610px;
-	width: 610px;
-}
+		align-self: center;
+		max-width: 610px;
+		width: 610px;
+	}
 .modal-content {
 	max-height: 100%;
   overflow-y: auto;

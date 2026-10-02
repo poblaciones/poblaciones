@@ -3,7 +3,7 @@
 
 		<div class="thinScroll" style="overflow-y: auto">
 			<div v-if="clipping.Region.Summary" v-show="!clipping.Region.Summary.Empty" class="panel card panel-body"
-					 style="background-color: transparent; padding-bottom: 11px; margin-bottom: 0px; ">
+					 style="background-color: transparent; padding-bottom: 11px; margin-bottom: 0px; border-radius: unset!important ">
 				<Clipping :clipping="clipping" :frame="frame" v-show="showPopulationTotals" />
 				<div v-if="metrics.length > 0" style="height: 0.2rem;"></div>
 				<template v-for="value in metrics">

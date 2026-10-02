@@ -1,6 +1,6 @@
 <template>
   <transition name="slide-right">
-    <div class="search-panel-wrapper sidepanelOffset" v-if="isOpen" :style="positionStyle">
+    <div class="search-panel-wrapper sidepanelOffset" v-if="isOpen" :style="positionStyle" v-touch:swipe.left="panLeftSwipeClose">
       <div class="search-panel" v-on-clickaway="close" :style="heightStyle">
         <div class="search-header">
           <div class="titleDialog">Buscar</div>
@@ -242,10 +242,10 @@ export default {
     // cerca del botón que de la esquina de la pantalla.
     positionStyle() {
       if (this.sidebarPosition === 'top') {
-        return { top: '60px', bottom: 'auto', transform: 'none' };
+        return { top: '20px', bottom: 'auto' };
       }
       if (this.sidebarPosition === 'bottom') {
-        return { bottom: '60px', top: 'auto', transform: 'none' };
+        return { bottom: '60px', top: 'auto' };
       }
       return null;
     },
@@ -265,11 +265,13 @@ export default {
         // recientes recién al abrir el panel, que es cuando puede haber
         // cambiado lo guardado desde la última vez que se mostraron.
         this.refreshRecents();
-        this.$nextTick(() => {
-					if (this.$refs.searchInput) {
-						this.$refs.searchInput.focus();
-          }
-        });
+        if (!this.$isMobile) {
+          this.$nextTick(() => {
+            if (this.$refs.searchInput) {
+              this.$refs.searchInput.focus();
+            }
+          });
+        }
       } else {
         this.kbd.detach();
         this.searchText = '';
@@ -315,6 +317,13 @@ export default {
     formatCoord(item) {
       return h.trimNumberCoords(item.Lat) + ',' + h.trimNumberCoords(item.Lon);
     },
+		panLeftSwipeClose() {
+			if (event.srcElement.className === 'excluded' ||
+				window.getSelection().toLocaleString().length > 0) {
+				return;
+			}
+			this.close();
+		},
     clipboardSuccess({ value, event }) {
       event.preventDefault();
       event.stopPropagation();
@@ -402,17 +411,18 @@ export default {
 /* Wrapper del panel */
 	.search-panel-wrapper {
 		position: absolute;
+    border-radius: 12px;
+    align-self: center;
 		left: 92px;
-		top: 50%;
-		transform: translateY(-50%);
 		z-index: 1050;
 	}
 
 	.search-panel {
 		background: white;
-		border-radius: 12px;
+		border-radius: inherit;
 		border: 1px solid rgb(165 164 164 / 50%);
 		width: 400px;
+		align-self: center;
 		max-height: 600px;
 		display: flex;
 		flex-direction: column;
@@ -650,21 +660,22 @@ export default {
 /* Media queries */
 	@media (max-width: 768px) {
 		.search-panel-wrapper {
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		margin: unset;
-		width: 100%;
-		max-width: 100%;
-		max-height: 100% !important;
-		border-radius: 0;
-		transform: none;
-	}
+			margin: unset;
+			width: 100%;
+      left: 0px;
+			max-width: 90%;
+			max-height: 100% !important;
+			border-radius: 0;
+			border-top-right-radius: 12px;
+			border-bottom-right-radius: 12px;
+			border-bottom-left-radius: 0px;
+			border-top-left-radius: 0px;
+		}
 
-  .search-panel {
-    width: 100%;
-    max-height: calc(100vh - 100px);
-  }
+		.search-panel {
+			width: 100%;
+			max-height: calc(100vh - 100px);
+			border-left: 0px;
+		}
 }
 </style>

@@ -15,7 +15,7 @@
 			<div id="holder" style="overflow-x: hidden">
 				<PopupsPanel :backgroundColor="workColor" />
 
-				<div id="panMain" class="" style="position: relative; width: 100%; z-index: 0; height: 100%; overflow: hidden">
+				<div id="panMain" class="" style="position: relative; width: 100%; display: flex; z-index: 0; height: 100%; overflow: hidden">
 					<Toolbar :metrics="metrics" :frame="frame" :user="user" v-show="!Embedded.Readonly"
 									 :work="work" :config="config" :toolbarStates="toolbarStates"
 									 class="exp-hiddable-block" />
@@ -59,9 +59,9 @@
 													:image="ownerLogo.Image"
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-					<FullScreenButton v-if="!Embedded.Readonly && mapLoaded" class="exp-hiddable-unset" :fullscreen="fullscreen" />
+					<FullScreenButton v-if="!Embedded.Readonly && mapLoaded && !$isMobile" class="exp-hiddable-unset" :fullscreen="fullscreen" />
 
-					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
+					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly && mapLoaded && !$isMobile" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
 										 :metrics="metrics" :toolbarStates="toolbarStates" />
 					<ClippingLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset" :style="(!Use.UseNewFabButton ? 'visibility: hidden' : '')"
 													:clipping="clipping" :toolbarStates="toolbarStates" />
@@ -172,7 +172,6 @@
 
 				selfCheckTimer: null,
 				workStartupSetter: null,
-				isMobile: false,
 				splitPanels: null,
 				featureNavigation: { Key: null, Values: [], GettingKey: null },
 				toolbarStates: {
@@ -710,7 +709,6 @@
 </script>
 <style src="@/common/styles/popovers.css"></style>
 <style src="@/common/styles/transition.css"></style>
-<style src="@/common/styles/visor-material3.css"></style>
 
 
 <style>
@@ -1480,8 +1478,8 @@
 	}
 
 	.animatedFlyLeft {
-		transform: translateX(-100%);
-		-webkit-transform: translateX(-100%);
+		transform: translateX(-100%) !important;
+		-webkit-transform: translateX(-100%) !important;
 	}
 
 	.animatedFlyRight {
@@ -1503,6 +1501,7 @@
 		padding: 8px 15px;
 		background-color: inherit !important;
 		color: inherit !important;
+		font-size: 16px;
 	}
 
 	.dropdown-menu, .dropdown.open .dropdown-menu {
@@ -1544,6 +1543,7 @@
 
 	.dropdown-menu {
 		border-radius: 12px;
+		border: 1px solid rgb(165 164 164 / 50%);
 	}
 
 	.dToolboxBox {
@@ -1686,7 +1686,7 @@
 		display: flex;
 		top: 60px;
 		width: calc(30% - 2.5px);
-		min-width: 292px;
+		min-width: min(90%, 340px);
 		position: absolute;
 		right: 0px;
 		z-index: 1020;

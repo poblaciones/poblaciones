@@ -1,11 +1,11 @@
 .btn {
 	color: #5e5e5e;
-	border-radius: 20px!important;
-	font-size: 13.5px!important;
-	padding: 6px 10px!important;
+	border-radius: 20px !important;
+	font-size: 13.5px !important;
+	padding: 6px 8px !important;
 	border: 1px;
-	margin-right: 4px;
-	margin-left: 4px!important;
+	margin-right: 2px;
+	margin-left: 1px !important;
 }
 .btn-accent {
 		border: 1px solid;
@@ -29,7 +29,20 @@
 	padding-left: 12px !important;
 	border-bottom: 0px;
 }
-
+.btn-solid {
+	border: 1px solid!important;
+		margin: 0px!important;
+}
+.modal-content .card {
+	border-radius: 12px !important;
+	border: 1px solid rgb(165 164 164 / 50%);
+	box-shadow: unset !important;
+}
+.btn-set {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
 .summaryToolbar .btn {
 	font-size: 18px !important;
 	border: 1px solid rgb(165 164 164 / 50%);
@@ -76,10 +89,19 @@
 .panel.card.panel-body {
 	background-color: white!important;
 }
-.modal-content .card {
-	border-radius: 12px;
-	border: 1px solid rgb(165 164 164 / 50%);
-	box-shadow: unset !important;
+
+.lefttrans-enter-active, .lefttrans-leave-active {
+	transition: opacity .35s;
+}
+
+.lefttrans-enter, .lefttrans-leave-to {
+	opacity: 0;
+	transition: 10s;
+	left: -100px;
+}
+
+.leaflet-control-attribution.leaflet-control > :nth-child(-n+2) {
+	display: none;
 }
 
 #panSummary {
@@ -103,8 +125,8 @@
 }
 
 .dropdown-menu > li > a:hover {
-	background-color: #eee!important;
-	color: unset!important;
+	background-color: #eee !important;
+	color: unset !important;
 }
 
 .sourceInfo .btn {
@@ -276,4 +298,13 @@
 	width: 24px;
 	text-align: center;
 	flex-shrink: 0;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+	.floatRightPanel {
+		margin-right: 0px;
+		border-bottom-right-radius: 0px !important;
+		border-top-right-radius: 0px !important;
+	}
 }

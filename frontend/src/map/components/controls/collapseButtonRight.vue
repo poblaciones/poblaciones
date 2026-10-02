@@ -1,6 +1,6 @@
 <template>
 	<div
-		id="collapseButtonRight"
+		id="collapseButtonRight"  v-show="collapsed || !$isMobile"
 		@click="doToggle" :title="tooltipText"
 		class="fa fa-2x hand right-arrow mapsOvercontrols"
 		:class="{ 'fa-caret-right': !collapsed, 'fa-caret-left': collapsed }"

@@ -20,6 +20,7 @@
         class="map-options-panel panel card"
         @mouseenter="keepPanelOpen = true"
         @mouseleave="handlePanelLeave"
+        v-touch:swipe.bottom="closePanel"
       >
 
 
@@ -596,8 +597,8 @@
 		right: 0;
 		bottom: 0;
 		width: 100%;
-		border-radius: 16px 16px 0 0;
-		transform-origin: bottom;
+		border-radius: 12px 12px 0 0;
+		margin-bottom: 0px;
 	}
 
   .fade-enter, .fade-leave-to {
@@ -620,13 +621,13 @@
 /* Para pantallas muy pequeñas */
 @media (max-width: 480px) {
   .map-style-btn {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
   }
 
   .map-style-icon {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
   }
 }
 </style>
