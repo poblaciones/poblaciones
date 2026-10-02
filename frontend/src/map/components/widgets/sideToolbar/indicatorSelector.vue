@@ -1,9 +1,8 @@
 <template>
-  <transition name="lefttrans">
-    <div class="indicator-selector-wrapper sidepanelOffset" v-if="isOpen" v-on-clickaway="closePanel" v-touch:swipe.left="panLeftSwipeClose">
-      <div ref="floatingPanel" class="work-offsetY floating-panel panel card"
-           :class="{ 'pos-anchored': !anchor && !isMobile && sidebarPosition !== 'middle' }"
-           :style="[panelStyle, positionStyle, heightStyle]">
+  <transition name="slide-right">
+    <div ref="floatingPanel" class="indicator-selector-wrapper work-offsetY" v-if="isOpen"
+         :style="[panelStyle, positionStyle, heightStyle]" v-on-clickaway="closePanel" v-touch:swipe.left="panLeftSwipeClose">
+      <div class="floating-panel panel card">
         <!-- Encabezado -->
         <div class="panel-header">
           <div class="titleDialog">{{ title }}</div>
@@ -394,7 +393,7 @@ export default {
       return { minHeight: 'min(90vh, ' + min + 'px)', maxHeight: 'max(90vh, ' + max + 'px)' };
     },
     // Con sidebarPosition 'top'/'bottom' el panel se ajusta a ese borde en
-    // vez de quedar centrado verticalmente (el default de .floating-panel).
+    // vez de quedar centrado verticalmente (el default de .indicator-selector-wrapper).
     // No aplica con anchor (otro mecanismo de posicionamiento, ver panelStyle)
     // ni en mobile (el panel ahí se desliza desde abajo siempre).
     positionStyle() {
@@ -632,7 +631,7 @@ export default {
       if (val) {
         this.kbd.attach();
         this.$nextTick(() => {
-          if (!this.$isMobile) {
+          if (!this.$isMobile()) {
             if (this.$refs.searchInput) this.$refs.searchInput.focus();
           }
           this.positionPanel();
@@ -1035,17 +1034,8 @@ export default {
 </script>
 
 <style scoped>
-/* Animación de entrada/salida */
-.slide-fade-enter-active { transition: all 0.3s ease; }
-.slide-fade-leave-active { transition: all 0.25s ease; }
-.slide-fade-enter, .slide-fade-leave-to { opacity: 0; }
-.slide-fade-enter .floating-panel:not(.pos-anchored),
-.slide-fade-leave-to .floating-panel:not(.pos-anchored) { transform: translateX(-100%) translateY(-50%); }
-.slide-fade-enter .floating-panel.pos-anchored,
-.slide-fade-leave-to .floating-panel.pos-anchored { transform: translateX(-100%); }
-
-/* Panel flotante */
-	.floating-panel {
+/* Wrapper posicionado (como en searchPanel.vue): sobre él actúa la transición global slide-right. */
+	.indicator-selector-wrapper {
 		position: absolute;
 		left: 92px;
 		top: 0;
@@ -1054,10 +1044,20 @@ export default {
 		width: 420px;
 		max-width: calc(100vw - 112px);
 		max-height: 90vh;
-		background: white;
 		border-radius: 12px;
-		border: 1px solid rgb(165 164 164 / 50%);
 		z-index: 1050;
+		display: flex;
+		flex-direction: column;
+	}
+
+/* Panel */
+	.floating-panel {
+		flex: 1 1 auto;
+		min-height: 0;
+		margin: 0;
+		background: white;
+		border-radius: inherit;
+		border: 1px solid rgb(165 164 164 / 50%);
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
@@ -1343,13 +1343,12 @@ export default {
 .sourceInfo { color: #999; }
 
 @media (prefers-reduced-motion: reduce) {
-  .slide-fade-enter-active, .slide-fade-leave-active,
   .category-card, .indicator-item, .selcheck { transition: none; }
   .category-card:hover { transform: none; }
 }
 
 	@media (max-width: 768px) {
-		.floating-panel {
+		.indicator-selector-wrapper {
 			left: 0;
 			width: 90%;
 			max-width: 100%;
@@ -1358,10 +1357,10 @@ export default {
 			border-bottom-right-radius: 12px;
 			border-bottom-left-radius: 0px;
 			border-top-left-radius: 0px;
+		}
+		.floating-panel {
 			border-left: 0px;
 		}
-  .slide-fade-enter .floating-panel,
-  .slide-fade-leave-to .floating-panel { transform: translateX(-100%); }
 
   .preview-tooltip {
     left: 50% !important; top: 50% !important; transform: translate(-50%, -50%);

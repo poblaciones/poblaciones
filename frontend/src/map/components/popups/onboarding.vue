@@ -53,7 +53,7 @@ export default {
 			this.$refs.wizard.show();
 		},
 		checkOpenTutorial() {
-			if (this.totalImagesRequested === 0) {
+			if (this.totalImagesRequested === 0 && !this.$isMobile()) {
 				if (this.work.Current.Tutorial.CheckOpenTutorial()) {
 					this.$refs.wizard.show();
 				}

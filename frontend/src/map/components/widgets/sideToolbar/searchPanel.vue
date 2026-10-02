@@ -1,6 +1,6 @@
 <template>
   <transition name="slide-right">
-    <div class="search-panel-wrapper sidepanelOffset" v-if="isOpen" :style="positionStyle" v-touch:swipe.left="panLeftSwipeClose">
+    <div class="search-panel-wrapper" v-if="isOpen" :style="positionStyle" v-touch:swipe.left="panLeftSwipeClose">
       <div class="search-panel" v-on-clickaway="close" :style="heightStyle">
         <div class="search-header">
           <div class="titleDialog">Buscar</div>
@@ -265,7 +265,7 @@ export default {
         // recientes recién al abrir el panel, que es cuando puede haber
         // cambiado lo guardado desde la última vez que se mostraron.
         this.refreshRecents();
-        if (!this.$isMobile) {
+        if (!this.$isMobile()) {
           this.$nextTick(() => {
             if (this.$refs.searchInput) {
               this.$refs.searchInput.focus();
@@ -394,19 +394,7 @@ export default {
 </script>
 
 <style scoped>
-/* Animación de slide desde la izquierda */
-.slide-right-enter-active {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
 
-.slide-right-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.6, 1);
-}
-
-.slide-right-enter, .slide-right-leave-to {
-  transform: translateX(-100%);
-  opacity: 0;
-}
 
 /* Wrapper del panel */
 	.search-panel-wrapper {

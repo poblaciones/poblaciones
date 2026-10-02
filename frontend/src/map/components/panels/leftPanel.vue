@@ -326,5 +326,19 @@ export default {
 		border: 1px solid rgba(165, 164, 164, 0.75);
 		user-select: text
 	}
+
+	/* Media queries */
+	@media (max-width: 768px) {
+		.floatLeftPanelContent {
+			border-top-right-radius: 12px;
+			border-bottom-right-radius: 12px;
+			border-bottom-left-radius: 0px;
+			border-top-left-radius: 0px;
+		border-left: 0px;
+		}
+		.floatLeftPanel {
+			padding-left: 0px;
+		}
+	}
 </style>
 
