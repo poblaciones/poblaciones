@@ -3,13 +3,19 @@
 		<div>
 			<div v-if="metadata !== null" ref="barBody" class="panel card workPanelBody"
 					 :style="'    text-shadow: rgb(118 118 118) 0px 0px 5px;rgba(76, 76, 76, 0.32) 0px 0px 6px 0px inset; background-color: ' + backgroundColor ">
-				<div class="floatBox pull-right btn-group exp-hiddable-block" style="margin-top: -1px">
-					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="hasOnboarding()"
+				<div class="floatBox pull-right exp-hiddable-block" style="margin-top: -1px">
+					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="hasOnboarding() && !isMobile"
 									style="color: #FFF"
 									title="Bienvenida" @click="showOnboarding">
 						<help-circle-icon style="color: #fff" title="Bienvenida" />
 					</button>
-					<button type="button" class="btn btn-default btn-accent smallButton" @click="showAddToMap">{{ addToMapLabel }}</button>
+					<button type="button" class="btn btn-default btn-accent smallButton" @click="showAddToMap">
+						<i v-if="isMobile" class="fas fa-plus"></i>
+						<template v-else>
+							{{ addToMapLabel }}
+						</template>
+
+					</button>
 					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="type === 'W' && hasMetrics"
 									style="color: #FFF"
 									:title="'Información de ' + metadata.Name" @click="clickFuente">
@@ -80,6 +86,9 @@ export default {
 			} else {
 				return '';
 			}
+		},
+		isMobile() {
+			return this.$isMobile();
 		},
 		institutionsList() {
 			if (!this.metadata) {
@@ -260,13 +269,9 @@ export default {
 	margin-bottom: -2px;
 	margin-top: 5px;
 }
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 768px) {
 	.titleRow {
 		font-size: 1.75rem!important;
-	}
-	.floatBox {
-		float: none !important;
-		margin-bottom: 6px;
 	}
 	.preTitleRow {
 		display: none;
@@ -278,6 +283,7 @@ export default {
 		display: inline-block;
 	}
 }
+
 .titleRow {
 	line-height: 1.1em;
 	margin-top: 0px;

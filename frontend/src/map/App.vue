@@ -1527,8 +1527,12 @@
 		color: #666 !important
 	}
 
-	@media (max-width: 991px) {
-		.dropdown-menu {
+	@media (max-width: 768px) {
+
+		.logosBox {
+			display: none;
+		}
+			.dropdown-menu {
 			display: block;
 		}
 

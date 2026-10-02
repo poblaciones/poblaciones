@@ -9,10 +9,6 @@
 <script>
 import TopPanel from './topPanel';
 
-// Wrapper fino: arma las props genéricas de topPanel.vue a partir de la
-// delimitación activa (ruta /map/b<id>). Ver workPanel.vue para el análogo
-// de cartografías. No pasa addToMapId ni work: el link de metadatos y el
-// onboarding son exclusivos de work (topPanel.vue los deshabilita por type).
 export default {
 	name: 'boundaryPanel',
 	components: {
