@@ -71,11 +71,10 @@
 				<transition
 										enter-active-class="animated quick zoomIn"
 										leave-active-class="animated quick zoomOut">
-					<div v-if="ShowMultiselectInfo" class="infoBoxHolder">
-						<div class="infoBox exp-hiddable-unset">
+					<div v-if="ShowMultiselectInfo" class="infoBoxHolder" @click="closeMultiselectInfo">
+						<div class="infoBox exp-hiddable-unset" @click="closeMultiselectInfo">
 							<mp-close-button title="Cerrar mensaje" @click="closeMultiselectInfo"
-															 style="float: none; top: 0; margin-top: 0px;
-																		position: absolute; right: 5px; font-size: 1.1em;" class="exp-hiddable-block" />
+															 style="float: none; top: 1px; margin-top: 0px; position: absolute; right: 0px; font-size: 1.1em; border: 0px solid !important; height: 16px; width: 16px; " class="exp-hiddable-block" />
 
 							Utilice CTRL+click para seleccionar varias zonas
 						</div>
@@ -264,18 +263,21 @@ export default {
 		border-radius: 6px;
 	}
 	.infoBoxHolder {
-		max-width: 40%;
+		max-width: 160px;
 		position: absolute;
-		left: 100px;
+		left: 40px;
 		margin-left: auto;
 		margin-right: auto;
 		font-size: 12px;
 		bottom: 2px;
+		cursor: pointer;
 		text-align: center;
+		top: -45px;
 		right: 0;
 		z-index: 100;
 		border-radius: 6px;
 		padding: 0px;
+		padding-left: 4px;
 	}
 
 	.btn-inline {

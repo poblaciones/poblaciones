@@ -1,33 +1,27 @@
 <template>
 	<Modal title="Personalizar delimitación" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="boundary">
-			<table class="localTable">
-				<tr>
-					<td colspan="2">
-						<div class="popupSubTitle">
-							Opciones de mapa
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td class="nowrapwords">Mostrar descripciones:</td>
-					<td>
-						<label class="radio-inline">
-							<input type="radio" name="descripciones" :value="true" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">Sí
-						</label>
-						<label class="radio-inline">
-							<input type="radio" name="descripciones" :value="false" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">No
-						</label>
-					</td>
-				</tr>
-				<tr>
-					<td class="optionsLabel">Trama:</td>
-					<td>
-						<PatternButtons :patterns="boundary.getValidPatterns()" :customPattern="boundary.customPattern"
-														:defaultPattern="boundary.pattern" @change="changePattern" />
-					</td>
-				</tr>
-			</table>
+			<div class="popupSubTitle">
+				Opciones de mapa
+			</div>
+			<div class="fld">
+				<div class="fld-label">Mostrar descripciones</div>
+				<div class="fld-value">
+					<label class="radio-inline">
+						<input type="radio" name="descripciones" :value="true" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">Sí
+					</label>
+					<label class="radio-inline">
+						<input type="radio" name="descripciones" :value="false" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">No
+					</label>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Trama</div>
+				<div class="fld-value">
+					<PatternButtons :patterns="boundary.getValidPatterns()" :customPattern="boundary.customPattern"
+													:defaultPattern="boundary.pattern" @change="changePattern" />
+				</div>
+			</div>
 		</div>
 	</Modal>
 </template>
@@ -70,11 +64,5 @@ export default {
 </script>
 
 <style scoped>
-	.nowrapwords {
-		white-space: nowrap;
-	}
-	.col1 {
-		width: 150px;
-	}
 </style>
 

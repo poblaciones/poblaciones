@@ -1,113 +1,107 @@
 <template>
 	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metric">
-			<table class="localTable">
-				<tbody>
-					<tr>
-						<td style="width: 250px">Fuente:</td>
-						<td style="width: 600px">{{ version.Work.Metadata.Name }}</td>
-					</tr>
-					<tr v-if="version.Work.Type !=='P' && version.Work.Metadata.Authors">
-						<td>Autores:</td>
-						<td>{{ version.Work.Metadata.Authors }}</td>
-					</tr>
-					<tr>
-						<td>Dataset:</td>
-						<td>{{ level.Dataset.Name }}</td>
-					</tr>
-					<tr>
-						<td>Licencia:</td>
-						<td>
-							<creativeCommons :license="version.Work.Metadata.License" />
-						</td>
-					</tr>
-					<tr>
-						<td>Nivel:</td>
-						<td v-if="version.Levels.length > 1 && !metric.Compare.Active">
-							<select :disabled="!visibleUrl" v-model="downloadLevel">
-								<option v-for="(level, index) in version.Levels" :key="level.Id" :value="index">{{ level.Name }}</option>
-							</select>
-							<div v-if="useFilter && levelOverflows" class="warningBox">
-								Las áreas del nivel '{{ level.Name }}' pueden exceder a las regiones seleccionadas. Cuando esto
-								suceda, las áreas parcialmente coincidentes serán incluidas en forma completa en la descarga.
-							</div>
-						</td>
-						<td v-else="">{{ level.Name }}</td>
-					</tr>
-					<tr v-if="hasUrbanityFilter">
-						<td>Filtro:</td>
-						<td>
-							<select :disabled="!visibleUrl" v-model="downloadUrbanity">
-								<option v-for="(value, key) in metric.GetUrbanityFilters()" :key="key" :value="key">{{ value.label }}</option>
-							</select>
-							<div class="warningBox">
-								{{ metric.GetUrbanityFilters()[downloadUrbanity].tooltip }}
-							</div>
-						</td>
-					</tr>
-					<tr v-if="useFilter">
-						<td>Selección:</td>
-						<td>
-							<div style="margin-bottom: -7px;">
-								<div v-for="region in regions" :key="region.Id"
-										 class="filterElement" style="margin-bottom: 7px;">
-									{{ region.Name }}
-									<mp-close-button @click="removeFilter(region.Id)" title="Quitar filtro"
-																	 class="exp-hiddable-block filterElement-close" />
-								</div>
-							</div>
-						</td>
-					</tr>
-					<tr v-if="hasPartitions">
-						<td>{{ partitions.Name }}:</td>
-						<td>
-							<select v-model="downloadPartition">
-								<option v-for="item in partitions.Values" :key="item.Value" :value="item.Value">{{ item.Caption }}</option>
-							</select>
-						</td>
-					</tr>
-
-					<tr>
-						<td>Descarga:</td>
-						<td>
-							<span v-if="visibleUrl" class="btn-set">
-								<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="btn btn-solid">
-									<download-icon title="Descargar" /> {{ format.caption }}
-								</button>
-								<button @click="sendFile(resolveMetadataUrl(), true)" class="btn btn-solid">
-									<i class="far fa-file-pdf" /> Metadatos
-								</button>
-								<button @click="sendFile(resolveMetadataDictionaryUrl(), true)" class="btn btn-solid">
-									<i class="far fa-file-excel" /> Diccionario de datos
-								</button>
-							</span>
-							<span v-else="">
-								<img src="/static/img/spinner.gif"> Generando el archivo. El proceso puede demorar varios minutos... {{ (progress ? '(' + progress + '%)' : '') }}
-							</span>
-						</td>
-					</tr>
-					<tr v-if="version.Work.Metadata.Files && version.Work.Metadata.Files.length > 0">
-						<td>Adjuntos:</td>
-						<td>
-							<div class="attachmentsDownloadPanel">
-								<span v-for="file in version.Work.Metadata.Files" :key="file.Id">
-									<a target="_blank" :href="resolveFileUrl(file)">
-										<i class="far fa-file-pdf" /> {{ file.Caption }}
-									</a>
-								</span>
-							</div>
-						</td>
-					</tr>
-					<tr v-if="level.HasArea || level.Dataset.AreSegments">
-						<td>Descarga con polígonos:</td>
-						<td class="btn-set">
-							<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="btn btn-solid">
-								<download-icon title="Descargar" /> {{ format.caption }}
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="fld">
+				<div class="fld-label">Fuente</div>
+				<div class="fld-value">{{ version.Work.Metadata.Name }}</div>
+			</div>
+			<div class="fld" v-if="version.Work.Type !== 'P' && version.Work.Metadata.Authors">
+				<div class="fld-label">Autores</div>
+				<div class="fld-value">{{ version.Work.Metadata.Authors }}</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Dataset</div>
+				<div class="fld-value">{{ level.Dataset.Name }}</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Licencia</div>
+				<div class="fld-value">
+					<creativeCommons :license="version.Work.Metadata.License" />
+				</div>
+			</div>
+			<div class="fld-pair">
+				<div class="fld">
+					<div class="fld-label">Nivel</div>
+					<div class="fld-value" v-if="version.Levels.length > 1 && !metric.Compare.Active">
+						<select :disabled="!visibleUrl" v-model="downloadLevel">
+							<option v-for="(level, index) in version.Levels" :key="level.Id" :value="index">{{ level.Name }}</option>
+						</select>
+						<div v-if="useFilter && levelOverflows" class="warningBox">
+							Las áreas del nivel '{{ level.Name }}' pueden exceder a las regiones seleccionadas. Cuando esto
+							suceda, las áreas parcialmente coincidentes serán incluidas en forma completa en la descarga.
+						</div>
+					</div>
+					<div class="fld-value" v-else>{{ level.Name }}</div>
+				</div>
+				<div class="fld" v-if="hasUrbanityFilter">
+					<div class="fld-label">Filtro</div>
+					<div class="fld-value">
+						<select :disabled="!visibleUrl" v-model="downloadUrbanity">
+							<option v-for="(value, key) in metric.GetUrbanityFilters()" :key="key" :value="key">{{ value.label }}</option>
+						</select>
+						<div class="warningBox">
+							{{ metric.GetUrbanityFilters()[downloadUrbanity].tooltip }}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="fld" v-if="useFilter">
+				<div class="fld-label">Selección</div>
+				<div class="fld-value fld-chips">
+					<div v-for="region in regions" :key="region.Id" class="filterElement">
+						{{ region.Name }}
+						<mp-close-button @click="removeFilter(region.Id)" title="Quitar filtro"
+														 class="exp-hiddable-block filterElement-close" />
+					</div>
+				</div>
+			</div>
+			<div class="fld" v-if="hasPartitions">
+				<div class="fld-label">{{ partitions.Name }}</div>
+				<div class="fld-value">
+					<select v-model="downloadPartition">
+						<option v-for="item in partitions.Values" :key="item.Value" :value="item.Value">{{ item.Caption }}</option>
+					</select>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Descarga</div>
+				<div class="fld-value">
+					<div v-if="visibleUrl" class="btn-set">
+						<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="btn btn-solid">
+							<download-icon title="Descargar" /> {{ format.caption }}
+						</button>
+						<button @click="sendFile(resolveMetadataUrl(), true)" class="btn btn-solid">
+							<i class="far fa-file-pdf" /> Metadatos
+						</button>
+						<button @click="sendFile(resolveMetadataDictionaryUrl(), true)" class="btn btn-solid">
+							<i class="far fa-file-excel" /> Diccionario de datos
+						</button>
+					</div>
+					<div v-else>
+						<img src="/static/img/spinner.gif"> Generando el archivo. El proceso puede demorar varios minutos... {{ (progress ? '(' + progress + '%)' : '') }}
+					</div>
+				</div>
+			</div>
+			<div class="fld" v-if="version.Work.Metadata.Files && version.Work.Metadata.Files.length > 0">
+				<div class="fld-label">Adjuntos</div>
+				<div class="fld-value">
+					<div class="attachmentsDownloadPanel">
+						<span v-for="file in version.Work.Metadata.Files" :key="file.Id">
+							<a target="_blank" :href="resolveFileUrl(file)">
+								<i class="far fa-file-pdf" /> {{ file.Caption }}
+							</a>
+						</span>
+					</div>
+				</div>
+			</div>
+			<div class="fld" v-if="level.HasArea || level.Dataset.AreSegments">
+				<div class="fld-label">Descarga con polígonos</div>
+				<div class="fld-value btn-set">
+					<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="btn btn-solid">
+						<download-icon title="Descargar" /> {{ format.caption }}
+					</button>
+				</div>
+			</div>
 		</div>
 	</Modal>
 </template>

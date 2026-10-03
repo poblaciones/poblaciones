@@ -1,83 +1,75 @@
 <template>
 	<Modal :title="title" ref="showFuente" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metadata">
-			<div>
-				<table class="localTable">
-					<tbody>
-						<tr>
-							<td>Título:</td>
-							<td class='tdWrappable'>{{ metadata.Name }}</td>
-						</tr>
-						<tr v-if="metadata.Authors">
-							<td>Autores:</td>
-							<td class='tdWrappable'>{{ metadata.Authors }}</td>
-						</tr>
-						<tr v-if="metadata.Institution">
-							<td>Institución:</td>
-							<td class='tdWrappable'>{{ metadata.Institution }}</td>
-						</tr>
-						<tr v-if="metadata.Date">
-							<td>Publicación:</td>
-							<td class='tdWrappable'>{{ metadata.Date }}</td>
-						</tr>
-						<tr v-if="metadata.Abstract">
-							<td>Resumen:</td>
-							<td class='tdWrappable'>{{ metadata.Abstract }} </td>
-						</tr>
-						<tr v-if="boundaryId !== null">
-							<td style="width: 120px;">Dirección:</td>
-							<td class='tdWrappable'>
-								<a target="_blank" :href="resolvePublicUrl()">{{ resolvePublicUrl() }}</a>
-							</td>
-						</tr>
-						<tr v-if="metadata.Ark">
-							<td>Ark:</td>
-							<td class='tdWrappable'>
-								<a target="_blank" :href="metadata.Ark">{{ metadata.Ark }}</a>
-								<a href="#" v-clipboard="() => metadata.Ark" class="superSmallButton">
-									Copiar
-								</a>
-							</td></tr>
-						<tr>
-							<td>Cita (APA):</td>
-							<td class="quotation tdWrappable">
-								<span v-html="citationAPA(metadata)"> </span>
-								<a href="#" v-clipboard="() => citationAPAText(metadata)" class="superSmallButton">
-									Copiar
-								</a>
-							</td>
-						</tr>
-						<tr>
-							<td>Licencia:</td>
-							<td>
-								<creativeCommons :license="metadata.License" />
-							</td>
-						</tr>
-						<!--<tr> //TODO: -->
-						<!--	<td>Cita:</td>-->
-						<!--	<td>(Armar algo simil APA… no sé si tiene sentido)</td>-->
-						<!--</tr>-->
-						<tr>
-							<td>Metadatos:</td>
-							<td>
-								<a target="_blank" :href="resolveMetadataUrl()">
-									<i class="far fa-file-pdf" /> Consultar
-								</a>
-							</td>
-						</tr>
-						<tr v-if="metadata.Files && metadata.Files.length > 0">
-							<td>Adjuntos:</td>
-							<td class='tdWrappable'><div class="attachmentsDownloadPanel">
-								<span v-for="file in metadata.Files" :key="file.Id">
-									<a target="_blank" :href="resolveFileUrl(file)">
-										<i class="far fa-file-pdf" /> {{ file.Caption }}
-									</a>
-								</span>
-								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<div class="fld">
+				<div class="fld-label">Título</div>
+				<div class="fld-value">{{ metadata.Name }}</div>
+			</div>
+			<div class="fld" v-if="metadata.Authors">
+				<div class="fld-label">Autores</div>
+				<div class="fld-value">{{ metadata.Authors }}</div>
+			</div>
+			<div class="fld" v-if="metadata.Institution">
+				<div class="fld-label">Institución</div>
+				<div class="fld-value">{{ metadata.Institution }}</div>
+			</div>
+			<div class="fld fld-hide-mobile" v-if="metadata.Date">
+				<div class="fld-label">Publicación</div>
+				<div class="fld-value">{{ metadata.Date }}</div>
+			</div>
+			<div class="fld fld-hide-mobile" v-if="metadata.Abstract">
+				<div class="fld-label">Resumen</div>
+				<div class="fld-value">{{ metadata.Abstract }}</div>
+			</div>
+			<div class="fld fld-hide-mobile" v-if="boundaryId !== null">
+				<div class="fld-label">Dirección</div>
+				<div class="fld-value">
+					<a target="_blank" :href="resolvePublicUrl()">{{ resolvePublicUrl() }}</a>
+				</div>
+			</div>
+			<div class="fld" v-if="metadata.Ark">
+				<div class="fld-label">Ark</div>
+				<div class="fld-value">
+					<a target="_blank" :href="metadata.Ark">{{ metadata.Ark }}</a>
+					<a href="#" v-clipboard="() => metadata.Ark" class="superSmallButton">
+						Copiar
+					</a>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Cita (APA)</div>
+				<div class="fld-value quotation">
+					<span v-html="citationAPA(metadata)"> </span>
+					<a href="#" v-clipboard="() => citationAPAText(metadata)" class="superSmallButton">
+						Copiar
+					</a>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Licencia</div>
+				<div class="fld-value">
+					<creativeCommons :license="metadata.License" />
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Metadatos</div>
+				<div class="fld-value">
+					<a target="_blank" :href="resolveMetadataUrl()">
+						<i class="far fa-file-pdf" /> Consultar
+					</a>
+				</div>
+			</div>
+			<div class="fld" v-if="metadata.Files && metadata.Files.length > 0">
+				<div class="fld-label">Adjuntos</div>
+				<div class="fld-value">
+					<div class="attachmentsDownloadPanel">
+						<span v-for="file in metadata.Files" :key="file.Id">
+							<a target="_blank" :href="resolveFileUrl(file)">
+								<i class="far fa-file-pdf" /> {{ file.Caption }}
+							</a>
+						</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	</Modal>

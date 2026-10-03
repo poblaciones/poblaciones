@@ -20,10 +20,12 @@
 
 	export default {
 		name: 'metricDropdown',
-		props: [
-			'metric',
-			'clipping',
-		],
+		props: {
+			metric: { type: Object, default: null },
+			clipping: { type: Object, default: null },
+			useCompare: { type: Boolean, default: false },
+			valueCompare: { type: Boolean, default: false },
+		},
 		components: {
 		},
 		data() {
@@ -44,7 +46,7 @@
 			clickCustomize() {
 				window.Popups.MetricCustomize.show(this.metric);
 			},
-			clickQuitar(e) {
+			clickQuitar() {
 				this.metric.Remove();
 			},
 			toggleRankings() {
@@ -58,6 +60,9 @@
 				if (this.metric.ShowChart == 1) {
 					this.$emit('ChartShown');
 				}
+			},
+			clickComparar(e) {
+				this.$emit("clickCompare", e);
 			},
 			toggleShowValues() {
 				if (this.metric.SelectedVariable().ShowValues == 1) {
@@ -118,6 +123,9 @@
 					case 'RANKINGS':
 						this.toggleRankings();
 						break;
+					case 'COMPARE':
+						this.clickComparar();
+						break;
 					case 'CHART':
 						this.toggleChart();
 						break;
@@ -172,9 +180,18 @@
 					}
 					// muestra ránking
 					if (this.metric.useRankings()) {
+						ret.push({ 'separator': true });
 						ret.push({
 							label: (this.metric.ShowRanking ? 'Ocultar ranking' : 'Mostrar ranking'),
 							key: 'RANKINGS',
+							/* icon: 'fa fa-signal' */
+						});
+					}
+					// muestra comparar
+					if (this.useCompare) {
+						ret.push({
+							label: (!this.valueCompare ? 'Comparar series' : 'Finalizar comparar'),
+							key: 'COMPARE',
 							/* icon: 'fa fa-signal' */
 						});
 					}

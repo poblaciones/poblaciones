@@ -67,7 +67,7 @@ export default {
 
 		&__wrapper {
 			position: relative;
-			min-width: 65vw;
+			min-width: min(800px, 65vw);
 			max-width: min(800px, 90%);
 			max-height: 85vh;
 			background: #fff;

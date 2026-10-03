@@ -203,8 +203,8 @@
 
 .modal-dialog {
 		align-self: center;
-		max-width: 610px;
 		width: 610px;
+		max-width: calc(100% - 20px);
 	}
 .modal-content {
 	max-height: 100%;

@@ -1,120 +1,110 @@
 <template>
 	<Modal title="Personalizar indicador" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metric && metric.SelectedVariable()">
-			<table class="localTable">
-				<tr>
-					<td colspan="2">
-						<div class="popupSubTitle">
-							Panel de información
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td class="col1 optionsLabel">Métrica:</td>
-					<td>
-						<div class="btn-group" style="display: flex">
-							<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
-								{{ metric.Caption }}
-							</button>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="anyHasArea() || !metric.SelectedVariable().IsSimpleCount">
-					<td colspan="2">
-						<div class="popupSubTitle">
-							Opciones de mapa
-						</div>
-					</td>
-				</tr>
-				<tr v-if="metric.SelectedLevel().HasDescriptions">
-					<td class="nowrapwords">Mostrar descripciones:</td>
-					<td>
-						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="1" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
-						</label>
-						<label class="radio-inline">
-							<input type="radio" name="descripciones" value="0" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">No
-						</label>
-					</td>
-				</tr>
-				<tr v-if="!metric.SelectedVariable().IsSimpleCount">
-					<td class="nowrapwords">Mostrar valores:</td>
-					<td>
-						<label class="radio-inline">
-							<input type="radio" name="valores" value="1" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">Sí
-						</label>
-						<label class="radio-inline">
-							<input type="radio" name="valores" value="0" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">No
-						</label>
-					</td>
-				</tr>
-				<tr v-if="usePerimeter && metric.SelectedVariable().Perimeter">
-					<td class="nowrapwords">Mostrar perímetros:</td>
-					<td>
-						<label class="radio-inline">
-							<input type="radio" name="perimeter" value="1" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
-						</label>
-						<label class="radio-inline">
-							<input type="radio" name="perimeter" value="0" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
-						</label>
-					</td>
-				</tr>
-				<tr v-if="showOpacityOptions()">
-					<td class="optionsLabel">Transparencia:</td>
-					<td>
-						<div class="btn-group">
-							<button type="button" @click="changeOpacity('H')" class="btn btn-default btn-xs" :class="getActiveOpacity('H')">
-								Baja
-							</button>
-							<button type="button" @click="changeOpacity('M')" class="btn btn-default btn-xs" :class="getActiveOpacity('M')">
-								Media
-							</button>
-							<button type="button" @click="changeOpacity('L')" class="btn btn-default btn-xs" :class="getActiveOpacity('L')">
-								Alta
-							</button>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="anyHasArea() && showGradientOptions()">
-					<td class="optionsLabel">Ajuste poblacional:</td>
-					<td>
-						<div class="btn-group">
-							<button type="button" @click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
-								Bajo
-							</button>
-							<button type="button" @click="changeGradientOpacity('M')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('M')">
-								Medio
-							</button>
-							<button type="button" @click="changeGradientOpacity('L')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('L')">
-								Alto
-							</button>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="anyHasArea()">
-					<td class="optionsLabel">Trama:</td>
-					<td>
-						<PatternButtons :patterns="metric.getValidPatterns()" :customPattern="metric.SelectedVariable().CustomPattern"
-																:defaultPattern="metric.SelectedVariable().Pattern" @change="changePattern" />
-					</td>
-				</tr>
-				<tr v-if="metric.SelectedLevel().Dataset.AreSegments">
-					<td class="optionsLabel">Ancho:</td>
-					<td>
-						<div class="btn-group">
-							<button type="button" @click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
-								Fino
-							</button>
-							<button type="button" @click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
-								Intermedio
-							</button>
-							<button type="button" @click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
-								Grueso
-							</button>
-						</div>
-					</td>
-				</tr>
-			</table>
+			<div class="popupSubTitle">
+				Panel de información
+			</div>
+			<div class="fld">
+				<div class="fld-label">Métrica</div>
+				<div class="fld-value">
+					<div class="btn-group">
+						<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
+							{{ metric.Caption }}
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="popupSubTitle" v-if="anyHasArea() || !metric.SelectedVariable().IsSimpleCount">
+				Opciones de mapa
+			</div>
+			<div class="fld" v-if="metric.SelectedLevel().HasDescriptions">
+				<div class="fld-label">Mostrar descripciones</div>
+				<div class="fld-value">
+					<label class="radio-inline">
+						<input type="radio" name="descripciones" value="1" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
+					</label>
+					<label class="radio-inline">
+						<input type="radio" name="descripciones" value="0" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">No
+					</label>
+				</div>
+			</div>
+			<div class="fld" v-if="!metric.SelectedVariable().IsSimpleCount">
+				<div class="fld-label">Mostrar valores</div>
+				<div class="fld-value">
+					<label class="radio-inline">
+						<input type="radio" name="valores" value="1" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">Sí
+					</label>
+					<label class="radio-inline">
+						<input type="radio" name="valores" value="0" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">No
+					</label>
+				</div>
+			</div>
+			<div class="fld" v-if="usePerimeter && metric.SelectedVariable().Perimeter">
+				<div class="fld-label">Mostrar perímetros</div>
+				<div class="fld-value">
+					<label class="radio-inline">
+						<input type="radio" name="perimeter" value="1" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
+					</label>
+					<label class="radio-inline">
+						<input type="radio" name="perimeter" value="0" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
+					</label>
+				</div>
+			</div>
+			<div class="fld" v-if="showOpacityOptions()">
+				<div class="fld-label">Transparencia</div>
+				<div class="fld-value">
+					<div class="btn-group">
+						<button type="button" @click="changeOpacity('H')" class="btn btn-default btn-xs" :class="getActiveOpacity('H')">
+							Baja
+						</button>
+						<button type="button" @click="changeOpacity('M')" class="btn btn-default btn-xs" :class="getActiveOpacity('M')">
+							Media
+						</button>
+						<button type="button" @click="changeOpacity('L')" class="btn btn-default btn-xs" :class="getActiveOpacity('L')">
+							Alta
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="fld" v-if="anyHasArea() && showGradientOptions()">
+				<div class="fld-label">Ajuste poblacional</div>
+				<div class="fld-value">
+					<div class="btn-group">
+						<button type="button" @click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
+							Bajo
+						</button>
+						<button type="button" @click="changeGradientOpacity('M')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('M')">
+							Medio
+						</button>
+						<button type="button" @click="changeGradientOpacity('L')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('L')">
+							Alto
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="fld" v-if="anyHasArea()">
+				<div class="fld-label">Trama</div>
+				<div class="fld-value">
+					<PatternButtons :patterns="metric.getValidPatterns()" :customPattern="metric.SelectedVariable().CustomPattern"
+													:defaultPattern="metric.SelectedVariable().Pattern" @change="changePattern" />
+				</div>
+			</div>
+			<div class="fld" v-if="metric.SelectedLevel().Dataset.AreSegments">
+				<div class="fld-label">Ancho</div>
+				<div class="fld-value">
+					<div class="btn-group">
+						<button type="button" @click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
+							Fino
+						</button>
+						<button type="button" @click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
+							Intermedio
+						</button>
+						<button type="button" @click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
+							Grueso
+						</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</Modal>
 </template>
@@ -254,11 +244,5 @@ export default {
 </script>
 
 <style scoped>
-	.nowrapwords {
-		white-space: nowrap;
-	}
-	.col1 {
-		width: 150px;
-	}
 </style>
 

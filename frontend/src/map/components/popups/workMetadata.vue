@@ -1,93 +1,85 @@
 <template>
-  <Modal :title="this.title" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
+	<Modal :title="this.title" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="metric || work">
-			<table class="localTable">
-				<tbody>
-					<tr>
-						<td>Título:</td>
-						<td class='tdWrappable'>{{ work.Metadata.Name }}</td>
-					</tr>
-					<tr v-if="work.Metadata.Authors">
-						<td>Autores:</td>
-						<td class='tdWrappable'>{{ work.Metadata.Authors }}</td>
-					</tr>
-					<tr v-if="level">
-						<td>Dataset:</td>
-						<td class='tdWrappable'>{{ level.Dataset.Name }}</td>
-					</tr>
-					<tr v-if="work.Metadata.ReleaseDate">
-						<td>Publicación:</td>
-						<td class='tdWrappable'>{{ formattedReleaseDate }}</td>
-					</tr>
-					<tr v-if="work.Metadata.Abstract">
-						<td>Resumen:</td>
-						<td class='tdWrappable'>{{ work.Metadata.Abstract }}</td>
-					</tr>
-					<tr>
-						<td style="width: 120px;">Dirección:</td>
-						<td class='tdWrappable'>
-							<a target="_blank" :href="completeUrl(work.Url)">{{ completeUrl(work.Url) }}</a>
-						</td>
-					</tr>
-					<tr v-if="work.ArkUrl">
-						<td style="width: 120px;">Ark:</td>
-						<td class='tdWrappable'>
-							<a target="_blank" :href="work.ArkUrl">{{ work.ArkUrl }}</a>
-							<a href="#" v-clipboard="() => work.ArkUrl" class="superSmallButton">
-								Copiar
+			<div class="fld">
+				<div class="fld-label">Título</div>
+				<div class="fld-value">{{ work.Metadata.Name }}</div>
+			</div>
+			<div class="fld" v-if="work.Metadata.Authors">
+				<div class="fld-label">Autores</div>
+				<div class="fld-value">{{ work.Metadata.Authors }}</div>
+			</div>
+			<div class="fld" v-if="level">
+				<div class="fld-label">Dataset</div>
+				<div class="fld-value">{{ level.Dataset.Name }}</div>
+			</div>
+			<div class="fld fld-hide-mobile" v-if="work.Metadata.ReleaseDate">
+				<div class="fld-label">Publicación</div>
+				<div class="fld-value">{{ formattedReleaseDate }}</div>
+			</div>
+			<div class="fld fld-hide-mobile" v-if="work.Metadata.Abstract">
+				<div class="fld-label">Resumen</div>
+				<div class="fld-value">{{ work.Metadata.Abstract }}</div>
+			</div>
+			<div class="fld fld-hide-mobile">
+				<div class="fld-label">Dirección</div>
+				<div class="fld-value">
+					<a target="_blank" :href="completeUrl(work.Url)">{{ completeUrl(work.Url) }}</a>
+				</div>
+			</div>
+			<div class="fld" v-if="work.ArkUrl">
+				<div class="fld-label">Ark</div>
+				<div class="fld-value">
+					<a target="_blank" :href="work.ArkUrl">{{ work.ArkUrl }}</a>
+					<a href="#" v-clipboard="() => work.ArkUrl" class="superSmallButton">
+						Copiar
+					</a>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Cita (APA)</div>
+				<div class="fld-value quotation">
+					<span v-html="citationAPA()"> </span>
+					<a href="#" v-clipboard="() => citationAPAText()" class="superSmallButton">
+						Copiar
+					</a>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Licencia</div>
+				<div class="fld-value">
+					<creativeCommons :license="work.Metadata.License" />
+				</div>
+			</div>
+			<div class="fld" v-if="version">
+				<div class="fld-label">Nivel</div>
+				<div class="fld-value" v-if="version.Levels.length > 1">
+					<select v-model="downloadLevel">
+						<option v-for="(level, index) in version.Levels" :key="level.Id" :value="index">{{ level.Name }}</option>
+					</select>
+				</div>
+				<div class="fld-value" v-else>{{ level.Name }}</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Metadatos</div>
+				<div class="fld-value">
+					<a target="_blank" :href="resolveMetadataUrl()">
+						<i class="far fa-file-pdf" /> Consultar
+					</a>
+				</div>
+			</div>
+			<div class="fld" v-if="work.Metadata.Files && work.Metadata.Files.length > 0">
+				<div class="fld-label">Adjuntos</div>
+				<div class="fld-value">
+					<div class="attachmentsDownloadPanel">
+						<span v-for="file in work.Metadata.Files" :key="file.Id">
+							<a target="_blank" :href="resolveFileUrl(file)">
+								<i class="far fa-file-pdf" /> {{ file.Caption }}
 							</a>
-						</td>
-					</tr>
-					<tr>
-						<td>Cita (APA):</td>
-						<td class="quotation tdWrappable">
-							<span v-html="citationAPA()"> </span>
-							<a href="#" v-clipboard="() => citationAPAText()" class="superSmallButton">
-								Copiar
-							</a>
-						</td>
-					</tr>
-					<tr>
-						<td>Licencia:</td>
-						<td>
-							<creativeCommons :license="work.Metadata.License" />
-						</td>
-					</tr>
-					<tr v-if="version">
-						<td>Nivel:</td>
-						<td v-if="version.Levels.length > 1">
-							<select v-model="downloadLevel">
-								<option v-for="(level, index) in version.Levels" :key="level.Id" :value="index">{{ level.Name }}</option>
-							</select>
-						</td>
-						<td v-else="">{{ level.Name }}</td>
-					</tr>
-					<!--<tr> //TODO: -->
-					<!--	<td>Cita:</td>-->
-					<!--	<td>(Armar algo simil APA… no sé si tiene sentido)</td>-->
-					<!--</tr>-->
-					<tr>
-						<td>Metadatos:</td>
-						<td>
-							<a target="_blank" :href="resolveMetadataUrl()">
-								<i class="far fa-file-pdf" /> Consultar
-							</a>
-						</td>
-					</tr>
-					<tr v-if="work.Metadata.Files && work.Metadata.Files.length > 0">
-						<td>Adjuntos:</td>
-						<td class='tdWrappable'>
-							<div class="attachmentsDownloadPanel">
-								<span v-for="file in work.Metadata.Files" :key="file.Id">
-									<a target="_blank" :href="resolveFileUrl(file)">
-										<i class="far fa-file-pdf" /> {{ file.Caption }}
-									</a>
-								</span>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+						</span>
+					</div>
+				</div>
+			</div>
 		</div>
 	</Modal>
 </template>

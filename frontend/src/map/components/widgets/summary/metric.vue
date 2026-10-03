@@ -7,7 +7,7 @@
 		</div>
 		<template v-if="!Embedded.Readonly">
 			<MetricDropdown v-if="!Embedded.Readonly" :metric="metric" :clipping="clipping" :key="metric.index"
-											class="exp-hiddable-block" @RankingShown="rankingShown" />
+											class="exp-hiddable-block" @RankingShown="rankingShown" :valueCompare="compare" :useCompare="allowCompare" @clickCompare="toggleCompare" />
 		</template>
 		<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
 			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
@@ -61,7 +61,7 @@
 					{{ pair.version.Version.Name }}
 				</button>
 			</div>
-			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly" :useCompare="!Embedded.Readonly && useComparer && hasComparableVariables"
+			<Source :sourceTitle="metric.properties.Metric.Name" v-if="!Embedded.Readonly && !$isMobile()" :useCompare="allowCompare"
 														:valueCompare="compare" :compareTitle="compareContent" :useRanking="metric.useRankings()" :valueRanking="metric.ShowRanking"
 							@clickRanking="rankingShown" @clickDownload="clickDescargar" @clickSource="clickFuente" @clickCompare="toggleCompare"  />
 			<div style="clear: both; height: 0px"></div>
@@ -370,6 +370,9 @@ export default {
 	computed: {
 			Use() {
 				return window.Use;
+		},
+		allowCompare() {
+			return !this.Embedded.Readonly && this.useComparer && this.hasComparableVariables;
 		},
 		hasComparableVariables() {
 			return this.metric.canCompareSelectedVariable();

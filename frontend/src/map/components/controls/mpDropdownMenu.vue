@@ -192,8 +192,8 @@
 
 	.trigger > li > a {
 		color: #66615b;
-		font-size: 14px;
-		padding: 10px 15px;
+		font-size: 16px;
+		padding: 8px 15px;
 		-webkit-transition: none;
 		-moz-transition: none;
 		-o-transition: none;

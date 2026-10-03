@@ -33,7 +33,7 @@
 			<BoundaryValues :boundary="boundary" v-show="!boundary.SelectedVersion().LabelsCollapsed" />
 		</template>
 
-		<div class="sourceRow" v-if="!Embedded.Readonly">
+		<div class="sourceRow" v-if="!Embedded.Readonly && !$isMobile()">
 			<div class="btn-group" style="float: left">
 				<button v-for="(ver, index) in boundary.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"

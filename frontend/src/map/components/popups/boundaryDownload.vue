@@ -1,73 +1,66 @@
 <template>
 	<Modal title="Descargar" ref="dialog" :showCancel="false" :showOk="false" :backgroundColor="backgroundColor">
 		<div v-if="boundary">
-			<table class="localTable">
-				<tbody>
-					<tr>
-						<td style="width: 250px">Título:</td>
-						<td style="width: 600px">{{ version.Metadata.Name }}</td>
-					</tr>
-					<tr v-if="version.Metadata.Authors">
-						<td>Autores:</td>
-						<td>{{ version.Metadata.Authors }}</td>
-					</tr>
-					<tr>
-						<td>Licencia:</td>
-						<td>
-							<creativeCommons :license="version.Metadata.License" />
-						</td>
-					</tr>
-					<tr v-if="useFilter">
-						<td>Selección:</td>
-						<td>
-							<div style="margin-bottom: -7px;">
-								<div v-for="region in regions" :key="region.Id"
-										 class="filterElement" style="margin-bottom: 7px;">
-									{{ region.Name }}
-									<mp-close-button @click="removeFilter(region.Id)" title="Quitar filtro"
-																	 class="exp-hiddable-block filterElement-close" />
-								</div>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>Descarga:</td>
-						<td>
-							<span v-if="visibleUrl" class="btn-set">
-								<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="btn btn-solid">
-									<download-icon title="Descargar" /> {{ format.caption }}
-								</button>
-								<button @click="sendFile(resolveMetadataUrl(), true)" class="btn btn-solid">
-									<i class="far fa-file-pdf" /> Metadatos
-								</button>
-							</span>
-							<span v-else="">
-								<img src="/static/img/spinner.gif"> Generando el archivo... {{ (progress ? '(' + progress + '%)' : '') }}
-							</span>
-						</td>
-					</tr>
-					<tr v-if="version.Metadata.Files && version.Metadata.Files.length > 0">
-						<td>Adjuntos:</td>
-						<td>
-							<div class="attachmentsDownloadPanel">
-								<span v-for="file in version.Metadata.Files" :key="file.Id">
-									<a target="_blank" :href="resolveFileUrl(file)">
-										<i class="far fa-file-pdf" /> {{ file.Caption }}
-									</a>
-								</span>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>Descarga con polígonos:</td>
-						<td class="btn-set">
-							<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="btn btn-solid">
-								<download-icon title="Descargar" /> {{ format.caption }}
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="fld">
+				<div class="fld-label">Título</div>
+				<div class="fld-value">{{ version.Metadata.Name }}</div>
+			</div>
+			<div class="fld" v-if="version.Metadata.Authors">
+				<div class="fld-label">Autores</div>
+				<div class="fld-value">{{ version.Metadata.Authors }}</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Licencia</div>
+				<div class="fld-value">
+					<creativeCommons :license="version.Metadata.License" />
+				</div>
+			</div>
+			<div class="fld" v-if="useFilter">
+				<div class="fld-label">Selección</div>
+				<div class="fld-value fld-chips">
+					<div v-for="region in regions" :key="region.Id" class="filterElement">
+						{{ region.Name }}
+						<mp-close-button @click="removeFilter(region.Id)" title="Quitar filtro"
+														 class="exp-hiddable-block filterElement-close" />
+					</div>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Descarga</div>
+				<div class="fld-value">
+					<div v-if="visibleUrl" class="btn-set">
+						<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="btn btn-solid">
+							<download-icon title="Descargar" /> {{ format.caption }}
+						</button>
+						<button @click="sendFile(resolveMetadataUrl(), true)" class="btn btn-solid">
+							<i class="far fa-file-pdf" /> Metadatos
+						</button>
+					</div>
+					<div v-else>
+						<img src="/static/img/spinner.gif"> Generando el archivo... {{ (progress ? '(' + progress + '%)' : '') }}
+					</div>
+				</div>
+			</div>
+			<div class="fld" v-if="version.Metadata.Files && version.Metadata.Files.length > 0">
+				<div class="fld-label">Adjuntos</div>
+				<div class="fld-value">
+					<div class="attachmentsDownloadPanel">
+						<span v-for="file in version.Metadata.Files" :key="file.Id">
+							<a target="_blank" :href="resolveFileUrl(file)">
+								<i class="far fa-file-pdf" /> {{ file.Caption }}
+							</a>
+						</span>
+					</div>
+				</div>
+			</div>
+			<div class="fld">
+				<div class="fld-label">Descarga con polígonos</div>
+				<div class="fld-value btn-set">
+					<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="btn btn-solid">
+						<download-icon title="Descargar" /> {{ format.caption }}
+					</button>
+				</div>
+			</div>
 		</div>
 	</Modal>
 </template>

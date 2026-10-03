@@ -4,7 +4,7 @@
 	font-size: 13.5px !important;
 	min-width: 32px;
 	padding: 6px 8px !important;
-	border: 1px;
+	border: 1px solid transparent;
 	margin-right: 2px;
 	margin-left: 1px !important;
 }
@@ -267,9 +267,20 @@
 	height: 32px;
 	font-size: 16px;
 }
+
+
+.btn-default.active.focus, .btn-default.active:focus, .btn-default.active:hover, .btn-default:active.focus, .btn-default:active:focus, .btn-default:active:hover, .open > .dropdown-toggle.btn-default.focus, .open > .dropdown-toggle.btn-default:focus, .open > .dropdown-toggle.btn-default:hover {
+	border-color: #e9e9e9 !important;
+}
+
+.btn:hover {
+	border-color: #e9e9e9!important;
+}
+
 	.btn-small-toolbar:hover {
 		background: #f0f0f0;
 		color: #666;
+		border-color: #e9e9e9;
 	}
 
 .titleDialog .btn-close {
@@ -324,5 +335,58 @@
 		border-right: 0px;
 		border-bottom-right-radius: 0px !important;
 		border-top-right-radius: 0px !important;
+	}
+}
+
+/* Campos etiqueta/valor de los diálogos (reemplazan a las tablas de dos columnas) */
+.fld {
+	display: grid;
+	grid-template-columns: 150px minmax(0, 1fr);
+	column-gap: 12px;
+	padding: 6px 0;
+}
+.fld-label {
+	color: #666;
+}
+.fld-value {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.fld-value select {
+	max-width: 100%;
+}
+.fld-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+}
+/* En escritorio los campos agrupados siguen apilados; solo en mobile comparten renglón */
+.fld-pair {
+	display: contents;
+}
+
+@media (max-width: 768px) {
+	.fld {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 2px;
+		padding: 8px 0;
+	}
+	.fld-label {
+		font-size: 12.5px;
+		font-weight: 600;
+	}
+	.fld-pair {
+		display: flex;
+		gap: 12px;
+	}
+	.fld-pair > .fld {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+	.fld-pair select {
+		width: 100%;
+	}
+	.fld-hide-mobile {
+		display: none;
 	}
 }

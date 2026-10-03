@@ -59,9 +59,9 @@
 													:image="ownerLogo.Image"
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
-					<FullScreenButton v-if="!Embedded.Readonly && mapLoaded && !$isMobile" class="exp-hiddable-unset" :fullscreen="fullscreen" />
+					<FullScreenButton v-if="!Embedded.Readonly && mapLoaded && !$isMobile()" class="exp-hiddable-unset" :fullscreen="fullscreen" />
 
-					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly && mapLoaded && !$isMobile" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
+					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly && mapLoaded && !$isMobile()" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
 										 :metrics="metrics" :toolbarStates="toolbarStates" />
 					<ClippingLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset" :style="(!Use.UseNewFabButton ? 'visibility: hidden' : '')"
 													:clipping="clipping" :toolbarStates="toolbarStates" />
@@ -261,7 +261,7 @@
 			collapseButtonOffset() {
 				return this.toolbarStates.collapsed
 					? "right: 0px; "
-					: "right: max(303px, calc(30% + 9px)); z-index: 1020!important;";
+					: "right: max(351px, calc(30% + 9px)); z-index: 1020!important;";
 			},
 			clippingStarted() {
 				return this.clipping.Region.Summary && !this.clipping.Region.Summary.Empty;
@@ -1546,8 +1546,10 @@
 	}
 
 	.dropdown-menu {
-		border-radius: 12px;
+		border-radius: 8px;
 		border: 1px solid rgb(165 164 164 / 50%);
+		padding-top: 6px;
+		padding-bottom: 6px;
 	}
 
 	.dToolboxBox {

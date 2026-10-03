@@ -27,7 +27,7 @@
 			<i class="fas fa-share-alt" />
 		</button>
 
-		<mp-dropdown-menu v-if="!$isMobile" :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
+		<mp-dropdown-menu v-if="!$isMobile()" :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
 											icon="fas fa-question" :styleRounded="true" tooltip="Ayuda" />
 
 		<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
