@@ -19,9 +19,7 @@
 		</div>
 		<template v-else>
 			<h4 class="title" style="margin-bottom: 6px;">{{ boundary.properties.Name }}</h4>
-			<div class="variableRow hand" @click="toggleCollapse()">
-				<i :class="dropClass()" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"
-					 @click.stop="toggleVisible()"></i>
+			<div class="variableRow hand" :class="activeClass()" @click="toggleCollapse()">
 				Cantidad de regiones
 				<span class="hand exp-hiddable-inline">
 					<chevron-down-icon v-if="boundary.SelectedVersion().LabelsCollapsed" title="Mostrar categorías" />
@@ -90,8 +88,12 @@ export default {
 		toggleVisible() {
 			this.boundary.ChangeVisibility();
 		},
-		dropClass() {
-			return this.boundary.visible ? 'dropMetric' : 'dropMetricMuted';
+		activeClass() {
+			if (this.boundary.visible) {
+				return 'active';
+			} else {
+				return '';
+			}
 		},
 		toggleCollapse() {
 			var version = this.boundary.SelectedVersion();
@@ -165,10 +167,6 @@ export default {
 		font-size: 14px;
 		margin-top: 2px
 	}
-.variableRow
-{
-	padding: 0.6rem 0rem 0rem 0rem;
-}
 .fa-left
 {
 	text-align: left;

@@ -6,11 +6,11 @@
 			</div>
 		</div>
 		<template v-if="!Embedded.Readonly">
-			<MetricDropdown v-if="!Embedded.Readonly" :metric="metric" :clipping="clipping" :key="metric.index"
+			<MetricTopButtons v-if="!Embedded.Readonly" :metric="metric" :clipping="clipping" :key="metric.index"
 											class="exp-hiddable-block" @RankingShown="rankingShown" :valueCompare="compare" :useCompare="allowCompare" @clickCompare="toggleCompare" />
 		</template>
 		<div v-if="isSimpleMetric && metric.SelectedVersion().Levels.length < 2">
-			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px;cursor: pointer">
+			<h4 class="title" @click="clickLabel(singleLabel)" style="margin-bottom: 6px; cursor: pointer;">
 				<i v-if="singleLabel.Visible" :style="'border-color: ' + singleLabel.FillColor + '; color: ' + singleLabel.FillColor + dropBorder(singleLabel.FillColor)"
 					 class="fa drop fa-tint exp-category-bullets-large smallIcon"></i>
 				<i v-else class="fa drop fa-tint exp-category-bullets-large smallIcon action-muted"  style="border-color: inherit" />
@@ -75,7 +75,7 @@
 
 import MetricVariables from './metricVariables';
 //https://github.com/drewjbartlett/vue-switches
-import MetricDropdown from './metricDropdown';
+import MetricTopButtons from './metricTopButtons';
 	import Source from './source';
 	import arr from '@/common/framework/arr';
 	import color from '@/common/framework/color';
@@ -89,7 +89,7 @@ import 'vue-slider-component/theme/default.css';
 export default {
 	name: 'metric',
 	components: {
-		MetricDropdown,
+		MetricTopButtons,
 		Source,
 		DragHorizontal,
 		MetricVariables,
@@ -490,7 +490,6 @@ export default {
 	.rankingBox {
 		padding: 16px 0px 0px 0px;
 	}
-
 	.smallIcon {
 		font-size: 14px;
 		margin-top: 2px

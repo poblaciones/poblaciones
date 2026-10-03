@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: 2px">
+		<div class="btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: -4px">
 			<h5 class="title">
 				<mp-close-button @click="clickQuitar" title="Quitar indicador"
 												 v-if="!metric.IsLocked" class="exp-hiddable-block" />

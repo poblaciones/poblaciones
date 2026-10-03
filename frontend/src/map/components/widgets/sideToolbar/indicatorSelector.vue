@@ -1144,7 +1144,7 @@ export default {
 		align-items: center;
 		gap: 6px;
 		background: #e9f2fd;
-		color: #1565c0;
+		color: #666;
 		border: 1px solid rgb(165 164 164 / 16%) !important;
     border-radius: 14px;
 		padding: 4px 6px 4px 12px;

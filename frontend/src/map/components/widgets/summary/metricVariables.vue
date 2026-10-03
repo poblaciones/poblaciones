@@ -2,8 +2,7 @@
 	<div class="variablesBlock">
 		<div v-for="(variable, index) in level.Variables" :key="variable.Id" class="variableBlock" :class="rowClass(index)">
 			<div v-if="fixedLevel || metric.matchesComparableFilter(variable)" v-show="!(level.Variables.length === 1 && level.Variables[0].Name === '')
-					 && (!Embedded.Readonly || index === level.SelectedVariableIndex)" class="variableRow hand" @click="clickVariable(index)">
-				<i :class="dropClass(index)" class="fas drop fasVariable fa-left fa-circle exp-hiddable-inline"></i>
+					 && (!Embedded.Readonly || index === level.SelectedVariableIndex)" class="variableRow hand" :class="activeClass(index)" @click="clickVariable(index)">
 				{{ variableName(variable) }} {{ divider(variable) }}<span v-if="isActive(index)" style="padding-left: 1px;">{{ variable.Asterisk }}</span>
 				<span v-if="isActive(index)" @click.stop="toggleVariable()" class='hand exp-hiddable-inline'>
 					<chevron-down-icon v-if="version.LabelsCollapsed"
@@ -92,11 +91,11 @@ export default {
 			var ret = variable.Name ? variable.Name : 'Conteo';
 			return str.RemoveDot(ret);
 		},
-		dropClass(index) {
+		activeClass(index) {
 			if (this.isActive(index) && this.level.SelectedVariableIndex === index) {
-				return 'dropMetric';
+				return 'active';
 			} else {
-				return 'dropMetricMuted';
+				return '';
 			}
 		},
 		rowClass(index) {
@@ -168,10 +167,7 @@ export default {
 </script>
 
 <style scoped>
-.variableRow
-{
-	padding: 0.6rem 0rem 0rem 0rem;
-}
+
 .variableBlock
 {
 	padding: 0.2rem 0rem 0.2rem 0rem;
