@@ -1,6 +1,6 @@
 <template>
-	<div v-if="metadata" class="sourceInfo exp-hiddable-block btn-group">
-		<button type="button" :title="sourceTitle" @click="clickFuente" class="btn btn-default btn-xs"><i class="fas fa-link"></i></button>
+	<div v-if="metadata" class="sourceInfo exp-hiddable-block mp-btn-group">
+		<button type="button" :title="sourceTitle" @click="clickFuente" class="mp-btn mp-btn--icon"><i class="fas fa-link"></i></button>
 	</div>
 </template>
 

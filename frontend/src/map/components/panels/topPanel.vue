@@ -4,20 +4,18 @@
 			<div v-if="metadata !== null" ref="barBody" class="panel card workPanelBody"
 					 :style="'    text-shadow: rgb(118 118 118) 0px 0px 5px;rgba(76, 76, 76, 0.32) 0px 0px 6px 0px inset; background-color: ' + backgroundColor ">
 				<div class="floatBox pull-right exp-hiddable-block" style="margin-top: -1px">
-					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="hasOnboarding() && !isMobile"
-									style="color: #FFF"
+					<button type="button" class="mp-btn mp-btn--on-dark" v-if="hasOnboarding() && !isMobile"
 									title="Bienvenida" @click="showOnboarding">
 						<help-circle-icon style="color: #fff" title="Bienvenida" />
 					</button>
-					<button type="button" class="btn btn-default btn-accent" style="color: #FFF" @click="showAddToMap">
+					<button type="button" class="mp-btn mp-btn--on-dark" @click="showAddToMap">
 						<i v-if="isMobile" class="fas fa-plus"></i>
 						<template v-else>
 							{{ addToMapLabel }}
 						</template>
 
 					</button>
-					<button type="button" class="btn btn-default btn-accent btn-xs" v-if="type === 'W' && hasMetrics"
-									style="color: #FFF"
+					<button type="button" class="mp-btn mp-btn--on-dark" v-if="type === 'W' && hasMetrics"
 									:title="'Información de ' + metadata.Name" @click="clickFuente">
 						<i class="fas fa-link"></i>
 					</button>

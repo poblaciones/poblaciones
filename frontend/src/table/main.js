@@ -1,5 +1,7 @@
 import Vue from 'vue';
 import 'vue2-animate/dist/vue2-animate.min.css';
+import '@/common/styles/tokens.css';
+import '@/common/styles/buttons.css';
 import Vuelidate from 'vuelidate';
 import Db from './classes/Db';
 import Context from '@/table/classes/Context';

@@ -3,7 +3,7 @@
       <div v-if="visible" class="suggestions-panel">
         <div class="suggestions-header">
           <div>💡 También puede interesarle...
-          <button class="btn-close" @click="hide" style="float:right">
+          <button class="mp-icon-btn mp-icon-btn--dismiss" @click="hide" style="float:right">
             <span aria-hidden="true">×</span>
           </button>
           </div>

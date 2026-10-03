@@ -3,41 +3,41 @@
 
 
 		<mp-dropdown-menu :items="captureItems" @itemClick="captureSelected" :floatRight="false"
-											icon="fas fa-camera" :styleRounded="true" tooltip="Guardar como" />
+											icon="fas fa-camera" variant="float" tooltip="Guardar como" />
 
-		<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="btn btn-default btn-xs"
+		<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="mp-btn mp-btn--float"
 						title="Ubicación actual" @click="geolocate()">
 			<i class="far fa-dot-circle" />
 		</button>
 
 		<button v-for="mode in selectionModes" :key="mode.Name" type="button"
 						@click="setMode(mode.Action)" @mouseup="setMode(mode.Action)"
-						class="btn btn-default btn-xs" :class="getActive(mode.Action)"
+						class="mp-btn mp-btn--float" :class="getActive(mode.Action)"
 						:title="mode.Name">
 			<i :class="mode.Icon" />
 		</button>
 
 		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="Use.UseEmbedding || !hasNativeShare()"
-											icon="fas fa-share-alt" :styleRounded="true" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
+											icon="fas fa-share-alt" variant="float" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
 
 		<button type="button" v-else-if="Use.UseEmbedding && hasNativeShare()"
 						@click="nativeShare"
-						class="btn btn-default btn-xs"
+						class="mp-btn mp-btn--float"
 						title="Compartir">
 			<i class="fas fa-share-alt" />
 		</button>
 
 		<mp-dropdown-menu v-if="!$isMobile()" :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
-											icon="fas fa-question" :styleRounded="true" tooltip="Ayuda" />
+											icon="fas fa-question" variant="float" tooltip="Ayuda" />
 
-		<button v-if='Use.UseFavorites && user.Logged' type="button" class="btn btn-default btn-xs" title="Agregar a favoritos" @click="setFavorite()">
+		<button v-if='Use.UseFavorites && user.Logged' type="button" class="mp-btn mp-btn--float" title="Agregar a favoritos" @click="setFavorite()">
 			<i class="far fa-heart" />
 		</button>
 
 		<mp-dropdown-menu v-if='!user.Logged' :items="getLoginItems()" @itemClick="loginSelected" :floatRight="false"
-											icon="fas fa-sign-in-alt" :styleRounded="true" tooltip="Ingresar/Registrarse" />
+											icon="fas fa-sign-in-alt" variant="float" tooltip="Ingresar/Registrarse" />
 		<mp-dropdown-menu v-else :items="userItems" @itemClick="userSelected" :floatRight="false"
-											:styleRounded="true" :tooltip="userTooltip">
+											variant="float" :tooltip="userTooltip">
 			<template slot="trigger">
 				<i v-if="!userPicture" class="fas fa-user" />
 				<img v-else :src="userPicture" :alt="userTooltip" class="avatar" />
@@ -246,7 +246,7 @@
 			},
 			getActive(mode) {
 				if (this.toolbarStates.selectionMode === mode) {
-					return ' active';
+					return ' is-selected';
 				}
 				return '';
 			},

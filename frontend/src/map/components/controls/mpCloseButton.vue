@@ -1,5 +1,5 @@
 <template>
-	<button :title="title" class="btn-close" @click="onClose" style="float: right">
+	<button :title="title" class="mp-icon-btn mp-icon-btn--dismiss" @click="onClose" style="float: right">
 		<span aria-hidden="true" style="margin-top: -3px">×</span>
 	</button>
 

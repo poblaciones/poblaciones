@@ -27,14 +27,14 @@
 			</table>
 		</div>
 		<div class="sourceRow exp-hiddable-block">
-			<div class="btn-group">
+			<div class="mp-btn-group">
 				<button v-for="sizeItem in possibleSizes" type="button" :key="sizeItem" :id="sizeItem"
-								 onmouseup="this.blur()" class="btn btn-default btn-xs" :class="getActiveSize(sizeItem)"
+								 onmouseup="this.blur()" class="mp-btn" :class="getActiveSize(sizeItem)"
 								@click="changeSize(sizeItem)">{{ sizeItem }}</button>
 			</div>
-			<div class="btn-group">
+			<div class="mp-btn-group">
 				<button v-for="direction in possibleDirections" type="button" :key="direction.Value" :id="direction.Value"
-								 onmouseup="this.blur()" class="btn btn-default btn-xs" :class="getActiveDirection(direction.Value)"
+								 onmouseup="this.blur()" class="mp-btn" :class="getActiveDirection(direction.Value)"
 								@click="changeDirection(direction.Value)" :title="direction.Tooltip"><i :class="direction.Icon" /></button>
 			</div>
 		</div>
@@ -139,14 +139,14 @@ export default {
 		},
 		getActiveDirection(direction) {
 			if (direction === this.metric.RankingDirection) {
-				return ' active';
+				return ' is-selected';
 			} else {
 				return '';
 			}
 		},
 		getActiveSize(currentSize) {
 			if (currentSize === this.metric.RankingSize) {
-				return ' active';
+				return ' is-selected';
 			} else {
 				return '';
 			}

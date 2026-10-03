@@ -56,7 +56,8 @@
 		name: 'dropdown',
 		props: {
 			floatRight: { type: Boolean, default: true },
-			styleRounded: { type: Boolean, default: false },
+			// 'ghost' (glifo suave de cabecera), 'icon' (circular de 32 px), 'float' (40 px sobre el mapa) o 'pill' (texto con fondo al pasar el mouse)
+			variant: { type: String, default: 'ghost' },
 			items: { type: Array, default: function () { return []; } },
 			icon: { type: String, default: '' },
 			level: { type: Number, default: 0 },
@@ -121,13 +122,20 @@
 				Use() {
 					return window.Use;
 				},
-				// Los disparadores con texto suman labelButton, que ajusta lo que
-				// lightButton resuelve suponiendo que solo lleva un ícono.
 				triggerClass() {
-					if (this.styleRounded) {
-						return 'btn btn-default btn-xs btn-small-toolbar';
+					if (this.variant === 'float') {
+						return 'mp-btn mp-btn--float';
 					}
-					return 'lightButton close' + ((this.label || this.$slots.trigger) ? ' labelButton' : '');
+					if (this.variant === 'icon') {
+						return 'mp-icon-btn triggerSpaced';
+					}
+					if (this.variant === 'pill') {
+						return 'mp-btn mp-btn--soft';
+					}
+					if (this.label || this.$slots.trigger) {
+						return 'mp-icon-btn mp-icon-btn--sm mp-icon-btn--label';
+					}
+					return 'mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost';
 				},
 				currentItem() {
 					return { label: this.label, level: this.level, key: this.key, separator: this.separator };
@@ -166,27 +174,16 @@
 		font-size: 14px;
 	}
 
-	/* Ajustes sobre lightButton para un disparador que lleva texto: ese fija
-	   un alto y ancho de 24px y un borde circular, pensados para los que solo
-	   llevan ícono. La clase `close` que lo acompaña le saca decoraciones de
-	   botón, pero de paso impone una opacidad, un color y un peso de fuente
-	   que acá se reponen. */
-	.labelButton {
-		width: auto !important;
-		border-radius: 11px;
-		font-size: 13px;
-		font-weight: normal;
-		padding: 6px 8px 2px 8px !important;
-		margin-top: 4px;
-		white-space: nowrap;
-		opacity: 1;
-		color: #a9a9a9;
-		text-transform: inherit;
+	.mp-btn--float .triggerIcon {
+		font-size: inherit;
 	}
 
-	.labelButton:hover {
-		color: #a9a9a9;
-		opacity: 1;
+	.mp-btn--soft .triggerIcon {
+		margin-left: .255em;
+	}
+
+	.triggerSpaced {
+		margin: 0 2px 0 1px;
 	}
 
 
@@ -209,10 +206,6 @@
 		.trigger > li > a:focus {
 			outline: 0 !important;
 		}
-
-	.btn-group.select .trigger {
-		min-width: 100%;
-	}
 
 	.trigger > li > a:hover,
 	.trigger > li > a:focus {

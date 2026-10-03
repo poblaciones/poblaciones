@@ -8,27 +8,27 @@
           <div class="titleDialog">{{ title }}</div>
           <div class="panel-header-actions">
             <button v-if="allowMultiSelectToggle && hasSelectableRows"
-                    class="btn-tool"
-                    :class="{ 'active': isMulti }"
+                    class="mp-icon-btn mp-icon-btn--muted"
+                    :class="{ 'is-selected': isMulti }"
                     @click="toggleMultiSelect"
                     :title="isMulti ? 'Salir de selección múltiple' : 'Selección múltiple'"
                     :aria-pressed="isMulti ? 'true' : 'false'">
               <i class="fas fa-tasks"></i>
             </button>
             <button v-if="hasHeaders"
-                    class="btn-tool"
+                    class="mp-icon-btn mp-icon-btn--muted"
                     @click="toggleCollapseAll"
                     :title="allCollapsed ? 'Expandir todos' : 'Colapsar todos'">
               <i :class="allCollapsed ? 'fas fa-caret-right' : 'fas fa-caret-down'"></i>
             </button>
-            <button class="btn-tool"
-                    :class="{ 'active': listModeActive }"
+            <button class="mp-icon-btn mp-icon-btn--muted"
+                    :class="{ 'is-selected': listModeActive }"
                     :disabled="!showingCards && !listModeActive"
                     @click="toggleViewMode"
                     :title="listModeActive ? 'Ver como grilla' : 'Ver como listado'">
               <i class="fas fa-stream"></i>
             </button>
-            <button class="btn-close" @click="closePanel" title="Cerrar" aria-label="Cerrar">
+            <button class="mp-icon-btn mp-icon-btn--dismiss" @click="closePanel" title="Cerrar" aria-label="Cerrar">
               <span aria-hidden="true">×</span>
             </button>
           </div>
@@ -37,7 +37,7 @@
         <!-- Breadcrumb (acumulativo, profundidad variable) -->
         <div class="breadcrumb-nav">
           <button v-if="navStack.length || searchQuery"
-                  class="chips-clear"
+                  class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted chips-clear"
                   @click.stop="goHome"
                   title="Volver al inicio">
             ×
@@ -58,7 +58,7 @@
         <!-- Zona fija: chips y buscador (no scrollean con la lista) -->
         <div>
           <div v-if="selection.length" class="chips-zone">
-            <button class="chips-clear"
+            <button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted chips-clear"
                     @click="clearSelection"
                     :title="selection.length === 1 ? 'Remover' : ('Remover todo (' + selection.length + ')')"
                     aria-label="Remover toda la selección">
@@ -67,7 +67,7 @@
             <div class="chips-scroll thinScroll">
               <div v-for="chip in selection" :key="chip.Key || chip.Id" class="chip" :title="chip.Description">
                 <span class="chip-label">{{ chip.Caption }}</span>
-                <button class="chip-remove" @click="removeChip(chip)" :aria-label="'Quitar ' + chip.Caption">×</button>
+                <button class="mp-chip-remove" @click="removeChip(chip)" :aria-label="'Quitar ' + chip.Caption">×</button>
               </div>
             </div>
           </div>
@@ -80,7 +80,7 @@
                    :placeholder="dynamicPlaceholder"
                    ref="searchInput"
                    @keyup.esc="onEscape" />
-            <button v-if="searchQuery" class="search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
+            <button v-if="searchQuery" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
           </div>
         </div>
 
@@ -204,7 +204,7 @@
                 </div>
                 <div class="indicator-actions">
                   <button v-if="!isMobile && hasInfo(row.item)"
-                          class="btn-preview btn btn-default btn-xs"
+                          class="mp-icon-btn mp-icon-btn--muted btn-preview"
                           @mouseenter="showTooltip($event, row.item)"
                           @mouseleave="hideTooltip"
                           @click.stop="preventDefault">
@@ -1064,20 +1064,6 @@ export default {
 	}
 .panel-header-actions { display: flex; align-items: center; gap: 4px; }
 
-.btn-tool {
-  background: none; border: none; cursor: pointer;
-  width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: #999; font-size: 15px; transition: all 0.2s;
-}
-.btn-tool:hover:not(:disabled) { background: #f0f0f0; color: #666; }
-
-	.btn-tool.active {
-		background: #e9f2fd;
-		color: #485167;
-	}
-.btn-tool:disabled { color: #d5d5d5; cursor: default; }
-
 /* Breadcrumb */
 	.breadcrumb-nav {
 		padding: 0px 12px 2px 24px;
@@ -1090,12 +1076,6 @@ export default {
 .breadcrumb-item:not(.active):hover { color: #333; text-decoration: underline; }
 .breadcrumb-item.active { color: #333; font-weight: 500; }
 .breadcrumb-sep { margin: 0 8px; color: #ccc; }
-.btn-breadcrumb-clear {
-  background: none; border: none; color: #999; float: right;
-  font-size: 24px; line-height: 1; padding: 0 0 0 6px;
-  cursor: pointer; vertical-align: middle; transition: color 0.2s;
-}
-.btn-breadcrumb-clear:hover { color: #333; }
 
 /* Cuerpo */
 	.panel-body {
@@ -1115,22 +1095,8 @@ export default {
 	.chips-clear {
 		margin-right: 8px;
 		float: right;
-    background: none;
-		border: none;
-		color: #999;
-		cursor: pointer;
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		font-size: 18px;
-		line-height: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s;
 		z-index: 1;
 	}
-.chips-clear:hover { background: #f0f0f0; color: #666; }
 .chips-scroll {
   display: flex; flex-wrap: wrap; gap: 6px;
   max-height: 96px; overflow-y: auto; /* ~3 renglones, luego scroll */
@@ -1152,12 +1118,6 @@ export default {
 		max-width: 100%;
 	}
 .chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
-.chip-remove {
-  background: rgba(21, 101, 192, 0.12); border: none; color: #1565c0; cursor: pointer;
-  width: 18px; height: 18px; border-radius: 50%; font-size: 14px; line-height: 1;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s;
-}
-.chip-remove:hover { background: rgba(21, 101, 192, 0.28); }
 
 /* Búsqueda */
 	/* Search Input */
@@ -1269,12 +1229,11 @@ export default {
 
 
 .btn-preview {
-  width: 28px; height: 28px; padding: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; border-radius: 4px; border: none;
-  background: transparent; color: #999; transition: all 0.2s;
+  height: 28px;
+  margin: 0 2px 0 1px;
+  border-radius: 14px;
+  font-size: 13.5px;
 }
-.btn-preview:hover { background: #e9ecef; color: #666; }
 
 .no-results { text-align: center; color: #999; padding: 40px 16px; font-style: italic; font-size: 15px; }
 .no-results-broaden { margin-top: 12px; font-style: normal; }

@@ -1,0 +1,43 @@
+/*
+ * Tokens de diseño compartidos (prefijo --mp-).
+ * Todo valor de color, radio o tamaño que se repita en más de un componente
+ * se define acá; las hojas globales y los estilos locales solo lo referencian.
+ */
+:root {
+	/* Colores de marca y de selección */
+	--mp-primary: #0fa7d8;
+	--mp-selection: #2196f3;
+
+	/* Texto e íconos */
+	--mp-text: #333;
+	--mp-text-muted: #666;
+	--mp-text-faint: #999;
+	--mp-text-ghost: #bbb;
+	--mp-text-subtle: #a9a9a9;
+	--mp-text-disabled: #d5d5d5;
+	--mp-text-selected: #485167;
+
+	/* Bordes y estados */
+	--mp-outline: rgb(165 164 164 / 50%);
+	--mp-outline-soft: rgb(165 164 164 / 37%);
+	--mp-hover: #e7e7e7;
+	--mp-pressed: #d4d4d4;
+	--mp-selected: #e9f2fe;
+
+	/* Superficies */
+	--mp-surface: #fff;
+	--mp-surface-translucent: #ffffffc0;
+
+	/* Radios */
+	--mp-radius-pill: 20px;
+	--mp-radius-md: 8px;
+	--mp-radius-sm: 4px;
+
+	/* Tamaños de botones de ícono */
+	--mp-icon-xs: 18px;
+	--mp-icon-sm: 24px;
+	--mp-icon-md: 32px;
+	--mp-icon-lg: 40px;
+
+	--mp-transition: .2s;
+}

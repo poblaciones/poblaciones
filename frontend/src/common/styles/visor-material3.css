@@ -1,40 +1,15 @@
-.btn {
-	color: #5e5e5e;
-	border-radius: 20px !important;
-	font-size: 13.5px !important;
-	min-width: 32px;
-	padding: 6px 8px !important;
-	border: 1px solid transparent;
-	margin-right: 2px;
-	margin-left: 1px !important;
-}
-.btn-accent {
-	border: 1px solid;
-	min-width: 33px;
-	height: 33px;
-}
 .step-header {
 	padding-bottom: 20px;
 	padding-left: 2px;
 	padding-top: 2px;
 	margin-right: -5px;
 }
-.btn-accent:focus, .btn-accent:hover {
-	background-color: #00000020 !important;
-	border: 1px solid white !important;
-	color: white !important;
-}
-
 .mpHeader {
 	padding-top: 14px !important;
 	padding-right: 8px !important;
 	padding-bottom: 0px !important;
 	padding-left: 12px !important;
 	border-bottom: 0px;
-}
-.btn-solid {
-	border: 1px solid!important;
-		margin: 0px!important;
 }
 .modal-content .card {
 	border-radius: 12px !important;
@@ -46,47 +21,9 @@
 	flex-wrap: wrap;
 	gap: 8px;
 }
-.summaryToolbar .btn {
-	font-size: 18px !important;
-	border: 1px solid rgb(165 164 164 / 50%);
-	padding: 0px !important;
-	width: 40px !important;
-	height: 40px !important;
-	background-color: #ffffffc0;
-}
-.summaryToolbar .triggerIcon {
-	font-size: 18px !important;
-}
-.btn.active {
-	background-color: #e9f2fe !important;
-	color: #66615b;
-	border: 1px solid rgb(165 164 164 / 37%) !important;
-}
-.btn.active:hover {
-	border: 1px solid rgb(165 164 164 / 50%)!important;
-}
-/* active hover */
-.btn-default.active.focus, .btn-default.active:focus, .btn-default.active:hover, .btn-default:active.focus, .btn-default:active:focus, .btn-default:active:hover, .open > .dropdown-toggle.btn-default.focus, .open > .dropdown-toggle.btn-default:focus, .open > .dropdown-toggle.btn-default:hover {
-	background-color: #d4d4d4;
-	color: #333;
-}
-
 .trigger > li > a:hover, .trigger > li > a:focus {
 	background-color: #eee !important;
 	color: unset !important;
-}
-/* hover */
-.btn.active, .btn:active, .btn:focus, .btn:hover, .navbar .navbar-nav > li > a.btn.active, .navbar .navbar-nav > li > a.btn:active, .navbar .navbar-nav > li > a.btn:focus, .navbar .navbar-nav > li > a.btn:hover, .open > .btn.dropdown-toggle, .open > .navbar .navbar-nav > li > a.btn.dropdown-toggle {
-	background-color: #e7e7e7;
-	color: #66615b;
-}
-
-.btn.active:not(:hover) + .btn.active:not(:hover)::before {
-	background-color: white !important;
-	width: 0px !important;
-}
-.btn-group {
-	margin-right: 2px!important;
 }
 .panel.card.panel-body {
 	background-color: white!important;
@@ -143,11 +80,6 @@
 .dropdown-menu > li > a:hover {
 	background-color: #eee !important;
 	color: unset !important;
-}
-
-.sourceInfo .btn {
-	width: 32px;
-	height: 32px;
 }
 
 	/* chequeadas */
@@ -215,25 +147,7 @@ h4.title {
 	right: 30px;
 	top: 50%;
 	transform: translateY(-50%);
-	background: none;
-	border: none;
-	color: #999;
-	cursor: pointer;
-	width: 24px;
-	height: 24px;
-	border-radius: 50%;
-	font-size: 18px;
-	line-height: 1;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.2s;
 }
-
-	.search-clear:hover {
-		background: #f0f0f0;
-		color: #666;
-	}
 
 .search-icon {
 	position: absolute;
@@ -275,63 +189,11 @@ h4.title {
 	font-size: 14px;
 }
 
-.sourceInfo .btn {
-	color: #747373;
-	font-size: 12.5px !important;
-	margin-right: 0px;
-}
-
 .sourceInfo {
 	padding-top: 2px;
 	font-size: 12px;
 	float: right;
 }
-
-.btn-small-toolbar {
-	width: 32px;
-	height: 32px;
-	font-size: 16px;
-}
-
-
-.btn-default.active.focus, .btn-default.active:focus, .btn-default.active:hover, .btn-default:active.focus, .btn-default:active:focus, .btn-default:active:hover, .open > .dropdown-toggle.btn-default.focus, .open > .dropdown-toggle.btn-default:focus, .open > .dropdown-toggle.btn-default:hover {
-	border-color: #e9e9e9 !important;
-}
-
-.btn:hover {
-	border-color: #e9e9e9!important;
-}
-
-	.btn-small-toolbar:hover {
-		background: #f0f0f0;
-		color: #666;
-		border-color: #e9e9e9;
-	}
-
-.titleDialog .btn-close {
-	 margin-top: -2px;
-}
-
-.btn-close {
-	background: none;
-	border: none;
-	font-size: 26px;
-	color: #666;
-	cursor: pointer;
-	padding: 0;
-	width: 32px;
-	height: 32px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 50%;
-	transition: all 0.2s;
-}
-
-	.btn-close:hover {
-		background: #f0f0f0;
-		color: #666;
-	}
 
 .statsHeader {
 	text-align: right;

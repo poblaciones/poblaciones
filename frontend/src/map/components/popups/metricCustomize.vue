@@ -7,8 +7,8 @@
 			<div class="fld">
 				<div class="fld-label">Métrica</div>
 				<div class="fld-value">
-					<div class="btn-group">
-						<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="btn btn-default btn-xs" :class="getActive(metric.Key)">
+					<div class="mp-btn-group">
+						<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="mp-btn" :class="getActive(metric.Key)">
 							{{ metric.Caption }}
 						</button>
 					</div>
@@ -53,14 +53,14 @@
 			<div class="fld" v-if="showOpacityOptions()">
 				<div class="fld-label">Transparencia</div>
 				<div class="fld-value">
-					<div class="btn-group">
-						<button type="button" @click="changeOpacity('H')" class="btn btn-default btn-xs" :class="getActiveOpacity('H')">
+					<div class="mp-btn-group">
+						<button type="button" @click="changeOpacity('H')" class="mp-btn" :class="getActiveOpacity('H')">
 							Baja
 						</button>
-						<button type="button" @click="changeOpacity('M')" class="btn btn-default btn-xs" :class="getActiveOpacity('M')">
+						<button type="button" @click="changeOpacity('M')" class="mp-btn" :class="getActiveOpacity('M')">
 							Media
 						</button>
-						<button type="button" @click="changeOpacity('L')" class="btn btn-default btn-xs" :class="getActiveOpacity('L')">
+						<button type="button" @click="changeOpacity('L')" class="mp-btn" :class="getActiveOpacity('L')">
 							Alta
 						</button>
 					</div>
@@ -69,14 +69,14 @@
 			<div class="fld" v-if="anyHasArea() && showGradientOptions()">
 				<div class="fld-label">Ajuste poblacional</div>
 				<div class="fld-value">
-					<div class="btn-group">
-						<button type="button" @click="changeGradientOpacity('H')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('H')">
+					<div class="mp-btn-group">
+						<button type="button" @click="changeGradientOpacity('H')" class="mp-btn" :class="getActiveGradientOpacity('H')">
 							Bajo
 						</button>
-						<button type="button" @click="changeGradientOpacity('M')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('M')">
+						<button type="button" @click="changeGradientOpacity('M')" class="mp-btn" :class="getActiveGradientOpacity('M')">
 							Medio
 						</button>
-						<button type="button" @click="changeGradientOpacity('L')" class="btn btn-default btn-xs" :class="getActiveGradientOpacity('L')">
+						<button type="button" @click="changeGradientOpacity('L')" class="mp-btn" :class="getActiveGradientOpacity('L')">
 							Alto
 						</button>
 					</div>
@@ -92,14 +92,14 @@
 			<div class="fld" v-if="metric.SelectedLevel().Dataset.AreSegments">
 				<div class="fld-label">Ancho</div>
 				<div class="fld-value">
-					<div class="btn-group">
-						<button type="button" @click="changeWidth(1)" class="btn btn-default btn-xs" :class="getActiveWidth(1)">
+					<div class="mp-btn-group">
+						<button type="button" @click="changeWidth(1)" class="mp-btn" :class="getActiveWidth(1)">
 							Fino
 						</button>
-						<button type="button" @click="changeWidth(2)" class="btn btn-default btn-xs" :class="getActiveWidth(2)">
+						<button type="button" @click="changeWidth(2)" class="mp-btn" :class="getActiveWidth(2)">
 							Intermedio
 						</button>
-						<button type="button" @click="changeWidth(3)" class="btn btn-default btn-xs" :class="getActiveWidth(3)">
+						<button type="button" @click="changeWidth(3)" class="mp-btn" :class="getActiveWidth(3)">
 							Grueso
 						</button>
 					</div>
@@ -135,7 +135,7 @@ export default {
 	methods: {
 		getActive(key) {
 			if(key === this.metric.properties.SummaryMetric) {
-				return ' active';
+				return ' is-selected';
 			} else {
 				return '';
 			}
@@ -156,21 +156,21 @@ export default {
 		},
 		getActiveGradientOpacity(key) {
 			if (key === this.metric.SelectedVariable().GradientOpacity) {
-				return ' active';
+				return ' is-selected';
 			} else {
 				return '';
 			}
 		},
 		getActiveWidth(key) {
 			if (key === this.metric.SelectedVariable().borderWidth) {
-				return ' active';
+				return ' is-selected';
 			} else {
 				return '';
 			}
 		},
 		getActiveOpacity(key) {
 			if (key === this.metric.SelectedVariable().Opacity) {
-				return ' active';
+				return ' is-selected';
 			} else {
 				return '';
 			}

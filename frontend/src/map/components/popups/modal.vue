@@ -106,11 +106,11 @@
 		},
 		okClass: {
 			type: String,
-			default: 'btn blue'
+			default: 'mp-btn'
 		},
 		cancelClass: {
 			type: String,
-			default: 'btn red btn-outline'
+			default: 'mp-btn'
 		},
 		closeWhenOK: {
 			type: Boolean,

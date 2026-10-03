@@ -91,8 +91,8 @@ module.exports = {
 	setDisplayByClass(classname, newValue) {
 		return this.setStyleAttributeByClass(classname, 'display', newValue);
 	},
-	setDisplayByClassNotActive(classname, newValue) {
-		return this.setStyleAttributeByClass(classname, 'display', newValue, "active");
+	setDisplayByClassNotSelected(classname, newValue) {
+		return this.setStyleAttributeByClass(classname, 'display', newValue, "is-selected");
 	},
 	setStyleAttributeByClass(classname, attributeName, newValue, filter) {
 		var classObjs = document.getElementsByClassName(classname);

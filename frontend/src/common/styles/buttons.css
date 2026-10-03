@@ -1,0 +1,335 @@
+/*
+ * Paleta de botones del visor.
+ *
+ *   .mp-btn          botón con texto o ícono, de borde pill (grupos de versiones, fuente, descargas)
+ *     --icon         solo ícono, 32 x 32
+ *     --float        40 x 40 sobre el mapa: borde y fondo translúcido (toolbar derecha)
+ *     --solid        borde visible en reposo
+ *     --on-dark      sobre fondos de color (panel superior)
+ *     --soft         sin borde; el estado hover oscurece el fondo (selector de partición)
+ *   .mp-btn-group    agrupa .mp-btn en línea
+ *
+ *   .mp-icon-btn     botón circular de un solo glifo, sin borde
+ *     --sm / --lg    24 / 40 px (por defecto 32)
+ *     --dismiss      glifo "×" de cierre o limpieza
+ *     --muted        glifo gris claro en reposo
+ *     --label        disparador con texto, en la cabecera de un panel
+ *     --faint        glifo gris muy claro en reposo
+ *     --ghost        glifo negro translúcido (cabeceras de panel)
+ *     --accent       fondo de color primario
+ *     --square       esquinas de 4 px en lugar de círculo
+ *   .mp-chip-remove  cruz dentro de un chip de selección
+ *
+ * Estado seleccionado: clase .is-selected o aria-pressed="true".
+ * Los márgenes de ubicación los pone el contenedor, salvo en .mp-btn,
+ * que conserva el espaciado que tenía .btn.
+ */
+
+/* ---------- .mp-btn ---------- */
+.mp-btn {
+	display: inline-block;
+	box-sizing: border-box;
+	min-width: var(--mp-icon-md);
+	margin: 0 2px 0 1px;
+	padding: 6px 8px;
+	border: 1px solid transparent;
+	border-radius: var(--mp-radius-pill);
+	background-color: transparent;
+	color: var(--mp-text-muted);
+	font-family: inherit;
+	font-size: 13.5px;
+	font-weight: 500;
+	line-height: 1.5;
+	text-align: center;
+	text-transform: none;
+	white-space: nowrap;
+	vertical-align: middle;
+	cursor: pointer;
+	user-select: none;
+	touch-action: manipulation;
+	-webkit-appearance: none;
+	appearance: none;
+	transition: all .15s ease-in-out;
+}
+
+/* :focus se resuelve igual que :hover porque el clic deja el foco en el botón.
+   Se conserva tal cual estaba; ver la sugerencia de pasar a :focus-visible. */
+.mp-btn:focus {
+	outline: 0;
+	background-color: var(--mp-hover);
+	border-color: var(--mp-text);
+}
+
+.mp-btn:hover {
+	background-color: var(--mp-hover);
+	border-color: var(--mp-hover);
+}
+
+.mp-btn:active,
+.mp-btn:active:hover {
+	background-color: var(--mp-pressed);
+	border-color: var(--mp-hover);
+	color: var(--mp-text);
+}
+
+.mp-btn.is-selected,
+.mp-btn[aria-pressed="true"] {
+	background-color: var(--mp-selected);
+	border-color: var(--mp-outline-soft);
+}
+
+.mp-btn.is-selected:hover,
+.mp-btn.is-selected:focus,
+.mp-btn.is-selected:active,
+.mp-btn[aria-pressed="true"]:hover,
+.mp-btn[aria-pressed="true"]:focus,
+.mp-btn[aria-pressed="true"]:active {
+	background-color: var(--mp-selected);
+	border-color: var(--mp-hover);
+	color: var(--mp-text);
+}
+
+.mp-btn:disabled {
+	cursor: not-allowed;
+	opacity: .65;
+}
+
+.mp-btn--icon {
+	width: var(--mp-icon-md);
+	height: var(--mp-icon-md);
+	margin-right: 0;
+	font-size: 12.5px;
+}
+
+.mp-btn--float {
+	width: var(--mp-icon-lg);
+	height: var(--mp-icon-lg);
+	padding: 0;
+	border-color: var(--mp-outline);
+	background-color: var(--mp-surface-translucent);
+	font-size: 18px;
+}
+
+.mp-btn--float:focus:not(:hover):not(.is-selected) {
+	border-color: var(--mp-outline);
+}
+
+.mp-btn--soft {
+	border-width: 0;
+}
+
+.mp-btn--soft:hover,
+.mp-btn--soft:focus {
+	background-color: var(--mp-pressed);
+	color: var(--mp-text);
+}
+
+.mp-btn--solid {
+	margin: 0;
+	line-height: 1.42857143;
+}
+
+.mp-btn--solid:not(:hover) {
+	border-color: currentColor;
+}
+
+.mp-btn--on-dark {
+	min-width: 33px;
+	height: 33px;
+	border-color: currentColor;
+	color: #fff;
+}
+
+.mp-btn--on-dark:hover,
+.mp-btn--on-dark:focus {
+	background-color: #00000020;
+}
+
+.mp-btn--on-dark:active,
+.mp-btn--on-dark:active:hover {
+	background-color: #00000020;
+	color: #fff;
+}
+
+.mp-btn--on-dark:focus:not(:hover) {
+	border-color: currentColor;
+}
+
+/* ---------- .mp-btn-group ---------- */
+.mp-btn-group {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 2px;
+}
+
+.mp-btn-group > .mp-btn {
+	position: relative;
+	float: left;
+}
+
+.mp-btn-group > .mp-btn:hover,
+.mp-btn-group > .mp-btn:focus,
+.mp-btn-group > .mp-btn:active,
+.mp-btn-group > .mp-btn.is-selected {
+	z-index: 2;
+}
+
+/* ---------- .mp-icon-btn ---------- */
+.mp-icon-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	width: var(--mp-icon-md);
+	height: var(--mp-icon-md);
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: none;
+	color: var(--mp-text-muted);
+	font-family: inherit;
+	font-size: 15px;
+	font-weight: inherit;
+	line-height: inherit;
+	text-transform: none;
+	cursor: pointer;
+	outline: none;
+	-webkit-appearance: none;
+	appearance: none;
+	transition: background-color var(--mp-transition), color var(--mp-transition), opacity var(--mp-transition);
+}
+
+.mp-icon-btn:hover {
+	background-color: var(--mp-hover);
+	color: var(--mp-text-muted);
+}
+
+.mp-icon-btn.is-selected,
+.mp-icon-btn[aria-pressed="true"] {
+	background-color: var(--mp-selected);
+	color: var(--mp-text-selected);
+}
+
+.mp-icon-btn:disabled {
+	color: var(--mp-text-disabled);
+	background: none;
+	cursor: default;
+}
+
+.mp-icon-btn--sm {
+	width: var(--mp-icon-sm);
+	height: var(--mp-icon-sm);
+	font-size: 14px;
+}
+
+.mp-icon-btn--lg {
+	width: var(--mp-icon-lg);
+	height: var(--mp-icon-lg);
+	font-size: 18px;
+}
+
+.mp-icon-btn--lg:hover {
+	color: var(--mp-text);
+}
+
+.mp-icon-btn--dismiss {
+	font-size: 26px;
+}
+
+.mp-icon-btn--dismiss.mp-icon-btn--sm {
+	font-size: 18px;
+	line-height: 1;
+}
+
+.mp-icon-btn--muted {
+	color: var(--mp-text-faint);
+}
+
+.mp-icon-btn--faint {
+	color: var(--mp-text-ghost);
+}
+
+/* Glifo flotado a la derecha en la cabecera de un panel; --label es el
+   mismo disparador con texto. */
+.mp-icon-btn--ghost,
+.mp-icon-btn--label {
+	float: right;
+	margin: 5px 2px 0 0;
+}
+
+.mp-icon-btn--ghost {
+	color: #000;
+	line-height: 1em;
+	opacity: .2;
+}
+
+/* El foco queda como el hover porque el clic lo deja en el botón. */
+.mp-icon-btn--ghost:hover,
+.mp-icon-btn--ghost:focus {
+	color: #000;
+	opacity: .5;
+}
+
+.mp-icon-btn--ghost:disabled {
+	color: #000;
+	opacity: .1;
+}
+
+.mp-icon-btn--label {
+	display: block;
+	width: auto;
+	margin-top: 4px;
+	padding: 6px 8px 2px 8px;
+	border-radius: 11px;
+	color: var(--mp-text-subtle);
+	font-size: 13px;
+	font-weight: normal;
+	line-height: 1em;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.mp-icon-btn--label:hover {
+	color: var(--mp-text-subtle);
+}
+
+.mp-icon-btn--accent {
+	background-color: var(--mp-primary);
+	color: #fff;
+}
+
+.mp-icon-btn--accent:hover,
+.mp-icon-btn--accent.is-selected {
+	background-color: var(--mp-primary);
+	color: #efefef;
+}
+
+.mp-icon-btn--square {
+	border-radius: var(--mp-radius-sm);
+}
+
+/* ---------- .mp-chip-remove ---------- */
+.mp-chip-remove {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	width: var(--mp-icon-xs);
+	height: var(--mp-icon-xs);
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: rgb(21 101 192 / 12%);
+	color: #1565c0;
+	font-size: 14px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background-color var(--mp-transition);
+}
+
+.mp-chip-remove:hover {
+	background: rgb(21 101 192 / 28%);
+}

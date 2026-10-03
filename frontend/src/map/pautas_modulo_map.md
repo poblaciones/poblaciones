@@ -474,6 +474,37 @@ Idénticas a las del módulo tabla; se repiten las operativas:
   (CRLF/LF) e indentación con tab. Al editar, respetar lo dominante en el
   archivo y no reformatear en masa (ensucia los diffs).
 
+### Botones (paleta `mp-`)
+
+Los botones del visor salen de `common/styles/buttons.css`; los colores, radios
+y tamaños que comparten están en `common/styles/tokens.css`. Un botón nuevo se
+arma con estas clases: no se definen botones en estilos locales ni se usan
+`btn`, `btn-default`, `btn-group`, `close` o `lightButton`.
+
+| Necesidad | Clases |
+|---|---|
+| Botón con texto o ícono (versiones, ranking, patrones) | `mp-btn`, dentro de `mp-btn-group` |
+| Ícono de 32 px en un grupo (fuente) | `mp-btn mp-btn--icon` |
+| Ícono de 40 px sobre el mapa (toolbar derecha) | `mp-btn mp-btn--float` |
+| Acción con borde visible (descargas) | `mp-btn mp-btn--solid` |
+| Sobre fondo de color (panel superior) | `mp-btn mp-btn--on-dark` |
+| Selector con texto y caret (partición) | `mp-btn mp-btn--soft` |
+| Glifo circular sin borde | `mp-icon-btn` (32 px); tamaños `--sm` 24 y `--lg` 40 |
+| Tono del glifo en reposo | `--muted`, `--faint`, `--ghost` |
+| Cierre o limpieza "×" | `mp-icon-btn mp-icon-btn--dismiss` (`--sm` dentro de campos); para cierres de paneles, `<mp-close-button>` |
+| Botón principal de la barra lateral | `mp-icon-btn--accent` |
+| Esquinas de 4 px en lugar de círculo | `mp-icon-btn--square` |
+| Cruz dentro de un chip | `mp-chip-remove` |
+
+- **Estado seleccionado: `is-selected`** (o `aria-pressed="true"`), nunca
+  `active`. `MapExport` oculta los `exp-serie-item` que no lo tengan.
+- La paleta define la apariencia; la ubicación (posición, márgenes, `float`)
+  la resuelve el contenedor o el CSS local del componente.
+- Los disparadores de menú son `mp-dropdown-menu` con su prop `variant`
+  (`ghost`, `icon`, `float`, `pill`).
+- Las clases que solo sirven de gancho para JS llevan prefijo `js-` y no
+  tienen estilos (ejemplo: `js-remove-recent`).
+
 ## 10. Tests
 
 Batería propia, sin framework externo, análoga a la del módulo tabla. Se corre

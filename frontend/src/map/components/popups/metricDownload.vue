@@ -67,13 +67,13 @@
 				<div class="fld-label">Descarga</div>
 				<div class="fld-value">
 					<div v-if="visibleUrl" class="btn-set">
-						<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="btn btn-solid">
+						<button @click="process($event, format.key)" v-for="format in getDataFormats()" :key="format.key" class="mp-btn mp-btn--solid">
 							<download-icon title="Descargar" /> {{ format.caption }}
 						</button>
-						<button @click="sendFile(resolveMetadataUrl(), true)" class="btn btn-solid">
+						<button @click="sendFile(resolveMetadataUrl(), true)" class="mp-btn mp-btn--solid">
 							<i class="far fa-file-pdf" /> Metadatos
 						</button>
-						<button @click="sendFile(resolveMetadataDictionaryUrl(), true)" class="btn btn-solid">
+						<button @click="sendFile(resolveMetadataDictionaryUrl(), true)" class="mp-btn mp-btn--solid">
 							<i class="far fa-file-excel" /> Diccionario de datos
 						</button>
 					</div>
@@ -97,7 +97,7 @@
 			<div class="fld" v-if="level.HasArea || level.Dataset.AreSegments">
 				<div class="fld-label">Descarga con polígonos</div>
 				<div class="fld-value btn-set">
-					<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="btn btn-solid">
+					<button @click="process($event, format.key)" v-for="format in getSpatialFormats()" :key="format.key" class="mp-btn mp-btn--solid">
 						<download-icon title="Descargar" /> {{ format.caption }}
 					</button>
 				</div>

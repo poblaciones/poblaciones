@@ -4,7 +4,7 @@
       <div class="search-panel" v-on-clickaway="close" :style="heightStyle">
         <div class="search-header">
           <div class="titleDialog">Buscar</div>
-          <button class="btn-close" @click="close">
+          <button class="mp-icon-btn mp-icon-btn--dismiss" @click="close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
@@ -19,7 +19,7 @@
                    placeholder="Buscar indicadores y lugares en Poblaciones"
                    @keyup="handleSearch"
                    autocomplete="off" />
-            <button v-if="searchText" class="search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
+            <button v-if="searchText" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
 
             <div v-if="loading" class="search-spinner">
               <i class="fas fa-spinner fa-spin"></i>
@@ -85,7 +85,7 @@
                         <div class="result-name">{{ item.Caption }}</div>
                         <div v-if="item.Subtitle" class="result-extra">{{ item.Subtitle }}</div>
                       </div>
-                      <button class="btn-remove-recent" @click.stop="removeRecent(item)" title="Eliminar de recientes">
+                      <button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--faint mp-icon-btn--square js-remove-recent" @click.stop="removeRecent(item)" title="Eliminar de recientes">
                         <span aria-hidden="true">×</span>
                       </button>
                     </div>
@@ -101,7 +101,7 @@
                           <div class="result-name">{{ row.Item.Caption }}</div>
                           <div v-if="row.Item.Subtitle" class="result-extra">{{ row.Item.Subtitle }}</div>
                         </div>
-                        <button class="btn-remove-recent" @click.stop="removeRecent(row.Item)" title="Eliminar de recientes">
+                        <button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--faint mp-icon-btn--square js-remove-recent" @click.stop="removeRecent(row.Item)" title="Eliminar de recientes">
                           <span aria-hidden="true">×</span>
                         </button>
                       </div>
@@ -375,7 +375,7 @@ export default {
     // Supr sobre un reciente lo elimina (equivale a su botón ×) y deja activo
     // al siguiente; si era el último, al anterior.
     kbdOnDelete(kind, el) {
-      const btn = kind === 'recent' ? el.querySelector('.btn-remove-recent') : null;
+      const btn = kind === 'recent' ? el.querySelector('.js-remove-recent') : null;
       if (!btn) return false;
       const idx = this.kbd.index;
       btn.click();
@@ -582,24 +582,6 @@ export default {
 		color: #707070;
 		padding: 10px 22px 4px;
 	}
-
-.btn-remove-recent {
-  background: none;
-  border: none;
-  color: #bbb;
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 4px 6px;
-  flex-shrink: 0;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.btn-remove-recent:hover {
-  background: #eee;
-  color: #666;
-}
 
 .show-more-recents {
   text-align: center;

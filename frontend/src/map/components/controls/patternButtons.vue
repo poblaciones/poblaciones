@@ -1,14 +1,14 @@
 <template>
 	<div>
-		<div class="btn-group">
+		<div class="mp-btn-group">
 			<button v-for="pattern in range(patterns, 0, 3)" :key="pattern.Key" type="button"
-							@click="$emit('change', pattern.Key)" class="btn btn-default btn-xs" :class="isActive(pattern.Key)">
+							@click="$emit('change', pattern.Key)" class="mp-btn" :class="isActive(pattern.Key)">
 				{{ pattern.Caption }}
 			</button>
 		</div>
-		<div class="btn-group" style="margin-top: 5px" v-if="range(patterns, 4, 20).length > 0">
+		<div class="mp-btn-group" style="margin-top: 5px" v-if="range(patterns, 4, 20).length > 0">
 			<button v-for="pattern in range(patterns, 4, 20)" :key="pattern.Key" type="button"
-							@click="$emit('change', pattern.Key)" class="btn btn-default btn-xs" :class="isActive(pattern.Key)">
+							@click="$emit('change', pattern.Key)" class="mp-btn" :class="isActive(pattern.Key)">
 				{{ pattern.Caption }}
 			</button>
 		</div>
@@ -41,7 +41,7 @@ export default {
 		isActive(key) {
 			if (key === this.customPattern ||
 				(this.customPattern === '' && key === this.defaultPattern)) {
-				return ' active';
+				return ' is-selected';
 			}
 			return '';
 		},

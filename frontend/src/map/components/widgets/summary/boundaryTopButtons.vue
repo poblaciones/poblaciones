@@ -1,12 +1,12 @@
 <template>
 	<div>
-		<div class="btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: -4px">
+		<div class="mp-btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: -4px">
 			<div class="title">
 
 				<mp-close-button @click="clickQuitar" title="Quitar delimitación"
 												 v-if="!boundary.IsLocked" class="exp-hiddable-block" />
 
-				<mp-dropdown-menu :styleRounded="true" :items="menuItems" @itemClick="dropdownSelected"
+				<mp-dropdown-menu variant="icon" :items="menuItems" @itemClick="dropdownSelected"
 											 icon="fas fa-ellipsis-v" />
 			</div>
 		</div>

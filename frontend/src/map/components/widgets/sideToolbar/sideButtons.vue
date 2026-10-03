@@ -14,16 +14,16 @@
            mantiene su orden), para no ser el más próximo al selector de mapa
            que se corre a esa misma esquina. -->
       <button v-show="!Embedded.HideAddMetrics"
-              class="toolbar-button toolbar-button-primary"
-              :class="{ 'active': activePanel === 'indicators', 'toolbar-button-last': sidebarPosition === 'bottom' }"
+              class="mp-icon-btn mp-icon-btn--lg mp-icon-btn--accent"
+              :class="{ 'is-selected': activePanel === 'indicators', 'toolbar-button-last': sidebarPosition === 'bottom' }"
               @click="togglePanel('indicators')"
               title="Explorar indicadores (Ctrl+I)">
         <i class="fas fa-plus"></i>
       </button>
 
       <!-- Botón para filtrar -->
-      <button class="toolbar-button"
-              :class="{ 'active': activePanel === 'places' }"
+      <button class="mp-icon-btn mp-icon-btn--lg"
+              :class="{ 'is-selected': activePanel === 'places' }"
               @click="togglePanel('places')"
               title="Filtrar (Ctrl+F)">
         <i class="fas fa-filter"></i>
@@ -31,8 +31,8 @@
 
       <!-- Botón para Búsqueda -->
       <button v-show="!Embedded.HideSearch"
-              class="toolbar-button"
-              :class="{ 'active': activePanel === 'search' }"
+              class="mp-icon-btn mp-icon-btn--lg"
+              :class="{ 'is-selected': activePanel === 'search' }"
               @click="togglePanel('search')"
               title="Buscar (Ctrl+B)">
         <i class="fas fa-search"></i>
@@ -40,8 +40,8 @@
 
       <!-- Botón para subir archivo -->
       <button v-show="!Embedded.HideSearch" v-if="useUpload"
-              class="toolbar-button"
-              :class="{ 'active': activePanel === 'upload' }"
+              class="mp-icon-btn mp-icon-btn--lg"
+              :class="{ 'is-selected': activePanel === 'upload' }"
               @click="togglePanel('upload')"
               title="Subir archivo georreferenciable">
         <i class="fas fa-cloud-upload-alt"></i>
@@ -148,6 +148,9 @@ export default {
 
 <style scoped>
 .map-toolbar {
+	/* En esta barra el botón seleccionado es gris neutro, no el celeste del resto */
+	--mp-selected: #ddd;
+	--mp-text-selected: var(--mp-text-muted);
 	border: 1px solid rgb(165 164 164 / 50%);
   position: absolute;
   left: 20px;
@@ -198,46 +201,6 @@ export default {
   cursor: grabbing;
 }
 
-.toolbar-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  color: #666;
-  background-color: unset;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
-}
-
-	.toolbar-button:hover {
-		background: #e7e7e7;
-		color: #333;
-	}
-	.toolbar-button.active {
-		background: #dddddd;
-	}
-
-/* Botón de indicadores, con color azul por defecto */
-.toolbar-button-primary {
-  background: #0fa7d8;
-  color: white;
-}
-
-	.toolbar-button-primary:hover {
-		background: #0fa7d8;
-		color: #efefef!important;
-	}
-
-	.toolbar-button-primary.active {
-		background: #0fa7d8;
-		color: #efefef !important;
-	}
-
 /* Con el panel abajo a la izquierda, el botón de indicadores pasa al final
    (el drag-handle y los demás botones no tienen order, quedan en su
    posición natural). */
@@ -276,9 +239,7 @@ export default {
     gap: 8px;
   }
 
-  .toolbar-button {
-    width: 40px;
-    height: 40px;
+  .mp-icon-btn {
     font-size: 16px;
   }
 }

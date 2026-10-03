@@ -119,7 +119,7 @@ MapExport.prototype.hideInteractiveElements = function (addClasses, attributesBy
 	dom.addClassesByList(addClasses);
 	dom.setStyleAttributesByList(attributesByClass);
 
-	dom.setDisplayByClassNotActive("exp-serie-item", "none");
+	dom.setDisplayByClassNotSelected("exp-serie-item", "none");
 };
 
 MapExport.prototype.restoreInteractiveElements = function (addClasses, attributesByClass) {
@@ -161,9 +161,8 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 		{ class: 'summaryRow', extraclass: 'exp-high-contrast' },
 		{ class: 'statsHeader', extraclass: 'exp-high-contrast' },
 		{ class: 'stats', extraclass: 'exp-high-contrast' },
-		{ class: 'frozen', extraclass: 'active' },
+		{ class: 'frozen', extraclass: 'is-selected' },
 		{ class: 'filterElement', extraclass: 'exp-high-contrast' },
-		{ class: 'exp-serie-item', extraclass: 'exp-high-button' },
 		// referencias de colores
 		{ class: 'exp-category-bullets', extraclass: 'exp-circles' },
 		{ class: 'exp-category-bullets-large', extraclass: 'exp-circles-large' }

@@ -1,9 +1,9 @@
 <template>
 
-	<div class="btn-group">
+	<div class="mp-btn-group">
 		<button type="button" v-for="value, key in items"
 						@mouseup="change(value)"  @click="change(value)"
-						class="btn btn-default btn-xs" :key="key" :class="getActive(value)">
+						class="mp-btn" :key="key" :class="getActive(value)">
 			{{ key }}
 		</button>
 	</div>
@@ -32,7 +32,7 @@ export default {
 	methods: {
 		getActive(v) {
 			if (v === this.value) {
-				return ' active';
+				return ' is-selected';
 			} else {
 				return '';
 			}

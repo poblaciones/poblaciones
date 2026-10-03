@@ -10,6 +10,8 @@ import Clipboard from 'v-clipboard';
 
 import "leaflet/dist/leaflet.css";
 import 'axios-progress-bar/dist/nprogress.css';
+import "@/common/styles/tokens.css";
+import "@/common/styles/buttons.css";
 import "@/common/styles/visor-material3.css";
 
 // Bus para comunicación entre componentes

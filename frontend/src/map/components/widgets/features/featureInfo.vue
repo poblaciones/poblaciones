@@ -20,11 +20,11 @@
 					</a>
 					<div style="float: right" class="exp-hiddable-block" v-if="featureInfo.Key && featureInfo.Key.MetricId">
 						<button type="button" :disabled="isLast"
-										class="close lightButton smallerButton" :title="(isLast ? '' : 'Siguiente' + positionalData)" @click="next()">
+										class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" :title="(isLast ? '' : 'Siguiente' + positionalData)" @click="next()">
 							<i class="fas fa-chevron-right" />
 						</button>
 						<button type="button" :disabled="isFirst" style="margin-right: -2px"
-										class="close lightButton smallerButton" :title="(isFirst ? '' : 'Anterior' + positionalData)" @click="previous()">
+										class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" :title="(isFirst ? '' : 'Anterior' + positionalData)" @click="previous()">
 							<i class="fas fa-chevron-left" />
 						</button>
 					</div>
@@ -33,7 +33,7 @@
 
 			<div style="overflow-y: auto; padding:15px " class="thinScroll">
 				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
-					<button type="button" class="close lightButton smallerButton" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
+					<button type="button" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
 									title="Seleccionar el perímetro" @click="selectPerimeter">
 						<i class="fas fa-circle-notch" />
 
@@ -255,9 +255,6 @@ export default {
 	padding-bottom: 10px;
 	word-wrap: break-word;
 }
-	.smallerButton {
-		padding: 4px 0px !important;
-	}
 	.topImage {
 		background-position: 50% 50%;
 		height: 200px;

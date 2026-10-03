@@ -1,11 +1,11 @@
 <template>
 	<div>
-		<div class="btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: -4px">
+		<div class="mp-btn-group pull-right exp-hiddable-unset" style="clear:both; margin-top: -4px">
 			<h5 class="title">
 				<mp-close-button @click="clickQuitar" title="Quitar indicador"
 												 v-if="!metric.IsLocked" class="exp-hiddable-block" />
 
-				<mp-dropdown-menu :items="menuItems" :styleRounded="true" @itemClick="dropdownSelected"
+				<mp-dropdown-menu :items="menuItems" variant="icon" @itemClick="dropdownSelected"
 											 icon="fas fa-ellipsis-v" />
 			</h5>
 		</div>

@@ -32,10 +32,10 @@
 		</template>
 
 		<div class="sourceRow" v-if="!Embedded.Readonly && !$isMobile()">
-			<div class="btn-group" style="float: left">
+			<div class="mp-btn-group" style="float: left">
 				<button v-for="(ver, index) in boundary.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"
-								class="btn btn-default btn-xs exp-serie-item"
+								class="mp-btn exp-serie-item"
 								:class="getActive(index)">
 					{{ ver.Name }}
 				</button>
@@ -108,7 +108,7 @@ export default {
 			if (this.boundary.properties.Versions.length == 1) {
 				return ' frozen';
 			} else if (this.boundary.properties.SelectedVersionIndex === index) {
-				return ' active';
+				return ' is-selected';
 			}
 			return '';
 		},

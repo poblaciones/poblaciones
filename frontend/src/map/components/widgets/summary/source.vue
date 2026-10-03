@@ -1,13 +1,13 @@
 <template>
-	<div class="sourceInfo exp-hiddable-block btn-group">
+	<div class="sourceInfo exp-hiddable-block mp-btn-group">
 
 		<button v-if="useCompare" type="button" @click="clickComparar"
-						:title="(valueCompare ? compareTitle : 'Comparar')" class="btn btn-default btn-xs" :class="(valueCompare ? 'active' : '')">
+						:title="(valueCompare ? compareTitle : 'Comparar')" class="mp-btn mp-btn--icon" :class="(valueCompare ? 'is-selected' : '')">
 			<i class="fas fa-columns"></i>
 		</button>
-		<button v-if="useRanking" type="button" title="Ránkings" @click="clickRanking" class="btn btn-default btn-xs" :class="(valueRanking ? 'active' : '')"><i class="fas fa-list-ol"></i></button>
-		<button type="button" title="Descargar" @click="clickDescargar" class="btn btn-default btn-xs"><i class="fas fa-download"></i></button>
-		<button type="button" :title="'Fuente de \'' + sourceTitle + '\''" @click="clickFuente" class="btn btn-default btn-xs"><i class="fas fa-link"></i></button>
+		<button v-if="useRanking" type="button" title="Ránkings" @click="clickRanking" class="mp-btn mp-btn--icon" :class="(valueRanking ? 'is-selected' : '')"><i class="fas fa-list-ol"></i></button>
+		<button type="button" title="Descargar" @click="clickDescargar" class="mp-btn mp-btn--icon"><i class="fas fa-download"></i></button>
+		<button type="button" :title="'Fuente de \'' + sourceTitle + '\''" @click="clickFuente" class="mp-btn mp-btn--icon"><i class="fas fa-link"></i></button>
 
 	</div>
 </template>

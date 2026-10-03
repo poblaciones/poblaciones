@@ -27,12 +27,12 @@ describe('patternButtons: activo (customPattern manda; si está vacío, usa defa
 
 it('con customPattern vacío, el activo es defaultPattern', () => {
 	const buttons = mount('', 1);
-	expect(buttons.isActive(1)).toBe(' active');
+	expect(buttons.isActive(1)).toBe(' is-selected');
 	expect(buttons.isActive(0)).toBe('');
 });
 
 it('con customPattern definido, manda sobre defaultPattern', () => {
 	const buttons = mount(0, 1);
-	expect(buttons.isActive(0)).toBe(' active');
+	expect(buttons.isActive(0)).toBe(' is-selected');
 	expect(buttons.isActive(1)).toBe('');
 });

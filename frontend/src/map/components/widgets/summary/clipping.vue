@@ -19,7 +19,7 @@
 
 				<mp-close-button @click="clickQuitar" title="Quitar selección" class="exp-hiddable-block" />
 
-				<button type="button" class="close lightButton exp-hiddable-block"
+				<button type="button" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost exp-hiddable-block"
 								title="Zoom a la selección" @click="fitSelection">
 					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px; margin-right: 2px;" />
 				</button>
@@ -61,9 +61,9 @@
 			</h3>
 
 			<div class="sourceRow" style="padding-bottom: 0.2rem;">
-				<div class="btn-group" style=" z-index: 100; background-color: white; max-width: calc(100% - 40px);">
+				<div class="mp-btn-group" style=" z-index: 100; background-color: white; max-width: calc(100% - 40px);">
 					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index"
-									class="btn btn-default btn-xs exp-serie-item" :class="getActive(index)" @mouseup="changeClipping(index)"
+									class="mp-btn exp-serie-item" :class="getActive(index)" @mouseup="changeClipping(index)"
 									@click="falseChangeClipping(index)">
 						{{ level.Revision }}
 					</button>
@@ -192,7 +192,7 @@ export default {
 		},
 		getActive(index) {
 			return {
-				'active': this.clipping.Region.SelectedLevelIndex === index,
+				'is-selected': this.clipping.Region.SelectedLevelIndex === index,
 			};
 		},
 		selectedLevel() {

@@ -51,6 +51,21 @@ it('refleja la elección del usuario', () => {
 	expect(badge.selected).toBe('Público');
 });
 
+it('el ítem elegido en el menú aplica su clave', () => {
+	const segMap = setupWindow();
+	segMap.UpdateMap = function () {};
+	const metric = conParticiones();
+	const badge = mountBadge(metric);
+	badge.itemSelected({ key: 'P', label: 'Público' });
+	expect(metric.properties.SelectedPartition).toBe('P');
+});
+
+it('los ítems del menú reflejan las particiones del nivel', () => {
+	setupWindow();
+	const badge = mountBadge(conParticiones());
+	expect(badge.List).toEqual([{ key: 'T', label: 'Todos' }, { key: 'P', label: 'Público' }]);
+});
+
 it('si el valor guardado ya no está entre los posibles, rige el primero', () => {
 	setupWindow();
 	const metric = conParticiones();

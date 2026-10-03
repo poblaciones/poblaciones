@@ -45,18 +45,18 @@
 			</template>
 		</div>
 		<div class="sourceRow">
-			<div class="btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
+			<div class="mp-btn-group" v-if="!useComparer || !metric.Compare.Active" style="float: left">
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"
-								class="btn btn-default btn-xs exp-serie-item"
+								class="mp-btn exp-serie-item"
 								:class="getActive(index)">
 					{{ ver.Version.Name }}
 				</button>
 			</div>
-			<div class="btn-group" v-if="useComparer && metric.Compare.Active" style="float: left">
+			<div class="mp-btn-group" v-if="useComparer && metric.Compare.Active" style="float: left">
 				<button v-for="pair in metric.Compare.GetVersionsWithComparableVariables()" :key="pair.version.Id" type="button"
 								@click="changeSelectedVersionIndexCompare(pair.index)"
-								class="btn btn-default btn-xs exp-serie-item"
+								class="mp-btn exp-serie-item"
 								:class="getActiveCompare(pair.version)">
 					{{ pair.version.Version.Name }}
 				</button>
@@ -127,7 +127,7 @@ export default {
 				if (this.metric.properties.Versions.length == 1) {
 					return ' frozen';
 				} else if (minIndex === version.Version.Name || maxIndex === version.Version.Name) {
-					return ' active';
+					return ' is-selected';
 				}
 				return '';
 			},
@@ -135,7 +135,7 @@ export default {
 			if (this.metric.properties.Versions.length == 1) {
 				return ' frozen';
 			} else if (this.metric.properties.SelectedVersionIndex === index) {
-				return ' active';
+				return ' is-selected';
 			}
 			return '';
 			},

@@ -1,18 +1,8 @@
 <template>
-	<div class="dropdown" style="padding-top: 8px;" v-if="LevelHasPartitions">
-		<button class="dropdown-soft btn btn-xs btn-default dropdown-toggle" :title="metric.SelectedLevel().Partitions.Name"
-						type="button" id="dropdownMenuButton" data-toggle="dropdown"
-						aria-haspopup="true" aria-expanded="false">
-			{{ selected }}<span class="exp-hiddable-visiblity arrow"></span>
-		</button>
-		<ul aria-labelledby="dropdownMenuButton" class="dropdown-menu dropPartitionFilter">
-			<li v-for="ele in this.List" :key="ele.key">
-				<a @click="changeValue(ele.key)">
-					{{ ele.label }}
-				</a>
-			</li>
-		</ul>
-
+	<div style="padding-top: 8px;" v-if="LevelHasPartitions">
+		<mp-dropdown-menu variant="pill" :items="List" :label="selected" :floatRight="false"
+											icon="fas fa-caret-down exp-hiddable-visiblity"
+											:tooltip="metric.SelectedLevel().Partitions.Name" @itemClick="itemSelected" />
 	</div>
 </template>
 
@@ -62,6 +52,9 @@ export default {
 		},
 	},
 	methods: {
+		itemSelected(item) {
+			this.changeValue(item.key);
+		},
 		changeValue(mode) {
 			this.metric.properties.SelectedPartition = mode;
 			window.SegMap.SaveRoute.UpdateRoute();
@@ -70,33 +63,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-
-	.dropPartitionFilter {
-		margin-top: 3px;
-		cursor: pointer;
-	}
-	.arrow {
-		display: inline-block;
-		margin-left: 0.255em;
-		vertical-align: 0.255em;
-		content: "";
-		border-top: 0.3em solid;
-		border-right: 0.3em solid transparent;
-		border-bottom: 0;
-		border-left: 0.3em solid transparent;
-	}
-	.dropdown-soft {
-		border-width: 0px;
-		font-size: 14px;
-		padding-left: 10px;
-		padding-right: 10px;
-		padding-bottom: 1px;
-	}
-	.dropdown-soft:hover, .dropdown-soft:focus {
-		color: #333;
-		background-color: #d4d4d4;
-	}
-</style>
-

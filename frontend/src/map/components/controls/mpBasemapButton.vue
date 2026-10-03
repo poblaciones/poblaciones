@@ -2,7 +2,7 @@
   <div class="map-style-selector-wrapper exp-hiddable-block" :class="{ 'shifted-right': sidebarPosition === 'bottom' }">
     <!-- Botón compacto para mostrar tipo de mapa al que se podría ir -->
     <button
-      class="map-style-btn btn btn-default btn-xs"
+      class="map-style-btn"
       :class="{ 'expanded': isExpanded }"
       @click="handleClick"
       @mouseenter="handleMouseEnter"
@@ -324,7 +324,8 @@
 		bottom: 20px;
 		width: 64px;
 		height: 64px;
-		border-radius: 8px !important;
+		margin-left: 1px;
+		border-radius: 8px;
 		background: #ffffffc0;
 		border: 1px solid rgb(165 164 164 / 50%);
     color: #333;
@@ -334,12 +335,12 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 2px !important;
+		padding: 2px;
 	}
 
 .map-style-btn:hover {
   background: #f8f9fa;
-  border-color: #ccc;
+  border-color: #e9e9e9;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 4px;
 }
 

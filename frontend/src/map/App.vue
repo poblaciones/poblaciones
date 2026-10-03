@@ -891,16 +891,6 @@
 		pointer-events: all !important;
 	}
 
-	.btn .exp-high-button {
-		color: unset !important;
-		background-color: #ffffff !important;
-	}
-
-		.btn .exp-high-button .active {
-			color: unset !important;
-			background-color: #ffffff !important;
-		}
-
 	.exp-circles {
 		margin-top: 5px !important;
 		color: white !important;
@@ -1228,16 +1218,6 @@
 		pointer-events: all;
 	}
 
-	.btn.active:not(:hover) + .btn.active:not(:hover)::before {
-		content: '';
-		width: 2px;
-		position: absolute;
-		left: -2px;
-		top: 1px;
-		bottom: 1px;
-		background-color: #c3c3c3;
-	}
-
 	.ibLink {
 		color: #5a626d;
 		cursor: pointer;
@@ -1443,36 +1423,6 @@
 		border-color: #cecece;
 	}
 
-	.close {
-		font-size: 22px;
-	}
-
-	.lightButton {
-		font-size: 14px;
-		padding: 4px 4px 4px 4px !important;
-		line-height: 1em;
-		margin-top: 5px;
-		margin-right: 2px;
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		transition: background-color .2s ease;
-	}
-
-		.lightButton:hover {
-			background-color: #f0f0f0!important;
-		}
-
-		.lightButton[disabled]:hover {
-			opacity: .1 !important;
-			cursor: default !important;
-		}
-
-		.lightButton[disabled] {
-			opacity: .1 !important;
-			cursor: default !important;
-		}
-
 	.animatedFlyAway {
 		transition: transform .3s ease;
 	}
@@ -1584,25 +1534,6 @@
 		min-width: 37px;
 		margin-top: 8px;
 		margin-left: -5px;
-	}
-
-	.btn-default.active.focus, .btn-default.active:focus, .btn-default.active:hover, .btn-default:active.focus, .btn-default:active:focus, .btn-default:active:hover, .open > .dropdown-toggle.btn-default.focus, .open > .dropdown-toggle.btn-default:focus, .open > .dropdown-toggle.btn-default:hover {
-		border-color: #66615B;
-	}
-
-	.btn:hover, .btn:focus, .btn:active, .open > .btn.dropdown-toggle,
-	.navbar .navbar-nav > li > a.btn:hover,
-	.navbar .navbar-nav > li > a.btn:focus,
-	.navbar .navbar-nav > li > a.btn:active,
-	.navbar .navbar-nav > li > a.btn.dropdown-toggle {
-		border-color: #333;
-	}
-
-	.btn.active,
-	.navbar .navbar-nav > li > a.btn.active {
-		background-color: #66615B;
-		color: rgba(255, 255, 255, 0.7);
-		border-color: #66615B;
 	}
 
 	.addthis_toolbox {
