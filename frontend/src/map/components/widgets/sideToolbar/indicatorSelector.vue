@@ -1,6 +1,6 @@
 <template>
   <transition name="slide-right">
-    <div ref="floatingPanel" class="indicator-selector-wrapper sidepanelOffset work-offsetY" v-if="isOpen"
+    <div ref="floatingPanel" class="indicator-selector-wrapper work-offsetY" v-if="isOpen"
          :style="[panelStyle, positionStyle]" v-on-clickaway="closePanel" v-touch:swipe.left="panLeftSwipeClose">
       <div class="floating-panel mp-surface">
         <!-- Encabezado -->
@@ -1051,12 +1051,12 @@ export default {
 /* Wrapper posicionado (como en searchPanel.vue): sobre él actúa la transición global slide-right. */
 	.indicator-selector-wrapper {
 		position: absolute;
-		left: 92px;
+		left: calc(92px + var(--mp-side-offset, 0px));
 		top: 0;
 		bottom: 0;
 		margin: auto 0;
 		width: 420px;
-		max-width: calc(100vw - 112px);
+		max-width: calc(100vw - 112px - var(--mp-side-offset, 0px));
 		min-height: min(50vh, 400px);
 		max-height: min(80vh, 750px);
 		border-radius: 12px;

@@ -204,19 +204,19 @@
 									<span class="cell-label-text">{{ cell.Label }}</span>
 									<span class="cell-label-actions">
 										<button v-if="rowRemoveTarget(cell)"
-														class="region-remove-btn"
+														class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted region-remove-btn"
 														@click.stop="removeRow(cell)"
 														:title="rowRemoveTitle(cell)">×</button>
-										<button class="row-open-map" @click.stop="openMapForRow(cell)"
+										<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted row-open-map" @click.stop="openMapForRow(cell)"
 														title="Abrir mapa" aria-label="Abrir mapa">
 											<i class="fas fa-globe-americas" aria-hidden="true"></i>
 										</button>
 										<button v-if="cell.isRegionHeader && groupKeys.length"
-														class="group-toggle group-toggle-all"
+														class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted"
 														@click.stop="toggleAllGroups"
 														:title="allGroupsCollapsed ? 'Expandir todos' : 'Colapsar todos'">{{ allGroupsCollapsed ? '▸' : '▾' }}</button>
 										<button v-if="cell.isGroupHeader"
-														class="group-toggle"
+														class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted"
 														@click.stop="toggleGroup(cell.GroupKey)"
 														:title="collapse.isCollapsed(cell.GroupKey) ? 'Expandir' : 'Colapsar'">{{ collapse.isCollapsed(cell.GroupKey) ? '▸' : '▾' }}</button>
 									</span>
@@ -1723,28 +1723,6 @@
 			padding-left: 13px;
 		}
 
-		/* Ícono "Abrir mapa" en el encabezado de fila. En dispositivos con hover real
-		   (mouse), queda oculto hasta pasar por la fila, para no recargar la columna.
-		   En touch, donde no hay manera de "pasar el mouse", queda siempre visible
-		   (el @media no aplica y prevalece la regla de abajo). Vive en
-		   .cell-label-actions junto con el resto de los controles, no necesita
-		   posición propia. */
-		.row-open-map {
-			border: none;
-			background: transparent;
-			color: #607d8b;
-			cursor: pointer;
-			padding: 0 4px;
-			display: inline-flex;
-			align-items: center;
-		}
-		.row-open-map:hover { color: #1565c0; }
-
-		@media (hover: hover) and (pointer: fine) {
-			.row-open-map { opacity: 0; transition: opacity 0.1s; }
-			tr:hover .row-open-map { opacity: 1; }
-		}
-
 	.pivot-row-group-header {
 		background-color: #f0f4f8;
 		font-weight: 600;
@@ -1767,19 +1745,6 @@
 	}
 
 	.pivot-cell-header { position: relative; }
-	/* Triángulo de colapso de grupos: un control más dentro de .cell-label-actions,
-	   sin posición propia (ver ahí). */
-	.group-toggle {
-		border: none;
-		background: transparent;
-		color: #607d8b;
-		cursor: pointer;
-		font-size: 14px;
-		line-height: 1;
-		padding: 2px 4px;
-	}
-	.group-toggle:hover { color: #263238; }
-
 	.pivot-table td {
 		padding: 2px 8px;
 	}
@@ -1841,27 +1806,13 @@
 		margin-left: auto;
 	}
 
-	.region-remove-btn {
-		background: none;
-		border: none;
-		color: inherit;
-		cursor: pointer;
-		font-size: 16px;
-		line-height: 1;
-		opacity: 0.6;
-		padding: 0 4px;
+	/* "Quitar fila" y "Abrir mapa" quedan ocultos hasta pasar por la fila, solo en
+	   dispositivos con hover real. En touch, donde no hay manera de "pasar el mouse",
+	   quedan siempre visibles. */
+	@media (hover: hover) and (pointer: fine) {
+		.region-remove-btn, .row-open-map { opacity: 0; }
+		tr:hover .region-remove-btn, tr:hover .row-open-map { opacity: 1; }
 	}
-		.region-remove-btn:hover {
-			opacity: 1;
-		}
-		/* Igual que el mundo: oculto hasta pasar por la fila, solo en dispositivos con
-		   hover real. En touch prevalece la regla de arriba (siempre visible, opacity
-		   0.6), porque no hay manera de "pasar el mouse" para revelarlo. */
-		@media (hover: hover) and (pointer: fine) {
-			.region-remove-btn { opacity: 0; transition: opacity 0.1s; }
-			tr:hover .region-remove-btn { opacity: 0.6; }
-			tr:hover .region-remove-btn:hover { opacity: 1; }
-		}
 
 	.cell-value {
 		display: block;

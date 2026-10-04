@@ -5,9 +5,9 @@
 				<span class="widget-kind">Resumen</span>
 			</div>
 			<div class="widget-head-actions">
-				<button class="head-btn" @click="exportCsv" :disabled="availability !== 'ready'" title="Exportar CSV">CSV</button>
-				<button class="head-btn" @click="exportExcel" :disabled="availability !== 'ready'" title="Exportar Excel">Excel</button>
-				<button class="widget-close" @click="requestClose" title="Ocultar">×</button>
+				<button class="mp-btn mp-btn--solid mp-btn--sm" @click="exportCsv" :disabled="availability !== 'ready'" title="Exportar CSV">CSV</button>
+				<button class="mp-btn mp-btn--solid mp-btn--sm" @click="exportExcel" :disabled="availability !== 'ready'" title="Exportar Excel">Excel</button>
+				<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted" @click="requestClose" title="Ocultar" aria-label="Ocultar">×</button>
 			</div>
 		</header>
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="map-toolbar exp-hiddable-block" :class="'pos-' + sidebarPosition + ($isMobile() ? '' : ' sidepanelOffset')"
+    <div class="map-toolbar exp-hiddable-block" :class="'pos-' + sidebarPosition"
          v-if="!Embedded.HideAddMetrics || !Embedded.HideSearch">
       <!-- Manija de arrastre: mové la barra a la posición que quieras (arriba,
            medio o abajo), siempre pegada al borde izquierdo. Solo visible al
@@ -158,7 +158,8 @@ export default {
 .map-toolbar {
 	border: 1px solid rgb(165 164 164 / 50%);
   position: absolute;
-  left: 20px;
+  left: calc(20px + var(--mp-side-offset, 0px));
+  transition: left .3s ease;
   z-index: 990;
   display: flex;
   flex-direction: column;

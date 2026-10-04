@@ -469,6 +469,12 @@ Antes de dar por buena una edición:
 - Estilos: `App.vue` carga las hojas de identidad Averta (`common/styles/averta/`: tipografía, campos, tema de
   Vue Material y utilidades) y `main.js` importa los tokens y las hojas compartidas con el visor (`utilities`,
   `surfaces`, `buttons`, `list-items`, `chips`, `switch`, `search`). Los componentes propios usan `scoped`.
+- Botones: los del módulo salen de la paleta del visor (`common/styles/buttons.css`), no se definen en estilos locales.
+  Texto con borde: `mp-btn mp-btn--solid mp-btn--sm` (el estado seleccionado es `is-selected` con
+  `:aria-pressed="$ariaPressed(...)"`). Glifos (cierre, quitar, colapsar, exportar, abrir mapa, expandir filas):
+  `mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted`, más `mp-icon-btn--dismiss` para "×"; todo botón de solo ícono
+  lleva `aria-label`. La ubicación (posición, márgenes) la resuelve el CSS local del componente.
+- Editor de texto enriquecido: `table` no registra `mp-text` (`RichTextBootstrap`), por lo que no carga CKEditor.
 - Arranque sin Vue Router: el componente raíz del módulo es `table/App.vue`
   (montado por el `main.js` del proyecto), que monta el `Dashboard`
   directamente. `App.vue` resuelve el "work" inicial con `StartTable` y, sobre una

@@ -5,9 +5,11 @@ import App from './App';
 import router from './router/router.js';
 
 import CommonBootstrap from '@/common/classes/CommonBootstrap';
+import RichTextBootstrap from '@/common/classes/RichTextBootstrap';
 import MpLargeDataItem from '@/backoffice/components/MpLargeDataItem';
 
 CommonBootstrap.Init(Vue);
+RichTextBootstrap.Register(Vue);
 
 // Extras exclusivos de este módulo
 Vue.component('router-link', Vue.options.components.RouterLink);

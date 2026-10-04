@@ -9,8 +9,8 @@
 			<div class="ms-version-bar">
 				<span class="ms-version-title">{{ vg.versionName || variableName || metricName }}</span>
 				<span class="ms-version-actions">
-					<button class="ms-xbtn" @click="exportVersionCsv(vg)" title="Exportar esta tabla a CSV">CSV</button>
-					<button class="ms-xbtn" @click="exportVersionXlsx(vg)" title="Exportar esta tabla a Excel">Excel</button>
+					<button class="mp-btn mp-btn--solid mp-btn--sm" @click="exportVersionCsv(vg)" title="Exportar esta tabla a CSV">CSV</button>
+					<button class="mp-btn mp-btn--solid mp-btn--sm" @click="exportVersionXlsx(vg)" title="Exportar esta tabla a Excel">Excel</button>
 				</span>
 			</div>
 
@@ -209,20 +209,6 @@ export default {
 	.ms-version-actions {
 		display: inline-flex;
 		gap: 4px;
-	}
-	.ms-xbtn {
-		border: 1px solid #d0d7de;
-		background: #fff;
-		color: #607d8b;
-		font-size: 10px;
-		padding: 2px 6px;
-		border-radius: 3px;
-		cursor: pointer;
-		line-height: 1.4;
-	}
-	.ms-xbtn:hover {
-		background: #f0f3f5;
-		color: #37474f;
 	}
 	.ms-table {
 		width: 100%;

@@ -5,7 +5,7 @@
 				<span class="widget-kind">Distribución</span>
 			</div>
 			<div class="widget-head-actions">
-				<button class="widget-close" @click="requestClose" title="Ocultar">×</button>
+				<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted" @click="requestClose" title="Ocultar" aria-label="Ocultar">×</button>
 			</div>
 		</header>
 
@@ -18,19 +18,19 @@
 				<!-- Indicador colapsado: franja angosta para reexpandir -->
 				<div v-if="isCollapsed(ind.metricId)" :key="'c-' + ind.metricId"
 						class="w-block dist-collapsed" :title="ind.name" @click="toggleCollapse(ind.metricId)">
-					<button class="dist-collapse-btn" :aria-label="'Expandir ' + ind.name">▸</button>
+					<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted" :aria-label="'Expandir ' + ind.name">▸</button>
 					<span class="dist-collapsed-name">{{ ind.name }}</span>
 				</div>
 
 				<div v-else :key="ind.metricId" class="w-block dist-indicator">
-					<button class="dist-collapse-btn dist-minimize" @click="toggleCollapse(ind.metricId)" title="Colapsar" aria-label="Colapsar">🗕</button>
+					<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted dist-minimize" @click="toggleCollapse(ind.metricId)" title="Colapsar" aria-label="Colapsar">🗕</button>
 					<div class="w-block-head">
 						<div class="dist-head-titles">
 							<div class="ms-indicator">{{ ind.name }}</div>
 							<div class="ms-variable">{{ ind.variableName }}</div>
 						</div>
 						<div class="dist-export">
-							<button class="dist-export-btn" @click.stop="toggleExportMenu(ind.metricId)" title="Exportar gráfico" aria-label="Exportar gráfico">
+							<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--muted" @click.stop="toggleExportMenu(ind.metricId)" title="Exportar gráfico" aria-label="Exportar gráfico">
 								<i class="fas fa-download"></i>
 							</button>
 							<div v-if="exportMenuFor === ind.metricId" class="dist-export-menu" @click.stop>
@@ -504,11 +504,6 @@ export default {
 
 	.w-block-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; padding-right: 24px; }
 	.dist-export { position: absolute; right: 30px; flex: 0 0 auto; }
-	.dist-export-btn {
-		border: none; background: transparent; color: #90a4ae; cursor: pointer;
-		font-size: 13px; line-height: 1; padding: 4px 6px; border-radius: 4px;
-	}
-	.dist-export-btn:hover { color: #1976d2; background: #e9f2fd; }
 	.dist-export-menu {
 		position: absolute; top: 100%; right: 0; margin-top: 2px; z-index: 5;
 		background: #fff; border: 1px solid #cfd8dc; border-radius: 4px;
@@ -526,18 +521,12 @@ export default {
 		text-overflow: ellipsis;
 		max-width: 320px;
 	}
-	.dist-collapse-btn {
-		border: none; background: transparent; color: #90a4ae; cursor: pointer;
-		font-size: 16px; line-height: 1; padding: 2px 4px; flex: 0 0 auto;
-	}
-	.dist-collapse-btn:hover { color: #455a64; }
 	.dist-minimize {
 		position: absolute; top: 4px; right: 4px; z-index: 1;
-		font-size: 8px; font-weight: 700; padding: 0 6px;
 	}
 
 	.dist-collapsed {
-		flex: 0 0 auto; width: 22px; cursor: pointer;
+		flex: 0 0 auto; width: 24px; cursor: pointer;
 		display: flex; flex-direction: column; align-items: center; gap: 8px;
 		padding: 8px 0; overflow: hidden;
 	}

@@ -24,7 +24,6 @@ import MpCopy from '@/common/components/MpCopy';
 import MpWait from '@/common/components/MpWait';
 import MpAlert from '@/common/components/MpAlert';
 import MpInput from '@/common/components/MpInput';
-import MpText from '@/common/components/MpText';
 import MpSearch from '@/common/components/MpSearch';
 import MpColorPicker from '@/common/components/MpColorPicker';
 import MpSimpleText from '@/common/components/MpSimpleText';
@@ -62,14 +61,13 @@ export default class CommonBootstrap {
 		Vue.component('mp-wait', MpWait);
 	}
 
-	/** Set "completo" que comparten main / admins / packs / credentials. */
+	/** Set "completo" que comparten main / admins / packs / credentials. mp-text se registra aparte (ver RichTextBootstrap). */
 	static RegisterExtendedComponents(Vue) {
 		Vue.component('title-bar', TitleBar);
 		Vue.component('stepper', Stepper);
 		Vue.component('mp-select', MpSelect);
 		Vue.component('mp-grid', MpGrid);
 		Vue.component('mp-search', MpSearch);
-		Vue.component('mp-text', MpText);
 		Vue.component('mp-help', MpHelp);
 		Vue.component('mp-color-picker', MpColorPicker);
 		Vue.component('mp-simple-text', MpSimpleText);

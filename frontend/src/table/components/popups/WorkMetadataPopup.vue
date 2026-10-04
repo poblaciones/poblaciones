@@ -32,7 +32,7 @@
 							<td class="wmp-label">Cita (APA)</td>
 							<td class="wmp-citation">
 								<span v-html="citationHtml"></span>
-								<button class="wmp-copy" @click="copy(citationText)">Copiar</button>
+								<button class="mp-btn mp-btn--solid mp-btn--sm wmp-copy" @click="copy(citationText)">Copiar</button>
 							</td>
 						</tr>
 						<tr v-if="work.Metadata.License">
@@ -165,16 +165,6 @@
 	.wmp-table a { color: #1976d2; text-decoration: none; word-break: break-all; }
 	.wmp-table a:hover { text-decoration: underline; }
 	.wmp-citation { display: flex; align-items: flex-start; gap: 8px; }
-	.wmp-copy {
-		flex: 0 0 auto;
-		border: 1px solid #cfd8dc;
-		background: #f5f7f8;
-		border-radius: 4px;
-		font-size: 12px;
-		padding: 2px 8px;
-		cursor: pointer;
-		color: #455a64;
-	}
-	.wmp-copy:hover { background: #eceff1; }
+	.wmp-copy { flex: 0 0 auto; }
 	.wmp-file { display: inline-block; margin-right: 12px; }
 </style>

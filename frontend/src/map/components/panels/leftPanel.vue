@@ -34,7 +34,6 @@ import FeatureList from '@/map/components/widgets/features/featureList';
 import PanelType from '@/map/enums/PanelType';
 import CollapseButton from '@/map/components/controls/collapseButton';
 import Split from 'split.js';
-import dom from '@/common/framework/dom';
 
 export default {
 	name: 'leftPanel',
@@ -239,17 +238,18 @@ export default {
 			window.SegMap.toolbarStates.leftPanelVisible = !this.collapsed;
 			window.SegMap.Session.UI.ToggleLeftPanel(!this.collapsed);
 		},
+		// --mp-side-offset corre hacia la derecha los paneles flotantes anclados al borde izquierdo (map/styles/layout.css).
 		updateSidePanel() {
-			var cssSidePanelOffset = dom.getCssRule(document, '.sidepanelOffset');
+			var offset = '0px';
 			if (this.collapsed) {
 				window.SegMap.SetTypeControlsDefault();
-				cssSidePanelOffset.style.marginLeft = '0px';
-
-				//css4.style.transform = '';
 			} else {
 				window.SegMap.SetTypeControlsDropDown();
-				cssSidePanelOffset.style.marginLeft = '352px';
+				if (!this.$isMobile()) {
+					offset = this.width + 'px';
+				}
 			}
+			document.documentElement.style.setProperty('--mp-side-offset', offset);
 		},
 		setCss(el, collapsed, onValue, offValue) {
 			var values = (collapsed ? offValue : onValue);

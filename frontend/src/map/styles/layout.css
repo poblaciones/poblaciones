@@ -21,8 +21,9 @@ body {
 	right: 0px;
 }
 
-.sidepanelOffset {
-	margin-left: 0px;
+/* Ancho del panel izquierdo cuando está abierto (lo fija leftPanel.vue); lo suman la barra de botones y sus paneles. */
+:root {
+	--mp-side-offset: 0px;
 }
 
 .gutter.gutter-horizontal {

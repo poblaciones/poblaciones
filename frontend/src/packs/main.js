@@ -5,8 +5,10 @@ import App from './App';
 import router from './router/router.js';
 
 import CommonBootstrap from '@/common/classes/CommonBootstrap';
+import RichTextBootstrap from '@/common/classes/RichTextBootstrap';
 
 CommonBootstrap.Init(Vue);
+RichTextBootstrap.Register(Vue);
 
 window.Db = new Db();
 

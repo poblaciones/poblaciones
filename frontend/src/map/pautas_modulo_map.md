@@ -316,6 +316,15 @@ mantener el contrato de props/eventos (`select`, `deselect`, `select-group`,
 `selectorSubtitles.js` y `selectorTooltips.js` preprocesan el árbol (subtítulos
 e Info) antes de pasarlo por props.
 
+**Desplazamiento con el panel izquierdo.** La barra de botones (`left: 20px`) y los
+paneles que se abren junto a ella (`indicatorSelector` y `searchPanel`, `left: 92px`)
+se corren hacia la derecha cuando se abre el panel izquierdo. `leftPanel.vue` fija
+`--mp-side-offset` en `:root` (el ancho del panel en escritorio; `0px` si está
+colapsado o en móvil) y cada posición se escribe como
+`calc(<posición> + var(--mp-side-offset, 0px))`. Un elemento nuevo anclado al borde
+izquierdo suma la misma variable; no se resuelve con una clase ni con un margen.
+`$isMobile` es una función (`this.$isMobile()`): sin paréntesis es siempre verdadera.
+
 ---
 
 ## 6. Persistencia en la URL
@@ -488,6 +497,7 @@ arma con estas clases: no se definen botones en estilos locales ni se usan
 | Ícono de 32 px en un grupo (fuente) | `mp-btn mp-btn--icon` |
 | Ícono de 40 px sobre el mapa (toolbar derecha) | `mp-btn mp-btn--float` |
 | Acción con borde visible (descargas) | `mp-btn mp-btn--solid` |
+| Acción con borde visible en barras densas (`table`) | `mp-btn mp-btn--solid mp-btn--sm` |
 | Sobre fondo de color (panel superior) | `mp-btn mp-btn--on-dark` |
 | Selector con texto y caret (partición) | `mp-btn mp-btn--soft` |
 | Glifo circular sin borde | `mp-icon-btn` (32 px); tamaños `--sm` 24 y `--lg` 40 |
@@ -497,6 +507,8 @@ arma con estas clases: no se definen botones en estilos locales ni se usan
 | Botón principal de la barra lateral | `mp-icon-btn--accent` |
 | Cruz dentro de un chip | `mp-chip-remove` |
 
+- `table` usa la misma paleta: sus botones de texto son `mp-btn--solid mp-btn--sm` y
+  sus glifos `mp-icon-btn--sm`; no define botones propios.
 - **Estado seleccionado: `is-selected`** (o `aria-pressed="true"`), nunca
   `active`. `MapExport` oculta los `exp-serie-item` que no lo tengan.
 - **Accesibilidad.** Todo botón de solo ícono lleva `aria-label` (con el mismo

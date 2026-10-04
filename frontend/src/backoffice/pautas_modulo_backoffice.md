@@ -182,6 +182,11 @@ más de una vista, va en la hoja que corresponde.
 | `averta/utilities.css` | `formRow`, `hand`, `normalTextLink`, `right`, `center` | ídem | Antes |
 | `credentials/styles/credentials.css` | Pantallas de ingreso, registro, activación y recuperación | `App.vue` de credentials | Antes |
 
+**Editor de texto enriquecido.** `mp-text` (el único componente que carga CKEditor) no lo registra
+`CommonBootstrap`: lo registra `RichTextBootstrap.Register(Vue)`, que llaman los `main.js` de `backoffice`,
+`admins` y `packs`. `credentials` y `table` no lo llaman, de modo que su paquete no incluye CKEditor. Un módulo
+nuevo que use `<mp-text>` debe llamar a `RichTextBootstrap.Register(Vue)` después de `CommonBootstrap.Init`.
+
 **Orden de carga.** Las hojas que van antes de `vue-material.css` pierden contra ella en todo lo que no lleva
 `!important`; las de `vue-material-late.css` le ganan por orden. Esa diferencia es intencional: no mover una regla
 de un grupo al otro ni reordenar los `<style src>` de `App.vue` sin comprobar el resultado.

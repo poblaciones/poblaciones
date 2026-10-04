@@ -5,7 +5,7 @@
 				<span class="widget-kind">Inspector</span>
 				<span class="widget-source" :title="datasetTitle">{{ datasetTitle }}</span>
 			</div>
-			<button class="widget-close" @click="requestClose" title="Ocultar">×</button>
+			<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted" @click="requestClose" title="Ocultar" aria-label="Ocultar">×</button>
 		</header>
 
 		<div v-if="availability !== 'ready'" class="widget-empty">
@@ -121,17 +121,6 @@ export default {
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	.widget-close {
-		border: none;
-		background: transparent;
-		font-size: 18px;
-		line-height: 1;
-		color: #90a4ae;
-		cursor: pointer;
-		padding: 0 4px;
-	}
-	.widget-close:hover { color: #455a64; }
-
 	.widget-empty {
 		flex: 1;
 		display: flex;

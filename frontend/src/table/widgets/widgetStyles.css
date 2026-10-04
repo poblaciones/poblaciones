@@ -44,27 +44,6 @@
 	text-overflow: ellipsis;
 }
 .widget-head-actions { display: flex; align-items: center; gap: 6px; }
-.head-btn {
-	border: 1px solid #d0d7de;
-	background: #fff;
-	color: #455a64;
-	font-size: 12px;
-	padding: 3px 8px;
-	border-radius: 4px;
-	cursor: pointer;
-}
-.head-btn:hover:not(:disabled) { background: #f0f3f5; }
-.head-btn:disabled { opacity: 0.45; cursor: default; }
-.widget-close {
-	border: none;
-	background: transparent;
-	font-size: 18px;
-	line-height: 1;
-	color: #90a4ae;
-	cursor: pointer;
-	padding: 0 4px;
-}
-.widget-close:hover { color: #455a64; }
 
 /* ── Cuerpo y estado vacío ───────────────────────────────────────────────── */
 .widget-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 10px 12px; }

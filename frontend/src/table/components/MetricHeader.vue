@@ -5,9 +5,7 @@
 			<div class="metric-title">
 				<span class="metric-name">{{ metric.properties.Metric.Name }}</span>
 			</div>
-			<button class="metric-remove-btn" @click="handleRemove" title="Remover métrica">
-				×
-			</button>
+			<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted" @click="handleRemove" title="Remover métrica" aria-label="Remover métrica">×</button>
 		</div>
 
 		<!-- Fila media: Variable lógica y modo de medición, juntos -->
@@ -178,28 +176,6 @@
 		font-weight: 600;
 		color: #1976d2;
 	}
-
-	.metric-remove-btn {
-		background: none;
-		border: none;
-		color: #9e9e9e;
-		font-size: 24px;
-		line-height: 1;
-		cursor: pointer;
-		padding: 0;
-		width: 24px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 50%;
-		transition: all 0.2s ease;
-	}
-
-		.metric-remove-btn:hover {
-			background-color: #ffebee;
-			color: #d32f2f;
-		}
 
 	.metric-variable-section {
 		position: relative;

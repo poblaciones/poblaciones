@@ -5,6 +5,7 @@
  *     --icon         solo ícono, 32 x 32
  *     --float        40 x 40 sobre el mapa: borde y fondo translúcido (toolbar derecha)
  *     --solid        borde visible en reposo
+ *     --sm           compacto, para barras densas (tablero de table)
  *     --on-dark      sobre fondos de color (panel superior)
  *     --soft         sin borde; el estado hover oscurece el fondo (selector de partición)
  *   .mp-btn-group    agrupa .mp-btn en línea
@@ -123,6 +124,12 @@
 
 .mp-btn--solid:not(:hover) {
 	border-color: currentColor;
+}
+
+.mp-btn--sm {
+	min-width: 0;
+	padding: 2px 10px;
+	font-size: 12px;
 }
 
 .mp-btn--on-dark {

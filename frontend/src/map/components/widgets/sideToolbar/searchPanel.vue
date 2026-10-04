@@ -401,7 +401,7 @@ export default {
 		position: absolute;
     border-radius: 12px;
     align-self: center;
-		left: 92px;
+		left: calc(92px + var(--mp-side-offset, 0px));
 		z-index: 1050;
 	}
 

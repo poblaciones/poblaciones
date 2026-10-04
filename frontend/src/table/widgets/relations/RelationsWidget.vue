@@ -2,7 +2,7 @@
 	<div class="widget relations-widget">
 		<header class="widget-head">
 			<div class="widget-titles"><span class="widget-kind">Relaciones</span></div>
-			<button class="widget-close" @click="requestClose" title="Ocultar">×</button>
+			<button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted" @click="requestClose" title="Ocultar" aria-label="Ocultar">×</button>
 		</header>
 
 		<div v-if="availability !== 'ready'" class="widget-empty">{{ emptyMessage() }}</div>
