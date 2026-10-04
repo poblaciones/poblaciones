@@ -22,8 +22,7 @@
  * Estado seleccionado: clase .is-selected o aria-pressed="true".
  * El foco de teclado se dibuja con :focus-visible; el clic no deja el botón marcado.
  * Los botones de solo ícono llevan aria-label (o title con el mismo texto).
- * Los márgenes de ubicación los pone el contenedor, salvo en .mp-btn,
- * que conserva el espaciado que tenía .btn.
+ * Los márgenes de ubicación los pone el contenedor, salvo en .mp-btn, que trae un margen propio.
  */
 
 /* ---------- .mp-btn ---------- */

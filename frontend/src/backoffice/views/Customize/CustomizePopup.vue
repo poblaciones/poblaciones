@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="open" class="customizePopup">
+		<md-dialog :md-active.sync="open" class="customizePopup mp-dialog-fixed-lg">
 			<md-dialog-title>Personalizar</md-dialog-title>
 			<md-dialog-content v-if="Work">
 				<md-tabs md-dynamic-height>
@@ -42,11 +42,6 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss">
-.customizePopup .md-dialog-container {
-	max-width: 1000px;
-	width: 1000px;
-}
-
 .customizePopup .md-dialog-content {
 	min-height: 360px;
 	max-height: 70vh;

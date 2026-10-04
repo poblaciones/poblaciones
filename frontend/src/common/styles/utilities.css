@@ -1,13 +1,12 @@
 /*
- * Utilidades del visor que reemplazan clases de Bootstrap 3 y Paper Dashboard.
- * Tienen prefijo mp- salvo .fa, que es la clase de Font Awesome.
+ * Utilidades compartidas por el visor y table.
  */
 
 .mp-float-right {
 	float: right;
 }
 
-/* Texto atenuado: el color de Bootstrap con la opacidad de Paper Dashboard. */
+/* Texto atenuado. */
 .mp-dimmed {
 	color: #777;
 	opacity: .35;
@@ -15,13 +14,4 @@
 
 .mp-text-small {
 	font-size: 85%;
-}
-
-/*
- * Paper Dashboard fija un ancho a todo ícono con clase fa, y varios paneles dependen de esa columna.
- * Font Awesome le ganaba a esa regla en .fa-fw (ancho de 1,25em), por eso se lo excluye.
- */
-.fa:not(.fa-fw) {
-	width: 21px;
-	text-align: center;
 }

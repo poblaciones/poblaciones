@@ -787,8 +787,5 @@ height: 36px;
 				font-size: 15px
 
 	}
-
-		.md-dialog-container {
-	}
 </style>
 

@@ -768,16 +768,3 @@ export default {
 	}
 };
 </script>
-
-<style rel="stylesheet/scss" lang="scss" scoped>
-
-.dashboard {
-	&-container {
-		margin: 30px;
-	}
-	&-text {
-		font-size: 20px;
-		line-height: 30px;
-	}
-}
-</style>

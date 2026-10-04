@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog v-if="visible" class="itemsDialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="visible" class="mp-dialog-wide-content" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>{{ title }}</md-dialog-title>
 			<md-dialog-content>
 				<mp-grid

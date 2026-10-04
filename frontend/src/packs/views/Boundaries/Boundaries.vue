@@ -455,17 +455,3 @@ const GROUP_LEVEL = -1;
   }
 };
 </script>
-
-<style rel="stylesheet/scss" lang="scss" scoped>
-.md-dialog-actions {
-  padding: 8px 20px 8px 24px !important;
-}
-
-.close-button {
-    min-width: unset;
-    height: unset;
-    margin: unset;
-    float: right;
-}
-
-</style>

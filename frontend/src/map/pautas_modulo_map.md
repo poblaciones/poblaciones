@@ -518,16 +518,17 @@ arma con estas clases: no se definen botones en estilos locales ni se usan
 
 ### Estilos globales
 
-El visor no usa clases de Bootstrap 3 ni de Paper Dashboard, y `index.html` ya
-no las carga (tampoco `animate.min.css`, `themify-icons.css`, jQuery ni
-`bootstrap.min.js`). Lo que aportaban esas hojas está en archivos propios,
-repartidos por responsabilidad; `App.vue` no tiene bloque de estilos.
+Los estilos globales del visor están en archivos propios, repartidos por
+responsabilidad; `App.vue` no tiene bloque de estilos. `index.html` no carga
+Bootstrap ni Paper Dashboard, por lo que sus clases (`card`, `btn`, `modal`,
+`dropdown-menu`, `badge`, `form-group`, etc.) no tienen efecto.
 
 | Hoja | Contenido |
 |---|---|
 | `common/styles/tokens.css` | Variables `--mp-*` |
 | `common/styles/base.css` | Reset y tipografía de los elementos sin clase (`body`, `h1`–`h6`, `a`, `label`, controles de formulario) y reglas de impresión |
-| `common/styles/utilities.css` | `mp-float-right`, `mp-dimmed`, `mp-text-small` y el ancho de los íconos `.fa` |
+| `common/styles/utilities.css` | `mp-float-right`, `mp-dimmed` y `mp-text-small` (también las carga `table`) |
+| `common/styles/surfaces.css` | Tarjeta base `mp-surface` y `mp-surface--padded` (también las carga `table`) |
 | `common/styles/animations.css` | `animated`, `zoomIn`, `zoomOut`, `fadeInDown`, `fadeInUp`, `fadeOutDown`, `fadeOutUp` |
 | `common/styles/buttons.css` | Paleta de botones |
 | `common/styles/list-items.css` | `mp-list-item` (renglón en pastilla: selector de indicadores, resultados de búsqueda) y `mp-list-row` (renglón compacto: capas, sugerencias) |
@@ -536,53 +537,36 @@ repartidos por responsabilidad; `App.vue` no tiene bloque de estilos.
 | `common/styles/search.css` | `mp-search-input`, `mp-search-icon`, `mp-search-clear`, `mp-search-spinner` |
 | `common/styles/popovers.css`, `transition.css` | Popovers de v-tooltip y transiciones comunes (también las carga `table`) |
 | `map/styles/tooltips.css` | Base de `.tooltip` y tooltip oscuro de los botones flotantes |
-| `map/styles/surfaces.css` | `mp-surface`, `mp-surface--padded` y `mp-modal*` |
+| `map/styles/icons.css` | Ancho de los íconos `.fa` |
+| `map/styles/surfaces.css` | Textos internos de `mp-surface` (`.title`, `.stats`, `label`), `mp-modal*` y títulos de diálogo |
 | `map/styles/menus.css` | `mp-menu` (menú de `mp-dropdown-menu`) |
 | `map/styles/fields.css` | `mp-radio-inline`, `mp-field-group` y bloque `fld*` |
 | `map/styles/lists.css` | `mp-badge`, filas de variables (`variableRow`) |
-| `map/styles/layout.css`, `panels.css`, `map-content.css`, `export.css`, `helpers.css`, `transitions.css` | Disposición general, paneles, etiquetas y marcadores del mapa, exportación a imagen, utilidades históricas y transiciones del visor |
+| `map/styles/layout.css`, `panels.css`, `map-content.css`, `export.css`, `helpers.css`, `transitions.css` | Disposición general, paneles, etiquetas y marcadores del mapa, exportación a imagen, clases auxiliares sueltas y transiciones del visor |
 | `map/styles/vendor-overrides.css`, `vendor-overrides-late.css` | Ajustes sobre Leaflet y Google |
 
-Equivalencias con las clases anteriores:
-
-| Antes | Ahora |
-|---|---|
-| `card`, `panel`, `panel-body` | `mp-surface` (con `mp-surface--padded` para el relleno de 15 px) |
-| `modal`, `modal-dialog`, `modal-content`, `modal-backdrop` | `mp-modal`, `mp-modal__dialog`, `__content`, `__backdrop` (solo en `popups/modal.vue`) |
-| `dropdown-menu`, `dropdown-menu-right` | `mp-menu`, dentro de `mp-dropdown-menu` |
-| `text-muted` | `mp-dimmed` |
-| `pull-right` | `mp-float-right` |
-| `badge` | `mp-badge` |
-| `form-group`, `radio-inline` | `mp-field-group`, `mp-radio-inline` |
-| `small` (clase) | `mp-text-small` |
-| `indicator-item`, `result-item` | `mp-list-item` (el componente conserva su clase para la disposición interna) |
-| `layer-item`, `suggestion-item` | `mp-list-row` (`mp-list-row--strong` si el fondo ya es gris) |
-| `chip`, `filterElement`, `year-tag` | `mp-chip`, `mp-chip-filter`, `mp-chip-tag` |
-| `sw-toggle`, `sw-track`, `sw-thumb` | `mp-switch`, `mp-switch-track`, `mp-switch-thumb` |
-| `search-input`, `search-icon`, `search-clear`, `search-spinner` | `mp-search-input`, `mp-search-icon`, `mp-search-clear`, `mp-search-spinner` |
-
 - **Orden de carga.** `map/main.js` importa `map/styles/foundation.js` antes
-  que cualquier componente (tokens, base, utilidades, animaciones, tooltips,
-  superficies y menús: queda en el lugar más bajo de la cascada) y
+  que cualquier componente (tokens, base, utilidades, íconos, animaciones,
+  tooltips, superficies y menús: queda en el lugar más bajo de la cascada) y
   `map/styles/index.js` después de ellos. El orden de `index.js` es
   significativo: `vendor-overrides.css` va antes de `leaflet.css` y
   `nprogress.css`, y `vendor-overrides-late.css` después, porque varias reglas
   sin `!important` dependen de ganarles o de perder contra ellas. Una hoja
   nueva se agrega en `index.js`, no con un `import` suelto.
 - **Dónde va un estilo nuevo.** Se elige la hoja por su responsabilidad; si
-  ninguna corresponde, se crea una y se la registra en `index.js`. El bloque
-  global de `App.vue` no se reconstruye.
-- Los componentes compartidos con `table` (`indicatorSelector`) solo pueden
-  apoyarse en hojas de `common/styles/`, porque `table` no carga `map/styles/`.
-  `table/main.js` importa `tokens`, `buttons`, `list-items`, `chips`, `switch`
-  y `search`.
+  ninguna corresponde, se crea una y se la registra en `index.js`. `App.vue` no
+  lleva estilos globales.
+- Los componentes compartidos con `table` (`topPanel`, `indicatorSelector`)
+  solo pueden apoyarse en hojas de `common/styles/`, porque `table` no carga
+  `map/styles/`. `table/main.js` importa `tokens`, `utilities`, `surfaces`,
+  `buttons`, `list-items`, `chips`, `switch` y `search`.
 - `scoped` se reserva para la disposición propia del componente. Un control
   reutilizable (botón, ítem de lista, chip, campo) no define su apariencia
   localmente.
 - No agregar `!important` fuera de `vendor-overrides*.css`; los existentes se
   retiran al tocar la regla.
-- Los selectores `.title`, `.stats` y `label` dentro de `mp-surface` conservan
-  la tipografía que daba Paper Dashboard a `card`; no replicarla en
+- Los selectores `.title`, `.stats` y `label` dentro de `mp-surface` ya traen
+  su tipografía en el visor (`map/styles/surfaces.css`); no replicarla en
   componentes.
 
 ## 10. Tests

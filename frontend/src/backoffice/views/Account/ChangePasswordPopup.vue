@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="open" class="passwordPopup">
+		<md-dialog :md-active.sync="open" class="mp-dialog-fixed-sm">
 			<md-dialog-title>Cambiar contraseña</md-dialog-title>
 			<invoker ref="invoker"></invoker>
 			<md-dialog-content>
@@ -71,14 +71,5 @@
 		color: red;
 		font-size: 13px;
 		margin-top: 8px;
-	}
-</style>
-
-<!-- El diálogo se monta fuera del componente, por lo que el ancho se fija con estilo global
-		 apoyado en la clase del popup. -->
-<style rel="stylesheet/scss" lang="scss">
-	.passwordPopup .md-dialog-container {
-		max-width: 420px;
-		width: 420px;
 	}
 </style>

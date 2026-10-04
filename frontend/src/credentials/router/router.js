@@ -20,7 +20,7 @@ Vue.use(Router);
 **/
 export const constantRouterMap = [
 //	{ path: '/login', component: () => import('@/backoffice/views/login/index'), hidden: true },
-{ path: '/404', component: () => import('@/backoffice/views/404'), hidden: true },
+{ path: '/404', component: () => import('@/common/components/NotFound'), hidden: true },
 	{
 		path: '',
 		redirect: '/signin', // default child path
@@ -60,7 +60,7 @@ export const constantRouterMap = [
 		meta: { title: 'Crear cuenta' },
 		component: () => import('@/credentials/views/Signup.vue'),
 	},
-	{ path: '*', redirect: '/40455', hidden: true }
+	{ path: '*', redirect: '/404', hidden: true }
 ];
 
 export default new Router({

@@ -2,7 +2,7 @@
 	<div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="regionPicker" @selected="onRegionSelected"></tree-picker-popup>
-		<md-dialog v-if="boundaryVersion" class="medium-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="boundaryVersion" class="mp-dialog-md" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>{{ dialogTitle }}</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">

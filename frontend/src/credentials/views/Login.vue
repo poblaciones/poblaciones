@@ -222,11 +222,3 @@ export default {
 	}
 };
 </script>
-<style rel="stylesheet/scss" lang="scss" scoped>
-.macronDiaeresisLogin {
-	height: 0.8rem;
-	margin-left: -0.85rem;
-	font-size: 1.3rem;
-	margin-top: 0.05px;
-}
-</style>

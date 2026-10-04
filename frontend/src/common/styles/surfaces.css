@@ -1,0 +1,29 @@
+/*
+ * Tarjeta base de los módulos que muestran paneles del visor (map y table).
+ * .mp-surface es la tarjeta; .mp-surface--padded agrega el relleno interior de un panel.
+ */
+.mp-surface {
+	position: relative;
+	z-index: 1;
+	margin-bottom: 20px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background-color: #fff;
+	box-shadow: 0 2px 2px rgba(204, 197, 185, 0.5);
+	color: #252422;
+}
+
+/* Los pseudoelementos contienen los flotantes de los hijos. */
+.mp-surface--padded {
+	padding: 15px;
+}
+
+.mp-surface--padded::before,
+.mp-surface--padded::after {
+	display: table;
+	content: " ";
+}
+
+.mp-surface--padded::after {
+	clear: both;
+}

@@ -31,7 +31,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="mp-modal__backdrop"></div>
+		<div class="mp-modal__backdrop" @click="clickMask"></div>
 	</div>
 </template>
 

@@ -1,0 +1,72 @@
+/*
+ * Diálogos de Vue Material (md-dialog).
+ *
+ * Ancho: todo diálogo tiene un tope de min(700px, 90%) (.md-dialog-container). Para cambiarlo se agrega
+ * una clase al <md-dialog>, sea un tope distinto (mp-dialog-md, -lg, -xl, -fit) o un ancho fijo
+ * (mp-dialog-fixed-*). Los topes llevan !important porque el global también lo lleva.
+ */
+.md-dialog {
+	min-width: 400px !important;
+	top: 52px!important;
+	border-radius: 4px !important;
+}
+
+.md-dialog-container.md-theme-default {
+	border-radius: .5rem;
+}
+
+.md-dialog-container > .md-dialog-container {
+	transform: translate(30px, 30px);
+}
+
+.md-dialog-container {
+	max-height: 95% !important;
+	max-width: calc(min(700px, 90%)) !important;
+}
+
+.md-dialog-title {
+	padding: 20px 15px 0px !important;
+}
+
+.md-dialog-actions {
+	background-color: white !important;
+	z-index: 10 !important;
+	border-top: 0.5px solid #cccccc;
+	padding: 8px 20px 8px 24px !important;
+}
+
+/* Topes de ancho: 720, 900 y 1100 px, o sin tope. */
+.mp-dialog-md > .md-dialog-container {
+	max-width: calc(min(720px, 95%)) !important;
+}
+
+.mp-dialog-lg > .md-dialog-container {
+	max-width: calc(min(900px, 95%)) !important;
+}
+
+.mp-dialog-xl > .md-dialog-container {
+	max-width: calc(min(1100px, 95%)) !important;
+}
+
+.mp-dialog-fit > .md-dialog-container {
+	max-width: unset!important;
+}
+
+/* Anchos fijos: 420 px, 600 px y el máximo que permita el tope. */
+.mp-dialog-fixed-sm > .md-dialog-container {
+	width: 420px;
+}
+
+.mp-dialog-fixed-md > .md-dialog-container {
+	width: 600px;
+}
+
+.mp-dialog-fixed-lg > .md-dialog-container {
+	width: 100%;
+}
+
+/* Contenido ancho (listado de ítems). */
+.mp-dialog-wide-content .md-dialog-content {
+	width: 90vw !important;
+	max-width: 1100px !important;
+}

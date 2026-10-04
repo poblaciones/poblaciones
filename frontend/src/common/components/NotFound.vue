@@ -182,17 +182,6 @@ export default {
       animation-delay: 0.1s;
       animation-fill-mode: forwards;
     }
-    &__info {
-      font-size: 13px;
-      line-height: 21px;
-      color: grey;
-      opacity: 0;
-      margin-bottom: 30px;
-      animation-name: slideUp;
-      animation-duration: 0.5s;
-      animation-delay: 0.2s;
-      animation-fill-mode: forwards;
-    }
     &__return-home {
       display: block;
       float: left;

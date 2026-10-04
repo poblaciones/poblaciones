@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openPopup" class="medium-extra-dialog" @md-closed="onClosed">
+		<md-dialog :md-active.sync="openPopup" class="mp-dialog-lg" @md-closed="onClosed">
 			<invoker ref="invoker"></invoker>
 			<md-dialog-title>
 				Categorías

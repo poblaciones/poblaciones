@@ -1,12 +1,14 @@
 /*
- * Hojas que sustituyen a Bootstrap 3 y Paper Dashboard.
- * main.js las importa antes que cualquier componente para que queden en el lugar más bajo de la cascada,
- * el mismo que tenían las hojas de esas librerías cuando index.html las cargaba.
+ * Hojas base del visor: tokens, reset, utilidades, íconos, superficies y menús.
+ * main.js las importa antes que cualquier componente, de modo que ocupan el lugar más bajo de la cascada
+ * y los estilos de los componentes las pisan sin necesidad de más especificidad.
  */
 import '@/common/styles/tokens.css';
 import '@/common/styles/base.css';
 import '@/common/styles/utilities.css';
+import '@/map/styles/icons.css';
 import '@/common/styles/animations.css';
 import '@/map/styles/tooltips.css';
+import '@/common/styles/surfaces.css';
 import '@/map/styles/surfaces.css';
 import '@/map/styles/menus.css';

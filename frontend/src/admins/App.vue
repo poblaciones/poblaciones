@@ -49,5 +49,10 @@
 </script>
 
 <style src="@/common/styles/popovers.css"></style>
+<style src="@/common/styles/admin/feedback.css"></style>
 <style src="@/common/styles/transition.css"></style>
-<style src="@/common/styles/material.css"></style>
+<style src="@/common/styles/admin/vue-material-overrides.css"></style>
+<style src="@/common/styles/admin/fields.css"></style>
+<style src="@/common/styles/admin/dialogs.css"></style>
+<style src="@/common/styles/admin/layout.css"></style>
+<style src="@/common/styles/admin/third-party.css"></style>

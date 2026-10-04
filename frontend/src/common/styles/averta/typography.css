@@ -1,0 +1,78 @@
+/*
+ * Tipografía de los módulos con identidad Averta (credentials y table): fuentes, base de html y body, y encabezados.
+ */
+
+@font-face {
+	font-family: "Averta-Regular";
+	src: url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.eot"); /* IE9*/
+	src: url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.woff2") format("woff2"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.woff") format("woff"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.ttf") format("truetype"), /* chrome firefox opera Safari, Android, iOS 4.2+*/
+	url("https://db.onlinewebfonts.com/t/f036e81e6040acc6b43aabc036862d21.svg#Averta-Regular") format("svg"); /* iOS 4.1- */
+}
+
+@font-face {
+	font-family: "AvertaStd-Bold";
+	src: url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.eot"); /* IE9*/
+	src: url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.woff2") format("woff2"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.woff") format("woff"), /* chrome firefox */
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.ttf") format("truetype"), /* chrome firefox opera Safari, Android, iOS 4.2+*/
+	url("https://db.onlinewebfonts.com/t/447315c0c330fd423c8e1cc18024669d.svg#AvertaStd-Bold") format("svg"); /* iOS 4.1- */
+}
+
+html,
+body {
+	height: 100%;
+	overflow-y: hidden;
+	margin: 0;
+	padding: 0;
+	font-size: 18px !important;
+	font-family: Averta-Regular, sans-serif !important;
+	letter-spacing: .015em;
+	line-height: 1.55em !important;
+	color: #666;
+	background-color: #fff;
+}
+
+h3 {
+	color: #000;
+	line-height: 1.5em;
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+h1 {
+	color: #000;
+	line-height: 1.0em;
+	font-size: 3.3em !important;
+	font-family: AvertaStd-Bold, sans-serif !important;
+}
+
+h2 {
+	color: #000;
+	line-height: 1.1em;
+	font-size: 2.55rem !important;
+	font-family: AvertaStd-Bold, sans-serif !important;
+}
+
+h4 {
+	display: block;
+	color: #444;
+	font-size: 1.17em;
+	margin-block-start: 1em;
+	margin-block-end: 1em;
+	margin-inline-start: 0px;
+	margin-inline-end: 0px;
+	font-weight: bold;
+}
+
+h5 {
+	font-size: 18px !important;
+}
+
+/* Lo llevan los títulos de Vue Material: md-dialog-title, md-toolbar y similares. */
+.md-title {
+	font-weight: normal !important;
+}

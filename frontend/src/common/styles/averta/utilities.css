@@ -1,0 +1,28 @@
+/*
+ * Utilidades de disposición y texto de credentials y table.
+ */
+
+.formRow {
+	margin-top: 25px;
+	margin-bottom: 25px;
+}
+
+.hand {
+	cursor: pointer;
+}
+
+.normalTextLink {
+	color: #444444 !important;
+}
+
+a.normalTextLink:hover {
+	text-decoration: none !important;
+}
+
+.right {
+	text-align: right;
+}
+
+.center {
+	text-align: center;
+}

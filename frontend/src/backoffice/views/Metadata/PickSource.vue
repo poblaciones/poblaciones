@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="openSources" class="content-sized-dialog">
+		<md-dialog :md-active.sync="openSources" class="mp-dialog-fit">
 
 			<md-dialog-title>
 				Agregar fuente
@@ -121,18 +121,3 @@ export default {
   }
 };
 </script>
-
-<style rel="stylesheet/scss" lang="scss" scoped>
-
-.md-dialog-actions {
-  padding: 8px 20px 8px 24px !important;
-}
-
-.close-button {
-    min-width: unset;
-    height: unset;
-    margin: unset;
-    float: right;
-}
-
-</style>

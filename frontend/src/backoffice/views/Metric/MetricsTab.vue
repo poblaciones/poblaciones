@@ -415,21 +415,11 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.md-dialog-actions {
-	padding: 8px 20px 8px 24px !important;
-}
 
 .innerList {
 	background-color: transparent;
 	margin-left: -16px;
 	margin-right: -16px;
-}
-
-.close-button {
-	min-width: unset;
-	height: unset;
-	margin: unset;
-	float: right;
 }
 
 </style>

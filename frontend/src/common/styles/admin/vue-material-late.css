@@ -1,0 +1,39 @@
+/*
+ * Ajustes sobre Vue Material que se cargan DESPUÉS de vue-material.css y de su tema
+ * (a diferencia de vue-material-overrides.css, fields.css y dialogs.css, que van antes).
+ * La carga CommonBootstrap para todos los módulos que instalan Vue Material.
+ */
+.md-field.md-theme-default:after {
+	background-color: unset !important;
+}
+
+.md-field.md-has-textarea:not(.md-autogrow):after,
+.md-field.md-has-textarea:not(.md-autogrow):before {
+	border: 0px solid transparent !important;
+}
+
+.md-layout-item {
+	flex: unset !important;
+}
+
+.md-layout-item.md-size-90 {
+	min-width: unset !important;
+	max-width: unset !important;
+	flex: unset !important;
+}
+
+.md-table-cell-container {
+	display: flex !important;
+}
+
+.md-icon {
+	translate: no;
+}
+
+.md-overlay {
+	z-index: 2000 !important;
+}
+
+.md-dialog {
+	z-index: 2001 !important;
+}

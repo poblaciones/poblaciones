@@ -1,0 +1,170 @@
+/*
+ * Ajustes sobre los componentes de Vue Material (backoffice, admins y packs), salvo diálogos y campos.
+ * Esta hoja se carga ANTES de vue-material.css: lo que no lleva !important pierde contra la hoja de la
+ * librería, por eso casi todo lo que debe prevalecer lo declara.
+ */
+:root {
+	--md-theme-default-primary: #00A0D2 !important;
+	--md-theme-default-accent: #00A0D2 !important;
+	--md-theme-default-theme: light;
+	--md-theme-default-icon-on-background: #767676;
+}
+
+.md-title {
+	font-weight: 500 !important;
+	font-family: 'Roboto', sans-serif;
+	font-size: 22px!important;
+}
+
+/* Botones */
+.md-button {
+	border-radius: 20px !important;
+	font-size: 13.5px !important;
+	padding-right: 10px !important;
+	padding-left: 10px !important;
+	font-family: 'Roboto';
+	font-weight: normal !important;
+	text-transform: none !important;
+	margin-left: 0px !important;
+}
+
+.md-button.md-icon-button.avatarButton {
+	padding: 0px!important;
+}
+
+.md-button .md-icon-button {
+	margin-left: 0px !important;
+	padding: 0px !important;
+}
+
+.md-button-content {
+	min-height: 24px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.largeitem .md-button-content {
+	flex-direction: column !important;
+	gap: 0px !important;
+}
+
+.adminButton .md-button {
+	vertical-align: text-bottom;
+}
+
+.md-icon-button {
+	cursor: pointer;
+	margin: 0 0px;
+}
+
+.md-button-mini {
+	width: 30px !important;
+	background-color: #ececec !important;
+	min-width: 30px !important;
+	height: 30px !important;
+}
+
+/* Pestañas */
+.md-tab {
+	overflow-x: hidden!important;
+}
+
+.md-tabs.md-theme-default .md-tabs-navigation {
+	background-color: unset !important;
+	margin-bottom: 25px !important;
+	border-bottom: #eee solid 1px !important;
+}
+
+.md-tabs.md-theme-default .md-tabs-navigation .md-button {
+	border-radius: 0px !important;
+}
+
+.md-tabs-navigation .md-button-content {
+	font-size: 14px!important;
+}
+
+.md-tabs-content {
+	height: auto !important;
+}
+
+/* Listas y menús */
+.md-list {
+	padding-top: 0px!important;
+	padding-bottom: 0px!important;
+}
+
+.md-list-item-content > .md-icon:first-child {
+	margin-right: 12px!important;
+}
+
+.smallerMenu .md-list-item-content {
+	font-size: 14px !important;
+	min-height: 40px !important;
+}
+
+.md-subheader {
+	min-height: 34px !important;
+	margin-top: 4px !important;
+}
+
+.mpSeparator {
+	background-color: #f3f3f3;
+	height: 29px !important;
+	pointer-events: none;
+}
+
+.mpSeparator .md-list-item-content {
+	color: #7e7e7e;
+	margin-top: -6px !important;
+	margin-left: -3px;
+	font-variant: all-petite-caps;
+	transform: scale(1.2);
+	transform-origin: left;
+}
+
+.md-menu-content {
+	z-index: 90000 !important;
+	border-radius: 5px!important;
+	max-width: 380px !important;
+	max-height: 65vh !important;
+	box-shadow: 0px 1px 2px 2px rgb(0 0 0 / 12%) !important;
+}
+
+.md-menu-content-container {
+	border-radius: 5px!important;
+}
+
+.md-menu-content .md-list-item-content {
+	justify-content: flex-start !important;
+}
+
+/* Tarjetas */
+.md-card {
+	border-radius: 12px !important;
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.md-card-content:last-of-type {
+	padding-bottom: 10px !important;
+}
+
+/* Tablas, interruptores y grilla */
+.md-table-cell-container {
+	padding-right: 0px !important;
+	word-break: break-word;
+}
+
+.md-table-sortable-icon {
+	right: 8px;
+	left: unset !important;
+}
+
+.md-switch.md-disabled {
+	filter: grayscale(1);
+}
+
+.md-layout-item-separated {
+	margin-top: 10px;
+}

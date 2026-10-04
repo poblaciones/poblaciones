@@ -1,5 +1,5 @@
 <template>
-	<md-dialog :md-active.sync="openEditableInstitution" class="medium-dialog">
+	<md-dialog :md-active.sync="openEditableInstitution" class="mp-dialog-md">
 		<md-dialog-title>
 			Institución
 		</md-dialog-title>

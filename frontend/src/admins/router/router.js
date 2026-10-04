@@ -20,7 +20,7 @@ Vue.use(Router);
 **/
 export const constantRouterMap = [
 //	{ path: '/login', component: () => import('@/backoffice/views/login/index'), hidden: true },
-{ path: '/404', component: () => import('@/backoffice/views/404'), hidden: true },
+{ path: '/404', component: () => import('@/common/components/NotFound'), hidden: true },
 {
     path: '',
     redirect: '/public', // default child path

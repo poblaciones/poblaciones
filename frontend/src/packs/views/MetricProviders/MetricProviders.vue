@@ -104,10 +104,3 @@ import arr from '@/common/framework/arr';
 };
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
-
-.md-dialog-actions {
-  padding: 8px 20px 8px 24px !important;
-}
-
-</style>

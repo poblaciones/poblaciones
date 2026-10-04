@@ -1,7 +1,7 @@
 /*
  * Menú desplegable (componente mp-dropdown-menu).
- * Reemplaza a .dropdown-menu de Bootstrap 3 y Paper Dashboard. Se muestra dentro de un v-popover,
- * que es quien lo oculta y lo posiciona; por eso es siempre visible y se ancla al borde derecho del popover.
+ * Se muestra dentro de un v-popover, que es quien lo oculta y lo posiciona; por eso es siempre visible
+ * y se ancla al borde derecho del popover.
  */
 
 .mp-menu {

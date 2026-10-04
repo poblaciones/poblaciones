@@ -9,7 +9,9 @@ import VueHotkey from 'v-hotkey';
 import VueRouter from 'vue-router';
 import Clipboard from 'v-clipboard';
 
-import '@/backoffice/styles/index.scss';
+import '@/common/styles/tokens.css';
+import '@/common/styles/admin/base.css';
+import '@/common/styles/admin/vue-material-late.css';
 
 // No-mp, siguen viviendo en backoffice porque no empiezan con "Mp"
 import TitleBar from '@/backoffice/views/Layout/TitleBar';

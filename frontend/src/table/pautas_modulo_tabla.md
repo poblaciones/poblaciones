@@ -466,7 +466,9 @@ Antes de dar por buena una edición:
   extensión `.js` explícita** (`from './Selection.js'`).
 - `Context.js` va en `table/classes/` e importa `./RegionStore` y `./MetricStore`
   como vecinos.
-- Estilos: el módulo asume el `index.scss` global; los componentes usan `scoped`.
+- Estilos: `App.vue` carga las hojas de identidad Averta (`common/styles/averta/`: tipografía, campos, tema de
+  Vue Material y utilidades) y `main.js` importa los tokens y las hojas compartidas con el visor (`utilities`,
+  `surfaces`, `buttons`, `list-items`, `chips`, `switch`, `search`). Los componentes propios usan `scoped`.
 - Arranque sin Vue Router: el componente raíz del módulo es `table/App.vue`
   (montado por el `main.js` del proyecto), que monta el `Dashboard`
   directamente. `App.vue` resuelve el "work" inicial con `StartTable` y, sobre una

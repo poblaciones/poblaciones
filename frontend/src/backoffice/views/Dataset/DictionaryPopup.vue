@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="open" class="content-sized-dialog">
+		<md-dialog :md-active.sync="open" class="mp-dialog-fit">
 			<md-dialog-title>Diccionario de {{ Dataset.properties.Caption }}</md-dialog-title>
 			<invoker ref="invoker"></invoker>
 			<ValuesPopup v-if="valuesPopupReset" ref="valuesPopup"></ValuesPopup>
@@ -562,17 +562,3 @@ export default {
 };
 </script>
 
-<style rel='stylesheet/scss' lang='scss' scoped>
-</style>
-
-<style rel='stylesheet/scss' lang='scss'>
-.dictionaryPopup .md-dialog-container {
-	max-width: 1120px;
-	width: 1120px;
-}
-.dictionaryPopup .md-dialog-content {
-	min-height: 420px;
-	max-height: 75vh;
-	overflow-y: auto;
-}
-</style>

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="open" class="sharePopup">
+		<md-dialog :md-active.sync="open">
 			<md-dialog-title>
 				Compartir
 			</md-dialog-title>
@@ -346,9 +346,4 @@ export default {
 	margin-right: auto;
 	color: #00A0D2 !important;
 }
-</style>
-
-<style rel="stylesheet/scss" lang="scss">
-.sharePopup .md-dialog-container {
-	}
 </style>

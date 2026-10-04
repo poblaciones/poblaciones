@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="open" class="accountPopup">
+		<md-dialog :md-active.sync="open" class="accountPopup mp-dialog-fixed-md">
 			<md-dialog-title>Detalles de cuenta</md-dialog-title>
 			<invoker ref="invoker"></invoker>
 			<md-dialog-content>
@@ -200,10 +200,6 @@ export default {
 </style>
 
 <style rel="stylesheet/scss" lang="scss">
-.accountPopup .md-dialog-container {
-	max-width: 600px;
-	width: 600px;
-}
 .accountPopup .md-dialog-content {
 	min-height: 300px;
 	max-height: 70vh;

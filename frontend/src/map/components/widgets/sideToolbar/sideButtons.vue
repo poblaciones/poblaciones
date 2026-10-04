@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="map-toolbar exp-hiddable-block" :class="'pos-' + sidebarPosition + ($isMobile ? '' : ' sidepanelOffset')"
+    <div class="map-toolbar exp-hiddable-block" :class="'pos-' + sidebarPosition + ($isMobile() ? '' : ' sidepanelOffset')"
          v-if="!Embedded.HideAddMetrics || !Embedded.HideSearch">
       <!-- Manija de arrastre: mové la barra a la posición que quieras (arriba,
            medio o abajo), siempre pegada al borde izquierdo. Solo visible al

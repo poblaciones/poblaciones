@@ -1,5 +1,5 @@
 <template>
-	<md-dialog :md-active.sync="openEditableSource" class="medium-dialog">
+	<md-dialog :md-active.sync="openEditableSource" class="mp-dialog-md">
 		<md-dialog-title>
 			Fuente
 		</md-dialog-title>

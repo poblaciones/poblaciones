@@ -47,5 +47,10 @@
 </script>
 
 <style src="@/common/styles/popovers.css"></style>
+<style src="@/common/styles/admin/feedback.css"></style>
 <style src="@/common/styles/transition.css"></style>
-<style src="@/credentials/styles/app.css"></style>
+<style src="@/common/styles/averta/typography.css"></style>
+<style src="@/common/styles/averta/fields.css"></style>
+<style src="@/common/styles/averta/theme.css"></style>
+<style src="@/common/styles/averta/utilities.css"></style>
+<style src="@/credentials/styles/credentials.css"></style>

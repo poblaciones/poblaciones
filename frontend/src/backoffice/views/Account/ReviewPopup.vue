@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="open" class="reviewPopup">
+		<md-dialog :md-active.sync="open" class="mp-dialog-fixed-md">
 			<md-dialog-title>
 				Indexación:
 				<md-icon v-if="Work.properties.IsIndexed" style="margin-top: -4px;">check_circle_outline</md-icon>
@@ -88,10 +88,3 @@ export default {
 
 <!-- El diálogo se monta fuera del componente, por lo que el ancho se fija con estilo global
 	   apoyado en la clase del popup. -->
-<style rel="stylesheet/scss" lang="scss">
-.reviewPopup .md-dialog-container {
-	max-width: 620px;
-	width: 620px;
-}
-</style>
-

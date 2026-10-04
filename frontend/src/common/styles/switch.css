@@ -1,5 +1,5 @@
 /*
- * Interruptor (reemplaza a los checkbox para opciones activables).
+ * Interruptor para opciones activables.
  * <label class="mp-switch"><input type="checkbox"><span class="mp-switch-track"><span class="mp-switch-thumb"></span></span> Texto</label>
  * El selector lleva la etiqueta para igualar la especificidad de ".mp-surface label" y ganarle por orden.
  */

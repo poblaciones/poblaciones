@@ -25,6 +25,17 @@ var webpackConfig = merge(baseWebpackConfig, {
 	optimization: {
     minimize: true,
 		minimizer: ['...', new CssMinimizerPlugin()],
+		runtimeChunk: { name: 'manifest' },
+		splitChunks: {
+			cacheGroups: {
+				vueMaterial: {
+					test: /[\\/]node_modules[\\/]vue-material[\\/]/,
+					name: 'vue-material',
+					chunks: 'all',
+					enforce: true
+				}
+			}
+		},
   },
 	module: {
 		rules: [
@@ -38,7 +49,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 			},
 		],
 	},
-	devtool: 'source-map',
+	devtool: config.build.productionSourceMap && 'source-map',
 	output: {
 		path: config.build.assetsRoot,
 		filename: utils.assetsPath('js/[name].[chunkhash].js'),
@@ -62,6 +73,7 @@ var webpackConfig = merge(baseWebpackConfig, {
       filename: "[name].css",
       chunkFilename: "[id].css"
     }),
+		new webpack.ContextReplacementPlugin(/moment[\\/]locale$/, /^\.\/es(\.js)?$/),
 		new SpriteLoaderPlugin(),
 		// generate dist index.html with correct asset hash for caching.
 		// you can customize output by editing /index.html

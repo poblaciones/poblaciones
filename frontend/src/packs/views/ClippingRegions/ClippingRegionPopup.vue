@@ -3,7 +3,7 @@
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="parentPicker" @selected="onParentSelected"></tree-picker-popup>
 		<tree-picker-popup ref="metadataSharePicker" @selected="onSharedMetadataRegionSelected"></tree-picker-popup>
-		<md-dialog v-if="clippingRegion" class="medium-extra-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="clippingRegion" class="mp-dialog-lg" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Región</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout">

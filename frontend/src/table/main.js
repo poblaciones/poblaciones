@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import 'vue2-animate/dist/vue2-animate.min.css';
 import '@/common/styles/tokens.css';
+import '@/common/styles/utilities.css';
+import '@/common/styles/surfaces.css';
 import '@/common/styles/buttons.css';
 import '@/common/styles/list-items.css';
 import '@/common/styles/chips.css';

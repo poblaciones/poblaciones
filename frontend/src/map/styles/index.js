@@ -1,9 +1,8 @@
 /*
  * Hojas globales del visor, en el orden en que se cargan. El orden es significativo.
  *
- * Las dos hojas vendor-overrides conservan la posición que tenían respecto de leaflet.css y nprogress.css,
- * porque varias reglas sin !important dependen de ganarles o de perder contra ellas. Unificarlas en una sola
- * posición exige resolver esos conflictos regla por regla.
+ * vendor-overrides.css va antes y vendor-overrides-late.css después de leaflet.css y nprogress.css:
+ * varias reglas sin !important dependen de perder contra esas hojas y otras de ganarles.
  */
 import '@/common/styles/popovers.css';
 import '@/common/styles/transition.css';

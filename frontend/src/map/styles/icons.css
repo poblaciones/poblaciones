@@ -1,0 +1,8 @@
+/*
+ * Los íconos con clase fa ocupan una columna de ancho fijo, de la que dependen varios paneles.
+ * .fa-fw queda fuera: conserva su ancho de 1,25em.
+ */
+.fa:not(.fa-fw) {
+	width: 21px;
+	text-align: center;
+}

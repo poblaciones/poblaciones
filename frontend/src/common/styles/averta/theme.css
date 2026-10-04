@@ -1,0 +1,56 @@
+/*
+ * Tema de Vue Material de credentials y table: color primario, botones, diálogos y listas desplegables.
+ */
+
+.md-menu-content-container .md-list {
+	font-family: unset !important;
+}
+
+.md-list-item-content {
+	min-height: 40px !important;
+	font-size: .97rem !important;
+}
+
+.md-list.md-theme-default .md-selected .md-list-item-content,
+.md-list.md-theme-default .router-link-active .md-list-item-content {
+	background-color: var(--md-theme-default-primary-on-background, #448aff);
+	color: white !important;
+}
+
+.md-dialog-title {
+	padding: 12px 12px 10px !important;
+	background-color: #007194;
+	color: white;
+}
+
+.md-dialog {
+	min-width: 400px !important;
+	border-radius: 4px !important;
+}
+
+.md-dialog-actions {
+	border-top: 0.5px solid #cccccc;
+}
+
+.md-button {
+	font-weight: normal !important;
+	text-transform: none !important;
+	height: 40px !important;
+	font-size: 16px !important;
+}
+
+.md-icon-button {
+	cursor: pointer;
+	margin: 0;
+}
+
+.md-button:not(.md-icon-button) {
+	min-width: 100px !important;
+}
+
+:root {
+	--md-theme-default-primary: #28608b !important;
+	--md-theme-default-primary-on-background: #28608b !important;
+	--md-theme-default-accent: #ca4a4a !important;
+	--md-theme-default-theme: light;
+}

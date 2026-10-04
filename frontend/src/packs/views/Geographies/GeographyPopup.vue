@@ -2,7 +2,7 @@
   <div>
 		<invoker ref="invoker"></invoker>
 		<tree-picker-popup ref="parentPicker" @selected="onParentSelected"></tree-picker-popup>
-		<md-dialog v-if="geography" class="large-dialog" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
+		<md-dialog v-if="geography" class="mp-dialog-xl" :md-active.sync="activateEdit" :md-click-outside-to-close="true">
 			<md-dialog-title>Geografía</md-dialog-title>
 			<md-dialog-content>
 				<div class="md-layout md-gutter">

@@ -92,16 +92,6 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.dashboard {
-	&-container {
-		margin: 30px;
-	}
-	&-text {
-		font-size: 20px;
-		line-height: 30px;
-	}
-}
-
 .transparentTab {
 	background-color: #fafafa;
 	padding: 4px;

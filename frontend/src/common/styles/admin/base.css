@@ -1,0 +1,80 @@
+/*
+ * Base de los módulos con Vue Material (backoffice, admins, packs, credentials y table).
+ * La carga CommonBootstrap, después de vue-material.css.
+ */
+body {
+	min-height: unset !important;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+
+html {
+	height: 100%;
+	box-sizing: border-box;
+}
+
+#app {
+	height: 100%;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+a,
+a:focus,
+a:hover {
+	cursor: pointer;
+	color: inherit;
+	outline: none;
+	text-decoration: none;
+}
+
+div:focus {
+	outline: none;
+}
+
+a:focus,
+a:active {
+	outline: none;
+}
+
+.hidden {
+	display: none;
+}
+
+/* Cuerpo de las vistas, debajo de la barra superior (dos barras, o una sola con app-singlebar). */
+.app-main {
+	min-height: 100%;
+}
+
+.app-container {
+	padding: 12px 20px 12px 20px;
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	overflow: auto;
+	border: 0px;
+	top: 107px;
+	height: calc(100% - 107px);
+}
+
+.app-singlebar {
+	top: 53px;
+	height: calc(100% - 53px);
+}
+
+/* Valor de solo lectura mostrado debajo de un mp-label (ej. la categoría padre elegida),
+   para que no quede más chico que el resto de los campos. */
+.mp-readonly-value {
+	font-size: 19px;
+}
+
+.mp-readonly-text {
+	padding-top: 12px;
+	display: inline-block;
+}

@@ -2,7 +2,7 @@
  * Campos de formulario y de diálogos: etiqueta/valor, radios y grupos.
  */
 
-/* Reemplazo de .radio-inline de Bootstrap 3. */
+/* Radio con su texto, en línea. */
 .mp-radio-inline {
 	position: relative;
 	display: inline-block;
@@ -23,7 +23,7 @@
 	margin-left: 10px;
 }
 
-/* Reemplazo de .form-group de Bootstrap 3. */
+/* Grupo de campo con separación inferior. */
 .mp-field-group {
 	margin-bottom: 15px;
 }
@@ -38,7 +38,7 @@
 	overflow-y: auto;
 }
 
-/* Campos etiqueta/valor de los diálogos (reemplazan a las tablas de dos columnas) */
+/* Campos etiqueta/valor de los diálogos, en dos columnas. */
 .fld {
 	display: grid;
 	grid-template-columns: 150px minmax(0, 1fr);

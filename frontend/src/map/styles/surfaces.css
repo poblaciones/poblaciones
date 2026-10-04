@@ -1,37 +1,9 @@
 /*
- * Superficies del visor: paneles flotantes, diálogos y sus títulos.
- * Reemplazan a .card (Paper Dashboard) combinada con .panel y .panel-body (Bootstrap 3),
- * y al conjunto .modal* de Bootstrap que usa popups/modal.vue.
+ * Superficies del visor: textos internos de .mp-surface (tarjeta base en common/styles/surfaces.css),
+ * diálogo de popups/modal.vue y títulos.
  */
 
-/* ---------- Superficie ---------- */
-.mp-surface {
-	position: relative;
-	z-index: 1;
-	margin-bottom: 20px;
-	border: 1px solid transparent;
-	border-radius: 6px;
-	background-color: #fff;
-	box-shadow: 0 2px 2px rgba(204, 197, 185, 0.5);
-	color: #252422;
-}
-
-/* Con el relleno interior de un panel; los pseudoelementos contienen los flotantes de los hijos. */
-.mp-surface--padded {
-	padding: 15px;
-}
-
-.mp-surface--padded::before,
-.mp-surface--padded::after {
-	display: table;
-	content: " ";
-}
-
-.mp-surface--padded::after {
-	clear: both;
-}
-
-/* Textos que Paper Dashboard estiliza solo cuando están dentro de una tarjeta. */
+/* ---------- Textos dentro de una superficie ---------- */
 .mp-surface .title {
 	margin: 0;
 	color: #252422;
@@ -107,6 +79,11 @@
 
 .mp-modal__header {
 	padding: 14px 8px 0 12px;
+}
+
+/* Sin cuerpo ni pie (mensaje de espera) el encabezado es todo el contenido: el relleno inferior iguala al superior. */
+.mp-modal__header:last-child {
+	padding-bottom: 14px;
 }
 
 .mp-modal__header::before,

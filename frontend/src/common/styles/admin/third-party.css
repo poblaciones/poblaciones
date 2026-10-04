@@ -1,0 +1,78 @@
+/*
+ * Ajustes sobre librerías que no son Vue Material: v-tooltip, vue-sidebar-menu, vue-color, jqWidgets,
+ * CKEditor y los controles de Google Maps. Se carga solo donde se usan (backoffice, admins y packs).
+ */
+.tooltip-inner a {
+	font-family: Roboto,Noto Sans,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+/* vue-sidebar-menu */
+.v-sidebar-menu.white-theme {
+	background-color: unset!important;
+}
+
+.v-sidebar-menu .vsm-badge {
+	right: 18px!important;
+}
+
+.v-sidebar-menu .vsm-item.active-item > .vsm-link, .v-sidebar-menu .vsm-item.parent-active-item > .vsm-link {
+	background-color: var(--mp-selected)!important;
+}
+
+.v-sidebar-menu .vsm-link {
+	border-top-right-radius: 30px !important;
+	border-bottom-right-radius: 30px !important;
+	margin-right: 10px !important;
+	margin-left: 0px !important;
+	padding-right: 12px !important;
+	padding-left: 12px !important;
+	box-shadow: none !important;
+}
+
+/* vue-color */
+.vc-compact-color-item {
+	width: 20px!important;
+	height: 20px!important;
+}
+
+.vc-compact-color-item:last-of-type {
+	border-radius: 3px!important;
+	border: 1px solid white!important;
+}
+
+/* jqWidgets */
+.jqx-grid-content :first-child {
+	overflow: initial !important;
+}
+
+.jqx-widget-content {
+	font-family: Roboto,Noto Sans,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+.jqx-grid-content {
+	cursor: default;
+}
+
+.jqx-widget {
+	font-family: Roboto,Noto Sans,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+/* CKEditor */
+.ck.ck-balloon-panel.ck-balloon-panel_visible {
+	display: block;
+	z-index: 10000;
+}
+
+/* Google Maps */
+.gm-fullscreen-control {
+	transform: scale(0.8);
+}
+
+.gm-bundled-control {
+	transform: scale(0.8);
+	margin: 0px 0px -24px 0px !important;
+}
+
+.gm-style-mtc {
+	transform: scale(0.8);
+}

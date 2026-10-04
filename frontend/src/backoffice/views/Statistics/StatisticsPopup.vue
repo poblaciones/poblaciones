@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="open" class="statisticsPopup">
+		<md-dialog :md-active.sync="open" class="statisticsPopup mp-dialog-fixed-lg">
 			<md-dialog-title>Estadísticas</md-dialog-title>
 			<invoker ref="invoker"></invoker>
 			<md-dialog-content>
@@ -147,11 +147,6 @@ export default {
 </style>
 
 <style rel="stylesheet/scss" lang="scss">
-.statisticsPopup .md-dialog-container {
-	max-width: 820px;
-	width: 820px;
-}
-
 /* Altura estable: mínimo cómodo para que no colapse,
    tope con scroll para que no se estire en pantallas grandes. */
 .statisticsPopup .md-dialog-content {

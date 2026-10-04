@@ -2,7 +2,7 @@
  * Insignias y filas de variables del panel de resumen.
  */
 
-/* Reemplazo de .badge de Bootstrap 3. */
+/* Insignia con un contador. */
 .mp-badge {
 	display: inline-block;
 	min-width: 10px;

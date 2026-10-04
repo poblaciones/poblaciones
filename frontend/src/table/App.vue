@@ -209,28 +209,14 @@
 </script>
 
 <style src="@/common/styles/popovers.css"></style>
+<style src="@/common/styles/admin/feedback.css"></style>
 <style src="@/common/styles/transition.css"></style>
-<style src="@/credentials/styles/app.css"></style>
-
+<style src="@/common/styles/averta/typography.css"></style>
+<style src="@/common/styles/averta/fields.css"></style>
+<style src="@/common/styles/averta/theme.css"></style>
+<style src="@/common/styles/averta/utilities.css"></style>
 
 <style>
-	.btn, .navbar .navbar-nav > li > a.btn {
-		background-color: transparent;
-		border-color: #66615b;
-		border-radius: 20px;
-		border-width: 2px;
-		box-sizing: border-box;
-		color: #66615b;
-		font-size: 14px;
-		font-weight: 500;
-		padding: 7px 18px;
-		-webkit-transition: all .15s linear;
-		-moz-transition: all .15s linear;
-		-o-transition: all .15s linear;
-		-ms-transition: all .15s linear;
-		transition: all .15s linear;
-	}
-
 	#holder {
 		width: 100%;
 		/* Alto por defecto para cuando el JS de carga del work aún no recalculó la
@@ -238,28 +224,12 @@
 		   recálculo por resize fija un alto en px inline que pisa este 100%. */
 		height: 100%;
 	}
-	.card {
-		margin-bottom: 20px;
-		z-index: 1;
-		background-color: #fff;
-		border-radius: 6px;
-		box-shadow: 0 2px 2px hsla(38, 16%, 76%, .5);
-		margin-bottom: 20px;
-		position: relative;
-		z-index: 1;
-	}
-
-	.pull-right {
-		float: right !important;
-	}
 
 	.wp {
 		line-height: .85em !important;
 	}
 
-	/* Un estilo global de fuera del módulo aplica letter-spacing: 0.01em a
-	   .md-body-1, .md-body-2 y body, que separa de más el texto de la tabla. Se
-	   revierte al valor apretado que corresponde al módulo. */
+	/* Interletrado de table: más apretado que el de averta/typography.css. */
 	.md-body-1, .md-body-2, body {
 		letter-spacing: -0.01em !important;
 	}

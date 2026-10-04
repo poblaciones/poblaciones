@@ -160,3 +160,52 @@ Antes de dar por buena una edición:
   `color`, `iconManager`) vive en `@/common/framework` y `@/common/js`.
 - Los errores de servicio se reportan con `err.errDialog(código, gerundio del
   intento, error)`; los textos siguen el registro de la sección 9.
+
+## 12. Estilos globales (módulos con Vue Material)
+
+`backoffice`, `admins` y `packs` comparten las hojas de `src/common/styles/admin/`; `credentials` y `table`
+cargan solo las que se indican. Los componentes no repiten overrides de Vue Material: si una regla vale para
+más de una vista, va en la hoja que corresponde.
+
+| Hoja | Contenido | La carga | Posición |
+|---|---|---|---|
+| `vue-material-overrides.css` | Tema, botones, pestañas, listas, menús, `md-card`, tablas | `App.vue` de backoffice, admins y packs | Antes de `vue-material.css` |
+| `fields.css` | `md-field` y etiquetas (`mp-label`, `mpLabel`, `helper`) | ídem | Antes |
+| `dialogs.css` | `md-dialog`, anchos y pie de acciones | ídem | Antes |
+| `layout.css` | Barra superior, `split`/`gutter`, separadores, utilidades | ídem | Antes |
+| `third-party.css` | v-tooltip, vue-sidebar-menu, vue-color, jqWidgets, CKEditor, Google Maps | ídem | Antes |
+| `feedback.css` | `md-snackbar` y `md-tooltip` | `App.vue` de los cinco módulos, tras `popovers.css` | Antes |
+| `base.css`, `vue-material-late.css` | Reset de `html`/`body`/`a`, `.app-container`, ajustes que deben ganarle al tema | `CommonBootstrap` | Después |
+| `averta/typography.css` | Fuentes Averta, base de `html` y `body`, encabezados y `md-title` | `App.vue` de credentials y table | Antes |
+| `averta/fields.css` | `md-field` y etiquetas (`label`, `mp-label`, `mp-area`, `helper`, `customField`) | ídem | Antes |
+| `averta/theme.css` | Color primario, botones de 40 px, diálogos y listas desplegables | ídem | Antes |
+| `averta/utilities.css` | `formRow`, `hand`, `normalTextLink`, `right`, `center` | ídem | Antes |
+| `credentials/styles/credentials.css` | Pantallas de ingreso, registro, activación y recuperación | `App.vue` de credentials | Antes |
+
+**Orden de carga.** Las hojas que van antes de `vue-material.css` pierden contra ella en todo lo que no lleva
+`!important`; las de `vue-material-late.css` le ganan por orden. Esa diferencia es intencional: no mover una regla
+de un grupo al otro ni reordenar los `<style src>` de `App.vue` sin comprobar el resultado.
+
+**Diálogos.** El tope global es `min(700px, 90%)` y lleva `!important`; un `max-width` sin `!important` dentro
+de un popup nunca se aplica. El tamaño se elige con una clase en el `<md-dialog>`:
+
+| Clase | Efecto |
+|---|---|
+| `mp-dialog-md`, `-lg`, `-xl` | Tope de 720, 900 o 1100 px |
+| `mp-dialog-fit` | Sin tope; el diálogo toma el ancho del contenido |
+| `mp-dialog-fixed-sm`, `-md` | Ancho fijo de 420 o 600 px |
+| `mp-dialog-fixed-lg` | Ancho completo, limitado por el tope global |
+| `mp-dialog-wide-content` | Contenido de `90vw` hasta 1100 px |
+
+El pie (`<md-dialog-actions>`) lo define `dialogs.css` para todos los diálogos: 8 px arriba y abajo, 24 a la
+izquierda y 20 a la derecha. Los componentes no lo redefinen.
+
+**Estilos `scoped`.** Una regla `scoped` solo alcanza los elementos de la plantilla del propio componente y la
+raíz de sus hijos: un `.md-dialog-actions` en una vista cuyo diálogo vive en otro componente no tiene efecto.
+Cuando una regla deba llegar a un diálogo, va en `dialogs.css` con una clase del diálogo.
+
+**Página 404.** Es `common/components/NotFound.vue`; los routers de backoffice, admins, packs y credentials la
+importan de ahí.
+
+**Antes de agregar una regla global,** buscar si la clase ya existe en estas hojas; las clases sin ningún uso en
+plantillas ni en JavaScript se eliminan.

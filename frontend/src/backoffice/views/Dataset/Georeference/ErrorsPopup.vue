@@ -1,5 +1,5 @@
 <template>
-	<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false" class="largeDialog">
+	<md-dialog :md-active.sync="openPopup" :md-click-outside-to-close="false" class="mp-dialog-lg">
 		<md-dialog-title>
 			Georreferenciando
 		</md-dialog-title>
