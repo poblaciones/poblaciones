@@ -9,13 +9,14 @@
 				<!-- Flechas (solo escritorio) -->
 				<button v-if="!isMobile"
 								class="arrow left"
+								aria-label="Desplazar a la izquierda"
 								:disabled="atStart"
 								@click="scrollBy(-1)">
 					◀
 				</button>
 				<div ref="scrollContainer"
 						 class="scroll-container">
-					<div class="container">
+					<div class="metric-columns">
 						<figure>
 							<div class="" v-for="(panel, index) in tree"
 									 :key="index">
@@ -37,6 +38,7 @@
 				</div>
 				<button v-if="!isMobile"
 								class="arrow right"
+								aria-label="Desplazar a la derecha"
 								:disabled="atEnd"
 								@click="scrollBy(1)">
 					▶
@@ -314,10 +316,31 @@ export default {
 			grid-column: 1;
 		}
 
-	.container {
+	/* Más ancho que el diálogo a propósito: el sobrante se recorre con las flechas. */
+	.metric-columns {
 		column-count: 3;
 		column-gap: 20px;
 		height: 100%;
+		margin: 0 auto;
+		padding: 0 15px;
+	}
+
+	@media (min-width: 768px) {
+		.metric-columns {
+			width: 750px;
+		}
+	}
+
+	@media (min-width: 992px) {
+		.metric-columns {
+			width: 970px;
+		}
+	}
+
+	@media (min-width: 1200px) {
+		.metric-columns {
+			width: 1170px;
+		}
 	}
 
 	/* Flechas */

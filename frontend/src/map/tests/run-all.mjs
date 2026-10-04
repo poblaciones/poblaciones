@@ -28,6 +28,7 @@ await import('./selectorTooltips.test.mjs');
 await import('./sidebarPositionCookie.test.mjs');
 await import('./sideButtons.test.mjs');
 await import('./patternButtons.test.mjs');
+await import('./ariaPlugin.test.mjs');
 await import('./boundary.test.mjs');
 await import('./fixedSizeShapes.test.mjs');
 

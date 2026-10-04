@@ -20,7 +20,7 @@
 				<mp-close-button @click="clickQuitar" title="Quitar selección" class="exp-hiddable-block" />
 
 				<button type="button" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost exp-hiddable-block"
-								title="Zoom a la selección" @click="fitSelection">
+								title="Zoom a la selección" aria-label="Zoom a la selección" @click="fitSelection">
 					<i class="fas fa-expand-arrows-alt" style="margin-left: 2px; margin-right: 2px;" />
 				</button>
 
@@ -43,17 +43,17 @@
 			<h3 class="title">
 				<div class="summaryBlock">
 					<div class="summaryRow">
-						Habitantes <span class="pull-right" :class="getMuted()">
+						Habitantes <span class="mp-float-right" :class="getMuted()">
 							<animatedNumber :value="population" />
 						</span>
 					</div>
 					<div class="summaryRow">
-						Hogares <span class="pull-right" :class="getMuted()">
+						Hogares <span class="mp-float-right" :class="getMuted()">
 							<animatedNumber :value="households" />
 						</span>
 					</div>
 					<div class="summaryRow">
-						Área (km<sup>2</sup>) <span class="pull-right" :class="getMuted()">
+						Área (km<sup>2</sup>) <span class="mp-float-right" :class="getMuted()">
 							<animatedNumber :value="areaKm2" format="km" />
 						</span>
 					</div>
@@ -63,8 +63,7 @@
 			<div class="sourceRow" style="padding-bottom: 0.2rem;">
 				<div class="mp-btn-group" style=" z-index: 100; background-color: white; max-width: calc(100% - 40px);">
 					<button v-for="(level, index) in clipping.Region.Levels" type="button" :key="level.Id" :id="index"
-									class="mp-btn exp-serie-item" :class="getActive(index)" @mouseup="changeClipping(index)"
-									@click="falseChangeClipping(index)">
+									class="mp-btn exp-serie-item" :class="getActive(index)" :aria-pressed="$ariaPressed(isLevelSelected(index))" @click="changeClipping(index)">
 						{{ level.Revision }}
 					</button>
 				</div>
@@ -178,7 +177,7 @@ export default {
 		},
 		getMuted() {
 			if (this.clipping.IsUpdating === '1') {
-				return ' text-muted';
+				return ' mp-dimmed';
 			} else {
 				return '';
 			}
@@ -190,9 +189,12 @@ export default {
 				return '';
 			}
 		},
+		isLevelSelected(index) {
+			return this.clipping.Region.SelectedLevelIndex === index;
+		},
 		getActive(index) {
 			return {
-				'is-selected': this.clipping.Region.SelectedLevelIndex === index,
+				'is-selected': this.isLevelSelected(index),
 			};
 		},
 		selectedLevel() {
@@ -202,9 +204,6 @@ export default {
 			this.clipping.Region.SelectedLevelIndex = index;
 			window.SegMap.Clipping.ClippingChanged(true);
 			window.SegMap.SaveRoute.UpdateRoute();
-		},
-		falseChangeClipping(index) {
-			this.clipping.Region.SelectedLevelIndex = index;
 		},
 		clickQuitar() {
 			if (window.SegMap.Clipping.FrameHasClippingCircle()) {

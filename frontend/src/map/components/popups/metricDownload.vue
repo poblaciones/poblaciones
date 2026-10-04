@@ -48,10 +48,10 @@
 			<div class="fld" v-if="useFilter">
 				<div class="fld-label">Selección</div>
 				<div class="fld-value fld-chips">
-					<div v-for="region in regions" :key="region.Id" class="filterElement">
+					<div v-for="region in regions" :key="region.Id" class="mp-chip-filter">
 						{{ region.Name }}
 						<mp-close-button @click="removeFilter(region.Id)" title="Quitar filtro"
-														 class="exp-hiddable-block filterElement-close" />
+														 class="exp-hiddable-block mp-chip-filter-close" />
 					</div>
 				</div>
 			</div>

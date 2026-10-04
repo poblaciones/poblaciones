@@ -375,24 +375,6 @@ export default {
 };
 </script>
 
-<style>
-.no-scroll-bar {
-	overflow-y: scroll;
-	scrollbar-width: none; /* Firefox */
-	-ms-overflow-style: none; /* Internet Explorer 10+ */
-}
-.no-scroll-bar::-webkit-scrollbar { /* WebKit */
-	width: 0;
-	height: 0;
-}
-
-.overflow-ellipsis {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-</style>
-
 <style scoped>
 .fab-panel {
 	display: flex;

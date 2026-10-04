@@ -8,7 +8,7 @@
 				<div class="fld-label">Métrica</div>
 				<div class="fld-value">
 					<div class="mp-btn-group">
-						<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="mp-btn" :class="getActive(metric.Key)">
+						<button v-for="metric in metric.getValidMetrics()" :key="metric.Key" type="button" @click="changeMetric(metric.Key)" class="mp-btn" :class="getActive(metric.Key)" :aria-pressed="$ariaPressed(isMetricSelected(metric.Key))">
 							{{ metric.Caption }}
 						</button>
 					</div>
@@ -20,10 +20,10 @@
 			<div class="fld" v-if="metric.SelectedLevel().HasDescriptions">
 				<div class="fld-label">Mostrar descripciones</div>
 				<div class="fld-value">
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="descripciones" value="1" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">Sí
 					</label>
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="descripciones" value="0" @change="updateShowDescriptions()" v-model="metric.SelectedVariable().ShowDescriptions">No
 					</label>
 				</div>
@@ -31,10 +31,10 @@
 			<div class="fld" v-if="!metric.SelectedVariable().IsSimpleCount">
 				<div class="fld-label">Mostrar valores</div>
 				<div class="fld-value">
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="valores" value="1" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">Sí
 					</label>
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="valores" value="0" @change="updateShowValues()" v-model="metric.SelectedVariable().ShowValues">No
 					</label>
 				</div>
@@ -42,10 +42,10 @@
 			<div class="fld" v-if="usePerimeter && metric.SelectedVariable().Perimeter">
 				<div class="fld-label">Mostrar perímetros</div>
 				<div class="fld-value">
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="perimeter" value="1" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">Sí
 					</label>
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="perimeter" value="0" @change="metric.RefreshMap()" v-model="metric.SelectedVariable().ShowPerimeter">No
 					</label>
 				</div>
@@ -54,13 +54,13 @@
 				<div class="fld-label">Transparencia</div>
 				<div class="fld-value">
 					<div class="mp-btn-group">
-						<button type="button" @click="changeOpacity('H')" class="mp-btn" :class="getActiveOpacity('H')">
+						<button type="button" @click="changeOpacity('H')" class="mp-btn" :class="getActiveOpacity('H')" :aria-pressed="$ariaPressed(isOpacitySelected('H'))">
 							Baja
 						</button>
-						<button type="button" @click="changeOpacity('M')" class="mp-btn" :class="getActiveOpacity('M')">
+						<button type="button" @click="changeOpacity('M')" class="mp-btn" :class="getActiveOpacity('M')" :aria-pressed="$ariaPressed(isOpacitySelected('M'))">
 							Media
 						</button>
-						<button type="button" @click="changeOpacity('L')" class="mp-btn" :class="getActiveOpacity('L')">
+						<button type="button" @click="changeOpacity('L')" class="mp-btn" :class="getActiveOpacity('L')" :aria-pressed="$ariaPressed(isOpacitySelected('L'))">
 							Alta
 						</button>
 					</div>
@@ -70,13 +70,13 @@
 				<div class="fld-label">Ajuste poblacional</div>
 				<div class="fld-value">
 					<div class="mp-btn-group">
-						<button type="button" @click="changeGradientOpacity('H')" class="mp-btn" :class="getActiveGradientOpacity('H')">
+						<button type="button" @click="changeGradientOpacity('H')" class="mp-btn" :class="getActiveGradientOpacity('H')" :aria-pressed="$ariaPressed(isGradientOpacitySelected('H'))">
 							Bajo
 						</button>
-						<button type="button" @click="changeGradientOpacity('M')" class="mp-btn" :class="getActiveGradientOpacity('M')">
+						<button type="button" @click="changeGradientOpacity('M')" class="mp-btn" :class="getActiveGradientOpacity('M')" :aria-pressed="$ariaPressed(isGradientOpacitySelected('M'))">
 							Medio
 						</button>
-						<button type="button" @click="changeGradientOpacity('L')" class="mp-btn" :class="getActiveGradientOpacity('L')">
+						<button type="button" @click="changeGradientOpacity('L')" class="mp-btn" :class="getActiveGradientOpacity('L')" :aria-pressed="$ariaPressed(isGradientOpacitySelected('L'))">
 							Alto
 						</button>
 					</div>
@@ -93,13 +93,13 @@
 				<div class="fld-label">Ancho</div>
 				<div class="fld-value">
 					<div class="mp-btn-group">
-						<button type="button" @click="changeWidth(1)" class="mp-btn" :class="getActiveWidth(1)">
+						<button type="button" @click="changeWidth(1)" class="mp-btn" :class="getActiveWidth(1)" :aria-pressed="$ariaPressed(isWidthSelected(1))">
 							Fino
 						</button>
-						<button type="button" @click="changeWidth(2)" class="mp-btn" :class="getActiveWidth(2)">
+						<button type="button" @click="changeWidth(2)" class="mp-btn" :class="getActiveWidth(2)" :aria-pressed="$ariaPressed(isWidthSelected(2))">
 							Intermedio
 						</button>
-						<button type="button" @click="changeWidth(3)" class="mp-btn" :class="getActiveWidth(3)">
+						<button type="button" @click="changeWidth(3)" class="mp-btn" :class="getActiveWidth(3)" :aria-pressed="$ariaPressed(isWidthSelected(3))">
 							Grueso
 						</button>
 					</div>
@@ -133,8 +133,11 @@ export default {
 		}
 	},
 	methods: {
+		isMetricSelected(key) {
+			return key === this.metric.properties.SummaryMetric;
+		},
 		getActive(key) {
-			if(key === this.metric.properties.SummaryMetric) {
+			if (this.isMetricSelected(key)) {
 				return ' is-selected';
 			} else {
 				return '';
@@ -154,22 +157,31 @@ export default {
 			this.metric = metric;
 			this.$refs.dialog.show();
 		},
+		isGradientOpacitySelected(key) {
+			return key === this.metric.SelectedVariable().GradientOpacity;
+		},
 		getActiveGradientOpacity(key) {
-			if (key === this.metric.SelectedVariable().GradientOpacity) {
+			if (this.isGradientOpacitySelected(key)) {
 				return ' is-selected';
 			} else {
 				return '';
 			}
+		},
+		isWidthSelected(key) {
+			return key === this.metric.SelectedVariable().borderWidth;
 		},
 		getActiveWidth(key) {
-			if (key === this.metric.SelectedVariable().borderWidth) {
+			if (this.isWidthSelected(key)) {
 				return ' is-selected';
 			} else {
 				return '';
 			}
 		},
+		isOpacitySelected(key) {
+			return key === this.metric.SelectedVariable().Opacity;
+		},
 		getActiveOpacity(key) {
-			if (key === this.metric.SelectedVariable().Opacity) {
+			if (this.isOpacitySelected(key)) {
 				return ' is-selected';
 			} else {
 				return '';

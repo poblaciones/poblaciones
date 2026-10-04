@@ -1,10 +1,10 @@
 <template>
 	<div v-if="showDialog" :transition="transition">
-		<div class="modal" @click.self="clickMask">
-			<div class="modal-dialog" :class="modalClass" @click.self="clickMask" ref="dialog">
-				<div class="modal-content card" :style="(maxHeight ? 'height: ' + maxHeight + ';': '') + (maxWidth ? 'max-width: ' + maxWidth + 'px' : '')">
+		<div class="mp-modal" @click.self="clickMask">
+			<div class="mp-modal__dialog" @click.self="clickMask" ref="dialog">
+				<div class="mp-modal__content mp-surface" :style="(maxHeight ? 'height: ' + maxHeight + ';': '') + (maxWidth ? 'max-width: ' + maxWidth + 'px' : '')">
 					<!--Header-->
-					<div class="modal-header mpHeader unselectable">
+					<div class="mp-modal__header unselectable">
 						<slot name="header">
 
 							<h5 class="titleDialog">
@@ -18,11 +18,11 @@
 						</slot>
 					</div>
 					<!--Container-->
-					<div class="modal-body" :class="bodyClass" v-if="hasBody">
+					<div class="mp-modal__body" :class="bodyClass" v-if="hasBody">
 						<slot></slot>
 					</div>
 					<!--Footer-->
-					<div class="modal-footer" v-if="showOk">
+					<div class="mp-modal__footer" v-if="showOk">
 						<slot name="footer">
 						<button v-if="showCancel" type="button" :class="cancelClass" @click="cancel">{{ cancelText }}</button>
 						<button type="button" :class="okClass" @click="ok">{{ okText }}</button>
@@ -31,14 +31,13 @@
 				</div>
 			</div>
 		</div>
-		<div class="modal-backdrop in"></div>
+		<div class="mp-modal__backdrop"></div>
 	</div>
 </template>
 
 <script>
 /**
- * Bootstrap Style Modal Component for Vue
- * Depend on Bootstrap.css
+ * Diálogo modal. Los estilos están en map/styles/surfaces.css (.mp-modal*).
  */
 	import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
 
@@ -76,18 +75,6 @@
 			type: String,
 			default: 'Modal'
 		},
-		small: {
-			type: Boolean,
-			default: false
-		},
-		large: {
-			type: Boolean,
-			default: false
-		},
-		full: {
-			type: Boolean,
-			default: false
-		},
 		clickOutsideToClose: {
 			type: Boolean,
 			default: true
@@ -123,15 +110,6 @@
 			showDialog: false,
 		};
 	},
-	computed: {
-		modalClass () {
-			return {
-				'modal-lg': this.large,
-				'modal-sm': this.small,
-				'modal-full': this.full
-			};
-		}
-	},
 	created () {
 		this.escapeHandler = new EscapeCloseHandler(() => {
 			if (this.showDialog) {
@@ -139,19 +117,19 @@
 			}
 		}, { useHistory: true });
 		if (this.showDialog) {
-			document.body.className += ' modal-open';
+			document.body.className += ' mp-modal-open';
 			this.escapeHandler.Open();
 		}
 	},
 	beforeDestroy () {
 		this.escapeHandler.Close();
-		document.body.className = document.body.className.replace(/\s?modal-open/, '');
+		document.body.className = document.body.className.replace(/\s?mp-modal-open/, '');
 	},
 	watch: {
 		showDialog (value) {
 			if (value) {
 				this.escapeHandler.Open();
-				document.body.className += ' modal-open';
+				document.body.className += ' mp-modal-open';
 			} else {
 				this.escapeHandler.Close();
 				if (!this.duration) {
@@ -159,7 +137,7 @@
 				}
 
 				window.setTimeout(() => {
-					document.body.className = document.body.className.replace(/\s?modal-open/, '');
+					document.body.className = document.body.className.replace(/\s?mp-modal-open/, '');
 				}, this.duration || 0);
 			}
 		}
@@ -194,59 +172,11 @@
 </script>
 
 <style scoped>
-	.modal {
-		display: flex;
-		height: 100%;
-		width: 100%;
-		position: absolute;
-	}
-
-.modal-dialog {
-		align-self: center;
-		width: 610px;
-		max-width: calc(100% - 20px);
-	}
-.modal-content {
-	max-height: 100%;
-  overflow-y: auto;
-	overflow-x: hidden;
-  margin: 0 auto;
-  max-width: 610px;
-}
-
-.modal-enter .modal-backdrop, .modal-leave .modal-backdrop {
-	opacity: 0;
-}
-
-
-.white {
-	color: white;
-}
-.mpHeaderClose {
-	margin-top: -6px;
-	padding: 3px;
-  margin-right: 2px;
-}
-.modal-transition {
-	transition: all .6s ease;
-}
-.modal-leave {
-	border-radius: 1px !important;
-}
-.modal-transition .modal-dialog, .modal-transition .modal-backdrop {
-	transition: all .5s ease;
-}
-.modal-enter .modal-dialog, .modal-leave .modal-dialog {
-	opacity: 0;
-	transform: translateY(-30%);
-}
-
 .waitImg {
 	float: left;
 	padding-right: 8px;
-  padding-bottom: 1px;
-  margin-top: 1px;
-  margin-bottom: -1px;
+	padding-bottom: 1px;
+	margin-top: 1px;
+	margin-bottom: -1px;
 }
 </style>
-

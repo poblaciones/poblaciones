@@ -29,10 +29,10 @@
 						<td class="dataBox action-muted center">
 							<i class="fa drop fa-tint exp-category-bullets" style="border-color: inherit"></i>
 						</td>
-						<td class="dataBox text-muted" style="width: 100%">
+						<td class="dataBox mp-dimmed" style="width: 100%">
 							{{ label.Name }}
 						</td>
-						<td class="text-muted textRight">{{ formattedValue(label) }}</td>
+						<td class="mp-dimmed textRight">{{ formattedValue(label) }}</td>
 					</template>
 				</tr>
 			</tbody>
@@ -106,7 +106,7 @@ export default {
 		},
 		getMuted() {
 			if (this.boundary.IsUpdatingSummary) {
-				return ' text-muted';
+				return ' mp-dimmed';
 			} else {
 				return '';
 			}

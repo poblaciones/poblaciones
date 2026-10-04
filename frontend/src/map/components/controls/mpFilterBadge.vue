@@ -1,9 +1,9 @@
 <template>
-	<div class="filterElement"
+	<div class="mp-chip-filter"
 			 :title="tooltip">
 		<div style="display: inline-block; padding-top: 3px;">{{ title }}</div>
 		<mp-close-button @click="onClose()" title="Quitar"
-										 class="exp-hiddable-block filterElement-close" />
+										 class="exp-hiddable-block mp-chip-filter-close" />
 	</div>
 </template>
 

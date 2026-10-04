@@ -1,0 +1,56 @@
+/*
+ * Ítems de listas. El aspecto (fondos, hover, selección, foco de teclado) es de estas clases;
+ * la disposición interna de cada ítem (columnas, íconos, textos) la define el componente.
+ */
+
+/* Renglón en forma de pastilla: selector de indicadores y resultados de búsqueda. */
+.mp-list-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 2px;
+	padding: 8px 8px 8px 25px;
+	border-radius: 26px;
+}
+
+.mp-list-item:hover {
+	background-color: var(--mp-hover);
+}
+
+.mp-list-item.is-selected {
+	background-color: var(--mp-selected);
+}
+
+.mp-list-item.is-selected:hover {
+	background-color: var(--mp-selected-hover);
+}
+
+.mp-list-item--muted {
+	background-color: var(--mp-surface-muted);
+}
+
+/* Elemento activo por teclado (KeyboardAwareList). */
+.mp-list-item[data-kbd-active] {
+	background-color: var(--mp-hover);
+	box-shadow: inset 0 0 0 2px var(--mp-focus-ring);
+}
+
+.mp-list-item.is-selected[data-kbd-active] {
+	background-color: var(--mp-selected-hover);
+}
+
+/* Renglón compacto de listas cortas: capas del mapa base y sugerencias. */
+.mp-list-row {
+	display: flex;
+	align-items: center;
+	transition: background-color var(--mp-transition);
+}
+
+.mp-list-row:hover {
+	background-color: var(--mp-hover-soft);
+}
+
+/* Para listas que ya están sobre un fondo gris, donde el hover suave no se distingue. */
+.mp-list-row--strong:hover {
+	background-color: var(--mp-hover);
+}

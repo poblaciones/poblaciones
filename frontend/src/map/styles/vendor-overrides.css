@@ -1,0 +1,212 @@
+/*
+ * Ajustes sobre Leaflet, Google Maps, deck.gl y nprogress.
+ * Se carga ANTES de las hojas de esas librerías (ver styles/index.js): varias reglas sin !important
+ * dependen de perder contra ellas, de modo que no debe reordenarse sin revisar la cascada.
+ */
+
+.leaflet-tooltip {
+	white-space: unset !important;
+	border: unset !important;
+	background-color: unset !important;
+	box-shadow: unset !important;
+	line-height: 1.15;
+}
+
+.leaflet-popup-content {
+	font-size: 13px !important;
+	margin: 8px 20px 5px 10px !important;
+}
+
+.leaflet-control-scale-line {
+	font-size: 9px !important;
+	cursor: default;
+}
+
+.gm-ui-hover-effect {
+	top: 0px !important;
+	right: 0px !important;
+}
+
+.gm-fullscreen-control {
+	transform: scale(0.8);
+}
+
+.gm-bundled-control {
+	transform: scale(0.8);
+	margin: 0px 0px -24px 0px !important;
+}
+
+.gm-style-mtc:first-of-type {
+	transform: translateX(9px) scale(0.8);
+}
+
+.gm-style-mtc {
+	transform: translateX(-8px) scale(0.8);
+}
+
+.gm-style-mtc:last-of-type {
+	transform: translateX(4px) scale(0.8);
+}
+
+.leaflet-tile-loaded {
+	pointer-events: all !important;
+}
+
+.leaflet-attribution-flag {
+	width: 0px !important;
+	margin-left: -3px;
+}
+
+.leaflet-control-attribution {
+	font-size: 11px;
+	margin-bottom: -1px !important;
+}
+
+#deckgl-overlay {
+	width: 100% !important;
+	height: 100% !important;
+}
+
+#nprogress .bar {
+	background: #29d;
+	height: 1px !important;
+	box-shadow: 0px 1px rgb(34 153 221 / 40%);
+}
+
+.leaflet-control-zoom {
+	border: 0px solid black !important;
+	box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px !important;
+}
+
+.leaflet-control-zoom-in {
+	border-bottom: 1px solid #f0f0f0 !important;
+	color: #666 !important;
+}
+
+.leaflet-control-zoom-out {
+	color: #666 !important;
+}
+
+.gm-svpc {
+	left: -111px !important;
+	top: 113px !important;
+}
+
+.gm-style-cc:last-child {
+	display: none !important;
+}
+
+a[title="Abrir esta área en Google&nbsp;Maps (se abre en una ventana nueva)"] {
+	display: none !important;
+}
+
+a[title="Abrir esta área en Google Maps (se abre en una ventana nueva)"] {
+	display: none !important;
+}
+
+a[title="Informar a Google errores en las imágenes o el mapa de carreteras."] {
+	display: none !important;
+}
+
+.leaflet-mouse-marker {
+	transition: none !important;
+}
+
+.leaflet-bottom.leaflet-left,
+.leaflet-bottom.leaflet-right {
+	margin-bottom: initial !important;
+}
+
+.leaflet-google-mutant a,
+.leaflet-google-mutant button {
+	pointer-events: auto;
+}
+
+.leaflet-google-mutant .gmnoprint,
+.leaflet-google-mutant .gm-style-cc {
+	top: 0;
+	bottom: auto !important;
+}
+
+.leaflet-control-attribution {
+	margin-left: -6px !important;
+	padding-left: 5px !important;
+}
+
+.leaflet-control-scale {
+	order: 1;
+}
+
+.leaflet-control-scale-line {
+	padding-bottom: 1px !important;
+	padding-left: 8px !important;
+	padding-right: 4px !important;
+	text-shadow: rgb(255, 255, 255) -2px -2px 0px, white 2px -2px 0px, white -2px 2px 0px, white 2px 2px 0px;
+	color: rgb(102, 102, 102);
+	margin-bottom: -5px;
+	margin-right: -2px;
+	margin-left: -2px;
+	text-align: center;
+	font-size: 10px !important;
+	border: 0px solid !important;
+	z-index: 0;
+}
+
+.leaflet-control-zoom {
+	bottom: 14px;
+	position: absolute;
+}
+
+.leaflet-bottom.leaflet-right {
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+.leaflet-control-scale-line::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	width: 100%;
+	height: 65%;
+	border-bottom: 2px solid #000;
+	border-left: 2px solid #000;
+	border-right: 2px solid #000;
+	transform: translateY(25%);
+	z-index: -1;
+	/* la línea queda por detrás del texto */
+}
+
+.leaflet-layer {
+	pointer-events: auto;
+}
+
+.leaflet-marker-pane {
+	pointer-events: none !important;
+	display: none;
+}
+
+/* Debe ir antes de las reglas de cursor de Leaflet que siguen: con igual especificidad, esas ganan durante el arrastre. */
+.drawing-active,
+.drawing-active * {
+	cursor: crosshair !important;
+}
+
+.leaflet-dragging {
+	cursor: move !important;
+}
+
+.leaflet-dragging .leaflet-grab {
+	cursor: move !important;
+}
+
+.leaflet-grab {
+	cursor: default;
+}
+
+.leaflet-zoom-animated {
+	cursor: unset !important;
+}
+
+.leaflet-layer {
+	cursor: unset !important;
+}

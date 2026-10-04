@@ -1,7 +1,7 @@
 <template>
 	<div v-if="dt">
 		<feature-info :dt='detail' v-if='showDetail' @clickBack='doCloseInfo' />
-		<div class='panel card panel-body' :class="(enabled ? '' : 'text-muted')" v-else>
+		<div class='mp-surface mp-surface--padded' :class="(enabled ? '' : 'mp-dimmed')" v-else>
 
 			<div class='stats' style="padding-top: 8px">{{ dt.Type }}</div>
 			<div class='titleDialog'>

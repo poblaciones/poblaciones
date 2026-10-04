@@ -2,13 +2,13 @@
 	<div>
 		<div class="mp-btn-group">
 			<button v-for="pattern in range(patterns, 0, 3)" :key="pattern.Key" type="button"
-							@click="$emit('change', pattern.Key)" class="mp-btn" :class="isActive(pattern.Key)">
+							@click="$emit('change', pattern.Key)" class="mp-btn" :class="isActive(pattern.Key)" :aria-pressed="$ariaPressed(isPressed(pattern.Key))">
 				{{ pattern.Caption }}
 			</button>
 		</div>
 		<div class="mp-btn-group" style="margin-top: 5px" v-if="range(patterns, 4, 20).length > 0">
 			<button v-for="pattern in range(patterns, 4, 20)" :key="pattern.Key" type="button"
-							@click="$emit('change', pattern.Key)" class="mp-btn" :class="isActive(pattern.Key)">
+							@click="$emit('change', pattern.Key)" class="mp-btn" :class="isActive(pattern.Key)" :aria-pressed="$ariaPressed(isPressed(pattern.Key))">
 				{{ pattern.Caption }}
 			</button>
 		</div>
@@ -38,9 +38,12 @@ export default {
 			}
 			return ret;
 		},
+		isPressed(key) {
+			return key === this.customPattern ||
+				(this.customPattern === '' && key === this.defaultPattern);
+		},
 		isActive(key) {
-			if (key === this.customPattern ||
-				(this.customPattern === '' && key === this.defaultPattern)) {
+			if (this.isPressed(key)) {
 				return ' is-selected';
 			}
 			return '';

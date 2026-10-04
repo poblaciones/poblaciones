@@ -1,11 +1,11 @@
 <template>
 	<nav class="workPanel">
 		<div>
-			<div v-if="metadata !== null" ref="barBody" class="panel card workPanelBody"
+			<div v-if="metadata !== null" ref="barBody" class="mp-surface workPanelBody"
 					 :style="'    text-shadow: rgb(118 118 118) 0px 0px 5px;rgba(76, 76, 76, 0.32) 0px 0px 6px 0px inset; background-color: ' + backgroundColor ">
-				<div class="floatBox pull-right exp-hiddable-block" style="margin-top: -1px">
+				<div class="floatBox mp-float-right exp-hiddable-block" style="margin-top: -1px">
 					<button type="button" class="mp-btn mp-btn--on-dark" v-if="hasOnboarding() && !isMobile"
-									title="Bienvenida" @click="showOnboarding">
+									title="Bienvenida" aria-label="Bienvenida" @click="showOnboarding">
 						<help-circle-icon style="color: #fff" title="Bienvenida" />
 					</button>
 					<button type="button" class="mp-btn mp-btn--on-dark" @click="showAddToMap">
@@ -16,7 +16,7 @@
 
 					</button>
 					<button type="button" class="mp-btn mp-btn--on-dark" v-if="type === 'W' && hasMetrics"
-									:title="'Información de ' + metadata.Name" @click="clickFuente">
+									:title="'Información de ' + metadata.Name" :aria-label="'Información de ' + metadata.Name" @click="clickFuente">
 						<i class="fas fa-link"></i>
 					</button>
 
@@ -24,7 +24,7 @@
 				<div v-if="institutionsList" class="littleRow preTitleRow">
 					{{ institutionsList }}
 				</div>
-				<div class="h3 title titleRow">
+				<div class="title titleRow">
 					{{ metadata.Name }}
 				</div>
 				<div v-if="metadata.Authors" class="littleRow postTitleRow">
@@ -284,6 +284,7 @@ export default {
 }
 
 .titleRow {
+	font-family: Muli, Helvetica, Arial, sans-serif;
 	line-height: 1.1em;
 	margin-top: 0px;
 	width: 100%;

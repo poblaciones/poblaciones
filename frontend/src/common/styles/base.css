@@ -1,0 +1,294 @@
+/*
+ * Base del visor: reset y tipografía de los elementos sin clase.
+ * Reemplaza lo que antes aportaban Bootstrap 3 y Paper Dashboard, con los mismos valores.
+ */
+
+html {
+	font-family: sans-serif;
+	font-size: 10px;
+	-webkit-text-size-adjust: 100%;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+	margin: 0;
+	background-color: #fff;
+	color: #66615b;
+	font-family: Muli, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.42857143;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+article, figure, footer, nav, section {
+	display: block;
+}
+
+figure {
+	margin: 0;
+}
+
+/* ---------- Texto ---------- */
+h1, h2, h3, h4, h5, h6, p, a, td {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-family: Muli, Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: inherit;
+	font-weight: 500;
+	line-height: 1.1;
+}
+
+h1, h2, h3, h4 {
+	margin: 30px 0 15px;
+	font-weight: 400;
+}
+
+h1 { font-size: 3.2em; }
+h2 { font-size: 2.6em; }
+
+h3 {
+	margin: 20px 0 10px;
+	font-size: 1.825em;
+	line-height: 1.4;
+}
+
+h4 {
+	font-size: 1.5em;
+	font-weight: 600;
+	line-height: 1.2em;
+}
+
+h5 {
+	margin: 10px 0 15px;
+	font-size: 1.25em;
+	font-weight: 400;
+	line-height: 1.4em;
+}
+
+h6 {
+	margin: 10px 0;
+	font-size: .9em;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+p {
+	margin: 0 0 10px;
+	font-size: 16px;
+	line-height: 1.4em;
+}
+
+b, strong {
+	font-weight: 700;
+}
+
+strong {
+	color: #403d39;
+}
+
+small {
+	font-size: 85%;
+}
+
+sub, sup {
+	position: relative;
+	font-size: 75%;
+	line-height: 0;
+	vertical-align: baseline;
+}
+
+sup { top: -.5em; }
+sub { bottom: -.25em; }
+
+a {
+	background-color: transparent;
+	color: #68b3c8;
+	text-decoration: none;
+}
+
+a:hover,
+a:focus {
+	color: #3091b2;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+a:active {
+	outline: 0;
+}
+
+ul, ol {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+
+ul ul, ul ol, ol ul, ol ol {
+	margin-bottom: 0;
+}
+
+hr {
+	height: 0;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	border: 0;
+	border-top: 1px solid #f1eae0;
+	box-sizing: content-box;
+}
+
+/* ---------- Imágenes y tablas ---------- */
+img {
+	border: 0;
+	vertical-align: middle;
+}
+
+svg:not(:root) {
+	overflow: hidden;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	background-color: transparent;
+}
+
+td, th {
+	padding: 0;
+}
+
+th {
+	text-align: left;
+}
+
+/* ---------- Controles de formulario ---------- */
+button, input, select, textarea {
+	margin: 0;
+	color: inherit;
+	font: inherit;
+	line-height: inherit;
+}
+
+button {
+	overflow: visible;
+	text-transform: none;
+	cursor: pointer;
+	-webkit-appearance: button;
+}
+
+button:focus,
+input:focus {
+	outline: 0;
+}
+
+button[disabled],
+html input[disabled] {
+	cursor: default;
+}
+
+select {
+	text-transform: none;
+}
+
+textarea {
+	overflow: auto;
+}
+
+label {
+	display: inline-block;
+	max-width: 100%;
+	margin-bottom: 5px;
+	font-weight: 700;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	margin: 4px 0 0;
+	padding: 0;
+	line-height: normal;
+}
+
+input[type="search"] {
+	box-sizing: border-box;
+	-webkit-appearance: none;
+}
+
+input[type="file"] {
+	display: block;
+}
+
+input[type="range"] {
+	display: block;
+	width: 100%;
+}
+
+select[multiple],
+select[size] {
+	height: auto;
+}
+
+@media (max-width: 991px) {
+	body {
+		position: relative;
+	}
+
+	h6 {
+		font-size: 1em;
+	}
+}
+
+/* ---------- Impresión ---------- */
+@media print {
+	*,
+	*::before,
+	*::after {
+		background: transparent !important;
+		box-shadow: none !important;
+		color: #000 !important;
+		text-shadow: none !important;
+	}
+
+	a:visited {
+		text-decoration: underline;
+	}
+
+	a[href]::after {
+		content: " (" attr(href) ")";
+	}
+
+	a[href^="#"]::after,
+	a[href^="javascript:"]::after {
+		content: "";
+	}
+
+	thead {
+		display: table-header-group;
+	}
+
+	tr, img {
+		page-break-inside: avoid;
+	}
+
+	img {
+		max-width: 100% !important;
+	}
+
+	p, h2, h3 {
+		orphans: 3;
+		widows: 3;
+	}
+
+	h2, h3 {
+		page-break-after: avoid;
+	}
+}

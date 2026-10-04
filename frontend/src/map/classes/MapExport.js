@@ -152,7 +152,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 	}
 	var addClasses = [
 		// saca borde al panel derecho
-		{ class: 'card panel-body', extraclass: 'exp-panel' },
+		{ class: 'mp-surface mp-surface--padded', extraclass: 'exp-panel' },
 		// acomoda logo si lo hubiera
 		{ class: 'logoDiv', extraclass: 'exp-logodiv-right' },
 		// botones de series
@@ -162,7 +162,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 		{ class: 'statsHeader', extraclass: 'exp-high-contrast' },
 		{ class: 'stats', extraclass: 'exp-high-contrast' },
 		{ class: 'frozen', extraclass: 'is-selected' },
-		{ class: 'filterElement', extraclass: 'exp-high-contrast' },
+		{ class: 'mp-chip-filter', extraclass: 'exp-high-contrast' },
 		// referencias de colores
 		{ class: 'exp-category-bullets', extraclass: 'exp-circles' },
 		{ class: 'exp-category-bullets-large', extraclass: 'exp-circles-large' }

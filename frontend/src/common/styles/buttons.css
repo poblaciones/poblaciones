@@ -12,15 +12,16 @@
  *   .mp-icon-btn     botón circular de un solo glifo, sin borde
  *     --sm / --lg    24 / 40 px (por defecto 32)
  *     --dismiss      glifo "×" de cierre o limpieza
- *     --muted        glifo gris claro en reposo
+ *     --muted        glifo gris en reposo
+ *     --faint        glifo gris más claro en reposo
  *     --label        disparador con texto, en la cabecera de un panel
- *     --faint        glifo gris muy claro en reposo
  *     --ghost        glifo negro translúcido (cabeceras de panel)
  *     --accent       fondo de color primario
- *     --square       esquinas de 4 px en lugar de círculo
  *   .mp-chip-remove  cruz dentro de un chip de selección
  *
  * Estado seleccionado: clase .is-selected o aria-pressed="true".
+ * El foco de teclado se dibuja con :focus-visible; el clic no deja el botón marcado.
+ * Los botones de solo ícono llevan aria-label (o title con el mismo texto).
  * Los márgenes de ubicación los pone el contenedor, salvo en .mp-btn,
  * que conserva el espaciado que tenía .btn.
  */
@@ -52,12 +53,8 @@
 	transition: all .15s ease-in-out;
 }
 
-/* :focus se resuelve igual que :hover porque el clic deja el foco en el botón.
-   Se conserva tal cual estaba; ver la sugerencia de pasar a :focus-visible. */
-.mp-btn:focus {
-	outline: 0;
+.mp-btn:focus-visible {
 	background-color: var(--mp-hover);
-	border-color: var(--mp-text);
 }
 
 .mp-btn:hover {
@@ -79,10 +76,10 @@
 }
 
 .mp-btn.is-selected:hover,
-.mp-btn.is-selected:focus,
+.mp-btn.is-selected:focus-visible,
 .mp-btn.is-selected:active,
 .mp-btn[aria-pressed="true"]:hover,
-.mp-btn[aria-pressed="true"]:focus,
+.mp-btn[aria-pressed="true"]:focus-visible,
 .mp-btn[aria-pressed="true"]:active {
 	background-color: var(--mp-selected);
 	border-color: var(--mp-hover);
@@ -110,16 +107,12 @@
 	font-size: 18px;
 }
 
-.mp-btn--float:focus:not(:hover):not(.is-selected) {
-	border-color: var(--mp-outline);
-}
-
 .mp-btn--soft {
 	border-width: 0;
 }
 
 .mp-btn--soft:hover,
-.mp-btn--soft:focus {
+.mp-btn--soft:focus-visible {
 	background-color: var(--mp-pressed);
 	color: var(--mp-text);
 }
@@ -141,7 +134,7 @@
 }
 
 .mp-btn--on-dark:hover,
-.mp-btn--on-dark:focus {
+.mp-btn--on-dark:focus-visible {
 	background-color: #00000020;
 }
 
@@ -149,10 +142,6 @@
 .mp-btn--on-dark:active:hover {
 	background-color: #00000020;
 	color: #fff;
-}
-
-.mp-btn--on-dark:focus:not(:hover) {
-	border-color: currentColor;
 }
 
 /* ---------- .mp-btn-group ---------- */
@@ -169,7 +158,7 @@
 }
 
 .mp-btn-group > .mp-btn:hover,
-.mp-btn-group > .mp-btn:focus,
+.mp-btn-group > .mp-btn:focus-visible,
 .mp-btn-group > .mp-btn:active,
 .mp-btn-group > .mp-btn.is-selected {
 	z-index: 2;
@@ -201,7 +190,8 @@
 	transition: background-color var(--mp-transition), color var(--mp-transition), opacity var(--mp-transition);
 }
 
-.mp-icon-btn:hover {
+.mp-icon-btn:hover,
+.mp-icon-btn:focus-visible {
 	background-color: var(--mp-hover);
 	color: var(--mp-text-muted);
 }
@@ -209,7 +199,7 @@
 .mp-icon-btn.is-selected,
 .mp-icon-btn[aria-pressed="true"] {
 	background-color: var(--mp-selected);
-	color: var(--mp-text-selected);
+	color: var(--mp-text-muted);
 }
 
 .mp-icon-btn:disabled {
@@ -262,19 +252,18 @@
 .mp-icon-btn--ghost {
 	color: #000;
 	line-height: 1em;
-	opacity: .2;
+	opacity: .45;
 }
 
-/* El foco queda como el hover porque el clic lo deja en el botón. */
 .mp-icon-btn--ghost:hover,
-.mp-icon-btn--ghost:focus {
+.mp-icon-btn--ghost:focus-visible {
 	color: #000;
-	opacity: .5;
+	opacity: .7;
 }
 
 .mp-icon-btn--ghost:disabled {
 	color: #000;
-	opacity: .1;
+	opacity: .2;
 }
 
 .mp-icon-btn--label {
@@ -283,7 +272,7 @@
 	margin-top: 4px;
 	padding: 6px 8px 2px 8px;
 	border-radius: 11px;
-	color: var(--mp-text-subtle);
+	color: var(--mp-text-faint);
 	font-size: 13px;
 	font-weight: normal;
 	line-height: 1em;
@@ -291,8 +280,9 @@
 	white-space: nowrap;
 }
 
-.mp-icon-btn--label:hover {
-	color: var(--mp-text-subtle);
+.mp-icon-btn--label:hover,
+.mp-icon-btn--label:focus-visible {
+	color: var(--mp-text-faint);
 }
 
 .mp-icon-btn--accent {
@@ -301,13 +291,10 @@
 }
 
 .mp-icon-btn--accent:hover,
+.mp-icon-btn--accent:focus-visible,
 .mp-icon-btn--accent.is-selected {
 	background-color: var(--mp-primary);
 	color: #efefef;
-}
-
-.mp-icon-btn--square {
-	border-radius: var(--mp-radius-sm);
 }
 
 /* ---------- .mp-chip-remove ---------- */
@@ -332,4 +319,26 @@
 
 .mp-chip-remove:hover {
 	background: rgb(21 101 192 / 28%);
+}
+
+/* ---------- Foco de teclado ---------- */
+/* El anillo es una sombra interior para que no lo recorten los contenedores con
+   overflow oculto. El outline transparente lo hace visible en modo de alto contraste. */
+.mp-btn:focus-visible,
+.mp-icon-btn:focus-visible,
+.mp-chip-remove:focus-visible {
+	box-shadow: inset 0 0 0 2px var(--mp-selection);
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+}
+
+.mp-btn--on-dark:focus-visible {
+	box-shadow: inset 0 0 0 2px #fff;
+}
+
+/* ---------- Conjunto de botones ---------- */
+.btn-set {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
 }

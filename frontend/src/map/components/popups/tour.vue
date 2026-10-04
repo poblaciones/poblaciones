@@ -203,10 +203,10 @@
       <footer>
         <div class="forward-actions">
           <!--         <button class="secondary skip" :disabled="isLastStep" v-show="!isLastStep" @click="skip(2)">Skip</button> -->
-          <button class="primary next" :disabled="isLastStep" v-show="!isLastStep" @click="skip(1)">
+          <button class="primary next" aria-label="Siguiente" :disabled="isLastStep" v-show="!isLastStep" @click="skip(1)">
             <i class="fa fa-fw fa-lg" :class="nextIcon"></i>
           </button>
-          <button class="accent save" :disabled="!isLastStep" v-show="isLastStep" @click="finish">
+          <button class="accent save" aria-label="Finalizar" :disabled="!isLastStep" v-show="isLastStep" @click="finish">
             <i class="fa fa-fw fa-lg fa-check"></i>
           </button>
         </div>
@@ -214,7 +214,7 @@
           <div class="step-dot" v-for="n in max" :key="n" :class="{active: n == step}" @click="goToStep(n)"></div>
         </div>
         <div class="back-actions">
-          <button class="secondary cancel prev" :disabled="isFirstStep" xv-show="!isFirstStep" @click="skip(-1)">
+          <button class="secondary cancel prev" aria-label="Anterior" :disabled="isFirstStep" xv-show="!isFirstStep" @click="skip(-1)">
             <i class="fa fa-fw fa-lg" :class="backIcon"></i>
           </button>
         </div>

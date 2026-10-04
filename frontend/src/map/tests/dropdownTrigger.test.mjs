@@ -48,3 +48,17 @@ it('la variante tiene prioridad sobre el label', () => {
 it('nunca devuelve vacío', () => {
 	expect(mount({}).triggerClass.length > 0).toBeTruthy();
 });
+
+describe('mpDropdownMenu: nombre accesible del disparador');
+
+it('sin texto visible usa el tooltip como aria-label', () => {
+	expect(mount({ icon: 'fas fa-camera', tooltip: 'Guardar como' }).triggerAriaLabel).toBe('Guardar como');
+});
+
+it('con texto visible no pisa el nombre con el tooltip', () => {
+	expect(mount({ icon: 'x', label: 'Total', tooltip: 'Particiones' }).triggerAriaLabel).toBe(null);
+});
+
+it('sin tooltip ni texto no define aria-label', () => {
+	expect(mount({ icon: 'x' }).triggerAriaLabel).toBe(null);
+});

@@ -278,7 +278,7 @@ pedido, `ActiveSelectedMetric.GetDataService*`.
 
 ## 5. `App.vue` como dueño y los globales
 
-`App.vue` (~1760 líneas) es el dueño del layout y de los objetos reactivos
+`App.vue` (~710 líneas, sin estilos globales) es el dueño del layout y de los objetos reactivos
 raíz: `frame`, `clipping`, `metrics` (el array que `MetricsList` envuelve),
 `toolbarStates`, `work`, `config`, y los árboles del panel lateral
 (`sideIndicators`, `sideBoundaries`). Reparte por props a los paneles
@@ -351,7 +351,7 @@ tabla los replica y para aquel módulo son de solo lectura.
 
     map/
       main.js                  Bootstrap Vue (registra componentes mp-*, crea window.bus)
-      App.vue                  Raíz: layout, globales, configuración, StartMap, SetupMap (~1760 líneas)
+      App.vue                  Raíz: layout, globales, configuración, StartMap, SetupMap (~710 líneas)
       classes/                 Comportamiento y estado (function + prototype)
         SegmentedMap.js        Agregado raíz (window.SegMap)
         StartMap.js            Decisión de arranque (work / URL / frame default)
@@ -407,6 +407,7 @@ tabla los replica y para aquel módulo son de solo lectura.
         popups/                Popups (addMetric, metricCustomize, download, embedding, tour…)
         controls/              Controles chicos reutilizables (mp-*)
       enums/PanelType.js
+      styles/                  Hojas globales del visor y sus dos cargadores (ver sección 9, "Estilos globales")
       tests/                   Batería propia (ver sección 10)
 
 ---
@@ -490,20 +491,99 @@ arma con estas clases: no se definen botones en estilos locales ni se usan
 | Sobre fondo de color (panel superior) | `mp-btn mp-btn--on-dark` |
 | Selector con texto y caret (partición) | `mp-btn mp-btn--soft` |
 | Glifo circular sin borde | `mp-icon-btn` (32 px); tamaños `--sm` 24 y `--lg` 40 |
-| Tono del glifo en reposo | `--muted`, `--faint`, `--ghost` |
+| Tono del glifo en reposo | `--muted`, `--faint` |
+| Glifo de cabecera de panel, flotado a la derecha | `mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost` |
 | Cierre o limpieza "×" | `mp-icon-btn mp-icon-btn--dismiss` (`--sm` dentro de campos); para cierres de paneles, `<mp-close-button>` |
 | Botón principal de la barra lateral | `mp-icon-btn--accent` |
-| Esquinas de 4 px en lugar de círculo | `mp-icon-btn--square` |
 | Cruz dentro de un chip | `mp-chip-remove` |
 
 - **Estado seleccionado: `is-selected`** (o `aria-pressed="true"`), nunca
   `active`. `MapExport` oculta los `exp-serie-item` que no lo tengan.
+- **Accesibilidad.** Todo botón de solo ícono lleva `aria-label` (con el mismo
+  texto que su `title`). Los botones de dos estados agregan
+  `:aria-pressed="$ariaPressed(condicion)"`, que entrega la cadena `"true"` o
+  `"false"` (Vue quita el atributo si recibe el booleano `false`); la condición
+  se extrae a un método `is...Selected()` y la clase `is-selected` se deriva de
+  él. El foco de teclado se dibuja con `:focus-visible`: el clic no deja el
+  botón marcado, por lo que no hace falta `blur()`.
+- **Contraste.** Los grises de la paleta cumplen 4,5:1 para texto
+  (`--mp-text-faint`) y 3:1 para glifos (`--mp-text-ghost`); no agregar grises
+  más claros para íconos o texto.
 - La paleta define la apariencia; la ubicación (posición, márgenes, `float`)
   la resuelve el contenedor o el CSS local del componente.
 - Los disparadores de menú son `mp-dropdown-menu` con su prop `variant`
   (`ghost`, `icon`, `float`, `pill`).
 - Las clases que solo sirven de gancho para JS llevan prefijo `js-` y no
   tienen estilos (ejemplo: `js-remove-recent`).
+
+### Estilos globales
+
+El visor no usa clases de Bootstrap 3 ni de Paper Dashboard, y `index.html` ya
+no las carga (tampoco `animate.min.css`, `themify-icons.css`, jQuery ni
+`bootstrap.min.js`). Lo que aportaban esas hojas está en archivos propios,
+repartidos por responsabilidad; `App.vue` no tiene bloque de estilos.
+
+| Hoja | Contenido |
+|---|---|
+| `common/styles/tokens.css` | Variables `--mp-*` |
+| `common/styles/base.css` | Reset y tipografía de los elementos sin clase (`body`, `h1`–`h6`, `a`, `label`, controles de formulario) y reglas de impresión |
+| `common/styles/utilities.css` | `mp-float-right`, `mp-dimmed`, `mp-text-small` y el ancho de los íconos `.fa` |
+| `common/styles/animations.css` | `animated`, `zoomIn`, `zoomOut`, `fadeInDown`, `fadeInUp`, `fadeOutDown`, `fadeOutUp` |
+| `common/styles/buttons.css` | Paleta de botones |
+| `common/styles/list-items.css` | `mp-list-item` (renglón en pastilla: selector de indicadores, resultados de búsqueda) y `mp-list-row` (renglón compacto: capas, sugerencias) |
+| `common/styles/chips.css` | `mp-chip` (selección), `mp-chip-filter` (etiqueta de filtro con cruz), `mp-chip-tag` (etiqueta sobre fondo oscuro) |
+| `common/styles/switch.css` | `mp-switch` |
+| `common/styles/search.css` | `mp-search-input`, `mp-search-icon`, `mp-search-clear`, `mp-search-spinner` |
+| `common/styles/popovers.css`, `transition.css` | Popovers de v-tooltip y transiciones comunes (también las carga `table`) |
+| `map/styles/tooltips.css` | Base de `.tooltip` y tooltip oscuro de los botones flotantes |
+| `map/styles/surfaces.css` | `mp-surface`, `mp-surface--padded` y `mp-modal*` |
+| `map/styles/menus.css` | `mp-menu` (menú de `mp-dropdown-menu`) |
+| `map/styles/fields.css` | `mp-radio-inline`, `mp-field-group` y bloque `fld*` |
+| `map/styles/lists.css` | `mp-badge`, filas de variables (`variableRow`) |
+| `map/styles/layout.css`, `panels.css`, `map-content.css`, `export.css`, `helpers.css`, `transitions.css` | Disposición general, paneles, etiquetas y marcadores del mapa, exportación a imagen, utilidades históricas y transiciones del visor |
+| `map/styles/vendor-overrides.css`, `vendor-overrides-late.css` | Ajustes sobre Leaflet y Google |
+
+Equivalencias con las clases anteriores:
+
+| Antes | Ahora |
+|---|---|
+| `card`, `panel`, `panel-body` | `mp-surface` (con `mp-surface--padded` para el relleno de 15 px) |
+| `modal`, `modal-dialog`, `modal-content`, `modal-backdrop` | `mp-modal`, `mp-modal__dialog`, `__content`, `__backdrop` (solo en `popups/modal.vue`) |
+| `dropdown-menu`, `dropdown-menu-right` | `mp-menu`, dentro de `mp-dropdown-menu` |
+| `text-muted` | `mp-dimmed` |
+| `pull-right` | `mp-float-right` |
+| `badge` | `mp-badge` |
+| `form-group`, `radio-inline` | `mp-field-group`, `mp-radio-inline` |
+| `small` (clase) | `mp-text-small` |
+| `indicator-item`, `result-item` | `mp-list-item` (el componente conserva su clase para la disposición interna) |
+| `layer-item`, `suggestion-item` | `mp-list-row` (`mp-list-row--strong` si el fondo ya es gris) |
+| `chip`, `filterElement`, `year-tag` | `mp-chip`, `mp-chip-filter`, `mp-chip-tag` |
+| `sw-toggle`, `sw-track`, `sw-thumb` | `mp-switch`, `mp-switch-track`, `mp-switch-thumb` |
+| `search-input`, `search-icon`, `search-clear`, `search-spinner` | `mp-search-input`, `mp-search-icon`, `mp-search-clear`, `mp-search-spinner` |
+
+- **Orden de carga.** `map/main.js` importa `map/styles/foundation.js` antes
+  que cualquier componente (tokens, base, utilidades, animaciones, tooltips,
+  superficies y menús: queda en el lugar más bajo de la cascada) y
+  `map/styles/index.js` después de ellos. El orden de `index.js` es
+  significativo: `vendor-overrides.css` va antes de `leaflet.css` y
+  `nprogress.css`, y `vendor-overrides-late.css` después, porque varias reglas
+  sin `!important` dependen de ganarles o de perder contra ellas. Una hoja
+  nueva se agrega en `index.js`, no con un `import` suelto.
+- **Dónde va un estilo nuevo.** Se elige la hoja por su responsabilidad; si
+  ninguna corresponde, se crea una y se la registra en `index.js`. El bloque
+  global de `App.vue` no se reconstruye.
+- Los componentes compartidos con `table` (`indicatorSelector`) solo pueden
+  apoyarse en hojas de `common/styles/`, porque `table` no carga `map/styles/`.
+  `table/main.js` importa `tokens`, `buttons`, `list-items`, `chips`, `switch`
+  y `search`.
+- `scoped` se reserva para la disposición propia del componente. Un control
+  reutilizable (botón, ítem de lista, chip, campo) no define su apariencia
+  localmente.
+- No agregar `!important` fuera de `vendor-overrides*.css`; los existentes se
+  retiran al tocar la regla.
+- Los selectores `.title`, `.stats` y `label` dentro de `mp-surface` conservan
+  la tipografía que daba Paper Dashboard a `card`; no replicarla en
+  componentes.
 
 ## 10. Tests
 

@@ -1,0 +1,26 @@
+/*
+ * Ajustes sobre Leaflet que deben ganarle a leaflet.css por orden de carga.
+ * Se carga DESPUÉS de las hojas de las librerías (ver styles/index.js).
+ */
+
+.leaflet-control-attribution.leaflet-control > :nth-child(-n+2) {
+	display: none;
+}
+
+.leaflet-touch .leaflet-control-zoom-in,
+.leaflet-touch .leaflet-control-zoom-out {
+	border: 1px solid rgb(165 164 164 / 50%) !important;
+	margin-top: 6px;
+	border-radius: 50% !important;
+	font-size: 18px;
+}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none !important;
+}
+
+.leaflet-bar a:hover {
+	text-decoration: none !important;
+}

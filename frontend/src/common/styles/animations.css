@@ -1,0 +1,99 @@
+/*
+ * Animaciones de entrada y salida usadas desde JavaScript y desde las props
+ * enter-active-class / leave-active-class de <transition>.
+ * Subconjunto de animate.css 3.x: solo las que el visor referencia.
+ */
+
+.animated {
+	animation-duration: 1s;
+	animation-fill-mode: both;
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translate3d(0, -100%, 0);
+	}
+	100% {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 100%, 0);
+	}
+	100% {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes fadeOutDown {
+	from {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate3d(0, 100%, 0);
+	}
+}
+
+@keyframes fadeOutUp {
+	from {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate3d(0, -100%, 0);
+	}
+}
+
+@keyframes zoomIn {
+	from {
+		opacity: 0;
+		transform: scale3d(.3, .3, .3);
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+@keyframes zoomOut {
+	from {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+		transform: scale3d(.3, .3, .3);
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+.fadeInDown {
+	animation-name: fadeInDown;
+}
+
+.fadeInUp {
+	animation-name: fadeInUp;
+}
+
+.fadeOutDown {
+	animation-name: fadeOutDown;
+}
+
+.fadeOutUp {
+	animation-name: fadeOutUp;
+}
+
+.zoomIn {
+	animation-name: zoomIn;
+}
+
+.zoomOut {
+	animation-name: zoomOut;
+}

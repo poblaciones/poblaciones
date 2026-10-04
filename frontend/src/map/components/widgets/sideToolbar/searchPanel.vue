@@ -4,24 +4,24 @@
       <div class="search-panel" v-on-clickaway="close" :style="heightStyle">
         <div class="search-header">
           <div class="titleDialog">Buscar</div>
-          <button class="mp-icon-btn mp-icon-btn--dismiss" @click="close">
+          <button class="mp-icon-btn mp-icon-btn--dismiss" @click="close" aria-label="Cerrar">
             <span aria-hidden="true">×</span>
           </button>
         </div>
 
         <div class="search-body">
           <div class="search-input-container">
-            <i class="fas fa-search search-icon"></i>
+            <i class="fas fa-search mp-search-icon"></i>
             <input v-model="searchText"
                    ref="searchInput"
                    type="text"
-                   class="search-input"
+                   class="mp-search-input"
                    placeholder="Buscar indicadores y lugares en Poblaciones"
                    @keyup="handleSearch"
                    autocomplete="off" />
-            <button v-if="searchText" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
+            <button v-if="searchText" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted mp-search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
 
-            <div v-if="loading" class="search-spinner">
+            <div v-if="loading" class="mp-search-spinner">
               <i class="fas fa-spinner fa-spin"></i>
             </div>
           </div>
@@ -36,7 +36,7 @@
                   <div
                     v-for="item in autolist"
                     :key="item.Id"
-                    class="result-item"
+                    class="mp-list-item result-item"
                     data-kbd-item="result"
                     @click="selectResult($event, item)"
                   >
@@ -75,7 +75,7 @@
                   <div
                     v-for="item in recentsPreview"
                     :key="item.DedupeKey"
-                    class="result-item"
+                    class="mp-list-item result-item"
                     data-kbd-item="recent"
                     @click="selectRecent(item)"
                   >
@@ -85,7 +85,7 @@
                         <div class="result-name">{{ item.Caption }}</div>
                         <div v-if="item.Subtitle" class="result-extra">{{ item.Subtitle }}</div>
                       </div>
-                      <button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--faint mp-icon-btn--square js-remove-recent" @click.stop="removeRecent(item)" title="Eliminar de recientes">
+                      <button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--faint js-remove-recent" @click.stop="removeRecent(item)" title="Eliminar de recientes" aria-label="Eliminar de recientes">
                         <span aria-hidden="true">×</span>
                       </button>
                     </div>
@@ -94,14 +94,14 @@
                 <template v-else>
                   <div v-for="row in recentsExpandedRows" :key="row.Key">
                     <div v-if="row.IsLabel" class="recents-group-label">{{ row.Label }}</div>
-                    <div v-else class="result-item" data-kbd-item="recent" @click="selectRecent(row.Item)">
+                    <div v-else class="mp-list-item result-item" data-kbd-item="recent" @click="selectRecent(row.Item)">
                       <div class="result-content">
                         <div class="list-icon"><i class="fas fa-clock"></i></div>
                         <div class="result-info">
                           <div class="result-name">{{ row.Item.Caption }}</div>
                           <div v-if="row.Item.Subtitle" class="result-extra">{{ row.Item.Subtitle }}</div>
                         </div>
-                        <button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--faint mp-icon-btn--square js-remove-recent" @click.stop="removeRecent(row.Item)" title="Eliminar de recientes">
+                        <button class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--faint js-remove-recent" @click.stop="removeRecent(row.Item)" title="Eliminar de recientes" aria-label="Eliminar de recientes">
                           <span aria-hidden="true">×</span>
                         </button>
                       </div>
@@ -489,28 +489,8 @@ export default {
   gap: 2px;
 }
 
-/* Result Item: mismo estilo que .indicator-item de indicatorSelector.vue,
-   para que este panel y el selector de indicadores/boundaries se vean como
-   un único sistema visual. */
-	.result-item {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 8px;
-		border-radius: 26px;
-		margin-bottom: 2px;
-    padding-right: 12px;
-		padding-left: 25px;
-	}
-
-.result-item:hover {
-  background-color: #eee;
-}
-
-/* Elemento activo por teclado (KeyboardAwareList) */
-.result-item[data-kbd-active] {
-  background-color: #e3e3e3;
-  box-shadow: inset 0 0 0 2px #90caf9;
+.result-item {
+	padding-right: 12px;
 }
 
 .result-content {

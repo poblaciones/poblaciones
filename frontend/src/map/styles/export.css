@@ -1,0 +1,62 @@
+/*
+ * Clases exp-* que MapExport aplica al DOM mientras genera la imagen o el PDF.
+ */
+
+.exp-showable-block {
+	display: none;
+}
+
+.exp-high-contrast {
+	color: #000000 !important;
+	background-color: #ffffff !important;
+}
+
+.exp-circles {
+	margin-top: 5px !important;
+	color: white !important;
+	font-size: 0px;
+}
+
+.exp-circles:after {
+	border-width: 7px;
+	border-style: solid;
+	border-color: inherit;
+	border-radius: 8px;
+	visibility: visible;
+	width: 1px;
+	height: 1px;
+	content: '';
+}
+
+.exp-circles-large {
+	margin-top: 8px !important;
+	color: white !important;
+	font-size: 0px !important;
+}
+
+.exp-circles-large:after {
+	border-width: 7px;
+	border-style: solid;
+	border-color: inherit;
+	border-radius: 8px;
+	visibility: visible;
+	width: 1px;
+	height: 1px;
+	content: '';
+}
+
+.exp-logodiv-right {
+	right: 8px !important;
+}
+
+.exp-panel {
+	padding: 10px !important;
+	border-width: 8px !important;
+	border-color: white !important;
+	border-style: solid !important;
+	box-shadow: unset !important;
+}
+
+.exp-rounded {
+	border-radius: 26px !important;
+}

@@ -55,12 +55,12 @@
 								</div>
 								<i v-else class="fa drop fa-tint exp-category-bullets" style="border-color: inherit"></i>
 							</td>
-							<td class="dataBox text-muted" style="width: 100%">
+							<td class="dataBox mp-dimmed" style="width: 100%">
 								{{ applySymbols(label.Name) }}
 								<div class="bar-muted" :style="getLength( metric.Summary.getValue(variable, variableValueLabels, label.Values, variableValueLabels), variable)"></div>
 							</td>
-							<td class='text-muted textRight'><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
-							<td class='text-muted textRight'>{{ metric.Summary.getValueFormatted(metric.Summary.getValue(variable, variableValueLabels, label.Values, variableValueLabels), variable.Decimals) }}</td>
+							<td class='mp-dimmed textRight'><span v-if="!variable.IsSimpleCount">{{ h.formatNum(label.Values.Count) }}</span></td>
+							<td class='mp-dimmed textRight'>{{ metric.Summary.getValueFormatted(metric.Summary.getValue(variable, variableValueLabels, label.Values, variableValueLabels), variable.Decimals) }}</td>
 						</template>
 					</template>
 				</tr>
@@ -276,7 +276,7 @@ export default {
 		},
 		getMutedClass(value) {
 			if (value !== '1') {
-				return ' text-muted';
+				return ' mp-dimmed';
 			} else {
 				return '';
 			}
@@ -290,7 +290,7 @@ export default {
 		},
 		getMuted() {
 			if (this.metric.IsUpdatingSummary) {
-				return ' text-muted';
+				return ' mp-dimmed';
 			} else {
 				return '';
 			}

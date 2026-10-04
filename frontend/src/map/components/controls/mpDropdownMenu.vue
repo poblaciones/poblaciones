@@ -6,23 +6,23 @@
 						 popoverInnerClass="tooltipNoBorder">
 
 		<li v-if="child" style="position: relative"
-				:class="(currentItem.separator ? 'liDividerNext' : '')" >
+				:class="(currentItem.separator ? 'mp-menu__item--divided' : '')" >
 
 			<a v-if="!currentItem.separator" :style="' width: 100%; display: inline-block; padding-right: 28px; padding-left: '+ (15 + (currentItem.level ? currentItem.level : 0) * 14) +'px' ">
 				{{ currentItem.label }}
 				<i style="position: absolute; right: 10px; top: 14px; font-size: 12px" :class="icon" />
 			</a>
 		</li>
-		<button v-else type="button" id="filterDropId" :title="tooltip"
+		<button v-else type="button" id="filterDropId" :title="tooltip" :aria-label="triggerAriaLabel" aria-haspopup="true"
 						:class="triggerClass" :style="triggerStyle">
 			<slot name="trigger">{{ label }}</slot>
 			<i :class="icon" class="triggerIcon" />
 		</button>
 
 		<div slot="popover">
-			<ul ref="menu" class="dropdown-menu dropdown-menu-right dropFilter" :style="menuStyle" aria-labelledby="filterDropId">
+			<ul ref="menu" class="mp-menu dropFilter" :style="menuStyle" aria-labelledby="filterDropId">
 				<template v-for="(item, index) in items">
-					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'liDividerNext' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
+					<li v-if="!item.items" style="position: relative" :class="(item.separator ? 'mp-menu__item--divided' : '') + ' ' + (item.liClass ? item.liClass : '')" :key="index">
 						<a v-if="!item.items && !item.separator" :href="item.href" :target="item.target" :style="'padding-right: 28px; padding-left: '+ (15 + (item.level ? item.level : 0) * 14) +'px' "
 							 @click="itemClicked(item, $event)" :class="(item.aClass ? item.aClass : '')">
 							{{ item.label }}
@@ -30,9 +30,9 @@
 
 							<i v-if="item.icon && item.icon != 'X'"
 								 style="position: absolute;"
-								 :class="item.icon" class="dropDownMenuIcon" />
+								 :class="item.icon" class="mp-menu__icon" />
 
-							<X-Icon v-if="item.icon == 'X'" :class="item.icon" class="dropDownMenuIconX"  />
+							<X-Icon v-if="item.icon == 'X'" :class="item.icon" class="mp-menu__icon--x"  />
 						</a>
 
 					</li>
@@ -136,6 +136,15 @@
 						return 'mp-icon-btn mp-icon-btn--sm mp-icon-btn--label';
 					}
 					return 'mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost';
+				},
+				triggerAriaLabel() {
+					if (this.label) {
+						return null;
+					}
+					if (this.tooltip) {
+						return this.tooltip;
+					}
+					return null;
 				},
 				currentItem() {
 					return { label: this.label, level: this.level, key: this.key, separator: this.separator };

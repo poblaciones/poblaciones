@@ -2,12 +2,13 @@
 	<div class="sourceInfo exp-hiddable-block mp-btn-group">
 
 		<button v-if="useCompare" type="button" @click="clickComparar"
-						:title="(valueCompare ? compareTitle : 'Comparar')" class="mp-btn mp-btn--icon" :class="(valueCompare ? 'is-selected' : '')">
+						:title="compareLabel" :aria-label="compareLabel" :aria-pressed="$ariaPressed(valueCompare)"
+						class="mp-btn mp-btn--icon" :class="{ 'is-selected': valueCompare }">
 			<i class="fas fa-columns"></i>
 		</button>
-		<button v-if="useRanking" type="button" title="Ránkings" @click="clickRanking" class="mp-btn mp-btn--icon" :class="(valueRanking ? 'is-selected' : '')"><i class="fas fa-list-ol"></i></button>
-		<button type="button" title="Descargar" @click="clickDescargar" class="mp-btn mp-btn--icon"><i class="fas fa-download"></i></button>
-		<button type="button" :title="'Fuente de \'' + sourceTitle + '\''" @click="clickFuente" class="mp-btn mp-btn--icon"><i class="fas fa-link"></i></button>
+		<button v-if="useRanking" type="button" title="Ránkings" aria-label="Ránkings" :aria-pressed="$ariaPressed(valueRanking)" @click="clickRanking" class="mp-btn mp-btn--icon" :class="{ 'is-selected': valueRanking }"><i class="fas fa-list-ol"></i></button>
+		<button type="button" title="Descargar" aria-label="Descargar" @click="clickDescargar" class="mp-btn mp-btn--icon"><i class="fas fa-download"></i></button>
+		<button type="button" :title="sourceLabel" :aria-label="sourceLabel" @click="clickFuente" class="mp-btn mp-btn--icon"><i class="fas fa-link"></i></button>
 
 	</div>
 </template>
@@ -30,6 +31,17 @@ export default {
 		return {
 			work: {},
 		};
+	},
+	computed: {
+		compareLabel() {
+			if (this.valueCompare) {
+				return this.compareTitle;
+			}
+			return 'Comparar';
+		},
+		sourceLabel() {
+			return 'Fuente de \'' + this.sourceTitle + '\'';
+		},
 	},
 		methods: {
 			clickComparar(e) {

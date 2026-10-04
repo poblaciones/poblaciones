@@ -1,0 +1,161 @@
+/*
+ * Superficies del visor: paneles flotantes, diálogos y sus títulos.
+ * Reemplazan a .card (Paper Dashboard) combinada con .panel y .panel-body (Bootstrap 3),
+ * y al conjunto .modal* de Bootstrap que usa popups/modal.vue.
+ */
+
+/* ---------- Superficie ---------- */
+.mp-surface {
+	position: relative;
+	z-index: 1;
+	margin-bottom: 20px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background-color: #fff;
+	box-shadow: 0 2px 2px rgba(204, 197, 185, 0.5);
+	color: #252422;
+}
+
+/* Con el relleno interior de un panel; los pseudoelementos contienen los flotantes de los hijos. */
+.mp-surface--padded {
+	padding: 15px;
+}
+
+.mp-surface--padded::before,
+.mp-surface--padded::after {
+	display: table;
+	content: " ";
+}
+
+.mp-surface--padded::after {
+	clear: both;
+}
+
+/* Textos que Paper Dashboard estiliza solo cuando están dentro de una tarjeta. */
+.mp-surface .title {
+	margin: 0;
+	color: #252422;
+	font-weight: 300;
+}
+
+.mp-surface .stats {
+	color: #a9a9a9;
+	font-weight: 300;
+}
+
+.mp-surface .stats i {
+	display: inline-block;
+	min-width: 15px;
+	margin-right: 2px;
+}
+
+.mp-surface label {
+	margin-bottom: 5px;
+	color: #777;
+	font-size: 15px;
+	font-weight: 400;
+}
+
+/* ---------- Diálogo modal ---------- */
+.mp-modal-open {
+	overflow: hidden;
+}
+
+.mp-modal {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 1050;
+	display: flex;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	outline: 0;
+}
+
+.mp-modal-open .mp-modal {
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.mp-modal__dialog {
+	position: relative;
+	align-self: center;
+	width: 610px;
+	max-width: calc(100% - 20px);
+	margin: 10px;
+}
+
+@media (min-width: 768px) {
+	.mp-modal__dialog {
+		margin: 30px auto;
+	}
+}
+
+.mp-modal__content {
+	max-width: 610px;
+	max-height: 100%;
+	margin: 0 auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+	border-color: rgba(0, 0, 0, 0.2);
+	outline: 0;
+	background-clip: padding-box;
+}
+
+.mp-modal__header {
+	padding: 14px 8px 0 12px;
+}
+
+.mp-modal__header::before,
+.mp-modal__header::after,
+.mp-modal__footer::before,
+.mp-modal__footer::after {
+	display: table;
+	content: " ";
+}
+
+.mp-modal__header::after,
+.mp-modal__footer::after {
+	clear: both;
+}
+
+.mp-modal__body {
+	position: relative;
+	padding: 15px;
+}
+
+.mp-modal__footer {
+	padding: 15px;
+	border-top: 1px solid #e5e5e5;
+	text-align: right;
+}
+
+.mp-modal__backdrop {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 1040;
+	background-color: #000;
+	opacity: .5;
+}
+
+/* ---------- Títulos ---------- */
+.titleDialog {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	font-size: 1.5em;
+	font-weight: 500;
+	line-height: 1.4em;
+}
+
+.step-header {
+	padding-top: 2px;
+	padding-bottom: 20px;
+	padding-left: 2px;
+	margin-right: -5px;
+}

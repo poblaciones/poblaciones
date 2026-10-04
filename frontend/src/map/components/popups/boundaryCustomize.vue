@@ -7,10 +7,10 @@
 			<div class="fld">
 				<div class="fld-label">Mostrar descripciones</div>
 				<div class="fld-value">
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="descripciones" :value="true" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">Sí
 					</label>
-					<label class="radio-inline">
+					<label class="mp-radio-inline">
 						<input type="radio" name="descripciones" :value="false" @change="boundary.UpdateMap()" v-model="boundary.showDescriptions">No
 					</label>
 				</div>

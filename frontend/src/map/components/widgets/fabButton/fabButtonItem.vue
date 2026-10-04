@@ -163,44 +163,6 @@
 	};
 </script>
 
-<style>
-	.no-highlight {
-		-webkit-user-select: none; /* Safari */
-		-moz-user-select: none; /* Firefox */
-		-ms-user-select: none; /* IE10+/Edge */
-		user-select: none; /* Standard */
-	}
-
-	.fab-tooltip.tooltip {
-		display: block !important;
-		padding: 0px;
-		z-index: 900;
-	}
-
-		.fab-tooltip.tooltip .tooltip-inner {
-			background: #333333;
-			color: white;
-			border-radius: 0px;
-			padding: 5px 10px 4px;
-		}
-
-		.fab-tooltip.tooltip tooltip-arrow {
-			display: none;
-		}
-
-		.fab-tooltip.tooltip[aria-hidden='true'] {
-			visibility: hidden;
-			opacity: 0;
-			transition: opacity 0.15s, visibility 0.15s;
-		}
-
-		.fab-tooltip.tooltip[aria-hidden='false'] {
-			visibility: visible;
-			opacity: 1;
-			transition: opacity 0.15s;
-		}
-</style>
-
 <style scoped>
 	.fab-list li {
 		display: flex;

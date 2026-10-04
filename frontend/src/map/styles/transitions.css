@@ -1,0 +1,44 @@
+/*
+ * Transiciones propias del visor (las genéricas de fade y breadcrumb están en common/styles/transition.css).
+ */
+
+.animatedFlyAway {
+	transition: transform .3s ease;
+}
+
+.animatedFlyLeft {
+	transform: translateX(-100%) !important;
+	-webkit-transform: translateX(-100%) !important;
+}
+
+.animatedFlyRight {
+	transform: translateX(100%);
+	-webkit-transform: translateX(100%);
+}
+
+/* Animación de slide desde la izquierda */
+.slide-right-enter-active {
+	transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slide-right-leave-active {
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.slide-right-enter,
+.slide-right-leave-to {
+	transform: translateX(-100%);
+	opacity: 0;
+}
+
+.lefttrans-enter-active,
+.lefttrans-leave-active {
+	transition: opacity .35s;
+}
+
+.lefttrans-enter,
+.lefttrans-leave-to {
+	opacity: 0;
+	transition: 10s;
+	left: -100px;
+}

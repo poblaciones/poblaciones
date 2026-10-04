@@ -1,0 +1,50 @@
+/*
+ * Campo de búsqueda con ícono, botón de limpiar e indicador de carga.
+ * El contenedor (position: relative y márgenes) lo define el componente.
+ */
+.mp-search-input {
+	width: 100%;
+	padding: 10px 10px 10px 32px;
+	border: 1px solid #e0e0e0;
+	border-radius: var(--mp-radius-pill);
+	background: #f8f9fa;
+	font-size: 14px;
+	outline: none;
+	transition: all 0.2s;
+}
+
+.mp-search-input:focus {
+	border-color: var(--mp-selection);
+	background: #fff;
+	box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.mp-search-input::placeholder {
+	color: var(--mp-text-faint);
+}
+
+.mp-search-icon {
+	position: absolute;
+	top: 50%;
+	left: 32px;
+	transform: translateY(-50%);
+	color: var(--mp-text-ghost);
+	font-size: 14px;
+	pointer-events: none;
+}
+
+.mp-search-clear {
+	position: absolute;
+	top: 50%;
+	right: 30px;
+	transform: translateY(-50%);
+}
+
+.mp-search-spinner {
+	position: absolute;
+	top: 50%;
+	right: 62px;
+	transform: translateY(-50%);
+	color: var(--mp-selection);
+	font-size: 14px;
+}

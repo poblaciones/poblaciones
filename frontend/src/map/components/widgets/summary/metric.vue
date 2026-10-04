@@ -49,7 +49,8 @@
 				<button v-for="(ver, index) in metric.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"
 								class="mp-btn exp-serie-item"
-								:class="getActive(index)">
+								:class="getActive(index)"
+								:aria-pressed="$ariaPressed(isVersionSelected(index))">
 					{{ ver.Version.Name }}
 				</button>
 			</div>
@@ -57,7 +58,8 @@
 				<button v-for="pair in metric.Compare.GetVersionsWithComparableVariables()" :key="pair.version.Id" type="button"
 								@click="changeSelectedVersionIndexCompare(pair.index)"
 								class="mp-btn exp-serie-item"
-								:class="getActiveCompare(pair.version)">
+								:class="getActiveCompare(pair.version)"
+								:aria-pressed="$ariaPressed(isCompareVersionSelected(pair.version))">
 					{{ pair.version.Version.Name }}
 				</button>
 			</div>
@@ -121,6 +123,9 @@ export default {
 					return '';
 				}
 			},
+			isCompareVersionSelected(version) {
+				return this.compareVersions[0] === version.Version.Name || this.compareVersions[1] === version.Version.Name;
+			},
 			getActiveCompare(version) {
 				var minIndex = this.compareVersions[0];
 				var maxIndex = this.compareVersions[1];
@@ -131,6 +136,9 @@ export default {
 				}
 				return '';
 			},
+		isVersionSelected(index) {
+			return this.metric.properties.SelectedVersionIndex === index;
+		},
 		getActive(index) {
 			if (this.metric.properties.Versions.length == 1) {
 				return ' frozen';
@@ -141,7 +149,7 @@ export default {
 			},
 		getMuted() {
 			if (this.metric.IsUpdatingSummary) {
-				return ' text-muted';
+				return ' mp-dimmed';
 			} else {
 				return '';
 			}

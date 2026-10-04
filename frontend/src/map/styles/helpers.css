@@ -1,0 +1,107 @@
+/*
+ * Clases auxiliares sueltas (cursor, selección, scroll, impresión).
+ */
+
+.hand {
+	cursor: pointer;
+}
+
+.action-muted {
+	color: #DDDDDD;
+	border-color: #DDDDDD !important;
+}
+
+.center {
+	text-align: center;
+}
+
+.superSmallButton {
+	border: 1px solid #68B3C8;
+	padding: 0px 3px;
+	margin-left: 2px;
+}
+
+.fa {
+	translate: no;
+}
+
+.fas {
+	translate: no;
+}
+
+.unselectable {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.color-muted {
+	color: #999 !important;
+}
+
+.frozen {
+	pointer-events: none;
+	border-color: #cecece;
+}
+
+@media print {
+	.no-print,
+	.no-print * {
+		display: none !important;
+	}
+
+	.always-print {
+		visible: visible;
+	}
+
+	.only-print {
+		display: block !important;
+	}
+}
+
+.only-print {
+	display: none;
+}
+
+.thinScroll::-webkit-scrollbar-thumb:hover {
+	background: #999;
+}
+
+.thinScroll::-webkit-scrollbar {
+	width: 6px;
+	border-top-right-radius: 2px;
+}
+
+.thinScroll::-webkit-scrollbar-thumb {
+	background: #ccc;
+	border-radius: 3px;
+}
+
+.thinScroll::-webkit-scrollbar-track {
+	background: #f1f1f1;
+}
+
+.no-highlight {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.no-scroll-bar {
+	overflow-y: scroll;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.no-scroll-bar::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+}
+
+.overflow-ellipsis {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

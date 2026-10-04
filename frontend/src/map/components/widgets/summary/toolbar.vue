@@ -6,14 +6,14 @@
 											icon="fas fa-camera" variant="float" tooltip="Guardar como" />
 
 		<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="mp-btn mp-btn--float"
-						title="Ubicación actual" @click="geolocate()">
+						title="Ubicación actual" aria-label="Ubicación actual" @click="geolocate()">
 			<i class="far fa-dot-circle" />
 		</button>
 
 		<button v-for="mode in selectionModes" :key="mode.Name" type="button"
-						@click="setMode(mode.Action)" @mouseup="setMode(mode.Action)"
+						@click="setMode(mode.Action)"
 						class="mp-btn mp-btn--float" :class="getActive(mode.Action)"
-						:title="mode.Name">
+						:title="mode.Name" :aria-label="mode.Name" :aria-pressed="$ariaPressed(isModeSelected(mode.Action))">
 			<i :class="mode.Icon" />
 		</button>
 
@@ -23,14 +23,14 @@
 		<button type="button" v-else-if="Use.UseEmbedding && hasNativeShare()"
 						@click="nativeShare"
 						class="mp-btn mp-btn--float"
-						title="Compartir">
+						title="Compartir" aria-label="Compartir">
 			<i class="fas fa-share-alt" />
 		</button>
 
 		<mp-dropdown-menu v-if="!$isMobile()" :items="getHelpItems()" @itemClick="helpSelected" :floatRight="false"
 											icon="fas fa-question" variant="float" tooltip="Ayuda" />
 
-		<button v-if='Use.UseFavorites && user.Logged' type="button" class="mp-btn mp-btn--float" title="Agregar a favoritos" @click="setFavorite()">
+		<button v-if='Use.UseFavorites && user.Logged' type="button" class="mp-btn mp-btn--float" title="Agregar a favoritos" aria-label="Agregar a favoritos" @click="setFavorite()">
 			<i class="far fa-heart" />
 		</button>
 
@@ -224,12 +224,6 @@
 			toggleLabels() {
 				window.SegMap.ToggleShowLabels();
 			},
-			getLabelsActive(mode) {
-				if (this.toolbarStates.showLabels) {
-					return ' active';
-				}
-				return ' unselected';
-			},
 			geolocate() {
 				if (navigator.geolocation) {
 					navigator.geolocation.getCurrentPosition(function (position) {
@@ -244,8 +238,11 @@
 			setMode(mode) {
 				window.SegMap.SetSelectionMode(mode);
 			},
+			isModeSelected(mode) {
+				return this.toolbarStates.selectionMode === mode;
+			},
 			getActive(mode) {
-				if (this.toolbarStates.selectionMode === mode) {
+				if (this.isModeSelected(mode)) {
 					return ' is-selected';
 				}
 				return '';

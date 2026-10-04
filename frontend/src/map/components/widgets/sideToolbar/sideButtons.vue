@@ -17,7 +17,9 @@
               class="mp-icon-btn mp-icon-btn--lg mp-icon-btn--accent"
               :class="{ 'is-selected': activePanel === 'indicators', 'toolbar-button-last': sidebarPosition === 'bottom' }"
               @click="togglePanel('indicators')"
-              title="Explorar indicadores (Ctrl+I)">
+              title="Explorar indicadores (Ctrl+I)"
+              aria-label="Explorar indicadores"
+              :aria-pressed="$ariaPressed(activePanel === 'indicators')">
         <i class="fas fa-plus"></i>
       </button>
 
@@ -25,7 +27,9 @@
       <button class="mp-icon-btn mp-icon-btn--lg"
               :class="{ 'is-selected': activePanel === 'places' }"
               @click="togglePanel('places')"
-              title="Filtrar (Ctrl+F)">
+              title="Filtrar (Ctrl+F)"
+              aria-label="Filtrar"
+              :aria-pressed="$ariaPressed(activePanel === 'places')">
         <i class="fas fa-filter"></i>
       </button>
 
@@ -34,7 +38,9 @@
               class="mp-icon-btn mp-icon-btn--lg"
               :class="{ 'is-selected': activePanel === 'search' }"
               @click="togglePanel('search')"
-              title="Buscar (Ctrl+B)">
+              title="Buscar (Ctrl+B)"
+              aria-label="Buscar"
+              :aria-pressed="$ariaPressed(activePanel === 'search')">
         <i class="fas fa-search"></i>
       </button>
 
@@ -43,7 +49,9 @@
               class="mp-icon-btn mp-icon-btn--lg"
               :class="{ 'is-selected': activePanel === 'upload' }"
               @click="togglePanel('upload')"
-              title="Subir archivo georreferenciable">
+              title="Subir archivo georreferenciable"
+              aria-label="Subir archivo georreferenciable"
+              :aria-pressed="$ariaPressed(activePanel === 'upload')">
         <i class="fas fa-cloud-upload-alt"></i>
       </button>
     </div>
@@ -148,9 +156,6 @@ export default {
 
 <style scoped>
 .map-toolbar {
-	/* En esta barra el botón seleccionado es gris neutro, no el celeste del resto */
-	--mp-selected: #ddd;
-	--mp-text-selected: var(--mp-text-muted);
 	border: 1px solid rgb(165 164 164 / 50%);
   position: absolute;
   left: 20px;

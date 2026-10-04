@@ -3,7 +3,7 @@
       <div v-if="visible" class="suggestions-panel">
         <div class="suggestions-header">
           <div>💡 También puede interesarle...
-          <button class="mp-icon-btn mp-icon-btn--dismiss" @click="hide" style="float:right">
+          <button class="mp-icon-btn mp-icon-btn--dismiss" @click="hide" aria-label="Cerrar" style="float:right">
             <span aria-hidden="true">×</span>
           </button>
           </div>
@@ -12,15 +12,15 @@
           <div
             v-for="suggestion in suggestions"
             :key="suggestion.Id"
-            class="suggestion-item"
+            class="mp-list-row suggestion-item"
             @click="accept(suggestion)"
           >
             <span class="suggestion-icon">{{ suggestion.Icon }}</span>
             <div class="suggestion-content">
               <span class="suggestion-label">{{ suggestion.Label }}</span>
               <div class="suggestion-meta">
-                <span class="badge">{{ suggestion.ScorePercent }}% relevancia</span>
-                <span class="text-muted small">{{ suggestion.Reason }}</span>
+                <span class="mp-badge suggestion-badge">{{ suggestion.ScorePercent }}% relevancia</span>
+                <span class="mp-dimmed mp-text-small">{{ suggestion.Reason }}</span>
               </div>
             </div>
           </div>
@@ -111,19 +111,12 @@ import arr from '@/common/framework/arr';
 }
 
 .suggestion-item {
-  display: flex;
-  align-items: center;
   padding: 8px 12px;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.suggestion-item:hover {
-  background: #f5f5f5;
 }
 
 
-.badge {
+.suggestion-badge {
   background: #4CAF50;
   color: white;
   padding: 2px 8px;

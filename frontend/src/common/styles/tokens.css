@@ -7,15 +7,15 @@
 	/* Colores de marca y de selección */
 	--mp-primary: #0fa7d8;
 	--mp-selection: #2196f3;
+	--mp-selection-strong: #1976d2;
 
-	/* Texto e íconos */
+	/* Texto e íconos. Contraste sobre blanco: muted 5,7:1, faint 4,5:1 (texto
+	   secundario), ghost 3,4:1 (solo glifos). El deshabilitado queda exento. */
 	--mp-text: #333;
 	--mp-text-muted: #666;
-	--mp-text-faint: #999;
-	--mp-text-ghost: #bbb;
-	--mp-text-subtle: #a9a9a9;
+	--mp-text-faint: #767676;
+	--mp-text-ghost: #8c8c8c;
 	--mp-text-disabled: #d5d5d5;
-	--mp-text-selected: #485167;
 
 	/* Bordes y estados */
 	--mp-outline: rgb(165 164 164 / 50%);
@@ -23,9 +23,13 @@
 	--mp-hover: #e7e7e7;
 	--mp-pressed: #d4d4d4;
 	--mp-selected: #e9f2fe;
+	--mp-selected-hover: #d6ebfc;
+	--mp-hover-soft: #f5f5f5;
+	--mp-focus-ring: #90caf9;
 
 	/* Superficies */
 	--mp-surface: #fff;
+	--mp-surface-muted: #f1f1f1;
 	--mp-surface-translucent: #ffffffc0;
 
 	/* Radios */

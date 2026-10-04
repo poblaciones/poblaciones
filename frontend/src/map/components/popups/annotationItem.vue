@@ -2,19 +2,19 @@
 	<Modal :title="title" ref="showAnnotations" @ok="onSave" @cancel="onCancel" :clickOutsideToClose="false"
 				 :showCancel="true" :showOk="true" :backgroundColor="backgroundColor">
 		<div v-if="element">
-			<div v-if="element.Type != 'C' && element.Type != 'Q'" class="form-group">
+			<div v-if="element.Type != 'C' && element.Type != 'Q'" class="mp-field-group">
 				<label for="name">Nombre:</label>
 				<input type="text" ref="description" v-model="element.Description">
 			</div>
-			<div class="form-group">
+			<div class="mp-field-group">
 				<label for="description">Descripción:</label>
 				<textarea v-model="element.DescriptionLong"></textarea>
 			</div>
-			<div class="form-group">
+			<div class="mp-field-group">
 				<label for="color">Color:</label>
 				<input type="color" v-model="element.Color">
 			</div>
-			<div class="form-group">
+			<div class="mp-field-group">
 				<label for="list">Lista:</label>
 				<select v-model="element.AnnotationId">
 					<option v-for="item in lists" :key="item.Value" :value="item.Value">{{ item.Caption }}</option>

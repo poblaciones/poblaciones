@@ -1,0 +1,177 @@
+/*
+ * Disposición general del visor: paneles divididos, paneles flotantes, modo embebido.
+ */
+
+html,
+body {
+	height: 100%;
+	overflow-y: hidden;
+	margin: 0;
+	padding: 0;
+	cursor: default;
+}
+
+.mapsOvercontrols {
+	z-index: 900 !important;
+}
+
+.rightButton {
+	transition: right 0.3s ease;
+	position: fixed;
+	right: 0px;
+}
+
+.sidepanelOffset {
+	margin-left: 0px;
+}
+
+.gutter.gutter-horizontal {
+	background-color: #ffffff !important;
+	filter: contrast(0.675);
+}
+
+.split p {
+	padding: 20px;
+}
+
+.split {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.gutter {
+	background-color: #eee;
+	background-repeat: no-repeat;
+	background-position: 50%;
+}
+
+.gutter.gutter-vertical {
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+	cursor: ns-resize;
+}
+
+.gutter.gutter-horizontal {
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+	cursor: ew-resize;
+}
+
+.fixedBody {
+	position: absolute;
+	top: 40px;
+	bottom: 0px;
+}
+
+.split.split-horizontal,
+.gutter.gutter-horizontal {
+	height: 100%;
+	width: 100%;
+	float: left;
+}
+
+.split.split-vertical,
+.gutter.gutter-vertical {
+	width: 100%;
+}
+
+.embeddedOpener {
+	position: absolute;
+	background-color: #ffffff;
+	color: #666666;
+	opacity: 1;
+	right: 8px;
+	width: 32px;
+	text-align: center;
+	height: 32px;
+	top: 14px;
+	z-index: 500;
+	cursor: pointer;
+	border-radius: 2px;
+	padding: 5px 0px;
+	font-weight: bold;
+	box-shadow: rgb(0, 0, 0, 0.3) 0px 1px 4px -1px;
+}
+
+.work-offsetY {
+	margin-top: 0px;
+}
+
+.embeddedNoOpener {
+	position: absolute;
+	background-color: transparent;
+	left: 0;
+	bottom: 0;
+	z-index: 1;
+	height: 25px;
+	width: 75px;
+}
+
+.embedded {
+	position: absolute;
+	background-color: transparent;
+	left: 0;
+	top: 0;
+	z-index: 900;
+	height: 100%;
+	width: 100%;
+}
+
+.fab-wrapper {
+	z-index: 2 !important;
+}
+
+.logosBox {
+	bottom: 24px;
+	right: 95px;
+	z-index: 1000;
+	position: absolute;
+	background-color: transparent;
+	display: flex;
+	width: auto;
+	max-width: 70%;
+	max-height: 64px;
+}
+
+.floatRightPanel {
+	margin-right: 12px;
+	margin-top: 12px;
+	border-radius: 12px;
+	max-height: calc(100% - 95px - 80px);
+	display: flex;
+	top: 60px;
+	width: calc(30% - 2.5px);
+	min-width: min(90%, 340px);
+	position: absolute;
+	right: 0px;
+	z-index: 1020;
+	border: 1px solid rgb(165 164 164 / 50%);
+	height: unset !important;
+}
+
+#holder {
+	top: 0px;
+	height: 100%;
+	width: 100%;
+	position: absolute;
+}
+
+#panSummary {
+	display: flex;
+	flex-direction: column;
+	background-color: transparent !important;
+}
+
+@media (max-width: 768px) {
+	.logosBox {
+		display: none;
+	}
+
+	.floatRightPanel {
+		margin-right: 0px;
+		border-right: 0px;
+		border-bottom-right-radius: 0px !important;
+		border-top-right-radius: 0px !important;
+	}
+}

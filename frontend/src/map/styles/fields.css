@@ -1,0 +1,92 @@
+/*
+ * Campos de formulario y de diálogos: etiqueta/valor, radios y grupos.
+ */
+
+/* Reemplazo de .radio-inline de Bootstrap 3. */
+.mp-radio-inline {
+	position: relative;
+	display: inline-block;
+	padding-left: 20px;
+	margin-bottom: 0;
+	font-weight: 400;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.mp-radio-inline input[type="radio"] {
+	position: absolute;
+	margin-left: -20px;
+}
+
+.mp-radio-inline + .mp-radio-inline {
+	margin-top: 0;
+	margin-left: 10px;
+}
+
+/* Reemplazo de .form-group de Bootstrap 3. */
+.mp-field-group {
+	margin-bottom: 15px;
+}
+
+/* ---------- Texto auxiliar de diálogos ---------- */
+.quotation {
+	font-size: 12px;
+}
+
+.attachmentsDownloadPanel {
+	max-height: 120px;
+	overflow-y: auto;
+}
+
+/* Campos etiqueta/valor de los diálogos (reemplazan a las tablas de dos columnas) */
+.fld {
+	display: grid;
+	grid-template-columns: 150px minmax(0, 1fr);
+	column-gap: 12px;
+	padding: 6px 0;
+}
+.fld-label {
+	color: #666;
+}
+.fld-value {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.fld-value select {
+	max-width: 100%;
+}
+.fld-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+}
+/* En escritorio los campos agrupados siguen apilados; solo en mobile comparten renglón */
+.fld-pair {
+	display: contents;
+}
+
+@media (max-width: 768px) {
+	.fld {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 2px;
+		padding: 8px 0;
+	}
+	.fld-label {
+		font-size: 12.5px;
+		font-weight: 600;
+	}
+	.fld-pair {
+		display: flex;
+		gap: 12px;
+	}
+	.fld-pair > .fld {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+	.fld-pair select {
+		width: 100%;
+	}
+	.fld-hide-mobile {
+		display: none;
+	}
+}

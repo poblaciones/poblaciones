@@ -1,7 +1,7 @@
 <template>
   <span v-if="metadata">
 		<span class="exp-hiddable-block">
-			<button type="button" :title="sourceTitle" @click="clickFuente" class="mp-btn"><i class="fas fa-link"></i></button>
+			<button type="button" :title="sourceTitle" :aria-label="sourceTitle" @click="clickFuente" class="mp-btn"><i class="fas fa-link"></i></button>
 		</span>
   </span>
 </template>

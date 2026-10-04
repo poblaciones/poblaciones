@@ -34,6 +34,11 @@ const packageStubs = {
 
 const uiComponentStubs = ['vue-switches', 'vue-slider-component'];
 
+// Módulos de common sin dependencias que se prueban con su código real.
+const realCommonModules = {
+	'@/common/framework/ariaPlugin': path.resolve(moduleRoot, '..', 'common', 'framework', 'ariaPlugin.js'),
+};
+
 const commonStubs = {
 	'@/common/framework/str': 'str.mjs',
 	'@/common/framework/arr': 'arr.mjs',
@@ -80,6 +85,9 @@ export function resolve(specifier, context, nextResolve) {
 	if (commonStubs[specifier]) {
 		return { url: stubUrl(commonStubs[specifier]), shortCircuit: true };
 	}
+	if (realCommonModules[specifier]) {
+		return { url: pathToFileURL(realCommonModules[specifier]).href, shortCircuit: true };
+	}
 	if (specifier.startsWith('@/map/')) {
 		const target = resolveWithExtension(path.join(moduleRoot, specifier.substring('@/map/'.length)));
 		if (target === null) {
@@ -123,6 +131,9 @@ export function load(url, context, nextLoad) {
 		return nextLoad(url, context);
 	}
 	const filePath = fileURLToPath(url);
+	if (Object.values(realCommonModules).indexOf(filePath) !== -1) {
+		return { format: 'module', source: fs.readFileSync(filePath, 'utf8'), shortCircuit: true };
+	}
 	if (!filePath.startsWith(moduleRoot) || filePath.startsWith(testsDir)) {
 		return nextLoad(url, context);
 	}

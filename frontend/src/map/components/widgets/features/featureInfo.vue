@@ -6,7 +6,7 @@
 										+ preProcess(featureInfo.Image) + ');'"
 					 class="topImage">
 			</div>
-			<div class='panel card panel-body' style="box-shadow: none !important; margin-bottom: 0px; padding-bottom: 6px; background-color: transparent !important " :class="(enabled ? '' : 'text-muted')">
+			<div class='mp-surface mp-surface--padded' style="box-shadow: none !important; margin-bottom: 0px; padding-bottom: 6px; background-color: transparent !important " :class="(enabled ? '' : 'mp-dimmed')">
 				<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
 				<h5 v-if="hasTitle" class="titleDialog">
 					<div @click="doBack" v-if='featureInfo.back' class='hand' style='background-color:pink'>&lt;&lt; Volver al listado</div>
@@ -20,11 +20,11 @@
 					</a>
 					<div style="float: right" class="exp-hiddable-block" v-if="featureInfo.Key && featureInfo.Key.MetricId">
 						<button type="button" :disabled="isLast"
-										class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" :title="(isLast ? '' : 'Siguiente' + positionalData)" @click="next()">
+										class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" :title="(isLast ? '' : 'Siguiente' + positionalData)" aria-label="Siguiente" @click="next()">
 							<i class="fas fa-chevron-right" />
 						</button>
 						<button type="button" :disabled="isFirst" style="margin-right: -2px"
-										class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" :title="(isFirst ? '' : 'Anterior' + positionalData)" @click="previous()">
+										class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" :title="(isFirst ? '' : 'Anterior' + positionalData)" aria-label="Anterior" @click="previous()">
 							<i class="fas fa-chevron-left" />
 						</button>
 					</div>
@@ -34,7 +34,7 @@
 			<div style="overflow-y: auto; padding:15px " class="thinScroll">
 				<div style="float: right" class="exp-hiddable-block" v-if="hasPerimeter && usePerimeter">
 					<button type="button" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--ghost" style="border: 1px solid grey; border-radius: 12px; width: 30px;"
-									title="Seleccionar el perímetro" @click="selectPerimeter">
+									title="Seleccionar el perímetro" aria-label="Seleccionar el perímetro" @click="selectPerimeter">
 						<i class="fas fa-circle-notch" />
 
 					</button>

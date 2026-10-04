@@ -1,0 +1,112 @@
+/*
+ * Contenido de los paneles de resumen y de los diálogos: encabezados, filas y bloques de texto.
+ */
+
+.section-title {
+	font-size: 14px;
+	color: #333;
+	letter-spacing: 0.5px;
+	margin-bottom: 8px;
+}
+
+.dragHandle:hover {
+	visibility: visible;
+}
+
+.metricPanel > .dragHandle {
+	visibility: hidden;
+}
+
+.metricPanel:hover > .dragHandle {
+	visibility: visible;
+}
+
+.metricPanel {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.dragHandle {
+	visibility: visible;
+	height: 14px;
+	margin-top: -13px;
+	color: #cccccc;
+	position: relative;
+	overflow: hidden;
+	cursor: move;
+	text-align: center;
+	font-size: 24px;
+}
+
+.warningBox {
+	font-size: 13px;
+	line-height: 1.4em;
+	margin-top: 4px;
+}
+
+.moderateHr {
+	margin-top: 0.9rem;
+	margin-bottom: 1.1rem;
+	border-color: #ccc;
+}
+
+.drop {
+	vertical-align: top !important;
+	padding-top: 5px;
+}
+
+.sourceRow {
+	position: relative;
+	padding: 0.6rem 0rem 0rem 0rem;
+}
+
+.coverageBox {
+	padding: 0px 0px 12px 0px;
+	font-size: 13px;
+	text-align: justify;
+}
+
+.localTable td {
+	border: 0px;
+	padding: 6px;
+	vertical-align: top;
+}
+
+.popupSubTitle {
+	font-weight: 600;
+	text-transform: uppercase;
+	font-size: 12px;
+	padding-top: 6px;
+	padding-bottom: 4px;
+}
+
+.summaryRow {
+	padding: 0rem 0rem 0.475rem 0rem;
+	font-size: 0.75em;
+	color: #555;
+}
+
+.summaryBlock {
+	padding: 0.2rem 0rem 0.3rem 0rem;
+}
+
+h4.title {
+	padding: 0px 0px 7px 0px;
+}
+
+.sourceInfo {
+	padding-top: 2px;
+	font-size: 12px;
+	float: right;
+}
+
+.statsHeader {
+	text-align: right;
+	color: #a9a9a9;
+	padding-bottom: 0px !important;
+	font-weight: 300;
+	font-size: 13px;
+	height: 16px;
+	padding: 0px;
+	text-transform: uppercase;
+}

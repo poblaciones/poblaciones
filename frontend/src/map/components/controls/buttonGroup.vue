@@ -2,8 +2,8 @@
 
 	<div class="mp-btn-group">
 		<button type="button" v-for="value, key in items"
-						@mouseup="change(value)"  @click="change(value)"
-						class="mp-btn" :key="key" :class="getActive(value)">
+						@click="change(value)"
+						class="mp-btn" :key="key" :class="getActive(value)" :aria-pressed="$ariaPressed(isSelected(value))">
 			{{ key }}
 		</button>
 	</div>
@@ -30,8 +30,11 @@ export default {
 	computed: {
 	},
 	methods: {
+		isSelected(v) {
+			return v === this.value;
+		},
 		getActive(v) {
-			if (v === this.value) {
+			if (this.isSelected(v)) {
 				return ' is-selected';
 			} else {
 				return '';

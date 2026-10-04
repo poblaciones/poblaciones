@@ -1,0 +1,197 @@
+/*
+ * Contenido dibujado sobre el mapa: etiquetas, tooltips de datos, marcadores y enlaces de texto.
+ */
+
+:root {
+	--color-texto-leyenda: #333;
+	--color-fondo-leyenda: #ffffff9e;
+}
+
+.ls {
+	fill: none !important;
+}
+
+.sl span {
+	opacity: .5;
+	color: #333;
+	text-shadow: 0.75px 0.75px 1px #fff, -0.75px -1px 1px #fff, -0.75px 0.75px 1px #fff, 0.75px -1px 1px #fff;
+}
+
+.innerBoxTooltip {
+	right: unset !important;
+	max-height: 200px !important;
+	overflow: auto !important;
+	box-shadow: 0 4px 10px rgba(60,64,67,.28);
+	margin-top: 20px;
+	padding-left: 0px;
+}
+
+.innerBox {
+	pointer-events: none;
+	position: relative;
+	max-height: 3.5em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	right: 50%;
+	color: #5a626d;
+	bottom: 0.4em;
+	text-align: center;
+}
+
+.activePath {
+	stroke: #FFF;
+	stroke-opacity: 1;
+	stroke-width: 2px;
+	fill: none;
+	vector-effect: non-scaling-stroke;
+}
+
+.sat.sl span {
+	opacity: .75 !important;
+}
+
+.sat span {
+	text-shadow: 0.75px 0.75px 1px #000, -0.75px -1px 1px #000, -0.75px 0.75px 1px #000, 0.75px -1px 1px #000 !important;
+	color: #fff !important;
+}
+
+.sat .ibLink {
+	color: #fff !important;
+}
+
+.sat .ibLink:hover {
+	color: #5591ec !important;
+	text-decoration: none !important;
+}
+
+.ibTooltipNoYOffset {
+	margin-top: -10px;
+}
+
+.tpValueLine {
+	border-bottom: 1px solid #666;
+	margin-left: -8px;
+	margin-right: -8px;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+.ibTooltip {
+	color: #5a626d;
+	pointer-events: none;
+	cursor: pointer;
+	background-color: #ffffff;
+	padding: 8px 8px 6px 8px;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 4px 10px rgba(60,64,67,.28);
+}
+
+.ibTooltipOffsetLeft {
+	margin-left: 9px;
+	max-width: unset !important;
+}
+
+.ibLinkTooltip {
+	pointer-events: all;
+}
+
+.ibLink {
+	color: #5a626d;
+	cursor: pointer;
+	pointer-events: all;
+}
+
+.ibLink:hover {
+	color: #2e8cff;
+	text-decoration: none !important;
+}
+
+.bottomBox {
+	position: relative;
+	/* pointer-events: none; */
+	right: 50%;
+	bottom: 0.4em;
+	text-align: center;
+}
+
+.mapLabels {
+	max-width: 200px;
+	background: transparent;
+	border: 0px solid black;
+	position: absolute;
+	font-weight: 400;
+	color: #333;
+	font-size: 12px;
+	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
+}
+
+.markerSelectedLabel {
+	text-shadow: .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px .75px 1px #fff, .75px -1px 1px #fff, .75px .75px 1px #fff, -.75px -1px 1px #fff, -.75px 1px 1px #fff, .75px -.75px 1px #FFF;
+	transform: translateX(calc(50% + 17px));
+}
+
+.mapLabelsLarger {
+	max-width: 250px;
+	font-size: 16px;
+}
+
+.drawing-active .ibLink:hover {
+	color: inherit !important;
+}
+
+.bItem {
+	border: 1px solid #999;
+	padding-right: 6px;
+	padding-left: 6px;
+	border-right-width: 0px;
+	white-space: nowrap;
+}
+
+.bItemRL {
+	border-bottom-left-radius: 1em;
+	border-top-left-radius: 1em;
+}
+
+.bItemRR {
+	border-bottom-right-radius: 1em;
+	border-top-right-radius: 1em;
+	border-right-width: 1px;
+}
+
+.bItemGroup {
+	border-top: 1px solid #999;
+	border-bottom: 1px solid #999;
+	border-radius: 1em;
+}
+
+.copyrightText {
+	color: #000000;
+}
+
+.copyrightText:active {
+	color: #000000;
+}
+
+.copyrightText:visited {
+	color: #000000;
+}
+
+.copyrightText:hover {
+	text-decoration: none;
+	color: #000000;
+}
+
+.copyright {
+	padding: 0px 0px 0px 1px;
+	user-select: none;
+	height: 14px;
+	line-height: 14px;
+	background-color: rgba(255, 255, 255, .5);
+	opacity: 0.9;
+	border-top-left-radius: 6px;
+	font-family: Roboto, Arial, sans-serif;
+	font-size: 11px;
+	white-space: nowrap;
+	vertical-align: middle;
+}

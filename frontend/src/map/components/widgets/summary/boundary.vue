@@ -36,7 +36,8 @@
 				<button v-for="(ver, index) in boundary.properties.Versions" :key="ver.Id" type="button"
 								@click="changeSelectedVersionIndex(index)"
 								class="mp-btn exp-serie-item"
-								:class="getActive(index)">
+								:class="getActive(index)"
+								:aria-pressed="$ariaPressed(isVersionSelected(index))">
 					{{ ver.Name }}
 				</button>
 			</div>
@@ -104,6 +105,9 @@ export default {
 			this.$set(version, 'LabelsCollapsed', !version.LabelsCollapsed);
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
+		isVersionSelected(index) {
+			return this.boundary.properties.SelectedVersionIndex === index;
+		},
 		getActive(index) {
 			if (this.boundary.properties.Versions.length == 1) {
 				return ' frozen';
@@ -114,7 +118,7 @@ export default {
 		},
 		getMuted() {
 			if (this.boundary.IsUpdatingSummary) {
-				return ' text-muted';
+				return ' mp-dimmed';
 			} else {
 				return '';
 			}

@@ -9,6 +9,7 @@
       @mouseleave="handleMouseLeave"
 
             :title="'Cambiar a ' + nextMapStyle.name.toLowerCase()"
+      :aria-label="'Cambiar a ' + nextMapStyle.name.toLowerCase()"
     >
       <div class="map-style-icon preview-default" :style="{ backgroundImage: 'url(' + nextMapStyle.asset + ')' }"></div>
     </button>
@@ -17,7 +18,7 @@
     <transition name="fade">
       <div
         v-if="isExpanded" v-on-clickaway="closePanel"
-        class="map-options-panel panel card"
+        class="map-options-panel mp-surface"
         @mouseenter="keepPanelOpen = true"
         @mouseleave="handlePanelLeave"
         v-touch:swipe.bottom="closePanel"
@@ -31,7 +32,7 @@
           <div class="map-layers-list">
             <div v-for="layer, index in activeLayers"
                  :key="index"
-                 class="layer-item hand" :class="(layer.Separator ? 'layer-separator' : '')"
+                 class="mp-list-row layer-item hand" :class="(layer.Separator ? 'layer-separator' : '')"
                  @click="toggleLayer(layer)">
               <div class="layer-info">
                 <i :class="layer.Icon" class="layer-icon"></i>
@@ -489,16 +490,9 @@
 	}
 
 .layer-item {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   padding: 8px 6px;
   border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.layer-item:hover {
-  background-color: #f8f9fa;
 }
 
 .layer-info {

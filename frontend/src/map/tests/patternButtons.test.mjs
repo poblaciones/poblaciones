@@ -36,3 +36,11 @@ it('con customPattern definido, manda sobre defaultPattern', () => {
 	expect(buttons.isActive(0)).toBe(' is-selected');
 	expect(buttons.isActive(1)).toBe('');
 });
+
+describe('patternButtons: estado presionado para aria-pressed');
+
+it('isPressed coincide con la clase de seleccionado', () => {
+	const buttons = mount('', 1);
+	expect(buttons.isPressed(1)).toBe(true);
+	expect(buttons.isPressed(0)).toBe(false);
+});

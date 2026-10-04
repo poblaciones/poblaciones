@@ -29,12 +29,12 @@
 		<div class="sourceRow exp-hiddable-block">
 			<div class="mp-btn-group">
 				<button v-for="sizeItem in possibleSizes" type="button" :key="sizeItem" :id="sizeItem"
-								 onmouseup="this.blur()" class="mp-btn" :class="getActiveSize(sizeItem)"
+								 class="mp-btn" :class="getActiveSize(sizeItem)" :aria-pressed="$ariaPressed(isSizeSelected(sizeItem))"
 								@click="changeSize(sizeItem)">{{ sizeItem }}</button>
 			</div>
 			<div class="mp-btn-group">
 				<button v-for="direction in possibleDirections" type="button" :key="direction.Value" :id="direction.Value"
-								 onmouseup="this.blur()" class="mp-btn" :class="getActiveDirection(direction.Value)"
+								 class="mp-btn" :class="getActiveDirection(direction.Value)" :aria-pressed="$ariaPressed(isDirectionSelected(direction.Value))" :aria-label="direction.Tooltip"
 								@click="changeDirection(direction.Value)" :title="direction.Tooltip"><i :class="direction.Icon" /></button>
 			</div>
 		</div>
@@ -86,7 +86,7 @@ export default {
 	methods: {
 		getMuted() {
 			if (this.metric.IsUpdatingRanking) {
-				return ' text-muted';
+				return ' mp-dimmed';
 			} else {
 				return '';
 			}
@@ -137,15 +137,21 @@ export default {
 			this.updateRanking();
 			window.SegMap.SaveRoute.UpdateRoute();
 		},
+		isDirectionSelected(direction) {
+			return direction === this.metric.RankingDirection;
+		},
 		getActiveDirection(direction) {
-			if (direction === this.metric.RankingDirection) {
+			if (this.isDirectionSelected(direction)) {
 				return ' is-selected';
 			} else {
 				return '';
 			}
 		},
+		isSizeSelected(currentSize) {
+			return currentSize === this.metric.RankingSize;
+		},
 		getActiveSize(currentSize) {
-			if (currentSize === this.metric.RankingSize) {
+			if (this.isSizeSelected(currentSize)) {
 				return ' is-selected';
 			} else {
 				return '';

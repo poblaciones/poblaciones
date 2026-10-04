@@ -2,7 +2,7 @@
   <transition name="slide-right">
     <div ref="floatingPanel" class="indicator-selector-wrapper sidepanelOffset work-offsetY" v-if="isOpen"
          :style="[panelStyle, positionStyle]" v-on-clickaway="closePanel" v-touch:swipe.left="panLeftSwipeClose">
-      <div class="floating-panel panel card">
+      <div class="floating-panel mp-surface">
         <!-- Encabezado -->
         <div class="panel-header">
           <div class="titleDialog">{{ title }}</div>
@@ -11,21 +11,25 @@
                     class="mp-icon-btn mp-icon-btn--muted"
                     :class="{ 'is-selected': isMulti }"
                     @click="toggleMultiSelect"
-                    :title="isMulti ? 'Salir de selección múltiple' : 'Selección múltiple'"
-                    :aria-pressed="isMulti ? 'true' : 'false'">
+                    :title="multiSelectLabel"
+                    :aria-label="multiSelectLabel"
+                    :aria-pressed="$ariaPressed(isMulti)">
               <i class="fas fa-tasks"></i>
             </button>
             <button v-if="hasHeaders"
                     class="mp-icon-btn mp-icon-btn--muted"
                     @click="toggleCollapseAll"
-                    :title="allCollapsed ? 'Expandir todos' : 'Colapsar todos'">
+                    :title="collapseAllLabel"
+                    :aria-label="collapseAllLabel">
               <i :class="allCollapsed ? 'fas fa-caret-right' : 'fas fa-caret-down'"></i>
             </button>
             <button class="mp-icon-btn mp-icon-btn--muted"
                     :class="{ 'is-selected': listModeActive }"
                     :disabled="!showingCards && !listModeActive"
                     @click="toggleViewMode"
-                    :title="listModeActive ? 'Ver como grilla' : 'Ver como listado'">
+                    :title="viewModeLabel"
+                    :aria-label="viewModeLabel"
+                    :aria-pressed="$ariaPressed(listModeActive)">
               <i class="fas fa-stream"></i>
             </button>
             <button class="mp-icon-btn mp-icon-btn--dismiss" @click="closePanel" title="Cerrar" aria-label="Cerrar">
@@ -39,7 +43,8 @@
           <button v-if="navStack.length || searchQuery"
                   class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted chips-clear"
                   @click.stop="goHome"
-                  title="Volver al inicio">
+                  title="Volver al inicio"
+                  aria-label="Volver al inicio">
             ×
           </button>
           <span class="breadcrumb-item" :class="{ 'active': !navStack.length && !searchQuery }" @click="goHome">
@@ -65,27 +70,27 @@
               ×
             </button>
             <div class="chips-scroll thinScroll">
-              <div v-for="chip in selection" :key="chip.Key || chip.Id" class="chip" :title="chip.Description">
-                <span class="chip-label">{{ chip.Caption }}</span>
+              <div v-for="chip in selection" :key="chip.Key || chip.Id" class="mp-chip" :title="chip.Description">
+                <span class="mp-chip-label">{{ chip.Caption }}</span>
                 <button class="mp-chip-remove" @click="removeChip(chip)" :aria-label="'Quitar ' + chip.Caption">×</button>
               </div>
             </div>
           </div>
 
           <div class="search-container">
-            <i class="fas fa-search search-icon"></i>
+            <i class="fas fa-search mp-search-icon"></i>
             <input type="text"
-                   class="search-input"
+                   class="mp-search-input"
                    v-model="searchQuery"
                    :placeholder="dynamicPlaceholder"
                    ref="searchInput"
                    @keyup.esc="onEscape" />
-            <button v-if="searchQuery" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
+            <button v-if="searchQuery" class="mp-icon-btn mp-icon-btn--sm mp-icon-btn--dismiss mp-icon-btn--muted mp-search-clear" @click="clearSearch" title="Borrar búsqueda" aria-label="Borrar búsqueda">×</button>
           </div>
         </div>
 
         <!-- Cuerpo (scrolleable) -->
-        <div class="panel-body thinScroll">
+        <div class="indicator-body thinScroll">
           <!-- Grid navegable (raíz o sub-categorías/tipos), modo árbol, sin búsqueda -->
           <div v-if="!searchQuery && currentBranches.length && !listModeActive">
             <template v-if="!navStack.length && groupCategories">
@@ -133,7 +138,7 @@
 
             <!-- Acción de grupo: agrega el nivel actual como capa (no marca hojas) -->
             <div v-if="!searchQuery && (showAddAll || !filterMode) && currentLeafItems.length"
-                 class="indicator-item add-all hand"
+                 class="mp-list-item mp-list-item--muted indicator-item hand"
                  data-kbd-item="group"
                  @click="onSelectGroup">
               <div class="indicator-content">
@@ -169,7 +174,7 @@
               <!-- Rama navegable (modo listado: nivel 1 de delimitaciones) -->
               <div v-else-if="row.type === 'branch'"
                    :key="row.key"
-                   class="indicator-item hand"
+                   class="mp-list-item indicator-item hand"
                    data-kbd-item="branch"
                    @click="enterListBranch(row.parent, row.branch)">
                 <div class="indicator-content">
@@ -186,7 +191,7 @@
               <!-- Fila de hoja -->
               <div v-else-if="row.type === 'item'"
                    :key="row.key"
-                   class="indicator-item hand"
+                   class="mp-list-item indicator-item hand"
                    data-kbd-item="item"
                    :class="{ 'is-selected': isSelected(row.item) }"
                    @click="onItemClick(row.item, row.container)">
@@ -204,7 +209,8 @@
                 </div>
                 <div class="indicator-actions">
                   <button v-if="!isMobile && hasInfo(row.item)"
-                          class="mp-icon-btn mp-icon-btn--muted btn-preview"
+                          class="mp-icon-btn mp-icon-btn--muted"
+                          :aria-label="'Información de ' + row.item.Name"
                           @mouseenter="showTooltip($event, row.item)"
                           @mouseleave="hideTooltip"
                           @click.stop="preventDefault">
@@ -227,9 +233,9 @@
            (activo) o los agrega todos (inactivo, default). Visible al ver
            delimitaciones, también en resultados de búsqueda. -->
         <div v-if="showDrillToggle" class="add-all-bar">
-          <label class="sw-toggle">
+          <label class="mp-switch">
             <input type="checkbox" v-model="drillIntoElements" />
-            <span class="sw-track"><span class="sw-thumb"></span></span>
+            <span class="mp-switch-track"><span class="mp-switch-thumb"></span></span>
             <span class="sw-label">Explorar las delimitaciones al seleccionar</span>
           </label>
         </div>
@@ -243,7 +249,7 @@
             </span>
           </div>
           <div class="suggestions-content thinScroll" :class="{ 'expanded': showAllSuggestions }">
-            <div v-for="item in visibleSuggestions" :key="item.Id" class="suggestion-item hand" @click="onItemClick(item)">
+            <div v-for="item in visibleSuggestions" :key="item.Id" class="mp-list-row mp-list-row--strong suggestion-item hand" @click="onItemClick(item)">
               <div class="indicator-content">
                 <div class="list-icon"><i :class="getIconClass(item.Icon)"></i></div>
                 <div class="indicator-info">
@@ -269,7 +275,7 @@
           <div v-for="(sec, i) in tooltip.item.Info.Sections" :key="i" class="preview-section">
             <div class="preview-label">{{ sec.Label }}</div>
             <div v-if="sec.Tags" class="year-tags">
-              <span v-for="(t, ti) in sec.Tags" :key="ti" class="year-tag">{{ t }}</span>
+              <span v-for="(t, ti) in sec.Tags" :key="ti" class="mp-chip-tag">{{ t }}</span>
             </div>
             <ul v-else-if="sec.List" :class="sec.List.length === 1 ? 'variablesSingle' : 'variables'">
               <li v-for="(v, vi) in sec.List" :key="vi">{{ v }}</li>
@@ -426,6 +432,24 @@ export default {
       return window.SegMap && window.SegMap.Configuration && window.SegMap.Configuration.IsMobile;
     },
     isMulti() { return this.internalMulti; },
+    multiSelectLabel() {
+      if (this.isMulti) {
+        return 'Salir de selección múltiple';
+      }
+      return 'Selección múltiple';
+    },
+    collapseAllLabel() {
+      if (this.allCollapsed) {
+        return 'Expandir todos';
+      }
+      return 'Colapsar todos';
+    },
+    viewModeLabel() {
+      if (this.listModeActive) {
+        return 'Ver como grilla';
+      }
+      return 'Ver como listado';
+    },
     selectedIds() { return new Set(this.selection.map(s => s.Id)); },
     visibleSuggestions() {
       return this.showAllSuggestions ? this.suggestions : this.suggestions.slice(0, 3);
@@ -842,7 +866,7 @@ export default {
       this.navStack = this.navStack.concat(node);
       this.searchQuery = '';
       this.$nextTick(() => {
-        const body = this.$el.querySelector('.panel-body');
+        const body = this.$el.querySelector('.indicator-body');
         if (body) body.scrollTop = 0;
       });
     },
@@ -955,7 +979,7 @@ export default {
       this.navStack = parent ? [parent, branch] : [branch];
       this.searchQuery = '';
       this.$nextTick(() => {
-        const body = this.$el.querySelector('.panel-body');
+        const body = this.$el.querySelector('.indicator-body');
         if (body) body.scrollTop = 0;
       });
     },
@@ -1078,7 +1102,7 @@ export default {
 .breadcrumb-sep { margin: 0 8px; color: #ccc; }
 
 /* Cuerpo */
-	.panel-body {
+	.indicator-body {
 		flex: 1;
 		overflow-y: auto;
 		padding:  4px 15px 20px 15px;
@@ -1105,19 +1129,6 @@ export default {
 .chips-scroll::-webkit-scrollbar { width: 6px; }
 .chips-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
 .chips-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-	.chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		background: #e9f2fd;
-		color: #666;
-		border: 1px solid rgb(165 164 164 / 16%) !important;
-    border-radius: 14px;
-		padding: 4px 6px 4px 12px;
-		font-size: 13px;
-		max-width: 100%;
-	}
-.chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
 
 /* Búsqueda */
 	/* Search Input */
@@ -1133,7 +1144,7 @@ export default {
   text-align: center; transition: all 0.2s; background: white;
 }
 .category-card:hover {
-  border-color: #2196F3; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15); transform: translateY(-2px);
+  border-color: var(--mp-selection); box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15); transform: translateY(-2px);
 }
 .category-card.featured { background: linear-gradient(135deg, #c3c3c3 0%, #818181 100%); color: white; border: none; }
 .category-card.featured .category-name { color: white; }
@@ -1149,12 +1160,6 @@ export default {
 .category-count { font-size: 13px; color: #999; padding-top: 2px; line-height: 1.3; }
 
 .add-all-bar { padding: 8px 14px; border-top: 1px solid #eee; background: #fafafa; flex: 0 0 auto; }
-.add-all-bar .sw-toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #455a64; cursor: pointer; user-select: none; }
-.add-all-bar .sw-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
-.add-all-bar .sw-track { position: relative; width: 32px; height: 17px; background: #cfd8dc; border-radius: 9px; transition: background 0.15s; flex: 0 0 auto; }
-.add-all-bar .sw-thumb { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; background: #fff; border-radius: 50%; transition: transform 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
-.add-all-bar .sw-toggle input:checked + .sw-track { background: #1976d2; }
-.add-all-bar .sw-toggle input:checked + .sw-track .sw-thumb { transform: translateX(15px); }
 
 /* Separadores / encabezados de sección (colapsables) */
 	.source-header {
@@ -1178,36 +1183,19 @@ export default {
 .source-header-count { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
 .source-header-caret { width: 14px; text-align: center; font-size: 13px; }
 .source-header-addall {
-  color: #1976d2;
+  color: var(--mp-selection-strong);
   cursor: pointer;
   font-size: 13px;
   padding: 2px 4px;
   border-radius: 4px;
 }
-.source-header-addall:hover { background: #e9f2fd; }
+.source-header-addall:hover { background: var(--mp-selected); }
 
-/* Items */
-	.indicator-item {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 8px;
-		border-radius: 26px;
-		margin-bottom: 2px;
-		padding-left: 25px;
-	}
-.indicator-item:hover { background-color: #eee; }
-.indicator-item.is-selected { background-color: #e9f2fd; }
-.indicator-item.is-selected:hover { background-color: #d6ebfc; }
-.indicator-item.add-all { background-color: #f1f1f1; }
-.indicator-item.add-all:hover { background-color: #e8e8e8; }
 /* Elemento activo por teclado (KeyboardAwareList) */
-.indicator-item[data-kbd-active] { background-color: #e3e3e3; box-shadow: inset 0 0 0 2px #90caf9; }
-.indicator-item.is-selected[data-kbd-active] { background-color: #d6ebfc; }
 .category-card[data-kbd-active] {
-  border-color: #2196F3; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+  border-color: var(--mp-selection); box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
 }
-.search-more[data-kbd-active] { background: #e9f2fd; }
+.search-more[data-kbd-active] { background: var(--mp-selected); }
 
 .indicator-content { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 
@@ -1223,23 +1211,16 @@ export default {
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; color: white; transition: all 0.15s; margin-right: 4px;
 }
-.selcheck.checked { background: #2196F3; border-color: #2196F3; }
-.selcheck.partial { background: #2196F3; border-color: #2196F3; }
-.indicator-item.is-selected .selcheck:not(.checked) { border-color: #2196F3; }
+.selcheck.checked { background: var(--mp-selection); border-color: var(--mp-selection); }
+.selcheck.partial { background: var(--mp-selection); border-color: var(--mp-selection); }
+.indicator-item.is-selected .selcheck:not(.checked) { border-color: var(--mp-selection); }
 
-
-.btn-preview {
-  height: 28px;
-  margin: 0 2px 0 1px;
-  border-radius: 14px;
-  font-size: 13.5px;
-}
 
 .no-results { text-align: center; color: #999; padding: 40px 16px; font-style: italic; font-size: 15px; }
 .no-results-broaden { margin-top: 12px; font-style: normal; }
-.no-results-link { color: #2196F3; font-size: 14px; cursor: pointer; text-decoration: underline; }
-.no-results-link:hover { color: #1976D2; }
-.search-more { text-align: center; color: #1976d2; padding: 12px 16px; font-size: 13px; cursor: pointer; border-top: 1px solid #eee; }
+.no-results-link { color: var(--mp-selection); font-size: 14px; cursor: pointer; text-decoration: underline; }
+.no-results-link:hover { color: var(--mp-selection-strong); }
+.search-more { text-align: center; color: var(--mp-selection-strong); padding: 12px 16px; font-size: 13px; cursor: pointer; border-top: 1px solid #eee; }
 .search-more:hover { background: #f5f9ff; }
 
 /* Sugerencias */
@@ -1252,17 +1233,14 @@ export default {
 .suggestion-header {
   padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0;
 }
-.more-link { color: #2196F3; font-size: 13px; font-weight: 500; transition: color 0.2s; }
-.more-link:hover { color: #1976D2; text-decoration: underline; }
+.more-link { color: var(--mp-selection); font-size: 13px; font-weight: 500; transition: color 0.2s; }
+.more-link:hover { color: var(--mp-selection-strong); text-decoration: underline; }
 .suggestions-content { flex: 1; overflow-y: hidden; padding: 8px 24px 12px 24px; max-height: 150px; }
 .suggestions-content.expanded { overflow-y: auto; max-height: 245px; }
 .suggestions-content.thinScroll::-webkit-scrollbar { width: 6px; }
 .suggestions-content.thinScroll::-webkit-scrollbar-track { background: #f1f1f1; }
 .suggestions-content.thinScroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-.suggestion-item {
-  display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: background-color 0.2s; margin-bottom: 4px;
-}
-.suggestion-item:hover { background-color: #e9ecef; }
+.suggestion-item { padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; }
 
 /* Tooltip */
 .preview-tooltip {
@@ -1282,7 +1260,6 @@ export default {
 .variablesSingle { padding-left: 0; list-style: none; }
 .variables { padding-left: 20px; }
 .year-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.year-tag { background: rgba(255, 255, 255, 0.15); padding: 4px 10px; border-radius: 4px; font-size: 12px; color: #e9e9e9; }
 
 /* Fade */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
