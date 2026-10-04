@@ -24,7 +24,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 	mode: 'production',
 	optimization: {
     minimize: true,
-		minimizer: [new CssMinimizerPlugin()],
+		minimizer: ['...', new CssMinimizerPlugin()],
   },
 	module: {
 		rules: [
