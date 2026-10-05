@@ -10,8 +10,12 @@
 					<chevron-up-icon v-else title="Ocultar categorías" />
 				</span>
 			</div>
-			<metricChart v-if="useCharts && metric.ShowChart == 1 && metric.useChart()" v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
-			<metricValues v-show="!version.LabelsCollapsed && isActive(index)" :metric="metric" :variable="variable" />
+			<mp-collapse>
+				<div v-show="isDetailVisible(index)" class="variableDetail">
+					<metricChart v-if="useCharts && metric.ShowChart == 1 && metric.useChart()" :metric="metric" :variable="variable" />
+					<metricValues :metric="metric" :variable="variable" />
+				</div>
+			</mp-collapse>
 		</div>
 		<div v-if="hasComparableVariables && hasNonComparableVariables" class="coverageBox" style="padding: 12px 0px 0px 0px">
 			<sup>+</sup> {{ hiddenLegend }}
@@ -24,6 +28,7 @@ import h from '@/map/js/helper';
 import str from '@/common/framework/str';
 import metricValues from './metricValues';
 import metricChart from './metricChart';
+import MpCollapse from '@/map/components/controls/mpCollapse';
 import ChevronDownIcon from 'vue-material-design-icons/ChevronDown.vue';
 import ChevronUpIcon from 'vue-material-design-icons/ChevronUp.vue';
 // https://materialdesignicons.com/cdn/1.9.32/
@@ -34,6 +39,7 @@ export default {
 	components: {
 		metricValues,
 		metricChart,
+		MpCollapse,
 		ChevronDownIcon,
 		ChevronUpIcon
 	},
@@ -116,6 +122,9 @@ export default {
 				return '';
 			}
 		},
+		isDetailVisible(index) {
+			return !this.version.LabelsCollapsed && this.isActive(index);
+		},
 		isActive(index) {
 			return this.metric.SelectedLevel() == this.level &&
 				(index === this.level.SelectedVariableIndex);
@@ -168,13 +177,9 @@ export default {
 
 <style scoped>
 
-.variableBlock
+.variableDetail
 {
-	padding: 0.2rem 0rem 0.2rem 0rem;
-}
-.variablesBlock
-{
-	padding: 0.5rem 0rem 1.5rem 0rem;
+	display: flow-root;
 }
 .fa-left
 {

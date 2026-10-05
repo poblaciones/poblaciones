@@ -1,6 +1,9 @@
 /*
  * Ítems de listas. El aspecto (fondos, hover, selección, foco de teclado) es de estas clases;
  * la disposición interna de cada ítem (columnas, íconos, textos) la define el componente.
+ *
+ * Los :hover van dentro de @media (hover: hover): en pantallas táctiles el hover queda aplicado al ítem donde
+ * se apoyó el dedo, y al desplazar la lista parecería que el ítem fue elegido.
  */
 
 /* Renglón en forma de pastilla: selector de indicadores y resultados de búsqueda. */
@@ -13,16 +16,20 @@
 	border-radius: 26px;
 }
 
-.mp-list-item:hover {
-	background-color: var(--mp-hover);
+@media (hover: hover) {
+	.mp-list-item:hover {
+		background-color: var(--mp-hover);
+	}
 }
 
 .mp-list-item.is-selected {
 	background-color: var(--mp-selected);
 }
 
-.mp-list-item.is-selected:hover {
-	background-color: var(--mp-selected-hover);
+@media (hover: hover) {
+	.mp-list-item.is-selected:hover {
+		background-color: var(--mp-selected-hover);
+	}
 }
 
 .mp-list-item--muted {
@@ -46,11 +53,13 @@
 	transition: background-color var(--mp-transition);
 }
 
-.mp-list-row:hover {
-	background-color: var(--mp-hover-soft);
-}
+@media (hover: hover) {
+	.mp-list-row:hover {
+		background-color: var(--mp-hover-soft);
+	}
 
-/* Para listas que ya están sobre un fondo gris, donde el hover suave no se distingue. */
-.mp-list-row--strong:hover {
-	background-color: var(--mp-hover);
+	/* Para listas que ya están sobre un fondo gris, donde el hover suave no se distingue. */
+	.mp-list-row--strong:hover {
+		background-color: var(--mp-hover);
+	}
 }

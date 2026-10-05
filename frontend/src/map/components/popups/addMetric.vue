@@ -12,7 +12,7 @@
 									:class="[(index < list.length - 1 ? 'metricrowborder ' : ''), 'hand',
 														(selected === item ? 'selectedRow' : ''), (item.Header ? 'row-header' : '')]">
 								<td :colspan="((item.Header || !item.Versions) ? 2 : 1)" class="metricCell" :style="'width: ' + (396 + (!item.Versions ? 150 : 0)) + 'px'">{{ item.Name }}</td>
-								<td v-if="!item.Header && item.Versions" class="metricCell" align="center" style="width: 150px">{{ joinVersions(item.Versions) }}</td>
+								<td v-if="!item.Header && item.Versions" class="metricCell" align="center" style="width: 180px">{{ joinVersions(item.Versions) }}</td>
 							</tr>
 						</tbody>
 					</table>

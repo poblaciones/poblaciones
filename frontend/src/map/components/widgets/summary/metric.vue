@@ -68,9 +68,11 @@
 							@clickRanking="rankingShown" @clickDownload="clickDescargar" @clickSource="clickFuente" @clickCompare="toggleCompare"  />
 			<div style="clear: both; height: 0px"></div>
 		</div>
-			<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
-				<Ranking :metric="metric" :clipping="clipping" />
-			</div>
+			<mp-collapse>
+				<div ref="rankings" v-if="metric.ShowRanking && metric.useRankings()" class="rankingBox">
+					<Ranking :metric="metric" :clipping="clipping" />
+				</div>
+			</mp-collapse>
 		</div>
 </template>
 <script>
@@ -83,6 +85,7 @@ import MetricTopButtons from './metricTopButtons';
 	import color from '@/common/framework/color';
 
 	import Ranking from './ranking';
+import MpCollapse, { DURACION_COLAPSO_MS } from '@/map/components/controls/mpCollapse';
 import DragHorizontal from 'vue-material-design-icons/DragHorizontal.vue';
 import Helper from '@/map/js/helper';
 import 'vue-slider-component/theme/default.css';
@@ -95,7 +98,8 @@ export default {
 		Source,
 		DragHorizontal,
 		MetricVariables,
-		Ranking
+		Ranking,
+		MpCollapse
 	},
 	props: [
 		'metric',
@@ -357,9 +361,10 @@ export default {
 				if (this.metric.ShowRanking) {
 					var vScrollTo = require('vue-scrollto');
 					var loc = this;
+					// Se espera a que termine la animación de apertura: el desplazamiento se calcula con el alto final del ranking.
 					setTimeout(function () {
 						vScrollTo.scrollTo(loc.$refs.rankings, 500, { container: '#panRight', force: false });
-					}, 100);
+					}, DURACION_COLAPSO_MS + 100);
 				}
 		},
 		inVersionsArray(versionsArray, version) {

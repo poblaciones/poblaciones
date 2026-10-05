@@ -576,6 +576,21 @@ Bootstrap ni Paper Dashboard, por lo que sus clases (`card`, `btn`, `modal`,
 - `scoped` se reserva para la disposición propia del componente. Un control
   reutilizable (botón, ítem de lista, chip, campo) no define su apariencia
   localmente.
+- **Hover y pantallas táctiles.** Los `:hover` de listas, tarjetas y filas
+  (`mp-list-item`, `mp-list-row`, `variableRow`, tarjetas y separadores del
+  selector de indicadores) van dentro de `@media (hover: hover)`: en táctil el
+  hover queda aplicado al elemento donde se apoyó el dedo y, al desplazar la
+  lista, parece una selección. `tests/touchHover.test.mjs` lo verifica.
+- **Mostrar y ocultar bloques de alto variable.** Se envuelven en
+  `<mp-collapse><div v-show="…">…</div></mp-collapse>` (también con `v-if`),
+  como el detalle de cada variable (`metricVariables.vue`), el de
+  «Cantidad de regiones» (`boundary.vue`) y el ranking (`metric.vue`).
+  `components/controls/mpCollapse.js` anima alto, relleno vertical y opacidad
+  en 250 ms con Web Animations y respeta `prefers-reduced-motion`. No agregar
+  `transition: height` ni `max-height` a mano. El elemento hijo debe contener
+  sus márgenes (`display: flow-root`); sus márgenes y bordes no se animan. Si
+  algo debe ocurrir al terminar la apertura (p. ej. desplazar el panel hasta el
+  bloque), esperar `DURACION_COLAPSO_MS`, que exporta el mismo módulo.
 - No agregar `!important` fuera de `vendor-overrides*.css`; los existentes se
   retiran al tocar la regla.
 - Los selectores `.title`, `.stats` y `label` dentro de `mp-surface` ya traen
@@ -691,6 +706,12 @@ desde la raíz del módulo con:
     (sin instanciar la clase completa, por el peso de su constructor): se
     salta la actualización únicamente cuando `toolbarStates.collapsed` y
     `toolbarStates.legendMinimized` están ambos activos a la vez.
+  - `mpCollapse.test.mjs` — hooks de entrada y salida con un elemento y una
+    animación simulados: keyframes (alto, relleno vertical y opacidad), recorte
+    mientras dura, orden entre aviso a Vue y `cancel()`, movimiento reducido,
+    ausencia de Web Animations e interrupciones.
+  - `touchHover.test.mjs` — los `:hover` de listas, tarjetas y filas están
+    dentro de `@media (hover: hover)` (lectura de las hojas, sin navegador).
 - **La cantidad de pruebas cambia seguido**; no fijar un número acá.
   Consultarla corriendo la batería (la última línea informa "N pasaron, 0
   fallaron"). Al cerrar una tanda, la batería debe quedar **en verde con 0

@@ -31,5 +31,7 @@ await import('./patternButtons.test.mjs');
 await import('./ariaPlugin.test.mjs');
 await import('./boundary.test.mjs');
 await import('./fixedSizeShapes.test.mjs');
+await import('./mpCollapse.test.mjs');
+await import('./touchHover.test.mjs');
 
 await report();
