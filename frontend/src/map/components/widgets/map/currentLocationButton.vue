@@ -37,7 +37,7 @@ export default {
 
 <style scoped>
 	.clButton {
-		right: 10px;
+		right: 11px;
 		bottom: 98px;
 	}
 </style>

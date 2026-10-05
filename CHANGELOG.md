@@ -1,3 +1,7 @@
+- 'Compartir' nativo para celulares.
+- Barra superior con logo en administración.
+- Paleta de controles y colores.
+
 v5.5 (2026-09-30)
 - Soporte para mapa base vectorial.
 - Soporte para teclado en panel de insertar indicador, buscar y filtrar.

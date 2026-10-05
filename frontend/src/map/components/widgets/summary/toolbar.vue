@@ -65,6 +65,8 @@
 		],
 		components: {
 		},
+		mounted() {
+		},
 		methods: {
 			switchMapProvider() {
 				window.SegMap.SwitchSessionProvider().then(function () {
@@ -112,11 +114,33 @@
 					default:
 				}
 			},
+			getUrl(app) {
+				var title = document.title;
+				var url = document.location.href + '&linkname=' + title + 'linknote=';
+				var ret = 'https://www.addtoany.com/add_to/' + app + '?linkurl=' + encodeURIComponent(url);
+				return ret;
+			},
 			shareSelected(item) {
 				switch (item.key) {
 					case 'EMBED':
 						this.showEmbeddedMapPopUp();
 						break;
+					case 'FACEBOOK':
+						window.open(this.getUrl('facebook'), '', "width=620,height=620,resizable=yes,scrollbars=yes");
+						break;
+					case 'LINKEDIN':
+						window.open(this.getUrl('linkedin'), '', "width=620,height=620,resizable=yes,scrollbars=yes");
+						break;
+					case 'WS':
+						window.open(this.getUrl('whatsapp'), '', "width=620,height=620,resizable=yes,scrollbars=yes");
+						break;
+					case 'X':
+						window.open(this.getUrl('twitter'), '', "width=620,height=620,resizable=yes,scrollbars=yes");
+						break;
+					case 'COPYLINK':
+						navigator.clipboard.writeText(document.location.href);
+						break;
+
 					default:
 				}
 			},
@@ -219,6 +243,7 @@
 				}
 			},
 			dropDownOpened() {
+				var loc = this;
 				setTimeout(() => {
 					a2a.init_all();
 				}, 100);			},
@@ -273,13 +298,13 @@
  			shareItems() {
 					var ret = [];
 					// opciones
-					ret.push({ label: 'Copiar link', key: 'COPYLINK', icon: 'fas fa-copy', liClass: 'a2a_kit', aClass: 'a2a_button_copy_link' });
+					ret.push({ label: 'Copiar link', key: 'COPYLINK', icon: 'fas fa-copy', liClass: '', aClass: 'a2a_button_copy_link' });
 					ret.push({ label: 'Insertar (embeber)', key: 'EMBED', icon: 'fas fa-link' });
 					ret.push({ separator: true });
-					ret.push({ label: 'X', key: 'X', icon: 'X', liClass: 'a2a_kit', aClass: 'a2a_button_twitter' });
-					ret.push({ label: 'Facebook', key: 'FACEBOOK', icon: 'fab fa-facebook', liClass: 'a2a_kit', aClass: 'a2a_button_facebook' });
-					ret.push({ label: 'LinkedIn', key: 'LINKEDIN', icon: 'fab fa-linkedin', liClass: 'a2a_kit', aClass: 'a2a_button_linkedin' });
-					ret.push({ label: 'WhatsApp', key: 'WS', icon: 'fab fa-whatsapp', liClass: 'a2a_kit', aClass: 'a2a_button_whatsapp' });
+					ret.push({ label: 'X', key: 'X', icon: 'X', liClass: '', aClass: 'a2a_button_twitter' });
+					ret.push({ label: 'Facebook', key: 'FACEBOOK', icon: 'fab fa-facebook', liClass: '', aClass: 'a2a_button_facebook' });
+					ret.push({ label: 'LinkedIn', key: 'LINKEDIN', icon: 'fab fa-linkedin', liClass: '', aClass: 'a2a_button_linkedin' });
+					ret.push({ label: 'WhatsApp', key: 'WS', icon: 'fab fa-whatsapp', liClass: '', aClass: 'a2a_button_whatsapp' });
 
 					return ret;
 			},
