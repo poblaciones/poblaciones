@@ -43,6 +43,10 @@ export default {
 		clickFuente() {
 			window.Popups.ClippingMetadata.show(this.boundary.SelectedVersion().Metadata, this.boundary.properties.Name);
 		},
+		zoomExtents() {
+			var extents = this.boundary.SelectedVersion().Extents;
+			window.SegMap.MapsApi.FitEnvelope(extents, true);
+		},
 		dropdownSelected(item) {
 			switch (item.key) {
 				case 'SETTINGS':
@@ -53,6 +57,9 @@ export default {
 					break;
 				case 'DESCRIPTIONS':
 					this.toggleDescriptions();
+					break;
+				case 'EXTENTS':
+					this.zoomExtents();
 					break;
 				case 'DOWNLOAD':
 					this.clickDescargar();
@@ -85,6 +92,14 @@ export default {
 				label: (this.boundary.showDescriptions ? 'Ocultar descripciones' : 'Mostrar descripciones'),
 				key: 'DESCRIPTIONS',
 			});
+			if (this.boundary.SelectedVersion().Extents) {
+				ret.push({ 'separator': true });
+				ret.push({
+					label: 'Zoom a la delimitación',
+					key: 'EXTENTS',
+					/* icon: 'fas fa-expand-arrows-alt' */
+				});
+			}
 			ret.push({ 'separator': true });
 			ret.push({ label: 'Fuente', key: 'SOURCE' });
 			ret.push({ label: 'Descargar', key: 'DOWNLOAD' });
@@ -102,9 +117,5 @@ export default {
 .vellipsis:after {
 	content: '\2807';
 	font-size: .8em;
-}
-
-.activeButton {
-	opacity: .45;
 }
 </style>

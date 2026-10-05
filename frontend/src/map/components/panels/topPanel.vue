@@ -252,12 +252,6 @@ export default {
 	margin-left: 1px;
 	font-size: 1.1rem;
 }
-.sourceInfo2
-{
-	margin-left: 30px;
-	font-size: 1.30rem;
-	margin-top: 10px;
-}
 .preTitleRow {
 	text-transform: uppercase;
 	margin-bottom: 3px;
@@ -278,9 +272,6 @@ export default {
 	.postTitleRow {
 		display: none;
 	}
-	.metadataInfo {
-		display: inline-block;
-	}
 }
 
 .titleRow {
@@ -296,18 +287,6 @@ export default {
 	padding: 7px 0px 0px 0px;
 	position: relative;
 }
-.smallButton {
-	color: white;
-	padding: 4px 14px;
-	border-color: white;
-}
-.spaceNext {
-	margin-right: 8px;
-	margin-left: 8px
-}
-	.spaceNextOb {
-		margin-right: 41px;
-	}
 	.workPanelBody {
 		background-color: #00A0D2;
 		color: #fff !important;

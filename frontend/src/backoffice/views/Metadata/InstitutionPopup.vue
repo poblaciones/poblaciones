@@ -170,13 +170,3 @@
 	}
 };
 </script>
-
-<style rel="stylesheet/scss" lang="scss" scoped>
-
-
-.label-primary-color{
-	font-size: 16px;
-	color: black;
-	margin-top: 30px;
-}
-</style>

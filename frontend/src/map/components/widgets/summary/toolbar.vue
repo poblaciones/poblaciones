@@ -5,11 +5,6 @@
 		<mp-dropdown-menu :items="captureItems" @itemClick="captureSelected" :floatRight="false"
 											icon="fas fa-camera" variant="float" tooltip="Guardar como" />
 
-		<button v-if="hasGeolocation() && !Embedded.Active" type="button" class="mp-btn mp-btn--float"
-						title="Ubicación actual" aria-label="Ubicación actual" @click="geolocate()">
-			<i class="far fa-dot-circle" />
-		</button>
-
 		<button v-for="mode in selectionModes" :key="mode.Name" type="button"
 						@click="setMode(mode.Action)"
 						class="mp-btn mp-btn--float" :class="getActive(mode.Action)"
@@ -17,10 +12,10 @@
 			<i :class="mode.Icon" />
 		</button>
 
-		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="Use.UseEmbedding || !hasNativeShare()"
+		<mp-dropdown-menu :items="shareItems" @itemClick="shareSelected" :floatRight="false" v-if="!hasNativeShare()"
 											icon="fas fa-share-alt" variant="float" tooltip="Compartir" @dropDownOpened="dropDownOpened" />
 
-		<button type="button" v-else-if="Use.UseEmbedding && hasNativeShare()"
+		<button type="button" v-else
 						@click="nativeShare"
 						class="mp-btn mp-btn--float"
 						title="Compartir" aria-label="Compartir">
@@ -94,7 +89,7 @@
 				navigator.share({
 					title: document.title,
 					//text: 'Mira este contenido interesante',
-					url: document.location
+					url: document.location.href
 				});
 			},
 			hasNativeShare() {
@@ -129,6 +124,12 @@
 				var ret = [];
 				ret.push({ label: 'Inicio', key: 'INICIO', href: this.authenticate.homeUrl(), icon: 'fas fa-home', target: '_blank' });
 				ret.push({ label: 'Bienvenida', key: 'BIENVENIDA', icon: 'fas fa-comment-alt' });
+
+				if (this.hasNativeShare()) {
+					ret.push({ separator: true });
+					ret.push({ label: 'Insertar (embeber)', key: 'EMBED', icon: 'fas fa-link' });
+				}
+
 				if (!this.helpLinks) {
 					return ret;
 				}
@@ -181,6 +182,9 @@
 				if (item.key === 'BIENVENIDA') {
 					this.showTutorial();
 				}
+				if (item.key === 'EMBED') {
+					this.showEmbeddedMapPopUp();
+				}
 			},
 			// No es computed: loginUrl() lee estado global no reactivo y un valor cacheado queda desactualizado
 			getLoginItems() {
@@ -218,19 +222,8 @@
 				setTimeout(() => {
 					a2a.init_all();
 				}, 100);			},
-			hasGeolocation() {
-				return navigator && navigator.geolocation;
-			},
 			toggleLabels() {
 				window.SegMap.ToggleShowLabels();
-			},
-			geolocate() {
-				if (navigator.geolocation) {
-					navigator.geolocation.getCurrentPosition(function (position) {
-						var coord = { Lat: position.coords.latitude, Lon: position.coords.longitude };
-						window.SegMap.SetMyLocation(coord);
-					});
-				}
 			},
 			setFavorite() {
 				alert('no implementado');
@@ -416,24 +409,8 @@
 </script>
 
 <style scoped>
-	.shareItem {
-		padding: 8px 15px!important;
-	}
-	.shareTopItem {
-		padding: 0px 2px 2px 1px !important;
-	}
 	.rel {
 		position: relative;
-	}
-	.lia {
-		padding: 8px 15px;
-	}
-	.topright {
-		position: absolute;
-		right: 10px;
-		top: 12px;
-		color: rgb(170, 170, 170);
-		font-size: 12px;
 	}
 	.summaryToolbar {
 		background-color: transparent;
@@ -452,14 +429,6 @@
 		border-radius: 20px;
 		margin-top: -6px !important;
 		margin: -5px;
-	}
-	.embedButton {
-		font-size: 13px;
-		margin-bottom: -2px;
-	}
-	.shareBox {
-		filter: grayscale(.9);
-		transform: scale(.95);
 	}
 </style>
 

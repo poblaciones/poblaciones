@@ -5,9 +5,9 @@
 				Las funciones para datos multinivel permiten crear más fácilmente indicadores
 				en varios niveles de agregación (ej. cobertura de agua corriente por provincias y por departamentos).
 		</div>
-		<div class="md-layout">
-			<div class="md-layout-item">
-				<md-table v-model="list" md-card="" v-if="list" style="min-width: 500px;">
+		<div class="md-layout"  style="width: 100%;">
+			<div class="md-layout-item md-size-100">
+				<md-table v-model="list" md-card="" v-if="list">
 					<md-table-row slot="md-table-row" slot-scope="{ item }">
 						<md-table-cell md-label="Vincular">
 							<md-switch v-model="item.Bounded" class="md-primary" :disabled="!canEdit || (item.ds.properties.MultilevelMatrix !== null && Dataset !== null && Dataset.properties.MultilevelMatrix !== null && item.ds.properties.MultilevelMatrix !== Dataset.properties.MultilevelMatrix)"

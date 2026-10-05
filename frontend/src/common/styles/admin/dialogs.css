@@ -11,6 +11,10 @@
 	border-radius: 4px !important;
 }
 
+.md-dialog-content {
+	min-width: 450px;
+}
+
 .md-dialog-container.md-theme-default {
 	border-radius: .5rem;
 }

@@ -59,11 +59,27 @@ Vue.use(AriaPlugin);
 Vue.config.productionTip = false;
 Vue.use(VueHotkey);
 
-var app = new Vue({
-	el: '#wrapper',
-	components: { App },
-	template: '<App/>'
-});
-window.app = app;
+// La página de paletas se carga en un fragmento aparte para que no pese en el arranque del visor.
+function isPalettePage() {
+	var path = window.location.pathname.replace(/\/+$/, '');
+	return path.endsWith('/paletas') || window.location.hash.startsWith('#/paletas');
+}
+
+function mountRoot(rootComponent) {
+	var app = new Vue({
+		el: '#wrapper',
+		components: { App: rootComponent },
+		template: '<App/>'
+	});
+	window.app = app;
+}
+
+if (isPalettePage()) {
+	import('@/map/components/paletas/paletas').then(function (module) {
+		mountRoot(module.default);
+	});
+} else {
+	mountRoot(App);
+}
 
 

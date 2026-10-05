@@ -1288,15 +1288,6 @@
 			white-space: nowrap;
 		}
 
-	.filter-item {
-		margin: 5px 0;
-		font-size: 13px;
-	}
-
-		.filter-item strong {
-			color: #1976d2;
-		}
-
 	.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 	.filter-chip {
 		display: inline-flex;
@@ -1537,13 +1528,7 @@
 	.pivot-table th.pivot-level-header {
 		position: relative;
 	}
-	.inline-header-control {
-		position: absolute;
-		right: 10px;
-		top: 50%;
-		transform: translateY(-50%);
-	}
-	.version-header-text, .level-header-text { vertical-align: middle; }
+	.version-header-text { vertical-align: middle; }
 	.version-no-data {
 		color: #ffd54f;
 		font-weight: 700;
@@ -1663,11 +1648,6 @@
 			background-color: #1565c0;
 		}
 
-	.subheader-version {
-		color: rgba(255,255,255,0.8);
-		font-weight: 500;
-	}
-
 	.subheader-label {
 		color: #fff;
 	}
@@ -1739,10 +1719,6 @@
 		/* El agrupador entero es clickeable para expandir/colapsar. */
 		.pivot-row-group-header { cursor: pointer; }
 		.pivot-row-group-header:hover { background-color: #e8eef4; }
-
-	.pivot-row-data {
-		background-color: #fff;
-	}
 
 	.pivot-cell-header { position: relative; }
 	.pivot-table td {
@@ -1817,20 +1793,6 @@
 	.cell-value {
 		display: block;
 	}
-
-	.pivot-summary {
-		flex: 0 0 auto;
-		margin-top: 8px;
-		padding: 6px 12px;
-		background-color: #fff;
-		border-radius: 4px;
-		font-size: 12px;
-		color: #616161;
-	}
-
-		.pivot-summary p {
-			margin: 0;
-		}
 
 	/* Responsivo */
 	@media (max-width: 768px) {

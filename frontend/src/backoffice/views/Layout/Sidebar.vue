@@ -315,13 +315,14 @@ export default {
 /* Contenedor del sidebar como columna de alto completo:
    el menú principal arriba (con scroll) y el grupo 'Publicación' anclado al fondo.
    El offset del topbar (55px) se aplica acá como padding, no en cada menú. */
-.sidebarRoot {
-	height: 100%;
-	box-sizing: border-box;
-	padding-top: 55px;
-	display: flex;
-	flex-direction: column;
-}
+	.sidebarRoot {
+		height: 100%;
+		box-sizing: border-box;
+		padding-top: 55px;
+		padding-left: 4px;
+		display: flex;
+		flex-direction: column;
+	}
 
 .sidebarRoot .topMenu {
 	flex: 1 1 auto;
@@ -334,13 +335,8 @@ export default {
 		overflow-x: hidden;
 	}
 
-.sidebarRoot .bottomMenu {
-	flex: 0 0 auto;
-	border-top: 1px solid #e2e2e2;
-}
 	.bottomMenu {
 		flex: 0 0 auto;
-		border-top: 1px solid #e2e2e2;
 	}
 
 /* Antes el margen superior lo ponía cada .v-sidebar-menu; ahora lo da .sidebarRoot. */

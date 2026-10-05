@@ -350,14 +350,6 @@
   border-color: #999;
 }
 
-.map-style-preview {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-
 	.map-style-icon {
 		width: 100%;
 		height: 100%;
@@ -366,29 +358,10 @@
 		flex-shrink: 0;
 	}
 
-.map-style-label {
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .rightButton {
 	position: absolute;
 	right: 10px;
 	top: 6px;
-}
-
-.expand-icon {
-  font-size: 12px;
-  color: #666;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-
-.expand-icon.rotated {
-  transform: rotate(180deg);
 }
 
 /* Panel de opciones */

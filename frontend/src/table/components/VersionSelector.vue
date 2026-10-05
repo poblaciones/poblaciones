@@ -139,13 +139,4 @@ export default {
 		border-top: 1px solid #e0e0e0;
 		background-color: #fafafa;
 	}
-	.switch-label {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-size: 11px;
-		color: #424242;
-		cursor: pointer;
-		white-space: nowrap;
-	}
 </style>

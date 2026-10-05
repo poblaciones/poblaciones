@@ -1,7 +1,7 @@
 <template>
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar">
-			<div class="topRight" style="background-color: #00A0D2">
+			<div class="topRight">
 				<!--backoffice-links><backoffice-links-->
 				<topbar-work-actions></topbar-work-actions>
 				<home-menu></home-menu>
@@ -9,7 +9,7 @@
 			</div>
 			<div style="float: left">
 				<router-link :to="getBackRoute">
-					<BackIcon class="icon" style="font-size: 28px; color: #fff" />
+					<BackIcon class="icon backIcon" />
 				</router-link>
 			</div>
 				<div style="width: calc(max(1100px,100%)) ">
@@ -19,8 +19,8 @@
 						</div>
 						<div class="md-layout md-gutter" style="margin-top: -21px">
 							<div class="md-layout-item md-size-100">
-								<mp-text id="whiteId" :canEdit="Work.CanEdit()" label="t" :largeFont="true"
-												 :maxlength="150" class="fieldWhite"
+								<mp-text id="workTitle" :canEdit="Work.CanEdit()" label="" :largeFont="true"
+												 :maxlength="150" class="fieldTitle" :lighterColor="true"
 												 :required="true" @update="UpdateTitle"
 												 v-model="Work.properties.Metadata.Title" />
 							</div>
@@ -96,23 +96,18 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-.barIco
-	{
-	margin-top: -10px;
-	}
+.backIcon {
+	font-size: 28px;
+	color: var(--topbar-icon);
+}
 
-.barIco .md-button-content > i
-	{
-	color: #FFF;
-	}
-
-.fieldWhite {
-	-webkit-text-fill-color: white!important;
+.fieldTitle {
+	-webkit-text-fill-color: var(--mp-text)!important;
 	font-size: 24px!important;
 }
 
-.fieldWhite .md-input {
-	-webkit-text-fill-color: white!important;
+.fieldTitle .md-input {
+	-webkit-text-fill-color: var(--mp-text)!important;
 }
 
 .titleLine {
@@ -120,12 +115,11 @@ export default {
 	/* Reserva espacio para la zona derecha:
 	   BackofficeLinks (~280px) + TopbarWorkActions (~130px) + ProfileMenu (~55px) + margen (~15px) */
 	margin-right: 490px;
-	color: white;
+	color: var(--mp-text);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	font-size: 24px;
 	line-height: 1.2em;
-	overflow: hidden;
 }
 
 	.topRight {
@@ -139,6 +133,7 @@ export default {
 		align-items: center;
 		height: 55px;
 		z-index: 1;
+		background-color: var(--mp-topbar);
 	}
 
 .topRight > * {

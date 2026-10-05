@@ -1,5 +1,5 @@
 <template >
-	<div :class="this.classSize" class="defaultColor" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
+	<div :class="this.classSize + (lighterColor ? ' lighterColor' : ' defaultColor')" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
 		<div style="position: relative">
 			<div style="padding-right: 85px" @dblclick="StartEdit">
 				<md-field style="margin-bottom: 0px" class="mp-editable-text">
@@ -7,7 +7,7 @@
 						{{ this.label }}
 					</label>
 					<md-input v-if="!this.multiline" :type="type" style="text-overflow: ellipsis; width: 100%" autocomplete="off"
-										:style="'font-size: ' + (largeFont ? '24' : '19') + 'px'"
+										:style="(largeFont ? 'font-size: 24px; letter-spacing: -1%;' : 'font-size: 19px')"
 										:placeholder="(placeholder ? placeholder : '')"
 										:class="(!editMode ? 'unselectable' : '')"
 										@mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue"
@@ -27,7 +27,7 @@
 				<span class="md-helper-text error" style="color: red; bottom: -18px;">{{ errorMessage }}</span>
 			</div>
 			<div v-if="!isDisabled" style="position: absolute; top: 0px; right: 80px;">
-				<button-panel ref="buttonPanel" style="position: absolute"
+				<button-panel ref="buttonPanel" style="position: absolute!important"
 											@onCancel="cancel" @onUpdate="Update" @onEditModeChange="ChangeEditableMode" @onFocus="focus"></button-panel>
 			</div>
 		</div>
@@ -282,6 +282,7 @@ export default {
 		largeFont: { type: Boolean, default: false},
 		multiline: Boolean,
 		formatted: { type: Boolean, default: false },
+		lighterColor: { type: Boolean, default: false },
 		suffix: String,
 		type: { type: String, default: null },
 		rows: Number,
@@ -315,9 +316,11 @@ export default {
 	-webkit-text-fill-color: unset !important;
 }
 
-.defaultColor {
-	-webkit-text-fill-color: rgba(0,0,0,0.87);
-}
+	.lighterColor {
+		-webkit-text-fill-color: var(--mp-text-muted)!important;
+	}.defaultColor {
+		-webkit-text-fill-color: rgba(0,0,0,0.87);
+	}
 
 
 .md-layout-item .md-size-25 {

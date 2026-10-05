@@ -31,6 +31,11 @@ class WorkService extends BaseService
 {
 	private const MAX_ICON_WIDTH = 120;
 	private const MAX_ICON_HEIGHT = 120;
+	private const SEARCH_MIN_LENGTH = 2;
+	private const SEARCH_MAX_LENGTH = 100;
+	private const SEARCH_MAX_TERMS = 5;
+	private const SEARCH_DEFAULT_LIMIT = 6;
+	private const SEARCH_MAX_LIMIT = 20;
 
 	public function Create($type, $title = '')
 	{
@@ -580,6 +585,13 @@ class WorkService extends BaseService
 
 	public function GetCurrentUserWorks()
 	{
+		$list = $this->GetWorks($this->GetCurrentUserWorksCondition());
+		return $list;
+	}
+
+	// Es la misma condición para el listado de cartografías y para el buscador: así no divergen.
+	private function GetCurrentUserWorksCondition()
+	{
 		$userId = Session::GetCurrentUser()->GetUserId();
 		// Si no es usuario público, trae todas las cartografías públicas
 		if (Session::IsSiteReader())
@@ -591,11 +603,151 @@ class WorkService extends BaseService
 			$condition_type = "";
 		}
 		// Trae las cartografías del usuario
-		$conditions = $condition_type . " wrk_id IN (SELECT wkp_work_id FROM draft_work_permission WHERE wkp_user_id = " . $userId . ")"
+		return $condition_type . " wrk_id IN (SELECT wkp_work_id FROM draft_work_permission WHERE wkp_user_id = " . $userId . ")"
 			. " OR wrk_is_example = 1";
-		$list = $this->GetWorks($conditions);
-		return $list;
 	}
+
+	// Busca cartografías, datasets e indicadores entre las cartografías que el usuario ve en su listado.
+	// Cada serie de un indicador es un resultado propio (una fila de draft_metric_version_level).
+	public function SearchUserWorks($text, $limitPerGroup)
+	{
+		Profiling::BeginTimer();
+		$terms = $this->ParseSearchTerms($text);
+		if (sizeof($terms) === 0)
+		{
+			$empty = $this->BuildSearchGroup(array(), 0, array());
+			$ret = array('Works' => $empty, 'Datasets' => $empty, 'Metrics' => $empty);
+		}
+		else
+		{
+			$limit = $this->NormalizeSearchLimit($limitPerGroup);
+			$access = "wrk_is_deleted = 0 AND (" . $this->GetCurrentUserWorksCondition() . ")";
+			$ret = array(
+				'Works' => $this->SearchWorks($access, $terms, $limit),
+				'Datasets' => $this->SearchDatasets($access, $terms, $limit),
+				'Metrics' => $this->SearchMetrics($access, $terms, $limit));
+		}
+		Profiling::EndTimer();
+		return $ret;
+	}
+
+	private function ParseSearchTerms($text)
+	{
+		$text = trim((string) $text);
+		if (!mb_check_encoding($text, 'UTF-8'))
+		{
+			throw new PublicException('El texto de búsqueda no es válido.');
+		}
+		$text = trim(mb_substr($text, 0, self::SEARCH_MAX_LENGTH));
+		if (mb_strlen($text) < self::SEARCH_MIN_LENGTH)
+		{
+			return array();
+		}
+		$terms = preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY);
+		return array_slice($terms, 0, self::SEARCH_MAX_TERMS);
+	}
+
+	private function NormalizeSearchLimit($limitPerGroup)
+	{
+		if ($limitPerGroup <= 0)
+		{
+			return self::SEARCH_DEFAULT_LIMIT;
+		}
+		if ($limitPerGroup > self::SEARCH_MAX_LIMIT)
+		{
+			return self::SEARCH_MAX_LIMIT;
+		}
+		return (int) $limitPerGroup;
+	}
+
+	private function SearchWorks($access, $terms, $limit)
+	{
+		$rows = $this->RunSearch("wrk_id Id, met_title Caption, wrk_type Type",
+			"draft_work JOIN draft_metadata ON met_id = wrk_metadata_id",
+			$access, array('met_title'), "met_title, wrk_id", $terms, $limit);
+		return $this->BuildSearchGroup($rows, $limit, array('Id'));
+	}
+
+	private function SearchDatasets($access, $terms, $limit)
+	{
+		$rows = $this->RunSearch("dat_id Id, dat_caption Caption, wrk_id WorkId, met_title WorkCaption, wrk_type WorkType",
+			"draft_dataset
+				JOIN draft_work ON wrk_id = dat_work_id
+				JOIN draft_metadata ON met_id = wrk_metadata_id",
+			$access, array('dat_caption'), "dat_caption, dat_id", $terms, $limit);
+		return $this->BuildSearchGroup($rows, $limit, array('Id', 'WorkId'));
+	}
+
+	private function SearchMetrics($access, $terms, $limit)
+	{
+		$rows = $this->RunSearch("mvl_id LevelId, mtr_id MetricId, mvr_id VersionId,
+				mtr_caption Caption, mvr_caption VersionCaption,
+				dat_id DatasetId, dat_caption DatasetCaption,
+				wrk_id WorkId, met_title WorkCaption, wrk_type WorkType",
+			"draft_metric_version_level
+				JOIN draft_metric_version ON mvr_id = mvl_metric_version_id
+				JOIN draft_metric ON mtr_id = mvr_metric_id
+				JOIN draft_dataset ON dat_id = mvl_dataset_id
+				JOIN draft_work ON wrk_id = dat_work_id
+				JOIN draft_metadata ON met_id = wrk_metadata_id",
+			$access, array('mtr_caption', 'mvr_caption'), "mtr_caption, mvr_caption, mvl_id", $terms, $limit);
+		return $this->BuildSearchGroup($rows, $limit,
+			array('LevelId', 'MetricId', 'VersionId', 'DatasetId', 'WorkId'));
+	}
+
+	// Primero van los resultados cuyo texto principal (la primera columna) empieza con el primer término.
+	// Se pide una fila de más para saber si hay más resultados que el límite.
+	private function RunSearch($select, $from, $access, $matchColumns, $orderBy, $terms, $limit)
+	{
+		$params = array();
+		$match = $this->BuildTermsCondition($matchColumns, $terms, $params);
+		$params[] = $this->EscapeLike($terms[0]) . '%';
+		$sql = "SELECT " . $select . "
+						FROM " . $from . "
+						WHERE (" . $access . ") AND " . $match . "
+						ORDER BY CASE WHEN " . $matchColumns[0] . " LIKE ? THEN 0 ELSE 1 END, " . $orderBy . "
+						LIMIT " . ($limit + 1);
+		return App::Db()->fetchAll($sql, $params);
+	}
+
+	// Cada término debe coincidir con alguna de las columnas. Los parámetros se agregan en el orden en que aparecen en el SQL.
+	// Las columnas se comparan una por una contra el parámetro: no deben concatenarse, porque tienen intercalaciones distintas.
+	private function BuildTermsCondition($columns, $terms, &$params)
+	{
+		$conditions = array();
+		foreach ($terms as $term)
+		{
+			$alternatives = array();
+			foreach ($columns as $column)
+			{
+				$alternatives[] = $column . " LIKE ?";
+				$params[] = '%' . $this->EscapeLike($term) . '%';
+			}
+			$conditions[] = "(" . implode(" OR ", $alternatives) . ")";
+		}
+		return implode(" AND ", $conditions);
+	}
+
+	private function EscapeLike($term)
+	{
+		return addcslashes($term, "\\%_");
+	}
+
+	private function BuildSearchGroup($rows, $limit, $integerFields)
+	{
+		$items = array();
+		for ($n = 0; $n < $limit && $n < sizeof($rows); $n++)
+		{
+			$item = $rows[$n];
+			foreach ($integerFields as $field)
+			{
+				$item[$field] = (int) $item[$field];
+			}
+			$items[] = $item;
+		}
+		return array('Items' => $items, 'HasMore' => sizeof($rows) > $limit);
+	}
+
 	private function GetWorks($condition)
 	{
 		Profiling::BeginTimer();

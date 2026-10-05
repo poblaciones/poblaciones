@@ -245,6 +245,15 @@ Db.prototype.LoadWorks = function () {
 	});
 };
 
+// Se usa axiosClient.get y no getPromise para no abrir un diálogo por cada falla: la consulta se repite
+// mientras se tipea y el panel del buscador informa el error.
+Db.prototype.SearchUserWorks = function (text, limitPerGroup) {
+	return axiosClient.get(window.host + '/services/backoffice/SearchUserWorks',
+		{ q: text, l: limitPerGroup }).then(function (res) {
+		return res.data;
+	});
+};
+
 Db.prototype.CreateWork = function (newWorkName, type) {
 	// Guarda en el servidor lo que esté en this.properties.Metadata
 	return axiosClient.getPromise(window.host + '/services/backoffice/CreateWork', {

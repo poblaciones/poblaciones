@@ -169,10 +169,10 @@ más de una vista, va en la hoja que corresponde.
 
 | Hoja | Contenido | La carga | Posición |
 |---|---|---|---|
-| `vue-material-overrides.css` | Tema, botones, pestañas, listas, menús, `md-card`, tablas | `App.vue` de backoffice, admins y packs | Antes de `vue-material.css` |
+| `vue-material-overrides.css` | Tema, botones, chips, pestañas, listas, menús, `md-card`, tablas | `App.vue` de backoffice, admins y packs | Antes de `vue-material.css` |
 | `fields.css` | `md-field` y etiquetas (`mp-label`, `mpLabel`, `helper`) | ídem | Antes |
 | `dialogs.css` | `md-dialog`, anchos y pie de acciones | ídem | Antes |
-| `layout.css` | Barra superior, `split`/`gutter`, separadores, utilidades | ídem | Antes |
+| `layout.css` | Barra superior clara, `split`/`gutter`, separadores, utilidades | ídem | Antes |
 | `third-party.css` | v-tooltip, vue-sidebar-menu, vue-color, jqWidgets, CKEditor, Google Maps | ídem | Antes |
 | `feedback.css` | `md-snackbar` y `md-tooltip` | `App.vue` de los cinco módulos, tras `popovers.css` | Antes |
 | `base.css`, `vue-material-late.css` | Reset de `html`/`body`/`a`, `.app-container`, ajustes que deben ganarle al tema | `CommonBootstrap` | Después |
@@ -209,8 +209,43 @@ izquierda y 20 a la derecha. Los componentes no lo redefinen.
 raíz de sus hijos: un `.md-dialog-actions` en una vista cuyo diálogo vive en otro componente no tiene efecto.
 Cuando una regla deba llegar a un diálogo, va en `dialogs.css` con una clase del diálogo.
 
+**Barra superior.** Las cuatro barras comparten la clase `.topbar` de `layout.css` (fondo `--mp-topbar`, sin sombra):
+la home (`components/HomeTopbar.vue`), el interior de la cartografía (`views/Layout/Topbar.vue`) y administración y
+paquetes (`common/components/TopWelcome.vue`). Siguen siendo archivos distintos. `HomeMenu`, `TopbarWorkActions` y
+`ProfileMenu` leen su color de `--topbar-icon`, `--topbar-avatar-bg` y `--topbar-avatar-text`, que define `.topbar`;
+un componente nuevo dentro de una barra hace lo mismo y no fija colores propios. `TopWelcome` no lleva título:
+`admin-links` recibe `current` (`admin` o `packs`) y marca ese botón con `md-primary`. El logo es `components/TopbarLogo.vue` (imagen `assets/logo-topbar.png`) y se usa en la home y en
+`TopWelcome`. `common/assets/back.svg` usa `currentColor`.
+
+**Buscador.** `BackofficeSearch.vue` emite `search` con el texto y `select` con el resultado elegido, y muestra
+los `results`, `truncatedKinds`, `loading` y `failed` que recibe; sigue el patrón combobox (flechas, Enter y Esc). La
+consulta se maneja en `HomeTopbar.vue` (espera de 250 ms, mínimo de 2 caracteres, descarte de respuestas atrasadas) y
+en `classes/WorkSearch.js`, que convierte la respuesta de `Db.SearchUserWorks` en resultados con su ruta de destino:
+cartografía (`/cartographies/:workId`), dataset (`.../datasets/:datasetId/data`) e indicador
+(`.../datasets/:datasetId/metrics?level=:levelId`, una entrada por serie). `MetricsTab.vue` resalta la fila cuyo `Id`
+coincide con `level`. El endpoint `GET /services/backoffice/SearchUserWorks?q=&l=` está especificado en
+`especificacion_endpoint_buscador.md` y lo implementa `WorkService::SearchUserWorks`. El campo mide 380 px fijos en
+la home y el panel se alinea a su izquierda con un ancho mínimo de 500 px. Cada resultado es un enlace (`href` que arma
+`HomeTopbar` con `$router.resolve`): un clic común navega con `$router.push` y con Ctrl, Cmd, Shift o el botón central
+el navegador lo abre aparte.
+
 **Página 404.** Es `common/components/NotFound.vue`; los routers de backoffice, admins, packs y credentials la
 importan de ahí.
 
 **Antes de agregar una regla global,** buscar si la clase ya existe en estas hojas; las clases sin ningún uso en
 plantillas ni en JavaScript se eliminan.
+
+## 13. Página de paletas
+
+`/users/#/paletas` muestra cada control vigente del backoffice con su código. Es una ruta oculta del router
+(`hidden: true`, sin `Layout`) y, como el resto del módulo, solo responde con un usuario autenticado. Vive en
+`backoffice/views/Paletas/`: `paletasCatalogo.js` (los ejemplos), `PaletaEjemplo.vue` (muestra en vivo y código)
+y `Paletas.vue` (la página).
+
+- Todo control, componente `mp-*` o clase global nueva se agrega a `paletasCatalogo.js` en el mismo cambio. El campo
+  `code` de cada ejemplo es la plantilla que se compila y la que se exhibe; `codeOnly` exhibe solo el código
+  (`mp-grid`, `title-bar`).
+- Los componentes que no están registrados globalmente (hoy `mp-select-auto`, `mp-dropdown-button` y `backoffice-search`) se declaran en
+  `components` de `PaletaEjemplo.vue` para que los ejemplos compilen.
+- La página usa las mismas hojas que el resto del módulo y no define controles propios. El prefijo `pal-` de sus
+  estilos es solo de disposición.

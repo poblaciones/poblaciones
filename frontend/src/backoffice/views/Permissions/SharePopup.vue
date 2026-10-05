@@ -341,9 +341,4 @@ export default {
 	margin-left: 8px;
 	white-space: nowrap;
 }
-
-.copyLink {
-	margin-right: auto;
-	color: #00A0D2 !important;
-}
 </style>

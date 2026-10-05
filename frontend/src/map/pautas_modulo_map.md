@@ -415,6 +415,7 @@ tabla los replica y para aquel módulo son de solo lectura.
                                searchPanel, selectorSubtitles.js, selectorTooltips.js
         popups/                Popups (addMetric, metricCustomize, download, embedding, tour…)
         controls/              Controles chicos reutilizables (mp-*)
+        paletas/               Página interna de ejemplos de controles (/map/paletas); ver sección 9
       enums/PanelType.js
       styles/                  Hojas globales del visor y sus dos cargadores (ver sección 9, "Estilos globales")
       tests/                   Batería propia (ver sección 10)
@@ -580,6 +581,21 @@ Bootstrap ni Paper Dashboard, por lo que sus clases (`card`, `btn`, `modal`,
 - Los selectores `.title`, `.stats` y `label` dentro de `mp-surface` ya traen
   su tipografía en el visor (`map/styles/surfaces.css`); no replicarla en
   componentes.
+
+### Página de paletas
+
+`/map/paletas` (o `/map/#/paletas`) muestra cada control vigente con su
+código. `map/main.js` la carga con `import()` dinámico, de modo que no suma al
+paquete del arranque. Vive en `map/components/paletas/`: `paletasCatalogo.js`
+(los ejemplos), `paletaEjemplo.vue` (muestra en vivo y código) y `paletas.vue`
+(la página).
+
+- Todo control, clase o modificador nuevo de `common/styles/` o `map/styles/`
+  se agrega a `paletasCatalogo.js` en el mismo cambio. El campo `code` de cada
+  ejemplo es la plantilla que se compila y la que se exhibe.
+- Al retirar una clase se la quita también de sus ejemplos.
+- La página usa las mismas hojas y tokens que el visor: no define controles
+  propios. El prefijo `pal-` de sus estilos es solo de disposición.
 
 ## 10. Tests
 

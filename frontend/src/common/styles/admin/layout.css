@@ -8,7 +8,7 @@ html, body {
 	padding: 0;
 }
 
-/* Barra superior */
+/* Barra superior. Los íconos y el avatar los colorean HomeMenu, TopbarWorkActions y ProfileMenu con estas variables. */
 .topbar {
 	position: fixed;
 	overflow: hidden;
@@ -17,10 +17,11 @@ html, body {
 	width: 20px;
 	height: 52px;
 	z-index: 10000;
-	background-color: #00A0D2;
-	color: #fff;
-	-webkit-box-shadow: 0 1px 4px 0 rgba(90,90,90,.32);
-	box-shadow: 0 1px 4px 0 rgba(90,90,90,.32);
+	background-color: var(--mp-topbar);
+	color: var(--mp-text);
+	--topbar-icon: var(--mp-text-muted);
+	--topbar-avatar-bg: #00799e;
+	--topbar-avatar-text: #fff;
 }
 
 .mp-right-toolbar {

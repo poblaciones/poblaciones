@@ -20,8 +20,8 @@
 }
 
 .v-sidebar-menu .vsm-link {
-	border-top-right-radius: 30px !important;
-	border-bottom-right-radius: 30px !important;
+	border-top-right-radius: 24px !important;
+	border-bottom-right-radius: 24px !important;
 	margin-right: 10px !important;
 	margin-left: 0px !important;
 	padding-right: 12px !important;

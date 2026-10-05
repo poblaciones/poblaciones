@@ -60,6 +60,7 @@
 													:name="ownerLogo.Name" />
 					<EditButton v-if="work.Current && !Embedded.Active && work.Current.CanEdit" ref="editPanel" class="exp-hiddable-unset" :backgroundColor="workColor" :work="work" />
 					<FullScreenButton v-if="!Embedded.Readonly && mapLoaded && !$isMobile()" class="exp-hiddable-unset" :fullscreen="fullscreen" />
+					<CurrentLocationButton v-if="!Embedded.Readonly && mapLoaded" class="exp-hiddable-unset" />
 
 					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly && mapLoaded && !$isMobile()" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
 										 :metrics="metrics" :toolbarStates="toolbarStates" />
@@ -92,6 +93,7 @@
 	import LeftPanel from '@/map/components/panels/leftPanel';
 	import EditButton from '@/map/components/widgets/map/editButton';
 	import FullScreenButton from '@/map/components/widgets/map/fullScreenButton';
+	import CurrentLocationButton from '@/map/components/widgets/map/currentLocationButton';
 	import MapLegend from '@/map/components/widgets/map/mapLegend';
 	import ClippingLegend from '@/map/components/widgets/map/clippingLegend';
 	import SummaryPanel from '@/map/components/panels/summaryPanel';
@@ -127,6 +129,7 @@
 			WaitMessage,
 			EditButton,
 			FullScreenButton,
+			CurrentLocationButton,
 			MapLegend,
 			Toolbar,
 			ClippingLegend,

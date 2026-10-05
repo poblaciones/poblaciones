@@ -60,13 +60,8 @@
 
 /* ── Jerarquía de títulos de un bloque (indicador / variable / año) ──────────
  * Misma escala tipográfica en todos los widgets, para que un indicador se vea
- * igual en Resumen que en Distribución.
+ * igual en Resumen que en Distribución. Se estila una sola vez acá, no por widget.
  */
-.w-indicator { font-size: 13px; font-weight: 600; color: #263238; white-space: nowrap; }
-.w-variable  { font-size: 11px; color: #78909c; white-space: nowrap; }
-
-/* Título del indicador y su variable, compartidos entre widgets (Resumen y
-   Distribución) para que se vean igual. Se estilan una sola vez acá, no por widget. */
 .ms-indicator { font-size: 18px; font-weight: normal; color: #263238; line-height: 1.45em; }
 .ms-variable  { font-size: 13px; color: #78909c; line-height: 1.4em; }
 .w-version   { font-size: 11px; font-weight: 700; color: #455a64; }
@@ -91,7 +86,6 @@
 .w-legend-item { display: inline-flex; align-items: center; gap: 5px; }
 .w-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: 0 0 auto; border: 1px solid #d0d0d0; }
 .w-legend-line { width: 14px; border-top: 1.5px dashed #607d8b; display: inline-block; }
-.w-note { font-size: 10.5px; color: #90a4ae; font-style: italic; }
 
 /* ── Pie del widget (barra de opciones) ──────────────────────────────────── */
 .widget-foot {
@@ -103,15 +97,6 @@
 	align-items: center;
 	gap: 14px;
 	flex-wrap: wrap;
-}
-.weight-toggle {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 12px;
-	color: #455a64;
-	cursor: pointer;
-	user-select: none;
 }
 
 /* Switch on/off compartido por los widgets (reemplaza checkboxes). */

@@ -3,38 +3,37 @@
 		<invoker ref="invoker"></invoker>
 		<import-popup ref="importPopup"></import-popup>
 
-		<div v-if="Work.CanEdit()">
-			<div class="topToolbar">
-				<md-button @click="beginCloneDataset">
-					<md-icon>file_copy</md-icon>
-					Duplicar dataset
-				</md-button>
-
-				<md-button @click="deleteDataset">
-					<md-icon>delete</md-icon>
-					Eliminar dataset
-				</md-button>
-			</div>
-			<div style="height: 48px;"></div>
-		</div>
-		<title-bar v-else title="Dataset" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()">
+		<title-bar v-if="!Work.CanEdit()" title="Dataset" :showReadonlyIndexedWarning="Work.ReadOnlyCausedByIndexing()">
 
 		</title-bar>
 
-		<div :class="(Work.CanEdit() ? 'app-container' : 'app-container')">
+		<div class="app-singlebar app-container">
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-100">
 					<md-card>
 						<md-card-content>
 
-							<div v-if="Dataset" class="md-layout md-gutter">
-									<div class="md-layout-item md-size-80 md-small-size-100">
-										<mp-text :canEdit="Work.CanEdit()" label="Título" :maxlength="100"
-														 helper="Nombre del dataset. Ej. Escuelas primarias."
-														 :required="true" @update="Update"
-														 v-model="Dataset.properties.Caption" />
+							<div v-if="Dataset" class="md-layout md-gutter" style="max-width: 1100px">
+								<div class="md-layout-item md-size-80">
+									<mp-text :canEdit="Work.CanEdit()" label="Título" :maxlength="100"
+													 helper="Nombre del dataset. Ej. Escuelas primarias."
+													 :required="true" @update="Update"
+													 v-model="Dataset.properties.Caption" />
+									</div>
+									<div class="md-layout-item" v-if="Work.CanEdit()" style="padding-top: 8px; padding-left: 0px;">
+										<div class="dataset-toolbar">
+											<md-button class="md-icon-button" @click="beginCloneDataset">
+												<md-icon>file_copy</md-icon>
+												<md-tooltip md-direction="bottom">Duplicar dataset</md-tooltip>
+											</md-button>
+
+											<md-button class="md-icon-button" @click="deleteDataset">
+												<md-icon>delete</md-icon>
+												<md-tooltip md-direction="bottom">Eliminar dataset</md-tooltip>
+											</md-button>
+											</div>
+									</div>
 								</div>
-							</div>
 
 							<div>
 								<div v-if="Dataset && !Dataset.properties.Table">
@@ -131,7 +130,7 @@
 				</div>
 			</div>
 		</div>
-		<md-dialog-prompt
+		<md-dialog-prompt class="mp-dialog-lg"
 				:md-active.sync="activateSaveAs"
 				v-model="newDatasetName"
 				md-title="Duplicar dataset"
@@ -308,5 +307,16 @@ export default {
   letter-spacing: -.05em;
   font-family: 'Roboto Mono', monospace;
 }
+
+	.dataset-toolbar {
+		border: 1px solid #dcdcdc;
+		height: 50px;
+		padding-top: 4px !important;
+		border-radius: 25px;
+		padding: 0px;
+		padding-left: 6px;
+		width: 105px;
+		float: right;
+	}
 </style>
 

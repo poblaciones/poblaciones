@@ -105,7 +105,7 @@ export default {
 		align-items: center;
 	}
 	.actionIcon .md-icon {
-		color: #fff !important;
+		color: var(--topbar-icon) !important;
 	}
 
 </style>

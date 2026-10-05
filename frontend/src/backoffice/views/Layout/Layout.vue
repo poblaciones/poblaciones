@@ -121,23 +121,4 @@ export default {
 	#mainPanel.collapsed {
 	padding-left: 0px;
 	}
-
-
-	.sidebar-container {
-		transition: width 0.28s;
-		width: 251px !important;
-		height: 100%;
-	  border-right: #dcdcdc solid 1px !important;
-    position: fixed;
-		font-size: 0px;
-		top: 0;
-		line-height: 9px;
-		bottom: 0;
-		left: 0;
-		z-index: 1001;
-		overflow: hidden;
-	}
-
-
-
 </style>

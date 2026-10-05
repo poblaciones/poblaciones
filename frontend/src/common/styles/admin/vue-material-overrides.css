@@ -28,6 +28,12 @@
 	margin-left: 0px !important;
 }
 
+/* El relleno lateral global deja sin ancho al botón de quitar del chip (20 px) y la cruz no se ve. */
+.md-chip .md-button {
+	padding-right: 0 !important;
+	padding-left: 0 !important;
+}
+
 .md-button.md-icon-button.avatarButton {
 	padding: 0px!important;
 }

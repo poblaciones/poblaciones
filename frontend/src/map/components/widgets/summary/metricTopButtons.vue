@@ -251,16 +251,6 @@
 		font-size: .8em;
 	}
 
-	.activeButton {
-		opacity: .45;
-	}
-
-	.filterDropdownButton {
-		font-size: 11px;
-		margin-left: -5px;
-		margin-right: 3px;
-	}
-
 	.dropFilter {
 		margin-top: 0px;
 		cursor: pointer;

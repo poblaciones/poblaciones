@@ -101,8 +101,8 @@
 		width: 34px;
 		height: 34px;
 		border-radius: 50%;
-		background-color: #fff;
-		color: #00A0D2;
+		background-color: var(--topbar-avatar-bg);
+		color: var(--topbar-avatar-text);
 		display: flex;
 		align-items: center;
 		justify-content: center;

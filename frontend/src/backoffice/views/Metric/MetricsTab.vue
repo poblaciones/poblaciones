@@ -43,10 +43,11 @@
 				Nivelar
 			</md-button>
 		</div>
-		<div class="md-layout" v-if="Dataset && list && Dataset.Columns">
+		<div class="md-layout" v-if="isTableReady">
 			<div class="md-layout-item">
 				<md-table v-model="list" md-card="">
-					<md-table-row slot="md-table-row" slot-scope="{ item }" md-alignment-top md-alignment-left-top>
+					<md-table-row slot="md-table-row" slot-scope="{ item }" md-alignment-top md-alignment-left-top
+													:class="{ 'search-target': isSearchTarget(item) }">
 						<md-table-cell class="selectable" md-label="Nombre" style="padding-right: 45px">
 							<div style="padding-top: 11px">
 								{{ item.MetricVersion.Metric.Caption }} ({{ item.MetricVersion.Caption }})
@@ -173,6 +174,9 @@ export default {
 		f() {
 			return f;
 		},
+		isTableReady() {
+			return !!(this.Dataset && this.list && this.Dataset.Columns);
+		},
 		canLevel() {
 			if (!this.Dataset) {
 				return false;
@@ -181,6 +185,15 @@ export default {
 		},
 	},
 	methods: {
+		isSearchTarget(item) {
+			return String(item.Id) === this.$route.query.level;
+		},
+		scrollToSearchTarget() {
+			var row = this.$el.querySelector('.search-target');
+			if (row) {
+				row.scrollIntoView({ block: 'center' });
+			}
+		},
 		createNewMetric() {
 			this.$refs.newMetric.show();
 		},
@@ -408,6 +421,14 @@ export default {
 	watch: {
 		"Work.MetricVersions.list"() {
 			this.ReloadUnUsedMetricVersions();
+		},
+		isTableReady: {
+			immediate: true,
+			handler(ready) {
+				if (ready) {
+					this.$nextTick(this.scrollToSearchTarget);
+				}
+			}
 		}
 	},
 };
@@ -420,6 +441,20 @@ export default {
 	background-color: transparent;
 	margin-left: -16px;
 	margin-right: -16px;
+}
+
+/* La fila a la que llegó el buscador (query level) conserva el color un instante y se desvanece. */
+.search-target .md-table-cell {
+	animation: search-target-fade 4s ease-out;
+}
+
+@keyframes search-target-fade {
+	0%, 60% {
+		background-color: var(--mp-selected-hover);
+	}
+	100% {
+		background-color: transparent;
+	}
 }
 
 </style>

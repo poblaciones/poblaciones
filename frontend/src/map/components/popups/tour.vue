@@ -409,17 +409,6 @@ export default {
   margin-left: 30px;
   float: left;
 }
-.topper {
-position: absolute;
-    top: 0;
-    left: 0;
-    background-color: #e61b1b;
-    width: 100%;
-    border-radius: 2px;
-    color: white;
-    padding: 8px;
-    font-size: 26px;
-}
 // modal content sliders
 article {
   flex: 1 1 100%;
@@ -433,16 +422,6 @@ article {
 }
 	.article {
 		border-radius: 12px!important;
-	}
-	.articleTitle {
-		padding: 6px 0 6px 12px;
-		font-size: 25px;
-		font-weight: 100;
-		border-top-left-radius: 12px;
-		border-top-right-radius: 12px;
-		margin: -10px -10px 30px -10px;
-		background-color: #00A0D2;
-		color: #ffffff;
 	}
 section p {
   font-size: 18px;

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<TopWelcome welcomeMessage="Paquetes de Poblaciones" :offerAdminLink="true" backColor='#5a8ae2' />
+		<TopWelcome current="packs" :offerAdminLink="true" />
 		<invoker ref="invoker">
 		</invoker>
 

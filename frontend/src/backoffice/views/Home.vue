@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<TopWelcome :offerAdminLink='true' />
+		<home-topbar />
 		<invoker ref="invoker">
 		</invoker>
 
@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import TopWelcome from '@/common/components/TopWelcome';
+import HomeTopbar from '@/backoffice/components/HomeTopbar';
 import Works from './Work/Works';
 import ActiveWork from '@/backoffice/classes/ActiveWork';
 import arr from '@/common/framework/arr';
@@ -48,7 +48,7 @@ import arr from '@/common/framework/arr';
 export default {
 	name: 'home',
 	components: {
-		TopWelcome,
+		HomeTopbar,
 		Works
 	},
 	mounted() {

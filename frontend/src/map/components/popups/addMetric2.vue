@@ -265,11 +265,6 @@ export default {
 		padding: 2px;
 	}
 
-	.panel-container {
-		width: 100%;
-		overflow: hidden;
-	}
-
 	/* Tabs */
 	.tabs {
 		display: flex;

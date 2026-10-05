@@ -641,15 +641,6 @@
 		/*		box-shadow: 0 4px 6px rgba(0,0,0,0.3);*/
 	}
 
-    .tooltip-header {
-        border-bottom: 1px solid #555;
-        margin-bottom: 3px;
-        font-size: 10px;
-        opacity: 0.8;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
 	.dot {
 		display: inline-block;
 		width: 6px;

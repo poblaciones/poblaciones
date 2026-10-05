@@ -186,35 +186,6 @@
 		flex-wrap: nowrap;
 	}
 
-	.metric-footer {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 10px;
-		margin-top: 13px;
-	}
-
-	.footer-left {
-		display: flex;
-		align-items: center;
-	}
-
-	.footer-right {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		font-size: 12px;
-	}
-
-	.metric-title-sortable {
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		gap: 4px;
-	}
-	.metric-title-sortable:hover .metric-name {
-		text-decoration: underline;
-	}
 	.sort-arrow {
 		font-size: 11px;
 		color: #1976d2;
@@ -227,11 +198,6 @@
 
 		.metric-name {
 			font-size: 14px;
-		}
-
-		.footer-right {
-			font-size: 11px;
-			gap: 6px;
 		}
 	}
 </style>

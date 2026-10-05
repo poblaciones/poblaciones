@@ -31,6 +31,7 @@
 	--mp-surface: #fff;
 	--mp-surface-muted: #f1f1f1;
 	--mp-surface-translucent: #ffffffc0;
+	--mp-topbar: #f1f1f1;
 
 	/* Radios */
 	--mp-radius-pill: 20px;

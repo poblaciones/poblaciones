@@ -1,13 +1,11 @@
 <template>
 	<div id="topBarContainer">
-		<div id="topBar" class="topbar" :style="(backColor ? 'background-color: ' + backColor : '')">
-			<div class="topRight">
-				<admin-links v-if="showAdminButton"></admin-links>
+		<div id="topBar" class="topbar welcome-topbar">
+			<topbar-logo />
+			<div class="welcome-actions">
+				<admin-links v-if="showAdminButton" :current="current"></admin-links>
 				<home-menu></home-menu>
 				<profile-menu></profile-menu>
-			</div>
-			<div style="padding-top: 4px; font-size: 1.5em;">
-				{{ welcomeMessage }}
 			</div>
 		</div>
 	</div>
@@ -19,13 +17,15 @@ import ActiveWork from '@/backoffice/classes/ActiveWork.js';
 import AdminLinks from './AdminLinks';
 import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
 import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
+import TopbarLogo from '@/backoffice/components/TopbarLogo.vue';
 
 export default {
 	name: 'topBar',
 	components: {
 		AdminLinks,
 		ProfileMenu,
-		HomeMenu
+		HomeMenu,
+		TopbarLogo
 	},
 	data() {
 		return {
@@ -45,9 +45,8 @@ export default {
 		},
 	},
 	props: {
-		welcomeMessage: { type: String, default: 'Bienvenido a Poblaciones' },
-		offerAdminLink: { type: Boolean, default: false },
-		backColor: { type: String, default: null }
+		current: { type: String, default: '' },
+		offerAdminLink: { type: Boolean, default: false }
 	},
 	mounted() {
 		window.addEventListener('resize', this.handleResize);
@@ -66,22 +65,18 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-.barIco {
-	margin-top: -10px;
-}
-.barIco .md-button-content > i {
-	color: #FFF;
-}
-/* La zona derecha es absoluta igual que en Topbar.vue,
-   para no desplazar el mensaje de bienvenida. */
-.topRight {
-	position: absolute;
-	top: -2px;
-	right: 10px;
+.welcome-topbar {
 	display: flex;
-	flex-direction: row;
 	align-items: center;
-	height: 55px;
-	z-index: 1;
+	gap: 16px;
+	padding: 0 20px;
+}
+
+.welcome-actions {
+	display: flex;
+	flex: 0 0 auto;
+	margin-left: auto;
+	align-items: center;
+	white-space: nowrap;
 }
 </style>

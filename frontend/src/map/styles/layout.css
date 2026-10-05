@@ -139,7 +139,7 @@ body {
 	margin-right: 12px;
 	margin-top: 12px;
 	border-radius: 12px;
-	max-height: calc(100% - 95px - 80px);
+	max-height: calc(100% - 95px - 76px);
 	display: flex;
 	top: 60px;
 	width: calc(30% - 2.5px);

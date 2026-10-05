@@ -337,15 +337,6 @@ export default {
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
 
-.mp-text-label{
-    padding-left: 0 !important;
-		left: 0 !important;
-		margin-bottom: 2px;
-    line-height: 1.1em;
-		color: #448aff!important;
-		font-size: 14px!important;
-}
-
 .mp-area{
 		left: 0 !important;
 		margin-bottom: 2px;

@@ -55,5 +55,5 @@ export default {
 	margin-right: 0px;
 }
 .actionIcon { margin: 0 2px; }
-.actionIcon .md-icon { color: #fff !important; }
+.actionIcon .md-icon { color: var(--topbar-icon) !important; }
 </style>

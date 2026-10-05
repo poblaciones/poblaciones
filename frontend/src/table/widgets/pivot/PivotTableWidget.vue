@@ -116,12 +116,6 @@ export default {
 		background: #fafafa;
 		cursor: move;
 	}
-	.widget-title-text {
-		font-size: 14px;
-		font-weight: 600;
-		color: #1976d2;
-		padding: 3px 6px;
-	}
 
 	.widget-head-actions { display: flex; align-items: center; gap: 6px; }
 

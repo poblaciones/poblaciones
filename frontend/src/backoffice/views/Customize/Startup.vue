@@ -213,17 +213,7 @@ export default {
 		border-radius: 3px;
 	}
 
-.paddedList {
-	padding: 20px 60px 0px 60px !important;
-}
 .noLeftMargin {
 	margin-left: 0px!important;
-}
-
-
-.extraInfo {
-	color: #777;
-	font-size: 85%;
-  font-style: italic;
 }
 </style>

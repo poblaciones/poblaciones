@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<TopWelcome welcomeMessage="Administración de Poblaciones" :offerAdminLink="true" backColor='#5a8ae2' />
+		<TopWelcome current="admin" :offerAdminLink="true" />
 		<invoker ref="invoker">
 		</invoker>
 

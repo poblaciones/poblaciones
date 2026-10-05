@@ -574,7 +574,6 @@ export default {
 		background: #fff;
 		box-sizing: border-box;
 	}
-	.dist-cut-note { margin-top: 6px; }
 	.dist-no-data {
 		display: flex;
 		align-items: center;

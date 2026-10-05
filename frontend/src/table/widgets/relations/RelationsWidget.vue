@@ -642,7 +642,6 @@ export default {
 	.corr-method { margin-top: 14px; padding-top: 10px; border-top: 1px solid #eceff1; font-size: 13px; color: #546e7a; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 	.corr-method label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 
-	.weight-toggle { color: #607d8b; margin-top: 6px; }
 	.hand { cursor: pointer; }
 	.reg-type { font-size: 14px; color: #455a64; margin: 6px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 	.reg-type label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }

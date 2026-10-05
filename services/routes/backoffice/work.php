@@ -158,6 +158,15 @@ App::$app->get('/services/backoffice/GetCurrentUserWorks', function (Request $re
 	return App::Json($controller->GetCurrentUserWorks());
 });
 
+App::$app->get('/services/backoffice/SearchUserWorks', function (Request $request) {
+	if ($denied = Session::CheckSessionAlive()) return $denied;
+
+	$controller = new services\WorkService();
+	$text = Params::Get('q');
+	$limitPerGroup = Params::GetInt('l', 6);
+	return App::Json($controller->SearchUserWorks($text, $limitPerGroup));
+});
+
 App::$app->get('/services/backoffice/GetWorkPreview', function (Request $request) {
 	$workId = Params::GetIntMandatory('w');
 	if ($denied = Session::CheckIsWorkReader($workId)) return $denied;

@@ -237,7 +237,7 @@ MapExport.prototype.prepareMapAndExport = function (exportFunction, scale, previ
 				var hideSecond = [{ attribute: 'overflow-y', set: 'hidden', restore: 'auto', class: '#panSummary' },
 					// oculta el spliter
 					{ attribute: 'display', set: 'none', restore: 'block', class: 'gutter gutter-horizontal' },
-					{ attribute: 'max-height', set: 'unset', restore: 'calc(100% - 95px - 80px)', class: '#panRight' }];
+					{ attribute: 'max-height', set: 'unset', restore: 'calc(100% - 95px - 76px)', class: '#panRight' }];
 
 				// oculta el panel de resumen
 				var hideSecond3 = [{ attribute: 'display', set: 'none', restore: 'flex', class: '#panRight' }];

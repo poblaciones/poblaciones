@@ -38,6 +38,27 @@
 	text-align: center;
 }
 
+.inMapButton {
+	z-index: 900;
+	position: absolute;
+	border: 1px solid rgb(165 164 164 / 50%) !important;
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	color: #5a5858;
+	background-color: #fbfbfb;
+	border-radius: 50%;
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+
+.inMapButton:hover, .inMapButton:focus {
+	background-color: #f4f4f4;
+}
+
 .activePath {
 	stroke: #FFF;
 	stroke-opacity: 1;

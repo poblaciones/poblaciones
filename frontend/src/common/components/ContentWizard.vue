@@ -381,15 +381,6 @@ article {
 		border-radius: 12px !important;
 	}
 
-.articleTitle {
-	padding: 6px 0 6px 12px;
-	font-size: 25px;
-	border-top-left-radius: 12px;
-	border-top-right-radius: 12px;
-	font-weight: 100;
-	margin: -10px -10px 29px -10px;
-	color: #ffffff;
-}
 section p {
 	font-size: 18px;
 	padding-left: 0px;

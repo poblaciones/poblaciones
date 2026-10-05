@@ -180,10 +180,6 @@ export default {
 	margin-bottom: 4px;
 }
 
-.clippingLegendVersion {
-	font-size: .92em;
-}
-
 .clippingLegendRemoveRegion {
 	display: none;
 	pointer-events: auto;

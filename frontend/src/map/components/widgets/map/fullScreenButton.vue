@@ -1,5 +1,5 @@
 <template>
-	<div class="fsButton" id="fsButton" title="Pantalla completa" @click="goFullScreen">
+	<div class="fsButton inMapButton" id="fsButton" title="Pantalla completa" @click="goFullScreen">
 		<arrow-expand-icon class="bt" title="Pantalla completa" v-if="!fullscreen" />
 		<arrow-collapse-icon class="bt" v-else title="Salir del modo de pantalla completa" />
 	</div>
@@ -40,24 +40,9 @@ export default {
 		margin-left: 1px;
 	}
 	.fsButton {
-		z-index: 900;
-		position: absolute;
 		right: 53px;
-		border: 1px solid rgb(165 164 164 / 50%) !important;
 		bottom: 24px;
-		font-size: 16px;
-		padding: 6px 0px 0px 5px;
-		width: 30px;
-		height: 30px;
-		cursor: pointer;
-		color: #5a5858;
-		background-color: #fbfbfb;
-		border-radius: 50%;
-		-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
 	}
-		.fsButton:hover, fsButton:focus {
-			background-color: #f4f4f4;
-		}
 
 </style>
 

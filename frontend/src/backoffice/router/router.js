@@ -24,6 +24,7 @@ import Layout from '../views/Layout/Layout.vue';
 export const constantRouterMap = [
 //	{ path: '/login', component: () => import('@/backoffice/views/login/index'), hidden: true },
 { path: '/404', component: () => import('@/common/components/NotFound'), hidden: true },
+{ path: '/paletas', component: () => import('@/backoffice/views/Paletas/Paletas.vue'), hidden: true },
 {
 	path: '',
 		hidden: true,
