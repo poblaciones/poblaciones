@@ -18,7 +18,7 @@
 			</h4>
 		</div>
 		<template v-else>
-			<h4 class="title" style="margin-bottom: 6px;">{{ boundary.properties.Name }}</h4>
+			<h4 class="title">{{ boundary.properties.Name }}</h4>
 			<div class="variablesBlock">
 				<div class="variableRow hand" :class="activeClass()" @click="toggleCollapse()">
 					Cantidad de regiones
