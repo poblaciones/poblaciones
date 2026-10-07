@@ -1,37 +1,38 @@
 <template>
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar">
+			<topbar-logo class="home-logo" />
+			<div class="backLink">
+				<router-link :to="getBackRoute">
+					<BackIcon class="icon backIcon" />
+				</router-link>
+			</div>
+			<div class="titleBox">
+				<div>
+					<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
+						Ejemplos >
+					</div>
+					<div class="md-layout md-gutter" style="margin-top: -21px">
+						<div class="md-layout-item md-size-100">
+							<mp-text id="workTitle" :canEdit="Work.CanEdit()" :alignRight="true" label="" :largeFont="true"
+											 :maxlength="150" class="fieldTitle" :lighterColor="true"
+											 :required="true" @update="UpdateTitle"
+											 v-model="Work.properties.Metadata.Title" />
+						</div>
+					</div>
+				</div>
+			</div>
 			<div class="topRight">
 				<!--backoffice-links><backoffice-links-->
 				<topbar-work-actions></topbar-work-actions>
 				<home-menu></home-menu>
 				<profile-menu></profile-menu>
 			</div>
-			<div style="float: left">
-				<router-link :to="getBackRoute">
-					<BackIcon class="icon backIcon" />
-				</router-link>
-			</div>
-				<div style="width: calc(max(1100px,100%)) ">
-					<div class="titleLine">
-						<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
-							Ejemplos >
-						</div>
-						<div class="md-layout md-gutter" style="margin-top: -21px">
-							<div class="md-layout-item md-size-100">
-								<mp-text id="workTitle" :canEdit="Work.CanEdit()" label="" :largeFont="true"
-												 :maxlength="150" class="fieldTitle" :lighterColor="true"
-												 :required="true" @update="UpdateTitle"
-												 v-model="Work.properties.Metadata.Title" />
-							</div>
-						</div>
-					</div>
-					</div>
-			</div>
-			<invoker ref="invoker"></invoker>
-			<stepper ref="TestStepper" title="Asistente de prueba">
-			</stepper>
 		</div>
+		<invoker ref="invoker"></invoker>
+		<stepper ref="TestStepper" title="Asistente de prueba">
+		</stepper>
+	</div>
 </template>
 
 <script>
@@ -41,11 +42,13 @@ import BackIcon from '@/common/assets/back.svg';
 import TopbarWorkActions from '@/backoffice/components/TopbarWorkActions.vue';
 import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
 import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
+import TopbarLogo from '@/backoffice/components/TopbarLogo';
 
 export default {
 	name: 'topBar',
 	components: {
 		BackIcon,
+		TopbarLogo,
 		TopbarWorkActions,
 		ProfileMenu,
 		HomeMenu
@@ -122,18 +125,31 @@ export default {
 	line-height: 1.2em;
 }
 
+#topBar {
+	display: flex;
+	align-items: flex-start;
+}
+
+.backLink {
+	margin-left: auto;
+	flex: none;
+}
+
+.titleBox {
+	flex: 0 1 calc(max(600px, 50%));
+	min-width: 0;
+}
+
 	.topRight {
-		position: absolute;
+		position: relative;
 		top: -2px;
-		right: 0px;
+		flex: none;
 		padding-right: 10px;
 		padding-left: 6px;
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		height: 55px;
-		z-index: 1;
-		background-color: var(--mp-topbar);
 	}
 
 .topRight > * {

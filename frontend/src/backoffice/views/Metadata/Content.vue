@@ -5,13 +5,6 @@
 			<div class="md-layout md-gutter">
 				<div class="md-layout-item md-size-80 md-small-size-100">
 							<div class="md-layout md-gutter">
-								<div class="md-layout-item md-size-100">
-									<mp-text :canEdit="canEdit" label="Título" :maxlength="150"
-													 helper="Nombre de la cartografía, indicando opcionalmente la cobertura,
-														fuente o período. Ej. Patrones de migración interprovincial 2001-2010."
-													 :required="true" @update="UpdateTitle"
-													 v-model="metadata.Title" />
-								</div>
 								<div class="md-layout-item md-size-90 md-small-size-100">
 
 										<mp-text :canEdit="canEdit" label="Descripción" :multiline="true" :maxlength="400"

@@ -1,13 +1,13 @@
 <template >
-	<div :class="this.classSize + (lighterColor ? ' lighterColor' : ' defaultColor')" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
-		<div style="position: relative">
+	<div :class="this.classSize + (lighterColor ? ' lighterColor' : ' defaultColor')" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '') + 'overflow: hidden'" v-on-clickaway="away">
+		<div style="position: relative;"  ref="container">
 			<div style="padding-right: 85px" @dblclick="StartEdit">
 				<md-field style="margin-bottom: 0px" class="mp-editable-text">
 					<label class="mp-label unselectable" :style="(this.multiline ? 'top: 6px !important' : '')">
 						{{ this.label }}
 					</label>
-					<md-input v-if="!this.multiline" :type="type" style="text-overflow: ellipsis; width: 100%" autocomplete="off"
-										:style="(largeFont ? 'font-size: 24px; letter-spacing: -1%;' : 'font-size: 19px')"
+					<md-input v-if="!this.multiline" :type="type" autocomplete="off"
+										:style="inputStyle"
 										:placeholder="(placeholder ? placeholder : '')"
 										:class="(!editMode ? 'unselectable' : '')"
 										@mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue"
@@ -21,12 +21,12 @@
 					<span v-if="suffix" class="md-suffix">{{ suffix }}</span>
 				</md-field>
 			</div>
-			<div :style="'line-height: 1em; margin-top: -5px; ' + helperPaddingRight ">
+			<div style="line-height: 1em; margin-top: -5px;">
 				<span class="md-helper-text helper" style="bottom: -18px;"
 							:ref="helperId" v-html="ProcessTip(helper)"></span>
 				<span class="md-helper-text error" style="color: red; bottom: -18px;">{{ errorMessage }}</span>
 			</div>
-			<div v-if="!isDisabled" style="position: absolute; top: 0px; right: 80px;">
+			<div v-if="!isDisabled" :style="panelStyle" class="buttonsPanel">
 				<button-panel ref="buttonPanel" style="position: absolute!important"
 											@onCancel="cancel" @onUpdate="Update" @onEditModeChange="ChangeEditableMode" @onFocus="focus"></button-panel>
 			</div>
@@ -42,14 +42,85 @@ import { mixin as clickaway } from 'vue-clickaway';
 import str from '@/common/framework/str';
 import MpRichArea from './MpRichArea';
 
+const PANEL_STEP = 55;
+const PANEL_GAP = 6;
+const PANEL_RIGHT_MARGIN = 80;
+const DEFAULT_EDIT_PANEL_WIDTH = 80;
+
 export default {
   name: 'MpText',
 	components: {
 		ButtonPanel,
 		MpRichArea
 	},
+	props: {
+		label: String,
+		size: String,
+		error: String,
+		canEdit: { type: Boolean, default: true },
+		largeFont: { type: Boolean, default: false },
+		multiline: Boolean,
+		alignRight: { type: Boolean, default: false },
+		formatted: { type: Boolean, default: false },
+		lighterColor: { type: Boolean, default: false },
+		suffix: String,
+		type: { type: String, default: null },
+		rows: Number,
+		placeholder: String,
+		maxlength: Number,
+		value: {
+			type: [String, Number],
+			default: ''
+		},
+		helper: String,
+		required: Boolean
+	},
 	mixins: [ clickaway ],
 	methods: {
+		measureTextWidth() {
+			var style = window.getComputedStyle(this.input.$el);
+			var context = this.measureCanvas.getContext('2d');
+			context.font = style.fontStyle + ' ' + style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
+			return context.measureText(String(this.localValue)).width;
+		},
+		maxPanelLeft() {
+			return Math.max(0, this.$refs.container.clientWidth - PANEL_RIGHT_MARGIN - this.editPanelWidth + 85);
+		},
+		rememberEditPanelWidth() {
+			var width = this.$refs.buttonPanel.$el.offsetWidth;
+			if (width > 0) {
+				this.editPanelWidth = width;
+			}
+		},
+		growPanelLeft(required, maxLeft) {
+			var left = Math.min(this.panelLeft, maxLeft);
+			if (required > left) {
+				var steps = Math.ceil((required - left) / PANEL_STEP);
+				left = left + steps * PANEL_STEP;
+			}
+			return Math.min(left, maxLeft);
+		},
+		observePanel() {
+			this.panelObserver.disconnect();
+			if (this.$refs.buttonPanel) {
+				this.panelObserver.observe(this.$refs.buttonPanel.$el);
+			}
+		},
+		updatePanelPosition() {
+			if (!this.isFloatingPanel || !this.$refs.buttonPanel) {
+				return;
+			}
+			if (this.editMode) {
+				this.rememberEditPanelWidth();
+			}
+			var maxLeft = this.maxPanelLeft();
+			var required = this.measureTextWidth() + PANEL_GAP;
+			if (this.editMode) {
+				this.panelLeft = this.growPanelLeft(required, maxLeft);
+			} else {
+				this.panelLeft = Math.min(required, maxLeft);
+			}
+		},
 		cancel() {
 			this.localValue = this.value;
 		},
@@ -188,20 +259,30 @@ export default {
 		},
   },
 	computed: {
+		isFloatingPanel() {
+			return !this.alignRight && !this.multiline;
+		},
+		panelStyle() {
+			if (this.isFloatingPanel) {
+				return { position: 'absolute', top: '0px', left: this.panelLeft + 'px' };
+			}
+			return { position: 'absolute', top: '0px', right: PANEL_RIGHT_MARGIN + 'px' };
+		},
+		inputStyle() {
+			var style = { 'text-overflow': 'ellipsis', width: '100%' };
+			if (this.largeFont) {
+				style['font-size'] = '21px';
+				style['letter-spacing'] = '-1%';
+			} else {
+				style['font-size'] = '19px';
+			}
+			if (this.alignRight) {
+				style['text-align'] = 'right';
+			}
+			return style;
+		},
 		classSize() {
 			return 'md-layout-item md-size-' + (this.size ? this.size : 100);
-		},
-		helperPaddingRight() {
-			if (this.isDisabled || this.maxlength === 0) {
-				return '';
-			}
-			if (this.maxlength > 999) {
-				return 'padding-right: 115px';
-			} else if (this.maxlength > 99) {
-				return 'padding-right: 105px';
-			} else {
-				return 'padding-right: 88px';
-			}
 		},
 		isDisabled() {
 			return !this.canEdit || this.$attrs.disabled;
@@ -241,9 +322,17 @@ export default {
 	},
 	created() {
 		this.localValue = this.value;
+		this.measureCanvas = document.createElement('canvas');
+		this.panelObserver = new ResizeObserver(this.updatePanelPosition);
+	},
+	beforeDestroy() {
+		window.removeEventListener('resize', this.updatePanelPosition);
+		this.panelObserver.disconnect();
 	},
 	mounted() {
 		var loc = this;
+		window.addEventListener('resize', this.updatePanelPosition);
+		this.$nextTick(this.observePanel);
 		this.input.$el.onblur = () => {
      setTimeout(() => {
 				this.CheckBluring(document.activeElement);
@@ -271,31 +360,21 @@ export default {
 			localValue: '',
 			localError: '',
 			editMode: false,
-			pendingMouseUp: false
+			pendingMouseUp: false,
+			panelLeft: 0,
+			editPanelWidth: DEFAULT_EDIT_PANEL_WIDTH
 		};
 	},
-  props: {
-    label: String,
-    size: String,
-    error: String,
-		canEdit: { type: Boolean, default: true },
-		largeFont: { type: Boolean, default: false},
-		multiline: Boolean,
-		formatted: { type: Boolean, default: false },
-		lighterColor: { type: Boolean, default: false },
-		suffix: String,
-		type: { type: String, default: null },
-		rows: Number,
-		placeholder: String,
-		maxlength: Number,
-		value: {
-			type: [String, Number],
-			default: ''
-		},
-		helper: String,
-		required: Boolean
-  },
 	watch: {
+		localValue() {
+			this.updatePanelPosition();
+		},
+		editMode() {
+			this.$nextTick(this.updatePanelPosition);
+		},
+		isDisabled() {
+			this.$nextTick(this.observePanel);
+		},
 	'value' () {
 			if (this.valueChanged) {
 				this.localValue = this.value;
@@ -326,5 +405,10 @@ export default {
 .md-layout-item .md-size-25 {
   padding: 0 !important;
 }
-
+	.buttonsPanel {
+		height: 3.1rem;
+		z-index: 100;
+		width: 100%;
+		background-color: white;
+	}
 </style>
