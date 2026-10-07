@@ -1,12 +1,7 @@
 <template>
 	<div id="topBarContainer">
-		<div id="topBar" class="topbar">
+		<div id="topBar" class="topbarFlex">
 			<topbar-logo class="home-logo" />
-			<div class="backLink">
-				<router-link :to="getBackRoute">
-					<BackIcon class="icon backIcon" />
-				</router-link>
-			</div>
 			<div class="titleBox">
 				<div>
 					<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
@@ -14,7 +9,7 @@
 					</div>
 					<div class="md-layout md-gutter" style="margin-top: -21px">
 						<div class="md-layout-item md-size-100">
-							<mp-text id="workTitle" :canEdit="Work.CanEdit()" :alignRight="true" label="" :largeFont="true"
+							<mp-text id="workTitle" :canEdit="Work.CanEdit()" label="" :alignRight="true" :largeFont="true"
 											 :maxlength="150" class="fieldTitle" :lighterColor="true"
 											 :required="true" @update="UpdateTitle"
 											 v-model="Work.properties.Metadata.Title" />
@@ -38,7 +33,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import Context from '@/backoffice/classes/Context';
-import BackIcon from '@/common/assets/back.svg';
 import TopbarWorkActions from '@/backoffice/components/TopbarWorkActions.vue';
 import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
 import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
@@ -47,7 +41,6 @@ import TopbarLogo from '@/backoffice/components/TopbarLogo';
 export default {
 	name: 'topBar',
 	components: {
-		BackIcon,
 		TopbarLogo,
 		TopbarWorkActions,
 		ProfileMenu,
@@ -137,25 +130,17 @@ export default {
 
 .titleBox {
 	flex: 0 1 calc(max(600px, 50%));
-	min-width: 0;
 }
 
 	.topRight {
-		position: relative;
-		top: -2px;
-		flex: none;
-		padding-right: 10px;
+		flex: 0 0 auto;
 		padding-left: 6px;
+		margin-top: -15px;
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		height: 55px;
 	}
-
-.topRight > * {
-	display: flex;
-	align-items: center;
-}
 
 #topBarContainer {
 	position: fixed;

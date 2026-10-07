@@ -1,5 +1,5 @@
 <template>
-	<a class="topbar-logo" :href="homePage" target="_blank" rel="noopener" aria-label="Ir al inicio de Poblaciones">
+	<a class="topbar-logo" :href="getBackRoute" rel="noopener" aria-label="Ir al inicio de Poblaciones">
 		<img :src="logo" alt="Poblaciones">
 	</a>
 </template>
@@ -15,9 +15,20 @@ export default {
 		};
 	},
 	computed: {
-		homePage() {
-			return window.Context.Configuration.HomePage;
-		}
+			getBackRoute() {
+				var work = window.Context.CurrentWork;
+				if (!work) {
+					return '/users#/works';
+				}
+				if (work.properties.Type == 'P') {
+					return '/users#/public';
+				} else if (work.properties.Type == 'R') {
+					return '/users#/works';
+				} else {
+					throw new Error('Tipo de obra no reconocida para getBackRoute.');
+				}
+			}
+//			return window.Context.Configuration.HomePage;
 	}
 };
 </script>

@@ -1,8 +1,8 @@
 <template >
 	<div :class="this.classSize + (lighterColor ? ' lighterColor' : ' defaultColor')" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '') + 'overflow: hidden'" v-on-clickaway="away">
 		<div style="position: relative;"  ref="container">
-			<div style="padding-right: 85px" @dblclick="StartEdit">
-				<md-field style="margin-bottom: 0px" class="mp-editable-text">
+			<div :style="wrapperStyle" @dblclick="StartEdit">
+				<md-field :style="fieldStyle" class="mp-editable-text">
 					<label class="mp-label unselectable" :style="(this.multiline ? 'top: 6px !important' : '')">
 						{{ this.label }}
 					</label>
@@ -45,6 +45,10 @@ import MpRichArea from './MpRichArea';
 const PANEL_STEP = 55;
 const PANEL_GAP = 6;
 const PANEL_RIGHT_MARGIN = 80;
+const PANEL_RESERVED_WIDTH = 85;
+const ALIGN_RIGHT_EXTRA_MARGIN = 12;
+const MIN_RIGHT_FIELD_WIDTH = 40;
+const RIGHT_FIELD_PADDING = 6;
 const DEFAULT_EDIT_PANEL_WIDTH = 80;
 
 export default {
@@ -104,6 +108,11 @@ export default {
 			this.panelObserver.disconnect();
 			if (this.$refs.buttonPanel) {
 				this.panelObserver.observe(this.$refs.buttonPanel.$el);
+			}
+		},
+		updateTextWidth() {
+			if (this.alignRight && !this.multiline) {
+				this.textWidth = this.measureTextWidth();
 			}
 		},
 		updatePanelPosition() {
@@ -262,11 +271,34 @@ export default {
 		isFloatingPanel() {
 			return !this.alignRight && !this.multiline;
 		},
-		panelStyle() {
-			if (this.isFloatingPanel) {
-				return { position: 'absolute', top: '0px', left: this.panelLeft + 'px' };
+		extraRightMargin() {
+			if (this.alignRight) {
+				return ALIGN_RIGHT_EXTRA_MARGIN;
 			}
-			return { position: 'absolute', top: '0px', right: PANEL_RIGHT_MARGIN + 'px' };
+			return 0;
+		},
+		panelRightMargin() {
+			return PANEL_RIGHT_MARGIN + this.extraRightMargin;
+		},
+		wrapperStyle() {
+			return { 'padding-right': (PANEL_RESERVED_WIDTH + this.extraRightMargin) + 'px' };
+		},
+		fieldStyle() {
+			var style = { 'margin-bottom': '0px' };
+			if (this.alignRight && !this.multiline) {
+				style.width = Math.max(MIN_RIGHT_FIELD_WIDTH, this.textWidth + RIGHT_FIELD_PADDING) + 'px';
+				style['max-width'] = '100%';
+				style['margin-left'] = 'auto';
+			}
+			return style;
+		},
+		panelStyle() {
+			var background = (this.alignRight ? 'unset' : 'white');
+			if (this.isFloatingPanel) {
+				return { position: 'absolute', top: '0px', left: this.panelLeft + 'px', backgroundColor: background };
+			} else {
+				return { position: 'absolute', top: '0px', right: this.panelRightMargin + 'px', width: '0px', backgroundColor: background };
+			}
 		},
 		inputStyle() {
 			var style = { 'text-overflow': 'ellipsis', width: '100%' };
@@ -333,6 +365,7 @@ export default {
 		var loc = this;
 		window.addEventListener('resize', this.updatePanelPosition);
 		this.$nextTick(this.observePanel);
+		this.updateTextWidth();
 		this.input.$el.onblur = () => {
      setTimeout(() => {
 				this.CheckBluring(document.activeElement);
@@ -362,11 +395,13 @@ export default {
 			editMode: false,
 			pendingMouseUp: false,
 			panelLeft: 0,
+			textWidth: 0,
 			editPanelWidth: DEFAULT_EDIT_PANEL_WIDTH
 		};
 	},
 	watch: {
 		localValue() {
+			this.updateTextWidth();
 			this.updatePanelPosition();
 		},
 		editMode() {

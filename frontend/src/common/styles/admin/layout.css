@@ -23,6 +23,21 @@ html, body {
 	--topbar-avatar-bg: #00799e;
 	--topbar-avatar-text: #fff;
 }
+.topbarFlex {
+	display: flex;
+	justify-content: space-between; /* Distribuye los bloques a lo largo del contenedor */
+	align-items: center; /* Alinea los elementos verticalmente al centro */
+	width: 100%;
+	overflow: hidden;
+	padding: 13px 20px;
+	height: 52px;
+	z-index: 10000;
+	background-color: var(--mp-topbar);
+	color: var(--mp-text);
+	--topbar-icon: var(--mp-text-muted);
+	--topbar-avatar-bg: #00799e;
+	--topbar-avatar-text: #fff;
+}
 
 .mp-right-toolbar {
 	position: absolute;
