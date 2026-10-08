@@ -66,7 +66,8 @@ computed: {
 | `caption` | String | primera columna | Propiedad que actúa como columna descriptiva: va primera y, si `onlySearchDescriptions` está activo, es la única que filtra el buscador. |
 | `onlySearchDescriptions` | Boolean | `false` | Restringe el buscador a la columna descriptiva. Por defecto busca en todas las columnas mostradas. |
 | `actions` | Array | `[]` | Acciones por fila (ver abajo). |
-| `canEdit` | Boolean | `false` | Agrega la acción de editar, que emite `itemEdit`. |
+| `canEdit` | Boolean | `false` | Agrega la acción de editar, que emite `itemEdit` (o, con `editNewTab`, abre la pestaña de edición). |
+| `editNewTab` | Boolean | `false` | La edición se abre en otra pestaña, una por ítem (ver "Edición en pestaña nueva"). |
 | `canDelete` | Boolean | `false` | Agrega la acción de eliminar, que **siempre confirma** y luego emite `itemDelete`. |
 | `isItemEditEnabled` | Function | `null` | `(item) => bool`; muestra u oculta la acción de editar por ítem. |
 | `isItemDeleteEnabled` | Function | `null` | Ídem para la de eliminar. |
@@ -88,7 +89,7 @@ computed: {
 
 | Evento | Carga | Cuándo |
 |---|---|---|
-| `itemEdit` | `item` | Con `canEdit`, al usar la acción de editar. |
+| `itemEdit` | `item` | Con `canEdit`, al usar la acción de editar. No se emite con `editNewTab`. |
 | `itemDelete` | `item` o `[items]` | Con `canDelete`, **una vez confirmado** el borrado. Llega un array si vino de una selección múltiple. |
 
 `itemDelete` llega ya confirmado: el handler ejecuta el borrado directamente, no
@@ -241,6 +242,35 @@ están expandidos) son fijos, no configurables.
 Buscar y ordenar respetan la jerarquía: los hijos nunca pierden su relación con
 el padre. Si un hijo coincide con la búsqueda, se muestran también todos sus
 ancestros; y el ordenamiento se aplica dentro de cada nivel.
+
+## Edición en pestaña nueva
+
+Con `editNewTab`, la edición de un ítem se abre en una pestaña propia en vez de
+reemplazar el listado. La URL de destino es el `href` de la **columna
+descriptiva**, que debe declararlo; si falta, la grilla lanza un error.
+
+La pestaña recibe un nombre estable, `mpgrid_<hash>_<Id>`, donde `<hash>` se
+deriva de la URL de la pantalla que contiene la grilla y `<Id>` es el de la
+fila. Abrir varias veces el mismo ítem reutiliza su pestaña, y ítems de
+pantallas distintas no comparten pestaña aunque tengan el mismo `Id`.
+
+Alcanza a:
+
+- El link de la columna descriptiva (se le agrega `target` con ese nombre, por lo
+  que conserva el comportamiento nativo del navegador, como Ctrl+clic).
+- La acción de `canEdit`, que abre la pestaña en lugar de emitir `itemEdit`.
+- Cualquier otro punto de entrada que la pantalla quiera dirigir a la edición,
+  mediante `grid.openEditTab(item)` (por ejemplo, en `rowClick`, en acciones
+  personalizadas o tras dar de alta un ítem). Devuelve la ventana, o `null` si el
+  navegador bloqueó la apertura:
+
+```js
+rowClick: function (grid, item) { grid.openEditTab(item); }
+```
+
+```html
+<mp-grid :items="works" :columns="gridColumns" :rowClick="onRowClick" editNewTab />
+```
 
 ## Selección múltiple
 

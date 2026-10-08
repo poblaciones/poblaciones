@@ -20,7 +20,7 @@
 			<invoker ref="invoker">
 			</invoker>
 			<div v-if="canCreate && !showingWelcome && createEnabled">
-				<md-button @click="onNewWork">
+				<md-button @click="onNewWork" class="offetDownButton">
 					<md-icon>add_circle_outline</md-icon>
 					{{ newLabel }}
 				</md-button>
@@ -28,8 +28,9 @@
 		</div>
 
 		<!-- Lista activa: soporta selección múltiple para archivar y eliminar. -->
-		<div v-if="list.length > 0">
+		<div v-show="list.length > 0">
 			<mp-grid
+				ref="activeGrid"
 				:items="list"
 				:columns="gridColumns"
 				:actions="activeActions"
@@ -37,6 +38,7 @@
 				defaultSortBy="Modificado"
 				defaultSortOrder="desc"
 				:rowClick="onRowClick"
+				editNewTab
 				:settingsKey="'works-' + filter + '-I'"
 				canDelete
 				:isItemDeleteEnabled="canDeleteActive"
@@ -62,6 +64,7 @@
 						defaultSortBy="Modificado"
 						defaultSortOrder="desc"
 						:rowClick="onRowClick"
+						editNewTab
 						:settingsKey="'works-' + filter + '-A'"
 						canDelete
 						:isItemDeleteEnabled="canDeleteArchived"
@@ -300,10 +303,10 @@ export default {
 		baseWorkActions() {
 			var loc = this;
 			return [
-				{ icon: 'remove_red_eye', caption: 'Consultar', onClick: function (grid, item) { loc.actionSelected('VIEW', item); }, isEnabled: function (item) { return !loc.canEdit(item); } },
+				{ icon: 'remove_red_eye', caption: 'Consultar', onClick: function (grid, item) { grid.openEditTab(item); }, isEnabled: function (item) { return !loc.canEdit(item); } },
 				{ icon: 'public', caption: 'Publicar', onClick: function (grid, item) { loc.actionSelected('PUBLISH', item); }, isEnabled: function (item) { return loc.canEdit(item) && !loc.publishDisabled(item); } },
 				{ icon: 'pause_circle_filled', caption: 'Revocar publicación', onClick: function (grid, item) { loc.actionSelected('REVOKE', item); }, isEnabled: function (item) { return loc.canEdit(item) && !loc.revokeDisabled(item); } },
-				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { loc.actionSelected('EDIT', item); }, isEnabled: function (item) { return loc.canEdit(item); } },
+				{ icon: 'edit', caption: 'Modificar', onClick: function (grid, item) { grid.openEditTab(item); }, isEnabled: function (item) { return loc.canEdit(item); } },
 				{ icon: 'file_copy', caption: 'Duplicar', onClick: function (grid, item) { loc.actionSelected('DUPLICATE', item); }, isEnabled: function (item) { return loc.canEdit(item); } },
 				{ icon: 'playlist_add', caption: 'Promover a Dato público', onClick: function (grid, item) { loc.actionSelected('PROMOTE', item); }, isEnabled: function (item) { return WorkPermissions.CanPromotePublic(item); } },
 				{ icon: 'lightbulb', caption: 'Convertir a ejemplo', onClick: function (grid, item) { loc.actionSelected('PROMOTEEXAMPLE', item); }, isEnabled: function (item) { return WorkPermissions.CanPromoteExample(item); } },
@@ -360,7 +363,7 @@ export default {
 			return '/users/#/cartographies/' + element.Id;
 		},
 		onRowClick(grid, item) {
-			this.select(item);
+			grid.openEditTab(item);
 		},
 
 		// ── Colapso del bloque "Archivadas" ─────────────────────────────────────
@@ -730,8 +733,18 @@ export default {
 			this.$refs.invoker.doMessage('Creando cartografía', window.Db,
 				window.Db.CreateWork, this.newWorkName.trim(), this.filter).then(
 				function (res) {
-					loc.select(res);
+					loc.openCreatedWork(res);
+					return window.Db.LoadWorks();
 				});
+		},
+		// El alta es asíncrona, por lo que el navegador puede bloquear la
+		// apertura al haber pasado el gesto del usuario: en ese caso se
+		// navega en la pestaña actual, para no dejar la acción sin efecto.
+		openCreatedWork(work) {
+			var tab = this.$refs.activeGrid.openEditTab(work);
+			if (!tab) {
+				this.select(work);
+			}
 		},
 		onRevoke(item) {
 			this.$refs.stepper.startUrl = window.Db.GetStartWorkRevokeUrl(item.Id);
@@ -768,3 +781,10 @@ export default {
 	}
 };
 </script>
+<style rel="stylesheet/scss" lang="scss" scoped>
+	.offetDownButton {
+		margin-top: 7px;
+		margin-bottom: 5px;
+	}
+
+</style>

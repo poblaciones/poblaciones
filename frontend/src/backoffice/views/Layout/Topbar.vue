@@ -1,7 +1,7 @@
 <template>
 	<div id="topBarContainer">
-		<div id="topBar" class="topbarFlex">
-			<topbar-logo class="home-logo" />
+		<div id="topBar" class="topbar topbarFlex">
+			<topbar-logo class="home-logo" style="margin-top: -4px" />
 			<div class="titleBox">
 				<div>
 					<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
@@ -129,7 +129,7 @@ export default {
 }
 
 .titleBox {
-	flex: 0 1 calc(max(600px, 50%));
+	flex: 0 1 calc(max(600px, 30%));
 }
 
 	.topRight {

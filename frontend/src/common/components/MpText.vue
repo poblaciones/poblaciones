@@ -1,9 +1,9 @@
 <template >
-	<div :class="this.classSize + (lighterColor ? ' lighterColor' : ' defaultColor')" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '') + 'overflow: hidden'" v-on-clickaway="away">
+	<div :class="this.classSize + (lighterColor ? ' lighterColor' : ' defaultColor') + helperClass" :style="(helper && helper.length > 0 ? 'margin-bottom: 20px;' : '')" v-on-clickaway="away">
 		<div style="position: relative;"  ref="container">
 			<div :style="wrapperStyle" @dblclick="StartEdit">
-				<md-field :style="fieldStyle" class="mp-editable-text">
-					<label class="mp-label unselectable" :style="(this.multiline ? 'top: 6px !important' : '')">
+				<md-field :style="fieldStyle" class="mp-editable-text" :class="fieldClass">
+					<label class="mp-label unselectable" :style="labelStyle">
 						{{ this.label }}
 					</label>
 					<md-input v-if="!this.multiline" :type="type" autocomplete="off"
@@ -11,7 +11,7 @@
 										:placeholder="(placeholder ? placeholder : '')"
 										:class="(!editMode ? 'unselectable' : '')"
 										@mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue"
-										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
+										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" :md-counter="false" />
 					<md-textarea v-if="this.multiline && !this.formatted" class="mp-area" :rows="rows" :style="minHeightRows + highlightBorder" autocomplete="off"
 											 :readonly="isDisabled || !editMode" @mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 
@@ -26,6 +26,7 @@
 							:ref="helperId" v-html="ProcessTip(helper)"></span>
 				<span class="md-helper-text error" style="color: red; bottom: -18px;">{{ errorMessage }}</span>
 			</div>
+			<div v-if="limitReached" class="mp-limit-tip" :style="limitTipStyle">{{ limitTipText }}</div>
 			<div v-if="!isDisabled" :style="panelStyle" class="buttonsPanel">
 				<button-panel ref="buttonPanel" style="position: absolute!important"
 											@onCancel="cancel" @onUpdate="Update" @onEditModeChange="ChangeEditableMode" @onFocus="focus"></button-panel>
@@ -46,9 +47,10 @@ const PANEL_STEP = 55;
 const PANEL_GAP = 6;
 const PANEL_RIGHT_MARGIN = 80;
 const PANEL_RESERVED_WIDTH = 85;
-const ALIGN_RIGHT_EXTRA_MARGIN = 12;
+const RIGHT_PANEL_EXTRA_MARGIN = 12;
 const MIN_RIGHT_FIELD_WIDTH = 40;
 const RIGHT_FIELD_PADDING = 6;
+const LABEL_EXTRA_WIDTH = 14;
 const DEFAULT_EDIT_PANEL_WIDTH = 80;
 
 export default {
@@ -81,11 +83,25 @@ export default {
 	},
 	mixins: [ clickaway ],
 	methods: {
-		measureTextWidth() {
-			var style = window.getComputedStyle(this.input.$el);
+		measureWidth(element, text) {
+			var style = window.getComputedStyle(element);
 			var context = this.measureCanvas.getContext('2d');
 			context.font = style.fontStyle + ' ' + style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
-			return context.measureText(String(this.localValue)).width;
+			return context.measureText(text).width;
+		},
+		measureTextWidth() {
+			var text = String(this.localValue);
+			if (text.length === 0 && this.placeholder) {
+				text = this.placeholder;
+			}
+			return this.measureWidth(this.input.$el, text);
+		},
+		measureLabelWidth() {
+			var labelElement = this.$el.querySelector('label');
+			if (!this.label || !labelElement) {
+				return 0;
+			}
+			return this.measureWidth(labelElement, this.label) + LABEL_EXTRA_WIDTH;
 		},
 		maxPanelLeft() {
 			return Math.max(0, this.$refs.container.clientWidth - PANEL_RIGHT_MARGIN - this.editPanelWidth + 85);
@@ -96,11 +112,12 @@ export default {
 				this.editPanelWidth = width;
 			}
 		},
-		growPanelLeft(required, maxLeft) {
+		stepPanelLeft(required, maxLeft) {
 			var left = Math.min(this.panelLeft, maxLeft);
 			if (required > left) {
-				var steps = Math.ceil((required - left) / PANEL_STEP);
-				left = left + steps * PANEL_STEP;
+				left = left + Math.ceil((required - left) / PANEL_STEP) * PANEL_STEP;
+			} else {
+				left = left - Math.floor((left - required) / PANEL_STEP) * PANEL_STEP;
 			}
 			return Math.min(left, maxLeft);
 		},
@@ -110,9 +127,16 @@ export default {
 				this.panelObserver.observe(this.$refs.buttonPanel.$el);
 			}
 		},
+		updateLimitReached() {
+			if (!this.editMode || !this.maxlength || this.multiline) {
+				this.limitReached = false;
+				return;
+			}
+			this.limitReached = String(this.localValue).length >= this.maxlength;
+		},
 		updateTextWidth() {
-			if (this.alignRight && !this.multiline) {
-				this.textWidth = this.measureTextWidth();
+			if (this.shrinksToText) {
+				this.contentWidth = Math.max(this.measureTextWidth() + RIGHT_FIELD_PADDING, this.measureLabelWidth());
 			}
 		},
 		updatePanelPosition() {
@@ -123,9 +147,9 @@ export default {
 				this.rememberEditPanelWidth();
 			}
 			var maxLeft = this.maxPanelLeft();
-			var required = this.measureTextWidth() + PANEL_GAP;
+			var required = Math.max(this.measureTextWidth() + PANEL_GAP, this.measureLabelWidth());
 			if (this.editMode) {
-				this.panelLeft = this.growPanelLeft(required, maxLeft);
+				this.panelLeft = this.stepPanelLeft(required, maxLeft);
 			} else {
 				this.panelLeft = Math.min(required, maxLeft);
 			}
@@ -272,8 +296,8 @@ export default {
 			return !this.alignRight && !this.multiline;
 		},
 		extraRightMargin() {
-			if (this.alignRight) {
-				return ALIGN_RIGHT_EXTRA_MARGIN;
+			if (!this.isFloatingPanel) {
+				return RIGHT_PANEL_EXTRA_MARGIN;
 			}
 			return 0;
 		},
@@ -283,21 +307,25 @@ export default {
 		wrapperStyle() {
 			return { 'padding-right': (PANEL_RESERVED_WIDTH + this.extraRightMargin) + 'px' };
 		},
+		shrinksToText() {
+			return !this.multiline;
+		},
 		fieldStyle() {
 			var style = { 'margin-bottom': '0px' };
-			if (this.alignRight && !this.multiline) {
-				style.width = Math.max(MIN_RIGHT_FIELD_WIDTH, this.textWidth + RIGHT_FIELD_PADDING) + 'px';
+			if (this.shrinksToText) {
+				style.width = Math.max(MIN_RIGHT_FIELD_WIDTH, this.contentWidth) + 'px';
 				style['max-width'] = '100%';
+			}
+			if (this.shrinksToText && this.alignRight) {
 				style['margin-left'] = 'auto';
 			}
 			return style;
 		},
 		panelStyle() {
-			var background = (this.alignRight ? 'unset' : 'white');
 			if (this.isFloatingPanel) {
-				return { position: 'absolute', top: '0px', left: this.panelLeft + 'px', backgroundColor: background };
+				return { position: 'absolute', top: '0px', left: this.panelLeft + 'px'};
 			} else {
-				return { position: 'absolute', top: '0px', right: this.panelRightMargin + 'px', width: '0px', backgroundColor: background };
+				return { position: 'absolute', top: '0px', right: this.panelRightMargin + 'px', width: '0px'};
 			}
 		},
 		inputStyle() {
@@ -312,6 +340,38 @@ export default {
 				style['text-align'] = 'right';
 			}
 			return style;
+		},
+		labelStyle() {
+			var style = '';
+			if (this.multiline) {
+				style += 'top: 6px !important;';
+			}
+			if (!this.editMode) {
+				style += 'pointer-events: auto !important;';
+			}
+			return style;
+		},
+		fieldClass() {
+			if (this.multiline && this.editMode) {
+				return 'mp-show-count';
+			}
+			return '';
+		},
+		limitTipText() {
+			return 'Límite de ' + this.maxlength + ' caracteres alcanzado';
+		},
+		limitTipStyle() {
+			var edgeOffset = (PANEL_RESERVED_WIDTH + this.extraRightMargin) + 'px';
+			if (this.alignRight) {
+				return { right: edgeOffset };
+			}
+			return { left: '0px' };
+		},
+		helperClass() {
+			if (this.helper && this.helper.length > 0) {
+				return ' mp-has-helper';
+			}
+			return '';
 		},
 		classSize() {
 			return 'md-layout-item md-size-' + (this.size ? this.size : 100);
@@ -395,16 +455,23 @@ export default {
 			editMode: false,
 			pendingMouseUp: false,
 			panelLeft: 0,
-			textWidth: 0,
+			contentWidth: 0,
+			limitReached: false,
 			editPanelWidth: DEFAULT_EDIT_PANEL_WIDTH
 		};
 	},
 	watch: {
+		label() {
+			this.$nextTick(this.updateTextWidth);
+			this.$nextTick(this.updatePanelPosition);
+		},
 		localValue() {
+			this.updateLimitReached();
 			this.updateTextWidth();
 			this.updatePanelPosition();
 		},
 		editMode() {
+			this.updateLimitReached();
 			this.$nextTick(this.updatePanelPosition);
 		},
 		isDisabled() {
@@ -440,10 +507,32 @@ export default {
 .md-layout-item .md-size-25 {
   padding: 0 !important;
 }
-	.buttonsPanel {
-		height: 3.1rem;
-		z-index: 100;
-		width: 100%;
-		background-color: white;
+	.mp-limit-tip {
+		position: absolute;
+		top: calc(100% + 2px);
+		z-index: 200;
+		padding: 1px 8px;
+		border-radius: 4px;
+		font-size: 12px;
+		white-space: nowrap;
+		pointer-events: none;
+		color: white;
+		-webkit-text-fill-color: white;
+		background-color: rgba(97, 97, 97, 0.92);
 	}
+	.mp-has-helper .mp-limit-tip {
+		top: calc(100% - 18px);
+	}
+	.buttonsPanel {
+		z-index: 100;
+	}
+</style>
+
+<style>
+.mp-editable-text:not(.mp-show-count) .md-count {
+	display: none !important;
+}
+.mp-has-helper .md-count {
+	transform: translateY(10px);
+}
 </style>

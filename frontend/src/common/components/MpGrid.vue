@@ -63,7 +63,7 @@
 						<md-button v-if="row.hasChildren" class="md-icon-button md-dense mp-grid-expand-btn" @click.stop="toggleRow(row)">
 							<md-icon>{{ row.expanded ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</md-icon>
 						</md-button>
-						<a v-if="columnHref(captionColumn, row.item)" :href="columnHref(captionColumn, row.item)" class="normalTextLink" @click.stop>{{ formattedValue(captionColumn, row.item) }}</a>
+						<a v-if="columnHref(captionColumn, row.item)" :href="columnHref(captionColumn, row.item)" class="normalTextLink" :target="captionLinkTarget(row.item)" @click.stop>{{ formattedValue(captionColumn, row.item) }}</a>
 						<span v-else-if="captionColumn.html" v-html="formattedValue(captionColumn, row.item)"></span>
 						<template v-else>{{ formattedValue(captionColumn, row.item) }}</template>
 					</span>
@@ -226,6 +226,36 @@ export default {
 				return null;
 			}
 			return MpGridHelper.ResolveValue(col.href, item);
+		},
+		// Nombre de ventana del link de la columna descriptiva: con
+		// editNewTab el navegador abre (o reutiliza) la pestaña de edición
+		// del ítem; sin editNewTab no se define target y el link navega en
+		// la misma pestaña.
+		captionLinkTarget(item) {
+			if (this.editNewTab) {
+				return this.editTabName(item);
+			}
+			return null;
+		},
+		editTabName(item) {
+			return MpGridHelper.BuildEditTabName(window.location.href, item.Id);
+		},
+		// Método público: abre la edición del ítem en su pestaña propia,
+		// usando como destino el href de la columna descriptiva. Devuelve
+		// la ventana, o null si el navegador bloqueó la apertura.
+		openEditTab(item) {
+			var href = this.captionColumn.href;
+			if (!href) {
+				throw new Error('MpGrid: abrir la edición en una pestaña requiere que la columna descriptiva declare href.');
+			}
+			return window.open(MpGridHelper.ResolveValue(href, item), this.editTabName(item));
+		},
+		startEdit(item) {
+			if (this.editNewTab) {
+				this.openEditTab(item);
+			} else {
+				this.$emit('itemEdit', item);
+			}
 		},
 		switchDisabled(col, item) {
 			return col.disabled ? MpGridHelper.ResolveValue(col.disabled, item) : false;
@@ -568,7 +598,7 @@ export default {
 					caption: 'Editar',
 					multiSelect: false,
 					isEnabled: this.isItemEditEnabled || null,
-					onClick: function (grid, item) { grid.$emit('itemEdit', item); },
+					onClick: function (grid, item) { grid.startEdit(item); },
 				});
 			}
 			if (this.canDelete) {
@@ -748,6 +778,11 @@ export default {
 		// resultante queda vacío, la columna de acciones no se muestra.
 		actions: { type: Array, default: () => [] },
 		canEdit: { type: Boolean, default: false },
+		// Abre la edición en otra pestaña, una por ítem (se reutiliza si ya
+		// estaba abierta). Afecta al link de la columna descriptiva y a la
+		// acción de canEdit, que en vez de emitir itemEdit abre la pestaña;
+		// requiere que la columna descriptiva declare href.
+		editNewTab: { type: Boolean, default: false },
 		// Agrega, al final de las acciones, un ícono de eliminar fijo (no
 		// configurable) que siempre pide confirmación antes de emitir
 		// itemDelete; el mecanismo de confirmación no se puede desactivar,

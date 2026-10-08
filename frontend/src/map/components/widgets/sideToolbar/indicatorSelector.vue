@@ -1153,7 +1153,7 @@ export default {
 .category-card.featured .category-count { color: rgba(255, 255, 255, 0.8); }
 	.category-icon {
 		font-size: 32px;
-		color: #888;
+		color: #666;
 		display: block;
 		margin-bottom: 12px;
 	}

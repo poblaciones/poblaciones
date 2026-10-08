@@ -16,10 +16,10 @@ html, body {
 	top: 0px;
 	width: 20px;
 	height: 52px;
-	z-index: 10000;
+	z-index: 1000;
 	background-color: var(--mp-topbar);
 	color: var(--mp-text);
-	--topbar-icon: var(--mp-text-muted);
+	--topbar-icon: var(--md-theme-default-icon-on-background);
 	--topbar-avatar-bg: #00799e;
 	--topbar-avatar-text: #fff;
 }
@@ -30,13 +30,6 @@ html, body {
 	width: 100%;
 	overflow: hidden;
 	padding: 13px 20px;
-	height: 52px;
-	z-index: 10000;
-	background-color: var(--mp-topbar);
-	color: var(--mp-text);
-	--topbar-icon: var(--mp-text-muted);
-	--topbar-avatar-bg: #00799e;
-	--topbar-avatar-text: #fff;
 }
 
 .mp-right-toolbar {
@@ -163,7 +156,7 @@ html, body {
 }
 
 .normalTextLink {
-	color: #444444 !important;
+	color: var(--md-theme-default-text-primary-on-background) !important;
 }
 
 a.normalTextLink:hover {

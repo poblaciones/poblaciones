@@ -7,7 +7,9 @@
 	--md-theme-default-primary: #00A0D2 !important;
 	--md-theme-default-accent: #00A0D2 !important;
 	--md-theme-default-theme: light;
-	--md-theme-default-icon-on-background: #767676;
+	--md-theme-default-icon-on-background: #666;
+	--md-theme-default-text-primary-on-background: #0b0b0b;
+	--md-theme-default-text-accent-on-background: #666;
 }
 
 .md-title {
@@ -16,6 +18,10 @@
 	font-size: 22px!important;
 }
 
+.md-icon.md-theme-default.md-icon-font {
+	color: var( --md-theme-default-icon-on-background) !important;
+	-webkit-text-fill-color: var( --md-theme-default-icon-on-background) !important;
+}
 /* Botones */
 .md-button {
 	border-radius: 20px !important;

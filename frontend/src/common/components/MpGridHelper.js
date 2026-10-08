@@ -39,6 +39,24 @@ module.exports = {
 		return 'text';
 	},
 
+	// Hash corto y determinístico (djb2) en base 36, apto para nombres de
+	// ventana: solo letras minúsculas y dígitos.
+	HashString(text) {
+		var hash = 5381;
+		for (var i = 0; i < text.length; i++) {
+			hash = ((hash * 33) + text.charCodeAt(i)) >>> 0;
+		}
+		return hash.toString(36);
+	},
+
+	// Nombre de la pestaña de edición de un ítem. Se deriva de la url de
+	// la pantalla que contiene la grilla (para que grillas de entidades
+	// distintas no compartan pestaña aunque coincida el id) y del id del
+	// ítem: abrir el mismo ítem dos veces reutiliza la pestaña.
+	BuildEditTabName(gridUrl, itemId) {
+		return 'mpgrid_' + this.HashString(gridUrl) + '_' + itemId;
+	},
+
 	// Un valor de columna puede ser fijo o una función (item) => valor;
 	// esto resuelve cualquiera de las dos formas.
 	ResolveValue(value, item) {

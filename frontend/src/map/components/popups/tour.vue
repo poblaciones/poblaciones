@@ -399,9 +399,9 @@ export default {
 	cursor: pointer;
 	cursor: hand;
 }
-.closeButton:hover {
-  color: #888;
-}
+	.closeButton:hover {
+		color: #666;
+	}
 
 .halves {
   max-width: 350px;

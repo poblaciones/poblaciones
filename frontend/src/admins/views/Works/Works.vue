@@ -96,15 +96,6 @@ export default {
 				throw '(entidad desconocida: ' + this.Filter + ')';
 			}
 		},
-		newLabel() {
-			if (this.filter === 'P') {
-				return 'Nuevos datos públicos';
-			} else if (this.filter === 'R') {
-				return 'Nueva cartografía';
-			} else {
-				return '(entidad desconocida)';
-			}
-		},
 		emptyMessage() {
 			var ret = 'No hay ' + this.entityName.plural;
 			return ret + (this.timeFilter ? ' para este período.' : '.');

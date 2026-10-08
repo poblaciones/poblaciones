@@ -358,9 +358,9 @@ export default {
 	margin-right: 10px;
 	cursor: pointer;
 }
-.closeButton:hover {
-	color: #888;
-}
+	.closeButton:hover {
+		color: #666;
+	}
 article {
 	flex: 1 1 100%;
 	height: 100%;
