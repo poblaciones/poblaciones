@@ -35,6 +35,12 @@
 						<td class="mp-dimmed textRight">{{ formattedValue(label) }}</td>
 					</template>
 				</tr>
+				<tr v-if="showTotals">
+					<td class="stats" colspan="2">
+						&nbsp;Total
+					</td>
+					<td class="stats textRight" :class="getMuted()">{{ totalFormatted }}</td>
+				</tr>
 			</tbody>
 		</table>
 	</div>
@@ -63,6 +69,14 @@ export default {
 			return boundary.SelectedVersion().ValueLabels.filter(function (label) {
 				return boundary.HasData(label);
 			});
+		},
+		// Igual criterio que metricValues.vue: no se muestra el total cuando
+		// hay una sola categoría con datos, porque repetiría su valor.
+		showTotals() {
+			return this.visibleLabels.length > 1;
+		},
+		totalFormatted() {
+			return this.boundary.FormatValue(this.boundary.CalculateTotal());
 		},
 		// La etiqueta corta es la que se ve como encabezado de la columna
 		// (puede traer HTML, así que acá se usa su versión en texto plano).

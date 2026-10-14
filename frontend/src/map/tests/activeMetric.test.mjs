@@ -1,6 +1,7 @@
 import { describe, it, expect } from './_harness.mjs';
 import { setupWindow, makeMetricProperties, makeVersion, makeLevel, makeVariable, makeValueLabel } from './fixtures.mjs';
 import ActiveMetric from '@/map/classes/ActiveMetric';
+import h from '@/map/js/helper';
 
 function makeThreeLevelMetric() {
 	const properties = makeMetricProperties({
@@ -316,4 +317,58 @@ it('un pedido fallido no queda cacheado: el siguiente intento reintenta', async 
 	expect(caught).toBeTruthy();
 	await metric.GetMetricData();
 	expect(callCount).toBe(2);
+});
+
+
+describe('ActiveMetric: métricas de resumen al comparar versiones');
+
+function metricWithVariable(variableOverrides) {
+	setupWindow();
+	const properties = makeMetricProperties({
+		Versions: [makeVersion({ Levels: [makeLevel({ Variables: [makeVariable(variableOverrides)] })] })],
+	});
+	const metric = new ActiveMetric(properties);
+	metric.Compare.Active = true;
+	return metric;
+}
+
+function incidence(metric) {
+	return metric.getValidMetrics().filter(m => m.Key === 'I');
+}
+
+it('porcentajes: la diferencia en puntos porcentuales se llama "Diferencia en Incidencia"', () => {
+	const metric = metricWithVariable({ HasTotals: true, NormalizationScale: 100 });
+	const found = incidence(metric);
+	expect(found).toHaveLength(1);
+	expect(found[0].Caption).toBe('Diferencia en Incidencia');
+});
+
+it('cantidades: ofrece "Diferencia porcentual" (clave I) solo al comparar', () => {
+	const metric = metricWithVariable({ HasTotals: false });
+	const found = incidence(metric);
+	expect(found).toHaveLength(1);
+	expect(found[0].Caption).toBe('Diferencia porcentual');
+	metric.Compare.Active = false;
+	expect(incidence(metric)).toHaveLength(0);
+});
+
+it('tasas (escala distinta de 100): la variación proporcional se llama "Diferencia porcentual"', () => {
+	const metric = metricWithVariable({ HasTotals: true, NormalizationScale: 1000 });
+	expect(incidence(metric)[0].Caption).toBe('Diferencia porcentual');
+});
+
+it('CheckValidMetric vuelve a N al dejar de comparar con la diferencia porcentual elegida', () => {
+	const metric = metricWithVariable({ HasTotals: false });
+	metric.properties.SummaryMetric = 'I';
+	metric.Compare.Active = false;
+	metric.CheckValidMetric();
+	expect(metric.properties.SummaryMetric).toBe('N');
+});
+
+it('encabezado de columna: Δ % para cantidades, tasas y porcentajes al comparar', () => {
+	expect(h.getColumnHeader(makeVariable({ HasTotals: false }), true)).toBe('Δ %');
+	expect(h.getColumnHeader(makeVariable({ HasTotals: true, NormalizationScale: 1000 }), true)).toBe('Δ %');
+	expect(h.getColumnHeader(makeVariable({ HasTotals: true, NormalizationScale: 100 }), true)).toBe('Δ %');
+	expect(h.getColumnHeader(makeVariable({ HasTotals: false }), false)).toBe('N');
+	expect(h.getColumnHeader(makeVariable({ HasTotals: true, NormalizationScale: 1000 }), false)).toBe('/k');
 });

@@ -1,6 +1,9 @@
 - 'Compartir' nativo para celulares.
 - Barra superior con logo en administración.
 - Paleta de controles y colores.
+- Al comparar, ofrece "Δ % - Diferencia porcentual" para diferencias entre cantidades.
+- Cuando se agrega una delimitación al panel de estadísticas que tiene varios tipos de delimitación en su interior, agrega fila de totales.
+
 
 v5.5 (2026-09-30)
 - Soporte para mapa base vectorial.

@@ -720,7 +720,15 @@ ActiveMetric.prototype.getValidMetrics = function (variable) {
 	}
 	ret.push({ Key: 'N', Caption: 'Cantidad' });
 
-	if (variable && variable.HasTotals) {
+	// En comparación, 'I' es la diferencia entre versiones: en puntos
+	// porcentuales ("Diferencia en Incidencia") o, cuando el delta es
+	// proporcional (cantidades y tasas, ver Compare.UseProportionalDelta),
+	// variación porcentual ("Diferencia porcentual"). Las cantidades (sin
+	// totales) solo ofrecen 'I' al comparar, porque fuera de la comparación
+	// su valor coincidiría con 'N'.
+	if (variable && this.Compare.Active && this.Compare.UseProportionalDelta(variable) && !variable.IsGap) {
+		ret.push({ Key: 'I', Caption: 'Diferencia porcentual' });
+	} else if (variable && (variable.HasTotals || this.Compare.Active)) {
 		ret.push({ Key: 'I', Caption: delta + 'Incidencia' });
 	}
 

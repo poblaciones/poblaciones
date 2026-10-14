@@ -195,6 +195,7 @@ export default {
 				loc.metric.Compare.Active = false;
 				this.compare = false;
 			}
+			loc.metric.CheckValidMetric();
 			loc.metric.UpdateSummary();
 			loc.metric.UpdateMap();
 
@@ -442,6 +443,7 @@ export default {
 			},
 			'compare'() {
 				this.metric.Compare.Active = this.compare;
+				this.metric.CheckValidMetric();
 				//this.toggleCompare();
 				if (this.metric.Compare.Active) {
 					this.updateCompareVersions();

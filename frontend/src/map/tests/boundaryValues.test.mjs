@@ -103,3 +103,33 @@ it('clickLabel invierte Visible y llama boundary.UpdateMap()', () => {
 	expect(label.Visible).toBeFalsy();
 	expect(updated).toBeTruthy();
 });
+
+
+describe('boundaryValues: fila de totales');
+
+it('con varias categorías con datos muestra el total general de zonas (N)', () => {
+	const values = mountValues(makeBoundary());
+	expect(values.showTotals).toBeTruthy();
+	expect(values.boundary.CalculateTotal()).toBe(450);
+	expect(values.totalFormatted).toBe(values.boundary.FormatValue(450));
+});
+
+it('el total ignora las categorías sin datos y se oculta con una sola categoría', () => {
+	const boundary = makeBoundary([
+		makeBoundaryValueLabel({ Id: 501, Name: 'Con datos', Values: { ValueId: 501, Value: 300, Km2: 120 } }),
+		makeBoundaryValueLabel({ Id: 502, Name: 'Sin datos', Values: { ValueId: 502, Value: '', Km2: '' } }),
+	]);
+	const values = mountValues(boundary);
+	expect(boundary.CalculateTotal()).toBe(300);
+	expect(values.showTotals).toBeFalsy();
+});
+
+it('el total acompaña la métrica: suma de áreas en K y 100 en distribuciones', () => {
+	const boundary = makeBoundary();
+	boundary.summaryMetric = 'K';
+	expect(boundary.CalculateTotal()).toBe(200);
+	boundary.summaryMetric = 'P';
+	expect(boundary.CalculateTotal()).toBe(100);
+	boundary.summaryMetric = 'A';
+	expect(boundary.CalculateTotal()).toBe(100);
+});

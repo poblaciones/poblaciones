@@ -122,10 +122,7 @@ module.exports = {
 				ret = '%';
 				break;
 			case 1:
-				if (unit === 'km²')
-					ret = ' / km²';
-				else
-					ret = '';
+				ret = '';
 				break;
 			case 1000:
 				ret = ' / mil ' + unit;
@@ -149,7 +146,7 @@ module.exports = {
 		if (ret !== '%') {
 			ret = pref + ret;
 		}
-		return ret.trim();
+		return ret.trimLeft();
 	},
 	ResolveNormalizationUnit(variable) {
 		switch (variable.Normalization) {
@@ -804,6 +801,12 @@ module.exports = {
 		var delta = compareActive ? 'Δ ' : '';
 		if (variable.IsGap) {
 			return delta + (variable.NormalizationScale == 100 ? 'Δ %' : 'Δ %');
+		}
+		// En comparación, cantidades y tasas muestran la variación porcentual
+		// (ver Compare.UseProportionalDelta); los porcentajes, la diferencia en
+		// puntos porcentuales. En ambos casos la unidad se rotula 'Δ %'.
+		if (compareActive && (!variable.HasTotals || variable.NormalizationScale !== 100)) {
+			return 'Δ %';
 		}
 		if (!variable.HasTotals) {
 			return 'N';

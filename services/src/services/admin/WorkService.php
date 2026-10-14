@@ -258,7 +258,7 @@ class WorkService extends BaseService
 		else
 			$condition = " 1=1 ";
 		if ($timeFilterDays > 0)
-			$condition .= ' AND met_create >= ( CURDATE() - INTERVAL ' . $timeFilterDays. ' DAY ) ';
+			$condition .= ' AND wrk_update >= ( CURDATE() - INTERVAL ' . $timeFilterDays. ' DAY ) ';
 		// Trae las cartografías
 		$list = $this->GetWorks($condition);
 		return $list;

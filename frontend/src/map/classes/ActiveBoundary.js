@@ -237,6 +237,29 @@ ActiveBoundary.prototype.CalculateValue = function (label) {
 	}
 };
 
+// Total de la columna actual, para la fila de totales de boundaryValues.vue:
+// suma de las categorías para cantidad (N) y área (K); 100 para las
+// distribuciones (P, A), que ya son proporciones del mismo conjunto.
+ActiveBoundary.prototype.CalculateTotal = function () {
+	var loc = this;
+	switch (this.summaryMetric) {
+		case 'N':
+			return this.sumValueLabels(function (l) { return loc.HasData(l) ? Number(l.Values.Value) : 0; });
+		case 'K':
+			return this.sumValueLabels(function (l) { return loc.HasData(l) ? Number(l.Values.Km2) : 0; });
+		case 'P':
+		case 'A': {
+			var useValue = (this.summaryMetric === 'P');
+			var sum = this.sumValueLabels(function (l) {
+				return loc.HasData(l) ? Number(useValue ? l.Values.Value : l.Values.Km2) : 0;
+			});
+			return sum > 0 ? 100 : 0;
+		}
+		default:
+			return '';
+	}
+};
+
 ActiveBoundary.prototype.FormatValue = function (value) {
 	if (value === '') {
 		return '';

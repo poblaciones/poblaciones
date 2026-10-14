@@ -69,7 +69,7 @@
 						</md-table-cell>
 						<md-table-cell v-if="Work.properties.Type === 'P'" class="selectable" md-label="Categoría">{{ formatGroup(item.MetricVersion.Metric.MetricGroup) }}</md-table-cell>
 						<md-table-cell class="selectable"
-													 style="vertical-align: top; max-width: 400px" md-label="Fórmula">
+													 style="vertical-align: top; max-width: 400px; min-width: 220px;" md-label="Fórmula">
 							<md-list class="innerList">
 								<md-list-item v-for="variable in item.Variables" style="display: -webkit-box"
 															:key='variable.Id' :value='variable.Id'>
@@ -160,6 +160,16 @@ export default {
 	},
 	mounted() {
 		this.ReloadUnUsedMetricVersions();
+		this.lastObservedWidth = 0;
+		this.resizeObserver = new ResizeObserver(this.onRootResized);
+		this.resizeObserver.observe(this.$el);
+	},
+	updated() {
+		this.scheduleAlignment();
+	},
+	beforeDestroy() {
+		this.resizeObserver.disconnect();
+		cancelAnimationFrame(this.alignmentFrame);
 	},
 	computed: {
 		Work() {
@@ -185,6 +195,46 @@ export default {
 		},
 	},
 	methods: {
+		onRootResized(entries) {
+			const width = entries[0].contentRect.width;
+			if (width !== this.lastObservedWidth) {
+				this.lastObservedWidth = width;
+				this.scheduleAlignment();
+			}
+		},
+		scheduleAlignment() {
+			cancelAnimationFrame(this.alignmentFrame);
+			this.alignmentFrame = requestAnimationFrame(this.alignRows);
+		},
+		alignRows() {
+			const pairs = this.collectItemPairs();
+			pairs.forEach(pair => {
+				pair.formula.style.height = '';
+				pair.actions.style.height = '';
+			});
+			const heights = pairs.map(pair => Math.max(
+				pair.formula.getBoundingClientRect().height,
+				pair.actions.getBoundingClientRect().height
+			));
+			pairs.forEach((pair, index) => {
+				pair.formula.style.height = heights[index] + 'px';
+				pair.actions.style.height = heights[index] + 'px';
+			});
+		},
+		collectItemPairs() {
+			const pairs = [];
+			this.$el.querySelectorAll('tbody tr').forEach(row => {
+				const lists = row.querySelectorAll('.innerList');
+				if (lists.length === 2) {
+					const formulaItems = lists[0].querySelectorAll(':scope > li');
+					const actionItems = lists[1].querySelectorAll(':scope > li');
+					for (let i = 0; i < formulaItems.length; i++) {
+						pairs.push({ formula: formulaItems[i], actions: actionItems[i] });
+					}
+				}
+			});
+			return pairs;
+		},
 		isSearchTarget(item) {
 			return String(item.Id) === this.$route.query.level;
 		},
