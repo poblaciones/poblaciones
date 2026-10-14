@@ -16,6 +16,9 @@
  *   GET  /api/automation/GetDatasetIndicators
  *   POST /api/automation/DeleteIndicator
  *   POST /api/automation/DeleteVariable
+ *   POST /api/automation/MoveVariableUp
+ *   POST /api/automation/MoveVariableDown
+ *   POST /api/automation/LevelDatasetMetrics
  */
 
 use Symfony\Component\HttpFoundation\Request;
@@ -294,6 +297,93 @@ App::$app->post('/services/api/automation/DeleteVariable', function (Request $re
 	$controller->DeleteVariable($datasetId, $levelId, $variableId);
 
 	return App::Json(['result' => 'ok']);
+});
+
+
+/**
+ * Sube una posición una variable dentro de su indicador (nivel).
+ * Si ya es la primera, no hace nada.
+ *
+ * Parámetros POST:
+ *   d           (int, obligatorio) – dataset ID
+ *   variable_id (int, obligatorio) – variable ID
+ *
+ * Respuesta: { result: "ok" }
+ */
+App::$app->post('/services/api/automation/MoveVariableUp', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$datasetId = Params::GetIntMandatory('d');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId))
+		return $denied;
+
+	$variableId = Params::GetIntMandatory('variable_id');
+
+	$controller = new services\MetricService();
+	$controller->MoveVariableUp($datasetId, $variableId);
+
+	return App::Json(['result' => 'ok']);
+});
+
+/**
+ * Baja una posición una variable dentro de su indicador (nivel).
+ * Si ya es la última, no hace nada.
+ *
+ * Parámetros POST:
+ *   d           (int, obligatorio) – dataset ID
+ *   variable_id (int, obligatorio) – variable ID
+ *
+ * Respuesta: { result: "ok" }
+ */
+App::$app->post('/services/api/automation/MoveVariableDown', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$datasetId = Params::GetIntMandatory('d');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId))
+		return $denied;
+
+	$variableId = Params::GetIntMandatory('variable_id');
+
+	$controller = new services\MetricService();
+	$controller->MoveVariableDown($datasetId, $variableId);
+
+	return App::Json(['result' => 'ok']);
+});
+
+
+/**
+ * Copia puntos de corte, categorías, colores y paleta de las variables de un
+ * dataset de referencia a las variables equivalentes de otro dataset. Es la
+ * misma operación que "copiar puntos de corte" del editor. Las variables se
+ * emparejan por indicador (mismo MetricId) y por columnas de datos y de
+ * normalización. Las variables copiadas quedan en modo de corte manual.
+ *
+ * Parámetros POST:
+ *   d         (int, obligatorio) – dataset ID destino
+ *   src       (int, obligatorio) – dataset ID de referencia
+ *   metric_id (int, opcional)    – si se indica, solo se actualiza ese indicador
+ *
+ * Respuesta: { affected: int }  – cantidad de variables actualizadas
+ */
+App::$app->post('/services/api/automation/LevelDatasetMetrics', function (Request $request) {
+	AutomationAuth::Authenticate();
+
+	$targetDatasetId = Params::GetIntMandatory('d');
+	if ($denied = Session::CheckIsDatasetEditor($targetDatasetId))
+		return $denied;
+
+	$sourceDatasetId = Params::GetIntMandatory('src');
+	if ($denied = Session::CheckIsDatasetReader($sourceDatasetId))
+		return $denied;
+
+	$metricId = Params::GetInt('metric_id', -1);
+	if ($metricId === -1)
+		$metricId = null;
+
+	$controller = new services\MetricService();
+	$affected = $controller->LevelDatasetMetrics($sourceDatasetId, $targetDatasetId, $metricId);
+
+	return App::Json(['affected' => $affected]);
 });
 
 

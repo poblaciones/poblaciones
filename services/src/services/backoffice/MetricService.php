@@ -722,7 +722,7 @@ class MetricService extends BaseService
 		return $ret;
 	}
 
-	public function LevelDatasetMetrics($srcDatasetId, $targetDatasetId)
+	public function LevelDatasetMetrics($srcDatasetId, $targetDatasetId, $metricId = null)
 	{
 		// Toma los puntos de corte de un dataset y se los pone a otro, emparentando
 		// las variables de los levels existentes por Data, Normalization y Metric.
@@ -731,6 +731,9 @@ class MetricService extends BaseService
 		$ret = 0;
 		foreach($targetLevels as $targetLevel)
 		{
+			// Si se indicó un indicador, se omiten los demás levels del dataset destino.
+			if ($metricId !== null && (int)$targetLevel->MetricVersion->Metric->Id !== (int)$metricId)
+				continue;
 			$targetLevelConnected = App::Orm()->Reconnect(entities\DraftMetricVersionLevel::class, $targetLevel);
 			foreach($targetLevel->Variables as $targetVariable)
 			{

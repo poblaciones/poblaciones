@@ -5,7 +5,7 @@
 			<iframe v-if="isPublished && !failedLoading && !item.PreviewId" :id="frameId" frameborder="0" @load="checkLoaded"
 							 :src="frameUrl"
 							 class="previewBox"></iframe>
-			<i v-else data-v-10cdbda8="" class="largeIco md-icon md-icon-font md-theme-default">{{ icon }}</i>
+			<i v-else data-v-10cdbda8="" class="md-icon md-icon-font md-theme-default largeIco" style="color: rgb(70, 138, 192) !important; -webkit-text-fill-color: rgb(70, 138, 192) !important; ">{{ icon }}</i>
 		</div>
 		<div class="textbox">
 			<div class="text" :title="(text.length > 40 ? text : '')">
@@ -112,7 +112,8 @@ export default {
 	.largeIco {
 		font-size: 50px !important;
 		margin-top: 55px;
-		color: #a2a2a2;
+		color: #0f8ed0;
+		-webkit-text-fill-color: #0f8ed0 !important;
 	}
 	.text {
 		text-align: left;

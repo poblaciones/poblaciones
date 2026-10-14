@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import a from '@/common/js/authentication';
+import auth from '@/common/js/authentication';
 import ChangePasswordPopup from '@/backoffice/views/Account/ChangePasswordPopup.vue';
 
 export default {
@@ -137,7 +137,7 @@ export default {
 		},
 		deleteAccount() {
 			this.$refs.invoker.doMessage('Eliminando cuenta', window.Db, window.Db.DeleteAccount)
-				.then(function () { a.logoff(); });
+				.then(function () { auth.logoff(); });
 		},
 		formatBytes(bytes) {
 			if (bytes === 0) { return '0 B'; }

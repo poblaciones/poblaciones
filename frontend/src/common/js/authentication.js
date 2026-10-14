@@ -1,5 +1,5 @@
 const axiosClient = require('./axiosClient');
-const login = require('./redirectLogin');
+const redirectLogin = require('./redirectLogin');
 const session = require('@/common/framework/session');
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
 					'acceder a la sesión activa').then(function (res) {
 						if (res.User.Logged === false) {
 							session.ClearRememberForUrl(serverConfiguration.Server);
-							login.redirectLogin();
+							redirectLogin.redirectLogin();
 						} else {
 							res.DynamicServer = serverConfiguration.Server;
 							setter(res);
@@ -22,29 +22,32 @@ module.exports = {
 			});
 	},
 	redirectLogin() {
-		login.redirectLogin();
+		redirectLogin.redirectLogin();
 	},
 	redirectRegister() {
-		login.redirectRegister();
+		redirectLogin.redirectRegister();
 	},
 	redirectHome() {
-		login.redirectHome();
+		redirectLogin.redirectHome();
 	},
 	registerUrl() {
-		return login.registerUrl();
+		return redirectLogin.registerUrl();
 	},
-	loginUrl() {
-		return login.loginUrl();
+	loginUrl(target) {
+		return redirectLogin.loginUrl(target);
 	},
 	homeUrl() {
-		return login.homeUrl();
+		return redirectLogin.homeUrl();
+	},
+	backofficeUrl() {
+		return redirectLogin.mainHost() + '/users';
 	},
 	redirectBackoffice() {
-		var url = window.mainHost + '/users';
+		var url = this.backofficeUrl();
 		document.location = url;
 	},
 	redirectAdmin() {
-		var url = window.mainHost + '/admins';
+		var url = redirectLogin.mainHost() + '/admins';
 		document.location = url;
 	},
 	logoff() {

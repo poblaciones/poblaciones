@@ -13,7 +13,7 @@
 						:key="ai"
 						:title="action.caption"
 						@click="runAction(action, selectedItems)">
-						<md-icon>{{ action.icon }}</md-icon>
+						<md-icon :style="actionIconColorStyle(action.icon)">{{ action.icon }}</md-icon>
 						<md-tooltip md-direction="bottom">{{ action.caption }}</md-tooltip>
 					</md-button>
 				</span>
@@ -80,19 +80,19 @@
 					@click.native="onCellClick(row.item)">
 
 					<template v-if="col.type === 'status'">
-						<i v-if="isFontAwesome(statusIcon(col, row.item))" class="mp-grid-fa-icon mp-grid-status-icon" :class="statusIcon(col, row.item)" :style="statusColor(col, row.item) ? ('color: ' + statusColor(col, row.item)) : ''">
+						<i v-if="isFontAwesome(statusIcon(col, row.item))" class="mp-grid-fa-icon mp-grid-status-icon" :class="statusIcon(col, row.item)" :style="statusStyle(col, row.item)">
 							<md-tooltip v-if="statusTooltip(col, row.item)" md-direction="bottom">{{ statusTooltip(col, row.item) }}</md-tooltip>
 						</i>
-						<md-icon v-else :style="statusColor(col, row.item) ? ('color: ' + statusColor(col, row.item)) : ''">
+						<md-icon v-else :style="statusStyle(col, row.item)">
 							{{ statusIcon(col, row.item) }}
 							<md-tooltip v-if="statusTooltip(col, row.item)" md-direction="bottom">{{ statusTooltip(col, row.item) }}</md-tooltip>
 						</md-icon>
 						<div class="mp-grid-status-badges" v-if="statusBadges(col, row.item).length">
 							<template v-for="(badge, bi) in statusBadges(col, row.item)">
-								<i v-if="badge.isFontAwesome" :key="bi" class="mp-grid-fa-icon mp-grid-status-badge" :class="badge.icon">
+								<i v-if="badge.isFontAwesome" :key="bi" class="mp-grid-fa-icon mp-grid-status-badge" :class="badge.icon" :style="statusIconStyle(badge.icon)">
 									<md-tooltip v-if="badge.tooltip" md-direction="bottom">{{ badge.tooltip }}</md-tooltip>
 								</i>
-								<md-icon v-else :key="bi" class="mp-grid-status-badge">
+								<md-icon v-else :key="bi" class="mp-grid-status-badge" :style="statusIconStyle(badge.icon)">
 									{{ badge.icon }}
 									<md-tooltip v-if="badge.tooltip" md-direction="bottom">{{ badge.tooltip }}</md-tooltip>
 								</md-icon>
@@ -197,6 +197,38 @@
 import MpGridHelper from './MpGridHelper';
 import str from '@/common/framework/str';
 
+// Color por significado de los íconos de la columna de estados. Solo cubre
+// los usados hoy; para un ícono nuevo, agregarlo acá. Los íconos
+// FontAwesome también se buscan por su clase completa (p. ej.
+// 'fas fa-history'). 'public' (el mundo) es siempre azul, sin importar lo
+// que represente.
+const STATUS_ICON_COLORS = new Map([
+	['check', '#388E3C'],
+	['check_circle', '#388E3C'],
+	['done', '#388E3C'],
+	['cancel', '#D32F2F'],
+	['close', '#D32F2F'],
+	['error', '#D32F2F'],
+	['warning', '#FFA000'],
+	['error_outline', '#FFA000'],
+	['pause_circle_filled', '#EF6C00'],
+	['public', '#1976D2'],
+	['lock', '#616161'],
+]);
+
+// Color de los íconos de acciones. Solo cubre las acciones indicadas;
+// las demás conservan el color por defecto.
+const ACTION_ICON_COLORS = new Map([
+	['public', '#468ac0'],
+	['emoji_objects', '#ffc64f'],
+	['delete', 'rgb(220 111 91)'],
+	['delete_outline', '#eb6b53'],
+	['delete_forever', '#eb6b53'],
+	['pause_circle_filled', 'rgb(255, 160, 0)'],
+	['pause_circle_outline', 'rgb(255, 160, 0)'],
+	['pause', 'rgb(255, 160, 0)'],
+]);
+
 export default {
 	name: 'MpGrid',
 	components: {},
@@ -271,8 +303,42 @@ export default {
 		isFontAwesome(icon) {
 			return MpGridHelper.IsFontAwesome(icon);
 		},
+		// Un color declarado explícitamente en la columna prevalece sobre el
+		// de la tabla de coloreo.
 		statusColor(col, item) {
-			return col.color ? MpGridHelper.ResolveValue(col.color, item) : null;
+			if (col.color) {
+				var explicitColor = MpGridHelper.ResolveValue(col.color, item);
+				if (explicitColor) {
+					return explicitColor;
+				}
+			}
+			return this.tableIconColor(STATUS_ICON_COLORS, this.statusIcon(col, item));
+		},
+		tableIconColor(table, icon) {
+			if (!this.coloringIcons) {
+				return null;
+			}
+			if (table.has(icon)) {
+				return table.get(icon);
+			}
+			return null;
+		},
+		// -webkit-text-fill-color e !important: los estilos de Vue Material
+		// sobre md-icon y los botones pisan un color simple.
+		colorStyle(color) {
+			if (color) {
+				return 'color: ' + color + ' !important; -webkit-text-fill-color: ' + color + ' !important';
+			}
+			return '';
+		},
+		statusIconStyle(icon) {
+			return this.colorStyle(this.tableIconColor(STATUS_ICON_COLORS, icon));
+		},
+		actionIconColorStyle(icon) {
+			return this.colorStyle(this.tableIconColor(ACTION_ICON_COLORS, icon));
+		},
+		statusStyle(col, item) {
+			return this.colorStyle(this.statusColor(col, item));
 		},
 		statusTooltip(col, item) {
 			return col.tooltip ? MpGridHelper.ResolveValue(col.tooltip, item) : null;
@@ -397,7 +463,13 @@ export default {
 			return MpGridHelper.ResolveValue(action.caption, item);
 		},
 		actionIconStyle(action, item) {
-			return action.iconStyle ? MpGridHelper.ResolveValue(action.iconStyle, item) : '';
+			if (action.iconStyle) {
+				var explicitStyle = MpGridHelper.ResolveValue(action.iconStyle, item);
+				if (explicitStyle) {
+					return explicitStyle;
+				}
+			}
+			return this.actionIconColorStyle(this.actionIcon(action, item));
 		},
 		actionBadge(action, item) {
 			return action.badge ? MpGridHelper.ResolveValue(action.badge, item) : null;
@@ -830,6 +902,11 @@ export default {
 		// Filas más bajas (menos padding vertical en celdas y acciones):
 		// para listados densos donde no hace falta tanto aire entre filas.
 		compact: { type: Boolean, default: false },
+		// Colorea los íconos de las columnas de tipo 'status' y de las
+		// acciones según su significado (tablas STATUS_ICON_COLORS y
+		// ACTION_ICON_COLORS). Un color de columna o un iconStyle de acción
+		// declarado prevalece sobre la tabla.
+		coloringIcons: { type: Boolean, default: true },
 	},
 	watch: {
 		items(newItems, oldItems) {

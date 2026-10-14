@@ -7,7 +7,7 @@
 					<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
 						Ejemplos >
 					</div>
-					<div class="md-layout md-gutter" style="margin-top: -21px">
+					<div class="md-layout md-gutter" style="margin-top: -21px; max-width: 100%">
 						<div class="md-layout-item md-size-100">
 							<mp-text id="workTitle" :canEdit="Work.CanEdit()" label="" :alignRight="true" :largeFont="true"
 											 :maxlength="150" class="fieldTitle" :lighterColor="true"

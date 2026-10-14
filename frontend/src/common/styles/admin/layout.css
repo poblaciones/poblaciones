@@ -11,7 +11,6 @@ html, body {
 /* Barra superior. Los íconos y el avatar los colorean HomeMenu, TopbarWorkActions y ProfileMenu con estas variables. */
 .topbar {
 	position: fixed;
-	overflow: hidden;
 	padding: 13px;
 	top: 0px;
 	width: 20px;
@@ -28,7 +27,6 @@ html, body {
 	justify-content: space-between; /* Distribuye los bloques a lo largo del contenedor */
 	align-items: center; /* Alinea los elementos verticalmente al centro */
 	width: 100%;
-	overflow: hidden;
 	padding: 13px 20px;
 }
 

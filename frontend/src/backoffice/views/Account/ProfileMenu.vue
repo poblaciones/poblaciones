@@ -34,7 +34,7 @@
 </template>
 
 <script>
-	import a from '@/common/js/authentication';
+	import auth from '@/common/js/authentication';
 	import AccountPopup from '@/backoffice/views/Account/AccountPopup.vue';
 	import ReviewPopup from '@/backoffice/views/Account/ReviewPopup.vue';
 
@@ -80,7 +80,7 @@
 				this.$refs.reviewPopup.show();
 			},
 			logoff() {
-				a.logoff();
+				auth.logoff();
 			}
 		}
 	};

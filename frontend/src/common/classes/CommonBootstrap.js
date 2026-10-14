@@ -29,7 +29,6 @@ import MpColorPicker from '@/common/components/MpColorPicker';
 import MpSimpleText from '@/common/components/MpSimpleText';
 import MpImageUpload from '@/common/components/MpImageUpload';
 import MpFileUpload from '@/common/components/MpFileUpload';
-import MpLargeButton from '@/common/components/MpLargeButton';
 import MpSelect from '@/common/components/MpSelect';
 import MpGrid from '@/common/components/MpGrid';
 import MpHelp from '@/common/components/MpHelp';
@@ -73,7 +72,6 @@ export default class CommonBootstrap {
 		Vue.component('mp-simple-text', MpSimpleText);
 		Vue.component('mp-image-upload', MpImageUpload);
 		Vue.component('mp-file-upload', MpFileUpload);
-		Vue.component('mp-large-button', MpLargeButton);
 		Vue.component('mp-alert', MpAlert);
 		Vue.component('mp-input', MpInput);
 	}

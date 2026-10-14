@@ -1,5 +1,5 @@
 <template>
-	<div class="no-print summaryToolbar" style="flex-direction: row; align-self: flex-end;">
+	<div class="no-print summaryToolbar" v-if="hasConfiguration" style="flex-direction: row; align-self: flex-end;">
 
 
 		<mp-dropdown-menu :items="captureItems" @itemClick="captureSelected" :floatRight="false"
@@ -46,7 +46,7 @@
 	import arr from '@/common/framework/arr';
 
 	import MapExport from '@/map/classes/MapExport';
-	import auth from '@/common/js/authentication';
+	import authentication from '@/common/js/authentication';
 
 	export default {
 		name: 'toolbar',
@@ -72,6 +72,10 @@
 				window.SegMap.SwitchSessionProvider().then(function () {
 					location.reload();
 				});
+			},
+			isEmptyObject(obj) {
+				if (!obj || obj.constructor !== Object) return false;
+				return Object.keys(obj).filter(key => key !== '__ob__').length === 0;
 			},
 			showTutorial() {
 				window.Popups.Tour.show();
@@ -213,7 +217,7 @@
 			// No es computed: loginUrl() lee estado global no reactivo y un valor cacheado queda desactualizado
 			getLoginItems() {
 				var ret = [];
-				ret.push({ label: 'Ingresar', key: 'LOGIN', href: this.authenticate.loginUrl() });
+				ret.push({ label: 'Ingresar', key: 'LOGIN', href: this.authenticate.backofficeUrl() });
 				ret.push({ label: 'Registrarse', key: 'REGISTER', href: this.authenticate.registerUrl() });
 				return ret;
 			},
@@ -279,6 +283,9 @@
 			useElevation() {
 				return this.toolbarStates.hasElevation;
 			},
+			hasConfiguration() {
+				return (this.config && !this.isEmptyObject(this.config));
+			},
 			helpLinks() {
 				if (this.config) {
 					return this.config.Help;
@@ -309,7 +316,7 @@
 					return ret;
 			},
 			authenticate() {
-				return auth;
+				return authentication;
 			},
 			isAdminReader() {
 				return this.user.Privileges === 'A' || this.user.Privileges === 'E' || this.user.Privileges === 'L';

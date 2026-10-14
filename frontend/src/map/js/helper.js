@@ -122,7 +122,10 @@ module.exports = {
 				ret = '%';
 				break;
 			case 1:
-				ret = '';
+				if (unit === 'km²')
+					ret = ' / km²';
+				else
+					ret = '';
 				break;
 			case 1000:
 				ret = ' / mil ' + unit;
@@ -146,7 +149,7 @@ module.exports = {
 		if (ret !== '%') {
 			ret = pref + ret;
 		}
-		return ret.trimLeft();
+		return ret.trim();
 	},
 	ResolveNormalizationUnit(variable) {
 		switch (variable.Normalization) {
