@@ -214,7 +214,7 @@ class DraftDatasetMarker
     /**
      * Get fixedSize
      *
-     * @return string
+     * @return float
      */
     public function getFixedSize()
     {
@@ -224,7 +224,7 @@ class DraftDatasetMarker
     /**
      * Set fixedSize
      *
-     * @param string $fixedSize
+     * @param float $fixedSize
      *
      * @return DraftDatasetMarker
      */
