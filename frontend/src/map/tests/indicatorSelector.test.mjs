@@ -2,11 +2,11 @@ import { describe, it, expect } from './_harness.mjs';
 import { setupWindow, makeCatalogTree, mountLite } from './fixtures.mjs';
 import IndicatorSelector from '@/map/components/widgets/sideToolbar/indicatorSelector.vue';
 
-// Caracterización de la lógica del panel selector ANTES de modularizarlo.
-// mountLite (fixtures) instancia el objeto de opciones sin Vue: props con
-// defaults, data(), methods bindeados y computed como getters. No se prueba
-// template ni DOM; sí toda la clasificación del árbol, la búsqueda y las
-// emisiones, que es lo que la refactorización debe conservar.
+// Lógica del panel selector: renderRows, búsqueda sobre el catálogo y
+// emisiones. mountLite (fixtures) instancia el objeto de opciones sin Vue:
+// props con defaults, data(), methods bindeados y computed como getters. No
+// se prueba template ni DOM. La clasificación del árbol y el matching tienen
+// sus propias suites (catalogTree, catalogMatcher, catalogSearch).
 
 function mountSelector(options) {
 	setupWindow();
@@ -15,59 +15,7 @@ function mountSelector(options) {
 	return mountLite(IndicatorSelector, options);
 }
 
-describe('indicatorSelector: clasificación del árbol (contentOf)');
-
-it('una categoría con sub-nodos que tienen Items es una rama navegable', () => {
-	const panel = mountSelector();
-	const content = panel.contentOf(panel.categories[0]); // Población
-	expect(content.branches).toHaveLength(2);
-	expect(content.sections).toHaveLength(0);
-});
-
-it('un nodo con hojas planas produce una única sección sin nombre', () => {
-	const panel = mountSelector();
-	const censos = panel.categories[0].Items[0];
-	const content = panel.contentOf(censos);
-	expect(content.branches).toHaveLength(0);
-	expect(content.sections).toHaveLength(1);
-	expect(content.sections[0].Key).toBe('_all');
-	expect(content.sections[0].Items).toHaveLength(2);
-});
-
-it('un nodo con VersionId y agrupadores produce una sección por agrupador, no ramas', () => {
-	const panel = mountSelector();
-	const grouped = {
-		Id: 9, Name: 'Municipios', VersionId: 3,
-		Items: [
-			{ Id: 91, Name: 'Buenos Aires', Code: '06', Items: [{ Id: 911, Name: 'Tandil' }] },
-			{ Id: 92, Name: 'Córdoba', Code: '14', Items: [{ Id: 921, Name: 'Río Cuarto' }] },
-		],
-	};
-	const content = panel.contentOf(grouped);
-	expect(content.branches).toHaveLength(0);
-	expect(content.sections).toHaveLength(2);
-	expect(content.sections[0].Name).toBe('Buenos Aires');
-	expect(content.sections[0].GroupId).toBe(91);
-	expect(content.sections[0].Items[0].Name).toBe('Tandil');
-});
-
-it('el formato anterior (diccionario agrupador→hojas) produce una sección por clave', () => {
-	const panel = mountSelector();
-	const content = panel.contentOf(panel.categories[2]); // Educación
-	expect(content.branches).toHaveLength(0);
-	expect(content.sections).toHaveLength(2);
-	expect(content.sections[0].Name).toBe('INDEC');
-	expect(content.sections[1].Items[0].Name).toBe('Matrícula');
-});
-
 describe('indicatorSelector: delimitaciones y etiquetas de conteo');
-
-it('isDelimitation distingue contenedores de hojas de los agrupadores de tipo', () => {
-	const panel = mountSelector();
-	const limites = panel.categories[1];
-	expect(panel.isDelimitation(limites)).toBeFalsy();          // agrupa ramas
-	expect(panel.isDelimitation(limites.Items[0])).toBeTruthy(); // Provincias: hojas
-});
 
 it('branchLabel cuenta hijos directos y usa el nombre del nodo si nounFromNodeName', () => {
 	const panel = mountSelector();
@@ -79,37 +27,6 @@ it('branchLabel cuenta hijos directos y usa el nombre del nodo si nounFromNodeNa
 });
 
 describe('indicatorSelector: búsqueda');
-
-it('normalize ignora mayúsculas y tildes', () => {
-	const panel = mountSelector();
-	expect(panel.normalize('Proyección')).toBe('proyeccion');
-});
-
-describe('indicatorSelector: matchesWordStart con varias palabras (AND, no frase exacta)');
-
-it('con una palabra, sigue comportándose igual que antes', () => {
-	const panel = mountSelector();
-	expect(panel.matchesWordStart('nivel educativo', 'niv')).toBeTruthy();
-	expect(panel.matchesWordStart('nivel educativo', 'edu')).toBeTruthy();
-});
-
-it('con dos palabras parciales, matchea si cada una es inicio de alguna palabra del nombre', () => {
-	const panel = mountSelector();
-	expect(panel.matchesWordStart('nivel educativo', 'niv edu')).toBeTruthy();
-	// El orden no importa: es AND entre palabras, no coincidencia de frase.
-	expect(panel.matchesWordStart('nivel educativo', 'edu niv')).toBeTruthy();
-});
-
-it('si alguna palabra del término no matchea ninguna palabra del nombre, no matchea', () => {
-	const panel = mountSelector();
-	expect(panel.matchesWordStart('nivel educativo', 'niv xyz')).toBeFalsy();
-});
-
-it('"pesan" no matchea con "san" (sigue evitando el ruido de mitad de palabra)', () => {
-	const panel = mountSelector();
-	expect(panel.matchesWordStart('pesan', 'san')).toBeFalsy();
-	expect(panel.matchesWordStart('sanar', 'san')).toBeTruthy();
-});
 
 it('filteredItems matchea por nombre parcial insensible a tildes', () => {
 	const panel = mountSelector();
@@ -124,6 +41,14 @@ it('filteredItems con dos palabras parciales encuentra el ítem (caso reportado:
 	panel.searchQuery = 'niv edu';
 	expect(panel.filteredItems).toHaveLength(1);
 	expect(panel.filteredItems[0].item.Name).toBe('Nivel educativo');
+});
+
+it('filteredItems encuentra por palabras clave (Keywords) y deja primero los que coinciden por nombre', () => {
+	const panel = mountSelector();
+	panel.categories[0].Items[1].Items[0].Keywords = 'poblacion futura';
+	panel.searchQuery = 'poblacion';
+	const names = panel.filteredItems.map(e => e.item.Name);
+	expect(names).toEqual(['Población total', 'Población migrante', 'Proyección 2030']);
 });
 
 it('el match por código es exacto, no parcial', () => {

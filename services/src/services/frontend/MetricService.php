@@ -105,6 +105,7 @@ class MetricService extends BaseService
 		$metric->Name = $item['myv_metric_caption'];
 		$metric->Tag = $item['myv_metric_tag'];
 		$metric->Icon = $item['myv_metric_icon'];
+		$metric->Keywords = $item['myv_metric_keywords'];
 		$metric->Signature = $item['myv_metric_revision'];
 		$metric->MetricGroupId = $item['myv_metric_group_id'];
 		$metric->MetricProviderId = $item['myv_metric_provider_id'];

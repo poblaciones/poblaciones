@@ -44,10 +44,14 @@ const commonStubs = {
 	'@/common/framework/arr': 'arr.mjs',
 	'@/common/framework/err': 'err.mjs',
 	'@/common/framework/color': 'color.mjs',
+	'@/common/framework/dom': 'dom.mjs',
 	'@/common/framework/promises': 'promises.mjs',
 	'@/common/framework/session': 'session.mjs',
 	'@/common/js/iconManager': 'iconManager.mjs',
 	'@/common/js/axiosProgressBar.js': 'axiosProgressBar.mjs',
+	'@/common/js/citationAPA': 'citationAPA.mjs',
+	'@/common/js/creativeCommons': 'creativeCommons.mjs',
+	'@/common/components/ContentWizard': 'content-wizard.mjs',
 };
 
 function stubUrl(fileName) {

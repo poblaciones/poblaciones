@@ -316,3 +316,41 @@ it('RestoreBoundaryState usa Vue.set para LabelsCollapsed (no viene preexistente
 	expect(VueStub.calls.length).toBe(callsBefore + 1);
 	expect(VueStub.calls[VueStub.calls.length - 1].key).toBe('LabelsCollapsed');
 });
+
+describe('SaveRoute.RemoveBoundary: saca el segmento "b<id>" de la ruta, análogo a RemoveWork');
+
+// calculateState() recorre todos los routers (frame, basemap, clipping,
+// etc.), cada uno con sus propios requisitos de window.SegMap: no es lo que
+// este test ejercita (ya cubierto en otros tests de cada router), así que
+// se la reemplaza por un valor fijo y se prueba solo el recorte del path.
+function makeSaveRouteWithPath(pathname) {
+	const pushCalls = [];
+	setupWindow({
+		location: { pathname: pathname, hash: '' },
+		history: { pushState(state, title, url) { pushCalls.push(url); } },
+	});
+	const saveRoute = new SaveRoute();
+	saveRoute.calculateState = function () { return ''; };
+	return { saveRoute, pushCalls };
+}
+
+it('con /map/b45, saca el segmento de la delimitación y conserva el resto de la ruta', () => {
+	const { saveRoute, pushCalls } = makeSaveRouteWithPath('/map/b45');
+	saveRoute.RemoveBoundary();
+	expect(pushCalls).toHaveLength(1);
+	expect(pushCalls[0]).toBe('/map/#');
+});
+
+it('con /map/83401 (un work, no una delimitación), no saca ningún segmento', () => {
+	const { saveRoute, pushCalls } = makeSaveRouteWithPath('/map/83401');
+	saveRoute.RemoveBoundary();
+	expect(pushCalls[0]).toBe('/map/83401/#');
+});
+
+it('isBoundarySegment distingue "b<n>" de un id numérico o de basura', () => {
+	const saveRoute = new SaveRoute();
+	expect(saveRoute.isBoundarySegment('b45')).toBeTruthy();
+	expect(saveRoute.isBoundarySegment('83401')).toBeFalsy();
+	expect(saveRoute.isBoundarySegment('b')).toBeFalsy();
+	expect(saveRoute.isBoundarySegment('b45x')).toBeFalsy();
+});

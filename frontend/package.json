@@ -10,7 +10,8 @@
 		"build": "node build/build.js",
 		"upload": "node build/upload.js",
 		"beta": "node build/beta.js",
-		"lint": "eslint --ext .js,.vue src"
+		"lint": "eslint --ext .js,.vue src",
+		"test": "node --import ./src/map/tests/_register-alias.mjs src/map/tests/run-all.mjs"
 	},
 	"dependencies": {
 		"@babel/runtime": "^7.12.5",

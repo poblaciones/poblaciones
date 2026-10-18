@@ -44,7 +44,7 @@ class SnapshotMetricModel extends BaseModel
 			$having = "";
 			$orderBy = "";
 		}
-		$sql = "SELECT	mvw_metric_id myv_metric_id, mvw_metric_revision myv_metric_revision, mvw_metric_tag myv_metric_tag, mvw_metric_icon myv_metric_icon,
+		$sql = "SELECT	mvw_metric_id myv_metric_id, mvw_metric_revision myv_metric_revision, mvw_metric_tag myv_metric_tag, mvw_metric_icon myv_metric_icon, mvw_metric_keywords myv_metric_keywords,
 										MIN(mvw_metric_caption) myv_metric_caption,
 										MAX(mvw_metric_revision) myv_metric_revision,
 										MIN(mvw_metric_group_id) myv_metric_group_id,
@@ -59,7 +59,7 @@ class SnapshotMetricModel extends BaseModel
 										GROUP_CONCAT(mvw_caption ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_version_captions
 									FROM snapshot_metric_version
 									" . $where . "
-									group by mvw_metric_id, mvw_metric_revision, mvw_metric_tag, mvw_metric_icon " .
+									group by mvw_metric_id, mvw_metric_revision, mvw_metric_tag, mvw_metric_icon, mvw_metric_keywords " .
 									$having .
 									$orderBy;
 		return $sql;

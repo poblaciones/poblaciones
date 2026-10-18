@@ -22,7 +22,7 @@ use minga\framework\Cookies;
 class ConfigurationService extends BaseService
 {
     const CookieName = 'nav';
-    const ValidRenew = 3000; // en d韆s
+    const ValidRenew = 3000; // en d铆as
 
 	public function GetTransactionServer()
 	{
@@ -32,9 +32,9 @@ class ConfigurationService extends BaseService
 
     public function GetCurrentMapProvider()
     {
-        // Se fija la configuraci髇 actual
+        // Se fija la configuraci贸n actual
         $ret = App::Settings()->Map()->MapsAPI;
-        // Se fija el valor en sesi髇
+        // Se fija el valor en sesi贸n
 		$sessionValue = PhpSession::GetSessionValue('MapsAPI', null);
         if ($sessionValue)
             $ret = $sessionValue;
@@ -42,9 +42,9 @@ class ConfigurationService extends BaseService
     }
 	public function SwitchSessionProvider()
     {
-		// Invierte y setea en sesi髇
+		// Invierte y setea en sesi贸n
         $current = $this->GetCurrentMapProvider();
-        // Se fija el valor en sesi髇
+        // Se fija el valor en sesi贸n
 		if ($current == "google")
 			$new = "leaflet";
 		else
@@ -133,6 +133,7 @@ class ConfigurationService extends BaseService
 			$mapAccess = Context::Settings()->Keys()->GoogleMapsKey;
 		}
 
+		$searchSettings = ['Autocomplete' => App::Settings()->Map()->Autocomplete, 'Stopwords' => App::Settings()->Map()->Stopwords];
 		$suggestions = array('minScore' => App::Settings()->Suggestions()->getMinScoreToSuggest(),
 							 'maxSuggestions' => App::Settings()->Suggestions()->getMaxSuggestionsPerTrigger(),
 							 'selectedUsers' => [],
@@ -179,7 +180,8 @@ class ConfigurationService extends BaseService
 									'MainServer' => $mainServer->publicUrl,
 									'ShortUrlPattern' => App::Settings()->Map()->ShortUrlPattern,
 									'BasemapUrls' => App::Settings()->Map()->BasemapUrls,
-									'BasemapAttributions' => App::Settings()->Map()->BasemapAttributions);
+									'BasemapAttributions' => App::Settings()->Map()->BasemapAttributions,
+									'Search' => $searchSettings);
 
 		$this->FilterUserSettings($ret['User']['Settings']);
 		Callbacks::$MapsOpened++;
@@ -203,13 +205,13 @@ class ConfigurationService extends BaseService
 	{
 		if ($mapsOpened == Context::Settings()->Limits()->WarningMonthlyMapsPerKey)
 		{
-			Performance::SendPerformanceWarning('apertura de mapas por key cercano al l韒ite',
+			Performance::SendPerformanceWarning('apertura de mapas por key cercano al l铆mite',
 				Context::Settings()->Limits()->WarningMonthlyMapsPerKey . ' hits', $mapsOpened . ' hits');
 		}
 
 		if ($mapsOpened == Context::Settings()->Limits()->LimitMonthlyMapsPerKey)
 		{
-			Performance::SendPerformanceWarning('apertura de mapas por key agotado - DENEGACI覰 DE PERMISO',
+			Performance::SendPerformanceWarning('apertura de mapas por key agotado - DENEGACI脫N DE PERMISO',
 				Context::Settings()->Limits()->LimitMonthlyMapsPerKey . ' hits', $mapsOpened . ' hits');
 		}
 	}

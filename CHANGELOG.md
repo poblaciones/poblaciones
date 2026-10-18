@@ -1,3 +1,5 @@
+- Búsqueda integrada con la búsqueda local de indicadores y delimitaciones.
+- Keywords para los indicadores de datos públicos.
 - 'Compartir' nativo para celulares.
 - Barra superior con logo en administración.
 - Paleta de controles y colores.

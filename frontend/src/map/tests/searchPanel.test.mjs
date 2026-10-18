@@ -104,9 +104,13 @@ it('hasMoreRecents es false con 4 recientes o menos', () => {
 it('el watcher de isOpen refresca los recientes al abrir el panel', () => {
 	const items = [{ DedupeKey: 'a', Caption: 'A' }];
 	const { panel } = mountSearchPanel(items);
+	// mountLite no ejecuta created(), que es donde el componente crea kbd.
+	let attached = false;
+	panel.kbd = { attach() { attached = true; }, detach() {} };
 	expect(panel.recentsList).toHaveLength(0);
 
 	SearchPanel.watch.isOpen.call(panel, true, false);
+	expect(attached).toBeTruthy();
 	expect(panel.recentsList).toHaveLength(1);
 });
 

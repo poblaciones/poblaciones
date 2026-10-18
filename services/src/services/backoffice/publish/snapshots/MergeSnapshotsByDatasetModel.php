@@ -124,6 +124,17 @@ class MergeSnapshotsByDatasetModel
 		return $table . "_matrix_" . $compareDatasetId;
 	}
 
+	// Elimina las tablas de comparación (matrix) de un dataset publicado:
+	// las propias (dataset como base) y las de otros datasets que lo usan como comparación.
+	// Ambos parámetros corresponden a ids de la base pública (shardificados).
+	public static function DropMatrixTables($datasetTable, $datasetIdShardified)
+	{
+		$snapshotTable = SnapshotByDatasetModel::SnapshotTable($datasetTable);
+		App::Db()->dropTableLikePattern($snapshotTable . "_matrix_%");
+		$pattern = 'work_dataset_shard_' . App::Settings()->Shard()->CurrentShard . '_%_snapshot_matrix_' . $datasetIdShardified;
+		App::Db()->dropTableLikePattern($pattern);
+	}
+
 	private function GetRequiredVariables($levels, $levelsCompare)
 	{
 		$ret = [];

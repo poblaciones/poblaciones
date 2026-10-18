@@ -16,6 +16,13 @@
 														:maxlength="150" v-model="newMetricVersionLevel.MetricVersion.Metric.Caption">
 						</mp-simple-text>
 					</div>
+					<div v-if="Work.IsPublicData()" class="md-layout-item md-size-100 md-small-size-100">
+						<mp-simple-text :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
+														label="Palabras clave" @enter="save"
+														helper="Separadas por comas. Ej. agua, salud, vivienda"
+														:maxlength="100" v-model="newMetricVersionLevel.MetricVersion.Metric.Keywords">
+						</mp-simple-text>
+					</div>
 					<div v-if="Work.IsPublicData()" class='md-layout-item md-size-75 md-small-size-100'>
 						<mp-select :canEdit="newMetricVersionLevel.MetricVersion.Metric.CanEdit"
 											 label='Categoría'

@@ -52,7 +52,7 @@
     />
 
     <!-- Panel de Búsqueda -->
-    <SearchPanel :is-open="activePanel === 'search'" :sidebar-position="sidebarPosition" @close="closePanel" />
+    <SearchPanel :is-open="activePanel === 'search'" :indicators="indicators" :boundaries="boundaries" :sidebar-position="sidebarPosition" @close="closePanel" />
 
     <!-- Panel de Subida -->
     <SearchPanel :is-open="activePanel === 'upload'" :sidebar-position="sidebarPosition" @close="closePanel" />

@@ -43,6 +43,9 @@ class SnapshotByDatasetModel
 			$this->BuildVariableColumns($datasetId, $variable, $columns);
 		}
 
+		// Invalida las tablas de comparación, que dependen de las columnas del snapshot
+		MergeSnapshotsByDatasetModel::DropMatrixTables($dataset['dat_table'], $datasetIdShardified);
+
 		if (App::Db()->tableExists($dataset['dat_table']))
 		{
 			$this->CreateTable($dataset, $columns);

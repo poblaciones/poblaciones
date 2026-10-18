@@ -44,6 +44,13 @@ class Metric
 	private $Icon;
 
 	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="mtr_keywords", type="string", length=100, precision=0, scale=0, nullable=true, unique=false)
+	 */
+	private $Keywords;
+
+	/**
 	 * @var boolean
 	 *
 	 * @ORM\Column(name="mtr_is_basic_metric", type="boolean", precision=0, scale=0, nullable=false, unique=false)
@@ -239,5 +246,24 @@ class Metric
     {
         return $this->MetricProvider;
     }
-}
 
+	/**
+	 * @param string|null $keywords
+	 *
+	 * @return Metric
+	 */
+	public function setKeywords($keywords)
+	{
+		$this->Keywords = $keywords;
+
+		return $this;
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function getKeywords()
+	{
+		return $this->Keywords;
+	}
+}

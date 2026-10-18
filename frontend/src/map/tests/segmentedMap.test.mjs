@@ -83,7 +83,7 @@ function callAddBoundaryById(isBaseMetric) {
 	const registerCalls = [];
 	const boundaryData = makeBoundaryProperties();
 	const fakeThis = {
-		Get() { return Promise.resolve({ data: boundaryData }); },
+		GetBoundaryInfo() { return Promise.resolve({ data: boundaryData }); },
 		Metrics: { AppendNonStandardMetric() {}, AddStandardMetric() {} },
 		Session: { Content: { AddBoundary() {} } },
 		Recents: { RegisterBoundary(id, caption) { registerCalls.push({ id, caption }); } },

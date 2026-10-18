@@ -15,6 +15,7 @@ class MetricInfo extends BaseMapModel
 	public $Signature;
 	public $Icon;
 	public $Tag;
+	public $Keywords;
 	public $Type;
 
 	public $Versions = array();
@@ -25,6 +26,7 @@ class MetricInfo extends BaseMapModel
 			'mtr_caption' => 'Name',
 			'mtr_tag' => 'Tag',
 			'mtr_icon' => 'Icon',
+			'mtr_keywords' => 'Keywords',
 			'mtr_metric_group_id' => 'MetricGroupId',
 			'mtr_metric_provider_id' => 'MetricProviderId',
 			'mvr_type' => 'Type');

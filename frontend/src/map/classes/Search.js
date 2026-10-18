@@ -17,14 +17,13 @@ Search.prototype.StartSearch = function (t) {
 	if (this.preSearch(t)) {
 		return;
 	}
-	if(this.view.retCancel !== null)
+	var view = this.view;
+	if(view.retCancel !== null)
 	{
-		this.view.retCancel('cancelled');
-		this.view.retCancel = null;
+		view.retCancel('cancelled');
+		view.retCancel = null;
 	}
 	var CancelToken = axios.CancelToken;
-	var retCancel = null;
-	var view = this.view;
 	var loc = this;
 	view.loading = true;
 	var facade = (this.isBackoffice ? 'backoffice' : 'frontend');
@@ -32,17 +31,21 @@ Search.prototype.StartSearch = function (t) {
 		params: {
 			q: t, f: this.searchType, w: this.revision, b: (this.getDraftMetrics ? '1' : '0'),
 				k: this.currentWorkId },
-		cancelToken: new CancelToken(function executor(c) { retCancel = c; })
+		cancelToken: new CancelToken(function executor(c) { view.retCancel = c; })
 		}))
 		.then(function (res) {
 			session.ReceiveSession(window.host, res);
 			loc.LoadResults(res.data, t);
 			view.loading = false;
 		}).catch(function(error) {
+			// La búsqueda cancelada por una más reciente no es un error: esa
+			// otra mantiene el estado de carga.
+			if (axios.isCancel(error)) {
+				return;
+			}
 			view.loading = false;
 			err.errDialog('search', 'completar la búsqueda solicitada', error);
 		});
-	view.retCancel = retCancel;
 };
 
 Search.prototype.preSearch = function (text) {
@@ -73,7 +76,9 @@ Search.prototype.LoadResults = function(list, t) {
 		el.Class = '';
 		return el;
 	});
-	if (view.autolist.length === 0) {
+	// En la búsqueda de lugares ('p') el mensaje de "sin resultados" lo muestra
+	// quien la invoca, porque puede haber resultados de otras fuentes.
+	if (view.autolist.length === 0 && this.searchType !== 'p') {
 		view.autolist = [{
 			Type: 'N',
 			Caption: 'No se encontraron resultados.',

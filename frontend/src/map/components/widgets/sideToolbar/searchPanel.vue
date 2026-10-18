@@ -32,39 +32,42 @@
           <div class="results-area">
             <transition name="fade">
               <div class="results-container" v-if="hasResults">
-                <div class="results-list">
-                  <div
-                    v-for="item in autolist"
-                    :key="item.Id"
-                    class="mp-list-item result-item"
-                    data-kbd-item="result"
-                    @click="selectResult($event, item)"
-                  >
-                    <div class="result-content">
-                      <div class="list-icon">
-                        <i :class="getResultIcon(item)"></i>
-                      </div>
-                      <div class="result-info">
-                        <div class="result-name" v-html="item.Highlighted"></div>
-                        <div class="result-extra">{{ item.Extra }}</div>
-                        <div v-if="item.Lat && item.Lon" class="result-coords">
-                          <a
-                            href="#"
-                            v-clipboard="() => formatCoord(item)"
-                            v-clipboard:success="clipboardSuccess"
-                            v-clipboard:error="clipboardError"
-                            @click.prevent
-                            title="Copiar coordenadas"
-                            class="copy-coords"
-                          >
-                            <i class="far fa-copy"></i>
-                          </a>
-                          <span class="coords-text">{{ formatCoord(item) }}</span>
+                <search-result-section
+                  v-for="section in resultSections"
+                  :key="section.Key"
+                  :title="section.Title"
+                  :rows="section.Rows"
+                  :limit="section.Limit"
+                  @more="expandSection(section.Key, $event)"
+                >
+                  <template slot="row" slot-scope="{ row }">
+                    <div class="mp-list-item result-item" data-kbd-item="result" @click="selectResult($event, row)">
+                      <div class="result-content">
+                        <div class="list-icon">
+                          <i :class="getResultIcon(row)"></i>
+                        </div>
+                        <div class="result-info">
+                          <div class="result-name" v-html="row.Highlighted"></div>
+                          <div class="result-extra">{{ row.Extra }}</div>
+                          <div v-if="row.Lat && row.Lon" class="result-coords">
+                            <a
+                              href="#"
+                              v-clipboard="() => formatCoord(row)"
+                              v-clipboard:success="clipboardSuccess"
+                              v-clipboard:error="clipboardError"
+                              @click.prevent
+                              title="Copiar coordenadas"
+                              class="copy-coords"
+                            >
+                              <i class="far fa-copy"></i>
+                            </a>
+                            <span class="coords-text">{{ formatCoord(row) }}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </template>
+                </search-result-section>
               </div>
             </transition>
 
@@ -109,12 +112,12 @@
                   </div>
                 </template>
               </div>
-              <div v-if="!showAllRecents && hasMoreRecents" class="show-more-recents hand" data-kbd-item="more" @click="showAllRecents = true">
+              <search-more-button v-if="!showAllRecents && hasMoreRecents" @more="showAllRecents = true">
                 Más vistos recientemente
-              </div>
+              </search-more-button>
             </div>
 
-            <div v-if="searchText && !hasResults && !loading" class="no-results">
+            <div v-if="searchText && !hasResults && !awaitingPlaces" class="no-results">
               <p>No se encontraron resultados</p>
             </div>
           </div>
@@ -130,11 +133,18 @@ import h from '@/map/js/helper';
 import Search from '@/map/classes/Search';
 import ActiveRecents from '@/map/classes/ActiveRecents';
 import KeyboardAwareList from '@/map/classes/KeyboardAwareList';
+import CatalogTree from '@/map/classes/catalog/CatalogTree';
+import CatalogSearch from '@/map/classes/catalog/CatalogSearch';
+import SearchQuery from '@/map/classes/catalog/SearchQuery';
+import SearchResultRows from '@/map/classes/catalog/SearchResultRows';
+import SearchResultSection from './searchResultSection.vue';
+import SearchMoreButton from './searchMoreButton.vue';
 
 const debounce = require('lodash.debounce');
 
 export default {
   name: 'SearchPanel',
+  components: { SearchResultSection, SearchMoreButton },
   mixins: [clickaway],
   props: {
     isOpen: {
@@ -148,13 +158,30 @@ export default {
     sidebarPosition: {
       type: String,
       default: 'middle'
+    },
+    // Catálogos de indicadores y de delimitaciones (los mismos árboles que
+    // indicatorSelector.vue): se buscan en el cliente. El servidor solo
+    // aporta lugares.
+    indicators: {
+      type: Array,
+      default: () => []
+    },
+    boundaries: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
     return {
       searchText: '',
       loading: false,
+      // Lugares (resultados del servidor) y coordenadas tecleadas. El nombre
+      // lo exige Search.js, que escribe en view.autolist.
       autolist: [],
+      // Filas visibles de cada sección del catálogo (ver SearchResultRows).
+      limits: { indicators: SearchResultRows.INITIAL_LIMIT, regions: SearchResultRows.INITIAL_LIMIT },
+      // Hay una búsqueda de lugares programada (debounce) aún no iniciada.
+      debouncePending: false,
       searched: '',
       retCancel: null,
       // Si se está mostrando la lista completa de recientes (agrupada por
@@ -167,16 +194,15 @@ export default {
       // haber cambiado: al abrir el panel y al eliminar un ítem.
       recentsList: [],
       recentsGroups: [],
-      doSearchDebounced: debounce(function(e) {
-        if (e.keyCode === 40 || e.keyCode === 38 || e.keyCode === 27) {
-          return;
-        }
+      doSearchDebounced: debounce(function() {
+        this.debouncePending = false;
         const t = this.searchText.trim().toLowerCase();
         if (t === '' || this.searched === t) {
           return;
         }
         this.autolist = [];
-        const s = new Search(this, window.SegMap.Signatures.Search, 'a');
+        // 'p': el servidor devuelve solo lugares.
+        const s = new Search(this, window.SegMap.Signatures.Search, 'p');
         s.StartSearch(t);
       }, 1000)
     };
@@ -197,7 +223,53 @@ export default {
   },
   computed: {
     hasResults() {
-      return this.autolist.length > 0;
+      return this.indicatorRows.length > 0 || this.regionRows.length > 0 || this.autolist.length > 0;
+    },
+    // Faltan lugares por llegar: hay una búsqueda programada o en curso.
+    awaitingPlaces() {
+      return this.loading || this.debouncePending;
+    },
+    queryResolver() {
+      return new SearchQuery(window.SegMap.Configuration.Search);
+    },
+    // El texto con las palabras vacías y el autocompletado del servidor.
+    resolvedText() {
+      const text = this.searchText.trim();
+      return text === '' ? '' : this.queryResolver.Resolve(text);
+    },
+    // El índice de palabras de cada catálogo se reconstruye solo al cambiar el catálogo.
+    indicatorsSearch() {
+      return new CatalogSearch(new CatalogTree(this.indicators));
+    },
+    boundariesSearch() {
+      return new CatalogSearch(new CatalogTree(this.boundaries));
+    },
+    indicatorRows() {
+      const search = this.indicatorsSearch;
+      return new SearchResultRows(search.tree).Indicators(search.FindItems(this.resolvedText, null));
+    },
+    // Delimitaciones (se agregan completas al mapa) y regiones.
+    regionRows() {
+      const search = this.boundariesSearch;
+      return new SearchResultRows(search.tree).Regions(
+        search.FindBranches(this.resolvedText, null),
+        search.FindItems(this.resolvedText, null)
+      );
+    },
+    placeRows() {
+      const rows = [];
+      for (let n = 0; n < this.autolist.length; n++) {
+        const item = this.autolist[n];
+        rows.push(Object.assign({}, item, { Key: item.Type + '|' + item.Id + '|' + n }));
+      }
+      return rows;
+    },
+    resultSections() {
+      return [
+        { Key: 'indicators', Title: 'Indicadores', Rows: this.indicatorRows, Limit: this.limits.indicators },
+        { Key: 'regions', Title: 'Regiones', Rows: this.regionRows, Limit: this.limits.regions },
+        { Key: 'places', Title: 'Lugares', Rows: this.placeRows, Limit: null }
+      ];
     },
     // Los recientes solo se ofrecen antes de tipear texto de búsqueda, igual
     // que en Google Maps.
@@ -231,9 +303,13 @@ export default {
     },
     // Cualquier cambio del contenido visible (resultados, recientes, vista
     // expandida) devuelve el elemento activo por teclado a -1. Se devuelve un
-    // arreglo nuevo en cada recálculo para que el watcher dispare.
+    // arreglo nuevo en cada recálculo para que el watcher dispare. No incluye
+    // los lugares ni los límites de las secciones: los lugares llegan al final
+    // de la lista y "Ver más" agrega filas después de la activa, así que ni
+    // su llegada ni su expansión deben perder la posición (ver autolist y
+    // expandSection).
     kbdContentKey() {
-      return [this.autolist, this.recentsList, this.showAllRecents, this.showRecents];
+      return [this.indicatorRows, this.regionRows, this.recentsList, this.showAllRecents, this.showRecents];
     },
     // Con sidebarPosition 'top'/'bottom', el panel se acerca al botón de
     // Buscar (que en esos casos está arriba o abajo, no en el medio de la
@@ -281,8 +357,18 @@ export default {
       }
     },
     searchText(val) {
+      this.limits = { indicators: SearchResultRows.INITIAL_LIMIT, regions: SearchResultRows.INITIAL_LIMIT };
       if (val === '') {
         this.handleEscape();
+      }
+    },
+    // Los lugares se agregan o se quitan al final de la lista: con la lista
+    // activa se conserva el índice (acotado al nuevo rango), sin quitarle el
+    // foco al campo si lo tiene.
+    autolist() {
+      const idx = this.kbd.index;
+      if (idx > -1 && document.activeElement !== this.$refs.searchInput) {
+        this.$nextTick(() => this.kbd.select(idx));
       }
     },
     kbdContentKey() {
@@ -298,10 +384,25 @@ export default {
 			this.$nextTick(() => { if (this.$refs.searchInput) this.$refs.searchInput.focus(); });
 		},
     handleSearch(e) {
+      if (e.keyCode === 40 || e.keyCode === 38 || e.keyCode === 27) {
+        return;
+      }
       if (e.keyCode === 13) {
         this.doSearchDebounced.flush();
-      } else {
-        return this.doSearchDebounced(e);
+        return;
+      }
+      this.debouncePending = true;
+      this.doSearchDebounced();
+    },
+    // "Ver más" de una sección. Si el botón era el elemento activo por teclado,
+    // el mismo índice pasa a ser la primera fila agregada (el botón queda
+    // después de las filas o desaparece), por lo que se vuelve a activar tras
+    // el render.
+    expandSection(key, wasActive) {
+      const idx = this.kbd.index;
+      this.limits[key] = SearchResultRows.NextLimit(this.limits[key]);
+      if (wasActive) {
+        this.$nextTick(() => this.kbd.select(idx));
       }
     },
     selectResult(event, item) {
@@ -385,9 +486,8 @@ export default {
       return true;
     },
     handleEscape() {
-      if (this.hasResults) {
-        this.autolist = [];
-      }
+      this.autolist = [];
+      this.searched = '';
     }
   }
 };
@@ -448,6 +548,7 @@ export default {
 		display: flex;
 		padding-left: 15px;
 		padding-right: 15px;
+		padding-bottom: 12px;
 		flex-direction: column;
 		/* Alto equivalente a 4 result-item vacíos, para que el panel no cambie
      de tamaño según haya resultados, recientes, ninguno de los dos, o un
@@ -562,19 +663,6 @@ export default {
 		color: #707070;
 		padding: 10px 22px 4px;
 	}
-
-.show-more-recents {
-  text-align: center;
-  padding: 10px 8px 4px;
-  font-size: 13px;
-  color: #0fa7d8;
-  cursor: pointer;
-}
-
-.show-more-recents:hover,
-.show-more-recents[data-kbd-active] {
-  text-decoration: underline;
-}
 
 /* No Results */
 .no-results {

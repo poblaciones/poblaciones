@@ -7,6 +7,7 @@ use helena\db\backoffice\WorkModel;
 use helena\classes\VersionUpdater;
 use helena\classes\App;
 use helena\services\backoffice\publish\snapshots\SnapshotByDatasetModel;
+use helena\services\backoffice\publish\snapshots\MergeSnapshotsByDatasetModel;
 
 use minga\framework\Profiling;
 use minga\framework\Arr;
@@ -34,15 +35,14 @@ class RevokeSnapshots extends BaseService
 		$this->publicWork = $this->publicWorkModel->GetWork($this->shardifiedWorkId);
 	}
 
-	public static function DropTable($table, $datasetId)
+	// $datasetIdShardified: id del dataset en la base pública (shardificado)
+	public static function DropTable($table, $datasetIdShardified)
 	{
 		App::Db()->dropTable($table);
 		$snapShotTable = SnapshotByDatasetModel::SnapshotTable($table);
 		App::Db()->dropTable($snapShotTable);
-		App::Db()->dropTableLikePattern($snapShotTable . "_matrix_%");
-		// Borra otras que hagan referencia a él
-		$pattern = 'work_dataset_shard_' . App::Settings()->Shard()->CurrentShard . '_%_snapshot_matrix_' . $datasetId;
-		App::Db()->dropTableLikePattern($pattern);
+		// Borra las matrices propias y las de otros datasets que hagan referencia a él
+		MergeSnapshotsByDatasetModel::DropMatrixTables($table, $datasetIdShardified);
 	}
 
 	public function DeleteAllWorkDatasets()
@@ -72,7 +72,7 @@ class RevokeSnapshots extends BaseService
 		$datasets = $this->workModel->GetDatasets($this->workId);
 		foreach($datasetsToDelete as $row)
 		{
-			self::DropTable($row['dat_table'], $row['dat_id']);
+			self::DropTable($row['dat_table'], PublishDataTables::Shardified($row['dat_id']));
 		}
 		$totalLabelsRowDeleted = 0;
 		foreach($datasetsToDelete as $row)

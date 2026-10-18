@@ -127,10 +127,6 @@ class FabService extends BaseService
 		return $table->GetRecommendedBoundaries();
 	}
 
-	private function IntensityTarget()
-	{
-
-	}
 	private function CalculateMetrics($providers, $useParent = false)
 	{
 		$ret = [];

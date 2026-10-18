@@ -138,7 +138,7 @@
 
             <!-- Acción de grupo: agrega el nivel actual como capa (no marca hojas) -->
             <div v-if="!searchQuery && (showAddAll || !filterMode) && currentLeafItems.length"
-                 class="mp-list-item mp-list-item--muted indicator-item hand"
+                 class="mp-list-item mp-list-item--muted indicator-item"
                  data-kbd-item="group"
                  @click="onSelectGroup">
               <div class="indicator-content">
@@ -174,7 +174,7 @@
               <!-- Rama navegable (modo listado: nivel 1 de delimitaciones) -->
               <div v-else-if="row.type === 'branch'"
                    :key="row.key"
-                   class="mp-list-item indicator-item hand"
+                   class="mp-list-item indicator-item"
                    data-kbd-item="branch"
                    @click="enterListBranch(row.parent, row.branch)">
                 <div class="indicator-content">
@@ -191,7 +191,7 @@
               <!-- Fila de hoja -->
               <div v-else-if="row.type === 'item'"
                    :key="row.key"
-                   class="mp-list-item indicator-item hand"
+                   class="mp-list-item indicator-item"
                    data-kbd-item="item"
                    :class="{ 'is-selected': isSelected(row.item) }"
                    @click="onItemClick(row.item, row.container)">
@@ -291,6 +291,8 @@
 <script>
 import { mixin as clickaway } from 'vue-clickaway';
 import KeyboardAwareList from '@/map/classes/KeyboardAwareList';
+import CatalogTree from '@/map/classes/catalog/CatalogTree';
+import CatalogSearch from '@/map/classes/catalog/CatalogSearch';
 
 export default {
   name: 'IndicatorSelector',
@@ -412,21 +414,21 @@ export default {
       // En filtro, explorar es obligatorio (no un toggle): no se ofrece.
       if (this.filterMode) return false;
       if (this.searchQuery) {
-        return this.filteredBranches.some(e => this.isDelimitation(e.branch));
+        return this.filteredBranches.some(e => this.tree.IsDelimitation(e.branch));
       }
       // Listado en la raíz: hay delimitaciones si alguna rama de las categorías lo es.
       if (this.listModeActive) {
-        var loc = this;
+        var tree = this.tree;
         return this.categories.some(function (cat) {
-          var content = loc.contentOf(cat);
-          return content.branches.some(loc.isDelimitation) ||
-            (content.branches.length === 0 && content.sections.some(function (s) { return s.Items && s.Items.length; }) && loc.isDelimitation(cat));
+          var content = tree.ContentOf(cat);
+          return content.branches.some(function (b) { return tree.IsDelimitation(b); }) ||
+            (content.branches.length === 0 && content.sections.some(function (s) { return s.Items && s.Items.length; }) && tree.IsDelimitation(cat));
         });
       }
       if (!this.navStack.length) return false;
       var branches = this.currentBranches;
       if (!branches.length) return false;
-      return branches.every(this.isDelimitation);
+      return branches.every(b => this.tree.IsDelimitation(b));
     },
     isMobile() {
       return window.SegMap && window.SegMap.Configuration && window.SegMap.Configuration.IsMobile;
@@ -462,7 +464,7 @@ export default {
       if (!this.currentNode) {
         return { branches: this.categories, sections: [] };
       }
-      return this.contentOf(this.currentNode);
+      return this.tree.ContentOf(this.currentNode);
     },
     currentBranches() { return this.currentContent.branches; },
     currentSections() { return this.currentContent.sections; },
@@ -487,57 +489,22 @@ export default {
       }
       return out;
     },
-    // Todas las hojas bajo el nodo actual (o todo el árbol en la raíz), con su
-    // contenedor directo (el "tipo") para subtítulo e ícono en la búsqueda.
-    searchScope() {
-      const out = [];
-      this.collectLeaves(this.currentNode ? [this.currentNode] : this.categories, out);
-      return out;
+    // El árbol y su índice de búsqueda se reconstruyen solo al cambiar el catálogo.
+    tree() {
+      return new CatalogTree(this.categories);
     },
+    catalogSearch() {
+      return new CatalogSearch(this.tree);
+    },
+    // Hojas bajo el nodo actual (o todo el árbol en la raíz) que coinciden por
+    // nombre, palabras clave o código exacto.
     filteredItems() {
-      const raw = this.searchQuery.trim();
-      const term = this.normalize(raw);
-      if (!term) return [];
-      // Coincide por nombre (parcial) o por código (exacto): si el término escrito
-      // es idéntico al Code del ítem, también se incluye. El match de código es
-      // completo, no parcial, para no traer ruido al teclear dígitos.
-      const matches = this.searchScope.filter(e => {
-        const byName = this.matchesWordStart(this.normalize(e.item.Name || ''), term);
-        const code = e.item.Code != null ? String(e.item.Code) : '';
-        const byCode = code !== '' && code === raw;
-        return byName || byCode;
-      });
-      // Un mismo indicador puede figurar en varias categorías (p. ej. "más usados"
-      // y los propios del usuario), por lo que el ámbito de búsqueda lo trae
-      // repetido. Se deduplica por Id conservando la primera aparición.
-      const seen = Object.create(null);
-      const out = [];
-      for (const e of matches) {
-        const id = e.item && e.item.Id != null ? e.item.Id : null;
-        if (id != null) {
-          if (seen[id]) continue;
-          seen[id] = true;
-        }
-        out.push(e);
-      }
-      return out;
-    },
-    // Todas las ramas (nodos contenedores navegables) bajo el ámbito actual, con
-    // su padre, para poder entrar en ellas desde la búsqueda.
-    branchScope() {
-      const out = [];
-      this.collectBranches(this.currentNode ? [this.currentNode] : this.categories, null, out);
-      return out;
+      return this.catalogSearch.FindItems(this.searchQuery, this.currentNode);
     },
     // Ramas cuyo nombre coincide con la búsqueda (p. ej. "Departamentos" al
     // buscar "departamento"): se ofrecen primero para entrar y ver sus hojas.
     filteredBranches() {
-      const term = this.normalize(this.searchQuery.trim());
-      if (!term) return [];
-      const matches = this.branchScope.filter(e => this.matchesWordStart(this.normalize(e.branch.Name || ''), term));
-      // Los agrupadores de mayor jerarquía (menor profundidad) aparecen primero,
-      // para poder entrar al contenedor amplio antes que a sus sub-ramas.
-      return matches.slice().sort((a, b) => (a.depth || 0) - (b.depth || 0));
+      return this.catalogSearch.FindBranches(this.searchQuery, this.currentNode);
     },
     listModeActive() {
       return this.viewMode === 'list' && !this.navStack.length;
@@ -578,7 +545,7 @@ export default {
         // el nivel 1 (hojas seleccionables, o ramas navegables si son tipos).
         for (const cat of this.categories) {
           const sKey = 'cat_' + this.containerKey(cat);
-          const content = this.contentOf(cat);
+          const content = this.tree.ContentOf(cat);
           rows.push({ type: 'header', key: 'h_' + sKey, sectionKey: sKey, name: cat.Name, count: this.branchLabel(cat), selectable: false });
           if (this.isCollapsed(sKey)) continue;
           if (content.branches.length) {
@@ -623,7 +590,7 @@ export default {
     hasSelectableRows() {
       if (this.searchQuery) return true;
       if (this.listModeActive) {
-        return this.categories.some(c => !this.contentOf(c).branches.length);
+        return this.categories.some(c => !this.tree.ContentOf(c).branches.length);
       }
       return this.currentSections.some(s => s.Items.length > 0);
     },
@@ -687,89 +654,8 @@ export default {
       top = Math.min(Math.max(margin, top), maxTop);
       this.panelStyle = { left: left + 'px', top: top + 'px', bottom: 'auto', margin: '0' };
     },
-    // Clasifica el contenido de un nodo en ramas u hojas.
-    contentOf(node) {
-      const items = node.Items;
-      // Un nodo con VersionId es un tipo de delimitación seleccionable: sus Items
-      // son sus hojas, ya sea planas o agrupadas (formato actual: cada agrupador
-      // trae { Id, Name, Code, Items }). En ese caso NO son ramas navegables, sino
-      // las secciones (grupos) de la delimitación.
-      if (node.VersionId != null) {
-        if (Array.isArray(items) && items.length && items[0] && items[0].Items !== undefined) {
-          // Agrupadores: una sección por agrupador, con su nombre como cabecera.
-          const sections = items.map(g => ({
-            Key: (g.Id != null ? String(g.Id) : g.Name), Name: g.Name, Parent: g.Name,
-            GroupId: (g.Id != null ? g.Id : null), Code: (g.Code != null ? g.Code : null),
-            Items: Array.isArray(g.Items) ? g.Items : [],
-          }));
-          return { branches: [], sections };
-        }
-        if (Array.isArray(items)) {
-          return { branches: [], sections: [{ Key: '_all', Name: '', Parent: null, Items: items }] };
-        }
-      }
-      if (Array.isArray(items)) {
-        if (items.length && items[0] && items[0].Items !== undefined) {
-          return { branches: items, sections: [] }; // sub-categorías navegables
-        }
-        return { branches: [], sections: [{ Key: '_all', Name: '', Parent: null, Items: items }] };
-      }
-      if (items && typeof items === 'object') {
-        // Formato anterior: diccionario { nombreGrupo: [hojas] }.
-        const sections = Object.keys(items).map(parent => ({
-          Key: parent, Name: parent, Parent: parent, Items: items[parent],
-        }));
-        return { branches: [], sections };
-      }
-      return { branches: [], sections: [] };
-    },
-    // Recolecta hojas recursivamente; container = nodo "tipo" que las contiene.
-    collectLeaves(nodes, out) {
-      for (const node of nodes) {
-        const content = this.contentOf(node);
-        if (content.branches.length) {
-          this.collectLeaves(content.branches, out);
-        } else {
-          for (const section of content.sections) {
-            for (const item of section.Items) out.push({ item, container: node });
-          }
-        }
-      }
-    },
-    // Recolecta ramas (nodos navegables) con su padre, para la búsqueda.
-    collectBranches(nodes, parent, out, depth) {
-      depth = depth || 0;
-      for (const node of nodes) {
-        const content = this.contentOf(node);
-        const hasBranches = content.branches.length > 0;
-        const hasLeaves = content.sections.some(s => s.Items && s.Items.length);
-        // Un nodo es navegable si contiene algo: sub-ramas u hojas. Incluye tanto
-        // los agrupadores mayores (p. ej. "Límites políticos", que agrupa
-        // delimitaciones) como los contenedores de hojas (p. ej. "Departamentos").
-        if (hasBranches || hasLeaves) {
-          out.push({ branch: node, parent: parent, depth: depth });
-        }
-        if (hasBranches) {
-          this.collectBranches(content.branches, node, out, depth + 1);
-        }
-      }
-    },
-    // Cantidad de hijos directos: sub-categorías si es una rama, hojas si es un
-    // nivel de hojas (planas o agrupadas por separador). No desciende a través
-    // de las ramas. Las ramas cuentan con el sustantivo genérico ("2 delimitaciones");
-    // los niveles de hojas, con el nombre del propio nodo si nounFromNodeName
-    // ("24 provincias") o con el genérico si no.
     branchLabel(node) {
-      const content = this.contentOf(node);
-      if (content.branches.length) {
-        const n = content.branches.length;
-        return n + ' ' + (n === 1 ? this.itemNoun : this.itemNounPlural);
-      }
-      const n = content.sections.reduce((a, s) => a + s.Items.length, 0);
-      if (this.nounFromNodeName && node.Name) {
-        return n + ' ' + node.Name.toLowerCase();
-      }
-      return n + ' ' + (n === 1 ? this.itemNoun : this.itemNounPlural);
+      return this.tree.BranchLabel(node, this.itemNoun, this.itemNounPlural, this.nounFromNodeName);
     },
     containerKey(container) {
       if (!container) return '';
@@ -844,21 +730,12 @@ export default {
     searchFromRoot() {
       this.navStack = [];
     },
-    // Una delimitación es una rama cuyos hijos son elementos (hojas), no más
-    // sub-ramas. Distingue boundaries reales (Provincias, Municipios) de los
-    // agrupadores de tipo (Límites políticos) y de las hojas sueltas.
-    isDelimitation(node) {
-      var content = this.contentOf(node);
-      return content.branches.length === 0 && content.sections.some(function (s) {
-        return s.Items && s.Items.length;
-      });
-    },
     enterBranch(node) {
       // Regiones: si "ver cada elemento" está inactivo (default), clic en una
       // delimitación agrega todos sus elementos en vez de entrar a navegarla.
       // Si está activo, se navega. Solo aplica a delimitaciones (no a grupos de
       // tipo ni a hojas).
-      if (this.selectableBranches && !this.drillIntoElements && this.isDelimitation(node)) {
+      if (this.selectableBranches && !this.drillIntoElements && this.tree.IsDelimitation(node)) {
         this.$emit('select-group', node);
         if (!this.isMulti && this.closeOnSelect) this.closePanel();
         return;
@@ -969,7 +846,7 @@ export default {
     enterListBranch(parent, branch) {
       // Misma lógica invertida que enterBranch: inactivo (default) agrega todos
       // los elementos de la delimitación; activo, entra a navegarla.
-      if (this.selectableBranches && !this.drillIntoElements && this.isDelimitation(branch)) {
+      if (this.selectableBranches && !this.drillIntoElements && this.tree.IsDelimitation(branch)) {
         this.$emit('select-group', branch);
         if (!this.isMulti && this.closeOnSelect) this.closePanel();
         return;
@@ -983,34 +860,12 @@ export default {
         if (body) body.scrollTop = 0;
       });
     },
-    // Comparación de búsqueda insensible a mayúsculas y tildes.
-    normalize(s) {
-      return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    },
-    // Coincide si cada palabra de `term` es el inicio de alguna palabra de
-    // `name` (ambos ya normalizados), tratando el término como un AND entre
-    // sus palabras: "niv edu" matchea "Nivel educativo" porque "niv" matchea
-    // el inicio de "nivel" y "edu" el de "educativo", en cualquier orden.
-    // "tan" matchea "Tandil" pero no "Catamarca": evita el ruido de encontrar
-    // la búsqueda en cualquier posición dentro de una palabra.
-    matchesWordStart(name, term) {
-      if (!term) return false;
-      const nameWords = name.split(/[^a-z0-9]+/).filter(Boolean);
-      const termWords = term.split(/[^a-z0-9]+/).filter(Boolean);
-      if (!termWords.length) return false;
-      return termWords.every(termWord => nameWords.some(w => w.indexOf(termWord) === 0));
-    },
     // ── Display ────────────────────────────────────────────────────────────────
     itemIcon(item, container) {
       return this.getIconClass(item.Icon || (container ? container.Icon : null));
     },
-    // Subtítulo: Subtitle si lo provee el backend; años (indicadores) o
-    // "Parent > Tipo" (regiones; Tipo = nombre del contenedor directo).
     itemSubtitle(item, container) {
-      if (item.Subtitle != null) return item.Subtitle;
-      if (item.Versions && item.Versions.length) return item.Versions.map(v => v.Name).join(', ');
-      if (item.Parent) return item.Parent + (container && container.Name ? ' > ' + container.Name : '');
-      return '';
+      return this.tree.ItemSubtitle(item, container);
     },
     hasInfo(item) { return !!item.Info; },
     // Los íconos llegan como clases FontAwesome desde la base; sin traducción.

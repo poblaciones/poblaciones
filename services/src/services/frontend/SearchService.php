@@ -22,6 +22,7 @@ class SearchService extends BaseService
 		// $filter:
 		// m = devuelve solo indicadores
 		// r = devuelve solo regiones
+		// p = devuelve solo lugares (features y direcciones)
 		// null = devuelve indicadores, límites, regiones y direcciones
 		// h = devuelve indicadores, límites o regiones, lo primero que coincida
 
@@ -39,14 +40,14 @@ class SearchService extends BaseService
 		$query = $this->ResolveAutocomplete($query);
 
 		// Trae los indicadores que coinciden
-		if ($filter != 'r')
+		if ($filter != 'r' && $filter != 'p')
 			$resLay = $metricLookup->SearchMetrics($query, $getDraftMetrics, ($filter !==  'm'), $currentWork);
 		else
 			$resLay = [];
 
 		// Trae las regiones
 		$resClippings = [];
-		if ($filter != 'm' && ($filter != 'h' || sizeof($resLay) === 0))
+		if ($filter != 'm' && $filter != 'p' && ($filter != 'h' || sizeof($resLay) === 0))
 		{
 			$resClippings = $regionsLookup->SearchClippingRegions($query);
 		}

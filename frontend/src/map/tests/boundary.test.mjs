@@ -79,12 +79,12 @@ it('toggleVisible reconecta boundary.ChangeVisibility (control de TODA la capa, 
 	expect(updated).toBeTruthy();
 });
 
-it('dropClass refleja boundary.visible con las mismas clases CSS que metricVariables.vue', () => {
+it('activeClass marca la línea como activa mientras las categorías no están colapsadas', () => {
 	const boundary = makeBoundary([makeBoundaryValueLabel({ Id: 501 }), makeBoundaryValueLabel({ Id: 502 })]);
 	const panel = mountBoundary(boundary);
-	expect(panel.dropClass()).toBe('dropMetric');
-	boundary.visible = false;
-	expect(panel.dropClass()).toBe('dropMetricMuted');
+	expect(panel.activeClass()).toBe('active');
+	boundary.SelectedVersion().LabelsCollapsed = true;
+	expect(panel.activeClass()).toBe('');
 });
 
 describe('boundary: disponibilidad del gráfico');
