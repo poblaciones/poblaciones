@@ -57,7 +57,7 @@ module.exports = {
 			pre = 'No fue posible ';
 		}
 		var post = '';
-		if (err.response && err.response.data) {
+		if (err && err.response && err.response.data) {
 			var msgtext = err.response.data.trim();
 			// extra en desa
 			var pos = msgtext.indexOf('<abbr title="minga\\frameproject\\PublicException">');

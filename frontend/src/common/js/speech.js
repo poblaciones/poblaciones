@@ -38,7 +38,7 @@ module.exports = {
 
 		var momentDateTime = moment(dateOf);
 
-		dateOnly = new Date(dateOf.getTime());
+		var dateOnly = new Date(dateOf.getTime());
 		dateOnly.setHours(0, 0, 0, 0);
 		var momentDateOnly = moment(dateOnly);
 		moment.locale('es');

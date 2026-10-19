@@ -1,7 +1,7 @@
 module.exports = {
 	AddSession(url, params) {
 		var s = this.GetSessionForUrl(url);
-		if (s) {
+		if (s && s !== 'null') {
 			if (!params.headers) {
 				params.headers = {};
 			}

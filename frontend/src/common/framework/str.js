@@ -110,13 +110,13 @@ module.exports = {
 
 			// Si el token es un número, aplicar padding de ceros
 			if (sinAcentos.startsWith("(") && sinAcentos.endsWith(")")) {
-				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 2);
+				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 1);
 			}
 			if (sinAcentos.startsWith("{") && sinAcentos.endsWith("}")) {
-				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 2);
+				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 1);
 			}
 			if (sinAcentos.startsWith("[") && sinAcentos.endsWith("]")) {
-				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 2);
+				sinAcentos = sinAcentos.substring(1, sinAcentos.length - 1);
 			}
 			if (sinAcentos.endsWith(".")) {
 				sinAcentos = sinAcentos.substring(0, sinAcentos.length - 1);

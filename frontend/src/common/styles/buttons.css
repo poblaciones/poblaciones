@@ -206,6 +206,7 @@
 .mp-icon-btn[aria-pressed="true"] {
 	background-color: var(--mp-selected);
 	color: var(--mp-text-muted);
+	border: 1px solid var(--mp-outline-soft);
 }
 
 .mp-icon-btn:disabled {

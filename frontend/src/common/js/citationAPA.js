@@ -8,7 +8,7 @@ module.exports = {
 			escapedTitle = null;
 		}
 		var ret = escapedAuthor;
-
+		if (escapedDate == null) escapedDate = '';
 		if (str.Contains(escapedDate, "/")) {
 			var parts = str.Split(escapedDate, '/');
 			escapedDate = parts[parts.length - 1];
