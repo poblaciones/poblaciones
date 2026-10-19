@@ -182,7 +182,8 @@
                     <i :class="branchIcon(row)"></i>
                   </div>
                   <div class="indicator-info">
-                    <div class="indicator-name">{{ row.branch.Name }}</div>
+                    <div v-if="row.highlightedName" class="indicator-name" v-html="row.highlightedName"></div>
+                    <div v-else class="indicator-name">{{ row.branch.Name }}</div>
                     <div class="indicator-meta">{{ branchLabel(row.branch) }}</div>
                   </div>
                 </div>
@@ -203,7 +204,8 @@
                     <i :class="itemIcon(row.item, row.container)"></i>
                   </div>
                   <div class="indicator-info">
-                    <div class="indicator-name">{{ row.item.Name }}</div>
+                    <div v-if="row.highlightedName" class="indicator-name" v-html="row.highlightedName"></div>
+                    <div v-else class="indicator-name">{{ row.item.Name }}</div>
                     <div v-if="row.snippet" class="indicator-meta indicator-meta--snippet" v-html="row.snippet"></div>
                     <div v-else class="indicator-meta">{{ itemSubtitle(row.item, row.container) }}</div>
                   </div>
@@ -529,6 +531,7 @@ export default {
           branch: e.branch,
           parent: e.parent,
           key: 'sb|' + this.containerKey(e.branch),
+          highlightedName: rowsHelper.highlightName(e.branch.Name, e.nameMatches)
         }));
         const itemRows = this.filteredItems.map(e => {
           const subtitle = this.itemSubtitle(e.item, e.container);
@@ -537,7 +540,8 @@ export default {
             item: e.item,
             container: e.container,
             key: this.containerKey(e.container) + '|' + e.item.Id,
-            snippet: e.keywordMatch ? rowsHelper.keywordSnippet(e.keywordMatch, subtitle) : ''
+            snippet: e.keywordMatch ? rowsHelper.keywordSnippet(e.keywordMatch, subtitle) : '',
+            highlightedName: rowsHelper.highlightName(e.item.Name, e.nameMatches)
           };
         });
         // Las ramas coincidentes (contenedores) van primero, para entrar en ellas.
@@ -1073,6 +1077,14 @@ export default {
 
 .indicator-info { flex: 1; min-width: 0; }
 .indicator-name { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 2px; line-height: 1.3; }
+.indicator-name mark {
+  background: #fff3a8;
+  color: #5a4700;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+.indicator-name mark strong { font-weight: inherit; }
 .indicator-meta { font-size: 12px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Snippet de match por keyword: "... villas ... 2022, 2023". Se renderiza con
@@ -1086,6 +1098,7 @@ export default {
   border-radius: 2px;
   font-weight: 600;
 }
+.indicator-meta--snippet mark strong { font-weight: inherit; }
 .indicator-actions { display: flex; gap: 6px; margin-left: 8px; }
 
 /* Checkbox */

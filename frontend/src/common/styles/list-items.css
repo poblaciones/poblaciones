@@ -40,7 +40,7 @@
 /* Elemento activo por teclado (KeyboardAwareList). */
 .mp-list-item[data-kbd-active] {
 	background-color: var(--mp-hover);
-	box-shadow: inset 0 0 0 2px var(--mp-focus-ring);
+	box-shadow: inset 0 0 0 .5px var(--mp-focus-ring)
 }
 
 .mp-list-item.is-selected[data-kbd-active] {

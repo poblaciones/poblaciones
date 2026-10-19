@@ -14,8 +14,8 @@
 }
 
 mark {
-	background-color: var(--mp-hover)!important;
-	color: unset;
+	background-color: #e7e7e7A5 !important;
+		color: unset;
 }
 
 .metricPanel > .dragHandle {

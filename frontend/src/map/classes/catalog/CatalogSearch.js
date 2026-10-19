@@ -33,12 +33,18 @@ CatalogSearch.prototype.FindItems = function (text, node) {
 		if (match && !(id != null && seen[id])) {
 			if (id != null) seen[id] = true;
 			if (match === CatalogMatcher.MATCH_NAME) {
-				byName.push(entry);
+				byName.push({
+					item: entry.item,
+					container: entry.container,
+					nameMatches: this.matcher.NameMatches(entry.item, query),
+					queryWords: query.Words
+				});
 			} else {
 				byKeywords.push({
 					item: entry.item,
 					container: entry.container,
-					keywordMatch: this.matcher.KeywordMatch(entry.item, query)
+					keywordMatch: this.matcher.KeywordMatch(entry.item, query),
+					queryWords: query.Words
 				});
 			}
 		}
@@ -50,13 +56,25 @@ CatalogSearch.prototype.FindItems = function (text, node) {
 // con el texto (p. ej. "Departamentos" al buscar "departamento"), como
 // { branch, parent, depth }. Los agrupadores de mayor jerarquía (menor
 // profundidad) van primero.
+//
+// Cada entry lleva además `nameMatches` (palabras del Name del branch que
+// coincidieron con el término) y `queryWords`, para que el panel pueda
+// resaltar el título de la rama igual que el de las hojas.
 CatalogSearch.prototype.FindBranches = function (text, node) {
 	const query = this.matcher.Prepare(text);
 	if (!query.Raw) return [];
 	const found = [];
 	const branches = this.tree.Branches(node);
 	for (const entry of branches) {
-		if (this.matcher.MatchBranch(entry.branch, query)) found.push(entry);
+		if (this.matcher.MatchBranch(entry.branch, query)) {
+			found.push({
+				branch: entry.branch,
+				parent: entry.parent,
+				depth: entry.depth,
+				nameMatches: this.matcher.NameMatches(entry.branch, query),
+				queryWords: query.Words
+			});
+		}
 	}
 	return found.sort((a, b) => a.depth - b.depth);
 };

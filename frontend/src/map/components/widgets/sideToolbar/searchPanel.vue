@@ -638,6 +638,22 @@ export default {
   border-radius: 2px;
   font-weight: 600;
 }
+.result-extra--snippet mark strong { font-weight: inherit; }
+
+/* Highlighting del título: <mark><strong>palabra</strong></mark>. markStrong
+   toma el mismo amarillo que el snippet para que se vea igual; strong va en
+   bold (redundante con font-weight:600, pero lo dejamos por si cambian los
+   estilos de mark). */
+.result-name mark {
+  background: #fff3a8;
+  color: #5a4700;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+.result-name mark strong {
+  font-weight: inherit;
+}
 
 .result-coords {
   display: flex;

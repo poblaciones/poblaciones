@@ -93,12 +93,50 @@ CatalogMatcher.prototype.KeywordMatch = function (item, query) {
 		for (const termWord of query.Words) {
 			for (let i = 0; i < normWords.length; i++) {
 				if (normWords[i].indexOf(termWord) === 0) {
-					return { Phrase: phrase, Index: i, Words: rawWords };
+					return { Phrase: phrase, Index: i, Words: rawWords, TermLen: termWord.length };
 				}
 			}
 		}
 	}
 	return null;
+};
+
+// Palabras del `Name` de un item que coinciden (por inicio, como MatchItem)
+// con cada palabra del término. Devuelve una lista de { normalized, termLen }
+// (sin duplicados por palabra), donde:
+//   · normalized: la palabra del name normalizada (lower + sin diacríticos),
+//     para que SearchResultRows pueda comparar contra el token del título.
+//   · termLen: largo del término MÁS LARGO del query que matcheó como prefijo
+//     de esa palabra. Es la cantidad de chars a resaltar con <strong> dentro
+//     del <mark> que envuelve toda la palabra.
+//
+// Solo se llama cuando MatchItem devolvió MATCH_NAME: en ese caso, cada
+// palabra del término es prefijo de alguna palabra del name. El match es
+// insensible a mayúsculas y tildes (ver Normalize) pero respeta los límites
+// de palabra: "tan" matchea "Tandil" pero no "Catamarca".
+//
+// termLen se mide en code units UTF-16 del término normalizado. Como la
+// normalización (NFD + strip diacríticos) no cambia el largo de los chars
+// del español (á->a, ñ->n, etc. son todos 1->1), termLen coincide con el
+// largo del prefijo a resaltar en la palabra ORIGINAL del name.
+CatalogMatcher.prototype.NameMatches = function (item, query) {
+	if (!query || !query.Words || !query.Words.length) return [];
+	const nameWords = this.Words(item.Name || '');
+	const found = [];
+	const seen = {};
+	for (const nameWord of nameWords) {
+		let bestLen = 0;
+		for (const termWord of query.Words) {
+			if (nameWord.indexOf(termWord) === 0 && termWord.length > bestLen) {
+				bestLen = termWord.length;
+			}
+		}
+		if (bestLen > 0 && !seen[nameWord]) {
+			found.push({ normalized: nameWord, termLen: bestLen });
+			seen[nameWord] = true;
+		}
+	}
+	return found;
 };
 
 CatalogMatcher.prototype.startsAll = function (words, termWords) {
