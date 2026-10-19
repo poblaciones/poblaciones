@@ -90,7 +90,7 @@
 
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button class="md-primary md-raised" @click="open = false">Listo</md-button>
+				<md-button class="md-primary" @click="open = false">Listo</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>

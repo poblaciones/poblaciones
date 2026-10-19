@@ -40,7 +40,7 @@
 					<md-button @click="activateEdit = false">Cancelar</md-button>
 					<md-button class="md-primary" @click="save">Guardar</md-button>
 				</template>
-				<md-button v-else="" @click="activateEdit = false">Cerrar</md-button>
+				<md-button class="md-primary" v-else="" @click="activateEdit = false">Listo</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>

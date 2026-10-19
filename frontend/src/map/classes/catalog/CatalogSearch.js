@@ -16,6 +16,10 @@ function CatalogSearch(tree) {
 // código y después las que solo coinciden por palabras clave. Un mismo
 // indicador puede figurar en varias categorías (p. ej. "más usados"), por lo
 // que se deduplica por Id conservando la primera aparición.
+//
+// Las coincidencias por keyword llevan además `keywordMatch` en el entry: el
+// resultado de CatalogMatcher.KeywordMatch, para que SearchResultRows pueda
+// armar el snippet con la palabra que anticipa de qué fue el match.
 CatalogSearch.prototype.FindItems = function (text, node) {
 	const query = this.matcher.Prepare(text);
 	if (!query.Raw) return [];
@@ -28,8 +32,15 @@ CatalogSearch.prototype.FindItems = function (text, node) {
 		const id = entry.item.Id != null ? entry.item.Id : null;
 		if (match && !(id != null && seen[id])) {
 			if (id != null) seen[id] = true;
-			if (match === CatalogMatcher.MATCH_NAME) byName.push(entry);
-			else byKeywords.push(entry);
+			if (match === CatalogMatcher.MATCH_NAME) {
+				byName.push(entry);
+			} else {
+				byKeywords.push({
+					item: entry.item,
+					container: entry.container,
+					keywordMatch: this.matcher.KeywordMatch(entry.item, query)
+				});
+			}
 		}
 	}
 	return byName.concat(byKeywords);

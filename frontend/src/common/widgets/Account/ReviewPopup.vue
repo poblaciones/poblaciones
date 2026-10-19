@@ -40,7 +40,8 @@
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="open = false">Cerrar</md-button>
+				<md-button @click="open = false">
+					{{ (Work.CanEdit() ? 'Cancelar' : 'Listo') }}</md-button>
 				<md-button v-if="Work.CanEdit() && !Work.properties.IsIndexed" class="md-primary md-raised" @click="askReview">
 					Solicitar revisión
 				</md-button>
@@ -48,10 +49,8 @@
 		</md-dialog>
 	</div>
 </template>
-
 <script>
 import f from '@/backoffice/classes/Formatter';
-
 export default {
 	name: 'ReviewPopup',
 	data() {
@@ -85,6 +84,5 @@ export default {
 	}
 };
 </script>
-
 <!-- El diálogo se monta fuera del componente, por lo que el ancho se fija con estilo global
 	   apoyado en la clase del popup. -->

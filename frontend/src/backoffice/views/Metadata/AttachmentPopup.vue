@@ -60,7 +60,7 @@
 				<md-button class="md-primary" :disabled="sending" @click="save()">Aceptar</md-button>
 			</div>
 			<div v-else>
-						<md-button @click="openEditableAttach = false">Cerrar</md-button>
+						<md-button class="md-primary" @click="openEditableAttach = false">Listo</md-button>
 				</div>
 		</md-dialog-actions>
 		</md-dialog>

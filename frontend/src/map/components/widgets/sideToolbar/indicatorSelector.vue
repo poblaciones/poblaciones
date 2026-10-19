@@ -204,7 +204,8 @@
                   </div>
                   <div class="indicator-info">
                     <div class="indicator-name">{{ row.item.Name }}</div>
-                    <div class="indicator-meta">{{ itemSubtitle(row.item, row.container) }}</div>
+                    <div v-if="row.snippet" class="indicator-meta indicator-meta--snippet" v-html="row.snippet"></div>
+                    <div v-else class="indicator-meta">{{ itemSubtitle(row.item, row.container) }}</div>
                   </div>
                 </div>
                 <div class="indicator-actions">
@@ -293,6 +294,7 @@ import { mixin as clickaway } from 'vue-clickaway';
 import KeyboardAwareList from '@/map/classes/KeyboardAwareList';
 import CatalogTree from '@/map/classes/catalog/CatalogTree';
 import CatalogSearch from '@/map/classes/catalog/CatalogSearch';
+import SearchResultRows from '@/map/classes/catalog/SearchResultRows';
 
 export default {
   name: 'IndicatorSelector',
@@ -496,6 +498,12 @@ export default {
     catalogSearch() {
       return new CatalogSearch(this.tree);
     },
+    // Helper para armar el snippet de keyword match (compartido con el
+    // searchPanel): cuando una hoja coincide por keyword y no por name,
+    // muestra la frase keyword resaltada entre `...` antes del subtítulo.
+    searchRows() {
+      return new SearchResultRows(this.tree);
+    },
     // Hojas bajo el nodo actual (o todo el árbol en la raíz) que coinciden por
     // nombre, palabras clave o código exacto.
     filteredItems() {
@@ -515,18 +523,23 @@ export default {
     },
     renderRows() {
       if (this.searchQuery) {
+        const rowsHelper = this.searchRows;
         const branchRows = this.filteredBranches.map(e => ({
           type: 'branch',
           branch: e.branch,
           parent: e.parent,
           key: 'sb|' + this.containerKey(e.branch),
         }));
-        const itemRows = this.filteredItems.map(e => ({
-          type: 'item',
-          item: e.item,
-          container: e.container,
-          key: this.containerKey(e.container) + '|' + e.item.Id,
-        }));
+        const itemRows = this.filteredItems.map(e => {
+          const subtitle = this.itemSubtitle(e.item, e.container);
+          return {
+            type: 'item',
+            item: e.item,
+            container: e.container,
+            key: this.containerKey(e.container) + '|' + e.item.Id,
+            snippet: e.keywordMatch ? rowsHelper.keywordSnippet(e.keywordMatch, subtitle) : ''
+          };
+        });
         // Las ramas coincidentes (contenedores) van primero, para entrar en ellas.
         const all = branchRows.concat(itemRows);
         // Con búsquedas de pocos caracteres el match puede ser de miles de filas;
@@ -1061,6 +1074,18 @@ export default {
 .indicator-info { flex: 1; min-width: 0; }
 .indicator-name { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 2px; line-height: 1.3; }
 .indicator-meta { font-size: 12px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Snippet de match por keyword: "... villas ... 2022, 2023". Se renderiza con
+   v-html porque contiene la palabra matcheada envuelta en <mark>; el subtítulo
+   y el resto de la frase llegan ya escapados desde SearchResultRows. */
+.indicator-meta--snippet { color: #707070; }
+.indicator-meta--snippet mark {
+  background: #fff3a8;
+  color: #5a4700;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 600;
+}
 .indicator-actions { display: flex; gap: 6px; margin-left: 8px; }
 
 /* Checkbox */

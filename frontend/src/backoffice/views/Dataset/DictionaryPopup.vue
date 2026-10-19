@@ -54,7 +54,7 @@
 				</div>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="open = false">Cerrar</md-button>
+				<md-button @click="open = false" class="md-primary" >Listo</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>

@@ -30,7 +30,7 @@
 				</md-table>
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cerrar</md-button>
+				<md-button @click="activateEdit = false" class="md-primary">Listo</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>

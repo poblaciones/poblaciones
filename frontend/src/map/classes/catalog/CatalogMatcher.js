@@ -61,6 +61,46 @@ CatalogMatcher.prototype.MatchItem = function (item, query) {
 	return 0;
 };
 
+// Cuando el match fue por keywords (MatchItem devolvió MATCH_KEYWORDS),
+// localiza la frase de Keywords en la que cayó el match para poder mostrarla
+// como anticipo del match. Devuelve { Phrase, Index, Words } o null si no hay
+// coincidencia por keyword:
+//   · Phrase: la keyword completa tal como figura en el item (p. ej.
+//     "villas de emergencia"), recortada de espacios.
+//   · Words: la misma frase partida en palabras limpias (alfanuméricas,
+//     conservando mayúsculas y acentos), alineadas con la normalización que
+//     usa MatchItem para comparar.
+//   · Index: posición (0-based) de la palabra matcheada dentro de Words, para
+//     poder resaltarla en el snippet.
+//
+// La búsqueda respeta la misma heurística que MatchItem: cada palabra del
+// término debe ser prefijo de alguna palabra de la frase (matches por inicio,
+// no por subcadena), y se recorre keyword por keyword (comas) para no mezclar
+// frases. Con un término de varias palabras ("vil emerg"), se devuelve la
+// primera keyword donde alguna palabra del término matcheó.
+CatalogMatcher.prototype.KeywordMatch = function (item, query) {
+	if (!query || !query.Words || !query.Words.length) return null;
+	const keywords = item.Keywords || '';
+	if (!keywords) return null;
+	const phrases = keywords.split(',').map(s => s.trim()).filter(function (s) { return s.length; });
+	for (const phrase of phrases) {
+		// Mismo separador que Words() pero conservando mayúsculas y
+		// acentos: así el snippet muestra la frase tal como la envió el
+		// backend, y a la vez las palabras normalizadas coinciden con
+		// las que MatchItem usó para decidir el match.
+		const rawWords = String(phrase).split(/[^a-zA-Z0-9áéíóúñüÁÉÍÓÚÑÜ]+/).filter(function (w) { return w.length; });
+		const normWords = rawWords.map(w => this.Normalize(w));
+		for (const termWord of query.Words) {
+			for (let i = 0; i < normWords.length; i++) {
+				if (normWords[i].indexOf(termWord) === 0) {
+					return { Phrase: phrase, Index: i, Words: rawWords };
+				}
+			}
+		}
+	}
+	return null;
+};
+
 CatalogMatcher.prototype.startsAll = function (words, termWords) {
 	if (!termWords.length) return false;
 	for (let t = 0; t < termWords.length; t++) {

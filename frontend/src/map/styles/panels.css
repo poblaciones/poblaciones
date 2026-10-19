@@ -13,6 +13,11 @@
 	visibility: visible;
 }
 
+mark {
+	background-color: var(--mp-hover)!important;
+	color: unset;
+}
+
 .metricPanel > .dragHandle {
 	visibility: hidden;
 }

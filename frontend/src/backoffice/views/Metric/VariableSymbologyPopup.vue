@@ -254,7 +254,7 @@
 				<md-button @click="hide">Cancelar</md-button>
 				<md-button class="md-primary" @click="Save">Guardar</md-button>
 			</template>
-			<md-button v-else @click="hide">Cerrar</md-button>
+			<md-button v-else @click="hide" class="md-primary">Listo</md-button>
 		</md-dialog-actions>
 
 		</md-dialog>

@@ -11,7 +11,7 @@
 					hasChildren />
 			</md-dialog-content>
 			<md-dialog-actions>
-				<md-button @click="activateDialog = false">Cerrar</md-button>
+				<md-button @click="activateDialog = false" class="md-primary">Seleccionar</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>

@@ -40,7 +40,7 @@
 			</md-dialog-content>
 			<stepper ref="stepper" title="Calculando intersecciones" @completed="calculationCompleted"></stepper>
 			<md-dialog-actions>
-				<md-button @click="activateEdit = false">Cerrar</md-button>
+				<md-button @click="activateEdit = false" class="md-primary">Listo</md-button>
 			</md-dialog-actions>
 		</md-dialog>
 	</div>

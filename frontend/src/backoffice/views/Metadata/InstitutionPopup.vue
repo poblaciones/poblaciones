@@ -57,7 +57,7 @@
 				<md-button class="md-primary" @click="save()">Aceptar</md-button>
 			</div>
 			<div v-else="">
-				<md-button @click="openEditableInstitution = false">Cerrar</md-button>
+				<md-button @click="openEditableInstitution = false" class="md-primary" >Listo</md-button>
 			</div>
 		</md-dialog-actions>
 	</md-dialog>

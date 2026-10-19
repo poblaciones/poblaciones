@@ -48,7 +48,8 @@
                         </div>
                         <div class="result-info">
                           <div class="result-name" v-html="row.Highlighted"></div>
-                          <div class="result-extra">{{ row.Extra }}</div>
+                          <div v-if="row.Snippet" class="result-extra result-extra--snippet" v-html="row.Snippet"></div>
+                          <div v-else class="result-extra">{{ row.Extra }}</div>
                           <div v-if="row.Lat && row.Lon" class="result-coords">
                             <a
                               href="#"
@@ -621,6 +622,21 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Snippet de match por keyword: "... villas ... 2022, 2023". Se renderiza con
+   v-html porque contiene la palabra matcheada envuelta en <mark>; el subtítulo
+   y el resto de la frase llegan ya escapados desde SearchResultRows. */
+.result-extra--snippet {
+  color: #707070;
+}
+
+.result-extra--snippet mark {
+  background: #fff3a8;
+  color: #5a4700;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 600;
 }
 
 .result-coords {
