@@ -11,9 +11,10 @@
 		"upload": "node build/upload.js",
 		"beta": "node build/beta.js",
 		"lint": "eslint --ext .js,.vue src",
-		"test": "npm run test:map && npm run test:common",
+		"test": "npm run test:map && npm run test:common && npm run test:credentials && npm run test:backoffice",
 		"test:map": "node --import ./src/map/tests/_register-alias.mjs src/map/tests/run-all.mjs",
 		"test:common": "node --import ./src/common/tests/_register-alias.mjs src/common/tests/run-all.mjs",
+		"test:backoffice": "node --import ./src/backoffice/tests/_register-alias.mjs src/backoffice/tests/run-all.mjs",
 		"test:credentials": "node --import ./src/credentials/tests/_register-alias.mjs src/credentials/tests/run-all.mjs"
 	},
 	"dependencies": {

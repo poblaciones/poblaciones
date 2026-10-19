@@ -49,4 +49,14 @@ await import('./textOverlay.test.mjs');
 await import('./topPanel.test.mjs');
 await import('./topPanelWrappers.test.mjs');
 
+// Suites agregadas: utilidades de helper, sesión/acciones, routers de
+// paneles, overlap de overlays, cookies, TileRequest y coordinate-parser.
+await import('./helperUtils.test.mjs');
+await import('./sessionActions.test.mjs');
+await import('./panelRouters.test.mjs');
+await import('./overlapRectangles.test.mjs');
+await import('./chartCookie.test.mjs');
+await import('./tileRequest.test.mjs');
+await import('./coordinateParser.test.mjs');
+
 await report();

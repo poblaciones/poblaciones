@@ -20,142 +20,171 @@ const moduleRoot = path.resolve(testsDir, '..');
 const stubsDir = path.join(testsDir, '_stubs');
 
 const packageStubs = {
-	'vue': 'vue.mjs',
-	'axios': 'axios.mjs',
-	'svg.js': 'svgjs.mjs',
-	'html2canvas': 'html2canvas.mjs',
-	'canvg': 'canvg.mjs',
-	'vue-clickaway': 'vue-clickaway.mjs',
-	'leaflet': 'leaflet.mjs',
-	'@tweenjs/tween.js': 'tween.mjs',
-	'js-cookie': 'js-cookie.mjs',
-	'@deck.gl/layers': 'deckgl-layers.mjs',
+        'vue': 'vue.mjs',
+        'axios': 'axios.mjs',
+        'svg.js': 'svgjs.mjs',
+        'html2canvas': 'html2canvas.mjs',
+        'canvg': 'canvg.mjs',
+        'vue-clickaway': 'vue-clickaway.mjs',
+        'leaflet': 'leaflet.mjs',
+        '@tweenjs/tween.js': 'tween.mjs',
+        'js-cookie': 'js-cookie.mjs',
+        '@deck.gl/layers': 'deckgl-layers.mjs',
 };
 
 const uiComponentStubs = ['vue-switches', 'vue-slider-component'];
 
 // Módulos de common sin dependencias que se prueban con su código real.
 const realCommonModules = {
-	'@/common/framework/ariaPlugin': path.resolve(moduleRoot, '..', 'common', 'framework', 'ariaPlugin.js'),
+        '@/common/framework/ariaPlugin': path.resolve(moduleRoot, '..', 'common', 'framework', 'ariaPlugin.js'),
 };
 
 const commonStubs = {
-	'@/common/framework/str': 'str.mjs',
-	'@/common/framework/arr': 'arr.mjs',
-	'@/common/framework/err': 'err.mjs',
-	'@/common/framework/color': 'color.mjs',
-	'@/common/framework/dom': 'dom.mjs',
-	'@/common/framework/promises': 'promises.mjs',
-	'@/common/framework/session': 'session.mjs',
-	'@/common/js/iconManager': 'iconManager.mjs',
-	'@/common/js/axiosProgressBar.js': 'axiosProgressBar.mjs',
-	'@/common/js/citationAPA': 'citationAPA.mjs',
-	'@/common/js/creativeCommons': 'creativeCommons.mjs',
-	'@/common/components/ContentWizard': 'content-wizard.mjs',
+        '@/common/framework/str': 'str.mjs',
+        '@/common/framework/arr': 'arr.mjs',
+        '@/common/framework/err': 'err.mjs',
+        '@/common/framework/color': 'color.mjs',
+        '@/common/framework/dom': 'dom.mjs',
+        '@/common/framework/promises': 'promises.mjs',
+        '@/common/framework/session': 'session.mjs',
+        '@/common/js/iconManager': 'iconManager.mjs',
+        '@/common/js/axiosProgressBar.js': 'axiosProgressBar.mjs',
+        '@/common/js/citationAPA': 'citationAPA.mjs',
+        '@/common/js/creativeCommons': 'creativeCommons.mjs',
+        '@/common/components/ContentWizard': 'content-wizard.mjs',
 };
 
+// Librerías vendidas dentro del módulo, en CommonJS puro y con require()
+// relativos reales (sin webpack ni paquetes npm). Se envuelven con un require
+// real acotado a su propio archivo (createRequire) en lugar de reescribir sus
+// require() a __stubRequire: los módulos que requieren se cargan nativamente
+// por el loader CommonJS de Node. Permite testearlas con su código real.
+const realRequirePrefixes = [
+        'js/coordinate-parser/',
+];
+
+function isRealRequireModule(filePath) {
+        // path.relative devuelve el separador nativo (backslash en Windows) y
+        // los prefijos de realRequirePrefixes están escritos con '/'. Se
+        // normaliza a '/' antes de comparar para que el wrapper de require
+        // real también aplique en Windows.
+        const relative = path.relative(moduleRoot, filePath).split(path.sep).join('/');
+        return realRequirePrefixes.some(function (prefix) { return relative.startsWith(prefix); });
+}
+
+function wrapRealRequire(source, filePath) {
+        return 'import { createRequire } from "node:module";\n'
+                + 'const require = createRequire(' + JSON.stringify(pathToFileURL(filePath).href) + ');\n'
+                + 'const module = { exports: {} };\n'
+                + 'const exports = module.exports;\n'
+                + source + '\nexport default module.exports;\n';
+}
+
 function stubUrl(fileName) {
-	return pathToFileURL(path.join(stubsDir, fileName)).href;
+        return pathToFileURL(path.join(stubsDir, fileName)).href;
 }
 
 function resolveWithExtension(basePath) {
-	for (const candidate of [basePath, basePath + '.js', basePath + '.vue']) {
-		if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
-			return candidate;
-		}
-	}
-	return null;
+        for (const candidate of [basePath, basePath + '.js', basePath + '.vue']) {
+                if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+                        return candidate;
+                }
+        }
+        return null;
 }
 
 export function resolve(specifier, context, nextResolve) {
-	// Los .svg de @/common no existen como módulo fuera de webpack.
-	if (specifier.startsWith('@/common/') && specifier.endsWith('.svg')) {
-		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
-	}
-	if (specifier.startsWith('vue-material-design-icons/')) {
-		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
-	}
-	// Los .css los resuelve webpack; fuera de él no son módulos.
-	if (specifier.endsWith('.css')) {
-		return { url: stubUrl('empty.mjs'), shortCircuit: true };
-	}
-	// Componentes de UI de terceros sin lógica que los tests necesiten.
-	if (uiComponentStubs.indexOf(specifier) !== -1) {
-		return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
-	}
-	if (packageStubs[specifier]) {
-		return { url: stubUrl(packageStubs[specifier]), shortCircuit: true };
-	}
-	if (commonStubs[specifier]) {
-		return { url: stubUrl(commonStubs[specifier]), shortCircuit: true };
-	}
-	if (realCommonModules[specifier]) {
-		return { url: pathToFileURL(realCommonModules[specifier]).href, shortCircuit: true };
-	}
-	if (specifier.startsWith('@/map/')) {
-		const target = resolveWithExtension(path.join(moduleRoot, specifier.substring('@/map/'.length)));
-		if (target === null) {
-			throw new Error('Alias no resuelto: ' + specifier);
-		}
-		return { url: pathToFileURL(target).href, shortCircuit: true };
-	}
-	if (specifier.startsWith('./') || specifier.startsWith('../')) {
-		const parentPath = fileURLToPath(context.parentURL);
-		const base = path.resolve(path.dirname(parentPath), specifier);
-		if (path.extname(base) === '') {
-			const target = resolveWithExtension(base);
-			if (target !== null) {
-				return { url: pathToFileURL(target).href, shortCircuit: true };
-			}
-		}
-	}
-	return nextResolve(specifier, context);
+        // Los .svg de @/common no existen como módulo fuera de webpack.
+        if (specifier.startsWith('@/common/') && specifier.endsWith('.svg')) {
+                return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
+        }
+        if (specifier.startsWith('vue-material-design-icons/')) {
+                return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
+        }
+        // Los .css los resuelve webpack; fuera de él no son módulos.
+        if (specifier.endsWith('.css')) {
+                return { url: stubUrl('empty.mjs'), shortCircuit: true };
+        }
+        // Componentes de UI de terceros sin lógica que los tests necesiten.
+        if (uiComponentStubs.indexOf(specifier) !== -1) {
+                return { url: stubUrl('mdi-icon.mjs'), shortCircuit: true };
+        }
+        if (packageStubs[specifier]) {
+                return { url: stubUrl(packageStubs[specifier]), shortCircuit: true };
+        }
+        if (commonStubs[specifier]) {
+                return { url: stubUrl(commonStubs[specifier]), shortCircuit: true };
+        }
+        if (realCommonModules[specifier]) {
+                return { url: pathToFileURL(realCommonModules[specifier]).href, shortCircuit: true };
+        }
+        if (specifier.startsWith('@/map/')) {
+                const target = resolveWithExtension(path.join(moduleRoot, specifier.substring('@/map/'.length)));
+                if (target === null) {
+                        throw new Error('Alias no resuelto: ' + specifier);
+                }
+                return { url: pathToFileURL(target).href, shortCircuit: true };
+        }
+        if (specifier.startsWith('./') || specifier.startsWith('../')) {
+                const parentPath = fileURLToPath(context.parentURL);
+                const base = path.resolve(path.dirname(parentPath), specifier);
+                if (path.extname(base) === '') {
+                        const target = resolveWithExtension(base);
+                        if (target !== null) {
+                                return { url: pathToFileURL(target).href, shortCircuit: true };
+                        }
+                }
+        }
+        return nextResolve(specifier, context);
 }
 
 function extractVueScript(source) {
-	const match = source.match(/<script>([\s\S]*?)<\/script>/);
-	if (!match) {
-		throw new Error('El .vue no contiene bloque <script>');
-	}
-	return match[1];
+        const match = source.match(/<script>([\s\S]*?)<\/script>/);
+        if (!match) {
+                throw new Error('El .vue no contiene bloque <script>');
+        }
+        return match[1];
 }
 
 function rewriteInlineRequires(source) {
-	return source.replace(/\brequire\(/g, 'globalThis.__stubRequire(');
+        return source.replace(/\brequire\(/g, 'globalThis.__stubRequire(');
 }
 
 function wrapCommonJs(source) {
-	return 'const module = { exports: {} };\nconst exports = module.exports;\n'
-		+ rewriteInlineRequires(source)
-		+ '\nexport default module.exports;\n';
+        return 'const module = { exports: {} };\nconst exports = module.exports;\n'
+                + rewriteInlineRequires(source)
+                + '\nexport default module.exports;\n';
 }
 
 export function load(url, context, nextLoad) {
-	if (!url.startsWith('file://')) {
-		return nextLoad(url, context);
-	}
-	const filePath = fileURLToPath(url);
-	if (Object.values(realCommonModules).indexOf(filePath) !== -1) {
-		return { format: 'module', source: fs.readFileSync(filePath, 'utf8'), shortCircuit: true };
-	}
-	if (!filePath.startsWith(moduleRoot) || filePath.startsWith(testsDir)) {
-		return nextLoad(url, context);
-	}
-	if (filePath.endsWith('.svg')) {
-		// webpack los resuelve como componentes Vue (vue-svg-loader). Acá
-		// alcanza con un componente vacío: no se prueba el render.
-		return { format: 'module', source: 'export default { name: "svg-stub", render: () => null };', shortCircuit: true };
-	}
-	if (filePath.endsWith('.vue')) {
-		const script = extractVueScript(fs.readFileSync(filePath, 'utf8'));
-		return { format: 'module', source: rewriteInlineRequires(script), shortCircuit: true };
-	}
-	if (filePath.endsWith('.js')) {
-		const source = fs.readFileSync(filePath, 'utf8');
-		if (source.includes('module.exports')) {
-			return { format: 'module', source: wrapCommonJs(source), shortCircuit: true };
-		}
-		return { format: 'module', source: rewriteInlineRequires(source), shortCircuit: true };
-	}
-	return nextLoad(url, context);
+        if (!url.startsWith('file://')) {
+                return nextLoad(url, context);
+        }
+        const filePath = fileURLToPath(url);
+        if (Object.values(realCommonModules).indexOf(filePath) !== -1) {
+                return { format: 'module', source: fs.readFileSync(filePath, 'utf8'), shortCircuit: true };
+        }
+        if (!filePath.startsWith(moduleRoot) || filePath.startsWith(testsDir)) {
+                return nextLoad(url, context);
+        }
+        if (filePath.endsWith('.svg')) {
+                // webpack los resuelve como componentes Vue (vue-svg-loader). Acá
+                // alcanza con un componente vacío: no se prueba el render.
+                return { format: 'module', source: 'export default { name: "svg-stub", render: () => null };', shortCircuit: true };
+        }
+        if (filePath.endsWith('.vue')) {
+                const script = extractVueScript(fs.readFileSync(filePath, 'utf8'));
+                return { format: 'module', source: rewriteInlineRequires(script), shortCircuit: true };
+        }
+        if (filePath.endsWith('.js')) {
+                const source = fs.readFileSync(filePath, 'utf8');
+                if (isRealRequireModule(filePath)) {
+                        return { format: 'module', source: wrapRealRequire(source, filePath), shortCircuit: true };
+                }
+                if (source.includes('module.exports')) {
+                        return { format: 'module', source: wrapCommonJs(source), shortCircuit: true };
+                }
+                return { format: 'module', source: rewriteInlineRequires(source), shortCircuit: true };
+        }
+        return nextLoad(url, context);
 }

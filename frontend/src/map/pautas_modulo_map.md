@@ -641,7 +641,10 @@ desde la raíz del módulo con:
      módulo a formato ESM, reescribe los `require()` inline a
      `globalThis.__stubRequire` (multigeojson, parse-svg, querystring,
      form-data) y envuelve los módulos CommonJS (`helper.js`) para exportarlos
-     como default.
+     como default. Las librerías vendidas en CommonJS puro con require()
+     relativos reales (`js/coordinate-parser/`, lista `realRequirePrefixes`
+     en `_alias-hooks.mjs`) se envuelven con un require real acotado a su
+     archivo (createRequire), para testearlas con su código de verdad.
   4. Define un `window` global mínimo **en import time**: el patrón de
      herencia `X.prototype = new Y()` ejecuta constructores base que consultan
      `window.SegMap` al cargarse el módulo. `setupWindow()` (fixtures) lo
@@ -712,6 +715,44 @@ desde la raíz del módulo con:
     ausencia de Web Animations e interrupciones.
   - `touchHover.test.mjs` — los `:hover` de listas, tarjetas y filas están
     dentro de `@media (hover: hover)` (lectura de las hojas, sin navegador).
+  - `helperUtils.test.mjs` — utilidades puras de `helper.js` no cubiertas por
+    `helperQueue`: comparaciones entre períodos (`calculateCompareValue`),
+    deltas con flechas (`formatDeltaValue`), encabezados de columna
+    (`getColumnHeader`), formatos sueltos (`formatKm`, `formatNumOverall`,
+    `formatPercent`, `quickFormat`, `ensureFinalDot/Bar`), parseo de rutas
+    (`parseSingleLetterArgs`, `getSafeValue*`), urls multi-server
+    (`resolveMultiUrl`, `selectMultiUrl` por seed), envelope/círculo
+    (`getFrameParams`, `scaleEnvelope`, `hasCircle`) y lookups por Id.
+  - `sessionActions.test.mjs` — registro de acciones para telemetría:
+    `ActionManagerBase` (dedupe por valor, flag `isRegisterEnabled`,
+    `RemoveIfLastIs` por nombre+tipo), `UIActions` (colapso de bounds
+    consecutivos, on/off de labels), `ContentActions` (AddMetric/SelectSerie/
+    SelectFeature/SelectRegions, segunda definición de `SelectBoundarySerie`
+    caracterizada) y `Session` por prototipo, sin instanciar (FillStartup,
+    GetTimeMs, escalera de intervalos de KeepTimer y Pulse con `setTimeout`
+    reemplazado: no guarda sin actividad, limpia acciones al confirmar y
+    envía `i` solo en el primer guardado).
+  - `panelRouters.test.mjs` — routers no cubiertos por `routes.test.mjs`:
+    `FrameRouter.ToRoute`/`calculateCenterAsCoordinate`, `BasemapRouter`
+    (acumulación de n/e/tags al mapType, default no serializado, marca de
+    métricas visibles), `FeatureInfoRouter` (f/l/v/x, fid viejo `[@..@]`),
+    `ZoomFeatureRouter`, `LeftPanelRouter` y `ClippingRouter` (parseo de
+    regiones/círculo/nivel, `clippingChanged` con su TODO Bugfix
+    caracterizado, ToRoute con niveles intermedios).
+  - `overlapRectangles.test.mjs` — cache de overlays por nivel de zoom: la
+    primera llamada fija el zoom y descarta lo previo, solapes (incluido el
+    borde compartido) y limpieza al cambiar de zoom.
+  - `chartCookie.test.mjs` — preferencia del gráfico del resumen en la cookie
+    `chartState` (default activado, persistencia 1/0).
+  - `tileRequest.test.mjs` — ensamblado de respuestas del tile: completitud
+    (data + geografía), subset, páginas concatenadas de geografía con
+    gradiente, cancelación propia y delegada al bloque compartido, y reparto
+    a suscriptos del bloque.
+  - `coordinateParser.test.mjs` — la librería vendida `js/coordinate-parser`
+    con su código real (Validator, Coordinates, CoordinateNumber): decimales,
+    coma española, S/W negativos, DMS y formatos compactos. Nota: el wrapper
+    `ParseCoordinate.js` del módulo no se testea (asigna globals sin
+    declarar y bajo ESM/strict lanza siempre).
 - **La cantidad de pruebas cambia seguido**; no fijar un número acá.
   Consultarla corriendo la batería (la última línea informa "N pasaron, 0
   fallaron"). Al cerrar una tanda, la batería debe quedar **en verde con 0

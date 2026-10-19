@@ -169,10 +169,10 @@ it('humanPrepare quita el punto final de un token', () => {
 	expect(str.humanPrepare('12.')).toBe('0000000012');
 });
 
-it('humanPrepare en un token entre paréntesis recorta de más: "(12)" queda "1" (comportamiento actual)', () => {
-	expect(str.humanPrepare('(12)')).toBe('0000000001');
-	expect(str.humanPrepare('[abc]')).toBe('ab');
-	expect(str.humanPrepare('{abc}')).toBe('ab');
+it('humanPrepare quita los delimitadores (), [] y {} de un token antes de evaluar si es número', () => {
+	expect(str.humanPrepare('(12)')).toBe('0000000012');
+	expect(str.humanPrepare('[abc]')).toBe('abc');
+	expect(str.humanPrepare('{abc}')).toBe('abc');
 });
 
 it('humanCompare ordena "Item 2" antes que "Item 10"', () => {

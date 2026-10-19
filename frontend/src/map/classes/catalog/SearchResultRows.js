@@ -122,7 +122,7 @@ SearchResultRows.prototype.highlightName = function (name, nameMatches) {
 
 // Snippet HTML con la keyword matcheada resaltada, para mostrar entre el título
 // y el subtítulo cuando el match fue por keyword y no por name. Formato:
-//   ... <mark><strong>vil</strong>las</mark> de emergencia ... 2022, 2023
+//   ..<mark><strong>vil</strong>las</mark> de emergencia.. 2022, 2023
 // La palabra matcheada se envuelve en <mark> y, dentro, el PREFIJO que coincidió
 // con el término va en <strong> (igual que el highlighting del título): así
 // buscar "vil" sobre la keyword "villas" resalta solo "vil". El subtítulo
@@ -145,7 +145,7 @@ SearchResultRows.prototype.keywordSnippet = function (match, subtitle) {
 			out.push(this.escape(words[i]));
 		}
 	}
-	const snippet = '... ' + out.join(' ') + ' ...';
+	const snippet = '..' + out.join(' ') + '..';
 	const escapedSubtitle = subtitle ? this.escape(subtitle) : '';
 	return escapedSubtitle ? (snippet + ' ' + escapedSubtitle) : snippet;
 };

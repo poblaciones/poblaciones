@@ -178,15 +178,12 @@ it('el error se registra y se cuenta una vez por cada diálogo mostrado', () => 
 	expect(browser.window.Context.ErrorSignaled.value).toBe(1);
 });
 
-it('sin objeto de error registra y luego lanza TypeError (comportamiento actual)', () => {
-	setupWithContext();
-	let thrown = null;
-	captureConsole(function () {
-		try {
-			err.errDialog('metodo', 'cargar');
-		} catch (e) {
-			thrown = e;
-		}
+it('sin objeto de error registra el método, cuenta el error y muestra el mensaje genérico', () => {
+	const browser = setupWithContext();
+	const logged = captureConsole(function () {
+		err.errDialog('metodo', 'cargar');
 	});
-	expect(thrown instanceof TypeError).toBeTruthy();
+	expect(logged.errors[0]).toEqual(['Error', 'metodo']);
+	expect(browser.window.Context.ErrorSignaled.value).toBe(1);
+	expect(browser.alerts[0]).toBe('No fue posible cargar.' + SUPPORT_TEXT);
 });

@@ -41,15 +41,9 @@ it('sin fecha (vacía o el texto "null") usa (s/f)', () => {
 	expect(citationAPA.onlineMapCitation('A', 'null', 'T', 'https://x.org').startsWith('A (s/f). ')).toBeTruthy();
 });
 
-it('una fecha null (no el texto) lanza TypeError (comportamiento actual)', () => {
+it('una fecha null también usa (s/f)', () => {
 	setupBrowser();
-	let thrown = null;
-	try {
-		citationAPA.onlineMapCitation('A', null, 'T', 'https://x.org');
-	} catch (e) {
-		thrown = e;
-	}
-	expect(thrown instanceof TypeError).toBeTruthy();
+	expect(citationAPA.onlineMapCitation('A', null, 'T', 'https://x.org').startsWith('A (s/f). ')).toBeTruthy();
 });
 
 it('sin URL usa la dirección base del sitio actual', () => {
