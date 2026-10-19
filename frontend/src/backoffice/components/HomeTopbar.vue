@@ -12,11 +12,11 @@
 </template>
 
 <script>
-import AdminLinks from '@/common/components/AdminLinks';
+import AdminLinks from '@/common/widgets/AdminLinks';
 import BackofficeSearch from '@/backoffice/components/BackofficeSearch';
-import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
-import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
-import TopbarLogo from '@/backoffice/components/TopbarLogo';
+	import ProfileMenu from '@/common/widgets/Account/ProfileMenu.vue';
+import HomeMenu from '@/common/widgets/HomeMenu.vue';
+import TopbarLogo from '@/common/widgets/TopbarLogo';
 import WorkSearch from '@/backoffice/classes/WorkSearch';
 
 const MIN_QUERY_LENGTH = 2;

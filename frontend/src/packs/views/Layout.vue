@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import TopWelcome from '@/common/components/TopWelcome';
+	import TopWelcome from '@/common/widgets/TopWelcome';
 
 import ClippingRegions from './ClippingRegions/ClippingRegions';
 import Boundaries from './Boundaries/Boundaries';

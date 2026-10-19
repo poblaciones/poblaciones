@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import TopWelcome from '@/common/components/TopWelcome';
+import TopWelcome from '@/common/widgets/TopWelcome';
 
 import Works from './Works/Works';
 import Users from './Users/Users';

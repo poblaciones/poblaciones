@@ -88,7 +88,7 @@
 
 <script>
 import auth from '@/common/js/authentication';
-import ChangePasswordPopup from '@/backoffice/views/Account/ChangePasswordPopup.vue';
+import ChangePasswordPopup from './ChangePasswordPopup.vue';
 
 export default {
 	name: 'AccountPopup',

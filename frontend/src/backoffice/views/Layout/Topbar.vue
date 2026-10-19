@@ -34,9 +34,9 @@
 import { mapGetters } from 'vuex';
 import Context from '@/backoffice/classes/Context';
 import TopbarWorkActions from '@/backoffice/components/TopbarWorkActions.vue';
-import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
-import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
-import TopbarLogo from '@/backoffice/components/TopbarLogo';
+import ProfileMenu from '@/common/widgets/Account/ProfileMenu.vue';
+import HomeMenu from '@/common/widgets/HomeMenu.vue';
+import TopbarLogo from '@/common/widgets/TopbarLogo';
 
 export default {
 	name: 'topBar',

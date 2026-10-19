@@ -15,9 +15,9 @@
 import { mapGetters } from 'vuex';
 import ActiveWork from '@/backoffice/classes/ActiveWork.js';
 import AdminLinks from './AdminLinks';
-import ProfileMenu from '@/backoffice/views/Account/ProfileMenu.vue';
-import HomeMenu from '@/backoffice/views/Account/HomeMenu.vue';
-import TopbarLogo from '@/backoffice/components/TopbarLogo.vue';
+import ProfileMenu from './Account/ProfileMenu.vue';
+import HomeMenu from './HomeMenu.vue';
+import TopbarLogo from './TopbarLogo.vue';
 
 export default {
 	name: 'topBar',

@@ -211,7 +211,7 @@ Cuando una regla deba llegar a un diálogo, va en `dialogs.css` con una clase de
 
 **Barra superior.** Las cuatro barras comparten la clase `.topbar` de `layout.css` (fondo `--mp-topbar`, sin sombra):
 la home (`components/HomeTopbar.vue`), el interior de la cartografía (`views/Layout/Topbar.vue`) y administración y
-paquetes (`common/components/TopWelcome.vue`). Siguen siendo archivos distintos. `HomeMenu`, `TopbarWorkActions` y
+paquetes (`common/widgets/TopWelcome.vue`). Siguen siendo archivos distintos. `HomeMenu`, `TopbarWorkActions` y
 `ProfileMenu` leen su color de `--topbar-icon`, `--topbar-avatar-bg` y `--topbar-avatar-text`, que define `.topbar`;
 un componente nuevo dentro de una barra hace lo mismo y no fija colores propios. `TopWelcome` no lleva título:
 `admin-links` recibe `current` (`admin` o `packs`) y marca ese botón con `md-primary`. El logo es `components/TopbarLogo.vue` (imagen `assets/logo-topbar.png`) y se usa en la home y en

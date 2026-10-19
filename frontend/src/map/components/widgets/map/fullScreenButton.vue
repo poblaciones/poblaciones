@@ -34,11 +34,10 @@ export default {
 
 <style scoped>
 	.bt {
-		margin-top: -2px;
-		margin-bottom: 3px;
-		margin-right: 1px;
-		margin-left: 1px;
+		margin-left: 3px;
+		transform: rotate(90deg);
 	}
+
 	.fsButton {
 		right: 53px;
 		bottom: 24px;

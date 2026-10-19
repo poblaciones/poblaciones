@@ -21,6 +21,14 @@
 	box-shadow: none !important;
 }
 
+	.leaflet-touch .leaflet-bar a {
+		line-height: 29px;
+	}
+
+.leaflet-control-attribution .leaflet-control {
+	margin-right: 0px!important;
+}
+
 .leaflet-bar a:hover {
 	text-decoration: none !important;
 }

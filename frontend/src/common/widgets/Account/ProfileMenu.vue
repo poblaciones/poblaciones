@@ -35,8 +35,8 @@
 
 <script>
 	import auth from '@/common/js/authentication';
-	import AccountPopup from '@/backoffice/views/Account/AccountPopup.vue';
-	import ReviewPopup from '@/backoffice/views/Account/ReviewPopup.vue';
+	import AccountPopup from './AccountPopup.vue';
+	import ReviewPopup from './ReviewPopup.vue';
 
 	export default {
 		name: 'ProfileMenu',
