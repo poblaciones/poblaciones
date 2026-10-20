@@ -1,4 +1,5 @@
-- Búsqueda integrada con la búsqueda local de indicadores y delimitaciones.
+v5.6 (2026-10-19)
+- - "Buscar" integrado con la búsqueda local de indicadores y delimitaciones.
 - Keywords para los indicadores de datos públicos.
 - 'Compartir' nativo para celulares.
 - Barra superior con logo en administración.

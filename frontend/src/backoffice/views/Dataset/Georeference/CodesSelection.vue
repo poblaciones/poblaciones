@@ -73,7 +73,7 @@ export default {
 		},
 		ResolveRootCaptions(list) {
 			var ret = [];
-			// MArca a los que tienen padres y etiqueta de root
+			// Marca a los que tienen padres y etiqueta de root
 			for (var n = 0; n < list.length; n++) {
 				if (list[n].RootCaption !== null && list[n].ParentId !== null) {
 					list[n].ParentId = 0;

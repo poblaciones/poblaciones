@@ -81,6 +81,16 @@ export default {
 			this.email = this.$route.query.email;
 			this.code = this.$route.query.code;
 
+			// valida parámetros antes de consultar al servidor
+			if(str.IsEmail(this.email) == false) {
+				this.$refs.messagebox.show('Debe ingresar un correo electrónico válido');
+				return;
+			}
+			if(/^\d{6}$/.test(this.code) == false) {
+				this.$refs.messagebox.show('Debe indicar el código.');
+				return;
+			}
+
 			if (window.Context.ServerLoaded) {
 				this.validateCode();
 			} else {
@@ -88,16 +98,6 @@ export default {
 					loc.validateCode();
 				});
 			}
-
-		// valida parámetros
-		if(str.IsEmail(this.email) == false) {
-			this.$refs.messagebox.show('Debe ingresar un correo electrónico válido');
-			return;
-		}
-		if(/^\d{6}$/.test(this.code) == false) {
-			this.$refs.messagebox.show('Debe indicar el código.');
-			return;
-		}
 	},
 	validations: {
 		firstname: {

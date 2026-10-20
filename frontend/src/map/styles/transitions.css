@@ -18,11 +18,11 @@
 
 /* Animación de slide desde la izquierda */
 .slide-right-enter-active {
-	transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+	transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .slide-right-leave-active {
-	transition: all 0.25s cubic-bezier(0.4, 0, 0.6, 1);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 .slide-right-enter,

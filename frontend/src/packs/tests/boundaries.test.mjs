@@ -433,15 +433,12 @@ it('eliminar una versión quita solo esa versión', async () => {
 
 describe('Boundaries: utilidades');
 
-it('asHtml reemplaza el primer salto de línea por <br> y devuelve vacío sin texto', () => {
+it('asHtml reemplaza cada salto de línea por <br> y devuelve vacío sin texto', () => {
 	const { vm } = setup();
 	expect(vm.asHtml('a\nb')).toBe('a<br>b');
+	expect(vm.asHtml('a\nb\nc')).toBe('a<br>b<br>c');
 	expect(vm.asHtml('')).toBe('');
 	expect(vm.asHtml(null)).toBe('');
-});
-
-it('comportamiento actual: asHtml solo reemplaza el primer salto de línea', () => {
-	expect(setup().vm.asHtml('a\nb\nc')).toBe('a<br>b\nc');
 });
 
 // ---------------------------------------------------------------------

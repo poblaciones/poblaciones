@@ -84,13 +84,17 @@ it('con un email inválido avisa; con un código mal formado avisa que debe indi
 	expect(b.messagebox.messages).toEqual(['Debe indicar el código.']);
 });
 
-it('comportamiento actual: el código se valida contra el servidor aun cuando los parámetros son inválidos', async () => {
-	const { vm, messagebox } = setup({ serverLoaded: true, query: { email: 'sin-arroba', code: '12ab' } });
-	serve({ [GET_VALIDATE]: { status: 'ERROR', message: 'Código inválido' } });
+it('con parámetros inválidos avisa solo del primer problema y no consulta al servidor ni espera su carga', async () => {
+	const { env, vm, messagebox } = setup({ serverLoaded: true, query: { email: 'sin-arroba', code: '12ab' } });
 	callHook(Activate, vm, 'mounted');
 	await settle();
-	expect(axios.calls).toHaveLength(1);
-	expect(messagebox.messages).toEqual(['Debe ingresar un correo electrónico válido', 'Código inválido']);
+	expect(messagebox.messages).toEqual(['Debe ingresar un correo electrónico válido']);
+	expect(axios.calls).toHaveLength(0);
+	const pending = setup({ query: { email: 'ana@mail.com', code: '12ab' } });
+	callHook(Activate, pending.vm, 'mounted');
+	expect(pending.messagebox.messages).toEqual(['Debe indicar el código.']);
+	expect(pending.env.messages.listenerCount('serverLoaded')).toBe(0);
+	expect(env.messages.listenerCount('serverLoaded')).toBe(0);
 });
 
 describe('Activate.validateCode');

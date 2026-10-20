@@ -120,17 +120,6 @@ SearchResultRows.prototype.highlightName = function (name, nameMatches) {
 	return out.join('');
 };
 
-// Snippet HTML con la keyword matcheada resaltada, para mostrar entre el título
-// y el subtítulo cuando el match fue por keyword y no por name. Formato:
-//   ..<mark><strong>vil</strong>las</mark> de emergencia.. 2022, 2023
-// La palabra matcheada se envuelve en <mark> y, dentro, el PREFIJO que coincidió
-// con el término va en <strong> (igual que el highlighting del título): así
-// buscar "vil" sobre la keyword "villas" resalta solo "vil". El subtítulo
-// (subtitle) se escapa y se concatena al final si está presente. `match.Index`
-// es la posición de la palabra dentro de `match.Words` y `match.TermLen` es el
-// largo del término que matcheó (ver CatalogMatcher.KeywordMatch). Solo se
-// reemplaza esa palabra, sin tocar el resto de la frase. Todo se escapa por
-// separado (prefix y resto) para no inyectar HTML desde el backend.
 SearchResultRows.prototype.keywordSnippet = function (match, subtitle) {
 	if (!match || !match.Phrase) return '';
 	const words = match.Words || String(match.Phrase).split(/\s+/);

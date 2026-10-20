@@ -80,7 +80,7 @@
 </template>
 
 <script>
-	import { required, email, checked, minLength, sameAs } from 'vuelidate/lib/validators';
+	import { required, email, minLength, sameAs } from 'vuelidate/lib/validators';
 import EnterCode from '@/common/components/EnterCode';
 import OpenAuth from './OpenAuth';
 import response from '@/common/framework/response';

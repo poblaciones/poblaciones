@@ -266,7 +266,7 @@ const GROUP_LEVEL = -1;
 		},
 		asHtml(text) {
 			if (text) {
-				return text.replace('\n', '<br>');
+				return text.replace(/\n/g, '<br>');
 			} else {
 				return '';
 			}
