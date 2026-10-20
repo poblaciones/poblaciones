@@ -42,7 +42,7 @@ it('pide la URL del catálogo, guarda la lista y deja de estar cargando', async 
 	expect(catalog.loading).toBeFalsy();
 });
 
-it('un fallo de red muestra el error y deja la carga marcada como en curso (comportamiento actual)', async () => {
+it('un fallo de red muestra el error una sola vez y libera la carga', async () => {
 	const browser = setup();
 	axios.respond('get', new Error('boom'));
 	const catalog = new AsyncCatalog(URL);
@@ -50,9 +50,26 @@ it('un fallo de red muestra el error y deja la carga marcada como en curso (comp
 		catalog.Refresh();
 		await flushPromises();
 	});
-	expect(browser.alerts).toHaveLength(2);
+	expect(browser.alerts).toHaveLength(1);
 	expect(catalog.hasData).toBeFalsy();
-	expect(catalog.loading).toBeTruthy();
+	expect(catalog.loading).toBeFalsy();
+});
+
+it('tras un fallo la próxima consulta reintenta y atiende a las que quedaron en cola', async () => {
+	setup();
+	axios.respond('get', new Error('boom'));
+	const catalog = new AsyncCatalog(URL);
+	let received = null;
+	await captureConsoleAsync(async function () {
+		catalog.GetAll(function (data) { received = data; });
+		await flushPromises();
+	});
+	expect(received).toBeNull();
+	respondWithCatalog();
+	catalog.GetAll(function () {});
+	await flushPromises();
+	expect(axios.calls).toHaveLength(2);
+	expect(received).toEqual(CATALOG);
 });
 
 describe('AsyncCatalog: Invalidate');
@@ -159,7 +176,7 @@ it('la primera consulta dispara una única carga y las siguientes esperan en col
 	expect(catalog.notifyQueue).toEqual([]);
 });
 
-it('Get y GetCopy encolados reciben la lista completa en lugar del elemento pedido (comportamiento actual)', async () => {
+it('Get y GetCopy encolados reciben el elemento pedido una vez cargado el catálogo', async () => {
 	setup();
 	respondWithCatalog();
 	const catalog = new AsyncCatalog(URL);
@@ -168,8 +185,9 @@ it('Get y GetCopy encolados reciben la lista completa en lugar del elemento pedi
 	catalog.Get('Column', function (data) { viaGet = data; });
 	catalog.GetCopy('Source', function (data) { viaGetCopy = data; });
 	await flushPromises();
-	expect(viaGet).toEqual(CATALOG);
-	expect(viaGetCopy).toEqual(CATALOG);
+	expect(viaGet === catalog.list.Column).toBeTruthy();
+	expect(viaGetCopy).toEqual({ Name: 'fuente' });
+	expect(viaGetCopy === catalog.list.Source).toBeFalsy();
 });
 
 describe('AsyncCatalog: versiones con promesa');

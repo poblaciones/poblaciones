@@ -70,6 +70,10 @@ DataPager.prototype.Fetch = function (postdataGrid, adapter, source, callback, c
 	let loc = this;
 
 	let finalAction = function () {
+		if (loc.lastRecordStartIndex === null) {
+			// ya se entregó el resultado de esta consulta
+			return;
+		}
 		let page1 = loc.CalculatePage(loc.lastRecordStartIndex, postdata.pagesize);
 		let page2 = loc.CalculatePage(loc.lastRecordEndIndex, postdata.pagesize);
 		if (loc.hasData(postdata, page1) &&

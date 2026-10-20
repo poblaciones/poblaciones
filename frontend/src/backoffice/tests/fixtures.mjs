@@ -1,6 +1,7 @@
 // Dobles de los globales que consultan las clases de backoffice (window.Context,
 // window.Db, window.host) sobre los dobles de navegador de common. Cada test
 // los reinstala con setupBackoffice(); no hay estado compartido entre tests.
+import querystring from 'node:querystring';
 import { setupBrowser } from '@/common/tests/fixtures.mjs';
 
 export { captureConsole, captureConsoleAsync, flushPromises } from '@/common/tests/fixtures.mjs';
@@ -28,4 +29,21 @@ export function setupBackoffice(privileges) {
 	browser.window.Context = makeContext(privileges || 'P');
 	browser.window.Db = {};
 	return browser;
+}
+
+// Cuerpo de un POST registrado por el doble de axios, ya separado en campos
+// (los valores que eran objetos llegan como texto JSON).
+export function parseBody(call) {
+	return querystring.parse(call.body);
+}
+
+// El doble de axios de common no incluye CancelToken, que ActiveDataset usa en
+// SetColumnOrder. El token invoca al ejecutor con una función de cancelación
+// identificable, que el test recupera a través del valor de retorno.
+export function installCancelToken(axios) {
+	const cancel = function cancel() {};
+	axios.CancelToken = function CancelToken(executor) {
+		executor(cancel);
+	};
+	return cancel;
 }

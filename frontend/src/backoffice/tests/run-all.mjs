@@ -15,5 +15,18 @@ await import('./context.test.mjs');
 await import('./asyncCatalog.test.mjs');
 await import('./workSearch.test.mjs');
 await import('./dataPager.test.mjs');
+await import('./activeMetadata.test.mjs');
+await import('./activeWork.test.mjs');
+await import('./activeDataset.test.mjs');
+await import('./activeDatasetColumns.test.mjs');
+await import('./db.test.mjs');
+
+// classes: escalas
+await import('./scaleGenerator.test.mjs');
+await import('./scaleGeneratorRegen.test.mjs');
+await import('./levelGenerator.test.mjs');
+
+// views
+await import('./paletasCatalogo.test.mjs');
 
 await report();

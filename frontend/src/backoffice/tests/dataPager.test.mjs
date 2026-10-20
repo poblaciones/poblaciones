@@ -267,7 +267,7 @@ it('una segunda consulta sobre la misma página se resuelve desde el caché', as
 	expect(results[1].records.map(function (row) { return row.id; })).toEqual([15, 16]);
 });
 
-it('con un rango de dos páginas ya en caché entrega el resultado dos veces y el segundo es erróneo (comportamiento actual)', async () => {
+it('con un rango de dos páginas ya en caché entrega el resultado una sola vez', async () => {
 	setup();
 	respondWithRows(10);
 	const pager = new DataPager();
@@ -278,9 +278,11 @@ it('con un rango de dos páginas ya en caché entrega el resultado dos veces y e
 	pager.Fetch(makeGridRequest(8, 12, 10), makeAdapter(), makeSource(), collect, function () {});
 	await flushPromises();
 	delivered.length = 0;
-	pager.Fetch(makeGridRequest(8, 12, 10), makeAdapter(), makeSource(), collect, function () {});
+	let completed = 0;
+	pager.Fetch(makeGridRequest(8, 12, 10), makeAdapter(), makeSource(), collect, function () { completed++; });
 	await flushPromises();
-	expect(delivered).toEqual([[8, 9, 10, 11, 12], [0]]);
+	expect(delivered).toEqual([[8, 9, 10, 11, 12]]);
+	expect(completed).toBe(1);
 });
 
 it('si la respuesta del servidor falla carga el adaptador vacío y entrega sus registros', async () => {

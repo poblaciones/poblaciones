@@ -16,10 +16,17 @@ const stubbedPackages = {
 	axios: path.join(testsDir, '_stubs', 'axios.cjs'),
 };
 
+// Los assets (imágenes) los resuelve webpack a una URL; bajo Node se
+// resuelven a un módulo cuyo export default es una URL ficticia.
+const assetStub = path.join(testsDir, '_stubs', 'asset.cjs');
+
 const resolveFilename = Module._resolveFilename;
 Module._resolveFilename = function (request, parent, isMain, options) {
 	if (stubbedPackages[request]) {
 		return stubbedPackages[request];
+	}
+	if (/\.(gif|png|jpg|jpeg|svg)$/.test(request)) {
+		return assetStub;
 	}
 	if (request.startsWith('@/')) {
 		const target = path.join(sourceRoot, request.substring(2));

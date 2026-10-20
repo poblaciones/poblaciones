@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { sourceRoot, stubbedPackages, testsDir } from './_paths.mjs';
+import { sourceRoot, stubbedAliases, stubbedPackages } from './_paths.mjs';
 
 const REQUIRE_SHIM = "import { createRequire as __createRequire } from 'node:module';\nconst require = __createRequire(import.meta.url);\n";
 
@@ -43,6 +43,9 @@ function toResolved(target) {
 export function resolve(specifier, context, nextResolve) {
 	if (stubbedPackages[specifier]) {
 		return toResolved(stubbedPackages[specifier]);
+	}
+	if (stubbedAliases[specifier]) {
+		return toResolved(stubbedAliases[specifier]);
 	}
 	if (specifier.startsWith('@/')) {
 		const target = resolveWithExtension(path.join(sourceRoot, specifier.substring(2)));

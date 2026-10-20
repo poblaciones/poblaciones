@@ -17,4 +17,11 @@ export const stubbedPackages = {
 	vue: path.join(stubsDir, 'vue.mjs'),
 	vuex: path.join(stubsDir, 'vuex.mjs'),
 	'js-cookie': path.join(stubsDir, 'js-cookie.mjs'),
+	colorbrewer: path.join(stubsDir, 'colorbrewer.cjs'),
+};
+
+// Módulos del proyecto que se reemplazan por completo: el helper del visor
+// (map) arrastra dependencias de mapa que no corresponden a estos tests.
+export const stubbedAliases = {
+	'@/map/js/helper': path.join(stubsDir, 'mapHelper.cjs'),
 };

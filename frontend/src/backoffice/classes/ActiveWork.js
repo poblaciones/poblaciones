@@ -329,8 +329,8 @@ ActiveWork.prototype.GetStepImage = function (step) {
 
 ActiveWork.prototype.UpdateMultilevelMatrix = function () {
 	var datasetMatrix = {};
-	for (var n = 0; n < this.Dataset.length; n++) {
-		datasetMatrix[this.Dataset[n].properties.Id] = this.Dataset[n].properties.MultilevelMatrix;
+	for (var n = 0; n < this.Datasets.length; n++) {
+		datasetMatrix[this.Datasets[n].properties.Id] = this.Datasets[n].properties.MultilevelMatrix;
 	}
 	this.WorkChanged();
 	return axiosClient.getPromise(window.host + '/services/backoffice/UpdateMultilevelMatrix',
@@ -406,7 +406,7 @@ ActiveWork.prototype.UpdateDatasetGeorreferencedCount = function () {
 	for (var n = 0; n < this.workListMetadata.length; n++) {
 		if (this.workListMetadata[n].Id === this.properties.Id) {
 			this.workListMetadata[n].DatasetCount = DatasetCount;
-			this.workListMetadata[n].GeorreferencedCount = DatasetCount;
+			this.workListMetadata[n].GeorreferencedCount = GeorreferencedCount;
 			break;
 		}
 	}

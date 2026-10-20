@@ -63,7 +63,7 @@ Db.prototype.RebindAndFocusLastDataset = function (router) {
 	var loc = this;
 	return this.RebindCurrentWork().then(function () {
 		if (window.Context.CurrentWork.Datasets.length === 0) {
-			return this.RebindAndFocusMetadataContent(router);
+			return loc.RebindAndFocusMetadataContent(router);
 		}
 		var newDataset = window.Context.CurrentWork.Datasets[window.Context.CurrentWork.Datasets.length - 1];
 		window.Db.BindDataset(newDataset.properties.Id);
@@ -75,7 +75,7 @@ Db.prototype.RebindAndGeorreferenceLastDataset = function (router) {
 	var loc = this;
 	return this.RebindCurrentWork().then(function () {
 		if (window.Context.CurrentWork.Datasets.length === 0) {
-			return this.RebindAndFocusMetadataContent(router);
+			return loc.RebindAndFocusMetadataContent(router);
 		}
 		var newDataset = window.Context.CurrentWork.Datasets[window.Context.CurrentWork.Datasets.length - 1];
 		window.Db.BindDataset(newDataset.properties.Id);

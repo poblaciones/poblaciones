@@ -193,8 +193,13 @@ function buildValidation(validations, vm) {
 	return v;
 }
 
+// Como Vue: el default de una prop de tipo Function es la función misma;
+// para cualquier otro tipo, un default función es una fábrica.
 function propDefault(spec) {
 	if (spec && typeof spec === 'object' && 'default' in spec) {
+		if (spec.type === Function) {
+			return spec.default;
+		}
 		return typeof spec.default === 'function' ? spec.default() : spec.default;
 	}
 	return undefined;
@@ -210,6 +215,7 @@ export function mountLite(component, options) {
 	vm.$route = opts.route || { path: '/', query: {} };
 	vm.$router = opts.router || makeRouter();
 	vm.$refs = opts.refs || {};
+	vm.$set = function (target, key, value) { target[key] = value; };
 	vm.$nextTick = function (callback) {
 		if (callback) {
 			callback();

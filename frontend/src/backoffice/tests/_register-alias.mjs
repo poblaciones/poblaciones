@@ -6,12 +6,15 @@
 //  - import de ESM: hooks de _alias-hooks.mjs.
 import Module, { register } from 'node:module';
 import path from 'node:path';
-import { sourceRoot, stubbedPackages } from './_paths.mjs';
+import { sourceRoot, stubbedAliases, stubbedPackages } from './_paths.mjs';
 
 const resolveFilename = Module._resolveFilename;
 Module._resolveFilename = function (request, parent, isMain, options) {
 	if (stubbedPackages[request]) {
 		return stubbedPackages[request];
+	}
+	if (stubbedAliases[request]) {
+		return stubbedAliases[request];
 	}
 	if (request.startsWith('@/')) {
 		const target = path.join(sourceRoot, request.substring(2));

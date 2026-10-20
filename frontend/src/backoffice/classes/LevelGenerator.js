@@ -34,7 +34,7 @@ LevelGenerator.prototype.CompleteLevel = function (metricVersion) {
 				// Pone el alerta con la suma de mensajes si es necesario
 				if (loc.HasMessages()) {
 					window.alert('Algunas de las variables del indicador no tienen su variable homónima: \n\n' +
-						this.Messages.join('\n') + '\n\nProcure revisar las definiciones de variables para este nivel.');
+						loc.Messages.join('\n') + '\n\nProcure revisar las definiciones de variables para este nivel.');
 				}
 				return ret;
 			});
