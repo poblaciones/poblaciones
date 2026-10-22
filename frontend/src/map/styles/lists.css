@@ -29,10 +29,9 @@
 }
 
 .variableRow {
-	padding: .6rem 0rem 0rem 0rem;
+	padding: .6rem 0rem .5rem 0rem;
 	border-radius: 20px;
 	padding-left: 10px !important;
-	padding-bottom: 6px !important;
 	border: 1px solid transparent;
 	transition: background-color 0.15s ease;
 }

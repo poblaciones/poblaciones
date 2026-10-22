@@ -699,9 +699,9 @@ class MetricService extends BaseService
 	public function GetRelatedDatasets($datasetId)
 	{
 		// Utiliza los metrics para determinar qué datasets comparten indicadores con el dataset indicado.
-		$dql = "SELECT dr FROM e:DraftDataset dr JOIN dr.Work wr JOIN wr.Metadata mr JOIN e:DraftMetricVersionLevel lr WITH lr.Dataset = dr JOIN
-														lr.MetricVersion vr JOIN vr.Metric m JOIN e:DraftMetricVersion v WITH v.Metric = m
-														JOIN e:DraftMetricVersionLevel l WITH l.MetricVersion = v JOIN l.Dataset d
+		$dql = "SELECT dr FROM " . entities\DraftDataset::class . " dr JOIN dr.Work wr JOIN wr.Metadata mr JOIN " . entities\DraftMetricVersionLevel::class . " lr WITH lr.Dataset = dr JOIN
+														lr.MetricVersion vr JOIN vr.Metric m JOIN " . entities\DraftMetricVersion::class . " v WITH v.Metric = m
+														JOIN " . entities\DraftMetricVersionLevel::class . " l WITH l.MetricVersion = v JOIN l.Dataset d
 														WHERE d.Id = :p1 ORDER BY mr.Title DESC, dr.Caption";
 		$datasets = App::Orm()->findManyByQuery($dql, array($datasetId));
 		$ret = array();
@@ -717,7 +717,7 @@ class MetricService extends BaseService
 	public function GetMetricVersionsByMetric($workId, $metricId)
 	{
 		Profiling::BeginTimer();
-		$ret = App::Orm()->findManyByQuery("SELECT v FROM e:DraftMetricVersion v JOIN v.Metric m WHERE m.Id = :p1 ORDER BY v.Order, v.Caption", array($metricId));
+		$ret = App::Orm()->findManyByQuery("SELECT v FROM " . entities\DraftMetricVersion::class . " v JOIN v.Metric m WHERE m.Id = :p1 ORDER BY v.Order, v.Caption", array($metricId));
 		Profiling::EndTimer();
 		return $ret;
 	}

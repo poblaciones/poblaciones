@@ -72,6 +72,11 @@
 				}
 				this.metric.RefreshMap();
 			},
+			toggleShowDescriptions() {
+				this.metric.SelectedVariable().ShowDescriptions = (this.metric.SelectedVariable().ShowDescriptions == "1" ? "0" : "1");
+				this.metric.SetShowDescriptionsToSelectedVariableSet(this.metric.SelectedVariable().ShowDescriptions);
+				this.metric.RefreshMap();
+			},
 			changeUrbanity(mode) {
 				this.metric.properties.SelectedUrbanity = mode.key;
 				window.SegMap.SaveRoute.UpdateRoute();
@@ -129,6 +134,9 @@
 					case 'CHART':
 						this.toggleChart();
 						break;
+					case 'SHOWDESCRIPTIONS':
+						this.toggleShowDescriptions();
+						break;
 					case 'SHOWVALUES':
 						this.toggleShowValues();
 						break;
@@ -162,6 +170,13 @@
 
 					if (!selectedVariable.IsSimpleCount || this.metric.useRankings()) {
 						ret.push({ 'separator': true });
+					}
+					// muestra descripciones
+					if (this.metric.SelectedLevel().HasDescriptions) {
+						ret.push({
+							label: (this.metric.SelectedVariable().ShowDescriptions == '1' ? 'Ocultar descripciones' : 'Mostrar descripciones'),
+							key: 'SHOWDESCRIPTIONS',
+						});
 					}
 					// muestra valores
 					if (!selectedVariable.IsSimpleCount) {

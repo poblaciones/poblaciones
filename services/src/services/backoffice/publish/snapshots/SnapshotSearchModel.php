@@ -132,8 +132,7 @@ class SnapshotSearchModel
 	{
 		Profiling::BeginTimer();
 
-		$sqlDelete = "TRUNCATE TABLE snapshot_lookup_clipping_region_item;";
-		App::Db()->exec($sqlDelete);
+		App::Db()->truncate("snapshot_lookup_clipping_region_item");
 		App::Db()->markTableUpdate('snapshot_lookup_clipping_region_item');
 
 		VersionUpdater::Increment('LOOKUP_REGIONS');

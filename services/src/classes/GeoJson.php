@@ -142,9 +142,7 @@ class GeoJson
 
 	public static function LoadBinaryGeometry($data)
 	{
-		$undata = unpack("@4/a*", $data);
-		$geometry = \geoPHP::load($undata, 'wkb');
-		return $geometry;
+		return GeoGeometry::FromDbBinary($data);
 	}
 
 	public function GenerateFeatureFromBinary($row, $useFID = false, $getCentroids = false, $project = false, $hasCaption = false, $projectedEnvelope = null)
@@ -153,8 +151,7 @@ class GeoJson
 			$geometry = $row['valueClipped'];
 		else
 		{
-			$data = unpack("@4/a*", $row['value']);
-			$geometry = \geoPHP::load($data, 'wkb');
+			$geometry = GeoGeometry::FromDbBinary($row['value']);
 		}
 		if ($geometry == null)
 			return null;
@@ -184,12 +181,12 @@ class GeoJson
 		$ret['properties'] = $properties;
 		}
 		if ($project)
-			$coordinates = self::ProjectRecursive($geometry->asArray(), $projectedEnvelope);
+			$coordinates = self::ProjectRecursive($geometry->AsArray(), $projectedEnvelope);
 		else
-			$coordinates = $geometry->asArray(); //self::ReallocRecursive($geometry->asArray());
+			$coordinates = $geometry->AsArray();
 
 		$ret['geometry'] = array(
-					'type' => $geometry->getGeomType(),
+					'type' => $geometry->GetType(),
 					'coordinates' => $coordinates
 					);
 		return $ret;

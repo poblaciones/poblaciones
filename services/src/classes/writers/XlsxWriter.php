@@ -2,9 +2,12 @@
 
 namespace helena\classes\writers;
 
-use OpenSpout\Reader\Common\Creator\ReaderEntityFactory;
-use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
-use OpenSpout\Writer\Common\Creator\Style\StyleBuilder;
+use OpenSpout\Reader\CSV\Reader as CsvReader;
+use OpenSpout\Writer\XLSX\Writer as XlsxSpoutWriter;
+use OpenSpout\Writer\XLSX\Options as XlsxOptions;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Style;
 use OpenSpout\Common\Entity\Style\Color;
 use OpenSpout\Writer\XLSX\Entity\SheetView;
 
@@ -26,10 +29,11 @@ class XlsxWriter extends CsvWriter
 
 	public static function CsvToExcel($fileCsv, $fileExcel, $cols = null)
 	{
-			$writer = WriterEntityFactory::createXLSXWriter();
-			$writer->setTempFolder(Context::Paths()->GetTempPath());
+			$options = new XlsxOptions();
+			$options->setTempFolder(Context::Paths()->GetTempPath());
+			$writer = new XlsxSpoutWriter($options);
 
-			$reader = ReaderEntityFactory::createReaderFromFile($fileCsv);
+			$reader = new CsvReader();
 			$reader->open($fileCsv);
 			$writer->openToFile($fileExcel);
 
@@ -41,9 +45,7 @@ class XlsxWriter extends CsvWriter
                 ->setFreezeRow(2)
         );
 
-			$styleBuilder = new StyleBuilder();
-			$styleBuilder->setBackgroundColor(Color::rgb(217, 217, 217));
-			$style = $styleBuilder->build();
+			$style = (new Style())->setBackgroundColor(Color::rgb(217, 217, 217));
 
 			$firstRow = true;
 			foreach ($reader->getSheetIterator() as $sheet)
@@ -62,13 +64,13 @@ class XlsxWriter extends CsvWriter
 									$val += 0;
 								else if (strlen($val) > 32767)
 									$val = "[TRIMMED]"  . substr($val, 0, 32757);
-								$outCells[] = WriterEntityFactory::createCell($val);
+								$outCells[] = Cell::fromValue($val);
 								$col++;
 							}
 							if ($firstRow)
-								$singleRow = WriterEntityFactory::createRow($outCells, $style);
+								$singleRow = new Row($outCells, $style);
 							else
-								$singleRow = WriterEntityFactory::createRow($outCells);
+								$singleRow = new Row($outCells);
 
 							$writer->addRow($singleRow);
 							$firstRow = false;
@@ -77,9 +79,6 @@ class XlsxWriter extends CsvWriter
 
 
 			$reader->close();
-
-/*			$values = ['Carl', 'is', 'great!'];
-			$rowFromValues = WriterEntityFactory::createRowFromArray($values);*/
 
 			$writer->close();
 	}

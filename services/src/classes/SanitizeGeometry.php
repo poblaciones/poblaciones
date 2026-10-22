@@ -11,8 +11,8 @@ namespace helena\classes;
  * cuando se indica una tolerancia.
  *
  * Diseño orientado a rendimiento y estabilidad con geometrías grandes:
- * geoPHP (clases globales, sin namespace: \geoPhp, \Geometry, etc.) se usa
- * una única vez, para parsear WKB o WKT. A partir de ahí todo el trabajo
+ * GeoGeometry se usa una única vez, para parsear WKT (el WKB se lee con el
+ * lector propio de más abajo). A partir de ahí todo el trabajo
  * (proyección, simplificación, orientación, generación del WKT de salida)
  * se hace sobre arrays de coordenadas [lon, lat] anidados —el mismo formato
  * que consume SimplifyGeometry—, sin crear objetos por punto ni re-parsear
@@ -172,7 +172,7 @@ class SanitizeGeometry
 	// ------------------------------------------------------------------
 
 	/**
-	 * Parsea la entrada con geoPHP y la convierte de inmediato a arrays de
+	 * Parsea la entrada con GeoGeometry y la convierte de inmediato a arrays de
 	 * coordenadas, liberando los objetos. Devuelve null ante entradas
 	 * inválidas o tipos no soportados.
 	 *
@@ -180,18 +180,19 @@ class SanitizeGeometry
 	 */
 	private static function parseToArrays(string $data, string $format): ?array
 	{
-		$geom = \geoPHP::load($data, $format);
-
-		if ($geom === null)
+		try {
+			$geom = $format === 'wkt' ? GeoGeometry::FromWkt($data) : GeoGeometry::FromWkb($data);
+		} catch (\InvalidArgumentException $e) {
 			return null;
+		}
 
-		$type = $geom->geometryType();
+		$type = $geom->GetType();
 		if (!in_array($type, ['Polygon', 'MultiPolygon', 'LineString', 'MultiLineString'], true))
 			return null;
 
-		// asArray() de geoPHP produce el formato GeoJSON anidado de [x, y],
+		// AsArray() de GeoGeometry produce el formato GeoJSON anidado de [x, y],
 		// exactamente el que consume SimplifyGeometry.
-		$coordinates = $geom->asArray();
+		$coordinates = $geom->AsArray();
 		unset($geom); // liberar los objetos por punto lo antes posible
 
 		if (!self::hasValidStructure($type, $coordinates))
@@ -549,8 +550,10 @@ class SanitizeGeometry
 	// Lector WKB propio
 	// ------------------------------------------------------------------
 	//
-	// El adapter WKB de geoPHP interpreta el tipo como un único byte, por lo
-	// que solo entiende WKB 2D: los tipos ISO con Z/M (1003, 2006, 3003...)
+	// Lector WKB especializado para el pipeline de importación (devuelve null
+	// ante datos inválidos en lugar de lanzar excepción). Reemplazó al adapter
+	// WKB de geoPHP, que interpretaba el tipo como un único byte, por lo
+	// que solo entendía WKB 2D: los tipos ISO con Z/M (1003, 2006, 3003...)
 	// y los flags EWKB (0x80000000, 0x40000000) no son reconocidos y el
 	// parseo devuelve null. Los GeoPackage exportados con dimensión Z son
 	// habituales, así que el WKB se lee acá directamente, produciendo
@@ -739,7 +742,7 @@ class SanitizeGeometry
 	}
 
 	// ------------------------------------------------------------------
-	// Serialización a WKT (por concatenación directa, sin geoPHP)
+	// Serialización a WKT (por concatenación directa, sin objetos por punto)
 	// ------------------------------------------------------------------
 
 	private static function toWkt(string $type, array $coordinates): string

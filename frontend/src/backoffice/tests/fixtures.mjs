@@ -47,3 +47,83 @@ export function installCancelToken(axios) {
 	};
 	return cancel;
 }
+
+function resolvePropDefault(definition) {
+	if (definition === null || definition === undefined) {
+		return undefined;
+	}
+	if (typeof definition === 'function') {
+		if (definition === Boolean) {
+			return false;
+		}
+		return undefined;
+	}
+	if (definition.default !== undefined) {
+		if (typeof definition.default === 'function' && definition.type !== Function) {
+			return definition.default();
+		}
+		return definition.default;
+	}
+	if (definition.type === Boolean) {
+		return false;
+	}
+	return undefined;
+}
+
+// "Instancia" el objeto de opciones de un componente sin Vue: defaults de
+// props, data(), methods enlazados, computed como getters sin caché y $emit
+// registrado en $emitted. No ejercita template, DOM ni watchers (para esos,
+// el test invoca component.watch[nombre].call(vm)).
+//  options.propsData: valores de props.   options.mocks: $route, $router, $refs, etc.
+let nextUid = 1;
+
+export function mountLite(component, options) {
+	const settings = options || {};
+	const vm = {
+		_uid: nextUid++,
+		$emitted: [],
+		$refs: {},
+		$t(key) {
+			return key;
+		},
+		$emit(name, ...args) {
+			vm.$emitted.push([name, ...args]);
+		},
+		$nextTick(callback) {
+			return Promise.resolve().then(callback);
+		},
+		$set(target, key, value) {
+			target[key] = value;
+		},
+	};
+	const props = component.props || {};
+	const propNames = Array.isArray(props) ? props : Object.keys(props);
+	for (const name of propNames) {
+		if (Array.isArray(props)) {
+			vm[name] = undefined;
+		} else {
+			vm[name] = resolvePropDefault(props[name]);
+		}
+	}
+	Object.assign(vm, settings.propsData || {});
+	if (component.data) {
+		Object.assign(vm, component.data.call(vm));
+	}
+	for (const [name, method] of Object.entries(component.methods || {})) {
+		vm[name] = method.bind(vm);
+	}
+	for (const [name, definition] of Object.entries(component.computed || {})) {
+		const descriptor = { configurable: true, enumerable: true };
+		if (typeof definition === 'function') {
+			descriptor.get = definition.bind(vm);
+		} else {
+			descriptor.get = definition.get.bind(vm);
+			if (definition.set) {
+				descriptor.set = definition.set.bind(vm);
+			}
+		}
+		Object.defineProperty(vm, name, descriptor);
+	}
+	Object.assign(vm, settings.mocks || {});
+	return vm;
+}

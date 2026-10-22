@@ -1,6 +1,5 @@
 <?php
 
-use Symfony\Component\Debug\ErrorHandler;
 
 use helena\classes\SilexApp;
 use helena\classes\Callbacks;
@@ -9,8 +8,6 @@ use helena\classes\App;
 use minga\framework\Context;
 
 time_elapsed('preregister');
-ErrorHandler::register();
-time_elapsed('ErrorHandler::register');
 
 // Initializa el mingaFramework
 Context::InjectSettings(App::Settings());

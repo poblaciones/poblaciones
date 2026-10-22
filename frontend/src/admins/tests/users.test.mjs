@@ -161,11 +161,6 @@ it('combina nombre y apellido sin espacios sobrantes', () => {
 	expect(vm.formatName({ Firstname: null, Lastname: null })).toBe('');
 });
 
-it('comportamiento actual: un nombre ausente (undefined) se muestra literalmente', () => {
-	const { vm } = setup();
-	expect(vm.formatName({ Lastname: 'Paz' })).toBe('undefined Paz');
-});
-
 describe('Users.createNewUser');
 
 it('abre la edición con una copia en blanco tomada de la fábrica', () => {
@@ -173,6 +168,19 @@ it('abre la edición con una copia en blanco tomada de la fábrica', () => {
 	const blank = { Id: null, Firstname: '', Lastname: '' };
 	preload(env.context.Factory, { User: blank });
 	vm.createNewUser();
+	expect(editPopup.shown).toHaveLength(1);
+	expect(editPopup.shown[0][0]).toEqual(blank);
+	expect(editPopup.shown[0][0] === blank).toBe(false);
+});
+
+it('si el catálogo de fábricas todavía no cargó, espera la carga y abre la edición con la copia de User (no con todo el catálogo)', async () => {
+	const { vm, editPopup } = setup();
+	const blank = { Id: null, Firstname: '', Lastname: '' };
+	serve({ 'GET /services/backoffice/GetFactories': { User: blank, Other: { Id: 1 } } });
+	vm.createNewUser();
+	expect(editPopup.shown).toHaveLength(0);
+	await settle();
+	expect(axios.calls).toHaveLength(1);
 	expect(editPopup.shown).toHaveLength(1);
 	expect(editPopup.shown[0][0]).toEqual(blank);
 	expect(editPopup.shown[0][0] === blank).toBe(false);

@@ -73,7 +73,7 @@ it('entityName nombra la entidad según el filtro', () => {
 	expect(setup({ filter: 'R' }).vm.entityName).toEqual({ single: 'cartografía', plural: 'cartografías', one: 'una', article: 'la' });
 });
 
-it('comportamiento actual: un filtro desconocido lanza un texto que nombra una propiedad inexistente (Filter)', () => {
+it('un filtro desconocido lanza un texto que nombra el filtro recibido', () => {
 	const { vm } = setup({ filter: 'X' });
 	let thrown = null;
 	try {
@@ -81,7 +81,7 @@ it('comportamiento actual: un filtro desconocido lanza un texto que nombra una p
 	} catch (e) {
 		thrown = e;
 	}
-	expect(thrown).toBe('(entidad desconocida: undefined)');
+	expect(thrown).toBe('(entidad desconocida: X)');
 });
 
 it('emptyMessage indica si el período está filtrado', () => {
@@ -504,13 +504,13 @@ it('onDuplicateStart inicia el clonado con el nombre codificado y, al terminar, 
 	expect(vm.works.map(function (w) { return w.Id; })).toEqual([5, 6]);
 });
 
-it('comportamiento actual: el nombre se valida recortado pero se envía tal como fue escrito', async () => {
+it('el nombre se valida y se envía recortado', async () => {
 	const { vm, stepper } = setup();
-	serve({ 'GET /services/backoffice/StartCloneWork?w=5&n=%20Copia%20': { done: true }, [GET_WORKS]: [] });
+	serve({ 'GET /services/backoffice/StartCloneWork?w=5&n=Copia': { done: true }, [GET_WORKS]: [] });
 	vm.source = work({ Id: 5 });
 	vm.newWorkName = ' Copia ';
 	vm.onDuplicateStart();
-	expect(stepper.startUrl).toBe('http://server.test/services/backoffice/StartCloneWork?w=5&n=%20Copia%20');
+	expect(stepper.startUrl).toBe('http://server.test/services/backoffice/StartCloneWork?w=5&n=Copia');
 	await settle();
 });
 

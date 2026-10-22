@@ -65,19 +65,19 @@ class InstitutionService extends BaseService
 	public function GetAllInstitutionsByCurrentUser()
 	{
 		$userId = Session::GetCurrentUser()->GetUserId();
-		$user = App::Orm()->findManyByQuery("SELECT DISTINCT y FROM e:DraftInstitution y WHERE y.IsGlobal = 0 AND
-																	(EXISTS (SELECT i FROM e:DraftMetadataInstitution mi
+		$user = App::Orm()->findManyByQuery("SELECT DISTINCT y FROM " . entities\DraftInstitution::class . " y WHERE y.IsGlobal = 0 AND
+																	(EXISTS (SELECT i FROM " . entities\DraftMetadataInstitution::class . " mi
 																				JOIN mi.Institution i
 																				JOIN mi.Metadata m
 																			WHERE i.IsGlobal = 0 AND i.Id = y.Id AND
 																			EXISTS (SELECT p FROM
-																				e:DraftWorkPermission p JOIN p.Work w JOIN p.User u
+																				" . entities\DraftWorkPermission::class . " p JOIN p.Work w JOIN p.User u
 																							JOIN w.Metadata mp WHERE mp.Id = m.Id AND u.Id = :p1))
 														OR
 																	EXISTS (
-																			SELECT i2 FROM e:DraftMetadataSource ms JOIN ms.Source s
+																			SELECT i2 FROM " . entities\DraftMetadataSource::class . " ms JOIN ms.Source s
 																			JOIN s.Institution i2 JOIN ms.Metadata m2 WHERE EXISTS
-																				(SELECT p2 FROM e:DraftWorkPermission p2 JOIN p2.Work w2
+																				(SELECT p2 FROM " . entities\DraftWorkPermission::class . " p2 JOIN p2.Work w2
 																				JOIN w2.Metadata m3 JOIN p2.User u2 WHERE m3.Id = m2.Id
 																					AND u2.Id = :p1) AND i2.IsGlobal = 0 AND i2.Id = y.Id)
 																	)", array($userId));

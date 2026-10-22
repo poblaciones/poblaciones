@@ -9,7 +9,8 @@ use minga\framework\Performance;
 use minga\framework\PublicException;
 use helena\services\backoffice\DbSession;
 
-use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Types\Type;
 
@@ -88,15 +89,13 @@ class Orm
 			Type::addType('linestring', 'LongitudeOne\Spatial\DBAL\Types\Geometry\LineStringType');
 
 			$proxyDir = Paths::GetDoctrineProxiesPath();
-			$cache = null; // desde 2.9, cambia el comoprtamiento
-			// Opciones: VoidCache, PhpFileCache, FilesystemCache
-			$cache = new ArrayCache();
-			$config = Setup::createAnnotationMetadataConfiguration(array($dir),
-								$isDevMode, $proxyDir, $cache, false);
+			// Caché PSR-6 en memoria (reemplaza a la ArrayCache propia basada en doctrine/cache).
+			$cache = new ArrayAdapter();
+			$config = ORMSetup::createAnnotationMetadataConfiguration(array($dir),
+								$isDevMode, $proxyDir, $cache);
 
 
 //			$config->setAutoGenerateProxyClasses(true);
-			$config->addEntityNamespace('e', 'helena\entities\backoffice');
 
 			$config->addCustomNumericFunction('ST_Area', StArea::class);
 			$config->addCustomStringFunction('ST_AsBinary', StAsBinary::class);

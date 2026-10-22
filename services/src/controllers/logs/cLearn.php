@@ -119,17 +119,17 @@ class cLearn extends cController {
 	{
 		App::Db()->exec("SET FOREIGN_KEY_CHECKS = 0");
 
-		App::Db()->exec("TRUNCATE TABLE suggestions_metric_cooccurrence");
-		App::Db()->exec("TRUNCATE TABLE suggestions_variable_cooccurrence");
-		App::Db()->exec("TRUNCATE TABLE suggestions_sequences");
-		App::Db()->exec("TRUNCATE TABLE suggestions_by_zoom_range");
-		App::Db()->exec("TRUNCATE TABLE suggestions_by_province");
-		App::Db()->exec("TRUNCATE TABLE suggestions_region_after_metric");
-		App::Db()->exec("TRUNCATE TABLE suggestions_boundary_patterns");
-		App::Db()->exec("TRUNCATE TABLE suggestions_processing_log");
+		App::Db()->truncate("suggestions_metric_cooccurrence");
+		App::Db()->truncate("suggestions_variable_cooccurrence");
+		App::Db()->truncate("suggestions_sequences");
+		App::Db()->truncate("suggestions_by_zoom_range");
+		App::Db()->truncate("suggestions_by_province");
+		App::Db()->truncate("suggestions_region_after_metric");
+		App::Db()->truncate("suggestions_boundary_patterns");
+		App::Db()->truncate("suggestions_processing_log");
 
 		// Si desea reiniciar también la configuración del modelo, descomente esta línea:
-         App::Db()->exec("TRUNCATE TABLE suggestions_model_metadata");
+    //App::Db()->truncate("suggestions_model_metadata");
 		App::Db()->exec("SET FOREIGN_KEY_CHECKS = 1");
 		App::Db()->exec("
                 INSERT INTO suggestions_model_metadata (smm_key_name, smm_value_text, smm_updated_at)

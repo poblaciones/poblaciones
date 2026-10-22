@@ -1,7 +1,5 @@
 <?php
 
-use Symfony\Component\Debug\Debug;
-
 use helena\classes\App;
 use minga\framework\Str;
 use minga\framework\Request;
@@ -82,13 +80,11 @@ if(Context::Settings()->Debug()->debug)
 {
 	Profiling::BeginTimer("Debug");
 	$app['debug'] = true;
-	Debug::enable();
-
+	App::SetDebug(true);
 	Context::Settings()->Debug()->showErrors = true;
 
 	//$app['twig.options'] = array('cache' => false);
 	require_once __DIR__.'/src/debug.php';
-
 	Profiling::EndTimer();
 }
 

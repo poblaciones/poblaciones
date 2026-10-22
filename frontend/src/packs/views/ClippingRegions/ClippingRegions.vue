@@ -169,11 +169,15 @@ import c from '@/common/framework/color';
 					counts[item.MetadataId] = (counts[item.MetadataId] || 0) + 1;
 				}
 			});
-			var sharedIds = Object.keys(counts).filter(function (id) { return counts[id] > 1; });
 			var palete = c.GetColorPalete();
 			var colors = {};
-			sharedIds.forEach(function (id, index) {
-				colors[id] = palete[index % palete.length];
+			var assigned = 0;
+			// Los colores se asignan por orden de aparición en la lista.
+			this.list.forEach(function (item) {
+				if (item.MetadataId && counts[item.MetadataId] > 1 && colors[item.MetadataId] === undefined) {
+					colors[item.MetadataId] = palete[assigned % palete.length];
+					assigned++;
+				}
 			});
 			this.sharedMetadataColors = colors;
 		},

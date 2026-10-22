@@ -157,8 +157,7 @@ class GeoreferenceService extends BaseService
 		if ($this->state->FromErrors())
 		{
 			// Mueve los datos de _errors a _retry, dejando _errors vacía.
-			$drop = "DROP TABLE IF EXISTS " . $this->state->RetryTable();
-			App::Db()->execDDL($drop);
+			App::Db()->dropTable($this->state->RetryTable());
 			$rename = "RENAME TABLE " . $this->state->ErrorsTable() . " TO " . $this->state->RetryTable();
 			App::Db()->execDDL($rename);
 			$this->EnsureErrorsTableExists();

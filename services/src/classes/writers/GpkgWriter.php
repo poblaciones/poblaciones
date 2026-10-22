@@ -3,6 +3,7 @@
 namespace helena\classes\writers;
 
 use minga\framework\Str;
+use helena\classes\GeoGeometry;
 use minga\framework\PublicException;
 use helena\classes\spss\Format;
 use helena\classes\writers\metrics\MetricsMetadataExporter;
@@ -266,8 +267,7 @@ class GpkgWriter extends BaseWriter
 	 */
 	private function wktToGpkgBlob(string $wkt): string
 	{
-		$geom = \geoPHP::load($wkt, 'wkt');
-		$wkb = $geom->out('wkb'); // WKB con indicador de byte-order propio
+		$wkb = GeoGeometry::WktToWkb($wkt); // WKB NDR, 2D, sin SRID
 		$header = pack('CCCCV', 0x47, 0x50, 0x00, 0x01, self::SRS_ID);
 		return $header . $wkb;
 	}

@@ -219,7 +219,7 @@ export default {
 			} else if (this.filter === 'R') {
 				return { single: 'cartografía', plural: 'cartografías', one: 'una', article: 'la' };
 			} else {
-				throw '(entidad desconocida: ' + this.Filter + ')';
+				throw '(entidad desconocida: ' + this.filter + ')';
 			}
 		},
 		newLabel() {

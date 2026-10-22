@@ -4,6 +4,7 @@
 // resolve(): '@/...' y los imports relativos sin extensión (estilo webpack) se
 //            resuelven probando exacto, '.js' y '.vue'; los paquetes de
 //            UI/red se reemplazan por sus dobles.
+//            Los .vue se sirven con su bloque <script> únicamente.
 // load():    los fuentes mezclan CommonJS (module.exports) y ESM (export
 //            default); se indica a Node el formato de cada uno según su
 //            contenido, ya que el package.json del proyecto no declara "type".
@@ -11,7 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { sourceRoot, stubbedAliases, stubbedPackages } from './_paths.mjs';
+import { genericStub, genericStubPrefixes, isStylesheet, sourceRoot, stubbedAliases, stubbedFiles, stubbedPackages } from './_paths.mjs';
 
 const REQUIRE_SHIM = "import { createRequire as __createRequire } from 'node:module';\nconst require = __createRequire(import.meta.url);\n";
 
@@ -37,12 +38,23 @@ function isProjectSource(filePath) {
 }
 
 function toResolved(target) {
+	if (stubbedFiles[target]) {
+		return { url: pathToFileURL(stubbedFiles[target]).href, shortCircuit: true };
+	}
 	return { url: pathToFileURL(target).href, shortCircuit: true };
 }
 
 export function resolve(specifier, context, nextResolve) {
 	if (stubbedPackages[specifier]) {
 		return toResolved(stubbedPackages[specifier]);
+	}
+	for (const prefix of genericStubPrefixes) {
+		if (specifier.startsWith(prefix)) {
+			return toResolved(genericStub);
+		}
+	}
+	if (isStylesheet(specifier)) {
+		return toResolved(genericStub);
 	}
 	if (stubbedAliases[specifier]) {
 		return toResolved(stubbedAliases[specifier]);
@@ -64,11 +76,24 @@ export function resolve(specifier, context, nextResolve) {
 	return nextResolve(specifier, context);
 }
 
+function extractScript(vueSource) {
+	const match = /<script[^>]*>([\s\S]*?)<\/script>/.exec(vueSource);
+	if (match === null) {
+		return 'export default {};';
+	}
+	return match[1];
+}
+
 export function load(url, context, nextLoad) {
 	if (!url.startsWith('file://')) {
 		return nextLoad(url, context);
 	}
 	const filePath = fileURLToPath(url);
+	if (isProjectSource(filePath) && filePath.endsWith('.vue')) {
+		const script = extractScript(fs.readFileSync(filePath, 'utf8'));
+		const header = script.includes('require(') ? REQUIRE_SHIM : '';
+		return { format: 'module', source: header + script, shortCircuit: true };
+	}
 	if (isProjectSource(filePath) && filePath.endsWith('.js')) {
 		const source = fs.readFileSync(filePath, 'utf8');
 		if (source.includes('module.exports')) {

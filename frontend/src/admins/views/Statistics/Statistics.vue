@@ -189,7 +189,9 @@ export default {
 			var loc = this;
 			this.$refs.invoker.doMessage('Calculando estadísticas', window.Db,
 				window.Db.ProcessStatistics, this.currentMonth).then(function (data) {
-					loc.toCache(null);
+					if (loc.currentMonth) {
+						loc.toCache(null);
+					}
 					loc.loadData();
 				});
 		},
@@ -218,8 +220,11 @@ export default {
 			arr.Fill(this.embedding, data.Embedding);
 
 			if (data.Months.length > 0) {
-				this.currentMonth = this.months[0];
 				arr.Fill(this.months, data.Months);
+				// Si todavía no hay un mes elegido, toma el más reciente.
+				if (!this.currentMonth) {
+					this.currentMonth = data.Months[0];
+				}
 			}
 			setTimeout(() => {
 				this.componentKey++;

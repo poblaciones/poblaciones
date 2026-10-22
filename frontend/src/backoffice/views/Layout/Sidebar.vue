@@ -71,11 +71,13 @@ export default {
 					men.alias = alias;
 				}
 			}
-			if (this.Work.CanEdit() === false) {
-				if (men.title === 'Nuevo dataset' || (men.title === 'Datasets' &&
-							window.Context.CurrentWork.Datasets.length == 0)) {
-					route.hidden = true;
-				}
+			var readOnly = (this.Work.CanEdit() === false);
+			if (men.title === 'Nuevo dataset') {
+				// La tabla de rutas es compartida entre cartografías: se fija en ambos sentidos.
+				route.hidden = readOnly;
+			} else if (readOnly && men.title === 'Datasets' &&
+					window.Context.CurrentWork.Datasets.length == 0) {
+				route.hidden = true;
 			}
 			return men;
 		},

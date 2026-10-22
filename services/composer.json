@@ -1,7 +1,7 @@
 {
 	"config": {
 		"platform": {
-			"php": "7.4"
+			"php": "8.3"
 		},
 		"apcu-autoloader": true,
 		"allow-plugins": {
@@ -13,48 +13,36 @@
 	"license": "GNU GLP v3",
 	"type": "project",
 	"require": {
-		"php": ">=7.4.0",
-		"symfony/asset": "~2.8|^3.0",
-		"symfony/browser-kit": "~2.8|^3.0",
-		"symfony/config": "~2.8|^3.0",
-		"symfony/console": "~2.8|^3.0",
-		"symfony/css-selector": "~2.8|^3.0",
-		"symfony/debug": "~2.8|^3.0",
-		"symfony/finder": "~2.8|^3.0",
-		"symfony/form": "~2.8|^3.0",
-		"symfony/monolog-bridge": "~2.8|^3.0",
-		"symfony/process": "~2.8|^3.0",
-		"symfony/translation": "~2.8|^3.0",
-		"symfony/twig-bridge": "~2.8|^3.0",
-		"symfony/validator": "~2.8|^3.0",
-		"phayes/geophp": "dev-master",
+		"php": ">=8.3.0",
+		"symfony/http-foundation": "^5.4",
+		"symfony/routing": "^5.4",
+		"symfony/serializer": "^5.4",
+		"symfony/property-info": "^5.4",
+		"symfony/property-access": "^5.4",
+		"symfony/error-handler": "^5.4",
+		"symfony/cache": "^5.4",
+		"twig/twig": "^3.0",
 		"mobiledetect/mobiledetectlib": "^2.8",
 		"sendgrid/sendgrid": "^7.0",
 		"defuse/php-encryption": "^2.2",
 		"phpmailer/phpmailer": "^6.0",
 		"geoip2/geoip2": "^2.9",
 		"doctrine/dbal": "^3.10",
-		"doctrine/orm": "^2.9.2",
-		"doctrine/annotations": "^1.4",
+		"doctrine/orm": "^2.19",
+		"doctrine/annotations": "^1.14",
 		"jms/serializer": "^3.0",
-		"symfony/serializer": "^3.4",
-		"symfony/property-info": "^3.4",
 		"jms/metadata": "^2.6.0",
 		"yogarine/doctrine-annotation-autoload": "^0.3.0",
-		"lusitanian/oauth": "^0.8.11",
+		"rodrigoq/lusitanian-oauth": "^2.0",
 		"gasparesganga/php-shapefile": "^3.1",
-		"mpdf/mpdf": "^8.0.7",
-		"phpoffice/phpspreadsheet": "^1.12",
-		"openspout/openspout": "^3.1",
+		"mpdf/mpdf": "^8.2",
+		"phpoffice/phpspreadsheet": "^1.29",
+		"openspout/openspout": "^4.0",
 		"rodrigoq/phpmailersendgrid": "^1.0",
 		"ezyang/htmlpurifier": "^4.13",
-		"simple-html-dom/simple-html-dom": "^1.5",
-		"symfony/cache": "^3.4",
+		"rodrigoq/simple-html-dom": "^1.5",
 		"proj4php/proj4php": "^2.0",
-		"longitude-one/doctrine-spatial": "^3.0",
-		"symfony/polyfill-php80": "^1.33",
-		"symfony/routing": "^4.1",
-		"symfony/http-foundation": "^4.4"
+		"longitude-one/doctrine-spatial": "^5.0"
 	},
 	"autoload": {
 		"psr-0": {
@@ -64,7 +52,10 @@
 			"helena\\": "src/",
 			"export\\": "EXPORT/",
 			"minga\\framework\\": "src/framework/src/"
-		}
+		},
+		"files": [
+			"vendor/rodrigoq/simple-html-dom/simple_html_dom_base.php"
+		]
 	},
 	"extra": {
 		"branch-alias": {
@@ -79,6 +70,6 @@
 	},
 	"require-dev": {
 		"phpstan/phpstan": "^2.2",
-		"phpunit/phpunit": "^7.5"
+		"phpunit/phpunit": "^9.6"
 	}
 }

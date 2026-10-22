@@ -276,9 +276,9 @@ class WorkService extends BaseService
 	public function GetWorkMetricsList($workId)
 	{
 		Profiling::BeginTimer();
-		$metrics = App::Orm()->findManyByQuery("SELECT m FROM e:DraftMetric m
-																				JOIN e:DraftMetricVersion v WITH v.Metric = m
-																				JOIN e:DraftMetricVersionLevel l WITH l.MetricVersion = v
+		$metrics = App::Orm()->findManyByQuery("SELECT m FROM " . entities\DraftMetric::class . " m
+																				JOIN " . entities\DraftMetricVersion::class . " v WITH v.Metric = m
+																				JOIN " . entities\DraftMetricVersionLevel::class . " l WITH l.MetricVersion = v
 																				JOIN v.Work w WHERE w.Id = :p1 ORDER BY m.Caption", array($workId));
 		Profiling::EndTimer();
 		return $metrics;
@@ -570,7 +570,7 @@ class WorkService extends BaseService
 	public function GetDatasets($workId)
 	{
 		Profiling::BeginTimer();
-		$ret = App::Orm()->findManyByQuery("SELECT d FROM e:DraftDataset d JOIN d.Work w WHERE w.Id = :p1", array($workId));
+		$ret = App::Orm()->findManyByQuery("SELECT d FROM " . entities\DraftDataset::class . " d JOIN d.Work w WHERE w.Id = :p1", array($workId));
 		Profiling::EndTimer();
 		return $ret;
 	}

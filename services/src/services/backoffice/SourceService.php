@@ -41,10 +41,10 @@ class SourceService extends BaseService
 	public function GetAllSourcesByCurrentUser()
 	{
 		$userId = Session::GetCurrentUser()->GetUserId();
-		$user = App::Orm()->findManyByQuery("SELECT DISTINCT s FROM e:DraftSource s
-																					JOIN e:DraftMetadataSource ms WITH ms.Source = s
+		$user = App::Orm()->findManyByQuery("SELECT DISTINCT s FROM " . entities\DraftSource::class . " s
+																					JOIN " . entities\DraftMetadataSource::class . " ms WITH ms.Source = s
 																					JOIN s.Institution i2 JOIN ms.Metadata m2 WHERE EXISTS
-																					(SELECT p2 FROM e:DraftWorkPermission p2 JOIN p2.Work w2
+																					(SELECT p2 FROM " . entities\DraftWorkPermission::class . " p2 JOIN p2.Work w2
 																					JOIN w2.Metadata m3 JOIN p2.User u2 WHERE m3.Id = m2.Id
 																						AND u2.Id = :p1) AND s.IsGlobal = 0", array($userId));
 		// Agrega las globales

@@ -14,7 +14,7 @@ class SnapshotGeographiesModel
 	{
 	 	Profiling::BeginTimer();
 
-		App::Db()->exec("TRUNCATE TABLE snapshot_geography_item");
+		App::Db()->truncate("snapshot_geography_item");
 		App::Db()->markTableUpdate('snapshot_geography_item');
 
 		VersionUpdater::Increment('CARTOGRAPHY_VIEW');

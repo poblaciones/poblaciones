@@ -1,12 +1,12 @@
-v5.6 (2026-10-19)
-- - "Buscar" integrado con la búsqueda local de indicadores y delimitaciones.
+v5.6 (2026-10-22)
+- Migración a PHP 8.3.36.
+- "Buscar" integrado con la búsqueda local de indicadores y delimitaciones.
 - Keywords para los indicadores de datos públicos.
 - 'Compartir' nativo para celulares.
 - Barra superior con logo en administración.
 - Paleta de controles y colores.
 - Al comparar, ofrece "Δ % - Diferencia porcentual" para diferencias entre cantidades.
 - Cuando se agrega una delimitación al panel de estadísticas que tiene varios tipos de delimitación en su interior, agrega fila de totales.
-
 
 v5.5 (2026-09-30)
 - Soporte para mapa base vectorial.

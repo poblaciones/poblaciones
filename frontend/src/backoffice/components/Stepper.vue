@@ -149,7 +149,7 @@ export default {
 		},
 		formatError(error) {
 			var ret = error.message;
-			if (error.response && error.response.data) {
+			if (error.response && typeof error.response.data === 'string') {
 				var msgtext = error.response.data.trim();
 				if (msgtext.startsWith('[PE-E]:')) {
 					ret = msgtext.substr(7).trim();

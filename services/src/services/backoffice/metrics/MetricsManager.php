@@ -124,7 +124,7 @@ class MetricsManager
 	{
 		Profiling::BeginTimer();
 		$ret = array();
-		$levels = App::Orm()->findManyByQuery("SELECT l FROM e:DraftMetricVersionLevel l JOIN l.Dataset d
+		$levels = App::Orm()->findManyByQuery("SELECT l FROM " . entities\DraftMetricVersionLevel::class . " l JOIN l.Dataset d
 																	JOIN d.Work w WHERE w.Id = :p1", array($workId));
 		$metricVersions = $this->GetUniquePropertiesFilter($levels, array('MetricVersion'));
 		foreach($metricVersions as $version)
@@ -156,8 +156,8 @@ class MetricsManager
 	private function AddVariables($datasetId, $levels)
 	{
 		Profiling::BeginTimer();
-		$variables = App::Orm()->findManyByQuery("SELECT v FROM e:DraftVariable v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d WHERE d.Id = :p1 ORDER BY lv.Id, v.Order", array($datasetId));
-		$values = App::Orm()->findManyByQuery("SELECT l FROM e:DraftVariableValueLabel l JOIN l.Variable v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d WHERE d.Id = :p1 ORDER BY lv.Id, v.Id, l.Order, l.Id", array($datasetId));
+		$variables = App::Orm()->findManyByQuery("SELECT v FROM " . entities\DraftVariable::class . " v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d WHERE d.Id = :p1 ORDER BY lv.Id, v.Order", array($datasetId));
+		$values = App::Orm()->findManyByQuery("SELECT l FROM " . entities\DraftVariableValueLabel::class . " l JOIN l.Variable v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d WHERE d.Id = :p1 ORDER BY lv.Id, v.Id, l.Order, l.Id", array($datasetId));
 
 		foreach($levels as $level)
 		{
@@ -203,8 +203,8 @@ class MetricsManager
 	public function GetMetricVersionLevelVariables($workId, $metricVersionLevelId)
 	{
 		Profiling::BeginTimer();
-		$variables = App::Orm()->findManyByQuery("SELECT v FROM e:DraftVariable v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d JOIN d.Work w WHERE w.Id = :p1 AND lv.Id = :p2 ORDER BY lv.Id, v.Order", array($workId, $metricVersionLevelId));
-		$values = App::Orm()->findManyByQuery("SELECT l FROM e:DraftVariableValueLabel l JOIN l.Variable v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d JOIN d.Work w WHERE w.Id = :p1 AND lv.Id = :p2 ORDER BY lv.Id, v.Id, l.Order, l.Id", array($workId, $metricVersionLevelId));
+		$variables = App::Orm()->findManyByQuery("SELECT v FROM " . entities\DraftVariable::class . " v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d JOIN d.Work w WHERE w.Id = :p1 AND lv.Id = :p2 ORDER BY lv.Id, v.Order", array($workId, $metricVersionLevelId));
+		$values = App::Orm()->findManyByQuery("SELECT l FROM " . entities\DraftVariableValueLabel::class . " l JOIN l.Variable v JOIN v.MetricVersionLevel lv JOIN lv.Dataset d JOIN d.Work w WHERE w.Id = :p1 AND lv.Id = :p2 ORDER BY lv.Id, v.Id, l.Order, l.Id", array($workId, $metricVersionLevelId));
 
 		$ret = $this->ExtractVariables($variables, $values, $metricVersionLevelId);
 

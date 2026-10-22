@@ -13,7 +13,7 @@ class cHandleTest extends TestCase
 	private $metricId;
 	private $regionId;
 
-	public function setUp()
+	public function setUp() : void
 	{
 		$this->workId = $this->Get('workId');
 		$this->metricId = $this->Get('metricId');

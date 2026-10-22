@@ -26,7 +26,16 @@ await import('./scaleGenerator.test.mjs');
 await import('./scaleGeneratorRegen.test.mjs');
 await import('./levelGenerator.test.mjs');
 
+// router
+await import('./router.test.mjs');
+
 // views
 await import('./paletasCatalogo.test.mjs');
+await import('./workItemActions.test.mjs');
+await import('./works.test.mjs');
+await import('./invoker.test.mjs');
+await import('./stepper.test.mjs');
+await import('./sidebar.test.mjs');
+await import('./backofficeSearch.test.mjs');
 
 await report();

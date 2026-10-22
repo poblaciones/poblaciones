@@ -10,7 +10,7 @@ use helena\classes\Account;
 
 class DatasetServiceTest extends TestCase
 {
-	public function setUp()
+	public function setUp() : void
 	{
 		Account::Impersonate($this->GetGlobal('dbuser'));
 	}

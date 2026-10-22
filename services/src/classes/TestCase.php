@@ -23,7 +23,7 @@ class TestCase extends TestCaseBase
 	public function assertFile($path, $expectedSize = -1, $description = "")
 	{
 		$this->assertTrue(IO::Exists($path), "Archivo no existe. " . $description);
-		if (IO::Exists($path) && $expectedSize != -1)
+		if ($expectedSize != -1)
 		{
 			$size = filesize($path);
 			if (!is_array($expectedSize)) $expectedSize = [$expectedSize];

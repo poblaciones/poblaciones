@@ -93,7 +93,7 @@ export default {
 			} else if (this.filter === 'R') {
 				return { single: 'cartografía', plural: 'cartografías', one: 'una', article: 'la' };
 			} else {
-				throw '(entidad desconocida: ' + this.Filter + ')';
+				throw '(entidad desconocida: ' + this.filter + ')';
 			}
 		},
 		emptyMessage() {
@@ -311,14 +311,15 @@ export default {
 		},
 		onDuplicateStart() {
 			var loc = this;
-			if (this.newWorkName.trim().length === 0) {
+			var name = this.newWorkName.trim();
+			if (name.length === 0) {
 				alert('Debe indicar un nombre.');
 				this.$nextTick(() => {
 					loc.activateSaveAs = true;
 				});
 				return;
 			}
-			this.$refs.stepper.startUrl = window.Db.GetStartWorkCloneUrl(this.source.Id, this.newWorkName);
+			this.$refs.stepper.startUrl = window.Db.GetStartWorkCloneUrl(this.source.Id, name);
 			this.$refs.stepper.stepUrl = window.Db.GetStepWorkCloneUrl();
 			this.$refs.stepper.setTitle('Duplicando ' + this.entityName.single);
 			this.$refs.stepper.Start().then(function() {

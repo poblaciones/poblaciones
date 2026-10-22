@@ -14,6 +14,7 @@ use minga\framework\Context;
 use minga\framework\Profiling;
 use minga\framework\MessageBox;
 use minga\framework\PhpSession;
+use minga\framework\SQLiteList;
 use minga\framework\WebConnection;
 
 use minga\framework\caching\ObjectCache;
@@ -31,6 +32,7 @@ use JMS\Serializer\Naming\IdenticalPropertyNamingStrategy;
 
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 
+use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -120,6 +122,11 @@ class App
 		Context::Settings()->Debug()->debug = $value;
 		self::$app['debug'] = $value;
 		if ($value) {
+	   	// Habilitar debug de php
+			ini_set('display_errors', '1');
+			error_reporting(E_ALL);
+	   	// Habilitar herramientas de debug de Symfony 5.4
+			Debug::enable();
 			//GlobalizeDebugSession::GlobalizeDebug();
 			self::$debugWasSet = true;
 		}
@@ -158,8 +165,7 @@ class App
 	}
 	public static function EndRequest($ommitExit = false)
 	{
-		// Llamarlo implica que se terminó antes un pedido, por lo que se
-		// realiza un rollback sobre la base de datos.
+		SQLiteList::ReleaseAllNamedStreams();
 		Performance::End();
 		if (!$ommitExit)
 			exit();
@@ -385,13 +391,8 @@ class App
 	private static function GetSerializer(){
 		$encoders = array(new JsonEncoder());
 		$normalizer = new ObjectNormalizer(null, null, null, new ReflectionExtractor());
-		$normalizer->setCircularReferenceLimit(1);
-		// Add Circular reference handler
-		/*$normalizer->setCircularReferenceHandler(function ($object) {
-			return get_class($object);
-		});*/
 
-		$dateTimeNormalizer = new DateTimeNormalizer('d-m-Y H:i');
+		$dateTimeNormalizer = new DateTimeNormalizer(['datetime_format' => 'd-m-Y H:i']);
 		$normalizers = array($dateTimeNormalizer, $normalizer);
 		$serializer = new Serializer($normalizers, $encoders);
 		return $serializer;

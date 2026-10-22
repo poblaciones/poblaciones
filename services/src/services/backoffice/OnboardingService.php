@@ -52,7 +52,7 @@ class OnboardingService extends BaseService
 		}
 		else
 		{
-			$steps = App::Orm()->findManyByQuery("SELECT s FROM e:DraftOnboardingStep s JOIN s.Onboarding o WHERE o.Id = :p1 ORDER BY s.Order", array($onboarding->getId()));
+			$steps = App::Orm()->findManyByQuery("SELECT s FROM " . entities\DraftOnboardingStep::class . " s JOIN s.Onboarding o WHERE o.Id = :p1 ORDER BY s.Order", array($onboarding->getId()));
 			$onboarding->Steps = $steps;
 		}
 		Profiling::EndTimer();
@@ -110,7 +110,7 @@ class OnboardingService extends BaseService
 
 	public function GetStepImage($workId, $n)
 	{
-		$step = App::Orm()->findByQuery("SELECT s FROM e:DraftOnboardingStep s
+		$step = App::Orm()->findByQuery("SELECT s FROM " . entities\DraftOnboardingStep::class . " s
 				JOIN s.Onboarding o
 				JOIN o.Work w WHERE w.Id = :p1 AND s.Order = :p2", array($workId, $n));
 		// saca el file

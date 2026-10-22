@@ -4,6 +4,7 @@ namespace helena\services\backoffice;
 
 use helena\classes\App;
 use minga\framework\Profiling;
+use helena\entities\backoffice as entities;
 
 class GeographyService extends DbSession
 {
@@ -29,7 +30,7 @@ class GeographyService extends DbSession
 	public function GetAllGeographies()
 	{
 		Profiling::BeginTimer();
-		$list = App::Orm()->findManyByQuery("SELECT g FROM e:Geography g ORDER BY g.Revision DESC, g.Caption");
+		$list = App::Orm()->findManyByQuery("SELECT g FROM " . entities\Geography::class . " g ORDER BY g.Revision DESC, g.Caption");
 		$ret = [];
 		foreach($list as $item)
 			if ($item->getRootCaption() !== 'Otros')

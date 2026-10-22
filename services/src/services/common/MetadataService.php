@@ -21,8 +21,11 @@ use minga\framework\Context;
 use helena\classes\PdfCreator;
 use helena\classes\Statistics;
 use helena\db\backoffice\WorkModel;
-use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
-use OpenSpout\Writer\Common\Creator\Style\StyleBuilder;
+use OpenSpout\Writer\XLSX\Writer as XlsxSpoutWriter;
+use OpenSpout\Writer\XLSX\Options as XlsxOptions;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Style;
 use helena\services\backoffice\publish\PublishDataTables;
 use OpenSpout\Common\Entity\Style\Color;
 use OpenSpout\Common\Entity\Style\CellAlignment;
@@ -96,7 +99,7 @@ class MetadataService extends BaseService
 			->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $friendlyName)
 			->deleteFileAfterSend(true);
 	}
-	public function GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft, $workId, $boundaryId, &$friendlyName)
+	public function GetMetadataPdfFile($metadataId, $datasetId = null, $fromDraft = false, $workId = null, $boundaryId = null, &$friendlyName = null)
 	{
 		$model = new MetadataModel($fromDraft);
 		$metadata = $model->GetMetadata($metadataId);
@@ -208,8 +211,10 @@ class MetadataService extends BaseService
 	{
 		$fileExcel = IO::GetTempFilename();
 
-		$writer = WriterEntityFactory::createXLSXWriter();
-		$writer->setTempFolder(Context::Paths()->GetTempPath());
+		$options = new XlsxOptions();
+		$options->setTempFolder(Context::Paths()->GetTempPath());
+		$options->setColumnWidth(60, 2);
+		$writer = new XlsxSpoutWriter($options);
 		$writer->openToFile($fileExcel);
 
 		$writer->getCurrentSheet()->setSheetView(
@@ -219,7 +224,6 @@ class MetadataService extends BaseService
           ->setZoomScalePageLayoutView(90)
   );
 
-		$writer->setColumnWidth(60, 2);
 		$this->AddTwoColumnExcelRow($writer, 'Diccionario de datos de ' . $dataset['dat_caption'], null, true);
 
 		foreach($dataset['columns'] as $column)
@@ -255,29 +259,26 @@ class MetadataService extends BaseService
 		$outCells = [];
 		if ($firstCentered)
 		{
-			$styleBuilder = new StyleBuilder();
-			$styleBuilder->setCellAlignment(CellAlignment::CENTER);
-			$style = $styleBuilder->build();
-			$outCells[] = WriterEntityFactory::createCell($value1, $style);
+			$style = (new Style())->setCellAlignment(CellAlignment::CENTER);
+			$outCells[] = Cell::fromValue($value1, $style);
 		}
 		else
 		{
-			$outCells[] = WriterEntityFactory::createCell($value1);
+			$outCells[] = Cell::fromValue($value1);
 		}
-		$outCells[] = WriterEntityFactory::createCell($value2);
+		$outCells[] = Cell::fromValue($value2);
 		if ($bold || $color)
 		{
-			$styleBuilder = new StyleBuilder();
+			$style = new Style();
 			if ($bold)
-				$styleBuilder->setFontBold();
+				$style->setFontBold();
 			if ($color)
-				 $styleBuilder->setBackgroundColor($color);
-			$style = $styleBuilder->build();
-			$singleRow = WriterEntityFactory::createRow($outCells, $style);
+				$style->setBackgroundColor($color);
+			$singleRow = new Row($outCells, $style);
 		}
 		else
 		{
-			$singleRow = WriterEntityFactory::createRow($outCells);
+			$singleRow = new Row($outCells);
 		}
 		$writer->addRow($singleRow);
 	}

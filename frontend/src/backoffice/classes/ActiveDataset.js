@@ -821,37 +821,11 @@ ActiveDataset.prototype.GetNumericColumns = function () {
 	return columns;
 };
 
-ActiveDataset.prototype.GetTextColumns = function () {
-	if (this.Columns === null) {
-		return [];
-	}
-	var columns = [];
-	for (let i = 0; i < this.Columns.length; i++) {
-		if (this.Columns[i].Format === columnFormatEnum.STRING) {
-			columns.push(this.Columns[i]);
-		}
-	}
-	return columns;
-};
-
 ActiveDataset.prototype.GetDistinctColumnValues = function (columnId) {
 	return axiosClient.getPromise(window.host + '/services/backoffice/GetColumnUniqueValues',
 			{ 'k': this.properties.Id, 'c': columnId }, 'obtener los valores para la columna');
 };
 
-
-ActiveDataset.prototype.GetColumnUniqueValues = function () {
-	if (this.Columns === null) {
-		return [];
-	}
-	var columns = [];
-	for (let i = 0; i < this.Columns.length; i++) {
-		if (this.Columns[i].Format === columnFormatEnum.NUMBER) {
-			columns.push(newColumn);
-		}
-	}
-	return columns;
-};
 
 ActiveDataset.prototype.GetColumnsForJqxGrid = function (showingErrors, validate) {
 	if (this.Columns === null) {
@@ -942,18 +916,6 @@ ActiveDataset.prototype.spssAlignmentToGridAligment = function (align) {
 		default:
 			return 'center';
 	}
-};
-
-ActiveDataset.prototype.GetDataFieldByColumnId = function (showingErrors, columnId) {
-	var column = this.GetColumnById(columnId);
-	var dataFields = this.GetDataFieldsForJqxGrid(showingErrors);
-	for (let i = 0; i < dataFields.length; i++) {
-		let dataField = dataFields[i];
-		if (dataField.name === column.Variable) {
-			return dataField;
-		}
-	}
-	throw new Error('DataField no encontrado.');
 };
 
 ActiveDataset.prototype.GetDataFieldByColumnId = function (showingErrors, columnId) {

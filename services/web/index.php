@@ -14,6 +14,7 @@ if (!array_key_exists('REQUEST_URI', $_SERVER))
 else
 	$uri = $_SERVER['REQUEST_URI'];
 
+
 $isPublic = isPublicPath($uri);
 /*
 $isLocal = isLocalPHP($uri);
@@ -30,7 +31,6 @@ require_once __DIR__ . '/../startup.php';
 time_elapsed('fin startup');
 require_once __DIR__ . '/../routes/routes.php';
 time_elapsed('fin routes');
-
 GlobalTimer::Start($startTotalTime);
 
 App::$app->run();

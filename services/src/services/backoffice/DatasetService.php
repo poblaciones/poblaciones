@@ -624,7 +624,7 @@ class DatasetService extends DbSession
 	private function DeleteMetricVersionLevels($datasetId)
 	{
 		Profiling::BeginTimer();
-		$metricVersionLevels = App::Orm()->findManyByQuery("SELECT v FROM e:DraftMetricVersionLevel v JOIN v.Dataset d WHERE d.Id = :p1", array($datasetId));
+		$metricVersionLevels = App::Orm()->findManyByQuery("SELECT v FROM " . entities\DraftMetricVersionLevel::class . " v JOIN v.Dataset d WHERE d.Id = :p1", array($datasetId));
 		foreach($metricVersionLevels as $metricVersionLevel)
 			$this->DeleteMetricVersionLevel($metricVersionLevel);
 		Profiling::EndTimer();

@@ -1,3 +1,5 @@
+import f from '@/backoffice/classes/Formatter';
+
 // Ordena una lista de Geography para selects agrupados por RootCaption,
 // replicando el mismo criterio que CodesSelection.vue (georreferencia de
 // datasets, en backoffice): recorre cada árbol en profundidad (raíz,
@@ -5,7 +7,11 @@
 // todos sus descendientes, para que la agrupación por RootCaption de
 // mp-select también agrupe bien a los niveles internos (que en el listado
 // original no necesariamente traen su propio RootCaption poblado).
-function ResolveRootCaptions(list) {
+// Trabaja sobre un clon: el listado recibido suele ser el del catálogo
+// compartido (Context) y no debe modificarse; el resultado está formado por
+// los elementos del clon.
+function ResolveRootCaptions(source) {
+	var list = f.clone(source);
 	var ret = [];
 	// Marca a los que tienen padre y a la vez traen RootCaption propio
 	// (raíces "promovidas") para tratarlas en un segundo grupo, al final.

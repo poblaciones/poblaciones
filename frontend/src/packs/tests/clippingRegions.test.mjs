@@ -104,16 +104,20 @@ it('solo colorea los metadatos que aparecen en más de una región', () => {
 	expect(vm.sharedMetadataColors).toEqual({ 5: c.GetColorPalete()[0] });
 });
 
-it('asigna colores por id de metadato ascendente y los repite al agotar la paleta', () => {
+it('asigna los colores por orden de aparición en la lista y los repite al agotar la paleta', () => {
 	const { vm } = setup();
 	const palete = c.GetColorPalete();
-	for (let n = 0; n <= palete.length; n++) {
-		vm.list.push(region({ Id: n * 2 + 1, MetadataId: 100 + n }), region({ Id: n * 2 + 2, MetadataId: 100 + n }));
-	}
+	// El id mayor aparece primero: recibe el primer color de la paleta.
+	vm.list.push(region({ Id: 1, MetadataId: 900 }), region({ Id: 2, MetadataId: 100 }), region({ Id: 3, MetadataId: 900 }), region({ Id: 4, MetadataId: 100 }));
 	vm.calculateSharedMetadataColors();
-	expect(vm.sharedMetadataColors[100]).toBe(palete[0]);
-	expect(vm.sharedMetadataColors[101]).toBe(palete[1 % palete.length]);
-	expect(vm.sharedMetadataColors[100 + palete.length]).toBe(palete[0]);
+	expect(vm.sharedMetadataColors[900]).toBe(palete[0]);
+	expect(vm.sharedMetadataColors[100]).toBe(palete[1 % palete.length]);
+	const many = setup().vm;
+	for (let n = 0; n <= palete.length; n++) {
+		many.list.push(region({ Id: n * 2 + 1, MetadataId: 100 + n }), region({ Id: n * 2 + 2, MetadataId: 100 + n }));
+	}
+	many.calculateSharedMetadataColors();
+	expect(many.sharedMetadataColors[100 + palete.length]).toBe(palete[0]);
 });
 
 it('resolveMetadataColor devuelve vacío sin metadato o si no está compartido', () => {

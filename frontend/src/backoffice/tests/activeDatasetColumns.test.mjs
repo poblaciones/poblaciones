@@ -395,19 +395,3 @@ it('GetDataFieldByColumnId devuelve el campo de la columna y falla con una colum
 	expect(dataset.GetDataFieldByColumnId(false, 3)).toEqual({ name: 'region', map: '2', type: 'string' });
 	expect(thrownMessage(function () { dataset.GetDataFieldByColumnId(false, 99); })).toBe('Columna no encontrada.');
 });
-
-describe('ActiveDataset: GetColumnUniqueValues');
-
-it('sin columnas cargadas devuelve una lista vacía', () => {
-	expect(makeActive().GetColumnUniqueValues()).toEqual([]);
-});
-
-it('con columnas numéricas falla con ReferenceError por una variable no definida (comportamiento actual)', () => {
-	let caught = null;
-	try {
-		makeLoadedDataset().GetColumnUniqueValues();
-	} catch (e) {
-		caught = e;
-	}
-	expect(caught instanceof ReferenceError).toBeTruthy();
-});

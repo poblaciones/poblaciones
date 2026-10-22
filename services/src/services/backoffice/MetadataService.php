@@ -65,7 +65,7 @@ class MetadataService extends BaseService
 	{
 		Profiling::BeginTimer();
 
-		$retRelations = App::Orm()->findManyByQuery("SELECT ms FROM e:" . $this->ApplyDraft("DraftMetadataSource") . " ms
+		$retRelations = App::Orm()->findManyByQuery("SELECT ms FROM " . $this->ApplyDraft(entities\DraftMetadataSource::class) . " ms
 						JOIN ms.Metadata m WHERE m.Id = :p1 ORDER BY ms.Order", array($metadataId));
 		$ret = [];
 		foreach ($retRelations as $relation)
@@ -81,7 +81,7 @@ class MetadataService extends BaseService
 	{
 		Profiling::BeginTimer();
 
-		$retRelations = App::Orm()->findManyByQuery("SELECT mi FROM e:" . $this->ApplyDraft("DraftMetadataInstitution") . " mi JOIN mi.Institution i
+		$retRelations = App::Orm()->findManyByQuery("SELECT mi FROM " . $this->ApplyDraft(entities\DraftMetadataInstitution::class) . " mi JOIN mi.Institution i
 											JOIN mi.Metadata m WHERE m.Id = :p1 ORDER BY mi.Order", array($metadataId));
 		$ret = [];
 		foreach ($retRelations as $relation)
@@ -192,7 +192,7 @@ class MetadataService extends BaseService
 	public function GetFiles($metadataId)
 	{
 		Profiling::BeginTimer();
-		$ret = App::Orm()->findManyByQuery("SELECT f FROM e:" . $this->ApplyDraft("DraftMetadataFile") . " f JOIN f.Metadata m WHERE m.Id = :p1 ORDER BY f.Order", array($metadataId));
+		$ret = App::Orm()->findManyByQuery("SELECT f FROM " . $this->ApplyDraft(entities\DraftMetadataFile::class) . " f JOIN f.Metadata m WHERE m.Id = :p1 ORDER BY f.Order", array($metadataId));
 		Profiling::EndTimer();
 		return $ret;
 	}

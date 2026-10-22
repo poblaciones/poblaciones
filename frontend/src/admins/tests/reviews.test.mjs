@@ -22,7 +22,13 @@ function review(overrides) {
 }
 
 function pendingEvents(vm) {
-	return vm.$emitted.filter(function (e) { return e.name === 'pendingUpdated'; }).map(function (e) { return e.args[0]; });
+	const ret = [];
+	for (const event of vm.$emitted) {
+		if (event.name === 'pendingUpdated') {
+			ret.push(event.args[0]);
+		}
+	}
+	return ret;
 }
 
 describe('Reviews.mounted');

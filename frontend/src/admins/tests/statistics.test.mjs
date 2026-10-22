@@ -126,6 +126,7 @@ it('pide las estadísticas del mes actual con mensaje de espera, las guarda en c
 	expect(vm.getFromCache('2024-05')).toBeTruthy();
 	expect(vm.works).toEqual([{ Id: 1 }]);
 	expect(vm.months).toEqual(['2024-05', '2024-04']);
+	expect(vm.currentMonth).toBe('2024-05');
 });
 
 it('si el mes ya está en caché lo muestra sin consultar al servidor', async () => {
@@ -175,13 +176,18 @@ it('a los 50 ms incrementa la clave del componente para forzar su redibujado', (
 	expect(vm.componentKey).toBe(1);
 });
 
-it('comportamiento actual: el mes actual se lee antes de llenar la lista de meses, por eso la primera carga lo deja indefinido', () => {
+it('la primera carga elige el mes más reciente de los datos', () => {
 	const { vm } = setup();
 	vm.receiveData(stats());
 	expect(vm.months).toEqual(['2024-05', '2024-04']);
-	expect(vm.currentMonth).toBe(undefined);
-	vm.receiveData(stats());
 	expect(vm.currentMonth).toBe('2024-05');
+});
+
+it('conserva el mes elegido por el usuario al recibir datos de otro mes', () => {
+	const { vm } = setup();
+	vm.currentMonth = '2024-04';
+	vm.receiveData(stats());
+	expect(vm.currentMonth).toBe('2024-04');
 });
 
 describe('Statistics.calculateStats');
@@ -201,17 +207,18 @@ it('con un mes elegido recalcula en el servidor, descarta la caché de ese mes y
 	expect(vm.works).toEqual([{ Id: 2 }]);
 });
 
-it('defecto conocido: sin un mes elegido falla al descartar la caché y no vuelve a consultar', async () => {
+it('sin meses conocidos (todavía no hay estadísticas) recalcula y consulta igualmente, sin fallar', async () => {
 	const { vm } = setup();
 	vm.mounted = true;
-	serve({ [PROCESS_STATS]: {} });
+	serve({ [PROCESS_STATS]: {}, [GET_STATS]: stats() });
 	let reasons = [];
 	await quiet(async function () {
 		reasons = await captureUnhandled(function () { vm.calculateStats(); });
 	});
-	expect(axios.calls).toHaveLength(1);
-	expect(reasons).toHaveLength(1);
-	expect(reasons[0] instanceof TypeError).toBe(true);
+	expect(reasons).toHaveLength(0);
+	expect(axios.calls.map(function (c) { return c.url.split('/').pop(); })).toEqual(['ProcessStatistics', 'GetStatistics']);
+	expect(axios.calls[0].config.params).toEqual({ m: null });
+	expect(vm.currentMonth).toBe('2024-05');
 });
 
 describe('Statistics: navegación');

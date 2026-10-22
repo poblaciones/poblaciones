@@ -21,8 +21,6 @@ use minga\framework\Context;
 use helena\classes\PdfCreator;
 use helena\classes\Statistics;
 use helena\db\backoffice\WorkModel;
-use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
-use OpenSpout\Writer\Common\Creator\Style\StyleBuilder;
 use OpenSpout\Common\Entity\Style\Color;
 use OpenSpout\Common\Entity\Style\CellAlignment;
 use OpenSpout\Writer\XLSX\Entity\SheetView;

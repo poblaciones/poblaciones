@@ -47,7 +47,7 @@ class WorkService extends BaseService
 	public function UpdateWorkSpaceUsage()
 	{
 		Profiling::BeginTimer();
-		App::Db()->exec("TRUNCATE TABLE work_space_usage");
+		App::Db()->truncate("work_space_usage");
 		$this->EnsureTableMetadataCache();
 		$this->RecalculateUsage(null, null);
 		App::Db()->markTableUpdate('work_space_usage');

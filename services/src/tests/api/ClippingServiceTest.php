@@ -9,7 +9,7 @@ use helena\classes\Account;
 
 class ClippingServiceTest extends TestCase
 {
-	public function setUp()
+	public function setUp() : void
 	{
 		Account::Impersonate($this->GetGlobal('dbuser'));
 	}

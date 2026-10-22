@@ -9,8 +9,6 @@ use helena\classes\SanitizeGeometry;
 use helena\classes\Projections;
 use helena\classes\spss\Variable;
 
-// geoPHP se usa como clase global (phayes/geophp no tiene namespace propio)
-
 /**
  * Convierte un GeoPackage (.gpkg) a archivos JSON manteniendo el formato
  * esperado por el pipeline de importación (header.json + data_NNNNN.json).
@@ -22,7 +20,7 @@ use helena\classes\spss\Variable;
  *   - <table>                → datos: columnas de atributos + blob de geometría
  *
  * La geometría se almacena como GeoPackage Binary (header 'GP' + WKB).
- * El header GPKG se elimina y el WKB puro se delega a geoPHP.
+ * El header GPKG se elimina y el WKB puro se delega a SanitizeGeometry.
  *
  * Integración con Projections:
  *   Para capas de puntos se requiere:
@@ -304,7 +302,7 @@ class GpkgReader extends BaseReader
 	}
 
 	// =========================================================================
-	// Procesamiento de geometría con geoPHP
+	// Procesamiento de geometría
 	// =========================================================================
 
 	/**
@@ -344,7 +342,7 @@ class GpkgReader extends BaseReader
 	 *   - Puntos    → [latitud, longitud]
 	 *   - Polígonos → [wkt]
 	 *
-	 * Usa geoPHP para parsear el WKB y obtener el WKT.
+	 * Usa SanitizeGeometry para parsear el WKB y obtener el WKT.
 	 */
 	private static function ProcessGeometry($geomBlob, bool $useLatLong, bool $needsProjection, $projector)
 	{

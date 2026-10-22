@@ -14,7 +14,6 @@ class ErrorsConfigurationTest extends TestCase
 	{
 		$value = Context::Settings()->Mail()->NotifyAddressErrors;
 		$this->assertNotEmpty($value, "El parámetro del archivo settings.php para Context::Settings()->Mail()->NotifyAddressErrors se encuentra vacío");
-		$this->assertNotNull($value, "El parámetro del archivo settings.php para Context::Settings()->Mail()->NotifyAddressErrors se encuentra vacío");
 	}
 
 	public function testPhpIniParseErrors()

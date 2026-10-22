@@ -1,5 +1,6 @@
 import app from './moduleApp.js';
 import axiosClient from '@/common/js/axiosClient';
+import err from '@/common/framework/err';
 import f from '@/backoffice/classes/Formatter';
 
 export default AsyncCatalog;
@@ -19,16 +20,15 @@ AsyncCatalog.prototype.Refresh = function () {
 		{}, 'consultar el listado de entidades').then(function (data) {
 			loc.list = data;
 			loc.hasData = true;
-			loc.loading = false;
-			var pending = loc.notifyQueue;
-			loc.notifyQueue = [];
-			for (var n = 0; n < pending.length; n++) {
-				loc.resolve(pending[n].callback, pending[n].clone, pending[n].type);
+			// procesa la cola
+			for (var n = 0; n < loc.notifyQueue.length; n++) {
+				var item = loc.notifyQueue[n];
+				loc.resolve(item.callback, item.clone, item.type);
 			}
-	}, function () {
-		// getPromise ya informó el error al usuario. Se libera la carga para que
-		// la próxima consulta reintente; la cola se conserva hasta que haya datos.
-		loc.loading = false;
+			loc.notifyQueue = [];
+			loc.loading = false;
+	}).catch(function (error) {
+		err.errDialog('Refresh', 'consultar el listado de entidades', error);
 	});
 };
 
