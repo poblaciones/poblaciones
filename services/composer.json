@@ -21,6 +21,7 @@
 		"symfony/property-access": "^5.4",
 		"symfony/error-handler": "^5.4",
 		"symfony/cache": "^5.4",
+		"symfony/http-kernel": "^5.4",
 		"twig/twig": "^3.0",
 		"mobiledetect/mobiledetectlib": "^2.8",
 		"sendgrid/sendgrid": "^7.0",
