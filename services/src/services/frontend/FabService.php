@@ -35,6 +35,67 @@ class FabService extends BaseService
 		return self::RemovePrivateFabBoundaries($data);
 	}
 
+	public function GetFabBoundaryVersions()
+	{
+		$shard = App::Settings()->Shard()->CurrentShard;
+		$data = null;
+		$key = 'V' . $shard;
+
+		if (!FabListsCache::Cache()->HasData($key, $data))
+		{
+			$table = new BoundaryModel();
+			$data = $this->groupBoundaryVersions($table->GetFabBoundaryVersions());
+			FabListsCache::Cache()->PutData($key, $data);
+		}
+		return $this->removePrivateBoundaryVersions($data);
+	}
+
+	private function groupBoundaryVersions($rows)
+	{
+		$groups = [];
+		foreach ($rows as $row)
+		{
+			$g = $row['Group'];
+			$b = $row['BoundaryId'];
+			if (!isset($groups[$g]))
+				$groups[$g] = ['Id' => null, 'Name' => $g, 'Icon' => $row['GroupIcon'], 'Items' => []];
+			if (!isset($groups[$g]['Items'][$b]))
+				$groups[$g]['Items'][$b] = ['Id' => $b, 'Name' => $row['BoundaryName'], 'Versions' => []];
+			$groups[$g]['Items'][$b]['Versions'][] = [
+				'Id' => $row['VersionId'],
+				'Name' => $row['VersionName'],
+				'WorkIsPrivate' => false
+			];
+		}
+		$ret = [];
+		foreach ($groups as $group)
+		{
+			$group['Items'] = array_values($group['Items']);
+			$ret[] = $group;
+		}
+		return $ret;
+	}
+
+	private function removePrivateBoundaryVersions($data)
+	{
+		if (Session::IsSiteReader())
+			return $data;
+		$ret = [];
+		foreach ($data as $group)
+		{
+			$items = [];
+			foreach ($group['Items'] as $item)
+				if (Session::IsBoundaryPublicOrAccessible($item['Id']))
+					$items[] = $item;
+			if (sizeof($items) > 0)
+			{
+				$group['Items'] = $items;
+				$ret[] = $group;
+			}
+		}
+		return $ret;
+	}
+
 	public function GetFabIndicators($incluseUserInfo) // nombre provisorio
 	{
 		$shard = App::Settings()->Shard()->CurrentShard;

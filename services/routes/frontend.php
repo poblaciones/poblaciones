@@ -19,27 +19,34 @@ App::RegisterControllerGet('/datasets', controllers\cDatasets::class);
 
 App::RegisterControllerGet('/services/content/downloads', controllers\cDownloads::class);
 
-App::RegisterControllerGet('/map', controllers\cMap::class);
-App::RegisterControllerGet('/map/', controllers\cMap::class);
-
-// TABLA
-if (App::Settings()->Map()->UsePivot)
-{
-	App::RegisterControllerGet('/table', controllers\cTable::class);
-	App::RegisterControllerGet('/table/', controllers\cTable::class);
-}
-
-
+$mapRegisterd = false;
 if (App::Settings()->Servers()->IsMainServerRequest()) {
 	require_once('frontend/mainServer.php');
 	if (!App::Settings()->Servers()->IsTransactionServerRequest())
 	{
 		require_once('frontend/remoteCrawler.php');
 		App::RegisterControllerGet('/map/{any}', controllers\cRemoteMap::class)->assert("any", ".*");
+		App::RegisterControllerGet('/map', controllers\cRemoteMap::class);
+		App::RegisterControllerGet('/map/', controllers\cRemoteMap::class);
 		if (App::Settings()->Map()->UsePivot)
 		{
 			App::RegisterControllerGet('/table/{any}', controllers\cRemoteTable::class)->assert("any", ".*");
+			App::RegisterControllerGet('/table', controllers\cRemoteTable::class);
+			App::RegisterControllerGet('/table/', controllers\cRemoteTable::class);
 		}
+		$mapRegisterd = true;
+	}
+}
+if (!$mapRegisterd)
+{
+	App::RegisterControllerGet('/map', controllers\cMap::class);
+	App::RegisterControllerGet('/map/', controllers\cMap::class);
+
+	// TABLA
+	if (App::Settings()->Map()->UsePivot)
+	{
+		App::RegisterControllerGet('/table', controllers\cTable::class);
+		App::RegisterControllerGet('/table/', controllers\cTable::class);
 	}
 }
 

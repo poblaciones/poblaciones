@@ -587,8 +587,7 @@
 						h: window.SegMap.Signatures.Suffix
 					}
 				});
-				// 1) Indicadores (árbol). La ruta general se cachea local; la de usuario no,
-				//    por eso se usan endpoints distintos según si hay sesión iniciada.
+				// 1) Indicadores (árbol).
 				var indicatorsEndpoint = (loc.user && loc.user.Logged) ? 'GetUserFabIndicators' : 'GetFabIndicators';
 				axios.get(window.host + '/services/metrics/' + indicatorsEndpoint, params).then(function (res) {
 					session.ReceiveSession(window.host, res);
@@ -600,8 +599,7 @@
 				}).catch(function (error) {
 					err.errDialog('LoadFabIndicators', 'obtener los indicadores', error);
 				});
-				// 2) Delimitaciones (árbol). Si seguís sirviéndolas desde GetFabMetrics,
-				//    cambiá la URL y tomá res.data.Boundaries en lugar de res.data.
+				// 2) Delimitaciones (árbol).
 				axios.get(window.host + '/services/metrics/GetFabBoundaries', params).then(function (res) {
 					session.ReceiveSession(window.host, res);
 					const data = res.data; // árbol: [{ Id, Name, Items: [tipo...] }]

@@ -13,6 +13,10 @@ export default {
 	name: 'OpenAuth',
 	components: {
 	},
+	created() {
+		// No reactivo a propósito: tras navegar a otro origen, Vue no puede inspeccionar el Window.
+		this.keepWindow = null;
+	},
 	mounted() {
 		window.addEventListener('message', this.receiveMessage);
 	},
@@ -21,11 +25,6 @@ export default {
 	},
 	props: {
 		terms: ''
-	},
-	data() {
-		return {
-			keepWindow: null
-		};
 	},
 	computed: {
 		target() {

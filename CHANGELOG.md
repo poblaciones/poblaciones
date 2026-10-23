@@ -1,3 +1,7 @@
+- Fix a openauth multiservidor.
+- Agregado de delimitaciones en explorar.
+- Versión preliminar guía actualizada.
+
 v5.6 (2026-10-22)
 - Migración a PHP 8.3.36.
 - "Buscar" integrado con la búsqueda local de indicadores y delimitaciones.

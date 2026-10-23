@@ -129,6 +129,14 @@ App::$app->get('/services/metrics/GetFabBoundaries', function (Request $request)
 		return App::Json($controller->GetBoundariesWithItems());
 });
 
+App::$app->get('/services/metrics/GetFabBoundaryVersions', function (Request $request) {
+	$controller = new services\FabService();
+	if (Params::GetIntMandatory('w') != -1)
+		return App::JsonImmutable($controller->GetFabBoundaryVersions());
+	else
+		return App::Json($controller->GetFabBoundaryVersions());
+});
+
 
 App::$app->get('/services/metrics/GetSelectedInfos', function (Request $request) {
 	$controller = new services\SelectedMetricService();

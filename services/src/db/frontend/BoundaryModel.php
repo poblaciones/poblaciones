@@ -166,6 +166,22 @@ class BoundaryModel extends BaseModel
 		Profiling::EndTimer();
 		return $ret;
 	}
+
+	public function GetFabBoundaryVersions()
+	{
+		Profiling::BeginTimer();
+
+		$sql = "SELECT bgr_caption `Group`, bgr_icon GroupIcon, bou_id BoundaryId, bou_caption BoundaryName,
+						bvr_id VersionId, bvr_caption VersionName
+						FROM boundary
+						INNER JOIN boundary_group ON bou_group_id = bgr_id
+						INNER JOIN boundary_version ON bvr_boundary_id = bou_id
+						WHERE EXISTS (SELECT * FROM snapshot_boundary_version_item WHERE biw_boundary_id = bou_id)
+						ORDER BY bgr_order, bgr_caption, bou_order, bou_caption, bvr_id";
+		$ret = App::Db()->fetchAll($sql);
+		Profiling::EndTimer();
+		return $ret;
+	}
 }
 
 

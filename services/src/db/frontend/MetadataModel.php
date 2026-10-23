@@ -81,10 +81,19 @@ class MetadataModel extends BaseModel
 																		JOIN metric_version ON mvl_metric_version_id = mvr_id
 																		WHERE wrk_is_indexed = 1 AND wrk_is_private = 0
 																UNION ALL
-																	SELECT CONCAT('boundaries/', bou_id) as url, DATE_FORMAT(met_update, '%Y-%m-%d') as lastmod
-																	FROM boundary
-																	JOIN metadata ON met_id = bou_metadata_id
-																	WHERE bou_is_private = 0");
+																	SELECT CONCAT('boundaries/', b.bou_id) AS url,
+																					DATE_FORMAT(
+																						(
+																							SELECT MAX(m.met_update)
+																							FROM boundary_version bv
+																							JOIN metadata m
+																								ON bv.bvr_metadata_id = m.met_id
+																							WHERE bv.bvr_boundary_id = b.bou_id
+																						),
+																						'%Y-%m-%d'
+																					) AS lastmod
+																				FROM boundary b
+																				WHERE b.bou_is_private = 0");
 		return $links;
 	}
 

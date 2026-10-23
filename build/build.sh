@@ -85,6 +85,7 @@ cp -vr ../services/doctrine_proxies $output>>$output-1_copy.log
 
 if [ $vendor = true ]; then
 	cp -vr ../services/vendor $output>>$output-1_copy.log
+        rm -rf $output/vendor/phpstan
 fi
 
 rm -rf $output/src/framework/data
@@ -94,8 +95,6 @@ find $output/config ! -name 'settings.php.sample' -type f -exec rm -f {} +
 rm -f $output/web/.htaccess
 rm -f $output/web/IIRF.ini
 rm -f $output/web/web.config
-
-rm -rf $output/web/gpsurbana
 
 rmcache=echo
 echo "*** 3. Compila frontend RELEASE"
