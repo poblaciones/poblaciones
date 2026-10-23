@@ -104,6 +104,7 @@ class StatisticsService extends BaseService
 													mvw_metric_group_id myv_metric_group_id,
 													mvw_metric_provider_id myv_metric_provider_id,
 													mvw_metric_revision myv_metric_revision,
+													mvw_metric_keywords myv_metric_keywords,
 													GROUP_CONCAT(mvw_work_id ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_ids,
 													GROUP_CONCAT(mvw_level ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_level,
 													GROUP_CONCAT(mvw_variable_captions ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_variable_captions,
@@ -114,9 +115,9 @@ class StatisticsService extends BaseService
 													GROUP_CONCAT(mvw_work_is_indexed ORDER BY mvw_caption, mvw_metric_version_id SEPARATOR '\t') myv_work_is_indexed,
 													MAX(sta_hits) Hits
 										 FROM statistic JOIN snapshot_metric_version ON sta_element_id = mvw_metric_id
-						WHERE sta_month = ? AND sta_type = 'M' " . $exclusions . "
+						WHERE sta_month = ? AND mvw_work_type = 'P' AND mvw_work_is_private = 0 AND sta_type = 'M' " . $exclusions . "
 						GROUP BY myv_metric_id, mvw_metric_revision, myv_metric_caption, mvw_metric_tag, mvw_metric_icon, myv_metric_group_id,
-											myv_metric_provider_id, myv_metric_revision
+											myv_metric_provider_id, myv_metric_revision, myv_metric_keywords
 						ORDER BY Hits DESC
 						LIMIT " . $limit;
 

@@ -164,6 +164,12 @@ class FabService extends BaseService
 				$ret[] = $group;
 			}
 		}
+
+		// Agrega los recomendados
+		$recommended = $this->GetRecommended($providers);
+		if ($recommended)
+			array_unshift($ret, $recommended);
+
 		return $ret;
 	}
 
@@ -364,19 +370,11 @@ class FabService extends BaseService
 			return null;
 
 		$metrics = $this->createMetricInfos($rows, $providers);
-		// Los ordena por provider, dejando los nulos al final
-		usort($metrics, array($this, 'sortByOrderDescriptionNullAtEnd'));
-		// inserta los headers
-		$metrics = $this->addSubHeaders($metrics);
-		// saca los provider
-		foreach ($metrics as $metric) {
-			unset($metric->Provider);
-		}
 		// Listo
 		return [
 			'Id' => null,
 			'Name' => 'Los más consultados',
-			'Icon' => 'fas fa-star',
+			'Icon' => 'fas fa-star fa-sm',
 			'Items' => $metrics,
 			'Intensity' => 1.05
 		];
