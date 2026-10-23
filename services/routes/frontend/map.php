@@ -104,15 +104,6 @@ App::$app->get('/services/GetConfiguration', function (Request $request) {
 	return App::Json($controller->GetConfiguration($workId, $link));
 });
 
-App::$app->get('/services/metrics/GetFabMetrics', function (Request $request) {
-	$controller = new services\FabService();
-	if (Params::GetIntMandatory('w') != -1)
-		return App::JsonImmutable($controller->GetFabMetrics());
-	else
-		return App::Json($controller->GetFabMetrics());
-});
-
-
 App::$app->get('/services/metrics/GetUserFabIndicators', function (Request $request) {
 	if ($denied = Session::CheckSessionAlive())
 		return $denied;

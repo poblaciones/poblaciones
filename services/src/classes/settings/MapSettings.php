@@ -63,8 +63,6 @@ class MapSettings
 
 	public $UseAnnotations = false;
 
-	public $UseNewFabButton = true;
-
 	public $BasemapUrls = [];
 	public $BasemapAttributions = [];
 

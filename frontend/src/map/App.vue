@@ -33,16 +33,13 @@
 													:clipping="clipping" :frame="frame" :user="user" ref="summaryPanel" :work="work"
 													:toolbarStates="toolbarStates"></SummaryPanel>
 					</div>
-					<SideToolbar v-show="Use.UseNewFabButton" ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor"
+					<SideToolbar ref="sideToolbar" @selectedItem="selectedItem" @deselectedItem="deselectedItem" @selectedGroup="selectedGroup" @placeSelected="placeSelected" :backgroundColor="workColor"
 											 :indicators="sideIndicators" :boundaries="sideBoundaries" :metrics="metrics"
 											 :clipping="clipping" :sidebarPosition="sidebarPosition" @update:sidebarPosition="changeSidebarPosition"></SideToolbar>
 					<LeftPanel ref='leftPanel' />
 					<MapPanel />
 					<SuggestionsPanel ref="suggestionsPanel" v-if="!Embedded.Active"></SuggestionsPanel>
 					<MapType ref="mapSelector" class="exp-hiddable-block" v-show="!Embedded.Readonly" :toolbarStates="toolbarStates" :sidebarPosition="sidebarPosition" :style="oldStyleIndent"></MapType>
-
-					<MetricsButton v-if="!Use.UseNewFabButton" v-show="!Embedded.HideAddMetrics" ref="fabPanel" :backgroundColor="workColor" id="fab-panel" class="exp-hiddable-unset mapsOvercontrols" />
-					<RecommendBoundaries v-if="!Use.UseNewFabButton" style="position: absolute; left: -27px; top: 15px; z-index: 500" ref="fabBoundaries" class="exp-hiddable-unset" :backgroundColor="workColor" />
 
 					<div v-if="work.Current && work.Current.Metadata" class="logosBox">
 						<template v-for="institution in work.Current.Metadata.Institutions">
@@ -62,9 +59,9 @@
 					<FullScreenButton v-if="!Embedded.Readonly && mapLoaded && !$isMobile()" class="exp-hiddable-unset" :fullscreen="fullscreen" />
 					<CurrentLocationButton v-if="!Embedded.Readonly && mapLoaded" class="exp-hiddable-unset" />
 
-					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly && mapLoaded && !$isMobile()" v-show="Use.UseNewFabButton" class="exp-hiddable-unset"
+					<MapLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly && mapLoaded && !$isMobile()" class="exp-hiddable-unset"
 										 :metrics="metrics" :toolbarStates="toolbarStates" />
-					<ClippingLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset" :style="(!Use.UseNewFabButton ? 'visibility: hidden' : '')"
+					<ClippingLegend v-if="!Embedded.HideSummaryPanel && !Embedded.Readonly" class="exp-hiddable-unset"
 													:clipping="clipping" :toolbarStates="toolbarStates" />
 				</div>
 				<div id="panLabelCalculus" style="display: block; width: 0px; height: 0px; overflow: hidden"></div>
@@ -86,8 +83,6 @@
 	import PopupsPanel from '@/map/components/panels/popupsPanel';
 	import MapExport from '@/map/classes/MapExport';
 	import MapPanel from '@/map/components/panels/mapPanel';
-	import MetricsButton from '@/map/components/widgets/map/metricsButton';
-	import RecommendBoundaries from '@/map/components/widgets/map/recommendBoundaries';
 	import Toolbar from '@/map/components/widgets/summary/toolbar';
 
 	import LeftPanel from '@/map/components/panels/leftPanel';
@@ -134,8 +129,6 @@
 			Toolbar,
 			ClippingLegend,
 			LeftPanel,
-			MetricsButton,
-			RecommendBoundaries,
 			SuggestionsPanel,
 			PopupsPanel,
 			WorkPanel,
@@ -583,29 +576,9 @@
 				new SidebarPositionCookie().Set(position);
 			},
 			loadFabMetrics() {
-				// Modo nuevo (panel lateral): dos llamadas, una por panel.
-				if (this.Use.UseNewFabButton && !this.Embedded.HideAddMetrics) {
-					this.loadFabData();
+				if (this.Embedded.HideAddMetrics) {
 					return;
 				}
-				const loc = this;
-				axios.get(window.host + '/services/metrics/GetFabMetrics', session.AddSession(window.host, {
-					params: {
-						w: window.SegMap.Signatures.FabMetrics,
-						h: window.SegMap.Signatures.Suffix
-					}
-				})).then(function (res) {
-					session.ReceiveSession(window.host, res);
-					loc.oldStyleIndent = 'position: relative; left: 70px; top: -5px;';
-					loc.$refs.fabPanel.fabMetrics = res.data.Metrics;
-					loc.$refs.fabBoundaries.fabMetrics = res.data.Boundaries;
-					window.fabMetrics = res.data.Metrics;
-					window.SegMap.Catalog.Receive(res.data);
-				}).catch(function (error) {
-					err.errDialog('LoadFabMetrics', 'obtener los indicadores de datos públicos', error);
-				});
-			},
-			loadFabData() {
 				const loc = this;
 				loc.oldStyleIndent = '';
 				const params = session.AddSession(window.host, {

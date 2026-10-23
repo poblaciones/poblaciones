@@ -77,56 +77,6 @@ class FabService extends BaseService
 		return $data;
 	}
 
-	public function GetFabMetrics()
-	{
-		$shard = App::Settings()->Shard()->CurrentShard;
-		$data = null;
-
-		if (FabListsCache::Cache()->HasData($shard, $data))
-			return self::RemovePrivateBoundaries($data);
-
-		$data = $this->CalculateFab();
-
-		FabListsCache::Cache()->PutData($shard, $data);
-		return self::RemovePrivateBoundaries($data);
-	}
-
-	private function CalculateFab()
-	{
-		$metrics = $this->CalculateFabMetrics();
-		$boundaries = $this->CalculateFabRecommendedBoundaries();
-
-		return ['Metrics' => $metrics, 'Boundaries' => $boundaries];
-	}
-
-	private function CalculateFabMetrics()
-	{
-		$metricsService = new MetricService();
-		$providers = $metricsService->GetMetricProviders();
-
-		// Arma los grupos con métricas
-		$ret = $this->CalculateMetrics($providers);
-
-		// Agrega boundaries
-		$boundaries = $this->doGetFabBoundaries();
-		if ($boundaries)
-			array_unshift($ret, $boundaries);
-
-		// Agrega los recomendados
-		$recommended = $this->GetRecommended($providers);
-		if ($recommended)
-			array_unshift($ret, $recommended);
-
-		return $ret;
-	}
-
-
-	private function CalculateFabRecommendedBoundaries()
-	{
-		$table = new BoundaryModel();
-		return $table->GetRecommendedBoundaries();
-	}
-
 	private function CalculateMetrics($providers, $useParent = false)
 	{
 		$ret = [];

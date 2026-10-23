@@ -224,7 +224,7 @@ export default {
     isToolbarAvailable() {
       const embedded = window.Embedded || {};
       const use = window.Use || {};
-      return !!use.UseNewFabButton && (!embedded.HideAddMetrics || !embedded.HideSearch);
+      return (!embedded.HideAddMetrics || !embedded.HideSearch);
     },
     isTypingTarget(el) {
       if (!el || !el.tagName) {

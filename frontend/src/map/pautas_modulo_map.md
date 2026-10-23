@@ -228,7 +228,7 @@ coordinan ante cambios de encuadre. El panel derecho (`summaryPanel` →
   `GetDefaultFrame[AndClipping]` (arranque limpio).
 - **Configuración**: la trae `App.vue` al montar (`GetConfiguration`) y
   `SegmentedMap` la vuelca en `window.Use` (flags como `UseDeckgl`,
-  `UseNewFabButton`, `UseGradients`, servidores estáticos, bloques).
+  `UseGradients`, servidores estáticos, bloques).
 
 ### Arranque
 

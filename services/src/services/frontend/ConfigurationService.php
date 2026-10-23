@@ -150,7 +150,6 @@ class ConfigurationService extends BaseService
 									'UseTextures' => App::Settings()->Map()->UseTextures,
 									'BasemapMetrics' => App::Settings()->Map()->BasemapMetrics,
 
-									'UseNewFabButton' =>  App::Settings()->Map()->UseNewFabButton,
 									'UseAnnotations' =>  App::Settings()->Map()->UseAnnotations,
 									'UsePerimeter' =>  App::Settings()->Map()->UsePerimeter,
 									'UseCharts' =>  App::Settings()->Map()->UseCharts,
