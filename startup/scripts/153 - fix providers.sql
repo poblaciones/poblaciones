@@ -4,12 +4,25 @@ metric_provider on  mtr_metric_provider_id = lpr_id
 set mtr_metric_provider_id = 1
 where lpr_caption like 'Censos nacionales%';
 
+update draft_metric  join
+metric_provider on  mtr_metric_provider_id = lpr_id
+set mtr_metric_provider_id = 1
+where lpr_caption like 'Censo nacional de población%';
+
 update metric  join
 metric_provider on  mtr_metric_provider_id = lpr_id
 set mtr_metric_provider_id = 1
 where lpr_caption like 'Censos nacionales%';
 
+update metric  join
+metric_provider on  mtr_metric_provider_id = lpr_id
+set mtr_metric_provider_id = 1
+where lpr_caption like 'Censo nacional de población%';
+
 delete from metric_provider  where lpr_caption like 'Censos nacionales%'
+and lpr_id <> 1;
+
+delete from metric_provider  where lpr_caption like 'Censo nacional de población%'
 and lpr_id <> 1;
 
 update metric_provider  set lpr_caption = replace(lpr_caption, ' (2018, 2021, 2024)', '');

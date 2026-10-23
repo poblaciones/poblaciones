@@ -23,9 +23,13 @@
                     :aria-label="collapseAllLabel">
               <i :class="allCollapsed ? 'fas fa-caret-right' : 'fas fa-caret-down'"></i>
             </button>
-            <button class="mp-icon-btn mp-icon-btn--muted"
+            <!-- Grilla/listado: se OCULTA (no se deshabilita) cuando el modo
+                 que ofrecería no aplica: en el nivel de boundaries (que es
+                 siempre lista), en niveles de hojas sin ramas para mostrar
+                 como tarjetas, y buscando dentro de un nivel. -->
+            <button v-if="showViewToggle"
+                    class="mp-icon-btn mp-icon-btn--muted"
                     :class="{ 'is-selected': listModeActive }"
-                    :disabled="!showingCards && !listModeActive"
                     @click="toggleViewMode"
                     :title="viewModeLabel"
                     :aria-label="viewModeLabel"
@@ -47,9 +51,7 @@
                   aria-label="Volver al inicio">
             ×
           </button>
-          <span class="breadcrumb-item" :class="{ 'active': !navStack.length && !searchQuery }" @click="goHome">
-            {{ rootLabel }}
-          </span>
+          <span class="breadcrumb-item" :class="{ 'active': !navStack.length && !searchQuery }" @click="goHome">{{ rootLabel }}</span>
           <template v-for="(node, depth) in navStack">
             <span :key="'sep' + depth" class="breadcrumb-sep">/</span>
             <span :key="'crumb' + depth"
@@ -92,7 +94,7 @@
         <!-- Cuerpo (scrolleable) -->
         <div class="indicator-body thinScroll">
           <!-- Grid navegable (raíz o sub-categorías/tipos), modo árbol, sin búsqueda -->
-          <div v-if="!searchQuery && currentBranches.length && !listModeActive">
+          <div v-if="!searchQuery && !listModeActive && (currentBranches.length || rootBoundaryCard)">
             <template v-if="!navStack.length && groupCategories">
               <div v-for="grp in groupedBranches" :key="grp.Name || '_'">
                 <div v-if="grp.Name" class="source-header">{{ grp.Name }}</div>
@@ -108,8 +110,18 @@
                   </div>
                 </div>
               </div>
+            <!-- La categoría de boundaries al pie de los grupos. -->
+            <div v-if="rootBoundaryCard" class="categories-grid">
+              <div class="category-card hand boundary-card"
+                   data-kbd-item="card"
+                   @click="enterBoundaries">
+                <span class="category-icon boundary-icon"><i class="fas fa-map"></i></span>
+                <div class="category-name">Delimitaciones</div>
+                <div class="category-count">{{ boundaryCountLabel }}</div>
+              </div>
+            </div>
             </template>
-            <div v-else class="categories-grid">
+            <div v-else-if="currentBranches.length || rootBoundaryCard" class="categories-grid">
               <div v-for="br in currentBranches"
                    :key="br.Id != null ? br.Id : br.Name"
                    class="category-card hand"
@@ -122,12 +134,27 @@
                 <div class="category-name">{{ br.Name }}</div>
                 <div class="category-count">{{ branchLabel(br) }}</div>
               </div>
+
+              <!-- Tarjeta que abre la categoría de boundaries. Adentro las
+                   delimitaciones se ven agrupadas por su tipo y en lista
+                   (obligatoria: dos niveles de cajas no sería legible, así
+                   que el botón de grilla se oculta en ese nivel). Nunca se
+                   listan las hojas de una delimitación: se ofrece como capa
+                   completa, con alta/baja por los métodos de boundary. -->
+              <div v-if="rootBoundaryCard"
+                   class="category-card hand boundary-card"
+                   data-kbd-item="card"
+                   @click="enterBoundaries">
+                <span class="category-icon boundary-icon"><i class="fas fa-map"></i></span>
+                <div class="category-name">Delimitaciones</div>
+                <div class="category-count">{{ boundaryCountLabel }}</div>
+              </div>
             </div>
           </div>
 
           <!-- Lista de hojas: misma fila para búsqueda y para navegación -->
           <div v-else class="indicators-list">
-            <div v-if="searchQuery && !filteredItems.length && !filteredBranches.length" class="no-results">
+            <div v-if="searchQuery && !filteredItems.length && !filteredBranches.length && !filteredBoundaries.length" class="no-results">
               <div>No se encontraron resultados para "{{ searchQuery }}"</div>
               <div v-if="navStack.length" class="no-results-broaden">
                 <a class="no-results-link" @click.stop="searchFromRoot">
@@ -185,6 +212,36 @@
                     <div v-if="row.highlightedName" class="indicator-name" v-html="row.highlightedName"></div>
                     <div v-else class="indicator-name">{{ row.branch.Name }}</div>
                     <div class="indicator-meta">{{ branchLabel(row.branch) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fila de boundary (listado raíz, nivel de boundaries y
+                   resultados de búsqueda): representa la delimitación
+                   COMPLETA. El clic la agrega o la quita del mapa como capa
+                   (Type 'B'); App.vue resuelve el alta/baja con los métodos
+                   de boundary, nunca con los de métrica. No navega a sus
+                   hojas: la delimitación se ofrece como capa completa.
+                   El checkbox solo se muestra en multiselección, igual que
+                   en las hojas de indicadores: en selección simple no hay
+                   casilla y el clic es un select común (agrega y cierra). -->
+              <div v-else-if="row.type === 'boundary'"
+                   :key="row.key"
+                   class="mp-list-item indicator-item boundary-row"
+                   data-kbd-item="branch"
+                   :class="{ 'is-selected': isBoundarySelected(row.node) }"
+                   @click="onBoundaryClick(row.node)">
+                <span v-if="isMulti" class="selcheck" :class="{ 'checked': isBoundarySelected(row.node) }">
+                  <i v-if="isBoundarySelected(row.node)" class="fas fa-check"></i>
+                </span>
+                <div class="indicator-content">
+                  <div class="list-icon">
+                    <i :class="boundaryIcon(row.node)"></i>
+                  </div>
+                  <div class="indicator-info">
+                    <div v-if="row.highlightedName" class="indicator-name" v-html="row.highlightedName"></div>
+                    <div v-else class="indicator-name">{{ row.node.Name }}</div>
+                    <div class="indicator-meta">{{ boundaryLabel(row.node) }}</div>
                   </div>
                 </div>
               </div>
@@ -298,6 +355,16 @@ import CatalogTree from '@/map/classes/catalog/CatalogTree';
 import CatalogSearch from '@/map/classes/catalog/CatalogSearch';
 import SearchResultRows from '@/map/classes/catalog/SearchResultRows';
 
+// Nodo virtual de la categoría "Delimitaciones" del panel Explorar. No es una
+// rama de `categories`: solo apila un nivel en el breadcrumb y conmuta el
+// contenido del panel hacia los boundaries agrupados por su tipo. Ese nivel
+// se muestra siempre como lista (el botón de grilla se oculta ahí adentro).
+const BOUNDARIES_NODE = Object.freeze({
+  Id: '__boundaries__',
+  Name: 'Delimitaciones',
+  IsBoundaryCategory: true,
+});
+
 export default {
   name: 'IndicatorSelector',
   mixins: [clickaway],
@@ -314,9 +381,21 @@ export default {
     //   · Items lista de nodos CON Items              -> sub-categorías navegables
     //   · Items lista de nodos SIN Items              -> hojas planas
     categories: { type: Array, default: () => [] },
+    // Boundaries opcionales (delimitaciones) que se ofrecen en el panel.
+    // Es el MISMO árbol que consume el panel Filtrar: tipo/agrupador (Límites
+    // geográficos, Áreas administrativas...) -> delimitación (Provincias,
+    // Departamentos...) -> hojas, y acá las hojas no se listan: cada
+    // delimitación se ofrece como capa completa. Es un árbol SEPARADO de
+    // `categories`: la búsqueda de indicadores trabaja sobre `categories`
+    // únicamente, así que un boundary no puede aparecer como resultado de
+    // indicador (ni viceversa). Los matches de boundaries se renderizan como
+    // filas propias (type 'boundary') bajo su propio separador, y el clic
+    // agrega o quita la capa completa (select-group / deselect con Type 'B'),
+    // nunca una métrica.
+    boundaries: { type: Array, default: () => [] },
     selection: { type: Array, default: () => [] },
     suggestions: { type: Array, default: () => [] },
-    title: { type: String, default: 'Explorar indicadores' },
+    title: { type: String, default: 'Explorar' },
     rootLabel: { type: String, default: 'Categorías' },
     searchPlaceholder: { type: String, default: 'Buscar indicador o delimitación...' },
     itemNoun: { type: String, default: 'indicador' },
@@ -415,6 +494,7 @@ export default {
     // navegando dentro de boundaries. No aparece en la grilla de tipos ni en hojas.
     showDrillToggle() {
       if (!this.selectableBranches) return false;
+      if (this.insideBoundaries) return false;
       // En filtro, explorar es obligatorio (no un toggle): no se ofrece.
       if (this.filterMode) return false;
       if (this.searchQuery) {
@@ -463,8 +543,26 @@ export default {
     currentNode() {
       return this.navStack.length ? this.navStack[this.navStack.length - 1] : null;
     },
+    // ¿Se está viendo el nivel virtual de boundaries (la categoría que se
+    // abre desde la tarjeta "Delimitaciones" de la raíz)?
+    insideBoundaries() {
+      return this.currentNode != null && this.currentNode.IsBoundaryCategory === true;
+    },
+    // El botón de grilla/listado se OCULTA (en vez de deshabilitarse) cuando
+    // el modo que ofrecería no aplica: en el nivel de boundaries (siempre
+    // lista), en niveles de hojas sin ramas para mostrar como tarjetas, y
+    // buscando dentro de un nivel.
+    showViewToggle() {
+      if (this.insideBoundaries) return false;
+      return this.showingCards || this.listModeActive;
+    },
     // Contenido del nivel actual: ramas (navegables) o secciones de hojas.
     currentContent() {
+      // El nodo virtual de boundaries no pertenece al árbol: contenido
+      // vacío, el listado lo arma boundaryLevelRows.
+      if (this.insideBoundaries) {
+        return { branches: [], sections: [] };
+      }
       if (!this.currentNode) {
         return { branches: this.categories, sections: [] };
       }
@@ -472,6 +570,102 @@ export default {
     },
     currentBranches() { return this.currentContent.branches; },
     currentSections() { return this.currentContent.sections; },
+    // ¿Hay boundaries que ofrecer? (tarjeta y listado de la raíz del panel)
+    hasBoundaries() {
+      return !!(this.boundaries && this.boundaries.length);
+    },
+    // Árbol e índice de búsqueda de los boundaries, separados del árbol de
+    // indicadores (tree / catalogSearch): la búsqueda de unos nunca contamina
+    // a la del otro.
+    boundariesTree() {
+      return this.hasBoundaries ? new CatalogTree(this.boundaries) : null;
+    },
+    boundariesSearch() {
+      return this.boundariesTree ? new CatalogSearch(this.boundariesTree) : null;
+    },
+    // Delimitaciones ofrecibles: los nodos que se agregan como capa completa
+    // (Provincias, Departamentos...). En el árbol de boundaries cuelgan de los
+    // tipos/agrupadores (Límites geográficos, Áreas administrativas...), que
+    // no se ofrecen como filas: en el listado raíz se saltean (sería un nivel
+    // de más) y en la búsqueda solo cuentan estas.
+    boundaryNodes() {
+      if (!this.boundariesTree) return [];
+      const tree = this.boundariesTree;
+      const out = [];
+      for (const root of this.boundaries) {
+        const content = tree.ContentOf(root);
+        if (content.branches.length) {
+          for (const br of content.branches) {
+            if (tree.IsDelimitation(br)) out.push(br);
+          }
+        } else if (tree.IsDelimitation(root)) {
+          // Árbol sin nivel de agrupador: la raíz ya es la delimitación.
+          out.push(root);
+        }
+      }
+      return out;
+    },
+    // Conteo legible para la tarjeta y el separador de la raíz.
+    boundaryCountLabel() {
+      const n = this.boundaryNodes.length;
+      return n === 1 ? '1 delimitación' : n + ' delimitaciones';
+    },
+    // La tarjeta "Delimitaciones" solo vive en la grilla de la raíz (en el
+    // listado raíz las delimitaciones ya aparecen como filas).
+    rootBoundaryCard() {
+      return !this.navStack.length && this.boundaryNodes.length > 0;
+    },
+    // Secciones del nivel boundaries (dentro de la tarjeta): cada tipo como
+    // separador y debajo sus delimitaciones como filas. Los tipos NO se
+    // navegan: son solo el corte de control del listado.
+    boundarySections() {
+      if (!this.insideBoundaries || !this.boundariesTree) return [];
+      const tree = this.boundariesTree;
+      const sections = [];
+      for (const root of this.boundaries) {
+        const content = tree.ContentOf(root);
+        const nodes = [];
+        for (const br of content.branches) {
+          if (tree.IsDelimitation(br)) nodes.push(br);
+        }
+        if (nodes.length) {
+          sections.push({ key: 'bnd_' + this.containerKey(root), name: root.Name, nodes });
+        } else if (tree.IsDelimitation(root)) {
+          // Agrupador ausente: la delimitación va directa y sin separador.
+          sections.push({ key: 'bnd_' + this.containerKey(root), name: '', nodes: [root] });
+        }
+      }
+      return sections;
+    },
+    // Filas del nivel boundaries: separadores por tipo + filas de
+    // delimitación (cada una alterna su capa completa; nunca navegan a las
+    // hojas).
+    boundaryLevelRows() {
+      const rows = [];
+      for (const section of this.boundarySections) {
+        if (section.name) {
+          rows.push({ type: 'header', key: 'h_' + section.key, sectionKey: section.key,
+            name: section.name, count: section.nodes.length, selectable: false });
+          if (this.isCollapsed(section.key)) continue;
+        }
+        for (const node of section.nodes) {
+          rows.push({ type: 'boundary', key: section.key + '|' + this.containerKey(node), node });
+        }
+      }
+      return rows;
+    },
+    // Boundaries que coinciden con la búsqueda (por identidad contra
+    // boundaryNodes: un agrupador cuyo nombre matchee no se ofrece). Se
+    // buscan desde la raíz y desde el propio nivel de boundaries; dentro de
+    // una categoría de indicadores la búsqueda es scoped a esa categoría
+    // ("Buscar en salud..."), y desde ahí se puede ampliar con "Buscar sin el
+    // filtro", que vuelve a la raíz y sí incluye boundaries.
+    filteredBoundaries() {
+      if (!this.boundariesSearch || !this.searchQuery) return [];
+      if (this.navStack.length && !this.insideBoundaries) return [];
+      return this.boundariesSearch.FindBranches(this.searchQuery, null)
+        .filter(e => this.boundaryNodes.indexOf(e.branch) !== -1);
+    },
     groupedBranches() {
       const groups = [];
       const index = new Map();
@@ -507,13 +701,16 @@ export default {
       return new SearchResultRows(this.tree);
     },
     // Hojas bajo el nodo actual (o todo el árbol en la raíz) que coinciden por
-    // nombre, palabras clave o código exacto.
+    // nombre, palabras clave o código exacto. En el nivel de boundaries no
+    // hay hojas de indicadores que buscar.
     filteredItems() {
+      if (this.insideBoundaries) return [];
       return this.catalogSearch.FindItems(this.searchQuery, this.currentNode);
     },
     // Ramas cuyo nombre coincide con la búsqueda (p. ej. "Departamentos" al
     // buscar "departamento"): se ofrecen primero para entrar y ver sus hojas.
     filteredBranches() {
+      if (this.insideBoundaries) return [];
       return this.catalogSearch.FindBranches(this.searchQuery, this.currentNode);
     },
     listModeActive() {
@@ -545,7 +742,35 @@ export default {
           };
         });
         // Las ramas coincidentes (contenedores) van primero, para entrar en ellas.
-        const all = branchRows.concat(itemRows);
+        let all = branchRows.concat(itemRows);
+        // Separador "Indicadores" arriba de los matches de indicadores,
+        // SIEMPRE que los haya (aunque no haya delimitaciones): en la raíz
+        // la búsqueda convive con resultados de boundaries, así que cada
+        // tramo de la lista queda tipificado con su propio corte de control.
+        if (all.length) {
+          all = [{
+            type: 'header',
+            key: 'h__search_indicators__',
+            sectionKey: '__search_indicators__',
+            name: 'Indicadores',
+            count: all.length,
+            selectable: false,
+          }].concat(all);
+        }
+        // Los boundaries coincidentes van al final, bajo su propio separador:
+        // son otro tipo de entidad, y un match de boundary jamás debe leerse
+        // como resultado de indicador.
+        const matchedBoundaryRows = this.filteredBoundaries.map(e => ({
+          type: 'boundary',
+          node: e.branch,
+          key: 'bnd|' + this.containerKey(e.branch),
+          highlightedName: rowsHelper.highlightName(e.branch.Name, e.nameMatches)
+        }));
+        if (matchedBoundaryRows.length) {
+          all.push({ type: 'header', key: 'h__search_boundaries__', sectionKey: '__search_boundaries__',
+            name: 'Delimitaciones', count: matchedBoundaryRows.length, selectable: false });
+          all = all.concat(matchedBoundaryRows);
+        }
         // Con búsquedas de pocos caracteres el match puede ser de miles de filas;
         // el filtrado es barato pero renderizarlas todas no. Se muestran las
         // primeras y se ofrece "Ver más" para renderizar el resto a pedido.
@@ -555,6 +780,11 @@ export default {
           return shown;
         }
         return all;
+      }
+      // Nivel de boundaries (desde la tarjeta "Delimitaciones"): siempre
+      // lista, con los tipos como separadores.
+      if (this.insideBoundaries) {
+        return this.boundaryLevelRows;
       }
       const rows = [];
       if (this.listModeActive) {
@@ -577,6 +807,19 @@ export default {
             }
           }
         }
+        // Boundaries al pie del listado de la raíz: las delimitaciones como
+        // filas propias (agregar/quitar la capa completa), sin sus hojas y
+        // salteando el nivel de tipos (el agrupador sería un nivel de más
+        // acá; se ve entrando a la tarjeta "Delimitaciones").
+        if (this.boundaryNodes.length) {
+          rows.push({ type: 'header', key: 'h_boundaries_root', sectionKey: 'boundaries_root',
+            name: 'Delimitaciones', count: this.boundaryCountLabel, selectable: false });
+          if (!this.isCollapsed('boundaries_root')) {
+            for (const node of this.boundaryNodes) {
+              rows.push({ type: 'boundary', key: 'boundaries_root|' + this.containerKey(node), node });
+            }
+          }
+        }
         return rows;
       }
       for (const section of this.currentSections) {
@@ -596,18 +839,33 @@ export default {
     // Claves de los separadores visibles (para "Colapsar todos").
     visibleHeaderKeys() {
       if (this.searchQuery) return [];
-      if (this.listModeActive) return this.categories.map(c => 'cat_' + this.containerKey(c));
+      if (this.insideBoundaries) {
+        return this.boundarySections.filter(s => s.name).map(s => s.key);
+      }
+      if (this.listModeActive) {
+        const keys = this.categories.map(c => 'cat_' + this.containerKey(c));
+        // El separador de boundaries del listado raíz también colapsa.
+        if (this.boundaryNodes.length) keys.push('boundaries_root');
+        return keys;
+      }
       return this.currentSections.filter(s => s.Name).map(s => s.Key);
     },
     hasHeaders() { return this.visibleHeaderKeys.length > 0; },
     allCollapsed() {
       return this.hasHeaders && this.visibleHeaderKeys.every(k => this.isCollapsed(k));
     },
-    // Hay hojas chequeables a la vista (ignora el colapso): habilita el modo múltiple.
+    // Hay filas chequeables a la vista (ignora el colapso): habilita el
+    // modo múltiple. Cuentan las hojas de indicadores Y las filas de
+    // boundaries (nivel propio de delimitaciones, listado raíz y búsqueda),
+    // así que el toggle de multiselección se ofrece igual que para
+    // indicadores. El default sigue siendo multi apagado: sin multiselección
+    // no hay casillas y el clic es un select común (agrega la capa y cierra).
     hasSelectableRows() {
       if (this.searchQuery) return true;
+      if (this.insideBoundaries) return this.boundaryNodes.length > 0;
       if (this.listModeActive) {
-        return this.categories.some(c => !this.tree.ContentOf(c).branches.length);
+        return this.categories.some(c => !this.tree.ContentOf(c).branches.length) ||
+          this.boundaryNodes.length > 0;
       }
       return this.currentSections.some(s => s.Items.length > 0);
     },
@@ -720,11 +978,11 @@ export default {
       this.$emit('update:multiSelect', this.internalMulti);
     },
     panLeftSwipeClose() {
-			if (event.srcElement.className === 'excluded' ||
-				window.getSelection().toLocaleString().length > 0) {
-				return;
-			}
-			this.closePanel();
+                        if (event.srcElement.className === 'excluded' ||
+                                window.getSelection().toLocaleString().length > 0) {
+                                return;
+                        }
+                        this.closePanel();
     },
     goHome() {
       this.navStack = [];
@@ -746,6 +1004,17 @@ export default {
     // cuenta y no hubo resultados: el término se conserva y el ámbito se amplía.
     searchFromRoot() {
       this.navStack = [];
+    },
+    // Entra al nivel virtual de boundaries (tarjeta "Delimitaciones" de la
+    // grilla raíz). Ahí el contenido es siempre una lista agrupada por tipo;
+    // desde este panel nunca se navega hacia las hojas de una delimitación.
+    enterBoundaries() {
+      this.navStack = [BOUNDARIES_NODE];
+      this.searchQuery = '';
+      this.$nextTick(() => {
+        const body = this.$el.querySelector('.indicator-body');
+        if (body) body.scrollTop = 0;
+      });
     },
     enterBranch(node) {
       // Regiones: si "ver cada elemento" está inactivo (default), clic en una
@@ -830,13 +1099,40 @@ export default {
       this.$emit('select-group', this.currentNode);
       if (!this.isMulti && this.closeOnSelect) this.closePanel();
     },
+    // ── Boundaries (prop `boundaries`) ─────────────────────────────────────
+    // Activa cuando hay un chip de capa de boundary (Type 'B') con el mismo
+    // Id. Se consulta por Type y no solo por Id: un indicador o una región
+    // de recorte podría compartir el Id numérico del nodo.
+    isBoundarySelected(node) {
+      return this.selection.some(s => s.Item && s.Item.Type === 'B' && s.Id === node.Id);
+    },
+    boundaryIcon(node) {
+      return (node.Icon && node.Icon.indexOf('fa') === 0) ? node.Icon : 'fas fa-map';
+    },
+    // Mismo criterio que el panel Filtrar: "24 provincias".
+    boundaryLabel(node) {
+      if (!this.boundariesTree) return '';
+      return this.boundariesTree.BranchLabel(node, 'delimitación', 'delimitaciones', true);
+    },
+    // Clic en una delimitación: si no está en el mapa, la agrega como capa
+    // (select-group; el consumidor resuelve con AddBoundaryById, Type 'B').
+    // Si ya está, la quita (deselect con Type 'B' -> boundary.Remove).
+    // Nunca pasa por los caminos de métrica.
+    onBoundaryClick(node) {
+      if (this.isBoundarySelected(node)) {
+        this.$emit('deselect', [{ Id: node.Id, Type: 'B', Name: node.Name }]);
+        return;
+      }
+      this.$emit('select-group', node);
+      if (!this.isMulti && this.closeOnSelect) this.closePanel();
+    },
     // ── Colapso y vista ──────────────────────────────────────────────────────────
     // Colapsado salvo decisión explícita del usuario; el default depende del
     // contexto: el listado unificado siempre arranca colapsado, los niveles hoja
     // según expandLeaves.
     isCollapsed(key) {
       if (key in this.expanded) return !this.expanded[key];
-      if (this.listModeActive) return false;
+      if (this.listModeActive || this.insideBoundaries) return false;
       return !this.expandLeaves;
     },
     toggleCollapse(key) { this.$set(this.expanded, key, this.isCollapsed(key)); },
@@ -845,6 +1141,9 @@ export default {
       for (const key of this.visibleHeaderKeys) this.$set(this.expanded, key, expand);
     },
     toggleViewMode() {
+      // En el nivel de boundaries el listado es obligatorio: el botón ni
+      // siquiera se muestra (showViewToggle); esto es una salvaguarda.
+      if (this.insideBoundaries) return;
       if (this.navStack.length) {
         // Desde un nivel interior, el botón lleva a la raíz en modo listado.
         this.navStack = [];
@@ -921,52 +1220,52 @@ export default {
 
 <style scoped>
 /* Wrapper posicionado (como en searchPanel.vue): sobre él actúa la transición global slide-right. */
-	.indicator-selector-wrapper {
-		position: absolute;
-		left: calc(92px + var(--mp-side-offset, 0px));
-		top: 0;
-		bottom: 0;
-		margin: auto 0;
-		width: 420px;
-		max-width: calc(100vw - 112px - var(--mp-side-offset, 0px));
-		min-height: min(50vh, 400px);
-		max-height: min(80vh, 750px);
-		border-radius: 12px;
-		z-index: 1050;
-		display: flex;
-		flex-direction: column;
-	}
+        .indicator-selector-wrapper {
+                position: absolute;
+                left: calc(92px + var(--mp-side-offset, 0px));
+                top: 0;
+                bottom: 0;
+                margin: auto 0;
+                width: 420px;
+                max-width: calc(100vw - 112px - var(--mp-side-offset, 0px));
+                min-height: min(50vh, 400px);
+                max-height: min(80vh, 750px);
+                border-radius: 12px;
+                z-index: 1050;
+                display: flex;
+                flex-direction: column;
+        }
 
 /* Panel */
-	.floating-panel {
-		flex: 1 1 auto;
-		min-height: 0;
-		margin: 0;
-		background: white;
-		border-radius: inherit;
-		border: 1px solid rgb(165 164 164 / 50%);
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-	}
+        .floating-panel {
+                flex: 1 1 auto;
+                min-height: 0;
+                margin: 0;
+                background: white;
+                border-radius: inherit;
+                border: 1px solid rgb(165 164 164 / 50%);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+        }
 
 /* Encabezado */
-	.panel-header {
-		padding: 12px 16px 8px 16px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		flex-shrink: 0;
-	}
+        .panel-header {
+                padding: 12px 16px 8px 16px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-shrink: 0;
+        }
 .panel-header-actions { display: flex; align-items: center; gap: 4px; }
 
 /* Breadcrumb */
-	.breadcrumb-nav {
-		padding: 0px 12px 2px 24px;
-		font-size: 16px;
-		flex-shrink: 0;
-		line-height: 1.75em;
-	}
+        .breadcrumb-nav {
+                padding: 0px 12px 2px 24px;
+                font-size: 16px;
+                flex-shrink: 0;
+                line-height: 1.75em;
+        }
 .breadcrumb-item { color: #666; transition: color 0.2s; }
 .breadcrumb-item:not(.active) { cursor: pointer; }
 .breadcrumb-item:not(.active):hover { color: #333; text-decoration: underline; }
@@ -974,27 +1273,27 @@ export default {
 .breadcrumb-sep { margin: 0 8px; color: #ccc; }
 
 /* Cuerpo */
-	.indicator-body {
-		flex: 1;
-		overflow-y: auto;
-		padding:  4px 15px 20px 15px;
-		min-height: 150px;
-	}
+        .indicator-body {
+                flex: 1;
+                overflow-y: auto;
+                padding:  4px 15px 20px 15px;
+                min-height: 150px;
+        }
 
 /* Chips */
-	.chips-zone {
-		position: relative;
-		padding: 12px;
-		padding-bottom: 10px;
-		padding-left: 20px;
-	}
-	.chips-clear {
-		margin-right: 8px;
-		float: right;
-		z-index: 1;
-	}
+        .chips-zone {
+                position: relative;
+                padding: 12px;
+                padding-bottom: 6px;
+                padding-left: 20px;
+        }
+        .chips-clear {
+                margin-right: 8px;
+                float: right;
+                z-index: 1;
+        }
 .chips-scroll {
-  display: flex; flex-wrap: wrap; gap: 6px;
+  display: flex; flex-wrap: wrap; gap: 8px;
   max-height: 96px; overflow-y: auto; /* ~3 renglones, luego scroll */
   padding-right: 28px; /* lugar para la cruz */
 }
@@ -1003,12 +1302,12 @@ export default {
 .chips-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
 /* Búsqueda */
-	/* Search Input */
-	.search-container {
-		position: relative;
-		padding: 12px 20px 12px 20px;
-		margin-bottom: 2px;
-	}
+        /* Search Input */
+        .search-container {
+                position: relative;
+                padding: 12px 20px 12px 20px;
+                margin-bottom: 2px;
+        }
 /* Grid de categorías */
 .categories-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 8px; }
 .category-card {
@@ -1023,34 +1322,42 @@ export default {
 .category-card.featured { background: linear-gradient(135deg, #c3c3c3 0%, #818181 100%); color: white; border: none; }
 .category-card.featured .category-name { color: white; }
 .category-card.featured .category-count { color: rgba(255, 255, 255, 0.8); }
-	.category-icon {
-		font-size: 32px;
-		color: #666;
-		display: block;
-		margin-bottom: 12px;
-	}
+        .category-icon {
+                font-size: 32px;
+                color: #666;
+                display: block;
+                margin-bottom: 12px;
+        }
 .category-icon.featured { text-shadow: none; color: #69bad5; }
 .category-name { font-size: 15px; color: #333; margin-bottom: 4px; line-height: 1.3; font-weight: 500; }
 .category-count { font-size: 13px; color: #999; padding-top: 2px; line-height: 1.3; }
 
+/* Boundaries (panel Explorar): tarjeta de categoría, nivel propio y filas
+   de resultados de búsqueda. El estado seleccionado de una fila refleja que
+   la capa ya está en el mapa; el clic alterna el alta/baja usando siempre
+   los métodos de boundary (Type 'B'), nunca los de métrica. */
+.boundary-card .boundary-icon {  }
+.boundary-row.is-selected .indicator-name { color: var(--mp-selection-strong); }
+.boundary-row .selcheck { margin-right: 4px; }
+
 .add-all-bar { padding: 8px 14px; border-top: 1px solid #eee; background: #fafafa; flex: 0 0 auto; }
 
 /* Separadores / encabezados de sección (colapsables) */
-	.source-header {
-		font-size: 13.5px;
-		color: #707070;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: background 0.15s;
-		padding-left: 20px;
-		padding-right: 15px;
-		border-radius: 20px;
-		padding-top: 12px;
-		padding-bottom: 12px;
-	}
+        .source-header {
+                font-size: 13.5px;
+                color: #707070;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: background 0.15s;
+                padding-left: 20px;
+                padding-right: 15px;
+                border-radius: 20px;
+                padding-top: 12px;
+                padding-bottom: 12px;
+        }
 .source-header:first-child { margin-top: 0; }
 @media (hover: hover) {
   .source-header.hand:hover { background: #f5f5f5; color: #777; }
@@ -1173,20 +1480,20 @@ export default {
   .category-card:hover { transform: none; }
 }
 
-	@media (max-width: 768px) {
-		.indicator-selector-wrapper {
-			left: 0;
-			width: 90%;
-			max-width: 100%;
-			max-height: 80% !important;
-			border-top-right-radius: 12px;
-			border-bottom-right-radius: 12px;
-			border-bottom-left-radius: 0px;
-			border-top-left-radius: 0px;
-		}
-		.floating-panel {
-			border-left: 0px;
-		}
+        @media (max-width: 768px) {
+                .indicator-selector-wrapper {
+                        left: 0;
+                        width: 90%;
+                        max-width: 100%;
+                        max-height: 80% !important;
+                        border-top-right-radius: 12px;
+                        border-bottom-right-radius: 12px;
+                        border-bottom-left-radius: 0px;
+                        border-top-left-radius: 0px;
+                }
+                .floating-panel {
+                        border-left: 0px;
+                }
 
   .preview-tooltip {
     left: 50% !important; top: 50% !important; transform: translate(-50%, -50%);

@@ -8,26 +8,26 @@
       @update:sidebarPosition="onSidebarPositionChange"
     />
 
-    <!-- Panel de Indicadores -->
     <IndicatorSelector
       :is-open="activePanel === 'indicators'"
       :categories="indicators"
-      :selection="indicatorSelection"
+      :boundaries="boundaries"
+      :selection="explorerSelection"
       :sidebar-position="sidebarPosition"
       :expand-leaves="true"
       :suggestions="suggestions"
-      title="Explorar indicadores"
+      title="Explorar"
       :filterMode="true"
       root-label="Categorías"
-      search-placeholder="Buscar indicador..."
+      search-placeholder="Buscar..."
       item-noun="indicador"
       item-noun-plural="indicadores"
       @select="onIndicatorSelect"
       @deselect="onIndicatorDeselect"
+      @select-group="onBoundaryGroup"
       @close="closePanel"
     />
 
-    <!-- Panel de Delimitaciones (botón de filtro) -->
     <IndicatorSelector
       :is-open="activePanel === 'places'"
       :categories="boundaries"
@@ -40,7 +40,7 @@
       :emit-container="true"
       :multi-select.sync="boundaryMulti"
       title="Filtrar"
-      root-label="Categorías"
+      root-label="Delimitaciones"
       search-placeholder="Buscar delimitación..."
       item-noun="delimitación"
       item-noun-plural="delimitaciones"
@@ -68,7 +68,7 @@ import EscapeCloseHandler from '@/map/classes/EscapeCloseHandler';
 
 // Atajos Ctrl+letra → panel. Reemplazan los atajos del navegador (buscar en
 // la página, marcadores, etc.) mientras la barra lateral está disponible.
-const PANEL_SHORTCUTS = { i: 'indicators', f: 'places', b: 'search' };
+const PANEL_SHORTCUTS = { e: 'indicators', f: 'places', b: 'search' };
 
 export default {
   name: 'SideToolbar',
@@ -179,6 +179,14 @@ export default {
 
       return chips;
     },
+    // Chips del panel Explorar: indicadores activos + delimitaciones en el
+    // mapa (capas 'B') + regiones de recorte ('C'), igual criterio que el
+    // panel de summary. El panel marca activa una delimitación consultando
+    // el Type del chip (no solo el Id), y al quitarla el deselect conserva
+    // el Type para que App.vue use el método de baja correcto.
+    explorerSelection() {
+      return this.indicatorSelection.concat(this.boundarySelection);
+    },
   },
   methods: {
     handlePanelToggle(panel) {
@@ -252,7 +260,7 @@ export default {
         this.activePanel = 'indicators';
         return;
       }
-      // Atajos directos: Ctrl+I indicadores, Ctrl+F filtrar, Ctrl+B buscar.
+      // Atajos directos: Ctrl+E explorar, Ctrl+F filtrar, Ctrl+B buscar.
       if (e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && typeof e.key === 'string') {
         const target = PANEL_SHORTCUTS[e.key.toLowerCase()];
         if (target && this.getPanelOrder().indexOf(target) >= 0) {
@@ -285,7 +293,15 @@ export default {
       items.forEach(it => this.$emit('selectedItem', { Id: it.Id, Type: 'M', Item: it }));
     },
     onIndicatorDeselect(items) {
-      items.forEach(it => this.$emit('deselectedItem', { Id: it.Id, Type: 'M', Item: it }));
+      items.forEach(it => {
+        if (it && it.Type === 'B') {
+          this.$emit('deselectedItem', { Id: it.Id, Type: 'B', Item: it });
+        } else if (it && it.Type === 'C') {
+          this.$emit('deselectedItem', { Id: it.Id, Type: 'C', Item: it });
+        } else {
+          this.$emit('deselectedItem', { Id: it.Id, Type: 'M', Item: it });
+        }
+      });
     },
 
     // ── Delimitaciones ───────────────────────────────────────────────────────────

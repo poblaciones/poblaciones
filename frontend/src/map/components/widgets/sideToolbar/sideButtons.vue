@@ -17,8 +17,8 @@
               class="mp-icon-btn mp-icon-btn--lg mp-icon-btn--accent"
               :class="{ 'is-selected': activePanel === 'indicators', 'toolbar-button-last': sidebarPosition === 'bottom' }"
               @click="togglePanel('indicators')"
-              title="Explorar indicadores (Ctrl+I)"
-              aria-label="Explorar indicadores"
+              title="Explorar (Ctrl+E)"
+              aria-label="Explorar"
               :aria-pressed="$ariaPressed(activePanel === 'indicators')">
         <i class="fas fa-plus"></i>
       </button>
@@ -94,12 +94,12 @@ export default {
     };
   },
  computed: {
- 		Embedded() {
-				return window.Embedded;
-			},
-  		useUpload() {
-	  		return window.Use.UseUploadFromMap;
-		  }
+                Embedded() {
+                                return window.Embedded;
+                        },
+                useUpload() {
+                        return window.Use.UseUploadFromMap;
+                  }
     },
   methods: {
     togglePanel(panel) {
@@ -156,7 +156,7 @@ export default {
 
 <style scoped>
 .map-toolbar {
-	border: 1px solid rgb(165 164 164 / 50%);
+        border: 1px solid rgb(165 164 164 / 50%);
   position: absolute;
   left: calc(20px + var(--mp-side-offset, 0px));
   transition: left .3s ease;

@@ -44,7 +44,7 @@ function indicatorLevels(item) {
 
 export function buildIndicatorInfo(item, container, parentName) {
   const sections = [
-    { Label: 'Variables', List: indicatorVariables(item) },
+    { Label: 'Categorías', List: indicatorVariables(item) },
     { Label: 'Niveles', Text: indicatorLevels(item).join(', ') },
   ];
   if (item.Versions && item.Versions.length) {

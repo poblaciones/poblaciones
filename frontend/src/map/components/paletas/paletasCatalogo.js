@@ -118,7 +118,7 @@ export default [
 				state: { panel: 'indicators' },
 				code: `<button type="button" class="mp-icon-btn mp-icon-btn--lg mp-icon-btn--accent"
 				:class="{ 'is-selected': panel === 'indicators' }" :aria-pressed="$ariaPressed(panel === 'indicators')"
-				title="Explorar indicadores" aria-label="Explorar indicadores" @click="panel = 'indicators'"><i class="fas fa-plus"></i></button>
+				title="Explorar" aria-label="Explorar" @click="panel = 'indicators'"><i class="fas fa-plus"></i></button>
 <button type="button" class="mp-icon-btn mp-icon-btn--lg"
 				:class="{ 'is-selected': panel === 'search' }" :aria-pressed="$ariaPressed(panel === 'search')"
 				title="Buscar" aria-label="Buscar" @click="panel = 'search'"><i class="fas fa-search"></i></button>`
