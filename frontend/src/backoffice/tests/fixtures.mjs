@@ -71,8 +71,8 @@ function resolvePropDefault(definition) {
 }
 
 // "Instancia" el objeto de opciones de un componente sin Vue: defaults de
-// props, data(), methods enlazados, computed como getters sin caché y $emit
-// registrado en $emitted. No ejercita template, DOM ni watchers (para esos,
+// props, methods enlazados, data(), computed como getters sin caché y $emit
+// registrado en $emitted. Sigue el orden de Vue: beforeCreate, props, methods, data, computed. No ejercita template, DOM ni watchers (para esos,
 // el test invoca component.watch[nombre].call(vm)).
 //  options.propsData: valores de props.   options.mocks: $route, $router, $refs, etc.
 let nextUid = 1;
@@ -106,11 +106,14 @@ export function mountLite(component, options) {
 		}
 	}
 	Object.assign(vm, settings.propsData || {});
-	if (component.data) {
-		Object.assign(vm, component.data.call(vm));
+	if (component.beforeCreate) {
+		component.beforeCreate.call(vm);
 	}
 	for (const [name, method] of Object.entries(component.methods || {})) {
 		vm[name] = method.bind(vm);
+	}
+	if (component.data) {
+		Object.assign(vm, component.data.call(vm));
 	}
 	for (const [name, definition] of Object.entries(component.computed || {})) {
 		const descriptor = { configurable: true, enumerable: true };

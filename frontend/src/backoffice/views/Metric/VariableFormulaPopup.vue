@@ -136,7 +136,7 @@
 				<md-button @click="hide">Cancelar</md-button>
 				<md-button class="md-primary" @click="Save">Guardar</md-button>
 			</template>
-			<md-button v-else="" @click="hide" class="md-primary">Listo</md-button>
+			<md-button v-else="" @click="hide">Cerrar</md-button>
 		</md-dialog-actions>
 
 		</md-dialog>
@@ -167,6 +167,8 @@ export default {
 			showDialog: false,
 			newVariable: null,
 			newNormalization: null,
+			newGapVariable: null,
+			newGapNormalization: null,
 			columnsForFilter: [],
 		};
 	},
@@ -186,8 +188,8 @@ export default {
 			}
 			this.Variable = f.clone(variable);
 			this.originalFilterValue = variable.FilterValue;
-			if (this.Variable.Symbology.NormalizationScale === null) {
-				this.Variable.Symbology.NormalizationScale = 100;
+			if (this.Variable.NormalizationScale === null) {
+				this.Variable.NormalizationScale = 100;
 			}
 			this.useFilter = this.Variable.FilterValue !== null;
 			this.showDialog = true;

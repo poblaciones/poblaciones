@@ -254,7 +254,7 @@
 				<md-button @click="hide">Cancelar</md-button>
 				<md-button class="md-primary" @click="Save">Guardar</md-button>
 			</template>
-			<md-button v-else @click="hide" class="md-primary">Listo</md-button>
+			<md-button v-else @click="hide">Cerrar</md-button>
 		</md-dialog-actions>
 
 		</md-dialog>
@@ -340,7 +340,7 @@ export default {
 			window.Db.ServerClipboardPaste().then(function(data) {
 				if (data.text === null) {
 					alert('No hay valores disponibles. Para pegar una simbología debe realizar \'copiar simbología\' en otro indicador.');
-				} else
+				} else {
 					var newClone = f.clone(loc.Variable);
 					var newData = JSON.parse(data.text);
 					loc.Dataset.ScaleGenerator.ApplySymbology(loc.Level, newClone, newData);
@@ -348,6 +348,7 @@ export default {
 					loc.receiveVariable(newClone);
 					loc.originalVariable = keepOriginalVariable;
 					loc.RegenCategories();
+				}
 			});
 		},
 		pasteColors() {
@@ -469,7 +470,7 @@ export default {
 			var known = {};
 			for (var i = 0; i < this.Variable.Values.length; i++) {
 				var v = this.Variable.Values[i];
-				if (known[v.value]) {
+				if (known[v.Value]) {
 					return v.Value + ' - ' + v.Caption;
 				}
 				known[v.Value] = true;
@@ -484,8 +485,8 @@ export default {
 			var last = null;
 			for (var i = 0; i < this.Variable.Values.length; i++) {
 				var v = this.Variable.Values[i];
-				if (v.value !== null && last !== null &&
-						v.value > last) {
+				if (v.Value !== null && last !== null &&
+						v.Value < last) {
 						alert('Los rangos deben encontrarse en orden creciente y no superponerse.');
 						return false;
 				}

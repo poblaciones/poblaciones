@@ -70,7 +70,7 @@ export default {
 		},
 		save() {
 			var max = Number.MAX_VALUE;
-			var min = Number.MIN_VALUE;
+			var min = -Number.MAX_VALUE;
 			if (this.previous !== null) {
 				if (this.previousValue === null ||
 					(this.previousValue + '').trim() === '') {
@@ -94,7 +94,7 @@ export default {
 				max = this.parseNumber(this.itemValue);
 				if (isNaN(max)) {
 					alert("Debe indicar un valor numérico.");
-						this.$refs.minInput.focus();
+						this.$refs.maxInput.focus();
 						return;
 				}
 			}

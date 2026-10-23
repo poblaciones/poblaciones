@@ -21,12 +21,13 @@ export const stubbedPackages = {
 	'vue-router': path.join(stubsDir, 'vue-router.mjs'),
 	'vue-clickaway': path.join(stubsDir, 'vue-clickaway.mjs'),
 	'vue-sidebar-menu': path.join(stubsDir, 'vue-sidebar-menu.mjs'),
+	leaflet: path.join(stubsDir, 'leaflet.mjs'),
 };
 
 // Paquetes de interfaz sin lógica que los tests ejerciten: cualquier import
 // que empiece con estos prefijos resuelve a un componente vacío.
 export const genericStubPrefixes = [
-	'split.js', 'vue2-dropzone', 'html2canvas', 'leaflet',
+	'split.js', 'vue2-dropzone', 'html2canvas',
 	'jqwidgets-scripts/', 'vue-material-design-icons/',
 ];
 export const genericStub = path.join(stubsDir, 'generic.mjs');
@@ -40,6 +41,7 @@ export function isStylesheet(specifier) {
 // (map) arrastra dependencias de mapa que no corresponden a estos tests.
 export const stubbedAliases = {
 	'@/map/js/helper': path.join(stubsDir, 'mapHelper.cjs'),
+	'@/map/classes/Search': path.join(stubsDir, 'mapSearch.mjs'),
 };
 
 // Archivos del proyecto que se reemplazan por completo. Layout arrastra la
@@ -48,3 +50,8 @@ export const stubbedAliases = {
 export const stubbedFiles = {
 	[path.join(sourceRoot, 'backoffice', 'views', 'Layout', 'Layout.vue')]: path.join(stubsDir, 'layout.mjs'),
 };
+
+// Imágenes que los componentes requieren desde paquetes: se resuelven a un
+// archivo vacío, que el registro de extensiones convierte en su nombre.
+export const imagePrefixes = ['leaflet/dist/images/'];
+export const imageStub = path.join(stubsDir, 'image.png');

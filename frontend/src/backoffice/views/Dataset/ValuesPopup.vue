@@ -81,7 +81,7 @@
 					<md-button class="md-primary" @click="save()">Aceptar</md-button>
 				</div>
 				<div v-else>
-						<md-button @click="openPopup = false" class="md-primary" >Listo</md-button>
+						<md-button @click="openPopup = false">Cerrar</md-button>
 				</div>
 
 			</md-dialog-actions>
@@ -379,7 +379,7 @@ export default {
 			var loc = this;
 			var selectedRows = this.selectedIndexes();
 			for(var n = selectedRows.length - 1; n >= 0; n--) {
-				if (this.source.localdata[selectedRows[n]].Id !== null)
+				if (this.source.localdata[selectedRows[n]].Id > 0)
 					this.deletedList.push(this.source.localdata[selectedRows[n]].Id);
 				arr.RemoveAt(this.source.localdata, selectedRows[n]);
 			}
@@ -546,8 +546,8 @@ export default {
 			this.bindData = f.clone(valueList);
 			this.reloadRowCallback = reloadCallback;
 			this.destroyCallback = destroyCallback;
-			if (this.doingAutorecode) {
-				this.message = "<p>La variable seleccionada serán utilizada para crear una variable numérica con etiquetas.</p>"
+			if (this.doingAutoRecode) {
+				this.message = "<p>La variable seleccionada será utilizada para crear una variable numérica con etiquetas.</p>"
 												+"<p>Este proceso reemplazará los valores de texto por números secuenciales (1, 2, 3, ..) generando "
 												+"etiquetas para los valores con los textos actuales.</p>";
 			} else {

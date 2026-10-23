@@ -6,7 +6,7 @@
 //  - import de ESM: hooks de _alias-hooks.mjs.
 import Module, { register } from 'node:module';
 import path from 'node:path';
-import { genericStub, genericStubPrefixes, isStylesheet, sourceRoot, stubbedAliases, stubbedPackages } from './_paths.mjs';
+import { genericStub, genericStubPrefixes, imagePrefixes, imageStub, isStylesheet, sourceRoot, stubbedAliases, stubbedPackages } from './_paths.mjs';
 
 const resolveFilename = Module._resolveFilename;
 Module._resolveFilename = function (request, parent, isMain, options) {
@@ -20,6 +20,11 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 	}
 	if (isStylesheet(request)) {
 		return genericStub;
+	}
+	for (const prefix of imagePrefixes) {
+		if (request.startsWith(prefix)) {
+			return imageStub;
+		}
 	}
 	if (stubbedAliases[request]) {
 		return stubbedAliases[request];

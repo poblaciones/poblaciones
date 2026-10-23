@@ -213,12 +213,14 @@ export default {
 			this.newMetric.Source.VersionId = this.newMetric.SelectedVersion.Version.Id;
 			this.newMetric.Source.LevelId = this.newMetric.SelectedLevel.Id;
 
+			// Las categorías viajan aparte (compactadas): se excluyen del origen en una copia,
+			// para que un reintento del proceso vuelva a enviarlas.
 			var labelIds = JSON.stringify(this.newMetric.Source.ValueLabelIds);
-			this.newMetric.Source.ValueLabelIds = null;
+			var source = Object.assign({}, this.newMetric.Source, { ValueLabelIds: null });
 			var compact = this.compactIdList(labelIds);
 			var ret = {
 					k: this.Dataset.properties.Id,
-					s: JSON.stringify(this.newMetric.Source),
+					s: JSON.stringify(source),
 					labelsCompact: compact.values,
 					labelsDict: JSON.stringify(compact.dict),
 			};
@@ -297,9 +299,12 @@ export default {
 		},
 		GetLargestNTilesCut(size, groups) {
 			for (var n = size; n >= 1; n--) {
-				var elements = groups[n].ntiles.length;
-				if (elements === n - 1 && groups[n].ntiles[elements - 1] !== null) {
-					return n;
+				var group = groups[n];
+				if (group) {
+					var elements = group.ntiles.length;
+					if (elements === n - 1 && group.ntiles[elements - 1] !== null) {
+						return n;
+					}
 				}
 			}
 			return 0;

@@ -36,6 +36,15 @@ await import('./works.test.mjs');
 await import('./invoker.test.mjs');
 await import('./stepper.test.mjs');
 await import('./sidebar.test.mjs');
+await import('./activeGrid.test.mjs');
+await import('./activeGridData.test.mjs');
+await import('./valuesPopup.test.mjs');
+await import('./dictionaryPopup.test.mjs');
+await import('./variableSymbologyPopup.test.mjs');
+await import('./metricsTab.test.mjs');
+await import('./calculatedWizard.test.mjs');
+await import('./valuePopup.test.mjs');
+await import('./variableFormulaPopup.test.mjs');
 await import('./backofficeSearch.test.mjs');
 
 await report();

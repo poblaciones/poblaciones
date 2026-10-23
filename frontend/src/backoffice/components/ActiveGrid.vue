@@ -386,7 +386,8 @@ export default {
 		},
 		fixPolygon() {
 			var row = this.getSelectedRowData();
-			this.$refs.FixPolygon.show(row[codeDataField.name]);
+			var polygonDataField = this.Dataset.GetDataFieldByColumnId(this.showingErrors, this.georeferenceParameters.polygon);
+			this.$refs.FixPolygon.show(row[polygonDataField.name]);
 		},
 		fixCode(codeRef) {
 			var row = this.getSelectedRowData();

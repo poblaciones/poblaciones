@@ -70,76 +70,53 @@ Idénticas a las del módulo tabla; se repiten las operativas:
 
 ## 10. Tests
 
-Batería propia, sin framework externo, análoga a la del módulo tabla. Se corre
-desde la raíz del módulo con:
+Batería propia, sin framework externo (mismo esquema que la del módulo `map`).
+Se corre desde la raíz del proyecto con:
 
-    node --import ./tests/_register-alias.mjs tests/run-all.mjs
+    npm run test:backoffice
 
-por ahora no hay tests hechos, pero en otro lado, que es /map en lugar de /BackOffice, está como:
+(equivale a `node --import ./src/backoffice/tests/_register-alias.mjs
+src/backoffice/tests/run-all.mjs`).
 
-- `tests/_harness.mjs`: micro-harness. `describe/it/expect`, soporta tests
-  async (cola interna; `report()` es async). `describe` admite usarse como
-  separador, sin callback. La lista de matchers es **cerrada**: **`toBe`,
-  `toEqual`, `toBeCloseTo`, `toBeNull`, `toBeTruthy`, `toBeFalsy`,
-  `toHaveLength`**. Antes de usar un matcher, verificar que esté en esa lista.
-- `tests/_register-alias.mjs` + `_alias-hooks.mjs`: loader que permite correr
-  los fuentes reales bajo Node sin webpack. Hace cuatro cosas:
-  1. Resuelve los alias `@/map/...` a los archivos reales del módulo y los
-     imports relativos sin extensión (estilo webpack) probando `.js` y `.vue`.
-  2. Mapea `@/common/...` y los paquetes npm de UI (vue, axios, svg.js,
-     html2canvas, canvg, leaflet, vue-clickaway, @tweenjs/tween.js,
-     js-cookie) a stubs en `tests/_stubs/`. Cualquier import bajo
-     `vue-material-design-icons/` resuelve a un único stub genérico
-     (`mdi-icon.mjs`), sin registrar cada ícono por separado. Los stubs de
-     `str`/`arr`/`color` tienen **implementaciones reales mínimas** (la
-     lógica testeada depende de que funcionen); `err` registra las llamadas
-     en `err.calls` sin lanzar ni mostrar diálogos.
-  3. Sirve los `.vue` extrayendo solo su bloque `<script>` (permite testear la
-     lógica de componentes como `indicatorSelector`), fuerza los `.js` del
-     módulo a formato ESM, reescribe los `require()` inline a
-     `globalThis.__stubRequire` (multigeojson, parse-svg, querystring,
-     form-data) y envuelve los módulos CommonJS (`helper.js`) para exportarlos
-     como default.
-  4. Define un `window` global mínimo **en import time**: el patrón de
-     herencia `X.prototype = new Y()` ejecuta constructores base que consultan
-     `window.SegMap` al cargarse el módulo. `setupWindow()` (fixtures) lo
-     reemplaza luego por el mock completo en cada test.
-- `tests/fixtures.mjs`:
-  - `setupWindow()` arma `window` con el mock de SegMap (frame, Clipping,
-    SaveRoute, Session, Configuration) y lo devuelve para ajustarlo por test.
-  - `makeMetricProperties` / `makeVersion` / `makeLevel` / `makeVariable` /
-    `makeValueLabel`: el JSON de un indicador con la forma mínima que el
-    cliente espera del servidor. `makeCatalogTree`: árbol como el de
-    `GetFabIndicators`/`GetFabBoundaries` (incluye el formato diccionario
-    anterior y un nodo con `VersionId` y agrupadores).
-  - `mountLite(componente, opciones)` "instancia" el objeto de opciones de un
-    componente Vue sin Vue: defaults de props, `data()`, methods bindeados,
-    computed como getters sin caché, `$emit` registrado en `$emitted`. Alcanza
-    para ejercitar la lógica pura del componente; **no** prueba template, DOM
-    ni watchers.
+- `tests/_harness.mjs`: `describe/it/expect`, soporta tests async. La lista de
+  matchers es **cerrada**: **`toBe`, `toEqual`, `toBeCloseTo`, `toBeNull`,
+  `toBeTruthy`, `toBeFalsy`, `toHaveLength`**. Antes de usar un matcher,
+  verificar que esté en esa lista (no hay `not` ni `toContain`).
+- `tests/_paths.mjs` + `_register-alias.mjs` + `_alias-hooks.mjs`: loader que
+  corre los fuentes reales bajo Node sin webpack. Resuelve `@/...` y los
+  imports relativos sin extensión, sirve los `.vue` con su bloque `<script>`
+  únicamente y elige ESM/CommonJS según el contenido de cada archivo. Los
+  paquetes y módulos que no deben ejercitarse se reemplazan por dobles de
+  `tests/_stubs/` (el de `axios` es el de `common/tests/_stubs`), y las
+  imágenes y hojas de estilo se resuelven a un valor vacío. **Todo reemplazo
+  nuevo se declara en `_paths.mjs`**; `Layout.vue`, `@/map/js/helper` y
+  `@/map/classes/Search` se reemplazan para no arrastrar el módulo `map`.
+- `tests/fixtures.mjs`: `setupBackoffice(privilegios)` (arma `window.Context`,
+  `window.Db` y `window.host` sobre los dobles de navegador de `common`),
+  `mountLite(componente, { propsData, mocks })` y utilidades (`parseBody`,
+  `installCancelToken`). `mountLite` sigue el orden de Vue (`beforeCreate`,
+  props, methods, data, computed) pero **no** prueba template, DOM ni
+  watchers: estos últimos se invocan a mano con `Componente.watch[nombre].call(vm)`.
+  Los dobles propios de un tema viven en `*Fixtures.mjs`.
 - `tests/run-all.mjs`: registra cada suite con `await import('./X.test.mjs')`.
   Al crear una suite nueva, agregar su import acá.
-- Suites actuales y qué protegen:
-  - `mercator.test.mjs` — bounds de tiles (documenta la convención Min=NO /
-    Max=SE con latitud invertida), normalización e intersecciones.
-  - `metricsList.test.mjs` — segmentos de apilamiento: inserción tras las
-    capas bloqueadas, posición absoluta en el mapa (z-order), movimiento,
-    búsqueda por Id.
-  - `activeMetric.test.mjs` — nivel según zoom (rango, extremos, pin,
-    exclusión del último nivel no-D, conservación de la variable por nombre),
-    métricas de resumen válidas (N/I/P/FIL/K/A/D/T y la exclusión de área en
-    segmentos), patrones, estilos, visibilidad de categorías, homónimas entre
-    niveles.
-- **La cantidad de pruebas cambia seguido**; no fijar un número acá.
-  Consultarla corriendo la batería (la última línea informa "N pasaron, 0
-  fallaron"). Al cerrar una tanda, la batería debe quedar **en verde con 0
-  fallos**.
-- Los tests **caracterizan el comportamiento real**, incluso donde sorprende
-  (la convención de latitud de `getTileBounds`, el bloque `w` de la ruta). Si
-  un comportamiento caracterizado se decide cambiar, se cambia el test en la
-  misma tanda, explícitamente.
-- Las clases que dependen de `window.SegMap` se prueban ajustando el mock de
-  `setupWindow()`, no inyectando dependencias a las clases.
+- Organización: una suite por clase o componente (`X.test.mjs`). Cubren la
+  lógica de `classes/` (permisos, escalas, acceso a datos), la consistencia de
+  la tabla de rutas y los componentes con lógica propia (listado de
+  cartografías, menú lateral, grilla, diccionario, categorías, simbología,
+  asistente de indicadores calculados). Quedan fuera de la batería: templates y
+  estilos, `GeographyOverlay` y `Relocate.vue` (dependen de Leaflet) y
+  `main.js`. Los componentes de poca lógica (p. ej. `StepSource`,
+  `GeoreferenceTab`, `ImportPopup`, `IconPickerPopup`, `SharePopup`) no tienen
+  suite todavía.
+- **La cantidad de pruebas cambia seguido**; no fijar un número acá. Al cerrar
+  una tanda, la batería debe quedar **en verde con 0 fallos**.
+- Los tests **caracterizan el comportamiento real**, incluso donde sorprende;
+  esos casos se nombran con "(comportamiento actual)". Si se decide corregir
+  un defecto o cambiar un comportamiento, se cambia el test en la misma
+  tanda, explícitamente.
+- El estado global se prepara con `setupBackoffice`, no inyectando
+  dependencias en las clases.
 
 ### Verificación obligatoria antes de entregar
 
