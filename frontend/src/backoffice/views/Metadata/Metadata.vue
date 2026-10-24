@@ -109,7 +109,7 @@ export default {
 								</p>`  + this.extraHelp('MetadataAbstractSection') },
 				{ Id: 'sources', Label: 'Fuentes secundarias', Helper: `
 							 <p>
-								 La sección de fuentes` + this.SecondaryLabel + ` permite ofrecer la lista de datos o documentación en la que se apoyó
+								 La sección de fuentes` + this.secondaryLabel() + ` permite ofrecer la lista de datos o documentación en la que se apoyó
 								 la construcción de la información puesta a disposición.
 							 </p><p>
 								 De esta forma, pueden consignarse como fuentes secundarias censos, encuestas o
@@ -129,9 +129,6 @@ export default {
 			};
 	},
 	computed: {
-		SecondaryLabel() {
-			return (this.useComplexAbstract ? '' : ' secundarias');
-		},
 		hasCurrentWork() {
 			return Context.CurrentWork != null;
 		},
@@ -144,6 +141,10 @@ export default {
 		}
 	},
 		methods: {
+			// Es un método y no una propiedad calculada porque data() lo usa y las calculadas aún no existen.
+			secondaryLabel() {
+				return (this.useComplexAbstract ? '' : ' secundarias');
+			},
 			extraHelp(section) {
 				if (window && window.Context.HelpLinkSection) {
 					return window.Context.HelpLinkSection(window.Context.Configuration.Help[section]);

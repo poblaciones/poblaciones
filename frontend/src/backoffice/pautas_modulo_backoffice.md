@@ -106,9 +106,10 @@ src/backoffice/tests/run-all.mjs`).
   cartografías, menú lateral, grilla, diccionario, categorías, simbología,
   asistente de indicadores calculados). Quedan fuera de la batería: templates y
   estilos, `GeographyOverlay` y `Relocate.vue` (dependen de Leaflet) y
-  `main.js`. Los componentes de poca lógica (p. ej. `StepSource`,
-  `GeoreferenceTab`, `ImportPopup`, `IconPickerPopup`, `SharePopup`) no tienen
-  suite todavía.
+  `main.js`. Quedan sin suite los componentes de poca lógica propia (selectores
+  `Pick*`, pasos de bienvenida del asistente, barras superiores, `Customize/*`,
+  `MpIconFontPanel`, `IconPreview`, entre otros); conviene sumarles una suite
+  cuando se les agregue lógica.
 - **La cantidad de pruebas cambia seguido**; no fijar un número acá. Al cerrar
   una tanda, la batería debe quedar **en verde con 0 fallos**.
 - Los tests **caracterizan el comportamiento real**, incluso donde sorprende;

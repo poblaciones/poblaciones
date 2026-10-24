@@ -131,7 +131,7 @@ ScaleGenerator.prototype.RegenAndSaveVariablesAffectedByDeletedSequenceIds = fun
 			for(var n = 0; n < level.Variables.length; n++) {
 				var variable = level.Variables[n];
 				if (variable.Symbology.SequenceColumn && variable.Symbology.SequenceColumn.Id === sequenceId) {
-					variable.Symbology.IsSequence = 'S';
+					variable.Symbology.IsSequence = false;
 					variable.Symbology.SequenceColumn = null;
 					this.Dataset.UpdateVariable(level, variable);
 				}

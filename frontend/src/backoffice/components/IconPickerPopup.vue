@@ -130,10 +130,10 @@ export default {
 		},
 		sanitize(file) {
 			file = file.toLowerCase();
-			file = file.replace(' ', '_');
-			file = file.replace('-', '_');
+			file = file.replace(/ /g, '_');
+			file = file.replace(/-/g, '_');
 			file = file.replace(/\W/g, '');
-			file = file.replace('_', '-');
+			file = file.replace(/_/g, '-');
 			if (file.length > 40) {
 				file = file.substr(0, 40);
 			}

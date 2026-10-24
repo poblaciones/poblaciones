@@ -60,7 +60,7 @@
 				<md-button class="md-primary" :disabled="sending" @click="save()">Aceptar</md-button>
 			</div>
 			<div v-else>
-						<md-button class="md-primary" @click="openEditableAttach = false">Listo</md-button>
+						<md-button @click="openEditableAttach = false">Cerrar</md-button>
 				</div>
 		</md-dialog-actions>
 		</md-dialog>
@@ -151,7 +151,7 @@ export default {
 			return false;
 		},
 		save() {
-			if (this.item.Caption === '') {
+			if (this.localCaption === '' || this.localCaption === null) {
 				alert('Debe indicar una descripción para el adjunto.');
 				return;
 			}

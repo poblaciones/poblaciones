@@ -187,14 +187,14 @@ it('una columna de corte eliminada pasa la variable a categoría única', () => 
 	expect(dataset.updated).toHaveLength(1);
 });
 
-it('una columna de secuencia eliminada se quita de las variables que la usan, aceptando ids como texto', () => {
+it('una columna de secuencia eliminada se quita de las variables que la usan y desactiva la secuencia, aceptando ids como texto', () => {
 	const dataset = makeDataset();
-	const affected = makeVariable({ SequenceColumn: { Id: 3 }, IsSequence: 'N' });
+	const affected = makeVariable({ SequenceColumn: { Id: 3 }, IsSequence: true });
 	const other = makeVariable({ SequenceColumn: null });
 	dataset.MetricVersionLevels = [makeLevel([affected, other])];
 	makeGenerator(dataset).RegenAndSaveVariablesAffectedByDeletedSequenceIds(['3']);
 	expect(affected.Symbology.SequenceColumn).toBeNull();
-	expect(affected.Symbology.IsSequence).toBe('S');
+	expect(affected.Symbology.IsSequence).toBe(false);
 	expect(dataset.updated).toHaveLength(1);
 });
 

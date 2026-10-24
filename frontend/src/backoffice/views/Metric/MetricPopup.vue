@@ -192,8 +192,8 @@ export default {
 			return ret.substr(2);
 		},
 		title() {
-			if (this.metricVersionLevel !== null) {
-				return this.metricVersionLevel.MetricVersion.Metric.Caption;
+			if (this.MetricVersionLevel !== null) {
+				return this.MetricVersionLevel.MetricVersion.Metric.Caption;
 			} else {
 				return null;
 			}
