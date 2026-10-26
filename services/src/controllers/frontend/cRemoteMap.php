@@ -13,9 +13,15 @@ class cRemoteMap extends cPublicController
 	public function Show()
 	{
 		Performance::SetController('remoteMap', 'get', true);
-
-		$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
-		$uri = $dynamicServer->publicUrl . Request::GetRequestURI();
-		return App::FlushRemoteFile($uri);
+		try
+		{
+			$dynamicServer = App::Settings()->Servers()->GetTransactionServer();
+			$uri = $dynamicServer->publicUrl . Request::GetRequestURI();
+			return App::FlushRemoteFile($uri);
+		}
+		catch (\Exception $e)
+		{
+			return $this->Render('serverFailed.html.twig');
+		}
 	}
 }

@@ -6,6 +6,7 @@ use helena\controllers\common\cController;
 use helena\classes\App;
 use helena\classes\Account;
 use helena\classes\Remember;
+use helena\classes\Session;
 
 use minga\framework\IO;
 use minga\framework\Str;
@@ -14,6 +15,7 @@ use minga\framework\Request;
 use minga\framework\Performance;
 use minga\framework\Params;
 use minga\framework\WebConnection;
+use minga\framework\Context;
 
 class cLoginAjax extends cController
 {
@@ -83,7 +85,14 @@ class cLoginAjax extends cController
 		}
 		if (!$account->Login($password))
 		{
-			return 'Contraseña incorrecta.';
+			if (Context::Settings()->readonlyForMaintenance)
+			{
+				return Session::ReadonlyForMaintenanceMessage();
+			}
+			else
+			{
+				return 'Contraseña incorrecta.';
+			}
 		}
 
 		if(Params::SafeGet('remember') . Params::SafeGet('ppremember') != '')

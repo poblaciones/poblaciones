@@ -127,6 +127,9 @@ class DeploymentService extends BaseService
 			if(is_dir($source) == false)
 				throw new ErrorException('Archivo no encontrado.');
 
+			// que borre la subcarpeta web/static para que no se acumulen los compilados
+			IO::RemoveDirectory(Context::Paths()->GetRoot() . "/web/static");
+			// mueve el nuevo contenido
 			IO::MoveDirectoryContents($source, Context::Paths()->GetRoot());
 
 			# Borra el zip/tar inicial.

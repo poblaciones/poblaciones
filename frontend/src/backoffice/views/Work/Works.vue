@@ -199,7 +199,7 @@ export default {
 			return speech;
 		},
 		canCreate() {
-			return (this.filter !== 'P' || window.Context.CanCreatePublicData());
+			return (this.filter !== 'P' || window.Context.CanCreatePublicData()) && !window.Context.Configuration.ReadonlyForMaintenance;
 		},
 		lastest() {
 			var listCopy = [];

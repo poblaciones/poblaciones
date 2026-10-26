@@ -2,6 +2,7 @@
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar welcome-topbar">
 			<topbar-logo />
+			<readonly-warning />
 			<div class="welcome-actions">
 				<admin-links v-if="showAdminButton" :current="current"></admin-links>
 				<home-menu></home-menu>
@@ -15,6 +16,7 @@
 import { mapGetters } from 'vuex';
 import ActiveWork from '@/backoffice/classes/ActiveWork.js';
 import AdminLinks from './AdminLinks';
+import ReadonlyWarning from './ReadonlyWarning';
 import ProfileMenu from './Account/ProfileMenu.vue';
 import HomeMenu from './HomeMenu.vue';
 import TopbarLogo from './TopbarLogo.vue';
@@ -23,6 +25,7 @@ export default {
 	name: 'topBar',
 	components: {
 		AdminLinks,
+		ReadonlyWarning,
 		ProfileMenu,
 		HomeMenu,
 		TopbarLogo

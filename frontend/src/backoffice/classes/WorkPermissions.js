@@ -13,7 +13,7 @@ module.exports = {
 		if (filter === 'P' && window.Context.User.Privileges === 'E') {
 			return true;
 		}
-		if (item.IsIndexed) {
+		if (item.IsIndexed || window.Context.Configuration.ReadonlyForMaintenance) {
 			return false;
 		}
 		return item.Privileges !== 'V';
@@ -21,6 +21,9 @@ module.exports = {
 	CanAdmin(item) {
 		if (window.Context.User.Privileges === 'A') {
 			return true;
+		}
+		if (item.IsIndexed || window.Context.Configuration.ReadonlyForMaintenance) {
+			return false;
 		}
 		return item.Privileges === 'A';
 	},

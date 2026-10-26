@@ -365,7 +365,12 @@ class Session
 	}
 	public static function ReadonlyForMaintenance()
 	{
-		throw new PublicException("Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre información. Por favor, vuelva a intentar más tarde.");
+		throw new PublicException(self::ReadonlyForMaintenanceMessage());
+	}
+
+	public static function ReadonlyForMaintenanceMessage()
+	{
+		return "Mientras realizamos tareas de mantenimiento en el sitio no es posible realizar operaciones de edición sobre la información. Por favor, vuelva a intentar más tarde.";
 	}
 
 	private static function ElementNotFound()

@@ -1,6 +1,8 @@
 <template>
 	<div class="topbar home-topbar">
 		<topbar-logo class="home-logo" />
+		<readonly-warning />
+
 		<backoffice-search :results="results" :truncated-kinds="truncatedKinds" :loading="loading" :failed="failed"
 											 @search="onSearch" @select="onSelect" />
 		<div class="home-actions">
@@ -14,9 +16,10 @@
 <script>
 import AdminLinks from '@/common/widgets/AdminLinks';
 import BackofficeSearch from '@/backoffice/components/BackofficeSearch';
-	import ProfileMenu from '@/common/widgets/Account/ProfileMenu.vue';
+import ProfileMenu from '@/common/widgets/Account/ProfileMenu.vue';
 import HomeMenu from '@/common/widgets/HomeMenu.vue';
 import TopbarLogo from '@/common/widgets/TopbarLogo';
+import ReadonlyWarning from '@/common/widgets/ReadonlyWarning';
 import WorkSearch from '@/backoffice/classes/WorkSearch';
 
 const MIN_QUERY_LENGTH = 2;
@@ -29,6 +32,7 @@ export default {
 		AdminLinks,
 		BackofficeSearch,
 		ProfileMenu,
+		ReadonlyWarning,
 		HomeMenu,
 		TopbarLogo
 	},

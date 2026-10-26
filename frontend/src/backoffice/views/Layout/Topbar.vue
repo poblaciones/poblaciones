@@ -2,6 +2,8 @@
 	<div id="topBarContainer">
 		<div id="topBar" class="topbar topbarFlex">
 			<topbar-logo class="home-logo" style="margin-top: -4px" />
+			<readonly-warning />
+
 			<div class="titleBox">
 				<div>
 					<div v-if="Work.properties.IsExample" style=" float: left; font-size: 24px; padding-top: 5px; padding-right: 10px; padding-left: 10px;">
@@ -37,12 +39,14 @@ import TopbarWorkActions from '@/backoffice/components/TopbarWorkActions.vue';
 import ProfileMenu from '@/common/widgets/Account/ProfileMenu.vue';
 import HomeMenu from '@/common/widgets/HomeMenu.vue';
 import TopbarLogo from '@/common/widgets/TopbarLogo';
+import ReadonlyWarning from '@/common/widgets/ReadonlyWarning';
 
 export default {
 	name: 'topBar',
 	components: {
 		TopbarLogo,
 		TopbarWorkActions,
+		ReadonlyWarning,
 		ProfileMenu,
 		HomeMenu
 	},

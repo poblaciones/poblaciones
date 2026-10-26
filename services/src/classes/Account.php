@@ -268,8 +268,6 @@ class Account
 
 	public function ValidatePassword($password)
 	{
-		Session::CheckReadonlyForMaintenance();
-
 		if ($this->EnsureDbInfo(false) == false)
 			return false;
 		else
@@ -281,6 +279,9 @@ class Account
 		$ret = $this->ValidatePassword($password);
 		if ($ret)
 		{
+			if (Context::Settings()->readonlyForMaintenance && !$this->IsMegaUser()) {
+				return false;
+			}
 			$this->Begin();
 		}
 		return $ret;

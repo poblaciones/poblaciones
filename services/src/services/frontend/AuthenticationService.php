@@ -5,6 +5,7 @@ namespace helena\services\frontend;
 use minga\framework\oauth\OauthData;
 use minga\framework\PhpSession;
 use minga\framework\Str;
+use minga\framework\Context;
 use helena\classes\Account;
 use helena\classes\App;
 use helena\classes\RegisterUser;
@@ -89,8 +90,13 @@ class AuthenticationService extends BaseService
 			$account = $res['account'];
 
 		if ($account->Login($password) == false)
-			return ['status' => self::ERROR, 'message' => ('Contraseña incorrecta.')];
-
+		{
+			if (Context::Settings()->readonlyForMaintenance) {
+				return ['status' => self::ERROR, 'message' => Session::ReadonlyForMaintenanceMessage()];
+			} else {
+				return ['status' => self::ERROR, 'message' => ('Contraseña incorrecta.')];
+			}
+		}
 		$remember = Remember::SetRemember($account);
 
 		return ['status' => self::OK, 'remember' => $remember];

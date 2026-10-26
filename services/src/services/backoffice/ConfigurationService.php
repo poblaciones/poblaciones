@@ -34,7 +34,7 @@ class ConfigurationService extends BaseService
 								'MainServer' => $mainServer->publicUrl);
 		else
 			return array('HomePage' =>  App::Settings()->Servers()->Home()->publicUrl,
-						 'UseCalculated' => App::Settings()->Map()->UseCalculated,
+								'UseCalculated' => App::Settings()->Map()->UseCalculated,
 								'UseTextures' => App::Settings()->Map()->UseTextures,
 								'UseGradients' => App::Settings()->Map()->UseGradients,
 								'UseGap' => App::Settings()->Map()->UseGap,
@@ -45,6 +45,7 @@ class ConfigurationService extends BaseService
 								'Signatures' => $signatures,
 								'User' => $user,
 								'MainServer' => $mainServer->publicUrl,
+								'ReadonlyForMaintenance' => App::Settings()->readonlyForMaintenance,
 								'ShortUrlPattern' => App::Settings()->Map()->ShortUrlPattern,
 								'BasemapUrls' => App::Settings()->Map()->BasemapUrls,
 								'BasemapAttributions' => App::Settings()->Map()->BasemapAttributions);

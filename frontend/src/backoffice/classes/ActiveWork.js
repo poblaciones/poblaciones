@@ -84,7 +84,7 @@ ActiveWork.prototype.CanEdit = function () {
 		(this.IsPublicData() && window.Context.User.Privileges === 'E')) {
 		return true;
 	}
-	if (this.properties.IsIndexed) {
+	if (this.properties.IsIndexed || window.Context.Configuration.ReadonlyForMaintenance) {
 		return false;
 	}
 	for (var i = 0; i < this.Permissions.length; i++) {
