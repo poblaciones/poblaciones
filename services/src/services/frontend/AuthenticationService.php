@@ -102,8 +102,25 @@ class AuthenticationService extends BaseService
 		return ['status' => self::OK, 'remember' => $remember];
 	}
 
+	private static function IsAllowedInMaintenance(string $user) : bool
+	{
+		$res = Account::LoadAndValidateAccount($user);
+		return $res['status'] == self::OK && $res['account']->IsMegaUser();
+	}
+
 	public function BeginActivation(string $user, string $to) : array
 	{
+		// En mantenimiento, el ingreso por OAuth queda limitado a administradores (igual que Account::Login).
+		if(Context::Settings()->readonlyForMaintenance)
+		{
+			$oauth = OauthData::DeserializeFromSession();
+			if($oauth != null && self::IsAllowedInMaintenance($oauth->email) == false)
+			{
+				OauthData::ClearSession();
+				return ['status' => self::ERROR, 'message' => Session::ReadonlyForMaintenanceMessage()];
+			}
+		}
+
 		if(RegisterUser::CompleteOauthRegistration())
 		{
 			$data = OauthData::DeserializeFromSession();
