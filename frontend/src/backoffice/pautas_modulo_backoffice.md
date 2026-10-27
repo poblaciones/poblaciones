@@ -89,8 +89,9 @@ src/backoffice/tests/run-all.mjs`).
   paquetes y módulos que no deben ejercitarse se reemplazan por dobles de
   `tests/_stubs/` (el de `axios` es el de `common/tests/_stubs`), y las
   imágenes y hojas de estilo se resuelven a un valor vacío. **Todo reemplazo
-  nuevo se declara en `_paths.mjs`**; `Layout.vue`, `@/map/js/helper` y
-  `@/map/classes/Search` se reemplazan para no arrastrar el módulo `map`.
+  nuevo se declara en `_paths.mjs`**. Los tests no ejecutan código de `map`:
+  `@/map/js/helper` y `@/map/classes/Search` tienen doble propio y cualquier
+  otro `@/map/...` se resuelve a un componente vacío.
 - `tests/fixtures.mjs`: `setupBackoffice(privilegios)` (arma `window.Context`,
   `window.Db` y `window.host` sobre los dobles de navegador de `common`),
   `mountLite(componente, { propsData, mocks })` y utilidades (`parseBody`,
@@ -105,11 +106,10 @@ src/backoffice/tests/run-all.mjs`).
   la tabla de rutas y los componentes con lógica propia (listado de
   cartografías, menú lateral, grilla, diccionario, categorías, simbología,
   asistente de indicadores calculados). Quedan fuera de la batería: templates y
-  estilos, `GeographyOverlay` y `Relocate.vue` (dependen de Leaflet) y
-  `main.js`. Quedan sin suite los componentes de poca lógica propia (selectores
-  `Pick*`, pasos de bienvenida del asistente, barras superiores, `Customize/*`,
-  `MpIconFontPanel`, `IconPreview`, entre otros); conviene sumarles una suite
-  cuando se les agregue lógica.
+  estilos, `GeographyOverlay` y `Relocate.vue` (dependen de Leaflet), `main.js`
+  y la página de paletas (`Paletas/*`). Tampoco tienen suite los componentes de
+  solo presentación (`SvgIcon`, `Icon`, `AppMain` y los pasos de bienvenida del
+  asistente); conviene sumarles una cuando se les agregue lógica.
 - **La cantidad de pruebas cambia seguido**; no fijar un número acá. Al cerrar
   una tanda, la batería debe quedar **en verde con 0 fallos**.
 - Los tests **caracterizan el comportamiento real**, incluso donde sorprende;

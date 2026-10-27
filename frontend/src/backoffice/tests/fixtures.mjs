@@ -19,6 +19,9 @@ function makeContext(privileges) {
 		CanCreatePublicData() {
 			return context.User.Privileges === 'A' || context.User.Privileges === 'E';
 		},
+		CanAccessAdminSite() {
+			return context.User.Privileges === 'A' || context.User.Privileges === 'E' || context.User.Privileges === 'L';
+		},
 	};
 	return context;
 }
@@ -97,7 +100,10 @@ export function mountLite(component, options) {
 		},
 	};
 	const props = component.props || {};
-	const propNames = Array.isArray(props) ? props : Object.keys(props);
+	let propNames = props;
+	if (!Array.isArray(props)) {
+		propNames = Object.keys(props);
+	}
 	for (const name of propNames) {
 		if (Array.isArray(props)) {
 			vm[name] = undefined;

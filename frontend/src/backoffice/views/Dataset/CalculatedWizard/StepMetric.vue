@@ -75,7 +75,7 @@ export default {
 			this.newMetric.SelectedVersion = null;
 			this.newMetric.SelectedLevel = null;
 			this.newMetric.SelectedVariable = null;
-			this.newMetric.columnExists = null;
+			this.columnExists = null;
 		},
 		metricSelected(metric) {
 			this.clearMetric();

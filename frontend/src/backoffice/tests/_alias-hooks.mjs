@@ -4,7 +4,8 @@
 // resolve(): '@/...' y los imports relativos sin extensión (estilo webpack) se
 //            resuelven probando exacto, '.js' y '.vue'; los paquetes de
 //            UI/red se reemplazan por sus dobles.
-//            Los .vue se sirven con su bloque <script> únicamente.
+//            Los .vue se sirven con su bloque <script> únicamente y las
+//            imágenes importadas como módulos devuelven su nombre de archivo.
 // load():    los fuentes mezclan CommonJS (module.exports) y ESM (export
 //            default); se indica a Node el formato de cada uno según su
 //            contenido, ya que el package.json del proyecto no declara "type".
@@ -12,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { genericStub, genericStubPrefixes, isStylesheet, sourceRoot, stubbedAliases, stubbedFiles, stubbedPackages } from './_paths.mjs';
+import { genericAliasPrefixes, genericStub, genericStubPrefixes, isStylesheet, sourceRoot, stubbedAliases, stubbedFiles, stubbedPackages } from './_paths.mjs';
 
 const REQUIRE_SHIM = "import { createRequire as __createRequire } from 'node:module';\nconst require = __createRequire(import.meta.url);\n";
 
@@ -37,6 +38,10 @@ function isProjectSource(filePath) {
 	return !filePath.includes(path.sep + 'tests' + path.sep) && !filePath.includes('node_modules');
 }
 
+function isImage(filePath) {
+	return ['.png', '.gif', '.jpg', '.jpeg', '.svg'].includes(path.extname(filePath).toLowerCase());
+}
+
 function toResolved(target) {
 	if (stubbedFiles[target]) {
 		return { url: pathToFileURL(stubbedFiles[target]).href, shortCircuit: true };
@@ -58,6 +63,11 @@ export function resolve(specifier, context, nextResolve) {
 	}
 	if (stubbedAliases[specifier]) {
 		return toResolved(stubbedAliases[specifier]);
+	}
+	for (const prefix of genericAliasPrefixes) {
+		if (specifier.startsWith(prefix)) {
+			return toResolved(genericStub);
+		}
 	}
 	if (specifier.startsWith('@/')) {
 		const target = resolveWithExtension(path.join(sourceRoot, specifier.substring(2)));
@@ -89,9 +99,15 @@ export function load(url, context, nextLoad) {
 		return nextLoad(url, context);
 	}
 	const filePath = fileURLToPath(url);
+	if (isImage(filePath)) {
+		return { format: 'module', source: 'export default ' + JSON.stringify(path.basename(filePath)) + ';', shortCircuit: true };
+	}
 	if (isProjectSource(filePath) && filePath.endsWith('.vue')) {
 		const script = extractScript(fs.readFileSync(filePath, 'utf8'));
-		const header = script.includes('require(') ? REQUIRE_SHIM : '';
+		let header = '';
+		if (script.includes('require(')) {
+			header = REQUIRE_SHIM;
+		}
 		return { format: 'module', source: header + script, shortCircuit: true };
 	}
 	if (isProjectSource(filePath) && filePath.endsWith('.js')) {

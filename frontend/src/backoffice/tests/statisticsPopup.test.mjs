@@ -98,6 +98,14 @@ it('GetData pide las estadísticas con un mensaje, las guarda en el caché y las
 	expect(vm.loading).toBe(false);
 });
 
+it('GetData con la clave null le informa al servidor un mes nulo y cachea bajo esa clave', async () => {
+	const { vm, refs } = setup();
+	vm.GetData('null');
+	expect(refs.invoker.messages[0][3]).toBeNull();
+	await flushPromises();
+	expect(Object.keys(vm.dataCache)).toEqual(['null']);
+});
+
 it('si la consulta falla deja de mostrar la carga', async () => {
 	const { vm, refs } = setup();
 	refs.invoker.result = Promise.reject(new Error('sin conexión'));
@@ -120,7 +128,16 @@ it('UpdateData usa el caché si ya tiene la clave y pide al servidor si no', asy
 	await flushPromises();
 });
 
-it('show reinicia el caché y el historial, elige el trimestre más reciente, abre el diálogo y pide los datos sin clave, que se cachean bajo "undefined" (comportamiento actual)', async () => {
+it('UpdateData sin historial y sin caché pide los períodos recientes con un mes nulo', async () => {
+	const { vm, refs } = setup();
+	vm.useHistory = false;
+	vm.UpdateData();
+	expect(refs.invoker.messages[0][3]).toBeNull();
+	await flushPromises();
+	expect(Object.keys(vm.dataCache)).toEqual(['null']);
+});
+
+it('show reinicia el caché y el historial, elige el trimestre más reciente, abre el diálogo y pide los períodos recientes', async () => {
 	const { vm, refs } = setup(['2024Q1', '2023Q4']);
 	vm.dataCache = { x: 1 };
 	vm.useHistory = true;
@@ -129,8 +146,9 @@ it('show reinicia el caché y el historial, elige el trimestre más reciente, ab
 	expect(vm.currentPeriod).toBe('2024Q1');
 	expect(vm.open).toBe(true);
 	expect(refs.invoker.messages).toHaveLength(1);
+	expect(refs.invoker.messages[0][3]).toBeNull();
 	await flushPromises();
-	expect(Object.keys(vm.dataCache)).toEqual(['undefined']);
+	expect(Object.keys(vm.dataCache)).toEqual(['null']);
 });
 
 it('show sin trimestres no elige período', () => {

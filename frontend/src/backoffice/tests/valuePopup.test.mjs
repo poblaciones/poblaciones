@@ -25,7 +25,10 @@ function setup() {
 function open(vm, itemValue, previousValue, isLast) {
 	const variable = { Values: [] };
 	const item = { Value: itemValue };
-	const previous = (previousValue === undefined ? null : { Value: previousValue });
+	let previous = null;
+	if (previousValue !== undefined) {
+		previous = { Value: previousValue };
+	}
 	vm.show(variable, ['#fff'], item, previous, isLast);
 	return { variable: variable, item: item, previous: previous };
 }

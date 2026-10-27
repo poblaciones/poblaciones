@@ -95,7 +95,7 @@ export default {
 				this.currentPeriod = this.historyPeriods[0].Id;
 			}
 			this.open = true;
-			this.GetData();
+			this.GetData(this.key);
 		},
 		UpdateData() {
 			if (this.dataCache[this.key]) {
@@ -107,8 +107,13 @@ export default {
 		GetData(key) {
 			var loc = this;
 			this.loading = true;
+			// 'null' es solo la clave del caché: al servidor se le informa un mes nulo (los períodos recientes).
+			var month = key;
+			if (key === 'null') {
+				month = null;
+			}
 			this.$refs.invoker.doMessage('Obteniendo información', this.Work,
-				this.Work.GetWorkStatistics, key).then(function (data) {
+				this.Work.GetWorkStatistics, month).then(function (data) {
 					loc.dataCache[key] = data;
 					loc.LoadData(data);
 					loc.loading = false;

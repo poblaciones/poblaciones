@@ -38,7 +38,11 @@ it('al montar crea la grilla solo si las columnas ya están cargadas', () => {
 describe('ActiveGrid: edición de celdas');
 
 function makeCell(datafield, value, row) {
-	return { datafield: datafield, value: value, row: row === undefined ? 0 : row };
+	let rowIndex = row;
+	if (row === undefined) {
+		rowIndex = 0;
+	}
+	return { datafield: datafield, value: value, row: rowIndex };
 }
 
 it('si el valor no cambió no valida ni graba', () => {

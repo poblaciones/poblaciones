@@ -10,7 +10,10 @@ function makeRelated(id, workId, geography) {
 function setup(ownGeography) {
 	const browser = setupBackoffice('P');
 	const dataset = makeGridDataset();
-	dataset.properties.Geography = (ownGeography === undefined ? { Caption: 'Departamentos' } : ownGeography);
+	dataset.properties.Geography = ownGeography;
+	if (ownGeography === undefined) {
+		dataset.properties.Geography = { Caption: 'Departamentos' };
+	}
 	dataset.LevelMetrics = function () {};
 	browser.window.Context.CurrentDataset = dataset;
 	const refs = { invoker: { saved: [], doSave(...args) { this.saved.push(args); return Promise.resolve(); } } };

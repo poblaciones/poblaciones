@@ -23,7 +23,10 @@ function setup(sameVersions) {
 	context.CurrentDataset = dataset;
 	context.MetricGroups = { list: [{ Id: 1 }] };
 	context.MetricProviders = { list: [{ Id: 2 }] };
-	const versions = (sameVersions === undefined ? [{ Caption: '2023' }, { Caption: '2024' }] : sameVersions);
+	let versions = sameVersions;
+	if (sameVersions === undefined) {
+		versions = [{ Caption: '2023' }, { Caption: '2024' }];
+	}
 	const work = { requested: [], GetMetricVersionsByMetric(metric) { this.requested.push(metric); return Promise.resolve(versions); } };
 	context.CurrentWork = work;
 	const refs = {

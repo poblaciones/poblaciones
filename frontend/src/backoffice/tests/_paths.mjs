@@ -21,16 +21,21 @@ export const stubbedPackages = {
 	'vue-router': path.join(stubsDir, 'vue-router.mjs'),
 	'vue-clickaway': path.join(stubsDir, 'vue-clickaway.mjs'),
 	'vue-sidebar-menu': path.join(stubsDir, 'vue-sidebar-menu.mjs'),
+	'split.js': path.join(stubsDir, 'split.mjs'),
 	leaflet: path.join(stubsDir, 'leaflet.mjs'),
 };
 
 // Paquetes de interfaz sin lógica que los tests ejerciten: cualquier import
 // que empiece con estos prefijos resuelve a un componente vacío.
 export const genericStubPrefixes = [
-	'split.js', 'vue2-dropzone', 'html2canvas',
+	'vue2-dropzone', 'html2canvas',
 	'jqwidgets-scripts/', 'vue-material-design-icons/',
 ];
 export const genericStub = path.join(stubsDir, 'generic.mjs');
+
+// Todo lo que se importe del módulo map y no tenga un doble específico (arriba) se
+// reemplaza por un componente vacío: estos tests no deben ejecutar código de map.
+export const genericAliasPrefixes = ['@/map/'];
 
 // Las hojas de estilo importadas por los componentes no tienen efecto bajo Node.
 export function isStylesheet(specifier) {
@@ -44,12 +49,8 @@ export const stubbedAliases = {
 	'@/map/classes/Search': path.join(stubsDir, 'mapSearch.mjs'),
 };
 
-// Archivos del proyecto que se reemplazan por completo. Layout arrastra la
-// barra lateral y componentes del módulo map; el router solo necesita su
-// identidad para saber qué rutas lo usan.
-export const stubbedFiles = {
-	[path.join(sourceRoot, 'backoffice', 'views', 'Layout', 'Layout.vue')]: path.join(stubsDir, 'layout.mjs'),
-};
+// Archivos del proyecto que se reemplazan por completo (hoy ninguno).
+export const stubbedFiles = {};
 
 // Imágenes que los componentes requieren desde paquetes: se resuelven a un
 // archivo vacío, que el registro de extensiones convierte en su nombre.

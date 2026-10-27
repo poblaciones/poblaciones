@@ -2,9 +2,11 @@
 // función a la cola de microtareas y use registra los plugins instalados.
 const Vue = {
 	used: [],
+	config: {},
 
 	reset() {
 		this.used = [];
+		this.config = {};
 	},
 
 	set(target, key, value) {

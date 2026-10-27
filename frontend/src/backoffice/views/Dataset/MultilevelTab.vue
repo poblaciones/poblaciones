@@ -73,13 +73,13 @@ export default {
 						this.Dataset.properties.Id,
 						this.Dataset.properties.MultilevelMatrix,
 						item.ds.properties.Id,
-						item.ds.properties.MultilevelMatrix).catch(function() {
+						item.ds.properties.MultilevelMatrix).then(function() {
+							// el reload es para que la grilla de 'completar nivel' tenga valores correctos
+							window.location.reload();
+						}, function() {
 							loc.Dataset.properties.MultilevelMatrix = keep1;
 							item.ds.properties.MultilevelMatrix = keep2;
 							item.Bounded = !value;
-							}).then(function() {
-								// el reload es para que la grilla de 'completar nivel' tenga valores correctos
-								window.location.reload();
 						});
 		},
 	}
