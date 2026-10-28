@@ -469,10 +469,7 @@ export default {
 			this.$refs.dictionaryPopup.show();
 		},
 		newColumn() {
-			var loc = this;
-			window.Context.Factory.GetCopy('Column', function (data) {
-				loc.$refs.columnEdit.show(data);
-			});
+			loc.$refs.showNew();
 		},
 		columnEdited() {
 			this.reloadColumns();

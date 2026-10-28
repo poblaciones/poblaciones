@@ -368,6 +368,19 @@ ActiveDataset.prototype.CalculatedMetricExists = function (variableId) {
 	});
 };
 
+ActiveDataset.prototype.CreateMetricVersionLevel = function (level) {
+	var loc = this;
+	var levelNoVariables = f.clone(level);
+	levelNoVariables.Variables = null;
+	this.Work.WorkChanged();
+
+	return axiosClient.postPromise(window.host + '/services/backoffice/CreateMetricVersionLevel',
+		{ 'k': this.properties.Id, 'l': levelNoVariables }, 'actualizar el indicador').then(
+			function (data) {
+				return loc.receiveUpdatedLevel(data, level);
+			});
+};
+
 ActiveDataset.prototype.UpdateMetricVersionLevel = function (level) {
 	var loc = this;
 	var levelNoVariables = f.clone(level);
@@ -377,22 +390,28 @@ ActiveDataset.prototype.UpdateMetricVersionLevel = function (level) {
 	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateMetricVersionLevel',
 		{ 'k': this.properties.Id, 'l': levelNoVariables }, 'actualizar el indicador').then(
 			function (data) {
-				var isNew = level.Id === 0 || level.Id === null;
-				level.Id = data.LevelId;
-				level.MetricVersion.Id = data.MetricVersionId;
-				level.MetricVersion.Metric.Id = data.MetricId;
-				if (isNew) {
-					loc.MetricVersionLevels.push(level);
-					window.Db.LoadWorks();
-				} else {
-					arr.ReplaceById(loc.MetricVersionLevels, level.Id, level);
-				}
-				window.Context.RefreshMetrics();
-				loc.Work.MetricVersions.Refresh();
-				return data;
+				return loc.receiveUpdatedLevel(data, level);
 			});
 };
 
+ActiveDataset.prototype.receiveUpdatedLevel = function (data, level) {
+	var isNew = (level.Id === 0 || level.Id === null);
+	level.Id = data.LevelId;
+	level.MetricVersion.Id = data.MetricVersionId;
+	level.MetricVersion.Metric.Id = data.MetricId;
+	if (data.Variables && data.Variables.length > 0) {
+		arr.AddRange(level.Variables, data.Variables);
+	}
+	if (isNew) {
+		this.MetricVersionLevels.push(level);
+		window.Db.LoadWorks();
+	} else {
+		arr.ReplaceById(this.MetricVersionLevels, level.Id, level);
+	}
+	window.Context.RefreshMetrics();
+	this.Work.MetricVersions.Refresh();
+	return data;
+};
 
 ActiveDataset.prototype.GetMultilevelDatasets = function () {
 	var ret = [];

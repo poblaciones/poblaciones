@@ -1,6 +1,6 @@
 <template>
   <div v-if="Dataset">
-		<md-dialog :md-active.sync="activateEdit" :md-click-outside-to-close="false">
+		<md-dialog :md-active.sync="activateEdit">
 			<md-dialog-title>Variable</md-dialog-title>
 			<md-dialog-content v-if="variable">
 				<invoker ref="invoker"></invoker>
@@ -21,7 +21,7 @@
 					</div>
 
 					<div class="md-layout-item md-size-50">
-						<mp-simple-text label="Ancho" :disabled="!variableIsString" type="number" :minimum="1" :maximum="32767"
+						<mp-simple-text :label="(variableIsString ? 'Ancho' : 'Ancho (dígitos)')" type="number" :minimum="1" :maximum="(variableIsString ? 32767 : 20)"
 														v-model="variable.FieldWidth" @enter="save" />
 					</div>
 					<div class="md-layout-item md-size-50" v-if="!variableIsString" >
@@ -99,6 +99,12 @@ export default {
 			setTimeout(() => {
 				loc.$refs.inputName.focus();
 			}, 250);
+		},
+		showNew() {
+			var loc = this;
+			window.Context.Factory.GetCopy('Column', function (data) {
+				loc.show(data);
+			});
 		},
 		save() {
 			var loc = this;

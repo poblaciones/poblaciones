@@ -11,6 +11,7 @@ export { captureConsole, captureConsoleAsync, flushPromises } from '@/common/tes
 function makeContext(privileges) {
 	const context = {
 		User: { Privileges: privileges },
+		Configuration: { ReadonlyForMaintenance: false },
 		ErrorSignaled: { value: 0 },
 		CurrentWork: null,
 		IsAdmin() {

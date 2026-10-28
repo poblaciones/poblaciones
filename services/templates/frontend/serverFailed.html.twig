@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Servidor de mapas no disponible - Poblaciones.org</title>
+				<!-- Tailwind CSS CDN -->
+				<script src="https://cdn.tailwindcss.com"></script>
+				<!-- Google Fonts: Inter -->
+				<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+					<style>
+						body {
+						font-family: 'Inter', sans-serif;
+						}
+						/* Subtle cartographic grid background pattern */
+						.bg-grid-pattern {
+						background-image: linear-gradient(to right, rgba(15, 41, 66, 0.04) 1px, transparent 1px),
+						linear-gradient(to bottom, rgba(15, 41, 66, 0.04) 1px, transparent 1px);
+						background-size: 24px 24px;
+						}
+					</style>
+				</head>
+	<body class="bg-slate-50 bg-grid-pattern min-h-screen flex flex-col items-center justify-center p-4 text-slate-800">
+
+		<!-- Main Container Card -->
+		<main class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-10 text-center relative overflow-hidden transition-all duration-300">
+
+			<!-- Top accent bar in corporate blue -->
+			<div class="absolute top-0 left-0 right-0 h-1.5 bg-[#0f2942]"></div>
+
+			<!-- Cartographic / Server Error Icon -->
+			<div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 text-[#0f2942] mb-6 shadow-inner">
+				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 11l0 3"></path>
+					<circle cx="12" cy="16" r="0.5" fill="currentColor"></circle>
+				</svg>
+			</div>
+
+			<!-- Platform branding badge -->
+			<div class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-700 uppercase bg-blue-50 rounded-full">
+				Poblaciones.org
+			</div>
+
+			<!-- Exact error message requested -->
+			<p class="text-slate-600 text-base md:text-lg leading-relaxed mb-6">
+				Nuestro servidor de mapas no está actualmente disponible. Por favor, aguarde unos instantes e intente nuevamente. Si el problema persiste, puede notificarlo en nuestro <a target="_blank" href="http://poblaciones.org/contacto" class="text-blue-600 hover:text-blue-800 font-medium underline transition-colors">formulario de contacto</a>.
+			</p>
+
+			<!-- Retry Status Counter Indicator -->
+			<div id="retry-counter-container" class="text-xs text-slate-400 mb-6 font-medium">
+				Intentos de reconexión: <span id="retry-count-display">0</span> / 5
+			</div>
+
+			<!-- Action Button & Spinner Area -->
+			<div class="space-y-4">
+				<button id="retry-btn" onclick="handleRetry()" class="w-full inline-flex items-center justify-center px-6 py-3.5 bg-[#0f2942] hover:bg-[#1a3d5e] text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0f2942] disabled:opacity-50 disabled:cursor-not-allowed">
+					<!-- Spinner (hidden by default) -->
+					<svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 c-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
+					<span id="btn-text">Reintentar conexión</span>
+				</button>
+
+				<!-- Max limit message (hidden by default) -->
+				<div id="max-limit-msg" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+					Se ha superado el límite máximo de reintentos. El servidor de mapas continúa inaccesible temporalmente. Por favor, utilice nuestro <a href="http://poblaciones.org/contacto" target="_blank" class="underline font-semibold hover:text-amber-900">formulario de contacto</a> para reportar la incidencia.
+				</div>
+			</div>
+
+		</main>
+
+		<!-- Footer minimal credit -->
+		<footer class="mt-8 text-xs text-slate-400">
+			&copy; Poblaciones.org.
+		</footer>
+
+		<!-- Script to handle retry logic & URL parameter tracking -->
+		<script>
+			// Parse URL parameters
+			const urlParams = new URLSearchParams(window.location.search);
+			let retries = parseInt(urlParams.get('retries'), 10);
+
+			// Initialize if parameter is missing or invalid
+			if (isNaN(retries)) {
+			retries = 0;
+			}
+
+			// Update UI based on current retry count
+			document.getElementById('retry-count-display').textContent = retries;
+
+			// Check if limit of 5 retries has been exceeded
+			if (retries > 5) {
+			const btn = document.getElementById('retry-btn');
+			btn.disabled = true;
+			btn.classList.add('hidden'); // Hide or keep disabled button
+			document.getElementById('max-limit-msg').classList.remove('hidden');
+			document.getElementById('retry-counter-container').classList.add('text-amber-600', 'font-semibold');
+			}
+
+			// Handle retry click with 2-second delay simulation
+			function handleRetry() {
+			const btn = document.getElementById('retry-btn');
+			const spinner = document.getElementById('loading-spinner');
+			const btnText = document.getElementById('btn-text');
+
+			// Disable button and show loading state
+			btn.disabled = true;
+			spinner.classList.remove('hidden');
+			btnText.textContent = 'Reconectando con el servidor...';
+
+			// Increment retry count for the next URL state
+			const nextRetries = retries + 1;
+
+			// Simulate 2 seconds delay ("sleep") before reload
+			setTimeout(() => {
+			urlParams.set('retries', nextRetries);
+			window.location.search = urlParams.toString();
+			}, 2000);
+			}
+		</script>
+	</body>
+</html>

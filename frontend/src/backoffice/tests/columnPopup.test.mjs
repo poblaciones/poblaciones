@@ -60,6 +60,20 @@ it('show de un formato desconocido lo informa como no reconocido', () => {
 	expect(vm.variable.FormatFormatted).toBe('No reconocido');
 });
 
+it('showNew abre el alta con una variable de texto sin identificador y con valores iniciales', () => {
+	const { vm } = setup();
+	vm.showNew();
+	expect(vm.activateEdit).toBe(true);
+	expect(vm.variable.Id).toBeNull();
+	expect(vm.variable.Variable).toBe('');
+	expect(vm.variable.Label).toBe('');
+	expect(vm.variable.Format).toBe(1);
+	expect(vm.variable.FormatFormatted).toBe('Texto');
+	expect(vm.variable.Measure).toBe(1);
+	expect(vm.variable.Alignment).toBe(0);
+	expect(vm.variable.UseInSummary).toBe(false);
+});
+
 describe('ColumnPopup: guardado');
 
 it('save rechaza un nombre de variable inválido con el mensaje del validador', () => {

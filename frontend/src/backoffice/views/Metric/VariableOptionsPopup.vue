@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<md-dialog :md-active.sync="showDialog" :md-click-outside-to-close="false" style="min-width: 670px!important;">
+		<md-dialog :md-active.sync="showDialog" style="min-width: 670px!important;">
 			<md-dialog-title>{{ title }}</md-dialog-title>
 			<md-dialog-content>
 				<invoker ref="invoker"></invoker>

@@ -16,7 +16,16 @@ module.exports = {
 		}
 		return params;
 	},
+	ReceiveErrorHeader(res) {
+		if (res.headers && res.headers['error-header'] && res.headers['error-header'].length > 0) {
+			const err = new Error('Request failed');
+			err.response = res;
+			throw err;
+		}
+	},
 	ReceiveSession(url, res) {
+		this.ReceiveErrorHeader(res);
+
 		if (res.headers['session-id']) {
 			this.SetSessionForUrl(url, res.headers['session-id']);
 		} else {

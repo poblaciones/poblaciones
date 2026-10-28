@@ -8,7 +8,7 @@
 					<invoker ref="invoker"></invoker>
 					<md-card>
 						<md-card-header class="largeText">
-							Información adicional <md-icon class="rightIcon">article</md-icon>
+							Información adicional
 						</md-card-header>
 						<md-card-content>
 							<div class='md-layout md-gutter'>
@@ -81,7 +81,7 @@
 				<div class='md-layout-item md-size-100'>
 					<md-card v-if="Dataset.properties.Type == 'L'">
 						<md-card-header class="largeText">
-							Opciones del marcador <md-icon class="rightIcon">room</md-icon>
+							Opciones del marcador
 						</md-card-header>
 						<md-card-content>
 							<div class='md-layout md-gutter'>
@@ -352,11 +352,6 @@
 	.labelSeparator {
 		margin-top: 16px;
 		margin-bottom: -2px;
-	}
-
-	.rightIcon {
-		margin-top: -4px;
-		-webkit-text-fill-color: #c3c3c3;
 	}
 
 	.smaller {

@@ -102,7 +102,7 @@
 										<md-icon>settings</md-icon>
 										<md-tooltip md-direction="bottom">Opciones</md-tooltip>
 									</md-button>
-									<md-button v-if="Work.CanEdit()" class="md-icon-button" @click="onDeleteVariable(item, variable)">
+									<md-button v-if="Work.CanEdit() && item.Variables.length > 1" class="md-icon-button" @click="onDeleteVariable(item, variable)">
 										<md-icon>delete</md-icon>
 										<md-tooltip md-direction="bottom">Quitar variable</md-tooltip>
 									</md-button>
@@ -121,12 +121,9 @@
 				</md-table>
 			</div>
 		</div>
-
 	</div>
 </template>
-
 <script>
-
 import Context from '@/backoffice/classes/Context';
 import ScaleGenerator from '@/backoffice/classes/ScaleGenerator';
 import MetricPopup from './MetricPopup.vue';
@@ -140,7 +137,6 @@ import f from '@/backoffice/classes/Formatter';
 import LevelPopup from "@/backoffice/views/Dataset/LevelPopup";
 import arr from '@/common/framework/arr';
 import color from '@/common/framework/color';
-
 export default {
 	name: 'MetricsTab',
 	data() {
@@ -269,12 +265,10 @@ export default {
 		},
 		formulaToSegments(variable) {
 			let segments = [];
-
 			if (variable.IsGap) {
 				const term1 = this.formulaTermToSegments(variable, 'Data', 'Normalization');
 				const term2 = this.formulaTermToSegments(variable, 'GapData', 'GapNormalization');
 				const hasNormalization = variable.Normalization !== null;
-
 				if (hasNormalization && variable.NormalizationScale == 100) {
 					segments = segments.concat(term2);
 					segments.push({ label: ' - ', tooltip: null });
@@ -291,7 +285,6 @@ export default {
 			} else {
 				segments = this.formulaTermToSegments(variable, 'Data', 'Normalization');
 			}
-
 			if (variable.Symbology.CutMode === 'V' && variable.Symbology.CutColumn !== null) {
 				segments.push({ label: ' por ', tooltip: null });
 				segments.push({
@@ -299,13 +292,10 @@ export default {
 					tooltip: f.formatColumnTooltip(variable.Symbology.CutColumn) || null
 				});
 			}
-
 			return segments;
 		},
-
 		formulaTermToSegments(variable, dataField, normalizationField) {
 			const segments = [];
-
 			if (variable.DataColumnIsCategorical) {
 				segments.push({ label: 'Conteo', tooltip: null });
 			} else {
@@ -314,7 +304,6 @@ export default {
 					tooltip: this.Dataset.formatTwoColumnVariableTooltip(variable[dataField], variable[dataField + 'Column']) || null
 				});
 			}
-
 			const normValue = variable[normalizationField];
 			if (normValue !== null) {
 				segments.push({ label: ' / ', tooltip: null });
@@ -322,7 +311,6 @@ export default {
 					label: this.Dataset.formatTwoColumnVariable(normValue, variable[normalizationField + 'Column'], true),
 					tooltip: this.Dataset.formatTwoColumnVariableTooltip(normValue, variable[normalizationField + 'Column']) || null
 				});
-
 				const scale = variable.NormalizationScale;
 				switch (scale) {
 					case 100: segments.push({ label: ' * 100', tooltip: null }); break;
@@ -332,7 +320,6 @@ export default {
 					case 1000000: segments.push({ label: ' / 1.000.000', tooltip: null }); break;
 				}
 			}
-
 			return segments;
 		},
 		formatGroup(item) {
@@ -483,21 +470,16 @@ export default {
 	},
 };
 </script>
-
 <style rel="stylesheet/scss" lang="scss" scoped>
-
-
 .innerList {
 	background-color: transparent;
 	margin-left: -16px;
 	margin-right: -16px;
 }
-
 /* La fila a la que llegó el buscador (query level) conserva el color un instante y se desvanece. */
 .search-target .md-table-cell {
 	animation: search-target-fade 4s ease-out;
 }
-
 @keyframes search-target-fade {
 	0%, 60% {
 		background-color: var(--mp-selected-hover);
@@ -506,5 +488,4 @@ export default {
 		background-color: transparent;
 	}
 }
-
 </style>

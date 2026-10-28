@@ -155,6 +155,18 @@ App::GetOrPost('/services/backoffice/UpdateMetricVersionLevel', function (Reques
 	return App::Json($controller->UpdateMetricVersionLevel($datasetId, $level));
 });
 
+App::GetOrPost('/services/backoffice/CreateMetricVersionLevel', function (Request $request) {
+	$controller = new services\MetricService();
+	$datasetId = Params::GetIntMandatory('k');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
+
+	$param = Params::GetJsonMandatory('l');
+
+	$level = App::ReconnectJsonParam(entities\DraftMetricVersionLevel::class, 'l');
+
+	return App::OrmJson($controller->CreateMetricVersionLevel($datasetId, $level));
+});
+
 App::Post('/services/backoffice/ClipboardCopy', function (Request $request) {
 	$text = Params::GetMandatory('t');
 	PhpSession::SetSessionValue('clipboard', $text);

@@ -40,6 +40,7 @@ await import('./touchHover.test.mjs');
 
 await import('./activeRecents.test.mjs');
 await import('./clipping.test.mjs');
+await import('./clippingSummaryHeadline.test.mjs');
 await import('./clippingMetadataStableUrl.test.mjs');
 await import('./escapeCloseHandler.test.mjs');
 await import('./searchPanel.test.mjs');

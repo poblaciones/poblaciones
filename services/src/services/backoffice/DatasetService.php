@@ -31,23 +31,9 @@ class DatasetService extends DbSession
 		$caption = trim($caption);
 		$dataset = $this->Create($workId, $caption);
 
-		$this->CreateDefaultMetric($dataset, $caption);
-		return $dataset;
-	}
-
-	private function CreateDefaultMetric($dataset, $caption)
-	{
-		// Crea el metric, metricVersion y metricVersionLevel
 		$metricService = new MetricService();
-
-		// Crea la variable default
-		$variable = $metricService->GetNewVariable();
-		$variable->setIsDefault(true);
-		$variable->setDataColumnIsCategorical(false);
-		$variable->setCaption('Conteo');
-		$variable->setData('N');
-
-		$metricService->CreateMetricByVariable($dataset, $caption, $variable);
+		$metricService->CreateDefaultMetric($dataset, $caption);
+		return $dataset;
 	}
 
 	public function Create($workId, $caption = '')

@@ -30,6 +30,10 @@
 					</div>
 					<div class="gridStatusBar">{{ statusBarText }}</div>
 					<div>
+						<md-button v-if="canEdit" @click="addOnClick()">
+							<md-icon>add_circle_outline</md-icon>
+							Nueva variable
+						</md-button>
 						<md-button v-if="canEdit" @click="showModify()" :disabled="modifyDisabled">
 							<md-icon>edit</md-icon>
 							Modificar
@@ -454,6 +458,9 @@ export default {
 			} else {
 				this.showModify();
 			}
+		},
+		addOnClick() {
+			this.$refs.edit.showNew();
 		},
 		showModify() {
 			let selectedRow = this.selectedId();

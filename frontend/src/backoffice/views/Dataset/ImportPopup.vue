@@ -1,6 +1,6 @@
 <template>
   <div>
-    <md-dialog :md-active.sync="openImport">
+    <md-dialog :md-active.sync="openImport" :md-click-outside-to-close="false">
       <md-dialog-title>Importar datos</md-dialog-title>
 
       <stepper ref="stepper" title="Importando datos" :useClose="georeference === 0" @closed="onCloseStepper"></stepper>

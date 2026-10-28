@@ -40,9 +40,14 @@
 			</div>
 		</div>
 		<div v-if="clipping.Region.Summary && selectedLevel()">
+			<h4 v-if="hasNoSelection" class="title">
+				Habitantes <span class="mp-float-right" :class="getMuted()">
+					<animatedNumber :value="population" />
+				</span>
+			</h4>
 			<h3 class="title">
 				<div class="summaryBlock">
-					<div class="summaryRow">
+					<div v-if="!hasNoSelection" class="summaryRow">
 						Habitantes <span class="mp-float-right" :class="getMuted()">
 							<animatedNumber :value="population" />
 						</span>
@@ -117,6 +122,9 @@ export default {
 		},
 		hasClippingCircle() {
 			return window.SegMap.Clipping.FrameHasClippingCircle();
+		},
+		hasNoSelection() {
+			return window.SegMap.Clipping.FrameHasNoClipping();
 		},
 		population() {
 			if(this.hasSummary) {

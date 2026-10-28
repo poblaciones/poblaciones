@@ -53,4 +53,5 @@
 <style src="@/common/styles/averta/fields.css"></style>
 <style src="@/common/styles/averta/theme.css"></style>
 <style src="@/common/styles/averta/utilities.css"></style>
+<style src="@/common/styles/admin/vue-material-overrides.css"></style>
 <style src="@/credentials/styles/credentials.css"></style>

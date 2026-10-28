@@ -101,7 +101,7 @@ it('en búsqueda, las ramas coincidentes van antes que las hojas', () => {
 	expect(lastBranchIndex < firstItemIndex).toBeTruthy();
 });
 
-it('limita el render de búsqueda y agrega la fila "Ver más"', () => {
+it('limita el render de búsqueda (el separador cuenta como una fila) y agrega la fila "Ver más"', () => {
 	const panel = mountSelector();
 	const many = [];
 	for (let n = 0; n < 60; n++) {
@@ -111,12 +111,30 @@ it('limita el render de búsqueda y agrega la fila "Ver más"', () => {
 	// matchesWordStart compara contra el inicio de cada palabra por separado.
 	panel.searchQuery = 'hoja';
 	let rows = panel.renderRows;
-	expect(rows).toHaveLength(51); // 50 + la fila "more"
+	expect(rows).toHaveLength(51); // 50 filas (separador "Indicadores" + 49 hojas) + la fila "more"
+	expect(rows[0].type).toBe('header');
 	expect(rows[50].type).toBe('more');
-	expect(rows[50].remaining).toBe(10);
+	expect(rows[50].remaining).toBe(11);
 	panel.liftSearchLimit();
 	rows = panel.renderRows;
-	expect(rows).toHaveLength(60);
+	expect(rows).toHaveLength(61); // separador + las 60 hojas
+});
+
+it('en búsqueda, los resultados de indicadores van bajo un separador "Indicadores" con su cantidad', () => {
+	const panel = mountSelector();
+	const many = [];
+	for (let n = 0; n < 3; n++) {
+		many.push({ Id: 9000 + n, Name: 'Hoja repetida ' + n });
+	}
+	panel.categories.push({ Id: 5, Name: 'Masivos', Items: many });
+	panel.searchQuery = 'hoja';
+	const rows = panel.renderRows;
+	expect(rows[0]).toEqual({
+		type: 'header', key: 'h__search_indicators__', sectionKey: '__search_indicators__',
+		name: 'Indicadores', count: 3, selectable: false,
+	});
+	expect(rows.filter(r => r.type === 'header')).toHaveLength(1);
+	expect(rows).toHaveLength(4);
 });
 
 it('en navegación, las secciones con nombre entran como cortes de control colapsables', () => {

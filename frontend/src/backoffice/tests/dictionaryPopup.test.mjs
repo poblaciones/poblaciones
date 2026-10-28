@@ -30,7 +30,7 @@ function setup(gridOverrides) {
 		columnsGrid: grid,
 		invoker: { calls: [], messages: [], call(method) { this.calls.push(method); }, doMessage(...args) { this.messages.push(args); } },
 		valuesPopup: { shown: [], show(...args) { this.shown.push(['show'].concat(args)); }, showAutoRecode(...args) { this.shown.push(['auto'].concat(args)); } },
-		edit: { shown: [], show(column) { this.shown.push(column); } },
+		edit: { shown: [], newShown: 0, show(column) { this.shown.push(column); }, showNew() { this.newShown++; } },
 		confirmDialog: { shown: 0, show() { this.shown++; } },
 	};
 	const vm = mountLite(DictionaryPopup, { mocks: { $refs: refs } });
@@ -418,6 +418,13 @@ it('los cambios de dataset o de columnas recargan la grilla solo con el diálogo
 });
 
 describe('DictionaryPopup: edición');
+
+it('addOnClick abre el alta de una variable nueva en el popup de columna', () => {
+	const { vm, refs } = setup();
+	vm.addOnClick();
+	expect(refs.edit.newShown).toBe(1);
+	expect(refs.edit.shown).toHaveLength(0);
+});
 
 it('showModify abre la edición de la columna seleccionada y no hace nada sin selección', () => {
 	const { vm, grid, refs, dataset } = setup({ selectedIndexes: [1] });

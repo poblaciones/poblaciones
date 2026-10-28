@@ -92,6 +92,16 @@ class MetricService extends BaseService
 		return $variable;
 	}
 
+	public function GetNewSimpleCountVariable()
+	{
+		$variable = $this->GetNewVariable();
+		$variable->setIsDefault(true);
+		$variable->setDataColumnIsCategorical(false);
+		$variable->setCaption('Conteo');
+		$variable->setData('N');
+		return $variable;
+	}
+
 	public function MoveVariableUp($datasetId, $variableId)
 	{
 		$variable = $this->LoadAndValidate($datasetId, $variableId);
@@ -343,6 +353,25 @@ class MetricService extends BaseService
 				$item['Versions'] = explode("\t", $item['Versions']);
 		}
 	}
+	public function CreateMetricVersionLevel($datasetId, $level)
+	{
+		// Se asegura la creación del nivel y del metric
+		$ret = $this->UpdateMetricVersionLevel($datasetId, $level);
+		// Le agrega la variable conteo default
+		$variable = $this->GetNewSimpleCountVariable();
+		$variable->setMetricVersionLevel($level);
+		$this->UpdateVariable($datasetId, $level, $variable);
+		// La agrega al return antes salir
+		$ret['Variables'][] = $variable;
+		return $ret;
+	}
+
+	public function CreateDefaultMetric($dataset, $caption)
+	{
+		// Crea la variable default
+		$variable = $this->GetNewSimpleCountVariable();
+		$this->CreateMetricByVariable($dataset, $caption, $variable);
+	}
 
 	public function UpdateMetricVersionLevel($datasetId, $level)
 	{
@@ -360,7 +389,8 @@ class MetricService extends BaseService
 		// Devuelve ids de los levels que actualizó
 		return array('LevelId' => $level->getId(),
 									'MetricVersionId' => $level->getMetricVersion()->getId(),
-									'MetricId' => $level->getMetricVersion()->getMetric()->getId());
+									'MetricId' => $level->getMetricVersion()->getMetric()->getId(),
+									'Variables' => []);
 	}
 
 	public function UpdateVariable($datasetId, $level, $variable)

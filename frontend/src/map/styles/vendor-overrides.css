@@ -210,3 +210,15 @@ a[title="Informar a Google errores en las imágenes o el mapa de carreteras."] {
 .leaflet-layer {
 	cursor: unset !important;
 }
+
+/*
+ * En táctil, la pulsación larga sobre el mapa abre el menú contextual del visor. Sin esto, Chrome
+ * además selecciona el texto bajo el dedo (etiquetas) y muestra su propia barra de selección.
+ */
+@media (pointer: coarse) {
+	.leaflet-container {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+}
