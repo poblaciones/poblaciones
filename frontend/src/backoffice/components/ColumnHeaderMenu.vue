@@ -13,10 +13,14 @@
 		</div>
 		<template v-if="canEdit">
 			<div class="menuSeparator"></div>
+			<div class="menuItem" @click="emitAndClose('calculate')">
+				<md-icon>calculate</md-icon><span>Calcular</span>
+			</div>
 			<div class="menuItem" :class="{ disabled: !canAutoRecode }"
 					 @click="canAutoRecode && emitAndClose('autoRecode')">
 				<md-icon>toc</md-icon><span>Auto-recodificar</span>
 			</div>
+			<div class="menuSeparator"></div>
 			<div class="menuItem" @click="emitAndClose('modify')">
 				<md-icon>edit</md-icon><span>Modificar</span>
 			</div>

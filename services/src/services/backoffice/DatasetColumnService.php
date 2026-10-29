@@ -23,12 +23,12 @@ class DatasetColumnService extends DbSession
 	public function GetNewColumn()
 	{
 		$column = new entities\DraftDatasetColumn();
-		$column->setColumnWidth(20);
-		$column->setFieldWidth(20);
+		$column->setColumnWidth(8);
+		$column->setFieldWidth(8);
 		$column->setDecimals(0);
-		$column->setFormat(1); // texto
-		$column->setMeasure(1); // nominal
-		$column->setAlignment(0); // izquierda
+		$column->setFormat(Format::F); // numérico
+		$column->setMeasure(Measurement::Scale);
+		$column->setAlignment(Alignment::Right);
 		$column->setUseInSummary(true);
 		$column->setUseInExport(true);
 		$column->setValueLabelsAreDirty(false);
@@ -73,8 +73,8 @@ class DatasetColumnService extends DbSession
 		$field = $column->getField();
 		$type = $column->getFormat();
 		if ($type !== Format::A)
-			throw new PublicException("No es posible cambiar el tama�o de un campo num�rico");
-		// Reduce tama�os
+			throw new PublicException("No es posible cambiar el tamaño de un campo numérico");
+		// Reduce tamaños
 		$sqlFixLengths = "UPDATE " . $table . " SET " . $field . " = LEFT(" . $field . ", " . $newSize . ") WHERE
 																		LENGTH(" . $field . ") > " . $newSize;
 		App::Db()->exec($sqlFixLengths);
@@ -469,6 +469,204 @@ class DatasetColumnService extends DbSession
 		}
 		Profiling::EndTimer();
 		return self::OK;
+	}
+
+	// Cada operacion se expresa como una plantilla SQL fija: los operandos solo
+	// entran por los marcadores {n}, nunca por concatenacion libre. 'value' solo
+	// convierte cadenas totalmente numericas: un CAST parcial aborta el UPDATE
+	// en modo estricto.
+	private static $columnOperations = [
+		'impute' => ['types' => ['number'], 'result' => 'number', 'sql' => '{0}'],
+		'imputeText' => ['types' => ['text'], 'result' => 'text', 'sql' => '{0}'],
+		'add' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '({0} + {1})'],
+		'subtract' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '({0} - {1})'],
+		'divide' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '({0} / NULLIF({1}, 0))'],
+		'multiply' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '({0} * {1})'],
+		'mod' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => 'MOD({0}, NULLIF({1}, 0))'],
+		'percent' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '(({0} / NULLIF({1}, 0)) * 100)'],
+		'int' => ['types' => ['number'], 'result' => 'number', 'sql' => 'TRUNCATE({0}, 0)'],
+		'abs' => ['types' => ['number'], 'result' => 'number', 'sql' => 'ABS({0})'],
+		'value' => ['types' => ['text'], 'result' => 'number',
+			'sql' => "(CASE WHEN TRIM({0}) REGEXP '^[-]{0,1}[0-9]{1,20}([.][0-9]{1,10}){0,1}$' THEN CAST(TRIM({0}) AS DECIMAL(30,10)) ELSE NULL END)"],
+		'concat' => ['types' => ['text', 'text'], 'result' => 'text', 'sql' => 'CONCAT({0}, {1})'],
+		'left' => ['types' => ['text', 'number'], 'result' => 'text', 'sql' => 'LEFT({0}, GREATEST({1}, 0))'],
+		'right' => ['types' => ['text', 'number'], 'result' => 'text', 'sql' => 'RIGHT({0}, GREATEST({1}, 0))'],
+		'substring' => ['types' => ['text', 'number', 'number'], 'result' => 'text',
+			'sql' => 'SUBSTRING({0}, GREATEST({1}, 0) + 1, GREATEST({2}, 0))'],
+		'trim' => ['types' => ['text'], 'result' => 'text', 'sql' => 'TRIM({0})'],
+		'string' => ['types' => ['number'], 'result' => 'text', 'sql' => 'CAST({0} AS CHAR)'],
+		'length' => ['types' => ['text'], 'result' => 'number', 'sql' => 'CHAR_LENGTH({0})'],
+		// Comparaciones: retornan 1 o 0. Solo la igualdad usa el operador seguro
+		// frente a nulos (<=>), de modo que permita preguntar por [Nulo].
+		'equals' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '({0} <=> {1})'],
+		'notEquals' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '(NOT ({0} <=> {1}))'],
+		'greater' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '({0} > {1})'],
+		'less' => ['types' => ['number', 'number'], 'result' => 'number', 'sql' => '({0} < {1})'],
+		'between' => ['types' => ['number', 'number', 'number'], 'result' => 'number', 'sql' => '({0} BETWEEN {1} AND {2})'],
+		'equalsText' => ['types' => ['text', 'text'], 'result' => 'number', 'sql' => '({0} <=> {1})'],
+		'notEqualsText' => ['types' => ['text', 'text'], 'result' => 'number', 'sql' => '(NOT ({0} <=> {1}))'],
+		'greaterText' => ['types' => ['text', 'text'], 'result' => 'number', 'sql' => '({0} > {1})'],
+		'lessText' => ['types' => ['text', 'text'], 'result' => 'number', 'sql' => '({0} < {1})'],
+		'betweenText' => ['types' => ['text', 'text', 'text'], 'result' => 'number', 'sql' => '({0} BETWEEN {1} AND {2})']
+	];
+
+	public function UpdateColumnValues($datasetId, $columnId, $operationKey, $operands)
+	{
+		Profiling::BeginTimer();
+		$operation = $this->GetColumnOperation($operationKey);
+		if (!is_array($operands) || count($operands) !== count($operation['types']))
+			throw new PublicException('La cantidad de valores no corresponde a la operación indicada.');
+
+		$columns = $this->GetDatasetColumnsById($datasetId);
+		$target = $this->GetColumnOfDataset($columns, $columnId);
+		$this->ValidateOperationResult($operation['result'], $target);
+
+		$fragments = [];
+		for ($n = 0; $n < count($operands); $n++)
+			$fragments[] = $this->BuildOperandFragment($operands[$n], $operation['types'][$n], $columns);
+		$expression = $this->ComposeColumnExpression($operation['sql'], $fragments);
+
+		// Evita que un resultado mas largo que el campo aborte la actualizacion
+		$valueSql = $expression['sql'];
+		if ($this->ColumnIsText($target))
+			$valueSql = "LEFT(" . $valueSql . ", " . (int)$target->getFieldWidth() . ")";
+
+		$dataset = App::Orm()->find(entities\DraftDataset::class, $datasetId);
+		$table = $dataset->getTable();
+		DatasetService::DatasetChanged($dataset);
+		$sql = "UPDATE " . $this->QuoteTable($table) . " SET " . $this->QuoteField($target) . " = " . $valueSql;
+		App::Db()->exec($sql, $expression['params']);
+		$affected = App::Db()->lastRowsAffected();
+		App::Db()->markTableUpdate($table);
+		BackofficeDownloadCache::Clear($datasetId);
+
+		Profiling::EndTimer();
+		return array('completed' => true, 'affected' => $affected);
+	}
+
+	private function GetColumnOperation($operationKey)
+	{
+		if (!is_string($operationKey) || !array_key_exists($operationKey, self::$columnOperations))
+			throw new PublicException('La operación indicada no es válida.');
+		return self::$columnOperations[$operationKey];
+	}
+
+	private function GetDatasetColumnsById($datasetId)
+	{
+		$ret = [];
+		foreach ($this->GetDatasetColumns($datasetId) as $column)
+			$ret[$column->getId()] = $column;
+		return $ret;
+	}
+
+	// Al resolver solo entre las columnas del dataset indicado se garantiza que
+	// ninguna columna ajena pueda intervenir en la operacion.
+	private function GetColumnOfDataset($columns, $columnId)
+	{
+		if (!array_key_exists($columnId, $columns))
+			throw new PublicException('La columna indicada no pertenece al dataset.');
+		return $columns[$columnId];
+	}
+
+	private function ColumnIsText($column)
+	{
+		return $column->getFormat() === Format::A;
+	}
+
+	private function ColumnIsNumeric($column)
+	{
+		return $column->getFormat() === Format::F;
+	}
+
+	private function ValidateOperationResult($resultType, $target)
+	{
+		if ($resultType === 'number' && !$this->ColumnIsNumeric($target))
+			throw new PublicException('El resultado de la operación es numérico: la columna a actualizar debe ser numérica.');
+		if ($resultType === 'text' && !$this->ColumnIsText($target))
+			throw new PublicException('El resultado de la operación es un texto: la columna a actualizar debe ser de texto.');
+	}
+
+	private function BuildOperandFragment($operand, $type, $columns)
+	{
+		if (!is_object($operand) || !property_exists($operand, 't') || !property_exists($operand, 'v'))
+			throw new PublicException('El valor indicado para la operación no es válido.');
+		if ($operand->t === 'N')
+			return ['sql' => 'NULL', 'params' => []];
+
+		if ($operand->t === 'V')
+			return $this->BuildLiteralFragment($operand->v, $type);
+		if ($operand->t === 'C')
+			return $this->BuildColumnFragment($operand->v, $type, $columns);
+		throw new PublicException('El tipo de valor indicado para la operación no es válido.');
+	}
+
+	// Los numeros solo se incorporan si responden a un patron estricto; los
+	// textos siempre viajan como parametro enlazado.
+	private function BuildLiteralFragment($value, $type)
+	{
+		if (!is_scalar($value))
+			throw new PublicException('El valor indicado para la operación no es válido.');
+		if ($type === 'number')
+		{
+			$text = trim((string)$value);
+			if (!preg_match('/^-?[0-9]{1,18}(\.[0-9]{1,18})?$/', $text))
+				throw new PublicException('El valor indicado no es un número válido.');
+			return ['sql' => '(' . $text . ')', 'params' => []];
+		}
+		return ['sql' => '?', 'params' => [(string)$value]];
+	}
+
+	private function BuildColumnFragment($value, $type, $columns)
+	{
+		$columnId = (int)$value;
+		if (!is_scalar($value) || (string)$columnId !== (string)$value)
+			throw new PublicException('La columna indicada no es válida.');
+		if ($columnId < 0)
+			throw new PublicException('Las variables especiales todavía no están disponibles para esta operación.');
+		$column = $this->GetColumnOfDataset($columns, $columnId);
+		if ($type === 'number' && !$this->ColumnIsNumeric($column))
+			throw new PublicException('Una de las columnas indicadas debe ser numérica.');
+		if ($type === 'text' && !$this->ColumnIsText($column))
+			throw new PublicException('Una de las columnas indicadas debe ser de texto.');
+		return ['sql' => $this->QuoteField($column), 'params' => []];
+	}
+
+	// Un operando puede aparecer mas de una vez en la plantilla: sus parametros
+	// se agregan en el mismo orden en que aparecen los marcadores.
+	private function ComposeColumnExpression($template, $fragments)
+	{
+		$parts = preg_split('/\{(\d)\}/', $template, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$sql = '';
+		$params = [];
+		for ($n = 0; $n < count($parts); $n++)
+		{
+			if ($n % 2 === 0)
+			{
+				$sql .= $parts[$n];
+			}
+			else
+			{
+				$fragment = $fragments[(int)$parts[$n]];
+				$sql .= $fragment['sql'];
+				$params = array_merge($params, $fragment['params']);
+			}
+		}
+		return ['sql' => $sql, 'params' => $params];
+	}
+
+	private function QuoteField($column)
+	{
+		$field = $column->getField();
+		if (!preg_match('/^[A-Za-z0-9_]+$/', $field))
+			throw new \Exception('El nombre de campo de la columna no es válido.');
+		return '`' . $field . '`';
+	}
+
+	private function QuoteTable($table)
+	{
+		if (!preg_match('/^[A-Za-z0-9_.]+$/', $table))
+			throw new \Exception('El nombre de la tabla del dataset no es válido.');
+		return $table;
 	}
 
 	public function UpdateLabels($columnId, $labels, $deletedLabels = array())

@@ -3,7 +3,7 @@
 		<div class="md-layout">
 			<div class="md-layout-item md-size-100" style="padding-right: 155px; padding-left: 150px;">
 				<div class="label">Código</div>
-				<md-field v-on:keydown.native.enter="next" :md-counter="false" @input="clearError" class="customField"
+				<md-field v-on:keydown.native.enter="next" @input="clearError" class="customField"
 							style="min-width: 115px!important;">
 					<md-input v-model="code" maxlength="6" ref="code" autocorrect="off"
 							autocapitalize="off" spellcheck="false" class="mono" placeholder="------"></md-input>

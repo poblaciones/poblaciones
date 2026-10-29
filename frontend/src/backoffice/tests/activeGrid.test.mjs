@@ -387,6 +387,16 @@ it('menuCategories abre las categorías de la columna y, al guardar, regenera la
 	destroyed.call(vm);
 });
 
+it('menuCalculate abre la calculadora sobre la columna y, al completarse, recarga la grilla', () => {
+	const { vm, refs, dataset } = setupGrid();
+	vm.menuCalculate(dataset.Columns[0]);
+	expect(refs.fieldCalculator.shown[0][0] === dataset.Columns[0]).toBeTruthy();
+	let created = 0;
+	vm.createGrid = function () { created++; };
+	vm.columnCalculated();
+	expect(created).toBe(1);
+});
+
 it('menuCategories de una columna sin etiquetas abre la lista vacía', async () => {
 	const { vm, refs, dataset } = setupGrid();
 	vm.menuCategories(dataset.Columns[1]);

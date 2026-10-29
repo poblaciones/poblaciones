@@ -10,10 +10,11 @@
 			<dictionary-popup v-if="!showingErrors" ref="dictionaryPopup"></dictionary-popup>
 			<column-popup v-if="!showingErrors" ref="columnEdit" @completed="columnEdited"></column-popup>
 			<values-popup v-if="!showingErrors && valuesPopupReset" ref="valuesPopup"></values-popup>
+			<field-calculator-popup v-if="!showingErrors" ref="fieldCalculator" @completed="columnCalculated"></field-calculator-popup>
 			<column-header-menu v-if="!showingErrors" ref="columnMenu"
 													@sortAsc="menuSortAsc" @sortDesc="menuSortDesc" @sortNone="menuSortNone"
 													@autoRecode="menuAutoRecode" @modify="menuModify"
-													@categories="menuCategories" @delete="menuDelete" />
+													@categories="menuCategories" @calculate="menuCalculate" @delete="menuDelete" />
 			<mp-confirm title="Eliminar columna"
 									:text="deleteColumnText"
 									confirm-text="Eliminar"
@@ -147,6 +148,7 @@ import ImportPopup from "@/backoffice/views/Dataset/ImportPopup";
 import DictionaryPopup from "@/backoffice/views/Dataset/DictionaryPopup.vue";
 import ColumnPopup from "@/backoffice/views/Dataset/ColumnPopup.vue";
 import ValuesPopup from "@/backoffice/views/Dataset/ValuesPopup.vue";
+import FieldCalculatorPopup from "@/backoffice/views/Dataset/FieldCalculatorPopup.vue";
 import ColumnHeaderMenu from "./ColumnHeaderMenu.vue";
 import MpDropdownButton from "./MpDropdownButton.vue";
 import str from '@/common/framework/str';
@@ -168,6 +170,7 @@ export default {
 		DictionaryPopup,
 		ColumnPopup,
 		ValuesPopup,
+		FieldCalculatorPopup,
 		ColumnHeaderMenu,
 		MpDropdownButton,
 		Relocate
@@ -469,7 +472,7 @@ export default {
 			this.$refs.dictionaryPopup.show();
 		},
 		newColumn() {
-			loc.$refs.showNew();
+			this.$refs.columnEdit.showNew();
 		},
 		columnEdited() {
 			this.reloadColumns();
@@ -596,6 +599,12 @@ export default {
 						loc.reloadColumns();
 					}, loc.destroyValuesCallback);
 			});
+		},
+		menuCalculate(column) {
+			this.$refs.fieldCalculator.show(column, column.Format === columnFormatEnum.STRING);
+		},
+		columnCalculated() {
+			this.refreshOnClick();
 		},
 		destroyValuesCallback() {
 			this.valuesPopupReset = false;

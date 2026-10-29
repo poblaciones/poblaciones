@@ -97,6 +97,7 @@ export function setupGrid(propsData, gridOverrides) {
 		columnEdit: makePopup(),
 		columnMenu: makePopup(),
 		valuesPopup: makePopup(),
+		fieldCalculator: makePopup(),
 		importPopup: makePopup(),
 		dictionaryPopup: makePopup(),
 		confirmDialog: makePopup(),

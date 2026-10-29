@@ -453,6 +453,17 @@ ActiveDataset.prototype.AutoRecodeValues = function (column, list, newName, newL
 			{ 'i': list, 'c': column.Id, 'l': newLabel, 'n': newName }, 'recodificar los valores');
 };
 
+ActiveDataset.prototype.CalculateColumn = function (column, operationKey, operands) {
+	var loc = this;
+	this.Work.WorkChanged();
+	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateColumnValues',
+		{ 'k': this.properties.Id, 'c': column.Id, 'o': operationKey, 'a': operands }, 'calcular los valores de la columna'
+	).then(function (data) {
+		loc.ScaleGenerator.Clear();
+		return data;
+	});
+};
+
 ActiveDataset.prototype.UpdateLabels = function (column, list, deletedList) {
 	this.Work.WorkChanged();
 	return axiosClient.postPromise(window.host + '/services/backoffice/UpdateLabels',

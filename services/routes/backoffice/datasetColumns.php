@@ -52,6 +52,16 @@ App::GetOrPost('/services/backoffice/AutoRecodeValues', function (Request $reque
 });
 
 
+App::Post('/services/backoffice/UpdateColumnValues', function (Request $request) {
+	$controller = new services\DatasetColumnService();
+	$datasetId = Params::GetIntMandatory('k');
+	if ($denied = Session::CheckIsDatasetEditor($datasetId)) return $denied;
+	$columnId = Params::GetIntMandatory('c');
+	$operationKey = Params::GetMandatory('o');
+	$operands = Params::GetJsonMandatory('a');
+	return App::Json($controller->UpdateColumnValues($datasetId, $columnId, $operationKey, $operands));
+});
+
 App::Post('/services/backoffice/UpdateLabels', function (Request $request) {
 	$controller = new services\DatasetColumnService();
 	$columnId = Params::GetIntMandatory('c');

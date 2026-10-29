@@ -60,6 +60,8 @@ await import('./iconPickerPopup.test.mjs');
 await import('./institutionPopup.test.mjs');
 await import('./metadataView.test.mjs');
 await import('./columnPopup.test.mjs');
+await import('./fieldOperations.test.mjs');
+await import('./fieldCalculatorPopup.test.mjs');
 await import('./statisticsPopup.test.mjs');
 await import('./datasetView.test.mjs');
 await import('./contentView.test.mjs');

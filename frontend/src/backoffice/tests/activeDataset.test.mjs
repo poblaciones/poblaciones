@@ -401,6 +401,20 @@ it('AutoRecodeValues y UpdateLabels envían la columna y las listas', async () =
 	expect(JSON.parse(body.d)).toEqual([2]);
 });
 
+it('CalculateColumn envía la columna, la operación y los operandos, y descarta las escalas cacheadas', async () => {
+	setup();
+	const dataset = makeActive();
+	dataset.ScaleGenerator.InfoCache.clave = {};
+	const operands = [{ t: 'C', v: 3 }, { t: 'V', v: 2 }];
+	expect(await dataset.CalculateColumn({ Id: 7 }, 'add', operands)).toBe('ok');
+	const body = parseBody(lastCall());
+	expect(lastCall().url).toBe(BASE + 'UpdateColumnValues');
+	expect(body.c).toBe('7');
+	expect(body.o).toBe('add');
+	expect(JSON.parse(body.a)).toEqual(operands);
+	expect(Object.keys(dataset.ScaleGenerator.InfoCache)).toHaveLength(0);
+});
+
 it('SaveColumn envía la variable y DeleteColumns las columnas a quitar', async () => {
 	setup();
 	const dataset = makeActive();

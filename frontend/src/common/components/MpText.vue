@@ -11,7 +11,7 @@
 										:placeholder="(placeholder ? placeholder : '')"
 										:class="(!editMode ? 'unselectable' : '')"
 										@mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue"
-										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" :md-counter="false" />
+										:disabled="isDisabled || !editMode" :ref="inputId" :maxlength="(!isDisabled ? maxlength : 0)" />
 					<md-textarea v-if="this.multiline && !this.formatted" class="mp-area" :rows="rows" :style="minHeightRows + highlightBorder" autocomplete="off"
 											 :readonly="isDisabled || !editMode" @mousedown="mouseDown" @mouseup="mouseUp" v-model="localValue" :maxlength="(!isDisabled ? maxlength : 0)" :ref="inputId" />
 
